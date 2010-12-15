@@ -950,6 +950,7 @@ void StarSystem::ProcessPendingJumps()
                 un->DecreaseWarpEnergy( false, 1.0f );
             if (dosightandsound)
                 _Universe->activeStarSystem()->DoJumpingComeSightAndSound( un );
+	    _Universe->AccessCockpit()->OnJumpEnd(un);
             delete pendingjump[kk];
             pendingjump.erase( pendingjump.begin()+kk );
             --kk;
@@ -1041,6 +1042,7 @@ bool StarSystem::JumpTo( Unit *un, Unit *jumppoint, const std::string &system, b
             int  ani = -1;
             if (dosightandsound)
                 ani = _Universe->activeStarSystem()->DoJumpingLeaveSightAndSound( un );
+	    _Universe->AccessCockpit()->OnJumpBegin(un);
             pendingjump.push_back( new unorigdest( un, jumppoint, this, ss, un->GetJumpStatus().delay, ani, justloaded,
                                                   save_coordinates ? ComputeJumpPointArrival( un->Position(), this->getFileName(),
                                                                                               system ) : QVector( 0, 0, 0 ) ) );

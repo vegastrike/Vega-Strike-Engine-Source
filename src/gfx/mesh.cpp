@@ -285,6 +285,16 @@ float Mesh::getCurrentFrame() const
     return framespersecond;
 }
 
+GFXVertexList *Mesh::getVertexList() const
+{
+    return vlist;
+}
+
+void Mesh::setVertexList( GFXVertexList* _vlist )
+{
+	vlist = _vlist;
+}
+
 float Mesh::getFramesPerSecond() const
 {
     return orig ? orig->framespersecond : framespersecond;

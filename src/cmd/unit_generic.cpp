@@ -1,3 +1,5 @@
+// -*- mode: c++; c-basic-offset: 4; indent-tabs-mode: nil -*-
+
 #include "config.h"
 #include <set>
 #include "configxml.h"
@@ -47,6 +49,10 @@
 
 #include "unit_find.h"
 #include "pilot.h"
+
+#include "vsfilesystem.h"
+#include <iostream>
+#define DEBUG_MESH_ANI
 
 //cannot seem to get min and max working properly across win and lin any other way...
 static float mymax( float a, float b )
@@ -814,6 +820,11 @@ Unit::Unit( const char *filename,
 
 Unit::~Unit()
 {
+    if(pMeshAnimation) {
+        delete pMeshAnimation;
+        pMeshAnimation = NULL;
+    }
+
     free( pImage->cockpit_damage );
     if ( (!killed) )
         VSFileSystem::vs_fprintf( stderr, "Assumed exit on unit %s(if not quitting, report error)\n", name.get().c_str() );
@@ -959,6 +970,8 @@ void Unit::ZeroAll()
     flightgroup           = NULL;
     flightgroup_subnumber = 0;
     setTractorability( tractorImmune );
+
+    pMeshAnimation = NULL;
 }
 
 void Unit::Init()
@@ -1161,7 +1174,7 @@ void Unit::Init()
     computer.radar.trackingactive= true;
     computer.radar.lockcone      = lc;
     computer.radar.mintargetsize = 0;
-    computer.radar.iff           = 0;
+    computer.radar.capability    = Computer::RADARLIM::Capability::IFF_NONE;
 
     flightgroup                  = NULL;
     flightgroup_subnumber        = 0;
@@ -1352,6 +1365,16 @@ void Unit::Init( const char *filename,
     }
     calculate_extent( false );
     pilot->SetComm( this );
+
+    this->pMeshAnimation = new MeshAnimation(this);
+	bool initsucc = pMeshAnimation->Init(filename, faction, flightgrp);
+	if(initsucc) {
+		pMeshAnimation->SetAniSpeed( 0.05 );
+		pMeshAnimation->StartAnimation();
+	} else {
+		delete pMeshAnimation;
+		pMeshAnimation = NULL;
+	}	
     ///	  ToggleWeapon(true);//change missiles to only fire 1
 }
 
@@ -4465,9 +4488,21 @@ void Unit::DamageRandSys( float dam, const Vector &vec, float randnum, float deg
         } else if (randnum >= .775) {
             computer.itts = false;             //Set the computer to not have an itts
         } else if (randnum >= .7) {
-            if (computer.radar.iff > 0)
-                //set the radar to not have color
-                computer.radar.iff -= 1;
+            // Gradually degrade radar capabilities
+            typedef Computer::RADARLIM::Capability Capability;
+            int& capability = computer.radar.capability;
+            if (capability & Capability::IFF_THREAT_ASSESSMENT)
+            {
+                capability &= ~Capability::IFF_THREAT_ASSESSMENT;
+            }
+            else if (capability & Capability::IFF_OBJECT_RECOGNITION)
+            {
+                capability &= ~Capability::IFF_OBJECT_RECOGNITION;
+            }
+            else if (capability & Capability::IFF_FRIEND_FOE)
+            {
+                capability &= ~Capability::IFF_FRIEND_FOE;
+            }
         } else if (randnum >= .5) {
             //THIS IS NOT YET SUPPORTED IN NETWORKING
             computer.target = NULL;             //set the target to NULL
@@ -5859,6 +5894,12 @@ bool Unit::Explode( bool draw, float timeit )
     return true;
 }
 
+float Unit::ExplodingProgress() const
+{
+  static float debrisTime = XMLSupport::parse_float( vs_config->getVariable( "physics", "debris_time", "500" ) );
+  return std::min(pImage->timeexplode / debrisTime, 1.0f);
+}
+
 void Unit::Destroy()
 {
     if (!killed) {
@@ -6342,6 +6383,8 @@ bool Unit::UnDock( Unit *utdw )
                     turretcontrol.push_back( 0 );
                 turretcontrol[_Universe->CurrentCockpit()] = 1;
             }
+	    // Send notification that a ship has undocked from a station
+	    _Universe->AccessCockpit()->OnDockEnd(utdw, this);
             return true;
         }
     return false;
@@ -7633,7 +7676,7 @@ bool Unit::UpAndDownGrade( const Unit *up,
         }
         if ( !csv_cell_null_check || force_change_on_nothing
             || cell_has_recursive_data( upgrade_name, up->faction, "Radar_Color" ) )
-            STDUPGRADE( computer.radar.iff, up->computer.radar.iff, templ->computer.radar.iff, 0 );
+            STDUPGRADE( computer.radar.capability, up->computer.radar.capability, templ->computer.radar.capability, 0 );
         if ( !csv_cell_null_check || force_change_on_nothing
             || cell_has_recursive_data( upgrade_name, up->faction, "ITTS" ) ) {
             computer.itts = UpgradeBoolval( computer.itts,
@@ -8165,6 +8208,11 @@ vector< CargoColor >& Unit::FilterUpgradeList( vector< CargoColor > &mylist )
         }
     }
     return FilterDowngradeList( mylist, false );
+}
+
+bool Unit::IsBase() const
+{
+  return ((flightgroup != NULL) && (flightgroup->name == "Base"));
 }
 
 inline float uniformrand( float min, float max )
@@ -9263,4 +9311,335 @@ void Unit::RequestPhysics()
 void Unit::applyTechniqueOverrides(const std::map<std::string, std::string> &overrides)
 {
     // No-op
+}
+
+std::map< string, Unit * > MeshAnimation::Units;
+
+MeshAnimation::MeshAnimation(Unit *_unitDst) :
+                   animatedMesh(true),
+                   activeAnimation(0),
+                   timeperframe(3.0),
+                   done(true),
+                   activeMesh(0),
+               	   nextactiveMesh(1),
+               	   infiniteLoop(true),
+               	   loopCount(0),
+               	   unitDst(_unitDst),
+               	   curtime(0.0)
+
+{}
+
+//helper func for Init
+string toLowerCase( string in )
+{
+    string out;
+    for(unsigned int i = 0; i < in.length(); i++)
+    {
+        switch(in[i])
+        {
+        case 'A': out +='a'; break;
+        case 'B': out +='b'; break;
+        case 'C': out +='c'; break;
+        case 'D': out +='d'; break;
+        case 'E': out +='e'; break;
+        case 'F': out +='f'; break;
+        case 'G': out +='g'; break;
+        case 'H': out +='h'; break;
+        case 'I': out +='i'; break;
+        case 'J': out +='j'; break;
+        case 'K': out +='k'; break;
+        case 'L': out +='l'; break;
+        case 'M': out +='m'; break;
+        case 'N': out +='n'; break;
+        case 'O': out +='o'; break;
+        case 'P': out +='p'; break;
+        case 'Q': out +='q'; break;
+        case 'R': out +='r'; break;
+        case 'S': out +='s'; break;
+        case 'T': out +='t'; break;
+        case 'U': out +='u'; break;
+        case 'V': out +='v'; break;
+        case 'W': out +='w'; break;
+        case 'X': out +='x'; break;
+        case 'Y': out +='y'; break;
+        case 'Z': out +='z'; break;
+        default:
+            out += in[i];
+        }
+    }
+    return out;
+}
+
+unsigned int MeshAnimation::unitCount = 0;
+
+bool MeshAnimation::Init(const char *filename, int faction,
+        Flightgroup *flightgrp, const char *animationExt)
+{
+    string fnam(filename);
+    string::size_type pos = fnam.find('.');
+    string anifilename = fnam.substr(0, pos);
+
+    if(animationExt)
+    	anifilename += string("_") + string(animationExt);
+
+	std::vector< Mesh* > *meshes = new vector<Mesh *>();
+	int i = 1;
+	char count[20] = "1";
+	string dir = anifilename;
+	while(true)
+	{
+		sprintf( count, "%d", i );
+		string unit_name = toLowerCase(anifilename) + "_";
+		if(i < 10)
+			unit_name += "0";
+		if(i < 100)
+			unit_name += "0";
+		if(i < 1000)
+			unit_name += "0";
+		if(i < 10000)
+			unit_name += "0";
+		if(i < 100000)
+			unit_name += "0";
+
+		unit_name += count;
+		string path = dir + "/" + unit_name + ".bfxm";
+		if( VSFileSystem::FileExistsData( path, VSFileSystem::MeshFile ) != -1 )
+		{
+			Mesh *m = Mesh::LoadMesh( path.c_str(), Vector(1,1,1), faction, flightgrp );
+			meshes->push_back( m );
+	#ifdef DEBUG_MESH_ANI
+			cerr << "Animated Mesh: " << path << " loaded - with: " << m->getVertexList()->GetNumVertices() << " vertices." << endl;
+	#endif
+		}
+		else
+			break;
+		i++;
+	}
+
+
+	if( meshes->size() != 0 )
+	{
+		//FIXME: an animation is created only for the first submesh
+		string animationName;
+		sprintf( count, "%d", meshes->size() );
+		if(!animationExt)
+			animationName = string(count); //if there is no extension given, the animations are called by their load order, 1, 2 ,3 ....10..
+		else
+			animationName = animationExt;
+		addAnimation(meshes, animationName.c_str());
+
+		int numFrames = meshes->size();
+		++MeshAnimation::unitCount;
+		sprintf( count, "%d", unitCount );
+		uniqueUnitName = unitDst->name + string(count);
+		Units[uniqueUnitName] = unitDst;
+		cerr << "Animation data loaded for unit: " << string(filename) << ", named " << uniqueUnitName << " - with: " << numFrames << " frames." << endl;
+		return true;
+	} else {
+		delete meshes;
+		return false;
+	}
+}
+
+void MeshAnimation::AnimationStep()
+{
+#ifdef DEBUG_MESH_ANI
+	std::cerr << "Starting animation step of Unit: " << uniqueUnitName << std::endl;
+#endif
+   	if((!this->isContinuousLoop())&&(loopCount==0))
+   	    return;
+
+    	int numvold = 0;
+    	int numvertices = 0;
+    	//copy reference to data
+    	unitDst->meshdata.at(0) = vecAnimations.at(activeAnimation)->at(activeMesh);
+
+#ifdef DEBUG_MESH_ANI
+    	std::cerr << "vertices changed from: " << numvold << " to: " << numvertices << std::endl;
+#endif
+
+    	unitDst->Draw();
+
+#ifdef DEBUG_MESH_ANI
+       	std::cerr << "Drawed mesh: " << uniqueUnitName << std::endl;
+#endif
+
+    	activeMesh = nextactiveMesh;
+    	nextactiveMesh++;
+    	if(nextactiveMesh >= vecAnimations.at(activeAnimation)->size())
+    	    nextactiveMesh = 0;
+
+  	    if(loopCount > 0)
+  	        loopCount--;
+#ifdef DEBUG_MESH_ANI
+	std::cerr << "Ending animation step of Unit: " << uniqueUnitName << std::endl;
+#endif
+}
+
+void MeshAnimation::UpdateFrames()
+{
+	std::map< string, Unit * >::iterator pos;
+	for(pos = Units.begin(); pos != Units.end(); ++pos)
+	{
+    	pos->second->pMeshAnimation->curtime += GetElapsedTime();
+        if (pos->second->pMeshAnimation->curtime >= pos->second->pMeshAnimation->timePerFrame()) {
+        	pos->second->pMeshAnimation->AnimationStep();
+        	pos->second->pMeshAnimation->curtime = 0.0;
+        }
+	}
+}
+
+void MeshAnimation::addAnimation( std::vector<Mesh *> *meshes, const char* name )
+{
+    if( (meshes->size() > 0) && animatedMesh ) {
+        vecAnimations.push_back( meshes );
+        vecAnimationNames.push_back(string(name));
+    }
+}
+
+void MeshAnimation::StartAnimation( unsigned int how_many_times, int numAnimation )
+{
+    bool infiniteLoop;
+    if(!how_many_times)
+        infiniteLoop = true;
+    else
+        infiniteLoop = false;
+
+    if(animationRuns())
+    	StopAnimation();
+
+    done = false;
+}
+
+void MeshAnimation::StopAnimation()
+{
+    done = true;
+}
+
+string MeshAnimation::getAnimationName(unsigned int animationNumber) const
+{
+	return vecAnimationNames.at(animationNumber);
+}
+
+unsigned int MeshAnimation::getAnimationNumber(const char *name) const
+{
+	string strname(name);
+	for(unsigned int i=0;i<vecAnimationNames.size();i++)
+		if(strname == vecAnimationNames[i])
+			return i;
+
+	return 0; //NOT FOUND!
+}
+
+void MeshAnimation::ChangeAnimation( const char *name )
+{
+	unsigned int AnimNumber = getAnimationNumber(name);
+    if( (AnimNumber < numAnimations()) && isAnimatedMesh() )
+        activeAnimation = AnimNumber;
+}
+
+void MeshAnimation::ChangeAnimation( unsigned int AnimNumber )
+{
+    if( (AnimNumber < numAnimations()) && isAnimatedMesh() )
+        activeAnimation = AnimNumber;
+}
+
+bool MeshAnimation::isAnimatedMesh() const
+{
+    return animatedMesh;
+}
+
+double MeshAnimation::framesPerSecond() const
+{
+    return 1/timeperframe;
+}
+
+double MeshAnimation::timePerFrame() const
+{
+    return timeperframe;
+}
+
+unsigned int MeshAnimation::numAnimations()
+{
+    return vecAnimations.size();
+}
+
+void MeshAnimation::ToggleAnimatedMesh( bool on )
+{
+    animatedMesh = on;
+}
+
+bool MeshAnimation::isContinuousLoop() const
+{
+	return infiniteLoop;
+}
+
+void MeshAnimation::SetAniSpeed( float speed )
+{
+    timeperframe = speed;
+}
+
+void MeshAnimation::clear()
+{
+    StopAnimation();
+
+    for (unsigned int i = 0; i < vecAnimations.size(); i++) {
+    	for(unsigned int j = 0; j < vecAnimations[i]->size(); j++) {
+    		delete vecAnimations[i]->at(j);
+    	}
+    	delete vecAnimations[i];
+		vecAnimations[i]->clear();
+    }
+    vecAnimations.clear();
+    vecAnimationNames.clear();
+
+    Units.erase(uniqueUnitName);
+}
+
+bool MeshAnimation::animationRuns() const
+{
+    return !done;
+}
+
+Unit::Computer::RADARLIM::Brand::Value Unit::Computer::RADARLIM::GetBrand() const
+{
+    switch (capability & Capability::IFF_UPPER_MASK)
+    {
+    case Capability::IFF_SPHERE:
+        return Brand::SPHERE;
+    case Capability::IFF_BUBBLE:
+        return Brand::BUBBLE;
+    case Capability::IFF_PLANE:
+        return Brand::PLANE;
+    default:
+        assert(false);
+        return Brand::SPHERE;
+    }
+}
+
+bool Unit::Computer::RADARLIM::UseFriendFoe() const
+{
+    // Backwardscompatibility
+    if (capability == 0)
+        return false;
+    else if ((capability == 1) || (capability == 2))
+        return true;
+
+    return (capability & Capability::IFF_FRIEND_FOE);
+}
+
+bool Unit::Computer::RADARLIM::UseObjectRecognition() const
+{
+    // Backwardscompatibility
+    if ((capability == 0) || (capability == 1))
+        return false;
+    else if (capability == 2)
+        return true;
+
+    return (capability & Capability::IFF_OBJECT_RECOGNITION);
+}
+
+bool Unit::Computer::RADARLIM::UseThreatAssessment() const
+{
+    return (capability & Capability::IFF_THREAT_ASSESSMENT);
 }

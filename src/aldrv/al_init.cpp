@@ -157,7 +157,8 @@ bool AUDInit()
         return false;
     int attrlist[] = {ALC_FREQUENCY, g_game.audio_frequency_mode, 0};
 #ifdef _WIN32
-    dev = alcOpenDevice(  (ALCubyte*)"DirectSound3D" );
+	dev = alcOpenDevice(  (ALCchar*)"DirectSound3D" );
+    // dev = alcOpenDevice(  (ALCubyte*)"DirectSound3D" ); pre update. New includes barf on ubyte. cannot convert parameter.
 #else
 #ifdef __APPLE__
     dev = alcOpenDevice( "sdl" );

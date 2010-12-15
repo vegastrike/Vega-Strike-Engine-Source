@@ -603,6 +603,23 @@ LIBGFXCLIENT = \
   src/gfx/quadtree_xml.cpp \
   src/gfx/quadtree.cpp \
   src/gfx/quadtree.h \
+  src/gfx/radar/bubble_display.cpp \
+  src/gfx/radar/bubble_display.h \
+  src/gfx/radar/dual_display.cpp \
+  src/gfx/radar/dual_display.h \
+  src/gfx/radar/null_display.h \
+  src/gfx/radar/plane_display.cpp \
+  src/gfx/radar/plane_display.h \
+  src/gfx/radar/radar.cpp \
+  src/gfx/radar/radar.h \
+  src/gfx/radar/sensor.cpp \
+  src/gfx/radar/sensor.h \
+  src/gfx/radar/sphere_display.cpp \
+  src/gfx/radar/sphere_display.h \
+  src/gfx/radar/track.cpp \
+  src/gfx/radar/track.h \
+  src/gfx/radar/viewarea.cpp \
+  src/gfx/radar/viewarea.h \
   src/gfx/ring.cpp \
   src/gfx/ring.h \
   src/gfx/screenshot.cpp \

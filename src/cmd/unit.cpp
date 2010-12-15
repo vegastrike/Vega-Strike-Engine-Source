@@ -60,12 +60,18 @@
 //#include "unit_bsp.h"
 //these .cpp files should be renamed to .h; they contain template functions...
 //--some of them GameUnit<> member functions, at that --chuck_starchaser
-#include "unit_jump.cpp"
+// Files changed from .cpp to .h 11-25
+/* #include "unit_jump.cpp"
 #include "unit_customize.cpp"
 #include "unit_damage.cpp"
 #include "unit_physics.cpp"
-#include "unit_click.cpp"
+#include "unit_click.cpp" */
 #include "base_util.h"
+#include "unit_jump.h"
+#include "unit_customize.h"
+#include "unit_damage.h"
+#include "unit_physics.h"
+#include "unit_click.h"
 
 using std::vector;
 using std::string;

@@ -32,7 +32,7 @@
 #include <map>
 #include <memory>
 class HaloSystem;
-class GFXColor;
+struct GFXColor; // labeled as class, declared as struct in gfxlib_struct.h
 class QVector;
 class Transformation;
 class Matrix;
@@ -212,6 +212,8 @@ public: GameUnit( int dummy );
  */
     Matrix WarpMatrix( const Matrix &ctm ) const;
 };
+
+
 
 /*
  ***************************************************************************

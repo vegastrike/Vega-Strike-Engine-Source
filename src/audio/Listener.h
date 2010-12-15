@@ -41,7 +41,14 @@ namespace Audio {
          * @remarks Implementations use the "dirty" member struct to precisely know and 
          *      track what changed and what didn't. Call reset() when synchronized.
          */
-        struct {
+        struct Dirty
+        {
+            Dirty()
+                : location(0),
+                  attributes(0),
+                  gain(0)
+            {}
+                  
             /** position, velocity & direction */
             int location : 1;
             

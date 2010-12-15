@@ -125,4 +125,3 @@ void Mesh::initTechnique( const std::string& ) {}
 
 void AddWarp( Unit *un, QVector, float ) {}
 void WarpTrailDraw() {}
-

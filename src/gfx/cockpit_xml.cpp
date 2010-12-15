@@ -452,10 +452,10 @@ pastarmor8:
         }
         goto loadsprite;
     case RADAR:
-        newsprite = &Radar[0];
+        newsprite = &radarSprites[0];
         goto loadsprite;
     case REARRADAR:
-        newsprite = &Radar[1];
+        newsprite = &radarSprites[1];
         goto loadsprite;
     case LVDU:
         vdu.push_back( NULL );

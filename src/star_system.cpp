@@ -486,6 +486,7 @@ void GameStarSystem::Draw( bool DrawCockpit )
                 processmesh );
     }
 */
+    MeshAnimation::UpdateFrames();
 }
 
 extern void update_ani_cache();

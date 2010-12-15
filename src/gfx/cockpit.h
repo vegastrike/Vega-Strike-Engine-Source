@@ -1,3 +1,5 @@
+// -*- mode: c++; c-basic-offset: 4; indent-tabs-mode: nil -*-
+
 #ifndef _COCKPIT_H_
 #define _COCKPIT_H_
 #include "gfx/cockpit_generic.h"
@@ -11,6 +13,8 @@ class VSSprite;
 class Gauge;
 class Unit;
 class NavigationSystem;
+#include "radar/radar.h"
+#include "radar/sensor.h"
 #include "vdu.h"
 #include "camera.h"
 #include "nav/navscreen.h"
@@ -61,7 +65,6 @@ struct soundArray
 
 class GameCockpit : public Cockpit
 {
-private:
     Camera    cam[NUM_CAM];
     float     vdu_time[MAXVDUS];
 ///saved values to compare with current values (might need more for damage)
@@ -77,7 +80,8 @@ private:
     std::vector< class Mesh* >mesh;
     int       soundfile;
     VSSprite *Pit[4];
-    VSSprite *Radar[2];
+    VSSprite *radarSprites[2];
+    std::auto_ptr<Radar::Display> radarDisplay;
 ///Video Display Units (may need more than 2 in future)
     std::vector< VDU* >vdu;
 /// An information string displayed in the VDU.
@@ -101,25 +105,10 @@ private:
     bool     steady_itts;
 //colors of blips/targetting boxes
     GFXColor friendly, enemy, neutral, targeted, targetting, planet;
-//gets the color by relation
-    GFXColor relationToColor( float relation );
-//gets the color by looking closer at the unit, and a sequence number representing the blip's priority
-    GFXColor unitToColor( Unit *un, Unit *target, char ifflevel, char &sequence );
     
-    GFXColor unitToColor( Unit *un, Unit *target, char ifflevel )
-    {
-        char seq;
-        return unitToColor( un, target, ifflevel, seq );
-    }
-    
-//the style of the radar (WC|Elite)
-    string radar_type;
 /// Used to display the arrow pointing to the currently selected target.
     float  projection_limit_x, projection_limit_y;
     float  inv_screen_aspect_ratio; //Precomputed division 1 / g_game.aspect.
-
-    void LocalToEliteRadar( const Vector &pos, float &s, float &t, float &h );
-    void LocalToRadar( const Vector &pos, float &s, float &t );
 
     void LoadXML( const char *file );
     void LoadXML( VSFileSystem::VSFile &f );
@@ -131,25 +120,23 @@ private:
     void DrawNavigationSymbol( const Vector &loc, const Vector &p, const Vector &q, float size );
 ///draws the target box around targetted unit
     float computeLockingSymbol( Unit *par );
-    void DrawTargetBox();
+    void DrawTargetBox(const Radar::Sensor&);
 ///draws the target box around all units
-    void DrawTargetBoxes();
+    void DrawTargetBoxes(const Radar::Sensor&);
 ///draws a target cross around all units targeted by your turrets // ** jay
-    void DrawTurretTargetBoxes();
-    void DrawTacticalTargetBox();
+    void DrawTurretTargetBoxes(const Radar::Sensor&);
+    void DrawTacticalTargetBox(const Radar::Sensor&);
     void DrawCommunicatingBoxes();
-///Draws all teh blips on the radar.
-    void DrawBlips( Unit *un );
-///Draws all teh blips on the radar in Elite-style
-    void DrawEliteBlips( Unit *un );
+///Draws all the tracks on the radar.
+    void DrawRadar(const Radar::Sensor&);
 ///Draws target gauges
     void DrawTargetGauges( Unit *target );
 ///Draws unit gauges
     void DrawGauges( Unit *un );
     NavigationSystem ThisNav;
 //Draw the arrow pointing to the target.
-    void DrawArrowToTarget( Unit*, Unit* );
-    void DrawArrowToTarget( Unit*, Vector LocalCoordinates );
+    void DrawArrowToTarget(const Radar::Sensor&, Unit*);
+    void DrawArrowToTarget(const Radar::Sensor&, Vector LocalCoordinates);
 public:
     std::string textMessage;
     bool editingTextMessage;
@@ -220,21 +207,23 @@ public:
         cam[currentcamera].UpdateGFX();
     }
     
-    struct BlipEntry {
-        bool bigger;
-        char sequence;
-        GFXColor color;
-        Vector vertex;
-    };
-    
-    /// Add the corresponding BlipEntry into out.
-    void drawUnToTarget( Unit *a, Unit *b, float xcent, float ycent, float xsize, float ysize, bool reardar, std::vector<BlipEntry> &out);
-    
     virtual bool SetDrawNavSystem( bool );
     virtual bool CanDrawNavSystem();
     virtual bool DrawNavSystem();
     virtual bool CheckCommAnimation( Unit *un );
     virtual void visitSystem( std::string systemName );
+    void AutoLanding();
+    void DoAutoLanding(Unit *, Unit *);
+
+    bool IsPaused() const;
+    // Game is paused
+    void OnPauseBegin();
+    void OnPauseEnd();
+    // Ship has undocked from station
+    void OnDockEnd(Unit *station, Unit *unit);
+    // Ship is jumping
+    void OnJumpBegin(Unit *unit);
+    void OnJumpEnd(Unit *unit);
 };
 #endif
 

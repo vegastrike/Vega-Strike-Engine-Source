@@ -86,11 +86,9 @@ void BaseInterface::Load( const char *filename, const char *time_of_day_hint, co
 #endif
     //now that we have a FILE * named inFile and a std::string named newfile we can finally begin the python
     string compilefile = string( filename )+time_of_day_hint+string( faction )+BASE_EXTENSION;
-    char  *pyfile = strdup( compilefile.c_str() );
     Python::reseterrors();
-    PyRun_SimpleFile( inFile, pyfile );
+    PyRun_SimpleFile( inFile, compilefile.c_str() );
     Python::reseterrors();
-    free( pyfile );
     VSFileSystem::vs_close( inFile );
 }
 

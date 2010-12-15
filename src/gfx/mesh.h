@@ -47,6 +47,7 @@ class BoundingBox;
 
 #define MESH_HASTHABLE_SIZE (503)
 
+
 // Struct polygon format returned by GetPolys, usually a triangle
 struct mesh_polygon
 {
@@ -169,8 +170,10 @@ protected:
     Mesh( std::string filename, const Vector &scalex, int faction, class Flightgroup *fg, bool orig = false );
 
 ///Loads a mesh that has been found in the hash table into this mesh (copying original data)
+public:
     bool LoadExistant( Mesh *mesh );
     bool LoadExistant( const string filehash, const Vector &scale, int faction );
+protected:
 ///the position of the center of this mesh for collision detection
     Vector local_pos;
 ///The hash table of all meshes
@@ -244,6 +247,8 @@ private:
 public: Mesh();
     Mesh( const Mesh &m );
 
+    GFXVertexList *getVertexList() const;
+    void setVertexList( GFXVertexList* _vlist );
     float getFramesPerSecond() const;
     float getCurrentFrame() const;
     void setCurrentFrame( float );
@@ -416,5 +421,6 @@ public: Mesh();
         this->mx   = mx;
     }
 };
+
 #endif
 

@@ -1,3 +1,4 @@
+// -*- mode: c++; c-basic-offset: 4; indent-tabs-mode: nil -*-
 /*
  * Vega Strike
  * Copyright (C) 2003 Mike Byron
@@ -5392,12 +5393,14 @@ void showUnitStats( Unit *playerUnit, string &text, int subunitlevel, int mode, 
 
             else text += "no";
             text += "#n#"+prefix+statcolor+"AFHH (Advanced Flag & Hostility Heuristics) support: #-c";
-            if (uc.radar.iff == 0) text += "no";
-
-            else if (uc.radar.iff == 1)
-                text += "friendly/hostile";
-
-            else text += "full";
+            std::string afhh;
+	    if (uc.radar.UseFriendFoe())
+                afhh += "friendly/hostile ";
+	    if (uc.radar.UseThreatAssessment())
+                afhh += "threat ";
+	    if (afhh.empty())
+                afhh = "no";
+            text += afhh;
         }
         text.append( "#n##n##c0:1:.5#"+prefix+"[ENERGY SUBSYSTEM]#n##-c" );
     } else {
@@ -5419,12 +5422,14 @@ void showUnitStats( Unit *playerUnit, string &text, int subunitlevel, int mode, 
 
                 else text += "no";
                 text += "#n#"+prefix+statcolor+"AFHH (Advanced Flag & Hostility Heuristics) support: #-c";
-                if (uc.radar.iff == 0) text += "no";
-
-                else if (uc.radar.iff == 1)
-                    text += "friendly/hostile";
-
-                else text += "full";
+                std::string afhh;
+                if (uc.radar.UseFriendFoe())
+                    afhh += "friendly/hostile ";
+                if (uc.radar.UseThreatAssessment())
+                    afhh += "threat ";
+                if (afhh.empty())
+                    afhh = "no";
+                text += afhh;
             }
             break;
         case 1:                 //Additive

@@ -514,7 +514,7 @@ void NetClient::receiveUnitDamage( NetBuffer &netbuf, Unit *un )
     }
     if (damages&Unit::COMPUTER_DAMAGED) {
         SETNOTNULL( un, un->computer.itts, netbuf.getChar() );
-        SETNOTNULL( un, un->computer.radar.iff, netbuf.getChar() );
+        SETNOTNULL( un, un->computer.radar.capability, netbuf.getChar() );
         SETNOTNULL( un, un->limits.retro, netbuf.getFloat() );
         SETNOTNULL( un, un->computer.radar.maxcone, netbuf.getFloat() );
         SETNOTNULL( un, un->computer.radar.lockcone, netbuf.getFloat() );

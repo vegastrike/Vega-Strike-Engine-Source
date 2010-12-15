@@ -1,8 +1,9 @@
+// -*- mode: c++; c-basic-offset: 4; indent-tabs-mode: nil -*-
+
 /// Draws cockpit parts
 /// Draws gauges, info strings, radar, ...
 
 #include <boost/version.hpp>
-
 #if BOOST_VERSION != 102800
 #include <boost/python/object.hpp>
 #include <boost/python/dict.hpp>
@@ -128,131 +129,9 @@ void GameCockpit::ReceivedTargetInfo()
         vdu[j]->ReceivedTargetData();
 }
 
-void DrawRadarCircles( float x, float y, float wid, float hei, const GFXColor &col )
-{
-    GFXColorf( col );
-    GFXEnable( SMOOTH );
-    GFXCircle( x, y, wid/2, hei/2 );
-    GFXCircle( x, y, wid/2.4, hei/2.4 );
-    GFXCircle( x, y, wid/6, hei/6 );
-    const float sqrt2 = sqrt( (double) 2 )/2;
-    GFXBegin( GFXLINE );
-    GFXVertex3f( x+(wid/6)*sqrt2, y+(hei/6)*sqrt2, 0 );
-    GFXVertex3f( x+(wid/2.4)*sqrt2, y+(hei/2.4)*sqrt2, 0 );
-    GFXVertex3f( x-(wid/6)*sqrt2, y+(hei/6)*sqrt2, 0 );
-    GFXVertex3f( x-(wid/2.4)*sqrt2, y+(hei/2.4)*sqrt2, 0 );
-    GFXVertex3f( x-(wid/6)*sqrt2, y-(hei/6)*sqrt2, 0 );
-    GFXVertex3f( x-(wid/2.4)*sqrt2, y-(hei/2.4)*sqrt2, 0 );
-    GFXVertex3f( x+(wid/6)*sqrt2, y-(hei/6)*sqrt2, 0 );
-    GFXVertex3f( x+(wid/2.4)*sqrt2, y-(hei/2.4)*sqrt2, 0 );
-    GFXEnd();
-    GFXDisable( SMOOTH );
-}
-
-void GameCockpit::LocalToRadar( const Vector &pos, float &s, float &t )
-{
-    s = (pos.k > 0 ? pos.k : 0)+1;
-    t = 2*sqrtf( pos.i*pos.i+pos.j*pos.j+s*s );
-    s = -pos.i/t;
-    t = pos.j/t;
-}
-
 void GameCockpit::SetSoundFile( string sound )
 {
     soundfile = AUDCreateSoundWAV( sound, false );
-}
-
-void GameCockpit::LocalToEliteRadar( const Vector &pos, float &s, float &t, float &h )
-{
-    s = -pos.i/1000.0;
-    t = pos.k/1000.0;
-    h = pos.j/1000.0;
-}
-
-GFXColor GameCockpit::unitToColor( Unit *un, Unit *target, char ifflevel, char &sequence )
-{
-    static GFXColor basecol    = RetrColor( "base", GFXColor( -1, -1, -1, -1 ) );
-    static GFXColor jumpcol    = RetrColor( "jump", GFXColor( 0, 1, 1, .8 ) );
-    static GFXColor navcol     = RetrColor( "nav", GFXColor( 1, 1, 1, 1 ) );
-    static GFXColor suncol     = RetrColor( "star", GFXColor( 1, 1, 1, 1 ) );
-    static GFXColor missilecol = RetrColor( "missile", GFXColor( .25, 0, .5, 1 ) );
-    static GFXColor cargocol   = RetrColor( "cargo", GFXColor( .6, .2, 0, 1 ) );
-    int cargofac = FactionUtil::GetUpgradeFaction();
-    static GFXColor black_and_white = RetrColor( "black_and_white", GFXColor( .5, .5, .5 ) );
-    sequence = 0;
-    if (ifflevel == 0)
-        return black_and_white;
-    if (target->GetDestinations().size() > 0 && ifflevel > 1)
-        return jumpcol;
-    if (ifflevel > 1) {
-        if (target->isUnit() == PLANETPTR) {
-            Planet *plan = static_cast< Planet* > (target);
-            if ( plan->hasLights() )
-                return suncol;
-            if ( plan->isAtmospheric() )
-                return navcol;
-            return planet;
-        } else if (target->isUnit() == MISSILEPTR) {
-            return missilecol;
-        } else if (target->faction == cargofac) {
-            return cargocol;
-        } else if (target == un->Target() && draw_all_boxes) {
-            //if we only draw target box we cannot tell what faction enemy is!
-            //my target
-            return targeted;
-        }
-    }
-    if (target->Target() == un)
-        //the other ships is targetting me
-        return targetting;
-    if (basecol.r > 0 && basecol.g > 0 && basecol.b > 0 && UnitUtil::getFlightgroupName( target ) == "Base" && ifflevel > 0)
-        return basecol;
-    //other spaceships
-        
-    float relation;
-    
-    static bool reltocolor =
-        XMLSupport::parse_bool( vs_config->getVariable( "graphics", "hud", "DrawTheirRelationColor", "true" ) );
-    if (reltocolor)
-        relation = target->getRelation( un );
-    else
-        relation = un->getRelation( target );
-    
-    if (relation > 0)
-        sequence = -1;
-    else if (relation < 0)
-        sequence = 1;
-    else
-        sequence = 0;
-    
-    return relationToColor( relation );
-}
-
-GFXColor GameCockpit::relationToColor( float relation )
-{
-    static bool absolute_relation_color =
-        XMLSupport::parse_bool( vs_config->getVariable( "graphics", "absolute_relation_color", "false" ) );
-    if (absolute_relation_color) {
-        if (relation > 0)
-            return friendly;
-        if (relation < 0)
-            return enemy;
-        return neutral;
-    }
-    if (relation > 0) {
-        return GFXColor( relation*friendly.r+(1-relation)*neutral.r,
-                         relation*friendly.g+(1-relation)*neutral.g,
-                         relation*friendly.b+(1-relation)*neutral.b,
-                         relation*friendly.a+(1-relation)*neutral.a );
-    } else if (relation == 0) {
-        return GFXColor( neutral.r, neutral.g, neutral.b, neutral.a );
-    } else {
-        return GFXColor( -relation*enemy.r
-                         +(1+relation)*neutral.r,
-                         -relation*enemy.g+(1+relation)*neutral.g,
-                         -relation*enemy.b+(1+relation)*neutral.b,
-                         -relation*enemy.a+(1+relation)*neutral.a );
-    }
 }
 
 void GameCockpit::DrawNavigationSymbol( const Vector &Loc, const Vector &P, const Vector &Q, float size )
@@ -553,13 +432,11 @@ inline void DrawDockingBoxes( Unit *un, Unit *target, const Vector &CamP, const 
     }
 }
 
-void GameCockpit::DrawTargetBoxes()
+void GameCockpit::DrawTargetBoxes(const Radar::Sensor& sensor)
 {
-    Unit *un = parent.GetUnit();
-    if (!un)
+    if (sensor.InsideNebula())
         return;
-    if (un->GetNebula() != NULL)
-        return;
+
     StarSystem     *ssystem  = _Universe->activeStarSystem();
     UnitCollection *unitlist = &ssystem->getUnitList();
     //UnitCollection::UnitIterator *uiter=unitlist->createIterator();
@@ -574,44 +451,55 @@ void GameCockpit::DrawTargetBoxes()
     GFXBlendMode( SRCALPHA, INVSRCALPHA );
     GFXDisable( LIGHTING );
     Unit *target;
+    Unit *player = sensor.GetPlayer();
+    assert(player);
     for (un_kiter uiter = unitlist->constIterator(); (target=*uiter)!=NULL; ++uiter) {
-        if (target != un) {
+        if (target != player) {
             QVector  Loc( target->Position() );
+            Radar::Track track = sensor.CreateTrack(target, Loc);
 
-            GFXColor drawcolor = unitToColor( un, target, un->GetComputerData().radar.iff );
-            GFXColorf( drawcolor );
-            if (target->isUnit() == UNITPTR) {
-                if (un->Target() == target) {
+            GFXColorf(sensor.GetColor(track));
+            switch (track.GetType())
+            {
+            case Radar::Track::Type::Base:
+            case Radar::Track::Type::CapitalShip:
+            case Radar::Track::Type::Ship:
+                if (sensor.IsTracking(track))
+                {
                     static bool draw_dock_box =
                         XMLSupport::parse_bool( vs_config->getVariable( "graphics", "draw_docking_boxes", "true" ) );
                     if (draw_dock_box)
-                        DrawDockingBoxes( un, target, CamP, CamQ, CamR );
-                    DrawOneTargetBox( Loc, target->rSize(), CamP, CamQ, CamR, computeLockingSymbol( un ), true );
+                        DrawDockingBoxes( player, target, CamP, CamQ, CamR );
+                    DrawOneTargetBox( Loc, target->rSize(), CamP, CamQ, CamR, computeLockingSymbol( player ), true );
                 } else {
-                    DrawOneTargetBox( Loc, target->rSize(), CamP, CamQ, CamR, computeLockingSymbol( un ), false );
+                    DrawOneTargetBox( Loc, target->rSize(), CamP, CamQ, CamR, computeLockingSymbol( player ), false );
                 }
+                break;
+
+            default:
+                break;
             }
         }
     }
 }
 
-void GameCockpit::DrawTargetBox()
+void GameCockpit::DrawTargetBox(const Radar::Sensor& sensor)
 {
+    if (sensor.InsideNebula())
+        return;
+
+    Unit *target = sensor.GetPlayer()->Target();
+    if (!target)
+        return;
+
     float speed, range;
     static GFXColor black_and_white = DockBoxColor( "black_and_white" );
     int   neutral = FactionUtil::GetNeutralFaction();
-    Unit *un = parent.GetUnit();
-    if (!un)
-        return;
-    if (un->GetNebula() != NULL)
-        return;
-    Unit   *target = un->Target();
-    if (!target)
-        return;
     Vector  CamP, CamQ, CamR;
     _Universe->AccessCamera()->GetPQR( CamP, CamQ, CamR );
     //Vector Loc (un->ToLocalCoordinates(target->Position()-un->Position()));
     QVector Loc( target->Position()-_Universe->AccessCamera()->GetPosition() );
+
     GFXDisable( TEXTURE0 );
     GFXDisable( TEXTURE1 );
     GFXDisable( DEPTHTEST );
@@ -621,10 +509,11 @@ void GameCockpit::DrawTargetBox()
     static bool draw_nav_symbol = XMLSupport::parse_bool( vs_config->getVariable( "graphics", "hud", "drawNavSymbol", "false" ) );
     if (draw_nav_symbol) {
         static GFXColor suncol = RetrColor( "nav", GFXColor( 1, 1, 1, 1 ) );
-        DrawNavigationSymbol( un->GetComputerData().NavPoint, CamP, CamQ,
-                             CamR.Cast().Dot( (un->GetComputerData().NavPoint).Cast()-_Universe->AccessCamera()->GetPosition() ) );
+        DrawNavigationSymbol(sensor.GetPlayer()->GetComputerData().NavPoint, CamP, CamQ,
+                             CamR.Cast().Dot( (sensor.GetPlayer()->GetComputerData().NavPoint).Cast()-_Universe->AccessCamera()->GetPosition() ) );
     }
-    GFXColorf( unitToColor( un, target, un->GetComputerData().radar.iff ) );
+    Radar::Track track = sensor.CreateTrack(target, Loc);
+    GFXColorf(sensor.GetColor(track));
     if (draw_line_to_target) {
         GFXBlendMode( SRCALPHA, INVSRCALPHA );
         GFXEnable( SMOOTH );
@@ -641,18 +530,18 @@ void GameCockpit::DrawTargetBox()
         GFXEnd();
         GFXDisable( SMOOTH );
     }
-    float distance = UnitUtil::getDistance( un, target );
     static bool draw_target_nav_symbol =
         XMLSupport::parse_bool( vs_config->getVariable( "graphics", "draw_target_nav_symbol", "true" ) );
     static bool draw_jump_nav_symbol   =
         XMLSupport::parse_bool( vs_config->getVariable( "graphics", "draw_jump_target_nav_symbol", "true" ) );
     bool nav_symbol = false;
+    // FIXME: Replace with UnitUtil::isDockableUnit?
     if ( draw_target_nav_symbol
         && ( (target->faction == neutral
               && target->isUnit() == UNITPTR) || target->isUnit() == ASTEROIDPTR
             || ( target->isPlanet() && ( (Planet*) target )->isAtmospheric()
                 && ( draw_jump_nav_symbol
-                    || target->GetDestinations().empty() ) ) || distance > un->GetComputerData().radar.maxrange ) ) {
+                     || target->GetDestinations().empty() ) ) || !sensor.InRange(track)) ) {
         static float nav_symbol_size = XMLSupport::parse_float( vs_config->getVariable( "graphics", "nav_symbol_size", ".25" ) );
         GFXColor4f( 1, 1, 1, 1 );
         DrawNavigationSymbol( Loc, CamP, CamQ, Loc.Magnitude()*nav_symbol_size );
@@ -660,21 +549,24 @@ void GameCockpit::DrawTargetBox()
     } else {
         static bool lock_nav_symbol =
             XMLSupport::parse_bool( vs_config->getVariable( "graphics", "lock_significant_target_box", "true" ) );
-        DrawOneTargetBox( Loc, target->rSize(), CamP, CamQ, CamR, computeLockingSymbol( un ), un->TargetLocked()
+        DrawOneTargetBox( Loc, target->rSize(), CamP, CamQ, CamR, computeLockingSymbol(sensor.GetPlayer()), sensor.GetPlayer()->TargetLocked()
                          && ( lock_nav_symbol || !UnitUtil::isSignificant( target ) ) );
     }
+
     static bool draw_dock_box = XMLSupport::parse_bool( vs_config->getVariable( "graphics", "draw_docking_boxes", "true" ) );
     if (draw_dock_box)
-        DrawDockingBoxes( un, target, CamP, CamQ, CamR );
-    if ( (always_itts || un->GetComputerData().itts) && !nav_symbol ) {
+        DrawDockingBoxes(sensor.GetPlayer(), target, CamP, CamQ, CamR);
+    if ( (always_itts || sensor.GetPlayer()->GetComputerData().itts) && !nav_symbol ) {
         float   mrange;
-        un->getAverageGunSpeed( speed, range, mrange );
-        float   err  = ( .01*( 1-un->CloakVisible() ) );
+        sensor.GetPlayer()->getAverageGunSpeed( speed, range, mrange );
+        float   err  = ( .01*( 1 - sensor.GetPlayer()->CloakVisible() ) );
+        const float radialSize = sensor.GetPlayer()->rSize();
         QVector iLoc =
-            target->PositionITTS( un->Position(), un->cumulative_velocity, speed,
+            target->PositionITTS( sensor.GetPlayer()->Position(), sensor.GetPlayer()->GetVelocity(), speed,
                                   steady_itts )-_Universe->AccessCamera()->GetPosition()+10*err*QVector(
-                -.5*.25*un->rSize()+rand()*.25*un->rSize()/RAND_MAX,
-                -.5*.25*un->rSize()+rand()*.25*un->rSize()/RAND_MAX, -.5*.25*un->rSize()+rand()*.25*un->rSize()/RAND_MAX );
+                -.5*.25*radialSize+rand()*.25*radialSize/RAND_MAX,
+                -.5*.25*radialSize+rand()*.25*radialSize/RAND_MAX,
+                -.5*.25*radialSize+rand()*.25*radialSize/RAND_MAX );
 
         GFXEnable( SMOOTH );
         GFXBlendMode( SRCALPHA, INVSRCALPHA );
@@ -683,11 +575,11 @@ void GameCockpit::DrawTargetBox()
             GFXVertexf( Loc );
             GFXVertexf( iLoc );
         }
-        GFXVertexf( iLoc+( CamP.Cast() )*.25*un->rSize() );
-        GFXVertexf( iLoc+( -CamQ.Cast() )*.25*un->rSize() );
-        GFXVertexf( iLoc+( -CamP.Cast() )*.25*un->rSize() );
-        GFXVertexf( iLoc+( CamQ.Cast() )*.25*un->rSize() );
-        GFXVertexf( iLoc+( CamP.Cast() )*.25*un->rSize() );
+        GFXVertexf( iLoc+( CamP.Cast() )*.25*radialSize );
+        GFXVertexf( iLoc+( -CamQ.Cast() )*.25*radialSize );
+        GFXVertexf( iLoc+( -CamP.Cast() )*.25*radialSize );
+        GFXVertexf( iLoc+( CamQ.Cast() )*.25*radialSize );
+        GFXVertexf( iLoc+( CamP.Cast() )*.25*radialSize );
         GFXEnd();
         GFXDisable( SMOOTH );
     }
@@ -716,13 +608,12 @@ void GameCockpit::DrawCommunicatingBoxes()
     }
 }
 
-void GameCockpit::DrawTurretTargetBoxes()
+void GameCockpit::DrawTurretTargetBoxes(const Radar::Sensor& sensor)
 {
-    static GFXColor black_and_white = DockBoxColor( "black_and_white" );
-    Unit *parun = parent.GetUnit();
-    if (!parun)
+    if (sensor.InsideNebula())
         return;
-    Unit *un;
+
+    static GFXColor black_and_white = DockBoxColor( "black_and_white" );
 
     GFXDisable( TEXTURE0 );
     GFXDisable( TEXTURE1 );
@@ -731,36 +622,35 @@ void GameCockpit::DrawTurretTargetBoxes()
     GFXDisable( LIGHTING );
 
     //This avoids rendering the same target box more than once
-    std::set< void* >drawn_targets;
-    for (un_kiter iter = parun->viewSubUnits(); (un=*iter)!=NULL; ++iter) {
-        if (!un)
+    Unit *subunit;
+    std::set<Unit *> drawn_targets;
+    for (un_kiter iter = sensor.GetPlayer()->viewSubUnits(); (subunit=*iter)!=NULL; ++iter) {
+        if (!subunit)
             return;
-        if (un->GetNebula() != NULL)
-            return;
-        Unit *target = un->Target();
-        void *vtgt   = (void*) target;
-        if ( !target || (drawn_targets.count( vtgt ) > 0) )
+        Unit *target = subunit->Target();
+        if (!target || (drawn_targets.find(target) != drawn_targets.end()))
             continue;
-        drawn_targets.insert( vtgt );
+        drawn_targets.insert(target);
 
         Vector CamP, CamQ, CamR;
         _Universe->AccessCamera()->GetPQR( CamP, CamQ, CamR );
         //Vector Loc (un->ToLocalCoordinates(target->Position()-un->Position()));
         QVector     Loc( target->Position()-_Universe->AccessCamera()->GetPosition() );
+        Radar::Track track = sensor.CreateTrack(target, Loc);
         static bool draw_nav_symbol =
             XMLSupport::parse_bool( vs_config->getVariable( "graphics", "hud", "drawNavSymbol", "false" ) );
         if (draw_nav_symbol) {
             GFXColor4f( 1, 1, 1, 1 );
-            DrawNavigationSymbol( un->GetComputerData().NavPoint, CamP, CamQ,
-                                 CamR.Cast().Dot( (un->GetComputerData().NavPoint).Cast()
+            DrawNavigationSymbol( subunit->GetComputerData().NavPoint, CamP, CamQ,
+                                 CamR.Cast().Dot( (subunit->GetComputerData().NavPoint).Cast()
                                                  -_Universe->AccessCamera()->GetPosition() ) );
         }
-        GFXColorf( unitToColor( un, target, un->GetComputerData().radar.iff ) );
+        GFXColorf(sensor.GetColor(track));
 
         //DrawOneTargetBox (Loc, target->rSize(), CamP, CamQ, CamR,computeLockingSymbol(un),un->TargetLocked());
 
         //** jay
-        float rSize = target->rSize();
+        float rSize = track.GetSize();
 
         float drift = rand()/(float) RAND_MAX;
         GFXEnable( SMOOTH );
@@ -782,19 +672,16 @@ void GameCockpit::DrawTurretTargetBoxes()
     }
 }
 
-void GameCockpit::DrawTacticalTargetBox()
+void GameCockpit::DrawTacticalTargetBox(const Radar::Sensor& sensor)
 {
     static bool drawtactarg =
         XMLSupport::parse_bool( vs_config->getVariable( "graphics", "hud", "DrawTacticalTarget", "false" ) );
     if (!drawtactarg)
         return;
     static GFXColor black_and_white = DockBoxColor( "black_and_white" );
-    Unit *parun = parent.GetUnit();
-    if (!parun)
+    if (sensor.GetPlayer()->getFlightgroup() == NULL)
         return;
-    if (parun->getFlightgroup() == NULL)
-        return;
-    Unit *target = parun->getFlightgroup()->target.GetUnit();
+    Unit *target = sensor.GetPlayer()->getFlightgroup()->target.GetUnit();
     if (target) {
         Vector  CamP, CamQ, CamR;
         _Universe->AccessCamera()->GetPQR( CamP, CamQ, CamR );
@@ -811,12 +698,13 @@ void GameCockpit::DrawTacticalTargetBox()
         static float fudge    = XMLSupport::parse_float( vs_config->getVariable( "graphics", "hud", "TacTargetLength", "0.1" ) );
         static float foci     = XMLSupport::parse_float( vs_config->getVariable( "graphics", "hud", "TacTargetFoci", "0.5" ) );
         glLineWidth( (int) thethick );         //temp
-        GFXColorf( unitToColor( parun, target, parun->GetComputerData().radar.iff ) );
+        Radar::Track track = sensor.CreateTrack(target, Loc);
+        GFXColorf(sensor.GetColor(track));
 
         //DrawOneTargetBox (Loc, target->rSize(), CamP, CamQ, CamR,computeLockingSymbol(un),un->TargetLocked());
 
         //** jay
-        float rSize = target->rSize();
+        float rSize = track.GetSize();
 
         GFXBegin( GFXLINE );
         GFXVertexf( Loc+( (-CamP).Cast()+(-CamQ).Cast() )*rSize*(foci+fudge) );
@@ -836,54 +724,6 @@ void GameCockpit::DrawTacticalTargetBox()
     }
 }
 
-void GameCockpit::drawUnToTarget( Unit *un, Unit *target, float xcent, float ycent, float xsize, float ysize, bool reardar, std::vector<GameCockpit::BlipEntry> &out )
-{
-    static GFXColor black_and_white   = DockBoxColor( "black_and_white" );
-    static GFXColor communicating     = DockBoxColor( "communicating" );
-    static bool     draw_blips_behind =
-        XMLSupport::parse_bool( vs_config->getVariable( "graphics", "hud", "draw_radar_blips_behind", "true" ) );
-
-    static float    fademax = XMLSupport::parse_float( vs_config->getVariable( "graphics", "hud", "BlipRangeMaxFade", "1.0" ) );
-    static float    fademin = XMLSupport::parse_float( vs_config->getVariable( "graphics", "hud", "BlipRangeMinFade", "1.0" ) );
-    static float    fademidpoint =
-        XMLSupport::parse_float( vs_config->getVariable( "graphics", "hud", "BlipRangeFadeMidpoint", "0.2" ) );
-    Vector localcoord( un->LocalCoordinates( target ) );
-    if (reardar)
-        localcoord.k = -localcoord.k;
-    if (draw_blips_behind == false && localcoord.k < 0) return;
-    float    s, t;
-    this->LocalToRadar( localcoord, s, t );
-    
-    out.resize(out.size()+1);
-    BlipEntry &blip = out.back();
-    
-    GFXColor localcol( this->unitToColor( un, target, un->GetComputerData().radar.iff, blip.sequence ) );
-    float    fade = float(localcoord.Magnitude()/un->GetComputerData().radar.maxrange);
-    fade = mymin( 1.f, mymax( 0.f,
-            (fade < fademidpoint) ? (0.5f*fade/fademidpoint) 
-                                  : ( 0.5f+0.5f*(fade-fademidpoint)/(1.0f-fademidpoint) ) ) );
-    if ( target == un->Target() )
-        fade = 0;
-    localcol.a *= fade*fademax+(1.0f-fade)*fademin;
-    if (1) {
-        unsigned int s = vdu.size();
-        for (unsigned int i = 0; i < s; ++i) {
-            if (vdu[i]->GetCommunicating() == target) {
-                localcol = communicating;
-               break;
-            }
-        }
-    }
-    
-    blip.color = localcol;
-    
-    float  rerror = ( (un->GetNebula() != NULL) ? .03 : 0 )+(target->GetNebula() != NULL ? .06 : 0);
-    Vector v( xcent+xsize*(s-.5*rerror+( rerror*rand() )/RAND_MAX),
-              ycent+ysize*(t+ -.5*rerror+( rerror*rand() )/RAND_MAX), 0 );
-    blip.vertex = v;
-    blip.bigger = ( target == un->Target() );
-}
-
 void GameCockpit::Eject()
 {
     ejecting = true;
@@ -896,9 +736,9 @@ void GameCockpit::EjectDock()
     going_to_dock_screen = true;
 }
 
-static void DoAutoLanding( Cockpit *thus, Unit *un, Unit *target )
+void GameCockpit::DoAutoLanding(Unit *un, Unit *target)
 {
-    if (!thus || !un || !target)
+    if (!un || !target)
         return;
     if (UnitUtil::isDockableUnit( target ) == false)
         return;
@@ -926,7 +766,7 @@ static void DoAutoLanding( Cockpit *thus, Unit *un, Unit *target )
             }
         }
     }
-    if (autoLandingExcludeList.count( target->name ) > 0)
+    if (autoLandingExcludeList.find(target->name) == autoLandingExcludeList.end())
         return;
     static float lessthan   = XMLSupport::parse_float( vs_config->getVariable( "physics", "AutoLandingDockDistance", "50" ) );
     static float warnless   = XMLSupport::parse_float( vs_config->getVariable( "physics", "AutoLandingWarningDistance", "350" ) );
@@ -993,15 +833,15 @@ static void DoAutoLanding( Cockpit *thus, Unit *un, Unit *target )
                 {
                 case 0:
                     warnsound.playsound();
-                    thus->SetCommAnimation( ani0, target );
+                    SetCommAnimation( ani0, target );
                     break;
                 case 1:
                     warnsound1.playsound();
-                    thus->SetCommAnimation( ani1, target );
+                    SetCommAnimation( ani1, target );
                     break;
                 default:
                     warnsound2.playsound();
-                    thus->SetCommAnimation( ani2, target );
+                    SetCommAnimation( ani2, target );
                     break;
                 }
             }
@@ -1014,279 +854,68 @@ static void DoAutoLanding( Cockpit *thus, Unit *un, Unit *target )
     }
 }
 
-class DrawUnitBlip
+void GameCockpit::AutoLanding()
 {
-    Unit  *un;
-    Unit  *makeBigger;
-    GameCockpit *parent;
-    float *xsize;
-    float *ysize;
-    float *xcent;
-    float *ycent;
-    bool  *reardar;
-    int    numradar;
-    std::vector<GameCockpit::BlipEntry> out;
-    std::vector<size_t> shuffle;
-    
-    class ShuffleComparator {
-        const std::vector<GameCockpit::BlipEntry> &data;
-    public:
-        ShuffleComparator(const std::vector<GameCockpit::BlipEntry> &_data) : data(_data) {}
-        
-        bool operator()(size_t a, size_t b) const
+    static bool autolanding_enable =
+        XMLSupport::parse_bool( vs_config->getVariable( "physics", "AutoLandingEnable", "false" ) );
+    if (autolanding_enable)
+    {
+        Unit *player = GetParent();
+        if (player == NULL)
+            return;
+
+        CollideMap *collideMap = _Universe->activeStarSystem()->collidemap[Unit::UNIT_ONLY];
+        for (CollideMap::iterator it = collideMap->begin(); it != collideMap->end(); ++it)
         {
-            return data[a].sequence < data[b].sequence;
-        }
-    };
-    
-public: 
-    
-    void sortBlips()
-    {
-        // Initialize shuffle
-        while (shuffle.size() < out.size())
-            shuffle.push_back(shuffle.size());
-        if (shuffle.size() > out.size())
-            shuffle.resize(out.size());
-        
-        // Compute sequence-sorted shuffle
-        ShuffleComparator cmp(out);
-        std::sort(shuffle.begin(), shuffle.end(), cmp);
-    }
-    
-    const std::vector<GameCockpit::BlipEntry>& getBlips() const
-    { 
-        return out; 
-    }
-    
-    const std::vector<size_t>& getShuffle() const
-    { 
-        return shuffle; 
-    }
-    
-    DrawUnitBlip() {}
-    void init( Unit *un,
-               GameCockpit *parent,
-               int numradar,
-               float *xsize,
-               float *ysize,
-               float *xcent,
-               float *ycent,
-               bool *reardar
-               )
-    {
-        this->un = un;
-        this->parent     = parent;
-        this->makeBigger = un->Target();
-        this->numradar   = numradar;
-        this->xsize      = xsize;
-        this->ysize      = ysize;
-        this->xcent      = xcent;
-        this->ycent      = ycent;
-        this->reardar    = reardar;
-    }
-    bool acquire( Unit *target, float distance )
-    {
-        if (target != un) {
-            double dist;
-            int    rad;
-            static bool draw_significant_blips =
-                XMLSupport::parse_bool( vs_config->getVariable( "graphics", "hud", "draw_significant_blips", "true" ) );
-            static bool untarget_out_cone  =
-                XMLSupport::parse_bool( vs_config->getVariable( "graphics", "hud", "untarget_beyond_cone", "false" ) );
-            static bool autolanding_enable =
-                XMLSupport::parse_bool( vs_config->getVariable( "physics", "AutoLandingEnable", "false" ) );
-            if (autolanding_enable) {
-                GFXEnd();
-                DoAutoLanding( parent, un, target );
-                GFXBegin( GFXPOINT );
-            }
-            if ( !un->InRange( target, dist, makeBigger == target && untarget_out_cone, true, true ) ) {
-                if (makeBigger == target)
-                    un->Target( NULL );
-                return true;
-            }
-            if (makeBigger != target && draw_significant_blips == false && getTopLevelOwner() == target->owner && distance
-                > un->GetComputerData().radar.maxrange)
-                return true;
-            static float minblipsize =
-                XMLSupport::parse_float( vs_config->getVariable( "graphics", "hud", "min_radarblip_size", "0" ) );
-            if (target->radial_size > minblipsize)
-                for (rad = 0; rad < numradar; ++rad)
-                    parent->drawUnToTarget( un, target, xcent[rad], ycent[rad], xsize[rad], ysize[rad], reardar[rad], out );
-            if (target->isPlanet() == PLANETPTR && target->radial_size > 0) {
-                Unit *sub = NULL;
-                for (un_kiter i = target->viewSubUnits(); (sub = *i) != NULL; ++i)
-                    if (target->radial_size > minblipsize)
-                        for (rad = 0; rad < numradar; ++rad)
-                            parent->drawUnToTarget( un, sub, xcent[rad], ycent[rad], xsize[rad], ysize[rad], reardar[rad], out );
-            }
-        }
-        return true;
-    }
-};
+            if (it->radius <= 0)
+                continue;
 
-void GameCockpit::DrawBlips( Unit *un )
-{
-    float xsize[2], ysize[2], xcent[2], ycent[2];
-    bool  reardar[2];
-    int   numradar = 0;
-    GFXDisable( TEXTURE0 );
-    GFXDisable( LIGHTING );
-    for (int i = 0; i < 2; ++i) {
-        if (Radar[numradar]) {
-            Radar[numradar]->GetSize( xsize[numradar], ysize[numradar] );
-            xsize[numradar] = fabs( xsize[numradar] );
-            ysize[numradar] = fabs( ysize[numradar] );
-            Radar[numradar]->GetPosition( xcent[numradar], ycent[numradar] );
-            if ( (!g_game.use_sprites) || Radar[numradar]->LoadSuccess() )
-                DrawRadarCircles( xcent[numradar], ycent[numradar], xsize[numradar], ysize[numradar], textcol );
-            reardar[numradar] = i ? true : false;
-            numradar++;
-        }
-    }
-    GFXPointSize( 2 );
-    GFXBegin( GFXPOINT );
-    static float unitRad =
-        XMLSupport::parse_float( vs_config->getVariable( "graphics", "hud", "radar_search_extra_radius", "1000" ) );
+            Unit *target = it->ref.unit;
+            if (target == NULL)
+                continue;
 
-    UnitWithinRangeLocator< DrawUnitBlip >unitLocator( un->GetComputerData().radar.maxrange, unitRad );
-    unitLocator.action.init( un, this, numradar, xsize, ysize, xcent, ycent, reardar );
-    if ( !is_null( un->location[Unit::UNIT_ONLY] ) )
-        findObjects( _Universe->activeStarSystem()->collidemap[Unit::UNIT_ONLY], un->location[Unit::UNIT_ONLY], &unitLocator );
-    static bool allGravUnits =
-        XMLSupport::parse_bool( vs_config->getVariable( "graphics", "hud", "draw_gravitational_objects", "true" ) );
-    if (allGravUnits) {
-        Unit *u;
-        bool  foundtarget = false;
-        Unit *targ = un->Target();
-        for (un_kiter i = _Universe->activeStarSystem()->gravitationalUnits().constIterator(); (u = *i) != NULL; ++i) {
-            unitLocator.action.acquire( u, UnitUtil::getDistance( un, u ) );
-            if (u == targ) foundtarget = true;
-        }
-        if (targ && !foundtarget)
-            unitLocator.action.acquire( targ, UnitUtil::getDistance( un, targ ) );
-    }
-    
-    unitLocator.action.sortBlips();
-    const std::vector<BlipEntry> &blips = unitLocator.action.getBlips();
-    const std::vector<size_t> &shuffle = unitLocator.action.getShuffle();
-    
-    assert(blips.size() == shuffle.size());
-    
-    for (std::vector<size_t>::const_iterator it = shuffle.begin(); it != shuffle.end(); ++it) {
-        const BlipEntry &blip = blips[*it];
-        
-        GFXColorf( blip.color );
-        GFXVertexf( blip.vertex );
-        if ( blip.bigger ) {
-            Vector v = blip.vertex;
-            
-            GFXVertexf( v );
-            GFXVertex3f( (float) (v.i+(7.8)/g_game.x_resolution), v.j, v.k );             //I need to tell it to use floats...
-            GFXVertex3f( (float) (v.i-(7.5)/g_game.x_resolution), v.j, v.k );             //otherwise, it gives an error about
-            GFXVertex3f( v.i, (float) (v.j-(7.5)/g_game.y_resolution), v.k );             //not knowning whether to use floats
-            GFXVertex3f( v.i, (float) (v.j+(7.8)/g_game.y_resolution), v.k );             //or doubles.
-
-            GFXVertex3f( (float) (v.i+(3.9)/g_game.x_resolution), v.j, v.k );             //I need to tell it to use floats...
-            GFXVertex3f( (float) (v.i-(3.75)/g_game.x_resolution), v.j, v.k );             //otherwise, it gives an error about
-            GFXVertex3f( v.i, (float) (v.j-(3.75)/g_game.y_resolution), v.k );             //not knowning whether to use floats
-            GFXVertex3f( v.i, (float) (v.j+(3.9)/g_game.y_resolution), v.k );             //or doubles.
+            DoAutoLanding(player, target);
         }
     }
-    
-    GFXEnd();
-    GFXPointSize( 1 );
-    GFXColor4f( 1, 1, 1, 1 );
-    GFXEnable( TEXTURE0 );
 }
 
-void GameCockpit::DrawEliteBlips( Unit *un )
+void GameCockpit::DrawRadar(const Radar::Sensor& sensor)
 {
-    if (!Radar[0])
-        return;
-    static GFXColor black_and_white  = DockBoxColor( "black_and_white" );
-    Unit::Computer::RADARLIM *radarl = &un->GetComputerData().radar;
-    UnitCollection *drawlist = &_Universe->activeStarSystem()->getUnitList();
-    Unit *target;
-    Unit *makeBigger = un->Target();
-    float s, t, es, et, eh;
-    float xsize, ysize, xcent, ycent;
-    Radar[0]->GetSize( xsize, ysize );
-    xsize = fabs( xsize );
-    ysize = fabs( ysize );
-    Radar[0]->GetPosition( xcent, ycent );
-    GFXDisable( TEXTURE0 );
-    GFXDisable( LIGHTING );
-    GFXEnable( SMOOTH );
-    if ( Radar[0]->LoadSuccess() )
-        DrawRadarCircles( xcent, ycent, xsize, ysize, textcol );
-    static bool draw_significant_blips =
-        XMLSupport::parse_bool( vs_config->getVariable( "graphics", "hud", "draw_significant_blips", "true" ) );
-    for (un_kiter iter = drawlist->constIterator(); (target=*iter)!=NULL; ++iter) {
-        if (target != un) {
-            static bool autolanding_enable =
-                XMLSupport::parse_bool( vs_config->getVariable( "physics", "AutoLandingEnable", "false" ) );
-            if (autolanding_enable)
-                DoAutoLanding( this, un, target );
-            double mm;
-            static bool untarget_out_cone =
-                XMLSupport::parse_bool( vs_config->getVariable( "graphics", "hud", "untarget_beyond_cone", "false" ) );
-            if ( !un->InRange( target, mm, makeBigger == target && untarget_out_cone, true, true ) ) {
-                if (makeBigger == target)
-                    un->Target( NULL );
-                continue;
+    static float maxUnitRadius =
+        XMLSupport::parse_float(vs_config->getVariable("graphics", "hud", "radar_search_extra_radius", "1000"));
+    static bool allGravUnits =
+        XMLSupport::parse_bool(vs_config->getVariable("graphics", "hud", "draw_gravitational_objects", "true"));
+
+    if (radarSprites)
+    {
+        GFXDisable(TEXTURE0);
+        GFXDisable(LIGHTING);
+
+        assert(radarDisplay.get() != 0);
+        radarDisplay->Draw(sensor, radarSprites[0], radarSprites[1]);
+
+        GFXEnable(TEXTURE0);
+
+        // Draw radar damage
+        float damage = (sensor.GetPlayer()->GetImageInformation().cockpit_damage[0]);
+        if (sensor.GetMaxRange() < 1.0)
+            damage = std::min(damage, 0.25f);
+        if (damage < .985) {
+            if (radar_time >= 0) {
+                if ( damage > .001 && ( cockpit_time > radar_time+(1-damage) ) ) {
+                    if (rand01() > SWITCH_CONST)
+                        radar_time = -cockpit_time;
+                } else {
+                    static Animation radar_ani( "static_round.ani", true, .1, BILINEAR );
+                    radar_ani.DrawAsVSSprite( radarSprites[0] );
+                    radar_ani.DrawAsVSSprite( radarSprites[1] );
+                }
+            } else if ( cockpit_time > ( ( 1-(-radar_time) )+damage ) ) {
+                if (rand01() > SWITCH_CONST)
+                    radar_time = cockpit_time;
             }
-            if (makeBigger != target && draw_significant_blips == false && getTopLevelOwner() == target->owner)
-                continue;
-            Vector localcoord( un->LocalCoordinates( target ) );
-
-            LocalToRadar( localcoord, s, t );
-            LocalToEliteRadar( localcoord, es, et, eh );
-
-            GFXColor localcol( unitToColor( un, target, radarl->iff ) );
-            GFXColorf( localcol );
-            int headsize = 4;
-#if 1
-            if (target == makeBigger)
-                headsize = 6;
-            //cout << "localcoord" << localcoord << " s=" << s << " t=" << t << endl;
-#endif
-
-            float xerr, yerr, y2, x2;
-            float rerror = ( (un->GetNebula() != NULL) ? .03 : 0 )+(target->GetNebula() != NULL ? .06 : 0);
-            xerr = xcent+xsize*(es-.5*rerror+( rerror*rand() )/RAND_MAX);
-            yerr = ycent+ysize*(et+ -.5*rerror+( rerror*rand() )/RAND_MAX);
-            x2   = xcent+xsize*( (es+0)-.5*rerror+( rerror*rand() )/RAND_MAX );
-            y2   = ycent+ysize*( (et+t)-.5*rerror+( rerror*rand() )/RAND_MAX );
-
-            //printf("xerr,yerr: %f %f xcent %f xsize %f\n",xerr,yerr,xcent,xsize);
-
-            ///draw the foot
-            GFXPointSize( 2 );
-            GFXBegin( GFXPOINT );
-            GFXVertex3f( xerr, yerr, 0 );
-            GFXEnd();
-
-            ///draw the leg
-            GFXBegin( GFXLINESTRIP );
-            GFXVertex3f( x2, yerr, 0 );
-            GFXVertex3f( x2, y2, 0 );
-            GFXEnd();
-
-            ///draw the head
-            GFXPointSize( headsize );
-            GFXBegin( GFXPOINT );
-            GFXVertex3f( xerr, y2, 0 );
-            GFXEnd();
-
-            GFXPointSize( 1 );
         }
     }
-    GFXDisable( SMOOTH );
-    GFXPointSize( 1 );
-    GFXColor4f( 1, 1, 1, 1 );
-    GFXEnable( TEXTURE0 );
 }
 
 float GameCockpit::LookupTargetStat( int stat, Unit *target )
@@ -1895,6 +1524,8 @@ void GameCockpit::Init( const char *file )
 
 void GameCockpit::Delete()
 {
+    Cockpit::Delete();
+
     int i;
     if (text) {
         delete text;
@@ -1911,7 +1542,6 @@ void GameCockpit::Delete()
         AUDDeleteSound( soundfile, false );
         soundfile = -1;
     }
-    viewport_offset = cockpit_offset = 0;
     for (i = 0; i < 4; i++) {
         /*
          *  if (Pit[i]) {
@@ -1925,13 +1555,13 @@ void GameCockpit::Delete()
             delete gauges[i];
             gauges[i] = NULL;
         }
-    if (Radar[0]) {
-        delete Radar[0];
-        Radar[0] = NULL;
+    if (radarSprites[0]) {
+        delete radarSprites[0];
+        radarSprites[0] = NULL;
     }
-    if (Radar[1]) {
-        delete Radar[1];
-        Radar[1] = NULL;
+    if (radarSprites[1]) {
+        delete radarSprites[1];
+        radarSprites[1] = NULL;
     }
     unsigned int j;
     for (j = 0; j < vdu.size(); j++)
@@ -1959,9 +1589,11 @@ void GameCockpit::InitStatic()
 }
 
 /***** WARNING CHANGED ORDER *****/
-GameCockpit::GameCockpit( const char *file, Unit *parent, const std::string &pilot_name ) : Cockpit( file, parent, pilot_name )
+GameCockpit::GameCockpit( const char *file, Unit *parent, const std::string &pilot_name )
+    : Cockpit( file, parent, pilot_name )
     , shake_time( 0 )
     , shake_type( 0 )
+    , radarDisplay(0)
     , textcol( 1, 1, 1, 1 )
     , text( NULL )
 {
@@ -1976,7 +1608,7 @@ GameCockpit::GameCockpit( const char *file, Unit *parent, const std::string &pil
     }
     for (i = 0; i < UnitImages< void >::NUMGAUGES; i++)
         gauges[i] = NULL;
-    Radar[0] = Radar[1] = Pit[0] = Pit[1] = Pit[2] = Pit[3] = NULL;
+    radarSprites[0] = radarSprites[1] = Pit[0] = Pit[1] = Pit[2] = Pit[3] = NULL;
 
     static bool st_draw_all_boxes =
         XMLSupport::parse_bool( vs_config->getVariable( "graphics", "hud", "drawAllTargetBoxes", "false" ) );
@@ -1988,7 +1620,6 @@ GameCockpit::GameCockpit( const char *file, Unit *parent, const std::string &pil
         XMLSupport::parse_bool( vs_config->getVariable( "graphics", "hud", "drawLineToITTS", "false" ) );
     static bool st_always_itts = XMLSupport::parse_bool( vs_config->getVariable( "graphics", "hud", "drawAlwaysITTS", "false" ) );
     static bool st_steady_itts = XMLSupport::parse_bool( vs_config->getVariable( "physics", "steady_itts", "false" ) );
-    static std::string st_radar_type = vs_config->getVariable( "graphics", "hud", "radarType", "WC" );
 
     draw_all_boxes = st_draw_all_boxes;
     draw_line_to_target = st_draw_line_to_target;
@@ -1996,8 +1627,9 @@ GameCockpit::GameCockpit( const char *file, Unit *parent, const std::string &pil
     draw_line_to_itts   = st_draw_line_to_itts;
     always_itts   = st_always_itts;
     steady_itts   = st_steady_itts;
-    radar_type    = st_radar_type;
     last_locktime = last_mlocktime = -FLT_MAX;
+
+    radarDisplay = Radar::Factory(Radar::Type::NullDisplay);
 
     //Compute the screen limits. Used to display the arrow pointing to the selected target.
     static float st_projection_limit_y = XMLSupport::parse_float( vs_config->getVariable( "graphics", "fov", "78" ) );
@@ -2371,13 +2003,13 @@ static void DrawDamageFlash( int dtype )
                 GFXBegin( GFXQUAD );
                 float width = 1, height = 1;
                 GFXTexCoord2f( 0.00F, 1.00F );
-                GFXVertex3f( -width, -height, 0.00F );                 //lower left
+                GFXVertex3f( -width, -height, 1.00F );                 //lower left
                 GFXTexCoord2f( 1.00F, 1.00F );
-                GFXVertex3f( width, -height, 0.00F );                 //upper left
+                GFXVertex3f( width, -height, 1.00F );                 //upper left
                 GFXTexCoord2f( 1.00F, 0.00F );
-                GFXVertex3f( width, height, 0.00F );                 //upper right
+                GFXVertex3f( width, height, 1.00F );                 //upper right
                 GFXTexCoord2f( 0.00F, 0.00F );
-                GFXVertex3f( -width, height, 0.00F );                 //lower right
+                GFXVertex3f( -width, height, 1.00F );                 //lower right
                 GFXEnd();
             } else {
                 GFXColor4f( fallbackcolor[i][0],
@@ -2386,10 +2018,10 @@ static void DrawDamageFlash( int dtype )
                             fallbackcolor[i][3] );
                 GFXDisable( TEXTURE0 );
                 GFXBegin( GFXQUAD );
-                GFXVertex3f( -1.0f, -1.0f, 0.0f );
-                GFXVertex3f( -1.0f, 1.0f, 0.0f );
-                GFXVertex3f( 1.0f, 1.0f, 0.0f );
-                GFXVertex3f( 1.0f, -1.0f, 0.0f );
+                GFXVertex3f( -1.0f, -1.0f, 1.0f );
+                GFXVertex3f( -1.0f, 1.0f, 1.0f );
+                GFXVertex3f( 1.0f, 1.0f, 1.0f );
+                GFXVertex3f( 1.0f, -1.0f, 1.0f );
                 GFXEnd();
                 GFXEnable( TEXTURE0 );
             }
@@ -2456,13 +2088,19 @@ void GameCockpit::Draw()
         XMLSupport::parse_bool( vs_config->getVariable( "graphics", "hud", "DrawTargettingBoxes", "true" ) );
     static bool draw_boxes_inside_only =
         XMLSupport::parse_bool( vs_config->getVariable( "graphics", "hud", "DrawTargettingBoxesInside", "true" ) );
-    if ( draw_any_boxes && screenshotkey == false && (draw_boxes_inside_only == false || view < CP_CHASE) ) {
-        DrawTargetBox();
-        DrawTurretTargetBoxes();
-        DrawTacticalTargetBox();
-        DrawCommunicatingBoxes();
-        if (draw_all_boxes)
-            DrawTargetBoxes();
+    if ( draw_any_boxes && screenshotkey == false && (draw_boxes_inside_only == false || view < CP_CHASE) )
+    {
+        Unit *player = GetParent();
+        if (player)
+        {
+            Radar::Sensor sensor(player);
+            DrawTargetBox(sensor);
+            DrawTurretTargetBoxes(sensor);
+            DrawTacticalTargetBox(sensor);
+            DrawCommunicatingBoxes();
+            if (draw_all_boxes)
+                DrawTargetBoxes(sensor);
+        }
         if (draw_star_destination_arrow) {
             std::string destination_system = AccessNavSystem()->getSelectedSystem();
             std::string current_system     = _Universe->activeStarSystem()->getFileName();
@@ -2765,35 +2403,8 @@ void GameCockpit::Draw()
             || (view == CP_PAN && drawPanVDU) || (view == CP_TARGET && drawTgtVDU) || (view == CP_VIEWTARGET && drawPadVDU) ) {
             //only draw crosshairs for front view
             DrawGauges( un );
-            if (Radar) {
-                //Radar->Draw();
-                if (radar_type == "Elite")
-                    DrawEliteBlips( un );
-                else
-                    DrawBlips( un );
-                /*	if (rand01()>un->GetImageInformation().cockpit_damage[0]) {
-                 *  static Animation radar_ani("round_static.ani",true,.1,BILINEAR);
-                 *  radar_ani.DrawAsVSSprite(Radar);
-                 *  }*/
-                float damage = (un->GetImageInformation().cockpit_damage[0]);
-                if (un->GetComputerData().radar.maxrange < 1.)
-                    damage = damage < 0.25 ? damage : 0.25;
-                if (damage < .985) {
-                    if (radar_time >= 0) {
-                        if ( damage > .001 && ( cockpit_time > radar_time+(1-damage) ) ) {
-                            if (rand01() > SWITCH_CONST)
-                                radar_time = -cockpit_time;
-                        } else {
-                            static Animation radar_ani( "static_round.ani", true, .1, BILINEAR );
-                            radar_ani.DrawAsVSSprite( Radar[0] );
-                            radar_ani.DrawAsVSSprite( Radar[1] );
-                        }
-                    } else if ( cockpit_time > ( ( 1-(-radar_time) )+damage ) ) {
-                        if (rand01() > SWITCH_CONST)
-                            radar_time = cockpit_time;
-                    }
-                }
-            }             //radar
+            Radar::Sensor sensor(un);
+            DrawRadar(sensor);
 
             GFXColor4f( 1, 1, 1, 1 );
             for (unsigned int vd = 0; vd < vdu.size(); vd++)
@@ -2881,21 +2492,23 @@ void GameCockpit::Draw()
             //printf("view: %i\n",view);
             Unit *parent = NULL;
             if ( drawarrow && ( parent = this->parent.GetUnit() ) ) {
+                Radar::Sensor sensor(parent);
                 if ( (view == CP_PAN
                       && !drawarrow_on_pancam)
                     || (view == CP_PANTARGET
                         && !drawarrow_on_pantgt) || (view == CP_CHASE && !drawarrow_on_chasecam) ) {} else {
-                    DrawArrowToTarget( parent, parent->Target() );
+                    DrawArrowToTarget(sensor, parent->Target());
                     if ( draw_star_destination_arrow
                         && (destination_system_location.i || destination_system_location.j
                             || destination_system_location.k) ) {
                         GFXColorf( destination_system_color );
-                        DrawArrowToTarget( parent, parent->ToLocalCoordinates( destination_system_location ) );
+                        DrawArrowToTarget(sensor, parent->ToLocalCoordinates(destination_system_location));
                     }
                 }
             }
         }         //end: draw arrow
     }
+    AutoLanding();
     GFXColor4f( 1, 1, 1, 1 );
     if (QuitAllow || getTimeCompression() < .5) {
         if (QuitAllow) {
@@ -3569,15 +3182,17 @@ Camera* GameCockpit::AccessCamera( int num )
 #define TARGET_ARROW_SIN_THETA (0.34202014332566873304409961468226)
 #define TARGET_ARROW_SIZE (0.05)
 
-void GameCockpit::DrawArrowToTarget( Unit *un, Unit *target )
+void GameCockpit::DrawArrowToTarget(const Radar::Sensor& sensor, Unit *target)
 {
-    if (un && target) {
-        GFXColorf( unitToColor( un, target, un->GetComputerData().radar.iff ) );
-        DrawArrowToTarget( un, un->LocalCoordinates( target ) );
+    Unit *player = sensor.GetPlayer();
+    if (player && target) {
+        Radar::Track track = sensor.CreateTrack(target);
+        GFXColorf(sensor.GetColor(track));
+        DrawArrowToTarget(sensor, track.GetPosition());
     }
 }
 
-void GameCockpit::DrawArrowToTarget( Unit *un, Vector localcoord )
+void GameCockpit::DrawArrowToTarget(const Radar::Sensor& sensor, Vector localcoord)
 {
     float  s, t, s_normalized, t_normalized, inv_len;
     Vector p1, p2, p_n;
@@ -3658,3 +3273,58 @@ bool GameCockpit::CheckCommAnimation( Unit *un )
     return false;
 }
 
+bool GameCockpit::IsPaused() const
+{
+    return (GetElapsedTime() <= 0.001);
+}
+
+void GameCockpit::OnPauseBegin()
+{
+    radarDisplay->OnPauseBegin();
+}
+
+void GameCockpit::OnPauseEnd()
+{
+    radarDisplay->OnPauseEnd();
+}
+
+void GameCockpit::OnDockEnd(Unit *station, Unit *ship)
+{
+    if (_Universe->isPlayerStarship(ship))
+    {
+        // We may have bought a new radar brand while docked, so the actual
+        // radar display is instantiated when we undock.
+        switch (ship->GetComputerData().radar.GetBrand())
+        {
+        case Unit::Computer::RADARLIM::Brand::BUBBLE:
+            radarDisplay = Radar::Factory(Radar::Type::BubbleDisplay);
+            break;
+
+        case Unit::Computer::RADARLIM::Brand::PLANE:
+            radarDisplay = Radar::Factory(Radar::Type::PlaneDisplay);
+            break;
+
+        default:
+            radarDisplay = Radar::Factory(Radar::Type::SphereDisplay);
+            break;
+        }
+        // Send notification that I have undocked
+        radarDisplay->OnDockEnd();
+    }
+}
+
+void GameCockpit::OnJumpBegin(Unit *ship)
+{
+    if (_Universe->isPlayerStarship(ship))
+    {
+        radarDisplay->OnJumpBegin();
+    }
+}
+
+void GameCockpit::OnJumpEnd(Unit *ship)
+{
+    if (_Universe->isPlayerStarship(ship))
+    {
+        radarDisplay->OnJumpEnd();
+    }
+}

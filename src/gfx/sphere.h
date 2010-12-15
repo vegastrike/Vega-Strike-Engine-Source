@@ -37,7 +37,8 @@ protected:
                      float theta_max = 2 *M_PI,
                      FILTER mipmap = MIPMAP,
                      bool reverse_normals = false,
-                     bool subclass = false );
+                     bool subclass = false,
+                     bool planet = false );
 public: SphereMesh() : Mesh()
     {
         setConvex( true );
@@ -63,7 +64,8 @@ public: SphereMesh() : Mesh()
                 float theta_min = 0.0,
                 float theta_max = 2 *M_PI,
                 FILTER mipmap = MIPMAP,
-                bool reverse_normals = false )
+                bool reverse_normals = false,
+                bool planet = false )
     {
         InitSphere( radius,
                     stacks,
@@ -80,7 +82,9 @@ public: SphereMesh() : Mesh()
                     theta_min,
                     theta_max,
                     mipmap,
-                    reverse_normals );
+                    reverse_normals,
+                    true,
+                    planet );
     }
     void Draw( float lod, bool centered = false, const Matrix &m = identity_matrix );
     virtual void ProcessDrawQueue( int whichpass, int which, bool zsort, const QVector &sortctr );

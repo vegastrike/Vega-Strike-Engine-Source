@@ -1557,7 +1557,7 @@ void Unit::beginElement( const string &name, const AttributeList &attributes )
         }
         pImage->unitwriter->AddTag( "Radar" );
         ADDELEMNAME( "itts", boolStarHandler, XMLType( &computer.itts ) );
-        ADDELEMNAME( "color", charStarHandler, XMLType( &computer.radar.iff ) );
+        ADDELEMNAME( "color", charStarHandler, XMLType( &computer.radar.capability ) );
         ADDELEMNAME( "mintargetsize", charStarHandler, XMLType( &computer.radar.mintargetsize ) );
         ADDELEMNAME( "range", floatStarHandler, XMLType( &computer.radar.maxrange ) );
         ADDELEMNAME( "maxcone", floatStarHandler, XMLType( &computer.radar.maxcone ) );
@@ -1591,9 +1591,9 @@ void Unit::beginElement( const string &name, const AttributeList &attributes )
                 computer.radar.maxrange     = parse_float( (*iter).value );
                 break;
             case ISCOLOR:
-                computer.radar.iff = atoi( (*iter).value.c_str() );
-                if (computer.radar.iff == 0)
-                    computer.radar.iff = parse_bool( (*iter).value );
+               computer.radar.capability = atoi( (*iter).value.c_str() );
+                if (computer.radar.capability == 0)
+                    computer.radar.capability = parse_bool( (*iter).value );
                 break;
             }
         }

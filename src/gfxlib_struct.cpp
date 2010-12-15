@@ -5,6 +5,7 @@
 #include "xml_support.h"
 #include "config_xml.h"
 #include "vs_globals.h"
+#include "vs_random.h"
 
 #include "options.h"
 
@@ -59,7 +60,7 @@ static void BindInd( unsigned int element_data )
     (*glBindBufferARB_p)(GL_ELEMENT_ARRAY_BUFFER_ARB, element_data);
 }
 #endif
-void GFXVertexList::RefreshDisplayList()
+void GFXVertexList::RefreshDisplayList( )
 {
 #ifndef NO_VBO_SUPPORT
     if (game_options.vbo && !vbo_data) {
@@ -584,3 +585,146 @@ GFXVertexList::GFXVertexList()
     memset( this, 0, sizeof (GFXVertexList) );
 } //private, only for inheriters
 
+POLYTYPE *GFXVertexList::GetPoyType() const
+{
+	return mode;
+}
+
+int *GFXVertexList::GetOffsets() const
+{
+	return offsets;
+}
+
+int GFXVertexList::GetNumLists() const
+{
+	return numlists;
+}
+
+///local helper funcs for procedural Modification
+void SetVector( const double factor, Vector *pv ) {
+    pv->i = pv->i * factor;
+    pv->j = pv->j * factor;
+    pv->k = pv->k * factor;
+}
+
+void GFXSphereVertexList::ProceduralModification()
+{
+    GFXVertex* v = sphere->BeginMutate( 0 )->vertices;
+  //  for(int j=0;j<5;j++) {
+        const int ROWS = 28;
+        int row[ROWS];
+        for(int i=0; i < ROWS; i++) {
+            row[i] = numVertices/ROWS*i;
+        }
+
+        Vector vert[ROWS];
+        int direction[ROWS/2];
+
+        int last_row_set[ROWS];
+        for(int i=0; i < ROWS; i++) {
+            last_row_set[i] = 0;
+        }
+
+        for(int i=0; i < numVertices; i++) {
+            for(int j=0; j < ROWS; j++)
+                if(row[j] < numVertices/ROWS*(j+1))
+                    vert[j] = v[row[j]].GetPosition();
+
+            for(int j=0; j < ROWS/2; j++)
+                direction[j] = (int)vsrandom.uniformInc( 0.0, 5.0 );
+/*
+            if(i % 2 != 0) {
+                for(int j=0; j < ROWS; j+=2) { 
+                    if(direction[j/2] > 2) {
+                        SetVector( 1.005, &vert[j] );
+                    } else {
+                        SetVector( 0.995, &vert[j] );
+                    }
+                }
+            }
+            if(i % 2 == 0 ) {
+                for(int j=1; j < ROWS; j+=2) {
+                    if(direction[(j-1)/2] > 2) {
+                        SetVector( 1.005, &vert[j] );
+                    } else {
+                        SetVector( 0.995, &vert[j] );
+                    }
+                }
+            }
+*/
+/*
+            if(i % 4 == 3) {
+                for(int j=0; j < ROWS; j+=2) { 
+                    if(direction[j/2] > 2) {
+                        SetVector( 1.005, &vert[j] );
+                        last_row_set[j] = 1;
+                    } else {
+                        SetVector( 0.995, &vert[j] );
+                        last_row_set[j] = -1;
+                    }
+                }
+            }
+*//*
+            if(i % 4 == 2) {
+                for(int j=0; j < ROWS; j+=2) { 
+                    if(direction[j/2] > 2) {
+                        SetVector( 1.005, &vert[j] );
+                        last_row_set[j] = 1;
+                    } else {
+                        SetVector( 0.995, &vert[j] );
+                        last_row_set[j] = -1;
+                    }
+                }
+            }
+*/
+            if(i % 4 == 1) {
+                for(int j=0; j < ROWS; j+=2) { 
+                    if(direction[j/2] > 2) {
+                        SetVector( 1.003, &vert[j] );
+                        last_row_set[j] = 1;
+                    } else {
+                //        SetVector( 1.001, &vert[j] );
+                        last_row_set[j] = -1;
+                    }
+                }
+
+           /*     for(int j=1; j < ROWS; j+=2) {
+                    if(last_row_set[j] = 1) {
+                        SetVector( 1.005, &vert[j] );
+                    } else {
+                        SetVector( 0.995, &vert[j] );
+                    }
+*/ //               }
+            }
+
+            if(i % 4 == 0 ) {
+                for(int j=1; j < ROWS; j+=2) {
+                    if(direction[(j-1)/2] > 2) {
+                        SetVector( 1.003, &vert[j] );
+                        last_row_set[j] = 1;
+                    } else {
+                  //      SetVector( 1.001, &vert[j] );
+                        last_row_set[j] = -1;
+                    }
+                }
+
+  /*              for(int j=0; j < ROWS; j+=2) { 
+                    if(last_row_set[j] = 1) {
+                        SetVector( 1.005, &vert[j] );
+                    } else {
+                        SetVector( 0.995, &vert[j] );
+                    }
+                }*/
+            }
+
+            for(int j=0; j < ROWS; j++)
+                if(row[j] < numVertices/ROWS*(j+1))
+                    v[row[j]].SetVertex( vert[j] );
+
+            for(int j=0; j < ROWS; j++)
+                row[j]++;
+        }
+
+  //  }
+    sphere->EndMutate( /*numVertices*/ );
+}

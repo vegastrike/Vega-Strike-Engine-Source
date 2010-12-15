@@ -1,3 +1,5 @@
+// -*- mode: c++; c-basic-offset: 4; indent-tabs-mode: nil -*-
+
 #ifndef __UNIT_GENERIC_H__
 #define __UNIT_GENERIC_H__
 
@@ -86,6 +88,7 @@ class Box;
 class StarSystem;
 struct colTrees;
 class Pilot;
+class MeshAnimation;
 
 /**
  * Currently the only inheriting function is planet
@@ -571,10 +574,40 @@ public:
  */
     class Computer
     {
-public:
+    public:
         class RADARLIM
         {
-public:
+        public:
+            struct Brand
+            {
+                enum Value
+                {
+                    SPHERE = 0,
+                    BUBBLE = 1,
+                    PLANE = 2
+                };
+            };
+            struct Capability
+            {
+                enum Value
+                {
+                    // For internal use
+                    IFF_UPPER_SHIFT = 16,
+                    IFF_LOWER_MASK = (1 << IFF_UPPER_SHIFT) - 1,
+                    IFF_UPPER_MASK = ~IFF_LOWER_MASK,
+
+                    // The lower 16 bits
+                    IFF_NONE               = 0,
+                    IFF_FRIEND_FOE         = 1 << 0,
+                    IFF_OBJECT_RECOGNITION = 1 << 1,
+                    IFF_THREAT_ASSESSMENT  = 1 << 2,
+
+                    // The upper 16 bits
+                    IFF_SPHERE = Brand::SPHERE << IFF_UPPER_SHIFT,
+                    IFF_BUBBLE = Brand::BUBBLE << IFF_UPPER_SHIFT,
+                    IFF_PLANE  = Brand::PLANE << IFF_UPPER_SHIFT
+                };
+            };
 //the max range the radar can handle
             float maxrange;
 //the dot with (0,0,1) indicating the farthest to the side the radar can handle.
@@ -583,8 +616,8 @@ public:
             float trackingcone;
 //The minimum radius of the target
             float mintargetsize;
-//what kind of iff support does it have 0 = none, 1=friend/enemy 2=object type
-            char  iff;
+            // What kind of type and capability the radar supports
+            int   capability;
             bool  locked;
             bool  canlock;
             bool  trackingactive;
@@ -593,9 +626,14 @@ public:
                 , lockcone( 0 )
                 , trackingcone( 0 )
                 , mintargetsize( 0 )
-                , iff( 0 )
+                , capability(Capability::IFF_NONE | Capability::IFF_SPHERE)
                 , locked( false )
-                , canlock( false ) {}
+                , canlock( false )
+            {}
+            Brand::Value GetBrand() const;
+            bool UseFriendFoe() const;
+            bool UseObjectRecognition() const;
+            bool UseThreatAssessment() const;
         }
         radar;
 //The nav point the unit may be heading for
@@ -854,6 +892,10 @@ public:
     {
         return killed;
     }
+    bool IsExploding() const { return pImage->timeexplode > 0; }
+    // 0 = not stated, 1 = done
+    float ExplodingProgress() const;
+
 //returns the current ammt of armor left
 //short fix
     float AfterburnData() const
@@ -1434,9 +1476,11 @@ public:
     }
 //get the full flightgroup ID (i.e 'green-4')
     const std::string getFgID();
+	// Changed next two lines from struct CargoColor to class CargoColor to fit line 70 declaration
+    std::vector< class CargoColor >& FilterDowngradeList( std::vector< class CargoColor > &mylist, bool downgrade = true );
+    std::vector< class CargoColor >& FilterUpgradeList( std::vector< class CargoColor > &mylist );
 
-    std::vector< struct CargoColor >& FilterDowngradeList( std::vector< struct CargoColor > &mylist, bool downgrade = true );
-    std::vector< struct CargoColor >& FilterUpgradeList( std::vector< struct CargoColor > &mylist );
+    bool IsBase() const;
 
 /*
  **************************************************************************************
@@ -1513,6 +1557,13 @@ public:
     float getRelation( const Unit *other ) const;
 
     void TurretFAW();
+
+    /*
+    **************************************************************************************
+    **** ANIMATION STUFF                                                       ***
+    **************************************************************************************
+    */
+        MeshAnimation *pMeshAnimation;	
 };
 
 Unit * findUnitInStarsystem( void *unitDoNotDereference );
@@ -1572,6 +1623,82 @@ inline void UnitCollection::UnitIterator::GetNextValidUnit()
 extern std::set< std::string >GetListOfDowngrades();
 extern void ClearDowngradeMap();
 #endif
+
+/*
+ **************************************************************************************
+ **** MESH ANIMATION STUFF                                                       ***
+ **************************************************************************************
+ */
+
+class MeshAnimation
+{
+protected:
+    std::vector< std::vector<Mesh *> *> vecAnimations;
+    std::vector< string > vecAnimationNames;
+
+    bool animatedMesh;
+    unsigned int activeAnimation;
+    double timeperframe;
+    bool   done;
+	unsigned int activeMesh;
+	unsigned int nextactiveMesh;
+	bool infiniteLoop;
+	unsigned int    loopCount;
+
+	string uniqueUnitName;
+    Unit *unitDst;
+
+public:
+    double curtime;
+
+    static unsigned int unitCount;
+
+    static std::map< string, Unit * > Units;
+
+    MeshAnimation(Unit* _unitDst);
+
+    bool Init(const char *filename, int faction, Flightgroup *flightgrp = NULL, const char *animationExt = NULL);
+
+    static void UpdateFrames();
+
+    void AnimationStep();
+
+    void clear();
+
+    ~MeshAnimation() { clear(); }
+
+    string getAnimationName(unsigned int animationNumber) const;
+
+    unsigned int getAnimationNumber(const char *name) const;
+
+    void ChangeAnimation( const char *name );
+
+    void ChangeAnimation( unsigned int AnimNumber );
+
+    //set how_many_times to 0 for continuous loop animation
+    void StartAnimation( unsigned int how_many_times = 0, int numAnimation = 0 );
+
+    void StopAnimation();
+
+    bool isAnimatedMesh() const;
+
+    bool animationRuns() const;
+
+    unsigned int numAnimations();
+
+    bool isContinuousLoop() const;
+
+    void addAnimation( std::vector<Mesh *> *meshes, const char* name );
+
+    double framesPerSecond() const;
+
+    double timePerFrame() const;
+
+    void ToggleAnimatedMesh( bool on );
+
+    void SetAniSpeed( float speed );
+};
+
 
 #endif
 

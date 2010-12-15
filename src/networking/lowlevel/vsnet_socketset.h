@@ -38,7 +38,7 @@
 #include "vsnet_pipe.h"
 #include "vsnet_debug.h"
 
-class ServerSocket;
+struct ServerSocket;
 class VsnetSocketBase;
 
 namespace VsnetDownload

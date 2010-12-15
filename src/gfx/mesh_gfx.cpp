@@ -17,6 +17,9 @@
 #endif
 #include "universe_util.h"
 #include <utility>
+#include <unistd.h>
+#include <signal.h>
+#include <sys/types.h>
 
 extern vector< Logo* > undrawn_logos;
 
@@ -355,7 +358,7 @@ AnimatedTexture * createAnimatedTexture( char const *c, int i, enum FILTER f )
 extern Hashtable< std::string, std::vector< Mesh* >, MESH_HASTHABLE_SIZE >bfxmHashTable;
 Mesh::~Mesh()
 {
-    if (!orig || orig == this) {
+	if (!orig || orig == this) {
         for (int j = 0; j < NUM_MESH_SEQUENCE; j++)
             for (OrigMeshVector::iterator it = undrawn_meshes[j].begin(); it != undrawn_meshes[j].end(); ++it)
                 if (it->orig == this) {

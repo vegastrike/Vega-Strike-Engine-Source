@@ -29,6 +29,8 @@
 #include "networking/netclient.h"
 #include "universe_util.h"
 
+extern bool toggle_pause();
+
 FireKeyboard::FireKeyboard( unsigned int whichplayer, unsigned int whichjoystick ) : Order( WEAPON, 0 )
 {
     memset( savedTargets, 0, sizeof (void*)*NUMSAVEDTARGETS );
@@ -56,7 +58,7 @@ ejectdock = eject = ejectcargo = ejectnonmissioncargo = firekey = missilekey = j
 rweapk = rmisk = cloakkey = neartargetkey = targetskey = targetukey = threattargetkey = picktargetkey = subtargetkey = targetkey = UP;
 rneartargetkey = rtargetskey = rtargetukey = rthreattargetkey = rpicktargetkey = rtargetkey = nearturrettargetkey = threatturrettargetkey = UP;
 pickturrettargetkey = turrettargetkey = enslave = freeslave = incomingmissiletargetkey = rincomingmissiletargetkey = nearesthostilekey = UP;
-nearestdangeroushostilekey = missiletargetkey = rmissiletargetkey = nearestfriendlykey = nearestbasekey = nearestplanetkey = nearestjumpkey = UP;
+nearestdangeroushostilekey = missiletargetkey = rmissiletargetkey = nearestfriendlykey = nearestbasekey = nearestplanetkey = nearestjumpkey = togglepausekey = UP;
         shieldpowerstate = 1;
 #ifdef CAR_SIM
         blinkleftkey     = blinkrightkey = headlightkey = sirenkey = UP;
@@ -131,6 +133,7 @@ nearestdangeroushostilekey = missiletargetkey = rmissiletargetkey = nearestfrien
     KBSTATE nearestbasekey;
     KBSTATE nearestplanetkey;
     KBSTATE nearestjumpkey;
+    KBSTATE togglepausekey;
 };
 
 static std::vector< FIREKEYBOARDTYPE >vectorOfKeyboardInput;
@@ -734,6 +737,12 @@ void FireKeyboard::NearestJumpKey( const KBData&, KBSTATE k )
         g().nearestjumpkey = k;
     if (k == PRESS)
         ExamineWhenTargetKey();
+}
+
+void FireKeyboard::TogglePause( const KBData&, KBSTATE k )
+{
+    if (g().togglepausekey != PRESS)
+        g().togglepausekey = k;
 }
 
 #ifdef CAR_SIM
@@ -1961,6 +1970,17 @@ void FireKeyboard::Execute()
         getNearestTargetUnit( parent, 5 );
         f().nearestjumpkey = DOWN;
         refresh_target     = true;
+    }
+    if (f().togglepausekey == PRESS) {
+        f().togglepausekey = DOWN;
+        if (toggle_pause())
+	{
+	    _Universe->AccessCockpit()->OnPauseBegin();
+	}
+	else
+	{
+	    _Universe->AccessCockpit()->OnPauseEnd();
+	}
     }
     if (f().weapk == PRESS || f().rweapk == PRESS) {
         bool forward;

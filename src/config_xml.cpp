@@ -217,7 +217,6 @@ void GameVegaConfig::initKeyMap()
 extern void inc_time_compression( const KBData&, KBSTATE a );
 extern void JoyStickToggleKey( const KBData&, KBSTATE a );
 extern void SuicideKey( const KBData&, KBSTATE a );
-extern void pause_key( const KBData&, KBSTATE a );
 extern void dec_time_compression( const KBData&, KBSTATE a );
 extern void reset_time_compression( const KBData&, KBSTATE a );
 extern void MapKey( const KBData&, KBSTATE a );
@@ -560,7 +559,7 @@ CommandMap initGlobalCommandMap()
     commandMap["ToggleAutotracking"]               = FireKeyboard::ToggleAutotracking;
     commandMap["SheltonKey"]                       = FlyByKeyboard::SheltonKey;
     commandMap["MatchSpeedKey"]                    = FlyByKeyboard::MatchSpeedKey;
-    commandMap["PauseKey"]                         = pause_key;
+    commandMap["PauseKey"]                         = FireKeyboard::TogglePause;
     commandMap["JumpKey"]                          = FlyByKeyboard::JumpKey;
     commandMap["AutoKey"]                          = FlyByKeyboard::AutoKey;
     commandMap["SwitchCombatMode"]                 = FlyByKeyboard::SwitchCombatModeKey;

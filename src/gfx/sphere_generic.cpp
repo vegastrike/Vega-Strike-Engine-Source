@@ -81,11 +81,12 @@ void SphereMesh::InitSphere( float radius,
                              float theta_max,
                              FILTER mipmap,
                              bool reverse_normals,
-                             bool subclass )
+                             bool subclass,
+                             bool planet )
 {
     setConvex( true );
     int   numspheres = (stacks+slices)/8;
-    if (numspheres < 1)
+   // if (numspheres < 1)
         numspheres = 1;
     Mesh *oldmesh;
     char  ab[3];
@@ -163,9 +164,15 @@ void SphereMesh::InitSphere( float radius,
                     vertexlist[j*2+fir].j = z*normalscale;
                     vertexlist[j*2+fir].s = GetS( g_theta( j ), theta_min, theta_max ); //1-s;//insideout?1-s:s;
                     vertexlist[j*2+fir].t = GetT( g_rho( i ), rho_min, rho_max ); //t;
-                    vertexlist[j*2+fir].x = x*radius;
-                    vertexlist[j*2+fir].z = -y*radius;
-                    vertexlist[j*2+fir].y = z*radius;
+                    if((j*2) % 4 == 0) {
+                        vertexlist[j*2+fir].x = x*radius * 1.0005;
+                        vertexlist[j*2+fir].z = -y*radius * 1.0005;
+                        vertexlist[j*2+fir].y = z*radius * 1.0005;
+                    } else  {
+                        vertexlist[j*2+fir].x = x*radius;
+                        vertexlist[j*2+fir].z = -y*radius;
+                        vertexlist[j*2+fir].y = z*radius;
+                    }
                     x = -sin( g_theta( j ) )*sin( g_rho( i+1 ) );
                     y = cos( g_theta( j ) )*sin( g_rho( i+1 ) );
                     z = nsign*cos( g_rho( i+1 ) );
@@ -174,9 +181,15 @@ void SphereMesh::InitSphere( float radius,
                     vertexlist[j*2+sec].j = z*normalscale; //double negative
                     vertexlist[j*2+sec].s = GetS( g_theta( j ), theta_min, theta_max ); //1-s;//insideout?1-s:s;
                     vertexlist[j*2+sec].t = GetT( g_rho( i+1 ), rho_min, rho_max ); //t - dt;
-                    vertexlist[j*2+sec].x = x*radius;
-                    vertexlist[j*2+sec].z = -y*radius;
-                    vertexlist[j*2+sec].y = z*radius;
+                    if((j*2) % 4 == 0) {
+						vertexlist[j*2+sec].x = x*radius * 1.0005;
+						vertexlist[j*2+sec].z = -y*radius * 1.0005;
+						vertexlist[j*2+sec].y = z*radius * 1.0005;
+					} else  {
+						vertexlist[j*2+sec].x = x*radius;
+						vertexlist[j*2+sec].z = -y*radius;
+						vertexlist[j*2+sec].y = z*radius;
+					}
                     s += ds;
                 }
                 t -= dt;
@@ -190,7 +203,13 @@ void SphereMesh::InitSphere( float radius,
             delete[] modes;
             delete[] QSOffsets;
         } else {
-            vlist = new GFXSphereVertexList( radius, stacks > slices ? stacks : slices, Insideout, reverse_normals );
+            if(!planet)
+                 vlist = new GFXSphereVertexList( radius, stacks > slices ? stacks : slices, Insideout, reverse_normals );
+            else {
+                vlist = new GFXSphereVertexList( radius, stacks > slices ? stacks : slices, Insideout, reverse_normals );
+                ((GFXSphereVertexList*)vlist)->ProceduralModification();
+            }
+
         }
         SetBlendMode( a, b );
         string inputtex    = texture;

@@ -137,7 +137,7 @@ void setup_game_data()
     g_game.MouseSensitivityX = 2;
     g_game.MouseSensitivityY = 4;
 }
-VegaConfig * createVegaConfig( char *file )
+VegaConfig * createVegaConfig( const char *file )
 {
     return new GameVegaConfig( file );
 }
@@ -211,10 +211,10 @@ void nothinghappens( unsigned int, unsigned int, bool, int, int ) {}
 void initSceneManager()
 {
     cout << "Creating scene manager..." << endl;
-    Audio::SceneManager *sm = new Audio::SceneManager();
+    Audio::SceneManager *sm = Audio::SceneManager::getSingleton();
     
     cout << "Creating template manager..." << endl;
-    new Audio::TemplateManager();
+    Audio::TemplateManager::getSingleton();
     
     if (Audio::SceneManager::getSingleton() == 0)
         throw Audio::Exception("Singleton null after SceneManager instantiation");
@@ -451,6 +451,7 @@ void bootstrap_draw( const std::string &message, Animation *newSplashScreen )
         ani->DrawNow( tmp ); //VSFileSystem::vs_fprintf( stderr, "(new?) splash screen ('animation'?) %d.  ", (long long)ani ); //temporary, by chuck
         }
     }
+
     static std::string defaultbootmessage = vs_config->getVariable( "graphics", "default_boot_message", "" );
     static std::string initialbootmessage = vs_config->getVariable( "graphics", "initial_boot_message", "Loading..." );
     bs_tp->Draw( defaultbootmessage.length() > 0 ? defaultbootmessage : message.length() > 0 ? message : initialbootmessage );

@@ -83,7 +83,7 @@ public: UnitHash3d( StarSystem *ss )
     }
     
 ///Hashes a single value to a value on the collide table truncated to all 3d constraints.  Consider using a swizzle
-    int hash_int( const double aye )
+    static int hash_int( const double aye )
     {
         return ( (int) ( ( (aye < 0) ? (aye
                                         -COLLIDETABLEACCURACY) : aye )

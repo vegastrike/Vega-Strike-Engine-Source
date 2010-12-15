@@ -545,7 +545,9 @@ protected:
                bool Mutable,
                unsigned int *indices );
 ///Propagates modifications to the display list
+public:
     void RefreshDisplayList();
+protected:
     virtual void Draw( enum POLYTYPE *poly, const INDEX index, const int numLists, const int *offsets );
     void RenormalizeNormals();
     GFXVertexList();
@@ -599,6 +601,9 @@ public:
     virtual int numQuads() const;
 ///Looks up the index in the appropriate short, char or int array
     unsigned int GetIndex( int offset ) const;
+    POLYTYPE *GetPoyType() const;
+    int *GetOffsets() const;
+    int GetNumLists() const;
     bool hasColor() const;
 
     int GetNumVertices() const
@@ -652,6 +657,8 @@ public:
     virtual void EndDrawState( GFXBOOL lock = GFXTRUE );
 ///returns a packed vertex list with number of polys and number of tries to passed in arguments. Useful for getting vertex info from a mesh
     virtual void GetPolys( GFXVertex **vert, int *numPolys, int *numTris );
+///generates procedural planetdata to the actual detaillevel with the "plasma method"
+    virtual void ProceduralModification();
 };
 
 /**

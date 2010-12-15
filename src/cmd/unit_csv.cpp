@@ -1,3 +1,5 @@
+// -*- mode: c++; c-basic-offset: 4; indent-tabs-mode: nil -*-
+
 #include "unit_generic.h"
 #include "csv.h"
 #include "savegame.h"
@@ -1242,9 +1244,65 @@ void Unit::LoadRow( CSVRow &row, string modification, string *netxml )
     computer.itts = stob( OPTIM_GET( row, table, ITTS ), true );
     computer.radar.canlock = stob( OPTIM_GET( row, table, Can_Lock ), true );
     {
+        // The Radar_Color column in the units.csv has been changed from a
+        // boolean value to a string. The boolean values are supported for
+        // backwardscompatibility.
+        // When we save this setting, it is simply converted from an integer
+        // number to a string, and we need to support this as well.
         std::string iffval = OPTIM_GET( row, table, Radar_Color );
-        int iff = stoi( iffval, 0 );
-        computer.radar.iff = iff ? iff : stob( iffval, false );
+        if ((iffval.empty()) || (iffval == "FALSE") || (iffval == "0"))
+        {
+            computer.radar.capability = Computer::RADARLIM::Capability::IFF_NONE;
+        }
+        else if ((iffval == "TRUE") || (iffval == "1"))
+        {
+            computer.radar.capability
+                = Computer::RADARLIM::Capability::IFF_SPHERE
+                | Computer::RADARLIM::Capability::IFF_FRIEND_FOE;
+        }
+        else if (iffval == "THREAT")
+        {
+            computer.radar.capability
+                = Computer::RADARLIM::Capability::IFF_SPHERE
+                | Computer::RADARLIM::Capability::IFF_FRIEND_FOE
+                | Computer::RADARLIM::Capability::IFF_THREAT_ASSESSMENT;
+        }
+        else if (iffval == "BUBBLE_THREAT")
+        {
+            computer.radar.capability
+                = Computer::RADARLIM::Capability::IFF_BUBBLE
+                | Computer::RADARLIM::Capability::IFF_FRIEND_FOE
+                | Computer::RADARLIM::Capability::IFF_OBJECT_RECOGNITION
+                | Computer::RADARLIM::Capability::IFF_THREAT_ASSESSMENT;
+        }
+        else if (iffval == "PLANE")
+        {
+            computer.radar.capability
+                = Computer::RADARLIM::Capability::IFF_PLANE
+                | Computer::RADARLIM::Capability::IFF_FRIEND_FOE;
+        }
+        else if (iffval == "PLANE_THREAT")
+        {
+            computer.radar.capability
+                = Computer::RADARLIM::Capability::IFF_PLANE
+                | Computer::RADARLIM::Capability::IFF_FRIEND_FOE
+                | Computer::RADARLIM::Capability::IFF_OBJECT_RECOGNITION
+                | Computer::RADARLIM::Capability::IFF_THREAT_ASSESSMENT;
+        }
+        else
+        {
+            unsigned int value = stoi(iffval, 0);
+            if (value == 0)
+            {
+                // Unknown value
+                assert(false);
+                computer.radar.capability = Computer::RADARLIM::Capability::IFF_NONE;
+            }
+            else
+            {
+                computer.radar.capability = value;
+            }
+        }
     }
     computer.radar.maxrange     = stof( OPTIM_GET( row, table, Radar_Range ), FLT_MAX );
     computer.radar.maxcone      = cos( stof( OPTIM_GET( row, table, Max_Cone ), 180 )*VS_PI/180 );
@@ -1648,7 +1706,7 @@ string Unit::WriteUnitString()
                 unit["Afterburner_Speed_Governor"]    = tos( computer.max_combat_ab_speed/game_speed );
                 unit["ITTS"] = tos( computer.itts );
                 unit["Can_Lock"]                      = tos( computer.radar.canlock );
-                unit["Radar_Color"]                   = tos( (int) computer.radar.iff );
+                unit["Radar_Color"]                   = tos( computer.radar.capability );
                 unit["Radar_Range"]                   = tos( computer.radar.maxrange );
                 unit["Tracking_Cone"]                 = tos( acos( computer.radar.trackingcone )*180./VS_PI );
                 unit["Max_Cone"]                      = tos( acos( computer.radar.maxcone )*180./VS_PI );

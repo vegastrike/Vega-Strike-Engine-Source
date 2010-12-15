@@ -262,25 +262,30 @@ AnimatedTexture::AnimatedTexture( const char *file, int stage, enum FILTER imm, 
 
 void AnimatedTexture::AniInit()
 {
-    numframes     = 1;
-    timeperframe  = 1;
+    Texture::InitTexture();
+
     Decal = NULL;
+    activebound = -1;
     physicsactive = 0;
-    name = -1;
-    activebound   = -1;
-    active = 0;
-    curtime = 0;
-    original = NULL;
     loadSuccess = false;
-    texstage = 0;
-    ismipmapped = BILINEAR;
-    detailTex = false;
     vidMode = false;
+    detailTex = false;
+    ismipmapped = BILINEAR;
+    texstage = 0;
     vidSource = 0;
-    constframerate     = true;
+
     options            = optLoop;
+
     defaultAddressMode = DEFAULT_ADDRESS_MODE;
-    done               = false;
+
+    numframes = 1;
+    timeperframe = 1;
+    active = 0;
+    nextactive = 0;
+    active_fraction = 0;
+    curtime = 0;
+    constframerate = true;
+    done = false;
 }
 //AnimatedTexture::AnimatedTexture (FILE * fp, int stage, enum FILTER imm, bool detailtex){
 //AniInit();
@@ -430,26 +435,25 @@ void AnimatedTexture::LoadVideoSource( VSFileSystem::VSFile &f )
         sizeY = vidSource->getHeight();
         mode  = _24BIT;
         data  = (unsigned char*) vidSource->getFrameBuffer();
-        
-        if ((ismipmapped == BILINEAR || ismipmapped == NEAREST) && gl_options.rect_textures) {
-            texture_target = TEXTURERECT;
-            image_target = TEXTURE_RECTANGLE;
-        }
-        
+		if ((ismipmapped == BILINEAR || ismipmapped == NEAREST) && gl_options.rect_textures) {
+			texture_target = TEXTURERECT;
+			image_target = TEXTURE_RECTANGLE;
+		}
+		
         Bind( 65535, GFXFALSE );
 
-        maxtcoord.x = sizeX-0.5f;
-        maxtcoord.y = sizeY-0.5f;
-        mintcoord.x = 0.5f;
-        mintcoord.y = 0.5f;
-        
-        if (image_target != TEXTURE_RECTANGLE) {
-            maxtcoord.x /= sizeX;
-            maxtcoord.y /= sizeY;
-            mintcoord.x /= sizeX;
-            mintcoord.y /= sizeY;
-        }
-        
+		maxtcoord.x = sizeX-0.5f;
+		maxtcoord.y = sizeY-0.5f;
+		mintcoord.x = 0.5f;
+		mintcoord.y = 0.5f;
+		
+		if (image_target != TEXTURE_RECTANGLE) {
+			maxtcoord.x /= sizeX;
+			maxtcoord.y /= sizeY;
+			mintcoord.x /= sizeX;
+			mintcoord.y /= sizeY;
+		}
+		
         anis.insert( this );
     }
 }

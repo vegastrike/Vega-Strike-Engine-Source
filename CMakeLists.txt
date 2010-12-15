@@ -265,6 +265,23 @@ SET(LIBGFXCLIENT_SOURCES src/gfx/ani_texture.cpp
 						 src/gfx/nav/navpath.cpp
 						 src/gfx/nav/navscreen.cpp
 						 src/gfx/nav/navscreenoccupied.cpp
+						 src/gfx/radar/bubble_display.cpp 
+						 src/gfx/radar/bubble_display.h 
+						 src/gfx/radar/dual_display.cpp 
+						 src/gfx/radar/dual_display.h 
+						 src/gfx/radar/null_display.h 
+						 src/gfx/radar/plane_display.cpp 
+						 src/gfx/radar/plane_display.h 
+						 src/gfx/radar/radar.cpp 
+						 src/gfx/radar/radar.h 
+						 src/gfx/radar/sensor.cpp 
+						 src/gfx/radar/sensor.h 
+						 src/gfx/radar/sphere_display.cpp 
+						 src/gfx/radar/sphere_display.h 
+						 src/gfx/radar/track.cpp 
+						 src/gfx/radar/track.h 
+						 src/gfx/radar/viewarea.cpp 
+						 src/gfx/radar/viewarea.h 
 						 src/gfx/particle.cpp
 						 src/gfx/pipelined_texture.cpp
 						 src/gfx/quadsquare_cull.cpp

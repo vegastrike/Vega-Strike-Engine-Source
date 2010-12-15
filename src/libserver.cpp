@@ -3,7 +3,7 @@
 #include "star_system_generic.h"
 #include "cmd/unit_generic.h"
 
-VegaConfig * createVegaConfig( char *file )
+VegaConfig * createVegaConfig( const char *file )
 {
     return new VegaConfig( file );
 }

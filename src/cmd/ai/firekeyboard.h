@@ -126,6 +126,7 @@ public:
     static void NearestBaseKey( const KBData&, KBSTATE k );
     static void NearestPlanetKey( const KBData&, KBSTATE k );
     static void NearestJumpKey( const KBData&, KBSTATE k );
+    static void TogglePause(const KBData&, KBSTATE);
 
 protected:
     void *savedTargets[NUMSAVEDTARGETS];

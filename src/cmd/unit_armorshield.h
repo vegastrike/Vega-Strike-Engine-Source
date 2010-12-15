@@ -1,13 +1,16 @@
 #ifndef __UNIT_ARMOR_SHIELD_H
 #define __UNIT_ARMOR_SHIELD_H
 
+#include <algorithm>
+
 ///Armor values: how much damage armor can withhold before internal damage accrues
 struct Armor
 {
     float frontlefttop, backlefttop, frontrighttop, backrighttop, frontleftbottom, backleftbottom, frontrightbottom,
           backrightbottom;
 
-    Armor() : frontlefttop( 0 )
+    Armor()
+        : frontlefttop( 0 )
         , backlefttop( 0 )
         , frontrighttop( 0 )
         , backrighttop( 0 )
@@ -19,6 +22,13 @@ struct Armor
 #define MAX_SHIELD_NUMBER 8
 struct ShieldFacing
 {
+    ShieldFacing()
+        : thetamin(0.0)
+        , thetamax(0.0)
+        , rhomin(0.0)
+        , rhomax(0.0)
+    {}
+
     float thetamin;
     float thetamax;
     float rhomin;
@@ -71,9 +81,16 @@ struct Shield
     ///What percentage leaks (divide by 100%)
     char  leak;
 
-    Shield() : recharge( 0 )
-        , number( 0 )
-        , leak( 0 ) {}
+    Shield()
+        : recharge(0)
+        , efficiency(0)
+        , number(0)
+        , leak(0)
+    {
+        std::fill_n(shield.cur, sizeof(shield.cur)/sizeof(shield.cur[0]), 0.0f);
+        std::fill_n(shield.max, sizeof(shield.max)/sizeof(shield.max[0]), 0.0f);
+        std::fill_n(range, sizeof(range)/sizeof(range[0]), ShieldFacing());
+    }
 };
 
 #endif

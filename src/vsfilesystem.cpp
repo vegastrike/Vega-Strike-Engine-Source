@@ -657,10 +657,6 @@ void InitDataDirectory()
             printf( "Using %s as the home directory\n", hsd.c_str() );
         }
     }
-    //Load default VS config file
-    char *conffile = new char[config_file.length()+1];
-    conffile[config_file.length()] = 0;
-    memcpy( conffile, config_file.c_str(), config_file.length() );
     //Get the mods path
     moddir = datadir+"/"+string( "mods" );
     cout<<"Found MODDIR = "<<moddir<<endl;
@@ -751,12 +747,7 @@ void LoadConfig( string subdir )
         fprintf( stderr, "reallocating vs_config \n" );
         delete vs_config;
     }
-    vs_config = NULL;
-    char *conffile = new char[config_file.length()+1];
-    conffile[config_file.length()] = 0;
-    memcpy( conffile, config_file.c_str(), config_file.length() );
-    vs_config = createVegaConfig( conffile );
-    delete[] conffile;
+    vs_config = createVegaConfig( config_file.c_str() );
 
     //Now check if there is a data directory specified in it
     //NOTE : THIS IS NOT A GOOD IDEA TO HAVE A DATADIR SPECIFIED IN THE CONFIG FILE
@@ -1729,7 +1720,7 @@ VSError VSFile::ReadLine( void *ptr, size_t length )
 string VSFile::ReadFull()
 {
     if (this->Size() < 0) {
-        cerr<<"Attempt to call ReadFull on a bad file "<<this->filename<<endl;
+        cerr<<"Attempt to call ReadFull on a bad file "<<this->filename<<" "<<this->Size()<<" "<<this->GetFullPath().c_str()<<endl;
         return string();
     }
     if (!UseVolumes[alt_type] || this->volume_type == VSFSNone) {

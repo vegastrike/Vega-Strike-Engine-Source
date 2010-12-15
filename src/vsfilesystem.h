@@ -17,7 +17,7 @@ class VegaConfig;
 class VSImage;
 
 extern char     *CONFIGFILE;
-extern VegaConfig * createVegaConfig( char *file );
+extern VegaConfig * createVegaConfig( const char *file );
 extern ObjSerial serial_seed;
 ObjSerial getUniqueSerial();
 #define DELIM '/'

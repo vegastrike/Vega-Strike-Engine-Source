@@ -110,6 +110,22 @@ void setTimeCompression( float tc )
     timecount = 0;     //to avoid any problems with time compression sounds... use getTimeCompression() instead
 }
 
+bool toggle_pause()
+{
+    static bool paused = false;
+    if (paused)
+    {
+        setTimeCompression(1);
+        paused = false;
+    }
+    else
+    {
+        setTimeCompression(.0000001);
+	paused = true;
+    }
+    return paused;
+}
+
 #ifdef _WIN32
 
 #ifndef NOMINMAX

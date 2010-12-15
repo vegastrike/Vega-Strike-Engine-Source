@@ -20,6 +20,10 @@ class Unit;
 class Camera;
 class Animation;
 class NavigationSystem;
+namespace Radar
+{
+    class Sensor;
+}
 #include "in.h"
 #include "cmd/images.h"
 /**
@@ -60,11 +64,6 @@ protected:
  * two values that represent the adjustment to perspective needed to center teh crosshairs in the perceived view.
  */
     float cockpit_offset, viewport_offset;
-///style of current view (chase cam, inside)
-//enum VIEWSTYLE view;
-    virtual void LocalToEliteRadar( const Vector &pos, float &s, float &t, float &h ) {}
-    virtual void LocalToRadar( const Vector &pos, float &s, float &t ) {}
-
     virtual void LoadXML( const char *file ) {}
     virtual void LoadXML( VSFileSystem::VSFile &f ) {}
     static void beginElement( void *userData, const XML_Char *name, const XML_Char **atts );
@@ -82,15 +81,13 @@ protected:
     }
     virtual void DrawTargetBox() {}
 ///draws the target box around all units
-    virtual void DrawTargetBoxes() {}
+    virtual void DrawTargetBoxes(const Radar::Sensor&) {}
 ///draws a target cross around all units targeted by your turrets // ** jay
     virtual void DrawTurretTargetBoxes() {}
 ///Shows the flightgroup's target, if any.
     virtual void DrawTacticalTargetBox() {}
-///Draws all teh blips on the radar.
-    virtual void DrawBlips( Unit *un ) {}
-///Draws all teh blips on the radar in Elite-style
-    virtual void DrawEliteBlips( Unit *un ) {}
+///Draws all the tracks on the radar.
+    virtual void DrawRadar(const Radar::Sensor&) {}
 ///Draws gauges
     virtual void DrawGauges( Unit *un ) {}
     float  cockpit_time;
@@ -233,6 +230,12 @@ public:
     {
         return false;
     }
+    // Cockpit events
+    virtual void OnPauseBegin() {}
+    virtual void OnPauseEnd() {}
+    virtual void OnDockEnd(Unit *, Unit *) {}
+    virtual void OnJumpBegin(Unit *) {}
+    virtual void OnJumpEnd(Unit *) {}
 };
 #endif
 

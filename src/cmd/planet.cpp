@@ -367,6 +367,11 @@ GamePlanet::GamePlanet( QVector x,
         atmospheric = !(blendSrc == ONE && blendDst == ZERO);
         meshdata.push_back( new SphereMesh( radius, stacks, stacks, textname.c_str(), technique, NULL, inside_out, blendSrc, blendDst ) );
 
+    //FIXED BUG: the radius of the sphere (the surface) must be a little bit smaller than the athmosphere in order to see the athmosphere
+ //   SphereMesh* m = new SphereMesh( radius * 0.95, stacks, stacks, textname.c_str(), technique, NULL, inside_out, blendSrc, blendDst, false, 0.0, M_PI, 0.0, 2*M_PI, MIPMAP, false, false);
+
+ //   meshdata.push_back( m );
+
         meshdata.back()->setEnvMap( GFXFALSE );
         meshdata.back()->SetMaterial( ourmat );
         meshdata.push_back( NULL );

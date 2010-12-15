@@ -85,3 +85,4 @@ GFXVertexList::~GFXVertexList()
     }
 }
 
+void GFXSphereVertexList::ProceduralModification() {}

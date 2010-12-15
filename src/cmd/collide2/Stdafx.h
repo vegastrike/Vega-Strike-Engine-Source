@@ -7,7 +7,9 @@
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 //chuck starchaser shutting up the warnings about violations of strict aliasing...
+#ifndef _WIN32 // pheonixstorm shutting up pragma warnings on win32
 #pragma GCC diagnostic ignored "-Wstrict-aliasing"
+#endif
 //believe me I tried to fix the code, using a union of float, int and unsigned, but the amount of
 //changes needed in the code was immense.
 //So, bottom line:

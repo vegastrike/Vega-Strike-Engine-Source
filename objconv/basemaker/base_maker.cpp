@@ -6,7 +6,7 @@
 #include <vector>
 #include <queue>
 #include <iostream>
-//#include "gfx/sprite.h"
+#include "sprite.h"
 #include <stdio.h>
 #include "base_maker_texture.h"
 #include "gfx/vec.h"
@@ -67,7 +67,7 @@ double cur_check  = 1;
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
-
+/*
 #ifndef SPRITE_H
 #define SPRITE_H
 
@@ -84,7 +84,8 @@ class VSSprite
     float    maxs, maxt;
     float    rotation;
     Texture *surface;
-public: VSSprite( const char *file, enum FILTER texturefilter = BILINEAR, GFXBOOL force = GFXFALSE );
+public: 
+	VSSprite( const char *file, enum FILTER texturefilter = BILINEAR, GFXBOOL force = GFXFALSE );
     ~VSSprite();
     bool LoadSuccess()
     {
@@ -112,6 +113,7 @@ public: VSSprite( const char *file, enum FILTER texturefilter = BILINEAR, GFXBOO
 };
 
 #endif
+
 /*
  * Vega Strike
  * Copyright (C) 2001-2002 Daniel Horn
@@ -132,6 +134,7 @@ public: VSSprite( const char *file, enum FILTER texturefilter = BILINEAR, GFXBOO
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
+/*
 #include <stdlib.h>
 #include <iostream>
 #include <assert.h>
@@ -287,10 +290,12 @@ void VSSprite::GetRotation( float &rot )
     rot = rotation;
 }
 
+*/
 void VSExit( int code )
 {
     exit( code );
 }
+
 
 #include <ctype.h>
 #include "gfx/hud.h"
@@ -806,6 +811,7 @@ static int mmy = 0;
 #include <stdio.h>
 
 static int indentlevel = 0;
+static int    bogus_int; //added by chuck_starchaser to squash ignored returns warnings.
 
 static void Indent( FILE *fp )
 {
@@ -2087,6 +2093,7 @@ int main( int argc, char **argv )
     glutShowWindow();
     printf( "\nLoaded!\n" );
     glutMainLoop();
+
     return 0;
 }
 
