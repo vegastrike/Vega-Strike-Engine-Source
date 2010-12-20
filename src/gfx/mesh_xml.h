@@ -124,27 +124,6 @@ struct MeshXML
     static const EnumMap::Pair attribute_names[];
     static const EnumMap element_map;
     static const EnumMap attribute_map;
-
-    MeshXML()
-        : sharevert(false),
-          usenormals(false),
-          usetangents(false),
-          reverse(false),
-          force_texture(false),
-          load_stage(0),
-          point_state(0),
-          vertex_state(0),
-          recalc_norm(false),
-          num_vertices(0),
-          tstrcnt(0),
-          tfancnt(0),
-          qstrcnt(0),
-          lstrcnt(0),
-          faction(0),
-          mesh(0)
-    {
-    }
-
     ///All logos on this unit
     vector< ZeLogo >logos;
     vector< Names > state_stack;

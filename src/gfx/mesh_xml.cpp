@@ -1362,9 +1362,15 @@ void Mesh::LoadXML( VSFileSystem::VSFile &f,
     MeshXML  *xml = new MeshXML;
     xml->mesh = this;
     xml->fg   = fg;
+    xml->usenormals    = false;
+    xml->usetangents   = false;
+    xml->force_texture = false;
+    xml->reverse = false;
+    xml->sharevert     = false;
     xml->faction = faction;
     GFXGetMaterial( 0, xml->material );     //by default it's the default material;
     xml->load_stage    = 0;
+    xml->recalc_norm   = false;
     xml->scale    = scale;
     xml->lodscale = scale;
     XML_Parser parser = XML_ParserCreate( NULL );
