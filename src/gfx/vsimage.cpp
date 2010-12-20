@@ -322,12 +322,7 @@ unsigned char* VSImage::ReadPNG()
         if (strip_16 && this->img_color_type == PNG_COLOR_TYPE_PALETTE)
             png_set_palette_to_rgb( png_ptr );
         if (this->img_color_type == PNG_COLOR_TYPE_GRAY && this->img_depth < 8) {
-#ifdef _WIN32
-            // png_set_gray_1_2_4_to_8( png_ptr ); changed in earlier version of libpng to fix an error
-			png_set_expand_gray_1_2_4_to_8( png_ptr );
-#else
             png_set_expand_gray_1_2_4_to_8( png_ptr );
-#endif
         }
         png_set_expand( png_ptr );
         png_read_update_info( png_ptr, info_ptr );
