@@ -6,7 +6,14 @@
 #include "gfx/matrix.h"
 #include "gfx/hud.h"
 #include "vs_globals.h"
-#include "glut.h"
+
+#if defined (__APPLE__) || defined (MACOSX)
+    #include <GLUT/glut.h>
+    #include <OpenGL/glext.h>
+#else
+    #include <GL/glut.h>
+    #include <GL/glext.h>
+#endif
 
 #include <iostream>
 //#include <stdlib>

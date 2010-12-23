@@ -23,6 +23,14 @@
 #include <sys/stat.h> //for mkdir
 #include <sys/types.h>
 
+#if defined (__APPLE__) || defined (MACOSX)
+    #include <GLUT/glut.h>
+    #include <OpenGL/glext.h>
+#else
+    #include <GL/glut.h>
+    #include <GL/glext.h>
+#endif
+
 /*
  * Globals
  */
@@ -299,7 +307,7 @@ void VSExit( int code )
 
 #include <ctype.h>
 #include "gfx/hud.h"
-//#include "glut.h"
+
 
 TextPlane::TextPlane( const GFXColor &c, const GFXColor &bgcol )
 {
