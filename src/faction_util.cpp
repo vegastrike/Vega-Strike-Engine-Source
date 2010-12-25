@@ -9,14 +9,14 @@ using namespace FactionUtil;
 Faction::~Faction()
 {
     delete[] factionname;
-    if (contraband)
+    if (contraband.get())
         contraband->Kill();
     delete logo;
 }
 
 Texture* FactionUtil::getForceLogo( int faction )
 {
-    Faction *fac = factions[faction];
+    boost::shared_ptr<Faction> fac = factions[faction];
     if (fac->logo == 0) {
         if ( !fac->logoName.empty() ) {
             if ( !fac->logoAlphaName.empty() )
@@ -33,7 +33,7 @@ Texture* FactionUtil::getForceLogo( int faction )
 //fixme--add squads in here
 Texture* FactionUtil::getSquadLogo( int faction )
 {
-    Faction *fac = factions[faction];
+    boost::shared_ptr<Faction> fac = factions[faction];
     if (fac->secondaryLogo == 0) {
         if ( !fac->secondaryLogoName.empty() ) {
             if ( !fac->secondaryLogoAlphaName.empty() )
@@ -100,7 +100,7 @@ Animation* FactionUtil::GetRandExplosionAnimation( int whichfaction, std::string
         if ( factions[whichfaction]->explosion_name.size() ) {
             int whichexp = rand()%factions[whichfaction]->explosion_name.size();
             which = factions[whichfaction]->explosion_name[whichexp];
-            return factions[whichfaction]->explosion[whichexp];
+            return factions[whichfaction]->explosion[whichexp].get();
         }
     }
     return NULL;

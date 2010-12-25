@@ -5,10 +5,10 @@
 #include "audiolib.h"
 #include "options.h"
 
-FSM::FSM( const char *filename )
+FSM::FSM(const std::string& filename)
 {
     //loads a conversation finite state machine with deltaRelation weight transition from an XML?
-    if (strlen( filename ) == 0) {
+    if (filename.empty()) {
         nodes.push_back( Node::MakeNode( "welcome to cachunkcachunk.com", 0 ) );
         nodes.push_back( Node::MakeNode( "I love you!", .1 ) );
         nodes.push_back( Node::MakeNode( "J00 0wnz m3", .08 ) );
@@ -38,7 +38,7 @@ FSM::FSM( const char *filename )
         for (i = 0; i < nodes.size(); i++)
             nodes[i].edges = edges;
     } else {
-        LoadXML( filename );
+        LoadXML( filename.c_str() );
     }
 }
 

@@ -96,7 +96,6 @@ void GameUniverse::Init( int argc, char **argv, const char *galaxy )
     bootstrap_first_loop();
 
     this->Universe::Init( galaxy );
-    //this->galaxy = new GalaxyXML::Galaxy (galaxy);
 }
 
 GameUniverse::GameUniverse( int argc, char **argv, const char *galaxy )

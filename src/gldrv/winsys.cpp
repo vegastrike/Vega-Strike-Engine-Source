@@ -53,6 +53,7 @@ static winsys_motion_func_t   passive_motion_func = NULL;
 static winsys_atexit_func_t   atexit_func   = NULL;
 
 static bool redisplay = false;
+static bool keepRunning = true;
 
 /*---------------------------------------------------------------------------*/
 /*!
@@ -273,6 +274,8 @@ static void setup_sdl_video_mode()
 
 void winsys_init( int *argc, char **argv, char const *window_title, char const *icon_title )
 {
+    keepRunning = true;
+
     //SDL_INIT_AUDIO|
     Uint32 sdl_flags = SDL_INIT_VIDEO|SDL_INIT_JOYSTICK;
     g_game.x_resolution    = XMLSupport::parse_int( vs_config->getVariable( "graphics", "x_resolution", "1024" ) );
@@ -318,13 +321,18 @@ void winsys_init( int *argc, char **argv, char const *window_title, char const *
  *  \date    Created:  2000-10-19
  *  \date    Modified: 2000-10-19
  */
-void winsys_shutdown()
+void winsys_cleanup()
 {
-    static bool shutdown = false;
-    if (!shutdown) {
-        shutdown = true;
+    static bool cleanup = false;
+    if (!cleanup) {
+        cleanup = true;
         SDL_Quit();
     }
+}
+
+void winsys_shutdown()
+{
+    keepRunning = false;
 }
 
 /*---------------------------------------------------------------------------*/
@@ -388,7 +396,8 @@ void winsys_process_events()
         keysym_to_unicode_init = true;
         memset( keysym_to_unicode, 0, sizeof (keysym_to_unicode) );
     }
-    while (true) {
+    while (keepRunning)
+    {
         SDL_LockAudio();
         SDL_UnlockAudio();
         while ( SDL_PollEvent( &event ) ) {
@@ -482,10 +491,7 @@ void winsys_process_events()
         }
         SDL_Delay( 1 );
     }
-    /* Never exits */
-#define CODE_NOT_REACHED 0
-    assert( CODE_NOT_REACHED );
-    //code_not_reached();
+    winsys_cleanup();
 }
 
 /*---------------------------------------------------------------------------*/
@@ -517,7 +523,7 @@ void winsys_exit( int code )
     winsys_shutdown();
     if (atexit_func)
         (*atexit_func)();
-    exit( code );
+    // exit( code );
 }
 
 #else

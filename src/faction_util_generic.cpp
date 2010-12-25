@@ -18,7 +18,7 @@ int FactionUtil:: neutralfac = 0;
 FSM* FactionUtil::GetConversation( int Myfaction, int TheirFaction )
 {
     assert( factions[Myfaction]->faction[TheirFaction].stats.index == TheirFaction );
-    return factions[Myfaction]->faction[TheirFaction].conversation;
+    return factions[Myfaction]->faction[TheirFaction].conversation.get();
 }
 
 const char* FactionUtil::GetFaction( int i )
@@ -41,14 +41,14 @@ static int GetFactionLookup( const char *factionname )
 
 Unit* FactionUtil::GetContraband( int faction )
 {
-    return factions[faction]->contraband;
+    return factions[faction]->contraband.get();
 }
 /**
  * Returns the relationship between myfaction and theirfaction
  * 1 is happy. 0 is neutral (btw 1 and 0 will not attack)
  * -1 is mad. <0 will attack
  */
-int FactionUtil::GetFactionIndex( string name )
+int FactionUtil::GetFactionIndex( const string& name )
 {
     static Hashtable< string, int, 47 >factioncache;
     int *tmp = factioncache.Get( name );
@@ -64,7 +64,7 @@ bool FactionUtil::isCitizenInt( int faction )
 {
     return factions[faction]->citizen;
 }
-bool FactionUtil::isCitizen( std::string name )
+bool FactionUtil::isCitizen( const std::string& name )
 {
     return isCitizenInt( GetFactionIndex( name ) );
 }

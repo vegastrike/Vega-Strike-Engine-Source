@@ -274,6 +274,7 @@ void TextMessageKey( const KBData&, KBSTATE newState )
 }
 void QuitNow()
 {
+    if (!cleanexit)
     {
         cleanexit = true;
         if (Network == NULL && game_options.write_savegame_on_exit)
@@ -282,7 +283,10 @@ void QuitNow()
             if (active_missions[i])
                 active_missions[i]->DirectorEnd();
         if (forcefeedback)
+        {
             delete forcefeedback;
+            forcefeedback = NULL;
+        }
         VSExit( 0 );
     }
 }

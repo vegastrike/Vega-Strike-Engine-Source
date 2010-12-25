@@ -724,9 +724,6 @@ void GFXLoop( void main_loop() )
     if (!are_we_looping) {
         are_we_looping = true;
         winsys_process_events();
-#define CODE_NOT_REACHED 0
-        assert( CODE_NOT_REACHED );
-        //never make it here;
     }
 }
 #endif

@@ -14,20 +14,6 @@ using namespace XMLSupport;
 
 static int unitlevel;
 
-static FSM * getFSM( const std::string &value )
-{
-    static Hashtable< std::string, FSM, 17 >fsms;
-    FSM *fsm = fsms.Get( value );
-    if (fsm) {
-        return fsm;
-    } else if (value != "FREE_THIS_LOAD") {
-        FSM *retval = new FSM( value.c_str() );
-        fsms.Put( value, retval );
-        return retval;
-    }
-    return NULL;
-}
-
 namespace FactionXML
 {
 //
@@ -129,7 +115,7 @@ void Faction::beginElement( void *userData, const XML_Char *names, const XML_Cha
             switch ( attribute_map.lookup( (*iter).name ) )
             {
             case NAME:
-                factions.back()->explosion.push_back( FactionUtil::createAnimation( (*iter).value.c_str() ) );
+                factions.back()->explosion.push_back( boost::shared_ptr<Animation>(FactionUtil::createAnimation( (*iter).value.c_str() )) );
                 factions.back()->explosion_name.push_back( (*iter).value );
                 break;
             }
@@ -193,7 +179,7 @@ void Faction::beginElement( void *userData, const XML_Char *names, const XML_Cha
     case FACTION:
         assert( unitlevel == 1 );
         unitlevel++;
-        factions.push_back( new Faction() );
+        factions.push_back(boost::shared_ptr<Faction>(new Faction()));
         assert( factions.size() > 0 );
         contrabandlists.push_back( "" );
         //factions[factions.size()-1];
@@ -271,7 +257,7 @@ void Faction::beginElement( void *userData, const XML_Char *names, const XML_Cha
                 break;
             case CONVERSATION:
                 factions[factions.size()
-                         -1]->faction[factions[factions.size()-1]->faction.size()-1].conversation = getFSM( (*iter).value );
+                         -1]->faction[factions[factions.size()-1]->faction.size()-1].conversation.reset(new FSM( (*iter).value ));
                 break;
             }
         }
@@ -323,41 +309,69 @@ void Faction::LoadXML( const char *filename, char *xmlbuffer, int buflength )
         XML_Parse( parser, ( f.ReadFull() ).c_str(), f.Size(), 1 );
     XML_ParserFree( parser );
     ParseAllAllies();
-    vsUMap< string, bool >cache;
-    for (unsigned int i = 0; i < factions.size(); i++) {
-        for (unsigned int j = 0; j < factions[i]->faction.size(); j++) {
-            Faction *fact      = factions[i];
-            string   myname    = fact->factionname;
-            string   jointname = myname+"to"+factions[j]->factionname;
-            string   fname;
-            if (fact->faction[j].conversation == NULL) {
-                //Looking for a file is somewhat expensive - a cache speeds up a lot this N^2 loop.
-                //I know... not a great improvement... but bare with me - I hate N^2 loops.
-                bool foundjointname = false;
-                bool foundmyname    = false;
-                vsUMap< string, bool >::iterator it = cache.find( myname );
-                if ( it != cache.end() ) {
-                    foundmyname = it->second;
-                } else {
-                    string f = myname+".xml";
-                    foundmyname = (VSFileSystem::LookForFile( f, CommFile ) <= Ok);
-                    cache.insert( pair< string, bool > ( myname, foundmyname ) );
+
+    // Results are cached to avoid looking for too many files
+    typedef vsUMap< string, boost::shared_ptr<FSM> > Cache;
+    Cache cache;
+
+    std::string fileSuffix(".xml");
+    std::string neutralName("neutral");
+    boost::shared_ptr<FSM> neutralComm;
+    neutralComm.reset(new FSM(neutralName + fileSuffix));
+    cache.insert(Cache::value_type(neutralName, neutralComm));
+
+    for (unsigned int i = 0; i < factions.size(); i++)
+    {
+        boost::shared_ptr<Faction> fact = factions[i];
+        std::string myCommFile = fact->factionname + fileSuffix;
+        boost::shared_ptr<FSM> myComm;
+        Cache::iterator it = cache.find(myCommFile);
+        if ( it != cache.end() )
+        {
+            myComm = it->second;
+        }
+        else
+        {
+            if (VSFileSystem::LookForFile(myCommFile, CommFile) <= Ok)
+            {
+                myComm.reset(new FSM(myCommFile));
+            }
+            else
+            {
+                myComm.reset();
+            }
+            cache.insert(Cache::value_type(myCommFile, myComm));
+        }
+
+        for (unsigned int j = 0; j < factions[i]->faction.size(); j++)
+        {
+            std::string jointCommFile = fact->factionname
+                + std::string("to")
+                + factions[j]->factionname
+                + fileSuffix;
+            boost::shared_ptr<FSM> jointComm;
+            if (!fact->faction[j].conversation)
+            {
+                it = cache.find(jointCommFile);
+                if ( it != cache.end() )
+                {
+                    jointComm = it->second;
                 }
-                it = cache.find( jointname );
-                if ( it != cache.end() ) {
-                    foundjointname = it->second;
-                } else {
-                    string f = jointname+".xml";
-                    foundjointname = (VSFileSystem::LookForFile( f, CommFile ) <= Ok);
-                    cache.insert( pair< string, bool > ( jointname, foundjointname ) );
-                }
-                if (foundjointname)
-                    fname = jointname;
-                else if (foundmyname)
-                    fname = myname;
                 else
-                    fname = "neutral";
-                factions[i]->faction[j].conversation = getFSM( fname+".xml" );
+                {
+                    if (VSFileSystem::LookForFile(jointCommFile, CommFile) <= Ok)
+                    {
+                        jointComm.reset(new FSM(jointCommFile));
+                    }
+                    else
+                    {
+                        jointComm.reset();
+                    }
+                    cache.insert(Cache::value_type(jointCommFile, jointComm));
+                }
+                factions[i]->faction[j].conversation = jointComm
+                    ? jointComm
+                    : (myComm ? myComm : neutralComm);
             }
         }
     }
@@ -370,7 +384,7 @@ void FactionUtil::LoadContrabandLists()
 {
     for (unsigned int i = 0; i < factions.size() && i < contrabandlists.size(); i++)
         if (contrabandlists[i].length() > 0)
-            factions[i]->contraband = UnitFactory::createUnit( contrabandlists[i].c_str(), true, i );
+            factions[i]->contraband.reset(UnitFactory::createUnit( contrabandlists[i].c_str(), true, i ));
     contrabandlists.clear();
 }
 

@@ -24,6 +24,7 @@
 #define NUM_LIGHT 8
 #define NUM_FORCES 64
 
+#include <memory>
 #include "star_system_generic.h"
 #include "faction_generic.h"
 #include "stardate.h"
@@ -49,7 +50,7 @@ class Galaxy;
 class Universe
 {
 protected:
-    class GalaxyXML::Galaxy*galaxy;
+    std::auto_ptr<GalaxyXML::Galaxy> galaxy;
 ///The users cockpit
     unsigned int current_cockpit;
     std::vector< Cockpit* >cockpit;
@@ -134,7 +135,7 @@ public:
     std::string getGalaxyPropertyDefault( const std::string &sys, const std::string &prop, const std::string def = "" );
     GalaxyXML::Galaxy * getGalaxy()
     {
-        return galaxy;
+        return galaxy.get();
     }
     bool StillExists( StarSystem *ss );
     void setActiveStarSystem( StarSystem *ss )

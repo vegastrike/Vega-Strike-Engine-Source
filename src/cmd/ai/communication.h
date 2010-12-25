@@ -31,7 +31,7 @@ public:
     };
     vector< Node >nodes;
     bool StopAllSounds( unsigned char sex );
-    FSM( const char *filename );
+    FSM(const std::string& filename);
     void LoadXML( const char *factionfile );
     void beginElement( const string &name, const AttributeList attributes );
     static void beginElement( void *userData, const XML_Char *name, const XML_Char **atts );

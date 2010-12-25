@@ -1,6 +1,7 @@
 #include <assert.h>
 #include <iostream>
 #include <vector>
+#include <boost/shared_ptr.hpp>
 #include "stardate.h"
 #include "lin_time.h"
 
@@ -10,7 +11,7 @@ using std::endl;
 using std::vector;
 
 class Faction;
-extern vector< Faction* >factions;
+extern vector< boost::shared_ptr<Faction> >factions;
 
 StarDate::StarDate()
 {

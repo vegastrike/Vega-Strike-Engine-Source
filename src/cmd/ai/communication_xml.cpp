@@ -44,7 +44,6 @@ const EnumMap element_map( element_names, 4 );
 const EnumMap attribute_map( attribute_names, 6 );
 }
 
-static vector< std::string >contrabandlists;
 void FSM::beginElement( void *userData, const XML_Char *names, const XML_Char **atts )
 {
     ( (FSM*) userData )->beginElement( names, AttributeList( atts ) );

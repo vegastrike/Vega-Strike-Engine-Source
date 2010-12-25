@@ -3,7 +3,7 @@
 
 using namespace FactionUtil;
 
-vector< Faction* >factions;  //the factions
+vector< boost::shared_ptr<Faction> >factions;  //the factions
 
 void Faction::ParseAllAllies()
 {

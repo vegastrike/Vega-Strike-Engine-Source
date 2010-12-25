@@ -2,6 +2,7 @@
 #define __FACTIONGENERIC_H
 #include "config.h"
 #include <string>
+#include <boost/shared_ptr.hpp>
 //#include <gnuhash.h>
 
 #include "xml_support.h"
@@ -20,7 +21,7 @@ public:
  * Other faction.  After it has been properly processed when calling
  * LoadXML, it will hold an ordered list containing all factions.
  * myfaction.faction[theirfaction].relationship will contain my
- * attitude to theirfaction
+ * attitude to their faction
  */
     struct faction_stuff
     {
@@ -33,12 +34,8 @@ public:
         stats;
         ///A value between 0 and 1 indicating my attitude towards index
         float relationship;
-        class FSM *conversation;  //a conversation any two factions can have
-        faction_stuff()
-        {
-            conversation = NULL;
-            relationship = 0;
-        }
+        boost::shared_ptr<FSM> conversation;  //a conversation any two factions can have
+        faction_stuff() : relationship(0.0) {}
     };
 public:
 /**
@@ -71,11 +68,12 @@ public:
             ,  base( CEITHER ) {}
     };
     std::vector< comm_face_t >     comm_faces;
-    std::vector< class Animation* >explosion;
+    std::vector< boost::shared_ptr<Animation> >explosion;
     std::vector< std::string >     explosion_name;
     std::vector< unsigned char >   comm_face_sex;
     MapStringFloat ship_relation_modifier;
-    Unit *contraband;
+    // This should be a std::auto_ptr, but then "cmd/unit.h" has to be included
+    boost::shared_ptr<Unit> contraband;
 ///Figures out the relationships of each faction with each other
     static void ParseAllAllies( /*Universe * thisuni*/ );
     void ParseAllies( /*Universe * thisuni,*/ unsigned int whichfaction );
@@ -87,7 +85,6 @@ public:
         playlist      = -1;
         citizen       = false;
         logo          = secondaryLogo = NULL;
-        contraband    = NULL;
         factionname   = NULL;
         sparkcolor[0] = .5;
         sparkcolor[1] = .5;
@@ -97,7 +94,7 @@ public:
     ~Faction(); //destructor
 };
 
-extern std::vector< Faction* >factions;   //the factions
+extern std::vector< boost::shared_ptr<Faction> >factions;   //the factions
 
 namespace FactionUtil
 {
@@ -122,7 +119,7 @@ const char * GetFaction( int faction );
  * 1 is happy. 0 is neutral (btw 1 and 0 will not attack)
  * -1 is mad. <0 will attack
  */
-int GetFactionIndex( std::string name );
+int GetFactionIndex( const std::string& name );
 
 inline int GetUpgradeFaction()
 {
@@ -147,7 +144,7 @@ inline float GetIntRelation( const int myfaction, const int theirfaction )
 //float GetRelation (std::string myfaction, std::string theirfaction);
 std::string GetFactionName( int index );
 bool isCitizenInt( int index );
-bool isCitizen( std::string name );
+bool isCitizen( const std::string& name );
 void AdjustIntRelation( const int myfaction, const int theirfaction, const float factor, const float rank );
 //void AdjustRelation(std::string myfaction,std::string theirfaction, float factor, float rank);
 int GetPlaylist( const int myfaction );
@@ -167,8 +164,6 @@ void LoadFactionPlaylists();
 /** Still in faction_xml.cpp because createUnit **/
 void LoadContrabandLists();
 };
-
-extern std::vector< Faction* >factions;   //the factions
 
 #endif
 

@@ -83,17 +83,6 @@ extern std::string global_password;
 
 vs_options game_options;
 
-int nadanixnuthin()
-{
-    float a    = 0;
-    int   test = 0;
-    Delta( a, a );
-    flipbit( test, test );
-    checkbit( test, test );
-    dosetbit( test, test );
-    unsetbit( test, test );
-    return 0;
-}
 /*
  * Globals
  */
@@ -150,6 +139,7 @@ std::string ParseCommandLine(int argc, char ** CmdLine);
  */
 int readCommandLineOptions(int argc, char ** argv);
 
+// FIXME: Code should throw exception instead of calling exit
 void VSExit( int code)
 {
     Music::CleanupMuzak();
@@ -158,8 +148,6 @@ void VSExit( int code)
 
 void cleanup( void )
 {
-    VSFileSystem::vs_fprintf( stdout, "\n\nLoop average : %g\n\n", avg_loop );
-    VSFileSystem::vs_fprintf( stderr, "\n\nLoop average : %g\n\n", avg_loop );
     STATIC_VARS_DESTROYED = true;
     printf( "Thank you for playing!\n" );
     //In network mode, we may not do the save since it is useless
@@ -257,6 +245,7 @@ void closeRenderer()
 
 //int allexcept=FE_DIVBYZERO|FE_INVALID;//|FE_OVERFLOW|FE_UNDERFLOW;
 extern void InitUnitTables();
+extern void CleanupUnitTables();
 bool isVista = false;
 int main( int argc, char *argv[] )
 {
@@ -352,8 +341,6 @@ int main( int argc, char *argv[] )
     AUDInit();
     AUDListenerGain( XMLSupport::parse_float( vs_config->getVariable( "audio", "sound_gain", ".5" ) ) );
     Music::InitMuzak();
-    /* Set up a function to clean up when program exits */
-    winsys_atexit( cleanup );
     
     initSceneManager();
     initALRenderer();
@@ -384,8 +371,13 @@ int main( int argc, char *argv[] )
     
     closeRenderer();
 
+    cleanup();
+
+    delete _Universe;
+    CleanupUnitTables();
     return 0;
 }
+
 static Animation *SplashScreen = NULL;
 static bool BootstrapMyStarSystemLoading = true;
 void SetStarSystemLoading( bool value )

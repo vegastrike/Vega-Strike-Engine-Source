@@ -4,7 +4,7 @@ using namespace FactionUtil;
 Faction::~Faction()
 {
     delete[] factionname;
-    if (contraband)
+    if (contraband.get())
         contraband->Kill();
 }
 

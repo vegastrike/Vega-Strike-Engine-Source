@@ -105,7 +105,7 @@ StarSystem::StarSystem()
     //AddStarsystemToUniverse(filename);
     time    = 0;
     //_Universe->popActiveStarSystem ();
-    zone    = NULL;
+    zone    = 0;
     sigIter = drawList.createIterator();
     this->current_sim_location = 0;
 }

@@ -163,7 +163,7 @@ void Universe::Init( const char *gal )
 {
     ROLES::getAllRolePriorities();
     LoadWeapons( VSFileSystem::weapon_list.c_str() );
-    this->galaxy = new GalaxyXML::Galaxy( gal );
+    galaxy.reset(new GalaxyXML::Galaxy( gal ));
     static bool firsttime = false;
     if (!firsttime) {
         LoadFactionXML( "factions.xml" );
@@ -172,9 +172,8 @@ void Universe::Init( const char *gal )
     script_system = NULL;
 }
 
-Universe::Universe( int argc, char **argv, const char *galaxy_str, bool server ) :
-    galaxy( NULL )
-    , current_cockpit( 0 )
+Universe::Universe( int argc, char **argv, const char *galaxy_str, bool server )
+    : current_cockpit( 0 )
     , script_system( NULL )
 {
     this->Init( galaxy_str );
@@ -182,9 +181,8 @@ Universe::Universe( int argc, char **argv, const char *galaxy_str, bool server )
     is_server    = server;
 }
 
-Universe::Universe() :
-    galaxy( NULL )
-    , current_cockpit( 0 )
+Universe::Universe()
+    : current_cockpit( 0 )
     , script_system( NULL )
 {
     is_server = false;
@@ -274,7 +272,7 @@ void Universe::Generate1( const char *file, const char *jumpback )
     VSError err = f.OpenReadOnly( file, SystemFile );
     //If the file is not found we generate a system
     if (err > Ok)
-        MakeStarSystem( file, galaxy, RemoveDotSystem( jumpback ), count );
+        MakeStarSystem( file, galaxy.get(), RemoveDotSystem( jumpback ), count );
     if (SERVER) {
         string filestr( file );
         UniverseUtil::ComputeSystemSerials( filestr );
@@ -370,3 +368,11 @@ void InitUnitTables()
     }
 }
 
+void CleanupUnitTables()
+{
+    for (std::vector<CSVTable*>::iterator it = unitTables.begin(); it != unitTables.end(); ++it)
+    {
+        delete *it;
+    }
+    unitTables.clear();
+}
