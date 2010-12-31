@@ -201,8 +201,8 @@ struct textureholder   //Holds 1 texture entry
     int type;
     int index;
     vector< unsigned char >name;
-    textureholder() : index( 0 ) {}
-    textureholder( int _index ) : index( _index ) {}
+    textureholder() : index( 0 ), type( -1 ) {}
+    textureholder( int _index, int _type = TEXTURE ) : index( _index ), type( _type ) {}
 };
 
 enum polytype

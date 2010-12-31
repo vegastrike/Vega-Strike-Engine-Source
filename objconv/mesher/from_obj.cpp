@@ -446,7 +446,6 @@ void ObjToXMESH( FILE *obj, FILE *mtl, vector< XML > &xmllist, bool forcenormals
         if ( 1 == sscanf( buf, "newmtl %s\n", str ) ) {
             mtls[str] = MTL();
             cur = &mtls[str];
-            cur->textures.push_back( textureholder() );
             continue;
         }
         wordtoupper( buf );
@@ -512,6 +511,14 @@ void ObjToXMESH( FILE *obj, FILE *mtl, vector< XML > &xmllist, bool forcenormals
             cur->textures.push_back( makeTextureHolder( str, tmpint ) );
         if ( 1 == sscanf( buf, "TECHNIQUE %s\n", str ) )
             cur->textures.push_back( makeTechniqueHolder( str ) );
+    }
+    
+    // Add phoney texture to textureless materials
+    // (they often produce crashes)
+    for (map< string , MTL >::iterator it = mtls.begin(); it != mtls.end(); ++it) {
+        cur = &(it->second);
+        if (cur->textures.empty())
+            cur->textures.push_back( textureholder() );
     }
     bool changemat = false;
 

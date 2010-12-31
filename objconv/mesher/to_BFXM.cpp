@@ -1160,9 +1160,7 @@ int32bit appendmeshfromxml( XML memfile, FILE *Outputfile, bool forcenormals )
     //Textures
     {
         size_t texnum;
-        intbuf = 0;
-        for (texnum = 0; texnum < memfile.textures.size(); texnum++)
-            intbuf++;
+        intbuf = memfile.textures.size();
         intbuf = VSSwapHostIntToLittle( intbuf );
         runningbytenum += sizeof (int32bit)*(int32bit) fwrite( &intbuf, sizeof (int32bit), 1, Outputfile );           //Number of textures
         for (texnum = 0; texnum < memfile.textures.size(); texnum++) {
