@@ -28,7 +28,11 @@ vector< string > readCSV( string s, string delim )
                 size_t dp = delim.find( s[epos] );
                 if (dp != string::npos) ddelim = delim[dp];
                 ep = (dp != string::npos);
-            } else {ep = s[epos] == ddelim; } if (ep) {
+            } else {
+                ep = s[epos] == ddelim; 
+            } 
+            
+            if (ep) {
                 insert = false;
                 l.push_back( as );
                 as.erase();
