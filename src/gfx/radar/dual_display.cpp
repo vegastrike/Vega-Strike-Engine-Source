@@ -7,6 +7,8 @@ namespace Radar
 
 DualDisplayBase::DualDisplayBase()
     : isPaused(false),
+      randomEngine(),
+      randomDistribution(),
       randomGenerator(randomEngine, randomDistribution),
       lastRandomNumber(0.0)
 {
