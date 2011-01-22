@@ -5,7 +5,6 @@
 #include "cmd/unit_collide.h"
 #include "cmd/collection.h"
 #include "cmd/click_list.h"
-#include "cmd/ai/input_dfa.h"
 #include "lin_time.h"
 #include "cmd/beam.h"
 #include "gfx/sphere.h"
@@ -70,8 +69,6 @@ GameStarSystem::GameStarSystem( const char *filename, const Vector &centr, const
     //cout << "origin: " << centr.i << " " << centr.j << " " << centr.k << " " << planetname << endl;
 
     current_stage  = MISSION_SIMULATION;
-
-    systemInputDFA = new InputDFA( this );
 
     LoadXML( filename, centr, timeofyear );
     if (!name)
@@ -202,7 +199,6 @@ GameStarSystem::~GameStarSystem()
     delete bg;
     delete stars;
     //delete [] name;
-    delete systemInputDFA;
     delete bolts;
     //delete collidetable;//BAD BAD BAD we need this to happen later!
 
@@ -468,14 +464,8 @@ void GameStarSystem::Draw( bool DrawCockpit )
     particleTrail.DrawAndUpdate();
     GameStarSystem::DrawJumpStars();
     ConditionalCursorDraw( false );
-    //static bool doInputDFA = XMLSupport::parse_bool (vs_config->getVariable ("graphics","MouseCursor","false"));
     if (DrawCockpit)
         _Universe->AccessCockpit()->Draw();
-    //if (doInputDFA) {
-    //GFXHudMode (true);
-    //systemInputDFA->Draw();
-    //GFXHudMode (false);
-    //}
     double fintime = queryTime()-starttime;
 /*    if ( debugPerformance() ) {
         printf( "draw: %f setup %f units %f maxunit %f processmesh %f ",

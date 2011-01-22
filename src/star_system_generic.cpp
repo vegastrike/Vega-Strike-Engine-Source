@@ -8,7 +8,6 @@
 #include "gfx/cockpit_generic.h"
 #include "audiolib.h"
 //#include "cmd/click_list.h"
-//#include "cmd/ai/input_dfa.h"
 #include "lin_time.h"
 #include "cmd/beam.h"
 //#include "gfx/sphere.h"
@@ -96,7 +95,6 @@ StarSystem::StarSystem()
     name = NULL;
     //_Universe->pushActiveStarSystem (this);
     current_stage = MISSION_SIMULATION;
-    //systemInputDFA = new InputDFA (this);
     /*
      *  LoadXML(filename,centr,timeofyear);
      *  if (!name)
@@ -127,7 +125,6 @@ StarSystem::StarSystem( const char *filename, const Vector &centr, const float t
     collidetable   = new CollideTable( this );
     //cout << "origin: " << centr.i << " " << centr.j << " " << centr.k << " " << planetname << endl;
     current_stage  = MISSION_SIMULATION;
-    //systemInputDFA = new InputDFA (this);
     this->filename = filename;
     LoadXML( filename, centr, timeofyear );
     if (!name)
@@ -194,7 +191,6 @@ StarSystem::~StarSystem()
     ClientServerSetLightContext( lightcontext );
     //delete stars;
     delete[] name;
-    //delete systemInputDFA;
     /* //FIXME  after doign so much debugging I think you shouldn't delete this
     //FIXME SQUARED: The purpose of comments is to clarify; NOT to mystify. --chuck_starchaser
      *  for (int i=0;i<numprimaries;i++) { 

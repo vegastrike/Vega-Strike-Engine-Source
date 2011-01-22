@@ -978,8 +978,6 @@ vegastrike_SOURCES = \
   src/cmd/ai/flyjoystick.h \
   src/cmd/ai/flykeyboard.cpp \
   src/cmd/ai/flykeyboard.h \
-  src/cmd/ai/input_dfa.cpp \
-  src/cmd/ai/input_dfa.h \
   src/cmd/asteroid.cpp \
   src/cmd/asteroid.h \
   src/cmd/atmosphere.cpp \

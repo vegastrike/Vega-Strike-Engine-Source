@@ -127,8 +127,6 @@ protected:
     char *name;
     std::string    filename;
     un_iter sigIter;
-///Process global clicks for input/output
-//InputDFA * systemInputDFA;
 ///to track the next given physics frame
     double time;
 ///The background associated with this system

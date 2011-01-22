@@ -424,7 +424,6 @@ SET(VEGASTRIKE_SOURCES ${LIBGUI_SOURCES}
 					   src/cmd/ai/firekeyboard.cpp
 					   src/cmd/ai/flyjoystick.cpp
 					   src/cmd/ai/flykeyboard.cpp
-					   src/cmd/ai/input_dfa.cpp
 					   src/cmd/asteroid.cpp
 					   src/cmd/atmosphere.cpp
 					   src/cmd/base_init.cpp

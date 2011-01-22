@@ -20,7 +20,6 @@
 #include "cmd/bolt.h"
 #include "gfx/loc_select.h"
 #include <string>
-#include "cmd/ai/input_dfa.h"
 #include "cmd/collection.h"
 #include "star_system.h"
 #include "cmd/planet.h"

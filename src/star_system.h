@@ -7,7 +7,6 @@
 #include "gfxlib_struct.h"
 class ClickList;
 class TextPlane;
-class InputDFA;
 
 class Texture;
 class Background;
@@ -23,8 +22,6 @@ class GameStarSystem : public StarSystem
 {
 private:
 /// Objects subject to global gravitron physics (disabled)
-///Process global clicks for input/output
-    InputDFA   *systemInputDFA;
 ///The background associated with this system
     Background *bg;
 ///The Light Map corresponding for the BP for spheremapping
