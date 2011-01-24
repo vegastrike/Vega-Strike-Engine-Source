@@ -1,7 +1,7 @@
 #include <cstring>
 #include <string>
 #include "background.h"
-Background::Background(const char *, int, float, std::string) {
+Background::Background(const char *, int, float, const std::string&, const GFXColor &, bool) {
 
 }
 void Background::EnableBG(bool){}

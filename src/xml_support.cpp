@@ -4,7 +4,11 @@
 //#include <strstream.h>
 #include <ctype.h>
 #include <assert.h>
+#include <stdarg.h>
 #include "xml_support.h"
+
+#include <boost/tokenizer.hpp>
+#include <boost/lexical_cast.hpp>
 
 using std::string;
 
@@ -33,6 +37,11 @@ namespace XMLSupport
  *  return string(((ostrstream*)&(ostrstream() << num << '\0'))->str());
  *  }
  */
+
+typedef boost::char_separator<std::string::value_type> Separator;
+typedef boost::tokenizer<Separator> Tokenizer;
+
+static const char *SEPARATORS = " \t,";
 
 EnumMap::EnumMap( const Pair *data, unsigned int num )
 {
@@ -93,6 +102,35 @@ float parse_floatf( const string &str )
     ss>>ret;
     return ret;
 }
+
+void parse_floatv(const std::string& input, size_t maxTokens, ...)
+{
+    va_list arguments;
+    va_start(arguments, maxTokens);
+    Separator separator(SEPARATORS);
+    Tokenizer tokens(input, separator);
+    
+    for (Tokenizer::iterator it = tokens.begin(); maxTokens > 0 && it != tokens.end(); ++it, --maxTokens) {
+        double *output = va_arg(arguments, double *);
+        *output = boost::lexical_cast<double>(*it);
+    }
+    va_end(arguments);
+}
+
+void parse_floatfv( const string &input, int maxTokens, ... )
+{
+    va_list arguments;
+    va_start(arguments, maxTokens);
+    Separator separator(SEPARATORS);
+    Tokenizer tokens(input, separator);
+    
+    for (Tokenizer::iterator it = tokens.begin(); maxTokens > 0 && it != tokens.end(); ++it, --maxTokens) {
+        float *output = va_arg(arguments, float *);
+        *output = boost::lexical_cast<float>(*it);
+    }
+    va_end(arguments);
+}
+
 
 int parse_int( const string &str )
 {

@@ -32,8 +32,11 @@
 #include "universe_util.h"
 #include <float.h>
 const float size = 100;
-Background::Background( const char *file, int numstars, float spread, std::string filename ) : Enabled( true )
+Background::Background( const char *file, int numstars, float spread, const std::string &filename, const GFXColor &color_, bool degamma_ ) 
+    : Enabled( true )
     , stars( NULL )
+    , degamma( degamma_ )
+    , color( color_ )
 {
     string temp;
     static string starspritetextures = vs_config->getVariable( "graphics", "far_stars_sprite_texture", "" );
@@ -172,13 +175,16 @@ void Background::Draw()
 {
     GFXClear( Enabled ? GFXFALSE : GFXTRUE );
     if (Enabled) {
-        GFXBlendMode( ONE, ZERO );
+        if (degamma)
+            GFXBlendMode( SRCCOLOR, ZERO );
+        else
+            GFXBlendMode( ONE, ZERO );
         GFXDisable( LIGHTING );
         GFXDisable( DEPTHWRITE );
         GFXDisable( DEPTHTEST );
         GFXEnable( TEXTURE0 );
         GFXDisable( TEXTURE1 );
-        GFXColor( 1, 1, 1, 1 );
+        GFXColorf(color);
         if (SphereBackground) {
             SphereBackground->DrawNow( FLT_MAX, true );
             //Mesh::ProcessUndrawnMeshes();//background must be processed...dumb but necessary--otherwise might collide with other mehses
@@ -346,7 +352,7 @@ void Background::Draw()
                 const float  _stca[] = {-1.f, -Ms, ms, Ms, +1.f}, _ttca[] = {-1.f, -Mt, mt, Mt, +1.f};
                 const float *stca    = _stca+2, *ttca = _ttca+2;
 
-                GFXColor4f( 1.00F, 1.00F, 1.00F, 1.00F );
+                GFXColorf(color);
 
                 _Universe->activateLightMap( 0 );
                 GFXToggleTexture( true, 0, CUBEMAP );
@@ -364,7 +370,7 @@ void Background::Draw()
                 }
                 float stca[] = {ms, Ms}, ttca[] = {mt, Mt};
 
-                GFXColor4f( 1.00F, 1.00F, 1.00F, 1.00F );
+                GFXColorf(color);
                 for (lyr = 0; (lyr < gl_options.Multitexture) || (lyr < numlayers); lyr++) {
                     GFXToggleTexture( (lyr < numlayers), lyr );
                     if (lyr < numlayers)

@@ -94,6 +94,8 @@ enum Names
     SALPHA,
     SPOWER,
     BACKGROUND,
+    BACKGROUND_COLOR,
+    BACKGROUND_DEGAMMA,
     STARS,
     STARSPREAD,
     NEARSTARS,
@@ -185,6 +187,8 @@ const EnumMap::Pair element_names[] = {
 const EnumMap::Pair attribute_names[] = {
     EnumMap::Pair( "UNKNOWN",               UNKNOWN ),
     EnumMap::Pair( "background",            BACKGROUND ),
+    EnumMap::Pair( "backgroundColor",       BACKGROUND_COLOR ),
+    EnumMap::Pair( "backgroundDegamma",     BACKGROUND_DEGAMMA ),
     EnumMap::Pair( "stars",                 STARS ),
     EnumMap::Pair( "nearstars",             NEARSTARS ),
     EnumMap::Pair( "fadestars",             FADESTARS ),
@@ -541,6 +545,16 @@ void StarSystem::beginElement( const string &name, const AttributeList &attribut
                 break;
             case BACKGROUND:
                 xml->backgroundname = (*iter).value;
+                break;
+            case BACKGROUND_COLOR:
+                parse_floatfv( (*iter).value, 4,
+                    &xml->backgroundColor.r,
+                    &xml->backgroundColor.g,
+                    &xml->backgroundColor.b,
+                    &xml->backgroundColor.a);
+                break;
+            case BACKGROUND_DEGAMMA:
+                xml->backgroundDegamma = XMLSupport::parse_bool((*iter).value);
                 break;
             case NEARSTARS:
             case STARS:
@@ -1578,6 +1592,8 @@ void StarSystem::LoadXML( const char *filename, const Vector &centroid, const fl
     xml->numnearstars   = GetNumNearStarsScale();
     xml->numstars = GetNumStarsScale();
     xml->backgroundname = string( "cube" );
+    xml->backgroundColor = GFXColor(1.0,1.0,1.0,1.0);
+    xml->backgroundDegamma = false;
     xml->reflectivity   = game_options.reflectivity;
     xml->unitlevel = 0;
     XML_Parser parser = XML_ParserCreate( NULL );

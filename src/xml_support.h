@@ -40,6 +40,8 @@ public: AttributeList( const XML_Char **atts );
 };
 float parse_floatf( const std::string &str );
 double parse_float( const std::string &str );
+void parse_floatfv( const std::string &str, int max, ... );
+void parse_floatv( const std::string &str, int max, ... );
 std::string replace_space( const std::string &str );
 int parse_int( const std::string &str );
 bool parse_bool( const std::string &str );

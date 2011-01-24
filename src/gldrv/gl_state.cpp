@@ -314,105 +314,34 @@ void /*GFXDRVAPI*/ GFXGetBlendMode( enum BLENDFUNC &src, enum BLENDFUNC &dst )
     dst = currBlendMode.dfactor;
 }
 
+static GLenum blendToGL(const enum BLENDFUNC func)
+{
+    switch (func)
+    {
+    case ZERO:          return GL_ZERO;
+    case ONE:           return GL_ONE;
+    case SRCALPHA:      return GL_SRC_ALPHA;
+    case INVSRCALPHA:   return GL_ONE_MINUS_SRC_ALPHA;
+    case DESTALPHA:     return GL_DST_ALPHA;
+    case INVDESTALPHA:  return GL_ONE_MINUS_DST_ALPHA;
+    case DESTCOLOR:     return GL_DST_COLOR;
+    case INVDESTCOLOR:  return GL_ONE_MINUS_DST_COLOR;
+    case SRCALPHASAT:   return GL_SRC_ALPHA_SATURATE;
+#ifndef _WIN32
+    case CONSTALPHA:    return GL_CONSTANT_ALPHA;
+    case INVCONSTALPHA: return GL_ONE_MINUS_CONSTANT_ALPHA;
+    case CONSTCOLOR:    return GL_CONSTANT_COLOR;
+    case INVCONSTCOLOR: return GL_ONE_MINUS_CONSTANT_COLOR;
+#endif
+    case SRCCOLOR:      return GL_SRC_COLOR;
+    case INVSRCCOLOR:   return GL_ONE_MINUS_SRC_COLOR;
+    }
+}
+
 void GFXBlendMode( const enum BLENDFUNC src, const enum BLENDFUNC dst )
 {
-    GLenum sfactor, dfactor;
-    switch (src)
-    {
-    case ZERO:
-        sfactor = GL_ZERO;
-        break;
-    case ONE:
-        sfactor = GL_ONE;
-        break;
-    case SRCALPHA:
-        sfactor = GL_SRC_ALPHA;
-        break;
-    case INVSRCALPHA:
-        sfactor = GL_ONE_MINUS_SRC_ALPHA;
-        break;
-    case DESTALPHA:
-        sfactor = GL_DST_ALPHA;
-        break;
-    case INVDESTALPHA:
-        sfactor = GL_ONE_MINUS_DST_ALPHA;
-        break;
-    case DESTCOLOR:
-        sfactor = GL_DST_COLOR;
-        break;
-    case INVDESTCOLOR:
-        sfactor = GL_ONE_MINUS_DST_COLOR;
-        break;
-    case SRCALPHASAT:
-        sfactor = GL_SRC_ALPHA_SATURATE;
-        break;
-#ifndef _WIN32
-    case CONSTALPHA:
-        sfactor = GL_CONSTANT_ALPHA;
-        break;
-    case INVCONSTALPHA:
-        sfactor = GL_ONE_MINUS_CONSTANT_ALPHA;
-        break;
-    case CONSTCOLOR:
-        sfactor = GL_CONSTANT_COLOR;
-        break;
-    case INVCONSTCOLOR:
-        sfactor = GL_ONE_MINUS_CONSTANT_COLOR;
-        break;
-#endif
-    case SRCCOLOR:
-    case INVSRCCOLOR:
-    default:
-        return;
-        //return FALSE;
-    }
-    switch (dst)
-    {
-    case ZERO:
-        dfactor = GL_ZERO;
-        break;
-    case ONE:
-        dfactor = GL_ONE;
-        break;
-    case SRCCOLOR:
-        dfactor = GL_SRC_COLOR;
-        break;
-    case INVSRCCOLOR:
-        dfactor = GL_ONE_MINUS_SRC_COLOR;
-        break;
-    case SRCALPHA:
-        dfactor = GL_SRC_ALPHA;
-        break;
-    case INVSRCALPHA:
-        dfactor = GL_ONE_MINUS_SRC_ALPHA;
-        break;
-    case DESTALPHA:
-        dfactor = GL_DST_ALPHA;
-        break;
-    case INVDESTALPHA:
-        dfactor = GL_ONE_MINUS_DST_ALPHA;
-        break;
-          #ifndef _WIN32
-    case CONSTALPHA:
-        dfactor = GL_CONSTANT_ALPHA;
-        break;
-    case INVCONSTALPHA:
-        dfactor = GL_ONE_MINUS_CONSTANT_ALPHA;
-        break;
-    case CONSTCOLOR:
-        dfactor = GL_CONSTANT_COLOR;
-        break;
-    case INVCONSTCOLOR:
-        dfactor = GL_ONE_MINUS_CONSTANT_COLOR;
-        break;
-
-    case DESTCOLOR:
-    case INVDESTCOLOR:
-    case SRCALPHASAT:
-#endif
-    default:
-        return;
-    }
+    GLenum sfactor = blendToGL(src);
+    GLenum dfactor = blendToGL(dst);
     glBlendFunc( sfactor, dfactor );
     currBlendMode.sfactor = src;
     currBlendMode.dfactor = dst;

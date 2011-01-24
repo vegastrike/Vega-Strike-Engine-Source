@@ -21,12 +21,16 @@
 #ifndef BACKGROUND_H
 #define BACKGROUND_H
 
+#include "gfxlib_struct.h"
+
 class SphereMesh;
 class Texture;
 class StarVlist;
 class Background
 {
     bool        Enabled;
+    bool        degamma;
+    GFXColor    color;
     StarVlist  *stars;
     Texture    *up;
     Texture    *left;
@@ -35,7 +39,8 @@ class Background
     Texture    *back;
     Texture    *down;
     SphereMesh *SphereBackground;
-public: Background( const char *file, int numstars, float spread, std::string starfilename );
+public: 
+    Background( const char *file, int numstars, float spread, const std::string &starfilename, const GFXColor &color, bool degamma);
     ~Background();
     void EnableBG( bool );
     void Draw();

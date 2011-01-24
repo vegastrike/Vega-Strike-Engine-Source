@@ -62,6 +62,8 @@ protected:
         std::vector< GFXLight >lights;
         std::vector< Planet* > moons;
         std::string backgroundname;
+        GFXColor backgroundColor;
+        bool   backgroundDegamma;
         Vector systemcentroid;
         Vector cursun;
         float  timeofyear;

@@ -555,7 +555,13 @@ void GameStarSystem::createBackground( StarSystem::StarXML *xml )
     LightMap[0] = new Texture( bgfile.c_str(), 1, MIPMAP, TEXTURE2D, TEXTURE_2D, GFXTRUE );
 #endif
 
-    bg    = new Background( xml->backgroundname.c_str(), xml->numstars, g_game.zfar*.9, filename );
+    bg = new Background( 
+        xml->backgroundname.c_str(), 
+        xml->numstars, 
+        g_game.zfar*.9, 
+        filename,
+        xml->backgroundColor,
+        xml->backgroundDegamma );
     stars = new Stars( xml->numnearstars, xml->starsp );
     stars->SetBlend( game_options.starblend, game_options.starblend );
 }
