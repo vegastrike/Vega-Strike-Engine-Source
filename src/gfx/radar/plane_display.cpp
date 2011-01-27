@@ -145,12 +145,14 @@ void PlaneDisplay::Draw(const Sensor& sensor,
                         VSSprite *distantSprite)
 {
     radarTime += GetElapsedTime();
-
-    SetViewArea(nearSprite, leftRadar);
-    SetViewArea(distantSprite, rightRadar);
-
-    nearSprite->Draw();
-    distantSprite->Draw();
+	if (nearSprite)
+	    SetViewArea(nearSprite, leftRadar);
+	if (distantSprite)
+	    SetViewArea(distantSprite, rightRadar);
+	if (nearSprite)
+	    nearSprite->Draw();
+	if (distantSprite)
+	    distantSprite->Draw();
 
     Sensor::TrackCollection tracks = sensor.FindTracksInRange();
 
@@ -159,9 +161,10 @@ void PlaneDisplay::Draw(const Sensor& sensor,
     GFXEnable(DEPTHTEST);
     GFXEnable(DEPTHWRITE);
     GFXEnable(SMOOTH);
-
-    DrawNear(sensor, tracks);
-    DrawDistant(sensor, tracks);
+	if (nearSprite)
+	    DrawNear(sensor, tracks);
+	if (distantSprite)
+	    DrawDistant(sensor, tracks);
 
     GFXPointSize(1);
     GFXDisable(DEPTHTEST);
@@ -173,10 +176,9 @@ void PlaneDisplay::Animate()
 {
     if (!animation.empty())
     {
-        AnimationCollection::const_reference item = animation.front();
-        if (radarTime > lastAnimationTime + item.duration)
+        if (radarTime > lastAnimationTime + animation.front().duration)
         {
-            currentCameraAngle = item.position;
+            currentCameraAngle = animation.front().position;
             CalculateRotation();
             animation.pop();
             lastAnimationTime = radarTime;

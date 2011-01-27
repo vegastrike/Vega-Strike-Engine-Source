@@ -275,7 +275,18 @@ struct Texmp
 
 static char * makebgname( char *tmp, size_t size, const char *InputName, const char *add, const char *suffix )
 {
-    snprintf(tmp, size, "%s%s%s", InputName, add, suffix);
+	size_t len=strlen(InputName)+strlen(add)+strlen(suffix)+1;
+	if (size>len) {
+       strcpy(tmp,InputName);
+       strcat(tmp,add);
+       strcat(tmp,suffix);
+	}else {
+		std::string temp = InputName;
+		temp+=add;
+		temp+=suffix;
+		strncpy(tmp,temp.c_str(),size);
+		tmp[size-1]='\0';
+	}
     return tmp;
 }
 

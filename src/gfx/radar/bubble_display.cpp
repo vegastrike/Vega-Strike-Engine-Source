@@ -85,10 +85,9 @@ void BubbleDisplay::Animate()
 {
     if (!animation.empty())
     {
-        AnimationCollection::const_reference item = animation.front();
-        if (radarTime > lastAnimationTime + item.duration)
+        if (radarTime > lastAnimationTime + animation.front().duration)
         {
-            sphereZoom = item.sphereZoom;
+            sphereZoom = animation.front().sphereZoom;
             animation.pop();
             lastAnimationTime = radarTime;
         }
@@ -98,12 +97,14 @@ void BubbleDisplay::Animate()
 void BubbleDisplay::Draw(const Sensor& sensor, VSSprite *front, VSSprite *rear)
 {
     radarTime += GetElapsedTime();
-
-    SetViewArea(front, leftRadar);
-    SetViewArea(rear, rightRadar);
-
-    front->Draw();
-    rear->Draw();
+	if (front)
+	    SetViewArea(front, leftRadar);
+	if (rear)
+	    SetViewArea(rear, rightRadar);
+	if (front)
+	    front->Draw();
+	if (rear)
+        rear->Draw();
 
     Sensor::TrackCollection tracks = sensor.FindTracksInRange();
 
@@ -115,20 +116,22 @@ void BubbleDisplay::Draw(const Sensor& sensor, VSSprite *front, VSSprite *rear)
 
     for (Sensor::TrackCollection::const_iterator it = tracks.begin(); it != tracks.end(); ++it)
     {
-        if (it->GetPosition().z < 0)
+        if (it->GetPosition().z < 0&&rear)
         {
             // Draw tracks behind the ship
             DrawTrack(sensor, rightRadar, *it);
         }
         else
         {
+			if (front)
             // Draw tracks in front of the ship
-            DrawTrack(sensor, leftRadar, *it);
+	            DrawTrack(sensor, leftRadar, *it);
         }
     }
-
-    DrawBackground(leftRadar, currentTargetMarkerSize);
-    DrawBackground(rightRadar, currentTargetMarkerSize);
+	if (front)
+	    DrawBackground(leftRadar, currentTargetMarkerSize);
+	if (rear)
+	    DrawBackground(rightRadar, currentTargetMarkerSize);
 
     GFXPointSize(1);
     GFXDisable(DEPTHTEST);

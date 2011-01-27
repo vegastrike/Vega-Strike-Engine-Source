@@ -47,25 +47,28 @@ SphereDisplay::SphereDisplay()
 void SphereDisplay::Draw(const Sensor& sensor, VSSprite *front, VSSprite *rear)
 {
     radarTime += GetElapsedTime();
-
-    SetViewArea(front, leftRadar);
-    SetViewArea(rear, rightRadar);
-
-    front->Draw();
-    rear->Draw();
+	if (front)
+	    SetViewArea(front, leftRadar);
+	if (rear)
+	    SetViewArea(rear, rightRadar);
+	if (front)
+	    front->Draw();
+	if (rear)
+	    rear->Draw();
 
     Sensor::TrackCollection tracks = sensor.FindTracksInRange();
 
     // FIXME: Consider using std::sort instead of the z-buffer
     GFXEnable(DEPTHTEST);
     GFXEnable(DEPTHWRITE);
-
-    DrawBackground(sensor, leftRadar);
-    DrawBackground(sensor, rightRadar);
+	if (front)
+	    DrawBackground(sensor, leftRadar);
+	if (rear)
+	    DrawBackground(sensor, rightRadar);
 
     for (Sensor::TrackCollection::const_iterator it = tracks.begin(); it != tracks.end(); ++it)
     {
-        if (it->GetPosition().z < 0)
+        if (it->GetPosition().z < 0 && rear)
         {
             // Draw tracks behind the ship
             DrawTrack(sensor, rightRadar, *it);
@@ -73,7 +76,8 @@ void SphereDisplay::Draw(const Sensor& sensor, VSSprite *front, VSSprite *rear)
         else
         {
             // Draw tracks in front of the ship
-            DrawTrack(sensor, leftRadar, *it);
+			if (front)
+	            DrawTrack(sensor, leftRadar, *it);
         }
     }
 
