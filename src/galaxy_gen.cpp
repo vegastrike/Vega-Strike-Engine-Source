@@ -159,7 +159,7 @@ public:
     }
     void Yaw( float rad ) //only works with unit vector
     {
-        float theta;
+        float theta = 0;
         float m = Mag();
         if (i > 0)
             theta = (float) atan( k/i );
@@ -176,7 +176,7 @@ public:
 
     void Roll( float rad )
     {
-        float theta;
+        float theta = 0;
         float m = Mag();
         if (i > 0)
             theta = (float) atan( j/i );
@@ -193,7 +193,7 @@ public:
 
     void Pitch( float rad )
     {
-        float theta;
+        float theta = 0;
         float m = Mag();
         if (k > 0)
             theta = (float) atan( j/k );

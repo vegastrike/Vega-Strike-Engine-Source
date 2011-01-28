@@ -82,7 +82,7 @@ int FileUtil::HashStringCompute( std::string buffer, unsigned char *digest )
             Hash.Update( hashbuf, nb );
         }
         Hash.Final( digest );
-        delete hashbuf;
+        delete[] hashbuf;
 
         return 0;
     } else {

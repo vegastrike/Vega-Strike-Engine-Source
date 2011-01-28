@@ -30,7 +30,7 @@ public:
     {
         if (smaller->isUnit() != ASTEROIDPTR) {
             double percent;
-            char  *tempdata = (char*) malloc( sizeof (this->shield) );
+            char tempdata[sizeof (this->shield)];
             memcpy( tempdata, &this->shield, sizeof (this->shield) );
             shield.number = 0;     //don't want them getting our boosted shields!
             shield.shield2fb.front = shield.shield2fb.back = shield.shield2fb.frontmax = shield.shield2fb.backmax = 0;

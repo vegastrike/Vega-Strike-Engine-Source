@@ -148,7 +148,7 @@ void NetServer::sendLoginAccept( ClientPtr clt, Cockpit *cp )
         FileUtil::HashFileCompute( relsys, digest, SystemFile );
     netbuf.addShort( FileUtil::Hash.DigestSize() );
     netbuf.addBuffer( digest, FileUtil::Hash.DigestSize() );
-    delete digest;
+    delete[] digest;
 #else
     netbuf.addShort( 0 );
 #endif

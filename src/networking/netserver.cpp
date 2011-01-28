@@ -1056,7 +1056,7 @@ void NetServer::processPacket( ClientPtr clt, unsigned char cmd, const AddressIP
                 }
             }
 #ifdef CRYPTO
-            delete server_hash;
+            delete[] server_hash;
 #endif
             break;
         }

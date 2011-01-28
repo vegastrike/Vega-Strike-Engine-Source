@@ -103,11 +103,9 @@ bool mmoc::getStatus( int in )
 //if in = 0, return status, else toggle status.
     SDL_mutex *m = SDL_CreateMutex();
     SDL_mutexP( m );
-    bool returner;
-    if (in == 0) {returner = status; } else {
-        if (status) status = false;
-        else status = true;
-    }
+    if (in != 0)
+         status = !status;
+    bool returner = status;
     SDL_mutexV( m );
     SDL_DestroyMutex( m );
     return returner;

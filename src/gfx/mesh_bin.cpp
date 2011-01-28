@@ -41,7 +41,6 @@ void Mesh::LoadBinary( const char *filename, int faction )
     GFXBOOL objtex;
     int     TexNameLength;
     char   *TexName  = NULL;
-    char   *TexNameA = NULL;
     int     NumPoints;
     float  *vb;
     int     NumTris;
@@ -232,15 +231,6 @@ void Mesh::LoadBinary( const char *filename, int faction )
          *       vertexlist[ii].t = readf(fp);// *oo256;
          *  }*/
         if (AlphaMap) {
-            TexNameA = new char[TexNameLength+5];
-            for (int kk = 0; kk < TexNameLength; kk++)
-                TexNameA[kk] = TexName[kk];
-            TexNameA[TexNameLength+4] = '\0';
-            TexNameA[TexNameLength+0] = '.';
-            TexNameA[TexNameLength+1] = 'a';
-            TexNameA[TexNameLength+2] = 'l';
-            TexNameA[TexNameLength+3] = 'p';
-            //Decal =	new Texture(TexName, TexNameA);
             if ( Decal.empty() ) Decal.push_back( NULL );
             Decal[0] = createTexture( TexName, 0 );
         } else {

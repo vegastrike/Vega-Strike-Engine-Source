@@ -51,7 +51,7 @@ unsigned short * Rread( const char *myfile )
      */
     if (coloffset)
         memcpy( smaller, tm+rowoffset+(coloffset-1)*512, sizeof (unsigned short)*256 );
-    delete[] tm;
+    free( tm );
     return smaller;
 }
 

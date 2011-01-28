@@ -78,11 +78,11 @@ double * VECCholeskyTriDiagResol( double *B, int nb )
         Result[I] = (Y[I]-Result[I+1]*LssDiag[I])/LDiag[I];
     }
     //finally
-    delete Y;
+    delete[] Y;
     //end;
     //finally
-    delete LDiag;
-    delete LssDiag;
+    delete[] LDiag;
+    delete[] LssDiag;
     //end;
 //end;
     return Result;
@@ -125,10 +125,10 @@ double ** MATInterpolationHermite( double *ordonnees, int nb )
             fa[0] = d;
         }
         //finally
-        delete deriv;
+        delete[] deriv;
         //end;
         //finally
-        delete bb;
+        delete[] bb;
         //end;
     }
     return m;
@@ -182,9 +182,9 @@ double MATValeurSplineSlope( double **spline, double x, int nb )
 //
 void CubicSpline::createSpline( QVector P0, QVector P1, QVector P2, QVector P3 )
 {
-    double *X = new double[4];
-    double *Y = new double[4];
-    double *Z = new double[4];
+    double X[4];
+    double Y[4];
+    double Z[4];
     X[0] = P0.i;
     X[1] = P1.i;
     X[2] = P2.i;
@@ -202,10 +202,6 @@ void CubicSpline::createSpline( QVector P0, QVector P1, QVector P2, QVector P3 )
     MatY = MATInterpolationHermite( Y, FNb );
     MatZ = MATInterpolationHermite( Z, FNb );
     MatW = 0;
-
-    delete X;
-    delete Y;
-    delete Z;
 }
 
 //Destroy

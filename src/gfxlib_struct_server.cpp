@@ -26,10 +26,20 @@ GFXVertexList::VDAT* GFXVertexList::Map( bool read, bool write )
 }
 void GFXVertexList::UnMap() {}
 
-GFXVertexList::GFXVertexList()
+//private, only for inheriters
+GFXVertexList::GFXVertexList() :
+    numVertices(0),
+    mode(0),
+    unique_mode(0),
+    display_list(0),
+    vbo_data(0),
+    numlists(0),
+    offsets(0),
+    changed(0)
 {
-    memset( this, 0, sizeof (GFXVertexList) );
+    // ctor
 }
+
 ///Returns the array of vertices to be mutated
 union GFXVertexList::VDAT* GFXVertexList::BeginMutate( int offset )
 {

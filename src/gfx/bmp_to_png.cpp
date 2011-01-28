@@ -72,7 +72,7 @@ const int SIZEOF_RGBQUAD = sizeof (BYTE)*4;
 static unsigned char * LoadTex( char *FileName, int &sizeX, int &sizeY )
 {
     unsigned char  ctemp;
-    unsigned char *data;
+    unsigned char *data = NULL;
     FILE *fp = NULL;
     fp = VSFileSystem::vs_open( FileName, "rb" );
     if (!fp)
@@ -84,7 +84,6 @@ static unsigned char * LoadTex( char *FileName, int &sizeX, int &sizeY )
     sizeX = le32_to_cpu( info.biWidth );
     sizeY = le32_to_cpu( info.biHeight );
     if (le16_to_cpu( info.biBitCount ) == 24) {
-        data = NULL;
         data = new unsigned char[3*sizeY*sizeX];
         if (!data)
             return false;
@@ -101,7 +100,6 @@ static unsigned char * LoadTex( char *FileName, int &sizeX, int &sizeY )
             }
         }
     } else if (le16_to_cpu( info.biBitCount ) == 8) {
-        data = NULL;
         data = new unsigned char[sizeY*sizeX*3];
         unsigned char  palette[256*3+1];
         unsigned char *paltemp = palette;

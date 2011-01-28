@@ -578,12 +578,19 @@ void GFXVertexList::EndMutate( int newvertexsize )
         changed &= (~CHANGE_CHANGE);
 }
 
-GFXVertexList::GFXVertexList()
+//private, only for inheriters
+GFXVertexList::GFXVertexList() :
+    numVertices(0),
+    mode(0),
+    unique_mode(0),
+    display_list(0),
+    vbo_data(0),
+    numlists(0),
+    offsets(0),
+    changed(0)
 {
-    vbo_data     = 0;
-    display_list = 0;
-    memset( this, 0, sizeof (GFXVertexList) );
-} //private, only for inheriters
+    // ctor
+}
 
 POLYTYPE *GFXVertexList::GetPolyType() const
 {

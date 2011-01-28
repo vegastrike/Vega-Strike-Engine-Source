@@ -503,6 +503,7 @@ protected:
         GFXVertex *vertices;
         ///Or has color data
         GFXColorVertex *colors;
+        VDAT() : vertices(0) {};
     }
     data;
     union INDEX
@@ -510,6 +511,7 @@ protected:
         unsigned char  *b; //stride 1
         unsigned short *s; //stride 2
         unsigned int   *i; //stride 4
+        INDEX() : i(0) {};
     }
     index;
 ///Array of modes that vertices will be drawn with

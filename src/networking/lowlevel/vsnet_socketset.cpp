@@ -152,8 +152,6 @@ void SocketSet::private_addset( int fd, fd_set &fds, int &maxfd )
 int SocketSet::private_select( timeval *timeout )
 {
 #ifdef VSNET_DEBUG
-    timeval *enter_timeout = NULL;
-    if (timeout) enter_timeout = new timeval( *timeout );
     fd_set   debug_copy_of_read_set_select;
     fd_set   debug_copy_of_write_set_select;
     FD_ZERO( &debug_copy_of_read_set_select );
@@ -206,8 +204,6 @@ int SocketSet::private_select( timeval *timeout )
 #endif
 
 #ifdef VSNET_DEBUG
-    timeval *used_timeout = NULL;
-    if (timeout) used_timeout = new timeval( *timeout );
     for (int i = 0; i < max_sock_select; i++) {
         if ( FD_ISSET( i, &read_set_select ) )
             FD_SET( i, &debug_copy_of_read_set_select );
@@ -229,19 +225,6 @@ int SocketSet::private_select( timeval *timeout )
 #endif
     } else if (ret == 0) {
 //printf("Nothing to do.\n");
-#ifdef VSNET_DEBUG
-#if 0
-        std::ostringstream s1;
-        std::ostringstream s2;
-        if (enter_timeout) s1<<*enter_timeout<<ends;
-        else s1<<"(NULL)"<<ends;
-        if (used_timeout) s2<<*used_timeout<<ends;
-        else s2<<"(NULL)"<<ends;
-        COUT<<"Timeout:"<<endl
-            <<"   *** SocketSet::select called with "<<s1.str()<<endl
-            <<"   ***          ::select called with "<<s2.str()<<endl;
-#endif
-#endif
     } else {
         ret++;
 #if defined (VSNET_DEBUG)
