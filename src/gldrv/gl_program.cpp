@@ -7,6 +7,8 @@
 #include <map>
 #include <set>
 
+#include "string.h"
+
 #if _MSC_VER >= 1300
 #define snprintf _snprintf
 #endif
@@ -27,6 +29,38 @@ static ProgramCache::key_type cacheKey( const std::string &vp, const std::string
             defhash ^= (defhash * 127) | *(defines++);
     }
     return std::pair< unsigned int , std::pair< std::string, std::string > > (defhash, std::pair< std::string, std::string > ( vp, fp ));
+}
+
+static bool validateLog( GLuint obj, bool shader, 
+                         bool allowSoftwareEmulation = false )
+{
+    // Retrieve compiler log
+    GLsizei infologLength = 0;
+    char    infoLog[1024];
+    if (shader)
+        glGetShaderInfoLog_p( obj, 1023, &infologLength, infoLog );
+    else
+        glGetProgramInfoLog_p( obj, 1023, &infologLength, infoLog );
+    
+    if (infologLength > 0) {
+        // make sure infoLog is null-termiated;
+        infoLog[infologLength] = 0;
+        
+        // make lowercase - for case-insensitive matching
+        for (GLsizei i=0; i<infologLength; ++i)
+            infoLog[i] = tolower(infoLog[i]);
+        
+        // search for signs of emulated execution
+        if (!allowSoftwareEmulation) {
+            if (strstr(infoLog, "run in software") != NULL)
+                return false;
+            if (strstr(infoLog, "run on software") != NULL)
+                return false;
+        }
+    }
+    
+    // No validation failed...
+    return true;
 }
 
 void printLog( GLuint obj, bool shader )
@@ -157,7 +191,7 @@ static int GFXCreateProgramNoCache( const char *vprogram, const char *fprogram, 
     
     GLint vproghandle = 0;
     GLint fproghandle = 0;
-    GLint sp = glCreateProgram_p();
+    GLint sp = 0;
     if (vperr <= Ok) {
         vproghandle = glCreateShader_p( GL_VERTEX_SHADER );
         const char *tmp = vertexprg.c_str();
@@ -168,10 +202,15 @@ static int GFXCreateProgramNoCache( const char *vprogram, const char *fprogram, 
         if (successp == 0) {
             printLog( vproghandle, true );
             fprintf( stderr, "Vertex Program Error: Failed to compile %s\n", vprogram );
+            glDeleteShader_p( vproghandle );
+            return 0;
+        } else if (!validateLog( vproghandle, true )) {
+            printLog( vproghandle, true );
+            fprintf( stderr, "Vertex Program Error: Failed log validation for %s. Inspect log above for details.\n", vprogram );
+            glDeleteShader_p( vproghandle );
             return 0;
         }
         printLog( vproghandle, true );
-        glAttachShader_p( sp, vproghandle );
     }
     if (fperr <= Ok) {
         fproghandle = glCreateShader_p( GL_FRAGMENT_SHADER );
@@ -183,17 +222,36 @@ static int GFXCreateProgramNoCache( const char *vprogram, const char *fprogram, 
         if (successp == 0) {
             printLog( fproghandle, true );
             fprintf( stderr, "Fragment Program Error: Failed to compile %s\n", fprogram );
+            glDeleteShader_p( vproghandle );
+            glDeleteShader_p( fproghandle );
+            return 0;
+        } else if (!validateLog( fproghandle, true )) {
+            printLog( vproghandle, true );
+            fprintf( stderr, "Vertex Program Error: Failed log validation for %s. Inspect log above for details.\n", vprogram );
+            glDeleteShader_p( vproghandle );
+            glDeleteShader_p( fproghandle );
             return 0;
         }
         printLog( fproghandle, true );
-        glAttachShader_p( sp, fproghandle );
     }
+    
+    sp = glCreateProgram_p();
+    glAttachShader_p( sp, vproghandle );
+    glAttachShader_p( sp, fproghandle );
     glLinkProgram_p( sp );
+    
     printLog( sp, false );
+    
     GLint successp = 0;
     glGetProgramiv_p( sp, GL_LINK_STATUS, &successp );
     if (successp == 0) {
         fprintf( stderr, "Shader Program Error: Failed to link %s to %s\n", vprogram, fprogram );
+        return 0;
+    } else if (!validateLog( sp, false )) {
+        fprintf( stderr, "Shader Program Error: Failed log validation for vp:%s fp:%s. Inspect log above for details.\n", vprogram, fprogram );
+        glDeleteShader_p( vproghandle );
+        glDeleteShader_p( fproghandle );
+        glDeleteProgram_p( sp );
         return 0;
     }
     /* only for dev work
