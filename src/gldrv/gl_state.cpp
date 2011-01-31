@@ -318,6 +318,7 @@ static GLenum blendToGL(const enum BLENDFUNC func)
 {
     switch (func)
     {
+    default:
     case ZERO:          return GL_ZERO;
     case ONE:           return GL_ONE;
     case SRCALPHA:      return GL_SRC_ALPHA;
