@@ -157,12 +157,16 @@ static VSFileSystem::VSError getProgramSource(const std::string &path, std::stri
 static std::string appendDefines( const std::string &prog, const char *extra_defines )
 {
     std::string::size_type nlpos = prog.find_first_of('\n');
+    
+    if (nlpos == std::string::npos)
+        nlpos = 0;
+    
     std::string firstline = prog.substr(0, nlpos);
     
     if (firstline.find("#version") != std::string::npos)
         return firstline 
-               + std::string(extra_defines) 
-               + "\n#line 1\n"
+               + "\n" + std::string(extra_defines) 
+               + "\n#line 1"
                + prog.substr(nlpos);
     else
         return std::string(extra_defines) 
