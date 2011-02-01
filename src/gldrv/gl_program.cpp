@@ -256,20 +256,22 @@ static int GFXCreateProgramNoCache( const char *vprogram, const char *fprogram, 
     glAttachShader_p( sp, fproghandle );
     glLinkProgram_p( sp );
     
-    printLog( sp, false );
-    
     GLint successp = 0;
     glGetProgramiv_p( sp, GL_LINK_STATUS, &successp );
     if (successp == 0) {
+        printLog( sp, false );
         fprintf( stderr, "Shader Program Error: Failed to link %s to %s\n", vprogram, fprogram );
         return 0;
     } else if (!validateLog( sp, false )) {
+        printLog( sp, false );
         fprintf( stderr, "Shader Program Error: Failed log validation for vp:%s fp:%s. Inspect log above for details.\n", vprogram, fprogram );
         glDeleteShader_p( vproghandle );
         glDeleteShader_p( fproghandle );
         glDeleteProgram_p( sp );
         return 0;
     }
+    printLog( sp, false );
+    
     /* only for dev work
      *  glGetProgramiv_p(sp,GL_VALIDATE_STATUS,&successp);
      *  if (successp==0) {
