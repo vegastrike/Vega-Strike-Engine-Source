@@ -7,7 +7,10 @@
 #include <map>
 #include <set>
 
-#include "string.h"
+#include <boost/algorithm/string/predicate.hpp>
+
+using boost::algorithm::icontains;
+
 
 #if _MSC_VER >= 1300
 #define snprintf _snprintf
@@ -35,26 +38,25 @@ static bool validateLog( GLuint obj, bool shader,
                          bool allowSoftwareEmulation = false )
 {
     // Retrieve compiler log
+    const GLsizei LOGBUF = 1024;
     GLsizei infologLength = 0;
-    char    infoLog[1024];
+    char    infoLog[LOGBUF+1]; // +1 for null terminator
+    
     if (shader)
-        glGetShaderInfoLog_p( obj, 1023, &infologLength, infoLog );
+        glGetShaderInfoLog_p( obj, LOGBUF, &infologLength, infoLog );
     else
-        glGetProgramInfoLog_p( obj, 1023, &infologLength, infoLog );
+        glGetProgramInfoLog_p( obj, LOGBUF, &infologLength, infoLog );
     
     if (infologLength > 0) {
         // make sure infoLog is null-termiated;
+        assert(infologLength <= LOGBUF);
         infoLog[infologLength] = 0;
-        
-        // make lowercase - for case-insensitive matching
-        for (GLsizei i=0; i<infologLength; ++i)
-            infoLog[i] = tolower(infoLog[i]);
         
         // search for signs of emulated execution
         if (!allowSoftwareEmulation) {
-            if (strstr(infoLog, "run in software") != NULL)
+            if (icontains(infoLog, "run in software"))
                 return false;
-            if (strstr(infoLog, "run on software") != NULL)
+            if (icontains(infoLog, "run on software"))
                 return false;
         }
     }
@@ -65,12 +67,19 @@ static bool validateLog( GLuint obj, bool shader,
 
 void printLog( GLuint obj, bool shader )
 {
+    const GLsizei LOGBUF = 1024;
     GLsizei infologLength = 0;
-    char    infoLog[1024];
+    char    infoLog[LOGBUF+1]; // +1 for null terminator
+    
     if (shader)
         glGetShaderInfoLog_p( obj, 1024, &infologLength, infoLog );
     else
         glGetProgramInfoLog_p( obj, 1024, &infologLength, infoLog );
+    
+    // make sure infoLog is null-termiated;
+    assert(infologLength <= LOGBUF);
+    infoLog[infologLength] = 0;
+    
     if (infologLength > 0)
         fprintf( stderr, "%s\n", infoLog );
 }
