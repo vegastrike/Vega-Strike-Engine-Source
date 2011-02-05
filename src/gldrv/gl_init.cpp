@@ -470,6 +470,13 @@ void init_opengl_extensions()
         gl_options.ext_srgb_framebuffer = false;
         VSFileSystem::vs_dprintf( 1, "OpenGL::sRGB Framebuffer unsupported\n" );
     }
+    if ( vsExtensionSupported( "GL_NV_fragment_program2" ) ) {
+        gl_options.nv_fp2 = true;
+        VSFileSystem::vs_dprintf( 3, "OpenGL::NV_fragment_program2 supported\n" );
+    } else {
+        gl_options.nv_fp2 = false;
+        VSFileSystem::vs_dprintf( 1, "OpenGL::NV_fragment_program2 unsupported\n" );
+    }
     if ( GFXDefaultShaderSupported() )
         if (gl_options.Multitexture < 16)
             gl_options.Multitexture = 16;

@@ -318,6 +318,7 @@ typedef struct
     bool ext_clamp_to_edge;
     bool ext_clamp_to_border;
     bool ext_srgb_framebuffer;
+    bool nv_fp2; // NV_fragment_program2 signals the presence of texture2DLod on plain 1.10 GLSL
     bool smooth_lines;
     bool smooth_points;
 } gl_options_t;
