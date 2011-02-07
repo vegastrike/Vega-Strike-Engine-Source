@@ -144,8 +144,16 @@ void AnimatedTexture::MakeActive( int stage, int pass )
                 //vidSource leaves frame data in its framebuffer, and our image data is initialized
                 //to point to that framebuffer, so all we need to do is transfer it to the GL.
                 if ( vidSource->seek( curtime ) ) {
+                    //Override compression options temporarily
+                    //NOTE: This is ugly, but otherwise we would have to hack Texture way too much,
+                    //or double the code. Let's use this then.
+                    int ocompression = gl_options.compression;
+                    gl_options.compression = 0;
+                    
                     VSFileSystem::vs_dprintf( 1, "Transferring video frame\n" );
                     Transfer( 65535, GFXFALSE );
+                    
+                    gl_options.compression = ocompression;
                 }
             }
             catch (::VidFile::EndOfStreamException e) {
