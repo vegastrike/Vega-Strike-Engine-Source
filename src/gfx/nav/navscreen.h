@@ -64,7 +64,7 @@ public:
         };
 
 private:
-        friend class SystemInfo;        //inner class needs to be friend in gcc-295
+        friend struct SystemInfo;        //inner class needs to be friend in gcc-295
         vector< SystemInfo >systems;
         unsigned currentPosition;
         CachedSystemIterator( const CachedSystemIterator &other );       //May be really slow. Don't try this at home.

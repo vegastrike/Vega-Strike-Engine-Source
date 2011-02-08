@@ -11,7 +11,7 @@
 namespace Radar
 {
 
-class ViewArea;
+struct ViewArea;
 
 class BubbleDisplay : public DualDisplayBase
 {

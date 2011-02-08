@@ -11,12 +11,12 @@
 #include "dual_display.h"
 
 class VSSprite;
-class GFXColor;
+struct GFXColor;  // Edit from class to struct as defined in gfxlib_struct.
 
 namespace Radar
 {
 
-class ViewArea;
+struct ViewArea;
 
 class PlaneDisplay : public DualDisplayBase
 {
