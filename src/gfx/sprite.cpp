@@ -45,8 +45,6 @@
 #include "audio/Types.h"
 #include "audio/Source.h"
 
-static float *mview = NULL;
-
 using namespace VSFileSystem;
 
 typedef vsUMap< std::string, VSSprite* >VSSpriteCache;
@@ -239,10 +237,6 @@ void VSSprite::Draw()
         size_t numlayers = surface->numLayers();
         bool  multitex  = (numlayers > 1);
         int   numpasses = surface->numPasses();
-        float ms = surface->mintcoord.i, Ms = surface->maxtcoord.i;
-        float mt = surface->mintcoord.j, Mt = surface->maxtcoord.j;
-        ms = (Ms-ms)*maxs+ms;
-        mt = (Mt-mt)*maxt+mt;
         GFXDisable( CULLFACE );
         Vector    ll, lr, ur, ul;
         DrawHere( ll, lr, ur, ul );
@@ -255,6 +249,14 @@ void VSSprite::Draw()
         for (int pass = 0; pass < numpasses; pass++) {
             if ( surface->SetupPass( pass, 0, src, dst ) ) {
                 surface->MakeActive( 0, pass );
+                
+                // Keep below MakeActive, AnimatedTexture only sets 
+                // the final effective coordinates there.
+                float ms = surface->mintcoord.i, Ms = surface->maxtcoord.i;
+                float mt = surface->mintcoord.j, Mt = surface->maxtcoord.j;
+                ms = (Ms-ms)*maxs+ms;
+                mt = (Mt-mt)*maxt+mt;
+                
                 GFXTextureEnv( 0, GFXMODULATETEXTURE );
                 GFXBegin( GFXQUAD );
                 if (!multitex)
