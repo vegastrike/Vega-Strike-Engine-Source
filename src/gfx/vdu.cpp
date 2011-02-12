@@ -1955,6 +1955,7 @@ void UpdateViewstyle( VIEWSTYLE &vs )
         vs = CP_PANTARGET;
         break;
     case CP_VIEWTARGET: //FIXME cases not previously handled in switch --added by chuck_starchaser; please verify correctness
+    case CP_PANINSIDE:
     case CP_FIXED:
     case CP_FIXEDPOS:
     case CP_FIXEDPOSTARGET:

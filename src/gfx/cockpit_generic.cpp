@@ -849,3 +849,13 @@ Cockpit::~Cockpit()
         delete savegame;
 }
 
+void Cockpit::SetInsidePanYawSpeed( float )
+{
+    // No-op in generic cockpits
+}
+
+void Cockpit::SetInsidePanPitchSpeed( float )
+{
+    // No-op in generic cockpits
+}
+

@@ -1591,6 +1591,10 @@ void GameCockpit::InitStatic()
 /***** WARNING CHANGED ORDER *****/
 GameCockpit::GameCockpit( const char *file, Unit *parent, const std::string &pilot_name )
     : Cockpit( file, parent, pilot_name )
+    , insidePanYaw( 0 )
+    , insidePanPitch( 0 )
+    , insidePanYawSpeed( 0 )
+    , insidePanPitchSpeed( 0 )
     , shake_time( 0 )
     , shake_type( 0 )
     , radarDisplay(0)
@@ -1723,17 +1727,18 @@ bool GameCockpit::DrawNavSystem()
 {
     bool ret = ThisNav.CheckDraw();
     if (ret) {
+        Camera *cam = AccessCamera(currentcamera);
         float c_o   = cockpit_offset;
-        float o_fov = cam[currentcamera].GetFov();
+        float o_fov = cam->GetFov();
         static float standard_fov = XMLSupport::parse_float( vs_config->getVariable( "graphics", "base_fov", "90" ) );
-        cam[currentcamera].SetFov( standard_fov );
-        cam[currentcamera].setCockpitOffset( 0 );
-        cam[currentcamera].UpdateGFX( GFXFALSE, GFXFALSE, GFXTRUE );
+        cam->SetFov( standard_fov );
+        cam->setCockpitOffset( 0 );
+        cam->UpdateGFX( GFXFALSE, GFXFALSE, GFXTRUE );
         ThisNav.Draw();
         cockpit_offset = c_o;
-        cam[currentcamera].SetFov( o_fov );
-        cam[currentcamera].setCockpitOffset( c_o );
-        cam[currentcamera].UpdateGFX( GFXFALSE, GFXFALSE, GFXTRUE );
+        cam->SetFov( o_fov );
+        cam->setCockpitOffset( c_o );
+        cam->UpdateGFX( GFXFALSE, GFXFALSE, GFXTRUE );
     }
     return ret;
 }
@@ -2297,7 +2302,7 @@ void GameCockpit::Draw()
         parse_bool( vs_config->getVariable( "graphics", "hud", "crosshairs_on_padlock", "false" ) );
     if ( (view == CP_FRONT)
         || (view == CP_CHASE && crosshairs_on_chasecam)
-        || (view == CP_VIEWTARGET && crosshairs_on_padlock) ) {
+        || ((view == CP_VIEWTARGET || view == CP_PANINSIDE) && crosshairs_on_padlock) ) {
         if (Panel.size() > 0 && Panel.front() && screenshotkey == false) {
             static bool drawCrosshairs =
                 parse_bool( vs_config->getVariable( "graphics", "hud", "draw_rendered_crosshairs",
@@ -2355,7 +2360,7 @@ void GameCockpit::Draw()
             Pit[view]->Draw();
     } else if ( (view == CP_CHASE
                  && drawChasecp)
-               || (view == CP_PAN && drawPancp) || (view == CP_TARGET && drawTgtcp) || (view == CP_VIEWTARGET && drawPadcp) ) {
+               || (view == CP_PAN && drawPancp) || (view == CP_TARGET && drawTgtcp) || ((view == CP_VIEWTARGET || view == CP_PANINSIDE) && drawPadcp) ) {
         if (Pit[0])
             Pit[0]->Draw();
     }
@@ -2370,7 +2375,7 @@ void GameCockpit::Draw()
     if ( view == CP_FRONT
         || (view == CP_CHASE
             && drawChaseVDU)
-        || (view == CP_PAN && drawPanVDU) || (view == CP_TARGET && drawTgtVDU) || (view == CP_VIEWTARGET && drawPadVDU) ) {
+        || (view == CP_PAN && drawPanVDU) || (view == CP_TARGET && drawTgtVDU) || ((view == CP_VIEWTARGET || view == CP_PANINSIDE) && drawPadVDU) ) {
         for (unsigned int j = 1; j < Panel.size(); j++)
             if (Panel[j])
                 Panel[j]->Draw();
@@ -2389,7 +2394,7 @@ void GameCockpit::Draw()
                         || (view == CP_CHASE
                             && drawChaseVDU)
                         || (view == CP_PAN
-                            && drawPanVDU) || (view == CP_TARGET && drawTgtVDU) || (view == CP_VIEWTARGET && drawPadVDU) )                                                                //{ //only draw crosshairs for front view
+                            && drawPanVDU) || (view == CP_TARGET && drawTgtVDU) || ((view == CP_VIEWTARGET || view == CP_PANINSIDE) && drawPadVDU) )                                                                //{ //only draw crosshairs for front view
                         //if (!UnitUtil::isSignificant(target)&&!UnitUtil::isSun(target)||UnitUtil::isCapitalShip(target)) //{
                         DrawTargetGauges( target );
                 }
@@ -2400,7 +2405,7 @@ void GameCockpit::Draw()
         if ( view == CP_FRONT
             || (view == CP_CHASE
                 && drawChaseVDU)
-            || (view == CP_PAN && drawPanVDU) || (view == CP_TARGET && drawTgtVDU) || (view == CP_VIEWTARGET && drawPadVDU) ) {
+            || (view == CP_PAN && drawPanVDU) || (view == CP_TARGET && drawTgtVDU) || ((view == CP_VIEWTARGET || view == CP_PANINSIDE) && drawPadVDU) ) {
             //only draw crosshairs for front view
             DrawGauges( un );
             Radar::Sensor sensor(un);
@@ -2974,32 +2979,31 @@ void GameCockpit::SetupViewPort( bool clip )
         un->UpdateHudMatrix( CP_RIGHT );
         un->UpdateHudMatrix( CP_BACK );
         un->UpdateHudMatrix( CP_CHASE );
-
-        Vector p, q, r;
+        un->UpdateHudMatrix( CP_PANINSIDE );
+        
+        insidePanYaw += insidePanYawSpeed * GetElapsedTime();
+        insidePanPitch += insidePanPitchSpeed * GetElapsedTime();
+        
+        Vector p, q, r, tmp;
         _Universe->AccessCamera( CP_FRONT )->GetOrientation( p, q, r );
-        Vector tmp = r;
-        r   = -p;
-        p   = tmp;
-        _Universe->AccessCamera( CP_LEFT )->SetOrientation( p, q, r );
-        _Universe->AccessCamera( CP_FRONT )->GetOrientation( p, q, r );
-        tmp = r;
-        r   = p;
-        p   = -tmp;
-        _Universe->AccessCamera( CP_RIGHT )->SetOrientation( p, q, r );
-        _Universe->AccessCamera( CP_FRONT )->GetOrientation( p, q, r );
-        r   = -r;
-        p   = -p;
-        _Universe->AccessCamera( CP_BACK )->SetOrientation( p, q, r );
+        _Universe->AccessCamera( CP_LEFT )->SetOrientation( r, q, -p );
+        _Universe->AccessCamera( CP_RIGHT )->SetOrientation( -r, q, p );
+        _Universe->AccessCamera( CP_BACK )->SetOrientation( -p, q, -r );
 #ifdef IWANTTOPVIEW
-        _Universe->AccessCamera( CP_FRONT )->GetOrientation( p, q, r );
-        tmp = r;
-        r   = -q;
-        q   = tmp;
-        _Universe->AccessCamera( CP_CHASE )->SetOrientation( p, q, r );
+        _Universe->AccessCamera( CP_CHASE )->SetOrientation( p, r, -q );
 #endif
+
+        Matrix pitchMatrix, yawMatrix, panMatrix;
+        RotateAxisAngle(pitchMatrix, Vector( 1, 0, 0 ), insidePanPitch);
+        RotateAxisAngle(yawMatrix, Transform(pitchMatrix, Vector( 0, 1, 0 )), insidePanYaw);
+        panMatrix = yawMatrix * pitchMatrix;
+        _Universe->AccessCamera( CP_PANINSIDE )->SetOrientation(
+            Transform(panMatrix, p),
+            Transform(panMatrix, q),
+            Transform(panMatrix, r) );
+        
         tgt = un->Target();
         if (tgt) {
-            Vector p, q, r, tmp;
             un->GetOrientation( p, q, r );
             r = ( tgt->Position()-un->Position() ).Cast();
             r.Normalize();
@@ -3328,3 +3332,14 @@ void GameCockpit::OnJumpEnd(Unit *ship)
         radarDisplay->OnJumpEnd();
     }
 }
+
+void GameCockpit::SetInsidePanYawSpeed( float speed )
+{
+    insidePanYawSpeed = speed;
+}
+
+void GameCockpit::SetInsidePanPitchSpeed( float speed )
+{
+    insidePanPitchSpeed = speed;
+}
+

@@ -8,7 +8,7 @@
 using namespace XMLSupport;
 enum VIEWSTYLE
 {
-    CP_FRONT, CP_BACK, CP_LEFT, CP_RIGHT, CP_VIEWTARGET, CP_CHASE, CP_PAN, CP_PANTARGET, CP_TARGET, CP_FIXED,
+    CP_FRONT, CP_BACK, CP_LEFT, CP_RIGHT, CP_VIEWTARGET, CP_PANINSIDE, CP_CHASE, CP_PAN, CP_PANTARGET, CP_TARGET, CP_FIXED,
     CP_FIXEDPOS, CP_FIXEDPOSTARGET, CP_NUMVIEWS
 };
 #ifdef NETCOMM_WEBCAM
@@ -183,6 +183,8 @@ public:
     virtual void SelectProperCamera() {}
     virtual void Eject();
     virtual void EjectDock();
+    virtual void SetInsidePanYawSpeed( float speed );
+    virtual void SetInsidePanPitchSpeed( float speed );
     static void Respawn( const KBData&, KBSTATE ) {}
     static void SwitchControl( const KBData&, KBSTATE ) {}
     static void ForceSwitchControl( const KBData&, KBSTATE ) {}

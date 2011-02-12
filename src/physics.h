@@ -72,6 +72,14 @@ public: PhysicsSystem( float M, float I, QVector *pos, Vector *p, Vector *q, Vec
     {
         AngularVelocity = w;
     }
+    const Vector& GetVelocity() const
+    {
+        return Velocity;
+    }
+    const Vector& GetAngularVelocity() const
+    {
+        return AngularVelocity;
+    }
 
     virtual void Update();
 };

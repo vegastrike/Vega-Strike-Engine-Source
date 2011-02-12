@@ -298,11 +298,11 @@ void SkipMusicTrack( const KBData&, KBSTATE newState )
     }
 }
 
-void PitchDown( const KBData&, KBSTATE newState )
+static void _PitchDown( KBSTATE newState, int fromCam = 0, int toCam = NUM_CAM-1 )
 {
     static Vector Q;
     static Vector R;
-    for (int i = 0; i < NUM_CAM; i++) {
+    for (int i = fromCam; i <= toCam; i++) {
         if (newState == PRESS) {
             if (QuitAllow)
                 QuitNow();
@@ -319,11 +319,11 @@ void PitchDown( const KBData&, KBSTATE newState )
     }
 }
 
-void PitchUp( const KBData&, KBSTATE newState )
+static void _PitchUp( KBSTATE newState, int fromCam = 0, int toCam = NUM_CAM-1 )
 {
     static Vector Q;
     static Vector R;
-    for (int i = 0; i < NUM_CAM; i++) {
+    for (int i = fromCam; i <= toCam; i++) {
         if (newState == PRESS) {
             Q = _Universe->AccessCockpit()->AccessCamera( i )->Q;
             R = _Universe->AccessCockpit()->AccessCamera( i )->R;
@@ -336,11 +336,11 @@ void PitchUp( const KBData&, KBSTATE newState )
     }
 }
 
-void YawLeft( const KBData&, KBSTATE newState )
+static void _YawLeft( KBSTATE newState, int fromCam = 0, int toCam = NUM_CAM-1 )
 {
     static Vector P;
     static Vector R;
-    for (int i = 0; i < NUM_CAM; i++) {
+    for (int i = fromCam; i <= toCam; i++) {
         if (newState == PRESS) {
             P = _Universe->AccessCockpit()->AccessCamera( i )->P;
             R = _Universe->AccessCockpit()->AccessCamera( i )->R;
@@ -353,9 +353,9 @@ void YawLeft( const KBData&, KBSTATE newState )
     }
 }
 
-void YawRight( const KBData&, KBSTATE newState )
+static void _YawRight( KBSTATE newState, int fromCam = 0, int toCam = NUM_CAM-1 )
 {
-    for (int i = 0; i < NUM_CAM; i++) {
+    for (int i = fromCam; i <= toCam; i++) {
         static Vector P;
         static Vector R;
         if (newState == PRESS) {
@@ -369,6 +369,110 @@ void YawRight( const KBData&, KBSTATE newState )
             _Universe->AccessCockpit()->AccessCamera( i )->myPhysics.SetAngularVelocity( Vector( 0, 0, 0 ) );
     }
 }
+
+void PitchDown( const KBData&, KBSTATE newState )
+{
+    _PitchDown(newState);
+}
+
+void PitchUp( const KBData&, KBSTATE newState )
+{
+    _PitchUp(newState);
+}
+
+void YawLeft( const KBData&, KBSTATE newState )
+{
+    _YawLeft(newState);
+}
+
+void YawRight( const KBData&, KBSTATE newState )
+{
+    _YawRight(newState);
+}
+
+static void InitPanInside()
+{
+    YawLeft( std::string(), RELEASE );
+    YawRight( std::string(), RELEASE );
+    PitchUp( std::string(), RELEASE );
+    PitchDown( std::string(), RELEASE );
+    _Universe->AccessCockpit()->SetView( CP_PANINSIDE );
+}
+
+void LookDown( const KBData& kbdata, KBSTATE newState )
+{
+    if (newState == PRESS && QuitAllow)
+        QuitNow();
+    if (newState == PRESS || newState == DOWN) {
+        if (_Universe->AccessCockpit()->GetView() <= CP_RIGHT) {
+            InitPanInside();
+        } else if (_Universe->AccessCockpit()->GetView() == CP_PANINSIDE) {
+            _Universe->AccessCockpit()->SetInsidePanPitchSpeed(game_options.camera_pan_speed*1000.0);
+        } else {
+            PitchDown( kbdata, newState );
+        }
+    } else if (newState == RELEASE) {
+        if (_Universe->AccessCockpit()->GetView() == CP_PANINSIDE)
+            _Universe->AccessCockpit()->SetInsidePanPitchSpeed(0);
+        else
+            PitchDown( kbdata, newState );
+    }
+}
+
+void LookUp( const KBData& kbdata, KBSTATE newState )
+{
+    if (newState == PRESS || newState == DOWN) {
+        if (_Universe->AccessCockpit()->GetView() <= CP_RIGHT) {
+            InitPanInside();
+        } else if (_Universe->AccessCockpit()->GetView() == CP_PANINSIDE) {
+            _Universe->AccessCockpit()->SetInsidePanPitchSpeed(-game_options.camera_pan_speed*1000.0);
+        } else {
+            PitchUp( kbdata, newState );
+        }
+    } else if (newState == RELEASE) {
+        if (_Universe->AccessCockpit()->GetView() == CP_PANINSIDE)
+            _Universe->AccessCockpit()->SetInsidePanPitchSpeed(0);
+        else
+            PitchUp( kbdata, newState );
+    }
+}
+
+void LookLeft( const KBData& kbdata, KBSTATE newState )
+{
+    if (newState == PRESS || newState == DOWN) {
+        if (_Universe->AccessCockpit()->GetView() <= CP_RIGHT) {
+            InitPanInside();
+        } else if (_Universe->AccessCockpit()->GetView() == CP_PANINSIDE) {
+            _Universe->AccessCockpit()->SetInsidePanYawSpeed(game_options.camera_pan_speed*1000.0);
+        } else {
+            YawLeft( kbdata, newState );
+        }
+    } else if (newState == RELEASE) {
+        if (_Universe->AccessCockpit()->GetView() == CP_PANINSIDE)
+            _Universe->AccessCockpit()->SetInsidePanYawSpeed(0);
+        else
+            YawLeft( kbdata, newState );
+    }
+}
+
+void LookRight( const KBData& kbdata, KBSTATE newState )
+{
+    if (newState == PRESS || newState == DOWN) {
+        if (_Universe->AccessCockpit()->GetView() <= CP_RIGHT) {
+            InitPanInside();
+        } else if (_Universe->AccessCockpit()->GetView() == CP_PANINSIDE) {
+            _Universe->AccessCockpit()->SetInsidePanYawSpeed(-game_options.camera_pan_speed*1000.0);
+        } else {
+            YawRight( kbdata, newState );
+        }
+    } else if (newState == RELEASE) {
+        if (_Universe->AccessCockpit()->GetView() == CP_PANINSIDE)
+            _Universe->AccessCockpit()->SetInsidePanYawSpeed(0);
+        else
+            YawRight( kbdata, newState );
+    }
+}
+
 
 void Quit( const KBData&, KBSTATE newState )
 {
@@ -388,7 +492,7 @@ void Quit( const KBData&, KBSTATE newState )
         QuitAllow = !QuitAllow;
     }
 }
-bool cockpitfront = true;
+
 void Inside( const KBData&, KBSTATE newState )
 {
     {
@@ -414,7 +518,6 @@ void Inside( const KBData&, KBSTATE newState )
         tmp = (tmp+1)%2;
     }
     if (newState == PRESS || newState == DOWN) {
-        cockpitfront = true;
         _Universe->AccessCockpit()->SetView( CP_FRONT );
     }
 }
@@ -478,6 +581,12 @@ void ZoomIn( const KBData&, KBSTATE newState )
         _Universe->AccessCockpit()->zoomfactor -= GetElapsedTime()/getTimeCompression();
 }
 
+void ZoomReset( const KBData&, KBSTATE newState )
+{
+    if (newState == PRESS || newState == DOWN)
+        _Universe->AccessCockpit()->zoomfactor = 1.f;
+}
+
 void InsideLeft( const KBData&, KBSTATE newState )
 {
     if (newState == PRESS || newState == DOWN) {
@@ -486,21 +595,18 @@ void InsideLeft( const KBData&, KBSTATE newState )
         PitchUp( std::string(), RELEASE );
         PitchDown( std::string(), RELEASE );
 
-        cockpitfront = false;
         _Universe->AccessCockpit()->SetView( CP_LEFT );
     }
 }
 void InsideRight( const KBData&, KBSTATE newState )
 {
     if (newState == PRESS || newState == DOWN) {
-        cockpitfront = false;
         _Universe->AccessCockpit()->SetView( CP_RIGHT );
     }
 }
 void PanTarget( const KBData&, KBSTATE newState )
 {
     if (newState == PRESS || newState == DOWN) {
-        cockpitfront = false;
         _Universe->AccessCockpit()->SetView( CP_PANTARGET );
     }
 }
@@ -512,7 +618,6 @@ void ViewTarget( const KBData&, KBSTATE newState )
         PitchUp( std::string(), RELEASE );
         PitchDown( std::string(), RELEASE );
 
-        cockpitfront = false;
         _Universe->AccessCockpit()->SetView( CP_VIEWTARGET );
     }
 }
@@ -524,7 +629,6 @@ void OutsideTarget( const KBData&, KBSTATE newState )
         PitchUp( std::string(), RELEASE );
         PitchDown( std::string(), RELEASE );
 
-        cockpitfront = false;
         _Universe->AccessCockpit()->SetView( CP_TARGET );
     }
 }
@@ -537,7 +641,6 @@ void InsideBack( const KBData&, KBSTATE newState )
         PitchUp( std::string(), RELEASE );
         PitchDown( std::string(), RELEASE );
 
-        cockpitfront = false;
         _Universe->AccessCockpit()->SetView( CP_BACK );
     }
 }
@@ -674,7 +777,6 @@ void Behind( const KBData&, KBSTATE newState )
         PitchUp( std::string(), RELEASE );
         PitchDown( std::string(), RELEASE );
 
-        cockpitfront = false;
         _Universe->AccessCockpit()->SetView( CP_CHASE );
     }
 }
@@ -686,7 +788,6 @@ void Pan( const KBData&, KBSTATE newState )
         PitchUp( std::string(), RELEASE );
         PitchDown( std::string(), RELEASE );
 
-        cockpitfront = false;
         _Universe->AccessCockpit()->SetView( CP_PAN );
     }
 }
