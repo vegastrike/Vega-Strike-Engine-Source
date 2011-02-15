@@ -114,7 +114,7 @@ class GameCockpit : public Cockpit
     /// Used to display the arrow pointing to the currently selected target.
     float  projection_limit_x, projection_limit_y;
     float  inv_screen_aspect_ratio; //Precomputed division 1 / g_game.aspect.
-
+    virtual void SetParent( Unit *unit, const char *filename, const char *unitmodname, const QVector &startloc );
     void LoadXML( const char *file );
     void LoadXML( VSFileSystem::VSFile &f );
     void beginElement( const string &name, const AttributeList &attributes );
@@ -142,6 +142,7 @@ class GameCockpit : public Cockpit
     //Draw the arrow pointing to the target.
     void DrawArrowToTarget(const Radar::Sensor&, Unit*);
     void DrawArrowToTarget(const Radar::Sensor&, Vector LocalCoordinates);
+    void updateRadar(Unit * un);
 public:
     std::string textMessage;
     bool editingTextMessage;

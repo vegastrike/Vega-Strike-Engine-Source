@@ -1666,6 +1666,7 @@ GameCockpit::GameCockpit( const char *file, Unit *parent, const std::string &pil
         vs_config->getColor( "planet", &planet.r );
     }
     InitStatic();
+    updateRadar(parent);
 }
 
 void GameCockpit::SelectProperCamera()
@@ -3295,9 +3296,8 @@ void GameCockpit::OnPauseEnd()
     radarDisplay->OnPauseEnd();
 }
 
-void GameCockpit::OnDockEnd(Unit *station, Unit *ship)
-{
-    if (_Universe->isPlayerStarship(ship))
+void GameCockpit::updateRadar(Unit*ship) {
+    if (ship)
     {
         // We may have bought a new radar brand while docked, so the actual
         // radar display is instantiated when we undock.
@@ -3318,6 +3318,16 @@ void GameCockpit::OnDockEnd(Unit *station, Unit *ship)
         // Send notification that I have undocked
         radarDisplay->OnDockEnd();
     }
+
+}
+void GameCockpit::SetParent( Unit *unit, const char *filename, const char *unitmodname, const QVector &startloc ){
+    this->Cockpit::SetParent(unit,filename,unitmodname,startloc);
+    updateRadar(unit);    
+}
+void GameCockpit::OnDockEnd(Unit *station, Unit *ship)
+{
+    if (_Universe->isPlayerStarship(ship))
+        updateRadar(ship);
 }
 
 void GameCockpit::OnJumpBegin(Unit *ship)

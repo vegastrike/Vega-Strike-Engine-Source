@@ -121,8 +121,8 @@ class CollectRadarTracks
 public:
     CollectRadarTracks()
         : sensor(NULL),
-          collection(NULL),
-          player(NULL)
+          player(NULL),
+          collection(NULL)
     {}
 
     void init(const Sensor *sensor, Sensor::TrackCollection *collection, Unit *player)
