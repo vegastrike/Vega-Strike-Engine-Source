@@ -753,7 +753,8 @@ void GameCockpit::DoAutoLanding(Unit *un, Unit *target)
         if ( !excludes.empty() ) {
             std::string::size_type pos = 0, epos = 0;
             while (epos != std::string::npos) {
-                autoLandingExcludeList.insert( excludes.substr( pos, epos = excludes.find( ' ', pos ) ) );
+                std::string xx (excludes.substr( pos, epos = excludes.find( ' ', pos ) ));
+                autoLandingExcludeList.insert( xx );
                 pos = epos+1;
             }
         }
@@ -761,12 +762,14 @@ void GameCockpit::DoAutoLanding(Unit *un, Unit *target)
         if ( !excludes.empty() ) {
             std::string::size_type pos = 0, epos = 0;
             while (epos != std::string::npos) {
-                autoLandingExcludeWarningList.insert( excludes.substr( pos, epos = excludes.find( ' ', pos ) ) );
+                std::string yy(excludes.substr( pos, epos = excludes.find( ' ', pos ) ));
+                autoLandingExcludeWarningList.insert( yy );
                 pos = epos+1;
             }
         }
     }
-    if (autoLandingExcludeList.find(target->name) == autoLandingExcludeList.end())
+    std::string tname=target->name;
+    if (autoLandingExcludeList.find(tname) != autoLandingExcludeList.end())
         return;
     static float lessthan   = XMLSupport::parse_float( vs_config->getVariable( "physics", "AutoLandingDockDistance", "50" ) );
     static float warnless   = XMLSupport::parse_float( vs_config->getVariable( "physics", "AutoLandingWarningDistance", "350" ) );
