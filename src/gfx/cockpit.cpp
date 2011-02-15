@@ -889,7 +889,7 @@ void GameCockpit::DrawRadar(const Radar::Sensor& sensor)
     static bool allGravUnits =
         XMLSupport::parse_bool(vs_config->getVariable("graphics", "hud", "draw_gravitational_objects", "true"));
 
-    if (radarSprites)
+    if (radarSprites[0] || radarSprites[1])
     {
         GFXDisable(TEXTURE0);
         GFXDisable(LIGHTING);

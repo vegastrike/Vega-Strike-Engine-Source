@@ -21,6 +21,8 @@ struct ViewArea
 
     GFXColor GetColor() const;
 
+    bool IsActive() const;
+
     VSSprite *sprite;
     Vector position;
     Vector size;

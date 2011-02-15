@@ -94,17 +94,21 @@ void BubbleDisplay::Animate()
     }
 }
 
-void BubbleDisplay::Draw(const Sensor& sensor, VSSprite *front, VSSprite *rear)
+void BubbleDisplay::Draw(const Sensor& sensor,
+                         VSSprite *frontSprite,
+                         VSSprite *rearSprite)
 {
+    assert(frontSprite || rearSprite); // There should be at least one radar display
+
     radarTime += GetElapsedTime();
-	if (front)
-	    SetViewArea(front, leftRadar);
-	if (rear)
-	    SetViewArea(rear, rightRadar);
-	if (front)
-	    front->Draw();
-	if (rear)
-        rear->Draw();
+
+    leftRadar.SetSprite(frontSprite);
+    rightRadar.SetSprite(rearSprite);
+
+    if (frontSprite)
+        frontSprite->Draw();
+    if (rearSprite)
+        rearSprite->Draw();
 
     Sensor::TrackCollection tracks = sensor.FindTracksInRange();
 
@@ -116,22 +120,20 @@ void BubbleDisplay::Draw(const Sensor& sensor, VSSprite *front, VSSprite *rear)
 
     for (Sensor::TrackCollection::const_iterator it = tracks.begin(); it != tracks.end(); ++it)
     {
-        if (it->GetPosition().z < 0&&rear)
+        if (it->GetPosition().z < 0)
         {
             // Draw tracks behind the ship
             DrawTrack(sensor, rightRadar, *it);
         }
         else
         {
-			if (front)
             // Draw tracks in front of the ship
-	            DrawTrack(sensor, leftRadar, *it);
+            DrawTrack(sensor, leftRadar, *it);
         }
     }
-	if (front)
-	    DrawBackground(leftRadar, currentTargetMarkerSize);
-	if (rear)
-	    DrawBackground(rightRadar, currentTargetMarkerSize);
+
+    DrawBackground(leftRadar, currentTargetMarkerSize);
+    DrawBackground(rightRadar, currentTargetMarkerSize);
 
     GFXPointSize(1);
     GFXDisable(DEPTHTEST);
@@ -143,6 +145,9 @@ void BubbleDisplay::DrawTrack(const Sensor& sensor,
                               const ViewArea& radarView,
                               const Track& track)
 {
+    if (!radarView.IsActive())
+        return;
+
     GFXColor color = sensor.GetColor(track);
 
     Vector position = track.GetPosition();
@@ -234,6 +239,9 @@ void BubbleDisplay::DrawTargetMarker(const Vector& position, float trackSize)
 
 void BubbleDisplay::DrawBackground(const ViewArea& radarView, float trackSize)
 {
+    if (!radarView.IsActive())
+        return;
+
     GFXColor groundColor = radarView.GetColor();
 
     // Split octagon

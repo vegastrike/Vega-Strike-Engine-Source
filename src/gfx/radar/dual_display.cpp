@@ -24,13 +24,6 @@ void DualDisplayBase::OnPauseEnd()
     isPaused = false;
 }
 
-void DualDisplayBase::SetViewArea(VSSprite *sprite, ViewArea& view)
-{
-    assert(sprite);
-
-    view.SetSprite(sprite);
-}
-
 float DualDisplayBase::Jitter(float errorOffset, float errorRange)
 {
     if (!isPaused)

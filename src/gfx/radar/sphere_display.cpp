@@ -44,31 +44,34 @@ SphereDisplay::SphereDisplay()
 {
 }
 
-void SphereDisplay::Draw(const Sensor& sensor, VSSprite *front, VSSprite *rear)
+void SphereDisplay::Draw(const Sensor& sensor,
+                         VSSprite *frontSprite,
+                         VSSprite *rearSprite)
 {
+    assert(frontSprite || rearSprite); // There should be at least one radar display
+
     radarTime += GetElapsedTime();
-	if (front)
-	    SetViewArea(front, leftRadar);
-	if (rear)
-	    SetViewArea(rear, rightRadar);
-	if (front)
-	    front->Draw();
-	if (rear)
-	    rear->Draw();
+
+    leftRadar.SetSprite(frontSprite);
+    rightRadar.SetSprite(rearSprite);
+
+    if (frontSprite)
+        frontSprite->Draw();
+    if (rearSprite)
+        rearSprite->Draw();
 
     Sensor::TrackCollection tracks = sensor.FindTracksInRange();
 
     // FIXME: Consider using std::sort instead of the z-buffer
     GFXEnable(DEPTHTEST);
     GFXEnable(DEPTHWRITE);
-	if (front)
-	    DrawBackground(sensor, leftRadar);
-	if (rear)
-	    DrawBackground(sensor, rightRadar);
+
+    DrawBackground(sensor, leftRadar);
+    DrawBackground(sensor, rightRadar);
 
     for (Sensor::TrackCollection::const_iterator it = tracks.begin(); it != tracks.end(); ++it)
     {
-        if (it->GetPosition().z < 0 && rear)
+        if (it->GetPosition().z < 0)
         {
             // Draw tracks behind the ship
             DrawTrack(sensor, rightRadar, *it);
@@ -76,8 +79,7 @@ void SphereDisplay::Draw(const Sensor& sensor, VSSprite *front, VSSprite *rear)
         else
         {
             // Draw tracks in front of the ship
-			if (front)
-	            DrawTrack(sensor, leftRadar, *it);
+            DrawTrack(sensor, leftRadar, *it);
         }
     }
 
@@ -90,6 +92,9 @@ void SphereDisplay::DrawTrack(const Sensor& sensor,
                               const ViewArea& radarView,
                               const Track& track)
 {
+    if (!radarView.IsActive())
+        return;
+
     GFXColor color = sensor.GetColor(track);
 
     Vector position = track.GetPosition();
@@ -187,6 +192,9 @@ void SphereDisplay::DrawTargetMarker(const Vector& position, float trackSize)
 void SphereDisplay::DrawBackground(const Sensor& sensor, const ViewArea& radarView)
 {
     // Split crosshair
+
+    if (!radarView.IsActive())
+        return;
 
     GFXColor groundColor = radarView.GetColor();
 

@@ -26,7 +26,6 @@ public:
 protected:
     float Jitter(float errorOffset, float errorRange);
     void Jitter(float errorOffset, float errorRange, Vector& position);
-    void SetViewArea(VSSprite *, ViewArea&);
 
 protected:
     ViewArea leftRadar;

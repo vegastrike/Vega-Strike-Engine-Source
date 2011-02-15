@@ -144,15 +144,17 @@ void PlaneDisplay::Draw(const Sensor& sensor,
                         VSSprite *nearSprite,
                         VSSprite *distantSprite)
 {
+    assert(nearSprite || distantSprite); // There should be at least one radar display
+
     radarTime += GetElapsedTime();
-	if (nearSprite)
-	    SetViewArea(nearSprite, leftRadar);
-	if (distantSprite)
-	    SetViewArea(distantSprite, rightRadar);
-	if (nearSprite)
-	    nearSprite->Draw();
-	if (distantSprite)
-	    distantSprite->Draw();
+
+    leftRadar.SetSprite(nearSprite);
+    rightRadar.SetSprite(distantSprite);
+
+    if (nearSprite)
+        nearSprite->Draw();
+    if (distantSprite)
+        distantSprite->Draw();
 
     Sensor::TrackCollection tracks = sensor.FindTracksInRange();
 
@@ -161,10 +163,9 @@ void PlaneDisplay::Draw(const Sensor& sensor,
     GFXEnable(DEPTHTEST);
     GFXEnable(DEPTHWRITE);
     GFXEnable(SMOOTH);
-	if (nearSprite)
-	    DrawNear(sensor, tracks);
-	if (distantSprite)
-	    DrawDistant(sensor, tracks);
+
+    DrawNear(sensor, tracks);
+    DrawDistant(sensor, tracks);
 
     GFXPointSize(1);
     GFXDisable(DEPTHTEST);
@@ -270,6 +271,9 @@ void PlaneDisplay::DrawNear(const Sensor& sensor,
 {
     // Draw all near tracks (distance scaled)
 
+    if (!leftRadar.IsActive())
+        return;
+
     float maxRange = sensor.GetCloseRange();
 
     DrawGround(sensor, leftRadar);
@@ -287,6 +291,9 @@ void PlaneDisplay::DrawDistant(const Sensor& sensor,
                                const Sensor::TrackCollection& tracks)
 {
     // Draw all near tracks (distance scaled)
+
+    if (!rightRadar.IsActive())
+        return;
 
     float minRange = sensor.GetCloseRange();
     float maxRange = sensor.GetMaxRange();
