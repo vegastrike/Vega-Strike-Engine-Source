@@ -7,12 +7,6 @@
 #include "viewarea.h"
 #include "sphere_display.h"
 
-#ifndef WIN32
-#include <sys/time.h>
-#else
-#include <time.h>
-#endif
-
 namespace
 {
 
