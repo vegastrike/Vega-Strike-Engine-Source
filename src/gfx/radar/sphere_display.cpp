@@ -93,9 +93,14 @@ void SphereDisplay::DrawTrack(const Sensor& sensor,
     GFXColor color = sensor.GetColor(track);
 
     Vector position = track.GetPosition();
-    if (position.z < 0)
-        position.z = -position.z;
-
+    if (position.z < 0){
+        static bool  negate_z       =
+            XMLSupport::parse_bool( vs_config->getVariable( "graphics", "hud", "show_negative_blips_as_positive", "false" ));
+        if (negate_z)
+            position.z=-position.z;
+        else                                    
+            position.z = 0;
+    }
     const float trackSize = 2.0;
 
     // FIXME: Jitter only on boundary, not in center
@@ -131,7 +136,7 @@ void SphereDisplay::DrawTrack(const Sensor& sensor,
     Vector scaledPosition = Vector(-position.x, position.y, position.z) / magnitude;
 
     Vector head = radarView.Scale(scaledPosition);
-
+    
     GFXColor headColor = color;
     if (sensor.UseThreatAssessment())
     {
@@ -142,7 +147,6 @@ void SphereDisplay::DrawTrack(const Sensor& sensor,
             headColor.a *= cosf(dangerRate * radarTime);
         }
     }
-
     // Fade out dying ships
     if (track.IsExploding())
     {
