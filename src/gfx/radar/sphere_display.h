@@ -21,7 +21,7 @@ public:
 
 protected:
     void DrawBackground(const Sensor&, const ViewArea&);
-    void DrawTrack(const Sensor&, const ViewArea&, const Track&);
+    void DrawTrack(const Sensor&, const ViewArea&, const Track&, bool negate_z=false);
     void DrawTargetMarker(const Vector&, float);
 
 protected:

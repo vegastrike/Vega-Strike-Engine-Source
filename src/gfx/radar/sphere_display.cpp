@@ -65,12 +65,14 @@ void SphereDisplay::Draw(const Sensor& sensor,
 
     for (Sensor::TrackCollection::const_iterator it = tracks.begin(); it != tracks.end(); ++it)
     {
-        if (it->GetPosition().z < 0)
+        static bool  draw_both       =
+            XMLSupport::parse_bool( vs_config->getVariable( "graphics", "hud", "draw_blips_on_both_radar", "false" ));
+        if (it->GetPosition().z < 0 || draw_both)
         {
             // Draw tracks behind the ship
-            DrawTrack(sensor, rightRadar, *it);
+            DrawTrack(sensor, rightRadar, *it,true);
         }
-        else
+        if (it->GetPosition().z >= 0 || draw_both)
         {
             // Draw tracks in front of the ship
             DrawTrack(sensor, leftRadar, *it);
@@ -84,7 +86,8 @@ void SphereDisplay::Draw(const Sensor& sensor,
 
 void SphereDisplay::DrawTrack(const Sensor& sensor,
                               const ViewArea& radarView,
-                              const Track& track)
+                              const Track& track,
+                              bool negate_z)
 {
     if (!radarView.IsActive())
         return;
@@ -92,13 +95,14 @@ void SphereDisplay::DrawTrack(const Sensor& sensor,
     GFXColor color = sensor.GetColor(track);
 
     Vector position = track.GetPosition();
+    if (negate_z) position.z=-position.z;
     if (position.z < 0){
         static bool  negate_z       =
-            XMLSupport::parse_bool( vs_config->getVariable( "graphics", "hud", "show_negative_blips_as_positive", "false" ));
+            XMLSupport::parse_bool( vs_config->getVariable( "graphics", "hud", "show_negative_blips_as_positive", "true" ));
         if (negate_z)
             position.z=-position.z;
         else                                    
-            position.z = 0;
+            position.z = .125;
     }
     const float trackSize = 2.0;
 
