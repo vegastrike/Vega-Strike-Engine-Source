@@ -6076,7 +6076,7 @@ void Unit::FreeDockingPort( unsigned int i )
     if (pImage->dockedunits.size() == 1)
         docked &= (~DOCKING_UNITS);
     unsigned int whichdock = pImage->dockedunits[i]->whichdock;
-    pImage->dockingports[whichdock].used = false;
+    pImage->dockingports[whichdock].Occupy(false);
     pImage->dockedunits[i]->uc.SetUnit( NULL );
     delete pImage->dockedunits[i];
     pImage->dockedunits.erase( pImage->dockedunits.begin()+i );
@@ -6163,12 +6163,12 @@ int Unit::ForceDock( Unit *utdw, unsigned int whichdockport )
 {
     if (utdw->pImage->dockingports.size() <= whichdockport)
         return 0;
-    utdw->pImage->dockingports[whichdockport].used = true;
+    utdw->pImage->dockingports[whichdockport].Occupy(true);
 
     utdw->docked |= DOCKING_UNITS;
     utdw->pImage->dockedunits.push_back( new DockedUnits( this, whichdockport ) );
     //NETFIXME: Broken on server.
-    if ( (!Network) && (!SERVER) && utdw->pImage->dockingports[whichdockport].internal ) {
+    if ( (!Network) && (!SERVER) && utdw->pImage->dockingports[whichdockport].IsInside() ) {
         RemoveFromSystem();
         SetVisible( false );
         docked |= DOCKED_INSIDE;
@@ -6247,51 +6247,47 @@ int Unit::Dock( Unit *utdw )
 
 inline bool insideDock( const DockingPorts &dock, const QVector &pos, float radius )
 {
-    if (dock.used)
+    if (dock.IsOccupied())
         return false;
-    double rad = dock.radius+radius;
-    return (pos-dock.pos).MagnitudeSquared() < rad*rad;
-    if (dock.internal) {
-        if ( (pos.i+radius < dock.max.i)
-            && (pos.j+radius < dock.max.j)
-            && (pos.k+radius < dock.max.k)
-            && (pos.i-radius > dock.min.i)
-            && (pos.j-radius > dock.min.j)
-            && (pos.k-radius > dock.min.k) )
-            return true;
-    } else if ( (pos-dock.pos).Magnitude() < dock.radius+radius
-               && (pos.i-radius < dock.max.i)
-               && (pos.j-radius < dock.max.j)
-               && (pos.k-radius < dock.max.k)
-               && (pos.i+radius > dock.min.i)
-               && (pos.j+radius > dock.min.j)
-               && (pos.k+radius > dock.min.k) ) {
-        return true;
-    }
-    return false;
+    return IsShorterThan(pos - dock.GetPosition(), double(radius + dock.GetRadius()));
 }
 
 int Unit::CanDockWithMe( Unit *un, bool force )
 {
     //don't need to check relation: already cleared.
-    for (unsigned int i = 0; i < pImage->dockingports.size(); ++i) {
-        if ( un->pImage->dockingports.size() ) {
+
+    // If your unit has docking ports then we check if any of our docking
+    // ports overlap with any of the station's docking ports.
+    // Otherwise we simply check if our unit overlaps with any of the
+    // station's docking ports.
+    for (unsigned int i = 0; i < pImage->dockingports.size(); ++i)
+    {
+        if ( !un->pImage->dockingports.empty() )
+        {
             for (unsigned int j = 0; j < un->pImage->dockingports.size(); ++j)
+            {
                 if ( insideDock( pImage->dockingports[i],
-                                 InvTransform( cumulative_transformation_matrix,
-                                              Transform( un->cumulative_transformation_matrix,
-                                                        un->pImage->dockingports[j].pos.Cast() ) ),
-                                 un->pImage->dockingports[j].radius ) )
+                                 InvTransform( GetTransformation(),
+                                               Transform( un->GetTransformation(),
+                                                          un->pImage->dockingports[j].GetPosition().Cast() ) ),
+                                 un->pImage->dockingports[j].GetRadius() ) )
+                {
+                    // We cannot dock if we are already docked
                     if ( ( ( un->docked&(DOCKED_INSIDE|DOCKED) ) == 0 ) && ( !(docked&DOCKED_INSIDE) ) )
                         return i;
-        } else if ( insideDock( pImage->dockingports[i],
-                               InvTransform( cumulative_transformation_matrix, un->Position() ), un->rSize() ) ) {
+                }
+            }
+        }
+        else if ( insideDock( pImage->dockingports[i],
+                                InvTransform( GetTransformation(), un->Position() ),
+                                un->rSize() ) )
+        {
             return i;
         }
     }
     if (force) {
         for (unsigned int i = 0; i < pImage->dockingports.size(); ++i)
-            if (!pImage->dockingports[i].used)
+            if (!pImage->dockingports[i].IsOccupied())
                 return i;
     }
     return -1;
@@ -8463,7 +8459,7 @@ void Unit::EjectCargo( unsigned int index )
 
                     static float eject_cargo_offset =
                         XMLSupport::parse_float( vs_config->getVariable( "physics", "eject_distance", "20" ) );
-                    QVector loc( Transform( this->GetTransformation(), this->DockingPortLocations()[0].pos.Cast() ) );
+                    QVector loc( Transform( this->GetTransformation(), this->DockingPortLocations()[0].GetPosition().Cast() ) );
                     //index is always > -1 because it's unsigned.  Lets use the correct terms, -1 in Uint is UINT_MAX
                     loc += tmpvel*1.5*rSize()+randVector( -.5*rSize()+(index == UINT_MAX ? eject_cargo_offset/2 : 0),
                                                          .5*rSize()+(index == UINT_MAX ? eject_cargo_offset : 0) );

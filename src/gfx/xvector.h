@@ -235,6 +235,11 @@ inline XVector operator*( const int obj, const XVector &rval )
     return XVector( rval.i*obj, rval.j*obj, rval.k*obj );
 }
 
+inline bool IsShorterThan(const XVector& a, QFLOAT delta)
+{
+    return (a.MagnitudeSquared() < (delta * delta));
+}
+
 inline void ScaledCrossProduct( const XVector &a, const XVector &b, XVector &r )
 {
     r.i = a.j*b.k-a.k*b.j;

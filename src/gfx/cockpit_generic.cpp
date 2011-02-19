@@ -394,7 +394,7 @@ static float dockingdistance( Unit *port, Unit *un )
     QVector pos( InvTransform( port->cumulative_transformation_matrix, un->Position() ) );
     float   mag = FLT_MAX;
     for (; i != end; ++i) {
-        float tmag = (pos.Cast()-(*i).pos).Magnitude()-un->rSize()-(*i).radius;
+        float tmag = (pos.Cast()-(*i).GetPosition()).Magnitude()-un->rSize()-(*i).GetRadius();
         if (tmag < mag)
             mag = tmag;
     }

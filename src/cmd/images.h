@@ -11,38 +11,113 @@
 
 struct DockingPorts
 {
-    ///Center
-    Vector pos;
-    ///Radius from center
-    float  radius;
-    ///axis aligned bounding box min
-    Vector min;
-    ///bounding box max
-    Vector max;
-    bool   internal;
-    bool   used;
-    float  minsize;
-    DockingPorts() {}
-    DockingPorts( const Vector &pos, float radius, float minradius, bool internal )
+    struct Type
     {
-        this->pos = (pos);
-        this->radius   = (radius);
-        min = Vector( pos-Vector( radius, radius, radius ) );
-        max = Vector( pos+Vector( radius, radius, radius ) );
-        this->internal = (internal);
-        used = false;
-        this->minsize  = minradius;
-    }
-    DockingPorts( const Vector &min, const Vector &max, float minradius, bool internal ) : radius( (max-min).Magnitude()*.5 )
-    {
-        pos = ( (float) .5 )*(min+max);
+        enum Value
+        {
+            CATEGORY_CONNECTED = 10,
+            CATEGORY_WAYPOINT = 20,
 
-        this->min = (min);
-        this->max = (max);
-        this->internal = (internal);
-        this->used     = (false);
-        this->minsize  = minradius;
-    }
+            // Unconnected types corresponds to the old true/false values
+            OUTSIDE = 0,
+            INSIDE = 1,
+
+            CONNECTED_OUTSIDE = CATEGORY_CONNECTED + OUTSIDE,
+            CONNECTED_INSIDE = CATEGORY_CONNECTED + INSIDE,
+
+            WAYPOINT_OUTSIDE = CATEGORY_WAYPOINT + OUTSIDE,
+            WAYPOINT_INSIDE = CATEGORY_WAYPOINT + INSIDE,
+
+            DEFAULT = OUTSIDE
+        };
+
+        static bool IsConnected(const Value& type)
+        {
+            switch (type)
+            {
+            case OUTSIDE:
+            case INSIDE:
+                return false;
+            default:
+                return true;
+            }
+        }
+
+        static bool IsInside(const Value& type)
+        {
+            switch (type)
+            {
+            case INSIDE:
+            case CONNECTED_INSIDE:
+            case WAYPOINT_INSIDE:
+                return true;
+            default:
+                return false;
+            }
+        }
+
+        static bool IsWaypoint(const Value& type)
+        {
+            switch (type)
+            {
+            case WAYPOINT_OUTSIDE:
+            case WAYPOINT_INSIDE:
+                return true;
+            default:
+                return false;
+            }
+        }
+    };
+
+    DockingPorts()
+        : radius(0),
+          isInside(false),
+          isConnected(false),
+          isWaypoint(false),
+          isOccupied(false)
+    {}
+
+    DockingPorts(const Vector &center, float radius, float minradius, const Type::Value& type)
+        : center(center),
+          radius(radius),
+          isInside(Type::IsInside(type)),
+          isConnected(Type::IsConnected(type)),
+          isWaypoint(Type::IsWaypoint(type)),
+          isOccupied(isWaypoint) // Waypoints are always occupied
+    {}
+
+    DockingPorts(const Vector &min, const Vector &max, float minradius, const Type::Value& type)
+        : center((min + max) / 2.0f),
+          radius((max - min).Magnitude() / 2.0f),
+          isInside(Type::IsInside(type)),
+          isConnected(Type::IsConnected(type)),
+          isWaypoint(Type::IsWaypoint(type)),
+          isOccupied(isWaypoint) // Waypoints are always occupied
+    {}
+
+    float GetRadius() const { return radius; }
+
+    const Vector& GetPosition() const { return center; }
+
+    // Waypoints are always marked as occupied.
+    bool IsOccupied() const { return isOccupied; }
+    void Occupy(bool yes) { isOccupied = yes; }
+
+    // Does port have connecting waypoints?
+    bool IsConnected() const { return isConnected; }
+
+    // Port is located inside or outside the station
+    bool IsInside() const { return isInside; }
+
+    bool IsDockable() const { return !isWaypoint; }
+
+private:
+    Vector center;
+    float radius;
+    bool isInside;
+    bool isConnected;
+    bool isWaypoint;
+    bool isOccupied;
 };
 
 struct DockedUnits

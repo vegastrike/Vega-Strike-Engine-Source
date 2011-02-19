@@ -59,8 +59,8 @@ int SelectDockPort( Unit *utdw, Unit *parent )
     float dist = FLT_MAX;
     int   num  = -1;
     for (unsigned int i = 0; i < dp->size(); ++i)
-        if (!(*dp)[i].used) {
-            Vector rez   = Transform( utdw->GetTransformation(), (*dp)[i].pos );
+        if (!(*dp)[i].IsOccupied()) {
+            Vector rez   = Transform( utdw->GetTransformation(), (*dp)[i].GetPosition() );
             float  wdist = ( rez-parent->Position() ).MagnitudeSquared();
             if (wdist < dist) {
                 num  = i;

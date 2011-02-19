@@ -422,7 +422,7 @@ void AddDocks( Unit *thus, Unit::XML &xml, const string &docks )
             ofs = when+1;
 
             QVector pos = QVector( 0, 0, 0 );
-            bool    internal = nextElementBool( docks, elemstart, elemend );
+            int type = nextElementInt( docks, elemstart, elemend );
             pos.i = nextElementFloat( docks, elemstart, elemend );
             pos.j = nextElementFloat( docks, elemstart, elemend );
             pos.k = nextElementFloat( docks, elemstart, elemend );
@@ -430,7 +430,7 @@ void AddDocks( Unit *thus, Unit::XML &xml, const string &docks )
             double minsize = nextElementFloat( docks, elemstart, elemend );
             for (int i = 0; i < overlap; i++)
                 thus->pImage->dockingports.push_back( DockingPorts( pos.Cast()*xml.unitscale, size*xml.unitscale, minsize
-                                                                    *xml.unitscale, internal ) );
+                                                                    *xml.unitscale, DockingPorts::Type::Value(type) ) );
         } else {
             ofs = string::npos;
         }

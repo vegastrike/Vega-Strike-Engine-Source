@@ -411,19 +411,32 @@ inline void DrawDockingBoxes( Unit *un, Unit *target, const Vector &CamP, const 
             dockboxgo.b = .5;
         }
         const vector< DockingPorts >d = target->DockingPortLocations();
-        for (unsigned int i = 0; i < d.size(); i++) {
-            float rad = d[i].radius/sqrt( 2.0 );
+        for (unsigned int i = 0; i < d.size(); i++)
+        {
+            // FIXME: Do not draw waypoints
+            if (!d[i].IsDockable())
+            {
+                GFXColor4f(0, 1, 1, 0.3); // docking_box_waypoint = cyan
+                DrawOneTargetBox( Transform( target->GetTransformation(),
+                                             d[i].GetPosition().Cast() )
+                                  - _Universe->AccessCamera()->GetPosition(), d[i].GetRadius(), CamP, CamQ, CamR, 1,
+                                  true, true );
+                 continue;
+            }
+            float rad = d[i].GetRadius() / sqrt( 2.0 );
             GFXDisable( DEPTHTEST );
             GFXDisable( DEPTHWRITE );
             GFXColorf( dockboxstop );
             DrawOneTargetBox( Transform( target->GetTransformation(),
-                                        d[i].pos.Cast() )-_Universe->AccessCamera()->GetPosition(), rad, CamP, CamQ, CamR, 1,
+                                         d[i].GetPosition().Cast() )
+                              - _Universe->AccessCamera()->GetPosition(), rad, CamP, CamQ, CamR, 1,
                               true, true );
             GFXEnable( DEPTHTEST );
             GFXEnable( DEPTHWRITE );
             GFXColorf( dockboxgo );
             DrawOneTargetBox( Transform( target->GetTransformation(),
-                                        d[i].pos.Cast() )-_Universe->AccessCamera()->GetPosition(), rad, CamP, CamQ, CamR, 1,
+                                         d[i].GetPosition().Cast() )
+                              - _Universe->AccessCamera()->GetPosition(), rad, CamP, CamQ, CamR, 1,
                               true, true );
         }
         GFXDisable( DEPTHTEST );

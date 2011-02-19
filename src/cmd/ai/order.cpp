@@ -143,25 +143,6 @@ bool Order::AttachOrder( QVector targetv )
     return true;
 }
 
-void ExecuteFor::Execute()
-{
-    if (time == 0) {
-        //VSFileSystem::vs_fprintf (stderr,"begin execute for %f\n",maxtime);
-    }
-    if (child) {
-        child->SetParent( parent );
-        type = child->getType();
-    }
-    if (time > maxtime) {
-        done = true;
-        //VSFileSystem::vs_fprintf (stderr,"finishing execute for %f\n",maxtime);
-        return;
-    }
-    time += SIMULATION_ATOM;
-    if (child)
-        child->Execute();
-}
-
 Order* Order::findOrder( Order *ord )
 {
     if (ord == NULL) {
@@ -256,3 +237,69 @@ string Order::createFullOrderDescription( int level )
     return desc;
 }
 
+namespace Orders
+{
+
+void ExecuteFor::Execute()
+{
+    if (time == 0) {
+        //VSFileSystem::vs_fprintf (stderr,"begin execute for %f\n",maxtime);
+    }
+    if (child) {
+        child->SetParent( parent );
+        type = child->getType();
+    }
+    if (time > maxtime) {
+        done = true;
+        //VSFileSystem::vs_fprintf (stderr,"finishing execute for %f\n",maxtime);
+        return;
+    }
+    time += SIMULATION_ATOM;
+    if (child)
+        child->Execute();
+}
+
+Join::Join(Unit *parent, Order *first, Order *second)
+    : Order(first->getType() | second->getType(),
+            first->getSubType()),
+      first(first),
+      second(second)
+{
+    assert((first->getType() & second->getType()) == 0);
+    assert(first->getSubType() == second->getSubType());
+
+    SetParent(parent);
+    EnqueueOrder(first);
+    EnqueueOrder(second);
+}
+
+void Join::Execute()
+{
+    // Execute both sub-orders
+    Order::Execute();
+    // Wait for both sub-orders to have finished
+    if (first->Done() && second->Done())
+    {
+        done = true;
+    }
+}
+
+Sequence::Sequence(Unit *parent, Order *order, unsigned int excludeTypes)
+    : Order(order->getType() | excludeTypes,
+            order->getSubType()),
+      order(order)
+{
+    SetParent(parent);
+    EnqueueOrder(order);
+}
+
+void Sequence::Execute()
+{
+    Order::Execute();
+    if (order->Done())
+    {
+        done = true;
+    }
+}
+
+} // namespace Orders

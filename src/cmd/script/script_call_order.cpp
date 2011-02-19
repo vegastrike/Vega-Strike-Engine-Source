@@ -148,7 +148,7 @@ varInst* Mission::call_order( missionNode *node, int mode )
         float  fortime  = checkFloatExpr( time_node, mode );
         Order *my_order = NULL;
         if (mode == SCRIPT_RUN)
-            my_order = new ExecuteFor( enq_order, fortime );
+            my_order = new Orders::ExecuteFor( enq_order, fortime );
         viret = newVarInst( VI_TEMP );
         viret->type       = VAR_OBJECT;
         viret->objectname = "order";

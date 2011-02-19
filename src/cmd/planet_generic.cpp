@@ -264,9 +264,9 @@ Vector Planet::AddSpaceElevator( const std::string &name, const std::string &fac
         else
             ElevatorLoc.p.Set( -dir.i*mn.i, -dir.j*mn.j, -dir.k*mn.k );
         Unit *un = UnitFactory::createUnit( name.c_str(), true, FactionUtil::GetFactionIndex( faction ), "", NULL );
-        if (pImage->dockingports.back().pos.MagnitudeSquared() < 10)
+        if (pImage->dockingports.back().GetPosition().MagnitudeSquared() < 10)
             pImage->dockingports.clear();
-        pImage->dockingports.push_back( DockingPorts( ElevatorLoc.p, un->rSize()*1.5, 0, true ) );
+        pImage->dockingports.push_back( DockingPorts( ElevatorLoc.p, un->rSize()*1.5, 0, DockingPorts::Type::INSIDE ) );
         un->SetRecursiveOwner( this );
         un->SetOrientation( ElevatorLoc.getQ(), ElevatorLoc.getR() );
         un->SetPosition( ElevatorLoc.p );
@@ -459,7 +459,7 @@ void Planet::InitPlanet( QVector x,
     //static int neutralfaction=FactionUtil::GetFaction("neutral");
     //this->faction = neutralfaction;
     killed = false;
-    bool destempty = dest.empty();
+    bool notJumppoint = dest.empty();
     for (unsigned int i = 0; i < dest.size(); ++i)
         AddDestination( dest[i] );
     //name = "Planet - ";
@@ -472,24 +472,22 @@ void Planet::InitPlanet( QVector x,
     static float densityOfJumpPoint =
         XMLSupport::parse_float( vs_config->getVariable( "physics", "density_of_jump_point", "100000" ) );
     //static  float massofplanet = XMLSupport::parse_float(vs_config->getVariable("physics","mass_of_planet","10000000"));
-    hull = (4./3)*M_PI*radius*radius*radius*(destempty ? densityOfRock : densityOfJumpPoint);
-    this->Mass   = (4./3)*M_PI*radius*radius*radius*( destempty ? densityOfRock : (densityOfJumpPoint/100000) );
+    hull = (4./3)*M_PI*radius*radius*radius*(notJumppoint ? densityOfRock : densityOfJumpPoint);
+    this->Mass   = (4./3)*M_PI*radius*radius*radius*( notJumppoint ? densityOfRock : (densityOfJumpPoint/100000) );
     SetAI( new PlanetaryOrbit( this, vely, pos, x, y, orbitcent, parent ) );     //behavior
     terraintrans = NULL;
 
     colTrees     = NULL;
     SetAngularVelocity( rotvel );
-    static int   numdock = XMLSupport::parse_int( vs_config->getVariable( "physics", "num_planet_docking_port", "4" ) );
+    // The docking port is 20% bigger than the planet
     static float planetdockportsize    = XMLSupport::parse_float( vs_config->getVariable( "physics", "planet_port_size", "1.2" ) );
     static float planetdockportminsize =
         XMLSupport::parse_float( vs_config->getVariable( "physics", "planet_port_min_size", "300" ) );
-    if ( (!atmospheric) && destempty ) {
-        for (int pdp = 0; pdp < numdock; pdp++) {
-            float dock = radius*planetdockportsize;
-            if (dock-radius < planetdockportminsize)
-                dock = radius+planetdockportminsize;
-            pImage->dockingports.push_back( DockingPorts( Vector( 0, 0, 0 ), dock, 0, true ) );
-        }
+    if ( (!atmospheric) && notJumppoint ) {
+        float dock = radius*planetdockportsize;
+        if (dock-radius < planetdockportminsize)
+            dock = radius+planetdockportminsize;
+        pImage->dockingports.push_back( DockingPorts( Vector( 0, 0, 0 ), dock, 0, DockingPorts::Type::CONNECTED_OUTSIDE ) );
     }
     string tempname = unitname.empty() ? ::getCargoUnitName( filename.c_str() ) : unitname;
     setFullname( tempname );

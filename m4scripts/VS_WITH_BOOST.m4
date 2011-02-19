@@ -4,7 +4,7 @@ AC_DEFUN([VS_WITH_BOOST],
 #Choosing Version of Boost Python library to use
 #--------------------------------------------------------------------------
 AC_ARG_WITH(boost, AC_HELP_STRING([[--with-boost[=VERSION]]], 
-[Currently supported versions are 1.28,1.35, and system]))
+[Currently supported versions are 1.28, 1.35, 1.45, and system]))
 case "$with_boost" in
    "") with_boost=1.45 ;;
    "1.28" | "1.35" | "1.45" | "system") ;;
@@ -14,9 +14,6 @@ esac
 if (test "x${with_boost}" = "xsystem"); then 
 BOOST_CPPFLAGS='-I/usr/include -DBOOST_PYTHON_NO_PY_SIGNATURES '
 with_boost_ver=$with_boost
-
-
-
 AC_MSG_NOTICE([Using System Boost])
 else
 dnl the stuff between [ ] is treated as a string by autoconf

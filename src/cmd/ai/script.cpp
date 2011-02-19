@@ -747,7 +747,7 @@ void AIScript::endElement( const string &name )
         xml->unitlevel--;
         if ( !xml->executefor.empty() ) {
             if (xml->executefor.back() > 0) {
-                xml->orders[xml->orders.size()-1] = new ExecuteFor( xml->orders[xml->orders.size()-1], xml->executefor.back() );
+                xml->orders[xml->orders.size()-1] = new Orders::ExecuteFor( xml->orders[xml->orders.size()-1], xml->executefor.back() );
                 xml->executefor.pop_back();
             }
         }

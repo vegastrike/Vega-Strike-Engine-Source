@@ -85,21 +85,23 @@ public:
     enum ORDERTYPES {MOVEMENT=1, FACING=2, WEAPON=4, CLOAKING=8, ALLTYPES=(1|2|4|8)};
     enum SUBORDERTYPES {SLOCATION=1, STARGET=2, SSELF=4};
 ///The default constructor setting everything to NULL and no dependency on order
-    Order() : targetlocation( 0, 0, 0 )
+    Order()
+        : parent(NULL),
+          type(0),
+          subtype(0),
+          done(false),
+          targetlocation( 0, 0, 0 )
     {
-        parent  = NULL;
-        type    = 0;
-        subtype = 0, done = false;
-        actionstring = "";
         VSCONSTRUCT1( 'O' )
     }
 ///The constructor that specifies what order dependencies this order has
-    Order( int ttype, int subtype ) : targetlocation( 0, 0, 0 )
+    Order( int type, int subtype )
+        : parent(NULL),
+          type(type),
+          subtype(subtype),
+          done(false),
+          targetlocation( 0, 0, 0 )
     {
-        parent = NULL;
-        type   = ttype;
-        done   = false;
-        actionstring = "";
         VSCONSTRUCT1( 'O' )
     }
 ///The virutal function that unrefs all memory then calls Destruct () which takes care of unreffing this or calling delete on this
@@ -140,7 +142,7 @@ public:
     {
         parent = parent1;
     }
-    Unit * GetParent()
+    Unit * GetParent() const
     {
         return parent;
     }
@@ -200,6 +202,10 @@ public:
         return new Order;
     }
 };
+
+namespace Orders
+{
+
 ///Executes another order for a number of seconds
 class ExecuteFor : public Order
 {
@@ -226,6 +232,35 @@ public: ExecuteFor( Order *chld, float seconds ) : Order( chld->getType(), chld-
         Order::Destroy();
     }
 };
+
+// Execute two orders simultaneously and wait until both has finished.
+class Join : public Order
+{
+public:
+    Join(Unit *parent,
+         Order *firstOrder,
+         Order *secondOrder);
+    void Execute();
+
+private:
+    Order *first;
+    Order *second;
+};
+
+// Execute one order and prevent other orders with excludeTypes from executing at the same time.
+class Sequence : public Order
+{
+public:
+    Sequence(Unit *parent,
+             Order *order,
+             unsigned int excludeTypes);
+    void Execute();
+
+private:
+    Order *order;
+};
+
+} // namespace Orders
 
 #endif
 

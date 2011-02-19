@@ -508,24 +508,24 @@ void AggressiveLoopAround( Order *aisc, Unit *un )
 void RollLeft( Order *aisc, Unit *un )
 {
     if (un->aistate)
-        AddOrd( un->aistate, un, new ExecuteFor( new Orders::MatchRoll( un->GetComputerData().max_roll_right, false ), 1.0f ) );
+        AddOrd( un->aistate, un, new Orders::ExecuteFor( new Orders::MatchRoll( un->GetComputerData().max_roll_right, false ), 1.0f ) );
 }
 void RollRight( Order *aisc, Unit *un )
 {
     if (un->aistate)
-        AddOrd( un->aistate, un, new ExecuteFor( new Orders::MatchRoll( -un->GetComputerData().max_roll_left, false ), 1.0f ) );
+        AddOrd( un->aistate, un, new Orders::ExecuteFor( new Orders::MatchRoll( -un->GetComputerData().max_roll_left, false ), 1.0f ) );
 }
 void RollLeftHard( Order *aisc, Unit *un )
 {
     static float durvar = XMLSupport::parse_float( vs_config->getVariable( "AI", "roll_order_duration", "5.0" ) );
     if (un->aistate)
-        AddOrd( un->aistate, un, new ExecuteFor( new Orders::MatchRoll( un->GetComputerData().max_roll_right, false ), durvar ) );
+        AddOrd( un->aistate, un, new Orders::ExecuteFor( new Orders::MatchRoll( un->GetComputerData().max_roll_right, false ), durvar ) );
 }
 void RollRightHard( Order *aisc, Unit *un )
 {
     static float durvar = XMLSupport::parse_float( vs_config->getVariable( "AI", "roll_order_duration", "5.0" ) );
     if (un->aistate)
-        AddOrd( un->aistate, un, new ExecuteFor( new Orders::MatchRoll( -un->GetComputerData().max_roll_left, false ), durvar ) );
+        AddOrd( un->aistate, un, new Orders::ExecuteFor( new Orders::MatchRoll( -un->GetComputerData().max_roll_left, false ), durvar ) );
 }
 void LoopAroundFast( Order *aisc, Unit *un )
 {
@@ -683,7 +683,7 @@ void CoastToStop( Order *aisc, Unit *un )
     vec.j = vec.j*0.1;
     vec.k = vec.k*0.1;
 
-    Order *ord = new ExecuteFor( new Orders::MatchLinearVelocity( un->ClampVelocity( vec, false ), true, false, true ), 1 );
+    Order *ord = new Orders::ExecuteFor( new Orders::MatchLinearVelocity( un->ClampVelocity( vec, false ), true, false, true ), 1 );
     AddOrd( aisc, un, ord );
 }
 
@@ -692,7 +692,7 @@ void DoNothing( Order *aisc, Unit *un )
     Vector vec( 0, 0, 0 );
     vec = un->GetVelocity();
 
-    Order *ord = new ExecuteFor( new Orders::MatchLinearVelocity( vec, true, false, true ), 1 );
+    Order *ord = new Orders::ExecuteFor( new Orders::MatchLinearVelocity( vec, true, false, true ), 1 );
     AddOrd( aisc, un, ord );
 }
 
@@ -749,7 +749,7 @@ void AfterburnVeerAndTurnAway( Order *aisc, Unit *un )
         Vector relpos = tpos-un->Position().Cast();
         CrossProduct( relpos, Vector( 1, 0, 0 ), vec );
     }
-    Order *ord = new ExecuteFor( new Orders::MatchLinearVelocity( Vector( 0, 0, 0 ), true, ab, true ), .5 );
+    Order *ord = new Orders::ExecuteFor( new Orders::MatchLinearVelocity( Vector( 0, 0, 0 ), true, ab, true ), .5 );
 
     AddOrd( aisc, un, ord );
     ord = new Orders::MatchLinearVelocity( un->ClampVelocity( Vector( 0, 0, 100000 ), ab ), true, ab, true );
@@ -800,7 +800,7 @@ void AfterburnerSlide( Order *aisc, Unit *un )
     bool   afterburn = useAfterburner();
     Order *ord = new Orders::MatchLinearVelocity( un->ClampVelocity( perp.Cast(), afterburn ), false, afterburn, true );
     AddOrd( aisc, un, ord );
-    ord = new ExecuteFor( new Orders::ChangeHeading( perp+un->Position(), 3 ), 1.5 );
+    ord = new Orders::ExecuteFor( new Orders::ChangeHeading( perp+un->Position(), 3 ), 1.5 );
     AddOrd( aisc, un, ord );
     ord = ( new Orders::FaceTargetITTS( false, 3 ) );
     AddOrd( aisc, un, ord );
@@ -824,7 +824,7 @@ void SkilledABSlide( Order *aisc, Unit *un )
 
     Order *ord = new Orders::MatchLinearVelocity( un->ClampVelocity( Perp.Cast(), afterburn ), false, afterburn, true );
     AddOrd( aisc, un, ord );
-    ord = new ExecuteFor( new Orders::ChangeHeading( Perp+un->Position(), 3 ), .5 );
+    ord = new Orders::ExecuteFor( new Orders::ChangeHeading( Perp+un->Position(), 3 ), .5 );
     AddOrd( aisc, un, ord );
     ord = ( new Orders::FaceTargetITTS( false, 3 ) );
     AddOrd( aisc, un, ord );
@@ -901,11 +901,11 @@ void Takeoff( Order *aisc, Unit *un )
         AddOrd( aisc, un, ord );
         ord = new Orders::MatchAngularVelocity( Vector( 0, 0, 0 ), 1, false );
         AddOrd( aisc, un, ord );
-        ord = new ExecuteFor( new Orders::MatchVelocity( un->ClampVelocity( vec, true ), Vector( 0,
+        ord = new Orders::ExecuteFor( new Orders::MatchVelocity( un->ClampVelocity( vec, true ), Vector( 0,
                                                                                                  0,
                                                                                                  0 ), true, true, false ), 1.5f );
         AddOrd( aisc, un, ord );
-        ord = new ExecuteFor( new Orders::MatchAngularVelocity( Vector( 0, 0, 0 ), 1, false ), 1.5f );
+        ord = new Orders::ExecuteFor( new Orders::MatchAngularVelocity( Vector( 0, 0, 0 ), 1, false ), 1.5f );
         AddOrd( aisc, un, ord );
         ord = new Orders::MatchLinearVelocity( un->ClampVelocity( vec, false ), true, false, false );
         AddOrd( aisc, un, ord );
@@ -920,7 +920,7 @@ void Takeoff( Order *aisc, Unit *un )
         ord = ( new Orders::FaceTargetITTS( 0, 3 ) );
         AddOrd( aisc, un, ord );
     }
-//ord = new ExecuteFor(new Orders::FaceTargetITTS(0, 1), 1.0f);
+//ord = new Orders::ExecuteFor(new Orders::FaceTargetITTS(0, 1), 1.0f);
     ord = new Orders::MatchLinearVelocity( un->ClampVelocity( vec, false ), true, false, false );
     AddOrd( aisc, un, ord );
     ord = ( new Orders::FaceTargetITTS( 0, 3 ) );
@@ -946,13 +946,13 @@ void TakeoffEveryZig( Order *aisc, Unit *un )
     AddOrd( aisc, un, ord );
     ord = new Orders::MatchAngularVelocity( Vector( 0, 0, 0 ), 1, false );
     AddOrd( aisc, un, ord );
-    ord = new ExecuteFor( new Orders::MatchAngularVelocity( Vector( 0, 0, 0 ), 1, false ), 3.4f );
+    ord = new Orders::ExecuteFor( new Orders::MatchAngularVelocity( Vector( 0, 0, 0 ), 1, false ), 3.4f );
     AddOrd( aisc, un, ord );
-    ord = new ExecuteFor( new Orders::MatchVelocity( un->ClampVelocity( vec, true ), Vector( 0,
+    ord = new Orders::ExecuteFor( new Orders::MatchVelocity( un->ClampVelocity( vec, true ), Vector( 0,
                                                                                              0,
                                                                                              0 ), true, true, false ), 0.1f );
     AddOrd( aisc, un, ord );
-    ord = new ExecuteFor( new Orders::FaceTarget( 0, 3 ), 1.0f );
+    ord = new Orders::ExecuteFor( new Orders::FaceTarget( 0, 3 ), 1.0f );
     AddOrd( aisc, un, ord );
     ord = new Orders::MatchVelocity( un->ClampVelocity( vec, true ), Vector( 0, 0, 0 ), true, true, false );
     AddOrd( aisc, un, ord );
@@ -969,7 +969,7 @@ void CloakForScript( Order *aisc, Unit *un )
     AddOrd( aisc, un, ord );
     ord = ( new Orders::FaceTargetITTS( 0, 3 ) );
     AddOrd( aisc, un, ord );
-    ord = new ExecuteFor( new CloakFor( 1, 8 ), 32 );
+    ord = new Orders::ExecuteFor( new CloakFor( 1, 8 ), 32 );
     AddOrd( aisc, un, ord );
 }
 void TurnTowardsITTS( Order *aisc, Unit *un )

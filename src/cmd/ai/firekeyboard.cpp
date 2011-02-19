@@ -1129,10 +1129,10 @@ bool getNearestTargetUnit( Unit *me, int iType )
 
 bool ChooseTargets( Unit *me, bool (*typeofunit)( Unit*, Unit* ), bool reverse )
 {
-    UnitCollection *drawlist = &_Universe->activeStarSystem()->getUnitList();
+    UnitCollection& drawlist = _Universe->activeStarSystem()->getUnitList();
     vector< Unit* > vec;
     Unit *target;
-    for (un_iter iter = drawlist->createIterator(); (target=*iter)!=NULL; ++iter)
+    for (un_iter iter = drawlist.createIterator(); (target=*iter)!=NULL; ++iter)
         vec.push_back( target );
     if (vec.size() == 0)
         return false;
@@ -1335,7 +1335,7 @@ static bool SuperDock( Unit *parent, Unit *target )
     if ( UnitUtil::isCloseEnoughToDock( parent, target ) ) {
         if ( UnitUtil::isDockableUnit( target ) ) {
             for (unsigned int i = 0; i < target->GetImageInformation().dockingports.size(); ++i)
-                if (target->GetImageInformation().dockingports[i].used == false)
+                if (!target->GetImageInformation().dockingports[i].IsOccupied())
                     return parent->ForceDock( target, i ) != 0;
         }
     }
@@ -1393,7 +1393,7 @@ static bool ExecuteRequestClearenceKey( Unit *parent, Unit *endt )
             endt->graphicOptions.WarpRamping = 1;
         endt->graphicOptions.InWarp = 0;
         static float clearencetime = ( XMLSupport::parse_float( vs_config->getVariable( "general", "dockingtime", "20" ) ) );
-        endt->EnqueueAIFirst( new ExecuteFor( new Orders::MatchVelocity( Vector( 0, 0, 0 ),
+        endt->EnqueueAIFirst( new Orders::ExecuteFor( new Orders::MatchVelocity( Vector( 0, 0, 0 ),
                     Vector( 0, 0, 0 ),
                     true,
                     false,

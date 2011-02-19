@@ -2,6 +2,7 @@
 #include "flykeyboard.h"
 #include "cmd/unit_generic.h"
 #include "navigation.h"
+#include "autodocking.h"
 #include "config_xml.h"
 #include "xml_support.h"
 #include "vs_globals.h"
@@ -275,9 +276,24 @@ void FlyByKeyboard::Execute( bool resetangvelocity )
                 parent->graphicOptions.WarpRamping = 1;
             }
         } else {
-            Orders::AutoLongHaul *temp = new Orders::AutoLongHaul();
-            temp->SetParent( parent );
-            Order::EnqueueOrderFirst( temp );
+            // Use AutoDocker if docking clearance on target, otherwise use AutoPilot
+            static bool autodock =
+                XMLSupport::parse_bool( vs_config->getVariable( "test", "autodocker", "false" ) );
+            Order *autoNavigator = NULL;
+            if (autodock)
+            {
+                Unit *station = parent->Target();
+                if (station->IsCleared(parent))
+                {
+                    autoNavigator = new Orders::AutoDocking(station);
+                }
+            }
+            if (autoNavigator == NULL)
+            {
+                autoNavigator = new Orders::AutoLongHaul();
+                autoNavigator->SetParent( parent );
+            }
+            Order::EnqueueOrderFirst(autoNavigator);
             FlyByKeyboard::inauto   = true;
             parent->autopilotactive = FlyByKeyboard::inauto;
         }

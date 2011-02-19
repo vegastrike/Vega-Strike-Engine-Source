@@ -766,70 +766,72 @@ void Unit::beginElement( const string &name, const AttributeList &attributes )
             break;
         }
     case DOCK:
-        ADDTAG;
-        tempbool = false;
-        assert( xml->unitlevel == 1 );
-        xml->unitlevel++;
-        pos = QVector( 0, 0, 0 );
-        P   = QVector( 1, 1, 1 );
-        Q   = QVector( FLT_MAX, FLT_MAX, FLT_MAX );
-        R   = QVector( FLT_MAX, FLT_MAX, FLT_MAX );
-        for (iter = attributes.begin(); iter != attributes.end(); iter++) {
-            switch ( attribute_map.lookup( (*iter).name ) )
-            {
-            case DOCKINTERNAL:
-                ADDDEFAULT;
-                tempbool = parse_bool( (*iter).value );
-                break;
-            case X:
-                ADDDEFAULT;
-                pos.i = xml->unitscale*parse_float( (*iter).value );
-                break;
-            case Y:
-                ADDDEFAULT;
-                pos.j = xml->unitscale*parse_float( (*iter).value );
-                break;
-            case Z:
-                ADDDEFAULT;
-                pos.k = xml->unitscale*parse_float( (*iter).value );
-                break;
-            case TOP:
-                ADDDEFAULT;
-                R.j = xml->unitscale*parse_float( (*iter).value );
-                break;
-            case BOTTOM:
-                ADDDEFAULT;
-                Q.j = xml->unitscale*parse_float( (*iter).value );
-                break;
-            case LEFT:
-                ADDDEFAULT;
-                Q.i = xml->unitscale*parse_float( (*iter).value );
-                break;
-            case RIGHT:
-                ADDDEFAULT;
-                R.i = parse_float( (*iter).value );
-                break;
-            case BACK:
-                ADDDEFAULT;
-                Q.k = xml->unitscale*parse_float( (*iter).value );
-                break;
-            case FRONT:
-                ADDDEFAULT;
-                R.k = xml->unitscale*parse_float( (*iter).value );
-                break;
-            case MOUNTSIZE:
-                ADDDEFAULT;
-                P.i = xml->unitscale*parse_float( (*iter).value );
-                P.j = xml->unitscale*parse_float( (*iter).value );
-                break;
+        {
+            ADDTAG;
+            DockingPorts::Type::Value dockType = DockingPorts::Type::DEFAULT;
+            assert( xml->unitlevel == 1 );
+            xml->unitlevel++;
+            pos = QVector( 0, 0, 0 );
+            P   = QVector( 1, 1, 1 );
+            Q   = QVector( FLT_MAX, FLT_MAX, FLT_MAX );
+            R   = QVector( FLT_MAX, FLT_MAX, FLT_MAX );
+            for (iter = attributes.begin(); iter != attributes.end(); iter++) {
+                switch ( attribute_map.lookup( (*iter).name ) )
+                {
+                case DOCKINTERNAL:
+                    ADDDEFAULT;
+                    dockType = DockingPorts::Type::Value(parse_int((*iter).value));
+                    break;
+                case X:
+                    ADDDEFAULT;
+                    pos.i = xml->unitscale*parse_float( (*iter).value );
+                    break;
+                case Y:
+                    ADDDEFAULT;
+                    pos.j = xml->unitscale*parse_float( (*iter).value );
+                    break;
+                case Z:
+                    ADDDEFAULT;
+                    pos.k = xml->unitscale*parse_float( (*iter).value );
+                    break;
+                case TOP:
+                    ADDDEFAULT;
+                    R.j = xml->unitscale*parse_float( (*iter).value );
+                    break;
+                case BOTTOM:
+                    ADDDEFAULT;
+                    Q.j = xml->unitscale*parse_float( (*iter).value );
+                    break;
+                case LEFT:
+                    ADDDEFAULT;
+                    Q.i = xml->unitscale*parse_float( (*iter).value );
+                    break;
+                case RIGHT:
+                    ADDDEFAULT;
+                    R.i = parse_float( (*iter).value );
+                    break;
+                case BACK:
+                    ADDDEFAULT;
+                    Q.k = xml->unitscale*parse_float( (*iter).value );
+                    break;
+                case FRONT:
+                    ADDDEFAULT;
+                    R.k = xml->unitscale*parse_float( (*iter).value );
+                    break;
+                case MOUNTSIZE:
+                    ADDDEFAULT;
+                    P.i = xml->unitscale*parse_float( (*iter).value );
+                    P.j = xml->unitscale*parse_float( (*iter).value );
+                    break;
+                }
             }
-        }
-        if (Q.i == FLT_MAX || Q.j == FLT_MAX || Q.k == FLT_MAX || R.i == FLT_MAX || R.j == FLT_MAX || R.k == FLT_MAX) {
-            pImage->dockingports.push_back( DockingPorts( pos.Cast(), P.i, 0, tempbool ) );
-        } else {
-            QVector tQ = Q.Min( R );
-            QVector tR = R.Max( Q );
-            pImage->dockingports.push_back( DockingPorts( tQ.Cast(), tR.Cast(), 0, tempbool ) );
+            if (Q.i == FLT_MAX || Q.j == FLT_MAX || Q.k == FLT_MAX || R.i == FLT_MAX || R.j == FLT_MAX || R.k == FLT_MAX) {
+                pImage->dockingports.push_back( DockingPorts( pos.Cast(), P.i, 0, dockType ) );
+            } else {
+                QVector tQ = Q.Min( R );
+                QVector tR = R.Max( Q );
+                pImage->dockingports.push_back( DockingPorts( tQ.Cast(), tR.Cast(), 0, dockType ) );
+            }
         }
         break;
     case MESHLIGHT:

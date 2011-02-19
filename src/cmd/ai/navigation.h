@@ -9,7 +9,6 @@ namespace Orders
 {
 const float bleed_threshold = 0.0001;
 const float THRESHOLD = 0.01;
-const unsigned char ABURN   = 1;
 
 /**
  * The moveto order attempts to calculate the best way to apply thrust (within the computer bound limits) to get a starship to place B and stopped.
@@ -22,7 +21,8 @@ const unsigned char ABURN   = 1;
 
 class MoveToParent
 {
-    unsigned char afterburnAndSwitchbacks; //don't need the lowest order bit
+    bool afterburn;
+    unsigned char switchbacks;
     unsigned char terminatingX;
     unsigned char terminatingY;
     unsigned char terminatingZ;
@@ -33,19 +33,16 @@ class MoveToParent
 public:
     void SetAfterburn( bool tf )
     {
-        if (tf)
-            afterburnAndSwitchbacks |= 1;
-        else
-            afterburnAndSwitchbacks &= (~1);
+        afterburn = tf;
     }
-    MoveToParent( bool aft, unsigned char numswitchbacks, bool terminating = true ) : afterburnAndSwitchbacks( aft
-                                                                                                              +(numswitchbacks
-                                                                                                                <<1) )
-        , terminatingX( 0 )
-        , terminatingY( 0 )
-        , terminatingZ( 0 )
-        , last_velocity( 0, 0, 0 )
-        , selfterminating( terminating ) {}
+ MoveToParent( bool aft, unsigned char switchbacks, bool terminating = true )
+     : afterburn(aft)
+     , switchbacks(switchbacks)
+     , terminatingX( 0 )
+     , terminatingY( 0 )
+     , terminatingZ( 0 )
+     , last_velocity( 0, 0, 0 )
+     , selfterminating( terminating ) {}
     bool Execute( Unit *parent, const QVector &targetlocation );
 };
 class MoveTo : public Order
@@ -58,9 +55,9 @@ public:
         m.SetAfterburn( tf );
     }
 ///takes in the destination target, whether afterburners should be applied, and the ammount of accuracy (how many times it shoudl miss destination and come back) should be used
-    MoveTo( const QVector &target, bool aft, unsigned char numswitchbacks, bool terminating = true ) : Order( MOVEMENT,
+    MoveTo( const QVector &target, bool aft, unsigned char switchbacks, bool terminating = true ) : Order( MOVEMENT,
                                                                                                               SLOCATION )
-        , m( aft, numswitchbacks, terminating )
+        , m( aft, switchbacks, terminating )
     {
         targetlocation = target;
         done = false;
@@ -83,7 +80,7 @@ public:
 class ChangeHeading : public Order
 {
     float turningspeed;
-    unsigned char switchbacks; //don't need the lowest order bit
+    unsigned char switchbacks;
     unsigned char terminatingX;
     unsigned char terminatingY;
     Vector  last_velocity;

@@ -80,7 +80,7 @@ Unit * DockToSavedBases( int playernum, QVector &safevec )
                 safevec = QVector( 0, 0, 0 );
                 return NULL;
             }
-            if (!dprt[i].used)
+            if (!dprt[i].IsOccupied())
                 break;
         }
         plr->ForceDock( closestUnit, i );

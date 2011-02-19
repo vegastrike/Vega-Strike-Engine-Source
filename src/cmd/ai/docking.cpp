@@ -109,13 +109,13 @@ void DockingOps::RestoreOldAI()
 }
 int SelectDockPort( Unit *utdw, Unit *parent )
 {
-    const vector< DockingPorts > *dp = &utdw->DockingPortLocations();
+    const vector< DockingPorts >& dp = utdw->DockingPortLocations();
     float dist = FLT_MAX;
     int   num  = -1;
-    for (unsigned int i = 0; i < dp->size(); ++i)
-        if (!(*dp)[i].used) {
-            Vector rez   = Transform( utdw->GetTransformation(), (*dp)[i].pos );
-            float  wdist = ( rez-parent->Position() ).MagnitudeSquared();
+    for (unsigned int i = 0; i < dp.size(); ++i)
+        if (!dp[i].IsOccupied()) {
+            Vector rez   = Transform( utdw->GetTransformation(), dp[i].GetPosition() );
+            float  wdist = ( rez - parent->Position() ).MagnitudeSquared();
             if (wdist < dist) {
                 num  = i;
                 dist = wdist;
@@ -134,7 +134,7 @@ bool DockingOps::RequestClearence( Unit *utdw )
 }
 QVector DockingOps::Movement( Unit *utdw )
 {
-    const QVector loc( Transform( utdw->GetTransformation(), utdw->DockingPortLocations()[port].pos.Cast() ) );
+    const QVector loc( Transform( utdw->GetTransformation(), utdw->DockingPortLocations()[port].GetPosition().Cast() ) );
     SetDest( loc );
 
     SetAfterburn( DistanceWarrantsTravelTo( parent, ( loc-parent->Position() ).Magnitude(), true ) );
@@ -149,7 +149,7 @@ QVector DockingOps::Movement( Unit *utdw )
 }
 bool DockingOps::DockToTarget( Unit *utdw )
 {
-    if (utdw->DockingPortLocations()[port].used) {
+    if (utdw->DockingPortLocations()[port].IsOccupied()) {
         if (keeptrying) {
             state = GETCLEARENCE;
             return false;
@@ -160,7 +160,7 @@ bool DockingOps::DockToTarget( Unit *utdw )
         }
     }
     QVector loc      = Movement( utdw );
-    float   rad      = utdw->DockingPortLocations()[port].radius+parent->rSize();
+    float   rad      = utdw->DockingPortLocations()[port].GetRadius() + parent->rSize();
     float   diss     = (parent->Position()-loc).MagnitudeSquared()-.1;
     bool    isplanet = utdw->isUnit() == PLANETPTR;
     static float MinimumCapacityToRefuelOnLand =

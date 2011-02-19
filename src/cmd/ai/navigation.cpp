@@ -104,7 +104,7 @@ void MoveTo::SetDest( const QVector &target )
 bool MoveToParent::OptimizeSpeed( Unit *parent, float v, float &a, float max_speed )
 {
     v += ( a/parent->GetMass() )*SIMULATION_ATOM;
-    //float max_speed = ((afterburnAndSwitchbacks&ABURN)?parent->GetComputerData().max_ab_speed():parent->GetComputerData().max_speed());
+    //float max_speed = ((afterburn)?parent->GetComputerData().max_ab_speed():parent->GetComputerData().max_speed());
     if ( (!max_speed) || fabs( v ) <= max_speed )
         return true;
     float deltaa = parent->GetMass()*(fabs( v )-max_speed)/SIMULATION_ATOM;       //clamping should take care of it
@@ -139,9 +139,9 @@ bool MoveToParent::Execute( Unit *parent, const QVector &targetlocation )
     last_velocity = local_vel;
     Vector heading      = parent->ToLocalCoordinates( ( targetlocation-parent->Position() ).Cast() );
     Vector thrust( parent->Limits().lateral, parent->Limits().vertical,
-                   (afterburnAndSwitchbacks&ABURN) ? parent->Limits().afterburn : parent->Limits().forward );
+                   afterburn ? parent->Limits().afterburn : parent->Limits().forward );
     float  max_speed    =
-        ( (afterburnAndSwitchbacks&ABURN) ? parent->GetComputerData().max_ab_speed() : parent->GetComputerData().max_speed() );
+        ( afterburn ? parent->GetComputerData().max_ab_speed() : parent->GetComputerData().max_speed() );
     Vector normheading  = heading;
     normheading.Normalize();
     Vector max_velocity = max_speed*normheading;
@@ -150,10 +150,9 @@ bool MoveToParent::Execute( Unit *parent, const QVector &targetlocation )
                      fabs( max_velocity.k ) );
     if (done) return done;       //unreachable
 
-    unsigned char numswitchbacks = afterburnAndSwitchbacks>>1;
-    if (terminatingX > numswitchbacks
-        && terminatingY > numswitchbacks
-        && terminatingZ > numswitchbacks) {
+    if (terminatingX > switchbacks
+        && terminatingY > switchbacks
+        && terminatingZ > switchbacks) {
         if ( Done( last_velocity ) ) {
             if (selfterminating) {
                 done = true;
@@ -185,15 +184,14 @@ bool MoveToParent::Execute( Unit *parent, const QVector &targetlocation )
         if (t < THRESHOLD) {
             thrust.k =
                 ( thrust.k > 0 ? -parent->Limits().retro
-                 /div : ( (afterburnAndSwitchbacks&ABURN) ? parent->Limits().afterburn/div : parent->Limits().forward/div ) );
+                 /div : ( afterburn ? parent->Limits().afterburn/div : parent->Limits().forward/div ) );
         } else if (t < SIMULATION_ATOM) {
             thrust.k *= t/SIMULATION_ATOM;
             thrust.k +=
                 (SIMULATION_ATOM
                  -t)
                 *( thrust.k > 0 ? -parent->Limits().retro
-                  /div : ( (afterburnAndSwitchbacks
-                            &ABURN) ? parent->Limits().afterburn/div : parent->Limits().forward/div ) )/SIMULATION_ATOM;
+                  /div : ( afterburn ? parent->Limits().afterburn/div : parent->Limits().forward/div ) )/SIMULATION_ATOM;
         }
         OptimizeSpeed( parent, last_velocity.k, thrust.k, max_velocity.k/vdiv );
         t = CalculateBalancedDecelTime( heading.i, last_velocity.i, thrust.i, parent->GetMass() );

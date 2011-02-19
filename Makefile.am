@@ -53,7 +53,7 @@ BOOSTSOURCES = \
   boost/1_35/src/converter/builtin_converters.cpp \
   boost/1_35/src/converter/type_id.cpp \
   boost/1_35/src/tuple.cpp 
-else 
+else
 if BOOST1_45
 BOOSTSOURCES_CXXFLAGS = -DBOOST_PYTHON_NO_PY_SIGNATURES -DBOOST_PYTHON_STATIC_LIB
 BOOSTSOURCES = \
@@ -276,6 +276,8 @@ LIBSCRIPT = \
 LIBAI = \
   src/cmd/ai/aggressive.cpp \
   src/cmd/ai/aggressive.h \
+  src/cmd/ai/autodocking.cpp \
+  src/cmd/ai/autodocking.h \
   src/cmd/ai/comm_ai.cpp \
   src/cmd/ai/comm_ai.h \
   src/cmd/ai/communication_xml.cpp \

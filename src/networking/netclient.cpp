@@ -1393,12 +1393,12 @@ int NetClient::recvMsg( Packet *outpacket, timeval *timeout )
                 //int dockport = netbuf.getInt32();
                 unsigned int dockport;
                 for (dockport = 0; dockport < un->pImage->dockingports.size(); ++dockport)
-                    if (!un->pImage->dockingports[dockport].used)
+                    if (!un->pImage->dockingports[dockport].IsOccupied())
                         break;
                 if ( dockport > un->pImage->dockingports.size() ) {
                     cerr<<"CMD_DOCK: All docking ports used up! Kicking out port 0!"<<endl;
                     dockport = 0;
-                    un->pImage->dockingports[0].used = false;
+                    un->pImage->dockingports[0].Occupy(false);
                 }
                 cerr<<"RECEIVED A DOCK AUTHORIZATION for unit "<<p1.getSerial()<<" to unit "<<utdw_serial
                     <<" at docking port #"<<dockport<<endl;
