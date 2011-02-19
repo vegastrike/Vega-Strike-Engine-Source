@@ -54,9 +54,42 @@ BOOSTSOURCES = \
   boost/1_35/src/converter/type_id.cpp \
   boost/1_35/src/tuple.cpp 
 else 
+if BOOST1_45
+BOOSTSOURCES_CXXFLAGS = -DBOOST_PYTHON_NO_PY_SIGNATURES -DBOOST_PYTHON_STATIC_LIB
+BOOSTSOURCES = \
+  boost/1_45/src/converter/arg_to_python_base.cpp \
+  boost/1_45/src/converter/builtin_converters.cpp \
+  boost/1_45/src/converter/from_python.cpp \
+  boost/1_45/src/converter/registry.cpp \
+  boost/1_45/src/converter/type_id.cpp \
+  boost/1_45/src/dict.cpp \
+  boost/1_45/src/errors.cpp \
+  boost/1_45/src/exec.cpp \
+  boost/1_45/src/import.cpp \
+  boost/1_45/src/list.cpp \
+  boost/1_45/src/long.cpp \
+  boost/1_45/src/module.cpp \
+  boost/1_45/src/numeric.cpp \
+  boost/1_45/src/object/class.cpp \
+  boost/1_45/src/object/enum.cpp \
+  boost/1_45/src/object/function.cpp \
+  boost/1_45/src/object/function_doc_signature.cpp \
+  boost/1_45/src/object/inheritance.cpp \
+  boost/1_45/src/object/iterator.cpp \
+  boost/1_45/src/object/life_support.cpp \
+  boost/1_45/src/object/pickle_support.cpp \
+  boost/1_45/src/object/stl_iterator.cpp \
+  boost/1_45/src/object_operators.cpp \
+  boost/1_45/src/object_protocol.cpp \
+  boost/1_45/src/slice.cpp \
+  boost/1_45/src/str.cpp \
+  boost/1_45/src/tuple.cpp \
+  boost/1_45/src/wrapper.cpp
+else
 BOOSTSOURCES=
 endif
-endif 
+endif
+endif
 
 #This was in the acct server and networking library stuff
 #if MACOSX
