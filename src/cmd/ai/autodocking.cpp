@@ -27,12 +27,12 @@ boost::optional<size_t> FindWaypoint(Unit *player,
     {
         const DockingPorts& waypoint = dockingPorts[i];
         if (waypoint.IsDockable()) // No further waypoints
-            return i - 1;
+            break;
         // Do not use docking port is one of the waypoints are too small
         if (waypoint.GetRadius() < player->rSize())
             return boost::optional<size_t>();
     }
-    return i;
+    return i - 1;
 }
 
 // Find suitable docking port and associated waypoints.
