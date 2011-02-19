@@ -244,7 +244,13 @@ Mission* Mission::getNthPlayerMission( int cp, int missionnum )
 void Mission::terminateMission()
 {
     vector< Mission* > *active_missions = ::active_missions.Get();
-    vector< Mission* >::iterator f = std::find( active_missions->begin(), active_missions->end(), this );
+    vector< Mission* >::iterator f;
+    
+    f = std::find( Mission_delqueue.begin(), Mission_delqueue.end(), this );
+    if (f != Mission_delqueue.end())
+        VSFileSystem::vs_dprintf( 1, "Not deleting mission twice: %s\n", this->mission_name.c_str() );
+    
+    f = std::find( active_missions->begin(), active_missions->end(), this );
     
     // Debugging aid for persistent missions bug
     if (g_game.vsdebug >= 1) {
