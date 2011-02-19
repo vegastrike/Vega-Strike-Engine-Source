@@ -34,28 +34,18 @@
 //this file isn't available on my system (all win32 machines?) i dun even know what it has or if we need it as I can compile without it
 #include <unistd.h>
 #endif
-//#include "gfx/aux_texture.h"
-//#include <expat.h>
-//#include "xml_support.h"
 
-//#include "vegastrike.h"
 #include <assert.h>
 #include "cmd/unit_generic.h"
 #include "mission.h"
 #include "flightgroup.h"
-//#include "gldrv/winsys.h"
+
 #ifdef HAVE_PYTHON
 #include "Python.h"
 #endif
 #include "python/python_class.h"
 #include "savegame.h"
 #include "networking/netserver.h"
-//#include "easydom.h"
-
-//#include "msgcenter.h"
-
-//#include "vs_globals.h"
-//#include "vegastrike.h"
 
 /* *********************************************************** */
 using std::cout;
@@ -212,22 +202,24 @@ void Mission::wipeDeletedMissions()
 
 int Mission::getPlayerMissionNumber()
 {
+    int num = 0;
+    
     vector< Mission* > *active_missions = ::active_missions.Get();
-    unsigned int num = 0;
     vector< Mission* >::iterator pl     = active_missions->begin();
-    if ( pl == active_missions->end() ) return -1;
-    for (; pl != active_missions->end(); ++pl) {
-        if ( (*pl)->player_num == this->player_num )
-            num++;
-        if (*pl == this)
-            break;
-    }
-    if (num == 0) return -1;
-    else --num;      //We previously assumed num started at -1
-    if ( pl == active_missions->end() ) return -1;
-    if ( num >= active_missions->size() )
+    
+    if ( pl == active_missions->end() ) 
         return -1;
-    return num;
+    
+    for (; pl != active_missions->end(); ++pl) {
+        if ( (*pl)->player_num == this->player_num ) {
+            if (*pl == this)
+                return (int)num;
+            else
+                num++;
+        }
+    }
+    
+    return -1;
 }
 Mission* Mission::getNthPlayerMission( int cp, int missionnum )
 {
@@ -253,9 +245,21 @@ void Mission::terminateMission()
 {
     vector< Mission* > *active_missions = ::active_missions.Get();
     vector< Mission* >::iterator f = std::find( active_missions->begin(), active_missions->end(), this );
+    
+    // Debugging aid for persistent missions bug
+    if (g_game.vsdebug >= 1) {
+        int misnum = -1;
+        for (vector< Mission* >::iterator i = active_missions->begin(); i != active_missions->end(); ++i) {
+            if ((*i)->player_num == player_num) {
+                ++misnum;
+                VSFileSystem::vs_dprintf( 1, "   Mission #%d: %s #%d\n", misnum, (*i)->mission_name.c_str() );
+            }
+        }
+    }
+    
     int queuenum = -1;
     if ( f != active_missions->end() ) {
-        queuenum = getPlayerMissionNumber();          //-1 used as error code
+        queuenum = getPlayerMissionNumber();          //-1 used as error code, 0 is first player mission
         if ( (Network != NULL || SERVER) && player_num >= 0 ) {
             int num = queuenum;
             if (num >= 0)
@@ -273,17 +277,25 @@ void Mission::terminateMission()
     if (this != (*active_missions)[0])        //Shouldn't this always be true?
         Mission_delqueue.push_back( this );          //only delete if we arent' the base mission
     //NETFIXME: This routine does not work properly yet.
+    VSFileSystem::vs_dprintf( 1, "Terminating mission %s #%d\n", this->mission_name.c_str(), queuenum );
     if (queuenum >= 0) {
-//int num=queuenum-1;  Why? we do this in GetPlayerMissionNumber()
-        unsigned int num = queuenum;
+        // queuenum - 1 since mission #0 is the base mission (main_menu) and is persisted
+        // in savegame.cpp:LoadSavedMissions, and it has no correspondin active_scripts/active_missions entry,
+        // meaning the actual active_scripts index is offset by 1.
+        unsigned int num = queuenum - 1; 
+        
         vector< std::string > *scripts = &_Universe->AccessCockpit( player_num )->savegame->getMissionStringData(
             "active_scripts" );
+        VSFileSystem::vs_dprintf( 1, "Terminating mission #%d - got %d scripts\n", queuenum, scripts->size() );
         if ( num < scripts->size() )
             scripts->erase( scripts->begin()+num );
         vector< std::string > *missions = &_Universe->AccessCockpit( player_num )->savegame->getMissionStringData(
             "active_missions" );
+        VSFileSystem::vs_dprintf( 1, "Terminating mission #%d - got %d missions\n", queuenum, missions->size() );
         if ( num < missions->size() )
             missions->erase( missions->begin()+num );
+        VSFileSystem::vs_dprintf( 1, "Terminating mission #%d - %d scripts remain\n", queuenum, scripts->size() );
+        VSFileSystem::vs_dprintf( 1, "Terminating mission #%d - %d missions remain\n", queuenum, missions->size() );
     }
     if (runtime.pymissions)
         runtime.pymissions->Destroy();
