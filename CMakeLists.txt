@@ -125,6 +125,7 @@ SET(LIBCMDSCRIPTSERVER_SOURCES src/cmd/script/flightgroup_server.cpp
 
 
 SET(LIBAI_SOURCES src/cmd/ai/aggressive.cpp
+				  src/cmd/ai/autodocking.cpp
 				  src/cmd/ai/comm_ai.cpp
 				  src/cmd/ai/communication_xml.cpp
 				  src/cmd/ai/communication.cpp
