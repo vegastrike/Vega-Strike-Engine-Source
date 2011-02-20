@@ -4,10 +4,7 @@
 #define VEGASTRIKE_CMD_AI_AUTODOCKING_H
 
 #include <deque>
-#include <queue>
-#include <utility>
 #include <boost/shared_ptr.hpp>
-#include <boost/optional.hpp>
 #include "cmd/ai/order.h"
 
 class Unit;
@@ -60,6 +57,8 @@ class AutoDocking : public Order
     typedef void (AutoDocking::*StateFunction)(Unit *, Unit *);
 
 public:
+    typedef std::deque<size_t> DockingPath;
+
     AutoDocking(Unit *destination);
 
     void Execute();
@@ -70,14 +69,21 @@ protected:
     void SelectionState(Unit *, Unit *);
     void DistantApproachState(Unit *, Unit *);
     void ApproachState(Unit *, Unit *);
-    void DockState(Unit *, Unit *);
+    void DockingState(Unit *, Unit *);
+    void DockedState(Unit *, Unit *);
+    void UndockingState(Unit *, Unit *);
+    void DepartureState(Unit *, Unit *);
     void AbortState(Unit *, Unit *);
     void EndState(Unit *, Unit *);
+
+    void EnqueuePort(Unit *, Unit *, size_t);
+    void EraseOrders();
 
 private:
     StateFunction state;
     UnitContainer target;
-    boost::optional<size_t> port;
+    // waypoints followed by docking port (back)
+    DockingPath dockingPath;
 };
 
 } // namespace Orders

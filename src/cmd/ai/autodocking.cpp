@@ -2,7 +2,7 @@
 
 #include <cassert>
 #include <iterator>
-#include <boost/iterator/counting_iterator.hpp>
+#include <boost/optional.hpp>
 #include "cmd/unit_generic.h"
 #include "cmd/unit_util.h"
 #include "cmd/ai/navigation.h"
@@ -10,7 +10,6 @@
 
 namespace
 {
-typedef std::pair<size_t, size_t> PortRange;
 
 // Find waypoints if we can travel through all of them.
 boost::optional<size_t> FindWaypoint(Unit *player,
@@ -28,7 +27,7 @@ boost::optional<size_t> FindWaypoint(Unit *player,
         const DockingPorts& waypoint = dockingPorts[i];
         if (waypoint.IsDockable()) // No further waypoints
             break;
-        // Do not use docking port is one of the waypoints are too small
+        // Do not use docking port if one of the waypoints are too small
         if (waypoint.GetRadius() < player->rSize())
             return boost::optional<size_t>();
     }
@@ -36,8 +35,8 @@ boost::optional<size_t> FindWaypoint(Unit *player,
 }
 
 // Find suitable docking port and associated waypoints.
-boost::optional<PortRange> FindDockingPort(Unit *player,
-                                           Unit *station)
+Orders::AutoDocking::DockingPath FindDockingPort(Unit *player,
+                                                 Unit *station)
 {
     // FIXME: Prefer outside docking ports (because they are more safe to travel to)
     // FIXME: Ensure line-of-sight to first point
@@ -45,9 +44,10 @@ boost::optional<PortRange> FindDockingPort(Unit *player,
 
     const std::vector<DockingPorts>& dockingPorts = station->DockingPortLocations();
 
+    typedef std::pair<size_t, size_t> PortRange;
     boost::optional<PortRange> candidate;
     float shortestDistance = std::numeric_limits<float>::max();
-    bool isPlanet = station->isPlanet();
+    const bool isPlanet = station->isPlanet();
     for (size_t i = 0; i < dockingPorts.size(); ++i)
     {
         if (dockingPorts[i].IsOccupied())
@@ -84,7 +84,17 @@ boost::optional<PortRange> FindDockingPort(Unit *player,
             }
         }
     }
-    return candidate;
+
+    Orders::AutoDocking::DockingPath result;
+    if (candidate)
+    {
+        assert(candidate->first < candidate->second);
+        for (size_t i = candidate->first; i <= candidate->second; ++i)
+        {
+            result.push_front(i);
+        }
+    }
+    return result;
 }
 
 } // anonymous namespace
@@ -122,7 +132,7 @@ void AutoDocking::EndState(Unit *player, Unit *station)
 
 void AutoDocking::AbortState(Unit *player, Unit *station)
 {
-    eraseType(ALLTYPES);
+    EraseOrders();
     state = &AutoDocking::EndState;
 }
 
@@ -162,7 +172,7 @@ void AutoDocking::DistantApproachState(Unit *player, Unit *station)
     Order::Execute();
     if (Done())
     {
-        eraseType(ALLTYPES);
+        EraseOrders();
         done = false;
         state = &AutoDocking::SelectionState;
     }
@@ -170,20 +180,97 @@ void AutoDocking::DistantApproachState(Unit *player, Unit *station)
 
 void AutoDocking::SelectionState(Unit *player, Unit *station)
 {
-    eraseType(ALLTYPES);
+    EraseOrders();
 
-    boost::optional<PortRange> range = FindDockingPort(player, station);
-    if (range)
+    dockingPath = FindDockingPort(player, station);
+    if (dockingPath.empty())
     {
-        port = range->first;
-    }
-    else
-    {
-        port.reset();
         state = &AutoDocking::AbortState;
         return;
     }
 
+    // Enqueue the waypoints from the farthest to the closest.
+    for (DockingPath::const_iterator it = dockingPath.begin(); it != dockingPath.end(); ++it)
+    {
+        EnqueuePort(player, station, *it);
+    }
+
+    state = &AutoDocking::ApproachState;
+}
+
+void AutoDocking::ApproachState(Unit *player, Unit *station)
+{
+    assert(!dockingPath.empty());
+
+    // Move to docking port
+    if (station->DockingPortLocations()[dockingPath.back()].IsOccupied())
+    {
+        // Another ship has docked at our port. Find a new port.
+        state = &AutoDocking::SelectionState;
+    }
+    else if (station->CanDockWithMe(player) == dockingPath.back())
+    {
+        state = &AutoDocking::DockingState;
+    }
+    else
+    {
+        // FIXME: Request clearance X times with fixed interval to keep capital ship immobile
+        Order::Execute();
+    }
+}
+
+void AutoDocking::DockingState(Unit *player, Unit *station)
+{
+    assert(!dockingPath.empty());
+
+    player->ForceDock(station, dockingPath.back());
+    state = &AutoDocking::DockedState;
+}
+
+void AutoDocking::DockedState(Unit *player, Unit *station)
+{
+    EraseOrders();
+    state = &AutoDocking::UndockingState;
+}
+
+void AutoDocking::UndockingState(Unit *player, Unit *station)
+{
+    assert(!dockingPath.empty());
+
+    state = &AutoDocking::EndState;
+
+    // Enqueue undocking path if docked at inner port
+    if (station->DockingPortLocations()[dockingPath.back()].IsInside())
+    {
+        DockingPath::const_reverse_iterator it = dockingPath.rbegin();
+        ++it; // Skip the docking port itself
+        for (; it != dockingPath.rend(); ++it)
+        {
+            EnqueuePort(player, station, *it);
+            state = &AutoDocking::DepartureState;
+        }
+    }
+}
+
+void AutoDocking::DepartureState(Unit *player, Unit *station)
+{
+    Order::Execute();
+    if (Done())
+    {
+        EraseOrders();
+        done = false;
+        state = &AutoDocking::EndState;
+    }
+}
+
+void AutoDocking::EraseOrders()
+{
+    eraseType(FACING);
+    eraseType(MOVEMENT);
+}
+
+void AutoDocking::EnqueuePort(Unit *player, Unit *station, size_t port)
+{
     // Set the coordinates for the docking port
     const float turningSpeed = 1;
     // If accuracy is too low then the ship does not always turn precisely.
@@ -194,64 +281,26 @@ void AutoDocking::SelectionState(Unit *player, Unit *station)
     const unsigned char accuracy = 7; // Higher means more accurate
     const bool useAfterburner = false;
     const bool terminateAfterUse = true;
-    // Iterate backwards to enqueue the waypoints from the farthest to the closest.
-    typedef std::reverse_iterator< boost::counting_iterator<size_t> > PortIterator;
-    PortIterator beginRange(range->second + 1); // counting_iterator expects an open ended interval
-    PortIterator endRange(range->first);
-    for (PortIterator it = beginRange; it != endRange; ++it)
+
+    const DockingPorts& currentPort = station->DockingPortLocations()[port];
+    QVector position = Transform(station->GetTransformation(),
+                                 currentPort.GetPosition().Cast());
+
+    Order *facing = new ChangeHeading(position, accuracy, turningSpeed, terminateAfterUse);
+    Order *movement = new MoveTo(position, useAfterburner, accuracy, terminateAfterUse);
+    if (currentPort.IsInside())
     {
-        const DockingPorts& currentPort = station->DockingPortLocations()[*it];
-        QVector position = Transform(station->GetTransformation(),
-                                     currentPort.GetPosition().Cast());
-
-        Order *facing = new ChangeHeading(position, accuracy, turningSpeed, terminateAfterUse);
-        Order *movement = new MoveTo(position, useAfterburner, accuracy, terminateAfterUse);
-        if (currentPort.IsInside())
-        {
-            // Perform facing and movement sequentially when navigating inside the station
-            const unsigned int blockedDuringFacing = MOVEMENT;
-            EnqueueOrder(new Sequence(player, facing, blockedDuringFacing));
-            const unsigned int blockedDuringMovement = FACING;
-            EnqueueOrder(new Sequence(player, movement, blockedDuringMovement));
-        }
-        else
-        {
-            // Perform facing and movement simultaneously outside the station
-            EnqueueOrder(new Join(player, facing, movement));
-        }
-    }
-
-    state = &AutoDocking::ApproachState;
-}
-
-void AutoDocking::ApproachState(Unit *player, Unit *station)
-{
-    assert(port);
-
-    // Move to docking port
-    if (station->DockingPortLocations()[*port].IsOccupied())
-    {
-        // Another ship has docked at our port. Find a new port.
-        state = &AutoDocking::SelectionState;
-    }
-    else if (station->CanDockWithMe(player) == *port)
-    {
-        state = &AutoDocking::DockState;
+        // Perform facing and movement sequentially when navigating inside the station
+        const unsigned int blockedDuringFacing = MOVEMENT;
+        EnqueueOrder(new Sequence(player, facing, blockedDuringFacing));
+        const unsigned int blockedDuringMovement = FACING;
+        EnqueueOrder(new Sequence(player, movement, blockedDuringMovement));
     }
     else
     {
-        // FIXME: Request clearance X times with fixed interval to keep capital ship immobile
-        Order::Execute();
+        // Perform facing and movement simultaneously outside the station
+        EnqueueOrder(new Join(player, facing, movement));
     }
-}
-
-void AutoDocking::DockState(Unit *player, Unit *station)
-{
-    assert(port);
-
-    eraseType(ALLTYPES);
-    player->ForceDock(station, *port);
-    state = &AutoDocking::EndState;
 }
 
 } // namespace Orders
