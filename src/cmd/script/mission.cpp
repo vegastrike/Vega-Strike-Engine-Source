@@ -258,7 +258,7 @@ void Mission::terminateMission()
         for (vector< Mission* >::iterator i = active_missions->begin(); i != active_missions->end(); ++i) {
             if ((*i)->player_num == player_num) {
                 ++misnum;
-                VSFileSystem::vs_dprintf( 1, "   Mission #%d: %s #%d\n", misnum, (*i)->mission_name.c_str() );
+                VSFileSystem::vs_dprintf( 1, "   Mission #%d: %s\n", misnum, (*i)->mission_name.c_str() );
             }
         }
     }
