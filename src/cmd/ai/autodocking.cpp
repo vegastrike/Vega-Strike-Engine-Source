@@ -88,7 +88,7 @@ Orders::AutoDocking::DockingPath FindDockingPort(Unit *player,
     Orders::AutoDocking::DockingPath result;
     if (candidate)
     {
-        assert(candidate->first < candidate->second);
+        assert(candidate->first <= candidate->second);
         for (size_t i = candidate->first; i <= candidate->second; ++i)
         {
             result.push_front(i);
