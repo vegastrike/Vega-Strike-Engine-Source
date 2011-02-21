@@ -124,6 +124,33 @@ void AutoDocking::Execute()
     }
 }
 
+bool AutoDocking::CanDock(Unit *player, Unit *station)
+{
+    if (!station->IsCleared(player))
+    {
+        return false;
+    }
+    else if (UnitUtil::isCapitalShip(player))
+    {
+        // A capital ship must align one of its docking ports with one of the
+        // the station's docking ports. This docking script cannot do that.
+        return false;
+    }
+    else if (!UnitUtil::isDockableUnit(station))
+    {
+        return false;
+    }
+    else if (!UnitUtil::isCloseEnoughToDock(player, station))
+    {
+        return false;
+    }
+    else if (FindDockingPort(player, station).empty())
+    {
+        return false;
+    }
+    return true;
+}
+
 void AutoDocking::EndState(Unit *player, Unit *station)
 {
     player->autopilotactive = false;
@@ -138,43 +165,13 @@ void AutoDocking::AbortState(Unit *player, Unit *station)
 
 void AutoDocking::InitialState(Unit *player, Unit *station)
 {
-    if (UnitUtil::isCapitalShip(player))
-    {
-        // A capital ship must align one of its docking ports with one of the
-        // the station's docking ports. This docking script cannot do that.
-        state = &AutoDocking::AbortState;
-    }
-    else if (!UnitUtil::isDockableUnit(station))
-    {
-        state = &AutoDocking::AbortState;
-    }
-    else if (!UnitUtil::isCloseEnoughToDock(player, station))
-    {
-        // Autopilot the ship closer to the station
-        AutoLongHaul *longHaul = new AutoLongHaul();
-        longHaul->SetParent(player);
-        EnqueueOrder(longHaul);
-        state = &AutoDocking::DistantApproachState;
-    }
-    else if (station->IsCleared(player))
+    if (CanDock(player, station))
     {
         state = &AutoDocking::SelectionState;
     }
     else
     {
         state = &AutoDocking::AbortState;
-    }
-}
-
-void AutoDocking::DistantApproachState(Unit *player, Unit *station)
-{
-    // Move to station from afar
-    Order::Execute();
-    if (Done())
-    {
-        EraseOrders();
-        done = false;
-        state = &AutoDocking::SelectionState;
     }
 }
 

@@ -63,11 +63,12 @@ public:
 
     void Execute();
 
+    static bool CanDock(Unit *player, Unit *station);
+
 protected:
     // States
     void InitialState(Unit *player, Unit *station);
     void SelectionState(Unit *, Unit *);
-    void DistantApproachState(Unit *, Unit *);
     void ApproachState(Unit *, Unit *);
     void DockingState(Unit *, Unit *);
     void DockedState(Unit *, Unit *);

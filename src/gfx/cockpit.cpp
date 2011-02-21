@@ -35,6 +35,7 @@
 #include "cmd/ai/flyjoystick.h"
 #include "cmd/ai/firekeyboard.h"
 #include "cmd/ai/aggressive.h"
+#include "cmd/ai/autodocking.h"
 #include "main_loop.h"
 #include <assert.h>     //needed for assert() calls
 #include "savegame.h"
@@ -1318,24 +1319,27 @@ float GameCockpit::LookupUnitStat( int stat, Unit *target )
         else
             return (float) UnitImages< void >::TOOFAR;
     case UnitImages< void >::CANDOCK_MODAL:
-        /*if(!target){ //FIXME
-         *       return (float)UnitImages<void>::READY;
-         *  } else if(!target){ //FIXME
-         *       return (float)UnitImages<void>::TOOFAR;
-         *  } else if(target->graphicOptions.InWarp){
-         *       return (float)UnitImages<void>::OFF;
-         *  } else {
-         *       return (float)UnitImages<void>::NOMINAL;
-         *  }*/
-        Unit*todock = target->Target();
-        if ( todock && (todock->CanDockWithMe( target, 1 ) != -1) ) {
-            return (todock->CanDockWithMe( target, 0 ) != -1)
-                   ? (float) UnitImages< void >::READY
-                   : (float) UnitImages< void >::TOOFAR;
+        {
+            Unit *station = target->Target();
+            if (station)
+            {
+                if (station->CanDockWithMe(target, true) != -1)
+                {
+                    if (station->CanDockWithMe(target, false) != -1)
+                    {
+                        return (float) UnitImages<void>::READY;
+                    }
+                    if (Orders::AutoDocking::CanDock(target, station))
+                    {
+                        return (float) UnitImages<void>::ON;
+                    }
+                    return (float) UnitImages<void>::TOOFAR;
+                }
+            }
+            return (float) UnitImages< void >::NOMINAL;
         }
-        return (float) UnitImages< void >::NOMINAL;
     }
-    return 1;
+    return 1.0f;
 }
 
 void GameCockpit::DrawTargetGauges( Unit *target )

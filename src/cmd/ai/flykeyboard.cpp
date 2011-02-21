@@ -283,7 +283,7 @@ void FlyByKeyboard::Execute( bool resetangvelocity )
             if (autodock)
             {
                 Unit *station = parent->Target();
-                if (station->IsCleared(parent))
+                if (Orders::AutoDocking::CanDock(parent, station))
                 {
                     autoNavigator = new Orders::AutoDocking(station);
                 }
