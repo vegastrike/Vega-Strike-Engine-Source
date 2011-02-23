@@ -1331,7 +1331,7 @@ float GameCockpit::LookupUnitStat( int stat, Unit *target )
                     }
                     if (Orders::AutoDocking::CanDock(target, station))
                     {
-                        return (float) UnitImages<void>::ON;
+                        return (float) UnitImages<void>::AUTOREADY;
                     }
                     return (float) UnitImages<void>::TOOFAR;
                 }
@@ -1514,6 +1514,9 @@ void GameCockpit::DrawGauges( Unit *un )
                 break;
             case UnitImages< void >::NOMINAL:
                 modevalue = " - ";
+                break;
+            case UnitImages< void >::AUTOREADY:
+                modevalue = "AUTO READY";
                 break;
             default:
                 modevalue = "MALFUNCTION!";
