@@ -182,7 +182,7 @@ void winsys_warp_pointer( int x, int y )
  *  \date    Created:  2000-10-20
  *  \date    Modified: 2000-10-20
  */
-static void setup_sdl_video_mode()
+static bool setup_sdl_video_mode()
 {
     Uint32 video_flags = SDL_OPENGL;
     int    bpp = 0;
@@ -258,12 +258,24 @@ static void setup_sdl_video_mode()
             exit( 1 );
         }
     }
+
+    std::string version = (const char*)glGetString(GL_RENDERER);
+    if (version == "GDI Generic")
+    {
+        VSFileSystem::vs_fprintf( stderr, "GDI Generic software driver reported, trying to reset.\n" );
+        SDL_Quit();
+        vs_config->setVariable( "graphics", "gl_accelerated_visual", "false" );
+        return false;
+    }
+
     VSFileSystem::vs_dprintf( 3, "Setting Screen to w %d h %d and pitch of %d and %d bpp %d bytes per pix mode\n",
             screen->w,
             screen->h,
             screen->pitch,
             screen->format->BitsPerPixel,
             screen->format->BytesPerPixel );
+
+    return true;
 }
 
 /*---------------------------------------------------------------------------*/
@@ -313,8 +325,12 @@ void winsys_init( int *argc, char **argv, char const *window_title, char const *
 
     SDL_WM_SetCaption( window_title, window_title );
     if (icon) SDL_WM_SetIcon( icon, 0 );
-    setup_sdl_video_mode();
-    glutInit( argc, argv );
+    
+    if (!setup_sdl_video_mode()) {
+        winsys_init(argc, argv, window_title, icon_title);
+    } else {
+        glutInit( argc, argv );
+    }
 }
 
 /*---------------------------------------------------------------------------*/
