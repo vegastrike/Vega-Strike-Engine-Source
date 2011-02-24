@@ -262,10 +262,16 @@ static bool setup_sdl_video_mode()
     std::string version = (const char*)glGetString(GL_RENDERER);
     if (version == "GDI Generic")
     {
-        VSFileSystem::vs_fprintf( stderr, "GDI Generic software driver reported, trying to reset.\n" );
-        SDL_Quit();
-        vs_config->setVariable( "graphics", "gl_accelerated_visual", "false" );
-        return false;
+        if (gl_accelerated_visual) {
+            VSFileSystem::vs_fprintf( stderr, "GDI Generic software driver reported, trying to reset.\n" );
+            SDL_Quit();
+            vs_config->setVariable( "graphics", "gl_accelerated_visual", "false" );
+            return false;
+        } else {
+            VSFileSystem::vs_fprintf( stderr, 
+                "GDI Generic software driver reported, reset failed.\n "
+                "Please make sure a graphics card driver is installed and functioning properly.\n" );
+        }
     }
 
     VSFileSystem::vs_dprintf( 3, "Setting Screen to w %d h %d and pitch of %d and %d bpp %d bytes per pix mode\n",
