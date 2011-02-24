@@ -239,7 +239,7 @@ void AutoDocking::UndockingState(Unit *player, Unit *station)
     // Enqueue undocking path if docked at inner port
     if (station->DockingPortLocations()[dockingPath.back()].IsInside())
     {
-        DockingPath::const_reverse_iterator it = dockingPath.rbegin();
+        DockingPath::reverse_iterator it = dockingPath.rbegin();
         ++it; // Skip the docking port itself
         for (; it != dockingPath.rend(); ++it)
         {
