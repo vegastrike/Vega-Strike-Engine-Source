@@ -252,7 +252,7 @@ string buildUpgradeDescription( Cargo &item );
 int basecargoassets( Unit *base, string cargoname );
 
 //"Basic Repair" item that is added to Buy UPGRADE mode.
-const string BASIC_REPAIR_NAME = "Basic Repair";
+const string BASIC_REPAIR_NAME = "Basic Repair & Refuel";
 
 const GFXColor BASIC_REPAIR_TEXT_COLOR()
 {
@@ -260,7 +260,7 @@ const GFXColor BASIC_REPAIR_TEXT_COLOR()
 }
 
 const string BASIC_REPAIR_DESC =
-    "Hire starship mechanics to examine and assess any wear and tear on your craft. They will replace any damaged components on your vessel with the standard components of the vessel you initially purchased.  Further upgrades above and beyond the original will not be replaced free of charge.  The total assessment and repair cost applies if any components are damaged or need servicing (fuel, wear and tear on jump drive, etc...) If such components are damaged you may save money by repairing them on your own.";
+    "Hire starship mechanics to examine and assess any wear and tear on your craft. They will replace any damaged components on your vessel with the standard components of the vessel you initially purchased.  Further upgrades above and beyond the original will not be replaced free of charge.  The total assessment and repair cost applies if any components are damaged or need servicing (fuel, wear and tear on jump drive, etc...). If such components are damaged you may save money by repairing them on your own. Your vessel will also be refuelled.";
 //Repair price is a config variable.
 
 //Info about each mode.

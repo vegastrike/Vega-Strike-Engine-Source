@@ -24,7 +24,7 @@
 
 #include <string>
 
-//Some pre-defined weights for the outline font.
+//Some pre-defined weights for the outline stroke font.
 static const float LIGHT_STROKE  = 0.6;
 static const float NORMAL_STROKE = 1.0;
 static const float BOLD_STROKE   = 1.5;
@@ -36,8 +36,8 @@ static const float BOLD_STROKE   = 1.5;
 //we don't want too much white space between lines.  (This spacing is a guess -- tweak
 //it if necessary.)
 //These constants describe the reference vertical spacing of the font:
-static const double REFERENCE_BASELINE_POS  = 35.0;
-static const double REFERENCE_FONT_ASCENDER = 125.0;
+static const double REFERENCE_BASELINE_POS  = 33.33;
+static const double REFERENCE_FONT_ASCENDER = 119.05;
 static const double REFERENCE_LINE_SPACING  = REFERENCE_FONT_ASCENDER+REFERENCE_BASELINE_POS;
 
 //Font object.
@@ -52,7 +52,7 @@ public:
 //Font size.  Vertical distance in identity space.
     float size( void ) const
     {
-        return m_size;
+        return m_size * 0.5;
     }
     void setSize( float s )
     {
@@ -92,7 +92,7 @@ public:
         , m_strokeWeight( weight )
         , m_needMetrics( true )
         , m_strokeWidth( 1.0 )
-        , m_extraCharWidth( 0.0 )
+        , m_extraCharWidth( 0.5 )
         , m_spaceCharFixup( 10.0 )
         , m_verticalScaling( 1.0 )
         , m_horizontalScaling( 1.0 )
