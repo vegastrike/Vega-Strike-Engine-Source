@@ -456,7 +456,7 @@ string SaveGame::WriteMissionData()
 std::string scanInString( char* &buf )
 {
     std::string str;
-    char c[2] = {'\n', '\0'};
+    //char c[2] = {'\n', '\0'};
     while ( *buf && isspace( *buf ) )
         buf++;
     char *start = buf;
@@ -592,7 +592,9 @@ void SaveGame::PurgeZeroStarships()
     for (MissionStringDat::MSD::iterator i = missionstringdata->m.begin(), ie = missionstringdata->m.end(); i != ie; ++i)
         if ( fg_util::IsFGKey( i->first ) )
             if ( fg_util::CheckFG( i->second ) )
-                printf( "correcting flightgroup %s to have right landed ships\n", i->first.c_str() );
+            {
+                //printf( "correcting flightgroup %s to have right landed ships\n", i->first.c_str() );
+            }
 }
 
 static inline void PushBackFloat( float f, vector< char > &ret )
@@ -667,7 +669,7 @@ void SaveGame::WriteMissionStringData( std::vector< char > &ret )
 void SaveGame::ReadStardate( char* &buf )
 {
     string stardate( AnyStringScanInString( buf ) );
-    cout<<"Read stardate : "<<stardate<<endl;
+    cout<<"Read stardate: "<<stardate<<endl;
     _Universe->current_stardate.InitTrek( stardate );
 }
 
@@ -711,7 +713,7 @@ void SaveGame::ReadSavedPackets( char* &buf,
             //su.push_back (SavedUnits (unitname,(clsptr)a,factname));
         }
     }
-    cout<<"\tExiting ReadSavedPackets"<<endl;
+    //cout<<"\Finished ReadSavedPackets"<<endl;
 }
 
 void SaveGame::LoadSavedMissions()
@@ -744,11 +746,14 @@ void SaveGame::LoadSavedMissions()
     getMissionStringData( "active_scripts" )  = scripts;
     getMissionStringData( "active_missions" ) = missions;
 }
+
 string SaveGame::WriteSavedUnit( SavedUnits *su )
 {
     return string( "\n" )+XMLSupport::tostring( su->type )+string( " " )+su->filename+" "+su->faction;
 }
+
 extern bool STATIC_VARS_DESTROYED;
+
 static char * tmprealloc( char *var, int &oldlength, int newlength )
 {
     if (oldlength < newlength) {
@@ -798,11 +803,13 @@ string SaveGame::WriteDynamicUniverse()
     char  *tmp = (char*) malloc( MB );
     memset( tmp, 0, MB );
     //Write mission data
-    //On server side we save the stardate
+    //we save the stardate
     if (SERVER) {
         cerr<<"SAVING STARDATE - SERVER="<<SERVER<<endl;
-        dyn_univ += "\n0 stardate data "+AnyStringWriteString( _Universe->current_stardate.GetFullTrekDate() );
     }
+    string stardate = AnyStringWriteString( _Universe->current_stardate.GetFullTrekDate() );
+    dyn_univ += "\n0 stardate data " + stardate;
+
     memset( tmp, 0, MB );
     sprintf( tmp, "\n%d %s %s", 0, "mission", "data " );
     dyn_univ += string( tmp );
@@ -981,7 +988,7 @@ void SaveGame::ParseSaveGame( const string &filename_p,
                 } else {
                     //If no faction -> default to privateer
                     playerfaction = string( "privateer" );
-                    cout<<"Faction not found assigning default one : privateer !!!"<<endl;
+                    cout<<"Faction not found assigning default one: privateer"<<endl;
                 }
                 free( factionname );
                 if (ForceStarSystem.length() == 0)
