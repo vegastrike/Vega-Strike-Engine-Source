@@ -16,6 +16,8 @@
 #include "networking/netclient.h"
 #include "ai/aggressive.h"
 #include "lin_time.h"
+#include "vsfilesystem.h"
+
 extern char SERVER;
 extern bool isMissile( const weapon_info* );
 Mount::Mount()
@@ -336,9 +338,9 @@ bool Mount::PhysicsAlignedFire( Unit *caller,
 
                 //Affect the stored mount serial to the new missile
                 temp->SetSerial( this->serial );
-#ifdef VS_DEBUG
-                printf( "Creating missile with SERIAL ID %d\n", this->serial );
-#endif
+
+                VSFileSystem::vs_dprintf( 3, "Creating missile with SERIAL ID %d\n", this->serial );
+
                 this->serial = 0;
                 if (target && target != owner) {
                     temp->Target( target );

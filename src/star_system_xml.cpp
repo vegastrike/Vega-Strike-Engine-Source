@@ -1601,7 +1601,7 @@ void StarSystem::LoadXML( const char *filename, const Vector &centroid, const fl
     XML_SetElementHandler( parser, &StarSystem::beginElement, &StarSystem::endElement );
     {
         string fcontents = f.ReadFull();
-        //printf( "Contents of star system:\n%s\n", fcontents.c_str() );
+        VSFileSystem::vs_dprintf( 2, "Contents of star system:\n%s\n", fcontents.c_str() );
         XML_Parse( parser, (fcontents).c_str(), f.Size(), 1 );
     }
     f.Close();
