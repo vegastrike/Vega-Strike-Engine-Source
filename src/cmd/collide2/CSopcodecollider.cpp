@@ -100,7 +100,8 @@ void csOPCODECollider::GeometryInitialize (const std::vector <mesh_polygon> &pol
 	} else
 	return;
 
-	bool status = m_pCollisionModel->Build (OPCC);
+	//bool status = m_pCollisionModel->Build (OPCC);
+    m_pCollisionModel->Build (OPCC);
 }
 
 
@@ -141,8 +142,10 @@ bool csOPCODECollider::rayCollide(const Ray &boltbeam, Vector&norm, float&distan
         retval=collFace.mDistance!=FLT_MAX;
         if (retval) {
             distance=collFace.mDistance;
+#ifdef VS_DEBUG
             printf("Opcode actually reported a hit at %f meters!\n",distance);
-        }else {
+#endif            
+        } else {
             return true;//FIXME: buggy! this should return FALSE but the math is obviously broken with opcode, so opcode is rarely telling us about intersections
         }
         //FIXME set normal

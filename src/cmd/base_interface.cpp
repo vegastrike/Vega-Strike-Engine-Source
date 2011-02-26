@@ -1064,11 +1064,13 @@ double compute_light_dot( Unit *base, Unit *un )
                 if ( ( (Planet*) st )->hasLights() ) {
                     QVector v1  = ( un->Position()-base->Position() ).Normalize();
                     QVector v2  = ( st->Position()-base->Position() ).Normalize();
+#ifdef VS_DEBUG
                     double  dot = v1.Dot( v2 );
                     if (dot > ret) {
                         VSFileSystem::vs_fprintf( stderr, "dot %lf", dot );
                         ret = dot;
                     }
+#endif
                 } else {
                     un_iter ui   = ( (Planet*) st )->satellites.createIterator();
                     Unit   *ownz = NULL;

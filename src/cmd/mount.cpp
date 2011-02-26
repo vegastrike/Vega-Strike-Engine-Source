@@ -336,7 +336,9 @@ bool Mount::PhysicsAlignedFire( Unit *caller,
 
                 //Affect the stored mount serial to the new missile
                 temp->SetSerial( this->serial );
+#ifdef VS_DEBUG
                 printf( "Creating missile with SERIAL ID %d\n", this->serial );
+#endif
                 this->serial = 0;
                 if (target && target != owner) {
                     temp->Target( target );

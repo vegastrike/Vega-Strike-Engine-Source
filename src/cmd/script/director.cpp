@@ -115,17 +115,19 @@ void Mission::DirectorShipDestroyed( Unit *unit )
     fg->nr_ships_left -= 1;
 
     char buf[512];
+#ifdef VS_DEBUG
     if ( (fg->faction.length()+fg->type.length()+fg->name.length()+12+30) < sizeof (buf) )
         sprintf( buf, "Ship destroyed: %s:%s:%s-%d", fg->faction.c_str(), fg->type.c_str(),
                 fg->name.c_str(), unit->getFgSubnumber() );
     else
         sprintf( buf, "Ship destroyed: (ERROR)-%d", unit->getFgSubnumber() );
+#endif
     msgcenter->add( "game", "all", buf );
     if (fg->nr_ships_left == 0) {
-        printf( "no ships left in fg %s\n", fg->name.c_str() );
+        //printf( "no ships left in fg %s\n", fg->name.c_str() );
         if (fg->nr_waves_left > 0) {
             //printf("relaunching wave %d of fg %s\n",fg->waves-fg->nr_waves_left,fg->name.c_str());
-            sprintf( buf, "Relaunching %s wave", fg->name.c_str() );
+            //sprintf( buf, "Relaunching %s wave", fg->name.c_str() );
             mission->msgcenter->add( "game", "all", buf );
 
             //launch new wave
@@ -136,7 +138,7 @@ void Mission::DirectorShipDestroyed( Unit *unit )
             order = unit->getAIState() ? unit->getAIState()->findOrderList() : NULL;
             fg->orderlist = NULL;
             if (order) {
-                printf( "found an orderlist\n" );
+                //printf( "found an orderlist\n" );
                 fg->orderlist = order->getOrderList();
             }
             CreateFlightgroup cf;

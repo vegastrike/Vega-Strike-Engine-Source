@@ -47,7 +47,7 @@ AIEvresult::AIEvresult( int type,
             }
         }
         printf(
-            "SERIOUS WARNING in AI script: no fast method to perform %s\nwhen type %d is at least %f and at most %f with priority %f for %f time\n",
+            "SERIOUS WARNING in AI script: no fast method to perform %s when type %d is at least %f and at most %f with priority %f for %f time\n",
             this->script.c_str(),
             type,
             min,

@@ -4811,9 +4811,11 @@ void Unit::Kill( bool erasefromsave, bool quitting )
     Unit *un;
     for (un_iter iter = getSubUnits(); (un = *iter); ++iter)
         un->Kill();
+#ifdef VS_DEBUG
     if (isUnit() != MISSILEPTR)
         printf( "UNIT HAS DIED: %s %s (file %s)\n", name.get().c_str(),
                fullname.c_str(), filename.get().c_str() );
+#endif
     if (ucref == 0) {
         Unitdeletequeue.push_back( this );
         if (flightgroup)

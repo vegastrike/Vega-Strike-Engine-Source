@@ -57,6 +57,7 @@
 
 extern vs_options game_options;
 
+/*
 static float mymin( float a, float b )
 {
     return (a < b) ? a : b;
@@ -66,6 +67,7 @@ static float mymax( float a, float b )
 {
     return (a > b) ? a : b;
 }
+*/
 
 using std::min;
 using std::max;
@@ -666,7 +668,7 @@ void GameCockpit::DrawTurretTargetBoxes(const Radar::Sensor& sensor)
         //** jay
         float rSize = track.GetSize();
 
-        float drift = rand()/(float) RAND_MAX;
+        //float drift = rand()/(float) RAND_MAX;
         GFXEnable( SMOOTH );
         GFXBlendMode( SRCALPHA, INVSRCALPHA );
         GFXBegin( GFXLINE );
@@ -898,10 +900,10 @@ void GameCockpit::AutoLanding()
 
 void GameCockpit::DrawRadar(const Radar::Sensor& sensor)
 {
-    static float maxUnitRadius =
-        XMLSupport::parse_float(vs_config->getVariable("graphics", "hud", "radar_search_extra_radius", "1000"));
-    static bool allGravUnits =
-        XMLSupport::parse_bool(vs_config->getVariable("graphics", "hud", "draw_gravitational_objects", "true"));
+    //static float maxUnitRadius =
+    //   XMLSupport::parse_float(vs_config->getVariable("graphics", "hud", "radar_search_extra_radius", "1000"));
+    //static bool allGravUnits =
+    //    XMLSupport::parse_bool(vs_config->getVariable("graphics", "hud", "draw_gravitational_objects", "true"));
 
     if (radarSprites[0] || radarSprites[1])
     {
@@ -963,7 +965,7 @@ float GameCockpit::LookupUnitStat( int stat, Unit *target )
     const float  fpsmax     = 1;
     static float numtimes   = fpsmax;
     float armordat[8];     //short fix
-    float retval;
+    //float retval;
     int   armori;
     Unit *tmpunit;
     if (shield8) {
@@ -1383,8 +1385,8 @@ void GameCockpit::DrawGauges( Unit *un )
     GFXColor     origbgcol = text->bgcol;
     static float background_alpha    =
         XMLSupport::parse_float( vs_config->getVariable( "graphics", "hud", "text_background_alpha", "0.0625" ) );
-    static float textwidthapproxHACK =
-        XMLSupport::parse_float( vs_config->getVariable( "graphics", "hud", "textwidthapproxHACK", "0.0175" ) );
+    //static float textwidthapproxHACK =
+    //    XMLSupport::parse_float( vs_config->getVariable( "graphics", "hud", "textwidthapproxHACK", "0.0175" ) );
     bool automatte = (0 == origbgcol.a);
     if (automatte) text->bgcol = GFXColor( 0, 0, 0, background_alpha );
     for (i = UnitImages< void >::KPS; i < UnitImages< void >::AUTOPILOT_MODAL; i++) {
@@ -1884,6 +1886,7 @@ void GameCockpit::Respawn( const KBData&, KBSTATE k )
     }
 }
 
+/*
 static void FaceTarget( Unit *un, const QVector &ourpos, Unit *target )
 {
     if (target) {
@@ -1905,6 +1908,7 @@ static void FaceTarget( Unit *un, const QVector &ourpos, Unit *target )
         }
     }
 }
+*/
 
 //SAME AS IN COCKPIT BUT ADDS SETVIEW and ACCESSCAMERA -> ~ DUPLICATE CODE
 int GameCockpit::Autopilot( Unit *target )
@@ -1960,7 +1964,7 @@ int GameCockpit::Autopilot( Unit *target )
                     if (face_target_on_auto) {
                         //FaceTarget(un,un->LocalPosition(),un->Target());
                     }
-                    static double numave   = 1.0;
+                    //static double numave   = 1.0;
 
                     static float  autotime = XMLSupport::parse_float( vs_config->getVariable( "physics", "autotime", "10" ) );                    //10 seconds for auto to kick in;
 
@@ -2651,7 +2655,9 @@ void GameCockpit::Draw()
             static int      revspr   =
                 XMLSupport::parse_bool( vs_config->getVariable( "joystick", "reverse_mouse_spr", "true" ) ) ? 1 : -1;
             static string   blah     = vs_config->getVariable( "joystick", "mouse_crosshair", "crosshairs.spr" );
+#ifdef VS_DEBUG
             static int      num = printf( "CROSS %f\n", crossceny );
+#endif
             static VSSprite MouseVSSprite( blah.c_str(), BILINEAR, GFXTRUE );
             float xcoord = ( -1+float(mousex)/(.5*g_game.x_resolution) );
             float ycoord = ( -revspr+float(revspr*mousey)/(.5*g_game.y_resolution) );
@@ -2760,7 +2766,7 @@ void GameCockpit::UpdAutoPilot()
     if (autopilot_time != 0) {
         autopilot_time -= SIMULATION_ATOM;
         {
-            static float autospeed = XMLSupport::parse_float( vs_config->getVariable( "physics", "autospeed", ".020" ) );             //10 seconds for auto to kick in;
+            //static float autospeed = XMLSupport::parse_float( vs_config->getVariable( "physics", "autospeed", ".020" ) );             //10 seconds for auto to kick in;
             if (autopan) {
                 Vector origR = Vector( 0, 0, 1 );
                 Vector origP = Vector( 1, 0, 0 );
