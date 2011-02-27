@@ -127,7 +127,7 @@ double StarDate::ConvertTrekDate( string date )
     minutes = temphours%100;
 
     res     = days*(24*60*60)+hours*(60*60)+minutes*(60)+seconds;
-    VSFileSystem::vs_dprintf( 3, "Converted date to %d, which stardate is %s\n", res, ConvertFullTrekDate(res) );
+    VSFileSystem::vs_dprintf( 3, "Converted date to %d, which stardate is %s\n", res, ConvertFullTrekDate(res).c_str() );
     return res;
 }
 
