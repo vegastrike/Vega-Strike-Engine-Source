@@ -1834,7 +1834,7 @@ void NavigationSystem::DisplayOrientationLines( float the_x,
 
     GFXBegin( GFXLINE );
 
-    GFXColorf( GFXColor( 0, 1, 0, .3 ) );
+    GFXColorf( GFXColor( 0.5, 0.5, 0.5, .15 ) );
 
     bool display_flat_circle = true;
     if ( (the_y_flat > screenskipby4[3])
