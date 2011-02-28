@@ -227,6 +227,17 @@ float GetGameTime()
 {
     return mission->gametime;
 }
+
+float getStarTime()
+{
+    return (float)_Universe->current_stardate.GetCurrentStarTime();
+}
+
+string getStarDate()
+{
+    return _Universe->current_stardate.GetFullTrekDate();
+}
+
 void SetTimeCompression()
 {
     setTimeCompression( 1.0 );
