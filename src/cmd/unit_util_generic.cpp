@@ -52,7 +52,7 @@ static inline T mymin( T a, T b )
 template < typename T >
 static inline T mymax( T a, T b )
 {
-    return (a < b) ? a : b;
+    return (a > b) ? a : b;
 }
 
 static const string& getFgDirectiveCR( const Unit *my_unit );
