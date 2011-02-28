@@ -11,6 +11,8 @@ if (test x$no_ffmpeg = x1); then
   AC_MSG_CHECKING([for ffmpeg])
   AC_MSG_RESULT([no (Disabled)])
 [else]
+  saved_CPPFLAGS="${CPPFLAGS}"
+  CPPFLAGS="${CPPFLAGS} -D__STDC_CONSTANT_MACROS"
   AC_CHECK_HEADERS([ffmpeg/avcodec.h ffmpeg/avformat.h ffmpeg/avio.h], no_ffmpeg=0, no_ffmpeg=1)
   if (test x$no_ffmpeg = x1); then
     AC_CHECK_HEADERS([libavcodec/avcodec.h libavformat/avformat.h libavformat/avio.h], no_ffmpeg=0, no_ffmpeg=1)
@@ -25,6 +27,15 @@ if (test x$no_ffmpeg = x1); then
     AC_MSG_RESULT($haveavcodec)
     
     if (test x$haveavcodec = xyes); then
+      AC_MSG_CHECKING([for optional libavutil])
+      saved_LIBS="${LIBS}"
+      LIBS="${LIBS} $NEW_LIBS"
+      AC_TRY_LINK(, , [haveavutil=yes], [haveavutil=no])
+      LIBS="$saved_LIBS"
+      AC_MSG_RESULT($haveavutil)
+      if (test x$haveavutil = xyes); then
+          NEW_LIBS="${NEW_LIBS} -lavutil"
+      fi
       VS_LIBS="${VS_LIBS} ${NEW_LIBS}"
       
       AC_MSG_CHECKING([for libswscale])
@@ -60,6 +71,7 @@ if (test x$no_ffmpeg = x1); then
       fi
     fi
   fi
+  CPPFLAGS="${saved_CPPFLAGS}"
 [fi]
 AM_CONDITIONAL([HAVE_FFMPEG], [test x$no_ffmpeg = 0])
 ])

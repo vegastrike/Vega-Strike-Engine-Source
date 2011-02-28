@@ -37,6 +37,7 @@ class QVector;
 struct Transformation;
 class Matrix;
 class Vector;
+class StarSystem;
 
 //#include "gfx/matrix.h"
 //#include "gfx/cockpit.h"
@@ -131,7 +132,7 @@ public: GameUnit( int dummy );
 //void SetPlanetOrbitData( PlanetaryTransform *trans ); commented out by chuck_starchaser; --never used
 //PlanetaryTransform * GetPlanetOrbit() const; commented out by chuck_starchaser; --never used
 //bool TransferUnitToSystem (StarSystem *NewSystem);
-    bool TransferUnitToSystem( unsigned int whichJumpQueue, class StarSystem*&previouslyActiveStarSystem, bool DoSightAndSound );
+    bool TransferUnitToSystem( unsigned int whichJumpQueue, StarSystem*&previouslyActiveStarSystem, bool DoSightAndSound );
 ///Begin and continue explosion
     bool Explode( bool draw, float timeit );
 /*
