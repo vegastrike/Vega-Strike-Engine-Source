@@ -68,7 +68,6 @@ double StarDate::GetInitialStarDate(int faction)
 
 void StarDate::InitTrek( string date )
 {
-    printf("StarDate-got trek date = %s\n", date.c_str());
     if (initial_star_time != NULL)
         //we must be reinitializing;
         delete[] initial_star_time;
@@ -79,12 +78,6 @@ void StarDate::InitTrek( string date )
     VSFileSystem::vs_dprintf( 3, "Initializing stardate from a Trek date for %d factions", factions.size() );
     for (unsigned int i = 0; i < factions.size(); i++)
         initial_star_time[i] = init_time;
-
-    printf("StarDate-got date = %s\n", date.c_str());
-    printf("StarDate-setting initial time = %f\n", (float)initial_time);
-    printf("StarDate-setting initial star time = %f\n", (float)initial_star_time[0]);
-    printf("StarDate-setting init time = %f\n", (float)init_time);
-    
 }
 
 /// The stardate format is ddd.hhmm:sec with
