@@ -1,3 +1,11 @@
+/// Provides functions for stardate and startime manipulation and conversion
+///There are various time measurement systems in VS
+///The stardate is an absolute time measurement in the game calendar
+/// Stardate is the in-game universe date in the format ddd.hhmm:sec
+/// Startime is the internal numeric representation of the stardate as number of seconds
+/// since the begin of initial universe time, which in Vega Strike UTCS universe is 3276800
+/// The formatting of the startime into faction specific output is done by the stardate.py script
+
 #include <assert.h>
 #include <iostream>
 #include <vector>
@@ -42,6 +50,16 @@ double StarDate::GetCurrentStarTime( int faction )
         return initial_star_time[faction]+time_since_server_started;
 }
 
+//Needed to calculate relative message and mission times
+//into stardate
+double StarDate::GetInitialStarDate(int faction)
+{
+    if (initial_star_time == NULL)
+        return initial_time;
+    else
+        return initial_star_time[faction] + initial_time;
+}
+
 /*
  *********************************************************************************
  **** Trek Stardate stuff                                                      ***
@@ -50,6 +68,7 @@ double StarDate::GetCurrentStarTime( int faction )
 
 void StarDate::InitTrek( string date )
 {
+    printf("StarDate-got trek date = %s\n", date.c_str());
     if (initial_star_time != NULL)
         //we must be reinitializing;
         delete[] initial_star_time;
@@ -60,73 +79,80 @@ void StarDate::InitTrek( string date )
     VSFileSystem::vs_dprintf( 3, "Initializing stardate from a Trek date for %d factions", factions.size() );
     for (unsigned int i = 0; i < factions.size(); i++)
         initial_star_time[i] = init_time;
+
+    printf("StarDate-got date = %s\n", date.c_str());
+    printf("StarDate-setting initial time = %f\n", (float)initial_time);
+    printf("StarDate-setting initial star time = %f\n", (float)initial_star_time[0]);
+    printf("StarDate-setting init time = %f\n", (float)init_time);
+    
 }
+
+/// The stardate format is ddd.hhmm:sec with
+/// ddd, hh, mm, sec = star day, hour, minute, seconds
+/// The second equals our terran second. The minute however has 480 seconds (HOURS_DIV=8)
+/// The hour has 60 minutes and the day has 100 hours
 
 //Convert a StarDate time into a Stardate string
 string StarDate::ConvertFullTrekDate( double date )
 {
-    unsigned int days, hours, minutes, seconds, tmpmin;
-
-    //Get the number of days dividing seconds number by the number of seconds in a day
-    days    = ( (unsigned int) date/(60*60*24) );
-    //Modulo gives us the number of seconds elapsed in the current day
-    date    = (unsigned int) date%(60*60*24);
-    //Get the hours elapsed in the day by dividing by number of seconds in an hour
-    hours   = (unsigned int) date/(60*60);
-    //Modulo gives us the number of seconds elapsed in that hour
-    date    = (unsigned int) date%(60*60);
-    //Get the number of minutes elapsed in that hour by dividing by the number of seconds in a minute
-    tmpmin = (unsigned int) date/(60*HOURS_DIV); 
-    minutes = (unsigned int) tmpmin*HOURS_DIV;
-    //The remaining seconds in the date
-    //The seconds are counted from 0 to 480 (HOURS_DIV=8 minutes) before the minute effectively is incremented
-    seconds = (unsigned int) date-days*(24*60*60)-hours*(60*60)-minutes*60;
-
+    unsigned int days, hours, minutes, seconds;
     char cdate[32];
-    //The hour/minute part is displayed like HHMM divided by HOURS_DIV which is 8 for now
-    unsigned int hrs  = (hours*100+minutes)/HOURS_DIV;
-    //unsigned int secs = seconds+(hours*100+minutes)%(HOURS_DIV*60);
 
-    sprintf( cdate, "%d.%.4d:%.3d", days, hrs, seconds );
+    // Get the number of days dividing seconds number by the number of seconds in a day: 100*60*60*8 = 2880000
+    days    = (unsigned int) date/2880000;
+    // Modulo gives us the number of stardate seconds elapsed in the current day
+    date    = (unsigned int) date%2880000;
+    // Get the hours elapsed in the day by dividing by number of seconds in a stardate hour: 60*60*8 = 28800
+    hours   = (unsigned int) date/28800; 
+    // Modulo gives us the number of seconds elapsed in that hour
+    date    = (unsigned int) date%28800;
+    //Get the number of minutes elapsed in that hour by dividing by the number of seconds in a minute: 60*8 = 480
+    minutes = (unsigned int) date/480;
+    //The remaining seconds in the date
+    //The seconds are counted from 0 to 480 before the minute effectively is incremented
+    seconds = (unsigned int) date%480;
+
+    //The hour/minute part is displayed like HHMM divided by HOURS_DIV which is 8 for now
+    unsigned int hhmm  = (hours*100+minutes);
+
+    sprintf( cdate, "%d.%.4d:%.3d", days, hhmm, seconds );
     return string( cdate );
 }
 
 string StarDate::ConvertTrekDate( double date )
 {
     unsigned int days, hours, minutes;
-
-    days    = ( (unsigned int) date/(60*60*24) );
-    date    = (unsigned int) date%(60*60*24);
-    hours   = (unsigned int) date/(60*60);
-    date    = (unsigned int) date%(60*60);
-    minutes = (unsigned int) date/60;
-
     char cdate[32];
-    unsigned int hrs = (hours*100+minutes)/HOURS_DIV;
 
-    sprintf( cdate, "%d.%.4d", days, hrs );
+    days    = (unsigned int) date/2880000;
+    date    = (unsigned int) date%2880000;
+    hours   = (unsigned int) date/28800;
+    date    = (unsigned int) date%28800;
+    minutes = (unsigned int) date/480;
+
+    unsigned int hhmm = (hours*100+minutes);
+
+    sprintf( cdate, "%d.%.4d", days, hhmm );
     return string( cdate );
 }
 
 //Convert a StarDate into a number of seconds
 double StarDate::ConvertTrekDate( string date )
 {
-    unsigned int days, hours, minutes, seconds, nb, pos;
+    unsigned int days, hours, minutes, tmphrs, seconds, nb, pos;
     double res;
     //Replace the dot with 'a' so sscanf won't take it for a decimal symbol
     pos = date.find( "." );
     date.replace( pos, 1, "a" );
-    if ( ( nb = sscanf( date.c_str(), "%da%4d:%3d", &days, &minutes, &seconds ) ) != 3 )
+    if ( ( nb = sscanf( date.c_str(), "%da%4d:%3d", &days, &tmphrs, &seconds ) ) != 3 )
         VSFileSystem::vs_dprintf( 3, "!!! ERROR reading date\n");
 
-    //Get the number of hours and minutes back to the form HHMM
-    int temphours = minutes*HOURS_DIV;
     //Extract number of hours
-    hours   = temphours/100;
+    hours   = tmphrs/100;
     //Extract number of minutes
-    minutes = temphours%100;
+    minutes = tmphrs%100;
 
-    res     = days*(24*60*60)+hours*(60*60)+minutes*(60)+seconds;
+    res     = days*2880000+hours*28800+minutes*480+seconds;
     VSFileSystem::vs_dprintf( 3, "Converted date to %d, which stardate is %s\n", res, ConvertFullTrekDate(res).c_str() );
     return res;
 }
