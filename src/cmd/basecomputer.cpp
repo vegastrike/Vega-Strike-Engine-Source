@@ -1813,17 +1813,29 @@ void BaseComputer::recalcTitle()
     char playerTitle[256];
     playerTitle[0] = '\0';              //Start with an empty string.
 
+    static bool showStardate =
+        XMLSupport::parse_bool( vs_config->getVariable( "graphics", "show_stardate", "true" ) );
+
     //Credits the player has.
     const float playerCredits = _Universe->AccessCockpit()->credits;
+    const char *stardate = _Universe->current_stardate.GetFullTrekDate().c_str();
     switch (m_currentDisplay)
     {
     default:
-        sprintf( playerTitle, "Credits: %.2f", playerCredits );
+        if (showStardate) {
+            sprintf( playerTitle, "Stardate: %s      Credits: %.2f", stardate, playerCredits );
+        } else {
+            sprintf( playerTitle, "Credits: %.2f", playerCredits );
+        }
         break;
     case MISSIONS:
         {
             const int count = guiMax( 0, active_missions.size()-1 );
-            sprintf( playerTitle, "Credits: %.2f,  Active missions: %d", playerCredits, count );
+            if (showStardate) {
+                sprintf( playerTitle, "Stardate: %s      Credits: %.2f      Active missions: %d", stardate, playerCredits, count );
+            } else {
+                sprintf( playerTitle, "Credits: %.2f      Active missions: %d", playerCredits, count );
+            }
             break;
         }
     case UPGRADE:
@@ -1837,8 +1849,11 @@ void BaseComputer::recalcTitle()
                 const float volumeLeft  = emptyVolume
                                           -( m_currentDisplay
                                             == CARGO ? playerUnit->getCargoVolume() : playerUnit->getUpgradeVolume() );
-                sprintf( playerTitle, "Credits: %.2f,  Space left: %.6g of %.6g",
-                         playerCredits, volumeLeft, emptyVolume );
+                if (showStardate) {
+                    sprintf( playerTitle, "Stardate: %s      Credits: %.2f      Space left: %.6g of %.6g cubic meters", stardate, playerCredits, volumeLeft, emptyVolume );
+                } else {
+                    sprintf( playerTitle, "Credits: %.2f      Space left: %.6g of %.6g cubic meters", playerCredits, volumeLeft, emptyVolume );
+                }
             }
             break;
         }
@@ -2247,6 +2262,8 @@ void BaseComputer::updateTransactionControlsForSelection( TransactionList *tlist
         }
     }
     //The description string.
+    char conversionBuffer[128];
+    string text = "";
     string descString;
     string tailString;
     char   tempString[2048];
@@ -2270,7 +2287,7 @@ void BaseComputer::updateTransactionControlsForSelection( TransactionList *tlist
             } else {
                 sprintf( tempString, "Price: #b#%.2f#-b#n#", baseUnit->PriceCargo( item.content ) );
                 descString += tempString;
-                sprintf( tempString, "Cargo volume: %.2f;  Mass: %.2f#n1.5#", item.volume, item.mass );
+                sprintf( tempString, "Cargo volume: %.2f cubic meters;  Mass: %.2f metric tons#n1.5#", item.volume, item.mass );
             }
             descString += tempString;
             tailString = buildCargoDescription( item, *this, item.price );
@@ -2308,12 +2325,17 @@ void BaseComputer::updateTransactionControlsForSelection( TransactionList *tlist
                 //the current base.  "Buying" this ship makes it my current ship.
                 sprintf( tempString, "#b#Transport cost: %.2f#-b#n1.5#", item.price );
             } else {
-                sprintf( tempString, "Price: #b#%.2f#-b#n#", baseUnit->PriceCargo( item.content ) );
+                PRETTY_ADDN("", baseUnit->PriceCargo(item.content), 2);
+                sprintf( tempString, "Price: #b#%s#-b#n#", text.c_str() );
+           //PRETTY_ADDU( statcolor+"Provides aftward thrust rated at: #-c",
+           //                      playerUnit->limits.retro/1000.0,
+           //                      2,
+           //                      "MegaNewtons" );
                 static bool printvolume =
                     XMLSupport::parse_bool( vs_config->getVariable( "graphics", "base_print_cargo_volume", "true" ) );
                 if (printvolume) {
                     descString += tempString;
-                    sprintf( tempString, "Cargo volume: %.2f;  Mass: %.2f#n1.5#", item.volume, item.mass );
+                    sprintf( tempString, "Vessel volume: %.2f cubic meters;  Mass: %.2f metric tons#n1.5#", item.volume, item.mass );
                 }
             }
             descString += tempString;
@@ -2332,7 +2354,7 @@ void BaseComputer::updateTransactionControlsForSelection( TransactionList *tlist
                 sprintf( tempString, "Value: #b#%.2f#-b, purchased for %.2f#n#",
                          baseUnit->PriceCargo( item.content ), item.price );
             descString += tempString;
-            sprintf( tempString, "Cargo volume: %.2f;  Mass: %.2f#n1.5#", item.volume, item.mass );
+            sprintf( tempString, "Cargo volume: %.2f cubic meters;  Mass: %.2f metric tons#n1.5#", item.volume, item.mass );
             descString += tempString;
             if (!item.mission)
                 tailString = buildCargoDescription( item, *this, baseUnit->PriceCargo( item.content ) );
@@ -3079,7 +3101,10 @@ void BaseComputer::loadNewsControls( void )
             const int playerNum = UnitUtil::isPlayerStarship( playerUnit );
             int len = getSaveStringLength( playerNum, NEWS_NAME_LABEL );
             for (int i = len-1; i >= 0; i--)
+            {
                 picker->addCell( new SimplePickerCell( getSaveString( playerNum, NEWS_NAME_LABEL, i ) ) );
+                //printf("---\nmessage:\n%s", getSaveString(playerNum, NEWS_NAME_LABEL, i).c_str() );
+            }
         }
     }
     //Make sure the description is empty.
@@ -4895,8 +4920,8 @@ void prettyPrintFloat( char *buffer, float f, int digitsBefore, int digitsAfter,
             buffer[bufferPos++] = '0'+digit;
             //reason for the folowing line: otherwise the  "((int)temp)%10" may overflow when converting
             f = f-( (float) digit*substractor );
-            if ( (p != 1) && (p%3 == 1) ) buffer[bufferPos++] = ',';
-        }
+            if ( (p != 1) && (p%3 == 1) ) buffer[bufferPos++] = ' '; // thousand separator
+         }
     } else {
         buffer[bufferPos++] = '0';
     }
@@ -4979,15 +5004,15 @@ void showUnitStats( Unit *playerUnit, string &text, int subunitlevel, int mode, 
         nametemp = beautify( nametemp );
         text    += statcolor+"Selected Part: #-c"+nametemp;
         if (item.mass == 1)
-            PRETTY_ADDU( statcolor+"Mass: #-c", item.mass, 0, "Metric ton." );
+            PRETTY_ADDU( statcolor+"Mass: #-c", item.mass, 0, "metric ton." );
         else
-            PRETTY_ADDU( statcolor+"Mass: #-c", item.mass, 1, "Metric tons." );
+            PRETTY_ADDU( statcolor+"Mass: #-c", item.mass, 1, "metric tons." );
         if (item.volume == 1) {
-            PRETTY_ADDN( statcolor+"  Space Required: #-c", item.volume, 0 );
-            text += " Cubic Meter.#n##n##c0:1:.5#"+prefix+"[DESCRIPTION]#n##-c";
+            PRETTY_ADDN( statcolor+"  Space required: #-c", item.volume, 0 );
+            text += " cubic meter.#n##n##c0:1:.5#"+prefix+"[DESCRIPTION]#n##-c";
         } else {
-            PRETTY_ADDN( statcolor+"  Space Required: #-c", item.volume, 1 );
-            text += " Cubic Meters.#n##n##c0:1:.5#"+prefix+"[DESCRIPTION]#n##-c";
+            PRETTY_ADDN( statcolor+"  Space required: #-c", item.volume, 1 );
+            text += " cubic meters.#n##n##c0:1:.5#"+prefix+"[DESCRIPTION]#n##-c";
         }
         text += MPLdesc;
         text += "#n#";
@@ -5082,7 +5107,7 @@ void showUnitStats( Unit *playerUnit, string &text, int subunitlevel, int mode, 
     //following lines somewhat borken in terms of semantics for quantity of fuel
     //and policy of upgrades to fuel
     if (!mode) {
-        PRETTY_ADDU( statcolor+"Fuel Capacity: #-c", playerUnit->FuelData(), 2, "Metric Tons of Lithium-6" );
+        PRETTY_ADDU( statcolor+"Fuel capacity: #-c", playerUnit->FuelData(), 2, "metric tons of Lithium-6" );
     } else if ( blankUnit->FuelData() != playerUnit->FuelData() ) {
         switch (replacement_mode)
         {
@@ -5090,7 +5115,7 @@ void showUnitStats( Unit *playerUnit, string &text, int subunitlevel, int mode, 
                                 //PRETTY_ADDU(statcolor+"Changes Fuel Capacity to: #-c",playerUnit->FuelData()/1000.0f,0,"Standard Fuel Units");
             break;
         case 1:                 //Additive
-            PRETTY_ADDU( statcolor+"Adds #-c", playerUnit->FuelData(), 2, "Metric Tons of Lithium-6 " /*+statcolor+"to Fuel Capacity #-c"*/ );
+            PRETTY_ADDU( statcolor+"Adds #-c", playerUnit->FuelData(), 2, "metric tons of Lithium-6 " /*+statcolor+"to Fuel Capacity #-c"*/ );
             break;
         case 2:                 //multiplicative
                                 //PRETTY_ADDU(statcolor+"Increases Fuel Capacity by #-c",100.0*(playerUnit->FuelData -1),0,"%");
@@ -5104,7 +5129,7 @@ void showUnitStats( Unit *playerUnit, string &text, int subunitlevel, int mode, 
     const Unit::Computer buc = blankUnit->ViewComputerData();
     if (!mode) {
         text += "#n##n#"+prefix+"#c0:1:.5#[FLIGHT CHARACTERISTICS]#n##-c";
-        text += "#n#"+prefix+statcolor+"Turning Response: #-c";
+        text += "#n#"+prefix+statcolor+"Turning response: #-c";
     }
     if (playerUnit->limits.yaw == playerUnit->limits.pitch && playerUnit->limits.yaw == playerUnit->limits.roll) {
         prettyPrintFloat( conversionBuffer, playerUnit->limits.yaw
@@ -5338,12 +5363,12 @@ void showUnitStats( Unit *playerUnit, string &text, int subunitlevel, int mode, 
     if (!mode) {
         if (uc.max_yaw_right == uc.max_pitch_up && uc.max_yaw_right == uc.max_roll_right) {
             PRETTY_ADD( statcolor+"Max turn rate: #-c", uc.max_yaw_right, 2 );
-            text += " Radians/second "+expstatcolor+"(yaw, pitch, roll)#-c";
+            text += " radians/second "+expstatcolor+"(yaw, pitch, roll)#-c";
         } else {
             text += ("#n#"+prefix+statcolor+"Max turn rates:#-c");
-            PRETTY_ADDU( substatcolor+" - yaw: #-c", uc.max_yaw_right, 2, "Radians/second" );
-            PRETTY_ADDU( substatcolor+" - pitch: #-c", uc.max_pitch_up, 2, "Radians/second" );
-            PRETTY_ADDU( substatcolor+" - roll: #-c", uc.max_roll_right, 2, "Radians/second" );
+            PRETTY_ADDU( substatcolor+" - yaw: #-c", uc.max_yaw_right, 2, "radians/second" );
+            PRETTY_ADDU( substatcolor+" - pitch: #-c", uc.max_pitch_up, 2, "radians/second" );
+            PRETTY_ADDU( substatcolor+" - roll: #-c", uc.max_roll_right, 2, "radians/second" );
         }
         text += "#n##n##c0:1:.5#"+prefix+"[TARGETTING SUBSYSTEM]#n##-c";
     } else if (uc.max_yaw_right != buc.max_yaw_right || uc.max_pitch_up != buc.max_pitch_up || uc.max_roll_right
@@ -5355,14 +5380,14 @@ void showUnitStats( Unit *playerUnit, string &text, int subunitlevel, int mode, 
             PRETTY_ADDN( substatcolor+"  yaw #-c", uc.max_yaw_right, 2 );
             PRETTY_ADDN( substatcolor+"  pitch #-c", uc.max_pitch_up, 2 );
             PRETTY_ADDN( substatcolor+"  roll #-c", uc.max_roll_right, 2 );
-            text += " Radians/second";
+            text += " radians/second";
             break;
         case 1:                         //Additive
             text += ("#n#"+prefix+"Governor settings for maximum turn rates increased by: ");
             PRETTY_ADDN( substatcolor+"  yaw #-c", uc.max_yaw_right, 2 );
             PRETTY_ADDN( substatcolor+"  pitch #-c", uc.max_pitch_up, 2 );
             PRETTY_ADDN( substatcolor+"  roll #-c", uc.max_roll_right, 2 );
-            text += " Radians/second";
+            text += " radians/second";
             break;
         case 2:                         //multiplicative
             text += ("#n#"+substatcolor+"Increases governor settings for maximum turn rates by: #-c");
@@ -5379,13 +5404,13 @@ void showUnitStats( Unit *playerUnit, string &text, int subunitlevel, int mode, 
     if (!mode) {
         PRETTY_ADDU( statcolor+"Tracking range: #-c", uc.radar.maxrange/1000, 0, "km" );
         if ( (acos( uc.radar.maxcone )*360/PI) < 359 ) {
-            PRETTY_ADDU( statcolor+"Tracking cone: #-c", acos( uc.radar.maxcone )*2, 2, "Radians" );
+            PRETTY_ADDU( statcolor+"Tracking cone: #-c", acos( uc.radar.maxcone )*2, 2, "radians" );
             text += expstatcolor+"#n#  (planar angle: 2 pi means full space)#-c";
         } else {
             text += "#n#"+prefix+statcolor+"Tracking cone: #-cOMNIDIRECTIONAL";
         }
-        PRETTY_ADDU( statcolor+"Assisted targeting cone: #-c", acos( uc.radar.trackingcone )*2, 2, "Radians" );
-        PRETTY_ADDU( statcolor+"Missile locking cone: #-c", acos( uc.radar.lockcone )*2, 2, "Radians" );
+        PRETTY_ADDU( statcolor+"Assisted targeting cone: #-c", acos( uc.radar.trackingcone )*2, 2, "radians" );
+        PRETTY_ADDU( statcolor+"Missile locking cone: #-c", acos( uc.radar.lockcone )*2, 2, "radians" );
         if (!subunitlevel) {
             //Always zero PRETTY_ADDU("Minimum target size: ",uc.radar.mintargetsize,2,"m");
             text += "#n#"+prefix+statcolor+"ITTS (Intelligent Target Tracking System) support: #-c";
@@ -5394,11 +5419,11 @@ void showUnitStats( Unit *playerUnit, string &text, int subunitlevel, int mode, 
             else text += "no";
             text += "#n#"+prefix+statcolor+"AFHH (Advanced Flag & Hostility Heuristics) support: #-c";
             std::string afhh;
-	    if (uc.radar.UseFriendFoe())
+        if (uc.radar.UseFriendFoe())
                 afhh += "friendly/hostile ";
-	    if (uc.radar.UseThreatAssessment())
+        if (uc.radar.UseThreatAssessment())
                 afhh += "threat ";
-	    if (afhh.empty())
+        if (afhh.empty())
                 afhh = "no";
             text += afhh;
         }
@@ -5410,13 +5435,13 @@ void showUnitStats( Unit *playerUnit, string &text, int subunitlevel, int mode, 
             if (uc.radar.maxrange != buc.radar.maxrange || uc.radar.maxcone != buc.radar.maxcone) {
                 PRETTY_ADDU( statcolor+"Tracking range: #-c", uc.radar.maxrange/1000, 0, "km" );
                 if ( (acos( uc.radar.maxcone )*360/PI) < 359 ) {
-                    PRETTY_ADDU( statcolor+"Tracking cone: #-c", acos( uc.radar.maxcone )*2, 2, "Radians" );
+                    PRETTY_ADDU( statcolor+"Tracking cone: #-c", acos( uc.radar.maxcone )*2, 2, "radians" );
                     text += statcolor+" (planar angle: 2 pi means full space)#-c";
                 } else {
                     text += "#n#"+prefix+statcolor+"Tracking cone: #-cOMNIDIRECTIONAL";
                 }
-                PRETTY_ADDU( statcolor+"Assisted targeting cone: #-c", acos( uc.radar.trackingcone )*2, 2, "Radians" );
-                PRETTY_ADDU( statcolor+"Missile locking cone: #-c", acos( uc.radar.lockcone )*2, 2, "Radians" );
+                PRETTY_ADDU( statcolor+"Assisted targeting cone: #-c", acos( uc.radar.trackingcone )*2, 2, "radians" );
+                PRETTY_ADDU( statcolor+"Missile locking cone: #-c", acos( uc.radar.lockcone )*2, 2, "radians" );
                 text += "#n#"+prefix+statcolor+"ITTS (Intelligent Target Tracking System) support: #-c";
                 if (uc.itts) text += "yes";
 
@@ -5947,7 +5972,7 @@ void showUnitStats( Unit *playerUnit, string &text, int subunitlevel, int mode, 
                     +
                     "WARNING: Capacitor banks are overdrawn: downgrade shield, upgrade reactor or purchase reactor capacitance!#-c";
         } else {
-            /*	PRETTY_ADDU("Power balance will make your reactor never recharge above ",(playerUnit->MaxEnergyData()-maxshield)*100.0/playerUnit->MaxEnergyData(),0,"% of it's max capacity");*/
+            /*  PRETTY_ADDU("Power balance will make your reactor never recharge above ",(playerUnit->MaxEnergyData()-maxshield)*100.0/playerUnit->MaxEnergyData(),0,"% of it's max capacity");*/
         }
         if (playerUnit->shield.number) {
             if (playerUnit->shield.recharge*playerUnit->shield.number*VSDM/shieldenergycap > playerUnit->EnergyRechargeData()
