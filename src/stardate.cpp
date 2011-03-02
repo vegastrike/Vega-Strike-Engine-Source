@@ -50,16 +50,6 @@ double StarDate::GetCurrentStarTime( int faction )
         return initial_star_time[faction]+time_since_server_started;
 }
 
-//Needed to calculate relative message and mission times
-//into stardate
-double StarDate::GetInitialStarDate(int faction)
-{
-    if (initial_star_time == NULL)
-        return initial_time;
-    else
-        return initial_star_time[faction] + initial_time;
-}
-
 /*
  *********************************************************************************
  **** Trek Stardate stuff                                                      ***
