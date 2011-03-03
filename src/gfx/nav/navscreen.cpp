@@ -365,6 +365,7 @@ void NavigationSystem::Draw()
     GFXClear( GFXFALSE );
 //GFXEnable(CLIPMODE)
     GFXEnable( LIGHTING );
+    GFXCenterCamera( true );
     for (int i = 0; i < NAVTOTALMESHCOUNT; i++) {
         float screen_x = 0.0;
         float screen_y = 0.0;
@@ -394,10 +395,13 @@ void NavigationSystem::Draw()
 
         Matrix mat( p, q, r, pos );
         if (mesh[i]) {
-            GFXDisable( CULLFACE );
-            mesh[i]->DrawNow( 1, true, mat );
+            mesh[i]->Draw( 
+                1000000000, // lod
+                mat );
         }
     }
+    Mesh::ProcessZFarMeshes();
+    Mesh::ProcessUndrawnMeshes();
     GFXBlendMode( SRCALPHA, INVSRCALPHA );
     GFXColor4f( 1, 1, 1, 1 );
     GFXEnable( TEXTURE0 );

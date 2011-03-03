@@ -78,7 +78,11 @@ public: Animation();
 
     static void ProcessDrawQueue();
 
+    static bool NeedsProcessDrawQueue();
+
     static void ProcessFarDrawQueue( float );
+    
+    static bool NeedsProcessFarDrawQueue();
 
     void SetDimensions( float wid, float hei );
 

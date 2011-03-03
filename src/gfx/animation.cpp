@@ -35,13 +35,20 @@
 #include "../gldrv/gl_globals.h"
 using std::vector;
 using std::stack;
+
 static vector< Animation* >far_animationdrawqueue;
 bool AnimationsLeftInFarQueue()
 {
     return !far_animationdrawqueue.empty();
 }
-static vector
-< Animation* >animationdrawqueue;
+
+static vector < Animation* >animationdrawqueue;
+bool AnimationsLeftInQueue()
+{
+    return !animationdrawqueue.empty();
+}
+
+
 static const unsigned char ani_up     = 0x01;
 static const unsigned char ani_close  = 0x02;
 static const unsigned char ani_alpha  = 0x04;
@@ -149,6 +156,10 @@ void Animation::ProcessDrawQueue()
     GFXDisable( DEPTHWRITE );
     ProcessDrawQueue( animationdrawqueue, -FLT_MAX );
 }
+bool Animation::NeedsProcessDrawQueue()
+{
+    return AnimationsLeftInQueue();
+}
 void Animation::ProcessFarDrawQueue( float farval )
 {
     //set farshit
@@ -158,6 +169,10 @@ void Animation::ProcessFarDrawQueue( float farval )
     GFXDisable( TEXTURE1 );
 
     ProcessDrawQueue( far_animationdrawqueue, farval );
+}
+bool Animation::NeedsProcessFarDrawQueue()
+{
+    return AnimationsLeftInFarQueue();
 }
 void Animation::ProcessDrawQueue( std::vector< Animation* > &animationdrawqueue, float limit )
 {

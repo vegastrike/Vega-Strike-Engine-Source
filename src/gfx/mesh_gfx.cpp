@@ -530,7 +530,7 @@ void Mesh::ProcessZFarMeshes( bool nocamerasetup )
 
     //clear Z buffer
     GFXClear( GFXFALSE, GFXTRUE, GFXFALSE );
-
+    
     static float far_margin = XMLSupport::parse_float( vs_config->getVariable( "graphics", "mesh_far_percent", ".8" ) );
     _Universe->AccessCamera()->UpdateGFXFrustum( GFXTRUE, g_game.zfar*far_margin, 0 );
 
@@ -570,6 +570,7 @@ void Mesh::ProcessUndrawnMeshes( bool pushSpecialEffects, bool nocamerasetup )
 {
     //clear Z buffer
     GFXClear( GFXFALSE, GFXTRUE, GFXFALSE );
+    
     for (int a = 0; a < NUM_ZBUF_SEQ; a++) {
         if (a == MESH_SPECIAL_FX_ONLY) {
             GFXPushGlobalEffects();
