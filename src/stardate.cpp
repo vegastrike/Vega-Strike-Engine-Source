@@ -1,10 +1,3 @@
-/// Provides functions for stardate and startime manipulation and conversion
-///There are various time measurement systems in VS
-///The stardate is an absolute time measurement in the game calendar
-/// Stardate is the in-game universe date in the format ddd.hhmm:sec
-/// Startime is the internal numeric representation of the stardate as number of seconds
-/// since the begin of initial universe time, which in Vega Strike UTCS universe is 3276800
-/// The formatting of the startime into faction specific output is done by the stardate.py script
 
 #include <assert.h>
 #include <iostream>
@@ -13,6 +6,7 @@
 #include "stardate.h"
 #include "lin_time.h"
 #include "vsfilesystem.h"
+#include "cmd/script/mission.h"
 
 using std::cerr;
 using std::cout;
@@ -24,7 +18,7 @@ extern vector< boost::shared_ptr<Faction> >factions;
 
 StarDate::StarDate()
 {
-    initial_time = getNewTime();
+    initial_time = mission->getGametime();
     initial_star_time = NULL;
 }
 
@@ -32,7 +26,7 @@ void StarDate::Init( double time )
 {
     if (initial_star_time != NULL)
         delete[] initial_star_time;
-    initial_time = getNewTime();
+    initial_time = mission->getGametime();
     initial_star_time = new double[factions.size()];
     for (unsigned int i = 0; i < factions.size(); i++)
         initial_star_time[i] = time;
@@ -42,12 +36,22 @@ void StarDate::Init( double time )
 double StarDate::GetCurrentStarTime( int faction )
 {
     //Get the number of seconds elapsed since the server start
-    double time_since_server_started = getNewTime()-initial_time;
+    double time_since_server_started = mission->getGametime()-initial_time;
     //Add them to the current date
     if (initial_star_time == NULL)
         return time_since_server_started;
     else
         return initial_star_time[faction]+time_since_server_started;
+}
+
+//Needed to calculate relative message and mission times
+//into stardate
+double StarDate::GetElapsedStarTime(int faction)
+{
+    if (initial_star_time == NULL)
+        return initial_time;
+    else
+        return initial_star_time[faction] - initial_time;
 }
 
 /*
@@ -62,7 +66,7 @@ void StarDate::InitTrek( string date )
         //we must be reinitializing;
         delete[] initial_star_time;
     initial_star_time = 0;
-    initial_time = getNewTime();
+    initial_time = mission->getGametime();
     initial_star_time = new double[factions.size()];
     double init_time = this->ConvertTrekDate( date );
     VSFileSystem::vs_dprintf( 3, "Initializing stardate from a Trek date for %d factions", factions.size() );

@@ -289,7 +289,6 @@ static void DrawHUDSprite( VDU *thus,
             mlr = middle_point*lr+middle_point_small*ul;
             mur = middle_point*ur+middle_point_small*ll;
             mul = middle_point*ul+middle_point_small*lr;
-            bool tmax = 1;
             GFXBegin( GFXQUAD );
             GFXColorf( getDamageColor( top_view ? adown : aleft ) );
             GFXTexCoord2f( 0, 0 );
@@ -376,6 +375,7 @@ void VDU::Scroll( int howmuch )
 
 #define MangleString( a, b ) (a)
 
+/*
 static std::string MangleStrung( std::string in, float probability )
 {
     //fails with ppc
@@ -396,6 +396,7 @@ static std::string MangleStrung( std::string in, float probability )
     }
     return std::string( str.begin(), str.end() );
 }
+*/
 
 static void DrawShield( float fs,
                         float rs,
@@ -567,6 +568,7 @@ static void DrawShield( float fs,
     GFXPopBlendMode();
 }
 
+/*
 static void DrawShieldArmor( Unit *parent, const float StartArmor[8], float x, float y, float w, float h, bool invertfrontback )
 {
     static bool drawVSarmor = XMLSupport::parse_bool( vs_config->getVariable( "graphics", "drawVSarmor", "true" ) );
@@ -579,9 +581,6 @@ static void DrawShieldArmor( Unit *parent, const float StartArmor[8], float x, f
     static float ishieldcolor[4]    = {.4, .4, 1, 1};
     static float mshieldcolor[4]    = {.4, .4, 1, 1};
     static float oshieldcolor[4]    = {.4, .4, 1, 1};
-    static bool  ishieldcolorloaded = (vs_config->getColor( "default", "inner_shield_color", ishieldcolor, true ), true);
-    static bool  mshieldcolorloaded = (vs_config->getColor( "default", "middle_shield_color", mshieldcolor, true ), true);
-    static bool  oshieldcolorloaded = (vs_config->getColor( "default", "outer_shield_color", oshieldcolor, true ), true);
 
     static float iarmorcolor[4]     = {1, .6, 0, 1};
     static float marmorcolor[4]     = {1, .6, 0, 1};
@@ -589,14 +588,6 @@ static void DrawShieldArmor( Unit *parent, const float StartArmor[8], float x, f
     static float iBarmorcolor[4]    = {.75, .45, .1, 1};
     static float mBarmorcolor[4]    = {.75, .45, .1, 1};
     static float oBarmorcolor[4]    = {.75, .45, .1, 1};
-
-    static bool  iarmorcolorloaded  = (vs_config->getColor( "default", "inner_armor_color", iarmorcolor, true ), true);
-    static bool  marmorcolorloaded  = (vs_config->getColor( "default", "middle_armor_color", marmorcolor, true ), true);
-    static bool  oarmorcolorloaded  = (vs_config->getColor( "default", "outer_armor_color", oarmorcolor, true ), true);
-
-    static bool  iBarmorcolorloaded = (vs_config->getColor( "default", "inner_bottom_armor_color", iBarmorcolor, true ), true);
-    static bool  mBarmorcolorloaded = (vs_config->getColor( "default", "middle_bottom_armor_color", mBarmorcolor, true ), true);
-    static bool  oBarmorcolorloaded = (vs_config->getColor( "default", "outer_bottom_armor_color", oBarmorcolor, true ), true);
 
     GFXDisable( TEXTURE0 );
     DrawShield( fs, rs, ls, bs, x, y, w, h, invertfrontback,
@@ -659,6 +650,7 @@ static void DrawShieldArmor( Unit *parent, const float StartArmor[8], float x, f
                    GFXColor( oarmorcolor[0], oarmorcolor[1], oarmorcolor[2], oarmorcolor[3] ) );
     }
 }
+*/
 
 void VDU::DrawVDUShield( Unit *parent )
 {
@@ -673,8 +665,8 @@ void VDU::DrawVDUShield( Unit *parent )
 
     h = fabs( h*.6 );
     w = fabs( w*.6 );
-    static bool invert_friendly_shields =
-        XMLSupport::parse_bool( vs_config->getVariable( "graphics", "hud", "invert_friendly_shields", "false" ) );
+    //static bool invert_friendly_shields =
+    //    XMLSupport::parse_bool( vs_config->getVariable( "graphics", "hud", "invert_friendly_shields", "false" ) );
     //DrawShieldArmor(parent,StartArmor,x,y,w,h,invert_friendly_shields);
     GFXColor4f( 1, parent->GetHullPercent(), parent->GetHullPercent(), 1 );
     GFXEnable( TEXTURE0 );
@@ -866,7 +858,6 @@ void VDU::DrawTarget( GameCockpit *cp, Unit *parent, Unit *target )
     float delautotime = UniverseUtil::GetGameTime()-cp->autoMessageTime;
     bool  draw_auto_message = (delautotime < auto_message_lim && cp->autoMessage.length() != 0);
     if (inrange) {
-        int  i = 0;
         char st[1024];
         memset( st, '\n', 1023 );
         int  tmplim = rows-3;
@@ -897,9 +888,6 @@ void VDU::DrawTarget( GameCockpit *cp, Unit *parent, Unit *target )
         static float ishieldcolor[4]    = {.4, .4, 1, 1};
         static float mshieldcolor[4]    = {.4, .4, 1, 1};
         static float oshieldcolor[4]    = {.4, .4, 1, 1};
-        static bool  ishieldcolorloaded = (vs_config->getColor( "default", "inner_shield_color", ishieldcolor, true ), true);
-        static bool  mshieldcolorloaded = (vs_config->getColor( "default", "middle_shield_color", mshieldcolor, true ), true);
-        static bool  oshieldcolorloaded = (vs_config->getColor( "default", "outer_shield_color", oshieldcolor, true ), true);
         //code replaced by target shields defined in cockpit.cpt files, preserve for mods
         static bool  builtin_shields    =
             XMLSupport::parse_bool( vs_config->getVariable( "graphics", "vdu_builtin_shields", "false" ) );
@@ -938,35 +926,17 @@ void VDU::DrawMessages( GameCockpit *parentcp, Unit *target )
 {
     static bool network_draw_messages = XMLSupport::parse_bool( vs_config->getVariable( "graphics", "network_chat_text", "true" ) );
     static bool draw_messages = XMLSupport::parse_bool( vs_config->getVariable( "graphics", "chat_text", "true" ) );
+
     if (Network != NULL && network_draw_messages == false)
         return;
     if (Network == NULL && draw_messages == false)
         return;
+
     string fullstr;
-    double nowtime     = mission->getGametime();
-    /*
-     *  char st[256];
-     *  //  sprintf (st,"\n%s",target->name.c_str());
-     *  if(target){
-     *  string ainame;
-     *  if(target->getFlightgroup()){
-     *   ainame=target->getFlightgroup()->ainame;
-     *  }
-     *  else{
-     *   ainame="unknown";
-     *  }
-     *
-     *  int nowtime_mins=(int)(nowtime/60.0);
-     *  int nowtime_secs=(int)(nowtime - nowtime_mins*60);
-     *  std::string blah=getUnitNameAndFgNoBase(target);
-     *  sprintf (st,"%s:%s:%2d.%02d",blah.c_str(),ainame.c_str(),nowtime_mins,nowtime_secs);
-     *  }
-     *  else{
-     *  sprintf(st,"no target");
-     *  }
-     */
+    double nowtime     = mission->getGametime(); //for message display duration
+
     string targetstr;
-    int    msglen      = targetstr.size();
+    //int    msglen      = targetstr.size();
     int    rows_needed = 0;  //msglen/(cols>0?cols:1);
     MessageCenter *mc  = mission->msgcenter;
     int    rows_used   = rows_needed;
@@ -974,11 +944,15 @@ void VDU::DrawMessages( GameCockpit *parentcp, Unit *target )
     whoNOT.push_back( "briefing" );
     whoNOT.push_back( "news" );
     whoNOT.push_back( "bar" );
+
     static float oldtime = XMLSupport::parse_float( vs_config->getVariable( "graphics", "last_message_time", "5" ) );
     static int   num_messages = XMLSupport::parse_int( vs_config->getVariable( "graphics", "num_messages", "2" ) );
+    static bool showStardate = XMLSupport::parse_bool( vs_config->getVariable( "graphics", "show_stardate", "true" ) );
+
     vector< std::string >message_people;     //should be "all", parent's name
     gameMessage  lastmsg;
     int row_lim = ( (scrolloffset< 0 || num_messages >rows) ? rows : num_messages );
+
     for (int i = scrolloffset < 0 ? -scrolloffset-1 : 0;
          rows_used < row_lim && mc->last( i, lastmsg, message_people, whoNOT );
          i++) {
@@ -987,13 +961,18 @@ void VDU::DrawMessages( GameCockpit *parentcp, Unit *target )
         if (scrolloffset >= 0 && sendtime < nowtime-oldtime*4)
             break;
         if ( sendtime <= nowtime && (sendtime > nowtime-oldtime || scrolloffset < 0) ) {
-            int    sendtime_mins = (int) (sendtime/60.0);
-            int    sendtime_secs = (int) (sendtime-sendtime_mins*60);
+            if (showStardate) {
+                string stardate = _Universe->current_stardate.ConvertFullTrekDate( sendtime + _Universe->current_stardate.GetElapsedStarTime() );
+                sprintf( timebuf, "%s", stardate.c_str() );
+            } else {
+                int    sendtime_mins = (int) (sendtime/60.0);
+                int    sendtime_secs = (int) (sendtime-sendtime_mins*60);
+                sprintf( timebuf, "%d.%02d", sendtime_mins, sendtime_secs );
+            }
 
-            sprintf( timebuf, "%d.%02d", sendtime_mins, sendtime_secs );
             string mymsg;
             if (lastmsg.from != "game")
-                mymsg = lastmsg.from+" ("+timebuf+"): "+lastmsg.message;
+                mymsg = lastmsg.from + " (" + timebuf + "): " + lastmsg.message;
             else
                 mymsg = string( timebuf )+": "+lastmsg.message;
             int msglen = mymsg.size();
@@ -1076,8 +1055,8 @@ void VDU::DrawNav( GameCockpit *cp, Unit *you, Unit *targ, const Vector &nav )
 {
     //Unit * you = _Universe->AccessCockpit()->GetParent();
     //Unit * targ = you!=NULL?you->Target():NULL;
-    static float game_speed = XMLSupport::parse_float( vs_config->getVariable( "physics", "game_speed", "1" ) );
-    static bool  lie = XMLSupport::parse_bool( vs_config->getVariable( "physics", "game_speed_lying", "true" ) );
+    //static float game_speed = XMLSupport::parse_float( vs_config->getVariable( "physics", "game_speed", "1" ) );
+    //static bool  lie = XMLSupport::parse_bool( vs_config->getVariable( "physics", "game_speed_lying", "true" ) );
     string nam     = "none";
     if (targ)
         nam = reformatName( targ->name );
@@ -1305,7 +1284,7 @@ void VDU::DrawDamage( Unit *parent )
 {
     //VDUdamage
     float x, y, w, h;
-    float th;
+    //float th;
     //char st[1024];
     GFXColor4f( 1, parent->GetHull()/(*maxhull), parent->GetHull()/(*maxhull), 1 );
     GFXEnable( TEXTURE0 );
@@ -1321,7 +1300,8 @@ void VDU::DrawDamage( Unit *parent )
                     +armor[7])/(float) (StartArmor[1]+StartArmor[3]+StartArmor[5]+StartArmor[7]),
                    parent->GetHull()/(*maxhull), true, false );
     GFXDisable( TEXTURE0 );
-    Unit *thr = parent->Threat();
+    //Unit *thr = parent->Threat();
+    parent->Threat();
     std::string fullname( getUnitNameAndFgNoBase( parent ) );
     //sprintf (st,"%s\nHull: %.3f",blah.c_str(),parent->GetHull());
     //tp->Draw (MangleString (st,_Universe->AccessCamera()->GetNebula()!=NULL?.5:0),0,true);
@@ -1500,15 +1480,9 @@ void VDU::DrawStarSystemAgain( float x, float y, float w, float h, VIEWSTYLE vie
                 h = fabs( h*.6 );
                 w = fabs( w*.6 );
 
-                static float ishieldcolor[4]    = {.4, .4, 1, 1};
-                static float mshieldcolor[4]    = {.4, .4, 1, 1};
-                static float oshieldcolor[4]    = {.4, .4, 1, 1};
-                static bool  ishieldcolorloaded =
-                    (vs_config->getColor( "default", "inner_shield_color", ishieldcolor, true ), true);
-                static bool  mshieldcolorloaded =
-                    (vs_config->getColor( "default", "middle_shield_color", mshieldcolor, true ), true);
-                static bool  oshieldcolorloaded =
-                    (vs_config->getColor( "default", "outer_shield_color", oshieldcolor, true ), true);
+                //static float ishieldcolor[4]    = {.4, .4, 1, 1};
+                //static float mshieldcolor[4]    = {.4, .4, 1, 1};
+                //static float oshieldcolor[4]    = {.4, .4, 1, 1};
 /*
  *       static float iarmorcolor[4]={1,.6,0,1};
  *       static float marmorcolor[4]={1,.6,0,1};
