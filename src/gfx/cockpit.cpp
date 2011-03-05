@@ -393,18 +393,20 @@ inline void DrawDockingBoxes( Unit *un, Unit *target, const Vector &CamP, const 
         const vector< DockingPorts >d = target->DockingPortLocations();
         for (unsigned int i = 0; i < d.size(); i++)
         {
+            float rad = d[i].GetRadius() / sqrt( 2.0 );
+
             if (!d[i].IsDockable())
             {
                 static GFXColor waypointcolor = DockBoxColor( "docking_box_waypoint", GFXColor(0, 1, 1, 0.3) );
                 if (waypointcolor.a > 0.01) {
                     DrawOneTargetBox( Transform( target->GetTransformation(),
                                                  d[i].GetPosition().Cast() )
-                                      - _Universe->AccessCamera()->GetPosition(), d[i].GetRadius(), CamP, CamQ, CamR, 1,
+                                      - _Universe->AccessCamera()->GetPosition(), rad, CamP, CamQ, CamR, 1,
                                       true, true );
                 }
                 continue;
             }
-            float rad = d[i].GetRadius() / sqrt( 2.0 );
+            
             GFXDisable( DEPTHTEST );
             GFXDisable( DEPTHWRITE );
             GFXColorf( dockboxstop );
