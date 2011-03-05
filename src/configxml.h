@@ -73,9 +73,9 @@ public:
     void getColor( configNode*node, string name, float color[4], bool have_color = false );
     void getColor( string section, string name, float color[4], bool have_color = false );
     void gethColor( string section, string name, float color[4], int hexcolor );
-    void getColor( string name, float color[4] )
+    void getColor( string name, float color[4], bool have_color = false )
     {
-        getColor( "default", name, color );
+        getColor( "default", name, color, have_color );
     }
     string getVariable( string section, string name, string defaultvalue );
     string getVariable( string section, string subsection, string name, string defaultvalue );
