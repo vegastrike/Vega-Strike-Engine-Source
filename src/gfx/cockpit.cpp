@@ -379,40 +379,30 @@ inline void DrawOneTargetBox( const QVector &Loc,
     GFXDisable( SMOOTH );
 }
 
-static GFXColor DockBoxColor( const string &name )
+static GFXColor DockBoxColor( const string &name, GFXColor deflt = GFXColor(1,1,1,1) )
 {
-    GFXColor dockbox( 1, 1, 1, 1 );
-    vs_config->getColor( name, &dockbox.r );
-    return dockbox;
+    vs_config->getColor( name, &deflt.r );
+    return deflt;
 }
 
 inline void DrawDockingBoxes( Unit *un, Unit *target, const Vector &CamP, const Vector &CamQ, const Vector &CamR )
 {
     if ( target->IsCleared( un ) ) {
-        static GFXColor dockboxstop = DockBoxColor( "docking_box_halt" );
-        static GFXColor dockboxgo   = DockBoxColor( "docking_box_proceed" );
-        if (dockboxstop.r == 1 && dockboxstop.g == 1 && dockboxstop.b == 1) {
-            dockboxstop.r = 1;
-            dockboxstop.g = 0;
-            dockboxstop.b = 0;
-        }
-        if (dockboxgo.r == 1 && dockboxgo.g == 1 && dockboxgo.b == 1) {
-            dockboxgo.r = 0;
-            dockboxgo.g = 1;
-            dockboxgo.b = .5;
-        }
+        static GFXColor dockboxstop = DockBoxColor( "docking_box_halt", GFXColor(1,0,0,1) );
+        static GFXColor dockboxgo   = DockBoxColor( "docking_box_proceed", GFXColor(0,1,.5,1) );
         const vector< DockingPorts >d = target->DockingPortLocations();
         for (unsigned int i = 0; i < d.size(); i++)
         {
-            // FIXME: Do not draw waypoints
             if (!d[i].IsDockable())
             {
-                GFXColor4f(0, 1, 1, 0.3); // docking_box_waypoint = cyan
-                DrawOneTargetBox( Transform( target->GetTransformation(),
-                                             d[i].GetPosition().Cast() )
-                                  - _Universe->AccessCamera()->GetPosition(), d[i].GetRadius(), CamP, CamQ, CamR, 1,
-                                  true, true );
-                 continue;
+                static GFXColor waypointcolor = DockBoxColor( "docking_box_waypoint", GFXColor(0, 1, 1, 0.3) );
+                if (waypointcolor.a > 0.01) {
+                    DrawOneTargetBox( Transform( target->GetTransformation(),
+                                                 d[i].GetPosition().Cast() )
+                                      - _Universe->AccessCamera()->GetPosition(), d[i].GetRadius(), CamP, CamQ, CamR, 1,
+                                      true, true );
+                }
+                continue;
             }
             float rad = d[i].GetRadius() / sqrt( 2.0 );
             GFXDisable( DEPTHTEST );
