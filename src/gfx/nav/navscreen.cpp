@@ -355,17 +355,23 @@ void NavigationSystem::Draw()
         return;
     if (_Universe->AccessCockpit()->GetParent() == NULL)
         return;
+    
     //DRAW THE SCREEN MODEL
     //**********************************
     Vector p, q, r;
+    static float zrange =
+        XMLSupport::parse_float( vs_config->getVariable( "graphics", "cockpit_nav_zrange", "10" ) );
+    static float zfloor =
+        XMLSupport::parse_float( vs_config->getVariable( "graphics", "cockpit_nav_zfloor", "0.1" ) );
     _Universe->AccessCamera()->GetOrientation( p, q, r );
+    _Universe->AccessCamera()->UpdateGFX( GFXTRUE,
+                                          GFXTRUE,
+                                          GFXFALSE,
+                                          GFXTRUE,
+                                          zfloor,
+                                          zfloor+zrange );
 
-    GFXEnable( TEXTURE0 );
-    GFXDisable( DEPTHTEST );
-    GFXClear( GFXFALSE );
-//GFXEnable(CLIPMODE)
-    GFXEnable( LIGHTING );
-    GFXCenterCamera( true );
+    _Universe->activateLightMap();
     for (int i = 0; i < NAVTOTALMESHCOUNT; i++) {
         float screen_x = 0.0;
         float screen_y = 0.0;
@@ -376,7 +382,7 @@ void NavigationSystem::Draw()
         screen_z = meshcoordinate_z[i];
         if ( checkbit( buttonstates, (i-1) ) )          //button1 = 0, starts at -1, returning 0, no addition done
             screen_z += meshcoordinate_z_delta[i];
-        QVector pos( 0, 0, 0 );
+        QVector pos = _Universe->AccessCamera()->GetPosition();
 
         //offset horizontal
         //***************
@@ -396,15 +402,15 @@ void NavigationSystem::Draw()
         Matrix mat( p, q, r, pos );
         if (mesh[i]) {
             mesh[i]->Draw( 
-                1000000000, // lod
+                FLT_MAX, // lod
                 mat );
         }
     }
-    Mesh::ProcessZFarMeshes();
-    Mesh::ProcessUndrawnMeshes();
+    Mesh::ProcessZFarMeshes(true);
+    Mesh::ProcessUndrawnMeshes(false,true);
     GFXBlendMode( SRCALPHA, INVSRCALPHA );
     GFXColor4f( 1, 1, 1, 1 );
-    GFXEnable( TEXTURE0 );
+    GFXDisable( TEXTURE0 );
     GFXDisable( TEXTURE1 );
     GFXDisable( LIGHTING );
 
@@ -486,6 +492,7 @@ void NavigationSystem::Draw()
     mouse_y_previous = ( 1+float(-1*mousey)/(.5*g_game.y_resolution) );
     //**********************************
 
+    GFXEnable( TEXTURE0 );
     GFXHudMode( false );
 }
 //**********************************

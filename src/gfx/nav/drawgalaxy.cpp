@@ -767,6 +767,7 @@ void NavigationSystem::DrawGalaxy()
     //**********************************
 
     glEnable( GL_ALPHA );
+    GFXDisable( LIGHTING );
     GFXBlendMode( SRCALPHA, INVSRCALPHA );
     if (!camera_z) {
         float max_x = 0.0;
@@ -968,6 +969,8 @@ void NavigationSystem::DrawGalaxy()
         }
         unsigned destsize = systemIter->GetDestinationSize();
         if (destsize != 0) {
+            GFXDisable( LIGHTING );
+            GFXDisable( TEXTURE0 );
             GFXBegin( GFXLINE );
             for (unsigned i = 0; i < destsize; ++i) {
                 CachedSystemIterator::SystemInfo &oth = systemIter[systemIter->GetDestinationIndex( i )];
