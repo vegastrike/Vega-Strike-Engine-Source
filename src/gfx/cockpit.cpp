@@ -381,7 +381,7 @@ inline void DrawOneTargetBox( const QVector &Loc,
 
 static GFXColor DockBoxColor( const string &name, GFXColor deflt = GFXColor(1,1,1,1) )
 {
-    vs_config->getColor( name, &deflt.r );
+    vs_config->getColor( name, &deflt.r, true );
     return deflt;
 }
 
@@ -394,14 +394,16 @@ inline void DrawDockingBoxes( Unit *un, Unit *target, const Vector &CamP, const 
         for (unsigned int i = 0; i < d.size(); i++)
         {
             float rad = d[i].GetRadius() / sqrt( 2.0 );
+            QVector dockpos = Transform( 
+                    target->GetTransformation(),
+                    d[i].GetPosition().Cast() 
+                ) - _Universe->AccessCamera()->GetPosition();
 
             if (!d[i].IsDockable())
             {
                 static GFXColor waypointcolor = DockBoxColor( "docking_box_waypoint", GFXColor(0, 1, 1, 0.3) );
                 if (waypointcolor.a > 0.01) {
-                    DrawOneTargetBox( Transform( target->GetTransformation(),
-                                                 d[i].GetPosition().Cast() )
-                                      - _Universe->AccessCamera()->GetPosition(), rad, CamP, CamQ, CamR, 1,
+                    DrawOneTargetBox( dockpos, rad, CamP, CamQ, CamR, 1,
                                       true, true );
                 }
                 continue;
@@ -410,16 +412,12 @@ inline void DrawDockingBoxes( Unit *un, Unit *target, const Vector &CamP, const 
             GFXDisable( DEPTHTEST );
             GFXDisable( DEPTHWRITE );
             GFXColorf( dockboxstop );
-            DrawOneTargetBox( Transform( target->GetTransformation(),
-                                         d[i].GetPosition().Cast() )
-                              - _Universe->AccessCamera()->GetPosition(), rad, CamP, CamQ, CamR, 1,
+            DrawOneTargetBox( dockpos, rad, CamP, CamQ, CamR, 1,
                               true, true );
             GFXEnable( DEPTHTEST );
             GFXEnable( DEPTHWRITE );
             GFXColorf( dockboxgo );
-            DrawOneTargetBox( Transform( target->GetTransformation(),
-                                         d[i].GetPosition().Cast() )
-                              - _Universe->AccessCamera()->GetPosition(), rad, CamP, CamQ, CamR, 1,
+            DrawOneTargetBox( dockpos, rad, CamP, CamQ, CamR, 1,
                               true, true );
         }
         GFXDisable( DEPTHTEST );
