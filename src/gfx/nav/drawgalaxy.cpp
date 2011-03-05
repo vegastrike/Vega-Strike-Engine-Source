@@ -2,6 +2,7 @@
 /// Draws in-system map, and  galaxy map of known sectors and systems
 
 #include <algorithm>
+#include <cmath>
 #include "vs_globals.h"
 #include "vegastrike.h"
 #include "gfx/gauge.h"
@@ -32,7 +33,6 @@
 #include "gui/glut_support.h"
 #include "networking/netclient.h"
 #include "cmd/unit_util.h"
-#include "math.h"
 #include "hashtable.h"
 #include "navscreen.h"
 #include "gfx/masks.h"
@@ -961,7 +961,10 @@ void NavigationSystem::DrawGalaxy()
         DrawNode( insert_type, insert_size, the_x, the_y,
                   (*systemIter).GetName(), screenoccupation, moused, isPath ? pathcol : col, false, false,
                   isPath ? "" : csector );
-        DisplayOrientationLines( the_x, the_y, the_x_flat, the_y_flat, 0 );
+        if (std::fabs(zdistance) < 2.0f * camera_z)
+        {
+            DisplayOrientationLines( the_x, the_y, the_x_flat, the_y_flat, 0 );
+        }
         if ( TestIfInRangeRad( the_x, the_y, insert_size, mouse_x_current, mouse_y_current ) ) {
             mouselist.push_back( systemdrawnode( insert_type, insert_size, the_x, the_y, (*systemIter).GetName(),
                                                  systemIter.getIndex(), screenoccupation, false, isPath ? pathcol : col ) );
