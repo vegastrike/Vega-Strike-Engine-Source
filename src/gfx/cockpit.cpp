@@ -388,6 +388,7 @@ static GFXColor DockBoxColor( const string &name, GFXColor deflt = GFXColor(1,1,
 inline void DrawDockingBoxes( Unit *un, Unit *target, const Vector &CamP, const Vector &CamQ, const Vector &CamR )
 {
     if ( target->IsCleared( un ) ) {
+        GFXBlendMode( SRCALPHA, INVSRCALPHA );
         static GFXColor dockboxstop = DockBoxColor( "docking_box_halt", GFXColor(1,0,0,1) );
         static GFXColor dockboxgo   = DockBoxColor( "docking_box_proceed", GFXColor(0,1,.5,1) );
         const vector< DockingPorts >d = target->DockingPortLocations();
@@ -403,6 +404,7 @@ inline void DrawDockingBoxes( Unit *un, Unit *target, const Vector &CamP, const 
             {
                 static GFXColor waypointcolor = DockBoxColor( "docking_box_waypoint", GFXColor(0, 1, 1, 0.3) );
                 if (waypointcolor.a > 0.01) {
+                    GFXColorf( waypointcolor );
                     DrawOneTargetBox( dockpos, rad, CamP, CamQ, CamR, 1,
                                       true, true );
                 }
