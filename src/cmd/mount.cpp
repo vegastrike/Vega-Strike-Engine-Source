@@ -32,6 +32,7 @@ Mount::Mount()
     status    = UNCHOSEN;
     processed = Mount::PROCESSED;
     sound     = -1;
+    last_sound_refire_time = 0.0;
     static float xyscalestat = XMLSupport::parse_float( vs_config->getVariable( "graphics", "weapon_xyscale", "1" ) );
 
     static float zscalestat  = XMLSupport::parse_float( vs_config->getVariable( "graphics", "weapon_zscale", "1" ) );
@@ -400,30 +401,58 @@ bool Mount::PhysicsAlignedFire( Unit *caller,
             XMLSupport::parse_float( vs_config->getVariable( "audio", "max_range_to_hear_weapon_fire",
                                                              "100000" ) )
             *XMLSupport::parse_float( vs_config->getVariable( "audio", "max_range_to_hear_weapon_fire", "100000" ) );
-        if ( ( ( (!use_separate_sound)
-                || type->type == weapon_info::BEAM )
-              || ( (!ai_use_separate_sound) && !ips ) ) && (isMissile( type ) == false) ) {
-            if ( ai_sound || (ips && type->type == weapon_info::BEAM) ) {
-                if ( !AUDIsPlaying( sound ) ) {
-                    if (distancesqr < maxdistancesqr)
-                        AUDPlay( sound, tmp.position, velocity, 1 );
-                } else {
-                    if (distancesqr < maxdistancesqr)
-                        AUDAdjustSound( sound, tmp.position, velocity );
-                    else AUDStopPlaying( sound );
-                }
-            }
-        } else if ( (ai_sound || ips) && distancesqr < maxdistancesqr ) {
-            int snd = AUDCreateSound( sound, false );
+        static float weapon_gain = 
+            XMLSupport::parse_float( vs_config->getVariable( "audio", "weapon_gain", ".25" ) );
+        static float exterior_weapon_gain = 
+            XMLSupport::parse_float( vs_config->getVariable( "audio", "exterior_weapon_gain", ".35" ) );
+        static float min_weapon_sound_refire = 
+            XMLSupport::parse_float( vs_config->getVariable( "audio", "min_weapon_sound_refre", ".2" ) );
+        float curtime = realTime();
+        bool tooquick = ((curtime - last_sound_refire_time) < min_weapon_sound_refire);
+        if (!tooquick) {
+            last_sound_refire_time = curtime;
+            
+            QVector sound_pos;
+            Vector sound_vel;
+            float sound_gain;
+            
             if (ips && cp != NULL && cp->GetView() <= CP_RIGHT) {
-                AUDAdjustSound( snd, Vector( 0, 0, 0 ), velocity );
-                static float gain = XMLSupport::parse_float( vs_config->getVariable( "audio", "weapon_gain", ".25" ) );
-                AUDSoundGain( snd, gain );
+                sound_pos = QVector(0, 0, 0);
+                sound_vel = Vector(0, 0, 0);
+                sound_gain = weapon_gain;
             } else {
-                AUDAdjustSound( snd, tmp.position, velocity );
+                sound_pos = tmp.position;
+                sound_vel = velocity;
+                sound_gain = exterior_weapon_gain;
             }
-            AUDStartPlaying( snd );
-            AUDDeleteSound( snd );
+            
+            if ( ( ( (!use_separate_sound)
+                    || type->type == weapon_info::BEAM )
+                  || ( (!ai_use_separate_sound) && !ips ) ) && (isMissile( type ) == false) ) {
+                if ( ai_sound || (ips && type->type == weapon_info::BEAM) ) {
+                    if ( !AUDIsPlaying( sound ) ) {
+                        AUDPlay( sound, sound_pos, sound_vel, sound_gain );
+                    } else {
+                        if (distancesqr < maxdistancesqr) {
+                            if (type->type == weapon_info::BEAM) {
+                                // Beams don't re-start, they keep playing
+                                AUDAdjustSound( sound, sound_pos, sound_vel );
+                                AUDSoundGain( sound, sound_gain );
+                            } else {
+                                // Other kinds of weapons just re-play the sound
+                                AUDStopPlaying( sound );
+                                AUDPlay( sound, sound_pos, sound_vel, sound_gain );
+                            }
+                        } else {
+                            AUDStopPlaying( sound );
+                        }
+                    }
+                }
+            } else if ( (ai_sound || ips) && distancesqr < maxdistancesqr ) {
+                int snd = AUDCreateSound( sound, false );
+                AUDPlay( sound, sound_pos, sound_vel, sound_gain );
+                AUDDeleteSound( snd );
+            }
         }
         return true;
     }

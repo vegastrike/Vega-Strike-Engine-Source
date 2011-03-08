@@ -80,7 +80,6 @@ void blutLoadWAVMemory( ALbyte *memory, ALenum
     WAVFileHdr_Struct  FileHdr;
     WAVSmplHdr_Struct  SmplHdr;
     WAVFmtHdr_Struct   FmtHdr;
-    int     i;
     ALbyte *Stream;
 
     *format = AL_FORMAT_MONO16;
@@ -274,17 +273,8 @@ static void ConvertFormat( vector< char > &ogg )
 #ifdef HAVE_OGG
             OggVorbis_File vf;
             ov_callbacks   callbacks;
-            vorbis_info   *info;
-            int  bitstream = -1;
-            long samplesize;
-            long samples;
-            int  read, to_read;
-            int  must_close = 1;
-            int  was_error  = 1;
-            //FILE * tmpf=tmpfile();
-            //fwrite(&ogg[0],ogg.size(),1,tmpf);
-            //fseek(tmpf,0,SEEK_SET);
             fake_file ff;
+            
             ff.data = &ogg[0];
             ff.loc  = 0;
             ff.size = ogg.size();
@@ -295,11 +285,8 @@ static void ConvertFormat( vector< char > &ogg )
             if ( ov_open_callbacks( &ff, &vf, NULL, 0, callbacks ) ) {
                 ogg.clear();
             } else {
-                int  bigendian    = 0;
                 long bytesread    = 0;
                 vorbis_info *info = ov_info( &vf, -1 );
-                //ogg_int64_t totalsize=ov_pcm_total(&vf,-1);
-                //long num_streams=ov_streams(&vf);
                 const int    segmentsize = 65536*32;
                 const int    samples     = 16;
                 converted.push_back( 'R' );
@@ -371,18 +358,13 @@ static void ConvertFormat( vector< char > &ogg )
                     int numtoerase = 0;
                     if (bytesread < segmentsize)
                         numtoerase = segmentsize-bytesread;
-                    //converted.erase(converted.end()-numtoerase,converted.end());
 
                     converted.resize( converted.size()+segmentsize-numtoerase );
                 }
                 converted.resize( converted.size()-segmentsize );
                 convertToLittle( converted.size()-8, &converted[4] );
                 convertToLittle( converted.size()-pcmsizestart, &converted[pcmsizestart-4] );
-#if 0
-                FILE *tmp = fopen( "c:/temp/bleh", "wb" );
-                fwrite( &converted[0], converted.size(), 1, tmp );
-                fclose( tmp );
-#endif
+
                 converted.swap( ogg );
             }
             ov_clear( &vf );
@@ -395,14 +377,13 @@ static void ConvertFormat( vector< char > &ogg )
 
 static int LoadSound( ALuint buffer, bool looping, bool music )
 {
-    static bool  verbose_debug = XMLSupport::parse_bool( vs_config->getVariable( "data", "verbose_debug", "false" ) );
     unsigned int i;
     if ( !dirtysounds.empty() ) {
         i = dirtysounds.back();
         dirtysounds.pop_back();
         //assert (sounds[i].buffer==(ALuint)0);
-        if (verbose_debug && sounds[i].buffer != (ALuint) 0)
-            VSFileSystem::vs_fprintf( stderr, "using claimed buffer %d", sounds[i].buffer );
+        if (sounds[i].buffer != (ALuint) 0)
+            VSFileSystem::vs_dprintf( 3, "using claimed buffer %d\n", sounds[i].buffer );
         sounds[i].buffer = buffer;
     } else {
         i = sounds.size();
@@ -699,6 +680,9 @@ void AUDDeleteSound( int sound, bool music )
 
 void AUDAdjustSound( const int sound, const QVector &pos, const Vector &vel )
 {
+    static float ref_distance = XMLSupport::parse_float( vs_config->getVariable( "audio", "audio_ref_distance", "4000" ) );
+    static float max_distance = XMLSupport::parse_float( vs_config->getVariable( "audio", "audio_max_distance", "1000000" ) );
+    
 #ifdef HAVE_AL
     if ( sound >= 0 && sound < (int) sounds.size() ) {
         float p[] = {
@@ -712,6 +696,12 @@ void AUDAdjustSound( const int sound, const QVector &pos, const Vector &vel )
             alSourcefv( sounds[sound].source, AL_POSITION, p );
             bool relative = (p[0] == 0 && p[1] == 0 && p[2] == 0);
             alSourcei( sounds[sound].source, AL_SOURCE_RELATIVE, relative );
+            if (!relative) {
+                // Set rolloff factrs
+                alSourcef(sounds[sound].source, AL_MAX_DISTANCE, scalepos * max_distance);
+                alSourcef(sounds[sound].source, AL_REFERENCE_DISTANCE, scalepos * ref_distance);
+                alSourcef(sounds[sound].source, AL_ROLLOFF_FACTOR, 1.f);
+            }
         }
         if (usedoppler && sounds[sound].source)
             alSourcefv( sounds[sound].source, AL_VELOCITY, v );
@@ -870,9 +860,6 @@ void AUDStartPlaying( const int sound )
 void AUDPlay( const int sound, const QVector &pos, const Vector &vel, const float gain )
 {
 #ifdef HAVE_AL
-#ifdef SOUND_DEBUG
-    printf( "AUDPlay(%d)", sound );
-#endif
     char tmp;
     if (sound < 0)
         return;
@@ -880,20 +867,22 @@ void AUDPlay( const int sound, const QVector &pos, const Vector &vel, const floa
         return;
     if (!starSystemOK() && !sounds[sound].music)
         return;
+    if ( AUDIsPlaying( sound ) )
+        AUDStopPlaying( sound );
     if ( ( tmp = AUDQueryAudability( sound, pos.Cast(), vel, gain ) ) != 0 ) {
         if ( AUDReclaimSource( sound, pos == QVector( 0, 0, 0 ) ) ) {
-            //ALfloat p [3] = {pos.i,pos.j,pos.k};
             AUDAdjustSound( sound, pos, vel );
             AUDSoundGain( sound, gain, sounds[sound].music );
             if (tmp != 2) {
-#ifdef SOUND_DEBUG
-                printf( "AUDPlay sound %d %d\n", sounds[sound].source, sounds[sound].buffer );
-#endif
+                VSFileSystem::vs_dprintf(3, "AUDPlay sound %d %d\n", 
+                    sounds[sound].source, sounds[sound].buffer );
                 AUDAddWatchedPlayed( sound, pos.Cast() );
-                alSourcePlay( sounds[sound].source );
-                //AUDAdjustSound (sound,pos,vel);
-                //alSourcef(sounds[sound].source,AL_GAIN,gain);
+            } else {
+                VSFileSystem::vs_dprintf(3, "AUDPlay stole sound %d %d\n", 
+                    sounds[sound].source, sounds[sound].buffer );
+                alSourceStop( sounds[sound].source );
             }
+            alSourcePlay( sounds[sound].source );
         }
     }
 #endif

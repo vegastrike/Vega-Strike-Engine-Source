@@ -112,6 +112,7 @@ protected:
 //Where is it
     Vector     pos;
     Quaternion orient;
+    double last_sound_refire_time;
     void ReplaceSound();
 public:
 //Serial used to store missiles serial id before they are really created

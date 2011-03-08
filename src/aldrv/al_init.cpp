@@ -191,6 +191,8 @@ bool AUDInit()
         alGetEr = alGetError();
     }
     
+    alDistanceModel(AL_INVERSE_DISTANCE_CLAMPED);
+    
     g_game.sound_enabled = sound_enabled;
     g_game.music_enabled = music_enabled;
     

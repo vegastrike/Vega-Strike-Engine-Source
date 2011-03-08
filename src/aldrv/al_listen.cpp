@@ -62,6 +62,25 @@ QVector AUDListenerLocation()
     return mylistener.pos.Cast();
 }
 
+static float EstimateGain(const Vector &pos, const float gain)
+{
+    static float ref_distance = XMLSupport::parse_float( vs_config->getVariable( "audio", "audio_ref_distance", "4000" ) );
+    
+    // Base priority is source gain
+    float final_gain = gain;
+    
+    // Account for distance attenuation
+    float listener_size = sqrt(mylistener.rsize);
+    float distance = (AUDListenerLocation() - pos.Cast()).Magnitude()
+                     - listener_size
+                     - ref_distance;
+    float ref = ref_distance;
+    float rolloff = 1.0f;
+    final_gain *= (distance <= 0) ? 1.f : float(ref / (ref + rolloff * distance));
+    
+    return final_gain;
+}
+
 char AUDQueryAudability( const int sound, const Vector &pos, const Vector &vel, const float gain )
 {
 #ifdef HAVE_AL
@@ -85,30 +104,47 @@ char AUDQueryAudability( const int sound, const Vector &pos, const Vector &vel, 
     if ( playingbuffers[hashed].empty() )
         return 1;
     //int target = rand()%playingbuffers[hashed].size();
-    for (int rr = 0; rr < 3; rr++) {
-        int target  = rand()%playingbuffers[hashed].size();
+    float est_gain = EstimateGain(pos, gain);
+    float min_gain = est_gain;
+    int min_index = -1;
+    for (size_t target = 0; target < playingbuffers[hashed].size(); ++target) {
         int target1 = playingbuffers[hashed][target].soundname;
         t = sounds[target1].pos-mylistener.pos;
         if ( sounds[target1].pos == Vector( 0, 0, 0 ) )
             t = Vector( 0, 0, 0 );
         //steal sound!
-        if (sounds[target1].buffer == sounds[sound].buffer)
-            if (t.Dot( t ) > mag) {
-                ALuint tmpsrc = sounds[target1].source;
-                //VSFileSystem::vs_fprintf (stderr,"stole sound %d %f\n", target1,mag);
-                sounds[target1].source = sounds[sound].source;
-                sounds[sound].source   = tmpsrc;
-                playingbuffers[hashed][target].soundname = sound;
-                if (tmpsrc == 0) {
-                    playingbuffers[hashed].erase( playingbuffers[hashed].begin()+target );
-                    if ( !playingbuffers[hashed].size() )
-                        break;
-                } else {
-                    //VSFileSystem::vs_fprintf (stderr,"stole %d",tmpsrc);
-                    return 2;
-                }
+        if (sounds[target1].buffer == sounds[sound].buffer) {
+            float target_est_gain;
+            if (sounds[target1].pos == Vector(0,0,0)) {
+                // relative sound, constant gain
+                target_est_gain = sounds[target1].gain;
+            } else {
+                // positional sound
+                target_est_gain = EstimateGain(sounds[target1].pos,sounds[target1].gain);
             }
+            if (target_est_gain <= min_gain) {
+                min_index = target;
+                min_gain = target_est_gain;
+            }
+        }
     }
+    if (min_index >= 0) {
+        int target = min_index;
+        int target1 = playingbuffers[hashed][target].soundname;
+        
+        ALuint tmpsrc = sounds[target1].source;
+        
+        sounds[target1].source = sounds[sound].source;
+        sounds[sound].source   = tmpsrc;
+        playingbuffers[hashed][target].soundname = sound;
+        if (tmpsrc == 0) {
+            playingbuffers[hashed].erase( playingbuffers[hashed].begin()+target );
+        } else {
+            VSFileSystem::vs_dprintf (4, "stole %d",tmpsrc);
+            return 2;
+        }
+    }
+    
     if (playingbuffers[hashed].size() > maxallowedsingle)
         return 0;
     if (totalplaying > maxallowedtotal)
