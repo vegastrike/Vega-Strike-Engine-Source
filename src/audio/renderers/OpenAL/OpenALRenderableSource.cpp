@@ -94,7 +94,7 @@ namespace Audio {
             // Distance attenuation
             if (source->isAttenuated()) {
                 alSourcef(als, AL_REFERENCE_DISTANCE, source->getRadius());
-                alSourcef(als, AL_ROLLOFF_FACTOR, 1.f / source->getRadius());
+                alSourcef(als, AL_ROLLOFF_FACTOR, 1.f);
             } else {
                 alSourcef(als, AL_ROLLOFF_FACTOR, 0.f);
             }
