@@ -276,15 +276,15 @@ static void AddMounts( Unit *thus, Unit::XML &xml, const std::string &mounts )
         if ( (a&1) == parity ) {
             int b = a;
             if ( (a&3) == 2 && (int) a < (thus->GetNumMounts()-1) ) {
-                if (thus->mounts[a].type->type != weapon_info::PROJECTILE && thus->mounts[a+1].type->type
-                    != weapon_info::PROJECTILE)
+                if (thus->mounts[a].type->type != weapon_info::PROJECTILE 
+                    && thus->mounts[a+1].type->type != weapon_info::PROJECTILE)
+                {
                     b = a+1;
+                }
             }
-            thus->mounts[b].sound = AUDCreateSound( thus->mounts[b].type->sound,
-                                                    thus->mounts[b].type->type != weapon_info::PROJECTILE );
+            thus->mounts[b].sound = AUDCreateSound( thus->mounts[b].type->sound, false );
         } else if ( (!half_sounds) || thus->mounts[a].type->type == weapon_info::PROJECTILE ) {
-            thus->mounts[a].sound = AUDCreateSound( thus->mounts[a].type->sound,
-                                                    thus->mounts[a].type->type != weapon_info::PROJECTILE );                                      //lloping also flase in unit_customize
+            thus->mounts[a].sound = AUDCreateSound( thus->mounts[a].type->sound, false );
         }
         if (a > 0)
             if (thus->mounts[a].sound == thus->mounts[a-1].sound && thus->mounts[a].sound != -1)

@@ -406,7 +406,7 @@ bool Mount::PhysicsAlignedFire( Unit *caller,
         static float exterior_weapon_gain = 
             XMLSupport::parse_float( vs_config->getVariable( "audio", "exterior_weapon_gain", ".35" ) );
         static float min_weapon_sound_refire = 
-            XMLSupport::parse_float( vs_config->getVariable( "audio", "min_weapon_sound_refre", ".2" ) );
+            XMLSupport::parse_float( vs_config->getVariable( "audio", "min_weapon_sound_refire", ".2" ) );
         float curtime = realTime();
         bool tooquick = ((curtime - last_sound_refire_time) < min_weapon_sound_refire);
         if (!tooquick) {
@@ -513,6 +513,6 @@ void Mount::PhysicsAlignedUnfire()
 
 void Mount::ReplaceSound()
 {
-    sound = AUDCreateSound( sound, type->type != weapon_info::PROJECTILE );     //copy constructor basically
+    sound = AUDCreateSound( sound, false );     //copy constructor basically
 }
 
