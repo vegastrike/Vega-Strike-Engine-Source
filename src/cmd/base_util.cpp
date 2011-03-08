@@ -167,27 +167,40 @@ void DestroyVideoSoundStream( SharedPtr<Source> source, const std::string &scene
     SceneManager::getSingleton()->getScene(scene)->remove(source);
 }
 
-void Video( int room, std::string index, std::string vfile, std::string afile, float x, float y )
+bool Video( int room, std::string index, std::string vfile, std::string afile, float x, float y )
 {
     BaseInterface::Room *newroom = CheckRoom( room );
-    if (!newroom) return;
+    if (!newroom) return false;
     BaseUtil::Texture( room, index, vfile, x, y );
 
     BaseInterface::Room::BaseVSSprite *baseSprite = dynamic_cast< BaseInterface::Room::BaseVSSprite* > ( newroom->objs.back() );
 
     if (!afile.empty()) {
-        baseSprite->soundscene = "video";
-        baseSprite->soundsource = CreateVideoSoundStream( afile, baseSprite->soundscene );
-        baseSprite->spr.SetTimeSource( baseSprite->soundsource );
+        if (g_game.sound_enabled) {
+            try {
+                baseSprite->soundscene = "video";
+                baseSprite->soundsource = CreateVideoSoundStream( afile, baseSprite->soundscene );
+                baseSprite->spr.SetTimeSource( baseSprite->soundsource );
+            } catch(Audio::FileOpenException e) {
+                baseSprite->spr.Reset();
+            } catch(VidFile::FileOpenException e) {
+                baseSprite->spr.Reset();
+            }
+        } else {
+            baseSprite->spr.Reset();
+        }
     }
+    
+    return true;
 }
-void VideoStream( int room, std::string index, std::string streamfile, float x, float y, float w, float h )
+bool VideoStream( int room, std::string index, std::string streamfile, float x, float y, float w, float h )
 {
     BaseInterface::Room *newroom = CheckRoom( room );
     if (!newroom) {
         fprintf(stderr, "ERROR: Room not found!!\n");
-        return;
+        return false;
     }
+    
     BaseInterface::Room::BaseVSMovie *newobj = new BaseInterface::Room::BaseVSMovie( streamfile, index );
     newobj->SetPos( x, y );
     newobj->SetSize( w, h );
@@ -196,9 +209,16 @@ void VideoStream( int room, std::string index, std::string streamfile, float x, 
     newobj->texfile = file;
 #endif
 
-    fprintf(stdout, "INFO: Added video stream %s\n", streamfile.c_str());
-
-    newroom->objs.push_back( newobj );
+    if (newobj->spr.LoadSuccess()) {
+        fprintf(stdout, "INFO: Added video stream %s\n", streamfile.c_str());
+        newroom->objs.push_back( newobj );
+    } else {
+        fprintf(stdout, "INFO: Missing video stream %s\n", streamfile.c_str());
+        delete newobj;
+        return false;
+    }
+    
+    return true;
 }
 void SetVideoCallback( int room, std::string index, std::string callback)
 {

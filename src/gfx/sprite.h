@@ -56,10 +56,7 @@ public:
     VSSprite( const VSSprite &source );
     ~VSSprite();
 //Return true if sprite was loaded successfully
-    bool LoadSuccess() const
-    {
-        return surface != NULL;
-    }
+    bool LoadSuccess() const;
     void Draw();
 /**
  * Draw at specified coordinates given by 4 endpoints.

@@ -9,8 +9,8 @@ int Room( std::string text )
     return 0;
 }
 void Texture( int room, std::string index, std::string file, float x, float y ) {}
-void Video( int room, std::string index, std::string file, float x, float y ) {}
-void VideoStream( int room, std::string index, std::string file, float x, float y, float w, float h ) {}
+bool Video( int room, std::string index, std::string file, float x, float y ) { return false; }
+bool VideoStream( int room, std::string index, std::string file, float x, float y, float w, float h ) { return false; }
 void PlayVideo( int room, std::string index ) {}
 void StopVideo( int room, std::string index ) {}
 void SetDJEnabled( bool enabled ) {}
@@ -67,6 +67,10 @@ int GetCurRoom()
 int GetNumRoom()
 {
     return 1;
+}
+bool HasObject( int room, std::string index ) 
+{ 
+    return false; 
 }
 void refreshBaseComputerUI( const class Cargo *carg ) {}
 }

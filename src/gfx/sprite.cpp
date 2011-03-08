@@ -356,3 +356,9 @@ void VSSprite::Reset()
     if (isAnimation)
         ( (AnimatedTexture*) surface )->Reset();
 }
+
+bool VSSprite::LoadSuccess() const
+{
+    return surface != NULL && surface->LoadSuccess();
+}
+

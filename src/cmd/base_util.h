@@ -44,8 +44,8 @@ typedef std::map< std::string, std::string >Dictionary;
 
 int Room( std::string text );
 void Texture( int room, std::string index, std::string file, float x, float y );
-void Video( int room, std::string index, std::string vfile, std::string afile, float x, float y );
-void VideoStream( int room, std::string index, std::string streamfile, float x, float y, float w, float h );
+bool Video( int room, std::string index, std::string vfile, std::string afile, float x, float y );
+bool VideoStream( int room, std::string index, std::string streamfile, float x, float y, float w, float h );
 void SetTexture( int room, std::string index, std::string file );
 void SetTextureSize( int room, std::string index, float w, float h );
 void SetTexturePos( int room, std::string index, float x, float y );
@@ -119,6 +119,7 @@ void EraseLink( int room, std::string index );
 void EraseObj( int room, std::string index );
 int GetCurRoom();
 void SetCurRoom( int room );
+bool HasObject( int room, std::string index );
 int GetNumRoom();
 bool BuyShip( std::string name, bool my_fleet, bool force_base_inventory );
 bool SellShip( std::string name );

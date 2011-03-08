@@ -62,6 +62,7 @@ PYTHON_DEFINE_GLOBAL( Base, &BaseUtil::Room, "Room" );
 PYTHON_DEFINE_GLOBAL( Base, &BaseUtil::SetCurRoom, "SetCurRoom" );
 PYTHON_DEFINE_GLOBAL( Base, &BaseUtil::GetCurRoom, "GetCurRoom" );
 PYTHON_DEFINE_GLOBAL( Base, &BaseUtil::GetNumRoom, "GetNumRoom" );
+PYTHON_DEFINE_GLOBAL( Base, &BaseUtil::GetNumRoom, "HasObject" );
 PYTHON_DEFINE_GLOBAL( Base, &BaseUtil::Comp, "Comp" );
 PYTHON_DEFINE_GLOBAL( Base, &BaseUtil::CompPython, "CompPython" );
 PYTHON_DEFINE_GLOBAL( Base, &BaseUtil::Launch, "Launch" );

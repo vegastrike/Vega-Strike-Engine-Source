@@ -157,7 +157,7 @@ BaseInterface::Room::BaseVSMovie::BaseVSMovie( const std::string &moviefile, con
 {
     playing = false;
     soundscene = "video";
-    if (g_game.sound_enabled) {
+    if (g_game.sound_enabled && spr.LoadSuccess()) {
         soundsource = BaseUtil::CreateVideoSoundStream( moviefile, soundscene );
         spr.SetTimeSource( soundsource );
     } else {
