@@ -299,7 +299,7 @@ void Python::initpaths()
      *  while ((backslash=modpaths.find("\\"))!=std::string::npos) {
      *  modpaths[backslash]='/';
      *  }*/
-    std::string changepath( "import sys\nprint sys.path\nsys.path = ["+modpaths+"]\n" );
+    std::string changepath( "import sys\nprint sys.path\nsys.path = ["+modpaths+"] + sys.path\n" );
     /*
      *  std::string changepath ("import sys\nprint sys.path\nsys.path = ["
      *                       "\""+VSFileSystem::datadir+DELIMSTR"modules"DELIMSTR"builtin\""
