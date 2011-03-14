@@ -564,6 +564,10 @@ void InitDataDirectory()
 {
     vector< string >data_paths;
 
+    /* commandline-specified paths come first */
+    if (!datadir.empty())
+        data_paths.push_back( datadir );
+
     /* DATA_DIR should no longer be necessary--it will either use the path
      *  to the binary, or the current directory. */
 #ifdef DATA_DIR
