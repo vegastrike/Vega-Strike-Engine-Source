@@ -96,19 +96,21 @@ int WINAPI WinMain( HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR lpCmdLine, int n
 int main( int argc, char *argv[] )
 {
 #endif
-    if (argc > 1) {
-        if (strcmp( argv[1], "--target" ) == 0 && argc > 2) {
-            bogus_int = chdir( argv[2] );
-        } else {
-            fprintf( stderr, "Usage: vssetup [--target DATADIR]\n" );
-            return 1;
-        }
-    }
     bogus_str = getcwd( origpath, 65535 );
     origpath[65535] = 0;
     changeToProgramDirectory( argv[0] );
     {
         vector< string >data_paths;
+        
+        if (argc > 1) {
+            if (strcmp( argv[1], "--target" ) == 0 && argc > 2) {
+                data_paths.push_back( argv[2] );
+            } else {
+                fprintf( stderr, "Usage: vssetup [--target DATADIR]\n" );
+                return 1;
+            }
+        }
+        
 #ifdef DATA_DIR
         data_paths.push_back( DATA_DIR );
 #endif
