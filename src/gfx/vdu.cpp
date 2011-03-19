@@ -1173,7 +1173,7 @@ void VDU::DrawManifest( Unit *parent, Unit *target )
                     if (cm >= cv)
                         retval += tostring( (int) ( (float) cq*cm ) )+string( "t " );
                     else
-                        retval += tostring( (int) ( (float) cq*cv ) )+string( "m^2 " );
+                        retval += tostring( (int) ( (float) cq*cv ) )+string( "m3 " );
                 } else {
                     retval += tostring( (int) cq )+" ";
                 }
@@ -1186,7 +1186,7 @@ void VDU::DrawManifest( Unit *parent, Unit *target )
         }
     if (target == parent && !simple_manifest)
         retval += string( "--------\nLoad: " )+tostring( load )+string( "t " )
-                  +tostring( vol )+string( "m^2 " )+tostring( cred )+string( "Cr.\n" );
+                  +tostring( vol )+string( "m3 " )+tostring( cred )+string( "Cr.\n" );
     static float background_alpha =
         XMLSupport::parse_float( vs_config->getVariable( "graphics", "hud", "text_background_alpha", "0.0625" ) );
     GFXColor     tpbg = tp->bgcol;
