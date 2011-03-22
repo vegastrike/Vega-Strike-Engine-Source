@@ -579,7 +579,7 @@ void BaseInterface::Room::BasePython::Draw( BaseInterface *base )
     timeleft += GetElapsedTime()/getTimeCompression();
     if (timeleft >= maxtime) {
         timeleft = 0;
-        printf( "Running python script... " );
+        VSFileSystem::vs_dprintf( 2, "Running python script... " );
         RunPython( this->pythonfile.c_str() );
         return;         //do not do ANYTHING with 'this' after the previous statement...
     }
