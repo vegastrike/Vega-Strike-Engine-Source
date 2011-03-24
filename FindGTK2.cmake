@@ -224,6 +224,12 @@ else (GTK2_LIBRARIES AND GTK2_INCLUDE_DIRS)
     )
     gtk2_debug_message("GTK2_GDK_LIBRARY is ${GTK2_GDK_LIBRARY}")
 
+    pkg_check_modules(pixbuf gdk-pixbuf-2.0)	
+    SET(_PIXBUFIncDir ${pixbuf_INCLUDE_DIRS})
+    SET(_PIXBUFLinkDir ${pixbuf_LIBRARY_DIRS})
+    SET(_PIXBUFLinkFlags ${pixbuf_LDFLAGS})
+    SET(_PIXBUFCflags ${pixbuf_CFLAGS})
+    
     find_library(GTK2_GDK_PIXBUF_LIBRARY
       NAMES
         gdk_pixbuf-2.0
@@ -238,6 +244,20 @@ else (GTK2_LIBRARIES AND GTK2_INCLUDE_DIRS)
         /sw/lib
     )
     gtk2_debug_message("GTK2_GDK_PIXBUF_LIBRARY is ${GTK2_GDK_PIXBUF_LIBRARY}")
+    
+    find_path(GTK2_GDK_PIXBUF_INCLUDE_DIR
+      NAMES
+        gdk-pixbuf/gdk-pixbuf.h
+      PATHS
+        ${_GDK2IncDir}
+        ${_PIXBUFIncDir}
+        /opt/gnome/include/gdk-pixbuf-2.0
+        /usr/include/gdk-pixbuf-2.0
+        /opt/include/gdk-pixbuf-2.0
+        /sw/include/gdk-pixbuf-2.0
+    )
+    gtk2_debug_message("GTK2_GDK_PIXBUF_INCLUDE_DIR is ${GTK2_GDK_PIXBUF_INCLUDE_DIR}")
+
 
     find_library(GTK2_GMODULE_LIBRARY
       NAMES
@@ -368,6 +388,7 @@ else (GTK2_LIBRARIES AND GTK2_INCLUDE_DIRS)
       ${GTK2_PANGO_INCLUDE_DIR}
       ${GTK2_CAIRO_INCLUDE_DIR}
       ${GTK2_ATK_INCLUDE_DIR}
+      ${GTK2_GDK_PIXBUF_INCLUDE_DIR}
     )
 
     if (GTK2_GTK_LIBRARY AND GTK2_GTK_INCLUDE_DIR)
