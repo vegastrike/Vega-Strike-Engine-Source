@@ -155,7 +155,7 @@ public:
                     player->Target(NULL);
                 return true;
             }
-            if (isCurrentTarget &&
+            if (!isCurrentTarget &&
                 !draw_significant_blips &&
                 (getTopLevelOwner() == target->owner) &&
                 (distance > player->GetComputerData().radar.maxrange))
