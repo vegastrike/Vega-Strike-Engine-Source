@@ -382,7 +382,7 @@ void Technique::Pass::compile()
                     defines += "#define SRGB_FRAMEBUFFER 0\n";
             }
             if (gl_options.nv_fp2)
-                defines += "#define GL_NV_fragment_program2 1\n";
+                defines += "#define VGL_NV_fragment_program2 1\n";
             
             // Compile program
             prog = GFXCreateProgram( vertexProgram.c_str(), fragmentProgram.c_str(), 
