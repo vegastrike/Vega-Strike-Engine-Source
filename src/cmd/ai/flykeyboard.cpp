@@ -449,10 +449,14 @@ void FlyByKeyboard::Execute( bool resetangvelocity )
                 InertialFlight( initial_inertial_mode );
         }
     }
-    if (SSCK.stoppress)
+    if (SSCK.stoppress) {
         Stop( 0 );
-    if (SSCK.startpress || enteredautopilot)
+        SSCK.stoppress = false;
+    }
+    if (SSCK.startpress || enteredautopilot) {
         Stop( 1 );
+        SSCK.startpress = false;
+    }
     if (SSCK.sheltonpress > 0)
         SheltonSlide( true );
     else
@@ -1083,17 +1087,8 @@ void FlyByKeyboard::StopAutoKey( const KBData&, KBSTATE k )
 void FlyByKeyboard::StopKey( const KBData&, KBSTATE k )
 {
     if (g().dirty) g().UnDirty();
-    switch (k)
-    {
-    case UP:
-        g().stoppress = false;
-        break;
-    case DOWN:
+    if (k == PRESS)
         g().stoppress = true;
-        break;
-    default:
-        break;
-    }
 }
 void FlyByKeyboard::AccelKey( const KBData&, KBSTATE k )
 {
@@ -1141,17 +1136,8 @@ void FlyByKeyboard::DecelKey( const KBData&, KBSTATE k )
 void FlyByKeyboard::StartKey( const KBData&, KBSTATE k )
 {
     if (g().dirty) g().UnDirty();
-    switch (k)
-    {
-    case UP:
-        g().startpress = false;
-        break;
-    case DOWN:
+    if (k == PRESS)
         g().startpress = true;
-        break;
-    default:
-        break;
-    }
 }
 
 void FlyByKeyboard::RollRightKey( const KBData&, KBSTATE k )
