@@ -13,6 +13,7 @@
 #include "oldcollection.h"
 #elif defined (USE_STL_COLLECTION)
 
+#include <cstddef>
 #include <list>
 #include <vector>
 

@@ -27,6 +27,8 @@
 #include "faction_generic.h"
 #include "docking.h"
 
+extern double aggfire;
+
 using namespace Orders;
 
 const EnumMap::Pair element_names[] = {
@@ -1608,7 +1610,6 @@ void AggressiveAI::Execute()
 {
     if (parent == uoi)
         printf( "kewl" );
-    extern double aggfire;
     jump_time_check++;     //just so we get a nicely often wrapping var;
     jump_time_check %= 5;
     Flightgroup  *fg  = parent->getFlightgroup();

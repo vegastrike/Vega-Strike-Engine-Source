@@ -15,6 +15,9 @@
 #include "lin_time.h" //DEBUG ONLY
 #include "cmd/pilot.h"
 
+extern int numprocessed;
+extern double targetpick;
+
 static bool NoDockWithClear()
 {
     static bool nodockwithclear = XMLSupport::parse_bool( vs_config->getVariable( "physics", "dock_with_clear_planets", "true" ) );
@@ -430,8 +433,6 @@ void FireAt::ChooseTargets( int numtargs, bool force )
 {
     float gunspeed, gunrange, missilerange;
     parent->getAverageGunSpeed( gunspeed, gunrange, missilerange );
-    extern int    numprocessed;
-    extern double targetpick;
     static float  targettimer = UniverseUtil::GetGameTime();    //timer used to determine passage of physics frames
     static float  mintimetoswitch =
         XMLSupport::parse_float( vs_config->getVariable( "AI", "Targetting", "MinTimeToSwitchTargets", "3" ) );
