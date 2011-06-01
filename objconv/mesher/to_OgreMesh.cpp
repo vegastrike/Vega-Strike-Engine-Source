@@ -234,6 +234,11 @@ void ConverterInit()
 {
     logMgr  = new Ogre::LogManager();
     logMgr->createLog( "mesher.log" );
+
+#if (OGRE_VERSION >= 0x010700)
+    lodMgr  = new Ogre::LodStrategyManager();
+#endif
+
     rgm     = new Ogre::ResourceGroupManager();
     mth     = new Ogre::Math();
     meshMgr = new Ogre::MeshManager();
@@ -243,10 +248,6 @@ void ConverterInit()
     meshSerializer     = new Ogre::MeshSerializer();
     skeletonSerializer = new Ogre::SkeletonSerializer();
     bufferManager = new Ogre::DefaultHardwareBufferManager();     //needed because we don't have a rendersystem
-
-#if (OGRE_VERSION >= 0x010700)
-    lodMgr  = new Ogre::LodStrategyManager();
-#endif
 }
 
 void ConverterClose()
@@ -267,6 +268,8 @@ void ConverterClose()
     mth    = 0;
     delete rgm;
     rgm    = 0;
+    delete lodMgr;
+    lodMgr = 0;
     delete logMgr;
     logMgr = 0;
 }
