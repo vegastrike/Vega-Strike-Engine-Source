@@ -766,7 +766,33 @@ bool AggressiveAI::ProcessCurrentFgDirective( Flightgroup *fg )
                     for (unsigned int i = 0; i < suborders.size(); i++)
                         suborders[i]->AttachSelfOrder( leader );
                 }
-            } else if (fg->directive.find( "l" ) != string::npos || fg->directive.find( "L" ) != string::npos) {
+            }       
+            //IAmDave - hold position command         
+            else if (fg->directive.find( "s" ) != string::npos || fg->directive.find( "S" ) != string::npos) {
+               Order * ord = new Orders::MatchVelocity(Vector(0,0,0),Vector(0,0,0),true,false);
+               ord->SetParent( parent );
+               ReplaceOrder( ord );
+            }
+            //IAmDave - dock at target command start... 
+            else if (fg->directive.find( "t" ) != string::npos || fg->directive.find( "T" ) != string::npos) {
+               Unit *targ   = fg->target.GetUnit();
+               bool  callme = false;
+               if ( targ->InCorrectStarSystem( _Universe->activeStarSystem() ) ) {
+                 Order * ord;
+                 if(targ->IsBase()){
+                   ord = new Orders::DockingOps(targ,new Orders::MatchVelocity(Vector(0,0,0),Vector(0,0,0),true,false),true,true);
+                 }
+                 else{
+                   ord = new Orders::MoveTo(targ->Position(),true,4);
+                 }
+                                ord->SetParent( parent );
+                                ReplaceOrder( ord );
+               }
+                
+            
+            }
+            //IAmDave - ...dock at target command end.
+            else if (fg->directive.find( "l" ) != string::npos || fg->directive.find( "L" ) != string::npos) {
                 if (leader != NULL) {
                     if ( leader->InCorrectStarSystem( _Universe->activeStarSystem() ) ) {
                         retval = true;
@@ -865,17 +891,17 @@ bool AggressiveAI::ProcessCurrentFgDirective( Flightgroup *fg )
                                 Xpos = 0;
                                 Ypos = 0;
                             }
-                            float dist     = (leader->radial_size+parent->radial_size);
+                            float dist     = (leader->radial_size+parent->radial_size*2);
                             float formdist = esc_percent*(1+fgnum*2)*alternate*(dist);
                             //if i am a cargo wingman, get into a dockable position
                             if (parentowner == leader) {
-                                Order *ord = new Orders::FormUp( QVector( 1.1*Xpos*psize, 1.1*Ypos*psize, fabs( dist ) ) );
+                                // move in front
+                                Order *ord = new Orders::FormUp( QVector( 0, 0, fabs( dist ) ) );
                                 ord->SetParent( parent );
                                 ReplaceOrder( ord );
                                 //facing me
                                 ord = new Orders::FaceDirection( -dist*turn_leader );
-                                ord->SetParent( parent );
-                                ReplaceOrder( ord );
+                                EnqueueOrderFirst( ord );
                             }
                             //if i am a cargo wingman and so is the player, get into a dockable position with the leader
                             else if ( parentowner && leaderowner && (parentowner == leaderowner) ) {

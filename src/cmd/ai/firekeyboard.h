@@ -115,6 +115,10 @@ public:
     static void FormUp( const KBData &, KBSTATE );
     static void DockWithMe( const KBData &, KBSTATE );
     static void DefendTarget( const KBData &, KBSTATE );
+    //IAmDave - new flightgroup commands...
+    static void DockTarget( const KBData&, KBSTATE k );
+    static void HoldPosition( const KBData&, KBSTATE k );
+    //IAmDave - ...new flightgroup commands end.
     static void AttackTarget( const KBData &, KBSTATE );
     static void TurretAIOn( const KBData &, KBSTATE );
     static void TurretAIOff( const KBData &, KBSTATE );

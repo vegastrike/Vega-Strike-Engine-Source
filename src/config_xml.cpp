@@ -591,6 +591,8 @@ CommandMap initGlobalCommandMap()
     commandMap["CommFormUp"]                       = FireKeyboard::FormUp;
     commandMap["CommDockWithMe"]                   = FireKeyboard::DockWithMe;
     commandMap["CommDefendTarget"]                 = FireKeyboard::DefendTarget;
+    commandMap["CommDockAtTarget"]                 = FireKeyboard::DockTarget;
+    commandMap["CommHoldPosition"]                 = FireKeyboard::HoldPosition;
     //Added for nearest unit targeting -ch
     commandMap["NearestHostileTargetKey"]          = FireKeyboard::NearestHostileTargetKey;
     commandMap["NearestDangerousHostileKey"]       = FireKeyboard::NearestDangerousHostileKey;

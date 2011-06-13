@@ -866,7 +866,17 @@ void FireKeyboard::DefendTarget( const KBData&, KBSTATE k )
     if (k == PRESS)
         LeadMe( "p", "Defend my target!", true );
 }
+void FireKeyboard::DockTarget( const KBData&, KBSTATE k )
+{
+    if (k == PRESS)
+        LeadMe( "t", "Dock at my target!", true );
+}
 
+void FireKeyboard::HoldPosition( const KBData&, KBSTATE k )
+{
+    if (k == PRESS)
+        LeadMe( "s", "Hold Position!", true );
+}
 void FireKeyboard::FormUp( const KBData&, KBSTATE k )
 {
     if (k == PRESS)
