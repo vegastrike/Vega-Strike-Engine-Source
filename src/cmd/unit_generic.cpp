@@ -1175,6 +1175,7 @@ void Unit::Init()
     computer.radar.lockcone      = lc;
     computer.radar.mintargetsize = 0;
     computer.radar.capability    = Computer::RADARLIM::Capability::IFF_NONE;
+    computer.ecmactive           = true;
 
     flightgroup                  = NULL;
     flightgroup_subnumber        = 0;
@@ -3867,7 +3868,7 @@ void Unit::RegenShields()
         }
     }
     //ECM energy drain
-    if ( (pImage->ecm != 0) ) {
+    if (computer.ecmactive) {
         static float ecmadj = XMLSupport::parse_float( vs_config->getVariable( "physics", "ecm_energy_cost", ".05" ) );
         float sim_atom_ecm  = ecmadj*pImage->ecm*SIMULATION_ATOM;
         if (energy > sim_atom_ecm)

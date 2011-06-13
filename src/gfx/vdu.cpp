@@ -1309,7 +1309,7 @@ void VDU::DrawDamage( Unit *parent )
     ecmstatus[0] = '\0';
     static bool print_ecm = XMLSupport::parse_bool( vs_config->getVariable( "graphics", "print_ecm_status", "true" ) );
     if (print_ecm) {
-        if (parent->GetImageInformation().ecm > 0) { 
+        if (UnitUtil::getECM(parent) > 0) { 
             GFXColor4f( 0, 1, 0, .5 );
             strcpy( ecmstatus, "ECM Active" );
             static float s = 0;

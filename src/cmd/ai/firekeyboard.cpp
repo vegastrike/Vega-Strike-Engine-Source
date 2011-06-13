@@ -1743,7 +1743,7 @@ void FireKeyboard::Execute()
     }
     if (f().ECMkey == PRESS) {
         f().ECMkey = DOWN;
-        parent->GetImageInformation().ecm = -parent->GetImageInformation().ecm;
+        parent->GetComputerData().ecmactive = !parent->GetComputerData().ecmactive;
     }
 #ifdef CAR_SIM
     int origecm = UnitUtil::getECM( parent );

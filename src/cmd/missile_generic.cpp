@@ -157,7 +157,7 @@ void Missile::UpdatePhysics2( const Transformation &trans,
         } else {
             static size_t max_ecm = (size_t)XMLSupport::parse_int( vs_config->getVariable( "physics", "max_ecm", "4" ) );
             size_t missile_hash = ( (size_t) this ) / 16383;
-            if ( (int)(missile_hash%max_ecm) < targ->GetImageInformation().ecm ) {
+            if ( (int)(missile_hash%max_ecm) < UnitUtil::getECM(targ)) {
                 Target( NULL );                 //go wild
             } else if (hull > 0) {
                 static unsigned int pointdef = ROLES::getRole( "POINTDEF" );
