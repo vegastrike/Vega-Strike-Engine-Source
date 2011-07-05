@@ -1849,6 +1849,7 @@ void VDU::Draw( GameCockpit *parentcp, Unit *parent, const GFXColor &color )
     case WEBCAM:
         if (Network != NULL)
             DrawWebcam( parent );
+        break;
     case SCANNING:
         if (!got_target_info)
             DrawScanningMessage();

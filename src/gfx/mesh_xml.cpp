@@ -1496,12 +1496,14 @@ static void SumNormals( vector< GFXVertex > &vertices,
         end -= 1;
         for (i = begin; begin < end; ++begin)
             SumLineNormal( vertices, indices[begin], indices[begin+1], weights );
+        break;
     case GFXLINE:
         if (end <= 1)
             break;
         end -= 1;
         for (i = begin; begin < end; begin += 2)
             SumLineNormal( vertices, indices[begin], indices[begin+1], weights );
+        break;
     case GFXPOLY:
     case GFXPOINT:
         break;
