@@ -36,8 +36,6 @@
 #include "gfx/lerp.h"
 #include "gfx/warptrail.h"
 #include "gfx/env_map_gent.h"
-extern int    muzak_count;
-extern Vector mouseline;
 #include "vsfilesystem.h"
 #include "cmd/unit_find.h"
 //static SphereMesh *foo;
@@ -47,7 +45,6 @@ extern Vector mouseline;
 
 extern vs_options game_options;
 
-extern string RemoveDotSystem( const char *input );
 /*
  *  GameStarSystem::GameStarSystem(): StarSystem()
  *  {

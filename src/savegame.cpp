@@ -597,15 +597,6 @@ void SaveGame::PurgeZeroStarships()
             }
 }
 
-static inline void PushBackFloat( float f, vector< char > &ret )
-{
-    char  c[128];
-    sprintf( c, "%f", f );
-    char *k = &c[0];
-    while (*k)
-        ret.push_back( *k );
-}
-
 static inline void PushBackUInt( unsigned int i, vector< char > &ret )
 {
     char tmp[32];
@@ -621,13 +612,6 @@ static inline void PushBackUInt( unsigned int i, vector< char > &ret )
         while (p)
             ret[q++] = tmp[--p];
     }
-}
-
-static inline void PushBackInt( int i, vector< char > &ret )
-{
-    if (i < 0)
-        ret.push_back( '-' );
-    PushBackUInt( i < 0 ? -i : 1, ret );
 }
 
 static inline void PushBackChars( const char *c, vector< char > &ret )

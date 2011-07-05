@@ -689,13 +689,9 @@ void StarSystem::UpdateUnitPhysics( bool firstframe )
     }
 }
 
-extern void UpdateTerrain();
 extern void TerrainCollide();
 extern void UpdateAnimatedTexture();
 extern void UpdateCameraSnds();
-extern void NebulaUpdate( StarSystem *ss );
-
-extern void reset_time_compression( const KBData &, KBSTATE );
 
 extern float getTimeCompression();
 
