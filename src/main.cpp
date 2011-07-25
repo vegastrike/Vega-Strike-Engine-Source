@@ -305,7 +305,8 @@ int main( int argc, char *argv[] )
     g_game.music_enabled = XMLSupport::parse_bool( vs_config->getVariable( "audio", "Music", "true" ) );
     if (mission_name[0] == '\0') {
         std::string defmis = vs_config->getVariable( "general", "default_mission", "test/test1.mission" );
-        strcpy( mission_name, defmis.c_str() );
+        strncpy( mission_name, defmis.c_str(), 1023 );
+        mission_name[1023] = '\0';
         cerr<<"MISSION_NAME is empty using : "<<mission_name<<endl;
     }
     
