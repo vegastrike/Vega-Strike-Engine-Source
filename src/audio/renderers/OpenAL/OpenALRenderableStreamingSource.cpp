@@ -30,6 +30,7 @@ namespace Audio {
         , alSource(0)
         , atEos(false)
         , shouldPlay(false)
+        , buffering(false)
     {
         alGenSources(1,&alSource);
     }
@@ -49,7 +50,7 @@ namespace Audio {
             
             if (!sound->isLoaded())
                 sound->load();
-            else
+            else if (!buffering)
                 dynamic_cast<OpenALStreamingSound*>(sound.get())->flushBuffers();
             
             // Seek the stream to the specified position
@@ -72,6 +73,7 @@ namespace Audio {
         throw(Exception)
     {
         shouldPlay = false;
+        buffering = false;
         alSourceStop(alSource);
     }
     
@@ -124,7 +126,7 @@ namespace Audio {
             
             if (!sound->isLoaded())
                 sound->load();
-            else
+            else if (!buffering)
                 dynamic_cast<OpenALStreamingSound*>(sound.get())->flushBuffers();
             
             // Make sure we have some starting buffers queued
@@ -197,6 +199,8 @@ namespace Audio {
             sound->load();
         
         assert(sound->isStreaming() && "OpenALRenderableStreamingSource can only handle streaming sounds");
+
+        buffering = true;
         
         OpenALStreamingSound *streamingSound = dynamic_cast<OpenALStreamingSound*>(sound.get());
         Source *source = getSource();

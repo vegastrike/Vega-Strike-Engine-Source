@@ -92,22 +92,34 @@ private:
         //Decode packets until we have decoded a complete frame
         while (true) {
             //Work on the current packet until we have decoded all of it
-            while (packetBufferSize > 0) {
+            while (packetBufferSize > 0 && packet.size > 0) {
                 //Decode the next chunk of data
+                #if (LIBAVCODEC_VERSION_MAJOR >= 53)
+                bytesDecoded = avcodec_decode_video2(
+                    pCodecCtx, pNextFrameYUV, &frameFinished,
+                    &packet );
+                #else
                 bytesDecoded = avcodec_decode_video(
                     pCodecCtx, pNextFrameYUV, &frameFinished,
                     packetBuffer, packetBufferSize );
+                #endif
                 //Was there an error?
-                if (bytesDecoded < 0) throw VidFile::FrameDecodeException( "Error decoding frame" );
+                if (bytesDecoded <= 0) throw VidFile::FrameDecodeException( "Error decoding frame" );
                 //Crappy ffmpeg!
+                #if (LIBAVCODEC_VERSION_MAJOR >= 53)
+                if (bytesDecoded > packet.size)
+                    bytesDecoded = packet.size;
+                packet.size -= bytesDecoded;
+                packet.data += bytesDecoded;
+                #else
                 if (bytesDecoded > packetBufferSize)
                     bytesDecoded = packetBufferSize;
                 packetBufferSize -= bytesDecoded;
                 packetBuffer     += bytesDecoded;
+                #endif
                 //Did we finish the current frame? Then we can return
                 if (frameFinished) {
-                    if (pNextFrameYUV->pts == 0)
-                        pNextFrameYUV->pts = packet.pts;
+                    pNextFrameYUV->pts = packet.dts;
                     frameReady = true;
                     return;
                 }
@@ -116,10 +128,19 @@ private:
             //stream
             do {
                 //Free old packet
-                if (packet.data != NULL)
+                if (packet.data != NULL) {
+                    #if (LIBAVCODEC_VERSION_MAJOR >= 53)
+                    if (packetBuffer != NULL) {
+                        packet.size = packetBufferSize;
+                        packet.data = packetBuffer;
+                    }
+                    #else
                     av_free_packet( &packet );
+                    #endif
+                }
                 //Read new packet
-                if (av_read_frame( pFormatCtx, &packet ) < 0) throw VidFile::EndOfStreamException();
+                if (av_read_frame( pFormatCtx, &packet ) < 0) 
+                    throw VidFile::EndOfStreamException();
             } while (packet.stream_index != videoStreamIndex);
             packetBufferSize = packet.size;
             packetBuffer     = packet.data;

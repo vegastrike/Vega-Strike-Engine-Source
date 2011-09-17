@@ -131,7 +131,7 @@ namespace Audio {
             throw EndOfStreamException();
         
         ALBufferHandle bufferHandle = bufferHandles[readBufferIndex];
-        
+
         clearAlError();
         alBufferData(bufferHandle, 
             asALFormat(targetFormat), 
@@ -149,8 +149,9 @@ namespace Audio {
     void OpenALStreamingSound::unqueueBuffer(ALBufferHandle buffer) 
         throw(Exception)
     {
-        if (playBufferIndex < NUM_BUFFERS && buffer == bufferHandles[playBufferIndex])
+        if (playBufferIndex < NUM_BUFFERS && buffer == bufferHandles[playBufferIndex]) {
             playBufferIndex = (playBufferIndex + 1) % NUM_BUFFERS;
+        }
     }
     
     void OpenALStreamingSound::seek(double position)

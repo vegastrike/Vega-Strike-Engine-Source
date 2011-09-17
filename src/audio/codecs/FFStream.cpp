@@ -201,7 +201,12 @@ namespace Audio {
             
             bool hasPacket() const throw()
             {
+                #if (LIBAVCODEC_VERSION_MAJOR >= 53)
+                return packetBuffer && packetBufferSize 
+                    && packet.data && packet.size;
+                #else
                 return packetBuffer && packetBufferSize;
+                #endif                
             }
             
             void readPacket() throw(EndOfStreamException)
@@ -209,8 +214,16 @@ namespace Audio {
                 // Read the next packet, skipping all packets that aren't for this stream
                 do {
                     // Free old packet
-                    if(packet.data != NULL)
-                        av_free_packet(&packet);
+                    if(packet.data != NULL) {
+                        #if (LIBAVCODEC_VERSION_MAJOR >= 53)
+                        if (packetBuffer != NULL) {
+                            packet.data = packetBuffer;
+                            packet.size = packetBufferSize;
+                        }
+                        #else
+                        av_free_packet( &packet );
+                        #endif
+                    }
                     
                     // Read new packet
                     if(av_read_frame(pFormatCtx, &packet) < 0)
@@ -238,19 +251,39 @@ namespace Audio {
                     throw PacketDecodeException();
                 
                 int dataSize = sampleBufferAlloc;
-                int used = avcodec_decode_audio2(
-                    pCodecCtx,
-                    (int16_t*)sampleBufferAligned, &dataSize,
-                    packetBuffer, packetBufferSize);
+                int used = 
+                #if (LIBAVCODEC_VERSION_MAJOR >= 53)
+                    avcodec_decode_audio3(
+                        pCodecCtx,
+                        (int16_t*)sampleBufferAligned, &dataSize,
+                        &packet);
+                #else
+                    avcodec_decode_audio2(
+                        pCodecCtx,
+                        (int16_t*)sampleBufferAligned, &dataSize,
+                        packetBuffer, packetBufferSize);
+                #endif
                 
                 if (used < 0)
                     throw PacketDecodeException();
                 
+                #if (LIBAVCODEC_VERSION_MAJOR >= 53)
+                
+                if ((size_t)used > packet.size)
+                    used = packet.size;
+
+                (char*&)(packet.data) += used;
+                packet.size -= used;
+                
+                #else
+                
                 if ((size_t)used > packetBufferSize)
                     used = packetBufferSize;
-                
+
                 (char*&)packetBuffer += used;
                 packetBufferSize -= used;
+                
+                #endif
                 
                 if (dataSize < 0)
                     dataSize = 0;

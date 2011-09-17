@@ -57,6 +57,13 @@ extern "C" {
     #endif
 }
 
+
+#if (LIBAVCODEC_VERSION_MAJOR >= 52)
+#define CODEC_TYPE_AUDIO AVMEDIA_TYPE_AUDIO
+#define CODEC_TYPE_VIDEO AVMEDIA_TYPE_VIDEO
+#endif
+
+
 #endif
 
 #endif //__FFMPEG_INIT_H__INCLUDED__

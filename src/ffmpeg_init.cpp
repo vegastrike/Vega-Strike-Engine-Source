@@ -95,6 +95,14 @@ struct URLProtocol vsFileProtocol = {
     _url_write,
     _url_seek,
     _url_close,
+    
+#if (LIBAVCODEC_VERSION_MAJOR >= 53)
+    NULL, NULL, NULL, NULL,
+    0,
+    NULL,
+    0,
+    NULL
+#endif
 };
 
 namespace FFMpeg
@@ -105,7 +113,11 @@ void initLibraries()
     if (!initted) {
         initted = true;
         av_register_all();
+        #if (LIBAVFORMAT_VERSION_MAJOR >= 53)
+        av_register_protocol2( &vsFileProtocol, sizeof(vsFileProtocol) );
+        #else
         register_protocol( &vsFileProtocol );
+        #endif
     }
 }
 };
