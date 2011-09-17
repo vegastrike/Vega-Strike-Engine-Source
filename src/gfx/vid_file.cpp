@@ -126,18 +126,14 @@ private:
             }
             //Read the next packet, skipping all packets that aren't for this
             //stream
+            #if (LIBAVCODEC_VERSION_MAJOR >= 53)
+            packet.size = packetBufferSize;
+            packet.data = packetBuffer;
+            #endif
             do {
                 //Free old packet
-                if (packet.data != NULL) {
-                    #if (LIBAVCODEC_VERSION_MAJOR >= 53)
-                    if (packetBuffer != NULL) {
-                        packet.size = packetBufferSize;
-                        packet.data = packetBuffer;
-                    }
-                    #else
+                if (packet.data != NULL)
                     av_free_packet( &packet );
-                    #endif
-                }
                 //Read new packet
                 if (av_read_frame( pFormatCtx, &packet ) < 0) 
                     throw VidFile::EndOfStreamException();
