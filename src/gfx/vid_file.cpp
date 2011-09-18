@@ -85,43 +85,50 @@ private:
         }
     }
 
-    void nextFrame() throw (VidFile::Exception)
+    void nextFrame(bool skip=false) throw (VidFile::Exception)
     {
         int bytesDecoded;
         int frameFinished;
         //Decode packets until we have decoded a complete frame
         while (true) {
-            //Work on the current packet until we have decoded all of it
-            while (packetBufferSize > 0 && packet.size > 0) {
-                //Decode the next chunk of data
-                #if (LIBAVCODEC_VERSION_MAJOR >= 53)
-                bytesDecoded = avcodec_decode_video2(
-                    pCodecCtx, pNextFrameYUV, &frameFinished,
-                    &packet );
-                #else
-                bytesDecoded = avcodec_decode_video(
-                    pCodecCtx, pNextFrameYUV, &frameFinished,
-                    packetBuffer, packetBufferSize );
-                #endif
-                //Was there an error?
-                if (bytesDecoded <= 0) throw VidFile::FrameDecodeException( "Error decoding frame" );
-                //Crappy ffmpeg!
-                #if (LIBAVCODEC_VERSION_MAJOR >= 53)
-                if (bytesDecoded > packet.size)
-                    bytesDecoded = packet.size;
-                packet.size -= bytesDecoded;
-                packet.data += bytesDecoded;
-                #else
-                if (bytesDecoded > packetBufferSize)
-                    bytesDecoded = packetBufferSize;
-                packetBufferSize -= bytesDecoded;
-                packetBuffer     += bytesDecoded;
-                #endif
-                //Did we finish the current frame? Then we can return
-                if (frameFinished) {
-                    pNextFrameYUV->pts = packet.dts;
-                    frameReady = true;
-                    return;
+            if (!skip) {
+                //Work on the current packet until we have decoded all of it
+                while (packetBufferSize > 0 && packet.size > 0) {
+                    //Decode the next chunk of data
+                    #if (LIBAVCODEC_VERSION_MAJOR >= 53)
+                    bytesDecoded = avcodec_decode_video2(
+                        pCodecCtx, pNextFrameYUV, &frameFinished,
+                        &packet );
+                    #else
+                    bytesDecoded = avcodec_decode_video(
+                        pCodecCtx, pNextFrameYUV, &frameFinished,
+                        packetBuffer, packetBufferSize );
+                    #endif
+                    VSFileSystem::vs_dprintf(3, "pts %ld: Decoded %d bytes %s\n", 
+                        packet.pts,
+                        bytesDecoded,
+                        (frameFinished ? "Got frame" : "")
+                    );
+                    //Was there an error?
+                    if (bytesDecoded <= 0) throw VidFile::FrameDecodeException( "Error decoding frame" );
+                    //Crappy ffmpeg!
+                    #if (LIBAVCODEC_VERSION_MAJOR >= 53)
+                    if (bytesDecoded > packet.size)
+                        bytesDecoded = packet.size;
+                    packet.size -= bytesDecoded;
+                    packet.data += bytesDecoded;
+                    #else
+                    if (bytesDecoded > packetBufferSize)
+                        bytesDecoded = packetBufferSize;
+                    packetBufferSize -= bytesDecoded;
+                    packetBuffer     += bytesDecoded;
+                    #endif
+                    //Did we finish the current frame? Then we can return
+                    if (frameFinished) {
+                        pNextFrameYUV->pts = packet.dts;
+                        frameReady = true;
+                        return;
+                    }
                 }
             }
             //Read the next packet, skipping all packets that aren't for this
@@ -140,6 +147,9 @@ private:
             } while (packet.stream_index != videoStreamIndex);
             packetBufferSize = packet.size;
             packetBuffer     = packet.data;
+            
+            if (skip)
+                break;
         }
     }
 
@@ -213,10 +223,20 @@ public:
         //Find first video stream
         pCodecCtx = 0;
         videoStreamIndex = -1;
-        for (int i = 0; (pCodecCtx == 0) && (i < pFormatCtx->nb_streams); ++i)
+        VSFileSystem::vs_dprintf(2, "Loaded %s\n", path.c_str());
+        for (int i = 0; (pCodecCtx == 0) && (i < pFormatCtx->nb_streams); ++i) {
+            VSFileSystem::vs_dprintf(3, "  Stream %d: type %s (%d)\n", 
+                i,
+                ( (pFormatCtx->streams[i]->codec->codec_type == CODEC_TYPE_VIDEO) ? "Video"
+                    : ( (pFormatCtx->streams[i]->codec->codec_type == CODEC_TYPE_AUDIO) ? "Audio" : "unk" ) ),
+                pFormatCtx->streams[i]->codec->codec_type
+            );
             if (pFormatCtx->streams[i]->codec->codec_type == CODEC_TYPE_VIDEO)
                 pCodecCtx = (pStream = pFormatCtx->streams[videoStreamIndex = i])->codec;
+        }
         if (pCodecCtx == 0) throw VidFile::FileOpenException( errbase+" (no video stream)" );
+        VSFileSystem::vs_dprintf(3, "  Codec Timebase: %d/%d\n", pCodecCtx->time_base.num, pCodecCtx->time_base.den);
+
         //Find codec for video stream and open it
         pCodec        = avcodec_find_decoder( pCodecCtx->codec_id );
         if (pCodec == 0) throw VidFile::UnsupportedCodecException( errbase+" (unsupported codec)" );
@@ -228,6 +248,8 @@ public:
         //Get some info
         frameRate = float(pStream->r_frame_rate.num)/float(pStream->r_frame_rate.den);
         duration  = float(pStream->duration*pStream->time_base.num)/float(pStream->time_base.den);
+        VSFileSystem::vs_dprintf(3, "  Framerate: %d/%d\n", pStream->r_frame_rate.num, pStream->r_frame_rate.den);
+        VSFileSystem::vs_dprintf(3, "  Stream timebase: %d/%d\n", pStream->time_base.num, pStream->time_base.den);
         
         //Get POT dimensions
         if (fbForcePOT) {
@@ -242,6 +264,7 @@ public:
                 height /= 2;
             }
         }
+        VSFileSystem::vs_dprintf(2, "  playing at %dx%d\n", width, height);
         
         //Allocate RGB frame buffer
         pFrameRGB         = avcodec_alloc_frame();
@@ -262,7 +285,7 @@ public:
 
 #ifndef DEPRECATED_IMG_CONVERT
         pSWSCtx = sws_getContext( pCodecCtx->width, pCodecCtx->height, pCodecCtx->pix_fmt,
-                                  width, height, PIX_FMT_RGB24, SWS_LANCZOS, NULL, NULL, NULL );
+                                  width, height, PIX_FMT_RGB24, SWS_LANCZOS|SWS_PRINT_INFO, NULL, NULL, NULL );
 #endif
     }
 
@@ -272,17 +295,29 @@ public:
             time = 0;
         
         //Translate float time to frametime
-        int64_t targetPTS = int64_t( floor( double(time)*pCodecCtx->time_base.den/pCodecCtx->time_base.num ) );
+        int64_t targetPTS = int64_t( floor( double(time)*pStream->time_base.den/pStream->time_base.num ) );
+        VSFileSystem::vs_dprintf(3, "Seeking to %.3fs pts %ld\n", time, targetPTS);
         if ( (targetPTS >= prevPTS) && (targetPTS < pNextFrameYUV->pts) ) {
             //same frame
+            if (targetPTS >= fbPTS) {
+                try {
+                    convertFrame();
+                    nextFrame();
+                    return true;
+                }
+                catch (VidFile::EndOfStreamException e) {
+                    sizePTS = fbPTS+1; throw e;
+                }            
+            }
             return false;
         } else {
             if (targetPTS < fbPTS) {
                 //frame backwards
-                int64_t backPTS = targetPTS - 1 - pCodecCtx->time_base.den/pCodecCtx->time_base.num/2;
+                int64_t backPTS = targetPTS - 1 - pStream->time_base.den/pStream->time_base.num/2;
                 if (backPTS < 0)
                     backPTS = 0;
                     
+                VSFileSystem::vs_dprintf(3, "backseeking to %ld (at %ld)\n", backPTS, pNextFrameYUV->pts);
                 av_seek_frame( pFormatCtx, videoStreamIndex, backPTS, AVSEEK_FLAG_BACKWARD );
                 
                 prevPTS = backPTS;
@@ -290,10 +325,23 @@ public:
             }
             //frame forward
             try {
+                // Try one frame, decoding
+                if (pNextFrameYUV->pts < targetPTS) {
+                    prevPTS = pNextFrameYUV->pts;
+                    nextFrame();
+                    VSFileSystem::vs_dprintf(3, "decoding to %ld (at %ld-%ld)\n", targetPTS, prevPTS, pNextFrameYUV->pts);
+                }
+                // If we have to skip more frames, don't decode, only skip data
+                while (packet.dts < targetPTS) {
+                    prevPTS = packet.dts;
+                    nextFrame(true);
+                    VSFileSystem::vs_dprintf(3, "skipping to %ld (at %ld-%ld)\n", targetPTS, prevPTS, packet.dts);
+                }
+                // we're close, decode now
                 while (pNextFrameYUV->pts < targetPTS) {
                     prevPTS = pNextFrameYUV->pts;
                     nextFrame();
-                    fprintf(stderr, "skipping to %ld (at %ld-%ld)\n", targetPTS, prevPTS, pNextFrameYUV->pts);
+                    VSFileSystem::vs_dprintf(3, "decoding to %ld (at %ld-%ld)\n", targetPTS, prevPTS, pNextFrameYUV->pts);
                 }
                 convertFrame();
                 nextFrame();
