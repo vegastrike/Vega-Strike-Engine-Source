@@ -104,8 +104,8 @@ private:
                         pCodecCtx, pNextFrameYUV, &frameFinished,
                         packetBuffer, packetBufferSize );
                     #endif
-                    VSFileSystem::vs_dprintf(3, "pts %ld: Decoded %d bytes %s\n", 
-                        packet.pts,
+                    VSFileSystem::vs_dprintf(3, "dts %ld: Decoded %d bytes %s\n", 
+                        packet.dts,
                         bytesDecoded,
                         (frameFinished ? "Got frame" : "")
                     );
@@ -219,19 +219,20 @@ public:
         #ifdef VS_DEBUG
         dump_format( pFormatCtx, 0, npath.c_str(), false );
         #endif
-
+        
         //Find first video stream
         pCodecCtx = 0;
         videoStreamIndex = -1;
         VSFileSystem::vs_dprintf(2, "Loaded %s\n", path.c_str());
-        for (int i = 0; (pCodecCtx == 0) && (i < pFormatCtx->nb_streams); ++i) {
-            VSFileSystem::vs_dprintf(3, "  Stream %d: type %s (%d)\n", 
+        for (int i = 0; i < pFormatCtx->nb_streams; ++i) {
+            VSFileSystem::vs_dprintf(3, "  Stream %d: type %s (%d) first dts %ld\n", 
                 i,
                 ( (pFormatCtx->streams[i]->codec->codec_type == CODEC_TYPE_VIDEO) ? "Video"
                     : ( (pFormatCtx->streams[i]->codec->codec_type == CODEC_TYPE_AUDIO) ? "Audio" : "unk" ) ),
-                pFormatCtx->streams[i]->codec->codec_type
+                pFormatCtx->streams[i]->codec->codec_type,
+                pFormatCtx->streams[i]->start_time
             );
-            if (pFormatCtx->streams[i]->codec->codec_type == CODEC_TYPE_VIDEO)
+            if ((pCodecCtx == 0) && (pFormatCtx->streams[i]->codec->codec_type == CODEC_TYPE_VIDEO))
                 pCodecCtx = (pStream = pFormatCtx->streams[videoStreamIndex = i])->codec;
         }
         if (pCodecCtx == 0) throw VidFile::FileOpenException( errbase+" (no video stream)" );
@@ -301,6 +302,7 @@ public:
             //same frame
             if (targetPTS >= fbPTS) {
                 try {
+                    prevPTS = fbPTS;
                     convertFrame();
                     nextFrame();
                     return true;

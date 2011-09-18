@@ -181,17 +181,17 @@ namespace Audio {
             
             bool saneTimeStamps() const throw()
             {
-                return pCodecCtx->time_base.num != 0;
+                return pStream->time_base.num != 0;
             }
             
             int64_t timeToPts(double time) const throw()
             {
-                return int64_t(floor(time * pCodecCtx->time_base.den / pCodecCtx->time_base.num));
+                return int64_t(floor(time * pStream->time_base.den / pStream->time_base.num));
             }
             
             double ptsToTime(int64_t pts) const throw()
             {
-                return double(pts) * pCodecCtx->time_base.num / pCodecCtx->time_base.den;
+                return double(pts) * pStream->time_base.num / pStream->time_base.den;
             }
             
             bool hasFrame() const throw()
@@ -228,6 +228,8 @@ namespace Audio {
         
                 packetBufferSize = packet.size;
                 packetBuffer = packet.data;
+
+                sampleBufferStart = int64_t(floor(ptsToTime(packet.dts) * pCodecCtx->sample_rate));
             }
             
             void syncPts() throw(EndOfStreamException)
@@ -235,7 +237,7 @@ namespace Audio {
                 if (!hasPacket())
                     throw EndOfStreamException();
                 sampleBufferSize = 0;
-                sampleBufferStart = int64_t(floor(ptsToTime(packet.pts) * pCodecCtx->sample_rate));
+                sampleBufferStart = int64_t(floor(ptsToTime(packet.dts) * pCodecCtx->sample_rate));
                 
                 if (sampleBufferStart > streamSize)
                     streamSize = sampleBufferStart;
@@ -283,7 +285,7 @@ namespace Audio {
                 
                 if (dataSize < 0)
                     dataSize = 0;
-                
+
                 sampleBuffer = sampleBufferAligned;
                 sampleBufferStart += sampleBufferSize;
                 sampleBufferSize = dataSize / sampleSize;
