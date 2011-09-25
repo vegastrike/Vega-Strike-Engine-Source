@@ -89,7 +89,7 @@ extern string GetUnitDir( string filename );
 
 string selectcurrentdir;
 
-#if defined (__FreeBSD__) || defined (__APPLE__)
+#if defined (__APPLE__)
 int selectdirs( struct dirent *entry )
 #else
 int selectdirs( const struct dirent * entry )
