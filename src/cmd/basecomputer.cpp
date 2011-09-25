@@ -3116,7 +3116,7 @@ void BaseComputer::loadNewsControls( void )
     recalcTitle();
 }
 
-#if defined (__FreeBSD__) || defined (__APPLE__)
+#if defined (__APPLE__)
 static int nodirs( struct dirent *entry )
 #else
 static int nodirs( const struct dirent * entry )
@@ -3157,7 +3157,7 @@ static int datesort( const void *v1, const void *v2 )
     return s1.st_mtime-s2.st_mtime;
 }
 
-#if (defined (_WIN32) && !defined (__CYGWIN__ ) ) || (defined (__GLIBC_MINOR__) && __GLIBC_MINOR__ >= 10) || defined(__HAIKU__)
+#if (defined (__FREEBSD__)) || (defined (_WIN32) && !defined (__CYGWIN__ ) ) || (defined (__GLIBC_MINOR__) && __GLIBC_MINOR__ >= 10) || defined(__HAIKU__)
 typedef int (*scancompare)( const struct dirent **v1, const struct dirent **v2 );
 #else
 typedef int (*scancompare)( const void *v1, const void *v2 );
