@@ -394,10 +394,18 @@ Unit* Unit::rayCollide( const QVector &start, const QVector &end, Vector &norm, 
                 return this;
             }
             if(tmpCol->rayCollide(boltbeam,norm,distance)){
+                // compute real distance 
+                distance = (end-start).Magnitude() * distance;
+                
                 // NOTE:   Here is where we need to retrieve the point on the ray that we collided with the mesh, and set it to end, create the normal and set distance
+                VSFileSystem::vs_dprintf(3,"Beam collide with %p, distance %f\n",this,distance);
                 return(this);
             }
         } else {//no col trees = a sphere
+            // compute real distance
+            distance = (end-start).Magnitude() * distance;
+            
+            VSFileSystem::vs_dprintf(3,"Beam collide with %p, distance %f\n",this,distance);
             return(this);
         }
     } else {
