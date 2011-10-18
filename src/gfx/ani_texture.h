@@ -57,6 +57,10 @@ protected:
     unsigned int     nextactive; //It is computable, but it's much more convenient this way
     float  active_fraction; //For interpolated animations
     double curtime;
+    
+    // for video de-jittering
+    double lastcurtime;
+    double lastrealtime; 
 
     bool   constframerate;
     bool   done;

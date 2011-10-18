@@ -218,12 +218,24 @@ void AnimatedTexture::UpdateAllPhysics()
 void AnimatedTexture::UpdateAllFrame()
 {
     double elapsed = GetElapsedTime();
+    double realtime = realTime();
     for (set< AnimatedTexture* >::iterator iter = anis.begin(); iter != anis.end(); iter++) {
         AnimatedTexture *ani = *iter;
-        if (ani->options & optSoundTiming)
-            ani->setTime( ani->GetTimeSource()->getPlayingTime() );
-        else
+        if (ani->options & optSoundTiming) {
+            // de-jitter, playtime reporting tends to have some jitter
+            double newcurtime = ani->GetTimeSource()->getPlayingTime();
+            double delta = realtime - ani->lastrealtime;
+            double drift = newcurtime - ani->lastcurtime - delta;
+            if (fabs(drift) > 0.2) {
+                ani->lastcurtime = newcurtime;
+                ani->lastrealtime = realtime;
+                ani->setTime(newcurtime);
+            } else {
+                ani->setTime(ani->lastcurtime + delta);
+            }
+        } else {
             ani->setTime( ani->curTime()+elapsed );
+        }
     }
 }
 
