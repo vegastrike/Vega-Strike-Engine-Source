@@ -9384,7 +9384,7 @@ bool MeshAnimation::Init(const char *filename, int faction,
 
 	std::vector< Mesh* > *meshes = new vector<Mesh *>();
 	int i = 1;
-	char count[20] = "1";
+	char count[30] = "1";
 	string dir = anifilename;
 	while(true)
 	{
@@ -9421,7 +9421,7 @@ bool MeshAnimation::Init(const char *filename, int faction,
 	{
 		//FIXME: an animation is created only for the first submesh
 		string animationName;
-		sprintf( count, "%d", meshes->size() );
+		sprintf( count, "%lu", meshes->size() );
 		if(!animationExt)
 			animationName = string(count); //if there is no extension given, the animations are called by their load order, 1, 2 ,3 ....10..
 		else
@@ -9430,7 +9430,7 @@ bool MeshAnimation::Init(const char *filename, int faction,
 
 		int numFrames = meshes->size();
 		++MeshAnimation::unitCount;
-		sprintf( count, "%d", unitCount );
+		sprintf( count, "%u", unitCount );
 		uniqueUnitName = unitDst->name + string(count);
 		Units[uniqueUnitName] = unitDst;
 		cerr << "Animation data loaded for unit: " << string(filename) << ", named " << uniqueUnitName << " - with: " << numFrames << " frames." << endl;
