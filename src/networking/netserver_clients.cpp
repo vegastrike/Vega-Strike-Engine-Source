@@ -12,7 +12,6 @@
 #include "vs_random.h"
 #include "save_util.h"
 
-extern QVector DockToSavedBases( int n );
 extern StarSystem * GetLoadedStarSystem( const char *system );
 
 /*
@@ -137,7 +136,7 @@ void NetServer::addClient( ClientPtr clt )
     //Try to see if the player is docked on start
 
     bool    besafe     = true;
-    QVector safevec;     //( DockToSavedBases( player));
+    QVector safevec;
     Unit   *dockedUnit = NULL;
     if (getSaveStringLength( player, "jump_from" ) > 0) {
         std::string srcsys = getSaveString( player, "jump_from", 0 );
