@@ -148,8 +148,6 @@ void GameUnit< UnitType >::UpgradeInterface( Unit *baseun )
 
 #define PARANOIA .4
 
-extern void UncheckUnit( Unit *un );
-
 inline static float perspectiveFactor( float d )
 {
     if (d > 0)
@@ -201,8 +199,6 @@ void GameUnit< UnitType >::addHalo( const char *filename,
 {
     phalos->AddHalo( filename, loc, size, col, halo_type, halo_speed );
 }
-
-extern void update_ani_cache();
 
 template < class UnitType >
 void GameUnit< UnitType >::Cloak( bool engage )

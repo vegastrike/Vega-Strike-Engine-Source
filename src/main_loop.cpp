@@ -73,9 +73,6 @@ Unit  *carrier  = NULL;
 Unit  *fighter  = NULL;
 Unit  *fighter2 = NULL;
 Unit  *midway   = NULL;
-//Cockpit *cockpit;
-void SuicideKey( const KBData&, KBSTATE newState );
-//void Respawn(const KBData&,KBSTATE newState);
 GFXBOOL     capture;
 GFXBOOL     quit = GFXFALSE;
 bool        _Slew     = true;
@@ -89,7 +86,6 @@ int allexcept = 0;
 #endif
 int shiftup( int );
 string getUnitNameAndFgNoBase( Unit *target );
-const Unit * loadUnitByCache( std::string name, int faction );
 ContinuousTerrain *myterrain;
 int numf = 0;
 CoordinateSelect  *locSel = NULL;

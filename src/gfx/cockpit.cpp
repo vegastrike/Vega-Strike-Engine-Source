@@ -74,7 +74,6 @@ static GFXColor RetrColor( const string &name, GFXColor def = GFXColor( 1, 1, 1,
     return def;
 }
 
-extern Unit * getTopLevelOwner();
 static soundContainer disableautosound;
 static soundContainer enableautosound;
 

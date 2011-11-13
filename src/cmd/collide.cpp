@@ -136,8 +136,6 @@ bool usehuge_table()
     return seed < (M/100);
 }
 
-size_t nondecal_index( Collidable::CollideRef b );
-
 bool Bolt::Collide( Collidable::CollideRef index )
 {
     return _Universe->activeStarSystem()->collidemap[Unit::UNIT_BOLT]->CheckCollisions( this, **location );

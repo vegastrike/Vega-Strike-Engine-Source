@@ -11,11 +11,7 @@
 //#include "cmd/script/mission.h"
 
 #include "networking/lowlevel/vsnet_sockethttp.h"
-extern string universe_file;
-extern bool verify_path( const vector< string > &path, bool allowmpl = false );
-extern void vschdirs( const vector< string > &path );
-extern void vscdups( const vector< string > &path );
-extern vector< vector< string > >lookforUnit( const char *filename, int faction, bool SubU );
+
 extern Unit& GetUnitMasterPartList();
 
 /*

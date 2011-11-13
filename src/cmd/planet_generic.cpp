@@ -75,9 +75,6 @@ PlanetaryOrbit::~PlanetaryOrbit()
     parent->SetResolveForces( true );
 }
 
-extern double saved_interpolation_blend_factor;
-double calc_blend_factor( double frac, int priority, int when_it_will_be_simulated, int cur_simulation_frame );
-
 void PlanetaryOrbit::Execute()
 {
     bool mining = parent->rSize() > 1444 && parent->rSize() < 1445;
@@ -576,8 +573,6 @@ Planet::Planet( QVector x,
     this->shield.number = 2;
     if ( meshdata.empty() ) meshdata.push_back( NULL );
 }
-
-extern vsUMap< std::string, std::string >readPlanetTypes( std::string filename );
 
 string Planet::getHumanReadablePlanetType() const
 {

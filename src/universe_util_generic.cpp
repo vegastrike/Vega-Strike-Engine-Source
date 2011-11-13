@@ -38,7 +38,6 @@ extern vs_options game_options;
 //extern class Music *muzak;
 //extern unsigned int AddAnimation (const QVector & pos, const float size, bool mvolatile, const std::string &name, float percentgrow );
 extern Unit& GetUnitMasterPartList();
-extern std::string universe_path;
 extern int num_delayed_missions();
 using std::string;
 using std::set;

@@ -20,8 +20,6 @@
 
 extern vs_options game_options;
 
-extern Unit     **fighters;
-extern Hashtable< std::string, StarSystem, 127 >star_system_table;
 void CacheJumpStar( bool destroy )
 {
     static Animation *cachedani = new Animation( game_options.jumpgate.c_str(), true, .1, MIPMAP, false );

@@ -904,8 +904,6 @@ void SetupGlowMapFourthPass( Texture *decal,
     GFXDisable( TEXTURE1 );
 }
 
-extern void GFXSelectMaterialAlpha( const unsigned int, float );
-
 void SetupDamageMapThirdPass( Texture *decal, unsigned int mat, float polygon_offset )
 {
     GFXPushBlendMode();

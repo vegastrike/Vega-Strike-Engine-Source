@@ -1639,7 +1639,6 @@ void Arrested( Unit *parent )
 
 extern void PowerDownShield( Shield *shield, float howmuch );
 
-extern bool CheckAccessory( Unit* );
 static void ForceChangeTarget( Unit *parent )
 {
     Unit *curtarg = parent->Target();
@@ -1658,8 +1657,6 @@ static void ForceChangeTarget( Unit *parent )
 }
 
 int SelectDockPort( Unit *utdw, Unit *parent );
-
-bool isMissile( const weapon_info* );
 
 void FireKeyboard::SetParent( Unit *parent1 )
 {

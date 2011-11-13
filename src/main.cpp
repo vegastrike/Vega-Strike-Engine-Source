@@ -131,7 +131,6 @@ VegaConfig * createVegaConfig( const char *file )
     return new GameVegaConfig( file );
 }
 
-extern bool soundServerPipes();
 std::string ParseCommandLine(int argc, char ** CmdLine);
 /**
  * Returns an exit code >= 0 if the game is supposed to exit rightaway

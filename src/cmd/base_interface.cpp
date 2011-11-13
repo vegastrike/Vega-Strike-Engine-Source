@@ -1222,11 +1222,7 @@ void BaseInterface::Terminate()
     }
 }
 
-extern void SwitchUnits( Unit *ol, Unit *nw );
-extern void SwitchUnits2( Unit *nw );
 extern void abletodock( int dock );
-extern vector< int >switchunit;
-extern vector< int >turretcontrol;
 #include "ai/communication.h"
 
 void BaseInterface::Room::Launch::Click( BaseInterface *base, float x, float y, int button, int state )

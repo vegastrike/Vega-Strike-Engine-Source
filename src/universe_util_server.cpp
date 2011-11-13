@@ -12,11 +12,7 @@
 #include "load_mission.h"
 #include "configxml.h"
 #include "vs_globals.h"
-extern unsigned int AddAnimation( const QVector &pos,
-                                  const float size,
-                                  bool mvolatile,
-                                  const std::string &name,
-                                  float percentgrow );
+
 void SetStarSystemLoading( bool value ) {}
 
 using std::string;

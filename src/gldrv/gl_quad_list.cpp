@@ -25,8 +25,6 @@
 #include "vs_globals.h"
 #include <stdio.h>
 #include "vsfilesystem.h"
-extern GFXBOOL bTex0;
-extern GFXBOOL bTex1;
 
 GFXQuadList::GFXQuadList( GFXBOOL color ) : numVertices( 0 )
     , numQuads( 0 )

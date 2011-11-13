@@ -10,8 +10,6 @@
 #include "configxml.h"
 GFXVertexList*bolt_draw::boltmesh = NULL;
 
-extern void AUDAdjustSound( int i, QVector const &qv, Vector const &vv );
-extern bool AUDIsPlaying( int snd );
 bolt_draw::~bolt_draw()
 {
     unsigned int i;

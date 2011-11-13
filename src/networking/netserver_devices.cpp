@@ -13,8 +13,6 @@
 #include "cmd/ai/communication.h"
 #include "cmd/ai/order.h"
 
-extern StarSystem * GetLoadedStarSystem( const char *system );
-
 //WEAPON STUFF
 
 void NetServer::BroadcastTarget( ObjSerial serial, ObjSerial oldtarget, ObjSerial target, unsigned short zone )

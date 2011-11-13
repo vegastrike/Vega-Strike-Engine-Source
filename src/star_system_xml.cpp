@@ -272,10 +272,8 @@ using XMLSupport::Attribute;
 using XMLSupport::AttributeList;
 
 extern Flightgroup * getStaticBaseFlightgroup( int faction );
-extern Flightgroup * getStaticStarFlightgroup( int faction );
 extern Flightgroup * getStaticNebulaFlightgroup( int faction );
 extern Flightgroup * getStaticAsteroidFlightgroup( int faction );
-extern Flightgroup * getStaticUnknownFlightgroup( int faction );
 
 template < typename T >
 static bool EvalCondition( const char *op, const T &left, const T &right )

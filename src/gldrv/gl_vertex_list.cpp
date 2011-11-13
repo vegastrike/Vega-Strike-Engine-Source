@@ -40,9 +40,6 @@
 
 GFXVertexList *next;
 
-extern GFXBOOL bTex0;
-extern GFXBOOL bTex1;
-
 struct VertexCompare
 {
     bool operator()( const GFXVertex *a, const GFXVertex *b ) const

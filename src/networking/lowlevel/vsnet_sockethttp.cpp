@@ -8,8 +8,6 @@
 #include "packet.h"
 #include "netui.h"
 
-static int httpnum = -1;
-
 VsnetHTTPSocket::VsnetHTTPSocket( const AddressIP &remote_ip, const std::string &host, const std::string &path,
                                   SocketSet &set ) :
     VsnetSocketBase( -1, "http", set )

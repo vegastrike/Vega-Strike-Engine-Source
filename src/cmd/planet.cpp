@@ -424,8 +424,6 @@ GamePlanet::GamePlanet( QVector x,
                       nlights );
 }
 
-extern bool shouldfog;
-
 vector< UnitContainer* >PlanetTerrainDrawQueue;
 void GamePlanet::Draw( const Transformation &quat, const Matrix &m )
 {

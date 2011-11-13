@@ -44,13 +44,6 @@
 
 vector< unsigned int >nav_keyboard_queue;
 
-//The separator used between categories in a category string.
-static const char  CATEGORY_SEP = '/';
-//Tag that says this is a category not an item.
-static const char  CATEGORY_TAG = (-1);
-//Space between mode buttons.
-static const float MODE_BUTTON_SPACE = 0.03;
-
 //Info about each mode.
 struct ModeInfo
 {

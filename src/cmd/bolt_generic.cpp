@@ -14,7 +14,6 @@
 using std::vector;
 using std::string;
 
-extern double interpolation_blend_factor;
 Bolt::Bolt( const weapon_info *typ,
             const Matrix &orientationpos,
             const Vector &shipspeed,

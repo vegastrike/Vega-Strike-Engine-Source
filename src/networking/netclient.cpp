@@ -76,7 +76,6 @@ using std::cin;
 
 double NETWORK_ATOM;
 
-extern vector< unorigdest* >pendingjump;
 extern Hashtable< std::string, StarSystem, 127 >star_system_table;
 typedef vector< Client* >::iterator   VC;
 typedef vector< ObjSerial >::iterator ObjI;

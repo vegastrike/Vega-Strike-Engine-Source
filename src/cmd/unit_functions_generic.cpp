@@ -19,7 +19,6 @@
 double saved_interpolation_blend_factor;
 double interpolation_blend_factor;
 bool   cam_setup_phase = false;
-extern const char *DamagedCategory;
 
 int cloakVal( int cloak, int cloakmin, int cloakrate, bool cloakglass )
 {

@@ -29,7 +29,7 @@
 //#include "gui/glut_support.h"
 #include "networking/netclient.h"
 #include "save_util.h"
-extern float rand01();
+
 #define SWITCH_CONST (0.9)
 
 vector< int >respawnunit;

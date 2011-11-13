@@ -35,8 +35,6 @@ static const char *miss_desc   = "mission_descriptions";
 static const char *news_name   = "dynamic_newsnews";
 using std::string;
 extern const Unit * makeFinalBlankUpgrade( string name, int faction );
-extern const Unit * makeTemplateUpgrade( string name, int faction );
-extern const Unit * loadUnitByCache( std::string name, int faction );
 
 static string beautify( const std::string &input )
 {

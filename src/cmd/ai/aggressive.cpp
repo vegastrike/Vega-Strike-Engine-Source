@@ -605,8 +605,6 @@ Unit * GetThreat( Unit *parent, Unit *leader )
     return th;
 }
 
-extern Cargo * GetMasterPartList( const char* );
-
 bool AggressiveAI::ProcessCurrentFgDirective( Flightgroup *fg )
 {
     bool retval = false;

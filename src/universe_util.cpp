@@ -34,7 +34,6 @@ extern void SetStarSystemLoading( bool value );
 extern bool GetStarSystemLoading();
 extern void bootstrap_draw( const std::string &message, Animation *newSplashScreen );
 extern Animation * GetSplashScreen();
-extern void SetSplashScreen( Animation *ss );
 extern const vector< string >& ParseDestinations( const string &value );
 
 using std::string;

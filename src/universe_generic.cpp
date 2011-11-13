@@ -229,8 +229,6 @@ StarSystem* Universe::Init( string systemfile, const Vector &centr, const string
     return GenerateStarSystem( (char*) fullname.c_str(), "", centr );
 }
 
-extern void micro_sleep( unsigned int howmuch );
-
 StarSystem* Universe::getStarSystem( string name )
 {
     vector< StarSystem* >::iterator iter;
@@ -242,7 +240,6 @@ StarSystem* Universe::getStarSystem( string name )
     return NULL;
 }
 
-extern void SetStarSystemLoading( bool value );
 extern void MakeStarSystem( string file, Galaxy *galaxy, string origin, int forcerandom );
 extern string RemoveDotSystem( const char *input );
 using namespace VSFileSystem;
