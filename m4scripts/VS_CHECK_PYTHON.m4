@@ -15,16 +15,16 @@ AC_MSG_CHECKING([for python])
 FOUND_PYTHON=no
 PYTHON_CXXFLAGS=""
 PYTHON_LIBS=""
-AC_ARG_WITH(python,AC_HELP_STRING([[--with-python[=VERSION]]],[ Enter 2, 2.2, 2.3, 2.4, 2.5, 2.6 (default 2.4)]))
+AC_ARG_WITH(python,AC_HELP_STRING([[--with-python[=VERSION]]],[ Enter 2, 2.2, 2.3, 2.4, 2.5, 2.6, 2.7 (default 2.4)]))
 case "$with_python" in 
 "") with_python=2.4 ;; 
-"2" | "2.2" | "2.3" | "2.4" | "2.5" | "2.6") ;;
+"2" | "2.2" | "2.3" | "2.4" | "2.5" | "2.6" | "2.7") ;;
 *) AC_MSG_ERROR([${with_python} is not valid]) ;;
 esac
 
 
 
-PYTHON_binchk="python${with_python} python2.4 python2.6 python2.5 python2.3 python2.2 python2 python"
+PYTHON_binchk="python${with_python} python2.4 python2.7 python2.6 python2.5 python2.3 python2.2 python2 python"
 for i in ${PYTHON_binchk};
 do
     PYTHON_check=`$i -V 2>/dev/null; echo $?`
