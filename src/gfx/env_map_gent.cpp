@@ -22,8 +22,6 @@
 #define snprintf _snprintf
 #endif
 
-
-#define NumLights 1
 static char *InputName      = NULL;
 static char *OutputName     = NULL;
 static bool  pushdown       = false;
@@ -34,12 +32,14 @@ static float power = 1;
 using namespace VSFileSystem;
 
 /*
- *  struct Vector {
- *       float i;
- *       float j;
- *       float k;
- *  };
- */
+struct Vector {
+    float i;
+    float j;
+    float k;
+};
+
+#define NumLights 1
+
 struct RGBColor
 {
     float r, b, g;
@@ -89,6 +89,7 @@ static void Lighting( RGBColor &Col, const Vector &Norm )
         if (Col.g < 0) Col.g = 0;
     }
 }
+*/
 
 const int   lmwid      = 512;
 const int   lmwido2    = lmwid/2;
@@ -103,13 +104,6 @@ struct CubeCoord
     unsigned int TexMap;    //0 = front, 1=back,2=right,3=left,4=up,5=down
     unsigned int padding;  //added by chuck_starchaser
 };
-
-static float abso( float x )
-{
-    if (x > 0)
-        return x;
-    else return -x;
-}
 
 static void gluSphereMap( CubeCoord &Tex, Vector Normal, float Theta )
 {
