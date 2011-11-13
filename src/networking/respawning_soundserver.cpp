@@ -144,6 +144,7 @@ int main( int argc, char **argv )
         INET_Write( fd, 1, &c );
     }
     INET_cleanup();
+    return 0;
 }
 
 void changehome( bool to, bool linuxhome = true )
