@@ -382,6 +382,7 @@ void Python::init()
         return;
     isinit = true;
 //initialize python library
+    Py_NoSiteFlag = 1;
     Py_Initialize();
     initpaths();
 #if BOOST_VERSION != 102800

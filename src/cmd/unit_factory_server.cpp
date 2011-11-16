@@ -18,13 +18,6 @@
 #include "networking/zonemgr.h"
 #include "networking/netserver.h"
 
-extern Unit *_masterPartList;
-std::string getMasterPartListUnitName()
-{
-    static std::string mpl = vs_config->getVariable( "data", "master_part_list", "master_part_list" );
-    return mpl;
-}
-
 Unit* UnitFactory::createUnit()
 {
     return new Unit( 0 );

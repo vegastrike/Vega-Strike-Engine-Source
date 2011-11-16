@@ -30,7 +30,6 @@
 #include "terrain.h"
 #include "cont_terrain.h"
 
-extern Unit *_masterPartList;
 std::string getMasterPartListUnitName()
 {
     static std::string mpl = vs_config->getVariable( "data", "master_part_list", "master_part_list" );

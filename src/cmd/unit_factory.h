@@ -36,6 +36,8 @@ class Asteroid;
 class Terrain;
 class ContinuousTerrain;
 
+std::string getMasterPartListUnitName();
+
 class UnitFactory
 {
 protected:
