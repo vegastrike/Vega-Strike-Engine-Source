@@ -282,6 +282,8 @@ Mix_Music *music   = NULL;
 #endif
 volatile bool sende = true;
 std::string   curmus;
+
+#ifdef HAVE_SDL
 static int numloops( std::string file )
 {
     int value = 1;
@@ -300,6 +302,8 @@ static int numloops( std::string file )
     }
     return value;
 }
+#endif
+
 Mix_Music * PlayMusic( std::string file, Mix_Music *oldmusic )
 {
     std::vector< std::string >files = split( file, "|" );
