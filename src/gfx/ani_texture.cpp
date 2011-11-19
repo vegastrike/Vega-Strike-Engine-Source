@@ -222,17 +222,23 @@ void AnimatedTexture::UpdateAllFrame()
     for (set< AnimatedTexture* >::iterator iter = anis.begin(); iter != anis.end(); iter++) {
         AnimatedTexture *ani = *iter;
         if (ani->options & optSoundTiming) {
+            // lazy init
+            if (ani->lastrealtime == 0)
+                ani->lastrealtime = realtime;
+            
             // de-jitter, playtime reporting tends to have some jitter
             double newcurtime = ani->GetTimeSource()->getPlayingTime();
             double delta = realtime - ani->lastrealtime;
             double drift = newcurtime - ani->lastcurtime - delta;
-            if (fabs(drift) > 0.2) {
-                ani->lastcurtime = newcurtime;
+            if (fabs(drift) > 1.0) {
+                ani->lastcurtime = newcurtime - delta;
                 ani->lastrealtime = realtime;
-                ani->setTime(newcurtime);
-            } else {
-                ani->setTime(ani->lastcurtime + delta);
+            } else if (fabs(drift) > 0.2) {
+                double catchup = drift * ((delta > 0.5) ? 0.5 : delta);
+                ani->lastcurtime += catchup;
+                ani->lastrealtime = realtime;
             }
+            ani->setTime(ani->lastcurtime + delta);
         } else {
             ani->setTime( ani->curTime()+elapsed );
         }
@@ -303,7 +309,7 @@ void AnimatedTexture::AniInit()
     active = 0;
     nextactive = 0;
     active_fraction = 0;
-    curtime = 0;
+    curtime = lastcurtime = lastrealtime = 0;
     constframerate = true;
     done = false;
 }
