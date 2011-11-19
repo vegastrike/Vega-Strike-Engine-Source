@@ -14,7 +14,6 @@
 extern vs_options game_options;
 
 //#define GFX_BUFFER_MAP_UNMAP
-static GLenum     gl_error;
 GLenum PolyLookup( POLYTYPE poly )
 {
     switch (poly)
@@ -58,6 +57,12 @@ static void BindBuf( unsigned int vbo_data )
 static void BindInd( unsigned int element_data )
 {
     (*glBindBufferARB_p)(GL_ELEMENT_ARRAY_BUFFER_ARB, element_data);
+}
+static void pr_gl_error(const string fmt)
+{
+    GLenum gl_error;
+    if (gl_error = glGetError())
+        printf (fmt, gl_error);
 }
 #endif
 void GFXVertexList::RefreshDisplayList( )
@@ -159,19 +164,14 @@ void GFXVertexList::BeginDrawState( GFXBOOL lock )
 
 #ifndef NO_VBO_SUPPORT
     if (vbo_data) {
-        /*if (gl_error=glGetError()) {
-         *  printf ("VBO18.5 Error %d\n",gl_error);
-         *  }*/
+        //pr_gl_error("VBO18.5 Error %d\n");
 
         BindBuf( vbo_data );
-        if (changed&HAS_INDEX)
-            /*if (gl_error=glGetError()) {
-             *  printf ("VBO18.5a Error %d\n",gl_error);
-             *  }*/
+        if (changed&HAS_INDEX) {
+            //pr_gl_error("VBO18.5a Error %d\n");
             BindInd( display_list );
-        /*if (gl_error=glGetError()) {
-         *  printf ("VBO18.5b Error %d\n",gl_error);
-         *  }*/
+        }
+        //pr_gl_error("VBO18.5b Error %d\n");
         if (changed&HAS_COLOR) {
             if (gl_options.Multitexture)
                 glClientActiveTextureARB_p( GL_TEXTURE0 );
