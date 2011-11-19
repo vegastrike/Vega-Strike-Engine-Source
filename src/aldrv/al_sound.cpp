@@ -735,14 +735,14 @@ bool starSystemOK()
 
 int AUDHighestSoundPlaying()
 {
-#ifdef HAVE_AL
     int retval     = -1;
+#ifdef HAVE_AL
     unsigned int s = ::sounds.size();
     for (unsigned int i = 0; i < s; ++i)
         if (false == ::sounds[i].music && AUDIsPlaying( i ) && false == ::sounds[i].looping)
             retval = i;
-    return retval;
 #endif
+    return retval;
 }
 
 void AUDStopAllSounds( int except_this_one )
