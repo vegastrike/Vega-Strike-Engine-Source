@@ -516,14 +516,6 @@ void Mesh::DrawNow( float lod, bool centered, const Matrix &m, int cloak, float 
         GFXEnable( TEXTURE1 );
 }
 
-static GFXColor getMeshColor()
-{
-    float    color[4];
-    vs_config->getColor( "unit", "ship_ambient", color );
-    GFXColor tmp( color[0], color[1], color[2], color[3] );
-    return tmp;
-}
-
 void Mesh::ProcessZFarMeshes( bool nocamerasetup )
 {
     int a = NUM_ZBUF_SEQ;
