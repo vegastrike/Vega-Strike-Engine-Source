@@ -9185,7 +9185,7 @@ void Unit::Repair()
     static float repairtime = XMLSupport::parse_float( vs_config->getVariable( "physics", "RepairDroidTime", "180" ) );
     static float checktime  = XMLSupport::parse_float( vs_config->getVariable( "physics", "RepairDroidCheckTime", "5" ) );
     if ( (repairtime <= 0) || (checktime <= 0) ) return;
-    if (pImage->repair_droid) {
+    if (pImage->repair_droid > 0) {
         if ( pImage->next_repair_time == -FLT_MAX || pImage->next_repair_time <= UniverseUtil::GetGameTime() ) {
             unsigned int numcargo = numCargo();
             if (numcargo > 0) {
@@ -9200,7 +9200,7 @@ void Unit::Repair()
                     && ( ( percentoperational =
                               UnitUtil::PercentOperational( this, carg->content, carg->category, true ) ) < 1.f ) ) {
                     if (pImage->next_repair_time == -FLT_MAX) {
-                        pImage->next_repair_time = UniverseUtil::GetGameTime()+repairtime*(1-percentoperational);
+                        pImage->next_repair_time = UniverseUtil::GetGameTime()+repairtime*(1-percentoperational)/pImage->repair_droid;
                     } else {
                         //ACtually fix the cargo here
                         static int  upfac = FactionUtil::GetUpgradeFaction();
@@ -9231,7 +9231,7 @@ void Unit::Repair()
                 }
             }
         }
-        float ammt_repair = SIMULATION_ATOM/repairtime;
+        float ammt_repair = SIMULATION_ATOM/repairtime*pImage->repair_droid;
         REPAIRINTEGRATED( pImage->LifeSupportFunctionality, pImage->LifeSupportFunctionalityMax );
         REPAIRINTEGRATED( pImage->fireControlFunctionality, pImage->fireControlFunctionalityMax );
         REPAIRINTEGRATED( pImage->SPECDriveFunctionality, pImage->SPECDriveFunctionalityMax );
