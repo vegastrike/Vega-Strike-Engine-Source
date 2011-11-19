@@ -100,7 +100,8 @@ namespace Audio {
     {
         try {
             if (rendererDataPtr.get() && isActive())
-                return rendererDataPtr->getPlayingTime(); else
+                return rendererDataPtr->getPlayingTime();
+            else
                 return lastKnownPlayingTime;
         } catch(Exception e) {
             return lastKnownPlayingTime;
