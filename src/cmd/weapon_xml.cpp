@@ -10,6 +10,9 @@
 #include "role_bitmask.h"
 #include "endianness.h"
 
+extern enum weapon_info::MOUNT_SIZE lookupMountSize( const char *str );
+
+
 #if (defined (__APPLE__) == POSH_BIG_ENDIAN) || !defined (INTEL_X86)
 //pre-optimization bug with "gcc 3.1 (20021003) prerelease"
 int counts = time( NULL );
@@ -241,8 +244,6 @@ void beginElementXML_Char( void *userData, const XML_Char *name, const XML_Char 
             -100                                      \
          )                                            \
     )
-
-extern enum weapon_info::MOUNT_SIZE lookupMountSize( const char *str );
 
 void beginElement( void *userData, const char *name, const char **atts )
 {
