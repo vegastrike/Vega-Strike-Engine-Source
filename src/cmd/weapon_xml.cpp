@@ -242,6 +242,8 @@ void beginElementXML_Char( void *userData, const XML_Char *name, const XML_Char 
          )                                            \
     )
 
+extern enum weapon_info::MOUNT_SIZE lookupMountSize( const char *str );
+
 void beginElement( void *userData, const char *name, const char **atts )
 {
     static float  game_speed    = XMLSupport::parse_float( vs_config->getVariable( "physics", "game_speed", "1" ) );
@@ -577,6 +579,3 @@ float weapon_info::Refire() const
     static float three = XMLSupport::parse_float( vs_config->getVariable( "physics", "refire_difficutly_scaling", "3.0" ) );
     return this->RefireRate*( three/(1.0f+(three-1.0f)*g_game.difficulty) );
 }
-
-extern enum weapon_info::MOUNT_SIZE lookupMountSize( const char *str );
-
