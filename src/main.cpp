@@ -821,6 +821,7 @@ std::string ParseCommandLine( int argc, char **lpCmdLine )
                     exit( 1 );
                 }
                 cout<<"Using data dir specified on command line : "<<datatmp<<endl;
+                break;
             case 'r':
             case 'R':
                 break;
@@ -897,6 +898,7 @@ std::string ParseCommandLine( int argc, char **lpCmdLine )
                     g_game.vsdebug = lpCmdLine[i][8] - '0';
                     ++i;
                 }
+                break;
             }
         } else {
             //no "-" before it - it's the mission name

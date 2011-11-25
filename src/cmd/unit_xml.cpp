@@ -1098,6 +1098,7 @@ void Unit::beginElement( const string &name, const AttributeList &attributes )
                     break;
                 }
             }
+            break;
         }
     case JUMP:
         {
