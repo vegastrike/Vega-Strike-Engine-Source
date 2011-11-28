@@ -7427,7 +7427,7 @@ bool Unit::UpAndDownGrade( const Unit *up,
     //Uncommon fields (capacities... rates... etc...)
     if ( !csv_cell_null_check || force_change_on_nothing
         || cell_has_recursive_data( upgrade_name, up->faction,
-                                    "Heat_Sink_Rating|Repair_Droid|Hold_Volume|Upgrade_Storage_Volume|Equipment_Space|Hidden_Cargo_Volume|ECM_Rating|Primary_Capacitor|Warp_Capacitor" ) )
+                                    "Heat_Sink_Rating|Repair_Droid|Hold_Volume|Upgrade_Storage_Volume|Equipment_Space|Hidden_Hold_Volume|ECM_Rating|Primary_Capacitor|Warp_Capacitor" ) )
     {
         if ( !csv_cell_null_check || force_change_on_nothing
             || cell_has_recursive_data( upgrade_name, up->faction, "Heat_Sink_Rating" ) )
@@ -7445,7 +7445,7 @@ bool Unit::UpAndDownGrade( const Unit *up,
             || cell_has_recursive_data( upgrade_name, up->faction, "Equipment_Space" ) )
             STDUPGRADE( pImage->equipment_volume, up->pImage->equipment_volume, templ->pImage->equipment_volume, 0 );
         if ( !csv_cell_null_check || force_change_on_nothing
-            || cell_has_recursive_data( upgrade_name, up->faction, "Hidden_Cargo_Volume" ) )
+            || cell_has_recursive_data( upgrade_name, up->faction, "Hidden_Hold_Volume" ) )
             STDUPGRADE( pImage->HiddenCargoVolume, up->pImage->HiddenCargoVolume, templ->pImage->HiddenCargoVolume, 0 );
         if ( !csv_cell_null_check || force_change_on_nothing
             || cell_has_recursive_data( upgrade_name, up->faction, "ECM_Rating" ) )
