@@ -23,7 +23,11 @@
 
 #ifdef _WIN32
 #ifdef HAVE_TR1_UNORDERED_MAP
+#if defined(_MSC_VER) && _MSC_VER >= 1600
 #include <unordered_map>  //MSVC doesn't use tr1 dirs
+#else
+#include <tr1/unordered_map>
+#endif
 #else
 #include <hash_map>
 #endif

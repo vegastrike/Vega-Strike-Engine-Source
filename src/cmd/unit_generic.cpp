@@ -2817,11 +2817,12 @@ void Unit::AddVelocity( float difficulty )
                            /warprampuptime) ) : (graphicOptions.RampCounter
                                                  /warprampdowntime)*(graphicOptions.RampCounter/warprampdowntime);
         }
-        if (minmultiplier < warpMultiplierMin*graphicOptions.MinWarpMultiplier)
-            minmultiplier = warpMultiplierMin*graphicOptions.MinWarpMultiplier;
-        if (minmultiplier > warpMultiplierMax*graphicOptions.MaxWarpMultiplier)
-            //SOFT LIMIT
-            minmultiplier = warpMultiplierMax*graphicOptions.MaxWarpMultiplier;
+        float minWarp = warpMultiplierMin*graphicOptions.MinWarpMultiplier;
+        float maxWarp = warpMultiplierMax*graphicOptions.MaxWarpMultiplier;
+        if (minmultiplier < minWarp)
+            minmultiplier = minWarp;
+        if (minmultiplier > maxWarp)
+            minmultiplier = maxWarp; //SOFT LIMIT
         minmultiplier *= rampmult;
         if (minmultiplier < 1)
             minmultiplier = 1;
@@ -7355,7 +7356,7 @@ bool Unit::UpAndDownGrade( const Unit *up,
     }
     //set up vars for "LookupUnitStat" to check for empty cells
     string upgrade_name = up->name;
-    //Check warp stuff
+    //Check SPEC stuff
     if ( !csv_cell_null_check || force_change_on_nothing
         || cell_has_recursive_data( upgrade_name, up->faction,
                                     "Spec_Interdiction|Warp_Min_Multiplier|Warp_Max_Multiplier" ) ) {
@@ -7400,6 +7401,28 @@ bool Unit::UpAndDownGrade( const Unit *up,
                         1 );
         }
     }
+    //Check jump and jump/SPEC stuff
+    if ( !csv_cell_null_check || force_change_on_nothing
+        || cell_has_recursive_data( upgrade_name, up->faction,
+                                    "Warp_Capacitor|Warp_Usage_Cost" ) ) {
+        if ( !csv_cell_null_check || force_change_on_nothing
+            || cell_has_recursive_data( upgrade_name, up->faction, "Warp_Capacitor" ) )
+            STDUPGRADE( maxwarpenergy, up->maxwarpenergy, templ->maxwarpenergy, 0 );
+        if ( !csv_cell_null_check || force_change_on_nothing
+            || cell_has_recursive_data( upgrade_name, up->faction, "Warp_Usage_Cost" ) )
+            STDUPGRADE( jump.insysenergy, up->jump.insysenergy, templ->jump.insysenergy, 0 );
+
+// for when we'll need more than one jump drive upgrade (Elite Strike?)
+        if ( !csv_cell_null_check || force_change_on_nothing
+            || cell_has_recursive_data( upgrade_name, up->faction, "Outsystem_Jump_Cost" ) )
+            STDUPGRADE( jump.energy, up->jump.energy, templ->jump.energy, 0 );
+        if ( !csv_cell_null_check || force_change_on_nothing
+            || cell_has_recursive_data( upgrade_name, up->faction, "Jump_Drive_Delay" ) )
+            STDUPGRADE( jump.delay, up->jump.delay, templ->jump.delay, 0 );
+
+    }
+	
+	
     if ( !csv_cell_null_check || force_change_on_nothing
         || cell_has_recursive_data( upgrade_name, up->faction, "Armor_Front_Top_Right" ) ) {
         STDUPGRADE( armor.frontrighttop, up->armor.frontrighttop, templ->armor.frontrighttop, 0 );
@@ -7454,12 +7477,6 @@ bool Unit::UpAndDownGrade( const Unit *up,
         if ( !csv_cell_null_check || force_change_on_nothing
             || cell_has_recursive_data( upgrade_name, up->faction, "Primary_Capacitor" ) )
             STDUPGRADE( maxenergy, up->maxenergy, templ->maxenergy, 0 );
-        if ( !csv_cell_null_check || force_change_on_nothing
-            || cell_has_recursive_data( upgrade_name, up->faction, "Warp_Capacitor" ) )
-            STDUPGRADE( maxwarpenergy, up->maxwarpenergy, templ->maxwarpenergy, 0 );
-        if ( !csv_cell_null_check || force_change_on_nothing
-            || cell_has_recursive_data( upgrade_name, up->faction, "Warp_Drive_Rating" ) )
-            STDUPGRADE( jump.warpDriveRating, up->jump.warpDriveRating, templ->jump.warpDriveRating, 0 );
     }
     //Maneuvering stuff
     if ( !csv_cell_null_check || force_change_on_nothing
