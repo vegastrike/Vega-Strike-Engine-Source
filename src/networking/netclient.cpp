@@ -401,6 +401,8 @@ void NetClient::Respawn( ObjSerial newserial )
     bool         setplayerXloc;
     string       mysystem;
     Cockpit     *cp = _Universe->AccessCockpit( whichcp );
+    vector< string > packedInfo;
+        
     static float initialzoom = XMLSupport::parse_float( vs_config->getVariable( "graphics", "inital_zoom_factor", "2.25" ) );
     cp->zoomfactor = initialzoom;
     cp->savegame->SetStarSystem( mysystem );
@@ -410,12 +412,14 @@ void NetClient::Respawn( ObjSerial newserial )
                                  pos,
                                  setplayerXloc,
                                  cp->credits,
-                                 cp->unitfilename,
+                                 packedInfo,
                                  whichcp,
                                  lastsave[0],
                                  false );
     string fullsysname = mysystem+".system";
     StarSystem *ss;
+    
+    cp->UnpackUnitInfo(packedInfo);
 
     {
         Background::BackgroundClone savedtextures = {
@@ -434,7 +438,7 @@ void NetClient::Respawn( ObjSerial newserial )
     _Universe->pushActiveStarSystem( ss );
     unsigned int oldcp     = _Universe->CurrentCockpit();
     _Universe->SetActiveCockpit( cp );
-    std::string  unkeyname = cp->unitfilename[0];
+    std::string  unkeyname = cp->GetUnitFileName();
     int fgsnumber = 0;
     if (cp->fg) {
         fgsnumber = cp->fg->flightgroup_nr++;

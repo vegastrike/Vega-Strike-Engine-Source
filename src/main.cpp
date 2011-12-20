@@ -631,6 +631,8 @@ void bootstrap_main_loop()
             }
             vector< SavedUnits >saved;
             /************* NETWORK PART ***************/
+            vector< string > packedInfo;
+            
             if (Network != NULL) {
                 string err;
                 string srvipadr;
@@ -642,13 +644,14 @@ void bootstrap_main_loop()
                     VSExit( 1 );
                 }
                 savefiles.push_back( *Network[k].loginSavedGame( 0 ) );
+                
                 _Universe->AccessCockpit( k )->savegame->ParseSaveGame( "",
                                                                         mysystem,
                                                                         mysystem,
                                                                         pos,
                                                                         setplayerXloc,
                                                                         credits,
-                                                                        _Universe->AccessCockpit()->unitfilename,
+                                                                        packedInfo,
                                                                         k,
                                                                         savefiles[k][0],
                                                                         false );
@@ -665,13 +668,14 @@ void bootstrap_main_loop()
                                                                             pos,
                                                                             setplayerXloc,
                                                                             credits,
-                                                                            _Universe->AccessCockpit()->unitfilename,
+                                                                            packedInfo,
                                                                             k );
                 } else {
                     _Universe->AccessCockpit( k )->savegame->SetOutputFileName( savegamefile );
                 }
             }
-            CopySavedShips( playername[k], k, _Universe->AccessCockpit()->unitfilename, true );
+            _Universe->AccessCockpit( k )->UnpackUnitInfo(packedInfo);
+            CopySavedShips( playername[k], k, packedInfo, true );
             playersaveunit.push_back( _Universe->AccessCockpit( k )->GetUnitFileName() );
             _Universe->AccessCockpit( k )->credits = credits;
             ss.push_back( _Universe->Init( mysystem, Vector( 0, 0, 0 ), planetname ) );

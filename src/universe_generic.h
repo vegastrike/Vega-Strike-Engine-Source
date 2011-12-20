@@ -130,6 +130,7 @@ public:
 //virtual unsigned int CurrentCockpit(){return 0;}
     Cockpit * createCockpit( std::string player );
 
+    void getJumpPath( const std::string &from, const std::string &to, std::vector< std::string > &path ) const;
     const std::vector< std::string >& getAdjacentStarSystems( const std::string &ss ) const;
     std::string getGalaxyProperty( const std::string &sys, const std::string &prop );
     std::string getGalaxyPropertyDefault( const std::string &sys, const std::string &prop, const std::string def = "" );

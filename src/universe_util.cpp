@@ -4,7 +4,6 @@
 #include "universe_util.h"
 #include "universe.h"
 #include "cmd/unit.h"
-#include "cmd/unit_interface.h"
 #include "cmd/unit_factory.h"    //for UnitFactory::getMasterPartList()
 #include "cmd/collection.h"
 #include "star_system.h"

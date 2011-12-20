@@ -5,7 +5,6 @@
 #include "universe_util.h"
 #include "universe_generic.h"
 #include "cmd/unit_generic.h"
-//#include "cmd/unit_interface.h"
 #include "cmd/unit_factory.h"    //for UnitFactory::getMasterPartList()
 #include "cmd/collection.h"
 #include "star_system_generic.h"
@@ -14,8 +13,6 @@
 #include "savegame.h"
 #include "save_util.h"
 #include "cmd/unit_csv.h"
-//#include "audiolib.h"
-//#include "gfx/animation.h"
 #include "gfx/cockpit_generic.h"
 #include "lin_time.h"
 #include "load_mission.h"
@@ -1014,8 +1011,11 @@ string getSaveDir()
 
 static std::string simplePrettySystem( std::string system )
 {
-    std::string::size_type where = system.find( "/" );
-    return std::string( "Sec:" )+system.substr( 0, where )+" Sys:"+( where == string::npos ? system : system.substr( where+1 ) );
+    std::string::size_type where = system.find_first_of( '/' );
+    std::string::size_type basewhere = system.find_first_of( '@', where );
+    return std::string( "Sec:" )+system.substr( 0, where )
+           +" Sys:"+( where == string::npos ? std::string("") : system.substr( where+1, (basewhere!=string::npos) ? basewhere-where-1 : string::npos ) )
+           +( basewhere == string::npos ? std::string("") : std::string(" ")+system.substr( basewhere+1 ) );
 }
 static std::string simplePrettyShip( std::string ship )
 {
@@ -1111,6 +1111,14 @@ string getNewGameSaveName()
     static string ngsn( "New_Game" );
     return ngsn;
 }
+
+vector< string > GetJumpPath( string from, string to )
+{
+    vector< string > path;
+    _Universe->getJumpPath(from, to, path);
+    return path;
+}
+
 }
 
 #undef activeSys

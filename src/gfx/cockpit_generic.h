@@ -94,6 +94,12 @@ protected:
     bool   ejecting;
     bool   going_to_dock_screen;
     int    partial_number_of_attackers;
+
+private:
+    std::vector< std::string > unitfilename;
+    std::vector< std::string > unitsystemname;
+    std::vector< std::string > unitbasename;
+    
 public:
     double secondsWithZeroEnergy;
     int    number_of_attackers;
@@ -113,7 +119,7 @@ public:
         return autopilot_time > 0;
     }
     bool unitInAutoRegion( Unit *un );
-    std::vector< std::string >unitfilename;
+    
 ///Sets the current viewstyle
     void SetView( const enum VIEWSTYLE tmp )
     {
@@ -130,15 +136,50 @@ public:
     void RestoreGodliness();
 ///Restores the view from the IDentity Matrix needed to draw sprites
     virtual void RestoreViewPort() {}
-    std::string& GetUnitFileName()
+    
+    std::string& GetUnitFileName(unsigned int which = 0)
     {
-        if ( unitfilename.empty() ) unitfilename.push_back( "" );
-        return unitfilename.front();
+        while ( which >= unitfilename.size() )
+            unitfilename.push_back("");
+        return unitfilename[which];
     }
+    
+    std::string& GetUnitSystemName(unsigned int which = 0)
+    {
+        while ( which >= unitsystemname.size() )
+            unitsystemname.push_back("");
+        return unitsystemname[which];
+    }
+    
+    std::string& GetUnitBaseName(unsigned int which = 0)
+    {
+        while ( which >= unitbasename.size() )
+            unitbasename.push_back("");
+        return unitbasename[which];
+    }
+
+    const std::string& GetUnitFileName(unsigned int which = 0) const;
+    const std::string& GetUnitSystemName(unsigned int which = 0) const;
+    const std::string& GetUnitBaseName(unsigned int which = 0) const;
+    
+    void RemoveUnit(unsigned int which = 0);
+    
+    static std::string MakeBaseName(const Unit *base);
+
     std::string GetUnitModifications()
     {
         return unitmodname;
     }
+    
+    size_t GetNumUnits() const
+    {
+        return unitfilename.size();
+    }
+    
+    void PackUnitInfo(vector< std::string > &info) const;
+
+    void UnpackUnitInfo(vector< std::string > &info);
+
     std::string communication_choices;
     float credits; //how much money player has
 ///How far away chasecam and pan cam is

@@ -12,9 +12,17 @@
 
 #include "options.h"
 
+#include <vector>
+#include <string>
+#include <map>
+#include <deque>
+#include <algorithm>
+
 extern vs_options game_options;
+
 using namespace XMLSupport;
 using namespace GalaxyXML;
+using namespace std;
 
 string RemoveDotSystem( const char *input )
 {
@@ -254,3 +262,52 @@ const vector< std::string >& Universe::getAdjacentStarSystems( const std::string
     return ParseDestinations( galaxy->getVariable( sector, name, "jumps", "" ) );
 }
 
+void Universe::getJumpPath( const std::string &from, const std::string &to, vector< std::string > &path ) const
+{
+    map< string, unsigned int > visited;
+    vector< const string* > origin;
+    deque< const string* > open;
+    
+    // seed with starting point
+    visited[from] = 0;
+    origin.push_back(NULL);
+    open.push_back(&from);
+    
+    // Textbook BFS search
+    while (!open.empty()) {
+        const string *system = open.front();
+        open.pop_front();
+        
+        const vector< std::string > &adjacent = getAdjacentStarSystems(*system);
+        for (vector< std::string >::const_iterator i = adjacent.begin(); i != adjacent.end(); ++i) {
+            map< string, unsigned int >::const_iterator velem = visited.find(*i);
+            if (velem == visited.end()) {
+                visited[*i] = origin.size();
+                origin.push_back(system);
+                velem = visited.find(*i);
+                
+                if (*i == to) {
+                    // finished we are
+                    open.clear();
+                    break;
+                } else {
+                    open.push_back(&velem->first);
+                }
+            }
+        }
+    }
+    
+    // Backtrack to get a reverse path
+    path.clear();
+    map< string, unsigned int >::const_iterator velem = visited.find(to);
+    while (velem != visited.end()) {
+        path.push_back(velem->first);
+        if (origin[velem->second] == NULL)
+            velem = visited.end();
+        else
+            velem = visited.find(*origin[velem->second]);
+    }
+    
+    // Reverse to get the straight path
+    reverse(path.begin(), path.end());
+}

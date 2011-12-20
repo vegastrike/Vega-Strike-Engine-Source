@@ -1063,8 +1063,6 @@ vegastrike_SOURCES = \
   src/cmd/unit_factory.cpp \
   src/cmd/unit_find.h \
   src/cmd/unit_functions.cpp \
-  src/cmd/unit_interface.cpp \
-  src/cmd/unit_interface.h \
   src/cmd/unit_template.h \
   src/cmd/unit_util.cpp \
   src/cmd/unit_util.h \

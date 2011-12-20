@@ -37,7 +37,11 @@ void SaveNetUtil::GetSaveStrings( int numplayer, string &savestr, string &xmlstr
             xmlstr  = un->WriteUnitString();
             const QVector POS( un->LocalPosition() );
             string fname( cp->activeStarSystem->getFileName() );
-            savestr = cp->savegame->WriteSaveGame( fname.c_str(), un->LocalPosition(), cp->credits, cp->unitfilename, numplayer,
+            vector< string > packedInfo;
+            
+            cp->PackUnitInfo(packedInfo);
+            
+            savestr = cp->savegame->WriteSaveGame( fname.c_str(), un->LocalPosition(), cp->credits, packedInfo, numplayer,
                                                    FactionUtil::GetFactionName( cp->GetParent()->faction ), false );
             //Only get the player data, the dynamic universe part is separated
             //savestr = cp->savegame->WritePlayerData ( POS, cp->unitfilename, fname.c_str(), cp->credits, FactionUtil::GetFactionName( cp->GetParent()->faction));

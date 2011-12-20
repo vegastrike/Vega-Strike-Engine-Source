@@ -452,7 +452,6 @@ SET(VEGASTRIKE_SOURCES ${LIBGUI_SOURCES}
 					   src/cmd/terrain.cpp
 					   src/cmd/unit_factory.cpp 
 					   src/cmd/unit_functions.cpp 
-					   src/cmd/unit_interface.cpp
 					   src/cmd/unit_util.cpp
                        src/cmd/faction_xml.cpp
                        src/cmd/pilot.cpp

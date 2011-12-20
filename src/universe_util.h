@@ -134,12 +134,16 @@ std::string GetAdjacentSystem( std::string str, int which );
 ///this gets a specific property of this system as found in universe/milky_way.xml
 std::string GetGalaxyProperty( std::string sys, std::string prop );
 
+///get the shortest path between systems as found in universe/milky_way.xml
+std::vector< std::string > GetJumpPath( std::string from, std::string to );
+
 ///this gets a specific property of this system as found in universe/milky_way.xml and returns a default value if not found
 std::string GetGalaxyPropertyDefault( std::string sys, std::string prop, std::string def );
 
-///this gets the number of systems adjacent to the sysname
 std::string GetGalaxyFaction( std::string sys );
 void SetGalaxyFaction( std::string sys, std::string fac );
+
+///this gets the number of systems adjacent to the sysname
 int GetNumAdjacentSystems( std::string sysname );
 
 ///this gets the current game time since last start in seconds

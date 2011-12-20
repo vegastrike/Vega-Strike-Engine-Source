@@ -76,6 +76,7 @@ struct dirent
 #include <dirent.h>
 #endif
 #include <sys/stat.h>
+
 //end for directory thing
 extern const char *DamagedCategory;
 
@@ -4184,70 +4185,86 @@ bool BaseComputer::changeToShipDealerMode( const EventCommandId &command, Contro
 }
 
 //Create a Cargo for the specified starship.
-Cargo CreateCargoForOwnerStarship( Cockpit *cockpit, int i )
+Cargo CreateCargoForOwnerStarship( const Cockpit *cockpit, const Unit *base, int i )
 {
     Cargo cargo;
     cargo.quantity = 1;
     cargo.volume   = 1;
     cargo.price    = 0;
+    
+    string locationSystemName = cockpit->GetUnitSystemName(i);
+    string locationBaseName = cockpit->GetUnitBaseName(i);
+    string destinationSystemName = _Universe->activeStarSystem()->getFileName();
+    string destinationBaseName = (base != NULL) ? Cockpit::MakeBaseName(base) : "";
 
-    bool needsTransport = true;
-    if ( i+1 < static_cast<int>(cockpit->unitfilename.size()) ) {
-        if ( cockpit->unitfilename[i+1] == _Universe->activeStarSystem()->getFileName() )
-            //Ship is in this system -- doesn't need transport.
-            needsTransport = false;
-    }
-    if (needsTransport) {
-        static const float shipping_price =
-            XMLSupport::parse_float( vs_config->getVariable( "physics", "shipping_price", "50000" ) );
-        cargo.price = shipping_price;
-    }
-    cargo.content  = cockpit->unitfilename[i];
+    bool needsJumpTransport = (locationSystemName != destinationSystemName);
+    bool needsInsysTransport = (locationBaseName != destinationBaseName);
+    
+    static const float shipping_price_base =
+        XMLSupport::parse_float( vs_config->getVariable( "physics", "shipping_price_base", "0" ) );
+    static const float shipping_price_insys =
+        XMLSupport::parse_float( vs_config->getVariable( "physics", "shipping_price_insys", "1000" ) );
+    static const float shipping_price_perjump =
+        XMLSupport::parse_float( vs_config->getVariable( "physics", "shipping_price_perjump", "25000" ) );
+        
+    cargo.price = shipping_price_base;
+    cargo.content  = cockpit->GetUnitFileName(i);
     cargo.category = "starships/My_Fleet";
+    
+    if (needsJumpTransport) {
+        vector< string > jumps;
+        _Universe->getJumpPath(
+            locationSystemName, 
+            destinationSystemName, 
+            jumps);
+        VSFileSystem::vs_dprintf(3, "Player ship needs transport from %s to %s across %d systems",
+            locationBaseName.c_str(), 
+            destinationSystemName.c_str(), 
+            jumps.size());
+        cargo.price += shipping_price_perjump * (jumps.size() - 1);
+    } else if (needsInsysTransport) {
+        VSFileSystem::vs_dprintf(3, "Player ship needs insys transport from %s to %s",
+            locationBaseName.c_str(), 
+            destinationBaseName.c_str());
+        cargo.price += shipping_price_insys;
+    }
 
     return cargo;
 }
 
 //Create a Cargo for an owned starship from the name.
-Cargo CreateCargoForOwnerStarshipName( Cockpit *cockpit, std::string name, int &index )
+Cargo CreateCargoForOwnerStarshipName( const Cockpit *cockpit, const Unit *base, std::string name, int &index )
 {
-    for (size_t i = 1; i < cockpit->unitfilename.size(); i += 2)
-        if (cockpit->unitfilename[i] == name) {
+    for (size_t i = 1, n = cockpit->GetNumUnits(); i < n; ++i) {
+        if (cockpit->GetUnitFileName(i) == name) {
             index = i;
-            return CreateCargoForOwnerStarship( cockpit, i );
+            return CreateCargoForOwnerStarship( cockpit, base, i );
         }
+    }
     //Didn't find it.
     return Cargo();
 }
 
-void SwapInNewShipName( Cockpit *cockpit, const std::string &newFileName, int swappingShipsIndex )
+void SwapInNewShipName( Cockpit *cockpit, Unit *base, const std::string &newFileName, int swappingShipsIndex )
 {
     Unit *parent = cockpit->GetParent();
     if (parent) {
+        size_t putpos = (swappingShipsIndex >= 0) ? swappingShipsIndex : cockpit->GetNumUnits();
+        cockpit->GetUnitFileName(putpos) = parent->name;
+        cockpit->GetUnitSystemName(putpos) = _Universe->activeStarSystem()->getFileName();
+        cockpit->GetUnitBaseName(putpos) = (base != NULL) ? Cockpit::MakeBaseName(base) : string("");
         if (swappingShipsIndex != -1) {
-            while (static_cast<int>(cockpit->unitfilename.size()) <= swappingShipsIndex+1)
-                cockpit->unitfilename.push_back( "" );
-            cockpit->unitfilename[swappingShipsIndex]   = parent->name;
-            cockpit->unitfilename[swappingShipsIndex+1] = _Universe->activeStarSystem()->getFileName();
-            for (size_t i = 1; i < cockpit->unitfilename.size(); i += 2)
-                if (cockpit->unitfilename[i] == newFileName) {
-                    cockpit->unitfilename.erase( cockpit->unitfilename.begin()+i );
-                    if ( i < cockpit->unitfilename.size() )
-                        cockpit->unitfilename.erase( cockpit->unitfilename.begin()+i );                          //get rid of system
-                    i -= 2;                     //then +=2;
+            for (size_t i = 1, n = cockpit->GetNumUnits(); i < n ; ++i)
+                if (cockpit->GetUnitFileName(i) == newFileName) {
+                    cockpit->RemoveUnit(i);
+                    --i; //then ++;
                 }
-        } else {
-            cockpit->unitfilename.push_back( parent->name );
-            cockpit->unitfilename.push_back( _Universe->activeStarSystem()->getFileName() );
         }
     } else if (swappingShipsIndex != -1) {
         //if parent is dead
-        if (static_cast<int>(cockpit->unitfilename.size()) > swappingShipsIndex)          //erase the ship we have
-            cockpit->unitfilename.erase( cockpit->unitfilename.begin()+swappingShipsIndex );
-        if (static_cast<int>(cockpit->unitfilename.size()) > swappingShipsIndex) //FIXME Any reason this repeat the previous two lines? --chuck_starchaser
-            cockpit->unitfilename.erase( cockpit->unitfilename.begin()+swappingShipsIndex );
+        cockpit->RemoveUnit(swappingShipsIndex);
     }
-    cockpit->unitfilename.front() = newFileName;
+    cockpit->GetUnitFileName() = newFileName;
 }
 
 string buildShipDescription( Cargo &item, std::string &texturedescription )
@@ -4551,9 +4568,9 @@ void BaseComputer::loadShipDealerControls( void )
 
     //Add in the starships owned by this player.
     Cockpit *cockpit = _Universe->AccessCockpit();
-    for (size_t i = 1; i < cockpit->unitfilename.size(); i += 2) {
+    for (size_t i = 1, n = cockpit->GetNumUnits(); i < n; ++i) {
         CargoColor cargoColor;
-        cargoColor.cargo = CreateCargoForOwnerStarship( cockpit, i );
+        cargoColor.cargo = CreateCargoForOwnerStarship( cockpit, m_base.GetUnit(), i );
         m_transList1.masterList.push_back( cargoColor );
     }
     //remove the descriptions, we don't build them all here, it is a time consuming operation
@@ -4578,20 +4595,19 @@ bool sellShip( Unit *baseUnit, Unit *playerUnit, std::string shipname, BaseCompu
         shipCargo = UniverseUtil::GetMasterPartList()->GetCargo( shipname, tempInt );
     if (shipCargo) {
         //now we can actually do the selling
-        for (size_t i = 1; i < cockpit->unitfilename.size(); i += 2)
-            if (cockpit->unitfilename[i] == shipname) {
+        for (size_t i = 1, n = cockpit->GetNumUnits(); i < n; ++i)
+            if (cockpit->GetUnitFileName(i) == shipname) {
                 if ( Network && !_Universe->netLocked() ) {
                     Network[0].shipRequest( shipname, Subcmd::SellShip );
                     return false;
                 }
                 float xtra = 0;
-                if ( cockpit->unitfilename[i+1] == _Universe->activeStarSystem()->getFileName() ) {
+                if ( cockpit->GetUnitSystemName(i) == _Universe->activeStarSystem()->getFileName() ) {
                     static const float shipping_price =
                         XMLSupport::parse_float( vs_config->getVariable( "physics", "sellback_shipping_price", "6000" ) );
                     xtra += shipping_price;
                 }
-                cockpit->unitfilename.erase( cockpit->unitfilename.begin()+i );
-                cockpit->unitfilename.erase( cockpit->unitfilename.begin()+i );
+                cockpit->RemoveUnit(i);
                 static float shipSellback =
                     XMLSupport::parse_float( vs_config->getVariable( "economics", "ship_sellback_price", ".5" ) );
                 cockpit->credits += shipSellback*shipCargo->price;                 //sellback cost
@@ -4634,7 +4650,7 @@ bool buyShip( Unit *baseUnit,
     if (myfleet) {
         //Player owns this starship.
         shipCargo = &myFleetShipCargo;
-        myFleetShipCargo = CreateCargoForOwnerStarshipName( _Universe->AccessCockpit(), content, swappingShipsIndex );
+        myFleetShipCargo = CreateCargoForOwnerStarshipName( _Universe->AccessCockpit(), baseUnit, content, swappingShipsIndex );
         if ( shipCargo->GetContent().empty() ) {
             //Something happened -- can't find ship by name.
             shipCargo = NULL;
@@ -4642,8 +4658,8 @@ bool buyShip( Unit *baseUnit,
         }
     } else {
         Cockpit *cockpit = _Universe->AccessCockpit();
-        for (size_t i = 1; i < cockpit->unitfilename.size(); i += 2)
-            if (cockpit->unitfilename[i] == content)
+        for (size_t i = 1, n = cockpit->GetNumUnits(); i < n; ++i)
+            if (cockpit->GetUnitFileName(i) == content)
                 return false;
         //can't buy a ship you own
     }
@@ -4689,12 +4705,12 @@ bool buyShip( Unit *baseUnit,
                     newPart->SetPosAndCumPos( UniverseUtil::SafeEntrancePoint( playerUnit->Position(), newPart->rSize() ) );
                     newPart->prev_physical_state = playerUnit->prev_physical_state;
                     _Universe->activeStarSystem()->AddUnit( newPart );
-                    SwapInNewShipName( _Universe->AccessCockpit(), content, swappingShipsIndex );
-                    for (int j = 0; j < 2; ++j)
+                    SwapInNewShipName( _Universe->AccessCockpit(), baseUnit, content, swappingShipsIndex );
+                    for (int j = 0; j < 2; ++j) {
                         for (int i = playerUnit->numCargo()-1; i >= 0; --i) {
                             Cargo c = playerUnit->GetCargo( i );
-                            if ( (c.mission != 0
-                                  && j == 0) || (c.mission == 0 && j == 1 && c.GetCategory().find( "upgrades" ) != 0) ) {
+                            if (    (c.mission != 0 && j == 0) 
+                                 || (c.mission == 0 && j == 1 && (!myfleet || Network) && c.GetCategory().find( "upgrades" ) != 0) ) {
                                 for (int k = c.quantity; k > 0; --k) {
                                     c.quantity = k;
                                     if ( newPart->CanAddCargo( c ) ) {
@@ -4705,6 +4721,7 @@ bool buyShip( Unit *baseUnit,
                                 }
                             }
                         }
+                    }
                     WriteSaveGame( _Universe->AccessCockpit(), true );                     //oops saved game last time at wrong place
 
                     _Universe->AccessCockpit()->SetParent( newPart, content.c_str(),

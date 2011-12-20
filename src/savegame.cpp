@@ -325,15 +325,18 @@ void WriteSaveGame( Cockpit *cp, bool auto_save )
     if (!un)
         return;
     if (un->GetHull() > 0) {
+        vector< string > packedInfo;
+        cp->PackUnitInfo(packedInfo);
+        
         cp->savegame->WriteSaveGame( cp->activeStarSystem->getFileName().c_str(),
-                                     un->LocalPosition(), cp->credits, cp->unitfilename, auto_save ? -1 : player_num );
+                                     un->LocalPosition(), cp->credits, packedInfo, auto_save ? -1 : player_num );
         un->WriteUnit( cp->GetUnitModifications().c_str() );
         if (GetWritePlayerSaveGame( player_num ).length() && !auto_save) {
             cp->savegame->SetSavedCredits( _Universe->AccessCockpit()->credits );
             cp->savegame->SetStarSystem( cp->activeStarSystem->getFileName() );
             //un->WriteUnit(GetWritePlayerSaveGame(player_num).c_str());
             cp->savegame->SetPlayerLocation( un->LocalPosition() );
-            CopySavedShips( cp->GetUnitModifications(), player_num, cp->unitfilename, false );
+            CopySavedShips( cp->GetUnitModifications(), player_num, packedInfo, false );
         }
     }
 }

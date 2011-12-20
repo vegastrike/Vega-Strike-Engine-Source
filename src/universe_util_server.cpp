@@ -2,7 +2,6 @@
 #include "universe_util.h"
 #include "universe_generic.h"
 #include "cmd/unit_generic.h"
-//#include "cmd/unit_interface.h"
 #include "cmd/unit_factory.h"    //for UnitFactory::getMasterPartList()
 #include "cmd/collection.h"
 #include "networking/netserver.h"

@@ -124,9 +124,8 @@ void Cockpit::SetParent( Unit *unit, const char *filename, const char *unitmodna
     parent.SetUnit( unit );
     savegame->SetPlayerLocation( pos );
     if (filename[0] != '\0') {
-        if ( this->unitfilename.empty() ) this->unitfilename.push_back( "" );
-        this->unitfilename[0] = std::string( filename );
-        this->unitmodname     = std::string( unitmodname );
+        this->GetUnitFileName() = std::string( filename );
+        this->unitmodname       = std::string( unitmodname );
     }
     if (unit) {
         this->unitfaction = unit->faction;
@@ -738,18 +737,20 @@ bool Cockpit::Update()
                     savegame->SetStarSystem( "" );
                     QVector tmpoldpos = savegame->GetPlayerLocation();
                     savegame->SetPlayerLocation( QVector( FLT_MAX, FLT_MAX, FLT_MAX ) );
+                    vector< string > packedInfo;
                     savegame->ParseSaveGame( savegamefile,
                                              newsystem,
                                              newsystem,
                                              pos,
                                              setplayerXloc,
                                              this->credits,
-                                             unitfilename,
+                                             packedInfo,
                                              k );
+                    UnpackUnitInfo(packedInfo);
                     if (pos.i == FLT_MAX && pos.j == FLT_MAX && pos.k == FLT_MAX)
                         pos = tmpoldpos;
                     savegame->SetPlayerLocation( pos );
-                    CopySavedShips( savegame->GetCallsign(), whichcp, unitfilename, true );
+                    CopySavedShips( savegame->GetCallsign(), whichcp, packedInfo, true );
                     bool actually_have_save = false;
                     static bool persistent_on_load =
                         XMLSupport::parse_bool( vs_config->getVariable( "physics", "persistent_on_load", "true" ) );
@@ -859,3 +860,93 @@ void Cockpit::SetInsidePanPitchSpeed( float )
     // No-op in generic cockpits
 }
 
+void Cockpit::PackUnitInfo(vector< std::string > &info) const
+{
+    info.clear();
+    
+    // First entry, current ship
+    if (GetNumUnits() > 0)
+        info.push_back(GetUnitFileName());
+    
+    // Following entries, ship/location pairs
+    for (size_t i=1,n=GetNumUnits(); i<n; ++i) {
+        info.push_back(GetUnitFileName(i));
+        info.push_back(GetUnitSystemName(i) + "@" + GetUnitBaseName(i));
+    }
+}
+
+void Cockpit::UnpackUnitInfo(vector< std::string > &info)
+{
+    vector< string > filenames, systemnames, basenames;
+
+    // First entry, current ship
+    if (!info.empty()) {
+        filenames.push_back( info[0] );
+        systemnames.push_back( "" );
+        basenames.push_back( "" );
+    }
+
+    // Following entries, ship/location pairs
+    for (size_t i=1, n=info.size(); i < n; i += 2) {
+        filenames.push_back( info[i] );
+        
+        string location = ((i+1) < n) ? info[i+1] : "";
+        string::size_type atpos = location.find_first_of('@');
+        
+        systemnames.push_back(location.substr(0, atpos));
+        basenames.push_back((atpos != string::npos) ? location.substr(atpos+1) : "");
+    }
+    
+    unitfilename.swap(filenames);
+    unitsystemname.swap(systemnames);
+    unitbasename.swap(basenames);    
+}
+
+static const std::string emptystring;
+
+const std::string& Cockpit::GetUnitFileName(unsigned int which) const 
+{
+    if ( which >= unitfilename.size() )
+        return emptystring;
+    else
+        return unitfilename[which];
+}
+
+const std::string& Cockpit::GetUnitSystemName(unsigned int which) const 
+{
+    if ( which >= unitsystemname.size() )
+        return emptystring;
+    else
+        return unitsystemname[which];
+}
+
+const std::string& Cockpit::GetUnitBaseName(unsigned int which) const 
+{
+    if ( which >= unitbasename.size() )
+        return emptystring;
+    else
+        return unitbasename[which];
+}
+
+void Cockpit::RemoveUnit(unsigned int which)
+{
+    if (which < unitfilename.size())
+        unitfilename.erase(unitfilename.begin()+which);
+    if (which < unitsystemname.size())
+        unitsystemname.erase(unitsystemname.begin()+which);
+    if (which < unitbasename.size())
+        unitbasename.erase(unitbasename.begin()+which);
+}
+
+string Cockpit::MakeBaseName(const Unit *base)
+{
+    string name;
+    if (base != NULL) {
+        if (base->getFlightgroup() != NULL)
+            name = base->getFlightgroup()->name + ':';
+        name += base->getFullname();
+        if (base->getFgSubnumber() > 0)
+            name += ':' + XMLSupport::tostring(base->getFgSubnumber());
+    }
+    return name;
+}
