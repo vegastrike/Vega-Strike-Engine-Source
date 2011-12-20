@@ -7068,6 +7068,10 @@ double Unit::Upgrade( const std::string &file, int mountoffset, int subunitoffse
     if (!up)
         up = UnitConstCache::setCachedConst( StringIntKey( file, upgradefac ),
                                             UnitFactory::createUnit( file.c_str(), true, upgradefac ) );
+    unsigned int cargonum;
+    Cargo *cargo = GetCargo(file, cargonum);
+    if (cargo)
+        cargo->installed = true;
     char  *unitdir    = GetUnitDir( this->name.get().c_str() );
     string templnam   = string( unitdir )+".template";
     const Unit *templ = UnitConstCache::getCachedConst( StringIntKey( templnam, this->faction ) );

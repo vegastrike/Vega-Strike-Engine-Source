@@ -1359,36 +1359,83 @@ void VDU::DrawDamage( Unit *parent )
                                                                          "hud",
                                                                          "not_included_in_damage_report",
                                                                          "plasteel_hull tungsten_hull isometal_hull" );
+    static bool print_percent_working =
+        XMLSupport::parse_bool( vs_config->getVariable( "graphics", "hud", "print_damage_percent", "true" ) );
+
+#define REPORTITEM(percent_working, max_functionality, print_percent_working, component_string) \
+    do { \
+        GFXColor final_color( (chdamaged[0]*percent_working)+( cdamaged[0]*(1.0-percent_working) ), \
+                              (chdamaged[1]*percent_working)+( cdamaged[1]*(1.0-percent_working) ), \
+                              (chdamaged[2]*percent_working)+( cdamaged[2]*(1.0-percent_working) ), \
+                              (chdamaged[3]*percent_working)+( cdamaged[3]*(1.0-percent_working) ) ); \
+        if (percent_working == 0.0) \
+            final_color = GFXColor( cdestroyed[0], cdestroyed[1], cdestroyed[2], cdestroyed[3] ); /*dead = grey*/ \
+        std::string trailer; \
+        if (percent_working < max_functionality) \
+            retval += colToString( final_color ).str; \
+        else \
+            retval += fpstring.str; \
+        trailer = fpstring.str; \
+        retval += component_string; \
+        if (print_percent_working) \
+            retval += string( " (" )+tostring( int(percent_working*100) )+string( "%)" ); \
+        retval += trailer+std::string( "\n" ); \
+    } while(0)
+    
+#define REPORTINTEGRATED(which, which_key, which_name_default) \
+    do { \
+        static string name = vs_config->getVariable( "graphics", "hud", which_key, which_name_default ); \
+        if (!name.empty()) { \
+            REPORTITEM( parent->pImage->which##Functionality, parent->pImage->which##FunctionalityMax, \
+                print_percent_working, \
+                name \
+            ); \
+        } \
+    } while(0)
+
+#define REPORTINTEGRATEDFLAG(which, which_key, which_name_default) \
+    do { \
+        static string name = vs_config->getVariable( "graphics", "hud", which_key, which_name_default ); \
+        if (!name.empty()) { \
+            REPORTITEM( ((parent->damages & which) ? 0.1 : 1.0), 1.0, \
+                false, \
+                name \
+            ); \
+        } \
+    } while(0)
+
+        
     for (unsigned int i = 0; i < numCargo; i++) {
         percent_working = 0.88;         //cargo.damage
         Cargo &the_cargo = parent->GetCargo( i );
         bool   damaged   = the_cargo.GetCategory().find( DamagedCategory ) == 0;
         if ( damaged
-            || (the_cargo.GetCategory().find( "upgrades/" ) == 0 && the_cargo.GetContent().find( "mult_" ) != 0
-                && the_cargo.GetContent().find( "add_" ) != 0 && non_repair_screen_cargo.find( the_cargo.GetContent() )
+            || (   the_cargo.GetCategory().find( "upgrades/" ) == 0 
+                && the_cargo.installed
+                && the_cargo.GetContent().find( "mult_" ) != 0
+                && the_cargo.GetContent().find( "add_" ) != 0 
+                && non_repair_screen_cargo.find( the_cargo.GetContent() )
                 == std::string::npos) ) {
             percent_working = UnitUtil::PercentOperational( parent, the_cargo.content, the_cargo.category, false );
             //retval+=parent->GetManifest (i,parent,parent->GetVelocity())+string (" (")+tostring (int(percent_working*100))+string ("%)" +the_cargo.GetCategory()+"\n");
-            GFXColor final_color( (chdamaged[0]*percent_working)+( cdamaged[0]*(1.0-percent_working) ),
-                                 (chdamaged[1]*percent_working)+( cdamaged[1]*(1.0-percent_working) ),
-                                 (chdamaged[2]*percent_working)+( cdamaged[2]*(1.0-percent_working) ),
-                                 (chdamaged[3]*percent_working)+( cdamaged[3]*(1.0-percent_working) ) );
-            if (percent_working == 0.0)
-                final_color = GFXColor( cdestroyed[0], cdestroyed[1], cdestroyed[2], cdestroyed[3] ); //dead = grey
-            std::string trailer;
-            if (percent_working < 1.0)
-                retval += colToString( final_color ).str;
-            else
-                retval += fpstring.str;
-            trailer = fpstring.str;
-            retval += parent->GetManifest( i, parent, parent->GetVelocity() );
-            static bool print_percent_working =
-                XMLSupport::parse_bool( vs_config->getVariable( "graphics", "hud", "print_damage_percent", "true" ) );
-            if (print_percent_working)
-                retval += string( " (" )+tostring( int(percent_working*100) )+string( "%)" );
-            retval += trailer+std::string( "\n" );
+            REPORTITEM(percent_working, 1.0, print_percent_working, parent->GetManifest( i, parent, parent->GetVelocity() ));
         }
     }
+    if (parent->pImage != NULL) {
+        // Integrated systems with percent working values
+        REPORTINTEGRATED(LifeSupport, "damage.names.life_support", "Life Support");
+        REPORTINTEGRATED(fireControl, "damage.names.fire_control", "Fire Control");
+        REPORTINTEGRATED(SPECDrive, "damage.names.spec_drive", "SPEC Drive");
+        REPORTINTEGRATED(Comm, "damage.names.comm", "Comm");
+        
+        // Integrated system with boolean damage flags
+        REPORTINTEGRATEDFLAG(Unit::LIMITS_DAMAGED, "damage.names.limits_name", "Thrusters");
+        REPORTINTEGRATEDFLAG(Unit::SHIELD_DAMAGED, "damage.names.shield_name", ""); // default invisible, is an upgrade
+        REPORTINTEGRATEDFLAG(Unit::COMPUTER_DAMAGED, "damage.names.computer_name", "Targetting Computer");
+        REPORTINTEGRATEDFLAG(Unit::JUMP_DAMAGED, "damage.names.jump_name", ""); // default invisible, is an upgrade
+        REPORTINTEGRATEDFLAG(Unit::CLOAK_DAMAGED, "damage.names.cloak_name", ""); // default invisible, is an upgrade
+    }
+        
     retval += ecmstatus;
     static float background_alpha =
         XMLSupport::parse_float( vs_config->getVariable( "graphics", "hud", "text_background_alpha", "0.0625" ) );

@@ -526,6 +526,8 @@ static void AddCarg( Unit *thus, const string &cargos )
             carg.maxfunctionality = nextElementFloat( cargos, elemstart, elemend );
             carg.description      = nextElementString( cargos, elemstart, elemend );
             carg.mission          = nextElementBool( cargos, elemstart, elemend, false );
+            carg.installed        = nextElementBool( cargos, elemstart, elemend, 
+                carg.category.get().find("upgrades/") == 0 );
 
             thus->AddCargo( carg, false );
         } else {
@@ -1612,14 +1614,16 @@ string Unit::WriteUnitString()
                     for (unsigned int i = 0; i < numCargo(); ++i) {
                         Cargo *c = &GetCargo( i );
                         char   tmp[2048];
-                        sprintf( tmp, ";%f;%d;%f;%f;%f;%f;;%s}",
+                        sprintf( tmp, ";%f;%d;%f;%f;%f;%f;;%s;%s}",
                                  c->price,
                                  c->quantity,
                                  c->mass,
                                  c->volume,
                                  c->functionality,
                                  c->maxfunctionality,
-                                 c->mission ? "true" : "false" );
+                                 c->mission ? "true" : "false",
+                                 c->installed ? "true" : "false"
+                               );
                         carg += "{"+c->GetContent()+";"+c->GetCategory()+tmp;
                     }
                     unit["Cargo"] = carg;

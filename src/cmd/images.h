@@ -139,6 +139,7 @@ public:
     float mass;
     float volume;
     bool  mission;
+    bool  installed;
     float functionality;
     float maxfunctionality;
     Cargo()
@@ -148,6 +149,7 @@ public:
         price    = 0;
         quantity = 1;
         mission  = false;
+        installed = false;
         functionality = maxfunctionality = 1.0f;
     }
     Cargo( std::string name, std::string cc, float pp, int qq, float mm, float vv, float func, float maxfunc ) :
@@ -159,6 +161,7 @@ public:
         mass     = mm;
         volume   = vv;
         mission  = false;
+        installed = false;
         functionality = func;
         maxfunctionality = maxfunc;
     }
@@ -171,6 +174,7 @@ public:
         mass     = mm;
         volume   = vv;
         mission  = false;
+        installed = false;
     }
     float GetFunctionality()
     {
