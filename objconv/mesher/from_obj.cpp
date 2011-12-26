@@ -147,6 +147,10 @@ struct VTX
     {
         return x != o.x || y != o.y || z != o.z;
     }
+    bool operator<( const VTX &o ) const
+    {
+        return (x < o.x) || ( (x == o.x) && ( (y < o.y) || ( (y == o.y) && (z < o.z) ) ) );
+    }
 
     float x, y, z;
 };
@@ -359,21 +363,25 @@ static void ObjToXML( XML &xml,
     }
 }
 
-static FACE map_face( const FACE &f, const vector< int > &txcmap, const vector< int > &normalmap )
+static FACE map_face( const FACE &f, const vector< int > &vtxmap, const vector< int > &txcmap, const vector< int > &normalmap )
 {
     FACE rf( f );
     switch (f.num)
     {
     case 4:
+        rf.r4.v = ( (rf.r4.v >= 0) ? vtxmap[rf.r4.v] : -1 );
         rf.r4.t = ( (rf.r4.t >= 0) ? txcmap[rf.r4.t] : -1 );
         rf.r4.n = ( (rf.r4.n >= 0) ? normalmap[rf.r4.n] : -1 );
     case 3:
+        rf.r3.v = ( (rf.r3.v >= 0) ? vtxmap[rf.r3.v] : -1 );
         rf.r3.t = ( (rf.r3.t >= 0) ? txcmap[rf.r3.t] : -1 );
         rf.r3.n = ( (rf.r3.n >= 0) ? normalmap[rf.r3.n] : -1 );
     case 2:
+        rf.r2.v = ( (rf.r2.v >= 0) ? vtxmap[rf.r2.v] : -1 );
         rf.r2.t = ( (rf.r2.t >= 0) ? txcmap[rf.r2.t] : -1 );
         rf.r2.n = ( (rf.r2.n >= 0) ? normalmap[rf.r2.n] : -1 );
     case 1:
+        rf.r1.v = ( (rf.r1.v >= 0) ? vtxmap[rf.r1.v] : -1 );
         rf.r1.t = ( (rf.r1.t >= 0) ? txcmap[rf.r1.t] : -1 );
         rf.r1.n = ( (rf.r1.n >= 0) ? normalmap[rf.r1.n] : -1 );
     }
@@ -523,14 +531,20 @@ void ObjToXMESH( FILE *obj, FILE *mtl, vector< XML > &xmllist, bool forcenormals
     bool changemat = false;
 
     vector< VTX >vtxlist;
+    map< VTX, int >      vtxmap;
+    vector< int >        vtxmap_ii;
+    
     vector< TEX >txclist;
     map< TEX, int >txcmap;
     vector< int >txcmap_ii;
+    
     map< NORMAL, int >   normalmap;
     vector< int >        normalmap_ii;
     vector< NORMAL >     normallist;
+    
     map< string, vector< FACE > >facelistlist;
     vector< FACE >       facelist;
+    
     map< string, string >mattexmap;
     string curmat;
 
@@ -558,7 +572,15 @@ void ObjToXMESH( FILE *obj, FILE *mtl, vector< XML > &xmllist, bool forcenormals
         if ( 3 == sscanf( buf, "v %f %f %f\n", &v.x, &v.y, &v.z ) ) {
             //xml.vertices.push_back(v);
             //xml.num_vertex_references.push_back(0);
-            vtxlist.push_back( VTX( v.x, v.y, v.z ) );
+            VTX vv( v.x, v.y, v.z );
+            map< VTX, int >::iterator vi = ( noopt ? vtxmap.end() : vtxmap.find( vv ) );
+            if ( vi == vtxmap.end() ) {
+                vtxmap_ii.push_back( int( vtxlist.size() ) );
+                vtxmap.insert( pair< VTX, int > ( vv, int( vtxlist.size() ) ) );
+                vtxlist.push_back( vv );
+            } else {
+                vtxmap_ii.push_back( (*vi).second );
+            }
             continue;
         }
         if ( 3 == sscanf( buf, "vn %f %f %f\n", &v.i, &v.j, &v.k ) ) {
@@ -599,19 +621,19 @@ void ObjToXMESH( FILE *obj, FILE *mtl, vector< XML > &xmllist, bool forcenormals
                     vector< string >splitwhite = splitWhiteSpace( buf+1 );
                     for (vector< string >::size_type i = 2; i < splitwhite.size(); i++)
                         facelist.push_back( map_face( FACE( parsePoly( splitwhite[0] ), parsePoly( splitwhite[i-1] ),
-                                                           parsePoly( splitwhite[i-2] ) ), txcmap_ii, normalmap_ii ) );
+                                                           parsePoly( splitwhite[i-2] ) ), vtxmap_ii, txcmap_ii, normalmap_ii ) );
                     break;
                 }
             case 4:
                 facelist.push_back( map_face( FACE( parsePoly( str ), parsePoly( str1 ), parsePoly( str2 ),
-                                                   parsePoly( str3 ) ), txcmap_ii, normalmap_ii ) );
+                                                   parsePoly( str3 ) ), vtxmap_ii, txcmap_ii, normalmap_ii ) );
                 break;
             case 3:
                 facelist.push_back( map_face( FACE( parsePoly( str ), parsePoly( str1 ),
-                                                   parsePoly( str2 ) ), txcmap_ii, normalmap_ii ) );
+                                                   parsePoly( str2 ) ), vtxmap_ii, txcmap_ii, normalmap_ii ) );
                 break;
             case 2:
-                facelist.push_back( map_face( FACE( parsePoly( str ), parsePoly( str1 ) ), txcmap_ii, normalmap_ii ) );
+                facelist.push_back( map_face( FACE( parsePoly( str ), parsePoly( str1 ) ), vtxmap_ii, txcmap_ii, normalmap_ii ) );
                 break;
             }
         }
@@ -623,6 +645,7 @@ void ObjToXMESH( FILE *obj, FILE *mtl, vector< XML > &xmllist, bool forcenormals
 
     int textnum = 0;
     int totface = 0;
+    int totindex = 0;
     for (map< string, vector< FACE > >::iterator it = facelistlist.begin(); it != facelistlist.end(); it++) {
         XML    xml;
 
@@ -657,13 +680,17 @@ void ObjToXMESH( FILE *obj, FILE *mtl, vector< XML > &xmllist, bool forcenormals
         ObjToXML( xml, vtxlist, txclist, normallist, (*it).second );
         xmllist.push_back( xml );
 
-        printf( "%u_0: %u faces, %u vertices, %u lines, %u tris, %u quads\n", textnum, (unsigned int) (*it).second.size(),
+        printf( "%u_0: %u faces, %u vertices, %u lines, %u tris, %u quads, %u indices\n", textnum, (unsigned int) (*it).second.size(),
                (unsigned int) xml.vertices.size(), (unsigned int) xml.lines.size(),
-               (unsigned int) xml.tris.size(), (unsigned int) xml.quads.size() );
+               (unsigned int) xml.tris.size(), (unsigned int) xml.quads.size(),
+               (unsigned int) (xml.tris.size()*3 + xml.quads.size()*4)
+              );
         textnum++;
         totface += int( (*it).second.size() );
+        totindex += int( xml.tris.size()*3 + xml.quads.size()*4 );
     }
     printf( "Total faces: %d\n", totface );
+    printf( "Total indices: %d\n", totindex );
 }
 
 void ObjToBFXM( FILE *obj, FILE *mtl, FILE *outputFile, bool forcenormals )
