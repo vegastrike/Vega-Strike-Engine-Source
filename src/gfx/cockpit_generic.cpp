@@ -30,6 +30,8 @@
 #include "networking/netclient.h"
 #include "save_util.h"
 
+#include <algorithm>
+
 #define SWITCH_CONST (0.9)
 
 vector< int >respawnunit;
@@ -948,5 +950,9 @@ string Cockpit::MakeBaseName(const Unit *base)
         if (base->getFgSubnumber() > 0)
             name += ':' + XMLSupport::tostring(base->getFgSubnumber());
     }
+    
+    // remove all whitespace, it breaks savegames
+    std::replace(name.begin(), name.end(), ' ', '_');
+    
     return name;
 }
