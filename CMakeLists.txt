@@ -941,7 +941,8 @@ add_subdirectory(objconv)
 
 
 target_link_libraries(vegaserver ${TST_SERVER_LIBS})
-set_target_properties(vegaserver PROPERTIES LINK_FLAGS "-L/usr/lib -L${vsUTCS_BINARY_DIR}")
+set_target_properties(vegaserver PROPERTIES LINK_FLAGS "-L/usr/lib -L${vsUTCS_BINARY_DIR}"
+                                            COMPILE_FLAGS "-DNO_GFX")
 add_dependencies(vegaserver mesh_tool)
 add_dependencies(vegaserver vssetup)
 # Debug crap 
