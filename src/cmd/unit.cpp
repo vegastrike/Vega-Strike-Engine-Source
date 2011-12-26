@@ -473,7 +473,7 @@ void GameUnit< UnitType >::Draw( const Transformation &parent, const Matrix &par
                     double pixradius = this->meshdata[i]->rSize()*perspectiveFactor(
                         (rd < g_game.znear) ? g_game.znear : rd );
                     double lod = pixradius*g_game.detaillevel;
-                    if (lod >= 0.5 && pixradius >= 0.5) {
+                    if (lod >= 0.5 && pixradius >= 2.5) {
                         //if the radius is at least half a pixel at detail 1 (equivalent to pixradius >= 0.5 / detail)
                         float currentFrame = this->meshdata[i]->getCurrentFrame();
                         this->meshdata[i]->Draw( lod, this->WarpMatrix( *ctm ), d, 
