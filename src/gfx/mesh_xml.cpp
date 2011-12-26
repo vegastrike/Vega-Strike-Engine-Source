@@ -1289,10 +1289,7 @@ vector< Mesh* >Mesh::LoadMeshes( const char *filename,
         return vector< Mesh* > ();
     }
     char bfxm[4];
-    f.Read( &bfxm[0], 1 );
-    f.Read( &bfxm[1], 1 );
-    f.Read( &bfxm[2], 1 );
-    f.Read( &bfxm[3], 1 );
+    f.Read( &bfxm[0], sizeof(bfxm[0])*4 );
     bool isbfxm = (bfxm[0] == 'B' && bfxm[1] == 'F' && bfxm[2] == 'X' && bfxm[3] == 'M');
     if ( isbfxm || strstr( filename, ".obj" ) ) {
         if (!isbfxm) {
