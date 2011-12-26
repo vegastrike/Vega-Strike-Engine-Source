@@ -481,6 +481,16 @@ void init_opengl_extensions()
         if (gl_options.Multitexture < 16)
             gl_options.Multitexture = 16;
     //only support shaders on ps_2_0 cards
+            
+    // some useful generic limits
+    GLint max_vertices=-1, max_indices=-1;
+    glGetIntegerv( GL_MAX_ELEMENTS_INDICES, &max_indices );
+    glGetIntegerv( GL_MAX_ELEMENTS_VERTICES, &max_vertices );
+    gl_options.max_array_indices = max_indices;
+    gl_options.max_array_vertices = max_vertices;
+
+    VSFileSystem::vs_dprintf( 1, "Max vertex array indices: %d\n", gl_options.max_array_indices );
+    VSFileSystem::vs_dprintf( 1, "Max vertex array vertices: %d\n", gl_options.max_array_vertices );
 }
 
 static void initfov()

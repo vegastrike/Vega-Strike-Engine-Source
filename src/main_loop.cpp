@@ -62,6 +62,10 @@
 
 #include "audio/SceneManager.h"
 
+#ifndef NO_GFX
+#include "gldrv/gl_globals.h"
+#endif
+
 extern vs_options  game_options;
 
 extern std::string global_username;
@@ -1172,6 +1176,14 @@ void main_loop()
         for (size_t jj = 0; jj < _Universe->numPlayers(); jj++)
             Network[jj].checkMsg( NULL );
     //Network[jj].sendMsg();
+    
+#ifndef NO_GFX
+    VSFileSystem::vs_dprintf(3, "Drawn %d vertices in %d batches\n", 
+                             gl_vertices_this_frame, 
+                             gl_batches_this_frame);
+    gl_vertices_this_frame = 0;
+    gl_batches_this_frame = 0;
+#endif
     
     //Commit audio scene status to renderer
     if (g_game.sound_enabled)

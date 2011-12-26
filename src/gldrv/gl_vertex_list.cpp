@@ -106,7 +106,9 @@ void GFXVertexList::Init( enum POLYTYPE *poly,
                           unsigned int *indices )
 {
     vbo_data = 0;
+    
     int stride = 0;
+    
     changed  = HAS_COLOR*( (colors != NULL) ? 1 : 0 );
     if (numlists > 0) {
         mode = new POLYTYPE[numlists];
@@ -159,20 +161,25 @@ void GFXVertexList::Init( enum POLYTYPE *poly,
             stride = INDEX_SHORT;
         if (numVertices > 65535)
             stride = INDEX_INT;
+                
         index.b = (unsigned char*) malloc( stride*numindices );
-        for (unsigned int i = 0; i < numindices; i++) {
-            switch (stride)
-            {
-            case INDEX_BYTE:
+        switch (stride)
+        {
+        case INDEX_BYTE:
+            VSFileSystem::vs_dprintf(3, "Optimized vertex list - using 8-bit indices\n");
+            for (unsigned int i = 0; i < numindices; i++)
                 index.b[i] = indices[i];
-                break;
-            case INDEX_SHORT:
+            break;
+        case INDEX_SHORT:
+            VSFileSystem::vs_dprintf(3, "Optimized vertex list - using 16-bit indices\n");
+            for (unsigned int i = 0; i < numindices; i++)
                 index.s[i] = indices[i];
-                break;
-            case INDEX_INT:
+            break;
+        case INDEX_INT:
+            VSFileSystem::vs_dprintf(2, "Optimized vertex list - using 32-bit indices\n");
+            for (unsigned int i = 0; i < numindices; i++)
                 index.i[i] = indices[i];
-                break;
-            }
+            break;
         }
     } else {
         index.b = NULL;

@@ -35,6 +35,10 @@ float  invprojection[16];
 Matrix rotview;
 }
 
+int gl_vertices_this_frame = 0;
+int gl_batches_this_frame = 0;
+
+
 //PFNGLMULTITEXCOORD2FARBPROC glMultiTexCoord2fARB;
 //PFNGLCLIENTACTIVETEXTUREARBPROC glClientActiveTextureARB;
 //PFNGLCLIENTACTIVETEXTUREARBPROC glActiveTextureARB;

@@ -312,6 +312,8 @@ typedef struct
     int  max_texture_dimension;
     int  max_movie_dimension;
     int  max_rect_dimension;
+    int  max_array_indices;
+    int  max_array_vertices;
     bool rect_textures;
     bool pot_video_textures;
     bool s3tc;
@@ -323,6 +325,10 @@ typedef struct
     bool smooth_points;
 } gl_options_t;
 extern gl_options_t gl_options;
+
+// rendering stats
+extern int gl_vertices_this_frame;
+extern int gl_batches_this_frame;
 
 //Maximum number of things that can be returned in a pick operation
 #define MAX_PICK 2048

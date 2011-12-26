@@ -59,6 +59,10 @@ static void BindInd( unsigned int element_data )
 {
     (*glBindBufferARB_p)(GL_ELEMENT_ARRAY_BUFFER_ARB, element_data);
 }
+static void clear_gl_error()
+{
+    glGetError();
+}
 static void print_gl_error(const char *fmt)
 {
     GLenum gl_error;
@@ -165,14 +169,16 @@ void GFXVertexList::BeginDrawState( GFXBOOL lock )
 
 #ifndef NO_VBO_SUPPORT
     if (vbo_data) {
-        print_gl_error("VBO18.5 Error %d\n");
+        clear_gl_error();
 
         BindBuf( vbo_data );
+        print_gl_error("VBO18.5a Error %d\n");
+        
         if (changed&HAS_INDEX) {
-            print_gl_error("VBO18.5a Error %d\n");
             BindInd( display_list );
+            print_gl_error("VBO18.5b Error %d\n");
         }
-        print_gl_error("VBO18.5b Error %d\n");
+        
         if (changed&HAS_COLOR) {
             if (gl_options.Multitexture)
                 glClientActiveTextureARB_p( GL_TEXTURE0 );
@@ -306,6 +312,7 @@ void GFXVertexList::Draw()
 {
     Draw( mode, index, numlists, offsets );
 }
+
 extern void GFXCallList( int list );
 void GFXVertexList::Draw( enum POLYTYPE *mode, const INDEX index, const int numlists, const int *offsets )
 {
@@ -343,6 +350,8 @@ void GFXVertexList::Draw( enum POLYTYPE *mode, const INDEX index, const int numl
             GFXPopBlendMode();
             GFXDisable( SMOOTH );
         }
+        
+        ++gl_batches_this_frame;
     } else {
         int totoffset = 0;
         if (changed&HAS_INDEX) {
@@ -352,20 +361,21 @@ void GFXVertexList::Draw( enum POLYTYPE *mode, const INDEX index, const int numl
                                : ( (changed&INDEX_SHORT)
                                   ? GL_UNSIGNED_SHORT
                                   : GL_UNSIGNED_INT );
-            bool use_vbo;
-            if (vbo_data && memcmp( &index, &this->index, sizeof (INDEX) ) == 0) {
+            bool use_vbo = vbo_data != 0;
+            use_vbo = use_vbo && memcmp( &index, &this->index, sizeof (INDEX) ) == 0;
+            if (use_vbo) {
             #ifndef NO_VBO_SUPPORT
                 BindInd( display_list );
+            #else
+                use_vbo = false;
             #endif
-                use_vbo = true;
             } else {
             #ifndef NO_VBO_SUPPORT
                 if (vbo_data)
                     BindInd( 0 );
             #endif
-                use_vbo = false;
             }
-            if (glMultiDrawElements_p) {
+            if (glMultiDrawElements_p != NULL && numlists > 1) {
                 static std::vector< bool >   drawn;
                 static std::vector< const GLvoid* >glindices;
                 static std::vector< GLsizei >glcounts;
@@ -376,19 +386,24 @@ void GFXVertexList::Draw( enum POLYTYPE *mode, const INDEX index, const int numl
                     if (!drawn[i]) {
                         glindices.clear();
                         glcounts.clear();
-                        for (int j = i, offs = totoffset; j < numlists; offs += offsets[j++])
+                        int totcount = 0;
+                        for (int j = i, offs = totoffset; j < numlists; offs += offsets[j++]) {
+                            totcount += offsets[j];
                             if ( !drawn[j] && (mode[j] == mode[i]) ) {
                                 glindices.push_back( use_vbo ? (GLvoid*) (stride*offs)
                                                      : (GLvoid*) &index.b[stride*offs] );
                                 glcounts.push_back( offsets[j] );
                                 drawn[j] = true;
                             }
+                        }
                         if (glindices.size() == 1)
                             glDrawElements( PolyLookup( mode[i] ), glcounts[0], indextype, glindices[0] );
 
                         else
                             glMultiDrawElements_p( PolyLookup(
                                                       mode[i] ), &glcounts[0], indextype, &glindices[0], glindices.size() );
+                        ++gl_batches_this_frame;
+                        gl_vertices_this_frame += totcount;
                     }
             } else {
                 for (int i = 0; i < numlists; i++) {
@@ -396,6 +411,8 @@ void GFXVertexList::Draw( enum POLYTYPE *mode, const INDEX index, const int numl
                                     use_vbo ? (void*) (stride*totoffset)
                                     : &index.b[stride*totoffset] );                     //changed&INDEX_BYTE == stride!
                     totoffset += offsets[i];
+                    ++gl_batches_this_frame;
+                    gl_vertices_this_frame += offsets[i];
                 }
             }
         } else {
@@ -410,12 +427,15 @@ void GFXVertexList::Draw( enum POLYTYPE *mode, const INDEX index, const int numl
                     if (!drawn[i]) {
                         gloffsets.clear();
                         glcounts.clear();
-                        for (int j = i, offs = totoffset; j < numlists; offs += offsets[j++])
+                        int totcount = 0;
+                        for (int j = i, offs = totoffset; j < numlists; offs += offsets[j++]) {
+                            totcount += offsets[j];
                             if ( !drawn[j] && (mode[j] == mode[i]) ) {
                                 gloffsets.push_back( offs );
                                 glcounts.push_back( offsets[j] );
                                 drawn[j] = true;
                             }
+                        }
                         bool blendchange = false;
                         switch (mode[i])
                         {
@@ -447,6 +467,8 @@ void GFXVertexList::Draw( enum POLYTYPE *mode, const INDEX index, const int numl
                             GFXPopBlendMode();
                             GFXDisable( SMOOTH );
                         }
+                        ++gl_batches_this_frame;
+                        gl_vertices_this_frame += totcount;
                     }
             } else {
                 for (int i = 0; i < numlists; i++) {
@@ -478,6 +500,8 @@ void GFXVertexList::Draw( enum POLYTYPE *mode, const INDEX index, const int numl
                         GFXPopBlendMode();
                         GFXDisable( SMOOTH );
                     }
+                    ++gl_batches_this_frame;
+                    gl_vertices_this_frame += offsets[i];
                 }
             }
         }
