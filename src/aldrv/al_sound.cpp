@@ -477,9 +477,11 @@ bool AUDLoadSoundFile( const char *s, struct AUDSoundProperties *info, bool use_
 int AUDBufferSound( const struct AUDSoundProperties *info, bool music )
 {
     ALuint wavbuf = 0;
+#ifdef HAVE_AL
     alGenBuffers( 1, &wavbuf );
     if (!wavbuf) printf( "OpenAL Error in alGenBuffers: %d\n", alGetError() );
     alBufferData( wavbuf, info->format, info->wave, info->size, info->freq );
+#endif
     return LoadSound( wavbuf, info->looping, music );
 }
 
@@ -895,9 +897,13 @@ void AUDPlay( const int sound, const QVector &pos, const Vector &vel, const floa
 
 float AUDGetCurrentPosition( const int sound )
 {
+#ifdef HAVE_AL
     ALfloat rv;
     alGetSourcef( sound, AL_SEC_OFFSET, &rv );
     return float(rv);
+#else
+    return 0;
+#endif
 }
 
 void AUDPausePlaying( const int sound )
