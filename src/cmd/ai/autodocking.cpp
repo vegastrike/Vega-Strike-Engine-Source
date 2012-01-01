@@ -8,6 +8,10 @@
 #include "cmd/ai/navigation.h"
 #include "autodocking.h"
 
+#include "flykeyboard.h"
+#include "in.h"
+#include "in_kb_data.h"
+
 namespace
 {
 
@@ -161,6 +165,10 @@ void AutoDocking::AbortState(Unit *player, Unit *station)
 {
     EraseOrders();
     state = &AutoDocking::EndState;
+    
+    // Safety: full stop on abort
+    KBData kbdata;
+    FlyByKeyboard::StopKey(kbdata, PRESS);
 }
 
 void AutoDocking::InitialState(Unit *player, Unit *station)
