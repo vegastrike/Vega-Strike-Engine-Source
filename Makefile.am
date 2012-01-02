@@ -295,6 +295,7 @@ LIBAI = \
   src/cmd/ai/flybywire.cpp \
   src/cmd/ai/flybywire.h \
   src/cmd/ai/flykeyboard.h \
+  src/cmd/ai/flykeyboard_generic.cpp \
   src/cmd/ai/hard_coded_scripts.cpp \
   src/cmd/ai/hard_coded_scripts.h \
   src/cmd/ai/ikarus.cpp \
@@ -987,6 +988,8 @@ vegaserver_SOURCES = \
   src/cmd/images_server.cpp \
   src/cmd/images.h \
   src/cmd/faction_xml_server.cpp \
+  src/cmd/ai/flykeyboard_server.cpp \
+  src/cmd/ai/flykeyboard.h \
   src/gfx/mesh_bin_server.cpp \
   src/cmd/script/director_server.cpp \
   src/gldrv/gl_vertex_list.cpp \

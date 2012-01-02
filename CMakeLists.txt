@@ -143,7 +143,8 @@ SET(LIBAI_SOURCES src/cmd/ai/aggressive.cpp
 				  src/cmd/ai/script.cpp
 				  src/cmd/ai/tactics.cpp
 				  src/cmd/ai/turretai.cpp
-				  src/cmd/ai/warpto.cpp )
+				  src/cmd/ai/warpto.cpp
+				  src/cmd/ai/flykeyboard_generic.cpp)
 
 add_library(OPcollide  src/cmd/collide2/Ice/IceAABB.cpp
 			   		   src/cmd/collide2/Ice/IceContainer.cpp
@@ -485,6 +486,7 @@ SET(VEGASERVER_SOURCES ${LIBCMDSERVER_SOURCES}
 					   ${LIBGFXSERVER_SOURCES}
 					   src/vegaserver.cpp
 					   src/cmd/script/director_server.cpp
+					   src/cmd/ai/flykeyboard_server.cpp
 					   src/gldrv/gl_vertex_list.cpp
 					   src/gldrv/gl_sphere_list_server.cpp)
 					   
