@@ -396,7 +396,8 @@ void BFXMToXmeshOrOBJ( FILE *Inputfile, FILE *Outputfile, FILE *OutputObj, FILE 
                     if (isxmesh)
                         fprintf( Outputfile, "<AnimationFrameIndex AnimationMeshIndex=\"%d\"/>\n", ref-1-numLODs );
                 }
-                fprintf( Outputfile, "</AnimationDefinition>\n" );
+                if (isxmesh)
+                    fprintf( Outputfile, "</AnimationDefinition>\n" );
             }
             //End AnimationDefinitions
             //End VSA
