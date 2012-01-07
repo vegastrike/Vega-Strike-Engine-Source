@@ -194,6 +194,9 @@ public:
                 /** The amount of damage received by the mesh */
                 Damage,
 
+                /** The amount of damage received by the mesh as a vec4 (.x=damage) */
+                Damage4,
+
                 /** The mesh's first detail plane normal */
                 DetailPlane0,
 

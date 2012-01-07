@@ -195,6 +195,7 @@ static Technique::Pass::ShaderParam::Semantic parseAutoParamSemantic( const std:
         enumMap["EnvColor"] = Technique::Pass::ShaderParam::EnvColor;
         enumMap["CloakingPhase"]     = Technique::Pass::ShaderParam::CloakingPhase;
         enumMap["Damage"]            = Technique::Pass::ShaderParam::Damage;
+        enumMap["Damage4"]           = Technique::Pass::ShaderParam::Damage4;
         enumMap["DetailPlane0"]      = Technique::Pass::ShaderParam::DetailPlane0;
         enumMap["DetailPlane1"]      = Technique::Pass::ShaderParam::DetailPlane1;
         enumMap["NumLights"]         = Technique::Pass::ShaderParam::NumLights;

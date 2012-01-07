@@ -1414,6 +1414,13 @@ void Mesh::ProcessShaderDrawQueue( size_t whichpass, int whichdrawqueue, bool zs
                         case Technique::Pass::ShaderParam::Damage:
                             GFXShaderConstant( sp.id, c.damage/255.f );
                             break;
+                        case Technique::Pass::ShaderParam::Damage4:
+                            GFXShaderConstant( sp.id, 
+                                               c.damage/255.f, 
+                                               c.damage/255.f, 
+                                               c.damage/255.f, 
+                                               c.damage/255.f );
+                            break;
                         case Technique::Pass::ShaderParam::EnvColor: //chuck_starchaser
                         case Technique::Pass::ShaderParam::DetailPlane0:
                         case Technique::Pass::ShaderParam::DetailPlane1:
