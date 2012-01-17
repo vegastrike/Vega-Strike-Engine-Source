@@ -7977,6 +7977,7 @@ int Unit::RepairUpgrade()
         pct = 1;
         success += 1;
     }
+    damages = NO_DAMAGE;
     bool ret = success && pct > 0;
     static bool ComponentBasedUpgrades =
         XMLSupport::parse_bool( vs_config->getVariable( "physics", "component_based_upgrades", "false" ) );
