@@ -428,6 +428,9 @@ void ObjToXMESH( FILE *obj, FILE *mtl, vector< XML > &xmllist, bool forcenormals
     bool flips = atoi( Converter::getNamedOption( "flips" ).c_str() ) != 0;
     bool flipt = atoi( Converter::getNamedOption( "flipt" ).c_str() ) != 0;
     bool flipn = atoi( Converter::getNamedOption( "flipn" ).c_str() ) != 0;
+    bool flipx = atoi( Converter::getNamedOption( "flipx" ).c_str() ) != 0;
+    bool flipy = atoi( Converter::getNamedOption( "flipy" ).c_str() ) != 0;
+    bool flipz = atoi( Converter::getNamedOption( "flipz" ).c_str() ) != 0;
     bool noopt = atoi( Converter::getNamedOption( "no-optimize" ).c_str() ) != 0;
 
     fseek( obj, 0, SEEK_END );
@@ -572,6 +575,9 @@ void ObjToXMESH( FILE *obj, FILE *mtl, vector< XML > &xmllist, bool forcenormals
         if ( 3 == sscanf( buf, "v %f %f %f\n", &v.x, &v.y, &v.z ) ) {
             //xml.vertices.push_back(v);
             //xml.num_vertex_references.push_back(0);
+            if (flipx) v.x = -v.x;
+            if (flipy) v.y = -v.y;
+            if (flipz) v.z = -v.z;
             VTX vv( v.x, v.y, v.z );
             map< VTX, int >::iterator vi = ( noopt ? vtxmap.end() : vtxmap.find( vv ) );
             if ( vi == vtxmap.end() ) {
@@ -586,6 +592,9 @@ void ObjToXMESH( FILE *obj, FILE *mtl, vector< XML > &xmllist, bool forcenormals
         if ( 3 == sscanf( buf, "vn %f %f %f\n", &v.i, &v.j, &v.k ) ) {
             //Sharing is loussy in .obj files... so lets merge a little
             if (flipn) v.i = -v.i, v.j = -v.j, v.k = -v.k;
+            if (flipx) v.x = -v.i;
+            if (flipy) v.y = -v.j;
+            if (flipz) v.z = -v.k;
             NORMAL n( v.i, v.j, v.k );
             map< NORMAL, int >::iterator mi = ( noopt ? normalmap.end() : normalmap.find( n ) );
             if ( mi == normalmap.end() ) {
