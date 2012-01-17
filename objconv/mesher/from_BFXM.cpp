@@ -260,37 +260,39 @@ void BFXMToXmeshOrOBJ( FILE *Inputfile, FILE *Outputfile, FILE *OutputObj, FILE 
                     fprintf( Outputfile, "%d", texindex ); //adds 2 or 3 or 4 or 5 to "texture"
                 if (isxmesh)
                     fprintf( Outputfile, "=\"%s\" ", texname.c_str() ); //does a technique name get here via "texname"??? --chuck
-                string textyp;
-                switch (texindex)
-                {
-                case 4:
-                    textyp = "Normal";
-                    break;
-                case 3:
-                    textyp = "Ke";
-                    break;
-                case 2:
-                    textyp = "Ka";
-                    emit   = true;
-                    break;
-                case 1:
-                    textyp = "Ks";
-                    break;
-                case 0:
-                    if (textype == ALPHAMAP)
-                        textyp = "opacity";
-                    else
-                        textyp = "Kd";
-                    break;
-                default:
-                    textyp = "";
-                }
                 if (!isxmesh) {
+                    string textyp;
+                    switch (texindex)
+                    {
+                    case 4:
+                        textyp = "map_Normal";
+                        break;
+                    case 3:
+                        textyp = "map_Ke";
+                        break;
+                    case 2:
+                        textyp = "map_Ka";
+                        emit   = true;
+                        break;
+                    case 1:
+                        textyp = "map_Ks";
+                        break;
+                    case 0:
+                        if (textype == ALPHAMAP)
+                            textyp = "map_opacity";
+                        else if (textype == TECHNIQUE)
+                            textyp = "technique";
+                        else
+                            textyp = "map_Kd";
+                        break;
+                    default:
+                        textyp = "map_unknown";
+                    }
+                    
                     if ( textyp.length() )
-                        fprintf( mtl, "map_%s %s\n", textyp.c_str(), texname.c_str() );
-
+                        fprintf( mtl, "%s %s\n", textyp.c_str(), texname.c_str() );
                     else
-                        fprintf( mtl, "map_%d %s\n", texindex, texname.c_str() );
+                        fprintf( mtl, "%d %s\n", texindex, texname.c_str() );
                 }
             }
             if (isxmesh)
