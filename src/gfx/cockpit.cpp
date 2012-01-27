@@ -27,6 +27,7 @@
 #include "hud.h"
 #include "vdu.h"
 #include "lin_time.h" //for fps
+#include "cmd/beam.h"
 #include "config_xml.h"
 #include "lin_time.h"
 #include "cmd/images.h"
@@ -478,12 +479,46 @@ void GameCockpit::DrawTargetBoxes(const Radar::Sensor& sensor)
     }
 }
 
+// got to move this to some more generic place
+#define SCATTER_CUBE \
+    QVector( rand()/RAND_MAX -.5, rand()/RAND_MAX -.5, rand()/RAND_MAX -.5 )
+
+
+
+inline void DrawITTSLine( QVector fromLoc, QVector aimLoc, GFXColor linecolor=GFXColor( 1, 1, 1, 1 ) )
+{
+    GFXColorf( linecolor );
+    GFXEnable( SMOOTH );
+    GFXBlendMode( SRCALPHA, INVSRCALPHA );
+    GFXBegin( GFXLINESTRIP );
+    GFXVertexf( fromLoc );
+    GFXVertexf( aimLoc );
+    GFXEnd();
+    GFXDisable( SMOOTH );
+}
+
+inline void DrawITTSMark( float Size, QVector p, QVector q, QVector aimLoc, GFXColor markcolor=GFXColor( 1, 1, 1, 1 ) )
+{
+    GFXColorf( markcolor );
+    GFXEnable( SMOOTH );
+    GFXBlendMode( SRCALPHA, INVSRCALPHA );
+    GFXBegin( GFXLINESTRIP );
+    GFXVertexf( aimLoc + p*Size );
+    GFXVertexf( aimLoc - q*Size );
+    GFXVertexf( aimLoc - p*Size );
+    GFXVertexf( aimLoc + q*Size );
+    GFXVertexf( aimLoc + p*Size );
+    GFXEnd();
+    GFXDisable( SMOOTH );
+}
+
 void GameCockpit::DrawTargetBox(const Radar::Sensor& sensor)
 {
     if (sensor.InsideNebula())
         return;
-
-    Unit *target = sensor.GetPlayer()->Target();
+    Unit *player = sensor.GetPlayer();
+    assert(player);
+    Unit *target = player->Target();
     if (!target)
         return;
 
@@ -504,11 +539,12 @@ void GameCockpit::DrawTargetBox(const Radar::Sensor& sensor)
     static bool draw_nav_symbol = XMLSupport::parse_bool( vs_config->getVariable( "graphics", "hud", "drawNavSymbol", "false" ) );
     if (draw_nav_symbol) {
         static GFXColor suncol = RetrColor( "nav", GFXColor( 1, 1, 1, 1 ) );
-        DrawNavigationSymbol(sensor.GetPlayer()->GetComputerData().NavPoint, CamP, CamQ,
-                             CamR.Cast().Dot( (sensor.GetPlayer()->GetComputerData().NavPoint).Cast()-_Universe->AccessCamera()->GetPosition() ) );
+        DrawNavigationSymbol(player->GetComputerData().NavPoint, CamP, CamQ,
+                             CamR.Cast().Dot( (player->GetComputerData().NavPoint).Cast()-_Universe->AccessCamera()->GetPosition() ) );
     }
     Radar::Track track = sensor.CreateTrack(target, Loc);
-    GFXColorf(sensor.GetColor(track));
+    GFXColor trackcolor=sensor.GetColor(track);
+    GFXColorf(trackcolor);
     if (draw_line_to_target) {
         GFXBlendMode( SRCALPHA, INVSRCALPHA );
         GFXEnable( SMOOTH );
@@ -544,40 +580,64 @@ void GameCockpit::DrawTargetBox(const Radar::Sensor& sensor)
     } else {
         static bool lock_nav_symbol =
             XMLSupport::parse_bool( vs_config->getVariable( "graphics", "lock_significant_target_box", "true" ) );
-        DrawOneTargetBox( Loc, target->rSize(), CamP, CamQ, CamR, computeLockingSymbol(sensor.GetPlayer()), sensor.GetPlayer()->TargetLocked()
+        DrawOneTargetBox( Loc, target->rSize(), CamP, CamQ, CamR, computeLockingSymbol(player), player->TargetLocked()
                          && ( lock_nav_symbol || !UnitUtil::isSignificant( target ) ) );
     }
 
     static bool draw_dock_box = XMLSupport::parse_bool( vs_config->getVariable( "graphics", "draw_docking_boxes", "true" ) );
     if (draw_dock_box)
-        DrawDockingBoxes(sensor.GetPlayer(), target, CamP, CamQ, CamR);
-    if ( (always_itts || sensor.GetPlayer()->GetComputerData().itts) && !nav_symbol ) {
+        DrawDockingBoxes(player, target, CamP, CamQ, CamR);
+    if ( (always_itts || player->GetComputerData().itts) && !nav_symbol ) {
         float   mrange;
-        sensor.GetPlayer()->getAverageGunSpeed( speed, range, mrange );
-        float   err  = ( .01*( 1 - sensor.GetPlayer()->CloakVisible() ) );
-        const float radialSize = sensor.GetPlayer()->rSize();
-        QVector iLoc =
-            target->PositionITTS( sensor.GetPlayer()->Position(), sensor.GetPlayer()->GetVelocity(), speed,
-                                  steady_itts )-_Universe->AccessCamera()->GetPosition()+10*err*QVector(
-                -.5*.25*radialSize+rand()*.25*radialSize/RAND_MAX,
-                -.5*.25*radialSize+rand()*.25*radialSize/RAND_MAX,
-                -.5*.25*radialSize+rand()*.25*radialSize/RAND_MAX );
-
-        GFXEnable( SMOOTH );
-        GFXBlendMode( SRCALPHA, INVSRCALPHA );
-        GFXBegin( GFXLINESTRIP );
-        if (draw_line_to_itts) {
-            GFXVertexf( Loc );
-            GFXVertexf( iLoc );
+        float   err  =  .01*( 1 - player->CloakVisible() );
+        float   scatter  = .25*player->rSize();
+        static bool ITTS_averageguns =
+            XMLSupport::parse_bool( vs_config->getVariable( "graphics", "hud", "ITTSUseAverageGunSpeed", "true" ) );
+        static bool ITTS_for_locks =
+            XMLSupport::parse_bool( vs_config->getVariable( "graphics", "hud", "ITTSForLockable", "false" ) );
+        static bool ITTS_for_beams =
+            XMLSupport::parse_bool( vs_config->getVariable( "graphics", "hud", "ITTSForBeams", "false" ) );
+        static bool line_to_itts_alpha =
+            XMLSupport::parse_float( vs_config->getVariable( "graphics", "hud", "ITTSLineToMarkAlpha", "0.1" ) );
+        QVector p = CamP.Cast();
+        QVector q = CamQ.Cast();
+        QVector offs = _Universe->AccessCamera()->GetPosition() - SCATTER_CUBE*scatter*10*err;
+        QVector iLoc;
+        Vector PlayerPosition = player->Position();
+        Vector PlayerVelocity = player->GetVelocity();
+        GFXColor mntcolor;
+        if (ITTS_averageguns) {
+            player->getAverageGunSpeed( speed, range, mrange );
+            iLoc = target->PositionITTS( PlayerPosition, PlayerVelocity, speed, steady_itts ) - offs;
+            if (draw_line_to_itts) 
+                DrawITTSLine(Loc, iLoc, trackcolor);
+            DrawITTSMark(scatter, p, q, iLoc, trackcolor);
         }
-        GFXVertexf( iLoc+( CamP.Cast() )*.25*radialSize );
-        GFXVertexf( iLoc+( -CamQ.Cast() )*.25*radialSize );
-        GFXVertexf( iLoc+( -CamP.Cast() )*.25*radialSize );
-        GFXVertexf( iLoc+( CamQ.Cast() )*.25*radialSize );
-        GFXVertexf( iLoc+( CamP.Cast() )*.25*radialSize );
-        GFXEnd();
-        GFXDisable( SMOOTH );
-    }
+        else {	// per-mount ITTS
+            int nummounts = player->GetNumMounts();
+            if (draw_line_to_itts) {
+                for (int i = 0; i < nummounts; i++) {
+                    if ( (player->mounts[i].status == Mount::ACTIVE) 
+                        && (ITTS_for_beams || (player->mounts[i].type->type != weapon_info::BEAM))
+                        && (ITTS_for_locks || (player->mounts[i].type->LockTime == 0)) )
+                    {
+                        iLoc = target->PositionITTS( PlayerPosition, PlayerVelocity, player->mounts[i].type->Speed, steady_itts ) - offs;
+                        DrawITTSLine( Loc, iLoc, GFXColor(trackcolor.r, trackcolor.g, trackcolor.b, line_to_itts_alpha) );
+                    }
+                }
+            }
+            for (int i = 0; i < nummounts; i++) {
+                if ( (player->mounts[i].status == Mount::ACTIVE)
+                    && (ITTS_for_beams || (player->mounts[i].type->type != weapon_info::BEAM)) 
+                    && (ITTS_for_locks || (player->mounts[i].type->LockTime == 0)) )
+                {
+                    mntcolor = MountColor( &player->mounts[i] );
+                    iLoc = target->PositionITTS( PlayerPosition, PlayerVelocity, player->mounts[i].type->Speed, steady_itts ) - offs;
+                    DrawITTSMark(scatter, p, q, iLoc, mntcolor);
+                }
+            }
+        }       // per mount
+    }       // draw ITTS
 }
 
 void GameCockpit::DrawCommunicatingBoxes()

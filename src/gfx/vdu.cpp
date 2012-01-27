@@ -1559,45 +1559,52 @@ void VDU::DrawStarSystemAgain( float x, float y, float w, float h, VIEWSTYLE vie
     //_Universe->AccessCockpit()->RestoreViewPort();
 }
 
-static GFXColor MountColor( Mount *mnt )
+GFXColor MountColor( Mount *mnt )
 {
-    GFXColor mountcolor( 0, 1, .2, 1 );
-    if (mnt->functionality == 1) {
-        float ref  = 1;
-        float tref = mnt->type->Refire();
-        float cref = 0;
-        if (mnt->type->type == weapon_info::BEAM) {
-            if (mnt->ref.gun)
-                cref = mnt->ref.gun->refireTime();
-        } else {
-            cref = mnt->ref.refire;
-        }
-        if (cref > tref)
-            ref = 1;
-        else
-            ref = cref/tref;
-        mountcolor = colLerp( GFXColor( .2, .2, .2 ), GFXColor( 0, 1, 1 ), ref );
-        if (ref == 1.0)
-            mountcolor = GFXColor( 0, 1, .2 );
-    } else {
-        mountcolor = colLerp( GFXColor( 1, 0, 0 ), GFXColor( 0, 1, .2 ), mnt->functionality );
-    }
+    GFXColor mountcolor;
     switch (mnt->ammo != 0 ? mnt->status : 127)
     {
-    case Mount::ACTIVE:
-        return mountcolor;
+    case Mount::ACTIVE: {
+            if (mnt->functionality == 1)
+            {
+                float ref  = 1;
+                float tref = mnt->type->Refire();
+                float cref = 0;
+                if (mnt->type->type == weapon_info::BEAM) {
+                    if (mnt->ref.gun)
+                        cref = mnt->ref.gun->refireTime();
+                } else {
+                    cref = mnt->ref.refire;
+                }
+                if (cref < tref)
+                    ref = cref/tref;
+                if (ref == 1.0)
+                    mountcolor = GFXColor( 0, 1, .2 );
+                else
+                    mountcolor = colLerp( GFXColor( .2, .2, .2 ), GFXColor( 0, 1, 1 ), ref );
+            } else	  // damaged
+            {
+                mountcolor = colLerp( GFXColor( 1, 0, 0 ), GFXColor( 0, 1, .2 ), mnt->functionality );
+            }
+        break;
+        }
     case Mount::DESTROYED:
         mountcolor = GFXColor( 1, 0, 0, 1 );
-        return mountcolor;
+        break;
     case Mount::INACTIVE:
         mountcolor = GFXColor( 1, 1, 1, 1 );
-        return mountcolor;
+        break;
     case Mount::UNCHOSEN:
-        return GFXColor( 1, 1, 1, 1 );
+        mountcolor = GFXColor( 1, 1, 1, 1 );
+        break;
     case 127:
-        return GFXColor( 0, .2, 0, 1 );
+        mountcolor = GFXColor( 0, .2, 0, 1 );
+        break;
+    default:
+        mountcolor = GFXColor( 0, 1, .2, 1 );
+        break;
     }
-    return GFXColor( 0, 1, .2, 1 );
+    return mountcolor;
 }
 
 void VDU::DrawWeapon( Unit *parent )
