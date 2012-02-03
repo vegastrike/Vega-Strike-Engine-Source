@@ -776,10 +776,11 @@ GFXBOOL /*GFXDRVAPI*/ GFXTransferTexture( unsigned char *buffer,
         if (internformat >= DXT1 && internformat <= DXT5) {
             if (textures[handle].width > 8 && textures[handle].height > 8 && mips > 0) {
                 offset1 += ( (textures[handle].width+3)/4 )*( (textures[handle].height+3)/4 )*blocksize;
-                textures[handle].width   >>= 1;
-                textures[handle].height  >>= 1;
-                textures[handle].iwidth  >>= 1;
-                textures[handle].iheight >>= 1;
+                if (textures[handle].width > 1) textures[handle].width   >>= 1;
+                if (textures[handle].height > 1) textures[handle].height  >>= 1;
+                if (textures[handle].iwidth > 1) textures[handle].iwidth  >>= 1;
+                if (textures[handle].iheight > 1) textures[handle].iheight >>= 1;
+                --mips;
             }
         }
     }
@@ -789,18 +790,19 @@ GFXBOOL /*GFXDRVAPI*/ GFXTransferTexture( unsigned char *buffer,
     if (internformat >= DXT1 && internformat <= DXT5) {
         while ( (textures[handle].width > maxdimension || textures[handle].height > maxdimension) && mips > 0 ) {
             offset1 += ( (textures[handle].width+3)/4 )*( (textures[handle].height+3)/4 )*blocksize;
-            textures[handle].width   >>= 1;
-            textures[handle].height  >>= 1;
-            textures[handle].iwidth  >>= 1;
-            textures[handle].iheight >>= 1;
+            if (textures[handle].width > 1) textures[handle].width   >>= 1;
+            if (textures[handle].height > 1) textures[handle].height  >>= 1;
+            if (textures[handle].iwidth > 1) textures[handle].iwidth  >>= 1;
+            if (textures[handle].iheight > 1) textures[handle].iheight >>= 1;
+            --mips;
         }
         offset2 = offset1;
         int w = textures[handle].width;
         int h = textures[handle].height;
         for (int i = 0; i < mips; ++i) {
             offset2 += ( (w+3)/4 )*( (h+3)/4 )*blocksize;
-            w >>= 1;
-            h >>= 1;
+            if (w > 1) w >>= 1;
+            if (h > 1) h >>= 1;
         }
     } else {
         //If we're not DDS, we have to generate a scaled version of the image
