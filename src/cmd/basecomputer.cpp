@@ -5483,8 +5483,8 @@ void showUnitStats( Unit *playerUnit, string &text, int subunitlevel, int mode, 
             break;
         }
     }
-    const Unit::UnitJump uj  = playerUnit->GetJumpStatus();
-    const Unit::UnitJump buj = blankUnit->GetJumpStatus();
+    const Unit::UnitJump &uj  = playerUnit->GetJumpStatus();
+    const Unit::UnitJump &buj = blankUnit->GetJumpStatus();
     if (!mode) {
         float maxshield = totalShieldEnergyCapacitance( playerUnit->shield );
         if (shields_require_power)
@@ -5494,7 +5494,7 @@ void showUnitStats( Unit *playerUnit, string &text, int subunitlevel, int mode, 
                      ( (playerUnit->MaxEnergyData()-maxshield)*RSconverter ), 0, "MJ" );
         //note: I found no function to get max warp energy, but since we're docked they are the same
         if (!subunitlevel) {
-            PRETTY_ADDU( statcolor+"Warp capacitor bank storage: #-c", playerUnit->GetWarpEnergy()*RSconverter*Wconv, 0, "MJ" );
+            PRETTY_ADDU( statcolor+"Warp capacitor bank storage: #-c", playerUnit->WarpCapData()*RSconverter*Wconv, 0, "MJ" );
 
             text += "#n##n##c0:1:.5#"+prefix+"[SPEC SUBSYSTEM]#n##-c";
 
@@ -5512,6 +5512,11 @@ void showUnitStats( Unit *playerUnit, string &text, int subunitlevel, int mode, 
                     PRETTY_ADDU( statcolor+"Delay: #-c", uj.delay, 0, "seconds" );
                 if (uj.damage > 0)
                     PRETTY_ADDU( statcolor+"Damage to outsystem jump drive: #-c", uj.damage*VSDM, 0, "MJ" );
+                if (playerUnit->WarpCapData() < uj.energy) {
+                    text += "#n##c1:.3:.3#"+prefix
+                            +
+                            "WARNING: Warp capacitor banks under capacity for jump: upgrade warp capacitance#-c";
+                }
             }
         }
     } else {
@@ -5990,6 +5995,11 @@ void showUnitStats( Unit *playerUnit, string &text, int subunitlevel, int mode, 
                     "WARNING: Capacitor banks are overdrawn: downgrade shield, upgrade reactor or purchase reactor capacitance!#-c";
         } else {
             /*  PRETTY_ADDU("Power balance will make your reactor never recharge above ",(playerUnit->MaxEnergyData()-maxshield)*100.0/playerUnit->MaxEnergyData(),0,"% of it's max capacity");*/
+        }
+        if (uj.drive != -2 && playerUnit->WarpCapData() < uj.energy) {
+            text += "#n##c1:.3:.3#"+prefix
+                    +
+                    "WARNING: Warp capacitor banks under capacity for jump: upgrade warp capacitance#-c";
         }
         if (playerUnit->shield.number) {
             if (playerUnit->shield.recharge*playerUnit->shield.number*VSDM/shieldenergycap > playerUnit->EnergyRechargeData()
