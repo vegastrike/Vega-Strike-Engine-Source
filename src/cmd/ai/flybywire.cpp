@@ -12,6 +12,7 @@
 #include "vs_globals.h"
 #include "config_xml.h"
 #define VELTHRESHOLD .1
+#define ANGVELTHRESHOLD .01
 
 using Orders::MatchLinearVelocity;
 
@@ -88,7 +89,7 @@ void Orders::MatchRoll::Execute()
     done = temp;
     Vector angvel( parent->UpCoordinateLevel( parent->GetAngularVelocity() ) );
     if (willfinish)
-        if (fabs( desired_roll-angvel.k ) < VELTHRESHOLD)
+        if (fabs( desired_roll-angvel.k ) < ANGVELTHRESHOLD)
             return;
     //prevent matchangvel from resetting this (kinda a hack)
     parent->ApplyLocalTorque( parent->GetMoment()*Vector( 0, 0, desired_roll-angvel.k )/SIMULATION_ATOM );
@@ -106,8 +107,8 @@ void MatchAngularVelocity::Execute()
     if (!LocalAng)
         desired = parent->ToLocalCoordinates( desired );
     if (willfinish) {
-        if ( (done = fabs( desired.i-angvel.i ) < VELTHRESHOLD && fabs( desired.j-angvel.j ) < VELTHRESHOLD
-                     && fabs( desired.k-angvel.k ) < VELTHRESHOLD) )
+        if ( (done = fabs( desired.i-angvel.i ) < ANGVELTHRESHOLD && fabs( desired.j-angvel.j ) < ANGVELTHRESHOLD
+                     && fabs( desired.k-angvel.k ) < ANGVELTHRESHOLD) )
             return;
     }
     parent->ApplyLocalTorque( parent->GetMoment()*( desired-parent->UpCoordinateLevel(
