@@ -517,6 +517,8 @@ OPTION(CPUINTEL_nocona "Enable Intel P4 (64bit) optimizations"
     OFF )
 OPTION(CPUINTEL_core2 "Enable Intel Core2 optimizations"
     OFF )
+OPTION(CPUINTEL_native "Enable host-specific optimizations for this machine"
+    OFF )
 
 
 # Hide our temporary variable and initialize it to empty
@@ -537,6 +539,8 @@ ELSEIF(CPUINTEL_nocona)
     SET(CPU_OPTS "-mtune=nocona -mfpmath=sse -msse3 -mmmx -ftree-vectorize -ffast-math -fassociative-math -funsafe-math-optimizations -funroll-loops -ftree-parallelize-loops=${CPU_SMP}")
 ELSEIF(CPUINTEL_core2)
     SET(CPU_OPTS "-mtune=core2 -mfpmath=sse -msse3 -mmmx -ftree-vectorize -ffast-math -fassociative-math -funsafe-math-optimizations -funroll-loops -ftree-parallelize-loops=${CPU_SMP}")
+ELSEIF(CPUINTEL_native)
+    SET(CPU_OPTS "-mtune=native -march=native -mfpmath=sse -msse3 -mmmx -ftree-vectorize -ffast-math -fassociative-math -funsafe-math-optimizations -funroll-loops -ftree-parallelize-loops=${CPU_SMP}")
 ENDIF(CPUAMD_k8)
 
 # Debug target block. 
