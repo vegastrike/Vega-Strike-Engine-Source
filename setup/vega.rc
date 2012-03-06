@@ -62,8 +62,8 @@ END
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 0,5,1,13278
- PRODUCTVERSION 0,5,1,13278
+ FILEVERSION 0,5,1,13324
+ PRODUCTVERSION 0,5,1,13324
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
  FILEFLAGS 0x1L
@@ -81,12 +81,12 @@ BEGIN
             VALUE "Comments", "Vega Strike is the 3D Space Simulator that allows you to trade and bounty hunt in a vast universe. Can you face the dangers and decisions that await..."
             VALUE "CompanyName", "Vega Strike Project"
             VALUE "FileDescription", "Vega Strike Configurator"
-            VALUE "FileVersion", "0.5.1.13278"
+            VALUE "FileVersion", "0.5.1.13324"
             VALUE "InternalName", "vegastrike"
             VALUE "LegalCopyright", "© Copyright 1998-2008 Vega Strike Project.  All rights reserved.  See the vega-licence.txt for details."
             VALUE "OriginalFilename", "setup.exe"
             VALUE "ProductName", "Vega Strike"
-            VALUE "ProductVersion", "0.5.1.13278"
+            VALUE "ProductVersion", "0.5.1.13324"
         END
     END
     BLOCK "VarFileInfo"
