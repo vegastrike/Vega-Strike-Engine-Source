@@ -18,7 +18,6 @@
 #include "universe_util.h"
 #include "cmd/csv.h"
 #include "cmd/role_bitmask.h"
-//#include "universe_util_generic.h" //Use universe_util.h instead
 
 using namespace GalaxyXML;
 

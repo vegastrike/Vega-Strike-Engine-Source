@@ -25,7 +25,6 @@
 #include "cmd/planet_generic.h"
 #include "networking/lowlevel/netbuffer.h"
 
-//class GameUnit;
 class Mesh;
 class Flightgroup;
 class Nebula;

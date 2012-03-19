@@ -48,8 +48,6 @@ void MissileEffect::ApplyDamage( Unit *smaller )
 
         Vector norm( pos-smaller->Position().Cast() );
         norm.Normalize();
-        //UniverseUtil::IOmessage(0,"game","all",string("dealt ")+XMLSupport::tostring(damage/rad)+string(" damage from ")+XMLSupport::tostring(orig)+string(" meters ")+XMLSupport::tostring(damage)+string(" damage and "+XMLSupport::tostring(radialmultiplier)+string(" rad mult")));
-        //divide effects by r^2
         smaller->ApplyDamage( pos, norm, damage/rad, smaller, GFXColor( 1,
                                                                         1,
                                                                         1,
@@ -173,7 +171,6 @@ void Missile::UpdatePhysics2( const Transformation &trans,
                             if ( ( Position()-su->Position() ).MagnitudeSquared() < range*range ) {
                                 su->Target( this );
                                 su->TargetTurret( this );
-                                //VSFileSystem::vs_fprintf (stderr,"%f targets %s",mission->getGametime(),targ->name.c_str());
                             }
                         }
                     }

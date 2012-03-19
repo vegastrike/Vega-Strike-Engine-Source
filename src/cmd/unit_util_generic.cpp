@@ -97,7 +97,6 @@ int getPhysicsPriority( Unit *un )
     float            tooclose = 0;
     unsigned int     np = _Universe->numPlayers();
     Cockpit         *cockpit  = _Universe->AccessCockpit();
-    //static bool fixed_system_orbit_priorities=XMLSupport::parse_bool(vs_config->getVariable("physics","fixed_system_orbit_priorities","true"));
     static float     fixed_system_orbit_priorities =
         XMLSupport::parse_float( vs_config->getVariable( "physics", "fixed_system_priority_velocity_cutoff", "50" ) );
     static const int SYSTEM_INSTALLATION_PRIORITY  = XMLSupport::parse_int(

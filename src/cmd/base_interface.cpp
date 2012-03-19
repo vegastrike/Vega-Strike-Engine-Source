@@ -328,7 +328,6 @@ void BaseInterface::Room::BaseShip::Draw( BaseInterface *base )
         _Universe->AccessCamera()->setCockpitOffset( co );
         _Universe->AccessCamera()->UpdateGFX();
         SetupViewport();
-//_Universe->AccessCockpit()->SetView (CP_PAN);
         GFXHudMode( GFXTRUE );
         g_game.fov = tmp;
         _Universe->AccessCamera()->SetFov( tmp1 );
@@ -555,21 +554,7 @@ void RunPython( const char *filnam )
             PyRun_SimpleString( const_cast< char* > (filnam) );
             ::Python::reseterrors();
         } else {
-            /*FILE *fp=VSFileSystem::vs_open(filnam,"r");
-             *  if (fp) {
-             *       int length=strlen(filnam);
-             *       char *newfile=new char[length+1];
-             *       strncpy(newfile,filnam,length);
-             *       newfile[length]='\0';
-             *       ::Python::reseterrors();
-             *       PyRun_SimpleFile(fp,newfile);
-             *       ::Python::reseterrors();
-             *       fclose(fp);
-             *       processDelayedMissions();
-             *  } else {
-             *       fprintf(stderr,"Warning:python link file '%s' not found\n",filnam);
-             *  }*/
-            CompileRunPython( filnam );
+			CompileRunPython( filnam );
         }
     }
 }
@@ -670,10 +655,7 @@ void base_main_loop()
             Network[jj].checkMsg( NULL );
     GFXBeginScene();
     if (createdbase) {
-        //static int i=0;
-        //if (i++%4==3) {
         createdbase = false;
-        //}
         AUDStopAllSounds( createdmusic );
     }
     if ( !RefreshGUI() ) {
@@ -1015,7 +997,6 @@ void BaseInterface::InitCallbacks()
     winsys_set_motion_func( ActiveMouseOverWin );
     winsys_set_passive_motion_func( PassiveMouseOverWin );
     CurrentBase = this;
-    //UpgradeCompInterface(caller,baseun);
     CallComp    = false;
     static bool simulate_while_at_base =
         XMLSupport::parse_bool( vs_config->getVariable( "physics", "simulate_while_docked", "false" ) );
@@ -1121,17 +1102,14 @@ BaseInterface::BaseInterface( const char *basefile, Unit *base, Unit *un ) :
     float x, y;
     curtext.GetCharSize( x, y );
     curtext.SetCharSize( x*2, y*2 );
-    //curtext.SetSize(2-(x*4 ),-2);
     curtext.SetSize( 1-.01, -2 );
     othtext.GetCharSize( x, y );
     othtext.SetCharSize( x*2, y*2 );
-    //othtext.SetSize(2-(x*4),-.75);
     othtext.SetSize( 1-.01, -.75 );
 
     std::string fac = base ? FactionUtil::GetFaction( base->faction ) : "neutral";
     if (base && fac == "neutral")
         fac = UniverseUtil::GetGalaxyFaction( UnitUtil::getUnitSystemFile( base ) );
-    //AUDStopAllSounds();
     Load( basefile, compute_time_of_day( base, un ), fac.c_str() );
     createdmusic = AUDHighestSoundPlaying();
     if (base && un) {
@@ -1330,17 +1308,13 @@ void BaseInterface::Room::Talk::Click( BaseInterface *base, float x, float y, in
             base->othtext.SetText( "" );
         } else if ( say.size() ) {
             curroom = base->curroom;
-//index=base->rooms[curroom]->objs.size();
             int sayindex = rand()%say.size();
             base->rooms[curroom]->objs.push_back( new Room::BaseTalk( say[sayindex], "currentmsg", true ) );
-//((Room::BaseTalk*)(base->rooms[curroom]->objs.back()))->sayindex=(sayindex);
-//((Room::BaseTalk*)(base->rooms[curroom]->objs.back()))->curtime=0;
             if (soundfiles[sayindex].size() > 0) {
                 int sound = AUDCreateSoundWAV( soundfiles[sayindex], false );
                 if (sound == -1) {
                     VSFileSystem::vs_fprintf( stderr, "\nCan't find the sound file %s\n", soundfiles[sayindex].c_str() );
                 } else {
-//AUDAdjustSound (sound,_Universe->AccessCamera ()->GetPosition(),Vector(0,0,0));
                     AUDStartPlaying( sound );
                     AUDDeleteSound( sound );                     //won't actually toast it until it stops
                 }

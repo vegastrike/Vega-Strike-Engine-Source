@@ -39,8 +39,6 @@
 #include "gfx/cockpit.h"
 #include "in_kb_data.h"
 #include "python/python_compile.h"
-//#include "vs_globals.h"
-//#include "vegastrike.h"
 #include "gfx/screenshot.h"
 using std::cout;
 using std::endl;
@@ -50,19 +48,6 @@ using std::cerr;
 
 GameVegaConfig::GameVegaConfig( const char *configfile ) : VegaConfig( configfile )
 {
-    /*
-     *  configNodeFactory *domf = new configNodeFactory();
-     *
-     *  configNode *top=(configNode *)domf->LoadXML(configfile);
-     *  if(top==NULL){
-     *  cout << "Panic exit - no configuration" << endl;
-     *  exit(0);
-     *  }
-     *  variables=NULL;
-     *  colors=NULL;
-     */
-    //top->walk(0);
-
     initCommandMap();
     initKeyMap();
     //set hatswitches to off
@@ -122,8 +107,6 @@ void decvol( const KBData&, KBSTATE a )
 void mute( const KBData&, KBSTATE a )
 {
 #ifdef HAVE_AL
-//if (a==PRESS)
-//AUDChangeVolume (0);broken
 #endif
 }
 
@@ -258,13 +241,8 @@ static void ComposeFunctionsToggle( const KBData &composition, KBSTATE k )
         ComposeFunctions( composition, k );
 }
 
-void GameVegaConfig::initCommandMap()
+void GameVegaConfig::initCommandMap() // DELETE ME
 {
-    //commandMap["LocationSelect::MoveMoveHandle"]=LocationSelect::MouseMoveHandle;
-    //commandMap["LocationSelect::incConstanst"]=LocationSelect::incConstant;
-    //commandMap["LocationSelect::decConstant"]=LocationSelect::decConstant;
-
-    //commandMap["CoordinateSelect::MouseeMoveHandle"]=CoordinateSelect::MouseMoveHandle;
 }
 
 /* *********************************************************** */
@@ -420,7 +398,6 @@ void GameVegaConfig::checkBind( configNode *node )
             }
             BindKey( glut_key, modifier, XMLSupport::parse_int( player_bound ), handler, KBData( additional_data ) );
         }
-        //cout << "bound key " << keystr << " to " << cmdstr << endl;
     } else if ( !buttonstr.empty() ) {
         //maps a joystick button or analogue hatswitch button
         int button_nr = atoi( buttonstr.c_str() );
@@ -434,7 +411,6 @@ void GameVegaConfig::checkBind( configNode *node )
 
             BindHatswitchKey( hatswitch_nr, button_nr, handler, KBData( additional_data ) );
 
-            //cout << "Bound hatswitch nr " << hatswitch_nr << " button: " << button_nr << " to " << cmdstr << endl;
         } else {
             //joystick button
             int joystick_nr;
@@ -449,7 +425,6 @@ void GameVegaConfig::checkBind( configNode *node )
 
                 BindJoyKey( joystick_nr, button_nr, handler, KBData( additional_data ) );
             }
-            //cout << "Bound joy= " << joystick_nr << " button= " << button_nr << "to " << cmdstr << endl;
             else {
                 static bool first = true;
                 if (first) {

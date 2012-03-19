@@ -135,11 +135,9 @@ enum Names
     BOLT,
     PROJECTILE,
     APPEARANCE,
-    //MANEUVER,
     ENERGY,
     DAMAGE,
     DISTANCE,
-    //attributes
     NAME,
     SOUNDMP3,
     SOUNDWAV,
@@ -168,9 +166,6 @@ enum Names
     ROLE, ANTIROLE,
     TEXTURESTRETCH
 
-    //YAW,
-    //PITCH,
-    //ROLL
 };
 
 const EnumMap::Pair element_names[] = {
@@ -181,7 +176,6 @@ const EnumMap::Pair element_names[] = {
     EnumMap::Pair( "Missile",    PROJECTILE ),
     EnumMap::Pair( "Weapons",    WEAPONS ),
     EnumMap::Pair( "Appearance", APPEARANCE ),
-    //EnumMap::Pair ("Maneuver",MANEUVER),
     EnumMap::Pair( "Energy",     ENERGY ),
     EnumMap::Pair( "Damage",     DAMAGE ),
     EnumMap::Pair( "Distance",   DISTANCE )
@@ -395,7 +389,6 @@ void beginElement( void *userData, const char *name, const char **atts )
                 tmpweapon.LockTime   = XMLSupport::parse_float( (*iter).value );
                 break;
             default:
-                //assert (0);
                 break;
             }
         }
@@ -404,7 +397,6 @@ void beginElement( void *userData, const char *name, const char **atts )
         {
             static float damagemodifier =
                 XMLSupport::parse_float( vs_config->getVariable( "physics", "weapon_damage_efficiency", "1.0" ) );
-            //assert (level==1);
             level++;
             for (iter = attributes.begin(); iter != attributes.end(); iter++) {
                 switch ( attribute_map.lookup( (*iter).name ) )
@@ -431,14 +423,12 @@ void beginElement( void *userData, const char *name, const char **atts )
                     tmpweapon.Longrange = XMLSupport::parse_float( (*iter).value );
                     break;
                 default:
-                    //assert (0);
                     break;
                 }
             }
             break;
         }
     case DISTANCE:
-        //assert (level==1);
         level++;
         for (iter = attributes.begin(); iter != attributes.end(); iter++) {
             switch ( attribute_map.lookup( (*iter).name ) )
@@ -486,13 +476,11 @@ void beginElement( void *userData, const char *name, const char **atts )
                 tmpweapon.Length = XMLSupport::parse_float( (*iter).value );
                 break;
             default:
-                //assert (0);
                 break;
             }
         }
         break;
     default:
-        //assert (0);
         break;
     }
 }
@@ -507,14 +495,12 @@ void endElement( void *userData, const XML_Char *name )
     case UNKNOWN:
         break;
     case WEAPONS:
-        //assert (level==0);
         level--;
         break;
     case BEAM:
     case BOLT:
     case BALL:
     case PROJECTILE:
-        //assert (level==1);
         level--;
         lookuptable.Put( strtoupper( curname ), new weapon_info( tmpweapon ) );
         tmpweapon.init();
@@ -523,7 +509,6 @@ void endElement( void *userData, const XML_Char *name )
     case DAMAGE:
     case DISTANCE:
     case APPEARANCE:
-        //assert (level==2);
         level--;
         break;
     default:

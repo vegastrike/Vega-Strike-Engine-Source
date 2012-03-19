@@ -16,7 +16,6 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
-//#include <fenv.h>
 #include "config.h"
 #include "cs_python.h"
 #include "audio/test.h"
@@ -87,7 +86,6 @@ vs_options game_options;
  * Globals
  */
 Universe  *_Universe;
-//GameUniverse _Universe;
 TextPlane *bs_tp = NULL;
 char SERVER = 0;
 
@@ -175,15 +173,10 @@ void cleanup( void )
 #endif
     Music::CleanupMuzak();
     winsys_shutdown();
-    //write_config_file();
     AUDDestroy();
-    //destroyObjects();
-    //Unit::ProcessDeleteQueue();
-    //delete _Universe;
     delete[] CONFIGFILE;
 }
 
-//Mission *mission;
 LeakVector< Mission* >active_missions;
 
 char mission_name[1024];
@@ -242,7 +235,6 @@ void closeRenderer()
     Audio::SceneManager::getSingleton()->setRenderer( SharedPtr<Audio::Renderer>() );
 }
 
-//int allexcept=FE_DIVBYZERO|FE_INVALID;//|FE_OVERFLOW|FE_UNDERFLOW;
 extern void InitUnitTables();
 extern void CleanupUnitTables();
 bool isVista = false;
@@ -325,12 +317,10 @@ int main( int argc, char *argv[] )
     std::vector<std::vector <char > > temp = ROLES::getAllRolePriorities();
 #if defined(HAVE_SDL)
 #ifndef NO_SDL_JOYSTICK
-    //&& defined(HAVE_SDL_MIXER)
     if ( SDL_InitSubSystem( SDL_INIT_JOYSTICK ) ) {
         VSFileSystem::vs_fprintf( stderr, "Couldn't initialize SDL: %s\n", SDL_GetError() );
         winsys_exit( 1 );
     }
-    //signal( SIGSEGV, SIG_DFL );
 #endif
 #endif
 #if 0
@@ -346,15 +336,6 @@ int main( int argc, char *argv[] )
     initALRenderer();
     initScenes();
     
-    /*
-     * #if defined(HAVE_SDL) && defined(HAVE_SDL_MIXER)
-     *
-     *  init_audio_data();
-     *  init_audio();
-     *  init_joystick();
-     *
-     * #endif
-     */
     //Register commands
     //COmmand Interpretor Seems to break VC8, so I'm leaving disabled for now - Patrick, Dec 24
     if ( XMLSupport::parse_bool( vs_config->getVariable( "general", "command_interpretor", "false" ) ) ) {
@@ -362,8 +343,6 @@ int main( int argc, char *argv[] )
         InitShipCommands();
     }
     _Universe = new GameUniverse( argc, argv, vs_config->getVariable( "general", "galaxy", "milky_way.xml" ).c_str() );
-    //_Universe.Init(argc, argv, vs_config->getVariable ("general","galaxy","milky_way.xml").c_str());
-    //winsys_set_keyboard_func(nothinghappens);
     _Universe->Loop( bootstrap_first_loop );
 
     //Unregister commands - and cleanup memory
@@ -547,19 +526,7 @@ void bootstrap_main_loop()
         string  mysystem     = mission->getVariable( "system", "sol.system" );
 
         int     numplayers;
-        /*
-         *  string nbplayers = vs_config->getVariable("network","nbplayers","1");
-         *  // Test if nb players if present in network section
-         *  if( !ignore_network && nbplayers != "")
-         *  {
-         *       numplayers = atoi( nbplayers.c_str());
-         *       cout<<numplayers<<" Players in Networking Mode"<<endl;
-         *  }
-         *  else
-         *  {
-         */
         numplayers = XMLSupport::parse_int( mission->getVariable( "num_players", "1" ) );
-        //}
         vector< std::string >playername;
         vector< std::string >playerpasswd;
         string pname, ppasswd;
@@ -656,10 +623,6 @@ void bootstrap_main_loop()
                                                                         savefiles[k][0],
                                                                         false );
                 _Universe->AccessCockpit( k )->TimeOfLastCollision = getNewTime();
-                /*
-                 *  cout<<"UNIT XML :"<<endl<<savefiles[k][0]<<endl<<endl;
-                 *  cout<<"UNIT FILE NAME = "<<_Universe->AccessCockpit(k)->unitfilename[0]<<endl;
-                 */
             } else {
                 if (loadLastSave) {
                     _Universe->AccessCockpit( k )->savegame->ParseSaveGame( savegamefile,
@@ -693,11 +656,6 @@ void bootstrap_main_loop()
         vs_config->bindKeys();         //gotta do this before we do ai
 
         createObjects( playersaveunit, ss, playerNloc, savefiles );
-        if (setplayerloc && fighters) {
-            if (fighters[0]) {
-                //fighters[0]->SetPosition (Vector (0,0,0));
-            }
-        }
         while ( !savedun.empty() ) {
             AddUnitToSystem( &savedun.back() );
             savedun.pop_back();
@@ -756,12 +714,6 @@ void bootstrap_main_loop()
         //Send a network msg saying we are ready and also send position info
         if (Network != NULL) {
             size_t l;
-            /*
-             *  for(l=0; l<_Universe->numPlayers(); l++)
-             *  {
-             *       Network[l].downloadZoneInfo();
-             *  }
-             */
             //Downloading zone info before setting inGame (CMD_ADDCLIENT) causes a race condition.
             //CMD_ADDEDYOU (response to CMD_ADDCLIENT) now sends zone info.
             for (l = 0; l < _Universe->numPlayers(); l++)
@@ -878,12 +830,10 @@ std::string ParseCommandLine( int argc, char **lpCmdLine )
                 break;
             case 'G':
             case 'g':
-                //viddrv = "GLDRV.DLL";
                 break;
             case '-':
                 //long options
                 if (strcmp( lpCmdLine[i], "--benchmark" ) == 0) {
-                    //benchmark=30.0;
                     benchmark = atof( lpCmdLine[i+1] );
                     i++;
                 } else if (strcmp( lpCmdLine[i], "--net" ) == 0) {

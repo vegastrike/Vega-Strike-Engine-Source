@@ -15,7 +15,6 @@
 #include "gfx/mesh.h"
 #include "gfx/sprite.h"
 #include "physics.h"
-//#include "cmd_hud.h"
 #include "gfxlib.h"
 #include "cmd/bolt.h"
 #include "gfx/loc_select.h"
@@ -82,7 +81,6 @@ GFXBOOL     quit = GFXFALSE;
 bool        _Slew     = true;
 bool        QuitAllow = false;
 extern bool cleanexit;
-//extern int allexcept;
 #ifndef _WIN32
 int allexcept = FE_DIVBYZERO; //|FE_INVALID;//|FE_OVERFLOW|FE_UNDERFLOW;
 #else
@@ -93,10 +91,8 @@ string getUnitNameAndFgNoBase( Unit *target );
 ContinuousTerrain *myterrain;
 int numf = 0;
 CoordinateSelect  *locSel = NULL;
-//Background * bg = NULL;
 SphereMesh *bg2 = NULL;
 ClickList  *shipList = NULL;
-//const float timek = .001;
 
 void VolUp( const KBData&, KBSTATE newState )
 {
@@ -111,37 +107,6 @@ void VolUp( const KBData&, KBSTATE newState )
     }
 }
 
-/*11-7-98
- * *Cool shit happened when a position rotation matrix from a unit was used for the drawing of the background... not very useful though
- */
-
-/*
- *  class Orbit:public AI{
- *       float count;
- *  public:
- *       Orbit(Unit *parent1):AI(parent1){count = 0;};
- *       Orbit():AI()
- *       {
- *               count = 0;
- *       };
- *       AI *Execute()
- *       {
- *               //parent->Position(); // query the position
- *         //parent->ZSlide(0.100F);
- *         //parent->Pitch(PI/180);
- *               count ++;
- *               if(30 == count)
- *               {
- *                 //			Unit *parent = this->parent;
- *                       //delete this;
- *                       //return new Line(parent);
- *                       return this;
- *               }
- *               else
- *                       return this;
- *       }
- *  };
- */
 
 void VolDown( const KBData&, KBSTATE newState )
 {
@@ -243,11 +208,6 @@ void TextMessageCallback( unsigned int ch, unsigned int mod, bool release, int x
                     }
                     UniverseUtil::receivedCustom( textmessager, true, cmd, args, string() );
                 }
-                /*
-                 *  static std::string anglestring=" >";
-                 *  //unit util checks for null, it's ok
-                 *  UniverseUtil::IOmessage(0,"game","all",name+"> "+gcp->textMessage);
-                 */                                                                                                                                                                                                                              //server seems to send it again
                 waszero = false;
             } else {waszero = true; } gcp->textMessage = "";
         } else if (code != 0 && code <= 127) {
@@ -311,11 +271,9 @@ static void _PitchDown( KBSTATE newState, int fromCam = 0, int toCam = NUM_CAM-1
             _Universe->AccessCockpit()->AccessCamera( i )->myPhysics.ApplyBalancedLocalTorque( -Q,
                                                                                                R,
                                                                                                game_options.camera_pan_speed );
-            //a =1;
         }
         if (_Slew && newState == RELEASE)
             _Universe->AccessCockpit()->AccessCamera( i )->myPhysics.SetAngularVelocity( Vector( 0, 0, 0 ) );
-        //a=0;
     }
 }
 
@@ -477,18 +435,6 @@ void LookRight( const KBData& kbdata, KBSTATE newState )
 void Quit( const KBData&, KBSTATE newState )
 {
     if (newState == PRESS) {
-        if (QuitAllow) {
-            /*
-             *  UniverseUtil::IOmessage(0,"game","all","#ffff00Quit Mode cancelled, Camera Keys restored to former function.");
-             *  UniverseUtil::IOmessage(0,"game","all","#00ff00Press Esc and then q to Quit at a later point.");
-             */
-        } else {
-            /*
-             *  UniverseUtil::IOmessage(0,"game","all","#ff0000You have pressed the quit key.");
-             *  UniverseUtil::IOmessage(0,"game","all","#00ffffIf you hit q, the game will quit.");
-             *  UniverseUtil::IOmessage(0,"game","all","#00ff55Pressing ESC again will cancel quit confirm mode.");
-             */
-        }
         QuitAllow = !QuitAllow;
     }
 }
@@ -533,12 +479,6 @@ void ScrollUp( const KBData&, KBSTATE newState )
     scrolltime += GetElapsedTime();
     if ( newState == PRESS || (newState == DOWN && scrolltime >= .5) ) {
         scrolltime = 0;
-        /*
-         *  if (_Universe->AccessCockpit()->GetParent()) {
-         *  _Universe->AccessCockpit()->GetParent()->DamageRandSys( _Universe->AccessCockpit()->GetParent()->GetHull()*(rand()/(float)RAND_MAX),Vector(rand()*2.0/(float)RAND_MAX-1.0,rand()*2.0/(float)RAND_MAX-1.0,rand()*2.0/(float)RAND_MAX-1.0),rand()/(float)RAND_MAX,rand()*3.14*2/(float)RAND_MAX);
-         *  }
-         */
-        //feenableexcept(allexcept);
         printf( "Enabling exceptions %d\n", allexcept );
         _Universe->AccessCockpit()->ScrollAllVDU( -1 );
     }
@@ -548,29 +488,6 @@ void ScrollDown( const KBData&, KBSTATE newState )
     scrolltime += GetElapsedTime();
     if ( newState == PRESS || (newState == DOWN && scrolltime >= .5) ) {
         scrolltime = 0;
-        /*
-         *  Unit * thus=_Universe->AccessCockpit()->GetParent();
-         *  if (thus) {
-         *  const char * DamagedCategory="upgrades/Damaged/";
-         *  int which = rand()%thus->numCargo();
-         *  static std::string Restricted_items=vs_config->getVariable("physics","indestructable_cargo_items","");
-         *  if (thus->GetCargo(which).category.find("upgrades/")==0&& thus->GetCargo(which).category.find(DamagedCategory)!=0 &&thus->GetCargo(which).content.find("mult_")!=0&&Restricted_items.find(thus->GetCargo(which).content)==string::npos) {//why not downgrade _add GetCargo(which).content.find("add_")!=0&&
-         *   int lenupgrades = strlen("upgrades/");
-         *   thus->GetCargo(which).category = string(DamagedCategory)+thus->GetCargo(which).category.substr(lenupgrades);
-         *   static bool NotActuallyDowngrade=XMLSupport::parse_bool(vs_config->getVariable("physics","separate_system_flakiness_component","false"));
-         *   if (!NotActuallyDowngrade) {
-         *     const Unit * downgrade=loadUnitByCache(thus->GetCargo(which).content,FactionUtil::GetFactionIndex("upgrades"));
-         *     if (downgrade) {
-         *       if (0==downgrade->GetNumMounts()&&downgrade->SubUnits.empty()) {
-         *         double percentage=0;
-         *         thus->Downgrade(downgrade,0,0,percentage,NULL);
-         *       }
-         *     }
-         *   }
-         *  }
-         *  }
-         */
-        //feenableexcept(0);
         printf( "Disabling exceptions\n" );
         _Universe->AccessCockpit()->ScrollAllVDU( 1 );
     }
@@ -795,41 +712,6 @@ void Pan( const KBData&, KBSTATE newState )
 
 using namespace CockpitKeys;
 
-/*
- *  int oldx =0;
- *  int  oldy=0;
- *  void startselect (KBSTATE k, int x,int y, int delx, int dely, int mod) {
- *  if (k==PRESS) {
- *   oldx = x;
- *   oldy = y;
- *  }
- *  }
- *
- *  void clickhandler (KBSTATE k, int x, int y, int delx, int dely, int mod) {
- *
- *  if (k==DOWN) {
- *   UnitCollection *c = shipList->requestIterator (oldx,oldy,x,y);
- *   if (c->createIterator()->current()!=NULL)
- *     VSFileSystem::Fprintf (stderr,"Select Box Hit single target");
- *   if (c->createIterator()->advance()!=NULL)
- *     VSFileSystem::Fprintf (stderr,"Select Box Hit Multiple Targets");
- *  }else {
- *   oldx = x;
- *   oldy = y;
- *  }
- *  if (k==PRESS) {
- *   VSFileSystem::Fprintf (stderr,"click?");
- *   UnitCollection * c = shipList->requestIterator (x,y);
- *   if (c->createIterator()->current()!=NULL)
- *     VSFileSystem::Fprintf (stderr,"Hit single target");
- *   if (c->createIterator()->advance()!=NULL)
- *     VSFileSystem::Fprintf (stderr,"Hit Multiple Targets");
- *   VSFileSystem::Fprintf (stderr,"\n");
- *
- *  }
- *  }
- */
-
 void InitializeInput()
 {
     BindKey( 27, 0, 0, Quit, KBData() );     //always have quit on esc
@@ -859,7 +741,6 @@ void createObjects( std::vector< std::string > &fighter0name,
 {
     vector< std::string >fighter0mods;
     vector< int > fighter0indices;
-    //GFXFogMode (FOG_OFF);
 
     static Vector TerrainScale( game_options.xscale, game_options.yscale, game_options.zscale );
 
@@ -869,7 +750,6 @@ void createObjects( std::vector< std::string > &fighter0name,
         Terrain *terr = new Terrain( stdstr.c_str(), TerrainScale, game_options.mass, game_options.radius );
         Matrix   tmp;
         ScaleMatrix( tmp, TerrainScale );
-        //tmp.r[0]=TerrainScale.i;tmp[5]=TerrainScale.j;tmp[10]=TerrainScale.k;
         QVector  pos;
         mission->GetOrigin( pos, stdstr );
         tmp.p = -pos;
@@ -885,19 +765,9 @@ void createObjects( std::vector< std::string > &fighter0name,
         tmp.p = -pos;
         myterrain->SetTransformation( tmp );
     }
-    //qt = new QuadTree("terrain.xml");
-    /******
-     *  locSel = new LocationSelect(Vector (0,-2,2),
-     *                           Vector(1,0,-1),
-     *                           Vector (-1,0,-1));
-     *  //GOOD!!
-     ****/
     BindKey( 1, CoordinateSelect::MouseMoveHandle );
 
-    //int numf=mission->number_of_flightgroups;
     int numf = mission->number_of_ships;
-
-    //cout << "numships: " << numf << endl;
 
     fighters = new Unit*[numf];
     int *tmptarget = new int[numf];
@@ -917,8 +787,6 @@ void createObjects( std::vector< std::string > &fighter0name,
         Flightgroup *fg = *siter;
         string fg_name  = fg->name;
         string fullname = fg->type;         //+ ".xunit";
-        //int fg_terrain = fg->terrain_nr;
-        //bool isvehicle = (fg->unittype==Flightgroup::VEHICLE);
         strcpy( fightername, fullname.c_str() );
         string   ainame    = fg->ainame;
         float    fg_radius = 0.0;
@@ -937,7 +805,6 @@ void createObjects( std::vector< std::string > &fighter0name,
             pox.i = fg->pos.i+s*fg_radius*3;
             pox.j = fg->pos.j+s*fg_radius*3;
             pox.k = fg->pos.k+s*fg_radius*3;
-            //cout << "loop pos " << fg_name << " " << pox.i << pox.j << pox.k << " a=" << a << endl;
             if (pox.i == pox.j && pox.j == pox.k && pox.k == 0) {
                 pox.i = rand()*10000./RAND_MAX-5000;
                 pox.j = rand()*10000./RAND_MAX-5000;
@@ -945,7 +812,6 @@ void createObjects( std::vector< std::string > &fighter0name,
             }
             tmptarget[a] = FactionUtil::GetFactionIndex( fg->faction );             //that should not be in xml?
             int fg_terrain = -1;
-            //cout << "before unit" << endl;
             if ( fg_terrain == -1 || (fg_terrain == -2 && myterrain == NULL) ) {
                 string modifications( "" );
                 if ( s == 0 && squadnum < (int) fighter0name.size() ) {
@@ -1000,8 +866,6 @@ void createObjects( std::vector< std::string > &fighter0name,
                 }
                 //In networking mode we name the ship save with .xml as they are xml files
                 if ( Network != NULL && squadnum < (int) fighter0name.size() ) {
-//if (backupcp==NULL) {
-                    //modifications = modifications+".xml";
                     if (Network[squadnum].getCallsign() != modifications) {
                         cout<<"Not CREATING A NETWORK PLAYER "<<fightername<<" FOR "<<modifications<<endl;
                         break;
@@ -1015,7 +879,6 @@ void createObjects( std::vector< std::string > &fighter0name,
                     Network[squadnum].setUnit( fighters[a] );
                     cout<<"Creating fighter["<<squadnum<<"] from "<<modifications<<" on Network["<<squadnum<<"] named "
                         <<Network[squadnum].getCallsign()<<endl;
-//}
                 } else if (Network != NULL) {
                     cout<<"Not CREATING A LOCAL SHIP : "<<fightername<<endl;
                     break;
@@ -1058,8 +921,6 @@ void createObjects( std::vector< std::string > &fighter0name,
             printf( "pox %lf %lf %lf\n", pox.i, pox.j, pox.k );
             fighters[a]->SetPosAndCumPos( pox );
             fg_radius = fighters[a]->rSize();
-            //fighters[a]->SetAI(new Order());
-            //cout << "before ai" << endl;
             if ( benchmark > 0.0 || ( s != 0 || squadnum >= (int) fighter0name.size() ) ) {
                 fighters[a]->LoadAIScript( ainame );
                 fighters[a]->SetTurretAI();
@@ -1070,8 +931,6 @@ void createObjects( std::vector< std::string > &fighter0name,
     }     //end of for flightgroups
 
     delete[] tmptarget;
-    //muzak = new Music (fighters[0]);
-    //muzak->Skip();
     for (int m_i = 0; m_i < muzak_count; m_i++)
         muzak[m_i].SetParent( fighters[0] );
     FactionUtil::LoadFactionPlaylists();
@@ -1087,7 +946,6 @@ void createObjects( std::vector< std::string > &fighter0name,
     shipList = _Universe->activeStarSystem()->getClickList();
     locSel   = new CoordinateSelect( QVector( 0, 0, 5 ) );
     UpdateTime();
-//_Universe->activeStarSystem()->AddUnit(UnitFactory::createNebula ("mynebula.xml","nebula",false,0,NULL,0));
 
     mission->DirectorInitgame();
     IncrementStartupVariable();
@@ -1122,7 +980,6 @@ void destroyObjects()
         delete myterrain;
     Terrain::DeleteAll();
     delete tmpcockpittexture;
-    //delete cockpit;
     delete[] fighters;
     delete locSel;
 }
@@ -1135,7 +992,6 @@ int getmicrosleep()
 void restore_main_loop()
 {
     RestoreKB();
-    //winsys_show_cursor(false);
     RestoreMouse();
     GFXLoop( main_loop );
 }
@@ -1146,25 +1002,14 @@ void main_loop()
     if (loop_count == 500) {
         last_check = cur_check;
         cur_check  = getNewTime();
-        //cout<<"Checkpoint at "<<cur_check<<" - last check at "<<last_check<<endl;
         if (last_check != 1) {
             //Time to update test
             avg_loop  = ( (nb_checks-1)*avg_loop+( loop_count/(cur_check-last_check) ) )/(nb_checks);
-            //cout<<"Nb checks : "<<nb_checks<<" -- loop_count : "<<loop_count<<endl;
-            //cout<<"Time elasped : "<<(cur_check - last_check)<<" -- Loop average : "<<avg_loop<<" -- Ratio : "<<(loop_count/(cur_check-last_check))<<endl;
             nb_checks = nb_checks+1;
         }
         loop_count = -1;
     }
     loop_count++;
-    //SuicideKey (std::string(),PRESS);
-
-    //Cockpit::Respawn (std::string(),PRESS);
-    /*  static int i=0;
-     *  setTimeCompression(i);
-     *  i++;
-     *  if (i>1000)
-     *  i=0;*/
 
     //Execute DJ script
     Music::MuzakCycle();
@@ -1175,7 +1020,6 @@ void main_loop()
     if (Network != NULL)
         for (size_t jj = 0; jj < _Universe->numPlayers(); jj++)
             Network[jj].checkMsg( NULL );
-    //Network[jj].sendMsg();
     
 #ifndef NO_GFX
     VSFileSystem::vs_dprintf(3, "Drawn %d vertices in %d batches\n", 

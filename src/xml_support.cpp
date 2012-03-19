@@ -1,7 +1,6 @@
 #include <string>
 #include <sstream>
 #include <stdlib.h>
-//#include <strstream.h>
 #include <ctype.h>
 #include <assert.h>
 #include <stdarg.h>
@@ -28,16 +27,6 @@ string strtolower( const string &foo )
 }
 namespace XMLSupport
 {
-/*
- *  string tostring(int num) {
- *  return string(((ostrstream*)&(ostrstream() << num << '\0'))->str());
- *  }
- *
- *  string tostring(float num) {
- *  return string(((ostrstream*)&(ostrstream() << num << '\0'))->str());
- *  }
- */
-
 typedef boost::char_separator<std::string::value_type> Separator;
 typedef boost::tokenizer<Separator> Tokenizer;
 

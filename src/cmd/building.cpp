@@ -1,6 +1,5 @@
 #include "building.h"
 #include "cont_terrain.h"
-//#include "gfx/planetary_transform.h" commented out by chuck_starchaser; --never used
 
 GameBuilding::GameBuilding( ContinuousTerrain *parent,
                             bool vehicle,
@@ -37,8 +36,6 @@ void GameBuilding::UpdatePhysics2( const Transformation &trans,
                                    bool ResolveLast,
                                    UnitCollection *uc )
 {
-//    if ( GetPlanetOrbit() )     // commented out by chuck_starchaser; --never used
-//        SetPlanetOrbitData( GetPlanetOrbit() );          //makes it dirty
     GameUnit< Building >::UpdatePhysics2( trans,
                                           old_physical_state,
                                           accel,
@@ -51,20 +48,12 @@ void GameBuilding::UpdatePhysics2( const Transformation &trans,
     Vector  p, q, r;
     GetOrientation( p, q, r );
     if (continuous) {
-//        if ( !GetPlanetOrbit() )    // commented out by chuck_starchaser; --never used
             tmp = parent.plane->GetGroundPos( tmp, p );
-/*        else    // commented out by chuck_starchaser; --never used
-            tmp =
-             GetPlanetOrbit()->Transform(
-              parent.plane->GetGroundPosIdentTrans(
-               GetPlanetOrbit()->InvTransform( tmp ),
-                p ) );*/
     } else {
         parent.terrain->GetGroundPos( tmp, p, (float) 0, (float) 0 );
     }
     if (vehicle) {
         Normalize( p );
-        //float k = p.Dot (q);
         Vector tmp1;
 #if 0
         if (k <= 0) {

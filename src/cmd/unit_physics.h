@@ -24,15 +24,13 @@
 
 #include "gfx/mesh.h"
 #include "unit.h"
-//#include "unit_template.h"
 #include "lin_time.h"
-//#include "physics.h"
 #include "beam.h"
 #include "planet.h"
 #include "audiolib.h"
 #include "configxml.h"
 #include "vs_globals.h"
-//#ifdef WIN32
+
 #ifdef FIX_TERRAIN
 #include "gfx/planetary_transform.h"
 #endif
@@ -42,30 +40,10 @@
 #include "cmd/script/mission.h"
 #include "networking/lowlevel/vsnet_clientstate.h"
 #include "networking/netclient.h"
-//#endif
+
 extern float copysign( float x, float y );
 
-//the rotation should be applied in world coordinates
-/** MISNOMER...not really clamping... more like renomalizing  slow too
- *  Vector Unit::ClampTorque(const Vector &amt1) {
- *  Vector norm = amt1;
- *  norm.Normalize();
- *  Vector max = MaxTorque(norm);
- *
- *  if(max.Magnitude() > amt1.Magnitude())
- *   return amt1;
- *  else
- *   return max;
- *  }
- */
-//FIXME 062201
-
 extern unsigned int apply_float_to_unsigned_int( float tmp ); //short fix
-//float max_speed;
-//float max_ab_speed;
-//float max_yaw;
-//float max_pitch;
-//float max_roll;
 
 template < class UnitType >
 void GameUnit< UnitType >::UpdatePhysics2( const Transformation &trans,
@@ -84,28 +62,13 @@ void GameUnit< UnitType >::UpdatePhysics2( const Transformation &trans,
     //+ speed to server (which velocity is to consider ?)
     //+ maybe Angular velocity to anticipate rotations in the other network clients
     if (Network != NULL) {
-        //cout<<"SEND UPDATE"<<endl;
         //Check if this is a player, because in network mode we should only send updates of our moves
         player = _Universe->whichPlayerStarship( this );
         if (player >= 0 /* && this->networked */) {
             if ( Network[0].isTime() ) {
-                //cout<<"Player number : "<<player<<endl;
-                //(NetForce + Transform (ship_matrix,NetLocalForce) )/mass = GLOBAL ACCELERATION
-
-                //curr_physical_state.position = curr_physical_state.position +  (Velocity*SIMULATION_ATOM*difficulty).Cast();
-                //If we want to inter(extra)polate sent position, DO IT HERE
-//if( !(old_physical_state.position == this->curr_physical_state.position && old_physical_state.orientation == this->curr_physical_state.orientation) )
-                //We moved so update
-                {
-                    /* If you're going to send an alive message, you might as well send your position while you're at it. */
-                    ClientState cstmp( this->serial, this->curr_physical_state, this->Velocity, accel, this->AngularVelocity, 0 );
-                    Network[player].sendPosition( &cstmp );
-                }
-//else
-//{
-//// Say we are still alive
-//Network[player].sendAlive();
-//}
+                /* If you're going to send an alive message, you might as well send your position while you're at it. */
+                ClientState cstmp( this->serial, this->curr_physical_state, this->Velocity, accel, this->AngularVelocity, 0 );
+                Network[player].sendPosition( &cstmp );
             }
             this->AddVelocity( difficulty );
         } else {
@@ -154,9 +117,6 @@ void GameUnit< UnitType >::UpdatePhysics2( const Transformation &trans,
         if (!tmp && this->hull < 0)
             Explode( false, SIMULATION_ATOM );
         double blah2 = queryTime();
-        if (blah2-blah1 > .001 || blah1-blah > .001) {
-            //printf ("Too much time in physics: fx: %f exp: %f \n",blah1-blah,blah2-blah1);
-        }
     }
 }
 
@@ -221,40 +181,6 @@ Vector GameUnit< UnitType >::ResolveForces( const Transformation &trans, const M
 #endif
     return Unit::ResolveForces( trans, transmat );
 }
-
-/*  commented out by chuck_starchaser; --never used
- *  template < class UnitType >
- *  void GameUnit< UnitType >::SetPlanetOrbitData( PlanetaryTransform *t )
- *  {
- * #ifdef FIX_TERRAIN
- *   if (isUnit() != BUILDINGPTR)
- *       return;
- *   if (!planet) {
- *       planet = (PlanetaryOrbitData*) malloc( sizeof (PlanetaryOrbitData) );
- *   } else if (!t) {
- *       free( planet );
- *       planet = NULL;
- *   }
- *   if (t) {
- *       planet->trans = t;
- *       planet->dirty = true;
- *   }
- * #endif
- *  }
- *
- *  template < class UnitType >
- *  PlanetaryTransform * GameUnit< UnitType >::GetPlanetOrbit() const
- *  {
- * #ifdef FIX_TERRAIN
- *   if (planet == NULL)
- *       return NULL;
- *   return planet->trans;
- *
- * #else
- *   return NULL;
- * #endif
- *  }
- */
 
 #endif
 

@@ -21,21 +21,14 @@
 
 #include <queue>
 #include <list>
-//#include "glob.h"
 #include "vegastrike.h"
 #include "vs_globals.h"
 #include "in_kb.h"
 #include "in_handler.h"
 #include "gldrv/winsys.h"
 #include "in_kb_data.h"
-//#include "cmd_unit.h"
-/*
- *  extern queue<InputListener*> activationreqqueue;
- *  extern list<InputListener*> listeners;
- *
- *  extern InputListener* activelistener;
- */
-static void DefaultKBHandler( const KBData&, KBSTATE newState )
+
+static void DefaultKBHandler( const KBData&, KBSTATE newState ) // FIXME ?
 {
     //do nothing
 }
@@ -148,7 +141,6 @@ void glut_keyboard_cb( unsigned int ch, unsigned int mod, bool release, int x, i
     int  ctrlon  = false;
 
     unsigned int modmask = KB_MOD_MASK;
-    //VSFileSystem::Fprintf (stderr,"keyboard  %d",ch);
     if ( ( WSK_MOD_LSHIFT == (mod&WSK_MOD_LSHIFT) ) || ( WSK_MOD_RSHIFT == (mod&WSK_MOD_RSHIFT) ) ) {
         //This is ugly, but we have to support legacy config files...
         //...maybe add config option to disable this soooo ugly thing...
@@ -188,25 +180,7 @@ void glut_keyboard_cb( unsigned int ch, unsigned int mod, bool release, int x, i
         }
     }
 }
-/*
- *  static void glut_special_cb( int key, int x, int y )
- *  {
- *  //  VSFileSystem::Fprintf (stderr,"keyboard s %d",key);
- *   kbGetInput( 128+key, 1, 0, x, y );
- *  }
- *
- *  static void glut_keyboard_up_cb( unsigned char ch, int x, int y )
- *  {
- *  //  VSFileSystem::Fprintf (stderr,"keyboard up %d",ch);
- *   kbGetInput( ch, 0, 1, x, y );
- *  }
- *
- *  static void glut_special_up_cb( int key, int x, int y )
- *  {
- *  //  VSFileSystem::Fprintf (stderr,"keyboard s up %d",key);
- *   kbGetInput( 128+key, 1, 1, x, y );
- *  }
- */
+
 void RestoreKB()
 {
     for (int i = 0; i < LAST_MODIFIER; ++i)
@@ -230,22 +204,6 @@ void InitKB()
 
 void ProcessKB( unsigned int player )
 {
-    /*  if(!activationreqqueue.empty()) {
-     *  InputListener *newactive = NULL;
-     *  list<InputListener*>::const_iterator li_it = listeners.begin();
-     *  float min = FLT_MAX;
-     *
-     *  while(li_it!=listeners.end()) { //pick the one with lowest z
-     *   float curr_z = (*li_it)->parent->Position().k;
-     *   if(curr_z<min ) {
-     *     min = curr_z;
-     *     newactive = *li_it;
-     *   }
-     *  }
-     *  if(newactive!=NULL)
-     *   activelistener = newactive;
-     *  //empty & analyze to see which one deserves to be activated
-     *  }*/
     for (int mod = 0; mod < LAST_MODIFIER; mod++)
         for (int a = 0; a < KEYMAP_SIZE; a++)
             if (playerBindings[mod][a] == player)

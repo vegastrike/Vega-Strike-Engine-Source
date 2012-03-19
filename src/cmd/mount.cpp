@@ -114,34 +114,9 @@ void Mount::UnFire()
     processed = UNFIRED;
     if (status != ACTIVE || ref.gun == NULL || type->type != weapon_info::BEAM)
         return;
-    //AUDStopPlaying (sound);
     ref.gun->Destabilize();
 }
-/*
- *  void Mount::SwapMounts(Mount * other) {
- *         int thisvol = volume; //short fix
- *         int othervol = other->volume; //short fix
- *         //short othersize = other->size;
- *         int thissize = size;
- *         bool thisbank=this->bank;
- *         bool otherbank=other->bank;
- *         Mount mnt = *this;
- *         this->size=thissize;
- * *this=*other;
- * *other=mnt;
- *         volume=thisvol;
- *
- *         other->volume=othervol;//volumes stay the same even if you swap out
- *         Vector v =this->GetMountLocation();
- *         Quaternion q = this->GetMountOrientation();
- *         this->SetMountPosition(other->GetMountLocation());
- *         this->SetMountOrientation(other->GetMountOrientation());
- *         other->SetMountPosition (v);
- *         other->SetMountOrientation (q);
- *         other->bank=otherbank;
- *         this->bank=thisbank;
- *  }NO LONGER NEEDED
- */
+
 void Mount::ReplaceMounts( Unit *un, const Mount *other )
 {
     int thisvol   = volume;     //short fix
@@ -274,7 +249,6 @@ bool Mount::PhysicsAlignedFire( Unit *caller,
         case weapon_info::BOLT:
         case weapon_info::BALL:
             caller->energy -= type->EnergyRate;
-            //set_null(hint[Unit::UNIT_ONLY]);
             hint[Unit::UNIT_BOLT] = Bolt( type, mat, velocity, owner, hint[Unit::UNIT_BOLT] ).location;             //FIXME turrets won't work! Velocity
 
             break;
@@ -345,8 +319,6 @@ bool Mount::PhysicsAlignedFire( Unit *caller,
                 this->serial = 0;
                 if (target && target != owner) {
                     temp->Target( target );
-//void GetMadAt(Unit* un, Unit * parent, int numhits=0) {
-
                     temp->TargetTurret( target );
                     if (err <= Ok) {
                         temp->EnqueueAI( new AIScript( (type->file+".xai").c_str() ) );
@@ -358,11 +330,9 @@ bool Mount::PhysicsAlignedFire( Unit *caller,
                         temp->SetTurretAI();
                         temp->TurretFAW();                         //turrets are for DEFENSE damnit!
                         temp->owner = caller;                         //spawned wingmen act as cargo (owned) wingmen, not as hired wingmen
-//static float fudge = XMLSupport::parse_float(vs_config->getVariable("ai","launched_relation_mult","100.0"));
                         float relat;
                         relat = caller->getRelation( target );
                         if (caller->isSubUnit() && relat >= 0) {
-                            //relat = caller->owner->getRelation(target);
                             relat = -1;
                             temp->owner = caller->owner;
                         }
@@ -508,7 +478,6 @@ void Mount::PhysicsAlignedUnfire()
     if (processed == UNFIRED)
         if ( AUDIsPlaying( sound ) )
             AUDStopPlaying( sound );
-    //processed=PROCESSED;
 }
 
 void Mount::ReplaceSound()

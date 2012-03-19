@@ -83,7 +83,6 @@ public:
             if ( templess != this->begin() )
                 --templess;
         }
-        //return iter;
     }
     typename SUPER::iterator insert( const T &newKey, typename SUPER::iterator hint )
     {

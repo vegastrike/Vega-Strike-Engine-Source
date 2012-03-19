@@ -132,8 +132,6 @@ public:
         class Python : public Link
         {
 public:
-//std::string file;
-//virtual void Click (::BaseInterface* base,float x, float y, int button, int state); // Commented since base class already does what's necessary
             Python( const std::string &ind, const std::string &pythonfile ) : Link( ind, pythonfile ) {}
             virtual ~Python() {}
 #ifdef BASE_MAKER
@@ -297,12 +295,10 @@ public:
             static bool  hastalked;
             virtual void Draw( ::BaseInterface*base );
 //Talk * caller;
-//int sayindex;
             unsigned int curchar;
             float curtime;
             virtual ~BaseTalk() {}
             std::string message;
-//BaseTalk (Talk *caller) : caller (caller),  sayindex (0),curchar(0) {}
             BaseTalk( const std::string &msg, const std::string &ind, bool only_one_talk );
 #ifdef BASE_MAKER
             virtual void EndXML( FILE *fp ) {}
@@ -340,9 +336,6 @@ public:
     void GotoLink( int linknum );
     void InitCallbacks();
     void CallCommonLinks( const std::string &name, const std::string &value );
-//static void BaseInterface::beginElement(void *userData, const XML_Char *names, const XML_Char **atts);
-//void BaseInterface::beginElement(const string &name, const AttributeList attributes);
-//static void BaseInterface::endElement(void *userData, const XML_Char *name);
     void Load( const char *filename, const char *time_of_day, const char *faction );
     static void ClickWin( int x, int y, int button, int state );
     void Click( int x, int y, int button, int state );

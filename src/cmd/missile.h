@@ -83,9 +83,6 @@ public:
             if ( (checker
                   && detonation_radius >= 0)
                 || ( ( Position()-targ->Position() ).Magnitude()-targ->rSize()-rSize() < detonation_radius ) ) {
-                //Vector norm;
-                //float dist;
-                //if ((targ)->queryBoundingBox (Position(),detonation_radius+rSize())) {
                 Discharge();
                 time = -1;
                 //}

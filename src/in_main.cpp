@@ -18,11 +18,6 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
-#ifdef WIN32
-
-//#include "gl_globals.h"
-
-#endif
 #include <queue>
 #include <list>
 using std::queue;
@@ -49,12 +44,6 @@ void AddListener( InputListener *il )
 
 void ActivateListener( InputListener *il )
 {
-//PRELINUX//list<InputListener*>::const_iterator al_it = activelisteners.begin();
-/*	for(int a = 0; a<activelisteners.size(); a++, al_it++)
- *  //PRELINUX COMMENT	if(al_it==il) {
- *                       activelisteners.push_back(il);
- *               }
- */
     activationreqqueue.push( il );
 }
 

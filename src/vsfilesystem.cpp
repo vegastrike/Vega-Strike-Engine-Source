@@ -48,10 +48,6 @@ int VSFS_DEBUG()
 }
 char *CONFIGFILE;
 char  pwd[65536];
-//extern int vfscanf( FILE * fp, const char * format, va_list arglist) ;
-//int gcc295vfscanf( FILE * fp, const char * format, va_list arglist) {
-//return vfscanf(fp,format,arglist);
-//}
 VSVolumeType isin_bigvolumes = VSFSNone;
 string curmodpath = "";
 
@@ -105,13 +101,6 @@ int selectdirs( const struct dirent * entry )
         return 0;
     if ( (s.st_mode&S_IFDIR) )
         return 1;
-    /*
-     *  // Everything shows up as DT_UNKNOWN (0) on Linux since it's just that cool.
-     * #else
-     *  if( entry->d_type==DT_DIR)
-     *       return 1;
-     * #endif
-     */
     return 0;
 }
 
@@ -586,29 +575,13 @@ void InitDataDirectory()
     }
     data_paths.push_back( "." );
     data_paths.push_back( ".." );
-    data_paths.push_back( "../data4.x" );
-    data_paths.push_back( "../../data4.x" );
+    //data_paths.push_back( "../data4.x" ); DELETE 4.x no longer used since .5 release obsolete, removal required.
+    //data_paths.push_back( "../../data4.x" );
     data_paths.push_back( "../data" );
     data_paths.push_back( "../../data" );
     data_paths.push_back( "../Resources" );
     data_paths.push_back( "../Resources/data" );
-    data_paths.push_back( "../Resources/data4.x" );
-/*
- *               data_paths.push_back( "/usr/share/local/vegastrike/data");
- *               data_paths.push_back( "/usr/local/share/vegastrike/data");
- *               data_paths.push_back( "/usr/local/vegastrike/data");
- *               data_paths.push_back( "/usr/share/vegastrike/data");
- *               data_paths.push_back( "/usr/local/games/vegastrike/data");
- *               data_paths.push_back( "/usr/games/vegastrike/data");
- *               data_paths.push_back( "/opt/share/vegastrike/data");
- *               data_paths.push_back( "/usr/share/local/vegastrike/data4.x");
- *               data_paths.push_back( "/usr/local/share/vegastrike/data4.x");
- *               data_paths.push_back( "/usr/local/vegastrike/data4.x");
- *               data_paths.push_back( "/usr/share/vegastrike/data4.x");
- *               data_paths.push_back( "/usr/local/games/vegastrike/data4.x");
- *               data_paths.push_back( "/usr/games/vegastrike/data4.x");
- *               data_paths.push_back( "/opt/share/vegastrike/data4.x");
- */
+    //data_paths.push_back( "../Resources/data4.x" );
 
     //Win32 data should be "."
     char tmppath[16384];
@@ -704,7 +677,6 @@ void LoadConfig( string subdir )
             }
         } else {
             cout<<"ERROR : coudn't find a mod named '"<<subdir<<"' in datadir/mods"<<endl;
-            //exit(1);
         }
         //}
     }
@@ -713,26 +685,12 @@ void LoadConfig( string subdir )
         if (FileExists( homedir, config_file ) >= 0) {
             cerr<<"CONFIGFILE - Found a config file in home directory, using : "<<(homedir+"/"+config_file)<<endl;
             config_file = homedir+"/"+config_file;
-            /*
-             *  char * conffile = new char[homedir.length()+1+config_file.length()+1];
-             *  conffile[homedir.length()+1+config_file.length()] = 0;
-             *  memcpy( conffile, (homedir+"/"+config_file).c_str(), homedir.length()+1+config_file.length());
-             *  vs_config = createVegaConfig( config_file.c_str());
-             *  delete []conffile;
-             */
         } else {
             cerr<<"CONFIGFILE - No config found in home : "<<(homedir+"/"+config_file)<<endl;
             if (FileExists( datadir, config_file ) >= 0) {
                 cerr<<"CONFIGFILE - No home config file found, using datadir config file : "<<(datadir+"/"+config_file)<<endl;
                 //We didn't find a config file in home_path so we load the data_path one
             }
-            /*
-             *  char * conffile = new char[datadir.length()+1+config_file.length()+1];
-             *  conffile[datadir.length()+1+config_file.length()] = 0;
-             *  memcpy( conffile, (datadir+"/"+config_file).c_str(), datadir.length()+1+config_file.length());
-             *  vs_config = createVegaConfig( conffile);
-             *  delete []conffile;
-             */
             else {
                 cerr<<"CONFIGFILE - No config found in data dir : "<<(datadir+"/"+config_file)<<endl;
                 cerr<<"CONFIG FILE NOT FOUND !!!"<<endl;
@@ -743,7 +701,6 @@ void LoadConfig( string subdir )
         printf( "Using Mod Directory %s\n", moddir.c_str() );
         CreateDirectoryHome( "mods" );
         CreateDirectoryHome( "mods/"+subdir );
-        //datadir = moddir+"/"+subdir;
         homedir = homedir+"/mods/"+subdir;
     }
     //Delete the default config in order to reallocate it with the right one (if it is a mod)
@@ -872,7 +829,6 @@ void InitPaths( string conf, string subdir )
     //Setup the directory lists we know about - note these are relative paths to datadir or homedir
     //----- THE Directories vector contains the resource/volume files name without extension or the main directory to files
     Directories[UnitFile] = sharedunits;
-    //SubDirectories[UnitFile].push_back( "factions");
     //Have to put it in first place otherwise VS will find default unit file
     SubDirectories[UnitFile].push_back( "subunits" );
     SubDirectories[UnitFile].push_back( "weapons" );
@@ -1075,29 +1031,14 @@ int FileExists( const string &root, const char *filename, VSFileType type, bool 
         else
             fullpath = root+rootsep+Directories[type]+"/"+file;
         struct stat s;
-        //cache doesn't work because we *do* create files....
-        //and this is too lowlevel to know which files need to be created... *sigh*
-        //static vsUMap<std::string,bool> fileExistsCache;
-        //vsUMap<std::string,bool>::iterator iter;
-        //iter=fileExistsCache.find(fullpath);
-        //if (iter!=fileExistsCache.end()) {
-        //if (iter->second) {
-        //found=1;
-        //isin_bigvolumes = VSFSNone;
-        //}
-        //}else {
         if (stat( fullpath.c_str(), &s ) >= 0) {
             if (s.st_mode&S_IFDIR) {
                 cerr<<" File is a directory ! ";
                 found = -1;
-                //fileExistsCache[fullpath]=false;
             } else {
                 isin_bigvolumes = VSFSNone;
                 found = 1;
-                //fileExistsCache[fullpath]=true;
             }
-        } else {
-            //fileExistsCache[fullpath]=false;
         }
         //}
     } else {
@@ -1129,7 +1070,6 @@ int FileExists( const string &root, const char *filename, VSFileType type, bool 
             }
             //Try to get the file index in the archive
             if (volok) {
-                //cerr<<"Volume is ok, looking for file in it"<<endl;
                 found = vol->FileExists( filestr.c_str() );
                 if (found >= 0)
                     isin_bigvolumes = VSFSBig;
@@ -1160,7 +1100,6 @@ int FileExists( const string &root, const char *filename, VSFileType type, bool 
                 }
                 //Try to get the file index in the archive
                 if (volok) {
-                    //cerr<<"Volume is ok, looking for file in it"<<endl;
                     found = vol->FileExists( filestr.c_str() );
                     if (found >= 0)
                         isin_bigvolumes = VSFSSplit;
@@ -1183,8 +1122,6 @@ int FileExists( const string &root, const char *filename, VSFileType type, bool 
         else
             failed.erase();
     }
-    //if (found<0&&root=="")
-    //return FileExists("/",filename,type,lookinvolume);
     return found;
 }
 int FileExists( const string &root, const string &filename, VSFileType type, bool lookinvolume )
@@ -1351,7 +1288,6 @@ VSError LookForFile( VSFile &f, VSFileType type, VSFileMode mode )
         }
     }
     if (VSFS_DEBUG() > 1) {
-        //cerr<<failed<<" - VOLUME TYPE="<<isin_bigvolumes<<endl;
         if (isin_bigvolumes > VSFSNone)
             cerr<<failed<<" - INDEX="<<found<<endl<<endl;
         else
@@ -1502,15 +1438,6 @@ VSError VSFile::OpenReadOnly( const char *file, VSFileType type )
                         failed += "\t"+filestr+" NOT FOUND !\n";
                 }
                 if (found < 0) {
-                    /*
-                     *  filestr = homedir+"/"+file;
-                     *  cerr<<"TRYING TO OPEN "<<filestr<<"... ";
-                     *  if( (found = FileExists( homedir, file))<0 )
-                     *  {
-                     *       filestr = datadir+"/"+file;
-                     *       found = FileExists( datadir, file);
-                     *  }
-                     */
                     for (unsigned int ij = 0; ij < Rootdir.size() && found < 0; ij++) {
                         filestr = Rootdir[ij]+"/"+file;
                         found   = FileExists( Rootdir[ij], file );
@@ -2026,19 +1953,11 @@ void VSFile::GoAfterEOL( unsigned int length )
 {
     while ( this->offset < length && this->offset < this->size
            && (this->pk3_extracted_file[offset] == '\r' || this->pk3_extracted_file[offset] == '\n') )
-        /*			if( pk3_extracted_file[offset]=='\n')
-         *             cerr<<"\\n ";
-         *     if( pk3_extracted_file[offset]=='\r')
-         *     cerr<<"\\r ";*/
         this->offset++;
 }
 void VSFile::GoAfterEOL()
 {
     while ( this->offset < this->size && (this->pk3_extracted_file[offset] == '\r' || this->pk3_extracted_file[offset] == '\n') )
-        /*			if( pk3_extracted_file[offset]=='\n')
-         *             cerr<<"\\n ";
-         *     if( pk3_extracted_file[offset]=='\r')
-         *     cerr<<"\\r ";*/
         this->offset++;
 }
 }

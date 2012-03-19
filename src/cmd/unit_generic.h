@@ -48,7 +48,6 @@ void UncheckUnit( class Unit*un );
 #include "gfx/quaternion.h"
 #include "gfxlib_struct.h"
 #include "weapon_xml.h"
-//#include "gfx/vdu.h"
 #include "xml_support.h"
 #include "container.h"
 #include "collection.h"
@@ -206,7 +205,6 @@ public:
 class VDU;
 struct UnitSounds;
 //template
-//struct UnitImages< void >;
 template < typename BOGUS >
 struct UnitImages;
 class Cargo;
@@ -220,7 +218,7 @@ struct PlanetaryOrbitData;
  * Units may have any number of weapons which, themselves may be units
  * the aistate indicates how the unit will behave in the upcoming phys frame
  */
-//class PlanetaryTransform; commented out by chuck_starchaser; --never used
+
 class Unit
 {
 protected:
@@ -511,11 +509,6 @@ public:
         return ( (int) meshdata.size() )-1;
     }
 //Uses planet stuff
-//virtual void SetPlanetOrbitData( PlanetaryTransform *trans ) {} commented out by chuck_starchaser; --never used
-/*    virtual PlanetaryTransform * GetPlanetOrbit() const commented out by chuck_starchaser; --never used
- *   {
- *       return NULL;
- *   }*/
 /* Updates the collide Queue with any possible change in sectors
  *  Split this mesh with into 2^level submeshes at arbitrary planes
  *  Uses Mesh so only in Unit and maybe in NetUnit */
@@ -1575,7 +1568,6 @@ struct Unit::XML
 {
     float randomstartframe;
     float randomstartseconds;
-    //vector<Halo*> halos;
     std::vector< Mount* >mountz;
     std::vector< Mesh* > meshes;
     std::vector< std::string >meshes_str;

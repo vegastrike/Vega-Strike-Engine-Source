@@ -7,21 +7,15 @@
 #include "cmd/collection.h"
 #include "gfx/cockpit_generic.h"
 #include "audiolib.h"
-//#include "cmd/click_list.h"
 #include "lin_time.h"
 #include "cmd/beam.h"
-//#include "gfx/sphere.h"
-//#include "cmd/unit_collide.h"
-//#include "gfx/star.h"
 #include "cmd/bolt.h"
 #include <expat.h>
 #include "cmd/music.h"
 #include "configxml.h"
 #include "vs_globals.h"
-//#include "cmd/cont_terrain.h"
 #include "vegastrike.h"
 #include "universe_generic.h"
-//#include "cmd/atmosphere.h"
 #include "cmd/nebula_generic.h"
 #include "galaxy_gen.h"
 #include "cmd/script/mission.h"
@@ -29,8 +23,6 @@
 #include "cmd/script/flightgroup.h"
 #include "load_mission.h"
 #include "lin_time.h"
-//#include "gfx/particle.h"
-//extern Vector mouseline;
 #include "cmd/unit_util.h"
 #include "cmd/unit_factory.h"
 #include "cmd/unit_collide.h"
@@ -59,10 +51,6 @@
 #include <boost/python/detail/extension_class.hpp>
 #endif
 vector< Vector >perplines;
-//static SphereMesh *foo;
-//static Unit *earth;
-
-//Atmosphere *theAtmosphere;
 extern std::vector< unorigdest* >pendingjump;
 
 void TentativeJumpTo( StarSystem *ss, Unit *un, Unit *jumppoint, const std::string &system )
@@ -93,16 +81,8 @@ StarSystem::StarSystem()
     no_collision_time = 0;               //(int)(1+2.000/SIMULATION_ATOM);
     ///adds to jumping table;
     name = NULL;
-    //_Universe->pushActiveStarSystem (this);
     current_stage = MISSION_SIMULATION;
-    /*
-     *  LoadXML(filename,centr,timeofyear);
-     *  if (!name)
-     *  name =strdup (filename);
-     */
-    //AddStarsystemToUniverse(filename);
     time    = 0;
-    //_Universe->popActiveStarSystem ();
     zone    = 0;
     sigIter = drawList.createIterator();
     this->current_sim_location = 0;
@@ -111,7 +91,6 @@ StarSystem::StarSystem()
 StarSystem::StarSystem( const char *filename, const Vector &centr, const float timeofyear )
 {
     no_collision_time = 0;               //(int)(1+2.000/SIMULATION_ATOM);
-    //collidemap=new CollideMap;
     collidemap[Unit::UNIT_ONLY] = new CollideMap( Unit::UNIT_ONLY );
     collidemap[Unit::UNIT_BOLT] = new CollideMap( Unit::UNIT_BOLT );
 
@@ -120,10 +99,8 @@ StarSystem::StarSystem( const char *filename, const Vector &centr, const float t
     name  = NULL;
     zone  = 0;
     _Universe->pushActiveStarSystem( this );
-    //GFXCreateLightContext (lightcontext);
     bolts = new bolt_draw;
     collidetable   = new CollideTable( this );
-    //cout << "origin: " << centr.i << " " << centr.j << " " << centr.k << " " << planetname << endl;
     current_stage  = MISSION_SIMULATION;
     this->filename = filename;
     LoadXML( filename, centr, timeofyear );
@@ -131,53 +108,8 @@ StarSystem::StarSystem( const char *filename, const Vector &centr, const float t
         name = strdup( filename );
     sigIter = drawList.createIterator();
     AddStarsystemToUniverse( filename );
-    //primaries[0]->SetPosition(0,0,0);
-    //iter = primaries->createIterator();
-    //iter->advance();
-    //earth=iter->current();
-    //delete iter;
 
-    //Calculate movement arcs; set behavior of primaries to follow these arcs
-    //Iterator *primary_iterator = primaries->createIterator();
-    //primaries->SetPosition(0,0,5);
-    //foo = new SphereMesh(1,5,5,"moon.bmp");
-    //cam[1].SetProjectionType(Camera::PARALLEL);
-    //cam[1].SetZoom(1);
-    //cam[1].SetPosition(Vector(0,0,0));
-    //cam[1].LookAt(Vector(0,0,0), Vector(0,0,1));
-    //cam[1].SetPosition(Vector(0,5,-2.5));
-    //cam[1].SetSubwindow(0,0,1,1);
-    //cam[2].SetProjectionType(Camera::PARALLEL);
-    //cam[2].SetZoom(10.0);
-    //cam[2].SetPosition(Vector(5,0,0));
-    //cam[2].LookAt(Vector(0,0,0), Vector(0,-1,0));
-    //cam[2].SetPosition(Vector(5,0,-2.5));
-    //cam[2].SetSubwindow(0.10,0,0.10,0.10);
-    //UpdateTime();
     time = 0;
-
-    /*
-     *  Atmosphere::Parameters params;
-     *  params.radius = 40000;
-     *  params.low_color[0] = GFXColor(0,0.5,0.0);
-     *  params.low_color[1] = GFXColor(0,1.0,0.0);
-     *  params.low_ambient_color[0] = GFXColor(0.0/255.0,0.0/255.0,0.0/255.0);
-     *  params.low_ambient_color[1] = GFXColor(0.0/255.0,0.0/255.0,0.0/255.0);
-     *  params.high_color[0] = GFXColor(0.5,0.0,0.0);
-     *  params.high_color[1] = GFXColor(1.0,0.0,0.0);
-     *  params.high_ambient_color[0] = GFXColor(0,0,0);
-     *  params.high_ambient_color[1] = GFXColor(0,0,0);
-     *  params.low_color[0] = GFXColor(241.0/255.0,123.0/255.0,67.0/255.0);
-     *  params.low_color[1] = GFXColor(253.0/255.0,65.0/255.0,55.0/255.0);
-     *  params.low_ambient_color[0] = GFXColor(0.0/255.0,0.0/255.0,0.0/255.0);
-     *  params.low_ambient_color[1] = GFXColor(0.0/255.0,0.0/255.0,0.0/255.0);
-     *  params.high_color[0] = GFXColor(60.0/255.0,102.0/255.0,249.0/255.0);
-     *  params.high_color[1] = GFXColor(57.0/255.0,188.0/255.0,251.0/255.0);
-     *  params.high_ambient_color[0] = GFXColor(0,0,0);
-     *  params.high_ambient_color[1] = GFXColor(0,0,0);
-     */
-    //params.scattering = 5;
-    //theAtmosphere = new Atmosphere(params);
     _Universe->popActiveStarSystem();
 }
 
@@ -187,26 +119,14 @@ StarSystem::~StarSystem()
     if ( _Universe->getNumActiveStarSystem() )
         _Universe->activeStarSystem()->SwapOut();
     _Universe->pushActiveStarSystem( this );
-    //_Universe->activeStarSystem()->SwapIn();
     ClientServerSetLightContext( lightcontext );
-    //delete stars;
     delete[] name;
-    /* //FIXME  after doign so much debugging I think you shouldn't delete this
-    //FIXME SQUARED: The purpose of comments is to clarify; NOT to mystify. --chuck_starchaser
-     *  for (int i=0;i<numprimaries;i++) { 
-     *  delete primaries[i];
-     *  }
-     *  delete [] primaries;
-     *
-     */
     Unit *unit;
-    //VSFileSystem::vs_fprintf (stderr,"|t%f i%lf|",GetElapsedTime(),interpolation_blend_factor);
     for (un_iter iter = drawList.createIterator(); (unit = *iter); ++iter)
         unit->Kill( false );
     //if the next line goes ANYWHERE else Vega Strike will CRASH!!!!!
     //DO NOT MOVE THIS LINE! IT MUST STAY
     if (collidetable) delete collidetable;
-    //_Universe->activeStarSystem()->SwapOut();
     _Universe->popActiveStarSystem();
     vector< StarSystem* >activ;
     while ( _Universe->getNumActiveStarSystem() ) {
@@ -237,7 +157,6 @@ void setStaticFlightgroup( vector< Flightgroup* > &fg, const std::string &nam, i
     if (fg[faction]->nr_ships == 0) {
         fg[faction]->flightgroup_nr = faction;
         fg[faction]->pos.i    = fg[faction]->pos.j = fg[faction]->pos.k = 0;
-        //fg[faction]->rot[0]=fg[faction]->rot[1]=fg[faction]->rot[2]=0;
         fg[faction]->nr_ships = 0;
         fg[faction]->ainame   = "default";
         fg[faction]->faction  = FactionUtil::GetFaction( faction );
@@ -340,7 +259,6 @@ bool StarSystem::RemoveUnit( Unit *un )
 {
     for (unsigned int locind = 0; locind < Unit::NUM_COLLIDE_MAPS; ++locind)
         if ( !is_null( un->location[locind] ) ) {
-            //assert (collidemap->find(*un->location)!=collidemap->end());
             collidemap[locind]->erase( un->location[locind] );
             set_null( un->location[locind] );
         }

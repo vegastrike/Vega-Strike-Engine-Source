@@ -83,7 +83,6 @@ int rnd( int lower, int upper )
     if (upper > lower)
         return lower+ssrand()%(upper-lower);
     else return lower;
-    //( lower+ (((float(upper-lower))*ssrand())/(float (VS_RAND_MAX)+1.))); WE THINK THIS IS BUGGY
 }
 const char nada[1] = "";
 string getGenericName( vector< string > &s )
@@ -275,8 +274,6 @@ vector< string >names;
 vector< string >rings;
 const float     moonofmoonprob = .01;
 string systemname;
-//int numnaturalphenomena;
-//int numstarbases;
 vector< float >    radii;
 const float        minspeed = .001;
 const float        maxspeed = 8;
@@ -319,7 +316,6 @@ void ResetGlobalVariables()
     xmllevel = 0;
     lights.clear();
     gradtex.clear();
-//numun[0]=numun[1]=numstarentities=0;
     naturalphenomena.clear();
     starbases.clear();
     starentities.clear();
@@ -726,6 +722,7 @@ void MakeJump( float radius, bool forceRS = false, Vector R = Vector( 0, 0, 0 ),
 
     ///writes out some pretty planet tags
 }
+
 void MakeBigUnit( int callingentitytype, string name = string(), float orbitalradius = 0 )
 {
     vector< string >fullname;
@@ -761,14 +758,6 @@ void MakeBigUnit( int callingentitytype, string name = string(), float orbitalra
                    == sscanf( fullname[i].c_str(), "planet%f",
                               &size ) || 1
                    == sscanf( fullname[i].c_str(), "moon%f", &size ) || 1 == sscanf( fullname[i].c_str(), "gas%f", &size ) ) {
-/*
- *     if (!first) {
- *       first= true;
- *       center=generateAndUpdateRS (r,s,size,false);
- *       stdloy=LengthOfYear (r,s);
- *     }
- *     MakePlanet (size,<TYPE>,callingentitytype,true,r,s,center,stdloy);
- */
             //FIXME: Obsolete/not supported/too lazy to implement.
         } else if ( ( tmp = starin( fullname[i] ) ).length() > 0 ) {
             if (!first) {
@@ -881,8 +870,6 @@ void MakePlanet( float radius, int entitytype, string texturename, string unitna
                     b = .5;
                 }
             }
-//static float concavity = XMLSupport::parse_float (vs_config->getVariable ("graphics","fog","concavity","0"));
-//static float focus = XMLSupport::parse_float (vs_config->getVariable ("graphics","fog","focus",".5"));
 
 /*----------------------------------------------------------------------------------------*\
 | **************************************************************************************** |
@@ -921,7 +908,6 @@ void MakePlanet( float radius, int entitytype, string texturename, string unitna
         }
     }
 //FIRME: need scaling of radius based on planet type.
-//radii.push_back (entitytype!=GAS?radius:1.4*radius);
     radii.push_back( radius );
 
     static float ringprob     = XMLSupport::parse_float( vs_config->getVariable( "galaxy", "RingProbability", ".1" ) );
@@ -995,7 +981,6 @@ void MakePlanet( float radius, int entitytype, string texturename, string unitna
                     wrapy );
             }
         }
-        //WriteUnit ("unit","","planetary-ring",Vector (0,0,0), Vector (0,0,0), Vector (0,0,0), string (""), string (""),false);
     }
     for (int i = 0; i < numberofstarbases; i++)
         MakeSmallUnit();
@@ -1074,7 +1059,6 @@ void beginStar()
     radii.push_back( 1.5*radius );
     static float planet_size_compared_to_sun =
         XMLSupport::parse_float( vs_config->getVariable( "galaxy", "RockyRelativeToPrimary", ".05" ) );
-//static float gas_size_compared_to_sun = XMLSupport::parse_float (vs_config->getVariable ("galaxy","GasRelativeToPrimary",".2"));
     xmllevel++;
     unsigned int numu;
     if (numstarentities) {
@@ -1096,16 +1080,6 @@ void beginStar()
     if ( !jumps.empty() )
         VSFileSystem::vs_fprintf( stderr, "ERROR: jumps not empty() Size==%u!!!!!\n", jumps.size() );
     staroffset++;
-    /*
-     *  //  No jump for you!!
-     *
-     *  MakeJumps (100+grand()*300,STAR);
-     *  if ((int)staroffset+1>=nument[STAR]) {
-     *  while (!jumps.empty()) {
-     *   MakeJumps (300+grand()*800,STAR);
-     *  }
-     *  }
-     */
 }
 
 void endStar()
@@ -1139,12 +1113,6 @@ void CreatePrimaries()
     unsigned int i;
     for (i = 0; i < numstarentities || i == 0; i++)
         CreateLight( i );
-    /*
-     *  int numprimaryunits=rnd(0,1+naturalphenomena.size());
-     *  for (i=0;i<numprimaryunits;i++) {
-     *  MakeBigUnit(STAR);
-     *  }
-     */
     CreateFirstStar();
 }
 
@@ -1373,7 +1341,6 @@ static int pushTowardsMean( int mean, int val )
     return pushDownTowardsMean( mean, val );
 }
 
-//void generateStarSystem (string datapath, int seed, string sector, string system, string outputfile, float sunradius, int numstars, bool nebulae, bool asteroids, int numnaturalphenomena, int numstarbases, string factions, const vector <string> &jumplocations, string namelist, string starlist, string planetlist, string smallunitlist, string nebulaelist, string asteroidlist,string ringlist, string backgroundlist) {
 void generateStarSystem( SystemInfo &si )
 {
     ResetGlobalVariables();
@@ -1383,7 +1350,6 @@ void generateStarSystem( SystemInfo &si )
     static float compactness_scale = XMLSupport::parse_float( vs_config->getVariable( "galaxy", "CompactnessScale", "1.5" ) );
     static float jump_compactness_scale =
         XMLSupport::parse_float( vs_config->getVariable( "galaxy", "JumpCompactnessScale", "1.5" ) );
-    //static int meansuns = XMLSupport::parse_int (vs_config->getVariable("galaxy","MeanSuns","1.5"));
     static int   meannaturalphenomena   = XMLSupport::parse_int( vs_config->getVariable( "galaxy", "MeanNaturalPhenomena", "1" ) );
     static int   meanbases = XMLSupport::parse_int( vs_config->getVariable( "galaxy", "MeanStarBases", "2" ) );
     compactness     = si.compactness*compactness_scale;

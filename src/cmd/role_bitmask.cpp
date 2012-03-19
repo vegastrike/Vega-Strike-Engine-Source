@@ -91,7 +91,6 @@ vector< vector< string > >buildscripts()
             for (unsigned int j = 0; j < vec.size(); j++)
                 scripts[i].push_back( "default" );
         }
-        //VSFileSystem::vs_seek (fp,0,SEEK_SET);
         for (i = 0; i < vec.size(); i++) {
             f.ReadLine( temp, len );
             vector< string >strs = readCSV( temp );
@@ -138,10 +137,8 @@ vector< vector< char > >buildroles()
         memset( temp, 0, len+1 );
         f.ReadLine( temp, len );
         vector< string >vec = readCSV( temp );
-        //VSFileSystem::vs_fprintf (stderr," SIZE %d\n",vec.size());
         unsigned int    i;
         for (i = 1; i < vec.size(); i++) {
-            //VSFileSystem::vs_fprintf (stderr," %s AS %d\n",vec[i].c_str(),i);
             rolemap.insert( pair< string, int > ( strtoupper( vec[i] ), i-1 ) );
             irolemap.insert( pair< int, string > ( i-1, strtoupper( vec[i] ) ) );
         }
@@ -200,12 +197,10 @@ vector< vector< char > >buildroles()
 }
 unsigned char getRole( const std::string &s )
 {
-    //int temp = maxRoleValue();
     return InternalGetRole( s );
 }
 const std::string& getRole( unsigned char c )
 {
-    //int temp = maxRoleValue();
     return InternalGetStrRole( c );
 }
 unsigned int readBitmask( const std::string &ss )

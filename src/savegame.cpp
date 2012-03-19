@@ -51,7 +51,7 @@ std::string GetHelperPlayerSaveGame( int num )
             res = new std::string;
             VSFile  f;
             //TRY TO OPEN THE save.4.x.txt FILE WHICH SHOULD CONTAIN THE NAME OF THE SAVE TO USE
-            VSError err = f.OpenReadOnly( "save.4.x.txt", UnknownFile );
+            VSError err = f.OpenReadOnly( "save.4.x.txt", UnknownFile ); // DELETE .4.x no longer used
             if (err > Ok) {
                 //IF save.4.x.txt DOES NOT EXIST WE CREATE ONE WITH "default" AS SAVENAME
                 err = f.OpenCreateWrite( "save.4.x.txt", UnknownFile );
@@ -202,7 +202,6 @@ string SaveGame::GetOldStarSystem()
 
 void SaveGame::SetPlayerLocation( const QVector &v )
 {
-    //VSFileSystem::vs_fprintf (stderr,"Set Location %f %f %f",v.i,v.j,v.k);
     if ( ( FINITE( v.i ) && FINITE( v.j ) && FINITE( v.k ) ) ) {
         PlayerLocation = v;
     } else {
@@ -217,15 +216,8 @@ QVector SaveGame::GetPlayerLocation()
     return PlayerLocation;
 }
 
-void SaveGame::RemoveUnitFromSave( long address )
+void SaveGame::RemoveUnitFromSave( long address ) // DELETE ? unused function?
 {
-    /*
-     *  SavedUnits *tmp;
-     *  if (NULL!=(tmp =savedunits->Get (address))) {
-     *  savedunits->Delete (address);
-     *  delete tmp;
-     *  }
-     */
 }
 
 string SaveGame::WriteNewsData()
@@ -334,7 +326,6 @@ void WriteSaveGame( Cockpit *cp, bool auto_save )
         if (GetWritePlayerSaveGame( player_num ).length() && !auto_save) {
             cp->savegame->SetSavedCredits( _Universe->AccessCockpit()->credits );
             cp->savegame->SetStarSystem( cp->activeStarSystem->getFileName() );
-            //un->WriteUnit(GetWritePlayerSaveGame(player_num).c_str());
             cp->savegame->SetPlayerLocation( un->LocalPosition() );
             CopySavedShips( cp->GetUnitModifications(), player_num, packedInfo, false );
         }
@@ -363,7 +354,6 @@ void SaveGame::ReadNewsData( char* &buf, bool just_skip )
     mission->msgcenter->clear( n00s, nada );
     int offset = hopto( buf, '\n', '\n', 0 );
     if (offset > 0) {
-        //fgets (news,1023,fp);
         sscanf( buf, "%d\n", &numnews );
         buf += offset;
         for (i = 0; i < numnews; i++) {
@@ -385,7 +375,6 @@ void SaveGame::AddUnitToSave( const char *filename, int type, const char *factio
 {
     if ( game_options.Drone.compare( filename ) )
         RemoveUnitFromSave( address );
-    //savedunits->Put (address,new SavedUnits (filename,type,faction));//not no more
 }
 
 std::vector< float >& SaveGame::getMissionData( const std::string &magic_number )
@@ -459,7 +448,6 @@ string SaveGame::WriteMissionData()
 std::string scanInString( char* &buf )
 {
     std::string str;
-    //char c[2] = {'\n', '\0'};
     while ( *buf && isspace( *buf ) )
         buf++;
     char *start = buf;
@@ -590,7 +578,7 @@ void SaveGame::ReadMissionStringData( char* &buf, bool select_data, const std::s
     this->PurgeZeroStarships();
 }
 
-void SaveGame::PurgeZeroStarships()
+void SaveGame::PurgeZeroStarships() // DELETE unused function?
 {
     for (MissionStringDat::MSD::iterator i = missionstringdata->m.begin(), ie = missionstringdata->m.end(); i != ie; ++i)
         if ( fg_util::IsFGKey( i->first ) )
@@ -697,10 +685,8 @@ void SaveGame::ReadSavedPackets( char* &buf,
             char output[31] = {0};
             strncpy( output, buf, 30 );
             printf( "buf unrecognized %s...\n", output );
-            //su.push_back (SavedUnits (unitname,(clsptr)a,factname));
         }
     }
-    //cout<<"\Finished ReadSavedPackets"<<endl;
 }
 
 void SaveGame::LoadSavedMissions()
@@ -763,9 +749,7 @@ string SaveGame::WritePlayerData( const QVector &FP,
     memset( tmp, 0, MB );
 
     QVector FighterPos = PlayerLocation-FP;
-//if (originalsystem!=systemname) {
     FighterPos = FP;
-//}
     string pipedunitname = createPipedString( unitname );
     tmp = tmprealloc( tmp, MB, pipedunitname.length()+strlen( systemname )+256 /*4 floats*/ );
     //If we specify no faction, it won't be saved in there
@@ -804,7 +788,6 @@ string SaveGame::WriteDynamicUniverse()
     memset( tmp, 0, MB );
     sprintf( tmp, "\n%d %s %s", 0, "missionstring", "data " );
     dyn_univ += string( tmp );
-    //dyn_univ += WriteMissionStringData();
     vector< char >missionstringdata1;
     WriteMissionStringData( missionstringdata1 );
     dyn_univ += string( &missionstringdata1[0], missionstringdata1.size() );

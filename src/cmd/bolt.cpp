@@ -23,9 +23,6 @@ bolt_draw::~bolt_draw()
     for (i = 0; i < cachedecals.size(); i++)
         boltdecals->DelTexture( cachedecals[i] );
     cachedecals.clear();
-    //if (boltmesh)
-    //delete boltmesh;
-    //boltmesh = NULL;
     for (i = 0; i < animations.size(); i++)
         delete animations[i];
     for (i = 0; i < balls.size(); i++)
@@ -106,7 +103,6 @@ void Bolt::Draw()
 
     GFXBlendMode( ONE, blendbeams ? ONE : ZERO );
 
-    //GFXDisable(DEPTHTEST);
     GFXDisable( DEPTHWRITE );
     GFXDisable( TEXTURE1 );
     GFXEnable( TEXTURE0 );
@@ -127,7 +123,7 @@ void Bolt::Draw()
     for (i = qq->balls.begin(); i != qq->balls.end(); i++, k++) {
         Animation *cur = *k;
         if ( i->begin() != i->end() ) {
-            float bolt_size = 2*i->begin()->type->Radius*2;             //+i->begin()->type->Length;
+            float bolt_size = 2*i->begin()->type->Radius*2;
             bolt_size *= bolt_size;
             //Matrix result;
             //FIXME::MuST USE DRAWNO	TRANSFORMNOW cur->CalculateOrientation (result);
@@ -140,19 +136,13 @@ void Bolt::Draw()
                     BlendTrans( bolt->drawmat, bolt->cur_position, bolt->prev_position );
                     Matrix tmp;
                     VectorAndPositionToMatrix( tmp, p, q, r, bolt->drawmat.p );
-                    //result[12]=(*j)->	drawmat[12];
-                    //result[13]=(*j)->drawmat[13]	;
-                    //result[13]=(*j)->drawmat[14];
-                    //cur->SetPosition (result[12],result[13],result[14]);
                     cur->SetDimensions( bolt->type->Radius, bolt->type->Radius );
-                    //cur->DrawNow(result);
                     GFXLoadMatrixModel( tmp );
                     GFXColor4f( type->r, type->g, type->b, type->a );
                     cur->DrawNoTransform( false, true );
                 }
             }
         }
-        //cur->UpdateTime (GetElapsedTime());//update the time of the animation;
     }
     GFXAlphaTest( ALWAYS, 0 );
     GFXDisable( DEPTHWRITE );

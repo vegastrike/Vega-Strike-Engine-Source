@@ -309,20 +309,14 @@ int CPK3::FileExists( const char *lpname )
     int  idx = -1;
 
     memset( &str, 0, sizeof (str) );
-    //cerr<<"\t\tSearching through "<<m_nEntries<<" files"<<endl;
     for (int i = 0; idx == -1 && i < m_nEntries; i++) {
         GetFilename( i, str );
-        //cerr<<"\t\tExamining file num."<<i<<" filename : "<<str<<"\tand compared to : "<<lpname<<endl;
         int result = vsstrcmp( lpname, str );
         if (result == 0) {
             cerr<<"FOUND IN PK3 FILE : "<<lpname<<" with index="<<i<<endl;
             idx = i;
         }
     }
-    /*
-     *  if( idx==-1)
-     *     cerr<<"DIDN'T FIND FILE : "<<lpname<<endl;
-     */
     //if the file isn't in the archive idx=-1
     return idx;
 }
@@ -356,7 +350,6 @@ char* CPK3::ExtractFile( const char *lpname, int *file_size )
     memset( &str, 0, sizeof (str) );
     for (int i = 0; index == -1 && i < m_nEntries; i++) {
         GetFilename( i, str );
-        //printf("%s",str);
         int result = vsstrcmp( lpname, str );
         if (result == 0)
             index = i;

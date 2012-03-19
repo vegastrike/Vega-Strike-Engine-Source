@@ -187,7 +187,7 @@ void showSplashMessage( const string &text )
     bootstrap_draw( text, 0 );
 }
 
-void showSplashProgress( float progress )
+void showSplashProgress( float progress ) //DELETE ?
 {
     //Unimplemented
 }

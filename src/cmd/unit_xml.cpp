@@ -1,12 +1,9 @@
-//#include "unit.h"
 #include "unit_xml.h"
 #include "unit_factory.h"
 #include "audiolib.h"
 #include "xml_support.h"
-//#include <iostream.h>
 #include <fstream>
 #include <expat.h>
-//#include <values.h>
 #include <float.h>
 #include <limits.h>
 #include "configxml.h"
@@ -17,9 +14,7 @@
 #include "xml_serializer.h"
 #include "vsfilesystem.h"
 #include "gfx/cockpit_generic.h"
-//#include "unit_bsp.h"
 #include "unit_collide.h"
-//#include "gfx/bsp.h"
 #include "unit_generic.h"
 #include "gfx/sphere.h"
 #include "role_bitmask.h"
@@ -580,7 +575,6 @@ void Unit::beginElement( const string &name, const AttributeList &attributes )
             case XFILE:
                 ADDELEM( stringHandler, (*iter).value );
                 addShieldMesh( xml, (*iter).value.c_str(), xml->unitscale, faction, flightgroup );
-                //xml->shieldmesh = createMesh((*iter).value.c_str(), xml->unitscale, faction,flightgroup);
                 break;
             case SHIELDTIGHT:
                 ADDDEFAULT;
@@ -709,7 +703,6 @@ void Unit::beginElement( const string &name, const AttributeList &attributes )
                 case XFILE:
                     ADDDEFAULT;
                     file = (*iter).value;
-                    //xml->meshes.push_back(cr		eateMesh((*iter).value.c_str(), xml->unitscale, faction,flightgroup));
                     break;
                 case STARTFRAME:
                     if (strtoupper( (*iter).value ) == "RANDOM")
@@ -972,12 +965,10 @@ void Unit::beginElement( const string &name, const AttributeList &attributes )
         xml->mountz.push_back( createMount( filename.c_str(), ammo, volume, xyscale, zscale, false /*no way to do banked in XML*/ ) );
         xml->mountz[indx]->SetMountOrientation( Quaternion::from_vectors( P.Cast(), Q.Cast(), R.Cast() ) );
         xml->mountz[indx]->SetMountPosition( pos.Cast() );
-        //xml->mountz[indx]->Activate();
         if (tempbool)
             xml->mountz[indx]->size = mntsiz;
         else
             xml->mountz[indx]->size = xml->mountz[indx]->type->size;
-        //->curr_physical_state=xml->units[indx]->prev_physical_state;
         setAverageGunSpeed();
         break;
     case SUBUNIT:
@@ -1036,9 +1027,6 @@ void Unit::beginElement( const string &name, const AttributeList &attributes )
                 break;
             }
         }
-        //Q.Normalize();
-        //R.Normalize();
-        //CrossProduct (Q,R,P);
         indx = xml->units.size();
         xml->units.push_back( UnitFactory::createUnit( filename.c_str(), true, faction, xml->unitModifications, NULL ) ); //I set here the fg arg to NULL
         if (xml->units.back()->name == "LOAD_FAILED") {
@@ -1178,12 +1166,10 @@ void Unit::beginElement( const string &name, const AttributeList &attributes )
             case ENGINEWAV:
                 ADDDEFAULT;
                 sound->engine = AUDCreateSoundWAV( (*iter).value, true );
-                //std::cout<<"engine sound wav : "<<(*iter).value<<endl;
                 break;
             case ENGINEMP3:
                 ADDDEFAULT;
                 sound->engine = AUDCreateSoundMP3( (*iter).value, true );
-                //std::cout<<"engine sound mp3 : "<<(*iter).value<<endl;
                 break;
             case SHIELDMP3:
                 ADDDEFAULT;
@@ -1495,7 +1481,6 @@ void Unit::beginElement( const string &name, const AttributeList &attributes )
             switch ( attribute_map.lookup( (*iter).name ) )
             {
             case AACCEL:
-                //accel=parse_float((*iter).value);
                 break;
             case FORWARD:
                 limits.forward   = game_speed*game_accel*parse_float( (*iter).value );

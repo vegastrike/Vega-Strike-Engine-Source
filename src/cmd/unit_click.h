@@ -4,8 +4,7 @@
 #include "vegastrike.h"
 #include "gfx/mesh.h"
 #include "unit.h"
-//#include "unit_template.h"
-//#include "gfx/bounding_box.h"
+
 extern Vector mouseline;
 extern vector< Vector >perplines;
 Vector MouseCoordinate( int mouseX, int mouseY );
@@ -28,7 +27,6 @@ bool GameUnit< UnitType >::querySphereClickList( int mouseX, int mouseY, float e
 
     Vector CamP, CamQ, CamR;
     for (i = 0; i < nummesh(); i++) {
-        //cerr << "pretransform position: " << meshdata[i]->Position() << endl;
         TargetPoint = Transform( this->cumulative_transformation_matrix, this->meshdata[i]->Position() );
 
         mousePoint  = Transform( vw, TargetPoint );

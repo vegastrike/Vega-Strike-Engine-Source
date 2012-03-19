@@ -273,16 +273,6 @@ SGalaxy::SGalaxy( const char *configfile )
         XML_SetUserData( parser, &x );
         XML_SetElementHandler( parser, &GalaxyXML::beginElement, &GalaxyXML::endElement );
         XML_Parse( parser, ( f.ReadFull() ).c_str(), f.Size(), 1 );
-        /*
-         *  do {
-         *       const int chunk_size = 65536;
-         *       char buf[chunk_size];
-         *       int length;
-         *       length = VSFileSystem::vs_read (buf,1,chunk_size,fp);
-         *       XML_Parse(parser,buf,length,VSFileSystem::vs_feof(fp));
-         *  }while (!VSFileSystem::vs_feof(fp));
-         *  VSFileSystem::vs_close (fp);
-         */
         f.Close();
 
         XML_ParserFree( parser );

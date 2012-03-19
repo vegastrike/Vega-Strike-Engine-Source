@@ -58,8 +58,6 @@ void Briefing::Render()
 
     cam.SetPosition( cam.GetPosition(), Vector( 0, 0, 0 ), Vector( 0, 0, 0 ), Vector( 0, 0, 0 ) );
     cam.UpdateGFX( GFXTRUE, GFXFALSE );
-    //glClearColor(1,0,0,1);
-    //GFXClear(GFXTRUE);
     for (unsigned int i = 0; i < starships.size(); i++)
         starships[i]->Render( identity_matrix, interpolation_blend_factor );
     GFXEnable( DEPTHTEST );
@@ -70,8 +68,8 @@ void Briefing::Render()
     GFXClear( GFXTRUE );
     Mesh::ProcessUndrawnMeshes();
     _Universe->AccessCamera()->UpdateGFX( GFXTRUE, GFXFALSE );
-    //glClearColor(0,0,0,0);
 }
+
 void Briefing::Ship::Render( const Matrix &cam, double interpol )
 {
     Matrix final;
@@ -94,17 +92,20 @@ void Briefing::Ship::Render( const Matrix &cam, double interpol )
         meshdata[i]->Draw( 1, camfinal, 1, cloak > .99 ? -1 : scloak );
     }
 }
+
 Briefing::Ship::~Ship()
 {
     Destroy();
     VSDESTRUCT2
 }
+
 void Briefing::Ship::Destroy()
 {
     for (unsigned int i = 0; i < meshdata.size(); i++)
         delete meshdata[i];
     meshdata.clear();
 }
+
 Briefing::Briefing()
 {
     VSCONSTRUCT2( 'b' )
@@ -168,8 +169,6 @@ void Briefing::Ship::Update()
         Vector finpos;
         if ( UpdatePosition( finpos, Position(), orders.front().vec, orders.front().speed ) ) {
             orders.pop_front();
-        } else {
-            //SetDirection (mat,Position(),orders.front().vec);
         }
         SetPosition( finpos );
     }

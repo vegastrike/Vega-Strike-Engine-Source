@@ -37,15 +37,7 @@ PhysicsSystem::PhysicsSystem( float M, float I, QVector *pos, Vector *p, Vector 
     NumActiveForces  = 0;
     NumActiveTorques = 0;
 }
-/*
- *       ActiveForces = new Force [forcemax];
- *       ActiveTorques = new Force [forcemax];
- *  }
- *  PhysicsSystem:: ~PhysicsSystem()
- *  {
- *       delete [] ActiveForces;
- *       delete [] ActiveTorques;
- *  }*/
+
 void PhysicsSystem::ResistiveLiquidTorque( float ResistiveForceCoef )
 {
     NetTorque += ResistiveForceCoef*AngularVelocity;
@@ -86,8 +78,6 @@ void PhysicsSystem::ResistiveForce( float ResistiveForceCoef )
 
 void PhysicsSystem::Update()
 {
-    //ResistiveForce (-10);
-    //ResistiveTorque(-10);
     ApplyImpulses( GetElapsedTime()/getTimeCompression() );
     NetForce  = Vector( 0, 0, 0 );
     NetTorque = Vector( 0, 0, 0 );
@@ -187,7 +177,6 @@ void PhysicsSystem::ApplyImpulses( float Time )
             ActiveForces[i].t -= Time;
         }
     }
-    //Vector temp = 0.5*GetElapsedTime()*NetTorque*(1.0/MomentOfInertia);//assume force is constant throughout the time
     temptorque = temptorque*(0.5/MomentOfInertia);
     Rotate( AngularVelocity+0.5*temptorque );
     AngularVelocity += temptorque;

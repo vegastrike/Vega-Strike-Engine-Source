@@ -162,7 +162,6 @@ void PlanetaryOrbit::Execute()
             sum_orbiting_average += orbiting_average[o];
         sum_orbiting_average *= 1./(limit == 0 ? 1 : limit);
     }
-    //unuseddouble radius =  sqrt((x_offset - focus).MagnitudeSquared() + (y_offset - focus).MagnitudeSquared());
     const double div2pi = ( 1.0/(2.0*PI) );
     theta += velocity*SIMULATION_ATOM*div2pi;
     if (Network != NULL || SERVER) {
@@ -218,27 +217,21 @@ Vector Planet::AddSpaceElevator( const std::string &name, const std::string &fac
     {
     case 'u':
         dir.Set( 0, 1, 0 );
-//scale.Set(1,len,1);
         break;
     case 'd':
         dir.Set( 0, -1, 0 );
-//scale.Set(1,len,1);
         break;
     case 'l':
         dir.Set( -1, 0, 0 );
-//scale.Set(len,1,1);
         break;
     case 'r':
         dir.Set( 1, 0, 0 );
-//scale.Set(len,1,1);
         break;
     case 'b':
         dir.Set( 0, 0, -1 );
-//scale.Set(1,1,len);
         break;
     default:
         dir.Set( 0, 0, 1 );
-//scale.Set(1,1,len);
         break;
     }
     Matrix ElevatorLoc( Vector( dir.j, dir.k, dir.i ), dir, Vector( dir.k, dir.i, dir.j ) );
@@ -288,54 +281,6 @@ Planet* Planet::GetTopPlanet( int level )
     } else {
         return this;
     }
-}
-
-void Planet::gravitate( UnitCollection *uc )
-{
-    /*
-     *  float *t = cumulative_transformation_matrix;
-     *
-     *
-     *  if(gravity!=0.0&&uc) {
-     *  Iterator *iterator = uc->createIterator();
-     *  Unit *unit;
-     *  Vector vec(0,0,0);
-     *
-     *  while((unit = iterator->current())!=NULL) {
-     *   if(unit->type()!=PLANETPTR) {
-     *     Vector r = (unit->Position() - (vec.Transform(t)));
-     *     //      cerr << "Unit (" << unit << "): " << endl;
-     *     //      cerr << "Gravity source: " << vec.Transform(t) << "\nUnit position: " << unit->Position() << "\nDelta: " << r << endl;
-     *     float _r_ = r.Magnitude();
-     *     r = r * (1.0/_r_);
-     *     r =  r * -(gravity/(_r_*_r_));
-     *     //      cerr << "Distance: " << _r_ << "\nGravity force vector: " << r << endl;
-     *
-     *     if(_r_ > radius) {
-     *       unit->Accelerate(r);
-     *     }
-     *   }
-     *   iterator->advance();
-     *  }
-     *  delete iterator;
-     *  }*/
-
-    //fake gravity
-    /***FIXME 091401 why do we need to traverse satellites??????
-     *  un_iter * iter;
-     *  for (iter = satellites.createIterator();
-     *    iter->current()!=NULL;
-     *    iter->advance()) {
-     *     if (iter->current()->isUnit()==PLANETPTR)
-     *         ((Planet *)iter->current())->gravitate(uc);//FIXME 071201
-     *     else { //FIXME...[causes flickering for crashing orbiting units
-     *
-     *       //((Unit *)iter->current())->ResolveForces (identity_transformation,identity_matrix,false);
-     *       ((Unit *)iter->current())->UpdateCollideQueue();
-     *     }
-     *  }
-     *  delete iter;
-     **/
 }
 
 void Planet::AddSatellite( Unit *orbiter )

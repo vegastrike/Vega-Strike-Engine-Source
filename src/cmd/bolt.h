@@ -54,7 +54,6 @@ public:
   vector <int> cachedecals;
   bolt_draw();
   ~bolt_draw();
-  //  void UpdatePhysics();
 };
 
 #endif

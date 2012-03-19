@@ -2,7 +2,6 @@
 #include <vector>
 #include "beam.h"
 #include "unit_generic.h"
-//#include "unit_collide.h"
 #include "gfx/aux_texture.h"
 #include "gfx/decalqueue.h"
 using std::vector;
@@ -44,7 +43,6 @@ Beam::Beam( const Transformation &trans, const weapon_info &clne, void *own, Uni
 Beam::~Beam()
 {
     VSDESTRUCT2
-    //VSFileSystem::vs_fprintf (stderr,"Deleting %x",this);
 #ifdef PERBOLTSOUND
     AUDDeleteSound( sound );
 #endif
@@ -81,7 +79,6 @@ void Beam::Draw( const Transformation &trans, const Matrix &m, Unit *targ, float
 
 void Beam::ProcessDrawQueue()
 {
-    //VSFileSystem::vs_fprintf (stderr,"DrawingAll\n");
     GFXDisable( LIGHTING );
     GFXDisable( CULLFACE );     //don't want lighting on this baby
     GFXDisable( DEPTHWRITE );
@@ -110,7 +107,6 @@ void Beam::ProcessDrawQueue()
             }
         }
     }
-    //GFXEnable (TEXTURE1);
     GFXEnable( DEPTHWRITE );
     GFXEnable( CULLFACE );
     GFXDisable( LIGHTING );

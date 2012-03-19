@@ -37,24 +37,13 @@
 
 #define MAX_RECENT_HISTORY "5"
 
-//#define USE_SOUNDSERVER
-
 Music *muzak = NULL;
 int    muzak_count = 0;
 int    muzak_cross_index = 0;
 
 static void print_check_err( int errorcode, const char *str )
 {
-#ifdef _WIN32
-    //errorcode is actually just a return value.
-    /*
-     *  // Whatever
-     *  int err = GetLastError();
-     *  if (err) {
-     *       fprintf(stderr, "WIN32 ERROR IN %s: %d (returned %d)\n", std, err, errorcode);
-     *  }
-     */
-#else
+#ifndef _WIN32
     if (errorcode) {
         static char const unknown_error[16] = "Unknown error"; //added by chuck_starchaser to get rid of warning
         char const *err = strerror( errorcode );
@@ -459,8 +448,6 @@ readerThread(
             if (foundcache) {
                 *me->music_load_info = wherecache->second;
                 me->freeWav = false;
-            } else if ( !AUDLoadSoundFile( songname, me->music_load_info, true ) ) {
-                //fprintf(stderr, "Failed to load song %s\n", songname);
             }
         }
         if (me->freeWav && docacheme) {
@@ -468,11 +455,9 @@ readerThread(
             wherecache->second = *me->music_load_info;
         }
         free( songname );
-        //fprintf(stderr,"readerThread: LOADED set TRUE\n");
         me->music_loaded = true;
         while (me->music_loaded)
             micro_sleep( 10000 );              //10ms of busywait for now... wait until end of frame.
-        //fprintf(stderr,"readerThread: LOADED is now FALSE\n");
     }
 #endif /* !USE_SOUNDSERVER */
     me->threadalive = 0;
@@ -488,7 +473,6 @@ void Music::_LoadLastSongAsync()
         return;
     if (!music_load_info) return;
     if (music_loading)
-        //fprintf(stderr,"Loading is TRUE\n");
         //No touching anything here!
         return;
     std::string song = music_load_list.back();
@@ -512,7 +496,6 @@ void Music::_LoadLastSongAsync()
         }
     music_load_info->hashname = song;
 #endif
-    //fprintf(stderr,"Loading set to true\n");
     music_loading = true;
 #ifdef _WIN32
     ReleaseMutex( musicinfo_mutex );
@@ -574,7 +557,6 @@ void Music::Listen()
                     return;
                 } else {
                     checkerr( trylock_ret );
-                    //fprintf(stderr,"LOADED set to false, LOADING set false\n");
                 }
                 music_loading = false;
                 music_loaded  = false;                 //once the loading thread sees this, it will try to grab a lock and wait.
@@ -860,15 +842,6 @@ Music::~Music()
         while ( threadalive && (spindown-- > 0) )
             micro_sleep( 100000 );
         if (threadalive)
-            /*
-             *  // The thread should be dead to make exiting easier...
-             * #ifdef _WIN32
-             *  TerminateThread(a_thread, 1);
-             * #else
-             *  // Taking its time to load a song...
-             *  pthread_kill(a_thread, SIGKILL);
-             * #endif
-             */
             threadalive = false;
     }
     //Kill the thread.

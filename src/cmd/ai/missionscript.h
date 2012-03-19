@@ -32,7 +32,6 @@
 
 #include "cmd/script/mission.h"
 
-//class AImissionScript : public Order {
 class AImissionScript : public FlyByWire
 {
 public:

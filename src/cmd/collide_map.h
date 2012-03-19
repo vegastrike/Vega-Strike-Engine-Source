@@ -8,7 +8,6 @@
 #endif
 #include <vector>
 /* Arbitrarily use Set for ALL PLATFORMS -hellcatv */
-//#define VS_ENABLE_COLLIDE_KEY
 class Unit;
 class Bolt;
 class Collidable
@@ -31,9 +30,6 @@ public:
     {
         //in case we want to drop in an xtra radius parameter when we get performance testing
         this->position = bpos;
-        /*
-         *  key=bpos.MagnitudeSquared();
-         */
 #ifdef __APPLE__
         if ( !FINITE( getKey() ) )
             position = QVector( 0, 0, 0 );      //hack for now
@@ -52,7 +48,6 @@ public:
         return this;
     }
 
-//float GetMagnitudeSquared()const {return key;}
     double getKey() const
     {
         return position.i;

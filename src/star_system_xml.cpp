@@ -28,13 +28,6 @@ extern vs_options game_options;
 #include <vector>
 #include <map>
 
-/*
- * #include "cmd/cont_terrain.h"
- * #include "gfx/aux_texture.h"
- * #include "gfx/env_map_gent.h"
- * #include "gfx/background.h"
- * #include "gfx/star.h"
- */
 using std::string;
 using std::vector;
 using std::map;
@@ -525,7 +518,6 @@ void StarSystem::beginElement( const string &name, const AttributeList &attribut
     case UNKNOWN:
         ++xml->unitlevel;
 
-        //cerr << "Unknown element start tag '" << name << "' detected " << endl;
         return;
 
     case SYSTEM:
@@ -875,39 +867,6 @@ void StarSystem::beginElement( const string &name, const AttributeList &attribut
             }
             break;
         }
-/*      {              THIS SEEMS LIKE DEAD CODE; COMMENTING OUT --chuck_starchaser
-            Atmosphere::Parameters params;
-            //NOTHING NEED TO RECODE
-            params.low_color[0] = GFXColor( 0, 0.5, 0.0 );
-
-            params.low_color[1] = GFXColor( 0, 1.0, 0.0 );
-
-            params.low_ambient_color[0] = GFXColor( 0.0/255.0, 0.0/255.0, 0.0/255.0 );
-
-            params.low_ambient_color[1] = GFXColor( 0.0/255.0, 0.0/255.0, 0.0/255.0 );
-
-            params.high_color[0] = GFXColor( 0.5, 0.0, 0.0 );
-
-            params.high_color[1] = GFXColor( 1.0, 0.0, 0.0 );
-
-            params.high_ambient_color[0] = GFXColor( 0, 0, 0 );
-
-            params.high_ambient_color[1] = GFXColor( 0, 0, 0 );
-
-            params.scattering = 5;
-            if ( ConfigAllows( varname, varvalue ) ) {
-                Atmosphere *a = new Atmosphere( params );
-                if (xml->unitlevel > 2) {
-                    assert( xml->moons.size() != 0 );
-                    Planet *p = xml->moons.back()->GetTopPlanet( xml->unitlevel-1 );
-                    if (p)
-                        p->setAtmosphere( a );
-                    else
-                        VSFileSystem::vs_fprintf( stderr, "atmosphere loose. no planet for it" );
-                }
-            }
-        }
-        break;          */
     case TERRAIN:
     case CONTTERRAIN:
         ++xml->unitlevel;
@@ -998,17 +957,13 @@ void StarSystem::beginElement( const string &name, const AttributeList &attribut
                 if (elem == TERRAIN) {
                     terrains.push_back( UnitFactory::createTerrain( myfile.c_str(), TerrainScale, position, radius, t ) );
                     xml->parentterrain = terrains.back();
-                    //Done in the UnitFactory wrapper
-                    //terrains.back()->SetTransformation(t);
                 } else {
                     contterrains.push_back( UnitFactory::createContinuousTerrain( myfile.c_str(), TerrainScale, position, t ) );
                     xml->ct = contterrains.back();
-                    //contterrains.back()->SetTransformation (t);
                     if (xml->unitlevel > 2) {
                         assert( xml->moons.size() != 0 );
                         Planet *p = xml->moons.back()->GetTopPlanet( xml->unitlevel-1 );
                         if (p) {
-                            //xml->ct->DisableDraw();
                             disableTerrainDraw( xml->ct );
                             p->setTerrain( xml->ct, scalex, numwraps, scaleatmos );
                             PlanetaryTransform **tmpp = (PlanetaryTransform**) &xml->parentterrain;
@@ -1057,7 +1012,6 @@ addlightprop:
                 break;
             }
         }
-        //setLightProperties( xml->lights.back());
         xml->lights.back().SetProperties( tmptarg, tmpcol );
         break;
     case JUMP:
@@ -1081,7 +1035,6 @@ addlightprop:
                 break;
             case NAME:
                 fullname = (*iter).value;
-                //cout << "\nFOUND planet/unit name " << fullname << endl;
                 bootstrap_draw( "Loading "+fullname );
                 break;
             case XFILE:
@@ -1109,8 +1062,6 @@ addlightprop:
                 break;
             case LIGHT:
                 GetLights( xml->lights, curlights, (*iter).value.c_str(), radius );
-                //assert (parse_int ((*iter).value)<xml->lights.size());
-                //curlights.push_back (xml->lights[parse_int ((*iter).value)]);
                 break;
             case FACTION:
                 {
@@ -1419,7 +1370,6 @@ addlightprop:
                     dest.clear();
                 }
                 un->SetAI( new PlanetaryOrbit( un, velocity, position, R, S, QVector( 0, 0, 0 ), plan ) );
-                //xml->moons[xml->moons.size()-1]->Planet::beginElement(R,S,velocity,position,gravity,radius,filename,NULL,vector <char *>(),xml->unitlevel-((xml->parentterrain==NULL&&xml->ct==NULL)?1:2),ourmat,curlights,true,faction);
                 if (elem == UNIT && un->faction != neutralfaction) {
                     un->SetTurretAI(); //FIXME un de-referenced before allocation
                     un->EnqueueAI( new Orders::FireAt( 15 ) ); //FIXME un de-referenced before allocation
@@ -1446,7 +1396,6 @@ addlightprop:
                     Unit *b = UnitFactory::createBuilding( 
                             xml->ct, elem == VEHICLE, filename.c_str(), false, faction );
                     b->SetSerial( serial );
-                    //b->SetPlanetOrbitData( (PlanetaryTransform*) xml->parentterrain ); commented out by chuck_starchaser; --never used
                     b->SetPosAndCumPos( xml->cursun.Cast()+xml->systemcentroid.Cast() );
                     b->EnqueueAI( new Orders::AggressiveAI( "default.agg.xml" ) );
                     b->SetTurretAI();
@@ -1525,7 +1474,6 @@ void StarSystem::endElement( const string &name )
         }
     case UNKNOWN:
         --xml->unitlevel;
-        //cerr << "Unknown element end tag '" << name << "' detected " << endl;
         break;
     case CONTTERRAIN:
         --xml->unitlevel;
@@ -1550,9 +1498,6 @@ using namespace VSFileSystem;
 void StarSystem::LoadXML( const char *filename, const Vector &centroid, const float timeofyear )
 {
     using namespace StarXML;
-    //shield.number=0;
-    //const int chunk_size = 16384;
-    //rrestricted=yrestricted=prestricted=false;
     bool   autogenerated = false;
     this->filename = filename;
     string file = VSFileSystem::GetCorrectStarSysPath( filename, autogenerated );
@@ -1568,24 +1513,14 @@ void StarSystem::LoadXML( const char *filename, const Vector &centroid, const fl
         printf( "StarSystem: file not found %s\n", file.c_str() );
         return;
     }
-    /*
-     *  }else {
-     *  printf("StarSystem: file not found %s\n",file.c_str());
-     *  return;
-     *  }
-     */
     xml = new StarXML;
     xml->scale = 1;
     xml->fade  = autogenerated;
-    //if (!autogenerated) {  // Originally implemented to keep travel time constant in hand tuned systems.  However, it really tweaks out other things, so we've turned it off.
-    //xml->scale*=parse_float (vs_config->getVariable("physics","game_speed","1"));
-    //}
     xml->scale *= game_options.star_system_scale;
     xml->parentterrain = NULL;
     xml->ct     = NULL;
     xml->systemcentroid = centroid;
     xml->timeofyear     = timeofyear;
-    //xml->fade is only if autogenerated
     xml->starsp = GetStarSpreadScale();
     xml->numnearstars   = GetNumNearStarsScale();
     xml->numstars = GetNumStarsScale();

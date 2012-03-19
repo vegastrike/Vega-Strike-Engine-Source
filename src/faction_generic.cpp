@@ -37,33 +37,6 @@ void Faction::ParseAllies( unsigned int thisfaction )
         tempvec[faction[i].stats.index].stats = tmp;
     }
     faction.swap( tempvec );
-    /*
-     *  while (faction.size()<factions.size()) {
-     *       faction.push_back (faction_stuff());
-     *       faction[faction.size()-1].stats.index=-1;
-     *  }
-     *  faction_stuff tmp;
-     *  tmp.stats.index ==0;
-     *  for (i=0;i<faction.size();i++) {
-     *       if (tmp.stats.index == i) {
-     *               faction[i].relationship= tmp.relationship;
-     *               faction[i].stats.index = faction[i].stats.index;
-     *       } else {
-     *               tmp.relationship = faction[i].relationship;
-     *               tmp.stats.index = faction[i].stats.index;
-     *               if (faction[i].stats.index!=i) {
-     *                       faction[i].relationship = 0;
-     *
-     *               }
-     *       }
-     *       for (j=0;j<faction.size();j++) {
-     *               if (faction[j].stats.index==i) {
-     *                       faction[i].relationship= faction[j].relationship;
-     *                       faction[i].stats.index = faction[j].stats.index;
-     *               }
-     *       }
-     *       faction[i].stats.index=i;
-     *  }
-     */
+
 }
 

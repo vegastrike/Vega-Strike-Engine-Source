@@ -124,7 +124,6 @@ Missile* UnitFactory::createMissile( const char *filename,
                                      float detonation_radius,
                                      ObjSerial netcreate )
 {
-//double startime= queryTime();
     Missile *un = new GameMissile( filename,
                                    faction,
                                    modifications,
@@ -139,8 +138,6 @@ Missile* UnitFactory::createMissile( const char *filename,
         un->SetSerial( netcreate );
     }
     return un;
-//double endtime= queryTime();
-//printf ("mcr %f ",endtime-startime);
 }
 
 Planet* UnitFactory::createPlanet()

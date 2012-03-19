@@ -41,7 +41,6 @@ GameMenu::~GameMenu() {}
 
 void GameMenu::run()
 {
-    //processWindowCommand(networkScreenInitCommand, NULL);
     WindowController::run();
 }
 
@@ -410,7 +409,7 @@ bool GameMenu::processSinglePlayerButton( const EventCommandId &command, Control
         GFXLoop( bootstrap_main_loop );
     window()->close();
     globalWindowManager().shutDown();
-    TerminateCurrentBase();      //BaseInterface::CurrentBase->Terminate();
+    TerminateCurrentBase();
     return true;
 }
 
@@ -624,7 +623,6 @@ bool NetActionConfirm::confirmedJoinGame()
         const vector< string > &shipList = Network[player].shipSelections();
         if (shipList.size() > 1) {
             UniverseUtil::hideSplashScreen();
-            //if (!err.empty()) err+="\n";
             showListQuestion( err+"  Select a ship to fly, or hit cancel  ", shipList,
                               new ShipSelectorCallback( this, false ), "ShipSelected" );
         } else {
@@ -678,37 +676,21 @@ bool NetActionConfirm::finalizeJoinGame( int launchShip )
     string err;
 
     restore_main_loop();
-//if (m_firstTime) {
-//GFXLoop(bootstrap_main_loop);
-//} else {
-//UniverseUtil::hideSplashScreen();
-//}
-    {
-        NetClient *playerClient = &Network[player];
-        Window    *parentWin    = m_parent;
+    NetClient *playerClient = &Network[player];
+    Window    *parentWin    = m_parent;
 
-        /*
-         *  if (window()) window()->close(); // THIS IS DELETED!
-         *
-         *  if (parentWin) {
-         *       parentWin->close();
-         *  }
-         */
+    globalWindowManager().shutDown();
+    TerminateCurrentBase();
 
-        globalWindowManager().shutDown();
-        TerminateCurrentBase();          //BaseInterface::CurrentBase->Terminate();
+    playerClient->startGame();
 
-        playerClient->startGame();
-
-        return true;
-    }
+    return true;
+    
 }
 
 bool GameMenu::processJoinGameButton( const EventCommandId &command, Control *control )
 {
     NetActionConfirm *nak = new NetActionConfirm( 0, window(), NetActionConfirm::JOINGAME );
-//nak->init();
-//nak->run();
     nak->confirmedJoinGame();
 
     return true;

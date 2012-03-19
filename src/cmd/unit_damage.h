@@ -3,13 +3,11 @@
 #include <string>
 #include <vector>
 #include "unit.h"
-//#include "unit_template.h"
 #include "unit_factory.h"
 #include "ai/order.h"
 #include "gfx/animation.h"
 #include "gfx/mesh.h"
 #include "gfx/halo.h"
-//#include "gfx/bsp.h"
 #include "vegastrike.h"
 #include "unit_collide.h"
 #include <float.h>
@@ -30,7 +28,6 @@
 #include "universe_util.h"
 #include "csv.h"
 #include "unit_csv.h"
-//#define DESTRUCTDEBUG
 #include "base.h"
 
 extern unsigned int apply_float_to_unsigned_int( float tmp );  //Short fix
@@ -219,53 +216,6 @@ float GameUnit< UnitType >::DealDamageToShield( const Vector &pnt, float &damage
     return percent;
 }
 
-/*
- *  template <class UnitType>
- *  float GameUnit<UnitType>::ApplyLocalDamage (const Vector & pnt, const Vector & normal, float amt, Unit * affectedUnit,const GFXColor &color, float phasedamage) {
- *  static float nebshields=XMLSupport::parse_float(vs_config->getVariable ("physics","nebula_shield_recharge",".5"));
- *  //  #ifdef REALLY_EASY
- *  float absamt= amt>=0?amt:-amt;
- *  Cockpit * cpt;
- *  if ((cpt=_Universe->isPlayerStarship(this))!=NULL) {
- *   if (color.a!=2) {
- *     //    ApplyDamage (amt);
- *     phasedamage*= (g_game.difficulty);
- *     amt*=(g_game.difficulty);
- *     cpt->Shake (absamt);
- *   }
- *  }
- *  //  #endif
- *  float percentage=0;
- *  percentage = UnitType::ApplyLocalDamage( pnt, normal,amt, affectedUnit, color, phasedamage);
- *  float leakamt = phasedamage+amt*.01*shield.leak;
- *  if( percentage==-1)
- *       return -1;
- *  if (GetNebula()==NULL||(nebshields>0)) {
- *   percentage = DealDamageToShield (pnt,absamt);
- *       amt = amt>=0?absamt:-absamt;
- *   if (meshdata.back()&&percentage>0&&amt==0) {//shields are up
- *     //      meshdata[nummesh]->LocalFX.push_back (GFXLight (true,
- *         //    GFXColor(pnt.i+normal.i,pnt.j+normal.j,pnt.k+normal.k),
- *         //    GFXColor (.3,.3,.3), GFXColor (0,0,0,1),
- *         //    GFXColor (.5,.5,.5),GFXColor (1,0,.01)));
- *     //calculate percentage
- *     if (GetNebula()==NULL)
- *       meshdata.back()->AddDamageFX(pnt,shieldtight?shieldtight*normal:Vector(0,0,0),percentage,color);
- *   }
- *  }
- *  if (shield.leak>0||!meshdata.back()||percentage==0||absamt>0||phasedamage) {
- *   percentage = DealDamageToHull (pnt, leakamt+amt);
- *   if (percentage!=-1) {//returns -1 on death--could delete
- *     for (int i=0;i<nummesh();i++) {
- *       if (percentage)
- *         meshdata[i]->AddDamageFX(pnt,shieldtight?shieldtight*normal:Vector (0,0,0),percentage,color);
- *     }
- *   }
- *  }
- *  return 1;
- *  }
- */
-
 extern Animation * GetVolatileAni( unsigned int );
 extern unsigned int AddAnimation( const QVector&, const float, bool, const string&, float percentgrow );
 
@@ -376,8 +326,6 @@ bool GameUnit< UnitType >::Explode( bool drawit, float timeit )
                             }
                         }
                     }
-                } else {
-                    //muzak->SkipRandSong(Music::LOSSLIST);
                 }
             }
         }
@@ -388,8 +336,6 @@ bool GameUnit< UnitType >::Explode( bool drawit, float timeit )
          || _Universe->AccessCockpit()->GetParent() == this || this->SubUnits.empty() );
     if (this->pImage->pExplosion) {
         this->pImage->timeexplode += timeit;
-        //Translate (tmp,meshdata[i]->Position());
-        //MultMatrix (tmp2,cumulative_transformation_matrix,tmp);
         this->pImage->pExplosion->SetPosition( this->Position() );
         Vector p, q, r;
         this->GetOrientation( p, q, r );

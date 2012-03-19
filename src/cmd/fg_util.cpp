@@ -85,7 +85,6 @@ bool CheckFG( std::vector< std::string > &data )
 bool CheckFG( SaveGame *sg, const std::string &fgname, unsigned int faction )
 {
     std::string key = MakeFGKey( fgname, faction );
-    //sg=_Universe->AccessCockpit()->savegame
     return CheckFG( sg->getMissionStringData( key ) );
 }
 

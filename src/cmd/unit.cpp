@@ -36,13 +36,10 @@
 #include "gfx/vsbox.h"
 #include "bolt.h"
 #include "gfx/lerp.h"
-//#include "gfx/bsp.h"
 #include "audiolib.h"
 #include "gfx/cockpit.h"
 #include "config_xml.h"
 #include "images.h"
-//#include "gfx/planetary_transform.h"
-///for saving features
 #include "main_loop.h"
 #include "script/mission.h"
 #include "script/flightgroup.h"
@@ -53,19 +50,8 @@
 #include "gfx/particle.h"
 #include "cmd/ai/aggressive.h"
 #include "cmd/base.h"
-//#include "unit_template.h"
-//#include "gfx/animation.h"
 #include "gfx/point_to_cam.h"
 
-//#include "unit_bsp.h"
-//these .cpp files should be renamed to .h; they contain template functions...
-//--some of them GameUnit<> member functions, at that --chuck_starchaser
-// Files changed from .cpp to .h 11-25
-/* #include "unit_jump.cpp"
-#include "unit_customize.cpp"
-#include "unit_damage.cpp"
-#include "unit_physics.cpp"
-#include "unit_click.cpp" */
 #include "base_util.h"
 #include "unit_jump.h"
 #include "unit_customize.h"
@@ -117,13 +103,6 @@ template < class UnitType >GameUnit< UnitType >::GameUnit( const char *filename,
 
 template < class UnitType >GameUnit< UnitType >::~GameUnit()
 {
-/*    if (this->pImage->pHudImage)
- *       delete this->pImage->pHudImage;
- *   if (this->pImage->explosion) {
- *       delete this->pImage->explosion;
- *       this->pImage->explosion = NULL;
- *   }*/
-    //VSFileSystem::vs_fprintf (stderr,"Freeing Unit %s\n",name.c_str());
     for (unsigned int meshcount = 0; meshcount < this->meshdata.size(); meshcount++)
         if (this->meshdata[meshcount])
             delete this->meshdata[meshcount];
@@ -155,33 +134,6 @@ inline static float perspectiveFactor( float d )
     else
         return 1.0f;
 }
-
-/*
- *  template <class UnitType>
- *  void GameUnit<UnitType>::Init()
- *  {
- *  this->Unit::Init();
- *  //  unsigned int numg= 1+MAXVDUS+UnitImages::NUMGAUGES;
- *  //  image->cockpit_damage=(float*)malloc((numg)*sizeof(float));
- *  //  for (unsigned int damageiterator=0;damageiterator<numg;damageiterator++) {
- *  //	image->cockpit_damage[damageiterator]=1;
- *  //  }
- *  CollideInfo.object.u = NULL;
- *  CollideInfo.type = LineCollide::UNIT;
- *  CollideInfo.Mini.Set (0,0,0);
- *  CollideInfo.Maxi.Set (0,0,0);
- *  SetAI (new Order());
- *  //yprrestricted=0;
- *  //ymin = pmin = rmin = -PI;
- *  //ymax = pmax = rmax = PI;
- *  //ycur = pcur = rcur = 0;
- *  //static Vector myang(XMLSupport::parse_float (vs_config->getVariable ("general","pitch","0")),XMLSupport::parse_float (vs_config->getVariable ("general","yaw","0")),XMLSupport::parse_float (vs_config->getVariable ("general","roll","0")));
- *  //static float rr = XMLSupport::parse_float (vs_config->getVariable ("graphics","hud","radarRange","20000"));
- *  //static float minTrackingNum = XMLSupport::parse_float (vs_config->getVariable("physics", "autotracking", ".93"));// DO NOT CHANGE see unit_customize.cpp
- *  //static float lc =XMLSupport::parse_float (vs_config->getVariable ("physics","lock_cone",".8"));// DO NOT CHANGE see unit_customize.cpp
- *  //  Fire();
- *  }
- */
 
 template < class UnitType >
 VSSprite*GameUnit< UnitType >::getHudImage() const
@@ -249,11 +201,6 @@ void GameUnit< UnitType >::UpdateHudMatrix( int whichcam )
 {
     Matrix m;
     Matrix ctm = this->cumulative_transformation_matrix;
-    /*if (this->planet) {
-     *  Transformation ct (linear_interpolate(this->prev_physical_state, this->curr_physical_state, interpolation_blend_factor));
-     *  ct.to_matrix (m);
-     *  ctm=m;
-     *  }*/
     Vector q( ctm.getQ() );
     Vector r( ctm.getR() );
     Vector tmp;
@@ -543,7 +490,6 @@ void GameUnit< UnitType >::Draw( const Transformation &parent, const Matrix &par
         static bool draw_mounts = XMLSupport::parse_bool( vs_config->getVariable( "graphics", "draw_weapons", "false" ) );
         Mount *mahnt = &this->mounts[i];
         if (draw_mounts && On_Screen)
-//Mesh * gun = WeaponMeshCache::getCachedMutable (mounts[i]->type->weapon_name);
             if (mahnt->xyscale != 0 && mahnt->zscale != 0) {
                 Mesh *gun = mahnt->type->gun;
                 if (gun && mahnt->status != Mount::UNCHOSEN) {
@@ -587,16 +533,13 @@ void GameUnit< UnitType >::Draw( const Transformation &parent, const Matrix &par
         Vector accel    = this->GetAcceleration();
         float  maxaccel = this->GetMaxAccelerationInDirectionOf( this->WarpMatrix( *ctm ).getR(), true );
         Vector velocity = this->GetVelocity();
-        //float enginescale = this->GetVelocity().MagnitudeSquared();
+
 #ifdef CAR_SIM
         Vector Scale( 1, pImage->ecm, computer.set_speed );
 #else
         float  cmas = this->computer.max_ab_speed()*this->computer.max_ab_speed();
         if (cmas == 0)
             cmas = 1;
-        /*if (enginescale>cmas)
-         *  enginescale=cmas;
-         *  Vector Scale (1,1,enginescale/(cmas));*/
         Vector Scale( 1, 1, 1 );         //Now, HaloSystem handles that
 #endif
         //WARNING: cmas is not a valid maximum speed for the upcoming multi-direction thrusters,
@@ -728,7 +671,6 @@ Matrix GameUnit< UnitType >::WarpMatrix( const Matrix &ctm ) const
         Matrix k( ctm );
 
         float  speed = this->GetWarpVelocity().Magnitude();
-        //Matrix scalar=identity_matrix;
         static float maxregion0stretch =
             XMLSupport::parse_float( vs_config->getVariable( "graphics", "warp_stretch_region0_max", "1" ) );
 
@@ -801,21 +743,4 @@ template class GameUnit< Nebula >;
  #include "cmd/enhancement.h"
 template class GameUnit< Enhancement >;
 
-//The unit types below don't compile; --probably they don't inherit from Unit.
-
-//#include "gfx/mesh.h"
-//template class GameUnit< Mesh >;
-
-//#include "cmd/script/flightgroup.h"
-//template class GameUnit< Flightgroup >;
-
-//#include "cmd/terrain.h"
-//template class GameUnit< Terrain >;
-
-//#include "cmd/cont_terrain.h"
-//template class GameUnit< ContinuousTerrain >;
-
-
 /////////////////////////////////////////////////////
-
-

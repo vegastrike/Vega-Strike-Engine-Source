@@ -230,7 +230,6 @@ void ContinuousTerrain::SetTransformation( const Matrix &transformation )
     ScaleMatrix( this->transformation, Scales );
     for (int i = 0; i < numcontterr; i++)
         dirty[i] = true;
-    //AdjustTerrain();
 }
 
 bool ContinuousTerrain::checkInvScale( double &pos, double campos, float size )
@@ -256,10 +255,8 @@ void ContinuousTerrain::Collide( Unit *un, Matrix t )
     if (un->isUnit() == BUILDINGPTR)
         return;
     ScaleMatrix( t, Scales );
-    //CopyMatrix (t,transformation);
     CopyMatrix( transform, t );
     for (int i = 0; i < numcontterr; i++) {
-        //Vector tmp;
         QVector tmp( Transform( t, location[i]-QVector(
                                    (data[i] ? (data[i])->getminX() : md[i].mesh->corner_min().i)+.5
                                    *( data[i] ? (data[i])->getSizeX() : (md[i].mesh->corner_max().i
@@ -270,14 +267,11 @@ void ContinuousTerrain::Collide( Unit *un, Matrix t )
                                      *( data[i] ? (data[i])->getSizeZ() : (md[i].mesh->corner_max().i-md[i].mesh->corner_min(
                                                                                                                             )
                                                                            .i) ) ) ) ) );
-        //tmp=Vector (Transform (t,location[i]-Vector (md[i].mesh->corner_min().i+.5*(md[i].mesh->corner_max().i-md[i].mesh->corner_min().i),0,md[i].mesh->corner_min().k+.5*(md[i].mesh->corner_max().k-md[i].mesh->corner_min().k))));
-        //}
 
         transform.p = tmp;
         if (data[i]) {
             data[i]->Collide( un, transform );
         } else {
-            //#if 0
             bool    autocol = false;
             QVector diff    = InvScaleTransform( t, un->Position() );
             if (diff.j < 0) autocol = true;
@@ -295,7 +289,6 @@ void ContinuousTerrain::Collide( Unit *un, Matrix t )
 
             smallmat.p = diff;
             const csReversibleTransform smalltransform( smallmat );
-            //#endif
 #if 0
             Matrix transform;
             AdjustTerrain( transform, t, un->Position(), i );
@@ -345,7 +338,7 @@ void ContinuousTerrain::Collide( Unit *un, Matrix t )
                 }
             }
             if (autocol) {
-                static float mass = 1000;                 //XMLSupport::parse_float (vs_config->getVariable ("terrain","mass","1000"));
+                static float mass = 1000;
                 un->ApplyForce( bigNormal*.4*un->GetMass()*fabs( bigNormal.Dot( (un->GetVelocity()/SIMULATION_ATOM) ) ) );
                 un->ApplyDamage( un->Position().Cast()-bigNormal*un->rSize(), -bigNormal, .5
                                  *fabs( bigNormal.Dot( un->GetVelocity() ) )*mass*SIMULATION_ATOM, un, GFXColor( 1,

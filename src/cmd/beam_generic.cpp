@@ -87,7 +87,6 @@ void Beam::Init( const Transformation &trans, const weapon_info &cln, void *own,
     curthick   = SIMULATION_ATOM*radialspeed;
     if (curthick > thickness)      //clamp to max thickness - needed for large simulation atoms
         curthick = thickness;
-    //int numvertex=mymax(48,(doscoop?(4 * radslices+1) * longslices * 4:0));
     static GFXVertexList *_vlist = 0;
     if (!_vlist) {
         int numvertex = float_to_int( mymax( 48, ( (4*radslices)+1 )*longslices*4 ) );

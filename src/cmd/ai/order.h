@@ -28,7 +28,6 @@
 #include <list>
 #include <vector>
 #include <string>
-//#include <cmd/script/mission.h>
 
 /**
  * Order is the base class for all orders.  All orders inherit from Order
@@ -39,7 +38,7 @@
  * is until Execute() time.  Perhaps "SetParent" Should be made virtual so that
  * various variables may be set earlier than at every execution time
  */
-//#define ORDERDEBUG
+
 class Animation;
 typedef std::vector< class varInst* >olist_t;
 class Order

@@ -14,7 +14,6 @@
 
 extern vs_options game_options;
 
-//#define GFX_BUFFER_MAP_UNMAP
 GLenum PolyLookup( POLYTYPE poly )
 {
     switch (poly)
@@ -264,7 +263,6 @@ extern GLenum PolyLookup( POLYTYPE poly );
 
 void GFXVertexList::Draw( enum POLYTYPE poly, int numV )
 {
-    //GLenum tmp = PolyLookup(poly);
     INDEX index;
     index.b = NULL;
     Draw( &poly, index, 1, &numV );
@@ -273,7 +271,6 @@ void GFXVertexList::Draw( enum POLYTYPE poly, int numV, unsigned char *index )
 {
     char  tmpchanged = changed;
     changed = sizeof (unsigned char)|( (~HAS_INDEX)&changed );
-    //GLenum myenum = PolyLookup (poly);
     INDEX tmp;
     tmp.b   = (index);
     Draw( &poly, tmp, 1, &numV );
@@ -283,7 +280,6 @@ void GFXVertexList::Draw( enum POLYTYPE poly, int numV, unsigned short *index )
 {
     char  tmpchanged = changed;
     changed = sizeof (unsigned short)|( (~HAS_INDEX)&changed );
-    //GLenum myenum = PolyLookup (poly);
     INDEX tmp;
     tmp.s   = (index);
     Draw( &poly, tmp, 1, &numV );
@@ -293,7 +289,6 @@ void GFXVertexList::Draw( enum POLYTYPE poly, int numV, unsigned int *index )
 {
     char  tmpchanged = changed;
     changed = sizeof (unsigned int)|( (~HAS_INDEX)&changed );
-    //GLenum myenum = PolyLookup (poly);
     INDEX tmp;
     tmp.i   = (index);
     Draw( &poly, tmp, 1, &numV );
@@ -642,7 +637,6 @@ void SetVector( const double factor, Vector *pv ) {
 void GFXSphereVertexList::ProceduralModification()
 {
     GFXVertex* v = sphere->BeginMutate( 0 )->vertices;
-  //  for(int j=0;j<5;j++) {
         const int ROWS = 28;
         int row[ROWS];
         for(int i=0; i < ROWS; i++) {
@@ -664,69 +658,16 @@ void GFXSphereVertexList::ProceduralModification()
 
             for(int j=0; j < ROWS/2; j++)
                 direction[j] = (int)vsrandom.uniformInc( 0.0, 5.0 );
-/*
-            if(i % 2 != 0) {
-                for(int j=0; j < ROWS; j+=2) { 
-                    if(direction[j/2] > 2) {
-                        SetVector( 1.005, &vert[j] );
-                    } else {
-                        SetVector( 0.995, &vert[j] );
-                    }
-                }
-            }
-            if(i % 2 == 0 ) {
-                for(int j=1; j < ROWS; j+=2) {
-                    if(direction[(j-1)/2] > 2) {
-                        SetVector( 1.005, &vert[j] );
-                    } else {
-                        SetVector( 0.995, &vert[j] );
-                    }
-                }
-            }
-*/
-/*
-            if(i % 4 == 3) {
-                for(int j=0; j < ROWS; j+=2) { 
-                    if(direction[j/2] > 2) {
-                        SetVector( 1.005, &vert[j] );
-                        last_row_set[j] = 1;
-                    } else {
-                        SetVector( 0.995, &vert[j] );
-                        last_row_set[j] = -1;
-                    }
-                }
-            }
-*//*
-            if(i % 4 == 2) {
-                for(int j=0; j < ROWS; j+=2) { 
-                    if(direction[j/2] > 2) {
-                        SetVector( 1.005, &vert[j] );
-                        last_row_set[j] = 1;
-                    } else {
-                        SetVector( 0.995, &vert[j] );
-                        last_row_set[j] = -1;
-                    }
-                }
-            }
-*/
             if(i % 4 == 1) {
                 for(int j=0; j < ROWS; j+=2) { 
                     if(direction[j/2] > 2) {
                         SetVector( 1.003, &vert[j] );
                         last_row_set[j] = 1;
                     } else {
-                //        SetVector( 1.001, &vert[j] );
                         last_row_set[j] = -1;
                     }
                 }
 
-           /*     for(int j=1; j < ROWS; j+=2) {
-                    if(last_row_set[j] = 1) {
-                        SetVector( 1.005, &vert[j] );
-                    } else {
-                        SetVector( 0.995, &vert[j] );
-                    }
-*/ //               }
             }
 
             if(i % 4 == 0 ) {
@@ -735,18 +676,9 @@ void GFXSphereVertexList::ProceduralModification()
                         SetVector( 1.003, &vert[j] );
                         last_row_set[j] = 1;
                     } else {
-                  //      SetVector( 1.001, &vert[j] );
                         last_row_set[j] = -1;
                     }
                 }
-
-  /*              for(int j=0; j < ROWS; j+=2) { 
-                    if(last_row_set[j] = 1) {
-                        SetVector( 1.005, &vert[j] );
-                    } else {
-                        SetVector( 0.995, &vert[j] );
-                    }
-                }*/
             }
 
             for(int j=0; j < ROWS; j++)
@@ -757,6 +689,5 @@ void GFXSphereVertexList::ProceduralModification()
                 row[j]++;
         }
 
-  //  }
     sphere->EndMutate( /*numVertices*/ );
 }

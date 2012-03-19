@@ -8,7 +8,6 @@
 #include "unit_collide.h"
 #include "collide2/Stdafx.h"
 #include "collide2/CSopcodecollider.h"
-//#include "gfx/bsp.h"
 #include "unit_factory.h"
 #include "audiolib.h"
 #include "unit_xml.h"
@@ -257,7 +256,6 @@ static void AddMounts( Unit *thus, Unit::XML &xml, const std::string &mounts )
             CrossProduct( Q, R, P );
             CrossProduct( R, P, Q );
             Q.Normalize();
-            //Transformation(Quaternion (from_vectors (P,Q,R),pos);
             Mount mnt( filename, ammo, volume, xml.unitscale*xyscale, xml.unitscale*zscale, func, maxfunc, banked );
             mnt.SetMountOrientation( Quaternion::from_vectors( P.Cast(), Q.Cast(), R.Cast() ) );
             mnt.SetMountPosition( xml.unitscale*pos.Cast() );
@@ -377,8 +375,6 @@ static void AddSubUnits( Unit *thus, Unit::XML &xml, const std::string &subunits
         R.Normalize();
         xml.units.back()->prev_physical_state = xml.units.back()->curr_physical_state;
         xml.units.back()->SetPosition( pos*xml.unitscale );
-        //xml.units.back()->prev_physical_state= Transformation(Quaternion::from_vectors(P,Q,R),pos);
-        //xml.units.back()->curr_physical_state=xml.units.back()->prev_physical_state;
         xml.units.back()->limits.structurelimits = R.Cast();
         xml.units.back()->limits.limitmin = restricted;
         xml.units.back()->name = filename;
@@ -967,7 +963,6 @@ void Unit::LoadRow( CSVRow &row, string modification, string *netxml )
     }
     //begin the geometry (and things that depend on stats)
     fullname = OPTIM_GET( row, table, Name );
-    //pImage->description=OPTIM_GET(row,table,Description);
     if ( ( tmpstr = OPTIM_GET( row, table, Hud_image ) ).length() != 0 ) {
         std::string fac = FactionUtil::GetFaction( faction );
         fac += "_";
@@ -1464,8 +1459,6 @@ void Unit::WriteUnit( const char *modifications )
         std::string savedir = modifications;
         VSFileSystem::CreateDirectoryHome( VSFileSystem::savedunitpath+"/"+savedir );
         VSFile  f;
-        //string filepath( savedir+"/"+this->filename);
-        //cerr<<"Saving Unit to : "<<filepath<<endl;
         VSError err = f.OpenCreateWrite( savedir+"/"+name+".csv", UnitFile );
         if (err > Ok) {
             fprintf( stderr, "!!! ERROR : Writing saved unit file : %s\n", f.GetFullPath().c_str() );

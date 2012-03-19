@@ -12,9 +12,6 @@
 class GameAsteroid : public GameUnit< Asteroid >
 {
 public:
-//void Init( float difficulty);
-//virtual enum clsptr isUnit() {return ASTEROIDPTR;}
-//virtual void reactToCollision(Unit * smaller, const QVector & biglocation, const Vector & bignormal, const QVector & smalllocation, const Vector & smallnormal, float dist);
     virtual void UpdatePhysics2( const Transformation &trans,
                                  const Transformation &old_physical_state,
                                  const Vector &accel,

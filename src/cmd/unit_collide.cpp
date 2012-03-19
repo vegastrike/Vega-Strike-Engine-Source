@@ -2,14 +2,12 @@
 /// Provides various functions for collision detection
 
 #include "vegastrike.h"
-//#include "unit.h"
 #include "beam.h"
 
 #include "bolt.h"
 #include "gfx/mesh.h"
 #include "unit_collide.h"
 #include "physics.h"
-//#include "gfx/bsp.h"
 
 #include "collide2/CSopcodecollider.h"
 #include "collide2/csgeom2/optransfrm.h"
@@ -38,7 +36,6 @@ void Unit::RemoveFromSystem()
                 XMLSupport::parse_bool( vs_config->getVariable( "physics", "collidemap_sanity_check", "false" ) );
             if (collidemap_sanity_check) {
                 if (0) {
-                    //activeStarSystem->collidemap->find(*this->location)==activeStarSystem->collidemap->end()){
                     CollideMap::iterator i;
                     CollideMap::iterator j = activeStarSystem->collidemap[locind]->begin();
 
@@ -145,7 +142,6 @@ bool Unit::Inside( const QVector &target, const float radius, Vector &normal, fl
     normal = ( target-Position() ).Cast();
     ::Normalize( normal );
     //if its' in the sphre, that's enough
-    //if ( isPlanet() == true || queryBSP( target, radius, normal, dist, false ) )
     if(isPlanet() )
         return true;
     return false;
@@ -165,7 +161,6 @@ bool Unit::InsideCollideTree( Unit *smaller,
     if (smaller->colTrees->usingColTree() == false || this->colTrees->usingColTree() == false)
         return false;
     csOPCODECollider::ResetCollisionPairs();
-    //printf ("Col %s %s\n",name.c_str(),smaller->name.c_str());
     Unit *bigger = this;
 
     csReversibleTransform bigtransform( bigger->cumulative_transformation_matrix );
@@ -180,8 +175,6 @@ bool Unit::InsideCollideTree( Unit *smaller,
     if ( tmpCol
         && ( tmpCol->Collide( *bigger->colTrees->colTree( bigger,
                                                          smaller->GetWarpVelocity() ), &smalltransform, &bigtransform ) ) ) {
-        //static int crashcount=0;
-        //VSFileSystem::vs_fprintf (stderr,"%s Crashez to %s %d\n", bigger->name.c_str(), smaller->name.c_str(),crashcount++);
         csCollisionPair *mycollide = csOPCODECollider::GetCollisions();
         unsigned int     numHits   = csOPCODECollider::GetCollisionPairCount();
         if (numHits) {
@@ -217,8 +210,6 @@ bool Unit::InsideCollideTree( Unit *smaller,
             float subrad = un->rSize();
             if ( (bigtype != ASTEROIDPTR) && (subrad/bigger->rSize() < rsizelim) ) {
                 break;
-            } else {
-                //printf ("s:%f",un->rSize()/bigger->rSize());
             }
             if ( ( un->Position()-smaller->Position() ).Magnitude() <= subrad+rad ) {
                 if ( ( un->InsideCollideTree( smaller, bigpos, bigNormal, smallpos, smallNormal, bigtype == ASTEROIDPTR,
@@ -234,7 +225,6 @@ bool Unit::InsideCollideTree( Unit *smaller,
         for (Unit *un; (un = *i); ++i) {
             float subrad = un->rSize();
             if ( (smalltype != ASTEROIDPTR) && (subrad/smaller->rSize() < rsizelim) )
-                //printf ("s:%f",un->rSize()/smaller->rSize());
                 break;
             if ( ( un->Position()-bigger->Position() ).Magnitude() <= subrad+rad ) {
                 if ( ( bigger->InsideCollideTree( un, bigpos, bigNormal, smallpos, smallNormal, bigtype == ASTEROIDPTR,
@@ -494,8 +484,6 @@ float Unit::querySphereNoRecurse( const QVector &start, const QVector &end, floa
         QVector st  = start-Transform( cumulative_transformation_matrix, meshdata[i]->Position().Cast() );
 
         QVector dir = end-start;         //now start and end are based on mesh's position
-        //v.Dot(v) = r*r; //equation for sphere
-        //(x0 + (x1 - x0) *t) * (x0 + (x1 - x0) *t) = r*r
         c = st.Dot( st );
         double temp1 = ( min_radius+meshdata[i]->rSize() );
         //if (st.MagnitudeSquared()<temp1*temp1) //UNCOMMENT if you want inside sphere to count...otherwise...
@@ -526,6 +514,5 @@ float Unit::querySphereNoRecurse( const QVector &start, const QVector &end, floa
             return c;
     }
     return 0.0f;
-    //return (bestd==-FLT_MAX)?0:(bestd/sqrt(beammsqr));
 }
 

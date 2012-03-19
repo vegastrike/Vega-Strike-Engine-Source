@@ -25,12 +25,9 @@
 
 #include <expat.h>
 #include "xml_support.h"
-//#include "vegastrike.h"
 #include <assert.h>
 #include "configxml.h"
 #include "easydom.h"
-//#include "vs_globals.h"
-//#include "vegastrike.h"
 
 using std::cout;
 using std::cerr;
@@ -46,7 +43,6 @@ VegaConfig::VegaConfig( const char *configfile )
         cout<<"Panic exit - no configuration"<<endl;
         exit( 0 );
     }
-    //top->walk(0);
     variables = NULL;
     colors    = NULL;
     checkConfig( top );
@@ -79,7 +75,6 @@ bool VegaConfig::checkConfig( configNode *node )
             doColors( cnode );
         else if (cnode->Name() == "bindings")
             bindings = cnode;              //delay the bindings until keyboard/joystick is initialized
-        //doBindings(cnode);
         else
             cout<<"Unknown tag: "<<cnode->Name()<<endl;
     }
@@ -147,7 +142,6 @@ void VegaConfig::doVar( string prefix, configNode *node )
     string value    = node->attr_value( "value" );
     string hashname = prefix+name;
     map_variables[hashname] = value;
-    //cout << "checking var " << name << " value " << value << endl;
     if ( name.empty() )
         cout<<"no name given for variable "<<name<<" "<<value<<" "<<endl;
 }
@@ -215,7 +209,6 @@ bool VegaConfig::checkColor( string prefix, configNode *node )
             cout<<"you have to give a referenced section when referencing colors"<<endl;
             ref_section = "default";
         }
-        //cout << "refsec: " << ref_section << " ref " << node->attr_value("ref") << endl;
         getColor( ref_section, ref_name, refcol );
 
         vColor &vc = map_colors[hashname];
@@ -235,7 +228,6 @@ bool VegaConfig::checkColor( string prefix, configNode *node )
     color->name = node->attr_value( "name" );
 
     node->color = color;
-    //colors.push_back(color);
 
     return true;
 }
@@ -268,18 +260,6 @@ string VegaConfig::getVariable( string section, string subsection, string name, 
 
     else
         return defaultvalue;
-    /*configNode *secnode=findSection(section,variables);
-     *  if(secnode!=NULL){
-     *  configNode *subnode=findSection(subsection,secnode);
-     *  if(subnode!=NULL){
-     *   configNode *entrynode=findEntry(name,subnode);
-     *   if(entrynode!=NULL){
-     *     return entrynode->attr_value("value");
-     *   }
-     *  }
-     *  }
-     *
-     *  return defaultvalue;*/
 }
 
 /* *********************************************************** */
@@ -293,21 +273,6 @@ string VegaConfig::getVariable( string section, string name, string defaultval )
 
     else
         return defaultval;
-    /*vector<easyDomNode *>::const_iterator siter;
-     *
-     *  for(siter= variables->subnodes.begin() ; siter!=variables->subnodes.end() ; siter++){
-     *  configNode *cnode=(configNode *)(*siter);
-     *  string scan_name=(cnode)->attr_value("name");
-     *  //    cout << "scanning section " << scan_name << endl;
-     *
-     *  if(scan_name==section){
-     *   return getVariable(cnode,name,defaultval);
-     *  }
-     *  }
-     *
-     *  cout << "WARNING: no section named " << section << endl;
-     *
-     *  return defaultval;*/
 }
 
 /* *********************************************************** */
@@ -359,28 +324,6 @@ void VegaConfig::getColor( string section, string name, float color[4], bool hav
         color[3] = (*it).second.a;
     } else if (!have_color) {
         color[0] = color[1] = color[2] = color[3] = 1.0f;
-        /*vector<easyDomNode *>::const_iterator siter;
-         *
-         *  if( colors == NULL )
-         *  {
-         *   cout << "WARNING: no colors defined in vegatrike config file" << endl;
-         *   return;
-         *  }
-         *
-         *  for(siter= colors->subnodes.begin() ; siter!=colors->subnodes.end() ; siter++){
-         *  configNode *cnode=(configNode *)(*siter);
-         *  string scan_name=(cnode)->attr_value("name");
-         *  //          cout << "scanning section " << scan_name << endl;
-         *
-         *  if(scan_name==section){
-         *   getColor(cnode,name,color,have_color);
-         *   return;
-         *  }
-         *  }
-         *
-         *  cout << "WARNING: no section named " << section << endl;
-         *
-         *  return;*/
     }
 }
 
@@ -391,7 +334,6 @@ void VegaConfig::getColor( configNode *node, string name, float color[4], bool h
     vector< easyDomNode* >::const_iterator siter;
     for (siter = node->subnodes.begin(); siter != node->subnodes.end(); siter++) {
         configNode *cnode = (configNode*) (*siter);
-        //cout << "scanning color " << (cnode)->attr_value("name") << endl;
         if ( (cnode)->attr_value( "name" ) == name ) {
             color[0] = (cnode)->color->r;
             color[1] = (cnode)->color->g;
@@ -427,7 +369,6 @@ configNode* VegaConfig::findSection( string section, configNode *startnode )
     for (siter = startnode->subnodes.begin(); siter != startnode->subnodes.end(); siter++) {
         configNode *cnode = (configNode*) (*siter);
         string scan_name  = (cnode)->attr_value( "name" );
-        //cout << "scanning section " << scan_name << endl;
         if (scan_name == section)
             return cnode;
     }

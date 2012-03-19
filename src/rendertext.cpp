@@ -46,25 +46,19 @@ RText::RText()
     ndraw    = 15;
     WORDWRAP = 85;
     conskip  = 0;
-//histpos = 0;
     saycommand( "" );
 }
-//}}}
-//Render Text (Console) Destructor {{{
 RText::~RText() {}
-//}}}
 //Set the text width, not used  .. yet{{{
 int RText::text_width( char *str )
 {
     return 0;
 }
-//}}}
 //Should be unused defines {{{
 #define VIRTW 2400
 #define VIRTH 1800
 #define PIXELTAB (VIRTW/12)
 #define FONTH 64
-//}}}
 //Draw text, used by the console, should be private, use conoutf to print to the console {{{
 void RText::draw_text( std::string &str, float left, float top, int gl_num )
 {
@@ -79,25 +73,17 @@ void RText::draw_text( std::string &str, float left, float top, int gl_num )
     newTextPlane.SetCharSize( .8, .12 );
     newTextPlane.Draw( str );
 }
-//}}}
 //render the console, only call if bool console == true {{{
 void RText::renderconsole() //render buffer
 {
     int  nd = 0;
     vector< string >refs;
     bool breaker = false;
-//int i = 0;
-//int lastmillis = 0;
-//int length = 0;
-//for(vector<cline>::iterator iter = conlines.begin();
-//iter < conlines.end(); iter++) length++;
-    {
-        for (vector< cline >::iterator iter = conlines.begin(); iter < conlines.end(); iter++) {
-            if (nd < ndraw)
-                refs.push_back( ( *(iter) ).cref );
-            else iter = conlines.end();
-            nd++;
-        }
+    for (vector< cline >::iterator iter = conlines.begin(); iter < conlines.end(); iter++) {
+        if (nd < ndraw)
+            refs.push_back( ( *(iter) ).cref );
+        else iter = conlines.end();
+        nd++;
     }
     size_t j = 0;
     float  x = -1;
@@ -127,7 +113,6 @@ void RText::renderconsole() //render buffer
     Acdraw.append( drawCommand.str() );
     draw_text( Acdraw, x, y, 2 );
 }
-//}}}
 //append a line to the console, optional "highlight" method , untested {{{
 void RText::conline( string &sf, bool highlight )        //add a line to the console buffer
 {
@@ -150,9 +135,7 @@ void RText::conline( string &sf, bool highlight )        //add a line to the con
         cl.cref.append( sf );
     }
     conlines.insert( conlines.begin(), cl );
-//puts(cl.cref.c_str());
 }
-//}}}
 //print a line to the console, broken at \n's {{{
 void RText::conoutf( char *in )
 {
@@ -168,27 +151,6 @@ void RText::conoutf( string &s, int a, int b, int c )
     SDL_LockMutex( mymutex );
 #endif
     cout<<s<<endl;
-//Old {{{
-//{
-//for(int x = WORDWRAP; x < s.size(); x = x+WORDWRAP) {
-//s.insert(x, "\n");
-//}
-//}
-
-//size_t x = s.find("\n");
-//if(x < string::npos) {
-//size_t xlast = 0;
-//for(; x < string::npos; x = s.find("\n", x+1)) {
-//string newone;
-//newone.append(s.substr(xlast, x-xlast));
-//conline(newone, 1);
-//xlast = x+1;
-//}
-//
-//} else {
-//conline(s, 1);
-//}
-//}}}
     string::size_type fries = s.size();
     string customer;
     for (string::size_type burger = 0; burger < fries; burger++) {
@@ -225,7 +187,6 @@ void RText::conoutf( string &s, int a, int b, int c )
     SDL_UnlockMutex( mymutex );
 #endif
 }
-//}}}
 //same as above, but I think it works better {{{
 void RText::conoutn( string &s, int a, int b, int c )
 {
@@ -247,19 +208,11 @@ void RText::conoutn( string &s, int a, int b, int c )
         conoutf( part, a, b, c );
     }
 }
-//}}}
 //saycommand(char *), should "say" something, will be useful only with network enabled {{{
 //does nothing now
-void RText::saycommand( const char *init ) ///
+void RText::saycommand( const char *init ) // DELETE unused
 {
-    //actually, it appends "init" to commandbuf
-//Unused.
-//SDL_EnableUNICODE((init!=NULL));
-//if(!editmode) keyrepeat(saycommandon);
-//if(!init) init = "";
-//commandbuf.append(init);
 }
-//}}}
 //Console Keyboard Input {{{
 void RText::ConsoleKeyboardI( int code, bool isdown )
 {
@@ -280,7 +233,6 @@ void RText::ConsoleKeyboardI( int code, bool isdown )
         case WSK_LEFT:
 //this should move a put pointer for commandbuf
 //right should move it the other way.
-//for(int i = 0; commandbuf[i]; i++) if(!commandbuf[i+1]) commandbuf[i] = 0;
             break;
 
         case WSK_RETURN:
@@ -298,9 +250,7 @@ void RText::ConsoleKeyboardI( int code, bool isdown )
                     }
                 } else if (noSize) {
                     vhistory.push_back( commandbuf );
-//histpos = vhistory.end();
                 }
-                //histpos--;
                 //commands beginning with / are executed
                 //in localPlayer.cpp just before this is called
             }
@@ -326,8 +276,6 @@ string RText::getcurcommand()
 {
     return commandbuf;
 }
-//}}}
-
 //footer, leave at bottom
 /*
  * Local variables:

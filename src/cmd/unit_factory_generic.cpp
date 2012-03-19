@@ -375,11 +375,6 @@ void UnitFactory::addBuffer( NetBuffer &netbuf, const Unit *un, bool allowSystem
     case MISSILEPTR:
         addMissileBuffer( netbuf, static_cast< const Missile* > (un) );
         break;
-    /*
-     *  case PLANETPTR:
-     *       if (allowSystemTypes) addPlanetBuffer(netbuf, static_cast<Planet*> (un));
-     *       break;
-     */
     case NEBULAPTR:
         if (allowSystemTypes)
             addNebulaBuffer( netbuf, static_cast< const Nebula* > (un) );

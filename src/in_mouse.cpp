@@ -20,8 +20,6 @@
  */
 
 #include "vegastrike.h"
-//#include "glob.h"
-//#include "dbg.h"
 #include "in_handler.h"
 #include "in_mouse.h"
 #include <deque>
@@ -75,7 +73,6 @@ static deque< MouseEvent >eventQueue;
 void mouseClickQueue( int button, int state, int x, int y )
 {
     int mod = 0;
-    //glutGetModifiers();
     eventQueue.push_back( MouseEvent( MouseEvent::CLICK, button, state, mod, x, y ) );
 }
 int delx = 0;
@@ -94,7 +91,6 @@ void DealWithWarp( int x, int y )
         if ( joystick[MOUSE_JOYSTICK]->player < _Universe->numPlayers() ) {
             if (x < mouse_warp_zone || y < mouse_warp_zone || x > g_game.x_resolution-mouse_warp_zone || y
                 > g_game.y_resolution-mouse_warp_zone) {
-                //VSFileSystem::Fprintf (stderr,"warped from %d %d to %d %d",mousex,mousey, g_game.x_resolution/2,g_game.y_resolution/2);
 
                 int delx = -x+g_game.x_resolution/2;
                 int dely = -y+g_game.y_resolution/2;
@@ -123,17 +119,7 @@ void mouseMotionQueue( int x, int y )
     eventQueue.push_back( MouseEvent( MouseEvent::MOTION, -1, -1, -1, x, y ) );
     DealWithWarp( x, y );
 }
-/*
- *  void mouseClick( int button, int state, int x, int y ) {
- *  int mod = 0;//glutGetModifiers();
- *  if(button>=NUM_BUTTONS) return;
- *
- *  mousex = x;
- *  mousey = y;
- *  mouseBindings[button](state==WS_MOUSE_DOWN?PRESS:RELEASE,x,y,0,0,mod);
- *  MouseState[button]=(state==WS_MOUSE_DOWN)?DOWN:UP;
- *  }
- */
+
 int lookupMouseButton( int b )
 {
     static int adj = 0;
@@ -186,7 +172,6 @@ void GetMouseDelta( int &dx, int &dy )
 
 void mouseDrag( int x, int y )
 {
-    //int mod =glutGetModifiers();
     for (int i = 0; i < NUM_BUTTONS+1; i++)
         mouseBindings[i] ( MouseState[i], x, y, x-mousex, y-mousey, 0 );
     AddDelta( x-mousex, y-mousey );
@@ -196,7 +181,6 @@ void mouseDrag( int x, int y )
 
 void mouseMotion( int x, int y )
 {
-    //int mod =glutGetModifiers();
     for (int i = 0; i < NUM_BUTTONS+1; i++)
         mouseBindings[i] ( MouseState[i], x, y, x-mousex, y-mousey, 0 );
     AddDelta( x-mousex, y-mousey );
@@ -204,14 +188,6 @@ void mouseMotion( int x, int y )
     mousey = y;
 }
 
-/**
- *  GLUT_ACTIVE_SHIFT
- *   Set if the Shift modifier or Caps Lock is active.
- *  GLUT_ACTIVE_CTRL
- *   Set if the Ctrl modifier is active.
- *  GLUT_ACTIVE_ALT
- *   Set if the Alt modifier is active.
- */
 static void DefaultMouseHandler( KBSTATE, int x, int y, int delx, int dely, int mod ) {}
 
 void UnbindMouse( int key )
@@ -256,9 +232,5 @@ void ProcessMouse()
         }
         eventQueue.pop_front();
     }
-    /*
-     *  for (int a=0;a<NUM_BUTTONS+1;a++) {
-     *  mouseBindings[a](MouseState[a],mousex,mousey,0,0,0);
-     *  }*/
 }
 

@@ -99,7 +99,6 @@ struct weapon_info
     {
         *this = tmp;
     }
-    //weapon_info& operator = (const weapon_info &tmp);
     void netswap();
 private:
     float RefireRate;

@@ -320,7 +320,6 @@ void Ship( int room, std::string index, QVector pos, Vector Q, Vector R )
     Vector P = R.Cross( Q );
     P.Normalize();
     newroom->objs.push_back( new BaseInterface::Room::BaseShip( P.i, P.j, P.k, Q.i, Q.j, Q.k, R.i, R.j, R.k, pos, index ) );
-//return BaseInterface::CurrentBase->rooms[BaseInterface::CurrentBase->curroom]->links.size()-1;
 }
 void RunScript( int room, std::string ind, std::string pythonfile, float time )
 {
@@ -428,7 +427,6 @@ void SetLinkEventMask( int room, std::string index, std::string maskdef )
         case 'm':
         case 'M':
             fprintf( stderr, "%s: WARNING: Ignoring request for movement event mask.\n", __FILE__ );
-            //mask |= BaseInterface::Room::Link::MoveEvent;
             break;
         }
     }
@@ -748,7 +746,6 @@ void refreshBaseComputerUI( const Cargo *carg )
     if (carg)
         //BaseComputer::draw() used dirty to determine what to recalculate.
         BaseComputer::dirty = 1;               //everything.
-    //BaseComputer::dirtyCargo=*carg;
     else
         BaseComputer::dirty = 2;               //only title.
 }

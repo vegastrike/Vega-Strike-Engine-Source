@@ -27,8 +27,6 @@
 #include "vegastrike.h"
 #include "vs_globals.h"
 
-//#include "glob.h"
-//#include "dbg.h"
 #include "in_handler.h"
 #include "in_joystick.h"
 #include "config_xml.h"
@@ -90,7 +88,6 @@ void JoyStickToggleKey( const KBData &key, KBSTATE a )
 }
 void myGlutJoystickCallback( unsigned int buttonmask, int x, int y, int z )
 {
-    //printf ("joy %d x %d y %d z %d\n",buttonmask, x,y,z);
     unsigned int i;
     for (i = 0; i < MAX_AXES; i++)
         joystick[0]->joy_axis[i] = 0.0;
@@ -160,8 +157,6 @@ void InitJoystick()
 #ifndef NO_SDL_JOYSTICK
 #ifdef HAVE_SDL
         if (i < num_joysticks)
-            //SDL_EventState (SDL_JOYBUTTONDOWN,SDL_ENABLE);
-            //SDL_EventState (SDL_JOYBUTTONUP,SDL_ENABLE);
             printf( "    %s\n", SDL_JoystickName( i ) );
 #else
         if (i < num_joysticks)
@@ -211,7 +206,6 @@ JoyStick::JoyStick( int which ) : mouse( which == MOUSE_JOYSTICK )
             joy_available = false;
         return;
     }
-    //SDL_JoystickEventState(SDL_ENABLE);
     joy = SDL_JoystickOpen( which );     //joystick nr should be configurable
     if (joy == NULL) {
         printf( "warning: no joystick nr %d\n", which );
@@ -319,7 +313,6 @@ void JoyStick::GetMouse( float &x, float &y, float &z, int &buttons )
         }
         fdx = float(valx)/game_options.mouse_blur;
         fdy = float(valy)/game_options.mouse_blur;
-        //printf (" x:%.2f y:%.2f %d ",fdx,fdy,avg);
     }
     joy_axis[0]  = fdx/(g_game.x_resolution*def_mouse_sens/game_options.mouse_sensitivity);
     joy_axis[1]  = fdy/(g_game.y_resolution*def_mouse_sens/game_options.mouse_sensitivity);

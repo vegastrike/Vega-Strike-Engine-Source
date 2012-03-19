@@ -24,14 +24,9 @@
  */
 
 #include <expat.h>
-//#include "xml_support.h"
 #include "easydom.h"
 
 #include <assert.h>     /// needed for assert() calls.
-
-//using XMLSupport::EnumMap;
-//using XMLSupport::Attribute;
-//using XMLSupport::AttributeList;
 
 using std::cout;
 using std::cerr;
@@ -41,18 +36,12 @@ easyDomNode::easyDomNode() {}
 void easyDomNode::set( easyDomNode *_parent, string _name, const XML_Char **atts )
 {
     parent = _parent;
-    //attributes=_attributes;
     if (atts != NULL) {
         for (; *atts != NULL; atts += 2) {
-            //for(AttributeList::const_iterator iter = _attributes->begin(); iter!=_attributes->end(); iter++) {
-            //cout <<  _name << "::" << (*iter).name << endl;
-            //printf("iter=%x *iter=%x\n",iter,*iter);
-            //cout << " " << (*iter).name << "=\"" << (*iter).value << "\"" << endl;
 #if 0
             att_name.push_back( (*iter).name );
             att_value.push_back( (*iter).value );
 #endif
-            //attribute_map[(*iter).name]=(*iter).value;
             attribute_map[atts[0]] = atts[1];
         }
     }
@@ -72,7 +61,6 @@ string easyDomNode::attr_value( string search_name )
 void easyDomNode::printNode( ostream &out, int recurse_level, int level )
 {
     vsUMap< string, string >::const_iterator iter;
-    //vector<string>::const_iterator iter2;
 
     out<<"<"<<name;
     for (iter = attribute_map.begin(); iter != attribute_map.end(); iter++)

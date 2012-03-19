@@ -28,7 +28,6 @@
 #include "profile.h"
 #include "gfx/cockpit.h"
 #include "cmd/weapon_xml.h"
-//#include "mission.h"
 #include "galaxy_xml.h"
 #include <algorithm>
 #include "config_xml.h"
@@ -109,8 +108,6 @@ GameUniverse::GameUniverse() : Universe()
 
 GameUniverse::~GameUniverse()
 {
-    //int i;
-    //CacheJumpStar(true);
     DeInitInput();
     GFXShutdown();
 }
@@ -165,17 +162,9 @@ void GameUniverse::StartGFX()
     GFXSetMaterial( tmp, mat );
     GFXSelectMaterial( tmp );
     int ligh;
-    //GFXSetSeparateSpecularColor (GFXTRUE);
     GFXCreateLightContext( ligh );
     GFXSetLightContext( ligh );
     GFXLightContextAmbient( GFXColor( 0, 0, 0, 1 ) );
-    /*
-     *  ///now planets make light
-     *  GFXCreateLight (ligh, GFXLight(true,GFXColor (0.001,0.001,.001),GFXColor (01,1,1,1),GFXColor(0,0,0,1), GFXColor (.2,.2,.2,1), GFXColor (1,0,0)),true);
-     *  //GFXEnableLight (ligh);
-     *  //	GFXCreateLight (ligh, GFXLight(true,GFXColor (0.001,0.001,.001),GFXColor (1,1,.6,1),GFXColor(1,1,1,1), GFXColor (0,0,0,1), GFXColor (1,.0000,.000000004)),false);
-     *  GFXEnableLight (ligh);
-     */
     GFXEndScene();
 }
 
@@ -220,16 +209,11 @@ inline void loadsounds( const string &str, const int max, soundArray &snds, bool
     for (int i = 0; i < max; ++i) {
         addstr[0] = '1'+i;
         string mynewstr = str;
-        //bool foundyet=false;
         while (1) {
             std::string::size_type found = mynewstr.find( '?' );
             if (found != std::string::npos) {
                 mynewstr[found] = addstr[0];
-                //foundyet=true;
             } else {
-                //if (!foundyet) {
-                //mynewstr=mynewstr+addstr;
-                //}
                 break;
             }
         }
@@ -380,37 +364,3 @@ StarSystem* GameUniverse::GenerateStarSystem( const char *file, const char *jump
     this->Generate2( ss );
     return ss;
 }
-
-/************************************************************************
- *  extern char *viddrv;
- *
- *  FARPROC WINAPI DliNotify(unsigned dliNotify, PDelayLoadInfo pdli)
- *  {
- *       switch(dliNotify)
- *       {
- *       case dliNotePreLoadLibrary:
- *               pdli->szDll = viddrv;
- *               return 0;
- *               break;
- *       default:
- *               return 0;
- *       }
- *  }
- *
- *  FARPROC WINAPI DliFailure(unsigned dliNotify, PDelayLoadInfo pdli)
- *  {
- *       switch(dliNotify)
- *       {
- *       case dliFailLoadLib:
- *               //load a library and then return the module #;
- *               return 0;
- *               break;
- *       default:
- *               return 0;
- *       }
- *  }
- *
- *  PfnDliHook   __pfnDliNotifyHook = DliNotify;
- *  PfnDliHook   __pfnDliFailureHook = DliFailure;
- ****************************************************************/
-

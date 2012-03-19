@@ -64,7 +64,6 @@ void Atmosphere::Update( const QVector &position, const Matrix &tmatrix )
     Unit   *primary;
     for (un_iter iter = system->getUnitList().createIterator(); (primary=*iter)!=NULL; ++iter)
         if ( primary->isUnit() == PLANETPTR && (currPlanet = (GamePlanet*) primary)->hasLights() ) {
-            //const std::vector <int> & lights = currPlanet->activeLights();
             /* for now just assume all planets with lights are really bright */
             QVector direction = (currPlanet->Position()-position);
             direction.Normalize();
@@ -119,10 +118,8 @@ void Atmosphere::Update( const QVector &position, const Matrix &tmatrix )
 
         GFXCreateLight( l0, light0, true );
         GFXCreateLight( l1, light1, true );
-        //GFXCreateLight(l2,light2,true);
         GFXEnableLight( l0 );
         GFXEnableLight( l1 );
-        //GFXEnableLight(l2);
     }
 }
 
@@ -149,11 +146,6 @@ void Atmosphere::ProcessDrawQueue()
 void Atmosphere::Draw()
 {
     GFXDisable( TEXTURE1 );
-    /*
-     *  [ 1 0 0 0 ]
-     *  [ 0 0 1 0 ]
-     *  [ 0 -1 0 0 ]
-     */
     Matrix rot( 1, 0, 0,
                0, 0, -1,
                0, 1, 0,
@@ -190,7 +182,6 @@ void Atmosphere::Draw()
     GFXDisableLight( l1 );
     GFXDeleteLight( l0 );
     GFXDeleteLight( l1 );
-    //GFXDeleteLight(l2);
 }
 
 void Atmosphere::DrawAtmospheres()

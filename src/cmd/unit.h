@@ -25,12 +25,11 @@
 #define CONTAINER_DEBUG
 #endif
 
-//struct GFXColor;
-
 #include <string>
 #include <vector>
 #include <map>
 #include <memory>
+
 class HaloSystem;
 struct GFXColor; // labeled as class, declared as struct in gfxlib_struct.h
 class QVector;
@@ -38,12 +37,6 @@ struct Transformation;
 class Matrix;
 class Vector;
 class StarSystem;
-
-//#include "gfx/matrix.h"
-//#include "gfx/cockpit.h"
-//#include "script/flightgroup.h"
-//#include "unit_generic.h"
-//#include "gfxlib.h"
 
 class Mesh;
 class Flightgroup;
@@ -53,8 +46,6 @@ class Unit;
 class VSSprite;
 class Camera;
 class UnitCollection;
-
-//using std::string;
 
 /**
  * GameUnit contains any physical object that may collide with something
@@ -83,7 +74,6 @@ public: GameUnit( int dummy );
     virtual ~GameUnit();
     int nummesh() const;
 ///fils in corner_min,corner_max and radial_size
-//void calculate_extent(bool update_collide_queue);
 ///returns -1 if unit cannot dock, otherwise returns which dock it can dock at
     UnitImages< void >& GetImageInformation();
     bool RequestClearance( Unit *dockingunit );
@@ -98,7 +88,6 @@ public: GameUnit( int dummy );
  */
  	double sparkle_accum;
     std::auto_ptr< HaloSystem >phalos;
-///vector <Mesh *> StealMeshes();
 ///Process all meshes to be deleted
 ///Split this mesh with into 2^level submeshes at arbitrary planes
     void Split( int level );
@@ -114,7 +103,6 @@ public: GameUnit( int dummy );
     virtual void DrawNow( const Matrix &m, float lod = 1000000000 );
     virtual void DrawNow();
 ///Deprecated
-//virtual void ProcessDrawQueue() {}
     void addHalo( const char *filename,
                   const QVector &loc,
                   const Vector &size,
@@ -129,9 +117,6 @@ public: GameUnit( int dummy );
  **** STAR SYSTEM STUFF                                                             ***
  **************************************************************************************
  */
-//void SetPlanetOrbitData( PlanetaryTransform *trans ); commented out by chuck_starchaser; --never used
-//PlanetaryTransform * GetPlanetOrbit() const; commented out by chuck_starchaser; --never used
-//bool TransferUnitToSystem (StarSystem *NewSystem);
     bool TransferUnitToSystem( unsigned int whichJumpQueue, StarSystem*&previouslyActiveStarSystem, bool DoSightAndSound );
 ///Begin and continue explosion
     bool Explode( bool draw, float timeit );
@@ -147,15 +132,12 @@ public: GameUnit( int dummy );
 ///Queries the bounding sphere with a duo of mouse coordinates that project
 ///to the center of a ship and compare with a sphere...pretty fast*/
     bool querySphereClickList( int, int, float err, Camera *activeCam );
-//virtual void reactToCollision(Unit * smaller, const QVector & biglocation, const Vector & bignormal, const QVector & smalllocation, const Vector & smallnormal, float dist);
 ///returns true if jump possible even if not taken
-//bool jumpReactToCollision (Unit *smaller);
 /*
  **************************************************************************************
  **** PHYSICS STUFF
  **************************************************************************************
  */
-//bool AutoPilotTo(Unit * un, bool ignore_friendlies=false);
 ///Updates physics given unit space transformations and if this is the last physics frame in the current gfx frame
     virtual void UpdatePhysics2( const Transformation &trans,
                                  const Transformation &old_physical_state,
@@ -165,7 +147,6 @@ public: GameUnit( int dummy );
                                  const Vector &CumulativeVelocity,
                                  bool ResolveLast,
                                  UnitCollection *uc = NULL );
-//class Cockpit * GetVelocityDifficultyMult(float &) const;
 ///Thrusts by ammt and clamps accordingly (afterburn or not)
     void Thrust( const Vector &amt, bool afterburn = false );
 ///Resolves forces of given unit on a physics frame
@@ -188,29 +169,6 @@ public: GameUnit( int dummy );
  *******************************************
  */
 ///Holds temporary values for inter-function XML communication Saves deprecated restr info
-/*
- *     struct XML {
- *       vector<Mount *> mountz;
- *       vector<Mesh*> meshes;
- *       vectorstring> meshes_str;
- *       Mesh * shieldmesh;
- *       Mesh * rapidmesh;
- *       void * data;
- *       vector<Unit*> units;
- *       int unitlevel;
- *       bool hasColTree;
- *       enum restr {YRESTR=1, PRESTR=2, RRESTR=4};
- *       const char * unitModifications;
- *       char yprrestricted;
- *       float unitscale;
- *       float ymin, ymax, ycur;
- *       float pmin, pmax, pcur;
- *       float rmin, rmax, rcur;
- *       std::string cargo_category;
- *       std::string hudimage;
- *       int damageiterator;
- *     };
- */
     Matrix WarpMatrix( const Matrix &ctm ) const;
 };
 
@@ -254,8 +212,4 @@ class Enhancement;
 template < class Enhancement >
 class GameUnit;
 
-//#include "unit.cpp"
-/////////////////////////////////////////////////////
-
 #endif
-

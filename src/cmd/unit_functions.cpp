@@ -9,7 +9,6 @@
 #include "gfx/halo.h"
 #include "gfx/mesh.h"
 #include "gfx/sphere.h"
-//#include "gfx/bsp.h"
 #include "gfx/sprite.h"
 #include "audiolib.h"
 #include "collide2/CSopcodecollider.h"

@@ -61,12 +61,10 @@ public:
                 mItem *mi = new mItem;
                 mi->autoreprint = true;
                 mi->Name.append( "1" );                       //argument to access menu
-//mi->action.append("python"); //adds this to the function  2 call as the argument
                 mi->display.append( "Python One Line input" );                       //menu's display name
                 mi->func2call.append( "python" );
                 mi->inputbit = true;                         //set single-line input mode
                 mi->selectstring.append( "Type a single line of Python" );                       //call function "Display" with this string
-//mi->predisplay.append("Python");
                 CommandInterpretor->addMenuItem( mi );
             }
             {
@@ -74,16 +72,13 @@ public:
                 mi->autoreprint = true;                         //auto-re-print the
                 //menu after this menuitem is finished
                 mi->Name.append( "2" );                       //argument to access menu
-//mi->action.append("python"); //adds this to the function  2 call as the argument
                 mi->display.append( "(Python Multi-Line input)" );                       //menu's display name
                 mi->func2call.append( "python" );                       //call this function when this menuitem is called and input is all recieved, user input is appened with a space, along with the action string if there is one. (string generated: "func2call action userinput")
                 mi->inputbit2 = true;                         //set single-line input mode
                 mi->selectstring.append( "Type multiple lines of python input. Use <ENTER> on a line ALONE to finish" );                       //Call function "Display" with this string
-//mi->predisplay.append(""); // this would be called if we wanted to look up a value of something on another object, using this string to do the lookup
                 CommandInterpretor->addMenuItem( mi );
             }
         }
-        //}}}
     }
     void pymenu();
     void left( bool *isKeyDown );

@@ -3,6 +3,7 @@
 #include "collide_map.h"
 #include "unit_generic.h"
 #include "bolt.h"
+
 volatile bool apart_return = true;
 void CollideArray::erase( iterator target )
 {
@@ -116,7 +117,7 @@ public:
         updateBackpointer( collidable );
     }
 };
-//extern bool debugPerformance();
+
 void CollideArray::flatten()
 {
     sorted.resize( count );
@@ -141,19 +142,7 @@ void CollideArray::flatten()
             }
         toflattenhints[i].resize( 0 );
     }
-    /*
-    if ( 0 && debugPerformance() ) {
-        unsigned int oo = 0;
-        std::vector< Collidable >::iterator ii, jj = sorted.begin(), sortedend = sorted.end();
-        if (jj != sortedend) ++jj;
-        for (ii = sorted.begin();
-             ii != sortedend; ++ii, ++jj)
-            if (*jj < *ii)
-                oo++;
-        printf( "sorted list %d is %d long with %d elements out of order\n",
-                location_index, (unsigned int) sorted.size(), oo );
-    }
-    */
+
     std::sort( sorted.begin(), sorted.end() );
     unsorted = sorted;
 
@@ -168,7 +157,6 @@ void CollideArray::flatten()
             update( *iter );
             radUpdate( *iter, i );
         }
-        //for_each(sorted.begin(),sorted.end(),UpdateBackpointers<1>(1));
     } else if (location_index == Unit::UNIT_ONLY) {
         for_each( sorted.begin(), sorted.end(), UpdateBackpointers< Unit::UNIT_ONLY > () );
     } else {
@@ -196,6 +184,7 @@ public: CopyExample( CollideArray::ResizableArray::iterator beg, CollideArray::R
         updateBackpointer( collidable );
     }
 };
+
 class resizezero
 {
 public:
@@ -209,28 +198,10 @@ void CollideArray::flatten( CollideArray &hint )
 {
     if (location_index == Unit::UNIT_ONLY) {
         sorted.resize( count );
-        /*
-        if ( 0 && debugPerformance() ) {
-            size_t tmpcount = 0;
-            for (size_t ii = 0; ii < hint.sorted.size(); ++ii)
-                tmpcount += (hint.sorted[ii].radius > 0 ? 1 : 0);
-            if (count != tmpcount)
-                printf( "Actual count is %u, local count is %u\n", (unsigned int) count, (unsigned int) tmpcount );
-        }
-        */
         for_each( toflattenhints.begin(), toflattenhints.end(), resizezero() );
         toflattenhints.resize( count+1 );
 
         for_each( sorted.begin(), sorted.end(), CopyExample( hint.sorted.begin(), hint.sorted.end() ) );
-/*		if (debugPerformance()) {
- *
- *                       for (ResizableArray::iterator ii=cp.examplebegin;ii!=cp.exampleend;++ii) {
- *                               if (ii->radius>0.0f) {
- *                                       printf( "Failed to copy unit %s when doing fast flatten\n",ii->ref.unit->name.c_str());
- *                               }
- *                       }
- *                       }*/
-        //unsorted=sorted;
     } else {
         printf( "Trying to use flatten hint on a array with both bolts and units\n" );
         flatten();
@@ -272,10 +243,6 @@ void CollideArray::checkSet()
         for (iterator newiter = this->begin(), iter = newiter++; newiter != this->end(); iter = newiter++)
             assert( *iter < *newiter );
 }
-
-//CollideMap null_collide_map;
-//CollideMap::iterator null_collide_iter;
-//bool null_collide_iter_initialized = false;
 
 Collidable::Collidable( Unit *un )
 {
@@ -456,9 +423,7 @@ public:
         double minlook, maxlook;
         CollideMap::iterator startIter = CheckBackref< T > () ( un, location_index );
         if ( ComputeMaxLookMinLook( un, cm, startIter, cmbegin, cmend, sortedloc, rad, minlook, maxlook ) ) return false;  //no units in area
-        //CollideChecker<T,canbebolt>::isNew(cm,un); Now we do this in the caller
         if ( !cm->Iterable( startIter ) ) {
-            //fprintf (stderr,"ERROR: New collide map entry checked for collision\n Aborting collide\n");
             CollideArray::CollidableBackref *br = static_cast< CollideArray::CollidableBackref* > (startIter);
             CollideMap::iterator tmploc = cmbegin+br->toflattenhints_offset;
             if (tmploc == cmend)
@@ -491,18 +456,6 @@ public:
     {
         return is_null( un->location[location_index] );
     }
-/*
- *  static bool isNew(CollideMap * cm, Unit * b) {
- *  assert(!b->isSubUnit());
- *  if (is_null(b->location)) {
- *   b->location=cm->insert(Collidable(b));
- *   return true;
- *  }
- *  return false;
- *  }
- *  static bool isNew(CollideMap *cm, Bolt * b) {
- *  return false;
- *  }*/                                                                                                                                                                                                                                                                                    //no longer necessary--done in caller
     static bool ApartPositive( const Collidable &a, const Collidable &b )
     {
         float aradius = a.radius;

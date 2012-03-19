@@ -1,7 +1,6 @@
 #ifndef __UNIT_JUMP_CPP__
 #define __UNIT_JUMP_CPP__
 
-//#include "unit_template.h"
 #include "unit.h"
 #include "audiolib.h"
 #include "star_system_generic.h"
@@ -24,20 +23,6 @@ inline std::vector< Unit* >ComparePrimaries( Unit *primary, StarSystem *origin )
     std::vector< Unit* >myvec;
     if ( CompareDest( primary, origin ) )
         myvec.push_back( primary );
-    /*
-     *  if (primary->isUnit()==PLANETPTR) {
-     *  Iterator *iter = ((Planet *)primary)->createIterator();
-     *  Unit * unit;
-     *  while((unit = iter->current())!=NULL) {
-     *   if (unit->isUnit()==PLANETPTR)
-     *     if (CompareDest ((Planet*)unit,origin)) {
-     *       myvec.push_back (unit);
-     *     }
-     *   iter->advance();
-     *  }
-     *  delete iter;
-     *  }
-     */
     return myvec;
 }
 

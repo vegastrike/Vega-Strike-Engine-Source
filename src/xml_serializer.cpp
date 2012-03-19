@@ -6,6 +6,7 @@
 #include "vs_globals.h"
 #include "vegastrike.h"
 #include "networking/const.h"
+
 ///Assumes that the tag is  <Mount type=\"  and that it will finish with " ></Mount>
 using namespace XMLSupport;
 using namespace VSFileSystem;
@@ -30,11 +31,6 @@ std::string absIntStarHandler( const XMLType &input, void *mythis )
 {
     return XMLSupport::tostring( (int) abs( *input.w.i ) );
 }
-/*
- *  std::string absShortStarHandler (const XMLType &input,void *mythis) {
- *  return XMLSupport::tostring((int)abs(*input.w.s));
- *  }
- */
 std::string scaledFloatStarHandler( const XMLType &input, void *mythis )
 {
     return XMLSupport::tostring( (float) ( (*input.w.f)/XMLSupport::parse_float( input.str ) ) );
@@ -62,16 +58,6 @@ std::string ucharStarHandler( const XMLType &input, void *mythis )
 {
     return XMLSupport::tostring( *input.w.uc );
 }
-/*
- *  std::string shortStarHandler (const XMLType &input, void*mythis) {
- *  return XMLSupport::tostring(*input.w.s);
- *  }
- */
-/*
- *  std::string ushortStarHandler (const XMLType &input, void*mythis) {
- *  return XMLSupport::tostring(*input.w.us);
- *  }
- */
 std::string negationCharStarHandler( const XMLType &input, void *mythis )
 {
     return XMLSupport::tostring( -(*input.w.c) );
@@ -111,11 +97,6 @@ std::string cloakHandler( const XMLType &input, void *mythis )
 {
     return XMLSupport::tostring( ( (*input.w.i) == -1 ) ? 1 : 0 );       //short fix
 }
-/*
- *  std::string shortToFloatHandler(const XMLType &input, void *mythis) {
- *  return XMLSupport::tostring ((float)(((float)(*input.w.s))/32767.));
- *  }
- */
 
 std::string intToFloatHandler( const XMLType &input, void *mythis )
 {
@@ -158,8 +139,6 @@ void XMLSerializer::Write( const char *modificationname )
             savedir = modificationname;
     VSFileSystem::CreateDirectoryHome( VSFileSystem::savedunitpath+"/"+savedir );
     VSFile  f;
-    //string filepath( savedir+"/"+this->filename);
-    //cerr<<"Saving Unit to : "<<filepath<<endl;
     VSError err = f.OpenCreateWrite( savedir+"/"+this->filename, UnitFile );
     if (err > Ok) {
         fprintf( stderr, "!!! ERROR : Writing saved unit file : %s\n", f.GetFullPath().c_str() );

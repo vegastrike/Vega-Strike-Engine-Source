@@ -38,22 +38,11 @@
 #include "gfx/env_map_gent.h"
 #include "vsfilesystem.h"
 #include "cmd/unit_find.h"
-//static SphereMesh *foo;
-//static Unit *earth;
 
 #include "options.h"
 
 extern vs_options game_options;
 
-/*
- *  GameStarSystem::GameStarSystem(): StarSystem()
- *  {
- *  _Universe->pushActiveStarSystem (this);
- *  GFXCreateLightContext (lightcontext);
- *  bolts = new bolt_draw;
- *  collidetable = new CollideTable(this);
- *  }
- */
 GameStarSystem::GameStarSystem( const char *filename, const Vector &centr, const float timeofyear )
 {
     no_collision_time = 0;               //(int)(1+2.000/SIMULATION_ATOM);
@@ -63,7 +52,6 @@ GameStarSystem::GameStarSystem( const char *filename, const Vector &centr, const
     GFXCreateLightContext( lightcontext );
     bolts = new bolt_draw;
     collidetable   = new CollideTable( this );
-    //cout << "origin: " << centr.i << " " << centr.j << " " << centr.k << " " << planetname << endl;
 
     current_stage  = MISSION_SIMULATION;
 
@@ -71,30 +59,6 @@ GameStarSystem::GameStarSystem( const char *filename, const Vector &centr, const
     if (!name)
         name = strdup( filename );
     AddStarsystemToUniverse( filename );
-    //primaries[0]->SetPosition(0,0,0);
-
-    //iter = primaries->createIterator();
-    //iter->advance();
-    //earth=iter->current();
-    //delete iter;
-
-    //Calculate movement arcs; set behavior of primaries to follow these arcs
-    //Iterator *primary_iterator = primaries->createIterator();
-    //primaries->SetPosition(0,0,5);
-    //foo = new SphereMesh(1,5,5,"moon.image");
-    //cam[1].SetProjectionType(Camera::PARALLEL);
-    //cam[1].SetZoom(1);
-    //cam[1].SetPosition(Vector(0,0,0));
-    //cam[1].LookAt(Vector(0,0,0), Vector(0,0,1));
-    //cam[1].SetPosition(Vector(0,5,-2.5));
-    //cam[1].SetSubwindow(0,0,1,1);
-
-    //cam[2].SetProjectionType(Camera::PARALLEL);
-    //cam[2].SetZoom(10.0);
-    //cam[2].SetPosition(Vector(5,0,0));
-    //cam[2].LookAt(Vector(0,0,0), Vector(0,-1,0));
-    //cam[2].SetPosition(Vector(5,0,-2.5));
-    //cam[2].SetSubwindow(0.10,0,0.10,0.10);
     UpdateTime();
     time = 0;
 
@@ -118,26 +82,6 @@ GameStarSystem::GameStarSystem( const char *filename, const Vector &centr, const
 
     params.high_ambient_color[1] = GFXColor( 0, 0, 0 );
 
-    /*
-     *
-     *  params.low_color[0] = GFXColor(241.0/255.0,123.0/255.0,67.0/255.0);
-     *
-     *  params.low_color[1] = GFXColor(253.0/255.0,65.0/255.0,55.0/255.0);
-     *
-     *  params.low_ambient_color[0] = GFXColor(0.0/255.0,0.0/255.0,0.0/255.0);
-     *
-     *  params.low_ambient_color[1] = GFXColor(0.0/255.0,0.0/255.0,0.0/255.0);
-     *
-     *  params.high_color[0] = GFXColor(60.0/255.0,102.0/255.0,249.0/255.0);
-     *
-     *  params.high_color[1] = GFXColor(57.0/255.0,188.0/255.0,251.0/255.0);
-     *
-     *  params.high_ambient_color[0] = GFXColor(0,0,0);
-     *
-     *  params.high_ambient_color[1] = GFXColor(0,0,0);
-     *
-     */
-
     params.scattering = 5;
 
     _Universe->popActiveStarSystem();
@@ -153,18 +97,6 @@ void GameStarSystem::activateLightMap( int stage )
     GFXActiveTexture( stage );
 #ifdef NV_CUBE_MAP
     LightMap[0]->MakeActive( stage );
-    /*
-     *   if (LightMap[1])
-     *      LightMap[1]->MakeActive(stage);
-     *   if (LightMap[2])
-     *      LightMap[2]->MakeActive(stage);
-     *   if (LightMap[3])
-     *      LightMap[3]->MakeActive(stage);
-     *   if (LightMap[4])
-     *      LightMap[4]->MakeActive(stage);
-     *   if (LightMap[5])
-     *      LightMap[5]->MakeActive(stage);
-     */
 #else
     LightMap[0]->MakeActive( stage );
 #endif
@@ -199,8 +131,6 @@ GameStarSystem::~GameStarSystem()
     delete bolts;
     //delete collidetable;//BAD BAD BAD we need this to happen later!
 
-    //I *think* this is legacy 012603  GFXDeleteLightContext (lightcontext);
-
     _Universe->popActiveStarSystem();
     RemoveStarsystemFromUniverse();
 }
@@ -210,13 +140,6 @@ ClickList* GameStarSystem::getClickList()
     return new ClickList( this, &drawList );
 }
 
-/**OBSOLETE!
- *  void GameStarSystem::modelGravity(bool lastframe) {
- *  for (int i=0;i<numprimaries;i++) {
- *       primaries[i]->UpdatePhysics (identity_transformation,identity_matrix,lastframe,units)
- *  }
- *  }
- */
 void ConditionalCursorDraw( bool tf )
 {
     if (game_options.hardware_cursor)
@@ -234,7 +157,6 @@ void GameStarSystem::SwapOut()
 extern double saved_interpolation_blend_factor;
 extern double interpolation_blend_factor;
 extern bool   cam_setup_phase;
-//extern bool debugPerformance();
 
 //Class for use of UnitWithinRangeLocator template
 //Used to do distance based pre-culling for draw function based on sorted search structure
@@ -337,7 +259,6 @@ void GameStarSystem::Draw( bool DrawCockpit )
     {
         cam_setup_phase = true;
 
-        //int numships=0;
         Unit *saveparent = _Universe->AccessCockpit()->GetSaveParent();
         Unit *targ = NULL;
         if (saveparent)
@@ -361,7 +282,6 @@ void GameStarSystem::Draw( bool DrawCockpit )
         interpolation_blend_factor = saved_interpolation_blend_factor;
         SIMULATION_ATOM = backup;
 
-        //printf("Number of insystem ships: %d (%d FPS)\n",numships,(int)(1.f/GetElapsedTime()));
 
         ///this is the final, smoothly calculated cam
         _Universe->AccessCockpit()->SetupViewPort( true );
@@ -446,7 +366,6 @@ void GameStarSystem::Draw( bool DrawCockpit )
     Matrix  ident;
     Identity( ident );
 
-    //Atmosphere::ProcessDrawQueue();
     GFXPopGlobalEffects();
     GFXLightContextAmbient( tmpcol );
     if ( ( neb = _Universe->AccessCamera()->GetNebula() ) )
@@ -454,7 +373,6 @@ void GameStarSystem::Draw( bool DrawCockpit )
     Beam::ProcessDrawQueue();
     Bolt::Draw();
 
-    //if (_Universe->AccessCamera()->GetNebula()!=NULL)
     GFXFogMode( FOG_OFF );
     Animation::ProcessDrawQueue();
     Halo::ProcessDrawQueue();
@@ -464,15 +382,6 @@ void GameStarSystem::Draw( bool DrawCockpit )
     if (DrawCockpit)
         _Universe->AccessCockpit()->Draw();
     double fintime = queryTime()-starttime;
-/*    if ( debugPerformance() ) {
-        printf( "draw: %f setup %f units %f maxunit %f processmesh %f ",
-                fintime,
-                setupdrawtime,
-                drawtime,
-                maxdrawtime,
-                processmesh );
-    }
-*/
     MeshAnimation::UpdateFrames();
 }
 
@@ -540,7 +449,6 @@ void GameStarSystem::createBackground( StarSystem::StarXML *xml )
                                   LightMap[0] );
     }
 #else
-    //string bglight= VSFileSystem::sharedtextures+"/"+xml->backgroundname+"_light.image";
     string  bglight = xml->backgroundname+"_light.image";
     string  bgfile  = xml->backgroundname+"_light.image";
     VSFile  f;

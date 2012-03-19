@@ -2,7 +2,6 @@
 #include "cmd/script/mission.h"
 #include "cmd/script/pythonmission.h"
 #include "vs_globals.h"
-//#include "gfxlib.h"
 #include "networking/netserver.h"
 #include "star_system_generic.h"
 #include "vs_globals.h"
@@ -72,7 +71,6 @@ int num_delayed_missions()
     for (unsigned int i = 0; i < delayed_missions.size(); ++i)
         if (delayed_missions[i].player == cp)
             ++number;
-    //return delayed_missions.size(); // Ignores that there can be more than one player.
     return number;
 }
 
@@ -266,8 +264,6 @@ void LoadMission( const char *nission_name, const std::string &script, bool load
             Flightgroup *fg = *siter;
             string fg_name  = fg->name;
             string fullname = fg->type;
-            //int fg_terrain = fg->terrain_nr;
-            //bool isvehicle = (fg->unittype==Flightgroup::VEHICLE);
             strncpy( fightername, fullname.c_str(), 1023 );
             fightername[1023] = '\0';
             int    a = 0;

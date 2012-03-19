@@ -32,8 +32,6 @@
 
 extern vs_options game_options;
 
-//extern class Music *muzak;
-//extern unsigned int AddAnimation (const QVector & pos, const float size, bool mvolatile, const std::string &name, float percentgrow );
 extern Unit& GetUnitMasterPartList();
 extern int num_delayed_missions();
 using std::string;
@@ -524,20 +522,6 @@ int GetNumAdjacentSystems( string sysname )
 {
     return _Universe->getAdjacentStarSystems( sysname ).size();
 }
-/*
- *  int musicAddList(string str) {
- *  return muzak->Addlist(str.c_str());
- *  }
- *  void musicPlaySong(string str) {
- *  muzak->GotoSong(str);
- *  }
- *  void musicPlayList(int which) {
- *  muzak->SkipRandSong(which);
- *  }
- *  void musicLoopList (int numloops) {
- *  muzak->loopsleft=numloops;
- *  }
- */
 float GetDifficulty()
 {
     return g_game.difficulty;
@@ -546,39 +530,6 @@ void SetDifficulty( float diff )
 {
     g_game.difficulty = diff;
 }
-/*
- *  void playSound(string soundName, QVector loc, Vector speed) {
- *  int sound = AUDCreateSoundWAV (soundName,false);
- *  AUDAdjustSound (sound,loc,speed);
- *  AUDStartPlaying (sound);
- *  AUDDeleteSound(sound);
- *  }
- *  void cacheAnimation(string aniName) {
- *  static vector <Animation *> anis;
- *  anis.push_back (new Animation(aniName.c_str()));
- *  }
- *  void playAnimation(string aniName, QVector loc, float size) {
- *  AddAnimation(loc,size,true,aniName,1);
- *  }
- *  void playAnimationGrow(string aniName, QVector loc, float size, float growpercent) {
- *  AddAnimation(loc,size,true,aniName,growpercent);
- *  }
- *  unsigned int getCurrentPlayer() {
- *  return _Universe->CurrentCockpit();
- *  }
- *  Unit *getPlayer(){
- *  return _Universe->AccessCockpit()->GetParent();;
- *  }
- *  int getNumPlayers () {
- *  return _Universe->numPlayers();
- *  }
- *  Unit *getPlayerX(int which){
- *  if (which>=getNumPlayers()) {
- *  return NULL;
- *  }
- *  return _Universe->AccessCockpit(which)->GetParent();
- *  }
- */
 extern void playVictoryTune();
 void terminateMission( bool Win )
 {
@@ -835,13 +786,6 @@ void receivedCustom( int cp, bool trusted, string cmd, string args, string id )
     ::Python::reseterrors();
     _Universe->popActiveStarSystem();
     _Universe->SetActiveCockpit( cp_orig );
-/*
- *                               netbuf.addString("game");
- *                               netbuf.addString(message);
- *                               p2.send( CMD_TXTMESSAGE, 0,
- *                                               netbuf.getData(), netbuf.getDataLength(), SENDRELIABLE,
- *                                               &clt->cltadr, clt->tcp_sock, __FILE__, PSEUDO__LINE__(847));
- */
 }
 int getNumPlayers()
 {
@@ -944,13 +888,10 @@ void ComputeSystemSerials( std::string &systempath )
         search_patterns.push_back( "<JUMP " );
         for (std::vector< std::string >::iterator ti = search_patterns.begin(); ti != search_patterns.end(); ++ti) {
             std::string search( (*ti) );
-            //cerr<<"Looking for "<<search<<endl;
             std::string::size_type search_length = (*ti).length();
             std::string::size_type curpos = 0;
             int nboc = 0;
-            //cerr<<"\tLooking for "<<search<<" length="<<search_length<<endl;
             while ( ( curpos = system.find( search, curpos ) ) != std::string::npos ) {
-                //cerr<<"\t\tSearch position = "<<curpos<<endl;
                 ObjSerial   new_serial = getUniqueSerial();
                 std::string serial_str( (*ti)+"serial=\""+XMLSupport::tostring5( new_serial )+"\" " );
                 //If there are already serial in the file we replace that kind of string : <planet serial="XXXXX"
@@ -994,11 +935,6 @@ void ComputeGalaxySerials( std::vector< std::string > &stak )
     for (; !stak.empty();) {
         string sys( stak.back()+".system" );
         stak.pop_back();
-        /*
-         *  string sysfilename( sys+".system");
-         *  string relpath( universe_path+sysdir+"/"+sysfilename);
-         *  string systempath( datadir+relpath);
-         */
         ComputeSystemSerials( sys );
     }
     cout<<"Computing done."<<endl;

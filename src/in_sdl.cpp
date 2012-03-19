@@ -3,10 +3,10 @@
 #include "config_xml.h"
 #include "in_kb_data.h"
 #include <assert.h>     /// needed for assert() calls.
-void DefaultJoyHandler( const KBData&, KBSTATE newState )
+void DefaultJoyHandler( const KBData&, KBSTATE newState ) // DELETE ME
 {
-    //VSFileSystem::Fprintf (stderr,"STATE: %d", st);
 }
+
 struct JSHandlerCall
 {
     KBHandler function;

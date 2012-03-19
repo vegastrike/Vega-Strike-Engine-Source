@@ -2,10 +2,8 @@
 #define __PLANETGENERIC_H
 
 #include "unit_generic.h"
-//#include "unit_factory.h"
 #include "ai/order.h"
 #include "configxml.h"
-//#include "gfx/planetary_transform.h"
 #include "gfxlib_struct.h"
 #include "images.h"
 
@@ -58,7 +56,6 @@ protected:
     float  gravity;
     UnitCollection    insiders;
     std::vector< int >lights;
-//Animation *shine;
 protected:
 /// default constructor - only to be called by UnitFactory
     Planet();
@@ -189,7 +186,6 @@ public:
     {
         this->Unit::reactToCollision( smaller, biglocation, bignormal, smalllocation, smallnormal, dist );
     }
-    virtual void gravitate( UnitCollection *units );
 
     class PlanetIterator
     {

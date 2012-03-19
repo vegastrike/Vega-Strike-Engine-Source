@@ -83,26 +83,6 @@ bool Bolt::Update( Collidable::CollideRef index )
     location = _Universe->activeStarSystem()->collidemap[Unit::UNIT_BOLT]->changeKey( location, updated );
     return true;
 }
-/*
- *  void bolt_draw::UpdatePhysics () {
- *  vector <vector <Bolt> > *tmp = &bolts;
- *  for (int l=0;l<2;l++) {
- *   for (vector <vector <Bolt> >::iterator i= tmp->begin();i!=tmp->end();i++) {
- *     for (int j=0;j<i->size();j++) {
- *       int size=i->size();
- *       Bolt * b=&((*i)[j]);
- *       ///warning these require active star system to be set appropriately
- *       if (b->Collide(j)) {//gotta collide before position update (old bolt table)
- *         j--;//deleted itself!
- *       }else if (!b->Update(j)) {
- *         j--;//deleted itself
- *       }
- *     }
- *   }
- *   tmp = &balls;
- *  }
- *  }
- */
 
 class UpdateBolt
 {
@@ -179,15 +159,6 @@ bool Bolt::Collide( Unit *target )
         tmp = tmp.Scale( distance );
         distance = curdist/this->type->Range;
         GFXColor    coltmp( this->type->r, this->type->g, this->type->b, this->type->a );
-        /*    coltmp.r+=.5;
-         *  coltmp.g+=.5;
-         *  coltmp.b+=.5;
-         *  if (coltmp.r>1)coltmp.r=1;
-         *  if (coltmp.g>1)coltmp.g=1;
-         *  if (coltmp.b>1)coltmp.b=1;*/
-        //float appldam = type->Damage;
-        //float phasdam =type->PhaseDamage;
-        //if (damage>0) { This was needed back in the "I don't share code" ApplyDamage days
         target->ApplyDamage( (prev_position+tmp).Cast(),
                             normal,
                             this->type->Damage*( (1-distance)+distance*this->type->Longrange ),
@@ -195,9 +166,6 @@ bool Bolt::Collide( Unit *target )
                             coltmp,
                             owner,
                             this->type->PhaseDamage*( (1-distance)+distance*this->type->Longrange ) );
-        //}else if (damage<0) {
-        //target->leach (1,phasdam<0?-phasdam:1,appldam<0?-appldam:1);
-        //}
         return true;
     }
     return false;
@@ -222,7 +190,6 @@ bool Bolt::CollideAnon( Collidable::CollideRef b, Unit *un )
     return false;
 }
 
-//union Collidable::CollideRef;  Perhaps not needed?
 Collidable::CollideRef Bolt::BoltIndex( int index, int decal, bool isBall )
 {
     Collidable::CollideRef temp;

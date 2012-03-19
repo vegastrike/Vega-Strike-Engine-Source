@@ -1,4 +1,3 @@
-
 #include <assert.h>
 #include <iostream>
 #include <vector>
@@ -162,7 +161,6 @@ float StarDate::GetFloatFromTrekDate( int faction )
 {
     float  float_date;
     string cur_date = this->GetFullTrekDate( faction );
-    //cout<<"------------------------- STARDATE "<<cur_date<<" --------------------------"<<endl;
     sscanf( cur_date.c_str(), "%f", &float_date );
 
     return float_date;

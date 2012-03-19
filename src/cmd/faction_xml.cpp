@@ -237,7 +237,6 @@ void Faction::beginElement( void *userData, const XML_Char *names, const XML_Cha
         unitlevel++;
         factions[factions.size()-1]->faction.push_back( faction_stuff() );
         assert( factions.size() > 0 );
-        //factions[factions.size()-1];
         for (iter = attributes.begin(); iter != attributes.end(); iter++) {
             switch ( attribute_map.lookup( (*iter).name ) )
             {

@@ -35,7 +35,6 @@ struct AIEvresult
                 const std::string &aiscript );
     bool Eval( const float eval ) const
     {
-        //return ((eval>=min)&&(eval<max)&&type>0)||(eval>=max&&eval<min&&type<0);
         if (eval >= min)
             if (eval < max)
                 if (type > 0)

@@ -5,7 +5,6 @@
 #include "gfxlib.h"
 #include "gfx/sphere.h"
 #include "collection.h"
-//#include "gfx/bsp.h"
 #include "ai/order.h"
 #include "gfxlib_struct.h"
 #include "vs_globals.h"
@@ -85,55 +84,7 @@ Mesh * MakeFogMesh( const AtmosphericFogMesh &f, float radius )
     SetFogMaterialColor( ret, GFXColor( f.er, f.eg, f.eb, f.ea ), GFXColor( f.dr, f.dg, f.db, f.da ) );
     return ret;
 }
-/*
- *  class FogMesh : public Mesh {
- *  public:
- *       void SetMaterialColor (const GFXColor &color,const GFXColor & dcolor) {
- *               GFXMaterial m;m.ar=m.ag=m.ab=m.aa=m.sr=m.sg=m.sb=m.sa=0;m.power=0;
- *               static float emm=XMLSupport::parse_float (vs_config->getVariable("graphics","atmosphere_emmissive","1"));
- *               static float diff=XMLSupport::parse_float (vs_config->getVariable("graphics","atmosphere_diffuse","1"));
- *               m.er= emm*color.r;
- *               m.eg= emm*color.g;
- *               m.eb= emm*color.b;
- *               m.ea= emm*color.a;
- *               m.dr= diff*dcolor.r;
- *               m.dg= diff*dcolor.g;
- *               m.db= diff*dcolor.b;
- *               m.da= diff*dcolor.a;
- *               this->SetMaterial(m);
- *
- *       }
- *       FogMesh (const AtmosphericFogMesh & f, float radius):Mesh(f.meshname.c_str(),Vector(f.scale*radius,f.scale*radius,f.scale*radius),0,NULL,true) {
- *               SetMaterialColor(GFXColor (f.er,f.eg,f.eb,f.ea),GFXColor(f.dr,f.dg,f.db,f.da));
- *               if (Decal.size()) {
- *                       if (Decal[0]) {
- *                               if (f.min_alpha!=0||f.max_alpha!=255||f.concavity!=0 || f.focus!=.5 || f.tail_mode_start!=-1 || f.tail_mode_end!=-1) {
- *                                       int rez=XMLSupport::parse_int (vs_config->getVariable("graphics","atmosphere_texture_resolution","512"));
- *                                       unsigned char * tex= (unsigned char *) malloc (sizeof(char) *rez*4);
- *                                       for (int i=0;i<rez;++i) {
- *                                               tex[i*4]=255;
- *                                               tex[i*4+1]=255;
- *                                               tex[i*4+2]=255;
- *                                               tex[i*4+3]=get_alpha(i,rez,f.min_alpha,f.max_alpha,f.focus,f.concavity,f.tail_mode_start,f.tail_mode_end);
- *                                       }
- *                                       static int count=0;
- *                                       count++;
- *                                       string nam = f.meshname+XMLSupport::tostring(count)+".png";
- *                                       // Writing in the homedir texture directory
- *                                       VSImage image;
- *                                       image.WriteImage( (char *)nam.c_str(), &tex[0], PngImage, rez, 1, true, 8, TextureFile);
- *                                       if (!orig) {
- *                                         delete Decal[0];
- *                                         Decal[0]= new Texture(nam.c_str(),nam.c_str());
- *                                       }
- *                               }
- *                       }
- *               }
- *
- *       }
- *       virtual ~FogMesh (){}
- *  };
- */
+
 class AtmosphereHalo : public GameUnit< Unit >
 {
 public:
@@ -151,9 +102,6 @@ public:
         float   distance   = dirtocam.Magnitude();
 
         float   MyDistanceRadiusFactor = planetRadius/distance;
-        //float AngleA = asin (MyDistanceRadiusFactor);
-        //float AngleC = 3.1415926536/2-AngleA;
-        //float HorizonHeight = sin(AngleC)*planetRadius; // these three lines are equiv to next 1 line (and much slower);
         float HorizonHeight = sqrt( 1-MyDistanceRadiusFactor*MyDistanceRadiusFactor )*planetRadius;
 
         float zscale;
@@ -175,8 +123,6 @@ void GamePlanet::AddFog( const std::vector< AtmosphericFogMesh > &v, bool optica
 #endif
     std::vector< Mesh* >fogs;
     for (unsigned int i = 0; i < v.size(); ++i) {
-//static float radiusmult = XMLSupport::parse_float (vs_config->getVariable("graphics","atmosphere_size","1.01"));
-
         Mesh *fog = MakeFogMesh( v[i], rSize() );
         fogs.push_back( fog );
     }
@@ -315,8 +261,6 @@ GamePlanet::GamePlanet( QVector x,
         GFXCreateLight( l, ligh[i].ligh, !ligh[i].islocal );
         lights.push_back( l );
     }
-    //BLENDFUNC blendSrc=SRCALPHA;
-    //BLENDFUNC blendDst=INVSRCALPHA;
     bool wormhole = dest.size() != 0;
     if (wormhole) {
         static std::string wormhole_unit = vs_config->getVariable( "graphics", "wormhole", "wormhole" );
@@ -347,10 +291,6 @@ GamePlanet::GamePlanet( QVector x,
                 for (un_kiter i = jump->viewSubUnits(); (su = *i) != NULL; ++i)
                     SubUnits.prepend( su );
                 jump->SubUnits.clear();
-/*			  for (i=jump->getSubUnits();(su=*i)!=NULL;) {
- *                                 i.remove();
- *                         }
- */
             }
             jump->Kill();
             if (jump != neujum)
@@ -366,12 +306,6 @@ GamePlanet::GamePlanet( QVector x,
         static int stacks = XMLSupport::parse_int( vs_config->getVariable( "graphics", "planet_detail", "24" ) );
         atmospheric = !(blendSrc == ONE && blendDst == ZERO);
         meshdata.push_back( new SphereMesh( radius, stacks, stacks, textname.c_str(), technique, NULL, inside_out, blendSrc, blendDst ) );
-
-    //FIXED BUG: the radius of the sphere (the surface) must be a little bit smaller than the athmosphere in order to see the athmosphere
- //   SphereMesh* m = new SphereMesh( radius * 0.95, stacks, stacks, textname.c_str(), technique, NULL, inside_out, blendSrc, blendDst, false, 0.0, M_PI, 0.0, 2*M_PI, MIPMAP, false, false);
-
- //   meshdata.push_back( m );
-
         meshdata.back()->setEnvMap( GFXFALSE );
         meshdata.back()->SetMaterial( ourmat );
         meshdata.push_back( NULL );
@@ -438,7 +372,6 @@ void GamePlanet::Draw( const Transformation &quat, const Matrix &m )
         if (t.Magnitude() < corner_max.i) {
             inside = true;
         } else {
-            //if ((terrain&&t.Dot (TerrainH)>corner_max.i)||(!terrain&t.Dot(t)>corner_max.i*corner_max.i)) {
             inside = false;
             ///somehow warp unit to reasonable place outisde of planet
             if (terrain) {
@@ -453,7 +386,6 @@ void GamePlanet::Draw( const Transformation &quat, const Matrix &m )
         GFXSetLight( lights[i], POSITION, GFXColor( cumulative_transformation.position.Cast() ) );
     if (inside && terrain)
         PlanetTerrainDrawQueue.push_back( new UnitContainer( this ) );
-    //DrawTerrain();
     if (shine) {
         Vector  p, q, r;
         QVector c;
@@ -468,7 +400,6 @@ void GamePlanet::Draw( const Transformation &quat, const Matrix &m )
 }
 void GamePlanet::ProcessTerrains()
 {
-    //_Universe->AccessCamera()->SetPlanetaryTransform( NULL ); commented out by chuck_starchaser; --never used
     while ( !PlanetTerrainDrawQueue.empty() ) {
         Planet *pl = (Planet*) PlanetTerrainDrawQueue.back()->GetUnit();
         pl->DrawTerrain();
@@ -480,7 +411,6 @@ void GamePlanet::ProcessTerrains()
 
 void GamePlanet::DrawTerrain()
 {
-    //_Universe->AccessCamera()->SetPlanetaryTransform( terraintrans ); commented out by chuck_starchaser; --never used
     inside = true;
     if (terrain)
         terrain->EnableUpdate();
@@ -491,13 +421,9 @@ void GamePlanet::DrawTerrain()
     Normalize( TerrainH );
 #endif
 
-    //shouldfog=true;
-
     GFXLoadIdentity( MODEL );
     if (inside && terrain) {
         _Universe->AccessCamera()->UpdatePlanetGFX();
-        //Camera * cc = _Universe->AccessCamera();
-        //VectorAndPositionToMatrix (tmp,cc->P,cc->Q,cc->R,cc->GetPosition()+cc->R*100);
         terrain->SetTransformation( *_Universe->AccessCamera()->GetPlanetGFX() );
         terrain->AdjustTerrain( _Universe->activeStarSystem() );
         terrain->Draw();
@@ -555,13 +481,6 @@ void GamePlanet::reactToCollision( Unit *un,
 #ifdef PLANETARYTRANSFORM
         terraintrans->GrabPerpendicularOrigin( un->Position(), top );
         static int tmp = 0;
-        /*    if (tmp) {
-         *  terrain->SetTransformation (top);
-         *  terrain->AdjustTerrain (_Universe->activeStarSystem());
-         *  terrain->Collide (un);
-         *  }else {*/
-
-        //}
 #endif
         terrain->Collide( un, top );
     }
@@ -641,10 +560,3 @@ void GamePlanet::Kill( bool erasefromsave )
     insiders.clear();
     GameUnit< Planet >::Kill( erasefromsave );
 }
-
-void GamePlanet::gravitate( UnitCollection *uc )
-{
-    //Should put computation only in Planet and GFX/SFX only here if needed
-    Planet::gravitate( uc );
-}
-

@@ -6,7 +6,6 @@
 #include "gfx/mesh.h"
 #include "unit_collide.h"
 #include "physics.h"
-//#include "gfx/bsp.h"
 
 #include "collide2/CSopcodecollider.h"
 #include "collide2/csgeom2/optransfrm.h"
@@ -44,12 +43,10 @@ csOPCODECollider* collideTrees::colTree( Unit *un, const Vector &othervelocity )
     if (un->rSize() <= 0.)      //Shouldn't happen bug I've seen this for asteroid fields...
         return NULL;
     //Force pow to 0 in order to avoid nan problems...
-    unsigned int   pow = 0;   //(int)ceil(log (movement/un->rSize())/loge2);
-//pow=collideTreesMaxTrees-1;
+    unsigned int   pow = 0;
     if (pow >= collideTreesMaxTrees || pow >= max_collide_trees)
         pow = collideTreesMaxTrees-1;
     int val = 1<<pow;
-    //VSFileSystem::vs_fprintf (stderr,"%s %d %d\n",un->name.c_str(),pow,val);
     if (rapidColliders[pow] == NULL)
         rapidColliders[pow] = un->getCollideTree( Vector( 1, 1, val ) );
     return rapidColliders[pow];
@@ -159,7 +156,6 @@ void Beam::CollideHuge( const LineCollide &lc, Unit *targetToCollideWith, Unit *
         CollideMap::iterator superloc = superunit->location[Unit::UNIT_ONLY];
         CollideMap::iterator tmore    = superloc;
         if ( !cm->Iterable( superloc ) ) {
-            //fprintf (stderr,"ERROR: New collide map entry checked for collision\n Aborting collide\n");
             CollideArray::CollidableBackref *br = static_cast< CollideArray::CollidableBackref* > (superloc);
             CollideMap::iterator tmploc = cm->begin()+br->toflattenhints_offset;
             if ( tmploc == cm->end() )

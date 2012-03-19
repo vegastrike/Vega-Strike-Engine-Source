@@ -15,7 +15,7 @@
 #define COLLIDETABLEACCURACY sizeof (CTACCURACY)
 ///objects that go over 16 sectors are considered huge and better to check against everything.
 #define HUGEOBJECT sizeof (CTHUGE)
-//const int HUGEOBJECT=12;
+
 class StarSystem;
 /**
  * Hashtable3d is a 3d datastructure that holds various starships that are
@@ -110,8 +110,6 @@ public: UnitHash3d( StarSystem *ss )
     int Get( const QVector &Exact, UnitCollection *retval[], bool GetHuge )
     {
         retval[1] = &table[hash_int( Exact.i )][hash_int( Exact.j )][hash_int( Exact.k )];
-        //retval+=hugeobjects;
-        //blah = blooh;
         retval[0] = active_huge;
         if (GetHuge)
             retval[0] = &hugeobjects;
@@ -126,9 +124,6 @@ public: UnitHash3d( StarSystem *ss )
     int Get( const LineCollide *target, UnitCollection *retval[], bool GetHuge )
     {
         unsigned int sizer = 1;
-        //int minx,miny,minz,maxx,maxy,maxz;
-        //hash_vec(Min,minx,miny,minz);
-        //hash_vec(Max,maxx,maxy,maxz);
         double maxx = ( ceil( target->Maxi.i/COLLIDETABLEACCURACY ) )*COLLIDETABLEACCURACY;
         double maxy = ( ceil( target->Maxi.j/COLLIDETABLEACCURACY ) )*COLLIDETABLEACCURACY;
         double maxz = ( ceil( target->Maxi.k/COLLIDETABLEACCURACY ) )*COLLIDETABLEACCURACY;
@@ -226,9 +221,6 @@ public: UnitHash3d( StarSystem *ss )
 ///Removes objectToKill from collide table with span of Target
     bool Remove( const LineCollide *target, Unit *objectToKill )
     {
-        //int minx,miny,minz,maxx,maxy,maxz;
-        //hash_vec(target->Mini,minx,miny,minz);
-        //hash_vec(target->Maxi,maxx,maxy,maxz);
         bool   ret  = false;
         int    x, y, z;
         double maxx = ( ceil( target->Maxi.i/COLLIDETABLEACCURACY ) )*COLLIDETABLEACCURACY;
@@ -267,7 +259,6 @@ public: CollideTable( StarSystem *ss ) : blocupdate( 0 )
     void Update()
     {
         ++blocupdate;
-       // c.updateBloc( blocupdate++ );
     }
     UnitHash3d< char[coltablesize], char[coltableacc], char[tablehuge] >c;
 };
