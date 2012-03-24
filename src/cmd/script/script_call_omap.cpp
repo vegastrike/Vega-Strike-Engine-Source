@@ -43,12 +43,9 @@
 #include "mission.h"
 #include "easydom.h"
 
-//#include "vs_globals.h"
-//#include "vegastrike.h"
 
 varInst* Mission::call_omap( missionNode *node, int mode )
 {
-    //varInst *viret=new varInst;
     varInst *viret = NULL;
     if (mode == SCRIPT_PARSE) {
         string cmd = node->attr_value( "name" );
@@ -77,7 +74,6 @@ varInst* Mission::call_omap( missionNode *node, int mode )
             viret->type = VAR_VOID;
         } else if (method_id == CMT_OMAP_set) {
             missionNode *snode  = getArgument( node, mode, 2 );
-            //varInst *vi=doVariable(snode,mode); // should be getObjExpr
             varInst     *var_vi = checkExpression( snode, mode );             //should be getObjExpr
 
             string name = getStringArgument( node, mode, 1 );
@@ -89,12 +85,10 @@ varInst* Mission::call_omap( missionNode *node, int mode )
                 assignVariable( push_vi, var_vi );
 
                 (*my_object)[name] = push_vi;
-                //printf("setting [%s] type %d\n",name.c_str(),push_vi->type);
             }
             deleteVarInst( var_vi );
             viret = newVarInst( VI_TEMP );
             viret->type = VAR_VOID;
-            //return viret;
         } else if (method_id == CMT_OMAP_get) {
             debug( 3, node, mode, "omap.get" );
 
@@ -105,7 +99,6 @@ varInst* Mission::call_omap( missionNode *node, int mode )
             if (mode == SCRIPT_RUN) {
                 varInst *back_vi = (*my_object)[name];
                 assignVariable( viret, back_vi );
-                //printf("viret type=%d back_vi type=%d\n",viret->type,back_vi->type);
                 if (back_vi->type > 10)
                     assert( 0 );
                 deleteVarInst( back_vi );                 //this won't delete it
@@ -117,7 +110,7 @@ varInst* Mission::call_omap( missionNode *node, int mode )
             }
             debug( 3, node, mode, "omap.toxml" );
             if (mode == SCRIPT_RUN) {
-                //call_olist_toxml(node,mode,ovi);
+                //call_olist_toxml(node,mode,ovi); DELETE ME FIXME ?
             }
             viret = newVarInst( VI_TEMP );
             viret->type = VAR_VOID;
@@ -134,7 +127,6 @@ varInst* Mission::call_omap( missionNode *node, int mode )
                 viret->int_val = len;
             }
             viret->type = VAR_INT;
-            //return viret;
         } else {
             fatalError( node, mode, "unknown command "+node->script.name+" for callback omap" );
             assert( 0 );

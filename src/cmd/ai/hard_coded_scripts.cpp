@@ -587,42 +587,9 @@ void SelfDestruct( Order *aisc, Unit *un )
     un->armor.frontleftbottom  = -1;
     un->armor.backleftbottom   = -1;
     un->hull = -1;     //hull goes to zero but no kill, same for armor. strangely enough, all of them together work.
-
     un->Split( rand()%3+1 );
-
-    //doesn't work either
-    /*
-     *   switch (un->shield.number) {
-     *  case 2:
-     *  un->shield.shield.shield2fb.front=0; //short fix
-     *  un->shield.shield2fb.back=0; //short fix
-     *  break;
-     *  case 8:  //short fix
-     *  un->shield.shield8.frontrighttop=0; //short fix
-     *  un->shield.shield8.backrighttop=0; //short fix
-     *  un->shield.shield8.frontlefttop=0; //short fix
-     *  un->shield.shield8.backlefttop=0; //short fix
-     *  un->shield.shield8.frontrightbottom=0; //short fix
-     *  un->shield.shield8.backrightbottom=0; //short fix
-     *  un->shield.shield8.frontleftbottom=0; //short fix
-     *  un->shield.shield8.backleftbottom=0; //short fix
-     *
-     *  break;
-     *  case 4:
-     *  default:
-     *  un->shield.shield4fbrl.front =0; //short fix
-     *  un->shield.shield4fbrl.back =0; //short fix
-     *  un->shield.shield4fbrl.right =0; //short fix
-     *  un->shield.shield4fbrl.left =0; //short fix
-     *  }
-     */
-
-    //un->Kill(); // does not work, crashes
-    //un->Destroy(); // does not work, crashes
     un->Explode( true, 0 );     //displays explosion, unit continues
     un->RemoveFromSystem();      //has no effect
-    //applydamage crashes
-    //un->ApplyDamage(un->Position(), Vector(0,0,1),10000,un,GFXColor(1,1,1,1),un->owner,0);
 }
 
 void AggressiveLoopAroundSlow( Order *aisc, Unit *un )
@@ -920,7 +887,6 @@ void Takeoff( Order *aisc, Unit *un )
         ord = ( new Orders::FaceTargetITTS( 0, 3 ) );
         AddOrd( aisc, un, ord );
     }
-//ord = new Orders::ExecuteFor(new Orders::FaceTargetITTS(0, 1), 1.0f);
     ord = new Orders::MatchLinearVelocity( un->ClampVelocity( vec, false ), true, false, false );
     AddOrd( aisc, un, ord );
     ord = ( new Orders::FaceTargetITTS( 0, 3 ) );
@@ -928,10 +894,6 @@ void Takeoff( Order *aisc, Unit *un )
     un->SelectAllWeapon( false );
     un->Fire( (weapon_info::LIGHT || weapon_info::MEDIUM), false );
     TurnTowards( aisc, un );
-//un->Fire(weapon_info::MEDIUM,false);
-//un->Fire(weapon_info::HEAVY,false);
-//un->Fire(weapon_info::SPECIAL,false);
-//un->Fire(weapon_info::CAPSHIP-LIGHT,false);  // new interceptors may have special weapons on them
 }
 
 void TakeoffEveryZig( Order *aisc, Unit *un )

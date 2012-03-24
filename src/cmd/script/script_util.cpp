@@ -46,7 +46,6 @@
 #include "vs_globals.h"
 #include "config_xml.h"
 
-//#include "vegastrike.h"
 using std::cout;
 using std::cerr;
 using std::endl;
@@ -95,12 +94,10 @@ void Mission::fatalError( missionNode *node, int mode, string message )
             contextStack *cstack  = runtime.cur_thread->exec_stack[i];
             missionNode  *mnode   = runtime.cur_thread->module_stack[i];
             unsigned int  classid = runtime.cur_thread->classid_stack[i];
-            //cout << "module " << mnode->script.name << " classid " << classid << endl;
             for (unsigned int j = 0; j < cstack->contexts.size(); j++) {
                 scriptContext *context = cstack->contexts[j];
                 missionNode   *bnode   = context->block_node;
                 if (bnode) {
-                    //cout << i << " : " << j << " " ;
                     cout<<mnode->script.name<<":"<<classid<<" line "<<bnode->attr_value( "line" )<<" "<<bnode->script.name<<" ";
 
                     printNode( bnode, mode );
@@ -139,7 +136,6 @@ void Mission::debug( missionNode *node, int mode, string message )
 {
     cout<<"debug ("<<modestring( mode )<<") "<<message<<" : ";
     printNode( node, mode );
-    //cout << endl;
 }
 
 /* *********************************************************** */
@@ -244,7 +240,6 @@ void Mission::printRuntime()
     cout<<"MODULES:"<<endl;
 
     vsUMap< string, missionNode* >::iterator iter;
-    //=runtime.modules.begin()
     for (iter = runtime.modules.begin(); iter != runtime.modules.end(); iter++) {
         cout<<"  module "<<(*iter).first;
         printNode( (*iter).second, 0 );
@@ -305,10 +300,8 @@ varInst* Mission::searchScopestack( string name )
             }
             if (vi == NULL)
                 debug( 5, scope, 0, "variable "+name+" not found in that scope" );
-            //printVarmap(scope->script.variables);
         } else {
             debug( 5, scope, 0, "variable "+name+" FOUND in that scope" );
-            //printVarmap(scope->script.variables);
         }
         elem--;
     }

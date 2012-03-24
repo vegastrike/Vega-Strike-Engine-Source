@@ -47,7 +47,6 @@
 
 #include "msgcenter.h"
 #include "cmd/unit_generic.h"
-//#include "vegastrike.h"
 
 /* *********************************************************** */
 
@@ -211,7 +210,6 @@ varInst* Mission::doScript( missionNode *node, int mode, varInstMap *varmap )
 
             node->script.nr_arguments = 0;
 
-            //string retvalue=node->attr_value("return");
             string retvalue = node->attr_value( "type" );
             if (retvalue.empty() || retvalue == "void")
                 node->script.vartype = VAR_VOID;
@@ -257,7 +255,6 @@ varInst* Mission::doScript( missionNode *node, int mode, varInstMap *varmap )
                 assert( 0 );
             }
         } else
-        //vi==NULL
         if (node->script.vartype != VAR_VOID) {
             fatalError( node, mode, "no return set from doScript" );
             assert( 0 );
@@ -373,9 +370,7 @@ void Mission::doReturn( missionNode *node, int mode )
         } else if (script->script.vartype == VAR_OBJECT) {
             varInst *vi2 = checkObjectExpr( expr, mode );
             vi->type = VAR_OBJECT;
-            //if(mode==SCRIPT_RUN){
             assignVariable( vi, vi2 );
-            //}
         } else {
             fatalError( node, mode, "unkown variable type" );
             assert( 0 );
@@ -427,8 +422,6 @@ varInst* Mission::doExec( missionNode *node, int mode )
         missionNode *module = NULL;
         missionNode *script = NULL;
         if ( !use_modstr.empty() ) {
-            //missionNode *use_script=lookupScript(name,use_modstr);
-
             module = runtime.modules[use_modstr];
         } else {
             module = current_module;
@@ -440,8 +433,6 @@ varInst* Mission::doExec( missionNode *node, int mode )
         script = module->script.scripts[name];
         if (script == NULL) {
             fatalError( node, mode, "script "+name+" not found in module "+use_modstr );
-            //printModules();
-
             assert( 0 );
         }
         node->script.exec_node   = script;

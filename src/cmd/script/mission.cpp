@@ -96,7 +96,6 @@ void Mission::ConstructMission( const char *configfile, const std::string &scrip
     }
     if (top == NULL)
         return;
-    //top->walk(0);
 
     variables   = NULL;
     origin_node = NULL;
@@ -129,18 +128,8 @@ void Mission::initMission( bool loadscripts )
         return;
     if (msgcenter == NULL)
         msgcenter = new MessageCenter();
-    //msgcenter->add("game","all","Welcome to Vegastrike");
-    /*
-     *  msgcenter->add("game","news","A hero is born");
-     *  msgcenter->add("game","news","2 hero is born");
-     *  msgcenter->add("game","news","3 hero is born");
-     *  msgcenter->add("game","news","4 hero is born.                That day, in teh news hero was born without even boring the born of bachunkuphe threw his last baseball throw he chewed his last hay the man was a hero a heayrinagia sf of a hero...who knw that ith all things iblicatedly obfusictaroed he arced his bunko bunka\nbachunk!jtkgjdfljg fdlg fdj glkdf jglkdfj glkdf jgjfd lkgj dflkg jlfkdjg ldjg  j");
-     */
     checkMission( top, loadscripts );
     mission_name = getVariable( "mission_name", "" );
-    //objectives.push_back (Objective(0.0,"cachunk"));
-    //objectives.push_back (Objective(1,"cachunk.org"));
-    //objectives.push_back (Objective(-1,"cachunk.com"));
 }
 
 /* *********************************************************** */
@@ -160,7 +149,6 @@ bool Mission::checkMission( easyDomNode *node, bool loadscripts )
         } else if ( ( (*siter)->Name() == "settings" ) ) {
             doSettings( *siter );
         } else if ( ( (*siter)->Name() == "module" ) ) {
-            //doModule(*siter);
             if (loadscripts)
                 DirectorStart( (missionNode*) *siter );
         } else if ( ( (*siter)->Name() == "python" ) && (!this->nextpythonmission) ) {
@@ -271,12 +259,6 @@ void Mission::terminateMission()
             if (num >= 0)
                 if (SERVER && num > 0)
                     VSServer->sendMission( player_num, Subcmd::TerminateMission, string(), num-1 );
-            /*
-             *  // At this point, it's too late!
-             *  if (Network!=NULL) {
-             *       Network[(*pl)->player_num]->missionRequest(Subcmd::TerminateMission, string(), num);
-             *  }
-             */
         }
         active_missions->erase( f );
     }
@@ -320,7 +302,6 @@ void Mission::doOrigin( easyDomNode *node )
 #ifndef VS_MIS_SEL
 void Mission::GetOrigin( QVector &pos, string &planetname )
 {
-    //float pos[3];
     if (origin_node == NULL) {
         pos.i = pos.j = pos.k = 0.0;
         planetname = string();
@@ -471,8 +452,6 @@ bool Mission::doPosition( easyDomNode *node, double pos[3], CreateFlightgroup *c
     string x = node->attr_value( "x" );
     string y = node->attr_value( "y" );
     string z = node->attr_value( "z" );
-    ///  string offset=node->attr_value("offset");
-    //cout << "POS: x=" << x << " y=" << y << " z=" << z << endl;
     if ( x.empty() || y.empty() || z.empty() ) {
         cout<<"no valid position"<<endl;
         return false;
@@ -494,9 +473,7 @@ Flightgroup* Mission::findFlightgroup( const string &offset_name, const string &
 {
     vector< Flightgroup* >::const_iterator siter;
     for (siter = flightgroups.begin(); siter != flightgroups.end(); siter++)
-        //cout << "checking " << offset_name << " against " << (*siter)->name << endl;
         if ( (*siter)->name == offset_name && (fac.empty() || (*siter)->faction == fac) )
-            //cout << "found " << offset_name << " against " << (*siter)->name << endl;
             return *siter;
     return NULL;
 }
@@ -532,12 +509,9 @@ string Mission::getVariable( string name, string defaultval )
     vector< easyDomNode* >::const_iterator siter;
     for (siter = variables->subnodes.begin(); siter != variables->subnodes.end(); siter++) {
         string scan_name = (*siter)->attr_value( "name" );
-        //cout << "scanning section " << scan_name << endl;
         if (scan_name == name)
             return (*siter)->attr_value( "value" );
     }
-    //cout << "WARNING: no variable named " << name << endl;
-
     return defaultval;
 }
 

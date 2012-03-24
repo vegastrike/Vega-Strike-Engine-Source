@@ -11,6 +11,7 @@
 #include "hard_coded_scripts.h"
 #include "universe_util.h"
 #include <assert.h>
+
 typedef vsUMap< string, CCScript* >HardCodedMap;
 static HardCodedMap MakeHardCodedScripts()
 {
@@ -262,7 +263,7 @@ const EnumMap attribute_map( attribute_names, 19 );
 using XMLSupport::EnumMap;
 using XMLSupport::Attribute;
 using XMLSupport::AttributeList;
-//#define BIDBG to do expat
+
 void AIScript::beginElement( const string &name, const AttributeList &attributes )
 {
     using namespace AiXml;
@@ -283,14 +284,10 @@ void AIScript::beginElement( const string &name, const AttributeList &attributes
         break;
     case UNKNOWN:
         xml->unitlevel++;
-
-        //cerr << "Unknown element start tag '" << name << "' detected " << endl;
         return;
-
     case SCRIPT:
         xml->unitlevel++;
         break;
-
     case LINEAR:
         xml->lin = 1;
     case ANGULAR:
@@ -421,28 +418,6 @@ void AIScript::beginElement( const string &name, const AttributeList &attributes
             }
         }
         break;
-    /*
-     *  case THREATPOS:
-     *  xml->unitlevel++;
-     *  if((tmp = this->parent->Threat())) {
-     *  xml->vectors.push(tmp->Position());
-     *  } else {
-     *  if ((tmp = this->parent->Target())) {
-     *  xml->vectors.push (tmp->Position());
-     *  } else {
-     *  xml->vectors.push(xml->defaultvec);
-     *  }
-     *  }
-     *  break;
-     *  case TARGETPOS:
-     *  xml->unitlevel++;
-     *  if((tmp = this->parent->Target())) {
-     *  xml->vectors.push(tmp->Position());
-     *  } else {
-     *  xml->vectors.push(xml->defaultvec);
-     *  }
-     *  break;
-     */
     case YOURPOS:
         xml->unitlevel++;
         xml->vectors.push( this->parent->Position() );
@@ -574,9 +549,7 @@ void AIScript::endElement( const string &name )
     {
     case UNKNOWN:
         xml->unitlevel--;
-        //cerr << "Unknown element end tag '" << name << "' detected " << endl;
         break;
-
     //Vector
     case THREATWORLD:
         xml->unitlevel++;
@@ -787,7 +760,6 @@ void AIScript::LoadXML()
         iter = hard_coded_scripts.find( full_filename );
     }
     if ( iter != hard_coded_scripts.end() ) {
-        //VSFileSystem::vs_fprintf (stderr,"hcscript %s\n",filename);
         CCScript *myscript = (*iter).second;
         (*myscript)(this, parent);
         if (doroll) {

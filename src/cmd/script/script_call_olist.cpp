@@ -42,8 +42,6 @@
 #include "mission.h"
 #include "easydom.h"
 #include "cmd/unit_generic.h"
-//#include "vs_globals.h"
-//#include "vegastrike.h"
 
 varInst* Mission::call_olist( missionNode *node, int mode )
 {

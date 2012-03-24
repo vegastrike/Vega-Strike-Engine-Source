@@ -27,7 +27,7 @@
 #include "vs_globals.h"
 using std::vector;
 using std::list;
-//#define ORDERDEBUG
+//#define ORDERDEBUG  // FIXME ?
 void Order::Execute()
 {
     static float airesptime = XMLSupport::parse_float( vs_config->getVariable( "AI", "CommResponseTime", "3" ) );
@@ -207,7 +207,6 @@ void Order::eraseOrder( Order *ord )
             vector< Order* >::iterator j = suborders.begin()+i;
             suborders.erase( j );
             found = true;
-            //printf("erased order\n");
         }
     if (!found) {
         printf( "TOLD TO ERASE AN ORDER - NOT FOUND\n" );
@@ -242,16 +241,12 @@ namespace Orders
 
 void ExecuteFor::Execute()
 {
-    if (time == 0) {
-        //VSFileSystem::vs_fprintf (stderr,"begin execute for %f\n",maxtime);
-    }
     if (child) {
         child->SetParent( parent );
         type = child->getType();
     }
     if (time > maxtime) {
         done = true;
-        //VSFileSystem::vs_fprintf (stderr,"finishing execute for %f\n",maxtime);
         return;
     }
     time += SIMULATION_ATOM;

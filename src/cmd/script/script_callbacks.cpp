@@ -38,7 +38,6 @@
 
 #include <expat.h>
 #include "xml_support.h"
-//#include "audiolib.h"
 #include "vegastrike.h"
 #include "lin_time.h"
 
@@ -48,8 +47,6 @@
 
 #include "msgcenter.h"
 #include "pythonmission.h"
-//#include "vs_globals.h"
-//#include "vegastrike.h"
 
 using std::cout;
 using std::cerr;
@@ -74,7 +71,6 @@ string varToString( varInst *vi )
     }
 }
 
-//extern unsigned int AddAnimation (const QVector & pos, const float size, bool mvolatile, const std::string &name ,float per);
 void Mission::doCall_toxml( string module, varInst *ovi )
 {
     if (module == "_olist")
@@ -242,7 +238,6 @@ varInst* Mission::doCall( missionNode *node, int mode )
     return vi;
 }
 
-//extern double gametime;
 
 varInst* Mission::call_isNull( missionNode *node, int mode )
 {
@@ -742,7 +737,6 @@ QVector Mission::getVec3Arg( missionNode *node, int mode, int arg_nr )
 {
     missionNode *pos_node = getArgument( node, mode, arg_nr );
     varInst     *pos_vi   = checkObjectExpr( pos_node, mode );
-    //olist_t *pos_olist=getOListObject(pos_node,mode,pos_vi);
 
     QVector vec3;
     if (mode == SCRIPT_RUN)

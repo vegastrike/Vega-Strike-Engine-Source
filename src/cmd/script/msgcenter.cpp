@@ -45,8 +45,6 @@
 
 #include "msgcenter.h"
 #include <algorithm>
-//#include "vs_globals.h"
-//#include "vegastrike.h"
 
 void MessageCenter::add( string from, string to, string message, double delay )
 {

@@ -180,7 +180,6 @@ bool DockingOps::DockToTarget( Unit *utdw )
         static float tmp = XMLSupport::parse_float( vs_config->getVariable( "physics", "docking_time", "10" ) );
         if (timer >= 1.5*tmp) {
             if (physicallyDock) {
-//DockedScript(parent,utdw);
                 return parent->Dock( utdw );
             } else {
                 float maxWillingToRefill = utdw->WarpCapData();

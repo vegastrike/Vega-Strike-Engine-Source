@@ -1,14 +1,10 @@
 #include "flybywire.h"
-
 #include "vegastrike.h"
-
 #include <math.h>
 #include <stdio.h>
 #include "cmd/unit_generic.h"
 #include "lin_time.h"
-
 #include "gfx/cockpit_generic.h"
-//#include "force_feedback.h"
 #include "vs_globals.h"
 #include "config_xml.h"
 #define VELTHRESHOLD .1
@@ -226,7 +222,7 @@ void FlyByWire::Afterburn( float per )
     else if (inertial_flight_model)
         DirectThrust += Vector( 0, 0, parent->Limits().afterburn*per );
     if ( parent == _Universe->AccessCockpit()->GetParent() ) {
-        //printf("afterburn is %d\n",afterburn);
+        //printf("afterburn is %d\n",afterburn); // DELETEME WTF all this force feedback code and its unused.
         //COMMENTED BECAUSE OF SERVER -- NEED TO REINTEGRATE IT IN ANOTHER WAY
         //forcefeedback->playAfterburner(afterburn);
     }

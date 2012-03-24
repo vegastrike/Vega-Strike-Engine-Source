@@ -6,8 +6,6 @@
 #include "vs_globals.h"
 #include "config_xml.h"
 #include  "in_kb_data.h"
-//static bool ab;
-//static bool shelt;
 
 FlyByJoystick::FlyByJoystick( unsigned int configfile ) : FlyByKeyboard( configfile )
 {
@@ -22,8 +20,6 @@ FlyByJoystick::FlyByJoystick( unsigned int configfile ) : FlyByKeyboard( configf
     BindButton( 0, FireKeyboard::FireKey );
     BindButton( 1, FireKeyboard::MissileKey );
 #endif
-    //BindJoyKey(whichjoystick,2,FlyByJoystick::JAB);
-    //BindJoyKey(whichjoystick,5,FlyByJoystick::JShelt);
 }
 
 #if 0
@@ -171,14 +167,6 @@ void FlyByJoystick::Execute()
                     Unit::Computer *cpu = &parent->GetComputerData();
                     if (axis_value > 1)
                         axis_value = 1;
-                    /*
-                     *  float minspeed = parent->Limits().retro/parent->Limits().forward;
-                     *  static bool minzero=XMLSupport::parse_bool(vs_config->getVariable("joystick","zero_min_throttle","false"));
-                     *  if (minzero)
-                     *       minspeed = 0;
-                     *  if (axis_value<minspeed)
-                     *       axis_value=minspeed;
-                     */
                     if (axis_value < -1)
                         axis_value = -1;                          //this code due to paolodinca
 

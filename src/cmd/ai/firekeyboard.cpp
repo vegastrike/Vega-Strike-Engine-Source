@@ -1027,13 +1027,6 @@ bool TargIncomingMissile( Unit *me, Unit *target )
 
 bool TargFront( Unit *me, Unit *target )
 {
-    /*
-     *  float dist;
-     *  if (me->cosAngleTo(target,dist)>.6) {
-     *       return true;
-     *  }
-     *  return false;
-     */
     if ( !TargAll( me, target ) )
         return false;
     QVector delta( target->Position()-me->Position() );
@@ -1253,9 +1246,6 @@ void Enslave( Unit*, bool );
 
 void abletodock( int dock )
 {
-//char dumb[2]={'\0'};
-//dumb[0]=(dock+'0');
-//muzak->GotoSong (string("Dockingsound #")+dumb);
     static bool play_anim = XMLSupport::parse_bool( vs_config->getVariable( "graphics", "docking_comm_anim", "false" ) );
     switch (dock)
     {
@@ -1286,24 +1276,12 @@ void abletodock( int dock )
             if (otherstr != "" && rand() < RAND_MAX/2) {
                 static int s = AUDCreateSoundWAV( otherstr, false );
                 AUDPlay( s, QVector( 0, 0, 0 ), Vector( 0, 0, 0 ), 1 );
-                if (play_anim) {
-                    //Unit * un=_Universe->AccessCockpit()->GetParent();
-                    //UnitUtil::commAnimation(un,"com_neutral_female_01.ani");
-                }
             } else {
                 if (reqsound.sound == -2) {
                     static string str = vs_config->getVariable( "cockpitaudio", "docking_complete", "docking_complete" );
                     reqsound.loadsound( str );
                 }
                 reqsound.playsound();
-            }
-            if (play_anim) {
-                //Unit * un=_Universe->AccessCockpit()->GetParent();
-                //if (rand()%2) {
-                //UnitUtil::commAnimation(un,"com_neutral_male_01.ani");
-                //}else {
-                //UnitUtil::commAnimation(un,"com_neutral_male_02.ani");
-                //}
             }
             break;
         }
@@ -1378,7 +1356,6 @@ static bool TryDock( Unit *parent, Unit *targ, unsigned char playa, int severity
             isDone = true;
             c.SetCurrentState( c.fsm->GetDockNode(), anim, gender );
             abletodock( 3 );
-            //vectorOfKeyboardInput[playa].req=true;
             if ( parent->getAIState() ) parent->getAIState()->Communicate( c );
             parent->UpgradeInterface( targ );
         } else if ( UnDockNow( parent, targ ) ) {
@@ -1426,7 +1403,6 @@ static void DoDockingOps( Unit *parent, Unit *targ, unsigned char playa, unsigne
                     parent->EndRequestClearance( targ );
                     break;
                 } else {
-                    //if (targ!=parent->Target())
                     parent->EndRequestClearance( targ );
                 }
             }
@@ -1448,7 +1424,6 @@ static void DoDockingOps( Unit *parent, Unit *targ, unsigned char playa, unsigne
                             parent->EndRequestClearance( targ );
                             break;
                         } else {
-                            //if (targ!=parent->Target())
                             parent->EndRequestClearance( targ );
                         }
                     }
@@ -1535,7 +1510,6 @@ void FireKeyboard::ProcessCommMessage( class CommunicationMessage &c )
         //mmhmm! Gcc-4.1 hack -- otherwise linker failure
     }
     int sound = c.getCurrentState()->GetSound( c.sex, whichsound );
-    //AUDAdjustSound(sound,parent->Position(),parent->GetVelocity());
     if ( reallydospeech && !AUDIsPlaying( sound ) )
         AUDPlay( sound, QVector( 0, 0, 0 ), Vector( 0, 0, 0 ), 1 );
 }
@@ -1697,7 +1671,6 @@ void FireKeyboard::Execute()
     if (f().shieldpowerstate != 1) {
         Shield *shield = &parent->shield;
         PowerDownShield( shield, f().shieldpowerstate );
-        //f().shieldpowerstate=1;
     }
     if (f().firekey == PRESS || f().jfirekey == PRESS || j().firekey == DOWN || j().jfirekey == DOWN) {
         if ( !_Universe->AccessCockpit()->CanDrawNavSystem() ) {
@@ -1718,7 +1691,6 @@ void FireKeyboard::Execute()
                     }
                 for (i = 0; i < nm; ++i)
                     if (special && normal) {
-                        //parent->ToggleWepaon(false,true);
                         if (parent->mounts[i].status == Mount::ACTIVE)
                             if ( (parent->mounts[i].type->size&weapon_info::SPECIAL) != 0 )
     parent->mounts[i].status = Mount::INACTIVE;
@@ -1928,7 +1900,6 @@ void FireKeyboard::Execute()
         f().turretaikey = UP;
     if (f().turrettargetkey == PRESS) {
         f().turrettargetkey = DOWN;
-        //ChooseTargets(true);
         parent->TargetTurret( parent->Target() );
         refresh_target = true;
     }
@@ -2065,14 +2036,6 @@ void FireKeyboard::Execute()
     }
     for (i = 0; i < NUMCOMMKEYS; i++)
         if (f().commKeys[i] == PRESS) {
-            /*
-             *  static string comm_switchstr=vs_config->getVariable("cockpitaudio","interface_target","vdu_e");
-             *  static soundContainer comm_switch;
-             *
-             *  if (comm_switch.sound<0)
-             *  comm_switch.loadsound(comm_switchstr);
-             *  comm_switch.playsound();
-             */
             f().commKeys[i] = RELEASE;
             Unit *targ = parent->Target();
             if (targ) {
@@ -2082,7 +2045,6 @@ void FireKeyboard::Execute()
                     CommunicationMessage c( parent, targ, i, NULL, parent->pilot->getGender() );
                     unsigned int whichspeech = DoSpeech( targ, targ, *c.getCurrentState() );
                     int sound = c.getCurrentState()->GetSound( c.sex, whichspeech );
-                    //AUDAdjustSound(sound,parent->Position(),parent->GetVelocity());
                     if ( !AUDIsPlaying( sound ) )
                         AUDPlay( sound, QVector( 0, 0, 0 ), Vector( 0, 0, 0 ), 1 );
                     Order *o = targ->getAIState();
@@ -2096,7 +2058,6 @@ void FireKeyboard::Execute()
                         CommunicationMessage c( parent, targ, *mymsg, i, NULL, parent->pilot->getGender() );
                         unsigned int whichmessage = DoSpeech( targ, targ, *c.getCurrentState() );
                         int sound = c.getCurrentState()->GetSound( c.sex, whichmessage );
-                        //AUDAdjustSound(sound,parent->Position(),parent->GetVelocity());
                         if ( !AUDIsPlaying( sound ) )
                             AUDPlay( sound, QVector( 0, 0, 0 ), Vector( 0, 0, 0 ), 1 );
                         Order *oo = targ->getAIState();
@@ -2163,8 +2124,6 @@ void FireKeyboard::Execute()
         Cockpit *cp = NULL;          //check if docking ports exist, no docking ports = no need to ejectdock so don't do anything
         if ( (SelectDockPort( utdw, parent ) > -1) && ( cp = _Universe->isPlayerStarship( parent ) ) )
             cp->EjectDock();              //use specialized ejectdock in the future
-//DockedScript(parent,utdw);
-//parent->Dock(utdw);
     }
     static bool actually_arrest = XMLSupport::parse_bool( vs_config->getVariable( "AI", "arrest_energy_zero", "false" ) );
     if (actually_arrest && parent->EnergyRechargeData() == 0)

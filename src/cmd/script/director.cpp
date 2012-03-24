@@ -69,7 +69,6 @@
 #include <boost/python/detail/extension_class.hpp>
 #endif
 #include "gfx/cockpit_generic.h"
-//#include "vegastrike.h"
 
 /* *********************************************************** */
 //ADD_FROM_PYTHON_FUNCTION(pythonMission)
@@ -127,7 +126,7 @@ void Mission::DirectorShipDestroyed( Unit *unit )
     if (fg->nr_ships_left == 0) {
         VSFileSystem::vs_dprintf( 2, "no ships left in fg %s\n", fg->name.c_str() );
         if (fg->nr_waves_left > 0) {
-            //sprintf( buf, "Relaunching %s wave", fg->name.c_str() );
+            //sprintf( buf, "Relaunching %s wave", fg->name.c_str() ); FIXME
             //mission->msgcenter->add( "game", "all", buf );
             VSFileSystem::vs_dprintf( 1, "Relaunching %s wave", fg->name.c_str() );
 
@@ -139,7 +138,6 @@ void Mission::DirectorShipDestroyed( Unit *unit )
             order = unit->getAIState() ? unit->getAIState()->findOrderList() : NULL;
             fg->orderlist = NULL;
             if (order) {
-                //printf( "found an orderlist\n" );
                 fg->orderlist = order->getOrderList();
             }
             CreateFlightgroup cf;
@@ -149,7 +147,6 @@ void Mission::DirectorShipDestroyed( Unit *unit )
             cf.waves    = fg->nr_waves_left;
             cf.nr_ships = fg->nr_ships;
 
-            //cf.type = fg->type;
             call_unit_launch( &cf, UNITPTR, string( "" ) );
         } else {
             mission->msgcenter->add( "game", "all", "Flightgroup "+fg->name+" destroyed" );
@@ -168,7 +165,6 @@ void Mission::BriefingStart()
     briefing = new Briefing();
     if (runtime.pymissions)
         runtime.pymissions->callFunction( "initbriefing" );
-    //RunDirectorScript ("initbriefing");
 }
 void Mission::BriefingUpdate()
 {
@@ -181,7 +177,6 @@ void Mission::BriefingLoop()
     if (briefing)
         if (runtime.pymissions)
             runtime.pymissions->callFunction( "loopbriefing" );
-    //RunDirectorScript ("loopbriefing");
 }
 class TextPlane* Mission::BriefingRender()
 {
@@ -206,7 +201,6 @@ void Mission::BriefingEnd()
     if (briefing) {
         if (runtime.pymissions)
             runtime.pymissions->callFunction( "endbriefing" );
-        //RunDirectorScript ("endbriefing");
         delete briefing;
         briefing = NULL;
     }
@@ -215,7 +209,6 @@ void Mission::BriefingEnd()
 void Mission::DirectorBenchmark()
 {
     total_nr_frames++;
-    //cout << "elapsed= " << elapsed << " fps= " << 1.0/elapsed << " average= " << ((double)total_nr_frames)/gametime << " in " << gametime << " seconds" << endl;
     if (benchmark > 0.0 && benchmark < gametime) {
         std::cout<<"Game was running for "<<gametime<<" secs,   av. framerate "<<( (double) total_nr_frames )/gametime
                  <<std::endl;

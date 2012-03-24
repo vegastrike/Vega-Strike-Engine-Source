@@ -41,7 +41,6 @@ bool DistanceWarrantsWarpTo( Unit *parent, float dist, bool following )
 bool DistanceWarrantsTravelTo( Unit *parent, float dist, bool following )
 {
     //first let us decide whether the target is far enough to warrant using warp
-    //double dist =UnitUtil::getSignificantDistance(parent,target);
     float diff = 1;
     parent->GetVelocityDifficultyMult( diff );
     float timetolive = dist/(diff*parent->GetComputerData().max_combat_speed);

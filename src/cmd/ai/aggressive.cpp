@@ -65,7 +65,6 @@ using std::pair;
 vsUMap< string, AIEvents::ElemAttrMap* >logic;
 
 extern bool CheckAccessory( Unit *tur );
-//extern void TurretFAW(Unit *parent); /*
 
 static void TurretFAW( Unit *parent )
 {
@@ -268,8 +267,6 @@ AggressiveAI::AggressiveAI( const char *filename, Unit *target ) : FireAt()
     if (target != NULL)
         AttachOrder( target );
     last_directive = filename;
-    //AIEvents::LoadAI (filename,logic,"neutral");
-    //AIEvents::LoadAI (interruptname,interrupt,"neutral");
 }
 
 void AggressiveAI::SetParent( Unit *parent1 )
@@ -325,7 +322,6 @@ bool AggressiveAI::ExecuteLogicItem( const AIEvents::AIEvresult &item )
 {
     if (item.script.length() != 0) {
         Order *tmp = new ExecuteFor( new AIScript( item.script.c_str() ), item.timetofinish );
-        //parent->EnqueueAI (tmp);
         EnqueueOrder( tmp );
         return true;
     } else {
@@ -515,11 +511,9 @@ bool AggressiveAI::ProcessLogicItem( const AIEvents::AIEvresult &item )
             break;
         }
     case FACING:
-        //return parent->getAIState()->queryType (Order::FACING)==NULL;
         return queryType( Order::FACING ) == NULL;
 
     case MOVEMENT:
-        //return parent->getAIState()->queryType (Order::MOVEMENT)==NULL;
         return queryType( Order::MOVEMENT ) == NULL;
 
     case RANDOMIZ:
@@ -535,8 +529,6 @@ bool AggressiveAI::ProcessLogic( AIEvents::ElemAttrMap &logi, bool inter )
 {
     //go through the logic.
     bool retval = false;
-    //Unit * tmp = parent->Target();
-    //distance = tmp? (tmp->Position()-parent->Position()).Magnitude()-parent->rSize()-tmp->rSize() : FLT_MAX;
     std::vector< std::list< AIEvents::AIEvresult > >::iterator i = logi.result.begin();
     for (; i != logi.result.end(); i++) {
         std::list< AIEvents::AIEvresult >::iterator j;
@@ -554,8 +546,6 @@ bool AggressiveAI::ProcessLogic( AIEvents::ElemAttrMap &logi, bool inter )
                 float priority = (*j).priority;
                 if (priority > this->currentpriority || !inter) {
                     if (inter) {
-                        //parent->getAIState()->eraseType (Order::FACING);
-                        //parent->getAIState()->eraseType (Order::MOVEMENT);
                         eraseType( Order::FACING );
                         eraseType( Order::MOVEMENT );
                     }
@@ -568,10 +558,7 @@ bool AggressiveAI::ProcessLogic( AIEvents::ElemAttrMap &logi, bool inter )
                                 this->currentpriority = priority;
                                 logiccurtime     += (*j).timetofinish;
                                 interruptcurtime += (*j).timetointerrupt;
-                                //AIEvents::AIEvresult tmp = *j;
-                                //i->erase(j);
                                 retval = true;
-                                //i->push_back (tmp);
                             }
                             j++;
                         }
@@ -661,8 +648,6 @@ bool AggressiveAI::ProcessCurrentFgDirective( Flightgroup *fg )
                                 parent->TurretFAW();
 
                                 c.SetCurrentState( c.fsm->GetYesNode(), NULL, 0 );
-                                //MatchVelocity(parent->ClampVelocity(vec,true),Vector(0,0,0),true,true,false)
-                                //Order * ord = new Orders::FormUp(QVector(position*parent->radial_size,0,fabs(dist)));
                                 Order *ord = new Orders::MatchLinearVelocity( parent->ClampVelocity( Vector( 0,
                                                                                                              0,
                                                                                                              0 ),
@@ -718,9 +703,6 @@ bool AggressiveAI::ProcessCurrentFgDirective( Flightgroup *fg )
                             last_time_insys = true;
                             CommunicationMessage c( parent, leader, NULL, 0 );
                             c.SetCurrentState( c.fsm->GetYesNode(), NULL, 0 );
-                            //}else {
-                            //c.SetCurrentState (c.fsm->GetNoNode(),NULL,0);
-                            //}
                             Order *o = leader->getAIState();
                             if (o)
                                 o->Communicate( c );
@@ -903,7 +885,6 @@ bool AggressiveAI::ProcessCurrentFgDirective( Flightgroup *fg )
                             }
                             //if i am a cargo wingman and so is the player, get into a dockable position with the leader
                             else if ( parentowner && leaderowner && (parentowner == leaderowner) ) {
-//float left= fgnum%2?1:-1;
                                 Unit  *leaderownerun =
                                     ( leaderowner
                                      == leader ? leader : ( leaderowner == parent ? parent : findUnitInStarsystem( leaderowner ) ) );
@@ -921,7 +902,6 @@ bool AggressiveAI::ProcessCurrentFgDirective( Flightgroup *fg )
                             }
                             //if i am the capship, go into defensive mode
                             else if (parent == leaderowner) {
-//// parent->Target(parent);
                                 parent->SetTurretAI();
                                 TurretFAW( parent );
                                 Order *ord = new Orders::MatchLinearVelocity( parent->ClampVelocity( Vector( 0,
@@ -1084,14 +1064,10 @@ bool AggressiveAI::ProcessCurrentFgDirective( Flightgroup *fg )
                         suborders[i]->AttachSelfOrder( leader );
                 }
             } else if (fg->directive.find( "h" ) != string::npos || fg->directive.find( "H" ) != string::npos) {
-                //VSFileSystem::vs_fprintf (stderr,"he wnats to help out");
                 if (fg->directive != last_directive && leader) {
                     if ( leader->InCorrectStarSystem( _Universe->activeStarSystem() ) ) {
-                        //VSFileSystem::vs_fprintf (stderr,"%s he wnats to help out and hasn't died\n", parent->name.c_str());
                         Unit *th = NULL;
                         if ( ( th = leader->Threat() ) ) {
-                            //VSFileSystem::vs_fprintf (stderr,"he wnats to help out and he has a threat\n");
-
                             CommunicationMessage c( parent, leader, NULL, 0 );
                             if ( parent->InRange( th, true, false ) ) {
                                 parent->Target( th );
@@ -1104,12 +1080,8 @@ bool AggressiveAI::ProcessCurrentFgDirective( Flightgroup *fg )
                             if (oo)
                                 oo->Communicate( c );
                         } else {
-                            //bool targetted=false;
-                            //float mindist;
-                            //Unit * un=NULL;
                             th = GetThreat( parent, leader );
                             CommunicationMessage c( parent, leader, NULL, 0 );
-                            //VSFileSystem::vs_fprintf (stderr,"he wnats to help out against threat %d",th);
                             if (th) {
                                 if ( parent->InRange( th, true, false ) ) {
                                     c.SetCurrentState( c.fsm->GetYesNode(), NULL, 0 );
@@ -1120,8 +1092,6 @@ bool AggressiveAI::ProcessCurrentFgDirective( Flightgroup *fg )
                                         //parent->Target(parent);
                                         parent->SetTurretAI();
                                         TurretFAW( parent );
-//MatchVelocity(parent->ClampVelocity(vec,true),Vector(0,0,0),true,true,false)
-//Order * ord = new Orders::FormUp(QVector(position*parent->radial_size,0,fabs(dist)));
                                         Order *ord =
                                             new Orders::MatchLinearVelocity( parent->ClampVelocity( Vector( 0,
                                                                                                             0,
@@ -1136,7 +1106,6 @@ bool AggressiveAI::ProcessCurrentFgDirective( Flightgroup *fg )
                                         }
                                     }
                                 } else {}
-                                //VSFileSystem::vs_fprintf (stderr,"Helping out kill: %s",th->name.c_str());
                             } else {
                                 c.SetCurrentState( c.fsm->GetNoNode(), NULL, 0 );
                             }
@@ -1147,16 +1116,12 @@ bool AggressiveAI::ProcessCurrentFgDirective( Flightgroup *fg )
                     }
                 }
             } else if (fg->directive.find( "p" ) != string::npos || fg->directive.find( "P" ) != string::npos) {
-                //VSFileSystem::vs_fprintf (stderr,"he wnats to help out");
                 bool callme = false;
                 if (fg->directive != last_directive && leader) {
                     if ( leader->InCorrectStarSystem( _Universe->activeStarSystem() ) ) {
-                        //VSFileSystem::vs_fprintf (stderr,"%s he wnats to help out and hasn't died\n", parent->name.c_str());
                         Unit *th   = NULL;
                         Unit *targ = fg->target.GetUnit();
                         if ( targ && ( th = targ->Threat() ) ) {
-                            //VSFileSystem::vs_fprintf (stderr,"he wnats to help out and he has a threat\n");
-
                             CommunicationMessage c( parent, leader, NULL, 0 );
                             if ( parent->InRange( th, true, false ) ) {
                                 parent->Target( th );
@@ -1170,12 +1135,8 @@ bool AggressiveAI::ProcessCurrentFgDirective( Flightgroup *fg )
                             if (oo)
                                 oo->Communicate( c );
                         } else {
-                            //bool targetted=false;
-                            //float mindist;
-                            //Unit * un=NULL;
                             th = GetThreat( parent, targ );
                             CommunicationMessage c( parent, leader, NULL, 0 );
-                            //VSFileSystem::vs_fprintf (stderr,"he wnats to help out against threat %d",th);
                             if (th) {
                                 if ( parent->InRange( th, true, false ) ) {
                                     c.SetCurrentState( c.fsm->GetYesNode(), NULL, 0 );
@@ -1185,11 +1146,8 @@ bool AggressiveAI::ProcessCurrentFgDirective( Flightgroup *fg )
                                     parent->TargetTurret( th );
 //if I am the capship, go into defensive mode.
                                     if (parent == leaderowner) {
-                                        //parent->Target(parent);
                                         parent->SetTurretAI();
                                         parent->TurretFAW();
-//MatchVelocity(parent->ClampVelocity(vec,true),Vector(0,0,0),true,true,false)
-//Order * ord = new Orders::FormUp(QVector(position*parent->radial_size,0,fabs(dist)));
                                         Order *ord =
                                             new Orders::MatchLinearVelocity( parent->ClampVelocity( Vector( 0,
                                                                                                             0,
@@ -1205,7 +1163,6 @@ bool AggressiveAI::ProcessCurrentFgDirective( Flightgroup *fg )
                                     }
                                 } else {
                                     c.SetCurrentState( c.fsm->GetNoNode(), NULL, 0 );
-                                    //VSFileSystem::vs_fprintf (stderr,"Helping out kill: %s",th->name.c_str());
                                 }
                             } else {
                                 c.SetCurrentState( c.fsm->GetNoNode(), NULL, 0 );
@@ -1577,7 +1534,6 @@ void AggressiveAI::ExecuteNoEnemies()
                     parent->Target( dest );                     //fly there, baby!
                 } else if ( dest->GetDestinations().size() == 0 && false == UnitUtil::isCapitalShip( parent )
                            && UnitUtil::isDockableUnit( dest ) ) {
-                    //UnitUtil::performDockingOperations(parent,dest,0);//dock there, baby
                     Order *ai = parent->aistate;
                     parent->aistate = NULL;
                     parent->PrimeOrders( new Orders::DockingOps( dest, ai, true, false ) );
@@ -1602,11 +1558,6 @@ void AggressiveAI::ExecuteNoEnemies()
             GoTo( this, parent, nav, creationtime, false, navDestination.GetUnit() );
         }
     }
-    /*
-     *  Order * ord = new Orders::MatchLinearVelocity (parent->ClampVelocity(Vector (0,0,10000),false),true,true,false);
-     *  ord->SetParent(parent);
-     *  EnqueueOrder (ord);
-     */
 }
 
 void AggressiveAI::AfterburnerJumpTurnTowards( Unit *target )
@@ -1637,7 +1588,6 @@ void AggressiveAI::Execute()
     jump_time_check++;     //just so we get a nicely often wrapping var;
     jump_time_check %= 5;
     Flightgroup  *fg  = parent->getFlightgroup();
-    //ReCommandWing(fg);
     double firetime   = queryTime();
     static int    pir = FactionUtil::GetFactionIndex( "pirates" );
     if (parent->faction == pir)
@@ -1685,7 +1635,6 @@ void AggressiveAI::Execute()
                         }
                         parent->jump.drive = -1;
                     } else {
-                        //VSFileSystem::vs_fprintf (stderr,"warning ship not equipped to jump");
                         parent->Target( NULL );
                     }
                 } else if (parent->GetJumpStatus().drive < 0) {
@@ -1699,18 +1648,14 @@ void AggressiveAI::Execute()
             last_jump_time = 0;
         }
         if ( (!isjumpable) && interruptcurtime <= 0 && target )
-//fprintf (stderr,"i");
             ProcessLogic( *logic, true );
         if (!target) {
             logiccurtime -= SIMULATION_ATOM;
             if (logiccurtime < 0) {
                 logiccurtime    = 20;
                 currentpriority = -FLT_MAX;
-                //eraseType (Order::FACING);
-                //eraseType (Order::MOVEMENT);
             }
         }
-        //if (parent->getAIState()->queryType (Order::FACING)==NULL&&parent->getAIState()->queryType (Order::MOVEMENT)==NULL) {
         if (queryAny( Order::FACING|Order::MOVEMENT ) == NULL) {
             if (isjumpable) {
                 AfterburnerJumpTurnTowards( target );
@@ -1730,8 +1675,6 @@ void AggressiveAI::Execute()
                 logiccurtime     -= SIMULATION_ATOM;
                 interruptcurtime -= SIMULATION_ATOM;
                 if (logiccurtime <= 0) {
-                    //parent->getAIState()->eraseType (Order::FACING);
-                    //parent->getAIState()->eraseType (Order::MOVEMENT);
                     eraseType( Order::FACING );
                     eraseType( Order::MOVEMENT );
                     if (isjumpable) {

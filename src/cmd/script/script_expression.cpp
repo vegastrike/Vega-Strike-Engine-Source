@@ -43,9 +43,6 @@
 #include "mission.h"
 #include "easydom.h"
 
-//#include "vs_globals.h"
-//#include "vegastrike.h"
-
 /* *********************************************************** */
 
 varInst* Mission::checkObjectExpr( missionNode *node, int mode )
@@ -93,7 +90,6 @@ varInst* Mission::checkObjectExpr( missionNode *node, int mode )
 
 varInst* Mission::doMath( missionNode *node, int mode )
 {
-    //if(mode==SCRIPT_PARSE){
     string mathname = node->attr_value( "math" );
 
     int    len = node->subnodes.size();
@@ -114,9 +110,6 @@ varInst* Mission::doMath( missionNode *node, int mode )
     if (res_vi->type == VAR_ANY)
         res_vi->type = VAR_FLOAT;
     deleteVarInst( res1_vi );
-    //char buffer[200];
-    //sprintf(buffer,"fmath: 1st expr returns %f",res);
-    //debug(4,node,mode,buffer);
     for (int i = 1; i < len; i++) {
         varInst *res2_vi   = checkExpression( (missionNode*) node->subnodes[i], mode );
         var_type res2_type = res2_vi->type;
@@ -200,7 +193,6 @@ double Mission::floatMath( string mathname, double res1, double res2 )
 
 double Mission::doFMath( missionNode *node, int mode )
 {
-    //debug(0,node,mode,"deprecated Fmath");
     varInst *math_vi = doMath( node, mode );
     if (math_vi->type != VAR_FLOAT) {
         fatalError( node, mode, "fmath expected float" );
@@ -211,7 +203,6 @@ double Mission::doFMath( missionNode *node, int mode )
 
     return ret;
 
-    //if(mode==SCRIPT_PARSE){
     string mathname = node->attr_value( "math" );
 
     int    len = node->subnodes.size();
@@ -250,7 +241,6 @@ double Mission::doFMath( missionNode *node, int mode )
 
 int Mission::doIMath( missionNode *node, int mode )
 {
-    //debug(0,node,mode,"deprecated Imath");
     varInst *math_vi = doMath( node, mode );
     if (math_vi->type != VAR_INT) {
         fatalError( node, mode, "fmath expected int" );
@@ -633,7 +623,6 @@ varInst* Mission::checkExpression( missionNode *node, int mode )
 {
     varInst *ret = NULL;
     debug( 3, node, mode, "checking expression" );
-    //printRuntime();
     switch (node->tag)
     {
     case DTAG_AND_EXPR:

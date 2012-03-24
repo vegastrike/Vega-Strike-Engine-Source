@@ -29,7 +29,6 @@ Flightgroup* Flightgroup::newFlightgroup( const std::string &name,
 }
 Flightgroup::~Flightgroup()
 {
-    //VSFileSystem::vs_fprintf (stderr,"deleting FG 0x%x %s %s\n",this,name.c_str(),faction.c_str());
     if (squadLogo)
         delete squadLogo;
 }

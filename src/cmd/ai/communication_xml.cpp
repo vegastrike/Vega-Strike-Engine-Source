@@ -77,7 +77,6 @@ void FSM::beginElement( const string &name, const AttributeList attributes )
         break;
     case UNKNOWN:
         unitlevel++;
-//cerr << "Unknown element start tag '" << name << "' detected " << endl;
         return;
 
     case NODE:
@@ -119,15 +118,11 @@ void FSM::beginElement( const string &name, const AttributeList attributes )
 void FSM::endElement( void *userData, const XML_Char *name )
 {
     using namespace CommXML;
-//((Universe::Faction*)userData)->endElement(name);
-
-//void Universe::Faction::endElement(const string &name) {
     Names elem = (Names) element_map.lookup( name );
     switch (elem)
     {
     case UNKNOWN:
         unitlevel--;
-//cerr << "Unknown element end tag '" << name << "' detected " << endl;
         break;
     default:
         unitlevel--;
@@ -140,8 +135,6 @@ void FSM::LoadXML( const char *filename )
     using namespace CommXML;
     using namespace VSFileSystem;
     unitlevel = 0;
-    //const int chunk_size = 16384;
-    //FILE * inFile = VSFileSystem::vs_open (filename, "r");
     VSFile  f;
     VSError err = f.OpenReadOnly( filename, CommFile );
     if (err > Ok) {
@@ -154,15 +147,6 @@ void FSM::LoadXML( const char *filename )
     XML_SetElementHandler( parser, &FSM::beginElement, &FSM::endElement );
 
     XML_Parse( parser, ( f.ReadFull() ).c_str(), f.Size(), 1 );
-    /*
-     *  do {
-     *     char buf[chunk_size];
-     *     int length;
-     *     length = VSFileSystem::vs_read (buf,1, chunk_size,inFile);
-     *     //length = inFile.gcount();
-     *     XML_Parse(parser, buf,length, VSFileSystem::vs_feof(inFile));
-     *  } while(!VSFileSystem::vs_feof(inFile));
-     */
     f.Close();
     XML_ParserFree( parser );
 }

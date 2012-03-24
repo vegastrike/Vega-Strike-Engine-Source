@@ -104,7 +104,6 @@ void MoveTo::SetDest( const QVector &target )
 bool MoveToParent::OptimizeSpeed( Unit *parent, float v, float &a, float max_speed )
 {
     v += ( a/parent->GetMass() )*SIMULATION_ATOM;
-    //float max_speed = ((afterburn)?parent->GetComputerData().max_ab_speed():parent->GetComputerData().max_speed());
     if ( (!max_speed) || fabs( v ) <= max_speed )
         return true;
     float deltaa = parent->GetMass()*(fabs( v )-max_speed)/SIMULATION_ATOM;       //clamping should take care of it
@@ -126,7 +125,6 @@ void MoveTo::Execute()
 {
     done = done || m.Execute( parent, targetlocation );
 }
-//cout << "MOVETO target =" << targetlocation << endl;
 bool MoveToParent::Execute( Unit *parent, const QVector &targetlocation )
 {
     bool   done = false;
@@ -209,13 +207,6 @@ bool MoveToParent::Execute( Unit *parent, const QVector &targetlocation )
     }
     parent->ApplyLocalForce( thrust );
 
-    /*moved to subclass
-     *  if (_Universe->AccessCockpit()->autoInProgress()) {
-     *  WarpToP(parent,dest);
-     *  }else {
-     *  WarpToP(parent,targetlocation,0);
-     *  }
-     */
     return done;
 }
 MoveTo::~MoveTo()
@@ -267,13 +258,8 @@ void ChangeHeading::TurnToward( float atancalc, float ang_veli, float &torquei )
     if (t > 0) {
         if (t < SIMULATION_ATOM)
             torquei *= ( (t/SIMULATION_ATOM)-( (SIMULATION_ATOM-t)/SIMULATION_ATOM ) );
-        //torquei=0;//this is just a test --hellcatv
     } else {
         torquei = -parent->GetMoment()*ang_veli/SIMULATION_ATOM;         //clamping should take care of it
-        /* // Print out the variables for debugging.
-         *  char msg[200];
-         *  sprintf(msg, " t=%f, torquei=%f ",t,torquei);
-         *  mission->msgcenter->add("game","all",msg, 0); */
     }
 }
 void ChangeHeading::SetDest( const QVector &target )
@@ -300,7 +286,6 @@ void ChangeHeading::Execute()
     Vector ang_vel = parent->GetAngularVelocity();
     Vector local_velocity( parent->UpCoordinateLevel( ang_vel ) );
     Vector local_heading( parent->ToLocalCoordinates( ( final_heading-parent->Position() ).Cast() ) );
-    //Vector local_heading (parent->UpCoordinateLevel(ang_vel));
     char   xswitch =
         ( (local_heading.i > 0) != (last_velocity.i > 0) || (!local_heading.i) ) && last_velocity.i != 0 ? 1 : 0;
     char   yswitch =
@@ -458,11 +443,6 @@ AutoLongHaul::AutoLongHaul( bool fini, int accuracy ) : ChangeHeading( QVector( 
     deactivatewarp      = false;
     StraightToTarget    = true;
     inside_landing_zone = false;
-    /*
-     *  whichDestinationIsOld=0;
-     *  for (unsigned int i=0;i<AUTOLONGHAULNUMDESTINATIONAVG;++i) {
-     *  PreviousNewDestinations[i]=QVector(0,0,0);
-     *  }*/
 }
 void AutoLongHaul::MakeLinearVelocityOrder()
 {
@@ -490,18 +470,6 @@ extern bool DistanceWarrantsWarpTo( Unit *parent, float dist, bool following );
 
 QVector AutoLongHaul::NewDestination( const QVector &curnewdestination, double magnitude )
 {
-    /*
-     *  QVector avg=curnewdestination;
-     *  unsigned int numave=1;
-     *  magnitude*=magnitude;
-     *  for (unsigned int i=0;i<AUTOLONGHAULNUMDESTINATIONAVG;++i) {
-     *  if ((curnewdestination-PreviousNewDestinations[i]).MagnitudeSquared()<magnitude) {
-     *   avg+=PreviousNewDestinations[i];
-     *   numave++;
-     *  }
-     *  }
-     *  return PreviousNewDestinations[whichDestinationIsOld++%AUTOLONGHAULNUMDESTINATIONAVG]=avg*(1./(double)numave);
-     */
     return curnewdestination;
 }
 static float mymax( float a, float b )
@@ -709,7 +677,6 @@ void FaceDirection::Execute()
         SetDest( target->Position() );
     else
         SetDest( parent->Position()+face.Cast() );
-    //VSFileSystem::vs_fprintf (stderr,"facing...cool");
     ChangeHeading::Execute();
     if (!finish)
         ResetDone();

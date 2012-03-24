@@ -475,7 +475,6 @@ void Mission::DirectorStart( missionNode *node )
     runtime.cur_thread = main_thread;
 
     director           = NULL;
-    //msgcenter->add("game","all","parsing programmed mission");
     std::string doparse = node->attr_value( "do_parse" );
     if ( !doparse.empty() )
         if (XMLSupport::parse_bool( doparse ) == false)
@@ -495,7 +494,6 @@ void Mission::DirectorStart( missionNode *node )
     doModule( node, SCRIPT_PARSE );
 
     vsUMap< string, missionNode* >::iterator iter;
-    //=runtime.modules.begin()
     for (iter = runtime.modules.begin(); iter != runtime.modules.end(); iter++) {
         string mname = (*iter).first;
         missionNode *mnode = (*iter).second;

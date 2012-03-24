@@ -2,6 +2,7 @@
 #include "communication.h"
 #include "networking/netserver.h"
 #include "networking/netclient.h"
+
 using std::list;
 using std::vector;
 void Order::AdjustRelationTo( Unit *un, float factor )

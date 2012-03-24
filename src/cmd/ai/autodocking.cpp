@@ -66,7 +66,6 @@ Orders::AutoDocking::DockingPath FindDockingPort(Unit *player,
         if (dockingPorts[i].GetRadius() < player->rSize())
             continue;
 
-        // DockingPorts::GetPosition() returns coordinates relative to the station
         QVector dockingPosition = Transform(station->GetTransformation(),
                                             dockingPorts[i].GetPosition().Cast());
         float distance = (dockingPosition - player->Position()).Magnitude();

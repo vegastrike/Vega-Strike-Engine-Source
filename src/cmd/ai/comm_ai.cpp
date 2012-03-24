@@ -44,13 +44,6 @@ CommunicatingAI::CommunicatingAI( int ttype,
     }
 }
 
-/*
- *  vector <Animation *> *CommunicatingAI::getCommFaces(unsigned char &sex) {
- *  sex = this->sex;
- *  return comm_face;
- *  }no longer
- */
-
 bool MatchingMood( const CommunicationMessage &c, float mood, float randomresponse, float relationship )
 {
     static float     pos_limit = XMLSupport::parse_float( vs_config->getVariable( "AI",
@@ -124,7 +117,6 @@ void AllUnitsCloseAndEngage( Unit *un, int faction )
          ++i)
         //Vector loc;
         if (ally->faction == faction) {
-            //if (ally->InRange (un,loc,true)) {
             if ( ( ally->Position()-un->Position() ).Magnitude() < contraband_assist_range ) {
                 GetMadAt( un, ally );
                 Flightgroup *fg = ally->getFlightgroup();
@@ -209,7 +201,6 @@ void CommunicatingAI::UpdateContrabandSearch()
                         SpeedAndCourse = u->GetVelocity();
                     }
                     float HiddenTotal    = use_hidden_cargo_space ? ( u->getHiddenCargoVolume() ) : (0);
-                    //float HiddenUsed = u->getHiddenCargoVolume();
                     Unit *contrabandlist = FactionUtil::GetContraband( parent->faction );
                     if (InList( item, contrabandlist ) > 0) {
                         //inlist now returns an integer so that we can do this at all...

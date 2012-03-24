@@ -44,12 +44,9 @@
 #include "mission.h"
 #include "easydom.h"
 
-//#include "vs_globals.h"
-//#include "vegastrike.h"
 
 varInst* Mission::call_string( missionNode *node, int mode )
 {
-    //varInst *viret=new varInst;
     varInst *viret = NULL;
     if (mode == SCRIPT_PARSE) {
         string cmd = node->attr_value( "name" );
@@ -75,7 +72,6 @@ varInst* Mission::call_string( missionNode *node, int mode )
                 call_string_print( node, mode, ovi );
             viret = newVarInst( VI_TEMP );
             viret->type = VAR_VOID;
-            //return viret;
         } else if (method_id == CMT_STRING_equal) {
             missionNode *other_node = getArgument( node, mode, 1 );
             varInst     *other_vi   = checkObjectExpr( other_node, mode );
@@ -100,7 +96,6 @@ varInst* Mission::call_string( missionNode *node, int mode )
             if (mode == SCRIPT_RUN) {
                 string s1 = call_string_getstring( node, mode, ovi );
                 string s2 = call_string_getstring( node, mode, other_vi );
-                //if((int)s1.compare(0,s2.size(),s2)==0){
                 if (s1.find( s2, 0 ) == 0)
                     res = true;
             }
@@ -122,7 +117,6 @@ string Mission::getStringArgument( missionNode *node, int mode, int arg_nr )
 {
     missionNode *arg_node = getArgument( node, mode, arg_nr );
     varInst     *arg_vi   = checkObjectExpr( arg_node, mode );
-    //string *arg_strptr=getStringObject(arg_node,mode,arg_vi);
 
     string retstr;
     if (mode == SCRIPT_RUN)

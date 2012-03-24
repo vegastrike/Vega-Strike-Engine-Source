@@ -53,7 +53,6 @@
 #include "vs_globals.h"
 #include "configxml.h"
 
-//#include "vegastrike.h"
 
 /* *********************************************************** */
 

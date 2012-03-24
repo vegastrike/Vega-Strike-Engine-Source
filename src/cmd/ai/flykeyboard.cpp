@@ -224,7 +224,6 @@ void FlyByKeyboard::Execute( bool resetangvelocity )
         autopilot->Execute();
     if (resetangvelocity)
         desired_ang_velocity = Vector( 0, 0, 0 );
-    //printf("flybykey::exec\n");
     static bool initial_inertial_mode = XMLSupport::parse_bool( vs_config->getVariable( "flight", "inertial::initial", "false" ) );
     if (SSCK.dirty) {
         //go with what's last there: no frames since last physics frame
@@ -252,7 +251,6 @@ void FlyByKeyboard::Execute( bool resetangvelocity )
             if (SSCK.rollleftpress > 0)
                 KeyboardRollRight( -1 );
         }
-        //VSFileSystem::vs_fprintf(stderr,"AB: press %d rel %d\n",SSCK.ABpress,SSCK.ABrelease);
         if (SSCK.ABpress >= 1)
             Afterburn( 1 );
         else
@@ -325,7 +323,6 @@ void FlyByKeyboard::Execute( bool resetangvelocity )
         if (SSCK.decelpress != 0)
             Accel( -( (float) FBWABS( SSCK.decelpress ) )/(FBWABS( SSCK.decelpress )+SSCK.decelrelease) );
         if (SSCK.ABpress || SSCK.ABrelease)
-            //VSFileSystem::vs_fprintf(stderr,"AB: press %d rel %d\n",SSCK.ABpress,SSCK.ABrelease);
             Afterburn( (SSCK.ABpress >= 1) ? 1 : 0 );
         if (SSCK.joyinertialxypress || SSCK.joyinertialxyrelease) {
             if (SSCK.joyinertialxypress > 0)

@@ -44,7 +44,6 @@
 #include "cmd/ai/order.h"
 #include "cmd/ai/aggressive.h"
 #include "cmd/ai/missionscript.h"
-//#include "gfx/aux_texture.h"
 #include "mission.h"
 #include "easydom.h"
 #include "msgcenter.h"
@@ -56,13 +55,11 @@
 #include "savegame.h"
 #include "cmd/nebula_generic.h"
 #include "hashtable.h"
-//#include "gfx/animation.h"
 #include "flightgroup.h"
 #include "cmd/unit_factory.h"
 #include "cmd/asteroid_generic.h"
 #include "gfxlib.h"
 #include "cmd/pilot.h"
-//#include "vegastrike.h"
 
 extern const vector< string >& ParseDestinations( const string &value );
 extern Unit& GetUnitMasterPartList();
@@ -916,7 +913,6 @@ varInst* Mission::call_unit( missionNode *node, int mode )
             }
             viret = newVarInst( VI_TEMP );
             viret->type = VAR_VOID;
-            //return viret;
         } else {
             fatalError( node, mode, "no such method "+node->script.name );
             assert( 0 );
@@ -1017,7 +1013,6 @@ Unit* Mission::call_unit_launch( CreateFlightgroup *fg, int type, const string &
         my_unit->UpdateCollideQueue( _Universe->scriptStarSystem(), hint );
         if ( !is_null( my_unit->location[Unit::UNIT_ONLY] ) && !is_null( my_unit->location[Unit::UNIT_BOLT] ) )
             hint = my_unit->location;
-        //findNextEnemyTarget(my_unit);
         my_unit->Target( NULL );
     }
     my_unit = units[0];

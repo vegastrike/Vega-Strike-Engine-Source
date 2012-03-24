@@ -49,7 +49,6 @@
 using std::cout;
 using std::cerr;
 using std::endl;
-//#include "vegastrike.h"
 
 /* *********************************************************** */
 
@@ -187,7 +186,6 @@ varInst* Mission::lookupClassVariable( string modulename, string varname, unsign
     if (classid == 0)
         //no class instance
         return NULL;
-    //printf("lookup classvar %s id=%d\n",varname.c_str(),classid);
     if ( classid >= module->script.classvars.size() ) {
         fatalError( module, SCRIPT_RUN, "illegal classvar nr." );
         assert( 0 );
@@ -195,9 +193,6 @@ varInst* Mission::lookupClassVariable( string modulename, string varname, unsign
     varInstMap *cvmap = module->script.classvars[classid];
 
     varInst    *var   = (*cvmap)[varname];
-    if (var == NULL) {
-        //printf("var not found as classvar\n");
-    }
     return var;
 }
 
@@ -210,7 +205,6 @@ varInst* Mission::lookupClassVariable( missionNode *asknode )
     if (classid == 0)
         //no class instance
         return NULL;
-    //printf("lookup classvar %s id=%d\n",varname.c_str(),classid);
     if ( classid >= module->script.classvars.size() ) {
         fatalError( asknode, SCRIPT_RUN, "illegal classvar nr." );
         assert( 0 );
@@ -218,9 +212,6 @@ varInst* Mission::lookupClassVariable( missionNode *asknode )
     varInstMap *cvmap = module->script.classvars[classid];
 
     varInst    *var   = (*cvmap)[varname];
-    if (var == NULL) {
-        //printf("var not found as classvar\n");
-    }
     return var;
 }
 
@@ -276,7 +267,6 @@ varInst* Mission::doVariable( missionNode *node, int mode )
         if (var == NULL) {
             var = lookupClassVariable( node );
             if (var != NULL) {
-                //printf("found classvar %x\n",(int)var);
             }
             if (var == NULL) {
                 //search in module namespace
@@ -338,8 +328,6 @@ void Mission::doDefVar( missionNode *node, int mode, bool global_var )
 
         (*vmap)[node->script.name] = vi;
 
-        //int varId=vmap->varVec.addVar(vi);
-
         printRuntime();
 
         return;
@@ -356,7 +344,6 @@ void Mission::doDefVar( missionNode *node, int mode, bool global_var )
     debug( 5, node, mode, "defining variable "+node->script.name );
 
     string type = node->attr_value( "type" );
-    //node->initval=node->attr_value("init");
 
     node->script.vartype = vartypeFromString( type );
 
@@ -455,7 +442,6 @@ void Mission::doSetVar( missionNode *node, int mode )
             fatalError( node, mode, "you have to give a variable name" );
     }
     debug( 3, node, mode, "trying to set variable "+node->script.name );
-    //varInst *var_expr=checkExpression((missionNode *)node->subnodes[0],mode);
     if (node->subnodes.size() != 1) {
         fatalError( node, mode, "setvar takes exactly one argument" );
         assert( 0 );
@@ -522,7 +508,6 @@ void Mission::doSetVar( missionNode *node, int mode )
 varInst* Mission::doConst( missionNode *node, int mode )
 {
     if (mode == SCRIPT_PARSE) {
-        //string name=node->attr_value("name");
         string typestr  = node->attr_value( "type" );
         string valuestr = node->attr_value( "value" );
         if ( typestr.empty() ) {
@@ -587,7 +572,7 @@ void Mission::assignVariable( varInst *v1, varInst *v2 )
             //the object has not been set
             //we set it below
         } else if ( v2->objectname.empty() ) {
-            //printf("WARNING: assignVariable v2==empty\n");
+            //printf("WARNING: assignVariable v2==empty\n");  FIXME ??
         } else if (v1->objectname != v2->objectname) {
             fatalError( NULL, SCRIPT_RUN, "wrong object types in assignment ("+v1->objectname+" , "+v2->objectname );
             assert( 0 );
