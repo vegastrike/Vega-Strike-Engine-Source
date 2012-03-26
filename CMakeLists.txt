@@ -946,11 +946,14 @@ add_subdirectory(objconv)
 #ADD_CUSTOM_TARGET(mesher DEPENDS objconv/mesher COMMAND ln -fs ${vsUTCS_BINARY_DIR}/objconv/mesher mesher || true)
 
 
+IF(NOT DISABLE_SERVER)
 target_link_libraries(vegaserver ${TST_SERVER_LIBS})
 set_target_properties(vegaserver PROPERTIES LINK_FLAGS "-L/usr/lib -L${vsUTCS_BINARY_DIR}"
                                             COMPILE_FLAGS "-DNO_GFX")
 add_dependencies(vegaserver mesh_tool)
 add_dependencies(vegaserver vssetup)
+ENDIF(NOT DISABLE_SERVER)
+
 # Debug crap 
 get_directory_property(TEMP_DIRECTORY INCLUDE_DIRECTORIES)
 message("Default build type is Release, no cpu opts enabled. ")
