@@ -448,6 +448,8 @@ readerThread(
             if (foundcache) {
                 *me->music_load_info = wherecache->second;
                 me->freeWav = false;
+            } else if ( !AUDLoadSoundFile( songname, me->music_load_info, true ) ) { 	 
+	            //fprintf(stderr, "Failed to load song %s\n", songname);
             }
         }
         if (me->freeWav && docacheme) {
