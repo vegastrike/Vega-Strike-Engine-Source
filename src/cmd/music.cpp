@@ -56,11 +56,6 @@ static void print_check_err( int errorcode, const char *str )
 //where func is the evaluation of func, and #func is the string form.
 #define checkerr(func) do{print_check_err(((func)),#func);}while(0)
 
-bool soundServerPipes()
-{
-    static bool ret = XMLSupport::parse_bool( vs_config->getVariable( "audio", "pierce_firewall", "true" ) );
-    return ret;
-}
 Music::Music( Unit *parent ) : random( false )
     , p( parent )
     , song( -1 )
@@ -78,7 +73,6 @@ Music::Music( Unit *parent ) : random( false )
     music_load_info = new AUDSoundProperties;
 #endif
 
-#ifndef USE_SOUNDSERVER
 #ifdef _WIN32
     musicinfo_mutex = CreateMutex( NULL, TRUE, NULL );
 #else //_WIN32
@@ -94,7 +88,6 @@ Music::Music( Unit *parent ) : random( false )
     //Lock it immediately, since the loader will want to wait for its first data upon creation.
     checkerr( pthread_mutex_lock( &musicinfo_mutex ) );
 #endif //!_WIN32
-#endif //!USE_SOUNDSERVER
     if (!g_game.music_enabled)
         return;
     lastlist = PEACELIST;
@@ -107,124 +100,6 @@ Music::Music( Unit *parent ) : random( false )
     const char *deflistvars[MAXLIST] = {"battle.m3u", "peace.m3u", "panic.m3u", "victory.m3u", "loss.m3u"};
     for (i = 0; i < MAXLIST; i++)
         LoadMusic( vs_config->getVariable( "audio", listvars[i], deflistvars[i] ).c_str() );
-#ifdef USE_SOUNDSERVER
-#if !defined (_WIN32)
-    if ( g_game.music_enabled && !soundServerPipes() ) {
-        int pid = fork();
-        if (!pid) {
-            string soundserver_path = VSFileSystem::datadir+"/bin/soundserver";
-            pid = execlp( soundserver_path.c_str(), soundserver_path.c_str(), NULL );
-            soundserver_path = VSFileSystem::datadir+"/soundserver";
-            pid = execlp( soundserver_path.c_str(), soundserver_path.c_str(), NULL );
-            g_game.music_enabled = false;
-            VSFileSystem::vs_fprintf( stderr, "Unable to spawn music player server\n" );
-            exit( 0 );
-        } else if (pid == -1) {
-            g_game.music_enabled = false;
-        }
-    }
-#endif
-#if defined (_WIN32) && !defined (__CYGWIN__)
-    if ( g_game.music_enabled && !soundServerPipes() ) {
-        string ss_path = VSFileSystem::datadir+"/soundserver.exe";
-        int    pid     = spawnl( P_NOWAIT, ss_path.c_str(), ss_path.c_str(), NULL );
-        if (pid == -1) {
-            ss_path = VSFileSystem::datadir+"/bin/soundserver.exe";
-            chdir( "bin" );
-            int pid = spawnl( P_NOWAIT, ss_path.c_str(), ss_path.c_str(), NULL );
-            if (pid == -1) {
-                g_game.music_enabled = false;
-                VSFileSystem::vs_fprintf( stderr, "Unable to spawn music player server Error (%d)\n", pid );
-            }
-        }
-    }
-#endif
-    if ( soundServerPipes() ) {
-        fNET_startup();
-        int pipesw[2];
-        int pipesr[2];
-        socketw = socketr = -1;         //FIXME  --"How?" --chuck_starchaser
-#ifdef _WIN32
-#define pipe _pipe
-#endif
-        if ( 0 == pipe( pipesw
-#ifdef _WIN32
-                        , 32, O_BINARY
-#endif
-                      )
-            && 0 == pipe( pipesr
-#ifdef _WIN32
-                          , 32, O_BINARY
-#endif
-                        ) ) {
-            socketw = pipesw[1];
-            socketr = pipesr[0];
-            char buffer1[32];
-            char buffer2[32];
-            sprintf( buffer1, "%d", pipesw[0] );
-            sprintf( buffer2, "%d", pipesr[1] );
-
-#if defined (_WIN32) && !defined (__CYGWIN__)
-            string ss_path = VSFileSystem::datadir+"/soundserver.exe";
-            int    pid     = spawnl( P_NOWAIT, ss_path.c_str(), ss_path.c_str(), buffer1, buffer2, NULL );
-            if (pid == -1) {
-                ss_path = VSFileSystem::datadir+"/bin/soundserver.exe";
-                bool chsuccess = (chdir( "bin" ) == 0);
-                int  pid = spawnl( P_NOWAIT, ss_path.c_str(), ss_path.c_str(), buffer1, buffer2, NULL );
-                if (chsuccess) chdir( ".." );
-                if (pid == -1) {
-                    g_game.music_enabled = false;
-                    VSFileSystem::vs_fprintf( stderr, "Unable to spawn music player server Error (%d)\n", pid );
-                }
-            }
-#else
-            if (g_game.music_enabled) {
-                std::string tmp = VSFileSystem::datadir+"/bin/soundserver";
-                FILE *fp = fopen( tmp.c_str(), "rb" );
-                if (!fp) {
-                    tmp = VSFileSystem::datadir+"/soundserver";
-                    fp  = fopen( tmp.c_str(), "rb" );
-                    if (!fp) {
-                        g_game.music_enabled = false;
-                        socketw = -1;
-                        socketr = -1;
-                    } else {fclose( fp ); }} else {fclose( fp ); }}
-            if (g_game.music_enabled) {
-                int pid = fork();
-                if (!pid) {
-                    string soundserver_path = VSFileSystem::datadir+"/bin/soundserver";
-                    pid = execlp( soundserver_path.c_str(), soundserver_path.c_str(), buffer1, buffer2, NULL );
-                    soundserver_path = VSFileSystem::datadir+"/soundserver";
-                    pid = execlp( soundserver_path.c_str(), soundserver_path.c_str(), buffer1, buffer2, NULL );
-                    g_game.music_enabled = false;
-                    VSFileSystem::vs_fprintf( stderr, "Unable to spawn music player server\n" );
-                    close( atoi( buffer1 ) );
-                    close( atoi( buffer2 ) );
-                    exit( 0 );
-                } else if (pid == -1) {
-                    g_game.music_enabled = false;
-                }
-            }
-#endif
-        }
-    } else {
-        int socket = -1;
-        INET_startup();
-        for (i = 0; (i < 10) && (socket == -1); i++)
-            socket = INET_ConnectTo( "localhost", 4364 );
-        socketw = socketr = socket;
-    }
-    if (socketw == -1 || socketr == -1) {
-        g_game.music_enabled = false;
-    } else {
-        string data = string( "i" )+vs_config->getVariable( "audio", "music_fadein", "0" )+"\n"
-                      "o"+vs_config->getVariable( "audio", "music_fadeout", "0" )+"\n";
-        if ( soundServerPipes() )
-            fNET_Write( socketw, data.size(), data.c_str() );
-        else
-            INET_Write( socketw, data.size(), data.c_str() );
-    }
-#endif /* USE_SOUNDSERVER */
     soft_vol_up_latency   = XMLSupport::parse_float( vs_config->getVariable( "audio", "music_volume_up_latency", "15" ) );
     soft_vol_down_latency = XMLSupport::parse_float( vs_config->getVariable( "audio", "music_volume_down_latency", "2" ) );
     //Hardware volume = 1
@@ -246,51 +121,16 @@ void Music::ChangeVolume( float inc, int layer )
     }
 }
 
-#ifdef USE_SOUNDSERVER
-static float tmpmin( float a, float b )
-{
-    return a < b ? a : b;
-}
-static float tmpmax( float a, float b )
-{
-    return a < b ? b : a;
-}
-#endif
-
 void Music::_SetVolume( float vol, bool hardware, float latency_override )
 {
     if (!g_game.music_enabled)
         return;
-#ifdef USE_SOUNDSERVER
-    vol = tmpmax( 0.0f, tmpmin( (hardware ? 1.0f : 2.0f), vol ) );
-    char tempbuf[100];
-    if ( ( hardware && (this->vol == vol) )
-        || ( !hardware && (this->soft_vol == vol) ) )
-        return;
-    if (hardware)
-        sprintf( tempbuf, "vh%f\n", vol );
-
-    else
-        sprintf( tempbuf, "vs%f\n%f\n", vol,
-                ( (latency_override
-                   < 0) ? ( (vol > soft_vol) ? soft_vol_up_latency : soft_vol_down_latency ) : latency_override ) );
-    if (hardware)
-        this->vol = vol;
-
-    else
-        this->soft_vol = vol;
-    if ( soundServerPipes() )
-        fNET_Write( socketw, strlen( tempbuf ), tempbuf );
-
-    else
-        INET_Write( socketw, strlen( tempbuf ), tempbuf );
-#else
     if (vol < 0) vol = 0;
     this->vol = vol;
     this->soft_vol = vol;     //for now fixme for fading
     for (std::list< int >::const_iterator iter = playingSource.begin(); iter != playingSource.end(); iter++)
         AUDSoundGain( *iter, soft_vol, true );
-#endif
+
 }
 
 bool Music::LoadMusic( const char *file )
@@ -385,9 +225,7 @@ int Music::SelectTracks( int layer )
 
 namespace Muzak
 {
-#ifndef USE_SOUNDSERVER
 std::map< std::string, AUDSoundProperties >cachedSongs;
-#endif
 
 #ifndef _WIN32
 void*
@@ -404,17 +242,6 @@ readerThread(
 {
     Music *me = (Music*) input;
     me->threadalive = 1;
-#ifdef USE_SOUNDSERVER
-    int    socketr = me->socketr;
-    while (!me->killthread) {
-        printf( "Reading from socket %d\n", socketr );
-        char data = fNET_fgetc( socketr );
-        printf( "Got data from socket %c\n", data );
-        if (data == 'e')
-            me->moredata = 1;
-        micro_sleep( 100000 );
-    }
-#else
     while (!me->killthread) {
 #ifdef _WIN32
         WaitForSingleObject( me->musicinfo_mutex, INFINITE );
@@ -461,7 +288,7 @@ readerThread(
         while (me->music_loaded)
             micro_sleep( 10000 );              //10ms of busywait for now... wait until end of frame.
     }
-#endif /* !USE_SOUNDSERVER */
+
     me->threadalive = 0;
     return NULL;
 }
@@ -469,7 +296,7 @@ readerThread(
 
 void Music::_LoadLastSongAsync()
 {
-#ifndef USE_SOUNDSERVER
+
 #ifdef HAVE_AL
     if (!g_game.music_enabled)
         return;
@@ -504,47 +331,12 @@ void Music::_LoadLastSongAsync()
 #else
     checkerr( pthread_mutex_unlock( &musicinfo_mutex ) );
 #endif
-#endif
+
 }
 
 void Music::Listen()
 {
     if (g_game.music_enabled) {
-#ifdef USE_SOUNDSERVER
-        if ( soundServerPipes() ) {
-            killthread  = 0;
-            threadalive = 0;
-            if (!thread_initialized) {
-#ifdef _WIN32
-                a_thread = CreateThread( NULL, 0, (LPTHREAD_START_ROUTINE) Muzak::readerThread, (PVOID) this, 0, NULL );
-#else
-                int res = pthread_create( &a_thread, NULL, Muzak::readerThread, (void*) this );
-#endif
-                thread_initialized = 1;
-            }
-            //int bytes=fNET_BytesToRead(socketr);
-            if (moredata) {
-                moredata = 0;
-                cur_song_file = "";
-                _Skip();
-            }
-        } else {
-            int bytes = INET_BytesToRead( socketr );
-            if (bytes) {
-                char data;
-                while (bytes) {
-                    data = INET_fgetc( socketr );
-                    bytes--;
-                }
-                if (data == 'e') {
-                    cur_song_file = "";
-                    _Skip();
-                } else {
-                    g_game.music_enabled = false;
-                }
-            }
-        }
-#else /* USE_SOUNDSERVER */
         if ( !music_load_list.empty() ) {
             if (music_loaded) {
                 //fprintf(stderr,"LOADED is true\n");
@@ -602,7 +394,6 @@ void Music::Listen()
             cur_song_file = "";
             _Skip();
         }
-#endif /* !USE_SOUNDSERVER */
     }
 }
 
@@ -644,8 +435,6 @@ void Music::_GotoSong( std::string mus )
     if (g_game.music_enabled) {
         if (mus == cur_song_file || mus.length() == 0) return;
         cur_song_file = mus;
-
-#ifndef USE_SOUNDSERVER
         _StopLater();         //Kill all our currently playing songs.
 
         music_load_list = rsplit( mus, "|" );         //reverse order.
@@ -665,13 +454,7 @@ void Music::_GotoSong( std::string mus )
 #endif
         }
         _LoadLastSongAsync();
-#else /* !USE_SOUNDSERVER */
-        string data = string( "p" )+mus+string( "\n" );
-        if ( soundServerPipes() )
-            fNET_Write( socketw, data.size(), data.c_str() );
-        else
-            INET_Write( socketw, data.size(), data.c_str() );
-#endif
+
     }
 }
 
@@ -811,28 +594,6 @@ void Music::_Skip( int layer )
 
 Music::~Music()
 {
-#ifdef USE_SOUNDSERVER
-    char send[2] = {'t', '\n'};
-    if (socketw != -1) {
-        if ( soundServerPipes() ) {
-            if (threadalive && thread_initialized) {
-                killthread = 1;
-                int spindown = 50;                 //Thread has 5 seconds to close down.
-                while ( threadalive && (spindown-- > 0) )
-                    micro_sleep( 100000 );
-            }
-            fNET_Write( socketw, 2, send );
-            fNET_close( socketw );
-            //fNET_close(socketr);
-            fNET_cleanup();
-        } else {
-            INET_Write( socketw, 2, send );
-            INET_close( socketw );
-            INET_cleanup();
-        }
-        socketw = -1;
-    }
-#else /* USE_SOUNDSERVER */
     if (threadalive && thread_initialized) {
         killthread = 1;
 #ifdef _WIN32
@@ -847,12 +608,14 @@ Music::~Music()
             threadalive = false;
     }
     //Kill the thread.
-#endif /* !USE_SOUNDSERVER */
+
 }
+
 void incmusicvol( const KBData&, KBSTATE a )
 {
     if (a == PRESS) Music::ChangeVolume( .0625 );
 }
+
 void decmusicvol( const KBData&, KBSTATE a )
 {
     if (a == PRESS) Music::ChangeVolume( -.0625 );
@@ -872,9 +635,6 @@ void Music::InitMuzak()
 void Music::CleanupMuzak()
 {
     if (muzak) {
-#ifdef USE_SOUNDSERVER
-        delete[] muzak;
-#endif
         //Multithreading issues... don't care to waste time here waiting to get the lock back.
         //Let the OS clean up this mess!
         muzak = NULL;
@@ -914,51 +674,34 @@ void Music::Stop( int layer )
 void Music::_StopNow()
 {
     if (g_game.music_enabled) {
-#ifdef USE_SOUNDSERVER
-        _Stop();
-#else
         for (std::vector< int >::const_iterator iter = sounds_to_stop.begin(); iter != sounds_to_stop.end(); iter++) {
             int sound = *iter;
             AUDStopPlaying( sound );
             AUDDeleteSound( sound, true );
         }
         sounds_to_stop.clear();
-#endif
     }
 }
 void Music::_StopLater()
 {
     if (g_game.music_enabled) {
-#ifdef USE_SOUNDSERVER
-        _Stop();
-#else
         for (std::list< int >::const_iterator iter = playingSource.begin(); iter != playingSource.end(); iter++) {
             int sound = *iter;
             sounds_to_stop.push_back( sound );
         }
         playingSource.clear();
-#endif
     }
 }
 
 void Music::_Stop()
 {
     if (g_game.music_enabled) {
-#ifdef USE_SOUNDSERVER
-        cur_song_file = "";
-        char send[1] = {'s'};
-        if ( soundServerPipes() )
-            fNET_Write( socketw, 1, send );
-        else
-            INET_Write( socketw, 1, send );
-#else
         for (std::list< int >::const_iterator iter = playingSource.begin(); iter != playingSource.end(); iter++) {
             int sound = *iter;
             AUDStopPlaying( sound );
             AUDDeleteSound( sound, true );
         }
         playingSource.clear();
-#endif
     }
 }
 
