@@ -543,7 +543,7 @@ void InitHomeDirectory()
     string user_home_path( chome_path );
     homedir = user_home_path+"/"+HOMESUBDIR;
 #else
-    char * userdir = getenv("USERPROFILE");
+    const char * userdir = getenv("USERPROFILE");
     if (userdir != NULL)
         homedir = std::string(userdir) + "/" + HOMESUBDIR;
     else
