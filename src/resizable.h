@@ -1,4 +1,5 @@
 #include <cstdlib>
+#include <string.h>
 template < class ITEM >
 class Resizable
 {
