@@ -56,7 +56,7 @@ rm objconv/mesher/expat.h
 %build
 %configure --with-data-dir=%{_datadir}/%{name} --with-boost=system \
   --enable-release --enable-flags="$RPM_OPT_FLAGS -DBOOST_PYTHON_NO_PY_SIGNATURES" \
-  --disable-ffmpeg --enable-stencil-buffer
+  --disable-ffmpeg --disable-ogre --enable-stencil-buffer
 make %{?_smp_mflags}
 
 
