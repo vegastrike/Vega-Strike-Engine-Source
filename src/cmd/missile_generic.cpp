@@ -13,46 +13,58 @@
 #include "unit_util.h"
 void StarSystem::UpdateMissiles()
 {
+    //if false, missiles collide with rocks as units, but not harm them with explosions
+    //FIXME that's how it's used now, but not really correct, as there could be separate AsteroidWeaponDamage for this
+    static bool collideroids = XMLSupport::parse_bool( vs_config->getVariable( "physics", "AsteroidWeaponCollision", "false" ) );
+
     //WARNING: This is a big performance problem...
     //...responsible for many hiccups.
     //TODO: Make it use the collidemap to only iterate through potential hits...
     //PROBLEM: The current collidemap does not allow this efficiently (no way of
     //taking the other unit's rSize() into account).
     if ( !dischargedMissiles.empty() ) {
-        Unit *un;
-        for (un_iter ui = getUnitList().createIterator();
-             NULL != ( un = (*ui) );
-             ++ui)
-            dischargedMissiles.back()->ApplyDamage( un );
+        if ( dischargedMissiles.back()->GetRadius() > 0 ) {           //we can avoid this iterated check for kinetic projectiles even if they "discharge" on hit
+            Unit *un;
+            for ( un_iter ui = getUnitList().createIterator(); 
+                  NULL != ( un = (*ui) ); 
+                  ++ui ) {
+                enum clsptr type = un->isUnit();
+                if (collideroids || type != ASTEROIDPTR )           // could check for more, unless someone wants planet-killer missiles, but what it would change?
+                    dischargedMissiles.back()->ApplyDamage( un );
+            }
+        }
         delete dischargedMissiles.back();
         dischargedMissiles.pop_back();
     }
 }
 void MissileEffect::ApplyDamage( Unit *smaller )
 {
-    float rad  = (smaller->Position().Cast()-pos).Magnitude()-smaller->rSize();
-    if (rad < .001) rad = .001;
-    float orig = rad;
-    rad = rad*rad;
-    if (smaller->isUnit() != MISSILEPTR && rad < radius*radius) {
-        if ( rad < (radialmultiplier*radialmultiplier) ) {
-            rad =
-                ( radialmultiplier*radialmultiplier*radialmultiplier*radialmultiplier
-                 /( (2*radialmultiplier*radialmultiplier)-(orig*orig) ) );
+    QVector norm = pos-smaller->Position();
+    float distance = norm.Magnitude()-smaller->rSize();         // no better check than the bounding sphere for now
+    if ( distance < radius) {                                   // "smaller->isUnit() != MISSILEPTR &&" was removed - why disable antimissiles?
+        if ( distance < 0)
+            distance = 0.f;                                     //it's inside the bounding sphere, so we'll not reduce the effect
+        if (radialmultiplier < .001) radialmultiplier = .001;
+        float dist_part=distance/radialmultiplier;              //radialmultiplier is radius of the set damage
+        float damage_mul;
+        if ( dist_part > 1.f) {                                  // there can be something else, such as different eye- and ear- candy
+            damage_mul = 1/(dist_part*dist_part);
+        }
+        else {
+            damage_mul = 2.f - dist_part*dist_part;
         }
         /*
          *  contrived formula to create paraboloid falloff rather than quadratic peaking at 2x damage at origin
-         *  rad = radmul^4/(2radmul^2-orig^2)
+         *  k = 2-distance^2/radmul^2
+         * 
+         * if the explosion itself was a weapon, it would have double the base damage, longrange=0.5 (counted at Rm) and more generic form:
+         * Kclose = 1-(1-longrange)*(R/Rm)^2
+         * Kfar   = longrange/(R/Rm)^2
+         * or Kapprox = longrange/(longrange-(R/Rm)^3*(1-longrange)) ; obviously, with more checks preventing /0
          */
-        rad = rad/(radialmultiplier*radialmultiplier);           //where radialmultiplier is radius of point with 0 falloff
-
-        Vector norm( pos-smaller->Position().Cast() );
         norm.Normalize();
-        smaller->ApplyDamage( pos, norm, damage/rad, smaller, GFXColor( 1,
-                                                                        1,
-                                                                        1,
-                                                                        1 ), ownerDoNotDereference, phasedamage
-                              > 0 ? phasedamage/rad : 0 );
+        smaller->ApplyDamage( pos.Cast(), norm, damage*damage_mul, smaller, GFXColor( 1,1,1,1 ),
+                                ownerDoNotDereference, phasedamage*damage_mul );
     }
 }
 
@@ -60,7 +72,7 @@ float Missile::ExplosionRadius()
 {
     static float missile_multiplier =
         XMLSupport::parse_float( vs_config->getVariable( "graphics", "missile_explosion_radius_mult", "1" ) );
-
+    
     return radial_effect*(missile_multiplier);
 }
 
@@ -71,7 +83,7 @@ void StarSystem::AddMissileToQueue( MissileEffect *me )
 void Missile::Discharge()
 {
     if ( (damage != 0 || phasedamage != 0) && !discharged )
-        _Universe->activeStarSystem()->AddMissileToQueue( new MissileEffect( Position().Cast(), damage, phasedamage,
+        _Universe->activeStarSystem()->AddMissileToQueue( new MissileEffect( Position(), damage, phasedamage,
                                                                              radial_effect, radial_multiplier, owner ) );
     discharged = true;
 }

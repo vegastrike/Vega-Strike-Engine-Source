@@ -256,7 +256,7 @@ bool GameUnit< UnitType >::Explode( bool drawit, float timeit )
                 XMLSupport::parse_float( vs_config->getVariable( "physics", "explosion_damage_center", "1" ) );
             static float damageedge =
                 XMLSupport::parse_float( vs_config->getVariable( "graphics", "explosion_damage_edge", ".125" ) );
-            _Universe->activeStarSystem()->AddMissileToQueue( new MissileEffect( this->Position().Cast(), this->MaxShieldVal(),
+            _Universe->activeStarSystem()->AddMissileToQueue( new MissileEffect( this->Position(), this->MaxShieldVal(),
                                                                                  0, this->ExplosionRadius()*expdamagecenter,
                                                                                  this->ExplosionRadius()*expdamagecenter
                                                                                  *damageedge, NULL ) );

@@ -4,7 +4,7 @@
 
 class MissileEffect
 {
-    Vector pos;
+    QVector pos;
     float  damage;
     float  phasedamage;
     float  radius;
@@ -12,7 +12,7 @@ class MissileEffect
     void  *ownerDoNotDereference;
 public:
     void ApplyDamage( Unit* );
-    MissileEffect( const Vector &pos, float dam, float pdam, float radius, float radmult, void *owner ) : pos( pos )
+    MissileEffect( const QVector &pos, float dam, float pdam, float radius, float radmult, void *owner ) : pos( pos )
     {
         damage = dam;
         phasedamage = pdam;
@@ -24,7 +24,7 @@ public:
     {
         return radius;
     }
-    const Vector& GetCenter() const
+    const QVector& GetCenter() const
     {
         return pos;
     }
