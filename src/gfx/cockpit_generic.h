@@ -34,35 +34,40 @@ namespace Radar
 class Cockpit
 {
 protected:
-///style of current view (chase cam, inside)
+    ///style of current view (chase cam, inside)
     enum VIEWSTYLE view;
+    
     int   currentcamera;
     float radar_time;
     float gauge_time[UnitImages < void > ::NUMGAUGES];
-/// 8 armor vals and 1 for startfuel
 
-/// 8 armor vals and 1 for startfuel
+    /// 8 armor vals and 1 for startfuel
     float StartArmor[9]; //short fix
 
-///saved values to compare with current values (might need more for damage)
+    ///saved values to compare with current values (might need more for damage)
     float maxfuel, maxhull;
-///this is the parent that Cockpit will read data from
+    
+    ///this is the parent that Cockpit will read data from
     UnitContainer parent;
     UnitContainer parentturret;
     int   unitfaction;
-///4 views f/r/l/b
+
+    ///4 views f/r/l/b
     float shakin;
-///Video Display Units (may need more than 2 in future)
+
+    ///Video Display Units (may need more than 2 in future)
     std::string unitmodname;
-///Color of cockpit default text
-///The font that the entire cockpit will use. Currently without color
-//Gauge *gauges[UnitImages::NUMGAUGES];
-//0 means no autopilot...positive autopilto in progress
+    
+    ///Color of cockpit default text
+    ///The font that the entire cockpit will use. Currently without color
+    //Gauge *gauges[UnitImages::NUMGAUGES];
+    //0 means no autopilot...positive autopilto in progress
     float autopilot_time;
     UnitContainer autopilot_target; //usually null
-/**
- * two values that represent the adjustment to perspective needed to center teh crosshairs in the perceived view.
- */
+    
+    /**
+     * two values that represent the adjustment to perspective needed to center teh crosshairs in the perceived view.
+     */
     float cockpit_offset, viewport_offset;
     virtual void LoadXML( const char *file ) {}
     virtual void LoadXML( VSFileSystem::VSFile &f ) {}
@@ -70,25 +75,33 @@ protected:
     static void endElement( void *userData, const XML_Char *name );
     virtual void beginElement( const string &name, const AttributeList &attributes ) {}
     virtual void endElement( const string &name ) {}
-///Destructs cockpit info for new loading
+
+    ///Destructs cockpit info for new loading
     virtual void Delete();
-///draws the navigation symbol around targetted location
+
+    ///draws the navigation symbol around targetted location
     virtual void DrawNavigationSymbol( const Vector &loc, const Vector &p, const Vector &q, float size ) {}
-///draws the target box around targetted unit
+
+    ///draws the target box around targetted unit
     virtual float computeLockingSymbol( Unit *par )
     {
         return 1;
     }
     virtual void DrawTargetBox() {}
-///draws the target box around all units
+
+    ///draws the target box around all units
     virtual void DrawTargetBoxes(const Radar::Sensor&) {}
-///draws a target cross around all units targeted by your turrets // ** jay
+    
+    ///draws a target cross around all units targeted by your turrets // ** jay
     virtual void DrawTurretTargetBoxes() {}
-///Shows the flightgroup's target, if any.
+
+    ///Shows the flightgroup's target, if any.
     virtual void DrawTacticalTargetBox() {}
-///Draws all the tracks on the radar.
+
+    ///Draws all the tracks on the radar.
     virtual void DrawRadar(const Radar::Sensor&) {}
-///Draws gauges
+
+    ///Draws gauges
     virtual void DrawGauges( Unit *un ) {}
     float  cockpit_time;
     bool   ejecting;
@@ -120,7 +133,7 @@ public:
     }
     bool unitInAutoRegion( Unit *un );
     
-///Sets the current viewstyle
+    ///Sets the current viewstyle
     void SetView( const enum VIEWSTYLE tmp )
     {
         view = tmp;
@@ -134,7 +147,8 @@ public:
     float godliness;
     virtual int Autopilot( Unit *target );
     void RestoreGodliness();
-///Restores the view from the IDentity Matrix needed to draw sprites
+
+    ///Restores the view from the IDentity Matrix needed to draw sprites
     virtual void RestoreViewPort() {}
     
     std::string& GetUnitFileName(unsigned int which = 0)
@@ -182,20 +196,24 @@ public:
 
     std::string communication_choices;
     float credits; //how much money player has
-///How far away chasecam and pan cam is
+    
+    ///How far away chasecam and pan cam is
     float zoomfactor;
     Cockpit( const char *file, Unit *parent, const std::string &pilotname );
     virtual ~Cockpit();
-///Looks up a particular Gauge stat on target unit
+    
+    ///Looks up a particular Gauge stat on target unit
     virtual float LookupTargetStat( int stat, Unit *target )
     {
         return 1;
     }
-///Loads cockpit info...just as constructor
+
+    ///Loads cockpit info...just as constructor
     virtual void Init( const char *file, bool defaultCockpit = false );
     void recreate( const std::string &pilotname );
-///Sets owner of this cockpit
-//unsigned int whichcockpit;//0 is the first player, 1 is the second and so forth
+
+    ///Sets owner of this cockpit
+    //unsigned int whichcockpit;//0 is the first player, 1 is the second and so forth
     class Flightgroup*fg;
     class StarSystem*activeStarSystem; //used for context switch in Universe
     virtual void SetParent( Unit *unit, const char *filename, const char *unitmodname, const QVector &startloc );
@@ -204,11 +222,13 @@ public:
         return parent.GetUnit();
     }
     Unit * GetSaveParent();
-///Draws Cockpit then restores viewport
+
+    ///Draws Cockpit then restores viewport
     virtual void Draw() {}
     bool Update(); //respawns and the like. Returns true if starsystem was reloaded
     virtual void UpdAutoPilot();
-///Sets up the world for rendering...call before draw
+
+    ///Sets up the world for rendering...call before draw
     virtual void SetupViewPort( bool clip = true ) {}
     virtual int getVDUMode( int vdunum )
     {
@@ -233,7 +253,8 @@ public:
     virtual void SetCommAnimation( Animation *ani, Unit *un ) {}
     virtual void SetStaticAnimation() {}
     class SaveGame*savegame;
-///Accesses the current navigationsystem
+
+    ///Accesses the current navigationsystem
     virtual NavigationSystem * AccessNavSystem()
     {
         return NULL;
@@ -242,19 +263,23 @@ public:
     {
         return "";
     }
-///Accesses the current camera
+
+    ///Accesses the current camera
     virtual Camera * AccessCamera()
     {
         return NULL;
     }
-///Returns the passed in cam
+
+    ///Returns the passed in cam
     virtual Camera * AccessCamera( int )
     {
         return NULL;
     }
-///Changes current camera to selected camera
+
+    ///Changes current camera to selected camera
     virtual void SelectCamera( int ) {}
-///GFXLoadMatrix proper camera
+
+    ///GFXLoadMatrix proper camera
     virtual void SetViewport() {}
     virtual void visitSystem( std::string systemName );
     virtual bool SetDrawNavSystem( bool )
