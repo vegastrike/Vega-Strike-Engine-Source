@@ -303,17 +303,6 @@ void Unit::BackupState()
     this->old_state.setAcceleration( this->net_accel );
 }
 
-bool isMissile( const weapon_info *weap )
-{
-    static bool useProjectile =
-        XMLSupport::parse_bool( vs_config->getVariable( "graphics", "hud", "projectile_means_missile", "false" ) );
-    if (useProjectile && weap->type == weapon_info::PROJECTILE)
-        return true;
-    if (useProjectile == false && weap->size >= weapon_info::LIGHTMISSILE)
-        return true;
-    return false;
-}
-
 bool flickerDamage( Unit *un, float hullpercent )
 {
 #define damagelevel hullpercent
@@ -1461,7 +1450,7 @@ void Unit::Fire( unsigned int weapon_type_bitmask, bool listen_to_owner )
             counter = j-1;                       //will increment to the next one
             index   = best;
         }
-        const bool mis = isMissile( i->type );
+        const bool mis = i->type->isMissile();
         const bool locked_on = i->time_to_lock <= 0;
         const bool lockable_weapon  = i->type->LockTime > 0;
         const bool autotracking_gun = (!mis) && 0 != (i->size&weapon_info::AUTOTRACKING) && locked_on;
@@ -1539,7 +1528,7 @@ void Unit::Fire( unsigned int weapon_type_bitmask, bool listen_to_owner )
                         if (i->ref.gun)
                             if ( ( !i->ref.gun->Dissolved() ) || i->ref.gun->Ready() )
                                 energy -= i->type->EnergyRate*SIMULATION_ATOM;
-                    } else if ( isMissile( i->type ) ) {
+                    } else if ( i->type->isMissile() ) {    // FIXME  other than beams, only missiles are processed here?
                         energy -= i->type->EnergyRate;
                     }
                     //IF WE REFRESH ENERGY FROM SERVER : Think to send the energy update to the firing client with ACK TO fireRequest
@@ -1639,7 +1628,11 @@ void Unit::setAverageGunSpeed()
         //this breaks the name, but... it _is_ more useful.
         for (int i = 0; i < GetNumMounts(); ++i)
             if (mounts[i].status == Mount::ACTIVE || mounts[i].status == Mount::INACTIVE) {
-                if (isMissile( mounts[i].type ) == false) {
+                if ( mounts[i].type->isMissile() ) {
+                        if (mounts[i].type->Range > mrange)
+                            mrange = mounts[i].type->Range;
+                }
+                else {
                     if (mounts[i].type->Range > grange)
                         grange = mounts[i].type->Range;
                     if (mounts[i].status == Mount::ACTIVE) {
@@ -1647,9 +1640,6 @@ void Unit::setAverageGunSpeed()
                         ++nummt;
                         beam  &= (mounts[i].type->type == weapon_info::BEAM);
                     }
-                } else if ( isMissile( mounts[i].type ) ) {
-                    if (mounts[i].type->Range > mrange)
-                        mrange = mounts[i].type->Range;
                 }
             }
         if (nummt) {
@@ -5372,7 +5362,7 @@ void Unit::SelectAllWeapon( bool Missile )
 
 void Mount::Activate( bool Missile )
 {
-    if ( ( isMissile( type ) ) == Missile )
+    if ( type->isMissile() == Missile )
         if (status == INACTIVE)
             status = ACTIVE;
 }
@@ -5380,7 +5370,7 @@ void Mount::Activate( bool Missile )
 ///Sets this gun to inactive, unless unchosen or destroyed
 void Mount::DeActive( bool Missile )
 {
-    if ( ( isMissile( type ) ) == Missile )
+    if ( type->isMissile() == Missile )
         if (status == ACTIVE)
             status = INACTIVE;
 }
@@ -5416,7 +5406,7 @@ void Unit::ActivateGuns( const weapon_info *sz, bool ms )
     for (int j = 0; j < 2; ++j)
         for (int i = 0; i < GetNumMounts(); ++i)
             if (mounts[i].type == sz) {
-                if ( mounts[i].status < Mount::DESTROYED && mounts[i].ammo != 0 && (isMissile( mounts[i].type ) == ms) )
+                if ( (mounts[i].status < Mount::DESTROYED) && (mounts[i].ammo != 0) && (mounts[i].type->isMissile() == ms) )
                     mounts[i].Activate( ms );
                 else
                     sz = mounts[(i+1)%GetNumMounts()].type;
@@ -5452,7 +5442,7 @@ public:
 
     static bool checkmount( Unit *un, int i, bool missile )
     {
-        return un->mounts[i].status < Mount::DESTROYED && ( ( isMissile( un->mounts[i].type ) ) == missile )
+        return un->mounts[i].status < Mount::DESTROYED && ( un->mounts[i].type->isMissile() == missile )
                && un->mounts[i].ammo != 0;
     }
 
@@ -5564,9 +5554,9 @@ int Unit::LockMissile() const
     bool dumblock    = false;
     for (int i = 0; i < GetNumMounts(); ++i) {
         if ( mounts[i].status == Mount::ACTIVE && mounts[i].type->LockTime > 0 && mounts[i].time_to_lock <= 0
-            && isMissile( mounts[i].type ) )
+            &&  mounts[i].type->isMissile() )
             missilelock = true;
-        else if (mounts[i].status == Mount::ACTIVE && mounts[i].type->LockTime == 0 && isMissile( mounts[i].type )
+        else if (mounts[i].status == Mount::ACTIVE && mounts[i].type->LockTime == 0 &&  mounts[i].type->isMissile()
                  && mounts[i].time_to_lock <= 0)
             dumblock = true;
     }

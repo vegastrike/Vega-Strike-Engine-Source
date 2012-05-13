@@ -19,7 +19,6 @@
 #include "vsfilesystem.h"
 
 extern char SERVER;
-extern bool isMissile( const weapon_info* );
 Mount::Mount()
 {
     static weapon_info wi( weapon_info::BEAM );
@@ -205,7 +204,7 @@ bool Mount::PhysicsAlignedFire( Unit *caller,
     if (lock_disrupted_by_false_fire)
         time_to_lock = type->LockTime;
     if (processed == FIRED) {
-        if ( type->type == weapon_info::BEAM || isMissile( type ) )
+        if ( type->type == weapon_info::BEAM || type->isMissile() )
             //Missiles and beams set to processed.
             processed = PROCESSED;
         else if (ref.refire < type->Refire() || type->EnergyRate > caller->energy)
@@ -398,7 +397,7 @@ bool Mount::PhysicsAlignedFire( Unit *caller,
             
             if ( ( ( (!use_separate_sound)
                     || type->type == weapon_info::BEAM )
-                  || ( (!ai_use_separate_sound) && !ips ) ) && (isMissile( type ) == false) ) {
+                  || ( (!ai_use_separate_sound) && !ips ) ) && !type->isMissile() ) {
                 if ( ai_sound || (ips && type->type == weapon_info::BEAM) ) {
                     if ( !AUDIsPlaying( sound ) ) {
                         AUDPlay( sound, sound_pos, sound_vel, sound_gain );
@@ -449,7 +448,7 @@ bool Mount::Fire( Unit *firer, void *owner, bool Missile, bool listen_to_owner )
 {
     if (ammo == 0)
         processed = UNFIRED;
-    if (processed == FIRED || status != ACTIVE || ( Missile != ( isMissile( type ) ) ) || ammo == 0)
+    if (processed == FIRED || status != ACTIVE || ( type->isMissile() != Missile ) || ammo == 0)
         return false;
     if (type->type == weapon_info::BEAM) {
         bool fireit = ref.gun == NULL;

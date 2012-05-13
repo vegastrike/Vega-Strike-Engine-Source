@@ -565,3 +565,14 @@ float weapon_info::Refire() const
     static float three = XMLSupport::parse_float( vs_config->getVariable( "physics", "refire_difficutly_scaling", "3.0" ) );
     return this->RefireRate*( three/(1.0f+(three-1.0f)*g_game.difficulty) );
 }
+
+bool weapon_info::isMissile() const
+{
+    static bool useProjectile =
+        XMLSupport::parse_bool( vs_config->getVariable( "graphics", "hud", "projectile_means_missile", "false" ) );
+    if (useProjectile && this->type == weapon_info::PROJECTILE)
+        return true;
+    if (useProjectile == false && this->size >= weapon_info::LIGHTMISSILE)
+        return true;
+    return false;
+}

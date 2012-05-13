@@ -1561,47 +1561,47 @@ void VDU::DrawStarSystemAgain( float x, float y, float w, float h, VIEWSTYLE vie
 
 GFXColor MountColor( Mount *mnt )
 {
-    GFXColor mountcolor;
+    static GFXColor col_mount_default     = getConfigColor ( "mount_default"    , GFXColor( 0.0, 1.0, 0.2, 1.0) );
+    static GFXColor col_mount_not_ready   = getConfigColor ( "mount_not_ready"  , GFXColor( 0.0, 1.0, 0.4, 1.0) );
+    static GFXColor col_mount_out_of_ammo = getConfigColor ( "mount_out_of_ammo", GFXColor( 0.2, 0.2, 0.4, 1.0) );
+    static GFXColor col_mount_inactive    = getConfigColor ( "mount_inactive"   , GFXColor( 0.7, 0.7, 0.7, 1.0) );
+    static GFXColor col_mount_destroyed   = getConfigColor ( "mount_destroyed"  , GFXColor( 1.0, 0.0, 0.0, 1.0) );
+    static GFXColor col_mount_unchosen    = getConfigColor ( "mount_unchosen"   , GFXColor( 0.3, 0.3, 0.3, 1.0) );
+
+    GFXColor mountcolor = col_mount_default;
     switch (mnt->ammo != 0 ? mnt->status : 127)
     {
     case Mount::ACTIVE: {
             if (mnt->functionality == 1)
             {
-                float ref  = 1;
                 float tref = mnt->type->Refire();
                 float cref = 0;
-                if (mnt->type->type == weapon_info::BEAM) {
-                    if (mnt->ref.gun)
-                        cref = mnt->ref.gun->refireTime();
-                } else {
-                    cref = mnt->ref.refire;
-                }
-                if (cref < tref)
-                    ref = cref/tref;
-                if (ref == 1.0)
-                    mountcolor = GFXColor( 0, 1, .2 );
+                if ( (mnt->type->type == weapon_info::BEAM) && mnt->ref.gun )
+                    cref = mnt->ref.gun->refireTime();
                 else
-                    mountcolor = colLerp( GFXColor( .2, .2, .2 ), GFXColor( 0, 1, 1 ), ref );
+                    cref = mnt->ref.refire;
+                if (cref < tref) 
+                    mountcolor = colLerp( col_mount_out_of_ammo, col_mount_not_ready, cref/tref );
             } else	  // damaged
             {
-                mountcolor = colLerp( GFXColor( 1, 0, 0 ), GFXColor( 0, 1, .2 ), mnt->functionality );
+                mountcolor = colLerp( col_mount_destroyed, col_mount_default, mnt->functionality );
             }
         break;
         }
     case Mount::DESTROYED:
-        mountcolor = GFXColor( 1, 0, 0, 1 );
+        mountcolor = col_mount_destroyed;
         break;
     case Mount::INACTIVE:
-        mountcolor = GFXColor( 1, 1, 1, 1 );
+        mountcolor = col_mount_inactive;
         break;
     case Mount::UNCHOSEN:
-        mountcolor = GFXColor( 1, 1, 1, 1 );
+        mountcolor = col_mount_unchosen;
         break;
     case 127:
-        mountcolor = GFXColor( 0, .2, 0, 1 );
+        mountcolor = col_mount_out_of_ammo;
         break;
     default:
-        mountcolor = GFXColor( 0, 1, .2, 1 );
+// already set default color before switch; other than that, "default" should not happen with the current code, ever, so maybe we have to do something when it does
         break;
     }
     return mountcolor;
@@ -1611,58 +1611,71 @@ void VDU::DrawWeapon( Unit *parent )
 {
     static bool drawweapsprite =
         XMLSupport::parse_bool( vs_config->getVariable( "graphics", "hud", "draw_weapon_sprite", "false" ) );
+    static string list_empty_mounts_as = 
+        vs_config->getVariable( "graphics", "hud", "mounts_list_empty", "" ); // empty string skips; " ", "n/a", "(empty)" or "-" will show an empty mount
+    static bool do_list_empty_mounts = (list_empty_mounts_as.length() != 0);
+        
+//  without fixed font we would need some sneaky tweaking to make it a table, probably with multiple TPs
+//    static int weaponcolumns = 
+//        XMLSupport::parse_int( vs_config->getVariable( "graphics", "hud", "gun_list_columns", "1" ) );
+//    int    count  = 0;
+//    int    mcount = 0;
     float  x, y, w, h;
     const float percent = .6;
     string buf( "#00ff00WEAPONS\n\n#ffffffGuns:#000000" );
-    int    len    = buf.length();
     string mbuf( "\n#ffffffMissiles:#000000" );
-    int    mlen   = mbuf.length();
-    int    count  = 1;
-    int    mcount = 1;
+    string::size_type mlen   = mbuf.length();
     GFXEnable( TEXTURE0 );
     DrawTargetSpr( drawweapsprite ? parent->getHudImage() : NULL, percent, x, y, w, h );
     GFXDisable( TEXTURE0 );
     GFXDisable( LIGHTING );
     int nummounts = parent->GetNumMounts();
-    int numave    = 0;
+    int numave    = 1;
     GFXColor average( 0, 0, 0, 0 );
     for (int i = 0; i < nummounts; i++) {
+        GFXColor mntcolor = MountColor( &parent->mounts[i] );
         if (drawweapsprite) {
             Vector pos( parent->mounts[i].GetMountLocation() );
             pos.i = -pos.i*fabs( w )/parent->rSize()*percent+x;
             pos.j = pos.k*fabs( h )/parent->rSize()*percent+y;
             pos.k = 0;
+            GFXColorf( mntcolor );
             DrawGun( pos, w, h, parent->mounts[i].type->size );
         }
-        string   ammo     =
-            (parent->mounts[i].ammo >= 0) ? string( "(" )+tostring( parent->mounts[i].ammo )+string( ")" ) : string( "" );
-        GFXColor mntcolor = MountColor( &parent->mounts[i] );
-        numave    += 1;
         average.r += mntcolor.r;
         average.g += mntcolor.g;
         average.b += mntcolor.b;
         average.a += mntcolor.a;
         if (i+1 < nummounts && parent->mounts[i].bank) {
-            //nothing
-        } else if (parent->mounts[i].status == Mount::ACTIVE || parent->mounts[i].status == Mount::DESTROYED) {
-            GFXColor mountcolor( average.r/numave, average.g/numave, average.b/numave, average.a/numave );
-            if (parent->mounts[i].type->size < weapon_info::LIGHTMISSILE) {
-                buf +=
-                    ( (buf.length()
-                       == (unsigned int) len) ? string( "" ) : string( "," ) )+( (count++%1 == 0) ? "\n" : "" )+string(
-                        colToString( mountcolor ).str )+parent->mounts[i].type->weapon_name+ammo;
-            } else {
-                mbuf +=
-                    ( (mbuf.length()
-                       == (unsigned int) mlen) ? string( "" ) : string( "," ) )
-                    +( (mcount++%1
-                        == 0) ? "\n" : "" )+string( colToString( mountcolor ).str )+parent->mounts[i].type->weapon_name+ammo;
+            // add up numave and average, waiting for the next non-bank mount
+            if ( parent->mounts[i].status != Mount::UNCHOSEN ) //skip empty mounts for banks that aren't full
+                numave++;
+        } else {
+            if ( (parent->mounts[i].status != Mount::UNCHOSEN) || do_list_empty_mounts ) {
+                GFXColor mountcolor( average.r/numave, average.g/numave, average.b/numave, average.a/numave );
+                string baseweaponreport = string( colToString( mountcolor ).str );
+                if (parent->mounts[i].status == Mount::UNCHOSEN)
+                    baseweaponreport += list_empty_mounts_as;
+                else
+                    baseweaponreport += parent->mounts[i].type->weapon_name;
+                if (numave != 1)    //  show banks, if any, here; "#" seems to be a reserved char, see colToString
+                    baseweaponreport += string( " x" )+tostring( numave );
+                if (parent->mounts[i].ammo >= 0)
+                    baseweaponreport += string( " (" )+tostring( parent->mounts[i].ammo )+string( ")" );
+                if ( parent->mounts[i].type->isMissile() )
+                {
+                    mbuf += "\n" + baseweaponreport;
+                    // here we should also add to different columns - when we know how to make these work, that is
+                } else
+                {
+                    buf  += "\n" + baseweaponreport;
+                }
             }
-            numave  = 0;
+            numave  = 1;
             average = GFXColor( 0, 0, 0, 0 );
         }
     }
-    if (mbuf.length() != (unsigned int) mlen)
+    if (mbuf.length() != mlen)
         buf += mbuf;
     static float background_alpha =
         XMLSupport::parse_float( vs_config->getVariable( "graphics", "hud", "text_background_alpha", "0.0625" ) );

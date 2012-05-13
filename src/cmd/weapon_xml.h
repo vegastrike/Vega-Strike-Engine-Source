@@ -36,6 +36,7 @@ struct weapon_info
     float  Damage, PhaseDamage, Stability, Longrange, LockTime;
     float  EnergyRate, volume;
     float  Refire() const;
+    bool   isMissile() const;
     float  TextureStretch;
     std::string   file;
     std::string   weapon_name;
