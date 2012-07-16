@@ -25,13 +25,10 @@
 #ifndef _VEGASTRIKE_H_
 #define _VEGASTRIKE_H_
 
-#if 0
-static const float SIMULATION_ATOM = (float) (1.0/10.0);
-extern float simulation_atom_var;   //not used, just dummy to compile
-#else
 extern float simulation_atom_var;
+extern float audio_atom_var;
 #define SIMULATION_ATOM (simulation_atom_var)
-#endif
+#define AUDIO_ATOM (audio_atom_var)
 
 #include "vs_math.h"
 

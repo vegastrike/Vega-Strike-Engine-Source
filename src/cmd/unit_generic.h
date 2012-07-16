@@ -923,6 +923,7 @@ public:
     {
         return warpenergy;
     }
+    float GetMaxWarpFieldStrength( float rampmult = 1.f ) const;
     void DecreaseWarpEnergy( bool insystem, float time = 1.0f );
     void IncreaseWarpEnergy( bool insystem, float time = 1.0f );
     bool RefillWarpEnergy();
@@ -1108,6 +1109,7 @@ public:
         return cumulative_velocity;
     }
     Vector GetWarpVelocity() const;
+    Vector GetWarpRefVelocity() const;
     void SetVelocity( const Vector& );
     void SetAngularVelocity( const Vector& );
     float GetMoment() const

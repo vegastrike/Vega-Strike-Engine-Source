@@ -558,6 +558,8 @@ LIBGFX = \
   src/gfx/mesh.h \
   src/gfx/quaternion.cpp \
   src/gfx/quaternion.h \
+  src/gfx/soundcontainer_generic.h \
+  src/gfx/soundcontainer_generic.cpp \
   src/gfx/sphere_generic.cpp \
   src/gfx/vec.cpp \
   src/gfx/vec.h \
@@ -660,6 +662,10 @@ LIBGFXCLIENT = \
   src/gfx/ring.h \
   src/gfx/screenshot.cpp \
   src/gfx/screenshot.h \
+  src/gfx/soundcontainer.h \
+  src/gfx/soundcontainer.cpp \
+  src/gfx/soundcontainer_aldrv.h \
+  src/gfx/soundcontainer_aldrv.cpp \
   src/gfx/sphere.cpp \
   src/gfx/sphere.h \
   src/gfx/sprite.cpp \

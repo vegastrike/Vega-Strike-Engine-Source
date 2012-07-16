@@ -42,6 +42,7 @@ string GetUnitDir( string filename )
 
 char  SERVER = 2;
 float simulation_atom_var = (float) 1.0/10.0;
+float audio_atom_var = (float) 1.0/18.0;
 class NetClient
 {};
 NetClient *Network;

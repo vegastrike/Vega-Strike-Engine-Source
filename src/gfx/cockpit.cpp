@@ -55,6 +55,7 @@
 #include <string>
 #include "cmd/unit_const_cache.h"
 #include "options.h"
+#include "soundcontainer_aldrv.h"
 
 extern vs_options game_options;
 
@@ -1141,6 +1142,9 @@ float GameCockpit::LookupUnitStat( int stat, Unit *target )
 
     case UnitImages< void >::WARPFIELDSTRENGTH:
         return target->graphicOptions.WarpFieldStrength;
+    
+    case UnitImages< void >::MAXWARPFIELDSTRENGTH:
+        return target->GetMaxWarpFieldStrength();
 
     case UnitImages< void >::JUMP:
         return jumpok ? 1 : 0;
@@ -1384,6 +1388,167 @@ void GameCockpit::DrawTargetGauges( Unit *target )
             gauges[i]->Draw( LookupTargetStat( i, target ) );
     if (!text)
         return;
+}
+
+GameCockpit::LastState::LastState()
+{
+    processing_time = 0;
+    
+    jumpok = jumpnotok = 
+    specon = specoff =
+    asapon = asapoff =
+    asap_dockon = asap_dockoff =
+    asap_dock_avail =
+    dock =
+    dock_avail = 
+    lock = missilelock = 
+    eject = 
+    flightcompon = flightcompoff = false;
+}
+
+void GameCockpit::TriggerEvents( Unit *un )
+{
+    double curtime = UniverseUtil::GetGameTime();
+    if ((curtime - AUDIO_ATOM) < last.processing_time)
+        return;
+    else
+        last.processing_time = curtime;
+    
+    VSFileSystem::vs_dprintf(3, "Processing events\n");
+    for (EVENTID event = EVENTID_FIRST; event < NUM_EVENTS; event = (EVENTID)(event+1)) {
+        GameSoundContainer *sound = static_cast<GameSoundContainer*>(GetSoundForEvent(event));
+        if (sound != NULL) {
+            #define MODAL_TRIGGER(name, _triggervalue, _curvalue, lastvar) \
+                do { \
+                    bool triggervalue = _triggervalue; \
+                    bool curvalue = _curvalue; \
+                    VSFileSystem::vs_dprintf(3, "Processing event " name " (cur=%d last=%d)\n", \
+                        int(curvalue), int(last.lastvar) ); \
+                    \
+                    if (curvalue != last.lastvar) { \
+                        VSFileSystem::vs_dprintf(2, "Triggering event edge " name " (cur=%d last=%d on=%d)\n", \
+                            int(curvalue), int(last.lastvar), int(triggervalue) ); \
+                        last.lastvar = curvalue; \
+                        if (curvalue == triggervalue) \
+                            sound->play(); \
+                        else \
+                            sound->stop(); \
+                    } \
+                } while(0)
+            
+            #define MODAL_IMAGE_TRIGGER(image, itrigger, btrigger, lastvar) \
+                MODAL_TRIGGER(#image, btrigger, LookupUnitStat(UnitImages< void >::image, un) == UnitImages< void >::itrigger, lastvar)
+            
+            #define MODAL_RAWIMAGE_TRIGGER(image, itrigger, btrigger, lastvar) \
+                MODAL_TRIGGER(#image, btrigger, LookupUnitStat(UnitImages< void >::image, un) itrigger, lastvar)
+            
+            switch(event) {
+            case WARP_READY:
+                MODAL_RAWIMAGE_TRIGGER(MAXWARPFIELDSTRENGTH, >= 2, true, warpready);
+                break;
+            case WARP_UNREADY:
+                MODAL_RAWIMAGE_TRIGGER(MAXWARPFIELDSTRENGTH, >= 2, false, warpunready);
+                break;
+            case WARP_ENGAGED:
+                MODAL_IMAGE_TRIGGER(SPEC_MODAL, OFF, false, specon);
+                break;
+            case WARP_DISENGAGED:
+                MODAL_IMAGE_TRIGGER(SPEC_MODAL, OFF, true, specoff);
+                break;
+            case FLIGHT_COMPUTER_ENABLED:
+                MODAL_IMAGE_TRIGGER(FLIGHTCOMPUTER_MODAL, OFF, false, flightcompon);
+                break;
+            case FLIGHT_COMPUTER_DISABLED:
+                MODAL_IMAGE_TRIGGER(FLIGHTCOMPUTER_MODAL, OFF, true, flightcompoff);
+                break;
+            case ASAP_ENGAGED:
+                MODAL_TRIGGER("ASAP_ENGAGED", true, un->autopilotactive, asapon);
+                break;
+            case ASAP_DISENGAGED:
+                MODAL_TRIGGER("ASAP_DISENGAGED", false, un->autopilotactive, asapoff);
+                break;
+            case DOCK_AVAILABLE:
+                MODAL_IMAGE_TRIGGER(CANDOCK_MODAL, READY, true, dock_avail);
+                break;
+            case ASAP_DOCKING_AVAILABLE:
+                MODAL_IMAGE_TRIGGER(CANDOCK_MODAL, AUTOREADY, true, asap_dock_avail);
+                break;
+            case ASAP_DOCKING_ENGAGED:
+                {
+                    UnitImages< void >::GAUGES candock = (UnitImages< void >::GAUGES)LookupUnitStat(UnitImages< void >::CANDOCK_MODAL, un);
+                    MODAL_TRIGGER("ASAP_DOCKING", true, 
+                                (un->autopilotactive && (   candock == UnitImages< void >::READY 
+                                                         || candock == UnitImages< void >::AUTOREADY)), 
+                                asap_dockon);
+                }
+                break;
+            case ASAP_DOCKING_DISENGAGED:
+                {
+                    UnitImages< void >::GAUGES candock = (UnitImages< void >::GAUGES)LookupUnitStat(UnitImages< void >::CANDOCK_MODAL, un);
+                    MODAL_TRIGGER("ASAP_DOCKING", false, 
+                                (un->autopilotactive && (   candock == UnitImages< void >::READY 
+                                                         || candock == UnitImages< void >::AUTOREADY)), 
+                                asap_dockoff);
+                }
+                break;
+            case JUMP_AVAILABLE:
+                MODAL_TRIGGER("JUMP_AVAILABLE", true, ((jumpok) ? true : false), jumpok);
+                break;
+            case JUMP_UNAVAILABLE:
+                MODAL_TRIGGER("JUMP_UNAVAILABLE", false, ((jumpok) ? true : false), jumpnotok);
+                break;
+            case LOCK_WARNING:
+                MODAL_RAWIMAGE_TRIGGER(LOCK, >= 1, true, lock);
+                break;
+            case MISSILELOCK_WARNING:
+                MODAL_RAWIMAGE_TRIGGER(MISSILELOCK, >= 1, true, missilelock);
+                break;
+            case EJECT_WARNING:
+                MODAL_RAWIMAGE_TRIGGER(EJECT, >= 1, true, eject);
+                break;
+            case WARP_LOOP0:
+            case WARP_LOOP0+1:
+            case WARP_LOOP0+2:
+            case WARP_LOOP0+3:
+            case WARP_LOOP0+4:
+            case WARP_LOOP0+5:
+            case WARP_LOOP0+6:
+            case WARP_LOOP0+7:
+            case WARP_LOOP0+8:
+            case WARP_LOOP0+9:
+                {
+                    float warpfieldstrength = LookupUnitStat(UnitImages< void >::WARPFIELDSTRENGTH, un);
+                    int warpreflevel = event - WARP_LOOP0;
+                    int warplevel = int(log(warpfieldstrength)/log(10));
+                    MODAL_TRIGGER("WARP_LOOP", warpreflevel, warplevel, warplooplevel);
+                }
+                break;
+            case WARP_SKIP0:
+            case WARP_SKIP0+1:
+            case WARP_SKIP0+2:
+            case WARP_SKIP0+3:
+            case WARP_SKIP0+4:
+            case WARP_SKIP0+5:
+            case WARP_SKIP0+6:
+            case WARP_SKIP0+7:
+            case WARP_SKIP0+8:
+            case WARP_SKIP0+9:
+                {
+                    float warpfieldstrength = LookupUnitStat(UnitImages< void >::WARPFIELDSTRENGTH, un);
+                    int warpreflevel = event - WARP_SKIP0;
+                    int warplevel = int(log(warpfieldstrength)/log(10));
+                    MODAL_TRIGGER("WARP_SKIP", warpreflevel, warplevel, warpskiplevel);
+                }
+                break;
+            case JUMP_FAILED:
+            case DOCK_FAILED:
+                // TODO
+                break;
+            default:
+                break;
+            }
+        }
+    }
 }
 
 void GameCockpit::DrawGauges( Unit *un )
@@ -2427,6 +2592,18 @@ void GameCockpit::Draw()
         }
     //draw unit gauges
     if ( ( un = parent.GetUnit() ) ) {
+        switch (view) {
+        case CP_FRONT:
+        case CP_LEFT:
+        case CP_RIGHT:
+        case CP_BACK:
+        case CP_VIEWTARGET:
+        case CP_PANINSIDE:
+            TriggerEvents( un );
+            break;
+        default:
+            break;
+        };
         if ( view == CP_FRONT
             || (view == CP_CHASE
                 && drawChaseVDU)
@@ -3374,3 +3551,7 @@ void GameCockpit::SetInsidePanPitchSpeed( float speed )
     insidePanPitchSpeed = speed;
 }
 
+SoundContainer* GameCockpit::soundImpl(const SoundContainer &specs)
+{
+    return new AldrvSoundContainer(specs);
+}

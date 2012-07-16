@@ -877,7 +877,8 @@ void InitPaths( string conf, string subdir )
     Directories[PythonFile]  = "bases";
     Directories[AccountFile] = "accounts";
 
-    simulation_atom_var = atof( vs_config->getVariable( "general", "simulation_atom", "0.1" ).c_str() );
+    SIMULATION_ATOM = atof( vs_config->getVariable( "general", "simulation_atom", "0.1" ).c_str() );
+    AUDIO_ATOM = atof( vs_config->getVariable( "general", "audio_atom", "0.05555555556" ).c_str() );
     cout<<"SIMULATION_ATOM: "<<SIMULATION_ATOM<<endl;
 
     /************************* Home directory subdirectories creation ************************/

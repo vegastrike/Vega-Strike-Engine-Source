@@ -111,6 +111,27 @@ class GameCockpit : public Cockpit
     //colors of blips/targetting boxes
     GFXColor friendly, enemy, neutral, targeted, targetting, planet;
     
+    // Last observed values for edge-triggered events
+    struct LastState {
+        double processing_time;
+        int warplooplevel;
+        int warpskiplevel;
+        
+        bool jumpok:1, jumpnotok:1;
+        bool specon:1, specoff:1;
+        bool asapon:1, asapoff:1;
+        bool asap_dockon:1, asap_dockoff:1;
+        bool asap_dock_avail:1;
+        bool dock:1;
+        bool dock_avail:1;
+        bool lock:1, missilelock:1;
+        bool eject:1;
+        bool flightcompon:1, flightcompoff:1;
+        bool warpready:1, warpunready:1;
+        
+        LastState();
+    } last;
+    
     /// Used to display the arrow pointing to the currently selected target.
     float  projection_limit_x, projection_limit_y;
     float  inv_screen_aspect_ratio; //Precomputed division 1 / g_game.aspect.
@@ -138,6 +159,8 @@ class GameCockpit : public Cockpit
     void DrawTargetGauges( Unit *target );
     ///Draws unit gauges
     void DrawGauges( Unit *un );
+    ///Trigger scripted events
+    void TriggerEvents( Unit *un );
     NavigationSystem ThisNav;
     //Draw the arrow pointing to the target.
     void DrawArrowToTarget(const Radar::Sensor&, Unit*);
@@ -233,6 +256,10 @@ public:
     // Ship is jumping
     void OnJumpBegin(Unit *unit);
     void OnJumpEnd(Unit *unit);
+    
+protected:
+    /// Override to use a specific kind of sound implementation
+    SoundContainer* soundImpl(const SoundContainer &specs);
 };
 #endif
 

@@ -15,6 +15,7 @@ NetServer *VSServer     = NULL;
 FILE       *fpread      = NULL;
 
 float       simulation_atom_var = (float) (1.0/10.0);
+float       audio_atom_var = (float) (1.0/18.0);
 Mission    *mission     = NULL;
 
 double      benchmark   = -1.0;

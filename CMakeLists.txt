@@ -233,6 +233,7 @@ SET(LIBGFXGENERIC_SOURCES src/gfx/cockpit_generic.cpp
 						  src/gfx/mesh_xml.cpp
 						  src/gfx/mesh.cpp
 						  src/gfx/quaternion.cpp
+                                                  src/gfx/soundcontainer_generic.cpp
 						  src/gfx/sphere_generic.cpp
 						  src/gfx/vec.cpp )
 
@@ -294,6 +295,8 @@ SET(LIBGFXCLIENT_SOURCES src/gfx/ani_texture.cpp
 						 src/gfx/quadtree.cpp
 						 src/gfx/ring.cpp
 						 src/gfx/screenshot.cpp
+                                                 src/gfx/soundcontainer.cpp
+                                                 src/gfx/soundcontainer_aldrv.cpp
 						 src/gfx/sphere.cpp
 						 src/gfx/sprite.cpp 
 						 src/gfx/star.cpp

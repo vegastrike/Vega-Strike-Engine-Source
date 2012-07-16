@@ -41,6 +41,11 @@ public: UnitContainer();
     ~UnitContainer();
     void SetUnit( Unit* );
     Unit * GetUnit();
+    
+    const Unit * GetConstUnit() const
+    {
+        return unit;
+    }
 };
 
 #endif

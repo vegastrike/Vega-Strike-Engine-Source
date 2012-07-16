@@ -58,7 +58,8 @@ public:
                 ++(_it->second);
         }
 
-public: Reference() :
+    public: 
+        Reference() :
             _it( SharedPool::getSingleton().referenceCounter.end() )
             , _rc( &SharedPool::getSingleton().referenceCounter )
         {}

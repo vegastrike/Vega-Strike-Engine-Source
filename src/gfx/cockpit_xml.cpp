@@ -78,7 +78,9 @@ enum Names
     G_LEFT,
     G_RIGHT,
     G_TIME,
-    ALPH
+    ALPH,
+    EVENT,
+    LOOPING
 };
 
 const EnumMap::Pair element_names[] = {
@@ -91,6 +93,7 @@ const EnumMap::Pair element_names[] = {
     EnumMap::Pair( "RightVDU",          RVDU ),
     EnumMap::Pair( "Panel",             PANEL ),
     EnumMap::Pair( "Crosshairs",        CROSSHAIRS ),
+    EnumMap::Pair( "Event",             EVENT ),
     EnumMap::Pair( "ArmorF",            UnitImages< void >::ARMORF ),
     EnumMap::Pair( "ArmorR",            UnitImages< void >::ARMORR ),
     EnumMap::Pair( "ArmorL",            UnitImages< void >::ARMORL ),
@@ -180,7 +183,56 @@ const EnumMap::Pair attribute_names[] = {
     EnumMap::Pair( "g",             GREEN ),
     EnumMap::Pair( "b",             BLUE ),
     EnumMap::Pair( "type",          VDUTYPE ),
-    EnumMap::Pair( "a",             ALPH )
+    EnumMap::Pair( "a",             ALPH ),
+    EnumMap::Pair( "event",         EVENT ),
+    EnumMap::Pair( "looping",       LOOPING ),
+    
+    
+    // Cockpit events
+    EnumMap::Pair( "WarpReady",     Cockpit::WARP_READY ),
+    EnumMap::Pair( "WarpUnready",   Cockpit::WARP_UNREADY ),
+    EnumMap::Pair( "WarpEngaged",   Cockpit::WARP_ENGAGED ),
+    EnumMap::Pair( "WarpDisengaged",Cockpit::WARP_DISENGAGED ),
+    EnumMap::Pair( "WarpLoop0",     Cockpit::WARP_LOOP0 ),
+    EnumMap::Pair( "WarpLoop1",     Cockpit::WARP_LOOP0+1 ),
+    EnumMap::Pair( "WarpLoop2",     Cockpit::WARP_LOOP0+2 ),
+    EnumMap::Pair( "WarpLoop3",     Cockpit::WARP_LOOP0+3 ),
+    EnumMap::Pair( "WarpLoop4",     Cockpit::WARP_LOOP0+4 ),
+    EnumMap::Pair( "WarpLoop5",     Cockpit::WARP_LOOP0+5 ),
+    EnumMap::Pair( "WarpLoop6",     Cockpit::WARP_LOOP0+6 ),
+    EnumMap::Pair( "WarpLoop7",     Cockpit::WARP_LOOP0+7 ),
+    EnumMap::Pair( "WarpLoop8",     Cockpit::WARP_LOOP0+8 ),
+    EnumMap::Pair( "WarpLoop9",     Cockpit::WARP_LOOP0+9 ),
+    EnumMap::Pair( "WarpSkip0",     Cockpit::WARP_LOOP0 ),
+    EnumMap::Pair( "WarpSkip1",     Cockpit::WARP_LOOP0+1 ),
+    EnumMap::Pair( "WarpSkip2",     Cockpit::WARP_LOOP0+2 ),
+    EnumMap::Pair( "WarpSkip3",     Cockpit::WARP_LOOP0+3 ),
+    EnumMap::Pair( "WarpSkip4",     Cockpit::WARP_LOOP0+4 ),
+    EnumMap::Pair( "WarpSkip5",     Cockpit::WARP_LOOP0+5 ),
+    EnumMap::Pair( "WarpSkip6",     Cockpit::WARP_LOOP0+6 ),
+    EnumMap::Pair( "WarpSkip7",     Cockpit::WARP_LOOP0+7 ),
+    EnumMap::Pair( "WarpSkip8",     Cockpit::WARP_LOOP0+8 ),
+    EnumMap::Pair( "WarpSkip9",     Cockpit::WARP_LOOP0+9 ),
+    
+    EnumMap::Pair( "ASAPEngaged",   Cockpit::ASAP_ENGAGED ),
+    EnumMap::Pair( "ASAPDisengaged",Cockpit::ASAP_DISENGAGED ),
+    EnumMap::Pair( "ASAPDockingAvailable",   Cockpit::ASAP_DOCKING_AVAILABLE ),
+    EnumMap::Pair( "ASAPDockingEngaged",     Cockpit::ASAP_DOCKING_ENGAGED ),
+    EnumMap::Pair( "ASAPDockingDisengaged",  Cockpit::ASAP_DOCKING_DISENGAGED ),
+    EnumMap::Pair( "FlightComputerEnabled",  Cockpit::FLIGHT_COMPUTER_ENABLED ),
+    EnumMap::Pair( "FlightComputerDisabled", Cockpit::FLIGHT_COMPUTER_DISABLED ),
+
+    EnumMap::Pair( "DockAvailable",     Cockpit::DOCK_AVAILABLE ),
+    EnumMap::Pair( "DockUnavailable",   Cockpit::DOCK_UNAVAILABLE ),
+    EnumMap::Pair( "DockFailed",        Cockpit::DOCK_FAILED ),
+    EnumMap::Pair( "JumpAvailable",     Cockpit::JUMP_AVAILABLE ),    
+    EnumMap::Pair( "JumpUnavailable",   Cockpit::JUMP_UNAVAILABLE ),    
+    EnumMap::Pair( "JumpFailed",        Cockpit::JUMP_FAILED ),    
+
+    EnumMap::Pair( "Lock",              Cockpit::LOCK_WARNING ),
+    EnumMap::Pair( "MissileLock",       Cockpit::MISSILELOCK_WARNING ),
+    EnumMap::Pair( "Eject",             Cockpit::EJECT_WARNING ),
+
 };
 
 const EnumMap element_map( element_names, sizeof (element_names)/sizeof (element_names[0]) );
@@ -569,6 +621,34 @@ loadsprite:
             }
         } else if ( newsprite == &Panel.back() ) {
             Panel.erase( Panel.end()-1 );             //don't want null panels
+        }
+        break;
+    case EVENT:
+        {
+            std::string soundfile;
+            bool looping = false;
+            EVENTID event = Cockpit::NUM_EVENTS;
+            
+            for (iter = attributes.begin(); iter != attributes.end(); iter++) {
+                switch ( attribute_map.lookup( (*iter).name ) )
+                {
+                case SOUNDFILE:
+                    soundfile = (*iter).value;
+                    break;
+                case LOOPING:
+                    looping = XMLSupport::parse_bool( (*iter).value );
+                    break;
+                case EVENT:
+                    event = (Cockpit::EVENTID) attribute_map.lookup( (*iter).value );
+                    break;
+                default:
+                    break;
+                }
+            }
+            
+            if (!soundfile.empty() && (event > 0) && (event < Cockpit::NUM_EVENTS)) {
+                SetSoundForEvent(event, SoundContainer(soundfile, looping));
+            }
         }
         break;
     default:

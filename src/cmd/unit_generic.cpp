@@ -166,6 +166,23 @@ void Unit::SetMaxEnergy( float maxen )
     maxenergy = maxen;
 }
 
+Vector Unit::GetWarpRefVelocity() const
+{
+    //Velocity
+    Vector VelocityRef( 0, 0, 0 );
+    {
+        const Unit *vr = computer.velocity_ref.GetConstUnit();
+        if (vr)
+            VelocityRef = vr->cumulative_velocity;
+    }
+    Vector v   = Velocity-VelocityRef;
+    float  len = v.Magnitude();
+    if (len > .01)      //only get velocity going in DIRECTIOn of cumulative transformation for warp calc...
+        v = v*( cumulative_transformation_matrix.getR().Dot( v*(1./len) ) );
+    
+    return v;
+}
+
 Vector Unit::GetWarpVelocity() const
 {
     Vector VelocityRef( 0, 0, 0 );
@@ -2661,25 +2678,50 @@ float CalculateNearestWarpUnit( const Unit *thus, float minmultiplier, Unit **ne
     return minmultiplier;
 }
 
+float Unit::GetMaxWarpFieldStrength( float rampmult ) const
+{
+    Vector v = GetWarpRefVelocity();
+    
+    //Pi^2
+    static float  warpMultiplierMin =
+        XMLSupport::parse_float( vs_config->getVariable( "physics", "warpMultiplierMin", "9.86960440109" ) );
+    //C
+    static float  warpMultiplierMax =
+        XMLSupport::parse_float( vs_config->getVariable( "physics", "warpMultiplierMax", "300000000" ) );
+    //Pi^2 * C
+    static float  warpMaxEfVel   = XMLSupport::parse_float( vs_config->getVariable( "physics", "warpMaxEfVel", "2960881320" ) );
+    //inverse fractional effect of ship vs real big object
+    float minmultiplier = warpMultiplierMax*graphicOptions.MaxWarpMultiplier;
+    Unit *nearest_unit  = NULL;
+    minmultiplier = CalculateNearestWarpUnit( this, minmultiplier, &nearest_unit, true );
+    float minWarp = warpMultiplierMin*graphicOptions.MinWarpMultiplier;
+    float maxWarp = warpMultiplierMax*graphicOptions.MaxWarpMultiplier;
+    if (minmultiplier < minWarp)
+        minmultiplier = minWarp;
+    if (minmultiplier > maxWarp)
+        minmultiplier = maxWarp; //SOFT LIMIT
+    minmultiplier *= rampmult;
+    if (minmultiplier < 1)
+        minmultiplier = 1;
+    v *= minmultiplier;
+    float vmag = sqrt( v.i*v.i+v.j*v.j+v.k*v.k );
+    if (vmag > warpMaxEfVel) {
+        v *= warpMaxEfVel/vmag; //HARD LIMIT
+        minmultiplier *= warpMaxEfVel/vmag;
+    }
+    return minmultiplier;
+}
+
 void Unit::AddVelocity( float difficulty )
 {
-    Vector VelocityRef( 0, 0, 0 );
-    {
-        Unit *vr = computer.velocity_ref.GetUnit();
-        if (vr)
-            VelocityRef = vr->cumulative_velocity;
-    }
     //for the heck of it.
     static float humanwarprampuptime = XMLSupport::parse_float( vs_config->getVariable( "physics", "warprampuptime", "5" ) );
     //for the heck of it.
     static float compwarprampuptime  =
         XMLSupport::parse_float( vs_config->getVariable( "physics", "computerwarprampuptime", "10" ) );
     static float warprampdowntime    = XMLSupport::parse_float( vs_config->getVariable( "physics", "warprampdowntime", "0.5" ) );
-    Vector v   = Velocity-VelocityRef;
-    float  len = v.Magnitude();
     float  lastWarpField = graphicOptions.WarpFieldStrength;
-    if (len > .01)      //only get velocity going in DIRECTIOn of cumulative transformation for warp calc...
-        v = v*( cumulative_transformation_matrix.getR().Dot( v*(1./len) ) );
+    
     bool   playa = _Universe->isPlayerStarship( this ) ? true : false;
     float  warprampuptime = playa ? humanwarprampuptime : compwarprampuptime;
     //Warp Turning on/off
@@ -2693,19 +2735,7 @@ void Unit::AddVelocity( float difficulty )
         graphicOptions.WarpRamping = 0;
     }
     if (graphicOptions.InWarp == 1 || graphicOptions.RampCounter != 0) {
-        //Pi^2
-        static float  warpMultiplierMin =
-            XMLSupport::parse_float( vs_config->getVariable( "physics", "warpMultiplierMin", "9.86960440109" ) );
-        //C
-        static float  warpMultiplierMax =
-            XMLSupport::parse_float( vs_config->getVariable( "physics", "warpMultiplierMax", "300000000" ) );
-        //Pi^2 * C
-        static float  warpMaxEfVel   = XMLSupport::parse_float( vs_config->getVariable( "physics", "warpMaxEfVel", "2960881320" ) );
-        //inverse fractional effect of ship vs real big object
-        float minmultiplier = warpMultiplierMax*graphicOptions.MaxWarpMultiplier;
-        Unit *nearest_unit  = NULL;
-        minmultiplier = CalculateNearestWarpUnit( this, minmultiplier, &nearest_unit, true );
-        float rampmult = 1;
+        float rampmult = 1.f;
         if (graphicOptions.RampCounter != 0) {
             graphicOptions.RampCounter -= SIMULATION_ATOM;
             if (graphicOptions.RampCounter <= 0)
@@ -2715,32 +2745,18 @@ void Unit::AddVelocity( float difficulty )
             if (graphicOptions.InWarp == 1 && graphicOptions.RampCounter > warprampuptime)
                 graphicOptions.RampCounter = warprampuptime;
             rampmult = (graphicOptions.InWarp) ? 1.0
-                       -( (graphicOptions.RampCounter
-                           /warprampuptime)
-                         *(graphicOptions.RampCounter
-                           /warprampuptime) ) : (graphicOptions.RampCounter
-                                                 /warprampdowntime)*(graphicOptions.RampCounter/warprampdowntime);
+                        -( (graphicOptions.RampCounter
+                            /warprampuptime)
+                            *(graphicOptions.RampCounter
+                            /warprampuptime) ) : (graphicOptions.RampCounter
+                                                    /warprampdowntime)*(graphicOptions.RampCounter/warprampdowntime);
         }
-        float minWarp = warpMultiplierMin*graphicOptions.MinWarpMultiplier;
-        float maxWarp = warpMultiplierMax*graphicOptions.MaxWarpMultiplier;
-        if (minmultiplier < minWarp)
-            minmultiplier = minWarp;
-        if (minmultiplier > maxWarp)
-            minmultiplier = maxWarp; //SOFT LIMIT
-        minmultiplier *= rampmult;
-        if (minmultiplier < 1)
-            minmultiplier = 1;
-        v *= minmultiplier;
-        float vmag = sqrt( v.i*v.i+v.j*v.j+v.k*v.k );
-        if (vmag > warpMaxEfVel) {
-            v *= warpMaxEfVel/vmag; //HARD LIMIT
-            minmultiplier *= warpMaxEfVel/vmag;
-        }
-        graphicOptions.WarpFieldStrength = minmultiplier;
+        graphicOptions.WarpFieldStrength = GetMaxWarpFieldStrength(rampmult);
     } else {
         graphicOptions.WarpFieldStrength = 1;
     }
     //not any more? lastWarpField=1;
+    Vector v;
     if (graphicOptions.WarpFieldStrength != 1.0)
         v = GetWarpVelocity();
     else
