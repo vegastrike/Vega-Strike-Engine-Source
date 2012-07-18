@@ -1475,7 +1475,7 @@ void GameCockpit::TriggerEvents( Unit *un )
                 break;
             case ASAP_DOCKING_ENGAGED:
                 {
-                    UnitImages< void >::GAUGES candock = (UnitImages< void >::GAUGES)LookupUnitStat(UnitImages< void >::CANDOCK_MODAL, un);
+                    float candock = LookupUnitStat(UnitImages< void >::CANDOCK_MODAL, un);
                     MODAL_TRIGGER("ASAP_DOCKING", true, 
                                 (un->autopilotactive && (   candock == UnitImages< void >::READY 
                                                          || candock == UnitImages< void >::AUTOREADY)), 
@@ -1484,7 +1484,7 @@ void GameCockpit::TriggerEvents( Unit *un )
                 break;
             case ASAP_DOCKING_DISENGAGED:
                 {
-                    UnitImages< void >::GAUGES candock = (UnitImages< void >::GAUGES)LookupUnitStat(UnitImages< void >::CANDOCK_MODAL, un);
+                    float candock = LookupUnitStat(UnitImages< void >::CANDOCK_MODAL, un);
                     MODAL_TRIGGER("ASAP_DOCKING", false, 
                                 (un->autopilotactive && (   candock == UnitImages< void >::READY 
                                                          || candock == UnitImages< void >::AUTOREADY)), 
@@ -1519,7 +1519,7 @@ void GameCockpit::TriggerEvents( Unit *un )
                 {
                     float warpfieldstrength = LookupUnitStat(UnitImages< void >::WARPFIELDSTRENGTH, un);
                     int warpreflevel = event - WARP_LOOP0;
-                    int warplevel = int(log(warpfieldstrength)/log(10));
+                    int warplevel = int(log(warpfieldstrength)/log(10.f));
                     MODAL_TRIGGER("WARP_LOOP", warpreflevel, warplevel, warplooplevel);
                 }
                 break;
