@@ -241,6 +241,11 @@ bool isVista = false;
 int main( int argc, char *argv[] )
 {
     VSFileSystem::ChangeToProgramDirectory( argv[0] );
+
+#ifdef WIN32
+	VSFileSystem::InitHomeDirectory();
+#endif
+
     CONFIGFILE = 0;
     mission_name[0] = '\0';
     {

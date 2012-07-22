@@ -1536,7 +1536,7 @@ void GameCockpit::TriggerEvents( Unit *un )
                 {
                     float warpfieldstrength = LookupUnitStat(UnitImages< void >::WARPFIELDSTRENGTH, un);
                     int warpreflevel = event - WARP_SKIP0;
-                    int warplevel = int(log(warpfieldstrength)/log(10));
+                    int warplevel = int(log(warpfieldstrength)/log(10.0f));
                     MODAL_TRIGGER("WARP_SKIP", warpreflevel, warplevel, warpskiplevel);
                 }
                 break;
