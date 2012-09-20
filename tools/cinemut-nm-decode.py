@@ -1,3 +1,4 @@
+#!/usr/bin/python
 import sys
 from PIL import Image
 import math
@@ -8,12 +9,12 @@ if len(sys.argv) <= 2:
 
 try:
     import numpy
-    def encode(im):
+    def encode(im, len=len):
         im.load()
         r,g,b,a = im.split()
         atan = numpy.arctan
         tan = numpy.tan
-        e = 3.1875
+        e = 2.0
         
         u  = numpy.array(r.getdata(), dtype=numpy.float32)
         u += numpy.array(g.getdata(), dtype=numpy.float32)
@@ -51,7 +52,7 @@ except ImportError:
     def encode(im, int=int):
         data = im.load()
         sqrt = math.sqrt
-        e = 3.1875
+        e = 2.0
         for x in xrange(im.size[0]):
             for y in xrange(im.size[1]):
                 loc = x,y
