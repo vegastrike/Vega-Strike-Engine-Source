@@ -229,7 +229,8 @@ namespace Audio {
                 packetBufferSize = packet.size;
                 packetBuffer = packet.data;
 
-                sampleBufferStart = int64_t(floor(ptsToTime(packet.dts) * pCodecCtx->sample_rate));
+                if (packet.pts != AV_NOPTS_VALUE)
+                    sampleBufferStart = uint64_t(floor(ptsToTime(packet.pts) * pCodecCtx->sample_rate));
             }
             
             void syncPts() throw(EndOfStreamException)
@@ -237,7 +238,8 @@ namespace Audio {
                 if (!hasPacket())
                     throw EndOfStreamException();
                 sampleBufferSize = 0;
-                sampleBufferStart = int64_t(floor(ptsToTime(packet.dts) * pCodecCtx->sample_rate));
+                if (packet.pts != AV_NOPTS_VALUE)
+                    sampleBufferStart = uint64_t(floor(ptsToTime(packet.pts) * pCodecCtx->sample_rate));
                 
                 if (sampleBufferStart > streamSize)
                     streamSize = sampleBufferStart;
