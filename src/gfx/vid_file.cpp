@@ -104,9 +104,9 @@ private:
                         pCodecCtx, pNextFrameYUV, &frameFinished,
                         packetBuffer, packetBufferSize );
                     #endif
-                    VSFileSystem::vs_dprintf(3, "dts %ld: Decoded %d bytes %s\n", 
-                        packet.dts,
-                        bytesDecoded,
+                    VSFileSystem::vs_dprintf(3, "dts %lld: Decoded %d bytes %s\n", 
+                        int64_t(packet.dts),
+                        int(bytesDecoded),
                         (frameFinished ? "Got frame" : "")
                     );
                     //Was there an error?
@@ -225,12 +225,12 @@ public:
         videoStreamIndex = -1;
         VSFileSystem::vs_dprintf(2, "Loaded %s\n", path.c_str());
         for (int i = 0; i < pFormatCtx->nb_streams; ++i) {
-            VSFileSystem::vs_dprintf(3, "  Stream %d: type %s (%d) first dts %ld\n", 
+            VSFileSystem::vs_dprintf(3, "  Stream %d: type %s (%d) first dts %lld\n", 
                 i,
                 ( (pFormatCtx->streams[i]->codec->codec_type == CODEC_TYPE_VIDEO) ? "Video"
                     : ( (pFormatCtx->streams[i]->codec->codec_type == CODEC_TYPE_AUDIO) ? "Audio" : "unk" ) ),
                 pFormatCtx->streams[i]->codec->codec_type,
-                pFormatCtx->streams[i]->start_time
+                int64_t(pFormatCtx->streams[i]->start_time)
             );
             if ((pCodecCtx == 0) && (pFormatCtx->streams[i]->codec->codec_type == CODEC_TYPE_VIDEO))
                 pCodecCtx = (pStream = pFormatCtx->streams[videoStreamIndex = i])->codec;
@@ -297,7 +297,7 @@ public:
         
         //Translate float time to frametime
         int64_t targetPTS = int64_t( floor( double(time)*pStream->time_base.den/pStream->time_base.num ) );
-        VSFileSystem::vs_dprintf(3, "Seeking to %.3fs pts %ld\n", time, targetPTS);
+        VSFileSystem::vs_dprintf(3, "Seeking to %.3fs pts %lld\n", time, targetPTS);
         if ( (targetPTS >= prevPTS) && (targetPTS < pNextFrameYUV->pts) ) {
             //same frame
             if (targetPTS >= fbPTS) {
@@ -319,7 +319,7 @@ public:
                 if (backPTS < 0)
                     backPTS = 0;
                     
-                VSFileSystem::vs_dprintf(3, "backseeking to %ld (at %ld)\n", backPTS, pNextFrameYUV->pts);
+                VSFileSystem::vs_dprintf(3, "backseeking to %lld (at %lld)\n", backPTS, int64_t(pNextFrameYUV->pts));
                 av_seek_frame( pFormatCtx, videoStreamIndex, backPTS, AVSEEK_FLAG_BACKWARD );
                 
                 prevPTS = backPTS;
@@ -331,19 +331,19 @@ public:
                 if (pNextFrameYUV->pts < targetPTS) {
                     prevPTS = pNextFrameYUV->pts;
                     nextFrame();
-                    VSFileSystem::vs_dprintf(3, "decoding to %ld (at %ld-%ld)\n", targetPTS, prevPTS, pNextFrameYUV->pts);
+                    VSFileSystem::vs_dprintf(3, "decoding to %lld (at %lld-%lld)\n", targetPTS, prevPTS, int64_t(pNextFrameYUV->pts));
                 }
                 // If we have to skip more frames, don't decode, only skip data
                 while (packet.dts < targetPTS) {
                     prevPTS = packet.dts;
                     nextFrame(true);
-                    VSFileSystem::vs_dprintf(3, "skipping to %ld (at %ld-%ld)\n", targetPTS, prevPTS, packet.dts);
+                    VSFileSystem::vs_dprintf(3, "skipping to %lld (at %lld-%lld)\n", targetPTS, prevPTS, int64_t(packet.dts));
                 }
                 // we're close, decode now
                 while (pNextFrameYUV->pts < targetPTS) {
                     prevPTS = pNextFrameYUV->pts;
                     nextFrame();
-                    VSFileSystem::vs_dprintf(3, "decoding to %ld (at %ld-%ld)\n", targetPTS, prevPTS, pNextFrameYUV->pts);
+                    VSFileSystem::vs_dprintf(3, "decoding to %lld (at %lld-%lld)\n", targetPTS, prevPTS, int64_t(pNextFrameYUV->pts));
                 }
                 convertFrame();
                 nextFrame();
