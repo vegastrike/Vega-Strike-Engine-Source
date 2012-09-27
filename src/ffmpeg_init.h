@@ -61,6 +61,10 @@ extern "C" {
 #if (LIBAVCODEC_VERSION_MAJOR > 52)
 #define CODEC_TYPE_AUDIO AVMEDIA_TYPE_AUDIO
 #define CODEC_TYPE_VIDEO AVMEDIA_TYPE_VIDEO
+#else
+#ifndef avformat_open_input
+#define avformat_open_input(ctx, path, fmt, ap) av_open_input_file(ctx, path, fmt, 0, ap)
+#endif
 #endif
 
 
