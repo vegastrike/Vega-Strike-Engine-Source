@@ -230,17 +230,18 @@ void AnimatedTexture::UpdateAllFrame()
             double newcurtime = ani->GetTimeSource()->getPlayingTime();
             double delta = realtime - ani->lastrealtime;
             double drift = newcurtime - ani->lastcurtime - delta;
-            if (fabs(drift) > 1.0) {
+            if (fabs(drift) > 4.0) {
                 ani->lastcurtime = newcurtime - delta;
                 ani->lastrealtime = realtime;
-            } else if (fabs(drift) > 0.2) {
+            } else if (drift > 0.2 || drift < -1.0) {
+                //  ^ asymmetric threshold because we don't want to skip back often
                 double catchup = drift * ((delta > 0.5) ? 0.5 : delta);
                 ani->lastcurtime += catchup;
                 ani->lastrealtime = realtime;
             }
-            ani->setTime(ani->lastcurtime + delta);
+            ani->setTime( ani->lastcurtime + delta );
         } else {
-            ani->setTime( ani->curTime()+elapsed );
+            ani->setTime( ani->curTime() + elapsed );
         }
     }
 }
