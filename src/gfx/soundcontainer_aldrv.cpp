@@ -17,6 +17,7 @@ AldrvSoundContainer::~AldrvSoundContainer()
 void AldrvSoundContainer::loadImpl()
 {
     sound = AUDCreateSoundWAV( getSoundFile(), isLooping() );
+    AUDSoundGain( sound, getGain() );
 }
 
 void AldrvSoundContainer::unloadImpl()

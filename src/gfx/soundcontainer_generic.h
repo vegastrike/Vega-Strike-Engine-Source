@@ -15,18 +15,19 @@ class SoundContainer
 {
 private:
     StringPool::Reference soundFile;
+    float gain;
     bool looping;
     
 protected:
-    void init( const StringPool::Reference &soundfile, bool looping );
+    void init( const StringPool::Reference &soundfile, bool looping, float gain );
     
 public:
     /**
      * Create a refernece to an optionally-looping sound file.
      */
     SoundContainer( const SoundContainer &other );
-    explicit SoundContainer( const std::string &soundfile, bool looping = false );
-    explicit SoundContainer( const StringPool::Reference &soundfile, bool looping = false );
+    explicit SoundContainer( const std::string &soundfile, bool looping = false, float gain = 1.0f );
+    explicit SoundContainer( const StringPool::Reference &soundfile, bool looping = false, float gain = 1.0f );
     
     const std::string& getSoundFile() const 
     { 
@@ -36,6 +37,11 @@ public:
     const bool isLooping() const
     {
         return looping;
+    }
+    
+    const bool getGain() const
+    {
+        return gain;
     }
     
     virtual ~SoundContainer();

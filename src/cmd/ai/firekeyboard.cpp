@@ -1509,9 +1509,10 @@ void FireKeyboard::ProcessCommMessage( class CommunicationMessage &c )
             MyFunction();
         //mmhmm! Gcc-4.1 hack -- otherwise linker failure
     }
-    int sound = c.getCurrentState()->GetSound( c.sex, whichsound );
+    float gain;
+    int sound = c.getCurrentState()->GetSound( c.sex, whichsound, gain );
     if ( reallydospeech && !AUDIsPlaying( sound ) )
-        AUDPlay( sound, QVector( 0, 0, 0 ), Vector( 0, 0, 0 ), 1 );
+        AUDPlay( sound, QVector( 0, 0, 0 ), Vector( 0, 0, 0 ), gain );
 }
 using std::list;
 
@@ -2044,9 +2045,10 @@ void FireKeyboard::Execute()
                 if ( mymsg == NULL || mymsg->curstate >= static_cast<int>(fsm->nodes.size()) ) {
                     CommunicationMessage c( parent, targ, i, NULL, parent->pilot->getGender() );
                     unsigned int whichspeech = DoSpeech( targ, targ, *c.getCurrentState() );
-                    int sound = c.getCurrentState()->GetSound( c.sex, whichspeech );
+                    float gain;
+                    int sound = c.getCurrentState()->GetSound( c.sex, whichspeech, gain );
                     if ( !AUDIsPlaying( sound ) )
-                        AUDPlay( sound, QVector( 0, 0, 0 ), Vector( 0, 0, 0 ), 1 );
+                        AUDPlay( sound, QVector( 0, 0, 0 ), Vector( 0, 0, 0 ), gain );
                     Order *o = targ->getAIState();
                     if (o)
                         o->Communicate( c );
@@ -2057,9 +2059,10 @@ void FireKeyboard::Execute()
                     if ( i < n->edges.size() ) {
                         CommunicationMessage c( parent, targ, *mymsg, i, NULL, parent->pilot->getGender() );
                         unsigned int whichmessage = DoSpeech( targ, targ, *c.getCurrentState() );
-                        int sound = c.getCurrentState()->GetSound( c.sex, whichmessage );
+                        float gain;
+                        int sound = c.getCurrentState()->GetSound( c.sex, whichmessage, gain );
                         if ( !AUDIsPlaying( sound ) )
-                            AUDPlay( sound, QVector( 0, 0, 0 ), Vector( 0, 0, 0 ), 1 );
+                            AUDPlay( sound, QVector( 0, 0, 0 ), Vector( 0, 0, 0 ), gain );
                         Order *oo = targ->getAIState();
                         if (oo)
                             oo->Communicate( c );

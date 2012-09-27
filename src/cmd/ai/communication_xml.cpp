@@ -22,26 +22,28 @@ enum Names
     VALUE,
     SOUND,
     SEXE,
-    FILENAME
+    FILENAME,
+    GAIN
 };
 
-const EnumMap::Pair element_names[4] = {
+const EnumMap::Pair element_names[] = {
     EnumMap::Pair( "UNKNOWN", UNKNOWN ),
     EnumMap::Pair( "Node",    NODE ),
     EnumMap::Pair( "Edge",    EDGE ),
     EnumMap::Pair( "Sound",   SOUND )
 };
-const EnumMap::Pair attribute_names[6] = {
+const EnumMap::Pair attribute_names[] = {
     EnumMap::Pair( "UNKNOWN",      UNKNOWN ),
     EnumMap::Pair( "Text",         NAME ),
     EnumMap::Pair( "Index",        INDEX ),
     EnumMap::Pair( "Relationship", VALUE ),
     EnumMap::Pair( "file",         FILENAME ),
-    EnumMap::Pair( "sex",          SEXE )
+    EnumMap::Pair( "sex",          SEXE ),
+    EnumMap::Pair( "gain",         GAIN )
 };
 
-const EnumMap element_map( element_names, 4 );
-const EnumMap attribute_map( attribute_names, 6 );
+const EnumMap element_map( element_names, sizeof(element_names)/sizeof(element_names[0]) );
+const EnumMap attribute_map( attribute_names, sizeof(attribute_names)/sizeof(attribute_names[0]) );
 }
 
 void FSM::beginElement( void *userData, const XML_Char *names, const XML_Char **atts )
@@ -61,6 +63,7 @@ void FSM::beginElement( const string &name, const AttributeList attributes )
     switch (elem)
     {
     case SOUND:
+        val = 1.0f;
         for (iter = attributes.begin(); iter != attributes.end(); iter++) {
             switch ( attribute_map.lookup( (*iter).name ) )
             {
@@ -70,10 +73,13 @@ void FSM::beginElement( const string &name, const AttributeList attributes )
             case FILENAME:
                 filename = (*iter).value;
                 break;
+            case GAIN:
+                val = XMLSupport::parse_float( (*iter).value );
+                break;
             }
         }
         if (!filename.empty())
-            nodes.back().AddSound( filename, sexe ); //FIXME sexe was used uninitialized until I added = 0 --chuck_starchaser
+            nodes.back().AddSound( filename, sexe, val ); //FIXME sexe was used uninitialized until I added = 0 --chuck_starchaser
         break;
     case UNKNOWN:
         unitlevel++;

@@ -10,13 +10,14 @@ public:
     {
         vector< std::string > messages;
         vector< std::string > soundfiles; //messages.size() sound file path for each sex
-        vector< int >sounds; //messages.size() sound for each sex
+        vector< int > sounds; //messages.size() sound for each sex
+        vector< float > gains; //messages.size()
         float messagedelta;
         vector< unsigned int >edges;
-        int   GetSound( unsigned char sex, unsigned int multiple );
+        int   GetSound( unsigned char sex, unsigned int multiple, float &gain );
         bool  StopSound( unsigned char sex );
         std::string GetMessage( unsigned int &multiple ) const;
-        void  AddSound( std::string soundfile, unsigned char sex );
+        void  AddSound( std::string soundfile, unsigned char sex, float gain = 1.0f );
         Node( const vector< std::string > &message, float messagedel ) : messages( message )
             , messagedelta( messagedel )
         {

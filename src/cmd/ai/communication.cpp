@@ -142,17 +142,20 @@ std::string FSM::Node::GetMessage( unsigned int &multiple ) const
 // FIXME: this variability makes it hard to use proper include files
 extern int createSound( std::string file, bool val );
 
-int FSM::Node::GetSound( unsigned char sex, unsigned int multiple ) 
+int FSM::Node::GetSound( unsigned char sex, unsigned int multiple, float &gain ) 
 {
     unsigned int index = multiple+( (unsigned int) sex )*messages.size();
     if ( index < sounds.size() ) {
+        gain = gains[index];
         if (sounds[index] < 0) {
             sounds[index] = createSound(soundfiles[index], false);
+            AUDSoundGain(sounds[index], gains[index], false);
             return sounds[index];
         } else {
             return sounds[index];
         }
     } else {
+        gain = 1.0f;
         return -1;
     }
 }
@@ -178,7 +181,7 @@ bool FSM::StopAllSounds( unsigned char sex )
     return ret;
 }
 
-void FSM::Node::AddSound( std::string soundfile, unsigned char sex )
+void FSM::Node::AddSound( std::string soundfile, unsigned char sex, float gain )
 {
     static std::string emptystr;
     
@@ -187,14 +190,16 @@ void FSM::Node::AddSound( std::string soundfile, unsigned char sex )
         while ( index >= sounds.size() ) {
             sounds.push_back( -1 );
             soundfiles.push_back(emptystr);
+            gains.push_back( 1.0f );
         }
         
         if (soundfiles[index].empty()) {
             soundfiles[index] = soundfile;
+            gains[index] = gain;
         
             // Preload sound if configured to do so
             if (game_options.comm_preload)
-                GetSound(sex, multiple);
+                GetSound(sex, multiple, gain);
             
             break;
         }

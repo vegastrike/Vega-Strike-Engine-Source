@@ -9082,7 +9082,7 @@ bool MeshAnimation::Init(const char *filename, int faction,
 	{
 		//FIXME: an animation is created only for the first submesh
 		string animationName;
-		sprintf( count, "%lu", meshes->size() );
+		sprintf( count, "%lu", (unsigned long)meshes->size() );
 		if(!animationExt)
 			animationName = string(count); //if there is no extension given, the animations are called by their load order, 1, 2 ,3 ....10..
 		else

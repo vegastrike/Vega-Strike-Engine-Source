@@ -80,7 +80,8 @@ enum Names
     G_TIME,
     ALPH,
     EVENT,
-    LOOPING
+    LOOPING,
+    GAIN
 };
 
 const EnumMap::Pair element_names[] = {
@@ -186,6 +187,7 @@ const EnumMap::Pair attribute_names[] = {
     EnumMap::Pair( "a",             ALPH ),
     EnumMap::Pair( "event",         EVENT ),
     EnumMap::Pair( "looping",       LOOPING ),
+    EnumMap::Pair( "gain",          GAIN ),
     
     
     // Cockpit events
@@ -627,6 +629,7 @@ loadsprite:
         {
             std::string soundfile;
             bool looping = false;
+            float gain = 1.0f;
             EVENTID event = Cockpit::NUM_EVENTS;
             
             for (iter = attributes.begin(); iter != attributes.end(); iter++) {
@@ -641,13 +644,16 @@ loadsprite:
                 case EVENT:
                     event = (Cockpit::EVENTID) attribute_map.lookup( (*iter).value );
                     break;
+                case GAIN:
+                    gain = XMLSupport::parse_float( (*iter).value );
+                    break;
                 default:
                     break;
                 }
             }
             
             if (!soundfile.empty() && (event > 0) && (event < Cockpit::NUM_EVENTS)) {
-                SetSoundForEvent(event, SoundContainer(soundfile, looping));
+                SetSoundForEvent(event, SoundContainer(soundfile, looping, gain));
             }
         }
         break;
