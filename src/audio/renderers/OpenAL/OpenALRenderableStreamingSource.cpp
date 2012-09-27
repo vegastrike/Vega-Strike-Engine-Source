@@ -30,6 +30,7 @@ namespace Audio {
         , alSource(0)
         , atEos(false)
         , shouldPlay(false)
+        , startedPlaying(false)
         , buffering(false)
     {
         alGenSources(1,&alSource);
@@ -65,6 +66,7 @@ namespace Audio {
             clearAlError();
             ALuint als = getALSource();
             alSourcePlay(als);
+            startedPlaying = true;
             checkAlError();
         }
     }
@@ -73,6 +75,7 @@ namespace Audio {
         throw(Exception)
     {
         shouldPlay = false;
+        startedPlaying = false;
         buffering = false;
         alSourceStop(alSource);
     }
@@ -80,6 +83,14 @@ namespace Audio {
     bool OpenALRenderableStreamingSource::isPlayingImpl() const 
         throw(Exception)
     {
+        // According to the AL, streaming sounds can cease to be 
+        // in the playing state because of buffer starvation. However,
+        // we want to consider them still playing, so if we haven't
+        // reached EOS, they're playing from the framework's POV
+        // (ie: just attaching more buffers make them play)
+        if (startedPlaying && !atEos)
+            return true;
+        
         ALint state = 0;
         alGetSourcei(getALSource(), AL_SOURCE_STATE, &state);
         return (state == AL_PLAYING);
@@ -137,6 +148,8 @@ namespace Audio {
             ALuint als = getALSource();
             alSourcePlay(als);
             checkAlError();
+            
+            startedPlaying = true;
         } else {
             queueALBuffers();
         }

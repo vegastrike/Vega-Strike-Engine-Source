@@ -25,6 +25,7 @@ namespace Audio {
         ALuint alSource;
         bool atEos;
         bool shouldPlay;
+        bool startedPlaying;
         bool buffering;
         
     public:
