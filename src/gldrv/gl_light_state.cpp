@@ -228,22 +228,37 @@ void gfx_light::SendGLPosition( const GLenum target ) const
     glLightfv( target, GL_POSITION, v );
 }
 
+void gfx_light::UpdateGLLight() const
+{
+    ContextSwitchClobberLight(target, -1);
+}
+
 inline void gfx_light::ContextSwitchClobberLight( const GLenum gltarg, const int original ) const
 {
     glLightf( gltarg, GL_CONSTANT_ATTENUATION, attenuate[0]*atten0scale );
     glLightf( gltarg, GL_LINEAR_ATTENUATION, attenuate[1]*atten1scale );
     glLightf( gltarg, GL_QUADRATIC_ATTENUATION, attenuate[2]*atten2scale );
 
+    float v[4];
+#define glLightfvAttenuated( gltarg, attr, value, attenuation ) do { \
+        v[0]=value[0]*attenuation; \
+        v[1]=value[1]*attenuation; \
+        v[2]=value[2]*attenuation; \
+        v[3]=value[3]*attenuation; \
+        glLightfv( gltarg, attr, v ); \
+    } while(0)
+    
     SendGLPosition( gltarg );
-    glLightfv( gltarg, GL_DIFFUSE, diffuse );
-    glLightfv( gltarg, GL_SPECULAR, specular );
-    glLightfv( gltarg, GL_AMBIENT, ambient );
+    glLightfvAttenuated( gltarg, GL_DIFFUSE, diffuse, occlusion );
+    glLightfvAttenuated( gltarg, GL_SPECULAR, specular, occlusion );
+    glLightfvAttenuated( gltarg, GL_AMBIENT, ambient, occlusion );
     if (original != -1) {
         gfx_light *orig = &( (*_llights)[GLLights[original].index] );
         orig->target = -1;
         GLLights[original].index = -1;
     }
 }
+
 
 inline void gfx_light::FinesseClobberLight( const GLenum gltarg, const int original )
 {

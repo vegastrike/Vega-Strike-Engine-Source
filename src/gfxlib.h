@@ -84,6 +84,10 @@ void /*GFXDRVAPI*/ GFXPickLights( const Vector &center, const float radius );
 void /*GFXDRVAPI*/ GFXPickLights( const Vector &center, const float radius, vector< int > &lights, const int maxlights, const bool pickglobals );
 ///activates local lights picked by GFXPickLight
 void /*GFXDRVAPI*/ GFXPickLights( vector< int >::const_iterator begin, vector< int >::const_iterator end );
+///loads "lights" with all enabled global lights, computing occlusion to the specified position too
+void /*GFXDRVAPI*/ GFXGlobalLights( vector< int > &lights, const Vector &center, const float radius );
+///loads "lights" with all enabled global lights
+void /*GFXDRVAPI*/ GFXGlobalLights( vector< int > &lights );
 ///Sets the light model to have separate specular color (if available)
 GFXBOOL /*GFXDRVAPI*/ GFXSetSeparateSpecularColor( const GFXBOOL spec );
 ///Sets the intensity cutoff before picked lights are ignored
@@ -113,6 +117,10 @@ GFXBOOL /*GFXDRVAPI*/ GFXDisableLight( const int light );
 
 ///Modifies the parameters of the given light
 GFXBOOL /*GFXDRVAPI*/ GFXSetLight( const int light, const enum LIGHT_TARGET, const GFXColor &color );
+
+///Retrieves the parameters of the given light
+const GFXLight& /*GFXDRVAPI*/ GFXGetLight( const int light );
+
 
 /**
  * In the case of shields and other T&L based effects, the global lights

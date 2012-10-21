@@ -293,6 +293,11 @@ GFXBOOL /*GFXDRVAPI*/ GFXSetLight( const int light, const enum LIGHT_TARGET lt, 
     return GFXTRUE;
 }
 
+const GFXLight& /*GFXDRVAPI*/ GFXGetLight( const int light )
+{
+    return (*_llights)[light];
+}
+
 GFXBOOL /*GFXDRVAPI*/ GFXEnableLight( int light )
 {
     assert( light >= 0 && light <= static_cast<int>(_llights->size()) );

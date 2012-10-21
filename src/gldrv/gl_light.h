@@ -23,76 +23,85 @@ const unsigned int lighthuge = 20*20*20;
 class gfx_light : public GFXLight
 {
 public: gfx_light() : GFXLight() {}
-///assigns a GFXLight to a gfx_light
+    ///assigns a GFXLight to a gfx_light
     GFXLight operator=( const GFXLight &tmp );
-///Returns the number this light is in the _llights list
+
+    ///Returns the number this light is in the _llights list
     int lightNum();
-///Returns if this light was saved as a local light
+    
+    ///Returns if this light was saved as a local light
     bool LocalLight() const
     {
         return (options&GFX_LOCAL_LIGHT) != 0;
     }
-///Retursn if this light is enabled
+
+    ///Retursn if this light is enabled
     bool enabled() const
     {
         return (options&GFX_LIGHT_ENABLED) != 0;
     }
-///Returns the target OpenGL light of this light. -1 is unassigned to a "real" light
+
+    ///Returns the target OpenGL light of this light. -1 is unassigned to a "real" light
     int& Target()
     {
         return target;
     }
 
-/**
- * if global, puts it into GLlights (if space ||enabled) <clobber?>
- * for local lights, if enabled, call Enable().
- */
+    /**
+     * if global, puts it into GLlights (if space ||enabled) <clobber?>
+     * for local lights, if enabled, call Enable().
+     */
     bool Create( const GFXLight&, bool global );
 
-/// Disables it (may remove from table), trashes it from GLlights. sets target to -2 (dead)
+    /// Disables it (may remove from table), trashes it from GLlights. sets target to -2 (dead)
     void Kill();
 
-///properly utilizes union to send to OGL
+    ///properly utilizes union to send to OGL
     void SendGLPosition( const GLenum target ) const;
 
-///replaces target GL light in the implementation. Sets this->target! Checks for -1 and calls ContextSwitch to clobber completely
+    ///replaces target GL light in the implementation. Sets this->target! Checks for -1 and calls ContextSwitch to clobber completely
     void ClobberGLLight( const int target );
+    
+    ///resends target GL light data (assumes valid target)
+    void UpdateGLLight() const;
 
-///replaces target GL light, copying all state sets this->target!
+    ///replaces target GL light, copying all state sets this->target!
     inline void FinesseClobberLight( const GLenum target, const int original );
 
-///replaces target GL light, copying all state sets this->target!
+    ///replaces target GL light, copying all state sets this->target!
     inline void ContextSwitchClobberLight( const GLenum target, const int original ) const;
 
-/**
- * for global lights, clobbers SOMETHING for sure, calls GLenable
- * for local lights, puts it into the light table
- */
+    /**
+     * for global lights, clobbers SOMETHING for sure, calls GLenable
+     * for local lights, puts it into the light table
+     */
     void Enable();
 
-/**
- * for global lights, GLdisables it.
- * for local lights, removes it from the table. and trashes it form GLlights.
- */
+    /**
+     * for global lights, GLdisables it.
+     * for local lights, removes it from the table. and trashes it form GLlights.
+     */
     void Disable();
-/** sets properties, making minimum GL state changes for global,
- *  for local lights, removes it from table, trashes it from GLlights,
- *  if enabled, puts it bakc in table.
- */
+    
+    /** sets properties, making minimum GL state changes for global,
+     *  for local lights, removes it from table, trashes it from GLlights,
+     *  if enabled, puts it bakc in table.
+     */
     void ResetProperties( const enum LIGHT_TARGET, const GFXColor &color );
 
-///Adds this light to table (assume local)
+    ///Adds this light to table (assume local)
     void AddToTable();
 
-///Removes this light from light table
+    ///Removes this light from light table
     bool RemoveFromTable( bool shouldremove = true, const GFXLight &t = GFXLight() );
 
-///Trash this light from active GLLights
+    ///Trash this light from active GLLights
     void TrashFromGLLights();
 
-///Do all enables from picking
+    ///Do all enables from picking
     static void dopickenables();
-///calculates bounds for the table given cutoffs!
+    
+    ///calculates bounds for the table given cutoffs!
     LineCollide CalculateBounds( bool &err );
 };
 

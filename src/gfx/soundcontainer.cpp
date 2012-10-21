@@ -37,7 +37,7 @@ void GameSoundContainer::play()
     if (!loaded)
         load();
     
-    if (!isLooping() || !isPlaying()) {
+    if (!isLooping() || !triggered) {
         playImpl();
         triggered = true;
     }

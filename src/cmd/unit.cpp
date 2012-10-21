@@ -27,6 +27,7 @@
 #include "gfx/quaternion.h"
 #include "gfx/matrix.h"
 #include "gfx/technique.h"
+#include "gfx/occlusion.h"
 
 #include "unit_factory.h"
 
@@ -386,6 +387,9 @@ void GameUnit< UnitType >::Draw( const Transformation &parent, const Matrix &par
         chardamage  = ( 255-(unsigned char) (damagelevel*255) );
     }
     
+    // We might need to scale rSize, this "average scale" takes the transform matrix into account
+    float avgscale = sqrt((ctm->getP().MagnitudeSquared() + ctm->getR().MagnitudeSquared()) * 0.5);
+    
     bool On_Screen = false;
     if ( ( !(this->invisible&UnitType::INVISUNIT) ) && ( ( !(this->invisible&UnitType::INVISCAMERA) ) || (!myparent) ) ) {
         if (!cam_setup_phase) {
@@ -411,16 +415,25 @@ void GameUnit< UnitType >::Draw( const Transformation &parent, const Matrix &par
                 }
                 QVector TransformedPosition = Transform( *ctm, this->meshdata[i]->Position().Cast() );
 
-                double d = GFXSphereInFrustum( TransformedPosition,
-                                               minmeshradius+this->meshdata[i]->clipRadialSize()*vlpqrScaleFactor );
-                if (d) {
-                    //d can be used for level of detail shit
-                    d = ( TransformedPosition-camerapos ).Magnitude();
-                    double rd  = d-this->meshdata[i]->rSize();
-                    double pixradius = this->meshdata[i]->rSize()*perspectiveFactor(
-                        (rd < g_game.znear) ? g_game.znear : rd );
-                    double lod = pixradius*g_game.detaillevel;
-                    if (lod >= 0.5 && pixradius >= 2.5) {
+                //d can be used for level of detail shit
+                float mSize = this->meshdata[i]->rSize() * avgscale;
+                double d = ( TransformedPosition-camerapos ).Magnitude();
+                double rd  = d-mSize;
+                double pixradius = mSize*perspectiveFactor(
+                    (rd < g_game.znear) ? g_game.znear : rd );
+                double lod = pixradius*g_game.detaillevel;
+                if (this->meshdata[i]->getBlendDst() == ZERO) {
+                    if (UnitType::isUnit() == PLANETPTR) {
+                        Occlusion::addOccluder(TransformedPosition, mSize, true);
+                    } else if (pixradius >= 10.0) {
+                        Occlusion::addOccluder(TransformedPosition, mSize, false);
+                    }
+                }
+                if (lod >= 0.5 && pixradius >= 2.5) {
+                    double frustd = GFXSphereInFrustum( 
+                        TransformedPosition,
+                        minmeshradius+mSize );
+                    if (frustd) {
                         //if the radius is at least half a pixel at detail 1 (equivalent to pixradius >= 0.5 / detail)
                         float currentFrame = this->meshdata[i]->getCurrentFrame();
                         this->meshdata[i]->Draw( lod, this->WarpMatrix( *ctm ), d, 
@@ -497,7 +510,7 @@ void GameUnit< UnitType >::Draw( const Transformation &parent, const Matrix &par
                     mountLocation.Compose( *ct, this->WarpMatrix( *ctm ) );
                     Matrix mat;
                     mountLocation.to_matrix( mat );
-                    if (GFXSphereInFrustum( mountLocation.position, gun->rSize()*vlpqrScaleFactor ) > 0) {
+                    if (GFXSphereInFrustum( mountLocation.position, gun->rSize()*avgscale ) > 0) {
                         float d   = ( mountLocation.position-_Universe->AccessCamera()->GetPosition() ).Magnitude();
                         float lod = gun->rSize()*g_game.detaillevel*perspectiveFactor(
                             (d-gun->rSize() < g_game.znear) ? g_game.znear : d-gun->rSize() );

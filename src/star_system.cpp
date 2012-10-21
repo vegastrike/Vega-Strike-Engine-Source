@@ -38,6 +38,7 @@
 #include "gfx/env_map_gent.h"
 #include "vsfilesystem.h"
 #include "cmd/unit_find.h"
+#include "gfx/occlusion.h"
 
 #include "options.h"
 
@@ -258,7 +259,7 @@ void GameStarSystem::Draw( bool DrawCockpit )
     double setupdrawtime = queryTime();
     {
         cam_setup_phase = true;
-
+        
         Unit *saveparent = _Universe->AccessCockpit()->GetSaveParent();
         Unit *targ = NULL;
         if (saveparent)
@@ -294,6 +295,9 @@ void GameStarSystem::Draw( bool DrawCockpit )
     double drawtime    = queryTime();
 
     double maxdrawtime = 0;
+
+    // Initialize occluder system (we'll populate it during unit render)
+    Occlusion::start();
 
     //Ballpark estimate of when an object of configurable size first becomes one pixel
 
@@ -347,6 +351,9 @@ void GameStarSystem::Draw( bool DrawCockpit )
     WarpTrailDraw();
 
     GFXFogMode( FOG_OFF );
+    
+    // At this point, we've set all occluders
+    // Mesh::ProcessXMeshes will query it
 
     GFXColor tmpcol( 0, 0, 0, 1 );
     GFXGetLightContextAmbient( tmpcol );
@@ -383,6 +390,9 @@ void GameStarSystem::Draw( bool DrawCockpit )
         _Universe->AccessCockpit()->Draw();
     double fintime = queryTime()-starttime;
     MeshAnimation::UpdateFrames();
+    
+    // And now we're done with the occluder set
+    Occlusion::end();
 }
 
 extern void update_ani_cache();

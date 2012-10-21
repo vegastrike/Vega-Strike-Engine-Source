@@ -354,6 +354,7 @@ public:
     float exp;
     float cutoff;
     float size;
+    float occlusion;
     
 public: 
     GFXLight()
@@ -372,6 +373,7 @@ public:
         exp = 0.0f;
         cutoff = 180.0f;
         size = 0.0f;
+        occlusion = 1.f;
     }
 
     GFXLight( const bool enabled, const GFXColor &vect, 

@@ -3,6 +3,7 @@
 #include <queue>
 #include <list>
 #include "vsfilesystem.h"
+#include "gfx/occlusion.h"
 
 #include <vector>
 #include <algorithm>
@@ -89,6 +90,11 @@ void unpicklights()
     oldpicked->clear();
 }
 
+static float occludedIntensity( const gfx_light &light, const Vector &center, const float rad )
+{
+    return Occlusion::testOcclusion(light.getPosition().Cast(), light.getSize(), center.Cast(), rad);
+}
+
 static float attenuatedIntensity( const gfx_light &light, const Vector &center, const float rad )
 {
     float intensity = (1.0/3.0)*(
@@ -111,11 +117,15 @@ static bool picklight( const LineCollide &lightcollide,
                        const Vector &center,
                        const float rad,
                        const int lightsenabled,
-                       const int lightindex )
+                       const int lightindex,
+                       float &attenuated,
+                       float &occlusion )
 {
     const gfx_light &light = (*_llights)[lightindex];
-    return !light.attenuated()
-           || (attenuatedIntensity( light, center, rad ) >= light.cutoff);
+    return (
+        !light.attenuated()
+        || (attenuated = attenuatedIntensity( light, center, rad ) >= light.cutoff)
+    ) && ((occlusion = occludedIntensity( light, center, rad )) * attenuated >= light.cutoff);
 }
 
 struct lightsort
@@ -136,6 +146,28 @@ struct lightsort
 
 typedef vector< LineCollideStar >veclinecol;
 
+void GFXGlobalLights( vector< int > &lights, const Vector &center, const float radius )
+{
+    for (int i = 0; i < GFX_MAX_LIGHTS; ++i) {
+        if ((GLLights[i].options & (OpenGLL::GL_ENABLED|OpenGLL::GLL_LOCAL)) == OpenGLL::GL_ENABLED) {
+            // It's global and enabled
+            gfx_light &light = (*_llights)[GLLights[i].index];
+            light.occlusion = occludedIntensity( light, center, radius );
+            lights.push_back(GLLights[i].index);
+        }
+    }
+}
+
+void GFXGlobalLights( vector< int > &lights )
+{
+    for (int i = 0; i < GFX_MAX_LIGHTS; ++i) {
+        if ((GLLights[i].options & (OpenGLL::GL_ENABLED|OpenGLL::GLL_LOCAL)) == OpenGLL::GL_ENABLED) {
+            // It's global and enabled
+            lights.push_back(GLLights[i].index);
+        }
+    }
+}
+
 void GFXPickLights( const Vector &center, const float radius, vector< int > &lights, const int maxlights, const bool pickglobals )
 {
     QVector     tmp;
@@ -144,25 +176,22 @@ void GFXPickLights( const Vector &center, const float radius, vector< int > &lig
     int         lightsenabled = _GLLightsEnabled;
     tmp = QVector( radius, radius, radius );
 
-    if (lightsenabled && pickglobals) {
-        // Push global lights into the picked set
-        for (int i = 0; i < GFX_MAX_LIGHTS; ++i) {
-            if ((GLLights[i].options & (OpenGLL::GL_ENABLED|OpenGLL::GLL_LOCAL)) == OpenGLL::GL_ENABLED) {
-                // It's global and enabled
-                lights.push_back(GLLights[i].index);
-            }
-        }
-    }
+    if (lightsenabled && pickglobals)
+        GFXGlobalLights(lights, center, radius);
     
     veclinecol *tmppickt[2];
     lighttable.Get( center.Cast(), tmppickt );
 
     for (int j = 0; j < 2; j++) {
         veclinecol::iterator i;
+        float attenuated, occlusion;
 
         for (i = tmppickt[j]->begin(); i != tmppickt[j]->end(); i++) {
-            if ( picklight( *i->lc, center, radius, lightsenabled, i->GetIndex() ) ) {
-                lights.push_back( i->GetIndex() );
+            if ( picklight( *i->lc, center, radius, lightsenabled, i->GetIndex(), attenuated, occlusion ) ) {
+                int ix = i->GetIndex();
+                gfx_light &l = (*_llights)[ix];
+                l.occlusion = occlusion;
+                lights.push_back( ix );
                 lightsenabled++;
             }
         }
@@ -189,32 +218,24 @@ void gfx_light::dopickenables()
     //sort it to find minimum num lights changed from last time.
     sort( newpicked->begin(), newpicked->end() );
     //newpicked->sort();
-    std::vector< int >::iterator traverse = newpicked->begin();
+    std::vector< int >::iterator traverse;
     std::vector< int >::iterator oldtrav;
-    while ( traverse != newpicked->end() && ( !oldpicked->empty() ) ) {
-        oldtrav = oldpicked->begin();
-        while (oldtrav != oldpicked->end() && *oldtrav < *traverse)
+    for ( traverse = newpicked->begin(); traverse != newpicked->end() && ( !oldpicked->empty() ); ++traverse ) {
+        for (oldtrav = oldpicked->begin(); oldtrav != oldpicked->end() && *oldtrav < *traverse ; )
             oldtrav++;
         if ( ( (*traverse) == (*oldtrav) ) && ( (*_llights)[*oldtrav].target >= 0 ) )
             //BOGUS ASSERT... just like this light wasn't on if it was somehow clobberedassert (GLLights[(*_llights)[oldpicked->front()].target].index == oldpicked->front());
             oldpicked->erase( oldtrav );              //already taken care of. main screen turn on ;-)
-        traverse++;
     }
-    oldtrav = oldpicked->begin();
-    while ( oldtrav != oldpicked->end() ) {
-        if ( GLLights[(*_llights)[(*oldtrav)].target].index != (*oldtrav) ) {
-            oldtrav++;
+    for ( oldtrav = oldpicked->begin(); oldtrav != oldpicked->end(); ++oldtrav ) {
+        if ( GLLights[(*_llights)[(*oldtrav)].target].index != (*oldtrav) ) 
             continue;             //don't clobber what's not yours
-        }
         GLLights[(*_llights)[(*oldtrav)].target].index    = -1;
         GLLights[(*_llights)[(*oldtrav)].target].options &= (OpenGLL::GL_ENABLED&OpenGLL::GLL_LOCAL);               //set it to be desirable to kill
-        oldtrav++;
     }
-    traverse = newpicked->begin();
-    while ( traverse != newpicked->end() ) {
+    for ( traverse = newpicked->begin(); traverse != newpicked->end(); ++traverse ) {
         if (*traverse>=(int)_llights->size()) {
             VSFileSystem::vs_fprintf (stderr,"GFXLIGHT FAILURE %d is beyond array of size %d",(int)*traverse,(int)_llights->size());
-            traverse++;
             continue;
         }
         if ( (*_llights)[*traverse].target == -1 ) {
@@ -224,8 +245,9 @@ void gfx_light::dopickenables()
                 break;
             }
             (*_llights)[(*traverse)].ClobberGLLight( gltarg );
+        } else {
+            (*_llights)[(*traverse)].UpdateGLLight();
         }
-        traverse++;
     }
     /*while (!oldpicked->empty()) {
      *  int glind=(*_llights)[oldpicked->front()].target;

@@ -255,7 +255,7 @@ SET(LIBGFXCLIENT_SOURCES src/gfx/ani_texture.cpp
 						 src/gfx/jpeg_memory.cpp
 						 src/gfx/loc_select.cpp
 						 src/gfx/masks.cpp
-                         src/gfx/mesh_bin.cpp
+                                                 src/gfx/mesh_bin.cpp
 						 src/gfx/mesh_fx.cpp
 						 src/gfx/mesh_gfx.cpp
 						 src/gfx/nav/criteria_xml.cpp
@@ -294,6 +294,7 @@ SET(LIBGFXCLIENT_SOURCES src/gfx/ani_texture.cpp
 						 src/gfx/quadtree_xml.cpp
 						 src/gfx/quadtree.cpp
 						 src/gfx/ring.cpp
+                                                 src/gfx/occlusion.cpp
 						 src/gfx/screenshot.cpp
                                                  src/gfx/soundcontainer.cpp
                                                  src/gfx/soundcontainer_aldrv.cpp
