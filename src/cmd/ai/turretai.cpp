@@ -11,6 +11,7 @@ TurretAI::TurretAI() : FaceTargetITTS( false )
     range  = -1;
     speed  = 1;
     mrange = 1;
+    hadFired = false;
 }
 void TurretAI::getAverageGunSpeed( float &speed, float &range, float &mrange ) const
 {
@@ -65,16 +66,21 @@ void TurretAI::Execute()
                    && dot > dot_cutoff)
                  && ( isplayerstarship == false || targ->faction == upg
                      || ( isplayerstarship
-                         && (targ->getRelation( (Unit*) parent->owner /*now that it is a player, we know it's dereferencable*/ )
-                             < 0
-                             || targ->Target() == (Unit*) parent->owner) ) ) && targ->faction != neu );
+                         && (targ->getRelation( (Unit*) parent->owner ) < 0 /*now that it is a player, we know it's dereferencable*/ 
+                             || targ->Target() == (Unit*) parent->owner) ) ) 
+                 && targ->faction != neu );
 
             parent->Fire( FireBitmask( parent, shouldfire, rand() < missile_prob*RAND_MAX*SIMULATION_ATOM ), true );
             if (!shouldfire)
                 parent->UnFire();
+            hadFired = shouldfire;
         }
         if (targ->hull < 0)
             parent->Target( NULL );
+    } else if (hadFired && parent->GetNumMounts() > 0) {
+        // When we get a kill, we must stop firing
+        parent->UnFire();
+        hadFired = false;
     }
 }
 

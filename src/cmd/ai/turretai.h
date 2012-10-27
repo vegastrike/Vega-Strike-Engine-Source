@@ -8,6 +8,8 @@ class TurretAI : public FaceTargetITTS
     float range;
     float speed;
     float mrange;
+    bool hadFired;
+    
 public: TurretAI();
     virtual void Execute();
     virtual void getAverageGunSpeed( float &speed, float &range, float &mrange ) const;
