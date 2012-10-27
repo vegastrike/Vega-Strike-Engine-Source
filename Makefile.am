@@ -606,6 +606,8 @@ LIBGFXCLIENT = \
   src/gfx/mesh_fx.cpp \
   src/gfx/mesh_fx.h \
   src/gfx/mesh_gfx.cpp \
+  src/gfx/occlusion.h \
+  src/gfx/occlusion.cpp \
   src/gfx/nav/criteria_xml.cpp \
   src/gfx/nav/criteria.cpp \
   src/gfx/nav/criteria.h \
