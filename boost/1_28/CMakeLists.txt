@@ -1,0 +1,1 @@
+add_library(boost_python src/module.cpp src/cross_module.cpp src/types.cpp src/extension_class.cpp src/errors.cpp src/functions.cpp src/init_function.cpp src/module_builder.cpp src/objects.cpp src/object/life_support.cpp src/object/function.cpp src/converter/callback.cpp src/classes.cpp src/conversions.cpp)
