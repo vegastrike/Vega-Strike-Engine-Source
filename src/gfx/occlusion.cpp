@@ -165,8 +165,9 @@ namespace Occlusion {
             // counting from light edges (not origin)
             // Inner cone tangent is (pSize - lSize) / occD
             // Outer cone tangent is (pSize + lSize) / occD
-            double occInner = 1.0 - lightSize;
-            double occOuter = 1.0 + lightSize;
+            // Add rSize to lSize to somewhat account for target size
+            double occInner = 1.0 - lightSize - rSize;
+            double occOuter = 1.0 + lightSize + rSize;
             
             // We don't bother with object cone, just the direction to its center
             // from the occluder's edge
@@ -174,9 +175,9 @@ namespace Occlusion {
             
             if (objTan > occOuter)
                 return 1.f;
-            else if (objTan < occInner) {
+            else if (objTan < occInner)
                 return 0.f;
-            } else if (occOuter != occInner)
+            else if (occOuter != occInner)
                 return float((objTan - occInner) / (occOuter - occInner));
             else
                 return 1.f;
