@@ -251,7 +251,7 @@ inline void gfx_light::ContextSwitchClobberLight( const GLenum gltarg, const int
     SendGLPosition( gltarg );
     glLightfvAttenuated( gltarg, GL_DIFFUSE, diffuse, occlusion );
     glLightfvAttenuated( gltarg, GL_SPECULAR, specular, occlusion );
-    glLightfvAttenuated( gltarg, GL_AMBIENT, ambient, occlusion );
+    glLightfv( gltarg, GL_AMBIENT, ambient );
     if (original != -1) {
         gfx_light *orig = &( (*_llights)[GLLights[original].index] );
         orig->target = -1;
