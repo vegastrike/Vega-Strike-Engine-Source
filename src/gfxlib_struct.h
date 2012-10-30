@@ -344,8 +344,8 @@ public:
 ///physical GL light its saved in
     int   target;
 ///last is w for positional, otherwise 3 for spec
-    float vect[3];
     int   options;
+    float vect[3];
     float diffuse[4];
     float specular[4];
     float ambient[4];
