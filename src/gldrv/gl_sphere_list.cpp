@@ -192,6 +192,10 @@ GFXSphereVertexList::GFXSphereVertexList( float radius, int detail, bool Insideo
 #undef g_theta
 
         vlists[which][detail] = new GFXVertexList( modes, numvertex, vertexlist, numQuadstrips, QSOffsets );
+
+        delete[] QSOffsets;
+        delete[] vertexlist;
+        delete[] modes;
     }
     sphere        = vlists[which][detail];
     numVertices   = sphere->numVertices;
