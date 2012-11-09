@@ -37,8 +37,8 @@ using std::endl;
 
 VegaConfig::VegaConfig( const char *configfile )
 {
-    configNodeFactory *domf = new configNodeFactory();
-    configNode *top = (configNode*) domf->LoadXML( configfile );
+    configNodeFactory domf;
+    configNode *top = (configNode*) domf.LoadXML( configfile );
     if (top == NULL) {
         cout<<"Panic exit - no configuration"<<endl;
         exit( 0 );
