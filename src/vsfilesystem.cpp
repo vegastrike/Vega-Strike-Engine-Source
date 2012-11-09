@@ -2097,6 +2097,7 @@ int scandir( const char *dirname, struct dirent ***namelist, int (*select)( cons
         if (ret != ERROR_NO_MORE_FILES) {
             //TODO: return some error code
         }
+        free( findIn );
         *namelist = dir;
         return nDir;
     }
