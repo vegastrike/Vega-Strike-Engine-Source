@@ -39,6 +39,7 @@ namespace Audio {
         }
         
     public:
+        virtual ~SourceListener() { }
         
         bool wantAttachEvents() const { return events.attach != 0; }
         bool wantPlayEvents() const { return events.play != 0; }
