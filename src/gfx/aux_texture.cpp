@@ -199,10 +199,10 @@ bool Texture::checkbad( const string &s )
 void Texture::setbad( const string &s )
 {
     //Put both current path+texfile and shared texfile since they both have been looked for
-    bool *b = new bool(true);
+    static bool TRUE = true;
     if (VSFileSystem::current_path.back() != "")
-        badtexHashTable.Put( VSFileSystem::GetHashName( s ), b );
-    badtexHashTable.Put( VSFileSystem::GetSharedTextureHashName( s ), b );
+        badtexHashTable.Put( VSFileSystem::GetHashName( s ), &TRUE );
+    badtexHashTable.Put( VSFileSystem::GetSharedTextureHashName( s ), &TRUE );
 }
 
 Texture::Texture( int stage,
