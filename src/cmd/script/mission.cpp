@@ -84,9 +84,8 @@ void Mission::ConstructMission( const char *configfile, const std::string &scrip
         nextpythonmission[script.length()]   = 0;
         strcpy( nextpythonmission, script.c_str() );
     }
-    easyDomFactory< missionNode > *domf = new easyDomFactory< missionNode > ();     //such a bloody leak!
-
-    top = domf->LoadXML( configfile );
+    easyDomFactory< missionNode > domf;
+    top = domf.LoadXML(configfile);
     static bool dontpanic = false;
     if (top == NULL && !dontpanic) {
         cout<<"Panic exit - mission file "<<configfile<<" not found"<<endl;
