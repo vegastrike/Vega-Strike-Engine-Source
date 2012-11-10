@@ -119,7 +119,7 @@ public:
     }
 
 //Return a copy of the rect inset by specified margins.
-    Rect copyAndInset( const Size s )
+    Rect copyAndInset( const Size &s )
     {
         Rect result = *this;
         result.inset( s );

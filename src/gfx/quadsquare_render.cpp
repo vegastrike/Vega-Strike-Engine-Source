@@ -25,7 +25,7 @@ static void TerrainMakeClearActive( const TerrainTexture &text )
     GFXBlendMode( text.blendDst != ZERO ? text.blendSrc : SRCALPHA, INVSRCALPHA );
 }
 
-static void TerrainMakeDeactive( const TerrainTexture text )
+static void TerrainMakeDeactive( const TerrainTexture &text )
 {
     if (text.tex.t) {}
 }

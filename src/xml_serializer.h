@@ -159,9 +159,9 @@ public:
     void AddTag( const std::string &tag );
     void AddElement( const std::string &element, XMLHandler *handler, const XMLType &input );
     void Write( const char *modificationname = "" );
-    string WriteString();
+    std::string WriteString();
     void EndTag( const std::string endname = string( "" ) );
-    std::string getName()
+    const std::string& getName()
     {
         return filename;
     }

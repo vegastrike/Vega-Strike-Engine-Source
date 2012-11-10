@@ -68,7 +68,7 @@ public:
         autoselect   = false;
         defaultInput = false;
     }
-    menu( const std::string n_in, char const *d_in, char const *e_in )
+    menu( const std::string &n_in, char const *d_in, char const *e_in )
     {
         selected     = false;
         noescape     = false;

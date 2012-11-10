@@ -30,11 +30,11 @@ public: UnitContainer();
     {
         return unit != oth;
     }
-    bool operator==( const UnitContainer oth ) const
+    bool operator==( const UnitContainer &oth ) const
     {
         return unit == oth.unit;
     }
-    bool operator!=( const UnitContainer oth ) const
+    bool operator!=( const UnitContainer &oth ) const
     {
         return unit != oth.unit;
     }

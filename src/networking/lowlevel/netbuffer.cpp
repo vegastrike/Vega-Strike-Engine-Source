@@ -36,7 +36,7 @@ int getSimpleInt( std::string &input )
     return 0;
 }
 
-void addSimpleString( std::string &input, const std::string adder )
+void addSimpleString( std::string &input, const std::string &adder )
 {
     addSimpleInt( input, adder.length() );
     input += adder;

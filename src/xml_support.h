@@ -67,7 +67,7 @@ public:
     {
         std::string name;
         int val;
-        Pair( const std::string c, int v )
+        Pair( const std::string &c, int v )
         {
             name = c;
             val  = v;
