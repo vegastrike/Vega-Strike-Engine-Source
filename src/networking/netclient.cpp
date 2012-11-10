@@ -746,13 +746,14 @@ int NetClient::recvMsg( Packet *outpacket, timeval *timeout )
                     }
                     Cockpit *ps = _Universe->isPlayerStarship( un );
                     for (j = 0; j < mount_num; ++j) {
-                        unsigned int mnt = (unsigned int)netbuf.getInt32();
-                        if (mnt < un->mounts.size() && mnt >= 0) {
-                            if ( ps == NULL || !preEmptiveClientFire( un->mounts[mnt].type ) ) {
-                                un->mounts[mnt].processed = Mount::ACCEPTED;
-                                un->mounts[mnt].status    = Mount::ACTIVE;
+                        int mnt = netbuf.getInt32();
+                        if (mnt >= 0 && size_t(mnt) < un->mounts.size()) {
+                            size_t umnt = size_t(mnt);
+                            if ( ps == NULL || !preEmptiveClientFire( un->mounts[umnt].type ) ) {
+                                un->mounts[umnt].processed = Mount::ACCEPTED;
+                                un->mounts[umnt].status    = Mount::ACTIVE;
                                 //Store the missile id in the mount that should fire a missile
-                                un->mounts[mnt].serial    = mis;
+                                un->mounts[umnt].serial    = mis;
                             }
                         }
                     }
@@ -791,12 +792,13 @@ int NetClient::recvMsg( Packet *outpacket, timeval *timeout )
                         (*i).status = Mount::INACTIVE;
                 }
                 for (j = 0; j < mount_num; ++j) {
-                    unsigned int mnt = (unsigned int)netbuf.getInt32();
-                    if (mnt < un->mounts.size() && mnt >= 0) {
-                        un->mounts[mnt].processed = Mount::UNFIRED;
-                        un->mounts[mnt].status    = Mount::ACTIVE;
+                    int mnt = netbuf.getInt32();
+                    if (mnt >= 0 && size_t(mnt) < un->mounts.size()) {
+                        size_t umnt = size_t(mnt);
+                        un->mounts[umnt].processed = Mount::UNFIRED;
+                        un->mounts[umnt].status    = Mount::ACTIVE;
                         //Store the missile id in the mount that should fire a missile
-                        un->mounts[mnt].serial    = 0;                           //mis;
+                        un->mounts[umnt].serial    = 0;                           //mis;
                     }
                 }
                 //Ask for fire
@@ -1029,14 +1031,15 @@ int NetClient::recvMsg( Packet *outpacket, timeval *timeout )
                         un->pImage->CargoVolume = cargvol;
                         un->pImage->UpgradeVolume = upgvol;
                     }
-                    unsigned int numcargo = (unsigned int)netbuf.getInt32();
+                    int numcargo = netbuf.getInt32();
                     bool mission = false;
                     if (numcargo < 0) {
                         mission  = true;
                         numcargo = -numcargo;
                     }
                     Cargo carg;
-                    for (i = 0; i < numcargo; i++) {
+                    unsigned int unumcargo = (unsigned int)numcargo;
+                    for (i = 0; i < unumcargo; i++) {
                         unsigned int mplind;
                         unsigned int quantity = (unsigned int)netbuf.getInt32();
                         string str = netbuf.getString();
@@ -1095,7 +1098,7 @@ int NetClient::recvMsg( Packet *outpacket, timeval *timeout )
                 if (nostarsystem) break;
                 Unit *from = UniverseUtil::GetUnitFromSerial( packet_serial );
                 Unit *to   = game_unit.GetUnit();
-                unsigned int curstate = netbuf.getInt32();
+                int curstate = netbuf.getInt32();
                 if (!from) {
                     COUT<<"Received invalid comm message "<<curstate<<" from "<<packet_serial<<endl;
                     break;
@@ -1105,7 +1108,7 @@ int NetClient::recvMsg( Packet *outpacket, timeval *timeout )
                     break;
                 }
                 FSM *fsm = FactionUtil::GetConversation( to->faction, from->faction );
-                if ( curstate >= 0 && curstate < fsm->nodes.size() ) {
+                if ( curstate >= 0 && size_t(curstate) < fsm->nodes.size() ) {
                     unsigned char sex = 0;
                     if (from->pilot)
                         sex = from->pilot->getGender();
@@ -1296,7 +1299,7 @@ int NetClient::recvMsg( Packet *outpacket, timeval *timeout )
                     break;
                 case (Subcmd::Objective|Subcmd::SetValue):
                     mission = activeMis;
-                    while (mission->objectives.size() <= (unsigned int) pos && (unsigned int) pos != UINT_MAX)
+                    while (mission->objectives.size() <= size_t(pos))
                         UniverseUtil::addObjective( "" );
                     UniverseUtil::setObjective( pos, strValue );
                     UniverseUtil::setCompleteness( pos, floatValue );
@@ -1305,8 +1308,7 @@ int NetClient::recvMsg( Packet *outpacket, timeval *timeout )
                     break;
                 case (Subcmd::Objective|Subcmd::EraseValue):
                     mission = activeMis;
-                    if ( (unsigned int) pos < mission->objectives.size() && (unsigned int) pos >= 0 && (unsigned int) pos
-                        != UINT_MAX )
+                    if ( pos >= 0 && size_t(pos) < mission->objectives.size() )
                         mission->objectives.erase( activeMis->objectives.begin()+pos );
                     else
                         UniverseUtil::clearObjectives();

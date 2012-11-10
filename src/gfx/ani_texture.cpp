@@ -655,7 +655,7 @@ void AnimatedTexture::LoadFrame( int frame )
 {
     if ( !vidMode || (Decal == NULL) || (*Decal == NULL) ) return;
     if ( (frame < 0) || (frame >= static_cast<int>(numframes)) ) return;
-    if ( (activebound >= 0) && (activebound < numframes) && (frames[frame] == frames[activebound]) ) return;
+    if ( (activebound < numframes) && (frames[frame] == frames[activebound]) ) return;
     const char *temp   = frames[frame].get().c_str();
     char   file[512]   = "white.bmp";
     char   alp[512]    = "white.bmp";

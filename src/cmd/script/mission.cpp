@@ -253,7 +253,7 @@ void Mission::terminateMission()
     int queuenum = -1;
     if ( f != active_missions->end() ) {
         queuenum = getPlayerMissionNumber();          //-1 used as error code, 0 is first player mission
-        if ( (Network != NULL || SERVER) && player_num >= 0 ) {
+        if (Network != NULL || SERVER) {
             int num = queuenum;
             if (num >= 0)
                 if (SERVER && num > 0)

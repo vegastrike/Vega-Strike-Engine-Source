@@ -647,9 +647,9 @@ Cargo GetCargoIndex( const Unit *my_unit, int index )
 Cargo GetCargo( const Unit *my_unit, std::string cargname )
 {
     if (my_unit) {
-        unsigned int indx    = 0;
+        unsigned int indx    = (~(unsigned int)0);
         const Cargo *cargptr = my_unit->GetCargo( cargname, indx );
-        if (cargptr && indx >= 0)
+        if (cargptr && indx != (~(unsigned int)0))
             return *cargptr;
     }
     Cargo ret;

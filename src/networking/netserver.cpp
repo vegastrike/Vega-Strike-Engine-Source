@@ -967,9 +967,9 @@ void NetServer::processPacket( ClientPtr clt, unsigned char cmd, const AddressIP
                 (*i).status = Mount::INACTIVE;
             }
             for (unsigned int j = 0; j < mount_num; ++j) {
-                unsigned int mnt = (unsigned int)netbuf.getInt32();
-                if (mnt < un->mounts.size() && mnt >= 0)
-                    un->mounts[mnt].status = Mount::ACTIVE;
+                int mnt = netbuf.getInt32();
+                if (mnt >= 0 && size_t(mnt) < un->mounts.size())
+                    un->mounts[size_t(mnt)].status = Mount::ACTIVE;
                 else
                     COUT<<"ERROR --> Received a fire order on an invalid MOUNT: "<<mount_num<<" > "<<( un->mounts.size() )
                         <<endl;
@@ -1006,9 +1006,9 @@ void NetServer::processPacket( ClientPtr clt, unsigned char cmd, const AddressIP
             for (; i != un->mounts.end(); ++i)
                 (*i).status = Mount::INACTIVE;
             for (unsigned int j = 0; j < mount_num; j++) {
-                unsigned int mnt = (unsigned int)netbuf.getInt32();
-                if (mnt < un->mounts.size() && mnt >= 0)
-                    un->mounts[mnt].status = Mount::ACTIVE;
+                int mnt = netbuf.getInt32();
+                if (mnt >= 0 && size_t(mnt) < un->mounts.size())
+                    un->mounts[size_t(mnt)].status = Mount::ACTIVE;
                 else
                     COUT<<"ERROR --> Received an unfire order on an invalid MOUNT: "<<mount_num<<" > "<<( un->mounts.size() )
                         <<endl;

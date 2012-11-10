@@ -539,8 +539,9 @@ void NavigationSystem::DrawMission()
             fac_loc_after = 0;
             fac_loc = disallowedFactions.find( factionname, fac_loc_after );
             while (fac_loc != string::npos) {
-                fac_loc_before = fac_loc-1;
-                if (fac_loc_before < 0)
+                if (fac_loc > 0)
+                    fac_loc_before = fac_loc-1;
+                else
                     fac_loc_before = 0;
                 fac_loc_after  = fac_loc+factionname.size();
                 if ( (fac_loc == 0 || disallowedFactions[fac_loc_before] == ' ' || disallowedFactions[fac_loc_before]
@@ -717,7 +718,7 @@ void NavigationSystem::DrawSectorList()
             }
         if (!drawable)
             continue;
-        if ( ( (count-sectorOffset) < 0 ) || ( (count-sectorOffset) >= numRows ) ) {
+        if ( ( count < sectorOffset ) || ( count >= (numRows+sectorOffset) ) ) {
             ++count;
             continue;
         }
@@ -780,7 +781,7 @@ void NavigationSystem::DrawSectorList()
         index = sectorIter->GetSubsystemIndex( i );
         if ( !systemIter[index].isDrawable() )
             continue;
-        if ( ( (count-systemOffset) < 0 ) || ( (count-systemOffset) >= numRows ) ) {
+        if ( ( count < systemOffset ) || ( count >= (numRows+systemOffset) ) ) {
             ++count;
             continue;
         }

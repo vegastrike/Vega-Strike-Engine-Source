@@ -1803,7 +1803,7 @@ void BaseComputer::recalcTitle()
         break;
     case MISSIONS:
         {
-            const int count = guiMax( 0, active_missions.size()-1 );
+            const int count = guiMax( 0, int(active_missions.size())-1 );
             if (showStardate) {
                 sprintf( playerTitle, "Stardate: %s      Credits: %.2f      Active missions: %d", stardate, playerCredits, count );
             } else {
@@ -4703,8 +4703,9 @@ bool BaseComputer::showPlayerInfo( const EventCommandId &command, Control *contr
         fac_loc_after = 0;
         fac_loc = disallowedFactions.find( factionname, fac_loc_after );
         while (fac_loc != string::npos) {
-            fac_loc_before = fac_loc-1;
-            if (fac_loc_before < 0)
+            if (fac_loc > 0)
+                fac_loc_before = fac_loc-1;
+            else
                 fac_loc_before = 0;
             fac_loc_after  = fac_loc+factionname.size();
             if ( (fac_loc == 0 || disallowedFactions[fac_loc_before] == ' '

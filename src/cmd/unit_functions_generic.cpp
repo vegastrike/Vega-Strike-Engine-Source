@@ -289,7 +289,7 @@ int parseMountSizes( const char *str )
                        tmp[10],
                        tmp[11],
                        tmp[12] );
-    for (int i = 0; i < num; i++)
+    for (int i = 0; i < num && i < 13; i++)
         ans |= lookupMountSize( tmp[i] );
     return ans;
 }
@@ -303,7 +303,7 @@ void DealPossibleJumpDamage( Unit *un )
     float dam    = speed*(damage*muld);
     if (dam > maxd) dam = maxd;
     if (dam > 1) {
-        un->ApplyDamage( ( un->Position()+un->GetVelocity().Cast() ).Cast(),
+        un->ApplyDamage( ( un->Position()+un->GetVelocity().Cast() ),
                         un->GetVelocity(),
                         dam,
                         un,
@@ -319,8 +319,8 @@ void Enslave( Unit *parent, bool enslave )
     unsigned int   i;
     vector< Cargo >ToBeChanged;
     unsigned int   numcargo = parent->numCargo();
-    for (i = numcargo-1; i >= 0; --i) {
-        Cargo *carg = &parent->GetCargo( i );
+    for (i = numcargo; i > 0; ) {
+        Cargo *carg = &parent->GetCargo( --i );
         if (enslave) {
             if (carg->GetCategory().find( "Passengers" ) != string::npos && carg->content != "Hitchhiker") {
                 ToBeChanged.push_back( *carg );
