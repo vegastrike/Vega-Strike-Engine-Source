@@ -1699,7 +1699,7 @@ string VSFile::ReadFull()
             cerr<<"Only read "<<readsize<<" out of "<<this->Size()<<" bytes of "<<this->filename<<endl;
             GetError( "ReadFull" );
             if (readsize <= 0)
-                return string();
+                content[0] = '\0';
             else
                 content[readsize] = '\0';
         }
