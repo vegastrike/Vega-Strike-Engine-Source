@@ -1692,6 +1692,10 @@ string VSFile::ReadFull()
         return string();
     }
     if (!UseVolumes[alt_type] || this->volume_type == VSFSNone) {
+        long sz = this->Size();
+        if (sz <= 0)
+            return string();
+        
         char *content  = new char[this->Size()+1];
         content[this->Size()] = 0;
         int   readsize = fread( content, 1, this->Size(), this->fp );
