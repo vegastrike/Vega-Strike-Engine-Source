@@ -182,22 +182,15 @@ public:
     }
     void drawParents()
     {
-        if (parent) {
-            if ( parent->isSubUnit() ) {
-                parent = UnitUtil::owner( parent );
-                draw( parent );
-            } else {
-                draw( parent );
-            }
-        }
-        if (parenttarget) {
-            if ( parenttarget->isSubUnit() ) {
-                parenttarget = UnitUtil::owner( parenttarget );
-                draw( parenttarget );
-            } else {
-                draw( parenttarget );
-            }
-        }
+        if (parent && parent->isSubUnit())
+            parent = UnitUtil::owner( parent );
+        if (parent)
+            draw(parent);
+        
+        if (parenttarget && parenttarget->isSubUnit())
+            parenttarget = UnitUtil::owner( parenttarget );
+        if (parenttarget)
+            draw(parenttarget);
     }
 
     bool draw( Unit *unit )
