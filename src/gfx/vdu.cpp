@@ -113,7 +113,7 @@ string getUnitNameAndFgNoBase( Unit *target )
 
 int vdu_lookup( char* &s )
 {
-#ifdef _WIN32
+#ifdef _MSC_VER
 #define strcasecmp stricmp
 #endif
     int   retval = 0;

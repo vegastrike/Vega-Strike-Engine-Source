@@ -30,7 +30,7 @@ const char* FactionUtil::GetFaction( int i )
 
 static int GetFactionLookup( const char *factionname )
 {
-#ifdef _WIN32
+#ifdef _MSC_VER
   #define strcasecmp stricmp
 #endif
     for (unsigned int i = 0; i < factions.size(); i++)

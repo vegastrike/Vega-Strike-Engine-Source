@@ -15,7 +15,7 @@
 #include "audiolib.h"
 #include "vs_globals.h"
 #include "unit_const_cache.h"
-#ifdef _WIN32
+#ifdef _MSC_VER
 #define strcasecmp stricmp
 #endif
 extern int GetModeFromName( const char* );
