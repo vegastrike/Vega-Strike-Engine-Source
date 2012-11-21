@@ -23,6 +23,7 @@
 #include "xml_support.h"
 #include "config_xml.h"
 #include "vs_globals.h"
+#include "vsfilesystem.h"
 #include <assert.h>
 #include <sstream>
 //#include <sys/signal.h>
@@ -437,17 +438,36 @@ void winsys_process_events()
                     SDL_GetMouseState( &x, &y );
 
                     bool maybe_unicode = handle_unicode_kb && !(event.key.keysym.sym&~0xFF);
+                    bool is_unicode = maybe_unicode && event.key.keysym.unicode;
+                    
+                    //Fix up ctrl unicode codes
+                    if (is_unicode && event.key.keysym.unicode <= 0x1a)
+                        event.key.keysym.unicode += 0x60; // 0x01 (^A) --> 0x61 (A)
+                        
                     //Translate untranslated release events
                     if (state && maybe_unicode
                         && keysym_to_unicode[event.key.keysym.sym&0xFF])
                         event.key.keysym.unicode = keysym_to_unicode[event.key.keysym.sym&0xFF];
-                    bool is_unicode = maybe_unicode && event.key.keysym.unicode;
+                    
                     //Remember translation for translating release events
                     if (is_unicode)
                         keysym_to_unicode[event.key.keysym.sym&0xFF] = event.key.keysym.unicode;
+                    
                     //Ugly hack: prevent shiftup/shiftdown screwups on intl keyboard
                     //Note: Thank god we'll have OIS for 0.5.x
                     bool shifton = event.key.keysym.mod&(KMOD_LSHIFT|KMOD_RSHIFT|KMOD_CAPS);
+                    
+                    VSFileSystem::vs_dprintf(2,
+                        "Kbd: %s mod:%x sym:%x unicode:%x sh:%c u:%c mu:%c\n",
+                        (event.type == SDL_KEYUP) ? "KEYUP" : "KEYDOWN",
+                        event.key.keysym.mod,
+                        event.key.keysym.sym,
+                        event.key.keysym.unicode,
+                        (shifton) ? 't' : 'f', 
+                        (is_unicode) ? 't' : 'f', 
+                        (maybe_unicode) ? 't' : 'f'
+                    );
+                    
                     if (shifton && is_unicode
                         && shiftup( shiftdown( event.key.keysym.unicode ) ) != event.key.keysym.unicode) {
                         event.key.keysym.mod = SDLMod( event.key.keysym.mod&~(KMOD_LSHIFT|KMOD_RSHIFT|KMOD_CAPS) );
