@@ -441,7 +441,7 @@ void winsys_process_events()
                     bool is_unicode = maybe_unicode && event.key.keysym.unicode;
                     
                     //Fix up ctrl unicode codes
-                    if (is_unicode && event.key.keysym.unicode <= 0x1a)
+                    if (is_unicode && event.key.keysym.unicode <= 0x1a && (event.key.keysym.sym&0xFF) > 0x1a && event.key.keysym.mod & (KMOD_LCTRL|KMOD_RCTRL))
                         event.key.keysym.unicode += 0x60; // 0x01 (^A) --> 0x61 (A)
                         
                     //Translate untranslated release events
