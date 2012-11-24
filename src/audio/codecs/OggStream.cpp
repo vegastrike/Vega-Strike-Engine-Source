@@ -12,6 +12,7 @@
 
 #include <utility>
 #include <limits>
+#include <stdlib.h>
 
 #include <vorbis/vorbisfile.h>
 #include "vsfilesystem.h"
