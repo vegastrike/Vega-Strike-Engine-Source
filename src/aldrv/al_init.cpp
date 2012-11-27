@@ -158,18 +158,16 @@ bool AUDInit()
     int attrlist[] = {ALC_FREQUENCY, g_game.audio_frequency_mode, 0};
 #ifdef _WIN32
 	dev = alcOpenDevice(  (ALCchar*)"DirectSound3D" );
-    // dev = alcOpenDevice(  (ALCubyte*)"DirectSound3D" ); pre update. New includes barf on ubyte. cannot convert parameter.
-#else
-#ifdef __APPLE__
-    dev = alcOpenDevice( "sdl" );
-    if (dev == NULL)
+#elif __APPLE__
+    dev = alcOpenDevice( (ALCchar*)"sdl" );
+#endif
+    if (dev == NULL) {
+        // use default device
         dev = alcOpenDevice( NULL );
-#else
-    dev = alcOpenDevice( NULL );
-#endif
-#endif
-    if (dev == NULL)
+    }
+    if (dev == NULL) {
         return false;
+    }
     context_id = alcCreateContext( dev, attrlist );
     if (context_id == NULL) {
         alcCloseDevice( dev );
