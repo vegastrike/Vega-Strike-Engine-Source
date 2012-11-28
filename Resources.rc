@@ -13,13 +13,11 @@
 #undef APSTUDIO_READONLY_SYMBOLS
 
 /////////////////////////////////////////////////////////////////////////////
-// English (U.S.) resources
+// English (United States) resources
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
-#ifdef _WIN32
 LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
 #pragma code_page(1252)
-#endif //_WIN32
 
 #ifdef APSTUDIO_INVOKED
 /////////////////////////////////////////////////////////////////////////////
@@ -62,8 +60,8 @@ IDI_ICON4               ICON                    "icon4.ico"
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 0,5,2,13446
- PRODUCTVERSION 0,5,2,13446
+ FILEVERSION 0,5,2,13451
+ PRODUCTVERSION 0,5,2,13451
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
  FILEFLAGS 0x9L
@@ -81,13 +79,13 @@ BEGIN
             VALUE "Comments", "Vega Strike is the 3D Space Simulator that allows you to trade and bounty hunt in a vast universe. Can you face the dangers and decisions that await..."
             VALUE "CompanyName", "Vega Strike Project"
             VALUE "FileDescription", "Vega Strike Open Source Space Simulator"
-            VALUE "FileVersion", "0, 5, 2, 13446"
+            VALUE "FileVersion", "0.5.2.13451"
             VALUE "InternalName", "vegastrike"
             VALUE "LegalCopyright", "© Copyright 1998-2011 Vega Strike Project.  All rights reserved.  See the vega-licence.txt for details."
             VALUE "OriginalFilename", "Vegastrike.exe"
             VALUE "PrivateBuild", "13370"
             VALUE "ProductName", "Vega Strike"
-            VALUE "ProductVersion", "0, 5, 2, 13446"
+            VALUE "ProductVersion", "0.5.2.13451"
         END
     END
     BLOCK "VarFileInfo"
@@ -96,7 +94,7 @@ BEGIN
     END
 END
 
-#endif    // English (U.S.) resources
+#endif    // English (United States) resources
 /////////////////////////////////////////////////////////////////////////////
 
 
