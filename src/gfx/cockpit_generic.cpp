@@ -957,7 +957,6 @@ string Cockpit::MakeBaseName(const Unit *base)
     return name;
 }
 
-#ifdef CLIENT
 SoundContainer* Cockpit::GetSoundForEvent(Cockpit::EVENTID eventId) const
 {
     if (eventId < sounds.size())
@@ -977,4 +976,4 @@ SoundContainer* Cockpit::soundImpl(const SoundContainer &specs)
 {
     return new SoundContainer(specs);
 }
-#endif
+

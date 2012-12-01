@@ -35,8 +35,7 @@ namespace Radar
 class Cockpit
 {
 public:
-    ///cockpit events. Not needed in server
-#ifdef CLIENT
+    ///cockpit events.
     enum EVENTID {
         EVENTID_FIRST, 
         
@@ -115,7 +114,7 @@ public:
         /// Just after all valid values
         NUM_EVENTS
     };
-#endif
+
 
 protected:
     ///style of current view (chase cam, inside)
@@ -338,7 +337,7 @@ public:
     virtual void SetCommAnimation( Animation *ani, Unit *un ) {}
     virtual void SetStaticAnimation() {}
     
-#ifdef CLIENT
+
     /**
      * Retrieves the sound associated to the given event.
      * Returns NULL if no sound has been associated
@@ -350,7 +349,7 @@ public:
      * (the actual container will be a different, implementation-specific one)
      */
     void SetSoundForEvent(EVENTID eventId, const SoundContainer &soundSpecs);
-#endif
+
 
     class SaveGame*savegame;
 
@@ -405,11 +404,9 @@ public:
     virtual void OnJumpBegin(Unit *) {}
     virtual void OnJumpEnd(Unit *) {}
 
-#ifdef CLIENT
 protected:
     /// Override to use a specific kind of sound implementation
     virtual SoundContainer* soundImpl(const SoundContainer &specs);
-#endif
 };
 #endif
 
