@@ -1,11 +1,13 @@
 #ifndef __UNIT_CONST_CACHE_H
 #define __UNIT_CONST_CACHE_H
 #include "config.h"
+#include "hashtable.h"
 #include <string>
 #include <gnuhash.h>
-#ifndef WIN32
+
+class Mesh;
 class ConstHasher;
-#endif
+
 class StringIntKey
 {
     friend class ConstHasher;
@@ -31,7 +33,7 @@ public: StringIntKey( std::string k, int f )
     }
 };
 
-#if !defined (_WIN32) && __GNUC__ != 2
+#if HAVE_TR1_UNORDERED_MAP || (!defined (_WIN32) && __GNUC__ != 2)
 class ConstHasher
 {
 public:
@@ -50,11 +52,12 @@ public:
 template < class Typ, class Key >
 class ClassCache
 {
-#if !defined (_WIN32) && __GNUC__ != 2
-    static vsUMap< Key, Typ*, ConstHasher >unit_cache;
+#if HAVE_TR1_UNORDERED_MAP || (!defined (_WIN32) && __GNUC__ != 2)
+    typedef vsUMap< Key, Typ*, ConstHasher > cache_map;
 #else
-    static vsUMap< Key, Typ* >unit_cache;
+    typedef vsUMap< Key, Typ* > cache_map;
 #endif
+	static cache_map unit_cache;
 public:
     static const Typ * getCachedConst( Key k )
     {
@@ -62,11 +65,7 @@ public:
     }
     static Typ * getCachedMutable( const Key &k )
     {
-#if !defined (_WIN32) && __GNUC__ != 2
-        typename vsUMap< Key, Typ*, ConstHasher >::iterator i = unit_cache.find( k );
-#else
-        typename vsUMap< Key, Typ* >::iterator i = unit_cache.find( k );
-#endif
+        typename cache_map::iterator i = unit_cache.find( k );
         if ( i != unit_cache.end() )
             return (*i).second;
         return NULL;
@@ -82,17 +81,12 @@ public:
     }
     static void purgeCache( void (*Kill)( Typ *un ) )
     {
-        typename vsUMap< Key, Typ*, ConstHasher >::iterator i = unit_cache.begin();
+        typename cache_map::iterator i = unit_cache.begin();
         for (; i != unit_cache.end(); ++i)
             (*Kill)( (*i).second );
         unit_cache.clear();
     }
 };
-
-#if (defined (__GNUC__) && ( ( __GNUC__ == 3 && __GNUC_MINOR__ >= 4) || __GNUC__ > 3 ) )
-template < class Typ, class Key >
-vsUMap< Key, Typ*, ConstHasher >ClassCache< Typ, Key >::unit_cache;
-#endif
 
 typedef ClassCache< Unit, StringIntKey >UnitConstCache;
 typedef ClassCache< Mesh, std::string > WeaponMeshCache;

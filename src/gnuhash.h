@@ -21,6 +21,11 @@
 #define vsHash stdext::hash
 #endif
 
+#ifdef HAVE_NO_HASH_COMPARE
+#undef vsHashComp
+#define vsHashComp vsHash
+#endif
+
 #ifdef _WIN32
 #ifdef HAVE_TR1_UNORDERED_MAP
 #if defined(_MSC_VER) && _MSC_VER >= 1600
