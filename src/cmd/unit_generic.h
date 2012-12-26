@@ -514,7 +514,7 @@ public:
  *  Uses Mesh so only in Unit and maybe in NetUnit */
     virtual void Split( int level ) {}
     virtual void addHalo( const char *filename,
-                          const QVector &loc,
+                          const Matrix &trans,
                           const Vector &size,
                           const GFXColor &col,
                           std::string halo_type,
@@ -816,6 +816,7 @@ protected:
 //Moment of intertia of this unit
     float  Momentofinertia;
     Vector SavedAccel;
+    Vector SavedAngAccel;
 
 public:
     class Limits
@@ -1082,11 +1083,16 @@ public:
     void SetOrientation( Quaternion Q );
     void SetOrientation( QVector p, QVector q, QVector r );
     void GetOrientation( Vector &p, Vector &q, Vector &r ) const;
-    Vector GetNetAcceleration();
+    Vector GetNetAcceleration() const;
+    Vector GetNetAngularAcceleration() const;
 //acceleration, retrieved from NetForce - not stable (partial during simulation), use GetAcceleration()
     Vector GetAcceleration() const
     {
         return SavedAccel;
+    }
+    Vector GetAngularAcceleration() const
+    {
+        return SavedAngAccel;
     }
 //acceleration, stable over the simulation
     float GetMaxAccelerationInDirectionOf( const Vector &ref, bool afterburn ) const;

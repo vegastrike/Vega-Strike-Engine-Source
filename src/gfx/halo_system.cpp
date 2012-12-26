@@ -26,20 +26,28 @@
 #define HALO_STEERING_DOWN_FACTOR (0.01)
 #define HALO_STABILIZATION_RANGE (0.25)
 
-static float ffmax( float a, float b )
+static float mymin( float a, float b )
+{
+    return a > b ? b : a;
+}
+
+static float mymax( float a, float b )
 {
     return a > b ? a : b;
 }
+
 void DoParticles( QVector pos, float percent, const Vector &velocity, float radial_size, float particle_size, int faction )
 {
-    percent = 1-percent;
-    int i = rand();
-    static float scale = XMLSupport::parse_float( vs_config->getVariable( "graphics", "sparklescale", "8" ) );
+    static float scale      = XMLSupport::parse_float( vs_config->getVariable( "graphics", "sparklescale", "8" ) );
     static float sspeed     = XMLSupport::parse_float( vs_config->getVariable( "graphics", "sparklespeed", ".5" ) );
     static float flare      = XMLSupport::parse_float( vs_config->getVariable( "graphics", "sparkleflare", ".15" ) );
     static float spread     = XMLSupport::parse_float( vs_config->getVariable( "graphics", "sparklespread", ".04" ) );
     static float absspeed   = XMLSupport::parse_float( vs_config->getVariable( "graphics", "sparkleabsolutespeed", ".02" ) );
+    static float sciz       = XMLSupport::parse_float( vs_config->getVariable( "graphics", "sparklesizeenginerelative", ".125" ) );
     static bool  fixed_size = XMLSupport::parse_bool( vs_config->getVariable( "graphics", "sparklefixedsize", "0" ) );
+
+    percent = 1-percent;
+    int i = rand();
     if (i < RAND_MAX*percent*scale) {
         ParticlePoint pp;
         float   r1 = rand()/( (float) RAND_MAX*.5 )-1;
@@ -52,8 +60,7 @@ void DoParticles( QVector pos, float percent, const Vector &velocity, float radi
         pp.col.g = col[1];
         pp.col.b = col[2];
         pp.col.a = 1.0f;
-        static float sciz = XMLSupport::parse_float( vs_config->getVariable( "graphics", "sparklesizeenginerelative", ".125" ) );
-        particleTrail.AddParticle( pp, rand*(ffmax(
+        particleTrail.AddParticle( pp, rand*(mymax(
                                                  velocity.Magnitude(),
                                                  absspeed )*spread+absspeed)+velocity*sspeed,
                                   fixed_size ? sciz : (sqrt( particle_size )*sciz) );
@@ -96,69 +103,32 @@ void LaunchOneParticle( const Matrix &mat, const Vector &vel, unsigned int seed,
     }
 }
 
-HaloSystem::HaloSystem()
+HaloSystem::HaloSystem() : sparkle_accum(0)
 {
     VSCONSTRUCT2( 'h' )
-    mesh = NULL;
-    activation    = 0;
-    oscale        = 0;
-    sparkle_accum = 0;
-}
-
-MyIndHalo::MyIndHalo( const QVector &loc, const Vector &size )
-{
-    this->loc  = loc;
-    this->size = size;
 }
 
 unsigned int HaloSystem::AddHalo( const char *filename,
-                                  const QVector &loc,
+                                  const Matrix &trans,
                                   const Vector &size,
                                   const GFXColor &col,
                                   std::string type,
                                   float activation_accel )
 {
-#ifdef CAR_SIM
-    ani.push_back( new Animation( "flare6.ani", 1, .1, MIPMAP, true, true, col ) );
-    ani.back()->SetDimensions( size.i, size.j );
-    ani.back()->SetPosition( loc );
-    halo_type.push_back( CAR::type_map.lookup( type ) );     //should default to headlights
-#endif
-    if (mesh == NULL) {
-        int neutralfac  = FactionUtil::GetNeutralFaction();
-        mesh = Mesh::LoadMesh( ( string( filename ) ).c_str(), Vector( 1, 1, 1 ), neutralfac, NULL );
-        static float gs = XMLSupport::parse_float( vs_config->getVariable( "physics", "game_speed", "1" ) );
-        activation = activation_accel*gs;
-    }
     static float engine_scale  = XMLSupport::parse_float( vs_config->getVariable( "graphics", "engine_radii_scale", ".4" ) );
     static float engine_length = XMLSupport::parse_float( vs_config->getVariable( "graphics", "engine_length_scale", "1.25" ) );
+    static float gs = XMLSupport::parse_float( vs_config->getVariable( "physics", "game_speed", "1" ) );
 
-    halo.push_back( MyIndHalo( loc, Vector( size.i*engine_scale, size.j*engine_scale, size.k*engine_length ) ) );
+    int neutralfac = FactionUtil::GetNeutralFaction();
+    halo.push_back( Halo() );
+    halo.back().trans = trans;
+    halo.back().size = Vector(size.i*engine_scale, size.j*engine_scale, size.k*engine_length);
+    halo.back().mesh = Mesh::LoadMesh( ( string( filename ) ).c_str(), Vector( 1, 1, 1 ), neutralfac, NULL );
+    halo.back().activation = activation_accel * gs;
+    halo.back().oscale = 0;
     return halo.size()-1;
 }
-using std::vector;
-void HaloSystem::SetSize( unsigned int which, const Vector &size )
-{
-    halo[which].size = size;
-#ifdef CAR_SIM
-    ani[which]->SetDimensions( size.i, size.j );
-#endif
-}
-void HaloSystem::SetPosition( unsigned int which, const QVector &loc )
-{
-    halo[which].loc = loc;
-#ifdef CAR_SIM
-    ani[which]->SetPosition( loc );
-#endif
-}
-static float mymin( float a, float b )
-{
-    return a > b ? b : a;
-}
-static float mymax( float a, float b )
-{
-    return a > b ? a : b;
-}
+
 static float HaloAccelSmooth( float linaccel, float olinaccel, float maxlinaccel )
 {
     linaccel = mymax( 0, mymin( maxlinaccel, linaccel ) );     //Clamp input, somehow, sometimes it's not clamped
@@ -166,7 +136,6 @@ static float HaloAccelSmooth( float linaccel, float olinaccel, float maxlinaccel
     float olinaccel2;
     if (linaccel > olinaccel)
         olinaccel2 = mymin( linaccel, olinaccel+maxlinaccel*HALO_STEERING_UP_FACTOR );
-
     else
         olinaccel2 = mymax( linaccel, olinaccel-maxlinaccel*HALO_STEERING_DOWN_FACTOR );
     linaccel = (1-phase)*linaccel+phase*olinaccel2;
@@ -174,145 +143,91 @@ static float HaloAccelSmooth( float linaccel, float olinaccel, float maxlinaccel
     return linaccel;
 }
 
-bool HaloSystem::ShouldDraw( const Matrix &trans,
-                             const Vector &velocity,
-                             const Vector &accel,
-                             float maxaccel,
-                             float maxvelocity )
-{
-    static bool halos_by_velocity = XMLSupport::parse_bool( vs_config->getVariable( "graphics", "halos_by_velocity", "false" ) );
-    if (halo.size() == 0)
-        return false;          //Any doubt?
-
-    Vector thrustvector = trans.getR().Normalize();
-    if (halos_by_velocity) {
-        float linvel = velocity.Dot( thrustvector );
-        return linvel > activation;
-    } else {
-        if (maxaccel <= 0) maxaccel = 1;
-        if (maxvelocity <= 0) maxvelocity = 1;
-        float linaccel = HaloAccelSmooth( accel.Dot( thrustvector )/maxaccel, oscale, 1.0f );
-        return linaccel > activation*maxaccel;
-    }
-}
 void HaloSystem::Draw( const Matrix &trans,
                        const Vector &scale,
                        int halo_alpha,
                        float nebdist,
                        float hullpercent,
                        const Vector &velocity,
-                       const Vector &accel,
+                       const Vector &linaccel,
+                       const Vector &angaccel,
                        float maxaccel,
                        float maxvelocity,
                        int faction )
 {
-#ifdef CAR_SIM
-    for (unsigned int i = 0; i < ani.size(); ++i) {
-        int bitwise = scale.j;
-        int typ     = 0;
-#ifdef CAR_SIM
-        typ = halo_type[i];
-#endif
-        bool drawnow = (typ == CAR::RUNNINGLIGHTS);
-        if ( (typ == CAR::BRAKE && scale.k < .01 && scale.k > -.01) )
-            drawnow = true;
-        if ( (typ == CAR::REVERSE && scale.k <= -.01) )
-            drawnow = true;
-        if (typ == CAR::HEADLIGHTS)
-            if ( scale.j >= CAR::ON_NO_BLINKEN
-                || ( bitwise < CAR::ON_NO_BLINKEN && bitwise > 0 && (bitwise&CAR::FORWARD_BLINKEN) ) )
-                drawnow = true;
-        if (typ == CAR::SIREN)
-            if ( (bitwise > 0) && ( (bitwise >= CAR::ON_NO_BLINKEN) || (bitwise&CAR::SIREN_BLINKEN) ) )
-                drawnow = true;
-        float blink_prob = .8;
-        if (typ == CAR::RIGHTBLINK)
-            if ( (bitwise > 0) && (bitwise < CAR::ON_NO_BLINKEN) && (bitwise&CAR::RIGHT_BLINKEN) )
-                if (rand() < RAND_MAX*blink_prob)
-                    drawnow = true;
-        if (typ == CAR::LEFTBLINK)
-            if ( (bitwise > 0) && (bitwise < CAR::ON_NO_BLINKEN) && (bitwise&CAR::LEFT_BLINKEN) )
-                if (rand() < RAND_MAX*blink_prob)
-                    drawnow = true;
-        if (drawnow) {
-            ani[i]->SetPosition( Transform( trans, halo[i].loc ) );
-            ani[i]->SetDimensions( scale.i, scale.i );
-            ani[i]->Draw();
-        }
-    }
-#else
-    if (halo_alpha >= 0) {
+    static bool halos_by_velocity = XMLSupport::parse_bool( vs_config->getVariable( "graphics", "halos_by_velocity", "false" ) );
+    static float percentColorChange = XMLSupport::parse_float(vs_config->getVariable("graphics","percent_afterburner_color_change",".5"));
+    static float abRedness = XMLSupport::parse_float(vs_config->getVariable("graphics","afterburner_color_red","1.0"));
+    static float abGreenness = XMLSupport::parse_float(vs_config->getVariable("graphics","afterburner_color_green","0.0"));
+    static float abBlueness = XMLSupport::parse_float(vs_config->getVariable("graphics","afterburner_color_blue","0.0"));
+    static float percentRedness = XMLSupport::parse_float(vs_config->getVariable("graphics","engine_color_red","1.0"));
+    static float percentGreenness = XMLSupport::parse_float(vs_config->getVariable("graphics","engine_color_green","1.0"));
+    static float percentBlueness = XMLSupport::parse_float(vs_config->getVariable("graphics","engine_color_blue","1.0"));
+    static float sparklerate = XMLSupport::parse_float( vs_config->getVariable( "graphics", "halosparklerate", "20" ) );
+
+    if ( halo_alpha >= 0 ) {
         halo_alpha /= 2;
-        if ( (halo_alpha&0x1) == 0 )
+        if ( (halo_alpha & 0x1) == 0 )
             halo_alpha += 1;
     }
-    static bool halos_by_velocity = XMLSupport::parse_bool( vs_config->getVariable( "graphics", "halos_by_velocity", "false" ) );
+    if ( maxaccel <= 0 ) maxaccel = 1;
+    if ( maxvelocity <= 0 ) maxvelocity = 1;
 
-    Vector thrustvector = trans.getR().Normalize();
-    if (maxaccel <= 0) maxaccel = 1;
-    if (maxvelocity <= 0) maxvelocity = 1;
-    float  value, maxvalue, minvalue;
-    if (halos_by_velocity) {
-        value    = velocity.Dot( thrustvector );
-        maxvalue = sqrt( maxvelocity );
-        minvalue = activation;
-    } else {
-        oscale   = HaloAccelSmooth( accel.Dot( thrustvector )/maxaccel, oscale, 1.0f );
-        value    = oscale;
-        maxvalue = 1.0f;
-        minvalue = activation/maxaccel;
-    }
-    if ( (value > minvalue) && (scale.k > 0) ) {
-        vector< MyIndHalo >::iterator i = halo.begin();
-        for (; i != halo.end(); ++i) {
-            Matrix m = trans;
+    for ( std::vector< Halo >::iterator i = halo.begin(); i != halo.end(); ++i ) {
+        Vector thrustvector = TransformNormal( trans, i->trans.getR() ).Normalize();
+        float value, maxvalue, minvalue;
+        if (halos_by_velocity) {
+            value = velocity.Dot( thrustvector );
+            maxvalue = sqrt( maxvelocity );
+            minvalue = i->activation;
+        } else {
+            Vector relpos = TransformNormal( trans, i->trans.p );
+            Vector accel = linaccel + relpos.Cross( angaccel );
+            float accelmag = accel.Dot( thrustvector );
+            i->oscale = HaloAccelSmooth( accelmag / maxaccel, i->oscale, 1.0f );
+            value = i->oscale;
+            maxvalue = 1.0f;
+            minvalue = i->activation / maxaccel;
+        }
+        if ( (value > minvalue) && (scale.k > 0) ) {
+            Matrix m = trans * i->trans;
             ScaleMatrix( m, Vector( scale.i*i->size.i, scale.j*i->size.j, scale.k*i->size.k*value/maxvalue ) );
-            m.p = Transform( trans, i->loc );
-            static float percentColorChange=XMLSupport::parse_float(vs_config->getVariable("graphics","percent_afterburner_color_change",".5"));
-            static float abRedness=XMLSupport::parse_float(vs_config->getVariable("graphics","afterburner_color_red","1.0"));
-            static float abGreenness=XMLSupport::parse_float(vs_config->getVariable("graphics","afterburner_color_green","0.0"));
-            static float abBlueness=XMLSupport::parse_float(vs_config->getVariable("graphics","afterburner_color_blue","0.0"));
-            static float percentRedness=XMLSupport::parse_float(vs_config->getVariable("graphics","engine_color_red","1.0"));
-            static float percentGreenness=XMLSupport::parse_float(vs_config->getVariable("graphics","engine_color_green","1.0"));
-            static float percentBlueness=XMLSupport::parse_float(vs_config->getVariable("graphics","engine_color_blue","1.0"));
-            GFXColor blend=GFXColor(percentRedness,percentGreenness,percentBlueness,1);
-            
-            if (value>maxvalue*percentColorChange) {
-                float test=value-maxvalue*percentColorChange;
-                test/=maxvalue*percentColorChange;
-                if (!(test<1.0)) test=1.0;
-                blend=GFXColor(abRedness*test+percentRedness*(1.0-test),abGreenness*test+percentGreenness*(1.0-test),abBlueness*test+percentBlueness*(1.0-test),1.0);
-                
+
+            GFXColor blend = GFXColor( percentRedness, percentGreenness, percentBlueness, 1 );
+            if (value > maxvalue*percentColorChange) {
+                float test = value-maxvalue*percentColorChange;
+                test /= maxvalue*percentColorChange;
+                if (!(test<1.0)) test = 1.0;
+                float r = abRedness*test+percentRedness*(1.0-test);
+                float g = abGreenness*test+percentGreenness*(1.0-test);
+                float b = abBlueness*test+percentBlueness*(1.0-test);
+                blend = GFXColor( r, g, b, 1.0 );
             }
+
             MeshFX xtraFX=MeshFX(1.0,1.0,
                                  true,
                                  GFXColor(1,1,1,1),
                                  GFXColor(1,1,1,1),
                                  GFXColor(1,1,1,1),
                                  blend);
-                                 
-            mesh->Draw( 50000000000000.0, m, 1, halo_alpha, nebdist, 0,false,&xtraFX );
-            if (hullpercent < .99) {
-                static float sparklerate = XMLSupport::parse_float( vs_config->getVariable( "graphics", "halosparklerate", "20" ) );
+            i->mesh->Draw( 50000000000000.0, m, 1, halo_alpha, nebdist, 0, false, &xtraFX );
+
+            if ( hullpercent < .99 ) {
                 sparkle_accum += GetElapsedTime()*sparklerate;
                 int spawn = (int) (sparkle_accum);
                 sparkle_accum -= spawn;
                 while (spawn-- > 0)
-                    DoParticles( m.p, hullpercent, velocity, mesh->rSize()*scale.i, mesh->rSize()*scale.i, faction );
+                    DoParticles( m.p, hullpercent, velocity, i->mesh->rSize()*scale.i, i->mesh->rSize()*scale.i, faction );
             }
         }
     }
-#endif
-}
-HaloSystem::~HaloSystem()
-{
-#ifdef CAR_SIM
-    for (unsigned int i = 0; i < ani.size(); i++)
-        delete ani[i];
-    ani.clear();
-#endif
-    VSDESTRUCT2
-    if (mesh)
-        delete mesh;
 }
 
+HaloSystem::~HaloSystem()
+{
+    VSDESTRUCT2
+    for ( std::vector< Halo >::iterator i = halo.begin(); i != halo.end(); ++i ) {
+        if ( i->mesh )
+            delete i->mesh;
+	}
+}

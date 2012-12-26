@@ -447,6 +447,7 @@ void AddLights( Unit *thus, Unit::XML &xml, const string &lights )
             string   filename = nextElementString( lights, elemstart, elemend );
             QVector  pos, scale;
             GFXColor halocolor;
+            QVector P(1, 0, 0), Q( 0, 1, 0 ), R( 0, 0, 1 );
             pos.i = nextElementFloat( lights, elemstart, elemend );
             pos.j = nextElementFloat( lights, elemstart, elemend );
             pos.k = nextElementFloat( lights, elemstart, elemend );
@@ -457,8 +458,24 @@ void AddLights( Unit *thus, Unit::XML &xml, const string &lights )
             halocolor.b = nextElementFloat( lights, elemstart, elemend, 1 );
             halocolor.a = nextElementFloat( lights, elemstart, elemend, 1 );
             double act_speed = nextElementFloat( lights, elemstart, elemend, default_halo_activation );
+            R.i   = nextElementFloat( lights, elemstart, elemend );
+            R.j   = nextElementFloat( lights, elemstart, elemend );
+            R.k   = nextElementFloat( lights, elemstart, elemend, 1 );
+            Q.i   = nextElementFloat( lights, elemstart, elemend );
+            Q.j   = nextElementFloat( lights, elemstart, elemend, 1 );
+            Q.k   = nextElementFloat( lights, elemstart, elemend );
 
-            thus->addHalo( filename.c_str(), pos*xml.unitscale, scale.Cast(), halocolor, "", act_speed );
+            Q.Normalize();
+            if ( fabs( Q.i ) == fabs( R.i ) && fabs( Q.j ) == fabs( R.j ) && fabs( Q.k ) == fabs( R.k ) ) {
+                Q = QVector(-1, 0, 0);
+            }
+            R.Normalize();
+            CrossProduct( Q, R, P );
+            CrossProduct( R, P, Q );
+            Q.Normalize();
+            Matrix trans(P.Cast(), Q.Cast(), R.Cast(), pos*xml.unitscale);
+
+            thus->addHalo( filename.c_str(), trans, scale.Cast(), halocolor, "", act_speed );
         } else {
             ofs = string::npos;
         }

@@ -144,13 +144,13 @@ VSSprite*GameUnit< UnitType >::getHudImage() const
 
 template < class UnitType >
 void GameUnit< UnitType >::addHalo( const char *filename,
-                                    const QVector &loc,
+                                    const Matrix &trans,
                                     const Vector &size,
                                     const GFXColor &col,
                                     std::string halo_type,
                                     float halo_speed )
 {
-    phalos->AddHalo( filename, loc, size, col, halo_type, halo_speed );
+    phalos->AddHalo( filename, trans, size, col, halo_type, halo_speed );
 }
 
 template < class UnitType >
@@ -309,12 +309,12 @@ void GameUnit< UnitType >::DrawNow( const Matrix &mato, float lod )
                 }
             }
     }
-    Vector accel    = this->GetAcceleration();
+    Vector linaccel = this->GetAcceleration();
+    Vector angaccel = this->GetAngularAcceleration();
     float  maxaccel = this->GetMaxAccelerationInDirectionOf( mat.getR(), true );
     Vector velocity = this->GetVelocity();
-    if ( phalos->ShouldDraw( mat, velocity, accel, maxaccel,
-                             cmas ) && !( this->docked&(UnitType::DOCKED|UnitType::DOCKED_INSIDE) ) )
-        phalos->Draw( mat, Scale, cloak, 0, this->GetHullPercent(), velocity, accel, maxaccel, cmas, this->faction );
+    if ( !( this->docked & (UnitType::DOCKED | UnitType::DOCKED_INSIDE) ) )
+        phalos->Draw( mat, Scale, cloak, 0, this->GetHullPercent(), velocity, linaccel, angaccel, maxaccel, cmas, this->faction );
     if (rootunit == (const void*) this) {
         Mesh::ProcessZFarMeshes();
         Mesh::ProcessUndrawnMeshes();
@@ -543,7 +543,8 @@ void GameUnit< UnitType >::Draw( const Transformation &parent, const Matrix &par
     if (cloak >= 0)
         haloalpha = ( (float) cloak )/2147483647;
     if ( On_Screen && (phalos->NumHalos() > 0) && !( this->docked&(UnitType::DOCKED|UnitType::DOCKED_INSIDE) ) ) {
-        Vector accel    = this->GetAcceleration();
+        Vector linaccel = this->GetAcceleration();
+        Vector angaccel = this->GetAngularAcceleration();
         float  maxaccel = this->GetMaxAccelerationInDirectionOf( this->WarpMatrix( *ctm ).getR(), true );
         Vector velocity = this->GetVelocity();
 
@@ -557,10 +558,9 @@ void GameUnit< UnitType >::Draw( const Transformation &parent, const Matrix &par
 #endif
         //WARNING: cmas is not a valid maximum speed for the upcoming multi-direction thrusters,
         //nor is maxaccel. Instead, each halo should have its own limits specified in units.csv
-        if ( phalos->ShouldDraw( this->WarpMatrix( *ctm ), velocity, accel, maxaccel, cmas ) )
-            phalos->Draw( this->WarpMatrix( *ctm ), Scale, cloak,
-                          (_Universe->AccessCamera()->GetNebula() == this->nebula && this->nebula != NULL) ? -1 : 0,
-                          this->GetHull() > 0 ? damagelevel : 1.0, velocity, accel, maxaccel, cmas, this->faction );
+        float nebd = (_Universe->AccessCamera()->GetNebula() == this->nebula && this->nebula != NULL) ? -1 : 0;
+        float hulld = this->GetHull() > 0 ? damagelevel : 1.0;
+        phalos->Draw( this->WarpMatrix( *ctm ), Scale, cloak, nebd, hulld, velocity, linaccel, angaccel, maxaccel, cmas, this->faction );
     }
     if ( On_Screen && !UnitType::graphicOptions.NoDamageParticles
         && !( this->docked&(UnitType::DOCKED|UnitType::DOCKED_INSIDE) ) ) {

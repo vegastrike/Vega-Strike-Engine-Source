@@ -226,14 +226,22 @@ void Unit::GetOrientation( Vector &p, Vector &q, Vector &r ) const
     r = m.getR();
 }
 
-Vector Unit::GetNetAcceleration()
+Vector Unit::GetNetAcceleration() const
 {
     Vector p, q, r;
     GetOrientation( p, q, r );
     Vector res( NetLocalForce.i*p+NetLocalForce.j*q+NetLocalForce.k*r );
-    if (NetForce.i || NetForce.j || NetForce.k)
-        res += InvTransformNormal( identity_matrix, NetForce );
+    res += NetForce;
     return res/GetMass();
+}
+
+Vector Unit::GetNetAngularAcceleration() const
+{
+    Vector p, q, r;
+    GetOrientation( p, q, r );
+    Vector res( NetLocalTorque.i*p+NetLocalTorque.j*q+NetLocalTorque.k*r );
+    res += NetTorque;
+    return res/GetMoment();
 }
 
 float Unit::GetMaxAccelerationInDirectionOf( const Vector &ref, bool afterburn ) const
@@ -889,6 +897,9 @@ void Unit::ZeroAll()
     SavedAccel.i = 0;
     SavedAccel.j = 0;
     SavedAccel.k = 0;
+    SavedAngAccel.i = 0;
+    SavedAngAccel.j = 0;
+    SavedAngAccel.k = 0;
     //old_state has a constructor
     damages      = NO_DAMAGE;
     //SubUnits has a constructor
@@ -3900,6 +3911,7 @@ Vector Unit::ResolveForces( const Transformation &trans, const Matrix &transmat 
 {
     //First, save theoretical instantaneous acceleration (not time-quantized) for GetAcceleration()
     SavedAccel = GetNetAcceleration();
+    SavedAngAccel = GetNetAngularAcceleration();
 
     Vector p, q, r;
     GetOrientation( p, q, r );

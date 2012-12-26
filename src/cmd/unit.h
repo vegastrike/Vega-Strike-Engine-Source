@@ -104,7 +104,7 @@ public: GameUnit( int dummy );
     virtual void DrawNow();
 ///Deprecated
     void addHalo( const char *filename,
-                  const QVector &loc,
+                  const Matrix &trans,
                   const Vector &size,
                   const GFXColor &col,
                   std::string halo_type,

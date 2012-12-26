@@ -552,6 +552,8 @@ void Unit::beginElement( const string &name, const AttributeList &attributes )
     QVector Q;
     QVector R;
     QVector pos;
+    Vector size;
+    GFXColor color;
     float   xyscale = -1;
     float   zscale = -1;
     bool    tempbool;
@@ -832,9 +834,11 @@ void Unit::beginElement( const string &name, const AttributeList &attributes )
         vs_config->gethColor( "unit", "engine", halocolor, 0xffffffff );
         assert( xml->unitlevel == 1 );
         xml->unitlevel++;
-        P   = QVector( 1, 1, 1 );
-        Q   = QVector( 1, 1, 1 );
+        P   = QVector( 1, 0, 0 );
+        Q   = QVector( 0, 1, 0 );
+        R   = QVector( 0, 0, 1 );
         pos = QVector( 0, 0, 0 );
+        size = Vector( 1, 1, 1 );
         for (iter = attributes.begin(); iter != attributes.end(); iter++) {
             switch ( attribute_map.lookup( (*iter).name ) )
             {
@@ -856,19 +860,19 @@ void Unit::beginElement( const string &name, const AttributeList &attributes )
                 break;
             case RED:
                 ADDDEFAULT;
-                halocolor[0] = parse_float( (*iter).value );
+                color.r = parse_float( (*iter).value );
                 break;
             case GREEN:
                 ADDDEFAULT;
-                halocolor[1] = parse_float( (*iter).value );
+                color.g = parse_float( (*iter).value );
                 break;
             case BLUE:
                 ADDDEFAULT;
-                halocolor[2] = parse_float( (*iter).value );
+                color.b = parse_float( (*iter).value );
                 break;
             case ALPHA:
                 ADDDEFAULT;
-                halocolor[3] = parse_float( (*iter).value );
+                color.a = parse_float( (*iter).value );
                 break;
             case XFILE:
                 ADDDEFAULT;
@@ -879,16 +883,39 @@ void Unit::beginElement( const string &name, const AttributeList &attributes )
                 break;
             case MOUNTSIZE:
                 ADDDEFAULT;
-                P.i = xml->unitscale*parse_float( (*iter).value );
-                P.j = xml->unitscale*parse_float( (*iter).value );
-                P.k = xml->unitscale*parse_float( (*iter).value );
+                size.i = xml->unitscale*parse_float( (*iter).value );
+                size.j = xml->unitscale*parse_float( (*iter).value );
+                size.k = xml->unitscale*parse_float( (*iter).value );
+                break;
+            case RI:
+                R.i = parse_float( (*iter).value );
+                break;
+            case RJ:
+                R.j = parse_float( (*iter).value );
+                break;
+            case RK:
+                R.k = parse_float( (*iter).value );
+                break;
+            case QI:
+                Q.i = parse_float( (*iter).value );
+                break;
+            case QJ:
+                Q.j = parse_float( (*iter).value );
+                break;
+            case QK:
+                Q.k = parse_float( (*iter).value );
                 break;
             }
         }
-        addHalo( filename.c_str(), pos, P.Cast(), GFXColor( halocolor[0],
-                                                            halocolor[1],
-                                                            halocolor[2],
-                                                            halocolor[3] ), light_type, act_speed );
+        Q.Normalize();
+        if ( fabs( Q.i ) == fabs( R.i ) && fabs( Q.j ) == fabs( R.j ) && fabs( Q.k ) == fabs( R.k ) ) {
+            Q = QVector(-1, 0, 0);
+        }
+        R.Normalize();
+        CrossProduct( Q, R, P );
+        CrossProduct( R, P, Q );
+        Q.Normalize();
+        addHalo( filename.c_str(), Matrix( P.Cast(), Q.Cast(), R.Cast(), pos ), size, color, light_type, act_speed );
         break;
     case MOUNT:
         ADDTAG;
