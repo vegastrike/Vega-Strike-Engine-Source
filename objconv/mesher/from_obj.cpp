@@ -496,12 +496,12 @@ void ObjToXMESH( FILE *obj, FILE *mtl, vector< XML > &xmllist, bool forcenormals
         }
         sscanf( buf, "NS %f\n", &cur->power );
         float floate, floatf, floatg;
-        if ( 3 == sscanf( buf, "detail_plane %f %f %f\n", &floate, &floatf, &floatg ) ) {
+        if ( 3 == sscanf( buf, "DETAIL_PLANE %f %f %f\n", &floate, &floatf, &floatg ) ) {
             cur->detailplanei.push_back( floate );
             cur->detailplanej.push_back( floatf );
             cur->detailplanek.push_back( floatg );
         }
-        if ( 1 == sscanf( buf, "illum %f\n", &floate ) ) {
+        if ( 1 == sscanf( buf, "ILLUM %f\n", &floate ) ) {
             cur->er = floate;
             cur->eg = floate;
             cur->eb = floate;
