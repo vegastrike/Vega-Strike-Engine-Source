@@ -304,6 +304,14 @@ void BFXMToXmeshOrOBJ( FILE *Inputfile, FILE *Outputfile, FILE *OutputObj, FILE 
                 fprintf( mtl, "Kd %f %f %f\n", dr, dg, db );
                 fprintf( mtl, "Ke %f %f %f\n", er, eg, eb );
                 fprintf( mtl, "Ks %f %f %f\n", sr, sg, sb );
+                if (bsrc == ONE && bdst == ONE)
+                    fprintf( mtl, "Blend 1.0\n" );
+                else if (bsrc == SRCALPHA && bdst == INVSRCALPHA)
+                    fprintf( mtl, "Blend 0.5\n" );
+                if (!usenormals)
+                    fprintf( mtl, "Normals 0\n" );
+                if (reflect)
+                    fprintf( mtl, "Map_Reflection 1\n" );
             } else {
                 fprintf( Outputfile,
                          "<Material power=\"%f\" cullface=\"%d\" reflect=\"%d\" lighting=\"%d\" usenormals=\"%d\">\n",
