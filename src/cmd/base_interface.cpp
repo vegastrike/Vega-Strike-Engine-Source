@@ -480,13 +480,14 @@ void BaseInterface::Room::Draw( BaseInterface *base )
                 Vector c2( c1.i, c3.j, 0 );
                 Vector c4( c3.i, c1.j, 0 );
                 GFXDisable( TEXTURE0 );
-                GFXBegin( GFXLINESTRIP );
-                GFXVertexf( c1 );
-                GFXVertexf( c2 );
-                GFXVertexf( c3 );
-                GFXVertexf( c4 );
-                GFXVertexf( c1 );
-                GFXEnd();
+                const float verts[5 * 3] = {
+                    c1.x, c1.y,  c1.z, 
+                    c2.x, c2.y,  c2.z, 
+                    c3.x, c3.y,  c3.z,
+                    c4.x, c4.y,  c4.z,
+                    c1.x, c1.y,  c1.z, 
+                };
+                GFXDraw( GFXLINESTRIP, verts, 5 );
                 GFXEnable( TEXTURE0 );
             }
         //if link
@@ -529,12 +530,13 @@ void BaseInterface::Room::BaseText::Draw( BaseInterface *base )
         text.GetSize( wid, hei );
 
         GFXColorf( text.bgcol );
-        GFXBegin( GFXQUAD );
-        GFXVertex3f( posx, hei, 0.0f );
-        GFXVertex3f( wid, hei, 0.0f );
-        GFXVertex3f( wid, posy, 0.0f );
-        GFXVertex3f( posx, posy, 0.0f );
-        GFXEnd();
+        const float verts[4 * 3] = {
+            posx, hei,  0.0f,
+            wid,  hei,  0.0f,
+            wid,  posy, 0.0f,
+            posx, posy, 0.0f,
+        };
+        GFXDraw( GFXQUAD, verts, 4 );
     } else {
         text.Draw( text.GetText(), 0, true, false, automatte );
     }
