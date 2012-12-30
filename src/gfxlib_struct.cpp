@@ -49,15 +49,7 @@ GLenum PolyLookup( POLYTYPE poly )
         return GL_TRIANGLES;
     }
 }
-#ifndef NO_VBO_SUPPORT
-static void BindBuf( unsigned int vbo_data )
-{
-    (*glBindBufferARB_p)(GL_ARRAY_BUFFER_ARB, vbo_data);
-}
-static void BindInd( unsigned int element_data )
-{
-    (*glBindBufferARB_p)(GL_ELEMENT_ARRAY_BUFFER_ARB, element_data);
-}
+
 static void clear_gl_error()
 {
     glGetError();
@@ -68,7 +60,7 @@ static void print_gl_error(const char *fmt)
     if ((gl_error = glGetError()))
         VSFileSystem::vs_dprintf(1, fmt, gl_error);
 }
-#endif
+
 void GFXVertexList::RefreshDisplayList( )
 {
 #ifndef NO_VBO_SUPPORT
@@ -83,12 +75,12 @@ void GFXVertexList::RefreshDisplayList( )
         }
     }
     if (vbo_data) {
-        BindBuf( vbo_data );
+        GFXBindBuffer( vbo_data );
         (*glBufferDataARB_p)(GL_ARRAY_BUFFER_ARB, numVertices
                              *( (changed&HAS_COLOR) ? sizeof (GFXColorVertex) : sizeof (GFXVertex) ), data.vertices,
                              (changed&CHANGE_MUTABLE) ? GL_DYNAMIC_DRAW_ARB : GL_STATIC_DRAW_ARB);
         if (changed&HAS_INDEX) {
-            BindInd( display_list );
+            GFXBindElementBuffer( display_list );
             unsigned int tot = 0;
             for (int i = 0; i < numlists; ++i)
                 tot += offsets[i];
@@ -170,11 +162,11 @@ void GFXVertexList::BeginDrawState( GFXBOOL lock )
     if (vbo_data) {
         clear_gl_error();
 
-        BindBuf( vbo_data );
+        GFXBindBuffer( vbo_data );
         print_gl_error("VBO18.5a Error %d\n");
         
         if (changed&HAS_INDEX) {
-            BindInd( display_list );
+            GFXBindElementBuffer( display_list );
             print_gl_error("VBO18.5b Error %d\n");
         }
         
@@ -360,14 +352,14 @@ void GFXVertexList::Draw( enum POLYTYPE *mode, const INDEX index, const int numl
             use_vbo = use_vbo && memcmp( &index, &this->index, sizeof (INDEX) ) == 0;
             if (use_vbo) {
             #ifndef NO_VBO_SUPPORT
-                BindInd( display_list );
+                GFXBindElementBuffer( display_list );
             #else
                 use_vbo = false;
             #endif
             } else {
             #ifndef NO_VBO_SUPPORT
                 if (vbo_data)
-                    BindInd( 0 );
+                    GFXBindElementBuffer( 0 );
             #endif
             }
             if (glMultiDrawElements_p != NULL && numlists > 1) {
@@ -532,13 +524,13 @@ union GFXVertexList::VDAT* GFXVertexList::Map( bool read, bool write )
     if (GFX_BUFFER_MAP_UNMAP)
         if (vbo_data) {
             if (display_list) {
-                BindInd( display_list );
+                GFXBindElementBuffer( display_list );
                 index.b =
                     (unsigned char*) (*glMapBufferARB_p)(GL_ELEMENT_ARRAY_BUFFER_ARB,
                                                          read ? (write ? GL_READ_WRITE_ARB : GL_READ_ONLY_ARB)
                                                          : GL_WRITE_ONLY_ARB);
             }
-            BindBuf( vbo_data );
+            GFXBindBuffer( vbo_data );
             void *ret =
                   (*glMapBufferARB_p)(GL_ARRAY_BUFFER_ARB,
                                     read ? (write ? GL_READ_WRITE_ARB : GL_READ_ONLY_ARB) : GL_WRITE_ONLY_ARB);
@@ -559,10 +551,10 @@ void GFXVertexList::UnMap()
     if (GFX_BUFFER_MAP_UNMAP)
         if (vbo_data) {
             if (display_list) {
-                BindInd( display_list );
+                GFXBindElementBuffer( display_list );
                 (*glUnmapBufferARB_p)(GL_ELEMENT_ARRAY_BUFFER_ARB);
             }
-            BindBuf( vbo_data );
+            GFXBindBuffer( vbo_data );
             (*glUnmapBufferARB_p)(GL_ARRAY_BUFFER_ARB);
             data.colors   = NULL;
             data.vertices = NULL;

@@ -423,6 +423,12 @@ void /*GFXDRVAPI*/ GFXVertexf( const QVector &v );
 ///Ends the current set of polytypes
 void /*GFXDRVAPI*/ GFXEnd();
 void /*GFXDRVAPI*/ GFXCircle( float x, float y, float r1, float r2 );
+unsigned int /*GFXDRVAPI*/ PolyLookup( POLYTYPE poly );
+void /*GFXDRVAPI*/ GFXDraw( POLYTYPE type, const float data[], int vnum,
+    int vsize = 3, int csize = 0, int tsize0 = 0, int tsize1 = 0 );
+///Bind VBO data, noop if VBO not supported
+void GFXBindBuffer(unsigned int vbo_data);
+void GFXBindElementBuffer(unsigned int element_data);
 ///Optimizes a list to reuse repeated vertices!
 void GFXOptimizeList( GFXVertex *old, int numV, GFXVertex **newlist, int *numnewVertices, unsigned int **indices );
 

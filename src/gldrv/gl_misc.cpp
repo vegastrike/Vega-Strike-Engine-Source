@@ -1,4 +1,4 @@
-/*
+/* 
  * Vega Strike
  * Copyright (C) 2001-2002 Daniel Horn & Alan Shieh
  *
@@ -29,6 +29,13 @@
 #include "config_xml.h"
 #include "winsys.h"
 
+// disable clientside draw for debugging purposes
+//#define NODRAW 1
+
+// cached gl state
+static unsigned int s_array_buffer = 0;
+static unsigned int s_element_array_buffer = 0;
+
 bool GFXMultiTexAvailable()
 {
     return gl_options.Multitexture != 0;
@@ -43,12 +50,94 @@ void GFXCircle( float x, float y, float wid, float hei )
          -Vector( wid*g_game.x_resolution*cos( 2.*M_PI/360.0 ), hei*g_game.y_resolution*sin( 2.*M_PI/360.0 ), 0 ) ).Magnitude();
     int accuracy = (int) ( 360.0f*aaccuracy*(1.0f < segmag ? 1.0 : segmag) );
     if (accuracy < 4) accuracy = 4;
-    //const int accuracy=((wid*g_game.x_resolution)+(hei*g_game.y_resolution))*M_PI;
-    GFXBegin( GFXLINESTRIP );
     float iaccuracy = 1.0f/accuracy;
-    for (int i = 0; i <= accuracy; i++)
-        GFXVertex3f( x+wid*cos( i*2.*M_PI*iaccuracy ), y+hei*sin( i*2.*M_PI*iaccuracy ), 0 );
-    GFXEnd();
+
+	std::vector<float> verts(3 * (accuracy + 1));
+    float * v = &verts[0];
+    for (int i = 0; i <= accuracy; i++) {
+        *v++ = x + wid * cos( i * 2 * M_PI * iaccuracy );
+        *v++ = y + hei * sin( i * 2 * M_PI * iaccuracy );
+        *v++ = 0.0f;
+    }
+    GFXDraw( GFXLINESTRIP, &verts[0], accuracy + 1 );
+}
+
+void /*GFXDRVAPI*/ GFXDraw( POLYTYPE type, const float data[], int vnum,
+    int vsize, int csize, int tsize0, int tsize1 )
+{
+#ifndef NODRAW
+    assert(data && vnum && vsize);
+    int stride = sizeof(float) * (vsize + csize + tsize0 + tsize1);
+
+    GFXBindBuffer(0);
+
+    glVertexPointer(vsize, GL_FLOAT, stride, data);
+    glEnableClientState(GL_VERTEX_ARRAY);
+
+    if (csize) {
+        glEnableClientState(GL_COLOR_ARRAY);
+        glColorPointer(csize, GL_FLOAT, stride, data + vsize);
+    }
+
+    if (gl_options.Multitexture) {
+        if (tsize0) {
+            glClientActiveTextureARB_p(GL_TEXTURE0);
+            glTexCoordPointer(tsize0, GL_FLOAT, stride, data + vsize + csize);
+            glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+        }
+
+        if (tsize1) {
+            glClientActiveTextureARB_p(GL_TEXTURE1);
+            glTexCoordPointer(tsize1, GL_FLOAT, stride, data + vsize + csize + tsize0);
+            glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+        }
+    } else if (tsize0) {
+        glTexCoordPointer(tsize0, GL_FLOAT, stride, data + vsize + csize);
+        glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+    }
+
+    glDrawArrays(PolyLookup(type), 0, vnum);
+   
+    if (gl_options.Multitexture) {
+        if (tsize1) {
+            glClientActiveTextureARB_p(GL_TEXTURE1);
+            glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+        }
+
+        if (tsize0) {
+            if (tsize1)
+                glClientActiveTextureARB_p(GL_TEXTURE0);
+            glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+        }
+    } else if (tsize0) {
+        glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+    }
+
+    if (csize)
+        glDisableClientState(GL_COLOR_ARRAY);
+
+    glDisableClientState(GL_VERTEX_ARRAY);
+#endif
+}
+
+void /*GFXDRVAPI*/ GFXBindBuffer(unsigned int vbo_data)
+{
+#ifndef NO_VBO_SUPPORT
+    if (s_array_buffer != vbo_data) {
+        s_array_buffer = vbo_data;
+        (*glBindBufferARB_p)(GL_ARRAY_BUFFER_ARB, vbo_data);
+    }
+#endif
+}
+
+void /*GFXDRVAPI*/ GFXBindElementBuffer(unsigned int element_data)
+{
+#ifndef NO_VBO_SUPPORT
+    if (s_element_array_buffer != element_data) {
+        s_element_array_buffer = element_data;
+        (*glBindBufferARB_p)(GL_ELEMENT_ARRAY_BUFFER_ARB, element_data);
+    }
+#endif
 }
 
 void /*GFXDRVAPI*/ GFXBeginScene()
@@ -59,8 +148,10 @@ void /*GFXDRVAPI*/ GFXBeginScene()
 
 void /*GFXDRVAPI*/ GFXEndScene()
 {
-    glFlush();
     winsys_swap_buffers();     //swap the buffers
+#ifdef NODRAW
+    GFXClear( GFXTRUE );
+#endif
 }
 
 void /*GFXDRVAPI*/ GFXClear( const GFXBOOL colorbuffer, const GFXBOOL depthbuffer, const GFXBOOL stencilbuffer )
