@@ -65,49 +65,9 @@ struct OrigMeshLoader
     }
 };
 
-//#define DLIST
-
-#ifdef DLIST
-
-#define GL_TRIANGLE (0)
-#define GL_QUAD (0)
-#define DLISTBEGINSTATE( stat )                    \
-    do {                                           \
-        if ( stat && (laststate != stat) ) {       \
-            if (laststate != GL_COMPILE) glEnd();  \
-            glBegin( stat );                       \
-            laststate = stat;                      \
-        }                                          \
-    }                                              \
-    while (0)
-
-#define DLISTENDSTATE( stat )                      \
-    do {                                           \
-        if ( stat && (laststate != GL_COMPILE) ) { \
-            glEnd();                               \
-            laststate = GL_COMPILE;                \
-        }                                          \
-    }                                              \
-    while (0)
-
-#define DLISTDOVERTEX( num )               \
-    do {                                   \
-        glTexCoord2f( vtx.s, vtx.t );      \
-        glNormal3f( vtx.i, vtx.j, vtx.k ); \
-        glVertex3f( vtx.x*xml.scale.i,     \
-                    vtx.y*xml.scale.j,     \
-                    vtx.z*xml.scale.k      \
-                  );                       \
-    }                                      \
-    while (0)
-
-#else
-
 #define DLISTBEGINSTATE( stat )
 #define DLISTDOVERTEX( num )
 #define DLISTENDSTATE( stat )
-
-#endif
 
 //sets up the appropriate lists for the below functions to utilize
 #define BEGIN_GL_LINES( expectitems )                                                               \
