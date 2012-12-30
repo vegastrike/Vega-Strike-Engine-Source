@@ -974,7 +974,9 @@ void NavigationSystem::DrawGalaxy()
         if (destsize != 0) {
             GFXDisable( LIGHTING );
             GFXDisable( TEXTURE0 );
-            GFXBegin( GFXLINE );
+            const int vsize = 3 + 4;
+            std::vector<float> verts(2 * destsize * vsize);
+            std::vector<float>::iterator v = verts.begin();
             for (unsigned i = 0; i < destsize; ++i) {
                 CachedSystemIterator::SystemInfo &oth = systemIter[systemIter->GetDestinationIndex( i )];
                 if ( oth.isDrawable() ) {
@@ -1004,32 +1006,30 @@ void NavigationSystem::DrawGalaxy()
                     IntersectBorder( the_new_x, the_new_y, the_x, the_y );
 
                     bool isConnectionPath = false;
-                    if (path_view != PATH_OFF) {
-                        if (systemIter->part_of_path && oth.part_of_path) {
-                            for (std::set< NavPath* >::iterator paths = systemIter->paths.begin();
-                                 paths != systemIter->paths.end();
-                                 ++paths)
-                                if ( (*paths)->getVisible() ) {
-                                    if ( (*paths)->isNeighborPath( temp, systemIter->GetDestinationIndex( i ) ) ) {
-                                        isConnectionPath = true;
-                                        GFXColorf( pathcol );
-                                        GFXVertex3f( the_x, the_y, 0 );
-                                        GFXColorf( pathcol );
-                                        GFXVertex3f( the_new_x, the_new_y, 0 );
-                                        break;
-                                    }
-                                }
+                    if (path_view != PATH_OFF && systemIter->part_of_path && oth.part_of_path) {
+                        for (std::set< NavPath* >::iterator paths = systemIter->paths.begin();
+                             !isConnectionPath && paths != systemIter->paths.end();
+                             ++paths) 
+                        {
+                            isConnectionPath = (*paths)->getVisible() && (*paths)->isNeighborPath( temp, systemIter->GetDestinationIndex( i ) );
                         }
                     }
-                    if (!isConnectionPath && path_view != PATH_ONLY) {
-                        GFXColorf( col );
-                        GFXVertex3f( the_x, the_y, 0 );
-                        GFXColorf( othcol );
-                        GFXVertex3f( the_new_x, the_new_y, 0 );
+                    if ( isConnectionPath ) {
+                        *v++ = the_x;     *v++ = the_y;     *v++ = 0;
+                        *v++ = pathcol.r; *v++ = pathcol.g; *v++ = pathcol.b; *v++ = pathcol.a;
+                        *v++ = the_new_x; *v++ = the_new_y; *v++ = 0;
+                        *v++ = pathcol.r; *v++ = pathcol.g; *v++ = pathcol.b; *v++ = pathcol.a;
+                    } else if ( path_view != PATH_ONLY ) {
+                        *v++ = the_x;     *v++ = the_y;     *v++ = 0;
+                        *v++ = col.r;     *v++ = col.g;     *v++ = col.b;     *v++ = col.a;
+                        *v++ = the_new_x; *v++ = the_new_y; *v++ = 0;
+                        *v++ = othcol.r;  *v++ = othcol.g;  *v++ = othcol.b;  *v++ = othcol.a;
                     }
                 }
             }
-            GFXEnd();
+            if (v != verts.end())
+                verts.erase(v, verts.end());
+            GFXDraw( GFXLINE, &verts[0], verts.size() / vsize, 3, 4 );
         }
         ++systemIter;
     }
