@@ -34,9 +34,9 @@
 const float size = 100;
 Background::Background( const char *file, int numstars, float spread, const std::string &filename, const GFXColor &color_, bool degamma_ ) 
     : Enabled( true )
-    , stars( NULL )
     , degamma( degamma_ )
     , color( color_ )
+    , stars( NULL )
 {
     string temp;
     static string starspritetextures = vs_config->getVariable( "graphics", "far_stars_sprite_texture", "" );
@@ -337,13 +337,10 @@ void Background::Draw()
             skybox_rendering_sequence[5].tex = down;
             for (size_t skr = 0; skr < sizeof (skybox_rendering_sequence)/sizeof (skybox_rendering_sequence[0]); skr++) {
                 Texture *tex = skybox_rendering_sequence[skr].tex;
-                int lyr;
 
 #ifdef NV_CUBE_MAP
                 if (tex == NULL)
                     tex = _Universe->getLightMap();
-                const int    numlayers = 1;
-                const bool   multitex  = true;
                 const int    numpasses = 1;
                 static const float edge_fixup =
                     XMLSupport::parse_float( vs_config->getVariable( "graphics", "background_edge_fixup", "0" ) );
@@ -357,6 +354,7 @@ void Background::Draw()
                 _Universe->activateLightMap( 0 );
                 GFXToggleTexture( true, 0, CUBEMAP );
 #else
+                int   lyr;
                 int   numlayers = tex->numLayers();
                 bool  multitex  = (numlayers > 1);
                 int   numpasses = tex->numPasses();
@@ -381,45 +379,54 @@ void Background::Draw()
                     if ( !tex || tex->SetupPass( pass, 0, ONE, ZERO ) ) {
                         if (tex)
                             tex->MakeActive( 0, pass );
-                        //GFXActiveTexture(0);
                         GFXTextureAddressMode( CLAMP );
                         GFXTextureEnv( 0, GFXMODULATETEXTURE );
                         GFXTextureCoordGenMode( 0, NO_GEN, NULL, NULL );
 
-                        float s1, t1, s2, t2;
+#define X( i ) skybox_rendering_sequence[skr].vertices[i][0]*size
+#define Y( i ) skybox_rendering_sequence[skr].vertices[i][1]*size
+#define Z( i ) skybox_rendering_sequence[skr].vertices[i][2]*size
+#define S( i ) stca[size_t(skybox_rendering_sequence[skr].tcoord[i][0])]
+#define T( i ) ttca[size_t(skybox_rendering_sequence[skr].tcoord[i][1])]
+#define U( i ) stca[size_t(skybox_rendering_sequence[skr].tcoord[i][2])]
+#define V( i ) ttca[size_t(skybox_rendering_sequence[skr].tcoord[i][3])]
 
 #ifdef NV_CUBE_MAP
-              #define VERTEX( i )                                    \
-    s1 = stca[size_t(skybox_rendering_sequence[skr].tcoord[i][0])];          \
-    t1 = ttca[size_t(skybox_rendering_sequence[skr].tcoord[i][1])];          \
-    s2 = stca[size_t(skybox_rendering_sequence[skr].tcoord[i][2])];          \
-    glTexCoord3f( s1, t1, s2 );                                      \
-    GFXVertex3f( skybox_rendering_sequence[skr].vertices[i][0]*size, \
-                 skybox_rendering_sequence[skr].vertices[i][1]*size, \
-                 skybox_rendering_sequence[skr].vertices[i][2]*size );
+                        const float verts[4 * (3 + 3)] = { 
+                            X(0), Y(0), Z(0), S(0), T(0), U(0),
+                            X(1), Y(1), Z(1), S(1), T(1), U(1),
+                            X(2), Y(2), Z(2), S(2), T(2), U(2),
+                            X(3), Y(3), Z(3), S(3), T(3), U(3),
+                        };
+                        GFXDraw( GFXQUAD, verts, 4, 3, 0, 3 );
 #else
-              #define VERTEX( i )                                    \
-    s1 = stca[size_t(skybox_rendering_sequence[skr].tcoord[i][0])];          \
-    t1 = ttca[size_t(skybox_rendering_sequence[skr].tcoord[i][1])];          \
-    s2 = stca[size_t(skybox_rendering_sequence[skr].tcoord[i][2])];          \
-    t2 = ttca[size_t(skybox_rendering_sequence[skr].tcoord[i][3])];          \
-    if (!multitex) GFXTexCoord2f( s1, t1 );                          \
-    else GFXTexCoord4f( s1, t1, s2, t2 );                            \
-    GFXVertex3f( skybox_rendering_sequence[skr].vertices[i][0]*size, \
-                 skybox_rendering_sequence[skr].vertices[i][1]*size, \
-                 skybox_rendering_sequence[skr].vertices[i][2]*size );
+                        if (!multitex) {
+                            const float verts[4 * (3 + 2)] = { 
+                                X(0), Y(0), Z(0), S(0), T(0),
+                                X(1), Y(1), Z(1), S(1), T(1),
+                                X(2), Y(2), Z(2), S(2), T(2),
+                                X(3), Y(3), Z(3), S(3), T(3),
+                            };
+                            GFXDraw( GFXQUAD, verts, 4, 3, 0, 2 );
+                        } else {
+                            const float verts[4 * (3 + 2 + 2)] = { 
+                                X(0), Y(0), Z(0), S(0), T(0), U(0), V(0),
+                                X(1), Y(1), Z(1), S(1), T(1), U(1), V(1),
+                                X(2), Y(2), Z(2), S(2), T(2), U(2), V(2),
+                                X(3), Y(3), Z(3), S(3), T(3), U(3), V(3),
+                            };
+                            GFXDraw( GFXQUAD, verts, 4, 3, 0, 2, 2 );
+                        }
 #endif
 
-                        GFXBegin( GFXQUAD );
-                        VERTEX( 0 );
-                        VERTEX( 1 );
-                        VERTEX( 2 );
-                        VERTEX( 3 );
-                        GFXEnd();
-
-              #undef VERTEX
+#undef X
+#undef Y
+#undef Z
+#undef S
+#undef T
+#undef U
+#undef V
                     }
-
 
 #ifdef NV_CUBE_MAP
                 GFXToggleTexture( false, 0, CUBEMAP );
