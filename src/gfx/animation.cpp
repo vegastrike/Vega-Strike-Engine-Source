@@ -252,11 +252,6 @@ bool Animation::CalculateOrientation( Matrix &result )
 }
 void Animation::DrawNow( const Matrix &final_orientation )
 {
-//  if (g_game.use_animations == 0 && g_game.use_textures == 0)
-//  {
-//  }
-//  else if ( !Done() || (options&ani_repeat) )
-//  {  //chuck_starchaser simplifying...
     if ( (g_game.use_animations || g_game.use_textures) && (!Done() || (options&ani_repeat)) )
     {
         GFXLoadMatrixModel( final_orientation );
@@ -277,28 +272,23 @@ void Animation::DrawNow( const Matrix &final_orientation )
             if ( SetupPass( pass, 0, src, dst ) ) {
                 MakeActive( 0, pass );
                 GFXTextureEnv( 0, GFXMODULATETEXTURE );
-                GFXBegin( GFXQUAD );
-                if (!multitex)
-                    GFXTexCoord2f( ms, Mt );
-                else
-                    GFXTexCoord4f( ms, Mt, ms, Mt );
-                GFXVertex3f( -width, -height, 0.0f );                 //lower left
-                if (!multitex)
-                    GFXTexCoord2f( Ms, Mt );
-                else
-                    GFXTexCoord4f( Ms, Mt, Ms, Mt );
-                GFXVertex3f( width, -height, 0.0f );                 //upper left
-                if (!multitex)
-                    GFXTexCoord2f( Ms, mt );
-                else
-                    GFXTexCoord4f( Ms, mt, Ms, mt );
-                GFXVertex3f( width, height, 0.0f );                 //upper right
-                if (!multitex)
-                    GFXTexCoord2f( ms, mt );
-                else
-                    GFXTexCoord4f( ms, mt, ms, mt );
-                GFXVertex3f( -width, height, 0.0f );                 //lower right
-                GFXEnd();
+                if (!multitex) {
+                    const float verts[4 * (3 + 2)] = {
+                        -width, -height, 0.0f,  ms, Mt,    //lower left
+                         width, -height, 0.0f,  Ms, Mt,    //upper left
+                         width,  height, 0.0f,  Ms, mt,    //upper right
+                        -width,  height, 0.0f,  ms, mt,    //lower right
+                    };
+                    GFXDraw( GFXQUAD, verts, 4, 3, 0, 2 );
+                } else {
+                    const float verts[4 * (3 + 4)] = {
+                        -width, -height, 0.0f,  ms, Mt, ms, Mt,
+                         width, -height, 0.0f,  Ms, Mt, Ms, Mt,
+                         width,  height, 0.0f,  Ms, mt, Ms, mt,
+                        -width,  height, 0.0f,  ms, mt, ms, mt,
+                    };
+                    GFXDraw( GFXQUAD, verts, 4, 3, 0, 2, 2 );
+                }
             }
         }
         for (lyr = 0; lyr < numlayers; lyr++)
@@ -336,24 +326,23 @@ void Animation::DrawAsVSSprite( VSSprite *spr )
             if ( SetupPass( pass, 0, src, dst ) ) {
                 MakeActive( 0, pass );
                 GFXTextureEnv( 0, GFXMODULATETEXTURE );
-                GFXBegin( GFXQUAD );
-                if (!multitex) GFXTexCoord2f( ms, Mt );
-
-                else GFXTexCoord4f( ms, Mt, ms, Mt );
-                GFXVertexf( ll );
-                if (!multitex) GFXTexCoord2f( Ms, Mt );
-
-                else GFXTexCoord4f( Ms, Mt, Ms, Mt );
-                GFXVertexf( lr );
-                if (!multitex) GFXTexCoord2f( Ms, mt );
-
-                else GFXTexCoord4f( Ms, mt, Ms, mt );
-                GFXVertexf( ur );
-                if (!multitex) GFXTexCoord2f( ms, mt );
-
-                else GFXTexCoord4f( ms, mt, ms, mt );
-                GFXVertexf( ul );
-                GFXEnd();
+                if (!multitex) {
+                    const float verts[4 * (3 + 2)] = {
+                        ll.i, ll.j, ll.k,  ms, Mt,    //lower left
+                        lr.i, lr.j, lr.k,  Ms, Mt,    //upper left
+                        ur.i, ur.j, ur.k,  Ms, mt,    //upper right
+                        ul.i, ul.j, ul.k,  ms, mt,    //lower right
+                    };
+                    GFXDraw( GFXQUAD, verts, 4, 3, 0, 2 );
+                } else {
+                    const float verts[4 * (3 + 4)] = {
+                        ll.i, ll.j, ll.k,  ms, Mt, ms, Mt,
+                        lr.i, lr.j, lr.k,  Ms, Mt, Ms, Mt,
+                        ur.i, ur.j, ur.k,  Ms, mt, Ms, mt,
+                        ul.i, ul.j, ul.k,  ms, mt, ms, mt,
+                    };
+                    GFXDraw( GFXQUAD, verts, 4, 3, 0, 2, 2 );
+                }
             }
         SetupPass( -1, 0, src, dst );
         for (lyr = 0; lyr < numlayers; lyr++)
@@ -390,58 +379,44 @@ void Animation::DrawNoTransform( bool cross, bool blendoption )
             if ( SetupPass( pass, 0, src, dst ) ) {
                 MakeActive( 0, pass );
                 GFXTextureEnv( 0, GFXMODULATETEXTURE );
-                GFXBegin( GFXQUAD );
-                if (!multitex) GFXTexCoord2f( ms, Mt );
+                int vnum = cross ? 12 : 4;
+                if (!multitex) {
+                    const float verts[12 * (3 + 2)] = {
+                        -width, -height, 0.0f,  ms, Mt,    //lower left
+                         width, -height, 0.0f,  Ms, Mt,    //upper left
+                         width,  height, 0.0f,  Ms, mt,    //upper right
+                        -width,  height, 0.0f,  ms, mt,    //lower right
 
-                else GFXTexCoord4f( ms, Mt, ms, Mt );
-                GFXVertex3f( -width, -height, 0.0f );                 //lower left
-                if (!multitex) GFXTexCoord2f( Ms, Mt );
+                        -width, 0.0f, -height,  ms, Mt,    //lower left
+                         width, 0.0f, -height,  Ms, Mt,    //upper left
+                         width, 0.0f,  height,  Ms, mt,    //upper right
+                        -width, 0.0f,  height,  ms, mt,    //lower right
 
-                else GFXTexCoord4f( Ms, Mt, Ms, Mt );
-                GFXVertex3f( width, -height, 0.0f );                 //upper left
-                if (!multitex) GFXTexCoord2f( Ms, mt );
+                         0.0f, -height, -height,  ms, Mt,    //lower left
+                         0.0f,  height, -height,  Ms, Mt,    //upper left
+                         0.0f,  height,  height,  Ms, mt,    //upper right
+                         0.0f, -height,  height,  ms, mt,    //lower right
+                    };
+                    GFXDraw( GFXQUAD, verts, vnum, 3, 0, 2 );
+                } else {
+                    const float verts[12 * (3 + 4)] = {
+                        -width, -height, 0.0f,  ms, Mt, ms, Mt,
+                         width, -height, 0.0f,  Ms, Mt, Ms, Mt,
+                         width,  height, 0.0f,  Ms, mt, Ms, mt,
+                        -width,  height, 0.0f,  ms, mt, ms, mt,
 
-                else GFXTexCoord4f( Ms, mt, Ms, mt );
-                GFXVertex3f( width, height, 0.0f );                 //upper right
-                if (!multitex) GFXTexCoord2f( ms, mt );
+                        -width, 0.0f, -height,  ms, Mt, ms, Mt,
+                         width, 0.0f, -height,  Ms, Mt, Ms, Mt,
+                         width, 0.0f,  height,  Ms, mt, Ms, mt,
+                        -width, 0.0f,  height,  ms, mt, ms, mt,
 
-                else GFXTexCoord4f( ms, mt, ms, mt );
-                GFXVertex3f( -width, height, 0.0f );                 //lower right
-                if (cross) {
-                    if (!multitex) GFXTexCoord2f( ms, Mt );
-
-                    else GFXTexCoord4f( ms, Mt, ms, Mt );
-                    GFXVertex3f( -width, 0.0f, -height );                     //lower left
-                    if (!multitex) GFXTexCoord2f( Ms, Mt );
-
-                    else GFXTexCoord4f( Ms, Mt, Ms, Mt );
-                    GFXVertex3f( width, 0.0f, -height );                     //upper left
-                    if (!multitex) GFXTexCoord2f( Ms, mt );
-
-                    else GFXTexCoord4f( Ms, mt, Ms, mt );
-                    GFXVertex3f( width, 0.0f, height );                     //upper right
-                    if (!multitex) GFXTexCoord2f( ms, mt );
-
-                    else GFXTexCoord4f( ms, mt, ms, mt );
-                    GFXVertex3f( -width, 0.0f, height );                     //lower right
-                    if (!multitex) GFXTexCoord2f( ms, Mt );
-
-                    else GFXTexCoord4f( ms, Mt, ms, Mt );
-                    GFXVertex3f( 0.0f, -height, -height );                     //lower left
-                    if (!multitex) GFXTexCoord2f( Ms, Mt );
-
-                    else GFXTexCoord4f( Ms, Mt, Ms, Mt );
-                    GFXVertex3f( 0.0f, height, -height );                     //upper left
-                    if (!multitex) GFXTexCoord2f( Ms, mt );
-
-                    else GFXTexCoord4f( Ms, mt, Ms, mt );
-                    GFXVertex3f( 0.0f, height, height );                     //upper right
-                    if (!multitex) GFXTexCoord2f( ms, mt );
-
-                    else GFXTexCoord4f( ms, mt, ms, mt );
-                    GFXVertex3f( 0.0f, -height, height );                     //lower right
+                         0.0f, -height, -height,  ms, Mt, ms, Mt,
+                         0.0f,  height, -height,  Ms, Mt, Ms, Mt,
+                         0.0f,  height,  height,  Ms, mt, Ms, mt,
+                         0.0f, -height,  height,  ms, mt, ms, mt,
+                    };
+                    GFXDraw( GFXQUAD, verts, vnum, 3, 0, 2, 2 );
                 }
-                GFXEnd();
             }
         SetupPass( -1, 0, src, dst );
         for (lyr = 0; lyr < numlayers; lyr++)
