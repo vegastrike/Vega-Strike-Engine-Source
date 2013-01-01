@@ -8,165 +8,152 @@
 #include "aux_texture.h"
 #include "gldrv/gl_globals.h"
 
+#include <iterator>
+
 ParticleTrail particleTrail( 500 );
+
 void ParticleTrail::ChangeMax( unsigned int max )
 {
     this->maxparticles = max;
 }
 
-bool ParticlePoint::Draw( const Vector &vel, const double time, Vector p, Vector q )
+static inline void Update( ParticlePoint & p, const Vector &vel, const float time, const float fade )
 {
-    static float pgrow = XMLSupport::parse_float( vs_config->getVariable( "graphics", "sparkegrowrate", "200.0" ) );     //200x size when disappearing
-    static float adj   = XMLSupport::parse_float( vs_config->getVariable( "graphics", "sparklefade", "0.1" ) );
-    static float trans = XMLSupport::parse_float( vs_config->getVariable( "graphics", "sparklealpha", "2.5" ) );     //NOTE: It's the base transparency, before surface attenuation, so it needn't be within the [0-1] range.
-    static bool  use_points = XMLSupport::parse_bool( vs_config->getVariable( "graphics", "point_sparkles", "false" ) );
+    p.loc += (vel * time).Cast();
+    p.col  = ( p.col - GFXColor( fade*time, fade*time, fade*time, fade*time ) ).clamp();
+}
 
-    float size    = this->size*(pgrow*(1-col.a)+col.a);
-    float maxsize = (this->size > size) ? this->size : size;
-    float minsize = (this->size <= size) ? this->size : size;
+//Write 3 pos and 4 col float values into v and increment v by 7
+static inline void SetPointVertex( const ParticlePoint & p, const float grow, const float trans, std::back_insert_iterator<std::vector<float> > &v )
+{
+    float size    = p.size * (grow * (1 - p.col.a) + p.col.a);
+    float maxsize = (p.size > size) ? p.size : size;
+    float minsize = (p.size <= size) ? p.size : size;
+
     //Squared, surface-linked decay - looks nicer, more real for emmisive gasses
     //NOTE: maxsize/minsize allows for inverted growth (shrinkage) while still fading correctly. Cheers!
-    GFXColorf( col*( col.a*trans*( minsize/( (maxsize > 0) ? maxsize : 1.f ) ) ) );
+    GFXColor c = p.col * ( p.col.a * trans * ( minsize / ( (maxsize > 0) ? maxsize : 1.f ) ) );
+    QVector  l = p.loc - _Universe->AccessCamera()->GetPosition();
 
-    {
-        QVector loc = this->loc-_Universe->AccessCamera()->GetPosition();
-        if (use_points) {
-            GFXVertexf( loc );
-        } else {
-  #if 0
-            q *= size;
-            p *= size;
-            GFXTexCoord2f( 0, 0 );
-            GFXVertex3d( loc.i+p.i+q.i, loc.j+p.j+q.j, loc.k+p.k+q.k );
-            GFXTexCoord2f( 0, 1 );
-            GFXVertex3d( loc.i+p.i-q.i, loc.j+p.j-q.j, loc.k+p.k-q.k );
-            GFXTexCoord2f( 1, 1 );
-            GFXVertex3d( loc.i-p.i-q.i, loc.j-p.j-q.j, loc.k-p.k-q.k );
-            GFXTexCoord2f( 1, 0 );
-            GFXVertex3d( loc.i-p.i+q.i, loc.j-p.j+q.j, loc.k-p.k+q.k );
-#else
-            GFXTexCoord2f( 0, 0 );
-            GFXVertex3d( loc.i+size, loc.j+size, loc.k );
-            GFXTexCoord2f( 0, 1 );
-            GFXVertex3d( loc.i+size, loc.j-size, loc.k );
-            GFXTexCoord2f( 1, 1 );
-            GFXVertex3d( loc.i-size, loc.j-size, loc.k );
-            GFXTexCoord2f( 1, 0 );
-            GFXVertex3d( loc.i-size, loc.j+size, loc.k );
-
-            GFXTexCoord2f( 0, 0 );
-            GFXVertex3d( loc.i, loc.j+size, loc.k+size );
-            GFXTexCoord2f( 0, 1 );
-            GFXVertex3d( loc.i, loc.j-size, loc.k+size );
-            GFXTexCoord2f( 1, 1 );
-            GFXVertex3d( loc.i, loc.j-size, loc.k-size );
-            GFXTexCoord2f( 1, 0 );
-            GFXVertex3d( loc.i, loc.j+size, loc.k-size );
-
-            GFXTexCoord2f( 0, 0 );
-            GFXVertex3d( loc.i+size, loc.j, loc.k+size );
-            GFXTexCoord2f( 0, 1 );
-            GFXVertex3d( loc.i+size, loc.j, loc.k-size );
-            GFXTexCoord2f( 1, 1 );
-            GFXVertex3d( loc.i-size, loc.j, loc.k-size );
-            GFXTexCoord2f( 1, 0 );
-            GFXVertex3d( loc.i-size, loc.j, loc.k+size );
-#endif
-
-#if 0
-            GFXEnd();
-            GFXBegin( GFXPOINT );
-            GFXVertexf( loc );
-            GFXEnd();
-            GFXBegin( GFXQUAD );
-#endif
-        }
-    }
-
-    loc += (vel*time).Cast();
-    col  = ( col-GFXColor( adj*time, adj*time, adj*time, adj*time ) ).clamp();
-    return col.a != 0;
+    *v++ = l.x; *v++ = l.y; *v++ = l.y;  *v++ = c.r; *v++ = c.g; *v++ = c.b; *v++ = c.a; 
 }
+
+//Write 12 * 3 pos and 12 * 4 col and 12 * 2 tex float values into v and increment v by 108
+static inline void SetQuadVertex( const ParticlePoint & p, const float grow, const float trans, std::back_insert_iterator<std::vector<float> > &v )
+{
+    float size    = p.size * (grow * (1 - p.col.a) + p.col.a);
+    float maxsize = (p.size > size) ? p.size : size;
+    float minsize = (p.size <= size) ? p.size : size;
+
+    //Squared, surface-linked decay - looks nicer, more real for emmisive gasses
+    //NOTE: maxsize/minsize allows for inverted growth (shrinkage) while still fading correctly. Cheers!
+    GFXColor c = p.col * ( p.col.a * trans * ( minsize / ( (maxsize > 0) ? maxsize : 1.f ) ) );
+    QVector  l = p.loc - _Universe->AccessCamera()->GetPosition();
+
+    *v++ = l.i+size; *v++ = l.j+size; *v++ = l.k;  *v++ = c.r; *v++ = c.g; *v++ = c.b; *v++ = c.a;  *v++ = 0; *v++ = 0;
+    *v++ = l.i+size; *v++ = l.j-size; *v++ = l.k;  *v++ = c.r; *v++ = c.g; *v++ = c.b; *v++ = c.a;  *v++ = 0; *v++ = 1;
+    *v++ = l.i-size; *v++ = l.j-size; *v++ = l.k;  *v++ = c.r; *v++ = c.g; *v++ = c.b; *v++ = c.a;  *v++ = 1; *v++ = 1;
+    *v++ = l.i-size; *v++ = l.j+size; *v++ = l.k;  *v++ = c.r; *v++ = c.g; *v++ = c.b; *v++ = c.a;  *v++ = 1; *v++ = 0;
+
+    *v++ = l.i; *v++ = l.j+size; *v++ = l.k+size;  *v++ = c.r; *v++ = c.g; *v++ = c.b; *v++ = c.a;  *v++ = 0; *v++ = 0;
+    *v++ = l.i; *v++ = l.j-size; *v++ = l.k+size;  *v++ = c.r; *v++ = c.g; *v++ = c.b; *v++ = c.a;  *v++ = 0; *v++ = 1;
+    *v++ = l.i; *v++ = l.j-size; *v++ = l.k-size;  *v++ = c.r; *v++ = c.g; *v++ = c.b; *v++ = c.a;  *v++ = 1; *v++ = 1;
+    *v++ = l.i; *v++ = l.j+size; *v++ = l.k-size;  *v++ = c.r; *v++ = c.g; *v++ = c.b; *v++ = c.a;  *v++ = 1; *v++ = 0;
+
+    *v++ = l.i+size; *v++ = l.j; *v++ = l.k+size;  *v++ = c.r; *v++ = c.g; *v++ = c.b; *v++ = c.a;  *v++ = 0; *v++ = 0;
+    *v++ = l.i+size; *v++ = l.j; *v++ = l.k-size;  *v++ = c.r; *v++ = c.g; *v++ = c.b; *v++ = c.a;  *v++ = 0; *v++ = 1;
+    *v++ = l.i-size; *v++ = l.j; *v++ = l.k-size;  *v++ = c.r; *v++ = c.g; *v++ = c.b; *v++ = c.a;  *v++ = 1; *v++ = 1;
+    *v++ = l.i-size; *v++ = l.j; *v++ = l.k+size;  *v++ = c.r; *v++ = c.g; *v++ = c.b; *v++ = c.a;  *v++ = 1; *v++ = 0;
+}
+
 void ParticleTrail::DrawAndUpdate()
 {
     static bool use_points = XMLSupport::parse_bool( vs_config->getVariable( "graphics", "point_sparkles", "false" ) );
-    Vector P, Q;
-    {
-        Vector R;
-        _Universe->AccessCamera()->GetPQR( P, Q, R );
-        static float particlesize = XMLSupport::parse_float( vs_config->getVariable( "graphics", "sparksize", "1" ) );
-        P *= particlesize;
-        Q *= particlesize;
-    }
+    static bool  pblend = XMLSupport::parse_bool( vs_config->getVariable( "graphics", "sparkeblend", "false" ) );
+    static float pgrow = XMLSupport::parse_float( vs_config->getVariable( "graphics", "sparkegrowrate", "200.0" ) );     //200x size when disappearing
+    static float ptrans = XMLSupport::parse_float( vs_config->getVariable( "graphics", "sparklealpha", "2.5" ) );     //NOTE: It's the base transparency, before surface attenuation, so it needn't be within the [0-1] range.
+    static float pfade = XMLSupport::parse_float( vs_config->getVariable( "graphics", "sparklefade", "0.1" ) );
+    
+    // Shortcircuit, not only an optimization, it avoids assertion failures in GFXDraw
+    if (particle.empty())
+        return;
 
-    vector< Vector >::iterator v = particleVel.begin();
-    vector< ParticlePoint >::iterator p = particle.begin();
-    if (use_points) {
-        GFXDisable( TEXTURE0 );
-        GFXDisable( CULLFACE );
-        static float psiz = XMLSupport::parse_float( vs_config->getVariable( "graphics", "sparkesize", "1.5" ) );
-
-        GFXPointSize( psiz );
-
-        static bool psmooth = XMLSupport::parse_bool( vs_config->getVariable( "graphics", "sparkesmooth", "false" ) );
-        if (psmooth && gl_options.smooth_points)
-            glEnable( GL_POINT_SMOOTH );
-    } else {
-        GFXEnable( TEXTURE0 );
-        GFXDisable( TEXTURE1 );
-        GFXDisable( DEPTHWRITE );
-        GFXDisable( CULLFACE );
-        static string   s = vs_config->getVariable( "graphics", "sparkletexture", "supernova.bmp" );
-        static Texture *t = new Texture( s.c_str() );
-
-        t->MakeActive();
-    }
+    // Draw particles
+    GFXDisable( CULLFACE );
     GFXDisable( LIGHTING );
     GFXLoadIdentity( MODEL );
     GFXTranslateModel( _Universe->AccessCamera()->GetPosition() );
-    static bool pblend = XMLSupport::parse_bool( vs_config->getVariable( "graphics", "sparkeblend", "false" ) );
-    //GFXBlendMode(ONE,ZERO);
     if (use_points) {
+        static float psize = XMLSupport::parse_float( vs_config->getVariable( "graphics", "sparkesize", "1.5" ) );
+        static bool psmooth = XMLSupport::parse_bool( vs_config->getVariable( "graphics", "sparkesmooth", "false" ) );
+
+        GFXDisable( TEXTURE0 );
+        GFXPointSize( psize );
+        if (psmooth && gl_options.smooth_points)
+            glEnable( GL_POINT_SMOOTH );
         if (pblend)
             GFXBlendMode( SRCALPHA, INVSRCALPHA );
         else
             GFXBlendMode( ONE, ZERO );
-        GFXBegin( GFXPOINT );
+
+        particleVert.clear();
+        particleVert.reserve(particle.size() * (3 + 4));
+        std::back_insert_iterator<std::vector<float> > v(particleVert);
+        for (size_t i = 0; i < particle.size(); ++i) {
+            SetPointVertex( particle[i], pgrow, ptrans, v );
+        }
+        GFXDraw( GFXPOINT, &particleVert[0], particle.size(), 3, 4 );
+
+        glDisable( GL_POINT_SMOOTH );
+        GFXPointSize( 1 );
     } else {
+        static string s = vs_config->getVariable( "graphics", "sparkletexture", "supernova.bmp" );
+        static Texture *t = new Texture( s.c_str() );
+
+        GFXEnable( TEXTURE0 );
+        GFXDisable( TEXTURE1 );
+        GFXDisable( DEPTHWRITE );
         GFXBlendMode( ONE, ONE );
-        GFXBegin( GFXQUAD );
+        t->MakeActive();
+
+        particleVert.clear();
+        particleVert.reserve(particle.size() * 12 * (3 + 4 + 2));
+        std::back_insert_iterator<std::vector<float> > v(particleVert);
+        for (size_t i = 0; i < particle.size(); ++i) {
+            SetQuadVertex( particle[i], pgrow, ptrans, v );
+        }
+        GFXDraw( GFXQUAD, &particleVert[0], particle.size() * 12, 3, 4, 2 );
     }
-    double mytime = GetElapsedTime();
+    GFXLoadIdentity( MODEL );
+
+    // Update particles
+    float mytime = GetElapsedTime();
+    for (size_t i = 0; i < particle.size(); ++i) {
+        Update(particle[i], particleVel[i], mytime, pfade);
+    }
+
+    // Sort particles
+    vector< Vector >::iterator v = particleVel.begin();
+    vector< ParticlePoint >::iterator p = particle.begin();
     while ( p != particle.end() ) {
-        if ( !(*p).Draw( *v, mytime, P, Q ) ) {
-            vector< Vector >::iterator vlast = particleVel.end();
-            vector< ParticlePoint >::iterator plast = particle.end();
-            --vlast;
-            --plast;
+        if ( !(p->col.a > 0) ) {
+            vector< Vector >::iterator vlast = particleVel.end() - 1;
+            vector< ParticlePoint >::iterator plast = particle.end() - 1;
             if (p != plast) {
                 *v = *vlast;
                 *p = *plast;
             }
-            size_t index  = p-particle.begin();
+            size_t indexp  = p - particle.begin();
             size_t indexv = v-particleVel.begin();
             particle.pop_back();
             particleVel.pop_back();
-            p = particle.begin()+index;
+            p = particle.begin() + indexp;
             v = particleVel.begin()+indexv;             //continue where we left off
         } else {
             ++p;
             ++v;
         }
     }
-    GFXEnd();
-    if (use_points) {
-        glDisable( GL_POINT_SMOOTH );
-        GFXPointSize( 1 );
-    } else {
-        GFXDisable( DEPTHWRITE );
-        GFXDisable( CULLFACE );
-    }
-    GFXLoadIdentity( MODEL );
 }
 
 void ParticleTrail::AddParticle( const ParticlePoint &P, const Vector &V, float size )
