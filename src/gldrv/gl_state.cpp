@@ -116,8 +116,11 @@ void /*GFXDRVAPI*/ GFXEnable( const STATE state )
         //assure correct settings of texture units 1 & 2, used during GUI rendering.
         GFXActiveTexture( 0 );
 #ifdef NV_CUBE_MAP
-        glDisable( GL_TEXTURE_CUBE_MAP_EXT );
+        if (bTex[0] != GL_TEXTURE_CUBE_MAP_EXT)
+            glDisable( GL_TEXTURE_CUBE_MAP_EXT );
 #endif
+        if (bTex[0] != 0 && bTex[0] != GL_TEXTURE_2D)
+            glDisable( bTex[0] );
         glEnable( bTex[0] = GL_TEXTURE_2D );
         break;
     case TEXTURE1:
@@ -141,8 +144,11 @@ void /*GFXDRVAPI*/ GFXEnable( const STATE state )
         //states in the GFX. Those two units are used during GUI rendering bypassing the GFX.
         if (gl_options.Multitexture) {
             GFXActiveTexture( 1 );
+            if (bTex[1] != 0)
+                glDisable( bTex[1] );
 #ifdef NV_CUBE_MAP
-            glDisable( GL_TEXTURE_2D );
+            if (bTex[1] != 0 && bTex[1] != GL_TEXTURE_2D)
+                glDisable( GL_TEXTURE_2D );
             glEnable( bTex[1] = GL_TEXTURE_CUBE_MAP_EXT );
 #else
             glEnable( bTex[1] = GL_TEXTURE_2D );
@@ -212,8 +218,12 @@ void /*GFXDRVAPI*/ GFXDisable( const STATE state )
         GFXActiveTexture( 0 );
 #ifdef NV_CUBE_MAP
         glDisable( GL_TEXTURE_CUBE_MAP_EXT );
+        if (bTex[0] == GL_TEXTURE_CUBE_MAP_EXT)
+            bTex[0] = 0;
 #endif
         glDisable( GL_TEXTURE_2D );
+        if (bTex[0] != 0 && bTex[0] != GL_TEXTURE_2D)
+            glDisable(bTex[0]);
         bTex[0] = 0;
         break;
     case TEXTURE1:
@@ -230,8 +240,12 @@ void /*GFXDRVAPI*/ GFXDisable( const STATE state )
             GFXActiveTexture( 1 );
 #ifdef NV_CUBE_MAP
             glDisable( GL_TEXTURE_CUBE_MAP_EXT );
+            if (bTex[1] == GL_TEXTURE_CUBE_MAP_EXT)
+                bTex[1] = 0;
 #endif
             glDisable( GL_TEXTURE_2D );
+            if (bTex[1] != 0 && bTex[1] != GL_TEXTURE_2D)
+                glDisable(bTex[1]);
             bTex[1] = 0;
         }
         break;

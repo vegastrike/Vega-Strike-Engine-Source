@@ -241,7 +241,21 @@ extern void /*GFXDRVAPI*/ GFXColor4f( const float r, const float g, const float 
 
 void GFXVertexList::EndDrawState( GFXBOOL lock )
 {
-    if (vbo_data) {} else if (display_list != 0) {} else {
+    if (vbo_data) {
+#ifndef NO_VBO_SUPPORT
+        if (gl_options.Multitexture) {
+            glClientActiveTextureARB_p( GL_TEXTURE0 );
+            glDisableClientState( GL_TEXTURE_COORD_ARRAY );
+            glClientActiveTextureARB_p( GL_TEXTURE1 );
+            glDisableClientState( GL_TEXTURE_COORD_ARRAY );
+            glClientActiveTextureARB_p( GL_TEXTURE2 );
+            glDisableClientState( GL_TEXTURE_COORD_ARRAY );
+            glClientActiveTextureARB_p( GL_TEXTURE0 );
+        } else {
+            glDisableClientState( GL_TEXTURE_COORD_ARRAY );
+        }
+#endif
+    } else if (display_list != 0) {} else {
 #ifndef NO_COMPILEDVERTEXARRAY_SUPPORT
         if (lock && glUnlockArraysEXT_p && numVertices)
             (*glUnlockArraysEXT_p)();

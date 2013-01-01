@@ -786,6 +786,8 @@ void RestoreFirstPassState( Texture *detailTexture,
         unsigned int sizeplus1 = detailPlanes.size()/2+1;
         for (unsigned int i = 1; i < sizeplus1; i++)
             GFXToggleTexture( false, i+1 );              //turn off high detial tex
+        
+        GFXTextureCoordGenMode( 1, NO_GEN, NULL, NULL );
     }
 }
 
@@ -823,12 +825,11 @@ void SetupEnvmapPass( Texture *decal, unsigned int mat, int passno )
 
 void RestoreEnvmapState()
 {
-    float dummy[4];
     static bool separatespec =
         XMLSupport::parse_bool( vs_config->getVariable( "graphics", "separatespecularcolor", "false" ) ) ? GFXTRUE : GFXFALSE;
     GFXSetSeparateSpecularColor( separatespec );
     GFXEnable( LIGHTING );
-    GFXTextureCoordGenMode( 0, NO_GEN, dummy, dummy );
+    GFXTextureCoordGenMode( 0, NO_GEN, NULL, NULL );
     GFXTextureEnv( 0, GFXMODULATETEXTURE );
     GFXDepthFunc( LEQUAL );
     GFXPopBlendMode();
@@ -928,7 +929,7 @@ void RestoreDamageMapState( bool write_to_depthmap, float polygonoffset )
     RestoreGlowMapState( write_to_depthmap, polygonoffset, DAMAGE_PASS );
 }
 
-void RestoreSpecMapState( bool envMap, bool write_to_depthmap, float polygonoffset )
+void RestoreSpecMapState( bool envMap, bool detailMap, bool write_to_depthmap, float polygonoffset )
 {
     //float a,b;
     //GFXGetPolygonOffset(&a,&b);
@@ -939,14 +940,16 @@ void RestoreSpecMapState( bool envMap, bool write_to_depthmap, float polygonoffs
             GFXActiveTexture( 1 );
             GFXTextureEnv( 1, GFXADDTEXTURE );             //restore modulate
         } else {
-            float dummy[4];
-            GFXTextureCoordGenMode( 0, NO_GEN, dummy, dummy );
+            GFXTextureCoordGenMode( 0, NO_GEN, NULL, NULL );
         }
     } else {
         static bool separatespec =
             XMLSupport::parse_bool( vs_config->getVariable( "graphics", "separatespecularcolor",
                                                             "false" ) ) ? GFXTRUE : GFXFALSE;
         GFXSetSeparateSpecularColor( separatespec );
+    }
+    if (detailMap) {
+        GFXTextureCoordGenMode( 1, NO_GEN, NULL, NULL );
     }
     if (write_to_depthmap)
         GFXEnable( DEPTHWRITE );
@@ -1710,7 +1713,7 @@ void Mesh::ProcessFixedDrawQueue( size_t techpass, int whichdrawqueue, bool zsor
                 break;
             case ENVSPEC_PASS:
                 if (!nomultienv)
-                    RestoreSpecMapState( ( splitpass1 ? false : getEnvMap() ), zwrite, polygon_offset );
+                    RestoreSpecMapState( ( splitpass1 ? false : getEnvMap() ), detailTexture != NULL, zwrite, polygon_offset );
 
                 else
                     RestoreEnvmapState();

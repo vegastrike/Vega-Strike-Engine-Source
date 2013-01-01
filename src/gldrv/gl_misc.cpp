@@ -75,8 +75,10 @@ void /*GFXDRVAPI*/ GFXDraw( POLYTYPE type, const float data[], int vnum,
     glEnableClientState(GL_VERTEX_ARRAY);
 
     if (csize) {
-        glEnableClientState(GL_COLOR_ARRAY);
         glColorPointer(csize, GL_FLOAT, stride, data + vsize);
+        glEnableClientState(GL_COLOR_ARRAY);
+    } else {
+        glDisableClientState(GL_COLOR_ARRAY);
     }
 
     if (gl_options.Multitexture) {
