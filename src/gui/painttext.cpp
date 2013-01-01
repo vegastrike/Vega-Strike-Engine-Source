@@ -200,7 +200,7 @@ void PaintText::calcLayoutIfNeeded( void ) const
 static float drawChars( const string &str, int start, int end, const Font &font, const GFXColor &color, float inRasterPos )
 {
     //Make sure the graphics state is right.
-    glColor4f( color.r, color.g, color.b, color.a );
+    GFXColorf( color );
     if ( useStroke() ) {
         glLineWidth( font.strokeWidth() );
     } else {
