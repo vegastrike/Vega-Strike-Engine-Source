@@ -102,10 +102,8 @@ void Bolt::Draw()
     static float stretchbolts = XMLSupport::parse_float( vs_config->getVariable( "graphics", "StretchBolts", "0" ) );     //set DEFAULT TO BE ZERO--it was wrecking all the mods.
 
     GFXBlendMode( ONE, blendbeams ? ONE : ZERO );
+    GFXTextureCoordGenMode( 0, NO_GEN, NULL, NULL );
 
-    GFXDisable( DEPTHWRITE );
-    GFXDisable( TEXTURE1 );
-    GFXEnable( TEXTURE0 );
     GFXAlphaTest( GREATER, .1 );
     vector< vector< Bolt > >::iterator i;
     vector< Bolt >::iterator j;
@@ -144,15 +142,20 @@ void Bolt::Draw()
             }
         }
     }
-    GFXAlphaTest( ALWAYS, 0 );
-    GFXDisable( DEPTHWRITE );
-    GFXDisable( TEXTURE1 );
-    if (blendbeams == true)
-        GFXBlendMode( ONE, ONE );
-    else
-        GFXBlendMode( ONE, ZERO );
     GFXVertexList *qmesh = qq->boltmesh;
-    if (qmesh) {
+    if (qmesh && qq->bolts.begin() != qq->bolts.end()) {
+        GFXAlphaTest( ALWAYS, 0 );
+        GFXDisable( DEPTHWRITE );
+        GFXDisable( TEXTURE1 );
+        GFXEnable( TEXTURE0 );
+        GFXTextureCoordGenMode( 0, NO_GEN, NULL, NULL );
+        
+        BLENDFUNC bsrc, bdst;
+        if (blendbeams == true)
+            GFXBlendMode( bsrc=ONE, bdst=ONE );
+        else
+            GFXBlendMode( bsrc=ONE, bdst=ZERO );
+        
         qmesh->LoadDrawState();
         qmesh->BeginDrawState();
         int decal = 0;
@@ -161,21 +164,26 @@ void Bolt::Draw()
             if ( dec && i->begin() != i->end() ) {
                 float bolt_size = 2*i->begin()->type->Radius+i->begin()->type->Length;
                 bolt_size *= bolt_size;
-                dec->MakeActive();
-                GFXToggleTexture( true, 0 );
-                for (j = i->begin(); j != i->end(); j++) {
-                    Bolt &bolt     = *j;
-                    float distance = (bolt.cur_position-campos).MagnitudeSquared();
-                    if (distance*pixel_angle < bolt_size) {
-                        const weapon_info *wt = bolt.type;
+                for (size_t pass = 0, npasses = dec->numPasses(); pass < npasses; ++pass) {
+                    GFXTextureEnv( 0, GFXMODULATETEXTURE );
+                    if (dec->SetupPass(0, bsrc, bdst)) {
+                        dec->MakeActive();
+                        GFXToggleTexture( true, 0 );
+                        for (j = i->begin(); j != i->end(); j++) {
+                            Bolt &bolt     = *j;
+                            float distance = (bolt.cur_position-campos).MagnitudeSquared();
+                            if (distance*pixel_angle < bolt_size) {
+                                const weapon_info *wt = bolt.type;
 
-                        BlendTrans( bolt.drawmat, bolt.cur_position, bolt.prev_position );
-                        Matrix drawmat( bolt.drawmat );
-                        if (stretchbolts > 0)
-                            ScaleMatrix( drawmat, Vector( 1, 1, bolt.type->Speed*etime*stretchbolts/bolt.type->Length ) );
-                        GFXLoadMatrixModel( drawmat );
-                        GFXColor4f( wt->r, wt->g, wt->b, wt->a );
-                        qmesh->Draw();
+                                BlendTrans( bolt.drawmat, bolt.cur_position, bolt.prev_position );
+                                Matrix drawmat( bolt.drawmat );
+                                if (stretchbolts > 0)
+                                    ScaleMatrix( drawmat, Vector( 1, 1, bolt.type->Speed*etime*stretchbolts/bolt.type->Length ) );
+                                GFXLoadMatrixModel( drawmat );
+                                GFXColor4f( wt->r, wt->g, wt->b, wt->a );
+                                qmesh->Draw();
+                            }
+                        }
                     }
                 }
             }
