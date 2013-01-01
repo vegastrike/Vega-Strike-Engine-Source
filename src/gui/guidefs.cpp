@@ -73,74 +73,81 @@ GFXColor GUI_OPAQUE_DARK_GRAY()
 //Draw a rectangle using the specified color.
 void drawRect( const Rect &rect, const GFXColor &color )
 {
-    glDisable( GL_TEXTURE_2D );
+    GFXDisable( TEXTURE0 );
 
-    glColor4f( color.r, color.g, color.b, color.a );
+    GFXColorf( color );
     glRectf( rect.left(), rect.bottom(), rect.right(), rect.top() );
 
-    glEnable( GL_TEXTURE_2D );
+    GFXEnable( TEXTURE0 );
 }
 
 //Draw the outline of a rectangle using the specified color.
 void drawRectOutline( const Rect &rect, const GFXColor &color, float lineWidth )
 {
-    glDisable( GL_TEXTURE_2D );
-    glLineWidth( lineWidth );
+    GFXDisable( TEXTURE0 );
+    GFXLineWidth( lineWidth );
+    GFXColorf( color );
 
-    glBegin( GL_LINE_LOOP );
-    glColor4f( color.r, color.g, color.b, color.a );
-    glVertex2f( rect.left(), rect.top() );
-    glVertex2f( rect.right(), rect.top() );
-    glVertex2f( rect.right(), rect.bottom() );
-    glVertex2f( rect.left(), rect.bottom() );
-    glEnd();
+    const float verts[5 * 3] = {
+        rect.left(),  rect.top(),    0,
+        rect.right(), rect.top(),    0,
+        rect.right(), rect.bottom(), 0,
+        rect.left(),  rect.bottom(), 0,
+        rect.left(),  rect.top(),    0,
+    };
+    GFXDraw( GFXLINESTRIP, verts, 5 );
 
-    glEnable( GL_TEXTURE_2D );
+    GFXEnable( TEXTURE0 );
 }
 
 //Draw upper-left part of rectangle's "shadow".
 void drawUpLeftShadow( const Rect &rect, const GFXColor &color, float lineWidth )
 {
-    glDisable( GL_TEXTURE_2D );
-    glLineWidth( lineWidth );
+    GFXDisable( TEXTURE0 );
+    GFXLineWidth( lineWidth );
+    GFXColorf( color );
 
-    glBegin( GL_LINE_STRIP );
-    glColor4f( color.r, color.g, color.b, color.a );
-    glVertex2f( rect.origin.x, rect.origin.y );
-    glVertex2f( rect.origin.x, rect.origin.y+rect.size.height );
-    glVertex2f( rect.origin.x+rect.size.width, rect.origin.y+rect.size.height );
-    glEnd();
+    const float verts[3 * 3] = {
+        rect.origin.x,                 rect.origin.y,                  0,
+        rect.origin.x,                 rect.origin.y+rect.size.height, 0,
+        rect.origin.x+rect.size.width, rect.origin.y+rect.size.height, 0,
+    };
+    GFXDraw( GFXLINESTRIP, verts, 3 );
 
-    glEnable( GL_TEXTURE_2D );
+    GFXEnable( TEXTURE0 );
 }
 
 //Draw lower-right part of rectangle's "shadow".
 void drawLowRightShadow( const Rect &rect, const GFXColor &color, float lineWidth )
 {
-    glDisable( GL_TEXTURE_2D );
-    glLineWidth( lineWidth );
+    GFXDisable( TEXTURE0 );
+    GFXLineWidth( lineWidth );
+    GFXColorf( color );
 
-    glBegin( GL_LINE_STRIP );
-    glColor4f( color.r, color.g, color.b, color.a );
-    glVertex2f( rect.origin.x, rect.origin.y );
-    glVertex2f( rect.origin.x+rect.size.width, rect.origin.y );
-    glVertex2f( rect.origin.x+rect.size.width, rect.origin.y+rect.size.height );
-    glEnd();
+    const float verts[3 * 3] = {
+        rect.origin.x,                 rect.origin.y,                  0,
+        rect.origin.x+rect.size.width, rect.origin.y,                  0,
+        rect.origin.x+rect.size.width, rect.origin.y+rect.size.height, 0,
+    };
+    GFXDraw( GFXLINESTRIP, verts, 3 );
 
-    glEnable( GL_TEXTURE_2D );
+    GFXEnable( TEXTURE0 );
 }
 
 //Fill a closed polygon.
 void drawFilledPolygon( const std::vector< Point > &coords, const GFXColor &color )
 {
-    glDisable( GL_TEXTURE_2D );
+    GFXDisable( TEXTURE0 );
+    GFXColorf( color );
 
-    glBegin( GL_POLYGON );
-    glColor4f( color.r, color.g, color.b, color.a );
-    for (std::vector< Point >::const_iterator i = coords.begin(); i != coords.end(); i++)
-        glVertex2f( i->x, i->y );
-    glEnd();
+    std::vector<float> verts(coords.size() * 2);
+    float * v = &verts[0];
+    for (std::vector< Point >::const_iterator i = coords.begin(); i != coords.end(); i++) {
+        *v++ = i->x;
+        *v++ = i->y;
+    }
+    GFXDraw( GFXPOLY, &verts[0], coords.size(), 2 );
 
-    glEnable( GL_TEXTURE_2D );
+    GFXDisable( TEXTURE0 );
 }
 
