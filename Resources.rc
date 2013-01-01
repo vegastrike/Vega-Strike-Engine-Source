@@ -60,8 +60,8 @@ IDI_ICON4               ICON                    "icon4.ico"
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 0,5,2,13451
- PRODUCTVERSION 0,5,2,13451
+ FILEVERSION 0,5,2,13473
+ PRODUCTVERSION 0,5,2,13473
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
  FILEFLAGS 0x9L
@@ -79,13 +79,13 @@ BEGIN
             VALUE "Comments", "Vega Strike is the 3D Space Simulator that allows you to trade and bounty hunt in a vast universe. Can you face the dangers and decisions that await..."
             VALUE "CompanyName", "Vega Strike Project"
             VALUE "FileDescription", "Vega Strike Open Source Space Simulator"
-            VALUE "FileVersion", "0.5.2.13451"
+            VALUE "FileVersion", "0.5.2.13473"
             VALUE "InternalName", "vegastrike"
             VALUE "LegalCopyright", "© Copyright 1998-2011 Vega Strike Project.  All rights reserved.  See the vega-licence.txt for details."
             VALUE "OriginalFilename", "Vegastrike.exe"
-            VALUE "PrivateBuild", "13370"
+            VALUE "PrivateBuild", "13473"
             VALUE "ProductName", "Vega Strike"
-            VALUE "ProductVersion", "0.5.2.13451"
+            VALUE "ProductVersion", "0.5.2.13473"
         END
     END
     BLOCK "VarFileInfo"
