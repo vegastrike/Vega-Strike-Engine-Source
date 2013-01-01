@@ -258,28 +258,23 @@ void VSSprite::Draw()
                 mt = (Mt-mt)*maxt+mt;
                 
                 GFXTextureEnv( 0, GFXMODULATETEXTURE );
-                GFXBegin( GFXQUAD );
-                if (!multitex)
-                    GFXTexCoord2f( ms, Mt );
-                else
-                    GFXTexCoord4f( ms, Mt, ms, Mt );
-                GFXVertexf( ll );
-                if (!multitex)
-                    GFXTexCoord2f( Ms, Mt );
-                else
-                    GFXTexCoord4f( Ms, Mt, Ms, Mt );
-                GFXVertexf( lr );
-                if (!multitex)
-                    GFXTexCoord2f( Ms, mt );
-                else
-                    GFXTexCoord4f( Ms, mt, Ms, mt );
-                GFXVertexf( ur );
-                if (!multitex)
-                    GFXTexCoord2f( ms, mt );
-                else
-                    GFXTexCoord4f( ms, mt, ms, mt );
-                GFXVertexf( ul );
-                GFXEnd();
+                if (!multitex) {
+                    const float vert[4 * (3 + 2)] = {
+                        ll.i, ll.j, ll.k,  ms, Mt,
+                        lr.i, lr.j, lr.k,  Ms, Mt,
+                        ur.i, ur.j, ur.k,  Ms, mt,
+                        ul.i, ul.j, ul.k,  ms, mt
+                    };
+                    GFXDraw( GFXQUAD, vert, 4, 3, 0, 2 );
+                } else {
+                    const float vert[4 * (3 + 4)] = {
+                        ll.i, ll.j, ll.k,  ms, Mt, ms, Mt,
+                        lr.i, lr.j, lr.k,  Ms, Mt, Ms, Mt,
+                        ur.i, ur.j, ur.k,  Ms, mt, Ms, mt,
+                        ul.i, ul.j, ul.k,  ms, mt, ms, mt
+                    };
+                    GFXDraw( GFXQUAD, vert, 4, 3, 0, 2, 2 );
+                }
             }
         }
         surface->SetupPass( -1, 0, src, dst );
