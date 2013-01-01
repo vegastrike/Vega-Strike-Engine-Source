@@ -97,60 +97,39 @@ void Box::ProcessDrawQueue( int )
     GFXDisable( TEXTURE1 );
     GFXDisable( DEPTHWRITE );
     GFXDisable( CULLFACE );
-    //GFXBlendMode(ONE, ONE);
+
+    unsigned vnum = 24 * draw_queue[0].size();
+    std::vector<float> verts(vnum * (3 + 4));
+    std::vector<float>::iterator v = verts.begin();
     while ( draw_queue[0].size() ) {
         GFXLoadMatrixModel( draw_queue[0].back().mat );
         draw_queue[0].pop_back();
-
-        GFXBegin( GFXQUAD );
-        GFXColor4f( 0.0, 1.0, 0.0, 0.2 );
-
-        GFXVertex3f( corner_max.i, corner_min.j, corner_max.k );
-        GFXVertex3f( corner_max.i, corner_max.j, corner_max.k );
-        GFXVertex3f( corner_min.i, corner_max.j, corner_max.k );
-        GFXVertex3f( corner_min.i, corner_min.j, corner_max.k );
-
-        GFXColor4f( 0.0, 1.0, 0.0, 0.2 );
-        GFXVertex3f( corner_min.i, corner_min.j, corner_min.k );
-        GFXVertex3f( corner_min.i, corner_max.j, corner_min.k );
-        GFXVertex3f( corner_max.i, corner_max.j, corner_min.k );
-        GFXVertex3f( corner_max.i, corner_min.j, corner_min.k );
-
-        GFXColor4f( 0.0, .70, 0.0, 0.2 );
-
-        GFXVertex3f( corner_max.i, corner_min.j, corner_max.k );
-        GFXVertex3f( corner_min.i, corner_min.j, corner_max.k );
-        GFXVertex3f( corner_min.i, corner_min.j, corner_min.k );
-        GFXVertex3f( corner_max.i, corner_min.j, corner_min.k );
-
-        GFXColor4f( 0.0, .70, 0.0, 0.2 );
-        GFXVertex3f( corner_max.i, corner_max.j, corner_min.k );
-        GFXVertex3f( corner_min.i, corner_max.j, corner_min.k );
-        GFXVertex3f( corner_min.i, corner_max.j, corner_max.k );
-        GFXVertex3f( corner_max.i, corner_max.j, corner_max.k );
-
-        GFXColor4f( 0.0, .90, .3, 0.2 );
-        GFXVertex3f( corner_max.i, corner_max.j, corner_max.k );
-        GFXVertex3f( corner_max.i, corner_min.j, corner_max.k );
-        GFXVertex3f( corner_max.i, corner_min.j, corner_min.k );
-        GFXVertex3f( corner_max.i, corner_max.j, corner_min.k );
-
-        GFXColor4f( 0.0, .90, .3, 0.2 );
-        GFXVertex3f( corner_min.i, corner_max.j, corner_min.k );
-        GFXVertex3f( corner_min.i, corner_min.j, corner_min.k );
-        GFXVertex3f( corner_min.i, corner_min.j, corner_max.k );
-        GFXVertex3f( corner_min.i, corner_max.j, corner_max.k );
-        GFXEnd();
-
-        /*
-         *  vlist->Draw();
-         *  if(quadstrips!=NULL) {
-         *   for(int a=0; a<numQuadstrips; a++)
-         *     quadstrips[a]->Draw()
-         *       ;
-         *       }
-         */
+        *v++ = corner_max.i; *v++ = corner_min.j; *v++ = corner_max.k;  *v++ = 0.0; *v++ = 1.0; *v++ = 0.0; *v++ = 0.2;
+        *v++ = corner_max.i; *v++ = corner_max.j; *v++ = corner_max.k;  *v++ = 0.0; *v++ = 1.0; *v++ = 0.0; *v++ = 0.2;
+        *v++ = corner_min.i; *v++ = corner_max.j; *v++ = corner_max.k;  *v++ = 0.0; *v++ = 1.0; *v++ = 0.0; *v++ = 0.2;
+        *v++ = corner_min.i; *v++ = corner_min.j; *v++ = corner_max.k;  *v++ = 0.0; *v++ = 1.0; *v++ = 0.0; *v++ = 0.2;
+        *v++ = corner_min.i; *v++ = corner_min.j; *v++ = corner_min.k;  *v++ = 0.0; *v++ = 1.0; *v++ = 0.0; *v++ = 0.2;
+        *v++ = corner_min.i; *v++ = corner_max.j; *v++ = corner_min.k;  *v++ = 0.0; *v++ = 1.0; *v++ = 0.0; *v++ = 0.2;
+        *v++ = corner_max.i; *v++ = corner_max.j; *v++ = corner_min.k;  *v++ = 0.0; *v++ = 1.0; *v++ = 0.0; *v++ = 0.2;
+        *v++ = corner_max.i; *v++ = corner_min.j; *v++ = corner_min.k;  *v++ = 0.0; *v++ = 1.0; *v++ = 0.0; *v++ = 0.2;
+        *v++ = corner_max.i; *v++ = corner_min.j; *v++ = corner_max.k;  *v++ = 0.0; *v++ = 0.7; *v++ = 0.0; *v++ = 0.2;
+        *v++ = corner_min.i; *v++ = corner_min.j; *v++ = corner_max.k;  *v++ = 0.0; *v++ = 0.7; *v++ = 0.0; *v++ = 0.2;
+        *v++ = corner_min.i; *v++ = corner_min.j; *v++ = corner_min.k;  *v++ = 0.0; *v++ = 0.7; *v++ = 0.0; *v++ = 0.2;
+        *v++ = corner_max.i; *v++ = corner_min.j; *v++ = corner_min.k;  *v++ = 0.0; *v++ = 0.7; *v++ = 0.0; *v++ = 0.2;
+        *v++ = corner_max.i; *v++ = corner_max.j; *v++ = corner_min.k;  *v++ = 0.0; *v++ = 0.7; *v++ = 0.0; *v++ = 0.2;
+        *v++ = corner_min.i; *v++ = corner_max.j; *v++ = corner_min.k;  *v++ = 0.0; *v++ = 0.7; *v++ = 0.0; *v++ = 0.2;
+        *v++ = corner_min.i; *v++ = corner_max.j; *v++ = corner_max.k;  *v++ = 0.0; *v++ = 0.7; *v++ = 0.0; *v++ = 0.2;
+        *v++ = corner_max.i; *v++ = corner_max.j; *v++ = corner_max.k;  *v++ = 0.0; *v++ = 0.7; *v++ = 0.0; *v++ = 0.2;
+        *v++ = corner_max.i; *v++ = corner_max.j; *v++ = corner_max.k;  *v++ = 0.0; *v++ = 0.9; *v++ = 0.3; *v++ = 0.2;
+        *v++ = corner_max.i; *v++ = corner_min.j; *v++ = corner_max.k;  *v++ = 0.0; *v++ = 0.9; *v++ = 0.3; *v++ = 0.2;
+        *v++ = corner_max.i; *v++ = corner_min.j; *v++ = corner_min.k;  *v++ = 0.0; *v++ = 0.9; *v++ = 0.3; *v++ = 0.2;
+        *v++ = corner_max.i; *v++ = corner_max.j; *v++ = corner_min.k;  *v++ = 0.0; *v++ = 0.9; *v++ = 0.3; *v++ = 0.2;
+        *v++ = corner_min.i; *v++ = corner_max.j; *v++ = corner_min.k;  *v++ = 0.0; *v++ = 0.9; *v++ = 0.3; *v++ = 0.2;
+        *v++ = corner_min.i; *v++ = corner_min.j; *v++ = corner_min.k;  *v++ = 0.0; *v++ = 0.9; *v++ = 0.3; *v++ = 0.2;
+        *v++ = corner_min.i; *v++ = corner_min.j; *v++ = corner_max.k;  *v++ = 0.0; *v++ = 0.9; *v++ = 0.3; *v++ = 0.2;
+        *v++ = corner_min.i; *v++ = corner_max.j; *v++ = corner_max.k;  *v++ = 0.0; *v++ = 0.9; *v++ = 0.3; *v++ = 0.2;
     }
+    GFXDraw( GFXQUAD, &verts[0], vnum, 3, 4 );
     GFXEnable( DEPTHWRITE );
 }
 
