@@ -426,6 +426,13 @@ void /*GFXDRVAPI*/ GFXCircle( float x, float y, float r1, float r2 );
 unsigned int /*GFXDRVAPI*/ PolyLookup( POLYTYPE poly );
 void /*GFXDRVAPI*/ GFXDraw( POLYTYPE type, const float data[], int vnum,
     int vsize = 3, int csize = 0, int tsize0 = 0, int tsize1 = 0 );
+
+template <int VSIZE, int CSIZE, int TSIZE0, int TSIZE1>
+void GFXDraw( POLYTYPE type, const VertexBuilder< float, VSIZE, 0, CSIZE, TSIZE0, TSIZE1 > &buffer)
+{
+    GFXDraw( type, buffer.buffer_pointer(), buffer.size(), VSIZE, CSIZE, TSIZE0, TSIZE1 );
+}
+
 ///Bind VBO data, noop if VBO not supported
 void GFXBindBuffer(unsigned int vbo_data);
 void GFXBindElementBuffer(unsigned int element_data);

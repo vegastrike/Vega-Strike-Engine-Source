@@ -23,6 +23,9 @@
 #include "gfx/vec.h"
 #include "endianness.h"
 
+#include <vector>
+#include <iterator>
+
 #ifndef GFXBOOL
 #define GFXBOOL unsigned char
 #endif
@@ -245,6 +248,17 @@ struct GFXColorVertex
         SetColor( rgba );
         SetTexCoord( s, t );
     }
+    GFXColorVertex( const Vector &vert, const GFXColor &rgba, float s, float t )
+    {
+        SetVertex( vert );
+        SetColor( rgba );
+        SetTexCoord( s, t );
+    }
+    GFXColorVertex( const Vector &vert, const GFXColor &rgba )
+    {
+        SetVertex( vert );
+        SetColor( rgba );
+    }
     GFXColorVertex( float x, float y, float z, float i, float j, float k, float r, float g, float b, float a, float s, float t )
     {
         this->x = x;
@@ -323,6 +337,194 @@ struct GFXColorVertex
     float GetTangentParity() const
     {
         return tw;
+    }
+};
+
+template <typename ELEM=float, int VSIZE=3, int NSIZE=0, int CSIZE=0, int TSIZE0=0, int TSIZE1=0> class VertexBuilder
+{
+    
+public:
+    typedef ELEM ElementType;
+    typedef std::vector<ElementType> BufferType;
+    typedef typename BufferType::iterator iterator;
+    typedef typename BufferType::const_iterator const_iterator;
+    typedef typename BufferType::size_type size_type;
+    
+    static const int ESIZE = VSIZE + NSIZE + CSIZE + TSIZE0 + TSIZE1;
+    
+    class back_insert_iterator {
+        friend class VertexBuilder<ELEM,VSIZE,NSIZE,CSIZE,TSIZE0,TSIZE1>;
+        
+        BufferType &buffer;
+        typename BufferType::size_type where;
+        
+        back_insert_iterator(BufferType &_buffer, typename BufferType::size_type _where) : buffer(_buffer), where(_where) {}
+        
+        back_insert_iterator(const back_insert_iterator &other) : buffer(other.buffer), where(other.where) {}
+        
+        template<typename IT> void _set_at(const GFXVertex &vtx, IT where)
+        {
+            if (VSIZE >= 1) { *where = vtx.x; ++where; }
+            if (VSIZE >= 2) { *where = vtx.y; ++where; }
+            if (VSIZE >= 3) { *where = vtx.z; ++where; }
+            if (NSIZE >= 1) { *where = vtx.i; ++where; }
+            if (NSIZE >= 2) { *where = vtx.j; ++where; }
+            if (NSIZE >= 3) { *where = vtx.k; ++where; }
+            if (CSIZE >= 1) { *where = 1.f; ++where; }
+            if (CSIZE >= 2) { *where = 1.f; ++where; }
+            if (CSIZE >= 3) { *where = 1.f; ++where; }
+            if (TSIZE0 >= 1) { *where = vtx.s; ++where; }
+            if (TSIZE0 >= 2) { *where = vtx.t; ++where; }
+            if (TSIZE0 >= 3) { *where = vtx.s; ++where; }
+            if (TSIZE0 >= 4) { *where = vtx.t; ++where; }
+            if (TSIZE1 >= 1) { *where = vtx.tx; ++where; }
+            if (TSIZE1 >= 2) { *where = vtx.ty; ++where; }
+            if (TSIZE1 >= 3) { *where = vtx.tz; ++where; }
+            if (TSIZE1 >= 4) { *where = vtx.tw; ++where; }
+        }
+        
+        template<typename IT> void _set_at(const GFXColorVertex &vtx, IT where)
+        {
+            if (VSIZE >= 1) { *where = vtx.x; ++where; }
+            if (VSIZE >= 2) { *where = vtx.y; ++where; }
+            if (VSIZE >= 3) { *where = vtx.z; ++where; }
+            if (NSIZE >= 1) { *where = vtx.i; ++where; }
+            if (NSIZE >= 2) { *where = vtx.j; ++where; }
+            if (NSIZE >= 3) { *where = vtx.k; ++where; }
+            if (CSIZE >= 1) { *where = vtx.r; ++where; }
+            if (CSIZE >= 2) { *where = vtx.g; ++where; }
+            if (CSIZE >= 3) { *where = vtx.b; ++where; }
+            if (CSIZE >= 4) { *where = vtx.a; ++where; }
+            if (TSIZE0 >= 1) { *where = vtx.s; ++where; }
+            if (TSIZE0 >= 2) { *where = vtx.t; ++where; }
+            if (TSIZE0 >= 3) { *where = vtx.s; ++where; }
+            if (TSIZE0 >= 4) { *where = vtx.t; ++where; }
+            if (TSIZE1 >= 1) { *where = vtx.tx; ++where; }
+            if (TSIZE1 >= 2) { *where = vtx.ty; ++where; }
+            if (TSIZE1 >= 3) { *where = vtx.tz; ++where; }
+            if (TSIZE1 >= 4) { *where = vtx.tw; ++where; }
+        }
+        
+    public:
+        back_insert_iterator& operator++(int)
+        {
+            where += ESIZE;
+            return this;
+        }
+        
+        back_insert_iterator operator++() 
+        {
+            back_insert_iterator rv(this);
+            ++*this;
+            return rv;
+        }
+        
+        back_insert_iterator& operator*()
+        {
+            return *this;
+        }
+        
+        const GFXVertex& operator=(const GFXVertex &vtx)
+        {
+            if ((where+ESIZE) > buffer.size())
+                buffer.resize(where+ESIZE);
+            _set_at(vtx, buffer.begin() + where);
+            return vtx;
+        }
+        
+        const GFXColorVertex& operator=(const GFXColorVertex &vtx)
+        {
+            if ((where+ESIZE) > buffer.size())
+                buffer.resize(where+ESIZE);
+            _set_at(vtx, buffer.begin() + where);
+            return vtx;
+        }
+    };
+    
+private:
+    BufferType buffer;
+
+public:
+    VertexBuilder() {};
+    
+    explicit VertexBuilder(size_type size)
+    {
+        reserve(size);
+    }
+    
+    const ElementType* buffer_pointer() const
+    {
+        return &buffer[0];
+    }
+    
+    const_iterator begin() const
+    {
+        return buffer.begin();
+    }
+    
+    const_iterator end() const
+    {
+        return buffer.end();
+    }
+    
+    iterator begin() 
+    {
+        return buffer.begin();
+    }
+    
+    iterator end() 
+    {
+        return buffer.end();
+    }
+    
+    back_insert_iterator insertor()
+    {
+        return back_insert_iterator(buffer, buffer.size());
+    }
+    
+    size_type size() const
+    {
+        return buffer.size() / ESIZE;
+    }
+    
+    void clear()
+    {
+        buffer.clear();
+    }
+    
+    void reserve(size_type size)
+    {
+        buffer.reserve(size * ESIZE);
+    }
+    
+    void insert(const GFXVertex &vtx)
+    {
+        *(insertor()) = vtx;
+    }
+    
+    void insert(const GFXColorVertex &vtx)
+    {
+        *(insertor()) = vtx;
+    }
+    
+    void insert(float x, float y, float z)
+    {
+        GFXVertex vtx;
+        vtx.x = x;
+        vtx.y = y;
+        vtx.z = z;
+        insert(vtx);
+    }
+    
+    void insert(float x, float y, float z, float s, float t)
+    {
+        GFXVertex vtx;
+        vtx.x = x;
+        vtx.y = y;
+        vtx.z = z;
+        vtx.s = s;
+        vtx.t = t;
+        insert(vtx);
     }
 };
 
