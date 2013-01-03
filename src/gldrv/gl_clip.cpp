@@ -86,23 +86,22 @@ CLIPSTATE GFXBoxInFrustum( double f[6][4], const Vector &min, const Vector &max 
 
 void DrawFrustum( double f[6][4] )
 {
-    GFXColor cols[6] = {
-        GFXColor( 0,
-                  0,
-                  1 ),
-        GFXColor(
-            0,
-            1,
-            0 ),
-        GFXColor( 1,
-                  0,
-                  0 ),                                    GFXColor( 1,  1, 0 ), GFXColor( 1,
-                                                                                          0,
-                                                                                          1 ),
-        GFXColor( 0,
-                  1,
-                  1 )
+    GFXDisable( LIGHTING );
+    GFXEnable( DEPTHTEST );
+    GFXEnable( DEPTHWRITE );
+    GFXDisable( TEXTURE0 );
+    GFXDisable( TEXTURE1 );
+    GFXBlendMode( ONE, ONE );
+    const GFXColor cols[6] = {
+        GFXColor( 0, 0, 1 ),
+        GFXColor( 0, 1, 0 ),
+        GFXColor( 1, 0, 0 ),
+        GFXColor( 1, 1, 0 ),
+        GFXColor( 1, 0, 1 ),
+        GFXColor( 0, 1, 1 )
     };
+    static VertexBuilder<float, 3, 0, 3> verts;
+    verts.clear();
     for (unsigned int i = 0; i < 4; i++) {
         Vector n( f[i][0], f[i][1], f[i][2] );
         Vector r( 9284, -3259, -1249 );
@@ -117,24 +116,17 @@ void DrawFrustum( double f[6][4] )
         Vector b = q+n;
         Vector c = n-t;
         Vector d = n-q;
-        GFXDisable( LIGHTING );
-        GFXEnable( DEPTHTEST );
-        GFXEnable( DEPTHWRITE );
-        GFXDisable( TEXTURE0 );
-        GFXBlendMode( ONE, ONE );
-        GFXDisable( TEXTURE1 );
-        GFXColorf( cols[i] );
-        GFXBegin( GFXQUAD );
-        GFXVertexf( a );
-        GFXVertexf( b );
-        GFXVertexf( c );
-        GFXVertexf( d );
-        GFXVertexf( d );
-        GFXVertexf( c );
-        GFXVertexf( b );
-        GFXVertexf( a );
-        GFXEnd();
+        
+        verts.insert(GFXColorVertex(a, cols[i]));
+        verts.insert(GFXColorVertex(b, cols[i]));
+        verts.insert(GFXColorVertex(c, cols[i]));
+        verts.insert(GFXColorVertex(d, cols[i]));
+        verts.insert(GFXColorVertex(d, cols[i]));
+        verts.insert(GFXColorVertex(c, cols[i]));
+        verts.insert(GFXColorVertex(b, cols[i]));
+        verts.insert(GFXColorVertex(a, cols[i]));
     }
+    GFXDraw( GFXQUAD, verts );
 }
 
 float /*GFXDRVAPI*/ GFXSphereInFrustum( double f[6][4], const QVector &Cnt, float radius )
