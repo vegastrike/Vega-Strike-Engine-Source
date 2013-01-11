@@ -76,7 +76,14 @@ void drawRect( const Rect &rect, const GFXColor &color )
     GFXDisable( TEXTURE0 );
 
     GFXColorf( color );
-    glRectf( rect.left(), rect.bottom(), rect.right(), rect.top() );
+    
+    const float verts[4 * 3] = {
+        rect.left(),  rect.top(),    0,
+        rect.right(), rect.top(),    0,
+        rect.right(), rect.bottom(), 0,
+        rect.left(),  rect.bottom(), 0,
+    };
+    GFXDraw( GFXQUAD, verts, 4 );
 
     GFXEnable( TEXTURE0 );
 }
