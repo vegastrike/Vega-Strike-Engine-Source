@@ -289,69 +289,44 @@ static void DrawHUDSprite( VDU *thus,
             mlr = middle_point*lr+middle_point_small*ul;
             mur = middle_point*ur+middle_point_small*ll;
             mul = middle_point*ul+middle_point_small*lr;
-            GFXBegin( GFXQUAD );
-            GFXColorf( getDamageColor( top_view ? adown : aleft ) );
-            GFXTexCoord2f( 0, 0 );
-            GFXVertexf( ul );
-            GFXColorf( getDamageColor( top_view ? adown : aup ) );
-            GFXTexCoord2f( 1, 0 );
-            GFXVertexf( ur );
-            GFXColorf( getDamageColor( hull, true ) );
-            GFXTexCoord2f( middle_point, middle_point_small );
-            GFXVertexf( mur );
-            GFXColorf( getDamageColor( hull, true ) );
-            GFXTexCoord2f( middle_point_small, middle_point_small );
-            GFXVertexf( mul );
-            GFXColorf( getDamageColor( top_view ? aright : aup ) );
-            GFXTexCoord2f( 1, 0 );
-            GFXVertexf( ur );
-            GFXColorf( getDamageColor( aright ) );
-            GFXTexCoord2f( 1, 1 );
-            GFXVertexf( lr );
-            GFXColorf( getDamageColor( hull, true ) );
-            GFXTexCoord2f( middle_point, middle_point );
-            GFXVertexf( mlr );
-            GFXColorf( getDamageColor( hull, true ) );
-            GFXTexCoord2f( middle_point, middle_point_small );
-            GFXVertexf( mur );
-            GFXColorf( getDamageColor( top_view ? aup : aright ) );
-            GFXTexCoord2f( 1, 1 );
-            GFXVertexf( lr );
-            GFXColorf( getDamageColor( top_view ? aup : adown ) );
-            GFXTexCoord2f( 0, 1 );
-            GFXVertexf( ll );
-            GFXColorf( getDamageColor( hull, true ) );
-            GFXTexCoord2f( middle_point_small, middle_point );
-            GFXVertexf( mll );
-            GFXColorf( getDamageColor( hull, true ) );
-            GFXTexCoord2f( middle_point, middle_point );
-            GFXVertexf( mlr );
-            GFXColorf( getDamageColor( top_view ? aleft : adown ) );
-            GFXTexCoord2f( 0, 1 );
-            GFXVertexf( ll );
-            GFXColorf( getDamageColor( aleft ) );
-            GFXTexCoord2f( 0, 0 );
-            GFXVertexf( ul );
-            GFXTexCoord2f( middle_point_small, middle_point_small );
-            GFXColorf( getDamageColor( hull, true ) );
-            GFXVertexf( mul );
-            GFXColorf( getDamageColor( hull, true ) );
-            GFXTexCoord2f( middle_point_small, middle_point );
-            GFXVertexf( mll );
-            GFXColorf( getDamageColor( hull, true ) );
-            GFXTexCoord2f( middle_point_small, middle_point_small );
-            GFXVertexf( mul );
-            GFXColorf( getDamageColor( hull, true ) );
-            GFXTexCoord2f( middle_point, middle_point_small );
-            GFXVertexf( mur );
-            GFXColorf( getDamageColor( hull, true ) );
-            GFXTexCoord2f( middle_point, middle_point );
-            GFXVertexf( mlr );
-            GFXColorf( getDamageColor( hull, true ) );
-            GFXTexCoord2f( middle_point_small, middle_point );
-            GFXVertexf( mll );
-            GFXEnd();
+            const GFXColor c[9] = {
+                getDamageColor( top_view ? adown : aleft ),
+                getDamageColor( top_view ? adown : aup ),
+                getDamageColor( hull, true ),
+                getDamageColor( top_view ? aright : aup ),
+                getDamageColor( aright ),
+                getDamageColor( top_view ? aup : aright ),
+                getDamageColor( top_view ? aup : adown ),
+                getDamageColor( top_view ? aleft : adown ),
+                getDamageColor( aleft ),
+            };
+            const float verts[20 * (3 + 4 + 2)] = {
+                 ul.x,  ul.y,  ul.z, c[0].r, c[0].g, c[0].b, c[0].a, 0.0f, 0.0f,
+                 ur.x,  ur.y,  ur.z, c[1].r, c[1].g, c[1].b, c[1].a, 1.0f, 0.0f,
+                mur.x, mur.y, mur.z, c[2].r, c[2].g, c[2].b, c[2].a, middle_point, middle_point_small,
+                mul.x, mul.y, mul.z, c[2].r, c[2].g, c[2].b, c[2].a, middle_point_small, middle_point_small,
 
+                 ur.x,  ur.y,  ur.z, c[3].r, c[3].g, c[3].b, c[3].a, 1.0f, 0.0f,
+                 lr.x,  lr.y,  lr.z, c[4].r, c[4].g, c[4].b, c[4].a, 1.0f, 1.0f,
+                mlr.x, mlr.y, mlr.z, c[2].r, c[2].g, c[2].b, c[2].a, middle_point, middle_point,
+                mur.x, mur.y, mur.z, c[2].r, c[2].g, c[2].b, c[2].a, middle_point, middle_point_small,
+
+                 lr.x,  lr.y,  lr.z, c[5].r, c[5].g, c[5].b, c[5].a, 1.0f, 1.0f,
+                 ll.x,  ll.y,  ll.z, c[6].r, c[6].g, c[6].b, c[6].a, 0.0f, 1.0f,
+                mll.x, mll.y, mll.z, c[2].r, c[2].g, c[2].b, c[2].a, middle_point_small, middle_point,
+                mlr.x, mlr.y, mlr.z, c[2].r, c[2].g, c[2].b, c[2].a, middle_point, middle_point,
+
+                 ll.x,  ll.y,  ll.z, c[7].r, c[7].g, c[7].b, c[7].a, 0.0f, 1.0f,
+                 ul.x,  ul.y,  ul.z, c[8].r, c[8].g, c[8].b, c[8].a, 0.0f, 0.0f,
+                mul.x, mul.y, mul.z, c[2].r, c[2].g, c[2].b, c[2].a, middle_point_small, middle_point_small,
+                mll.x, mll.y, mll.z, c[2].r, c[2].g, c[2].b, c[2].a, middle_point_small, middle_point,
+
+                mul.x, mul.y, mul.z, c[2].r, c[2].g, c[2].b, c[2].a, middle_point_small, middle_point_small, 
+                mur.x, mur.y, mur.z, c[2].r, c[2].g, c[2].b, c[2].a, middle_point, middle_point_small,
+                mlr.x, mlr.y, mlr.z, c[2].r, c[2].g, c[2].b, c[2].a, middle_point, middle_point,
+                mll.x, mll.y, mll.z, c[2].r, c[2].g, c[2].b, c[2].a, middle_point_small, middle_point,
+            };
+            GFXDraw( GFXQUAD, verts, 20, 3, 4, 2 );
             GFXEnable( CULLFACE );
         }
         s->SetSize( nw, nh );
@@ -412,10 +387,7 @@ static void DrawShield( float fs,
                         GFXColor innershield )
 {
     //FIXME why is this static?
-    GFXEnable( SMOOTH );
-    GFXPushBlendMode();
-    GFXBlendMode( SRCALPHA, INVSRCALPHA );
-    GFXBegin( GFXLINE );
+
     if (invert) {
         float tmp = fs;
         fs = bs;
@@ -455,115 +427,112 @@ static void DrawShield( float fs,
         shcolor[3][1].a *= mymax( 0.0f, mymin( 1.0f, (bs-shthresh[1])/(shthresh[2]-shthresh[1])*shtrans[1] ) );
         shcolor[3][2].a *= mymax( 0.0f, mymin( 1.0f, (bs-shthresh[2])/(1.0f-shthresh[2])*shtrans[2] ) );
     }
+
+    GFXEnable( SMOOTH );
+    GFXPushBlendMode();
+    GFXBlendMode( SRCALPHA, INVSRCALPHA );
+
+    static VertexBuilder<float, 3, 0, 4> verts;
+    verts.clear();
+    verts.reserve(72);
     if (fs > shthresh[0]) {
-        GFXColorf( shcolor[0][0] );
-        GFXVertex3d( (double) x-w/8, y+h/2, 0. );
-        GFXVertex3d( (double) x-w/3, y+.9*h/2, 0. );
-        GFXVertex3d( (double) x+w/8, y+h/2, 0. );
-        GFXVertex3d( (double) x+w/3, y+.9*h/2, 0. );
-        GFXVertex3d( (double) x+w/8, y+h/2, 0. );
-        GFXVertex3d( (double) x-w/8, y+h/2, 0. );
+        verts.insert(GFXColorVertex(Vector(x-w/8, y+h/2   , 0), shcolor[0][0]));
+        verts.insert(GFXColorVertex(Vector(x-w/3, y+.9*h/2, 0), shcolor[0][0]));
+        verts.insert(GFXColorVertex(Vector(x+w/8, y+h/2   , 0), shcolor[0][0]));
+        verts.insert(GFXColorVertex(Vector(x+w/3, y+.9*h/2, 0), shcolor[0][0]));
+        verts.insert(GFXColorVertex(Vector(x+w/8, y+h/2   , 0), shcolor[0][0]));
+        verts.insert(GFXColorVertex(Vector(x-w/8, y+h/2   , 0), shcolor[0][0]));
     }
     if (fs > shthresh[1]) {
-        GFXColorf( shcolor[0][1] );
-        GFXVertex3d( (double) x-w/8, y+1.1*h/2, 0. );
-        GFXVertex3d( (double) x+w/8, y+1.1*h/2, 0. );
-        GFXVertex3d( (double) x-w/8, y+1.1*h/2, 0. );
-        GFXVertex3d( (double) x-w/3, y+h/2, 0. );
-        GFXVertex3d( (double) x+w/8, y+1.1*h/2, 0. );
-        GFXVertex3d( (double) x+w/3, y+h/2, 0. );
+        verts.insert(GFXColorVertex(Vector(x-w/8, y+1.1*h/2, 0), shcolor[0][1]));
+        verts.insert(GFXColorVertex(Vector(x+w/8, y+1.1*h/2, 0), shcolor[0][1]));
+        verts.insert(GFXColorVertex(Vector(x-w/8, y+1.1*h/2, 0), shcolor[0][1]));
+        verts.insert(GFXColorVertex(Vector(x-w/3, y+h/2    , 0), shcolor[0][1]));
+        verts.insert(GFXColorVertex(Vector(x+w/8, y+1.1*h/2, 0), shcolor[0][1]));
+        verts.insert(GFXColorVertex(Vector(x+w/3, y+h/2    , 0), shcolor[0][1]));
     }
     if (fs > shthresh[2]) {
-        GFXColorf( shcolor[0][2] );
-        GFXVertex3d( (double) x-w/8, y+1.2*h/2, 0. );
-        GFXVertex3d( (double) x+w/8, y+1.2*h/2, 0. );
-        GFXVertex3d( (double) x-w/8, y+1.2*h/2, 0. );
-        GFXVertex3d( (double) x-w/3, y+1.1*h/2, 0. );
-        GFXVertex3d( (double) x+w/8, y+1.2*h/2, 0. );
-        GFXVertex3d( (double) x+w/3, y+1.1*h/2, 0. );
+        verts.insert(GFXColorVertex(Vector(x-w/8, y+1.2*h/2, 0), shcolor[0][2]));
+        verts.insert(GFXColorVertex(Vector(x+w/8, y+1.2*h/2, 0), shcolor[0][2]));
+        verts.insert(GFXColorVertex(Vector(x-w/8, y+1.2*h/2, 0), shcolor[0][2]));
+        verts.insert(GFXColorVertex(Vector(x-w/3, y+1.1*h/2, 0), shcolor[0][2]));
+        verts.insert(GFXColorVertex(Vector(x+w/8, y+1.2*h/2, 0), shcolor[0][2]));
+        verts.insert(GFXColorVertex(Vector(x+w/3, y+1.1*h/2, 0), shcolor[0][2]));
     }
     if (rs > shthresh[0]) {
-        GFXColorf( shcolor[1][0] );
-        GFXVertex3d( (double) x+1*w/2, y-h/8, 0. );
-        GFXVertex3d( (double) x+.9*w/2, y-h/3, 0. );
-        GFXVertex3d( (double) x+1*w/2, y+h/8, 0. );
-        GFXVertex3d( (double) x+1*w/2, y-h/8, 0. );
-        GFXVertex3d( (double) x+.9*w/2, y+h/3, 0. );
-        GFXVertex3d( (double) x+1*w/2, y+h/8, 0. );
+        verts.insert(GFXColorVertex(Vector(x+w/2   , y-h/8, 0), shcolor[1][0]));
+        verts.insert(GFXColorVertex(Vector(x+.9*w/2, y-h/3, 0), shcolor[1][0]));
+        verts.insert(GFXColorVertex(Vector(x+w/2   , y+h/8, 0), shcolor[1][0]));
+        verts.insert(GFXColorVertex(Vector(x+w/2   , y-h/8, 0), shcolor[1][0]));
+        verts.insert(GFXColorVertex(Vector(x+.9*w/2, y+h/3, 0), shcolor[1][0]));
+        verts.insert(GFXColorVertex(Vector(x+w/2   , y+h/8, 0), shcolor[1][0]));
     }
     if (rs > shthresh[1]) {
-        GFXColorf( shcolor[1][1] );
-        GFXVertex3d( (double) x+1.1*w/2, y-h/8, 0. );
-        GFXVertex3d( (double) x+1*w/2, y-h/3, 0. );
-        GFXVertex3d( (double) x+1.1*w/2, y+h/8, 0. );
-        GFXVertex3d( (double) x+1.1*w/2, y-h/8, 0. );
-        GFXVertex3d( (double) x+1*w/2, y+h/3, 0. );
-        GFXVertex3d( (double) x+1.1*w/2, y+h/8, 0. );
+        verts.insert(GFXColorVertex(Vector(x+1.1*w/2, y-h/8, 0), shcolor[1][1]));
+        verts.insert(GFXColorVertex(Vector(x+w/2    , y-h/3, 0), shcolor[1][1]));
+        verts.insert(GFXColorVertex(Vector(x+1.1*w/2, y+h/8, 0), shcolor[1][1]));
+        verts.insert(GFXColorVertex(Vector(x+1.1*w/2, y-h/8, 0), shcolor[1][1]));
+        verts.insert(GFXColorVertex(Vector(x+w/2    , y+h/3, 0), shcolor[1][1]));
+        verts.insert(GFXColorVertex(Vector(x+1.1*w/2, y+h/8, 0), shcolor[1][1]));
     }
     if (rs > shthresh[2]) {
-        GFXColorf( shcolor[1][2] );
-        GFXVertex3d( (double) x+1.2*w/2, y-h/8, 0. );
-        GFXVertex3d( (double) x+1.1*w/2, y-h/3, 0. );
-        GFXVertex3d( (double) x+1.2*w/2, y+h/8, 0. );
-        GFXVertex3d( (double) x+1.2*w/2, y-h/8, 0. );
-        GFXVertex3d( (double) x+1.1*w/2, y+h/3, 0. );
-        GFXVertex3d( (double) x+1.2*w/2, y+h/8, 0. );
+        verts.insert(GFXColorVertex(Vector(x+1.2*w/2, y-h/8, 0), shcolor[1][2]));
+        verts.insert(GFXColorVertex(Vector(x+1.1*w/2, y-h/3, 0), shcolor[1][2]));
+        verts.insert(GFXColorVertex(Vector(x+1.2*w/2, y+h/8, 0), shcolor[1][2]));
+        verts.insert(GFXColorVertex(Vector(x+1.2*w/2, y-h/8, 0), shcolor[1][2]));
+        verts.insert(GFXColorVertex(Vector(x+1.1*w/2, y+h/3, 0), shcolor[1][2]));
+        verts.insert(GFXColorVertex(Vector(x+1.2*w/2, y+h/8, 0), shcolor[1][2]));
     }
     if (ls > shthresh[0]) {
-        GFXColorf( shcolor[2][0] );
-        GFXVertex3d( (double) x-1*w/2, y-h/8, 0. );
-        GFXVertex3d( (double) x-.9*w/2, y-h/3, 0. );
-        GFXVertex3d( (double) x-1*w/2, y+h/8, 0. );
-        GFXVertex3d( (double) x-1*w/2, y-h/8, 0. );
-        GFXVertex3d( (double) x-.9*w/2, y+h/3, 0. );
-        GFXVertex3d( (double) x-1*w/2, y+h/8, 0. );
+        verts.insert(GFXColorVertex(Vector(x-w/2   , y-h/8, 0), shcolor[2][0]));
+        verts.insert(GFXColorVertex(Vector(x-.9*w/2, y-h/3, 0), shcolor[2][0]));
+        verts.insert(GFXColorVertex(Vector(x-w/2   , y+h/8, 0), shcolor[2][0]));
+        verts.insert(GFXColorVertex(Vector(x-w/2   , y-h/8, 0), shcolor[2][0]));
+        verts.insert(GFXColorVertex(Vector(x-.9*w/2, y+h/3, 0), shcolor[2][0]));
+        verts.insert(GFXColorVertex(Vector(x-w/2   , y+h/8, 0), shcolor[2][0]));
     }
     if (ls > shthresh[1]) {
-        GFXColorf( shcolor[2][1] );
-        GFXVertex3d( (double) x-1.1*w/2, y-h/8, 0. );
-        GFXVertex3d( (double) x-1*w/2, y-h/3, 0. );
-        GFXVertex3d( (double) x-1.1*w/2, y+h/8, 0. );
-        GFXVertex3d( (double) x-1.1*w/2, y-h/8, 0. );
-        GFXVertex3d( (double) x-1*w/2, y+h/3, 0. );
-        GFXVertex3d( (double) x-1.1*w/2, y+h/8, 0. );
+        verts.insert(GFXColorVertex(Vector(x-1.1*w/2, y-h/8, 0), shcolor[2][1]));
+        verts.insert(GFXColorVertex(Vector(x-w/2    , y-h/3, 0), shcolor[2][1]));
+        verts.insert(GFXColorVertex(Vector(x-1.1*w/2, y+h/8, 0), shcolor[2][1]));
+        verts.insert(GFXColorVertex(Vector(x-1.1*w/2, y-h/8, 0), shcolor[2][1]));
+        verts.insert(GFXColorVertex(Vector(x-w/2    , y+h/3, 0), shcolor[2][1]));
+        verts.insert(GFXColorVertex(Vector(x-1.1*w/2, y+h/8, 0), shcolor[2][1]));
     }
     if (ls > shthresh[2]) {
-        GFXColorf( shcolor[2][2] );
-        GFXVertex3d( (double) x-1.2*w/2, y-h/8, 0. );
-        GFXVertex3d( (double) x-1.1*w/2, y-h/3, 0. );
-        GFXVertex3d( (double) x-1.2*w/2, y+h/8, 0. );
-        GFXVertex3d( (double) x-1.2*w/2, y-h/8, 0. );
-        GFXVertex3d( (double) x-1.1*w/2, y+h/3, 0. );
-        GFXVertex3d( (double) x-1.2*w/2, y+h/8, 0. );
+        verts.insert(GFXColorVertex(Vector(x-1.2*w/2, y-h/8, 0), shcolor[2][2]));
+        verts.insert(GFXColorVertex(Vector(x-1.1*w/2, y-h/3, 0), shcolor[2][2]));
+        verts.insert(GFXColorVertex(Vector(x-1.2*w/2, y+h/8, 0), shcolor[2][2]));
+        verts.insert(GFXColorVertex(Vector(x-1.2*w/2, y-h/8, 0), shcolor[2][2]));
+        verts.insert(GFXColorVertex(Vector(x-1.1*w/2, y+h/3, 0), shcolor[2][2]));
+        verts.insert(GFXColorVertex(Vector(x-1.2*w/2, y+h/8, 0), shcolor[2][2]));
     }
     if (bs > shthresh[0]) {
-        GFXColorf( shcolor[3][0] );
-        GFXVertex3d( (double) x-w/8, y-h/2, 0. );
-        GFXVertex3d( (double) x-w/3, y-.9*h/2, 0. );
-        GFXVertex3d( (double) x+w/8, y-h/2, 0. );
-        GFXVertex3d( (double) x+w/3, y-.9*h/2, 0. );
-        GFXVertex3d( (double) x+w/8, y-h/2, 0. );
-        GFXVertex3d( (double) x-w/8, y-h/2, 0. );
+        verts.insert(GFXColorVertex(Vector(x-w/8, y-h/2   , 0), shcolor[3][0]));
+        verts.insert(GFXColorVertex(Vector(x-w/3, y-.9*h/2, 0), shcolor[3][0]));
+        verts.insert(GFXColorVertex(Vector(x+w/8, y-h/2   , 0), shcolor[3][0]));
+        verts.insert(GFXColorVertex(Vector(x+w/3, y-.9*h/2, 0), shcolor[3][0]));
+        verts.insert(GFXColorVertex(Vector(x+w/8, y-h/2   , 0), shcolor[3][0]));
+        verts.insert(GFXColorVertex(Vector(x-w/8, y-h/2   , 0), shcolor[3][0]));
     }
     if (bs > shthresh[1]) {
-        GFXColorf( shcolor[3][1] );
-        GFXVertex3d( (double) x-w/8, y-1.1*h/2, 0. );
-        GFXVertex3d( (double) x+w/8, y-1.1*h/2, 0. );
-        GFXVertex3d( (double) x-w/8, y-1.1*h/2, 0. );
-        GFXVertex3d( (double) x-w/3, y-h/2, 0. );
-        GFXVertex3d( (double) x+w/8, y-1.1*h/2, 0. );
-        GFXVertex3d( (double) x+w/3, y-h/2, 0. );
+        verts.insert(GFXColorVertex(Vector(x-w/8, y-1.1*h/2, 0), shcolor[3][1]));
+        verts.insert(GFXColorVertex(Vector(x+w/8, y-1.1*h/2, 0), shcolor[3][1]));
+        verts.insert(GFXColorVertex(Vector(x-w/8, y-1.1*h/2, 0), shcolor[3][1]));
+        verts.insert(GFXColorVertex(Vector(x-w/3, y-h/2    , 0), shcolor[3][1]));
+        verts.insert(GFXColorVertex(Vector(x+w/8, y-1.1*h/2, 0), shcolor[3][1]));
+        verts.insert(GFXColorVertex(Vector(x+w/3, y-h/2    , 0), shcolor[3][1]));
     }
     if (bs > shthresh[2]) {
-        GFXColorf( shcolor[3][2] );
-        GFXVertex3d( (double) x-w/8, y-1.2*h/2, 0. );
-        GFXVertex3d( (double) x+w/8, y-1.2*h/2, 0. );
-        GFXVertex3d( (double) x-w/8, y-1.2*h/2, 0. );
-        GFXVertex3d( (double) x-w/3, y-1.1*h/2, 0. );
-        GFXVertex3d( (double) x+w/8, y-1.2*h/2, 0. );
-        GFXVertex3d( (double) x+w/3, y-1.1*h/2, 0. );
+        verts.insert(GFXColorVertex(Vector(x-w/8, y-1.2*h/2, 0), shcolor[3][2]));
+        verts.insert(GFXColorVertex(Vector(x+w/8, y-1.2*h/2, 0), shcolor[3][2]));
+        verts.insert(GFXColorVertex(Vector(x-w/8, y-1.2*h/2, 0), shcolor[3][2]));
+        verts.insert(GFXColorVertex(Vector(x-w/3, y-1.1*h/2, 0), shcolor[3][2]));
+        verts.insert(GFXColorVertex(Vector(x+w/8, y-1.2*h/2, 0), shcolor[3][2]));
+        verts.insert(GFXColorVertex(Vector(x+w/3, y-1.1*h/2, 0), shcolor[3][2]));
     }
-    GFXEnd();
+    GFXDraw( GFXLINE, verts );
+
     GFXDisable( SMOOTH );
     GFXPopBlendMode();
 }
@@ -1206,75 +1175,106 @@ static void DrawGun( Vector pos, float w, float h, weapon_info::MOUNT_SIZE sz )
     pos.j -= h/3.8;
     if (sz == weapon_info::NOWEAP) {
         GFXPointSize( 4 );
-        GFXBegin( GFXPOINT );
-        GFXVertexf( pos );
-        GFXEnd();
+        const float verts[3] = {
+            pos.x, pos.y, pos.z
+        };
+        GFXDraw( GFXPOINT, verts, 1 );
         GFXPointSize( 1 );
     } else if (sz < weapon_info::SPECIAL) {
-        GFXBegin( GFXLINE );
-        GFXVertex3d( pos.i+oox, pos.j, 0 );
-        GFXVertex3d( pos.i+oox, pos.j-h/15, 0 );
-        GFXVertex3d( pos.i-oox, pos.j, 0 );
-        GFXVertex3d( pos.i-oox, pos.j-h/15, 0 );
-        GFXVertex3d( pos.i+oox, pos.j-h/15, 0 );
-        GFXVertex3d( pos.i-oox, pos.j-h/15, 0 );
         if (sz == weapon_info::LIGHT) {
-            GFXVertex3d( pos.i, pos.j, 0 );
-            GFXVertex3d( pos.i, pos.j+h/4, 0 );
-            GFXVertex3d( pos.i, pos.j+h/4+ooy*2, 0 );
-            GFXVertex3d( pos.i, pos.j+h/4+ooy*5, 0 );
+            const float verts[10 * 3] = {
+                pos.i+oox, pos.j,           0,
+                pos.i+oox, pos.j-h/15,      0,
+                pos.i-oox, pos.j,           0,
+                pos.i-oox, pos.j-h/15,      0,
+                pos.i+oox, pos.j-h/15,      0,
+                pos.i-oox, pos.j-h/15,      0,
+                pos.i,     pos.j,           0,
+                pos.i,     pos.j+h/4,       0,
+                pos.i,     pos.j+h/4+ooy*2, 0,
+                pos.i,     pos.j+h/4+ooy*5, 0,
+            };
+            GFXDraw( GFXLINE, verts, 10 );
         } else if (sz == weapon_info::MEDIUM) {
-            GFXVertex3d( pos.i, pos.j, 0 );
-            GFXVertex3d( pos.i, pos.j+h/5, 0 );
-            GFXVertex3d( pos.i, pos.j+h/5+ooy*4, 0 );
-            GFXVertex3d( pos.i, pos.j+h/5+ooy*5, 0 );
-            GFXVertex3d( pos.i+oox, pos.j+h/5+ooy*2, 0 );
-            GFXVertex3d( pos.i-oox, pos.j+h/5+ooy*2, 0 );
+            const float verts[12 * 3] = {
+                pos.i+oox, pos.j,           0,
+                pos.i+oox, pos.j-h/15,      0,
+                pos.i-oox, pos.j,           0,
+                pos.i-oox, pos.j-h/15,      0,
+                pos.i+oox, pos.j-h/15,      0,
+                pos.i-oox, pos.j-h/15,      0,
+                pos.i,     pos.j,           0,
+                pos.i,     pos.j+h/5,       0,
+                pos.i,     pos.j+h/5+ooy*4, 0,
+                pos.i,     pos.j+h/5+ooy*5, 0,
+                pos.i+oox, pos.j+h/5+ooy*2, 0,
+                pos.i-oox, pos.j+h/5+ooy*2, 0,
+            };
+            GFXDraw( GFXLINE, verts, 12 );
         } else if (sz == weapon_info::HEAVY) {
-            GFXVertex3d( pos.i, pos.j, 0 );
-            GFXVertex3d( pos.i, pos.j+h/5, 0 );
-            GFXVertex3d( pos.i, pos.j+h/5+ooy*4, 0 );
-            GFXVertex3d( pos.i, pos.j+h/5+ooy*5, 0 );
-            GFXVertex3d( pos.i+2*oox, pos.j+h/5+ooy*3, 0 );
-            GFXVertex3d( pos.i, pos.j+h/5+ooy*2, 0 );
-            GFXVertex3d( pos.i-2*oox, pos.j+h/5+ooy*3, 0 );
-            GFXVertex3d( pos.i, pos.j+h/5+ooy*2, 0 );
-        } else {
-            //capship gun
-            GFXVertex3d( pos.i, pos.j, 0 );
-            GFXVertex3d( pos.i, pos.j+h/6, 0 );
-            GFXVertex3d( pos.i, pos.j+h/6+ooy*6, 0 );
-            GFXVertex3d( pos.i, pos.j+h/6+ooy*7, 0 );
-            GFXVertex3d( pos.i-oox, pos.j+h/6+ooy*2, 0 );
-            GFXVertex3d( pos.i+oox, pos.j+h/6+ooy*2, 0 );
-            GFXVertex3d( pos.i-2*oox, pos.j+h/6+ooy*4, 0 );
-            GFXVertex3d( pos.i+2*oox, pos.j+h/6+ooy*4, 0 );
+            const float verts[14 * 3] = {
+                pos.i+oox,   pos.j,           0,
+                pos.i+oox,   pos.j-h/15,      0,
+                pos.i-oox,   pos.j,           0,
+                pos.i-oox,   pos.j-h/15,      0,
+                pos.i+oox,   pos.j-h/15,      0,
+                pos.i-oox,   pos.j-h/15,      0,
+                pos.i,       pos.j,           0,
+                pos.i,       pos.j+h/5,       0,
+                pos.i,       pos.j+h/5+ooy*4, 0,
+                pos.i,       pos.j+h/5+ooy*5, 0,
+                pos.i+2*oox, pos.j+h/5+ooy*3, 0,
+                pos.i,       pos.j+h/5+ooy*2, 0,
+                pos.i-2*oox, pos.j+h/5+ooy*3, 0,
+                pos.i,       pos.j+h/5+ooy*2, 0,
+            };
+            GFXDraw( GFXLINE, verts, 14 );
+        } else { //capship gun
+            const float verts[14 * 3] = {
+                pos.i+oox,   pos.j,           0,
+                pos.i+oox,   pos.j-h/15,      0,
+                pos.i-oox,   pos.j,           0,
+                pos.i-oox,   pos.j-h/15,      0,
+                pos.i+oox,   pos.j-h/15,      0,
+                pos.i-oox,   pos.j-h/15,      0,
+                pos.i,       pos.j,           0,
+                pos.i,       pos.j+h/6,       0,
+                pos.i,       pos.j+h/6+ooy*6, 0,
+                pos.i,       pos.j+h/6+ooy*7, 0,
+                pos.i-oox,   pos.j+h/6+ooy*2, 0,
+                pos.i+oox,   pos.j+h/6+ooy*2, 0,
+                pos.i-2*oox, pos.j+h/6+ooy*4, 0,
+                pos.i+2*oox, pos.j+h/6+ooy*4, 0,
+            };
+            GFXDraw( GFXLINE, verts, 14 );
         }
-        GFXEnd();
     } else if (sz == weapon_info::SPECIAL || sz == weapon_info::SPECIALMISSILE) {
         GFXPointSize( 4 );
-        GFXBegin( GFXPOINT );
-        GFXVertexf( pos );
-        GFXEnd();
+        const float verts[3] = {
+            pos.x, pos.y, pos.z
+        };
+        GFXDraw( GFXPOINT, verts, 1 );
         GFXPointSize( 1 );         //classified...  FIXME
     } else if (sz < weapon_info::HEAVYMISSILE) {
-        GFXBegin( GFXLINE );
-        GFXVertex3d( pos.i, pos.j-h/8, 0 );
-        GFXVertex3d( pos.i, pos.j+h/8, 0 );
-        GFXVertex3d( pos.i+2*oox, pos.j-h/8+2*ooy, 0 );
-        GFXVertex3d( pos.i-2*oox, pos.j-h/8+2*ooy, 0 );
-        GFXEnd();
+        const float verts[4 * 3] = {
+            pos.i,       pos.j-h/8,       0,
+            pos.i,       pos.j+h/8,       0,
+            pos.i+2*oox, pos.j-h/8+2*ooy, 0,
+            pos.i-2*oox, pos.j-h/8+2*ooy, 0,
+        };
+        GFXDraw( GFXLINE, verts, 4 );
     } else if (sz <= weapon_info::CAPSHIPHEAVYMISSILE) {
-        GFXBegin( GFXLINE );
-        GFXVertex3d( pos.i, pos.j-h/6, 0 );
-        GFXVertex3d( pos.i, pos.j+h/6, 0 );
-        GFXVertex3d( pos.i+3*oox, pos.j-h/6+2*ooy, 0 );
-        GFXVertex3d( pos.i-3*oox, pos.j-h/6+2*ooy, 0 );
-        GFXVertex3d( pos.i+oox, pos.j-h/6, 0 );
-        GFXVertex3d( pos.i+oox, pos.j+h/9, 0 );
-        GFXVertex3d( pos.i-oox, pos.j-h/6, 0 );
-        GFXVertex3d( pos.i-oox, pos.j+h/9, 0 );
-        GFXEnd();
+        const float verts[8 * 3] = {
+            pos.i,       pos.j-h/6,       0,
+            pos.i,       pos.j+h/6,       0,
+            pos.i+3*oox, pos.j-h/6+2*ooy, 0,
+            pos.i-3*oox, pos.j-h/6+2*ooy, 0,
+            pos.i+oox,   pos.j-h/6,       0,
+            pos.i+oox,   pos.j+h/9,       0,
+            pos.i-oox,   pos.j-h/6,       0,
+            pos.i-oox,   pos.j+h/9,       0,
+        };
+        GFXDraw( GFXLINE, verts, 8 );
     }
 }
 
