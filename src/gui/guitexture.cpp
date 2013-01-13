@@ -56,17 +56,14 @@ void GuiTexture::draw( const Rect &rect ) const
     if ( m_texture == NULL || !m_texture->LoadSuccess() )
         return;
     m_texture->MakeActive();
-    GFXBegin( GFXQUAD );
     GFXColor4f( 1, 1, 1, 1 );
-    GFXTexCoord2f( 0, 1 );
-    GFXVertexf( Vector( rect.left(), rect.top(), 0.00f ) );
-    GFXTexCoord2f( 0, 0 );
-    GFXVertexf( Vector( rect.left(), rect.bottom(), 0.00f ) );
-    GFXTexCoord2f( 1, 0 );
-    GFXVertexf( Vector( rect.right(), rect.bottom(), 0.00f ) );
-    GFXTexCoord2f( 1, 1 );
-    GFXVertexf( Vector( rect.right(), rect.top(), 0.00f ) );
-    GFXEnd();
+    const float verts[4 * (3 + 2)] = {
+        rect.left(),  rect.top(),    0,  0, 1,
+        rect.left(),  rect.bottom(), 0,  0, 0,
+        rect.right(), rect.bottom(), 0,  1, 0,
+        rect.right(), rect.top(),    0,  1, 1,
+    };
+    GFXDraw( GFXQUAD, verts, 4, 3, 0, 2 );
 }
 
 //CONSTRUCTION
