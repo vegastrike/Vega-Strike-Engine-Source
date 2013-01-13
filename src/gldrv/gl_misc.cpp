@@ -66,7 +66,10 @@ void /*GFXDRVAPI*/ GFXDraw( POLYTYPE type, const float data[], int vnum,
     int vsize, int csize, int tsize0, int tsize1 )
 {
 #ifndef NODRAW
-    assert(data && vnum && vsize);
+    if (vnum < 0)
+	return;
+
+    assert(data && vsize);
     int stride = sizeof(float) * (vsize + csize + tsize0 + tsize1);
 
     GFXBindBuffer(0);

@@ -430,7 +430,8 @@ void /*GFXDRVAPI*/ GFXDraw( POLYTYPE type, const float data[], int vnum,
 template <int VSIZE, int CSIZE, int TSIZE0, int TSIZE1>
 void GFXDraw( POLYTYPE type, const VertexBuilder< float, VSIZE, 0, CSIZE, TSIZE0, TSIZE1 > &buffer)
 {
-    GFXDraw( type, buffer.buffer_pointer(), buffer.size(), VSIZE, CSIZE, TSIZE0, TSIZE1 );
+    if (buffer.size() > 0)
+        GFXDraw( type, buffer.buffer_pointer(), buffer.size(), VSIZE, CSIZE, TSIZE0, TSIZE1 );
 }
 
 ///Bind VBO data, noop if VBO not supported
