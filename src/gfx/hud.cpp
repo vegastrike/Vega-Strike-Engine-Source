@@ -178,16 +178,17 @@ static float TwoCharToFloat( char a, char b )
 
 void DrawSquare( float left, float right, float top, float bot )
 {
-    GFXBegin( GFXQUAD );
-    GFXVertex3f( left, top, 0 );
-    GFXVertex3f( left, bot, 0 );
-    GFXVertex3f( right, bot, 0 );
-    GFXVertex3f( right, top, 0 );
-    GFXVertex3f( right, top, 0 );
-    GFXVertex3f( right, bot, 0 );
-    GFXVertex3f( left, bot, 0 );
-    GFXVertex3f( left, top, 0 );
-    GFXEnd();
+    float verts[8 * 3] = {
+        left,  top, 0,
+        left,  bot, 0,
+        right, bot, 0,
+        right, top, 0,
+        right, top, 0,
+        right, bot, 0,
+        left,  bot, 0,
+        left,  top, 0
+    };
+    GFXDraw( GFXQUAD, verts, 8 );
 }
 
 float charWidth( char c, float myFontMetrics )
