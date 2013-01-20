@@ -28,6 +28,8 @@ void ClickButton(GtkWidget *w, struct catagory *CUR);
 #include <unistd.h>
 #endif
 
+#include <string>
+
 //#define USE_RADIO
 
 
@@ -63,10 +65,14 @@ void InitGraphics(int *argc, char*** argv) {
 	gtk_widget_show(window);
 }
 void myexit(int exitval){
+    std::string readme_path(CONFIG.data_path);
+    
 #ifdef _WIN32
-	int err=(int)ShellExecute(NULL,"open","documentation\\readme.txt","","",1);
+    readme_path += "\\documentation\\readme.txt";
+	int err=(int)ShellExecute(NULL,"open",readme_path.c_str(),"","",1);
 #else
-	execlp("less", "less","readme.txt", NULL); //Will this work in Linux?
+    readme_path += "/documentation/readme.txt";
+	execlp("xdg-open", "xdg-open", readme_path.c_str(), NULL); //Will this work in Linux?
 #endif
 	exit(0);//exitval);
 }

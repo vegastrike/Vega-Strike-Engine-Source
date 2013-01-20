@@ -96,8 +96,14 @@ int WINAPI WinMain( HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR lpCmdLine, int n
 int main( int argc, char *argv[] )
 {
 #endif
+    CONFIG.data_path = NULL;
+    CONFIG.config_file = NULL;
+    CONFIG.program_name = NULL;
+    CONFIG.temp_file = NULL;
+    
     bogus_str = getcwd( origpath, 65535 );
     origpath[65535] = 0;
+    
     changeToProgramDirectory( argv[0] );
     {
         vector< string >data_paths;
@@ -165,6 +171,7 @@ int main( int argc, char *argv[] )
             bogus_str = getcwd( origpath, 65535 );
             origpath[65535] = 0;
             printf( "Found data in %s\n", origpath );
+            CONFIG.data_path = strdup(origpath);
             break;
         }
     }

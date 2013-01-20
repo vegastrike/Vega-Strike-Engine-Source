@@ -70,6 +70,7 @@ struct global_settings {
 	char *program_name;
 	char *config_file;
 	char *temp_file;
+    char *data_path;
 	int columns;
 };
 
