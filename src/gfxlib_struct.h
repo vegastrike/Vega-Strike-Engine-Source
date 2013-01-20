@@ -507,6 +507,16 @@ public:
         *(insertor()) = vtx;
     }
     
+    void insert(const QVector &v)
+    {
+        insert(v.x, v.y, v.z);
+    }
+    
+    void insert(const Vector &v)
+    {
+        insert(v.x, v.y, v.z);
+    }
+    
     void insert(float x, float y, float z)
     {
         GFXVertex vtx;

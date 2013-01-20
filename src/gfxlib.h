@@ -427,11 +427,27 @@ unsigned int /*GFXDRVAPI*/ PolyLookup( POLYTYPE poly );
 void /*GFXDRVAPI*/ GFXDraw( POLYTYPE type, const float data[], int vnum,
     int vsize = 3, int csize = 0, int tsize0 = 0, int tsize1 = 0 );
 
+void /*GFXDRVAPI*/ GFXDrawElements( POLYTYPE type, const float data[], int vnum, const unsigned char indices[], int nelem,
+    int vsize = 3, int csize = 0, int tsize0 = 0, int tsize1 = 0 );
+
+void /*GFXDRVAPI*/ GFXDrawElements( POLYTYPE type, const float data[], int vnum, const unsigned short indices[], int nelem,
+    int vsize = 3, int csize = 0, int tsize0 = 0, int tsize1 = 0 );
+
+void /*GFXDRVAPI*/ GFXDrawElements( POLYTYPE type, const float data[], int vnum, const unsigned int indices[], int nelem,
+    int vsize = 3, int csize = 0, int tsize0 = 0, int tsize1 = 0 );
+
 template <int VSIZE, int CSIZE, int TSIZE0, int TSIZE1>
 void GFXDraw( POLYTYPE type, const VertexBuilder< float, VSIZE, 0, CSIZE, TSIZE0, TSIZE1 > &buffer)
 {
     if (buffer.size() > 0)
         GFXDraw( type, buffer.buffer_pointer(), buffer.size(), VSIZE, CSIZE, TSIZE0, TSIZE1 );
+}
+
+template <typename ITYPE, int VSIZE, int CSIZE, int TSIZE0, int TSIZE1>
+void GFXDrawElements( POLYTYPE type, const VertexBuilder< float, VSIZE, 0, CSIZE, TSIZE0, TSIZE1 > &buffer, const ITYPE *indices, int nelements)
+{
+    if (buffer.size() > 0 && nelements > 0)
+        GFXDrawElements( type, buffer.buffer_pointer(), buffer.size(), indices, nelements, VSIZE, CSIZE, TSIZE0, TSIZE1 );
 }
 
 ///Bind VBO data, noop if VBO not supported

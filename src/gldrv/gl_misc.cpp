@@ -62,13 +62,9 @@ void GFXCircle( float x, float y, float wid, float hei )
     GFXDraw( GFXLINESTRIP, &verts[0], accuracy + 1 );
 }
 
-void /*GFXDRVAPI*/ GFXDraw( POLYTYPE type, const float data[], int vnum,
+static void /*GFXDRVAPI*/ GFXDrawSetup( POLYTYPE type, const float data[], int vnum,
     int vsize, int csize, int tsize0, int tsize1 )
 {
-#ifndef NODRAW
-    if (vnum < 0)
-	return;
-
     assert(data && vsize);
     int stride = sizeof(float) * (vsize + csize + tsize0 + tsize1);
 
@@ -100,9 +96,11 @@ void /*GFXDRVAPI*/ GFXDraw( POLYTYPE type, const float data[], int vnum,
         glTexCoordPointer(tsize0, GL_FLOAT, stride, data + vsize + csize);
         glEnableClientState(GL_TEXTURE_COORD_ARRAY);
     }
+}
 
-    glDrawArrays(PolyLookup(type), 0, vnum);
-   
+static void /*GFXDRVAPI*/ GFXDrawCleanup( POLYTYPE type, const float data[], int vnum,
+    int vsize, int csize, int tsize0, int tsize1 )
+{
     if (gl_options.Multitexture) {
         if (tsize1) {
             glClientActiveTextureARB_p(GL_TEXTURE1);
@@ -122,6 +120,77 @@ void /*GFXDRVAPI*/ GFXDraw( POLYTYPE type, const float data[], int vnum,
         glDisableClientState(GL_COLOR_ARRAY);
 
     glDisableClientState(GL_VERTEX_ARRAY);
+}
+
+void /*GFXDRVAPI*/ GFXDraw( POLYTYPE type, const float data[], int vnum,
+    int vsize, int csize, int tsize0, int tsize1 )
+{
+#ifndef NODRAW
+    if (vnum <= 0)
+        return;
+
+    GFXDrawSetup(type, data, vnum, vsize, csize, tsize0, tsize1);
+    
+    glDrawArrays(PolyLookup(type), 0, vnum);
+    
+    GFXDrawCleanup(type, data, vnum, vsize, csize, tsize0, tsize1);
+#endif
+}
+
+void /*GFXDRVAPI*/ GFXDrawElements( POLYTYPE type, 
+    const float data[], int vnum, const unsigned char indices[], int nelem,
+    int vsize, int csize, int tsize0, int tsize1 )
+{
+#ifndef NODRAW
+    if (vnum <= 0 || nelem <= 0)
+        return;
+
+    GFXDrawSetup(type, data, vnum, vsize, csize, tsize0, tsize1);
+
+    // Note: glDrawRangeElements doesn't seem to work well in MESA, 
+    //       stay away from it
+    GFXBindElementBuffer( 0 );
+    glDrawElements(PolyLookup(type), nelem, GL_UNSIGNED_BYTE, indices);
+    
+    GFXDrawCleanup(type, data, vnum, vsize, csize, tsize0, tsize1);
+#endif
+}
+
+void /*GFXDRVAPI*/ GFXDrawElements( POLYTYPE type, 
+    const float data[], int vnum, const unsigned short indices[], int nelem,
+    int vsize, int csize, int tsize0, int tsize1 )
+{
+#ifndef NODRAW
+    if (vnum <= 0 || nelem <= 0)
+        return;
+
+    GFXDrawSetup(type, data, vnum, vsize, csize, tsize0, tsize1);
+    
+    // Note: glDrawRangeElements doesn't seem to work well in MESA, 
+    //       stay away from it
+    GFXBindElementBuffer( 0 );
+    glDrawElements(PolyLookup(type), nelem, GL_UNSIGNED_SHORT, indices);
+    
+    GFXDrawCleanup(type, data, vnum, vsize, csize, tsize0, tsize1);
+#endif
+}
+
+void /*GFXDRVAPI*/ GFXDrawElements( POLYTYPE type, 
+    const float data[], int vnum, const unsigned int indices[], int nelem,
+    int vsize, int csize, int tsize0, int tsize1 )
+{
+#ifndef NODRAW
+    if (vnum <= 0 || nelem <= 0)
+        return;
+
+    GFXDrawSetup(type, data, vnum, vsize, csize, tsize0, tsize1);
+    
+    // Note: glDrawRangeElements doesn't seem to work well in MESA, 
+    //       stay away from it
+    GFXBindElementBuffer( 0 );
+    glDrawElements(PolyLookup(type), nelem, GL_UNSIGNED_INT, indices);
+    
+    GFXDrawCleanup(type, data, vnum, vsize, csize, tsize0, tsize1);
 #endif
 }
 

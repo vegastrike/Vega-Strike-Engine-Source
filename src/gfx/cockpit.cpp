@@ -128,38 +128,40 @@ void GameCockpit::SetSoundFile( string sound )
 
 void GameCockpit::DrawNavigationSymbol( const Vector &Loc, const Vector &P, const Vector &Q, float size )
 {
-    if (1) {
-        static float crossthick =
-            XMLSupport::parse_float( vs_config->getVariable( "graphics", "hud", "NavCrossLineThickness", "1" ) );                        //1.05;
-        GFXLineWidth( crossthick );
-        size = .125*size;
-        GFXBlendMode( SRCALPHA, INVSRCALPHA );
-        GFXEnable( SMOOTH );
-        GFXBegin( GFXLINE );
-        GFXVertexf( Loc+P*size );
-        GFXVertexf( Loc+.125*P*size );
-        GFXVertexf( Loc-P*size );
-        GFXVertexf( Loc-.125*P*size );
-        GFXVertexf( Loc+Q*size );
-        GFXVertexf( Loc+.125*Q*size );
-        GFXVertexf( Loc-Q*size );
-        GFXVertexf( Loc-.125*Q*size );
-        GFXVertexf( Loc+.0625*Q*size );
-        GFXVertexf( Loc+.0625*P*size );
-        GFXVertexf( Loc-.0625*Q*size );
-        GFXVertexf( Loc-.0625*P*size );
-        GFXVertexf( Loc+.9*P*size+.125*Q*size );
-        GFXVertexf( Loc+.9*P*size-.125*Q*size );
-        GFXVertexf( Loc-.9*P*size+.125*Q*size );
-        GFXVertexf( Loc-.9*P*size-.125*Q*size );
-        GFXVertexf( Loc+.9*Q*size+.125*P*size );
-        GFXVertexf( Loc+.9*Q*size-.125*P*size );
-        GFXVertexf( Loc-.9*Q*size+.125*P*size );
-        GFXVertexf( Loc-.9*Q*size-.125*P*size );
-        GFXEnd();
-        GFXDisable( SMOOTH );
-        GFXLineWidth( 1 );
-    }
+    static float crossthick =
+        XMLSupport::parse_float( vs_config->getVariable( "graphics", "hud", "NavCrossLineThickness", "1" ) );                        //1.05;
+    
+    GFXLineWidth( crossthick );
+    size = .125*size;
+    GFXBlendMode( SRCALPHA, INVSRCALPHA );
+    GFXEnable( SMOOTH );
+    
+    static VertexBuilder<> verts;
+    verts.clear();
+    verts.insert( Loc+P*size );
+    verts.insert( Loc+.125*P*size );
+    verts.insert( Loc-P*size );
+    verts.insert( Loc-.125*P*size );
+    verts.insert( Loc+Q*size );
+    verts.insert( Loc+.125*Q*size );
+    verts.insert( Loc-Q*size );
+    verts.insert( Loc-.125*Q*size );
+    verts.insert( Loc+.0625*Q*size );
+    verts.insert( Loc+.0625*P*size );
+    verts.insert( Loc-.0625*Q*size );
+    verts.insert( Loc-.0625*P*size );
+    verts.insert( Loc+.9*P*size+.125*Q*size );
+    verts.insert( Loc+.9*P*size-.125*Q*size );
+    verts.insert( Loc-.9*P*size+.125*Q*size );
+    verts.insert( Loc-.9*P*size-.125*Q*size );
+    verts.insert( Loc+.9*Q*size+.125*P*size );
+    verts.insert( Loc+.9*Q*size-.125*P*size );
+    verts.insert( Loc-.9*Q*size+.125*P*size );
+    verts.insert( Loc-.9*Q*size-.125*P*size );
+    GFXDraw( GFXLINE, verts );
+    
+    GFXDisable( SMOOTH );
+    GFXLineWidth( 1 );
 }
 
 float GameCockpit::computeLockingSymbol( Unit *par )
@@ -185,60 +187,59 @@ inline void DrawOneTargetBox( const QVector &Loc,
     GFXLineWidth( boxthick );
     GFXEnable( SMOOTH );
     GFXBlendMode( SRCALPHA, INVSRCALPHA );
+    static VertexBuilder<> verts;
+    verts.clear();
     if (Diamond) {
         float ModrSize = rSize/1.41;
-        GFXBegin( GFXLINESTRIP );
-        GFXVertexf( Loc+(.75*CamP+CamQ).Cast()*ModrSize );
-        GFXVertexf( Loc+(CamP+.75*CamQ).Cast()*ModrSize );
-        GFXVertexf( Loc+(CamP-.75*CamQ).Cast()*ModrSize );
-        GFXVertexf( Loc+(.75*CamP-CamQ).Cast()*ModrSize );
-        GFXVertexf( Loc+(-.75*CamP-CamQ).Cast()*ModrSize );
-        GFXVertexf( Loc+(-CamP-.75*CamQ).Cast()*ModrSize );
-        GFXVertexf( Loc+(.75*CamQ-CamP).Cast()*ModrSize );
-        GFXVertexf( Loc+(CamQ-.75*CamP).Cast()*ModrSize );
-        GFXVertexf( Loc+(.75*CamP+CamQ).Cast()*ModrSize );
-        GFXEnd();
+        verts.insert( Loc+(.75*CamP+CamQ).Cast()*ModrSize );
+        verts.insert( Loc+(CamP+.75*CamQ).Cast()*ModrSize );
+        verts.insert( Loc+(CamP-.75*CamQ).Cast()*ModrSize );
+        verts.insert( Loc+(.75*CamP-CamQ).Cast()*ModrSize );
+        verts.insert( Loc+(-.75*CamP-CamQ).Cast()*ModrSize );
+        verts.insert( Loc+(-CamP-.75*CamQ).Cast()*ModrSize );
+        verts.insert( Loc+(.75*CamQ-CamP).Cast()*ModrSize );
+        verts.insert( Loc+(CamQ-.75*CamP).Cast()*ModrSize );
+        verts.insert( Loc+(.75*CamP+CamQ).Cast()*ModrSize );
+        GFXDraw( GFXLINESTRIP, verts );
     } else if (ComputerLockon) {
-        GFXBegin( GFXLINESTRIP );
-        GFXVertexf( Loc+(CamP+CamQ).Cast()*rSize );
-        GFXVertexf( Loc+(CamP-CamQ).Cast()*rSize );
-        GFXVertexf( Loc+(-CamP-CamQ).Cast()*rSize );
-        GFXVertexf( Loc+(CamQ-CamP).Cast()*rSize );
-        GFXVertexf( Loc+(CamP+CamQ).Cast()*rSize );
-        GFXEnd();
+        verts.insert( Loc+(CamP+CamQ).Cast()*rSize );
+        verts.insert( Loc+(CamP-CamQ).Cast()*rSize );
+        verts.insert( Loc+(-CamP-CamQ).Cast()*rSize );
+        verts.insert( Loc+(CamQ-CamP).Cast()*rSize );
+        verts.insert( Loc+(CamP+CamQ).Cast()*rSize );
+        GFXDraw( GFXLINESTRIP, verts );
     } else {
-        GFXBegin( GFXLINE );
-        GFXVertexf( Loc+(CamP+CamQ).Cast()*rSize );
-        GFXVertexf( Loc+(CamP+.66*CamQ).Cast()*rSize );
+        verts.insert( Loc+(CamP+CamQ).Cast()*rSize );
+        verts.insert( Loc+(CamP+.66*CamQ).Cast()*rSize );
 
-        GFXVertexf( Loc+(CamP-CamQ).Cast()*rSize );
-        GFXVertexf( Loc+(CamP-.66*CamQ).Cast()*rSize );
+        verts.insert( Loc+(CamP-CamQ).Cast()*rSize );
+        verts.insert( Loc+(CamP-.66*CamQ).Cast()*rSize );
 
-        GFXVertexf( Loc+(-CamP-CamQ).Cast()*rSize );
-        GFXVertexf( Loc+(-CamP-.66*CamQ).Cast()*rSize );
+        verts.insert( Loc+(-CamP-CamQ).Cast()*rSize );
+        verts.insert( Loc+(-CamP-.66*CamQ).Cast()*rSize );
 
-        GFXVertexf( Loc+(CamQ-CamP).Cast()*rSize );
-        GFXVertexf( Loc+(CamQ-.66*CamP).Cast()*rSize );
+        verts.insert( Loc+(CamQ-CamP).Cast()*rSize );
+        verts.insert( Loc+(CamQ-.66*CamP).Cast()*rSize );
 
-        GFXVertexf( Loc+(CamP+CamQ).Cast()*rSize );
-        GFXVertexf( Loc+(CamP+.66*CamQ).Cast()*rSize );
+        verts.insert( Loc+(CamP+CamQ).Cast()*rSize );
+        verts.insert( Loc+(CamP+.66*CamQ).Cast()*rSize );
 
-        GFXVertexf( Loc+(CamP+CamQ).Cast()*rSize );
-        GFXVertexf( Loc+(.66*CamP+CamQ).Cast()*rSize );
+        verts.insert( Loc+(CamP+CamQ).Cast()*rSize );
+        verts.insert( Loc+(.66*CamP+CamQ).Cast()*rSize );
 
-        GFXVertexf( Loc+(CamP-CamQ).Cast()*rSize );
-        GFXVertexf( Loc+(.66*CamP-CamQ).Cast()*rSize );
+        verts.insert( Loc+(CamP-CamQ).Cast()*rSize );
+        verts.insert( Loc+(.66*CamP-CamQ).Cast()*rSize );
 
-        GFXVertexf( Loc+(-CamP-CamQ).Cast()*rSize );
-        GFXVertexf( Loc+(-.66*CamP-CamQ).Cast()*rSize );
+        verts.insert( Loc+(-CamP-CamQ).Cast()*rSize );
+        verts.insert( Loc+(-.66*CamP-CamQ).Cast()*rSize );
 
-        GFXVertexf( Loc+(CamQ-CamP).Cast()*rSize );
-        GFXVertexf( Loc+(.66*CamQ-CamP).Cast()*rSize );
+        verts.insert( Loc+(CamQ-CamP).Cast()*rSize );
+        verts.insert( Loc+(.66*CamQ-CamP).Cast()*rSize );
 
-        GFXVertexf( Loc+(CamP+CamQ).Cast()*rSize );
-        GFXVertexf( Loc+(.66*CamP+CamQ).Cast()*rSize );
+        verts.insert( Loc+(CamP+CamQ).Cast()*rSize );
+        verts.insert( Loc+(.66*CamP+CamQ).Cast()*rSize );
 
-        GFXEnd();
+        GFXDraw( GFXLINE, verts );
     }
     if (lock_percent < .99) {
         if (lock_percent < 0)
@@ -271,33 +272,34 @@ inline void DrawOneTargetBox( const QVector &Loc,
             float outerdis   = innerdis+bracketsize;
             float bracketdis = (bracketinnerouter ? innerdis : outerdis);
             float r = rSize < absmin ? absmin : rSize;
-            GFXBegin( GFXLINE );
 
-            GFXVertexf( Loc+CamP*(innerdis*r) );
-            GFXVertexf( Loc+CamP*(outerdis*r) );
+            verts.clear();
+            
+            verts.insert( Loc+CamP*(innerdis*r) );
+            verts.insert( Loc+CamP*(outerdis*r) );
 
-            GFXVertexf( Loc+CamP*(bracketdis*r)+CamQ*(bracketwidth*r) );
-            GFXVertexf( Loc+CamP*(bracketdis*r)-CamQ*(bracketwidth*r) );
+            verts.insert( Loc+CamP*(bracketdis*r)+CamQ*(bracketwidth*r) );
+            verts.insert( Loc+CamP*(bracketdis*r)-CamQ*(bracketwidth*r) );
 
-            GFXVertexf( Loc-CamP*(innerdis*r) );
-            GFXVertexf( Loc-CamP*(outerdis*r) );
+            verts.insert( Loc-CamP*(innerdis*r) );
+            verts.insert( Loc-CamP*(outerdis*r) );
 
-            GFXVertexf( Loc-CamP*(bracketdis*r)+CamQ*(bracketwidth*r) );
-            GFXVertexf( Loc-CamP*(bracketdis*r)-CamQ*(bracketwidth*r) );
+            verts.insert( Loc-CamP*(bracketdis*r)+CamQ*(bracketwidth*r) );
+            verts.insert( Loc-CamP*(bracketdis*r)-CamQ*(bracketwidth*r) );
 
-            GFXVertexf( Loc+CamQ*(innerdis*r) );
-            GFXVertexf( Loc+CamQ*(outerdis*r) );
+            verts.insert( Loc+CamQ*(innerdis*r) );
+            verts.insert( Loc+CamQ*(outerdis*r) );
 
-            GFXVertexf( Loc+CamQ*(bracketdis*r)+CamP*(bracketwidth*r) );
-            GFXVertexf( Loc+CamQ*(bracketdis*r)-CamP*(bracketwidth*r) );
+            verts.insert( Loc+CamQ*(bracketdis*r)+CamP*(bracketwidth*r) );
+            verts.insert( Loc+CamQ*(bracketdis*r)-CamP*(bracketwidth*r) );
 
-            GFXVertexf( Loc-CamQ*(innerdis*r) );
-            GFXVertexf( Loc-CamQ*(outerdis*r) );
+            verts.insert( Loc-CamQ*(innerdis*r) );
+            verts.insert( Loc-CamQ*(outerdis*r) );
 
-            GFXVertexf( Loc-CamQ*(bracketdis*r)+CamP*(bracketwidth*r) );
-            GFXVertexf( Loc-CamQ*(bracketdis*r)-CamP*(bracketwidth*r) );
+            verts.insert( Loc-CamQ*(bracketdis*r)+CamP*(bracketwidth*r) );
+            verts.insert( Loc-CamQ*(bracketdis*r)-CamP*(bracketwidth*r) );
 
-            GFXEnd();
+            GFXDraw( GFXLINE, verts );
         } else {
             float  max   = diamondsize;
             //VSFileSystem::Fprintf (stderr,"lock percent %f\n",lock_percent);
@@ -312,68 +314,73 @@ inline void DrawOneTargetBox( const QVector &Loc,
             static float diamondthick =
                 XMLSupport::parse_float( vs_config->getVariable( "graphics", "hud", "DiamondLineThickness", "1" ) );                              //1.05;
             GFXLineWidth( diamondthick );
-            Vector  TLockBox( rtot*LockBox.i+rtot*LockBox.j, rtot*LockBox.j-rtot*LockBox.i, LockBox.k );
-            Vector  SLockBox( TLockBox.j, TLockBox.i, TLockBox.k );
+            QVector TLockBox( rtot*LockBox.i+rtot*LockBox.j, rtot*LockBox.j-rtot*LockBox.i, LockBox.k );
+            QVector SLockBox( TLockBox.j, TLockBox.i, TLockBox.k );
             QVector Origin = (CamP+CamQ).Cast()*(rSize*coord);
-            TLockBox = (TLockBox.i*CamP+TLockBox.j*CamQ+TLockBox.k*CamR);
-            SLockBox = (SLockBox.i*CamP+SLockBox.j*CamQ+SLockBox.k*CamR);
+            QVector Origin1 = (CamP-CamQ).Cast()*(rSize*coord);
+            TLockBox = (TLockBox.i*CamP+TLockBox.j*CamQ+TLockBox.k*CamR).Cast();
+            SLockBox = (SLockBox.i*CamP+SLockBox.j*CamQ+SLockBox.k*CamR).Cast();
             double  r1Size = rSize*bracketsize;
             if (r1Size < absmin)
                 r1Size = absmin;
-            GFXBegin( GFXLINESTRIP );
+
+            TLockBox *= r1Size;
+            SLockBox *= r1Size;
+            
             max *= rSize*.75*endreticle;
+            verts.clear();
             if (lock_percent == 0) {
-                GFXVertexf( Loc+CamQ.Cast()*max*lockline );
-                GFXVertexf( Loc+CamQ.Cast()*max );
-            }
-            GFXVertexf( Loc+Origin+(TLockBox.Cast()*r1Size) );
-            GFXVertexf( Loc+Origin );
-            GFXVertexf( Loc+Origin+(SLockBox.Cast()*r1Size) );
-            if (lock_percent == 0) {
-                GFXVertexf( Loc+CamP.Cast()*max );
-                GFXVertexf( Loc+CamP.Cast()*max*lockline );
-
-                GFXEnd();
-                GFXBegin( GFXLINESTRIP );
-                GFXVertexf( Loc-CamP.Cast()*max );
+                const QVector qCamP(CamP.Cast());
+                const QVector qCamQ(CamQ.Cast());
+                
+                verts.insert( Loc+qCamQ*max*lockline );
+                verts.insert( Loc+qCamQ*max );
+                verts.insert( Loc+Origin+TLockBox );
+                verts.insert( Loc+Origin );
+                verts.insert( Loc+Origin+SLockBox );
+                verts.insert( Loc+qCamP*max );
+                verts.insert( Loc+qCamP*max*lockline );
+                verts.insert( Loc-qCamP*max );
+                verts.insert( Loc-Origin-SLockBox );
+                verts.insert( Loc-Origin );
+                verts.insert( Loc-Origin-TLockBox );
+                verts.insert( Loc-qCamQ*max );
+                verts.insert( Loc-qCamQ*max*lockline );
+                verts.insert( Loc+Origin1+TLockBox );
+                verts.insert( Loc+Origin1 );
+                verts.insert( Loc+Origin1-SLockBox );
+                verts.insert( Loc-qCamP*max*lockline );
+                verts.insert( Loc-Origin1+SLockBox );
+                verts.insert( Loc-Origin1 );
+                verts.insert( Loc-Origin1-TLockBox );
+                
+                static const unsigned char indices[] = {
+                    0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 7, 8,
+                    8, 9, 9, 10, 10, 11, 11, 12, 12, 11, 11, 13, 13, 14,
+                    14, 15, 15, 5, 16, 7, 7, 17, 17, 18, 18, 19, 19, 1
+                };
+                
+                GFXDrawElements( GFXLINE, verts, indices, sizeof(indices) / sizeof(*indices) );
             } else {
-                GFXEnd();
-                GFXBegin( GFXLINESTRIP );
+                verts.insert( Loc+Origin+TLockBox );
+                verts.insert( Loc+Origin );
+                verts.insert( Loc+Origin+SLockBox );
+                verts.insert( Loc-Origin-SLockBox );
+                verts.insert( Loc-Origin );
+                verts.insert( Loc-Origin-TLockBox );
+                verts.insert( Loc+Origin1+TLockBox );
+                verts.insert( Loc+Origin1 );
+                verts.insert( Loc+Origin1-SLockBox );
+                verts.insert( Loc-Origin1+SLockBox );
+                verts.insert( Loc-Origin1 );
+                verts.insert( Loc-Origin1-TLockBox );
+                
+                static const unsigned char indices[] = {
+                    0, 1, 1, 2, 3, 4, 4, 5, 6, 7, 7, 8, 9, 10, 10, 11
+                };
+                
+                GFXDrawElements( GFXLINE, verts, indices, sizeof(indices) / sizeof(*indices) );
             }
-            GFXVertexf( Loc-Origin-(SLockBox.Cast()*r1Size) );
-            GFXVertexf( Loc-Origin );
-            GFXVertexf( Loc-Origin-(TLockBox.Cast()*r1Size) );
-
-            Origin = (CamP-CamQ).Cast()*(rSize*coord);
-            if (lock_percent == 0) {
-                GFXVertexf( Loc-CamQ.Cast()*max );
-                GFXVertexf( Loc-CamQ.Cast()*max*lockline );
-
-                GFXVertexf( Loc-CamQ.Cast()*max );
-            } else {
-                GFXEnd();
-                GFXBegin( GFXLINESTRIP );
-            }
-            GFXVertexf( Loc+Origin+(TLockBox.Cast()*r1Size) );
-            GFXVertexf( Loc+Origin );
-            GFXVertexf( Loc+Origin-(SLockBox.Cast()*r1Size) );
-            if (lock_percent == 0) {
-                GFXVertexf( Loc+CamP.Cast()*max );
-                GFXEnd();
-                GFXBegin( GFXLINESTRIP );
-                GFXVertexf( Loc-CamP.Cast()*max*lockline );
-
-                GFXVertexf( Loc-CamP.Cast()*max );
-            } else {
-                GFXEnd();
-                GFXBegin( GFXLINESTRIP );
-            }
-            GFXVertexf( Loc-Origin+(SLockBox.Cast()*r1Size) );
-            GFXVertexf( Loc-Origin );
-            GFXVertexf( Loc-Origin-(TLockBox.Cast()*r1Size) );
-            if (lock_percent == 0)
-                GFXVertexf( Loc+CamQ.Cast()*max );
-            GFXEnd();
         }
     }
     GFXLineWidth( 1 );
@@ -491,10 +498,11 @@ inline void DrawITTSLine( QVector fromLoc, QVector aimLoc, GFXColor linecolor=GF
     GFXColorf( linecolor );
     GFXEnable( SMOOTH );
     GFXBlendMode( SRCALPHA, INVSRCALPHA );
-    GFXBegin( GFXLINESTRIP );
-    GFXVertexf( fromLoc );
-    GFXVertexf( aimLoc );
-    GFXEnd();
+    const float verts[2 * 3] = {
+        fromLoc.x, fromLoc.y, fromLoc.z, 
+        aimLoc.x,   aimLoc.y,  aimLoc.z,
+    };
+    GFXDraw( GFXLINE, verts, 2 );
     GFXDisable( SMOOTH );
 }
 
@@ -503,13 +511,14 @@ inline void DrawITTSMark( float Size, QVector p, QVector q, QVector aimLoc, GFXC
     GFXColorf( markcolor );
     GFXEnable( SMOOTH );
     GFXBlendMode( SRCALPHA, INVSRCALPHA );
-    GFXBegin( GFXLINESTRIP );
-    GFXVertexf( aimLoc + p*Size );
-    GFXVertexf( aimLoc - q*Size );
-    GFXVertexf( aimLoc - p*Size );
-    GFXVertexf( aimLoc + q*Size );
-    GFXVertexf( aimLoc + p*Size );
-    GFXEnd();
+    static VertexBuilder<> verts;
+    verts.clear();
+    verts.insert( aimLoc + p*Size );
+    verts.insert( aimLoc - q*Size );
+    verts.insert( aimLoc - p*Size );
+    verts.insert( aimLoc + q*Size );
+    verts.insert( aimLoc + p*Size );
+    GFXDraw( GFXLINESTRIP, verts );
     GFXDisable( SMOOTH );
 }
 
@@ -549,17 +558,24 @@ void GameCockpit::DrawTargetBox(const Radar::Sensor& sensor)
     if (draw_line_to_target) {
         GFXBlendMode( SRCALPHA, INVSRCALPHA );
         GFXEnable( SMOOTH );
-        QVector my_loc( _Universe->AccessCamera()->GetPosition() );
-        GFXBegin( GFXLINESTRIP );
-        GFXVertexf( my_loc );
-        GFXVertexf( Loc );
+        QVector myLoc( _Universe->AccessCamera()->GetPosition() );
 
         Unit *targets_target = target->Target();
         if (draw_line_to_targets_target && targets_target != NULL) {
-            QVector ttLoc( targets_target->Position() );
-            GFXVertexf( ttLoc );
+            QVector ttLoc = targets_target->Position();
+            const float verts[3 * 3] = {
+                myLoc.x, myLoc.y, myLoc.z, 
+                Loc.x,   Loc.y,   Loc.z, 
+                ttLoc.x, ttLoc.x, ttLoc.x,
+            };
+            GFXDraw( GFXLINESTRIP, verts, 3 );
+        } else {
+            const float verts[2 * 3] = {
+                myLoc.x, myLoc.y, myLoc.z, 
+                Loc.x,   Loc.y,   Loc.z, 
+            };
+            GFXDraw( GFXLINESTRIP, verts, 2 );
         }
-        GFXEnd();
         GFXDisable( SMOOTH );
     }
     static bool draw_target_nav_symbol =
@@ -676,6 +692,8 @@ void GameCockpit::DrawTurretTargetBoxes(const Radar::Sensor& sensor)
     GFXDisable( DEPTHTEST );
     GFXDisable( DEPTHWRITE );
     GFXDisable( LIGHTING );
+    
+    static VertexBuilder<> verts;
 
     //This avoids rendering the same target box more than once
     Unit *subunit;
@@ -710,19 +728,23 @@ void GameCockpit::DrawTurretTargetBoxes(const Radar::Sensor& sensor)
 
         GFXEnable( SMOOTH );
         GFXBlendMode( SRCALPHA, INVSRCALPHA );
-        GFXBegin( GFXLINE );
-        GFXVertexf( Loc+(CamP).Cast()*rSize*1.3 );
-        GFXVertexf( Loc+(CamP).Cast()*rSize*.8 );
 
-        GFXVertexf( Loc+(-CamP).Cast()*rSize*1.3 );
-        GFXVertexf( Loc+(-CamP).Cast()*rSize*.8 );
+        verts.clear();
 
-        GFXVertexf( Loc+(CamQ).Cast()*rSize*1.3 );
-        GFXVertexf( Loc+(CamQ).Cast()*rSize*.8 );
+        verts.insert( Loc+(CamP).Cast()*rSize*1.3 );
+        verts.insert( Loc+(CamP).Cast()*rSize*.8 );
 
-        GFXVertexf( Loc+(-CamQ).Cast()*rSize*1.3 );
-        GFXVertexf( Loc+(-CamQ).Cast()*rSize*.8 );
-        GFXEnd();
+        verts.insert( Loc+(-CamP).Cast()*rSize*1.3 );
+        verts.insert( Loc+(-CamP).Cast()*rSize*.8 );
+
+        verts.insert( Loc+(CamQ).Cast()*rSize*1.3 );
+        verts.insert( Loc+(CamQ).Cast()*rSize*.8 );
+
+        verts.insert( Loc+(-CamQ).Cast()*rSize*1.3 );
+        verts.insert( Loc+(-CamQ).Cast()*rSize*.8 );
+        
+        GFXDraw( GFXLINESTRIP, verts );
+        
         GFXDisable( SMOOTH );
     }
 }
@@ -761,20 +783,23 @@ void GameCockpit::DrawTacticalTargetBox(const Radar::Sensor& sensor)
         //** jay
         float rSize = track.GetSize();
 
-        GFXBegin( GFXLINE );
-        GFXVertexf( Loc+( (-CamP).Cast()+(-CamQ).Cast() )*rSize*(foci+fudge) );
-        GFXVertexf( Loc+( (-CamP).Cast()+(-CamQ).Cast() )*rSize*(foci-fudge) );
+        static VertexBuilder<> verts;
+        verts.clear();
 
-        GFXVertexf( Loc+( (-CamP).Cast()+(CamQ).Cast() )*rSize*(foci+fudge) );
-        GFXVertexf( Loc+( (-CamP).Cast()+(CamQ).Cast() )*rSize*(foci-fudge) );
+        verts.insert( Loc+( (-CamP).Cast()+(-CamQ).Cast() )*rSize*(foci+fudge) );
+        verts.insert( Loc+( (-CamP).Cast()+(-CamQ).Cast() )*rSize*(foci-fudge) );
 
-        GFXVertexf( Loc+( (CamP).Cast()+(-CamQ).Cast() )*rSize*(foci+fudge) );
-        GFXVertexf( Loc+( (CamP).Cast()+(-CamQ).Cast() )*rSize*(foci-fudge) );
+        verts.insert( Loc+( (-CamP).Cast()+(CamQ).Cast() )*rSize*(foci+fudge) );
+        verts.insert( Loc+( (-CamP).Cast()+(CamQ).Cast() )*rSize*(foci-fudge) );
 
-        GFXVertexf( Loc+( (CamP).Cast()+(CamQ).Cast() )*rSize*(foci+fudge) );
-        GFXVertexf( Loc+( (CamP).Cast()+(CamQ).Cast() )*rSize*(foci-fudge) );
-        GFXEnd();
+        verts.insert( Loc+( (CamP).Cast()+(-CamQ).Cast() )*rSize*(foci+fudge) );
+        verts.insert( Loc+( (CamP).Cast()+(-CamQ).Cast() )*rSize*(foci-fudge) );
 
+        verts.insert( Loc+( (CamP).Cast()+(CamQ).Cast() )*rSize*(foci+fudge) );
+        verts.insert( Loc+( (CamP).Cast()+(CamQ).Cast() )*rSize*(foci-fudge) );
+
+        GFXDraw( GFXLINE, verts );
+        
         glLineWidth( (int) 1 );         //temp
     }
 }
@@ -2195,29 +2220,29 @@ static void DrawDamageFlash( int dtype )
             if ( aflashes[i]->LoadSuccess() ) {
                 aflashes[i]->MakeActive();
                 GFXColor4f( 1, 1, 1, 1 );
-                GFXBegin( GFXQUAD );
-                float width = 1, height = 1;
-                GFXTexCoord2f( 0.00F, 1.00F );
-                GFXVertex3f( -width, -height, 1.00F );                 //lower left
-                GFXTexCoord2f( 1.00F, 1.00F );
-                GFXVertex3f( width, -height, 1.00F );                 //upper left
-                GFXTexCoord2f( 1.00F, 0.00F );
-                GFXVertex3f( width, height, 1.00F );                 //upper right
-                GFXTexCoord2f( 0.00F, 0.00F );
-                GFXVertex3f( -width, height, 1.00F );                 //lower right
-                GFXEnd();
+                
+                static const float verts[4 * (3 + 2)] = {
+                   -1.0f, -1.0f, 1.0f,  0.0f, 1.0f,    //lower left
+                    1.0f, -1.0f, 1.0f,  1.0f, 1.0f,    //upper left
+                    1.0f,  1.0f, 1.0f,  1.0f, 0.0f,    //upper right
+                   -1.0f,  1.0f, 1.0f,  0.0f, 0.0f,    //lower right
+                };
+                GFXDraw( GFXQUAD, verts, 4, 3, 0, 2 );
             } else {
                 GFXColor4f( fallbackcolor[i][0],
                             fallbackcolor[i][1],
                             fallbackcolor[i][2],
                             fallbackcolor[i][3] );
                 GFXDisable( TEXTURE0 );
-                GFXBegin( GFXQUAD );
-                GFXVertex3f( -1.0f, -1.0f, 1.0f );
-                GFXVertex3f( -1.0f, 1.0f, 1.0f );
-                GFXVertex3f( 1.0f, 1.0f, 1.0f );
-                GFXVertex3f( 1.0f, -1.0f, 1.0f );
-                GFXEnd();
+
+                static const float verts[4 * 3] = {
+                   -1.0f, -1.0f, 1.0f,
+                   -1.0f,  1.0f, 1.0f,
+                    1.0f,  1.0f, 1.0f,
+                    1.0f, -1.0f, 1.0f,
+                };
+                GFXDraw( GFXQUAD, verts, 4 );
+                
                 GFXEnable( TEXTURE0 );
             }
             GFXPopBlendMode();
@@ -2236,20 +2261,23 @@ static void DrawCrosshairs( float x, float y, float wid, float hei, const GFXCol
     GFXCircle( x, y, wid/4, hei/4 );
     GFXCircle( x, y, wid/7, hei/7 );
     GFXDisable( SMOOTH );
-    GFXBegin( GFXLINE );
-    GFXVertex3f( x-(wid/2), y, 0 );
-    GFXVertex3f( x-(wid/6), y, 0 );
-    GFXVertex3f( x+(wid/2), y, 0 );
-    GFXVertex3f( x+(wid/6), y, 0 );
-    GFXVertex3f( x, y-(hei/2), 0 );
-    GFXVertex3f( x, y-(hei/6), 0 );
-    GFXVertex3f( x, y+(hei/2), 0 );
-    GFXVertex3f( x, y+(hei/6), 0 );
-    GFXVertex3f( x-.001, y+.001, 0 );
-    GFXVertex3f( x+.001, y-.001, 0 );
-    GFXVertex3f( x+.001, y+.001, 0 );
-    GFXVertex3f( x-.001, y-.001, 0 );
-    GFXEnd();
+    
+    const float verts[12 * 3] = {
+        x-(wid/2), y, 0,
+        x-(wid/6), y, 0,
+        x+(wid/2), y, 0,
+        x+(wid/6), y, 0,
+        x, y-(hei/2), 0,
+        x, y-(hei/6), 0,
+        x, y+(hei/2), 0,
+        x, y+(hei/6), 0,
+        x-.001, y+.001, 0,
+        x+.001, y-.001, 0,
+        x+.001, y+.001, 0,
+        x-.001, y-.001, 0,
+    };
+    GFXDraw( GFXLINE, verts, 12 );
+    
     GFXEnable( TEXTURE0 );
 }
 
@@ -3458,13 +3486,15 @@ void GameCockpit::DrawArrowToTarget(const Radar::Sensor& sensor, Vector localcoo
     GFXDisable( TEXTURE1 );
     GFXBlendMode( SRCALPHA, INVSRCALPHA );
 
-    glBegin( GL_LINE_LOOP );
-    GFXVertex3f( s, t, 0 );
-    GFXVertexf( p1 );
-    GFXVertexf( p2 );
-    GFXEnd();
+    const float verts[4 * 3] = {
+        s,    t,    0,
+        p1.x, p1.y, p1.z,
+        p2.x, p2.y, p2.z,
+        s,    t,    0,
+    };
+    GFXDraw( GFXLINESTRIP, verts, 4 );
+    
     GFXColor4f( 1, 1, 1, 1 );
-
     GFXDisable( SMOOTH );
 }
 
