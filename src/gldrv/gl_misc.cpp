@@ -314,46 +314,6 @@ void GFXLineWidth( const float size )
     glLineWidth( size );
 }
 
-void /*GFXDRVAPI*/ GFXBegin( const enum POLYTYPE ptype )
-{
-    GLenum mode;
-    switch (ptype)
-    {
-    case GFXTRI:
-        mode = GL_TRIANGLES;
-        break;
-    case GFXLINE:
-        mode = GL_LINES;
-        break;
-    case GFXTRISTRIP:
-        mode = GL_TRIANGLE_STRIP;
-        break;
-    case GFXTRIFAN:
-        mode = GL_TRIANGLE_FAN;
-        break;
-    case GFXQUAD:
-        mode = GL_QUADS;
-        break;
-    case GFXQUADSTRIP:
-        mode = GL_QUAD_STRIP;
-        break;
-    case GFXLINESTRIP:
-        mode = GL_LINE_STRIP;
-        break;
-    case GFXPOLY:
-        mode = GL_POLYGON;
-        break;
-    case GFXPOINT:
-        mode = GL_POINTS;
-        break;
-    default:
-        mode = GL_POINTS;
-        assert( 0 ||! "Bad case in gl_misc.cpp." );
-        break;
-    }
-    glBegin( mode );
-}
-
 void /*GFXDRVAPI*/ GFXColorf( const GFXColor &col )
 {
     glColor4fv( &col.r );
@@ -381,84 +341,6 @@ void /*GFXDRVAPI*/ GFXColor4f( const float r, const float g, const float b, cons
     glColor4f( r, g, b, a );
 }
 
-void /*GFXDRVAPI*/ GFXTexCoord2f( const float s, const float t )
-{
-    glTexCoord2f( s, t );
-}
-
-void /*GFXDRVAPI*/ GFXTexCoord4f( const float s, const float t, const float u, const float v )
-{
-#if !defined (IRIX)
-    if (gl_options.Multitexture) {
-        glMultiTexCoord2fARB_p( GL_TEXTURE0_ARB, s, t );
-        glMultiTexCoord2fARB_p( GL_TEXTURE1_ARB, u, v );
-    } else
-#endif
-    {
-        glTexCoord2f( s, t );
-    }
-}
-
-void /*GFXDRVAPI*/ GFXTexCoord224f( const float s,
-                                    const float t,
-                                    const float s2,
-                                    const float t2,
-                                    const float s3,
-                                    const float t3,
-                                    const float u3,
-                                    const float v3 )
-{
-#if !defined (IRIX)
-    if (gl_options.Multitexture) {
-        glMultiTexCoord2fARB_p( GL_TEXTURE0_ARB, s, t );
-        glMultiTexCoord2fARB_p( GL_TEXTURE1_ARB, s2, t2 );
-        glMultiTexCoord4fARB_p( GL_TEXTURE2_ARB, s3, t3, u3, v3 );
-    } else
-#endif
-    {
-        glTexCoord2f( s, t );
-    }
-}
-
-void /*GFXDRVAPI*/ GFXNormal3f( const float i, const float j, const float k )
-{
-    glNormal3f( i, j, k );
-}
-
-void /*GFXDRVAPI*/ GFXNormal( const Vector &n )
-{
-    glNormal3fv( &n.i );
-}
-
-void /*GFXDRVAPI*/ GFXVertex3f( const float x, const float y, const float z )
-{
-    glVertex3f( x, y, z );
-}
-
-void /*GFXDRVAPI*/ GFXVertex3f( const double x, const double y, const double z )
-{
-    glVertex3d( x, y, z );
-}
-
-void /*GFXDRVAPI*/ GFXVertex3d( const double x, const double y, const double z )
-{
-    glVertex3d( x, y, z );
-}
-
-void GFXVertexf( const Vector &v )
-{
-    glVertex3f( v.i, v.j, v.k );
-}
-
-void GFXVertexf( const QVector &v )
-{
-    glVertex3d( v.i, v.j, v.k );
-}
-
-void /*GFXDRVAPI*/ GFXEnd()
-{
-    glEnd();
-}
 
 int GFXCreateList()
 {

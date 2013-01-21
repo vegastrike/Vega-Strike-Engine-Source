@@ -310,9 +310,9 @@ void GFXVertexList::RenormalizeNormals()
 
 unsigned int GFXVertexList::GetIndex( int offset ) const
 {
-    return ( changed&sizeof (unsigned char) )
+    return ( changed & INDEX_BYTE )
            ? (unsigned int) (index.b[offset])
-           : ( ( changed&sizeof (unsigned short) )
+           : ( ( changed & INDEX_SHORT )
               ? (unsigned int) (index.s[offset])
               : index.i[offset] );
 }

@@ -381,8 +381,6 @@ void GFXGetPolygonOffset( float *factor, float *units );
 void /*GFXDRVAPI*/ GFXPolygonMode( const enum POLYMODE );
 ///Sets the facecull mode
 void /*GFXDRVAPI*/ GFXCullFace( const enum POLYFACE );
-///Begins a polytype
-void /*GFXDRVAPI*/ GFXBegin( const enum POLYTYPE );
 
 ///Specifies a color for henceforth drawn vertices to share
 void /*GFXDRVAPI*/ GFXColorf( const GFXColor &col );
@@ -393,35 +391,6 @@ void /*GFXDRVAPI*/ GFXColor4f( const float r, const float g, const float b, cons
 ///Gets the current color
 GFXColor /*GFXDRVAPI*/ GFXColorf();
 
-///Specifies a pair of texture coordinates for given vertex
-void /*GFXDRVAPI*/ GFXTexCoord2f( const float s, const float t );
-
-///Specifies four texture coordinates for a given vertex (2 textures)
-void /*GFXDRVAPI*/ GFXTexCoord4f( const float s, const float t, const float u, const float v );
-///Specifies four texture coordinates for a given vertex (3 textures)
-void /*GFXDRVAPI*/ GFXTexCoord224f( const float s,
-                                    const float t,
-                                    const float s2,
-                                    const float t2,
-                                    const float s3,
-                                    const float t3,
-                                    const float u3,
-                                    const float v3 );
-/// Specifies a normal with 3 floats
-void /*GFXDRVAPI*/ GFXNormal3f( const float i, const float j, const float k );
-///Specifies a notmal with 1 vector
-void /*GFXDRVAPI*/ GFXNormal( const Vector &n );
-
-///Specifies a vertex with 3 floats
-void /*GFXDRVAPI*/ GFXVertex3f( const float x, const float y, const float z = 1.0 );
-void /*GFXDRVAPI*/ GFXVertex3f( const double x, const double y, const double z = 1.0 );
-void /*GFXDRVAPI*/ GFXVertex3d( const double x, const double y, const double z = 1.0 );
-
-///Specifies a vertex with a vector
-void /*GFXDRVAPI*/ GFXVertexf( const Vector &v );
-void /*GFXDRVAPI*/ GFXVertexf( const QVector &v );
-///Ends the current set of polytypes
-void /*GFXDRVAPI*/ GFXEnd();
 void /*GFXDRVAPI*/ GFXCircle( float x, float y, float r1, float r2 );
 unsigned int /*GFXDRVAPI*/ PolyLookup( POLYTYPE poly );
 void /*GFXDRVAPI*/ GFXDraw( POLYTYPE type, const float data[], int vnum,

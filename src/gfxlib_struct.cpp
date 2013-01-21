@@ -61,6 +61,38 @@ static void print_gl_error(const char *fmt)
         VSFileSystem::vs_dprintf(1, fmt, gl_error);
 }
 
+static void EnableArrays(const GFXColorVertex *data)
+{
+    if (gl_options.Multitexture)
+        glClientActiveTextureARB_p( GL_TEXTURE0 );
+    glInterleavedArrays( GL_T2F_C4F_N3F_V3F, sizeof (GFXColorVertex), data );
+    if (gl_options.Multitexture) {
+        glClientActiveTextureARB_p( GL_TEXTURE1 );
+        glTexCoordPointer( 2, GL_FLOAT, sizeof (GFXColorVertex), &data[0].s );
+        glEnableClientState( GL_TEXTURE_COORD_ARRAY );
+        glClientActiveTextureARB_p( GL_TEXTURE2 );
+        glTexCoordPointer( 4, GL_FLOAT, sizeof (GFXColorVertex), &data[0].tx );
+        glEnableClientState( GL_TEXTURE_COORD_ARRAY );
+        glClientActiveTextureARB_p( GL_TEXTURE0 );
+    }
+}
+
+static void EnableArrays(const GFXVertex *data)
+{
+    if (gl_options.Multitexture)
+        glClientActiveTextureARB_p( GL_TEXTURE0 );
+    glInterleavedArrays( GL_T2F_N3F_V3F, sizeof (GFXVertex), data );
+    if (gl_options.Multitexture) {
+        glClientActiveTextureARB_p( GL_TEXTURE1 );
+        glTexCoordPointer( 2, GL_FLOAT, sizeof (GFXVertex), &data[0].s );
+        glEnableClientState( GL_TEXTURE_COORD_ARRAY );
+        glClientActiveTextureARB_p( GL_TEXTURE2 );
+        glTexCoordPointer( 4, GL_FLOAT, sizeof (GFXVertex), &data[0].tx );
+        glEnableClientState( GL_TEXTURE_COORD_ARRAY );
+        glClientActiveTextureARB_p( GL_TEXTURE0 );
+    }
+}
+
 void GFXVertexList::RefreshDisplayList( )
 {
 #ifndef NO_VBO_SUPPORT
@@ -103,49 +135,30 @@ void GFXVertexList::RefreshDisplayList( )
     int offset = 0;
     display_list = GFXCreateList();
     if (changed&HAS_COLOR) {
-        for (int i = 0; i < numlists; i++) {
-            glBegin( PolyLookup( mode[i] ) );
-            if (changed&HAS_INDEX) {
-                for (a = 0; a < offsets[i]; a++) {
-                    const GFXColorVertex &vtx = data.colors[GetIndex( offset+a )];
-                    GFXTexCoord224f( vtx.s, vtx.t, vtx.s, vtx.t, vtx.tx, vtx.ty, vtx.tz, vtx.tw );
-                    glColor4fv( &vtx.r );
-                    glNormal3fv( &vtx.i );
-                    glVertex3fv( &vtx.x );
-                }
-            } else {
-                for (a = 0; a < offsets[i]; a++) {
-                    const GFXColorVertex &vtx = data.colors[offset+a];
-                    GFXTexCoord224f( vtx.s, vtx.t, vtx.s, vtx.t, vtx.tx, vtx.ty, vtx.tz, vtx.tw );
-                    glColor4fv( &vtx.r );
-                    glNormal3fv( &vtx.i );
-                    glVertex3fv( &vtx.x );
-                }
-            }
-            offset += offsets[i];
-            glEnd();
-        }
+        EnableArrays(data.colors);
     } else {
-        for (int i = 0; i < numlists; i++) {
-            glBegin( PolyLookup( mode[i] ) );
-            if (changed&HAS_INDEX) {
-                for (a = 0; a < offsets[i]; a++) {
-                    const GFXVertex &vtx = data.vertices[GetIndex( offset+a )];
-                    glNormal3fv( &vtx.i );
-                    GFXTexCoord224f( vtx.s, vtx.t, vtx.s, vtx.t, vtx.tx, vtx.ty, vtx.tz, vtx.tw );
-                    glVertex3fv( &vtx.x );
-                }
-            } else {
-                for (a = 0; a < offsets[i]; a++) {
-                    const GFXVertex &vtx = data.vertices[offset+a];
-                    glNormal3fv( &vtx.i );
-                    GFXTexCoord224f( vtx.s, vtx.t, vtx.s, vtx.t, vtx.tx, vtx.ty, vtx.tz, vtx.tw );
-                    glVertex3fv( &vtx.x );
-                }
+        EnableArrays(data.vertices);
+    }
+    for (int i = 0; i < numlists; i++) {
+        // Populate the display list with array data
+        if (changed&HAS_INDEX) {
+            switch (changed & (INDEX_BYTE|INDEX_INT|INDEX_SHORT)) {
+                case INDEX_BYTE:
+                    glDrawElements( PolyLookup(mode[i]), offsets[i], GL_UNSIGNED_BYTE, index.b );
+                    break;
+                case INDEX_SHORT:
+                    glDrawElements( PolyLookup(mode[i]), offsets[i], GL_UNSIGNED_SHORT, index.s );
+                    break;
+                case INDEX_INT:
+                    glDrawElements( PolyLookup(mode[i]), offsets[i], GL_UNSIGNED_INT, index.i );
+                    break;
+                default:
+                    break;
             }
-            offset += offsets[i];
-            glEnd();
+        } else {
+            glDrawArrays( PolyLookup(mode[i]), offset, offsets[i] );
         }
+        offset += offsets[i];
     }
     if ( !GFXEndList() ) {
         GFXDeleteList( display_list );
@@ -171,65 +184,17 @@ void GFXVertexList::BeginDrawState( GFXBOOL lock )
         }
         
         if (changed&HAS_COLOR) {
-            if (gl_options.Multitexture)
-                glClientActiveTextureARB_p( GL_TEXTURE0 );
-            glInterleavedArrays( GL_T2F_C4F_N3F_V3F, sizeof (GFXColorVertex), 0 );
-            if (gl_options.Multitexture) {
-                glClientActiveTextureARB_p( GL_TEXTURE1 );
-                glTexCoordPointer( 2, GL_FLOAT, sizeof (GFXColorVertex),
-                                  (void*) ( (char*) &data.colors[0].s-(char*) data.vertices ) );
-                glEnableClientState( GL_TEXTURE_COORD_ARRAY );
-                glClientActiveTextureARB_p( GL_TEXTURE2 );
-                glTexCoordPointer( 4, GL_FLOAT, sizeof (GFXColorVertex),
-                                  (void*) ( (char*) &data.colors[0].tx-(char*) data.vertices ) );
-                glEnableClientState( GL_TEXTURE_COORD_ARRAY );
-                glClientActiveTextureARB_p( GL_TEXTURE0 );
-            }
+            EnableArrays((GFXColorVertex*)NULL);
         } else {
-            if (gl_options.Multitexture)
-                glClientActiveTextureARB_p( GL_TEXTURE0 );
-            glInterleavedArrays( GL_T2F_N3F_V3F, sizeof (GFXVertex), 0 );
-            if (gl_options.Multitexture) {
-                glClientActiveTextureARB_p( GL_TEXTURE1 );
-                glTexCoordPointer( 2, GL_FLOAT, sizeof (GFXVertex),
-                                  (void*) ( (char*) &data.vertices[0].s-(char*) data.vertices ) );
-                glEnableClientState( GL_TEXTURE_COORD_ARRAY );
-                glClientActiveTextureARB_p( GL_TEXTURE2 );
-                glTexCoordPointer( 4, GL_FLOAT, sizeof (GFXVertex),
-                                  (void*) ( (char*) &data.vertices[0].tx-(char*) data.vertices ) );
-                glEnableClientState( GL_TEXTURE_COORD_ARRAY );
-                glClientActiveTextureARB_p( GL_TEXTURE0 );
-            }
+            EnableArrays((GFXVertex*)NULL);
         }
     } else
 #endif
-    if (display_list != 0) {} else {
+    if (display_list == 0) {
         if (changed&HAS_COLOR) {
-            if (gl_options.Multitexture)
-                glClientActiveTextureARB_p( GL_TEXTURE0 );
-            glInterleavedArrays( GL_T2F_C4F_N3F_V3F, sizeof (GFXColorVertex), &data.colors[0] );
-            if (gl_options.Multitexture) {
-                glClientActiveTextureARB_p( GL_TEXTURE1 );
-                glTexCoordPointer( 2, GL_FLOAT, sizeof (GFXColorVertex), &data.colors[0].s );
-                glEnableClientState( GL_TEXTURE_COORD_ARRAY );
-                glClientActiveTextureARB_p( GL_TEXTURE2 );
-                glTexCoordPointer( 4, GL_FLOAT, sizeof (GFXColorVertex), &data.colors[0].tx );
-                glEnableClientState( GL_TEXTURE_COORD_ARRAY );
-                glClientActiveTextureARB_p( GL_TEXTURE0 );
-            }
+            EnableArrays(data.colors);
         } else {
-            if (gl_options.Multitexture)
-                glClientActiveTextureARB_p( GL_TEXTURE0 );
-            glInterleavedArrays( GL_T2F_N3F_V3F, sizeof (GFXVertex), &data.vertices[0] );
-            if (gl_options.Multitexture) {
-                glClientActiveTextureARB_p( GL_TEXTURE1 );
-                glTexCoordPointer( 2, GL_FLOAT, sizeof (GFXVertex), &data.vertices[0].s );
-                glEnableClientState( GL_TEXTURE_COORD_ARRAY );
-                glClientActiveTextureARB_p( GL_TEXTURE2 );
-                glTexCoordPointer( 4, GL_FLOAT, sizeof (GFXVertex), &data.vertices[0].tx );
-                glEnableClientState( GL_TEXTURE_COORD_ARRAY );
-                glClientActiveTextureARB_p( GL_TEXTURE0 );
-            }
+            EnableArrays(data.vertices);
         }
 #ifndef NO_COMPILEDVERTEXARRAY_SUPPORT
         if (lock && glLockArraysEXT_p)
