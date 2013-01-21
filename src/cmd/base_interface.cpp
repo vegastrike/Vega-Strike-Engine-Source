@@ -1416,16 +1416,13 @@ static void AnimationDraw()
     GFXEnable( TEXTURE0 );
     GFXDisable( TEXTURE1 );
     GFXDisable( CULLFACE );
-    GFXBegin( GFXQUAD );
-    GFXTexCoord2f( 0, 0 );
-    GFXVertex3f( -1.0, -1.0, 0.0 );
-    GFXTexCoord2f( 1, 0 );
-    GFXVertex3f( 1.0, -1.0, 0.0 );
-    GFXTexCoord2f( 1, 1 );
-    GFXVertex3f( 1.0, 1.0, 0.0 );
-    GFXTexCoord2f( 0, 1 );
-    GFXVertex3f( -1.0, 1.0, 0.0 );
-    GFXEnd();
+    const float verts[4 * (3 + 2)] = {
+        -1, -1, 0, 0, 0,
+         1, -1, 0, 1, 0,
+         1,  1, 0, 1, 1,
+        -1,  1, 0, 0, 1,
+    };
+    GFXDraw( GFXQUAD, verts, 4, 3, 0, 2 );
 #endif
 }
 void BaseInterface::Draw()
