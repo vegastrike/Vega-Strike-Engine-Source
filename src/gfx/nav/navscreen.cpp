@@ -1218,16 +1218,17 @@ void NavigationSystem::DrawButtonOutline( float &x1, float &x2, float &y1, float
     GFXDisable( LIGHTING );
     GFXBlendMode( SRCALPHA, INVSRCALPHA );
 
-    GFXBegin( GFXLINE );
-    GFXVertex3f( x1, y1, 0 );
-    GFXVertex3f( x1, y2, 0 );
-    GFXVertex3f( x2, y1, 0 );
-    GFXVertex3f( x2, y2, 0 );
-    GFXVertex3f( x1, y1, 0 );
-    GFXVertex3f( x2, y1, 0 );
-    GFXVertex3f( x1, y2, 0 );
-    GFXVertex3f( x2, y2, 0 );
-    GFXEnd();
+    const float verts[8 * 3] = {
+        x1, y1, 0,
+        x1, y2, 0,
+        x2, y1, 0,
+        x2, y2, 0,
+        x1, y1, 0,
+        x2, y1, 0,
+        x1, y2, 0,
+        x2, y2, 0,
+    };
+    GFXDraw( GFXLINE, verts, 8 );
 
     GFXEnable( TEXTURE0 );
 }
@@ -1621,30 +1622,25 @@ void NavigationSystem::DrawOriginOrientationTri( float center_nav_x, float cente
     GFXDisable( LIGHTING );
     GFXBlendMode( SRCALPHA, INVSRCALPHA );
 
-    float where_x = center_nav_x-0.8*( (screenskipby4[1]-screenskipby4[0])/2 );
-    float where_y = center_nav_y-0.8*( (screenskipby4[3]-screenskipby4[2])/2 );
+    float x0 = center_nav_x-0.8*( (screenskipby4[1]-screenskipby4[0])/2 );
+    float y0 = center_nav_y-0.8*( (screenskipby4[3]-screenskipby4[2])/2 );
+    float x1 = x0+( directionx.i*( 0.3/(0.3-directionx.k) ) );
+    float y1 = y0+( directionx.j*( 0.3/(0.3-directionx.k) ) );
+    float x2 = x0+( directiony.i*( 0.3/(0.3-directiony.k) ) );
+    float y2 = y0+( directiony.j*( 0.3/(0.3-directiony.k) ) );
+    float x3 = x0+( directionz.i*( 0.3/(0.3-directionz.k) ) );
+    float y3 = y0+( directionz.j*( 0.3/(0.3-directionz.k) ) );
 
-    GFXBegin( GFXLINE );
+    const float verts[6 * (3 + 4)] = {
+        x0, y0, 0,  1, 0, 0, 0.5,
+        x1, y1, 0,  1, 0, 0, 0.5,
+        x0, y0, 0,  0, 1, 0, 0.5,
+        x2, y2, 0,  0, 1, 0, 0.5,
+        x0, y0, 0,  0, 0, 1, 0.5,
+        x3, y3, 0,  0, 0, 1, 0.5,
+    };
+    GFXDraw( GFXLINE, verts, 6, 3, 4 );
 
-    GFXColorf( GFXColor( 1, 0, 0, 0.5 ) );
-    GFXVertex3f( where_x, where_y, 0 );
-    GFXVertex3f( where_x+( directionx.i*( 0.3/(0.3-directionx.k) ) ),
-                 where_y+( directionx.j*( 0.3/(0.3-directionx.k) ) ),
-                 0 );
-
-    GFXColorf( GFXColor( 0, 1, 0, 0.5 ) );
-    GFXVertex3f( where_x, where_y, 0 );
-    GFXVertex3f( where_x+( directiony.i*( 0.3/(0.3-directiony.k) ) ),
-                 where_y+( directiony.j*( 0.3/(0.3-directiony.k) ) ),
-                 0 );
-
-    GFXColorf( GFXColor( 0, 0, 1, 0.5 ) );
-    GFXVertex3f( where_x, where_y, 0 );
-    GFXVertex3f( where_x+( directionz.i*( 0.3/(0.3-directionz.k) ) ),
-                 where_y+( directionz.j*( 0.3/(0.3-directionz.k) ) ),
-                 0 );
-
-    GFXEnd();
     GFXEnable( TEXTURE0 );
     //**********************************
 }
@@ -1843,9 +1839,6 @@ void NavigationSystem::DisplayOrientationLines( float the_x,
     GFXDisable( TEXTURE0 );
     GFXDisable( LIGHTING );
     GFXBlendMode( SRCALPHA, INVSRCALPHA );
-
-    GFXBegin( GFXLINE );
-
     GFXColorf( GFXColor( 0.5, 0.5, 0.5, .15 ) );
 
     bool display_flat_circle = true;
@@ -1866,12 +1859,15 @@ void NavigationSystem::DisplayOrientationLines( float the_x,
     }
     if (display_flat) {
         IntersectBorder( the_x_flat, the_y_flat, the_x, the_y );
-        GFXVertex3f( the_x_flat, the_y_flat, 0 );
-        GFXVertex3f( the_x, the_y, 0 );
+        const float verts[2 * 3] = {
+            the_x_flat, the_y_flat, 0,
+            the_x,      the_y,      0,
+        };
+        GFXDraw( GFXLINE, verts, 2 );
         if (display_flat_circle)
             DrawCircle( the_x_flat, the_y_flat, (.005*system_item_scale), GFXColor( 1, 1, 1, .2 ) );
     }
-    GFXEnd();
+
     GFXEnable( TEXTURE0 );
     //**********************************
 }
