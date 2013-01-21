@@ -7,6 +7,10 @@
 #include "radar.h"
 #include "dual_display.h"
 
+#include <auto_ptr.h>
+
+struct GFXColor;
+
 namespace Radar
 {
 
@@ -16,13 +20,18 @@ class SphereDisplay : public DualDisplayBase
 {
 public:
     SphereDisplay();
+    virtual ~SphereDisplay();
 
     void Draw(const Sensor& sensor, VSSprite *, VSSprite *);
 
+private:
+    struct Impl;
+    std::auto_ptr< Impl > impl;
+    
 protected:
     void DrawBackground(const Sensor&, const ViewArea&);
     void DrawTrack(const Sensor&, const ViewArea&, const Track&, bool negate_z=false);
-    void DrawTargetMarker(const Vector&, float);
+    void DrawTargetMarker(const Vector&, const GFXColor&, float);
 
 protected:
     const float innerSphere;

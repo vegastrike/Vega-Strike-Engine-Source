@@ -8,6 +8,10 @@
 #include "radar.h"
 #include "dual_display.h"
 
+#include <auto_ptr.h>
+
+struct GFXColor;
+
 namespace Radar
 {
 
@@ -17,6 +21,7 @@ class BubbleDisplay : public DualDisplayBase
 {
 public:
     BubbleDisplay();
+    virtual ~BubbleDisplay();
 
     void Draw(const Sensor&, VSSprite *, VSSprite *);
 
@@ -24,12 +29,16 @@ public:
     void OnJumpBegin();
     void OnJumpEnd();
 
+private:
+    struct Impl;
+    std::auto_ptr<Impl> impl;
+
 protected:
     typedef std::vector<float> ZoomSequence;
 
     void DrawBackground(const ViewArea&, float);
     void DrawTrack(const Sensor&, const ViewArea&, const Track&);
-    void DrawTargetMarker(const Vector&, float);
+    void DrawTargetMarker(const Vector&, const GFXColor&, float);
 
     void Animate();
     void PrepareAnimation(const ZoomSequence&);

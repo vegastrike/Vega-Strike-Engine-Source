@@ -28,6 +28,10 @@ public:
     void OnDockEnd();
     void OnJumpEnd();
 
+private:
+    struct Impl;
+    std::auto_ptr< Impl > impl;
+    
 protected: 
     typedef std::vector<float> AngleSequence;
 

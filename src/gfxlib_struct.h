@@ -526,6 +526,19 @@ public:
         insert(vtx);
     }
     
+    void insert(float x, float y, float z, const GFXColor &color)
+    {
+        GFXColorVertex vtx;
+        vtx.x = x;
+        vtx.y = y;
+        vtx.z = z;
+        vtx.r = color.r;
+        vtx.g = color.g;
+        vtx.b = color.b;
+        vtx.a = color.a;
+        insert(vtx);
+    }
+    
     void insert(float x, float y, float z, float s, float t)
     {
         GFXVertex vtx;

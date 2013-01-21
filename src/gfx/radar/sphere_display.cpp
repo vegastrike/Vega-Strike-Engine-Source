@@ -6,6 +6,9 @@
 #include "gfxlib.h"
 #include "viewarea.h"
 #include "sphere_display.h"
+#include <physics.h>
+
+#define TRACK_SIZE 2.0
 
 namespace
 {
@@ -32,9 +35,27 @@ float GetDangerRate(Radar::Sensor::ThreatLevel::Value threat)
 namespace Radar
 {
 
+struct SphereDisplay::Impl {
+    VertexBuilder< float, 3, 0, 3 > points;
+    VertexBuilder< float, 3, 0, 3 > lines;
+    VertexBuilder<> thinlines;
+    
+    void clear()
+    {
+        points.clear();
+        lines.clear();
+        thinlines.clear();
+    }
+};
+
 SphereDisplay::SphereDisplay()
-    : innerSphere(0.98),
-      radarTime(0.0)
+    : impl(new SphereDisplay::Impl)
+    , innerSphere(0.98)
+    , radarTime(0.0)
+{
+}
+
+SphereDisplay::~SphereDisplay()
 {
 }
 
@@ -46,6 +67,8 @@ void SphereDisplay::Draw(const Sensor& sensor,
 
     radarTime += GetElapsedTime();
 
+    impl->clear();
+    
     leftRadar.SetSprite(frontSprite);
     rightRadar.SetSprite(rearSprite);
 
@@ -78,7 +101,16 @@ void SphereDisplay::Draw(const Sensor& sensor,
             DrawTrack(sensor, leftRadar, *it);
         }
     }
+    
+    GFXPointSize(TRACK_SIZE);
+    GFXDraw(GFXPOINT, impl->points);
 
+    GFXLineWidth(TRACK_SIZE);
+    GFXDraw(GFXLINE, impl->lines);
+    
+    GFXLineWidth(1);
+    GFXDraw(GFXLINE, impl->thinlines);
+    
     GFXPointSize(1);
     GFXDisable(DEPTHTEST);
     GFXDisable(DEPTHWRITE);
@@ -104,7 +136,6 @@ void SphereDisplay::DrawTrack(const Sensor& sensor,
         else                                    
             position.z = .125;
     }
-    const float trackSize = 2.0;
 
     // FIXME: Jitter only on boundary, not in center
     if (sensor.InsideNebula())
@@ -117,7 +148,7 @@ void SphereDisplay::DrawTrack(const Sensor& sensor,
         const bool isEcmActive = track.HasActiveECM();
         if (isNebula || isEcmActive)
         {
-            float error = 0.02 * trackSize;
+            float error = 0.02 * TRACK_SIZE;
             Jitter(error, error, position);
         }
     }
@@ -156,18 +187,15 @@ void SphereDisplay::DrawTrack(const Sensor& sensor,
         headColor.a *= (1.0 - track.ExplodingProgress());
     }
 
-    GFXColorf(headColor);
     if (sensor.IsTracking(track))
     {
-        DrawTargetMarker(head, trackSize);
+        DrawTargetMarker(head, headColor, TRACK_SIZE);
     }
-    GFXPointSize(trackSize);
-    GFXBegin(GFXPOINT);
-    GFXVertexf(head);
-    GFXEnd();
+    
+    impl->points.insert(head);
 }
 
-void SphereDisplay::DrawTargetMarker(const Vector& position, float trackSize)
+void SphereDisplay::DrawTargetMarker(const Vector& position, const GFXColor &color, float trackSize)
 {
     // Crosshair
     const float crossSize = 8.0;
@@ -176,15 +204,10 @@ void SphereDisplay::DrawTargetMarker(const Vector& position, float trackSize)
 
     // The crosshair wiggles as it moves around. The wiggling is less noticable
     // when the crosshair is drawn with the smooth option.
-    GFXEnable(SMOOTH);
-    GFXLineWidth(trackSize);
-    GFXBegin(GFXLINE);
-    GFXVertex3f(position.x + xcross, position.y, 0.0f);
-    GFXVertex3f(position.x - xcross, position.y, 0.0f);
-    GFXVertex3f(position.x, position.y - ycross, 0.0f);
-    GFXVertex3f(position.x, position.y + ycross, 0.0f);
-    GFXEnd();
-    GFXDisable(SMOOTH);
+    impl->lines.insert(position.x + xcross, position.y, 0.0f, color);
+    impl->lines.insert(position.x - xcross, position.y, 0.0f, color);
+    impl->lines.insert(position.x, position.y - ycross, 0.0f, color);
+    impl->lines.insert(position.x, position.y + ycross, 0.0f, color);
 }
 
 void SphereDisplay::DrawBackground(const Sensor& sensor, const ViewArea& radarView)
@@ -208,20 +231,14 @@ void SphereDisplay::DrawBackground(const Sensor& sensor, const ViewArea& radarVi
     const float yground = size / g_game.y_resolution;
     Vector center = radarView.Scale(Vector(0.0, 0.0, 0.0));
 
-    GFXEnable(SMOOTH);
-    GFXLineWidth(1);
-    GFXColorf(groundColor);
-    GFXBegin(GFXLINE);
-    GFXVertexf(Vector(center.x - 2.0 * xground, center.y, center.z));
-    GFXVertexf(Vector(center.x - xground, center.y, center.z));
-    GFXVertexf(Vector(center.x + 2.0 * xground, center.y, center.z));
-    GFXVertexf(Vector(center.x + xground, center.y, center.z));
-    GFXVertexf(Vector(center.x, center.y - 2.0 * yground, center.z));
-    GFXVertexf(Vector(center.x, center.y - yground, center.z));
-    GFXVertexf(Vector(center.x, center.y + 2.0 * yground, center.z));
-    GFXVertexf(Vector(center.x, center.y + yground, center.z));
-    GFXEnd();
-    GFXDisable(SMOOTH);
+    impl->thinlines.insert(center.x - 2.0 * xground, center.y, center.z, groundColor);
+    impl->thinlines.insert(center.x - xground, center.y, center.z, groundColor);
+    impl->thinlines.insert(center.x + 2.0 * xground, center.y, center.z, groundColor);
+    impl->thinlines.insert(center.x + xground, center.y, center.z, groundColor);
+    impl->thinlines.insert(center.x, center.y - 2.0 * yground, center.z, groundColor);
+    impl->thinlines.insert(center.x, center.y - yground, center.z, groundColor);
+    impl->thinlines.insert(center.x, center.y + 2.0 * yground, center.z, groundColor);
+    impl->thinlines.insert(center.x, center.y + yground, center.z, groundColor);
 }
 
 } // namespace Radar

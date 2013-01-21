@@ -450,6 +450,13 @@ void GFXDrawElements( POLYTYPE type, const VertexBuilder< float, VSIZE, 0, CSIZE
         GFXDrawElements( type, buffer.buffer_pointer(), buffer.size(), indices, nelements, VSIZE, CSIZE, TSIZE0, TSIZE1 );
 }
 
+template <typename ITYPE, int VSIZE, int CSIZE, int TSIZE0, int TSIZE1>
+void GFXDrawElements( POLYTYPE type, const VertexBuilder< float, VSIZE, 0, CSIZE, TSIZE0, TSIZE1 > &buffer, const std::vector<ITYPE> &indices)
+{
+    if (buffer.size() > 0 && indices.size() > 0)
+        GFXDrawElements( type, buffer.buffer_pointer(), buffer.size(), &indices[0], indices.size(), VSIZE, CSIZE, TSIZE0, TSIZE1 );
+}
+
 ///Bind VBO data, noop if VBO not supported
 void GFXBindBuffer(unsigned int vbo_data);
 void GFXBindElementBuffer(unsigned int element_data);

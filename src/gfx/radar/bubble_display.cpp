@@ -2,6 +2,7 @@
 
 #include <cmath>
 #include <vector>
+#include <map>
 #include <boost/assign/std/vector.hpp>
 #include "lin_time.h" // GetElapsedTime
 #include "cmd/unit_generic.h"
@@ -9,6 +10,10 @@
 #include "gfxlib.h"
 #include "viewarea.h"
 #include "bubble_display.h"
+
+#include <limits>
+
+#define POINT_SIZE_GRANULARITY 0.5
 
 namespace
 {
@@ -35,18 +40,71 @@ float GetDangerRate(Radar::Sensor::ThreatLevel::Value threat)
 namespace Radar
 {
 
+struct BubbleDisplay::Impl {
+    typedef VertexBuilder< float, 3, 0, 4 > LineBuffer;
+    typedef VertexBuilder< float, 3, 0, 4 > PointBuffer;
+    typedef std::vector< unsigned short > LineElements;
+    
+    typedef std::map< unsigned int, PointBuffer > PointBufferMap;
+    
+    LineBuffer lines;
+    LineElements lineIndices;
+    PointBufferMap pointmap;
+    
+    PointBuffer& getPointBuffer(float size) 
+    {
+        int isize = int(size / POINT_SIZE_GRANULARITY);
+        if (isize < 1)
+            isize = 1;
+        
+        PointBufferMap::iterator it = pointmap.find(isize);
+        if (it == pointmap.end())
+            it = pointmap.insert(std::pair<unsigned int, PointBuffer>(isize, PointBuffer())).first;
+        return it->second;
+    }
+    
+    void clear()
+    {
+        for (PointBufferMap::iterator it = pointmap.begin(); it != pointmap.end(); ++it)
+            it->second.clear();
+        
+        lines.clear();
+        lineIndices.clear();
+    }
+    
+    void flush()
+    {
+        for (Impl::PointBufferMap::reverse_iterator it = pointmap.rbegin(); it != pointmap.rend(); ++it) {
+            Impl::PointBuffer &points = it->second;
+            if (points.size() > 0) {
+                GFXPointSize( it->first * POINT_SIZE_GRANULARITY );
+                GFXDraw( GFXPOINT, points );
+            }
+        }
+        
+        GFXLineWidth(1);
+        GFXDrawElements( GFXLINE, lines, lineIndices );
+    }
+};
+    
 BubbleDisplay::BubbleDisplay()
-    : innerSphere(0.45),
-      outerSphere(1.0),
-      sphereZoom(1.0),
-      radarTime(0.0),
-      currentTargetMarkerSize(0.0),
-      lastAnimationTime(0.0)
+    : impl(new BubbleDisplay::Impl)
+    , innerSphere(0.45)
+    , outerSphere(1.0)
+    , sphereZoom(1.0)
+    , radarTime(0.0)
+    , currentTargetMarkerSize(0.0)
+    , lastAnimationTime(0.0)
 {
     using namespace boost::assign; // vector::operator+=
     explodeSequence += 0.0, 0.0001, 0.0009, 0.0036, 0.0100, 0.0225, 0.0441, 0.0784, 0.1296, 0.2025, 0.3025, 0.4356, 0.6084, 0.8281, 1.0, 0.8713, 0.7836, 0.7465, 0.7703, 0.8657, 1.0, 0.9340, 0.9595, 1.0, 0.9659, 1.0;
     implodeSequence += 1.0, 0.9999, 0.9991, 0.9964, 0.9900, 0.9775, 0.9559, 0.9216, 0.8704, 0.7975, 0.6975, 0.5644, 0.3916, 0.1719, 0.0, 0.1287, 0.2164, 0.2535, 0.2297, 0.1343, 0.0, 0.0660, 0.0405, 0.0, 0.0341, 0.0;
 }
+
+BubbleDisplay::~BubbleDisplay()
+{
+}
+
 
 void BubbleDisplay::PrepareAnimation(const ZoomSequence& sequence)
 {
@@ -104,6 +162,8 @@ void BubbleDisplay::Draw(const Sensor& sensor,
 
     leftRadar.SetSprite(frontSprite);
     rightRadar.SetSprite(rearSprite);
+    
+    impl->clear();
 
     if (frontSprite)
         frontSprite->Draw();
@@ -131,9 +191,10 @@ void BubbleDisplay::Draw(const Sensor& sensor,
             DrawTrack(sensor, leftRadar, *it);
         }
     }
-
     DrawBackground(leftRadar, currentTargetMarkerSize);
     DrawBackground(rightRadar, currentTargetMarkerSize);
+
+    impl->flush();
 
     GFXPointSize(1);
     GFXDisable(DEPTHTEST);
@@ -195,11 +256,10 @@ void BubbleDisplay::DrawTrack(const Sensor& sensor,
     if (track.GetType() != Track::Type::Cargo)
         trackSize += 1.0;
 
-    GFXColorf(headColor);
     if (sensor.IsTracking(track))
     {
         currentTargetMarkerSize = trackSize;
-        DrawTargetMarker(head, trackSize);
+        DrawTargetMarker(head, headColor, trackSize);
     }
 
     const bool isNebula = (track.GetType() == Track::Type::Nebula);
@@ -210,31 +270,41 @@ void BubbleDisplay::DrawTrack(const Sensor& sensor,
         trackSize *= Jitter(0.5, 1.0);
     }
 
-    GFXPointSize(trackSize);
-    GFXBegin(GFXPOINT);
-    GFXVertexf(head);
-    GFXEnd();
+    impl->getPointBuffer(trackSize).insert(GFXColorVertex(head, headColor));
 }
 
-void BubbleDisplay::DrawTargetMarker(const Vector& position, float trackSize)
+void BubbleDisplay::DrawTargetMarker(const Vector& position, const GFXColor &color, float trackSize)
 {
     // Split octagon
     float size = 3.0 * std::max(trackSize, 3.0f);
     float xsize = size / g_game.x_resolution;
     float ysize = size / g_game.y_resolution;
-    GFXLineWidth(1);
-    GFXBegin(GFXLINESTRIP);
-    GFXVertex3f(position.x - xsize / 2, position.y - ysize, position.z);
-    GFXVertex3f(position.x - xsize, position.y - ysize / 2, position.z);
-    GFXVertex3f(position.x - xsize, position.y + ysize / 2, position.z);
-    GFXVertex3f(position.x - xsize / 2, position.y + ysize, position.z);
-    GFXEnd();
-    GFXBegin(GFXLINESTRIP);
-    GFXVertex3f(position.x + xsize / 2, position.y - ysize, position.z);
-    GFXVertex3f(position.x + xsize, position.y - ysize / 2, position.z);
-    GFXVertex3f(position.x + xsize, position.y + ysize / 2, position.z);
-    GFXVertex3f(position.x + xsize / 2, position.y + ysize, position.z);
-    GFXEnd();
+    
+    Impl::LineElements::value_type base_index = Impl::LineElements::value_type(impl->lines.size());
+    
+    // Don't overflow the index type
+    if (base_index < (std::numeric_limits<Impl::LineElements::value_type>::max() - 8)) {
+        impl->lines.insert(position.x - xsize / 2, position.y - ysize, position.z, color);
+        impl->lines.insert(position.x - xsize, position.y - ysize / 2, position.z, color);
+        impl->lines.insert(position.x - xsize, position.y + ysize / 2, position.z, color);
+        impl->lines.insert(position.x - xsize / 2, position.y + ysize, position.z, color);
+        impl->lines.insert(position.x + xsize / 2, position.y - ysize, position.z, color);
+        impl->lines.insert(position.x + xsize, position.y - ysize / 2, position.z, color);
+        impl->lines.insert(position.x + xsize, position.y + ysize / 2, position.z, color);
+        impl->lines.insert(position.x + xsize / 2, position.y + ysize, position.z, color);
+        impl->lineIndices.push_back(base_index + 0);
+        impl->lineIndices.push_back(base_index + 1);
+        impl->lineIndices.push_back(base_index + 1);
+        impl->lineIndices.push_back(base_index + 2);
+        impl->lineIndices.push_back(base_index + 2);
+        impl->lineIndices.push_back(base_index + 3);
+        impl->lineIndices.push_back(base_index + 4);
+        impl->lineIndices.push_back(base_index + 5);
+        impl->lineIndices.push_back(base_index + 5);
+        impl->lineIndices.push_back(base_index + 6);
+        impl->lineIndices.push_back(base_index + 6);
+        impl->lineIndices.push_back(base_index + 7);
+    }
 }
 
 void BubbleDisplay::DrawBackground(const ViewArea& radarView, float trackSize)
@@ -250,20 +320,31 @@ void BubbleDisplay::DrawBackground(const ViewArea& radarView, float trackSize)
     float yground = size / g_game.y_resolution;
     Vector center = radarView.Scale(Vector(0.0, 0.0, 0.0));
 
-    GFXColorf(groundColor);
-    GFXLineWidth(1);
-    GFXBegin(GFXLINESTRIP);
-    GFXVertex3f(center.x - xground, center.y - yground / 2, center.z);
-    GFXVertex3f(center.x - xground / 2, center.y - yground, center.z);
-    GFXVertex3f(center.x + xground / 2, center.y - yground, center.z);
-    GFXVertex3f(center.x + xground, center.y - yground / 2, center.z);
-    GFXEnd();
-    GFXBegin(GFXLINESTRIP);
-    GFXVertex3f(center.x - xground, center.y + yground / 2, center.z);
-    GFXVertex3f(center.x - xground / 2, center.y + yground, center.z);
-    GFXVertex3f(center.x + xground / 2, center.y + yground, center.z);
-    GFXVertex3f(center.x + xground, center.y + yground / 2, center.z);
-    GFXEnd();
+    Impl::LineElements::value_type base_index = Impl::LineElements::value_type(impl->lines.size());
+    
+    // Don't overflow the index type
+    if (base_index < (std::numeric_limits<Impl::LineElements::value_type>::max() - 8)) {
+        impl->lines.insert(center.x - xground, center.y - yground / 2, center.z, groundColor);
+        impl->lines.insert(center.x - xground / 2, center.y - yground, center.z, groundColor);
+        impl->lines.insert(center.x + xground / 2, center.y - yground, center.z, groundColor);
+        impl->lines.insert(center.x + xground, center.y - yground / 2, center.z, groundColor);
+        impl->lines.insert(center.x - xground, center.y + yground / 2, center.z, groundColor);
+        impl->lines.insert(center.x - xground / 2, center.y + yground, center.z, groundColor);
+        impl->lines.insert(center.x + xground / 2, center.y + yground, center.z, groundColor);
+        impl->lines.insert(center.x + xground, center.y + yground / 2, center.z, groundColor);
+        impl->lineIndices.push_back(base_index + 0);
+        impl->lineIndices.push_back(base_index + 1);
+        impl->lineIndices.push_back(base_index + 1);
+        impl->lineIndices.push_back(base_index + 2);
+        impl->lineIndices.push_back(base_index + 2);
+        impl->lineIndices.push_back(base_index + 3);
+        impl->lineIndices.push_back(base_index + 4);
+        impl->lineIndices.push_back(base_index + 5);
+        impl->lineIndices.push_back(base_index + 5);
+        impl->lineIndices.push_back(base_index + 6);
+        impl->lineIndices.push_back(base_index + 6);
+        impl->lineIndices.push_back(base_index + 7);
+    }
 }
 
 } // namespace Radar

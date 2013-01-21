@@ -12,6 +12,10 @@
 #include "viewarea.h"
 #include "plane_display.h"
 
+#include <limits>
+
+#define POINT_SIZE_GRANULARITY 0.5
+
 namespace
 {
 
@@ -43,11 +47,72 @@ float GetDangerRate(Radar::Sensor::ThreatLevel::Value threat)
 namespace Radar
 {
 
+struct PlaneDisplay::Impl {
+    typedef VertexBuilder< float, 3, 0, 4 > PointBuffer;
+    typedef VertexBuilder< float, 3, 0, 4 > LineBuffer;
+    typedef VertexBuilder< float, 3, 0, 4 > PolyBuffer;
+    typedef std::vector< unsigned short > ElementBuffer;
+    typedef std::map< unsigned int, PointBuffer > PointBufferMap;
+    PointBufferMap headsmap;
+    
+    VertexBuilder<> ground;
+    LineBuffer legs;
+    LineBuffer diamonds;
+    ElementBuffer diamondIndices;
+    PointBuffer heads;
+    PolyBuffer areas;
+    
+    
+    PointBuffer& getHeadBuffer(float size) 
+    {
+        int isize = int(size / POINT_SIZE_GRANULARITY);
+        if (isize < 1)
+            isize = 1;
+        
+        PointBufferMap::iterator it = headsmap.find(isize);
+        if (it == headsmap.end())
+            it = headsmap.insert(std::pair<unsigned int, PointBuffer>(isize, PointBuffer())).first;
+        return it->second;
+    }
+    
+    void clear()
+    {
+        ground.clear();
+        legs.clear();
+        areas.clear();
+        diamonds.clear();
+        diamondIndices.clear();
+        
+        for (PointBufferMap::iterator it = headsmap.begin(); it != headsmap.end(); ++it)
+            it->second.clear();
+    }
+    
+    void flush()
+    {
+        GFXDraw(GFXTRI, areas);
+        
+        GFXLineWidth(0.2);
+        GFXDraw(GFXLINE, legs);
+        
+        for (Impl::PointBufferMap::reverse_iterator it = headsmap.rbegin(); it != headsmap.rend(); ++it) {
+            Impl::PointBuffer &points = it->second;
+            if (points.size() > 0) {
+                GFXPointSize( it->first * POINT_SIZE_GRANULARITY );
+                GFXDraw( GFXPOINT, points );
+            }
+        }
+        
+        GFXLineWidth(1);
+        GFXDrawElements(GFXLINE, diamonds, diamondIndices);
+    }
+};
+
 PlaneDisplay::PlaneDisplay()
-    : finalCameraAngle(Degree2Radian(30), Degree2Radian(0), Degree2Radian(0)),
-      currentCameraAngle(finalCameraAngle),
-      radarTime(0.0),
-      lastAnimationTime(0.0)
+    : impl(new PlaneDisplay::Impl)
+    , finalCameraAngle(Degree2Radian(30), Degree2Radian(0), Degree2Radian(0))
+    , currentCameraAngle(finalCameraAngle)
+    , radarTime(0.0)
+    , lastAnimationTime(0.0)
 {
     using namespace boost::assign; // vector::operator+=
 
@@ -224,30 +289,30 @@ void PlaneDisplay::DrawGround(const Sensor& sensor, const ViewArea& radarView)
     groundColor.a = 0.1;
     GFXColorf(groundColor);
     GFXLineWidth(0.5);
-    GFXBegin(GFXPOLY);
+    impl->ground.clear();
     for (std::vector<Vector>::const_iterator it = groundPlane.begin(); it != groundPlane.end(); ++it)
     {
-        GFXVertexf(Projection(radarView, outer * (*it)));
+        impl->ground.insert(Projection(radarView, outer * (*it)));
     }
-    GFXEnd();
+    GFXDraw(GFXPOLY, impl->ground);
 
     groundColor.a = 0.4;
     GFXColorf(groundColor);
-    GFXBegin(GFXLINESTRIP);
+    impl->ground.clear();
     for (std::vector<Vector>::const_iterator it = groundPlane.begin(); it != groundPlane.end(); ++it)
     {
-        GFXVertexf(Projection(radarView, middle * (*it)));
+        impl->ground.insert(Projection(radarView, middle * (*it)));
     }
-    GFXVertexf(Projection(radarView, middle * groundPlane.front()));
-    GFXEnd();
+    impl->ground.insert(Projection(radarView, middle * groundPlane.front()));
+    GFXDraw(GFXLINESTRIP, impl->ground);
 
-    GFXBegin(GFXLINESTRIP);
+    impl->ground.clear();
     for (std::vector<Vector>::const_iterator it = groundPlane.begin(); it != groundPlane.end(); ++it)
     {
-        GFXVertexf(Projection(radarView, inner * (*it)));
+        impl->ground.insert(Projection(radarView, inner * (*it)));
     }
-    GFXVertexf(Projection(radarView, inner * groundPlane.front()));
-    GFXEnd();
+    impl->ground.insert(Projection(radarView, inner * groundPlane.front()));
+    GFXDraw(GFXLINESTRIP, impl->ground);
 
     groundColor.a = 0.4;
     const float xcone = cosf(sensor.GetLockCone());
@@ -257,12 +322,12 @@ void PlaneDisplay::DrawGround(const Sensor& sensor, const ViewArea& radarView)
     Vector leftCone(xcone, 0.0f, zcone);
     Vector rightCone(-xcone, 0.0f, zcone);
     GFXColorf(groundColor);
-    GFXBegin(GFXLINE);
-    GFXVertexf(Projection(radarView, outerCone * leftCone));
-    GFXVertexf(Projection(radarView, innerCone * leftCone));
-    GFXVertexf(Projection(radarView, outerCone * rightCone));
-    GFXVertexf(Projection(radarView, innerCone * rightCone));
-    GFXEnd();
+    impl->ground.clear();
+    impl->ground.insert(Projection(radarView, outerCone * leftCone));
+    impl->ground.insert(Projection(radarView, innerCone * leftCone));
+    impl->ground.insert(Projection(radarView, outerCone * rightCone));
+    impl->ground.insert(Projection(radarView, innerCone * rightCone));
+    GFXDraw(GFXLINE, impl->ground);
     GFXLineWidth(1);
 }
 
@@ -277,6 +342,8 @@ void PlaneDisplay::DrawNear(const Sensor& sensor,
     float maxRange = sensor.GetCloseRange();
 
     DrawGround(sensor, leftRadar);
+    
+    impl->clear();
 
     for (Sensor::TrackCollection::const_iterator it = tracks.begin(); it != tracks.end(); ++it)
     {
@@ -285,6 +352,8 @@ void PlaneDisplay::DrawNear(const Sensor& sensor,
 
         DrawTrack(sensor, leftRadar, *it, maxRange);
     }
+    
+    impl->flush();
 }
 
 void PlaneDisplay::DrawDistant(const Sensor& sensor,
@@ -299,6 +368,8 @@ void PlaneDisplay::DrawDistant(const Sensor& sensor,
     float maxRange = sensor.GetMaxRange();
 
     DrawGround(sensor, rightRadar);
+    
+    impl->clear();
 
     for (Sensor::TrackCollection::const_iterator it = tracks.begin(); it != tracks.end(); ++it)
     {
@@ -307,6 +378,8 @@ void PlaneDisplay::DrawDistant(const Sensor& sensor,
 
         DrawTrack(sensor, rightRadar, *it, maxRange);
     }
+    
+    impl->flush();
 }
 
 void PlaneDisplay::DrawTrack(const Sensor& sensor,
@@ -393,19 +466,11 @@ void PlaneDisplay::DrawTarget(Track::Type::Value unitType,
     // Draw leg
     GFXColor legColor = color;
     legColor.a /= 2;
-    GFXLineWidth(0.2);
-    GFXColorf(legColor);
-    GFXBegin(GFXLINE);
-    GFXVertexf(head);
-    GFXVertexf(ground);
-    GFXEnd();
+    impl->legs.insert(GFXColorVertex(head, legColor));
+    impl->legs.insert(GFXColorVertex(ground, legColor));
 
     // Draw head
-    GFXColorf(color);
-    GFXPointSize(trackSize);
-    GFXBegin(GFXPOINT);
-    GFXVertexf(head);
-    GFXEnd();
+    impl->getHeadBuffer(trackSize).insert(GFXColorVertex(head, color));
 }
 
 void PlaneDisplay::DrawTargetMarker(const Vector& head,
@@ -419,12 +484,9 @@ void PlaneDisplay::DrawTargetMarker(const Vector& head,
     {
         GFXColor areaColor = color;
         areaColor.a /= 4;
-        GFXColorf(areaColor);
-        GFXBegin(GFXPOLY);
-        GFXVertexf(head);
-        GFXVertexf(ground);
-        GFXVertexf(center);
-        GFXEnd();
+        impl->areas.insert(GFXColorVertex(head, areaColor));
+        impl->areas.insert(GFXColorVertex(ground, areaColor));
+        impl->areas.insert(GFXColorVertex(center, areaColor));
     }
 
     // Diamond
@@ -432,15 +494,24 @@ void PlaneDisplay::DrawTargetMarker(const Vector& head,
     float xsize = size / g_game.x_resolution;
     float ysize = size / g_game.y_resolution;
 
-    GFXColorf(color);
-    GFXLineWidth(1);
-    GFXBegin(GFXLINESTRIP);
-    GFXVertex3f(head.x - xsize, head.y, 0.0f);
-    GFXVertex3f(head.x, head.y - ysize, 0.0f);
-    GFXVertex3f(head.x + xsize, head.y, 0.0f);
-    GFXVertex3f(head.x, head.y + ysize, 0.0f);
-    GFXVertex3f(head.x - xsize, head.y, 0.0f);
-    GFXEnd();
+    
+    // Don't overflow the index type
+    Impl::ElementBuffer::value_type base_index = Impl::ElementBuffer::value_type(impl->diamonds.size());
+    if (base_index < (std::numeric_limits<Impl::ElementBuffer::value_type>::max() - 5)) {
+        impl->diamonds.insert(head.x - xsize, head.y, 0.0f, color);
+        impl->diamonds.insert(head.x, head.y - ysize, 0.0f, color);
+        impl->diamonds.insert(head.x + xsize, head.y, 0.0f, color);
+        impl->diamonds.insert(head.x, head.y + ysize, 0.0f, color);
+        impl->diamonds.insert(head.x - xsize, head.y, 0.0f, color);
+        impl->diamondIndices.push_back(base_index + 0);
+        impl->diamondIndices.push_back(base_index + 1);
+        impl->diamondIndices.push_back(base_index + 1);
+        impl->diamondIndices.push_back(base_index + 2);
+        impl->diamondIndices.push_back(base_index + 2);
+        impl->diamondIndices.push_back(base_index + 3);
+        impl->diamondIndices.push_back(base_index + 3);
+        impl->diamondIndices.push_back(base_index + 4);
+    }
 }
 
 } // namespace Radar
