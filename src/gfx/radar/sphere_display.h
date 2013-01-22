@@ -7,7 +7,7 @@
 #include "radar.h"
 #include "dual_display.h"
 
-#include <auto_ptr.h>
+#include <memory>
 
 struct GFXColor;
 
