@@ -192,7 +192,7 @@ void SphereDisplay::DrawTrack(const Sensor& sensor,
         DrawTargetMarker(head, headColor, TRACK_SIZE);
     }
     
-    impl->points.insert(head);
+    impl->points.insert(GFXColorVertex(head, headColor));
 }
 
 void SphereDisplay::DrawTargetMarker(const Vector& position, const GFXColor &color, float trackSize)
