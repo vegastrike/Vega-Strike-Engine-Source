@@ -258,6 +258,8 @@ unsigned char* VSImage::ReadPNG()
         png_infop info_ptr;
         int interlace_type;
 
+        vs_dprintf( 2, "Loading PNG: %s\n", this->img_file->GetFilename().c_str() );
+
         img_file->Begin();
         if ( !CheckPNGSignature( img_file ) ) {
             vs_dprintf(1,"VSImage::ReadPNG() ERROR : NOT A PNG FILE\n");
@@ -422,6 +424,8 @@ unsigned char* VSImage::ReadJPEG()
 
         my_error_mgr jerr;
 
+        vs_dprintf( 2, "Loading JPEG: %s\n", this->img_file->GetFilename().c_str() );
+
         cinfo.err = jpeg_std_error( &jerr.pub );
         jerr.pub.error_exit = my_error_exit;
         if ( setjmp( jerr.setjmp_buffer ) ) {
@@ -511,6 +515,8 @@ unsigned char* VSImage::ReadBMP()
     unsigned char *adata = NULL;
 
     try {
+        vs_dprintf( 2, "Loading BMP: %s\n", this->img_file->GetFilename().c_str() );
+
         if (CheckBMPSignature( img_file ) != Ok) {
             vs_dprintf(1, "VSImage ERROR : BMP signature check failed : this should not happen !!!\n");
             vs_dprintf( 1,"%s\n", img_file->GetFilename().c_str() ); 
@@ -638,6 +644,8 @@ unsigned char* VSImage::ReadDDS()
     int width  = 0;
     int height = 0;
     try {
+        vs_dprintf( 2, "Loading DDS: %s\n", this->img_file->GetFilename().c_str() );
+
         //Skip what we already know.
         img_file->GoTo( 4 );
         //Read in bytes to header. Not sure if just reading to struct is endian-safe.
