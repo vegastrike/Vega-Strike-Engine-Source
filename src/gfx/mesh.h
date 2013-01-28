@@ -107,6 +107,8 @@ struct MeshDrawContext
 using XMLSupport::EnumMap;
 using XMLSupport::AttributeList;
 
+enum CLK_CONSTS {CLKSCALE=2147483647};
+
 #define NUM_MESH_SEQUENCE (5)
 #define NUM_ZBUF_SEQ (4)
 #define MESH_SPECIAL_FX_ONLY (3)

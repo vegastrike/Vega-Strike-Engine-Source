@@ -157,6 +157,7 @@ void HaloSystem::Draw( const Matrix &trans,
 {
     static bool halos_by_velocity = XMLSupport::parse_bool( vs_config->getVariable( "graphics", "halos_by_velocity", "false" ) );
     static float percentColorChange = XMLSupport::parse_float(vs_config->getVariable("graphics","percent_afterburner_color_change",".5"));
+    static float percentFadeIn = XMLSupport::parse_float(vs_config->getVariable("graphics","percent_halo_fade_in",".5"));
     static float abRedness = XMLSupport::parse_float(vs_config->getVariable("graphics","afterburner_color_red","1.0"));
     static float abGreenness = XMLSupport::parse_float(vs_config->getVariable("graphics","afterburner_color_green","0.0"));
     static float abBlueness = XMLSupport::parse_float(vs_config->getVariable("graphics","afterburner_color_blue","0.0"));
@@ -167,12 +168,11 @@ void HaloSystem::Draw( const Matrix &trans,
 
     if ( halo_alpha >= 0 ) {
         halo_alpha /= 2;
-        if ( (halo_alpha & 0x1) == 0 )
-            halo_alpha += 1;
+        halo_alpha |= 1;
     }
     if ( maxaccel <= 0 ) maxaccel = 1;
     if ( maxvelocity <= 0 ) maxvelocity = 1;
-
+    
     for ( std::vector< Halo >::iterator i = halo.begin(); i != halo.end(); ++i ) {
         Vector thrustvector = TransformNormal( trans, i->trans.getR() ).Normalize();
         float value, maxvalue, minvalue;
@@ -192,6 +192,15 @@ void HaloSystem::Draw( const Matrix &trans,
         if ( (value > minvalue) && (scale.k > 0) ) {
             Matrix m = trans * i->trans;
             ScaleMatrix( m, Vector( scale.i*i->size.i, scale.j*i->size.j, scale.k*i->size.k*value/maxvalue ) );
+            
+            float maxfade = minvalue * (1.0 - percentFadeIn) + maxvalue * percentFadeIn;
+            int alpha = halo_alpha;
+            if (value < maxfade) {
+                if (alpha < 0)
+                    alpha = CLKSCALE;
+                alpha = int(alpha * (value-minvalue) / (maxfade-minvalue));
+                alpha |= 1;
+            }
 
             GFXColor blend = GFXColor( percentRedness, percentGreenness, percentBlueness, 1 );
             if (value > maxvalue*percentColorChange) {
@@ -210,7 +219,7 @@ void HaloSystem::Draw( const Matrix &trans,
                                  GFXColor(1,1,1,1),
                                  GFXColor(1,1,1,1),
                                  blend);
-            i->mesh->Draw( 50000000000000.0, m, 1, halo_alpha, nebdist, 0, false, &xtraFX );
+            i->mesh->Draw( 50000000000000.0, m, 1, alpha, nebdist, 0, false, &xtraFX );
 
             if ( hullpercent < .99 ) {
                 sparkle_accum += GetElapsedTime()*sparklerate;
