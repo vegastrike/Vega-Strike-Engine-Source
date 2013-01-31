@@ -411,6 +411,8 @@ bool AUDLoadSoundFile( const char *s, struct AUDSoundProperties *info, bool use_
     VSFileSystem::vs_dprintf(3, "Loading sound file %s\n", s);
     
     info->success = false;
+    
+#ifdef HAVE_AL
     vector< char >dat;
     if (use_fileptr) {
         FILE *f = fopen( s, "rb" );
@@ -472,17 +474,22 @@ bool AUDLoadSoundFile( const char *s, struct AUDSoundProperties *info, bool use_
 
     info->success = true;
     return true;
+#else
+    return false;
+#endif
 }
 
 int AUDBufferSound( const struct AUDSoundProperties *info, bool music )
 {
-    ALuint wavbuf = 0;
 #ifdef HAVE_AL
+    ALuint wavbuf = 0;
     alGenBuffers( 1, &wavbuf );
     if (!wavbuf) printf( "OpenAL Error in alGenBuffers: %d\n", alGetError() );
     alBufferData( wavbuf, info->format, info->wave, info->size, info->freq );
-#endif
     return LoadSound( wavbuf, info->looping, music );
+#else
+    return -1;
+#endif
 }
 
 #ifdef HAVE_AL
