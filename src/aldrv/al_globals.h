@@ -6,6 +6,14 @@
 #include <string>
 #include <vector>
 
+#ifdef HAVE_AL
+#ifdef __APPLE__
+#include <al.h>
+#else
+#include <AL/al.h>
+#endif
+#endif
+
 struct AUDSoundProperties
 {
     // Keep here all that is AL-independent
@@ -43,11 +51,6 @@ struct AUDSoundProperties
 };
 
 #ifdef HAVE_AL
-#ifdef __APPLE__
-#include <al.h>
-#else
-#include <AL/al.h>
-#endif
 
 class Vector;
 
