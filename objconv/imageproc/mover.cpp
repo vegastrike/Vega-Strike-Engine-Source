@@ -1,3 +1,4 @@
+#include <string.h>
 #include <png.h>
 #include <stdlib.h>
 #include <stdio.h>

@@ -1,5 +1,6 @@
 #include "hashtable.h"
 #include "base_maker_texture.h"
+#include <string.h>
 #include <stdio.h>
 #include <png.h>
 #ifdef _WIN32

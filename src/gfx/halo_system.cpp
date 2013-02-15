@@ -38,44 +38,14 @@ static float mymax( float a, float b )
 
 void DoParticles( QVector pos, float percent, const Vector &basevelocity, const Vector &velocity, float radial_size, float particle_size, int faction )
 {
-    static float scale      = XMLSupport::parse_float( vs_config->getVariable( "graphics", "sparklescale", "8" ) );
-    static float sspeed     = XMLSupport::parse_float( vs_config->getVariable( "graphics", "sparklespeed", ".5" ) );
-    static float flare      = XMLSupport::parse_float( vs_config->getVariable( "graphics", "sparkleflare", ".15" ) );
-    static float spread     = XMLSupport::parse_float( vs_config->getVariable( "graphics", "sparklespread", ".04" ) );
-    static float absspeed   = XMLSupport::parse_float( vs_config->getVariable( "graphics", "sparkleabsolutespeed", ".02" ) );
-    static float sciz       = XMLSupport::parse_float( vs_config->getVariable( "graphics", "sparklesizeenginerelative", ".125" ) );
-    static bool  fixed_size = XMLSupport::parse_bool( vs_config->getVariable( "graphics", "sparklefixedsize", "0" ) );
-
-    percent = 1-percent;
-    int i = rand();
-    if (i < RAND_MAX*percent*scale) {
-        ParticlePoint pp;
-        float   r1 = rand()/( (float) RAND_MAX*.5 )-1;
-        float   r2 = rand()/( (float) RAND_MAX*.5 )-1;
-        float   r3 = rand()/( (float) RAND_MAX*.5 )-1;
-        float   r4 = rand()/( (float) RAND_MAX*.5 )-1;
-        Vector rand( r1, r2, r3 );
-        rand.Normalize();
-        pp.loc   = pos+rand*radial_size*flare;
-        
-        // Make randomization direction-centric
-        Vector direction = velocity;
-        direction.Normalize();
-        rand *= spread;
-        rand += direction;
-        rand.Normalize();
-        rand *= 1.0 + spread * r4;
-        
-        const float *col = FactionUtil::GetSparkColor( faction );
-        pp.col.r = col[0];
-        pp.col.g = col[1];
-        pp.col.b = col[2];
-        pp.col.a = 1.0f;
-        particleTrail.AddParticle( pp, 
-            rand*( mymax( velocity.Magnitude(), absspeed )*spread+absspeed)+velocity*sspeed+basevelocity,
-            fixed_size ? sciz : (sqrt( particle_size )*sciz) 
-        );
-    }
+    static ParticleEmitter sparkles(&particleTrail, "sparkle");
+    
+    const float *col = FactionUtil::GetSparkColor( faction );
+    
+    sparkles.doParticles( 
+        pos, radial_size, percent, basevelocity, velocity, particle_size, 
+        GFXColor(col[0], col[1], col[2], 1.0f) 
+    );
 }
 
 void LaunchOneParticle( const Matrix &mat, const Vector &vel, unsigned int seed, Unit *mush, float hull, int faction )

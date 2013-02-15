@@ -9,8 +9,22 @@
 #include "gldrv/gl_globals.h"
 
 #include <iterator>
+#include <limits>
 
-ParticleTrail particleTrail( 500 );
+ParticleTrail particleTrail( "sparkle", 500 );
+ParticleTrail smokeTrail( "smoke", 500, SRCALPHA, INVSRCALPHA );
+ParticleTrail debrisTrail( "debris", 500, SRCALPHA, INVSRCALPHA, 0.5, true );
+
+
+static float mymin( float a, float b )
+{
+    return a > b ? b : a;
+}
+
+static float mymax( float a, float b )
+{
+    return a > b ? a : b;
+}
 
 void ParticleTrail::ChangeMax( unsigned int max )
 {
@@ -66,26 +80,80 @@ static inline void SetQuadVertex( const ParticlePoint & p, const float grow, con
     *v++ = l.i-size; *v++ = l.j; *v++ = l.k+size;  *v++ = c.r; *v++ = c.g; *v++ = c.b; *v++ = c.a;  *v++ = 1; *v++ = 0;
 }
 
+template <typename R, typename T> class IndexCompare {
+    const std::vector<R> &ref;
+    
+public:
+    IndexCompare(const std::vector<R> &ref_) : ref(ref_) 
+    {
+    }
+    
+    bool operator()(const T &a, const T &b) const
+    {
+        return ref[a] > ref[b];
+    }
+};
+
+ParticleTrail::Config::Config()
+{
+    texture = NULL;
+}
+
+ParticleTrail::Config::~Config()
+{
+    if (texture != NULL)
+        delete texture;
+}
+
+void ParticleTrail::Config::init(const std::string &prefix)
+{
+    use         = XMLSupport::parse_bool( vs_config->getVariable( "graphics", prefix, "true" ) );
+    use_points  = XMLSupport::parse_bool( vs_config->getVariable( "graphics", prefix + "point", "false" ) );
+    pblend      = XMLSupport::parse_bool( vs_config->getVariable( "graphics", prefix + "blend", "false" ) );
+    pgrow       = XMLSupport::parse_float( vs_config->getVariable( "graphics", prefix + "growrate", "200.0" ) );     //200x size when disappearing
+    ptrans      = XMLSupport::parse_float( vs_config->getVariable( "graphics", prefix + "alpha", "2.5" ) );     //NOTE: It's the base transparency, before surface attenuation, so it needn't be within the [0-1] range.
+    pfade       = XMLSupport::parse_float( vs_config->getVariable( "graphics", prefix + "fade", "0.1" ) );
+    
+    if (use_points) {
+        psize       = XMLSupport::parse_float( vs_config->getVariable( "graphics", prefix + "size", "1.5" ) );
+        psmooth     = XMLSupport::parse_bool( vs_config->getVariable( "graphics", prefix + "smooth", "false" ) );
+    } else {
+        std::string s = vs_config->getVariable( "graphics", prefix + "texture", "supernova.bmp" );
+        texture     = new Texture( s.c_str() );
+    }
+}
+
+void ParticleEmitter::Config::init(const std::string &prefix)
+{
+    rate      = XMLSupport::parse_float( vs_config->getVariable( "graphics", prefix + "scale", "8" ) );
+    speed     = XMLSupport::parse_float( vs_config->getVariable( "graphics", prefix + "speed", ".5" ) );
+    locSpread = XMLSupport::parse_float( vs_config->getVariable( "graphics", prefix + "flare", ".15" ) );
+    spread    = XMLSupport::parse_float( vs_config->getVariable( "graphics", prefix + "spread", ".04" ) );
+    absSpeed  = XMLSupport::parse_float( vs_config->getVariable( "graphics", prefix + "absolutespeed", ".02" ) );
+    relSize   = XMLSupport::parse_float( vs_config->getVariable( "graphics", prefix + "sizerelative", ".125" ) );
+    fixedSize = XMLSupport::parse_bool ( vs_config->getVariable( "graphics", prefix + "fixedsize", "0" ) );
+}
+
 void ParticleTrail::DrawAndUpdate()
 {
-    static bool use_points = XMLSupport::parse_bool( vs_config->getVariable( "graphics", "point_sparkles", "false" ) );
-    static bool  pblend = XMLSupport::parse_bool( vs_config->getVariable( "graphics", "sparkeblend", "false" ) );
-    static float pgrow = XMLSupport::parse_float( vs_config->getVariable( "graphics", "sparkegrowrate", "200.0" ) );     //200x size when disappearing
-    static float ptrans = XMLSupport::parse_float( vs_config->getVariable( "graphics", "sparklealpha", "2.5" ) );     //NOTE: It's the base transparency, before surface attenuation, so it needn't be within the [0-1] range.
-    static float pfade = XMLSupport::parse_float( vs_config->getVariable( "graphics", "sparklefade", "0.1" ) );
-    
     // Shortcircuit, not only an optimization, it avoids assertion failures in GFXDraw
-    if (particle.empty())
+    if (!config.use || particle.empty())
         return;
 
+    bool  use_points = config.use_points;
+    bool  pblend = config.pblend;
+    float pgrow = config.pgrow;
+    float ptrans = config.ptrans;
+    float pfade = config.pfade;
+    
     // Draw particles
     GFXDisable( CULLFACE );
     GFXDisable( LIGHTING );
     GFXLoadIdentity( MODEL );
     GFXTranslateModel( _Universe->AccessCamera()->GetPosition() );
     if (use_points) {
-        static float psize = XMLSupport::parse_float( vs_config->getVariable( "graphics", "sparkesize", "1.5" ) );
-        static bool psmooth = XMLSupport::parse_bool( vs_config->getVariable( "graphics", "sparkesmooth", "false" ) );
+        float psize = config.psize;
+        bool psmooth = config.psmooth;
 
         GFXDisable( TEXTURE0 );
         GFXPointSize( psize );
@@ -107,22 +175,75 @@ void ParticleTrail::DrawAndUpdate()
         glDisable( GL_POINT_SMOOTH );
         GFXPointSize( 1 );
     } else {
-        static string s = vs_config->getVariable( "graphics", "sparkletexture", "supernova.bmp" );
-        static Texture *t = new Texture( s.c_str() );
+        Texture *t = config.texture;
+        const int vertsPerParticle = 12;
+        bool dosort = blenddst != ONE && (blenddst != ZERO || !writeDepth);
 
         GFXEnable( TEXTURE0 );
         GFXDisable( TEXTURE1 );
-        GFXDisable( DEPTHWRITE );
-        GFXBlendMode( ONE, ONE );
+        GFXBlendMode( blendsrc, blenddst );
+        if (writeDepth) {
+            GFXEnable( DEPTHWRITE );
+        } else {
+            GFXDisable( DEPTHWRITE );
+        }
+        if (alphaMask > 0) {
+            GFXAlphaTest(GEQUAL, alphaMask);
+        }
         t->MakeActive();
-
+    
+        if (dosort) {
+            // Must sort
+            Vector cam =  _Universe->AccessCamera()->GetPosition().Cast();
+            distances.clear();
+            distances.reserve(particle.size());
+            { for (std::vector<ParticlePoint>::const_iterator it = particle.begin(); it != particle.end(); ++it) {
+                distances.push_back((cam - it->loc).MagnitudeSquared());
+            } }
+            IndexCompare<float, unsigned short> dcomp(distances);
+            
+            unsigned short nindices;
+            if ( particle.size() >= (size_t)std::numeric_limits< unsigned short >::max() / vertsPerParticle )
+                nindices = (unsigned short)std::numeric_limits< unsigned short >::max() / vertsPerParticle;
+            else
+                nindices = (unsigned short)particle.size();
+            pointIndices.clear();
+            pointIndices.reserve(nindices);
+            { for (unsigned short i=0; i < nindices; ++i) {
+                pointIndices.push_back(i);
+            } }
+            
+            std::sort(pointIndices.begin(), pointIndices.end(), dcomp);
+            
+            indices.clear();
+            indices.reserve(nindices *  vertsPerParticle);
+            { for (std::vector<unsigned short>::const_iterator it = pointIndices.begin(); it != pointIndices.end(); ++it) {
+                for (int i = 0; i < vertsPerParticle; ++i)
+                    indices.push_back(*it * vertsPerParticle + i);
+            } }
+        }
+        
         particleVert.clear();
-        particleVert.reserve(particle.size() * 12 * (3 + 4 + 2));
+        particleVert.reserve(particle.size() * vertsPerParticle * (3 + 4 + 2));
         std::back_insert_iterator<std::vector<float> > v(particleVert);
         for (size_t i = 0; i < particle.size(); ++i) {
             SetQuadVertex( particle[i], pgrow, ptrans, v );
         }
-        GFXDraw( GFXQUAD, &particleVert[0], particle.size() * 12, 3, 4, 2 );
+        
+        if (dosort) {
+            GFXDrawElements( GFXQUAD, 
+                &particleVert[0], particle.size() * vertsPerParticle, 
+                &indices[0], indices.size(),
+                3, 4, 2 );
+        } else {
+            GFXDraw( GFXQUAD, &particleVert[0], particle.size() * 12, 3, 4, 2 );
+        }
+        
+        if (alphaMask > 0) {
+            GFXAlphaTest(ALWAYS, 0);
+        }
+        
+        GFXBlendMode( ONE, ZERO );
     }
     GFXLoadIdentity( MODEL );
 
@@ -158,6 +279,9 @@ void ParticleTrail::DrawAndUpdate()
 
 void ParticleTrail::AddParticle( const ParticlePoint &P, const Vector &V, float size )
 {
+    if (!config.use)
+        return;
+    
     if (particle.size() > maxparticles) {
         vector< Vector >::iterator vel = particleVel.begin();
         vector< ParticlePoint >::iterator p = particle.begin();
@@ -174,3 +298,33 @@ void ParticleTrail::AddParticle( const ParticlePoint &P, const Vector &V, float 
     }
 }
 
+void ParticleEmitter::doParticles(const QVector& pos, float rSize, float percent, const Vector& basevelocity, const Vector& velocity, float pSize, const GFXColor& color)
+{
+    percent = 1-percent;
+    int i = rand();
+    if (i < RAND_MAX*percent*config.rate) {
+        ParticlePoint pp;
+        float   r1 = rand()/( (float) RAND_MAX*.5 )-1;
+        float   r2 = rand()/( (float) RAND_MAX*.5 )-1;
+        float   r3 = rand()/( (float) RAND_MAX*.5 )-1;
+        float   r4 = rand()/( (float) RAND_MAX*.5 )-1;
+        Vector rand( r1, r2, r3 );
+        rand.Normalize();
+        pp.loc   = pos+rand*rSize*config.locSpread;
+        
+        // Make randomization direction-centric
+        Vector direction = velocity;
+        direction.Normalize();
+        rand *= config.spread;
+        rand += direction;
+        rand.Normalize();
+        rand *= 1.0 + config.spread * r4;
+        
+        pp.col = color;
+        particleTrail.AddParticle( pp, 
+            rand*( mymax( velocity.Magnitude(), config.absSpeed )*config.spread+config.absSpeed)
+                +velocity*config.speed+basevelocity,
+            config.fixedSize ? config.relSize : (pSize*config.relSize) 
+        );
+    }
+}

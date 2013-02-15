@@ -12,6 +12,7 @@
 
 #include "vsfilesystem.h"
 #include "vs_globals.h"
+#include <string.h>
 #include <png.h>
 #include "posh.h"
 
