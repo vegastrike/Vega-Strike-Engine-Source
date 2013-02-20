@@ -14,6 +14,12 @@ struct ParticlePoint
     float    size;
 };
 
+/**
+ * Particle system class, contains regularly updated geometry for all active
+ * particles of the same kind. 
+ * 
+ * Can be instantiated statically.
+ */
 class ParticleTrail
 {
     std::vector< Vector > particleVel;
@@ -28,6 +34,9 @@ class ParticleTrail
     bool writeDepth;
     
     struct Config {
+        std::string prefix;
+        bool  initialized;
+        
         bool  use;
         bool  use_points;
         bool  pblend;
@@ -38,16 +47,16 @@ class ParticleTrail
         float psize;
         Texture *texture;
         
-        Config();
+        explicit Config(const std::string &prefix);
         ~Config();
         
-        void init(const std::string &prefix);
+        void init();
     } config;
     
 public: 
-    ParticleTrail( std::string configPrefix, unsigned int max, BLENDFUNC blendsrc=ONE, BLENDFUNC blenddst=ONE, float alphaMask = 0, bool writeDepth = false )
+    ParticleTrail( const std::string &configPrefix, unsigned int max, BLENDFUNC blendsrc=ONE, BLENDFUNC blenddst=ONE, float alphaMask = 0, bool writeDepth = false )
+        : config(configPrefix)
     {
-        config.init(configPrefix);
         ChangeMax( max );
         this->blendsrc = blendsrc;
         this->blenddst = blenddst;
@@ -59,6 +68,11 @@ public:
     void ChangeMax( unsigned int max );
 };
 
+/**
+ * Particle emitter, given a particle system, it emits particles with randomized
+ * position and directions, based on config key. Cannot be instantiated statically
+ * since it queries vsConfig at construction time (which is not available statically)
+ */
 class ParticleEmitter 
 {
     ParticleTrail *particles;

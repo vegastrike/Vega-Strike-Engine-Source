@@ -94,9 +94,11 @@ public:
     }
 };
 
-ParticleTrail::Config::Config()
+ParticleTrail::Config::Config(const std::string &prefix)
 {
     texture = NULL;
+    initialized = false;
+    this->prefix = prefix;
 }
 
 ParticleTrail::Config::~Config()
@@ -105,8 +107,11 @@ ParticleTrail::Config::~Config()
         delete texture;
 }
 
-void ParticleTrail::Config::init(const std::string &prefix)
+void ParticleTrail::Config::init()
 {
+    if (initialized)
+        return;
+    
     use         = XMLSupport::parse_bool( vs_config->getVariable( "graphics", prefix, "true" ) );
     use_points  = XMLSupport::parse_bool( vs_config->getVariable( "graphics", prefix + "point", "false" ) );
     pblend      = XMLSupport::parse_bool( vs_config->getVariable( "graphics", prefix + "blend", "false" ) );
@@ -121,6 +126,8 @@ void ParticleTrail::Config::init(const std::string &prefix)
         std::string s = vs_config->getVariable( "graphics", prefix + "texture", "supernova.bmp" );
         texture     = new Texture( s.c_str() );
     }
+    
+    initialized = true;
 }
 
 void ParticleEmitter::Config::init(const std::string &prefix)
@@ -137,6 +144,7 @@ void ParticleEmitter::Config::init(const std::string &prefix)
 void ParticleTrail::DrawAndUpdate()
 {
     // Shortcircuit, not only an optimization, it avoids assertion failures in GFXDraw
+    config.init();
     if (!config.use || particle.empty())
         return;
 
@@ -279,6 +287,7 @@ void ParticleTrail::DrawAndUpdate()
 
 void ParticleTrail::AddParticle( const ParticlePoint &P, const Vector &V, float size )
 {
+    config.init();
     if (!config.use)
         return;
     
