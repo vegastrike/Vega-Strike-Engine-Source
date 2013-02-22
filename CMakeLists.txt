@@ -699,28 +699,28 @@ ELSE(PYTHONLIBS_FOUND OR PYTHON_LIBRARIES AND PYTHON_INCLUDE_PATH)
 ENDIF(PYTHONLIBS_FOUND OR PYTHON_LIBRARIES AND PYTHON_INCLUDE_PATH)
 
 # Find Boost with boost_python library
-OPTION(USE_SYSTEM_BOOST "Use system boost" OFF)
-IF(USE_SYSTEM_BOOST)
-  find_package(Boost COMPONENTS python)
-ENDIF(USE_SYSTEM_BOOST)
+OPTION(USE_SYSTEM_BOOST "Use system boost" ON)
+find_package( Boost 1.50.0 COMPONENTS python )
 IF(Boost_FOUND)
   SET(BOOST_PYTHON_NO_PY_SIGNATURES 1)
   SET(TST_INCLUDES ${TST_INCLUDES} ${Boost_INCLUDE_DIRS})
   SET(TST_LIBS ${TST_LIBS} ${Boost_LIBRARIES})
   include_directories(${TST_INCLUDES})
 ELSE(Boost_FOUND)
-  message("++ Using Internal Boost")
-  SET(BOOST_PYTHON_NO_PY_SIGNATURES 1)
-  SET(TST_INCLUDES ${TST_INCLUDES} ${vsUTCS_SOURCE_DIR}/boost/1_45)
-  SET(TST_LIBS ${TST_LIBS} boost_python)
-  include_directories(${TST_INCLUDES})
-  add_subdirectory(boost/1_45)
-  IF(NOT DISABLE_CLIENT)
-    add_dependencies(vegastrike boost_python)
-  ENDIF(NOT DISABLE_CLIENT)
-  IF(NOT DISABLE_SERVER)
-    add_dependencies(vegaserver boost_python)
-  ENDIF(NOT DISABLE_SERVER)
+  IF(NOT USE_SYSTEM_BOOST)
+    message("++ Using Internal Boost")
+    SET(BOOST_PYTHON_NO_PY_SIGNATURES 1)
+    SET(TST_INCLUDES ${TST_INCLUDES} ${vsUTCS_SOURCE_DIR}/boost/1_45)
+    SET(TST_LIBS ${TST_LIBS} boost_python)
+    include_directories(${TST_INCLUDES})
+    add_subdirectory(boost/1_45)
+    IF(NOT DISABLE_CLIENT)
+	add_dependencies(vegastrike boost_python)
+    ENDIF(NOT DISABLE_CLIENT)
+    IF(NOT DISABLE_SERVER)
+	add_dependencies(vegaserver boost_python)
+    ENDIF(NOT DISABLE_SERVER)
+  ENDIF(NOT USE_SYSTEM_BOOST)
 ENDIF(Boost_FOUND)
 
 IF(NOT DISABLE_CLIENT) ##########
@@ -974,6 +974,7 @@ message("Default build type is Release, no cpu opts enabled. ")
 # End Debug Crap 
 
 MARK_AS_ADVANCED(FORCE
+	Boost_DIR
 	AVCODEC_FOUND
 	AVFORMAT_FOUND
 	AVUTIL_FOUND
