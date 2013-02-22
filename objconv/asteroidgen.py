@@ -77,7 +77,7 @@ def vecLen(x):
 i=0
 sys.stdout.write(",,,,,,,,,0,0,16,0,1")
 import math
-print ""
+print("")
 sys.stdout.write('"asteroidsPriv","objects/asteroids","Asteroids","FIXME","FIXME","INERT","AFieldBasePriv","af-hud.spr",1,,,,," ",,,,,,20000,20000,,,999999999,500,500,500,500,500,500,500,500,0,0,0,0,,,,,0,,,,,FALSE,,,,,0,,500,500,500,10,10,10,20000,20000,20000,20000,20000,20000,20000,,,FALSE,FALSE,4999,5,180,10,,,,,,,,0,0,0,"1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1","1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1",1,1,1,1,1,1,1,1,0,0,,,,')
 for i in range(num):
 	vec=(rad,rad,rad)
@@ -86,4 +86,4 @@ for i in range(num):
 
 	writeRoid(vec[0],vec[1],vec[2],"asteroid"+str(random.randrange(0,8)))
 sys.stdout.write(",,,,,,,,,0,0,16,0,1,0,,1")
-print ""
+print("")

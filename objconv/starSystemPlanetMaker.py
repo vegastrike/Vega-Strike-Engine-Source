@@ -70,7 +70,7 @@ if (stardatafile):
 		stardatalines[i]=stardatalines[i].strip().split(',')
 		if (len(stardatalines[i])<4):
 			starcoords.append((1./0.000001,1./0.00000001,1./0.000000000001))
-			print 'error '+str(stardatalines[i])			
+			print('error '+str(stardatalines[i]))			
 			continue
 		rad = float(stardatalines[i][1])
 		asc = float(stardatalines[i][2])
@@ -93,7 +93,7 @@ if (stardata):
 			if (x*x+y*y+z*z<.000001):
 				if (not len(stardata[k][0])):
 					break;
-				print s.getAttribute('name') +' same as '+stardata[k][0];
+				print(s.getAttribute('name') +' same as '+stardata[k][0]);
 				newchild = xml.dom.minidom.Element('var')
 				newchild.setAttribute('name','designation')
 				newchild.setAttribute('value',stardata[k][0])

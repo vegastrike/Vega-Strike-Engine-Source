@@ -695,7 +695,7 @@ void SaveGame::LoadSavedMissions()
     vector< string >scripts  = getMissionStringData( "active_scripts" );
     vector< string >missions = getMissionStringData( "active_missions" );
     PyRun_SimpleString(
-        "import VS\nVS.loading_active_missions=True\nprint \"Loading active missions \"+str(VS.loading_active_missions)\n" );
+        "import VS\nVS.loading_active_missions=True\nprint(\"Loading active missions \"+str(VS.loading_active_missions))\n" );
     //kill any leftovers so they don't get loaded twice.
     Mission *ignoreMission = Mission::getNthPlayerMission( _Universe->CurrentCockpit(), 0 );
     for (i = active_missions.size()-1; i > 0; --i)      //don't terminate zeroth mission

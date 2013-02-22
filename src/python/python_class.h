@@ -1,6 +1,5 @@
 #ifndef __PYTHON_CLASS_H__
 #define __PYTHON_CLASS_H__
-//#define BOOST_PYTHON_NO_PY_SIGNATURES
 #include "config.h"
 //This takes care of the fact that several systems use the _POSIX_C_SOURCES
 //variable and don't set them to the same thing.
@@ -9,16 +8,9 @@
 #undef _POSIX_C_SOURCE
 #endif
 #include "cs_python.h"
-/*namespace boost{namespace python{
-template <class T> struct type;
-}}
-#define DEC_FROM_PYTHON_SMART_POINTER(Pointer) \
-class Pointer *from_python(PyObject *p,boost::python::type<class Pointer *>);
-class Unit *from_python(PyObject *p,boost::python::type<class Unit *>);
-//DEC_FROM_PYTHON_SMART_POINTER(Unit)
-*/
+
 #include <boost/version.hpp>
-#if BOOST_VERSION != 102800
+
 #if defined (_MSC_VER) && _MSC_VER<=1200
 #define Vector Vactor
 #endif
@@ -30,11 +22,6 @@ class Unit *from_python(PyObject *p,boost::python::type<class Unit *>);
 #undef Vector
 #endif
 #define class_builder class_
-#else
-#include "boost/python/objects.hpp"
-#include "boost/python/class_builder.hpp"
-#include "boost/python/detail/extension_class.hpp"
-#endif
 
 #include "init.h"
 #include "cmd/script/pythonmission.h"
@@ -44,17 +31,11 @@ class Unit *from_python(PyObject *p,boost::python::type<class Unit *>);
 #include "cmd/ai/fire.h"
 #include <memory>
 #include "init.h"
-#if BOOST_VERSION == 102800
-#define PYTHONCALLBACK(rtype, ptr, str) \
-  boost::python::callback<rtype>::call_method(ptr, str)
-#define PYTHONCALLBACK2(rtype, ptr, str, str2) \
-  boost::python::callback<rtype>::call_method(ptr, str, str2)
-#else
 #define PYTHONCALLBACK(rtype, ptr, str) \
   boost::python::call_method<rtype>(ptr, str)
 #define PYTHONCALLBACK2(rtype, ptr, str, str2) \
   boost::python::call_method<rtype>(ptr, str, str2)
-#endif
+
 /*
 These following #defines will create a module for python
 call them with:
@@ -95,9 +76,6 @@ inline PyObject* to_python(class Pointer* x) {return boost::python::python_exten
 inline PyObject* to_python(const class Pointer* p) {return to_python(const_cast<class Pointer*>(p));} \
 BOOST_PYTHON_END_CONVERSION_NAMESPACE
 
-//		return from_python(p,boost::python::type<SuperClass &>());
-//	namespace boost{namespace python{
-//	}}
 #define ADD_FROM_PYTHON_FUNCTION(SuperClass) \
 BOOST_PYTHON_BEGIN_CONVERSION_NAMESPACE \
 	SuperClass & from_python(PyObject *obj,boost::python::type<SuperClass &>) { \
@@ -128,22 +106,16 @@ BOOST_PYTHON_BEGIN_CONVERSION_NAMESPACE \
 #define PYTHON_INIT_GLOBALS(name,Class)
 #endif
 //These two functions purposely have opening/closing braces that don't match up
-#if BOOST_VERSION != 102800
+
 #define PYTHON_BEGIN_MODULE(name) BOOST_PYTHON_MODULE(name) {
 #define PYTHON_DEFINE_GLOBAL(modul,fun,funname) boost::python::def (funname,fun)
 #define VS_BOOST_MAKE_TUPLE(a,b,c) boost::python::make_tuple(a,b,c)
 #define VS_BOOST_MAKE_TUPLE_2(a,b) boost::python::make_tuple(a,b)
 #define VS_BOOST_MAKE_TUPLE_4(a,b,c,d) boost::python::make_tuple(a,b,c,d)
-#else
-#define PYTHON_BEGIN_MODULE(name) BOOST_PYTHON_MODULE_INIT(name) {boost::python::module_builder name(#name);
-#define PYTHON_DEFINE_GLOBAL(modul,fun,funname) modul.def (fun,funname)
-#define VS_BOOST_MAKE_TUPLE(a,b,c) boost::python::tuple(a,b,c)
-#define VS_BOOST_MAKE_TUPLE_2(a,b) boost::python::tuple(a,b)
-#define VS_BOOST_MAKE_TUPLE_4(a,b,c,d) boost::python::tuple(a,b,c,d)
-#endif
+
 #define PYTHON_END_MODULE(name) }
-#define PYTHON_INIT_MODULE(name) init##name()
-#if BOOST_VERSION != 102800
+#define PYTHON_INIT_MODULE(name) PyInit_##name()
+
 
 #define PYTHON_BASE_BEGIN_INHERIT_CLASS(name,NewClass,SuperClass,myclass) { \
 boost::python::class_builder <SuperClass, NewClass, boost::noncopyable > Class (myclass
@@ -156,23 +128,7 @@ boost::python::class_builder <SuperClass, NewClass, boost::noncopyable > Class (
 );
 #define PYTHON_DEFINE_METHOD(modul,fun,funname) modul.def (funname,fun)
 #define PYTHON_DEFINE_METHOD_DEFAULT(modul,fun,funname,deflt) modul.def (funname,deflt)
-#else
-
-#define PYTHON_BASE_BEGIN_INHERIT_CLASS(name,NewClass,SuperClass,myclass) { \
-    boost::python::class_builder <SuperClass ,NewClass> Class (name,myclass);
-#define PYTHON_BEGIN_INHERIT_CLASS(name,NewClass,SuperClass,myclass) PYTHON_BASE_BEGIN_INHERIT_CLASS(name,NewClass,SuperClass,myclass) \
-    Class.def (boost::python::constructor<>());
-
-#define PYTHON_BASE_BEGIN_CLASS(name,CLASS,myclass) { \
-    boost::python::class_builder <CLASS> Class (name,myclass);
-#define PYTHON_BEGIN_CLASS(name,CLASS,myclass) PYTHON_BASE_BEGIN_CLASS(name,CLASS,myclass) \
-    Class.def (boost::python::constructor<>());
-#define PYTHON_DEFINE_METHOD(modul,fun,funname) modul.def (fun,funname)
-#define PYTHON_DEFINE_METHOD_DEFAULT(modul,fun,funname,defaultfun) modul.def (fun,funname,defaultfun)
-#endif
 #define PYTHON_END_CLASS(name,SuperClass) }
-/*    BaseClass.def (&PythonClass<SuperClass>::IncRef,"IncRef"); \
-      boost::python::class_builder <SuperClass> TempClass (name,"SuperClass"); */
 
 
 template <class SuperClass> 

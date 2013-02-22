@@ -285,12 +285,12 @@ void Python::initpaths()
     std::string modpaths( "" );
     //Find all the mods dir (ignore homedir)
     for (unsigned int i = 1; i < VSFileSystem::Rootdir.size(); i++) {
-        modpaths += "r\""+VSFileSystem::Rootdir[i]+PATHSEP+moduledir+PATHSEP "builtin\",";
-        modpaths += "r\""+VSFileSystem::Rootdir[i]+PATHSEP+moduledir+PATHSEP "quests\",";
-        modpaths += "r\""+VSFileSystem::Rootdir[i]+PATHSEP+moduledir+PATHSEP "missions\",";
-        modpaths += "r\""+VSFileSystem::Rootdir[i]+PATHSEP+moduledir+PATHSEP "ai\",";
-        modpaths += "r\""+VSFileSystem::Rootdir[i]+PATHSEP+moduledir+"\",";
-        modpaths += "r\""+VSFileSystem::Rootdir[i]+PATHSEP+basesdir+"\"";
+        modpaths += "\""+VSFileSystem::Rootdir[i]+PATHSEP+moduledir+PATHSEP "builtin\",";
+        modpaths += "\""+VSFileSystem::Rootdir[i]+PATHSEP+moduledir+PATHSEP "quests\",";
+        modpaths += "\""+VSFileSystem::Rootdir[i]+PATHSEP+moduledir+PATHSEP "missions\",";
+        modpaths += "\""+VSFileSystem::Rootdir[i]+PATHSEP+moduledir+PATHSEP "ai\",";
+        modpaths += "\""+VSFileSystem::Rootdir[i]+PATHSEP+moduledir+"\",";
+        modpaths += "\""+VSFileSystem::Rootdir[i]+PATHSEP+basesdir+"\"";
         if ( i+1 < VSFileSystem::Rootdir.size() )
             modpaths += ",";
     }
@@ -299,7 +299,7 @@ void Python::initpaths()
      *  while ((backslash=modpaths.find("\\"))!=std::string::npos) {
      *  modpaths[backslash]='/';
      *  }*/
-    std::string changepath( "import sys\nprint sys.path\nsys.path = ["+modpaths+"] + sys.path\n" );
+    std::string changepath( "import sys\nprint(sys.path)\nsys.path = ["+modpaths+"] + sys.path\n" );
     /*
      *  std::string changepath ("import sys\nprint sys.path\nsys.path = ["
      *                       "\""+VSFileSystem::datadir+DELIMSTR"modules"DELIMSTR"builtin\""
@@ -392,7 +392,7 @@ void Python::init()
     InitBriefing();
     InitVS();
     VSFileSystem::vs_fprintf( stderr, "testing VS random" );
-    std::string changepath( "import sys\nprint sys.path\n" );
+    std::string changepath( "import sys\nprint(sys.path)\n" );
     VSFileSystem::vs_fprintf( stderr, "running %s", changepath.c_str() );
     char *temppython = strdup( changepath.c_str() );
     PyRun_SimpleString( temppython );
@@ -450,32 +450,6 @@ void Python::test()
         PyRun_SimpleFile( fp, "config.py" );
         VSFileSystem::Close( fp1 );
     }
-#endif
-#ifdef OLD_PYTHON_TEST
-    //CompileRunPython ("simple_test.py");
-    //PyObject * arglist = CreateTuple (vector <PythonBasicType> ());
-    //PyObject * res = PyEval_CallObject(po, arglist);
-    //Py_DECREF(arglist);
-    //Py_XDECREF(res);
-
-    PyRun_SimpleString(
-        "import VS\n"
-        "import sys\n"
-        "sys.stderr.write('asdf')\n"
-//"VSConfig=VS.Var()\n"
-//"VSConfig.test='hi'\n"
-//"print VSConfig.test\n"
-//"print VSConfig.undefinedvar\n"
-//"VSConfig.__setattr__('undefined','An undefined variable')\n"
-//"print VSConfig.__getattr__('undefined')\n"
-        "class MyAI(VS.CommAI):\n"
-        "   def Execute(self):\n"
-        "      sys.stdout.write('MyAI\\n')\n"
-        "hi2 = MyAI()\n"
-        "hi1 = VS.CommAI()\n"
-        "print hi1.Execute()\n"
-        "print hi2.Execute()\n"
-                      );
 #endif
 //char buffer[128];
 //PythonIOString::buffer << endl << '\0';

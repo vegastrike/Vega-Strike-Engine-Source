@@ -57,8 +57,8 @@ def parseLine(line, filename):
     global templine
     if templine.__len__() == 2:#if this line continues on a getVariable
         if filename != templine[1]:
-            print "Incomplete reference in file "+filename[1]
-            print filename[0]
+            print("Incomplete reference in file "+filename[1])
+            print(filename[0])
         else:
             line = templine[0]+line
         templine = tuple()
@@ -71,7 +71,7 @@ def parseLine(line, filename):
         line = line[ind:]
         start = line.find("(")
         if start == -1:
-            print "No opening bracket found: "+line +"("+filename+")"
+            print("No opening bracket found: "+line +"("+filename+")")
             return
         finish = False
         count = 0
@@ -101,8 +101,8 @@ def parseColorLine(line, filename):
     global templine
     if templine.__len__() == 2:#if this line continues on a getVariable
         if filename != templine[1]:
-            print "Incomplete color in file "+filename[1]
-            print filename[0]
+            print("Incomplete color in file "+filename[1])
+            print(filename[0])
         else:
             line = templine[0]+line
         templine = tuple()
@@ -115,7 +115,7 @@ def parseColorLine(line, filename):
         line = line[ind:]
         start = line.find("(")
         if start == -1:
-            print "No opening bracket found: "+line +"("+filename+")"
+            print("No opening bracket found: "+line +"("+filename+")")
             return
         finish = False
         count = 0
@@ -134,7 +134,7 @@ def parseColorLine(line, filename):
             return
         parsed = line[start+1:finish]
         parsed = makeColorList(parsed)
-        print parsed
+        print(parsed)
         if parsed:
             global varlines
             parsed.append(filename)
@@ -146,8 +146,8 @@ def parseKeyBindingLine(line, filename):
     global templine
     if templine.__len__() == 2:#if this line continues on a getVariable
         if filename != templine[1]:
-            print "Incomplete keybinding in file "+filename[1]
-            print filename[0]
+            print("Incomplete keybinding in file "+filename[1])
+            print(filename[0])
         else:
             line = templine[0]+line
         templine = tuple()
@@ -160,7 +160,7 @@ def parseKeyBindingLine(line, filename):
         line = line[ind:]
         start = line.find("[")
         if start == -1:
-            print "No opening bracket found: "+line +"("+filename+")"
+            print("No opening bracket found: "+line +"("+filename+")")
             return
         finish = False
         count = 0
@@ -212,18 +212,18 @@ def makeList(parsed):
     return [section,var,default]
 
 def makeColorList(parsed):
-    print "-----------------"
-    print parsed
+    print("-----------------")
+    print(parsed)
     parsed = cleanSection(parsed,True).split("\"")
     if len(parsed) < 1:
         return False
-    print parsed
+    print(parsed)
     if parsed[0] != "":
 #        print 'a'
         return False
     parsed = parsed[1:]
     newparsed = list()
-    print newparsed
+    print(newparsed)
     for item in parsed:
         if item == "":
             break
@@ -236,7 +236,7 @@ def makeColorList(parsed):
         return False
     if len(parsed) != 1:#if not a single string
         if len(parsed) != 2:#if not two strings
-            print "More than the expected number of color strings!"
+            print("More than the expected number of color strings!")
             return False
     else:
         if parsed[0] == "default":
@@ -249,7 +249,7 @@ def makeColorList(parsed):
 def makeKeyBinding(parsed):
     parsed = parsed.split("\"")
     if len(parsed) != 3:
-        print "Bad keybinding ... this should *never* happen if the code compiles"
+        print("Bad keybinding ... this should *never* happen if the code compiles")
         return False
     return parsed[1]
         
@@ -353,7 +353,7 @@ def printDuplicates():
                     break
             if varlines[i][1] == varlines[i+1][1] and duplicate:
                 if varlines[i][2] != varlines[i+1][2]:
-                    print "\nNon-Identical Duplicate:\n"+formatDuplicate(varlines[i],varlines[i+1])+"\n"
+                    print("\nNon-Identical Duplicate:\n"+formatDuplicate(varlines[i],varlines[i+1])+"\n")
 
 #----------------
 # XML creation functions
@@ -368,7 +368,7 @@ def createSection(currnode,section):
 def constructTraverse(currnode, sec):
     add = True
     for element in currnode.getElementsByTagName('section'):
-        if element.attributes.has_key('name'):
+        if 'name' in element.attributes:
             if element.attributes['name'].value == sec:
                 add = False
                 newchild = element
@@ -383,7 +383,7 @@ def constructTraverse(currnode, sec):
 def createVar(currnode, var, default):
     add = True
     for element in currnode.getElementsByTagName('var'):
-        if element.attributes.has_key('name'):
+        if 'name' in element.attributes:
             if element.attributes['name'].value == var:
                 if shouldOverwrite(element,default):
                     element.attributes['name'].value = var
@@ -397,10 +397,10 @@ def createVar(currnode, var, default):
         currnode.appendChild(newchild)
 
 def createColor(currnode, name):#<color name="engine" r="1" g="1" b="1" a="1"/>	    <section name="absolute">
-    print "color %s added"%name
+    print("color %s added"%name)
     add = True
     for element in currnode.getElementsByTagName('color'):
-        if element.attributes.has_key('name'):
+        if 'name' in element.attributes:
             if element.attributes['name'].value == name:
 #                if shouldOverwrite(element,default):
 #                    element.attributes['name'].value = var
@@ -419,9 +419,9 @@ def createColor(currnode, name):#<color name="engine" r="1" g="1" b="1" a="1"/>	
 def createBinding(currnode, binding):
     add = True
     for element in currnode.getElementsByTagName('bind'):
-        if element.attributes.has_key('command'):
+        if 'command' in element.attributes:
             if element.attributes['command'].value == binding:
-                print "Not adding keybinding %s.  Already present."%binding
+                print("Not adding keybinding %s.  Already present."%binding)
                 add = False
                 break
     if add:
@@ -435,7 +435,7 @@ def createBinding(currnode, binding):
 def shouldOverwrite(element,new):
     current = element.attributes['value'].value
     if current == str() and new != str():
-        print 'Overwriting %s with %s'%(current,new)
+        print('Overwriting %s with %s'%(current,new))
         return True
 
 
@@ -449,17 +449,17 @@ srcpath = os.curdir
 if len(arg) > 1:
     srcpath=arg[1]
 
-print 'Using source in '+srcpath
+print('Using source in '+srcpath)
 
 srcpath=srcpath+os.sep
 
-print 'Grepping files'
+print('Grepping files')
 
 filelist = list()
 
 os.path.walk(srcpath, add, filelist)
 
-print 'Parsing list'
+print('Parsing list')
 
 #Browse through for normal variables.
 for filename in filelist:
@@ -489,7 +489,7 @@ a.close()
 
 printDuplicates()
 
-print 'Creating XML'
+print('Creating XML')
 
 config.appendChild(config.createElement('vegaconfig'))
 

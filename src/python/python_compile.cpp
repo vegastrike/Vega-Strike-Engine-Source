@@ -82,7 +82,7 @@ void CompileRunPython( const std::string &filename )
             if ( ( m = PyImport_AddModule( main_str ) ) != NULL ) {
                 PyObject *localdict = PyDict_New();
                 if ( ( d = PyModule_GetDict( m ) ) != NULL ) {
-                    PyObject *exe = PyEval_EvalCode( CompiledProgram, d, localdict );
+                    PyObject *exe = PyEval_EvalCode( ( PyObject * ) CompiledProgram, d, localdict );
                     Py_XDECREF( exe );
                     //unref exe?
                 }

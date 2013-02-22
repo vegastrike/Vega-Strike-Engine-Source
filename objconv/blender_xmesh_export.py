@@ -80,12 +80,12 @@ def processSelected():
 	else:
 		for obj in objs:
 			if obj.getType() != "Mesh":
-				print("Error: Object " + obj.name + " is a " + obj.getType() + ", not a mesh!")
+				print(("Error: Object " + obj.name + " is a " + obj.getType() + ", not a mesh!"))
 			else:
-				print("Object is a " + obj.getType())
+				print(("Object is a " + obj.getType()))
 				exportObject(obj)
 
-	print "Finished: xmesh files written to %s" % os.getcwd()
+	print("Finished: xmesh files written to %s" % os.getcwd())
 
 
 def exportObject(obj):
@@ -194,23 +194,23 @@ def exportObject(obj):
 
 	FILE.write("</Polygons>\n<Material>\n</Material>\n</Mesh>")
 	FILE.close()
- 	print("Written " + filename)
-	print "\t%s contains %s faces (%s quads, %s tris) and %s vertices" % (filename, len(objfaces), len(quads), len(tris), len(objvertices))
+ 	print(("Written " + filename))
+	print("\t%s contains %s faces (%s quads, %s tris) and %s vertices" % (filename, len(objfaces), len(quads), len(tris), len(objvertices)))
 	printErrors()
 
 def printErrors():
 	global teximg
 	if teximg == [""]:
-		print "\tError (non critical): your object has no textures!"
-		print "\t\tIf this is a surprise to you, remember that your object"
-		print "\t\tcan only use UV mapping to export the texture info properly."
+		print("\tError (non critical): your object has no textures!")
+		print("\t\tIf this is a surprise to you, remember that your object")
+		print("\t\tcan only use UV mapping to export the texture info properly.")
 
 	elif len(teximg) != 1:
-		print "\tError (non critical): your object uses %s images as textures." % len(teximg)
-		print "\t\tAlthough valid in blender...VS doesn't support this."
-		print "\t\tIf you hassle me enough, I may make the script automatically"
-		print "\t\tbreak the object into seperate meshes to accomodate that."
-	print "\n"
+		print("\tError (non critical): your object uses %s images as textures." % len(teximg))
+		print("\t\tAlthough valid in blender...VS doesn't support this.")
+		print("\t\tIf you hassle me enough, I may make the script automatically")
+		print("\t\tbreak the object into seperate meshes to accomodate that.")
+	print("\n")
 
 def makePolys(polylist,FILE):
 	has_uv = False

@@ -69,15 +69,15 @@ def CsvImport(units, unitList):
         return
 
 def usageError(Module):
-	print
-	print Module, USAGE
-	print
+	print()
+	print(Module, USAGE)
+	print()
 	return
 
 def fileError(File):
-        print
-        print File, ":File does not exit"
-        print
+        print()
+        print(File, ":File does not exit")
+        print()
         return
 
 def CollapseStruct(s):

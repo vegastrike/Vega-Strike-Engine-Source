@@ -4,7 +4,7 @@ from PIL import Image
 import math
 
 if len(sys.argv) <= 2:
-    print "Usage: ./cinemut-nm-decode.py <inputfile> <outputfile>"
+    print("Usage: ./cinemut-nm-decode.py <inputfile> <outputfile>")
     sys.exit(0)
 
 try:
@@ -48,13 +48,13 @@ try:
         im = Image.merge("RGBA", (r,g,b,a))
         return im
 except ImportError:
-    print >>sys.stderr, "Warning: numpy not found. Install it to greatly improve performance."
+    print("Warning: numpy not found. Install it to greatly improve performance.", file=sys.stderr)
     def encode(im, int=int):
         data = im.load()
         sqrt = math.sqrt
         e = 2.0
-        for x in xrange(im.size[0]):
-            for y in xrange(im.size[1]):
+        for x in range(im.size[0]):
+            for y in range(im.size[1]):
                 loc = x,y
                 r,g,b,a = data[loc]
                 u = (r+g+b) / (3*255.0) - 0.5
