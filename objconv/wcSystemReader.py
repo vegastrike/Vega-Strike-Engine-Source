@@ -38,7 +38,7 @@ def InfluenceToFaction(inf):
 		return "border_worlds"
 	if  (inf.find("kkan")!=-1):
 		return "firekkan"
-	print("error faction "+inf+" unknown")
+	print "error faction "+inf+" unknown"
 	return "border_worlds"
 
 
@@ -91,14 +91,14 @@ if len(sys.argv)>1:
 		if (i in jumps):
 			for k in jumps[i]:
 				if not k in tab:
-					print(k+" missing from system list")
+					print k+" missing from system list"
 					continue
 				if (jamp!=""):
 					jamp+=" "
 				jamp+=Prettify(tab[k]["SectorName"])+"/"+Prettify(tab[k]["SystemName"])
 			h["jumps"]=jamp
 		else:
-			print("no jumps for "+i+" "+name)
+			print "no jumps for "+i+" "+name
 		if not sec in secs:
 			secs[sec]={}
 		secs[sec][name]=h

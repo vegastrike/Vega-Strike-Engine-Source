@@ -25,7 +25,7 @@ def printn0(n,delim=','):
     return retstring
 
 def usage():
-    print("Usage:\n\tCall with name of Xunit file to convert to MasterPartList file")
+    print "Usage:\n\tCall with name of Xunit file to convert to MasterPartList file"
     return
 
 def xmltocaps(dom):
@@ -39,7 +39,7 @@ def xmltocaps(dom):
     return
 
 def getAttributeValueCIS(node,attributename):
-    for key in list(node.attributes.keys()):
+    for key in node.attributes.keys():
         if node.getAttributeNode(key).name.lower()==attributename.lower():
             return node.getAttribute(key);
     return ""
@@ -64,12 +64,12 @@ for inputunit in sys.argv:
     isblank = (inputunit.find(".blank")!=-1)
     istemplate = (inputunit.find(".template")!=-1)
     ismilspec = isblank==0 and istemplate==0
-    print("Adding "+inputunit)
+    print "Adding "+inputunit
     inpxml = open(inputunit,"r")
     try:
       intermed = xml.dom.minidom.parseString(inpxml.read())
     except:
-      print(inputunit+" failed")
+      print inputunit+" failed"
       continue
     inpxml.close()
     xmltocaps(intermed)

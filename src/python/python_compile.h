@@ -40,7 +40,7 @@ public:
         switch (type)
         {
         case MYSTRING:
-            return PyUnicode_FromString( objects.c_str() );
+            return PyString_FromString( objects.c_str() );
 
         case MYLONG:
             return PyLong_FromLong( objecti );

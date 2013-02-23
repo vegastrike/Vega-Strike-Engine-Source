@@ -85,5 +85,5 @@ def sizeToNum(size):
 		for j in range (3):
 			if (numToSize(i,j)==size):
 				return (i,j)
-	print("Size "+str(size)+" failed")
+	print "Size "+str(size)+" failed"
 	return (50,1)

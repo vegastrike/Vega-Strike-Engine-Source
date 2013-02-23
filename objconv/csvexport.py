@@ -66,15 +66,15 @@ def CsvExport(path, args):
 	        # The above block should work, rarely, to catch errors... and next line should be elif rowLL:
 	        # It fails miserably because most lines in units.csv do not have the same number of fields.
                 #if rowLL:	# bool False, if row list length is zero... an empty line in file, this suppresses blank line results.
-	        print("Line:", numLine, "Columns:", rowLL, "Entry:", Entry)
+	        print "Line:", numLine, "Columns:", rowLL, "Entry:", Entry
 		if ToScreen:
 		    for i in range(rowLL):
 	                if GuideList[i].find('{')!=-1:
-	                    print(csv.writeList([KeyList[i]]+ProcessList(GuideList[i],row[i])))
+	                    print csv.writeList([KeyList[i]]+ProcessList(GuideList[i],row[i]))
 	                elif GuideList[i].find(';')!=-1:
-	                    print(csv.writeList([KeyList[i]]+ProcessStruct(GuideList[i],row[i])))
+	                    print csv.writeList([KeyList[i]]+ProcessStruct(GuideList[i],row[i]))
 	                else:
-	                    print(csv.writeList([makeName(KeyList[i],GuideList[i]), row[i]]))
+	                    print csv.writeList([makeName(KeyList[i],GuideList[i]), row[i]])
                 else:
 		    outfile = file(Entry+".csv", "w")
 		    for i in range(rowLL):
@@ -91,9 +91,9 @@ def CsvExport(path, args):
     #failed most of these records."""
 
 def usageError(Module):
-	print()
-	print(Module, USAGE)
-	print()
+	print
+	print Module, USAGE
+	print
 	return
 
 def filterParen(l):
@@ -130,7 +130,7 @@ def ProcessList(guide,row):
 	og=guide.find('{');
 	cg=guide.find('}');
 	if (og==-1 or cg== -1):
-		print("error in "+str(row)+" "+str(guide))
+		print "error in "+str(row)+" "+str(guide)
 		return ""
 	guide=guide[og+1:cg]
 	ret=[]
