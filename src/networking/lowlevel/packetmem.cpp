@@ -102,7 +102,7 @@ void PacketMem::inner_set( void* buffer, size_t size, bool own )
     }
     else
     {
-        _buffer.reset( 0 );
+        _buffer.reset();
         _len = 0;
     }
 }
