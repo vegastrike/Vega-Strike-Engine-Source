@@ -111,17 +111,17 @@ public:
             return *this;
         }
 
-        operator const T &() const
+        operator const T& () const
         {
             return get();
         }
 
-        Reference&operator=( const T &s )
+        Reference& operator=( const T &s )
         {
             return set( s );
         }
 
-        Reference&operator=( const Reference &s )
+        Reference& operator=( const Reference &s )
         {
             if (this == &s)
                 return *this;
@@ -206,12 +206,6 @@ template < typename T >
 inline T& operator<<( T &stream, const StringPool::Reference &ref )
 {
     return stream<<ref.get();
-}
-
-template < typename T >
-bool operator==( const typename SharedPool< T >::Reference &r, const T &s )
-{
-    return r.get() == s;
 }
 
 #include "SharedPool.cpp"
