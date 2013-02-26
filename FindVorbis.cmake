@@ -52,6 +52,7 @@ else (Vorbis_LIBRARIES AND Vorbis_INCLUDE_DIRS)
       vorbisfile
     PATHS
       /usr/lib
+      /usr/lib/x86_64-linux-gnu
       /usr/local/lib
       /opt/local/lib
       /sw/lib
@@ -62,6 +63,7 @@ else (Vorbis_LIBRARIES AND Vorbis_INCLUDE_DIRS)
       ogg
     PATHS
       /usr/lib
+      /usr/lib/x86_64-linux-gnu
       /usr/local/lib
       /opt/local/lib
       /sw/lib
