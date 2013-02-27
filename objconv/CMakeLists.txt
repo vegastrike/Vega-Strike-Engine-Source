@@ -47,6 +47,15 @@ SET(MESHER_SOURCES mesher/Converter.cpp
 
 include_directories(${MSH_INCLUDES} mesher)
 add_executable(mesh_tool ${MESHER_SOURCES})
+
+# OGRE already looked for by parent
+# USE_SYSTEM_BOOST already set by main script
+IF(OGRE_FOUND AND NOT USE_SYSTEM_BOOST)
+    # Ogre usage in mesher requires boost::system
+    add_dependencies(mesh_tool boost_system)
+    SET(MSH_LIBS ${MSH_LIBS} boost_system)
+ENDIF(OGRE_FOUND AND NOT USE_SYSTEM_BOOST)
+
 target_link_libraries(mesh_tool ${MSH_LIBS})
 
 
