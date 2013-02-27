@@ -25,7 +25,7 @@ SET(MESHER_SOURCES Converter.cpp
 
 add_executable(mesher ${MESHER_SOURCES})
 
-target_link_libraries(mesher ${EXPAT_LIBRARIES} ${OGRE_LIBRARIES})
+target_link_libraries(mesher ${MESHER_LIBRARIES} ${EXPAT_LIBRARIES} ${OGRE_LIBRARIES})
 set_target_properties(mesher PROPERTIES LINK_FLAGS "-L/usr/lib")
 ELSE(EXPAT_FOUND)
     message("!! Not going to be able to compile mesher, no expat found")

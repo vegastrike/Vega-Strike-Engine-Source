@@ -29,3 +29,6 @@ add_library(boost_python
   src/converter/builtin_converters.cpp
   src/converter/arg_to_python_base.cpp
   src/converter/registry.cpp)
+
+add_library(boost_system
+  system/error_code.cpp)
