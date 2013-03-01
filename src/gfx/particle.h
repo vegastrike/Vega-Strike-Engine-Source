@@ -31,7 +31,7 @@ class ParticleTrail
     unsigned int maxparticles;
     BLENDFUNC blendsrc, blenddst;
     float alphaMask;
-    bool writeDepth;
+    bool writeDepth, fadeColor;
     
     struct Config {
         std::string prefix;
@@ -54,7 +54,7 @@ class ParticleTrail
     } config;
     
 public: 
-    ParticleTrail( const std::string &configPrefix, unsigned int max, BLENDFUNC blendsrc=ONE, BLENDFUNC blenddst=ONE, float alphaMask = 0, bool writeDepth = false )
+    ParticleTrail( const std::string &configPrefix, unsigned int max, BLENDFUNC blendsrc=ONE, BLENDFUNC blenddst=ONE, float alphaMask = 0, bool writeDepth = false, bool fadeColor = false )
         : config(configPrefix)
     {
         ChangeMax( max );
@@ -62,6 +62,7 @@ public:
         this->blenddst = blenddst;
         this->alphaMask = alphaMask;
         this->writeDepth = writeDepth;
+        this->fadeColor = fadeColor;
     }
     void DrawAndUpdate();
     void AddParticle( const ParticlePoint&, const Vector&, float size );

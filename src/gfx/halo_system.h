@@ -17,11 +17,12 @@ private:
         Matrix trans;
         Vector size;
         Mesh *mesh;
+        double sparkle_accum;
+        float sparkle_rate;
         float activation;
         float oscale;
     };
     std::vector< Halo >halo;
-    double sparkle_accum;
 
 public:
     virtual ~HaloSystem();

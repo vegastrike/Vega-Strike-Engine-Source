@@ -587,7 +587,11 @@ void GameUnit< UnitType >::Draw( const Transformation &parent, const Matrix &par
                     LaunchOneParticle( *ctm, this->GetVelocity(), ( (long) this )+257, this, damagelevel, this->faction );
                 }
             }
+        } else {
+            sparkle_accum = 0;
         }
+    } else {
+        sparkle_accum = 0;
     }
 }
 

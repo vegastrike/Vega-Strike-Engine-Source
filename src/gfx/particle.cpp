@@ -11,7 +11,7 @@
 #include <iterator>
 #include <limits>
 
-ParticleTrail particleTrail( "sparkle", 500 );
+ParticleTrail particleTrail( "sparkle", 500, SRCALPHA, ONE, 0.05, false, true );
 ParticleTrail smokeTrail( "smoke", 500, SRCALPHA, INVSRCALPHA );
 ParticleTrail debrisTrail( "debris", 500, SRCALPHA, INVSRCALPHA, 0.5, true );
 
@@ -31,10 +31,17 @@ void ParticleTrail::ChangeMax( unsigned int max )
     this->maxparticles = max;
 }
 
-static inline void Update( ParticlePoint & p, const Vector &vel, const float time, const float fade )
+static inline void UpdateColor( ParticlePoint & p, const Vector &vel, const float time, const float fade )
+{
+    float fadetime = fade * time;
+    p.loc += (vel * time).Cast();
+    p.col  = ( p.col - GFXColor( fadetime, fadetime, fadetime, fadetime ) ).clamp();
+}
+
+static inline void UpdateAlpha( ParticlePoint & p, const Vector &vel, const float time, const float fade )
 {
     p.loc += (vel * time).Cast();
-    p.col  = ( p.col - GFXColor( fade*time, fade*time, fade*time, fade*time ) ).clamp();
+    p.col.a = mymax(0.0f, p.col.a - fade * time);
 }
 
 //Write 3 pos and 4 col float values into v and increment v by 7
@@ -254,18 +261,24 @@ void ParticleTrail::DrawAndUpdate()
         GFXBlendMode( ONE, ZERO );
     }
     GFXLoadIdentity( MODEL );
-
+    
     // Update particles
     float mytime = GetElapsedTime();
-    for (size_t i = 0; i < particle.size(); ++i) {
-        Update(particle[i], particleVel[i], mytime, pfade);
+    if (fadeColor) {
+        for (size_t i = 0, n = particle.size(); i < n; ++i) {
+            UpdateColor(particle[i], particleVel[i], mytime, pfade);
+        }
+    } else {
+        for (size_t i = 0, n = particle.size(); i < n; ++i) {
+            UpdateAlpha(particle[i], particleVel[i], mytime, pfade);
+        }
     }
 
     // Sort particles
     vector< Vector >::iterator v = particleVel.begin();
     vector< ParticlePoint >::iterator p = particle.begin();
     while ( p != particle.end() ) {
-        if ( !(p->col.a > 0) ) {
+        if ( !(p->col.a > alphaMask) ) {
             vector< Vector >::iterator vlast = particleVel.end() - 1;
             vector< ParticlePoint >::iterator plast = particle.end() - 1;
             if (p != plast) {

@@ -89,7 +89,7 @@ void LaunchOneParticle( const Matrix &mat, const Vector &vel, unsigned int seed,
     }
 }
 
-HaloSystem::HaloSystem() : sparkle_accum(0)
+HaloSystem::HaloSystem() 
 {
     VSCONSTRUCT2( 'h' )
 }
@@ -112,6 +112,8 @@ unsigned int HaloSystem::AddHalo( const char *filename,
     halo.back().mesh = Mesh::LoadMesh( ( string( filename ) ).c_str(), Vector( 1, 1, 1 ), neutralfac, NULL );
     halo.back().activation = activation_accel * gs;
     halo.back().oscale = 0;
+    halo.back().sparkle_accum = 0;
+    halo.back().sparkle_rate = 0.5 + rand() * 0.5 / float(RAND_MAX);
     return halo.size()-1;
 }
 
@@ -161,6 +163,8 @@ void HaloSystem::Draw( const Matrix &trans,
     if ( maxaccel <= 0 ) maxaccel = 1;
     if ( maxvelocity <= 0 ) maxvelocity = 1;
     
+    double sparkledelta = GetElapsedTime() * sparklerate;
+    
     for ( std::vector< Halo >::iterator i = halo.begin(); i != halo.end(); ++i ) {
         Vector thrustvector = TransformNormal( trans, i->trans.getR() ).Normalize();
         float value, maxvalue, minvalue;
@@ -209,17 +213,25 @@ void HaloSystem::Draw( const Matrix &trans,
                                  blend);
             i->mesh->Draw( 50000000000000.0, m, 1, alpha, nebdist, 0, false, &xtraFX );
 
-            if ( hullpercent < .99 ) {
-                sparkle_accum += GetElapsedTime()*sparklerate;
-                int spawn = (int) (sparkle_accum);
-                sparkle_accum -= spawn;
+            // If damaged, and halo is back-facing
+            if ( hullpercent < .99 && ((i->trans.getR().z / i->trans.getR().Magnitude()) > 0.707) ) {
+                float vpercent = value/maxvalue;
+                i->sparkle_accum += sparkledelta * i->sparkle_rate * vpercent;
+                int spawn = (int) (i->sparkle_accum);
                 
-                float rsize = i->mesh->rSize()*scale.i*i->size.i;
-                Vector pvelocity = thrustvector * -rsize * sparklespeed;
-                
-                while (spawn-- > 0)
+                if (spawn > 0) {
+                    i->sparkle_accum -= 1;
+                    
+                    float rsize = i->mesh->rSize()*scale.i*i->size.i;
+                    Vector pvelocity = thrustvector * -rsize * sparklespeed * vpercent;
+                    
                     DoParticles( m.p, hullpercent, velocity, pvelocity, rsize, rsize * sparklescale, faction );
+                }
+            } else {
+                i->sparkle_accum = 0;
             }
+        } else {
+            i->sparkle_accum = 0;
         }
     }
 }
