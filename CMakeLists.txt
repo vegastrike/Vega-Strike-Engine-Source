@@ -689,7 +689,7 @@ include (CheckIncludeFileCXX)
 SET(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${vsUTCS_SOURCE_DIR})
 
 # Configurable python version (some data sets might need 3.x, some 2.x)
-SET(VS_PYTHON_VERSION 2 CACHE STRING "Python version to build against")
+SET(VS_PYTHON_VERSION 2 CACHE STRING "Python version to build against: 2, 3, 2.x, 3.x")
 
 find_package(PythonLibs ${VS_PYTHON_VERSION} REQUIRED)
 IF(PYTHONLIBS_FOUND OR PYTHON_LIBRARIES AND PYTHON_INCLUDE_PATH)
