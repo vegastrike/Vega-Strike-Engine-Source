@@ -1,10 +1,15 @@
 #!/usr/bin/python
+from __future__ import print_function
 import sys
 from PIL import Image
 import math
+try:
+    range = xrange
+except:
+    pass
 
 if len(sys.argv) <= 2:
-    print "Usage: ./cinemut-nm-encode.py <inputfile> <outputfile>"
+    print("Usage: ./cinemut-nm-encode.py <inputfile> <outputfile>")
     sys.exit(0)
 
 try:
@@ -46,14 +51,14 @@ try:
         im = Image.merge("RGBA", (r,g,b,a))
         return im
 except ImportError:
-    print >>sys.stderr, "Warning: numpy not found. Install it to greatly improve performance."
+    print("Warning: numpy not found. Install it to greatly improve performance.", file=sys.stderr)
     def encode(im, int=int):
         data = im.load()
         atan = math.atan
         tan = math.tan
         e = 2.0
-        for x in xrange(im.size[0]):
-            for y in xrange(im.size[1]):
+        for x in range(im.size[0]):
+            for y in range(im.size[1]):
                 loc = x,y
                 u,v,z,a = data[loc]
                 if z:

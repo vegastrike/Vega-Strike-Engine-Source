@@ -1,3 +1,5 @@
+from __future__ import print_function
+
 def findQuot(s,chr='"', offset=0):
 	if (offset>=len(s)):
 		return -1
@@ -14,7 +16,7 @@ def elimiQuote(s, delim='"""'):
 	while(where!=-1):
 		tmp=s[0:where]
 		if (even==1 and delim!='"'):
-			print tmp
+			print(tmp)
 			tmp=elimiQuote(tmp,'"')
 		ret=ret+tmp
 		even = 1-even
@@ -98,7 +100,7 @@ def semiColonSeparatedList(s, delim=','):
 def makeTable(llist, keynum=0):
 	keylist = llist[0];
 	ret={}
-	print "lust" +str(keylist)
+	print("lust" +str(keylist))
 	for l in llist[1:]:
 		key=l[keynum]
 		mhash={}
@@ -106,7 +108,7 @@ def makeTable(llist, keynum=0):
 			try:
 				mhash[keylist[i]]=l[i]
 			except:
-				print str(l)+":: "+str(l[i])+" not in keys "
+				print(str(l)+":: "+str(l[i])+" not in keys ")
 				
 		ret[key]=mhash
 	return ret

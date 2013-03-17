@@ -1,3 +1,4 @@
+from __future__ import print_function
 import sys
 import xml
 import xml.dom
@@ -130,7 +131,7 @@ def removeVal(node,val):
 	    node.removeChild(i)
 	    
 def usage():
-    print "Usage:\n\tCall with name of Xunit file to append to Master Unit file"
+    print("Usage:\n\tCall with name of Xunit file to append to Master Unit file")
     return
 
 def xmltocaps(dom):
@@ -528,12 +529,12 @@ for inputunit in sys.argv[1:]:
     isblank = (inputunit.find(".blank")!=-1)
     istemplate = (inputunit.find(".template")!=-1)
     ismilspec = isblank==0 and istemplate==0
-    print "Adding "+inputunit
+    print("Adding "+inputunit)
     inpxml = open(inputunit,"r")
     try:
       intermed = xml.dom.minidom.parseString(inpxml.read())
     except:
-      print inputunit+" failed"
+      print(inputunit+" failed")
       continue
     inpxml.close()
     xmltocaps(intermed)

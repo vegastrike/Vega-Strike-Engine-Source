@@ -22,6 +22,7 @@
 #	I am doing this in preparation for next step in a csv editor, which in turn will lead to a
 #		units IDE.
 #_____________________________________________________________________________________________________
+from __future__ import print_function
 USAGE = """USAGE: csvimport.py <filename> <unitname(s)>
      <filename> = <path/><units.csv>
      <unitname> = llama goddard		to import changed llama and goddard"""
@@ -69,15 +70,15 @@ def CsvImport(units, unitList):
         return
 
 def usageError(Module):
-	print
-	print Module, USAGE
-	print
+	print()
+	print(Module, USAGE)
+	print()
 	return
 
 def fileError(File):
-        print
-        print File, ":File does not exit"
-        print
+        print()
+        print(File, ":File does not exit")
+        print()
         return
 
 def CollapseStruct(s):

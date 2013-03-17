@@ -6,6 +6,11 @@ Blender: 237
 Group: 'Import'
 Tooltip: 'Import VegaStrike Models (.xmesh)'
 """
+from __future__ import print_function
+try:
+    range = xrange
+except:
+    pass
 
 __author__	= "Alex 'CubOfJudahsLion' Feterman"
 __url__		= ("blender", "http://www.blender.org", "Author's homepage, http://geocities.com/cubofjudahslion")
@@ -44,7 +49,6 @@ import xml.sax
 import meshtools
 import os.path
 from string import lower
-
 
 locationDir = []		# registers the search of the results for images
 
@@ -108,7 +112,7 @@ class XMeshHandler(xml.sax.handler.ContentHandler):
 			Callback. Invoked when the parsing starts. Used to
 			display notification of process initiation.
 		"""
-		print "Loading file..."
+		print("Loading file...")
 		Blender.Window.DrawProgressBar(0.0, "Loading file...")
 
 	def endDocument(self):
@@ -117,11 +121,11 @@ class XMeshHandler(xml.sax.handler.ContentHandler):
 			the mesh from collected vertex/faces and texturizing info.
 		"""
 		# report
-		print "Finished loading file, constructing mesh..."
+		print("Finished loading file, constructing mesh...")
 		Blender.Window.DrawProgressBar(0.9, "Building mesh...")
 		# build object
 		meshtools.create_mesh(self.verts, self.faces, self.objName, self.faceuvs, self.uvs)
-		print "Done, object built"
+		print("Done, object built")
 		# load corresponding images and set texture
 		Blender.Window.DrawProgressBar(0.95, "Loading/Applying Texture...")
 		colorTex, specTex = None, None
@@ -187,17 +191,17 @@ class XMeshHandler(xml.sax.handler.ContentHandler):
 		if name == "mesh":
 			if "texture" in attr:
 				self.colorTexture = attr["texture"]
-				print "* color tex:", self.colorTexture
+				print("* color tex:", self.colorTexture)
 			if "texture1" in attr:
 				self.specTexture = attr["texture1"]
-				print "* spec tex:", self.specTexture
+				print("* spec tex:", self.specTexture)
 		elif name == "points":
-			print "Reading vertex coordinates..."
+			print("Reading vertex coordinates...")
 			Blender.Window.DrawProgressBar(0.1, "Reading vertexes...")
 		elif name == "location":
 			self.verts.append( (float(attr["x"]), float(attr["y"]), float(attr["z"])) )
 		elif name == "polygons":
-			print "Reading faces..."
+			print("Reading faces...")
 			Blender.Window.DrawProgressBar(0.25, "Reading faces...")
 		elif name == "tri" or name == "quad" or name == "trifan":
 			self.faceVerts	= []
@@ -235,7 +239,7 @@ class XMeshHandler(xml.sax.handler.ContentHandler):
 			# are expected to be retrievable as
 			# self.uvs[self.faceuvs[i][j]]
 			insertPos = len(self.uvs)
-			self.faceuvs.append(range(insertPos, insertPos+len(self.facevUVs)))
+			self.faceuvs.append(list(range(insertPos, insertPos+len(self.facevUVs))))
 			self.uvs.extend(self.facevUVs)
 		elif name == "trifan":
 			# yes, opengl handles triangle fans naturally, but not blender
@@ -244,7 +248,7 @@ class XMeshHandler(xml.sax.handler.ContentHandler):
 				# so we make triangles out of them instead
 				self.faces.append( [self.faceVerts[0], self.faceVerts[fanIdx-1], self.faceVerts[fanIdx]] )
 				insertPos = len(self.uvs)
-				self.faceuvs.append(range(insertPos, insertPos+3))
+				self.faceuvs.append(list(range(insertPos, insertPos+3)))
 				self.uvs.extend( [self.facevUVs[0], self.facevUVs[fanIdx-1], self.facevUVs[fanIdx]] )
 				fanIdx += 1
 

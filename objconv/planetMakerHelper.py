@@ -1,3 +1,4 @@
+from __future__ import print_function
 
 def CombineTables(Prob,Mult,fac,newkey,ret):
 	tot=0	
@@ -322,7 +323,7 @@ def getBody(plist):
 		if (rfloat<plist[i]):
 			return i
 		rfloat-=plist[i]
-	return plist.items()[len(plist)-1][0]
+	return list(plist.items())[len(plist)-1][0]
 
 def getPlanet(fac,radpair=None,name=''):
 	global combined_planet_prob
@@ -391,7 +392,7 @@ def abbreviate(l,planets):
 						ret.append(abbrev)
 						break
 			if (not found):
-				print longname+"Not found"
+				print(longname+"Not found")
 				throw
 	except:
 		ret=[]
