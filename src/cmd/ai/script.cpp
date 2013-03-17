@@ -12,6 +12,8 @@
 #include "universe_util.h"
 #include <assert.h>
 
+using namespace XMLSupport;
+
 typedef vsUMap< string, CCScript* >HardCodedMap;
 static HardCodedMap MakeHardCodedScripts()
 {
@@ -260,9 +262,6 @@ const EnumMap element_map( element_names, 32 );
 const EnumMap attribute_map( attribute_names, 19 );
 }
 
-using XMLSupport::EnumMap;
-using XMLSupport::Attribute;
-using XMLSupport::AttributeList;
 
 void AIScript::beginElement( const string &name, const AttributeList &attributes )
 {

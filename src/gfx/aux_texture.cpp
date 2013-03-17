@@ -34,7 +34,7 @@
 
 using std::string;
 using namespace VSFileSystem;
-
+using namespace XMLSupport;
 ///holds all the textures in a huge hash table
 Hashtable< string, Texture, 4007 >texHashTable;
 Hashtable< string, bool, 4007 >   badtexHashTable;

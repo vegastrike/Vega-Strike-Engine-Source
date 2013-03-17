@@ -5,7 +5,6 @@
 #include <assert.h>
 #endif
 #include "cmd/unit_generic.h"
-using namespace Orders;
 #include "lin_time.h"
 #include "cmd/script/flightgroup.h"
 #include "config_xml.h"
@@ -13,6 +12,8 @@ using namespace Orders;
 #include "warpto.h"
 #include "flybywire.h"
 #include "cmd/unit_util.h"
+
+using namespace Orders;
 /**
  * the time we need to start slowing down from now calculation (if it's in this frame we'll only accelerate for partial
  * vslowdown - decel * t = 0               t = vslowdown/decel

@@ -65,6 +65,11 @@ PYTHON_END_MODULE( Briefing )
 
 void InitBriefing()
 {
+    PyImport_AppendInittab("Briefing",PYTHON_MODULE_INIT_FUNCTION(Briefing));
+}
+
+void InitBriefing2()
+{
     Python::reseterrors();
     PYTHON_INIT_MODULE( Briefing );
     Python::reseterrors();

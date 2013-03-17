@@ -23,7 +23,7 @@
  *  xml Mission written by Alexander Rawass <alexannika@users.sourceforge.net>
  */
 #include "config.h"
-#include <Python.h>
+#include "cs_python.h"
 #include <math.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -40,9 +40,6 @@
 #include "mission.h"
 #include "flightgroup.h"
 
-#ifdef HAVE_PYTHON
-#include "Python.h"
-#endif
 #include "python/python_class.h"
 #include "savegame.h"
 #include "networking/netserver.h"

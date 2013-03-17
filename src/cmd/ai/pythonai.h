@@ -1,4 +1,4 @@
-#include <Python.h>
+#include "cs_python.h"
 #include "fire.h"
 #include <assert.h>
 

@@ -23,16 +23,13 @@
  *  xml Mission Scripting written by Alexander Rawass <alexannika@users.sourceforge.net>
  */
 #include "config.h"
-#ifdef HAVE_PYTHON
-#include <Python.h>
-#endif
 #include "python/python_class.h"
 #include <boost/version.hpp>
-#if BOOST_VERSION != 102800
 #include <boost/python/class.hpp>
-#else
-#include <boost/python/detail/extension_class.hpp>
+#ifdef HAVE_PYTHON
+#include "cs_python.h"
 #endif
+
 #include <math.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -42,8 +39,6 @@
 #include <unistd.h>
 #include <pwd.h>
 #endif
-
-#include "python/python_class.h"
 
 #include "cmd/unit_generic.h"
 #include "mission.h"
@@ -56,13 +51,24 @@ PYTHON_BEGIN_MODULE( Briefing )
 //Nothing here, but keeps those files that do a "import Briefing" happy.
 PYTHON_END_MODULE( Briefing )
 
+
 void InitBase()
+{
+    PyImport_AppendInittab("Base",PYTHON_MODULE_INIT_FUNCTION(Base));
+}
+
+void InitBriefing()
+{
+    PyImport_AppendInittab("Briefing",PYTHON_MODULE_INIT_FUNCTION(Briefing));
+}
+
+void InitBase2()
 {
     Python::reseterrors();
     PYTHON_INIT_MODULE( Base );
     Python::reseterrors();
 }
-void InitBriefing()
+void InitBriefing2()
 {
     Python::reseterrors();
     PYTHON_INIT_MODULE( Briefing );

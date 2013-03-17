@@ -7,7 +7,7 @@
 #include "gfxlib_struct.h"
 #include <vector>
 #include <list>
-using namespace XMLSupport;
+
 class TextPlane;
 class VSSprite;
 class Gauge;
@@ -19,6 +19,7 @@ class NavigationSystem;
 #include "camera.h"
 #include "physics.h"
 #include "nav/navscreen.h"
+using namespace XMLSupport;   // DONT PUT THIS ABOVE HEADERS
 #define NUM_CAM CP_NUMVIEWS
 /**
  * The Cockpit Contains all displayable information about a particular Unit *

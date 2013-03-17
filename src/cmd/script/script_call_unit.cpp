@@ -1,4 +1,4 @@
-#include <Python.h>
+#include "cs_python.h"
 #include <string>
 
 #include "gfx/aux_texture.h"

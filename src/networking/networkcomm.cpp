@@ -1,8 +1,9 @@
+#include <assert.h>
 #include "config.h"
-#include "cmd/unit_generic.h"
-#include "networking/networkcomm.h"
-#include "vsfilesystem.h"
-#include "vs_globals.h"
+#ifdef NETCOMM_JVOIP
+#include <jvoiplib/jvoipsession.h>
+#include <jvoiplib/jvoiprtptransmission.h>
+#endif /* NETCOMM_JVOIP */
 #ifdef CRYPTO
 #include <crypto++/filters.h>
 #include <crypto++/hex.h>
@@ -12,36 +13,30 @@
 #include <crypto++/rsa.h>
 #include <crypto++/des.h>
 #include <crypto++/sha.h>
-
-using namespace CryptoPP;
 #endif /* CRYPTO */
 
-//#ifdef NETCOMM
-
-#include <config.h>
-
+#include "vs_globals.h"
+#include "cmd/unit_generic.h"
+#include "networking/networkcomm.h"
+#include "vsfilesystem.h"
 #include "universe_util.h"
 #include "networking/lowlevel/vsnet_dloadmgr.h"
 #ifdef NETCOMM_WEBCAM
 #include "networking/webcam_support.h"
 #endif /* NETCOMM_NOWEBCAM */
-#ifdef NETCOMM_JVOIP
-#include <jvoiplib/jvoipsession.h>
-#include <jvoiplib/jvoiprtptransmission.h>
-#endif /* NETCOMM_JVOIP */
+#include "networking/lowlevel/packet.h"
+#include "xml_support.h"
 
-#define VOIP_PORT 5000
-extern bool cleanexit;
+using namespace VSFileSystem;
+#ifdef CRYPTO
+using namespace CryptoPP;
+#endif
 
 bool use_pa;
 bool use_secured;
 
-#include "networking/lowlevel/packet.h"
-#include <assert.h>
-#include "xml_support.h"
-
-using namespace VSFileSystem;
-
+#define VOIP_PORT 5000
+extern bool cleanexit;
 #ifdef NETCOMM_JVOIP
 void CheckVOIPError( int val )
 {

@@ -62,6 +62,7 @@ static float mymin( float a, float b )
     return a < b ? a : b;
 }
 
+using namespace XMLSupport;
 using namespace Orders;
 
 extern void DestroyMount( Mount* );

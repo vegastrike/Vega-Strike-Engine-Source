@@ -23,6 +23,8 @@
  *  xml Mission Scripting written by Alexander Rawass <alexannika@users.sourceforge.net>
  */
 #include "config.h"
+#include <boost/version.hpp>
+#include <boost/python/class.hpp>
 #include "python/python_class.h"
 #include <stdlib.h>
 #include <stdio.h>
@@ -58,16 +60,10 @@
 #include "cmd/briefing.h"
 #include "pythonmission.h"
 #ifdef HAVE_PYTHON
-#include "Python.h"
+#include "cs_python.h"
 #endif
 #include "flightgroup.h"
 #include "gldrv/winsys.h"
-#include <boost/version.hpp>
-#if BOOST_VERSION != 102800
-#include <boost/python/class.hpp>
-#else
-#include <boost/python/detail/extension_class.hpp>
-#endif
 #include "gfx/cockpit_generic.h"
 
 /* *********************************************************** */

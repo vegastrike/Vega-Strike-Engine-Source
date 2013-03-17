@@ -1,13 +1,9 @@
-#include "python_class.h"
-
+#include "config.h"
 #include <boost/version.hpp>
-#if BOOST_VERSION != 102800
 #include <boost/python.hpp>
 typedef boost::python::dict       BoostPythonDictionary;
-#else
-#include <boost/python/objects.hpp>
-typedef boost::python::dictionary BoostPythonDictionary;
-#endif
+
+#include "python_class.h"
 #include "cmd/container.h"
 #include <string>
 #include "init.h"
@@ -17,6 +13,13 @@ typedef boost::python::dictionary BoostPythonDictionary;
 #include "cmd/unit_util.h"
 #include "faction_generic.h"
 #include "cmd/ai/fire.h"
+#include "unit_wrapper_class.h"
+#include "unit_from_to_python.h"
+#if _MSC_VER <= 1200
+#else
+#include "define_odd_unit_functions.h"
+#endif
+
 extern void StarSystemExports();
 
 //makes to_python for both vector and qvector turn them into tuples :-)
@@ -24,14 +27,8 @@ using namespace UnitUtil;
 using namespace UniverseUtil;
 using Orders::FireAt;
 
-#include "unit_wrapper_class.h"
 extern void DefineOddUnitFunctions( boost::python::class_builder< UnitWrapper > &Class );
 extern void ExportUnit( boost::python::class_builder< UnitWrapper > &Class );
-#include "unit_from_to_python.h"
-#if _MSC_VER <= 1200
-#else
-#include "define_odd_unit_functions.h"
-#endif
 
 namespace UniverseUtil
 {
@@ -55,7 +52,7 @@ PYTHON_BEGIN_MODULE( VS )
 //#undef voidEXPORT_FACTION
 #define EXPORT_FACTION( name, aff ) PYTHON_DEFINE_GLOBAL( VS, &FactionUtil::name, #name );
 #define voidEXPORT_FACTION( name ) EXPORT_FACTION( name, 0 )
-EXPORT_UTIL( getUnitList, un_iter() )
+EXPORT_UTIL( getUnitList, PythonUnitIter() )
 EXPORT_UTIL( getScratchUnit, Unit() )
 voidEXPORT_UTIL( setScratchUnit )
 EXPORT_UTIL( getNumPlayers, 1 )
@@ -72,21 +69,13 @@ EXPORT_UTIL( getPlayerX, Unit() )
 EXPORT_UTIL( GetMasterPartList, Unit() )
 voidEXPORT_UTIL( setOwner )
 EXPORT_UTIL( getOwner, Unit() )
-#if BOOST_VERSION != 102800
 StarSystemExports();
-#else
-#include "star_system_exports.h"
-#endif
 #undef EXPORT_UTIL
 #undef voidEXPORT_UTIL
 #undef EXPORT_FACTION
 #undef voidEXPORT_FACTION
 PYTHON_BASE_BEGIN_CLASS( VS, Cargo, "Cargo" )
-#if BOOST_VERSION != 102800
 , boost::python::init< std::string, std::string, float, int, float, float > ( ) );
-#else
-Class.def( boost::python::constructor< std::string, std::string, float, int, float, float > () );
-#endif
 PYTHON_DEFINE_METHOD( Class, &Cargo::SetPrice, "SetPrice" );
 PYTHON_DEFINE_METHOD( Class, &Cargo::GetPrice, "GetPrice" );
 PYTHON_DEFINE_METHOD( Class, &Cargo::SetMass, "SetMass" );
@@ -124,6 +113,7 @@ DefineOddUnitFunctions( Class );
 PYTHON_END_CLASS( VS, UnitWrapper )
 
 PYTHON_BEGIN_CLASS( VS, UniverseUtil::PythonUnitIter, "un_iter" )
+
 PYTHON_DEFINE_METHOD( Class, &UniverseUtil::PythonUnitIter::current, "current" );
 PYTHON_DEFINE_METHOD( Class, &UniverseUtil::PythonUnitIter::isDone, "isDone" );
 PYTHON_DEFINE_METHOD( Class, &UniverseUtil::PythonUnitIter::notDone, "notDone" );
@@ -138,6 +128,8 @@ PYTHON_DEFINE_METHOD( Class, &UniverseUtil::PythonUnitIter::advanceNPlanet, "adv
 PYTHON_DEFINE_METHOD( Class, &UniverseUtil::PythonUnitIter::advanceJumppoint, "advanceJumppoint" );
 PYTHON_DEFINE_METHOD( Class, &UniverseUtil::PythonUnitIter::advanceNJumppoint, "advanceNJumppoint" );
 PYTHON_DEFINE_METHOD( Class, &UniverseUtil::PythonUnitIter::next, "next" );
+PYTHON_DEFINE_METHOD( Class, &UniverseUtil::PythonUnitIter::next, "__next__" );
+PYTHON_DEFINE_METHOD( Class, &UniverseUtil::PythonUnitIter::current, "__iter__" );
 PYTHON_DEFINE_METHOD( Class, &UniverseUtil::PythonUnitIter::remove, "remove" );
 PYTHON_DEFINE_METHOD( Class, &UniverseUtil::PythonUnitIter::preinsert, "preinsert" );
 PYTHON_END_CLASS( VS, UniverseUtil::PythonUnitIter )
@@ -169,10 +161,15 @@ PYTHON_END_MODULE( VS )
 
 void InitVS()
 {
+    PyImport_AppendInittab("VS",PYTHON_MODULE_INIT_FUNCTION(VS));
+}
+void InitVS2()
+{
     Python::reseterrors();
     PYTHON_INIT_MODULE( VS );
     Python::reseterrors();
 }
+
 
 static std::string ParseSizeFlags( int size )
 {

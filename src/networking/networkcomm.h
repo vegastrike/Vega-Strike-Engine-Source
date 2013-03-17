@@ -4,7 +4,7 @@
 #include "client.h"
 #ifdef CRYPTO
 #include <crypto++/randpool.h>
-using namespace CryptoPP;
+// using namespace CryptoPP;  DONT DO THIS IN HEADERS
 #endif
 
 #include "const.h"

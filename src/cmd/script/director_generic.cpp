@@ -1,7 +1,9 @@
 #include "config.h"
 
 #ifdef HAVE_PYTHON
-#include <Python.h>
+#include <boost/version.hpp>
+#include <boost/python/class.hpp>
+#include "cs_python.h"
 #endif
 
 #include "cmd/unit_generic.h"
@@ -12,12 +14,6 @@
 
 #include "python/python_class.h"
 
-#include <boost/version.hpp>
-#if BOOST_VERSION != 102800
-#include <boost/python/class.hpp>
-#else
-#include <boost/python/detail/extension_class.hpp>
-#endif
 
 #include "networking/netserver.h"
 
@@ -359,6 +355,11 @@ PYTHON_DEFINE_GLOBAL( Director, &saveStringListPy, "saveStringList" );
 PYTHON_END_MODULE( Director )
 
 void InitDirector()
+{
+    PyImport_AppendInittab("Director",PYTHON_MODULE_INIT_FUNCTION(Director));
+}
+
+void InitDirector2()
 {
     Python::reseterrors();
     PYTHON_INIT_MODULE( Director );

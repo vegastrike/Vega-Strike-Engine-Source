@@ -1,5 +1,12 @@
 #include "config.h"
-#include <Python.h>
+#include <boost/version.hpp>
+#if BOOST_VERSION != 102800
+#include <boost/python/object.hpp>
+#else
+#include <boost/python/objects.hpp>
+#endif
+
+#include "cs_python.h"
 #include <vector>
 #include <string>
 #include <math.h>
@@ -7,12 +14,7 @@
 #include "base.h"
 #include "base_util.h"
 #include "vsfilesystem.h"
-#include <boost/version.hpp>
-#if BOOST_VERSION != 102800
-#include <boost/python/object.hpp>
-#else
-#include <boost/python/objects.hpp>
-#endif
+
 
 static FILE * withAndWithout( std::string filename, std::string time_of_day_hint )
 {

@@ -1,4 +1,19 @@
 #include "config.h"
+#include <sys/stat.h>
+#ifdef _WIN32
+#define HAVE_LSTAT
+#define lstat _stat
+#define stat _stat
+#endif
+
+#ifndef HAVE_LSTAT
+struct stat
+{
+    size_t st_size;
+};
+
+extern "C" int lstat( const char *name, struct stat *buf );
+#endif
 
 #include "vsfilesystem.h"
 #include "vs_globals.h"
@@ -32,21 +47,7 @@ extern "C" int vs_access( const char *name, int mode );
 
 #endif
 
-#include <sys/stat.h>
-#ifdef _WIN32
-#define HAVE_LSTAT
-#define lstat _stat
-#define stat _stat
-#endif
-
-#ifndef HAVE_LSTAT
-struct stat
-{
-    size_t st_size;
-};
-
-extern "C" int lstat( const char *name, struct stat *buf );
-#endif
+using namespace VSFileSystem;
 
 namespace VsnetDownload
 {

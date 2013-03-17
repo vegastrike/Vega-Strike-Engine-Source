@@ -1,6 +1,7 @@
 #ifndef _NEBULA_GENERIC_H_
 #define _NEBULA_GENERIC_H_
 #include "unit_generic.h"
+#include "xml_support.h"
 
 class Nebula : public Unit
 {
@@ -87,28 +88,28 @@ enum Names
 const unsigned short int MAXENAMES = 4;
 const unsigned short int MAXANAMES = 11;
 
-const EnumMap::Pair element_names[MAXENAMES] = {
-    EnumMap::Pair( "UNKNOWN", UNKNOWN ),
-    EnumMap::Pair( "Nebula",  NEBULA ),
-    EnumMap::Pair( "Color",   COLOR ),
-    EnumMap::Pair( "Limits",  LIMITS ),
+const XMLSupport::EnumMap::Pair element_names[MAXENAMES] = {
+    XMLSupport::EnumMap::Pair( "UNKNOWN", UNKNOWN ),
+    XMLSupport::EnumMap::Pair( "Nebula",  NEBULA ),
+    XMLSupport::EnumMap::Pair( "Color",   COLOR ),
+    XMLSupport::EnumMap::Pair( "Limits",  LIMITS ),
 };
-const EnumMap::Pair attribute_names[MAXANAMES] = {
-    EnumMap::Pair( "UNKNOWN",       UNKNOWN ),
-    EnumMap::Pair( "Red",           RED ),
-    EnumMap::Pair( "Green",         GREEN ),
-    EnumMap::Pair( "Blue",          BLUE ),
-    EnumMap::Pair( "Near",          NEBNEAR ),
-    EnumMap::Pair( "Far",           NEBFAR ),
-    EnumMap::Pair( "Density",       DENSITY ),
-    EnumMap::Pair( "Mode",          MODE ),
-    EnumMap::Pair( "Index",         INDEX ),
-    EnumMap::Pair( "ExplosionTime", EXPLOSIONTIME ),
-    EnumMap::Pair( "FogThis",       FOGTHIS )
+const XMLSupport::EnumMap::Pair attribute_names[MAXANAMES] = {
+    XMLSupport::EnumMap::Pair( "UNKNOWN",       UNKNOWN ),
+    XMLSupport::EnumMap::Pair( "Red",           RED ),
+    XMLSupport::EnumMap::Pair( "Green",         GREEN ),
+    XMLSupport::EnumMap::Pair( "Blue",          BLUE ),
+    XMLSupport::EnumMap::Pair( "Near",          NEBNEAR ),
+    XMLSupport::EnumMap::Pair( "Far",           NEBFAR ),
+    XMLSupport::EnumMap::Pair( "Density",       DENSITY ),
+    XMLSupport::EnumMap::Pair( "Mode",          MODE ),
+    XMLSupport::EnumMap::Pair( "Index",         INDEX ),
+    XMLSupport::EnumMap::Pair( "ExplosionTime", EXPLOSIONTIME ),
+    XMLSupport::EnumMap::Pair( "FogThis",       FOGTHIS )
 };
 
-const EnumMap element_map( element_names, MAXENAMES );
-const EnumMap attribute_map( attribute_names, MAXANAMES );
+const XMLSupport::EnumMap element_map( element_names, MAXENAMES );
+const XMLSupport::EnumMap attribute_map( attribute_names, MAXANAMES );
 }
 
 #endif

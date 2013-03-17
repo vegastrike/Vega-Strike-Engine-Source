@@ -6,13 +6,13 @@
 #error This thread library should not be in use right now. Bitrot !
 
 //#include <iostream>
-//using namespace std;
+//
 //
 //#include "vsnet_debug.h"
 //#include "jthread.h"
 //#include "jmutex.h"
 //#include "jcond.h"
-//
+//using namespace std;
 ///*------------------------------------------------------------*
 //* definition of VSThread                                     *
 //*------------------------------------------------------------*/

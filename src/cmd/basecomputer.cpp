@@ -77,6 +77,8 @@ struct dirent
 #endif
 #include <sys/stat.h>
 
+using namespace XMLSupport;
+
 //end for directory thing
 extern const char *DamagedCategory;
 

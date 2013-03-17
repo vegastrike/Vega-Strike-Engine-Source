@@ -1,4 +1,4 @@
-#include <config.h>
+#include "config.h"
 
 #if !defined (_WIN32)
 #include <unistd.h>

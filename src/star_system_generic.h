@@ -42,7 +42,6 @@ struct AtmosphericFogMesh
     AtmosphericFogMesh();
 };
 
-using XMLSupport::AttributeList;
 //class Atmosphere;
 /**
  * Star System
@@ -79,7 +78,7 @@ protected:
     }
     *xml;
     void LoadXML( const char*, const Vector &centroid, const float timeofyear );
-    void beginElement( const std::string &name, const AttributeList &attributes );
+    void beginElement( const std::string &name, const XMLSupport::AttributeList &attributes );
     void endElement( const std::string &name );
 
 public:

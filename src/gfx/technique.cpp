@@ -1,22 +1,19 @@
 //
 //C++ Implementation: Technique
 //
-
-#include "technique.h"
 #include "config.h"
-
-#include "XMLDocument.h"
-#include "VSFileXMLSerializer.h"
-#include "vsfilesystem.h"
-#include "gfxlib.h"
-#include "aux_texture.h"
 
 #include <exception>
 #include <map>
 #include <boost/smart_ptr.hpp>
 
 #include "xml_support.h"
-
+#include "technique.h"
+#include "XMLDocument.h"
+#include "VSFileXMLSerializer.h"
+#include "vsfilesystem.h"
+#include "gfxlib.h"
+#include "aux_texture.h"
 #include "options.h"
 #include "gldrv/gl_globals.h"
 #include "audio/Exceptions.h"

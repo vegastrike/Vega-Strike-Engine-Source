@@ -1,9 +1,9 @@
 #include "config.h"
+#include <list>
+#include <vector>
 #include "aggressive.h"
 #include "event_xml.h"
 #include "script.h"
-#include <list>
-#include <vector>
 #include "vs_globals.h"
 #include "config_xml.h"
 #include "xml_support.h"
@@ -30,6 +30,7 @@
 extern double aggfire;
 
 using namespace Orders;
+using namespace XMLSupport;
 
 const EnumMap::Pair element_names[] = {
     EnumMap::Pair( "AggressiveAI",                AggressiveAI::AGGAI ),

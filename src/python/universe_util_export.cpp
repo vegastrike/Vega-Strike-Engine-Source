@@ -1,13 +1,7 @@
-#include "python_class.h"
+#include "config.h"
 #include <boost/version.hpp>
-/* ToDo: Fix so Boost 1.28 is supported */
-#if BOOST_VERSION != 102800
-#if BOOST_VERSION != 102800
 #include <boost/python.hpp>
-#else
-#include <boost/python/objects.hpp>
-#endif
-
+#include "python_class.h"
 #include "cmd/container.h"
 #include "init.h"
 #include "gfx/vec.h"
@@ -28,5 +22,5 @@ void StarSystemExports()
         #include "star_system_exports.h"
 }
 #include <string>
-#endif
+
 

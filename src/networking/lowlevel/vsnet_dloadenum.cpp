@@ -1,12 +1,8 @@
 #include <config.h>
 
 #include "vsnet_dloadenum.h"
-//#include "vsnet_dloadmgr.h"
-//#include "vsnet_notify.h"
-//#include "vsnet_cmd.h"
-//#include "netbuffer.h"
-//#include "packet.h"
 
+using namespace VSFileSystem;
 
 namespace VsnetDownload
 {

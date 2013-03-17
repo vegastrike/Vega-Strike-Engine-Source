@@ -17,7 +17,7 @@
 /*
  *  NetServer - Network Server Interface - written by Stephane Vaxelaire <svax@free.fr>
  */
-
+#include "cs_python.h"
 #include <time.h>
 #include <math.h>
 #if !defined (_WIN32) || defined (__CYGWIN__)
@@ -64,7 +64,6 @@
 #include "cmd/unit_const_cache.h"
 
 #include "python/init.h"
-#include <Python.h>
 
 #include "netversion.h"
 ObjSerial SERVER_NETVERSION = NETWORK_VERSION;

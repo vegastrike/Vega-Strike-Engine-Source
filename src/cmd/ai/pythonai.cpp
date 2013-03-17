@@ -1,14 +1,12 @@
-#include <Python.h>
+#include "config.h"
+#include <boost/version.hpp>
+#include <boost/python/class.hpp>
+
+#include "cs_python.h"
 #include <compile.h>
 #include <eval.h>
 #include <stdio.h>
-#include <boost/version.hpp>
-#if BOOST_VERSION != 102800
-#include <boost/python/class.hpp>
-#else
-#include <boost/python/class_builder.hpp>
-#include <boost/python/detail/extension_class.hpp>
-#endif
+
 #include "python/python_class.h"
 #include "python/python_compile.h"
 #include "config_xml.h"

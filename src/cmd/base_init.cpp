@@ -1,9 +1,4 @@
 #include <math.h>
-#include "cs_python.h"
-#include "python/python_class.h"
-#include "base.h"
-#include "base_util.h"
-#include "vsfilesystem.h"
 
 #include <boost/version.hpp>
 #if BOOST_VERSION != 102800
@@ -19,6 +14,13 @@ typedef boost::python::dictionary BoostPythonDictionary;
 #else
 #include <boost/python/objects.hpp>
 #endif
+
+#include "cs_python.h"
+#include "python/python_class.h"
+#include "base.h"
+#include "base_util.h"
+#include "vsfilesystem.h"
+
 
 static BoostPythonDictionary GetEventDataPython()
 {
@@ -113,6 +115,11 @@ PYTHON_DEFINE_GLOBAL( Base, &BaseUtil::ExitGame, "ExitGame" );
 PYTHON_END_MODULE( Base )
 
 void InitBase()
+{
+    PyImport_AppendInittab("Base",PYTHON_MODULE_INIT_FUNCTION(Base));
+}
+
+void InitBase2()
 {
     Python::reseterrors();
     PYTHON_INIT_MODULE( Base );

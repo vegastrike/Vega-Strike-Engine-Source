@@ -7,6 +7,7 @@
 #include "images.h"
 #include "../gfx/camera.h"
 
+using namespace XMLSupport;
 extern double interpolation_blend_factor;
 extern bool AdjustMatrix( Matrix &mat, const Vector &velocity, Unit *target, float speed, bool lead, float cone );
 

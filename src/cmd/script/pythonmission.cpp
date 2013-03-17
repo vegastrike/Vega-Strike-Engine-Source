@@ -1,15 +1,13 @@
-#include <Python.h>
+#include "config.h"
+#include <boost/version.hpp>
+#include "cs_python.h"
 #include <math.h>
 #include "pythonmission.h"
 #include "python/python_compile.h"
 #include <string>
 #include "pythonmission.h"
 #include "python/init.h"
-#include <boost/version.hpp>
-#if BOOST_VERSION == 102800
-#include <boost/python/reference.hpp>
-#include <boost/python/callback.hpp>
-#endif
+
 #include "vsfilesystem.h"
 #include "cmd/container.h"
 PythonMissionBaseClass::PythonMissionBaseClass() {}

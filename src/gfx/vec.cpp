@@ -19,12 +19,8 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 
-/* © 1998 Chris Fry & Daniel Horn*/
-#include "vegastrike.h"
-#include <math.h>
-#include "vec.h"
+/*  1998 Chris Fry & Daniel Horn*/
 #include <boost/version.hpp>
-#if BOOST_VERSION != 102800
 #if defined (_MSC_VER) && _MSC_VER <= 1200
 #define Vector Vactor
 #endif
@@ -33,13 +29,14 @@
 #include <boost/python/to_python_indirect.hpp>
 #include <boost/python/to_python_value.hpp>
 #include <boost/python/converter/builtin_converters.hpp>
+#include "vegastrike.h"
+#include <math.h>
+#include "vec.h"
 #include "cs_boostpython.h"
 #if defined (_MSC_VER) && _MSC_VER <= 1200
 #undef Vector
 #endif
-#else
-#include <boost/python/detail/extension_class.hpp>
-#endif
+
 //#include "glob_externs.h"
 #define _CZ (761.465325527)
 //extern Vector	_LightVector;

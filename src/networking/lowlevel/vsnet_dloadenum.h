@@ -5,7 +5,7 @@
 
 #include <iostream>
 #include "vsfilesystem.h"
-using namespace VSFileSystem;
+// using namespace VSFileSystem; DONT DO THIS IN HEADERS
 
 namespace VsnetDownload
 {
@@ -49,7 +49,7 @@ enum State
 
 std::ostream&operator<<( std::ostream &ostr, State s );
 
-std::ostream&operator<<( std::ostream &ostr, VSError e );
+std::ostream&operator<<( std::ostream &ostr, VSFileSystem::VSError e );
 }; //namespace Client
 }; //namespace VsnetDownload
 

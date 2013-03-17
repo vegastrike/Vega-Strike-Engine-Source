@@ -124,9 +124,13 @@ inline QVector from_python( PyObject *p, boost::python::type< QVector >)
 BOOST_PYTHON_END_CONVERSION_NAMESPACE
 
 void InitBriefing();
+void InitBriefing2();
 void InitDirector();
+void InitDirector2();
 void InitVS();
+void InitVS2();
 void InitBase();
+void InitBase2();
 
 #endif
 

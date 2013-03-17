@@ -8,9 +8,7 @@
 #include "xml_support.h"
 #undef BOOST_NO_CWCHAR
 
-using XMLSupport::EnumMap;
-using XMLSupport::Attribute;
-using XMLSupport::AttributeList;
+using namespace XMLSupport;
 using namespace NebulaXML;
 
 FOGMODE NebulaXML::parse_fogmode( string val )

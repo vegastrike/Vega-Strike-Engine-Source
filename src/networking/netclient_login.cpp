@@ -14,6 +14,7 @@
 #include "networking/lowlevel/netui.h"
 #include "networking/client.h"
 #include "networking/fileutil.h"
+#include "vs_random.h" //For random ping time.
 
 std::string global_username;
 std::string global_password;
@@ -457,7 +458,7 @@ SOCKETALT NetClient::init( const char *addr, unsigned short port, std::string &e
  */
 
 //NETFIXME: Correctly obtain ping time.
-#include "vs_random.h" //For random ping time.
+
 
 void NetClient::synchronizeTime( SOCKETALT *udpsock )
 {

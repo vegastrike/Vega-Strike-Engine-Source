@@ -6,13 +6,13 @@
 #include "networking/const.h"
 #include "vsfilesystem.h"
 
-using namespace VSFileSystem;
+// using namespace VSFileSystem; DONT DO THIS IN HEADERS
 using std::string;
 using std::vector;
 
 #ifdef CRYPTO
 #include <crypto++/sha.h>
-using namespace CryptoPP;
+// using namespace CryptoPP; DONT DO THIS IN HEADERS
 #endif
 
 namespace FileUtil
@@ -26,9 +26,9 @@ extern bool use_crypto;
 extern HASHMETHOD Hash;
 #endif
 void displayHash( unsigned char *hash, unsigned int length );
-int HashCompare( string filename, unsigned char *hashdigest, VSFileType type );
-int HashFileCompute( string filename, unsigned char *hashdigest, VSFileType type );
-int HashCompute( const char *filename, unsigned char *digest, VSFileType type );
+int HashCompare( string filename, unsigned char *hashdigest, VSFileSystem::VSFileType type );
+int HashFileCompute( string filename, unsigned char *hashdigest, VSFileSystem::VSFileType type );
+int HashCompute( const char *filename, unsigned char *digest, VSFileSystem::VSFileType type );
 int HashStringCompute( std::string buffer, unsigned char *digest );
 }
 

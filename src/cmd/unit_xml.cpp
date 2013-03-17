@@ -22,6 +22,10 @@
 #include "cmd/collide2/CSopcodecollider.h"
 
 #include "networking/netclient.h"
+
+using namespace XMLSupport;
+
+
 #define VS_PI (3.1415926536)
 
 /*ADDED FOR extensible use of unit pretty print and unit load */
@@ -510,9 +514,6 @@ Mount * createMount( const std::string &name, int ammo, int volume, float xyscal
     return new Mount( name.c_str(), ammo, volume, xyscale, zscale, 1, 1, banked );
 }
 
-using XMLSupport::EnumMap;
-using XMLSupport::Attribute;
-using XMLSupport::AttributeList;
 
 extern int GetModeFromName( const char* );
 

@@ -1,5 +1,6 @@
 #include "config.h"
-#include <Python.h>
+#include <algorithm>
+#include "cs_python.h"
 #include "base.h"
 #include "gldrv/winsys.h"
 #include "vsfilesystem.h"
@@ -10,7 +11,6 @@
 #include "python/init.h"
 #include "python/python_compile.h"
 #include "planet_generic.h"
-#include <algorithm>
 #include "base_util.h"
 #include "config_xml.h"
 #include "save_util.h"
@@ -30,6 +30,7 @@
 #include "in_mouse.h"
 #include "in_kb.h"
 
+#include "ai/communication.h"
 #include "audio/SceneManager.h"
 
 
@@ -84,13 +85,15 @@ static char makingstate = 0;
 #endif
 extern const char *mission_key; //defined in main.cpp
 bool BaseInterface::Room::BaseTalk::hastalked = false;
-using namespace VSFileSystem;
+
 #define NEW_GUI
 
 #ifdef NEW_GUI
 #include "basecomputer.h"
 #include "../gui/eventmanager.h"
 #endif
+
+using namespace VSFileSystem;
 std::vector< unsigned int >base_keyboard_queue;
 static void CalculateRealXAndY( int xbeforecalc, int ybeforecalc, float *x, float *y )
 {
@@ -1203,7 +1206,7 @@ void BaseInterface::Terminate()
 }
 
 extern void abletodock( int dock );
-#include "ai/communication.h"
+
 
 void BaseInterface::Room::Launch::Click( BaseInterface *base, float x, float y, int button, int state )
 {

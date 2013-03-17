@@ -6,7 +6,7 @@
 #include "vsnet_notify.h"
 #include "vsnet_debug.h"
 
-
+using namespace VSFileSystem;
 namespace VsnetDownload
 {
 namespace Client

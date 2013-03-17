@@ -14,10 +14,6 @@ using Orders::FireAt;
 
 BOOST_PYTHON_BEGIN_CONVERSION_NAMESPACE
 
-#if BOOST_VERSION == 102800
-extern PyObject * to_python( Unit *x );
-#endif
-
 BOOST_PYTHON_END_CONVERSION_NAMESPACE
 bool useAfterburner()
 {

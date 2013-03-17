@@ -32,8 +32,6 @@
 #include "in_kb_data.h"
 #include "universe_util.h"               //get galaxy faction, dude
 #include <boost/version.hpp>
-#if BOOST_VERSION != 102800
-
 #if defined (_MSC_VER) && _MSC_VER <= 1200
 
 #define Vector Vactor
@@ -46,10 +44,7 @@
 #undef Vector
 #endif
 
-#else
-
-#include <boost/python/detail/extension_class.hpp>
-#endif
+using namespace XMLSupport;
 vector< Vector >perplines;
 extern std::vector< unorigdest* >pendingjump;
 

@@ -2,6 +2,7 @@
 #define _CMD_AISCRIPT_H_
 #include "order.h"
 #include "navigation.h"
+#include "xml_support.h"
 
 /**
  * Loads a script from a given XML file
@@ -30,7 +31,7 @@ class AIScript : public Order
 ///Pop the top vector of teh current stack
     void popv();
 ///member function begin elements... deals with pushing vectors on stack
-    void beginElement( const string &name, const AttributeList &attributes );
+    void beginElement( const string &name, const XMLSupport::AttributeList &attributes );
 ///member function end elements...deals with calling AI scripts from the stack
     void endElement( const string &name );
 public:

@@ -1,14 +1,4 @@
-#include <Python.h>
-#include "python/python_class.h"
-#include <string>
-#include <stdlib.h>
-#include "audiolib.h"
-#include "base.h"
-#include "base_util.h"
-#include "universe_util.h"
-#include "basecomputer.h"
-#include "main_loop.h"
-#include "music.h"
+#include "cs_python.h"
 
 #include <boost/version.hpp>
 #if BOOST_VERSION != 102800
@@ -26,6 +16,16 @@ typedef boost::python::dictionary BoostPythonDictionary;
 #include <boost/python/objects.hpp>
 #endif
 
+#include "python/python_class.h"
+#include <string>
+#include <stdlib.h>
+#include "audiolib.h"
+#include "base.h"
+#include "base_util.h"
+#include "universe_util.h"
+#include "basecomputer.h"
+#include "main_loop.h"
+#include "music.h"
 #include "in_kb.h"
 
 
@@ -45,7 +45,7 @@ using Audio::SourceListener;
 using Audio::LVector3;
 using Audio::Vector3;
 
-
+using namespace XMLSupport;
 namespace BaseUtil
 {
 inline BaseInterface::Room * CheckRoom( int room )

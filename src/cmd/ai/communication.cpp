@@ -5,6 +5,8 @@
 #include "audiolib.h"
 #include "options.h"
 
+
+using namespace XMLSupport;
 FSM::FSM(const std::string& filename)
 {
     //loads a conversation finite state machine with deltaRelation weight transition from an XML?

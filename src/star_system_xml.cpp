@@ -31,7 +31,8 @@ extern vs_options game_options;
 using std::string;
 using std::vector;
 using std::map;
-
+using namespace XMLSupport;
+using namespace VSFileSystem;
 extern const vector< string >& ParseDestinations( const string &value );
 extern void bootstrap_draw( const string &message, Animation *SplashScreen = NULL );
 extern void disableTerrainDraw( ContinuousTerrain *ct );
@@ -1494,7 +1495,7 @@ void StarSystem::endElement( const string &name )
     if (xml->unitlevel == 0) {}
 }
 
-using namespace VSFileSystem;
+
 void StarSystem::LoadXML( const char *filename, const Vector &centroid, const float timeofyear )
 {
     using namespace StarXML;

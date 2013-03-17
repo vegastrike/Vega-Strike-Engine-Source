@@ -11,7 +11,7 @@
 #include <string>
 #include <compile.h>
 
-extern Hashtable< std::string, PyCodeObject, 1023 >compiled_python;
+extern Hashtable< std::string, PyObject, 1023 >compiled_python;
 
 class PythonBasicType
 {
@@ -40,7 +40,7 @@ public:
         switch (type)
         {
         case MYSTRING:
-            return PyString_FromString( objects.c_str() );
+            return PyUnicode_FromString( objects.c_str() );
 
         case MYLONG:
             return PyLong_FromLong( objecti );
@@ -53,7 +53,7 @@ public:
 };
 
 void InterpretPython( const std::string &filename );
-PyCodeObject * CompilePython( const std::string &filename );
+PyObject * CompilePython( const std::string &filename );
 void CompileRunPython( const std::string &filename );
 PyObject * CreateTuple( const std::vector< PythonBasicType > &values );
 

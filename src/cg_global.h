@@ -34,7 +34,7 @@
 #include <glh/glh_obs.h>
 #include <glh/glh_cube_map.h>
 
-using namespace glh;
+// using namespace glh; DONT DO THIS IN HEADERS
 
 class CG_Cloak
 {

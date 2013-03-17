@@ -8,7 +8,7 @@
 #include "init.h"
 #include "universe_util.h"
 #include "in_kb_data.h"
-Hashtable< string, PyCodeObject, 1023 >compiled_python;
+Hashtable< string, PyObject, 1023 >compiled_python;
 
 char * LoadString( const char *filename )
 {
@@ -46,10 +46,10 @@ void InterpretPython( const std::string &name )
     free( temp );
 }
 
-PyCodeObject * CompilePython( const std::string &name )
+PyObject * CompilePython( const std::string &name )
 {
     Python::reseterrors();
-    PyCodeObject *retval = compiled_python.Get( name );
+    PyObject *retval = compiled_python.Get( name );
     Python::reseterrors();
     if (retval)
         return retval;
@@ -60,7 +60,7 @@ PyCodeObject * CompilePython( const std::string &name )
         std::string compiling_name = getCompilingName( name ).c_str();
         char *temp = strdup( compiling_name.c_str() );
 
-        retval = (PyCodeObject*) Py_CompileString( str, temp, Py_file_input );
+        retval = Py_CompileString( str, temp, Py_file_input );
         if (retval)
             compiled_python.Put( name, retval );
         free( temp );
@@ -68,13 +68,13 @@ PyCodeObject * CompilePython( const std::string &name )
     }
     return retval;
 }
-
+extern PyObject* PyInit_VS;
 void CompileRunPython( const std::string &filename )
 {
     static bool ndebug_libs = XMLSupport::parse_bool( vs_config->getVariable( "AI", "compile_python", "true" ) );
     if (ndebug_libs) {
         Python::reseterrors();
-        PyCodeObject *CompiledProgram = CompilePython( filename );
+        PyObject *CompiledProgram = CompilePython( filename );
         Python::reseterrors();
         if (CompiledProgram) {
             PyObject *m, *d;
@@ -82,7 +82,13 @@ void CompileRunPython( const std::string &filename )
             if ( ( m = PyImport_AddModule( main_str ) ) != NULL ) {
                 PyObject *localdict = PyDict_New();
                 if ( ( d = PyModule_GetDict( m ) ) != NULL ) {
-                    PyObject *exe = PyEval_EvalCode( CompiledProgram, d, localdict );
+                    PyObject *exe = PyEval_EvalCode( 
+#if (PY_VERSION_HEX >= 0x03020000)
+		        CompiledProgram, 
+#else
+		        (PyCodeObject*)CompiledProgram, 
+#endif
+			d, localdict );
                     Py_XDECREF( exe );
                     //unref exe?
                 }

@@ -5,7 +5,7 @@
 #include <vector>
 #include "gfx/vec.h"
 #include "vsfilesystem.h"
-using namespace XMLSupport;
+//using namespace XMLSupport;  DONT DO THIS IN HEADERS
 enum VIEWSTYLE
 {
     CP_FRONT, CP_BACK, CP_LEFT, CP_RIGHT, CP_VIEWTARGET, CP_PANINSIDE, CP_CHASE, CP_PAN, CP_PANTARGET, CP_TARGET, CP_FIXED,
@@ -156,7 +156,7 @@ protected:
     virtual void LoadXML( VSFileSystem::VSFile &f ) {}
     static void beginElement( void *userData, const XML_Char *name, const XML_Char **atts );
     static void endElement( void *userData, const XML_Char *name );
-    virtual void beginElement( const string &name, const AttributeList &attributes ) {}
+    virtual void beginElement( const string &name, const XMLSupport::AttributeList &attributes ) {}
     virtual void endElement( const string &name ) {}
 
     ///Destructs cockpit info for new loading
