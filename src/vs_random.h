@@ -49,19 +49,19 @@ class VSRandom
     {
         return NN_CONSTANT;
     }
-    static const int M()
+    static const unsigned int M()
     {
         return 397;
     }
-    static const int MATRIX_A()
+    static const unsigned int MATRIX_A()
     {
         return 0x9908b0dfUL;
     }
-    static const int UPPER_MASK()
+    static const unsigned int UPPER_MASK()
     {
         return 0x80000000UL;
     }
-    static const int LOWER_MASK()
+    static const unsigned int LOWER_MASK()
     {
         return 0x7fffffffUL;
     }

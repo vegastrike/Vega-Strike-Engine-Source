@@ -525,7 +525,6 @@ void Manager::addCmdDownload( SOCKETALT sock, NetBuffer &buffer )
                 //If we want to download a memory buffer from server access is considered ok
                 if (ft == VSFileSystem::ZoneBuffer) {
                     //We receive a filename containing a zone id so we test it exists
-                    int zoneid = atoi( file.c_str() );
                     ok = true;
                 } else {
                     ok = private_test_access( file, (VSFileSystem::VSFileType) ft );

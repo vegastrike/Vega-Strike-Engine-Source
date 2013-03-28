@@ -4,6 +4,9 @@
 #include "vs_globals.h"
 #include "universe_util.h"
 #include "gldrv/winsys.h"
+#include "options.h"
+
+
 
 static inline float fmin( float a, float b )
 {
@@ -124,14 +127,10 @@ void ShipCommands::setkps( const char *in )
     float kps    = XMLSupport::parse_float( std::string( in ) );
     Unit *player = UniverseUtil::getPlayer();
     if (player) {
-        static float game_speed = XMLSupport::parse_float( vs_config->getVariable( "physics", "game_speed", "1" ) );
-        static bool  display_in_meters = XMLSupport::parse_bool( vs_config->getVariable( "physics", "display_in_meters", "true" ) );
-        static bool  lie = XMLSupport::parse_bool( vs_config->getVariable( "physics", "game_speed_lying", "true" ) );
-        if (lie)
-            kps *= game_speed;
-
+        if (game_options.game_speed_lying)
+            kps *= game_options.game_speed;
         else
-            kps /= display_in_meters ? 1.0f : 3.6f;
+            kps /= game_options.display_in_meters ? 1.0f : 3.6f;
         player->GetComputerData().set_speed = fmin( player->GetComputerData().max_speed(), kps );
     }
 }

@@ -1,13 +1,16 @@
+#include <map>
+#include <set>
+
+#include <boost/algorithm/string/predicate.hpp>
+
 #include "gl_globals.h"
 #include "vs_globals.h"
 #include "vegastrike.h"
 #include "config_xml.h"
 #include "gfxlib.h"
 #include "lin_time.h"
-#include <map>
-#include <set>
+#include "options.h"
 
-#include <boost/algorithm/string/predicate.hpp>
 
 using boost::algorithm::icontains;
 
@@ -338,6 +341,9 @@ static int  defaultprog    = 0;
 static int  lowfiprog = 0;
 static int  hifiprog  = 0;
 
+
+// THIS IS STUPID!
+
 #ifdef __APPLE__
 std::string hifiProgramName  = "mac";
 std::string lowfiProgramName = "maclite";
@@ -345,16 +351,22 @@ std::string lowfiProgramName = "maclite";
 std::string hifiProgramName  = "default";
 std::string lowfiProgramName = "lite";
 #endif
+// END STUPID 
+
 
 int getDefaultProgram()
 {
     static bool initted = false;
     if (!initted) {
+
+// THIS IS STUPID,  Also why is lofi not configurable ?
 #ifdef __APPLE__
-        hifiProgramName = vs_config->getVariable( "graphics", "mac_shader_name", "mac" );
+        hifiProgramName = game_options.mac_shader_name;
 #else
-        hifiProgramName = vs_config->getVariable( "graphics", "shader_name", "default" );
+        hifiProgramName = game_options.shader_name;
 #endif
+// END STUPID
+
         if (hifiProgramName.length() == 0) {
             lowfiprog = hifiprog = 0;
         } else {
@@ -463,9 +475,7 @@ GameSpeed GFXGetFramerate()
 bool GFXShaderReloaded()
 {
     bool retval = programChanged;
-    static bool framerate_changes_shader =
-        XMLSupport::parse_bool( vs_config->getVariable( "graphics", "framerate_changes_shader", "false" ) );
-    if (framerate_changes_shader) {
+    if (game_options.framerate_changes_shader) {
         switch ( GFXGetFramerate() )
         {
         case TOOSLOW:

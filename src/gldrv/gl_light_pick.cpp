@@ -184,7 +184,7 @@ void GFXPickLights( const Vector &center, const float radius, vector< int > &lig
 
     for (int j = 0; j < 2; j++) {
         veclinecol::iterator i;
-        float attenuated, occlusion;
+        float attenuated = 0, occlusion = 0;
 
         for (i = tmppickt[j]->begin(); i != tmppickt[j]->end(); i++) {
             if ( picklight( *i->lc, center, radius, lightsenabled, i->GetIndex(), attenuated, occlusion ) ) {

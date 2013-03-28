@@ -12,7 +12,7 @@
 
 #include <vector>
 
-extern vs_options game_options;
+
 
 GLenum PolyLookup( POLYTYPE poly )
 {
@@ -131,17 +131,16 @@ void GFXVertexList::RefreshDisplayList( )
         return;          //don't used lists if they're mutable
     if (display_list)
         GFXDeleteList( display_list );
-    int a;
     int offset = 0;
     display_list = GFXCreateList();
-    if (changed&HAS_COLOR) {
+    if (changed & HAS_COLOR) {
         EnableArrays(data.colors);
     } else {
         EnableArrays(data.vertices);
     }
     for (int i = 0; i < numlists; i++) {
         // Populate the display list with array data
-        if (changed&HAS_INDEX) {
+        if (changed & HAS_INDEX) {
             switch (changed & (INDEX_BYTE|INDEX_INT|INDEX_SHORT)) {
                 case INDEX_BYTE:
                     glDrawElements( PolyLookup(mode[i]), offsets[i], GL_UNSIGNED_BYTE, index.b );
@@ -321,7 +320,7 @@ void GFXVertexList::Draw( enum POLYTYPE *mode, const INDEX index, const int numl
     } else {
         int totoffset = 0;
         if (changed&HAS_INDEX) {
-            char   stride    = changed&HAS_INDEX;
+            long   stride    = changed&HAS_INDEX;
             GLenum indextype = (changed&INDEX_BYTE)
                                ? GL_UNSIGNED_BYTE
                                : ( (changed&INDEX_SHORT)
@@ -353,7 +352,7 @@ void GFXVertexList::Draw( enum POLYTYPE *mode, const INDEX index, const int numl
                         glindices.clear();
                         glcounts.clear();
                         int totcount = 0;
-                        for (int j = i, offs = totoffset; j < numlists; offs += offsets[j++]) {
+                        for (long j = i, offs = totoffset; j < numlists; offs += offsets[j++]) {
                             totcount += offsets[j];
                             if ( !drawn[j] && (mode[j] == mode[i]) ) {
                                 glindices.push_back( use_vbo ? (GLvoid*) (stride*offs)
@@ -374,8 +373,8 @@ void GFXVertexList::Draw( enum POLYTYPE *mode, const INDEX index, const int numl
             } else {
                 for (int i = 0; i < numlists; i++) {
                     glDrawElements( PolyLookup( mode[i] ), offsets[i], indextype,
-                                    use_vbo ? (void*) (stride*totoffset)
-                                    : &index.b[stride*totoffset] );                     //changed&INDEX_BYTE == stride!
+                                    use_vbo ? (GLvoid*) (stride*totoffset)
+                                    : (GLvoid*)&index.b[stride*totoffset] );                     //changed&INDEX_BYTE == stride!
                     totoffset += offsets[i];
                     ++gl_batches_this_frame;
                     gl_vertices_this_frame += offsets[i];
@@ -617,11 +616,6 @@ void GFXSphereVertexList::ProceduralModification()
         Vector vert[ROWS];
         int direction[ROWS/2];
 
-        int last_row_set[ROWS];
-        for(int i=0; i < ROWS; i++) {
-            last_row_set[i] = 0;
-        }
-
         for(int i=0; i < numVertices; i++) {
             for(int j=0; j < ROWS; j++)
                 if(row[j] < numVertices/ROWS*(j+1))
@@ -631,24 +625,16 @@ void GFXSphereVertexList::ProceduralModification()
                 direction[j] = (int)vsrandom.uniformInc( 0.0, 5.0 );
             if(i % 4 == 1) {
                 for(int j=0; j < ROWS; j+=2) { 
-                    if(direction[j/2] > 2) {
+                    if(direction[j/2] > 2) 
                         SetVector( 1.003, &vert[j] );
-                        last_row_set[j] = 1;
-                    } else {
-                        last_row_set[j] = -1;
-                    }
                 }
 
             }
 
             if(i % 4 == 0 ) {
                 for(int j=1; j < ROWS; j+=2) {
-                    if(direction[(j-1)/2] > 2) {
+                    if(direction[(j-1)/2] > 2) 
                         SetVector( 1.003, &vert[j] );
-                        last_row_set[j] = 1;
-                    } else {
-                        last_row_set[j] = -1;
-                    }
                 }
             }
 

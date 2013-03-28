@@ -89,6 +89,10 @@ Orders::AutoDocking::DockingPath FindDockingPort(Unit *player,
     }
 
     Orders::AutoDocking::DockingPath result;
+#if __GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ >= 7)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wmaybe-uninitialized"
+#endif
     if (candidate)
     {
         assert(candidate->first <= candidate->second);
@@ -98,6 +102,9 @@ Orders::AutoDocking::DockingPath FindDockingPort(Unit *player,
         }
     }
     return result;
+#if __GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ >= 7)
+#pragma GCC diagnostic pop
+#endif
 }
 
 } // anonymous namespace

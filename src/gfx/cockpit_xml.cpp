@@ -296,7 +296,7 @@ void GameCockpit::beginElement( const string &name, const AttributeList &attribu
     VSSprite *oldpit       = NULL;
     bool      replaced[4]  = {false, false, false, false};
     int       counter      = 0;
-    switch (elem)
+    switch ((int)elem)
     {
     case COCKPIT:
         for (iter = attributes.begin(); iter != attributes.end(); iter++) {
@@ -369,7 +369,7 @@ void GameCockpit::beginElement( const string &name, const AttributeList &attribu
         for (counter = 0; counter < 4; ++counter)
             if (!replaced[counter]) {
                 delete Pit[counter];
-                Pit[counter] = false;
+                Pit[counter] = NULL;
             }
         break;
     case UnitImages< void >::SHIELD4:
@@ -670,13 +670,11 @@ using namespace VSFileSystem;
 
 void GameCockpit::LoadXML( const char *filename )
 {
-    const int chunk_size = 16384;
 
     VSFile    f;
-    VSError   err = Unspecified;
     if (filename[0] != '\0')
-        VSError err = f.OpenReadOnly( filename, CockpitFile );
-    LoadXML( f );
+        if(f.OpenReadOnly( filename, CockpitFile ))
+            LoadXML(f);
 }
 
 void GameCockpit::LoadXML( VSFileSystem::VSFile &f )

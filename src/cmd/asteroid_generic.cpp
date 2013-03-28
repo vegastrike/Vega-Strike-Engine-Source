@@ -12,7 +12,7 @@ static void RecursiveSetSchedule(Unit *un)
 		else {
 			un->schedule_priority = Unit::scheduleAField;
 			un->do_subunit_scheduling = true;
-			for (un_iter it=un->getSubUnits(); it.notDone(); ++it)
+			for (un_iter it=un->getSubUnits(); !it.isDone(); ++it)
 				RecursiveSetSchedule(*it);
 		}
 	}

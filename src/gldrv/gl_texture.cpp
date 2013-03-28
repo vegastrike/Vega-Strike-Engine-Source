@@ -26,6 +26,10 @@
 #include "config_xml.h"
 #include "gfxlib.h"
 
+#include "options.h"
+
+
+
 #ifndef GL_TEXTURE_CUBE_MAP_EXT
 #define GL_TEXTURE_CUBE_MAP_EXT 0x8513
 #define GL_TEXTURE_CUBE_MAP_POSITIVE_X_EXT 0x8515
@@ -893,9 +897,7 @@ GFXBOOL /*GFXDRVAPI*/ GFXTransferTexture( unsigned char *buffer,
         internalformat = GetTextureFormat( internformat );
         if ( ( ( textures[handle].mipmapped&(TRILINEAR|MIPMAP) ) && gl_options.mipmap >= 2 ) || detail_texture ) {
             if (detail_texture) {
-                static FILTER fil =
-                    XMLSupport::parse_bool( vs_config->getVariable( "graphics", "detail_texture_trilinear",
-                                                                    "true" ) ) ? TRILINEAR : MIPMAP;
+                static FILTER fil = game_options.detail_texture_trilinear ? TRILINEAR : MIPMAP;
                 textures[handle].mipmapped = fil;
                 glTexParameteri( textures[handle].targets, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
                 if (fil&TRILINEAR)
@@ -903,7 +905,6 @@ GFXBOOL /*GFXDRVAPI*/ GFXTransferTexture( unsigned char *buffer,
                 else
                     glTexParameteri( textures[handle].targets, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_NEAREST );
             }
-            XMLSupport::parse_int( vs_config->getVariable( "graphics", "detail_texture_full_color", "1" ) );
             //If we are DDS and we need to generate mipmaps (almost everything gets sent here, even non-3d visuals)
             if (internformat >= DXT1 && internformat <= DXT5) {
                 int size = 0;
@@ -1168,7 +1169,7 @@ ENVMODE:
         glTexEnvi( GL_TEXTURE_ENV, GL_OPERAND2_ALPHA_ARB, GL_SRC_ALPHA );
         {
             GLfloat arg2v[4] = {
-                0, 0, 0, 1.0-arg2
+                0, 0, 0, 1.0f-arg2
             };
             glTexEnvfv( GL_TEXTURE_ENV, GL_TEXTURE_ENV_COLOR, arg2v );
         }

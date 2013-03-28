@@ -631,12 +631,10 @@ void NavigationSystem::DrawShip()
     navdrawlist factionlist( 0, screenoccupation, factioncolours );
 
     float     deltax   = screenskipby4[1]-screenskipby4[0];
-    float     deltay   = screenskipby4[3]-screenskipby4[2];
     float     originx  = screenskipby4[0]; //left
     float     originy  = screenskipby4[3]; //top
     string    writethis;
     Unit     *par;
-    int       foundpos = 0;
     if ( ( par = _Universe->AccessCockpit()->GetParent() ) )
         writethis = MakeUnitXMLPretty( par->WriteUnitString(), par );
     TextPlane displayname;
@@ -1760,12 +1758,6 @@ void NavigationSystem::TranslateCoordinates( QVector &pos,
                                              float &system_item_scale_temp,
                                              bool system_not_galaxy )
 {
-    float itemscale = CalculatePerspectiveAdjustment( zscale,
-                                                      zdistance,
-                                                      pos,
-                                                      pos_flat,
-                                                      system_item_scale_temp,
-                                                      system_not_galaxy );
 
     //TRANSLATE INTO SCREEN DISPLAY COORDINATES
     //**********************************

@@ -779,7 +779,6 @@ void RestoreFirstPassState( Texture *detailTexture,
     GFXPopBlendMode();
     if (!nomultienv) GFXDepthFunc( LEQUAL );
     if (detailTexture || skipped_glowpass) {
-        static float tempo[4] = {1, 0, 0, 0};
         _Universe->activeStarSystem()->activateLightMap();
     }
     if (detailTexture) {
@@ -912,9 +911,6 @@ void SetupDamageMapThirdPass( Texture *decal, unsigned int mat, float polygon_of
 
 void RestoreGlowMapState( bool write_to_depthmap, float polygonoffset, float NOT_USED_BUT_BY_HELPER = 3 )
 {
-    float a, b;
-    //GFXGetPolygonOffset(&a,&b);
-    //GFXPolygonOffset (a, b+polygonoffset+NOT_USED_BUT_BY_HELPER);
     GFXDepthFunc( LEQUAL );     //By Klauss - restore original depth function
     static bool force_write_to_depthmap =
         XMLSupport::parse_bool( vs_config->getVariable( "graphics", "force_glowmap_restore_write_to_depthmap", "true" ) );
@@ -1227,7 +1223,6 @@ void Mesh::ProcessShaderDrawQueue( size_t whichpass, int whichdrawqueue, bool zs
     //If we're not writing anything... why go on?
     if (!pass.colorWrite && !zwrite)
         return;
-    float zero[4] = {0, 0, 0, 0};
     float envmaprgba[4]   = {1, 1, 1, 0};
     float noenvmaprgba[4] = {0.5, 0.5, 0.5, 1.0};
 
@@ -1327,7 +1322,6 @@ void Mesh::ProcessShaderDrawQueue( size_t whichpass, int whichdrawqueue, bool zs
         //but... WTH... nothing is thread safe in VS.
         //Also: Be careful with reentrancy... right now, this section is not reentrant.
         static vector< int >lights;
-        int numGlobalLights   = _GLLightsEnabled;
         MeshDrawContext    &c = cur_draw_queue[zsort ? indices[i] : i];
         if (c.mesh_seq == whichdrawqueue) {
             lights.clear();
@@ -1358,7 +1352,6 @@ void Mesh::ProcessShaderDrawQueue( size_t whichpass, int whichdrawqueue, bool zs
             bool popGlobals = false;
             size_t maxiter    = 1;
             int  maxlights  = lights.size();
-            size_t nlights    = 0;
             if (pass.perLightIteration) {
                 maxlights = pass.perLightIteration;
                 maxiter   = pass.maxIterations;
@@ -1564,7 +1557,6 @@ void Mesh::ProcessFixedDrawQueue( size_t techpass, int whichdrawqueue, bool zsor
     //Restore texture units
     for (unsigned int i = 2; i < gl_options.Multitexture; ++i)
         GFXToggleTexture( false, i );
-    bool last_pass = !DecalSize;
     
     // Set up GL state from technique-specified values
     setupGLState(pass, zwrite, blendSrc, blendDst, myMatNum, alphatest, whichdrawqueue);
@@ -1578,7 +1570,6 @@ void Mesh::ProcessFixedDrawQueue( size_t techpass, int whichdrawqueue, bool zsor
     GFXEnable( TEXTURE0 );
     if (alphatest)
         GFXAlphaTest( GEQUAL, alphatest/255.0 );
-    static Texture *white = new Texture( "white.png" );
     static Texture *black = new Texture( "blackclear.png" );
     if ( HASDECAL( BASE_TEX ) )
         GETDECAL( BASE_TEX )->MakeActive();

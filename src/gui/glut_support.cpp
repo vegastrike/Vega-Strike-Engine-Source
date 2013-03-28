@@ -193,6 +193,7 @@ void EndGUIFrame( MousePointerStyle pointerStyle )
         switch(pointerStyle) {
         case MOUSE_POINTER_NORMAL:  whichSprite = &MouseVSSprite; break;
         case MOUSE_POINTER_HOVER:   whichSprite = &MouseOverVSSprite; break;
+        case MOUSE_POINTER_NONE: return;
         }
         
         DrawGlutMouse( mmx, mmy, whichSprite );

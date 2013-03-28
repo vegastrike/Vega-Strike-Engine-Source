@@ -18,14 +18,16 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
-#include "gfxlib.h"
-
-#include "gl_light.h"
 #include <stack>
 using std::stack;
 #include <assert.h>
 #include "vs_globals.h"
+#include "gfxlib.h"
+#include "gl_light.h"
 #include "config_xml.h"
+#include "options.h"
+
+
 
 GLint   GFX_MAX_LIGHTS = 8;
 GLint   GFX_OPTIMAL_LIGHTS    = 4;
@@ -376,26 +378,16 @@ void GFXDestroyAllLights()
 
 static void SetupGLLightGlobals()
 {
-    int i;
     glLightModeli( GL_LIGHT_MODEL_LOCAL_VIEWER, 1 );     //don't want lighting coming from infinity....we have to take the hit due to sphere mapping matrix tweaking
-    //
     glGetIntegerv( GL_MAX_LIGHTS, &GFX_MAX_LIGHTS );
     if (!GLLights) {
         GLLights = (OpenGLLights*) malloc( sizeof (OpenGLLights)*GFX_MAX_LIGHTS );
-        for (i = 0; i < GFX_MAX_LIGHTS; i++)
+        for (int i = 0; i < GFX_MAX_LIGHTS; i++)
             GLLights[i].index = -1;
     }
-    static float lightcutoff     = XMLSupport::parse_float( vs_config->getVariable( "graphics", "lightcutoff", ".06" ) );
-    static float lightoptimalintensity =
-        XMLSupport::parse_float( vs_config->getVariable( "graphics", "lightoptimalintensity", ".06" ) );
-    static float lightsaturation = XMLSupport::parse_float( vs_config->getVariable( "graphics", "lightsaturation", ".95" ) );
-    static int   numlights = XMLSupport::parse_int( vs_config->getVariable( "graphics", "numlights", "4" ) );
-    static bool  separatespecularcolor =
-        XMLSupport::parse_bool( vs_config->getVariable( "graphics", "separatespecularcolor", "false" ) );
 
-    GFXSetCutoff( lightcutoff );
-    GFXSetOptimalIntensity( lightoptimalintensity, lightsaturation );
-    GFXSetOptimalNumLights( numlights );
-    GFXSetSeparateSpecularColor( separatespecularcolor ? GFXTRUE : GFXFALSE );
+    GFXSetCutoff( game_options.lightcutoff );
+    GFXSetOptimalIntensity( game_options.lightoptimalintensity, game_options.lightsaturation );
+    GFXSetOptimalNumLights( game_options.numlights );
+    GFXSetSeparateSpecularColor( game_options.separatespecularcolor ? GFXTRUE : GFXFALSE );
 }
-

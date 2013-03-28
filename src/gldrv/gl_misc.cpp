@@ -28,6 +28,9 @@
 #include "gl_light.h"
 #include "config_xml.h"
 #include "winsys.h"
+#include "options.h"
+
+
 
 // disable clientside draw for debugging purposes
 //#define NODRAW 1
@@ -43,12 +46,11 @@ bool GFXMultiTexAvailable()
 
 void GFXCircle( float x, float y, float wid, float hei )
 {
-    static float aaccuracy = XMLSupport::parse_float( vs_config->getVariable( "graphics", "circle_accuracy", "0.1" ) );
     float segmag =
         ( Vector( wid*g_game.x_resolution, 0,
                   0 )
          -Vector( wid*g_game.x_resolution*cos( 2.*M_PI/360.0 ), hei*g_game.y_resolution*sin( 2.*M_PI/360.0 ), 0 ) ).Magnitude();
-    int accuracy = (int) ( 360.0f*aaccuracy*(1.0f < segmag ? 1.0 : segmag) );
+    int accuracy = (int) ( 360.0f*game_options.circle_accuracy*(1.0f < segmag ? 1.0 : segmag) );
     if (accuracy < 4) accuracy = 4;
     float iaccuracy = 1.0f/accuracy;
 
@@ -150,7 +152,7 @@ void /*GFXDRVAPI*/ GFXDrawElements( POLYTYPE type,
     // Note: glDrawRangeElements doesn't seem to work well in MESA, 
     //       stay away from it
     GFXBindElementBuffer( 0 );
-    glDrawElements(PolyLookup(type), nelem, GL_UNSIGNED_BYTE, indices);
+    glDrawRangeElements(PolyLookup(type), 0, vnum-1, nelem, GL_UNSIGNED_BYTE, indices);
     
     GFXDrawCleanup(type, data, vnum, vsize, csize, tsize0, tsize1);
 #endif
@@ -169,7 +171,7 @@ void /*GFXDRVAPI*/ GFXDrawElements( POLYTYPE type,
     // Note: glDrawRangeElements doesn't seem to work well in MESA, 
     //       stay away from it
     GFXBindElementBuffer( 0 );
-    glDrawElements(PolyLookup(type), nelem, GL_UNSIGNED_SHORT, indices);
+    glDrawRangeElements(PolyLookup(type), 0, vnum-1, nelem, GL_UNSIGNED_SHORT, indices);
     
     GFXDrawCleanup(type, data, vnum, vsize, csize, tsize0, tsize1);
 #endif
@@ -188,7 +190,7 @@ void /*GFXDRVAPI*/ GFXDrawElements( POLYTYPE type,
     // Note: glDrawRangeElements doesn't seem to work well in MESA, 
     //       stay away from it
     GFXBindElementBuffer( 0 );
-    glDrawElements(PolyLookup(type), nelem, GL_UNSIGNED_INT, indices);
+    glDrawRangeElements(PolyLookup(type), 0, vnum-1, nelem, GL_UNSIGNED_INT, indices);
     
     GFXDrawCleanup(type, data, vnum, vsize, csize, tsize0, tsize1);
 #endif

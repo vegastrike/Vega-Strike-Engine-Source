@@ -59,6 +59,10 @@
 #include "unit_damage.h"
 #include "unit_physics.h"
 #include "unit_click.h"
+#include "options.h"
+
+
+
 
 using std::vector;
 using std::string;
@@ -112,9 +116,10 @@ template < class UnitType >GameUnit< UnitType >::~GameUnit()
 }
 
 template < class UnitType >
-int GameUnit< UnitType >::nummesh() const
+unsigned int GameUnit< UnitType >::nummesh() const
 {
-    return ( (int) this->meshdata.size() )-1;
+    // return number of meshes but not the shield 
+    return (this->meshdata.size() - 1 );
 }
 
 template < class UnitType >
@@ -170,7 +175,7 @@ void GameUnit< UnitType >::Cloak( bool engage )
 template < class UnitType >
 bool GameUnit< UnitType >::queryFrustum( double frustum[6][4] ) const
 {
-    int    i;
+    unsigned int    i;
 #ifdef VARIABLE_LENGTH_PQR
     Vector TargetPoint( cumulative_transformation_matrix[0],
                         cumulative_transformation_matrix[1],
@@ -179,7 +184,7 @@ bool GameUnit< UnitType >::queryFrustum( double frustum[6][4] ) const
 #else
     Vector TargetPoint;
 #endif
-    for (i = 0; i < nummesh(); i++) {
+    for (i = 0; i < nummesh() && this->meshdata[i]; i++) {
         TargetPoint = Transform( this->cumulative_transformation_matrix, this->meshdata[i]->Position() );
         if ( GFXSphereInFrustum( frustum,
                                  TargetPoint,
@@ -245,7 +250,7 @@ void GameUnit< UnitType >::DrawNow( const Matrix &mato, float lod )
     int cloak = this->cloaking;
     if (this->cloaking > this->cloakmin)
         cloak = cloakVal( cloak, this->cloakmin, this->pImage->cloakrate, this->pImage->cloakglass );
-    for (i = 0; (int) i < this->nummesh(); i++) {
+    for (i = 0; i <= this->nummesh(); i++) {
         //NOTE LESS THAN OR EQUALS...to cover shield mesh
         if (this->meshdata[i] == NULL)
             continue;
@@ -257,34 +262,27 @@ void GameUnit< UnitType >::DrawNow( const Matrix &mato, float lod )
             this->meshdata[i]->Draw( lod, mat, d, cloak );
     }
     Unit *un;
-    for (un_kiter iter = this->SubUnits.constIterator(); (un = *iter); ++iter) {
+    for (un_iter iter = this->getSubUnits(); (un = *iter); ++iter) {
         Matrix temp;
         un->curr_physical_state.to_matrix( temp );
         Matrix submat;
         MultMatrix( submat, mat, temp );
         (un)->DrawNow( submat, lod );
     }
-    float  haloalpha   = 1;
-    if (cloak >= 0)
-        haloalpha = ( (float) cloak )/2147483647;
-#ifdef CAR_SIM
-    Vector Scale( 1, pImage->ecm, computer.set_speed );
-#else
     float  cmas = this->computer.max_ab_speed()*this->computer.max_ab_speed();
     if (cmas == 0)
         cmas = 1;
         Vector Scale( 1, 1, 1 );         //Now, HaloSystem handles that
-#endif
     int    nummounts = this->GetNumMounts();
+    Matrix wmat = this->WarpMatrix( mat );
     for (i = 0; (int) i < nummounts; i++) {
-        static bool draw_mounts = XMLSupport::parse_bool( vs_config->getVariable( "graphics", "draw_weapons", "false" ) );
         Mount *mahnt = &this->mounts[i];
-        if (draw_mounts)
+        if (game_options.draw_weapons)
             if (mahnt->xyscale != 0 && mahnt->zscale != 0) {
                 Mesh *gun = mahnt->type->gun;
                 if (gun && mahnt->status != Mount::UNCHOSEN) {
                     Transformation mountLocation( mahnt->GetMountOrientation(), mahnt->GetMountLocation().Cast() );
-                    mountLocation.Compose( Transformation::from_matrix( mat ), this->WarpMatrix( mat ) );
+                    mountLocation.Compose( Transformation::from_matrix( mat ), wmat );
                     Matrix mmat;
                     mountLocation.to_matrix( mmat );
                     if (GFXSphereInFrustum( mountLocation.position, gun->rSize()*vlpqrScaleFactor ) > 0) {
@@ -336,11 +334,6 @@ void GameUnit< UnitType >::Draw( const Transformation &parent, const Matrix &par
     //Quick shortcut for camera setup phase
     bool myparent = ( this == _Universe->AccessCockpit()->GetParent() );
 
-#ifdef VARIABLE_LENGTH_PQR
-    const float     vlpqrScaleFactor = SizeScaleFactor;
-#else
-    const float     vlpqrScaleFactor = 1.f;
-#endif
 
     Matrix         *ctm;
     Matrix invview;
@@ -370,27 +363,35 @@ void GameUnit< UnitType >::Draw( const Transformation &parent, const Matrix &par
     AUDAdjustSound( sound.engine, cumulative_transformation.position, GetVelocity() );
 #endif
 
-    int cloak = this->cloaking;
-    if (this->cloaking > this->cloakmin) {
-        cloak = (int) (this->cloaking-interpolation_blend_factor*this->pImage->cloakrate*SIMULATION_ATOM);
-        cloak = cloakVal( cloak, this->cloakmin, this->pImage->cloakrate, this->pImage->cloakglass );
-    }
-    
     unsigned int i;
     if ( (this->hull < 0) && (!cam_setup_phase) )
         Explode( true, GetElapsedTime() );
     
     float damagelevel = 1.0f;
     unsigned char chardamage = 0;
-    if (this->hull < this->maxhull && !cam_setup_phase) {
-        damagelevel = this->hull/this->maxhull;
-        chardamage  = ( 255-(unsigned char) (damagelevel*255) );
-    }
     
     // We might need to scale rSize, this "average scale" takes the transform matrix into account
-    float avgscale = sqrt((ctm->getP().MagnitudeSquared() + ctm->getR().MagnitudeSquared()) * 0.5);
+    float avgscale = 1.0f;
     
     bool On_Screen = false;
+    float Apparent_Size = 0.0f;
+    int cloak = this->cloaking;
+    Matrix wmat;
+
+    if (!cam_setup_phase) {
+        // Following stuff is only needed in actual drawing phase
+        if (this->cloaking > this->cloakmin) {
+            cloak = (int) (this->cloaking-interpolation_blend_factor*this->pImage->cloakrate*SIMULATION_ATOM);
+            cloak = cloakVal( cloak, this->cloakmin, this->pImage->cloakrate, this->pImage->cloakglass );
+        }
+        if (this->hull < this->maxhull) {
+            damagelevel = this->hull/this->maxhull;
+            chardamage  = ( 255-(unsigned char) (damagelevel*255) );
+        }
+        avgscale = sqrt((ctm->getP().MagnitudeSquared() + ctm->getR().MagnitudeSquared()) * 0.5);
+        wmat = this->WarpMatrix( *ctm );
+    }
+    
     if ( ( !(this->invisible&UnitType::INVISUNIT) ) && ( ( !(this->invisible&UnitType::INVISCAMERA) ) || (!myparent) ) ) {
         if (!cam_setup_phase) {
             Camera *camera = _Universe->AccessCamera();
@@ -400,14 +401,14 @@ void GameUnit< UnitType >::Draw( const Transformation &parent, const Matrix &par
                 ( camera->GetVelocity().Magnitude()+this->Velocity.Magnitude() )*SIMULATION_ATOM;
             
             unsigned int numKeyFrames = this->graphicOptions.NumAnimationPoints;
-            for (i = 0; i < this->meshdata.size(); i++) {
+            for (i = 0; i <= this->nummesh(); i++) {
                 //NOTE LESS THAN OR EQUALS...to cover shield mesh
                 if (this->meshdata[i] == NULL)
                     continue;
-                if ( (int) i == this->nummesh() && (this->meshdata[i]->numFX() == 0 || this->hull < 0) )
+                if (  i == this->nummesh() && (this->meshdata[i]->numFX() == 0 || this->hull < 0) )
                     continue;
                 if (this->meshdata[i]->getBlendDst() == ONE) {
-                    if ( (this->invisible&UnitType::INVISGLOW) != 0 )
+                    if ( (this->invisible & UnitType::INVISGLOW) != 0 )
                         continue;
                     if (damagelevel < .9)
                         if ( flickerDamage( this, damagelevel ) )
@@ -419,11 +420,11 @@ void GameUnit< UnitType >::Draw( const Transformation &parent, const Matrix &par
                 float mSize = this->meshdata[i]->rSize() * avgscale;
                 double d = ( TransformedPosition-camerapos ).Magnitude();
                 double rd  = d-mSize;
-                double pixradius = mSize*perspectiveFactor(
+                float pixradius = Apparent_Size = mSize*perspectiveFactor(
                     (rd < g_game.znear) ? g_game.znear : rd );
-                double lod = pixradius*g_game.detaillevel;
+                float lod = pixradius*g_game.detaillevel;
                 if (this->meshdata[i]->getBlendDst() == ZERO) {
-                    if (UnitType::isUnit() == PLANETPTR) {
+                    if (UnitType::isUnit() == PLANETPTR && pixradius > 10) {
                         Occlusion::addOccluder(TransformedPosition, mSize, true);
                     } else if (pixradius >= 10.0) {
                         Occlusion::addOccluder(TransformedPosition, mSize, false);
@@ -436,7 +437,7 @@ void GameUnit< UnitType >::Draw( const Transformation &parent, const Matrix &par
                     if (frustd) {
                         //if the radius is at least half a pixel at detail 1 (equivalent to pixradius >= 0.5 / detail)
                         float currentFrame = this->meshdata[i]->getCurrentFrame();
-                        this->meshdata[i]->Draw( lod, this->WarpMatrix( *ctm ), d, 
+                        this->meshdata[i]->Draw( lod, wmat, d, 
                                                  i == this->meshdata.size()-1 ? -1 : cloak,
                                                  (camera->GetNebula() == this->nebula && this->nebula != NULL) ? -1 : 0, 
                                                  chardamage );                                                                                                                                                            //cloakign and nebula
@@ -464,7 +465,7 @@ void GameUnit< UnitType >::Draw( const Transformation &parent, const Matrix &par
             Unit  *un;
             double backup = interpolation_blend_factor;
             int    cur_sim_frame = _Universe->activeStarSystem()->getCurrentSimFrame();
-            for (un_kiter iter = this->SubUnits.constIterator(); (un = *iter); ++iter) {
+            for (un_iter iter = this->getSubUnits(); (un = *iter); ++iter) {
                 float backup = SIMULATION_ATOM;
                 if (this->sim_atom_multiplier && un->sim_atom_multiplier)
                     SIMULATION_ATOM = SIMULATION_ATOM*un->sim_atom_multiplier/this->sim_atom_multiplier;
@@ -500,76 +501,74 @@ void GameUnit< UnitType >::Draw( const Transformation &parent, const Matrix &par
     if (cam_setup_phase) return;
     int nummounts = this->GetNumMounts();
     for (i = 0; (int) i < nummounts; i++) {
-        static bool draw_mounts = XMLSupport::parse_bool( vs_config->getVariable( "graphics", "draw_weapons", "false" ) );
         Mount *mahnt = &this->mounts[i];
-        if (draw_mounts && On_Screen)
+        if (game_options.draw_weapons && On_Screen)
             if (mahnt->xyscale != 0 && mahnt->zscale != 0) {
                 Mesh *gun = mahnt->type->gun;
                 if (gun && mahnt->status != Mount::UNCHOSEN) {
                     Transformation mountLocation( mahnt->GetMountOrientation(), mahnt->GetMountLocation().Cast() );
-                    mountLocation.Compose( *ct, this->WarpMatrix( *ctm ) );
+                    mountLocation.Compose( *ct, wmat );
                     Matrix mat;
                     mountLocation.to_matrix( mat );
                     if (GFXSphereInFrustum( mountLocation.position, gun->rSize()*avgscale ) > 0) {
                         float d   = ( mountLocation.position-_Universe->AccessCamera()->GetPosition() ).Magnitude();
-                        float lod = gun->rSize()*g_game.detaillevel*perspectiveFactor(
+                        float pixradius = gun->rSize()*perspectiveFactor(
                             (d-gun->rSize() < g_game.znear) ? g_game.znear : d-gun->rSize() );
-                        ScaleMatrix( mat, Vector( mahnt->xyscale, mahnt->xyscale, mahnt->zscale ) );
-                        gun->setCurrentFrame( this->mounts[i].ComputeAnimatedFrame( gun ) );
-                        gun->Draw( lod, mat, d, cloak,
-                                   (_Universe->AccessCamera()->GetNebula() == this->nebula && this->nebula != NULL) ? -1 : 0,
-                                   chardamage,
-                                   true );                                                                                                                                      //cloakign and nebula
-                        if (mahnt->type->gun1) {
-                            gun = mahnt->type->gun1;
+                        float lod = pixradius * g_game.detaillevel;
+                        if (lod > 0.5 && pixradius > 2.5) {
+                            ScaleMatrix( mat, Vector( mahnt->xyscale, mahnt->xyscale, mahnt->zscale ) );
                             gun->setCurrentFrame( this->mounts[i].ComputeAnimatedFrame( gun ) );
                             gun->Draw( lod, mat, d, cloak,
-                                       (_Universe->AccessCamera()->GetNebula() == this->nebula && this->nebula
-                                        != NULL) ? -1 : 0,
-                                       chardamage, true );                                                                                                                              //cloakign and nebula
+                                       (_Universe->AccessCamera()->GetNebula() == this->nebula && this->nebula != NULL) ? -1 : 0,
+                                       chardamage,
+                                       true );                                                                                                                                      //cloakign and nebula
+                        }
+                        if (mahnt->type->gun1) {
+                            pixradius = gun->rSize()*perspectiveFactor(
+                                (d-gun->rSize() < g_game.znear) ? g_game.znear : d-gun->rSize() );
+                            lod = pixradius * g_game.detaillevel;
+                            if (lod > 0.5 && pixradius > 2.5) {
+                                gun = mahnt->type->gun1;
+                                gun->setCurrentFrame( this->mounts[i].ComputeAnimatedFrame( gun ) );
+                                gun->Draw( lod, mat, d, cloak,
+                                           (_Universe->AccessCamera()->GetNebula() == this->nebula && this->nebula
+                                            != NULL) ? -1 : 0,
+                                           chardamage, true );                                                                                                                              //cloakign and nebula
+                            }
                         }
                     }
                 }
             }
         if (this->mounts[i].type->type == weapon_info::BEAM)
             if (this->mounts[i].ref.gun)
-                this->mounts[i].ref.gun->Draw( *ct, this->WarpMatrix( *ctm ),
+                this->mounts[i].ref.gun->Draw( *ct, wmat,
                                                ( (this->mounts[i].size&weapon_info::AUTOTRACKING)
                                                 && (this->mounts[i].time_to_lock <= 0)
                                                 && (this->computer.radar.trackingactive) ) ? Unit::Target() : NULL, 
                                                this->computer.radar.trackingcone );
     }
-    float haloalpha = 1;
-    if (cloak >= 0)
-        haloalpha = ( (float) cloak )/2147483647;
-    if ( On_Screen && (phalos->NumHalos() > 0) && !( this->docked&(UnitType::DOCKED|UnitType::DOCKED_INSIDE) ) ) {
+    if ( On_Screen && (phalos->NumHalos() > 0) && !( this->docked&(UnitType::DOCKED|UnitType::DOCKED_INSIDE) ) && (Apparent_Size > 5.0f) ) {
         Vector linaccel = this->GetAcceleration();
         Vector angaccel = this->GetAngularAcceleration();
-        float  maxaccel = this->GetMaxAccelerationInDirectionOf( this->WarpMatrix( *ctm ).getR(), true );
+        float  maxaccel = this->GetMaxAccelerationInDirectionOf( wmat.getR(), true );
         Vector velocity = this->GetVelocity();
 
-#ifdef CAR_SIM
-        Vector Scale( 1, pImage->ecm, computer.set_speed );
-#else
         float  cmas = this->computer.max_ab_speed()*this->computer.max_ab_speed();
         if (cmas == 0)
             cmas = 1;
         Vector Scale( 1, 1, 1 );         //Now, HaloSystem handles that
-#endif
         //WARNING: cmas is not a valid maximum speed for the upcoming multi-direction thrusters,
         //nor is maxaccel. Instead, each halo should have its own limits specified in units.csv
         float nebd = (_Universe->AccessCamera()->GetNebula() == this->nebula && this->nebula != NULL) ? -1 : 0;
         float hulld = this->GetHull() > 0 ? damagelevel : 1.0;
-        phalos->Draw( this->WarpMatrix( *ctm ), Scale, cloak, nebd, hulld, velocity, linaccel, angaccel, maxaccel, cmas, this->faction );
+        phalos->Draw( wmat, Scale, cloak, nebd, hulld, velocity, linaccel, angaccel, maxaccel, cmas, this->faction );
     }
     if ( On_Screen && !UnitType::graphicOptions.NoDamageParticles
         && !( this->docked&(UnitType::DOCKED|UnitType::DOCKED_INSIDE) ) ) {
-        int numm = this->nummesh();
-        if (damagelevel < .99 && numm > 0 && this->GetHull() > 0) {
+        if (damagelevel < .99 && this->nummesh() > 0 && this->GetHull() > 0) {
             unsigned int switcher    = (damagelevel > .8) ? 1
                                        : (damagelevel > .6) ? 2 : (damagelevel > .4) ? 3 : (damagelevel > .2) ? 4 : 5;
-            static float sparklerate = XMLSupport::parse_float( vs_config->getVariable( "graphics", "sparklerate", "5" ) );
-            sparkle_accum += GetElapsedTime()*sparklerate;
+            sparkle_accum += GetElapsedTime()*game_options.sparklerate;
             int spawn = (int) (sparkle_accum);
             sparkle_accum -= spawn;
             while (spawn-- > 0) {
@@ -674,41 +673,22 @@ void GameUnit< UnitType >::applyTechniqueOverrides(const map<string, string> &ov
 template < class UnitType >
 Matrix GameUnit< UnitType >::WarpMatrix( const Matrix &ctm ) const
 {
-    static float cutoff =
-        XMLSupport::parse_float( vs_config->getVariable( "graphics", "warp_stretch_cutoff",
-                                                         "50000" ) )*XMLSupport::parse_float(
-            vs_config->getVariable( "physics", "game_speed", "1" ) );
-    static float cutoffcutoff = cutoff*cutoff;
-    static bool  only_stretch_in_warp =
-        XMLSupport::parse_bool( vs_config->getVariable( "graphics", "only_stretch_in_warp", "true" ) );
-    if ( this->GetWarpVelocity().MagnitudeSquared() < cutoffcutoff
-        || (only_stretch_in_warp && this->graphicOptions.InWarp == 0) ) {
+    if ( this->GetWarpVelocity().MagnitudeSquared() < (game_options.warp_stretch_cutoff * game_options.warp_stretch_cutoff * game_options.game_speed * game_options.game_speed )
+        || (game_options.only_stretch_in_warp && this->graphicOptions.InWarp == 0) ) {
         return ctm;
     } else {
         Matrix k( ctm );
 
         float  speed = this->GetWarpVelocity().Magnitude();
-        static float maxregion0stretch =
-            XMLSupport::parse_float( vs_config->getVariable( "graphics", "warp_stretch_region0_max", "1" ) );
-
-        static float maxstretch = XMLSupport::parse_float( vs_config->getVariable( "graphics", "warp_stretch_max", "4" ) );
-        static float maxspeed   =
-            XMLSupport::parse_float( vs_config->getVariable( "graphics", "warp_stretch_max_speed",
-                                                             "1000000" ) )
-            *XMLSupport::parse_float( vs_config->getVariable( "physics", "game_speed", "1" ) );
-        static float maxregion0speed =
-            XMLSupport::parse_float( vs_config->getVariable( "graphics", "warp_stretch_max_region0_speed",
-                                                             "100000" ) )
-            *XMLSupport::parse_float( vs_config->getVariable( "physics", "game_speed", "1" ) );
-        float stretchregion0length = maxregion0stretch*(speed-cutoff)/(maxregion0speed-cutoff);
+        float stretchregion0length = game_options.warp_stretch_region0_max*(speed-(game_options.warp_stretch_cutoff * game_options.game_speed))/((game_options.warp_stretch_max_region0_speed * game_options.game_speed)-(game_options.warp_stretch_cutoff * game_options.game_speed));
         float stretchlength =
-            (maxstretch
-             -maxregion0stretch)*(speed-maxregion0speed)/(maxspeed-maxregion0speed+.06125)+maxregion0stretch;
-        if (stretchlength > maxstretch)
-            stretchlength = maxstretch;
-        if (stretchregion0length > maxregion0stretch)
-            stretchregion0length = maxregion0stretch;
-        ScaleMatrix( k, Vector( 1, 1, 1+(speed > maxregion0speed ? stretchlength : stretchregion0length) ) );
+            (game_options.warp_stretch_max
+             -game_options.warp_stretch_region0_max)*(speed-(game_options.warp_stretch_max_region0_speed * game_options.game_speed))/((game_options.warp_stretch_max_speed * game_options.game_speed)-(game_options.warp_stretch_max_region0_speed * game_options.game_speed)+.06125f)+game_options.warp_stretch_region0_max;
+        if (stretchlength > game_options.warp_stretch_max)
+            stretchlength = game_options.warp_stretch_max;
+        if (stretchregion0length > game_options.warp_stretch_region0_max)
+            stretchregion0length = game_options.warp_stretch_region0_max;
+        ScaleMatrix( k, Vector( 1, 1, 1+(speed > (game_options.warp_stretch_max_region0_speed * game_options.game_speed) ? stretchlength : stretchregion0length) ) );
         return k;
     }
 }

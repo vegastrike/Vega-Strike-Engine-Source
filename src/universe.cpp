@@ -56,7 +56,7 @@
 using std::string;
 using std::vector;
 using std::find;
-extern vs_options game_options;
+
 extern void CacheJumpStar( bool );
 extern void SortStarSystems( vector< StarSystem* > &ss, StarSystem *drawn );
 StarSystem* GameUniverse::Init( string systemfile, const Vector &centr, const string planetname )
@@ -118,9 +118,7 @@ void GameUniverse::SetupCockpits( vector< string >playerNames )
 {
     for (unsigned int i = 0; i < playerNames.size(); ++i) {
         cockpit.push_back( NULL );
-        int temp = cockpit.size();
         cockpit.back() = new GameCockpit( "", NULL, playerNames[i] );
-        temp = cockpit.size();
     }
 }
 

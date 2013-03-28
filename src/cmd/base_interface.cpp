@@ -1048,9 +1048,10 @@ double compute_light_dot( Unit *base, Unit *un )
         for (; (st = *ui); ++ui)
             if ( st->isPlanet() ) {
                 if ( ( (Planet*) st )->hasLights() ) {
+#ifdef VS_DEBUG
                     QVector v1  = ( un->Position()-base->Position() ).Normalize();
                     QVector v2  = ( st->Position()-base->Position() ).Normalize();
-#ifdef VS_DEBUG
+
                     double  dot = v1.Dot( v2 );
                     if (dot > ret) {
                         VSFileSystem::vs_fprintf( stderr, "dot %lf", dot );

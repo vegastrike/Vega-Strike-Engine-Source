@@ -57,8 +57,8 @@ public:
     // Can the sensor detect harmful ships
     bool UseThreatAssessment() const;
 
-    Track CreateTrack(Unit *) const;
-    Track CreateTrack(Unit *, const Vector&) const;
+    Track CreateTrack(const Unit *) const;
+    Track CreateTrack(const Unit *, const Vector&) const;
 
     // I am tracking target
     bool IsTracking(const Track&) const;

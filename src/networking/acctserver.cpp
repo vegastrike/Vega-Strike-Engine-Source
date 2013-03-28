@@ -11,7 +11,7 @@
 #include "networking/fileutil.h"
 #include "posh.h"
 #include "options.h"
-extern vs_options game_options;
+
 using namespace VSFileSystem;
 
 VegaConfig *vs_config = NULL;
@@ -68,7 +68,6 @@ void AccountServer::start()
     strcpy( CONFIGFILE, "accountserver.config" );
     cout<<"Loading config file...";
     VSFileSystem::InitPaths( CONFIGFILE );
-    game_options.init();
     //vs_config = new VegaConfig( ACCTCONFIGFILE);
     cout<<" done."<<endl;
     InitTime();

@@ -908,8 +908,7 @@ void ZoneMgr::displayNPCs()
             Cockpit *cp = _Universe->AccessCockpit( i );
             if (cp->activeStarSystem != ss)
                 continue;
-            Unit    *un;
-            char     name[15];
+            char name[15];
             if ( !cp->GetParent() ) {
                 sprintf( name, "*Plr% 3d ", i );
                 displayUnitInfo( NULL, cp->savegame->GetCallsign(), name );

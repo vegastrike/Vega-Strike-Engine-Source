@@ -1,7 +1,7 @@
-#include "star_system.h"
-
-#include "weapon_xml.h"
 #include <assert.h>
+
+#include "star_system.h"
+#include "weapon_xml.h"
 #include "audiolib.h"
 #include "unit_generic.h"
 #include "beam.h"
@@ -9,6 +9,9 @@
 #include "vsfilesystem.h"
 #include "role_bitmask.h"
 #include "endianness.h"
+#include "options.h"
+
+
 
 extern enum weapon_info::MOUNT_SIZE lookupMountSize( const char *str );
 
@@ -241,12 +244,9 @@ void beginElementXML_Char( void *userData, const XML_Char *name, const XML_Char 
 
 void beginElement( void *userData, const char *name, const char **atts )
 {
-    static float  game_speed    = XMLSupport::parse_float( vs_config->getVariable( "physics", "game_speed", "1" ) );
-    static bool   adj_gun_speed =
-        XMLSupport::parse_bool( vs_config->getVariable( "physics", "gun_speed_adjusted_game_speed", "false" ) );
-    static float  gun_speed     =
-        XMLSupport::parse_float( vs_config->getVariable( "physics", "gun_speed", "1" ) )*(adj_gun_speed ? game_speed : 1);
-    static int    gamma = (int) ( 20*XMLSupport::parse_float( vs_config->getVariable( "graphics", "weapon_gamma", "1.35" ) ) );
+
+    static float  gun_speed     = game_options.gun_speed * (game_options.gun_speed_adjusted_game_speed ? game_options.game_speed : 1);
+    static int    gamma = (int) ( 20*game_options.weapon_gamma );
     AttributeList attributes( atts );
     enum weapon_info::WEAPON_TYPE weaptyp;
     Names elem = (Names) element_map.lookup( string( name ) );
@@ -330,29 +330,29 @@ void beginElement( void *userData, const char *name, const char **atts )
                 tmpweapon.sound    = AUDCreateSoundWAV( (*iter).value, tmpweapon.type == weapon_info::PROJECTILE );
                 break;
             case OFFSETX:
-                tmpweapon.offset.i = XMLSupport::parse_float( iter->value );
+                tmpweapon.offset.i = XMLSupport::parse_floatf( iter->value );
                 break;
             case OFFSETY:
-                tmpweapon.offset.j = XMLSupport::parse_float( iter->value );
+                tmpweapon.offset.j = XMLSupport::parse_floatf( iter->value );
                 break;
             case OFFSETZ:
-                tmpweapon.offset.k = XMLSupport::parse_float( iter->value );
+                tmpweapon.offset.k = XMLSupport::parse_floatf( iter->value );
                 break;
             case RED:
-                tmpweapon.r = XMLSupport::parse_float( (*iter).value );
+                tmpweapon.r = XMLSupport::parse_floatf( (*iter).value );
                 break;
             case GREEN:
-                tmpweapon.g = XMLSupport::parse_float( (*iter).value );
+                tmpweapon.g = XMLSupport::parse_floatf( (*iter).value );
                 break;
             case BLUE:
-                tmpweapon.b = XMLSupport::parse_float( (*iter).value );
+                tmpweapon.b = XMLSupport::parse_floatf( (*iter).value );
                 break;
             case ALPHA:
-                tmpweapon.a = XMLSupport::parse_float( (*iter).value );
+                tmpweapon.a = XMLSupport::parse_floatf( (*iter).value );
                 break;
             case TEXTURESTRETCH:
                 tmpweapon.TextureStretch =
-                    XMLSupport::parse_float( (*iter).value );
+                    XMLSupport::parse_floatf( (*iter).value );
                 break;
             default:
                 break;
@@ -374,19 +374,19 @@ void beginElement( void *userData, const char *name, const char **atts )
                 VSFileSystem::vs_fprintf( stderr, "Unknown Weapon Element %s", (*iter).name.c_str() );
                 break;
             case CONSUMPTION:
-                tmpweapon.EnergyRate = XMLSupport::parse_float( (*iter).value );
+                tmpweapon.EnergyRate = XMLSupport::parse_floatf( (*iter).value );
                 break;
             case RATE:
-                tmpweapon.EnergyRate = XMLSupport::parse_float( (*iter).value );
+                tmpweapon.EnergyRate = XMLSupport::parse_floatf( (*iter).value );
                 break;
             case STABILITY:
-                tmpweapon.Stability  = XMLSupport::parse_float( (*iter).value );
+                tmpweapon.Stability  = XMLSupport::parse_floatf( (*iter).value );
                 break;
             case REFIRE:
-                tmpweapon.RefireRate = XMLSupport::parse_float( (*iter).value );
+                tmpweapon.RefireRate = XMLSupport::parse_floatf( (*iter).value );
                 break;
             case LOCKTIME:
-                tmpweapon.LockTime   = XMLSupport::parse_float( (*iter).value );
+                tmpweapon.LockTime   = XMLSupport::parse_floatf( (*iter).value );
                 break;
             default:
                 break;
@@ -395,8 +395,6 @@ void beginElement( void *userData, const char *name, const char **atts )
         break;
     case DAMAGE:
         {
-            static float damagemodifier =
-                XMLSupport::parse_float( vs_config->getVariable( "physics", "weapon_damage_efficiency", "1.0" ) );
             level++;
             for (iter = attributes.begin(); iter != attributes.end(); iter++) {
                 switch ( attribute_map.lookup( (*iter).name ) )
@@ -405,19 +403,19 @@ void beginElement( void *userData, const char *name, const char **atts )
                     VSFileSystem::vs_fprintf( stderr, "Unknown Weapon Element %s", (*iter).name.c_str() );
                     break;
                 case DAMAGE:
-                    tmpweapon.Damage = damagemodifier*XMLSupport::parse_float( (*iter).value );
+                    tmpweapon.Damage = game_options.weapon_damage_efficiency*XMLSupport::parse_floatf( (*iter).value );
                     break;
                 case RADIUS:
-                    tmpweapon.Radius = XMLSupport::parse_float( (*iter).value );
+                    tmpweapon.Radius = XMLSupport::parse_floatf( (*iter).value );
                     break;
                 case RADIALSPEED:
-                    tmpweapon.RadialSpeed = XMLSupport::parse_float( (*iter).value );
+                    tmpweapon.RadialSpeed = XMLSupport::parse_floatf( (*iter).value );
                     break;
                 case PHASEDAMAGE:
-                    tmpweapon.PhaseDamage = damagemodifier*XMLSupport::parse_float( (*iter).value );
+                    tmpweapon.PhaseDamage = game_options.weapon_damage_efficiency*XMLSupport::parse_floatf( (*iter).value );
                     break;
                 case RATE:
-                    tmpweapon.Damage    = damagemodifier*XMLSupport::parse_float( (*iter).value );
+                    tmpweapon.Damage    = game_options.weapon_damage_efficiency*XMLSupport::parse_floatf( (*iter).value );
                     break;
                 case LONGRANGE:
                     tmpweapon.Longrange = XMLSupport::parse_float( (*iter).value );
@@ -442,15 +440,15 @@ void beginElement( void *userData, const char *name, const char **atts )
             case SPEED:
                 tmpweapon.Speed  = XMLSupport::parse_float( (*iter).value );
                 if (tmpweapon.Speed < 1000) {
-                    tmpweapon.Speed = tmpweapon.Speed*(adj_gun_speed ? (1.0+gun_speed/1.25) : gun_speed);
+                    tmpweapon.Speed = tmpweapon.Speed*(game_options.gun_speed_adjusted_game_speed ? (1.0+gun_speed/1.25) : gun_speed);
                 } else {
                     if (tmpweapon.Speed < 2000) {
-                        tmpweapon.Speed = tmpweapon.Speed*( adj_gun_speed ? (1.0+gun_speed/2.5) : (gun_speed) );
+                        tmpweapon.Speed = tmpweapon.Speed*( game_options.gun_speed_adjusted_game_speed ? (1.0+gun_speed/2.5) : (gun_speed) );
                     } else {
                         if (tmpweapon.Speed < 4000)
-                            tmpweapon.Speed = tmpweapon.Speed*( adj_gun_speed ? (1.0+gun_speed/6.0) : (gun_speed) );
+                            tmpweapon.Speed = tmpweapon.Speed*( game_options.gun_speed_adjusted_game_speed ? (1.0+gun_speed/6.0) : (gun_speed) );
                         else if (tmpweapon.Speed < 8000)
-                            tmpweapon.Speed = tmpweapon.Speed*( adj_gun_speed ? (1.0+gun_speed/17.0) : (gun_speed) );
+                            tmpweapon.Speed = tmpweapon.Speed*( game_options.gun_speed_adjusted_game_speed ? (1.0+gun_speed/17.0) : (gun_speed) );
                     }
                 }
                 break;
@@ -466,7 +464,7 @@ void beginElement( void *userData, const char *name, const char **atts )
                 tmpweapon.RadialSpeed = XMLSupport::parse_float( (*iter).value );
                 break;
             case RANGE:
-                tmpweapon.Range = ( adj_gun_speed ? (1.0+gun_speed/16.0) : (gun_speed) )*XMLSupport::parse_float(
+                tmpweapon.Range = ( game_options.gun_speed_adjusted_game_speed ? (1.0+gun_speed/16.0) : (gun_speed) )*XMLSupport::parse_float(
                     (*iter).value );
                 break;
             case RADIUS:
@@ -527,7 +525,6 @@ weapon_info * getTemplate( const string &kkey )
     weapon_info *wi = lookuptable.Get( strtoupper( kkey ) );
     if (wi) {
         if ( !WeaponMeshCache::getCachedMutable( wi->weapon_name ) ) {
-            static string sharedmountdir = vs_config->getVariable( "data", "mountlocation", "weapons" );
             static FileLookupCache lookup_cache;
             string meshname = strtolower( kkey )+".bfxm";
             if (CachedFileLookup( lookup_cache, meshname, MeshFile ) <= Ok) {
@@ -562,17 +559,14 @@ float weapon_info::Refire() const
         != 'o' || weapon_name[len-6] != 'm' || weapon_name[len-5] != 'p' || weapon_name[len-4] != 'u' || weapon_name[len-3]
         != 't' || weapon_name[len-2] != 'e' || weapon_name[len-1] != 'r')
         return RefireRate;
-    static float three = XMLSupport::parse_float( vs_config->getVariable( "physics", "refire_difficutly_scaling", "3.0" ) );
-    return this->RefireRate*( three/(1.0f+(three-1.0f)*g_game.difficulty) );
+    return this->RefireRate*( game_options.refire_difficulty_scaling/(1.0f+(game_options.refire_difficulty_scaling-1.0f)*g_game.difficulty) );
 }
 
 bool weapon_info::isMissile() const
 {
-    static bool useProjectile =
-        XMLSupport::parse_bool( vs_config->getVariable( "graphics", "hud", "projectile_means_missile", "false" ) );
-    if (useProjectile && this->type == weapon_info::PROJECTILE)
+    if (game_options.projectile_means_missile  && this->type == weapon_info::PROJECTILE)
         return true;
-    if (useProjectile == false && this->size >= weapon_info::LIGHTMISSILE)
+    if (game_options.projectile_means_missile == false && this->size >= weapon_info::LIGHTMISSILE)
         return true;
     return false;
 }

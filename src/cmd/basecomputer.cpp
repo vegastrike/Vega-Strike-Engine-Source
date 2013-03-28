@@ -1116,8 +1116,6 @@ void BaseComputer::constructControls( void )
         netStatGroup->setHidden( true );
         networkGroup->addChild( netStatGroup );
 
-        GFXColor color = getColorForGroup( "NetworkGroup" );
-
         GameMenu::createNetworkControls( netJoinGroup, &base_keyboard_queue );
         if (Network) {
             NetClient &nc = Network[0];             //Hack?: Assume 0th player.

@@ -143,11 +143,7 @@ MatchVelocity::~MatchVelocity()
 static bool getControlType()
 {
     static bool control = XMLSupport::parse_bool( vs_config->getVariable( "physics", "CarControl",
-#ifdef CAR_SIM
-                                                                          "true"
-#else
                                                                           "false"
-#endif
                                                                         ) );
     return control;
 }

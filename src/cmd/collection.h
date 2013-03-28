@@ -50,10 +50,6 @@ public:
                 return false;
             return true;
         }
-        inline bool notDone()
-        {
-            return !isDone();
-        }
         
         /*   Request the current unit to be removed */
         void remove();
@@ -72,7 +68,10 @@ public:
 
         /* same as advance, only it returns the unit at the same time */
         Unit * next();
-
+	
+	int size() const {
+	    return (col->size());
+	}
         UnitIterator& operator=( const UnitIterator& );
         inline const UnitIterator operator++( int )
         {
@@ -115,15 +114,15 @@ public:
         ~ConstIterator();
         ConstIterator& operator=( const ConstIterator &orig );
         Unit * next();
+	int size() const {
+	    return (col->size());
+	}
+        
         inline bool isDone()
         {
             if ( col && it != col->u.end() )
                 return false;
             return true;
-        }
-        inline bool notDone()
-        {
-             return !isDone();
         }
         void advance();
         const ConstIterator& operator++();
@@ -205,7 +204,7 @@ public:
      */
     void erase( std::list< class Unit* >::iterator& );
 
-    /* traverse list and remove all matching Units.
+    /* traverse list and remove first (only) matching Unit.
      * Do not use in fast-path code */
     bool remove( const class Unit* );
 

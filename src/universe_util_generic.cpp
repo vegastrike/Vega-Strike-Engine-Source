@@ -30,7 +30,7 @@
 #include "cs_python.h"
 #include "options.h"
 
-extern vs_options game_options;
+
 
 extern Unit& GetUnitMasterPartList();
 extern int num_delayed_missions();
@@ -43,48 +43,38 @@ using namespace VSFileSystem;
 
 namespace UniverseUtil
 {
-Unit* PythonUnitIter::current()
-{
-    Unit *ret = NULL;
-    while ( (ret = **this) ) {
-        if (ret->hull > 0)
-            return ret;
-        advance();
-    }
-    return ret;
-}
 
 void PythonUnitIter::advanceSignificant()
 {
     advance();
-    while ( notDone() && !UnitUtil::isSignificant( **this ) )
+    while ( !isDone() && !UnitUtil::isSignificant( **this ) )
         advance();
 }
 
 void PythonUnitIter::advanceInsignificant()
 {
     advance();
-    while ( notDone() && UnitUtil::isSignificant( **this ) )
+    while ( !isDone() && UnitUtil::isSignificant( **this ) )
         advance();
 }
 
 void PythonUnitIter::advancePlanet()
 {
     advance();
-    while ( notDone() && !(**this)->isPlanet() )
+    while ( !isDone() && !(**this)->isPlanet() )
         advance();
 }
 
 void PythonUnitIter::advanceJumppoint()
 {
     advance();
-    while ( notDone() && !(**this)->isJumppoint() )
+    while ( !isDone() && !(**this)->isJumppoint() )
         advance();
 }
 
 void PythonUnitIter::advanceN( int n )
 {
-    while (notDone() && n > 0) {
+    while (!isDone() && n > 0) {
         advance();
         --n;
     }
@@ -92,9 +82,9 @@ void PythonUnitIter::advanceN( int n )
 
 void PythonUnitIter::advanceNSignificant( int n )
 {
-    if ( notDone() && !UnitUtil::isSignificant( **this ) )
+    if ( !isDone() && !UnitUtil::isSignificant( **this ) )
         advanceSignificant();
-    while ( notDone() && (n > 0) ) {
+    while ( !isDone() && (n > 0) ) {
         advanceSignificant();
         --n;
     }
@@ -102,9 +92,9 @@ void PythonUnitIter::advanceNSignificant( int n )
 
 void PythonUnitIter::advanceNInsignificant( int n )
 {
-    if ( notDone() && UnitUtil::isSignificant( **this ) )
+    if ( !isDone() && UnitUtil::isSignificant( **this ) )
         advanceInsignificant();
-    while ( notDone() && (n > 0) ) {
+    while ( !isDone() && (n > 0) ) {
         advanceInsignificant();
         --n;
     }
@@ -112,9 +102,9 @@ void PythonUnitIter::advanceNInsignificant( int n )
 
 void PythonUnitIter::advanceNPlanet( int n )
 {
-    if ( notDone() && !(**this)->isPlanet() )
+    if ( !isDone() && !(**this)->isPlanet() )
         advancePlanet();
-    while (notDone() && n > 0) {
+    while (!isDone() && n > 0) {
         advancePlanet();
         --n;
     }
@@ -122,9 +112,9 @@ void PythonUnitIter::advanceNPlanet( int n )
 
 void PythonUnitIter::advanceNJumppoint( int n )
 {
-    if ( notDone() && !(**this)->isJumppoint() )
+    if ( !isDone() && !(**this)->isJumppoint() )
         advanceJumppoint();
-    while (notDone() && n > 0) {
+    while (!isDone() && n > 0) {
         advanceJumppoint();
         --n;
     }
@@ -449,17 +439,14 @@ Unit * getUnitByPtr( void *ptr, Unit *finder, bool allowslowness )
     }
     if (!allowslowness)
         return 0;
-    un_iter it = activeSys->getUnitList().createIterator();
-    while ( it.notDone() && ( (void*) (*it) != ptr ) )
-        ++it;
-    return ( (void*) (*it) == ptr ) ? reinterpret_cast< Unit* > (ptr) : 0;
+    return ( (activeSys->getUnitList().contains((Unit*)ptr)) ? reinterpret_cast< Unit* > (ptr) : NULL);
 }
 Unit * getUnitByName( std::string name )
 {
     un_iter iter = activeSys->getUnitList().createIterator();
-    while (iter.notDone() && UnitUtil::getName( *iter ) != name)
+    while (!iter.isDone() && UnitUtil::getName( *iter ) != name)
         ++iter;
-    return iter.notDone() ? (*iter) : NULL;
+    return ((!iter.isDone()) ? (*iter) : NULL);
 }
 int getNumUnits()
 {
@@ -971,7 +958,6 @@ string getSaveInfo( const std::string &filename, bool formatForTextbox )
     static set< string >campaign_score_vars;
     static bool campaign_score_vars_init = false;
     if (!campaign_score_vars_init) {
-        string campaign_score   = vs_config->getVariable( "physics", "campaigns", "privateer_campaign vegastrike_campaign" );
 
         string::size_type where = 0, when = game_options.campaigns.find( ' ' );
         while (where != string::npos) {

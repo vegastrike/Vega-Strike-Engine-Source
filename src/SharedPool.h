@@ -4,6 +4,7 @@
 #include <string>
 #include "gnuhash.h"
 
+
 #ifndef INITIAL_STRINGPOOL_SIZE
 #define INITIAL_STRINGPOOL_SIZE (1<<15)
 #endif
@@ -209,5 +210,6 @@ inline T& operator<<( T &stream, const StringPool::Reference &ref )
 }
 
 #include "SharedPool.cpp"
+
 #endif //__STRINGPOOL_H__INCLUDED__
 

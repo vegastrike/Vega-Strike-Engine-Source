@@ -10,7 +10,7 @@
 namespace Radar
 {
 
-Track::Track(Unit *player, Unit *target)
+Track::Track(Unit *player, const Unit *target)
     : player(player),
       target(target),
       distance(0.0)
@@ -20,7 +20,7 @@ Track::Track(Unit *player, Unit *target)
     type = IdentifyType();
 }
 
-Track::Track(Unit *player, Unit *target, const Vector& position)
+Track::Track(Unit *player, const Unit *target, const Vector& position)
     : player(player),
       target(target),
       position(position)
@@ -29,7 +29,7 @@ Track::Track(Unit *player, Unit *target, const Vector& position)
     type = IdentifyType();
 }
 
-Track::Track(Unit *player, Unit *target, const Vector& position, float distance)
+Track::Track(Unit *player, const Unit *target, const Vector& position, float distance)
     : player(player),
       target(target),
       position(position),
@@ -121,7 +121,7 @@ Track::Type::Value Track::IdentifyType() const
 
     case PLANETPTR:
         {
-            Planet *planet = static_cast<Planet *>(target);
+            const Planet *planet = static_cast<const Planet *>(target);
             if (planet->isJumppoint())
                 return Type::JumpPoint;
 

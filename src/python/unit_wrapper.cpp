@@ -116,7 +116,6 @@ PYTHON_BEGIN_CLASS( VS, UniverseUtil::PythonUnitIter, "un_iter" )
 
 PYTHON_DEFINE_METHOD( Class, &UniverseUtil::PythonUnitIter::current, "current" );
 PYTHON_DEFINE_METHOD( Class, &UniverseUtil::PythonUnitIter::isDone, "isDone" );
-PYTHON_DEFINE_METHOD( Class, &UniverseUtil::PythonUnitIter::notDone, "notDone" );
 PYTHON_DEFINE_METHOD( Class, &UniverseUtil::PythonUnitIter::advance, "advance" );
 PYTHON_DEFINE_METHOD( Class, &UniverseUtil::PythonUnitIter::advanceN, "advanceN" );
 PYTHON_DEFINE_METHOD( Class, &UniverseUtil::PythonUnitIter::advanceSignificant, "advanceSignificant" );
@@ -127,6 +126,7 @@ PYTHON_DEFINE_METHOD( Class, &UniverseUtil::PythonUnitIter::advancePlanet, "adva
 PYTHON_DEFINE_METHOD( Class, &UniverseUtil::PythonUnitIter::advanceNPlanet, "advanceNPlanet" );
 PYTHON_DEFINE_METHOD( Class, &UniverseUtil::PythonUnitIter::advanceJumppoint, "advanceJumppoint" );
 PYTHON_DEFINE_METHOD( Class, &UniverseUtil::PythonUnitIter::advanceNJumppoint, "advanceNJumppoint" );
+PYTHON_DEFINE_METHOD( Class, &UniverseUtil::PythonUnitIter::size, "size" );
 PYTHON_DEFINE_METHOD( Class, &UniverseUtil::PythonUnitIter::next, "next" );
 PYTHON_DEFINE_METHOD( Class, &UniverseUtil::PythonUnitIter::next, "__next__" );
 PYTHON_DEFINE_METHOD( Class, &UniverseUtil::PythonUnitIter::current, "__iter__" );

@@ -227,8 +227,6 @@ void beginElement( const string &name, const AttributeList &attributes, XML *xml
 
     AttributeList::const_iterator iter;
     XML::Names elem = (XML::Names) XML::element_map.lookup( name );
-    XML::Names top;
-    if (xml->state_stack.size() > 0) top = *xml->state_stack.rbegin();
     xml->state_stack.push_back( elem );
     switch (elem)
     {
@@ -422,7 +420,7 @@ void beginElement( const string &name, const AttributeList &attributes, XML *xml
                         strsize = (int32bit) strlen( "TECHNIQUE" );
                     }
                     if (whichtype != XML::UNKNOWN) {
-                        unsigned int32bit texindex = 0;
+                        int32bit texindex = 0;
                         string ind( iter->name.substr( strsize ) );
                         if ( !ind.empty() )
                             texindex = atoi( ind.c_str() );
@@ -542,7 +540,7 @@ void beginElement( const string &name, const AttributeList &attributes, XML *xml
         break;
     case XML::VERTEX:
     {
-        unsigned int32bit index = 0; //FIXME Not all cases below initialized index; "=0" added temporarily by chuck_starchaser
+        int32bit index = 0; //FIXME Not all cases below initialized index; "=0" added temporarily by chuck_starchaser
         float32bit s, t;
         s = 0.0f;
         t = 0.0f;
@@ -698,7 +696,7 @@ void beginElement( const string &name, const AttributeList &attributes, XML *xml
     }
     case XML::LOGO:
     {
-        unsigned int32bit typ = 0; //FIXME Not all cases below initialized! "=0" added temporarily by chuck_starchaser
+        int32bit typ = 0; //FIXME Not all cases below initialized! "=0" added temporarily by chuck_starchaser
         float32bit rot, siz, offset;
         rot = siz = offset = 0.0f; //FIXME Not all cases below initialized! This line added temporarily by chuck_starchaser
         for (iter = attributes.begin(); iter != attributes.end(); iter++) {
@@ -730,10 +728,10 @@ void beginElement( const string &name, const AttributeList &attributes, XML *xml
     }
     case XML::REF:     //FIXME
         {
-            unsigned int32bit ind = 0;
+            int32bit ind = 0;
             float32bit indweight  = 1;
             bool foundindex = false;
-            for (iter = attributes.begin(); iter != attributes.end(); iter++) {
+            for (iter = attributes.begin(); iter != attributes.end() && !foundindex; iter++) {
                 switch ( XML::attribute_map.lookup( (*iter).name ) )
                 {
                 case XML::UNKNOWN:
@@ -803,9 +801,6 @@ void beginElement( const string &name, const AttributeList &attributes, XML *xml
 
 void endElement( const string &name, XML *xml )
 {
-    bool flips = atoi( Converter::getNamedOption( "flips" ).c_str() ) != 0;
-    bool flipt = atoi( Converter::getNamedOption( "flipt" ).c_str() ) != 0;
-
     xml->state_stack.pop_back();
     XML::Names elem = (XML::Names) XML::element_map.lookup( name );
     switch (elem)
@@ -919,7 +914,7 @@ static size_t bogus_return; //added by chuck_starchaser, to get rid of ignored r
 void xmeshToBFXM( XML memfile, FILE *Outputfile, char mode, bool forcenormals )
 {
     //converts input file to BFXM creates new, or appends record based on mode
-    unsigned int32bit intbuf;
+    int32bit intbuf;
 
     bool     append = (mode == 'a');
 
@@ -949,10 +944,7 @@ void xmeshToBFXM( XML memfile, FILE *Outputfile, char mode, bool forcenormals )
 
 int32bit writesuperheader( XML memfile, FILE *Outputfile )
 {
-    float    transx = float( atof( Converter::getNamedOption( "addx" ).c_str() ) );
-    float    transy = float( atof( Converter::getNamedOption( "addy" ).c_str() ) );
-    float    transz = float( atof( Converter::getNamedOption( "addz" ).c_str() ) );
-    unsigned int32bit intbuf;
+    int32bit intbuf;
     int32bit versionnumber  = VSSwapHostIntToLittle( 20 );
     char8bit bytebuf;
     int32bit runningbytenum = 0;
@@ -988,14 +980,14 @@ int32bit writesuperheader( XML memfile, FILE *Outputfile )
 
 int32bit appendrecordfromxml( XML memfile, FILE *Outputfile, bool forcenormals )
 {
-    unsigned int32bit intbuf;
+    int32bit intbuf;
     int32bit runningbytenum = 0;
     //Record Header
     intbuf = VSSwapHostIntToLittle( 12 );     //Size of Record Header in bytes
     runningbytenum += sizeof (int32bit)*(int32bit) fwrite( &intbuf, sizeof (int32bit), 1, Outputfile );       //Number of bytes in record header
     intbuf = VSSwapHostIntToLittle( 0 );     //Size of Record in bytes
     runningbytenum += sizeof (int32bit)*(int32bit) fwrite( &intbuf, sizeof (int32bit), 1, Outputfile );       //Number of bytes in record
-    intbuf = VSSwapHostIntToLittle( (unsigned int32bit) ( 1+memfile.LODs.size()+memfile.animframes.size() ) );     //Number of meshes = 1 + numLODs + numAnims.
+    intbuf = VSSwapHostIntToLittle( (int32bit) ( 1+memfile.LODs.size()+memfile.animframes.size() ) );     //Number of meshes = 1 + numLODs + numAnims.
     runningbytenum += sizeof (int32bit)*(int32bit) fwrite( &intbuf, sizeof (int32bit), 1, Outputfile );       //Number of meshes
     runningbytenum += appendmeshfromxml( memfile, Outputfile, forcenormals );     //write top level mesh
     size_t mesh;
@@ -1053,7 +1045,7 @@ int32bit appendmeshfromxml( XML memfile, FILE *Outputfile, bool forcenormals )
     float transx = float( atof( Converter::getNamedOption( "addx" ).c_str() ) );
     float transy = float( atof( Converter::getNamedOption( "addy" ).c_str() ) );
     float transz = float( atof( Converter::getNamedOption( "addz" ).c_str() ) );
-    unsigned int32bit intbuf;
+    int32bit intbuf;
     float32bit floatbuf;
     char8bit   bytebuf;
     int32bit   runningbytenum = 0;
@@ -1147,7 +1139,7 @@ int32bit appendmeshfromxml( XML memfile, FILE *Outputfile, bool forcenormals )
         }
     }
     //Detail Planes
-    intbuf = VSSwapHostIntToLittle( (unsigned int32bit) memfile.detailplanes.size() );
+    intbuf = VSSwapHostIntToLittle( (int32bit) memfile.detailplanes.size() );
     runningbytenum += sizeof (int32bit)*(int32bit) fwrite( &intbuf, sizeof (int32bit), 1, Outputfile );       //Number of detail planes
     for (size_t plane = 0; plane < memfile.detailplanes.size(); plane++) {
         floatbuf = VSSwapHostFloatToLittle( memfile.detailplanes[plane].x );
@@ -1185,7 +1177,7 @@ int32bit appendmeshfromxml( XML memfile, FILE *Outputfile, bool forcenormals )
     }
     //Logos
     //FIXME?
-    intbuf = VSSwapHostIntToLittle( (unsigned int32bit) memfile.logos.size() );
+    intbuf = VSSwapHostIntToLittle( (int32bit) memfile.logos.size() );
     runningbytenum += sizeof (int32bit)*(int32bit) fwrite( &intbuf, sizeof (int32bit), 1, Outputfile );       //Number of logos
     for (size_t logonum = 0; logonum < memfile.logos.size(); logonum++) {
         floatbuf = VSSwapHostFloatToLittle( memfile.logos[logonum].size );
@@ -1209,7 +1201,7 @@ int32bit appendmeshfromxml( XML memfile, FILE *Outputfile, bool forcenormals )
     //LODs + Animations
     //LODs
     int32bit submeshref = 1;
-    intbuf = VSSwapHostIntToLittle( (unsigned int32bit) memfile.LODs.size() );
+    intbuf = VSSwapHostIntToLittle( (int32bit) memfile.LODs.size() );
     runningbytenum += sizeof (int32bit)*(int32bit) fwrite( &intbuf, sizeof (int32bit), 1, Outputfile );       //Number of LODs
     for (size_t lod = 0; lod < memfile.LODs.size(); lod++) {
         floatbuf = VSSwapHostFloatToLittle( memfile.LODs[lod].size );
@@ -1220,7 +1212,7 @@ int32bit appendmeshfromxml( XML memfile, FILE *Outputfile, bool forcenormals )
         submeshref++;
     }
     //Current VS File format is not compatible with new animation specification - can't test until I fix old files (only 1 at present uses animations)
-    intbuf = VSSwapHostIntToLittle( (unsigned int32bit) memfile.animdefs.size() );
+    intbuf = VSSwapHostIntToLittle( (int32bit) memfile.animdefs.size() );
     runningbytenum += sizeof (int32bit)*(int32bit) fwrite( &intbuf, sizeof (int32bit), 1, Outputfile );       //Number of animdefs
     for (size_t anim = 0; anim < memfile.animdefs.size(); anim++) {
         int32bit namelen = (int32bit) memfile.animdefs[anim].name.size();
@@ -1249,7 +1241,7 @@ int32bit appendmeshfromxml( XML memfile, FILE *Outputfile, bool forcenormals )
     //End Variable sized Attributes
     int32bit VSAend = runningbytenum;
     //GEOMETRY
-    intbuf = VSSwapHostIntToLittle( (unsigned int32bit) memfile.vertices.size() );
+    intbuf = VSSwapHostIntToLittle( (int32bit) memfile.vertices.size() );
     runningbytenum += sizeof (int32bit)*(int32bit) fwrite( &intbuf, sizeof (int32bit), 1, Outputfile );       //Number of vertices
     for (size_t verts = 0; verts < memfile.vertices.size(); verts++) {
         floatbuf = VSSwapHostFloatToLittle( memfile.vertices[verts].x+transx );
@@ -1277,7 +1269,7 @@ int32bit appendmeshfromxml( XML memfile, FILE *Outputfile, bool forcenormals )
         floatbuf = VSSwapHostFloatToLittle( memfile.vertices[verts].t );
         runningbytenum += sizeof (float32bit)*(int32bit) fwrite( &floatbuf, sizeof (float32bit), 1, Outputfile );           //vertex #vert:t
     }
-    intbuf = VSSwapHostIntToLittle( (unsigned int32bit) memfile.lines.size() );
+    intbuf = VSSwapHostIntToLittle( (int32bit) memfile.lines.size() );
     runningbytenum += sizeof (int32bit)*(int32bit) fwrite( &intbuf, sizeof (int32bit), 1, Outputfile );       //Number of lines
     for (size_t lines = 0; lines < memfile.lines.size(); lines++) {
         intbuf = VSSwapHostIntToLittle( memfile.lines[lines].flatshade );
@@ -1291,7 +1283,7 @@ int32bit appendmeshfromxml( XML memfile, FILE *Outputfile, bool forcenormals )
             runningbytenum += sizeof (float32bit)*(int32bit) fwrite( &floatbuf, sizeof (float32bit), 1, Outputfile );               //t coord
         }
     }
-    intbuf = VSSwapHostIntToLittle( (unsigned int32bit) memfile.tris.size() );
+    intbuf = VSSwapHostIntToLittle( (int32bit) memfile.tris.size() );
     runningbytenum += sizeof (int32bit)*(int32bit) fwrite( &intbuf, sizeof (int32bit), 1, Outputfile );       //Number of triangles
     for (size_t tris = 0; tris < memfile.tris.size(); tris++) {
         intbuf = VSSwapHostIntToLittle( memfile.tris[tris].flatshade );
@@ -1305,7 +1297,7 @@ int32bit appendmeshfromxml( XML memfile, FILE *Outputfile, bool forcenormals )
             runningbytenum += sizeof (float32bit)*(int32bit) fwrite( &floatbuf, sizeof (float32bit), 1, Outputfile );               //t coord
         }
     }
-    intbuf = VSSwapHostIntToLittle( (unsigned int32bit) memfile.quads.size() );
+    intbuf = VSSwapHostIntToLittle( (int32bit) memfile.quads.size() );
     runningbytenum += sizeof (int32bit)*(int32bit) fwrite( &intbuf, sizeof (int32bit), 1, Outputfile );       //Number of Quads
     for (size_t quads = 0; quads < memfile.quads.size(); quads++) {
         intbuf = VSSwapHostIntToLittle( memfile.quads[quads].flatshade );
@@ -1319,10 +1311,10 @@ int32bit appendmeshfromxml( XML memfile, FILE *Outputfile, bool forcenormals )
             runningbytenum += sizeof (float32bit)*(int32bit) fwrite( &floatbuf, sizeof (float32bit), 1, Outputfile );               //t coord
         }
     }
-    intbuf = VSSwapHostIntToLittle( (unsigned int32bit) memfile.linestrips.size() );
+    intbuf = VSSwapHostIntToLittle( (int32bit) memfile.linestrips.size() );
     runningbytenum += sizeof (int32bit)*(int32bit) fwrite( &intbuf, sizeof (int32bit), 1, Outputfile );       //Number of linestrips
     for (size_t ls = 0; ls < memfile.linestrips.size(); ls++) {
-        intbuf = VSSwapHostIntToLittle( (unsigned int32bit) memfile.linestrips[ls].points.size() );
+        intbuf = VSSwapHostIntToLittle( (int32bit) memfile.linestrips[ls].points.size() );
         runningbytenum += sizeof (int32bit)*(int32bit) fwrite( &intbuf, sizeof (int32bit), 1, Outputfile );           //Number of elements in current linestrip
         intbuf = VSSwapHostIntToLittle( memfile.linestrips[ls].flatshade );
         runningbytenum += sizeof (int32bit)*(int32bit) fwrite( &intbuf, sizeof (int32bit), 1, Outputfile );           //Flatshade flag
@@ -1335,10 +1327,10 @@ int32bit appendmeshfromxml( XML memfile, FILE *Outputfile, bool forcenormals )
             runningbytenum += sizeof (float32bit)*(int32bit) fwrite( &floatbuf, sizeof (float32bit), 1, Outputfile );               //t coord
         }
     }
-    intbuf = VSSwapHostIntToLittle( (unsigned int32bit) memfile.tristrips.size() );
+    intbuf = VSSwapHostIntToLittle( (int32bit) memfile.tristrips.size() );
     runningbytenum += sizeof (int32bit)*(int32bit) fwrite( &intbuf, sizeof (int32bit), 1, Outputfile );       //Number of tristrips
     for (size_t ts = 0; ts < memfile.tristrips.size(); ts++) {
-        intbuf = VSSwapHostIntToLittle( (unsigned int32bit) memfile.tristrips[ts].points.size() );
+        intbuf = VSSwapHostIntToLittle( (int32bit) memfile.tristrips[ts].points.size() );
         runningbytenum += sizeof (int32bit)*(int32bit) fwrite( &intbuf, sizeof (int32bit), 1, Outputfile );           //Number of elements in current tristrip
         intbuf = VSSwapHostIntToLittle( memfile.tristrips[ts].flatshade );
         runningbytenum += sizeof (int32bit)*(int32bit) fwrite( &intbuf, sizeof (int32bit), 1, Outputfile );           //Flatshade flag
@@ -1351,10 +1343,10 @@ int32bit appendmeshfromxml( XML memfile, FILE *Outputfile, bool forcenormals )
             runningbytenum += sizeof (float32bit)*(int32bit) fwrite( &floatbuf, sizeof (float32bit), 1, Outputfile );               //t coord
         }
     }
-    intbuf = VSSwapHostIntToLittle( (unsigned int32bit) memfile.trifans.size() );
+    intbuf = VSSwapHostIntToLittle( (int32bit) memfile.trifans.size() );
     runningbytenum += sizeof (int32bit)*(int32bit) fwrite( &intbuf, sizeof (int32bit), 1, Outputfile );       //Number of trifans
     for (size_t tf = 0; tf < memfile.trifans.size(); tf++) {
-        intbuf = VSSwapHostIntToLittle( (unsigned int32bit) memfile.trifans[tf].points.size() );
+        intbuf = VSSwapHostIntToLittle( (int32bit) memfile.trifans[tf].points.size() );
         runningbytenum += sizeof (int32bit)*(int32bit) fwrite( &intbuf, sizeof (int32bit), 1, Outputfile );           //Number of elements in current trifan
         intbuf = VSSwapHostIntToLittle( memfile.trifans[tf].flatshade );
         runningbytenum += sizeof (int32bit)*(int32bit) fwrite( &intbuf, sizeof (int32bit), 1, Outputfile );           //Flatshade flag
@@ -1367,10 +1359,10 @@ int32bit appendmeshfromxml( XML memfile, FILE *Outputfile, bool forcenormals )
             runningbytenum += sizeof (float32bit)*(int32bit) fwrite( &floatbuf, sizeof (float32bit), 1, Outputfile );               //t coord
         }
     }
-    intbuf = VSSwapHostIntToLittle( (unsigned int32bit) memfile.quadstrips.size() );
+    intbuf = VSSwapHostIntToLittle( (int32bit) memfile.quadstrips.size() );
     runningbytenum += sizeof (int32bit)*(int32bit) fwrite( &intbuf, sizeof (int32bit), 1, Outputfile );       //Number of quadstrips
     for (size_t qs = 0; qs < memfile.quadstrips.size(); qs++) {
-        intbuf = VSSwapHostIntToLittle( (unsigned int32bit) memfile.quadstrips[qs].points.size() );
+        intbuf = VSSwapHostIntToLittle( (int32bit) memfile.quadstrips[qs].points.size() );
         runningbytenum += sizeof (int32bit)*(int32bit) fwrite( &intbuf, sizeof (int32bit), 1, Outputfile );           //Number of elements in current quadstrip
         intbuf = VSSwapHostIntToLittle( memfile.quadstrips[qs].flatshade );
         runningbytenum += sizeof (int32bit)*(int32bit) fwrite( &intbuf, sizeof (int32bit), 1, Outputfile );           //Flatshade flag

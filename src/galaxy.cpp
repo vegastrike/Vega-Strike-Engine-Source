@@ -18,7 +18,7 @@
 #include <deque>
 #include <algorithm>
 
-extern vs_options game_options;
+
 
 using namespace XMLSupport;
 using namespace GalaxyXML;

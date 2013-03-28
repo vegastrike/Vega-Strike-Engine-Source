@@ -185,28 +185,26 @@ void Mesh::GetPolys( vector< mesh_polygon > &polys )
     int offset = 0;
     int last   = numtris;
     mesh_polygon tmppolygon;
-    for (int l = 0; l < 2; l++) {
-        for (i = 0; i < last; i++) {
-            polys.push_back( tmppolygon );
-            for (int j = 0; j < 3; j++) {
-                vv.i = tmpres[offset+i*inc+j].x;                 //+local_pos.i;
-                vv.j = tmpres[offset+i*inc+j].y;                 //+local_pos.j;
-                vv.k = tmpres[offset+i*inc+j].z;                 //+local_pos.k;
-                polys[polys.size()-1].v.push_back( vv );
-            }
-            if (inc == 4) {
-                for (int j = 1; j < 4; j++) {
-                    vv.i = tmpres[offset+i*inc+j].x;                     //+local_pos.i;
-                    vv.j = tmpres[offset+i*inc+j].y;                     //+local_pos.j;
-                    vv.k = tmpres[offset+i*inc+j].z;                     //+local_pos.k;
-                    polys[polys.size()-1].v.push_back( vv );
-                }
-            }
+    // Unroll this loop a bit to remove conditional 
+    for (i = 0; i < last; i++) {
+        polys.push_back( tmppolygon );
+        for (int j = 0; j < 3; j++,polys.back().v.push_back(vv)) {
+            vv.i = tmpres[offset+i*inc+j].x;                 //+local_pos.i;
+            vv.j = tmpres[offset+i*inc+j].y;                 //+local_pos.j;
+            vv.k = tmpres[offset+i*inc+j].z;                 //+local_pos.k;
         }
-        inc    = 4;
-        offset = numtris*3;
-        last   = numquads;
     }
-    free( tmpres );
+    inc    = 4;
+    offset = numtris*3;
+    last   = numquads;
+    for (i = 0; i < last; i++) {
+        polys.push_back( tmppolygon );
+         for (int j = 1; j < 4; j++,polys.back().v.push_back(vv)) {
+            vv.i = tmpres[offset+i*inc+j].x;                     //+local_pos.i;
+            vv.j = tmpres[offset+i*inc+j].y;                     //+local_pos.j;
+            vv.k = tmpres[offset+i*inc+j].z;                     //+local_pos.k;
+         }
+     }
+     free( tmpres );
 }
 

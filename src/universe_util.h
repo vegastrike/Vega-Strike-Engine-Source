@@ -22,7 +22,10 @@ public: PythonUnitIter() : UnitIterator() {}
 //PythonUnitIterator (UnitListNode * start):UnitIterator(start){}
     PythonUnitIter( const UnitCollection::UnitIterator &t ) : UnitIterator( t ) {}
     ~PythonUnitIter() {}
-    Unit * current();
+    inline Unit * current()
+    {
+        return(**this);
+    }
     inline void advance()
     {
         UnitIterator::advance();
@@ -43,10 +46,6 @@ public: PythonUnitIter() : UnitIterator() {}
     inline bool isDone()
     {
         return UnitIterator::isDone();
-    }
-    inline bool notDone()
-    {
-        return UnitIterator::notDone();
     }
     inline void remove()
     {

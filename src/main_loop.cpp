@@ -94,6 +94,9 @@ CoordinateSelect  *locSel = NULL;
 SphereMesh *bg2 = NULL;
 ClickList  *shipList = NULL;
 
+float SIMULATION_ATOM = 0.0f;
+float AUDIO_ATOM = 0.0f;
+
 void VolUp( const KBData&, KBSTATE newState )
 {
     if (newState == PRESS) {
@@ -223,9 +226,7 @@ void TextMessageCallback( unsigned int ch, unsigned int mod, bool release, int x
 void TextMessageKey( const KBData&, KBSTATE newState )
 {
     if (newState == PRESS) {
-        static bool chat_only_in_network =
-            XMLSupport::parse_bool( vs_config->getVariable( "network", "chat_only_in_network", "false" ) );
-        if ( (Network == NULL) && chat_only_in_network )
+        if ( (Network == NULL) && game_options.chat_only_in_network)
             return;
         winsys_set_keyboard_func( TextMessageCallback );
         textmessager = _Universe->CurrentCockpit();

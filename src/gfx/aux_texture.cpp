@@ -473,7 +473,6 @@ void Texture::Load( const char *FileNameRGB,
     }
     VSFile  f1;
     VSError err1 = Unspecified;
-    bool    shared1;
     if (FileNameA) {
         static bool use_alphamap =
             parse_bool( vs_config->getVariable( "graphics",
@@ -481,9 +480,8 @@ void Texture::Load( const char *FileNameRGB,
                                                 "true" ) );
         if (use_alphamap) {
             std::string tmp;
-            f1.OpenReadOnly( FileNameA, TextureFile );
+            err1 = f1.OpenReadOnly( FileNameA, TextureFile );
 
-            shared1 = (err1 == Shared);
             if (err1 > Ok) {
                 data = NULL;
                 FileNameA = NULL;
@@ -664,7 +662,6 @@ static void ActivateWhite( int stage )
 
 void Texture::MakeActive( int stag, int pass )
 {
-    static bool missing = false;
     if ( (name == -1) || (pass != 0) ) {
         ActivateWhite( stag );
     } else {

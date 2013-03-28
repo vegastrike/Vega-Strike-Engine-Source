@@ -353,7 +353,6 @@ void Animation::DrawAsVSSprite( VSSprite *spr )
 }
 void Animation::DrawNoTransform( bool cross, bool blendoption )
 {
-    bool doitagain = false;
     if (g_game.use_animations == 0 && g_game.use_textures == 0) {} else if ( !Done() || (options&ani_repeat) ) {
         size_t lyr;
         size_t numlayers = numLayers();
@@ -431,8 +430,7 @@ void Animation::Draw()
     if (g_game.use_animations != 0 || g_game.use_textures != 0) {
         Vector  camp, camq, camr;
         QVector pos( Position() );
-        float   hei = height;
-        float   wid = width;
+
         static float HaloOffset = XMLSupport::parse_float( vs_config->getVariable( "graphics", "HaloOffset", ".1" ) );
 
         /**/

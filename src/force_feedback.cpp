@@ -33,7 +33,7 @@
 #include "cmd/script/mission.h"
 #include "options.h"
 
-extern vs_options game_options;
+
 
 #define FF_DOIT 1
 

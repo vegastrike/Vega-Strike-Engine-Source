@@ -1,4 +1,3 @@
-#include "audiolib.h"
 #ifdef HAVE_AL
 #ifdef __APPLE__
 #include <al.h>
@@ -8,10 +7,15 @@
 #endif
 #include <stdio.h>
 #include <vector>
+#include "audiolib.h"
 #include "al_globals.h"
 #include "vs_globals.h"
 #include "vsfilesystem.h"
 #include "config_xml.h"
+#include "options.h"
+
+
+
 
 using std::vector;
 
@@ -63,9 +67,7 @@ QVector AUDListenerLocation()
 }
 
 static float EstimateGain(const Vector &pos, const float gain)
-{
-    static float ref_distance = XMLSupport::parse_float( vs_config->getVariable( "audio", "audio_ref_distance", "4000" ) );
-    
+{    
     // Base priority is source gain
     float final_gain = gain;
     
@@ -73,8 +75,8 @@ static float EstimateGain(const Vector &pos, const float gain)
     float listener_size = sqrt(mylistener.rsize);
     float distance = (AUDListenerLocation() - pos.Cast()).Magnitude()
                      - listener_size
-                     - ref_distance;
-    float ref = ref_distance;
+                     - game_options.audio_ref_distance;
+    float ref = game_options.audio_ref_distance;
     float rolloff = 1.0f;
     final_gain *= (distance <= 0) ? 1.f : float(ref / (ref + rolloff * distance));
     
@@ -95,8 +97,7 @@ char AUDQueryAudability( const int sound, const Vector &pos, const Vector &vel, 
         mag = 0;
         return 1;
     }
-    static float max_cutoff = XMLSupport::parse_float( vs_config->getVariable( "audio", "audio_cutoff_distance", "1000000" ) );
-    if ( !(mag < max_cutoff*max_cutoff) )
+    if ( !(mag < game_options.audio_max_distance*game_options.audio_max_distance) )
         return 0;
     unsigned int hashed = hash_sound( sounds[sound].buffer );
     if ( ( !unusedsrcs.empty() ) && playingbuffers[hashed].size() < maxallowedsingle ) return 1;

@@ -167,16 +167,16 @@ public:
         pFormatCtx( 0 )
         , pCodecCtx( 0 )
         , pCodec( 0 )
-        , pStream( 0 )
         , pFrameRGB( 0 )
         , pFrameYUV( 0 )
         , pNextFrameYUV( 0 )
-        , frameBuffer( 0 )
+        , pStream( 0 )
+        , frameReady( false )
         , packetBuffer( 0 )
         , packetBufferSize( 0 )
-        , frameReady( false )
         , fbDimensionLimit( maxDimensions )
         , fbForcePOT( forcePOT )
+        , frameBuffer( 0 )
     {
         packet.data = 0;
     }
@@ -224,7 +224,7 @@ public:
         pCodecCtx = 0;
         videoStreamIndex = -1;
         VSFileSystem::vs_dprintf(2, "Loaded %s\n", path.c_str());
-        for (int i = 0; i < pFormatCtx->nb_streams; ++i) {
+        for (unsigned int i = 0; i < pFormatCtx->nb_streams; ++i) {
             VSFileSystem::vs_dprintf(3, "  Stream %d: type %s (%d) first dts %lld\n", 
                 i,
                 ( (pFormatCtx->streams[i]->codec->codec_type == CODEC_TYPE_VIDEO) ? "Video"
@@ -296,7 +296,7 @@ public:
             time = 0;
         
         //Translate float time to frametime
-        int64_t targetPTS = int64_t( floor( double(time)*pStream->time_base.den/pStream->time_base.num ) );
+        uint64_t targetPTS = uint64_t( floor( double(time)*pStream->time_base.den/pStream->time_base.num ) );
         VSFileSystem::vs_dprintf(3, "Seeking to %.3fs pts %lld\n", time, targetPTS);
         if ( (targetPTS >= prevPTS) && (targetPTS < pNextFrameYUV->pts) ) {
             //same frame

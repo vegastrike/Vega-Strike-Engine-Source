@@ -14,6 +14,9 @@
 #include "galaxy_xml.h"
 #include "galaxy_gen.h"
 #include "vs_random.h"
+#include "options.h"
+
+
 
 #ifndef _WIN32
 #include <ctype.h>
@@ -228,10 +231,9 @@ float difffunc( float inputdiffuse )
 }
 void WriteLight( unsigned int i )
 {
-    static float ambientColorFactor = XMLSupport::parse_float( vs_config->getVariable( "galaxy", "AmbientLightFactor", "0" ) );
     float ambient = (lights[i].r+lights[i].g+lights[i].b);
 
-    ambient *= ambientColorFactor;
+    ambient *= game_options.AmbientLightFactor;
     Tab();
     f.Fprintf( "<Light>\n" );
     xmllevel++;
@@ -343,7 +345,6 @@ void readColorGrads( vector< string > &entity, const char *file )
 {
     VSFile  f;
     VSError err = f.OpenReadOnly( file, UniverseFile );
-    static float radiusscale = XMLSupport::parse_float( vs_config->getVariable( "galaxy", "StarRadiusScale", "1000" ) );
     if (err > Ok) {
         printf( "Failed to load %s", file );
         GradColor( g );
@@ -360,7 +361,7 @@ void readColorGrads( vector< string > &entity, const char *file )
     while ( !f.Eof() ) {
         f.ReadLine( input_buffer, 999 );
         if (sscanf( input_buffer, "%f %f %f %f %f %s", &g.minrad, &g.r, &g.g, &g.b, &g.variance, output_buffer ) == 6) {
-            g.minrad *= radiusscale;
+            g.minrad *= game_options.StarRadiusScale;
             colorGradiant.push_back( g );
             entity.push_back( output_buffer );
         }
@@ -406,8 +407,7 @@ Color StarColor( float radius, unsigned int &entityindex )
 GFXColor getStarColorFromRadius( float radius )
 {
     unsigned int myint = 0;
-    static float radiusscale = XMLSupport::parse_float( vs_config->getVariable( "galaxy", "StarRadiusScale", "1000" ) );
-    Color tmp = StarColor( radius*radiusscale, myint );
+    Color tmp = StarColor( radius*game_options.StarRadiusScale, myint );
     return GFXColor( tmp.r, tmp.g, tmp.b, 1 );
 }
 float LengthOfYear( Vector r, Vector s )
@@ -796,14 +796,11 @@ void MakePlanet( float radius, int entitytype, string texturename, string unitna
     string thisname;
     thisname = getRandName( names );
     Tab();
-    static string default_atmosphere = vs_config->getVariable( "galaxy",
-                                                               "DefaultAtmosphereTexture",
-                                                               "sol/earthcloudmaptrans.png" );
     string atmosphere = _Universe->getGalaxy()->getPlanetVariable( texturename, "atmosphere", "false" );
     if (atmosphere == "false")
         atmosphere = "";
     else if (atmosphere == "true")
-        atmosphere = default_atmosphere;
+        atmosphere = game_options.DefaultAtmosphereTexture;
     string cname;
     string planetlites = _Universe->getGalaxy()->getPlanetVariable( texturename, "lights", "" );
     if ( !planetlites.empty() ) {
@@ -844,8 +841,7 @@ void MakePlanet( float radius, int entitytype, string texturename, string unitna
         Tab();
         f.Fprintf( "<CityLights file=\"%s\" wrapx=\"%d\" wrapy=\"%d\"/>\n", cname.c_str(), wrapx, wrapy );
     }
-    static float atmosphere_prob = XMLSupport::parse_float( vs_config->getVariable( "galaxy", "AtmosphereProbability", "0.5" ) );
-    if ( (entitytype == PLANET && temprandom < atmosphere_prob) && ( !atmosphere.empty() ) ) {
+    if ( (entitytype == PLANET && temprandom < game_options.AtmosphereProbability) && ( !atmosphere.empty() ) ) {
         string NAME = thisname+" Atmosphere";
         {
             bool doalphaatmosphere = (temprandom< .08 || temprandom >.3);
@@ -910,23 +906,16 @@ void MakePlanet( float radius, int entitytype, string texturename, string unitna
 //FIRME: need scaling of radius based on planet type.
     radii.push_back( radius );
 
-    static float ringprob     = XMLSupport::parse_float( vs_config->getVariable( "galaxy", "RingProbability", ".1" ) );
-    static float dualringprob = XMLSupport::parse_float( vs_config->getVariable( "galaxy", "DoubleRingProbability", ".025" ) );
     if (entitytype == PLANET) {
         float ringrand = grand();
-        if (ringrand < ringprob) {
+        if (ringrand < game_options.RingProbability) {
             string ringname  = getRandName( rings );
-            static float innerRingRadMin = XMLSupport::parse_float( vs_config->getVariable( "galaxy", "InnerRingRadius", "1.5" ) );
-            static float outerRingRadMin = XMLSupport::parse_float( vs_config->getVariable( "galaxy", "OuterRingRadius", "2.5" ) );
-            double inner_rad = ( innerRingRadMin*(1+grand()*.5) )*radius;
-            double outer_rad = inner_rad+( outerRingRadMin*grand() )*radius;
+            double inner_rad = ( game_options.InnerRingRadius*(1+grand()*.5) )*radius;
+            double outer_rad = inner_rad+( game_options.OuterRingRadius*grand() )*radius;
             int    wrapx     = 1;
             int    wrapy     = 1;
             if ( ringname.empty() ) {
-                static string defringname = vs_config->getVariable( "galaxy",
-                                                                         "DefaultRingTexture",
-                                                                         "planets/ring.pngwrapx36wrapy2" );
-                ringname = defringname;
+                ringname = game_options.DefaultRingTexture;
             }
             ringname = GetWrapXY( ringname, wrapx, wrapy );
             Vector r, s;
@@ -943,7 +932,7 @@ void MakePlanet( float radius, int entitytype, string texturename, string unitna
                 s.j /= smag;
                 s.k /= smag;
             }
-            if ( ringrand < (1-dualringprob) ) {
+            if ( ringrand < (1-game_options.DoubleRingProbability) ) {
                 Tab();
                 f.Fprintf(
                     "<Ring file=\"%s\" ri=\"%f\" rj=\"%f\" rk=\"%f\" si=\"%f\" sj=\"%f\" sk=\"%f\" innerradius=\"%f\" outerradius=\"%f\" wrapx=\"%d\" wrapy=\"%d\" />\n",
@@ -959,12 +948,10 @@ void MakePlanet( float radius, int entitytype, string texturename, string unitna
                     wrapx,
                     wrapy );
             }
-            if ( ringrand < dualringprob || ringrand >= (ringprob-dualringprob) ) {
+            if ( ringrand < game_options.DoubleRingProbability || ringrand >= (game_options.RingProbability-game_options.DoubleRingProbability) ) {
                 double movable = grand();
-                static float second_ring_move =
-                    XMLSupport::parse_float( vs_config->getVariable( "galaxy", "SecondRingDifference", ".4" ) );
-                inner_rad = outer_rad*( 1+.1*(second_ring_move+second_ring_move*movable) );
-                outer_rad = inner_rad*(outerRingRadMin*movable);
+                inner_rad = outer_rad*( 1+.1*(game_options.SecondRingDifference+game_options.SecondRingDifference*movable) );
+                outer_rad = inner_rad*(game_options.OuterRingRadius*movable);
                 Tab();
                 f.Fprintf(
                     "<Ring file=\"%s\" ri=\"%f\" rj=\"%f\" rk=\"%f\" si=\"%f\" sj=\"%f\" sk=\"%f\" innerradius=\"%f\" outerradius=\"%f\" wrapx=\"%d\" wrapy=\"%d\" />\n",
@@ -984,12 +971,8 @@ void MakePlanet( float radius, int entitytype, string texturename, string unitna
     }
     for (int i = 0; i < numberofstarbases; i++)
         MakeSmallUnit();
-    static float moon_size_compared_to_planet =
-        XMLSupport::parse_float( vs_config->getVariable( "galaxy", "MoonRelativeToPlanet", ".4" ) );
-    static float moon_size_compared_to_moon   =
-        XMLSupport::parse_float( vs_config->getVariable( "galaxy", "MoonRelativeToMoon", ".8" ) );
     moonlevel++;
-    MakeMoons( entitytype != MOON ? moon_size_compared_to_planet*radius : moon_size_compared_to_moon*radius, entitytype );
+    MakeMoons( entitytype != MOON ? game_options.MoonRelativeToPlanet*radius : game_options.MoonRelativeToMoon*radius, entitytype );
     MakeJumps( 100+grand()*300, entitytype, numberofjumps );
     moonlevel--;
     radii.pop_back();
@@ -1057,8 +1040,6 @@ void beginStar()
         lights[staroffset].g,
         lights[staroffset].b );
     radii.push_back( 1.5*radius );
-    static float planet_size_compared_to_sun =
-        XMLSupport::parse_float( vs_config->getVariable( "galaxy", "RockyRelativeToPrimary", ".05" ) );
     xmllevel++;
     unsigned int numu;
     if (numstarentities) {
@@ -1075,7 +1056,7 @@ void beginStar()
     for (i = 0; i < stars[staroffset].numstarbases; ++i)
         MakeSmallUnit();
     MakeJumps( 100+grand()*300, STAR, stars[staroffset].numjumps );
-    MakeMoons( planet_size_compared_to_sun*radius, STAR );
+    MakeMoons( game_options.RockyRelativeToPrimary*radius, STAR );
     //Fixme: no jumps should be made around the star.
     if ( !jumps.empty() )
         VSFileSystem::vs_fprintf( stderr, "ERROR: jumps not empty() Size==%u!!!!!\n", jumps.size() );
@@ -1333,8 +1314,7 @@ static int pushDownTowardsMean( int mean, int val )
 }
 static int pushTowardsMean( int mean, int val )
 {
-    static bool dopushingtomean = XMLSupport::parse_bool( vs_config->getVariable( "galaxy", "PushValuesToMean", "true" ) );
-    if (!dopushingtomean)
+    if (!game_options.PushValuesToMean)
         return val;
     if (val < mean)
         return -pushDownTowardsMean( -mean, -val );
@@ -1344,26 +1324,20 @@ static int pushTowardsMean( int mean, int val )
 void generateStarSystem( SystemInfo &si )
 {
     ResetGlobalVariables();
-    static float radiusscale = XMLSupport::parse_float( vs_config->getVariable( "galaxy", "StarRadiusScale", "1000" ) );
-    si.sunradius *= radiusscale;
+    si.sunradius *= game_options.StarRadiusScale;
     systemname    = si.name;
-    static float compactness_scale = XMLSupport::parse_float( vs_config->getVariable( "galaxy", "CompactnessScale", "1.5" ) );
-    static float jump_compactness_scale =
-        XMLSupport::parse_float( vs_config->getVariable( "galaxy", "JumpCompactnessScale", "1.5" ) );
-    static int   meannaturalphenomena   = XMLSupport::parse_int( vs_config->getVariable( "galaxy", "MeanNaturalPhenomena", "1" ) );
-    static int   meanbases = XMLSupport::parse_int( vs_config->getVariable( "galaxy", "MeanStarBases", "2" ) );
-    compactness     = si.compactness*compactness_scale;
-    jumpcompactness = si.compactness*jump_compactness_scale;
+
+    compactness     = si.compactness*game_options.CompactnessScale;
+    jumpcompactness = si.compactness*game_options.JumpCompactnessScale;
     if (si.seed)
         seedrand( si.seed );
     else
         seedrand( stringhash( si.sector+'/'+si.name ) );
     VSFileSystem::vs_fprintf( stderr, "star %d, natural %d, bases %d", si.numstars, si.numun1, si.numun2 );
-    int nat = pushTowardsMean( meannaturalphenomena, si.numun1 );
+    int nat = pushTowardsMean( game_options.MeanNaturalPhenomena, si.numun1 );
     numnaturalphenomena = nat > si.numun1 ? si.numun1 : nat;
-    numstarbases    = pushTowardsMean( meanbases, si.numun2 );
-    static float smallUnitsMultiplier = XMLSupport::parse_float( vs_config->getVariable( "galaxy", "SmallUnitsMultiplier", "0" ) );
-    numstarbases    = (int) (si.numun2*smallUnitsMultiplier);
+    numstarbases    = pushTowardsMean( game_options.MeanStarBases, si.numun2 );
+    // numstarbases    = (int) (si.numun2*game_options.SmallUnitsMultiplier); This yields 0  in addition to making the preceding statement pointless.   Probably not intended
     numstarentities = si.numstars;
     VSFileSystem::vs_fprintf( stderr, "star %d, natural %d, bases %d", numstarentities, numnaturalphenomena, numstarbases );
     starradius.push_back( si.sunradius );

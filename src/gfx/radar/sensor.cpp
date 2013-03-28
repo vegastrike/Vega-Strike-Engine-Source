@@ -81,14 +81,14 @@ float Sensor::GetLockCone() const
     return player->GetComputerData().radar.lockcone;
 }
 
-Track Sensor::CreateTrack(Unit *target) const
+Track Sensor::CreateTrack(const Unit *target) const
 {
     assert(player);
 
     return Track(player, target);
 }
 
-Track Sensor::CreateTrack(Unit *target, const Vector& position) const
+Track Sensor::CreateTrack(const Unit *target, const Vector& position) const
 {
     assert(player);
 
@@ -132,7 +132,7 @@ public:
         this->player = player;
     }
 
-    bool acquire(Unit *target, float distance)
+    bool acquire(const Unit *target, float distance)
     {
         assert(sensor);
         assert(collection);
@@ -168,7 +168,7 @@ public:
             }
             if (target->isPlanet() == PLANETPTR && target->radial_size > 0)
             {
-                Unit *sub = NULL;
+                const Unit *sub = NULL;
                 for (un_kiter i = target->viewSubUnits(); (sub = *i) != NULL; ++i)
                 {
                     if (target->rSize() > minblipsize)
@@ -211,7 +211,7 @@ const Sensor::TrackCollection& Sensor::FindTracksInRange() const
     if (allGravUnits)
     {
         Unit *target = player->Target();
-        Unit *gravUnit;
+        const Unit *gravUnit;
         bool foundtarget = false;
         for (un_kiter i = _Universe->activeStarSystem()->gravitationalUnits().constIterator();
              (gravUnit = *i) != NULL;
@@ -279,7 +279,6 @@ GFXColor Sensor::GetColor(const Track& track) const
     static GFXColor baseColor    = RetrColor("base", GFXColor( -1, -1, -1, -1 ));
     static GFXColor planetColor  = RetrColor("planet", GFXColor( -1, -1, -1, -1 ));
     static GFXColor jumpColor    = RetrColor("jump", GFXColor( 0, 1, 1, .8 ));
-    static GFXColor navColor     = RetrColor("nav", GFXColor( 1, 1, 1, 1 ));
     static GFXColor starColor    = RetrColor("star", GFXColor( 1, 1, 1, 1 ));
     static GFXColor missileColor = RetrColor("missile", GFXColor( .25, 0, .5, 1 ));
     static GFXColor cargoColor   = RetrColor("cargo", GFXColor( .6, .2, 0, 1 ));

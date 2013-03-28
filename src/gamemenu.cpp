@@ -17,6 +17,10 @@
 #include "gamemenu.h"
 #include "gfxlib_struct.h"
 #include "cmd/music.h"
+#include "options.h"
+
+
+
 
 extern void TerminateCurrentBase( void );
 vector< unsigned int >gamemenu_keyboard_queue;
@@ -99,16 +103,15 @@ void GameMenu::createNetworkControls( GroupControl *serverConnGroup, std::vector
     joinServer->setFont( Font( .07 ) );
     serverConnGroup->addChild( joinServer );
 
-    bool useacctserver = XMLSupport::parse_bool( vs_config->getVariable( "network", "use_account_server", "true" ) );
 
     GroupControl *acctConnGroup = new GroupControl;
     acctConnGroup->setId( "MultiPlayerAccountServer" );
-    acctConnGroup->setHidden( !useacctserver );
+    acctConnGroup->setHidden( !game_options.use_account_server );
     serverConnGroup->addChild( acctConnGroup );
 
     GroupControl *hostConnGroup = new GroupControl;
     hostConnGroup->setId( "MultiPlayerHostPort" );
-    hostConnGroup->setHidden( useacctserver );
+    hostConnGroup->setHidden( game_options.use_account_server );
     serverConnGroup->addChild( hostConnGroup );
     StaticDisplay *mplayTitle = new StaticDisplay;
     mplayTitle->setRect( Rect( -.7, .6, 1, .1 ) );
@@ -129,7 +132,7 @@ void GameMenu::createNetworkControls( GroupControl *serverConnGroup, std::vector
     serverInputText->setTextColor( GUI_OPAQUE_WHITE() );
     serverInputText->setTextMargins( Size( .02, .01 ) );
     serverInputText->setId( "VegaserverHost" );
-    serverInputText->setText( vs_config->getVariable( "network", "server_ip", "" ) );
+    serverInputText->setText( game_options.server_ip);
     hostConnGroup->addChild( serverInputText );
 
     mplayTitle = new StaticDisplay;
@@ -151,7 +154,7 @@ void GameMenu::createNetworkControls( GroupControl *serverConnGroup, std::vector
     portInputText->setTextColor( GUI_OPAQUE_WHITE() );
     portInputText->setTextMargins( Size( .02, .01 ) );
     portInputText->setId( "VegaserverPort" );
-    portInputText->setText( vs_config->getVariable( "network", "server_port", "6777" ) );
+    portInputText->setText( game_options.server_port);
     hostConnGroup->addChild( portInputText );
 
     mplayTitle = new StaticDisplay;
@@ -172,8 +175,7 @@ void GameMenu::createNetworkControls( GroupControl *serverConnGroup, std::vector
     acctserverInput->setTextColor( GUI_OPAQUE_WHITE() );
     acctserverInput->setTextMargins( Size( .02, .01 ) );
     acctserverInput->setId( "AccountServer" );
-    acctserverInput->setText( vs_config->getVariable( "network", "account_server_url",
-                                                      "http://vegastrike.sourceforge.net/cgi-bin/accountserver.py?" ) );
+    acctserverInput->setText( game_options.account_server_url);
     acctConnGroup->addChild( acctserverInput );
 
     mplayTitle = new StaticDisplay;
@@ -185,7 +187,6 @@ void GameMenu::createNetworkControls( GroupControl *serverConnGroup, std::vector
     mplayTitle->setId( "UsernameTitle" );
     serverConnGroup->addChild( mplayTitle );
 
-    string origpass( vs_config->getVariable( "player", "password", "" ) );
     StaticDisplay *usernameInput = new TextInputDisplay( inputqueue, "\x1b\n\t\r*\\|<>\"^" );
     usernameInput->setRect( Rect( -.6, -.18, 1.2, .15 ) );
     usernameInput->setColor( GFXColor( 1, .5, 0, .1 ) );
@@ -195,7 +196,7 @@ void GameMenu::createNetworkControls( GroupControl *serverConnGroup, std::vector
     usernameInput->setTextColor( GUI_OPAQUE_WHITE() );
     usernameInput->setTextMargins( Size( .02, .01 ) );
     usernameInput->setId( "Username" );
-    if ( !origpass.empty() ) usernameInput->setText( vs_config->getVariable( "player", "callsign", "" ) );
+    if ( !game_options.password.empty() ) usernameInput->setText( game_options.callsign );
     serverConnGroup->addChild( usernameInput );
 
     mplayTitle = new StaticDisplay;
@@ -226,7 +227,7 @@ void GameMenu::createNetworkControls( GroupControl *serverConnGroup, std::vector
     passwordInput->setTextColor( GUI_OPAQUE_WHITE() );
     passwordInput->setTextMargins( Size( .02, .01 ) );
     passwordInput->setId( "Password" );
-    passwordInput->setText( origpass );
+    passwordInput->setText( game_options.password );
     serverConnGroup->addChild( passwordInput );
 
     NewButton *multiStart = new NewButton;
@@ -677,7 +678,6 @@ bool NetActionConfirm::finalizeJoinGame( int launchShip )
 
     restore_main_loop();
     NetClient *playerClient = &Network[player];
-    Window    *parentWin    = m_parent;
 
     globalWindowManager().shutDown();
     TerminateCurrentBase();

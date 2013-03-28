@@ -145,87 +145,14 @@ TextArea::TextArea( float x, float y, float wid, float hei, int scrollbar )
 
 void TextArea::Refresh( void )
 {
-    float x    = xcoord[0], y = ycoord[0], wid = width[0], hei = height[0];
-    //Local x,y,wid,hei for images to render
-    float lx   = 0;
-    float ly   = 0;
-    float lwid = 0;
-    float lhei = 0;
+    // Obscene amounts of commented code removed, check r13553 for content
 
-    //Ratio border and scrollbar
-    //float ratio[] = { 0.06, 0.12 };
-
-    lwid = ratio[0]*wid;
-    lhei = ratio[1]*wid;
     //Draw the bars to run across the length
-/*
- *       // Top Horizontal
- *       lx = x;
- *       ly = y;
- *       ShowImage(lx, ly, wid, lwid, Images[IMG_TOP], 1, 0);
- *
- *       // Left Horizontal
- *       ShowImage(lx, ly, lwid, hei, Images[IMG_LEFT_SIDE], 0, 1);
- *
- *       // Bottom Horizontal
- *       ly = y - hei + lwid;
- *       ShowImage(lx, ly, wid, lwid, Images[IMG_BOTTOM], 1, 0);
- *
- *       // Right Horizontal
- *       ly = y;
- *       lx = x + wid - lhei;
- *       if (has_scrollbar != 0) { ShowImage(lx, ly, lhei, hei, Images[IMG_RIGHT_SIDE], 0, 1); }
- *
- *
- *       // Draw the corners
- *
- *       // Top right corner
- *       if (has_scrollbar != 0) { ShowImage(lx, ly, lhei, lhei, Images[IMG_CORNER_TOP_RIGHT], 0, 0); }
- *       else { ShowImage(lx, ly, lhei, lhei, Images[IMG_END], 0, 0); }
- *
- *       // Bottom right corner
- *       ly = y - hei + lhei;
- *       if (has_scrollbar != 0) { ShowImage(lx, ly, lhei, lhei, Images[IMG_CORNER_BOTTOM_RIGHT], 0, 0); }
- *       else { ShowImage(lx, ly, lhei, lhei, Images[IMG_END], 0, 0); }
- *
- *       // Bottom left corner
- *       lx = x;
- *       ly = y - hei + lwid;
- *       ShowImage(lx, ly, lwid, lwid, Images[IMG_CORNER_BOTTOM_LEFT], 0, 0);
- *
- *       // Top left corner
- *       ly = y;
- *       ShowImage(lx, ly, lwid, lwid, Images[IMG_CORNER_TOP_LEFT], 0, 0);
- *
- *       if (button_pressed == 1) {
- *               ShowImage(xcoord[1], ycoord[1], width[1], height[1], Images[IMG_HIGHLIGHT_BUTTON_UP], 0, 0);
- *       }
- *       if (button_pressed == 2) {
- *               ShowImage(xcoord[2], ycoord[2], width[2], height[2], Images[IMG_HIGHLIGHT_BUTTON_DOWN], 0, 0);
- *       }
- */
+
     if (has_scrollbar != 0) DisplayScrollbar();
     RenderText();
-//if (cur_highlighted > 0 && cur_highlighted != (cur_selected - top_item_number)) { HighlightCount(cur_highlighted, 1); }
-    if (cur_highlighted > 0) HighlightCount( cur_highlighted, 1 );       //if (cur_selected > 0) { HighlightCount(cur_selected - top_item_number, 2); }
+    if (cur_highlighted > 0) HighlightCount( cur_highlighted, 1 );   
     if (cur_selected > 0) HighlightCount( cur_selected, 2 );
-    //Displays a transparent red box in the area where text can be displayed
-    //ShowColor(xcoord[5], ycoord[5], width[5], height[5], 1, 0, 0, 0.5);
-
-    //Displays a transparent green box in the area where the buttons should be
-    //ShowColor(xcoord[1], ycoord[1], width[1], height[1],  0, 1, 0, 0.5);
-    //ShowColor(xcoord[2], ycoord[2], width[2], height[2],  0, 1, 0, 0.5);
-
-    //Displays a transparent yellow box in the area where the scrollbar should be
-    //ShowColor(xcoord[3], ycoord[3], width[3], height[3],  1, 1, 0, 0.5);
-
-    //ShowColor(xcoord[3], ycoord[3], width[3], height[3],  0.51, 0.47, 0.79, 1);
-    //ShowColor(xcoord[3], ycoord[3], width[3], height[3]/2,  0.66, 0.6, 1, 1);
-    //ShowColor(xcoord[3], ycoord[3], width[3], height[3]/2,  0, 1,1, 0.05);
-
-    //ShowColor(xcoord[3], ycoord[3], width[3], height[3]/2,  1, 0, 0, 0.05);
-
-    //ShowImage(xcoord[3], ycoord[3], width[3], height[3], Images[IMG_SCROLLBAR], 0, 1);
 }
 
 void TextArea::RenderText( void )

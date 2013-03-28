@@ -1089,8 +1089,6 @@ void Unit::beginElement( const string &name, const AttributeList &attributes )
         break;
     case NETCOM:
         {
-            float  minfreq   = 0, maxfreq = 0;
-            bool   video     = false, secured = false;
             string method;
             assert( xml->unitlevel == 1 );
             xml->unitlevel++;
@@ -1098,16 +1096,12 @@ void Unit::beginElement( const string &name, const AttributeList &attributes )
                 switch ( attribute_map.lookup( (*iter).name ) )
                 {
                 case NETCOMM_MINFREQ:
-                    minfreq = parse_float( (*iter).value );
                     break;
                 case NETCOMM_MAXFREQ:
-                    maxfreq = parse_float( (*iter).value );
                     break;
                 case NETCOMM_SECURED:
-                    secured = parse_bool( (*iter).value );
                     break;
                 case NETCOMM_VIDEO:
-                    video   = parse_bool( (*iter).value );
                     break;
                 case NETCOMM_CRYPTO:
                     method  = (*iter).value;
@@ -2037,12 +2031,10 @@ void Unit::LoadXML( VSFileSystem::VSFile &f, const char *modifications, string *
             }
         }
     } else {
-        Mesh *tmp = NULL;
         static int shieldstacks = XMLSupport::parse_int( vs_config->getVariable( "graphics", "shield_detail", "16" ) );
         static std::string shieldtex = vs_config->getVariable( "graphics", "shield_texture", "shield.bmp" );
         static std::string shieldtechnique = vs_config->getVariable( "graphics", "shield_technique", "" );
         meshdata.back() = new SphereMesh( rSize(), shieldstacks, shieldstacks, shieldtex.c_str(), shieldtechnique, NULL, false, ONE, ONE );
-        tmp = meshdata.back();
     }
     meshdata.back()->EnableSpecialFX();
     if (!this->colTrees) {
@@ -2070,22 +2062,33 @@ void Unit::LoadXML( VSFileSystem::VSFile &f, const char *modifications, string *
     delete xml;
 }
 
-csOPCODECollider* Unit::getCollideTree( const Vector &scale, const std::vector< mesh_polygon > *pol )
+csOPCODECollider* Unit::getCollideTree( const Vector & __restrict__ scale, std::vector< mesh_polygon > * __restrict__ pol )
 {
-    vector< mesh_polygon >polies;
-    if (!pol)
-        for (int j = 0; j < nummesh(); j++)
+    if (!pol){
+	vector< mesh_polygon > polies;
+        for (unsigned int j = 0; j < nummesh(); j++){
             meshdata[j]->GetPolys( polies );
-    else
-        polies = *pol;
+	}
+	if (scale.i != 1 || scale.j != 1 || scale.k != 1) {
+	    for (unsigned int i = 0;i < polies.size();++i){
+        	for (unsigned int j = 0; j < polies[i].v.size(); ++j) {
+            	    polies[i].v[j].i *= scale.i;
+            	    polies[i].v[j].j *= scale.j;
+            	    polies[i].v[j].k *= scale.k;
+        	}
+	    }
+	}
+	return new csOPCODECollider( polies );
+    }	
     if (scale.i != 1 || scale.j != 1 || scale.k != 1) {
-        for (vector< mesh_polygon >::iterator i = polies.begin(); i != polies.end(); ++i)
-            for (unsigned int j = 0; j < i->v.size(); ++j) {
-                i->v[j].i *= scale.i;
-                i->v[j].j *= scale.j;
-                i->v[j].k *= scale.k;
-            }
+	for (unsigned int i = 0;i < pol->size();++i){
+	    for (unsigned int j = 0; j < (*pol)[i].v.size(); ++j) {
+    		(*pol)[i].v[j].i *= scale.i;
+        	(*pol)[i].v[j].j *= scale.j;
+        	(*pol)[i].v[j].k *= scale.k;
+    	    }
+	}
     }
-    return new csOPCODECollider( polies );
+    return new csOPCODECollider( *pol );
 }
 

@@ -25,6 +25,8 @@
 #include "cmd/script/mission.h"
 #include "force_feedback.h"
 #include "lin_time.h"
+#include "cmd/unit_factory.h"
+
 #include "options.h"
 //#ifndef _WIN32
 //#include <fenv.h>
@@ -35,14 +37,21 @@ LeakVector< Mission* >active_missions;
 
 vs_options game_options;
 
+float SIMULATION_ATOM = 0.0f;
+float AUDIO_ATOM = 0.0f;
+
 void VSExit( int code )
 {
     VSServer->closeAllSockets();
     exit( 1 );
 }
 
+// I dont think vegaserver makes use of this but it has to be defined.  
+Unit *TheTopLevelUnit = NULL;
+
 int main( int argc, char **argv )
 {
+
     //#ifndef _WIN32
     //feenableexcept(FE_DIVBYZERO|FE_INVALID);//|FE_OVERFLOW|FE_UNDERFLOW)
     //#endif
@@ -55,7 +64,6 @@ int main( int argc, char **argv )
     VSServer = new NetServer;
     //Fake forcefeedback
     forcefeedback = new ForceFeedback();
-
     VSServer->start( argc, argv );
 
     delete VSServer;

@@ -194,21 +194,12 @@ public: UnitHash3d( StarSystem *ss )
             }
         }
     }
+
     static bool removeFromVector( UnitCollection &myvector, Unit *objectToKill )
     {
-        bool    ret     = false;
-        un_iter removal = myvector.createIterator();
-        Unit   *un;
-        while ( (un = *removal) ) {
-            if (un == objectToKill) {
-                ret = true;
-                removal.remove();
-            } else {
-                ++removal;
-            }
-        }
-        return ret;
+        return (myvector.remove(objectToKill));
     }
+
     bool Eradicate( Unit *objectToKill )
     {
         bool ret = removeFromVector( hugeobjects, objectToKill );

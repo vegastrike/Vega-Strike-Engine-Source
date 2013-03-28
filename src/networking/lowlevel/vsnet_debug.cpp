@@ -12,8 +12,9 @@ using std::ostream;
 using std::clog;
 
 struct TimeTriggerStruct {};
-
+#ifdef VSNET_DEBUG
 static TimeTriggerStruct time_trigger;
+#endif
 ostream& operator<<( ostream &ostr, const TimeTriggerStruct &c )
 {
 #ifndef _WIN32

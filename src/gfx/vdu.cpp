@@ -402,13 +402,13 @@ static void DrawShield( float fs,
     static bool  do_shield_fade = XMLSupport::parse_bool( vs_config->getVariable( "graphics", "hud", "shield_vdu_fade", "true" ) );
 
     static float shthresh[3]    = {
-        XMLSupport::parse_float( vs_config->getVariable( "graphics",                         "hud",
+        XMLSupport::parse_floatf( vs_config->getVariable( "graphics",                         "hud",
                                                          "shield_vdu_thresh0",
                                                          do_shield_fade ? "0" : ".25" ) ),
-        XMLSupport::parse_float( vs_config->getVariable( "graphics",                         "hud",
+        XMLSupport::parse_floatf( vs_config->getVariable( "graphics",                         "hud",
                                                          "shield_vdu_thresh1",
                                                          do_shield_fade ? ".33" : ".50" ) ),
-        XMLSupport::parse_float( vs_config->getVariable( "graphics",                         "hud",
+        XMLSupport::parse_floatf( vs_config->getVariable( "graphics",                         "hud",
                                                          "shield_vdu_thresh2",
                                                          do_shield_fade ? ".66" : ".75" ) )
     };                                                                                                                    //PM me if you don't know why I did this.
@@ -1456,9 +1456,6 @@ void VDU::SetViewingStyle( VIEWSTYLE vs )
 
 void VDU::DrawStarSystemAgain( float x, float y, float w, float h, VIEWSTYLE viewStyle, Unit *parent, Unit *target )
 {
-#ifdef CAR_SIM
-    viewStyle = CP_BACK;
-#endif
     GFXEnable( DEPTHTEST );
     GFXEnable( DEPTHWRITE );
     VIEWSTYLE which     = viewStyle;
@@ -1484,7 +1481,6 @@ void VDU::DrawStarSystemAgain( float x, float y, float w, float h, VIEWSTYLE vie
     GFXDisable( TEXTURE0 );
     GFXDisable( DEPTHTEST );
     GFXDisable( DEPTHWRITE );
-#ifndef CAR_SIM
     char buf[1024];
     bool inrange = false;
     if (target) {
@@ -1555,7 +1551,6 @@ void VDU::DrawStarSystemAgain( float x, float y, float w, float h, VIEWSTYLE vie
                                 _Universe->AccessCamera()->GetNebula() != NULL ? .4 : 0 ), 0, true, false, automatte );
         tp->bgcol = tpbg;
     }
-#endif
     //_Universe->AccessCockpit()->RestoreViewPort();
 }
 

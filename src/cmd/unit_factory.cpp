@@ -39,10 +39,10 @@ std::string getMasterPartListUnitName()
 void KillDuplicateUnits( ObjSerial likeSerial )
 {
     if ( likeSerial != 0 && (Network || SERVER) ) {
-        Unit *un; //FIXME What's the purpos of un here?; doesn't seem to be used --unless macro magic exists...
+        Unit *un; 
         for (un_iter it = _Universe->activeStarSystem()->getUnitList().createIterator(); (un=*it)!=NULL; ++it)
-            if ( (*it)->GetSerial() == likeSerial )
-                (*it)->Kill();
+            if ( un->GetSerial() == likeSerial )
+                un->Kill();
     }
 }
 

@@ -332,7 +332,7 @@ vector< Mesh* >Mesh::LoadMeshes( VSFileSystem::VSFile &Inputfile,
             xml.faction = fac;
             if (recordindex > 0 || meshindex > 0) {
                 char     filenamebuf[56];                     //Is more than enough characters - int can't be this big in decimal
-                int32bit error    = sprintf( filenamebuf, "%d_%d.xmesh", recordindex, meshindex );
+                int error    = sprintf( filenamebuf, "%d_%d.xmesh", recordindex, meshindex );
                 if (error == -1)                          //if wasn't enough characters - something is horribly wrong.
                     exit( error );
                 string   filename = string( filenamebuf );
@@ -608,7 +608,7 @@ vector< Mesh* >Mesh::LoadMeshes( VSFileSystem::VSFile &Inputfile,
             word32index += 1;
 #ifndef STANDALONE
             if (meshindex == 0)
-                for (int framecount = numLODs+1; framecount < nummeshes; framecount++)
+                for (int32bit framecount = numLODs+1; framecount < nummeshes; framecount++)
                     bxmfprintf( Outputfile, "<Frame FrameMeshName=\"%d_%d.xmesh\"/>\n", recordindex, framecount );
 #endif
             for (int32bit anim = 0; anim < numanimdefs; anim++) {

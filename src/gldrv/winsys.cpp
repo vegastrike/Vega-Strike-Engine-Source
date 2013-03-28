@@ -16,6 +16,9 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
+#include <assert.h>
+#include <sstream>
+
 #include "config.h"
 #include "gl_globals.h"
 #include "winsys.h"
@@ -24,9 +27,10 @@
 #include "config_xml.h"
 #include "vs_globals.h"
 #include "vsfilesystem.h"
-#include <assert.h>
-#include <sstream>
-//#include <sys/signal.h>
+#include "options.h"
+
+
+
 /*
  * Windowing System Abstraction Layer
  * Abstracts creation of windows, handling of events, etc.
@@ -197,16 +201,15 @@ static bool setup_sdl_video_mode()
     }
     bpp = gl_options.color_depth;
 
-    int    rs, gs, bs, zs;
+    int    rs, gs, bs;
     rs  = gs = bs = (bpp == 16) ? 5 : 8;
-    string rgbfmt = vs_config->getVariable( "graphics", "rgb_pixel_format", ( (bpp == 16) ? "555" : "888" ) );
-    bool gl_accelerated_visual = XMLSupport::parse_bool(
-        vs_config->getVariable( "graphics", "gl_accelerated_visual", "true" ) );
-    zs  = XMLSupport::parse_int( vs_config->getVariable( "graphics", "z_pixel_format", "24" ) );
-    if ( (rgbfmt.length() == 3) && isdigit( rgbfmt[0] ) && isdigit( rgbfmt[1] ) && isdigit( rgbfmt[2] ) ) {
-        rs = rgbfmt[0]-'0';
-        gs = rgbfmt[1]-'0';
-        bs = rgbfmt[2]-'0';
+    if(game_options.rgb_pixel_format.compare("undefined") == 0){
+	game_options.rgb_pixel_format = ((bpp == 16) ? "555" : "888");
+    }
+    if ( (game_options.rgb_pixel_format.length() == 3) && isdigit( game_options.rgb_pixel_format[0] ) && isdigit( game_options.rgb_pixel_format[1] ) && isdigit( game_options.rgb_pixel_format[2] ) ) {
+        rs = game_options.rgb_pixel_format[0]-'0';
+        gs = game_options.rgb_pixel_format[1]-'0';
+        bs = game_options.rgb_pixel_format[2]-'0';
     }
     int otherbpp;
     int otherattributes;
@@ -216,7 +219,7 @@ static bool setup_sdl_video_mode()
         SDL_GL_SetAttribute( SDL_GL_RED_SIZE, rs );
         SDL_GL_SetAttribute( SDL_GL_GREEN_SIZE, gs );
         SDL_GL_SetAttribute( SDL_GL_BLUE_SIZE, bs );
-        SDL_GL_SetAttribute( SDL_GL_DEPTH_SIZE, zs );
+        SDL_GL_SetAttribute( SDL_GL_DEPTH_SIZE, game_options.z_pixel_format );
         SDL_GL_SetAttribute( SDL_GL_DOUBLEBUFFER, 1 );
     } else {
         otherattributes = 5;
@@ -224,11 +227,11 @@ static bool setup_sdl_video_mode()
         SDL_GL_SetAttribute( SDL_GL_RED_SIZE, rs );
         SDL_GL_SetAttribute( SDL_GL_GREEN_SIZE, gs );
         SDL_GL_SetAttribute( SDL_GL_BLUE_SIZE, bs );
-        SDL_GL_SetAttribute( SDL_GL_DEPTH_SIZE, zs );
+        SDL_GL_SetAttribute( SDL_GL_DEPTH_SIZE, game_options.z_pixel_format );
         SDL_GL_SetAttribute( SDL_GL_DOUBLEBUFFER, 1 );
     }
 #if SDL_VERSION_ATLEAST( 1, 2, 10 )
-    if (gl_accelerated_visual)
+    if (game_options.gl_accelerated_visual)
         SDL_GL_SetAttribute( SDL_GL_ACCELERATED_VISUAL, 1 );
 #endif
     width  = g_game.x_resolution;
@@ -263,10 +266,10 @@ static bool setup_sdl_video_mode()
     std::string version = (const char*)glGetString(GL_RENDERER);
     if (version == "GDI Generic")
     {
-        if (gl_accelerated_visual) {
+        if (game_options.gl_accelerated_visual) {
             VSFileSystem::vs_fprintf( stderr, "GDI Generic software driver reported, trying to reset.\n" );
             SDL_Quit();
-            vs_config->setVariable( "graphics", "gl_accelerated_visual", "false" );
+	    game_options.gl_accelerated_visual = false;
             return false;
         } else {
             VSFileSystem::vs_fprintf( stderr, 
@@ -300,10 +303,10 @@ void winsys_init( int *argc, char **argv, char const *window_title, char const *
 
     //SDL_INIT_AUDIO|
     Uint32 sdl_flags = SDL_INIT_VIDEO|SDL_INIT_JOYSTICK;
-    g_game.x_resolution    = XMLSupport::parse_int( vs_config->getVariable( "graphics", "x_resolution", "1024" ) );
-    g_game.y_resolution    = XMLSupport::parse_int( vs_config->getVariable( "graphics", "y_resolution", "768" ) );
-    gl_options.fullscreen  = XMLSupport::parse_bool( vs_config->getVariable( "graphics", "fullscreen", "false" ) );
-    gl_options.color_depth = XMLSupport::parse_int( vs_config->getVariable( "graphics", "colordepth", "32" ) );
+    g_game.x_resolution    = game_options.x_resolution;
+    g_game.y_resolution    = game_options.y_resolution;
+    gl_options.fullscreen  = game_options.fullscreen;
+    gl_options.color_depth = game_options.colordepth;
     /*
      * Initialize SDL
      */
@@ -414,8 +417,6 @@ void winsys_process_events()
     int  x, y;
     bool state;
 
-    static bool handle_unicode_kb = XMLSupport::parse_bool( vs_config->getVariable( "keyboard", "enable_unicode", "true" ) );
-
     static unsigned int keysym_to_unicode[256];
     static bool keysym_to_unicode_init = false;
     if (!keysym_to_unicode_init) {
@@ -437,7 +438,7 @@ void winsys_process_events()
                 if (keyboard_func) {
                     SDL_GetMouseState( &x, &y );
 
-                    bool maybe_unicode = handle_unicode_kb && !(event.key.keysym.sym&~0xFF);
+                    bool maybe_unicode = game_options.enable_unicode && !(event.key.keysym.sym&~0xFF);
                     bool is_unicode = maybe_unicode && event.key.keysym.unicode;
                     
                     //Fix up ctrl unicode codes
@@ -768,13 +769,12 @@ void winsys_init( int *argc, char **argv, char const *window_title, char const *
 {
     int width, height;
     int glutWindow;
-    g_game.x_resolution    = XMLSupport::parse_int( vs_config->getVariable( "graphics", "x_resolution", "1024" ) );
-    g_game.y_resolution    = XMLSupport::parse_int( vs_config->getVariable( "graphics", "y_resolution", "768" ) );
-    gl_options.fullscreen  = XMLSupport::parse_bool( vs_config->getVariable( "graphics", "fullscreen", "false" ) );
-    gl_options.color_depth = XMLSupport::parse_int( vs_config->getVariable( "graphics", "colordepth", "32" ) );
+    g_game.x_resolution    = game_options.x_resolution;
+    g_game.y_resolution    = game_options.y_resolution;
+    gl_options.fullscreen  = game_options.fullscreen;
+    gl_options.color_depth = game_options.colordepth;
     glutInit( argc, argv );
-    static bool get_stencil = XMLSupport::parse_bool( vs_config->getVariable( "graphics", "glut_stencil", "true" ) );
-    if (get_stencil) {
+    if (game_options.glut_stencil) {
 #ifdef __APPLE__
         if ( !(glutInitDisplayMode( GLUT_RGBA|GLUT_DEPTH|GLUT_DOUBLE|GLUT_STENCIL ), 1) )
             glutInitDisplayMode( GLUT_RGBA|GLUT_DEPTH|GLUT_DOUBLE );

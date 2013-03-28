@@ -104,7 +104,7 @@ void GameUnit< UnitType >::UpdatePhysics2( const Transformation &trans,
     unsigned int    i;
     if (lastframe) {
         char   tmp  = 0;
-        double blah = queryTime();
+//        double blah = queryTime();
         for (i = 0; i < this->meshdata.size(); i++) {
             if (!this->meshdata[i])
                 continue;
@@ -113,10 +113,10 @@ void GameUnit< UnitType >::UpdatePhysics2( const Transformation &trans,
                 this->meshdata[i]->UpdateFX( SIMULATION_ATOM );
             this->meshdata[i]->UnDraw();
         }
-        double blah1 = queryTime();
+//        double blah1 = queryTime();
         if (!tmp && this->hull < 0)
             Explode( false, SIMULATION_ATOM );
-        double blah2 = queryTime();
+//        double blah2 = queryTime();
     }
 }
 
@@ -152,7 +152,6 @@ void GameUnit< UnitType >::Thrust( const Vector &amt1, bool afterburn )
         static float lastbuzz = getNewTime();
         Unit *playa = _Universe->AccessCockpit()->GetParent();
         if (playa) {
-            Vector diff = this->Position()-playa->Position();
             if (UnitUtil::getDistance( this,
                                        playa ) < buzzingdistance && playa->owner != this && this->owner != playa
                 && this->owner != playa->owner) {

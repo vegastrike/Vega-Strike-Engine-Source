@@ -57,7 +57,7 @@
 #include "options.h"
 #include "soundcontainer_aldrv.h"
 
-extern vs_options game_options;
+
 
 using std::min;
 using std::max;
@@ -393,7 +393,7 @@ static GFXColor DockBoxColor( const string &name, GFXColor deflt = GFXColor(1,1,
     return deflt;
 }
 
-inline void DrawDockingBoxes( Unit *un, Unit *target, const Vector &CamP, const Vector &CamQ, const Vector &CamR )
+inline void DrawDockingBoxes( Unit *un, const Unit *target, const Vector &CamP, const Vector &CamQ, const Vector &CamR )
 {
     if ( target->IsCleared( un ) ) {
         GFXBlendMode( SRCALPHA, INVSRCALPHA );
@@ -454,7 +454,7 @@ void GameCockpit::DrawTargetBoxes(const Radar::Sensor& sensor)
     GFXDisable( DEPTHWRITE );
     GFXBlendMode( SRCALPHA, INVSRCALPHA );
     GFXDisable( LIGHTING );
-    Unit *target;
+    const Unit *target;
     Unit *player = sensor.GetPlayer();
     assert(player);
     for (un_kiter uiter = unitlist->constIterator(); (target=*uiter)!=NULL; ++uiter) {
@@ -533,7 +533,6 @@ void GameCockpit::DrawTargetBox(const Radar::Sensor& sensor)
         return;
 
     float speed, range;
-    static GFXColor black_and_white = DockBoxColor( "black_and_white" );
     int   neutral = FactionUtil::GetNeutralFaction();
     Vector  CamP, CamQ, CamR;
     _Universe->AccessCamera()->GetPQR( CamP, CamQ, CamR );
@@ -548,7 +547,6 @@ void GameCockpit::DrawTargetBox(const Radar::Sensor& sensor)
     GFXDisable( LIGHTING );
     static bool draw_nav_symbol = XMLSupport::parse_bool( vs_config->getVariable( "graphics", "hud", "drawNavSymbol", "false" ) );
     if (draw_nav_symbol) {
-        static GFXColor suncol = RetrColor( "nav", GFXColor( 1, 1, 1, 1 ) );
         DrawNavigationSymbol(player->GetComputerData().NavPoint, CamP, CamQ,
                              CamR.Cast().Dot( (player->GetComputerData().NavPoint).Cast()-_Universe->AccessCamera()->GetPosition() ) );
     }
@@ -665,7 +663,7 @@ void GameCockpit::DrawCommunicatingBoxes()
     for (unsigned int i = 0; i < vdu.size(); ++i) {
         Unit *target = vdu[i]->GetCommunicating();
         if (target) {
-            static GFXColor black_and_white = DockBoxColor( "communicating" );
+            GFXColor black_and_white = DockBoxColor( "communicating" );
             QVector Loc( target->Position()-_Universe->AccessCamera()->GetPosition() );
             GFXDisable( TEXTURE0 );
             GFXDisable( TEXTURE1 );
@@ -685,7 +683,6 @@ void GameCockpit::DrawTurretTargetBoxes(const Radar::Sensor& sensor)
     if (sensor.InsideNebula())
         return;
 
-    static GFXColor black_and_white = DockBoxColor( "black_and_white" );
 
     GFXDisable( TEXTURE0 );
     GFXDisable( TEXTURE1 );
@@ -698,7 +695,7 @@ void GameCockpit::DrawTurretTargetBoxes(const Radar::Sensor& sensor)
     //This avoids rendering the same target box more than once
     Unit *subunit;
     std::set<Unit *> drawn_targets;
-    for (un_kiter iter = sensor.GetPlayer()->viewSubUnits(); (subunit=*iter)!=NULL; ++iter) {
+    for (un_iter iter = sensor.GetPlayer()->getSubUnits(); (subunit=*iter)!=NULL; ++iter) {
         if (!subunit)
             return;
         Unit *target = subunit->Target();
@@ -755,7 +752,6 @@ void GameCockpit::DrawTacticalTargetBox(const Radar::Sensor& sensor)
         XMLSupport::parse_bool( vs_config->getVariable( "graphics", "hud", "DrawTacticalTarget", "false" ) );
     if (!drawtactarg)
         return;
-    static GFXColor black_and_white = DockBoxColor( "black_and_white" );
     if (sensor.GetPlayer()->getFlightgroup() == NULL)
         return;
     Unit *target = sensor.GetPlayer()->getFlightgroup()->target.GetUnit();
@@ -1467,7 +1463,7 @@ void GameCockpit::TriggerEvents( Unit *un )
             #define MODAL_RAWIMAGE_TRIGGER(image, itrigger, btrigger, lastvar) \
                 MODAL_TRIGGER(#image, btrigger, LookupUnitStat(UnitImages< void >::image, un) itrigger, lastvar)
             
-            switch(event) {
+            switch((int)event) {
             case WARP_READY:
                 MODAL_RAWIMAGE_TRIGGER(MAXWARPFIELDSTRENGTH, >= 2, true, warpready);
                 break;
@@ -1617,16 +1613,16 @@ void GameCockpit::DrawGauges( Unit *un )
             float tmp  = LookupUnitStat( i, un );
             float tmp2 = 0;
             char  ourchar[64];
-            int   len  = sprintf( ourchar, "%.0f", tmp );
+            sprintf( ourchar, "%.0f", tmp );
             if (i == UnitImages< void >::KPS) {
                 float c = 300000000.0f;
                 if (tmp > c/10) {
                     tmp2 = tmp/c;
-                    len  = sprintf( ourchar, "%.2f C", tmp2 );
+                    sprintf( ourchar, "%.2f C", tmp2 );
                 }
             }
             if (i == UnitImages< void >::MASSEFFECT)
-                len = sprintf( ourchar, "MASS:%.0f%% (base)", tmp );
+                sprintf( ourchar, "MASS:%.0f%% (base)", tmp );
             GFXColorf( textcol );
             text->SetSize( 2, -2 );
             text->Draw( string( ourchar ), 0, false, false, automatte );
@@ -1971,17 +1967,10 @@ bool GameCockpit::DrawNavSystem()
     bool ret = ThisNav.CheckDraw();
     if (ret) {
         Camera *cam = AccessCamera(currentcamera);
-        float c_o   = cockpit_offset;
-        float o_fov = cam->GetFov();
-        static float standard_fov = XMLSupport::parse_float( vs_config->getVariable( "graphics", "base_fov", "90" ) );
-        cam->SetFov( standard_fov );
-        cam->setCockpitOffset( 0 );
+        cam->SetFov( cam->GetFov() );
+        cam->setCockpitOffset( cockpit_offset );
         cam->UpdateGFX( GFXFALSE, GFXFALSE, GFXTRUE );
         ThisNav.Draw();
-        cockpit_offset = c_o;
-        cam->SetFov( o_fov );
-        cam->setCockpitOffset( c_o );
-        cam->UpdateGFX( GFXFALSE, GFXFALSE, GFXTRUE );
     }
     return ret;
 }
@@ -2263,18 +2252,18 @@ static void DrawCrosshairs( float x, float y, float wid, float hei, const GFXCol
     GFXDisable( SMOOTH );
     
     const float verts[12 * 3] = {
-        x-(wid/2), y, 0,
-        x-(wid/6), y, 0,
-        x+(wid/2), y, 0,
-        x+(wid/6), y, 0,
-        x, y-(hei/2), 0,
-        x, y-(hei/6), 0,
-        x, y+(hei/2), 0,
-        x, y+(hei/6), 0,
-        x-.001, y+.001, 0,
-        x+.001, y-.001, 0,
-        x+.001, y+.001, 0,
-        x-.001, y-.001, 0,
+        x-(wid/2.f), y, 0,
+        x-(wid/6.f), y, 0,
+        x+(wid/2.f), y, 0,
+        x+(wid/6.f), y, 0,
+        x, y-(hei/2.f), 0,
+        x, y-(hei/6.f), 0,
+        x, y+(hei/2.f), 0,
+        x, y+(hei/6.f), 0,
+        x-.001f, y+.001f, 0,
+        x+.001f, y-.001f, 0,
+        x+.001f, y+.001f, 0,
+        x-.001f, y-.001f, 0,
     };
     GFXDraw( GFXLINE, verts, 12 );
     
@@ -2464,7 +2453,7 @@ void GameCockpit::Draw()
                     XMLSupport::parse_int( vs_config->getVariable( "graphics", "cockpit_z_partitions", "1" ) );                                         //Should not be needed if VERYNEAR_CONST is propperly set, but would be useful with stenciled inverse order rendering.
                 float zrange = cockpitradial*(1-VERYNEAR_CONST)+driftmag;
                 float zfloor = cockpitradial*VERYNEAR_CONST;
-                for (j = COCKPITZ_PARTITIONS-1; j < COCKPITZ_PARTITIONS; j--) { //FIXME This is a program lockup!!! (actually, no; j is a size_t...)
+                for (j = COCKPITZ_PARTITIONS; j > 0; j--) { //FIXME This is a program lockup!!! (actually, no; j is a size_t...)
                     AccessCamera()->UpdateGFX( GFXTRUE,
                                                GFXTRUE,
                                                GFXTRUE,
@@ -2787,10 +2776,6 @@ void GameCockpit::Draw()
                     text->GetCharSize( x, y );
                     text->SetCharSize( x*4, y*4 );
                     text->SetPos( 0-(x*2*14), 0-(y*2) );
-                    char playr[3];
-                    playr[0] = 'p';
-                    playr[1] = '0'+_Universe->CurrentCockpit();
-                    playr[2] = '\0';
                 }
                 GFXColorf( textcol );
                 static bool show_died_text =
@@ -3480,7 +3465,6 @@ void GameCockpit::DrawArrowToTarget(const Radar::Sensor& sensor, Vector localcoo
     p2.j += t;
     p2.k  = p1.k = 0;
 
-    static GFXColor black_and_white = DockBoxColor( "black_and_white" );
     GFXEnable( SMOOTH );
     GFXDisable( TEXTURE0 );
     GFXDisable( TEXTURE1 );

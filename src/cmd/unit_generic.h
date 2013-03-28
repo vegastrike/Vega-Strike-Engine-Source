@@ -504,9 +504,10 @@ public:
     void RemoveFromSystem();
     void RequestPhysics();               //Requeues the unit so that it is simulated ASAP
     bool InCorrectStarSystem( StarSystem* );
-    virtual int nummesh() const
+    virtual unsigned int nummesh() const
     {
-        return ( (int) meshdata.size() )-1;
+        // Return number of meshes except shield
+        return ( meshdata.size() - 1 );
     }
 //Uses planet stuff
 /* Updates the collide Queue with any possible change in sectors
@@ -759,7 +760,7 @@ private:
 protected:
     virtual float ExplosionRadius();
 public:
-    bool AutoPilotToErrorMessage( Unit *un, bool automaticenergyrealloc, std::string &failuremessage, int recursive_level = 2 );
+    bool AutoPilotToErrorMessage( const Unit *un, bool automaticenergyrealloc, std::string &failuremessage, int recursive_level = 2 );
     bool AutoPilotTo( Unit *un, bool automaticenergyrealloc );
 //The owner of this unit. This may not collide with owner or units owned by owner. Do not dereference (may be dead pointer)
     void *owner;                                 //void ensures that it won't be referenced by accident
@@ -869,7 +870,7 @@ protected:
 
 public:
     Vector corner_min, corner_max;
-    Vector LocalCoordinates( Unit *un ) const
+    Vector LocalCoordinates( const Unit *un ) const
     {
         return ToLocalCoordinates( ( un->Position()-Position() ).Cast() );
     }
@@ -1225,13 +1226,14 @@ protected:
 //not used yet
     StringPool::Reference target_fgid[3];
 public:
-    bool InRange( Unit *target, bool cone = true, bool cap = true ) const
+    bool InRange( const Unit *target, bool cone = true, bool cap = true ) const
     {
         double mm;
         return InRange( target, mm, cone, cap, true );
     }
-    bool InRange( Unit *target, double &mm, bool cone, bool cap, bool lock ) const;
+    bool InRange( const Unit *target, double &mm, bool cone, bool cap, bool lock ) const;
     Unit * Target();
+    const Unit * Target() const;
     Unit * VelocityReference();
     Unit * Threat();
 //Uses Universe stuff so only in Unit class
@@ -1308,7 +1310,7 @@ public:
 public:
     class csOPCODECollider * getCollideTree( const Vector &scale = Vector( 1,
                                                                            1,
-                                                                           1 ), const std::vector< struct mesh_polygon >* = NULL );
+                                                                           1 ), std::vector< struct mesh_polygon >* = NULL );
 //Because accessing in daughter classes member function from Unit * instances
     Order *aistate;
     Order * getAIState() const
@@ -1333,7 +1335,7 @@ public:
 //Uses Order class but just a poiner so ok
 //Uses AI so only in NetUnit and Unit classes
 //for clicklist
-    double getMinDis( const QVector &pnt );
+    double getMinDis( const QVector &pnt ) const;
 //Uses AI stuff so only in NetUnit and Unit classes
     void SetTurretAI();
     void DisableTurretAI();
@@ -1396,7 +1398,7 @@ public:
  * queries the sphere for weapons (world space point)
  * Only in Unit class
  */
-    virtual bool querySphereClickList( int, int, float err, Camera *activeCam )
+    virtual bool querySphereClickList( int, int, float err, Camera *activeCam ) const
     {
         return false;
     }
@@ -1569,7 +1571,7 @@ public:
         MeshAnimation *pMeshAnimation;	
 };
 
-Unit * findUnitInStarsystem( void *unitDoNotDereference );
+Unit * findUnitInStarsystem( const void *unitDoNotDereference );
 
 //Holds temporary values for inter-function XML communication Saves deprecated restr info
 struct Unit::XML

@@ -18,7 +18,7 @@
 
 #include "options.h"
 
-extern vs_options game_options;
+
 
 using namespace VSFileSystem;
 using std::vector;

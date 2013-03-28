@@ -42,7 +42,7 @@
 
 #include "options.h"
 
-extern vs_options game_options;
+
 
 GameStarSystem::GameStarSystem( const char *filename, const Vector &centr, const float timeofyear )
 {
@@ -221,7 +221,6 @@ public:
 //#define UPDATEDEBUG  //for hard to track down bugs
 void GameStarSystem::Draw( bool DrawCockpit )
 {
-    double starttime = queryTime();
     GFXEnable( DEPTHTEST );
     GFXEnable( DEPTHWRITE );
     saved_interpolation_blend_factor = interpolation_blend_factor =
@@ -232,7 +231,6 @@ void GameStarSystem::Draw( bool DrawCockpit )
     for (unsigned int i = 0; i < contterrains.size(); ++i)
         contterrains[i]->AdjustTerrain( this );
     Unit *par;
-    bool  alreadysetviewport = false;
     if ( ( par = _Universe->AccessCockpit()->GetParent() ) == NULL ) {
         _Universe->AccessCamera()->UpdateGFX( GFXTRUE );
     } else if ( !par->isSubUnit() ) {
@@ -247,7 +245,6 @@ void GameStarSystem::Draw( bool DrawCockpit )
                                                                   interpolation_blend_factor );
         }
         _Universe->AccessCockpit()->SetupViewPort( true );
-        alreadysetviewport = true;
     }
     double setupdrawtime = queryTime();
     {
@@ -287,8 +284,6 @@ void GameStarSystem::Draw( bool DrawCockpit )
     bg->Draw();
     double drawtime    = queryTime();
 
-    double maxdrawtime = 0;
-
     // Initialize occluder system (we'll populate it during unit render)
     Occlusion::start();
 
@@ -302,7 +297,7 @@ void GameStarSystem::Draw( bool DrawCockpit )
     Unit *unit;
     if ( ( drawer.action.parent = _Universe->AccessCockpit()->GetParent() ) != NULL )
         drawer.action.parenttarget = drawer.action.parent->Target();
-    for (un_iter iter = this->GravitationalUnits.createIterator(); (unit = *iter) != NULL; ++iter) {
+    for (un_iter iter = this->GravitationalUnits.createIterator(); (unit = *iter); ++iter) {
         float distance = ( drawstartpos-unit->Position() ).Magnitude()-unit->rSize();
         if (distance < game_options.precull_dist)
             drawer.action.grav_acquire( unit );
@@ -337,7 +332,6 @@ void GameStarSystem::Draw( bool DrawCockpit )
         interpolation_blend_factor = saved_interpolation_blend_factor;
         SIMULATION_ATOM = backup;
         tmp = queryTime()-tmp;
-        if (tmp > maxdrawtime) maxdrawtime = tmp;
     }
 #endif
     drawtime = queryTime()-drawtime;
@@ -381,7 +375,6 @@ void GameStarSystem::Draw( bool DrawCockpit )
     ConditionalCursorDraw( false );
     if (DrawCockpit)
         _Universe->AccessCockpit()->Draw();
-    double fintime = queryTime()-starttime;
     MeshAnimation::UpdateFrames();
     
     // And now we're done with the occluder set
@@ -426,29 +419,28 @@ void GameStarSystem::createBackground( StarSystem::StarXML *xml )
 {
 #ifdef NV_CUBE_MAP
     printf( "using NV_CUBE_MAP\n" );
-    static int max_cube_size = XMLSupport::parse_int( vs_config->getVariable( "graphics", "max_cubemap_size", "1024" ) );
     LightMap[0] = new Texture( (xml->backgroundname+"_light.cube").c_str(), 1, TRILINEAR, CUBEMAP, CUBEMAP_POSITIVE_X,
-                              GFXFALSE, max_cube_size );
+                              GFXFALSE, game_options.max_cubemap_size );
     if ( LightMap[0]->LoadSuccess() && LightMap[0]->isCube() ) {
         LightMap[1] = LightMap[2] = LightMap[3] = LightMap[4] = LightMap[5] = 0;
     } else {
         delete LightMap[0];
         LightMap[0] = new Texture( (xml->backgroundname+"_right.image").c_str(), 1, TRILINEAR, CUBEMAP, CUBEMAP_POSITIVE_X,
-                                  GFXFALSE, max_cube_size );
+                                  GFXFALSE, game_options.max_cubemap_size );
         LightMap[1] = new Texture( (xml->backgroundname+"_left.image").c_str(), 1, TRILINEAR, CUBEMAP, CUBEMAP_NEGATIVE_X,
-                                  GFXFALSE, max_cube_size, GFXFALSE, GFXFALSE, DEFAULT_ADDRESS_MODE,
+                                  GFXFALSE, game_options.max_cubemap_size, GFXFALSE, GFXFALSE, DEFAULT_ADDRESS_MODE,
                                   LightMap[0] );
         LightMap[2] = new Texture( (xml->backgroundname+"_up.image").c_str(), 1, TRILINEAR, CUBEMAP, CUBEMAP_POSITIVE_Y,
-                                  GFXFALSE, max_cube_size, GFXFALSE, GFXFALSE, DEFAULT_ADDRESS_MODE,
+                                  GFXFALSE, game_options.max_cubemap_size, GFXFALSE, GFXFALSE, DEFAULT_ADDRESS_MODE,
                                   LightMap[0] );
         LightMap[3] = new Texture( (xml->backgroundname+"_down.image").c_str(), 1, TRILINEAR, CUBEMAP, CUBEMAP_NEGATIVE_Y,
-                                  GFXFALSE, max_cube_size, GFXFALSE, GFXFALSE, DEFAULT_ADDRESS_MODE,
+                                  GFXFALSE, game_options.max_cubemap_size, GFXFALSE, GFXFALSE, DEFAULT_ADDRESS_MODE,
                                   LightMap[0] );
         LightMap[4] = new Texture( (xml->backgroundname+"_front.image").c_str(), 1, TRILINEAR, CUBEMAP, CUBEMAP_POSITIVE_Z,
-                                  GFXFALSE, max_cube_size, GFXFALSE, GFXFALSE, DEFAULT_ADDRESS_MODE,
+                                  GFXFALSE, game_options.max_cubemap_size, GFXFALSE, GFXFALSE, DEFAULT_ADDRESS_MODE,
                                   LightMap[0] );
         LightMap[5] = new Texture( (xml->backgroundname+"_back.image").c_str(), 1, TRILINEAR, CUBEMAP, CUBEMAP_NEGATIVE_Z,
-                                  GFXFALSE, max_cube_size, GFXFALSE, GFXFALSE, DEFAULT_ADDRESS_MODE,
+                                  GFXFALSE, game_options.max_cubemap_size, GFXFALSE, GFXFALSE, DEFAULT_ADDRESS_MODE,
                                   LightMap[0] );
     }
 #else

@@ -41,7 +41,7 @@ extern float __tanf( float );
 #undef XVector
 #undef YVector
 
-inline Vector QVector::operator=( const Vector &a )
+inline const Vector& QVector::operator=( const Vector &a )
 {
     i = a.i;
     j = a.j;
@@ -56,7 +56,7 @@ inline QVector::QVector( const Vector &a )
     k = a.k;
 }
 
-inline QVector Vector::operator=( const QVector &a )
+inline const QVector& Vector::operator=( const QVector &a )
 {
     i = a.i;
     j = a.j;

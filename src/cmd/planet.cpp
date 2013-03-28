@@ -287,9 +287,8 @@ GamePlanet::GamePlanet( QVector x,
                     jump->meshdata.pop_back();
                 }
                 jump->meshdata.push_back( shield );
-                Unit   *su;
-                for (un_kiter i = jump->viewSubUnits(); (su = *i) != NULL; ++i)
-                    SubUnits.prepend( su );
+                for (un_iter i = jump->getSubUnits(); !i.isDone(); ++i)
+                    SubUnits.prepend( *i );
                 jump->SubUnits.clear();
             }
             jump->Kill();

@@ -199,18 +199,6 @@ namespace Occlusion {
     static QVector biggestLightPos;
     static float biggestLightSize;
     
-    static int maxDynamicOccluders( )
-    {
-        static int maxDynamicOccluders = XMLSupport::parse_int( vs_config->getVariable( "graphics", "max_dynamic_occluders", "16" ) );
-        return maxDynamicOccluders;
-    }
-
-    static int maxForcedOccluders( )
-    {
-        static int maxForcedOccluders = XMLSupport::parse_int( vs_config->getVariable( "graphics", "max_forced_occluders", "32" ) );
-        return maxForcedOccluders;
-    }
-
     void /*GFXDRVAPI*/ start( )
     {
         end();

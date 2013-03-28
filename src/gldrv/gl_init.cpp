@@ -18,6 +18,9 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
+#include <assert.h>
+#include <string>
+
 #define GL_INIT_CPP
 #include "gl_globals.h"
 #undef GL_INIT_CPP
@@ -26,9 +29,10 @@
 #include "xml_support.h"
 #include "config_xml.h"
 #include "winsys.h"
-#include <assert.h>
 #include "gfxlib.h"
-#include <string>
+#include "options.h"
+
+
 
 #if !defined (_WIN32) && !defined (__CYGWIN__)
 
@@ -237,7 +241,7 @@ void init_opengl_extensions()
 
 #ifndef NO_COMPILEDVERTEXARRAY_SUPPORT
     if ( vsExtensionSupported( "GL_EXT_compiled_vertex_array" )
-        && XMLSupport::parse_bool( vs_config->getVariable( "graphics", "LockVertexArrays", "true" ) ) ) {
+        && game_options.LockVertexArrays ) {
 #ifdef __APPLE__
 #ifndef __APPLE_PANTHER_GCC33_CLI__
 #if defined (glLockArraysEXT) && defined (glUnlockArraysEXT)
@@ -378,8 +382,7 @@ void init_opengl_extensions()
 #ifdef GL_FOG_DISTANCE_MODE_NV
     if ( vsExtensionSupported( "GL_NV_fog_distance" ) ) {
         VSFileSystem::vs_dprintf( 3, "OpenGL::Accurate Fog Distance supported\n" );
-        int foglev = XMLSupport::parse_int( vs_config->getVariable( "graphics", "fogdetail", "0" ) );
-        switch (foglev)
+        switch (game_options.fogdetail)
         {
         case 0:
             glFogi( GL_FOG_DISTANCE_MODE_NV, GL_EYE_PLANE_ABSOLUTE_NV );
@@ -495,18 +498,18 @@ void init_opengl_extensions()
 
 static void initfov()
 {
-    g_game.fov    = XMLSupport::parse_float( vs_config->getVariable( "graphics", "fov", "78" ) );
-    g_game.aspect = XMLSupport::parse_float( vs_config->getVariable( "graphics", "aspect", "1.33" ) );
-    g_game.znear  = XMLSupport::parse_float( vs_config->getVariable( "graphics", "znear", "1" ) );
-    g_game.zfar   = XMLSupport::parse_float( vs_config->getVariable( "graphics", "zfar", "100000" ) );
-    g_game.detaillevel         = XMLSupport::parse_float( vs_config->getVariable( "graphics", "ModelDetail", "1" ) );
-    g_game.use_textures        = XMLSupport::parse_bool( vs_config->getVariable( "graphics", "UseTextures", "true" ) );
-    g_game.use_ship_textures   = XMLSupport::parse_bool( vs_config->getVariable( "graphics", "UseShipTextures", "false" ) );
-    g_game.use_planet_textures = XMLSupport::parse_bool( vs_config->getVariable( "graphics", "UsePlanetTextures", "false" ) );
-    g_game.use_logos           = XMLSupport::parse_bool( vs_config->getVariable( "graphics", "UseLogos", "true" ) );
-    g_game.use_sprites         = XMLSupport::parse_bool( vs_config->getVariable( "graphics", "UseVSSprites", "true" ) );
-    g_game.use_animations      = XMLSupport::parse_bool( vs_config->getVariable( "graphics", "UseAnimations", "true" ) );
-    g_game.use_videos          = XMLSupport::parse_bool( vs_config->getVariable( "graphics", "UseVideos", "true" ) );
+    g_game.fov    = game_options.fov;
+    g_game.aspect = game_options.aspect;
+    g_game.znear  = game_options.znear;
+    g_game.zfar   = game_options.zfar;
+    g_game.detaillevel         = game_options.ModelDetail;
+    g_game.use_textures        = game_options.UseTextures;
+    g_game.use_ship_textures   = game_options.UseShipTextures;
+    g_game.use_planet_textures = game_options.UsePlanetTextures;
+    g_game.use_logos           = game_options.UseLogos;
+    g_game.use_sprites         = game_options.UseVSSprites;
+    g_game.use_animations      = game_options.UseAnimations;
+    g_game.use_videos          = game_options.UseVideos;
 
     /*
      *  FILE * fp = fopen ("glsetup.txt","r");
@@ -539,18 +542,12 @@ void GFXInit( int argc, char **argv )
 
     glViewport( 0, 0, g_game.x_resolution, g_game.y_resolution );
     float clearcol[4];
-    gl_options.wireframe = XMLSupport::parse_bool( vs_config->getVariable( "graphics", "use_wireframe", "0" ) );
-    gl_options.max_texture_dimension =
-        XMLSupport::parse_int( vs_config->getVariable( "graphics", "max_texture_dimension", "65536" ) );
-    gl_options.max_movie_dimension   =
-        XMLSupport::parse_int( vs_config->getVariable( "graphics", "max_movie_dimension", "65536" ) );
-        
-    gl_options.rect_textures    =
-        XMLSupport::parse_bool( vs_config->getVariable( "graphics", "rect_textures", 
-            (   vsExtensionSupported( "GL_ARB_texture_non_power_of_two" )
-             || vsExtensionSupported( "GL_ARB_texture_rectangle" )
-             || vsExtensionSupported( "GL_NV_texture_rectangle" )  
-            ) ? "true" : "false" ) );
+    gl_options.wireframe = game_options.use_wireframe;
+    gl_options.max_texture_dimension = game_options.max_texture_dimension;
+    gl_options.max_movie_dimension   = game_options.max_movie_dimension;
+    bool textsupported = (vsExtensionSupported( "GL_ARB_texture_non_power_of_two" ) ||  vsExtensionSupported( "GL_ARB_texture_rectangle" ) || vsExtensionSupported( "GL_NV_texture_rectangle" )) ? "true" : "false" ;
+
+    gl_options.rect_textures    = game_options.rect_textures ? true : textsupported;
 
     if (gl_options.rect_textures) {
         VSFileSystem::vs_dprintf(3, "RECT textures supported\n");
@@ -565,13 +562,10 @@ void GFXInit( int argc, char **argv )
         VSFileSystem::vs_dprintf(3, "RECT max texture dimension: %d\n", max_rect_dimension);
     }
         
-    gl_options.pot_video_textures    =
-        XMLSupport::parse_bool( vs_config->getVariable( "graphics", "pot_video_textures", 
-            (   gl_options.rect_textures
-             || (   vsExtensionSupported( "GL_ARB_texture_non_power_of_two" )
-                 && vsVendorMatch("nvidia")  )
-            ) ? "false" : "true" ) );
-    
+    bool vidsupported = (   gl_options.rect_textures || (   vsExtensionSupported( "GL_ARB_texture_non_power_of_two" ) && vsVendorMatch("nvidia"))); 
+
+    gl_options.pot_video_textures    = game_options.pot_video_textures ? true : vidsupported;
+
     if (!gl_options.pot_video_textures && gl_options.rect_textures) {
         // Enforce max rect texture for movies, which use them
         if (gl_options.max_movie_dimension > gl_options.max_rect_dimension)
@@ -582,18 +576,18 @@ void GFXInit( int argc, char **argv )
         VSFileSystem::vs_dprintf(1, "Forcing POT video textures\n");
     else
         VSFileSystem::vs_dprintf(3, "Using NPOT video textures\n");
-    
-    gl_options.smooth_shade        = XMLSupport::parse_bool( vs_config->getVariable( "graphics", "SmoothShade", "true" ) );
-    gl_options.mipmap = XMLSupport::parse_int( vs_config->getVariable( "graphics", "mipmapdetail", "2" ) );
-    gl_options.compression         = XMLSupport::parse_int( vs_config->getVariable( "graphics", "texture_compression", "0" ) );
-    gl_options.Multitexture        = XMLSupport::parse_bool( vs_config->getVariable( "graphics", "reflection", "true" ) );
-    gl_options.smooth_lines        = XMLSupport::parse_bool( vs_config->getVariable( "graphics/mesh", "smooth_lines", "true" ) );
-    gl_options.smooth_points       = XMLSupport::parse_bool( vs_config->getVariable( "graphics/mesh", "smooth_points", "true" ) );
+    // Removing gl_options soon
+    gl_options.smooth_shade        = game_options.SmoothShade;
+    gl_options.mipmap 		   = game_options.mipmapdetail;
+    gl_options.compression         = game_options.texture_compression;
+    gl_options.Multitexture        = game_options.reflection;
+    gl_options.smooth_lines        = game_options.smooth_lines;
+    gl_options.smooth_points       = game_options.smooth_points;
 
-    gl_options.display_lists       = XMLSupport::parse_bool( vs_config->getVariable( "graphics", "displaylists", "false" ) );
-    gl_options.s3tc = XMLSupport::parse_bool( vs_config->getVariable( "graphics", "s3tc", "true" ) );
-    gl_options.ext_clamp_to_edge   = XMLSupport::parse_bool( vs_config->getVariable( "graphics", "ext_clamp_to_edge", "true" ) );
-    gl_options.ext_clamp_to_border = XMLSupport::parse_bool( vs_config->getVariable( "graphics", "ext_clamp_to_border", "true" ) );
+    gl_options.display_lists       = game_options.displaylists;
+    gl_options.s3tc 		   = game_options.s3tc;
+    gl_options.ext_clamp_to_edge   = game_options.ext_clamp_to_edge;
+    gl_options.ext_clamp_to_border = game_options.ext_clamp_to_border;
 
     vs_config->getColor( "space_background", clearcol );
     glClearColor( clearcol[0], clearcol[1], clearcol[2], clearcol[3] );
@@ -683,12 +677,13 @@ void GFXInit( int argc, char **argv )
     GFXCreateLightContext( con );
     //glutSetCursor(GLUT_CURSOR_NONE);
     /* Avoid scrambled screen on startup - Twice, for triple buffering */
-    if ( XMLSupport::parse_bool( vs_config->getVariable( "graphics", "ClearOnStartup", "true" ) ) ) {
+    if ( game_options.ClearOnStartup ) {
         glClear( GL_COLOR_BUFFER_BIT );
         winsys_swap_buffers();
         glClear( GL_COLOR_BUFFER_BIT );
         winsys_swap_buffers();
     }
+    glEnable( GL_TEXTURE_CUBE_MAP_SEAMLESS );
     winsys_show_cursor( false );
 }
 

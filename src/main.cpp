@@ -56,7 +56,7 @@
 #include "cmd/music.h"
 #include "ship_commands.h"
 #include "gamemenu.h"
-
+#include "cmd/unit_factory.h"
 
 #include "audio/SceneManager.h"
 #include "audio/TemplateManager.h"
@@ -113,7 +113,6 @@ void setup_game_data()
     g_game.use_animations    = 1;
     g_game.use_videos        = 1;
     g_game.use_logos = 1;
-    g_game.music_enabled     = 1;
     g_game.sound_volume      = 1;
     g_game.music_volume      = 1;
     g_game.warning_level     = 20;
@@ -238,8 +237,12 @@ void closeRenderer()
 extern void InitUnitTables();
 extern void CleanupUnitTables();
 bool isVista = false;
+
+Unit *TheTopLevelUnit;
+
 int main( int argc, char *argv[] )
 {
+
     VSFileSystem::ChangeToProgramDirectory( argv[0] );
 
 #ifdef WIN32
@@ -289,19 +292,14 @@ int main( int argc, char *argv[] )
         VSFileSystem::InitPaths( CONFIGFILE, subdir );
     }
 
-    //This should be put into some common function...
-    //Keep in mind that initialization must also go into networking/netserver.cpp
-    game_options.init();
     //If no debug argument is supplied, set to what the config file has.
     if (g_game.vsdebug == '0')
         g_game.vsdebug = game_options.vsdebug;
     //can use the vegastrike config variable to read in the default mission
-    if ( XMLSupport::parse_bool( vs_config->getVariable( "network", "force_client_connect", "false" ) ) )
+    if ( game_options.force_client_connect )
         ignore_network = false;
-    g_game.music_enabled = XMLSupport::parse_bool( vs_config->getVariable( "audio", "Music", "true" ) );
     if (mission_name[0] == '\0') {
-        std::string defmis = vs_config->getVariable( "general", "default_mission", "test/test1.mission" );
-        strncpy( mission_name, defmis.c_str(), 1023 );
+        strncpy( mission_name, game_options.default_mission.c_str(), 1023 );
         mission_name[1023] = '\0';
         cerr<<"MISSION_NAME is empty using : "<<mission_name<<endl;
     }
@@ -334,7 +332,7 @@ int main( int argc, char *argv[] )
 #endif
 
     AUDInit();
-    AUDListenerGain( XMLSupport::parse_float( vs_config->getVariable( "audio", "sound_gain", ".5" ) ) );
+    AUDListenerGain( game_options.sound_gain );
     Music::InitMuzak();
     
     initSceneManager();
@@ -343,11 +341,12 @@ int main( int argc, char *argv[] )
     
     //Register commands
     //COmmand Interpretor Seems to break VC8, so I'm leaving disabled for now - Patrick, Dec 24
-    if ( XMLSupport::parse_bool( vs_config->getVariable( "general", "command_interpretor", "false" ) ) ) {
+    if ( game_options.command_interpretor ) {
         CommandInterpretor = new commandI;
         InitShipCommands();
     }
-    _Universe = new GameUniverse( argc, argv, vs_config->getVariable( "general", "galaxy", "milky_way.xml" ).c_str() );
+    _Universe = new GameUniverse( argc, argv, game_options.galaxy.c_str() );
+    TheTopLevelUnit = UnitFactory::createUnit();
     _Universe->Loop( bootstrap_first_loop );
 
     //Unregister commands - and cleanup memory
@@ -427,10 +426,9 @@ void bootstrap_draw( const std::string &message, Animation *newSplashScreen )
         ani->DrawNow( tmp ); //VSFileSystem::vs_fprintf( stderr, "(new?) splash screen ('animation'?) %d.  ", (long long)ani ); //temporary, by chuck
         }
     }
-
-    static std::string defaultbootmessage = vs_config->getVariable( "graphics", "default_boot_message", "" );
-    static std::string initialbootmessage = vs_config->getVariable( "graphics", "initial_boot_message", "Loading..." );
-    bs_tp->Draw( defaultbootmessage.length() > 0 ? defaultbootmessage : message.length() > 0 ? message : initialbootmessage );
+    bs_tp->Draw( game_options.default_boot_message.length() > 0 ? 
+		 game_options.default_boot_message : message.length() > 0 ? 
+		 message : game_options.initial_boot_message );
 
     GFXHudMode( GFXFALSE );
     GFXEndScene();
@@ -481,12 +479,9 @@ vector< string >parse_space_string( std::string s )
 void bootstrap_first_loop()
 {
     static int  i = 0;
-    static std::string ss  = vs_config->getVariable( "graphics", "splash_screen", "vega_splash.ani" );
-    static std::string sas = vs_config->getVariable( "graphics", "splash_audio", "" );
-    static bool isgamemenu = XMLSupport::parse_bool( vs_config->getVariable( "graphics", "main_menu", "false" ) );
     if (i == 0) {
-        vector< string >s  = parse_space_string( ss );
-        vector< string >sa = parse_space_string( sas );
+        vector< string >s  = parse_space_string( game_options.splash_screen );
+        vector< string >sa = parse_space_string( game_options.splash_audio );
         int snum = time( NULL )%s.size();
         SplashScreen = new Animation( s[snum].c_str(), 0 );
         if ( sa.size() && sa[0].length() ) muzak->GotoSong( sa[snum%sa.size()] );
@@ -495,24 +490,23 @@ void bootstrap_first_loop()
     bootstrap_draw( "Vegastrike Loading...", SplashScreen );
     if (i++ > 4) {
         if (_Universe) {
-            if (isgamemenu)
+            if (game_options.main_menu)
                 UniverseUtil::startMenuInterface( true );
             else
                 _Universe->Loop( bootstrap_main_loop );
         }
     }
 }
+
 void SetStartupView( Cockpit *cp )
 {
-    static std::string startupview = vs_config->getVariable( "graphics", "startup_cockpit_view", "front" );
-    cp->SetView( startupview
-                == "view_target" ? CP_TARGET : ( startupview
-                                                == "back" ? CP_BACK : (startupview == "chase" ? CP_CHASE : CP_FRONT) ) );
+    cp->SetView( game_options.startup_cockpit_view
+                == "view_target" ? CP_TARGET : ( game_options.startup_cockpit_view
+                                                == "back" ? CP_BACK : (game_options.startup_cockpit_view == "chase" ? CP_CHASE : CP_FRONT) ) );
 }
 void bootstrap_main_loop()
 {
     static bool LoadMission  = true;
-    static bool loadLastSave = XMLSupport::parse_bool( vs_config->getVariable( "general", "load_last_savegame", "false" ) );
     InitTime();
     if (LoadMission) {
         LoadMission = false;
@@ -527,7 +521,6 @@ void bootstrap_main_loop()
         string  planetname;
 
         mission->GetOrigin( pos, planetname );
-        bool    setplayerloc = false;
         string  mysystem     = mission->getVariable( "system", "sol.system" );
 
         int     numplayers;
@@ -536,8 +529,8 @@ void bootstrap_main_loop()
         vector< std::string >playerpasswd;
         string pname, ppasswd;
         for (int p = 0; p < numplayers; p++) {
-            pname   = vs_config->getVariable( "player"+( (p > 0) ? tostring( p+1 ) : string( "" ) ), "callsign", "" );
-            ppasswd = vs_config->getVariable( "player"+( (p > 0) ? tostring( p+1 ) : string( "" ) ), "password", "" );
+            pname   = game_options.getPlayer(p);
+            ppasswd = game_options.getPassword(p);
             if ( p == 0 && global_username.length() )
                 pname = global_username;
             if ( p == 0 && global_password.length() )
@@ -629,7 +622,7 @@ void bootstrap_main_loop()
                                                                         false );
                 _Universe->AccessCockpit( k )->TimeOfLastCollision = getNewTime();
             } else {
-                if (loadLastSave) {
+                if (game_options.load_last_savegame) {
                     _Universe->AccessCockpit( k )->savegame->ParseSaveGame( savegamefile,
                                                                             mysystem,
                                                                             mysystem,
@@ -651,7 +644,6 @@ void bootstrap_main_loop()
                 playerNloc.push_back( pos );
             else
                 playerNloc.push_back( QVector( FLT_MAX, FLT_MAX, FLT_MAX ) );
-            setplayerloc = setplayerXloc;             //FIX ME will only set first player where he was
             for (unsigned int j = 0; j < saved.size(); j++)
                 savedun.push_back( saved[j] );
         }
@@ -670,36 +662,16 @@ void bootstrap_main_loop()
         UpdateTime();
         FactionUtil::LoadContrabandLists();
         {
-            string str = vs_config->getVariable(
-                "general",
-                "intro1",
-                "Welcome to Vega Strike! Use #8080FFTab#000000 to afterburn (#8080FF+,-#000000 cruise control), #8080FFarrows#000000 to steer." );
-            if ( !str.empty() ) {
-                UniverseUtil::IOmessage( 0, "game", "all", str );
-                str = vs_config->getVariable(
-                    "general",
-                    "intro2",
-                    "The #8080FFt#000000 key targets objects; #8080FFspace#000000 fires at them & #8080FFa#000000 activates the SPEC drive. To" );
-                if ( !str.empty() ) {
-                    UniverseUtil::IOmessage( 4, "game", "all", str );
-                    str = vs_config->getVariable(
-                        "general",
-                        "intro3",
-                        "go to another star system, buy a jump drive for about 10000 credits, fly to a" );
-                    if ( !str.empty() ) {
-                        UniverseUtil::IOmessage( 8, "game", "all", str );
-                        str = vs_config->getVariable(
-                            "general",
-                            "intro4",
-                            "wireframe jump-point and press #8080FFj#000000 to warp to a near star. Target a base or planet;" );
-                        if ( !str.empty() ) {
-                            UniverseUtil::IOmessage( 12, "game", "all", str );
-                            str = vs_config->getVariable(
-                                "general",
-                                "intro5",
-                                "When you get close a green box will appear. Inside the box, #8080FFd#000000 will land." );
-                            if ( !str.empty() )
-                                UniverseUtil::IOmessage( 16, "game", "all", str );
+            if ( !game_options.intro1.empty() ) {
+                UniverseUtil::IOmessage( 0, "game", "all", game_options.intro1 );
+                if ( !game_options.intro2.empty() ) {
+                    UniverseUtil::IOmessage( 4, "game", "all", game_options.intro2 );
+                    if ( !game_options.intro3.empty() ) {
+                        UniverseUtil::IOmessage( 8, "game", "all", game_options.intro3 );
+                        if ( !game_options.intro4.empty() ) {
+                            UniverseUtil::IOmessage( 12, "game", "all",game_options.intro4 );
+                            if ( !game_options.intro5.empty() )
+                                UniverseUtil::IOmessage( 16, "game", "all", game_options.intro5 );
                         }
                     }
                 }
@@ -709,7 +681,7 @@ void bootstrap_main_loop()
         if ( Network == NULL
             && mission->getVariable( "savegame",
                                      "" ).length() != 0
-            && XMLSupport::parse_bool( vs_config->getVariable( "AI", "dockOnLoad", "true" ) ) ) {
+            && game_options.dockOnLoad) {
             for (size_t i = 0; i < _Universe->numPlayers(); i++) {
                 QVector vec;
                 DockToSavedBases( i, vec );
@@ -724,7 +696,7 @@ void bootstrap_main_loop()
             for (l = 0; l < _Universe->numPlayers(); l++)
                 Network[l].inGame();
         }
-        if (loadLastSave) {
+        if (game_options.load_last_savegame) {
             //Don't write if we didn't load...
             for (unsigned int i = 0; i < _Universe->numPlayers(); ++i)
                 WriteSaveGame( _Universe->AccessCockpit( i ), false );
@@ -734,7 +706,7 @@ void bootstrap_main_loop()
             _Universe->AccessCockpit( i )->savegame->LoadSavedMissions();
         _Universe->Loop( main_loop );
         ///return to idle func which now should call main_loop mohahahah
-        if ( XMLSupport::parse_bool( vs_config->getVariable( "splash", "auto_hide", "true" ) ) )
+        if ( game_options.auto_hide )
             UniverseUtil::hideSplashScreen();
     }
     ///Draw Texture

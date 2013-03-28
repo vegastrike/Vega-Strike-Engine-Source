@@ -44,21 +44,24 @@ ClientPtr NetServer::newConnection_tcp()
 void NetServer::checkTimedoutClients_udp()
 {
     /********* Method 1 : compare latest_timestamp to current time and see if > CLIENTTIMEOUT */
-    double curtime  = getNewTime();
-    double deltatmp = 0;
+
     for (LI i = allClients.begin(); i != allClients.end(); i++) {
         ClientPtr cl = *i;
         if ( !cl->lossy_socket->isTcp() ) {
             //NETFIXME: Does this delta and latest_timeout actually only check UDP or does this include TCP?
             //Time elapsed since latest packet in seconds
-            deltatmp = ( fabs( curtime-cl->latest_timeout ) );
+#ifdef TIMEOUT_USING_UDP_EVEN_THOUGH_THEY_USE_TCP
+            double curtime  = getNewTime();
+            double deltatmp = ( fabs( curtime-cl->latest_timeout ) );
+#endif
             if (cl->latest_timeout != 0) {
-                //COUT<<"DELTATMP = "<<deltatmp<<" - clienttimeout = "<<clienttimeout<<endl;
-                //Here considering a delta > 0xFFFFFFFX where X should be at least something like 0.9
-                //This allows a packet not to be considered as "old" if timestamp has been "recycled" on client
-                //side -> when timestamp has grown enough to became bigger than what an u_int can store
+                /* COUT<<"DELTATMP = "<<deltatmp<<" - clienttimeout = "<<clienttimeout<<endl;
+                   Here considering a delta > 0xFFFFFFFX where X should be at least something like 0.9
+                   This allows a packet not to be considered as "old" if timestamp has been "recycled" on client
+                   side -> when timestamp has grown enough to became bigger than what an u_int can store
 
-                //if( cl->ingame && deltatmp > clienttimeout && deltatmp < (0xFFFFFFFF*0.9) )
+                  if( cl->ingame && deltatmp > clienttimeout && deltatmp < (0xFFFFFFFF*0.9) )
+                */
 #ifdef TIMEOUT_USING_UDP_EVEN_THOUGH_THEY_USE_TCP
                 if (cl->ingame == true && deltatmp > clienttimeout) {
                     Unit *un;

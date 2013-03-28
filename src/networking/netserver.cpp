@@ -206,8 +206,6 @@ void NetServer::start( int argc, char **argv )
     cout<<"Loading server config...";
     VSFileSystem::InitPaths( CONFIGFILE );
 
-    game_options.init();
-
     InitUnitTables();     //universe_generic.cpp
     //Here we say we want to only handle activity in all starsystems
     run_only_player_starsystem = false;
@@ -691,7 +689,6 @@ void NetServer::processPacket( ClientPtr clt, unsigned char cmd, const AddressIP
             this->sendLoginUnavailable( clt );
         } else {
             SOCKETALT        tmpsock;
-            const AddressIP *iptmp;
             WaitListEntry    entry;
             NetBuffer        netbuf( packet.getData(), packet.getDataLength() );
             std::string      user   = netbuf.getString();
@@ -710,7 +707,6 @@ void NetServer::processPacket( ClientPtr clt, unsigned char cmd, const AddressIP
                 sendLoginAlready( clt );
                 break;
             }
-            iptmp   = &clt->cltadr;
             tmpsock = clt->tcp_sock;
 
             //Redirect the login request packet to account server

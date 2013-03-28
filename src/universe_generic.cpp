@@ -18,8 +18,11 @@
 #include "universe_util.h"
 #include "cmd/csv.h"
 #include "cmd/role_bitmask.h"
+#include "options.h"
 
 using namespace GalaxyXML;
+
+
 
 extern StarSystem * GetLoadedStarSystem( const char *file );
 vector< StarSystem* >deleteQueue;
@@ -43,8 +46,7 @@ Cockpit* Universe::createCockpit( std::string player )
 
 Unit * DockToSavedBases( int playernum, QVector &safevec )
 {
-    static string _str = vs_config->getVariable( "AI", "startDockedTo", "MiningBase" );
-    string str = _str;
+    string str = game_options.startDockedTo;
     Unit  *plr = _Universe->AccessCockpit( playernum )->GetParent();
     if ( !plr || !plr->getStarSystem() ) {
         safevec = QVector( 0, 0, 0 );
@@ -261,8 +263,7 @@ static void ss_generating( bool enable )
 void Universe::Generate1( const char *file, const char *jumpback )
 {
     int count = 0;
-    static bool show_loading = XMLSupport::parse_bool( vs_config->getVariable( "splash", "while_loading_starsystem", "false" ) );
-    if (show_loading)
+    if (game_options.while_loading_starsystem)
         ss_generating( true );
     VSFile  f;
     VSError err = f.OpenReadOnly( file, SystemFile );
@@ -280,9 +281,7 @@ void Universe::Generate2( StarSystem *ss )
     static bool firsttime = true;
     LoadStarSystem( ss );
     pushActiveStarSystem( ss );
-    static int num_times_to_simulate_new_star_system =
-        XMLSupport::parse_int( vs_config->getVariable( "physics", "num_times_to_simulate_new_star_system", "20" ) );
-    for (unsigned int tume = 0; tume <= num_times_to_simulate_new_star_system*SIM_QUEUE_SIZE+1; ++tume)
+    for (unsigned int tume = 0; tume <= game_options.num_times_to_simulate_new_star_system*SIM_QUEUE_SIZE+1; ++tume)
         ss->UpdateUnitPhysics( true );
     //notify the director that a new system is loaded (gotta have at least one active star system)
     StarSystem *old_script_system = script_system;
@@ -323,11 +322,9 @@ StarSystem* Universe::GenerateStarSystem( const char *file, const char *jumpback
 
 void Universe::Update()
 {
-    static float nonactivesystemtime = XMLSupport::parse_floatf( vs_config->getVariable( "physics", "InactiveSystemTime", ".3" ) );
-    float systime = nonactivesystemtime;
     for (unsigned int i = 0; i < star_system.size(); ++i)
         //Calls the update function for server
-        star_system[i]->Update( (i == 0) ? 1 : systime/i );
+        star_system[i]->Update( (i == 0) ? 1 : game_options.InactiveSystemTime/i );
 }
 
 int Universe::StarSystemIndex( StarSystem *ss )
@@ -342,19 +339,18 @@ void InitUnitTables()
 {
     VSFile  allUnits;
     VSError err;
-    static string unitdata = vs_config->getVariable( "data", "UnitCSV", "modunits.csv" );
-    while (unitdata.length() != 0) {
-        string::size_type where = unitdata.find( " " ), where2 = where;
+    while (game_options.UnitCSV.length() != 0) {
+        string::size_type where = game_options.UnitCSV.find( " " ), where2 = where;
         if (where == string::npos)
-            where = unitdata.length();
-        string tmp = unitdata.substr( 0, where );
+            where = game_options.UnitCSV.length();
+        string tmp = game_options.UnitCSV.substr( 0, where );
         err = allUnits.OpenReadOnly( tmp, UnitFile );
         if (err <= Ok) {
             unitTables.push_back( new CSVTable( allUnits, allUnits.GetRoot() ) );
             allUnits.Close();
         }
         if (where2 == string::npos) break;
-        unitdata = unitdata.substr( where+1, unitdata.length() );
+        game_options.UnitCSV = game_options.UnitCSV.substr( where+1, game_options.UnitCSV.length() );
     }
     //Now include units.csv at the end.
     err = allUnits.OpenReadOnly( "units.csv", UnitFile );

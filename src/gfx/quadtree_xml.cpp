@@ -346,7 +346,6 @@ void QuadTree::SetZSizes( int mZ, unsigned int maxZ )
 
 void QuadTree::LoadXML( const char *filename, const Vector &Scales, const float Radius )
 {
-    const int chunk_size = 16384;
     std::vector< unsigned int >ind;
     //FILE* inFile = VSFileSystem::vs_open (filename, "r");
     VSFile    f;
@@ -366,24 +365,6 @@ void QuadTree::LoadXML( const char *filename, const Vector &Scales, const float 
     XML_SetUserData( parser, this );
     XML_SetElementHandler( parser, &QuadTree::beginElement, &QuadTree::endElement );
     XML_Parse( parser, ( f.ReadFull() ).c_str(), f.Size(), 1 );
-    /*
-     *  do {
-     * #ifdef BIDBG
-     *  char *buf = (XML_Char*)XML_GetBuffer(parser, chunk_size);
-     * #else
-     *  char buf[chunk_size];
-     * #endif
-     *  int length;
-     *
-     *  length = VSFileSystem::vs_read(buf,1, chunk_size,inFile);
-     *  //length = inFile.gcount();
-     * #ifdef BIDBG
-     *  XML_ParseBuffer(parser, length, VSFileSystem::vs_feof(inFile));
-     * #else
-     *  XML_Parse (parser,buf,length,VSFileSystem::vs_feof(inFile));
-     * #endif
-     *  } while(!VSFileSystem::vs_feof(inFile));
-     */
     f.Close();
     XML_ParserFree( parser );
     unsigned int i;
@@ -413,7 +394,6 @@ void QuadTree::LoadXML( const char *filename, const Vector &Scales, const float 
         hm.XOrigin = (int) xml->data[i].OriginX;
         hm.ZOrigin = (int) xml->data[i].OriginY;
         hm.Scale   = xml->data[i].scale;
-        unsigned char *palette;
         //FILE * fp;
         //fp = VSFileSystem::vs_open (xml->data[i].file.c_str(),"rb");
         Texture tex;

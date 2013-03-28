@@ -51,7 +51,7 @@ public:
         QFLOAT z;
     };
 
-    XVector() {}
+    XVector() : i(0),j(0),k(0){}
 private:
     friend class Quadsquare;
     friend class QuadTree;
@@ -59,7 +59,7 @@ private:
     friend class AIScript;
     //friend class PlanetaryTransform;
     friend class SphericalTransform;
-    inline YVector operator=( const YVector& );
+    inline const YVector& operator=( const YVector& );
 public:
     inline XVector( const YVector& );
     inline YVector Cast() const;
@@ -156,6 +156,13 @@ public:
         return XVector( (i > other.i) ? i : other.i,
                        (j > other.j) ? j : other.j,
                        (k > other.k) ? k : other.k );
+    }
+    inline XVector& operator=( const XVector& other )
+    {
+        this->i = other.i;
+        this->j = other.j;
+        this->k = other.k;
+        return *this;
     }
     XVector( struct _object* );
 };

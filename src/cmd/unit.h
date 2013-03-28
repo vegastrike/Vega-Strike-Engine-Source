@@ -72,7 +72,7 @@ public: GameUnit( int dummy );
     GameUnit( const char *filename, bool SubUnit, int faction, std::string customizedUnit = std::string(
                   "" ), Flightgroup *flightgroup = NULL, int fg_subnumber = 0, std::string *netxml = NULL );
     virtual ~GameUnit();
-    int nummesh() const;
+    unsigned int nummesh() const;
 ///fils in corner_min,corner_max and radial_size
 ///returns -1 if unit cannot dock, otherwise returns which dock it can dock at
     UnitImages< void >& GetImageInformation();
@@ -131,7 +131,7 @@ public: GameUnit( int dummy );
 
 ///Queries the bounding sphere with a duo of mouse coordinates that project
 ///to the center of a ship and compare with a sphere...pretty fast*/
-    bool querySphereClickList( int, int, float err, Camera *activeCam );
+    bool querySphereClickList( int, int, float err, Camera *activeCam ) const;
 ///returns true if jump possible even if not taken
 /*
  **************************************************************************************

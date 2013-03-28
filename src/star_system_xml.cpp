@@ -20,7 +20,7 @@
 #include "cmd/atmosphere.h"
 
 #include "options.h"
-extern vs_options game_options;
+
 
 #include <stdlib.h>
 

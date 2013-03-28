@@ -10,9 +10,9 @@ extern vector< Vector >perplines;
 Vector MouseCoordinate( int mouseX, int mouseY );
 
 template < class UnitType >
-bool GameUnit< UnitType >::querySphereClickList( int mouseX, int mouseY, float err, Camera *activeCam )
+bool GameUnit< UnitType >::querySphereClickList( int mouseX, int mouseY, float err, Camera *activeCam ) const
 {
-    int    i;
+    unsigned int    i;
     Matrix vw;
     _Universe->AccessCamera()->GetView( vw );
     Vector mousePoint;
@@ -54,10 +54,11 @@ bool GameUnit< UnitType >::querySphereClickList( int mouseX, int mouseY, float e
            )
             return true;
     }
-    Unit *su;
-    for (un_iter ui = this->getSubUnits(); (su = *ui); ++ui)
-        if ( (su)->querySphereClickList( mouseX, mouseY, err, activeCam ) )
+    const Unit *su;
+    for (un_kiter ui = this->viewSubUnits(); (su = *ui); ++ui){
+        if( su->querySphereClickList( mouseX, mouseY, err, activeCam ) )
             return true;
+    }
     return false;
 }
 

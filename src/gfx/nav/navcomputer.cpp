@@ -600,7 +600,6 @@ void NavComputer::constructControls( void )
         GroupControl *targetGroup = new GroupControl;
         targetGroup->setId( selectorModeInfo[TARGET].groupId );
         window()->addControl( targetGroup );
-        GFXColor   color    = getColorForGroup( selectorModeInfo[TARGET].groupId );
 
         NewButton *absolute = new NewButton;
         absolute->setRect( Rect( -.56, .26, .61, .12 ) );

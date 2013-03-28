@@ -184,7 +184,7 @@ bool UnitCollection::contains( const Unit *unit ) const
 {
     if ( empty() ) return false;
     ConstFastIterator it = constFastIterator();
-    while ( it.notDone() ) {
+    while ( !it.isDone() ) {
         if (it.current() == unit)
             return true;
 
@@ -199,7 +199,7 @@ bool UnitCollection::remove( const Unit *unit )
     bool res = false;
     if ( empty() ) return false;
     FastIterator it = fastIterator();
-    while ( it.notDone() ) {
+    while ( !it.isDone() ) {
         if (it.current() == unit)
             it.remove(), res = true;
 
@@ -213,7 +213,7 @@ void UnitCollection::cleanup()
 {
     //NOTE: advance() will be cleaning up the list by itself
     un_iter ui = createIterator();
-    while ( ui.notDone() )
+    while ( !ui.isDone() )
         ui.advance();
 }
 

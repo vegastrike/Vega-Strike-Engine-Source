@@ -228,7 +228,7 @@ void NetClient::loginAccept( Packet &p1 )
         <<_Universe->current_stardate.GetFullTrekDate()<<endl;
     lastsave.push_back( netbuf.getString() );
     lastsave.push_back( netbuf.getString() );
-    unsigned char *digest = 0;
+
     unsigned short digest_length;
 
     /*
@@ -269,11 +269,14 @@ void NetClient::loginAccept( Packet &p1 )
     digest_length = netbuf.getShort();
     COUT<<"Initial system = "<<fullsys;
     if (digest_length) {
-        digest = netbuf.getBuffer( digest_length );
+        
 #ifdef CRYPTO
+        unsigned char *digest =  netbuf.getBuffer( digest_length );
         cerr<<" - File Hash = "<<digest;
         if ( FileUtil::HashCompare( fullsys, digest, SystemFile ) )
             downloadsystem = false;
+#else 
+        netbuf.getBuffer( digest_length );
 #endif
     }
     //Set the zone number
@@ -607,9 +610,11 @@ void NetClient::synchronizeTime( SOCKETALT *udpsock )
 //Receives possible start locations (first a short representing number of locations)
 //Then for each number, a desc
 
+
+// This function does absolutely nothing.  why does it exist?
 void NetClient::receiveLocations( const Packet* )
 {
-    unsigned char cmd;
+//    unsigned char cmd;
 
 #ifdef __DEBUG__
     COUT<<"Nb start locations : "<<nblocs<<endl;
@@ -617,7 +622,7 @@ void NetClient::receiveLocations( const Packet* )
     //Choose starting location here
 
     //Send the chosen location to the server
-    cmd = CMD_ADDCLIENT;
+  //  cmd = CMD_ADDCLIENT;
 }
 
 /*

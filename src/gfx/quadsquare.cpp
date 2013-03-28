@@ -217,7 +217,7 @@ float quadsquare::GetHeight( const quadcornerdata &cd, float x, float z, Vector 
     if (iz < 0) return -FLT_MAX;        //iz = 0;
     if (iz > 1) return -FLT_MAX;          ///iz = 1;
 
-    int index = ix^(iz^1)+(iz<<1); //FIXME gcc computes ix^((iz^1)+(iz<<1)).. Was this the intent? Who can understand this code?
+    int index = (ix^(iz^1))+(iz<<1); //FIXME gcc computes ix^((iz^1)+(iz<<1)).. Was this the intent? Who can understand this code?
     if (Child[index] && Child[index]->Static) {
         //Pass the query down to the child which contains it.
         quadcornerdata q;
@@ -226,10 +226,11 @@ float quadsquare::GetHeight( const quadcornerdata &cd, float x, float z, Vector 
     }
     //Bilinear interpolation.
     lx -= ix;
-    if (lx < 0) lx = 0;
-    if (lx > 1) lx = 1;
+    if (lx <= 0.f) 
+	lx = 0.f;
+    else 
+	lx = 1.f;
     lz -= iz;
-    if (lx < 0) lz = 0; //FIXME did this mean to say "if (lz < 0) lz = 0;" ? It says "if (lx..."
     if (lz > 1) lz = 1;
     float s00, s01, s10, s11;
     switch (index)

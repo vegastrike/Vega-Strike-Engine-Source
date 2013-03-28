@@ -100,6 +100,7 @@ protected:
 public:
     UnitCollection satellites;
     virtual ~Planet();
+    inline const float getRadius() const { return radius; }
     virtual Vector AddSpaceElevator( const std::string &name, const std::string &faction, char direction );
     virtual void AddFog( const vector< AtmosphericFogMesh > &meshes, bool optical_illusion ) {}
     virtual void AddAtmosphere( const std::string &texture,
@@ -209,7 +210,7 @@ public: PlanetIterator( Planet *p )
         }
         inline Unit * current()
         {
-            if ( pos.notDone() )
+            if ( !pos.isDone() )
                 return *pos;
             return NULL;
         }
@@ -218,7 +219,7 @@ public: PlanetIterator( Planet *p )
             if (current() != NULL) {
                 Unit *cur = *pos;
                 if (cur->isUnit() == PLANETPTR)
-                    for (un_iter tmp( ( (Planet*) cur )->satellites.createIterator() ); tmp.notDone(); ++tmp)
+                    for (un_iter tmp( ( (Planet*) cur )->satellites.createIterator() ); !tmp.isDone(); ++tmp)
                         localCollection.append( (*tmp) );
                 ++pos;
             }
@@ -244,12 +245,12 @@ private:
     {
         return PlanetIterator( this );
     }
-    bool isAtmospheric()
+    bool isAtmospheric() const
     {
         return hasLights() || atmospheric;
     }
 
-    bool hasLights()
+    bool hasLights() const
     {
         return !lights.empty();
     }

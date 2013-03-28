@@ -147,7 +147,7 @@ void ParticleTrail::Config::init()
     use         = XMLSupport::parse_bool( vs_config->getVariable( "graphics", prefix, "true" ) );
     use_points  = XMLSupport::parse_bool( vs_config->getVariable( "graphics", prefix + "point", "false" ) );
     pblend      = XMLSupport::parse_bool( vs_config->getVariable( "graphics", prefix + "blend", "false" ) );
-    pgrow       = XMLSupport::parse_float( vs_config->getVariable( "graphics", prefix + "growrate", "50.0" ) );     //200x size when disappearing
+    pgrow       = XMLSupport::parse_float( vs_config->getVariable( "graphics", prefix + "growrate", "50.0" ) );     //50x size when disappearing
     ptrans      = XMLSupport::parse_float( vs_config->getVariable( "graphics", prefix + "alpha", "2.5" ) );     //NOTE: It's the base transparency, before surface attenuation, so it needn't be within the [0-1] range.
     pfade       = XMLSupport::parse_float( vs_config->getVariable( "graphics", prefix + "fade", "0.1" ) );
     
@@ -277,13 +277,13 @@ void ParticleTrail::DrawAndUpdate()
         }
         
         if (dosort) {
-            VSFileSystem::vs_dprintf(2, "Drawing %d/%d sorted particles\n", particle.size(), maxparticles);
+            VSFileSystem::vs_dprintf(3, "Drawing %d/%d sorted particles\n", particle.size(), maxparticles);
             GFXDrawElements( GFXQUAD, 
                 &particleVert[0], particle.size() * vertsPerParticle, 
                 &indices[0], indices.size(),
                 3, 4, 2 );
         } else {
-            VSFileSystem::vs_dprintf(2, "Drawing %d/%d unsorted particles\n", particle.size(), maxparticles);
+            VSFileSystem::vs_dprintf(3, "Drawing %d/%d unsorted particles\n", particle.size(), maxparticles);
             GFXDraw( GFXQUAD, &particleVert[0], particle.size() * 12, 3, 4, 2 );
         }
         

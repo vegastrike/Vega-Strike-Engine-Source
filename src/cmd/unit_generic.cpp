@@ -268,7 +268,7 @@ void Unit::SetAngularVelocity( const Vector &v )
     AngularVelocity = v;
 }
 
-bool Unit::InRange( Unit *target, double &mm, bool cone, bool cap, bool lock ) const
+bool Unit::InRange( const Unit *target, double &mm, bool cone, bool cap, bool lock ) const
 {
     if (this == target || target->CloakVisible() < .8)
         return false;
@@ -293,9 +293,14 @@ bool Unit::InRange( Unit *target, double &mm, bool cone, bool cap, bool lock ) c
     return true;
 }
 
-Unit* Unit::Target()
+Unit* Unit::Target() 
 {
     return computer.target.GetUnit();
+}
+
+const Unit* Unit::Target() const
+{
+    return computer.target.GetConstUnit();
 }
 
 Unit* Unit::VelocityReference()
@@ -1350,7 +1355,7 @@ vector< Mesh* >Unit::StealMeshes()
     vector< Mesh* >ret;
 
     Mesh *shield = meshdata.empty() ? NULL : meshdata.back();
-    for (int i = 0; i < nummesh(); ++i)
+    for (unsigned int i = 0; i <= nummesh(); ++i)
         ret.push_back( meshdata[i] );
     meshdata.clear();
     meshdata.push_back( shield );
@@ -1376,7 +1381,7 @@ bool CheckAccessory( Unit *tur )
 
 void Unit::calculate_extent( bool update_collide_queue )
 {
-    int a;
+    unsigned int a;
     corner_min = Vector( FLT_MAX, FLT_MAX, FLT_MAX );
     corner_max = Vector( -FLT_MAX, -FLT_MAX, -FLT_MAX );
     for (a = 0; a < nummesh(); ++a) {
@@ -2805,14 +2810,14 @@ void Unit::UpdatePhysics2( const Transformation &trans,
     }
 }
 
-static QVector RealPosition( Unit *un )
+static QVector RealPosition( const Unit *un )
 {
     if ( un->isSubUnit() )
         return un->Position();
     return un->LocalPosition();
 }
 
-static QVector AutoSafeEntrancePoint( const QVector start, float rsize, Unit *goal )
+static QVector AutoSafeEntrancePoint( const QVector start, float rsize, const Unit *goal )
 {
     QVector def  = UniverseUtil::SafeEntrancePoint( start, rsize );
     float   bdis = ( def-RealPosition( goal ) ).MagnitudeSquared();
@@ -2859,7 +2864,7 @@ std::string GenerateAutoError( Unit *me, Unit *targ )
     return err;
 }
 
-bool Unit::AutoPilotToErrorMessage( Unit *target,
+bool Unit::AutoPilotToErrorMessage( const Unit *target,
                                     bool ignore_energy_requirements,
                                     std::string &failuremessage,
                                     int recursive_level )
@@ -2872,7 +2877,7 @@ bool Unit::AutoPilotToErrorMessage( Unit *target,
         return false;
     }
     if (target->isUnit() == PLANETPTR) {
-        Unit   *targ = *(target->viewSubUnits());
+        const Unit   *targ = *(target->viewSubUnits());
         if (targ && 0 == targ->graphicOptions.FaceCamera)
             return AutoPilotToErrorMessage( targ, ignore_energy_requirements, failuremessage, recursive_level );
     }
@@ -4154,7 +4159,7 @@ float Unit::ApplyLocalDamage( const Vector &pnt,
             cpt->Shake( amt+leakamt, tmp != this->GetHull() ? 2 : 1 );
         if (ppercentage != -1) {
             //returns -1 on death--could delete
-            for (int i = 0; i < nummesh(); ++i)
+            for (unsigned int i = 0; i < nummesh(); ++i)
                 if (ppercentage)
                     meshdata[i]->AddDamageFX( pnt, shieldtight ? shieldtight*normal : Vector( 0, 0, 0 ), ppercentage, color );
         }
@@ -4200,7 +4205,7 @@ void Unit::ApplyNetDamage( Vector &pnt, Vector &normal, float amt, float ppercen
     if (shield.leak > 0 || !meshdata.back() || spercentage == 0 || amt > 0) {
         if (ppercentage != -1) {
             //returns -1 on death--could delete
-            for (int i = 0; i < nummesh(); ++i)
+            for (unsigned int i = 0; i < nummesh(); ++i)
                 if (ppercentage) {
                     meshdata[i]->AddDamageFX( pnt, shieldtight ? shieldtight*normal : Vector( 0, 0, 0 ), ppercentage, color );
                     if (cpt)
@@ -4210,11 +4215,11 @@ void Unit::ApplyNetDamage( Vector &pnt, Vector &normal, float amt, float ppercen
     }
 }
 
-Unit * findUnitInStarsystem( void *unitDoNotDereference )
+Unit * findUnitInStarsystem(const void *unitDoNotDereference )
 {
     Unit *un;
-    for (un_kiter i = _Universe->activeStarSystem()->getUnitList().constIterator(); (un = *i) != NULL; ++i)
-        if (un == unitDoNotDereference)
+    for (un_iter i = _Universe->activeStarSystem()->getUnitList().createIterator(); (un = *i) != NULL; ++i)
+        if (un == reinterpret_cast<const Unit*>(unitDoNotDereference))
             return un;
     return NULL;
 }
@@ -5325,7 +5330,7 @@ void Unit::Target( Unit *targ )
             if (jump.drive != -1) {
                 bool    found = false;
                 Unit   *u;
-                for (un_kiter i = _Universe->activeStarSystem()->getUnitList().constIterator(); (u = *i) != NULL; ++i)
+                for (un_iter i = _Universe->activeStarSystem()->getUnitList().createIterator(); (u = *i) != NULL; ++i)
                     if ( !u->GetDestinations().empty() ) {
                         if ( std::find( u->GetDestinations().begin(), u->GetDestinations().end(),
                                        targ->activeStarSystem->getFileName() ) != u->GetDestinations().end() ) {
@@ -5638,11 +5643,11 @@ void Unit::SetCollisionParent( Unit *name )
 #endif
 }
 
-double Unit::getMinDis( const QVector &pnt )
+double Unit::getMinDis( const QVector &pnt ) const
 {
     float  minsofar = 1e+10;
     float  tmpvar;
-    int    i;
+    unsigned int    i;
     Vector TargetPoint( cumulative_transformation_matrix.getP() );
 
 #ifdef VARIABLE_LENGTH_PQR
@@ -5659,9 +5664,8 @@ double Unit::getMinDis( const QVector &pnt )
         if (tmpvar < minsofar)
             minsofar = tmpvar;
     }
-    Unit *su;
-    for (un_kiter ui = viewSubUnits(); (su = *ui); ++ui) {
-        tmpvar = su->getMinDis( pnt );
+    for (un_kiter ui = viewSubUnits(); !ui.isDone(); ++ui) {
+        tmpvar = (*ui)->getMinDis( pnt );
         if (tmpvar < minsofar)
             minsofar = tmpvar;
     }
@@ -5673,7 +5677,7 @@ extern vector< Vector >perplines;
 extern vector< int >   turretcontrol;
 float Unit::querySphereClickList( const QVector &st, const QVector &dir, float err ) const
 {
-    int    i;
+    unsigned int    i;
     float  retval = 0;
     float  adjretval   = 0;
     const Matrix *tmpo = &cumulative_transformation_matrix;
@@ -5722,9 +5726,8 @@ float Unit::querySphereClickList( const QVector &st, const QVector &dir, float e
             }
         }
     }
-    const Unit *su;
-    for (un_kiter ui = viewSubUnits(); (su = *ui); ++ui) {
-        float tmp = su->querySphereClickList( st, dir, err );
+    for (un_kiter ui = viewSubUnits();!ui.isDone(); ++ui) {
+        float tmp = (*ui)->querySphereClickList( st, dir, err );
         if (tmp == 0)
             continue;
         if (retval == 0) {
@@ -6549,7 +6552,7 @@ bool Unit::UpgradeSubUnitsWithFactory( const Unit *up, int subunitoffset, bool t
     std::string turSize;
     un_iter     ui;
     bool        found = false;
-    for (j = 0, ui = getSubUnits(); (*ui) != NULL && j < subunitoffset; ++ui, ++j) {}     ///set the turrets to the offset
+    for (j = 0, ui = getSubUnits(); !ui.isDone() && j < subunitoffset; ++ui, ++j) {}     ///set the turrets to the offset
     un_kiter    upturrets;
     Unit       *giveAway;
 
@@ -6597,8 +6600,7 @@ bool Unit::UpgradeSubUnitsWithFactory( const Unit *up, int subunitoffset, bool t
                     Unit *un;                            //make garbage unit
                     //NOT 100% SURE A GENERIC UNIT CAN FIT (WAS GAME UNIT CREATION)
                     //give a default do-nothing unit
-                    ui.preinsert( un = UnitFactory::createUnit( "upgrading_dummy_unit", true, faction ) );
-                    //WHAT?!?!?!?! 102302	  ui.preinsert (un=new Unit(0));//give a default do-nothing unit
+                    ui.preinsert( un = UnitFactory::createUnit( "upgrading_dummy_unit", true, faction ) );                 
                     un->SetFaction( faction );
                     un->curr_physical_state = addToMeCur;
                     un->prev_physical_state = addToMePrev;
@@ -8292,9 +8294,8 @@ bool Unit::CanAddCargo( const Cargo &carg ) const
     if ( total_volume <= ( upgradep ? getEmptyUpgradeVolume() : getEmptyCargoVolume() ) )
         return true;
     //Hm... not in main unit... perhaps a subunit can take it
-    const Unit *un;
-    for (un_kiter i = viewSubUnits(); (un = *i) != NULL; ++i)
-        if ( un->CanAddCargo( carg ) )
+    for (un_kiter i = viewSubUnits(); !i.isDone(); ++i)
+        if ( (*i)->CanAddCargo( carg ) )
             return true;
     //Bad luck
     return false;
@@ -9173,12 +9174,6 @@ void MeshAnimation::addAnimation( std::vector<Mesh *> *meshes, const char* name 
 
 void MeshAnimation::StartAnimation( unsigned int how_many_times, int numAnimation )
 {
-    bool infiniteLoop;
-    if(!how_many_times)
-        infiniteLoop = true;
-    else
-        infiniteLoop = false;
-
     if(animationRuns())
     	StopAnimation();
 

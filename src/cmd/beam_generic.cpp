@@ -397,16 +397,6 @@ bool Beam::Collide( Unit *target, Unit *firer, Unit *superunit )
     static float scoopcosangle = (float) cos( scoopangle );
     static float maxrelspeed   =
         XMLSupport::parse_float( vs_config->getVariable( "physics", "tractor.max_relative_speed", "150" ) );
-    static float c_lighting    =
-        XMLSupport::parse_float( vs_config->getVariable( "physics", "tractor.cargo.light_shields_on_push", "1" ) );
-    static float u_lighting    =
-        XMLSupport::parse_float( vs_config->getVariable( "physics", "tractor.upgrade.light_shields_on_push", "1" ) );
-    static float f_lighting    =
-        XMLSupport::parse_float( vs_config->getVariable( "physics", "tractor.faction.light_shields_on_push", "1" ) );
-    static float d_lighting    =
-        XMLSupport::parse_float( vs_config->getVariable( "physics", "tractor.disabled.light_shields_on_push", "0" ) );
-    static float o_lighting    =
-        XMLSupport::parse_float( vs_config->getVariable( "physics", "tractor.others.light_shields_on_push", "1" ) );
     static float c_ors_m =
         XMLSupport::parse_float( vs_config->getVariable( "physics", "tractor.cargo.distance_own_rsize", "1.5" ) );
     static float c_trs_m =
@@ -467,18 +457,6 @@ bool Beam::Collide( Unit *target, Unit *firer, Unit *superunit )
                 fp = d_fp, fi = d_fi;
             //tractor/repulsor beam!
             if ( fp || target->isTractorable( Unit::tractorPush ) ) {
-                float lighting = o_lighting;
-                if (target->faction == owner_faction)
-                    lighting = f_lighting;
-
-                else if (target->faction == upgradesfaction)
-                    lighting = u_lighting;
-
-                else if (target->faction == cargofaction)
-                    lighting = c_lighting;
-
-                else if (target->getAIState() == NULL)
-                    lighting = d_lighting;
                 //Compute relative speed - if it's higher than the maximum, don't accelerate it anymore
                 //FIXME: Should predict the resulting velocity after applying the force,
                 //and adjust the force to match the maximum relative velocity - but the

@@ -83,10 +83,8 @@ void Mesh::InitUnit()
     mn    = Vector( 0, 0, 0 );
     mx    = Vector( 0, 0, 0 );
     radialSize = 0;
-    GFXVertex *alphalist;
     if ( Decal.empty() )
         Decal.push_back( NULL );
-    alphalist     = NULL;
 
     //texturename[0] = -1;
     numforcelogo  = numsquadlogo = 0;

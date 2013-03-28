@@ -341,13 +341,11 @@ Unit* CommunicatingAI::GetRandomUnit( float playaprob, float targprob )
                                                                                         vsrandom.uniformInc( -1, 1 ) );
     Collidable   wherewrapper( 0, 0, where );
 
-    //FIXME cm and unitRad below cause unused variable warnings because VS_ENABLE_COLLIDE_KEY is obviously not defined.
-    //Anybody knows if this ifdef serves an important purpose or can be removed?
+    NearestUnitLocator   unitLocator;
+#ifdef VS_ENABLE_COLLIDE_KEY
     CollideMap  *cm = _Universe->activeStarSystem()->collidemap[Unit::UNIT_ONLY];
     static float unitRad =
         XMLSupport::parse_float( vs_config->getVariable( "graphics", "hud", "radar_search_extra_radius", "1000" ) );
-    NearestUnitLocator   unitLocator;
-#ifdef VS_ENABLE_COLLIDE_KEY
     CollideMap::iterator iter = cm->lower_bound( wherewrapper );
     if (iter != cm->end() && (*iter)->radius > 0)
         if ( (*iter)->ref.unit != parent )

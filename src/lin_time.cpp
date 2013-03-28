@@ -173,16 +173,16 @@ void InitTime()
     (void) gettimeofday( &tv, NULL );
 
     newtime  = (double) tv.tv_sec+(double) tv.tv_usec*1.e-6;
-    lasttime = newtime-.001;
+    lasttime = newtime-.0001;
 
 #elif defined (HAVE_SDL)
     newtime  = SDL_GetTicks()*1.e-3;
-    lasttime = newtime-.001;
+    lasttime = newtime-.0001;
 
 #else
 # error "We have no way to determine the time on this system."
 #endif
-    elapsedtime = .001;
+    elapsedtime = .0001;
 }
 
 double GetElapsedTime()

@@ -41,7 +41,7 @@
 
 #include "options.h"
 
-extern vs_options game_options;
+
 
 //Used for storing the max and min values of the tree Joystick Axes - Okona
 static int maxx   = 1;
@@ -342,9 +342,8 @@ void JoyStick::GetJoyStick( float &x, float &y, float &z, int &buttons )
     int a;
 #ifndef NO_SDL_JOYSTICK
 #if defined (HAVE_SDL)
-    int numaxes = SDL_JoystickNumAxes( joy );
-
-    vector< Sint16 >axi( numaxes < MAX_AXES ? MAX_AXES : numaxes );
+    int numaxes = SDL_JoystickNumAxes( joy ) < MAX_AXES ? SDL_JoystickNumAxes( joy ) : MAX_AXES;
+    vector< Sint16 >axi( numaxes );
     for (a = 0; a < numaxes; a++)
         axi[a] = SDL_JoystickGetAxis( joy, a );
     joy_buttons   = 0;

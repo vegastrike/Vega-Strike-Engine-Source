@@ -27,8 +27,13 @@
 
 extern float simulation_atom_var;
 extern float audio_atom_var;
-#define SIMULATION_ATOM (simulation_atom_var)
-#define AUDIO_ATOM (audio_atom_var)
+//#define SIMULATION_ATOM (simulation_atom_var)
+//#define AUDIO_ATOM (audio_atom_var)
+
+// Why do we need two variables to reflect the same thing ?
+extern float SIMULATION_ATOM;
+extern float AUDIO_ATOM;
+
 
 #include "vs_math.h"
 
@@ -42,6 +47,9 @@ extern float audio_atom_var;
 #include <limits.h>
 #include <stdarg.h>
 #include "debug_vs.h"
+
+
+
 
 #if defined (WIN32) || defined (__CYGWIN__)
 /* Note that this will define WIN32 for us, if it isn't defined already

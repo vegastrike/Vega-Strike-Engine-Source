@@ -1,8 +1,3 @@
-#include "audiolib.h"
-#include "config_xml.h"
-#include "xml_support.h"
-#include "vs_globals.h"
-
 #ifdef HAVE_AL
 #ifdef __APPLE__
 #include <al.h>
@@ -15,8 +10,17 @@
 #endif
 #include <stdlib.h>
 #include <stdio.h>
-#include "al_globals.h"
+
 #include <vector>
+
+#include "audiolib.h"
+#include "config_xml.h"
+#include "xml_support.h"
+#include "vs_globals.h"
+#include "al_globals.h"
+#include "options.h"
+
+
 
 #if 1
 #define AL_GET_PROC( name ) ( alGetProcAddress( const_cast< ALubyte* > ( reinterpret_cast< const ALubyte* > (name) ) ) )
@@ -132,28 +136,22 @@ static ALCcontext *context_id = NULL;
 bool AUDInit()
 {
     g_game.sound_enabled = 
-    g_game.music_enabled = false;
 #ifdef HAVE_AL
-    usedoppler    = XMLSupport::parse_bool( vs_config->getVariable( "audio", "Doppler", "false" ) );
-    usepositional = XMLSupport::parse_bool( vs_config->getVariable( "audio", "Positional", "true" ) );
+    usedoppler    = game_options.Doppler;
+    usepositional = game_options.Positional;
     double linuxadjust=1;
 #ifndef _WIN32
 #ifndef __APPLE__
     linuxadjust=1./3.;
 #endif
 #endif
-    scalepos = 1.0f/(XMLSupport::parse_float( vs_config->getVariable( "audio", "Volume", "100" ) )
-                  *linuxadjust
-        );
-    scalevel = XMLSupport::parse_float( vs_config->getVariable( "audio", "DopplerScale", "1" ) );
-    //enabled = XMLSupport::parse_bool (vs_config->getVariable ("audio","enabled","true"));
-    g_game.audio_frequency_mode = XMLSupport::parse_int( vs_config->getVariable( "audio", "frequency", "48000" ) );
-    maxallowedsingle     = XMLSupport::parse_int( vs_config->getVariable( "audio", "MaxSingleSounds", "8" ) );
+    scalepos = 1.0f/(game_options.Volume*linuxadjust);
+    scalevel = game_options.DopplerScale;
+    g_game.audio_frequency_mode = game_options.frequency;
+    maxallowedsingle     = game_options.MaxSingleSounds;
     g_game.max_sound_sources = 
-    maxallowedtotal      = XMLSupport::parse_int( vs_config->getVariable( "audio", "MaxTotalSounds", "20" ) );
-    bool sound_enabled = XMLSupport::parse_bool( vs_config->getVariable( "audio", "Sound", "true" ) );
-    bool music_enabled = XMLSupport::parse_bool( vs_config->getVariable( "audio", "Music", "true" ) );
-    if (!sound_enabled && !music_enabled)
+    maxallowedtotal      = game_options.MaxTotalSounds;
+    if (!game_options.Sound && !game_options.Music)
         return false;
     int attrlist[] = {ALC_FREQUENCY, g_game.audio_frequency_mode, 0};
 #ifdef _WIN32
@@ -191,8 +189,8 @@ bool AUDInit()
     
     alDistanceModel(AL_INVERSE_DISTANCE_CLAMPED);
     
-    g_game.sound_enabled = sound_enabled;
-    g_game.music_enabled = music_enabled;
+    g_game.sound_enabled = game_options.Sound;
+
     
     return true;
 #endif

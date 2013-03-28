@@ -405,7 +405,7 @@ Unit* Unit::rayCollide( const QVector &start, const QVector &end, Vector &norm, 
 
 bool Unit::querySphere( const QVector &pnt, float err ) const
 {
-    int    i;
+    unsigned int    i;
     const Matrix *tmpo = &cumulative_transformation_matrix;
 
     Vector TargetPoint( tmpo->getP() );
@@ -473,7 +473,7 @@ float Unit::querySphere( const QVector &start, const QVector &end, float min_rad
 //does not check inside sphere
 float Unit::querySphereNoRecurse( const QVector &start, const QVector &end, float min_radius ) const
 {
-    int    i;
+    unsigned int    i;
     double tmp;
     for (i = 0; i < nummesh(); i++) {
         if ( ( meshdata[i]->Position().Magnitude() > this->rSize() ) || ( meshdata[i]->rSize() > 30+this->rSize() ) )

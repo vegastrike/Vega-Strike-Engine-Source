@@ -7,7 +7,9 @@
 #include <list>
 #include <vector>
 #ifndef LIST_TESTING
+#include "unit_util.h"
 #include "unit_generic.h"
+
 #else
 #include "testcollection/unit.h"
 #endif
@@ -16,7 +18,7 @@ using std::list;
 using std::vector;
 //UnitIterator  BEGIN:
 
-UnitCollection::UnitIterator&UnitCollection::UnitIterator::operator=( const UnitCollection::UnitIterator &orig )
+UnitCollection::UnitIterator& UnitCollection::UnitIterator::operator=( const UnitCollection::UnitIterator &orig )
 {
     if (col != orig.col) {
         if (col)
@@ -40,10 +42,18 @@ UnitCollection::UnitIterator::UnitIterator( const UnitIterator &orig )
 UnitCollection::UnitIterator::UnitIterator( UnitCollection *orig )
 {
     col = orig;
-    for (it = orig->u.begin(); it != col->u.end(); ++it)
-        if (*it)
-            break;
-    col->reg( this );
+    it = col->u.begin();
+    while(it != col->u.end()){
+        if((*it) == NULL)
+            ++it;
+        else {
+            if((*it)->Killed())
+                col->erase(it);
+            else 
+                break;
+        }
+    }
+    col->reg(this);
 }
 
 UnitCollection::UnitIterator::~UnitIterator()
@@ -84,25 +94,22 @@ void UnitCollection::UnitIterator::postinsert( Unit *unit )
 void UnitCollection::UnitIterator::advance()
 {
     if ( !col || it == col->u.end() ) return;
-    if ( (*it) != NULL && (*it)->Killed() )
-        col->erase( it );
-    else
-        ++it;
+    ++it;
     while ( it != col->u.end() ) {
-        if ( (*it) == NULL )
+        if ( (*it) == NULL)
             ++it;
-        else if ( (*it)->Killed() )
-            col->erase( it );
-        else
-            break;
+        else {
+            if((*it)->Killed())
+                col->erase(it);
+            else
+                break;
+        }
     }
 }
 
 Unit* UnitCollection::UnitIterator::next()
 {
     advance();
-    if ( !col || it == col->u.end() )
-        return NULL;
     return *it;
 }
 
@@ -127,7 +134,7 @@ UnitCollection::ConstIterator::ConstIterator( const UnitCollection *orig )
 {
     col = orig;
     for (it = orig->u.begin(); it != col->u.end(); ++it)
-        if (*it)
+        if ((*it) && !(*it)->Killed())
             break;
 }
 
@@ -149,10 +156,12 @@ inline void UnitCollection::ConstIterator::advance()
     while ( it != col->u.end() ) {
         if ( (*it) == NULL )
             ++it;
-        else if ( (*it)->Killed() )
-            ++it;
-        else
-            break;
+        else {
+            if ((*it)->Killed())
+                ++it;
+            else
+                break;
+        }
     }
 }
 
@@ -318,18 +327,15 @@ inline void UnitCollection::erase( list< Unit* >::iterator &it2 )
 
 bool UnitCollection::remove( const Unit *unit )
 {
-    bool res = false;
     if (u.empty() || !unit)
         return false;
-    for (list< Unit* >::iterator it = u.begin(); it != u.end();) {
+    for (list< Unit* >::iterator it = u.begin(); it != u.end();++it) {
         if ( (*it) == unit ) {
             erase( it );
-            res = true;
-        } else {
-            ++it;
+            return(true);
         }
     }
-    return res;
+    return (false);
 }
 
 const UnitCollection& UnitCollection::operator=( const UnitCollection &uc )

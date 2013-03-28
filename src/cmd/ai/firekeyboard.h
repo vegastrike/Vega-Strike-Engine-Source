@@ -20,12 +20,6 @@ class FireKeyboard : public Order
     std::list< CommunicationMessage >resp;
 public:
     virtual void SetParent( Unit *parent1 );
-#ifdef CAR_SIM
-    static void BlinkLeftKey( const KBData &, KBSTATE );
-    static void BlinkRightKey( const KBData &, KBSTATE );
-    static void HeadlightKey( const KBData &, KBSTATE );
-    static void SirenKey( const KBData &, KBSTATE );
-#endif
     static void SetShieldsOff( const KBData &, KBSTATE );
     static void SetShieldsOneThird( const KBData &, KBSTATE );
     static void SetShieldsTwoThird( const KBData &, KBSTATE );

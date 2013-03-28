@@ -33,6 +33,10 @@ struct dirent
 
 #include "gnuhash.h"
 
+#include "options.h"
+
+
+
 using VSFileSystem::VSVolumeType;
 using VSFileSystem::VSFSNone;
 using std::cout;
@@ -42,8 +46,7 @@ using std::string;
 int VSFS_DEBUG()
 {
     if (vs_config) {
-        static int vs_debug = XMLSupport::parse_int( vs_config->getVariable( "general", "debug_fs", "0" ) );
-        return vs_debug;
+	return(game_options.debug_fs);
     }
     return 0;
 }
@@ -746,11 +749,10 @@ void LoadConfig( string subdir )
 
     //Now check if there is a data directory specified in it
     //NOTE : THIS IS NOT A GOOD IDEA TO HAVE A DATADIR SPECIFIED IN THE CONFIG FILE
-    static string data_path( vs_config->getVariable( "data", "datadir", "" ) );
-    if (data_path != "") {
+    if (game_options.datadir.size()>0 ) {
         //We found a path to data in config file
-        cout<<"DATADIR - Found a datadir in config, using : "<<data_path<<endl;
-        datadir = data_path;
+        cout<<"DATADIR - Found a datadir in config, using : "<<game_options.datadir<<endl;
+        datadir = game_options.datadir;
     } else {
         cout<<"DATADIR - No datadir specified in config file, using ; "<<datadir<<endl;
     }
@@ -762,15 +764,14 @@ void InitMods()
     struct dirent **dirlist;
     //new config program should insert hqtextures variable
     //with value "hqtextures" in data section.
-    string hq = vs_config->getVariable( "data", "hqtextures", "" );
-    if (hq != "") {
+    if (game_options.hqtextures.size() > 0 ) {
         //HQ Texture dir sits alongside data dir.
         selectcurrentdir = datadir+"/..";
         int ret = scandir( selectcurrentdir.c_str(), &dirlist, selectdirs, 0 );
         if (ret >= 0) {
             while (ret--) {
                 string dname( dirlist[ret]->d_name );
-                if (dname == hq) {
+                if (dname == game_options.hqtextures) {
                     curpath = selectcurrentdir+"/"+dname;
                     cout<<"\n\nAdding HQ Textures Pack\n\n";
                     Rootdir.push_back( curpath );
@@ -832,35 +833,40 @@ void InitPaths( string conf, string subdir )
 	InitHomeDirectory();
 	#endif
     LoadConfig( subdir );
-    //Paths relative to datadir or homedir (both should have the same structure)
-    //Units are in sharedunits/unitname/, sharedunits/subunits/unitname/ or sharedunits/weapons/unitname/ or in sharedunits/faction/unitname/
-    //Meshes are in sharedmeshes/ or in current unit that is being loaded
-    //Textures are in sharedtextures/ or in current unit dir that is being loaded or in the current animation dir that is being loaded or in the current sprite dir that is being loeded
-    //Sounds are in sharedsounds/
-    //Universes are in universe/
-    //Systems are in "sectors"/ config variable
-    //Cockpits are in cockpits/ (also a config var)
-    //Animations are in animations/
-    //VSSprite are in sprites/ or in ./ (when full subpath is provided) or in the current cockpit dir that is being loaded
-    //First allocate an empty directory list for each file type
+    /*
+      Paths relative to datadir or homedir (both should have the same structure)
+      Units are in sharedunits/unitname/, sharedunits/subunits/unitname/ or sharedunits/weapons/unitname/ or in sharedunits/faction/unitname/
+      Meshes are in sharedmeshes/ or in current unit that is being loaded
+      Textures are in sharedtextures/ or in current unit dir that is being loaded or in the current animation dir that is being loaded or in the current sprite dir that is being loeded
+      Sounds are in sharedsounds/
+      Universes are in universe/
+      Systems are in "sectors"/ config variable
+      Cockpits are in cockpits/ (also a config var)
+      Animations are in animations/
+      VSSprite are in sprites/ or in ./ (when full subpath is provided) or in the current cockpit dir that is being loaded
+      First allocate an empty directory list for each file type
+    */
     for (i = 0; i < UnknownFile; i++) {
         vector< string >vec;
         Directories.push_back( "" );
         SubDirectories.push_back( vec );
     }
-    sharedsectors  = vs_config->getVariable( "data", "sectors", "sectors" );
-    sharedcockpits = vs_config->getVariable( "data", "cockpits", "cockpits" );
-    shareduniverse = vs_config->getVariable( "data", "universe_path", "universe" );
-    sharedanims    = vs_config->getVariable( "data", "animations", "animations" );
-    sharedvideos   = vs_config->getVariable( "data", "movies", "movies" );
-    sharedsprites  = vs_config->getVariable( "data", "sprites", "sprites" );
-    savedunitpath  = vs_config->getVariable( "data", "serialized_xml", "serialized_xml" );
-    sharedtextures = vs_config->getVariable( "data", "sharedtextures", "textures" );
-    sharedsounds   = vs_config->getVariable( "data", "sharedsounds", "sounds" );
-    sharedmeshes   = vs_config->getVariable( "data", "sharedmeshes", "meshes" );
-    sharedunits    = vs_config->getVariable( "data", "sharedunits", "units" );
-    aidir = vs_config->getVariable( "data", "ai_directory", "ai" );
-    universe_name  = vs_config->getVariable( "general", "galaxy", "milky_way.xml" );
+    
+    game_options.init();
+
+    sharedsectors  = game_options.sectors;
+    sharedcockpits = game_options.cockpits;
+    shareduniverse = game_options.universe_path;
+    sharedanims    = game_options.animations;
+    sharedvideos   = game_options.movies;
+    sharedsprites  = game_options.sprites;
+    savedunitpath  = game_options.serialized_xml;
+    sharedtextures = game_options.sharedtextures;
+    sharedsounds   = game_options.sharedsounds;
+    sharedmeshes   = game_options.sharedmeshes;
+    sharedunits    = game_options.sharedunits;
+    aidir          = game_options.ai_directory;
+    universe_name  = game_options.galaxy;
 
     //Setup the directory lists we know about - note these are relative paths to datadir or homedir
     //----- THE Directories vector contains the resource/volume files name without extension or the main directory to files
@@ -909,9 +915,9 @@ void InitPaths( string conf, string subdir )
     Directories[PythonFile]  = "bases";
     Directories[AccountFile] = "accounts";
 
-    SIMULATION_ATOM = atof( vs_config->getVariable( "general", "simulation_atom", "0.1" ).c_str() );
-    AUDIO_ATOM = atof( vs_config->getVariable( "general", "audio_atom", "0.05555555556" ).c_str() );
-    cout<<"SIMULATION_ATOM: "<<SIMULATION_ATOM<<endl;
+    SIMULATION_ATOM = game_options.simulation_atom;
+    AUDIO_ATOM = game_options.audio_atom;
+    cout<<"SIMULATION_ATOM: "<< SIMULATION_ATOM<<endl;
 
     /************************* Home directory subdirectories creation ************************/
     CreateDirectoryHome( savedunitpath );
@@ -932,7 +938,7 @@ void InitPaths( string conf, string subdir )
     //NOTE : UniverseFiles cannot use volumes since some are needed by python
     //Also : Have to try with systems, not sure it would work well
     //Setup the use of volumes for certain VSFileType
-    volume_format = vs_config->getVariable( "data", "volume_format", "pk3" );
+    volume_format = game_options.volume_format;
     if (volume_format == "vsr")
         q_volume_format = vfmtVSR;
 

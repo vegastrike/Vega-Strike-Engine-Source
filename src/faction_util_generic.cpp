@@ -9,7 +9,7 @@
 
 #include "options.h"
 
-extern vs_options game_options;
+
 
 using namespace FactionUtil;
 int FactionUtil:: upgradefac = 0;
@@ -25,7 +25,7 @@ const char* FactionUtil::GetFaction( int i )
 {
     if ( i >= 0 && i < (int) factions.size() )
         return factions[i]->factionname;
-    return NULL;
+    return "";
 }
 
 static int GetFactionLookup( const char *factionname )
@@ -156,8 +156,7 @@ void FactionUtil::LoadSerializedFaction( FILE *fp )
 {
     for (unsigned int i = 0; i < factions.size(); i++) {
         char *tmp  = new char[24*factions[i]->faction.size()];
-        static char *bogus_return; //added by chuck_starchaser to squash a warning
-        bogus_return = fgets( tmp, 24*factions[i]->faction.size()-1, fp );
+        fgets( tmp, 24*factions[i]->faction.size()-1, fp );
         char *tmp2 = tmp;
         if (numnums( tmp ) == 0) {
             i--;

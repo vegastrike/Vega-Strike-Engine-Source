@@ -297,6 +297,9 @@ extern PFNGLDELETEPROGRAMPROC glDeleteProgram_p;
 #ifdef STATS_QUEUE
 extern queue< GFXStats >statsqueue;
 #endif
+
+// Most of these will likely be folded into vs_options
+
 typedef struct
 {
     int  fullscreen;

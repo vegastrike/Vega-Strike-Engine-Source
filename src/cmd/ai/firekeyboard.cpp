@@ -60,9 +60,6 @@ rneartargetkey = rtargetskey = rtargetukey = rthreattargetkey = rpicktargetkey =
 pickturrettargetkey = turrettargetkey = enslave = freeslave = incomingmissiletargetkey = rincomingmissiletargetkey = nearesthostilekey = UP;
 nearestdangeroushostilekey = missiletargetkey = rmissiletargetkey = nearestfriendlykey = nearestbasekey = nearestplanetkey = nearestjumpkey = togglepausekey = UP;
         shieldpowerstate = 1;
-#ifdef CAR_SIM
-        blinkleftkey     = blinkrightkey = headlightkey = sirenkey = UP;
-#endif
         doc = und = req = 0;
     }
     KBSTATE firekey;
@@ -70,12 +67,6 @@ nearestdangeroushostilekey = missiletargetkey = rmissiletargetkey = nearestfrien
     bool    doc;
     bool    und;
     bool    req;
-#ifdef CAR_SIM
-    KBSTATE blinkleftkey;
-    KBSTATE blinkrightkey;
-    KBSTATE headlightkey;
-    KBSTATE sirenkey;
-#endif
     KBSTATE missiletargetkey;
     KBSTATE incomingmissiletargetkey;
     KBSTATE rmissiletargetkey;
@@ -745,39 +736,6 @@ void FireKeyboard::TogglePause( const KBData&, KBSTATE k )
         g().togglepausekey = k;
 }
 
-#ifdef CAR_SIM
-void FireKeyboard::BlinkLeftKey( const KBData&, KBSTATE k )
-{
-    if (k == PRESS)
-        g().blinkleftkey = k;
-    if (k == RELEASE)
-        g().blinkleftkey = k;
-}
-
-void FireKeyboard::BlinkRightKey( const KBData&, KBSTATE k )
-{
-    if (k == PRESS)
-        g().blinkrightkey = k;
-    if (k == RELEASE)
-        g().blinkrightkey = k;
-}
-
-void FireKeyboard::SirenKey( const KBData&, KBSTATE k )
-{
-    if (k == PRESS)
-        g().sirenkey = k;
-    if (k == RELEASE)
-        g().sirenkey = k;
-}
-
-void FireKeyboard::HeadlightKey( const KBData&, KBSTATE k )
-{
-    if (k == PRESS)
-        g().headlightkey = k;
-    if (k == RELEASE)
-        g().headlightkey = k;
-}
-#endif
 
 extern unsigned int DoSpeech( Unit *un, Unit *player_un, const FSM::Node &convNode );
 extern Unit * GetThreat( Unit *par, Unit *leader );
@@ -1246,7 +1204,6 @@ void Enslave( Unit*, bool );
 
 void abletodock( int dock )
 {
-    static bool play_anim = XMLSupport::parse_bool( vs_config->getVariable( "graphics", "docking_comm_anim", "false" ) );
     switch (dock)
     {
     case 5:
@@ -1725,41 +1682,6 @@ void FireKeyboard::Execute()
         f().ECMkey = DOWN;
         parent->GetComputerData().ecmactive = !parent->GetComputerData().ecmactive;
     }
-#ifdef CAR_SIM
-    int origecm = UnitUtil::getECM( parent );
-    if (origecm >= CAR::ON_NO_BLINKEN)
-        origecm = CAR::FORWARD_BLINKEN;
-    if (origecm < 0)
-        origecm = 0;
-    if (f().blinkleftkey == PRESS) {
-        f().blinkleftkey = DOWN;
-        if ( (origecm&CAR::LEFT_BLINKEN) )
-            UnitUtil::setECM( parent, ( origecm&(~CAR::LEFT_BLINKEN) ) );
-        else
-            UnitUtil::setECM( parent, origecm|CAR::LEFT_BLINKEN );
-    }
-    if (f().blinkrightkey == PRESS) {
-        f().blinkrightkey = DOWN;
-        if ( (origecm&CAR::RIGHT_BLINKEN) )
-            UnitUtil::setECM( parent, ( origecm&(~CAR::RIGHT_BLINKEN) ) );
-        else
-            UnitUtil::setECM( parent, origecm|CAR::RIGHT_BLINKEN );
-    }
-    if (f().sirenkey == PRESS) {
-        f().sirenkey = DOWN;
-        if ( (origecm&CAR::SIREN_BLINKEN) )
-            UnitUtil::setECM( parent, ( origecm&(~CAR::SIREN_BLINKEN) ) );
-        else
-            UnitUtil::setECM( parent, origecm|CAR::SIREN_BLINKEN );
-    }
-    if (f().headlightkey == PRESS) {
-        f().headlightkey = DOWN;
-        if ( (origecm&CAR::FORWARD_BLINKEN) )
-            UnitUtil::setECM( parent, ( origecm&(~CAR::FORWARD_BLINKEN) ) );
-        else
-            UnitUtil::setECM( parent, origecm|CAR::FORWARD_BLINKEN );
-    }
-#endif
     if (f().targetkey == PRESS || j().jtargetkey == PRESS) {
         f().targetkey  = DOWN;
         j().jtargetkey = DOWN;

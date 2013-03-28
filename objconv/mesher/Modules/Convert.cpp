@@ -13,7 +13,9 @@ namespace Converter {
 		CRegistry() 
 		{
 		}
-
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdelete-non-virtual-dtor"
+// This is ok because our modules are all the same size as the abstract
 		~CRegistry()
 		{
 			for (ConversionImplList::iterator it=list.begin(); it!=list.end(); ++it)
@@ -21,7 +23,7 @@ namespace Converter {
 			list.clear();
 		}
 	};
-
+#pragma GCC diagnostic pop
 	// This awkward thing makes sure the registry has been constructed when we need it.
 	// Since we'll be using registry functions at static object initialization, we need this.
 	static ConversionImplList& getRegistry()

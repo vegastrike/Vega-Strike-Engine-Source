@@ -19,7 +19,7 @@
 
 #include "options.h"
 
-extern vs_options game_options;
+
 std::string PickledDataSansMissionName( std::string pickled )
 {
     string::size_type newline = pickled.find( "\n" );

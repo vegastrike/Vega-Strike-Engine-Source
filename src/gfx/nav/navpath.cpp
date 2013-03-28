@@ -459,8 +459,6 @@ void NavPath::addNewPath()
 {
     NavigationSystem::CachedSystemIterator &systemIter = _Universe->AccessCockpit()->AccessNavSystem()->systemIter;
 
-    int i;
-    unsigned system;
     //Inscribe new path
     //*************************
 

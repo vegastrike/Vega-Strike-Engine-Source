@@ -47,7 +47,6 @@ bool NetServer::loginAccept( const string &_inetbuf, ClientPtr clt, int newacct,
     string    callsign;
     string    unused;
     NetBuffer netbuf;
-    ObjSerial cltserial;
     callsign = getSimpleString( inetbuf );
     unused   = getSimpleString( inetbuf );
     string    serverip   = getSimpleString( inetbuf );
@@ -400,7 +399,6 @@ bool NetServer::loadFromSavegame( ClientPtr clt, Cockpit *cp )
         un->Kill();
     }
     if (!exist) {
-        unsigned short serial = cltserial;
         std::string    logoutnetbuf;
         addSimpleChar( logoutnetbuf, ACCT_LOGOUT );
         addSimpleString( logoutnetbuf, clt->callsign );

@@ -29,6 +29,7 @@
 #include "csv.h"
 #include "unit_csv.h"
 #include "base.h"
+#include "options.h"
 
 extern unsigned int apply_float_to_unsigned_int( float tmp );  //Short fix
 extern vector< Mesh* >MakeMesh( unsigned int mysize );
@@ -36,13 +37,11 @@ extern vector< Mesh* >MakeMesh( unsigned int mysize );
 template < class UnitType >
 void GameUnit< UnitType >::Split( int level )
 {
-    static bool split_subunits = XMLSupport::parse_bool( vs_config->getVariable( "graphics", "split_dead_subunits", "true" ) );
-    if (split_subunits)
+    if (game_options.split_dead_subunits)
         for (un_iter su = this->getSubUnits(); *su; ++su)
             (*su)->Split( level );
-    static float debrismassmult = XMLSupport::parse_float( vs_config->getVariable( "physics", "debris_mass", ".00001" ) );
     Vector PlaneNorm;
-    for (int i = 0; i < nummesh();) {
+    for (unsigned int i = 0; i < nummesh();) {
         if (this->meshdata[i]) {
             if (this->meshdata[i]->getBlendDst() == ONE) {
                 delete this->meshdata[i];
@@ -124,26 +123,23 @@ void GameUnit< UnitType >::Split( int level )
         this->SubUnits.prepend( splitsub = UnitFactory::createUnit( tempmeshes, true, this->faction ) );
         splitsub->hull = 1000;
         splitsub->name = "debris";
-        splitsub->Mass = debrismassmult*splitsub->Mass/level;
+        splitsub->Mass = game_options.debris_mass*splitsub->Mass/level;
         splitsub->pImage->timeexplode = .1;
         if (splitsub->meshdata[0]) {
             Vector loc  = splitsub->meshdata[0]->Position();
-            static float explosion_force = XMLSupport::parse_float( vs_config->getVariable( "graphics", "explosionforce", ".5" ) );             //10 seconds for auto to kick in;
             float  locm = loc.Magnitude();
             if (locm < .0001)
                 locm = 1;
-            splitsub->ApplyForce( splitsub->meshdata[0]->rSize()*explosion_force*10*splitsub->GetMass()*loc/locm );
+            splitsub->ApplyForce( splitsub->meshdata[0]->rSize()*game_options.explosionforce*10*splitsub->GetMass()*loc/locm );
             loc.Set( rand(), rand(), rand()+.1 );
             loc.Normalize();
-            static float explosion_torque =
-                XMLSupport::parse_float( vs_config->getVariable( "graphics", "explosiontorque", ".001" ) );                                     //10 seconds for auto to kick in;
-            splitsub->ApplyLocalTorque( loc*splitsub->GetMoment()*explosion_torque*( 1+rand()%(int) ( 1+this->rSize() ) ) );
+            splitsub->ApplyLocalTorque( loc*splitsub->GetMoment()*game_options.explosiontorque*( 1+rand()%(int) ( 1+this->rSize() ) ) );
         }
     }
     old.clear();
     this->meshdata.clear();
     this->meshdata.push_back( NULL );     //the shield
-    this->Mass *= debrismassmult;
+    this->Mass *= game_options.debris_mass;
 }
 
 extern float rand01();
@@ -152,15 +148,14 @@ template < class UnitType >
 void GameUnit< UnitType >::ArmorDamageSound( const Vector &pnt )
 {
     if ( !_Universe->isPlayerStarship( this ) ) {
-        static bool ai_sound = XMLSupport::parse_bool( vs_config->getVariable( "audio", "ai_sound", "true" ) );
         if ( AUDIsPlaying( this->sound->armor ) )
             AUDStopPlaying( this->sound->armor );
-        if (ai_sound)
+        if (game_options.ai_sound)
             AUDPlay( this->sound->armor, this->ToWorldCoordinates(
                          pnt ).Cast()+this->cumulative_transformation.position, this->Velocity, 1 );
     } else {
         static int playerarmorsound =
-            AUDCreateSoundWAV( vs_config->getVariable( "unitaudio", "player_armor_hit", "bigarmor.wav" ) );
+            AUDCreateSoundWAV( game_options.player_armor_hit );
         int sound = playerarmorsound != -1 ? playerarmorsound : this->sound->armor;
         if ( AUDIsPlaying( sound ) )
             AUDStopPlaying( sound );
@@ -173,14 +168,13 @@ template < class UnitType >
 void GameUnit< UnitType >::HullDamageSound( const Vector &pnt )
 {
     if ( !_Universe->isPlayerStarship( this ) ) {
-        static bool ai_sound = XMLSupport::parse_bool( vs_config->getVariable( "audio", "ai_sound", "true" ) );
         if ( AUDIsPlaying( this->sound->hull ) )
             AUDStopPlaying( this->sound->hull );
-        if (ai_sound)
+        if (game_options.ai_sound)
             AUDPlay( this->sound->hull, this->ToWorldCoordinates(
                          pnt ).Cast()+this->cumulative_transformation.position, this->Velocity, 1 );
     } else {
-        static int playerhullsound = AUDCreateSoundWAV( vs_config->getVariable( "unitaudio", "player_hull_hit", "bigarmor.wav" ) );
+        static int playerhullsound = AUDCreateSoundWAV( game_options.player_hull_hit );
         int sound = playerhullsound != -1 ? playerhullsound : this->sound->hull;
         if ( AUDIsPlaying( sound ) )
             AUDStopPlaying( sound );
@@ -194,17 +188,16 @@ float GameUnit< UnitType >::DealDamageToShield( const Vector &pnt, float &damage
 {
     float percent = UnitType::DealDamageToShield( pnt, damage );
     if ( !_Universe->isPlayerStarship( this ) ) {
-        static bool ai_sound = XMLSupport::parse_bool( vs_config->getVariable( "audio", "ai_sound", "true" ) );
         if (percent) {
             if ( AUDIsPlaying( this->sound->shield ) )
                 AUDStopPlaying( this->sound->shield );
-            if (ai_sound)
+            if (game_options.ai_sound)
                 AUDPlay( this->sound->shield, this->ToWorldCoordinates(
                     pnt ).Cast()+this->cumulative_transformation.position, this->Velocity, 1 );
         }
     } else {
         static int playerhullsound =
-            AUDCreateSoundWAV( vs_config->getVariable( "unitaudio", "player_shield_hit", "shieldhit.wav" ) );
+            AUDCreateSoundWAV( game_options.player_shield_hit);
         int sound = playerhullsound != -1 ? playerhullsound : this->sound->hull;
         if (percent) {
             if ( AUDIsPlaying( sound ) )
@@ -233,58 +226,45 @@ bool GameUnit< UnitType >::Explode( bool drawit, float timeit )
         mission->DirectorShipDestroyed( this );
         disableSubUnits( this );
         this->pImage->timeexplode = 0;
-        static string expani = vs_config->getVariable( "graphics", "explosion_animation", "explosion_orange.ani" );
 
         string bleh = this->pImage->explosion_type;
         if ( bleh.empty() )
             FactionUtil::GetRandExplosionAnimation( this->faction, bleh );
         if ( bleh.empty() ) {
-            static Animation cache( expani.c_str(), false, .1, BILINEAR, false );
+            static Animation cache( game_options.explosion_animation.c_str(), false, .1, BILINEAR, false );
             bleh = getRandomCachedAniString();
             if (bleh.size() == 0)
-                bleh = expani;
+                bleh = game_options.explosion_animation;
         }
-        static bool explosion_face_player =
-            XMLSupport::parse_bool( vs_config->getVariable( "graphics", "explosion_face_player", "true" ) );
-        this->pImage->pExplosion = new Animation( bleh.c_str(), explosion_face_player, .1, BILINEAR, true );
+        this->pImage->pExplosion = new Animation( bleh.c_str(), game_options.explosion_face_player, .1, BILINEAR, true );
         this->pImage->pExplosion->SetDimensions( this->ExplosionRadius(), this->ExplosionRadius() );
         Vector p, q, r;
         this->GetOrientation( p, q, r );
         this->pImage->pExplosion->SetOrientation( p, q, r );
         if (this->isUnit() != MISSILEPTR) {
-            static float expdamagecenter =
-                XMLSupport::parse_float( vs_config->getVariable( "physics", "explosion_damage_center", "1" ) );
-            static float damageedge =
-                XMLSupport::parse_float( vs_config->getVariable( "graphics", "explosion_damage_edge", ".125" ) );
             _Universe->activeStarSystem()->AddMissileToQueue( new MissileEffect( this->Position(), this->MaxShieldVal(),
-                                                                                 0, this->ExplosionRadius()*expdamagecenter,
-                                                                                 this->ExplosionRadius()*expdamagecenter
-                                                                                 *damageedge, NULL ) );
+                                                                                 0, this->ExplosionRadius()*game_options.explosion_damage_center,
+                                                                                 this->ExplosionRadius()*game_options.explosion_damage_center
+                                                                                 *game_options.explosion_damage_edge, NULL ) );
         }
         QVector exploc = this->cumulative_transformation.position;
         bool    sub    = this->isSubUnit();
         Unit   *un     = NULL;
         if (!sub)
             if (( un = _Universe->AccessCockpit( 0 )->GetParent() )) {
-                static float explosion_closeness =
-                    XMLSupport::parse_float( vs_config->getVariable( "audio", "explosion_closeness", ".8" ) );
-                exploc = un->Position()*explosion_closeness+exploc*(1-explosion_closeness);
+                exploc = un->Position()*game_options.explosion_closeness+exploc*(1-game_options.explosion_closeness);
             }
         AUDPlay( this->sound->explode, exploc, this->Velocity, 1 );
         if (!sub) {
             un = _Universe->AccessCockpit()->GetParent();
             if (this->isUnit() == UNITPTR) {
-                static float percentage_shock =
-                    XMLSupport::parse_float( vs_config->getVariable( "graphics", "percent_shockwave", ".5" ) );
-                if ( rand() < RAND_MAX*percentage_shock && ( !this->isSubUnit() ) ) {
-                    static float      shockwavegrowth =
-                        XMLSupport::parse_float( vs_config->getVariable( "graphics", "shockwave_growth", "1.05" ) );
-                    static string     shockani( vs_config->getVariable( "graphics", "shockwave_animation", "explosion_wave.ani" ) );
-
+                if ( rand() < RAND_MAX*game_options.percent_shockwave && ( !this->isSubUnit() ) ) {
+                    static string     shockani( game_options.shockwave_animation);
                     static Animation *__shock__ani = new Animation( shockani.c_str(), true, .1, MIPMAP, false );
+
                     __shock__ani->SetFaceCam( false );
                     unsigned int      which = AddAnimation( this->Position(),
-                                                            this->ExplosionRadius(), true, shockani, shockwavegrowth );
+                                                            this->ExplosionRadius(), true, shockani, game_options.shockwave_growth );
                     Animation *ani = GetVolatileAni( which );
                     if (ani) {
                         ani->SetFaceCam( false );
@@ -303,24 +283,18 @@ bool GameUnit< UnitType >::Explode( bool drawit, float timeit )
                 }
                 if (un) {
                     int upgradesfaction    = FactionUtil::GetUpgradeFaction();
-                    static float badrel    =
-                        XMLSupport::parse_float( vs_config->getVariable( "sound", "loss_relationship", "-.1" ) );
-                    static float goodrel   =
-                        XMLSupport::parse_float( vs_config->getVariable( "sound", "victory_relationship", ".5" ) );
-                    static float timelapse =
-                        XMLSupport::parse_float( vs_config->getVariable( "sound", "time_between_music", "180" ) );
                     float rel = un->getRelation( this );
                     if (!BaseInterface::CurrentBase) {
                         static float lasttime = 0;
                         float newtime = getNewTime();
-                        if ( newtime-lasttime > timelapse
+                        if ( newtime-lasttime > game_options.time_between_music
                             || (_Universe->isPlayerStarship( this ) && this->isUnit() != MISSILEPTR && this->faction
                                 != upgradesfaction) ) {
                             //No victory for missiles or spawned explosions
-                            if (rel > goodrel) {
+                            if (rel > game_options.victory_relationship) {
                                 lasttime = newtime;
                                 muzak->SkipRandSong( Music::LOSSLIST );
-                            } else if (rel < badrel) {
+                            } else if (rel < game_options.loss_relationship) {
                                 lasttime = newtime;
                                 muzak->SkipRandSong( Music::VICTORYLIST );
                             }
@@ -330,9 +304,8 @@ bool GameUnit< UnitType >::Explode( bool drawit, float timeit )
             }
         }
     }
-    static float timebeforeexplodedone = XMLSupport::parse_float( vs_config->getVariable( "physics", "debris_time", "500" ) );
     bool timealldone =
-        ( this->pImage->timeexplode > timebeforeexplodedone || this->isUnit() == MISSILEPTR
+        ( this->pImage->timeexplode > game_options.debris_time || this->isUnit() == MISSILEPTR
          || _Universe->AccessCockpit()->GetParent() == this || this->SubUnits.empty() );
     if (this->pImage->pExplosion) {
         this->pImage->timeexplode += timeit;
@@ -356,11 +329,10 @@ bool GameUnit< UnitType >::Explode( bool drawit, float timeit )
                 alldone |= temp;
         }
     }
-    static float phatloot = XMLSupport::parse_float( vs_config->getVariable( "physics", "eject_cargo_on_blowup", "0" ) );
-    if ( (phatloot > 0) && (this->numCargo() > 0) ) {
-        size_t dropcount = (size_t) floor( this->numCargo()/phatloot )+1;
+    if ( (game_options.eject_cargo_on_blowup > 0) && (this->numCargo() > 0) ) {
+        unsigned int dropcount =  floor( this->numCargo()/game_options.eject_cargo_on_blowup )+1;
         if ( dropcount > this->numCargo() ) dropcount = this->numCargo();
-        for (size_t i = 0; i < dropcount; i++)
+        for (unsigned int i = 0; i < dropcount; i++)
             this->EjectCargo( this->numCargo()-1 );              //Ejecting the last one is somewhat faster
     }
     return alldone || (!timealldone);

@@ -20,7 +20,7 @@
 #include "cmd/base.h"
 #include "options.h"
 
-extern vs_options game_options;
+
 
 extern unsigned int AddAnimation( const QVector &pos,
                                   const float size,

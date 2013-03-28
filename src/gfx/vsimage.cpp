@@ -638,7 +638,7 @@ unsigned char* VSImage::ReadBMP()
 unsigned char* VSImage::ReadDDS()
 {
     ddsHeader header;
-    unsigned int   internal  = GL_NONE, type = GL_RGB;
+    unsigned int  type = GL_RGB;
     int blockSize = 16;
     unsigned char *s = NULL;
     unsigned int   inputSize = 0;

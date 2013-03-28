@@ -30,6 +30,9 @@ extern bool   cleanexit;
 extern bool   run_only_player_starsystem;
 
 /* All global data is stored in a variable of this type */
+
+// We will be removing all of these and using vs_options instead
+
 typedef struct
 {
     char  use_textures;
@@ -41,7 +44,6 @@ typedef struct
     char  use_planet_textures;
     int   audio_frequency_mode;   //0==11025/8 1==22050/8 2==44100/8  3==11025/16 4==22050/16 5==44100/16
     int   sound_enabled;
-    int   music_enabled;
     int   sound_volume;
     int   music_volume;
     int   max_sound_sources;

@@ -757,7 +757,6 @@ bool AggressiveAI::ProcessCurrentFgDirective( Flightgroup *fg )
             //IAmDave - dock at target command start... 
             else if (fg->directive.find( "t" ) != string::npos || fg->directive.find( "T" ) != string::npos) {
                Unit *targ   = fg->target.GetUnit();
-               bool  callme = false;
                if ( targ->InCorrectStarSystem( _Universe->activeStarSystem() ) ) {
                  Order * ord;
                  if(targ->IsBase()){
@@ -886,7 +885,7 @@ bool AggressiveAI::ProcessCurrentFgDirective( Flightgroup *fg )
                             }
                             //if i am a cargo wingman and so is the player, get into a dockable position with the leader
                             else if ( parentowner && leaderowner && (parentowner == leaderowner) ) {
-                                Unit  *leaderownerun =
+                                const Unit  *leaderownerun =
                                     ( leaderowner
                                      == leader ? leader : ( leaderowner == parent ? parent : findUnitInStarsystem( leaderowner ) ) );
                                 float  qdist = ( parent->rSize()+leaderownerun->rSize() );
@@ -1169,7 +1168,7 @@ bool AggressiveAI::ProcessCurrentFgDirective( Flightgroup *fg )
                                 c.SetCurrentState( c.fsm->GetNoNode(), NULL, 0 );
                             }
                             Order *loo = leader->getAIState();
-                            if (loo)
+                            if (loo || callme)
                                 loo->Communicate( c );
                         }
                     }

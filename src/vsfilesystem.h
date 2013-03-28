@@ -387,7 +387,7 @@ public: VSFile();
         } else {
             if (q_volume_format == vfmtPK3) {
                 checkExtracted();
-                int   ret       = -1, readbytes = 0;
+                int   readbytes = 0;
                 int   length    = strlen( format );
                 int   newlength = length+3;
                 char *newformat = new char[newlength];
@@ -412,7 +412,7 @@ public: VSFile();
         } else {
             if (q_volume_format == vfmtPK3) {
                 checkExtracted();
-                int   ret       = -1, readbytes = 0;
+                int   readbytes = 0;
                 int   length    = strlen( format );
                 int   newlength = length+3;
                 char *newformat = new char[newlength];

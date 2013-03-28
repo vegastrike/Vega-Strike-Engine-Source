@@ -7,6 +7,10 @@
 #include <stdlib.h>
 #include "cmd/unit_generic.h"
 #include "gfx/cockpit_generic.h"
+#include "options.h"
+
+
+
 #ifdef HAVE_AL
 
 typedef struct                                   /* WAV File-header */
@@ -429,8 +433,7 @@ bool AUDLoadSoundFile( const char *s, struct AUDSoundProperties *info, bool use_
             size_t siz = ftell( f );
             fseek( f, 0, SEEK_SET );
             dat.resize( siz );
-            size_t bogus_return_var; //added by chuck_starchaser to get rid of warning
-            bogus_return_var = fread( &dat[0], 1, siz, f );
+            if(fread( &dat[0], 1, siz, f )!= siz) return false;
             info->hashname = s;
             info->shared   = false;
             fclose( f );
@@ -505,7 +508,7 @@ int AUDCreateSoundWAV( const std::string &s, const bool music, const bool LOOP )
 #ifdef SOUND_DEBUG
     printf( "AUDCreateSoundWAV:: " );
 #endif
-    if ( (g_game.sound_enabled && !music) || (g_game.music_enabled && music) ) {
+    if ( (game_options.Music && !music) || (game_options.Music && music) ) {
         ALuint     *wavbuf = NULL;
         std::string hashname;
         if (!music) {
@@ -558,7 +561,7 @@ int AUDCreateSoundMP3( const std::string &s, const bool music, const bool LOOP )
 {
 #ifdef HAVE_AL
     assert( 0 );
-    if ( (g_game.sound_enabled && !music) || (g_game.music_enabled && music) ) {
+    if ( (game_options.Music && !music) || (game_options.Music && music) ) {
         VSFile      f;
         VSError     error  = f.OpenReadOnly( s.c_str(), SoundFile );
         bool        shared = (error == Shared);
@@ -689,8 +692,6 @@ void AUDDeleteSound( int sound, bool music )
 
 void AUDAdjustSound( const int sound, const QVector &pos, const Vector &vel )
 {
-    static float ref_distance = XMLSupport::parse_float( vs_config->getVariable( "audio", "audio_ref_distance", "4000" ) );
-    static float max_distance = XMLSupport::parse_float( vs_config->getVariable( "audio", "audio_max_distance", "1000000" ) );
     
 #ifdef HAVE_AL
     if ( sound >= 0 && sound < (int) sounds.size() ) {
@@ -707,8 +708,8 @@ void AUDAdjustSound( const int sound, const QVector &pos, const Vector &vel )
             alSourcei( sounds[sound].source, AL_SOURCE_RELATIVE, relative );
             if (!relative) {
                 // Set rolloff factrs
-                alSourcef(sounds[sound].source, AL_MAX_DISTANCE, scalepos * max_distance);
-                alSourcef(sounds[sound].source, AL_REFERENCE_DISTANCE, scalepos * ref_distance);
+                alSourcef(sounds[sound].source, AL_MAX_DISTANCE, scalepos * game_options.audio_max_distance);
+                alSourcef(sounds[sound].source, AL_REFERENCE_DISTANCE, scalepos * game_options.audio_ref_distance);
                 alSourcef(sounds[sound].source, AL_ROLLOFF_FACTOR, 1.f);
             }
         }

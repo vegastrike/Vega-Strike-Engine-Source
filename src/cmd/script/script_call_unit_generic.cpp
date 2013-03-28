@@ -60,6 +60,7 @@
 #include "cmd/asteroid_generic.h"
 #include "gfxlib.h"
 #include "cmd/pilot.h"
+#include "cmd/unit_util.h"
 
 extern const vector< string >& ParseDestinations( const string &value );
 extern Unit& GetUnitMasterPartList();
@@ -511,9 +512,7 @@ varInst* Mission::call_unit( missionNode *node, int mode )
         } else if (method_id == CMT_UNIT_isPlanet) {
             bool res = false;
             if (mode == SCRIPT_RUN) {
-                res = my_unit->isPlanet();
-                if (res)
-                    res = !PlanetHasLights( my_unit );
+                res = my_unit->isPlanet() && ! UnitUtil::isSun(my_unit);
             }
             viret = newVarInst( VI_TEMP );
             viret->type = VAR_BOOL;
@@ -521,11 +520,7 @@ varInst* Mission::call_unit( missionNode *node, int mode )
         } else if (method_id == CMT_UNIT_isSignificant) {
             bool res = false;
             if (mode == SCRIPT_RUN) {
-                clsptr typ = my_unit->isUnit();
-                string s   = my_unit->getFlightgroup() ? my_unit->getFlightgroup()->name : "";
-                res =
-                    ( typ == PLANETPTR
-                     && !PlanetHasLights( my_unit ) ) || typ == ASTEROIDPTR || typ == NEBULAPTR || s == "Base";
+                res = UnitUtil::isSignificant(my_unit);
             }
             viret = newVarInst( VI_TEMP );
             viret->type = VAR_BOOL;
@@ -533,9 +528,7 @@ varInst* Mission::call_unit( missionNode *node, int mode )
         } else if (method_id == CMT_UNIT_isSun) {
             bool res = false;
             if (mode == SCRIPT_RUN) {
-                res = my_unit->isPlanet();
-                if (res)
-                    res = PlanetHasLights( my_unit );
+                res = UnitUtil::isSun(my_unit);
             }
             viret = newVarInst( VI_TEMP );
             viret->type = VAR_BOOL;

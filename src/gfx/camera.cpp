@@ -90,13 +90,14 @@ void Camera::UpdateGFX( GFXBOOL clip,
     lastGFXUpdate.overrideZFar     = overrideZFar;
 
     const float ZFARCONST = 1000000;
-    float xmin, xmax, ymin, ymax, znear, zfar;
-    if (1 || changed) {
+    float znear, zfar;
+    if(changed){
         myPhysics.Update();
-        GFXLoadIdentity( PROJECTION );
-        //FIXMEGFXLoadIdentity(VIEW);
-        switch (projectionType)
-        {
+        changed = GFXFALSE;
+    }
+    GFXLoadIdentity( PROJECTION );
+    //FIXMEGFXLoadIdentity(VIEW);
+    switch (projectionType) {
         case Camera::PERSPECTIVE:
             znear = (overrideZFrustum ? overrideZNear : g_game.znear);
             zfar  = ( overrideZFrustum ? overrideZFar : g_game.zfar*(clip ? 1 : ZFARCONST) );
@@ -104,12 +105,6 @@ void Camera::UpdateGFX( GFXBOOL clip,
             GFXPerspective( zoom*fov, g_game.aspect, znear, zfar, cockpit_offset );             //set perspective to 78 degree FOV
             break;
         case Camera::PARALLEL:
-            ymax  = g_game.znear*tanf( zoom*fov*PI/( (float) 360.0 ) );
-
-            ymin  = -ymax;             //-4.7046
-
-            xmin  = ymin*g_game.aspect;              //-6.2571
-            xmax  = ymax*g_game.aspect;              //6.2571
 
             znear = ( overrideZFrustum ? overrideZNear : -g_game.zfar*(clip ? 1 : ZFARCONST) );
             zfar  = ( overrideZFrustum ? overrideZFar : g_game.zfar*(clip ? 1 : ZFARCONST) );
@@ -117,19 +112,19 @@ void Camera::UpdateGFX( GFXBOOL clip,
             //GFXParallel(xmin,xmax,ymin,ymax,-znear,zfar);
             GFXParallel( g_game.aspect* -zoom, g_game.aspect*zoom, -zoom, zoom, znear, zfar );
             break;
-        }
-        GFXLookAt( -R, centerCamera ? QVector( 0, 0, 0 ) : Coord, Q );
-        if (updateFrustum) GFXCalculateFrustum();
-#ifdef PERFRAMESOUND
-        Vector lastpos( view[12], view[13], view[14] );
-        AUDListener( Coord, (Coord-lastpos)/GetElapsedTime() );           //this pos-last pos / elapsed time
-#endif
-        //GFXGetMatrix(VIEW,view);
-        GFXSubwindow( x, y, xsize, ysize );
-#ifdef PERFRAMESOUND
-        AUDListenerOrientation( P, Q, R );
-#endif
     }
+    GFXLookAt( -R, centerCamera ? QVector( 0, 0, 0 ) : Coord, Q );
+    if (updateFrustum) GFXCalculateFrustum();
+#ifdef PERFRAMESOUND
+    Vector lastpos( view[12], view[13], view[14] );
+    AUDListener( Coord, (Coord-lastpos)/GetElapsedTime() );           //this pos-last pos / elapsed time
+#endif
+    //GFXGetMatrix(VIEW,view);
+    GFXSubwindow( x, y, xsize, ysize );
+#ifdef PERFRAMESOUND
+    AUDListenerOrientation( P, Q, R );
+#endif
+    
 }
 
 void Camera::UpdateCameraSounds()
@@ -192,7 +187,6 @@ void Camera::UpdateGLCenter()
 #undef ITISDEPRECATED
 //static float rotfactor = 0;
     //glMatrixMode(GL_PROJECTION);
-    float xmin, xmax, ymin, ymax;
     if (changed) {
         GFXLoadIdentity( PROJECTION );
         GFXLoadIdentity( VIEW );
@@ -203,12 +197,6 @@ void Camera::UpdateGLCenter()
             GFXPerspective( zoom*fov, g_game.aspect, g_game.znear, g_game.zfar, cockpit_offset );             //set perspective to 78 degree FOV
             break;
         case Camera::PARALLEL:
-            ymax = g_game.znear*tanf( zoom*fov*PI/( (float) 360.0 ) );                //78.0 --> 4.7046
-
-            ymin = -ymax;             //-4.7046
-
-            xmin = ymin*g_game.aspect;               //-6.2571
-            xmax = ymax*g_game.aspect;               //6.2571
 
             //GFXParallel(xmin,xmax,ymin,ymax,-znear,zfar);
             GFXParallel( g_game.aspect* -zoom, g_game.aspect*zoom, -zoom, zoom, -g_game.znear, g_game.zfar );
@@ -217,7 +205,7 @@ void Camera::UpdateGLCenter()
         RestoreViewPort( 0, 0 );
 
         GFXLookAt( -R, QVector( 0, 0, 0 ), Q );
-        //changed = GFXFALSE;
+        changed = GFXFALSE;
     }
     //glMultMatrixf(view);
 }

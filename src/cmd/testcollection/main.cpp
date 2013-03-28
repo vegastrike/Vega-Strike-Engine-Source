@@ -52,7 +52,7 @@ int main()
     int ii = SIZE/2;
     seconds = time( NULL );
     while (ii < SIZE)
-        for (un_iter iter = c->createIterator(); iter.notDone() && ii < SIZE; ++iter) {
+        for (un_iter iter = c->createIterator(); !iter.isDone() && ii < SIZE; ++iter) {
             int rnd = rand();
             if (rnd < RAND_MAX/200) {
                 iter.postinsert( u[ii] );
@@ -95,7 +95,7 @@ int main()
             delete u[i];
     }
     int size = 0;
-    for (un_iter counter = c->createIterator(); counter.notDone(); ++counter)
+    for (un_iter counter = c->createIterator(); !counter.isDone(); ++counter)
         ++size;
     printf( "size of list is verified at %d  : %d killed \n", size, SIZE-size );
     delete c;

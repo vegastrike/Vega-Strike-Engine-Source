@@ -57,7 +57,7 @@ class AutoDocking : public Order
     typedef void (AutoDocking::*StateFunction)(Unit *, Unit *);
 
 public:
-    typedef std::deque<size_t> DockingPath;
+    typedef std::deque<int> DockingPath;
 
     AutoDocking(Unit *destination);
 

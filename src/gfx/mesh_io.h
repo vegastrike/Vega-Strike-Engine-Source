@@ -1,7 +1,7 @@
 #ifndef __MESH_IO_H__INCLUDED_
 #define __MESH_IO_H__INCLUDED_
 
-#define int32bit int
+#define int32bit unsigned int
 #define float32bit float
 #define char8bit unsigned char
 

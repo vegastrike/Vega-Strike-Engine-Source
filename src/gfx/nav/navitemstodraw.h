@@ -24,7 +24,7 @@ void NavigationSystem::DrawCursor( float x, float y, float wid, float hei, const
         GFXDisable( LIGHTING );
         GFXBlendMode( SRCALPHA, INVSRCALPHA );
 
-        const float verts[8 * 3] = {
+        const double verts[8 * 3] = {
             x,          y,          0,
             x,          y-hei,      0,
             x,          y,          0,
@@ -34,7 +34,7 @@ void NavigationSystem::DrawCursor( float x, float y, float wid, float hei, const
             x+0.35*wid, y-0.6*hei,  0,
             x+wid,      y-0.75*hei, 0,
         };
-        GFXDraw( GFXLINE, verts, 8 );
+        GFXDraw( GFXLINE, (const float*)verts, 8 );
 
         GFXEnable( TEXTURE0 );
     }
@@ -282,18 +282,18 @@ void NavigationSystem::DrawMissile( float x, float y, float size, const GFXColor
     GFXBlendMode( SRCALPHA, INVSRCALPHA );
 
     const float verts[12 * 3] = {
-        x-0.5*size,  y-0.125*size, 0,
-        x,           y+0.375*size, 0,
-        x+0.5*size,  y-0.125*size, 0,
-        x,           y+0.375*size, 0,
-        x-0.25*size, y-0.125*size, 0,
-        x-0.25*size, y+0.125*size, 0,
-        x+0.25*size, y-0.125*size, 0,
-        x+0.25*size, y+0.125*size, 0,
-        x-0.25*size, y+0.125*size, 0,
-        x,           y-0.125*size, 0,
-        x+0.25*size, y+0.125*size, 0,
-        x,           y-0.125*size, 0,
+        x-0.5f*size,  y-0.125f*size, 0,
+        x,           y+0.375f*size, 0,
+        x+0.5f*size,  y-0.125f*size, 0,
+        x,           y+0.375f*size, 0,
+        x-0.25f*size, y-0.125f*size, 0,
+        x-0.25f*size, y+0.125f*size, 0,
+        x+0.25f*size, y-0.125f*size, 0,
+        x+0.25f*size, y+0.125f*size, 0,
+        x-0.25f*size, y+0.125f*size, 0,
+        x,           y-0.125f*size, 0,
+        x+0.25f*size, y+0.125f*size, 0,
+        x,           y-0.125f*size, 0,
     };
     GFXDraw( GFXLINE, verts, 12 );
 
@@ -311,22 +311,22 @@ void NavigationSystem::DrawTargetCorners( float x, float y, float size, const GF
     GFXBlendMode( SRCALPHA, INVSRCALPHA );
 
     const float verts[16 * 3] = {
-        x-0.5*size, y+0.5*size, 0,
-        x-0.3*size, y+0.5*size, 0,
-        x-0.5*size, y+0.5*size, 0,
-        x-0.5*size, y+0.3*size, 0,
-        x+0.5*size, y+0.5*size, 0,
-        x+0.3*size, y+0.5*size, 0,
-        x+0.5*size, y+0.5*size, 0,
-        x+0.5*size, y+0.3*size, 0,
-        x-0.5*size, y-0.5*size, 0,
-        x-0.3*size, y-0.5*size, 0,
-        x-0.5*size, y-0.5*size, 0,
-        x-0.5*size, y-0.3*size, 0,
-        x+0.5*size, y-0.5*size, 0,
-        x+0.3*size, y-0.5*size, 0,
-        x+0.5*size, y-0.5*size, 0,
-        x+0.5*size, y-0.3*size, 0,
+        x-0.5f*size, y+0.5f*size, 0,
+        x-0.3f*size, y+0.5f*size, 0,
+        x-0.5f*size, y+0.5f*size, 0,
+        x-0.5f*size, y+0.3f*size, 0,
+        x+0.5f*size, y+0.5f*size, 0,
+        x+0.3f*size, y+0.5f*size, 0,
+        x+0.5f*size, y+0.5f*size, 0,
+        x+0.5f*size, y+0.3f*size, 0,
+        x-0.5f*size, y-0.5f*size, 0,
+        x-0.3f*size, y-0.5f*size, 0,
+        x-0.5f*size, y-0.5f*size, 0,
+        x-0.5f*size, y-0.3f*size, 0,
+        x+0.5f*size, y-0.5f*size, 0,
+        x+0.3f*size, y-0.5f*size, 0,
+        x+0.5f*size, y-0.5f*size, 0,
+        x+0.5f*size, y-0.3f*size, 0,
     };
     GFXDraw( GFXLINE, verts, 16 );
 

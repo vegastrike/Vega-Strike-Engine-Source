@@ -607,7 +607,7 @@ private:
     void doOrder( easyDomNode *node, Flightgroup *fg );
     void checkFlightgroup( easyDomNode *node );
     bool doPosition( easyDomNode*node, double pos[3], class CreateFlightgroup* );
-    bool doRotation( easyDomNode*node, float rot[3], class CreateFlightgroup* );
+//    bool doRotation( easyDomNode*node, float rot[3], class CreateFlightgroup* );
     void doOrigin( easyDomNode *node );
     void doSettings( easyDomNode *node );
 

@@ -1,4 +1,7 @@
 #include <assert.h>
+#include <boost/version.hpp>
+#include <expat.h>
+
 #include "star_system_generic.h"
 #include "gfx/vec.h"
 #include "cmd/planet_generic.h"
@@ -10,7 +13,6 @@
 #include "lin_time.h"
 #include "cmd/beam.h"
 #include "cmd/bolt.h"
-#include <expat.h>
 #include "cmd/music.h"
 #include "configxml.h"
 #include "vs_globals.h"
@@ -22,7 +24,6 @@
 #include "in_kb.h"
 #include "cmd/script/flightgroup.h"
 #include "load_mission.h"
-#include "lin_time.h"
 #include "cmd/unit_util.h"
 #include "cmd/unit_factory.h"
 #include "cmd/unit_collide.h"
@@ -31,7 +32,8 @@
 #include "networking/netclient.h"
 #include "in_kb_data.h"
 #include "universe_util.h"               //get galaxy faction, dude
-#include <boost/version.hpp>
+#include "options.h"
+
 #if defined (_MSC_VER) && _MSC_VER <= 1200
 
 #define Vector Vactor
@@ -43,6 +45,8 @@
 
 #undef Vector
 #endif
+
+
 
 using namespace XMLSupport;
 vector< Vector >perplines;
@@ -58,10 +62,8 @@ void TentativeJumpTo( StarSystem *ss, Unit *un, Unit *jumppoint, const std::stri
 
 float ScaleJumpRadius( float radius )
 {
-    static float jump_radius_scale = parse_float( vs_config->getVariable( "physics", "jump_radius_scale", "2" ) );
-    static float game_speed = parse_float( vs_config->getVariable( "physics", "game_speed", "1" ) );
     //need this because sys scale doesn't affect j-point size
-    radius *= jump_radius_scale*game_speed;
+    radius *= game_options.jump_radius_scale*game_options.game_speed;
     return radius;
 }
 
@@ -116,9 +118,8 @@ StarSystem::~StarSystem()
     _Universe->pushActiveStarSystem( this );
     ClientServerSetLightContext( lightcontext );
     delete[] name;
-    Unit *unit;
-    for (un_iter iter = drawList.createIterator(); (unit = *iter); ++iter)
-        unit->Kill( false );
+    for (un_iter iter = drawList.createIterator();!iter.isDone(); ++iter)
+        (*iter)->Kill( false );
     //if the next line goes ANYWHERE else Vega Strike will CRASH!!!!!
     //DO NOT MOVE THIS LINE! IT MUST STAY
     if (collidetable) delete collidetable;
@@ -226,17 +227,8 @@ void StarSystem::AddUnit( Unit *unit )
 {
     if ( stats.system_faction == FactionUtil::GetNeutralFaction() )
         stats.CheckVitals( this );
-    if (unit->specInterdiction > 0 || unit->isPlanet() || unit->isJumppoint() || unit->isUnit() == ASTEROIDPTR) {
-        Unit *un;
-        bool  found = false;
-        for (un_iter i = gravitationalUnits().createIterator();
-             (un = *i) != NULL;
-             ++i)
-            if (un == unit) {
-                found = true;
-                break;
-            }
-        if (!found)
+    if ( unit->isPlanet() || unit->isJumppoint() || unit->isUnit() == ASTEROIDPTR) {
+        if (!gravitationalUnits().contains(unit))
             gravitationalUnits().prepend( unit );
     }
     drawList.prepend( unit );
@@ -257,39 +249,18 @@ bool StarSystem::RemoveUnit( Unit *un )
             collidemap[locind]->erase( un->location[locind] );
             set_null( un->location[locind] );
         }
-    bool  removed2 = false;
-    Unit *unit;
-    for (un_iter iter = gravitationalUnits().createIterator(); (unit = *iter); ++iter)
-        if (unit == un) {
-            iter.remove();
-            removed2 = true;
-            break;                                       //Shouldn't be in there twice
-        }
-    //NOTE: not sure why if(1) was here, but safemode removed it
-    bool removed = false;
-    if (1) {
-        for (un_iter iter = drawList.createIterator(); (unit = *iter); ++iter)
-            if (unit == un) {
-                iter.remove();
-                removed = true;
-                break;
+
+    if (drawList.remove(un) ) {
+        // regardless of being drawn, it should be in physics list
+        for (unsigned int i = 0; i <= SIM_QUEUE_SIZE; ++i) {    
+            if(physics_buffer[i].remove(un)){
+                i = SIM_QUEUE_SIZE +1;
             }
-    }
-    if (removed) {
-        for (unsigned int i = 0; i <= SIM_QUEUE_SIZE; ++i) {
-            Unit *unit;
-            for (un_iter iter = physics_buffer[i].createIterator(); (unit = *iter); ++iter)
-                if (unit == un) {
-                    iter.remove();
-                    removed = true;
-                    //terminate outer loop
-                    i = SIM_QUEUE_SIZE+1;
-                    break;
-                }
         }
         stats.RemoveUnit( un );
+        return(true);
     }
-    return removed;
+    return (false);
 }
 
 void StarSystem::ExecuteUnitAI()
@@ -311,10 +282,11 @@ void StarSystem::ExecuteUnitAI()
     }
 }
 
+extern Unit *TheTopLevelUnit;
 //sorry boyz...I'm just a tourist with a frag nav console--could you tell me where I am?
-Unit * getTopLevelOwner() //returns terrible memory--don't dereference...ever...not even aligned
+Unit * getTopLevelOwner() 
 {
-    return (Unit*) 0x31337; //FIXME How about telling us a little story behind this function? --chuck_starchaser
+    return (TheTopLevelUnit) ;  // Now we return a pointer to a new game unit created in main(), outside of any lists 
 }
 
 void CarSimUpdate( Unit *un, float height )
@@ -346,11 +318,9 @@ void StarSystem::Statistics::CheckVitals( StarSystem *ss )
     if (faction != system_faction) {
         *this = Statistics();                    //invoke copy constructor to clear it
         this->system_faction = faction;
-        Unit *un;
-        for (un_iter ui = ss->getUnitList().createIterator();
-             (un = *ui) != NULL;
-             ++ui)
-            this->AddUnit( un );                 //siege will take some time
+        for (un_iter ui = ss->getUnitList().createIterator();!ui.isDone();++ui){
+            this->AddUnit( *ui );                 //siege will take some time
+        }
         return;                                          //no need to check vitals now, they're all set
     }
     size_t iter = navCheckIter;
@@ -368,6 +338,7 @@ void StarSystem::Statistics::CheckVitals( StarSystem *ss )
     while ( iter < totalnavchecking && iter < navs[k].size() ) {
         if (navs[k][iter].GetUnit() == NULL) {
             navs[k].erase( navs[k].begin()+iter );
+            break;
         } else {
             ++iter;
             ++navCheckIter;
@@ -455,13 +426,16 @@ void StarSystem::Statistics::RemoveUnit( Unit *un )
         //kill it--stupid I know--but hardly time critical
         jumpPoints.erase( jumpPoints.find( un->GetDestinations()[0] ) );
     }
+    bool temp_erased = false;
     if ( UnitUtil::isSignificant( un ) ) {
-        for (int k = 0; k < 3; ++k)
-            for (size_t i = 0; i < navs[k].size();) {
-                if (navs[k][i].GetUnit() == un)
+        for (int k = 0; k < 3 && !temp_erased; ++k)
+            for (size_t i = 0; i < navs[k].size();++i) {
+                if (navs[k][i].GetUnit() == un){
                     //slow but who cares
                     navs[k].erase( navs[k].begin()+i );
-                else ++i;                                //only increment if you didn't erase current
+                    temp_erased = true;
+                    break; // would we exist in this array more than once?
+                }
             }
     }
 }
@@ -497,7 +471,6 @@ void StarSystem::UpdateUnitPhysics( bool firstframe )
     double aitime = 0;
     double phytime = 0;
     double collidetime     = 0;
-    double flattentime     = 0;
     double bolttime = 0;
     targetpick   = 0;
     aggfire      = 0;
@@ -562,11 +535,9 @@ void StarSystem::UpdateUnitPhysics( bool firstframe )
             Bolt::UpdatePhysics( this );
             double cc  = queryTime();
             last_collisions.clear();
-            double fl0 = queryTime();
             collidemap[Unit::UNIT_BOLT]->flatten();
             if (Unit::NUM_COLLIDE_MAPS > 1)
                 collidemap[Unit::UNIT_ONLY]->flatten( *collidemap[Unit::UNIT_BOLT] );
-            flattentime = queryTime()-fl0;
             Unit *unit;
             for (un_iter iter = physics_buffer[current_sim_location].createIterator(); (unit = *iter);) {
                 int   priority = unit->sim_atom_multiplier;
@@ -659,8 +630,8 @@ void StarSystem::Update( float priority )
     float normal_simulation_atom = SIMULATION_ATOM;
     time += GetElapsedTime();
     _Universe->pushActiveStarSystem( this );
-    if ( time/SIMULATION_ATOM >= (1./PHY_NUM) ) {
-        while ( time/SIMULATION_ATOM >= (1.) ) {
+    if ( time > SIMULATION_ATOM*2 ) {
+        while ( time > SIMULATION_ATOM ) {
             //Chew up all SIMULATION_ATOMs that have elapsed since last update
             ExecuteDirector();
             TerrainCollide();
@@ -684,7 +655,6 @@ void StarSystem::Update( float priority )
 void StarSystem::Update( float priority, bool executeDirector )
 {
     bool   firstframe = true;
-    double pythontime = 0;
     ///this makes it so systems without players may be simulated less accurately
     for (unsigned int k = 0; k < _Universe->numPlayers(); ++k)
         if (_Universe->AccessCockpit( k )->activeStarSystem == this)
@@ -694,29 +664,24 @@ void StarSystem::Update( float priority, bool executeDirector )
     ///just be sure to restore this at the end
     time += GetElapsedTime();
     _Universe->pushActiveStarSystem( this );
-    //WARNING PERFORMANCE HACK!!!!!
-    if (time > 2*SIMULATION_ATOM)
-        time = 2*SIMULATION_ATOM;
     double bolttime = 0;
-    if ( time/SIMULATION_ATOM >= (1./PHY_NUM) ) {
+      if (time > SIMULATION_ATOM ){
         //Chew up all SIMULATION_ATOMs that have elapsed since last update
-        while ( time/SIMULATION_ATOM >= (1./PHY_NUM) ) {
+          while ( time > SIMULATION_ATOM ) {
             if (current_stage == MISSION_SIMULATION) {
                 TerrainCollide();
                 UpdateAnimatedTexture();
                 Unit::ProcessDeleteQueue();
-                double pythonidea = queryTime();
                 if ( (run_only_player_starsystem
                       && _Universe->getActiveStarSystem( 0 ) == this) || !run_only_player_starsystem )
                     if (executeDirector)
                         ExecuteDirector();
-                pythontime = queryTime()-pythonidea;
                 static int dothis = 0;
                 if ( this == _Universe->getActiveStarSystem( 0 ) )
                     if ( (++dothis)%2 == 0 )
                         AUDRefreshSounds();
                 for (unsigned int i = 0; i < active_missions.size(); ++i)
-                    //waste of farkin time
+                    //waste of frakkin time
                     active_missions[i]->BriefingUpdate();
                 current_stage = PROCESS_UNIT;
             } else if (current_stage == PROCESS_UNIT) {
@@ -730,7 +695,7 @@ void StarSystem::Update( float priority, bool executeDirector )
                 current_stage = MISSION_SIMULATION;
                 firstframe    = false;
             }
-            time -= (1./PHY_NUM)*SIMULATION_ATOM;
+            time -= SIMULATION_ATOM;
         }
         unsigned int i = _Universe->CurrentCockpit();
         for (unsigned int j = 0; j < _Universe->numPlayers(); ++j)
@@ -814,9 +779,7 @@ void StarSystem::ProcessPendingJumps()
                     } else if (!player) {
                         un->SetVelocity( Vector( 0, 0, 0 ) );
                     }
-                    static bool setshieldzero =
-                        XMLSupport::parse_bool( vs_config->getVariable( "physics", "jump_disables_shields", "true" ) );
-                    if (setshieldzero)
+                    if (game_options.jump_disables_shields)
                         SetShieldZero( un );
                 }
             }
@@ -888,9 +851,8 @@ double calc_blend_factor( double frac, int priority, unsigned int when_it_will_b
 void ActivateAnimation( Unit *jumppoint )
 {
     jumppoint->graphicOptions.Animating = 1;
-    Unit *un;
-    for (un_iter i = jumppoint->getSubUnits(); NULL != (un = *i); ++i)
-        ActivateAnimation( un );
+    for (un_iter i = jumppoint->getSubUnits(); !i.isDone(); ++i)
+        ActivateAnimation( *i );
 }
 
 static bool isJumping( const vector< unorigdest* > &pending, Unit *un )

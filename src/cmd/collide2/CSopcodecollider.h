@@ -41,7 +41,7 @@
 	The next two calls happen usually once when you first create a unit.
 	
 	Create an instance of the collider sending it the appropriate geometry
-	csOPCODECollider(vector<mesh_polygon>);
+	csOPCODECollider(const vector<mesh_polygon>&);
 	
 	Optionally set if you want to return on first contact or not. 
 	It defaults to not. 

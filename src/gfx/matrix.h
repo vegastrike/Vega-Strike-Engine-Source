@@ -105,7 +105,7 @@ const Matrix identity_matrix( 1, 0, 0,
 
 /** moves a vector struct to a matrix */
 
-inline void ScaleMatrix( Matrix &matrix, const Vector &scale )
+inline void ScaleMatrix( Matrix & __restrict__ matrix, const Vector & __restrict__ scale )
 {
     matrix.r[0] *= scale.i;
     matrix.r[1] *= scale.i;
@@ -133,47 +133,31 @@ inline void VectorAndPositionToMatrix( Matrix &matrix, const Vector &v1, const V
     matrix.r[8] = v3.k;
     matrix.p    = pos;
 }
-inline Matrix::Matrix( const Vector &v1, const Vector &v2, const Vector &v3, const QVector &pos )
+inline Matrix::Matrix( const Vector & __restrict__ v1, const Vector & __restrict__ v2, const Vector & __restrict__ v3, const QVector & __restrict__ pos )
 {
     VectorAndPositionToMatrix( *this, v1, v2, v3, pos );
 }
 
 /** zeros out a 4x4 matrix quickly
  */
-inline void Zero( Matrix &matrix )
+inline void Zero( Matrix & __restrict__ matrix )
 {
-    matrix.r[0] = 0;
-    matrix.r[1] = 0;
-    matrix.r[2] = 0;
-    matrix.r[3] = 0;
-
-    matrix.r[4] = 0;
-    matrix.r[5] = 0;
-    matrix.r[6] = 0;
-    matrix.r[7] = 0;
-
-    matrix.r[8] = 0;
+    for(unsigned int i = 0 ; i < 9; i++){
+	matrix.r[i] = 0;
+    }
     matrix.p.Set( 0, 0, 0 );
 }
 /** Computes a 4x4 identity matrix
  */
-inline void Identity( Matrix &matrix )
+inline void Identity( Matrix & __restrict__ matrix )
 {
-    matrix.r[0] = 1;
-    matrix.r[1] = 0;
-    matrix.r[2] = 0;
-    matrix.r[3] = 0;
-    matrix.r[4] = 1;
-    matrix.r[5] = 0;
-    matrix.r[6] = 0;
-    matrix.r[7] = 0;
-    matrix.r[8] = 1;
-    matrix.p.Set( 0, 0, 0 );
+    Zero(matrix);
+    matrix.r[0] = matrix.r[4] = matrix.r[8] = 1;
 }
 /** Computes a Translation matrix based on x,y,z translation
  */
 
-inline void RotateAxisAngle( Matrix &tmp, const Vector &axis, const float angle )
+inline void RotateAxisAngle( Matrix & __restrict__ tmp, const Vector & __restrict__ axis, const float angle )
 {
     float c = cosf( angle );
     float s = sinf( angle );
@@ -196,22 +180,17 @@ inline void RotateAxisAngle( Matrix &tmp, const Vector &axis, const float angle 
 
 inline void Translate( Matrix &matrix, const QVector &v )
 {
-    matrix.r[0] = 1;
-    matrix.r[1] = 0;
-    matrix.r[2] = 0;
-    matrix.r[3] = 0;
-    matrix.r[4] = 1;
-    matrix.r[5] = 0;
-    matrix.r[6] = 0;
-    matrix.r[7] = 0;
-    matrix.r[8] = 1;
+    for(unsigned int i = 0; i < 9 ; i++){
+	matrix.r[i] = 0;
+    }
+    matrix.r[0] = matrix.r[4] = matrix.r[8] = 1;
     matrix.p    = v;
 }
 
 /** Multiplies m1 and m2 and pops the result into dest;
  *  dest != m1, dest !=m2
  */
-inline void MultMatrix( Matrix &dest, const Matrix &m1, const Matrix &m2 )
+inline void MultMatrix( Matrix & __restrict__ dest, const Matrix & __restrict__ m1, const Matrix & __restrict__ m2 )
 {
     dest.r[0] = m1.r[0]*m2.r[0]+m1.r[3]*m2.r[1]+m1.r[6]*m2.r[2];
     dest.r[1] = m1.r[1]*m2.r[0]+m1.r[4]*m2.r[1]+m1.r[7]*m2.r[2];
@@ -247,7 +226,7 @@ inline void CopyMatrix( Matrix &dest, const Matrix &source )
 /**
  * moves a vector in the localspace to world space through matrix t
  */
-inline QVector Transform( const Matrix &t, const QVector &v )
+inline QVector Transform( const Matrix & __restrict__ t, const QVector & __restrict__ v )
 {
     return QVector( t.p.i+v.i*t.r[0]+v.j*t.r[3]+v.k*t.r[6],
                     t.p.j+v.i*t.r[1]+v.j*t.r[4]+v.k*t.r[7],

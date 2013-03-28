@@ -392,19 +392,6 @@ namespace ExpatHandlers
 *                                                                *
 ******************************************************************/
 
-static void Doctype( void *userData,
-                     const XML_Char *doctypeName,
-                     const XML_Char *sysid,
-                     const XML_Char *pubid,
-                     int has_internal_subset )
-{
-    XMLParserContext *internals = (XMLParserContext*) userData;
-    assert( internals );
-    assert( internals->document );
-    internals->document->docType = doctypeName;
-    internals->document->sysId   = sysid;
-    internals->document->pubId   = pubid;
-}
 
 /* atts is array of name/value pairs, terminated by 0;
  *   names and values are 0 terminated. */

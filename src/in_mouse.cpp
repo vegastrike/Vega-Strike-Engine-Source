@@ -27,6 +27,10 @@
 #include "config_xml.h"
 #include "in_joystick.h"
 #include "gldrv/winsys.h"
+#include "options.h"
+
+
+
 using std::deque;
 #define NUM_BUTTONS 15
 
@@ -85,12 +89,10 @@ void AddDelta( int dx, int dy )
 int warpallowage = 2;
 void DealWithWarp( int x, int y )
 {
-    static bool warp_pointer    = XMLSupport::parse_bool( vs_config->getVariable( "joystick", "warp_mouse", "false" ) );
-    static int  mouse_warp_zone = XMLSupport::parse_int( vs_config->getVariable( "joystick", "warp_mouse_zone", "100" ) );
-    if (warp_pointer) {
+    if (game_options.warp_mouse) {
         if ( joystick[MOUSE_JOYSTICK]->player < _Universe->numPlayers() ) {
-            if (x < mouse_warp_zone || y < mouse_warp_zone || x > g_game.x_resolution-mouse_warp_zone || y
-                > g_game.y_resolution-mouse_warp_zone) {
+            if (x < game_options.warp_mouse_zone || y < game_options.warp_mouse_zone || x > g_game.x_resolution-game_options.warp_mouse_zone || y
+                > g_game.y_resolution-game_options.warp_mouse_zone) {
 
                 int delx = -x+g_game.x_resolution/2;
                 int dely = -y+g_game.y_resolution/2;

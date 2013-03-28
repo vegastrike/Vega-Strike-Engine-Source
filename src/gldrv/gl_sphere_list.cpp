@@ -31,7 +31,7 @@ void GFXSphereVertexList::BeginDrawState( GFXBOOL lock )
 
     sphere->BeginDrawState( lock );
 }
-void GFXSphereVertexList::GetPolys( GFXVertex **vert, int *numPolys, int *numTris )
+void GFXSphereVertexList::GetPolys( GFXVertex ** __restrict__ vert, int * __restrict__ numPolys, int * __restrict__ numTris )
 {
     sphere->GetPolys( vert, numPolys, numTris );
     int numt  = *numTris;

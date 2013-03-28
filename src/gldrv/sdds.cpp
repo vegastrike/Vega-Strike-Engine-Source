@@ -21,7 +21,7 @@
 
 /*	Software decompression for DDS files, helper functions */
 
-void decode_color_block( unsigned char *dst, unsigned char *src, int w, int h, int rowbytes, TEXTUREFORMAT format )
+void decode_color_block( unsigned char * __restrict__ dst, unsigned char * __restrict__ src, int w, int h, int rowbytes, TEXTUREFORMAT format )
 {
     int i, x, y;
     unsigned int   indexes, idx;
@@ -48,23 +48,38 @@ void decode_color_block( unsigned char *dst, unsigned char *src, int w, int h, i
         }
     }
     src += 4;
-    for (y = 0; y < h; ++y) {
-        d = dst+(y*rowbytes);
-        indexes = src[y];
-        for (x = 0; x < w; ++x) {
-            idx       = indexes&0x03;
-            d[0]      = colors[idx][0];
-            d[1]      = colors[idx][1];
-            d[2]      = colors[idx][2];
-            if (format == DXT1 || format == DXT1RGBA)
+    if (format == DXT1 || format == DXT1RGBA){
+	for (y = 0; y < h; ++y) {
+    	    d = dst+(y*rowbytes);
+    	    indexes = src[y];
+    	    for (x = 0; x < w; ++x) {
+        	idx       = indexes&0x03;
+        	d[0]      = colors[idx][0];
+        	d[1]      = colors[idx][1];
+        	d[2]      = colors[idx][2];
                 d[3] = ( (c0 <= c1) && idx == 3 ) ? 0 : 255;
-            indexes >>= 2;
-            d += 4;
-        }
+        	indexes >>= 2;
+        	d += 4;
+    	    }
+	}
+    } else {
+        for (y = 0; y < h; ++y) {
+    	    d = dst+(y*rowbytes);
+    	    indexes = src[y];
+    	    for (x = 0; x < w; ++x) {
+        	idx       = indexes&0x03;
+        	d[0]      = colors[idx][0];
+        	d[1]      = colors[idx][1];
+        	d[2]      = colors[idx][2];
+        	indexes >>= 2;
+        	d += 4;
+    	    }
+    
+	}
     }
 }
 
-void decode_dxt3_alpha( unsigned char *dst, unsigned char *src, int w, int h, int rowbytes )
+void decode_dxt3_alpha( unsigned char * __restrict__ dst, unsigned char * __restrict__ src, int w, int h, int rowbytes )
 {
     int x, y;
     unsigned char *d;
@@ -81,7 +96,7 @@ void decode_dxt3_alpha( unsigned char *dst, unsigned char *src, int w, int h, in
     }
 }
 
-void decode_dxt5_alpha( unsigned char *dst, unsigned char *src, int w, int h, int bpp, int rowbytes )
+void decode_dxt5_alpha( unsigned char * __restrict__ dst, unsigned char * __restrict__ src, int w, int h, int bpp, int rowbytes )
 {
     int x, y, code;
     unsigned char     *d, a0 = src[0], a1 = src[1];
@@ -90,10 +105,8 @@ void decode_dxt5_alpha( unsigned char *dst, unsigned char *src, int w, int h, in
         d = dst+(y*rowbytes);
         for (x = 0; x < w; ++x) {
             code = ( (unsigned int) bits )&0x07;
-            if (code == 0)
-                d[0] = a0;
-            else if (code == 1)
-                d[0] = a1;
+            if (code < 2)
+                d[0] = src[code];
             else if (a0 > a1)
                 d[0] = ( (8-code)*a0+(code-1)*a1 )/7;
             else if (code >= 6)
@@ -108,7 +121,7 @@ void decode_dxt5_alpha( unsigned char *dst, unsigned char *src, int w, int h, in
     }
 }
 
-void ddsDecompress( unsigned char* &buffer, unsigned char* &data, TEXTUREFORMAT internformat, int height, int width )
+void ddsDecompress( unsigned char* & __restrict__ buffer, unsigned char* & __restrict__ data, TEXTUREFORMAT internformat, int height, int width )
 {
     unsigned char *pos_out = NULL, *pos_in = NULL;
     int bpp = 4;

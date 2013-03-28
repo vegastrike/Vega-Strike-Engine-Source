@@ -409,7 +409,7 @@ void addCredits( const Unit *my_unit, float credits )
 
 const string& getFlightgroupNameCR( const Unit *my_unit )
 {
-    static const string empty_string;
+    static const string empty_string("");
     if (!my_unit) return empty_string;
     Flightgroup *fg = my_unit->getFlightgroup();
     if (fg)
@@ -709,13 +709,7 @@ float getSignificantDistance( const Unit *un, const Unit *sig )
 bool isSun( const Unit *my_unit )
 {
     if (!my_unit) return false;
-    if ( my_unit->isJumppoint() )
-        return false;
-    bool res = false;
-    res = my_unit->isPlanet();
-    if (res)
-        res = ( (Planet*) my_unit )->hasLights();
-    return res;
+    return my_unit->isPlanet() && ((Planet*)my_unit)->hasLights();
 }
 
 bool isSignificant( const Unit *my_unit )
@@ -772,9 +766,7 @@ static bool ishere( const Unit *par, const Unit *look )
 {
     const Unit *un;
     for (un_kiter uniter = par->viewSubUnits(); (un = *uniter); ++uniter) {
-        if (un == look)
-            return true;
-        if ( un != par && ishere( un, look ) )
+        if ( un == look || (un != par && ishere( un, look )) )
             return true;
     }
     return false;
@@ -782,14 +774,12 @@ static bool ishere( const Unit *par, const Unit *look )
 
 Unit * owner( const Unit *un )
 {
-    Unit *found = NULL;
     Unit *tmp;
     for (UniverseUtil::PythonUnitIter uniter = UniverseUtil::getUnitList(); (tmp = *uniter); ++uniter)
         if ( tmp == un || ishere( tmp, un ) ) {
-            found = tmp;
-            break;
+            return(tmp);
         }
-    return found;
+    return (NULL);
 }
 
 void performDockingOperations( Unit *un, Unit *unitToDockWith, int actually_dock )

@@ -1,3 +1,8 @@
+#include <vector>
+
+#include <string>
+#include <algorithm>
+
 #include "bolt.h"
 #include "gfxlib.h"
 #include "gfx/mesh.h"
@@ -5,14 +10,11 @@
 #include "gfx/aux_texture.h"
 #include "gfx/animation.h"
 #include "gfx/decalqueue.h"
-#include <vector>
-
-#include <string>
-#include <algorithm>
 #include "unit.h"
 #include "audiolib.h"
 #include "config_xml.h"
 #include "gfx/camera.h"
+#include "options.h"
 
 using std::vector;
 using std::string;
@@ -37,10 +39,9 @@ bolt_draw::bolt_draw()
 {
     boltdecals = new DecalQueue;
     if (!boltmesh) {
-        static float beam_offset = XMLSupport::parse_float( vs_config->getVariable( "graphics", "bolt_offset", "-.2" ) );
         GFXVertex    vtx[12];
 #define V( ii, xx, yy, zz, ss,                                                                                                \
-           tt ) vtx[ii].x = xx; vtx[ii].y = yy; vtx[ii].z = zz+beam_offset+.875; vtx[ii].i = 0; vtx[ii].j = 0; vtx[ii].k = 1; \
+           tt ) vtx[ii].x = xx; vtx[ii].y = yy; vtx[ii].z = zz+game_options.bolt_offset+.875; vtx[ii].i = 0; vtx[ii].j = 0; vtx[ii].k = 1; \
     vtx[ii].s = ss; vtx[ii].t = tt;
         V( 0, 0, 0, -.875, 0, .5 );
         V( 1, 0, -1, 0, .875, 1 );
@@ -98,10 +99,8 @@ void Bolt::Draw()
     GFXDisable( LIGHTING );
     GFXDisable( CULLFACE );
 
-    static bool  blendbeams   = XMLSupport::parse_bool( vs_config->getVariable( "graphics", "BlendGuns", "true" ) );
-    static float stretchbolts = XMLSupport::parse_float( vs_config->getVariable( "graphics", "StretchBolts", "0" ) );     //set DEFAULT TO BE ZERO--it was wrecking all the mods.
 
-    GFXBlendMode( ONE, blendbeams ? ONE : ZERO );
+    GFXBlendMode( ONE, game_options.BlendGuns ? ONE : ZERO );
     GFXTextureCoordGenMode( 0, NO_GEN, NULL, NULL );
 
     GFXAlphaTest( GREATER, .1 );
@@ -109,11 +108,10 @@ void Bolt::Draw()
     vector< Bolt >::iterator j;
     vector< Animation* >::iterator     k = qq->animations.begin();
     float etime = GetElapsedTime();
-    static float bolt_constant = XMLSupport::parse_float( vs_config->getVariable( "graphics", "bolt_pixel_size", ".5" ) );
     float pixel_angle = 2
                         *sin( g_game.fov*M_PI/180.0
                              /(g_game.y_resolution
-                               > g_game.x_resolution ? g_game.y_resolution : g_game.x_resolution) )*bolt_constant;
+                               > g_game.x_resolution ? g_game.y_resolution : g_game.x_resolution) )*game_options.bolt_pixel_size;
     pixel_angle *= pixel_angle;
     Vector  p, q, r;
     _Universe->AccessCamera()->GetOrientation( p, q, r );
@@ -151,7 +149,7 @@ void Bolt::Draw()
         GFXTextureCoordGenMode( 0, NO_GEN, NULL, NULL );
         
         BLENDFUNC bsrc, bdst;
-        if (blendbeams == true)
+        if (game_options.BlendGuns == true)
             GFXBlendMode( bsrc=ONE, bdst=ONE );
         else
             GFXBlendMode( bsrc=ONE, bdst=ZERO );
@@ -177,8 +175,8 @@ void Bolt::Draw()
 
                                 BlendTrans( bolt.drawmat, bolt.cur_position, bolt.prev_position );
                                 Matrix drawmat( bolt.drawmat );
-                                if (stretchbolts > 0)
-                                    ScaleMatrix( drawmat, Vector( 1, 1, bolt.type->Speed*etime*stretchbolts/bolt.type->Length ) );
+                                if (game_options.StretchBolts > 0)
+                                    ScaleMatrix( drawmat, Vector( 1, 1, bolt.type->Speed*etime*game_options.StretchBolts/bolt.type->Length ) );
                                 GFXLoadMatrixModel( drawmat );
                                 GFXColor4f( wt->r, wt->g, wt->b, wt->a );
                                 qmesh->Draw();

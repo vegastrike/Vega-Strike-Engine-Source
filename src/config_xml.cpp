@@ -576,12 +576,6 @@ CommandMap initGlobalCommandMap()
     commandMap["NearestPlanetKey"]                 = FireKeyboard::NearestPlanetKey;
     commandMap["NearestJumpKey"]                   = FireKeyboard::NearestJumpKey;
 
-#ifdef CAR_SIM
-    commandMap["BlinkLeftKey"]                     = FireKeyboard::BlinkLeftKey;
-    commandMap["BlinkRightKey"]                    = FireKeyboard::BlinkRightKey;
-    commandMap["HeadlightKey"]                     = FireKeyboard::HeadlightKey;
-    commandMap["SirenKey"]                         = FireKeyboard::SirenKey;
-#endif
     commandMap["CommBreakForm"]                    = FireKeyboard::BreakFormation;
 
     commandMap["Comm1Key"]                         = FireKeyboard::PressComm1Key;

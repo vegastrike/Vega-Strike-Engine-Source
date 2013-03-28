@@ -11,11 +11,19 @@
 #endif
 #endif
 
+
+#ifdef _WIN32
 #ifdef HAVE_TR1_UNORDERED_MAP
+#if defined(_MSC_VER) && _MSC_VER >= 1600
+#include <unordered_map>  //MSVC doesn't use tr1 dirs
+#else
+#include <tr1/unordered_map>
+#endif
 #define vsUMap std::tr1::unordered_map
 #define vsHashComp std::tr1::hash_compare
 #define vsHash std::tr1::hash
 #else
+#include <hash_map>
 #define vsUMap stdext::hash_map
 #define vsHashComp stdext::hash_compare
 #define vsHash stdext::hash
@@ -26,16 +34,7 @@
 #define vsHashComp vsHash
 #endif
 
-#ifdef _WIN32
-#ifdef HAVE_TR1_UNORDERED_MAP
-#if defined(_MSC_VER) && _MSC_VER >= 1600
-#include <unordered_map>  //MSVC doesn't use tr1 dirs
-#else
-#include <tr1/unordered_map>
-#endif
-#else
-#include <hash_map>
-#endif
+
 #else //#ifdef _WIN32 { ... } else ...
 #if __GNUC__ == 2
 #include <map>
@@ -51,11 +50,35 @@ public:
     static const size_t min_buckets = 8;
 };
 }
+#ifdef HAVE_TR1_UNORDERED_MAP
+#define vsUMap std::tr1::unordered_map
+#define vsHashComp std::tr1::hash_compare
+#define vsHash std::tr1::hash
+#else
+#define vsUMap stdext::hash_map
+#define vsHashComp stdext::hash_compare
+#define vsHash stdext::hash
+#endif
+
+#ifdef HAVE_NO_HASH_COMPARE
+#undef vsHashComp
+#define vsHashComp vsHash
+#endif
 
 #include "hashtable.h"
 #else //if __GNUC__ == 2 { ... } else ...
 #ifdef HAVE_TR1_UNORDERED_MAP
 #include <tr1/unordered_map>
+
+#define vsUMap std::tr1::unordered_map
+#define vsHashComp std::tr1::hash_compare
+#define vsHash std::tr1::hash
+
+#ifdef HAVE_NO_HASH_COMPARE
+#undef vsHashComp
+#define vsHashComp vsHash
+#endif
+
 #include "hashtable.h"
 class Unit;
 namespace std
@@ -65,6 +88,15 @@ namespace tr1
 #else //if HAVE_TR1_UNORDERED_MAP { ... } else ...
 #include <ext/hash_map>
 #define stdext __gnu_cxx
+#define vsUMap stdext::hash_map
+#define vsHashComp stdext::hash_compare
+#define vsHash stdext::hash
+
+#ifdef HAVE_NO_HASH_COMPARE
+#undef vsHashComp
+#define vsHashComp vsHash
+#endif
+
 #include "hashtable.h"
 
 class Unit;
@@ -81,11 +113,12 @@ public:
         size_t _HASH_SALT_0  = 0x7EF92C3B;
         size_t _HASH_SALT_1  = 0x9B;
         size_t k = 0;
-        for (std::string::const_iterator start = key.begin(); start != key.end(); start++) {
-            k ^= (*start&_HASH_SALT_1);
+        
+        for (unsigned int i = 0; i < key.size(); ++i) {
+            k ^= (key[i]&_HASH_SALT_1);
             k ^= _HASH_SALT_0;
             k  = ( ( (k>>4)&0xF )|( k<<(_HASH_INTSIZE-4) ) );
-            k ^= *start;
+            k ^= key[i];
         }
         return k;
     }

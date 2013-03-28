@@ -84,10 +84,6 @@ public: UnitIterator() : pos( NULL ) {}
         {
             return pos->next->unit == NULL;
         }
-        bool notDone() const
-        {
-            return pos->next->unit != NULL;
-        }
 ///removes something after pos.  eg the first valid unit. or current()
         void remove();
         void moveBefore( UnitCollection &otherList );
@@ -163,10 +159,6 @@ public: ConstIterator() : pos( NULL ) {}
         {
             return current() == NULL;
         }
-        bool notDone() const
-        {
-            return current() != NULL;
-        }
         void advance()
         {
             pos = pos->next;
@@ -232,10 +224,6 @@ public: ConstFastIterator() : pos( NULL ) {}
         {
             return pos->next->unit == NULL;
         }
-        bool notDone() const
-        {
-            return pos->next->unit != NULL;
-        }
 private:
         ConstFastIterator&operator=( const ConstFastIterator& );
     };
@@ -293,10 +281,6 @@ public:
         bool isDone() const
         {
             return pos->next->unit == NULL;
-        }
-        bool notDone() const
-        {
-            return pos->next->unit != NULL;
         }
 private:
         FastIterator&operator=( const FastIterator& );
