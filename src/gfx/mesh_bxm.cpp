@@ -189,8 +189,8 @@ struct OrigMeshLoader
 
 #define READSTRING( inmemfile, word32index, stringlen, stringvar )                                 \
     do {     /* By Klauss - Much more efficient than the preceding code, and yet still portable */ \
-        char8bit *inmemstring = (char8bit*) (inmemfile+word32index);                               \
-        char8bit  oc = inmemstring[stringlen]; inmemstring[stringlen] = 0;                         \
+        uchar8bit *inmemstring = (uchar8bit*) (inmemfile+word32index);                               \
+        uchar8bit  oc = inmemstring[stringlen]; inmemstring[stringlen] = 0;                         \
         stringvar    = (const char*) inmemstring;                                                  \
         inmemstring[stringlen] = oc;                                                               \
         word32index += (stringlen+3)/4;                                                            \
@@ -268,19 +268,19 @@ vector< Mesh* >Mesh::LoadMeshes( VSFileSystem::VSFile &Inputfile,
 #endif
 
     vector< OrigMeshLoader >meshes;
-    int32bit word32index = 0;
+    uint32bit word32index = 0;
     union chunk32
     {
-        int32bit   i32val;
+        uint32bit   i32val;
         float32bit f32val;
-        char8bit   c8val[4];
+        uchar8bit   c8val[4];
     }
     *inmemfile;
 #ifdef STANDALONE
     printf( "Loading Mesh File: %s\n", Inputfile.GetFilename().c_str() );
-    fseek( Inputfile, 4+sizeof (int32bit), SEEK_SET );
-    fread( &intbuf, sizeof (int32bit), 1, Inputfile );              //Length of Inputfile
-    int32bit Inputlength = VSSwapHostIntToLittle( intbuf );
+    fseek( Inputfile, 4+sizeof (uint32bit), SEEK_SET );
+    fread( &intbuf, sizeof (uint32bit), 1, Inputfile );              //Length of Inputfile
+    uint32bit Inputlength = VSSwapHostIntToLittle( intbuf );
     inmemfile = (chunk32*) malloc( Inputlength+1 );
     if (!inmemfile) {
         fprintf( stderr, "Buffer allocation failed, Aborting" );
@@ -290,7 +290,7 @@ vector< Mesh* >Mesh::LoadMeshes( VSFileSystem::VSFile &Inputfile,
     fread( inmemfile, 1, Inputlength, Inputfile );
     fcloseInput( Inputfile );
 #else
-    int32bit Inputlength = Inputfile.Size();
+    uint32bit Inputlength = Inputfile.Size();
     inmemfile = (chunk32*) malloc( Inputlength );
     if (!inmemfile) {
         fprintf( stderr, "Buffer allocation failed, Aborting" );
@@ -301,30 +301,30 @@ vector< Mesh* >Mesh::LoadMeshes( VSFileSystem::VSFile &Inputfile,
 #endif
     //Extract superheader fields
     word32index += 3;
-    int32bit Superheaderlength  = VSSwapHostIntToLittle( inmemfile[word32index].i32val );
-    int32bit NUMFIELDSPERVERTEX = VSSwapHostIntToLittle( inmemfile[word32index+1].i32val );             //Number of fields per vertex:integer (8)
-    int32bit NUMFIELDSPERPOLYGONSTRUCTURE    = VSSwapHostIntToLittle( inmemfile[word32index+2].i32val );             //Number of fields per polygon structure: integer (1)
-    int32bit NUMFIELDSPERREFERENCEDVERTEX    = VSSwapHostIntToLittle( inmemfile[word32index+3].i32val );             //Number of fields per referenced vertex: integer (3)
-    int32bit NUMFIELDSPERREFERENCEDANIMATION = VSSwapHostIntToLittle( inmemfile[word32index+4].i32val );             //Number of fields per referenced animation: integer (1)
-    int32bit numrecords = VSSwapHostIntToLittle( inmemfile[word32index+5].i32val );             //Number of records: integer
-    int32bit NUMFIELDSPERANIMATIONDEF = VSSwapHostIntToLittle( inmemfile[word32index+6].i32val );             //Number of fields per animationdef: integer (1)
+    uint32bit Superheaderlength  = VSSwapHostIntToLittle( inmemfile[word32index].i32val );
+    uint32bit NUMFIELDSPERVERTEX = VSSwapHostIntToLittle( inmemfile[word32index+1].i32val );             //Number of fields per vertex:integer (8)
+    uint32bit NUMFIELDSPERPOLYGONSTRUCTURE    = VSSwapHostIntToLittle( inmemfile[word32index+2].i32val );             //Number of fields per polygon structure: integer (1)
+    uint32bit NUMFIELDSPERREFERENCEDVERTEX    = VSSwapHostIntToLittle( inmemfile[word32index+3].i32val );             //Number of fields per referenced vertex: integer (3)
+    uint32bit NUMFIELDSPERREFERENCEDANIMATION = VSSwapHostIntToLittle( inmemfile[word32index+4].i32val );             //Number of fields per referenced animation: integer (1)
+    uint32bit numrecords = VSSwapHostIntToLittle( inmemfile[word32index+5].i32val );             //Number of records: integer
+    uint32bit NUMFIELDSPERANIMATIONDEF = VSSwapHostIntToLittle( inmemfile[word32index+6].i32val );             //Number of fields per animationdef: integer (1)
     word32index = (Superheaderlength/4);               //Go to first record
     //For each record
-    for (int32bit recordindex = 0; recordindex < numrecords; recordindex++) {
-        int32bit recordbeginword    = word32index;
+    for (uint32bit recordindex = 0; recordindex < numrecords; recordindex++) {
+        uint32bit recordbeginword    = word32index;
         //Extract Record Header
-        int32bit recordheaderlength = VSSwapHostIntToLittle( inmemfile[word32index].i32val );                 //length of record header in bytes
+        uint32bit recordheaderlength = VSSwapHostIntToLittle( inmemfile[word32index].i32val );                 //length of record header in bytes
         word32index += 1;
-        int32bit recordlength = VSSwapHostIntToLittle( inmemfile[word32index].i32val );                 //length of record in bytes
+        uint32bit recordlength = VSSwapHostIntToLittle( inmemfile[word32index].i32val );                 //length of record in bytes
         word32index += 1;
-        int32bit nummeshes    = VSSwapHostIntToLittle( inmemfile[word32index].i32val );                 //Number of meshes in the current record
+        uint32bit nummeshes    = VSSwapHostIntToLittle( inmemfile[word32index].i32val );                 //Number of meshes in the current record
         word32index  = recordbeginword+(recordheaderlength/4);
         meshes.push_back( OrigMeshLoader() );
         meshes.back().num     = nummeshes;
         meshes.back().m = new Mesh[nummeshes];
         meshes.back().sizes.insert( meshes.back().sizes.begin(), nummeshes, 0 );
         //For each mesh
-        for (int32bit meshindex = 0; meshindex < nummeshes; meshindex++) {
+        for (uint32bit meshindex = 0; meshindex < nummeshes; meshindex++) {
             Mesh   *mesh = &meshes.back().m[meshindex];
             mesh->draw_queue = new vector< MeshDrawContext >[NUM_ZBUF_SEQ+1];
             MeshXML xml;
@@ -339,17 +339,17 @@ vector< Mesh* >Mesh::LoadMeshes( VSFileSystem::VSFile &Inputfile,
                 Outputfile = bxmfopen( filename.c_str(), "w+" );
             }
             //Extract Mesh Header
-            int32bit   meshbeginword    = word32index;
-            int32bit   meshheaderlength = VSSwapHostIntToLittle( inmemfile[word32index].i32val );                   //length of record header in bytes
+            uint32bit   meshbeginword    = word32index;
+            uint32bit   meshheaderlength = VSSwapHostIntToLittle( inmemfile[word32index].i32val );                   //length of record header in bytes
             word32index += 1;
-            int32bit   meshlength    = VSSwapHostIntToLittle( inmemfile[word32index].i32val );                   //length of record in bytes
+            uint32bit   meshlength    = VSSwapHostIntToLittle( inmemfile[word32index].i32val );                   //length of record in bytes
             float32bit scale = VSSwapHostFloatToLittle( inmemfile[meshbeginword+2].f32val );                     //scale
-            int32bit   reverse       = VSSwapHostIntToLittle( inmemfile[meshbeginword+3].i32val );                   //reverse flag if
-            int32bit   forcetexture  = VSSwapHostIntToLittle( inmemfile[meshbeginword+4].i32val );                   //force texture flag
-            int32bit   sharevert     = VSSwapHostIntToLittle( inmemfile[meshbeginword+5].i32val );                   //share vertex flag
+            uint32bit   reverse       = VSSwapHostIntToLittle( inmemfile[meshbeginword+3].i32val );                   //reverse flag if
+            uint32bit   forcetexture  = VSSwapHostIntToLittle( inmemfile[meshbeginword+4].i32val );                   //force texture flag
+            uint32bit   sharevert     = VSSwapHostIntToLittle( inmemfile[meshbeginword+5].i32val );                   //share vertex flag
             float32bit polygonoffset = VSSwapHostFloatToLittle( inmemfile[meshbeginword+6].f32val );                     //polygonoffset
-            int32bit   bsrc       = VSSwapHostIntToLittle( inmemfile[meshbeginword+7].i32val );                   //Blendmode source
-            int32bit   bdst       = VSSwapHostIntToLittle( inmemfile[meshbeginword+8].i32val );                   //Blendmode destination
+            uint32bit   bsrc       = VSSwapHostIntToLittle( inmemfile[meshbeginword+7].i32val );                   //Blendmode source
+            uint32bit   bdst       = VSSwapHostIntToLittle( inmemfile[meshbeginword+8].i32val );                   //Blendmode destination
             float32bit power      = VSSwapHostFloatToLittle( inmemfile[meshbeginword+9].f32val );                     //Specular: power
             float32bit ar         = VSSwapHostFloatToLittle( inmemfile[meshbeginword+10].f32val );                     //Ambient: red
             float32bit ag         = VSSwapHostFloatToLittle( inmemfile[meshbeginword+11].f32val );                     //Ambient: green
@@ -367,18 +367,18 @@ vector< Mesh* >Mesh::LoadMeshes( VSFileSystem::VSFile &Inputfile,
             float32bit sg         = VSSwapHostFloatToLittle( inmemfile[meshbeginword+23].f32val );                     //Specular: green
             float32bit sb         = VSSwapHostFloatToLittle( inmemfile[meshbeginword+24].f32val );                     //Specular: blue
             float32bit sa         = VSSwapHostFloatToLittle( inmemfile[meshbeginword+25].f32val );                     //Specular: Alpha
-            int32bit   cullface   = VSSwapHostIntToLittle( inmemfile[meshbeginword+26].i32val );                   //CullFace
-            int32bit   lighting   = VSSwapHostIntToLittle( inmemfile[meshbeginword+27].i32val );                   //lighting
-            int32bit   reflect    = VSSwapHostIntToLittle( inmemfile[meshbeginword+28].i32val );                   //reflect
-            int32bit   usenormals = VSSwapHostIntToLittle( inmemfile[meshbeginword+29].i32val );                   //usenormals
+            uint32bit   cullface   = VSSwapHostIntToLittle( inmemfile[meshbeginword+26].i32val );                   //CullFace
+            uint32bit   lighting   = VSSwapHostIntToLittle( inmemfile[meshbeginword+27].i32val );                   //lighting
+            uint32bit   reflect    = VSSwapHostIntToLittle( inmemfile[meshbeginword+28].i32val );                   //reflect
+            uint32bit   usenormals = VSSwapHostIntToLittle( inmemfile[meshbeginword+29].i32val );                   //usenormals
             float32bit alphatest  = 0;
             if (meshheaderlength > 30*4)
                 alphatest = VSSwapHostFloatToLittle( inmemfile[meshbeginword+30].f32val );                          //Alpha Testing Values
             //End Header
             //Go to Arbitrary Length Attributes section
             word32index  = meshbeginword+(meshheaderlength/4);
-            int32bit VSAbeginword = word32index;
-            int32bit LengthOfArbitraryLengthAttributes = VSSwapHostIntToLittle( inmemfile[word32index].i32val );                     //Length of Arbitrary length attributes section in bytes
+            uint32bit VSAbeginword = word32index;
+            uint32bit LengthOfArbitraryLengthAttributes = VSSwapHostIntToLittle( inmemfile[word32index].i32val );                     //Length of Arbitrary length attributes section in bytes
             word32index += 1;
             bxmfprintf(
                 Outputfile,
@@ -405,7 +405,7 @@ vector< Mesh* >Mesh::LoadMeshes( VSFileSystem::VSFile &Inputfile,
             mesh->SetBlendMode( (BLENDFUNC) bsrc, (BLENDFUNC) bdst );
 
             string   detailtexturename    = "";
-            int32bit detailtexturenamelen = VSSwapHostIntToLittle( inmemfile[word32index].i32val ); //detailtexture name length
+            uint32bit detailtexturenamelen = VSSwapHostIntToLittle( inmemfile[word32index].i32val ); //detailtexture name length
             word32index += 1;
             READSTRING( inmemfile, word32index, detailtexturenamelen, detailtexturename );
             if (detailtexturename.size() != 0) {
@@ -416,9 +416,9 @@ vector< Mesh* >Mesh::LoadMeshes( VSFileSystem::VSFile &Inputfile,
                 mesh->detailTexture = 0;
             }
             vector< Mesh_vec3f >Detailplanes;                     //store detail planes until finish printing mesh attributes
-            int32bit numdetailplanes = VSSwapHostIntToLittle( inmemfile[word32index].i32val ); //number of detailplanes
+            uint32bit numdetailplanes = VSSwapHostIntToLittle( inmemfile[word32index].i32val ); //number of detailplanes
             word32index += 1;
-            for (int32bit detailplane = 0; detailplane < numdetailplanes; detailplane++) {
+            for (uint32bit detailplane = 0; detailplane < numdetailplanes; detailplane++) {
                 float32bit x = VSSwapHostFloatToLittle( inmemfile[word32index].f32val ); //x-coord
                 float32bit y = VSSwapHostFloatToLittle( inmemfile[word32index+1].f32val ); //y-coord
                 float32bit z = VSSwapHostFloatToLittle( inmemfile[word32index+2].f32val ); //z-coord
@@ -430,17 +430,17 @@ vector< Mesh* >Mesh::LoadMeshes( VSFileSystem::VSFile &Inputfile,
                 Detailplanes.push_back( temp );
             }                     //End detail planes
                                   //Textures
-            int32bit numtextures = VSSwapHostIntToLittle( inmemfile[word32index].i32val );                     //number of textures
+            uint32bit numtextures = VSSwapHostIntToLittle( inmemfile[word32index].i32val );                     //number of textures
             word32index += 1;
-            for (int32bit tex = 0; tex < numtextures; tex++) {
-                int32bit textype    = VSSwapHostIntToLittle( inmemfile[word32index].i32val );                         //texture type
-                int32bit texindex   = VSSwapHostIntToLittle( inmemfile[word32index+1].i32val );                         //texture index
-                int32bit texnamelen = VSSwapHostIntToLittle( inmemfile[word32index+2].i32val );                         //texture name length
+            for (uint32bit tex = 0; tex < numtextures; tex++) {
+                uint32bit textype    = VSSwapHostIntToLittle( inmemfile[word32index].i32val );                         //texture type
+                uint32bit texindex   = VSSwapHostIntToLittle( inmemfile[word32index+1].i32val );                         //texture index
+                uint32bit texnamelen = VSSwapHostIntToLittle( inmemfile[word32index+2].i32val );                         //texture name length
                 word32index += 3;
                 string   texname    = "";
-                /*int32bit namebound=(texnamelen+3)/4;
+                /*uint32bit namebound=(texnamelen+3)/4;
                  *  for(stringindex=0;stringindex<namebound;stringindex++){
-                 *  for(int32bit bytenum=0;bytenum<4;bytenum++){ // Extract chars
+                 *  for(uint32bit bytenum=0;bytenum<4;bytenum++){ // Extract chars
                  *       if(inmemfile[word32index].c8val[bytenum]){ //If not padding
                  *     texname+=inmemfile[word32index].c8val[bytenum]; //Append char to end of string
                  *       }
@@ -548,7 +548,7 @@ vector< Mesh* >Mesh::LoadMeshes( VSFileSystem::VSFile &Inputfile,
 #ifdef STANDALONE
             mesh->myMatNum     = xml.material;
 #endif
-            for (int32bit detplane = 0; (unsigned int) detplane < Detailplanes.size(); detplane++) {
+            for (uint32bit detplane = 0; (unsigned int) detplane < Detailplanes.size(); detplane++) {
                 bxmfprintf( Outputfile, "<DetailPlane x=\"%f\" y=\"%f\" z=\"%f\" />\n", Detailplanes[detplane].x,
                             Detailplanes[detplane].y, Detailplanes[detplane].z );
                 mesh->detailPlanes.push_back( Vector( Detailplanes[detplane].x,
@@ -556,13 +556,13 @@ vector< Mesh* >Mesh::LoadMeshes( VSFileSystem::VSFile &Inputfile,
                                                       Detailplanes[detplane].z ) );
             }
             //Logos
-            int32bit numlogos = VSSwapHostIntToLittle( inmemfile[word32index++].i32val );                     //number of logos
-            for (int32bit logo = 0; logo < numlogos; logo++) {
+            uint32bit numlogos = VSSwapHostIntToLittle( inmemfile[word32index++].i32val );                     //number of logos
+            for (uint32bit logo = 0; logo < numlogos; logo++) {
                 float32bit size     = VSSwapHostFloatToLittle( inmemfile[word32index].f32val );                         //size
                 float32bit offset   = VSSwapHostFloatToLittle( inmemfile[word32index+1].f32val );                         //offset
                 float32bit rotation = VSSwapHostFloatToLittle( inmemfile[word32index+2].f32val );                         //rotation
-                int32bit   type     = VSSwapHostIntToLittle( inmemfile[word32index+3].i32val );                       //type
-                int32bit   numrefs  = VSSwapHostIntToLittle( inmemfile[word32index+4].i32val );                       //number of reference points
+                uint32bit   type     = VSSwapHostIntToLittle( inmemfile[word32index+3].i32val );                       //type
+                uint32bit   numrefs  = VSSwapHostIntToLittle( inmemfile[word32index+4].i32val );                       //number of reference points
                 bxmfprintf( Outputfile,
                             "<Logo type=\"%d\" rotate=\"%f\" size=\"%f\" offset=\"%f\">\n",
                             type,
@@ -581,8 +581,8 @@ vector< Mesh* >Mesh::LoadMeshes( VSFileSystem::VSFile &Inputfile,
                 xml.logos.back().offset = offset;
 
                 word32index += 5;
-                for (int32bit ref = 0; ref < numrefs; ref++) {
-                    int32bit   refnum = VSSwapHostIntToLittle( inmemfile[word32index].i32val );                           //Logo ref
+                for (uint32bit ref = 0; ref < numrefs; ref++) {
+                    uint32bit   refnum = VSSwapHostIntToLittle( inmemfile[word32index].i32val );                           //Logo ref
                     float32bit weight = VSSwapHostFloatToLittle( inmemfile[word32index+1].f32val );                             //reference weight
                     bxmfprintf( Outputfile, "\t<Ref point=\"%d\" weight=\"%f\"/>\n", refnum, weight );
                     xml.logos.back().refpnt.push_back( refnum );
@@ -593,26 +593,26 @@ vector< Mesh* >Mesh::LoadMeshes( VSFileSystem::VSFile &Inputfile,
             }
             //End logos
             //LODs
-            int32bit numLODs = VSSwapHostIntToLittle( inmemfile[word32index].i32val );                     //number of LODs
+            uint32bit numLODs = VSSwapHostIntToLittle( inmemfile[word32index].i32val );                     //number of LODs
             word32index += 1;
-            for (int32bit LOD = 0; LOD < numLODs; LOD++) {
+            for (uint32bit LOD = 0; LOD < numLODs; LOD++) {
                 float32bit    size  = VSSwapHostFloatToLittle( inmemfile[word32index].f32val );                      //Size
-                int32bit      index = VSSwapHostIntToLittle( inmemfile[word32index+1].i32val );                    //Mesh index
+                uint32bit      index = VSSwapHostIntToLittle( inmemfile[word32index+1].i32val );                    //Mesh index
                 bxmfprintf( Outputfile, "<LOD size=\"%f\" meshfile=\"%d_%d.xmesh\"/>\n", size, recordindex, index );
                 meshes.back().sizes[LOD] = size;
                 word32index += 2;
             }
             //End LODs
             //AnimationDefinitions
-            int32bit numanimdefs = VSSwapHostIntToLittle( inmemfile[word32index].i32val );                     //number of animation definitions
+            uint32bit numanimdefs = VSSwapHostIntToLittle( inmemfile[word32index].i32val );                     //number of animation definitions
             word32index += 1;
 #ifndef STANDALONE
             if (meshindex == 0)
-                for (int32bit framecount = numLODs+1; framecount < nummeshes; framecount++)
+                for (uint32bit framecount = numLODs+1; framecount < nummeshes; framecount++)
                     bxmfprintf( Outputfile, "<Frame FrameMeshName=\"%d_%d.xmesh\"/>\n", recordindex, framecount );
 #endif
-            for (int32bit anim = 0; anim < numanimdefs; anim++) {
-                int32bit animnamelen = VSSwapHostIntToLittle( inmemfile[word32index].i32val );                         //length of name
+            for (uint32bit anim = 0; anim < numanimdefs; anim++) {
+                uint32bit animnamelen = VSSwapHostIntToLittle( inmemfile[word32index].i32val );                         //length of name
                 word32index += 1;
                 string animname;
                 READSTRING( inmemfile, word32index, animnamelen, animname );
@@ -622,10 +622,10 @@ vector< Mesh* >Mesh::LoadMeshes( VSFileSystem::VSFile &Inputfile,
                 vector< int > *framerefs    = new vector< int >;
                 mesh->framespersecond = FPS;
                 word32index += NUMFIELDSPERANIMATIONDEF;
-                int32bit       numframerefs = VSSwapHostIntToLittle( inmemfile[word32index].i32val );                   //number of animation frame references
+                uint32bit       numframerefs = VSSwapHostIntToLittle( inmemfile[word32index].i32val );                   //number of animation frame references
                 word32index += 1;
-                for (int32bit fref = 0; fref < numframerefs; fref++) {
-                    int32bit ref = VSSwapHostIntToLittle( inmemfile[word32index].i32val );                             //number of animation frame references
+                for (uint32bit fref = 0; fref < numframerefs; fref++) {
+                    uint32bit ref = VSSwapHostIntToLittle( inmemfile[word32index].i32val );                             //number of animation frame references
                     word32index += NUMFIELDSPERREFERENCEDANIMATION;
                     bxmfprintf( Outputfile, "<AnimationFrameIndex AnimationMeshIndex=\"%d\"/>\n", ref-1-numLODs );
                     framerefs->push_back( ref );
@@ -639,11 +639,11 @@ vector< Mesh* >Mesh::LoadMeshes( VSFileSystem::VSFile &Inputfile,
             word32index = VSAbeginword+(LengthOfArbitraryLengthAttributes/4);
             //Vertices
             bxmfprintf( Outputfile, "<Points>\n" );
-            int32bit numvertices = VSSwapHostIntToLittle( inmemfile[word32index].i32val );                     //number of vertices
+            uint32bit numvertices = VSSwapHostIntToLittle( inmemfile[word32index].i32val );                     //number of vertices
             word32index += 1;
             xml.vertices.reserve( xml.vertices.size()+numvertices );
             xml.vertexcount.reserve( xml.vertexcount.size()+numvertices );
-            for (int32bit vert = 0; vert < numvertices; vert++) {
+            for (uint32bit vert = 0; vert < numvertices; vert++) {
                 float32bit x = VSSwapHostFloatToLittle( inmemfile[word32index].f32val );                         //x
                 float32bit y = VSSwapHostFloatToLittle( inmemfile[word32index+1].f32val );                         //y
                 float32bit z = VSSwapHostFloatToLittle( inmemfile[word32index+2].f32val );                         //z
@@ -694,17 +694,17 @@ vector< Mesh* >Mesh::LoadMeshes( VSFileSystem::VSFile &Inputfile,
             glNewList( mesh->vlist, GL_COMPILE );
 #endif
             bxmfprintf( Outputfile, "<Polygons>\n" );
-            int32bit numlines = VSSwapHostIntToLittle( inmemfile[word32index].i32val );                     //number of vertices
+            uint32bit numlines = VSSwapHostIntToLittle( inmemfile[word32index].i32val );                     //number of vertices
             word32index += 1;
             BEGINSTATE( GL_LINES, numlines );
-            for (int32bit rvert = 0; rvert < numlines; rvert++) {
-                int32bit   flatshade = VSSwapHostIntToLittle( inmemfile[word32index].i32val );                       //flatshade
+            for (uint32bit rvert = 0; rvert < numlines; rvert++) {
+                uint32bit   flatshade = VSSwapHostIntToLittle( inmemfile[word32index].i32val );                       //flatshade
                 word32index += NUMFIELDSPERPOLYGONSTRUCTURE;
-                int32bit   ind1 = VSSwapHostIntToLittle( inmemfile[word32index].i32val );                       //index 1
+                uint32bit   ind1 = VSSwapHostIntToLittle( inmemfile[word32index].i32val );                       //index 1
                 float32bit s1   = VSSwapHostFloatToLittle( inmemfile[word32index+1].f32val );                         //s
                 float32bit t1   = VSSwapHostFloatToLittle( inmemfile[word32index+2].f32val );                         //t
                 word32index += NUMFIELDSPERREFERENCEDVERTEX;
-                int32bit   ind2 = VSSwapHostIntToLittle( inmemfile[word32index].i32val );                       //index 2
+                uint32bit   ind2 = VSSwapHostIntToLittle( inmemfile[word32index].i32val );                       //index 2
                 float32bit s2   = VSSwapHostFloatToLittle( inmemfile[word32index+1].f32val );                         //s
                 float32bit t2   = VSSwapHostFloatToLittle( inmemfile[word32index+2].f32val );                         //t
                 word32index += NUMFIELDSPERREFERENCEDVERTEX;
@@ -725,21 +725,21 @@ vector< Mesh* >Mesh::LoadMeshes( VSFileSystem::VSFile &Inputfile,
             ENDSTATE( GL_LINES );
             //End Lines
             //Triangles
-            int32bit numtris = VSSwapHostIntToLittle( inmemfile[word32index].i32val );                     //number of vertices
+            uint32bit numtris = VSSwapHostIntToLittle( inmemfile[word32index].i32val );                     //number of vertices
             word32index += 1;
             BEGINSTATE( GL_TRIANGLES, numtris );
-            for (int32bit rtvert = 0; rtvert < numtris; rtvert++) {
-                int32bit   flatshade = VSSwapHostIntToLittle( inmemfile[word32index].i32val );                       //flatshade
+            for (uint32bit rtvert = 0; rtvert < numtris; rtvert++) {
+                uint32bit   flatshade = VSSwapHostIntToLittle( inmemfile[word32index].i32val );                       //flatshade
                 word32index += NUMFIELDSPERPOLYGONSTRUCTURE;
-                int32bit   ind1 = VSSwapHostIntToLittle( inmemfile[word32index].i32val );                       //index 1
+                uint32bit   ind1 = VSSwapHostIntToLittle( inmemfile[word32index].i32val );                       //index 1
                 float32bit s1   = VSSwapHostFloatToLittle( inmemfile[word32index+1].f32val );                         //s
                 float32bit t1   = VSSwapHostFloatToLittle( inmemfile[word32index+2].f32val );                         //t
                 word32index += NUMFIELDSPERREFERENCEDVERTEX;
-                int32bit   ind2 = VSSwapHostIntToLittle( inmemfile[word32index].i32val );                       //index 2
+                uint32bit   ind2 = VSSwapHostIntToLittle( inmemfile[word32index].i32val );                       //index 2
                 float32bit s2   = VSSwapHostFloatToLittle( inmemfile[word32index+1].f32val );                         //s
                 float32bit t2   = VSSwapHostFloatToLittle( inmemfile[word32index+2].f32val );                         //t
                 word32index += NUMFIELDSPERREFERENCEDVERTEX;
-                int32bit   ind3 = VSSwapHostIntToLittle( inmemfile[word32index].i32val );                       //index 3
+                uint32bit   ind3 = VSSwapHostIntToLittle( inmemfile[word32index].i32val );                       //index 3
                 float32bit s3   = VSSwapHostFloatToLittle( inmemfile[word32index+1].f32val );                         //s
                 float32bit t3   = VSSwapHostFloatToLittle( inmemfile[word32index+2].f32val );                         //t
                 word32index += NUMFIELDSPERREFERENCEDVERTEX;
@@ -766,25 +766,25 @@ vector< Mesh* >Mesh::LoadMeshes( VSFileSystem::VSFile &Inputfile,
             ENDSTATE( GL_TRIANGLES );
             //End Triangles
             //Quads
-            int32bit numquads = VSSwapHostIntToLittle( inmemfile[word32index].i32val );                     //number of vertices
+            uint32bit numquads = VSSwapHostIntToLittle( inmemfile[word32index].i32val );                     //number of vertices
             word32index += 1;
             BEGINSTATE( GL_QUADS, numquads );
-            for (int32bit rqvert = 0; rqvert < numquads; rqvert++) {
-                int32bit   flatshade = VSSwapHostIntToLittle( inmemfile[word32index].i32val );                       //flatshade
+            for (uint32bit rqvert = 0; rqvert < numquads; rqvert++) {
+                uint32bit   flatshade = VSSwapHostIntToLittle( inmemfile[word32index].i32val );                       //flatshade
                 word32index += NUMFIELDSPERPOLYGONSTRUCTURE;
-                int32bit   ind1 = VSSwapHostIntToLittle( inmemfile[word32index].i32val );                       //index 1
+                uint32bit   ind1 = VSSwapHostIntToLittle( inmemfile[word32index].i32val );                       //index 1
                 float32bit s1   = VSSwapHostFloatToLittle( inmemfile[word32index+1].f32val );                         //s
                 float32bit t1   = VSSwapHostFloatToLittle( inmemfile[word32index+2].f32val );                         //t
                 word32index += NUMFIELDSPERREFERENCEDVERTEX;
-                int32bit   ind2 = VSSwapHostIntToLittle( inmemfile[word32index].i32val );                       //index 2
+                uint32bit   ind2 = VSSwapHostIntToLittle( inmemfile[word32index].i32val );                       //index 2
                 float32bit s2   = VSSwapHostFloatToLittle( inmemfile[word32index+1].f32val );                         //s
                 float32bit t2   = VSSwapHostFloatToLittle( inmemfile[word32index+2].f32val );                         //t
                 word32index += NUMFIELDSPERREFERENCEDVERTEX;
-                int32bit   ind3 = VSSwapHostIntToLittle( inmemfile[word32index].i32val );                       //index 3
+                uint32bit   ind3 = VSSwapHostIntToLittle( inmemfile[word32index].i32val );                       //index 3
                 float32bit s3   = VSSwapHostFloatToLittle( inmemfile[word32index+1].f32val );                         //s
                 float32bit t3   = VSSwapHostFloatToLittle( inmemfile[word32index+2].f32val );                         //t
                 word32index += NUMFIELDSPERREFERENCEDVERTEX;
-                int32bit   ind4 = VSSwapHostIntToLittle( inmemfile[word32index].i32val );                       //index 3
+                uint32bit   ind4 = VSSwapHostIntToLittle( inmemfile[word32index].i32val );                       //index 3
                 float32bit s4   = VSSwapHostFloatToLittle( inmemfile[word32index+1].f32val );                         //s
                 float32bit t4   = VSSwapHostFloatToLittle( inmemfile[word32index+2].f32val );                         //t
                 word32index += NUMFIELDSPERREFERENCEDVERTEX;
@@ -815,17 +815,17 @@ vector< Mesh* >Mesh::LoadMeshes( VSFileSystem::VSFile &Inputfile,
             ENDSTATE( GL_QUADS );
             //End Quads
             //Linestrips
-            int32bit numlinestrips = VSSwapHostIntToLittle( inmemfile[word32index].i32val );                     //number of vertices
+            uint32bit numlinestrips = VSSwapHostIntToLittle( inmemfile[word32index].i32val );                     //number of vertices
             word32index += 1;
-            for (int32bit lstrip = 0; lstrip < numlinestrips; lstrip++) {
-                int32bit numstripelements = VSSwapHostIntToLittle( inmemfile[word32index].i32val );                         //number of vertices
-                int32bit flatshade = VSSwapHostIntToLittle( inmemfile[word32index+1].i32val );                         //flatshade
+            for (uint32bit lstrip = 0; lstrip < numlinestrips; lstrip++) {
+                uint32bit numstripelements = VSSwapHostIntToLittle( inmemfile[word32index].i32val );                         //number of vertices
+                uint32bit flatshade = VSSwapHostIntToLittle( inmemfile[word32index+1].i32val );                         //flatshade
                 bxmfprintf( Outputfile, "\t<Linestrip flatshade=\"%d\">\n", flatshade );
 
                 BEGINSTATE( GL_LINE_STRIP, numstripelements );
                 word32index += 1+NUMFIELDSPERPOLYGONSTRUCTURE;
-                for (int32bit elem = 0; elem < numstripelements; elem++) {
-                    int32bit   ind1 = VSSwapHostIntToLittle( inmemfile[word32index].i32val );                           //index 1
+                for (uint32bit elem = 0; elem < numstripelements; elem++) {
+                    uint32bit   ind1 = VSSwapHostIntToLittle( inmemfile[word32index].i32val );                           //index 1
                     float32bit s1   = VSSwapHostFloatToLittle( inmemfile[word32index+1].f32val );                             //s
                     float32bit t1   = VSSwapHostFloatToLittle( inmemfile[word32index+2].f32val );                             //t
                     word32index += NUMFIELDSPERREFERENCEDVERTEX;
@@ -837,16 +837,16 @@ vector< Mesh* >Mesh::LoadMeshes( VSFileSystem::VSFile &Inputfile,
             }
             //End Linestrips
             //Tristrips
-            int32bit numtristrips = VSSwapHostIntToLittle( inmemfile[word32index].i32val );                     //number of vertices
+            uint32bit numtristrips = VSSwapHostIntToLittle( inmemfile[word32index].i32val );                     //number of vertices
             word32index += 1;
-            for (int32bit tstrip = 0; tstrip < numtristrips; tstrip++) {
-                int32bit numstripelements = VSSwapHostIntToLittle( inmemfile[word32index].i32val );                         //number of vertices
-                int32bit flatshade = VSSwapHostIntToLittle( inmemfile[word32index+1].i32val );                         //flatshade
+            for (uint32bit tstrip = 0; tstrip < numtristrips; tstrip++) {
+                uint32bit numstripelements = VSSwapHostIntToLittle( inmemfile[word32index].i32val );                         //number of vertices
+                uint32bit flatshade = VSSwapHostIntToLittle( inmemfile[word32index+1].i32val );                         //flatshade
                 bxmfprintf( Outputfile, "\t<Tristrip flatshade=\"%d\">\n", flatshade );
                 BEGINSTATE( GL_TRIANGLE_STRIP, numstripelements );
                 word32index += 1+NUMFIELDSPERPOLYGONSTRUCTURE;
-                for (int32bit elem = 0; elem < numstripelements; elem++) {
-                    int32bit   ind1 = VSSwapHostIntToLittle( inmemfile[word32index].i32val );                           //index 1
+                for (uint32bit elem = 0; elem < numstripelements; elem++) {
+                    uint32bit   ind1 = VSSwapHostIntToLittle( inmemfile[word32index].i32val );                           //index 1
                     float32bit s1   = VSSwapHostFloatToLittle( inmemfile[word32index+1].f32val );                             //s
                     float32bit t1   = VSSwapHostFloatToLittle( inmemfile[word32index+2].f32val );                             //t
                     word32index += NUMFIELDSPERREFERENCEDVERTEX;
@@ -858,16 +858,16 @@ vector< Mesh* >Mesh::LoadMeshes( VSFileSystem::VSFile &Inputfile,
             }
             //End Tristrips
             //Trifans
-            int32bit numtrifans = VSSwapHostIntToLittle( inmemfile[word32index].i32val );                     //number of vertices
+            uint32bit numtrifans = VSSwapHostIntToLittle( inmemfile[word32index].i32val );                     //number of vertices
             word32index += 1;
-            for (int32bit tfan = 0; tfan < numtrifans; tfan++) {
-                int32bit numstripelements = VSSwapHostIntToLittle( inmemfile[word32index].i32val );                         //number of vertices
-                int32bit flatshade = VSSwapHostIntToLittle( inmemfile[word32index+1].i32val );                         //flatshade
+            for (uint32bit tfan = 0; tfan < numtrifans; tfan++) {
+                uint32bit numstripelements = VSSwapHostIntToLittle( inmemfile[word32index].i32val );                         //number of vertices
+                uint32bit flatshade = VSSwapHostIntToLittle( inmemfile[word32index+1].i32val );                         //flatshade
                 bxmfprintf( Outputfile, "\t<Trifan flatshade=\"%d\">\n", flatshade );
                 BEGINSTATE( GL_TRIANGLE_FAN, numstripelements );
                 word32index += 1+NUMFIELDSPERPOLYGONSTRUCTURE;
-                for (int32bit elem = 0; elem < numstripelements; elem++) {
-                    int32bit   ind1 = VSSwapHostIntToLittle( inmemfile[word32index].i32val );                           //index 1
+                for (uint32bit elem = 0; elem < numstripelements; elem++) {
+                    uint32bit   ind1 = VSSwapHostIntToLittle( inmemfile[word32index].i32val );                           //index 1
                     float32bit s1   = VSSwapHostFloatToLittle( inmemfile[word32index+1].f32val );                             //s
                     float32bit t1   = VSSwapHostFloatToLittle( inmemfile[word32index+2].f32val );                             //t
                     word32index += NUMFIELDSPERREFERENCEDVERTEX;
@@ -879,16 +879,16 @@ vector< Mesh* >Mesh::LoadMeshes( VSFileSystem::VSFile &Inputfile,
             }
             //End Trifans
             //Quadstrips
-            int32bit numquadstrips = VSSwapHostIntToLittle( inmemfile[word32index].i32val );                     //number of vertices
+            uint32bit numquadstrips = VSSwapHostIntToLittle( inmemfile[word32index].i32val );                     //number of vertices
             word32index += 1;
-            for (int32bit qstrip = 0; qstrip < numquadstrips; qstrip++) {
-                int32bit numstripelements = VSSwapHostIntToLittle( inmemfile[word32index].i32val );                         //number of vertices
-                int32bit flatshade = VSSwapHostIntToLittle( inmemfile[word32index+1].i32val );                         //flatshade
+            for (uint32bit qstrip = 0; qstrip < numquadstrips; qstrip++) {
+                uint32bit numstripelements = VSSwapHostIntToLittle( inmemfile[word32index].i32val );                         //number of vertices
+                uint32bit flatshade = VSSwapHostIntToLittle( inmemfile[word32index+1].i32val );                         //flatshade
                 bxmfprintf( Outputfile, "\t<Quadstrip flatshade=\"%d\">\n", flatshade );
                 BEGINSTATE( GL_QUAD_STRIP, numstripelements );
                 word32index += 1+NUMFIELDSPERPOLYGONSTRUCTURE;
-                for (int32bit elem = 0; elem < numstripelements; elem++) {
-                    int32bit   ind1 = VSSwapHostIntToLittle( inmemfile[word32index].i32val );                           //index 1
+                for (uint32bit elem = 0; elem < numstripelements; elem++) {
+                    uint32bit   ind1 = VSSwapHostIntToLittle( inmemfile[word32index].i32val );                           //index 1
                     float32bit s1   = VSSwapHostFloatToLittle( inmemfile[word32index+1].f32val );                             //s
                     float32bit t1   = VSSwapHostFloatToLittle( inmemfile[word32index+2].f32val );                             //t
                     word32index += NUMFIELDSPERREFERENCEDVERTEX;

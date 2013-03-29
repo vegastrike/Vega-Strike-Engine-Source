@@ -1,9 +1,9 @@
 #ifndef __MESH_IO_H__INCLUDED_
 #define __MESH_IO_H__INCLUDED_
 
-#define int32bit unsigned int
+#define uint32bit unsigned int
 #define float32bit float
-#define char8bit unsigned char
+#define uchar8bit unsigned char
 
 #ifdef DEFINE_BLENDFUNC
 enum BLENDFUNC
