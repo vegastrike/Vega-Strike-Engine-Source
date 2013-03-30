@@ -308,6 +308,11 @@ Unit* Unit::VelocityReference()
     return computer.velocity_ref.GetUnit();
 }
 
+const Unit* Unit::VelocityReference() const
+{
+    return computer.velocity_ref.GetConstUnit();
+}
+
 Unit* Unit::Threat()
 {
     return computer.threat.GetUnit();

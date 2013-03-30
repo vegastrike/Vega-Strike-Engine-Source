@@ -2240,6 +2240,77 @@ static void DrawDamageFlash( int dtype )
     GFXColor4f( 1, 1, 1, 1 );
 }
 
+static void DrawHeadingMarker( const Vector &p, const Vector &q, const Vector &pos, float size )
+{
+    static VertexBuilder<> verts;
+    verts.clear();
+    verts.insert( pos + (2.5*size)*p );
+    verts.insert( pos + size*p );
+    verts.insert( pos + (0.939*size)*p - (0.342*size)*q );
+    verts.insert( pos + (0.776*size)*p - (0.643*size)*q );
+    verts.insert( pos + (0.500*size)*p - (0.866*size)*q );
+    verts.insert( pos + (0.174*size)*p - (0.985*size)*q );
+    verts.insert( pos - (0.174*size)*p - (0.985*size)*q );
+    verts.insert( pos - (0.500*size)*p - (0.866*size)*q );
+    verts.insert( pos - (0.776*size)*p - (0.643*size)*q );
+    verts.insert( pos - (0.939*size)*p - (0.342*size)*q );
+    verts.insert( pos - size*p );
+    verts.insert( pos - (2.5*size)*p );
+    GFXDraw( GFXLINESTRIP, verts );
+}
+
+static void DrawHeadingMarker( Cockpit &cp, const GFXColor &col )
+{
+    const Unit * u = cp.GetParent();
+    const Camera * cam = cp.AccessCamera();
+    bool drawv = true;
+    
+    // heading direction (unit fwd direction)
+    Vector d = u->GetTransformation().getR();
+
+    // flight direcion (unit vel direction)
+    Vector v = u->GetWarpVelocity();
+    if (u->VelocityReference())
+        v -= u->VelocityReference()->GetWarpVelocity();
+    float v2 = v.MagnitudeSquared();
+    if ( v2 > 0.25 ) // 1/2 m/s seems reasonable for a speed marker
+        v *= 1.0f / sqrtf(v2);
+    else
+        drawv = false;
+
+    // up and right dirs p, q
+    Vector p, q, r;
+    cam->GetPQR(p, q, r);
+
+    // znear offset
+    float offset = 2 * g_game.znear / cos(cam->GetFov() * M_PI / 180.0);
+    v *= offset;
+    d *= offset;
+
+    // size scale and flight dir alpha
+    float size = 0.175f;
+    float alpha = std::min(0.60f, (v - d).MagnitudeSquared() / (size * size * 36));
+
+    // draw
+    GFXDisable( TEXTURE0 );
+    GFXDisable( LIGHTING );
+    GFXBlendMode( SRCALPHA, INVSRCALPHA );
+    GFXEnable( SMOOTH );
+
+    if (drawv) {
+        GFXLineWidth( 1.35f );
+        GFXColor4f( col.r, col.g, col.b, col.a * alpha );
+        DrawHeadingMarker( p, q, v * 1.01, size );
+    }
+
+    GFXLineWidth( 1.25f );
+    GFXColor4f( col.r, col.g, col.b, col.a );
+    DrawHeadingMarker( p, q, d, size );
+
+    GFXLineWidth( 1.0f );
+    GFXEnable( TEXTURE0 );
+}
+
 static void DrawCrosshairs( float x, float y, float wid, float hei, const GFXColor &col )
 {
     GFXColorf( col );
@@ -2277,6 +2348,7 @@ double howFarToJump();
 
 void GameCockpit::Draw()
 {
+    static bool drawHeadingMarker = parse_bool( vs_config->getVariable( "graphics", "draw_heading_marker", "false" ) );
     static bool     draw_star_destination_arrow =
         XMLSupport::parse_bool( vs_config->getVariable( "graphics", "hud", "draw_star_direction", "true" ) );
     static GFXColor destination_system_color    = DockBoxColor( "destination_system_color" );
@@ -2344,23 +2416,13 @@ void GameCockpit::Draw()
             }
         }
     }
+    if (drawHeadingMarker && view < CP_CHASE)
+        DrawHeadingMarker( *this, textcol );
     GFXEnable( TEXTURE0 );
     GFXEnable( DEPTHTEST );
     GFXEnable( DEPTHWRITE );
+
     if (view < CP_CHASE) {
-/*broken velocity inidcator
- *         static bool draw_velocity_indicator=XMLSupport::parse_bool(vs_config->getVariable("graphics","draw_velocity_indicator","true"));
- *         if (draw_velocity_indicator) {
- *                   Vector P,Q,R;
- *                       Unit *par=GetParent();
- *                       if (par ) {
- *                               Vector vel=par->Velocity;
- *                               float speed=vel.Magnitude();
- *           static float nav_symbol_size = XMLSupport::parse_float(vs_config->getVariable("graphics","nav_symbol_size",".25"));
- *                   AccessCamera()->GetPQR (P,Q,R);
- *                DrawNavigationSymbol(vel,P,Q,speed*nav_symbol_size);
- *                       }
- *         }*/
         if ( mesh.size() ) {
             Unit *par = GetParent();
             if (par) {
@@ -2514,14 +2576,12 @@ void GameCockpit::Draw()
             static bool drawCrosshairs =
                 parse_bool( vs_config->getVariable( "graphics", "hud", "draw_rendered_crosshairs",
                                                    vs_config->getVariable( "graphics", "draw_rendered_crosshairs", "true" ) ) );
-            Panel.front()->GetPosition( crosscenx, crossceny );
             if (drawCrosshairs) {
                 float x, y, wid, hei;
+                Panel.front()->GetPosition( x, y );
                 Panel.front()->GetSize( wid, hei );
-                x = crosscenx;
-                y = crossceny;
                 DrawCrosshairs( x, y, wid, hei, textcol );
-            } else {
+            } else if (!drawHeadingMarker) {
                 GFXBlendMode( SRCALPHA, INVSRCALPHA );
                 GFXEnable( TEXTURE0 );
                 Panel.front()->Draw();                 //draw crosshairs

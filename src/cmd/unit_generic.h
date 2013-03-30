@@ -1235,6 +1235,7 @@ public:
     Unit * Target();
     const Unit * Target() const;
     Unit * VelocityReference();
+    const Unit * VelocityReference() const;
     Unit * Threat();
 //Uses Universe stuff so only in Unit class
     void VelocityReference( Unit *targ );

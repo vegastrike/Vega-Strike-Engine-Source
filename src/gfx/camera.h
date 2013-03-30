@@ -90,11 +90,11 @@ public:
 ///This function updates the sound if sound is not updated on a per frame basis
     void UpdateCameraSounds();
     void GetView( Matrix& );
-    const Vector& GetR()
+    const Vector& GetR() const
     {
         return R;
     }
-    void GetPQR( Vector &p1, Vector &q1, Vector &r1 );
+    void GetPQR( Vector &p1, Vector &q1, Vector &r1 ) const;
     void UpdateGFX( GFXBOOL clip,
                     GFXBOOL updateFrustum,
                     GFXBOOL centerCamera,

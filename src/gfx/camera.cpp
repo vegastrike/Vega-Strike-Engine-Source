@@ -62,7 +62,7 @@ Camera::Camera( ProjectionType proj ) : projectionType( proj )
     lastGFXUpdate.overrideZFar     = 1000000;
 }
 
-void Camera::GetPQR( Vector &p1, Vector &q1, Vector &r1 )
+void Camera::GetPQR( Vector &p1, Vector &q1, Vector &r1 ) const
 {
     p1.i = P.i;
     p1.j = P.j;
