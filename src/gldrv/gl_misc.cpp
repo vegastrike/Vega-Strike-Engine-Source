@@ -152,7 +152,7 @@ void /*GFXDRVAPI*/ GFXDrawElements( POLYTYPE type,
     // Note: glDrawRangeElements doesn't seem to work well in MESA, 
     //       stay away from it
     GFXBindElementBuffer( 0 );
-    glDrawRangeElements(PolyLookup(type), 0, vnum-1, nelem, GL_UNSIGNED_BYTE, indices);
+    glDrawElements(PolyLookup(type), nelem, GL_UNSIGNED_BYTE, indices);
     
     GFXDrawCleanup(type, data, vnum, vsize, csize, tsize0, tsize1);
 #endif
@@ -171,7 +171,7 @@ void /*GFXDRVAPI*/ GFXDrawElements( POLYTYPE type,
     // Note: glDrawRangeElements doesn't seem to work well in MESA, 
     //       stay away from it
     GFXBindElementBuffer( 0 );
-    glDrawRangeElements(PolyLookup(type), 0, vnum-1, nelem, GL_UNSIGNED_SHORT, indices);
+    glDrawElements(PolyLookup(type), nelem, GL_UNSIGNED_SHORT, indices);
     
     GFXDrawCleanup(type, data, vnum, vsize, csize, tsize0, tsize1);
 #endif
@@ -190,7 +190,7 @@ void /*GFXDRVAPI*/ GFXDrawElements( POLYTYPE type,
     // Note: glDrawRangeElements doesn't seem to work well in MESA, 
     //       stay away from it
     GFXBindElementBuffer( 0 );
-    glDrawRangeElements(PolyLookup(type), 0, vnum-1, nelem, GL_UNSIGNED_INT, indices);
+    glDrawElements(PolyLookup(type), nelem, GL_UNSIGNED_INT, indices);
     
     GFXDrawCleanup(type, data, vnum, vsize, csize, tsize0, tsize1);
 #endif
