@@ -11,10 +11,11 @@
 #include <iterator>
 #include <limits>
 
+#include "aligned.h"
+
 ParticleTrail particleTrail( "sparkle", 500, SRCALPHA, ONE, 0.05, false, true );
 ParticleTrail smokeTrail( "smoke", 500, SRCALPHA, INVSRCALPHA );
 ParticleTrail debrisTrail( "debris", 500, SRCALPHA, INVSRCALPHA, 0.5, true );
-
 
 static float mymin( float a, float b )
 {
@@ -56,45 +57,68 @@ void ParticleTrail::ChangeMax( unsigned int max )
     this->maxparticles = max;
 }
 
-static inline void UpdateColor( ParticlePoint & p, const Vector &vel, const float time, const float fade )
+template <typename LOC, typename VEL, typename COL>
+static inline void UpdateColor( LOC &vloc, const VEL &vvel, COL &vcol, typename COL::const_reference fadetime, const float time )
 {
-    float fadetime = fade * time;
-    p.loc += vel.Cast() * time;
-    p.col  = ( p.col - GFXColor( fadetime, fadetime, fadetime, fadetime ) ).clamp();
+    double *loc = &(coll_start_pointer(vloc)->i);
+    typename COL::pointer col = coll_start_pointer(vcol);
+    const float *vel = &(coll_start_pointer(vvel)->i);
+    size_t n = vloc.size();
+    const double dtime = time;
+    
+    size_t i, n3=n*3;
+    for (i=0; i<n3; ++i) {
+        loc[i] += vel[i] * dtime;
+    }
+    for (i=0; i<n; ++i) {
+        col[i] = ( col[i] - fadetime ).clamp();
+    }
 }
 
-static inline void UpdateAlpha( ParticlePoint & p, const Vector &vel, const float time, const float fade )
+template <typename LOC, typename VEL, typename COL>
+static inline void UpdateAlpha( LOC &vloc, const VEL &vvel, COL &vcol, const float time, const float fade )
 {
-    p.loc += vel.Cast() * time;
-    p.col.a = mymax(0.0f, p.col.a - fade * time);
+    double *loc = &(coll_start_pointer(vloc)->i);
+    typename COL::pointer col = coll_start_pointer(vcol);
+    const float *vel = &(coll_start_pointer(vvel)->i);
+    size_t n = vloc.size();
+    const double dtime = time;
+    
+    size_t i, n3=n*3;
+    for (i=0; i<n3; ++i) {
+        loc[i] += vel[i] * dtime;
+    }
+    for (i=0; i<n; ++i) {
+        col[i].a = mymax(0.0f, col[i].a - fade * time);
+    }
 }
 
 //Write 3 pos and 4 col float values into v and increment v by 7
-static inline void SetPointVertex( const ParticlePoint & p, const float grow, const float trans, std::back_insert_iterator<std::vector<float> > &v, const QVector &campos )
+static inline void SetPointVertex( const QVector &loc, const GFXColor &col, const float psize, const float grow, const float trans, std::back_insert_iterator<std::vector<float> > &v, const QVector &campos )
 {
-    float size    = p.size * (grow * (1.0f - p.col.a) + p.col.a);
-    float maxsize = (p.size > size) ? p.size : size;
-    float minsize = (p.size <= size) ? p.size : size;
+    float size    = psize * (grow * (1.0f - col.a) + col.a);
+    float maxsize = (psize > size) ? psize : size;
+    float minsize = (psize <= size) ? psize : size;
 
     //Squared, surface-linked decay - looks nicer, more real for emmisive gasses
     //NOTE: maxsize/minsize allows for inverted growth (shrinkage) while still fading correctly. Cheers!
-    GFXColor c = p.col * ( p.col.a * trans * ( minsize / ( (maxsize > 0) ? maxsize : 1.f ) ) );
-    QVector  l = p.loc - campos;
+    GFXColor c = col * ( col.a * trans * ( minsize / ( (maxsize > 0) ? maxsize : 1.f ) ) );
+    QVector  l = loc - campos;
 
     *v++ = l.x; *v++ = l.y; *v++ = l.y;  *v++ = c.r; *v++ = c.g; *v++ = c.b; *v++ = c.a; 
 }
 
 //Write 12 * 3 pos and 12 * 4 col and 12 * 2 tex float values into v and increment v by 108
-static inline void SetQuadVertex( const ParticlePoint & p, const float grow, const float trans, std::back_insert_iterator<std::vector<float> > &v, const QVector &campos )
+static inline void SetQuadVertex( const QVector &loc, const GFXColor &col, const float psize, const float grow, const float trans, std::back_insert_iterator<std::vector<float> > &v, const QVector &campos )
 {
-    float size    = p.size * (grow * (1 - p.col.a) + p.col.a);
-    float maxsize = (p.size > size) ? p.size : size;
-    float minsize = (p.size <= size) ? p.size : size;
+    float size    = psize * (grow * (1 - col.a) + col.a);
+    float maxsize = (psize > size) ? psize : size;
+    float minsize = (psize <= size) ? psize : size;
 
     //Squared, surface-linked decay - looks nicer, more real for emmisive gasses
     //NOTE: maxsize/minsize allows for inverted growth (shrinkage) while still fading correctly. Cheers!
-    GFXColor c = p.col * ( p.col.a * trans * ( minsize / ( (maxsize > 0) ? maxsize : 1.f ) ) );
-    QVector  l = p.loc - campos;
+    GFXColor c = col * ( col.a * trans * ( minsize / ( (maxsize > 0) ? maxsize : 1.f ) ) );
+    QVector  l = loc - campos;
 
     *v++ = l.i+size; *v++ = l.j+size; *v++ = l.k;  *v++ = c.r; *v++ = c.g; *v++ = c.b; *v++ = c.a;  *v++ = 0; *v++ = 0;
     *v++ = l.i+size; *v++ = l.j-size; *v++ = l.k;  *v++ = c.r; *v++ = c.g; *v++ = c.b; *v++ = c.a;  *v++ = 0; *v++ = 1;
@@ -182,7 +206,7 @@ void ParticleTrail::DrawAndUpdate()
         VSFileSystem::vs_dprintf(1, "Configured particle system %s with %d particles\n", 
             config.prefix.c_str(), maxparticles);
     }
-    if (!config.use || particle.empty())
+    if (!config.use || particleLoc.empty())
         return;
 
     bool  use_points = config.use_points;
@@ -192,6 +216,7 @@ void ParticleTrail::DrawAndUpdate()
     float pfade = config.pfade;
     
     const QVector campos = _Universe->AccessCamera()->GetPosition();
+    size_t nparticles = particleLoc.size();
     
     // Draw particles
     GFXDisable( CULLFACE );
@@ -212,12 +237,12 @@ void ParticleTrail::DrawAndUpdate()
             GFXBlendMode( ONE, ZERO );
 
         particleVert.clear();
-        particleVert.reserve(particle.size() * (3 + 4));
+        particleVert.reserve(particleLoc.size() * (3 + 4));
         std::back_insert_iterator<std::vector<float> > v(particleVert);
-        for (size_t i = 0; i < particle.size(); ++i) {
-            SetPointVertex( particle[i], pgrow, ptrans, v, campos );
+        for (size_t i = 0; i < nparticles; ++i) {
+            SetPointVertex( particleLoc[i], particleColor[i], particleSize[i], pgrow, ptrans, v, campos );
         }
-        GFXDraw( GFXPOINT, &particleVert[0], particle.size(), 3, 4 );
+        GFXDraw( GFXPOINT, &particleVert[0], particleLoc.size(), 3, 4 );
 
         glDisable( GL_POINT_SMOOTH );
         GFXPointSize( 1 );
@@ -242,17 +267,17 @@ void ParticleTrail::DrawAndUpdate()
         if (dosort) {
             // Must sort
             distances.clear();
-            distances.reserve(particle.size());
-            { for (std::vector<ParticlePoint>::const_iterator it = particle.begin(); it != particle.end(); ++it) {
-                distances.push_back((campos - it->loc).MagnitudeSquared());
+            distances.reserve(nparticles);
+            { for (std::vector<QVector, aligned_allocator<QVector> >::const_iterator it = particleLoc.begin(); it != particleLoc.end(); ++it) {
+                distances.push_back((campos - *it).MagnitudeSquared());
             } }
             IndexCompare<float, unsigned short> dcomp(distances);
             
             unsigned short nindices;
-            if ( particle.size() >= (size_t)std::numeric_limits< unsigned short >::max() / vertsPerParticle )
+            if ( nparticles >= (size_t)std::numeric_limits< unsigned short >::max() / vertsPerParticle )
                 nindices = (unsigned short)std::numeric_limits< unsigned short >::max() / vertsPerParticle;
             else
-                nindices = (unsigned short)particle.size();
+                nindices = (unsigned short)nparticles;
             pointIndices.clear();
             pointIndices.reserve(nindices);
             { for (unsigned short i=0; i < nindices; ++i) {
@@ -270,21 +295,21 @@ void ParticleTrail::DrawAndUpdate()
         }
         
         particleVert.clear();
-        particleVert.reserve(particle.size() * vertsPerParticle * (3 + 4 + 2));
+        particleVert.reserve(nparticles * vertsPerParticle * (3 + 4 + 2));
         std::back_insert_iterator<std::vector<float> > v(particleVert);
-        for (size_t i = 0; i < particle.size(); ++i) {
-            SetQuadVertex( particle[i], pgrow, ptrans, v, campos );
+        for (size_t i = 0; i < nparticles; ++i) {
+            SetQuadVertex( particleLoc[i], particleColor[i], particleSize[i], pgrow, ptrans, v, campos );
         }
         
         if (dosort) {
-            VSFileSystem::vs_dprintf(3, "Drawing %d/%d sorted particles\n", particle.size(), maxparticles);
+            VSFileSystem::vs_dprintf(3, "Drawing %d/%d sorted particles\n", nparticles, maxparticles);
             GFXDrawElements( GFXQUAD, 
-                &particleVert[0], particle.size() * vertsPerParticle, 
+                &particleVert[0], nparticles * vertsPerParticle, 
                 &indices[0], indices.size(),
                 3, 4, 2 );
         } else {
-            VSFileSystem::vs_dprintf(3, "Drawing %d/%d unsorted particles\n", particle.size(), maxparticles);
-            GFXDraw( GFXQUAD, &particleVert[0], particle.size() * 12, 3, 4, 2 );
+            VSFileSystem::vs_dprintf(3, "Drawing %d/%d unsorted particles\n", nparticles, maxparticles);
+            GFXDraw( GFXQUAD, &particleVert[0], nparticles * 12, 3, 4, 2 );
         }
         
         if (alphaMask > 0) {
@@ -298,40 +323,51 @@ void ParticleTrail::DrawAndUpdate()
     // Update particles
     float mytime = GetElapsedTime();
     if (fadeColor) {
-        for (size_t i = 0, n = particle.size(); i < n; ++i) {
-            UpdateColor(particle[i], particleVel[i], mytime, pfade);
-        }
+        float fadetimef = pfade * mytime;
+        GFXColor fadetime __attribute__((aligned(16))) = GFXColor(fadetimef, fadetimef, fadetimef, fadetimef);
+        UpdateColor(particleLoc, particleVel, particleColor, fadetime, mytime);
     } else {
-        for (size_t i = 0, n = particle.size(); i < n; ++i) {
-            UpdateAlpha(particle[i], particleVel[i], mytime, pfade);
-        }
+        UpdateAlpha(particleLoc, particleVel, particleColor, mytime, pfade);
     }
 
     // Quickly remove dead particles at the end
-    while ( !particle.empty() && !(particle.back().col.a > alphaMask) ) {
+    while ( !particleColor.empty() && !(particleColor.back().a > alphaMask) ) {
         particleVel.pop_back();
-        particle.pop_back();
+        particleLoc.pop_back();
+        particleColor.pop_back();
+        particleSize.pop_back();
     }
     
     // Remove dead particles anywhere
-    vector< Vector >::iterator v = particleVel.begin();
-    vector< ParticlePoint >::iterator p = particle.begin();
-    while ( p != particle.end() ) {
-        if ( !(p->col.a > alphaMask) ) {
-            vector< Vector >::iterator vlast = particleVel.end() - 1;
-            vector< ParticlePoint >::iterator plast = particle.end() - 1;
-            if (p != plast) {
+    vector< Vector, aligned_allocator<Vector> >::iterator v = particleVel.begin();
+    vector< QVector, aligned_allocator<QVector> >::iterator loc = particleLoc.begin();
+    vector< GFXColor, aligned_allocator<GFXColor> >::iterator col = particleColor.begin();
+    vector< float, aligned_allocator<float> >::iterator sz = particleSize.begin();
+    while ( col != particleColor.end() ) {
+        if ( !(col->a > alphaMask) ) {
+            vector< Vector, aligned_allocator<Vector> >::iterator vlast = particleVel.end() - 1;
+            vector< QVector, aligned_allocator<QVector> >::iterator loclast = particleLoc.end() - 1;
+            vector< GFXColor, aligned_allocator<GFXColor> >::iterator collast = particleColor.end() - 1;
+            vector< float, aligned_allocator<float> >::iterator szlast = particleSize.end() - 1;
+            if (col != collast) {
                 *v = *vlast;
-                *p = *plast;
+                *loc = *loclast;
+                *col = *collast;
+                *sz = *szlast;
             }
-            size_t indexp  = p - particle.begin();
-            size_t indexv = v - particleVel.begin();
-            particle.pop_back();
+            size_t index  = col - particleColor.begin();
+            particleColor.pop_back();
             particleVel.pop_back();
-            p = particle.begin() + indexp;
-            v = particleVel.begin() + indexv;             //continue where we left off
+            particleLoc.pop_back();
+            particleSize.pop_back();
+            col = particleColor.begin() + index;
+            v = particleVel.begin() + index;
+            loc = particleLoc.begin() + index;
+            sz = particleSize.begin() + index;
         } else {
-            ++p;
+            ++loc;
+            ++col;
+            ++sz;
             ++v;
         }
     }
@@ -343,18 +379,24 @@ void ParticleTrail::AddParticle( const ParticlePoint &P, const Vector &V, float 
     if (!config.use)
         return;
     
-    if (particle.size() > maxparticles) {
-        vector< Vector >::iterator vel = particleVel.begin();
-        vector< ParticlePoint >::iterator p = particle.begin();
-        size_t off = ( (size_t) rand() )%particle.size();
+    if (particleLoc.size() > maxparticles) {
+        vector< Vector, aligned_allocator<Vector> >::iterator vel = particleVel.begin();
+        vector< QVector, aligned_allocator<QVector> >::iterator loc = particleLoc.begin();
+        vector< GFXColor, aligned_allocator<GFXColor> >::iterator col = particleColor.begin();
+        vector< float, aligned_allocator<float> >::iterator sz = particleSize.begin();
+        size_t off = ( (size_t) rand() ) % particleLoc.size();
         vel += off;
-        p   += off;
-        *p   = P;
-        (*p).size = size;
+        loc += off;
+        col += off;
+        sz += off;
+        *loc = P.loc;
+        *col = P.col;
+        *sz = size;
         *vel = V;
     } else {
-        particle.push_back( P );
-        particle.back().size = size;
+        particleLoc.push_back( P.loc );
+        particleColor.push_back( P.col );
+        particleSize.push_back( P.size );
         particleVel.push_back( V );
     }
 }

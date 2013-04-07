@@ -26,8 +26,8 @@ inline XVector operator*( const XVector &lval, const QFLOAT obj );
 
 inline XVector operator*( const QFLOAT obj, const XVector &rval );
 
-inline XVector operator+=( XVector &lval, const XVector &obj );
-inline XVector operator-=( XVector &lval, const XVector &obj );
+inline XVector& operator+=( XVector &lval, const XVector &obj );
+inline XVector& operator-=( XVector &lval, const XVector &obj );
 
 inline QFLOAT DotProduct( const XVector &a, const XVector &b );
 inline void Normalize( XVector &r );
@@ -169,18 +169,17 @@ public:
 
 inline XVector operator/( const XVector &lval, const QFLOAT obj )
 {
-    XVector retval( lval.i/obj, lval.j/obj, lval.k/obj );
-    return retval;
+    return lval * (QFLOAT(1) / obj);
 }
 
-inline XVector operator+=( XVector &lval, const XVector &obj )
+inline XVector& operator+=( XVector &lval, const XVector &obj )
 {
     lval.i += obj.i;
     lval.j += obj.j;
     lval.k += obj.k;
     return lval;
 }
-inline XVector operator-=( XVector &lval, const XVector &obj )
+inline XVector& operator-=( XVector &lval, const XVector &obj )
 {
     lval.i -= obj.i;
     lval.j -= obj.j;
@@ -188,10 +187,11 @@ inline XVector operator-=( XVector &lval, const XVector &obj )
     return lval;
 }
 
-inline XVector operator*=( XVector &lval, const QFLOAT &obj )
+inline XVector& operator*=( XVector &lval, const QFLOAT &obj )
 {
     lval.i *= obj;
-    lval.j *= obj, lval.k *= obj;
+    lval.j *= obj;
+    lval.k *= obj;
     return lval;
 }
 
@@ -213,13 +213,11 @@ inline QFLOAT DotProduct( const XVector &a, const XVector &b )
 
 inline XVector operator*( const XVector &lval, const double obj )
 {
-    XVector retval( lval.i*obj, lval.j*obj, lval.k*obj );
-    return retval;
+    return XVector( lval.i*obj, lval.j*obj, lval.k*obj );
 }
 inline XVector operator*( const XVector &lval, const float obj )
 {
-    XVector retval( lval.i*obj, lval.j*obj, lval.k*obj );
-    return retval;
+    return XVector( lval.i*obj, lval.j*obj, lval.k*obj );
 }
 
 inline XVector operator*( const double obj, const XVector &rval )
@@ -233,8 +231,7 @@ inline XVector operator*( const float obj, const XVector &rval )
 }
 inline XVector operator*( const XVector &lval, const int obj )
 {
-    XVector retval( lval.i*obj, lval.j*obj, lval.k*obj );
-    return retval;
+    return XVector( lval.i*obj, lval.j*obj, lval.k*obj );
 }
 
 inline XVector operator*( const int obj, const XVector &rval )

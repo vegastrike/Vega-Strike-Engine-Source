@@ -2,6 +2,8 @@
 #define __PARTICLE_H
 
 #include <vector>
+#include <memory>
+#include "aligned.h"
 #include "vec.h"
 #include "gfxlib_struct.h"
 
@@ -22,8 +24,10 @@ struct ParticlePoint
  */
 class ParticleTrail
 {
-    std::vector< Vector > particleVel;
-    std::vector< ParticlePoint > particle;
+    std::vector< Vector, aligned_allocator<Vector> > particleVel;
+    std::vector< QVector, aligned_allocator<QVector> > particleLoc;
+    std::vector< GFXColor, aligned_allocator<GFXColor> > particleColor;
+    std::vector< float, aligned_allocator<float> > particleSize;
     std::vector< float > particleVert;
     std::vector< float > distances;
     std::vector< unsigned short > pointIndices;
