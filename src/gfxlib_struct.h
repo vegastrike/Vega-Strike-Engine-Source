@@ -25,6 +25,7 @@
 
 #include <vector>
 #include <iterator>
+#include <functional>
 
 #ifndef GFXBOOL
 #define GFXBOOL unsigned char

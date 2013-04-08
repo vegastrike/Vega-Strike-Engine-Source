@@ -20,6 +20,9 @@
  */
 
 #ifdef __cplusplus
+
+#include "vectorizable.h"
+
 class XVector;
 
 inline XVector operator*( const XVector &lval, const QFLOAT obj );
@@ -293,5 +296,8 @@ void ResetVectors( XVector &p, XVector &q, XVector &r );
 void MakeRVector( XVector &p, XVector &q, XVector &r );
 void Orthogonize( XVector &p, XVector &q, XVector &r );
 Vector MakeNonColinearVector( const Vector &p );
+
+template<> class vectorizable_traits<XVector> : public struct_vectorizable_traits<XVector, QFLOAT, 3> {};
+
 #endif
 

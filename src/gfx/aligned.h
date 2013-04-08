@@ -2,7 +2,7 @@
 #define __ALIGNED_H
 
 #include <memory>
-#include <boost/concept_check.hpp>
+#include <cstddef>
 
 #if __GNUC__ < 4 || (__GNUC__ == 4 && __GNUC_MINOR__ < 7)
 #define __alpn(x,a) x

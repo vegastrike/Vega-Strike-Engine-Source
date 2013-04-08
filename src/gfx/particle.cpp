@@ -12,10 +12,13 @@
 #include <limits>
 
 #include "aligned.h"
+#include "vectorize.h"
 
 ParticleTrail particleTrail( "sparkle", 500, SRCALPHA, ONE, 0.05, false, true );
 ParticleTrail smokeTrail( "smoke", 500, SRCALPHA, INVSRCALPHA );
 ParticleTrail debrisTrail( "debris", 500, SRCALPHA, INVSRCALPHA, 0.5, true );
+
+using vectorized::vectorize;
 
 static float mymin( float a, float b )
 {
@@ -57,39 +60,23 @@ void ParticleTrail::ChangeMax( unsigned int max )
     this->maxparticles = max;
 }
 
+VECTORIZE_MEMBER_FUNC(color_clamp_func, GFXColor, GFXColor, clamp);
+
 template <typename LOC, typename VEL, typename COL>
 static inline void UpdateColor( LOC &vloc, const VEL &vvel, COL &vcol, typename COL::const_reference fadetime, const float time )
 {
-    double *loc = &(coll_start_pointer(vloc)->i);
-    typename COL::pointer col = coll_start_pointer(vcol);
-    const float *vel = &(coll_start_pointer(vvel)->i);
-    size_t n = vloc.size();
     const double dtime = time;
-    
-    size_t i, n3=n*3;
-    for (i=0; i<n3; ++i) {
-        loc[i] += vel[i] * dtime;
-    }
-    for (i=0; i<n; ++i) {
-        col[i] = ( col[i] - fadetime ).clamp();
-    }
+    vectorize(vloc) += vectorize(vvel) * dtime;
+    vectorize(vcol) = vectorized::map( vectorize(vcol) - fadetime, color_clamp_func() );
 }
 
 template <typename LOC, typename VEL, typename COL>
 static inline void UpdateAlpha( LOC &vloc, const VEL &vvel, COL &vcol, const float time, const float fade )
 {
-    double *loc = &(coll_start_pointer(vloc)->i);
-    typename COL::pointer col = coll_start_pointer(vcol);
-    const float *vel = &(coll_start_pointer(vvel)->i);
-    size_t n = vloc.size();
     const double dtime = time;
-    
-    size_t i, n3=n*3;
-    for (i=0; i<n3; ++i) {
-        loc[i] += vel[i] * dtime;
-    }
-    for (i=0; i<n; ++i) {
-        col[i].a = mymax(0.0f, col[i].a - fade * time);
+    vectorize(vloc) += vectorize(vvel) * dtime;
+    for (typename COL::iterator it = vcol.begin(); it != vcol.end(); ++it) {
+        it->a = mymax(0.0f, it->a - fade * time);
     }
 }
 
