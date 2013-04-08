@@ -160,8 +160,10 @@ void Python::init()
     boost::python::converter::registry::insert( Vector_convertible, QVector_construct, boost::python::type_id< QVector > () );
     boost::python::converter::registry::insert( Vector_convertible, Vector_construct, boost::python::type_id< Vector > () );
 #endif
+#if (PY_VERSION_HEX < 0x03000000)
     InitBriefing2();
     InitVS2();
+#endif
     VSFileSystem::vs_fprintf( stderr, "testing VS random" );
     std::string changepath( "import sys\nprint(sys.path)\n" );
     VSFileSystem::vs_fprintf( stderr, "running %s", changepath.c_str() );
@@ -169,8 +171,10 @@ void Python::init()
     PyRun_SimpleString( temppython );
     Python::reseterrors();
     free( temppython );
+#if (PY_VERSION_HEX < 0x03000000)
     InitDirector2();
     InitBase2();
+#endif
 }
 
 void Python::test()
