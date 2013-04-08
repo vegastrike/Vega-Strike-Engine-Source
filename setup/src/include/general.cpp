@@ -111,7 +111,7 @@ char *pre_chomp(char *line) {
  */
 
 char *replace(char *line, char *search, char *replace, int LENGTH) {
-	int length, dif, calc;
+	int  dif, calc;
 	char *ptr_new, *location;
 
 	char *chr_new,*current;
@@ -119,7 +119,6 @@ char *replace(char *line, char *search, char *replace, int LENGTH) {
 	current = (char *) malloc (sizeof (char)*LENGTH);
 	calc = strlen(line) - strlen(search) + strlen(replace);
 	if (calc > LENGTH) { return line; }
-	length = strlen(line);
 	strcpy(current, line);
 	while ((location = strstr(current, search)) > 0) {
 		chr_new[0] = '\0';
@@ -250,7 +249,7 @@ double pwer(double start, long end) {
 
 void btoa(char *dest, char *string) {
 	int max, cur, pos, new_val;
-	char *ptr_char, cur_char[1];
+	char *ptr_char;
 	char *new_string= (char *)malloc(strlen(string)+1);
 	max = 7;
 	cur = 7;
@@ -258,7 +257,6 @@ void btoa(char *dest, char *string) {
 	ptr_char = string;
 	new_val = 0;
 	while (ptr_char[0] != '\0') {
-		cur_char[0] = ptr_char[0];
 		if (ptr_char[0] == '1') { new_val += pwr(2,cur); }
 		cur--;
 		if (cur < 0) { cur = max; new_string[pos] = new_val; new_val = 0; pos++; }

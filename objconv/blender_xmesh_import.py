@@ -6,11 +6,6 @@ Blender: 237
 Group: 'Import'
 Tooltip: 'Import VegaStrike Models (.xmesh)'
 """
-from __future__ import print_function
-try:
-    range = xrange
-except:
-    pass
 
 __author__	= "Alex 'CubOfJudahsLion' Feterman"
 __url__		= ("blender", "http://www.blender.org", "Author's homepage, http://geocities.com/cubofjudahslion")
@@ -42,6 +37,11 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 	Generates UV mappings, but for the texture to be activated, go to
 	the texture buttons and 
 """
+from __future__ import print_function
+try:
+	range = xrange
++except:
+	pass
 
 import Blender
 from Blender import Image, Texture, Material, Object, NMesh, Types, sys
@@ -49,6 +49,7 @@ import xml.sax
 import meshtools
 import os.path
 from string import lower
+
 
 locationDir = []		# registers the search of the results for images
 
@@ -185,7 +186,7 @@ class XMeshHandler(xml.sax.handler.ContentHandler):
 		# we transalte everything to lowercase
 		name = lower(pname)
 		attr = {}
-		for ik, iv in attrMixed.items():
+		for ik, iv in list(attrMixed.items()):
 			attr[lower(ik)] = iv
 		# pre-parse attributes if available
 		if name == "mesh":

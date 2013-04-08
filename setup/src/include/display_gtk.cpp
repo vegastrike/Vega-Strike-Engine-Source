@@ -79,12 +79,10 @@ void myexit(int exitval){
 
 void ShowMain(void) {
 	struct group *CURRENT;
-	struct catagory *CUR;
 	int count = 1;
 	int column = 1;
 	GtkWidget *hbox, *vbox, *label, *button;
 	CURRENT = &GROUPS;
-	CUR = &CATS;
 	hbox = 0;
 	do {
 		if (CURRENT->name == NULL) { continue; }
@@ -153,7 +151,9 @@ void ShowMain(void) {
 
 void AddCats(GtkWidget *vbox, char *group, char *def) {
 	struct catagory *CUR;
+#ifdef USE_RADIO
 	GSList *radiogroup = NULL;
+#endif    
 	CUR = &CATS;
 	do {
 		GtkWidget *button;
@@ -193,10 +193,11 @@ void ClickButton(GtkWidget *w, struct catagory *CUR) {
 	struct catagory *OLD;
 	struct group *NEW;
 	char *new_text, *old;
+
+#ifdef USE_RADIO
 	int length;
 	length = strlen(GetInfo(CUR->name))+3;
 
-#ifdef USE_RADIO
 	if (!gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (w))) {
 		// Deactivate event--we don't care.
 		return;

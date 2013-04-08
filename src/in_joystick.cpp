@@ -355,7 +355,7 @@ void JoyStick::GetJoyStick( float &x, float &y, float &z, int &buttons )
     }
     for (int h = 0; h < nr_of_hats; h++)
         digital_hat[h] = SDL_JoystickGetHat( joy, h );
-    for (a = 0; a < MAX_AXES; a++)
+    for (a = 0; a < numaxes; a++)
         joy_axis[a] = ( (float) axi[a]/32768.0 );
     modifyDeadZone( this );
     modifyExponent( this );
