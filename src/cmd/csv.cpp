@@ -3,7 +3,7 @@
 
 using std::string;
 
-vector< string > readCSV( string s, string delim )
+vector< string > readCSV( const string &s, string delim )
 {
     vector< string >l;
     string as;
@@ -92,7 +92,7 @@ string writeCSV( const vector< string > &key, const vector< string > &table, str
     return ret;
 }
 
-void CSVTable::Init( string data )
+void CSVTable::Init( const string &data )
 {
     //Clear optimizer
     optimizer_setup = false;
@@ -138,19 +138,70 @@ void CSVTable::Init( string data )
     }
 }
 
-CSVTable::CSVTable( string data, string root )
+CSVTable::CSVTable( const string &data, const string &root )
 {
     this->rootdir = root;
     Init( data );
 }
 
-CSVTable::CSVTable( VSFileSystem::VSFile &f, string root )
+CSVTable::CSVTable( VSFileSystem::VSFile &f, const string &root )
 {
     this->rootdir = root;
     Init( f.ReadFull() );
 }
 
-CSVRow::CSVRow( CSVTable *parent, string key )
+void 
+CSVTable::Merge( const CSVTable &other )
+{
+    // Remember in preparation to reshape
+    size_t orig_cols = columns.size();
+    
+    // Merge columns
+    std::vector<int> colmap;
+    colmap.resize(other.columns.size());
+    
+    for (vsUMap<std::string, int>::const_iterator it = other.columns.begin(); it != other.columns.end(); ++it) {
+        vsUMap<std::string, int>::const_iterator local = columns.find(it->first);
+        if (local == columns.end()) {
+            key.push_back(it->first);
+            local = columns.insert(std::pair<string, int>(it->first, columns.size()-1)).first;
+        }
+        colmap[it->second] = local->second;
+    }
+    
+    // Reshape if necessary
+    if (orig_cols != columns.size()) {
+        std::vector<std::string> orig_table;
+        orig_table.swap(table);
+        std::vector<std::string>::const_iterator orig_it = orig_table.begin();
+        std::string empty;
+        
+        table.reserve(rows.size() * key.size());
+        while (orig_it != orig_table.end()) {
+            size_t i,n;
+            for (i = 0; orig_it != orig_table.end() && i < orig_cols; ++i)
+                table.push_back(*orig_it++);
+            for (n = columns.size(); i < n; ++i)
+                table.push_back(empty);
+        }
+    }
+    
+    // Merge rows
+    for (vsUMap<std::string, int>::const_iterator it = other.rows.begin(); it != other.rows.end(); ++it) {
+        vsUMap<std::string, int>::const_iterator local = rows.find(it->first);
+        if (local == rows.end()) {
+            table.resize(table.size() + key.size());
+            local = rows.insert(std::pair<string, int>(it->first, (table.size() - 1) / key.size())).first;
+        }
+        std::vector<std::string>::iterator table_it = table.begin() + local->second * key.size();
+        std::vector<std::string>::const_iterator other_it = other.table.begin() + it->second * other.key.size();
+        for (size_t i = 0; i < colmap.size(); ++i)
+            if (!(other_it + i)->empty())
+                *(table_it + colmap[i]) = *(other_it + i);
+    }
+}
+
+CSVRow::CSVRow( CSVTable *parent, const string &key )
 {
     this->parent = parent;
     iter = parent->rows[key]*parent->key.size();
@@ -183,7 +234,7 @@ const string& CSVRow::getKey( unsigned int which ) const
     return parent->key[which];
 }
 
-bool CSVTable::RowExists( string name, unsigned int &where )
+bool CSVTable::RowExists( const string &name, unsigned int &where )
 {
     vsUMap< string, int >::iterator i = rows.find( name );
     if ( i == rows.end() )
@@ -192,7 +243,7 @@ bool CSVTable::RowExists( string name, unsigned int &where )
     return true;
 }
 
-bool CSVTable::ColumnExists( string name, unsigned int &where )
+bool CSVTable::ColumnExists( const string &name, unsigned int &where )
 {
     vsUMap< string, int >::iterator i = columns.find( name );
     if ( i == columns.end() )
@@ -211,7 +262,7 @@ string CSVRow::getRoot()
     return "";
 }
 
-void CSVTable::SetupOptimizer( vector< string > keys, unsigned int type )
+void CSVTable::SetupOptimizer( const vector< string > &keys, unsigned int type )
 {
     optimizer_setup = true;
     optimizer_type  = type;

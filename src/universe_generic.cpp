@@ -335,29 +335,35 @@ int Universe::StarSystemIndex( StarSystem *ss )
     return -1;
 }
 
-void InitUnitTables()
+static void AppendUnitTables(const string &csvfiles)
 {
-    VSFile  allUnits;
-    VSError err;
-    while (game_options.UnitCSV.length() != 0) {
-        string::size_type where = game_options.UnitCSV.find( " " ), where2 = where;
+    string::size_type pwhere = 0, where, where2;
+    CSVTable *table = NULL;
+    while (where != string::npos && where < csvfiles.length()) {
+        where = csvfiles.find( " ", pwhere ), where2 = where;
         if (where == string::npos)
-            where = game_options.UnitCSV.length();
-        string tmp = game_options.UnitCSV.substr( 0, where );
-        err = allUnits.OpenReadOnly( tmp, UnitFile );
+            where = csvfiles.length();
+        string tmp = csvfiles.substr( pwhere, where );
+        VSFile allUnits;
+        VSError err = allUnits.OpenReadOnly( tmp, UnitFile );
         if (err <= Ok) {
-            unitTables.push_back( new CSVTable( allUnits, allUnits.GetRoot() ) );
+            if (table == NULL)
+                table = new CSVTable( allUnits, allUnits.GetRoot() );
+            else
+                table->Merge(CSVTable( allUnits, allUnits.GetRoot() ));
             allUnits.Close();
         }
         if (where2 == string::npos) break;
-        game_options.UnitCSV = game_options.UnitCSV.substr( where+1, game_options.UnitCSV.length() );
+        pwhere = where+1;
     }
-    //Now include units.csv at the end.
-    err = allUnits.OpenReadOnly( "units.csv", UnitFile );
-    if (err <= Ok) {
-        unitTables.push_back( new CSVTable( allUnits, allUnits.GetRoot() ) );
-        allUnits.Close();
-    }
+    if (table != NULL)
+        unitTables.push_back(table);
+}
+
+void InitUnitTables()
+{
+    AppendUnitTables(game_options.modUnitCSV);
+    AppendUnitTables(game_options.unitCSV);
 }
 
 void CleanupUnitTables()

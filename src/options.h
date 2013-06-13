@@ -274,7 +274,8 @@ public: vs_options() {}
     std::string universe_path;
     std::string sectors;              
     std::string techniquesBasePath;
-    std::string UnitCSV;
+    std::string unitCSV;
+    std::string modUnitCSV;
     std::string cockpits;
     std::string animations;
     std::string movies;

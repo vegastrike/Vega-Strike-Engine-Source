@@ -11,12 +11,14 @@ class VSFile;
 
 // delim should be read as separator and not to be confused with text delimiter see http://creativyst.com/Doc/Articles/CSV/CSV01.htm
 // separator values , and ; while delimiter is listed as quote or "
-std::vector< std::string >readCSV( std::string line, std::string delim = ",;" );  
+std::vector< std::string >readCSV( const std::string &line, std::string delim = ",;" );  
 std::string writeCSV( const std::vector< std::string > &key, const std::vector< std::string > &table, std::string delim = ",;" );
+
 class CSVTable
 {
 private:
-    void Init( std::string data );
+    void Init( const std::string &data );
+    
 public:
     std::string rootdir;
     vsUMap< std::string, int >columns;
@@ -24,18 +26,19 @@ public:
     std::vector< std::string >key;
     std::vector< std::string >table;
 
-    CSVTable( std::string name, std::string saveroot );
-    CSVTable( VSFileSystem::VSFile &f, std::string saveroot );
+    CSVTable( const std::string &name, const std::string &saveroot );
+    CSVTable( VSFileSystem::VSFile &f, const std::string &saveroot );
 
-    bool RowExists( std::string name, unsigned int &where );
-    bool ColumnExists( std::string name, unsigned int &where );
+    bool RowExists( const std::string &name, unsigned int &where );
+    bool ColumnExists( const std::string &name, unsigned int &where );
+    void Merge(const CSVTable &other);
 
 public:
-//Optimizer toolbox
+    //Optimizer toolbox
     enum optimizer_enum {optimizer_undefined=0x7fffffff};
-    void SetupOptimizer( std::vector< std::string >keys, unsigned int type );
+    void SetupOptimizer( const std::vector< std::string > &keys, unsigned int type );
 
-//Opaque Optimizers - use the optimizer toolbox to set them up
+    //Opaque Optimizers - use the optimizer toolbox to set them up
     bool optimizer_setup;
     unsigned int optimizer_type;
     std::vector< std::string >optimizer_keys;
@@ -48,19 +51,20 @@ class CSVRow
     CSVTable *parent;
 public:
     std::string getRoot();
-    size_t size()
+    size_t size() const
     {
         return parent->key.size();
     }
-    CSVRow( CSVTable *parent, std::string key );
+    
+    CSVRow( CSVTable *parent, const std::string &key );
     CSVRow( CSVTable *parent, unsigned int which );
     CSVRow()
     {
         parent = NULL;
         iter   = std::string::npos;
     }
-    const std::string&operator[]( const std::string& ) const;
-    const std::string&operator[]( unsigned int ) const;
+    const std::string& operator[]( const std::string& ) const;
+    const std::string& operator[]( unsigned int ) const;
     const std::string& getKey( unsigned int which ) const;
     std::vector< std::string >::iterator begin();
     std::vector< std::string >::iterator end();
