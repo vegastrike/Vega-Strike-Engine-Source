@@ -158,13 +158,18 @@ CSVTable::Merge( const CSVTable &other )
     
     // Merge columns
     std::vector<int> colmap;
-    colmap.resize(other.columns.size());
+    colmap.resize(other.key.size());
     
     for (vsUMap<std::string, int>::const_iterator it = other.columns.begin(); it != other.columns.end(); ++it) {
         vsUMap<std::string, int>::const_iterator local = columns.find(it->first);
         if (local == columns.end()) {
+            VSFileSystem::vs_dprintf(2, "New column %s\n", it->first.c_str());
             key.push_back(it->first);
-            local = columns.insert(std::pair<string, int>(it->first, columns.size()-1)).first;
+            local = columns.insert(std::pair<string, int>(it->first, key.size()-1)).first;
+        }
+        if (it->second >= colmap.size()) {
+            std::cerr << "WTF column " << it->second << "?" << std::endl;
+            abort();
         }
         colmap[it->second] = local->second;
     }
@@ -176,6 +181,7 @@ CSVTable::Merge( const CSVTable &other )
         std::vector<std::string>::const_iterator orig_it = orig_table.begin();
         std::string empty;
         
+        VSFileSystem::vs_dprintf(1, "Reshaping %d columns into %d\n", orig_cols, columns.size());
         table.reserve(rows.size() * key.size());
         while (orig_it != orig_table.end()) {
             size_t i,n;
@@ -185,13 +191,19 @@ CSVTable::Merge( const CSVTable &other )
                 table.push_back(empty);
         }
     }
+    VSFileSystem::vs_dprintf(2, "Reshaped table holds %d cells\n", table.size());
     
     // Merge rows
+    VSFileSystem::vs_dprintf(1, "Merging rows...\n");
+    size_t merged_rows = 0, new_rows = 0;
     for (vsUMap<std::string, int>::const_iterator it = other.rows.begin(); it != other.rows.end(); ++it) {
         vsUMap<std::string, int>::const_iterator local = rows.find(it->first);
         if (local == rows.end()) {
             table.resize(table.size() + key.size());
             local = rows.insert(std::pair<string, int>(it->first, (table.size() - 1) / key.size())).first;
+            ++new_rows;
+        } else {
+            ++merged_rows;
         }
         std::vector<std::string>::iterator table_it = table.begin() + local->second * key.size();
         std::vector<std::string>::const_iterator other_it = other.table.begin() + it->second * other.key.size();
@@ -199,6 +211,8 @@ CSVTable::Merge( const CSVTable &other )
             if (!(other_it + i)->empty())
                 *(table_it + colmap[i]) = *(other_it + i);
     }
+    VSFileSystem::vs_dprintf(1, "Rows Merged: %d, Rows Added: %d\n", merged_rows, new_rows);
+    VSFileSystem::vs_dprintf(2, "Merged table holds %d cells\n", table.size());
 }
 
 CSVRow::CSVRow( CSVTable *parent, const string &key )

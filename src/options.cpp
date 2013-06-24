@@ -267,7 +267,7 @@ void vs_options::init()
     sectors                  = vs_config->getVariable( "data", "sectors", "sectors" );     
     techniquesBasePath       = vs_config->getVariable( "data", "techniques", "techniques" );
     unitCSV                  = vs_config->getVariable( "data", "UnitCSV", "units.csv" );
-    modUnitCSV               = vs_config->getVariable( "data", "ModUnitCSV", "modunits.csv" );
+    modUnitCSV               = vs_config->getVariable( "data", "ModUnitCSV", "" );
     cockpits                 = vs_config->getVariable( "data", "cockpits", "cockpits" );
     animations               = vs_config->getVariable( "data", "animations", "animations" );
     movies                   = vs_config->getVariable( "data", "movies", "movies" );

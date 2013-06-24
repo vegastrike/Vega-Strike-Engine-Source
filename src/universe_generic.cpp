@@ -352,6 +352,9 @@ static void AppendUnitTables(const string &csvfiles)
             else
                 table->Merge(CSVTable( allUnits, allUnits.GetRoot() ));
             allUnits.Close();
+        } else {
+            std::cerr << "Could not load unit database at " << tmp << std::endl;
+            exit(2);
         }
         if (where2 == string::npos) break;
         pwhere = where+1;
