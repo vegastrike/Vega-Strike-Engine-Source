@@ -145,7 +145,6 @@ static string nextElementString( const string &inp, string::size_type &start, st
     std::pair< string::size_type, string::size_type >rng = nextElementRange( inp, start, end );
     if (rng.second == string::npos)
         return inp.substr( rng.first );
-
     else
         return inp.substr( rng.first, rng.second-rng.first );
 }
@@ -153,23 +152,36 @@ static string nextElementString( const string &inp, string::size_type &start, st
 static int nextElementInt( const string &inp, string::size_type &start, string::size_type end, int def = 0 )
 {
     std::pair< string::size_type, string::size_type >rng = nextElementRange( inp, start, end );
-    return (rng.first == rng.second) ? def : atoi( inp.c_str()+rng.first );
+    if (rng.second == string::npos && rng.first >= inp.length())
+        return def;
+    else if (rng.first == rng.second) 
+        return def;
+    else
+        return atoi( inp.c_str()+rng.first );
 }
 
 static double nextElementFloat( const string &inp, string::size_type &start, string::size_type end, double def = 0 )
 {
     std::pair< string::size_type, string::size_type >rng = nextElementRange( inp, start, end );
-    return (rng.first == rng.second) ? def : atof( inp.c_str()+rng.first );
+    if (rng.second == string::npos && rng.first >= inp.length())
+        return def;
+    else if (rng.first == rng.second) 
+        return def;
+    else
+        return atof( inp.c_str()+rng.first );
 }
 
 static double nextElementBool( const string &inp, string::size_type &start, string::size_type end, bool def = false )
 {
     std::pair< string::size_type, string::size_type >rng = nextElementRange( inp, start, end );
-    return (rng.first
-            == rng.second) ? def : XMLSupport::parse_bool( inp.substr( rng.first,
-                                                                      ( (rng.second
-                                                                         == string::npos) ? string::npos : (rng.second
-                                                                                                            -rng.first) ) ) );
+    if (rng.second == string::npos && rng.first >= inp.length())
+        return def;
+    else if (rng.first == rng.second) 
+        return def;
+    else if (rng.second == string::npos)
+        return XMLSupport::parse_bool( inp.substr( rng.first ) );
+    else
+        return XMLSupport::parse_bool( inp.substr( rng.first, rng.second-rng.first ) );
 }
 
 static string nextElement( string &inp )
@@ -535,8 +547,8 @@ static void AddCarg( Unit *thus, const string &cargos )
             carg.quantity = nextElementInt( cargos, elemstart, elemend );
             carg.mass = nextElementFloat( cargos, elemstart, elemend );
             carg.volume = nextElementFloat( cargos, elemstart, elemend );
-            carg.functionality    = nextElementFloat( cargos, elemstart, elemend );
-            carg.maxfunctionality = nextElementFloat( cargos, elemstart, elemend );
+            carg.functionality    = nextElementFloat( cargos, elemstart, elemend, 1.f );
+            carg.maxfunctionality = nextElementFloat( cargos, elemstart, elemend, 1.f );
             carg.description      = nextElementString( cargos, elemstart, elemend );
             carg.mission          = nextElementBool( cargos, elemstart, elemend, false );
             carg.installed        = nextElementBool( cargos, elemstart, elemend, 
@@ -690,16 +702,16 @@ const std::string EMPTY_STRING( "" );
 
 #if FORCE_OPTIMIZER
 
-#define OPTIM_GET( row, table, variable )                                                      \
+#define OPTIM_GET_DEF( row, table, variable, deflt )                                           \
     ((                                                                                         \
         (table->optimizer_indexes[OPTIMIZER_INDEX(variable)] == CSVTable::optimizer_undefined) \
-        ? EMPTY_STRING                                                                         \
+        ? (deflt)                                                                              \
         : row[ table->optimizer_indexes[OPTIMIZER_INDEX(variable)] ]                           \
     ))
 
 #else
 
-#define OPTIM_GET( row, table, variable )                                    \
+#define OPTIM_GET( row, table, variable, deflt )                             \
     ((                                                                       \
         use_optimizer                                                        \
         ? (                                                                  \
@@ -710,13 +722,15 @@ const std::string EMPTY_STRING( "" );
                     == CSVTable::optimizer_undefined                         \
                    )                                                         \
             )                                                                \
-            ? EMPTY_STRING                                                   \
+            ? (deflt)                                                        \
             : row[table->optimizer_indexes[OPTIMIZER_INDEX(variable )]]      \
         )                                                                    \
         : row[#variable]                                                     \
     ))
 
 #endif
+
+#define OPTIM_GET( rot, table, variable ) OPTIM_GET_DEF( row, table, variable, EMPTY_STRING )
 
 void Unit::LoadRow( CSVRow &row, string modification, string *netxml )
 {
@@ -1344,14 +1358,14 @@ void Unit::LoadRow( CSVRow &row, string modification, string *netxml )
         HudDamage( pImage->cockpit_damage, OPTIM_GET( row, table, Hud_Functionality ) );
         HudDamage( pImage->cockpit_damage+1+MAXVDUS+UnitImages< void >::NUMGAUGES, OPTIM_GET( row, table, Max_Hud_Functionality ) );
     }
-    pImage->LifeSupportFunctionality    = ::stof( OPTIM_GET( row, table, Lifesupport_Functionality ) );
-    pImage->LifeSupportFunctionalityMax = ::stof( OPTIM_GET( row, table, Max_Lifesupport_Functionality ) );
-    pImage->CommFunctionality = ::stof( OPTIM_GET( row, table, Comm_Functionality ) );
-    pImage->CommFunctionalityMax = ::stof( OPTIM_GET( row, table, Max_Comm_Functionality ) );
-    pImage->fireControlFunctionality    = ::stof( OPTIM_GET( row, table, FireControl_Functionality ) );
-    pImage->fireControlFunctionalityMax = ::stof( OPTIM_GET( row, table, Max_FireControl_Functionality ) );
-    pImage->SPECDriveFunctionality = ::stof( OPTIM_GET( row, table, SPECDrive_Functionality ) );
-    pImage->SPECDriveFunctionalityMax   = ::stof( OPTIM_GET( row, table, Max_SPECDrive_Functionality ) );
+    pImage->LifeSupportFunctionality    = ::stof( OPTIM_GET_DEF( row, table, Lifesupport_Functionality, "1" ) );
+    pImage->LifeSupportFunctionalityMax = ::stof( OPTIM_GET_DEF( row, table, Max_Lifesupport_Functionality, "1" ) );
+    pImage->CommFunctionality = ::stof( OPTIM_GET_DEF( row, table, Comm_Functionality, "1" ) );
+    pImage->CommFunctionalityMax = ::stof( OPTIM_GET_DEF( row, table, Max_Comm_Functionality, "1" ) );
+    pImage->fireControlFunctionality    = ::stof( OPTIM_GET_DEF( row, table, FireControl_Functionality, "1" ) );
+    pImage->fireControlFunctionalityMax = ::stof( OPTIM_GET_DEF( row, table, Max_FireControl_Functionality, "1" ) );
+    pImage->SPECDriveFunctionality = ::stof( OPTIM_GET_DEF( row, table, SPECDrive_Functionality, "1" ) );
+    pImage->SPECDriveFunctionalityMax   = ::stof( OPTIM_GET_DEF( row, table, Max_SPECDrive_Functionality, "1" ) );
     computer.slide_start = ::stoi( OPTIM_GET( row, table, Slide_Start ) );
     computer.slide_end   = ::stoi( OPTIM_GET( row, table, Slide_End ) );
     UpgradeUnit( this, OPTIM_GET( row, table, Upgrades ) );
