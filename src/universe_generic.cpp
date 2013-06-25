@@ -338,35 +338,7 @@ int Universe::StarSystemIndex( StarSystem *ss )
 
 static void AppendUnitTables(const string &csvfiles)
 {
-    string::size_type pwhere = 0, where, where2 = 0;
-    CSVTable *table = NULL;
-    while (where2 != string::npos) {
-        where = where2 = csvfiles.find_first_of( " \t\r\n", pwhere );
-        if (where == string::npos)
-            where = csvfiles.length();
-        string tmp = csvfiles.substr( pwhere, where-pwhere );
-        
-        if (!tmp.empty()) {
-            VSFileSystem::vs_dprintf(3, "Opening unit database from '%s'\n", tmp.c_str());
-            
-            VSFile allUnits;
-            VSError err = allUnits.OpenReadOnly( tmp, UnitFile );
-            if (err <= Ok) {
-                VSFileSystem::vs_dprintf(1, "Loading unit database from '%s'\n", tmp.c_str());
-                if (table == NULL)
-                    table = new CSVTable( allUnits, allUnits.GetRoot() );
-                else
-                    table->Merge(CSVTable( allUnits, allUnits.GetRoot() ));
-                allUnits.Close();
-            } else {
-                std::cerr << "Could not load unit database at " << tmp << std::endl;
-                exit(2);
-            }
-        }
-        if (where2 == string::npos) 
-            break;
-        pwhere = where+1;
-    }
+    CSVTable *table = loadCSVTableList(csvfiles, VSFileSystem::UnitFile, true);
     if (table != NULL)
         unitTables.push_back(table);
 }

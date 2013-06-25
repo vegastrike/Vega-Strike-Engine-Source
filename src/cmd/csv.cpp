@@ -180,7 +180,7 @@ CSVTable::Merge( const CSVTable &other )
             key.push_back(it->first);
             local = columns.insert(std::pair<string, int>(it->first, key.size()-1)).first;
         }
-        if (it->second >= colmap.size()) {
+        if (it->second >= int(colmap.size())) {
             std::cerr << "WTF column " << it->second << "?" << std::endl;
             abort();
         }
@@ -299,3 +299,36 @@ void CSVTable::SetupOptimizer( const vector< string > &keys, unsigned int type )
         ColumnExists( keys[i], optimizer_indexes[i] );
 }
 
+CSVTable* loadCSVTableList(const string& csvfiles, VSFileSystem::VSFileType fileType, bool critical)
+{
+    string::size_type pwhere = 0, where, where2 = 0;
+    CSVTable *table = NULL;
+    while (where2 != string::npos) {
+        where = where2 = csvfiles.find_first_of( " \t\r\n", pwhere );
+        if (where == string::npos)
+            where = csvfiles.length();
+        string tmp = csvfiles.substr( pwhere, where-pwhere );
+        
+        if (!tmp.empty()) {
+            VSFileSystem::vs_dprintf(3, "Opening CSV database from '%s'\n", tmp.c_str());
+            
+            VSFileSystem::VSFile thisFile;
+            VSFileSystem::VSError err = thisFile.OpenReadOnly( tmp, fileType );
+            if (err <= VSFileSystem::Ok) {
+                VSFileSystem::vs_dprintf(1, "Loading CSV database from '%s'\n", tmp.c_str());
+                if (table == NULL)
+                    table = new CSVTable( thisFile, thisFile.GetRoot() );
+                else
+                    table->Merge(CSVTable( thisFile, thisFile.GetRoot() ));
+                thisFile.Close();
+            } else if (critical) {
+                std::cerr << "Could not load CSV database at " << tmp << std::endl;
+                exit(2);
+            }
+        }
+        if (where2 == string::npos) 
+            break;
+        pwhere = where+1;
+    }
+    return table;
+}

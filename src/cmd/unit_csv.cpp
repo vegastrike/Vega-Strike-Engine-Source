@@ -1814,18 +1814,16 @@ void UpdateMasterPartList( Unit *ret )
 
 Unit* Unit::makeMasterPartList()
 {
-    static std::string    mpl = vs_config->getVariable( "data", "master_part_list", "master_part_list" );
+    unsigned int i;
+    static std::string mpl = vs_config->getVariable( "data", "master_part_list", "master_part_list" );
+    CSVTable *table = loadCSVTableList(mpl, VSFileSystem::UnknownFile, false);
+    
     Unit *ret = new Unit();
     ret->name = "master_part_list";
-    VSFileSystem::VSFile  mplf;
-    VSFileSystem::VSError err = mplf.OpenReadOnly( mpl, VSFileSystem::UnknownFile );
-    unsigned int i;
-    if (err <= VSFileSystem::Ok) {
-        CSVTable table( mplf, mplf.GetRoot() );
-        mplf.Close();
+    if (table) {
         vsUMap< std::string, int >::const_iterator it;
-        for (it = table.rows.begin(); it != table.rows.end(); ++it) {
-            CSVRow row( &table, it->second );
+        for (it = table->rows.begin(); it != table->rows.end(); ++it) {
+            CSVRow row( table, it->second );
             Cargo  carg;
             carg.content     = row["file"];
             carg.category    = row["categoryname"];
@@ -1836,6 +1834,7 @@ Unit* Unit::makeMasterPartList()
             carg.description = row["description"];
             ret->GetImageInformation().cargo.push_back( carg );
         }
+        delete table;
     }
     UpdateMasterPartList( ret );
     if ( !ret->GetCargo( "Pilot", i ) )     //required items

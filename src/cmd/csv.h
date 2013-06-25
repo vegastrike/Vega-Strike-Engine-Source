@@ -4,10 +4,7 @@
 #include <gnuhash.h>
 
 #include "hashtable.h"
-namespace VSFileSystem
-{
-class VSFile;
-}
+#include "vsfilesystem.h"
 
 // delim should be read as separator and not to be confused with text delimiter see http://creativyst.com/Doc/Articles/CSV/CSV01.htm
 // separator values , and ; while delimiter is listed as quote or "
@@ -77,6 +74,16 @@ public:
         return parent;
     }
 };
+
+/**
+ * Load a space-separated list of CSV files and return a merged
+ * representation of it.
+ * 
+ * @param csvfiles Space-separated list of CSV files
+ * @param critical If true, any error reading any file will result
+ *      in a fatal error and an exit() call.
+ */
+CSVTable * loadCSVTableList(const std::string &csvfiles, VSFileSystem::VSFileType fileType, bool critical);
 
 extern std::vector< CSVTable* >unitTables;
 
