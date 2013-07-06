@@ -24,7 +24,7 @@ void NavigationSystem::DrawCursor( float x, float y, float wid, float hei, const
         GFXDisable( LIGHTING );
         GFXBlendMode( SRCALPHA, INVSRCALPHA );
 
-        const double verts[8 * 3] = {
+        const float verts[8 * 3] = {
             x,          y,          0,
             x,          y-hei,      0,
             x,          y,          0,
@@ -34,7 +34,7 @@ void NavigationSystem::DrawCursor( float x, float y, float wid, float hei, const
             x+0.35*wid, y-0.6*hei,  0,
             x+wid,      y-0.75*hei, 0,
         };
-        GFXDraw( GFXLINE, (const float*)verts, 8 );
+        GFXDraw( GFXLINE, verts, 8 );
 
         GFXEnable( TEXTURE0 );
     }
