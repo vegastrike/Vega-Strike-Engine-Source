@@ -311,7 +311,7 @@ void ParticleTrail::DrawAndUpdate()
     float mytime = GetElapsedTime();
     if (fadeColor) {
         float fadetimef = pfade * mytime;
-        GFXColor fadetime __attribute__((aligned(16))) = GFXColor(fadetimef, fadetimef, fadetimef, fadetimef);
+        GFXColor _ALIGNED(16) fadetime = GFXColor(fadetimef, fadetimef, fadetimef, fadetimef);
         UpdateColor(particleLoc, particleVel, particleColor, fadetime, mytime);
     } else {
         UpdateAlpha(particleLoc, particleVel, particleColor, mytime, pfade);

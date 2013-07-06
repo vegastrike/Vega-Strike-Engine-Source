@@ -16,6 +16,14 @@
 #define __alpr(x) __alprn(x,16)
 #endif
 
+#if defined(__GNUC__)
+#define _ALIGNED(x) __attribute__ ((aligned(x)))
+#else
+#if defined(_MSC_VER)
+#define _ALIGNED(x) __declspec(align(x))
+#endif
+#endif
+
 template <typename T, int ALIGN=16> class aligned_allocator : public std::allocator<T>
 {
 public:
