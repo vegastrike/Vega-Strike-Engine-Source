@@ -317,8 +317,14 @@ void ParticleTrail::DrawAndUpdate()
         UpdateAlpha(particleLoc, particleVel, particleColor, mytime, pfade);
     }
 
+    // Compute alpha for dead particles
+    float minalpha = (ptrans > 0.0f) ? sqrtf(alphaMask / ptrans) : 0.0f;
+    
+    if (nparticles) 
+        VSFileSystem::vs_dprintf(3, "Drawn %d particles, minalpha %f\n", nparticles, minalpha);
+    
     // Quickly remove dead particles at the end
-    while ( !particleColor.empty() && !(particleColor.back().a > alphaMask) ) {
+    while ( !particleColor.empty() && !(particleColor.back().a > minalpha) ) {
         particleVel.pop_back();
         particleLoc.pop_back();
         particleColor.pop_back();
@@ -331,7 +337,7 @@ void ParticleTrail::DrawAndUpdate()
     vector< GFXColor, aligned_allocator<GFXColor> >::iterator col = particleColor.begin();
     vector< float, aligned_allocator<float> >::iterator sz = particleSize.begin();
     while ( col != particleColor.end() ) {
-        if ( !(col->a > alphaMask) ) {
+        if ( !(col->a > minalpha) ) {
             vector< Vector, aligned_allocator<Vector> >::iterator vlast = particleVel.end() - 1;
             vector< QVector, aligned_allocator<QVector> >::iterator loclast = particleLoc.end() - 1;
             vector< GFXColor, aligned_allocator<GFXColor> >::iterator collast = particleColor.end() - 1;
