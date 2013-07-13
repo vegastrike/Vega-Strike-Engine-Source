@@ -211,8 +211,7 @@ bool doNewLine( string::const_iterator begin,
         return true;
     if (*begin == ' ' && !last_row) {
         cur_pos += charWidth( *begin, metrics );
-        *begin++;
-        for (; begin != end && cur_pos <= end_pos && !isspace( *begin ); begin++)
+        for (++begin; begin != end && cur_pos <= end_pos && !isspace( *begin ); ++begin)
             cur_pos += charWidth( *begin, metrics );
         return cur_pos > end_pos;
     }
