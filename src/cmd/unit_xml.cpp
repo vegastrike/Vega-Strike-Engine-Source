@@ -2062,7 +2062,7 @@ void Unit::LoadXML( VSFileSystem::VSFile &f, const char *modifications, string *
     delete xml;
 }
 
-csOPCODECollider* Unit::getCollideTree( const Vector & __restrict__ scale, std::vector< mesh_polygon > * __restrict__ pol )
+csOPCODECollider* Unit::getCollideTree( const Vector & RESTRICT scale, std::vector< mesh_polygon > * RESTRICT pol )
 {
     if (!pol){
 	vector< mesh_polygon > polies;

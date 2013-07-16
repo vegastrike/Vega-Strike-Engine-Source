@@ -1,5 +1,6 @@
 #include <stdlib.h>
 #include "gldrv/sdds.h"
+#include "vs_globals.h"
 
 #ifndef GETL16
 #define GETL16( buf ) ( ( (unsigned short) (buf)[0] )|( (unsigned short) (buf)[1]<<8 ) )
@@ -21,7 +22,7 @@
 
 /*	Software decompression for DDS files, helper functions */
 
-void decode_color_block( unsigned char * __restrict__ dst, unsigned char * __restrict__ src, int w, int h, int rowbytes, TEXTUREFORMAT format )
+void decode_color_block( unsigned char * RESTRICT dst, unsigned char * RESTRICT src, int w, int h, int rowbytes, TEXTUREFORMAT format )
 {
     int i, x, y;
     unsigned int   indexes, idx;
@@ -79,7 +80,7 @@ void decode_color_block( unsigned char * __restrict__ dst, unsigned char * __res
     }
 }
 
-void decode_dxt3_alpha( unsigned char * __restrict__ dst, unsigned char * __restrict__ src, int w, int h, int rowbytes )
+void decode_dxt3_alpha( unsigned char * RESTRICT dst, unsigned char * RESTRICT src, int w, int h, int rowbytes )
 {
     int x, y;
     unsigned char *d;
@@ -96,7 +97,7 @@ void decode_dxt3_alpha( unsigned char * __restrict__ dst, unsigned char * __rest
     }
 }
 
-void decode_dxt5_alpha( unsigned char * __restrict__ dst, unsigned char * __restrict__ src, int w, int h, int bpp, int rowbytes )
+void decode_dxt5_alpha( unsigned char * RESTRICT dst, unsigned char * RESTRICT src, int w, int h, int bpp, int rowbytes )
 {
     int x, y, code;
     unsigned char     *d, a0 = src[0], a1 = src[1];
@@ -121,7 +122,7 @@ void decode_dxt5_alpha( unsigned char * __restrict__ dst, unsigned char * __rest
     }
 }
 
-void ddsDecompress( unsigned char* & __restrict__ buffer, unsigned char* & __restrict__ data, TEXTUREFORMAT internformat, int height, int width )
+void ddsDecompress( unsigned char* & RESTRICT buffer, unsigned char* & RESTRICT data, TEXTUREFORMAT internformat, int height, int width )
 {
     unsigned char *pos_out = NULL, *pos_in = NULL;
     int bpp = 4;

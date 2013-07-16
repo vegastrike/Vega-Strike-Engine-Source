@@ -17,6 +17,12 @@ extern Universe *_Universe;
  * #endif
  */
 
+#ifdef WIN32
+#define RESTRICT __restrict
+#else
+#define RESTRICT __restrict__
+#endif
+
 extern void cleanup();
 extern void VSExit( int code );
 extern bool   STATIC_VARS_DESTROYED;

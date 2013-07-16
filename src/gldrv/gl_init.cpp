@@ -52,6 +52,7 @@
 #ifndef NOMINMAX
 #define NOMINMAX
 #endif //tells VCC not to generate min/max macros
+#define GL_TEXTURE_CUBE_MAP_SEAMLESS_ARB 0x884F // FIXME May need to actually include the GLEW package for this to work.
 #include <windows.h>
 #endif
 #define GL_GLEXT_PROTOTYPES 1

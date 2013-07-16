@@ -330,7 +330,7 @@ bool GameUnit< UnitType >::Explode( bool drawit, float timeit )
         }
     }
     if ( (game_options.eject_cargo_on_blowup > 0) && (this->numCargo() > 0) ) {
-        unsigned int dropcount =  floor( this->numCargo()/game_options.eject_cargo_on_blowup )+1;
+        unsigned int dropcount =  floorf( this->numCargo()/game_options.eject_cargo_on_blowup )+1;
         if ( dropcount > this->numCargo() ) dropcount = this->numCargo();
         for (unsigned int i = 0; i < dropcount; i++)
             this->EjectCargo( this->numCargo()-1 );              //Ejecting the last one is somewhat faster
