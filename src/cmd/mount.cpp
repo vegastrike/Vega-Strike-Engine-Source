@@ -370,21 +370,21 @@ bool Mount::PhysicsAlignedFire( Unit *caller,
             XMLSupport::parse_float( vs_config->getVariable( "audio", "max_range_to_hear_weapon_fire",
                                                              "100000" ) )
             *XMLSupport::parse_float( vs_config->getVariable( "audio", "max_range_to_hear_weapon_fire", "100000" ) );
-        static float weapon_gain = 
+        static float weapon_gain =
             XMLSupport::parse_float( vs_config->getVariable( "audio", "weapon_gain", ".25" ) );
-        static float exterior_weapon_gain = 
+        static float exterior_weapon_gain =
             XMLSupport::parse_float( vs_config->getVariable( "audio", "exterior_weapon_gain", ".35" ) );
-        static float min_weapon_sound_refire = 
+        static float min_weapon_sound_refire =
             XMLSupport::parse_float( vs_config->getVariable( "audio", "min_weapon_sound_refire", ".2" ) );
         float curtime = realTime();
         bool tooquick = ((curtime - last_sound_refire_time) < min_weapon_sound_refire);
         if (!tooquick) {
             last_sound_refire_time = curtime;
-            
+
             QVector sound_pos;
             Vector sound_vel;
             float sound_gain;
-            
+
             if (ips && cp != NULL && cp->GetView() <= CP_RIGHT) {
                 sound_pos = QVector(0, 0, 0);
                 sound_vel = Vector(0, 0, 0);
@@ -394,7 +394,7 @@ bool Mount::PhysicsAlignedFire( Unit *caller,
                 sound_vel = velocity;
                 sound_gain = exterior_weapon_gain;
             }
-            
+
             if ( ( ( (!use_separate_sound)
                     || type->type == weapon_info::BEAM )
                   || ( (!ai_use_separate_sound) && !ips ) ) && !type->isMissile() ) {
@@ -423,7 +423,8 @@ bool Mount::PhysicsAlignedFire( Unit *caller,
                 AUDDeleteSound( snd );
             }
         }
-        return true;
+        if (type->isMissile() && ammo == 0)
+            status = UNCHOSEN;
     }
     return true;
 }
