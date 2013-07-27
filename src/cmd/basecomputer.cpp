@@ -1822,10 +1822,15 @@ void BaseComputer::recalcTitle()
                 const float volumeLeft  = emptyVolume
                                           -( m_currentDisplay
                                             == CARGO ? playerUnit->getCargoVolume() : playerUnit->getUpgradeVolume() );
+                // Cargo weight may render your ship hard to manoeuver, display its effects
+                const float basemass = atof( UniverseUtil::LookupUnitStat( playerUnit->name, "", "Mass" ).c_str() );
+                float massEffect = 0.0;
+                if (basemass > 0)
+                    massEffect = 100 * playerUnit->Mass / basemass;
                 if (showStardate) {
-                    sprintf( playerTitle, "Stardate: %s      Credits: %.2f      Space left: %.6g of %.6g cubic meters", stardate, playerCredits, volumeLeft, emptyVolume );
+                    sprintf( playerTitle, "Stardate: %s      Credits: %.2f      Space left: %.6g of %.6g cubic meters   Mass: %.0f%% (base)", stardate, playerCredits, volumeLeft, emptyVolume, massEffect );
                 } else {
-                    sprintf( playerTitle, "Credits: %.2f      Space left: %.6g of %.6g cubic meters", playerCredits, volumeLeft, emptyVolume );
+                    sprintf( playerTitle, "Credits: %.2f      Space left: %.6g of %.6g cubic meters   Mass: %.0f%% (base)", playerCredits, volumeLeft, emptyVolume, massEffect);
                 }
             }
             break;
