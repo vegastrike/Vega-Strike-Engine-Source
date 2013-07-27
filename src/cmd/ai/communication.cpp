@@ -31,7 +31,7 @@ FSM::FSM(const std::string& filename)
         nodes.push_back( Node::MakeNode( "No contraband detected: You may proceed.", 0 ) );
         nodes.push_back( Node::MakeNode( "Contraband detected! All units close and engage!", 0 ) );
         nodes.push_back( Node::MakeNode( "Your Course is deviating! Maintain Course!", 0 ) );
-        nodes.push_back( Node::MakeNode( "Request Clearence To Land.", 0 ) );
+        nodes.push_back( Node::MakeNode( "Request Clearance To Land.", 0 ) );
         nodes.push_back( Node::MakeNode( "*hit*", -.2 ) );
         vector< unsigned int >edges;
         unsigned int i;
@@ -299,7 +299,7 @@ std::string FSM::GetEdgesString( unsigned int curstate )
     static bool print_docking =
         XMLSupport::parse_bool( vs_config->getVariable( "graphics", "hud", "print_request_docking", "true" ) );
     if (print_docking)
-        retval += "0. Request Docking Clearence";
+        retval += "0. Request Docking Clearance";
     return retval;
 }
 
