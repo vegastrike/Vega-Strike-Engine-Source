@@ -174,6 +174,7 @@ voidEXPORT_UTIL1( setSpeed, float, speed )
 EXPORT_UTIL0( float, maxSpeed )
 EXPORT_UTIL0( float, maxAfterburnerSpeed )
 voidEXPORT_UTIL0( setMissionRelevant )
+voidEXPORT_UTIL0( unsetMissionRelevant )
 
 voidEXPORT_UTIL5( orbit, UnitWrapper, orbitee, float, speed, QVector, R, QVector, S, QVector, center )
 WRAPPED0( int, RepairCost, 0 )

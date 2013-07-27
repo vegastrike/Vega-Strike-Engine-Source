@@ -7,6 +7,7 @@ using std::string;
 
 namespace UnitUtil {
 	void setMissionRelevant(Unit* my_unit);
+	void unsetMissionRelevant(Unit* my_unit);
 	string getFactionName (const Unit *my_unit);
 	int getFactionIndex (const Unit *my_unit);
 	void setFactionIndex (Unit *my_unit,int factionname);
