@@ -5,7 +5,6 @@
 #include "pythonmission.h"
 #include "python/python_compile.h"
 #include <string>
-#include "pythonmission.h"
 #include "python/init.h"
 
 #include "vsfilesystem.h"
