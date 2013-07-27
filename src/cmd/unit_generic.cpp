@@ -2743,17 +2743,23 @@ void Unit::AddVelocity( float difficulty )
         XMLSupport::parse_float( vs_config->getVariable( "physics", "computerwarprampuptime", "10" ) );
     static float warprampdowntime    = XMLSupport::parse_float( vs_config->getVariable( "physics", "warprampdowntime", "0.5" ) );
     float  lastWarpField = graphicOptions.WarpFieldStrength;
-    
+
     bool   playa = _Universe->isPlayerStarship( this ) ? true : false;
     float  warprampuptime = playa ? humanwarprampuptime : compwarprampuptime;
     //Warp Turning on/off
     if (graphicOptions.WarpRamping) {
-        //Warp Turning on
-        if (graphicOptions.InWarp == 1)
+        float  oldrampcounter = graphicOptions.RampCounter;
+        if (graphicOptions.InWarp == 1)             //Warp Turning on
             graphicOptions.RampCounter = warprampuptime;
-        //Warp Turning off
-        else
+        else                                        //Warp Turning off
             graphicOptions.RampCounter = warprampdowntime;
+        //switched mid - ramp time; we also know old mode's ramptime != 0, or there won't be ramping
+        if (oldrampcounter != 0 && graphicOptions.RampCounter != 0 ) {
+            if (graphicOptions.InWarp == 1)             //Warp is turning on before it turned off
+                graphicOptions.RampCounter *= (1 - oldrampcounter/warprampdowntime);
+            else                                        //Warp is turning off before it turned on
+                graphicOptions.RampCounter *= (1 - oldrampcounter/warprampuptime);
+        }
         graphicOptions.WarpRamping = 0;
     }
     if (graphicOptions.InWarp == 1 || graphicOptions.RampCounter != 0) {
