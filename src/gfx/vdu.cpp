@@ -1734,11 +1734,14 @@ int VDU::DrawVDUObjective( void *obj, int offset )
 void DrawObjectivesTextPlane( TextPlane *tp, int scrolloffset, Unit *parent )
 {
     std::string rez( "\n" );
+    std::string rezcompleted( "" );
     for (unsigned int i = 0; i < active_missions.size(); ++i)
         if ( !active_missions[i]->objectives.empty() ) {
             rez += "#FFFFFF";
             static bool force_anonymous_missions =
                 XMLSupport::parse_bool( vs_config->getVariable( "general", "force_anonymous_mission_names", "true" ) );
+            static bool completed_objectives_last =
+                XMLSupport::parse_bool( vs_config->getVariable( "graphics", "hud", "completed_objectives_last", "true" ) );
             if (active_missions[i]->mission_name.empty() || force_anonymous_missions)
                 rez += "Mission "+XMLSupport::tostring( (int) i )+"\n";
             else
@@ -1746,12 +1749,19 @@ void DrawObjectivesTextPlane( TextPlane *tp, int scrolloffset, Unit *parent )
             vector< Mission::Objective >::iterator j = active_missions[i]->objectives.begin();
             for (; j != active_missions[i]->objectives.end(); ++j)
                 if (j->getOwner() == NULL || j->getOwner() == parent) {
-                    if ( (*j).objective.length() ) {
-                        rez += GetColorFromSuccess( (*j).completeness );
-                        rez += (*j).objective;
-                        rez += '\n';
+                    if ( j->objective.length() ) {
+                        std::string tmp( "" );
+                        tmp += GetColorFromSuccess( j->completeness );
+                        tmp += j->objective;
+                        tmp += '\n';
+                        if (j->completeness && completed_objectives_last)
+                            rezcompleted += tmp;
+                        else
+                            rez += tmp;
                     }
                 }
+            // Put completed mission objectives at the end as they are less interesting
+            rez += rezcompleted;
             rez += '\n';
         }
     static float background_alpha =
