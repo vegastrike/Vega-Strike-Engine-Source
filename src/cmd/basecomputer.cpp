@@ -4050,7 +4050,7 @@ Cargo CreateCargoForOwnerStarship( const Cockpit *cockpit, const Unit *base, int
     cargo.quantity = 1;
     cargo.volume   = 1;
     cargo.price    = 0;
-    
+
     string locationSystemName = cockpit->GetUnitSystemName(i);
     string locationBaseName = cockpit->GetUnitBaseName(i);
     string destinationSystemName = _Universe->activeStarSystem()->getFileName();
@@ -4058,32 +4058,32 @@ Cargo CreateCargoForOwnerStarship( const Cockpit *cockpit, const Unit *base, int
 
     bool needsJumpTransport = (locationSystemName != destinationSystemName);
     bool needsInsysTransport = (locationBaseName != destinationBaseName);
-    
+
     static const float shipping_price_base =
         XMLSupport::parse_float( vs_config->getVariable( "physics", "shipping_price_base", "0" ) );
     static const float shipping_price_insys =
         XMLSupport::parse_float( vs_config->getVariable( "physics", "shipping_price_insys", "1000" ) );
     static const float shipping_price_perjump =
         XMLSupport::parse_float( vs_config->getVariable( "physics", "shipping_price_perjump", "25000" ) );
-        
+
     cargo.price = shipping_price_base;
     cargo.content  = cockpit->GetUnitFileName(i);
     cargo.category = "starships/My_Fleet";
-    
+
     if (needsJumpTransport) {
         vector< string > jumps;
         _Universe->getJumpPath(
-            locationSystemName, 
-            destinationSystemName, 
+            locationSystemName,
+            destinationSystemName,
             jumps);
         VSFileSystem::vs_dprintf(3, "Player ship needs transport from %s to %s across %d systems",
-            locationBaseName.c_str(), 
-            destinationSystemName.c_str(), 
+            locationBaseName.c_str(),
+            destinationSystemName.c_str(),
             jumps.size());
         cargo.price += shipping_price_perjump * (jumps.size() - 1);
     } else if (needsInsysTransport) {
         VSFileSystem::vs_dprintf(3, "Player ship needs insys transport from %s to %s",
-            locationBaseName.c_str(), 
+            locationBaseName.c_str(),
             destinationBaseName.c_str());
         cargo.price += shipping_price_insys;
     }
@@ -4186,12 +4186,12 @@ class PriceSort {
     bool reverse;
 
 public:
-    PriceSort(const vector<float> &_price, bool _reverse) 
+    PriceSort(const vector<float> &_price, bool _reverse)
         : price(_price)
         , reverse(_reverse)
     {
     }
-    
+
     bool operator()(size_t a, size_t b)
     {
         if (reverse)
@@ -4201,29 +4201,29 @@ public:
     }
 };
 
-void trackPrice(int whichplayer, const Cargo &item, float price, const string &systemName, const string &baseName, 
+void trackPrice(int whichplayer, const Cargo &item, float price, const string &systemName, const string &baseName,
     /*out*/ vector<string> &highest, /*out*/ vector<string> &lowest)
 {
     static size_t toprank = (size_t)
-        XMLSupport::parse_int( vs_config->getVariable( "general", "trade_interface_tracks_prices_toprank", "10" ) ); 
+        XMLSupport::parse_int( vs_config->getVariable( "general", "trade_interface_tracks_prices_toprank", "10" ) );
 
-    VSFileSystem::vs_dprintf(1, "Ranking item %s/%s at %s/%s\n", 
+    VSFileSystem::vs_dprintf(1, "Ranking item %s/%s at %s/%s\n",
         item.category.get().c_str(), item.content.get().c_str(),
         systemName.c_str(), baseName.c_str());
     fflush(stderr);
-    
-    // Recorded prices are always sorted, so we first do a quick check to avoid 
+
+    // Recorded prices are always sorted, so we first do a quick check to avoid
     // triggering savegame serialization without reason
     string itemkey = string(item.category) + "/" + item.content;
     string hilock = itemkey + "?hi?loc";
     string lolock = itemkey + "?lo?loc";
     string hipricek = itemkey + "?hi?pcs";
     string lopricek = itemkey + "?lo?pcs";
-    
+
     // First record the given item's price and update the ranking lists
     {
         string locname = "#b#" + baseName + "#-b# in the #b#" + systemName + "#-b# system";
-        
+
         {
             bool resort = false;
             {
@@ -4231,9 +4231,9 @@ void trackPrice(int whichplayer, const Cargo &item, float price, const string &s
                 const vector<string> &recordedHighestLocs = getStringList(whichplayer, hilock);
                 const vector<float> &recordedHighestPrices = getSaveData(whichplayer, hipricek);
                 vector<string>::const_iterator prev = std::find(
-                    recordedHighestLocs.begin(), recordedHighestLocs.end(), 
+                    recordedHighestLocs.begin(), recordedHighestLocs.end(),
                     locname);
-                    
+
                 if (prev != recordedHighestLocs.end()) {
                     size_t index = prev - recordedHighestLocs.begin();
                     putSaveData(whichplayer, hipricek, index, price);
@@ -4245,35 +4245,35 @@ void trackPrice(int whichplayer, const Cargo &item, float price, const string &s
                     resort = true;
                 }
             }
-            
+
             if (resort) {
                 // Re-get lists, the ones we got earlier could be empty stubs
                 const vector<string> &locs = getStringList(whichplayer, hilock);
                 const vector<float> &prices = getSaveData(whichplayer, hipricek);
                 vector<size_t> indices;
-                
+
                 indices.resize(mymin(prices.size(),locs.size()));
                 { for (size_t i=0; i<indices.size(); ++i)
                     indices[i] = i; }
-                
+
                 std::sort(indices.begin(), indices.end(), PriceSort(prices, true));
-                
+
                 vector<string> newlocs;
                 vector<float> newprices;
-                
+
                 newlocs.reserve(indices.size());
                 newprices.reserve(indices.size());
                 { for (size_t i=0; i<indices.size() && i<toprank; ++i) {
                     newlocs.push_back(locs[indices[i]]);
                     newprices.push_back(prices[indices[i]]);
                 } }
-                
+
                 // Save new rank list
                 saveDataList(whichplayer, hipricek, newprices);
                 saveStringList(whichplayer, hilock, newlocs);
             }
         }
-        
+
         {
             bool resort = false;
             {
@@ -4281,9 +4281,9 @@ void trackPrice(int whichplayer, const Cargo &item, float price, const string &s
                 const vector<string> &recordedLowestLocs = getStringList(whichplayer, lolock);
                 const vector<float> &recordedLowestPrices = getSaveData(whichplayer, lopricek);
                 vector<string>::const_iterator prev = std::find(
-                    recordedLowestLocs.begin(), recordedLowestLocs.end(), 
+                    recordedLowestLocs.begin(), recordedLowestLocs.end(),
                     locname);
-                    
+
                 if (prev != recordedLowestLocs.end()) {
                     size_t index = prev - recordedLowestLocs.begin();
                     putSaveData(whichplayer, lopricek, index, price);
@@ -4295,29 +4295,29 @@ void trackPrice(int whichplayer, const Cargo &item, float price, const string &s
                     resort = true;
                 }
             }
-            
+
             if (resort) {
                 // Re-get lists, the ones we got earlier could be empty stubs
                 const vector<string> &locs = getStringList(whichplayer, lolock);
                 const vector<float> &prices = getSaveData(whichplayer, lopricek);
                 vector<size_t> indices;
-                
+
                 indices.resize(mymin(prices.size(),locs.size()));
                 { for (size_t i=0; i<indices.size(); ++i)
                     indices[i] = i; }
-                
+
                 std::sort(indices.begin(), indices.end(), PriceSort(prices, false));
-                
+
                 vector<string> newlocs;
                 vector<float> newprices;
-                
+
                 newlocs.reserve(indices.size());
                 newprices.reserve(indices.size());
                 { for (size_t i=0; i<indices.size() && i<toprank; ++i) {
                     newlocs.push_back(locs[indices[i]]);
                     newprices.push_back(prices[indices[i]]);
                 } }
-                
+
                 // Save new rank list
                 saveDataList(whichplayer, lopricek, newprices);
                 saveStringList(whichplayer, lolock, newlocs);
@@ -4331,51 +4331,51 @@ void trackPrice(int whichplayer, const Cargo &item, float price, const string &s
         const vector<string> &recordedLowestLocs = getStringList(whichplayer, lolock);
         const vector<float> &recordedHighestPrices = getSaveData(whichplayer, hipricek);
         const vector<float> &recordedLowestPrices = getSaveData(whichplayer, lopricek);
-        
+
         string prefix = "   ";
         char conversionBuffer[128];
-        
+
         VSFileSystem::vs_dprintf(1,"Tracking data:\n");
         VSFileSystem::vs_dprintf(1,"  highest locs: (%d)\n", recordedHighestLocs.size());
         { for (size_t i=0; i < recordedHighestLocs.size(); ++i) {
             VSFileSystem::vs_dprintf(1, "    %d : %s\n", i, recordedHighestLocs[i].c_str());
         } }
-        
+
         VSFileSystem::vs_dprintf(1,"  highest prices: (%d)\n", recordedHighestPrices.size());
         { for (size_t i=0; i < recordedHighestPrices.size(); ++i) {
             VSFileSystem::vs_dprintf(1, "    %d : %.2f\n", i, recordedHighestPrices[i]);
         } }
-        
+
         VSFileSystem::vs_dprintf(1,"  loest locs: (%d)\n", recordedLowestLocs.size());
         { for (size_t i=0; i < recordedLowestLocs.size(); ++i) {
             VSFileSystem::vs_dprintf(1, "    %d : %s\n", i, recordedLowestLocs[i].c_str());
         } }
-        
+
         VSFileSystem::vs_dprintf(1,"  lowest prices: (%d)\n", recordedLowestPrices.size());
         { for (size_t i=0; i < recordedLowestPrices.size(); ++i) {
             VSFileSystem::vs_dprintf(1, "    %d : %.2f\n", i, recordedLowestPrices[i]);
         } }
-        
+
         fflush(stderr);
-        
-        
+
+
         highest.clear();
         highest.resize(recordedHighestPrices.size());
         { for (size_t i=0; i < recordedHighestPrices.size(); ++i) {
             string &text = highest[i];
             PRETTY_ADD( "", recordedHighestPrices[i], 2 );
             text += " (at " + recordedHighestLocs[i] + ")";
-            
+
             VSFileSystem::vs_dprintf(1, "Highest item %s\n", text.c_str());
         } }
-        
+
         lowest.clear();
         lowest.resize(recordedLowestPrices.size());
         { for (size_t i=0; i < recordedLowestPrices.size(); ++i) {
             string &text = lowest[i];
             PRETTY_ADD( "", recordedLowestPrices[i], 2 );
             text += " (at " + recordedLowestLocs[i] + ")";
-            
+
             VSFileSystem::vs_dprintf(1, "Lowest item %s\n", text.c_str());
         } }
     }
@@ -4384,26 +4384,26 @@ void trackPrice(int whichplayer, const Cargo &item, float price, const string &s
 string buildCargoDescription( const Cargo &item, BaseComputer &computer, float price )
 {
     static bool trackBestPrices =
-        XMLSupport::parse_bool( vs_config->getVariable( "general", "trade_interface_tracks_prices", "true" ) ); 
+        XMLSupport::parse_bool( vs_config->getVariable( "general", "trade_interface_tracks_prices", "true" ) );
 
     string desc;
-    
+
     if (trackBestPrices && computer.m_base.GetUnit() != NULL) {
         int cp = _Universe->whichPlayerStarship( computer.m_player.GetUnit() );
         vector<string> highest, lowest;
-        
+
         const string &baseName = (computer.m_base.GetUnit()->isUnit() == PLANETPTR) ?
               computer.m_base.GetUnit()->name.get()
             : computer.m_base.GetUnit()->getFullname();
-        
+
         trackPrice(cp, item, price, UniverseUtil::getSystemName(), baseName, highest, lowest );
-        
+
         if (highest.size()) {
             desc += "#n##n##b#Highest prices seen#-b#:";
             for (vector<string>::const_iterator i=highest.begin(); i!=highest.end(); ++i)
                 desc += *i;
         }
-        
+
         if (lowest.size()) {
             desc += "#n##n##b#Lowest prices seen#-b#:";
             for (vector<string>::const_iterator i=lowest.begin(); i!=lowest.end(); ++i)
@@ -4568,7 +4568,7 @@ bool buyShip( Unit *baseUnit,
                     for (int j = 0; j < 2; ++j) {
                         for (int i = playerUnit->numCargo()-1; i >= 0; --i) {
                             Cargo c = playerUnit->GetCargo( i );
-                            if (    (c.mission != 0 && j == 0) 
+                            if (    (c.mission != 0 && j == 0)
                                  || (c.mission == 0 && j == 1 && (!myfleet || Network) && c.GetCategory().find( "upgrades" ) != 0) ) {
                                 for (int k = c.quantity; k > 0; --k) {
                                     c.quantity = k;
@@ -4799,10 +4799,10 @@ void prettyPrintFloat( char *buffer, float f, int digitsBefore, int digitsAfter,
         buffer[bufferPos] = 0;
         return;
     }
-    
+
     if (bufferPos < bufferLen)
         buffer[bufferPos++] = '.';
-    
+
     temp = f;
     for (int i = 0; bufferPos < (bufferLen-1) && i < digitsAfter; i++) {
         temp *= 10;
@@ -5739,34 +5739,43 @@ void showUnitStats( Unit *playerUnit, string &text, int subunitlevel, int mode, 
                                      wi->Damage*VSDM,
                                      0,
                                      wi->type == weapon_info::BEAM ? "MJ/s" : "MJ" );
-                    }
-                    PRETTY_ADDU( statcolor+"   Range: #-c", wi->Range, 0, "meters" );
+                        if (wi->PhaseDamage > 0)
+                            PRETTY_ADDU( statcolor+"   Phase damage: #-c",
+                                         wi->PhaseDamage*VSDM,
+                                         0,
+                                         wi->type == weapon_info::BEAM ? "MJ/s" : "MJ" );
+                   }
                     PRETTY_ADDU( statcolor+"   Energy usage: #-c",
                                  wi->EnergyRate*RSconverter,
                                  0,
                                  wi->type == weapon_info::BEAM ? "MJ/s" : "MJ/shot" );
-
                     PRETTY_ADDU( statcolor+"   Refire delay: #-c", wi->Refire(), 2, "seconds" );
-                    if (wi->PhaseDamage > 0)
-                        PRETTY_ADDU( statcolor+"   Phase damage: #-c", wi->PhaseDamage*VSDM, 2, "MJ" );
                     //display info specific to some weapons type
+
+                    PRETTY_ADDU( statcolor+"   Range: #-c", wi->Range, 0, "meters" );
+                    if ( ( 100000*(1.0-wi->Longrange)/(wi->Range) ) > 0.00001 ) {
+                        PRETTY_ADD( statcolor+"   Range attenuation factor: #-c",
+                                        100000*(1.0-wi->Longrange)/(wi->Range),
+                                        2 );
+                        text += "% per km";
+                    }
+
                     switch (wi->type)
                     {
                     case weapon_info::BALL:                     //may need ammo
                     case weapon_info::BOLT:
                         if (wi->Damage > 0)
                             totalWeaponDamage += ( wi->Damage/wi->Refire() );                              //damage per second
+                        if (wi->PhaseDamage > 0)
+                            totalWeaponDamage += ( wi->PhaseDamage/wi->Refire() );                              //damage per second
+
                         PRETTY_ADDU( statcolor+"   Exit velocity: #-c", wi->Speed, 0, "meters/second" );
-                        if ( ( 100000*(1.0-wi->Longrange)/(wi->Range) ) > 0.00001 ) {
-                            PRETTY_ADD( statcolor+"   Range attenuation factor: #-c",
-                                        100000*(1.0-wi->Longrange)/(wi->Range),
-                                        2 );
-                            text += "% per km";
+                        if ( playerUnit->mounts[i].ammo != -1) {
+                            if ( (wi->size & weapon_info::SPECIALMISSILE) == 0)
+                                PRETTY_ADD( statcolor+"   Rounds remaining: #-c", playerUnit->mounts[i].ammo, 0 );
+                            else
+                                PRETTY_ADD( statcolor+"   Rockets remaining: #-c", playerUnit->mounts[i].ammo, 0 );
                         }
-                        if ( playerUnit->mounts[i].ammo != -1 && (lookupMountSize( wi->size ) != "SPECIAL-MISSILE") )
-                            PRETTY_ADD( statcolor+"   Rounds remaining: #-c", playerUnit->mounts[i].ammo, 0 );
-                        else if (lookupMountSize( wi->size ) == "SPECIAL-MISSILE")
-                            PRETTY_ADD( statcolor+"   Rockets remaining: #-c", playerUnit->mounts[i].ammo, 0 );
                         totalWeaponEnergyUsage += ( wi->EnergyRate/wi->Refire() );
                         break;
                     case weapon_info::PROJECTILE:                     //need ammo
@@ -5783,18 +5792,39 @@ void showUnitStats( Unit *playerUnit, string &text, int subunitlevel, int mode, 
                     case weapon_info::BEAM:
                         if (wi->Damage > 0)
                             totalWeaponDamage += wi->Damage;
+                        if (wi->PhaseDamage > 0)
+                            totalWeaponDamage += wi->PhaseDamage;
                         PRETTY_ADDU( statcolor+"   Beam stability: #-c", wi->Stability, 2, "seconds" );
-                        if ( ( 100000*(1.0-wi->Longrange)/(wi->Range) ) > 0.00001 ) {
-                            PRETTY_ADD( statcolor+"   Range attenuation factor: #-c",
-                                        100000*(1.0-wi->Longrange)/(wi->Range),
-                                        2 );
-                            text += "% per km";
-                        }
+                        if ( playerUnit->mounts[i].ammo != -1)
+                            PRETTY_ADD( statcolor+"   Shots remaining: #-c", playerUnit->mounts[i].ammo, 0 );
                         totalWeaponEnergyUsage += wi->EnergyRate;
                         break;
                     default:
                         break;
                     }
+                    if ( (mode!=0) &&
+                         (wi->type != weapon_info::PROJECTILE) &&
+                         (wi->Refire()>0) &&
+                         ( (wi->Damage != 0) || (wi->PhaseDamage != 0) || (wi->EnergyRate != 0) ))
+                    {
+                        text += "#n##n#"+prefix+statcolor+"   Average for continuous firing:#-c";
+                        float shot_cycle_mul = wi->type==weapon_info::BEAM ?
+                                                    wi->Stability / ( wi->Refire() + wi->Stability ) :
+                                                    1 / wi->Refire();
+                        if (wi->Damage != 0)
+                            PRETTY_ADDU( statcolor+"   Damage: #-c",
+                                     wi->Damage*VSDM*shot_cycle_mul,
+                                     2, "MJ/s" );
+                        if (wi->PhaseDamage != 0)
+                            PRETTY_ADDU( statcolor+"   Phase damage: #-c",
+                                         wi->PhaseDamage*VSDM*shot_cycle_mul,
+                                         2, "MJ/s" );
+                        if (wi->EnergyRate != 0)
+                            PRETTY_ADDU( statcolor+"   Energy usage: #-c",
+                                         wi->EnergyRate*RSconverter*shot_cycle_mul,
+                                         2, "MJ/s" );
+                   }
+                            text += "#n#";
                 }
             }
         } else                  //end mountpoint list
@@ -5825,7 +5855,7 @@ void showUnitStats( Unit *playerUnit, string &text, int subunitlevel, int mode, 
             text += "#n##c1:.3:.3#"+prefix
                     +
                     "WARNING: Capacitor banks are overdrawn: downgrade shield, upgrade reactor or purchase reactor capacitance!#-c";
-        } 
+        }
         if (uj.drive != -2 && playerUnit->WarpCapData() < uj.energy) {
             text += "#n##c1:.3:.3#"+prefix
                     +
