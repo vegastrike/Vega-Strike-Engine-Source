@@ -482,6 +482,22 @@ static float mymin( float a, float b )
     return a < b ? a : b;
 }
 
+inline void WarpRampOff (Unit *un, bool rampdown)
+{
+    if (un->graphicOptions.InWarp == 1) {
+        un->graphicOptions.InWarp = 0;
+        if (rampdown)
+            un->graphicOptions.WarpRamping = 1;
+    }
+}
+inline void CautiousWarpRampOn (Unit *un)
+{
+    if ((un->graphicOptions.InWarp == 0) && (un->graphicOptions.RampCounter == 0)) { // don't restart warp during ramp-down - avoid shaking
+        un->graphicOptions.InWarp = 1;
+        un->graphicOptions.WarpRamping = 1;
+    }
+}
+
 bool useJitteryAutopilot( Unit *parent, Unit *target, float minaccel )
 {
     static float specInterdictionLimit =
@@ -535,7 +551,10 @@ void AutoLongHaul::Execute()
     QVector destinationdirection = (destination-myposition);       //find vector from us to destination
     double  destinationdistance  = destinationdirection.Magnitude();
     destinationdirection = destinationdirection*(1./destinationdistance);       //this is a direction, so it is normalize
-    if (parent->graphicOptions.WarpFieldStrength < enough_warp_for_cruise && parent->graphicOptions.InWarp) {
+
+    StraightToTarget = true;    // free to fly
+
+    if ((parent->graphicOptions.WarpFieldStrength < enough_warp_for_cruise) && ( parent->graphicOptions.RampCounter == 0)) {
         //face target unless warp ramping is done and warp is less than some intolerable ammt
         Unit *obstacle = NULL;
         float maxmultiplier = CalculateNearestWarpUnit( parent, FLT_MAX, &obstacle, compensate_for_interdiction );         //find the unit affecting our spec
@@ -546,14 +565,16 @@ void AutoLongHaul::Execute()
             inside_landing_zone = currently_inside_landing_zone;
             MakeLinearVelocityOrder();
         }
-        if (maxmultiplier < enough_warp_for_cruise && obstacle != NULL && obstacle != target) {
+        if ( obstacle != NULL && obstacle != target) {
             //if it exists and is not our destination
             QVector obstacledirection = (obstacle->LocalPosition()-myposition);               //find vector from us to obstacle
             double  obstacledistance  = obstacledirection.Magnitude();
 
             obstacledirection = obstacledirection*(1./obstacledistance);               //normalize the obstacle direction as well
             float   angle = obstacledirection.Dot( destinationdirection );
-            if (obstacledistance-obstacle->rSize() < destinationdistance-target->rSize() && angle > warp_behind_angle) {
+            if (       (obstacledistance-obstacle->rSize() < destinationdistance-target->rSize())
+                    && (angle > warp_behind_angle)) {
+                StraightToTarget = false;
                 //if our obstacle is closer than obj and the obstacle is not behind us
                 QVector planetdest   = destination-obstacle->LocalPosition();                 //find the vector from planet to dest
                 QVector planetme     = -obstacledirection;                 //obstacle to me
@@ -574,12 +595,8 @@ void AutoLongHaul::Execute()
                     QVector olddestination = myposition+destinationdirection*finaldetourdistance;                     //destination direction in the same magnitude as the newdestination from the ship
                     destination = newdestination*(1-weight)+olddestination*weight;                       //use the weight to combine our direction and the dest
                 }
-                StraightToTarget = false;
-            } else {
-                StraightToTarget = true;
             }
-        } else {StraightToTarget = true; }} else if (parent->graphicOptions.WarpFieldStrength >= enough_warp_for_cruise) {
-        StraightToTarget = true;
+        }
     }
     if (parent->graphicOptions.InWarp == 0 && parent->graphicOptions.RampCounter == 0)
         deactivatewarp = false;
@@ -587,9 +604,9 @@ void AutoLongHaul::Execute()
     float minaccel =
         mymin( parent->limits.lateral, mymin( parent->limits.vertical, mymin( parent->limits.forward, parent->limits.retro ) ) );
     if (mass) minaccel /= mass;
+    QVector cfacing = parent->cumulative_transformation_matrix.getR();         //velocity.Cast();
+    float   speed   = cfacing.Magnitude();
     if ( StraightToTarget && useJitteryAutopilot( parent, target, minaccel ) ) {
-        QVector cfacing = parent->cumulative_transformation_matrix.getR();         //velocity.Cast();
-        float   speed   = cfacing.Magnitude();
         if (speed > .01)
             cfacing = cfacing*(1./speed);
         static float dotLimit =
@@ -599,18 +616,26 @@ void AutoLongHaul::Execute()
         if (cfacing.Dot( destinationdirection ) < dotLimit)          //if wanting to face target but overshooting.
             deactivatewarp = true;              //turn off drive
     }
+    static float min_warpfield_to_enter_warp =
+        XMLSupport::parse_float( vs_config->getVariable( "AI", "min_warp_to_try", "1.5" ) );
+    if (parent->GetMaxWarpFieldStrength(1) < min_warpfield_to_enter_warp)
+        deactivatewarp = true;
+    float maxspeed   = mymax (speed, parent->graphicOptions.WarpFieldStrength*parent->GetComputerData().max_combat_ab_speed);
+    double dis     = UnitUtil::getSignificantDistance( parent, target );
+    float time_to_destination = dis/maxspeed;
+
     static bool rampdown = XMLSupport::parse_bool( vs_config->getVariable( "physics", "autopilot_ramp_warp_down", "true" ) );
+    static float warprampdowntime    = XMLSupport::parse_float( vs_config->getVariable( "physics", "warprampdowntime", "0.5" ) );
+    float time_to_stop = SIMULATION_ATOM;
+    if (rampdown)
+        time_to_stop += warprampdowntime;
+    if (time_to_destination <= time_to_stop)
+        deactivatewarp = true;
     if (DistanceWarrantsWarpTo( parent,
                                 UnitUtil::getSignificantDistance( parent, target ), false ) && deactivatewarp == false) { \
-        if (parent->graphicOptions.InWarp == 0) {
-            parent->graphicOptions.InWarp = 1;
-            parent->graphicOptions.WarpRamping = 1;
-        }
-    } else if (parent->graphicOptions.InWarp == 1) {
-        parent->graphicOptions.InWarp = 0;
-        if (rampdown)
-            parent->graphicOptions.WarpRamping = 1;
-    }
+        CautiousWarpRampOn( parent );
+    } else
+        WarpRampOff( parent, rampdown );
     SetDest( destination );
     bool combat_mode = parent->GetComputerData().combat_mode;
     parent->GetComputerData().combat_mode = !inside_landing_zone;     //turn off limits in landing zone
@@ -623,11 +648,10 @@ void AutoLongHaul::Execute()
     static float enemy_distance_to_stop =
         XMLSupport::parse_float( vs_config->getVariable( "physics", "auto_pilot_termination_distance_enemy", "24000" ) );
     static bool  do_auto_finish = XMLSupport::parse_bool( vs_config->getVariable( "physics", "autopilot_terminate", "true" ) );
-    double dis     = UnitUtil::getSignificantDistance( parent, target );
     bool   stopnow = false;
-    float  speed   = parent->GetComputerData().max_combat_ab_speed;
-    if (speed && parent->limits.retro) {
-        float time_to_destination = dis/speed;         //conservative
+    maxspeed   = parent->GetComputerData().max_combat_ab_speed;
+    if (maxspeed && parent->limits.retro) {
+        float time_to_destination = dis/maxspeed;         //conservative
         float time_to_stop = speed*mass/parent->limits.retro;
         if (time_to_destination <= time_to_stop)
             stopnow = true;
@@ -635,11 +659,7 @@ void AutoLongHaul::Execute()
     if ( do_auto_finish
         && ( stopnow || dis < distance_to_stop || (target->Target() == parent && dis < enemy_distance_to_stop) ) ) {
         parent->autopilotactive = false;
-        if (parent->graphicOptions.InWarp == 1) {
-            parent->graphicOptions.InWarp = 0;
-            if (rampdown)
-                parent->graphicOptions.WarpRamping = 1;
-        }
+        WarpRampOff( parent, rampdown );
         done = true;
     }
 }
