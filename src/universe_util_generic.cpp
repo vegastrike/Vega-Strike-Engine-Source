@@ -189,6 +189,8 @@ Cargo getRandCargo( int quantity, string category )
         if (Begin < End) {
             unsigned int i = Begin+( rand()%(End-Begin) );
             ret = &mpl->GetCargo( i );
+        } else {
+            VSFileSystem::vs_dprintf(1, "Cargo category %s not found\n", category.c_str());
         }
     } else if ( mpl->numCargo() ) {
         for (unsigned int i = 0; i < 500; ++i) {
