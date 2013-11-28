@@ -158,9 +158,9 @@ static string strip_white( const string &s )
     
     string::size_type end = s.find_last_not_of(" \t\r\n");
     if (end == string::npos)
-        end = s.length();
-    
-    return s.substr(start, end-start);
+        return s.substr(start);
+    else
+        return s.substr(start, end+1-start);
 }
 
 void 
@@ -184,6 +184,7 @@ CSVTable::Merge( const CSVTable &other )
             std::cerr << "WTF column " << it->second << "?" << std::endl;
             abort();
         }
+        VSFileSystem::vs_dprintf(2, "  %s (%d) -> %d\n", it->first.c_str(), it->second, local->second);
         colmap[it->second] = local->second;
     }
     
@@ -192,7 +193,7 @@ CSVTable::Merge( const CSVTable &other )
         std::vector<std::string> orig_table;
         orig_table.swap(table);
         std::vector<std::string>::const_iterator orig_it = orig_table.begin();
-        std::string empty;
+        const std::string empty;
         
         VSFileSystem::vs_dprintf(1, "Reshaping %d columns into %d\n", orig_cols, columns.size());
         table.reserve(rows.size() * key.size());
