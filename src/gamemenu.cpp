@@ -281,7 +281,7 @@ void GameMenu::createControls()
     StaticDisplay  *baseTitle     = new StaticDisplay;
     baseTitle->setRect( Rect( -.96, .83, 1.9, .1 ) );
     baseTitle->setText( "Vega Strike menu" );
-    static GFXColor baseNameColor = getConfigColor( "base_name_color", GFXColor( .1, .8, .1 ) );
+    static GFXColor baseNameColor = vs_config->getColor( "base_name_color", GFXColor( .1, .8, .1 ) );
     baseTitle->setTextColor( baseNameColor );
     baseTitle->setColor( GUI_CLEAR );
     baseTitle->setFont( Font( .07, 2 ) );

@@ -392,9 +392,9 @@ static void GetLights( const vector< GFXLight > &origlights, vector< GFXLightLoc
         assert( tint < (int) origlights.size() );
         lloc.ligh    = origlights[tint];
         lloc.islocal = (numel > 1 && isloc == 'l');
-        
+
         lloc.ligh.setSize(lightSize);
-        
+
         curlights.push_back( lloc );
         while ( isspace( *st ) )
             ++st;
@@ -492,12 +492,33 @@ void StarSystem::beginElement( const string &name, const AttributeList &attribut
     bool isdest = false;
 
     xml->cursun.k = 0;
+    static GFXColor planet_mat_ambient   = vs_config->getColor( "default", "planet_mat_ambient",
+                                           GFXColor( 1.0,1.0,1.0,1.0 ) );
+    static GFXColor planet_mat_diffuse   = vs_config->getColor( "default", "planet_mat_diffuse",
+                                           GFXColor( 1.0,1.0,1.0,1.0 ) );
+    static GFXColor planet_mat_specular  = vs_config->getColor( "default", "planet_mat_specular",
+                                           GFXColor( 0.0,0.0,0.0,1.0 ) );
+    static GFXColor planet_mat_emissive = vs_config->getColor( "default", "planet_mat_emmissive",
+                                           GFXColor( 0.0,0.0,0.0,1.0 ) );
     GFXMaterial ourmat;
     GFXGetMaterial( 0, ourmat );
-    vs_config->getColor( "planet_mat_ambient", &ourmat.ar );
-    vs_config->getColor( "planet_mat_diffuse", &ourmat.dr );
-    vs_config->getColor( "planet_mat_specular", &ourmat.sr );
-    vs_config->getColor( "planet_mat_emmissive", &ourmat.er );
+    ourmat.ar=planet_mat_ambient.r;
+    ourmat.ag=planet_mat_ambient.g;
+    ourmat.ab=planet_mat_ambient.b;
+    ourmat.aa=planet_mat_ambient.a;
+    ourmat.dr=planet_mat_diffuse.r;
+    ourmat.dg=planet_mat_diffuse.g;
+    ourmat.db=planet_mat_diffuse.b;
+    ourmat.da=planet_mat_diffuse.a;
+    ourmat.sr=planet_mat_specular.r;
+    ourmat.sg=planet_mat_specular.g;
+    ourmat.sb=planet_mat_specular.b;
+    ourmat.sa=planet_mat_specular.a;
+    ourmat.sr=planet_mat_emissive.r;
+    ourmat.sg=planet_mat_emissive.g;
+    ourmat.sb=planet_mat_emissive.b;
+    ourmat.sa=planet_mat_emissive.a;
+
     int     numwraps = 1;
     float   scalex   = 1;
     vector< string >dest;
@@ -1165,7 +1186,7 @@ addlightprop:
             case GRAVITY:
                 gravity = parse_float( (*iter).value );
                 break;
-                
+
             case OVERRIDE:
                 {
                     string::size_type eqpos = (*iter).value.find_first_of('=');
@@ -1184,8 +1205,8 @@ addlightprop:
         if (xml->unitlevel > 2) {
             assert( xml->moons.size() != 0 );
             fprintf(stderr, "Creating planet %s with texture %s and technique %s - unitlevel > 2\n", fullname.c_str(), filename.c_str(), technique.c_str());
-            Unit *un = xml->moons[xml->moons.size()-1]->beginElement( R, S, velocity, ComputeRotVel( rotvel, R, S ), 
-                                                                      position, gravity, radius, 
+            Unit *un = xml->moons[xml->moons.size()-1]->beginElement( R, S, velocity, ComputeRotVel( rotvel, R, S ),
+                                                                      position, gravity, radius,
                                                                       filename, technique, unitname, blendSrc, blendDst, dest,
                                                                       xml->unitlevel-1, ourmat, curlights, false,
                                                                       faction
@@ -1202,13 +1223,13 @@ addlightprop:
             fprintf(stderr, "Creating planet %s with texture %s and technique %s - unitlevel <= 2\n", fullname.c_str(), filename.c_str(), technique.c_str());
             xml->moons.push_back( ( planet =
                                        UnitFactory::createPlanet( R, S, velocity,
-                                                                  ComputeRotVel( rotvel, R, S ), 
-                                                                  position, gravity, radius, 
-                                                                  filename, technique, unitname, 
+                                                                  ComputeRotVel( rotvel, R, S ),
+                                                                  position, gravity, radius,
+                                                                  filename, technique, unitname,
                                                                   blendSrc, blendDst, dest, xml->cursun.Cast()
                                                                   +xml->systemcentroid.Cast(),
                                                                   NULL, ourmat, curlights, faction
-                                                                  != 0 ? faction : FactionUtil::GetFactionIndex( 
+                                                                  != 0 ? faction : FactionUtil::GetFactionIndex(
                                                                         UniverseUtil::GetGalaxyFaction( truncatedfilename ) ),
                                                                   fullname,
                                                                   insideout ) ) );
@@ -1217,9 +1238,9 @@ addlightprop:
             xml->moons.back()->SetOwner( getTopLevelOwner() );
             planet->SetSerial( serial );
             planet->applyTechniqueOverrides(paramOverrides);
-            
+
             break;
-            
+
         }
         break;
     case CONDITION:
@@ -1382,7 +1403,7 @@ addlightprop:
                 un->SetAngularVelocity( ComputeRotVel( rotvel, R, S ) ); //FIXME un de-referenced before allocation
             } else {
                 if ( (elem == BUILDING || elem == VEHICLE) && xml->ct == NULL && xml->parentterrain != NULL ) {
-                    Unit *b = UnitFactory::createBuilding( 
+                    Unit *b = UnitFactory::createBuilding(
                             xml->parentterrain, elem == VEHICLE, filename.c_str(), false, faction, string("") );
                     b->SetSerial( serial );
                     b->SetPosAndCumPos( xml->cursun.Cast()+xml->systemcentroid.Cast() );
@@ -1394,7 +1415,7 @@ addlightprop:
                         dest.clear();
                     }
                 } else if ( (elem == BUILDING || elem == VEHICLE) && xml->ct != NULL ) {
-                    Unit *b = UnitFactory::createBuilding( 
+                    Unit *b = UnitFactory::createBuilding(
                             xml->ct, elem == VEHICLE, filename.c_str(), false, faction );
                     b->SetSerial( serial );
                     b->SetPosAndCumPos( xml->cursun.Cast()+xml->systemcentroid.Cast() );

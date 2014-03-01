@@ -12,17 +12,9 @@
 
 using XMLSupport::tostring;
 
-static GFXColor getSphereColor()
-{
-    float    color[4];
-    vs_config->getColor( "planet_ambient", color );
-    GFXColor tmp( color[0], color[1], color[2], color[3] );
-    return tmp;
-}
-
 void SphereMesh::ProcessDrawQueue( int whichpass, int whichdrawqueue, bool zsort, const QVector &sortctr )
 {
-    static GFXColor spherecol( getSphereColor() );
+    static GFXColor spherecol = vs_config->getColor( "planet_ambient" );
     GFXColor tmpcol( 0, 0, 0, 1 );
     GFXGetLightContextAmbient( tmpcol );
     GFXLightContextAmbient( spherecol );

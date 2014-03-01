@@ -31,6 +31,7 @@
 #include "xml_support.h"
 #include "easydom.h"
 #include <map>
+#include "gfxlib_struct.h"
 
 using std::string;
 using std::map;
@@ -70,12 +71,11 @@ public:
     float hatswitch_margin[MAX_HATSWITCHES];
     int   hatswitch_axis[MAX_HATSWITCHES];
     int   hatswitch_joystick[MAX_HATSWITCHES];
-    void getColor( configNode*node, string name, float color[4], bool have_color = false );
-    void getColor( string section, string name, float color[4], bool have_color = false );
-    void gethColor( string section, string name, float color[4], int hexcolor );
-    void getColor( string name, float color[4], bool have_color = false )
+    GFXColor getColor( configNode*node, string name, GFXColor default_color = GFXColor( 1, 1, 1, 1 ) );
+    GFXColor getColor( string section, string name, GFXColor default_color = GFXColor( 1, 1, 1, 1 ) );
+    inline GFXColor getColor( string name, GFXColor default_color = GFXColor( 1, 1, 1, 1 ) )
     {
-        getColor( "default", name, color, have_color );
+        return getColor( "default", name, default_color );
     }
     string getVariable( string section, string name, string defaultvalue );
     string getVariable( string section, string subsection, string name, string defaultvalue );

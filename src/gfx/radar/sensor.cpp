@@ -8,17 +8,6 @@
 
 extern Unit *getTopLevelOwner(); // WTF... located in star_system_generic.cpp
 
-namespace
-{
-
-GFXColor RetrColor( const std::string &name, GFXColor def = GFXColor( 1, 1, 1, 1 ) )
-{
-    vs_config->getColor( name, &def.r );
-    return def;
-}
-
-} // anonymous namespace
-
 namespace Radar
 {
 
@@ -273,16 +262,16 @@ GFXColor Sensor::GetColor(const Track& track) const
 {
     assert(player);
 
-    static GFXColor friendColor  = RetrColor("friend", GFXColor(-1, -1, -1, -1));
-    static GFXColor enemyColor   = RetrColor("enemy", GFXColor(-1, -1, -1, -1));
-    static GFXColor neutralColor = RetrColor("neutral", GFXColor(-1, -1, -1, -1));
-    static GFXColor baseColor    = RetrColor("base", GFXColor( -1, -1, -1, -1 ));
-    static GFXColor planetColor  = RetrColor("planet", GFXColor( -1, -1, -1, -1 ));
-    static GFXColor jumpColor    = RetrColor("jump", GFXColor( 0, 1, 1, .8 ));
-    static GFXColor starColor    = RetrColor("star", GFXColor( 1, 1, 1, 1 ));
-    static GFXColor missileColor = RetrColor("missile", GFXColor( .25, 0, .5, 1 ));
-    static GFXColor cargoColor   = RetrColor("cargo", GFXColor( .6, .2, 0, 1 ));
-    static GFXColor noColor      = RetrColor("black_and_white", GFXColor( .5, .5, .5 ));
+    static GFXColor friendColor  = vs_config->getColor("friend", GFXColor(-1, -1, -1, -1));
+    static GFXColor enemyColor   = vs_config->getColor("enemy", GFXColor(-1, -1, -1, -1));
+    static GFXColor neutralColor = vs_config->getColor("neutral", GFXColor(-1, -1, -1, -1));
+    static GFXColor baseColor    = vs_config->getColor("base", GFXColor( -1, -1, -1, -1 ));
+    static GFXColor planetColor  = vs_config->getColor("planet", GFXColor( -1, -1, -1, -1 ));
+    static GFXColor jumpColor    = vs_config->getColor("jump", GFXColor( 0, 1, 1, .8 ));
+    static GFXColor starColor    = vs_config->getColor("star", GFXColor( 1, 1, 1, 1 ));
+    static GFXColor missileColor = vs_config->getColor("missile", GFXColor( .25, 0, .5, 1 ));
+    static GFXColor cargoColor   = vs_config->getColor("cargo", GFXColor( .6, .2, 0, 1 ));
+    static GFXColor noColor      = vs_config->getColor("black_and_white", GFXColor( .5, .5, .5 ));
 
     Track::Type::Value trackType = track.GetType();
     ThreatLevel::Value threatLevel = IdentifyThreat(track);

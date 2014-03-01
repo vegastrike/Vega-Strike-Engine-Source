@@ -139,44 +139,44 @@ static bool color_insufficient_money_flag = false;
 
 static GFXColor NO_MONEY_COLOR()
 {
-    static GFXColor NMC = getConfigColor( "no_money", GFXColor( 1, 1, .3, 1 ) );
+    static GFXColor NMC = vs_config->getColor( "no_money", GFXColor( 1, 1, .3, 1 ) );
     return NMC;       //Start out with bogus color.
 }
 
 //Make the variable static, so it won't print so many annoying messages!
 static GFXColor PROHIBITED_COLOR()
 {
-    static GFXColor PU = getConfigColor( "prohibited_upgrade", GFXColor( 1, .1, 0, 1 ) );
+    static GFXColor PU = vs_config->getColor( "prohibited_upgrade", GFXColor( 1, .1, 0, 1 ) );
     return PU;
 }
 
 static GFXColor DOWNGRADE_OR_NONCOMPAT_COLOR()
 {
-    static GFXColor DNC = getConfigColor( "downgrade_or_noncompatible", GFXColor( .75, .5, .5, 1 ) );
+    static GFXColor DNC = vs_config->getColor( "downgrade_or_noncompatible", GFXColor( .75, .5, .5, 1 ) );
     return DNC;
 }
 
 static GFXColor NO_ROOM_COLOR()
 {
-    static GFXColor NRFU = getConfigColor( "no_room_for_upgrade", GFXColor( 1, 0, 1, 1 ) );
+    static GFXColor NRFU = vs_config->getColor( "no_room_for_upgrade", GFXColor( 1, 0, 1, 1 ) );
     return NRFU;
 }
 
 static GFXColor ITEM_DESTROYED_COLOR()
 {
-    static GFXColor IDC = getConfigColor( "upgrade_item_destroyed", GFXColor( 0.2, 0.2, 0.2, 1 ) );
+    static GFXColor IDC = vs_config->getColor( "upgrade_item_destroyed", GFXColor( 0.2, 0.2, 0.2, 1 ) );
     return IDC;
 }
 
 //Color of the text of a category.
 static GFXColor CATEGORY_TEXT_COLOR()
 {
-    static GFXColor CTC = getConfigColor( "base_category_color", GFXColor( 0, .75, 0, 1 ) );
+    static GFXColor CTC = vs_config->getColor( "base_category_color", GFXColor( 0, .75, 0, 1 ) );
     return CTC;
 }
 static GFXColor MISSION_COLOR()
 {
-    static GFXColor MiC = getConfigColor( "base_mission_color", GFXColor( .66, .2, 0, 1 ) );
+    static GFXColor MiC = vs_config->getColor( "base_mission_color", GFXColor( .66, .2, 0, 1 ) );
     return MiC;
 }
 
@@ -185,7 +185,7 @@ static const float MODE_BUTTON_SPACE = 0.03;
 //Default color in CargoColor.
 static GFXColor DEFAULT_UPGRADE_COLOR()
 {
-    static GFXColor DuC = getConfigColor( "base_upgrade_color", GFXColor( 1, 1, 1, 1 ) );
+    static GFXColor DuC = vs_config->getColor( "base_upgrade_color", GFXColor( 1, 1, 1, 1 ) );
     return DuC;
 }
 
@@ -513,7 +513,7 @@ void BaseComputer::constructControls( void )
         StaticDisplay  *baseTitle     = new StaticDisplay;
         baseTitle->setRect( Rect( -.96, .76, 1.9, .08 ) );
         baseTitle->setText( "ERROR" );
-        static GFXColor baseNameColor = getConfigColor( "base_name_color", GFXColor( .1, .8, .1 ) );
+        static GFXColor baseNameColor = vs_config->getColor( "base_name_color", GFXColor( .1, .8, .1 ) );
         baseTitle->setTextColor( baseNameColor );
         baseTitle->setColor( GUI_CLEAR );
         baseTitle->setFont( Font( .07, 1.75 ) );
@@ -523,7 +523,7 @@ void BaseComputer::constructControls( void )
 
         //Player info title.
         StaticDisplay  *playerTitle     = new StaticDisplay;
-        static GFXColor basePlayerColor = getConfigColor( "base_player_color", GFXColor( .7, .7, .9 ) );
+        static GFXColor basePlayerColor = vs_config->getColor( "base_player_color", GFXColor( .7, .7, .9 ) );
         playerTitle->setRect( Rect( -.96, .69, 1.9, .07 ) );
         playerTitle->setTextColor( basePlayerColor );
         playerTitle->setColor( GUI_CLEAR );
@@ -532,7 +532,7 @@ void BaseComputer::constructControls( void )
         //Put it on the window.
         window()->addControl( playerTitle );
 
-        static GFXColor saveLoadColor = getConfigColor( "base_save_load_color", GFXColor( .75, 0, 0 ) );
+        static GFXColor saveLoadColor = vs_config->getColor( "base_save_load_color", GFXColor( .75, 0, 0 ) );
         //Options button.
         NewButton *options = new NewButton;
         options->setRect( Rect( .64, .85, .32, .1 ) );
@@ -552,7 +552,7 @@ void BaseComputer::constructControls( void )
         //Put the button on the window.
         window()->addControl( options );
     }
-    static GFXColor doneColor = getConfigColor( "base_done_color", GFXColor( .75, 0, 0 ) );
+    static GFXColor doneColor = vs_config->getColor( "base_done_color", GFXColor( .75, 0, 0 ) );
     //Done button.
     NewButton *done = new NewButton;
     done->setRect( Rect( .74, .71, .22, .1 ) );
@@ -568,7 +568,7 @@ void BaseComputer::constructControls( void )
 
     //Mode button.
     NewButton *mode = new NewButton;
-    static GFXColor mode_color = getConfigColor( "base_mode_color", GFXColor( 0, .5, 0 ) );
+    static GFXColor mode_color = vs_config->getColor( "base_mode_color", GFXColor( 0, .5, 0 ) );
     mode->setRect( Rect( -.96, .86, .24, .09 ) );
     mode->setLabel( "ERROR" );
     mode->setColor( GFXColor( mode_color.r, mode_color.g, mode_color.b, .25 ) );
@@ -1542,7 +1542,7 @@ void BaseComputer::constructControls( void )
         NewButton      *playerInfo = new NewButton;
         playerInfo->setRect( Rect( -.40, .52, .27, .09 ) );
         playerInfo->setLabel( "Player Info" );
-        static GFXColor pinfo_col  = getConfigColor( "player_info", GFXColor( 0, .4, 0 ) );
+        static GFXColor pinfo_col  = vs_config->getColor( "player_info", GFXColor( 0, .4, 0 ) );
         playerInfo->setCommand( "ShowPlayerInfo" );
 
         playerInfo->setColor( GFXColor( pinfo_col.r, pinfo_col.g, pinfo_col.b, .25 ) );

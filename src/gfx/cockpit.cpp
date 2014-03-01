@@ -56,6 +56,7 @@
 #include "cmd/unit_const_cache.h"
 #include "options.h"
 #include "soundcontainer_aldrv.h"
+#include "configxml.h"
 
 
 
@@ -69,12 +70,6 @@ using VSFileSystem::SoundFile;
 #define VERYNEAR_CONST (0.004f)
 /*so that znear/zfar are not too close to max/min values, and account for off-center cockpits */
 #define COCKPITZ_HEADROOM (1.01f)
-
-static GFXColor RetrColor( const string &name, GFXColor def = GFXColor( 1, 1, 1, 1 ) )
-{
-    vs_config->getColor( name, &def.r );
-    return def;
-}
 
 static soundContainer disableautosound;
 static soundContainer enableautosound;
@@ -130,12 +125,12 @@ void GameCockpit::DrawNavigationSymbol( const Vector &Loc, const Vector &P, cons
 {
     static float crossthick =
         XMLSupport::parse_float( vs_config->getVariable( "graphics", "hud", "NavCrossLineThickness", "1" ) );                        //1.05;
-    
+
     GFXLineWidth( crossthick );
     size = .125*size;
     GFXBlendMode( SRCALPHA, INVSRCALPHA );
     GFXEnable( SMOOTH );
-    
+
     static VertexBuilder<> verts;
     verts.clear();
     verts.insert( Loc+P*size );
@@ -159,7 +154,7 @@ void GameCockpit::DrawNavigationSymbol( const Vector &Loc, const Vector &P, cons
     verts.insert( Loc-.9*Q*size+.125*P*size );
     verts.insert( Loc-.9*Q*size-.125*P*size );
     GFXDraw( GFXLINE, verts );
-    
+
     GFXDisable( SMOOTH );
     GFXLineWidth( 1 );
 }
@@ -274,7 +269,7 @@ inline void DrawOneTargetBox( const QVector &Loc,
             float r = rSize < absmin ? absmin : rSize;
 
             verts.clear();
-            
+
             verts.insert( Loc+CamP*(innerdis*r) );
             verts.insert( Loc+CamP*(outerdis*r) );
 
@@ -326,13 +321,13 @@ inline void DrawOneTargetBox( const QVector &Loc,
 
             TLockBox *= r1Size;
             SLockBox *= r1Size;
-            
+
             max *= rSize*.75*endreticle;
             verts.clear();
             if (lock_percent == 0) {
                 const QVector qCamP(CamP.Cast());
                 const QVector qCamQ(CamQ.Cast());
-                
+
                 verts.insert( Loc+qCamQ*max*lockline );
                 verts.insert( Loc+qCamQ*max );
                 verts.insert( Loc+Origin+TLockBox );
@@ -353,13 +348,13 @@ inline void DrawOneTargetBox( const QVector &Loc,
                 verts.insert( Loc-Origin1+SLockBox );
                 verts.insert( Loc-Origin1 );
                 verts.insert( Loc-Origin1-TLockBox );
-                
+
                 static const unsigned char indices[] = {
                     0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 7, 8,
                     8, 9, 9, 10, 10, 11, 11, 12, 12, 11, 11, 13, 13, 14,
                     14, 15, 15, 5, 16, 7, 7, 17, 17, 18, 18, 19, 19, 1
                 };
-                
+
                 GFXDrawElements( GFXLINE, verts, indices, sizeof(indices) / sizeof(*indices) );
             } else {
                 verts.insert( Loc+Origin+TLockBox );
@@ -374,11 +369,11 @@ inline void DrawOneTargetBox( const QVector &Loc,
                 verts.insert( Loc-Origin1+SLockBox );
                 verts.insert( Loc-Origin1 );
                 verts.insert( Loc-Origin1-TLockBox );
-                
+
                 static const unsigned char indices[] = {
                     0, 1, 1, 2, 3, 4, 4, 5, 6, 7, 7, 8, 9, 10, 10, 11
                 };
-                
+
                 GFXDrawElements( GFXLINE, verts, indices, sizeof(indices) / sizeof(*indices) );
             }
         }
@@ -387,30 +382,24 @@ inline void DrawOneTargetBox( const QVector &Loc,
     GFXDisable( SMOOTH );
 }
 
-static GFXColor DockBoxColor( const string &name, GFXColor deflt = GFXColor(1,1,1,1) )
-{
-    vs_config->getColor( name, &deflt.r, true );
-    return deflt;
-}
-
 inline void DrawDockingBoxes( Unit *un, const Unit *target, const Vector &CamP, const Vector &CamQ, const Vector &CamR )
 {
     if ( target->IsCleared( un ) ) {
         GFXBlendMode( SRCALPHA, INVSRCALPHA );
-        static GFXColor dockboxstop = DockBoxColor( "docking_box_halt", GFXColor(1,0,0,1) );
-        static GFXColor dockboxgo   = DockBoxColor( "docking_box_proceed", GFXColor(0,1,.5,1) );
+        static GFXColor dockboxstop = vs_config->getColor( "docking_box_halt", GFXColor(1,0,0,1) );
+        static GFXColor dockboxgo   = vs_config->getColor( "docking_box_proceed", GFXColor(0,1,.5,1) );
+        static GFXColor waypointcolor = vs_config->getColor( "docking_box_waypoint", GFXColor(0, 1, 1, 0.3) );
         const vector< DockingPorts >d = target->DockingPortLocations();
         for (unsigned int i = 0; i < d.size(); i++)
         {
             float rad = d[i].GetRadius() / sqrt( 2.0 );
-            QVector dockpos = Transform( 
+            QVector dockpos = Transform(
                     target->GetTransformation(),
-                    d[i].GetPosition().Cast() 
+                    d[i].GetPosition().Cast()
                 ) - _Universe->AccessCamera()->GetPosition();
 
             if (!d[i].IsDockable())
             {
-                static GFXColor waypointcolor = DockBoxColor( "docking_box_waypoint", GFXColor(0, 1, 1, 0.3) );
                 if (waypointcolor.a > 0.01) {
                     GFXColorf( waypointcolor );
                     DrawOneTargetBox( dockpos, rad, CamP, CamQ, CamR, 1,
@@ -418,7 +407,6 @@ inline void DrawDockingBoxes( Unit *un, const Unit *target, const Vector &CamP, 
                 }
                 continue;
             }
-            
             GFXDisable( DEPTHTEST );
             GFXDisable( DEPTHWRITE );
             GFXColorf( dockboxstop );
@@ -499,7 +487,7 @@ inline void DrawITTSLine( QVector fromLoc, QVector aimLoc, GFXColor linecolor=GF
     GFXEnable( SMOOTH );
     GFXBlendMode( SRCALPHA, INVSRCALPHA );
     const float verts[2 * 3] = {
-        fromLoc.x, fromLoc.y, fromLoc.z, 
+        fromLoc.x, fromLoc.y, fromLoc.z,
         aimLoc.x,   aimLoc.y,  aimLoc.z,
     };
     GFXDraw( GFXLINE, verts, 2 );
@@ -562,15 +550,15 @@ void GameCockpit::DrawTargetBox(const Radar::Sensor& sensor)
         if (draw_line_to_targets_target && targets_target != NULL) {
             QVector ttLoc = targets_target->Position();
             const float verts[3 * 3] = {
-                myLoc.x, myLoc.y, myLoc.z, 
-                Loc.x,   Loc.y,   Loc.z, 
+                myLoc.x, myLoc.y, myLoc.z,
+                Loc.x,   Loc.y,   Loc.z,
                 ttLoc.x, ttLoc.x, ttLoc.x,
             };
             GFXDraw( GFXLINESTRIP, verts, 3 );
         } else {
             const float verts[2 * 3] = {
-                myLoc.x, myLoc.y, myLoc.z, 
-                Loc.x,   Loc.y,   Loc.z, 
+                myLoc.x, myLoc.y, myLoc.z,
+                Loc.x,   Loc.y,   Loc.z,
             };
             GFXDraw( GFXLINESTRIP, verts, 2 );
         }
@@ -624,7 +612,7 @@ void GameCockpit::DrawTargetBox(const Radar::Sensor& sensor)
         if (ITTS_averageguns) {
             player->getAverageGunSpeed( speed, range, mrange );
             iLoc = target->PositionITTS( PlayerPosition, PlayerVelocity, speed, steady_itts ) - offs;
-            if (draw_line_to_itts) 
+            if (draw_line_to_itts)
                 DrawITTSLine(Loc, iLoc, trackcolor);
             DrawITTSMark(scatter, p, q, iLoc, trackcolor);
         }
@@ -632,7 +620,7 @@ void GameCockpit::DrawTargetBox(const Radar::Sensor& sensor)
             int nummounts = player->GetNumMounts();
             if (draw_line_to_itts) {
                 for (int i = 0; i < nummounts; i++) {
-                    if ( (player->mounts[i].status == Mount::ACTIVE) 
+                    if ( (player->mounts[i].status == Mount::ACTIVE)
                         && (ITTS_for_beams || (player->mounts[i].type->type != weapon_info::BEAM))
                         && (ITTS_for_locks || (player->mounts[i].type->LockTime == 0)) )
                     {
@@ -643,7 +631,7 @@ void GameCockpit::DrawTargetBox(const Radar::Sensor& sensor)
             }
             for (int i = 0; i < nummounts; i++) {
                 if ( (player->mounts[i].status == Mount::ACTIVE)
-                    && (ITTS_for_beams || (player->mounts[i].type->type != weapon_info::BEAM)) 
+                    && (ITTS_for_beams || (player->mounts[i].type->type != weapon_info::BEAM))
                     && (ITTS_for_locks || (player->mounts[i].type->LockTime == 0)) )
                 {
                     mntcolor = MountColor( &player->mounts[i] );
@@ -663,7 +651,7 @@ void GameCockpit::DrawCommunicatingBoxes()
     for (unsigned int i = 0; i < vdu.size(); ++i) {
         Unit *target = vdu[i]->GetCommunicating();
         if (target) {
-            GFXColor black_and_white = DockBoxColor( "communicating" );
+            static GFXColor black_and_white = vs_config->getColor( "communicating" );
             QVector Loc( target->Position()-_Universe->AccessCamera()->GetPosition() );
             GFXDisable( TEXTURE0 );
             GFXDisable( TEXTURE1 );
@@ -689,7 +677,7 @@ void GameCockpit::DrawTurretTargetBoxes(const Radar::Sensor& sensor)
     GFXDisable( DEPTHTEST );
     GFXDisable( DEPTHWRITE );
     GFXDisable( LIGHTING );
-    
+
     static VertexBuilder<> verts;
 
     //This avoids rendering the same target box more than once
@@ -739,9 +727,9 @@ void GameCockpit::DrawTurretTargetBoxes(const Radar::Sensor& sensor)
 
         verts.insert( Loc+(-CamQ).Cast()*rSize*1.3 );
         verts.insert( Loc+(-CamQ).Cast()*rSize*.8 );
-        
+
         GFXDraw( GFXLINESTRIP, verts );
-        
+
         GFXDisable( SMOOTH );
     }
 }
@@ -795,7 +783,7 @@ void GameCockpit::DrawTacticalTargetBox(const Radar::Sensor& sensor)
         verts.insert( Loc+( (CamP).Cast()+(CamQ).Cast() )*rSize*(foci-fudge) );
 
         GFXDraw( GFXLINE, verts );
-        
+
         glLineWidth( (int) 1 );         //temp
     }
 }
@@ -1163,7 +1151,7 @@ float GameCockpit::LookupUnitStat( int stat, Unit *target )
 
     case UnitImages< void >::WARPFIELDSTRENGTH:
         return target->graphicOptions.WarpFieldStrength;
-    
+
     case UnitImages< void >::MAXWARPFIELDSTRENGTH:
         return target->GetMaxWarpFieldStrength();
 
@@ -1414,16 +1402,16 @@ void GameCockpit::DrawTargetGauges( Unit *target )
 GameCockpit::LastState::LastState()
 {
     processing_time = 0;
-    
-    jumpok = jumpnotok = 
+
+    jumpok = jumpnotok =
     specon = specoff =
     asapon = asapoff =
     asap_dockon = asap_dockoff =
     asap_dock_avail =
     dock =
-    dock_avail = 
-    lock = missilelock = 
-    eject = 
+    dock_avail =
+    lock = missilelock =
+    eject =
     flightcompon = flightcompoff = false;
 }
 
@@ -1434,7 +1422,7 @@ void GameCockpit::TriggerEvents( Unit *un )
         return;
     else
         last.processing_time = curtime;
-    
+
     VSFileSystem::vs_dprintf(3, "Processing events\n");
     for (EVENTID event = EVENTID_FIRST; event < NUM_EVENTS; event = (EVENTID)(event+1)) {
         GameSoundContainer *sound = static_cast<GameSoundContainer*>(GetSoundForEvent(event));
@@ -1456,13 +1444,13 @@ void GameCockpit::TriggerEvents( Unit *un )
                             sound->stop(); \
                     } \
                 } while(0)
-            
+
             #define MODAL_IMAGE_TRIGGER(image, itrigger, btrigger, lastvar) \
                 MODAL_TRIGGER(#image, btrigger, LookupUnitStat(UnitImages< void >::image, un) == UnitImages< void >::itrigger, lastvar)
-            
+
             #define MODAL_RAWIMAGE_TRIGGER(image, itrigger, btrigger, lastvar) \
                 MODAL_TRIGGER(#image, btrigger, LookupUnitStat(UnitImages< void >::image, un) itrigger, lastvar)
-            
+
             switch((int)event) {
             case WARP_READY:
                 MODAL_RAWIMAGE_TRIGGER(MAXWARPFIELDSTRENGTH, >= 2, true, warpready);
@@ -1497,18 +1485,18 @@ void GameCockpit::TriggerEvents( Unit *un )
             case ASAP_DOCKING_ENGAGED:
                 {
                     float candock = LookupUnitStat(UnitImages< void >::CANDOCK_MODAL, un);
-                    MODAL_TRIGGER("ASAP_DOCKING", true, 
-                                (un->autopilotactive && (   candock == UnitImages< void >::READY 
-                                                         || candock == UnitImages< void >::AUTOREADY)), 
+                    MODAL_TRIGGER("ASAP_DOCKING", true,
+                                (un->autopilotactive && (   candock == UnitImages< void >::READY
+                                                         || candock == UnitImages< void >::AUTOREADY)),
                                 asap_dockon);
                 }
                 break;
             case ASAP_DOCKING_DISENGAGED:
                 {
                     float candock = LookupUnitStat(UnitImages< void >::CANDOCK_MODAL, un);
-                    MODAL_TRIGGER("ASAP_DOCKING", false, 
-                                (un->autopilotactive && (   candock == UnitImages< void >::READY 
-                                                         || candock == UnitImages< void >::AUTOREADY)), 
+                    MODAL_TRIGGER("ASAP_DOCKING", false,
+                                (un->autopilotactive && (   candock == UnitImages< void >::READY
+                                                         || candock == UnitImages< void >::AUTOREADY)),
                                 asap_dockoff);
                 }
                 break;
@@ -1885,21 +1873,13 @@ GameCockpit::GameCockpit( const char *file, Unit *parent, const std::string &pil
 
     oaccel     = Vector( 0, 0, 0 );
 
-    friendly   = GFXColor( -1, -1, -1, -1 );
-    enemy      = GFXColor( -1, -1, -1, -1 );
-    neutral    = GFXColor( -1, -1, -1, -1 );
-    targeted   = GFXColor( -1, -1, -1, -1 );
-    targetting = GFXColor( -1, -1, -1, -1 );
-    planet     = GFXColor( -1, -1, -1, -1 );
+    enemy      = vs_config->getColor( "enemy",           GFXColor(1.0 ,0.0,0.0,1.0) ); // red
+    friendly   = vs_config->getColor( "friend",          GFXColor(0.0 ,1.0,0.0,1.0) ); // green
+    neutral    = vs_config->getColor( "neutral",         GFXColor(1.0 ,1.0,0.0,1.0) ); // yellow
+    targeted   = vs_config->getColor( "target",          GFXColor(1.0 ,0.0,1.0,1.0) ); // violet
+    targetting = vs_config->getColor( "targetting_ship", GFXColor( .68, .9,1.0,1.0) ); // light-blue
+    planet     = vs_config->getColor( "planet",          GFXColor(1.0 ,1.0, .6,1.0) ); //
     soundfile  = -1;
-    if (friendly.r == -1) {
-        vs_config->getColor( "enemy", &enemy.r );
-        vs_config->getColor( "friend", &friendly.r );
-        vs_config->getColor( "neutral", &neutral.r );
-        vs_config->getColor( "target", &targeted.r );
-        vs_config->getColor( "targetting_ship", &targetting.r );
-        vs_config->getColor( "planet", &planet.r );
-    }
     InitStatic();
     updateRadar(parent);
 }
@@ -2176,9 +2156,12 @@ static void DrawDamageFlash( int dtype )
     flashes[0] = shieldflash;
     flashes[1] = armorflash;
     flashes[2] = hullflash;
-    float fallbackcolor[numtypes][4] = {
-        {0, 1, .5, .2}, {1, 0, .2, .25}, {1, 0, 0, .5}
+    static GFXColor fallbackcolor[numtypes] = {
+        vs_config->getColor( "shield_flash", GFXColor(0, 1, .5, .2 ) ),
+        vs_config->getColor( "armor_flash" , GFXColor(1, 0, .2, .25) ),
+        vs_config->getColor( "hull_flash"  , GFXColor(1, 0, 0 , .5 ) )
     };
+
 
     static bool init = false;
     static Animation *aflashes[numtypes];
@@ -2192,9 +2175,6 @@ static void DrawDamageFlash( int dtype )
             else
                 aflashes[i] = NULL;
         }
-        vs_config->getColor( "shield_flash", fallbackcolor[0] );
-        vs_config->getColor( "armor_flash", fallbackcolor[1] );
-        vs_config->getColor( "hull_flash", fallbackcolor[2] );
     }
     if (dtype < numtypes) {
         int i = dtype;
@@ -2209,7 +2189,7 @@ static void DrawDamageFlash( int dtype )
             if ( aflashes[i]->LoadSuccess() ) {
                 aflashes[i]->MakeActive();
                 GFXColor4f( 1, 1, 1, 1 );
-                
+
                 static const float verts[4 * (3 + 2)] = {
                    -1.0f, -1.0f, 1.0f,  0.0f, 1.0f,    //lower left
                     1.0f, -1.0f, 1.0f,  1.0f, 1.0f,    //upper left
@@ -2218,10 +2198,10 @@ static void DrawDamageFlash( int dtype )
                 };
                 GFXDraw( GFXQUAD, verts, 4, 3, 0, 2 );
             } else {
-                GFXColor4f( fallbackcolor[i][0],
-                            fallbackcolor[i][1],
-                            fallbackcolor[i][2],
-                            fallbackcolor[i][3] );
+                GFXColor4f( fallbackcolor[i].r,
+                            fallbackcolor[i].g,
+                            fallbackcolor[i].b,
+                            fallbackcolor[i].a );
                 GFXDisable( TEXTURE0 );
 
                 static const float verts[4 * 3] = {
@@ -2231,7 +2211,7 @@ static void DrawDamageFlash( int dtype )
                     1.0f, -1.0f, 1.0f,
                 };
                 GFXDraw( GFXQUAD, verts, 4 );
-                
+
                 GFXEnable( TEXTURE0 );
             }
             GFXPopBlendMode();
@@ -2264,7 +2244,7 @@ static void DrawHeadingMarker( Cockpit &cp, const GFXColor &col )
     const Unit * u = cp.GetParent();
     const Camera * cam = cp.AccessCamera();
     bool drawv = true;
-    
+
     // heading direction (unit fwd direction)
     Vector d = u->GetTransformation().getR();
 
@@ -2321,7 +2301,7 @@ static void DrawCrosshairs( float x, float y, float wid, float hei, const GFXCol
     GFXCircle( x, y, wid/4, hei/4 );
     GFXCircle( x, y, wid/7, hei/7 );
     GFXDisable( SMOOTH );
-    
+
     const float verts[12 * 3] = {
         x-(wid/2.f), y, 0,
         x-(wid/6.f), y, 0,
@@ -2337,7 +2317,7 @@ static void DrawCrosshairs( float x, float y, float wid, float hei, const GFXCol
         x-.001f, y-.001f, 0,
     };
     GFXDraw( GFXLINE, verts, 12 );
-    
+
     GFXEnable( TEXTURE0 );
 }
 
@@ -2351,7 +2331,7 @@ void GameCockpit::Draw()
     static bool drawHeadingMarker = parse_bool( vs_config->getVariable( "graphics", "draw_heading_marker", "false" ) );
     static bool     draw_star_destination_arrow =
         XMLSupport::parse_bool( vs_config->getVariable( "graphics", "hud", "draw_star_direction", "true" ) );
-    static GFXColor destination_system_color    = DockBoxColor( "destination_system_color" );
+    static GFXColor destination_system_color    = vs_config->getColor( "destination_system_color" );
     Vector destination_system_location( 0, 0, 0 );
     cockpit_time += GetElapsedTime();
     if (cockpit_time >= 100000)
@@ -2407,7 +2387,7 @@ void GameCockpit::Draw()
                                 destination_system_color.b,
                                 destination_system_color.a );
 
-                    static GFXColor suncol = RetrColor( "remote_star", GFXColor( 0, 1, 1, .8 ) );
+                    static GFXColor suncol = vs_config->getColor( "remote_star", GFXColor( 0, 1, 1, .8 ) );
                     GFXColorf( suncol );
                     DrawNavigationSymbol( delta.Cast(), P, Q, delta.Magnitude()*nav_symbol_size );
 
@@ -3252,10 +3232,10 @@ void GameCockpit::SetupViewPort( bool clip )
         un->UpdateHudMatrix( CP_BACK );
         un->UpdateHudMatrix( CP_CHASE );
         un->UpdateHudMatrix( CP_PANINSIDE );
-        
+
         insidePanYaw += insidePanYawSpeed * GetElapsedTime();
         insidePanPitch += insidePanPitchSpeed * GetElapsedTime();
-        
+
         Vector p, q, r, tmp;
         _Universe->AccessCamera( CP_FRONT )->GetOrientation( p, q, r );
         _Universe->AccessCamera( CP_LEFT )->SetOrientation( r, q, -p );
@@ -3273,7 +3253,7 @@ void GameCockpit::SetupViewPort( bool clip )
             Transform(panMatrix, p),
             Transform(panMatrix, q),
             Transform(panMatrix, r) );
-        
+
         tgt = un->Target();
         if (tgt) {
             un->GetOrientation( p, q, r );
@@ -3537,7 +3517,7 @@ void GameCockpit::DrawArrowToTarget(const Radar::Sensor& sensor, Vector localcoo
         s,    t,    0,
     };
     GFXDraw( GFXLINESTRIP, verts, 4 );
-    
+
     GFXColor4f( 1, 1, 1, 1 );
     GFXDisable( SMOOTH );
 }
@@ -3591,7 +3571,7 @@ void GameCockpit::updateRadar(Unit*ship) {
 }
 void GameCockpit::SetParent( Unit *unit, const char *filename, const char *unitmodname, const QVector &startloc ){
     this->Cockpit::SetParent(unit,filename,unitmodname,startloc);
-    updateRadar(unit);    
+    updateRadar(unit);
 }
 void GameCockpit::OnDockEnd(Unit *station, Unit *ship)
 {

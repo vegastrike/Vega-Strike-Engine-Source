@@ -329,19 +329,14 @@ void NavigationSystem::Setup()
     screenoccupation = new navscreenoccupied( screenskipby4[0], screenskipby4[1], screenskipby4[2], screenskipby4[3], 1 );
 
     //Get special colors from the config
-    float tempcol1[4] = {1, 0.3, 0.3, 1.0};
-    vs_config->getColor( "nav", "current_system", tempcol1, true );
-    currentcol     = GFXColor( tempcol1[0], tempcol1[1], tempcol1[2], tempcol1[3] );
-    float tempcol2[4] = {1, 0.77, 0.3, 1.0};
-    vs_config->getColor( "nav", "destination_system", tempcol2, true );
-    destinationcol = GFXColor( tempcol2[0], tempcol2[1], tempcol2[2], tempcol2[3] );
-    float tempcol3[4] = {0.3, 1, 0.3, 1.0};
-    vs_config->getColor( "nav", "selection_system", tempcol3, true );
-    selectcol = GFXColor( tempcol3[0], tempcol3[1], tempcol3[2], tempcol3[3] );
-    float tempcol4[4] = {1, 0.3, 0.3, 1.0};
-    vs_config->getColor( "nav", "path_system", tempcol4, true );
-    pathcol   = GFXColor( tempcol4[0], tempcol4[1], tempcol4[2], tempcol4[3] );
-
+    static GFXColor currentcol = vs_config->getColor( "nav", "current_system",
+                                           GFXColor( 1, 0.3, 0.3, 1.0 ) );
+    static GFXColor destinationcol = vs_config->getColor( "nav", "destination_system",
+                                           GFXColor( 1, 0.77, 0.3, 1.0 ) );
+    static GFXColor selectcol = vs_config->getColor( "nav", "selection_system",
+                                           GFXColor( 0.3, 1, 0.3, 1.0 ) );
+    static GFXColor pathcol = vs_config->getColor( "nav", "path_system",
+                                           GFXColor( 1, 0.3, 0.3, 1.0 ) );
     navcomp->init();
 }
 

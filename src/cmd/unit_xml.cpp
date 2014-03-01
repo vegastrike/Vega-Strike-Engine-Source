@@ -561,7 +561,7 @@ void Unit::beginElement( const string &name, const AttributeList &attributes )
     unsigned int dirfrac = 0;
     float   fbrltb[6]    = {-1};
     AttributeList::const_iterator iter;
-    float   halocolor[4];
+    GFXColor halocolor; //FIXME it's set, but not actually used
     int     ammo   = -1; //short fix
     int     mntsiz = weapon_info::NOWEAP;
     string  light_type;
@@ -832,7 +832,7 @@ void Unit::beginElement( const string &name, const AttributeList &attributes )
         break;
     case MESHLIGHT:
         ADDTAG;
-        vs_config->gethColor( "unit", "engine", halocolor, 0xffffffff );
+        halocolor = vs_config->getColor( "unit", "engine", GFXColor( 1, 1, 1, 1 ) );
         assert( xml->unitlevel == 1 );
         xml->unitlevel++;
         P   = QVector( 1, 0, 0 );

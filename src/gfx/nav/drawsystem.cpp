@@ -347,14 +347,9 @@ void NavigationSystem::DrawSystem()
         insert_size *= system_item_scale_temp;
         if ( _Universe->AccessCockpit()->GetParent()->Target() == (*blah) ) {
             //Get a color from the config
-            static float col[4] = {1, 0.3, 0.3, 0.8};
-            static bool  init   = false;
-            if (!init) {
-                vs_config->getColor( "nav", "targeted_unit", col, true );
-                init = true;
+            static GFXColor col = vs_config->getColor( "nav", "targetted_unit", GFXColor(1, 0.3, 0.3, 0.8) );
+            DrawTargetCorners( the_x, the_y, insert_size, col );
             }
-            DrawTargetCorners( the_x, the_y, insert_size, GFXColor( col[0], col[1], col[2], col[3] ) );
-        }
         bool tests_in_range = 0;
         if (insert_type == navstation)
             tests_in_range = TestIfInRangeBlk( the_x, the_y, insert_size, mouse_x_current, mouse_y_current );

@@ -175,26 +175,24 @@ Unit* navdrawlist::gettailunit()
     return tail->source;
 }
 
-#define INIT_COL_ARRAY( col, r, g, b, a ) do{ col[0] = r; col[1] = g; col[2] = b; col[3] = a; }while(0)
+//#define INIT_COL_ARRAY( col, r, g, b, a ) do{ col[0] = r; col[1] = g; col[2] = b; col[3] = a; }while(0)
 
-static GFXColor getUnitTypeColor( std::string name, bool text, float col[4], float unselectedalpha )
+static GFXColor getUnitTypeColor( std::string name, bool text, GFXColor def, float unselectedalpha )
 {
-    vs_config->getColor( "nav", (std::string( "unhighlighted_" )+name)+(text ? "_text" : ""), col, true );
-    if (col[3] == 0) {
-        if (name != "unit" && col[0] == 0 && col[1] == 0 && col[2] == 0) {
+    GFXColor col = vs_config->getColor( "nav", (std::string( "unhighlighted_" )+name)+(text ? "_text" : ""), def );
+    if (col.a == 0) {
+        if (name != "unit" && col.r == 0 && col.g == 0 && col.b == 0) {
             if (!text) {
-                INIT_COL_ARRAY( col, 1, 1, .7, 1 );
-                return getUnitTypeColor( "unit", text, col, unselectedalpha );
+                return getUnitTypeColor( "unit", false, GFXColor (1, 1, .7, 1 ), unselectedalpha );
             } else {
-                INIT_COL_ARRAY( col, .2, 1, .5, 0 );
-                GFXColor temp = getUnitTypeColor( "unit", text, col, unselectedalpha );
+                GFXColor temp = getUnitTypeColor( "unit", true, GFXColor(.2, 1, .5, 0 ) , unselectedalpha );
                 temp.a = unselectedalpha;
                 return temp;
             }
         }
-        col[3] = unselectedalpha;
+        col.a = unselectedalpha;
     }
-    return GFXColor( col[0], col[1], col[2], col[3] );
+    return col;
 }
 
 void drawlistitem( int type,
@@ -209,6 +207,12 @@ void drawlistitem( int type,
                    GFXColor *factioncolours )
 {
     float relation = 0.0;
+    
+    //Get a color from the config
+    static bool inited = false;
+    static GFXColor highlighted_tail_col;
+    static GFXColor highlighted_tail_text;
+    static GFXColor highlighted_untail_col;
     static GFXColor unhighlighted_sun_col;
     static GFXColor unhighlighted_sun_text;
     static GFXColor unhighlighted_planet_text;
@@ -224,83 +228,42 @@ void drawlistitem( int type,
     static GFXColor unhighlighted_jump_text;
     static GFXColor unhighlighted_station_text;
     static GFXColor unhighlighted_fighter_text;
-    static GFXColor unhighlighted_unit_text;
-    static GFXColor highlighted_tail_col;
-    static GFXColor highlighted_tail_text;
-    static GFXColor highlighted_untail_col;
     static GFXColor unhighlighted_capship_text;
-    static bool     init = false;
-    if (!init) {
-        //Get a color from the config
-        float col[4];
+    static GFXColor unhighlighted_unit_text;
 
-        INIT_COL_ARRAY( col, 1, .3, .3, .8 );
-        vs_config->getColor( "nav", "highlighted_unit_on_tail", col, true );
-        highlighted_tail_col = GFXColor( col[0], col[1], col[2], col[3] );
-
-        INIT_COL_ARRAY( col, 1, 1, .7, 1 );
-        vs_config->getColor( "nav", "highlighted_text_on_tail", col, true );
-        highlighted_tail_text = GFXColor( col[0], col[1], col[2], col[3] );
-
-        INIT_COL_ARRAY( col, 1, 1, 1, .8 );
-        vs_config->getColor( "nav", "highlighted_unit_off_tail", col, true );
-        highlighted_untail_col = GFXColor( col[0], col[1], col[2], col[3] );
-
-        INIT_COL_ARRAY( col, 0, 0, 0, 0 );         //If not found, use defaults
-        unhighlighted_sun_col  = getUnitTypeColor( "sun", false, col, unselectedalpha );
-        INIT_COL_ARRAY( col, 0, 0, 0, 0 );
-        unhighlighted_sun_text = getUnitTypeColor( "sun", true, col, unselectedalpha );
-
+    if (!inited) {
+        inited = true;
+        
+        highlighted_tail_col   = vs_config->getColor( "nav", "highlighted_unit_on_tail", GFXColor( 1, .3, .3, .8 ) );
+        highlighted_tail_text  = vs_config->getColor( "nav", "highlighted_text_on_tail", GFXColor( 1, 1, .7, 1 ) );
+        highlighted_untail_col = vs_config->getColor( "nav", "highlighted_unit_off_tail", GFXColor( 1, 1, 1, .8 ) );
+        unhighlighted_sun_col       = getUnitTypeColor( "sun", false, GFXColor( 0, 0, 0, 0 ), unselectedalpha );
+        unhighlighted_sun_text      = getUnitTypeColor( "sun", true, GFXColor( 0, 0, 0, 0 ), unselectedalpha );
+        
         //Planet color is the relation color, so is not defined here.
-        INIT_COL_ARRAY( col, 0, 0, 0, 0 );
-        unhighlighted_planet_text   = getUnitTypeColor( "planet", true, col, unselectedalpha );
-
-        INIT_COL_ARRAY( col, .3, .3, 1, .8 );         //If not found, use defaults
-        unhighlighted_c_player_col  = getUnitTypeColor( "curplayer", false, col, .8 );
-        INIT_COL_ARRAY( col, .3, .3, 1, 0 );
-        unhighlighted_c_player_text = getUnitTypeColor( "curplayer", true, col, unselectedalpha );
-
-        INIT_COL_ARRAY( col, .3, .3, 1, .8 );         //If not found, use defaults
-        unhighlighted_player_col    = getUnitTypeColor( "player", false, col, .8 );
-        INIT_COL_ARRAY( col, .3, .3, 1, 0 );
-        unhighlighted_player_text   = getUnitTypeColor( "player", true, col, unselectedalpha );
-
-        INIT_COL_ARRAY( col, .3, .3, 1, .8 );         //If not found, use defaults
-        unhighlighted_player_col    = getUnitTypeColor( "player", false, col, .8 );
-        INIT_COL_ARRAY( col, .3, .3, 1, 0 );
-        unhighlighted_player_text   = getUnitTypeColor( "player", true, col, unselectedalpha );
-
-        INIT_COL_ARRAY( col, 1, .8, .8, .6 );         //If not found, use defaults
-        unhighlighted_asteroid_col  = getUnitTypeColor( "asteroid", false, col, .6 );
-        INIT_COL_ARRAY( col, 0, 0, 0, 0 );
-        unhighlighted_asteroid_text = getUnitTypeColor( "asteroid", true, col, unselectedalpha );
-
-        INIT_COL_ARRAY( col, 1, .5, 1, .6 );         //If not found, use defaults
-        unhighlighted_nebula_col    = getUnitTypeColor( "nebula", false, col, .6 );
-        INIT_COL_ARRAY( col, 0, 0, 0, 0 );
-        unhighlighted_nebula_text   = getUnitTypeColor( "nebula", true, col, unselectedalpha );
-
-        INIT_COL_ARRAY( col, .5, .9, .9, .6 );         //If not found, use defaults
-        unhighlighted_jump_col  = getUnitTypeColor( "jump", false, col, .6 );
-        INIT_COL_ARRAY( col, .3, 1, .8, 0 );
-        unhighlighted_jump_text = getUnitTypeColor( "jump", true, col, unselectedalpha );
-
+        unhighlighted_planet_text   = getUnitTypeColor( "planet", true, GFXColor( 0, 0, 0, 0 ), unselectedalpha );
+        unhighlighted_c_player_col  = getUnitTypeColor( "curplayer", false, GFXColor( .3, .3, 1, .8 ), .8 );
+        unhighlighted_c_player_text = getUnitTypeColor( "curplayer", true, GFXColor( .3, .3, 1, 0), unselectedalpha );
+        unhighlighted_player_col    = getUnitTypeColor( "player", false, GFXColor( .3, .3, 1, .8 ), .8 );
+        unhighlighted_player_text   = getUnitTypeColor( "player", true, GFXColor( .3, .3, 1, 0 ), unselectedalpha );
+        unhighlighted_asteroid_col  = getUnitTypeColor( "asteroid", false, GFXColor( 1, .8, .8, .6 ), .6 );
+        unhighlighted_asteroid_text = getUnitTypeColor( "asteroid", true, GFXColor( 0, 0, 0, 0 ), unselectedalpha );
+        unhighlighted_nebula_col    = getUnitTypeColor( "nebula", false, GFXColor( 1, .5, 1, .6 ), .6 );
+        unhighlighted_nebula_text   = getUnitTypeColor( "nebula", true, GFXColor( 0, 0, 0, 0 ), unselectedalpha );
+        unhighlighted_jump_col      = getUnitTypeColor( "jump", false, GFXColor(.5, .9, .9, .6 ), .6 );
+        unhighlighted_jump_text     = getUnitTypeColor( "jump", true, GFXColor( .3, 1, .8, 0 ), unselectedalpha );
+        
         //Basic unit types:
-        INIT_COL_ARRAY( col, 0, 0, 0, 0 );
-        unhighlighted_station_text = getUnitTypeColor( "station", true, col, unselectedalpha );
-        INIT_COL_ARRAY( col, 0, 0, 0, 0 );
-        unhighlighted_fighter_text = getUnitTypeColor( "fighter", true, col, unselectedalpha );
-        INIT_COL_ARRAY( col, 0, 0, 0, 0 );
-        unhighlighted_capship_text = getUnitTypeColor( "capship", true, col, unselectedalpha );
-        INIT_COL_ARRAY( col, 0, 0, 0, 0 );
-        unhighlighted_unit_text    = getUnitTypeColor( "unit", true, col, unselectedalpha );
-
-        init = true;
+        unhighlighted_station_text = getUnitTypeColor( "station", true, GFXColor( 0, 0, 0, 0 ), unselectedalpha );
+        unhighlighted_fighter_text = getUnitTypeColor( "fighter", true, GFXColor( 0, 0, 0, 0 ), unselectedalpha );
+        unhighlighted_capship_text = getUnitTypeColor( "capship", true, GFXColor( 0, 0, 0, 0 ), unselectedalpha );
+        unhighlighted_unit_text = getUnitTypeColor( "unit", true, GFXColor( 0, 0, 0, 0 ), unselectedalpha  );
     }
-//if(source != NULL)
-//relation =      FactionUtil::GetIntRelation( ( UniverseUtil::getPlayerX(UniverseUtil::getCurrentPlayer()) )->faction ,source->faction);
-//else
-//relation = 0;
+    
+    //if(source != NULL)
+    //relation =      FactionUtil::GetIntRelation( ( UniverseUtil::getPlayerX(UniverseUtil::getCurrentPlayer()) )->faction ,source->faction);
+    //else
+    //relation = 0;
     //the realtime relationship
     if (source != NULL)
         relation = source->getRelation( UniverseUtil::getPlayerX( UniverseUtil::getCurrentPlayer() ) );
@@ -309,9 +272,9 @@ void drawlistitem( int type,
     relation = relation*0.5;
     relation = relation+0.5;
 
-//to avoid duplicate code
+    //to avoid duplicate code
     GFXColor relColor( (1.0-relation), relation, ( 1.0-( 2.0*Delta( relation, 0.5 ) ) ), .7 );
-//GFXColor((1.0-relation),relation,(1.0-(2.0*Delta(relation, 0.5))),1)
+    //GFXColor((1.0-relation),relation,(1.0-(2.0*Delta(relation, 0.5))),1)
     if (type == navsun) {
         if (!inmouserange) {
             NavigationSystem::DrawCircle( x, y, size, unhighlighted_sun_col );

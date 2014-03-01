@@ -542,7 +542,7 @@ void GFXInit( int argc, char **argv )
     winsys_enable_key_repeat( false );
 
     glViewport( 0, 0, g_game.x_resolution, g_game.y_resolution );
-    float clearcol[4];
+    static GFXColor clearcol = vs_config->getColor( "space_background" );;
     gl_options.wireframe = game_options.use_wireframe;
     gl_options.max_texture_dimension = game_options.max_texture_dimension;
     gl_options.max_movie_dimension   = game_options.max_movie_dimension;
@@ -590,8 +590,8 @@ void GFXInit( int argc, char **argv )
     gl_options.ext_clamp_to_edge   = game_options.ext_clamp_to_edge;
     gl_options.ext_clamp_to_border = game_options.ext_clamp_to_border;
 
-    vs_config->getColor( "space_background", clearcol );
-    glClearColor( clearcol[0], clearcol[1], clearcol[2], clearcol[3] );
+
+    glClearColor( clearcol.r, clearcol.g, clearcol.b, clearcol.a );
     winsys_set_reshape_func( Reshape );
     initfov();
     glShadeModel( GL_SMOOTH );

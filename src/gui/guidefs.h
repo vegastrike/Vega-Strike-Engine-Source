@@ -209,7 +209,6 @@ enum Justification
     LEFT_JUSTIFY
 };
 
-GFXColor getConfigColor( const char *name, GFXColor defaul );
 GFXColor SaturatedColor( float r, float g, float b, float a = 1.0f );
 //Predefined colors.
 GFXColor GUI_OPAQUE_BLACK(); //(0.0,0.0,0.0);

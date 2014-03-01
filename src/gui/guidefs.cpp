@@ -24,16 +24,6 @@
 #include "vs_globals.h"
 #include "config_xml.h"
 #include "guidefs.h"
-GFXColor getConfigColor( const char *name, GFXColor defaul )
-{
-    float color[4];
-    color[0] = defaul.r;
-    color[1] = defaul.g;
-    color[2] = defaul.b;
-    color[3] = defaul.a;
-    vs_config->getColor( std::string( "default" ), std::string( name ), color, true );
-    return GFXColor( color[0], color[1], color[2], color[3] );
-}
 
 GFXColor SaturatedColor( float r, float g, float b, float a )
 {
@@ -45,28 +35,28 @@ GFXColor SaturatedColor( float r, float g, float b, float a )
 }
 GFXColor GUI_OPAQUE_BLACK()
 {
-    static GFXColor gui_black = getConfigColor( "base_black", GFXColor( 0, 0, 0, 1 ) );
+    static GFXColor gui_black = vs_config->getColor( "base_black", GFXColor( 0, 0, 0, 1 ) );
     return gui_black;
 }
 GFXColor GUI_OPAQUE_WHITE()
 {
-    static GFXColor gui_white = getConfigColor( "base_white", GFXColor( 1, 1, 1, 1 ) );
+    static GFXColor gui_white = vs_config->getColor( "base_white", GFXColor( 1, 1, 1, 1 ) );
     return gui_white;
 }
 
 GFXColor GUI_OPAQUE_LIGHT_GRAY()
 {
-    static GFXColor gui_light_gray = getConfigColor( "base_light_gray", GFXColor( .25, .25, .25, 1 ) );
+    static GFXColor gui_light_gray = vs_config->getColor( "base_light_gray", GFXColor( .25, .25, .25, 1 ) );
     return gui_light_gray;
 }
 GFXColor GUI_OPAQUE_MEDIUM_GRAY()
 {
-    static GFXColor gui_gray = getConfigColor( "base_gray", GFXColor( .5, .5, .5, 1 ) );
+    static GFXColor gui_gray = vs_config->getColor( "base_gray", GFXColor( .5, .5, .5, 1 ) );
     return gui_gray;
 }
 GFXColor GUI_OPAQUE_DARK_GRAY()
 {
-    static GFXColor gui_dark_gray = getConfigColor( "base_dark_gray", GFXColor( .75, .75, .75, 1 ) );
+    static GFXColor gui_dark_gray = vs_config->getColor( "base_dark_gray", GFXColor( .75, .75, .75, 1 ) );
     return gui_dark_gray;
 }
 
@@ -76,7 +66,7 @@ void drawRect( const Rect &rect, const GFXColor &color )
     GFXDisable( TEXTURE0 );
 
     GFXColorf( color );
-    
+
     const float verts[4 * 3] = {
         rect.left(),  rect.top(),    0,
         rect.right(), rect.top(),    0,

@@ -173,6 +173,9 @@ bool VegaConfig::checkColor( string prefix, configNode *node )
     string  hashname = prefix+name;
 
     vColor *color;
+    color    = new vColor;
+    vColor &vc = map_colors[hashname];
+
     if ( node->attr_value( "ref" ).empty() ) {
         string r = node->attr_value( "r" );
         string g = node->attr_value( "g" );
@@ -187,21 +190,17 @@ bool VegaConfig::checkColor( string prefix, configNode *node )
         float   bf = atof( b.c_str() );
         float   af = atof( a.c_str() );
 
-        vColor &vc = map_colors[hashname];
         vc.name.erase();
         vc.r     = rf;
         vc.g     = gf;
         vc.b     = bf;
         vc.a     = af;
 
-        color    = new vColor;
-
         color->r = rf;
         color->g = gf;
         color->b = bf;
         color->a = af;
     } else {
-        float  refcol[4];
 
         string ref_section = node->attr_value( "section" );
         string ref_name    = node->attr_value( "ref" );
@@ -209,24 +208,21 @@ bool VegaConfig::checkColor( string prefix, configNode *node )
             cout<<"you have to give a referenced section when referencing colors"<<endl;
             ref_section = "default";
         }
-        getColor( ref_section, ref_name, refcol );
+        GFXColor refcol;
+        refcol = getColor( ref_section, ref_name, refcol );
 
-        vColor &vc = map_colors[hashname];
         vc.name  = ref_section+"/"+ref_name;
-        vc.r     = refcol[0];
-        vc.g     = refcol[1];
-        vc.b     = refcol[2];
-        vc.a     = refcol[3];
+        vc.r     = refcol.r;
+        vc.g     = refcol.g;
+        vc.b     = refcol.b;
+        vc.a     = refcol.a;
 
-        color    = new vColor;
-
-        color->r = refcol[0];
-        color->g = refcol[1];
-        color->b = refcol[2];
-        color->a = refcol[3];
+        color->r = refcol.r;
+        color->g = refcol.g;
+        color->b = refcol.b;
+        color->a = refcol.a;
     }
-    color->name = node->attr_value( "name" );
-
+    color->name = name;
     node->color = color;
 
     return true;
@@ -299,60 +295,29 @@ string VegaConfig::getVariable( configNode *section, string name, string default
     return defaultval;
 }
 
-/* *********************************************************** */
-
-void VegaConfig::gethColor( string section, string name, float color[4], int hexcolor )
-{
-    color[3] = ( (float) (hexcolor&0xff) )/256.0;
-    color[2] = ( (float) ( (hexcolor&0xff00)>>8 ) )/256.0;
-    color[1] = ( (float) ( (hexcolor&0xff0000)>>16 ) )/256.0;
-    color[0] = ( (float) ( (hexcolor&0xff000000)>>24 ) )/256.0;
-
-    getColor( section, name, color, true );
-}
-
-/* *********************************************************** */
-
-void VegaConfig::getColor( string section, string name, float color[4], bool have_color )
+GFXColor VegaConfig::getColor( string section, string name, GFXColor default_color )
 {
     string hashname = section+"/"+name;
     std::map< string, vColor >::iterator it;
-    if ( ( it = map_colors.find( hashname ) ) != map_colors.end() ) {
-        color[0] = (*it).second.r;
-        color[1] = (*it).second.g;
-        color[2] = (*it).second.b;
-        color[3] = (*it).second.a;
-    } else if (!have_color) {
-        color[0] = color[1] = color[2] = color[3] = 1.0f;
+    if ( ( it = map_colors.find( hashname ) ) != map_colors.end() )
+        return GFXColor( (*it).second.r, (*it).second.g, (*it).second.b, (*it).second.a );
+    else
+        return default_color;
     }
-}
 
 /* *********************************************************** */
 
-void VegaConfig::getColor( configNode *node, string name, float color[4], bool have_color )
+GFXColor VegaConfig::getColor( configNode *node, string name, GFXColor default_color )
 {
     vector< easyDomNode* >::const_iterator siter;
     for (siter = node->subnodes.begin(); siter != node->subnodes.end(); siter++) {
         configNode *cnode = (configNode*) (*siter);
-        if ( (cnode)->attr_value( "name" ) == name ) {
-            color[0] = (cnode)->color->r;
-            color[1] = (cnode)->color->g;
-            color[2] = (cnode)->color->b;
-            color[3] = (cnode)->color->a;
-            return;
+        if ( (cnode)->attr_value( "name" ) == name )
+            return GFXColor( (cnode)->color->r, (cnode)->color->g, (cnode)->color->b, (cnode)->color->a );
         }
+    cout<<"WARNING: color "<<name<<" not defined, using default"<<endl;
+    return default_color;
     }
-    if (have_color == false) {
-        color[0] = 1.0;
-        color[1] = 1.0;
-        color[2] = 1.0;
-        color[3] = 1.0;
-
-        cout<<"WARNING: color "<<name<<" not defined, using default (white)"<<endl;
-    } else {
-        cout<<"WARNING: color "<<name<<" not defined, using default (hexcolor)"<<endl;
-    }
-}
 
 /* *********************************************************** */
 

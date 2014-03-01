@@ -211,26 +211,18 @@ VDU::VDU( const char *file, TextPlane *textp, unsigned short modes, short rwws, 
 
 GFXColor getDamageColor( float armor, bool gradient = false )
 {
-    static bool  init = false;
-    static float damaged[4] = {1, 0, 0, 1};
-    static float half_damaged[4] = {1, 1, 0, 1};
-    static float full[4]    = {1, 1, 1, 1};
-    if (!init) {
-        vs_config->getColor( "default", "hud_target_damaged", damaged, true );
-        vs_config->getColor( "default", "hud_target_half_damaged", half_damaged, true );
-        vs_config->getColor( "default", "hud_target_full", full, true );
-        init = true;
-    }
+    static GFXColor damaged = vs_config->getColor( "default", "hud_target_damaged",
+                                           GFXColor( 1, 0, 0, 1 ) );
+    static GFXColor half_damaged = vs_config->getColor( "default", "hud_target_half_damaged",
+                                           GFXColor( 1, 1, 0, 1 ) );
+    static GFXColor full = vs_config->getColor( "default", "hud_target_full",
+                                           GFXColor( 1, 1, 1, 1 ) );
     if (armor >= .9)
-        return GFXColor( full[0], full[1], full[2], full[3] );
+        return full;
     float avghalf    = armor >= .3 ? 1 : 0;
     if (gradient && armor >= .3)
         avghalf = (armor-.3)/.6;
-    float avgdamaged = 1-avghalf;
-    return GFXColor( half_damaged[0]*avghalf+damaged[0]*avgdamaged,
-                     half_damaged[1]*avghalf+damaged[1]*avgdamaged,
-                     half_damaged[2]*avghalf+damaged[2]*avgdamaged,
-                     half_damaged[3]*avghalf+damaged[3]*avgdamaged );
+    return colLerp( damaged, half_damaged, avghalf );
 }
 
 static void DrawHUDSprite( VDU *thus,
@@ -321,7 +313,7 @@ static void DrawHUDSprite( VDU *thus,
                 mul.x, mul.y, mul.z, c[2].r, c[2].g, c[2].b, c[2].a, middle_point_small, middle_point_small,
                 mll.x, mll.y, mll.z, c[2].r, c[2].g, c[2].b, c[2].a, middle_point_small, middle_point,
 
-                mul.x, mul.y, mul.z, c[2].r, c[2].g, c[2].b, c[2].a, middle_point_small, middle_point_small, 
+                mul.x, mul.y, mul.z, c[2].r, c[2].g, c[2].b, c[2].a, middle_point_small, middle_point_small,
                 mur.x, mur.y, mur.z, c[2].r, c[2].g, c[2].b, c[2].a, middle_point, middle_point_small,
                 mlr.x, mlr.y, mlr.z, c[2].r, c[2].g, c[2].b, c[2].a, middle_point, middle_point,
                 mll.x, mll.y, mll.z, c[2].r, c[2].g, c[2].b, c[2].a, middle_point_small, middle_point,
@@ -1309,7 +1301,7 @@ void VDU::DrawDamage( Unit *parent )
     ecmstatus[0] = '\0';
     static bool print_ecm = XMLSupport::parse_bool( vs_config->getVariable( "graphics", "print_ecm_status", "true" ) );
     if (print_ecm) {
-        if (UnitUtil::getECM(parent) > 0) { 
+        if (UnitUtil::getECM(parent) > 0) {
             GFXColor4f( 0, 1, 0, .5 );
             strcpy( ecmstatus, "ECM Active" );
             static float s = 0;
@@ -1335,19 +1327,16 @@ void VDU::DrawDamage( Unit *parent )
     //char hullval[128];
     //sprintf (hullval,"%.3f",parent->GetHull());
     //string retval (fullname+"\nHull: "+hullval+"\n");
-    static float cfullpower[4] = {1, 1, 1, 1};
-    static float cdamaged[4]   = {1, 0, 0, 1};
-    static float chdamaged[4]  = {1, 1, 0, 1};
-    static float cdestroyed[4] = {.2, .2, .2, 1};
-    static bool  init = false;
-    if (!init) {
-        init = true;
-        vs_config->getColor( "default", "hud_repair_repaired", cfullpower, true );
-        vs_config->getColor( "default", "hud_repair_half_damaged", chdamaged, true );
-        vs_config->getColor( "default", "hud_repair_damaged", cdamaged, true );
-        vs_config->getColor( "default", "hud_repair_destroyed", cdestroyed, true );
-    }
-    colorstring   fpstring = colToString( GFXColor( cfullpower[0], cfullpower[1], cfullpower[2], cfullpower[3] ) );
+    static GFXColor cfullpower = vs_config->getColor( "default", "hud_repair_repaired",
+                                                    GFXColor( 1,  1,  1,  1 ) );
+    static GFXColor chdamaged  = vs_config->getColor( "default", "hud_repair_half_damaged",
+                                                    GFXColor( 1,  1,  0,  1 ) );
+    static GFXColor cdamaged   = vs_config->getColor( "default", "hud_repair_damaged",
+                                                    GFXColor( 1,  0,  0,  1 ) );
+    static GFXColor cdestroyed = vs_config->getColor( "default", "hud_repair_destroyed",
+                                                    GFXColor( .2, .2, .2, 1 ) );
+
+    colorstring   fpstring = colToString( cfullpower);
     static string damage_report_heading =
         XMLSupport::escaped_string( vs_config->getVariable( "graphics", "hud", "damage_report_heading",
                                                             "#00ff00DAMAGE REPORT\n\n" ) );
@@ -1364,12 +1353,9 @@ void VDU::DrawDamage( Unit *parent )
 
 #define REPORTITEM(percent_working, max_functionality, print_percent_working, component_string) \
     do { \
-        GFXColor final_color( (chdamaged[0]*percent_working)+( cdamaged[0]*(1.0-percent_working) ), \
-                              (chdamaged[1]*percent_working)+( cdamaged[1]*(1.0-percent_working) ), \
-                              (chdamaged[2]*percent_working)+( cdamaged[2]*(1.0-percent_working) ), \
-                              (chdamaged[3]*percent_working)+( cdamaged[3]*(1.0-percent_working) ) ); \
+        GFXColor final_color = colLerp( cdamaged, chdamaged, percent_working ); \
         if (percent_working == 0.0) \
-            final_color = GFXColor( cdestroyed[0], cdestroyed[1], cdestroyed[2], cdestroyed[3] ); /*dead = grey*/ \
+            final_color = cdestroyed; /*dead = grey*/ \
         std::string trailer; \
         if (percent_working < max_functionality) \
             retval += colToString( final_color ).str; \
@@ -1381,7 +1367,7 @@ void VDU::DrawDamage( Unit *parent )
             retval += string( " (" )+tostring( int(percent_working*100) )+string( "%)" ); \
         retval += trailer+std::string( "\n" ); \
     } while(0)
-    
+
 #define REPORTINTEGRATED(which, which_key, which_name_default) \
     do { \
         static string name = vs_config->getVariable( "graphics", "hud", which_key, which_name_default ); \
@@ -1404,16 +1390,16 @@ void VDU::DrawDamage( Unit *parent )
         } \
     } while(0)
 
-        
+
     for (unsigned int i = 0; i < numCargo; i++) {
         percent_working = 0.88;         //cargo.damage
         Cargo &the_cargo = parent->GetCargo( i );
         bool   damaged   = the_cargo.GetCategory().find( DamagedCategory ) == 0;
         if ( damaged
-            || (   the_cargo.GetCategory().find( "upgrades/" ) == 0 
+            || (   the_cargo.GetCategory().find( "upgrades/" ) == 0
                 && the_cargo.installed
                 && the_cargo.GetContent().find( "mult_" ) != 0
-                && the_cargo.GetContent().find( "add_" ) != 0 
+                && the_cargo.GetContent().find( "add_" ) != 0
                 && non_repair_screen_cargo.find( the_cargo.GetContent() )
                 == std::string::npos) ) {
             percent_working = UnitUtil::PercentOperational( parent, the_cargo.content, the_cargo.category, false );
@@ -1427,7 +1413,7 @@ void VDU::DrawDamage( Unit *parent )
         REPORTINTEGRATED(fireControl, "damage.names.fire_control", "Fire Control");
         REPORTINTEGRATED(SPECDrive, "damage.names.spec_drive", "SPEC Drive");
         REPORTINTEGRATED(Comm, "damage.names.comm", "Comm");
-        
+
         // Integrated system with boolean damage flags
         REPORTINTEGRATEDFLAG(Unit::LIMITS_DAMAGED, "damage.names.limits_name", "Thrusters");
         REPORTINTEGRATEDFLAG(Unit::SHIELD_DAMAGED, "damage.names.shield_name", ""); // default invisible, is an upgrade
@@ -1435,7 +1421,7 @@ void VDU::DrawDamage( Unit *parent )
         REPORTINTEGRATEDFLAG(Unit::JUMP_DAMAGED, "damage.names.jump_name", ""); // default invisible, is an upgrade
         REPORTINTEGRATEDFLAG(Unit::CLOAK_DAMAGED, "damage.names.cloak_name", ""); // default invisible, is an upgrade
     }
-        
+
     retval += ecmstatus;
     static float background_alpha =
         XMLSupport::parse_float( vs_config->getVariable( "graphics", "hud", "text_background_alpha", "0.0625" ) );
@@ -1556,12 +1542,12 @@ void VDU::DrawStarSystemAgain( float x, float y, float w, float h, VIEWSTYLE vie
 
 GFXColor MountColor( Mount *mnt )
 {
-    static GFXColor col_mount_default     = getConfigColor ( "mount_default"    , GFXColor( 0.0, 1.0, 0.2, 1.0) );
-    static GFXColor col_mount_not_ready   = getConfigColor ( "mount_not_ready"  , GFXColor( 0.0, 1.0, 0.4, 1.0) );
-    static GFXColor col_mount_out_of_ammo = getConfigColor ( "mount_out_of_ammo", GFXColor( 0.2, 0.2, 0.4, 1.0) );
-    static GFXColor col_mount_inactive    = getConfigColor ( "mount_inactive"   , GFXColor( 0.7, 0.7, 0.7, 1.0) );
-    static GFXColor col_mount_destroyed   = getConfigColor ( "mount_destroyed"  , GFXColor( 1.0, 0.0, 0.0, 1.0) );
-    static GFXColor col_mount_unchosen    = getConfigColor ( "mount_unchosen"   , GFXColor( 0.3, 0.3, 0.3, 1.0) );
+    static GFXColor col_mount_default     = vs_config->getColor ( "mount_default"    , GFXColor( 0.0, 1.0, 0.2, 1.0) );
+    static GFXColor col_mount_not_ready   = vs_config->getColor ( "mount_not_ready"  , GFXColor( 0.0, 1.0, 0.4, 1.0) );
+    static GFXColor col_mount_out_of_ammo = vs_config->getColor ( "mount_out_of_ammo", GFXColor( 0.2, 0.2, 0.4, 1.0) );
+    static GFXColor col_mount_inactive    = vs_config->getColor ( "mount_inactive"   , GFXColor( 0.7, 0.7, 0.7, 1.0) );
+    static GFXColor col_mount_destroyed   = vs_config->getColor ( "mount_destroyed"  , GFXColor( 1.0, 0.0, 0.0, 1.0) );
+    static GFXColor col_mount_unchosen    = vs_config->getColor ( "mount_unchosen"   , GFXColor( 0.3, 0.3, 0.3, 1.0) );
 
     GFXColor mountcolor = col_mount_default;
     switch (mnt->ammo != 0 ? mnt->status : 127)
@@ -1575,7 +1561,7 @@ GFXColor MountColor( Mount *mnt )
                     cref = mnt->ref.gun->refireTime();
                 else
                     cref = mnt->ref.refire;
-                if (cref < tref) 
+                if (cref < tref)
                     mountcolor = colLerp( col_mount_out_of_ammo, col_mount_not_ready, cref/tref );
             } else	  // damaged
             {
@@ -1606,12 +1592,12 @@ void VDU::DrawWeapon( Unit *parent )
 {
     static bool drawweapsprite =
         XMLSupport::parse_bool( vs_config->getVariable( "graphics", "hud", "draw_weapon_sprite", "false" ) );
-    static string list_empty_mounts_as = 
+    static string list_empty_mounts_as =
         vs_config->getVariable( "graphics", "hud", "mounts_list_empty", "" ); // empty string skips; " ", "n/a", "(empty)" or "-" will show an empty mount
     static bool do_list_empty_mounts = (list_empty_mounts_as.length() != 0);
-        
+
 //  without fixed font we would need some sneaky tweaking to make it a table, probably with multiple TPs
-//    static int weaponcolumns = 
+//    static int weaponcolumns =
 //        XMLSupport::parse_int( vs_config->getVariable( "graphics", "hud", "gun_list_columns", "1" ) );
 //    int    count  = 0;
 //    int    mcount = 0;

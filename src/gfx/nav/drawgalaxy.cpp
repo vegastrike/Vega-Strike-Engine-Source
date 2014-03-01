@@ -117,19 +117,8 @@ static void DrawNode( int type,
     if (willclick == true && mouseover == false)
         //Perhaps some key binding or mouseclick will be set in the future to do this.
         mouseover = true;
-    static bool     inited = false;
-    static GFXColor highlighted_tail_col;
-    static GFXColor highlighted_tail_text;
-    if (!inited) {
-        float col1[4] = {1, .3, .3, .8};
-        vs_config->getColor( "nav", "highlighted_unit_on_tail", col1, true );
-        highlighted_tail_col = GFXColor( col1[0], col1[1], col1[2], col1[3] );
-
-        float col2[4] = {1, 1, .7, 1};
-        vs_config->getColor( "nav", "highlighted_text_on_tail", col2, true );
-        highlighted_tail_text = GFXColor( col2[0], col2[1], col2[2], col2[3] );
-        inited = true;
-    }
+    static GFXColor highlighted_tail_col  = vs_config->getColor( "nav", "highlighted_unit_on_tail", GFXColor(1, .3, .3, .8) ) ;
+    static GFXColor highlighted_tail_text = vs_config->getColor( "nav", "highlighted_text_on_tail", GFXColor(1,1  , .7,1  ) ) ;
     if (color == 'm')
         race = GrayColor;
     if (mouseover) {
