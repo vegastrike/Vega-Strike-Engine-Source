@@ -544,7 +544,7 @@ void GameUnit< UnitType >::Draw( const Transformation &parent, const Matrix &par
                 this->mounts[i].ref.gun->Draw( *ct, wmat,
                                                ( (this->mounts[i].size&weapon_info::AUTOTRACKING)
                                                 && (this->mounts[i].time_to_lock <= 0)
-                                                && (this->computer.radar.trackingactive) ) ? Unit::Target() : NULL, 
+                                                && Unit::TargetTracked() ) ? Unit::Target() : NULL, 
                                                this->computer.radar.trackingcone );
     }
     if ( On_Screen && (phalos->NumHalos() > 0) && !( this->docked&(UnitType::DOCKED|UnitType::DOCKED_INSIDE) ) && (Apparent_Size > 5.0f) ) {

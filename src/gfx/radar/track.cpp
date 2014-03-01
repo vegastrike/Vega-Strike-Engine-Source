@@ -105,9 +105,10 @@ bool Track::HasLock() const
 
 bool Track::HasWeaponLock() const
 {
+    assert(player);
     assert(target);
 
-    return (HasLock() && target->TargetLocked());
+    return (target->TargetLocked(player));
 }
 
 Track::Type::Value Track::IdentifyType() const

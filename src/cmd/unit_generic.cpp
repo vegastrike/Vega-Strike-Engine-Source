@@ -275,7 +275,7 @@ bool Unit::InRange( const Unit *target, double &mm, bool cone, bool cap, bool lo
     if (cone && computer.radar.maxcone > -.98) {
         QVector delta( target->Position()-Position() );
         mm = delta.Magnitude();
-        if ( (!lock) || ( !(TargetLocked() && computer.target == target) ) ) {
+        if ( (!lock) || ( !TargetLocked(target) ) ) {
             double tempmm = mm-target->rSize();
             if (tempmm > 0.0001)
                 if ( (ToLocalCoordinates( Vector( delta.i, delta.j, delta.k ) ).k/tempmm) < computer.radar.maxcone && cone )
@@ -2421,13 +2421,10 @@ void Unit::UpdatePhysics( const Transformation &trans,
         }
         if (mounts[i].type->type == weapon_info::BEAM) {
             if (mounts[i].ref.gun) {
-                static bool must_lock_to_autotrack =
-                    XMLSupport::parse_bool( vs_config->getVariable( "physics", "must_lock_to_autotrack", "true" ) );
                 Unit *autotarg     =
                     (   (mounts[i].size&weapon_info::AUTOTRACKING) 
                      && (mounts[i].time_to_lock <= 0)
-                     && (player_cockpit == NULL || TargetLocked() || !must_lock_to_autotrack)
-                     && (computer.radar.trackingactive)  ) ? target : NULL;
+                     && TargetTracked() ) ? target : NULL;
                 float trackingcone = computer.radar.trackingcone;
                 if ( CloseEnoughToAutotrack( this, target, trackingcone ) ) {
                     if (autotarg)
@@ -2454,14 +2451,9 @@ void Unit::UpdatePhysics( const Transformation &trans,
             t1.Compose( trans, transmat );
             t1.to_matrix( m1 );
             int autotrack = 0;
-            static bool must_lock_to_autotrack =
-                XMLSupport::parse_bool( vs_config->getVariable( "physics", "must_lock_to_autotrack", "true" ) );
             if (   ( 0 != (mounts[i].size&weapon_info::AUTOTRACKING) )
-                && computer.radar.trackingactive
                 && (   (Network != NULL && !SERVER) 
-                     || player_cockpit == NULL
-                     || TargetLocked()
-                     || !must_lock_to_autotrack )  )
+                    || TargetTracked() )  )
                 autotrack = computer.itts ? 2 : 1;
             float trackingcone = computer.radar.trackingcone;
             if ( CloseEnoughToAutotrack( this, target, trackingcone ) ) {
@@ -5313,6 +5305,31 @@ void Unit::LockTarget( bool myboo )
     if ( myboo && computer.radar.canlock == false && false == UnitUtil::isSignificant( Target() ) )
         computer.radar.locked = false;
 }
+
+bool Unit::TargetLocked( const Unit *checktarget ) const
+{
+    if (!computer.radar.locked)
+        return false;
+    return (checktarget == NULL) || (computer.target == checktarget);
+}
+
+bool Unit::TargetTracked( const Unit *checktarget )
+{
+    static bool must_lock_to_autotrack = XMLSupport::parse_bool( 
+        vs_config->getVariable( "physics", "must_lock_to_autotrack", "true" ) );
+    bool we_do_track = computer.radar.trackingactive
+        && ( !_Universe->isPlayerStarship(this) || TargetLocked() || !must_lock_to_autotrack);
+    if (!we_do_track)
+        return false;
+    if (checktarget == NULL)
+        return true;
+    if (computer.target != checktarget)
+        return false;
+    float mycone = computer.radar.trackingcone;
+    we_do_track = CloseEnoughToAutotrack( this, computer.target.GetUnit(), mycone ); 
+    return we_do_track;
+}
+
 
 void Unit::Target( Unit *targ )
 {

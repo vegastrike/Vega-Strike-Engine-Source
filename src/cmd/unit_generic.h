@@ -1178,10 +1178,8 @@ public:
     void setAverageGunSpeed();
     int LockMissile() const;             //-1 is no lock necessary 1 is locked
     void LockTarget( bool myboo );
-    bool TargetLocked() const
-    {
-        return computer.radar.locked;
-    }
+    bool TargetLocked( const Unit *checktarget = NULL ) const;
+    bool TargetTracked( const Unit *checktarget = NULL );
     float TrackingGuns( bool &missileLock );
 //Changes currently selected weapon
     void ToggleWeapon( bool Missile, bool forward = true );
