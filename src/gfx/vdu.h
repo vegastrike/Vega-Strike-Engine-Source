@@ -1,7 +1,6 @@
 #ifndef _GFX_VDU_H_
 #define _GFX_VDU_H_
 
-#include "cockpit_generic.h"
 #include "cmd/unit_generic.h"
 #include "sprite.h"
 #include <string>
@@ -97,7 +96,6 @@ public:
 
 int parse_vdu_type( const char *s );
 
-GFXColor colLerp( GFXColor a, GFXColor b, float bweight );
 GFXColor MountColor( Mount *mnt );
 #endif
 

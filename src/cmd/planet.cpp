@@ -42,19 +42,14 @@ GamePlanet::GamePlanet() :
 
 static void SetFogMaterialColor( Mesh *thus, const GFXColor &color, const GFXColor &dcolor )
 {
-    GFXMaterial  m;
-    m.ar    = m.ag = m.ab = m.aa = m.sr = m.sg = m.sb = m.sa = 0;
-    m.power = 0;
     static float emm  = XMLSupport::parse_float( vs_config->getVariable( "graphics", "atmosphere_emmissive", "1" ) );
     static float diff = XMLSupport::parse_float( vs_config->getVariable( "graphics", "atmosphere_diffuse", "1" ) );
-    m.er    = emm*color.r;
-    m.eg    = emm*color.g;
-    m.eb    = emm*color.b;
-    m.ea    = emm*color.a;
-    m.dr    = diff*dcolor.r;
-    m.dg    = diff*dcolor.g;
-    m.db    = diff*dcolor.b;
-    m.da    = diff*dcolor.a;
+    GFXMaterial  m;
+    setMaterialAmbient( m, 0.0);
+    setMaterialDiffuse( m, diff*dcolor);
+    setMaterialSpecular( m, 0.0);
+    setMaterialEmissive(m, emm*color);
+    m.power = 0;
     thus->SetMaterial( m );
 }
 Mesh * MakeFogMesh( const AtmosphericFogMesh &f, float radius )
@@ -151,14 +146,13 @@ void GamePlanet::AddCity( const std::string &texture,
         meshdata.push_back( NULL );
     Mesh *shield = meshdata.back();
     meshdata.pop_back();
-    GFXMaterial  m;
-    m.ar = m.ag = m.ab = m.aa = 0.0;
     static float materialweight    = XMLSupport::parse_float( vs_config->getVariable( "graphics", "city_light_strength", "10" ) );
-    static float daymaterialweight =
-        XMLSupport::parse_float( vs_config->getVariable( "graphics", "day_city_light_strength", "0" ) );
-    m.dr    = m.dg = m.db = m.da = materialweight;
-    m.sr    = m.sg = m.sb = m.sa = 0.0;
-    m.er    = m.eg = m.eb = m.ea = daymaterialweight;
+    static float daymaterialweight = XMLSupport::parse_float( vs_config->getVariable( "graphics", "day_city_light_strength", "0" ) );
+    GFXMaterial  m;
+    setMaterialAmbient( m, 0.0);
+    setMaterialDiffuse( m, materialweight );
+    setMaterialSpecular(m, 0.0);
+    setMaterialEmissive(m, daymaterialweight );
     m.power = 0.0;
     static int stacks = XMLSupport::parse_int( vs_config->getVariable( "graphics", "planet_detail", "24" ) );
     meshdata.push_back( new CityLights( radius, stacks, stacks, texture.c_str(), numwrapx, numwrapy, inside_out, ONE, ONE,
@@ -327,7 +321,7 @@ GamePlanet::GamePlanet( QVector x,
         static float glowradius =
             XMLSupport::parse_float( vs_config->getVariable( "graphics", "star_glow_radius", "1.33" ) )/bodyradius;
         if (drawglow) {
-            GFXColor    c( ourmat.er, ourmat.eg, ourmat.eb, ourmat.ea );
+            GFXColor    c = getMaterialEmissive( ourmat );
             static bool spec = XMLSupport::parse_bool( vs_config->getVariable( "graphics", "glow_ambient_star_light", "false" ) );
             static bool diff = XMLSupport::parse_bool( vs_config->getVariable( "graphics", "glow_diffuse_star_light", "false" ) );
             if (diff)

@@ -153,15 +153,6 @@ char tohexdigit( int x )
         return (char) (x-10+'A');
 }
 
-GFXColor colLerp( GFXColor a, GFXColor b, float bweight )
-{
-    float aweight = 1-bweight;
-    return GFXColor( a.r*aweight+b.r*bweight,
-                     a.g*aweight+b.g*bweight,
-                     a.b*aweight+b.b*bweight,
-                     a.a*aweight+b.a*bweight );
-}
-
 struct colorstring
 {
     char str[8];

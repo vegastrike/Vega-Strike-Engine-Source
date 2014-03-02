@@ -12,8 +12,6 @@
 
 #include <vector>
 
-
-
 GLenum PolyLookup( POLYTYPE poly )
 {
     switch (poly)

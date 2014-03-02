@@ -502,22 +502,10 @@ void StarSystem::beginElement( const string &name, const AttributeList &attribut
                                            GFXColor( 0.0,0.0,0.0,1.0 ) );
     GFXMaterial ourmat;
     GFXGetMaterial( 0, ourmat );
-    ourmat.ar=planet_mat_ambient.r;
-    ourmat.ag=planet_mat_ambient.g;
-    ourmat.ab=planet_mat_ambient.b;
-    ourmat.aa=planet_mat_ambient.a;
-    ourmat.dr=planet_mat_diffuse.r;
-    ourmat.dg=planet_mat_diffuse.g;
-    ourmat.db=planet_mat_diffuse.b;
-    ourmat.da=planet_mat_diffuse.a;
-    ourmat.sr=planet_mat_specular.r;
-    ourmat.sg=planet_mat_specular.g;
-    ourmat.sb=planet_mat_specular.b;
-    ourmat.sa=planet_mat_specular.a;
-    ourmat.sr=planet_mat_emissive.r;
-    ourmat.sg=planet_mat_emissive.g;
-    ourmat.sb=planet_mat_emissive.b;
-    ourmat.sa=planet_mat_emissive.a;
+    setMaterialAmbient(ourmat, planet_mat_ambient);
+    setMaterialDiffuse(ourmat, planet_mat_diffuse);
+    setMaterialSpecular(ourmat, planet_mat_specular);
+    setMaterialEmissive(ourmat, planet_mat_emissive);
 
     int     numwraps = 1;
     float   scalex   = 1;

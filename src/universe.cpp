@@ -136,25 +136,10 @@ void GameUniverse::StartGFX()
 {
     GFXBeginScene();
     GFXMaterial mat;
-    mat.ar    = 1.00F;
-    mat.ag    = 1.00F;
-    mat.ab    = 1.00F;
-    mat.aa    = 1.00F;
-
-    mat.dr    = 1.00F;
-    mat.dg    = 1.00F;
-    mat.db    = 1.00F;
-    mat.da    = 1.00F;
-
-    mat.sr    = 1.00F;
-    mat.sg    = 1.00F;
-    mat.sb    = 1.00F;
-    mat.sa    = 1.00F;
-
-    mat.er    = 0.0F;
-    mat.eg    = 0.0F;
-    mat.eb    = 0.0F;
-    mat.ea    = 1.0F;
+    setMaterialAmbient( mat, 1.0, 1.0, 1.0, 1.0 );
+    setMaterialDiffuse( mat, 1.0, 1.0, 1.0, 1.0 );
+    setMaterialSpecular( mat, 1.0, 1.0, 1.0, 1.0 );
+    setMaterialEmissive( mat, 0.0, 0.0, 0.0, 1.0 );
     mat.power = 60.0F;
     unsigned int tmp;
     GFXSetMaterial( tmp, mat );

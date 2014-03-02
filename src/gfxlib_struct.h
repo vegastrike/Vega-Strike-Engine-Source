@@ -212,6 +212,21 @@ inline GFXColor operator-( const GFXColor &c0, const GFXColor &c1 )
     return GFXColor( c0.r-c1.r, c0.g-c1.g, c0.b-c1.b, c0.a-c1.a );
 }
 
+inline bool operator==( const GFXColor &c0, const GFXColor &c1 )
+{
+    return (c0.r==c1.r)&&(c0.g==c1.g)&&(c0.b==c1.b)&&(c0.a==c1.a);
+}
+
+inline GFXColor colLerp( GFXColor a, GFXColor b, float bweight )
+{
+    float aweight = 1.0f-bweight;
+    return GFXColor( a.r*aweight+b.r*bweight,
+                     a.g*aweight+b.g*bweight,
+                     a.b*aweight+b.b*bweight,
+                     a.a*aweight+b.a*bweight );
+}
+
+
 ///This vertex is used for the interleaved array argument for color based arrays T2F_C4F_N3F_V3F
 struct GFXColorVertex
 {
@@ -924,6 +939,83 @@ struct GFXMaterial
     /// specular power
     float power;
 };
+
+inline void setMaterialAmbient( GFXMaterial mat, float r,float g,float b,float a ) {
+    mat.ar=r;
+    mat.ag=g;
+    mat.ab=b;
+    mat.aa=a;
+}
+inline void setMaterialDiffuse( GFXMaterial mat, float r,float g,float b,float a ) {
+    mat.dr=r;
+    mat.dg=g;
+    mat.db=b;
+    mat.da=a;
+}
+inline void setMaterialSpecular( GFXMaterial mat, float r,float g,float b,float a ) {
+    mat.sr=r;
+    mat.sg=g;
+    mat.sb=b;
+    mat.sa=a;
+}
+inline void setMaterialEmissive( GFXMaterial mat, float r,float g,float b,float a ) {
+    mat.er=r;
+    mat.eg=g;
+    mat.eb=b;
+    mat.ea=a;
+}
+
+inline void setMaterialAmbient( GFXMaterial mat, float rgba ) {
+    mat.ar=mat.ag=mat.ab=mat.aa=rgba;
+}
+inline void setMaterialDiffuse( GFXMaterial mat, float rgba ) {
+    mat.dr=mat.dg=mat.db=mat.da=rgba;
+}
+inline void setMaterialSpecular( GFXMaterial mat, float rgba ) {
+    mat.sr=mat.sg=mat.sb=mat.sa=rgba;
+}
+inline void setMaterialEmissive( GFXMaterial mat, float rgba ) {
+    mat.er=mat.eg=mat.eb=mat.ea=rgba;
+}
+
+inline void setMaterialAmbient( GFXMaterial mat, GFXColor col ) {
+    mat.ar=col.r;
+    mat.ag=col.g;
+    mat.ab=col.b;
+    mat.aa=col.a;
+}
+inline void setMaterialDiffuse( GFXMaterial mat, GFXColor col ) {
+    mat.dr=col.r;
+    mat.dg=col.g;
+    mat.db=col.b;
+    mat.da=col.a;
+}
+inline void setMaterialSpecular( GFXMaterial mat, GFXColor col ) {
+    mat.sr=col.r;
+    mat.sg=col.g;
+    mat.sb=col.b;
+    mat.sa=col.a;
+}
+inline void setMaterialEmissive( GFXMaterial mat, GFXColor col ) {
+    mat.er=col.r;
+    mat.eg=col.g;
+    mat.eb=col.b;
+    mat.ea=col.a;
+}
+
+inline GFXColor getMaterialAmbient( GFXMaterial mat ) {
+    return GFXColor ( mat.ar, mat.ag, mat.ab, mat.aa );
+}
+inline GFXColor getMaterialDiffuse( GFXMaterial mat ) {
+    return GFXColor ( mat.dr, mat.dg, mat.db, mat.da );
+}
+inline GFXColor getMaterialSpecular( GFXMaterial mat ) {
+    return GFXColor ( mat.sr, mat.sg, mat.sb, mat.sa );
+}
+inline GFXColor getMaterialEmissive( GFXMaterial mat ) {
+    return GFXColor ( mat.er, mat.eg, mat.eb, mat.ea );
+}
+
 //Textures may only be cube maps, Texture1d, Texture2d or Texture3d
 enum TEXTURE_TARGET
 {
