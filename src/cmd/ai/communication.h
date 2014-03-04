@@ -1,6 +1,7 @@
 #ifndef _COMMUNICATION_H_
 #define _COMMUNICATION_H_
 #include "cmd/unit_generic.h"
+#include "gfxlib_struct.h"
 
 class FSM
 {
@@ -100,5 +101,20 @@ public:
         return fsm->getDeltaRelation( prevstate, curstate );
     }
 };
+
+struct RGBstring
+{
+    char str[8];
+};
+
+RGBstring colToString( GFXColor col );
+RGBstring GetRelationshipRGBstring( float rel );
+
+inline std::string GetRelationshipColorString( float rel ) {
+    return GetRelationshipRGBstring( rel ).str;
+}
+
+unsigned int DoSpeech( Unit *un, Unit *player_un, const FSM::Node &node );
+
 #endif
 

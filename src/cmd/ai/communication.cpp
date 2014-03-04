@@ -418,3 +418,103 @@ CommunicationMessage::CommunicationMessage( Unit *send,
     assert( this->curstate >= 0 );
 }
 
+char tohexdigit( int x )
+{
+    if (x <= 9 && x >= 0)
+        return (char) (x+'0');
+    else
+        return (char) (x-10+'A');
+}
+
+RGBstring colToString( GFXColor col )
+{
+    unsigned char r = (unsigned char) (col.r*255);
+    unsigned char g = (unsigned char) (col.g*255);
+    unsigned char b = (unsigned char) (col.b*255);
+    RGBstring   ret;
+    ret.str[0] = '#';
+    ret.str[7] = '\0';
+    ret.str[1] = tohexdigit( r/16 );
+    ret.str[2] = tohexdigit( r%16 );
+    ret.str[3] = tohexdigit( g/16 );
+    ret.str[4] = tohexdigit( g%16 );
+    ret.str[5] = tohexdigit( b/16 );
+    ret.str[6] = tohexdigit( b%16 );
+    return ret;
+}
+
+RGBstring GetRelationshipRGBstring( float rel )
+{
+    static GFXColor col_enemy   = vs_config->getColor( "relation_enemy",   vs_config->getColor( "enemy",
+                                                                            GFXColor(1.0 ,0.0,0.0,1.0) )); // red   - like target
+    static GFXColor col_friend  = vs_config->getColor( "relation_friend",  vs_config->getColor( "friend",
+                                                                            GFXColor(0.0 ,1.0,0.0,1.0) )); // green - like target
+    static GFXColor col_neutral = vs_config->getColor( "relation_neutral", vs_config->getColor( "black_and_white",
+                                                                            GFXColor(1.0 ,1.0,1.0,1.0) )); // white - NOT like target
+    GFXColor col;
+    if (rel==0)
+        col = col_neutral;
+    else {
+        if (rel<0) {
+            rel = -rel;
+            col = col_enemy;
+        } else {
+            col = col_friend;
+        }
+        if (rel<1.0)
+            col = colLerp (col_neutral, col, rel);
+    }
+    return colToString( col );
+}
+
+unsigned int DoSpeech( Unit *un, Unit *player_un, const FSM::Node &node )
+{
+    static float scale_rel_color =
+        XMLSupport::parse_float( vs_config->getVariable( "graphics", "hud", "scale_relationship_color", "10.0" ) );
+    static std::string ownname_RGBstr = colToString( vs_config->getColor( "player_name", GFXColor( 0.0 ,0.2, 1.0 ) ) ).str; // bluish
+    unsigned int dummy = 0;
+    string speech = node.GetMessage( dummy );
+    string myname( "[Static]" );
+    if (un != NULL) {
+        myname = un->isUnit() == PLANETPTR ? un->name : un->getFullname();
+        Flightgroup *fg = un->getFlightgroup();
+        if (fg && fg->name != "base" && fg->name != "Base")
+            myname = fg->name+" "+XMLSupport::tostring( un->getFgSubnumber() )+", "+un->getFullname();
+        else if (myname.length() == 0)
+            myname = un->name;
+        if (player_un != NULL) {
+            if (player_un == un) {
+                myname = ownname_RGBstr+myname+"#000000";
+            } else {
+                float rel = un->getRelation( player_un );
+                myname = GetRelationshipColorString( rel )+myname+"#000000";
+            }
+        }
+    }
+    mission->msgcenter->add( myname, "all",
+                            GetRelationshipColorString( node.messagedelta*scale_rel_color )+speech+"#000000" );     //multiply by 2 so colors are easier to tell
+    return dummy;
+}
+
+void LeadMe( Unit *un, string directive, string speech, bool changetarget )
+{
+    if (un != NULL) {
+        for (unsigned int i = 0; i < _Universe->numPlayers(); i++) {
+            Unit *pun = _Universe->AccessCockpit( i )->GetParent();
+            if (pun)
+                if ( pun->getFlightgroup() == un->getFlightgroup() )
+                    DoSpeech( un, pun, FSM::Node::MakeNode( speech, .1 ) );
+        }
+        Flightgroup *fg = un->getFlightgroup();
+        if (fg) {
+            if (fg->leader.GetUnit() != un)
+                if ( ( !_Universe->isPlayerStarship( fg->leader.GetUnit() ) ) || _Universe->isPlayerStarship( un ) )
+                    fg->leader.SetUnit( un );
+            fg->directive = directive;
+            if (changetarget)
+                fg->target.SetUnit( un->Target() );
+            if ( (directive == "") )
+                fg->target.SetUnit( NULL );
+        }
+    }
+}

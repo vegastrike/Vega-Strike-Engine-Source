@@ -21,6 +21,7 @@
 #include "universe_util.h"
 #include "networking/netclient.h"
 #include "vsfilesystem.h"
+#include "cmd/ai/communication.h"
 
 template < typename T >
 inline T mymin( T a, T b )
@@ -143,36 +144,6 @@ int parse_vdu_type( const char *x )
         retval |= vdu_lookup( s );
     free( mystr );
     return retval;
-}
-
-char tohexdigit( int x )
-{
-    if (x <= 9 && x >= 0)
-        return (char) (x+'0');
-    else
-        return (char) (x-10+'A');
-}
-
-struct colorstring
-{
-    char str[8];
-};
-
-colorstring colToString( GFXColor col )
-{
-    unsigned char r = (unsigned char) (col.r*255);
-    unsigned char g = (unsigned char) (col.g*255);
-    unsigned char b = (unsigned char) (col.b*255);
-    colorstring   ret;
-    ret.str[0] = '#';
-    ret.str[7] = '\0';
-    ret.str[1] = tohexdigit( r/16 );
-    ret.str[2] = tohexdigit( r%16 );
-    ret.str[3] = tohexdigit( g/16 );
-    ret.str[4] = tohexdigit( g%16 );
-    ret.str[5] = tohexdigit( b/16 );
-    ret.str[6] = tohexdigit( b%16 );
-    return ret;
 }
 
 VDU::VDU( const char *file, TextPlane *textp, unsigned short modes, short rwws, short clls, float *ma,
@@ -1327,7 +1298,7 @@ void VDU::DrawDamage( Unit *parent )
     static GFXColor cdestroyed = vs_config->getColor( "default", "hud_repair_destroyed",
                                                     GFXColor( .2, .2, .2, 1 ) );
 
-    colorstring   fpstring = colToString( cfullpower);
+    RGBstring   fpstring = colToString( cfullpower);
     static string damage_report_heading =
         XMLSupport::escaped_string( vs_config->getVariable( "graphics", "hud", "damage_report_heading",
                                                             "#00ff00DAMAGE REPORT\n\n" ) );
@@ -1625,7 +1596,7 @@ void VDU::DrawWeapon( Unit *parent )
         } else {
             if ( (parent->mounts[i].status != Mount::UNCHOSEN) || do_list_empty_mounts ) {
                 GFXColor mountcolor( average.r/numave, average.g/numave, average.b/numave, average.a/numave );
-                string baseweaponreport = string( colToString( mountcolor ).str );
+                string baseweaponreport = colToString( mountcolor ).str;
                 if (parent->mounts[i].status == Mount::UNCHOSEN)
                     baseweaponreport += list_empty_mounts_as;
                 else
