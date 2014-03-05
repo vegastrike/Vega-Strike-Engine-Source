@@ -940,79 +940,79 @@ struct GFXMaterial
     float power;
 };
 
-inline void setMaterialAmbient( GFXMaterial mat, float r,float g,float b,float a ) {
+inline void setMaterialAmbient( GFXMaterial &mat, float r,float g,float b,float a ) {
     mat.ar=r;
     mat.ag=g;
     mat.ab=b;
     mat.aa=a;
 }
-inline void setMaterialDiffuse( GFXMaterial mat, float r,float g,float b,float a ) {
+inline void setMaterialDiffuse( GFXMaterial &mat, float r,float g,float b,float a ) {
     mat.dr=r;
     mat.dg=g;
     mat.db=b;
     mat.da=a;
 }
-inline void setMaterialSpecular( GFXMaterial mat, float r,float g,float b,float a ) {
+inline void setMaterialSpecular( GFXMaterial &mat, float r,float g,float b,float a ) {
     mat.sr=r;
     mat.sg=g;
     mat.sb=b;
     mat.sa=a;
 }
-inline void setMaterialEmissive( GFXMaterial mat, float r,float g,float b,float a ) {
+inline void setMaterialEmissive( GFXMaterial &mat, float r,float g,float b,float a ) {
     mat.er=r;
     mat.eg=g;
     mat.eb=b;
     mat.ea=a;
 }
 
-inline void setMaterialAmbient( GFXMaterial mat, float rgba ) {
+inline void setMaterialAmbient( GFXMaterial &mat, float rgba ) {
     mat.ar=mat.ag=mat.ab=mat.aa=rgba;
 }
-inline void setMaterialDiffuse( GFXMaterial mat, float rgba ) {
+inline void setMaterialDiffuse( GFXMaterial &mat, float rgba ) {
     mat.dr=mat.dg=mat.db=mat.da=rgba;
 }
-inline void setMaterialSpecular( GFXMaterial mat, float rgba ) {
+inline void setMaterialSpecular( GFXMaterial &mat, float rgba ) {
     mat.sr=mat.sg=mat.sb=mat.sa=rgba;
 }
-inline void setMaterialEmissive( GFXMaterial mat, float rgba ) {
+inline void setMaterialEmissive( GFXMaterial &mat, float rgba ) {
     mat.er=mat.eg=mat.eb=mat.ea=rgba;
 }
 
-inline void setMaterialAmbient( GFXMaterial mat, GFXColor col ) {
+inline void setMaterialAmbient( GFXMaterial &mat, const GFXColor &col ) {
     mat.ar=col.r;
     mat.ag=col.g;
     mat.ab=col.b;
     mat.aa=col.a;
 }
-inline void setMaterialDiffuse( GFXMaterial mat, GFXColor col ) {
+inline void setMaterialDiffuse( GFXMaterial &mat, const GFXColor &col ) {
     mat.dr=col.r;
     mat.dg=col.g;
     mat.db=col.b;
     mat.da=col.a;
 }
-inline void setMaterialSpecular( GFXMaterial mat, GFXColor col ) {
+inline void setMaterialSpecular( GFXMaterial &mat, const GFXColor &col ) {
     mat.sr=col.r;
     mat.sg=col.g;
     mat.sb=col.b;
     mat.sa=col.a;
 }
-inline void setMaterialEmissive( GFXMaterial mat, GFXColor col ) {
+inline void setMaterialEmissive( GFXMaterial &mat, const GFXColor &col ) {
     mat.er=col.r;
     mat.eg=col.g;
     mat.eb=col.b;
     mat.ea=col.a;
 }
 
-inline GFXColor getMaterialAmbient( GFXMaterial mat ) {
+inline GFXColor getMaterialAmbient( const GFXMaterial &mat ) {
     return GFXColor ( mat.ar, mat.ag, mat.ab, mat.aa );
 }
-inline GFXColor getMaterialDiffuse( GFXMaterial mat ) {
+inline GFXColor getMaterialDiffuse( const GFXMaterial &mat ) {
     return GFXColor ( mat.dr, mat.dg, mat.db, mat.da );
 }
-inline GFXColor getMaterialSpecular( GFXMaterial mat ) {
+inline GFXColor getMaterialSpecular( const GFXMaterial &mat ) {
     return GFXColor ( mat.sr, mat.sg, mat.sb, mat.sa );
 }
-inline GFXColor getMaterialEmissive( GFXMaterial mat ) {
+inline GFXColor getMaterialEmissive( const GFXMaterial &mat ) {
     return GFXColor ( mat.er, mat.eg, mat.eb, mat.ea );
 }
 
