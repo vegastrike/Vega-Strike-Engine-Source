@@ -218,7 +218,7 @@ int Music::SelectTracks( int layer )
             return whichsong;
         }
     }
-    if ( _Universe && _Universe->numPlayers() ) {
+    if ( _Universe && _Universe->activeStarSystem() != NULL && _Universe->numPlayers() ) {
         CompileRunPython( dj_script );
     } else {
         static std::string loading_tune = vs_config->getVariable( "audio", "loading_sound", "../music/loading.ogg" );
