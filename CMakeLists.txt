@@ -549,10 +549,13 @@ OPTION(CPUINTEL_core2 "Enable Intel Core2 optimizations"
 OPTION(CPUINTEL_native "Enable host-specific optimizations for this machine"
     OFF )
 
+SET(DATADIR "" CACHE STRING "Default vegastrike data directory")
 
 # Hide our temporary variable and initialize it to empty
 SET(CPU_OPTS  )
+SET(DEFINES " -DNV_CUBE_MAP -DBOOST_PYTHON_NO_PY_SIGNATURES ")
 MARK_AS_ADVANCED( CPU_OPTS )
+MARK_AS_ADVANCED( DEFINES )
 SET(CPU_SMP "1" CACHE STRING 
     "Number of CPU's in system")
 # Depending on the boolean chosen above, set CPU_OPTS to the correct cpu opts
@@ -579,11 +582,15 @@ IF(CPU_SMP GREATER 1)
     SET(CPU_OPTS " ${CPU_OPTS} -ftree-parallelize-loops=${CPU_SMP} ")
 ENDIF(CPU_SMP GREATER 1)
 
+IF(DATADIR)
+    SET(DEFINES "${DEFINES} -DDATA_DIR=\"${DATADIR}\"")
+ENDIF(DATADIR)
+
 # Debug target block. 
-SET(CMAKE_CXX_FLAGS_DEBUG " ${BUILD_OPT} ${CPU_OPTS} -DNV_CUBE_MAP -DBOOST_PYTHON_NO_PY_SIGNATURES -include config.h -pipe -g2 -Wall -fvisibility=hidden" CACHE STRING
+SET(CMAKE_CXX_FLAGS_DEBUG " ${BUILD_OPT} ${CPU_OPTS} ${DEFINES} -include config.h -pipe -g2 -Wall -fvisibility=hidden" CACHE STRING
     "Flags used by the C++ compiler during debug builds."
      FORCE )
-SET( CMAKE_C_FLAGS_DEBUG "  ${BUILD_OPT} ${CPU_OPTS} -DNV_CUBE_MAP -DBOOST_PYTHON_NO_PY_SIGNATURES -include config.h -pipe -g2 -Wall -Wno-unused-function -Wno-unused-variable -fvisibility=hidden" CACHE STRING
+SET( CMAKE_C_FLAGS_DEBUG "  ${BUILD_OPT} ${CPU_OPTS} ${DEFINES} -include config.h -pipe -g2 -Wall -Wno-unused-function -Wno-unused-variable -fvisibility=hidden" CACHE STRING
     "Flags used by the C compiler during debug builds."
      FORCE )
 SET( CMAKE_EXE_LINKER_FLAGS_DEBUG
