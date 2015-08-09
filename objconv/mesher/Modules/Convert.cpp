@@ -145,7 +145,7 @@ namespace Converter {
 							rc = cit->second->convert(params[0],params[1],params[2]);
 						}
 						if (rc == ConversionImpl::RC_NOT_IMPLEMENTED) {
-							cerr << "Error: " << params[2] << " from " << params[0] << " to " << params[1] << " unimplemneted" << endl;
+							cerr << "Error: " << params[2] << " from " << params[0] << " to " << params[1] << " unimplemented" << endl;
 							return ConversionImpl::RC_NOT_IMPLEMENTED;
 						} else if (rc == ConversionImpl::RC_OK) {
 							params.erase(params.begin(),params.begin()+3);
