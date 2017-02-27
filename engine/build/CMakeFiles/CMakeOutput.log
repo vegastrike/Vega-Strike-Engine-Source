@@ -1,0 +1,792 @@
+The system is: Linux - 4.8.0-39-generic - x86_64
+Compiling the C compiler identification source file "CMakeCCompilerId.c" succeeded.
+Compiler: /usr/bin/cc 
+Build flags: 
+Id flags: 
+
+The output was:
+0
+
+
+Compilation of the C compiler identification source "CMakeCCompilerId.c" produced "a.out"
+
+The C compiler identification is GNU, found in "/home/talrose/projects/Vegastrike/engine/build/CMakeFiles/3.5.2/CompilerIdC/a.out"
+
+Compiling the CXX compiler identification source file "CMakeCXXCompilerId.cpp" succeeded.
+Compiler: /usr/bin/c++ 
+Build flags: 
+Id flags: 
+
+The output was:
+0
+
+
+Compilation of the CXX compiler identification source "CMakeCXXCompilerId.cpp" produced "a.out"
+
+The CXX compiler identification is GNU, found in "/home/talrose/projects/Vegastrike/engine/build/CMakeFiles/3.5.2/CompilerIdCXX/a.out"
+
+Determining if the C compiler works passed with the following output:
+Change Dir: /home/talrose/projects/Vegastrike/engine/build/CMakeFiles/CMakeTmp
+
+Run Build Command:"/usr/bin/make" "cmTC_ff470/fast"
+/usr/bin/make -f CMakeFiles/cmTC_ff470.dir/build.make CMakeFiles/cmTC_ff470.dir/build
+make[1]: Entering directory '/home/talrose/projects/Vegastrike/engine/build/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_ff470.dir/testCCompiler.c.o
+/usr/bin/cc     -o CMakeFiles/cmTC_ff470.dir/testCCompiler.c.o   -c /home/talrose/projects/Vegastrike/engine/build/CMakeFiles/CMakeTmp/testCCompiler.c
+Linking C executable cmTC_ff470
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_ff470.dir/link.txt --verbose=1
+/usr/bin/cc       CMakeFiles/cmTC_ff470.dir/testCCompiler.c.o  -o cmTC_ff470 -rdynamic 
+make[1]: Leaving directory '/home/talrose/projects/Vegastrike/engine/build/CMakeFiles/CMakeTmp'
+
+
+Detecting C compiler ABI info compiled with the following output:
+Change Dir: /home/talrose/projects/Vegastrike/engine/build/CMakeFiles/CMakeTmp
+
+Run Build Command:"/usr/bin/make" "cmTC_5a8c9/fast"
+/usr/bin/make -f CMakeFiles/cmTC_5a8c9.dir/build.make CMakeFiles/cmTC_5a8c9.dir/build
+make[1]: Entering directory '/home/talrose/projects/Vegastrike/engine/build/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_5a8c9.dir/CMakeCCompilerABI.c.o
+/usr/bin/cc     -o CMakeFiles/cmTC_5a8c9.dir/CMakeCCompilerABI.c.o   -c /usr/share/cmake-3.5/Modules/CMakeCCompilerABI.c
+Linking C executable cmTC_5a8c9
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_5a8c9.dir/link.txt --verbose=1
+/usr/bin/cc      -v CMakeFiles/cmTC_5a8c9.dir/CMakeCCompilerABI.c.o  -o cmTC_5a8c9 -rdynamic  
+Using built-in specs.
+COLLECT_GCC=/usr/bin/cc
+COLLECT_LTO_WRAPPER=/usr/lib/gcc/x86_64-linux-gnu/6/lto-wrapper
+Target: x86_64-linux-gnu
+Configured with: ../src/configure -v --with-pkgversion='Ubuntu 6.2.0-5ubuntu12' --with-bugurl=file:///usr/share/doc/gcc-6/README.Bugs --enable-languages=c,ada,c++,java,go,d,fortran,objc,obj-c++ --prefix=/usr --program-suffix=-6 --program-prefix=x86_64-linux-gnu- --enable-shared --enable-linker-build-id --libexecdir=/usr/lib --without-included-gettext --enable-threads=posix --libdir=/usr/lib --enable-nls --with-sysroot=/ --enable-clocale=gnu --enable-libstdcxx-debug --enable-libstdcxx-time=yes --with-default-libstdcxx-abi=new --enable-gnu-unique-object --disable-vtable-verify --enable-libmpx --enable-plugin --enable-default-pie --with-system-zlib --disable-browser-plugin --enable-java-awt=gtk --enable-gtk-cairo --with-java-home=/usr/lib/jvm/java-1.5.0-gcj-6-amd64/jre --enable-java-home --with-jvm-root-dir=/usr/lib/jvm/java-1.5.0-gcj-6-amd64 --with-jvm-jar-dir=/usr/lib/jvm-exports/java-1.5.0-gcj-6-amd64 --with-arch-directory=amd64 --with-ecj-jar=/usr/share/java/eclipse-ecj.jar --enable-objc-gc --enable-multiarch --disable-werror --with-arch-32=i686 --with-abi=m64 --with-multilib-list=m32,m64,mx32 --enable-multilib --with-tune=generic --enable-checking=release --build=x86_64-linux-gnu --host=x86_64-linux-gnu --target=x86_64-linux-gnu
+Thread model: posix
+gcc version 6.2.0 20161005 (Ubuntu 6.2.0-5ubuntu12) 
+COMPILER_PATH=/usr/lib/gcc/x86_64-linux-gnu/6/:/usr/lib/gcc/x86_64-linux-gnu/6/:/usr/lib/gcc/x86_64-linux-gnu/:/usr/lib/gcc/x86_64-linux-gnu/6/:/usr/lib/gcc/x86_64-linux-gnu/
+LIBRARY_PATH=/usr/lib/gcc/x86_64-linux-gnu/6/:/usr/lib/gcc/x86_64-linux-gnu/6/../../../x86_64-linux-gnu/:/usr/lib/gcc/x86_64-linux-gnu/6/../../../../lib/:/lib/x86_64-linux-gnu/:/lib/../lib/:/usr/lib/x86_64-linux-gnu/:/usr/lib/../lib/:/usr/lib/gcc/x86_64-linux-gnu/6/../../../:/lib/:/usr/lib/
+COLLECT_GCC_OPTIONS='-v' '-o' 'cmTC_5a8c9' '-rdynamic' '-mtune=generic' '-march=x86-64'
+ /usr/lib/gcc/x86_64-linux-gnu/6/collect2 -plugin /usr/lib/gcc/x86_64-linux-gnu/6/liblto_plugin.so -plugin-opt=/usr/lib/gcc/x86_64-linux-gnu/6/lto-wrapper -plugin-opt=-fresolution=/tmp/ccNy5X5n.res -plugin-opt=-pass-through=-lgcc -plugin-opt=-pass-through=-lgcc_s -plugin-opt=-pass-through=-lc -plugin-opt=-pass-through=-lgcc -plugin-opt=-pass-through=-lgcc_s --sysroot=/ --build-id --eh-frame-hdr -m elf_x86_64 --hash-style=gnu --as-needed -export-dynamic -dynamic-linker /lib64/ld-linux-x86-64.so.2 -pie -z now -z relro -o cmTC_5a8c9 /usr/lib/gcc/x86_64-linux-gnu/6/../../../x86_64-linux-gnu/Scrt1.o /usr/lib/gcc/x86_64-linux-gnu/6/../../../x86_64-linux-gnu/crti.o /usr/lib/gcc/x86_64-linux-gnu/6/crtbeginS.o -L/usr/lib/gcc/x86_64-linux-gnu/6 -L/usr/lib/gcc/x86_64-linux-gnu/6/../../../x86_64-linux-gnu -L/usr/lib/gcc/x86_64-linux-gnu/6/../../../../lib -L/lib/x86_64-linux-gnu -L/lib/../lib -L/usr/lib/x86_64-linux-gnu -L/usr/lib/../lib -L/usr/lib/gcc/x86_64-linux-gnu/6/../../.. CMakeFiles/cmTC_5a8c9.dir/CMakeCCompilerABI.c.o -lgcc --as-needed -lgcc_s --no-as-needed -lc -lgcc --as-needed -lgcc_s --no-as-needed /usr/lib/gcc/x86_64-linux-gnu/6/crtendS.o /usr/lib/gcc/x86_64-linux-gnu/6/../../../x86_64-linux-gnu/crtn.o
+COLLECT_GCC_OPTIONS='-v' '-o' 'cmTC_5a8c9' '-rdynamic' '-mtune=generic' '-march=x86-64'
+make[1]: Leaving directory '/home/talrose/projects/Vegastrike/engine/build/CMakeFiles/CMakeTmp'
+
+
+Parsed C implicit link information from above output:
+  link line regex: [^( *|.*[/\])(ld|([^/\]+-)?ld|collect2)[^/\]*( |$)]
+  ignore line: [Change Dir: /home/talrose/projects/Vegastrike/engine/build/CMakeFiles/CMakeTmp]
+  ignore line: []
+  ignore line: [Run Build Command:"/usr/bin/make" "cmTC_5a8c9/fast"]
+  ignore line: [/usr/bin/make -f CMakeFiles/cmTC_5a8c9.dir/build.make CMakeFiles/cmTC_5a8c9.dir/build]
+  ignore line: [make[1]: Entering directory '/home/talrose/projects/Vegastrike/engine/build/CMakeFiles/CMakeTmp']
+  ignore line: [Building C object CMakeFiles/cmTC_5a8c9.dir/CMakeCCompilerABI.c.o]
+  ignore line: [/usr/bin/cc     -o CMakeFiles/cmTC_5a8c9.dir/CMakeCCompilerABI.c.o   -c /usr/share/cmake-3.5/Modules/CMakeCCompilerABI.c]
+  ignore line: [Linking C executable cmTC_5a8c9]
+  ignore line: [/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_5a8c9.dir/link.txt --verbose=1]
+  ignore line: [/usr/bin/cc      -v CMakeFiles/cmTC_5a8c9.dir/CMakeCCompilerABI.c.o  -o cmTC_5a8c9 -rdynamic  ]
+  ignore line: [Using built-in specs.]
+  ignore line: [COLLECT_GCC=/usr/bin/cc]
+  ignore line: [COLLECT_LTO_WRAPPER=/usr/lib/gcc/x86_64-linux-gnu/6/lto-wrapper]
+  ignore line: [Target: x86_64-linux-gnu]
+  ignore line: [Configured with: ../src/configure -v --with-pkgversion='Ubuntu 6.2.0-5ubuntu12' --with-bugurl=file:///usr/share/doc/gcc-6/README.Bugs --enable-languages=c,ada,c++,java,go,d,fortran,objc,obj-c++ --prefix=/usr --program-suffix=-6 --program-prefix=x86_64-linux-gnu- --enable-shared --enable-linker-build-id --libexecdir=/usr/lib --without-included-gettext --enable-threads=posix --libdir=/usr/lib --enable-nls --with-sysroot=/ --enable-clocale=gnu --enable-libstdcxx-debug --enable-libstdcxx-time=yes --with-default-libstdcxx-abi=new --enable-gnu-unique-object --disable-vtable-verify --enable-libmpx --enable-plugin --enable-default-pie --with-system-zlib --disable-browser-plugin --enable-java-awt=gtk --enable-gtk-cairo --with-java-home=/usr/lib/jvm/java-1.5.0-gcj-6-amd64/jre --enable-java-home --with-jvm-root-dir=/usr/lib/jvm/java-1.5.0-gcj-6-amd64 --with-jvm-jar-dir=/usr/lib/jvm-exports/java-1.5.0-gcj-6-amd64 --with-arch-directory=amd64 --with-ecj-jar=/usr/share/java/eclipse-ecj.jar --enable-objc-gc --enable-multiarch --disable-werror --with-arch-32=i686 --with-abi=m64 --with-multilib-list=m32,m64,mx32 --enable-multilib --with-tune=generic --enable-checking=release --build=x86_64-linux-gnu --host=x86_64-linux-gnu --target=x86_64-linux-gnu]
+  ignore line: [Thread model: posix]
+  ignore line: [gcc version 6.2.0 20161005 (Ubuntu 6.2.0-5ubuntu12) ]
+  ignore line: [COMPILER_PATH=/usr/lib/gcc/x86_64-linux-gnu/6/:/usr/lib/gcc/x86_64-linux-gnu/6/:/usr/lib/gcc/x86_64-linux-gnu/:/usr/lib/gcc/x86_64-linux-gnu/6/:/usr/lib/gcc/x86_64-linux-gnu/]
+  ignore line: [LIBRARY_PATH=/usr/lib/gcc/x86_64-linux-gnu/6/:/usr/lib/gcc/x86_64-linux-gnu/6/../../../x86_64-linux-gnu/:/usr/lib/gcc/x86_64-linux-gnu/6/../../../../lib/:/lib/x86_64-linux-gnu/:/lib/../lib/:/usr/lib/x86_64-linux-gnu/:/usr/lib/../lib/:/usr/lib/gcc/x86_64-linux-gnu/6/../../../:/lib/:/usr/lib/]
+  ignore line: [COLLECT_GCC_OPTIONS='-v' '-o' 'cmTC_5a8c9' '-rdynamic' '-mtune=generic' '-march=x86-64']
+  link line: [ /usr/lib/gcc/x86_64-linux-gnu/6/collect2 -plugin /usr/lib/gcc/x86_64-linux-gnu/6/liblto_plugin.so -plugin-opt=/usr/lib/gcc/x86_64-linux-gnu/6/lto-wrapper -plugin-opt=-fresolution=/tmp/ccNy5X5n.res -plugin-opt=-pass-through=-lgcc -plugin-opt=-pass-through=-lgcc_s -plugin-opt=-pass-through=-lc -plugin-opt=-pass-through=-lgcc -plugin-opt=-pass-through=-lgcc_s --sysroot=/ --build-id --eh-frame-hdr -m elf_x86_64 --hash-style=gnu --as-needed -export-dynamic -dynamic-linker /lib64/ld-linux-x86-64.so.2 -pie -z now -z relro -o cmTC_5a8c9 /usr/lib/gcc/x86_64-linux-gnu/6/../../../x86_64-linux-gnu/Scrt1.o /usr/lib/gcc/x86_64-linux-gnu/6/../../../x86_64-linux-gnu/crti.o /usr/lib/gcc/x86_64-linux-gnu/6/crtbeginS.o -L/usr/lib/gcc/x86_64-linux-gnu/6 -L/usr/lib/gcc/x86_64-linux-gnu/6/../../../x86_64-linux-gnu -L/usr/lib/gcc/x86_64-linux-gnu/6/../../../../lib -L/lib/x86_64-linux-gnu -L/lib/../lib -L/usr/lib/x86_64-linux-gnu -L/usr/lib/../lib -L/usr/lib/gcc/x86_64-linux-gnu/6/../../.. CMakeFiles/cmTC_5a8c9.dir/CMakeCCompilerABI.c.o -lgcc --as-needed -lgcc_s --no-as-needed -lc -lgcc --as-needed -lgcc_s --no-as-needed /usr/lib/gcc/x86_64-linux-gnu/6/crtendS.o /usr/lib/gcc/x86_64-linux-gnu/6/../../../x86_64-linux-gnu/crtn.o]
+    arg [/usr/lib/gcc/x86_64-linux-gnu/6/collect2] ==> ignore
+    arg [-plugin] ==> ignore
+    arg [/usr/lib/gcc/x86_64-linux-gnu/6/liblto_plugin.so] ==> ignore
+    arg [-plugin-opt=/usr/lib/gcc/x86_64-linux-gnu/6/lto-wrapper] ==> ignore
+    arg [-plugin-opt=-fresolution=/tmp/ccNy5X5n.res] ==> ignore
+    arg [-plugin-opt=-pass-through=-lgcc] ==> ignore
+    arg [-plugin-opt=-pass-through=-lgcc_s] ==> ignore
+    arg [-plugin-opt=-pass-through=-lc] ==> ignore
+    arg [-plugin-opt=-pass-through=-lgcc] ==> ignore
+    arg [-plugin-opt=-pass-through=-lgcc_s] ==> ignore
+    arg [--sysroot=/] ==> ignore
+    arg [--build-id] ==> ignore
+    arg [--eh-frame-hdr] ==> ignore
+    arg [-m] ==> ignore
+    arg [elf_x86_64] ==> ignore
+    arg [--hash-style=gnu] ==> ignore
+    arg [--as-needed] ==> ignore
+    arg [-export-dynamic] ==> ignore
+    arg [-dynamic-linker] ==> ignore
+    arg [/lib64/ld-linux-x86-64.so.2] ==> ignore
+    arg [-pie] ==> ignore
+    arg [-znow] ==> ignore
+    arg [-zrelro] ==> ignore
+    arg [-o] ==> ignore
+    arg [cmTC_5a8c9] ==> ignore
+    arg [/usr/lib/gcc/x86_64-linux-gnu/6/../../../x86_64-linux-gnu/Scrt1.o] ==> ignore
+    arg [/usr/lib/gcc/x86_64-linux-gnu/6/../../../x86_64-linux-gnu/crti.o] ==> ignore
+    arg [/usr/lib/gcc/x86_64-linux-gnu/6/crtbeginS.o] ==> ignore
+    arg [-L/usr/lib/gcc/x86_64-linux-gnu/6] ==> dir [/usr/lib/gcc/x86_64-linux-gnu/6]
+    arg [-L/usr/lib/gcc/x86_64-linux-gnu/6/../../../x86_64-linux-gnu] ==> dir [/usr/lib/gcc/x86_64-linux-gnu/6/../../../x86_64-linux-gnu]
+    arg [-L/usr/lib/gcc/x86_64-linux-gnu/6/../../../../lib] ==> dir [/usr/lib/gcc/x86_64-linux-gnu/6/../../../../lib]
+    arg [-L/lib/x86_64-linux-gnu] ==> dir [/lib/x86_64-linux-gnu]
+    arg [-L/lib/../lib] ==> dir [/lib/../lib]
+    arg [-L/usr/lib/x86_64-linux-gnu] ==> dir [/usr/lib/x86_64-linux-gnu]
+    arg [-L/usr/lib/../lib] ==> dir [/usr/lib/../lib]
+    arg [-L/usr/lib/gcc/x86_64-linux-gnu/6/../../..] ==> dir [/usr/lib/gcc/x86_64-linux-gnu/6/../../..]
+    arg [CMakeFiles/cmTC_5a8c9.dir/CMakeCCompilerABI.c.o] ==> ignore
+    arg [-lgcc] ==> lib [gcc]
+    arg [--as-needed] ==> ignore
+    arg [-lgcc_s] ==> lib [gcc_s]
+    arg [--no-as-needed] ==> ignore
+    arg [-lc] ==> lib [c]
+    arg [-lgcc] ==> lib [gcc]
+    arg [--as-needed] ==> ignore
+    arg [-lgcc_s] ==> lib [gcc_s]
+    arg [--no-as-needed] ==> ignore
+    arg [/usr/lib/gcc/x86_64-linux-gnu/6/crtendS.o] ==> ignore
+    arg [/usr/lib/gcc/x86_64-linux-gnu/6/../../../x86_64-linux-gnu/crtn.o] ==> ignore
+  remove lib [gcc]
+  remove lib [gcc_s]
+  remove lib [gcc]
+  remove lib [gcc_s]
+  collapse library dir [/usr/lib/gcc/x86_64-linux-gnu/6] ==> [/usr/lib/gcc/x86_64-linux-gnu/6]
+  collapse library dir [/usr/lib/gcc/x86_64-linux-gnu/6/../../../x86_64-linux-gnu] ==> [/usr/lib/x86_64-linux-gnu]
+  collapse library dir [/usr/lib/gcc/x86_64-linux-gnu/6/../../../../lib] ==> [/usr/lib]
+  collapse library dir [/lib/x86_64-linux-gnu] ==> [/lib/x86_64-linux-gnu]
+  collapse library dir [/lib/../lib] ==> [/lib]
+  collapse library dir [/usr/lib/x86_64-linux-gnu] ==> [/usr/lib/x86_64-linux-gnu]
+  collapse library dir [/usr/lib/../lib] ==> [/usr/lib]
+  collapse library dir [/usr/lib/gcc/x86_64-linux-gnu/6/../../..] ==> [/usr/lib]
+  implicit libs: [c]
+  implicit dirs: [/usr/lib/gcc/x86_64-linux-gnu/6;/usr/lib/x86_64-linux-gnu;/usr/lib;/lib/x86_64-linux-gnu;/lib]
+  implicit fwks: []
+
+
+
+
+Detecting C [-std=c11] compiler features compiled with the following output:
+Change Dir: /home/talrose/projects/Vegastrike/engine/build/CMakeFiles/CMakeTmp
+
+Run Build Command:"/usr/bin/make" "cmTC_7cfc3/fast"
+/usr/bin/make -f CMakeFiles/cmTC_7cfc3.dir/build.make CMakeFiles/cmTC_7cfc3.dir/build
+make[1]: Entering directory '/home/talrose/projects/Vegastrike/engine/build/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_7cfc3.dir/feature_tests.c.o
+/usr/bin/cc    -std=c11 -o CMakeFiles/cmTC_7cfc3.dir/feature_tests.c.o   -c /home/talrose/projects/Vegastrike/engine/build/CMakeFiles/feature_tests.c
+Linking C executable cmTC_7cfc3
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_7cfc3.dir/link.txt --verbose=1
+/usr/bin/cc       CMakeFiles/cmTC_7cfc3.dir/feature_tests.c.o  -o cmTC_7cfc3 -rdynamic 
+make[1]: Leaving directory '/home/talrose/projects/Vegastrike/engine/build/CMakeFiles/CMakeTmp'
+
+
+    Feature record: C_FEATURE:1c_function_prototypes
+    Feature record: C_FEATURE:1c_restrict
+    Feature record: C_FEATURE:1c_static_assert
+    Feature record: C_FEATURE:1c_variadic_macros
+
+
+Detecting C [-std=c99] compiler features compiled with the following output:
+Change Dir: /home/talrose/projects/Vegastrike/engine/build/CMakeFiles/CMakeTmp
+
+Run Build Command:"/usr/bin/make" "cmTC_1f0fb/fast"
+/usr/bin/make -f CMakeFiles/cmTC_1f0fb.dir/build.make CMakeFiles/cmTC_1f0fb.dir/build
+make[1]: Entering directory '/home/talrose/projects/Vegastrike/engine/build/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_1f0fb.dir/feature_tests.c.o
+/usr/bin/cc    -std=c99 -o CMakeFiles/cmTC_1f0fb.dir/feature_tests.c.o   -c /home/talrose/projects/Vegastrike/engine/build/CMakeFiles/feature_tests.c
+Linking C executable cmTC_1f0fb
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_1f0fb.dir/link.txt --verbose=1
+/usr/bin/cc       CMakeFiles/cmTC_1f0fb.dir/feature_tests.c.o  -o cmTC_1f0fb -rdynamic 
+make[1]: Leaving directory '/home/talrose/projects/Vegastrike/engine/build/CMakeFiles/CMakeTmp'
+
+
+    Feature record: C_FEATURE:1c_function_prototypes
+    Feature record: C_FEATURE:1c_restrict
+    Feature record: C_FEATURE:0c_static_assert
+    Feature record: C_FEATURE:1c_variadic_macros
+
+
+Detecting C [-std=c90] compiler features compiled with the following output:
+Change Dir: /home/talrose/projects/Vegastrike/engine/build/CMakeFiles/CMakeTmp
+
+Run Build Command:"/usr/bin/make" "cmTC_c934e/fast"
+/usr/bin/make -f CMakeFiles/cmTC_c934e.dir/build.make CMakeFiles/cmTC_c934e.dir/build
+make[1]: Entering directory '/home/talrose/projects/Vegastrike/engine/build/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_c934e.dir/feature_tests.c.o
+/usr/bin/cc    -std=c90 -o CMakeFiles/cmTC_c934e.dir/feature_tests.c.o   -c /home/talrose/projects/Vegastrike/engine/build/CMakeFiles/feature_tests.c
+Linking C executable cmTC_c934e
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_c934e.dir/link.txt --verbose=1
+/usr/bin/cc       CMakeFiles/cmTC_c934e.dir/feature_tests.c.o  -o cmTC_c934e -rdynamic 
+make[1]: Leaving directory '/home/talrose/projects/Vegastrike/engine/build/CMakeFiles/CMakeTmp'
+
+
+    Feature record: C_FEATURE:1c_function_prototypes
+    Feature record: C_FEATURE:0c_restrict
+    Feature record: C_FEATURE:0c_static_assert
+    Feature record: C_FEATURE:0c_variadic_macros
+Determining if the CXX compiler works passed with the following output:
+Change Dir: /home/talrose/projects/Vegastrike/engine/build/CMakeFiles/CMakeTmp
+
+Run Build Command:"/usr/bin/make" "cmTC_0b4ad/fast"
+/usr/bin/make -f CMakeFiles/cmTC_0b4ad.dir/build.make CMakeFiles/cmTC_0b4ad.dir/build
+make[1]: Entering directory '/home/talrose/projects/Vegastrike/engine/build/CMakeFiles/CMakeTmp'
+Building CXX object CMakeFiles/cmTC_0b4ad.dir/testCXXCompiler.cxx.o
+/usr/bin/c++      -o CMakeFiles/cmTC_0b4ad.dir/testCXXCompiler.cxx.o -c /home/talrose/projects/Vegastrike/engine/build/CMakeFiles/CMakeTmp/testCXXCompiler.cxx
+Linking CXX executable cmTC_0b4ad
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_0b4ad.dir/link.txt --verbose=1
+/usr/bin/c++        CMakeFiles/cmTC_0b4ad.dir/testCXXCompiler.cxx.o  -o cmTC_0b4ad -rdynamic 
+make[1]: Leaving directory '/home/talrose/projects/Vegastrike/engine/build/CMakeFiles/CMakeTmp'
+
+
+Detecting CXX compiler ABI info compiled with the following output:
+Change Dir: /home/talrose/projects/Vegastrike/engine/build/CMakeFiles/CMakeTmp
+
+Run Build Command:"/usr/bin/make" "cmTC_73ebf/fast"
+/usr/bin/make -f CMakeFiles/cmTC_73ebf.dir/build.make CMakeFiles/cmTC_73ebf.dir/build
+make[1]: Entering directory '/home/talrose/projects/Vegastrike/engine/build/CMakeFiles/CMakeTmp'
+Building CXX object CMakeFiles/cmTC_73ebf.dir/CMakeCXXCompilerABI.cpp.o
+/usr/bin/c++      -o CMakeFiles/cmTC_73ebf.dir/CMakeCXXCompilerABI.cpp.o -c /usr/share/cmake-3.5/Modules/CMakeCXXCompilerABI.cpp
+Linking CXX executable cmTC_73ebf
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_73ebf.dir/link.txt --verbose=1
+/usr/bin/c++       -v CMakeFiles/cmTC_73ebf.dir/CMakeCXXCompilerABI.cpp.o  -o cmTC_73ebf -rdynamic  
+Using built-in specs.
+COLLECT_GCC=/usr/bin/c++
+COLLECT_LTO_WRAPPER=/usr/lib/gcc/x86_64-linux-gnu/6/lto-wrapper
+Target: x86_64-linux-gnu
+Configured with: ../src/configure -v --with-pkgversion='Ubuntu 6.2.0-5ubuntu12' --with-bugurl=file:///usr/share/doc/gcc-6/README.Bugs --enable-languages=c,ada,c++,java,go,d,fortran,objc,obj-c++ --prefix=/usr --program-suffix=-6 --program-prefix=x86_64-linux-gnu- --enable-shared --enable-linker-build-id --libexecdir=/usr/lib --without-included-gettext --enable-threads=posix --libdir=/usr/lib --enable-nls --with-sysroot=/ --enable-clocale=gnu --enable-libstdcxx-debug --enable-libstdcxx-time=yes --with-default-libstdcxx-abi=new --enable-gnu-unique-object --disable-vtable-verify --enable-libmpx --enable-plugin --enable-default-pie --with-system-zlib --disable-browser-plugin --enable-java-awt=gtk --enable-gtk-cairo --with-java-home=/usr/lib/jvm/java-1.5.0-gcj-6-amd64/jre --enable-java-home --with-jvm-root-dir=/usr/lib/jvm/java-1.5.0-gcj-6-amd64 --with-jvm-jar-dir=/usr/lib/jvm-exports/java-1.5.0-gcj-6-amd64 --with-arch-directory=amd64 --with-ecj-jar=/usr/share/java/eclipse-ecj.jar --enable-objc-gc --enable-multiarch --disable-werror --with-arch-32=i686 --with-abi=m64 --with-multilib-list=m32,m64,mx32 --enable-multilib --with-tune=generic --enable-checking=release --build=x86_64-linux-gnu --host=x86_64-linux-gnu --target=x86_64-linux-gnu
+Thread model: posix
+gcc version 6.2.0 20161005 (Ubuntu 6.2.0-5ubuntu12) 
+COMPILER_PATH=/usr/lib/gcc/x86_64-linux-gnu/6/:/usr/lib/gcc/x86_64-linux-gnu/6/:/usr/lib/gcc/x86_64-linux-gnu/:/usr/lib/gcc/x86_64-linux-gnu/6/:/usr/lib/gcc/x86_64-linux-gnu/
+LIBRARY_PATH=/usr/lib/gcc/x86_64-linux-gnu/6/:/usr/lib/gcc/x86_64-linux-gnu/6/../../../x86_64-linux-gnu/:/usr/lib/gcc/x86_64-linux-gnu/6/../../../../lib/:/lib/x86_64-linux-gnu/:/lib/../lib/:/usr/lib/x86_64-linux-gnu/:/usr/lib/../lib/:/usr/lib/gcc/x86_64-linux-gnu/6/../../../:/lib/:/usr/lib/
+COLLECT_GCC_OPTIONS='-v' '-o' 'cmTC_73ebf' '-rdynamic' '-shared-libgcc' '-mtune=generic' '-march=x86-64'
+ /usr/lib/gcc/x86_64-linux-gnu/6/collect2 -plugin /usr/lib/gcc/x86_64-linux-gnu/6/liblto_plugin.so -plugin-opt=/usr/lib/gcc/x86_64-linux-gnu/6/lto-wrapper -plugin-opt=-fresolution=/tmp/ccGhBXTv.res -plugin-opt=-pass-through=-lgcc_s -plugin-opt=-pass-through=-lgcc -plugin-opt=-pass-through=-lc -plugin-opt=-pass-through=-lgcc_s -plugin-opt=-pass-through=-lgcc --sysroot=/ --build-id --eh-frame-hdr -m elf_x86_64 --hash-style=gnu --as-needed -export-dynamic -dynamic-linker /lib64/ld-linux-x86-64.so.2 -pie -z now -z relro -o cmTC_73ebf /usr/lib/gcc/x86_64-linux-gnu/6/../../../x86_64-linux-gnu/Scrt1.o /usr/lib/gcc/x86_64-linux-gnu/6/../../../x86_64-linux-gnu/crti.o /usr/lib/gcc/x86_64-linux-gnu/6/crtbeginS.o -L/usr/lib/gcc/x86_64-linux-gnu/6 -L/usr/lib/gcc/x86_64-linux-gnu/6/../../../x86_64-linux-gnu -L/usr/lib/gcc/x86_64-linux-gnu/6/../../../../lib -L/lib/x86_64-linux-gnu -L/lib/../lib -L/usr/lib/x86_64-linux-gnu -L/usr/lib/../lib -L/usr/lib/gcc/x86_64-linux-gnu/6/../../.. CMakeFiles/cmTC_73ebf.dir/CMakeCXXCompilerABI.cpp.o -lstdc++ -lm -lgcc_s -lgcc -lc -lgcc_s -lgcc /usr/lib/gcc/x86_64-linux-gnu/6/crtendS.o /usr/lib/gcc/x86_64-linux-gnu/6/../../../x86_64-linux-gnu/crtn.o
+COLLECT_GCC_OPTIONS='-v' '-o' 'cmTC_73ebf' '-rdynamic' '-shared-libgcc' '-mtune=generic' '-march=x86-64'
+make[1]: Leaving directory '/home/talrose/projects/Vegastrike/engine/build/CMakeFiles/CMakeTmp'
+
+
+Parsed CXX implicit link information from above output:
+  link line regex: [^( *|.*[/\])(ld|([^/\]+-)?ld|collect2)[^/\]*( |$)]
+  ignore line: [Change Dir: /home/talrose/projects/Vegastrike/engine/build/CMakeFiles/CMakeTmp]
+  ignore line: []
+  ignore line: [Run Build Command:"/usr/bin/make" "cmTC_73ebf/fast"]
+  ignore line: [/usr/bin/make -f CMakeFiles/cmTC_73ebf.dir/build.make CMakeFiles/cmTC_73ebf.dir/build]
+  ignore line: [make[1]: Entering directory '/home/talrose/projects/Vegastrike/engine/build/CMakeFiles/CMakeTmp']
+  ignore line: [Building CXX object CMakeFiles/cmTC_73ebf.dir/CMakeCXXCompilerABI.cpp.o]
+  ignore line: [/usr/bin/c++      -o CMakeFiles/cmTC_73ebf.dir/CMakeCXXCompilerABI.cpp.o -c /usr/share/cmake-3.5/Modules/CMakeCXXCompilerABI.cpp]
+  ignore line: [Linking CXX executable cmTC_73ebf]
+  ignore line: [/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_73ebf.dir/link.txt --verbose=1]
+  ignore line: [/usr/bin/c++       -v CMakeFiles/cmTC_73ebf.dir/CMakeCXXCompilerABI.cpp.o  -o cmTC_73ebf -rdynamic  ]
+  ignore line: [Using built-in specs.]
+  ignore line: [COLLECT_GCC=/usr/bin/c++]
+  ignore line: [COLLECT_LTO_WRAPPER=/usr/lib/gcc/x86_64-linux-gnu/6/lto-wrapper]
+  ignore line: [Target: x86_64-linux-gnu]
+  ignore line: [Configured with: ../src/configure -v --with-pkgversion='Ubuntu 6.2.0-5ubuntu12' --with-bugurl=file:///usr/share/doc/gcc-6/README.Bugs --enable-languages=c,ada,c++,java,go,d,fortran,objc,obj-c++ --prefix=/usr --program-suffix=-6 --program-prefix=x86_64-linux-gnu- --enable-shared --enable-linker-build-id --libexecdir=/usr/lib --without-included-gettext --enable-threads=posix --libdir=/usr/lib --enable-nls --with-sysroot=/ --enable-clocale=gnu --enable-libstdcxx-debug --enable-libstdcxx-time=yes --with-default-libstdcxx-abi=new --enable-gnu-unique-object --disable-vtable-verify --enable-libmpx --enable-plugin --enable-default-pie --with-system-zlib --disable-browser-plugin --enable-java-awt=gtk --enable-gtk-cairo --with-java-home=/usr/lib/jvm/java-1.5.0-gcj-6-amd64/jre --enable-java-home --with-jvm-root-dir=/usr/lib/jvm/java-1.5.0-gcj-6-amd64 --with-jvm-jar-dir=/usr/lib/jvm-exports/java-1.5.0-gcj-6-amd64 --with-arch-directory=amd64 --with-ecj-jar=/usr/share/java/eclipse-ecj.jar --enable-objc-gc --enable-multiarch --disable-werror --with-arch-32=i686 --with-abi=m64 --with-multilib-list=m32,m64,mx32 --enable-multilib --with-tune=generic --enable-checking=release --build=x86_64-linux-gnu --host=x86_64-linux-gnu --target=x86_64-linux-gnu]
+  ignore line: [Thread model: posix]
+  ignore line: [gcc version 6.2.0 20161005 (Ubuntu 6.2.0-5ubuntu12) ]
+  ignore line: [COMPILER_PATH=/usr/lib/gcc/x86_64-linux-gnu/6/:/usr/lib/gcc/x86_64-linux-gnu/6/:/usr/lib/gcc/x86_64-linux-gnu/:/usr/lib/gcc/x86_64-linux-gnu/6/:/usr/lib/gcc/x86_64-linux-gnu/]
+  ignore line: [LIBRARY_PATH=/usr/lib/gcc/x86_64-linux-gnu/6/:/usr/lib/gcc/x86_64-linux-gnu/6/../../../x86_64-linux-gnu/:/usr/lib/gcc/x86_64-linux-gnu/6/../../../../lib/:/lib/x86_64-linux-gnu/:/lib/../lib/:/usr/lib/x86_64-linux-gnu/:/usr/lib/../lib/:/usr/lib/gcc/x86_64-linux-gnu/6/../../../:/lib/:/usr/lib/]
+  ignore line: [COLLECT_GCC_OPTIONS='-v' '-o' 'cmTC_73ebf' '-rdynamic' '-shared-libgcc' '-mtune=generic' '-march=x86-64']
+  link line: [ /usr/lib/gcc/x86_64-linux-gnu/6/collect2 -plugin /usr/lib/gcc/x86_64-linux-gnu/6/liblto_plugin.so -plugin-opt=/usr/lib/gcc/x86_64-linux-gnu/6/lto-wrapper -plugin-opt=-fresolution=/tmp/ccGhBXTv.res -plugin-opt=-pass-through=-lgcc_s -plugin-opt=-pass-through=-lgcc -plugin-opt=-pass-through=-lc -plugin-opt=-pass-through=-lgcc_s -plugin-opt=-pass-through=-lgcc --sysroot=/ --build-id --eh-frame-hdr -m elf_x86_64 --hash-style=gnu --as-needed -export-dynamic -dynamic-linker /lib64/ld-linux-x86-64.so.2 -pie -z now -z relro -o cmTC_73ebf /usr/lib/gcc/x86_64-linux-gnu/6/../../../x86_64-linux-gnu/Scrt1.o /usr/lib/gcc/x86_64-linux-gnu/6/../../../x86_64-linux-gnu/crti.o /usr/lib/gcc/x86_64-linux-gnu/6/crtbeginS.o -L/usr/lib/gcc/x86_64-linux-gnu/6 -L/usr/lib/gcc/x86_64-linux-gnu/6/../../../x86_64-linux-gnu -L/usr/lib/gcc/x86_64-linux-gnu/6/../../../../lib -L/lib/x86_64-linux-gnu -L/lib/../lib -L/usr/lib/x86_64-linux-gnu -L/usr/lib/../lib -L/usr/lib/gcc/x86_64-linux-gnu/6/../../.. CMakeFiles/cmTC_73ebf.dir/CMakeCXXCompilerABI.cpp.o -lstdc++ -lm -lgcc_s -lgcc -lc -lgcc_s -lgcc /usr/lib/gcc/x86_64-linux-gnu/6/crtendS.o /usr/lib/gcc/x86_64-linux-gnu/6/../../../x86_64-linux-gnu/crtn.o]
+    arg [/usr/lib/gcc/x86_64-linux-gnu/6/collect2] ==> ignore
+    arg [-plugin] ==> ignore
+    arg [/usr/lib/gcc/x86_64-linux-gnu/6/liblto_plugin.so] ==> ignore
+    arg [-plugin-opt=/usr/lib/gcc/x86_64-linux-gnu/6/lto-wrapper] ==> ignore
+    arg [-plugin-opt=-fresolution=/tmp/ccGhBXTv.res] ==> ignore
+    arg [-plugin-opt=-pass-through=-lgcc_s] ==> ignore
+    arg [-plugin-opt=-pass-through=-lgcc] ==> ignore
+    arg [-plugin-opt=-pass-through=-lc] ==> ignore
+    arg [-plugin-opt=-pass-through=-lgcc_s] ==> ignore
+    arg [-plugin-opt=-pass-through=-lgcc] ==> ignore
+    arg [--sysroot=/] ==> ignore
+    arg [--build-id] ==> ignore
+    arg [--eh-frame-hdr] ==> ignore
+    arg [-m] ==> ignore
+    arg [elf_x86_64] ==> ignore
+    arg [--hash-style=gnu] ==> ignore
+    arg [--as-needed] ==> ignore
+    arg [-export-dynamic] ==> ignore
+    arg [-dynamic-linker] ==> ignore
+    arg [/lib64/ld-linux-x86-64.so.2] ==> ignore
+    arg [-pie] ==> ignore
+    arg [-znow] ==> ignore
+    arg [-zrelro] ==> ignore
+    arg [-o] ==> ignore
+    arg [cmTC_73ebf] ==> ignore
+    arg [/usr/lib/gcc/x86_64-linux-gnu/6/../../../x86_64-linux-gnu/Scrt1.o] ==> ignore
+    arg [/usr/lib/gcc/x86_64-linux-gnu/6/../../../x86_64-linux-gnu/crti.o] ==> ignore
+    arg [/usr/lib/gcc/x86_64-linux-gnu/6/crtbeginS.o] ==> ignore
+    arg [-L/usr/lib/gcc/x86_64-linux-gnu/6] ==> dir [/usr/lib/gcc/x86_64-linux-gnu/6]
+    arg [-L/usr/lib/gcc/x86_64-linux-gnu/6/../../../x86_64-linux-gnu] ==> dir [/usr/lib/gcc/x86_64-linux-gnu/6/../../../x86_64-linux-gnu]
+    arg [-L/usr/lib/gcc/x86_64-linux-gnu/6/../../../../lib] ==> dir [/usr/lib/gcc/x86_64-linux-gnu/6/../../../../lib]
+    arg [-L/lib/x86_64-linux-gnu] ==> dir [/lib/x86_64-linux-gnu]
+    arg [-L/lib/../lib] ==> dir [/lib/../lib]
+    arg [-L/usr/lib/x86_64-linux-gnu] ==> dir [/usr/lib/x86_64-linux-gnu]
+    arg [-L/usr/lib/../lib] ==> dir [/usr/lib/../lib]
+    arg [-L/usr/lib/gcc/x86_64-linux-gnu/6/../../..] ==> dir [/usr/lib/gcc/x86_64-linux-gnu/6/../../..]
+    arg [CMakeFiles/cmTC_73ebf.dir/CMakeCXXCompilerABI.cpp.o] ==> ignore
+    arg [-lstdc++] ==> lib [stdc++]
+    arg [-lm] ==> lib [m]
+    arg [-lgcc_s] ==> lib [gcc_s]
+    arg [-lgcc] ==> lib [gcc]
+    arg [-lc] ==> lib [c]
+    arg [-lgcc_s] ==> lib [gcc_s]
+    arg [-lgcc] ==> lib [gcc]
+    arg [/usr/lib/gcc/x86_64-linux-gnu/6/crtendS.o] ==> ignore
+    arg [/usr/lib/gcc/x86_64-linux-gnu/6/../../../x86_64-linux-gnu/crtn.o] ==> ignore
+  remove lib [gcc_s]
+  remove lib [gcc]
+  remove lib [gcc_s]
+  remove lib [gcc]
+  collapse library dir [/usr/lib/gcc/x86_64-linux-gnu/6] ==> [/usr/lib/gcc/x86_64-linux-gnu/6]
+  collapse library dir [/usr/lib/gcc/x86_64-linux-gnu/6/../../../x86_64-linux-gnu] ==> [/usr/lib/x86_64-linux-gnu]
+  collapse library dir [/usr/lib/gcc/x86_64-linux-gnu/6/../../../../lib] ==> [/usr/lib]
+  collapse library dir [/lib/x86_64-linux-gnu] ==> [/lib/x86_64-linux-gnu]
+  collapse library dir [/lib/../lib] ==> [/lib]
+  collapse library dir [/usr/lib/x86_64-linux-gnu] ==> [/usr/lib/x86_64-linux-gnu]
+  collapse library dir [/usr/lib/../lib] ==> [/usr/lib]
+  collapse library dir [/usr/lib/gcc/x86_64-linux-gnu/6/../../..] ==> [/usr/lib]
+  implicit libs: [stdc++;m;c]
+  implicit dirs: [/usr/lib/gcc/x86_64-linux-gnu/6;/usr/lib/x86_64-linux-gnu;/usr/lib;/lib/x86_64-linux-gnu;/lib]
+  implicit fwks: []
+
+
+
+
+Detecting CXX [-std=c++14] compiler features compiled with the following output:
+Change Dir: /home/talrose/projects/Vegastrike/engine/build/CMakeFiles/CMakeTmp
+
+Run Build Command:"/usr/bin/make" "cmTC_77ffb/fast"
+/usr/bin/make -f CMakeFiles/cmTC_77ffb.dir/build.make CMakeFiles/cmTC_77ffb.dir/build
+make[1]: Entering directory '/home/talrose/projects/Vegastrike/engine/build/CMakeFiles/CMakeTmp'
+Building CXX object CMakeFiles/cmTC_77ffb.dir/feature_tests.cxx.o
+/usr/bin/c++     -std=c++14 -o CMakeFiles/cmTC_77ffb.dir/feature_tests.cxx.o -c /home/talrose/projects/Vegastrike/engine/build/CMakeFiles/feature_tests.cxx
+Linking CXX executable cmTC_77ffb
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_77ffb.dir/link.txt --verbose=1
+/usr/bin/c++        CMakeFiles/cmTC_77ffb.dir/feature_tests.cxx.o  -o cmTC_77ffb -rdynamic 
+make[1]: Leaving directory '/home/talrose/projects/Vegastrike/engine/build/CMakeFiles/CMakeTmp'
+
+
+    Feature record: CXX_FEATURE:1cxx_aggregate_default_initializers
+    Feature record: CXX_FEATURE:1cxx_alias_templates
+    Feature record: CXX_FEATURE:1cxx_alignas
+    Feature record: CXX_FEATURE:1cxx_alignof
+    Feature record: CXX_FEATURE:1cxx_attributes
+    Feature record: CXX_FEATURE:1cxx_attribute_deprecated
+    Feature record: CXX_FEATURE:1cxx_auto_type
+    Feature record: CXX_FEATURE:1cxx_binary_literals
+    Feature record: CXX_FEATURE:1cxx_constexpr
+    Feature record: CXX_FEATURE:1cxx_contextual_conversions
+    Feature record: CXX_FEATURE:1cxx_decltype
+    Feature record: CXX_FEATURE:1cxx_decltype_auto
+    Feature record: CXX_FEATURE:1cxx_decltype_incomplete_return_types
+    Feature record: CXX_FEATURE:1cxx_default_function_template_args
+    Feature record: CXX_FEATURE:1cxx_defaulted_functions
+    Feature record: CXX_FEATURE:1cxx_defaulted_move_initializers
+    Feature record: CXX_FEATURE:1cxx_delegating_constructors
+    Feature record: CXX_FEATURE:1cxx_deleted_functions
+    Feature record: CXX_FEATURE:1cxx_digit_separators
+    Feature record: CXX_FEATURE:1cxx_enum_forward_declarations
+    Feature record: CXX_FEATURE:1cxx_explicit_conversions
+    Feature record: CXX_FEATURE:1cxx_extended_friend_declarations
+    Feature record: CXX_FEATURE:1cxx_extern_templates
+    Feature record: CXX_FEATURE:1cxx_final
+    Feature record: CXX_FEATURE:1cxx_func_identifier
+    Feature record: CXX_FEATURE:1cxx_generalized_initializers
+    Feature record: CXX_FEATURE:1cxx_generic_lambdas
+    Feature record: CXX_FEATURE:1cxx_inheriting_constructors
+    Feature record: CXX_FEATURE:1cxx_inline_namespaces
+    Feature record: CXX_FEATURE:1cxx_lambdas
+    Feature record: CXX_FEATURE:1cxx_lambda_init_captures
+    Feature record: CXX_FEATURE:1cxx_local_type_template_args
+    Feature record: CXX_FEATURE:1cxx_long_long_type
+    Feature record: CXX_FEATURE:1cxx_noexcept
+    Feature record: CXX_FEATURE:1cxx_nonstatic_member_init
+    Feature record: CXX_FEATURE:1cxx_nullptr
+    Feature record: CXX_FEATURE:1cxx_override
+    Feature record: CXX_FEATURE:1cxx_range_for
+    Feature record: CXX_FEATURE:1cxx_raw_string_literals
+    Feature record: CXX_FEATURE:1cxx_reference_qualified_functions
+    Feature record: CXX_FEATURE:1cxx_relaxed_constexpr
+    Feature record: CXX_FEATURE:1cxx_return_type_deduction
+    Feature record: CXX_FEATURE:1cxx_right_angle_brackets
+    Feature record: CXX_FEATURE:1cxx_rvalue_references
+    Feature record: CXX_FEATURE:1cxx_sizeof_member
+    Feature record: CXX_FEATURE:1cxx_static_assert
+    Feature record: CXX_FEATURE:1cxx_strong_enums
+    Feature record: CXX_FEATURE:1cxx_template_template_parameters
+    Feature record: CXX_FEATURE:1cxx_thread_local
+    Feature record: CXX_FEATURE:1cxx_trailing_return_types
+    Feature record: CXX_FEATURE:1cxx_unicode_literals
+    Feature record: CXX_FEATURE:1cxx_uniform_initialization
+    Feature record: CXX_FEATURE:1cxx_unrestricted_unions
+    Feature record: CXX_FEATURE:1cxx_user_literals
+    Feature record: CXX_FEATURE:1cxx_variable_templates
+    Feature record: CXX_FEATURE:1cxx_variadic_macros
+    Feature record: CXX_FEATURE:1cxx_variadic_templates
+
+
+Detecting CXX [-std=c++11] compiler features compiled with the following output:
+Change Dir: /home/talrose/projects/Vegastrike/engine/build/CMakeFiles/CMakeTmp
+
+Run Build Command:"/usr/bin/make" "cmTC_5981e/fast"
+/usr/bin/make -f CMakeFiles/cmTC_5981e.dir/build.make CMakeFiles/cmTC_5981e.dir/build
+make[1]: Entering directory '/home/talrose/projects/Vegastrike/engine/build/CMakeFiles/CMakeTmp'
+Building CXX object CMakeFiles/cmTC_5981e.dir/feature_tests.cxx.o
+/usr/bin/c++     -std=c++11 -o CMakeFiles/cmTC_5981e.dir/feature_tests.cxx.o -c /home/talrose/projects/Vegastrike/engine/build/CMakeFiles/feature_tests.cxx
+Linking CXX executable cmTC_5981e
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_5981e.dir/link.txt --verbose=1
+/usr/bin/c++        CMakeFiles/cmTC_5981e.dir/feature_tests.cxx.o  -o cmTC_5981e -rdynamic 
+make[1]: Leaving directory '/home/talrose/projects/Vegastrike/engine/build/CMakeFiles/CMakeTmp'
+
+
+    Feature record: CXX_FEATURE:0cxx_aggregate_default_initializers
+    Feature record: CXX_FEATURE:1cxx_alias_templates
+    Feature record: CXX_FEATURE:1cxx_alignas
+    Feature record: CXX_FEATURE:1cxx_alignof
+    Feature record: CXX_FEATURE:1cxx_attributes
+    Feature record: CXX_FEATURE:0cxx_attribute_deprecated
+    Feature record: CXX_FEATURE:1cxx_auto_type
+    Feature record: CXX_FEATURE:0cxx_binary_literals
+    Feature record: CXX_FEATURE:1cxx_constexpr
+    Feature record: CXX_FEATURE:0cxx_contextual_conversions
+    Feature record: CXX_FEATURE:1cxx_decltype
+    Feature record: CXX_FEATURE:0cxx_decltype_auto
+    Feature record: CXX_FEATURE:1cxx_decltype_incomplete_return_types
+    Feature record: CXX_FEATURE:1cxx_default_function_template_args
+    Feature record: CXX_FEATURE:1cxx_defaulted_functions
+    Feature record: CXX_FEATURE:1cxx_defaulted_move_initializers
+    Feature record: CXX_FEATURE:1cxx_delegating_constructors
+    Feature record: CXX_FEATURE:1cxx_deleted_functions
+    Feature record: CXX_FEATURE:0cxx_digit_separators
+    Feature record: CXX_FEATURE:1cxx_enum_forward_declarations
+    Feature record: CXX_FEATURE:1cxx_explicit_conversions
+    Feature record: CXX_FEATURE:1cxx_extended_friend_declarations
+    Feature record: CXX_FEATURE:1cxx_extern_templates
+    Feature record: CXX_FEATURE:1cxx_final
+    Feature record: CXX_FEATURE:1cxx_func_identifier
+    Feature record: CXX_FEATURE:1cxx_generalized_initializers
+    Feature record: CXX_FEATURE:0cxx_generic_lambdas
+    Feature record: CXX_FEATURE:1cxx_inheriting_constructors
+    Feature record: CXX_FEATURE:1cxx_inline_namespaces
+    Feature record: CXX_FEATURE:1cxx_lambdas
+    Feature record: CXX_FEATURE:0cxx_lambda_init_captures
+    Feature record: CXX_FEATURE:1cxx_local_type_template_args
+    Feature record: CXX_FEATURE:1cxx_long_long_type
+    Feature record: CXX_FEATURE:1cxx_noexcept
+    Feature record: CXX_FEATURE:1cxx_nonstatic_member_init
+    Feature record: CXX_FEATURE:1cxx_nullptr
+    Feature record: CXX_FEATURE:1cxx_override
+    Feature record: CXX_FEATURE:1cxx_range_for
+    Feature record: CXX_FEATURE:1cxx_raw_string_literals
+    Feature record: CXX_FEATURE:1cxx_reference_qualified_functions
+    Feature record: CXX_FEATURE:0cxx_relaxed_constexpr
+    Feature record: CXX_FEATURE:0cxx_return_type_deduction
+    Feature record: CXX_FEATURE:1cxx_right_angle_brackets
+    Feature record: CXX_FEATURE:1cxx_rvalue_references
+    Feature record: CXX_FEATURE:1cxx_sizeof_member
+    Feature record: CXX_FEATURE:1cxx_static_assert
+    Feature record: CXX_FEATURE:1cxx_strong_enums
+    Feature record: CXX_FEATURE:1cxx_template_template_parameters
+    Feature record: CXX_FEATURE:1cxx_thread_local
+    Feature record: CXX_FEATURE:1cxx_trailing_return_types
+    Feature record: CXX_FEATURE:1cxx_unicode_literals
+    Feature record: CXX_FEATURE:1cxx_uniform_initialization
+    Feature record: CXX_FEATURE:1cxx_unrestricted_unions
+    Feature record: CXX_FEATURE:1cxx_user_literals
+    Feature record: CXX_FEATURE:0cxx_variable_templates
+    Feature record: CXX_FEATURE:1cxx_variadic_macros
+    Feature record: CXX_FEATURE:1cxx_variadic_templates
+
+
+Detecting CXX [-std=c++98] compiler features compiled with the following output:
+Change Dir: /home/talrose/projects/Vegastrike/engine/build/CMakeFiles/CMakeTmp
+
+Run Build Command:"/usr/bin/make" "cmTC_83883/fast"
+/usr/bin/make -f CMakeFiles/cmTC_83883.dir/build.make CMakeFiles/cmTC_83883.dir/build
+make[1]: Entering directory '/home/talrose/projects/Vegastrike/engine/build/CMakeFiles/CMakeTmp'
+Building CXX object CMakeFiles/cmTC_83883.dir/feature_tests.cxx.o
+/usr/bin/c++     -std=c++98 -o CMakeFiles/cmTC_83883.dir/feature_tests.cxx.o -c /home/talrose/projects/Vegastrike/engine/build/CMakeFiles/feature_tests.cxx
+Linking CXX executable cmTC_83883
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_83883.dir/link.txt --verbose=1
+/usr/bin/c++        CMakeFiles/cmTC_83883.dir/feature_tests.cxx.o  -o cmTC_83883 -rdynamic 
+make[1]: Leaving directory '/home/talrose/projects/Vegastrike/engine/build/CMakeFiles/CMakeTmp'
+
+
+    Feature record: CXX_FEATURE:0cxx_aggregate_default_initializers
+    Feature record: CXX_FEATURE:0cxx_alias_templates
+    Feature record: CXX_FEATURE:0cxx_alignas
+    Feature record: CXX_FEATURE:0cxx_alignof
+    Feature record: CXX_FEATURE:0cxx_attributes
+    Feature record: CXX_FEATURE:0cxx_attribute_deprecated
+    Feature record: CXX_FEATURE:0cxx_auto_type
+    Feature record: CXX_FEATURE:0cxx_binary_literals
+    Feature record: CXX_FEATURE:0cxx_constexpr
+    Feature record: CXX_FEATURE:0cxx_contextual_conversions
+    Feature record: CXX_FEATURE:0cxx_decltype
+    Feature record: CXX_FEATURE:0cxx_decltype_auto
+    Feature record: CXX_FEATURE:0cxx_decltype_incomplete_return_types
+    Feature record: CXX_FEATURE:0cxx_default_function_template_args
+    Feature record: CXX_FEATURE:0cxx_defaulted_functions
+    Feature record: CXX_FEATURE:0cxx_defaulted_move_initializers
+    Feature record: CXX_FEATURE:0cxx_delegating_constructors
+    Feature record: CXX_FEATURE:0cxx_deleted_functions
+    Feature record: CXX_FEATURE:0cxx_digit_separators
+    Feature record: CXX_FEATURE:0cxx_enum_forward_declarations
+    Feature record: CXX_FEATURE:0cxx_explicit_conversions
+    Feature record: CXX_FEATURE:0cxx_extended_friend_declarations
+    Feature record: CXX_FEATURE:0cxx_extern_templates
+    Feature record: CXX_FEATURE:0cxx_final
+    Feature record: CXX_FEATURE:0cxx_func_identifier
+    Feature record: CXX_FEATURE:0cxx_generalized_initializers
+    Feature record: CXX_FEATURE:0cxx_generic_lambdas
+    Feature record: CXX_FEATURE:0cxx_inheriting_constructors
+    Feature record: CXX_FEATURE:0cxx_inline_namespaces
+    Feature record: CXX_FEATURE:0cxx_lambdas
+    Feature record: CXX_FEATURE:0cxx_lambda_init_captures
+    Feature record: CXX_FEATURE:0cxx_local_type_template_args
+    Feature record: CXX_FEATURE:0cxx_long_long_type
+    Feature record: CXX_FEATURE:0cxx_noexcept
+    Feature record: CXX_FEATURE:0cxx_nonstatic_member_init
+    Feature record: CXX_FEATURE:0cxx_nullptr
+    Feature record: CXX_FEATURE:0cxx_override
+    Feature record: CXX_FEATURE:0cxx_range_for
+    Feature record: CXX_FEATURE:0cxx_raw_string_literals
+    Feature record: CXX_FEATURE:0cxx_reference_qualified_functions
+    Feature record: CXX_FEATURE:0cxx_relaxed_constexpr
+    Feature record: CXX_FEATURE:0cxx_return_type_deduction
+    Feature record: CXX_FEATURE:0cxx_right_angle_brackets
+    Feature record: CXX_FEATURE:0cxx_rvalue_references
+    Feature record: CXX_FEATURE:0cxx_sizeof_member
+    Feature record: CXX_FEATURE:0cxx_static_assert
+    Feature record: CXX_FEATURE:0cxx_strong_enums
+    Feature record: CXX_FEATURE:1cxx_template_template_parameters
+    Feature record: CXX_FEATURE:0cxx_thread_local
+    Feature record: CXX_FEATURE:0cxx_trailing_return_types
+    Feature record: CXX_FEATURE:0cxx_unicode_literals
+    Feature record: CXX_FEATURE:0cxx_uniform_initialization
+    Feature record: CXX_FEATURE:0cxx_unrestricted_unions
+    Feature record: CXX_FEATURE:0cxx_user_literals
+    Feature record: CXX_FEATURE:0cxx_variable_templates
+    Feature record: CXX_FEATURE:0cxx_variadic_macros
+    Feature record: CXX_FEATURE:0cxx_variadic_templates
+Determining if the include file pthread.h exists passed with the following output:
+Change Dir: /home/talrose/projects/Vegastrike/engine/build/CMakeFiles/CMakeTmp
+
+Run Build Command:"/usr/bin/make" "cmTC_82400/fast"
+/usr/bin/make -f CMakeFiles/cmTC_82400.dir/build.make CMakeFiles/cmTC_82400.dir/build
+make[1]: Entering directory '/home/talrose/projects/Vegastrike/engine/build/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_82400.dir/CheckIncludeFile.c.o
+/usr/bin/cc     -o CMakeFiles/cmTC_82400.dir/CheckIncludeFile.c.o   -c /home/talrose/projects/Vegastrike/engine/build/CMakeFiles/CMakeTmp/CheckIncludeFile.c
+Linking C executable cmTC_82400
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_82400.dir/link.txt --verbose=1
+/usr/bin/cc       CMakeFiles/cmTC_82400.dir/CheckIncludeFile.c.o  -o cmTC_82400 -rdynamic 
+make[1]: Leaving directory '/home/talrose/projects/Vegastrike/engine/build/CMakeFiles/CMakeTmp'
+
+
+Determining if the function pthread_create exists in the pthread passed with the following output:
+Change Dir: /home/talrose/projects/Vegastrike/engine/build/CMakeFiles/CMakeTmp
+
+Run Build Command:"/usr/bin/make" "cmTC_62a58/fast"
+/usr/bin/make -f CMakeFiles/cmTC_62a58.dir/build.make CMakeFiles/cmTC_62a58.dir/build
+make[1]: Entering directory '/home/talrose/projects/Vegastrike/engine/build/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_62a58.dir/CheckFunctionExists.c.o
+/usr/bin/cc    -DCHECK_FUNCTION_EXISTS=pthread_create   -o CMakeFiles/cmTC_62a58.dir/CheckFunctionExists.c.o   -c /usr/share/cmake-3.5/Modules/CheckFunctionExists.c
+Linking C executable cmTC_62a58
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_62a58.dir/link.txt --verbose=1
+/usr/bin/cc   -DCHECK_FUNCTION_EXISTS=pthread_create    CMakeFiles/cmTC_62a58.dir/CheckFunctionExists.c.o  -o cmTC_62a58 -rdynamic -lpthread 
+make[1]: Leaving directory '/home/talrose/projects/Vegastrike/engine/build/CMakeFiles/CMakeTmp'
+
+
+Determining if the include file wchar.h exists passed with the following output:
+Change Dir: /home/talrose/projects/Vegastrike/engine/build/CMakeFiles/CMakeTmp
+
+Run Build Command:"/usr/bin/make" "cmTC_32f3a/fast"
+/usr/bin/make -f CMakeFiles/cmTC_32f3a.dir/build.make CMakeFiles/cmTC_32f3a.dir/build
+make[1]: Entering directory '/home/talrose/projects/Vegastrike/engine/build/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_32f3a.dir/CheckIncludeFile.c.o
+/usr/bin/cc     -o CMakeFiles/cmTC_32f3a.dir/CheckIncludeFile.c.o   -c /home/talrose/projects/Vegastrike/engine/build/CMakeFiles/CMakeTmp/CheckIncludeFile.c
+Linking C executable cmTC_32f3a
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_32f3a.dir/link.txt --verbose=1
+/usr/bin/cc       CMakeFiles/cmTC_32f3a.dir/CheckIncludeFile.c.o  -o cmTC_32f3a -rdynamic 
+make[1]: Leaving directory '/home/talrose/projects/Vegastrike/engine/build/CMakeFiles/CMakeTmp'
+
+
+Determining if the include file float.h exists passed with the following output:
+Change Dir: /home/talrose/projects/Vegastrike/engine/build/CMakeFiles/CMakeTmp
+
+Run Build Command:"/usr/bin/make" "cmTC_d8eff/fast"
+/usr/bin/make -f CMakeFiles/cmTC_d8eff.dir/build.make CMakeFiles/cmTC_d8eff.dir/build
+make[1]: Entering directory '/home/talrose/projects/Vegastrike/engine/build/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_d8eff.dir/CheckIncludeFile.c.o
+/usr/bin/cc     -o CMakeFiles/cmTC_d8eff.dir/CheckIncludeFile.c.o   -c /home/talrose/projects/Vegastrike/engine/build/CMakeFiles/CMakeTmp/CheckIncludeFile.c
+Linking C executable cmTC_d8eff
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_d8eff.dir/link.txt --verbose=1
+/usr/bin/cc       CMakeFiles/cmTC_d8eff.dir/CheckIncludeFile.c.o  -o cmTC_d8eff -rdynamic 
+make[1]: Leaving directory '/home/talrose/projects/Vegastrike/engine/build/CMakeFiles/CMakeTmp'
+
+
+Determining if the include file wctype.h exists passed with the following output:
+Change Dir: /home/talrose/projects/Vegastrike/engine/build/CMakeFiles/CMakeTmp
+
+Run Build Command:"/usr/bin/make" "cmTC_26940/fast"
+/usr/bin/make -f CMakeFiles/cmTC_26940.dir/build.make CMakeFiles/cmTC_26940.dir/build
+make[1]: Entering directory '/home/talrose/projects/Vegastrike/engine/build/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_26940.dir/CheckIncludeFile.c.o
+/usr/bin/cc     -o CMakeFiles/cmTC_26940.dir/CheckIncludeFile.c.o   -c /home/talrose/projects/Vegastrike/engine/build/CMakeFiles/CMakeTmp/CheckIncludeFile.c
+Linking C executable cmTC_26940
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_26940.dir/link.txt --verbose=1
+/usr/bin/cc       CMakeFiles/cmTC_26940.dir/CheckIncludeFile.c.o  -o cmTC_26940 -rdynamic 
+make[1]: Leaving directory '/home/talrose/projects/Vegastrike/engine/build/CMakeFiles/CMakeTmp'
+
+
+Determining if the include file inttypes.h exists passed with the following output:
+Change Dir: /home/talrose/projects/Vegastrike/engine/build/CMakeFiles/CMakeTmp
+
+Run Build Command:"/usr/bin/make" "cmTC_b14d9/fast"
+/usr/bin/make -f CMakeFiles/cmTC_b14d9.dir/build.make CMakeFiles/cmTC_b14d9.dir/build
+make[1]: Entering directory '/home/talrose/projects/Vegastrike/engine/build/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_b14d9.dir/CheckIncludeFile.c.o
+/usr/bin/cc     -o CMakeFiles/cmTC_b14d9.dir/CheckIncludeFile.c.o   -c /home/talrose/projects/Vegastrike/engine/build/CMakeFiles/CMakeTmp/CheckIncludeFile.c
+Linking C executable cmTC_b14d9
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_b14d9.dir/link.txt --verbose=1
+/usr/bin/cc       CMakeFiles/cmTC_b14d9.dir/CheckIncludeFile.c.o  -o cmTC_b14d9 -rdynamic 
+make[1]: Leaving directory '/home/talrose/projects/Vegastrike/engine/build/CMakeFiles/CMakeTmp'
+
+
+Determining if the include file zlib.h exists passed with the following output:
+Change Dir: /home/talrose/projects/Vegastrike/engine/build/CMakeFiles/CMakeTmp
+
+Run Build Command:"/usr/bin/make" "cmTC_a808b/fast"
+/usr/bin/make -f CMakeFiles/cmTC_a808b.dir/build.make CMakeFiles/cmTC_a808b.dir/build
+make[1]: Entering directory '/home/talrose/projects/Vegastrike/engine/build/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_a808b.dir/CheckIncludeFile.c.o
+/usr/bin/cc     -o CMakeFiles/cmTC_a808b.dir/CheckIncludeFile.c.o   -c /home/talrose/projects/Vegastrike/engine/build/CMakeFiles/CMakeTmp/CheckIncludeFile.c
+Linking C executable cmTC_a808b
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_a808b.dir/link.txt --verbose=1
+/usr/bin/cc       CMakeFiles/cmTC_a808b.dir/CheckIncludeFile.c.o  -o cmTC_a808b -rdynamic 
+make[1]: Leaving directory '/home/talrose/projects/Vegastrike/engine/build/CMakeFiles/CMakeTmp'
+
+
+Determining if the include file math.h exists passed with the following output:
+Change Dir: /home/talrose/projects/Vegastrike/engine/build/CMakeFiles/CMakeTmp
+
+Run Build Command:"/usr/bin/make" "cmTC_bdecb/fast"
+/usr/bin/make -f CMakeFiles/cmTC_bdecb.dir/build.make CMakeFiles/cmTC_bdecb.dir/build
+make[1]: Entering directory '/home/talrose/projects/Vegastrike/engine/build/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_bdecb.dir/CheckIncludeFile.c.o
+/usr/bin/cc     -o CMakeFiles/cmTC_bdecb.dir/CheckIncludeFile.c.o   -c /home/talrose/projects/Vegastrike/engine/build/CMakeFiles/CMakeTmp/CheckIncludeFile.c
+Linking C executable cmTC_bdecb
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_bdecb.dir/link.txt --verbose=1
+/usr/bin/cc       CMakeFiles/cmTC_bdecb.dir/CheckIncludeFile.c.o  -o cmTC_bdecb -rdynamic 
+make[1]: Leaving directory '/home/talrose/projects/Vegastrike/engine/build/CMakeFiles/CMakeTmp'
+
+
+Determining if the include file tr1/unordered_map exists passed with the following output:
+Change Dir: /home/talrose/projects/Vegastrike/engine/build/CMakeFiles/CMakeTmp
+
+Run Build Command:"/usr/bin/make" "cmTC_b783b/fast"
+/usr/bin/make -f CMakeFiles/cmTC_b783b.dir/build.make CMakeFiles/cmTC_b783b.dir/build
+make[1]: Entering directory '/home/talrose/projects/Vegastrike/engine/build/CMakeFiles/CMakeTmp'
+Building CXX object CMakeFiles/cmTC_b783b.dir/CheckIncludeFile.cxx.o
+/usr/bin/c++      -o CMakeFiles/cmTC_b783b.dir/CheckIncludeFile.cxx.o -c /home/talrose/projects/Vegastrike/engine/build/CMakeFiles/CMakeTmp/CheckIncludeFile.cxx
+Linking CXX executable cmTC_b783b
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_b783b.dir/link.txt --verbose=1
+/usr/bin/c++        CMakeFiles/cmTC_b783b.dir/CheckIncludeFile.cxx.o  -o cmTC_b783b -rdynamic 
+make[1]: Leaving directory '/home/talrose/projects/Vegastrike/engine/build/CMakeFiles/CMakeTmp'
+
+
+Determining if the function gettimeofday exists passed with the following output:
+Change Dir: /home/talrose/projects/Vegastrike/engine/build/CMakeFiles/CMakeTmp
+
+Run Build Command:"/usr/bin/make" "cmTC_2678a/fast"
+/usr/bin/make -f CMakeFiles/cmTC_2678a.dir/build.make CMakeFiles/cmTC_2678a.dir/build
+make[1]: Entering directory '/home/talrose/projects/Vegastrike/engine/build/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_2678a.dir/CheckFunctionExists.c.o
+/usr/bin/cc    -DCHECK_FUNCTION_EXISTS=gettimeofday   -o CMakeFiles/cmTC_2678a.dir/CheckFunctionExists.c.o   -c /usr/share/cmake-3.5/Modules/CheckFunctionExists.c
+Linking C executable cmTC_2678a
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_2678a.dir/link.txt --verbose=1
+/usr/bin/cc   -DCHECK_FUNCTION_EXISTS=gettimeofday    CMakeFiles/cmTC_2678a.dir/CheckFunctionExists.c.o  -o cmTC_2678a -rdynamic 
+make[1]: Leaving directory '/home/talrose/projects/Vegastrike/engine/build/CMakeFiles/CMakeTmp'
+
+
+Determining if the function isnan exists passed with the following output:
+Change Dir: /home/talrose/projects/Vegastrike/engine/build/CMakeFiles/CMakeTmp
+
+Run Build Command:"/usr/bin/make" "cmTC_00552/fast"
+/usr/bin/make -f CMakeFiles/cmTC_00552.dir/build.make CMakeFiles/cmTC_00552.dir/build
+make[1]: Entering directory '/home/talrose/projects/Vegastrike/engine/build/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_00552.dir/CheckFunctionExists.c.o
+/usr/bin/cc    -DCHECK_FUNCTION_EXISTS=isnan   -o CMakeFiles/cmTC_00552.dir/CheckFunctionExists.c.o   -c /usr/share/cmake-3.5/Modules/CheckFunctionExists.c
+<command-line>:0:23: warning: conflicting types for built-in function ‘isnan’
+/usr/share/cmake-3.5/Modules/CheckFunctionExists.c:6:6: note: in expansion of macro ‘CHECK_FUNCTION_EXISTS’
+ char CHECK_FUNCTION_EXISTS();
+      ^~~~~~~~~~~~~~~~~~~~~
+Linking C executable cmTC_00552
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_00552.dir/link.txt --verbose=1
+/usr/bin/cc   -DCHECK_FUNCTION_EXISTS=isnan    CMakeFiles/cmTC_00552.dir/CheckFunctionExists.c.o  -o cmTC_00552 -rdynamic 
+make[1]: Leaving directory '/home/talrose/projects/Vegastrike/engine/build/CMakeFiles/CMakeTmp'
+
+
+Determining if the function finite exists passed with the following output:
+Change Dir: /home/talrose/projects/Vegastrike/engine/build/CMakeFiles/CMakeTmp
+
+Run Build Command:"/usr/bin/make" "cmTC_e543f/fast"
+/usr/bin/make -f CMakeFiles/cmTC_e543f.dir/build.make CMakeFiles/cmTC_e543f.dir/build
+make[1]: Entering directory '/home/talrose/projects/Vegastrike/engine/build/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_e543f.dir/CheckFunctionExists.c.o
+/usr/bin/cc    -DCHECK_FUNCTION_EXISTS=finite   -o CMakeFiles/cmTC_e543f.dir/CheckFunctionExists.c.o   -c /usr/share/cmake-3.5/Modules/CheckFunctionExists.c
+<command-line>:0:23: warning: conflicting types for built-in function ‘finite’
+/usr/share/cmake-3.5/Modules/CheckFunctionExists.c:6:6: note: in expansion of macro ‘CHECK_FUNCTION_EXISTS’
+ char CHECK_FUNCTION_EXISTS();
+      ^~~~~~~~~~~~~~~~~~~~~
+Linking C executable cmTC_e543f
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_e543f.dir/link.txt --verbose=1
+/usr/bin/cc   -DCHECK_FUNCTION_EXISTS=finite    CMakeFiles/cmTC_e543f.dir/CheckFunctionExists.c.o  -o cmTC_e543f -rdynamic 
+make[1]: Leaving directory '/home/talrose/projects/Vegastrike/engine/build/CMakeFiles/CMakeTmp'
+
+
+Determining if the include file sys/stat.h exists passed with the following output:
+Change Dir: /home/talrose/projects/Vegastrike/engine/build/CMakeFiles/CMakeTmp
+
+Run Build Command:"/usr/bin/make" "cmTC_afa94/fast"
+/usr/bin/make -f CMakeFiles/cmTC_afa94.dir/build.make CMakeFiles/cmTC_afa94.dir/build
+make[1]: Entering directory '/home/talrose/projects/Vegastrike/engine/build/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_afa94.dir/CheckIncludeFile.c.o
+/usr/bin/cc     -o CMakeFiles/cmTC_afa94.dir/CheckIncludeFile.c.o   -c /home/talrose/projects/Vegastrike/engine/build/CMakeFiles/CMakeTmp/CheckIncludeFile.c
+Linking C executable cmTC_afa94
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_afa94.dir/link.txt --verbose=1
+/usr/bin/cc       CMakeFiles/cmTC_afa94.dir/CheckIncludeFile.c.o  -o cmTC_afa94 -rdynamic 
+make[1]: Leaving directory '/home/talrose/projects/Vegastrike/engine/build/CMakeFiles/CMakeTmp'
+
+
+Determining if the function lstat exists passed with the following output:
+Change Dir: /home/talrose/projects/Vegastrike/engine/build/CMakeFiles/CMakeTmp
+
+Run Build Command:"/usr/bin/make" "cmTC_88bfd/fast"
+/usr/bin/make -f CMakeFiles/cmTC_88bfd.dir/build.make CMakeFiles/cmTC_88bfd.dir/build
+make[1]: Entering directory '/home/talrose/projects/Vegastrike/engine/build/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_88bfd.dir/CheckFunctionExists.c.o
+/usr/bin/cc    -DCHECK_FUNCTION_EXISTS=lstat   -o CMakeFiles/cmTC_88bfd.dir/CheckFunctionExists.c.o   -c /usr/share/cmake-3.5/Modules/CheckFunctionExists.c
+Linking C executable cmTC_88bfd
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_88bfd.dir/link.txt --verbose=1
+/usr/bin/cc   -DCHECK_FUNCTION_EXISTS=lstat    CMakeFiles/cmTC_88bfd.dir/CheckFunctionExists.c.o  -o cmTC_88bfd -rdynamic 
+make[1]: Leaving directory '/home/talrose/projects/Vegastrike/engine/build/CMakeFiles/CMakeTmp'
+
+
+Determining if the GLX_ARB_get_proc_address exist passed with the following output:
+Change Dir: /home/talrose/projects/Vegastrike/engine/build/CMakeFiles/CMakeTmp
+
+Run Build Command:"/usr/bin/make" "cmTC_c5a68/fast"
+/usr/bin/make -f CMakeFiles/cmTC_c5a68.dir/build.make CMakeFiles/cmTC_c5a68.dir/build
+make[1]: Entering directory '/home/talrose/projects/Vegastrike/engine/build/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_c5a68.dir/CheckSymbolExists.c.o
+/usr/bin/cc     -o CMakeFiles/cmTC_c5a68.dir/CheckSymbolExists.c.o   -c /home/talrose/projects/Vegastrike/engine/build/CMakeFiles/CMakeTmp/CheckSymbolExists.c
+Linking C executable cmTC_c5a68
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_c5a68.dir/link.txt --verbose=1
+/usr/bin/cc       CMakeFiles/cmTC_c5a68.dir/CheckSymbolExists.c.o  -o cmTC_c5a68 -rdynamic 
+make[1]: Leaving directory '/home/talrose/projects/Vegastrike/engine/build/CMakeFiles/CMakeTmp'
+
+File /home/talrose/projects/Vegastrike/engine/build/CMakeFiles/CMakeTmp/CheckSymbolExists.c:
+/* */
+#include <GL/glx.h>
+
+int main(int argc, char** argv)
+{
+  (void)argv;
+#ifndef GLX_ARB_get_proc_address
+  return ((int*)(&GLX_ARB_get_proc_address))[argc];
+#else
+  (void)argc;
+  return 0;
+#endif
+}
+
