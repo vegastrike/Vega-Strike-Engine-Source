@@ -1,0 +1,39 @@
+<system name="callimachius" background="backgrounds/turquoise" nearstars="500" stars="1000" starspread="150">
+<Light>
+	<ambient red="0.126813" green="0.126813" blue="0.126813"/>
+	<diffuse red="0.816497" green="0.764327" blue="0.520479"/>
+	<specular red="1.000000" green="0.876293" blue="0.406348"/>
+</Light>
+<Light>
+	<ambient red="0.079898" green="0.079898" blue="0.079898"/>
+	<diffuse red="0.816497" green="0.375258" blue="0.388958"/>
+	<specular red="1.000000" green="0.211228" blue="0.226933"/>
+</Light>
+<Light>
+	<ambient red="0.078358" green="0.078358" blue="0.078358"/>
+	<diffuse red="0.816497" green="0.345735" blue="0.392545"/>
+	<specular red="1.000000" green="0.179299" blue="0.231137"/>
+</Light>
+<Planet name="callimachius A" file="stars/orange_star.png" ri="0.000000" rj="0.000000" rk="0.000000" si="0.000000" sj="0.000000" sk="0.000000" radius="16000000.000000" x="0" y="0" z="0"  Red="0.666667" Green="0.584195" Blue="0.270899" ReflectNoLight="true" light="0">
+	<Asteroid name="AFieldBase" file="AFieldBase" ri="3386811.000000" rj="214662400.000000" rk="-99427096.000000" si="105597408.000000" sj="-170841984.000000" sk="-365249664.000000" x="380610592.000000" y="-143727760.000000" z="137942064.000000" year= "562875200.000000"  />
+	<Unit name="AsteroidFighterBase" file="AsteroidFighterBase" ri="3386811.000000" rj="214662400.000000" rk="-99427096.000000" si="105597408.000000" sj="-170841984.000000" sk="-365249664.000000" x="380610592.000000" y="-143727760.000000" z="137942064.000000" year= "562875200.000000" faction="confed"  />
+	<Planet name="sol_sector/tingvallir" file="jump.png" ri="3842222.000000" rj="-89544544.000000" rk="-29341934.000000" si="-7277032.000000" sj="19995198.000000" sk="-61973448.000000" radius="100.227898" x="97236736.000000" y="-106933272.000000" z="72258008.000000" year= "84584328.000000" day="52314404.000000" alpha="ONE ONE" destination="sol_sector/tingvallir"  >
+	</Planet>
+	<Planet name="enigma_sector/axis" file="jump.png" ri="67987592.000000" rj="46963476.000000" rk="35904832.000000" si="31229236.000000" sj="6974222.500000" sk="-68256392.000000" radius="99.789467" x="-99726432.000000" y="31428322.000000" z="46656012.000000" year= "100733168.000000" day="31483150.000000" alpha="ONE ONE" destination="enigma_sector/axis"  >
+	</Planet>
+	<Planet name="enigma_sector/crichton" file="jump.png" ri="-29576520.000000" rj="-32992126.000000" rk="-21496458.000000" si="45652556.000000" sj="-40590312.000000" sk="-515576.000000" radius="72.409012" x="40951116.000000" y="-35416568.000000" z="-101582512.000000" year= "623185792.000000" day="480868832.000000" alpha="ONE ONE" destination="enigma_sector/crichton"  >
+	</Planet>
+	<Planet name="callimachius B" file="stars/red_star.png" ri="76389568.000000" rj="123820744.000000" rk="-130134600.000000" si="-160797024.000000" sj="81396048.000000" sk="-16941650.000000" radius="12689840.000000" x="0" y="0" z="0" year= "543194304.000000" day="435291488.000000"  Red="0.666667" Green="0.140819" Blue="0.151288" ReflectNoLight="true" light="1">
+		<Planet name="enigma_sector/enigma" file="jump.png" ri="-24734808.000000" rj="23365594.000000" rk="11162366.000000" si="-28194682.000000" sj="-18316396.000000" sk="-24136154.000000" radius="308.874115" x="101019120.000000" y="-67812200.000000" z="-61607348.000000" year= "119745184.000000" day="61997652.000000" alpha="ONE ONE" destination="enigma_sector/enigma"  >
+		</Planet>
+		<Planet name="enigma_sector/heavens_gate" file="jump.png" ri="4271318.000000" rj="67387128.000000" rk="56696276.000000" si="34337364.000000" sj="12679372.000000" sk="-17657108.000000" radius="241.219772" x="-67930824.000000" y="-54248852.000000" z="-86542624.000000" year= "73414424.000000" day="10234599.000000" alpha="ONE ONE" destination="enigma_sector/heavens_gate"  >
+		</Planet>
+		<Planet name="enigma_sector/telamon" file="jump.png" ri="32518958.000000" rj="7965696.500000" rk="-39279900.000000" si="-31547574.000000" sj="58814868.000000" sk="-14190280.000000" radius="262.203857" x="-41877044.000000" y="-23646108.000000" z="63968116.000000" year= "59763528.000000" day="46004072.000000" alpha="ONE ONE" destination="enigma_sector/telamon"  >
+		</Planet>
+	</Planet>
+	<Planet name="callimachius C" file="stars/red_star.png" ri="-10753653.000000" rj="37872560.000000" rk="-138259936.000000" si="107059664.000000" sj="-122014088.000000" sk="-41749392.000000" radius="8923124.000000" x="0" y="0" z="0" year= "4313522176.000000" day="2706170112.000000"  Red="0.666667" Green="0.119532" Blue="0.154091" ReflectNoLight="true" light="2">
+		<Planet name="sol_sector/ella" file="jump.png" ri="32574132.000000" rj="40820892.000000" rk="-35844844.000000" si="-5604352.000000" sj="-6870923.000000" sk="-12917733.000000" radius="163.676453" x="-37563052.000000" y="-24811990.000000" z="65906768.000000" year= "91781968.000000" day="31315726.000000" alpha="ONE ONE" destination="sol_sector/ella"  >
+		</Planet>
+	</Planet>
+</Planet>
+</system>

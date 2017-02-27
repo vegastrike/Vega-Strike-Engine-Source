@@ -1,0 +1,34 @@
+This file describes the integration process for adding new versions of the boost
+python integrtion library to the Vega Strike build system.
+Assuming that the version of boost works with Vega Strike, very little
+developer time should be required.
+
+1.  Create new directory under /boost of $VER, where $Ver has the . replaced with underscore.
+
+2.  Add new dir to svn.   Run propedit svn:externals to point boost to desired release 
+    For example,   boost http://svn.boost.org/svn/boost/tags/release/Boost_1_35_0/boost
+    commit. 
+
+3.  svn copy src dir from last /boost/$VER to new /boost/$VER
+    Use remote urls. 
+
+
+4.  Modify m4scripts/VS_WITH_BOOST.m4
+    a)  Modify the help string to show the new version.
+    b)  Modify the case to treat the new version as valid
+    c)  Copy one of the existing AM_CONDITIONAL lines and modify the
+        version number to the version being added.
+    d)  Optional:  Once the version is verified as working, modify the
+        empty string case to set the version to the version being added.
+    e)  Optional:  Delete references to obsolete versions of boost from
+        the m4scripts/VS_WITH_BOOST.m4 file and remove the directory
+        containing the obsolete version.
+        useful commands:  
+        
+5.  Test new boost sources.
+    a)  in vegastrike root directory, run autotools.
+        (./bootstrap-sh --with-boost=${DOTTEDVER})
+    b)  correct any errors seen in a) and repeat as necessary.
+    c)  run make
+    d)  correct any errors seen in c) and repeat as necessary.
+

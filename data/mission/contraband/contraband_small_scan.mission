@@ -1,0 +1,56 @@
+<mission>
+	<settings>
+		<origin  planet="earth" x="0000" y="100" z="000.0"/>
+	</settings>
+
+	<variables>
+		<var name="defaultplayer" value="blue"/>
+		<var name="system" value="sol_sector/hammer" />
+		<var name="mission_name" value="Contraband Mission" />
+		<var name="description" value="Destroy ships with contraband on them for 6000 creds." />
+	</variables>
+        <flightgroups>
+                <flightgroup name="blue" faction="confed" type="nova" ainame="default" waves="1" nr_ships="2">
+			<pos x="0400" y="-35400" z="24700000"/>
+			<rot x="180.0" y="180.0" z="180.0"/>
+			<order order="tmptarget" target="omikron"/>
+			<order priority="0" order="superiority" target="enemy"/>
+			<order priority="1" order="bomber" target="omikron"/>
+			<order priority="2" order="escort" target="blue"/>
+		</flightgroup>
+        </flightgroups>
+	<module name="director">
+		<import name="contraband_mission"/>
+		<script name="initgame">
+			<exec module="contraband_mission" name="initrandom">
+			<const type="object" object="string" value="Contraband"/> <!--name of the bad cargo -->
+			<const type="int" value="0"/><!-- the number of systems away the contraband mission is in -->
+			<const type="float" value="6000"/> <!--the distance from the jump point that you have to be at-->
+			<const type="float" value="6000"/> <!-- how much you are paid -->
+			<const type="int" value="0"/> <!--difficulty of mission(do they send peeps after you)-->
+			<const type="int" value="6"/> <!--number of ships (maybe do a random number???) -->
+			<const type="float" value="0.5"/><!--percentage of those ships that will be bad-->
+			<const type="float" value="5000"/> <!-- min distance ship can appear at-->
+			<const type="float" value="9480"/> <!-- maximum distance ship can appear at-->
+			</exec>
+		</script>
+		<script name="gameloop">
+			<exec module="contraband_mission" name="loop"/>
+		</script>
+
+
+		<script name="initbriefing">
+			<exec module="contraband_mission" name="initbriefing">
+			</exec>
+		</script>
+		<script name="loopbriefing">
+			<exec module="contraband_mission" name="loopbriefing">
+			</exec>
+		</script>
+		<script name="endbriefing">
+			<exec module="contraband_mission" name="endbriefing">
+			</exec>
+		</script>
+
+	</module>
+</mission>

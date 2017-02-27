@@ -1,0 +1,30 @@
+<Unit>
+	<Description combatRole="TMASSIVE">
+	</Description>
+
+<Meshfile file="turretlaunchergun.bfxm"/>
+
+<Mount weapon="CapshipMissile" mountsize="heavy-capship-missile" x="0" y="-0.225000" z="22.000000" ri="0.000000" rj="0.000000" rk="1.000000" qi="0.022849" qj="-0.999739" qk="0.000000" ammo="6"/>
+
+		<Thrust>
+		<Engine Afterburner="000000" Forward="000000" Retro="0000" Left="0000" Right="0000" Top="00000" Bottom="000000"/>
+		<Maneuver yaw="0" pitch="113" roll="0000"/>
+	</Thrust>
+	<Sound></Sound>
+	<Defense>
+		<Armor front="80" right="80" left="80" back="80"/>
+		<Shields front="130" back="130" recharge="9.333333"/>
+		<Hull strength="110"/>
+		<Cloak cloakmin=".01" cloakrate=".2" cloakenergy="0"/>
+	</Defense>
+	<Stats mass="1" momentofinertia="1" fuel="20000"></Stats>
+	<Computer yaw="000" pitch="32" roll="0000" afterburner="000000" maxspeed="00000">
+		<Radar itts="true" range="1000000" color="true" error="0" lockcone="0.1"/>
+	</Computer>
+
+	<Energy>
+		<Reactor recharge="10" limit="10"/>
+	</Energy>
+
+
+</Unit>

@@ -1,0 +1,57 @@
+<mission>
+	<settings>
+		<origin  planet="earth" x="0000" y="100" z="000.0"/>
+	</settings>
+
+	<variables>
+		<var name="defaultplayer" value="blue"/>
+		<var name="system" value="sol_sector/sirius" />
+		<var name="mission_name" value="Escort" />
+		<var name="description" value="A critical craft carying weapons for the front lines is under attack. You must assist it in reaching our escort craft on the other side of the jump point before it is too late. If you succeed we will offer 18280. Failure is unacceptible to us as Aera and results in execution." />
+	</variables>
+        <flightgroups>
+                <flightgroup name="blue" faction="confed" type="nova" ainame="default" waves="1" nr_ships="2">
+			<pos x="0400" y="-35400" z="24700.0"/>
+			<rot x="180.0" y="180.0" z="180.0"/>
+			<order order="tmptarget" target="omikron"/>
+			<order priority="0" order="superiority" target="enemy"/>
+			<order priority="1" order="bomber" target="omikron"/>
+			<order priority="2" order="escort" target="blue"/>
+		</flightgroup>
+        </flightgroups>
+	<python>
+import escort_mission
+newmission = escort_mission.initrandom ('aera', 5, 13280, 60, 2)
+newmission=0
+
+</python>
+	<madule name="director">
+		<import name="escort_mission"/>
+		<script name="initgame">
+			<exec module="escort_mission" name="initrandom">
+			<const type="object" object="string" value="aera"/> <!--faction name 0 confed 1 aera... -->
+			<const type="int" value="5"/> <!--difficulty of mission(do they send peeps after you)-->
+			<const type="float" value="13280"/> <!-- how much you are paid -->
+			<const type="float" value="60"/> <!-- how often enemies jump in-->
+			<const type="int" value="2"/> <!-- will this occur in merely the system you are in (no jump drive required)-->
+			</exec>
+		</script>
+		<script name="gameloop">
+			<exec module="escort_mission" name="loop"/>
+		</script>
+
+		<script name="initbriefing">
+			<exec module="escort_mission" name="initbriefing">
+			</exec>
+		</script>
+		<script name="loopbriefing">
+			<exec module="escort_mission" name="loopbriefing">
+			</exec>
+		</script>
+		<script name="endbriefing">
+			<exec module="escort_mission" name="endbriefing">
+			</exec>
+		</script>
+
+	</module>
+</mission>

@@ -1,0 +1,58 @@
+<mission>
+	<settings>
+		<origin  planet="earth" x="0000" y="100" z="000.0"/>
+	</settings>
+
+	<variables>
+		<var name="defaultplayer" value="blue"/>
+		<var name="system" value="enigma_sector/enigma" />
+		<var name="mission_name" value="Defend Against Retro Insurgent" />
+		<var name="description" value="A lone retro-religious fanatic has been reportedly terrorizing freighters in this system. Your task is to eliminate this misguided man--reward is 4300 credits" />
+	</variables>
+        <flightgroups>
+                <flightgroup name="blue" faction="confed" type="nova" ainame="default" waves="1" nr_ships="2">
+			<pos x="0400" y="-35400" z="47200000"/>
+			<rot x="180.0" y="180.0" z="180.0"/>
+			<order order="tmptarget" target="omikron"/>
+			<order priority="0" order="superiority" target="enemy"/>
+			<order priority="1" order="bomber" target="omikron"/>
+			<order priority="2" order="escort" target="blue"/>
+		</flightgroup>
+        </flightgroups>
+	<python>
+import defend
+newmission = defend.defend ('retro', 0, 1, 2000, 100000, 4300, 0, 0)
+newmission=0
+
+</python>
+	<madule name="director">
+		<import name="defend"/>
+		<script name="initgame">
+			<exec module="defend" name="init">
+			<const type="object" object="string" value="retro"/> <!--faction name of thing you should attack 0 confed 1 aera... -->
+			<const type="int" value="0"/> <!--num systems away the delivery point is -->
+			<const type="int" value="1"/><!--ammt of enemies guaranteed -->
+			<const type="float" value="2000"/> <!--the distance drom base the new ship is generated at -->
+			<const type="float" value="100000"/> <!-- how far they have to go to ahve been conisdered run away -->
+			<const type="float" value="4300"/> <!-- how much you are  paid -->
+			<const type="bool" value="false"/> <!--do you need to defend a base here-->
+			<const type="bool" value="false"/> <!--do you need to defend a base here-->
+			</exec>
+		</script>
+		<script name="gameloop">
+			<exec module="defend" name="loop"/>
+		</script>
+		<script name="initbriefing">
+			<exec module="defend" name="initbriefing">
+			</exec>
+		</script>
+		<script name="loopbriefing">
+			<exec module="defend" name="loopbriefing">
+			</exec>
+		</script>
+		<script name="endbriefing">
+			<exec module="defend" name="endbriefing">
+			</exec>
+		</script>
+	</module>
+</mission>

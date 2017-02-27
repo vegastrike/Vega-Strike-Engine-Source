@@ -1,0 +1,32 @@
+# Localstuff: file(1) magic(5) for locally observed files
+#     global magic file is /usr/share/misc/magic(.mgc)
+
+# DDS Texture format.
+0       string      DDS\              DDS Image data
+>4    	lelong      !124        \b, ERROR: Nonstandard Header Size %d
+>12    	lelong      x        \b, %hd x
+>16    	lelong      x        %hd
+>24    	lelong      >0        \b, Depth %d
+>28    	lelong      x        \b, %d Mipmaps
+>76    	lelong      !32        \b, ERROR: Nonstandard PixelFormat Size %d
+>80    	lelong      &0x4        \b,
+>>84    byte        >0        \b%c
+>>>85   byte        >0        \b%c
+>>>86   byte        >0        \b%c
+>>>87   byte        >0        \b%c
+>80    	lelong      &0x401        \b, Format
+>>80    lelong      &0x11
+>>>88   lelong      16
+>>>>104 lelong      &0x8000            A1R5G5B5
+>>>>104 lelong      ^0x8000         A4R4G4B4
+>>>88   lelong      32         A8R8G8B8
+>>80    lelong      ^0x11
+>>>88   lelong      16                 R5G6B5
+>>>88   lelong      24         R8G8B8
+>84     byte        0
+>>88    lelong      >0        \b, BitCount %d
+>>88    lelong      0        \b, ERROR: No FourCC and no BitCount
+>92     lelong      >0        \b, RMask %08X
+>96     lelong      >0        \b, GMask %08X
+>100    lelong      >0        \b, BMask %08X
+>104    lelong      >0        \b, AMask %08X

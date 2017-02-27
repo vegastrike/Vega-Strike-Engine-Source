@@ -1,0 +1,12 @@
+[Desktop Entry]
+Name=Vega Strike
+GenericName=vegastrike
+Comment=3D OpenGL spaceflight simulator
+Comment[es]=Simulador de vuelo espacial 3D/OpenGL
+Comment[cs]=Hraj 3D vesmírnou simulaci
+Exec=vegastrike
+Icon=vegastrike
+Terminal=false
+Type=Application
+Categories=Game;Simulation;
+

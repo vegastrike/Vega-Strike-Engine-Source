@@ -1,0 +1,4 @@
+interfaces/quine/left_pressed.ani 0
+1.94 1.94
+1 1000 mins=0.75,mint=0.5,maxs=1,maxt=0.75
+interfaces/quine/pressed_buttons.image true

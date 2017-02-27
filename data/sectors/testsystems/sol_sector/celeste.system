@@ -1,0 +1,52 @@
+<system name="celeste" background="backgrounds/emerald" nearstars="500" stars="1000" starspread="150"><!-- 75? -->
+<Light>
+	<ambient red="0.0" green="0.0" blue="0.0"/>
+	<diffuse red="0.866025" green="0.356567" blue="0.370882"/>
+	<specular red="1.000000" green="0.169520" blue="0.183405"/>
+</Light>
+<Light>
+	<ambient red="0.0" green="0.0" blue="0.0"/>
+	<diffuse red="0.866025" green="0.832528" blue="0.837217"/>
+	<specular red="1.000000" green="0.924138" blue="0.934576"/>
+</Light>
+<Planet name="celeste A" file="stars/red_star.png" ri="0.000000" rj="0.000000" rk="0.000000" si="0.000000" sj="0.000000" sk="0.000000" radius="9395907.000000" x="0" y="0" z="0"  Red="0.750000" Green="0.127140" Blue="0.137554" ReflectNoLight="true" light="0">
+	<Planet name="Hestia" file="planets/gas_giant.png" ri="-16679474.000000" rj="-17469314.000000" rk="15440911.000000" si="10265017.000000" sj="9167817.000000" sk="21460560.000000" radius="286188.500000" x="-29627122.000000" y="-22665526.000000" z="-24484952.000000" year= "43267424.000000" day="100000.000000"  >
+	<Atmosphere radius="286188.500000"/>
+	<Ring file="rings/planet_ring7.texture" innerradius="386000" outerradius="500000" NumSlices="8" wrapx="36" wrapy="2"/>
+		<Planet name="JumpToWeslyn" file="jump.png" ri="-587437.000000" rj="-537754.500000" rk="-495494.906250" si="-160644.203125" sj="829934.187500" sk="-710264.625000" radius="351.483765" x="1117784.000000" y="-1348540.750000" z="-735380.375000" year= "2709792.750000" day="71219.914062" alpha="ONE ONE" destination="sol_sector/weslyn"  >
+		</Planet>
+		<Planet name="JumpToArcturus" file="jump.png" ri="968822.562500" rj="-414770.406250" rk="569807.000000" si="242640.937500" sj="-74648.148438" sk="-466891.187500" radius="245.856232" x="-1340587.125000" y="-1069783.125000" z="540723.812500" year= "1992378.250000" day="20556.134766" alpha="ONE ONE" destination="sol_sector/arcturus"  >
+		</Planet>
+		<Unit name="Johannesburg" file="refinery" ri="-169842.625000" rj="-64134.390625" rk="394041.062500" si="-428037.218750" sj="677737.375000" sk="-74186.929688" x="-703664.750000" y="-656984.500000" z="-450085.093750" year= "1504623.750000" faction="confed"  />
+		<Planet name="Thelxepia" file="sol/venus.png" ri="42281.859375" rj="-622452.125000" rk="597590.812500" si="-826034.375000" sj="56207.941406" sk="116991.468750" radius="109467.835938" x="-1133487.000000" y="-953114.562500" z="-441210.968750" year= "1313971.000000" day="29799.812500"  >
+			<Planet name="JumpToTimonen" file="jump.png" ri="441643.531250" rj="796498.312500" rk="762867.875000" si="-418774.468750" sj="920332.125000" sk="-718465.187500" radius="132.296631" x="948319.312500" y="-813369.125000" z="-848464.125000" year= "1345696.500000" day="9000.781250" alpha="ONE ONE" destination="sol_sector/timonen"  >
+			</Planet>
+		</Planet>
+		<Planet name="JumpToCamelot" file="jump.png" ri="446404.250000" rj="-81792.320312" rk="-120224.007812" si="200087.703125" sj="80601.843750" sk="688110.437500" radius="315.902374" x="440729.250000" y="423746.625000" z="-861426.750000" year= "1288378.500000" day="7582.500000" alpha="ONE ONE" destination="sol_sector/camelot"  >
+		</Planet>
+	</Planet>
+	<Planet name="Poseidon" file="planets/m_class3.png" ri="-1689267.500000" rj="18288712.000000" rk="-7126605.000000" si="-33693752.000000" sj="330328.593750" sk="8834367.000000" radius="1281005.250000" x="31823828.000000" y="-19413926.000000" z="22706640.000000" year= "643225472.0" day="4280.000000"  >
+                <planet name="Poseidon Atmosphere" file="sol/earthcloudmaptrans2.png" alpha="true" radius="1289477" gravity="20" ri="0" rj="0" rk="0" si="0" sj="0" sk="0" day="6631949" position="0"/>
+
+		<Planet name="Morpheus" file="planets/Dirt.png" ri="-1987450.750000" rj="797110.687500" rk="1454460.875000" si="837468.062500" sj="3863860.000000" sk="-973210.937500" radius="453328.468750" x="-4887528.500000" y="-3180762.750000" z="-6028558.500000" year= "7532217.000000" day="5583.500000"  >
+		<CityLights file="planets/Dirt_light_repeat.png" wrapx="64" wrapy="64" radius="453328.468750"/>
+		</Planet>
+		<Planet name="Hecate" file="planets/red_rocky.png" ri="-2060346.000000" rj="-2826513.250000" rk="-3634564.000000" si="4993352.000000" sj="1188513.875000" sk="-3754888.750000" radius="294555.031250" x="6625531.000000" y="-4116763.750000" z="-6082743.500000" year= "6286643.000000" day="5583.500000"  >
+		</Planet>
+		<Planet name="JumpToRoss246" file="jump.png" ri="2308478.500000" rj="3310841.500000" rk="-2288129.500000" si="2970920.750000" sj="731337.125000" sk="4055560.750000" radius="149.500946" x="-4823265.500000" y="5152681.500000" z="5367650.000000" year= "38024636.000000" day="76764.000000" alpha="ONE ONE" destination="sol_sector/ross246"  >
+		</Planet>
+		<Planet name="JumpToMastif" file="jump.png" ri="-2254123.000000" rj="1222289.250000" rk="-1606742.875000" si="-742453.187500" sj="-2579943.500000" sk="-921028.562500" radius="193.019211" x="5129849.000000" y="2748872.500000" z="1986597.250000" year= "22373078.000000" day="20887214.000000" alpha="ONE ONE" destination="sol_sector/mastif"  >
+		</Planet>
+	</Planet>
+	<Planet name="celeste B" file="stars/white_star.png" ri="24068616.000000" rj="-22122458.000000" rk="-755120.187500" si="618163.625000" sj="1814914.625000" sk="-33467552.000000" radius="6832280.000000" x="0" y="0" z="0" year= "28090314.000000" day="14282713.000000"  Red="0.750000" Green="0.693103" Blue="0.700932" ReflectNoLight="true" light="1">
+<!--		<Planet name="Fama" file="planets/gas_midget.png" ri="16969814.000000" rj="-18441758.000000" rk="-3271439.500000" si="14644268.000000" sj="11634363.000000" sk="10378424.000000" radius="175371.546875" x="-15271811.000000" y="12280318.000000" z="-19664828.000000" year= "27979948.000000" day="8398.000000"  >
+		</Planet>-->
+		<Planet name="Hercules" file="planets/Dirt1.png" citylights="planets/Dirt_light.png" ri="14012564.000000" rj="25086940.000000" rk="-15404876.000000" si="5237440.500000" sj="3321417.000000" sk="10173024.000000" radius="1159477.875000" x="32804308.000000" y="36147272.000000" z="15274085.000000" year= "27604526.000000" day="1949.000000"  >
+			<CityLights file="planets/Dirt_light.png" wrapx="1" wrapy="1" radius="1159477.875"/>
+			<Unit name="NewPoona" file="MiningBase" ri="-1487661.250000" rj="515457.125000" rk="1710049.625000" si="97929.093750" sj="4524174.500000" sk="-1278520.125000" x="-3147456.750000" y="3282749.500000" z="-4585473.500000" year= "3735579.750000" faction="confed"  />
+			<Planet name="Hebe" file="sol/phobos.png" ri="-3836945.000000" rj="1118239.500000" rk="-3008122.500000" si="-2174379.000000" sj="1242923.500000" sk="3235526.000000" radius="457877.031250" x="-5068575.500000" y="-5723015.000000" z="-2620428.250000" year= "24204288.000000" day="5494.875000"  >
+			</Planet>
+		</Planet>
+	</Planet>
+</Planet>
+</system>

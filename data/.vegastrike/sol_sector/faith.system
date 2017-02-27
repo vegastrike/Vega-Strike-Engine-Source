@@ -1,0 +1,39 @@
+<system name="faith" background="backgrounds/purple" nearstars="500" stars="1000" starspread="150">
+<Light>
+	<ambient red="0.000000" green="0.000000" blue="0.000000"/>
+	<diffuse red="1.000000" green="1.000000" blue="0.964416"/>
+	<specular red="1.000000" green="1.000000" blue="0.930097"/>
+</Light>
+<Planet name="faith A" file="stars/white_star.png" ri="0.000000" rj="0.000000" rk="0.000000" si="0.000000" sj="0.000000" sk="0.000000" radius="6959042.500000" x="0" y="0" z="0"  Red="1.000000" Green="1.000000" Blue="0.930097" ReflectNoLight="true" light="0">
+	<Planet name="Mount Ida" file="planets/Dirt.png" ri="18516342.000000" rj="-4425695.500000" rk="882229.437500" si="-2562833.250000" sj="-5341126.000000" sk="26995360.000000" radius="340131.250000" x="19149022.000000" y="-28663888.000000" z="-26822382.000000" year= "24904524.000000" day="446.251899"  >
+	<CityLights file="planets/Dirt_light.png" wrapx="1" wrapy="1"/>
+		<Unit name="" file="refinery" ri="442747.562500" rj="224367.234375" rk="-403454.562500" si="-527845.875000" sj="206623.218750" sk="-464347.250000" x="-1061509.500000" y="954293.250000" z="1097610.625000" year= "710567.934794" faction="confed"  />
+		<Planet name="Asclepius" file="sol/phobos.png" ri="841201.375000" rj="405574.937500" rk="1294367.750000" si="-889461.187500" sj="978967.062500" sk="271307.375000" radius="118632.281250" x="599222.562500" y="-1218350.250000" z="1616031.500000" year= "6050982.000000" day="480.266609"  >
+		</Planet>
+	</Planet>
+	<Planet name="Iphigenia" file="planets/m_class1.png" ri="9338556.000000" rj="10998088.000000" rk="26024232.000000" si="13796446.000000" sj="-12700612.000000" sk="416671.812500" radius="238804.937500" x="-36074680.000000" y="-17564056.000000" z="25548754.000000" year= "27968858.000000" day="456.904568"  >
+	</Planet>
+	<Planet name="Eretria" file="planets/Dirt1.png" ri="18115802.000000" rj="24607578.000000" rk="-19973608.000000" si="-25201102.000000" sj="20832784.000000" sk="2809017.750000" radius="264672.781250" x="25015288.000000" y="-17159668.000000" z="-33408734.000000" year= "38484172.000000" day="26.789880"  >
+	<CityLights file="planets/Dirt_light.png" wrapx="1" wrapy="1"/>
+	<Atmosphere file="sol/earthcloudmaptrans.png" alpha="SRCALPHA INVSRCALPHA" radius="272612.964688"/>
+		<Planet name="Aglaia" file="sol/neptune.png" ri="391511.281250" rj="-412211.000000" rk="-281509.125000" si="-428617.656250" sj="-732740.250000" sk="476840.406250" radius="95796.578125" x="-431630.562500" y="-707373.125000" z="-1015803.875000" year= "6313831.000000" day="637.525315"  >
+		</Planet>
+	</Planet>
+	<Planet name="Pasiphae" file="planets/m_class.png" ri="8808973.000000" rj="-5874358.500000" rk="6616289.000000" si="19964752.000000" sj="10811963.000000" sk="-16981668.000000" radius="325859.343750" x="-17728222.000000" y="25083654.000000" z="26250156.000000" year= "32737198.000000" day="564.380504"  >
+	<Atmosphere file="sol/earthcloudmaptrans.png" alpha="SRCALPHA INVSRCALPHA" radius="335635.124063"/>
+	</Planet>
+	<Planet name="Jocasta" file="planets/Snow2.png" ri="-21773864.000000" rj="-2831752.000000" rk="21147894.000000" si="21932508.000000" sj="11124785.000000" sk="24071338.000000" radius="330659.125000" x="-33260650.000000" y="31195916.000000" z="-35933644.000000" year= "42203224.000000" day="596.654927"  >
+	<CityLights file="Snow_light.png" wrapx="6" wrapy="3"/>
+		<Planet name="Delos" file="sol/janus.png" ri="496478.625000" rj="55452.558594" rk="110517.171875" si="-8998.706055" sj="-631461.187500" sk="357264.000000" radius="77918.375000" x="1037610.687500" y="418667.718750" z="-690340.562500" year= "627586.687500" day="70.824427"  >
+		</Planet>
+	</Planet>
+	<Planet name="Thalia" file="planets/gas_giant1.png" ri="-4835188.000000" rj="21769832.000000" rk="-23008142.000000" si="-5002825.000000" sj="9387800.000000" sk="9933893.000000" radius="733856.500000" x="-20841618.000000" y="-38882256.000000" z="-20711058.000000" year= "1402328448.000000" day="167.937742"  >
+		<Planet name="Callen" file="sol/triton.png" ri="2313372.250000" rj="1976700.250000" rk="2150356.500000" si="1650467.250000" sj="-1093636.250000" sk="-770269.500000" radius="287759.906250" x="3327232.250000" y="4575889.500000" z="-1668434.625000" year= "29809830.000000" day="852.266243"  >
+		</Planet>
+		<Planet name="Aeolus" file="sol/toutatis.png" ri="2223305.750000" rj="1520472.375000" rk="-1517242.500000" si="803136.562500" sj="235066.453125" sk="1412450.500000" radius="169203.343750" x="-4154534.500000" y="-2413428.500000" z="1276027.625000" year= "156293344.000000" day="683.405621"  >
+		</Planet>
+		<Planet name="JumpToBeacon" file="jump.png" ri="-934423.937500" rj="-1183761.625000" rk="-395712.250000" si="-2270796.750000" sj="1804953.500000" sk="-37268.460938" radius="204.429214" x="3099772.750000" y="2309700.250000" z="-1559015.250000" year= "2831925.250000" day="355.519638" alpha="ONE ONE" destination="sol_sector/beacon"  >
+		</Planet>
+	</Planet>
+</Planet>
+</system>

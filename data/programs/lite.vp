@@ -1,0 +1,43 @@
+uniform int light_enabled[gl_MaxLights];
+uniform int max_light_enabled;
+uniform vec4 detail0Plane;
+uniform vec4 detail1Plane;
+vec2 EnvMapGen(vec3 f) {
+   float fzp1=f.z+1.0;
+   float m=2.0*sqrt(f.x*f.x+f.y*f.y+(fzp1)*(fzp1));
+   return vec2(f.x/m+.5,f.y/m+.5);
+}
+
+void main() {
+
+  vec4 position=gl_ModelViewMatrix*gl_Vertex;
+  vec3 eyetopos=normalize(position.xyz/position.w);//find the direction from eye to object
+  vec3 normal = normalize(gl_NormalMatrix * gl_Normal);//normalize the normal in world space
+  gl_TexCoord[1].xy=EnvMapGen(reflect(-eyetopos,normal));
+  gl_TexCoord[1].zw=vec2(0);
+  gl_TexCoord[0]=gl_MultiTexCoord0;
+  //gl_TexCoord[7]=gl_MultiTexCoord0*detail0Plane;//detail texture
+  ///set primary color to the front light[0] ambient and light model ambient + emissive material properties
+  vec4 pc=gl_FrontLightProduct[0].ambient+gl_FrontLightModelProduct.sceneColor;
+  vec4 sc=vec4(0);
+  for (int li=0;li<5;++li) {//computed in engine
+    if (light_enabled[li]!=0&&li<=max_light_enabled) {//only compute for enabled lights
+    //do per vertex lighting for lights 1,2,3,4,5,6,7+
+      vec3 lightvec=gl_LightSource[li].position.xyz*position.w-position.xyz*gl_LightSource[li].position.w;
+      float dist=length(lightvec);
+      vec4 att = 1.0 / (gl_LightSource[li].constantAttenuation +
+  	               gl_LightSource[li].linearAttenuation * vec4(dist) +
+	               gl_LightSource[li].quadraticAttenuation * vec4(dist * dist));
+      lightvec=lightvec/dist;
+      vec3 halfangle=lightvec-eyetopos;
+      halfangle=halfangle/length(halfangle);
+      pc+=att*(gl_FrontMaterial.emission+gl_FrontMaterial.ambient*(gl_LightSource[li].ambient)
+        + max(dot(normal,lightvec),0.0)*gl_LightSource[li].diffuse*gl_FrontMaterial.diffuse);
+      sc+=att*gl_FrontMaterial.specular*gl_LightSource[li].specular*pow(max(dot(normal,halfangle),0.0),gl_FrontMaterial.shininess);
+    }
+  }
+//FIXME this may be better served as an ftransform--but I figure this will get more opts in the future
+  gl_Position=gl_ModelViewProjectionMatrix*gl_Vertex;
+  gl_FrontColor=gl_BackColor=pc;
+  gl_FrontSecondaryColor=sc;
+}

@@ -1,0 +1,103 @@
+#include "gas_giants_params.h"
+#include "../config.h"
+#include "../stdlib_vp.h"
+#include "../stdlib.h"
+
+#define outCloudCoord gl_TexCoord[0].xy
+#define outGroundCoord gl_TexCoord[0].zw
+#define outShadowCoord gl_TexCoord[1].xy
+#define outNoiseCoord gl_TexCoord[1].zw
+#define outCityCoord gl_TexCoord[2].xy
+
+#define varTSLight gl_TexCoord[3]
+#define varTSView gl_TexCoord[4]
+#define varWSNormal gl_TexCoord[5]
+#define varCloudLayerDensitySVC gl_TexCoord[6]
+
+uniform float fTime;
+
+float soffs(float lim, float x)
+{
+  return x + ((x>=0.0)?lim:-lim);
+}
+
+vec2 shadowExtrude(in vec2 texcoord, in vec3 direction, float mult)
+{
+  return texcoord + direction.xy * fAtmosphereExtrusion.x * fShadowRelHeight.x / soffs(0.01,direction.z) * mult;
+}
+
+float  atmosphereLighting(float fNDotL) { return saturatef(min(1.0,fAtmosphereContrast*fNDotL)); }
+float  groundLighting(float fNDotL) { return saturatef(min(1.0,fGroundContrast*fNDotL)); }
+
+void main()
+{
+   // Compute position, eye-to-object direction and normalized world-space normal
+   vec4 extrudedPosition = gl_Vertex + vec4(normalize(gl_Normal.xyz),0.0) * fAtmosphereExtrusion.x * fShadowRelHeight.x * fvCloudLayers.x;
+   vec3 normal   = normalize(gl_NormalMatrix * gl_Normal);
+   vec3 tangent  = normalize(gl_NormalMatrix * gl_MultiTexCoord2.xyz);
+   vec3 binormal = cross(tangent, normal) * sign(gl_MultiTexCoord2.w);
+   
+   // Extrude sphere
+   vec4 position = gl_ModelViewMatrix * extrudedPosition;
+   vec3 eyetopos = normalize(position.xyz);
+   
+   vec4 lightpos;
+   float lightatt;
+   lightPosSizeAndAtt0(position, lightpos, lightatt);
+   
+   // TS view vector
+   varTSView.x = dot( tangent, -eyetopos );
+   varTSView.y = dot( binormal, -eyetopos );
+   varTSView.z = dot( normal, -eyetopos );
+   
+   // TS light posision
+   varTSLight.x = dot( tangent, lightpos.xyz );
+   varTSLight.y = dot( binormal, lightpos.xyz );
+   varTSLight.z = dot( normal, lightpos.xyz );
+   
+   // WS normal
+   varWSNormal.xyz = normal;
+   
+   // Load varyings
+   float layerThickness = fvCloudLayers.x + 1.0 / fvCloudLayerScales.x - fvCloudLayers.w;
+   outCloudCoord       = gl_MultiTexCoord0.xy + fTime*fvCloudLayerDrift.xy;
+   outNoiseCoord       = gl_MultiTexCoord0.xy - fTime*fvCloudLayerDrift.xy;
+   outCityCoord        = gl_MultiTexCoord0.xy;
+   outGroundCoord      = shadowExtrude(outCloudCoord.xy, varTSView.xyz, layerThickness).xy;
+   outShadowCoord      = shadowExtrude(outGroundCoord.xy, varTSLight.xyz, -1.0).xy;
+
+   float  fCloudLayerDensityL = fCloudLayerDensity / (abs(varTSLight.z)+fShadowRelHeight.x);
+   float  fCloudLayerDensityV = fCloudLayerDensity / (abs(varTSView.z)+fShadowRelHeight.x);
+   varCloudLayerDensitySVC.x  = fCloudLayerDensityL * fCloudSelfShadowFactor;
+   varCloudLayerDensitySVC.y  = fCloudLayerDensityV;
+   varCloudLayerDensitySVC.z  = fCloudLayerDensity * fCloudSelfShadowFactor;
+   
+   // set primary color to the emissive material properties
+   vec4 pc = gl_FrontMaterial.emission;
+   vec4 sc = vec4(0.0);
+   pc.a = fvCloudColor.a * fCloudLayerDensity;
+   
+   pc.rgb += fvCloudColor.rgb * gl_LightSource[0].diffuse.rgb * lightatt;
+
+   float fNDotV = saturatef( varTSView.z );
+   float fNDotL = saturatef( varTSLight.z );
+
+   // self shadowing
+   pc.rgb *= self_shadow(fNDotL) * atmosphereLighting(fNDotL);
+   
+   // atmospheric absorption
+   vec3 absorption = lerp(fAtmosphereAbsorptionColor.rgb,vec3(1.0),saturatef(sqr(fNDotV*fNDotL*4.0)));
+   pc.rgb *= absorption;
+   
+   // ambient
+   sc.rgb += gl_LightSource[0].ambient.rgb;
+
+   
+   // Need this instead of ftransform() for invariance
+   gl_Position = gl_ModelViewProjectionMatrix * extrudedPosition;
+   gl_FrontColor = gl_BackColor = pc;
+   gl_FrontSecondaryColor = gl_BackSecondaryColor = sc;
+}
+
+
+

@@ -1,0 +1,15 @@
+<system name="Mars" background="backgrounds/green" nearstars="500" stars="1000" starspread="150"  x="0" y="0" z="0">
+<Light>
+<ambient red="0" green="0" blue="0"/>
+<diffuse red="1" green="1" blue="1"/>
+<specular red="1" green="1" blue="1"/>
+</Light>
+
+<Light>
+<ambient red="1" green=".1" blue="0"/>
+<!--<diffuse red="1" green=".7" blue="0"/>-->
+<!--<attenuated red=".00000001" blue=".00000015"/>-->
+<attenuated red="0" blue=".0000001"/>
+</Light>
+
+</system>

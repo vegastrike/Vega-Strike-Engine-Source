@@ -1,0 +1,52 @@
+<Unit>
+<!-- The subunits were generated with the following commands
+     ./asteroidgen asteroid.xmesh 4000 160 40 120 .3 10 20 0 1025
+     ./asteroidgen asteroid.lod1.xmesh 4000 160 40 120 .3 6 15 0 1025
+     ./asteroidgen asteroid.lod2.xmesh 4000 160 40 120 .3 4 6 0 1025
+     
+     the command line arguments are in the same order as the questions asked.
+     to make a different LOD use a different seed
+ -->
+<SubUnit file="asteroids400gap"  />
+<SubUnit file="asteroids400gap" x="0" y="00" z="00" ri="1" rj="0" rk="0" qi="0" qj="0" qk="1" pi="0" pj="1" pk="0"/>
+<SubUnit file="asteroids400gap" x="00" y="00" z="0" ri="1" rj="0" rk="0" qi="0" qj="0" qk="-1" pi="0" pj="-1" pk="0"/>
+<SubUnit file="asteroids" x="00" y="400" z="1400" ri="1" rj="0" rk="0" qi="0" qj="1" qk="0" pi="0" pj="0" pk="1"/>
+<SubUnit file="asteroids" x="0" y="-400" z="3550" ri="-1" rj="0" rk="0" qi="0" qj="0" qk="1" pi="0" pj="1" pk="0"/>
+<SubUnit file="asteroids" x="00" y="-500" z="3550" ri="-1" rj="0" rk="0" qi="0" qj="0" qk="-1" pi="0" pj="-1" pk="0"/>
+
+<SubUnit file="asteroids" x="00" y="800" z="-4000" />
+<SubUnit file="asteroids" x="00" y="-800" z="-3524"  ri="1" rj="0" rk="0" qi="0" qj="0" qk="1" pi="0" pj="1" pk="0"/>
+<SubUnit file="asteroids" x="00" y="00" z="-6024"  ri="1" rj="0" rk="0" qi="0" qj="0" qk="-1" pi="0" pj="-1" pk="0"/>
+
+<SubUnit file="asteroids" y="00" x="524"  z="-8400" ri="-1" rj="0" rk="0" qi="0" qj="0" qk="1" pi="0" pj="1" pk="0"/>
+<SubUnit file="asteroids" y="00" x="024"  z="-10024"  ri="-1" rj="0" rk="0" qi="0" qj="0" qk="-1" pi="0" pj="-1" pk="0"/>-->
+<SubUnit file="asteroids" y="00" x="-800"  z="11400"  ri="-1" rj="0" rk="0" qi="0" qj="0" qk="1" pi="0" pj="1" pk="0"/>
+<SubUnit file="asteroids" y="00" x="100"  z="-8000"  ri="-1" rj="0" rk="0" qi="0" qj="0" qk="-1" pi="0" pj="-1" pk="0"/>
+<SubUnit file="asteroids" y="00" x="500"  z="-9000"  ri="-1" rj="0" rk="0" qi="0" qj="1" qk="0" pi="0" pj="0" pk="1"/> 
+
+
+<SubUnit file="asteroids" y="-600" z="12024"  x="024" />
+<SubUnit file="asteroids" y="-600" z="-12000"  x="00"  ri="1" rj="0" rk="0" qi="0" qj="0" qk="1" pi="0" pj="1" pk="0"/>
+<SubUnit file="asteroids" y="600" z="13024"  x="400"  ri="1" rj="0" rk="0" qi="0" qj="0" qk="-1" pi="0" pj="-1" pk="0"/>
+<SubUnit file="asteroids" y="600" z="-10000"  x="500"  ri="1" rj="0" rk="0" qi="0" qj="1" qk="0" pi="0" pj="0" pk="1"/>
+<SubUnit file="asteroids" y="00" z="-14000"  x="024"  ri="-1" rj="0" rk="0" qi="0" qj="0" qk="1" pi="0" pj="1" pk="0"/>
+
+<SubUnit file="asteroids" z="13600" x="400" y="-800" ri="1" rj="0" rk="0" qi="0" qj="1" qk="0" pi="0" pj="0" pk="1"/>
+<SubUnit file="asteroids" z="-13600" x="-300" y="400" ri="-1" rj="0" rk="0" qi="0" qj="0" qk="1" pi="0" pj="1" pk="0"/>
+<SubUnit file="asteroids" z="14600" x="400" y="200" ri="-1" rj="0" rk="0" qi="0" qj="0" qk="-1" pi="0" pj="-1" pk="0"/>
+<SubUnit file="asteroids" z="6600" x="-400" y="800" />
+<SubUnit file="asteroids" z="5000" y="-024" x="800" ri="1" rj="0" rk="0" qi="0" qj="1" qk="0" pi="0" pj="0" pk="1"/>
+<SubUnit file="asteroids" z="9600" y="-00" x="-240" ri="-1" rj="0" rk="0" qi="0" qj="0" qk="1" pi="0" pj="1" pk="0"/>
+<SubUnit file="asteroids" z="-9600" y="500" x="524" ri="-1" rj="0" rk="0" qi="0" qj="0" qk="-1" pi="0" pj="-1" pk="0"/>
+
+	<Thrust>
+		<Engine Afterburner="00.000000" Forward="0" Retro="0" Left="0" Right="0" Top="0" Bottom="0"/>
+		<Maneuver yaw="0000" pitch="0000" roll="0000"/>
+	</Thrust>
+	<Defense HudImage="af-hud.spr">
+		<Hull strength="400000000"/>
+	</Defense>
+
+<Stats mass="600" momentofinertia="600" fuel="20000"></Stats>
+
+</Unit>

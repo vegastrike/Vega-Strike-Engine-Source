@@ -1,0 +1,111 @@
+uniform int light_enabled[gl_MaxLights];
+uniform int max_light_enabled;
+uniform vec4 detail0Plane;
+uniform vec4 detail1Plane;
+
+//temporarily using the Sun's solid angle, as seen from Earth, for the solid
+//angle of all light sources, until this parameter can be passed as a uniform
+//for each light.
+#define SUNS_SOLID_ANGLE (0.000263759)
+
+/* varyings:
+ *   gl_TexCoord[
+ *    0 - tex coord
+ *    1 - ws normal
+ *    2 - ws tangent
+ *    3 - ws binormal
+ *    4 - vertex-to-eye direction
+ *    5 - vertex-to-light0@xyz, attenuation@z
+ *    6 - vertex-to-light1@xyz, attenuation@z
+ **/
+
+#define lightPosAndAttenuation(name, lightno) \
+vec4 name(in vec4 vertex) \
+{ \
+  vec4 lpos = gl_LightSource[lightno].position; \
+  vec4 rv; \
+  rv.xyz    = lpos.xyz - vertex.xyz*lpos.w; \
+  rv.w      = SUNS_SOLID_ANGLE; \
+  return rv; \
+}
+
+
+lightPosAndAttenuation(lightPosAndAttenuation0, 0)
+lightPosAndAttenuation(lightPosAndAttenuation1, 1)
+lightPosAndAttenuation(lightPosAndAttenuation2, 2)
+lightPosAndAttenuation(lightPosAndAttenuation3, 3)
+lightPosAndAttenuation(lightPosAndAttenuation4, 4)
+lightPosAndAttenuation(lightPosAndAttenuation5, 5)
+lightPosAndAttenuation(lightPosAndAttenuation6, 6)
+lightPosAndAttenuation(lightPosAndAttenuation7, 7)
+
+//float selfshadowStep(float VNdotL) { return step(0.0,VNdotL); } // fast but hard selfshadow function
+float selfshadowStep(float VNdotL) { return smoothstep(0.0,0.25,VNdotL); } // costly but soft and nice selfshadow function
+
+#define lighting(name, lpattname, lightno) \
+void name(in vec4 vertex, in vec3 eye, in vec3 normal, inout vec4 pc, inout vec4 sc) \
+{ \
+  vec4 lpatt  = lpattname(vertex); \
+  vec3 refl   = reflect( eye, normal ); \
+  float NdotL = dot( lpatt.xyz, normal ); \
+  float RdotL = dot( lpatt.xyz, refl ); \
+  \
+  pc += lpatt.w*(  gl_FrontMaterial.ambient * gl_LightSource[lightno].ambient \
+                 + max(0.0, NdotL) * gl_LightSource[lightno].diffuse * gl_FrontMaterial.diffuse );  \
+  sc += lpatt.w*(  pow( max(0.0, RdotL) , max(1.0,gl_FrontMaterial.shininess) ) * selfshadowStep(NdotL) \
+                 * gl_LightSource[lightno].specular * gl_FrontMaterial.specular );  \
+}
+
+lighting(lighting2, lightPosAndAttenuation2, 2)
+lighting(lighting3, lightPosAndAttenuation3, 3)
+lighting(lighting4, lightPosAndAttenuation4, 4)
+lighting(lighting5, lightPosAndAttenuation5, 5)
+lighting(lighting6, lightPosAndAttenuation6, 6)
+lighting(lighting7, lightPosAndAttenuation7, 7)
+
+void main() 
+{
+  // Compute position, eye-to-object direction and normalized world-space normal
+  vec4 position = gl_ModelViewMatrix * gl_Vertex;
+  vec3 eyetopos = normalize(position.xyz);
+  vec3 normal   = normalize(gl_NormalMatrix * gl_Normal);
+  vec3 tangent  = normalize(gl_NormalMatrix * gl_MultiTexCoord2.xyz);
+  vec3 binormal = cross(tangent, normal) * sign(gl_MultiTexCoord2.w);
+  
+  // Load varyings
+  gl_TexCoord[0] = gl_MultiTexCoord0;
+  gl_TexCoord[1].xyz = normal;
+  gl_TexCoord[2].xyz = tangent;
+  gl_TexCoord[3].xyz = binormal;
+  gl_TexCoord[4].xyz = -eyetopos;
+  gl_TexCoord[5] = lightPosAndAttenuation0(position);
+  gl_TexCoord[6] = lightPosAndAttenuation1(position);
+  gl_TexCoord[1].w =
+  gl_TexCoord[2].w =
+  gl_TexCoord[3].w =
+  gl_TexCoord[4].w = 0.0;
+  
+  // set texcoord 7 to the front light[0] ambient and light model ambient, for simple GI modulation.
+  gl_TexCoord[7] = 
+            gl_FrontLightProduct[0].ambient 
+          + gl_FrontLightModelProduct.sceneColor
+          + float(light_enabled[1]) * gl_FrontLightProduct[1].ambient;
+
+  // set primary color to the emissive material properties
+  vec4 pc = gl_FrontMaterial.emission;
+  vec4 sc = vec4(0.0);
+
+  if (max_light_enabled >= 2) {
+    if (light_enabled[2] != 0) lighting2(position, eyetopos, normal, pc, sc);
+    if (light_enabled[3] != 0) lighting3(position, eyetopos, normal, pc, sc);
+    if (light_enabled[4] != 0) lighting4(position, eyetopos, normal, pc, sc);
+    if (light_enabled[5] != 0) lighting5(position, eyetopos, normal, pc, sc);
+    if (light_enabled[6] != 0) lighting6(position, eyetopos, normal, pc, sc);
+    if (light_enabled[7] != 0) lighting7(position, eyetopos, normal, pc, sc);
+  }
+
+  // Need this instead of ftransform() for invariance
+  gl_Position = gl_ModelViewProjectionMatrix * gl_Vertex;
+  gl_FrontColor = gl_BackColor = pc;
+  gl_FrontSecondaryColor = gl_BackSecondaryColor = sc;
+}

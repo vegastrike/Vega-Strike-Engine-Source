@@ -1,0 +1,14 @@
+<Unit>
+<Meshfile file="hiddenasteroid.bfxm"/>
+	<Thrust>
+		<Engine Afterburner="00.000000" Forward="000000" Retro="000000" Left="00000" Right="000000" Top="000000" Bottom="00000"/>
+		<Maneuver yaw="0000" pitch="00000" roll="00000"/>
+	</Thrust>
+	<Sound> </Sound>
+	<Defense>
+		<Armor front="8000" right="8000" left="8000" back="8000"/>
+		<Hull strength="8500"/>
+	</Defense>
+	<Stats mass="7" momentofinertia="7" fuel="0000"></Stats>
+<Dock x="-150" y="107" z="0.594800" size="300.000000" ri="0.000000" rj="-1.000000" rk="0.000000" qi="0.820142" qj="0.000000" qk="0.572160"/>
+</Unit>

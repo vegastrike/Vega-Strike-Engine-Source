@@ -1,0 +1,45 @@
+<?xml version="1.0"?>
+<technique fallback="highend">
+    <!-- Full-blown shader technique, with Z-write prepass to avoid
+         shading overhead for occluded fragments.
+         
+         This technique implements normal-mapping, specmaps with intensity-derived
+         shininess modulation, variable-kernel filtered environmental reflections
+         (based on shininess), specularity normalization, fading damage maps with
+         specmap perturbation, and supports up to 8 lights.
+         
+         This is a one-pass technique, so only the first 2 lights are done 
+         per-pixel, the remaining ones use per-vertex lighting.
+    -->
+
+    <!-- Z-write prepasses go at sequence 10 -->
+    <pass type="shader" sequence="10" cull="back" cwrite="false">
+        <vertex_program src="zwrite"/>
+        <fragment_program src="zwrite"/>
+        <texture_unit src="decal:0" default="file:white.bmp" name="diffuseMap"/>
+    </pass>
+    
+    <!-- first and only lighting pass -->
+    <pass type="shader" sequence="15" cull="back" >
+        <vertex_program src="highendplus"/>
+        <fragment_program src="highendplus"/>
+        
+        <texture_unit src="decal:0" default="file:white.bmp" name="diffuseMap"/>
+        <texture_unit src="environment" name="envMap"/>
+        <texture_unit src="decal:1" default="file:black.png" name="specMap"/>
+        <texture_unit src="decal:3" default="file:black.png" name="glowMap"/>
+        <texture_unit src="decal:4" default="file:gray.png" name="normalMap"/>
+        <texture_unit src="decal:2" default="decal:0" name="damageMap"/>
+        <texture_unit src="file:grey_metal.png" name="detail0Map"/>
+        <texture_unit src="file:grey_metal.png" name="detail1Map"/>
+        
+        <auto_param name="envColor" semantic="EnvColor" optional="true"/>
+        <auto_param name="light_enabled" semantic="ActiveLightsArray" optional="true"/>
+        <auto_param name="max_light_enabled" semantic="NumLights" optional="true"/>
+        <auto_param name="detail0plane" semantic="DetailPlane0" optional="true"/>
+        <auto_param name="detail1plane" semantic="DetailPlane1" optional="true"/>
+        <auto_param name="cloaking" semantic="CloakingPhase" optional="true"/>
+        <auto_param name="damage" semantic="Damage4" optional="true"/>
+        <auto_param name="gameTime" semantic="GameTime" optional="true"/>
+    </pass>
+</technique>

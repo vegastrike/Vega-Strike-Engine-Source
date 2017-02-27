@@ -1,0 +1,29 @@
+<mission>
+	<settings>
+		<origin  planet="earth" x="0000" y="100" z="000.0"/>
+	</settings>
+
+	<variables>
+		<var name="credits" value="20000"/>
+		<var name="defaultplayer" value="blue"/>
+		<var name="mission_name" value="Networking" />
+		<var name="num_players" value="1"/>
+		<var name="unit_to_dock_with" value="1"/>
+		<var name="system" value="Special/Network" />
+		<!--<var name="system" value="testsystems/absolutelynothing" />-->
+		<var name="description" value="Default mission used on a private server." />
+	</variables>
+        <flightgroups>
+                <flightgroup name="blue" faction="privateer" type="wayfarer.begin" ainame="default" waves="1" nr_ships="1">
+			<pos x="20400" y="-35400" z="84700000.0"/>
+			<rot x="180.0" y="180.0" z="180.0"/>
+		</flightgroup>
+        </flightgroups>
+<python>
+# from privateer import privateer
+# my_obj=privateer(20000,40000,500,3,2,.6,.25,.02,400000,2000)
+
+import server
+my_obj=server.server()
+</python>
+</mission>

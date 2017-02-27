@@ -1,0 +1,56 @@
+<AggressiveAI time="7">
+<!-- interrupts -->
+<hull max=".7" script="barrel roll" time="2" timetointerrupt="2" priority="7"> 
+  <fshield max=".25" script="barrel roll" time="10" timetointerrupt="7" priority="7">
+  </fshield>
+</hull>
+
+<hull max=".7" script="barrel roll" time="7" timetointerrupt="5" priority="7"> 
+  <bshield max=".25" script="afterburner slide" time="7" timetointerrupt="4" priority="7">
+  </bshield>
+</hull>
+
+<meterdistance max="30" script="turn away" time="7" timetointerrupt="7" priority="6">
+	<rand min=".5" script="fly straight" time="2" timetointerrupt="2" priority="6"/>
+</meterdistance>
+
+<meterdistance max="30" script="loop around" time="5" timetointerrupt="5" priority="6">
+</meterdistance>
+
+
+<!-- main script -->
+<meterdistance max="60" script="loop around" priority="4" time="15"/>
+
+<!-- meterdistance less than .1-->
+<meterdistance min="60" max="5000" script="cloak" priority="4" time="10"> 
+  <threat min=".3" script="barrel roll" priority="4" time="10">
+  </threat>
+</meterdistance>
+
+<meterdistance min="60" max="500" script="turn towards itts" priority="4" time="5">
+  <threat max=".3" script="turn towards" priority="4" time="8">
+   <rand min=".5" script="loop around" priority="4" time="5">
+   </rand>
+  </threat>
+</meterdistance>
+<meterdistance min="60" max="500" script="afterburner slide" priority="4" time="15"> 
+  <threat max=".3" script="turn towards" priority="4" time="8">
+  </threat>
+</meterdistance>
+
+<meterdistance min="500" max="5000" script="afterburn turn towards itts" priority="4" time="7">
+	<meterdistance min="500" max="5000" script="turn towards" priority="4" time="8">
+		<meterdistance min="500" max="5000" script="aggressive loop around" priority="4" time="15">
+		</meterdistance>
+	</meterdistance>
+</meterdistance>
+
+<!-- meterdistance far out-->
+<meterdistance min="5000" script="barrel roll" time="4" timetointerrupt="4">
+  <fshield max=".1"  script="barrel roll" time="3">
+  </fshield>
+</meterdistance>
+<meterdistance min="5000" script="afterburn turn towards itts" priority="4" time="3">
+</meterdistance>
+
+</AggressiveAI>

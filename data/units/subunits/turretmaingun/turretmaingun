@@ -1,0 +1,30 @@
+<Unit scale="3">
+	<Description combatRole="TSMALLCAP">
+	</Description>
+
+<Meshfile file="turretbeamgun.bfxm"/>
+
+	<Mount weapon="Capshipdisruptor" size="capship-light capship-medium" x="2" y=".25" z="4.5" ri="0.000000" rj="0.000000" rk="1.000000" qi="0.022849" qj="-0.999739" qk="0.000000"/>
+	<Mount weapon="Capshipdisruptor" size="capship-light capship-medium" x="-2" y=".25" z="4.5" ri="0.000000" rj="0.000000" rk="1.000000" qi="0.032845" qj="-0.999460" qk="0.000000"/>
+
+		<Thrust>
+		<Engine Afterburner="000000" Forward="000000" Retro="0000" Left="0000" Right="0000" Top="00000" Bottom="000000"/>
+		<Maneuver yaw="0" pitch="10.0" roll="0000"/>
+	</Thrust>
+	<Sound></Sound>
+	<Defense>
+		<Armor front="200" right="200" left="200" back="200"/>
+		<Shields front="300" back="300" recharge="14.333333"/>
+		<Hull strength="150"/>
+		<Cloak cloakmin=".01" cloakrate=".2" cloakenergy="0"/>
+	</Defense>
+	<Stats mass="1" momentofinertia="1" fuel="20000"></Stats>
+	<Computer yaw="000" pitch="8.0" roll="0000" afterburner="000000" maxspeed="00000">
+		<Radar itts="true" range="30000000" color="true" error="0"/>
+	</Computer>
+
+	<Energy>
+		<Reactor recharge="300" limit="600"/>
+	</Energy>
+
+</Unit>

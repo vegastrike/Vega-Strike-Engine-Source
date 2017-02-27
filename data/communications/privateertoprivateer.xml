@@ -1,0 +1,253 @@
+<comm>
+	<node text="startingNode" relationship="0"><!-- node 0 (starting node: Don't link here)-->
+		<edge index="1"/>
+		<edge index="2"/>
+		<edge index="3"/>
+	</node>
+
+<!-- Starting Points -->
+	<node text="Welcome to the happy hunting grounds." relationship="0.2"><!-- node 1 (very happy)-->
+	<sound file="communications/hunter/male/01.wav" sex="0"/>
+	<sound file="communications/hunter/female/01.wav" sex="1"/>
+		<edge index="4"/>
+		<edge index="5"/>
+		<edge index="6"/>
+	</node>
+	<node text="If you're smart you watch your back!" relationship="0"><!-- node 2 (neutral)-->
+	<sound file="communications/hunter/male/02.wav" sex="0"/>
+	<sound file="communications/hunter/female/02.wav" sex="1"/>
+		<edge index="8"/>
+		<edge index="9"/>
+		<edge index="10"/>
+	</node>
+	<node text="You've gotten careless, and the advantage is mine!" relationship="-.2"><!-- node 3 (very mad)-->
+	<sound file="communications/hunter/male/07.wav" sex="0"/>
+	<sound file="communications/hunter/female/07.wav" sex="1"/>
+		<edge index="12"/>
+		<edge index="13"/>
+		<edge index="14"/>
+	</node>
+<!-- End of Starting Points -->
+
+<!-- Other Nodes -->
+
+	<node text="Better clear out, there could be trouble soon." relationship=".03125"><!-- node 4(random good chatter)-->
+	<sound file="communications/hunter/male/03.wav" sex="0"/>
+	<sound file="communications/hunter/female/03.wav" sex="1"/>
+		<edge index="4"/>
+		<edge index="5"/>
+	</node>
+	<node text="If you're smart, you'll watch your back." relationship=".0625"><!-- node 5 (random good chatter)-->
+	<sound file="communications/hunter/male/02.wav" sex="0"/>
+	<sound file="communications/hunter/female/02.wav" sex="1"/>
+		<edge index="4"/>
+		<edge index="6"/>
+	</node>
+	<node text="Welcome to the happy hunting grounds." relationship=".0625"><!-- node 6 (best node)-->
+	<sound file="communications/hunter/male/01.wav" sex="0"/>
+	<sound file="communications/hunter/female/01.wav" sex="1"/>
+		<edge index="5"/>
+		<edge index="6"/>
+	</node>
+	<node text="Better clear out, trouble's brewing." relationship="-.03125"><!-- node 7 (hit while happy)-->
+	<sound file="communications/hunter/male/03.wav" sex="0"/>
+	<sound file="communications/hunter/female/03.wav" sex="1"/>
+		<edge index="4"/>
+		<edge index="8"/>
+		<edge index="9"/>
+		<edge index="10"/>
+	</node>
+	<node text="You're not on my list ... this time." relationship=".03125"><!-- node 8 (random neutral chatter)-->
+	<sound file="communications/hunter/male/04.wav" sex="0"/>
+	<sound file="communications/hunter/female/04.wav" sex="1"/>
+		<edge index="9"/>
+		<edge index="10"/>
+	</node>
+	<node text="Just smoking out a little game, flyboy." relationship=".04125"><!-- node 9 (neutral node after he has decided to be nicer after conflict)-->
+	<sound file="communications/hunter/male/05.wav" sex="0"/>
+	<sound file="communications/hunter/female/05.wav" sex="1"/>
+		<edge index="8"/>
+		<edge index="10"/>
+	</node>
+	<node text="Don't worry, I only kill for a fee." relationship=".03125"><!-- node 10 (good node in neutral) -->
+	<sound file="communications/hunter/male/06.wav" sex="0"/>
+	<sound file="communications/hunter/female/06.wav" sex="1"/>
+		<edge index="8"/>
+		<edge index="9"/>
+	</node>
+	<node text="Oh... this is not good..." relationship="-.125"><!-- node 11 (got hit when neutral)-->
+	<sound file="communications/hunter/male/11.wav" sex="0"/>
+	<sound file="communications/hunter/female/11.wav" sex="1"/>
+		<edge index="9"/>
+		<edge index="12"/>
+		<edge index="13"/>
+		<edge index="14"/>
+	</node>
+	<node text="The advantage is mine, now you die!." relationship="-.0625"><!-- node 12 (taunt)-->
+	<sound file="communications/hunter/male/07.wav" sex="0"/>
+	<sound file="communications/hunter/female/07.wav" sex="1"/>
+		<edge index="13"/>
+		<edge index="15"/>
+		<edge index="19"/>
+	</node>
+	<node text="Killing you will put me in the black, flyboy" relationship="-.125"><!-- node 13 (taunt)-->
+	<sound file="communications/hunter/male/09.wav" sex="0"/>
+	<sound file="communications/hunter/female/09.wav" sex="1"/>
+		<edge index="12"/>
+		<edge index="15"/>
+		<edge index="19"/>
+	</node>
+	<node text="The advantage is mine, now you die!" relationship="-.0625"><!-- node 14 (trying to appease him, but failing)-->
+	<sound file="communications/hunter/male/07.wav" sex="0"/>
+	<sound file="communications/hunter/female/07.wav" sex="1"/>
+		<edge index="8"/>
+		<edge index="12"/>
+		<edge index="13"/>
+		<edge index="14"/>
+	</node>
+	<node text="Nothing personal, but your death is my gain" relationship="-.0625"><!-- node 15 hit while mad node-->
+	<sound file="communications/hunter/male/08.wav" sex="0"/>
+	<sound file="communications/hunter/female/08.wav" sex="1"/>
+		<edge index="11"/>
+		<edge index="13"/>
+		<edge index="12"/>
+		<edge index="19"/>
+	</node>
+	<node text="Nothing personal, but your death is my gain." relationship="-.0625"><!-- node 16 kill-->
+	<sound file="communications/hunter/male/08.wav" sex="0"/>
+	<sound file="communications/hunter/female/08.wav" sex="1"/>
+		<edge index="12"/>
+		<edge index="13"/>
+		<edge index="17"/>
+		<edge index="19"/>
+	</node>
+	<node text="Killing you will put me in the black, flyboy" relationship="-.125"><!-- node 13 (taunt)-->
+	<sound file="communications/hunter/male/09.wav" sex="0"/>
+	<sound file="communications/hunter/female/09.wav" sex="1"/>
+		<edge index="12"/>
+		<edge index="13"/>
+		<edge index="16"/>
+		<edge index="19"/>
+	</node>
+	<node text="Hey, what can I say? I'm a professional" relationship="-.03125"><!-- node 18 (trying to appease, but failing)-->
+	<sound file="communications/hunter/male/12.wav" sex="0"/>
+	<sound file="communications/hunter/female/12.wav" sex="1"/>
+		<edge index="9"/>
+		<edge index="12"/>
+		<edge index="13"/>
+		<edge index="14"/>
+	</node>	
+	<node text="Your death is my living, buddy." relationship="-.0625"><!-- node 19 (taunt)-->
+	<sound file="communications/hunter/male/13.wav" sex="0"/>
+	<sound file="communications/hunter/female/13.wav" sex="1"/>
+		<edge index="12"/>
+		<edge index="13"/>
+		<edge index="14"/>
+	</node>
+
+<!-- Built-in Conversations --> 
+	<node text="Docking operation complete. You're free of the docking clamps." relationship="0.01">
+		<edge index="4"/>
+		<edge index="5"/>
+		<edge index="6"/>
+		<edge index="7"/>
+	</node>
+	<node text="You are not in docking clamps. Move into one of the green guide boxes and try to dock again." relationship="0">
+		<edge index="8"/>
+		<edge index="9"/>
+		<edge index="10"/>
+		<edge index="11"/>
+	</node>
+	<node text="Docking Operation begun; press 0 to step into airlock." relationship="0">
+		<edge index="8"/>
+		<edge index="9"/>
+		<edge index="10"/>
+		<edge index="11"/>
+	</node>		
+	<node text="Docking denied. Do not land here!" relationship="0">
+		<edge index="8"/>
+		<edge index="9"/>
+		<edge index="10"/>
+		<edge index="11"/>
+	</node>		
+	<node text="Docking agreement reached: move to docking port in green indicators." relationship="0">
+		<edge index="8"/>
+		<edge index="9"/>
+		<edge index="10"/>
+		<edge index="11"/>
+	</node>		
+	<node text="No can do, Boss." relationship="0">
+		<edge index="8"/>
+		<edge index="9"/>
+		<edge index="10"/>
+		<edge index="11"/>
+	</node>		
+	<node text="Roger that, Boss." relationship="0">
+		<edge index="4"/>
+		<edge index="5"/>
+		<edge index="6"/>
+		<edge index="7"/>
+	</node>		
+	<node text="My mission is to search you; hold still." relationship="0"> <!-- maintain speed and course -->
+		<edge index="8"/>
+		<edge index="9"/>
+		<edge index="10"/>
+	</node>
+	<node text="Nothing is interesting in your hold." relationship="0"> <!-- no contraband detected you may proceed -->
+		<edge index="8"/>
+		<edge index="9"/>
+		<edge index="10"/>
+	</node>
+	<node text="The treasures you carry could put me back in the black!" relationship="-.125"> <!-- contraband detected! all units close and engage -->
+		<edge index="12"/>
+		<edge index="13"/>
+		<edge index="14"/>
+	</node>
+	<node text="Better clear out, trouble's brewing!" relationship="0"> <!-- maintain your speed and course...DO NOT deviate -->
+	<sound file="communications/hunter/male/03.wav" sex="0"/>
+	<sound file="communications/hunter/female/03.wav" sex="1"/>
+		<edge index="8"/>
+		<edge index="9"/>
+		<edge index="10"/>
+	</node>	
+	<node text="Request Clearance To Dock." relationship="0"> 
+		<edge index="8"/>
+		<edge index="9"/>
+		<edge index="10"/>
+	</node>	
+	<node text="One more for the resume." text1="Another day, another kill" relationship="-.0625"><!-- node 17 kill-->
+	<sound file="communications/hunter/male/15.wav" sex="0"/>
+	<sound file="communications/hunter/female/15.wav" sex="1"/>
+	<sound file="communications/hunter/male/14.wav" sex="0"/>
+	<sound file="communications/hunter/female/14.wav" sex="1"/>
+		<edge index="12"/>
+		<edge index="13"/>
+		<edge index="14"/>
+		<edge index="15"/>
+	</node>
+	<node text="Your death is my living, buddy." relationship="-.0625"><!-- dealt damage -->
+	<sound file="communications/hunter/male/13.wav" sex="0"/>
+	<sound file="communications/hunter/female/13.wav" sex="1"/>
+		<edge index="12"/>
+		<edge index="13"/>
+		<edge index="14"/>
+		<edge index="15"/>
+	</node>
+	<node text="Oh... this is not good..." text1="No..it can't end like this!" relationship="-.125"><!--  critical damage -->
+	<sound file="communications/hunter/male/11.wav" sex="0"/>
+	<sound file="communications/hunter/female/11.wav" sex="1"/>
+	<sound file="communications/hunter/male/10.wav" sex="0"/>
+	<sound file="communications/hunter/female/10.wav" sex="1"/>
+		<edge index="12"/>
+		<edge index="13"/>
+		<edge index="14"/>
+		<edge index="15"/>
+	</node>
+	<node text="*hit*" relationship="-.01">
+		<edge index="7"/>
+		<edge index="11"/>
+		<edge index="15"/>
+	</node>
+
+<!-- End of Built-in Conversations --> 
+</comm>

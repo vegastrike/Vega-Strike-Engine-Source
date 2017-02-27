@@ -1,0 +1,76 @@
+<Unit>
+	<Description combatRole="ESCORTCAP">
+	</Description>
+	<Energy afterburnenergy="32767">
+	</Energy>
+	<upgrade file="engine_level_0"/>
+	<Meshfile file="corvette.bfxm" />
+	<Thrust>
+		<Engine Afterburner="320.000000" Forward="149.333328" Retro="130.666662" Left="74.666664" Right="74.666664" Top="74.666664" Bottom="74.666664"/>
+		<Maneuver yaw="160.200050" pitch="170.600025" roll="165.200050"/>
+	</Thrust>
+	<Sound>
+	</Sound>
+	<Defense HudImage="corvette-hud.spr">
+		<Armor front="800" right="600" left="600" back="600"/>
+		<Shields front="250.000000" back="250.000000" recharge="15.000000"/>
+		<Hull strength="800.000000"/>
+	</Defense>
+	<Stats mass="260.000000" momentofinertia="230.000000" fuel="200000000"></Stats>
+	<Computer yaw="21.00002" pitch="25.200001" roll="31.400002" afterburner="62.000000" maxspeed="28.666666">
+		<Radar itts="false" error="0" range="5000" maxcone=".25" color="false"/>
+	</Computer>
+
+	<Jump missing="1" delay="1" jumpenergy="900"/>       
+<!--<Dock x="-110" y="28" z="-97" size="60"/>
+<Dock x="110" y="28" z="-97" size="60"/>
+<Dock x="-110" y="-11" z="-38" size="60"/>
+<Dock x="110" y="-11" z="-38" size="60"/>
+<Dock x="-110" y="28" z="-37" size="60"/>
+<Dock x="110" y="28" z="-37" size="60"/>
+<Dock x="-110" y="-11" z="30" size="60"/>
+<Dock x="110" y="-11" z="-30" size="60"/>
+<Dock x="-110" y="28" z="-38" size="60"/>
+<Dock x="110" y="28" z="-38" size="60"/>
+<Dock x="-110" y="-11" z="90" size="60"/>
+<Dock x="110" y="-11" z="90" size="60"/>
+-->	<Hold volume="400">
+	</Hold>
+
+<!-- new elements added -->
+<Mount weapon="" size="light medium heavy special capship-medium" x="-39.333334" y="-9.733333" z="289.333344"/>
+<Mount weapon="" size="light medium heavy special capship-medium" x="39.333334" y="-9.733333" z="289.333344"/>
+
+<Mount weapon="" size="light-capship-missile" x="-168.333334" y="7.733333" z="-49.333344" ammo="12" volume="7200" />
+<Mount weapon="" size="light-capship-missile" x="168.333334" y="7.733333" z="-49.333344" ammo="12" volume="7200" />
+<Mount weapon="" size="heavy-capship-missile" x="-158.333334" y="7.733333" z="-49.333344" ammo="12" volume="12000"/>
+<Mount weapon="" size="heavy-capship-missile" x="158.333334" y="7.733333" z="-49.333344" ammo="12" volume="12000"/>
+<Mount weapon="" size="light-missile medium-missile heavy-missile special-missile heavy-missile" x="-148.333334" y="7.733333" z="-49.333344" ammo="24" volume="6000"/>
+<Mount weapon="" size="light-missile medium-missile heavy-missile special-missile heavy-missile" x="148.333334" y="7.733333" z="-49.333344" ammo="24" volume="6000"/>
+
+<Subunit file="capship_blank" x="-37.414394" y="13.548389" z="204.285370" ri="0.762493" rj="0.457496" rk="0.457496" qi="-0.432829" qj="0.886268" qk="-0.164887"/>
+<Subunit file="capship_blank" x="37.414394" y="13.548389" z="204.285370" ri="-0.218112" rj="0.280430" rk="0.934765" qi="0.432829" qj="0.886268" qk="-0.164887"/>
+<Subunit file="capship_blank" x="-37.414394" y="-10.548389" z="204.285370" ri="-1.762493" rj="0.457496" rk="1.457496" qi="-0.432829" qj="-0.886268" qk="-0.164887"/>
+<Subunit file="capship_blank" x="37.414394" y="-10.548389" z="204.285370" ri="-1.218112" rj="0.280430" rk="1.934765" qi="0.432829" qj="-0.886268" qk="-0.164887"/>
+<Subunit file="capship_blank" x="-35.000000" y="31.500000" z="20.000000" ri="-1.000000" rj="0.000000" rk="0.000000" qi="0.000000" qj="1.000000" qk="0.000000"/>
+<Subunit file="capship_blank" x="35.000000" y="31.500000" z="20.000000" ri="-1.000000" rj="0.000000" rk="0.000000" qi="0.000000" qj="1.000000" qk="0.000000"/>
+<Subunit file="capship_blank" x="-35.000000" y="-24.500000" z="20.000000" ri="0.000000" rj="0.000000" rk="1.000000" qi="0.000000" qj="-1.000000" qk="0.000000"/>
+<Subunit file="capship_blank" x="35.000000" y="-24.500000" z="20.000000" ri="0.000000" rj="0.000000" rk="1.000000" qi="0.000000" qj="-1.000000" qk="0.000000"/>
+<Subunit file="capship_blank" x="0.000000" y="31.500000" z="10.000000" ri="-1.000000" rj="0.000000" rk="0.000000" qi="0.000000" qj="1.000000" qk="0.000000"/>
+<Subunit file="capship_blank" x="0.000000" y="-24.500000" z="10.000000" ri="0.000000" rj="0.000000" rk="1.000000" qi="0.000000" qj="-1.000000" qk="0.000000"/>
+<Subunit file="capship_blank" x="0.000000" y="31.500000" z="-63.000000" ri="-1.000000" rj="0.000000" rk="0.000000" qi="0.000000" qj="1.000000" qk="0.000000"/>
+<Subunit file="capship_blank" x="0.000000" y="-24.500000" z="-63.000000" ri="0.000000" rj="0.000000" rk="1.000000" qi="0.000000" qj="-1.000000" qk="0.000000"/>
+<Subunit file="capship_blank" x="0.000000" y="31.500000" z="-130.000000" ri="-1.000000" rj="0.000000" rk="0.000000" qi="0.000000" qj="1.000000" qk="0.000000"/>
+<Subunit file="capship_blank" x="0.000000" y="-24.500000" z="-130.000000" ri="0.000000" rj="0.000000" rk="1.000000" qi="0.000000" qj="-1.000000" qk="0.000000"/>
+<Subunit file="capship_blank" x="-35.000000" y="31.500000" z="-73.000000" ri="-1.000000" rj="0.000000" rk="0.000000" qi="0.000000" qj="1.000000" qk="0.000000"/>
+<Subunit file="capship_blank" x="35.000000" y="31.500000" z="-73.000000" ri="-1.000000" rj="0.000000" rk="0.000000" qi="0.000000" qj="1.000000" qk="0.000000"/>
+<Subunit file="capship_blank" x="-35.000000" y="-24.500000" z="-73.000000" ri="0.000000" rj="0.000000" rk="1.000000" qi="0.000000" qj="-1.000000" qk="0.000000"/>
+<Subunit file="capship_blank" x="35.000000" y="-24.500000" z="-73.000000" ri="0.000000" rj="0.000000" rk="1.000000" qi="0.000000" qj="-1.000000" qk="0.000000"/>
+<Subunit file="capship_blank" x="-35.000000" y="31.500000" z="-147.000000" ri="-1.000000" rj="0.000000" rk="0.000000" qi="0.000000" qj="1.000000" qk="0.000000"/>
+<Subunit file="capship_blank" x="35.000000" y="31.500000" z="-147.000000" ri="-1.000000" rj="0.000000" rk="0.000000" qi="0.000000" qj="1.000000" qk="0.000000"/>
+<Subunit file="capship_blank" x="-35.000000" y="-24.500000" z="-147.000000" ri="0.000000" rj="0.000000" rk="1.000000" qi="0.000000" qj="-1.000000" qk="0.000000"/>
+<Subunit file="capship_blank" x="35.000000" y="-24.500000" z="-147.000000" ri="0.000000" rj="0.000000" rk="1.000000" qi="0.000000" qj="-1.000000" qk="0.000000"/>
+<Upgrade file="mult_general_downgrade"/>
+<Light file="supernova.bmp.bfxm" x="27.433210" y="2.060570" z="-245.000000" size="56.000000"/>
+<Light file="supernova.bmp.bfxm" x="-25.389259" y="0.350620" z="-245.000015" size="51.100002"/>
+</Unit>

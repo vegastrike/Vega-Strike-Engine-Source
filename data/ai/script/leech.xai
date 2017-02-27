@@ -1,0 +1,8 @@
+<SCRIPT>
+  <FaceTarget terminate="0">
+  </FaceTarget>
+  <MatchLin afterburn="0" terminate="0" local="1">
+    <Vector x="0" y="0" z="10000"/>
+  </MatchLin>
+ 
+</SCRIPT>

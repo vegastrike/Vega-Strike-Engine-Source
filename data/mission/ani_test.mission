@@ -1,0 +1,37 @@
+<mission>
+	<settings>
+		<origin  planet="earth" x="0000" y="100" z="000.0"/>
+	</settings>
+
+	<variables>
+		<var name="defaultplayer" value="blue"/>
+		<var name="system" value="enigma_sector/blake" />
+		<var name="mission_name" value="Cargo Mission" />
+		<var name="description" value="Deliver cargo to a system" />
+	</variables>
+        <flightgroups>
+                <flightgroup name="blue" faction="confed" type="nova" ainame="default" waves="1" nr_ships="2">
+			<pos x="10000" y="20000" z="20000.0"/>
+			<rot x="180.0" y="180.0" z="180.0"/>
+			<order order="tmptarget" target="omikron"/>
+			<order priority="0" order="superiority" target="enemy"/>
+			<order priority="1" order="bomber" target="omikron"/>
+			<order priority="2" order="escort" target="blue"/>
+		</flightgroup>
+        </flightgroups>
+	<module name="director">
+		<import name="ani_test"/>
+		<script name="initgame">
+			<exec module="ani_test" name="init">
+			<const type="float" value="10000"/> <!--the distance drom base the new ship is generated at -->
+			<const type="float" value="20000"/> <!-- how much you are paid -->
+			<const type="float" value="20000"/> <!-- how much you are paid -->
+			<const type="float" value="2000"/> <!-- how much you are paid -->
+
+			</exec>
+		</script>
+		<script name="gameloop">
+			<exec module="ani_test" name="loop"/>
+		</script>
+	</module>
+</mission>

@@ -1,0 +1,20 @@
+<SCRIPT>
+<ExecuteFor time="4">
+  <MatchLin afterburn="0" terminate="0" local="1">
+    <Vector x="0" y="0" z="10000"/>
+  </MatchLin>
+  <FaceTarget terminate="0">
+  </FaceTarget>
+</ExecuteFor>
+<CloakFor time="4">
+</CloakFor>
+<ExecuteFor time="2">
+  <MatchLin afterburn="0" terminate="0" local="1">
+    <Vector x="0" y="0" z="10000"/>
+  </MatchLin>
+  <FaceTarget terminate="0">
+  </FaceTarget>
+</ExecuteFor>
+
+
+</SCRIPT>

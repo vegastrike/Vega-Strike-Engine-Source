@@ -1,0 +1,47 @@
+<system name="tag" background="backgrounds/purple" nearstars="500" stars="1000" starspread="150">
+<Light>
+	<ambient red="0.180952" green="0.180952" blue="0.180952"/>
+	<diffuse red="1.000000" green="0.860774" blue="0.656116"/>
+	<specular red="1.000000" green="0.740931" blue="0.430488"/>
+</Light>
+<Planet name="tag A" file="stars/orange_star.png" ri="0.000000" rj="0.000000" rk="0.000000" si="0.000000" sj="0.000000" sk="0.000000" radius="2999.000000" x="0" y="0" z="0"  Red="1.000000" Green="0.740931" Blue="0.430488" ReflectNoLight="true" light="0">
+	<Planet name="mission_sector/tag" file="jump.png" ri="3259.775879" rj="-2381.924072" rk="-2637.620605" si="1075.193237" sj="-2964.382080" sk="4005.815430" radius="201.528534" x="5138.029785" y="-4986.144043" z="-4807.348633" year= "6172.497559" day="4522.328613" alpha="ONE ONE" destination="mission_sector/tag"  >
+	</Planet>
+	<Planet name="mission_sector/tag" file="jump.png" ri="-3538.525635" rj="-3150.753418" rk="468.969818" si="3257.825195" sj="-3427.269043" sk="1555.360718" radius="233.586594" x="4993.522949" y="4767.988770" z="4781.317871" year= "10983.282227" day="966.027405" alpha="ONE ONE" destination="mission_sector/tag"  >
+	</Planet>
+	<Planet name="mission_sector/tag" file="jump.png" ri="4125.309082" rj="2811.254639" rk="838.442017" si="-1750.722900" sj="3519.098877" sk="-3185.441895" radius="278.421112" x="-5049.158691" y="-4851.518555" z="-5046.855469" year= "23382.361328" day="21003.236328" alpha="ONE ONE" destination="mission_sector/tag"  >
+	</Planet>
+	<Planet name="mission_sector/tag" file="jump.png" ri="-1119.197388" rj="305.159912" rk="-4959.542969" si="-1202.892212" sj="-4814.993164" sk="-24.814581" radius="163.559250" x="-4707.261230" y="-5066.131836" z="-4877.683105" year= "5847.511719" day="461.847595" alpha="ONE ONE" destination="mission_sector/tag"  >
+	</Planet>
+	<Planet name="mission_sector/tag" file="jump.png" ri="3802.184326" rj="-3087.272705" rk="1421.499756" si="-2512.889160" sj="-1159.093994" sk="4204.029785" radius="177.154114" x="4859.387207" y="4918.562012" z="-5112.611816" year= "4591.166992" day="272.805023" alpha="ONE ONE" destination="mission_sector/tag"  >
+	</Planet>
+	<Planet name="mission_sector/tag" file="jump.png" ri="1768.605103" rj="4744.518555" rk="-92.162018" si="3035.177490" sj="-1206.317627" sk="-3855.873779" radius="290.996490" x="4840.173340" y="4876.875488" z="-5249.824219" year= "7654.323242" day="4733.173340" alpha="ONE ONE" destination="mission_sector/tag"  >
+	</Planet>
+	<Planet name="mission_sector/tag" file="jump.png" ri="182.990021" rj="2562.718018" rk="-4076.674561" si="-3732.248291" sj="-2979.864014" sk="-2040.760132" radius="279.038422" x="5068.066406" y="5068.459961" z="4902.929688" year= "8251.552734" day="5684.447754" alpha="ONE ONE" destination="mission_sector/tag"  >
+	</Planet>
+	<Planet name="mission_sector/tag" file="jump.png" ri="-1934.929443" rj="-2934.419189" rk="3313.307129" si="-392.608795" sj="3902.926758" sk="3227.334961" radius="252.545517" x="-4894.373047" y="-4756.438965" z="-4948.803711" year= "5381.390625" day="2727.565430" alpha="ONE ONE" destination="mission_sector/tag"  >
+	</Planet>
+	<Planet name="mission_sector/tag" file="jump.png" ri="4878.168457" rj="696.156677" rk="-623.608215" si="-796.406799" sj="5125.248535" sk="-508.381317" radius="290.159363" x="-4916.095703" y="5053.630859" z="5060.864746" year= "11131.720703" day="10887.120117" alpha="ONE ONE" destination="mission_sector/tag"  >
+	</Planet>
+	<Planet name="mission_sector/tag" file="jump.png" ri="-3711.524170" rj="1478.498535" rk="2577.680176" si="714.771240" sj="-3679.037598" sk="3139.389893" radius="216.414139" x="-4774.298340" y="-5156.000977" z="-5003.979004" year= "5509.103027" day="3520.297852" alpha="ONE ONE" destination="mission_sector/tag"  >
+	</Planet>
+	<Planet name="mission_sector/tag" file="jump.png" ri="-2775.847168" rj="-3472.248047" rk="-2240.571045" si="2886.339600" sj="-3523.371094" sk="1884.332764" radius="199.143463" x="-4937.952148" y="-5144.096680" z="4798.973633" year= "5850.633789" day="508.696411" alpha="ONE ONE" destination="mission_sector/tag"  >
+	</Planet>
+	<Planet name="mission_sector/tag" file="jump.png" ri="2666.543457" rj="401.693481" rk="-3889.956543" si="-1548.901001" sj="-4617.887695" sk="-1538.625854" radius="154.467957" x="5113.067383" y="4830.072266" z="-4911.453125" year= "8857.366211" day="2241.440430" alpha="ONE ONE" destination="mission_sector/tag"  >
+	</Planet>
+	<Planet name="mission_sector/tag" file="jump.png" ri="-847.642761" rj="-3639.115479" rk="-3114.439209" si="-4687.461426" sj="105.399063" sk="1152.609741" radius="162.226425" x="5048.810059" y="-4714.990723" z="4735.914063" year= "5739.364258" day="2264.953125" alpha="ONE ONE" destination="mission_sector/tag"  >
+	</Planet>
+	<Planet name="mission_sector/tag" file="jump.png" ri="-1918.481934" rj="3443.216797" rk="-3319.988770" si="-4408.609375" sj="-767.651184" sk="1751.406128" radius="187.026413" x="4928.775879" y="5091.433105" z="5021.122070" year= "91282.875000" day="16531.039063" alpha="ONE ONE" destination="mission_sector/tag"  >
+	</Planet>
+	<Planet name="mission_sector/tag" file="jump.png" ri="2641.414551" rj="459.358337" rk="-4275.213379" si="882.836365" sj="-4824.949707" sk="27.029297" radius="235.078430" x="4881.016602" y="4892.962891" z="-4831.119141" year= "4073.133301" day="3049.598145" alpha="ONE ONE" destination="mission_sector/tag"  >
+	</Planet>
+	<Planet name="mission_sector/tag" file="jump.png" ri="-2369.378662" rj="3736.625977" rk="-1601.928101" si="-1943.630493" sj="678.350098" sk="4457.089844" radius="161.445435" x="-5039.559082" y="4779.121582" z="4793.499023" year= "5318.522949" day="525.895386" alpha="ONE ONE" destination="mission_sector/tag"  >
+	</Planet>
+	<Planet name="mission_sector/tag" file="jump.png" ri="-164.842148" rj="3801.651855" rk="3147.342529" si="1366.208130" sj="-3138.063965" sk="3861.999512" radius="257.872162" x="-5171.986816" y="4811.111328" z="4872.643066" year= "5081.412109" day="3636.093262" alpha="ONE ONE" destination="mission_sector/tag"  >
+	</Planet>
+	<Planet name="mission_sector/tag" file="jump.png" ri="165.045624" rj="-4740.004395" rk="1267.996460" si="2176.983154" sj="1313.256470" sk="4625.833008" radius="303.398804" x="5134.018066" y="4804.800781" z="5006.844727" year= "19035.630859" day="14770.957031" alpha="ONE ONE" destination="mission_sector/tag"  >
+	</Planet>
+	<Planet name="mission_sector/tag" file="jump.png" ri="795.334229" rj="-3043.480713" rk="-3682.869873" si="-144.296417" sj="-3956.647461" sk="3238.565674" radius="200.078781" x="4951.897461" y="-4897.909668" z="4940.455078" year= "21138.744141" day="17553.150391" alpha="ONE ONE" destination="mission_sector/tag"  >
+	</Planet>
+</Planet>
+</system>

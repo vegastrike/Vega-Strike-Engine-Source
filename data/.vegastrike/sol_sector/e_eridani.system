@@ -1,0 +1,42 @@
+<system name="e_eridani" background="backgrounds/purple" nearstars="500" stars="1000" starspread="150">
+<Light>
+	<ambient red="0.000000" green="0.000000" blue="0.000000"/>
+	<diffuse red="1.000000" green="0.952167" blue="0.965172"/>
+	<specular red="1.000000" green="0.906623" blue="0.931556"/>
+</Light>
+<Planet name="e_eridani A" file="stars/white_star.png" ri="0.000000" rj="0.000000" rk="0.000000" si="0.000000" sj="0.000000" sk="0.000000" radius="6000000.000000" x="0" y="0" z="0"  Red="1.000000" Green="0.906623" Blue="0.931556" ReflectNoLight="true" light="0">
+	<Planet name="Argos" file="planets/m_class1.png" ri="2992824.750000" rj="22973944.000000" rk="22897610.000000" si="-2502101.500000" sj="12015269.000000" sk="-11728289.000000" radius="297610.406250" x="32671806.000000" y="10980952.000000" z="-31269374.000000" year= "37538972.000000" day="863.472639"  >
+		<Planet name="Hermes" file="sol/dione.png" ri="-9122.330078" rj="-128740.492188" rk="-665159.187500" si="313687.343750" sj="-262609.062500" sk="46525.492188" radius="81740.000000" x="549578.812500" y="-517929.625000" z="-1022363.062500" year= "566949.062500" day="536.984160"  >
+		</Planet>
+	</Planet>
+	<Planet name="Andromeda" file="planets/m_class1.png" ri="-11524287.000000" rj="-4612798.500000" rk="-12036720.000000" si="-11732458.000000" sj="-11774555.000000" sk="15745309.000000" radius="252583.390625" x="-38871256.000000" y="27400120.000000" z="23887728.000000" year= "81460552.000000" day="179.697867"  >
+	<Atmosphere file="sol/earthcloudmaptrans.png" alpha="SRCALPHA INVSRCALPHA" radius="260160.892344"/>
+		<Unit name="" file="factory" ri="-77704.593750" rj="-296165.000000" rk="-501163.375000" si="1107742.750000" sj="-301246.968750" sk="6269.650391" x="-1034139.937500" y="-378014.875000" z="833158.437500" year= "1108092.811136" faction="confed"  />
+	</Planet>
+	<Planet name="Philoctetes" file="planets/m_class3.png" ri="18954056.000000" rj="-17014988.000000" rk="19697794.000000" si="-27626722.000000" sj="-15502282.000000" sk="13192714.000000" radius="264412.375000" x="-24900068.000000" y="-20573146.000000" z="-19193748.000000" year= "63332684.000000" day="570.155095"  >
+	<Atmosphere file="sol/earthcloudmaptrans.png" alpha="SRCALPHA INVSRCALPHA" radius="272344.746250"/>
+		<Planet name="JumpToElla" file="jump.png" ri="-450201.375000" rj="544408.437500" rk="-442525.687500" si="608777.812500" sj="-43691.648438" sk="-673088.000000" radius="178.824081" x="427472.593750" y="649825.812500" z="572639.625000" year= "33356404.000000" day="371.208594" alpha="ONE ONE" destination="sol_sector/ella"  >
+		</Planet>
+	</Planet>
+	<Planet name="Hecatonchires" file="planets/carribean2.png" ri="31332796.000000" rj="9749978.000000" rk="-20105134.000000" si="-15917912.000000" sj="15001895.000000" sk="-17532064.000000" radius="282041.375000" x="-34213700.000000" y="-12588911.000000" z="15179807.000000" year= "58703892.000000" day="31.905271"  >
+	<Atmosphere file="sol/earthcloudmaptrans.png" alpha="SRCALPHA INVSRCALPHA" radius="290502.616250"/>
+		<Planet name="Helene" file="planets/rock1.png" ri="-605462.500000" rj="388825.437500" rk="-575383.875000" si="1131920.750000" sj="780522.750000" sk="-663641.250000" radius="78674.117188" x="-592884.750000" y="1643219.500000" z="534181.937500" year= "1913196.000000" day="173.079501"  >
+		</Planet>
+		<Planet name="JumpToCanarus" file="jump.png" ri="-1000101.937500" rj="125254.429688" rk="602652.000000" si="-273105.562500" sj="-579195.125000" sk="-332839.968750" radius="172.378662" x="-1079646.125000" y="-1022123.750000" z="-710740.750000" year= "2061764.750000" day="111.193823" alpha="ONE ONE" destination="sol_sector/canarus"  >
+		</Planet>
+	</Planet>
+	<Planet name="Chios" file="planets/m_class.png" ri="-12263073.000000" rj="-2216297.500000" rk="-11130690.000000" si="-8162105.000000" sj="27768792.000000" sk="3463269.250000" radius="189986.875000" x="11858258.000000" y="-40001840.000000" z="-16917140.000000" year= "42093136.000000" day="618.619464"  >
+	<Atmosphere file="sol/earthcloudmaptrans.png" alpha="SRCALPHA INVSRCALPHA" radius="195686.481250"/>
+		<Planet name="Aether" file="sol/proteus.png" ri="-292410.531250" rj="-143038.843750" rk="-268671.843750" si="515557.593750" sj="-461411.906250" sk="-315457.875000" radius="41894.867188" x="-1054626.000000" y="-606645.312500" z="-1047673.187500" year= "2732656.500000" day="80.765160"  >
+		</Planet>
+		<Planet name="JumpToE_indi" file="jump.png" ri="18845.544922" rj="332795.781250" rk="-313398.156250" si="409043.750000" sj="-488634.406250" sk="-494281.218750" radius="139.791901" x="609225.500000" y="661251.125000" z="-729900.562500" year= "2219763.250000" day="256.507828" alpha="ONE ONE" destination="sol_sector/e_indi"  >
+		</Planet>
+	</Planet>
+	<Planet name="Thalia" file="planets/gas_giant1.png" ri="-28108682.000000" rj="-15800523.000000" rk="31497840.000000" si="-25018412.000000" sj="29200058.000000" sk="-7678573.500000" radius="627521.562500" x="-29840338.000000" y="-13911383.000000" z="24421608.000000" year= "41059764.000000" day="360.424085"  >
+		<Planet name="Nemesis" file="sol/neptune.png" ri="1133968.125000" rj="-2390812.250000" rk="1413223.000000" si="3283546.000000" sj="1974798.250000" sk="706141.437500" radius="145390.734375" x="-1921300.875000" y="-2998789.750000" z="2180273.250000" year= "10219100.000000" day="315.308450"  >
+		</Planet>
+		<Planet name="Cetus" file="sol/rhea.png" ri="2598759.250000" rj="2669425.250000" rk="-6596.850098" si="-1076835.875000" sj="1047723.375000" sk="-245184.812500" radius="183493.609375" x="2599052.500000" y="3232411.500000" z="-3758326.500000" year= "2996413.500000" day="850.156803"  >
+		</Planet>
+	</Planet>
+</Planet>
+</system>

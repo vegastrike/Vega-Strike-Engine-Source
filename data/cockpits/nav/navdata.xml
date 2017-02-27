@@ -1,0 +1,49 @@
+<nav>
+
+<console> 
+<Meshfile file="console.bfxm"    x_small=".12"  x_large=".7"  y_small=".15" y_large=".85" x_mesh_coord="-12.0" y_mesh_coord="0.0" z_mesh_coord="100.0" scale="1.4"/>
+</console>
+
+<button1>
+<Meshfile file="b_generic.bfxm"   x=".755" y=".8"  dx=".11" dy=".05" x_mesh_coord="40.0" y_mesh_coord="42.0" z_mesh_coord="100.0" z_mesh_coord_delta="1.0" scale="1.4"/>
+</button1>
+
+<button2>
+<Meshfile file="b_generic.bfxm"    x=".755" y=".7"  dx=".11" dy=".05" x_mesh_coord="40.0" y_mesh_coord="30.0" z_mesh_coord="100.0" z_mesh_coord_delta="1.0" scale="1.4"/>
+</button2>
+
+<button3>
+<Meshfile file="b_generic.bfxm"    x=".755" y=".6"  dx=".11" dy=".05" x_mesh_coord="40.0" y_mesh_coord="18.0" z_mesh_coord="100.0" z_mesh_coord_delta="1.0" scale="1.4"/>
+</button3>
+
+<button4>
+<Meshfile file="b_generic.bfxm"  x=".755" y=".5"  dx=".11" dy=".05" x_mesh_coord="40.0" y_mesh_coord="6.0" z_mesh_coord="100.0" z_mesh_coord_delta="1.0" scale="1.4"/>
+</button4>
+
+<button5>
+<Meshfile file="b_generic.bfxm" x=".755" y=".4" dx=".11" dy=".05" x_mesh_coord="40.0" y_mesh_coord="-6.0" z_mesh_coord="100.0" z_mesh_coord_delta="1.0" scale="1.4"/>
+</button5>
+
+<button6>
+<Meshfile file="b_generic.bfxm"     x=".755" y=".3" dx=".11" dy=".05" x_mesh_coord="40.0" y_mesh_coord="-18.0" z_mesh_coord="100.0" z_mesh_coord_delta="1.0" scale="1.4"/>
+</button6>
+
+<button7>
+<Meshfile file="b_generic.bfxm"   x=".755" y=".2" dx=".11" dy=".05" x_mesh_coord="40.0" y_mesh_coord="-30.0" z_mesh_coord="100.0" z_mesh_coord_delta="1.0" scale="1.4"/>
+</button7>
+
+<systemiteminfo>
+<Info itemscale="2.0" zshiftmultiplier="2.5" itemzscalefactor="2.0" unselectedalpha="0.4" minimumitemscaledown="0.3" maximumitemscaleup="6.0"/>
+</systemiteminfo>
+
+<factioncolours>
+<colour faction="confed" r=".5" g="1" b=".5" a="1"/>
+<colour faction="rlaan" r="1" g=".5" b=".5" a="1"/>
+<colour faction="aera" r=".5" g=".5" b="1" a="1"/>
+</factioncolours>
+
+<configmode>
+<Mode configmode="0"/>
+</configmode>
+
+</nav>

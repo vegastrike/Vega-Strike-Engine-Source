@@ -1,0 +1,14 @@
+#EXTM3U
+#rlaan-specific
+../music/industrialmixed.ogg
+../music/Bliss.ogg
+../music/DepressionChamber.ogg
+#outweight "avoid monotonous play" section
+../music/industrialmixed.ogg|../music/Bliss.ogg
+../music/industrialmixed.ogg
+../music/Bliss.ogg|../music/industrialmixed.ogg
+../music/Bliss.ogg|../music/industrialmixed.ogg
+../music/Bliss.ogg
+../music/Bliss.ogg
+#avoid monotonous play, rlaanish enough
+../music/peace4.ogg

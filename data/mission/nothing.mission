@@ -1,0 +1,15 @@
+<mission>
+	<variables>
+		<var name="defaultplayer" value="blue"/>
+		<var name="system" value="enigma_sector/enigma" />
+		<var name="mission_name" value="Mission" />
+		<var name="description" value="INTERNAL MISSION: DO NOT RUN THIS MISSION!!!"/>
+	</variables>
+	<flightgroups>
+		<flightgroup name="blue" faction="confed" type="nova" ainame="default" waves="1" nr_ships="1">
+			<pos x="0400" y="400" z="00"/>
+			<rot x="180.0" y="180.0" z="180.0"/>
+		</flightgroup>
+	</flightgroups>
+	<python></python>
+</mission>

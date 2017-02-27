@@ -1,0 +1,39 @@
+<system scalesystem="3" name="Perry" background="backgrounds/lightgreen" nearstars="500" stars="1000" starspread="150"  x="0" y="0" z="0">
+<Light>
+<ambient red="000.0" green="000.0" blue="000.0"/>
+<diffuse red="0.774596669241483" green="0.774596669241483" blue="1"/>
+<specular red="0.6" green="0.6" blue="1"/>
+</Light>
+
+<Planet name="perry" file="sol/sun.png" radius="10000000" x="14594814.00
+0000" y="00.00" z="-14594814.000000"  Red="0.6" Green="0.6" Blue="1" ReflectNoLight="true" light="0"/>
+
+<Light>
+<ambient red="000.0" green="000.0" blue="000.0"/>
+<diffuse red="1" green="1" blue="1"/>
+<specular red="1" green="1" blue="1"/>
+</Light>
+
+<Light>
+<ambient red="1" green=".1" blue="0"/>
+<!--<diffuse red="1" green=".7" blue="0"/>-->
+<!--<attenuated red=".00000001" blue=".00000015"/>-->
+<attenuated red="0" blue=".000000002"/>
+</Light>	
+<Light>
+<ambient red="1" green=".1" blue="0"/>
+<!--<diffuse red="1" green=".7" blue="0"/>-->
+<!--<attenuated red=".00000001" blue=".00000015"/>-->
+<attenuated red="0" blue=".0000001"/>
+</Light>	
+
+        <planet name="JumpToRagnarok" file="jump.png" alpha="ONE ONE" radius="100" gravity="0" z="-5500" x="17500" day="240" destination="gemini_sector/ragnarok"/>
+        <planet name="JumpToNitir" file="jump.png" alpha="ONE ONE" radius="100" gravity="0" z="-17500" x="8000" day="240" destination="gemini_sector/nitir"/>
+        <planet name="JumpToMidgard" file="jump.png" alpha="ONE ONE" radius="100" gravity="0" z="-7500" x="-6500" day="240" destination="gemini_sector/midgard"/>
+        <unit name= "Anapolis"  file="refinery" faction="confed" z="-14000" x="-17200"/>
+        <planet name="JumpToNewDetroit" file="jump.png" alpha="ONE ONE" radius="100" gravity="0" z="16000" x="4000" day="240" destination="gemini_sector/newdetroit"/>
+        <planet name="JumpToNewcastle" file="jump.png" alpha="ONE ONE" radius="100" gravity="0" z="11000" x="-17200" day="240" destination="gemini_sector/newcastle" />
+        <planet name="JumpToSurtur" file="jump.png" alpha="ONE ONE" radius="100" gravity="0" z="14000" x="0" day="240" destination="gemini_sector/surtur"/>
+        <planet name="JumpToTingerhoff" file="jump.png" alpha="ONE ONE" radius="100" gravity="0" z="5200" x="7500" day="240" destination="gemini_sector/tingerhoff"/>
+        <unit name= "PerryNavalBase"  file="starfortress" faction="confed" z="14000" x="17500"/>
+</system>

@@ -1,0 +1,43 @@
+<system name="stage" background="backgrounds/green" nearstars="500" stars="1000" starspread="150">
+<Light>
+	<ambient red="0.000000" green="0.000000" blue="0.000000"/>
+	<diffuse red="1.000000" green="0.935510" blue="0.950798"/>
+	<specular red="1.000000" green="0.875179" blue="0.904016"/>
+</Light>
+<Asteroid name="" file="AFieldBaseThin" ri="0.000000" rj="0.000000" rk="0.000000" si="0.000000" sj="0.000000" sk="0.000000" x="56834612.000000" y="52277432.000000" z="-120381352.000000"  />
+<Unit name="" file="MiningBase" ri="0.000000" rj="0.000000" rk="0.000000" si="0.000000" sj="0.000000" sk="0.000000" x="56834612.000000" y="52277432.000000" z="-120381352.000000" faction="unknown"  />
+<Planet name="stage A" file="sol/sun.png" ri="0.000000" rj="0.000000" rk="0.000000" si="0.000000" sj="0.000000" sk="0.000000" radius="5365707.500000" x="0" y="0" z="0"  Red="1.000000" Green="0.875179" Blue="0.904016" ReflectNoLight="true" light="0">
+	<Planet name="Aladdin" file="planets/m_class1.png" ri="-26755904.000000" rj="-23384436.000000" rk="31827534.000000" si="-85727984.000000" sj="-51067392.000000" sk="-109587880.000000" radius="245564.593750" x="83312528.000000" y="-22475102.000000" z="123893896.000000" year= "398275648.000000" day="328.413342"  >
+	<Atmosphere file="sol/earthcloudmaptrans.png" alpha="SRCALPHA INVSRCALPHA" radius="252931.531562"/>
+		<Planet name="Edinburgh" file="sol/deimos.png" ri="610288.875000" rj="-5521828.000000" rk="-2149400.000000" si="-1820041.375000" sj="-1134990.875000" sk="2399029.000000" radius="67631.250000" x="-2288932.500000" y="-2963197.000000" z="-1294201.625000" year= "9364541.000000" day="63.520493"  >
+		</Planet>
+	</Planet>
+	<Planet name="McLanahan" file="planets/m_class2.png" ri="18961858.000000" rj="4417004.000000" rk="-17446334.000000" si="1586105.750000" sj="14759528.000000" sk="5460654.500000" radius="221279.968750" x="-113556440.000000" y="174112192.000000" z="-53696728.000000" year= "21779830.000000" day="625.105990"  >
+	<Atmosphere file="sol/earthcloudmaptrans.png" alpha="SRCALPHA INVSRCALPHA" radius="227918.367813"/>
+	</Planet>
+	<Planet name="Taos" file="planets/m_class4.png" ri="-37613316.000000" rj="-39632356.000000" rk="22803520.000000" si="31795384.000000" sj="23740482.000000" sk="93705752.000000" radius="230875.906250" x="144510912.000000" y="-67471448.000000" z="-149083616.000000" year= "312769792.000000" day="594.097231"  >
+	<Atmosphere file="sol/earthcloudmaptrans.png" alpha="SRCALPHA INVSRCALPHA" radius="237802.183438"/>
+		<Planet name="Stephanie" file="sol/uranus.png" ri="-447396.312500" rj="130919.125000" rk="-394977.625000" si="1204383.000000" sj="33954.281250" sk="-1352965.750000" radius="87074.328125" x="-4346880.000000" y="-5565710.500000" z="-4391555.000000" year= "9164495.000000" day="303.047334"  >
+		</Planet>
+		<Planet name="JumpToCeleste" file="jump.png" ri="172319.531250" rj="-21552.810547" rk="-230869.031250" si="-319566.156250" sj="-246625.343750" sk="-215498.875000" radius="178.151794" x="-376886.468750" y="-721769.437500" z="-361336.906250" year= "390436.406250" day="55.425520" alpha="ONE ONE" destination="stage_sector/celeste"  >
+		</Planet>
+	</Planet>
+	<Planet name="Kennan" file="planets/m_class1.png" ri="-4899238.000000" rj="-9316070.000000" rk="-2460975.250000" si="-152397984.000000" sj="91257824.000000" sk="-42068796.000000" radius="171048.609375" x="179841280.000000" y="-37721820.000000" z="-128669816.000000" year= "245219312.000000" day="246.303415"  >
+	<Atmosphere file="sol/earthcloudmaptrans.png" alpha="SRCALPHA INVSRCALPHA" radius="176180.067656"/>
+	</Planet>
+	<Planet name="Sucellus" file="planets/Dirt.png" ri="-38478864.000000" rj="34854272.000000" rk="-39237676.000000" si="149043936.000000" sj="63774004.000000" sk="-89512048.000000" radius="156278.046875" x="108885704.000000" y="92123632.000000" z="54518836.000000" year= "149396736.000000" day="476.865138"  >
+	<CityLights file="planets/Dirt_light_repeat.png" wrapx="64" wrapy="64"/>
+<Ring file="planets/ring.png" innerradius="299003.920156" outerradius="421493.343512"  wrapx="36" wrapy="2" />
+<Ring file="planets/ring.png" ri="0.452797" rj="-0.687433" rk="0.567812" si="-0.160174" sj="-0.689191" sk="-0.706654" innerradius="303488.020824" outerradius="427814.393023" wrapx="36" wrapy="2" />		<Planet name="Huns" file="sol/titan.png" ri="2326446.500000" rj="-2228359.000000" rk="-2243191.750000" si="-1356910.000000" sj="-2516608.500000" sk="1092697.125000" radius="38118.738281" x="4470206.500000" y="4382448.000000" z="-2061387.250000" year= "9644518.000000" day="506.291818"  >
+		</Planet>
+	</Planet>
+	<Planet name="Bugatti" file="planets/gas_medium.png" ri="-6066615.000000" rj="-47099784.000000" rk="-23755066.000000" si="105745304.000000" sj="-84657104.000000" sk="140846368.000000" radius="797298.875000" x="162845568.000000" y="66875712.000000" z="28277340.000000" year= "354222080.000000" day="581.783379"  >
+		<Planet name="Mathematik" file="sol/charon.png" ri="-12987851.000000" rj="-24976522.000000" rk="12404497.000000" si="10177597.000000" sj="1175989.000000" sk="13024087.000000" radius="268853.281250" x="27059858.000000" y="-12083140.000000" z="25897946.000000" year= "104623088.000000" day="734.638630"  >
+		</Planet>
+		<Planet name="Swarthmore" file="planets/rock1.png" ri="-2389798.000000" rj="2890232.250000" rk="34679.496094" si="21984312.000000" sj="18361286.000000" sk="-15291882.000000" radius="273894.937500" x="14576405.000000" y="-1819438.875000" z="-27550936.000000" year= "25976534.000000" day="653.108798"  >
+		</Planet>
+		<Planet name="JumpToCeleste" file="jump.png" ri="2343986.250000" rj="-2042996.500000" rk="-1804249.750000" si="-1114584.625000" sj="-1548990.000000" sk="305949.843750" radius="253.262955" x="-1131130.000000" y="-4274738.500000" z="-4202805.500000" year= "8516007.000000" day="800.795922" alpha="ONE ONE" destination="stage_sector/celeste"  >
+		</Planet>
+	</Planet>
+</Planet>
+</system>

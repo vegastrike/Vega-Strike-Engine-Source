@@ -1,0 +1,64 @@
+# 
+# Wavefront material file
+# Converted by the DEEP Exploration  2.00.1211
+# Right Hemisphere, LTD
+# http://www.righthemisphere.com/
+# 
+
+newmtl Metal_Dark_Gold
+Ka 0 0 0
+Kd 0.878431 0.607843 0.317647
+Ks 0.854902 0.764706 0.65098
+illum 2
+Ns 8
+
+newmtl Ground_Grass
+Ka 0 0 0
+Kd 0.533333 0.772549 0.521569
+Ks 0.898039 0.898039 0.898039
+illum 2
+Ns 2.14355
+map_Kd GRASS2.JPG
+map_bump GRASS2.JPG
+bump GRASS2.JPG
+
+newmtl Concrete_Brown
+Ka 0.0980392 0.0980392 0.0980392
+Kd 0.498039 0.498039 0.498039
+Ks 0.898039 0.898039 0.898039
+illum 2
+Ns 2.14355
+map_Kd GRYCON7.JPG
+map_bump GRYCON7.JPG
+bump GRYCON7.JPG
+
+newmtl Metal_Galvanized
+Ka 0 0 0
+Kd 0.592157 0.666667 0.74902
+Ks 0.898039 0.898039 0.898039
+illum 2
+Ns 84.4485
+map_Kd GALVPLAT.JPG
+map_opacity GALVPLAT.JPG
+map_d GALVPLAT.JPG
+map_kS GALVPLAT.JPG
+
+newmtl Stones_Travertn
+Ka 0.447059 0.447059 0.447059
+Kd 0.447059 0.447059 0.447059
+Ks 0.898039 0.898039 0.898039
+illum 2
+Ns 2.14355
+map_Kd TRAVERTN.TGA
+map_bump TRAVERTN.TGA
+bump TRAVERTN.TGA
+
+newmtl Ground_Sand
+Ka 0.592157 0.513726 0.192157
+Kd 0.592157 0.513726 0.192157
+Ks 0.898039 0.898039 0.898039
+illum 2
+Ns 2.14355
+map_Kd SAND3.JPG
+map_bump SAND3.JPG
+bump SAND3.JPG

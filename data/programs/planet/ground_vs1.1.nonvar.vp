@@ -1,0 +1,65 @@
+#include "earth_params.h"
+#include "../stdlib_vp.h"
+
+uniform float fTime;
+
+#define varTSView gl_TexCoord[3]
+#define varTSLight gl_TexCoord[4]
+
+
+float soffs(float lim, float x)
+{
+  return x + ((x>=0.0)?lim:-lim);
+}
+
+vec2 shadowExtrude(in vec2 texcoord, in vec3 direction)
+{
+  return texcoord - direction.xy * fAtmosphereExtrusion.x * fvCloudLayerDrift_ShadowRelHeight.w / soffs(0.1,direction.z);
+}
+
+void main() 
+{
+  // Compute position, eye-to-object direction and normalized world-space normal
+  vec4 position = gl_ModelViewMatrix * gl_Vertex;
+  vec3 eyetopos = normalize(position.xyz);
+  vec3 normal   = normalize(gl_NormalMatrix * gl_Normal);
+  vec3 tangent  = normalize(gl_NormalMatrix * gl_MultiTexCoord2.xyz);
+  vec3 binormal = cross(tangent, normal) * sign(gl_MultiTexCoord2.w);
+  vec4 lightpos;
+  float lightatt; 
+  lightPosSizeAndAtt0(position, lightpos, lightatt);
+  
+  // Load varyings
+  gl_TexCoord[0] = gl_MultiTexCoord0;
+  
+  // TS view vector
+  varTSView.x = dot( tangent, -eyetopos );
+  varTSView.y = dot( binormal, -eyetopos );
+  varTSView.z = dot( normal, -eyetopos );
+  
+  // TS light posision
+  varTSLight.x = dot( tangent, lightpos.xyz );
+  varTSLight.y = dot( binormal, lightpos.xyz );
+  varTSLight.z = dot( normal, lightpos.xyz );
+  
+  // Cloud & shadow coords
+  vec2 cloudcoord = gl_MultiTexCoord0.xy + fTime*fvCloudLayerDrift_ShadowRelHeight.xy;
+  vec2 clouddetail= gl_MultiTexCoord0.xy - fTime*fvCloudLayerDrift_ShadowRelHeight.xy;
+  gl_TexCoord[1].zw = cloudcoord;
+  gl_TexCoord[1].xy = shadowExtrude(cloudcoord, varTSLight.xyz);
+  gl_TexCoord[2].xy = shadowExtrude(clouddetail, varTSLight.xyz);
+  gl_TexCoord[2].zw = vec2(0.0);
+  
+  // set primary color to the emissive material properties
+  vec4 pc = gl_FrontMaterial.emission;
+  vec4 sc = vec4(0.0);
+  
+  pc += gl_FrontMaterial.diffuse * gl_LightSource[0].diffuse * lightatt;
+  sc += gl_FrontMaterial.specular * gl_LightSource[0].specular * lightatt;
+  
+  // Need this instead of ftransform() for invariance
+  gl_Position = gl_ModelViewProjectionMatrix * gl_Vertex;
+  gl_FrontColor = gl_BackColor = pc;
+  gl_FrontSecondaryColor = gl_BackSecondaryColor = sc;
+}
+

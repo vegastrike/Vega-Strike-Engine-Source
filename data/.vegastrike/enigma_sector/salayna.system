@@ -1,0 +1,46 @@
+<system name="salayna" background="backgrounds/magic_galaxy" nearstars="500" stars="1000" starspread="150">
+<Light>
+	<ambient red="0.000000" green="0.000000" blue="0.000000"/>
+	<diffuse red="1.000000" green="0.989884" blue="0.956532"/>
+	<specular red="1.000000" green="0.979870" blue="0.914954"/>
+</Light>
+<Planet name="salayna A" file="sol/sun.png" ri="0.000000" rj="0.000000" rk="0.000000" si="0.000000" sj="0.000000" sk="0.000000" radius="28000000.000000" x="0" y="0" z="0"  Red="1.000000" Green="0.979870" Blue="0.914954" ReflectNoLight="true" light="0">
+	<Planet name="Jimenez" file="planets/Snow.png" ri="-717341952.000000" rj="-65327120.000000" rk="757810560.000000" si="457928480.000000" sj="-945854912.000000" sk="351936640.000000" radius="897415.062500" x="-645279360.000000" y="1083894144.000000" z="-832997952.000000" year= "11642120192.000000" day="38.365429"  >
+	<CityLights file="planets/Snow_light.png" wrapx="6" wrapy="3"/>
+	<Atmosphere file="sol/earthcloudmaptrans.png" alpha="SRCALPHA INVSRCALPHA" radius="924337.514375"/>
+		<Planet name="Hetty" file="sol/dione.png" ri="-8225510.500000" rj="-4017780.250000" rk="1912746.125000" si="-13255846.000000" sj="22272806.000000" sk="-10220309.000000" radius="288568.500000" x="-28670296.000000" y="-15644593.000000" z="-14406874.000000" year= "36445400.000000" day="379.303589"  >
+		</Planet>
+		<Planet name="JumpToDyson" file="jump.png" ri="466215.281250" rj="-732680.000000" rk="-827309.812500" si="1004541.375000" sj="-508331.656250" sk="1016278.250000" radius="108.573753" x="-2875018.500000" y="-3145512.500000" z="-1242737.625000" year= "31252126.000000" day="164.167114" alpha="ONE ONE" destination="enigma_sector/dyson"  >
+		</Planet>
+	</Planet>
+	<Planet name="Bor" file="planets/m_class.png" ri="248810752.000000" rj="-225169872.000000" rk="38784632.000000" si="-459876192.000000" sj="-477877536.000000" sk="175804848.000000" radius="739030.125000" x="-844647744.000000" y="-975828544.000000" z="467375616.000000" year= "3234301440.000000" day="238.182068"  >
+	<Atmosphere file="sol/earthcloudmaptrans.png" alpha="SRCALPHA INVSRCALPHA" radius="761201.028750"/>
+		<Planet name="JumpToGibson" file="jump.png" ri="-804880.125000" rj="1289946.625000" rk="-2338995.750000" si="-604875.125000" sj="562892.562500" sk="518578.687500" radius="148.696533" x="-2475664.750000" y="-1733730.375000" z="-1255285.375000" year= "8905207.000000" day="118.761444" alpha="ONE ONE" destination="enigma_sector/gibson"  >
+		</Planet>
+		<Planet name="JumpToBrin" file="jump.png" ri="265223.375000" rj="-1533302.750000" rk="-1827671.625000" si="-814642.937500" sj="786040.937500" sk="-777656.687500" radius="199.218170" x="-2438738.250000" y="1807613.875000" z="1028391.000000" year= "3477685.000000" day="489.548126" alpha="ONE ONE" destination="enigma_sector/brin"  >
+		</Planet>
+	</Planet>
+	<Planet name="Dorcas" file="planets/m_class3.png" ri="-61220676.000000" rj="-423870080.000000" rk="356191552.000000" si="583200896.000000" sj="-218394400.000000" sk="-159652544.000000" radius="1253877.375000" x="-663348608.000000" y="553939712.000000" z="-1059669056.000000" year= "2041800704.000000" day="223.099579"  >
+	<Atmosphere file="sol/earthcloudmaptrans.png" alpha="SRCALPHA INVSRCALPHA" radius="1291493.696250"/>
+		<Planet name="Zagreb" file="sol/callisto.png" ri="-6165496.500000" rj="3868940.500000" rk="2764519.000000" si="9312111.000000" sj="17538742.000000" sk="-3777350.500000" radius="378195.187500" x="-20513628.000000" y="29409032.000000" z="34885348.000000" year= "19586780.000000" day="432.830566"  >
+		</Planet>
+		<Planet name="JumpToCrichton" file="jump.png" ri="1888506.000000" rj="4567225.000000" rk="-347003.375000" si="-922299.375000" sj="603039.312500" sk="2917690.250000" radius="90.820175" x="-2539131.500000" y="-1612237.250000" z="4681271.500000" year= "4562218.000000" day="469.350250" alpha="ONE ONE" destination="enigma_sector/crichton"  >
+		</Planet>
+	</Planet>
+	<Planet name="Downs" file="planets/m_class4.png" ri="-443374528.000000" rj="-213281792.000000" rk="-208286624.000000" si="-19569982.000000" sj="165989904.000000" sk="-128312568.000000" radius="1023371.062500" x="1051904384.000000" y="-967695936.000000" z="636652096.000000" year= "1074827648.000000" day="715.284546"  >
+		<Planet name="JumpToAdams" file="jump.png" ri="-2454906.500000" rj="-207374.000000" rk="-855367.000000" si="291633.968750" sj="2908596.500000" sk="-1542146.750000" radius="129.734222" x="3504861.750000" y="2766425.750000" z="3271277.750000" year= "4358535.500000" day="16.822779" alpha="ONE ONE" destination="enigma_sector/adams"  >
+		</Planet>
+	</Planet>
+	<Planet name="India" file="planets/m_class1.png" ri="-31444304.000000" rj="73625104.000000" rk="-116678144.000000" si="765553600.000000" sj="355412992.000000" sk="17955552.000000" radius="896176.000000" x="496079904.000000" y="1032596416.000000" z="1009470464.000000" year= "1620582144.000000" day="22.913786"  >
+	<Atmosphere file="sol/earthcloudmaptrans.png" alpha="SRCALPHA INVSRCALPHA" radius="923061.280000"/>
+		<Planet name="JumpToNiven" file="jump.png" ri="902118.000000" rj="655373.000000" rk="555428.125000" si="-671952.187500" sj="2199365.500000" sk="-1503749.500000" radius="268.839294" x="2756601.250000" y="2429037.750000" z="-2106645.250000" year= "2715572.750000" day="439.712646" alpha="ONE ONE" destination="enigma_sector/niven"  >
+		</Planet>
+	</Planet>
+	<Planet name="Thessaly" file="planets/gas_giant1.png" ri="-577419840.000000" rj="665101440.000000" rk="-830207296.000000" si="925831296.000000" sj="919306.062500" sk="-643191040.000000" radius="5386968.500000" x="600894272.000000" y="445316000.000000" z="713505344.000000" year= "1638338816.000000" day="383.074188"  >
+		<Planet name="Milquetoasts" file="sol/charon.png" ri="-81407296.000000" rj="19841094.000000" rk="-37254012.000000" si="-21516484.000000" sj="79118008.000000" sk="89155136.000000" radius="1680256.875000" x="-102564304.000000" y="157990944.000000" z="143941024.000000" year= "418121952.000000" day="196.731583"  >
+		</Planet>
+		<Planet name="Fredericton" file="planets/rock.png" ri="-7936553.000000" rj="-104960272.000000" rk="-95518584.000000" si="-101270.484375" sj="107665680.000000" sk="-118299648.000000" radius="1722738.375000" x="-55926192.000000" y="-18926010.000000" z="-11993373.000000" year= "380783552.000000" day="391.960205"  >
+		</Planet>
+	</Planet>
+</Planet>
+</system>

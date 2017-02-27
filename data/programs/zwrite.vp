@@ -1,0 +1,7 @@
+void main() 
+{
+  // Compute position and texcoord alone - don't need anything else
+  // Need this instead of ftransform() for invariance
+  gl_Position = gl_ModelViewProjectionMatrix * gl_Vertex;
+  gl_TexCoord[0] = gl_MultiTexCoord0;
+}

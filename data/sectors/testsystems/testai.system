@@ -1,0 +1,41 @@
+<system name="Mars" background="backgrounds/red_galaxy1" nearstars="500" stars="1000" starspread="150"  x="0" y="0" z="0">
+<Light>
+<ambient red=".5" green=".5" blue=".5"/>
+<diffuse red="1" green="1" blue="1"/>
+<specular red="1" green="1" blue="1"/>
+</Light>
+
+<Light>
+<ambient red="1" green=".1" blue="0"/>
+<!--<diffuse red="1" green=".7" blue="0"/>-->
+<!--<attenuated red=".00000001" blue=".00000015"/>-->
+<attenuated red="0" blue=".000000002"/>
+</Light>	
+<Light>
+<ambient red="1" green=".1" blue="0"/>
+<!--<diffuse red="1" green=".7" blue="0"/>-->
+<!--<attenuated red=".00000001" blue=".00000015"/>-->
+<attenuated red="0" blue=".0000001"/>
+</Light>	
+
+<planet name="sun" file="sol/sun.png" radius="25000" gravity="20" x="10000" z="-400000"  Red=".9" Green=".9" Blue=".9" ReflectNoLight="true" light="0 1l" />
+
+
+<planet name="Mars" file="sol/mars.png" radius="2500" gravity="20" >
+</planet>
+
+<planet name="Phobos" file="sol/phobos.png" radius="200" gravity="20" x="2000" y="1000"  z="-8000" position="0" />			
+
+<planet name="Deimos" file="sol/deimos.png" radius="150" gravity="20" x="-2000" y="1000"  z="-8000" position="0" />			
+
+<planet name="jumppoint-earth" file="jump.png" alpha="ONE ONE" radius="500" gravity="20" x="-2000" y="1000" z="-7000" destination="visit_from_the_aera/earth" />
+
+<planet name="jumppoint-nebula" file="jump.png" alpha="ONE ONE" radius="500" gravity="20" x="-2000" y="5000" z="-1000" destination="visit_from_the_aera/militia_nebula" />
+
+<planet name="jumppoint-pluto" file="jump.png" alpha="ONE ONE" radius="500" gravity="20" x="-1000" y="-2000" z="-9000" destination="visit_from_the_aera/pluto" />
+
+<unit name= "station-mars"  file="station" x="3000" y="3000" z="-5000" position="0" faction="confed" />
+
+
+
+</system>

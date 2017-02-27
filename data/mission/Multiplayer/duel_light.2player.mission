@@ -1,0 +1,45 @@
+<mission>
+	<settings>
+		<origin  planet="earth" x="0000" y="100" z="000.0"/>
+	</settings>
+
+	<variables>
+<!--		<var name="continuousterrain" value="continuousterrain.txt"/>-->
+		<var name="credits" value="3500"/>
+		<var name="defaultplayer" value="blue"/>
+		<var name="mission_name" value="4 versus 4" />
+		<var name="num_players" value="2"/>
+		<var name="system" value="gemini_sector/troy" />
+		<var name="description" value="Enjoy troy in a nova." />
+	</variables>
+        <flightgroups>
+                <flightgroup name="blue" faction="confed" type="nova" ainame="default" waves="1" nr_ships="1">
+			<pos x="20400" y="-35400" z="2470000"/>
+			<rot x="180.0" y="180.0" z="180.0"/>
+			<order order="tmptarget" target="omikron"/>
+			<order priority="0" order="superiority" target="enemy"/>
+			<order priority="1" order="bomber" target="omikron"/>
+			<order priority="2" order="escort" target="blue"/>
+		</flightgroup>
+                <flightgroup name="green" faction="aera" type="aeon" ainame="default" waves="1" nr_ships="1">
+			<pos x="20400" y="-35400" z="2471000.0"/>
+			<rot x="180.0" y="180.0" z="180.0"/>
+			<order order="tmptarget" target="omikron"/>
+			<order priority="0" order="superiority" target="enemy"/>
+			<order priority="1" order="bomber" target="omikron"/>
+			<order priority="2" order="escort" target="blue"/>
+		</flightgroup>
+        </flightgroups>
+<!--	<module name="director">
+		<import name="gauntlet"/>
+		<script name="initgame">
+			<exec module="gauntlet" name="initgame">
+			<const type="int" value="3"/>
+			<const type="int" value="4"/>
+			</exec>
+		</script>
+		<script name="gameloop">
+			<exec module="gauntlet" name="loop"/>
+		</script>
+	</module>-->
+</mission>

@@ -1,0 +1,67 @@
+<mission>
+	<settings>
+		<origin  planet="earth" x="0000" y="100" z="000.0"/>
+	</settings>
+
+	<variables>
+<!--		<var name="continuousterrain" value="continuousterrain.txt"/>-->
+<!--		<var name="difficulty" value=".1" />-->
+		<var name="credits" value="10000"/>
+		<var name="defaultplayer" value="blue"/>
+		<var name="mission_name" value="4 versus 4" />
+		<var name="splashscreen" value="bad_guys_vs_good_guys.bmp" />
+		<var name="system" value="nothing" />
+		<var name="description" value="4vs4.txt" />
+	</variables>
+
+        <flightgroups>
+       	    <flightgroup name="navajo" faction="confed" type="avenger" ainame="sitting_duck" waves="1" nr_ships="1">
+                        <pos x="120000" y="40000" z="50000.0"/>
+			<rot x="180.0" y="180.0" z="180.0"/>
+		    </flightgroup>
+
+
+		    <flightgroup name="oldgringo" faction="confed" type="cruiser" ainame="macho" waves="1" nr_ships="1">
+                        <pos x="105000" y="30000" z="30000.0"/>
+			<rot x="180.0" y="180.0" z="180.0"/>
+		    </flightgroup>
+
+		    <flightgroup name="gringoviejo" faction="confed" type="borken" ainame="macho" waves="1" nr_ships="1">
+                        <pos x="110000" y="30000" z="30000.0"/>
+			<rot x="180.0" y="180.0" z="180.0"/>
+		    </flightgroup>
+
+		    
+
+
+                <flightgroup name="pancho" faction="confed" type="yavok" ainame="macho" waves="1" nr_ships="1">
+                        <pos x="130000" y="30000" z="30000.0"/>
+			<rot x="180.0" y="180.0" z="180.0"/>
+		    </flightgroup>
+
+             
+<!--		    <flightgroup name="contras" faction="confed" type="vark" ainame="macho" waves="1" nr_ships="10">
+                        <pos x="125000" y="30000" z="30000.0"/>
+			<rot x="180.0" y="180.0" z="180.0"/>
+		    </flightgroup>
+
+                <flightgroup name="yucatan" faction="aera" type="vitik" ainame="macho" waves="1" nr_ships="1">
+                        <pos x="135000" y="30000" z="15000.0"/>
+			<rot x="180.0" y="180.0" z="180.0"/>
+		    </flightgroup>
+
+		   
+		    <flightgroup name="losfederales" faction="confed" type="starrunner" ainame="macho" waves="1" nr_ships="2">
+                        <pos x="110000" y="30000" z="25000.0"/>
+			<rot x="180.0" y="180.0" z="180.0"/>
+		    </flightgroup>
+
+
+ 		    <flightgroup name="lospolicias" faction="confed" type="destroyer" ainame="macho" waves="1" nr_ships="6">
+                        <pos x="115000" y="32000" z="32000.0"/>
+			<rot x="180.0" y="180.0" z="180.0"/>
+		    </flightgroup>
+-->
+
+        </flightgroups>
+</mission>

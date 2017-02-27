@@ -1,0 +1,43 @@
+<Cockpit mesh="cockpit-medium.bfxm" r="0" g="1" b="0">
+   <Crosshairs file="crosshairs.sprite" xcent="0" ycent="0"/>
+   <Radar file="radar.sprite" />
+   <RearRadar file="radarr.sprite" />
+   <Speed file="radar.sprite" xcent="-.23" ycent="-.52" width=".018" height=".036"/>
+   <SetSpeed file="radar.sprite" xcent=".23" ycent="-.52" width=".018" height=".036"/>
+   <WARPFIELDSTRENGTH file="radar.sprite" xcent="-.23" ycent="-.58" width=".018" height=".036"/>
+   <Fuel file="fuelstat.sprite" GaugeRight="1" xcent="0" ycent="-.6"/>
+   <Energy file="blasterpower.sprite" GaugeRight="1"/>
+   <WarpEnergy file="jumppower.sprite" GaugeRight="1" xcent="0" ycent="-.55"/>
+   <Lock file="locklight.sprite" xcent="0" ycent="-.82"/>
+   <MissileLock file="missilelocklight.sprite" xcent="0" ycent="-.76"/>
+   <ECM file="ecmlight.sprite" xcent="0" ycent="-.7"/>
+   <Auto file="auto.sprite"/>
+   <Jump file="canjump.sprite"/>
+   <Eject file="eject.sprite"/>
+   <FPS xcent="0.94" ycent="0.96" width=".018" height=".036"/>
+
+   <ShieldF file="shieldf.sprite" GaugeDown="1"/>
+   <ShieldB file="shieldf.sprite" xcent="-.765" ycent="-.567"/>
+   <ShieldR file="shieldr.sprite" GaugeLeft="1"/>
+   <ShieldL file="shieldr.sprite" xcent="-.665" ycent="-.700" GaugeRight="1"/>
+   <ArmorFRT file="armorf.sprite" width="0.204"  height="0.136" GaugeDown="1" />
+   <ArmorFLT file="armorf.sprite" width="-0.204" height="0.136" GaugeDown="1" />
+   <ArmorBRT file="armorf.sprite" width="0.204"  height="0.136" xcent="-0.765" ycent="-0.632" />
+   <ArmorBLT file="armorf.sprite" width="-0.204" height="0.136" xcent="-0.765" ycent="-0.632" />
+   <ArmorFRB file="armorr.sprite" width="0.102"  height="0.272" GaugeRight="1" />
+   <ArmorBRB file="armorr.sprite" width="0.102" height="-0.272" GaugeRight="1" />
+   <ArmorFLB file="armorr.sprite" width="0.102"  height="0.272" xcent="-0.714" ycent="-0.700" GaugeLeft="1" />
+   <ArmorBLB file="armorr.sprite" width="0.102" height="-0.272" xcent="-0.714" ycent="-0.700" GaugeLeft="1" />
+
+   <TargetShieldF file="targetshieldf.sprite" GaugeDown="1"/>
+   <TargetShieldB file="targetshieldf.sprite" xcent="0.765" ycent="-.567"/>
+   <TargetShieldR file="targetshieldr.sprite" GaugeLeft="1"/>
+   <TargetShieldL file="targetshieldr.sprite" xcent="0.865" ycent="-.700" GaugeRight="1"/>
+
+   <VDU TextRows="30" TextCols="25" type="Weapon Manifest Damage" file="wvdu.sprite" xcent="-.8" ycent=".2"/>
+   <VDU  TextRows="15" TextCols="25" type="Target View TargetManifest Nav" file ="rvdu.sprite" xcent=".775" ycent="-.75"/>
+   <VDU TextRows="15" TextCols="25" type="Shield  Manifest" file="lvdu.sprite"/>
+   <VDU TextRows="14" TextCols="100" type="Message" file="mvdu.sprite"/>
+   <VDU TextRows="30" TextCols="30" type="Objectives" file="objvdu.sprite"/>
+   <VDU TextRows="15" TextCols="30" type="Comm" file ="commvdu.sprite" />
+</Cockpit>

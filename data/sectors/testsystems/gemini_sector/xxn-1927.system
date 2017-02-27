@@ -1,0 +1,39 @@
+<system scalesystem="3" name="XXN-1927" background="backgrounds/blue2" nearstars="500" stars="1000" starspread="150"  x="0" y="0" z="0">
+<Light>
+<ambient red="000.0" green="000.0" blue="000.0"/>
+<diffuse red="0.707106781186548" green="0.707106781186548" blue="1"/>
+<specular red="0.5" green="0.5" blue="1"/>
+</Light>
+
+<Planet name="xxn-1927" file="sol/sun.png" radius="10000000" x="14594814.00
+0000" y="00.00" z="-14594814.000000"  Red="0.5" Green="0.5" Blue="1" ReflectNoLight="true" light="0"/>
+
+<Light>
+<ambient red="000.0" green="000.0" blue="000.0"/>
+<diffuse red="1" green="1" blue="1"/>
+<specular red="1" green="1" blue="1"/>
+</Light>
+
+<Light>
+<ambient red="1" green=".1" blue="0"/>
+<!--<diffuse red="1" green=".7" blue="0"/>-->
+<!--<attenuated red=".00000001" blue=".00000015"/>-->
+<attenuated red="0" blue=".000000002"/>
+</Light>	
+<Light>
+<ambient red="1" green=".1" blue="0"/>
+<!--<diffuse red="1" green=".7" blue="0"/>-->
+<!--<attenuated red=".00000001" blue=".00000015"/>-->
+<attenuated red="0" blue=".0000001"/>
+</Light>	
+
+        <planet name="JumpToOxford" file="jump.png" alpha="ONE ONE" radius="100" gravity="0" z="-12000" x="4000" day="240" destination="gemini_sector/oxford"/>
+        <planet name="JumpToNewDetroit" file="jump.png" alpha="ONE ONE" radius="100" gravity="0" z="8000" x="14500" day="240" destination="gemini_sector/newdetroit"/>
+        <planet name="JumpToNewConstantinople" file="jump.png" alpha="ONE ONE" radius="100" gravity="0" z="14000" x="7500" day="240" destination="gemini_sector/newconstantinople" />
+        <planet name="JumpToMetsor" file="jump.png" alpha="ONE ONE" radius="100" gravity="0" z="16500" x="-8000" day="240" destination="gemini_sector/metsor"/>
+        <unit name= "Joplin"  file="refinery" faction="confed" z="14000" x="-18000"/>
+        <planet name="JumpTo119CE" file="jump.png" alpha="ONE ONE" radius="100" gravity="0" z="-6000" x="-21000" day="240" destination="gemini_sector/119ce"/>
+        <planet name="Jolson" file="planets/carribean.png" radius="300" gravity="20" z="-3000" x="-10500" si="-3000" day="300">
+                <planet name="Jolson Atmosphere" file="sol/earthcloudmaptrans.png" alpha="true" radius="310" gravity="20" ri="0" rj="0" rk="0" si="0" sj="0" sk="0" day="600" position="0"/>
+        </planet>
+</system>

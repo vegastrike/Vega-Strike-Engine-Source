@@ -1,0 +1,4 @@
+N70000^red-nebula.xml^nebula&A8480^AFieldBaseSparse&A100^HiddenAsteroid&E50^unknown_derelict 
+N70000^red-nebula.xml^nebula&A8480^AFieldBaseSparse&A100^HiddenAsteroid&E50^unknown_derelict 
+N80000^purple-nebula.xml^purple-nebula&E50^unknown_derelict
+N80000^green-nebula.xml^green-nebula&A100^HiddenAsteroid&E50^unknown_derelict

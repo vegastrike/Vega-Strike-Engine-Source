@@ -1,0 +1,32 @@
+LN_S := @LN_S@ -f
+
+#if VS_MAKE_NO_CLIENT
+#	CLIENT_PROG=
+#else
+#	CLIENT_PROG=vegastrike
+#endif
+
+EXEEXT = @EXEEXT@
+VS_MAKE_NO_CLIENT_FALSE = @VS_MAKE_NO_CLIENT_FALSE@
+VS_MAKE_NO_CLIENT_TRUE = @VS_MAKE_NO_CLIENT_TRUE@
+@VS_MAKE_NO_CLIENT_FALSE@CLIENT_PROG = vegastrike vssetup soundserver
+@VS_MAKE_NO_CLIENT_TRUE@CLIENT_PROG = 
+
+.PHONY: all vegastrike vegaserver accountserver vssetup
+all: $(CLIENT_PROG) vegaserver accountserver
+
+vegastrike:
+	cd .. ; $(MAKE) vegastrike$(EXEEXT) && \
+	$(LN_S) "`pwd`"/vegastrike$(EXEEXT) src/vegastrike
+vssetup:
+	cd .. ; $(MAKE) vssetup$(EXEEXT) && \
+	$(LN_S) "`pwd`"/vssetup$(EXEEXT) src/vssetup
+vegaserver:
+	cd .. ; $(MAKE) vegaserver$(EXEEXT) && \
+	$(LN_S) "`pwd`"/vegaserver$(EXEEXT) src/vegaserver
+accountserver:
+	cd .. ; $(MAKE) accountserver$(EXEEXT) && \
+	$(LN_S) "`pwd`"/accountserver$(EXEEXT) src/accountserver
+clean:
+	$(MAKE) -C .. clean
+	rm -f vegaserver vegastrike accountserver

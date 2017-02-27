@@ -1,0 +1,19 @@
+<?xml version="1.0" ?>
+<system background="backgrounds/blue" name="Modelview" nearstars="500" scalesystem="1000" stars="1000" starspread="150">
+<Light>
+	<ambient blue="0.05" green="0.05" red="0.05"/>
+	<diffuse blue="1.0" green="1.0" red="1.0"/>
+	<specular blue="0.1" green="0.1" red="0.1"/>
+</Light>
+<Planet Blue="0.9" Green="0.9" Red="0.9" ReflectNoLight="true" file="stars/white_star.texture" light="0" name="Cephid_17 A" radius="746000.000000" ri="0.000000" rj="0.000000" rk="0.000000" si="0.000000" sj="0.000000" sk="0.000000" x="0" y="0" z="0">
+    <Planet day="950" file="planets/university.texture" gravity="18" name="Landing Paradise" position="0" radius="1281005" ri="26000000.0" rj="0" rk="26000000" si="26000000.0" sj="0" sk="-26000000.0" year="13661700">
+        <Atmosphere alpha="SRCALPHA INVSRCALPHA" file="sol/earthcloudmaptrans2.texture" radius="1282000"/>  
+        <CityLights file="planets/university_light.texture" wrapx="1" wrapy="1"/>
+        <Fog>
+            <FogElement ScaleAtmosphereHeight="0.96" alpha="0.5" blue="1" concavity=".99" dialpha=".5" diblue="1" digreen="1" dired="1" file="atmXatm.bfxm" focus=".01" green=".7" maxalpha="0.25" minalpha="0" red=".5"/>
+            <FogElement ScaleAtmosphereHeight="0.96" alpha="0.5" blue="1" concavity=".99" dialpha=".5" diblue="1" digreen="1" dired="1" file="atmXhalo.bfxm" focus=".01" green=".7" maxalpha="1" minalpha="0" red=".5"/>
+        </Fog>
+        <Unit day="20700" faction="confed" file="AsteroidFighterBase" name="A Base" ri="2059833" rj="-400" rk="0" si="0" sj="-400" sk="2059833" year="1118260"/>
+    </Planet>
+</Planet>
+</system>

@@ -1,0 +1,183 @@
+<!-- Sol II System for VegaStrike.  Copyright 2003 Coridon Henshaw   -->
+<!-- Freely available to the VegaStrike community for all uses not   -->
+<!-- not involving the exchange of funds or the creation of profit   -->
+<!-- provided that this notice remains intact.                       -->
+<!--                                                                 -->
+<!-- No liability is assumed or implied.  Use at own risk.           -->
+<!--                                                                 -->
+<!-- Do what you will with this file but do not charge money for it. -->
+
+
+<system name="Sol" background="backgrounds/milkyway" nearstars="1" stars="1" starspread="1"  x="0" y="0" z="0" scalesystem="1000">
+<Light>
+	<ambient red=".03" green="0.03" blue="0.03"/>
+	<diffuse  red="1" green="1" blue="1"/>
+	<specular  red="1" green="1" blue="1"/>
+</Light>
+
+<planet name="Sol" file="sol/sun.texture" radius="695500" gravity="20" x="0" y="0" z="0"  Red=".9" Green=".9" Blue=".9" ReflectNoLight="true" light="0">
+    <planet name="Mercury" file="sol/mercury.texture" radius="2439.5" gravity="20" ri="46e6" rj="0" rk="0" sk="-69.8e6" sj="0" si="0" day="5053.1960" Year="757976.9624" position="0">
+</planet>
+
+<planet name="Venus" file="sol/ven0mss2-seal.texture" radius="6052.0" gravity="20" ri="107.5e6" rj="0" rk="0" sk="-108.9e6" sj="0" si="0" day="-20938.73769" Year="19361159.2094" position="0">
+    <fog>
+        <FogElement file="atmXatm.bfxm" ScaleAtmosphereHeight="1.000" red=".9" blue=".7" green=".8" alpha="1.0" dired="1" diblue="1" digreen="1" dialpha="1" concavity=".3" focus=".6" minalpha="0" maxalpha=".5"/>
+        <FogElement file="atmXhalo.bfxm" ScaleAtmosphereHeight="1.000" red=".9" blue=".7" green=".8" alpha="1.0" dired="1" diblue="1" digreen="1" dialpha="1" concavity=".3" focus=".6" minalpha="0" maxalpha=".5"/>
+    </fog>
+</planet> <!-- End Venus -->
+
+<planet name="Earth" 
+        file="planets/earth/earth_diffuse.texture|planets/earth/earth_specular.texture|planets/earth/earth_clouds.texture|planets/earth/earth_night.texture|planets/earth/earth_normal.texture" 
+        unit="earth"
+        technique="earth" 
+        radius="6378.0" gravity="20" 
+        ri="147.1e6" rj="0" rk="0" si="0" sj="0" sk="-152.1e6" 
+        day="86.400" Year="31471954." position="0" 
+        Red="0" Green="0" Blue="0" 
+        DRed="0.87" DGreen="0.87" DBlue="0.87" 
+        SRed="0.85" SGreen="0.85" SBlue="0.85" >  
+    <planet name="Earth: Luna" file="sol/moon.texture" radius="1913.4" gravity="20" ri="0.363e6" rj="0" rk="0" sk="0.406e6" sj="0" si="0" day="2360.440" Year="2360440.0" position=".39"/>
+<unit name= "Solar Defense:Earth SF 1" file="Starfortress" ri="0.28e5" rj="0" rk="0" sk="0.28e5" sj="0" si="" year="2400000.0" position="0" faction="purist"></unit>
+<unit name= "Solar Defense:Earth SF 2" file="Starfortress" ri="0.28e5" rj="0" rk="0" sk="0.28e5" sj="0" si="" year="2400000.0" position="0.25" faction="purist"></unit>
+<unit name= "Solar Defense:Earth SF 3" file="Starfortress" ri="0.28e5" rj="0" rk="0" sk="0.28e5" sj="0" si="" year="2400000.0" position="0.5" faction="purist"></unit>
+<unit name= "Solar Defense:Earth SF 4" file="Starfortress" ri="0.28e5" rj="0" rk="0" sk="0.28e5" sj="0" si="" year="2400000.0" position="0.75" faction="purist"></unit>
+</planet> <!-- End Earth -->
+
+<planet name="Mars" file="planets/mars/mars_diffuse.texture|black.png|planets/mars/mars_clouds.texture|sol/marslights.texture|planets/mars/mars_normal.texture" 
+		unit="mars" technique="mars"
+		radius="3397.0" gravity="20" ri="206.6e6" rj="0" rk="0" sk="-249.2e6" sj="0" si="0" day="88.920" Year="59193012.7" position=".62"  Red=".2" Green=".2" Blue=".2">
+    <planet name="Mars: Phobos" file="sol/phobos.texture" faction="neutral" radius="11" sj="9000" rk="0" year="27477.0"/>
+    <planet name="Mars: Deimos" file="sol/deimos.texture" faction="neutral" radius="6" year="108739.0" sj="-23000" rk="15000"/>
+	<unit name= "Mars: Mars Centre" file="Commerce_Center" ri="0.25e5" rj="0" rk="0" sk="0.25e5" sj="0" si="" year="240000.0" position="0.3" faction="confed"></unit>
+
+</planet> <!-- End Mars -->
+
+
+<!-- Belt objects -->
+<!--
+			<unit name="Belt: Central Command" file="Starfortress" year="284546700000.0" ri="473e6" sk="-473e6" faction="confed"/>
+            <asteroid name="Virtual Rocks" file="AFieldBase" year="2845467000000.0" ri="473e6" sk="-473e6" difficulty="1"/>
+
+			<planet name="Belt: JumpToSirius" file="jump.texture" alpha="ONE ONE" radius="30" rk="413900000" si="-413900000" day="19584000" Year="14516496000.0" position=".162" destination="sol_sector/sirius">
+                <unit name="Belt: Sirius Border Control" file="Fighter_Barracks" faction="confed" ri="500" sk="-500"/>
+            </planet>
+-->
+<planet name="Belt: 1 Ceres" file="sol/asteroid.texture" radius="466" gravity="20" rk="413900000" si="-413900000" day="1958400" Year="145164960000.0" position=".62"/>
+
+<planet name="Belt: 2 Pallas" file="sol/asteroid.texture" radius="261" gravity="20" rk="414500000" si="-414500000" day="1958400" Year="145164960000.0" position=".2"/>
+<!--
+    <unit name="Belt: 2 Pallas" file="miningbase" radius="261" gravity="20" rk="414500000" si="-414500000" day="1958400" Year="145164960000.0" position=".2" faction="confed"/>
+-->
+<planet name="Belt: 4 Vesta" file="sol/asteroid.texture" radius="265" gravity="20" rk="353400000" si="-353400000" day="1958400" Year="145164960000.0" position=".8"/>
+<!--            <unit name="Belt: 4 Vesta" file="miningbase" gravity="20" rk="353400000" si="-353400000" day="1958400" Year="145164960000.0" position=".8" faction="confed"/> -->
+
+<planet name="Belt: 10 Hygiea" file="sol/asteroid.texture" radius="215" gravity="20" rk="470300000" si="-470300000" day="1958400" Year="145164960000.0" position=".8"> <!-- FIXME not checked -->
+    <asteroid name="The Rockpile" file="AFieldBaseSparse" rk="1000" si="1000" year="1e15" difficulty="0"/>
+</planet> <!-- End Hygiea -->
+
+            <!-- End belt objects -->
+
+<planet name="Jupiter" file="sol/jupiter.texture|black.png|sol/jupiter.texture" 
+        unit="jupiter" technique="gas_giants" 
+        radius="71492.0" gravity="20" ri="740.5e6" rj="0" rk="0" sk="-816.6e6" sj="0" si="0" day="35.640" Year="373313713.686" position="0">
+
+    <!-- Main ring -->
+    <Ring file="rings/ring.texture" innerradius="122800" outerradius="129200" wrapx="200" wrapy="10" year="1e12"/>
+
+    <planet name="Jupiter: Io"       file="sol/io.texture"       radius="1815" gravity="0" ri="422000"  sk="-422000"  year="152424.0"   day="10.000">
+            <CityLights file="sol/iolights.texture" wrapx="1" wrapy="1" radius = "1815.1"/>
+    </planet>
+    <planet name="Jupiter: Europa"   file="sol/europa.texture"   radius="1569" gravity="0" ri="671000"  sk="-671000"  year="305968.7" day="70.000" position=".1"></planet>
+    <planet name="Jupiter: Ganymede" file="sol/ganymede.texture" radius="2631" gravity="0" ri="1070000" sk="-1070000" year="616504.12" position= ".3" />
+    <planet name="Jupiter: Callisto" file="sol/callisto.texture" radius="2400" gravity="0" ri="1883000" sk="-1883000" year="1438078.8" position=".8" />
+
+    <unit name="Jupiter: HE3 installation" file="Refinery" gravity="0" ri="1470000" sk="-1470000" year="768000000.0" position="0.52" />
+</planet> <!-- End Jupiter -->
+
+<planet name="Saturn" file="sol/saturn.texture|black.png|sol/saturn.texture" 
+        unit="saturn" technique="gas_giants"
+        radius="60268.0" gravity="20" ri="1352.6e6" rj="0" rk="0" sk="-1514.5e6" sj="0" si="0" day="38.5200" Year="927058497.2" position="0">
+    <Ring file="sol/saturn-ring.texture" innerradius="74500" outerradius="136800" wrapx="1" wrapy="1" year="1e12"/>
+    <planet name="Saturn: Mimas" file="sol/mimas-cel.texture" radius="196" gravity="0" ri="186000" sk="-186000" year="8116.6" position="0.23" />
+    <planet name="Saturn: Enceladus" file="sol/enceladus.texture" radius="260" gravity="0" ri="238000" sk="-238000" year="118044.0" position="0.7" />
+    <planet name="Saturn: Tethys" file="sol/tethys.texture" radius="530" gravity="0" ri="295000" sk="-295000" year="162677.0" position="-0.23" />
+    <planet name="Saturn: Dione" file="sol/dione.texture" radius="560" gravity="0" ri="377000" sk="-377000" year="235831.0" position="0.1" />
+        <planet name="Saturn: Rhea" file="sol/rhea.texture" radius="765" gravity="0" ri="527000" sk="-527000" year="389289.0" position="-0.1"/>
+        <planet name="Saturn: Titan" file="sol/titan.texture" radius="2575" gravity="0" ri="1222000" sk="-1222000" year="1374317.0" position="0.4"/>
+        <planet name="Saturn: Hyperion" file="sol/hyperion.texture" radius="143" gravity="0" ri="1481000" sk="-1481000" year="29000.0" position="-0.4"/>
+        <planet name="Saturn: Iapetus" file="sol/iapetus.texture" radius="730" gravity="0" ri="3561000" sk="-3561000" year="6835397.0" position="0.6"/>
+        <planet name="Saturn: Phoebe" file="sol/asteroid.texture" radius="110" gravity="0" ri="12952000" sk="-12952000" year="2900000.0" position="-0.6"/>
+        </planet> <!-- End Saturn -->
+
+        <planet name="Uranus" file="sol/uranus.texture|black.png|sol/uranus.texture" 
+                unit="uranus" technique="gas_giants"
+                radius="25559.0" gravity="20" ri="2741.3e6" rj="0" rk="0" sk="-3003.6e6" sj="0" si="0" day="61.9200" Year="40193946000.0" position="0">
+            <!-- Epsilon ring -->
+            <Ring file="sol/uranus_rings.texture" innerradius="41900" outerradius="51300" wrapx="1" wrapy="1" year="1e12"/>
+
+            <planet name="Uranus: Miranda" file="sol/miranda-cel.texture" radius="236" gravity="0" ri="130000" sk="-130000" year="121749.0" position="0.1" />
+            <planet name="Uranus: Ariel" file="sol/ariel-cel.texture" radius="579" gravity="0" ri="191000" sk="-191000" year="217219.0" position="0.3" />
+            <planet name="Uranus: Umbriel" file="sol/umbriel-cel.texture" radius="585" gravity="0" ri="266000" sk="-266000" year="357236.0" position="0.5" />
+            <planet name="Uranus: Titania" file="sol/titania-cel.texture" radius="789" gravity="0" ri="436000" sk="-436000" year="749972.0" position="0.7" />
+            <planet name="Uranus: Oberon" file="sol/oberon-cel.texture" radius="761" gravity="0" ri="583000" sk="-583000" year="1160027.0" position="0.9" />
+        </planet> <!-- End Uranus -->
+
+        <planet name="Neptune" file="sol/neptune.texture|black.png|sol/neptune.texture" 
+                unit="neptune" technique="gas_giants"
+                radius="24764.0" gravity="20" ri="4444.5e6" rj="0" rk="0" sk="-4545.7e6" sj="0" si="0" day="57.9600" Year="78577200000.0" position="0">
+
+		<planet name="Neptune: Proteus" file="sol/proteus.texture" radius="209" gravity="0" ri="118000" sk="-118000" year="400000.0" position="0.1" /><!-- FIXME year is wrong -->
+		<planet name="Neptune: Triton" file="sol/triton.texture" radius="1350" gravity="0" ri="355000" sk="-355000" year="506386.0" position="0.8" />
+
+        <planet name="Neptune: Nereid" file="sol/asteroid.texture"  radius="150" gravity="0" ri="1377500" sk="-4132500" year="31467128.0" position="-0.2" /> <!-- FIXME all sorts of wrong -->
+        </planet> <!-- End Neptune -->
+
+        <planet name="Pluto" file="sol/pluto.texture" radius="1195.0" gravity="20" ri="4335e6" rj="0" rk="0" sk="-7304.3e6" sj="0" si="0" day="550.3438" Year="7794835216.04" position=".5">
+            <planet name="Pluto: Charon" file="sol/charon.texture" radius="586" gravity="20" ri="19640" rj="0" rk="0" sk="-19640" sj="0" si="0" day="550.3438" Year="550343.8" position=".5"/>
+        </planet> <!-- End Pluto -->
+
+        <!-- Kupier belt objects -->
+
+        <planet name="KBO: Quaoar" file="sol/asteroid.texture" radius="750" gravity="20" ri="5983914827.64" rj="0" rk="0" sk="-5983914827.64" sj="0" si="0" day="551880.0" Year="119032632000000.0" position=".666"/>
+        <planet name="KBO: Ixion" file="sol/asteroid.texture" radius="530" gravity="20" ri="5983914827.64" rj="0" rk="0" sk="-5983914827.64" sj="0" si="0" day="551880.0" Year="119032632000000.0" position=".333"/>
+        <planet name="KBO: Varuna" file="sol/asteroid.texture" radius="450" gravity="20" ri="5983914827.64" rj="0" rk="0" sk="-5983914827.64" sj="0" si="0" day="551880.0" Year="119032632000000.0" position=".999"/>
+        <planet name="KBO: 2002 AW197" file="sol/asteroid.texture" radius="445" gravity="20" ri="5983914827.64" rj="0" rk="0" sk="-5983914827.64" sj="0" si="0" day="551880.0" Year="119032632000000.0" position=".192"/>
+
+        <!-- End KBOs -->
+
+    <planet name="Jump_To_Proxima_Centauri" file="jump.texture" radius="30" gravity="20" ri="2500e6" rj="0" rk="0" sk="3000e6" sj="0" si="0" day="1000" Year="40000000000.0" position="0" destination="Sol/Proxima_Centauri">
+		<unit name="Border Control: Proxima Centauri" file="Fighter_Barracks" faction="confed" ri="500" sk="-500"/>
+	</planet>
+
+    <planet name="Jump_To_Alpha_Centauri" file="jump.texture" radius="30" gravity="20" ri="2600e6" rj="0" rk="0" sk="2900e6" sj="0" si="0" day="1000" Year="40000000000.0" position="0" destination="Sol/Alpha_Centauri">
+	<unit name="Border Control: Alpha Centauri" file="Fighter_Barracks" faction="confed" ri="500" sk="-500"/>
+	</planet>
+
+	<planet name="Jump_To_Alpha_Canis_Majoris" file="jump.texture" radius="30" gravity="20" ri="3000e6" rj="0" rk="0" sk="2600e6" sj="0" si="0" day="1000" Year="40000000000.0" position="0" destination="Sol/Alpha_Canis_Majoris">
+		<unit name="Border Control: Alpha Canis Majoris" file="Fighter_Barracks" faction="confed" ri="500" sk="-500"/>
+	</planet>
+
+	<planet name="Jump_To_Red" file="jump.texture" radius="30" gravity="20" ri="2000e6" rj="0" rk="0" sk="2100e6" sj="0" si="0" day="1000" Year="40000000000.0" position="0" destination="Sol/Red">
+		<unit name="Border Control: Red" file="Fighter_Barracks" faction="confed" ri="500" sk="-500"/>
+	</planet>
+
+	<planet name="Jump_To_Epsilon_Ind" file="jump.texture" radius="30" gravity="20" ri="1000e6" rj="0" rk="1500e6" sk="1500e6" sj="0" si="400e6" day="1000" Year="40000000000.0" position="0" destination="Sol/Epsilon_Ind">
+		<unit name="Border Control: Epsilon Ind" file="Fighter_Barracks" faction="confed" ri="500" sk="-500"/>
+	</planet>
+
+	<planet name="Jump_To_Alcestis" file="jump.texture" radius="30" gravity="20" ri="3000e6" rj="0" rk="0" sk="2600e6" sj="0" si="1000e6" day="1000" Year="40000000000.0" position="0" destination="Sol/Alcestis">
+		<unit name="Border Control: Alcestis" file="Fighter_Barracks" faction="confed" ri="500" sk="-500"/>
+	</planet>
+
+	<planet name="Jump_To_Telamon" file="jump.texture" radius="30" gravity="20" ri="2500e6" rj="0" rk="1000e6" sk="2600e6" sj="0" si="0" day="1000" Year="40000000000.0" position="0" destination="Sol/Telamon">
+		<unit name="Border Control: Telamon" file="Fighter_Barracks" faction="confed" ri="500" sk="-500"/>
+	</planet>
+
+    </planet>
+</system>
+
+
+
+
+
+

@@ -1,0 +1,31 @@
+<Unit>
+	<Description combatRole="TFIGHTER">
+	</Description>
+
+
+<Meshfile file="turretsmall.bfxm" />
+
+
+
+		<Thrust>
+		<Engine Afterburner="000000" Forward="000000" Retro="0000" Left="0000" Right="0000" Top="00000" Bottom="000000"/>
+		<Maneuver yaw="410.60" pitch="0" roll="0000"/>
+	</Thrust>
+	<Sound></Sound>
+	<Defense>
+		<Armor front="30" right="30" left="30" back="30"/>
+		<Shields front="30" back="30" recharge="4.333333"/>
+		<Hull strength="50"/>
+		<Cloak cloakmin=".01" cloakrate=".2" cloakenergy="0"/>
+	</Defense>
+	<Stats mass="1" momentofinertia="1" fuel="20000"></Stats>
+	<Computer yaw="128" pitch="0" roll="0000" afterburner="000000" maxspeed="00000">
+		<Radar itts="true" range="4000" color="true" error="0"/>
+	</Computer>
+
+	<Energy>
+		<Reactor recharge="10" limit="100"/>
+	</Energy>
+	<Subunit file="turretgunsmall" y=".1" ri="0" rj="1" rk="0" qi="0" qj="0" qk="-1" restricted="0"/>  
+
+</Unit>

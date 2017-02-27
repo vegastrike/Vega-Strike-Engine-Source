@@ -1,0 +1,188 @@
+<mission>
+	<settings>
+		<origin  planet="earth" x="0000" y="100" z="000.0"/>
+	</settings>
+
+	<variables>
+<!--		<var name="continuousterrain" value="continuousterrain.txt"/>-->
+<!--		<var name="difficulty" value=".1" />-->
+		<var name="credits" value="10000"/>
+		<var name="defaultplayer" value="blue"/>
+		<var name="mission_name" value="4 versus 4" />
+		<var name="splashscreen" value="bad_guys_vs_good_guys.bmp" />
+		<var name="system" value="sol_sector/sol" />
+		<var name="description" value="4vs4.txt" />
+	</variables>
+
+        <flightgroups>
+            <flightgroup name="navajo" faction="confed" type="mongoose" ainame="borken.py" waves="1" nr_ships="1">
+                        <pos x="-1000" y="30000" z="30000.0"/>
+			<rot x="180.0" y="180.0" z="180.0"/>
+		    </flightgroup>
+
+
+<!--                    <flightgroup name="daroids" faction="neutral" type="asteroids" ainame="borken.py" waves="666" nr_ships="1">
+                        <pos x="-4500" y="30000" z="30000.0"/>
+			<rot x="180.0" y="180.0" z="180.0"/>
+		    </flightgroup>
+
+-->
+
+		    <flightgroup name="nova" faction="confed" type="nova" ainame="borken.py" waves="1" nr_ships="1">
+                        <pos x="0" y="30000" z="30000.0"/>
+			<rot x="180.0" y="180.0" z="180.0"/>
+		    </flightgroup>
+
+		    <flightgroup name="mongoose" faction="confed" type="mongoose" ainame="borken.py" waves="1" nr_ships="1">
+                        <pos x="250" y="30000" z="30000.0"/>
+			<rot x="180.0" y="180.0" z="180.0"/>
+		    </flightgroup>
+
+		    <flightgroup name="kyta" faction="confed" type="kyta" ainame="borken.py" waves="1" nr_ships="1">
+                        <pos x="500" y="30000" z="30000.0"/>
+			<rot x="180.0" y="180.0" z="180.0"/>
+		    </flightgroup>
+
+		    <flightgroup name="aeon" faction="confed" type="aeon" ainame="borken.py" waves="1" nr_ships="1">
+                        <pos x="750" y="30000" z="30000.0"/>
+			<rot x="180.0" y="180.0" z="180.0"/>
+		    </flightgroup>
+
+		    <flightgroup name="starfish" faction="confed" type="starfish" ainame="borken.py" waves="1" nr_ships="1">
+                        <pos x="1000" y="30000" z="30000.0"/>
+			<rot x="180.0" y="180.0" z="180.0"/>
+		    </flightgroup>
+
+		    <flightgroup name="firefly" faction="confed" type="khanjarli" ainame="borken.py" waves="1" nr_ships="1">
+                        <pos x="1250" y="30000" z="30000.0"/>
+			<rot x="180.0" y="180.0" z="180.0"/>
+		    </flightgroup>
+
+		    <flightgroup name="tian" faction="confed" type="tian" ainame="borken.py" waves="1" nr_ships="1">
+                        <pos x="1500" y="30000" z="30000.0"/>
+			<rot x="180.0" y="180.0" z="180.0"/>
+		    </flightgroup>
+
+		    <flightgroup name="metron" faction="confed" type="metron" ainame="borken.py" waves="1" nr_ships="1">
+                        <pos x="1750" y="30000" z="30000.0"/>
+			<rot x="180.0" y="180.0" z="180.0"/>
+		    </flightgroup>
+
+		    <flightgroup name="butterfly" faction="confed" type="butterfly" ainame="borken.py" waves="1" nr_ships="1">
+                        <pos x="2000" y="30000" z="30000.0"/>
+			<rot x="180.0" y="180.0" z="180.0"/>
+		    </flightgroup>
+
+		    <flightgroup name="kira" faction="confed" type="kira" ainame="borken.py" waves="1" nr_ships="1">
+                        <pos x="2250" y="30000" z="30000.0"/>
+			<rot x="180.0" y="180.0" z="180.0"/>
+		    </flightgroup>
+
+		    <flightgroup name="skart" faction="confed" type="skart" ainame="borken.py" waves="1" nr_ships="1">
+                        <pos x="2500" y="30000" z="30000.0"/>
+			<rot x="180.0" y="180.0" z="180.0"/>
+		    </flightgroup>
+
+		    <flightgroup name="wayfarer" faction="confed" type="wayfarer" ainame="borken.py" waves="1" nr_ships="1">
+                        <pos x="2750" y="30000" z="30000.0"/>
+			<rot x="180.0" y="180.0" z="180.0"/>
+		    </flightgroup>
+
+		    <flightgroup name="longhaul" faction="confed" type="longhaul" ainame="borken.py" waves="1" nr_ships="1">
+                        <pos x="3000" y="30000" z="30000.0"/>
+			<rot x="180.0" y="180.0" z="180.0"/>
+		    </flightgroup>
+
+		    <flightgroup name="avenger" faction="confed" type="avenger" ainame="borken.py" waves="1" nr_ships="1">
+                        <pos x="3250" y="30000" z="30000.0"/>
+			<rot x="180.0" y="180.0" z="180.0"/>
+		    </flightgroup>
+
+		    <flightgroup name="osprey" faction="confed" type="osprey" ainame ="borken.py" waves="1" nr_ships="1">
+                        <pos x="3500" y="30000" z="30000.0"/>
+			<rot x="180.0" y="180.0" z="180.0"/>
+		    </flightgroup>
+
+		    <flightgroup name="f109vampire" faction="confed" type="f109vampire" ainame="borken.py" waves="1" nr_ships="1">
+                        <pos x="3750" y="30000" z="30000.0"/>
+			<rot x="180.0" y="180.0" z="180.0"/>
+		    </flightgroup>
+
+		    <flightgroup name="aevant" faction="confed" type="aevant" ainame="borken.py" waves="1" nr_ships="1">
+                        <pos x="4000" y="30000" z="30000.0"/>
+			<rot x="180.0" y="180.0" z="180.0"/>
+		    </flightgroup>
+
+		    <flightgroup name="katar" faction="confed" type="katar" ainame="borken.py" waves="1" nr_ships="1">
+                        <pos x="4250" y="30000" z="30000.0"/>
+			<rot x="180.0" y="180.0" z="180.0"/>
+		    </flightgroup>
+
+		    <flightgroup name="lekra" faction="confed" type="lekra" ainame="borken.py" waves="1" nr_ships="1">
+                        <pos x="4500" y="30000" z="30000.0"/>
+			<rot x="180.0" y="180.0" z="180.0"/>
+		    </flightgroup>
+
+		    <flightgroup name="puma" faction="confed" type="puma" ainame="borken.py" waves="1" nr_ships="1">
+                        <pos x="4750" y="30000" z="30000.0"/>
+			<rot x="180.0" y="180.0" z="180.0"/>
+		    </flightgroup>
+
+		    <flightgroup name="dagger" faction="confed" type="dagger" ainame="borken.py" waves="1" nr_ships="1">
+                        <pos x="5000" y="30000" z="30000.0"/>
+			<rot x="180.0" y="180.0" z="180.0"/>
+		    </flightgroup>
+
+		    <flightgroup name="destiny" faction="confed" type="destiny" ainame="borken.py" waves="1" nr_ships="1">
+                        <pos x="5250" y="30000" z="30000.0"/>
+			<rot x="180.0" y="180.0" z="180.0"/>
+		    </flightgroup>
+ 
+                <flightgroup name="hispidus" faction="confed" type="hispidus" ainame="borken.py" waves="1" nr_ships="1">
+                        <pos x="6500" y="30000" z="30000.0"/>
+			<rot x="180.0" y="180.0" z="180.0"/>
+		    </flightgroup>
+
+		    <flightgroup name="corvette" faction="confed" type="corvette" ainame="borken.py" waves="1" nr_ships="1">
+                        <pos x="8000" y="30000" z="30000.0"/>
+			<rot x="180.0" y="180.0" z="180.0"/>
+		    </flightgroup>
+
+		    <flightgroup name="escortcarrier" faction="confed" type="escortcarrier" ainame="borken.py" waves="1" nr_ships="1">
+                        <pos x="10000" y="30000" z="30000.0"/>
+			<rot x="180.0" y="180.0" z="180.0"/>
+		    </flightgroup>
+
+		    <flightgroup name="vark" faction="confed" type="vark" ainame="borken.py" waves="1" nr_ships="1">
+                        <pos x="13000" y="30000" z="30000.0"/>
+			<rot x="180.0" y="180.0" z="180.0"/>
+		    </flightgroup>
+
+		    <flightgroup name="destroyer" faction="confed" type="destroyer" ainame="borken.py" waves="1" nr_ships="1">
+                        <pos x="17000" y="30000" z="30000.0"/>
+			<rot x="180.0" y="180.0" z="180.0"/>
+		    </flightgroup>
+
+		    <flightgroup name="starrunner" faction="confed" type="starrunner" ainame="borken.py" waves="1" nr_ships="1">
+                        <pos x="21000" y="30000" z="30000.0"/>
+			<rot x="180.0" y="180.0" z="180.0"/>
+		    </flightgroup>
+
+		    <flightgroup name="cruiser" faction="confed" type="cruiser" ainame="borken.py" waves="1" nr_ships="1">
+                        <pos x="26000" y="30000" z="30000.0"/>
+			<rot x="180.0" y="180.0" z="180.0"/>
+		    </flightgroup>
+
+		    <flightgroup name="yavok" faction="confed" type="yavok" ainame="borken.py" waves="1" nr_ships="1">
+                        <pos x="35000" y="30000" z="30000.0"/>
+			<rot x="180.0" y="180.0" z="180.0"/>
+		    </flightgroup>
+
+
+             
+
+
+
+
+        </flightgroups>
+</mission>

@@ -1,0 +1,1329 @@
+2002-07-08 Daniel Aleksandrow <dandandaman@users.sourceforge.net>
+
+	* Added prelim terrain files
+	 -data/terrain/cunerpicus/lyed.sphereterrain
+	 -data/terrain/cunerpicus/lyed_terrain256.png
+	 -data/terrain/cunerpicus/lyed_terrain512.png
+	 -data/vega_sector/cunerpicus.system
+	 -data/textures/cunerpicus/lyed.png
+	 -data/mission/test/dana_terrain.mission
+
+2002-04-24 Alexander Rawass <alexannika@users.sourceforge.net>
+
+	* added debian packages to homepage/doc
+	* fixed broken link on download page
+2002-04-22 Daniel Horn <hellcatv@hotmail.com>
+	* added briefing class that will render ships as they explain to players what to do
+	* added hooks and a subclass to the mission scripting system
+	* fixed _unit.getFaction's mem leak and _unit.getPosition()'s duplicate code
+	* fixed duplicate code in director.cpp
+
+2002-04-20 Daniel Horn <hellcatv@hotmail.com>
+	* Added flyto AI scripts
+	* Added _std.playSound ()
+	* Added _unit.commAnimation() which plays a specified animation.ani file and caches it
+	* Added _unit.communicateTo()  which plays the default animation for that unit at a mood and returns the sex of that unit (so as to play the proper sound)
+	* Fixed hard coded script "turntowards" to work
+	* Changed logic of cosAngleTo so that if jump is on it doesn't report relative distance
+	
+2002-04-20 Daniel Horn <hellcatv@hotmail.com>
+	* Added Secondary Logos as part of the flightgroup class
+	* Added optional arguments to _unit.launch for primary (and possibly secondary) texture
+	* Added point-click to the texturizer
+
+2002-04-19 Daniel Horn <hellcatv@hotmail.com>
+&Before
+	* mounts can have volume which limit the number of ammo they can purchase of any given weapon
+	* "news" messages can be sent to the message center...they may be browsed while docked and get reloaded upon save and load of savegame
+	* .templates load from the units/upgrades/god/god file before their stats are replaced...so teh default template with nothing in it will have the maximum values for all stats (so things don't start to wrap)
+	* missions look for AI scripts in all active missions
+	* upgrades have been tested for almost all stats...they seem to work fine :-)
+	* added a selling minimum so you cannot buy low end stuff and sell it as damaged high end stuff  (you have to repair stuff mostly before selling it)
+	* Missiels have blast radius ....  damage is computed as damage/(r/radialspeed)^2 where r/radialspeed is clamped to 1 (no less)
+	* mucho data has been changed...and most relevant upgrades have been added for purchase.....  templates are being worked on
+	* comms have been started by Ri- from #wing-commander
+	* docking response is instantaneous and they talk back sometimes
+	* any AI scripts can be ported to C++... it checks for C++ (hard coded) ai scripts in cmd/ai/hard_coded_scripts.cpp before it looks for the soft coded ones...that way we can pull in user-written XML code in the next release as fast C++ that above bottleneck along with many others have been reduced...performance has been improved a lot
+	* all known crashing bugs have been destroyed (by use of unitcollections in collide table...and removal of beams there)
+	* several cool missions have been written...scan for contraband, escort cargo ship (which triggered the aforementioned collide table bug), attack, patrol, etc missions...all of them discover the system they work in and decide where to go from there.....
+	* jamming ship mission will be added: nebulas can be added by missions (for radio jamming ships for instance) starships can be moved by missions (to be used by aforementioned mission)
+
+	* more cargo has been added by Fire Hawk
+
+	* ^asa^ fixed many weapons to have volume
+
+2002-04-07 Daniel Horn <hellcatv@hotmail.com>
+	* Changed collide table to use UnitCollection (should be reasonably fast and certainly safer)
+	
+2002-04-06 Daniel Horn <hellcatv@hotmail.com>
+
+	* Added activeStarSystem to unit so it knows which system to clean its collide table from (could fix a bug)
+	* Removed beams from collide table...now they only query it (removes lots of clutter)
+	* Fixed collections so multiple collections can run through the queue at any given time
+	* Only allowed units to target starships in their star system (target jump point if starship is in adjacent star system)
+	
+
+2002-03-22 Alexander Rawass <alexannika@users.sourceforge.net>
+
+	* hopefully fixed _unit.getName
+	
+
+
+2002-03-24 Daniel Horn <hellcatv@hotmail.com>
+	* Added sounds to comms (electricity.wav playes when someone hates you
+	* Added bases to flightgroup Base, Nebuale to flightgroup Nebula
+	* Added Damage effects to the HUD
+	* Added Damage to any system of your starship
+	* Added cockpit damage float [] to images (saves and loads and upgrades)
+	* Added Damage Repair droid <Defense RepairDroid="4"> ...
+	* Made Starsystem load and position orbits before running mission loadsys script
+	* Added a parameter to increment and decrement cargo (script): quantity
+	
+2002-03-23 Daniel Horn <hellcatv@hotmail.com>
+	* Finished up comms
+	* Added comm animations
+	* Cockpit Huds == pretty
+	* Added Contraband Searches
+	* Addded contraband lists
+	* Added XML conversations (communication/neutral.xml or what you specify in factions.xml)
+	* Added "getting mad when you fire at me" (eventually can use for scorechart)
+	* Added random communication
+	* Brushed up some turret switching code
+	* Fixed loading screen
+	* Added comm screen
+	* Improved Request Clearence to be processed throgh communication channel
+	
+2002-03-22 Alexander Rawass <alexannika@users.sourceforge.net>
+	
+	* made the textplane of the slash screen a TextPlane *
+	  because the font tried to load before the configuration
+	* tried to improve vs_path.cpp
+	  - data dir is first searched in current dir
+	  - then in DATA_DIR (if defined)
+	  - then in the data dir from ~/.vegastrike/vegastrike.config
+	
+
+2002-03-21 Daniel Horn <hellcatv@hotmail.com>
+	* Happy birthday Debra
+	* Made it so that all AI classes who wish to "talk back" inherit from
+	       CommunicatingAI
+	* If you wish to select responses not randomly, override the virtual selectCommunicationMessage
+	* Added mood swinging... and they get mad if you shoot at them
+	* Added Request Clearence to land
+	
+2002-03-20 Alexander Rawass <alexannika@users.sourceforge.net>
+	
+	* moved the static var SplashScreen from main.cpp:bootstrap_main_loop
+	  to global namespace
+	* the same with the TextPlane that bootstrap_draw uses
+	* bootstrap_draw uses this to check if it should draw
+	* this way, a call to bootstrap_draw can be added to Texture()
+	* see main.cpp:186 aux_texture.cpp:203
+	* Bug: when the background is loaded, there's a short pic of
+	  the environment map
+
+	
+2002-03-20 Daniel Horn <hellcatv@hotmail.com>
+	* Added intiial comm support
+	* Todo:
+	*  a) make it so that the communications load from an XML file
+	* b) make it so that Order::AdjustRelationTo () does SOMETHING (so that at 
+	     least they target you if you say something bad or the like...eventually it 
+	     needs to modify some local state about the relationship between your race and 
+	     theirs...or at least your ship and theirs)
+	* c) Alex this might be your job: make it so the other AI's respond to 
+	      messages...currently only AggressiveAI responds to messages
+	* d) someday we might want to color code messages
+
+	
+2002-03-19 Alexander Rawass <alexannika@users.sourceforge.net>
+	
+	* modified src/Makefile.am (bindir was screwed up)
+	* modified mission/Makefile.am (bindir)
+	* added missile.h to src/cmd/Makefile.am
+	* modified vegastrike.spec
+	* added vegastrike-data.spec
+	* improved some modules (unit==NULL checks)
+
+2002-03-09 Daniel Horn <hellcatv@hotmail.com>
+	* Begun adding communications to AI
+	* Fixed Segfault in LoadUniverse's call to mission which may create starships without an active starsystem
+	* Added a FSM (Finite State Machine) pointer to each faction-faction relation
+	* Added a drawing text function to the happy splashscreen
+	* Made it so that you can't donwgrade what you don't have
+	
+2002-03-18 Alexander Rawass <alexannika@users.sourceforge.net>
+
+	tag: alex_after_unitcontainer_changes
+	
+	* added to _unit:
+	  - _unit.getContainer
+	  - _unit.getUnitFromContainer
+	  - _unit.deleteContainer
+	* config var interpreter/trace will give you trace output
+	* updated ai_flyto_wp,ai_flyto_jp,ai_patrol,ai_orderlist
+	* added debug stuff to Order
+
+	
+tag: alex_before_unitcontainer_changes
+	
+2002-03-16 Alexander Rawass <alexannika@users.sourceforge.net>
+
+	* added data/force_feedback/vegastrike.ifr
+	  (Immersion Studio Effects file)
+	* exchanged/improved the effects
+	
+	
+2002-03-14 Alexander Rawass <alexannika@users.sourceforge.net>
+
+	* very basic force feedback support
+	  - added files src/force_feedback.cpp/h
+	  - modified src/Makefile.am
+	  - config vars: joystick/force_feedback, joystick/ff_device
+	  - to compile use -DHAVE_FORCE_FEEDBACK
+
+	
+2002-03-12 Daniel Horn <hellcatv@hotmail.com>
+	* Added option for swithcing cockpits when units change
+	* Added option for AI to not pilot ship you turret
+	* Fixed UnitContainer bug in player_unit
+	* Fixed up missiels to deal damage in the list and self destruct
+	
+2002-03-10 Alexander Rawass <alexannika@users.sourceforge.net>
+	
+	* Interpreter:
+	  - faster lookup for other callback modules
+	
+
+2002-03-10 Alexander Rawass <alexannika@users.sourceforge.net>
+	
+	* Interpreter:
+	  - faster callback module lookup
+	  - faster lookup of callback module std (others will follow)
+
+
+2002-03-09 Daniel Horn <hellcatv@hotmail.com>
+	* Fixed disappearing first unit bug with low quality sprites
+	* Fixed cockpit cycle complaint
+	* Added Gauntlet mission (if you kill 3 guys, 3 more come)
+	* Added XvX missions using the nvn module
+	* Fixed [ key to cycle through all allies
+	* Fixed save directory to be .vegastrike in windows
+
+2002-03-09 Alexander Rawass <alexannika@users.sourceforge.net>
+
+	* director:
+	  ai_orderlist now remembers order when re-launched
+	* added findOrderList to Order
+	* replaced messy vegastrike.config with older version
+
+
+2002-03-09 Alexander Rawass <alexannika@users.sourceforge.net>
+	
+	* fixed crosshairs in firefly/hornet cockpit
+	* interpreter:
+	  - deleting class instances correctly
+	  - faster variable lookup (not working yet)
+	  - better fatal error output (stackdump)
+	* modified Order::~Order()
+	  the suborders get now deleted correctly
+
+
+2002-03-08 Alexander Rawass <alexannika@users.sourceforge.net>
+	
+	* ai_orderlist now faster
+	* added scanSystem() to Unit class
+
+	
+2002-03-07 Daniel Horn <hellcatv@hotmail.com>
+	* also had to add gui to src/Makefile.am...strange
+	* added gui to configure.in
+	* Switched stars to use animations instead of lights so they will not appear 'through' other objects
+	* switched any strange OpenGL state vs was setting for the GUI
+
+2002-03-07 Alexander Rawass <alexannika@users.sourceforge.net>
+	
+	* ai_orderlist now basically working
+	* had to add gui to src/Makefile.am
+
+	
+2002-03-06 Alexander Rawass <alexannika@users.sourceforge.net>
+	
+	* homepage/docu
+	  added bugs/todo section
+	* exporer-missions: fixed? nan-velocity/position bug
+	* ordered the missions dir new
+	* ai_orderlist (still experimental)
+	
+
+2002-03-06 Corey O'Connor <zoldar256@users.sourceforge.net>
+        * A few small changes to OS X target
+	  - GLUT mission selector now compiles
+	  - VegaStrikeOSXApp now includes GLUT mission selector
+	    as a front end to the vegastrike executable in 
+	    Resources.
+
+2002-03-05 Alexander Rawass <alexannika@users.sourceforge.net>
+	
+	* homepage/docu
+	  - added force feedback section
+
+	
+2002-03-04 Daniel Horn <hellcatv@hotmail.com>
+	* Added text over viewscreen
+	* Added glow to stars....
+	* Made glow work at infinite distance instaed of twinking out
+	* Added default Jump, Planet and Sun HudImages
+	* Added Hud images for about 98% of objects (tons fo work)
+	* Added high_quality_sprite mode (for antialiasing them)
+	* Fixed Weapons info with sprite
+	* Fixed some ships being upside down (noticed when taking screenshot)
+	* Added text for weapon info
+
+	* Added docking bays to be drawn when you press SHIFT-C and have clearence
+	* Added manifest VDU screen
+	* Fixed known problems with upgrades and tradings
+	* Added credits into the picture (get saved as starsystem^credits
+	* When you respawn you get loaded into a saved unit.
+	* Saved units (with upgrades) are loaded if a mission has a saved game
+	* Fixed many font issues
+	* Fixed calculation in navigation.cpp to calculate proper velocity with fixed time intervals of SIMULATION_ATOM instead of continuous time
+
+	
+2002-04-01 Corey O'Connor <oconnorc@dogheadbone.com>
+	* Added "Import" option in units...now you can import whole categories at different price from the master part list
+	
+2002-03-01 Corey O'Connor <oconnorc@dogheadbone.com>
+        * Additions and fixes to make a double clickable app.
+          - The big problem was the os x glut was setting the working dir to Resources in the bundle. Ack.
+          
+2002-03-01 Corey O'Connor <oconnorc@dogheadbone.com>
+        * Initial commit of mac os x support. 
+          - Lot's of small changes. Mostly to header files and such.
+          - Need to upload some build instructions as the configure files if it's mac os x expect some things to be in
+            certain places. This will most likely be fine for most people but it needs some flexability.
+
+2002-02-28 Daniel Horn <hellcatv@hotmail.com>
+	* Added Terrain support for rendered meshes...this was a hell of a lot of work
+	* Added glutStrokeFont and broke a level of abstraction cus I'm tired... basically GFX does not wrap glutStrokeFont at the moment...should be trivial fix...enjoy pretty fonts
+	
+
+2002-02-28 Alexander Rawass <alexannika@users.sourceforge.net>
+
+	* ai_orderlist (not yet finished)
+	* homepage/docu
+	  - moved the installing and playing page into the player documentation
+	  - put links to install and playing into main.html
+	  - added a download for the docu-tarball
+	
+
+2002-02-27 Daniel Horn <hellcatv@hotmail.com>
+	* Added caching to the collision data structures
+	* Added caching to sphere meshes (shields were taking long time to load)
+	* Added cargo to a unit...you can buy and sell cargo at places. Havenot added to interface yet
+	* Cargo only makes you heavier right now...soon you will be able to sell for profit-- when you have money that is
+	
+
+2002-02-27 Alexander Rawass <alexannika@users.sourceforge.net>
+
+	* modified Universe
+	  - can set 'scripting system' from scripting
+	  - scripting gets notified if a new system is loaded:
+	    initstarsystem is called
+	* added faction 'pirates' to factions.xml
+	* added re-launching of waves (nr. of waves now gets respected)
+	
+
+2002-02-27 Daniel Horn <hellcatv@hotmail.com>
+	* Added Purchasing ability. once you are docked hold down SHIFT-C again and it will bring you to a TEXT BASED menu...from there you can upgrade your unit or add stuff to it... or buy a new starship alltogether.  Or you can remove weapons or armor you have purchased.
+	* Percent means a couple of things (calculated the same for all)
+	          a) if you are buying, you have x as much as that thing costs.
+	             if life were fair you'd pay 1-x the price...but you prolly
+		     end up buying 1-.5*x the cost or something
+		  b) If you are selling then you get that much back 
+	   	     (times .5 or so relating to difficuly for used part)
+		  c) If you are adding to your part (eg adding armor)
+		     x is 0 so you pay full price (because it adds on)
+	* Fixed Star System jumping bug that would skip the star system ahead a few seconds on jump.
+	
+
+2002-02-26 Alexander Rawass <alexannika@users.sourceforge.net>
+
+	* wrote ai_flyto_jumppoint, ai_explorer, ai_flyto_waypoint_defend
+	* addJPTravellers for random_launch.c
+	
+
+2002-02-25 Alexander Rawass <alexannika@users.sourceforge.net>
+	
+	* visit_aera:
+	  - finished the systems (can be improved later)
+	
+2002-02-24 Alexander Rawass <alexannika@users.sourceforge.net>
+	
+	* updated docu
+	  - added TODO lines
+	  - Terrain section
+	  - Docking section
+	* imported data/mission/devel/visit_from the aera
+	  and data/visit_from_the_aera
+	* patched src/in_sdl.cpp, for joy buttons to work with 
+	  a second joystick
+	  thanks to Martin Scherer <marsch84@web.de> for his patch
+
+	
+2002-02-23 Alexander Rawass <alexannika@users.sourceforge.net>
+
+	* updated documentation/homepage
+	* modified c_alike.lex to ignore \r (to work for win32)
+
+2002-02-21 Alexander Rawass <alexannika@users.sourceforge.net>
+
+	* updated documentation/homepage
+	  - updated install page
+	  - started to write a player tutorial
+	* updated some of my missions (author/description tags)
+
+	
+2002-02-19 Alexander Rawass <alexannika@users.sourceforge.net>
+	
+	* new callbacks:
+	  - _std.getSystemName()
+	  - _unit.getVelocity(),isPlanet(),isStarShip(),isJumppoint()
+	* added scale and add to vec3.c
+	* random_launch.c: launch in front of player
+	* modified unit.h to have is... functions
+	* started to write more AIs (not yet)
+
+	
+2002-02-18 Alexander Rawass <alexannika@users.sourceforge.net>
+	
+	* little improvements to random_launch.c
+
+	
+2002-02-17 Alexander Rawass <alexannika@users.sourceforge.net>
+
+	* added omap object type to scripting (sort of struct)
+	  - added file script_call_omap.cpp, mod. Makefile.am
+	* wrote explore_the_unviverse.c script and missions
+	* wrote random_launch.c
+
+
+2002-02-16 Alexander Rawass <alexannika@users.sourceforge.net>
+
+	* modified main.cpp, so that the savegame is only loaded if
+	  there's a savegame variable
+	
+
+2002-02-13 Daniel Horn <hellcatv@hotmail.com>
+	* Made genearted light maps save in home directory
+	* Made universes searched for in home directory
+	* Wired in a star system generator that will generate systems that are not there
+	* Added feature taht will call this generator in the event a system is not found
+	* Added a lame autopilot feature
+	* Added another version of config_xml.cpp  -- galaxy_xml  we should really combine duplicate code...but I don't know how to do it...config_xml depends a lot on joystick....
+	* Explore!!!!!!!!!!!!!!!!! You can craete a galaxy map using galaxy_xml to specify connectivity and who owns system...otherwise ti will pick unknown faction to own everything (hate everyone)
+	
+2002-02-12 Alexander Rawass <alexannika@users.sourceforge.net>
+
+	* first tutorial mission
+	* gave the hornet cockpit a message display
+	* moved the defines for HOMESUBDIR,CONFIGFILE and DELIM
+	  from vs_path.cpp to vs_path.h
+	* changed saving of variables to ~/.vegastrike/default-player.variables
+
+	
+2002-02-12 Alexander Rawass <alexannika@users.sourceforge.net>
+
+	* updated the homepage/doc directory:
+	  - changed the menu from java to simple text-links
+	  - added Sabarok to the credits page (and removed James T. Richardson)
+	  - updated playing/installing/download page
+	* added PickTargetKey to FireKeyboard
+	* started to write tutorial mission (not working yet)
+	
+
+2002-02-10 Daniel Horn <hellcatv@hotmail.com>
+	* Removed special case for subunits (eg pseudo 1 xtra refcount)
+	* Streamlined UnitIterator
+	* Added useful functions for unit iterators
+	* Change BSP's to return a (nonconst) unit so subunits may be directly damaged
+	* Added constant iterators and fast iterators
+	* un_iter is standard un_fiter is the fast iterattor that doesn't check the Killed() value
+	* un_kiter is the standard constant iterator and un_fkiter is the fast constant iterator to go down unit queues
+	* If you get odd segfaults please tell me backtrace
+	* Added autopilot feature (F9 and F10)
+	
+2002-02-09 Alexander Rawass <alexannika@users.sourceforge.net>
+
+	* test mission for dana
+	* no CXXFLAGS/optimization for src/cmd/script/c_alike
+
+	
+2002-02-09 Daniel Horn <hellcatv@hotmail.com>
+	* Fixed absolutely horrible ucref 'smart pointer' bug with subunits
+	* Added some original mining bases by DMJC
+	
+
+2002-02-08 Daniel Horn <hellcatv@hotmail.com>
+	* Added Day/Year tag to system
+	* Removed velocity tag from system (besides it should have been speed...misleading)
+	* Added ability to slow down simulations in other star systems so they won't bog down the game
+	
+2002-02-07 Daniel Horn <hellcatv@hotmail.com>
+	* Completed VIEW VDU segment
+	* Completed Asteroids that don't crash with anything but units
+	* Worked on Debug options for geometry-corrupting vertex arrays
+	* Finished Asteroid generator
+	* Added more camera views
+	* Added more VDU options
+	* Fixed Explosions (sometimes they wouldn't show up. now they do)
+	* Added Wormholes as an option
+	
+2002-02-06 Alexander Rawass <alexannika@users.sourceforge.net>
+	
+	* set the color of planets in the radar to blue
+	* begun to write a new targetting scheme
+	  (not working, not used yet)
+
+	
+2002-02-06 Alexander Rawass <alexannika@users.sourceforge.net>
+	
+	* various improvements on missions:
+	  - moved benchmarking/gametime from main_loop.cpp to director
+	  - message display shows the time when the message came
+	  - added a delay to the messages
+	* modified my systems to use new texture dirs
+
+	
+2002-02-03 Daniel Horn <hellcatv@hotmail.com>
+	* Added splash screens... it's a variable in vegastrike.config defaults to vega_splash.ani  found in animations/vega_splash.ani
+
+	
+2002-02-03 Alexander Rawass <alexannika@users.sourceforge.net>
+	
+	* modified easydom.cpp/h and mission.cpp/h
+	  so that these classes can be used without the rest
+	  of Vegastrike (for the mission selector)
+	
+	
+2002-02-02 Daniel Aleksandrow <dandandaman@users.sourceforge.net>
+
+	* Added textures to merchant ship
+	* Committed better system and testmission for "Cunerpicus"
+
+2002-01-30 Daniel Horn <hellcatv@hotmail.com>
+	* Added nebulas to the list of vegastrike's features
+	* Added explosions to the nebulas that make them glow from time to time
+	* Added fog to nebulas so that things inside them will be fogged
+	* Removed shield from nebulas so that shields are nonfunctional there
+	* Scrambled sensors in nebulas
+	* Added BSP trees to being in nebulas (so there is an "inside" as opposed to just a shell)
+	* Made it so Nebulas don't collide with bullets
+	
+2002-01-30 Daniel Aleksandrow <dandandaman@users.sourceforge.net>
+
+	* Added rlaan_cruiser --no textures/weapons or anything (just to look)
+	* Added space truck, no textures or weapons (only a merchant)
+
+2002-01-29 Daniel Horn <hellcatv@hotmail.com>
+	* Fixed double delete of SubUnits when Kill() was being called and adding them to the delete queue (only to be delted by the Unit itself on the delete queue)
+	* Fixed some reference count issues with lists
+
+2002-01-29 Alexander Rawass <alexannika@users.sourceforge.net>
+	
+	* removed some memory leaks in the interpreter
+	
+
+2002-01-29 Daniel Horn <hellcatv@hotmail.com>
+	* Realized that ucref (the reference for units) was off by many many orders of magnitude...fixed
+	* Realized that units weren't being deleted even if they were on the delete queue
+	* Experimental! Enabled deletion. To disable #define DISABLE_DELETE in cmd/unit_damage.cpp  Let me know if you run into ANY problems freeing a unit! So far I have had one...but I haven't bene able to reproduce ... or get any stack of usefulness... maybe someone can point me in the right direction here...it would be a shame not to delete units
+	* Added docking vector so that units may dock to each other (soon)
+
+
+2002-01-29 Alexander Rawass <alexannika@users.sourceforge.net>
+	
+	* modified star_system,planet,unit
+	  to read in the 'name' of a planet or unit
+	* improved missions
+	* removed bug in easydom::parseCalike
+
+	
+2002-01-29 Daniel Aleksandrow <dandandaman@users.sourceforge.net>
+
+	* Fixed the revoker's texture
+	* Added cunerpicus texture (for moon)
+	* Added asteroid textures and meshes (all the ones I could find)
+
+2002-01-28 Daniel Horn <hellcatv@hotmail.com>
+
+	* Added VDU type to cockpit file... you can select what sort of type of VDU it is by adding the type flag like so <VDU type="Message Navigation"/>
+	* Added Disable-sound option to configure
+	* Added Scroll buttons to scroll up and down on the vDU's
+	* Changed Scroll buttons to only react on press :-/
+	
+2002-01-28 Daniel Horn <hellcatv@hotmail.com>
+	* Added jump sounds on exit and entrance (jumparrive jumpleave in config)
+	* Fixed it so jump star did not draw unless the event (leaving or arriving) happened in teh system with the current Cockpit's parent
+	* Fixed ancient ~Beam bug that would cause segfault at null pointer if all beams with a certain texture were deleted.
+	* Fixed bug that caused clipping to incorrectly clip after 'host' camera starship destroyed
+
+
+2002-01-28 Daniel Aleksandrow <dandandaman@users.sourceforge.net>
+
+	* New ship (the Revoker).....unit file not finished
+
+2002-01-27 Alexander Rawass <alexannika@users.sourceforge.net>
+	
+	* wrote rather complex mission
+	
+
+2002-01-27 Alexander Rawass <alexannika@users.sourceforge.net>
+	
+	* wrote Order AIPatrol that can patrol around an area/unit
+	  uses modules/ai_patrol.c
+
+	
+2002-01-26 Daniel Horn <hellcatv@hotmail.com>
+	* fixed bug that about 1 in 1000 units leaves a ghost behind on the collide board.
+	* scans entire collide table when a unit is leaving systems or dying
+	* testing with missions/totalwar2.mission
+	
+
+2002-01-26 Alexander Rawass <alexannika@users.sourceforge.net>
+	
+	* updated systems a bit
+	* started to work on AI scripting again
+	- wrote Order AIFlyToWaypoint that uses the module ai_flyto_waypoint.c
+	
+
+2002-01-25 Daniel Aleksandrow <dandandaman@users.sourceforge.net>
+
+	* Added fiery galaxy....looks much better than the others!
+
+2002-01-25 Daniel Horn <hellcatv@users.sourceforge.net>
+
+	* Warp effect now looks cool!
+	* Fixed bug with deletion of animations
+	* Added entering jump effect.
+	* Fixed bug with SubUnit being set on random planets, and collisions not being checked against them
+	* Added feature that planets may be targetted anywhere due to their size
+	
+2002-01-25 Daniel Horn <hellcatv@users.sourceforge.net>
+	
+	* Fixed a whole lot of lighting problems with local lights. Not all are fixed, but enough to do the standard things I think.
+	* Fixed a lot of problems with collision tables and multiple systems (weapons used to be left behind, which would cause random crashes
+	* Added AI jumping through jump portals.
+	* Made AI follow human through jumping
+	* Made all players exit at a jump point that would lead back to original system
+	* Added an animation (right now explosion) that will play before jumping
+	* Added ability to specify jump drives on specific starships with <Jump delay="3" jumpenergy="10"/> which would mean that it would take 10 energy to jump (if it were negative it would be 10 fuel times mass)
+	* Added ability to make planets not cull by passing in ONE ONE to the alphamap of the planet
+	* Made test2.mission demonstrate combat with jump points (fun)
+
+2002-01-24 Denial Horn <hellcatv@users.sourceforge.net>
+	* Added jump drives!  Now you can go to a planet designated as a jump point...press 'j' and it will load the system if not already loaded...
+	* Try jumping from the green sphere around earth...and then activating time compression and jumping back from the big earth in the next system... it's great
+	* Warning using fighters[0] as your fighter to indicate whether to teleport the cam as well as the ship
+
+2002-01-24 Daniel Horn <hellcatv@users.sourceforge.net>
+	
+	* Made collisions work inside the shield by checking against the shield bsp and then the mesh BSP, so shots wouldn't go inside the mesh if the shields were up. 
+
+2002-01-21 Daniel Horn <hellcatv@users.sourceforge.net>
+	
+	* changed Planets to deactivate their lights at destroy, not delete
+
+2002-01-18 Alexander Rawass <alexannika@users.sourceforge.net>
+	
+	* modified the added textures to backgrounds
+	* modified *.system to use new backgrounds
+	* added mars_station.system,pluto_hq.system
+
+
+2002-01-17 Alexander Rawass <alexannika@users.sourceforge.net>
+
+	* removed more data
+	* added parts of the homepage to vegastrike/doc
+	
+
+2002-01-17 Alexander Rawass <alexannika@users.sourceforge.net>
+	tag: after_data_removal_stage1
+	
+	* removed all data which might upset lawyers from CVS
+	
+
+	tag: before_data_removal_stage1
+2002-01-08 Alexander Rawass <alexannika@users.sourceforge.net>
+	
+	* vampire/drone bug fixed???
+	  - uncommented that sorting in mesh.cpp
+	
+
+2002-01-05 Alexander Rawass <alexannika@users.sourceforge.net>
+	
+	* imported data/units/drone for testing
+	* added data/mission/test/drone*.mission
+	* imported vegastrike/doc/texturizer
+	
+	
+2002-01-01 Alexander Rawass <alexannika@users.sourceforge.net>
+	
+	* wrote some dumb ai's in TuxFleet-style
+	  ai_rolling,ai_stationary,ai_circling
+	* wrote ai that can flyto a waypoint ai_flyto*
+	
+
+2001-12-30 Alexander Rawass <alexannika@users.sourceforge.net>
+	
+	* added more Orders to the _order callback
+	* made AImissionScript a subclass of FlyByWire
+	* added FlyByWire-Callbacks to the _order callbacks
+	* added more callbacks to _unit
+	
+
+2001-12-29 Alexander Rawass <alexannika@users.sourceforge.net>
+	
+	* 'fixed' aggressive.cpp
+	   it now uses it's own suborders, instead of the units orders
+	
+	
+2001-12-28 Alexander Rawass <alexannika@users.sourceforge.net>
+	
+	* the first ai works now with new scripting
+	* improved vdu/messages
+
+	
+2001-12-27 Alexander Rawass <alexannika@users.sourceforge.net>
+	
+	* interpreter:
+	  - added script_call_order.cpp
+
+2001-12-26 Alexander Rawass <alexannika@users.sourceforge.net>
+	
+	* interpreter:
+	  - added sort-of classes/instances of modules
+	* AI scripting:
+	  - first test ai is running (doing nothing)
+	  - added modules/ai_test.c , mission/testd/testd_aitest1.mission
+
+	
+2001-12-24 Alexander Rawass <alexannika@users.sourceforge.net>
+	
+	* interpreter:
+	  - fixed memory leaks for varInsts
+	* AI scripting:
+	  - added src/cmd/ai/missionscript.{cpp,h}
+	  - modified src/cmd/ai/Makefile.am
+	* new AI scripting is used if ainame begins with _ (not working yet)
+	
+
+2001-12-22 Alexander Rawass <alexannika@users.sourceforge.net>
+	
+	* interpreter:
+	  - I'm starting to free memory/varInsts
+	
+
+2001-12-22 Alexander Rawass <alexannika@users.sourceforge.net>
+	
+	* modified Cockpit:
+	  - Elite-Style radar
+	  - config var graphics/hud/radarType, can be WC or Elite
+	  - several 'lines' that get drawn, several config vars
+	
+
+2001-12-21 Alexander Rawass <alexannika@users.sourceforge.net>
+	
+	* modified Cockpit:
+	  - to draw a box around all units
+	    config var drawAllTargetBoxes controls that behaviour
+	  - to always draw the ITTS (var drawAlwaysITTS)
+	  - to use more colors on the radar/the target boxes
+	
+
+2001-12-21 Alexander Rawass <alexannika@users.sourceforge.net>
+	
+	* modified configure.in
+	  - added python1.5 to search for python libs
+	  - fixed setting of have_boost_lib
+	* modified gfx/vdu.{h,cpp} cockpit_xml.cpp
+	  - messages are now displayed in the right VDU
+	  - the target-vdu now displays also the FgID
+
+	
+2001-12-20 Alexander Rawass <alexannika@users.sourceforge.net>
+	
+	* callbacks use now ints instead of floats
+	* modules/*.c use now also ints
+	
+
+2001-12-19 Alexander Rawass <alexannika@users.sourceforge.net>
+	
+	* added _io.printf
+	* datatype int working
+	
+
+2001-12-18 Alexander Rawass <alexannika@users.sourceforge.net>
+	
+	* datatype int implemented (untested)
+	* added basic python support (SCREAM!)
+	
+
+2001-12-16 Alexander Rawass <alexannika@users.sourceforge.net>
+	
+	* added src/cmd/script/director.cpp
+	* at end-of-game, the variables are serialized to disk
+	* add _string.equal, _std.equal
+	
+
+2001-12-16 Alexander Rawass <alexannika@users.sourceforge.net>
+	
+	* added src/cmd/script/msgcenter.{cpp,h}
+	* modified src/cmd/script/Makefile.am
+	* added callbacks _io.message, _io.printMsgList
+	
+
+2001-12-15 Alexander Rawass <alexannika@users.sourceforge.net>
+
+	* added commonly used modules:
+	  - faction_ships.c
+	  - launch.c
+	  - random.c
+	  - vec3.c
+	* added mission total_war1, launch_and_launch1
+
+	
+2001-12-15 Alexander Rawass <alexannika@users.sourceforge.net>
+	
+	* added _std.isNull function to test for null objects
+	* added callback 'launch' to launch new ships from script
+	
+	
+2001-12-14 Alexander Rawass <alexannika@users.sourceforge.net>
+	
+	* a joystick axis can now have an 'inverse' attribute
+	* more fixes for parseCalike problem
+	
+	
+2001-12-13 Alexander Rawass <alexannika@users.sourceforge.net>
+
+	* fix for Patrick's parseCalike problem?
+
+	
+2001-12-13 Alexander Rawass <alexannika@users.sourceforge.net>
+
+	* added strings to c_alike.yacc
+	* added string callbacks src/cmd/script/script_call_string.cpp
+	* made Unit remember the Flightgroup & nr
+	* testd_unit1.mission now prints out also the fg id
+	
+
+2001-12-12 Alexander Rawass <alexannika@users.sourceforge.net>
+	
+	* added file src/cmd/script/script_call_unit.cpp
+
+
+2001-12-12 Alexander Rawass <alexannika@users.sourceforge.net>
+	
+	* added file src/cmd/script/script_call_olist.cpp
+	* improved olist code
+	* added variable 'startgame' to section 'interpreter' in
+	  vegastrike.config
+	
+	
+2001-12-11 Alexander Rawass <alexannika@users.sourceforge.net>
+	
+	* interpreter runs now while the game goes on
+	* added callback 'getGameTime'
+
+	
+2001-12-11 Alexander Rawass <alexannika@users.sourceforge.net>
+
+	* interpreter can use c_alike module files
+
+2001-12-10 Alexander Rawass <alexannika@users.sourceforge.net>
+	
+	* imported vegastrike/src/cmd/script/c_alike
+	* modified Makefile.am's and configure.in
+
+2001-12-07 Alexander Rawass <alexannika@users.sourceforge.net>
+
+	* digital hatswitch code can be turned off/on with
+	  debug_digital_hatswitch in section joystick
+
+
+2001-12-06 Alexander Rawass <alexannika@users.sourceforge.net>
+
+	* interpreter:
+	  - datatype object
+	  - callback 'olist' implements list
+	
+
+2001-12-06 Alexander Rawass <alexannika@users.sourceforge.net>
+
+	* interpreter:
+	  - moved code out of mission_script.cpp:
+	    - added script_variables.cpp
+	    - added script_util.cpp
+	    - modified cmd/script/Makefile.am
+
+
+2001-12-04 Alexander Rawass <alexannika@users.sourceforge.net>
+
+	* interpreter:
+	  - import of multiple modules
+	  - exec in another module
+	  - saveVariables
+	  - datatype object (not yet)
+	* change of dir structure
+	  - modified src/Makefile.am src/cmd/Makefile.am configure.in
+	  - imported interpreter code at src/cmd/script
+	  - imported missions to data/mission
+	  - imported modules to data/modules
+	* imported doc dir at vegastrike/doc
+	  
+
+2001-12-04 Alexander Rawass <alexannika@users.sourceforge.net>
+	
+	* interpreter:
+	  - scripts can have return values
+	  - global variables
+	  - while works
+	  - exec is checked for correct return type
+
+	
+2001-12-03 Alexander Rawass <alexannika@users.sourceforge.net>
+
+	* added more script tests
+	* improved interpreter
+	  - multiple scripts in module
+	  - exec to call scripts from scripts
+	  - arguments to exec
+	* added section "interpreter" to vegastrike.conf
+	  added variable "debuglevel" to that section
+
+	
+2001-12-02 Alexander Rawass <alexannika@users.sourceforge.net>
+
+	* mission script interpreter working
+	* added more testd*.mission files
+
+
+2001-12-01 Alexander Rawass <alexannika@users.sourceforge.net>
+	
+	* same seed when in benchmark mode
+	* worked on the script interpreter:
+	  - added script_callbacks.cpp to Makefile.am
+	* added test missions:
+	  - ships_confed1,ships_ares1
+	  - testd_random1
+
+
+2001-11-27 Alexander Rawass <alexannika@users.sourceforge.net>
+	
+	* modified main_loop/main to have benchmarking mode
+	* mission variable: terrain
+	
+
+2001-11-27 Alexander Rawass <alexannika@users.sourceforge.net>
+
+	* last fix to link for icc
+	
+
+2001-11-26 Alexander Rawass <alexannika@users.sourceforge.net>
+	
+	* improved digital hatswitch code
+	* fixes for compilation with intel c++
+	
+
+2001-11-22 Alexander Rawass <alexannika@users.sourceforge.net>
+
+	* gethColor now correcly uses hexcolor argument
+	* modified cmd/unit_xml and cmd/terrain to use gethColor instead of getColor
+	* digital hatswitch first try
+	
+
+2001-11-19 Daniel Horn <hellcatv@hotmail.com>
+	* added terrain config file
+	* added texturemap .png image to specify which texture to use
+	* added heightmap .png image
+	* added png support (soon to port to aux_texture once the cwd stuff is in)
+	
+
+2001-11-17 Alexander Rawass <alexannika@users.sourceforge.net>
+	
+	* modified vegastrike.h to have SIMULATION_ATOM as a define
+	  that uses the float simulation_atom_var
+	* modified vs_path.cpp to init simulation_atom_var with
+	  'simulation_atom' from the config file
+	* added simulation_atom in section general to the config file
+	
+
+2001-11-16 Alexander Rawass <alexannika@users.sourceforge.net>
+
+	* uncommented AC_LANG_CPLUSPLUS in configure.in
+
+	
+2001-11-11 Alexander Rawass <alexannika@users.sourceforge.net>
+	
+	* added mission_script.cpp,script_*.cpp to src/Makefile.am
+	* added script_expression.cpp, script_statement.cpp
+	
+
+2001-11-09 Alexander Rawass <alexannika@users.sourceforge.net>
+
+	* added #ifdef HAVE_AL to the volume callbacks
+	
+
+2001-11-09 Alexander Rawass <alexannika@users.sourceforge.net>
+
+	* modified config_xml to have variable subsections
+	* modified missions to have a settings section
+	* modified missions to have an origin inside settings
+	* modified star_system to take three args (3rd: planetname)
+	* modified Universe::Init to take those args
+	* modified main.cpp to use the new Universe::Init
+	
+	
+2001-11-08 Alexander Rawass <alexannika@users.sourceforge.net>
+	
+	* modified vegastrike.spec
+	* added data/vegastrike-data.spec
+	* set version in configure.in to 0.1.0cvs
+	* added data/Makefile.dist
+	* added variable joystick/deadband to vegastrike.config
+	* using now this variable in in_joystick
+	
+
+2001-11-08 Daniel Horn <hellcatv@hotmail.com>
+	* made lights resolution even less so that the sun's melting light won't take up all space
+	* fixme lights should have more levels of grainulairty in the future
+	* added TargetNearest and TargetThreat commands
+	* fixed some problems near the end of the range of the zbuffer....
+	* fixed AI to target near starships and to change targets every now and then for inaccessible stuff (eg missiles)
+	* turrets now cloak along with theri parents
+
+	
+2001-11-07 Daniel Horn <hellcatv@hotmail.com>
+	
+	* made convex objects be allowed to be farther than zfar away
+	* made gl_light_pick more robust
+	* fixed gl_light_pick for >1 light
+	* now objects in the distance are sorted in order and drawn w/o zbuf (painter algorithm
+	* FIXME painters order does not respect multiple objects sharing a mesh--though planets do not share meshes so this does not affect large planets in distance
+	
+
+2001-11-02 Alexander Rawass <alexannika@users.sourceforge.net>
+
+	* added file src/mission_script.cpp (not yet compilable)
+	* started to write mission scripting
+	* started to write documentation for mission scripting
+	
+
+2001-11-01 Daniel Horn <hellcatv@hotmail.com>
+
+	* added Polygon Offset and employed its use for Logos... now they don't fade behind other polygons
+	* changed Z-buffer to be GL_LESS to prevent saturn's rings from "peeking" out behind saturn
+	
+
+2001-11-01 Alexander Rawass <alexannika@users.sourceforge.net>
+	
+	* added setVariable to config_xml
+
+2001-11-01 Alexander Rawass <alexannika@users.sourceforge.net>
+	
+	* tried to match Daniel's request for color sections
+	* transformed easyDomFactory to template class
+	* modified config_xml to use configNode instead of easyDomNode
+	* modified colors to have sections
+	
+	
+2001-10-31 Daniel Horn <hellcatv@hotmail.com>
+
+	* happy halloween!
+	* added ship_ambient and planet_ambient into the picture
+	* of course I set them both to 0 :-)
+	* added halo parameters
+	* made turrets work with multiple subunits
+	* put in sample turret with sample carrier
+	* carrier has BSP problems due to self intersection...
+	
+2001-10-31 Alexander Rawass <alexannika@users.sourceforge.net>
+
+	* modified doxygenConfig to show comments in source
+	* modified TODO
+	* added getVariable to Mission
+	* modified Universe to have Init(string filename)
+	* modified main.cpp to load the system that's defined
+	  as 'system' in the mission file
+	* removed data/test.xml
+	* added data/sol.system (former test.xml)
+	* added error msg to star_system_xml if system file not found
+	* added used variables to vegastrike.config
+
+	
+2001-10-27 Daniel Horn <hellcatv@hotmail.com>
+2001-10-28 Daniel Horn <hellcatv@hotmail.com>
+2001-10-29 Daniel Horn <hellcatv@hotmail.com>
+
+	* ported to windows (sound et all)
+	* added Direct3DSound support for windoze hardware acceleration
+	* added doppler effect (off by default) to config & aldrv lib
+	* modified aldrv to use a limited number of sources
+	* fixed sound "stealing" so that it respected the limited sources
+	* changed weapons to play with looping sounds to eliminate static
+	* modified weapon sounds to 'steal' properly so human gets to hear his sounds
+	* modified camera to have 1/2 frame lagtime in figuring out which ships to clip
+	* modified music to respect limited number of sources.
+	* modified music to respect doppler effect & position
+	* modified music to allow <4 length playlists
+	* modified Units to have a configurable ModelDetail value (higher means that higher (better) LODs are used for far starships
+	* added factions to mission parsing (_Universe->GetFaction(int i)) hehe
+
+
+2001-10-27 Alexander Rawass <alexannika@users.sourceforge.net>
+
+	* added section printout when warning for variables
+	* modified main_loop to use nr_ships
+	* modified Unit constructor to take a Flightgroup argument
+	
+	
+2001-10-25 Alexander Rawass <alexannika@users.sourceforge.net>
+	
+	* fixed bug in joystick routines that caused it to fly wildly around
+	   on win32 when having no joystick
+
+
+2001-10-25 Daniel Horn <hellcatv@hotmail.com>
+	* added ability to delete playing sounds
+	* added ability to have explosions without alpha (GL_ONE,GL_ONE)
+	* changed GFXPickLights's checking if object was too large to work with to use floats so it won't over flow
+	* fixed GFXPickLights () to actually work! (now lights are picked out of a 3d hash table)
+	* added the option to put star system lights into the 3d hash table light="0 1l"  means 0 is on globally and 1 is on for starships "near enough" Now we only have 1 global light and 1 attenuated light for starships "close enough" Framerates should skyrocket for GeForce cards
+	* learned not to debug with fastmath on
+	* added default states for cockpits
+	* added default space background color if backgrounds should be off
+	* modified test.xml to make planets farther apart
+	* modified config_xml.cpp to print out the missing var's default val
+	
+2001-10-25 Alexander Rawass <alexannika@users.sourceforge.net>
+	
+	* implemented orders in mission file (preliminary)
+	* wrote stuff to use it in createObjects(), but could not be used properly
+	
+
+2001-10-25 Daniel Horn <hellcatv@hotmail.com>
+	* added starsystem based lighting (now planets may emit lights
+	* define a light at the top of a system then any planets may use such a light. 
+	* data directory changed so that starships get hot (glow) when they get close to the sun.  Ambient light index increased for dinged up monitors (you can edit it yourself... 
+
+
+2001-10-24 Daniel Horn <hellcatv@hotmail.com>
+
+	* added Turrets to the scenes.  They may use any preconcieved AI script, but right now they just load "turntowards" and "fireat" target
+	* made an ifdef to allow the user to fly a turret  #ifdef IPILOTTURRET
+	* IFLYTURRET will only work if the unit in question has a turret
+	* add turrets as follows:  	<Subunit file="rapier" y="10" ri="0" rj="1" rk="0" pi="0" pj="0" pk="1" restricted="-.5"/>
+	* turrets may not use their own type for a turret...
+	* retricted means dot with "Ri,Rj,Rk" vector must be greater than that value  (so turrets can't turn inside a hull)	
+
+
+2001-10-24 Alexander Rawass <alexannika@users.sourceforge.net>
+
+	* new command-line argument: vegastrike <mission-name>
+	* removed old un-needed code (old key-bindings)
+	* removed debugging output from my routines
+	* removed old data dir from vegastrike/Makefile.am
+	* removed data/Makefile from configure.in
+
+	
+2001-10-24 Alexander Rawass <alexannika@users.sourceforge.net>
+	
+	* added support for analogue hatswitch, should work now
+	* ABKey can now be used on two or more bindings
+
+
+2001-10-23 Daniel Horn <hellcatv@hotmail.com>
+
+	* added cloaking as a feature
+	* added cloaking sound to the config file
+	* added cloaking to the AI
+	* made it so targetting respected cloaked starships
+	* made it so weapons respected cloaked starships
+	* added CloakFor AI script that will cloak for N seconds
+	* added a cloak keybinding
+	* added the basis for fog in the future
+
+2001-10-23 Alexander Rawass <alexannika@users.sourceforge.net>
+	
+	* changed a lot in in_joystick to support any number of axes
+	* added analogue hatswitch parser, but not yet used
+
+
+2001-10-23 Alexander Rawass <alexannika@users.sourceforge.net>
+	
+	* modified firekeyboard so that two keys can have the same command
+	  (FireKey)
+	* modified flyjoystick to map axis from config file
+	* added variables to test1.mission for later use
+	
+	
+2001-10-23 Alexander Rawass <alexannika@users.sourceforge.net>
+
+	* modified main_loop to use xml-missions
+	* modified unit_xml/event_xml to output filenames if not found
+	* added mission to vs_globals.h
+	* call to Mission is done in main.cpp
+	* modified test1.mission
+
+
+2001-10-22 Alexander Rawass <alexannika@users.sourceforge.net>
+
+	* added bindings for joy-buttons
+	  works only for some commands
+	* ordered .vegastrikerc better
+	
+	
+2001-10-22 Daniel Horn <hellcatv@hotmail.com>
+	* modified units to go in <data>/unit/<unitname> or <data>/unit/<factionname>/<unitname>
+	* modified textures go either in the "current dir" or in <data>/textures/ for shared textures
+	* modified sounds to either go in the current dir or <data>/sounds
+	* modified animations to go in <currentdir>/animations
+	* modified sprites to go in <currentdir>/sprites
+	* allowed flat data directories too :-)
+
+	* changed the number of times the sound's location was updated to once every physics phase
+	* fixed  a problem with weapons (one that had been there for a while) that weapons would be fired by the AI script and not be aligned to a physics frame... this produced a somewhat cool but undesirable effect to have the weapons seem to carry with them a lot of inertia  so I made the unit remember when a shot was fired, and then instead "fire it" at the physics frame 
+	* problem caused: because the physics frame deals with the "next" frame instead of this one....  so I had to use the saved data from the previous frame...which is somewhat inaccurate as I do not know the parent of this unit (may cause problems with a turret on a wildly evading starship)
+
+
+2001-10-21 Daniel Horn <hellcatv@hotmail.com>
+
+	* added Sound support
+	* added buffers share preloaded sounds
+	* added heuristic that will take X sounds of one type and N closest sounds
+	* modified weapon sounds to be present on the mount (with exception of beams)
+	* added sounds in unit config file and global config file for common things like explosions, etc
+	* added music that will determine the "badness" of current situation and play sounds accordingly
+
+
+2001-10-21 Alexander Rawass <alexannika@users.sourceforge.net>
+	
+	* added mapping from string to KBHandler to config_xml
+	* modified firekeyboard.h
+	  the static void xxKey(int, KBSTATE) are now public
+	   to be used in config_xml
+	* removed config tests from main.cpp
+	* uncommented old BindKeys(..) in FlyByKeyboard::FlyByKeyboard 
+	* uncommented old BindKeys(..) in FireKeyboard
+	* uncommented old BindKeys(..) in main_loop:InitializeInput
+	* added cockpit-callbacks to main_loop.h
+	  gave it namespace CockpitKeys
+	* added bindings to vegastrike.config
+	
+
+2001-10-20 Alexander Rawass <alexannika@users.sourceforge.net>
+
+	* added variables and colors to vegastrike.config
+	* renamed vegaconfig.* to config_xml.* (Daniel's request)
+	* modified src/Makefile.am (vegaconfig to config_xml)
+	* modified includes in config_xml.cpp, main.cpp and many more ;-)
+	* modified TODO/Jobs list
+	
+
+2001-10-20 Daniel Horn <hellcatv@hotmail.com>
+
+	* added maximum range and cone functions to various radars
+	* added color utilization to the radar 
+	* added radar config file to unit_xml that could specify radar stuff
+
+	
+2001-10-19 Daniel Horn <hellcatv@hotmail.com>
+
+	* added stub functions in for planned audio functions
+	* used stub functions in the places where audio will be present
+	* added some init functions to OpenAL functions
+	* added config files to gfxlib so they use vegastrike.config
+	* added config file defaults to star_system star blending
+
+2001-10-19 Alexander Rawass <alexannika@users.sourceforge.net>
+
+	* added colors and bindings to vegaconfig
+	  - the bindings are parsed but not yet bound
+	* added src/mission.{cpp,h}
+	  - the mission is parsed but not yet used
+	* modified src/Makefile.am (added mission)
+	* added data/test1.mission
+	* modified data/Makefile.am (added test1.mission)
+	* added call to Mission to main.cpp (preliminary)
+	
+
+2001-10-18 Alexander Rawass <alexannika@users.sourceforge.net>
+	
+	* added easydom.{cpp,h}
+	* added easydom.{cpp,h} to src/Makefile.am
+	* re-wrote src/vegaconfig
+	* re-wrote data/vegastrike.config
+	* added config tests in main.cpp
+
+	
+2001-10-16 Alexander Rawass <alexannika@users.sourceforge.net>
+
+	* modified src/vegaconfig
+	* added vegaconfig.{cpp,h} to src/Makefile.am
+	* added call to VegaConfig to main.cpp::main
+	
+
+2001-10-16 Alexander Rawass <alexannika@users.sourceforge.net>
+
+	* added data/vegastrike.config (not used yet)
+	* added src/vegaconfig.h  (not used yet)
+	* added src/vegaconfig.cpp (not used yet)
+	* changed data/Makefile.am from pattern to list
+	
+	
+2001-10-14 Alexander Rawass <alexannika@users.sourceforge.net>
+
+	* added data/Makefile.am
+	* modified src/Makefile.am to install binary in $(prefix)/games/@PACKAGE@/bin
+	* added objconf/Makefile.am
+	* changed configure.in :
+	  - version set to 0.0.9cvs
+	  - added data and objconv to AC_OUTPUT
+	* changed toplevel Makefile.am to find subdirs data and objconv
+	* added RPM spec file vegastrike.spec
+	
+
+2001-10-11 Alexander Rawass <alexannika@users.sourceforge.net>
+
+	* added joystick buttons
+	  - wrote BindButton etc in in_joystick
+	  - buttonBindings are called in ProcessJoystick
+	  - buttons are bound in FlyByJoystick (FireKeyboardButtons don't work?)
+	  - buttonState is set in FlyByJoystick::Execute
+
+	
+2001-10-11 Alexander Rawass <alexannika@users.sourceforge.net>
+
+	* made joystick work (no buttons yet, no hat, just steering)
+	  - no FlyByWire::Execute(); is called in FlyByKeyboard::Execute()
+	      when Joystick is enabled
+	    FlyByWire::Execute(); is called instead in FlyByJoystick::Execute()
+            please check if keyboard still works on systems without joystick
+	  - modified FlyByJoystick::Execute()
+	  - improved in_joystick
+	  - ProcessJoystick is just a dummy function now
+
+	
+2001-10-10 Alexander Rawass <alexannika@users.sourceforge.net>
+
+	* modified doxyConfig:
+	  replaced absolute path with relative
+	  (documentation is generated in ./doxygen)
+	  added alphabetical listing
+	* added files in_joystick.{cpp,h}
+	* modified Makefile.am to compile in_joystick
+	* uncommented SDL_Init in main.cpp
+	* calling Process/InitJoystick in in_main.cpp
+	* yet only debug-output is done, joystick has no effect yet
+	* had to convert modified files from dos to unix

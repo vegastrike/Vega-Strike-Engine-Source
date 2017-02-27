@@ -1,0 +1,223 @@
+<comm>
+	<node text="startingNode" relationship="0"><!-- node 0 (starting node: Don't link here)-->
+		<edge index="1"/>
+		<edge index="2"/>
+		<edge index="3"/>
+	</node>
+
+<!-- Starting Points -->
+	<node text="We sense in you the will to repent." relationship=".1"><!-- node 2-->
+		<edge index="4"/>
+		<edge index="5"/>
+		<edge index="6"/>
+		<edge index="7"/>
+	</node>
+	<node text="Those who are not with us walk a dark path. Do you know where your feet lead?" relationship="0"><!-- node 2-->
+		<edge index="4"/>
+		<edge index="5"/>
+		<edge index="6"/>
+		<edge index="7"/>
+	</node>
+	<node text="You are a boil that shall be lanced!" relationship="-.2"><!-- node 3-->
+		<edge index="8"/>
+		<edge index="9"/>
+		<edge index="10"/>
+		<edge index="11"/>
+	</node>
+<!-- End of Starting Points -->
+
+<!-- Other Nodes -->
+	<node text="If we cannot return you to the fold, you must be culled!" relationship="-.046875"><!-- node 4-->
+		<edge index="4"/>
+		<edge index="5"/>
+		<edge index="6"/>
+		<edge index="7"/>
+	</node>
+	<node text="You embrace sickness! May our fire cleanse your dying flesh." relationship="-.0625"><!-- node 5-->
+		<edge index="4"/>
+		<edge index="5"/>
+		<edge index="6"/>
+		<edge index="7"/>
+	</node>
+	<node text="There is no hope for those no longer human!" relationship="-0.078125"><!-- node 6-->
+		<edge index="4"/>
+		<edge index="5"/>
+		<edge index="6"/>
+		<edge index="7"/>
+	</node>
+	<node text="Cursed demonspawn of twisted genes and machines, return to the hell that birthed you!." relationship="-.125"><!-- node 7-->
+		<edge index="4"/>
+		<edge index="5"/>
+		<edge index="6"/>
+		<edge index="7"/>
+	</node>
+	<node text="In death alone may you be saved from your own twisted flesh." relationship="-.03125"><!-- node 8-->
+		<edge index="8"/>
+		<edge index="9"/>
+		<edge index="10"/>
+		<edge index="11"/>
+	</node>
+	<node text="The shepherd knows when to cull the sickly ones. Why do they not know themselves?" relationship="-.03125"><!-- node 9-->
+		<edge index="8"/>
+		<edge index="9"/>
+		<edge index="10"/>
+		<edge index="11"/>
+	</node>
+	<node text="Your shambling taint shall stain our race no more!" relationship="-.0625"><!-- node 10-->
+		<edge index="8"/>
+		<edge index="9"/>
+		<edge index="10"/>
+		<edge index="11"/>
+	</node>
+	<node text="Make peace with whatever devils drive you, you shall meet them soon!" relationship="-.125"><!-- node 11-->
+		<edge index="8"/>
+		<edge index="9"/>
+		<edge index="10"/>
+		<edge index="11"/>
+	</node>
+	<node text="Our wrath, like pure humanity, is without end!" relationship="-.0625"><!-- node 12-->
+		<edge index="12"/>
+		<edge index="13"/>
+		<edge index="14"/>
+		<edge index="15"/>
+	</node>
+	<node text="So petulant are your kind, without the good grace to die from shame!" relationship="-.0625"><!-- node 13-->
+		<edge index="12"/>
+		<edge index="13"/>
+		<edge index="14"/>
+		<edge index="15"/>
+	</node>
+	<node text="We are rightious, you are wrong - your struggle is already decided." relationship="-.0625"><!-- node 14-->
+		<edge index="12"/>
+		<edge index="13"/>
+		<edge index="14"/>
+		<edge index="15"/>
+	</node>
+	<node text="You deface the very image of God with your existence!" relationship="-.125"><!-- node 15-->
+		<edge index="12"/>
+		<edge index="13"/>
+		<edge index="14"/>
+		<edge index="15"/>
+	</node>
+	<node text="I care not if you are a monster or merely serve them - both must die!" relationship="-.03125"><!-- node 16-->
+		<edge index="16"/>
+		<edge index="17"/>
+		<edge index="18"/>
+		<edge index="19"/>
+	</node>
+	<node text="Glory to the true form, death to the defacers!" relationship="-.0625"><!-- node 17-->
+		<edge index="16"/>
+		<edge index="17"/>
+		<edge index="18"/>
+		<edge index="19"/>
+	</node>
+	<node text="Run from my purity and light, dark one!" relationship="-.0625"><!-- node 18-->
+		<edge index="12"/>
+		<edge index="13"/>
+		<edge index="14"/>
+		<edge index="15"/>
+	</node>
+	<node text="Fear me, corrupted one, for I am the cure to your cancerous existence!" relationship="-.125"><!-- node 19-->
+		<edge index="16"/>
+		<edge index="17"/>
+		<edge index="18"/>
+		<edge index="19"/>
+	</node>
+	<node text="Docking operation complete. You're free of the docking clamps." relationship="-0.01">
+		<edge index="4"/>
+		<edge index="5"/>
+		<edge index="6"/>
+		<edge index="7"/>
+	</node>
+	<node text="You are not in docking clamps. Move into one of the green guide boxes and try to dock again." relationship="-.005">
+		<edge index="8"/>
+		<edge index="9"/>
+		<edge index="10"/>
+		<edge index="11"/>
+	</node>
+	<node text="Docking Operation begun; press 0 to step into airlock." relationship="-0">
+		<edge index="8"/>
+		<edge index="9"/>
+		<edge index="10"/>
+		<edge index="11"/>
+	</node>		
+	<node text="Docking denied. You are not authorized to land here!" relationship="-0">
+		<edge index="8"/>
+		<edge index="9"/>
+		<edge index="10"/>
+		<edge index="11"/>
+	</node>		
+	<node text="The true of heart, body, and mind are always welcome here." relationship="-0">
+		<edge index="8"/>
+		<edge index="9"/>
+		<edge index="10"/>
+		<edge index="11"/>
+	</node>		
+	<node text="Negatory." relationship="-0">
+		<edge index="8"/>
+		<edge index="9"/>
+		<edge index="10"/>
+		<edge index="11"/>
+	</node>		
+	<node text="Affirmative." relationship="-0">
+		<edge index="4"/>
+		<edge index="5"/>
+		<edge index="6"/>
+		<edge index="7"/>
+	</node>		
+	<node text="We must scan for evidence of corruption. Hold fast friend, we shall be swift." relationship="-0">
+		<edge index="8"/>
+		<edge index="9"/>
+		<edge index="10"/>
+		<edge index="11"/>
+	</node>
+	<node text="You carry naught of concern." relationship="-0">
+		<edge index="8"/>
+		<edge index="9"/>
+		<edge index="10"/>
+		<edge index="11"/>
+	</node>
+	<node text="You further within the bowels of your ship the madness of Monsters - we cannot let you proceed." relationship="-.1">
+		<edge index="12"/>
+		<edge index="13"/>
+		<edge index="14"/>
+		<edge index="15"/>
+	</node>
+	<node text="Even a single moment left is a chance to come closer to the shape of God." relationship="-0">
+		<edge index="12"/>
+		<edge index="13"/>
+		<edge index="14"/>
+		<edge index="15"/>
+	</node>	
+	<node text="Request Clearance To Land." relationship="-0">
+		<edge index="12"/>
+		<edge index="13"/>
+		<edge index="14"/>
+		<edge index="15"/>
+	</node>	
+	<node text="The Pure is eternal, and your shadow burns." relationship="-.046875"><!-- node 4-->
+		<edge index="12"/>
+		<edge index="13"/>
+		<edge index="14"/>
+		<edge index="15"/>
+	</node>
+	<node text="May death release your soul for judgement." relationship="-.2"><!-- node 3-->
+		<edge index="12"/>
+		<edge index="13"/>
+		<edge index="14"/>
+		<edge index="15"/>
+	</node>
+	<node text="The Pure is eternal! We shall not waver! The Pure is eternal! The Pure do not fear death!" relationship="-.0625"><!-- node 16-->
+		<edge index="12"/>
+		<edge index="13"/>
+		<edge index="14"/>
+		<edge index="15"/>
+	</node>
+	<node text="*hit*" relationship="-.01">
+		<edge index="12"/>
+		<edge index="13"/>
+		<edge index="14"/>
+		<edge index="15"/>
+	</node>
+<!-- End of Built-in Conversations --> 
+</comm>

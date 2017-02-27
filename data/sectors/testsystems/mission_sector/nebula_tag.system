@@ -1,0 +1,24 @@
+<system name="nebula_tag" background="backgrounds/magic_galaxy" nearstars="500" stars="1000" starspread="150">
+<Light>
+	<ambient red="0.176164" green="0.176164" blue="0.176164"/>
+	<diffuse red="0.791261" green="0.698476" blue="1.000000"/>
+	<specular red="0.626093" green="0.487869" blue="1.000000"/>
+</Light>
+<Nebula name="nebula_veryhuge" file="nebula_veryhuge" nebfile="nebula_veryhuge.nebula" ri="0.000000" rj="0.000000" rk="0.000000" si="0.000000" sj="0.000000" sk="0.000000" x="4294.435059" y="-4760.093750" z="3733.550537"  />
+<Planet name="nebula_tag A" file="stars/white_star.png" ri="0.000000" rj="0.000000" rk="0.000000" si="0.000000" sj="0.000000" sk="0.000000" radius="3500.000000" x="0" y="0" z="0"  Red="0.626093" Green="0.487869" Blue="1.000000" ReflectNoLight="true" light="0">
+	<Planet name="mission_sector/nebula_tag" file="jump.png" ri="-5353.309082" rj="4635.876465" rk="1730.510986" si="-3172.322510" sj="-1404.354858" sk="-6051.395508" radius="235.740402" x="-5517.716309" y="-7697.731934" z="6578.635742" year= "5762.647461" day="2789.433105" alpha="ONE ONE" destination="mission_sector/nebula_tag"  >
+	</Planet>
+	<Planet name="mission_sector/nebula_tag" file="jump.png" ri="2007.048096" rj="3821.469727" rk="3942.761475" si="-6375.019043" sj="411.559052" sk="2846.281250" radius="238.907959" x="-5797.551270" y="5732.472168" z="5956.521484" year= "10998.032227" day="110.091087" alpha="ONE ONE" destination="mission_sector/nebula_tag"  >
+	</Planet>
+	<Planet name="mission_sector/nebula_tag" file="jump.png" ri="3330.026611" rj="1478.853149" rk="-4221.915039" si="5943.171875" sj="-705.723328" sk="4440.464355" radius="250.582855" x="7143.690430" y="8118.929199" z="-6938.386230" year= "20971.839844" day="14535.705078" alpha="ONE ONE" destination="mission_sector/nebula_tag"  >
+	</Planet>
+	<Planet name="mission_sector/nebula_tag" file="jump.png" ri="-1465.131836" rj="-3147.662354" rk="-4564.645508" si="-6399.738281" sj="2343.506836" sk="438.126556" radius="151.761276" x="-7377.945313" y="-7562.498535" z="-6388.328125" year= "5818.691406" day="133.893646" alpha="ONE ONE" destination="mission_sector/nebula_tag"  >
+	</Planet>
+	<Planet name="mission_sector/nebula_tag" file="jump.png" ri="2629.441895" rj="-4260.996582" rk="-4337.220215" si="6284.882813" sj="-1312.977051" sk="5100.115723" radius="236.549850" x="5757.302734" y="-7381.733887" z="-6011.980957" year= "14474.969727" day="1629.632324" alpha="ONE ONE" destination="mission_sector/nebula_tag"  >
+	</Planet>
+	<Planet name="mission_sector/nebula_tag" file="jump.png" ri="-5816.650391" rj="-1020.444885" rk="2930.998291" si="223.597916" sj="6944.716309" sk="2861.581787" radius="179.257370" x="-7546.895020" y="6746.846680" z="-5623.035156" year= "36832.484375" day="8142.781250" alpha="ONE ONE" destination="mission_sector/nebula_tag"  >
+	</Planet>
+	<Planet name="mission_sector/nebula_tag" file="jump.png" ri="-6730.465820" rj="3015.016113" rk="2796.408203" si="1860.308228" sj="7113.333008" sk="-3191.978516" radius="247.031235" x="-6538.156738" y="6086.124512" z="7522.076660" year= "46401.832031" day="46237.562500" alpha="ONE ONE" destination="mission_sector/nebula_tag"  >
+	</Planet>
+</Planet>
+</system>

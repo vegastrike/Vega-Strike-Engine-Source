@@ -1,0 +1,75 @@
+#include "earth_params.h"
+#include "../stdlib_vp.h"
+
+#define outCloudCoord gl_TexCoord[0]
+#define outGroundCoord gl_TexCoord[1]
+#define outShadowCoord gl_TexCoord[2]
+#define outNoiseCoord gl_TexCoord[3]
+#define outCityCoord gl_TexCoord[4]
+
+#define varTSView gl_TexCoord[5]
+#define varTSLight gl_TexCoord[6]
+#define varWSNormal gl_TexCoord[7]
+
+uniform float fTime;
+
+float soffs(float lim, float x)
+{
+  return x + ((x>=0.0)?lim:-lim);
+}
+
+vec2 shadowExtrude(in vec2 texcoord, in vec3 direction, float mult)
+{
+  return texcoord + direction.xy * fAtmosphereExtrusion.x * fShadowRelHeight.x / soffs(0.1,direction.z) * mult;
+}
+
+void main()
+{
+   // Compute position, eye-to-object direction and normalized world-space normal
+   vec4 extrudedPosition = gl_Vertex + vec4(normalize(gl_Normal.xyz),0.0) * fAtmosphereExtrusion.x * fShadowRelHeight.x;
+   vec3 normal   = normalize(gl_NormalMatrix * gl_Normal);
+   vec3 tangent  = normalize(gl_NormalMatrix * gl_MultiTexCoord2.xyz);
+   vec3 binormal = cross(tangent, normal) * sign(gl_MultiTexCoord2.w);
+   
+   // Extrude sphere
+   vec4 position = gl_ModelViewMatrix * extrudedPosition;
+   vec3 eyetopos = normalize(position.xyz);
+   
+   vec4 lightpos;
+   float lightatt;
+   lightPosSizeAndAtt0(position, lightpos, lightatt);
+   
+   // TS view vector
+   varTSView.x = dot( tangent, -eyetopos );
+   varTSView.y = dot( binormal, -eyetopos );
+   varTSView.z = dot( normal, -eyetopos );
+   
+   // TS light posision
+   varTSLight.x = dot( tangent, lightpos.xyz );
+   varTSLight.y = dot( binormal, lightpos.xyz );
+   varTSLight.z = dot( normal, lightpos.xyz );
+   
+   // WS normal
+   varWSNormal.xyz = normal;
+   
+   // Load varyings
+   outCloudCoord       = gl_MultiTexCoord0 + fTime*fvCloudLayerDrift.xyxy;
+   outNoiseCoord       = gl_MultiTexCoord0 - fTime*fvCloudLayerDrift.xyxy;
+   outCityCoord        = gl_MultiTexCoord0;
+   outGroundCoord      = shadowExtrude(outCloudCoord.xy, varTSView.xyz, 1.0).xyxy;
+   outShadowCoord      = shadowExtrude(outGroundCoord.xy, varTSLight.xyz, -1.0).xyxy;
+   
+   // set primary color to the emissive material properties
+   vec4 pc = gl_FrontMaterial.emission;
+   vec4 sc = vec4(0.0);
+   pc.a = fvCloudColor.a * fCloudLayerDensity;
+   
+   pc.rgb += fvCloudColor.rgb * gl_LightSource[0].diffuse.rgb * lightatt;
+   sc.rgb += fvCloudColor.rgb * gl_LightSource[0].specular.rgb * lightatt;
+   
+   // Need this instead of ftransform() for invariance
+   gl_Position = gl_ModelViewProjectionMatrix * extrudedPosition;
+   gl_FrontColor = gl_BackColor = pc;
+   gl_FrontSecondaryColor = gl_BackSecondaryColor = sc;
+}
+

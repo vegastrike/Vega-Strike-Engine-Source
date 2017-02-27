@@ -1,0 +1,185 @@
+<?xml version="1.0"?>
+<technique fallback="0_fixed_gl/mars">
+    <!-- Full-blown shader technique, with Z-write prepass to avoid
+         shading overhead for occluded fragments.
+         
+         This technique implements normal-mapping, specmaps with intensity-derived
+         shininess modulation, specularity normalization, specmap perturbation, 
+         and supports up to 8 lights.
+         
+         This is a multi-pass technique, so every light is rather expensive.
+         As such, it will render only the first two lights.
+    -->
+
+    <!-- Z-write prepasses go at sequence 10 -->
+    <pass type="shader" sequence="10" cull="back" cwrite="false">
+        <vertex_program src="zwrite"/>
+        <fragment_program src="zwrite"/>
+        <texture_unit src="decal:0" default="file:white.bmp" name="diffuseMap"/>
+    </pass>
+
+    <!-- atmosphere halo effect -->
+    <pass type="shader" sequence="14" cull="back" 
+            zwrite="false"
+            srgb_aware="true"
+            iteration="once"
+            blend="alpha_blend">
+        <vertex_program src="planet/atmo_vs1.1.nonvar"/>
+        <fragment_program src="planet/atmo_ps1.4"/>
+
+        <texture_unit src="environment" name="envMap"/>
+        <texture_unit src="file:cosAngleToDepth_1024.png" name="cosAngleToDepth_20"/>
+
+        <param name="fAtmosphereExtrusionType_Thickness_Contrast_LAOffs" value="0.75,1540.0,1.25,0.04" optional="true"/>
+        <param name="fAtmosphereExtrusion" value="1500.0" optional="true"/>
+        <param name="fGroundContrast_SelfShadowFactor_MinMaxScatterFactor" value="3.0,0.2,0.2,8.96" optional="true"/>
+        <param name="fReyleighRate_Amount" value="4.0,8.0" optional="true"/>
+        <param name="fAtmosphereAbsorptionColor" value="0.768627,0.684211,0.500451,1.000000" optional="true"/> <!-- rgb color, a=rate -->
+        <param name="fAtmosphereScatterColor" value="0.682353,0.757900,1.000000,0.900000" optional="true"/>
+        <param name="fAtmosphereExtrusionNDLScaleOffsSteepThick" value="0.70,0.03,4.0,1.72" optional="true"/>
+
+        <auto_param name="fTime" semantic="GameTime" optional="true"/>
+        <auto_param name="envColor" semantic="EnvColor" optional="true"/>
+        
+        <auto_param name="light_enabled" semantic="ActiveLightsArray" optional="true"/>
+        <auto_param name="light_size" semantic="ApparentLightSizeArray" optional="true"/>
+        <auto_param name="max_light_enabled" semantic="NumLights" optional="true"/>
+        
+    </pass>
+
+    <!-- main lighting pass -->
+    <pass type="shader" sequence="14" cull="back" 
+            zwrite="false" 
+            srgb_aware="true"
+            iteration="1" maxiterations="1"
+            blend="multi_alpha_blend">
+        <vertex_program src="planet/ground_vs1.1.nonvar"/>
+        <fragment_program src="planet/ground_ps1.4"/>
+        
+        <texture_unit src="decal:0" default="file:white.bmp" name="baseMap_20"/>
+        <texture_unit src="environment" name="envMap"/>
+        <texture_unit src="decal:1" default="file:black.png" name="specularMap_20"/>
+        <texture_unit src="decal:2" name="cloudMap_20"/>
+        <texture_unit src="decal:3" default="file:black.png" name="cityLights_20"/>
+        <texture_unit src="decal:4" default="file:blue.png" name="normalMap_20"/>
+        <texture_unit src="file:cosAngleToDepth_1024.png" name="cosAngleToDepth_20"/>
+        <texture_unit src="file:noise.png" name="noiseMap_20"/>
+
+        <param name="fAtmosphereType_Thickness_Contrast_LAOffs" value="0.980380,140.0,1.5,0.04" optional="true"/>
+        <param name="fAtmosphereShadowInfluence" value="0.5" optional="true"/>
+        <param name="fAtmosphereExtrusion" value="0.048000" optional="true"/>
+        <param name="fBumpScale" value="0.001,24.0,0.025,0.0" optional="true"/>
+        <param name="fGroundContrast_SelfShadowFactor_MinMaxScatterFactor" value="3.0,0.2,0.2,2.24" optional="true"/>
+        <param name="fCityLightTriggerBias" value="0.2" optional="true"/>
+        <param name="fCloud_Dens_Thick_CLF_SSF" value="2.0,0.5,1.0,0.3" optional="true"/>
+        <param name="fFresnelEffect" value="0.98" optional="true"/>
+        <param name="fReyleighRate_Amount" value="4.0,8.0" optional="true"/>
+        <param name="fShininess" value="0.16" optional="true"/>
+        <param name="fvCityLightColor" value="0.4,0.4,0.4,1.0" optional="true"/>
+        <param name="fvCloudLayerDrift_ShadowRelHeight" value="0.0002,0.000,0.002,0.03" optional="true"/>
+        <param name="fvShadowColor" value="0.321569,0.323308,0.323308,1.000000" optional="true"/>
+        <param name="fAtmosphereAbsorptionColor" value="0.768627,0.684211,0.500451,1.000000" optional="true"/> <!-- rgb color, a=rate -->
+        <param name="fAtmosphereScatterColor" value="0.682353,0.757900,1.000000,0.900000" optional="true"/>
+
+        <auto_param name="fTime" semantic="GameTime" optional="true"/>
+        <auto_param name="envColor" semantic="EnvColor" optional="true"/>
+        
+        <auto_param name="light_enabled" semantic="ActiveLightsArray" optional="true"/>
+        <auto_param name="light_size" semantic="ApparentLightSizeArray" optional="true"/>
+        <auto_param name="max_light_enabled" semantic="NumLights" optional="true"/>
+        
+    </pass>
+    
+    <!-- environment lighting pass -->
+    <pass type="shader" sequence="14" cull="back" 
+            zwrite="false" 
+            srgb_aware="true"
+            iteration="once"
+            blend="add">
+        <vertex_program src="planet/environment"/>
+        <fragment_program src="planet/environment_ps1.4"/>
+
+        <texture_unit src="decal:0" default="file:white.bmp" name="diffuseMap"/>
+        <texture_unit src="environment" name="envMap"/>
+        <texture_unit src="decal:1" default="file:black.png" name="specMap"/>
+        <texture_unit src="decal:2" default="file:sol/earthcloudmaptrans2.texture" name="cloudMap"/>
+        <texture_unit src="decal:3" default="file:black.png" name="cityMap"/>
+        <texture_unit src="file:cosAngleToDepth_1024.png" name="cosAngleToDepth_20"/>
+        
+        <param name="fAtmosphereType_Thickness_Contrast_LAOffs" value="0.980380,140.0,1.5,0.04" optional="true"/>
+        <param name="fCloudLayerDensity" value="0.0" optional="true"/>
+        <param name="fAtmosphereThickness" value="540.0" optional="true"/>
+        <param name="fAtmosphereExtrusion" value="0.048000" optional="true"/>
+        <param name="fvCloudColor" value="1.0,1.0,1.0,1.0" optional="true"/>
+        <param name="fvCloudLayerDrift_ShadowRelHeight" value="0.0002,0.000,0.002,0.03" optional="true"/>
+        <param name="fAtmosphereScatterColor" value="0.682353,0.757900,1.000000,0.900000" optional="true"/>
+        <param name="fShininess" value="0.16" optional="true"/>
+        <param name="fFresnelEffect" value="0.98" optional="true"/>
+        <param name="fCloud_Dens_Thick_CLF_SSF" value="1.0,0.5,1.0,0.3" optional="true"/>
+        <param name="fCityLightTriggerBias" value="0.2" optional="true"/>
+        <param name="fvCityLightColor" value="1.0,1.0,1.0,1.0" optional="true"/>
+        
+        <auto_param name="fTime" semantic="GameTime" optional="true"/>
+        
+        <auto_param name="envColor" semantic="EnvColor" optional="true"/>
+        
+    </pass>
+    
+    <!-- clouds pass -->
+    <pass type="shader" sequence="14" cull="back" 
+            zwrite="false"
+            srgb_aware="true"
+            iteration="1" maxiterations="1"
+            blend="multi_alpha_blend"
+            polygon_offset_units="-1">
+        <vertex_program src="planet/cloud_vs1.1.nonvar"/>
+        <fragment_program src="planet/cloud_ps1.4"/>
+
+        <texture_unit src="environment" name="envMap"/>
+        <texture_unit src="decal:2" name="cloudMap_20"/>
+        <texture_unit src="decal:3" default="file:black.png" name="cityLights_20"/>
+        <texture_unit src="file:cosAngleToDepth_1024.png" name="cosAngleToDepth_20"/>
+        <texture_unit src="file:noise.png" name="noiseMap_20"/>
+
+        <param name="fAtmosphereType_Thickness_Contrast_LAOffs" value="0.980380,140.0,2.0,0.04" optional="true"/>
+        <param name="fAtmosphereExtrusion" value="0.048000" optional="true"/>
+        <param name="fBumpScale" value="0.001,24.0,0.1,0.0" optional="true"/>
+        <param name="fGroundContrast_SelfShadowFactor_MinMaxScatterFactor" value="3.0,0.2,0.05,2.24" optional="true"/>
+        <param name="fCityLightTriggerBias" value="0.2" optional="true"/>
+        <param name="fCloud_Dens_Thick_CLF_SSF" value="0.3,0.5,1.0,0.3" optional="true"/>
+        <param name="fReyleighRate_Amount" value="4.0,8.0" optional="true"/>
+        <param name="fvCityLightCloudDiffusion" value="3.0,5.0" optional="true"/>
+        <param name="fvCityLightColor" value="1.0,1.0,1.0,1.0" optional="true"/>
+        <param name="fvCloudLayerDrift_ShadowRelHeight" value="0.0002,0.000,0.002,0.03" optional="true"/>
+        <param name="fvCloudLayerDrift" value="0.0002,0.000,0.002,0.2" optional="true"/>
+        <param name="fvCloudLayerMix" value="0.5,0.20,0.20,0.40" optional="true"/>
+        <param name="fvCloudSelfShadowColor" value="0.0,0.0,0.0,1.000000" optional="true"/>
+        <param name="fvCloudColor" value="1.0,1.0,1.0,1.0" optional="true"/>
+        <param name="fShadowRelHeight" value="0.030000" optional="true"/>
+        <param name="fAtmosphereAbsorptionColor" value="0.768627,0.684211,0.500451,1.000000" optional="true"/> <!-- rgb color, a=rate -->
+        <param name="fAtmosphereScatterColor" value="0.682353,0.757900,1.000000,0.900000" optional="true"/>
+
+        <auto_param name="fTime" semantic="GameTime" optional="true"/>
+        <auto_param name="envColor" semantic="EnvColor" optional="true"/>
+        
+        <auto_param name="light_enabled" semantic="ActiveLightsArray" optional="true"/>
+        <auto_param name="light_size" semantic="ApparentLightSizeArray" optional="true"/>
+        <auto_param name="max_light_enabled" semantic="NumLights" optional="true"/>
+    </pass>
+    
+<!--
+
+baseMap: "D:\Monografias\Claudio\Progs\vegastrike\contrib\celestia\earth\Don Edwards\RealisticEarth-v4-4kPNG.dds" ORIGIN="0"/>
+cityLights: "D:\Monografias\Claudio\Progs\vegastrike\contrib\celestia\earth\John van Vilet\EarthNight.dds" ORIGIN="0"/>
+pow256: "D:\Monografias\Claudio\Progs\vegastrike\data5.x\core\textures\specular_fn\pow256.png" ORIGIN="0"/>
+specmap: "D:\Monografias\Claudio\Progs\vegastrike\contrib\celestia\earth\Don Edwards\4kEarthSpecular.dds" ORIGIN="0"/>
+cosAngleToDepth: "D:\Monografias\Claudio\Progs\vegastrike\branches\ogre_branch\data5.x\core\textures\atmosphericScatter\cosAngleToDepth_512.png" ORIGIN="0"/>
+normalMap: "D:\Monografias\Claudio\Progs\vegastrike\contrib\celestia\earth\John van Vilet\4kEarthNormalBump.png" ORIGIN="0"/>
+cosAngleToDepth_1024: "D:\Monografias\Claudio\Progs\vegastrike\branches\ogre_branch\data5.x\core\textures\atmosphericScatter\cosAngleToDepth_1024.png" ORIGIN="0"/>
+noise: "C:\Program Files\ATI Research Inc\RenderMonkey 1.6\Examples\Media\Textures\noise.tga" ORIGIN="0"/>
+cloudMap: "D:\Monografias\Claudio\Progs\vegastrike\contrib\celestia\earth\Don Edwards\clouds-121303-4k-forvs3.png" ORIGIN="0"/>
+cloudDetailMap: "D:\Monografias\Claudio\Progs\vegastrike\branches\ogre_branch\data5.x\mods\vegastrike\textures\planets\detail\cloud.png" ORIGIN="0"/>
+
+-->
+</technique>
+

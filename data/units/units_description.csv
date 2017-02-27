@@ -1,0 +1,822 @@
+,Textual_Description
+Key,string
+,
+admonisher,"Purist light assault craft"
+admonisher__homeland-security,"Purist light assault craft"
+admonisher__homeland-security.blank,"Purist light assault craft"
+admonisher.blank,"Purist light assault craft"
+admonisher.old,"Purist light assault craft"
+,
+aelar,"Aeran escort/superiority fighter"
+aelar.blank,"Aeran escort/superiority fighter"
+,
+aeon,"Aeran interceptor"
+aeon.blank,"Aeran interceptor"
+,
+aevant,"Aeran assault craft (fighter bomber)"
+aevant.blank,"Aeran assault craft (fighter bomber)"
+,
+ancestor,"The 'ancestors' of the Ancestor class have been flying for hundreds of years. This most recent remodelling of the Shaper's aerospace frame has been in service for 15 years, and has seen action several times in assaults on dirtside criminal bases."
+ancestor.blank,"The 'ancestors' of the Ancestor class have been flying for hundreds of years. This most recent remodelling of the Shaper's aerospace frame has been in service for 15 years, and has seen action several times in assaults on dirtside criminal bases."
+
+,
+archimedes,"Aging considerably, the Archimedes class remains formidable at long range, where it's arsenal of capital missiles of design more modern than itself maintain its martial standing with assistance from recent upgrades to the main battery of beam weapons and fully modern sensor equipment. However, limited time, resources, and fundamental design issues have meant that the rest of the ship shows the age of the design enough that the survivability of the craft is not as high as it once was, even if the offensive impact has increased."
+archimedes.blank,"Aging considerably, the Archimedes class remains formidable at long range, where it's arsenal of capital missiles of design more modern than itself maintain its martial standing with assistance from recent upgrades to the main battery of beam weapons and fully modern sensor equipment. However, limited time, resources, and fundamental design issues have meant that the rest of the ship shows the age of the design enough that the survivability of the craft is not as high as it once was, even if the offensive impact has increased."
+,
+beholder,"Ancient Drone"
+,
+clydesdale,"The only warship produced at Merchant shipyards, the Clydesdale suffers somewhat from being a truly Confederation designed vessel, with noticeable committee effects. If not posessing unrivaled capabilities, nor visionary design, it is nonetheless a solid, workhorse of a vessel and produced, like all craft rolling off the Merchant shipyards, in some number."
+clydesdale.blank,"The only warship produced at Merchant shipyards, the Clydesdale suffers somewhat from being a truly Confederation designed vessel, with noticeable committee effects. If not posessing unrivaled capabilities, nor visionary design, it is nonetheless a solid, workhorse of a vessel and produced, like all craft rolling off the Merchant shipyards, in some number."
+,
+convolution,"Unadorned assault craft"
+convolution.blank,"Unadorned assault craft"
+,
+corvette,"The Thales class has the distinction of being the oldest military vessel in service that was originally designed for military use."
+corvette__pirates,"Over the decades, as they were decommissioned from the Andolian fleet and sold to other governments, many Thales class vessels have found their way into the hands of less than reputable parties."
+corvette__pirates.blank,"Over the decades, as they were decommissioned from the Andolian fleet and sold to other governments, many Thales class vessels have found their way into the hands of less than reputable parties."
+corvette.blank,"The Thales class has the distinction of being the oldest military vessel in service that was originally designed for military use."
+,
+derivative,"Unadorned missile based interceptor"
+derivative.blank,"Unadorned missile based interceptor"
+,
+determinant,"Unadorned superiority fighter"
+determinant.blank,"Unadorned superiority fighter"
+,
+dirge,"Shmrn Insystem Interceptor"
+dirge.blank,"Shmrn Insystem Interceptor"
+,
+dodo,"As a cargo tug, quite successful - as a piece of art, quite ugly."
+dodo.blank,"As a cargo tug, quite successful - as a piece of art, quite ugly."
+,
+dostoevsky,"A superioritx fighter manufactured in massive numbers by the Andolian Protectorate, the Dostoevsky combines a light, efficient design with immediately palpable firepower.  Though designed to engage other fighters, its ability to carry a torpedo, if only one, broadens the range of targets that must stay wary, especially in the numbers that Dostoevskys tend to appear in."
+dostoevsky.blank,"A superiority fighter manufactured in massive numbers by the Andolian Protectorate, the Dostoevsky combines a light, efficient design with immediately palpable firepower.  Though designed to engage other fighters, its ability to carry a torpedo, if only one, broadens the range of targets that must stay wary, especially in the numbers that Dostoevskys tend to appear in."
+,
+franklin,"Andolian diplomatic shuttle"
+franklin.blank,"Andolian diplomatic shuttle"
+,
+gawain,"The High-Born have a spacecraft manufacturing methodology most other factions reserve for Luxury Yachts. The Gawain class of interceptors stays true to this line of thinking, with exceptional performance being provided for exhorbitant cost. The price tag comes from the manufacturing method itself, the lower scale of production, and the equally important mere 3 years of production on the current version."
+gawain.blank,"The High-Born have a spacecraft manufacturing methodology most other factions reserve for Luxury Yachts. The Gawain class of interceptors stays true to this line of thinking, with exceptional performance being provided for exorbitant cost. The price tag comes from the manufacturing method itself, the lower scale of production, and the equally important mere 3 years of production on the current version."
+,
+goddard,"Recently developed Andolian bomber. One of the most advanced and most expensive human craft currently in service."
+goddard.blank,"Recently developed Andolian bomber. One of the most advanced and most expensive human craft currently in service."
+,
+GTIO,"High-Born Manufactured Civilian Sports-Vessel"
+GTIO.blank,"High-Born Manufactured Civilian Sports-Vessel"
+,
+hammer,"The Hammer assault craft was originally named the 'Toad', a creation of the LIHW.  However, usage of this model by the ISO has made it iconic, to the point where few call it by its original name.  Much larger than the other famous ISO ship, the Sickle, the Hammer  has sometimes been referred to as 'the mighty arm of the proletariat' in ISO propaganda."
+hammer.blank,"The Hammer assault craft was originally named the 'Toad', a creation of the LIHW.  However, usage of this model by the ISO has made it iconic, to the point where few call it by its original name.  Much larger than the other famous ISO ship, the Sickle, the Hammer  has sometimes been referred to as 'the mighty arm of the proletariat' in ISO propaganda."
+,
+hidalgo,"A luxury yacht of such size and quality of construction that only the wealthy can consider investing in one."
+hidalgo__pirates,"Converted luxury yachts make excellent pirate vessels, provided the pirate doesn't need to purchase the vessel in the first place."
+hidalgo__pirates.blank,"Converted luxury yachts make excellent pirate vessels, provided the pirate doesn't need to purchase the vessel in the first place."
+hidalgo.blank,"A luxury yacht of such size and quality of construction that only the wealthy can consider investing in one."
+,
+huldra,"Rlaan destroyer. Generally seen escorting larger capital vessels."
+huldra.blank,"Rlaan destroyer. Generally seen escorting larger capital vessels."
+,
+hyena,"The Hyena's size and bulk may be to its detriment as a combat vessel, but are desired properties for looting-oriented engagements."
+hyena__pirates,"The Hyena's size and bulk may be to its detriment as a combat vessel, but are desired properties for looting-oriented engagements."
+hyena__pirates.blank,"The Hyena's size and bulk may be to its detriment as a combat vessel, but are desired properties for looting-oriented engagements."
+hyena.blank,"Like their namesakes from the savannahs of Earth, Hyenas are often seen preferring to engage the damaged, the naive, and the straggler rather than pursuing more solid prey, especially when in the hands of Pirates.  Though they possess neither great speed, nor impressive maneuverability, the Hyenas nonetheless pack enough firepower to give a pilot pause, especially in packs."
+,
+idun,"The Rlaan Shizu is in many ways similar to its Confederate counterpart, the Schroedinger, meant more for reconaissance and scouting patrols than heavy combat.  Nonetheless, its twin gun mountings allow it to mount a basic defense, should it come under attack."
+idun.blank,"The Rlaan Shizu is in many ways similar to its Confederate counterpart, the Schroedinger, meant more for reconaissance and scouting patrols than heavy combat.  Nonetheless, its twin gun mountings allow it to mount a basic defense, should it come under attack."
+,
+kafka,"A Klk'k unarmed light cargo shuttle"
+kafka.blank,"A Klk'k unarmed light cargo shuttle"
+,
+kahan,"Andolian torpedo destroyer. An older model, many of the Kahans currently in service serve in the Andolian, Unadorned, and Mechanist units of the Confederation navy rather than in the Andolian Protectorate home fleet, though they are not uncommon there as well."
+kahan.blank,"Andolian torpedo destroyer. An older model, many of the Kahans currently in service serve in the Andolian, Unadorned, and Mechanist units of the Confederation navy rather than in the Andolian Protectorate home fleet, though they are not uncommon there as well."
+,
+kierkegaard,"Andolian Protectorate Missileboat/Gunship"
+kierkegaard.blank,"Andolian Protectorate Missileboat/Gunship"
+,
+lancelot,"High-Born heavy superiority fighter"
+lancelot.blank,"High-Born heavy superiority fighter"
+,
+llama,"What can be said of a llama, save for that one is rather less suited to carrying than a mule and not too adept at pulling a plowshare."
+llama.begin,"What can be said of a llama, save for that one is rather less suited to carrying than a mule and not too adept at pulling a plowshare."
+llama.blank,"What can be said of a llama, save for that one is rather less suited to carrying than a mule and not too adept at pulling a plowshare."
+,
+lodur,"Rlaan cruiser"
+lodur.blank,"Rlaan cruiser"
+,
+mule,"The Mule class is the cargo vessel of choice for anything that does not require the immense load of an Ox class. Mule class vessels are the preferred mode of military supply transport, if only because their abundance makes them easier to replace when they meet unfortunate ends."
+mule.blank,"The Mule class is the cargo vessel of choice for anything that does not require the immense load of an Ox class. Mule class vessels are the preferred mode of military supply transport, if only because their abundance makes them easier to replace when they meet unfortunate ends."
+,
+ox,"A container transport, the Ox is more suited to multi-hop interstellar bulk cargo runs than the smaller mule."
+ox.blank,"A container transport, the Ox is more suited to multi-hop interstellar bulk cargo runs than the smaller mule."
+,
+pacifier,"Aging Purist heavy fighter/bomber"
+pacifier.blank,"Aging Purist heavy fighter/bomber"
+,
+plowshare,"Lovingly referred to as a 'large brick with engines and guns', the Plowshare is a top of the line Purist cargo shuttle, far more spacious than the aged LIHW Llama, and easier to obtain for private use than the Merchant Reindeer. Much of the non-Merchant's Guild traffic within Purist friendly systems occurs via Plowshares."
+plowshare__pirates,"Pirate-centric modification to the traditional Purist Plowshare design"
+plowshare__pirates.blank,"Pirate-centric modification to the traditional Purist Plowshare design"
+plowshare.blank,"Lovingly referred to as a 'large brick with engines and guns', the Plowshare is a top of the line Purist cargo shuttle, far more spacious than the aged LIHW Llama, and easier to obtain for private use than the Merchant Reindeer. Much of the non-Merchant's Guild traffic within Purist friendly systems occurs via Plowshares."
+,
+progeny,"Shaper single-pilot interceptor"
+progeny.blank,"Shaper single-pilot interceptor"
+,
+quicksilver,"Confederation courier ship"
+quicksilver.blank,"Confederation courier ship"
+,
+redeemer,"The luddites, being by their nature not given to grand industrialization, rely on a small number of hidden facilities and sympathetic manufacturing plants to supply them with ships. The Redeemer bears the distinction of being the only class of spacecraft officially sanctioned by the reverend Sverde, who, when presented with its initial designs 45 years ago, said that prayer had revealed to her that that this was to be the 'shepherds crook' by which man's sins would be constrained. Inexpensive, even at the time of its introduction, the Redeemer remains a utilitarian craft well suited to the production schedules of backwater worlds."
+redeemer.blank,"The luddites, being by their nature not given to grand industrialization, rely on a small number of hidden facilities and sympathetic manufacturing plants to supply them with ships. The Redeemer bears the distinction of being the only class of spacecraft officially sanctioned by the reverend Sverde, who, when presented with its initial designs 45 years ago, said that prayer had revealed to her that that this was to be the 'shepherds crook' by which man's sins would be constrained. Inexpensive, even at the time of its introduction, the Redeemer remains a utilitarian craft well suited to the production schedules of backwater worlds."
+,
+robin,"The robins of Terra never achieved a reputation for being fearsome birds of prey. Neither have the Robins of the LIHW. They have however received a reputation for being dependable, cost-effective, and low-maintenance."
+robin.blank,"The robins of Terra never achieved a reputation for being fearsome birds of prey. Neither have the Robins of the LIHW. They have however received a reputation for being dependable, cost-effective, and low-maintenance."
+,
+sartre,"Andolian Protectorate orbital shuttle"
+sartre.blank,"Andolian Protectorate orbital shuttle"
+,
+schroedinger,"The Schroedinger serves as a scout ship, lightly armed when compared to most other vessels.  As per the infamous cat, its acceleration curve and advanced ECM and stealth hardware make it difficult to discern whether its in the same state it was last seen in."
+schroedinger.blank,"The Schroedinger serves as a scout ship, lightly armed when compared to most other vessels.  As per the infamous cat, its acceleration curve and advanced ECM and stealth hardware make it difficult to discern whether its in the same state it was last seen in."
+,
+sickle,"Like the Hammer, the Sickle is a ship of LIHW design, and was known prior to ISO usage as the 'Goose'. While the Hammer is more feared, the Sickle is more common. By far the most common ship seen in use by the ISO, the Sickle's maneuverability and large missile bays make it a favorite of many Hunters as well."
+sickle.blank,"Like the Hammer, the Sickle is a ship of LIHW design, and was known prior to ISO usage as the 'Goose'. While the Hammer is more feared, the Sickle is more common. By far the most common ship seen in use by the ISO, the Sickle's maneuverability and large missile bays make it a favorite of many Hunters as well."
+,
+tesla,"Andolian special purpose light cruiser introduced fairly recently into service. Designed specifically for anti-capital engagements, this vessel is unsuited to other attacking lesser targets, being in many senses a ship built as an unfortunate necessity to transport the desired weapons package."
+tesla.blank,"Andolian special purpose light cruiser introduced fairly recently into service. Designed specifically for anti-capital engagements, this vessel is unsuited to other attacking lesser targets, being in many senses a ship built as an unfortunate necessity to transport the desired weapons package."
+,
+thrud,"Rlaan mass production fighter"
+thrud.blank,"Rlaan mass production fighter"
+,
+vark,"A venerable Aeran destroyer, the Agasicles is designed far more for screening efforts than for capital engagements, but is nimble for a ship its size and dangerous in close quarters."
+vark.blank,"A venerable Aeran destroyer, the Agasicles is designed far more for screening efforts than for capital engagements, but is nimble for a ship its size and dangerous in close quarters."
+,
+vidar,"Rlaan mass production assault craft"
+vidar.blank,"Rlaan mass production assault craft"
+,
+vitik,"A carrier built on a scale of paranoid grandeur, this Aeran vessel is as much mobile base as anything else, packing sufficient supplies for prolonged engagements with contested supply lines."
+vitik.blank,"A carrier built on a scale of paranoid grandeur, this Aeran vessel is as much mobile base as anything else, packing sufficient supplies for prolonged engagements with contested supply lines."
+,
+watson,"A support vessel of joint Andolian and Mechanist manufacture, the mostly automated Watson provides in-flight re-fueling and rearming for small craft."
+watson.blank,"A support vessel of joint Andolian and Mechanist manufacture, the mostly automated Watson provides in-flight re-fueling and rearming for small craft."
+,
+yavok,"The Dreadnaught of the modern day, these Aeran battleships pack so many innovations and so much firepower into a single vessel that it is unfair to categorize it with other battlecruisers or battleships."
+yavok.blank,"The Dreadnaught of the modern day, these Aeran battleships pack so many innovations and so much firepower into a single vessel that it is unfair to categorize it with other battlecruisers or battleships."
+,
+yrilan,"Aeran cruiser, of venerable tenure of service."
+yrilan.blank,"Aeran cruiser, of venerable tenure of service."
+,
+,
+,
+,
+capacitor01__upgrades,"@upgrades/capacitor.png@Energy storage"
+capacitor02__upgrades,"@upgrades/capacitor.png@Energy storage"
+capacitor03__upgrades,"@upgrades/capacitor.png@Energy storage"
+capacitor04__upgrades,"@upgrades/capacitor2.png@Energy storage"
+capacitor05__upgrades,"@upgrades/capacitor2.png@Energy storage"
+capacitor06__upgrades,"@upgrades/capacitor2.png@Energy storage"
+capacitor07__upgrades,"@upgrades/capacitor3.png@Energy storage"
+capacitor08__upgrades,"@upgrades/capacitor3.png@Energy storage"
+capacitor09__upgrades,"@upgrades/capacitor3.png@Energy storage"
+capacitor10__upgrades,"@upgrades/capacitor4.png@Energy storage"
+capacitor11__upgrades,"@upgrades/capacitor4.png@Energy storage"
+capacitor12__upgrades,"@upgrades/capacitor4.png@Energy storage"
+capacitor13__upgrades,"@upgrades/capacitor5.png@Energy storage"
+capacitor14__upgrades,"@upgrades/capacitor5.png@Energy storage"
+capacitor15__upgrades,"@upgrades/capacitor5.png@Energy storage"
+,
+reactor01__upgrades,"@upgrades/reactor_light.png@Energy production"
+reactor02__upgrades,"@upgrades/reactor_light.png@Energy production"
+reactor03__upgrades,"@upgrades/reactor_light.png@Energy production"
+reactor04__upgrades,"@upgrades/reactor_light.png@Energy production"
+reactor05__upgrades,"@upgrades/reactor_light.png@Energy production"
+reactor06__upgrades,"@upgrades/reactor_medium.png@Energy production"
+reactor07__upgrades,"@upgrades/reactor_medium.png@Energy production"
+reactor08__upgrades,"@upgrades/reactor_medium.png@Energy production"
+reactor09__upgrades,"@upgrades/reactor_medium.png@Energy production"
+reactor10__upgrades,"@upgrades/reactor_medium.png@Energy production"
+reactor11__upgrades,"@upgrades/reactor_heavy.png@Energy production"
+reactor12__upgrades,"@upgrades/reactor_heavy.png@Energy production"
+reactor13__upgrades,"@upgrades/reactor_heavy.png@Energy production"
+reactor14__upgrades,"@upgrades/reactor_heavy.png@Energy production"
+reactor15__upgrades,"@upgrades/reactor_heavy.png@Energy production"
+,
+dualshield01__upgrades,"@upgrades/shield2light.png@GEM shielding, with fore and aft decoupling."
+dualshield02__upgrades,"@upgrades/shield2light.png@GEM shielding, with fore and aft decoupling."
+dualshield03__upgrades,"@upgrades/shield4light.png@GEM shielding, with fore and aft decoupling."
+dualshield04__upgrades,"@upgrades/shield4light.png@GEM shielding, with fore and aft decoupling."
+dualshield05__upgrades,"@upgrades/shield4light.png@GEM shielding, with fore and aft decoupling."
+dualshield06__upgrades,"@upgrades/shield2medium.png@GEM shielding, with fore and aft decoupling."
+dualshield07__upgrades,"@upgrades/shield2medium.png@GEM shielding, with fore and aft decoupling."
+dualshield08__upgrades,"@upgrades/shield4medium.png@GEM shielding, with fore and aft decoupling."
+dualshield09__upgrades,"@upgrades/shield4medium.png@GEM shielding, with fore and aft decoupling."
+dualshield10__upgrades,"@upgrades/shield4medium.png@GEM shielding, with fore and aft decoupling."
+dualshield11__upgrades,"@upgrades/shield2heavy.png@GEM shielding, with fore and aft decoupling."
+dualshield12__upgrades,"@upgrades/shield2heavy.png@GEM shielding, with fore and aft decoupling."
+dualshield13__upgrades,"@upgrades/shield4heavy.png@GEM shielding, with fore and aft decoupling."
+dualshield14__upgrades,"@upgrades/shield4heavy.png@GEM shielding, with fore and aft decoupling."
+dualshield15__upgrades,"@upgrades/shield4heavy.png@GEM shielding, with fore and aft decoupling."
+,
+quadshield01__upgrades,"@upgrades/shield.png@GEM shielding, fore, aft, port, and starboard decoupling."
+quadshield02__upgrades,"@upgrades/shield.png@GEM shielding, fore, aft, port, and starboard decoupling."
+quadshield03__upgrades,"@upgrades/shield.png@GEM shielding, fore, aft, port, and starboard decoupling."
+quadshield04__upgrades,"@upgrades/shield2.png@GEM shielding, fore, aft, port, and starboard decoupling."
+quadshield05__upgrades,"@upgrades/shield2.png@GEM shielding, fore, aft, port, and starboard decoupling."
+quadshield06__upgrades,"@upgrades/shield2.png@GEM shielding, fore, aft, port, and starboard decoupling."
+quadshield07__upgrades,"@upgrades/shield3.png@GEM shielding, fore, aft, port, and starboard decoupling."
+quadshield08__upgrades,"@upgrades/shield3.png@GEM shielding, fore, aft, port, and starboard decoupling."
+quadshield09__upgrades,"@upgrades/shield3.png@GEM shielding, fore, aft, port, and starboard decoupling."
+quadshield10__upgrades,"@upgrades/shield4.png@GEM shielding, fore, aft, port, and starboard decoupling."
+quadshield11__upgrades,"@upgrades/shield4.png@GEM shielding, fore, aft, port, and starboard decoupling."
+quadshield12__upgrades,"@upgrades/shield4.png@GEM shielding, fore, aft, port, and starboard decoupling."
+quadshield13__upgrades,"@upgrades/shield5.png@GEM shielding, fore, aft, port, and starboard decoupling."
+quadshield14__upgrades,"@upgrades/shield5.png@GEM shielding, fore, aft, port, and starboard decoupling."
+quadshield15__upgrades,"@upgrades/shield5.png@GEM shielding, fore, aft, port, and starboard decoupling."
+,
+mult_overdrive01__upgrades,"@upgrades/afterburner_generic.png@Engine overdrive. Increases thrust at the expense of decreased fuel efficiency. Comes bundled with appropriate vector-governor firmware updates."
+mult_overdrive02__upgrades,"@upgrades/afterburner_generic.png@Engine overdrive. Increases thrust at the expense of decreased fuel efficiency. Comes bundled with appropriate vector-governor firmware updates."
+mult_overdrive03__upgrades,"@upgrades/afterburner_generic.png@Engine overdrive. Increases thrust at the expense of decreased fuel efficiency. Comes bundled with appropriate vector-governor firmware updates."
+mult_overdrive04__upgrades,"@upgrades/afterburner.png@Engine overdrive. Increases thrust at the expense of decreased fuel efficiency. Comes bundled with appropriate vector-governor firmware updates."
+mult_overdrive05__upgrades,"@upgrades/afterburner.png@Engine overdrive. Increases thrust at the expense of decreased fuel efficiency. Comes bundled with appropriate vector-governor firmware updates."
+mult_overdrive06__upgrades,"@upgrades/afterburner.png@Engine overdrive. Increases thrust at the expense of decreased fuel efficiency. Comes bundled with appropriate vector-governor firmware updates."
+,
+spec_capacitor01__upgrades,"@upgrades/reactor_capacitance.png@Capacitor for storing energy for FTL travel"
+spec_capacitor02__upgrades,"@upgrades/reactor_capacitance.png@Capacitor for storing energy for FTL travel"
+spec_capacitor03__upgrades,"@upgrades/reactor_capacitance.png@Capacitor for storing energy for FTL travel"
+spec_capacitor04__upgrades,"@upgrades/reactor_capacitance.png@Capacitor for storing energy for FTL travel"
+spec_capacitor05__upgrades,"@upgrades/reactor_capacitance.png@Capacitor for storing energy for FTL travel"
+,
+armor01__upgrades,"@cargo/plasteel.png@Armor takes up no upgrade volume, but does add to the mass of your ship, affecting maneuverability"
+armor02__upgrades,"@cargo/isometal.png@Armor takes up no upgrade volume, but does add to the mass of your ship, affecting maneuverability"
+armor03__upgrades,"@cargo/hull_patches.png@Armor takes up no upgrade volume, but does add to the mass of your ship, affecting maneuverability"
+armor04__upgrades,"@cargo/tritanium.png@Armor takes up no upgrade volume, but does add to the mass of your ship, affecting maneuverability"
+armor05__upgrades,"@cargo/carbonium.png@Armor takes up no upgrade volume, but does add to the mass of your ship, affecting maneuverability"
+armor06__upgrades,"@cargo/duranium.png@Armor takes up no upgrade volume, but does add to the mass of your ship, affecting maneuverability"
+,
+hawkeye1__upgrades,"@upgrades/hawkeye_zx16.png@"
+hawkeye2__upgrades,"@upgrades/hawkeye_zx50.png@"
+hawkeye3__upgrades,"@upgrades/hawkeye_zx86.png@"
+skyscope1__upgrades,"@upgrades/skyscope_alpha.png@"
+skyscope2__upgrades,"@upgrades/skyscope_alphaplus.png@"
+skyscope3__upgrades,"@upgrades/skyscope_beta.png@"
+starscanner1__upgrades,"@upgrades/starscanner_2530.png@"
+starscanner2__upgrades,"@upgrades/starscanner_2545.png@"
+starscanner3__upgrades,"@upgrades/starscanner_2600.png@"
+,
+jump_drive__upgrades,"@upgrades/jump_drive.png@Jump drive for traveling between stars"
+cargo_expansion__upgrades,"@cargo/cargo_hud.png@Trades upgrade space and support systems for cargo volume"
+autotracking__upgrades,"@cargo/cargo_hud.png@While all mounted weapons have inherent auto-tracking capabilities, these defaults are limited in civilian mounts. A full-powered military auto-tracker like this greatly enhances weapon accuracy."
+tractor_capability__upgrades,"@cargo/cargo_hud.png@"
+,
+mult_shady_moreupgrade__upgrades,"@cargo/cargo_hud.png@Trades cargo space for upgrade room"
+mult_shady_morethrust__upgrades,"@cargo/cargo_hud.png@Trades side armor for increased thrust"
+mult_shady_moreshields__upgrades,"@cargo/cargo_hud.png@Trades main hull for shield capacity"
+mult_shady_moregunrecharge__upgrades,"@upgrades/circuit1.png@Trades energy capacity for recharge rate"
+mult_shady_moreshieldrecharge__upgrades,"@upgrades/mult_shield_regenerator.png@Increases ship mass, increases shield recharge"
+mult_shady_moreturning__upgrades,"@upgrades/mult_turn_jet_enhancer.png@Trades  for increased turning speed"
+,
+repair_droid01__upgrades,"@cargo/cargo_hud.png@Repairs ship upgrades in-flight"
+repair_droid02__upgrades,"@cargo/cargo_hud.png@Repairs ship upgrades in-flight"
+repair_droid03__upgrades,"@cargo/cargo_hud.png@Repairs ship upgrades in-flight"
+repair_droid04__upgrades,"@cargo/cargo_hud.png@Repairs ship upgrades in-flight"
+repair_droid05__upgrades,"@cargo/cargo_hud.png@Repairs ship upgrades in-flight"
+,
+ecm_package01__upgrades,"@upgrades/ecm1.png@Electronic CounterMeasures\ ECM refers to a broad spectrum of techniques designed to defeat or spoof enemy sensors and communications."
+ecm_package02__upgrades,"@upgrades/ecm2.png@Electronic CounterMeasures\ ECM refers to a broad spectrum of techniques designed to defeat or spoof enemy sensors and communications."
+ecm_package03__upgrades,"@upgrades/ecm3.png@Electronic CounterMeasures\ ECM refers to a broad spectrum of techniques designed to defeat or spoof enemy sensors and communications."
+,
+passenger_quarters_01__upgrades,"@upgrades/passenger_cryo_chamber.png@All the life-support a frozen passenger needs to survive the journey in a depressurized cargo hold. Provides life-support and space for 1 passenger."
+passenger_quarters_02__upgrades,"@upgrades/passenger_steerage_class.png@Part of the cargo hold is just equiped with an additional life-support for whatever kind of atmosphere is needed for the merry guests standing there or sitting on the floor. Provides life-support and space for up to 4 passengers."
+passenger_quarters_03__upgrades,"@upgrades/passenger_economy_class.png@Life-support and even seats for the dear customer. Provides life-support and space for up to 4 passengers."
+passenger_quarters_04__upgrades,"@upgrades/passenger_comfort_class.png@Life-support, seat and even bunk-beds provide a level of comfort the captain would like to have. Provides life-support and space for up to 2 passengers."
+,
+hud_repair__upgrades,"@upgrades/circuit2.png@Given that any craft of sufficient size and many smaller craft(produced by particular factions), have no physical viewports for their pilots, and that no pilot could fly without the nav cues overlayed by the HUD, the ability to do in-flight repair of damaged HUD systems is nearly vital."
+,
+cloaking_device01__upgrades,"@cargo/cargo_hud.png@This device uses gravity manipulation technology. A powerful gravitational lens distorts a massive region around the vessel, bending signals emitted by active sensors around the ship and out at seeming random angles and locations. This makes it very easy to know that a ship mounting a cloaking device is present, but very hard to figure out what class of ship, where it's headed, and where exactly it is."
+,
+laser01__upgrades,"@upgrades/light.png@"
+laser02__upgrades,"@upgrades/light.png@"
+laser03__upgrades,"@upgrades/light.png@"
+laser04__upgrades,"@upgrades/light.png@"
+meson01__upgrades,"@upgrades/accelerator_gun.png@"
+meson02__upgrades,"@upgrades/accelerator_gun.png@"
+meson03__upgrades,"@upgrades/accelerator_gun.png@"
+meson04__upgrades,"@upgrades/accelerator_gun.png@"
+plasma01__upgrades,"@upgrades/heavy.png@"
+plasma02__upgrades,"@upgrades/heavy.png@"
+plasma03__upgrades,"@upgrades/heavy.png@"
+plasma04__upgrades,"@upgrades/heavy.png@"
+disruptor01__upgrades,"@upgrades/razor_gun.png@"
+disruptor02__upgrades,"@upgrades/razor_gun.png@"
+disruptor03__upgrades,"@upgrades/razor_gun.png@"
+disruptor04__upgrades,"@upgrades/razor_gun.png@"
+photon01__upgrades,"@upgrades/beam2.png@"
+photon02__upgrades,"@upgrades/beam2.png@"
+photon03__upgrades,"@upgrades/beam3.png@"
+photon04__upgrades,"@upgrades/beam3.png@"
+,
+MiniGravThumper_ammo__upgrades,"@cargo/cargo_hud.png@"
+,
+aera_turret_pd__upgrades,"@cargo/cargo_hud.png@Using low yield pulse lasers, the aera have made simple and effective anti-missile turrets."
+beam_turret__upgrades,"@cargo/cargo_hud.png@Specially designed for the energy and heat dissipation requirements of beam weapons, this turret has everything you need to mount a pair of them."
+capship_turret__upgrades,"@cargo/cargo_hud.png@When hunting for bear, hover softly, and carry a big stick"
+capship_turret_heavy__upgrades,"@cargo/cargo_hud.png@If your vessel can mount this, this can mount whatever you want."
+franklin_pd__upgrades,"@cargo/cargo_hud.png@These turrets were custom designed for the Franklin class diplomatic transport. Any hotshot who splurges on the Franklin should undoubtedly get these fine turrets to complement the exterior decor."
+heavy_turret__upgrades,"@upgrades/turret_heavy.png@For when evasive maneuvers are too subtle a hint your tailgaters."
+medium_turret__upgrades,"@upgrades/turret_medium.png@It turns, it shoots, it slices. No, it does not dice, but it does come with a free fuzzy pair."
+rlaan_turret_mini__upgrades,"@cargo/cargo_hud.png@While Rlaan ships tend to mount flash-shields capable of shrugging off most small arms fire, they still prefer the option of 'convincing' fighters to stop firing."
+rlaan_turret_pd__upgrades,"@cargo/cargo_hud.png@The Rlaan are well known for their disdain of missiles, especially those fired at them."
+small_turret__upgrades,"@upgrades/turret_light.png@Given the armament commonly placed in such turrets, the small turret has become affectionately known as 'the machine that goes ping'."
+turret_pd__upgrades,"@cargo/cargo_hud.png@One is heavily advised to not play 'catch the missile' unless one mounts several of these."
+turret_pd_long__upgrades,"@cargo/cargo_hud.png@One of the most impressive applications of disruptor technology, this military rated point defense turret is the best of its kind."
+,
+,
+beam_heavy_lr__upgrades,"@cargo/cargo_hud.png@"
+discontinuity__upgrades,"@cargo/cargo_hud.png@"
+flak__upgrades,"@cargo/cargo_hud.png@"
+flak_heavy__upgrades,"@cargo/cargo_hud.png@"
+fusion_heavy__upgrades,"@cargo/cargo_hud.png@"
+lr_disruptor_beam__upgrades,"@cargo/cargo_hud.png@"
+lr_laser_beam__upgrades,"@cargo/cargo_hud.png@"
+lr_pminus_beam__upgrades,"@cargo/cargo_hud.png@"
+lr_pminus_beam_mkiv__upgrades,"@cargo/cargo_hud.png@"
+particle_beam__upgrades,"@cargo/cargo_hud.png@"
+particle_beam_lr__upgrades,"@cargo/cargo_hud.png@"
+penetrator_mkvi__upgrades,"@cargo/cargo_hud.png@"
+photon_capship__upgrades,"@cargo/cargo_hud.png@"
+rlr_laser_beam__upgrades,"@cargo/cargo_hud.png@"
+rlr_pminus_beam__upgrades,"@cargo/cargo_hud.png@"
+sanitizer__upgrades,"@cargo/cargo_hud.png@"
+,
+,
+anihilator_gun__upgrades,"@cargo/cargo_hud.png@"
+antimatter_gun__upgrades,"@cargo/cargo_hud.png@"
+crippler__upgrades,"@cargo/cargo_hud.png@"
+disruptor__upgrades,"@cargo/cargo_hud.png@"
+disruptor_beam__upgrades,"@cargo/cargo_hud.png@"
+disruptor_cannon__upgrades,"@cargo/cargo_hud.png@"
+fusion_gun__upgrades,"@cargo/cargo_hud.png@"
+hellspawn__upgrades,"@cargo/cargo_hud.png@"
+icepick__upgrades,"@cargo/cargo_hud.png@"
+ion__upgrades,"@cargo/cargo_hud.png@"
+ion_beam__upgrades,"@upgrades/medium.png@"
+ion_beam_heavy__upgrades,"@upgrades/medium.png@"
+ktek_beam__upgrades,"@upgrades/beam1.png@"
+ktek_beam_pd__upgrades,"@upgrades/beam1.png@"
+ktek_cap_beam__upgrades,"@upgrades/beam1.png@"
+ktek_gun__upgrades,"@cargo/cargo_hud.png@"
+laser__upgrades,"@cargo/cargo_hud.png@Though not a laser by any stretch of the imagination, due to its resemblance to the so called 'lasers' of classic games and movies of the previous millenium, the misnomer has stuck stronger than space rated epoxy. Cheap and utterly dependable, this and other similar low yield plasma weapons are ubiquitous in armed civilian populations."
+laser_beam__upgrades,"@cargo/cargo_hud.png@"
+leech_gun__upgrades,"@cargo/cargo_hud.png@"
+mass_driver__upgrades,"@cargo/cargo_hud.png@Long before the dawn of modern man, it was known to various hominids that hurling a blunt object was a reasonable way to deliver damage from a distance. Fittingly enough, the worlds of the Purist faction are among the chief manufacturers of mass drivers."
+meson_blaster__upgrades,"@cargo/cargo_hud.png@"
+neutron_gun__upgrades,"@cargo/cargo_hud.png@"
+particle_cannon__upgrades,"@cargo/cargo_hud.png@"
+penetrator_gun__upgrades,"@cargo/cargo_hud.png@"
+photon_gun__upgrades,"@cargo/cargo_hud.png@"
+plasma_gun__upgrades,"@cargo/cargo_hud.png@"
+razor_gun__upgrades,"@upgrades/razor_gun.png@"
+reaper_cannon__upgrades,"@cargo/cargo_hud.png@"
+repulsor_beam__upgrades,"@cargo/cargo_hud.png@"
+stormfire__upgrades,"@cargo/cargo_hud.png@"
+tractor_beam__upgrades,"@cargo/cargo_hud.png@"
+tractor_heavy__upgrades,"@cargo/cargo_hud.png@Animal magnetism is overrated.  This is just over-engineered."
+,
+advtorpedo_ammo__upgrades,"@upgrades/missile.png@"
+antimatter__upgrades",
+breeze_ammo__upgrades,"@upgrades/missile.png@"
+cap_iff__upgrades,"@upgrades/capiff.png@"
+capcluster_ammo__upgrades,"@upgrades/missile.png@"
+capiff_ammo__upgrades,"@upgrades/capiff.png@"
+capship_disruptor__upgrades",
+cluster_ammo__upgrades,"@upgrades/cluster.png@"
+dumbfire_ammo__upgrades,"@upgrades/dumbfire.png@"
+emp_torpedo_ammo__upgrades,"@upgrades/emp3.png@"
+friend_or_foe_ammo__upgrades,"@upgrades/fof.png@"
+gauss_ammo__upgrades,"@upgrades/missile.png@"
+grand_gauss__upgrades,"@upgrades/emp2.png@"
+hadouken__upgrades",
+hail_ammo__upgrades,"@upgrades/missile.png@"
+heatseeker_ammo__upgrades,"@upgrades/heatseeker.png@"
+hephaestus_mini__upgrades,"@upgrades/missile.png@"
+hephaestus_point_defense__upgrades,"@upgrades/missile.png@"
+image_recognition_ammo__upgrades,"@upgrades/imrec.png@"
+javelin__upgrades,"@upgrades/missile.png@"
+killer_bee_ammo__upgrades",
+killerbee_ammo__upgrades",
+kineticmissile__upgrades,"@upgrades/kineticmissle.png@"
+leech_ammo__upgrades,"@upgrades/leech.png@"
+lr_beam__upgrades",
+mace__upgrades",
+maul_ammo__upgrades,"@upgrades/maul.png@"
+photon_swarm__upgrades,"@upgrades/missile.png@"
+porcupine_mine__upgrades,"@upgrades/porcupine_mine.png@"
+swarm_ammo__upgrades,"@upgrades/swarm.png@"
+thermopylae__upgrades",
+torpedo_ammo__upgrades,"@upgrades/emp1.png@"
+,
+capiff,"WRITEME"
+capshipmissile,"@upgrades/capshipmissile.png@"
+cluster,"WRITEME"
+dumbfire,"WRITEME"
+friendorfoe,"WRITEME"
+heatseek,"WRITEME"
+hellspawn,"WRITEME"
+imrec,"WRITEME"
+kineticmissile,"WRITEME"
+leech,"WRITEME"
+mine,"WRITEME"
+pmiss",
+spacebomb,"WRITEME"
+torp,"WRITEME"
+torpedo,"WRITEME"
+,
+,
+,
+aeraturretadvtorp,"WRITEME"
+aeraturretcapshipgun,"WRITEME"
+aeraturretLR_heavy,"WRITEME"
+aeraturretLR_heavygun,"WRITEME"
+aeraturretpd,"WRITEME"
+aeraturretRLR_pd,"WRITEME"
+franklinpd,"WRITEME"
+rlaanturret,"WRITEME"
+rlaanturretgun,"WRITEME"
+rlaanturretmini,"WRITEME"
+rlaanturretminigun,"WRITEME"
+rlaanturretpd,"WRITEME"
+rlaanturretpdgun,"WRITEME"
+turret,"WRITEME"
+turret_120,"WRITEME"
+turret_90,"WRITEME"
+turret_capship_dreadnaughtblend,"WRITEME"
+turret_capship_dreadnaughtblend_guns,"WRITEME"
+turret_capship_gun,"WRITEME"
+turret_capship_layered_defense,"WRITEME"
+turret_capship_layered_defense_guns,"WRITEME"
+turret_capship_light_particlebeamgun,"WRITEME"
+turret_capship_pd_gun,"WRITEME"
+turret_capship_torplauncher,"WRITEME"
+turret_capship_torplauncher_gun,"WRITEME"
+turret_medium,"WRITEME"
+turret_medium_gun,"WRITEME"
+turretbeam,"WRITEME"
+turretbeamgun,"WRITEME"
+turretbeamheavy,"WRITEME"
+turretbeamheavygun,"WRITEME"
+turretbeampgun,"WRITEME"
+turretcapmissile,"WRITEME"
+turretcapmissiledeep,"WRITEME"
+turretflak,"WRITEME"
+turretflak_120,"WRITEME"
+turretflak_90,"WRITEME"
+turretflakgun,"WRITEME"
+turretgun,"WRITEME"
+turretgunheavy,"WRITEME"
+turretgunsmall,"WRITEME"
+turretheavy,"WRITEME"
+turretlauncher,"WRITEME"
+turretlaunchercapmissile,"WRITEME"
+turretlaunchergun,"WRITEME"
+turretlauncherswarm,"WRITEME"
+turretLR_PminusBeam,"WRITEME"
+turretmain,"WRITEME"
+turretmaingun,"WRITEME"
+turretmaingunheavy,"WRITEME"
+turretmainheavy,"WRITEME"
+turretpd,"WRITEME"
+turretpdgun,"WRITEME"
+turretpdlong,"WRITEME"
+turretpdlonggun,"WRITEME"
+turretpunisher,"WRITEME"
+turretpunishergun,"WRITEME"
+turretsmall,"WRITEME"
+turretswarm,"WRITEME"
+,
+,
+,
+carribean__planets",
+deimos__planets",
+desert__planets",
+Dirt__planets",
+earth__planets",
+ganymede__planets",
+industrial__planets",
+j_class__planets",
+jump__planets",
+k_class__planets",
+Lava__planets",
+m_class__planets",
+mars__planets",
+moon__planets",
+n_class__planets",
+newdetroit__planets",
+ocean__planets",
+Snow__planets",
+tkirsa__planets",
+tundra__planets",
+university__planets",
+,
+,
+AsteroidFighterBase,"WRITEME"
+AsteroidFighterBase__aera,"WRITEME"
+AsteroidFighterBase__rlaan,"WRITEME"
+commerce_center,"WRITEME"
+factory,"WRITEME"
+factory__aera,"WRITEME"
+factory__rlaan,"WRITEME"
+fighter_barracks,"WRITEME"
+fighter_barracks__aera,"WRITEME"
+fighter_barracks__rlaan,"WRITEME"
+medical,"WRITEME"
+medical__aera,"WRITEME"
+medical__rlaan,"WRITEME"
+MiningBase,"WRITEME"
+MiningBase__aera,"WRITEME"
+MiningBase__pirates,"WRITEME"
+MiningBase__rlaan,"WRITEME"
+outpost,"WRITEME"
+refinery,"WRITEME"
+refinery__aera,"WRITEME"
+refinery__pirates,"WRITEME"
+refinery__rlaan,"WRITEME"
+relay,"WRITEME"
+research,"WRITEME"
+research__aera,"WRITEME"
+Shipyard,"WRITEME"
+starfortress,"WRITEME"
+starfortress__aera,"WRITEME"
+starfortress__rlaan,"WRITEME"
+starfortressinner__rlaan,"WRITEME"
+starfortressouter__rlaan,"WRITEME"
+,
+orange_star__planets",
+red_star__planets",
+sun__planets",
+white_star__planets",
+,
+,
+aera_mil_missions__upgrades",
+aera_missions__upgrades",
+confed_mil_missions__upgrades",
+confed_missions__upgrades",
+iso_missions__upgrades",
+pirate_missions__upgrades",
+rlaan_mil_missions__upgrades",
+rlaan_missions__upgrades",
+standard_missions__upgrades",
+,
+contraband",
+contraband.blank",
+contraband.template",
+contraband__aera",
+contraband__confed",
+contraband__luddites",
+contraband__rlaan",
+,
+,
+,
+generic_cargo,"WRITEME"
+eject,"WRITEME"
+eject.template,"WRITEME"
+eject.blank,"WRITEME"
+navpoint",
+navpoint.blank",
+navpoint.template",
+box,"WRITEME"
+box.blank,"WRITEME"
+box.template,"WRITEME"
+landscape",
+landscape.template",
+ABelt__neutral",
+AField__neutral",
+AFieldBase__neutral",
+AFieldBaseSparse__neutral",
+AFieldBaseThin__neutral",
+AFieldJump__neutral",
+AFieldJumpSparse__neutral",
+AFieldJumpThin__neutral",
+AFieldSparse__neutral",
+AFieldThin__neutral",
+asteroidsPriv__neutral,"AFieldBasePriv"
+asteroid0,"asteroidsPriv"
+asteroid1,"asteroidsPriv"
+asteroid2,"asteroidsPriv"
+asteroid3,"asteroidsPriv"
+asteroid4,"asteroidsPriv"
+asteroid5,"asteroidsPriv"
+asteroid6,"asteroidsPriv"
+asteroid7,"asteroidsPriv"
+small_asteroid0.cargo,"@cargo/gems.png@A chunk of asteroid. Can be mined for ore if further shot upon."
+small_asteroid1.cargo,"@cargo/gems.png@A chunk of asteroid. Can be mined for ore if further shot upon."
+small_asteroid2.cargo,"@cargo/gems.png@A chunk of asteroid. Can be mined for ore if further shot upon."
+small_asteroid3.cargo,"@cargo/gems.png@A chunk of asteroid. Can be mined for ore if further shot upon."
+small_asteroid4.cargo,"@cargo/gems.png@A chunk of asteroid. Can be mined for ore if further shot upon."
+small_asteroid5.cargo,"@cargo/gems.png@A chunk of asteroid. Can be mined for ore if further shot upon."
+small_asteroid6.cargo,"@cargo/gems.png@A chunk of asteroid. Can be mined for ore if further shot upon."
+small_asteroid7.cargo,"@cargo/gems.png@A chunk of asteroid. Can be mined for ore if further shot upon."
+iron_ore.cargo,"asteroidsPriv"
+tungsten_ore.cargo,"asteroidsPriv"
+asteroids__neutral",
+asteroids1600gap__neutral",
+asteroids200gap__neutral",
+asteroids400gap__neutral",
+asteroids800gap__neutral",
+green-nebula__neutral",
+green-nebula.nebula__neutral",
+HiddenAsteroid__neutral",
+nebula__neutral",
+nebula_veryhuge__neutral",
+nebula_veryhuge.nebula__neutral",
+nebula.bigger1.xmesh__neutral",
+nebula.bigger2.xmesh__neutral",
+nebula.bigger3.xmesh__neutral",
+nebula.bigger4.xmesh__neutral",
+nebula.nebula__neutral",
+purple-nebula__neutral",
+purple-nebula.nebula__neutral",
+red-nebula__neutral",
+red-nebula.nebula__neutral",
+wormhole.neutral.stable",
+wormhole.stable",
+wormhole.stableglownetsaccessory",
+wormhole.stableswirlsaccessory,"WRITEME"
+wormhole.unstable",
+wormhole.unstableglownetsaccessory",
+wormhole.unstableswirlsaccessory",
+,
+First_Class_Passenger,"@cargo/cargo-hud.png@If you are taking first class passengers around, they had better have all the amenities one expects."
+Business_Class_Passenger,"@cargo/cargo-hud.png@With a laptop and a wide rear, the business class passenger enjoys some of the room of the first class passenger."
+AI_Cores,"@cargo/ai_cores.png@Because if they have to ride with the cargo, they start calling you Dave."
+Frozen_Colonist,"@cargo/frozen_colonist.png@Polite, space-efficient, doesn't try to back-seat pilot, doesn't care how long it takes to get there. Unfortunately, being technically, if only temporarily, deceased - not much for conversation."
+Hitchhiker,"@cargo/steerage_class@Always brings a towel of his/her own"
+Standard_Mealpacks,"@cargo/standard_mealpacks.png@Food! Glorious food! Hot TVP and Soymilk!"
+Luxury_Foods,"@cargo/luxury_mealpacks.png@Containing such rarities as actual game meat and imported specialty products, these bundles of luxury items are primarily purchased only by upscale hotels and restaurants."
+Filtered_Water,"@cargo/fresh_water.png@While no colony world settled by Humans or Aera is without substantial natural water supplies, mining bases and orbital stations are always in need of re-supply."
+Filtered_Water,"@cargo/fresh_water.png@While no colony world settled by Humans or Aera is without substantial natural water supplies, mining bases and orbital stations are always in need of re-supply."
+Aera_Ration,"@cargo/cargo-hud.png@Containing utilitarian dehydrated meal bars with jerky for dessert, the Aera ration is human edible, but prolonged human consumption will result in eventual sickness and death due to alkaloid content."
+Jhurlon,"@cargo/jhurlon.png@A native of the Bzbr world, the Jhurlon most closely resembles a boulder sized land dwelling abalone. While well protected against native predators, modern technology has made cutting through their shell somewhat easier."
+Salted_Thok,"@cargo/salted_thok.png@Though the Aera destroyed their jungle forests, the seas fared better, and continue to produce this tasty fish-like creature."
+Rlaan_Nutripack,"@cargo/cargo-hud.png@Containing a protein brick, carb glop and fizzy drinks, even the Rlaan find something to be desired in the aesthetic."
+Rlaan_Luxury_Nutripack,"@cargo/cargo-hud.png@Featuring the Rlaan equivalent of haggis served with the Rlaan equivalent of lutefisk, one can only conjecture that the Rlaan are not to be trusted with the culinary decisions of other species."
+Rlaan_Generic_Nutripack,"@cargo/cargo-hud.png@Consisting primarily of amonia solutions and gels stored at temperatures such that the ammonia is liquid, opening one of these packages is usually a fatal experience for an unprepared human."
+Coffee,"@cargo/coffee.png@Generation upon generation of addicts have made the production of coffee one of the largest industries in known space."
+Animal_Products,"@cargo/animal_products.png@Typically diary, eggs, caviar and other products of various animal internal organs, they remain a food source of high nutritional value for all species, and some diners derive a twisted pleasure from eating foods originating from such a source."
+Grains,"@cargo/grains.png@The edible grass seeds, grains, and the carbohydrates garnered from them, are a pillar of an omnivorous diet. When fermented properly, they become the pillars of a liquid diet."
+Seafood,"@cargo/seafood.png@The only common meats not vat-grown, fish, or the local equivalent, if edible, are the mainstays of agro-planet diets."
+Meats,"@cargo/animal_meat.png@As range animals are too resource intensive, nearly all meat is vat grown."
+Produce,"@cargo/produce.png@While space facilities grow an algae sludge for basic food use, it makes a lousy salad."
+Malt_Beverages,"@cargo/cargo-hud.png@Beer! (It's what's for dinner.)"
+Specialty_Wines,"@cargo/arkturian_wines.png@Finely crafted wines from carefully cultivated vinyards.  Unlike the cheap wines from farm planets devoted to wine production, every bottle contains liquid craftsmanship and the potential for culinary exploration."
+Bulk_Wines,"@cargo/wine.png@Long the purvey of French snobs competing with Californian snobs, wine making is now the purvey of French snobs from several planets competing with Californian snobs from several planets. Red wine is differentiated from white wine in that it tastes progressively more and worse the cheaper the wine gets.  White wine is differentiated from red wine in that as the wine gets cheaper, it begins to taste more like the water it appears to be."
+Spirits,"@cargo/spirits.png@Spirits are those liquors of sufficiently indeterminate make and origin that one can at best say they were produced in the spirit of being potable."
+Brandy,"@cargo/cargo-hud.png@Fermented fruit, distilled into liver quaking perfection. Notably, after humans expanded offworld, people stopped caring as much as to whether their brandy came from the Cognac region..."
+Space_Grog,"@cargo/space_grog.png@Unprofessionally distilled fermented sugar product. Because candy is dandy, but liquor is quicker ... and the local rot-gut is even cheaper."
+Tripezian_Premium,"@cargo/tripezian_premium.png@Taste the flavour of the Frontier! Tripezian Ale is the product of fermented tripezian berries, an alien fruit lethal when eaten, but whose fermented juices have an intense and exotic flavour. Tripezian berries are produced on only a few worlds, andin limited quantities. This makes Tripezian Ale one of the most expensive and sought after beverages in all of known space."
+Sarakan_Tears,"@cargo/sarakan_tears.png@Distilled from the sap of the Sarak bush, this spirit defines the old adage 'Whatever doesn't kill you, will numb the mouth, burn the throat, upset the stomach, tear you a new one, and leave you with a nice rosey outlook towards the universe!"
+Cotton,"@cargo/cotton.png@Long used as a fabric in clothing, textiles and home furnishings, cotton remains remains in demand despite the numerous syynthetic alternatives."
+Incense,"@cargo/incense.png@Consisting of compressed fragrant plantlife, oils and the occasional recreational drug, incense is used for both religious purposes, and by the mass market for relaxation."
+Bonsai,"@cargo/bonsai.png@The ancient art of Bonsai (crudely: Tree Pruning) creates easily transportable plant shapes of all exotic shape and bent. In high demand for their aesthetic appearance, they are often used to complete landscaped visual surrounds. A secondary use is their calming effect while caring for your Bonsai."
+Khaisalantimin_F62,"@cargo/khaisalantimin_F62.png@Produced by a genetically engineered hybrid of Terran and Xeno flora, the F62 variant of the extract of the seeds of the Khaisal plant induces a prolonged state of euphoria in humans. While the extract is not intrinsically toxic and withdrawl is remarkably mild, problems arise due to rapidly increasing tolerance and lost productivity due to usage."
+Tobacco,"@cargo/cargo-hud.png@The tobacco plant, native to Terra, is the source of the pesticide Nicotine. Tobacco leaves, when cured and burned, release the addictive pesticide, along with numerous carcinogens. So far, no species other than humanity has been stupid enough to use the addictive pesticide recreationally."
+Water,"@cargo/heavy_water.png@Also known as the universal solvent, water is a useful substance, even to those species that do not require it biologically."
+Rubber,"@cargo/rubber.png@An elastic substance that is obtained by coagulating the milky juice of various tropical plants, prepared as sheets then dried and cut. Basic uses include preventing 18-21 years of child support payments."
+Livestock,"@cargo/erotica.png@Without goats and sheep, the world of good cheese would be greatly crippled."
+Lumber,"@cargo/lumber.png@While wood is no longer as common a building material for structural aspects, it remains an aesthetic desired by many residents of paved industrial worlds."
+,
+Iron_Ore,"@cargo/base.png@Iron has been vital in the histories of all of the spacefaring races. The prime variance is the ratio of cast iron cookware to iron and steel killingware."
+Nickel_Ore,"@cargo/base.png@Useful as an anti-corrosive coating, nickel is often mined in bulk from nickel-iron asteroids."
+Tin_Ore,"@cargo/base.png@Absent tin, the interstellar sardine trade would flounder."
+Tungsten_Ore,"@cargo/base.png@Due to its exceptional melting temperature and continued tensile strength at high temperatures, tungsten is a vital part of the spacefaring industry."
+Alkali_Metals,"@cargo/base.png@Caution: Do not clean with water."
+Gold,"@cargo/precious.png@An exceptionally ductile metal, gold has long been used for the manufacture of useless, albeit pretty, constructions. It's conductive properties have, over the last millenium, given it roles in more useful applications."
+Anti_Corrosives,"@cargo/cargo-hud.png@Exemplified by such metals as Platinum ,prized for its luster and resistance to corrosion, the rarity of these metals leads to their value."
+Rare_Earth,"@cargo/cargo-hud.png@Dense rare earth metals for alloy use such as Osmium and Irridium."
+Isometal,"@cargo/isometal.png@The generic term for any metal or alloy which has been strengthened via a slow thermal reduction cycle, it is also the brand name for one company's iridium, steel, and titanium alloy. "
+Plasteel,"@cargo/cargo-hud.png@More carbon than steel, this substance consists of steel reinforced by countless carbon nanotubes."
+Steel,"@cargo/steel.png@Although it has been surpassed in performance, when it comes to cost-performance, steel is always a contender, especially on less developed worlds."
+Polysteel,"@cargo/cargo-hud.png@An intricate filadough-like sandwich of metals and ceramics glued together by carbon polymers."
+Tritanium,"@cargo/tritanium.png@An alloy formed of titanium, osmium, and iridium."
+Duranium,"@cargo/cargo-hud.png@Sacrificing increased mass for increased protection, massive slabs of depleted uranium are mixed with osmium and encased in an ablative coating of tantalum carbide."
+Obsidisteel,"@cargo/obsidisteel.png@A combination of metals and silicate oxides, this dark, hard substance is prized for its use in the art world."
+Carbonium,"@cargo/carbonium.png@A mix of tungsten and tantalum, into which have been introduced carbons (from a biological source), it is used in certain high temperature applications."
+Radium,"@cargo/radioactives.png@A wonderful ingredient for glowing paints."
+Thorium,"@cargo/radioactives.png@An exceptionally common source of nuclear power, it is also known for the exceptional melting points of its oxide."
+Uranium,"@cargo/radioactives.png@A rather common radioactive used primarily in fission piles. The depleted isotopes are used in kinetic impact weapons."
+Diamonds,"@cargo/cargo-hud.png@Exceptionally hard, and useful for many industrial purposes, these carbon lattice crystals have long been loved for their gleaming appearance. Even though the differences are no longer perceptable between manufactured and natural diamonds, there are still those willing to pay more for those hewn from the rock."
+Emeralds,"@cargo/cargo-hud.png@A translucent green variety of beryl.  Perfect for creating that Oz look."
+Rubies,"@cargo/cargo-hud.png@Red translucent variety of corundum. Work well on shoes."
+Corundum_Crystals,"@cargo/cargo-hud.png@A hard aluminum oxide, the common forms of which are used as abrasives."
+Dilithium_Crystals,"@cargo/cargo-hud.png@Dilithium telluride, while not particularly impressive, is always a desired item among the religious fanatics of the trekkie religion."
+Quartz_Crystals,"@cargo/cargo-hud.png@A useful component of cheap oscillators and cheap art."
+Trilithium_Crystals,"@cargo/cargo-hud.png@Prized possessions of the trekkie religion, the crystals (trilithium nitride) have precious little actual value."
+Construction_Stone,"@cargo/construction_stone.png@Cheap. Dense. Low-Tech. Gets the job done anyway."
+Natural_Sculptures,"@cargo/natural_sculptures.png@Originally considered waste, stone that has been carved by nature is now considered both decoration and art. Large slabs are used as wall decoration, while small pieces are used in artwork, or are works of art themselves."
+Jade,"@cargo/cargo-hud.png@Greenish. Somewhat expensive. Very retro."
+Marble,"@cargo/cargo-hud.png@A prized material for ancient sculptors and interior designers, marble still finds itself a prized material of sculptors and interior designers."
+Natural_Gas,"@cargo/natural_gas.png@A combustible mixture of gases, usable as both a fuel and a raw material in production. A secondary source of such gas is the by-product of animal bio-waste."
+Coal,"@cargo/hydrocarbons.png@Ancient dead compressed carbon-life. Solid form."
+Oil,"@cargo/cargo-hud.png@Liquid lipids of various origin."
+Petroleum,"@cargo/cargo-hud.png@Ancient dead carbon-life. Liquid form."
+Butane,"@cargo/cargo-hud.png@Because sometimes, with all the technology around you, what you really want is a Zippo."
+Diesel,"@cargo/petrochems.png@On planets where resupply is expensive, diesel is an efficient, if polluting, fuel of choice."
+Deut-Deut_Fusion_Fuel,"@cargo/nuclear_pods.png@Refined from heavy water, nearly pure deuterium is a cheap and abundant, if somewhat difficult to store and transport, source of energy."
+Baakgah,"@cargo/cargo-hud.png@A fuel cell material that releases hydrogen in an easily controlled manner."
+AntiMatter_Pack,"@cargo/cargo-hud.png@Antimatter is held in an ionic lattice at low temperature. Energy is then drawn from the slow interaction between the antimatter and its surroundings."
+Biopower_Pack,"@cargo/cargo-hud.png@While its output is minimal, its efficiency is phenomenal. Living hydrogen emitting fuel cells, biopower packs are a key component of all Rlaan life-support systems."
+Chitty-chitty-boom-boom,"@cargo/cargo-hud.png@An incredibly large, incredibly complex, and incredibly unstable hydrocarbon, CCBB is used in applications where fusion reactors are too large, antimatter cells are too expensive, and fission reactors are impractical. This tends to limit its use to power-tools and personal transport units."
+Compressed_Oxygen-Nitrogen_Atmosphere,"@cargo/atmospheric_gases.png@Breathable - and not even in that sort of LA meets Mexico city sort of way."
+Compressed_Methane-Breather_Atmosphere,"@cargo/atmospheric_gases.png@Breathable - and not even in that sort of Aantlbzztkbzbrr meets Bzeentkbrraantl sort of way."
+Noble_Gases,"@cargo/noble_gases.png@Otherwise known as the inert gases. Commonly used in refining, medical applications, general manufacturing as well as nuclear energy production and laser weapon production and research."
+Halogen_Gases,"@cargo/halogen_gases.png@Caustic gasses - great for docking lights!"
+Recycled_Electronics,"@cargo/cargo-hud.png@Especially prized by the collectors of the arcane, though also prized by cheapskates, the garbage of the modern day is still valuable in its obsolescence."
+Recycled_Metals,"@cargo/cargo-hud.png@That which can be readily melted can be readily re-made."
+Recycled_Oil,"@cargo/cargo-hud.png@Given the prodigious use of hydrocarbons by sentient life, it is useful to reuse when possible."
+Recycled_Plastics,"@cargo/cargo-hud.png@As nearly all human civilian products rely on hydrocarbon polymers, were there not a massive recycling program, humanity would have drowned under its own refuse."
+Gears,"@cargo/cargo-hud.png@There is no such thing as too much torque."
+Lubricants,"@cargo/cargo-hud.png@Much to the dismay of all mechanical systems, friction cannot be overcome. Much to the delight of all users of mechanical systems, great advances have been made in mitigating friction's undesired effects."
+Spare_Parts,"@cargo/cargo-hud.png@While the mean time to failure of solid-state components tends to be measured in decades, this does not tend to account for the type and degree of abuse that consumers will pile on their belongings."
+Aerospace_Ground_Equipment,"@cargo/cargo-hud.png@While only small to medium sized craft are capable of planetary landing, the abuse taken by a spaceport due to dropships and other forms of cargo delivery requires that an elaborate array of maintenance equipment, spare parts, and freight loaders must be kept on hand at all times."
+Aerospace_Repair_Equipment,"@cargo/cargo-hud.png@The special materials used in aerospace construction require special equipment for repair and maintenance. Given the dire frequencies of pirate attacks and other sources of damage, this equipment is in high demand."
+Atmospheric_Scrubbers,"@cargo/cargo-hud.png@Atmostpheric scrubbers consist of a series of screens, containers and filters to remove toxic wastes from an artificial atmosphere. As few if any spaceborn craft have an effective contained ecology, they require such artifical means of providing a sustained breathable atmosphere."
+Welding_Supplies,"@cargo/cargo-hud.png@Though few know what their true purpose is, there always seem to be govenment projects in every colony that primarily consist of tearing up infrastructure and welding big metal plates over the holes until some second agency comes by a few years later to replace whatever was ripped out. There's also the whole starship construction buisness, but one wonders which is the bigger market."
+Self_Contained_Hydroponics,"@cargo/cargo-hud.png@With the dawn of space travel, hydroponics wasn't just for growing herbs in your closet anymore."
+Bulk_Seeds,"@cargo/cargo-hud.png@Even if mono-culture is the name of the game, and automation of farms is nearly total, all non-native crops must still be brought in through interstellar shipping, and most agricultural colonies tend to lack the genetic research facilities to produce their own variants."
+Herbicides,"@cargo/cargo-hud.png@Many planets have species that make kudzu look like a houseplant. These planets therefore also have markets full of colonists looking for some practical defoliants."
+Hydroponic_Supplies,"@cargo/cargo-hud.png@Growing plants in a liquid solution offers flexibility in placement relative to soil planting. Especially useful in environments that do not actually have soil."
+Pesticides,"@cargo/cargo-hud.png@No matter where one goes, it seems that every world capable of supporting life supports at least one species that is exceptionally annoying to whatever civilization attempts to colonize it. The age-old solution to this problem is to kill said species. Admittedly, doing so in a fashion that doesn't manage to hurt the colonists is still a subject of intense research. However, any pesticide producer will proudly claim that having a few babies born with the wrong number of legs is surely a small price to pay for not having disfiguring holes in all of the world's crops."
+Synthetic_Fertilizer,"@cargo/cargo-hud.png@When synthetic fertilizer became not only better, but cheaper and less smelly than those based on manure, few regretted switching over."
+Engineered_Seeds,"@cargo/cargo-hud.png@Genetically enhanced cropseed developed to remain fertile in some particular form of hostile soil, and to render the native lifeforms of that planet more edible. Luddite terrorists still protest the use of such products, despite the inability of many existing populations to otherwise feed themselves."
+Boring_Droids,"@cargo/boring_droids.png@Construction of mine shafts has never been so easy. Just let a few of these know where you want the tunnels, and come back a few days later to find huge mounds of debris a delightfully polished passageway."
+Laser_Drills,"@cargo/cargo-hud.png@While the precise nature of the cuts produced by this drill add to its usefulness, it is fact that lasers never get dull or snagged on dense ore deposits that has caused the laser drill to replace all other competitors."
+Light_Alls,"@cargo/cargo-hud.png@There are few things more terrifying to an asteroid miner than the classic scene from the holovid movie 'The Dark Rock', wherein a group of asteroid miners' standard light droid loses power, and they are attacked by a hideous alien awoken by their mining. While no voracious aliens have ever actually been found in an asteroid mine, reality has never been been a particularly key component of marketing strategy."
+Utility_Vehicles,"@cargo/cargo-hud.png@The ability to lift large masses and manipulate them dextrously in three dimensions is essential for construction and lacking in all known sentient beings. These machines make up for the shortcomings of biology."
+PreFab_Buildings,"@cargo/cargo-hud.png@Unless one is absurdly wealthy, one lives in a building made out of modular components just like these."
+Landscaping_Equipment,"@cargo/cargo-hud.png@For when that hill is blocking your view, you want to recreate your garden surrounds in the latest style, or just want to cover up that unsightly nuclear waste dump."
+BioApplicator,"@cargo/cargo-hud.png@Essentially a vat full of genetically engineered bacteria with some valves and a spray nozzle, this device is used to create and apply the complex proteins that the Rlaan use as a basic construction material. When the goop sprayed out of the nozzle reacts with the methane atmosphere present on nearly all Rlaan worlds, the proteins produced by the bacteria denature into the desired solid form."
+BioRemodeler,"@cargo/cargo-hud.png@This device applies a set of enzymes that sufficiently liquify the organics used in most Rlaan construction so that they can be altered."
+First_Aid_Kits,"@cargo/cargo-hud.png@While the contents have changed countless times, these kits can be found in every public transport and in every overprotective mother's travel bags."
+Aera_First_Aid_Kit,"@cargo/cargo-hud.png@Given their somewhat similar chemical makeup, the Aera First-Aid kit contains many items similar or analogous to those found in a Human kit. Of noteworthy exception, however, is the standard issue in all Aera packs of a suicide pill marked with a lable that translates to 'For use in conjunction with eventually terminal trauma.'"
+Pseudotherms,"@cargo/cargo-hud.png@The Aera originated on a warm world, and are subject to episodes of reduced functionality if caught unprepared in a frigid environment. These coveralls are packed with shielded isotopes and spectral converters that are guaranteed to warm an Aera back up to body temperature within a few minutes."
+DNA_Resequencer,"@cargo/cargo-hud.png@This portable device can take any DNA sample and transcribe it into the more familiar Rlaan analogs so that it may be more conveniently analyzed."
+Rlaan_Cellular_Regrowth_Accelerant,"@cargo/cargo-hud.png@A gel pack of complex organic muck that when applied to the site of an injury, will greatly increase the rate of a Rlaan's healing process."
+Cryogenic_Supplies,"@cargo/cryogenic_pods.png@For the last thousand years humans have been freezing themselves (or their heads) in the hope that they will one day be revived. While the oddsmakers on New Vegas tend to see the survival rate ever breaking fifty/fifty as too close to call one way or the other, it is clear that our ability to freeze things has advanced rather more rapidly than our ability to defrost them."
+Regen_Tank,"@cargo/regen_tank.png@With advances in cellular research, the medical establishment has been able to restore lost or damaged cellular material. They have not, however, figured out how to stop the replacement part from itching the entire time it's growing back..."
+Syringes,"@cargo/vaccines.png@Although no longer necessary for most rational purposes, certain segments of the medical community seem to still gain some perverse pleasure from jamming large hollow needles into their fellow beings."
+Vaccines,"@cargo/vaccines.png@With interstellar trade and war, the risk of infection from dangerous diseases and biological weapons requires vaccinations against every conceivable threat."
+Altered_Strains,"@cargo/cargo-hud.png@While the Rlaan are masters of genetic manipulation, the Aera are decided amateurs, and are behind most of humanity in this area of research. In particular, they have only recently taken measures to artificially expand the gene pool of their own species."
+Implant_tolerance_enhancements,"@cargo/cargo-hud.png@Although tending to be more physically gifted than the other dominant species, the Aera suffer from high rejection rates of mechanical implants due to their overzealous immune systems."
+Bio_Adapters,"@cargo/cargo-hud.png@The Rlaan are more skilled than any other known species at the production of altered organisms, but are still working on perfecting organo-mechanical interface units.  One tends to believe success at the first has hindered funding towards the second."
+Bio_Splicers,"@cargo/cargo-hud.png@Hand-held retro-viral incubation and insertion device. Testing still in the Beta stage - namely, not on Rlaan"
+Surgical_Techniques,"@cargo/surgical_techniques.png@The medical establishements of all species can appreciate the development of any techniques that are more discussed by surgeons than by lawyers."
+Engineered_Bacteria,"@cargo/engineered_bacteria.png@Engineered bacteria have been used for over a millenia - but the set of tasks gets bigger every year."
+Synthetic_Limbs,"@cargo/cargo-hud.png@Fully functional synthetic limbs are old hat. Cheap fully functional synthetic limbs that are far better than the originals and indistinguishable from their native organic counterparts are far more interesting things."
+Experimental_Drugs,"@cargo/experimental_drugs.png@When a Lilipution Lime-leech is lunching on your liver, you don't care if or what the drugs were tested on."
+Nano_Constructors,"@cargo/cargo-hud.png@While the devices themselves, due to the Nano-plague, are decidedly macro-scale, they are capable of constructing nearly anything with atomic precision."
+Self_Repairing_Metal,"@cargo/cargo-hud.png@By embedding sensor nets and electrical delivery systems, sheets of metal can be produced that will compensate for any cracking or deformation by selectively heating portions of themselves with exceptional precision."
+Automated_Factories,"@cargo/cargo-hud.png@As expensive as AI cores are, sets of orbiting factories tend to be even more expensive. The trick, and gist of many a grant proposal, is to figure out how to convince an AI to do something as boring as operate a holovid factory..."
+Atmospheric_Rejuvinator,"@cargo/cargo-hud.png@Whether it be because of overindustrialization or innate unpleasantness, if a planetary atmosphere is not to one's liking, deploying a few million of these (or a few dozen for a domed community)can do wonders."
+Ozone_Healer,"@cargo/ozone_replacement.png@Many electronic devices naturally produce ozone. However, as most of these devices tend to be grounded, they do not contribute to the accretion of an ozone layer at high altitude. A recently arrived at solution: move lots of electronic devices out to the ozone layer on high efficiency flying platforms. These are the platforms."
+Forest_Regenerator,"@cargo/forest_regenerators.png@While many civilized races, with the notable exception of the Aera, would love to see their ancestral forests of old regrown, nearly all are uninclined to do much work towards this goal. Therefore, some effort has been made into producing autonomous forest tending units that can oversee the regrowth of an ecosystem without anyone having to get their manipulator appendages dirty."
+(Xeno)forming_Units,"@cargo/terraforming_units.png@For humans, terraformers, for every other species, something else - for the targeted planet underneath them, truly an alien transformation. Incorporating atmospheric processing, development of a viable biosphere, and creation of potable liquids, xenoforming units are automated monstrocities that can be landed on a hostile planet surface. Given enough time, any airless desert of sufficient size can be made into a golf-course and a strip mall."
+Quantum_Deductor,"@cargo/quantum_deductor.png@The ever so polite name for the class of devices used to attack quantum cryptosystems."
+Virtual_Tunneling_Terminal,"@cargo/cargo-hud.png@A device used for viewing and traversing the internals of macro-scale objects via tunneling effects."
+Quantum_Computers,"@cargo/quantum_processor.png@Featuring massive parallelism and minute feature size, a top of the line number cruncher can analyze more useless facts about its user in a second than most users desire to know in a lifetime."
+Consoles,"@cargo/cargo-hud.png@Of the many interfaces between organics and machines, species specific variants of the Nazduc console produced on various Unadorned worlds remain among the most popular."
+Microprocessors,"@cargo/cargo-hud.png@A vital component of every consumer product since the dawn of ubiquitous computing, microprocessors, though individually near worthless, are in exceptional demand as bulk products."
+Protocol_Droids,"@cargo/cargo-hud.png@Trained in the nuances of interspecies relations, these machines are valued accessories for both diplomats and far ranging merchants - provided they can figure out how to make the damned things shut up when not in use."
+Robotic_Laborers,"@cargo/robot_workers.png@Tireless laborers that will attempt to do nearly anything you can convey to them as their task. Unfortunately, in order to keep costs down, their ability to understand exactly what it is you were trying to convey is somewhat limited. NOTE: Certain aberrations with this particular model have been noticed in conjunction with the request 'lend me a hand'. Please refrain from issuing this command."
+Enhanced_Limbs,"@cargo/enhanced_limbs.png@When the limbs of a sentient being are just not up to the job, fiber enhancements, neuro drivers and bone reinforcing increases function by several orders of magnitude."
+Enhanced_Organs,"@cargo/enhanced_organs.png@Sometimes genecrafting alone cannot provide the benefits desired."
+Artificial_Limbs,"@cargo/artificial_limbs.png@We have the technology - we can rebuild him."
+Cyborg_Construction_Workers,"@cargo/cargo-hud.png@While, in most cultures, granted a set of rights nearly indistinguishable from normal organics, due to the bulky, less than aesthetically pleasing attachments most construction cyborgs are equipped with, transportation regulations welcome their being shipped in cargo holds."
+Cyborg_Defenders,"@cargo/cyborg_mercs.png@The modern day equivalent to the private security officers of old, these cyborgs tend to be somewhat more cost effective, if somewhat less pleasant to stand next to. So they ride in the cargo hold instead..."
+Pleasure_Borgs,"@cargo/pleasure_borgs.png@Pleasure cyborgs, differentiated from pleasure bots by having real skin and systems to keep said skin alive, are sufficiently non-sapient that they may be freely bought and sold.  That being said, they still don't like being shoved into the closet every time grandma comes to visit."
+PAI_Wetware,"@cargo/pai_wetware.png@Pseudo-Artificial Intelligence. PAIs are wet-ware embedded in hardware - genetically engineered brain-in-boxes that distribute the tasks of thinking between the organic and inorganic components. Commercial PAIs are almost universally designed as idiot-savant systems, capable of limited self-motivation and direction, easy to manipulate, but capable of extraordinary problem solving power for the problems they were designed for and trained to assault. PAIs tend to be able to present more natural user interfaces than the expert systems they compete with, tending to be at least vaguely self-aware, and much more responsive to and on emotional levels. In particular, niche market and custom built models are limited only by legislation requiring that entities surpassing a specified set of standardized metrics cannot be considered property, and must be registered as either custom children or custom dependent employees. While the difference is clear for low end models, standards aside, most will agree that the line between a high-end PAI and a designer cyborg human is exceptionally blurry."
+Neural_Interface,"@cargo/cargo-hud.png@The true pulse of an Andolian is not the calm beating of her heart, but the rampaging datastream of her mind."
+Jewelry,"@cargo/jewelry.png@All but entirely useless, except as art or in dating simulations. Still, there will always be a demand for items suitable for decadent expenditure."
+Carpets,"@cargo/cargo-hud.png@Carpets, albeit of far less dust loving varieties, have made their way into space primarily because large slabs of metal are cold to walk on."
+Furniture,"@cargo/cargo-hud.png@No matter what their size or shape, all corporeal beings need something to park their butt-equivalent on."
+Home_Appliances,"@cargo/cargo-hud.png@From the esoteric hover-masseuse to the ubiquitous InstaNuker, these are the champions of eternal consumerism."
+Hygiene_Supplies,"@cargo/personal_hygienics.png@As advanced as the sentient races have become, they have not escaped the need for a good scrubbing up every once and a while. Cremes and balms promise to use the latest advances in nanoscale chemical transport to remove wrinkles and provide superior skin tone, anti-esthers seek out and destroy unpleasant scent particles, and orifice specific probes prevent awkward mucus excretions."
+Janitorial_Supplies,"@cargo/cargo-hud.png@While most developed worlds are moving away from using living janitors, the need for chemical cleansers and means to apply them has not changed."
+Textiles,"@cargo/cargo-hud.png@No matter how far technology has advanced, there will always be those who desire to the freedom to make their own kilt."
+Clothing,"@cargo/clothing.png@Despite the proselytizing efforts of the adherents of the Trekie religion, the unitard never did catch on. Clothing in all manner of make and manufacture can be found in most any region of inhabited space."
+Robot_Servants,"@cargo/robot_servants.png@Having the abilities of a simple-minded bodyservant and portable data storage unit, these machines are valued accessories for those too poor or too ethical to use human servants."
+Personal_Transport,"@cargo/personal_transport.png@Despite the best efforts of government to encourage people to do so, they still tend not to take public transit or transport-pool."
+IntaTouch,"@cargo/cargo-hud.png@A tactile simulator that reminds provides an Aera with relaxing sensations."
+VirtuArea,"@cargo/cargo-hud.png@A wall hanging that projects the illusion of open space."
+Books,"@cargo/cargo-hud.png@While the manner of its conveyance has gone through countless alterations over untold millenia, few things compare to a well crafted tale."
+Games,"@cargo/games.png@Providing near endless possibility for gameplay and maximizing entertainment return, interactive computer games are a market fueled by the hard labors of underfunded dreamers. Despite their lack of fiscal resources they still manage to produce high quality products and garner wide fan bases. These fan bases could theoretically provide support for the poor, downtrodden programmers and content providers, but strangely they never seem to."
+Holo_Vids,"@cargo/holovids.png@Mindless entertainment for the masses. Especially popular among those with no noticeable social life. This year's top seller on the Confederation frontier: 'Who's your Dgn?: Interspecies Fantasies XXIV'. And, as always, the top seller in High Born space: 'Birth of a Nation II.'"
+Rare_Artwork,"@cargo/rare_artwork.png@Wonderfully handcrafted with near-forgotton techniques and wonderously copied with exceptionally well known ones. 'Dogs playing poker', 'Rlaan plays it by trust', and replicas of mid 21st century CE Terran plastic food storage units are among the more popular items of this type."
+Erotica,"@cargo/erotica.png@If you have to ask, this terminal judges you too young to be told."
+Resistant_biologics,"@cargo/resistant_biologics.png@While of potential legitimate use for research, these pathogens are deemed too dangerous to transport, if only because someone willing to use them might intercept them."
+Illegal_Weapons,"@cargo/hp_weapons.png@While it may seem odd, given the loose nature of the laws governing what armaments may be placed on civilian ships, certain weapons, such as thermonuclear mortars, hunter-killer drones, and Anchadaen wrestling worms, are not allowed to be carried around by the civilians of any known political entity deserving of the title. This does not prevent groups and individuals from desiring the aquisition of such devices."
+Pilot,"@cargo/cargo-hud.png@Much as you may hate the pilot of the ship that attempted to destroy yours, destroying that pilot's ship does not grant one, under interstellar law, the right to sell said pilot into slavery. That being said, many have been known to justify such actions by claiming it to be an entirely proper form of remuneration. [Note to editors: Do not change name as the code relies on Pilot]"
+Slaves,"@cargo/cargo-hud.png@Illegal due to fears of interspecies domination, among a plethora of other reasons, economic inefficiencies looming largest of all."
+Clones,"@cargo/cargo-hud.png@It is illegal to transport clones as mass cargo. Each clone must book individual passage at cabin rate on a certified civilian transport. Exceptions may be granted for clones under the age of gestation."
+ISO_Propaganda,"@cargo/cargo-hud.png@A fair portion of it's true a fair portion of the time, but all of it's illegal all of the time."
+ISO_Party_Member,"@cargo/iso_member.png@Anyone in Confederation space willing to openly declare their membership in the ISO either has great fortitude or suffers from great idiocy. The same however, must be said of those willing to transport them through said space."
+Socialist_Worker_Journal,"@cargo/swj.png@The Socialist Worker Journal is a bi-monthly electronic publication believed to have its origins on Berkeley in the Trotsky system. The SWJ highlights the importance of advancing socialism, and features artwork and music produced by workers, for workers. This product has been officially deemed 'unworthy for use even in the task of wiping one's rear.'"
+Luddite_Religious_Tracts,"@cargo/luddite_tracts.png@Carrying ISO propaganda will get one arrested.  Carrying luddite propaganda, outside of the more sympathetic Purist regions, is likely to get one summarily shot."
+Escaped_Political_Prisoners,"@cargo/political_prisoners.png@Are you now, or have you ever been, a member of the ISO?"
+Overeager_Immigrants,"@cargo/cargo-hud.png@With the passing of the Confederation's so called 'Enough is Enough' legislation, it is illegal to transport individuals whose stated purpose is to settle on a planet deemed to have already reached its maximum desired population. While many decried the legislative package as both idiotic and unenforceable and hearings on the act dragged on for years, the coalition of Purists, High Born, Shapers, and various minor factions prevailed over the opposition of the Andolians and the Merchants, with the Unadorned not deigning to participate in the discussion."
+ICBINF,"@cargo/cargo-hud.png@Originally designed as a cheap, renewable, and environmentally friendly refrigerant, it was found to induce exceptionally terminal cancers in Rlaan."
+Zhollus,"@cargo/cargo-hud.png@A plant-like lifeform that, while exceptionally tasty to a Rlaan, is exceptionally devastating to a Rlaan friendly ecosystem."
+RetrifiedSalt,"@cargo/cargo-hud.png@Salted crematory remains. Illegal in Aera space due to the combination of a cultural disdain for such and an unwillingness to remove an ancient law from the books."
+AeraNerveStimuli,"@cargo/cargo-hud.png@Ever watched an Aera spasm in something that looks like a cross between an epileptic fit and an orgasm?  Give them some of this and sit back. Way back. Preferably behind a barrier, because when the Aera in question starts to go into withdrawl induced fits of berserker rage, you might live to tell the tale."

@@ -1,0 +1,88 @@
+uniform int light_enabled[gl_MaxLights];
+uniform int max_light_enabled;
+varying vec4 tc0,tc1;
+
+#define lightPosAndAttenuation(name, lightno) \
+vec4 name(in vec4 vertex) \
+{ \
+  vec4 lpos = gl_LightSource[lightno].position; \
+  vec4 rv; \
+  rv.xyz    = lpos.xyz*vertex.w - vertex.xyz*lpos.w; \
+  rv.w      = length(rv.xyz); \
+  rv.xyz   /= rv.w; \
+  rv.w      = dot( vec3(1,rv.w,rv.w*rv.w), vec3(gl_LightSource[lightno].constantAttenuation, \
+                                                gl_LightSource[lightno].linearAttenuation, \
+                                                gl_LightSource[lightno].quadraticAttenuation) ); \
+  return rv; \
+}
+
+lightPosAndAttenuation(lightPosAndAttenuation0, 0)
+lightPosAndAttenuation(lightPosAndAttenuation1, 1)
+lightPosAndAttenuation(lightPosAndAttenuation2, 2)
+lightPosAndAttenuation(lightPosAndAttenuation3, 3)
+lightPosAndAttenuation(lightPosAndAttenuation4, 4)
+lightPosAndAttenuation(lightPosAndAttenuation5, 5)
+lightPosAndAttenuation(lightPosAndAttenuation6, 6)
+lightPosAndAttenuation(lightPosAndAttenuation7, 7)
+
+//float selfshadowStep(float VNdotL) { return step(0.0,VNdotL); } // fast but hard selfshadow function
+float selfshadowStep(float VNdotL) { return smoothstep(0.0,0.25,VNdotL); } // costly but soft and nice selfshadow function
+
+#define lighting(name, lpattname, lightno) \
+void name(in vec4 vertex, in vec3 eye, in vec3 normal, inout vec4 pc, inout vec4 sc) \
+{ \
+  vec4 lpatt  = lpattname(vertex); \
+  vec3 refl   = -reflect( eye, normal ); \
+  float NdotL = dot( lpatt.xyz, normal ); \
+  float RdotL = dot( lpatt.xyz, refl ); \
+  \
+  pc += lpatt.w*(  gl_FrontMaterial.emission + gl_FrontMaterial.ambient * gl_LightSource[lightno].ambient \
+                 + max(0.0, NdotL) * gl_LightSource[lightno].diffuse * gl_FrontMaterial.diffuse );  \
+  sc += lpatt.w*(  pow( max(0.0, RdotL) , gl_FrontMaterial.shininess ) * selfshadowStep(NdotL) \
+		     * gl_LightSource[lightno].specular * gl_FrontMaterial.specular );  \
+}
+
+
+lighting(lighting2, lightPosAndAttenuation2, 2)
+lighting(lighting3, lightPosAndAttenuation3, 3)
+lighting(lighting4, lightPosAndAttenuation4, 4)
+lighting(lighting5, lightPosAndAttenuation5, 5)
+//lighting(lighting6, lightPosAndAttenuation6, 6)
+//lighting(lighting7, lightPosAndAttenuation7, 7)
+
+
+void main() {
+
+  vec4 position=gl_ModelViewMatrix*gl_Vertex;
+  vec3 eyetopos=normalize(position.xyz/position.w);//find the direction from eye to object
+  vec3 normal = normalize(gl_NormalMatrix * gl_Normal);//normalize the normal in world space
+  tc0.xy=gl_MultiTexCoord0.xy;
+  //tc7=gl_MultiTexCoord0*detail0Plane;//detail texture
+  //tc6=gl_Vertex*detail1Plane;//detail texture
+  tc1.xyz=normal;
+  //tc4.xyz=-eyetopos;//direction from vertex to eye
+  vec3 forward=gl_NormalMatrix*vec3(0.01,.01,1);//cheat use forward of ship to compute tangent
+  vec3 binormal=normalize(cross(forward,normal));//gramm schmitt orthonormalization process
+  vec3 tangent=normalize(cross(binormal,normal));
+  //tc2.xyz=tangent;
+  //  tc3.xyz=binormal;
+  tc0.zw=position.xy/position.w;
+  tc1.w=position.z/position.w;
+  //tc5.xyz=normalize(gl_LightSource[0].position.xyz*position.w-position.xyz*gl_LightSource[0].position.w);//find the direction of the vertex to the light...if not directional position.w==1
+  //tc2.w=tc3.w=tc4.w=tc5.w=tc1.w=0.0;
+  ///set primary color to the front light[0] ambient and light model ambient + emissive material properties
+  vec4 pc=gl_FrontLightProduct[0].ambient+gl_FrontLightModelProduct.sceneColor;
+  vec4 sc=vec4(0);
+  if (max_light_enabled >= 2) {
+    if (light_enabled[2] != 0) lighting2(position, eyetopos, normal, pc, sc);
+    if (light_enabled[3] != 0) lighting3(position, eyetopos, normal, pc, sc);
+    if (light_enabled[4] != 0) lighting4(position, eyetopos, normal, pc, sc);
+    //if (light_enabled[5] != 0) lighting5(position, eyetopos, normal, pc, sc);
+    //if (light_enabled[6] != 0) lighting6(position, eyetopos, normal, pc, sc);
+    //if (light_enabled[7] != 0) lighting7(position, eyetopos, normal, pc, sc);
+  }
+//FIXME this may be better served as an ftransform--but I figure this will get more opts in the future
+  gl_Position=ftransform();//gl_ModelViewProjectionMatrix*gl_Vertex;
+  gl_FrontColor=pc;
+  gl_FrontSecondaryColor=sc;
+}

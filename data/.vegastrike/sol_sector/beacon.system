@@ -1,0 +1,59 @@
+<system name="beacon" background="backgrounds/lightgreen" nearstars="500" stars="1000" starspread="150">
+<Light>
+	<ambient red="0.000000" green="0.000000" blue="0.000000"/>
+	<diffuse red="0.866025" green="0.796397" blue="0.611888"/>
+	<specular red="1.000000" green="0.845665" blue="0.499210"/>
+</Light>
+<Light>
+	<ambient red="0.000000" green="0.000000" blue="0.000000"/>
+	<diffuse red="0.866025" green="0.313668" blue="0.418622"/>
+	<specular red="1.000000" green="0.131184" blue="0.233659"/>
+</Light>
+<Nebula name="" file="red-nebula" nebfile="red-nebula.xml" ri="0.000000" rj="0.000000" rk="0.000000" si="0.000000" sj="0.000000" sk="0.000000" x="41011612.000000" y="64504188.000000" z="-34444744.000000"  />
+<Planet name="beacon A" file="stars/orange_star.png" ri="0.000000" rj="0.000000" rk="0.000000" si="0.000000" sj="0.000000" sk="0.000000" radius="15000000.000000" x="0" y="0" z="0"  Red="0.750000" Green="0.634249" Blue="0.374407" ReflectNoLight="true" light="0">
+	<Planet name="Olympus" file="planets/desert.png" ri="63032204.000000" rj="-64304296.000000" rk="-2170866.000000" si="18897032.000000" sj="17639184.000000" sk="26186026.000000" radius="686105.687500" x="54165424.000000" y="60129364.000000" z="-38155780.000000" year= "83761808.000000" day="572.870998"  >
+		<Planet name="Erebus" file="sol/io.png" ri="-1983207.125000" rj="-312763.000000" rk="-1557150.750000" si="408423.000000" sj="-1162995.375000" sk="-286578.250000" radius="241120.078125" x="-3069933.000000" y="-1269211.500000" z="-2165716.000000" year= "2976995.250000" day="119.183325"  >
+		</Planet>
+		<Planet name="JumpToMcdaniels_world" file="jump.png" ri="855675.312500" rj="-399666.343750" rk="-755842.437500" si="-1293929.375000" sj="135390.750000" sk="-1536423.875000" radius="210.003586" x="1631350.250000" y="-689856.500000" z="1663867.875000" year= "2869822.500000" day="745.396770" alpha="ONE ONE" destination="vega_sector/mcdaniels_world"  >
+		</Planet>
+	</Planet>
+	<Planet name="Erinyes" file="planets/Dirt.png" ri="55166352.000000" rj="-52936424.000000" rk="-15637159.000000" si="-18887218.000000" sj="-23010850.000000" sk="11266327.000000" radius="712508.000000" x="71303456.000000" y="78711272.000000" z="-84232312.000000" year= "103046904.000000" day="606.490188"  >
+	<CityLights file="planets/Dirt_light_repeat.png" wrapx="64" wrapy="64"/>
+		<Planet name="Neoptolemos" file="planets/rock1.png" ri="-658960.375000" rj="-782991.812500" rk="-391471.875000" si="456077.968750" sj="-2090388.875000" sk="3413323.750000" radius="207722.609375" x="-955789.250000" y="1622295.750000" z="3581315.000000" year= "8550651.000000" day="469.429364"  >
+		</Planet>
+	</Planet>
+	<Planet name="Arachne" file="planets/m_class4.png" ri="-24770872.000000" rj="21690860.000000" rk="-34222480.000000" si="33471210.000000" sj="29137512.000000" sk="-5759178.000000" radius="513878.281250" x="66399572.000000" y="-98440288.000000" z="-47504196.000000" year= "205081568.000000" day="541.203039"  >
+<Ring file="planets/ring.png" innerradius="1070986.198204" outerradius="1735035.122535"  wrapx="32" wrapy="1" />
+		<Planet name="JumpToLuyten" file="jump.png" ri="583359.437500" rj="-69360.757813" rk="-626170.687500" si="168206.171875" sj="-554607.437500" sk="218139.656250" radius="111.108505" x="1886189.000000" y="1376349.375000" z="657616.812500" year= "781715.687500" day="859.675648" alpha="ONE ONE" destination="sol_sector/luyten"  >
+		</Planet>
+	</Planet>
+	<Planet name="Stymphalus" file="planets/gas_giant3.png" ri="-33524048.000000" rj="-36397348.000000" rk="-2647276.750000" si="-35999996.000000" sj="34496548.000000" sk="-18402758.000000" radius="1584505.750000" x="-104034152.000000" y="100227880.000000" z="-69592512.000000" year= "196680720.000000" day="228.346812"  >
+		<Planet name="Sophocles" file="planets/rock2.png" ri="-5801802.500000" rj="1266385.000000" rk="-5669194.000000" si="-6447865.000000" sj="-617896.812500" sk="6460661.500000" radius="482194.218750" x="10993068.000000" y="-5613207.000000" z="-4745139.500000" year= "14270824.000000" day="431.406720"  >
+		</Planet>
+		<Planet name="Thesseus" file="planets/tkirsa.png" ri="4103438.000000" rj="-3133633.750000" rk="3980040.750000" si="-1613474.125000" sj="-4472436.000000" sk="-1857816.500000" radius="611674.250000" x="11781166.000000" y="5699987.000000" z="-10048794.000000" year= "5293736.500000" day="95.056612"  >
+		</Planet>
+		<Planet name="JumpToLuyten" file="jump.png" ri="-2527362.750000" rj="2848956.750000" rk="2696895.250000" si="4958077.000000" sj="-2276669.250000" sk="7051439.500000" radius="383.255096" x="8261311.500000" y="3944086.500000" z="4522255.000000" year= "23576652.000000" day="301.386150" alpha="ONE ONE" destination="sol_sector/Luyten"  >
+		</Planet>
+		<Planet name="JumpToFaith" file="jump.png" ri="-5416642.500000" rj="4973585.000000" rk="5098896.500000" si="2501305.750000" sj="-1027028.500000" sk="3658967.000000" radius="302.444855" x="-2896503.000000" y="-3261612.000000" z="6230837.500000" year= "7448852.000000" day="564.828760" alpha="ONE ONE" destination="sol_sector/faith"  >
+		</Planet>
+	</Planet>
+	<Planet name="beacon B" file="stars/red_star.png" ri="0.000000" rj="0.000000" rk="0.000000" si="0.000000" sj="0.000000" sk="0.000000" radius="9191717.000000" x="0" y="0" z="0"  Red="0.750000" Green="0.098388" Blue="0.175244" ReflectNoLight="true" light="1">
+		<Planet name="Lachesis" file="planets/m_class.png" ri="466301.156250" rj="-5947279.000000" rk="-15175906.000000" si="-45067452.000000" sj="9320307.000000" sk="-5037292.500000" radius="331908.312500" x="38040756.000000" y="-61278180.000000" z="47546228.000000" year= "42810172.000000" day="740.597796"  >
+		<Atmosphere file="sol/earthcloudmaptrans.png" alpha="SRCALPHA INVSRCALPHA" radius="341865.561875"/>
+			<Planet name="Agamemnon" file="sol/gaspra.png" ri="-779657.812500" rj="-778573.437500" rk="-38149.898438" si="1033002.125000" sj="-1073570.250000" sk="798560.937500" radius="90406.453125" x="-1366974.500000" y="824456.500000" z="998892.875000" year= "5186792.000000" day="229.322428"  >
+			</Planet>
+		</Planet>
+		<Planet name="Asclepius" file="planets/Dirt1.png" ri="-31025552.000000" rj="5706633.000000" rk="17678354.000000" si="-30414738.000000" sj="-29868344.000000" sk="-43736324.000000" radius="329054.031250" x="16060742.000000" y="-50096068.000000" z="-36158808.000000" year= "72509760.000000" day="587.478865"  >
+		<CityLights file="planets/Dirt_light.png" wrapx="1" wrapy="1"/>
+			<Unit name="" file="fighter_barracks" ri="1033654.750000" rj="-166491.437500" rk="768643.687500" si="-646533.000000" sj="-704133.812500" sk="716924.750000" x="490790.781250" y="884589.750000" z="636693.625000" year= "2057212.659751" faction="confed"  />
+			<Planet name="Minotaur" file="sol/europa.png" ri="329408.093750" rj="-299379.625000" rk="-272788.218750" si="329120.375000" sj="314394.968750" sk="52390.335938" radius="79122.796875" x="-1664035.125000" y="600754.375000" z="-1743885.375000" year= "763423.000000" day="72.195563"  >
+			</Planet>
+		</Planet>
+		<Planet name="Apollo" file="planets/m_class1.png" ri="29965956.000000" rj="-37896124.000000" rk="807545.000000" si="-17689892.000000" sj="-14863845.000000" sk="-41096908.000000" radius="287228.875000" x="-46961576.000000" y="-54268924.000000" z="15737520.000000" year= "96533632.000000" day="309.560228"  >
+		<Atmosphere file="sol/earthcloudmaptrans.png" alpha="SRCALPHA INVSRCALPHA" radius="295845.741250"/>
+			<Planet name="Cepheus" file="sol/triton.png" ri="929279.937500" rj="-284225.843750" rk="-1241579.000000" si="-883128.500000" sj="254753.109375" sk="-719310.625000" radius="91457.070313" x="-474776.031250" y="-820979.437500" z="-1093660.000000" year= "3979632.750000" day="554.940763"  >
+			</Planet>
+		</Planet>
+	</Planet>
+</Planet>
+</system>

@@ -1,0 +1,42 @@
+<system name="Militia Nebula" background="backgrounds/emerald" nearstars="500" stars="1000" starspread="150"  x="0" y="0" z="0">
+<Light>
+<ambient red=".5" green=".5" blue=".5"/>
+<diffuse red="1" green="1" blue="1"/>
+<specular red="1" green="1" blue="1"/>
+</Light>
+
+<Light>
+<ambient red="1" green=".1" blue="0"/>
+<!--<diffuse red="1" green=".7" blue="0"/>-->
+<!--<attenuated red=".00000001" blue=".00000015"/>-->
+<attenuated red="0" blue=".000000002"/>
+</Light>	
+<Light>
+<ambient red="1" green=".1" blue="0"/>
+<!--<diffuse red="1" green=".7" blue="0"/>-->
+<!--<attenuated red=".00000001" blue=".00000015"/>-->
+<attenuated red="0" blue=".0000001"/>
+</Light>	
+
+<planet name="brother" file="stars/orange_star.png" radius="25000" gravity="20" x="100000" z="-100000"  Red=".9" Green=".9" Blue=".9" ReflectNoLight="true" light="0 1l" />
+<planet name="sister" file="stars/red_star.png" radius="25000" gravity="20" x="50000" y="80000" z="400000"  Red=".9" Green=".9" Blue=".9" ReflectNoLight="true" light="0 1l" />
+
+
+<planet name="Nanny" file="sol/triton.png" radius="3000" z="10000" gravity="20" >
+</planet>
+
+<planet name="Peter" file="sol/phobos.png" radius="400" gravity="20" x="1000" y="1000"  z="-14000" position="0" />			
+
+<planet name="Paul" file="sol/rhea.png" radius="150" gravity="20" x="-2000" y="1000"  z="-8000" position="0" />			
+
+<planet name="Mary" file="sol/deimos.png" radius="400" gravity="20" x="3000" y="1000"  z="-6000" position="0" />			
+
+<planet name="jumppoint-mars" file="jump.png" alpha="ONE ONE" radius="500" gravity="20" x="-2000" y="-1000" z="-4000" destination="visit_from_the_aera/mars" />
+
+<!--
+<Nebula name="militia-nebula" file="green-nebula" nebfile="green-nebula.xml" />
+-->
+
+
+
+</system>

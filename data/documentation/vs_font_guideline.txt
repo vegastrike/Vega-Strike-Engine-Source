@@ -1,0 +1,29 @@
+
+background color = #000000
+font color = #483855
+glow color = #BFB8FE
+
+font = Megalomania
+font size = 72
+
+Create selection:
+Layer > Text to Selection > Text to Selection
+Create new layer
+Rename layer to _glow
+Select layer
+Grow = 2
+Feather = 6
+Fill
+Stack layer below font
+
+
+Buttons background:
+rounded rectangle 20%
+Background fill
+Opacity 60
+
+Button frame
+Opacity 100
+Shrink 4 px
+Cut
+

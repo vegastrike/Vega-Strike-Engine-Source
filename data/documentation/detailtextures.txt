@@ -1,0 +1,83 @@
+;; This buffer is for notes you don't want to save, and for Lisp evaluation.
+;; If you want to create a file, visit that file with C-x C-f,
+;; then enter the text in that file's own buffer.
+
+Ace123 uploaded a binary with all the features people have been requesting...
+http://vegastrike.sourceforge.net/users/ace123
+so let me list them for you:
+a) I have now enabled detail textures that fade in slowly as you get close...
+the way to enable these is to make a mesh with the following tagline:
+
+<Mesh texture="combine4.bmp" texture1="combinePPL.jpg" detailTexture="grid.png" scale="30">
+<DetailPlane x=".02" y=".02" z="0"/>
+<DetailPlane x="0" y=".02" z=".02"/>
+<Points>
+ ... ... ...
+</Mesh>
+
+So let me explain what this means
+First of all--the detail textures are applied through multitexturing--so they no speed hit for cards with multiple pipelines (anything decent these days) The other thigns require passes because simply they cannot just add up--they need to multiply with each other--so the speed hit from detailTexture is limited and will be able to be turned off easily.
+Secondly... the DetailPlane... what is this?
+ok well given that I can't expect everyone to edit all the models and retexture them with insane detailed detail textures--we have to pick a formula to apply the texture on the model so that it will look decent.  these numbers were the first numbers I tried on the star fortress-and lo and behold it looks snazzy...
+let me go into a bit of detail about how these planes work :-)
+first of all notice .02 ... that's how BIG the detail textures are...  the smaller the number the bigger the detail texture and the earlier it will appear to the user.  right now we're saying that the texture is 1/.02 or 50 units long. for a star fortress that's pretty small.
+ok so why specify 2 and what are the x,y,z
+well each detailtexture you wish to apply needs 2 DetailPlanes .
+if you specify 4 then your starbase will have 2 layers of the detailTexture you chose.
+the formula is.
+the horizontal coordinate of the texture is determined by the first DetailPlane.  It's the pointx*x+pointy*y+pointz*z where the point is the point of the polygon being textured
+same for the vertical coordinate--but the second DetailPlane....
+basically choose the magnification first...
+then choose the most important plane of your ship...if your ship is a flying sauser with a huge xz plane then have your detail planes instead:
+<DetailPlane x=".02" y="0" z=".02"/>
+<DetailPlane x="0" y=".02" z=".02"/>
+so that the xz plane is emphasized :-) make sense?
+and change .02 to whatever you think the player will be seing when he/she's clsoe
+
+
+the last two config variables you'll need to worry about are:
+"graphics","detail_texture_blankout","3"     
+"graphics","detail_texture_full_color","1"
+if you want the detail texture to stay at full intensity for longer make 1 a higher number
+if you want it to black out faster make 3 a higher number :-)
+these are in vegastrike.config :-)
+
+
+Now we move to animated meshes...
+this will sound similar to LODs because I use the same code :-) w00t
+
+<Mesh ... ... >
+.....
+</Polygons>
+<Logo> 
+...
+</Logo>
+<Material ...> 
+...
+</Material>
+<LOD meshfile="secondframe.xmesh" framespersecond="5" size="1"/>
+<LOD meshfile="secondframe.xmesh"  size="1"/>
+<LOD meshfile="secondframe.xmesh"  size="1"/>
+<LOD meshfile="secondframe.xmesh"  size="1"/>
+<LOD meshfile="secondframe.xmesh"  size="1"/>
+</Mesh>
+
+
+that maeans the animation will run at 5 fps...first using the first mesh then all the meshes listed inside it.
+
+Ok so this is how detail textures and animated meshes work...what about muzzle flash? well that's just an animated mesh put on a gun...just make a file in meshes/weapons/laser.xmesh and meshes/weapons/laser_flare.xmesh
+the flare will be your muzzle flare...you need to design that yourself.
+first get the laser itself appearing...
+unfortunately the meshes do need to be modified to have visible weapons
+you need to make the weapons 1 unit long...
+then modify the 
+<Mount size="....".. ... ... xyscale="5" zscale="10"/>
+that will make the gun stick out 5 wide and 10 long :-) on your particular mount...each mount can have a different sized weapon.
+the weapon will animate when it's being fired (use animation technique above) :-) not before not after.
+
+now the one problem with animations is that LODs and Animations are mutually exclusive--but this is the one way I could accomplish both without slowing the whole (unanimated) engine down :-)
+
+so I hope you enjoy--no one seems to use lods anyway
+
+
+http://vegastrike.sourceforge.net/forums/viewtopic.php?t=1205

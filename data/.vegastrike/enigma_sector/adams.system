@@ -1,0 +1,44 @@
+<system name="adams" background="backgrounds/emerald" nearstars="500" stars="1000" starspread="150">
+<Light>
+	<ambient red="0.000000" green="0.000000" blue="0.000000"/>
+	<diffuse red="0.866025" green="0.808272" blue="0.866025"/>
+	<specular red="1.000000" green="0.871071" blue="1.000000"/>
+</Light>
+<Light>
+	<ambient red="0.000000" green="0.000000" blue="0.000000"/>
+	<diffuse red="0.866025" green="0.802394" blue="0.866025"/>
+	<specular red="1.000000" green="0.858449" blue="1.000000"/>
+</Light>
+<Planet name="adams A" file="sol/sun.png" ri="0.000000" rj="0.000000" rk="0.000000" si="0.000000" sj="0.000000" sk="0.000000" radius="34535444.000000" x="0" y="0" z="0"  Red="0.750000" Green="0.653304" Blue="0.750000" ReflectNoLight="true" light="0">
+	<Planet name="Cernunnos" file="planets/Snow1.png" ri="86462592.000000" rj="62574200.000000" rk="-34682352.000000" si="22688622.000000" sj="34778792.000000" sk="119310600.000000" radius="1251247.250000" x="131235168.000000" y="133951632.000000" z="-121395136.000000" year= "108395024.000000" day="112.591327"  >
+	<CityLights file="planets/Snow_light.png" wrapx="6" wrapy="3"/>
+		<Unit name="" file="factory" ri="1751862.750000" rj="-6113.009766" rk="142256.015625" si="132156.343750" sj="385498.031250" sk="-1610921.125000" x="1282710.500000" y="-4063734.500000" z="-4001277.000000" year= "3529839.061233" faction="confed"  />
+		<Planet name="Shiva" file="sol/rhea.png" ri="1355737.250000" rj="1436402.375000" rk="-1424204.250000" si="-2235131.500000" sj="-517429.343750" sk="-2649541.000000" radius="417245.343750" x="3327369.250000" y="2652898.000000" z="5524149.500000" year= "21606152.000000" day="824.579851"  >
+		</Planet>
+		<Planet name="JumpToHeavens_gate" file="jump.png" ri="-2654813.500000" rj="-1603578.000000" rk="141381.796875" si="223700.234375" sj="-192679.718750" sk="2015149.625000" radius="142.628128" x="2343047.500000" y="-1955474.000000" z="2658662.000000" year= "3586664.500000" day="789.273109" alpha="ONE ONE" destination="enigma_sector/heavens_gate"  >
+		</Planet>
+	</Planet>
+	<Planet name="Nagasaki" file="planets/m_class3.png" ri="47462780.000000" rj="13276645.000000" rk="55619352.000000" si="32394430.000000" sj="-87814128.000000" sk="-6682075.000000" radius="1063719.500000" x="164673232.000000" y="-61786256.000000" z="56770056.000000" year= "2032839168.000000" day="704.368175"  >
+	<Atmosphere file="sol/earthcloudmaptrans.png" alpha="SRCALPHA INVSRCALPHA" radius="1095631.085000"/>
+	</Planet>
+	<Planet name="JumpToSalayna" file="jump.png" ri="-36695080.000000" rj="33119596.000000" rk="-35475908.000000" si="-82732504.000000" sj="-4325257.000000" sk="81537736.000000" radius="269.200653" x="105938464.000000" y="65959484.000000" z="-51844244.000000" year= "652227648.000000" day="334.662557" alpha="ONE ONE" destination="enigma_sector/salayna"  >
+	</Planet>
+	<Planet name="JumpToBlake" file="jump.png" ri="-20063846.000000" rj="4326807.500000" rk="-49722016.000000" si="109010592.000000" sj="-84530160.000000" sk="-51343804.000000" radius="259.868134" x="-89567728.000000" y="115279360.000000" z="-145190304.000000" year= "189971232.000000" day="360.793237" alpha="ONE ONE" destination="enigma_sector/blake"  >
+	</Planet>
+	<Planet name="adams B" file="sol/sun.png" ri="35147796.000000" rj="-43618096.000000" rk="82828480.000000" si="-66094256.000000" sj="56087528.000000" sk="57582836.000000" radius="28917256.000000" x="0" y="0" z="0" year= "128552232.000000" day="22193669.720961"  Red="0.750000" Green="0.643837" Blue="0.750000" ReflectNoLight="true" light="1">
+		<Planet name="Kate" file="planets/m_class1.png" ri="13437209.000000" rj="-51406104.000000" rk="-63836384.000000" si="87107576.000000" sj="79797272.000000" sk="-45923408.000000" radius="998253.000000" x="-89550680.000000" y="111536792.000000" z="130052920.000000" year= "1644178176.000000" day="454.083193"  >
+		<Atmosphere file="sol/earthcloudmaptrans.png" alpha="SRCALPHA INVSRCALPHA" radius="1028200.590000"/>
+			<Planet name="JumpToNiven" file="jump.png" ri="-1005103.312500" rj="-454606.125000" rk="-286047.156250" si="374955.000000" sj="116427.093750" sk="-1502539.000000" radius="281.979584" x="-2942407.750000" y="1123812.250000" z="-1615983.500000" year= "5101576.500000" day="381.492111" alpha="ONE ONE" destination="enigma_sector/niven"  >
+			</Planet>
+		</Planet>
+		<Planet name="Bodb Dearg" file="planets/carribean3.png" ri="85451768.000000" rj="35117688.000000" rk="-67297328.000000" si="-56244944.000000" sj="-13913436.000000" sk="-78678272.000000" radius="975020.875000" x="-105088336.000000" y="118767272.000000" z="-83193128.000000" year= "279243808.000000" day="635.363139"  >
+<Ring file="planets/ring.png" innerradius="1762451.327918" outerradius="2910742.460191"  wrapx="36" wrapy="2" />
+			<Unit name="" file="research" ri="-1106978.500000" rj="1056908.500000" rk="333206.781250" si="882732.562500" sj="824797.000000" sk="316413.156250" x="-2037563.875000" y="3232960.250000" z="-1355617.125000" year= "2580178.345418" faction="confed"  />
+			<Planet name="Shara" file="planets/forest1.png" ri="-2532670.750000" rj="-559629.687500" rk="2233022.750000" si="281942.500000" sj="1554194.625000" sk="709281.187500" radius="243060.406250" x="3751592.250000" y="-3019495.250000" z="3325400.750000" year= "4551092.000000" day="323.614368"  >
+			</Planet>
+		</Planet>
+		<Planet name="Malden" file="planets/m_class4.png" ri="-36924532.000000" rj="66919980.000000" rk="72814664.000000" si="80657440.000000" sj="-62732756.000000" sk="98555872.000000" radius="1148699.125000" x="106112040.000000" y="-128823128.000000" z="59644052.000000" year= "291871392.000000" day="289.415082"  >
+		</Planet>
+	</Planet>
+</Planet>
+</system>

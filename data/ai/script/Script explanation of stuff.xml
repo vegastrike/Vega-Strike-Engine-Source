@@ -1,0 +1,64 @@
+Explanation of AI SCript XML stuff - I hope
+Ok the XML is parsed and fed to:
+http://vegastrike.svn.sourceforge.net/viewvc/vegastrike/trunk/vegastrike/src/cmd/ai/script.cpp?revision=12467&view=markup
+Amoung others
+
+Some of the other crap like math specifics for altering vectors are in Vectors.py
+
+The possible script commands/queries: (XML name, C++ NAME)
+
+const EnumMap::Pair element_names[] = {
+UNKNOWN", UNKNOWN),
+Float", FFLOAT),
+Script", SCRIPT),
+Vector", VECTOR),   						After a Vector, has (itts,afterburn,terminate,lin) arguements <vector> (1,1,1,0)
+Moveto", MOVETO),							Go somehwere, XYZ, a POS, etc
+Default", DEFAULT),
+Targetworld", TARGETWORLD),
+Yourworld", YOURWORLD),
+Targetlocal", TARGETLOCAL),
+Yourlocal", YOURLOCAL),
+FaceTarget", FACETARGET),					Turn to face the target
+CloakFor", CLOAKFOR),						Cloak for so long
+ExecuteFor", EXECUTEFOR),
+ChangeHead", CHANGEHEAD),					Change the heading bby an XYZ vaule
+MatchLin", MATCHLIN),						Match the various velocities to a certian value?
+MatchAng", MATCHANG),
+MatchVel", MATCHVEL),
+Angular", ANGULAR),
+Add", ADD),									Functions for the "Vector" element - add
+Neg", NEG),									Functions for the "Vector" element - ???
+Sub", SUB),									Functions for the "Vector" element - Subtract
+Normalize", NORMALIZE),						Functions for the "Vector" element - normalize
+Scale", SCALE),								Functions for the "Vector" element - ???
+Cross", CROSS),								Functions for the "Vector" element - multiply
+Dot", DOT),
+Multf", MULTF),
+Addf", ADDF),
+Fromf", FROMF),
+Tof", TOF),
+Linear", LINEAR),
+Threatworld", THREATWORLD),
+Threatlocal", THREATLOCAL)
+};
+const EnumMap::Pair attribute_names[] = {
+UNKNOWN", UNKNOWN),
+accuracy", ACCURACY),
+x", X),										Floating Value thing? Ie a value is given here to change heading, vector, etc
+y", Y),
+z", Z),
+Time", TIME),
+Terminate", TERMINATE),
+Local", LOCAL),
+Value", VALUE),
+ITTS", ITTTS),								Use ITTS 0/1 or in use?
+Afterburn", AFTERBURN),						Use an afterburner 0/1 or in use?
+Position", YOURPOS),						AI's position
+TargetPos", TARGETPOS),						Position of Target
+ThreatPos", THREATPOS),						Position of threat
+Velocity", YOURV),							AI's velocity
+TargetV", TARGETV),							Target Velocity
+ThreatV", THREATV),							Threats Velocity
+SimlationAtom", SIMATOM),
+Dup", DUPLIC)								Duplicate a vector
+};

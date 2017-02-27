@@ -1,0 +1,66 @@
+<Cockpit r="1" g="1" b="1">
+   <Panel file="panel.sprite"/>
+
+   <Lock file="lock.sprite"/>
+   <Eject file="eject.sprite" />
+   <Crosshairs file="crosshairs.sprite" xcent="0.001" ycent="0.003"/>
+   <Radar file="radar.sprite" /> 
+   <RearRadar file="radar_rear.sprite" />
+   <Energy file="gauge_blasterpower.sprite" GaugeRight="1"/>	
+   <WarpEnergy file="gauge_jumppower.sprite" GaugeRight="1"/>
+   <Fuel file="gauge_fuelstatus.sprite" GaugeRight="1"/>
+   <Panel file="text_capacitor.sprite"/>
+   <Panel file="text_drives.sprite"/>
+   <Panel file="text_fuel.sprite"/>
+
+   <MASSEFFECT xcent="-0.760" ycent="0.180" width=".018" height=".036"/> 
+   <MTURRET xcent="-0.675" ycent="0.140" width=".018" height=".036"/> 
+   <MTRAVEL xcent="-0.125" ycent="-0.985" width=".018" height=".036"/>
+   <MFLIGHTCOMP xcent="0.005" ycent="-.945" width=".018" height=".036"/>  
+   <MJUMP xcent="-0.155" ycent="-0.595" width=".018" height=".036"/> 
+   <MDOCK xcent="0.548" ycent="-0.925" width=".018" height=".036"/> 
+   <MSPEC xcent="-0.960" ycent="-0.46" width=".018" height=".036"/> 
+   <MECM xcent="-0.720" ycent="-0.965" width=".018" height=".036"/> 
+   <MCLOAK xcent="-0.960" ycent="-0.965" width=".018" height=".036"/> 
+   <MAUTO xcent="-0.720" ycent="-0.46" width=".018" height=".036"/> 
+
+   <Speed xcent="-.125" ycent="-.895" width=".018" height=".036"/> 
+   <SetSpeed xcent=".005" ycent="-.895" width=".018" height=".036"/>
+   <WARPFIELDSTRENGTH xcent="-.125" ycent="-.945" width=".018" height=".036"/>
+   <FPS xcent="0.94" ycent="0.96" width=".018" height=".036"/>
+
+   <MissileLock file="light_missilelock.sprite" />
+   <Jump file="light_jump.sprite" />
+   <Auto file="light_spec.sprite" />
+   <ECM file="light_ecm.sprite" />
+
+   <!-- Positioning helper (disabled now) -->
+   <!--Hull file="hull.spr"/-->
+
+   <ShieldF file="shieldf.sprite" GaugeDown="1"/>
+   <ShieldB file="shieldf.sprite" xcent="-.765" ycent="-.567"/>
+   <ShieldR file="shieldr.sprite" GaugeLeft="1"/>
+   <ShieldL file="shieldr.sprite" xcent="-.665" ycent="-.700" GaugeRight="1"/>
+
+   <!-- Octet Armor -->
+   <ArmorFRT file="armort.sprite" width="0.204"  height="0.136" GaugeDown="1" />
+   <ArmorFLT file="armort.sprite" width="-0.204" height="0.136" GaugeDown="1" />
+   <ArmorBRT file="armort.sprite" width="0.204"  height="0.136" xcent="-0.765" ycent="-0.632" />
+   <ArmorBLT file="armort.sprite" width="-0.204" height="0.136" xcent="-0.765" ycent="-0.632" />
+   <ArmorFRB file="armorb.sprite" width="0.102"  height="0.272" GaugeRight="1" />
+   <ArmorBRB file="armorb.sprite" width="0.102" height="-0.272" GaugeRight="1" />
+   <ArmorFLB file="armorb.sprite" width="0.102"  height="0.272" xcent="-0.714" ycent="-0.700" GaugeLeft="1" />
+   <ArmorBLB file="armorb.sprite" width="0.102" height="-0.272" xcent="-0.714" ycent="-0.700" GaugeLeft="1" />
+
+   <TargetShieldF file="targetshieldf.sprite" GaugeDown="1"/>
+   <TargetShieldB file="targetshieldf.sprite" xcent="0.765" ycent="-.567"/>
+   <TargetShieldR file="targetshieldr.sprite" GaugeLeft="1"/>
+   <TargetShieldL file="targetshieldr.sprite" xcent="0.865" ycent="-.700" GaugeRight="1"/>
+
+   <VDU TextRows="30" TextCols="25" type="Weapon Manifest Damage" file="wvdu.sprite" />	
+   <VDU TextRows="15" TextCols="25" type="Target View TargetManifest Nav" file ="rvdu.sprite" />
+   <VDU TextRows="15" TextCols="25" type="Shield Manifest" file="lvdu.sprite" />
+   <VDU TextRows="14" TextCols="100" type="Message" file="mvdu.sprite" />	
+   <VDU TextRows="30" TextCols="30" type="Objectives" file="objvdu.sprite"/>
+   <VDU TextRows="15" TextCols="30" type="Comm" file ="commvdu.sprite" />
+</Cockpit>

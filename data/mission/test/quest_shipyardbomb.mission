@@ -1,0 +1,26 @@
+<!-- Vega Strike - Upon The Coldest Sea -->
+<!-- Quest testing misson               -->
+<!-- Author: pyramid                    -->
+<!-- Version: 2008-04-23                -->
+<!-- start from your data4.x folder with: ./vegastrike test/quest_shipyardbomb.mission -->
+<mission>
+   <settings>
+      <origin  planet="Earth" x="10000" y="10000" z="1000"/>
+   </settings>
+
+   <variables>
+      <var name="defaultplayer" value="blue"/>
+      <var name="system" value="Sol/Alpha_Centauri" />
+      <var name="credits" value="13500"/>
+   </variables>
+        <flightgroups>
+                <flightgroup name="blue" faction="privateer" type="Goddard" ainame="default" waves="1" nr_ships="2">
+         <pos x="29294584368" y="-29977674838" z="1834038513"/>
+         <rot x="180.0" y="180.0" z="180.0"/>
+      </flightgroup>
+        </flightgroups>
+   <python>
+from quest_shipyardbomb import MissionExecutor, quest_shipyardbomb
+mission = MissionExecutor([quest_shipyardbomb()])
+   </python> 
+</mission>

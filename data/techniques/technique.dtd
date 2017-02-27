@@ -1,0 +1,181 @@
+<!--
+
+    A technique that won't compile under the current
+    hardware will use the "fallback" technique, if specified.
+    If a technique fails to compile and no callback is specified,
+    an error condition arises
+
+ -->
+
+<!ELEMENT technique (pass+)>
+<!ATTLIST technique
+    fallback                CDATA   #IMPLIED
+    >
+
+<!--
+
+    Passes are rendered in sequence, as specified by "sequence".
+    
+    When a pass is rendered, one can assume all passes (of all techniques) of
+    lesser sequence have been rendered already. Within same-sequence passes,
+    opaque passes are rendered first, and transparent last. A pass is said to
+    be opaque if the destination color plays no part in the blending mode.
+    
+    Parameters:
+    
+    iteration: "once" means the pass will be executed only once. A number
+        specifies the number of lights which this pass can handle in one
+        execution. The pass will be executed as many times are necessary
+        to process all lights.
+    
+    maxiterations: A number that specifies, under iterated execution, the
+        maximum number of times the pass is allowed to be executed. 0 is a special
+        value that means "infinity"
+    
+    blend: The blending mode of the pass. Default uses the blending mode of the
+        mesh being rendered by the pass.
+    
+    sequence: A number specifying the sort order of the pass.
+    
+    depth_function: The depth-testing function used. "always" will disable depth tests.
+    
+    cull: The backface culling mode. Notice that "front" culls front faces - ie, does NOT
+        draw frontfaces. Default is whatever the mesh/context specifies, usually "back".
+    
+    polygon_mode: The polygon drawing mode. Defaults to the usual, "fill"
+    
+    polygon_offset_units: A floating point number that specifies the 
+        z-buffer offset in "delta units".
+    
+    polygon_offset_factor: A floating point number that specifies the
+        z-buffer offset as a slope factor.
+    
+    line_width: A floating point number that specifies, when in "line" polygon
+        mode, thewidth of the rendered lines.
+    
+    srgb_aware: If true, shaders are aware of SRGB frambuffers, so everything should be set up
+        for sRGB blending if sRGB framebuffers are available. Shaders will be compiled
+        with SRGB_FRAMEBUFFER set to 0 (not supported) or 1 (supported).
+
+ -->
+
+<!ELEMENT pass (vertex_program?, fragment_program?, texture_unit*, auto_param*, param*)>
+<!ATTLIST pass
+    type                    CDATA   #REQUIRED
+    cwrite                  CDATA   (true|false)        "true"
+    zwrite                  CDATA   (true|false|auto)   "auto"
+    srgb_aware              CDATA   (true|false)        "false"
+    iteration               CDATA   (once|0|1|2|3|4|5|6|7|8)    "once"
+    maxiterations           NMTOKEN "0"
+    blend                   CDATA   (default|add|multiply|alpha_blend|decal|premult_alpha|multi_alpha_blend)    "default"
+    sequence                NMTOKEN #IMPLIED
+    depth_function          CDATA   (less|lequal|greater|gequal|equal|always|never) "lequal"
+    cull                    CDATA   (none|back|front|both|default)  "default"
+    polygon_mode            CDATA   (point|line|fill)   "fill"
+    polygon_offset_units    NMTOKEN "0"
+    polygon_offset_factor   NMTOKEN "0"
+    line_width              NMTOKEN "1"
+    >
+    
+
+<!--
+    src is a name of a program without extension.
+    the extension '.vp' is automatically appended.
+ -->
+<!ELEMENT vertex_program EMPTY>
+<!ATTLIST vertex_program
+    src                     CDATA   #REQUIRED
+    >
+
+<!--
+    src is a name of a program without extension.
+    the extension '.fp' is automatically appended.
+ -->
+<!ELEMENT fragment_program EMPTY>
+<!ATTLIST fragment_program
+    src                     CDATA   #REQUIRED
+    >
+
+<!--
+
+    Defines a texture unit to be set up for the pass.
+    
+    target: a texture unit number. In the fixed-function pipeline,
+        0 = diffuse
+        1 = specmap
+        2 = damagemap
+        3 = glowmap
+    
+    src: a texture source, of the form "<type>:<path>". May be:
+        decal:<number>
+            The mesh texture number <number>
+        environment
+            The environment spheremap (or cubemap, depends on build configuration)
+        file:<path>
+            A specific texture file
+    
+    default: a default texture source, in case the 'src' cannot be found.
+        Follows the same format as 'src'.
+    
+    name: A shader parameter name used to bind a program with its texture unit.
+        Required for shader passes, ignored for fixed-function passes.
+    
+    kind: a texture kind, unused for "environment", sice it has an implied kind.
+        2d: a normal 2-d texture (the default for file and decal)
+        3d: <unimplemented> a 3-d texture. 
+            Currently, only the DDS format supports this kind.
+        cube: <unimplemented> a 6-side cubemap.
+            Whatever the kind of the first side is, this kind expects 6
+            faces concatenated to a single file, in the order
+            <unspecified>
+        separatedCube: <unimplemented> a 6-side cubemap.
+            This kind expects its sides to be found with name suffixes:
+                up/down/left/right/front/back
+        default: a context-dependant default value. For decal and file
+            sources, this usually means 2d. For environment, dependant on
+            build flags, it means either 2d (spheremap) or cube.
+    
+ -->
+<!ELEMENT texture_unit EMPTY>
+<!ATTLIST texture_unit
+    target                  CDATA   (0|1|2|3|4|5|6|7|8|9|10|11|12|13|14|15) #IMPLIED
+    src                     CDATA   #REQUIRED
+    default                 CDATA   #IMPLIED
+    name                    CDATA   #IMPLIED
+    kind                    CDATA   (default|2d|3d|cube|separatedCube) #IMPLIED
+    >
+
+<!--
+    A shader parameter bound to a fixed value.
+    Ignored for fixed-function passes
+    
+    name: the name of the parameter within the program
+    value: A coma-separated list of up to 4 floats, eg: "1,0,0.5,1"
+    optional: if true, failure to resolve the parameter 
+        within the program is not considered an error.
+ -->
+
+<!ELEMENT param EMPTY>
+<!ATTLIST param
+    value                   CDATA   #REQUIRED
+    name                    CDATA   #REQUIRED
+    optional                CDATA   (true|false)    "false"
+    >
+
+<!--
+    A shader parameter bound to an engine-supplied value.
+    Ignored for fixed-function passes
+    
+    name: the name of the parameter within the program
+    semantic: the "semantic" or "meaning" of the parameter. 
+        Defines what runtime value will be bound to it.
+    optional: if true, failure to resolve the parameter 
+        within the program is not considered an error.
+ -->
+
+<!ELEMENT auto_param EMPTY>
+<!ATTLIST auto_param
+    semantic                CDATA   (EnvColor|CloakingPhase|Damage|DetailPlane0|DetailPlane1|NumLights|ActiveLightsArray|GameTime)  #REQUIRED
+    name                    CDATA   #REQUIRED
+    optional                CDATA   (true|false)    "false"
+    >

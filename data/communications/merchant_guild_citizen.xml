@@ -1,0 +1,240 @@
+<comm>
+	<node text="startingNode" relationship="0"><!-- node 0 (starting node: Don't link here)-->
+		<edge index="1"/>
+		<edge index="2"/>
+		<edge index="3"/>
+	</node>
+
+<!-- Starting Points -->
+	<node text="Hey friend! Haul anything interesting lately?" relationship="0.2"><!-- node 1 (very happy)-->
+	<sound file="communications/sounds/merchant_guild_citizen/merchant_guild_citizen_hey-friend-haul.ogg" sex="0"/>
+		<edge index="4"/>
+		<edge index="5"/>
+		<edge index="6"/>
+	</node>
+	<node text="If you're hauling for a living, you should join the Guild. Did wonders for my life." relationship="0"><!-- node 2 (neutral)-->
+	<sound file="communications/sounds/merchant_guild_citizen/merchant_guild_citizen_if-youre-hauling.ogg"  sex="0"/>
+		<edge index="8"/>
+		<edge index="9"/>
+		<edge index="10"/>
+	</node>
+	<node text="I've come to the opinion that you're bad for business." relationship="-.2"><!-- node 3 (very mad)-->
+	<sound file="communications/sounds/merchant_guild_citizen/merchant_guild_citizen_ive-come-to-the-opinion.ogg"  sex="0"/>
+		<edge index="12"/>
+		<edge index="13"/>
+		<edge index="14"/>
+	</node>
+<!-- End of Starting Points -->
+
+<!-- Other Nodes -->
+
+	<node text="I had to sell my farm for a downpayment on this ship. No regrets though. None at all." relationship=".03125"><!-- node 4(random good chatter)-->
+	<sound file="communications/sounds/merchant_guild_citizen/merchant_guild_citizen_i-had-to-sell.ogg"  sex="0"/>
+		<edge index="4"/>
+		<edge index="5"/>
+	</node>
+	<node text="I'm sure glad I'm working the civilian side of things. Supplying the military is dangerous work with a war on!" relationship=".0625"><!-- node 5 (random good chatter)-->
+	<sound file="communications/sounds/merchant_guild_citizen/merchant_guild_citizen_im-sure-glad-i.ogg"  sex="0"/>
+		<edge index="4"/>
+		<edge index="6"/>
+	</node>
+	<node text="Hey friend, if you're headed where I'm headed, we can convoy - unofficially, of course." relationship=".0625"><!-- node 6 (best node)-->
+	<sound file="communications/sounds/merchant_guild_citizen/merchant_guild_citizen_hey-friend-if.ogg"  sex="0"/>
+		<edge index="5"/>
+		<edge index="6"/>
+	</node>
+	<node text="Friendly fire! Friendly fire! What in profit's name is going on out there!" relationship="-.03125"><!-- node 7 (hit while happy)-->
+	<sound file="communications/sounds/merchant_guild_citizen/merchant_guild_citizen_friendly-fire.ogg"  sex="0"/>
+		<edge index="4"/>
+		<edge index="8"/>
+		<edge index="9"/>
+		<edge index="10"/>
+	</node>
+	<node text="Sorry if I'm not too chatty - I've been hauling freight straight through the local night-shift." relationship=".03125"><!-- node 8 (random neutral chatter)-->
+	<sound file="communications/sounds/merchant_guild_citizen/merchant_guild_citizen_sorry-if-im-not.ogg"  sex="0"/>
+		<edge index="9"/>
+		<edge index="10"/>
+	</node>
+	<node text="Laissez faire, bud - let's just go our separate ways." relationship=".04125"><!-- node 9 (neutral node after he has decided to be nicer after conflict)-->
+	<sound file="communications/sounds/merchant_guild_citizen/merchant_guild_citizen_laizzez-faire.ogg"  sex="0"/>
+		<edge index="8"/>
+		<edge index="10"/>
+	</node>
+	<node text="The lifeblood of the economy is flowing smoothly today - you, me and every hard working fellow in the merchant fleets!" relationship=".03125"><!-- node 10 (good node in neutral) -->
+	<sound file="communications/sounds/merchant_guild_citizen/merchant_guild_citizen_the-lifeblood-of.ogg"  sex="0"/>
+		<edge index="8"/>
+		<edge index="9"/>
+	</node>
+	<node text="Do you know what this is going to do to my insurance rates!?!" relationship="-.125"><!-- node 11 (got hit when neutral)-->
+	<sound file="communications/sounds/merchant_guild_citizen/merchant_guild_citizen_do-you-know-what.ogg"  sex="0"/>
+		<edge index="9"/>
+		<edge index="12"/>
+		<edge index="13"/>
+		<edge index="14"/>
+	</node>
+	<node text="I don't think you're very good at this whole piracy thing, are you?" relationship="-.0625"><!-- node 12 (taunt)-->
+	<sound file="communications/sounds/merchant_guild_citizen/merchant_guild_citizen_i-don-think-youre.ogg"  sex="0"/>
+		<edge index="13"/>
+		<edge index="15"/>
+		<edge index="19"/>
+	</node>
+	<node text="You're a crazy bugger - the Guild has a LONG memory." relationship="-.125"><!-- node 13 (taunt)-->
+	<sound file="communications/sounds/merchant_guild_citizen/merchant_guild_citizen_youre-a-crazy.ogg"  sex="0"/>
+		<edge index="12"/>
+		<edge index="15"/>
+		<edge index="19"/>
+	</node>
+	<node text="Words are cheap, my cargo isn't!" relationship="-.0625"><!-- node 14 (trying to appease him, but failing)-->
+	<sound file="communications/sounds/merchant_guild_citizen/merchant_guild_citizen_words-are-cheap.ogg"  sex="0"/>
+		<edge index="8"/>
+		<edge index="12"/>
+		<edge index="13"/>
+		<edge index="14"/>
+	</node>
+	<node text="I'm aiming for more than a pound of YOUR flesh!" relationship="-.0625"><!-- node 15 hit while mad node-->
+	<sound file="communications/sounds/merchant_guild_citizen/merchant_guild_citizen_im-aiming-for.ogg"  sex="0"/>
+		<edge index="11"/>
+		<edge index="13"/>
+		<edge index="12"/>
+		<edge index="19"/>
+	</node>
+	<node text="Bet you weren't counting on someone who could fight back, were you!" relationship="-.0625"><!-- node 16 kill-->
+	<sound file="communications/sounds/merchant_guild_citizen/merchant_guild_citizen_bet-you-werent.ogg"  sex="0"/>
+		<edge index="12"/>
+		<edge index="13"/>
+		<edge index="17"/>
+		<edge index="19"/>
+	</node>
+	<node text="What a waste of credits." relationship="-.0625"><!-- node 17 kill-->
+	<sound file="communications/sounds/merchant_guild_citizen/merchant_guild_citizen_what-a-waste.ogg"  sex="0"/>
+		<edge index="12"/>
+		<edge index="13"/>
+		<edge index="16"/>
+		<edge index="19"/>
+	</node>
+	<node text="Speak with your wallet, or don't speak at all!" relationship="-.03125"><!-- node 18 (trying to appease, but failing)-->
+	<sound file="communications/sounds/merchant_guild_citizen/merchant_guild_citizen_speak-with-your.ogg"  sex="0"/>
+		<edge index="9"/>
+		<edge index="12"/>
+		<edge index="13"/>
+		<edge index="14"/>
+	</node>	
+	<node text="Quit hassling me, I feed your planets." relationship=".0125"><!-- node 19 (taunt)-->
+	<sound file="communications/sounds/merchant_guild_citizen/merchant_guild_citizen_quit-hassling.ogg"  sex="0"/>
+		<edge index="12"/>
+		<edge index="13"/>
+		<edge index="14"/>
+	</node>
+
+<!-- Built-in Conversations --> 
+	<node text="Docking operation complete. You're free of the docking clamps." relationship="0.01">
+	<sound file="communications/sounds/merchant_guild_citizen/merchant_guild_citizen_docking-complete.ogg"  sex="0"/>
+		<edge index="4"/>
+		<edge index="5"/>
+		<edge index="6"/>
+		<edge index="7"/>
+	</node>
+	<node text="You are not in the docking clamps. Move into one of the green guide boxes and try to dock again." relationship="0">
+	<sound file="communications/sounds/merchant_guild_citizen/merchant_guild_citizen_you-are-not-in-dock.ogg"  sex="0"/>
+		<edge index="8"/>
+		<edge index="9"/>
+		<edge index="10"/>
+		<edge index="11"/>
+	</node>
+	<node text="Docking Operation begun; press 0 to step into airlock." relationship="0">
+	<sound file="communications/sounds/merchant_guild_citizen/merchant_guild_citizen_docking-begun.ogg"  sex="0"/>
+		<edge index="8"/>
+		<edge index="9"/>
+		<edge index="10"/>
+		<edge index="11"/>
+	</node>		
+	<node text="Docking denied. Do not land here!" relationship="0">
+	<sound file="communications/sounds/merchant_guild_citizen/merchant_guild_citizen_docking-denied.ogg"  sex="0"/>
+		<edge index="8"/>
+		<edge index="9"/>
+		<edge index="10"/>
+		<edge index="11"/>
+	</node>		
+	<node text="Docking agreement reached: move to docking port in green indicators." relationship="0">
+	<sound file="communications/sounds/merchant_guild_citizen/merchant_guild_citizen_docking-agreement.ogg"  sex="0"/>
+		<edge index="8"/>
+		<edge index="9"/>
+		<edge index="10"/>
+		<edge index="11"/>
+	</node>		
+	<node text="Unable to comply, privateer." relationship="0">
+	<sound file="communications/sounds/merchant_guild_citizen/merchant_guild_citizen_unable-to-comply.ogg"  sex="0"/>
+		<edge index="8"/>
+		<edge index="9"/>
+		<edge index="10"/>
+		<edge index="11"/>
+	</node>		
+	<node text="Affirmative, merchant moving into position." relationship="0">
+	<sound file="communications/sounds/merchant_guild_citizen/merchant_guild_citizen_affirmative.ogg"  sex="0"/>
+		<edge index="4"/>
+		<edge index="5"/>
+		<edge index="6"/>
+		<edge index="7"/>
+	</node>		
+	<node text="My mission is to search you; hold still." relationship="0"> <!-- maintain speed and course -->
+	<sound file="communications/sounds/merchant_guild_citizen/merchant_guild_citizen_my-mission-is-to.ogg"  sex="0"/>
+		<edge index="8"/>
+		<edge index="9"/>
+		<edge index="10"/>
+	</node>
+	<node text="Nothing is interesting in your hold." relationship="0"> <!-- no contraband detected you may proceed -->
+	<sound file="communications/sounds/merchant_guild_citizen/merchant_guild_citizen_nothing-interesting.ogg"  sex="0"/>
+		<edge index="8"/>
+		<edge index="9"/>
+		<edge index="10"/>
+	</node>
+	<node text="Well, hello precious, I think you have something that might be better off mine!" relationship="-.125"> <!-- contraband detected! all units close and engage -->
+	<sound file="communications/sounds/merchant_guild_citizen/merchant_guild_citizen_well-hello-precious.ogg"  sex="0"/>
+		<edge index="12"/>
+		<edge index="13"/>
+		<edge index="14"/>
+	</node>
+	<node text="Your course is deviating. Maintain course!" relationship="0"> <!-- maintain your speed and course...DO NOT deviate -->
+	<sound file="communications/sounds/merchant_guild_citizen/merchant_guild_citizen_your-course-is.ogg"  sex="0"/>
+		<edge index="8"/>
+		<edge index="9"/>
+		<edge index="10"/>
+	</node>	
+	<node text="Request Clearance To Land." relationship="0"> 
+	<sound file="communications/sounds/merchant_guild_citizen/merchant_guild_citizen_request-clearance.ogg"  sex="0"/>
+		<edge index="8"/>
+		<edge index="9"/>
+		<edge index="10"/>
+	</node>	
+	<node text="And I aint gonna sell you a new one, neither." text1="I'd be scared, but that was incompetent." relationship="-.0625"><!-- node damaged target-->
+	<sound file="communications/sounds/merchant_guild_citizen/merchant_guild_citizen_and-i-aint-gonna.ogg"  sex="0"/>
+	<sound file="communications/sounds/merchant_guild_citizen/merchant_guild_citizen_id-be-scared-but.ogg"  sex="0"/>
+		<edge index="12"/>
+		<edge index="13"/>
+		<edge index="14"/>
+		<edge index="15"/>
+	</node>
+	<node text="Maybe your scraps will pay for repairs." text1="Guess all those games were good for something." relationship="-.0625"><!-- node killed target-->
+	<sound file="communications/sounds/merchant_guild_citizen/merchant_guild_citizen_maybe-your-scraps.ogg"  sex="0"/>
+	<sound file="communications/sounds/merchant_guild_citizen/merchant_guild_citizen_guess-all-those-games.ogg"  sex="0"/>
+		<edge index="12"/>
+		<edge index="13"/>
+		<edge index="14"/>
+		<edge index="15"/>
+	</node>
+	<node text="For the love of - this run just keeps getting worse." test1="The Guild is gonna slap a contract on your ass so fast, you won't be able to sit again!" relationship="-.0625"><!-- node damaged target-->
+	<sound file="communications/sounds/merchant_guild_citizen/merchant_guild_citizen_for-the-love-of.ogg"  sex="0"/>
+	<sound file="communications/sounds/merchant_guild_citizen/merchant_guild_citizen_the-guild-is-gonna.ogg"  sex="0"/>
+		<edge index="12"/>
+		<edge index="13"/>
+		<edge index="14"/>
+		<edge index="15"/>
+	</node>
+	<node text="*hit*" relationship="-.01">
+		<edge index="7"/>
+		<edge index="11"/>
+		<edge index="15"/>
+	</node>
+
+<!-- End of Built-in Conversations --> 
+</comm>

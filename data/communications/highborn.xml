@@ -1,0 +1,239 @@
+<comm>
+	<node text="startingNode" relationship="0"><!-- node 0 (starting node: Don't link here)-->
+		<edge index="1"/>
+		<edge index="2"/>
+		<edge index="3"/>
+	</node>
+
+<!-- Starting Points -->
+	<node text="Fear not, friend, I keep this area safe today!" relationship="0.2"><!-- node 1 (very happy)-->
+    <sound file="communications/sounds/highborn/highborn_fear-not.ogg" sex="0"/>
+		<edge index="4"/>
+		<edge index="5"/>
+		<edge index="6"/>
+	</node>
+	<node text="Yes? Was there something you wanted? I don't do handouts." relationship="0"><!-- node 2 (neutral)-->
+    <sound file="communications/sounds/highborn/highborn_yes-was-there-something.ogg" sex="0"/>
+		<edge index="8"/>
+		<edge index="9"/>
+		<edge index="10"/>
+	</node>
+	<node text="As I swear it so shall you die this day!" relationship="-.2"><!-- node 3 (very mad)-->
+    <sound file="communications/sounds/highborn/highborn_as-i-swear-it.ogg" sex="0"/>
+		<edge index="12"/>
+		<edge index="13"/>
+		<edge index="14"/>
+	</node>
+<!-- End of Starting Points -->
+
+<!-- Other Nodes -->
+
+	<node text="Make room for your betters, friends. Room for your betters." relationship=".03125"><!-- node 4(random good chatter)-->
+    <sound file="communications/sounds/highborn/highborn_make-room-for.ogg" sex="0"/>
+		<edge index="4"/>
+		<edge index="5"/>
+	</node>
+	<node text="Ah, isn't war glorious? The front is where I belong. " relationship=".0625"><!-- node 5 (random good chatter)-->
+    <sound file="communications/sounds/highborn/highborn_ah-isnt-war-glorious.ogg" sex="0"/>
+		<edge index="4"/>
+		<edge index="6"/>
+	</node>
+	<node text="You seem like a good chap - drop my name at Avalon, and they'll let you park further from the servants." relationship=".0625"><!-- node 6 (best node)-->
+    <sound file="communications/sounds/highborn/highborn_you-seem-like-a.ogg" sex="0"/>
+		<edge index="5"/>
+		<edge index="6"/>
+	</node>
+	<node text="Have you no honor, or merely no sense!" relationship="-.03125"><!-- node 7 (hit while happy)-->
+    <sound file="communications/sounds/highborn/highborn_have-you-no-honor.ogg" sex="0"/>
+		<edge index="4"/>
+		<edge index="8"/>
+		<edge index="9"/>
+		<edge index="10"/>
+	</node>
+	<node text="Oh, bother. What a chore to be in a cockpit that can't fit my entire entourage." relationship=".03125"><!-- node 8 (random neutral chatter)-->
+    <sound file="communications/sounds/highborn/highborn_oh-bother-what-a-chore.ogg" sex="0"/>
+		<edge index="9"/>
+		<edge index="10"/>
+	</node>
+	<node text="There are worse things about than you, I suppose." relationship=".04125"><!-- node 9 (neutral node after he has decided to be nicer after conflict)-->
+    <sound file="communications/sounds/highborn/highborn_there-are-worse-things.ogg" sex="0"/>
+		<edge index="8"/>
+		<edge index="10"/>
+	</node>
+	<node text="Yes, yes, I know you're impressed. Move along, no time for admirers and all that." relationship=".03125"><!-- node 10 (good node in neutral) -->
+    <sound file="communications/sounds/highborn/highborn_yes-yes-i-know.ogg" sex="0"/>
+		<edge index="8"/>
+		<edge index="9"/>
+	</node>
+	<node text="I shall strike you down!" relationship="-.125"><!-- node 11 (got hit when neutral)-->
+    <sound file="communications/sounds/highborn/highborn_i-shall-strike-you.ogg" sex="0"/>
+		<edge index="9"/>
+		<edge index="12"/>
+		<edge index="13"/>
+		<edge index="14"/>
+	</node>
+	<node text="Pathetic peasant filth! You're barely worth fighting!" relationship="-.0625"><!-- node 12 (taunt)-->
+    <sound file="communications/sounds/highborn/highborn_pathetic-peasant.ogg" sex="0"/>
+		<edge index="13"/>
+		<edge index="15"/>
+		<edge index="19"/>
+	</node>
+	<node text="Die in your own filth, knave!" relationship="-.125"><!-- node 13 (taunt)-->
+    <sound file="communications/sounds/highborn/highborn_die-in-your-own.ogg" sex="0"/>
+		<edge index="12"/>
+		<edge index="15"/>
+		<edge index="19"/>
+	</node>
+	<node text="What kind of idiot do you think I am, a SuSim, or something!?" relationship="-.0625"><!-- node 14 (trying to appease him, but failing)-->
+    <sound file="communications/sounds/highborn/highborn_what-kind-of-idiot.ogg" sex="0"/>
+		<edge index="8"/>
+		<edge index="12"/>
+		<edge index="13"/>
+		<edge index="14"/>
+	</node>
+	<node text="If you weren't a coward you'd have dueled me like a real warrior!" relationship="-.0625"><!-- node 15 hit while mad node-->
+    <sound file="communications/sounds/highborn/highborn_if-you-werent-a-coward.ogg" sex="0"/>
+		<edge index="11"/>
+		<edge index="13"/>
+		<edge index="12"/>
+		<edge index="19"/>
+	</node>
+	<node text="Kneel in submission!" relationship="-.0625"><!-- node 16 kill-->
+    <sound file="communications/sounds/highborn/highborn_kneel-in-submission.ogg" sex="0"/>
+		<edge index="12"/>
+		<edge index="13"/>
+		<edge index="17"/>
+		<edge index="19"/>
+	</node>
+	<node text="Oh, just die, so I can be rid of your disgusting presence!" relationship="-.0625"><!-- node 17 kill-->
+    <sound file="communications/sounds/highborn/highborn_oh-just-die.ogg" sex="0"/>
+		<edge index="12"/>
+		<edge index="13"/>
+		<edge index="16"/>
+		<edge index="19"/>
+	</node>
+	<node text="Perhaps you mistake me for a servant!" relationship="-.03125"><!-- node 18 (trying to appease, but failing)-->
+    <sound file="communications/sounds/highborn/highborn_perhaps-you-mistake-me.ogg" sex="0"/>
+		<edge index="9"/>
+		<edge index="12"/>
+		<edge index="13"/>
+		<edge index="14"/>
+	</node>	
+	<node text="To me, practice and sport. To you, death!" relationship="-.0625"><!-- node 19 (taunt)-->
+    <sound file="communications/sounds/highborn/highborn_to-me-practice.ogg" sex="0"/>
+		<edge index="12"/>
+		<edge index="13"/>
+		<edge index="14"/>
+	</node>
+
+<!-- Built-in Conversations --> 
+	<node text="Docking operation complete. You're free of the docking clamps." relationship="0.01">
+    <sound file="communications/sounds/highborn/highborn_docking-operation-complete.ogg" sex="0"/>
+		<edge index="4"/>
+		<edge index="5"/>
+		<edge index="6"/>
+		<edge index="7"/>
+	</node>
+	<node text="You are not in the docking clamps. Move into one of the green guide boxes and try to dock again." relationship="0">
+    <sound file="communications/sounds/highborn/highborn_you-are-not-in-dock.ogg" sex="0"/>
+		<edge index="8"/>
+		<edge index="9"/>
+		<edge index="10"/>
+		<edge index="11"/>
+	</node>
+	<node text="Docking operation begun; press 0 to step into our starship." relationship="0">
+    <sound file="communications/sounds/highborn/highborn_docking-operation-begun.ogg" sex="0"/>
+		<edge index="8"/>
+		<edge index="9"/>
+		<edge index="10"/>
+		<edge index="11"/>
+	</node>		
+	<node text="You are not authorized to land here!" relationship="0">
+    <sound file="communications/sounds/highborn/highborn_you-are-not-authorized.ogg" sex="0"/>
+		<edge index="8"/>
+		<edge index="9"/>
+		<edge index="10"/>
+		<edge index="11"/>
+	</node>		
+	<node text="Clearance code acknowledged; move into landing pattern and dock at the white indicators." relationship="0">
+    <sound file="communications/sounds/highborn/highborn_clearance-code-acknowledged.ogg" sex="0"/>
+		<edge index="8"/>
+		<edge index="9"/>
+		<edge index="10"/>
+		<edge index="11"/>
+	</node>		
+	<node text="Unable to comply." relationship="0">
+    <sound file="communications/sounds/highborn/highborn_unable-to-comply.ogg" sex="0"/>
+		<edge index="8"/>
+		<edge index="9"/>
+		<edge index="10"/>
+		<edge index="11"/>
+	</node>		
+	<node text="Acknowledged." relationship="0">
+    <sound file="communications/sounds/highborn/highborn_acknowledged.ogg" sex="0"/>
+		<edge index="4"/>
+		<edge index="5"/>
+		<edge index="6"/>
+		<edge index="7"/>
+	</node>		
+	<node text="Maintain speed and course for contraband search!" relationship="0"> <!-- maintain speed and course -->
+    <sound file="communications/sounds/highborn/highborn_maintain-speed-and.ogg" sex="0"/>
+		<edge index="8"/>
+		<edge index="9"/>
+		<edge index="10"/>
+	</node>
+	<node text="No contraband detected, you may proceed." relationship="0"> <!-- no contraband detected you may proceed -->
+    <sound file="communications/sounds/highborn/highborn_no-contraband-detected.ogg" sex="0"/>
+		<edge index="8"/>
+		<edge index="9"/>
+		<edge index="10"/>
+	</node>
+	<node text="Contraband detected, target offender and fire at will!" relationship="-.125"> <!-- contraband detected! all units close and engage -->
+    <sound file="communications/sounds/highborn/highborn_contraband-detected.ogg" sex="0"/>
+		<edge index="12"/>
+		<edge index="13"/>
+		<edge index="14"/>
+	</node>
+	<node text="Your course is deviating. Maintain course!" relationship="0"> <!-- maintain your speed and course...DO NOT deviate -->
+    <sound file="communications/sounds/highborn/highborn_your-course-is-deviating.ogg" sex="0"/>
+		<edge index="8"/>
+		<edge index="9"/>
+		<edge index="10"/>
+	</node>	
+	<node text="Request Clearance To Land." relationship="0"> 
+    <sound file="communications/sounds/highborn/highborn_request-clearance.ogg" sex="0"/>
+		<edge index="8"/>
+		<edge index="9"/>
+		<edge index="10"/>
+	</node>	
+	<node text="It appears my staff will have to add another kill-marker!" text1="One less prattling peon." relationship="-.0625"><!-- dealt critical damage -->
+    <sound file="communications/sounds/highborn/highborn_it-appears-my-staff.ogg" sex="0"/>
+    <sound file="communications/sounds/highborn/highborn_one-less-prattling.ogg" sex="0"/>
+		<edge index="12"/>
+		<edge index="13"/>
+		<edge index="14"/>
+		<edge index="15"/>
+	</node>
+	<node text="Quit snivelling and expire, you pathetic lump of insolent feces!." relationship="-.0625"><!-- dealt critical damage -->
+    <sound file="communications/sounds/highborn/highborn_quit-sniveling-and.ogg" sex="0"/>
+		<edge index="12"/>
+		<edge index="13"/>
+		<edge index="14"/>
+		<edge index="15"/>
+	</node>
+	<node text="Lord of righteousness, why have you forsaken me!" text1="My noble steed has faltered, and I with it am [garbled]" relationship="-.125">
+    <sound file="communications/sounds/highborn/highborn_lord-of-rightousness.ogg" sex="0"/>
+    <sound file="communications/sounds/highborn/highborn_my-noble-steed.ogg" sex="0"/>
+		<edge index="12"/>
+		<edge index="13"/>
+		<edge index="14"/>
+		<edge index="15"/>
+	</node>
+	<node text="*hit*" relationship="-.01">
+		<edge index="7"/>
+		<edge index="11"/>
+		<edge index="15"/>
+	</node>
+
+<!-- End of Built-in Conversations --> 
+</comm>

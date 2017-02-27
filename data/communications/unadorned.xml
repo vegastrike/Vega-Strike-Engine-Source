@@ -1,0 +1,239 @@
+<comm>
+	<node text="startingNode" relationship="0"><!-- node 0 (starting node: Don't link here)-->
+		<edge index="1"/>
+		<edge index="2"/>
+		<edge index="3"/>
+	</node>
+
+<!-- Starting Points -->
+	<node text="The numbers are well today." relationship="0.2"><!-- node 1 (very happy)-->
+<sound file="communications/sounds/unadorned/unadorned_the-numbers-are-well.ogg" sex="0"/>
+		<edge index="4"/>
+		<edge index="5"/>
+		<edge index="6"/>
+	</node>
+	<node text="You are not part of my equations." relationship="0"><!-- node 2 (neutral)-->
+<sound file="communications/sounds/unadorned/unadorned_you-are-not-part.ogg" sex="0"/>
+		<edge index="8"/>
+		<edge index="9"/>
+		<edge index="10"/>
+	</node>
+	<node text="Even the infinite offers no escape for you." relationship="-.2"><!-- node 3 (very mad)-->
+<sound file="communications/sounds/unadorned/unadorned_even-the-infinite.ogg" sex="0"/>
+		<edge index="12"/>
+		<edge index="13"/>
+		<edge index="14"/>
+	</node>
+<!-- End of Starting Points -->
+
+<!-- Other Nodes -->
+
+	<node text="The universe is functioning perfectly." relationship=".03125"><!-- node 4(random good chatter)-->
+<sound file="communications/sounds/unadorned/unadorned_the-universe.ogg" sex="0"/>
+		<edge index="4"/>
+		<edge index="5"/>
+	</node>
+	<node text="I appreciate the logic in your actions." relationship=".0625"><!-- node 5 (random good chatter)-->
+<sound file="communications/sounds/unadorned/unadorned_i-appreciate.ogg" sex="0"/>
+		<edge index="4"/>
+		<edge index="6"/>
+	</node>
+	<node text="May logic guide you always." relationship=".0625"><!-- node 6 (best node)-->
+<sound file="communications/sounds/unadorned/unadorned_may-logic-guide.ogg" sex="0"/>
+		<edge index="5"/>
+		<edge index="6"/>
+	</node>
+	<node text="The numbers are unclear - are you irrational, or the victim of chaotic accident?" relationship="-.03125"><!-- node 7 (hit while happy)-->
+<sound file="communications/sounds/unadorned/unadorned_the-numbers-are-unclear.ogg" sex="0"/>
+		<edge index="4"/>
+		<edge index="8"/>
+		<edge index="9"/>
+		<edge index="10"/>
+	</node>
+	<node text="Time waits not but awaits all." relationship=".03125"><!-- node 8 (random neutral chatter)-->
+<sound file="communications/sounds/unadornedunadorned_time-waits/.ogg" sex="0"/>
+		<edge index="9"/>
+		<edge index="10"/>
+	</node>
+	<node text="You may yet see the errors in your approach." relationship=".04125"><!-- node 9 (neutral node after he has decided to be nicer after conflict)-->
+<sound file="communications/sounds/unadorned/unadorned_you-may-yet.ogg" sex="0"/>
+		<edge index="8"/>
+		<edge index="10"/>
+	</node>
+	<node text="All is determined, but remains unknown." relationship=".03125"><!-- node 10 (good node in neutral) -->
+<sound file="communications/sounds/unadorned/unadorned_all-is-determined.ogg" sex="0"/>
+		<edge index="8"/>
+		<edge index="9"/>
+	</node>
+	<node text="It is revealed. You seek unity with the empty set." relationship="-.125"><!-- node 11 (got hit when neutral)-->
+<sound file="communications/sounds/unadorned/unadorned_it-is-revealed.ogg" sex="0"/>
+		<edge index="9"/>
+		<edge index="12"/>
+		<edge index="13"/>
+		<edge index="14"/>
+	</node>
+	<node text="You are all chaos! Logic is lost on you!" relationship="-.0625"><!-- node 12 (taunt)-->
+<sound file="communications/sounds/unadorned/unadorned_you-are-all.ogg" sex="0"/>
+		<edge index="13"/>
+		<edge index="15"/>
+		<edge index="19"/>
+	</node>
+	<node text="My weapons calculate your inversion!" relationship="-.125"><!-- node 13 (taunt)-->
+<sound file="communications/sounds/unadorned/unadorned_my-weapons.ogg" sex="0"/>
+		<edge index="12"/>
+		<edge index="15"/>
+		<edge index="19"/>
+	</node>
+	<node text="Your emotional arithmetic is flawed." relationship="-.0625"><!-- node 14 (trying to appease him, but failing)-->
+<sound file="communications/sounds/unadorned/unadorned_your-emotional.ogg" sex="0"/>
+		<edge index="8"/>
+		<edge index="12"/>
+		<edge index="13"/>
+		<edge index="14"/>
+	</node>
+	<node text="I will so thoroughly annihilate you, all record of your existence shall be uncomputed!" relationship="-.0625"><!-- node 15 hit while mad node-->
+<sound file="communications/sounds/unadorned/unadorned_i-will-so.ogg" sex="0"/>
+		<edge index="11"/>
+		<edge index="13"/>
+		<edge index="12"/>
+		<edge index="19"/>
+	</node>
+	<node text="Death intercepts your timeline now." relationship="-.0625"><!-- node 16 kill-->
+<sound file="communications/sounds/unadorned/unadorned_death-intercepts.ogg" sex="0"/>
+		<edge index="12"/>
+		<edge index="13"/>
+		<edge index="17"/>
+		<edge index="19"/>
+	</node>
+	<node text="Your death will make the universe more orderly!" relationship="-.0625"><!-- node 17 kill-->
+<sound file="communications/sounds/unadorned/unadorned_your-death.ogg" sex="0"/>
+		<edge index="12"/>
+		<edge index="13"/>
+		<edge index="16"/>
+		<edge index="19"/>
+	</node>
+	<node text="I would sooner believe 0 and 1 to be the same!" relationship="-.03125"><!-- node 18 (trying to appease, but failing)-->
+<sound file="communications/sounds/unadorned/unadorned_i-would-sooner.ogg" sex="0"/>
+		<edge index="9"/>
+		<edge index="12"/>
+		<edge index="13"/>
+		<edge index="14"/>
+	</node>	
+	<node text="Irrational beast!" relationship="-.0625"><!-- node 19 (taunt)-->
+<sound file="communications/sounds/unadorned/unadorned_irrational-beast.ogg" sex="0"/>
+		<edge index="12"/>
+		<edge index="13"/>
+		<edge index="14"/>
+	</node>
+
+<!-- Built-in Conversations --> 
+	<node text="Docking operation complete. You're free of the docking clamps." relationship="0.01">
+<sound file="communications/sounds/unadorned/unadorned_docking-complete.ogg" sex="0"/>
+		<edge index="4"/>
+		<edge index="5"/>
+		<edge index="6"/>
+		<edge index="7"/>
+	</node>
+	<node text="You are not in docking clamps. Move into one of the green guide boxes and try to dock again." relationship="0">
+<sound file="communications/sounds/unadorned/unadorned_not-in-dock.ogg" sex="0"/>
+		<edge index="8"/>
+		<edge index="9"/>
+		<edge index="10"/>
+		<edge index="11"/>
+	</node>
+	<node text="Docking operation begun; press 0 to step into our starship." relationship="0">
+<sound file="communications/sounds/unadorned/unadorned_docking-begun.ogg" sex="0"/>
+		<edge index="8"/>
+		<edge index="9"/>
+		<edge index="10"/>
+		<edge index="11"/>
+	</node>		
+	<node text="You are not authorized to land here!" relationship="0">
+<sound file="communications/sounds/unadorned/unadorned_you-are-not-authorized.ogg" sex="0"/>
+		<edge index="8"/>
+		<edge index="9"/>
+		<edge index="10"/>
+		<edge index="11"/>
+	</node>		
+	<node text="Clearance code acknowledged; move into landing pattern and dock at the white indicators." relationship="0">
+<sound file="communications/sounds/unadorned/unadorned_clearance-code-ack.ogg" sex="0"/>
+		<edge index="8"/>
+		<edge index="9"/>
+		<edge index="10"/>
+		<edge index="11"/>
+	</node>		
+	<node text="Unable to comply." relationship="0">
+<sound file="communications/sounds/unadorned/unadorned_unable-to-comply.ogg" sex="0"/>
+		<edge index="8"/>
+		<edge index="9"/>
+		<edge index="10"/>
+		<edge index="11"/>
+	</node>		
+	<node text="Acknowledged." relationship="0">
+<sound file="communications/sounds/unadorned/unadorned_acknowledged.ogg" sex="0"/>
+		<edge index="4"/>
+		<edge index="5"/>
+		<edge index="6"/>
+		<edge index="7"/>
+	</node>		
+	<node text="Maintain speed and course for contraband search!" relationship="0"> <!-- maintain speed and course -->
+<sound file="communications/sounds/unadorned/unadorned_maintain-speed-and.ogg" sex="0"/>
+		<edge index="8"/>
+		<edge index="9"/>
+		<edge index="10"/>
+	</node>
+	<node text="No contraband detected, you may proceed." relationship="0"> <!-- no contraband detected you may proceed -->
+<sound file="communications/sounds/unadorned/unadorned_no-contraband.ogg" sex="0"/>
+		<edge index="8"/>
+		<edge index="9"/>
+		<edge index="10"/>
+	</node>
+	<node text="Contraband detected, target offender and fire at will!" relationship="-.125"> <!-- contraband detected! all units close and engage -->
+<sound file="communications/sounds/unadorned/unadorned_contraband-detected.ogg" sex="0"/>
+		<edge index="12"/>
+		<edge index="13"/>
+		<edge index="14"/>
+	</node>
+	<node text="Your course is deviating. Maintain course!" relationship="0"> <!-- maintain your speed and course...DO NOT deviate -->
+<sound file="communications/sounds/unadorned/unadorned_your-course-is.ogg" sex="0"/>
+		<edge index="8"/>
+		<edge index="9"/>
+		<edge index="10"/>
+	</node>	
+	<node text="Request Clearance To Land." relationship="0"> 
+<sound file="communications/sounds/unadorned/unadorned_request-clearance.ogg" sex="0"/>
+		<edge index="8"/>
+		<edge index="9"/>
+		<edge index="10"/>
+	</node>	
+	<node text="Value and limit are unified." text1="One less variable." relationship="-.0625"><!-- dealt critical damage -->
+<sound file="communications/sounds/unadorned/unadorned_value-and-limit.ogg" sex="0"/>
+<sound file="communications/sounds/unadorned/unadorned_one-less.ogg" sex="0"/>
+		<edge index="12"/>
+		<edge index="13"/>
+		<edge index="14"/>
+		<edge index="15"/>
+	</node>
+	<node text="Further resistance would be illogical." relationship="-.0625"><!-- dealt critical damage -->
+<sound file="communications/sounds/unadorned/unadorned_further-resistance.ogg" sex="0"/>
+		<edge index="12"/>
+		<edge index="13"/>
+		<edge index="14"/>
+		<edge index="15"/>
+	</node>
+	<node text="I can see the code of the universe!" text1="I have misread the numbers!" relationship="-.125">
+<sound file="communications/sounds/unadorned/unadorned_i-can-see-the.ogg" sex="0"/>
+<sound file="communications/sounds/unadorned/unadorned_i-have-misread.ogg" sex="0"/>
+		<edge index="12"/>
+		<edge index="13"/>
+		<edge index="14"/>
+		<edge index="15"/>
+	</node>
+	<node text="*hit*" relationship="-.01">
+		<edge index="7"/>
+		<edge index="11"/>
+		<edge index="15"/>
+	</node>
+
+<!-- End of Built-in Conversations --> 
+</comm>

@@ -1,0 +1,12 @@
+#EXTM3U
+#terran-specific
+../music/terranpeace2.ogg
+#terran-hostile
+../music/MezzaMessa.ogg
+#common hostile-space files
+../music/battle3electro.ogg
+../music/battle4showdown.ogg
+../music/battel5_p.ogg
+#fix weights
+../music/terranpeace2.ogg
+../music/terranpeace2.ogg

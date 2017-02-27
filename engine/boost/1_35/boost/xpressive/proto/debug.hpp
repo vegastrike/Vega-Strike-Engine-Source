@@ -1,0 +1,186 @@
+///////////////////////////////////////////////////////////////////////////////
+/// \file debug.hpp
+/// Utilities for debugging proto expression trees
+//
+//  Copyright 2007 Eric Niebler. Distributed under the Boost
+//  Software License, Version 1.0. (See accompanying file
+//  LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
+
+#ifndef BOOST_PROTO_DEBUG_HPP_EAN_12_31_2006
+#define BOOST_PROTO_DEBUG_HPP_EAN_12_31_2006
+
+#include <boost/preprocessor/iteration/local.hpp>
+#include <boost/preprocessor/repetition/repeat.hpp>
+
+#if !defined(__WAVE__) || !defined(BOOST_PROTO_DOXYGEN_INVOKED)
+#include <iomanip>
+#include <iostream>
+#include <typeinfo>
+#include <boost/xpressive/proto/proto_fwd.hpp>
+#include <boost/xpressive/proto/expr.hpp>
+#include <boost/xpressive/proto/traits.hpp>
+#else
+/// INTERNAL ONLY
+/// Needed to work around doxygen bug
+struct a_dummy_global;
+#endif
+
+namespace boost { namespace proto
+{
+    namespace tag
+    {
+        namespace hidden_detail_
+        {
+            typedef char (&not_ostream)[sizeof(std::ostream)+1];
+            not_ostream operator<<(std::ostream &, detail::dont_care);
+
+            template<typename Tag, std::size_t S>
+            struct printable_tag_
+            {
+                typedef char const *type;
+                static type call() { return typeid(Tag).name(); }
+            };
+
+            template<typename Tag>
+            struct printable_tag_<Tag, sizeof(std::ostream)>
+            {
+                typedef Tag type;
+                static type call() { return Tag(); }
+            };
+
+            template<typename Tag>
+            struct printable_tag
+              : printable_tag_<Tag, sizeof(std::cout << Tag())>
+            {};
+        }
+
+        template<typename Tag>
+        inline typename hidden_detail_::printable_tag<Tag>::type proto_tag_name(Tag)
+        {
+            return hidden_detail_::printable_tag<Tag>::call();
+        }
+
+    #define BOOST_PROTO_DEFINE_TAG_NAME(Tag)\
+        inline char const *proto_tag_name(tag::Tag)\
+        {\
+            return #Tag;\
+        }\
+        /**/
+
+        BOOST_PROTO_DEFINE_TAG_NAME(posit)
+        BOOST_PROTO_DEFINE_TAG_NAME(negate)
+        BOOST_PROTO_DEFINE_TAG_NAME(dereference)
+        BOOST_PROTO_DEFINE_TAG_NAME(complement)
+        BOOST_PROTO_DEFINE_TAG_NAME(address_of)
+        BOOST_PROTO_DEFINE_TAG_NAME(logical_not)
+        BOOST_PROTO_DEFINE_TAG_NAME(pre_inc)
+        BOOST_PROTO_DEFINE_TAG_NAME(pre_dec)
+        BOOST_PROTO_DEFINE_TAG_NAME(post_inc)
+        BOOST_PROTO_DEFINE_TAG_NAME(post_dec)
+        BOOST_PROTO_DEFINE_TAG_NAME(shift_left)
+        BOOST_PROTO_DEFINE_TAG_NAME(shift_right)
+        BOOST_PROTO_DEFINE_TAG_NAME(multiplies)
+        BOOST_PROTO_DEFINE_TAG_NAME(divides)
+        BOOST_PROTO_DEFINE_TAG_NAME(modulus)
+        BOOST_PROTO_DEFINE_TAG_NAME(plus)
+        BOOST_PROTO_DEFINE_TAG_NAME(minus)
+        BOOST_PROTO_DEFINE_TAG_NAME(less)
+        BOOST_PROTO_DEFINE_TAG_NAME(greater)
+        BOOST_PROTO_DEFINE_TAG_NAME(less_equal)
+        BOOST_PROTO_DEFINE_TAG_NAME(greater_equal)
+        BOOST_PROTO_DEFINE_TAG_NAME(equal_to)
+        BOOST_PROTO_DEFINE_TAG_NAME(not_equal_to)
+        BOOST_PROTO_DEFINE_TAG_NAME(logical_or)
+        BOOST_PROTO_DEFINE_TAG_NAME(logical_and)
+        BOOST_PROTO_DEFINE_TAG_NAME(bitwise_and)
+        BOOST_PROTO_DEFINE_TAG_NAME(bitwise_or)
+        BOOST_PROTO_DEFINE_TAG_NAME(bitwise_xor)
+        BOOST_PROTO_DEFINE_TAG_NAME(comma)
+        BOOST_PROTO_DEFINE_TAG_NAME(mem_ptr)
+        BOOST_PROTO_DEFINE_TAG_NAME(assign)
+        BOOST_PROTO_DEFINE_TAG_NAME(shift_left_assign)
+        BOOST_PROTO_DEFINE_TAG_NAME(shift_right_assign)
+        BOOST_PROTO_DEFINE_TAG_NAME(multiplies_assign)
+        BOOST_PROTO_DEFINE_TAG_NAME(divides_assign)
+        BOOST_PROTO_DEFINE_TAG_NAME(modulus_assign)
+        BOOST_PROTO_DEFINE_TAG_NAME(plus_assign)
+        BOOST_PROTO_DEFINE_TAG_NAME(minus_assign)
+        BOOST_PROTO_DEFINE_TAG_NAME(bitwise_and_assign)
+        BOOST_PROTO_DEFINE_TAG_NAME(bitwise_or_assign)
+        BOOST_PROTO_DEFINE_TAG_NAME(bitwise_xor_assign)
+        BOOST_PROTO_DEFINE_TAG_NAME(subscript)
+        BOOST_PROTO_DEFINE_TAG_NAME(if_else_)
+        BOOST_PROTO_DEFINE_TAG_NAME(function)
+
+    #undef BOOST_PROTO_DEFINE_TAG_NAME
+    }
+
+    namespace functional
+    {
+        // Display a proto expression tree
+        struct display_expr
+        {
+            display_expr(int depth = 0, std::ostream &sout = std::cout)
+              : depth_(depth)
+              , first_(true)
+              , sout_(sout)
+            {}
+
+            template<typename Args>
+            void operator()(expr<tag::terminal, Args, 0> const &expr) const
+            {
+                this->sout_ << std::setw(this->depth_) << (this->first_? "" : ", ")
+                    << "terminal(" << proto::arg(expr) << ")\n";
+                this->first_ = false;
+            }
+
+        #define BOOST_PROTO_ARG(z, n, data)                                                         \
+            display(proto::arg_c<n>(expr));                                                         \
+            /**/
+
+        #define BOOST_PP_LOCAL_MACRO(N)                                                             \
+            template<typename Tag, typename Args>                                                   \
+            void operator()(expr<Tag, Args, N> const &expr) const                                   \
+            {                                                                                       \
+                using namespace tag;                                                                \
+                this->sout_ << std::setw(this->depth_) << (this->first_? "" : ", ")                 \
+                    << proto_tag_name(Tag()) << "(\n";                                              \
+                display_expr display(this->depth_ + 4, this->sout_);                                \
+                BOOST_PP_REPEAT(N, BOOST_PROTO_ARG, _)                                              \
+                this->sout_ << std::setw(this->depth_) << "" << ")\n";                              \
+                this->first_ = false;                                                               \
+            }                                                                                       \
+            /**/
+
+        #define BOOST_PP_LOCAL_LIMITS (1, BOOST_PROTO_MAX_ARITY)
+        #include BOOST_PP_LOCAL_ITERATE()
+        #undef BOOST_PROTO_ARG
+
+            template<typename T>
+            void operator()(T const &t) const
+            {
+                (*this)(t.proto_base());
+            }
+
+        private:
+            int depth_;
+            mutable bool first_;
+            std::ostream &sout_;
+        };
+    }
+
+    template<typename Expr>
+    void display_expr(Expr const &expr)
+    {
+        functional::display_expr()(expr);
+    }
+
+    template<typename Expr>
+    void display_expr(Expr const &expr, std::ostream &sout)
+    {
+        functional::display_expr(0, sout)(expr);
+    }
+
+}}
+
+#endif

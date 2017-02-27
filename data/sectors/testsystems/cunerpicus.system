@@ -1,0 +1,27 @@
+<system name="Cunerpicus4" background="backgroudns/plasma_galaxy" nearstars="500" stars="1000" starspread="150"  x="0" y="0" z="0">
+<Light>
+<ambient red=".3" green=".3" blue=".3"/>
+<diffuse red=".8" green=".8" blue="1"/>
+<specular red="1" green="1" blue="1"/>
+</Light>
+
+<Light>
+<ambient red=".1" green=".1" blue="1"/>
+<diffuse red=".7" green=".7" blue="1"/>
+<attenuated red="0" blue=".0000001"/>
+</Light>
+
+        <planet name="Sun" file="sun.bmp" radius="40000" gravity="20" ri="0" rj="0" rk="0" si="0" sj="0" sk="0" velocity="0" position="0" Red=".5" Green=".5" Blue=".9" light="0 1l" faction="neutral">
+
+		<planet name="Cunerpicus" file="cunerpicus.png" radius="50000" gravity="20" ri="1200000" rj="0" rk="0" si="0" sj="0" sk="1200000" position="0" velocity="0" faction="neutral">
+		<planet name="SolJump" file="jump.png" alpha="ONE ONE" radius="300" gravity="20" ri="60000" rj="0" rk="0" si="0" sj="0" sk="60000" velocity="0" position="1.75" destination="sol"/>
+
+		<planet name="SolSmallJump" file="jump.png" alpha="ONE ONE" radius="300" gravity="20" ri="60000" rj="0" rk="0" si="0" sj="0" sk="60000" velocity="0" position="1.5" destination="solsmall"/>
+
+<!--	                <ContinuousTerrain file="continuousterrain.txt" mass=".00000100" qi="0" qj="1" qk="0" ri="0" rj="0" rk="1" si="0" sj="0" sk="0" position="0" velocity="0" faction="neutral"/>
+				<Atmosphere radius="55000"/>
+-->		</planet>
+
+		</planet>
+	</planet>
+</system>

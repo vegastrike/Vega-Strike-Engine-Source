@@ -1,0 +1,26 @@
+<!-- Vega Strike - Upon The Coldest Sea -->
+<!-- Dispute quest testing misson       -->
+<!-- Author: pyramid                    -->
+<!-- Version: 2008-04-15                -->
+<!-- start from your data4.x folder with: ./vegastrike test/quest_dispute.mission -->
+<mission>
+   <settings>
+      <origin  planet="Earth" x="10000" y="10000" z="1000"/>
+   </settings>
+
+   <variables>
+      <var name="defaultplayer" value="blue"/>
+      <var name="system" value="Sol/Regallis" />
+      <var name="credits" value="13500"/>
+   </variables>
+        <flightgroups>
+                <flightgroup name="blue" faction="privateer" type="Llama.begin" ainame="default" waves="1" nr_ships="2">
+         <pos x="-8689970616" y="7476156455" z="-3089452498"/>
+         <rot x="180.0" y="180.0" z="180.0"/>
+      </flightgroup>
+        </flightgroups>
+   <python>
+from quest_dispute import Executor, quest_dispute
+tmpvar=Executor([quest_dispute()])
+   </python> 
+</mission>

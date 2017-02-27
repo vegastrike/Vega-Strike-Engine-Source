@@ -1,0 +1,113 @@
+How the AI Picks its XML: VegaEvent.VegaPersonalities.XML
+
+Ok First the AI gets the target and AI Combat role from Units.CSV. Then, using VegaEvents.csv as a chart (target=Row, AI=Column)
+The cross is the first name of the XML. (bomber targeting base = bomber)
+Then, the AI consults VegaPersonalities.XML in this File the Column is the AI's faction. The row are the names of the middle
+section of the XML. The AI picks one at random. (ie agg,agg,civ is 66% change of agg, 33% chance of civ)
+
+It looks like it tries to load a normal AI(specified by the CSV's) or an int (why?). Failing that it loads .agg. 
+then default.agg.xml, then crashes
+
+
+ taken from:
+ http://vegastrike.sourceforge.net/mediawiki/index.php?title=Development:AIScripts
+ 
+ header AggressiveAI - time how often to search for scripts in the event.xml max of 15 from source code i think
+ 
+ Arguements things: all can be min/max or not (not sure how "not" works though, possibly for thing that return y/n? 
+ ie 1/0?)
+ http://vegastrike.svn.sourceforge.net/viewvc/vegastrike/trunk/vegastrike/src/cmd/ai/aggressive.cpp?revision=12424&view=markup
+ 
+Distance				Normalized distance value 0-1
+MeterDistance			Meter version - speed and intertial calculated in, max of 10000?
+Threat					from the source: value = parent->GetComputerData().threatlevel; Not sure of result range?
+FShield					% shield in decimal 0-1
+LShield
+RShield
+BShield
+Hull					% hull in decimal 0-1
+Facing					?not sure - Is the AI facing the target 0/1?
+Movement				Is our AI moving? 0/1?
+FShield_Heal_Rate		change in shield over 1 sec - looks like % in decimal 0-1
+BShield_Heal_Rate
+LShield_Heal_Rate
+RShield_Heal_Rate
+FArmor_Heal_Rate		0 seems hard set to zero except...
+BArmor_Heal_Rate
+LArmor_Heal_Rate
+RArmor_Heal_Rate		0.5 not sure why... ask devs?
+Hull_Heal_Rate			change in hull over 1 sec - looks like % in decimal 0-1 - didn't know the hull could heal....
+Target_Faces_You		0 or 1. No or Yes. Does the target face the AI?
+Target_In_Front_Of_You	0 or 1. No or Yes   Is the target in front of the AI?
+Rand					Random number generator - 0-1
+Target_Going_Your_Direction 0 or 1. No or Yes.
+ 
+ Then
+ script			- tells AI to run a script
+ time			- max length of time to run script for
+ timetointerupt	- length of time to run script uninterupted
+ priority		- sets the value of interuptability of the script. Only scripts with a higher priority can interupt and
+					only if timetointerupt is not running (or finished running)
+ 
+ It appears looking at some of the AI event.xml's, that one can string several conditions to one script or several conditions
+	several scripts. However, It does not appear that one condition can activate several scripts in a string. Each, event must
+	be separate.
+ 
+ LIST OF SCRIPTS AND WHAT THEY DO!
+ ---
+ afterburn evade				Modified evade up/down/left/right w/afterburner on
+ afterburn evade left right	    fire up afterburners and wiggle to the left and right
+ afterburn evade up down	    fire up afterburners and wiggle up and down
+ afterburn fly straight	     	flight afterburners and fly in a straight line
+ afterburn turn away	       	turn away from target using afterburners if available
+ afterburn turn towards	     	turn towards the center of the target with full afterburners
+ afterburn turn towards itts	turn towards where the target will be given the gun speed (lead) and shoot
+ afterburn vector away          vectors thrusters away from the target while turning away from target and hitting afterburners
+ afterburn veer away     	    vectors thrusters away from the target while facing it and shooting with afterburners engaged
+ afterburner slide				aim slightly away from the target, fire afterburners forward then aim towards the target and shoot
+ aggressive loop around  	    uses whatever mode is selected in the vegastrike.config for use_afterburners and vectors thrust to above or to the left or right of the target in an effort to get past it and get on its tail while aiming at it with its guns
+ aggressive loop around fast	hits the afterburners and vectors the thrusters to left or above the target while facing it and shooting at it and eventually coming around behind it
+ aggressive loop around slow    uses normal thruster to vector thrust just above or to the left or right of the target in an effort to pass it and get behind the target while shooting at it
+ barrel roll                    hits the pitch and roll keys at the same time to get a corkscrew effect
+ cloak	    					cloak and evade
+ coast to stop	      			slow down to a stop
+ do nothing	     				do not adjust velocity vector or turn--if target is in sights then shoot otherwise do nothing
+ drop cargo	         			drop all cargo
+ drop half cargo	         	drop half cargo
+ drop one cargo	         		drop a single cargo item
+ evade	    					Modified - up/down/left/right
+ evade left right	          	evade left and right (just like evade)
+ evade up down	         		evade up and down to avoid fire
+ fly straight                   fly in a straight line
+ fly straight afterburner	    light afterburners and fly in a straight line
+ kick stop	     				stop as fast as possible
+ loop around                    uses whatever mode is selected in the vegastrike.config for use_afterburners and aims to above or to the left or right of the target in an effort to get past it and get on its tail
+ loop around fast               hits the afterburner and aims just to the left or above or right of the target in order to hopefully pass it and come around on its tail     
+ loop around slow               uses normal thrusters and aims just above or to the left or right of the target in an effort to pass it and get behind it
+ match velocity                 vectors thrusters such that the target velocity is matched
+ move to 	      				fly to where the target is and stop
+ roll left	         			roll left at half power
+ roll left hard	         		roll left at full power
+ roll right	         			do a right roll at half power
+ roll right hard	         	do a right roll full power
+ self destruct	      			unknown
+ shelton slide	      			keep velocity the same while turning towards target
+ skilled afterburner slide	    vector thrusters slightly away from the target, fire afterburners forward then aim towards the target and shoot
+ stop	        				counteract momentum with thrusters and come to a stop
+ take off	      				unknown
+ take off every zig	      		unknown
+ turn away	        			turn away from target using normal thrusters
+ turn towards	      			turn towards target and fire at it without using afterburn
+ turn towards itts	        	turn towards target given lead and current guns and fire at it without using afterburn
+ veer and turn away             vectors thrusters away from target as well as turning away from target
+ veer and vector away           vectors thrusters away from target as well as turning away from target
+ veer away                      vectors thrusters away from the target while facing it and shooting
+ veer away itts                 vectors thrusters away from target while facing it with lead and shooting
+ 
+ <!-- found some new ones in hard_coded_scripts.cpp -->
+ FacePerpendicularFast;			Looking at the code, It looks like these things loop around while changing direction??
+ FacePerpendicular;				"Orbits target while facing it"
+ FacePerpendicularSlow;
+ RollFacePerpendicularFast;		I got no idea... same thing while doing a barrel roll?
+ RollFacePerpendicular;			They all have the same orders in the CPP files facePerdendicular - just different varialbes:
+ RollFacePerpendicularSlow;		Ie true,true,true, or something - So all of these are essentially variations of the same move

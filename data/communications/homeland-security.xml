@@ -1,0 +1,241 @@
+<comm>
+	<node text="startingNode" relationship="0"><!-- node 0 (starting node: Don't link here)-->
+		<edge index="1"/>
+		<edge index="2"/>
+		<edge index="3"/>
+	</node>
+
+<!-- Starting Points -->
+	<node text="Freedom demands eternal vigilance - seen any dissident neigbors?" relationship="0.2"><!-- node 1 (very happy)-->
+    <sound file="communications/sounds/homeland_security/homeland_security_freedom-demands-eternal.ogg" sex="0"/>
+		<edge index="4"/>
+		<edge index="5"/>
+		<edge index="6"/>
+	</node>
+	<node text="Nothing to see here citizen, move along." relationship="0"><!-- node 2 (neutral)-->
+    <sound file="communications/sounds/homeland_security/homeland_security_nothing-to-see.ogg" sex="0"/>
+		<edge index="8"/>
+		<edge index="9"/>
+		<edge index="10"/>
+	</node>
+	<node text="Feel the long arm of the law, felon!" relationship="-.2"><!-- node 3 (very mad)-->
+    <sound file="communications/sounds/homeland_security/homeland_security_feel-the-long-arm.ogg" sex="0"/>
+		<edge index="12"/>
+		<edge index="13"/>
+		<edge index="14"/>
+	</node>
+<!-- End of Starting Points -->
+
+<!-- Other Nodes -->
+
+	<node text="Nothing but happy, productive citizens here." relationship=".03125"><!-- node 4(random good chatter)-->
+    <sound file="communications/sounds/homeland_security/homeland_security_nothing-but-happy.ogg" sex="0"/>
+		<edge index="4"/>
+		<edge index="5"/>
+	</node>
+	<node text="Tell me immediately if you think you see any evil-doers." relationship=".0625"><!-- node 5 (random good chatter)-->
+    <sound file="communications/sounds/homeland_security/homeland_security_tell-me-immediately.ogg" sex="0"/>
+		<edge index="4"/>
+		<edge index="6"/>
+	</node>
+	<node text="Wrong-thinkers are everywhere, keep a lookout, friend." relationship=".0625"><!-- node 6 (best node)-->
+    <sound file="communications/sounds/homeland_security/homeland_security_wrong-thinkers-are.ogg" sex="0"/>
+		<edge index="5"/>
+		<edge index="6"/>
+	</node>
+	<node text="If your aim does not improve, I must question your aims." relationship="-.03125"><!-- node 7 (hit while happy)-->
+    <sound file="communications/sounds/homeland_security/homeland_security_if-your-aim-does-not.ogg" sex="0"/>
+		<edge index="4"/>
+		<edge index="8"/>
+		<edge index="9"/>
+		<edge index="10"/>
+	</node>
+	<node text="Stay within the lanes. The lanes are your friends." relationship=".03125"><!-- node 8 (random neutral chatter)-->
+    <sound file="communications/sounds/homeland_security/homeland_security_stay-within-the-lanes.ogg" sex="0"/>
+		<edge index="9"/>
+		<edge index="10"/>
+	</node>
+	<node text="Background check is negative, proceed freely." relationship=".04125"><!-- node 9 (neutral node after he has decided to be nicer after conflict)-->
+    <sound file="communications/sounds/homeland_security/homeland_security_background-check-is-negative.ogg" sex="0"/>
+		<edge index="8"/>
+		<edge index="10"/>
+	</node>
+	<node text="Keep an eye out for the enemy - he has agents everywhere." relationship=".03125"><!-- node 10 (good node in neutral) -->
+    <sound file="communications/sounds/homeland_security/homeland_security_keep-an-eye-out.ogg" sex="0"/>
+		<edge index="8"/>
+		<edge index="9"/>
+	</node>
+	<node text="Homeland Security to regional base, terrorist revealed, requesting backup." relationship="-.125"><!-- node 11 (got hit when neutral)-->
+    <sound file="communications/sounds/homeland_security/homeland_security_to-regional-base.ogg" sex="0"/>
+		<edge index="9"/>
+		<edge index="12"/>
+		<edge index="13"/>
+		<edge index="14"/>
+	</node>
+	<node text="You're not getting away on my watch!" relationship="-.0625"><!-- node 12 (taunt)-->
+    <sound file="communications/sounds/homeland_security/homeland_security_youre-not-getting-away.ogg" sex="0"/>
+		<edge index="13"/>
+		<edge index="15"/>
+		<edge index="19"/>
+	</node>
+	<node text="Those who break the law shall be broken by the Law." relationship="-.125"><!-- node 13 (taunt)-->
+    <sound file="communications/sounds/homeland_security/homeland_security_those-who-break-the.ogg" sex="0"/>
+		<edge index="12"/>
+		<edge index="15"/>
+		<edge index="19"/>
+	</node>
+	<node text="Save it for the tribunal." relationship="-.0625"><!-- node 14 (trying to appease him, but failing)-->
+    <sound file="communications/sounds/homeland_security/homeland_security_save-it-for-the.ogg" sex="0"/>
+		<edge index="8"/>
+		<edge index="12"/>
+		<edge index="13"/>
+		<edge index="14"/>
+	</node>
+	<node text="Your continued resistance does not help you. Stand down or face destruction." relationship="-.0625"><!-- node 15 hit while mad node-->
+    <sound file="communications/sounds/homeland_security/homeland_security_your-continued-resistance.ogg" sex="0"/>
+		<edge index="11"/>
+		<edge index="13"/>
+		<edge index="12"/>
+		<edge index="19"/>
+	</node>
+	<node text="The hammer of justice smites you!" relationship="-.0625"><!-- node 16 kill-->
+    <sound file="communications/sounds/homeland_security/homeland_security_the-hamer-of-justice.ogg" sex="0"/>
+		<edge index="12"/>
+		<edge index="13"/>
+		<edge index="17"/>
+		<edge index="19"/>
+	</node>
+	<node text="All things come to dust..." relationship="-.0625"><!-- node 17 kill-->
+    <sound file="communications/sounds/homeland_security/homeland_security_all-things-come-to.ogg" sex="0"/>
+		<edge index="12"/>
+		<edge index="13"/>
+		<edge index="16"/>
+		<edge index="19"/>
+	</node>
+	<node text="You will tarnish our homeland no longer!" relationship="-.03125"><!-- node 18 (trying to appease, but failing)-->
+    <sound file="communications/sounds/homeland_security/homeland_security_you-will-tarnish.ogg" sex="0"/>
+		<edge index="9"/>
+		<edge index="12"/>
+		<edge index="13"/>
+		<edge index="14"/>
+	</node>	
+	<node text="Hailing enemy of the state, can you squeal like a pig?" relationship="-.0625"><!-- node 19 (taunt)-->
+    <sound file="communications/sounds/homeland_security/homeland_security_hailing-enemy-of-the.ogg" sex="0"/>
+		<edge index="12"/>
+		<edge index="13"/>
+		<edge index="14"/>
+	</node>
+
+<!-- Built-in Conversations --> 
+	<node text="Docking operation complete. You're free of the docking clamps." relationship="0.01">
+    <sound file="communications/sounds/homeland_security/homeland_security_docking-operation-complete.ogg" sex="0"/>
+		<edge index="4"/>
+		<edge index="5"/>
+		<edge index="6"/>
+		<edge index="7"/>
+	</node>
+	<node text="You are not in docking clamps. Move into one of the green guide boxes and try to dock again." relationship="0">
+    <sound file="communications/sounds/homeland_security/homeland_security_you-are-not-in-dock.ogg" sex="0"/>
+		<edge index="8"/>
+		<edge index="9"/>
+		<edge index="10"/>
+		<edge index="11"/>
+	</node>
+	<node text="Docking operation begun; press 0 to step into our starship." relationship="0">
+    <sound file="communications/sounds/homeland_security/homeland_security_docking-operation-begun.ogg" sex="0"/>
+		<edge index="8"/>
+		<edge index="9"/>
+		<edge index="10"/>
+		<edge index="11"/>
+	</node>		
+	<node text="You are not authorized to land here!" relationship="0">
+    <sound file="communications/sounds/homeland_security/homeland_security_you-are-not-authorized.ogg" sex="0"/>
+		<edge index="8"/>
+		<edge index="9"/>
+		<edge index="10"/>
+		<edge index="11"/>
+	</node>		
+	<node text="Clearance code acknowledged; move into landing pattern and dock at the white indicators." relationship="0">
+    <sound file="communications/sounds/homeland_security/homeland_security_clearance-code-ack.ogg" sex="0"/>
+		<edge index="8"/>
+		<edge index="9"/>
+		<edge index="10"/>
+		<edge index="11"/>
+	</node>		
+	<node text="Unable to comply." relationship="0">
+    <sound file="communications/sounds/homeland_security/homeland_security_unable-to-comply.ogg" sex="0"/>
+		<edge index="8"/>
+		<edge index="9"/>
+		<edge index="10"/>
+		<edge index="11"/>
+	</node>		
+	<node text="Acknowledged." relationship="0">
+    <sound file="communications/sounds/homeland_security/homeland_security_acknowledged.ogg" sex="0"/>
+		<edge index="4"/>
+		<edge index="5"/>
+		<edge index="6"/>
+		<edge index="7"/>
+	</node>		
+	<node text="Prepare to be searched, maintain speed and course!" relationship="0"> <!-- maintain speed and course -->
+    <sound file="communications/sounds/homeland_security/homeland_security_prepare-to-be-searched.ogg" sex="0"/>
+		<edge index="8"/>
+		<edge index="9"/>
+		<edge index="10"/>
+	</node>
+	<node text="No contraband detected you may proceed." relationship="0"> <!-- no contraband detected you may proceed -->
+    <sound file="communications/sounds/homeland_security/homeland_security_no-contraband-detect.ogg" sex="0"/>
+		<edge index="8"/>
+		<edge index="9"/>
+		<edge index="10"/>
+	</node>
+	<node text="Contraband detected all units close and terminate!" text1="Filthy little smuggler; you're busted!" relationship="-.125"> <!-- contraband detected! all units close and engage -->
+    <sound file="communications/sounds/homeland_security/homeland_security_contraband-detected.ogg" sex="0"/>
+    <sound file="communications/sounds/homeland_security/homeland_security_filthy-little-smuggler.ogg" sex="0"/>
+		<edge index="12"/>
+		<edge index="13"/>
+		<edge index="14"/>
+	</node>
+	<node text="Your course is deviating. Maintain course!" relationship="0"> <!-- maintain your speed and course...DO NOT deviate -->
+    <sound file="communications/sounds/homeland_security/homeland_security_your-course-is-deviating.ogg" sex="0"/>
+		<edge index="8"/>
+		<edge index="9"/>
+		<edge index="10"/>
+	</node>	
+	<node text="Request Clearance To Land." relationship="0"> 
+    <sound file="communications/sounds/homeland_security/homeland_security_request-clearance.ogg" sex="0"/>
+		<edge index="8"/>
+		<edge index="9"/>
+		<edge index="10"/>
+	</node>	
+	<node text="Target neutralized, send out a cleanup crew." text1="Target tagged, prep an interrogation squad." relationship="0"> <!-- no contraband detected you may proceed -->
+    <sound file="communications/sounds/homeland_security/homeland_security_target-neutralized.ogg" sex="0"/>
+    <sound file="communications/sounds/homeland_security/homeland_security_target-tagged.ogg" sex="0"/>
+		<edge index="12"/>
+		<edge index="13"/>
+		<edge index="14"/>
+		<edge index="15"/>
+	</node>
+	<node text="Give up your fight, there's no need to die just yet." text1="Continuing to resist arrest will only make this worse." relationship="-.0625"><!-- node 17 kill-->
+    <sound file="communications/sounds/homeland_security/homeland_security_give-up-your-fight.ogg" sex="0"/>
+    <sound file="communications/sounds/homeland_security/homeland_security_continuing-to-resist.ogg" sex="0"/>
+		<edge index="12"/>
+		<edge index="13"/>
+		<edge index="14"/>
+		<edge index="15"/>
+	</node>
+	<node text="You may kill me now, but the Law shall prevail!" text1="I cannot pursue much longer, get that backup here before the criminal escapes!" relationship="-.125"><!-- Critical damage -->
+    <sound file="communications/sounds/homeland_security/homeland_security_you-may-kill-me.ogg" sex="0"/>
+    <sound file="communications/sounds/homeland_security/homeland_security_i-cannot-pursue-much.ogg" sex="0"/>
+		<edge index="12"/>
+		<edge index="13"/>
+		<edge index="14"/>
+		<edge index="15"/>
+	</node>
+	<node text="*hit*" relationship="-.01">
+		<edge index="7"/>
+		<edge index="11"/>
+		<edge index="15"/>
+	</node>
+
+<!-- End of Built-in Conversations --> 
+</comm>

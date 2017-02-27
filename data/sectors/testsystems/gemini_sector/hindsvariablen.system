@@ -1,0 +1,37 @@
+<system scalesystem="3" name="Hind's Variable N" background="backgrounds/green" nearstars="500" stars="1000" starspread="150"  x="0" y="0" z="0">
+<Light>
+<ambient red="000.0" green="000.0" blue="000.0"/>
+<diffuse red="0.774596669241483" green="0.774596669241483" blue="1"/>
+<specular red="0.6" green="0.6" blue="1"/>
+</Light>
+
+<Planet name="hindsvariablen" file="sol/sun.png" radius="10000000" x="14594814.00
+0000" y="00.00" z="-14594814.000000"  Red="0.6" Green="0.6" Blue="1" ReflectNoLight="true" light="0"/>
+
+<Light>
+<ambient red="000.0" green="000.0" blue="000.0"/>
+<diffuse red="1" green="1" blue="1"/>
+<specular red="1" green="1" blue="1"/>
+</Light>
+
+<Light>
+<ambient red="1" green=".1" blue="0"/>
+<!--<diffuse red="1" green=".7" blue="0"/>-->
+<!--<attenuated red=".00000001" blue=".00000015"/>-->
+<attenuated red="0" blue=".000000002"/>
+</Light>	
+<Light>
+<ambient red="1" green=".1" blue="0"/>
+<!--<diffuse red="1" green=".7" blue="0"/>-->
+<!--<attenuated red=".00000001" blue=".00000015"/>-->
+<attenuated red="0" blue=".0000001"/>
+</Light>	
+
+        <planet name="JumpToDN-N1912" file="jump.png" alpha="ONE ONE" radius="100" gravity="0" z="8000" x="11500" day="240" destination="gemini_sector/dn-n1912"/>
+        <unit name= "Meadows"  file="refinery" faction="confed" z="11000" x="-10500"/>
+        <planet name="Nav 3" file="invisible.png" alpha="ONE ONE" radius="100" gravity="0" z="0" x="-1500" day="240" />        
+        <planet name="Oresville" file="planets/m_class3.png" radius="300" gravity="20" z="-12000" x="7000" day="300">
+                <planet name="Oresville Atmosphere" file="sol/earthcloudmaptrans.png" alpha="true" radius="310" gravity="20" ri="0" rj="0" rk="0" si="0" sj="0" sk="0" day="600" position="0"/>
+        </planet>
+        <planet name="JumpToAldebran" file="jump.png" alpha="ONE ONE" radius="100" gravity="0" z="8200" x="-14000" day="240" destination="gemini_sector/aldebran"/>
+</system>

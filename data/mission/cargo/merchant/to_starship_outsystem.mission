@@ -1,0 +1,58 @@
+<mission>
+	<settings>
+		<origin  planet="earth" x="0000" y="100" z="000.0"/>
+	</settings>
+
+	<variables>
+		<var name="defaultplayer" value="blue"/>
+		<var name="system" value="enigma_sector/blake" />
+		<var name="mission_name" value="Commercial Cargo Delivery" />
+		<var name="description" value="A Corporation wishes you to deliver some supplies to one of their spacecraft a number of systems away. The pay is 1200 per system travelled."/>
+	</variables>
+        <flightgroups>
+                <flightgroup name="blue" faction="confed" type="nova" ainame="default" waves="1" nr_ships="2">
+			<pos x="0400" y="-35400" z="47200000"/>
+			<rot x="180.0" y="180.0" z="180.0"/>
+			<order order="tmptarget" target="omikron"/>
+			<order priority="0" order="superiority" target="enemy"/>
+			<order priority="1" order="bomber" target="omikron"/>
+			<order priority="2" order="escort" target="blue"/>
+		</flightgroup>
+        </flightgroups>
+	<python>
+import cargo_mission
+newmission = cargo_mission.initrandom ('merchant', 0, 1200, 1, 1, 3, 2200, '')
+newmission=0
+
+</python>
+	<madule name="director">
+		<import name="cargo_mission"/>
+		<script name="initbriefing">
+			<exec module="cargo_mission" name="initbriefing">
+			</exec>
+		</script>
+		<script name="loopbriefing">
+			<exec module="cargo_mission" name="loopbriefing">
+			</exec>
+		</script>
+		<script name="endbriefing">
+			<exec module="cargo_mission" name="endbriefing">
+			</exec>
+		</script>
+		<script name="initgame">
+			<exec module="cargo_mission" name="initrandom">
+			<const type="object" object="string" value="merchant"/>
+			<const type="int" value="0"/> <!--difficulty of mission(do they send peeps after you)-->
+			<const type="float" value="1200"/> <!-- how much you are paid -->
+			<const type="bool" value="true"/><!-- if they send a capship or prefer to have you drop it at a planet -->
+			<const type="int" value="1"/><!-- min systems away-->
+			<const type="int" value="3"/><!-- max systems away-->
+			<const type="float" value="2200"/>
+			<const type="object"  object="string" value=""/>
+			</exec>
+		</script>
+		<script name="gameloop">
+			<exec module="cargo_mission" name="loop"/>
+		</script>
+	</module>
+</mission>

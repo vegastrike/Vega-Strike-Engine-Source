@@ -1,0 +1,28 @@
+<mission>
+    <settings>
+        <origin planet="earth" x="0000" y="100" z="000.0"/>
+    </settings>
+
+    <variables>
+        <var name="defaultplayer" value="blue"/>
+        <var name="mission_name" value="4 versus 4" />
+        <var name="splashscreen" value="" />
+        <var name="system" value="testsystems/nothing" />
+        <var name="description" value="4vs4.txt" />
+    </variables>
+    <flightgroups>
+        <flightgroup name="Knight" faction="confed" type="mule" ainame="ai_sitting_duck.py" waves="1" nr_ships="1">
+            <pos x="53460000" y="4019000" z="40000.0"/>
+            <rot x="180.0" y="180.0" z="180.0"/>
+        </flightgroup>
+    </flightgroups>
+    <python>
+import balancer
+bomber=["Pacifier","Areus","Goddard","Taizong"]
+interceptor=["Gawain","Nicander","Derivative","Shizu","Progeny","Schroedinger"]
+fighter=["Ariston","Admonisher","Ancestor","Convolution","Determinant","Dostoevsky","Hammer","Robin","Sickle","Zhuangzong","Hyena","Lancelot","Redeemer"]
+shuttle=["Dodo","Franklin","Llama","Plowshare","Sartre"]
+placeholder=["Kafka","Quicksilver","GTIO","Dirge","Kierkegaard"]
+my_obj=balancer.balancer(fighter+bomber+interceptor+shuttle+placeholder)
+    </python>
+</mission>

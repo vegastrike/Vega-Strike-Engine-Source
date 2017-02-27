@@ -1,0 +1,224 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>Introduction to the Vegastrike Fixer system</title></head><body>
+    <h1>Introduction</h1>
+        <h2>What is a Fixer?</h2>
+            <p>
+                A fixer is a sprite that can be placed in rooms around the base
+                (as long as the rooms have specified "locations" for the fixers
+                to exist in) to allow player interaction in campaigns and/or
+                missions.  Most commonly, fixers are found in the bar to offer you
+                various types of missions.  Adding a fixer of your own was a long
+                and tedious process, and the results were often less than ideal.
+            </p>
+        
+        <h2>If it's that hard, what is this document for?</h2>
+            <p>
+                Recently, a new fixer interface was implemented that allows the
+                easy creation of fixers for scripted campaigns or missions.
+                The new system, in keeping with the aim of the simulated universe,
+                is dynamic, and can be made to change depending on the situation
+                of the universe.  In addition, script writers are no longer
+                limited to a simple question/answer interaction.  A whole
+                "conversation" can be scripted, much like the interactions
+                in games such as the Kings Quest series.
+            </p>
+            <p>
+                This new system is what I will be teaching you to use in this
+                document.
+            </p>
+        
+    
+    <h1>The Objects</h1>
+        <h2>Overview</h2>
+            <p>
+                The classes you will be using to construct your fixer are found
+                in the bases/fixers.py file.  The <strong>Conversation</strong>,
+                <strong>Node</strong>, <strong>RootNode</strong>, and <strong>SubNode</strong>
+                classes define the fixer and the interactions possible.
+            </p>
+        
+        <h2>SubNode</h2>
+            <p>
+                This class defines the objects that contain the content of any
+                conversation.  Each object can be created with content:
+                <p><pre>
+sn = SubNode("Ahh, that's right.  You're here about the jump drive!", [str(TRIGGER_SAVE) + '#' + str(TRIGGER_VALUE)], ["bases/fixers/no.spr|#\nimport quest_intro\nquest_intro.interactWithJenek(\"nojump\")|Sorry, what else do you have?", "bases/fixers/yes.spr|#\nimport quest_intro\nquest_intro.interactWithJenek(\"yesjump\")|Yeah, I'm interested."], "bases/fixers/merchant.spr", "Talk to Jenek about the jump drive.")
+                </pre></p>
+                Or each object can be created empty, and the content added later:
+                <p><pre>
+sn = SubNode()
+sn.text = "Ahh, that's right.  You're here about the jump drive!"
+sn.conditions = [str(TRIGGER_SAVE) + '#' + str(TRIGGER_VALUE)]
+sn.choices = ["bases/fixers/no.spr|#\nimport quest_intro\nquest_intro.interactWithJenek(\"nojump\")|Sorry, what else do you have?", "bases/fixers/yes.spr|#\nimport quest_intro\nquest_intro.interactWithJenek(\"yesjump\")|Yeah, I'm interested."]
+sn.sprite = "bases/fixers/merchant.spr"
+sn.motext = "Talk to Jenek about the jump drive."
+                </pre></p>
+                <h3>What do I put in the value:  text  ?</h3>
+                    This value contains the string that is displayed when the
+                    fixer is clicked.
+                
+                <h3>What do I put in the value:  conditions  ?</h3>
+                    This list contains the conditions that must all be satisfied
+                    for the SubNode to be accepted.
+                    
+                    The condition can take the form of a SAVEVAR#VALUE pair,
+                    which will return true if and only if the SaveData key in
+                    the save game dictionary has its first value \=\= VALUE.
+                    <p><pre>str(TRIGGER_SAVE) + '#' + str(TRIGGER_VALUE)</pre></p>
+                    
+                    An alternative form is also available, to allow for more
+                    complete condition checking.  If the condition string is
+                    preceded by a '#' character, then the string is assumed
+                    to be python code and executed.  After the execution, the
+                    value stored in the value "result" (this must be created
+                    in the executed string) is taken to be the result (True/False)
+                    of the condition.
+                    <p><pre>"#\nimport quest_intro\nresult = quest_intro.buyDrive()==%s"%str(DRV_SUCCESS)</pre></p>
+                
+                <h3>What do I put in the value:  choices  ?</h3>
+                    This string contains the information needed to create "Choice"
+                    buttons for this SubNode.  The format is simple.  Seperated
+                    by the "|" character are three fields.
+                    The first is the path to the sprite for the choice (relative
+                    to the sprites directory in the datadir).
+                    The second is the string to be executed if the button is clicked.
+                    Finally, the third is the text to display when the users
+                    mouse moves over the button.
+                
+                <h3>What do I put in the value:  sprite  ?</h3>
+                    The is a string containing the path to the sprite to be used
+                    for the fixer.  Relative the the sprites directory in the datadir.
+                
+                <h3>What do I put in the value:  motext  ?</h3>
+                    This is the string to display when the player moves his
+                    mouse over the fixer in the room.
+                
+                
+                    It should be noted that both the sprite and motext variables
+                    are only needed for SubNode objects that will be add to a
+                    RootNode object (as this is the only node the fixer gets its
+                    creation information from).
+                
+            </p>
+        
+        <h2>Node</h2>
+            <p>
+                The <strong>Node</strong> class requires significantly less
+                understanding than the <strong>SubNode</strong> class, as the
+                data for the fixer has already been specified.
+            </p>
+            <p>
+                The SubNodes belonging to the node can be referenced in a list
+                when the object is created, or added later using the addNode method.
+            </p>
+        
+        <h2>RootNode</h2>
+            <p>
+                The <strong>RootNode</strong> class inherits from the <strong>Node</strong>
+                class.  At the time of writing the only difference is an extra
+                method, getInitialInfo method.  As a result, the <strong>RootNode</strong>
+                class has the requirement that any <strong>SubNode</strong> child
+                must have valid <emph>sprite</emph> and <emph>motext</emph> values.
+            </p>
+        
+        <h2>Conversation</h2>
+            <p>
+                The <strong>Conversation</strong> class requires additional data
+                about the conversation not presented in the <strong>SubNode</strong>.
+                In addition to the list of nodes, the conversation class must
+                have a valid name string (to reference the fixer), general
+                preconditions (whether or not the fixer displays at all), and
+                a string that contains the code to be executed if/when the fixer
+                is clicked.  The conversation object must be accessible through
+                the reference <emph>conversation</emph>.
+                The iterate method will create the next set of text and buttons
+                for the given node.
+                <strong>Node</strong> objects can be added using the addNode method.
+            </p>
+        
+    
+    <h1>Creating a fixer</h1>
+        <p>
+            Well, other than what I've told you so far, and looking at examples,
+            there isn't mush more that can be tought without doing.  That said,
+            there are some details left out of the above descriptions that might
+            come in useful to know ;-)
+        </p>
+        <h2>How can I add my fixer to the game?</h2>
+            <p>
+                These fixers, at least at this stage, are currently limited to
+                being created by python code in various parts, most likely quests.
+                To help scripters manage their fixers, there are some functions
+                in the <strong>fixers</strong> module to help.
+            </p>
+            <p>
+                <p><pre>queueFixer(playernum, name, scripttext, overwrite=0)</pre></p>
+                The name is simply the name given to identify this fixer, and the
+                scripttext is the string to be executed to retrieve the fixer.
+                overwrite is more of a testing argument (may be removed in future!)
+                that allows you to overwrite any fixer with the same name.  If
+                overwrite is not set to 1 and a fixer is already queued with the
+                same name, an error is outputted to the console and the fixer is
+                <strong>not</strong> updated.
+            </p>
+            <p>
+                <p><pre>eraseCFixer(playernum, name)</pre></p>
+                This is a lot easier to explain.  It deletes the first fixer with the
+                matching name in the fixer queue.
+            </p>
+        
+        <h2>How does this all work together?</h2>
+            <p>
+                At last, the easy bit to write!  This is actually quite simple.
+                Assuming the fixer has been queued using the appropriate functions,
+                when you dock, and the base screens are created, the following will occur.
+            </p>
+            <p>
+                First each conversation in the queue is retrieved (by executing the string
+                stored with the name), and the fixer objects are created.  Then,
+                until the loading room is full (ie the bar has room for 3 fixers),
+                each fixer has it's conversation preconditions evaluated, and if
+                they are good the fixer is drawn using the information retrieved
+                from the RootNode (which is <strong>mandatory</strong>.
+            </p>
+            <p>
+                "But wait!" I hear you say.  "Aren't we able to add multiple
+                possibilities for the fixers display via SubNodes?"
+                The answer of course is yes.  In the display of each node, and
+                this includes the RootNode, each of the SubNodes will have their
+                conditions evaluated, with the first SubNode with all conditions
+                returning true being used.  If none of the SubNodes in the Node
+                evaluate as true, the last in the list will be used as a default.
+            </p>
+            <p>
+                The last question I am able to think of at this late hour is, 
+                "How do I end a conversation?"  This too is easy, simply make
+                the last subnode used have no choice buttons created!
+            </p>
+        
+        <h2>Executable Strings</h2>
+            <p>
+                Now to explain how to do the strings that hold code to be executed.
+                ie the 'alternative' conditions, the choices, and the code
+                referencing the <strong>Conversation</strong> object.
+            </p>
+            <p>
+                The format of these strings is simple.  Each must be preceded by a
+                # (hash) character.  Each must have each line of code seperated by
+                the \n character, and each other special character (quotes,
+                backslash) must also be escaped.  In addition, if used as a
+                'condition,' the result must be stored in a variable called result:
+                <p><pre>"#import module\nresult = module.testMethod()"</pre></p>
+                If the string is used to retrieve the <strong>Conversation</strong>
+                object, the object must be stored in a variable called conversation:
+                <p><pre>"#import quest_module\nconversation = quest_module.getCon()"</pre></p>
+            </p>
+        
+        <h2>Examples</h2>
+            <p>
+                See quest_into.py for an example.
+            </p>
+        
+    
+</body></html>

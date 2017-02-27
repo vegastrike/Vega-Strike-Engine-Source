@@ -1,0 +1,10 @@
+#EXTM3U
+#AWACS-specific
+../music/isobattle.ogg
+#common threat files
+../music/battle3electro.ogg
+../music/battle5.ogg
+../music/galacticbattle.ogg
+#fix weights
+../music/isobattle.ogg
+../music/isobattle.ogg

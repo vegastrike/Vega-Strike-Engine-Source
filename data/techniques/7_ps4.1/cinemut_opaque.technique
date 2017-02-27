@@ -1,0 +1,41 @@
+<?xml version="1.0"?>
+<technique fallback="default">
+    <!-- Full-blown shader technique, with Z-write prepass to avoid
+         shading overhead for occluded fragments.
+         
+         This technique implements normal-mapping, specmaps with intensity-derived
+         shininess modulation, variable-kernel filtered environmental reflections
+         (based on shininess), specularity normalization, fading damage maps with
+         specmap perturbation, and supports up to 8 lights.
+         
+         This is a one-pass technique, so only the first 2 lights are done 
+         per-pixel, the remaining ones use per-vertex lighting.
+    -->
+
+    <!-- Z-write prepasses go at sequence 10 -->
+    <pass type="shader" sequence="10" cwrite="false">
+        <vertex_program src="zwrite"/>
+        <fragment_program src="zwrite"/>
+        <texture_unit src="decal:0" default="file:white.bmp" name="diffuseMap"/>
+    </pass>
+    
+    <!-- first and only lighting pass -->
+    <pass type="shader" sequence="15">
+        <vertex_program src="highend"/>
+        <fragment_program src="cinemut_opaque"/>
+        
+         <texture_unit src="decal:0" name="diffMap"/>
+        <texture_unit src="environment" name="envMap"/>
+        <texture_unit src="decal:1" name="specMap"/>
+        <texture_unit src="decal:3" name="glowMap"/>
+        <texture_unit src="decal:4" default="file:gray.png" name="normMap"/>
+        <texture_unit src="decal:2" name="damgMap"/>
+        <texture_unit src="file:cm_detail.png" name="detailMap"/>
+        <texture_unit src="file:moto_PRT.png" name="prtMap"/>
+        
+        <auto_param name="light_enabled" semantic="ActiveLightsArray" optional="true"/>
+        <auto_param name="max_light_enabled" semantic="NumLights" optional="true"/>
+        <auto_param name="ucloaking" semantic="CloakingPhase" optional="true"/>
+        <auto_param name="udamage" semantic="Damage4" optional="true"/>
+    </pass>
+</technique>

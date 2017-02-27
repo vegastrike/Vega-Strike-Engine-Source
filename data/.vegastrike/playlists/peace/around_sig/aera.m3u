@@ -1,0 +1,15 @@
+#EXTM3U
+#aera-specific
+../music/aerapeace.ogg
+../music/InnerChild.ogg
+#common peace/away files - not very aerish, they break the mood
+#../music/mission.ogg
+#../music/steel_p.ogg
+../music/BlackLlama.ogg
+#fix weights - I want aerapeace to kick in most of the time one 
+#   gets within a significant's range
+../music/aerapeace.ogg
+../music/aerapeace.ogg
+../music/aerapeace.ogg
+../music/aerapeace.ogg
+../music/aerapeace.ogg

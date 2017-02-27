@@ -1,0 +1,62 @@
+<system name="enigma" background="backgrounds/blue_galaxy1" nearstars="500" stars="1000" starspread="150">
+<Light>
+	<ambient red="0.000000" green="0.000000" blue="0.000000"/>
+	<diffuse red="0.883953" green="0.953332" blue="1.000000"/>
+	<specular red="0.781372" green="0.908842" blue="1.000000"/>
+</Light>
+<unit name="BlackHole" file="brief_blackhole" x="0" y="-10000000000" z="0"/>
+<Planet name="enigma A" file="stars/white_star.png" ri="0.000000" rj="0.000000" rk="0.000000" si="0.000000" sj="0.000000" sk="0.000000" radius="43097344.000000" x="0" y="0" z="0"   ReflectNoLight="true" light="0" Red="0.781372" Green="0.908842" Blue="1.000000">
+<!--<Ring file="planets/blackhole.png" innerradius="2082038" outerradius="40127520.618260"  wrapx="1" wrapy="1" />-->
+</Planet>
+	<Planet name="Cernunnos" file="sol/saturn.png" ri="-92869800.000000" rj="-35290636.000000" rk="-133518968.000000" si="-72367368.000000" sj="-41938908.000000" sk="61420440.000000" radius="1598017.000000" x="175575104.000000" y="-169187488.000000" z="177667680.000000" year= "158309072.000000" day="603.381592"  >
+	</Planet>
+		<Planet name="JumpToNiven" file="jump.png" ri="-2203457.250000" rj="870224.437500" rk="-3476964.250000" si="2027663.375000" sj="-2445178.750000" sk="-1896977.625000" radius="254.216446" x="179692857" y="-172439242.750000" z="180667680" year= "7332553.500000" day="671.660400" alpha="ONE ONE" destination="enigma_sector/niven"  >
+		</Planet>
+		<Planet name="JumpToBlake" file="jump.png" ri="1956029.000000" rj="-2967638.750000" rk="-1136234.000000" si="-720483.000000" sj="245346.203125" sk="-1881112.875000" radius="281.896606" x="179692857" y="-172439242.750000" z="-180667680" year= "3162263.500000" day="132.078232" alpha="ONE ONE" destination="enigma_sector/blake"  >
+		</Planet>
+
+	<planet name="Manawydan ap Llyr" file="planets/gas_giant3.png" ri="6171173.500000" rj="-136143920.000000" rk="-107391160.000000" si="-184356096.000000" sj="14312360.000000" sk="-28738252.000000" radius="1108744.750000" x="105880168.000000" y="-171842528.000000" z="87651032.000000" year= "239107840.000000" day="747.153992" >
+      <Ring file="rings/planet_ring0.texture" innerradius="2082038.0" outerradius="4012752.0"  wrapx="1" wrapy="1" >
+   </planet>
+	<Unit name="" file="research" ri="-1266347.000000" rj="1359996.625000" rk="-1042323.812500" si="-1731170.250000" sj="-1942633.000000" sk="-431451.468750" x="105880168.000000" y="-171842528.000000" z="89651032.000000" year= "3155533.000000" faction="confed"  />
+	<Planet name="JumpToZelanzny" file="jump.png" ri="-943195.250000" rj="390165.968750" rk="1228625.875000" si="2755215.500000" sj="541284.500000" sk="1943240.375000" radius="265.630463" x="115880168.000000" y="-171842528.000000" z="89651032.000000" year= "4626919.000000" day="586.318726" alpha="ONE ONE" destination="enigma_sector/zelanzny"  >
+	</Planet>
+	<Planet name="JumpToHeinlein" file="jump.png" ri="-711837.375000" rj="338523.437500" rk="804178.437500" si="1312412.375000" sj="-209673.812500" sk="1249975.875000" radius="206.488678" x="115880168.000000" y="-181842528.000000" z="89651032.000000"  year= "3258800.000000" day="419.828827" alpha="ONE ONE" destination="enigma_sector/heinlein"  >
+	</Planet>
+	
+	<Planet name="Taranis" file="planets/gas_giant4.png" ri="135917072.000000" rj="58800736.000000" rk="104222320.000000" si="-2378382.750000" sj="-149398208.000000" sk="87390000.000000" radius="1834392.125000" x="-94815440.000000" y="144020096.000000" z="-170646224.000000" year= "383504800.000000" day="649.221680"  >
+	</Planet>
+		<Unit name="" file="MiningBase" ri="-3600512.750000" rj="-1950006.500000" rk="-1442974.750000" si="2525798.250000" sj="-3664775.000000" sk="-1349873.875000" x="5378249.500000" y="-5188770.500000" z="-2838338.500000" year= "4062636.000000" faction="confed"  />
+		<Planet name="Shoney" file="sol/uranus.png" ri="1721465.375000" rj="-2291297.000000" rk="1225482.625000" si="-4870583.000000" sj="-2325649.500000" sk="2493537.750000" radius="427107.000000" x="-100815440.000000" y="144020096.000000" z="-170646224.000000"  year= "19876646.000000" day="767.597656"  >
+		</Planet>
+		<Planet name="JumpToKtithrak_mang" file="jump.png" ri="-1718688.875000" rj="823641.187500" rk="-1266702.875000" si="-482599.468750" sj="4075145.500000" sk="3304560.250000" radius="284.702698" x="-90815440.000000" y="144020096.000000" z="-170646224.000000"  year= "4462433.500000" day="444.454987" alpha="ONE ONE" destination="enigma_sector/ktithrak_mang"  >
+		</Planet>
+		<Planet name="JumpToMccaffrey" file="jump.png" ri="1897444.000000" rj="3085386.500000" rk="272116.343750" si="-2612778.250000" sj="1641138.125000" sk="-389337.218750" radius="228.133682" x="-94815440.000000" y="140020096.000000" z="-170646224.000000"  year= "7015442.000000" day="236.946487" alpha="ONE ONE" destination="enigma_sector/mccaffrey"  >
+		</Planet>
+	
+	<Planet name="Lugh Lamfota" file="planets/gas_giant5.png" ri="-106563408.000000" rj="-112577664.000000" rk="40656692.000000" si="-132982488.000000" sj="142420208.000000" sk="45804696.000000" radius="1186306.500000" x="-135473664.000000" y="134074984.000000" z="126295048.000000" year= "415383360.000000" day="641.257812"  >
+	</Planet>
+		<Planet name="Scathach" file="planets/red_rocky.png" ri="565140.312500" rj="-995412.375000" rk="2095293.125000" si="-2959008.250000" sj="-2094283.750000" sk="-196832.265625" radius="276734.593750" x="-139473664.000000" y="134074984.000000" z="126295048.000000" year= "5352735.000000" day="17.405823"  >
+		</Planet>
+		<Planet name="JumpToArraman" file="jump.png" ri="1201476.500000" rj="53361.054688" rk="-1024248.312500" si="-70328.742188" sj="-1190554.125000" sk="-144523.125000" radius="142.486725" x="-130473664.000000" y="134074984.000000" z="126295048.000000" year= "2942670.750000" day="533.546570" alpha="ONE ONE" destination="enigma_sector/arraman"  >
+		</Planet>
+		<Planet name="JumpToTesla" file="jump.png" ri="956383.250000" rj="-591406.562500" rk="1398657.000000" si="1516573.000000" sj="-488300.562500" sk="-1243485.250000" radius="174.195694" x="-132473664.000000" y="134074984.000000" z="126295048.000000" year= "12773940.000000" day="487.458862" alpha="ONE ONE" destination="enigma_sector/tesla"  >
+		</Planet>
+		<Planet name="JumpToBradbury" file="jump.png" ri="-2875911.750000" rj="-702095.812500" rk="-2477161.250000" si="-134132.234375" sj="-2382871.500000" sk="831095.125000" radius="82.066566" x="-135473664.000000" y="130074984.000000" z="126295048.000000" year= "3199643.750000" day="694.103027" alpha="ONE ONE" destination="enigma_sector/bradbury"  >
+		</Planet>
+		<Planet name="Belatucadros" file="planets/m_class.png" ri="6430273.000000" rj="-3757607.750000" rk="-5779607.000000" si="2667264.000000" sj="-15515084.000000" sk="13054665.000000" x="-135473664.000000" y="124074984.000000" z="126295048.000000" radius="1093724.125000"  year= "25698912.000000" day="159.016220"  >
+		</Planet>
+		<Planet name="JumpToCallimachius" file="jump.png" ri="2253674.750000" rj="2106301.000000" rk="2500811.750000" si="2642713.500000" sj="-4137426.500000" sk="1103181.625000" radius="68.397461" x="-135473664.000000" y="144074984.000000" z="126295048.000000" year= "35472020.000000" day="451.688812" alpha="ONE ONE" destination="enigma_sector/callimachius"  >
+		</Planet>
+	
+	<Planet name="Creiddylad" file="planets/ocean.png" ri="-62117572.000000" rj="-115489536.000000" rk="145283312.000000" si="87955264.000000" sj="10801790.000000" sk="46192928.000000" radius="4456065.500000" x="157534096.000000" y="144428448.000000" z="-150222752.000000" year= "502038016.000000" day="300.663483"  >
+	</Planet>
+		<Unit name="" file="MiningBase" ri="-1197330.375000" rj="-10442541.000000" rk="9357395.000000" si="6952141.000000" sj="-4223373.500000" sk="-3823579.750000" x="150534096.000000" y="144428448.000000" z="-150222752.000000"  year= "76334544.000000" faction="confed"  />
+		<Planet name="Grannus" file="sol/deimos.png" ri="-9109489.000000" rj="-8788611.000000" rk="-4894728.500000" si="9335861.000000" sj="-1407472.875000" sk="-14847646.000000"  x="160534096.000000" y="144428448.000000" z="-150222752.000000" radius="1166269.625000"  year= "29752634.000000" day="131.940186"  >
+		</Planet>
+	
+	<Asteroid name="" file="AFieldJump" ri="-52237544.000000" rj="33950032.000000" rk="49943896.000000" si="-126934312.000000" sj="18691738.000000" sk="-145469664.000000" x="117021736.000000" y="93658336.000000" z="167590960.000000" year= "173869104.000000"  />
+	<Planet name="JumpToGhorah_khar" file="jump.png" ri="584690.937500" rj="9435826.000000" rk="12393445.000000" si="13559153.000000" sj="-9271852.000000" sk="6419496.500000" radius="305.101654" x="117021736.000000" y="93658336.000000" z="167590960.000000" year= "13928722.000000" day="721.345703" alpha="ONE ONE" destination="enigma_sector/ghorah_khar">
+	</Planet>
+
+</system>

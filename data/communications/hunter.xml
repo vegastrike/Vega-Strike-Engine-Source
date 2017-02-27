@@ -1,0 +1,239 @@
+<comm>
+	<node text="startingNode" relationship="0"><!-- node 0 (starting node: Don't link here)-->
+		<edge index="1"/>
+		<edge index="2"/>
+		<edge index="3"/>
+	</node>
+
+<!-- Starting Points -->
+	<node text="You here for some hunting? There's plenty enough to share today." relationship="0.2"><!-- node 1 (very happy)-->
+<sound file="communications/sounds/hunter/hunter_you-here-for-some.ogg" sex="0"/>
+		<edge index="4"/>
+		<edge index="5"/>
+		<edge index="6"/>
+	</node>
+	<node text="Don't try to scoop me, and I won't be any trouble to you." relationship="0"><!-- node 2 (neutral)-->
+<sound file="communications/sounds/hunter/hunter_dont-try-to-scoop.ogg" sex="0"/>
+		<edge index="8"/>
+		<edge index="9"/>
+		<edge index="10"/>
+	</node>
+	<node text="I've seen your name before, it was PAYDAY!" relationship="-.2"><!-- node 3 (very mad)-->
+<sound file="communications/sounds/hunter/hunter_ive-seen-your.ogg" sex="0"/>
+		<edge index="12"/>
+		<edge index="13"/>
+		<edge index="14"/>
+	</node>
+<!-- End of Starting Points -->
+
+<!-- Other Nodes -->
+
+	<node text="Keep an eye out - repairs are expensive these days." relationship=".03125"><!-- node 4(random good chatter)-->
+<sound file="communications/sounds/hunter/hunter_keep-an-eye-out.ogg" sex="0"/>
+		<edge index="4"/>
+		<edge index="5"/>
+	</node>
+	<node text="It's getting harder to make a killing making a killing these days." relationship=".0625"><!-- node 5 (random good chatter)-->
+<sound file="communications/sounds/hunter/hunter_its-getting-harder.ogg" sex="0"/>
+		<edge index="4"/>
+		<edge index="6"/>
+	</node>
+	<node text="Hey there, seen anybody I should know about?" relationship=".0625"><!-- node 6 (best node)-->
+<sound file="communications/sounds/hunter/hunter_hey-there.ogg" sex="0"/>
+		<edge index="5"/>
+		<edge index="6"/>
+	</node>
+	<node text="Woah! Watch it wiseass! You sure you have a license for that thing?!" relationship="-.03125"><!-- node 7 (hit while happy)-->
+<sound file="communications/sounds/hunter/hunter_woah-watch-it.ogg" sex="0"/>
+		<edge index="4"/>
+		<edge index="8"/>
+		<edge index="9"/>
+		<edge index="10"/>
+	</node>
+	<node text="I'm making a list, of those who won't be missed, and - oh crud, the mike was on!" relationship=".03125"><!-- node 8 (random neutral chatter)-->
+<sound file="communications/sounds/hunter/hunter_im-making-a-list.ogg" sex="0"/>
+		<edge index="9"/>
+		<edge index="10"/>
+	</node>
+	<node text="Be vewwy, vewwy quiet, I'm hunting Aewwa." relationship=".04125"><!-- node 9 (neutral node after he has decided to be nicer after conflict)-->
+<sound file="communications/sounds/hunter/hunter_be-vewwy-quiet.ogg" sex="0"/>
+		<edge index="8"/>
+		<edge index="10"/>
+	</node>
+	<node text="So, hunt here often?" relationship=".03125"><!-- node 10 (good node in neutral) -->
+<sound file="communications/sounds/hunter/hunter_so-hunt-here.ogg" sex="0"/>
+		<edge index="8"/>
+		<edge index="9"/>
+	</node>
+	<node text="When you screw up, you screw up big. You're dead kid." relationship="-.125"><!-- node 11 (got hit when neutral)-->
+<sound file="communications/sounds/hunter/hunter_when-you-screw-up.ogg" sex="0"/>
+		<edge index="9"/>
+		<edge index="12"/>
+		<edge index="13"/>
+		<edge index="14"/>
+	</node>
+	<node text="Bad move kid, I kill for a living." relationship="-.0625"><!-- node 12 (taunt)-->
+<sound file="communications/sounds/hunter/hunter_bad-move.ogg" sex="0"/>
+		<edge index="13"/>
+		<edge index="15"/>
+		<edge index="19"/>
+	</node>
+	<node text="When I get my new reactor, I'll name it after you!" relationship="-.125"><!-- node 13 (taunt)-->
+<sound file="communications/sounds/hunter/hunter_when-i-get-my.ogg" sex="0"/>
+		<edge index="12"/>
+		<edge index="15"/>
+		<edge index="19"/>
+	</node>
+	<node text="I've got all the cards, buddy, that bluff won't hold." relationship="-.0625"><!-- node 14 (trying to appease him, but failing)-->
+<sound file="communications/sounds/hunter/hunter_ive-got-all.ogg" sex="0"/>
+		<edge index="8"/>
+		<edge index="12"/>
+		<edge index="13"/>
+		<edge index="14"/>
+	</node>
+	<node text="Hey, don't make me decide to kill you slowly!" relationship="-.0625"><!-- node 15 hit while mad node-->
+<sound file="communications/sounds/hunter/hunter_hey-dont-make.ogg" sex="0"/>
+		<edge index="11"/>
+		<edge index="13"/>
+		<edge index="12"/>
+		<edge index="19"/>
+	</node>
+	<node text="Don't know what you really did, but someone's pissed enough to pay." relationship="-.0625"><!-- node 16 kill-->
+<sound file="communications/sounds/hunter/hunter_dont-know-what.ogg" sex="0"/>
+		<edge index="12"/>
+		<edge index="13"/>
+		<edge index="17"/>
+		<edge index="19"/>
+	</node>
+	<node text="I need the credits more than I need your goodwill." relationship="-.125"><!-- node 13 (taunt)-->
+<sound file="communications/sounds/hunter/hunter_i-need-the-credits.ogg" sex="0"/>
+		<edge index="12"/>
+		<edge index="13"/>
+		<edge index="16"/>
+		<edge index="19"/>
+	</node>
+	<node text="Sorry, but I'm more familiar with my bills than you." relationship="-.03125"><!-- node 18 (trying to appease, but failing)-->
+<sound file="communications/sounds/hunter/hunter_sorry-but-im-more.ogg" sex="0"/>
+		<edge index="9"/>
+		<edge index="12"/>
+		<edge index="13"/>
+		<edge index="14"/>
+	</node>	
+	<node text="So, before I kill you, any next of kin I should know about?" relationship="-.0625"><!-- node 19 (taunt)-->
+<sound file="communications/sounds/hunter/hunter_so-before-i-kill.ogg" sex="0"/>
+		<edge index="12"/>
+		<edge index="13"/>
+		<edge index="14"/>
+	</node>
+
+<!-- Built-in Conversations --> 
+	<node text="Docking operation complete. You're free of the docking clamps." relationship="0.01">
+<sound file="communications/sounds/hunter/hunter_docking-complete.ogg" sex="0"/>
+		<edge index="4"/>
+		<edge index="5"/>
+		<edge index="6"/>
+		<edge index="7"/>
+	</node>
+	<node text="You are not in the docking clamps. Move into one of the green guide boxes and try to dock again." relationship="0">
+<sound file="communications/sounds/hunter/hunter_not-in-dock.ogg" sex="0"/>
+		<edge index="8"/>
+		<edge index="9"/>
+		<edge index="10"/>
+		<edge index="11"/>
+	</node>
+	<node text="Docking Operation begun; press 0 to step into airlock." relationship="0">
+<sound file="communications/sounds/hunter/hunter_docking-begun.ogg" sex="0"/>
+		<edge index="8"/>
+		<edge index="9"/>
+		<edge index="10"/>
+		<edge index="11"/>
+	</node>		
+	<node text="Docking denied. Do not land here!" relationship="0">
+<sound file="communications/sounds/hunter/hunter_docking-denied.ogg" sex="0"/>
+		<edge index="8"/>
+		<edge index="9"/>
+		<edge index="10"/>
+		<edge index="11"/>
+	</node>		
+	<node text="Docking agreement reached: move to docking port in green indicators." relationship="0">
+<sound file="communications/sounds/hunter/hunter_docking-agreement.ogg" sex="0"/>
+		<edge index="8"/>
+		<edge index="9"/>
+		<edge index="10"/>
+		<edge index="11"/>
+	</node>		
+	<node text="Bug off buddy, I don't work for free." relationship="0">
+<sound file="communications/sounds/hunter/hunter_bug-off.ogg" sex="0"/>
+		<edge index="8"/>
+		<edge index="9"/>
+		<edge index="10"/>
+		<edge index="11"/>
+	</node>		
+	<node text="Roger, WILCO - nothing better to do today." relationship="0">
+<sound file="communications/sounds/hunter/hunter_roger-wilco.ogg" sex="0"/>
+		<edge index="4"/>
+		<edge index="5"/>
+		<edge index="6"/>
+		<edge index="7"/>
+	</node>		
+	<node text="My mission is to search you; hold still." relationship="0"> <!-- maintain speed and course -->
+<sound file="communications/sounds/hunter/hunter_my-mission-is-to-search.ogg" sex="0"/>
+		<edge index="8"/>
+		<edge index="9"/>
+		<edge index="10"/>
+	</node>
+	<node text="Nothing is interesting in your hold." relationship="0"> <!-- no contraband detected you may proceed -->
+<sound file="communications/sounds/hunter/hunter_nothing-is-interesting.ogg" sex="0"/>
+		<edge index="8"/>
+		<edge index="9"/>
+		<edge index="10"/>
+	</node>
+	<node text="What have we here? An unexpected donation?" relationship="-.125"> <!-- contraband detected! all units close and engage -->
+<sound file="communications/sounds/hunter/hunter_what-have-we-here.ogg" sex="0"/>
+		<edge index="12"/>
+		<edge index="13"/>
+		<edge index="14"/>
+	</node>
+	<node text="If it's too hot for me, I doubt you should be here either!" relationship="0"> <!-- maintain your speed and course...DO NOT deviate -->
+<sound file="communications/sounds/hunter/hunter_if-its-too-hot.ogg" sex="0"/>
+		<edge index="8"/>
+		<edge index="9"/>
+		<edge index="10"/>
+	</node>	
+	<node text="Request clearance to land." relationship="0"> 
+<sound file="communications/sounds/hunter/hunter_request-clearance.ogg" sex="0"/>
+		<edge index="8"/>
+		<edge index="9"/>
+		<edge index="10"/>
+	</node>	
+	<node text="It's a pity there's not enough left of that to mount." text1="I'm thinking closed casket..." relationship="-.0625"><!-- node 17 kill-->
+<sound file="communications/sounds/hunter/hunter_its-a-pity.ogg" sex="0"/>
+<sound file="communications/sounds/hunter/hunter_im-thinking.ogg" sex="0"/>
+		<edge index="12"/>
+		<edge index="13"/>
+		<edge index="14"/>
+		<edge index="15"/>
+	</node>
+	<node text="Nothing personal, but I've got rent to pay." relationship="-.0625"><!-- dealt damage -->
+<sound file="communications/sounds/hunter/hunter_nothing-personal.ogg" sex="0"/>
+		<edge index="12"/>
+		<edge index="13"/>
+		<edge index="14"/>
+		<edge index="15"/>
+	</node>
+	<node text="Like Achilles, the choice at least was mine." text1="At least death will void my debts..." relationship="-.125"><!--  critical damage -->
+<sound file="communications/sounds/hunter/hunter_like-achilles.ogg" sex="0"/>
+<sound file="communications/sounds/hunter/hunter_at-least-death.ogg" sex="0"/>
+		<edge index="12"/>
+		<edge index="13"/>
+		<edge index="14"/>
+		<edge index="15"/>
+	</node>
+	<node text="*hit*" relationship="-.01">
+		<edge index="7"/>
+		<edge index="11"/>
+		<edge index="15"/>
+	</node>
+
+<!-- End of Built-in Conversations --> 
+</comm>

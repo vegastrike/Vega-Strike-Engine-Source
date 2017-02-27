@@ -1,0 +1,31 @@
+<?xml version="1.0"?>
+<technique fallback="fixed5">
+    <!-- Pseudo fixed-function shader pass. Does in one pass what
+         the fixed function does in many. Higher performance on
+         capable systems. Only caveat is that light attenuation
+         is a bit odd... 
+         
+         All lighting is per-vertex.
+         
+         This version handles up to 8 lights. Fallbacks exist for
+         systems with lesser vertex shaders.
+    -->
+
+    <!-- sequence 15 to go after Z-write prepasses (that's 10) -->
+    <pass type="shader" sequence="15">
+        <vertex_program src="fixed8"/>
+        <fragment_program src="fixed"/>
+        
+        <texture_unit src="decal:0" default="file:white.bmp" name="diffuseMap"/>
+        <texture_unit src="environment" name="envMap"/>
+        <texture_unit src="decal:1" default="file:black.png" name="specMap"/>
+        <texture_unit src="decal:2" default="decal:0" name="damageMap"/>
+        <texture_unit src="decal:3" default="file:black.png" name="glowMap"/>
+        
+        <auto_param name="envColor" semantic="EnvColor" optional="true"/>
+        <auto_param name="light_enabled" semantic="ActiveLightsArray" optional="true"/>
+        <auto_param name="max_light_enabled" semantic="NumLights" optional="true"/>
+        <auto_param name="cloaking" semantic="CloakingPhase" optional="true"/>
+        <auto_param name="damage" semantic="Damage4" optional="true"/>
+    </pass>
+</technique>

@@ -1,0 +1,239 @@
+<comm>
+	<node text="startingNode" relationship="0"><!-- node 0 (starting node: Don't link here)-->
+		<edge index="1"/>
+		<edge index="2"/>
+		<edge index="3"/>
+	</node>
+
+<!-- Starting Points -->
+	<node text="How's it going comrade?" relationship="0.2"><!-- node 1 (very happy)-->
+<sound file="communications/sounds/iso/iso_how-is-it-going.ogg" sex="0"/>
+		<edge index="4"/>
+		<edge index="5"/>
+		<edge index="6"/>
+	</node>
+	<node text="Cut me some slack, will you?" relationship="0"><!-- node 2 (neutral)-->
+<sound file="communications/sounds/iso/iso_cut-me-some.ogg" sex="0"/>
+		<edge index="8"/>
+		<edge index="9"/>
+		<edge index="10"/>
+	</node>
+	<node text="Don't touch me you capitalist swine!" relationship="-.2"><!-- node 3 (very mad)-->
+<sound file="communications/sounds/iso/iso_dont-touch-me.ogg" sex="0"/>
+		<edge index="12"/>
+		<edge index="13"/>
+		<edge index="14"/>
+	</node>
+<!-- End of Starting Points -->
+
+<!-- Other Nodes -->
+
+	<node text="How's it going comrade?" relationship=".03125"><!-- node 4(random good chatter)-->
+<sound file="communications/sounds/iso/iso_how-is-it-going.ogg" sex="0"/>
+		<edge index="4"/>
+		<edge index="5"/>
+	</node>
+	<node text="Good to see a friend of the cause." relationship=".0625"><!-- node 5 (random good chatter)-->
+<sound file="communications/sounds/iso/iso_good-to-see.ogg" sex="0"/>
+		<edge index="4"/>
+		<edge index="6"/>
+	</node>
+	<node text="The proletariate will rise!" relationship=".0625"><!-- node 6 (best node)-->
+<sound file="communications/sounds/iso/iso_the-proletariat-will-rise.ogg" sex="0"/>
+		<edge index="5"/>
+		<edge index="6"/>
+	</node>
+	<node text="We're only after corporate lackeys, don't get nervous." relationship="-.03125"><!-- node 7 (hit while happy)-->
+<sound file="communications/sounds/iso/iso_we-are-only-after.ogg" sex="0"/>
+		<edge index="4"/>
+		<edge index="8"/>
+		<edge index="9"/>
+		<edge index="10"/>
+	</node>
+	<node text="Cut me some slack will you?" relationship=".03125"><!-- node 8 (random neutral chatter)-->
+<sound file="communications/sounds/iso/iso_cut-me-some.ogg" sex="0"/>
+		<edge index="9"/>
+		<edge index="10"/>
+	</node>
+	<node text="Power to the people, comrade." relationship=".04125"><!-- node 9 (neutral node after he has decided to be nicer after conflict)-->
+<sound file="communications/sounds/iso/iso_power-to-the-people.ogg" sex="0"/>
+		<edge index="8"/>
+		<edge index="10"/>
+	</node>
+	<node text="Just a travelling worker don't get jumpy." relationship=".03125"><!-- node 10 (good node in neutral) -->
+<sound file="communications/sounds/iso/iso_just-a-travelling-worker.ogg" sex="0"/>
+		<edge index="8"/>
+		<edge index="9"/>
+	</node>
+	<node text="Please don't make us your enemy, comrade." relationship="-.125"><!-- node 11 (got hit when neutral)-->
+<sound file="communications/sounds/iso/iso_please-dont-make-us.ogg" sex="0"/>
+		<edge index="9"/>
+		<edge index="12"/>
+		<edge index="13"/>
+		<edge index="14"/>
+	</node>
+	<node text="Trotsky would spit upon your grave." relationship="-.0625"><!-- node 12 (taunt)-->
+<sound file="communications/sounds/iso/iso_trotsky-would-spit.ogg" sex="0"/>
+		<edge index="13"/>
+		<edge index="15"/>
+		<edge index="19"/>
+	</node>
+	<node text="You maniac! The union will hear about this." relationship="-.125"><!-- node 13 (taunt)-->
+<sound file="communications/sounds/iso/iso_you-maniac-the-union.ogg" sex="0"/>
+		<edge index="12"/>
+		<edge index="15"/>
+		<edge index="19"/>
+	</node>
+	<node text="Not bad for a lowly worker, eh capitalist pig?" relationship="-.0625"><!-- node 14 (trying to appease him, but failing)-->
+<sound file="communications/sounds/iso/iso_not-bad-for.ogg" sex="0"/>
+		<edge index="8"/>
+		<edge index="12"/>
+		<edge index="13"/>
+		<edge index="14"/>
+	</node>
+	<node text="How can you attack a member of the party?" relationship="-.0625"><!-- node 15 hit while mad node-->
+<sound file="communications/sounds/iso/iso_how-can-you-attack.ogg" sex="0"/>
+		<edge index="11"/>
+		<edge index="13"/>
+		<edge index="12"/>
+		<edge index="19"/>
+	</node>
+	<node text="Not bad for a lowly worker, eh capitalist pig?" relationship="-.0625"><!-- node 16 kill-->
+<sound file="communications/sounds/iso/iso_not-bad-for.ogg" sex="0"/>
+		<edge index="12"/>
+		<edge index="13"/>
+		<edge index="17"/>
+		<edge index="19"/>
+	</node>
+	<node text="Serves you right you corporate whore!" relationship="-.0625"><!-- node 17 kill-->
+<sound file="communications/sounds/iso/iso_serves-you-right-you.ogg" sex="0"/>
+		<edge index="12"/>
+		<edge index="13"/>
+		<edge index="16"/>
+		<edge index="19"/>
+	</node>
+	<node text="How can you attack a member of the Party?" relationship="-.03125"><!-- node 18 (trying to appease, but failing)-->
+<sound file="communications/sounds/iso/iso_how-can-you-attack.ogg" sex="0"/>
+		<edge index="9"/>
+		<edge index="12"/>
+		<edge index="13"/>
+		<edge index="14"/>
+	</node>	
+	<node text="You maniac! The union will hear about this." relationship="-.125"><!-- node 19 (taunt)-->
+<sound file="communications/sounds/iso/iso_you-maniac-the-union.ogg" sex="0"/>
+		<edge index="12"/>
+		<edge index="13"/>
+		<edge index="14"/>
+	</node>
+
+<!-- Built-in Conversations --> 
+	<node text="Docking operation complete. You're free of the docking clamps." relationship="0.01">
+<sound file="communications/sounds/iso/iso_docking-operation-complete.ogg" sex="0"/>
+		<edge index="4"/>
+		<edge index="5"/>
+		<edge index="6"/>
+		<edge index="7"/>
+	</node>
+	<node text="You are not in docking clamps. Move into one of the green guide boxes and try to dock again." relationship="0">
+<sound file="communications/sounds/iso/iso_you-are-not-in-docking.ogg" sex="0"/>
+		<edge index="8"/>
+		<edge index="9"/>
+		<edge index="10"/>
+		<edge index="11"/>
+	</node>
+	<node text="Docking Operation begun; press 0 to step into airlock." relationship="0">
+<sound file="communications/sounds/iso/iso_docking-operation-begun.ogg" sex="0"/>
+		<edge index="8"/>
+		<edge index="9"/>
+		<edge index="10"/>
+		<edge index="11"/>
+	</node>		
+	<node text="Docking denied. Do not land here, comrade!" relationship="0">
+<sound file="communications/sounds/iso/iso_docking-denied.ogg" sex="0"/>
+		<edge index="8"/>
+		<edge index="9"/>
+		<edge index="10"/>
+		<edge index="11"/>
+	</node>		
+	<node text="Docking agreement reached: move to docking port in green indicators." relationship="0">
+<sound file="communications/sounds/iso/iso_docking-agreement.ogg" sex="0"/>
+		<edge index="8"/>
+		<edge index="9"/>
+		<edge index="10"/>
+		<edge index="11"/>
+	</node>		
+	<node text="Unable to comply, comrade." relationship="0">
+<sound file="communications/sounds/iso/iso_unable-to-comply.ogg" sex="0"/>
+		<edge index="8"/>
+		<edge index="9"/>
+		<edge index="10"/>
+		<edge index="11"/>
+	</node>		
+	<node text="Affirmative, comrade." relationship="0">
+<sound file="communications/sounds/iso/iso_affirmative-comrade.ogg" sex="0"/>
+		<edge index="4"/>
+		<edge index="5"/>
+		<edge index="6"/>
+		<edge index="7"/>
+	</node>		
+	<node text="By order of the Party and the People you are being searched." relationship="0"> <!-- maintain speed and course -->
+<sound file="communications/sounds/iso/iso_by-order-of-the-party.ogg" sex="0"/>
+		<edge index="8"/>
+		<edge index="9"/>
+		<edge index="10"/>
+	</node>
+	<node text="Your hold contained no items dangerous to the people." relationship="0"> <!-- no contraband detected you may proceed -->
+<sound file="communications/sounds/iso/iso_your-hold-contained-no-items.ogg" sex="0"/>
+		<edge index="8"/>
+		<edge index="9"/>
+		<edge index="10"/>
+	</node>
+	<node text="You are carrying contraband that goes against the will of the people!" relationship="-.125"> <!-- contraband detected! all units close and engage -->
+<sound file="communications/sounds/iso/iso_you-are-carrying-contraband.ogg" sex="0"/>
+		<edge index="12"/>
+		<edge index="13"/>
+		<edge index="14"/>
+	</node>
+	<node text="Your course is deviating. Maintain course, comrade!" relationship="0"> <!-- maintain your speed and course...DO NOT deviate -->
+<sound file="communications/sounds/iso/iso_your-course-is-deviating.ogg" sex="0"/>
+		<edge index="8"/>
+		<edge index="9"/>
+		<edge index="10"/>
+	</node>	
+	<node text="Request Clearance To Land." relationship="0"> 
+<sound file="communications/sounds/iso/iso_request-clearance.ogg" sex="0"/>
+		<edge index="8"/>
+		<edge index="9"/>
+		<edge index="10"/>
+	</node>	
+	<node text="Not bad for a lowly worker, eh capitalist pig?" relationship="-.0625"><!-- node damaged target-->
+<sound file="communications/sounds/iso/iso_not-bad-for.ogg" sex="0"/>
+		<edge index="12"/>
+		<edge index="13"/>
+		<edge index="14"/>
+		<edge index="15"/>
+	</node>
+	<node text="Serves you right, you corporate whore!" text1="Die, lackey of the masters!" relationship="-.0625"><!-- node killed target-->
+<sound file="communications/sounds/iso/iso_serves-you-right-you.ogg" sex="0"/>
+<sound file="communications/sounds/iso/x.ogg" sex="0"/>
+		<edge index="12"/>
+		<edge index="13"/>
+		<edge index="14"/>
+		<edge index="15"/>
+	</node>
+	<node text="Help! Help! I'm being oppressed." text1="How can you attack a member of the party?" relationship="-.0625"><!-- node damaged target-->
+<sound file="communications/sounds/iso/iso_help-help.ogg" sex="0"/>
+<sound file="communications/sounds/iso/iso_how-can-you-attack.ogg" sex="0"/>
+		<edge index="12"/>
+		<edge index="13"/>
+		<edge index="14"/>
+		<edge index="15"/>
+	</node>
+	<node text="*hit*" relationship="-.01">
+		<edge index="7"/>
+		<edge index="11"/>
+		<edge index="15"/>
+	</node>
+
+<!-- End of Built-in Conversations --> 
+</comm>

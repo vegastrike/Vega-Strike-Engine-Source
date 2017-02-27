@@ -1,0 +1,11 @@
+#EXTM3U
+#rlaan-specific
+../music/industralmixed.ogg
+../music/Bliss.ogg
+../music/BlackLlama.ogg
+../music/DepressionChamber.ogg
+#fix weights
+../music/industralmixed.ogg
+../music/Bliss.ogg
+../music/industralmixed.ogg|../music/Bliss.ogg
+../music/Bliss.ogg|../music/industralmixed.ogg

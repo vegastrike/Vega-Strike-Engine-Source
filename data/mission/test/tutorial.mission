@@ -1,0 +1,26 @@
+<!-- Vega Strike - Upon The Coldest Sea -->
+<!-- Tutorial quest test mission script -->
+<!-- Author: pyramid                    -->
+<!-- Version: 2008-04-01                -->
+<!-- start from your data4.x folder with: ./vegastrike test/tutorial.mission -->
+<mission>
+   <settings>
+      <origin  planet="Atlantis" x="10000" y="10000" z="1000"/>
+   </settings>
+
+   <variables>
+      <var name="defaultplayer" value="blue"/>
+      <var name="system" value="Crucible/Cephid_17" />
+      <var name="credits" value="13500"/>
+   </variables>
+        <flightgroups>
+                <flightgroup name="blue" faction="privateer" type="Llama.begin" ainame="default" waves="1" nr_ships="2">
+         <pos x="120002624717" y="-13098839" z="-110002838534"/>
+         <rot x="180.0" y="180.0" z="180.0"/>
+      </flightgroup>
+        </flightgroups>
+   <python>
+from quest_tutorial import Executor, quest_tutorial
+tmpvar=Executor([quest_tutorial()])
+   </python> 
+</mission>

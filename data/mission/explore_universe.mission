@@ -1,0 +1,25 @@
+<mission>
+	<settings>
+		<origin  planet="earth" x="0000" y="100" z="000.0"/>
+	</settings>
+
+	<variables>
+<!--		<var name="continuousterrain" value="continuousterrain.txt"/>-->
+		<var name="credits" value="13500"/>
+		<var name="defaultplayer" value="blue"/>
+		<var name="mission_name" value="Privateer Mission" />
+		<var name="difficulty" value=".25"/><!--good starting difficulty here-->
+		<var name="system" value="Crucible/Cephid_17" />
+		<var name="description" value="Like, as if." />
+		<var name="savegame" value="explore_universe_difficulty" />
+	</variables>
+        <flightgroups>
+                <flightgroup name="Shlimazel" faction="privateer" type="Llama.begin" ainame="default" waves="1" nr_ships="1">
+			<pos x="119990000000" y="-9000000" z="-109990000000.0"/>
+		</flightgroup>
+        </flightgroups>
+	<python>
+from privateer import privateer
+my_obj=privateer(8000,40000,500,3,2,.6,.25,.1,400000,2000)
+	</python>
+</mission>

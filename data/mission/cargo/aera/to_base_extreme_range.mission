@@ -1,0 +1,59 @@
+<mission>
+	<settings>
+		<origin  planet="earth" x="0000" y="100" z="000.0"/>
+	</settings>
+
+	<variables>
+		<var name="defaultplayer" value="blue"/>
+		<var name="system" value="enigma_sector/blake" />
+		<var name="mission_name" value="Extreme Range Base Cargo Delivery" />
+		<var name="description" value="A long range Aera base requires a resupply. We will disclose the location upon mission acceptance. The base is over 8 systems away. Your pay will be 1200 per system traversed in a minimal path to the destination. It can use any and all supplies you bring to it."/>
+	</variables>
+        <flightgroups>
+                <flightgroup name="blue" faction="confed" type="nova" ainame="default" waves="1" nr_ships="2">
+			<pos x="-79061911" y="3235825" z="83628304"/>
+			<rot x="180.0" y="180.0" z="180.0"/>
+			<order order="tmptarget" target="omikron"/>
+			<order priority="0" order="superiority" target="enemy"/>
+			<order priority="1" order="bomber" target="omikron"/>
+			<order priority="2" order="escort" target="blue"/>
+		</flightgroup>
+        </flightgroups>
+	<python>
+import cargo_mission
+newmission = cargo_mission.initrandom ('aera', 0, 1200, 0, 8, 12, 2400, '')
+newmission=0
+
+</python>
+	<madule name="director">
+		<import name="cargo_mission"/>
+		<script name="initbriefing">
+			<exec module="cargo_mission" name="initbriefing">
+			</exec>
+		</script>
+		<script name="loopbriefing">
+			<exec module="cargo_mission" name="loopbriefing">
+			</exec>
+		</script>
+		<script name="endbriefing">
+			<exec module="cargo_mission" name="endbriefing">
+			</exec>
+		</script>
+		<script name="initgame">
+			<exec module="cargo_mission" name="initrandom">
+			<const type="object" object="string" value="aera"/>
+			<const type="int" value="0"/> <!--difficulty of mission(do they send peeps after you)-->
+			<const type="float" value="1200"/> <!-- how much you are paid -->
+			<const type="bool" value="false"/><!-- if they send a capship or prefer to have you drop it at a planet -->
+			<const type="int" value="8"/><!-- min systems away-->
+			<const type="int" value="12"/><!-- max systems away-->
+			<const type="float" value="2400"/><!--time -->
+			<const type="object"  object="string" value=""/>
+			</exec>
+
+		</script>
+		<script name="gameloop">
+			<exec module="cargo_mission" name="loop"/>
+		</script>
+	</module>
+</mission>

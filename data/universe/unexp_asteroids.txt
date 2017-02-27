@@ -1,0 +1,4 @@
+A5600^AFieldBase&A100^HiddenAsteroid&E50^unknown_derelict 
+A8480^AFieldBaseSparse&A100^HiddenAsteroid&E50^unknown_derelict 
+A7919^AFieldBaseThin&A100^HiddenAsteroid&E50^unknown_derelict 
+

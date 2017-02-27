@@ -1,0 +1,48 @@
+<system name="AlphaCentauri" background="backgrounds/lightgreen" nearstars="500" stars="1000" starspread="150"  x="0" y="0" z="0" scalesystem="100">
+<Light>
+<ambient red=".3" green=".3" blue=".3"/>
+<diffuse red=".7" green=".7" blue=".7"/>
+<specular red=".8" green=".8" blue=".8"/>
+</Light>
+<Light>
+<ambient red=".1" green=".1" blue=".1"/>
+<diffuse red=".5" green=".3" blue=".2"/>
+<specular red=".8" green=".8" blue=".8"/>
+</Light>
+
+<Light>
+<ambient red="1" green="0" blue="0"/>
+<!--<diffuse red="1" green=".7" blue="0"/>-->
+<!--<attenuated red=".00000001" blue=".00000015"/>-->
+<attenuated red="0" blue=".000000002"/>
+</Light>	
+<Light>
+<ambient red="1" green=".1" blue="0"/>
+<!--<diffuse red="1" green=".7" blue="0"/>-->
+<!--<attenuated red=".00000001" blue=".00000015"/>-->
+<attenuated red="0" blue=".0000001"/>
+</Light>	
+
+        <planet name="Rigil Kentaurus" file="sol/sun.png" radius="20000" gravity="20" z="00000"  Red=".9" Green=".9" Blue=".9" ReflectNoLight="true" light="0">
+	        <planet name="AlphaCentauriB" file="stars/white_star.png" radius="14920" gravity="20" rk="60000" si="60000"  Red="1" Green=".47" Blue=".38" ReflectNoLight="true" light="1" year="180000" day="1000"/> 
+		<planet name="JumpToAlphaCentauri" file="jump.png" alpha="ONE ONE" radius="900" day="1000" year="28000" ri="36000" sk="35000" destination="sol_sector/alpha_centauri"/>
+		<planet name="Weigert" file="planets/Dirt1.png" radius="2800" ri="80000" sk="80000" year="10000" day="2000"/>
+		<planet name="Holman" file="planets/m_class.png" radius="3500" ri="100000" sk="100000" year="15000" day="4000">
+			<planet name="JumpToSol" file="jump.png" alpha="ONE ONE" radius="500" faction="neutral" sk="20000" ri="25555" day="100" year="8000" destination="sol_sector/sol"/>
+			<unit name="Naval Shipyard" file="factory" faction="confed" sk="30000" rj="30000"/>
+			<planet name="Hart" file="sol/asteroid.png" radius="300" ri="15000" sj="18000" day="1000" year="1000"/>	
+		</planet>
+		<planet name="Kasting" file="planets/gas_giant5.png" radius="10000" ri="90000" sj="130000" day="1200" year="10000">
+			<unit name="AlphaCentauriHq" file="starfortress" ri="-30000" sk="28000" year="1000"/>
+			<planet name="JumpToTingVallir" file="jump.png" alpha="ONE ONE" radius="400" faction="neutral" rk="25000" si="25555" day="100" year="6000" destination="sol_sector/tingvallir"/>
+		</planet>
+		<planet name="ProximaCentauri" file="stars/red_star.png" radius="12045" Red=".9" Green=".9" Blue=".9" ReflectNoLight="true" rj="200000" sk="200000" light="2" year="30000" day="300">
+			<planet name="Schultz" file="planets/Snow.png" radius="4000" ri="-35000" sk="35000" day="1200" year="7000">
+				<planet name="JumpToCygnus" file="jump.png" alpha="ONE ONE" radius="300" day="1000" year="80000" rj="10000" si="-20000" destination="sol_sector/cygnus"/>
+			</planet>			
+			<asteroid name="AsteroidField" file="AFieldBaseSparse" rk="47000" si="46000" sj="15000" year="80000" difficulty=".8"/>
+			<unit name="FighterBase" file="AsteroidFighterBase" rk="47000" si="46000" sj="15000" year="80000"/>
+			<planet name="JumpToAlphaCentauri" file="jump.png" alpha="ONE ONE" radius="100" day="1000" year="80000" rk="46750" si="46250" sj="15000" destination="sol_sector/alpha_centauri"/>
+		</planet>
+	</planet>
+</system>

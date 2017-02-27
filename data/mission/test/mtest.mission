@@ -1,0 +1,74 @@
+<mission>
+	<settings>
+		<origin  planet="earth" x="0000" y="100" z="000.0"/>
+	</settings>
+
+	<variables>
+<!--		<var name="continuousterrain" value="continuousterrain.txt"/>-->
+<!--		<var name="difficulty" value=".1" />-->
+		<var name="credits" value="10000"/>
+		<var name="defaultplayer" value="blue"/>
+		<var name="mission_name" value="4 versus 4" />
+		<var name="splashscreen" value="bad_guys_vs_good_guys.bmp" />
+		<var name="system" value="sol_sector/celeste" />
+		<var name="description" value="4vs4.txt" />
+	</variables>
+
+        <flightgroups>
+         	    <flightgroup name="navajo" faction="neutral" type="tian" ainame="default" waves="1" nr_ships="1">
+                        <pos x="12626341" y="17349946" z="-9085592.0"/>
+			<rot x="180.0" y="180.0" z="180.0"/>
+		    </flightgroup>
+
+                <flightgroup name="federales" faction="confed" type="nova" ainame="ikarus" waves="1" nr_ships="1">
+                        <pos x="12626341" y="17349946" z="-9086592.0"/>
+			<rot x="180.0" y="180.0" z="180.0"/>
+		    </flightgroup>
+
+
+                <flightgroup name="contras" faction="aera" type="aeon" ainame="ikarus" waves="1" nr_ships="1">
+                        <pos x="12626341" y="17349846" z="-9086092.0"/>
+			<rot x="180.0" y="180.0" z="180.0"/>
+		    </flightgroup>
+
+	
+<!--		    <flightgroup name="orange" faction="confed" type="yavok" ainame="default" waves="1" nr_ships="1">
+			<pos x="43300" y="4000" z="40000.0"/>
+			<rot x="180.0" y="180.0" z="180.0"/>
+			<order order="tmptarget" target="puce"/>
+			<order priority="0" order="superiority" target="enemy"/>
+			<order priority="1" order="bomber" target="puce"/>
+			<order priority="2" order="escort" target="orange"/>
+		    </flightgroup>
+       	    <flightgroup name="puce" faction="confed" type="vitik" ainame="default" waves="1" nr_ships="1">
+			<pos x="60000" y="4000" z="35000.0"/>
+			<rot x="180.0" y="180.0" z="180.0"/>
+			<order order="tmptarget" target="orange"/>
+			<order priority="0" order="superiority" target="enemy"/>
+			<order priority="1" order="bomber" target="omikron"/>
+			<order priority="2" order="escort" target="blue"/>
+		    </flightgroup>
+	    
+
+                <flightgroup name="red" faction="confed" type="cruiser" ainame="default" waves="1" nr_ships="1">
+			<pos x="99400" y="30000" z="40000.0"/>
+			<rot x="180.0" y="180.0" z="180.0"/>
+			<order order="tmptarget" target="omikron"/>
+			<order priority="0" order="superiority" target="enemy"/>
+			<order priority="1" order="bomber" target="omicron"/>
+			<order priority="2" order="escort" target="blue"/>
+		  </flightgroup>
+
+              <flightgroup name="ch" faction="confed" type="vark" ainame="default" waves="1" nr_ships="1">
+			<pos x="666400" y="30000" z="40000.0"/>
+			<rot x="180.0" y="180.0" z="180.0"/>
+			<order order="tmptarget" target="omikron"/>
+			<order priority="0" order="superiority" target="enemy"/>
+			<order priority="1" order="bomber" target="omicron"/>
+			<order priority="2" order="escort" target="blue"/>
+		  </flightgroup>
+
+-->
+		
+        </flightgroups>
+</mission>

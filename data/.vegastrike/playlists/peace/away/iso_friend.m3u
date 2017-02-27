@@ -1,0 +1,20 @@
+#EXTM3U
+#aera-specific
+../music/isopeace.ogg
+#common peace/away files
+../music/mission.ogg
+../music/steel_p.ogg
+#outweight "avoid monotonous play" section
+../music/mission.ogg
+../music/steel_p.ogg
+../music/mission.ogg
+../music/steel_p.ogg|../music/isopeace.ogg
+../music/steel_p.ogg|../music/isopeace.ogg
+../music/isopeace.ogg|../music/steel_p.ogg
+../music/isopeace.ogg|../music/steel_p.ogg
+../music/isopeace.ogg
+../music/isopeace.ogg
+#avoid monotonous play
+../music/peace1.ogg
+../music/peace2.ogg
+../music/peace3.ogg

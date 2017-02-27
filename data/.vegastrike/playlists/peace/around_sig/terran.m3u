@@ -1,0 +1,17 @@
+#EXTM3U
+#terran-specific
+../music/terranpeace.ogg
+../music/terranpeace2.ogg
+../music/Machina.ogg
+#common peace/away files
+../music/steel_p.ogg
+../music/BlackLlama.ogg
+#fix weights
+../music/steel_p.ogg
+../music/Machina.ogg
+../music/Machina.ogg
+../music/Machina.ogg
+../music/terranpeace.ogg
+../music/terranpeace2.ogg
+../music/terranpeace2.ogg
+../music/terranpeace2.ogg

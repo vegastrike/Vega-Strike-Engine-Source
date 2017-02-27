@@ -1,0 +1,60 @@
+<system name="Cephid_17" background="backgrounds/green" nearstars="500" stars="1000" starspread="150" scalesystem="1000">
+<Light>
+	<ambient red="0.05" green="0.05" blue="0.05"/>
+	<diffuse red="0.87" green="0.85" blue="0.76"/>
+	<specular red="0.25" green="0.25" blue="0.20"/>
+</Light>
+<Light>
+	<ambient red="0.05" green="0.05" blue="0.05"/>
+	<diffuse red="0.86" green="0.45" blue="0.34"/>
+	<specular red="0.2" green="0.2" blue="0.15"/>
+</Light>
+
+<Asteroid name="" file="AFieldJumpThin" ri="0.0" rj="0.0" rk="0.0" si="0.0" sj="0.0" sk="0.0" x="-81750376.0" y="-30150176.0" z="-70781912.0"  />
+
+<Planet name="JumpTo17-ar" file="jump.texture" ri="0.0" rj="0.0" rk="0.0" si="0.0" sj="0.0" sk="0.0" radius="2.0" x="-81750376.0" y="-30150176.0" z="-70781912.0" alpha="ONE ONE" destination="Crucible/17-ar" faction="klkk"  >
+</Planet>
+
+<Planet name="Cephid_17 A" file="stars/white_star.texture" ri="0.000000" rj="0.0" rk="0.0" si="0.0" sj="0.0" sk="0.0" radius="746000.0" x="0" y="0" z="0"  Red="0.95" Green="0.93" Blue="0.64" ReflectNoLight="true" light="0">
+	<Planet name="Atlantis" 
+            file="planets/ocean.texture|planets/ocean_specular.texture|planets/earth/earth_clouds.texture" 
+            technique="earth"
+            unit="ocean"
+            ri="120000000" rj="-8436.0" rk="-110000000" si="-120000000.0" sj="-150000.0" sk="110000000.0" 
+            radius="5000.0" 
+            x="120000000" y="-10000" z="-110000000" year= "8000000000" day="80000"
+            Red="0" Green="0" Blue="0" 
+            DRed="0.87" DGreen="0.87" DBlue="0.87" 
+            SRed="0.85" SGreen="0.85" SBlue="0.85" >
+	<Planet name="Phillies" file="planets/rock.texture" ri="-468434.7" rj="-361541" rk="433559.750000" si="-412172.000000" sj="300463.5" sk="-498163.5" radius="1661.98062500" x="-468434" y="-361541" z="433559" year="80000000" day="498000.276794"  >
+	</Planet>
+	<Planet name="JumpToEnyo" file="jump.texture" ri="234340.000000" rj="103060.007812" rk="920958.875000" si="471364.750000" sj="-517154.250000" sk="-62067.574219" radius="0.95771751" x="-1312920.250000" y="-717132.625000" z="1060315.625000" year= "80000000.750000" day="303.621857" alpha="ONE ONE" destination="Crucible/Enyo" faction="klkk"  >
+	</Planet>
+	<Planet name="JumpToCardell" file="jump.texture" ri="-254216.593750" rj="-423678.437500" rk="-372411.875000" si="-455824.562500" sj="479803.437500" sk="-234697.656250" radius="1.30477371" x="997000.562500" y="-455441.750000" z="753232.687500" year= "80000000.5" day="761.770081" alpha="ONE ONE" destination="Crucible/Cardell" faction="klkk"  >
+	</Planet>
+	<Unit name="Ataraxia" file="Fighter_Barracks" rj="-40000.593750" ri="-42.437500" rk="-47000.875000" sj="40000.562500" sk="47000" si="42" radius="130.477371"  x="-42" y="-40000" z="-47000" year= "4381063.5" day="761" faction="klkk"  >
+	</Unit>
+	</Planet>
+
+    <Planet name="JumpToOldziey" file="jump.texture" ri="141807924.0" rj="43125792.0" rk="10400903.0" si="-3642116.5" sj="-5128123.0" sk="-141807924.0" radius="2.63800079"  year= "7057770400.0" day="536.628845" alpha="ONE ONE" destination="Crucible/Oldziey" faction="klkk"  >
+		<Unit name="Plainfield" file="Relay" ri="25000" rj="25000" rk="0.0" si="-26000" sj="-24000" sk="0.00" x="25000" y="25000" z="0.0" year= "8000000" faction="klkk">
+		</Unit>
+	</Planet>
+
+    <Planet name="JumpToEverett" file="jump.texture" ri="-20080682.0" rj="42690276.0" rk="157634672.0" si="72114176.0" sj="-61331199.0" sk="-96111560.0" radius="3.11738037"  year= "7778511200.0" day="431.547974" alpha="ONE ONE" destination="Crucible/Everett" faction="klkk"  >
+	</Planet>
+
+    <Planet name="JumpToStirling" file="jump.texture" ri="-182282287.0" rj="-15947974.0" rk="-23532624.0" si="-31423934.0" sj="94449516.0" sk="-168381.671875" radius="2.10078888" x="77007976.0" y="-28267140.0" z="-51236048.0" year= "3688542800.0" day="212.563385" alpha="ONE ONE" destination="Crucible/Stirling" faction="klkk"  >
+	</Planet>
+
+    <Planet name="Cephid_17 B" file="stars/red_star.texture" ri="0.0" rj="7500000000.0" rk="1500000000.0" si="-1500000000.0" sj="0.0" sk="0.0" radius="102620.0" x="0" y="0" z="0"  Red="0.950000" Green="0.207289" Blue="0.119170" ReflectNoLight="true" light="1">
+		<Planet name="Wiley" file="planets/molten.texture" ri="-65226760.0" rj="19793218.000000" rk="30020006." si="23492010.0" sj="-254089232.0" sk="-116486856.0" radius="3564.39250000" year= "9138671360.0" day="721.044067"  >
+			<Unit name="Serenity" file="MiningBase" rj="-25421.593750" ri="-22367.437500" rk="-27241.875000" sj="-25582.562500" sk="27980.437500" si="-23469.656250" radius="130.477371" x="997000.562500" y="-455441.750000" z="753232.687500" year= "93000000.5" day="761.770081" faction="klkk"  >
+		</Unit>
+		</Planet>
+		<Planet name="Broadway" file="sol/ganymede.texture|planets/rock.texture" ri="30215382.0" rj="18258252.0" rk="-30780302.0" si="-52761992.0" sj="-133019048.0" sk="-130697848.0" radius="4305.06218750" x="-37981648.0" y="187513920.0" z="42497932.0" year= "7862598400.0" day="652.678345"  >
+		</Planet>
+	</Planet>
+
+</Planet>
+</system>

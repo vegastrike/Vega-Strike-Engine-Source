@@ -1,0 +1,132 @@
+<mission>
+	<settings>
+		<origin  planet="earth" x="0000" y="100" z="000.0"/>
+	</settings>
+
+	<variables>
+		<var name="credits" value="10000"/>
+		<var name="defaultplayer" value="blue"/>
+		<var name="mission_name" value="4 versus 4" />
+		<var name="splashscreen" value="bad_guys_vs_good_guys.bmp" />
+                <var name="system" value="Crucible/Cephid_17" />
+		<var name="description" value="4vs4.txt" />
+	</variables>
+
+        <flightgroups>
+
+            <flightgroup name="navajo" faction="neutral" type="Lancelot" ainame="default" waves="1" nr_ships="1">
+                        <pos x="1000000000" y="10000" z="1000000000.0"/>
+			<rot x="180.0" y="180.0" z="180.0"/>
+		    </flightgroup>
+
+            <flightgroup name="comanche0" faction="confed" type="Lancelot" ainame="default" waves="1" nr_ships="990">
+                        <pos x="1000000000" y="4000" z="1000000000.0"/>
+			<rot x="180.0" y="180.0" z="180.0"/>
+		    </flightgroup>
+
+            <flightgroup name="cherokee0" faction="confed" type="Nicander" ainame="default" waves="1" nr_ships="2">
+                        <pos x="1000000000" y="-4000" z="1000000000.0"/>
+			<rot x="180.0" y="180.0" z="180.0"/>
+		    </flightgroup>
+
+
+
+            <flightgroup name="comanche1" faction="confed" type="Lancelot" ainame="default" waves="1" nr_ships="990">
+                        <pos x="1000000000" y="4000" z="-10000000000.0"/>
+			<rot x="180.0" y="180.0" z="180.0"/>
+		    </flightgroup>
+
+            <flightgroup name="cherokee1" faction="confed" type="Nicander" ainame="default" waves="1" nr_ships="2">
+                        <pos x="1000000000" y="-4000" z="-10000000000.0"/>
+			<rot x="180.0" y="180.0" z="180.0"/>
+		    </flightgroup>
+
+
+            <flightgroup name="comanche2" faction="confed" type="Lancelot" ainame="default" waves="1" nr_ships="990">
+                        <pos x="1000000000" y="4000" z="20000000000.0"/>
+			<rot x="180.0" y="180.0" z="180.0"/>
+		    </flightgroup>
+
+            <flightgroup name="cherokee2" faction="confed" type="Nicander" ainame="default" waves="1" nr_ships="2">
+                        <pos x="1000000000" y="-4000" z="20000000000.0"/>
+			<rot x="180.0" y="180.0" z="180.0"/>
+		    </flightgroup>
+
+
+            <flightgroup name="comanche3" faction="confed" type="Lancelot" ainame="default" waves="1" nr_ships="990">
+                        <pos x="1000000000" y="4000" z="30000000000.0"/>
+			<rot x="180.0" y="180.0" z="180.0"/>
+		    </flightgroup>
+
+            <flightgroup name="cherokee3" faction="confed" type="Nicander" ainame="default" waves="1" nr_ships="2">
+                        <pos x="1000000000" y="-4000" z="30000000000.0"/>
+			<rot x="180.0" y="180.0" z="180.0"/>
+		    </flightgroup>
+
+
+            <flightgroup name="comanche4" faction="confed" type="Lancelot" ainame="default" waves="1" nr_ships="990">
+                        <pos x="1000000000" y="4000" z="40000000000.0"/>
+			<rot x="180.0" y="180.0" z="180.0"/>
+		    </flightgroup>
+
+            <flightgroup name="cherokee4" faction="confed" type="Nicander" ainame="default" waves="1" nr_ships="2">
+                        <pos x="1000000000" y="-4000" z="40000000000.0"/>
+			<rot x="180.0" y="180.0" z="180.0"/>
+		    </flightgroup>
+
+
+            <flightgroup name="comanche5" faction="confed" type="Lancelot" ainame="default" waves="1" nr_ships="990">
+                        <pos x="1000000000" y="4000" z="50000000000.0"/>
+			<rot x="180.0" y="180.0" z="180.0"/>
+		    </flightgroup>
+
+            <flightgroup name="cherokee5" faction="confed" type="Nicander" ainame="default" waves="1" nr_ships="2">
+                        <pos x="1000000000" y="-4000" z="50000000000.0"/>
+			<rot x="180.0" y="180.0" z="180.0"/>
+		    </flightgroup>
+
+
+            <flightgroup name="comanche6" faction="confed" type="Lancelot" ainame="default" waves="1" nr_ships="990">
+                        <pos x="1000000000" y="4000" z="60000000000.0"/>
+			<rot x="180.0" y="180.0" z="180.0"/>
+		    </flightgroup>
+
+            <flightgroup name="cherokee6" faction="confed" type="Nicander" ainame="default" waves="1" nr_ships="2">
+                        <pos x="1000000000" y="-4000" z="60000000000.0"/>
+			<rot x="180.0" y="180.0" z="180.0"/>
+		    </flightgroup>
+
+
+            <flightgroup name="comanche7" faction="confed" type="Lancelot" ainame="default" waves="1" nr_ships="990">
+                        <pos x="1000000000" y="4000" z="70000000000.0"/>
+			<rot x="180.0" y="180.0" z="180.0"/>
+		    </flightgroup>
+
+            <flightgroup name="cherokee7" faction="confed" type="Nicander" ainame="default" waves="1" nr_ships="2">
+                        <pos x="1000000000" y="-4000" z="70000000000.0"/>
+			<rot x="180.0" y="180.0" z="180.0"/>
+		    </flightgroup>
+
+
+            <flightgroup name="comanche8" faction="confed" type="Lancelot" ainame="default" waves="1" nr_ships="990">
+                        <pos x="1000000000" y="4000" z="80000000000.0"/>
+			<rot x="180.0" y="180.0" z="180.0"/>
+		    </flightgroup>
+
+            <flightgroup name="cherokee8" faction="confed" type="Nicander" ainame="default" waves="1" nr_ships="2">
+                        <pos x="1000000000" y="-4000" z="80000000000.0"/>
+			<rot x="180.0" y="180.0" z="180.0"/>
+		    </flightgroup>
+
+
+            <flightgroup name="comanche9" faction="confed" type="Lancelot" ainame="default" waves="1" nr_ships="990">
+                        <pos x="1000000000" y="4000" z="90000000000.0"/>
+			<rot x="180.0" y="180.0" z="180.0"/>
+		    </flightgroup>
+
+            <flightgroup name="cherokee9" faction="confed" type="Nicander" ainame="default" waves="1" nr_ships="2">
+                        <pos x="1000000000" y="-4000" z="90000000000.0"/>
+			<rot x="180.0" y="180.0" z="180.0"/>
+		    </flightgroup>
+        </flightgroups>
+</mission>

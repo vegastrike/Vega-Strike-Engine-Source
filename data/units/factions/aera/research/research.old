@@ -1,0 +1,147 @@
+<Unit scale="150">
+	<Thrust>
+		<Engine Afterburner="00.000000" Forward="0" Retro="0" Left="0" Right="0" Top="0" Bottom="0"/>
+		<Maneuver yaw="0000" pitch="0000" roll="10"/>
+	</Thrust>
+	<Defense HudImage="research-hud.spr">
+		<Shields front="800" right="800" left="800" back="800" recharge="80"/>
+		<Armor front="8000" right="8000" left="8000" back="8000"/>
+		<Hull strength="4000"/>
+	</Defense>
+
+<Stats mass="600" momentofinertia="60" fuel="20000"></Stats>
+       
+<Meshfile file="research.xmesh"/>
+<Dock x="-2.5" y="5.8" z="0" size=".3"/>       
+<Dock x="2.5" y="5.8" z="0" size=".3"/>       
+<Dock x="-2.0" y="5.8" z="0" size=".3"/>       
+<Dock x="2.0" y="5.8" z="0" size=".3"/>       
+<Dock x="-1.5" y="5.8" z="0" size=".3"/>       
+<Dock x="1.5" y="5.8" z="0" size=".3"/>       
+<Dock x="-1" y="5.8" z="0" size=".3"/>       
+<Dock x="1" y="5.8" z="0" size=".3"/>       
+<Dock x="-.5" y="5.8" z="0" size=".3"/>       
+<Dock x=".5" y="5.8" z="0" size=".3"/>       
+<Dock x="0" y="5.8" z="0" size=".3"/>       
+
+<!-- new elements added -->
+<Subunit file="turretbeamheavy" x="0.028281" y="6.402340" z="0.175269" ri="-0.999981" rj="-0.006110" rk="0.000000" qi="-0.006090" qj="0.996711" qk="0.080805"/>
+<Subunit file="turretheavy" x="0.533589" y="-4.742596" z="2.104627" ri="0.969332" rj="0.000000" rk="-0.245756" qi="0.245751" qj="0.006602" qk="0.969311"/>
+<Subunit file="turretheavy" x="0.444161" y="-4.742596" z="-2.141020" ri="-0.979152" rj="0.000000" rk="-0.203128" qi="0.203124" qj="0.006649" qk="-0.979131"/>
+<Subunit file="turretbeamheavy" x="-2.148306" y="-4.860644" z="-0.115608" ri="-0.000971" rj="0.000000" rk="0.999999" qi="-0.999978" qj="0.006531" qk="-0.000971"/>
+<!--Last Edited by: Daniel-->
+<!--23MAY01-->
+	<Hold volume="100000000000">
+		<Category file="Natural_Products/Food">
+			<import price=".8" pricestddev=".2" quantity="0" quantitystddev="0"/>
+		</Category>
+		<Category file="Natural_Products/Aera_Food">
+			<import price="2" pricestddev=".2" quantity="5" quantitystddev="2"/>
+		</Category>
+		<Category file="Natural_Products/Liquor">
+			<import price=".4" pricestddev=".2" quantity="0" quantitystddev="0"/>
+		</Category>
+		<Category file="Natural_Products/Plants">
+			<import price="1.3" pricestddev=".2" quantity="0" quantitystddev="0"/>
+		</Category>
+		<Category file="Natural_Products/Natural_Resources">
+			<import price=".8" pricestddev=".1" quantity="0" quantitystddev="0"/>
+		</Category>
+		<Category file="Raw_Materials/Metals/Crude">
+			<import price=".8" pricestddev=".1" quantity="0" quantitystddev="0"/>
+		</Category>
+		<Category file="Raw_Materials/Metals/Precious">
+			<import price=".8" pricestddev=".1" quantity="0" quantitystddev="0"/>
+		</Category>
+		<Category file="Raw_Materials/Metals/Aera_Alloys">
+			<import price="1.05" pricestddev=".1" quantity="0" quantitystddev="0"/>
+		</Category>
+		<Category file="Raw_Materials/Metals/Alloys">
+			<import price=".8" pricestddev=".1" quantity="0" quantitystddev="0"/>
+		</Category>
+		<Category file="Raw_Materials/Metals/Radioactive">
+			<import price="1.2" pricestddev=".3" quantity="0" quantitystddev="0"/>
+		</Category>
+		<Category file="Raw_Materials/Gems/Jewelry">
+			<import price=".7" pricestddev=".1" quantity="0" quantitystddev="0"/>
+		</Category>
+		<Category file="Raw_Materials/Gems/Industrial">
+			<import price="1.2" pricestddev=".1" quantity="0" quantitystddev="0"/>
+		</Category>
+		<Category file="Raw_Materials/Stone">
+			<import price=".5" pricestddev=".1" quantity="0" quantitystddev="0"/>
+		</Category>
+		<Category file="Fuels/Crude">
+			<import price=".8" pricestddev=".1" quantity="0" quantitystddev="0"/>
+		</Category>
+		<Category file="Fuels/Refined">
+			<import price=".8" pricestddev=".1" quantity="3" quantitystddev="3" />
+		</Category>
+		<Category file="Compressed_Gasses">
+			<import price="1.1" pricestddev=".1" quantity="3" quantitystddev="3" />
+		</Category>
+		<Category file="Recycled_Products">
+			<import price=".8" pricestddev=".1" quantity="0" quantitystddev="0"/>
+		</Category>
+		<Category file="Machinery_Goods">
+			<import price=".8" pricestddev=".1" quantity="0" quantitystddev="0"/>
+		</Category>
+		<Category file="Supplies/Aerospace_Supplies">
+			<import price="1" pricestddev=".1" quantity="3" quantitystddev="3" />
+		</Category>
+		<Category file="Supplies/Agriculteral_Supplies">
+			<import price=".8" pricestddev=".1" quantity="0" quantitystddev="0"/>
+		</Category>
+		<Category file="Supplies/Mining_Supplies">
+			<import price=".5" pricestddev=".1" quantity="0" quantitystddev="0"/>
+		</Category>
+		<Category file="Supplies/Construction_Supplies">
+			<import price=".8" pricestddev=".1" quantity="0" quantitystddev="0" />
+		</Category>
+		<Category file="Supplies/Medical_Supplies">
+			<import price=".9" pricestddev=".1" quantity="3" quantitystddev="3" />
+		</Category>
+		<Category file="Supplies/Aera_Medical_Supplies">
+			<import price="1.85" pricestddev=".1" quantity="3" quantitystddev="3" />
+		</Category>
+		<Category file="Research/Aera_Medical">
+		<!-- price these at 1/10 their normal price...-->
+		        <import price="8.5" pricestddev="3" quantity="-40" quantitystddev="80" />
+		</Category>
+		<Category file="Research/Electronics">
+		<!-- price these at 1/10 their normal price...-->
+		        <import price="8.5" pricestddev="2" quantity="-40" quantitystddev="75" />
+		</Category>
+		<Category file="Electronics">
+			<import price="1.25" pricestddev=".2" quantity="5" quantitystddev="2"/>
+		</Category>
+		<Category file="Electronics/Robotics">
+			<import price="1.2" pricestddev=".2" quantity="0" quantitystddev="1"/>
+		</Category>
+		<Category file="Electronics/Bionics">
+			<import price="1.2" pricestddev=".2" quantity="0" quantitystddev="2"/>
+		</Category>
+		<Category file="Manufactured_Goods">
+			<import price="1.1" pricestddev=".1" quantity="4" quantitystddev="2"/>
+		</Category>
+		<Category file="Entertainment">
+			<import price=".5" pricestddev=".1" quantity="0" quantitystddev="0"/>
+		</Category>
+		<Category file="Contraband">
+			<import price=".2" pricestddev=".1" quantity="0" quantitystddev="0"/>
+		</Category>
+		<Category file="Contraband/Aera">
+			<import price="1.3" pricestddev=".1" quantity="0" quantitystddev="0"/>
+		</Category>
+		<Category file="Contraband/Medical"><!-- need medical to research -->
+			<import price="1.4" pricestddev=".3" quantity="-9" quantitystddev="10"/>
+		</Category>
+		<Category file="upgrades/Experimental">
+			<import price=".8" pricestddev=".1" quantity="-18" quantitystddev="28"/>
+		</Category>
+		<Category file="upgrades/Repair_Systems/Research">
+			<import price="1" pricestddev=".1" quantity="-15" quantitystddev="22"/>
+		</Category>
+	</Hold>
+	<Upgrade file="confed_mil_missions"/>
+</Unit>

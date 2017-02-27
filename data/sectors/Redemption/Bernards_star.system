@@ -1,0 +1,33 @@
+<?xml version="1.0" ?>
+<system name="Bernards_star" background="backgrounds/plasma_galaxy">
+	<Light>
+		<ambient red="0.000000" green="0.000000" blue="0.000000"/>
+		<diffuse red="1.000000" green="0.934859" blue="0.681488"/>
+		<specular red="1.000000" green="0.873962" blue="0.464426"/>
+	</Light>
+	<Planet name="Bernards_star A" file="stars/white_star.texture" ri="0.000000" rj="0.000000" rk="0.000000" si="0.000000" sj="0.000000" sk="0.000000" radius="16600000.000000" x="0" y="0" z="0"  Red="1.000000" Green="0.873962" Blue="0.464426" ReflectNoLight="true" light="0">
+        <Planet name="Jacobs" 
+                file="planets/desert.texture|planets/desert.texture|sol/marscloudmaptrans.texture" 
+                technique="earth"
+                unit="desert"
+                ri="-118089736.000000" rj="278018208.000000" rk="-25360734.000000" si="24973292.000000" sj="14125440.000000" sk="38565144.000000" 
+                radius="770221.812500" 
+                x="-44644456.000000" y="347795296.000000" z="-551082368.000000" year= "249084323.908888" day="414.551532" 
+                Red="0" Green="0" Blue="0" 
+                DRed="0.87" DGreen="0.87" DBlue="0.87" 
+                SRed="0.85" SGreen="0.85" SBlue="0.85" >
+            <Ring file="rings/planet_ring.texture" innerradius="1353606.618322" outerradius="2809372.475550"  wrapx="1" wrapy="1" />
+            <Jump name="Jump_To_Cardell" file="jump.texture" ri="519313.000000" rj="-310327.625000" rk="-572179.500000" si="1401454.250000" sj="16277.311523" sk="1263139.000000" radius="182.595474" x="2167916.500000" y="2690857.500000" z="1492497.750000" year= "2085504.003214" day="474.387628" alpha="ONE ONE" destination="Crucible/Cardell" faction="shmrn" />
+        </Planet>
+        <Planet name="Rubaiyat" file="planets/gas_midget.texture|black.png|planets/gas_midget.texture" unit="gas_midget" technique="gas_giants" ri="89701680.000000" rj="208837408.000000" rk="387025888.000000" si="-325619744.000000" sj="-384489952.000000" sk="282938496.000000" radius="571803.562500" x="226148256.000000" y="-158711664.000000" z="281049088.000000" year= "705366983.376447" day="756.240208" >
+			<Jump name="Jump_To_Stirling" file="jump.texture" ri="-1407737.125000" rj="-1693779.500000" rk="38130.496094" si="-767979.875000" sj="604289.062500" sk="-1510112.875000" radius="245.564011" x="-1440352.500000" y="-1498494.125000" z="-1807028.375000" year= "19408343.392342" day="627.345922" alpha="ONE ONE" destination="Crucible/Stirling" faction="shmrn" />
+			<Jump name="Jump_To_Dakota" file="jump.texture" ri="-574103.687500" rj="-729940.375000" rk="866901.250000" si="-1069156.000000" sj="880853.875000" sk="33642.113281" radius="215.464478" x="-824898.625000" y="-1860099.250000" z="931698.375000" year= "3302525.047580" day="706.996159" alpha="ONE ONE" destination="Redemption/Dakota" faction="shmrn" />
+			<Jump name="Jump_To_Maat" file="jump.texture" ri="-405302.281250" rj="-153690.500000" rk="-835729.875000" si="1354730.750000" sj="588936.312500" sk="-765306.375000" radius="307.866180" x="-1631226.875000" y="-858185.375000" z="-986049.875000" year= "1373097.959144" day="5.658553" alpha="ONE ONE" destination="Crucible/Maat" faction="shmrn" />
+			<Jump name="Jump_To_Callisto" file="jump.texture" ri="900251.062500" rj="290904.093750" rk="405526.812500" si="649234.750000" sj="246226.312500" sk="-1617901.750000" radius="206.750839" x="2079259.250000" y="1032080.687500" z="1019815.375000" year= "9645456.479186" day="28.929300" alpha="ONE ONE" destination="Solace/Callisto" faction="shmrn" />
+		</Planet>
+		<Planet name="Cumberland" file="planets/gas_midget.texture|black.png|planets/gas_midget.texture" unit="gas_midget" technique="gas_giants" ri="-466040384.000000" rj="-68595864.000000" rk="-43275616.000000" si="18994210.000000" sj="-348436032.000000" sk="347752448.000000" radius="606196.375000" x="-321668736.000000" y="-177830320.000000" z="-381507872.000000" year= "408171354.712180" day="514.125909" >
+			<Ring file="rings/planet_ring1.texture" innerradius="952856.917422" outerradius="1238157.093511"  wrapx="1" wrapy="2" />
+			<Ring file="rings/planet_ring2.texture" ri="0.778259" rj="0.603799" rk="0.172450" si="0.444447" sj="-0.335654" sk="-0.830544" innerradius="805966.681736" outerradius="1047285.637412" wrapx="1" wrapy="2" />
+		</Planet>
+	</Planet>
+</system>

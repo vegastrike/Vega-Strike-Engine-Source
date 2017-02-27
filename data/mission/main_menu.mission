@@ -1,0 +1,34 @@
+<mission>
+	<settings>
+		<origin  planet="earth" x="0000" y="100" z="000.0"/>
+	</settings>
+
+	<variables>
+		<var name="credits" value="13500"/>
+		<var name="defaultplayer" value="blue"/>
+		<var name="mission_name" value="Vega Strike Main Menu" />
+		<var name="difficulty" value=".25"/><!--good starting difficulty here-->
+		<var name="system" value="Special/Empty" />
+		<var name="description" value="Welcome to Vega Strike: Upon the Cold Sea." />
+		<var name="savegame" value="main_menu" />
+	</variables>
+	
+    <flightgroups>
+		<!-- need at least one, to avoid messing with the engine -->
+                <flightgroup name="Shlimazel" faction="privateer" type="dumbfire" ainame="default" waves="1" nr_ships="1">
+			<pos x="119990000000" y="-9000000" z="-109990000000.0"/>
+		</flightgroup>
+    </flightgroups>
+	
+	<python>
+import Base
+import Director
+
+Base.LoadBaseInterface("main_menu")
+
+from privateer import privateer
+my_obj=privateer(8000,40000,500,3,2,.6,.25,.1,400000,2000)
+
+	</python>
+
+</mission>

@@ -1,0 +1,149 @@
+<AggressiveAI time="5">
+
+<!-- Ok, This is try #2. Note to self, when moving stuff - don't delete the directory that has you AI XML's in it! -->
+<!-- This is the Bomber AGG AI.
+	Purpose:
+		Bomber will set up attack runs from 10k - hardcoded limit i think
+		Perform attack runs/evade enemy fire
+		Pull out after run is completed to set up another or
+		Remain close for a kill
+	Sections of the script:
+		Collision Detection
+		Attack run (with and with out Threat/Rand)
+		Damage Evasion (for .3 hull or under - too high will evade more than attack)
+		Long range activity (10K)
+		Flee system
+	Priorities:
+		Collision: 8
+		Flee:7
+		Evade:6
+		Attack:5
+		Longrange:4
+	-->
+	
+<!-- TODO:
+Complete - possible proofreading and submission...
+
+-->
+	
+	<!-- Collision avoidence 
+	Large target bulky bomber, simple turn away longer distance-->
+<meterdistance max="100" script="afterburn turn away" time="7" timetointerrupt="5" priority="8">
+</meterdistance>
+	
+	<!-- Flee system 
+	Will be added later working on a larger one for frieghters Temporary one is here-->
+<hull max=".1" script="afterburn turn away" time="10" timetointerrupt="5" priority="7">
+</hull>
+	
+	<!-- Damage Evasion .3hull, .75 sheild .5 hull -->
+<hull max=".3" script="afterburn evade" time="6" timetointerrupt="6" priority="6">
+</hull>
+
+<hull max=".3" script="veer away itts" time="2" priority="6">
+		<threat min=".8" script="veer away itts" time="6" timetointerrupt="6" priority="6">
+		</threat>
+</hull>
+
+<hull max=".3" script="loop around" time="10" timetointerrupt="5" priority="6">
+	<bshield max=".15" script="evade" time="5" timetointerrupt="5" priority="6">
+	</bshield>
+</hull>
+
+<hull max=".3" script="afterburn vector away" time="5" timetointerrupt="4" priority="6">
+	<rand max=".45" script="evade" time="5" timetointerrupt="5" priority="6">
+	</rand>
+</hull>
+
+<hull max=".3" script="roll right hard" time="2" priority="6">
+	<fshield max=".25" script="evade up down" time="2" priority="6">
+		<rand min=".23" script="barrel roll" time="6" timetointerrupt="6" priority="6">
+		</rand>
+	</fshield>
+</hull>
+
+<hull max=".3" script="roll left hard" time="2" priority="6">
+	<fshield max=".25" script="evade up down" time="2" priority="6">
+		<rand min=".23" script="barrel roll" time="6" timetointerrupt="6" priority="6">
+		</rand>
+	</fshield>
+</hull>
+<!-- medium damage evasion -->
+<fshield max=".75" script="evade" time="5" timetointerrupt="4" priority="6">
+</fshield>
+
+<fshield max=".75" script="evade" time="5" timetointerrupt="4" priority="6">
+	<bshield max=".75" script="loop around" time="10" timetointerrupt="4" priority="6">
+	</bshield>
+</fshield>
+
+<fshield max=".5" script="evade" time="7" timetointerrupt="5" priority="6">
+</fshield>
+
+<bshield max=".5" script="afterburn evade" time="7" timetointerrupt="5" priority="6">
+</bshield>
+
+<fshield max=".3" script="afterburn evade" time="7" timetointerrupt="4" priority="6">
+	<bshield max=".3" script="aggressive loop around fast" time="7" timetointerrupt="4" priority="6">
+	</bshield>
+</fshield>
+
+<!-- Experiemental Attempted to see if The directional face things work. Move out of main guns range! 
+	Appears to work - Goddards lack the speed to do it - Pacifiers - ok -->
+
+<Target_Faces_You min=".5" script="face perpendicular fast" time="10" timetointerrupt="7" priority="6">
+</Target_Faces_You>
+
+	<!-- Attack runs -->
+<!-- ok this run the bomber will approach evading fire at long range. one in weapon range the bomber will fire with
+its long range weapons, then engage the after burner, sliding past the target while firing as long as possible. If there is 
+high threat values, the bomber will try to evade more often and approach faster. With rand, if the bomber was over cautious
+with threat, they will be overly eager with RAND-->
+<!-- these were 15000 -->
+<meterdistance max="10000" script="turn towards" time="7" timetointerrupt="4" priority="5">
+</meterdistance>
+
+<meterdistance max="10000" script="afterburn turn towards" time="7" timetointerrupt="4" priority="5">
+	<rand min=".7" script="barrel roll" time="4" priority="5">
+	</rand>
+</meterdistance>
+
+<meterdistance max="3000" script="turn towards itts" time="6" priority="5">
+</meterdistance>
+
+<meterdistance max="3000" script="afterburn turn towards itts" time="6" priority="5">
+	<rand min=".7" script="evade up down" time="3" priority="5">
+	</rand>
+</meterdistance>
+
+<meterdistance max="3000" script="turn towards itts" time="6" priority="5">
+	<threat min=".8" script="evade left right" time="3" priority="5">
+	</threat>
+</meterdistance>
+
+<meterdistance max="700" script="afterburner slide" time="10" timetointerrupt="5" priority="5">
+</meterdistance>
+
+<meterdistance max="600" script="face perpendicular" time="10" timetointerrupt="5" priority="5">
+	<threat min=".85" script="afterburn evade up down" time="3" priority="5">
+	</threat>
+</meterdistance>
+
+<meterdistance max="600" script="aggressive loop around fast" time="8" timetointerrupt="5" priority="5">
+	<rand min=".7" script="afterburn turn towards itts" time="6" priority="5">
+	</rand>
+</meterdistance>
+
+<meterdistance max="200" script="veer away itts" time="4" priority="5">
+</meterdistance>
+
+<meterdistance max="200" script="afterburn veer away" time="5" priority="5">
+	<threat min=".9" script="barrel roll" time="6" priority="5">
+	</threat>
+</meterdistance>
+
+	<!-- long range -->
+<meterdistance min="10000" script="turn towards" time="7" priority="4">
+</meterdistance>
+
+</AggressiveAI>

@@ -1,0 +1,27 @@
+<system name="Stage" background="backgrounds/blue" nearstars="1" stars="1" starspread="1000"  x="0" y="0" z="0" scalesystem="1">
+<Light>
+<ambient red=".3" green=".3" blue=".3"/>
+<diffuse red="1" green="1" blue="1"/>
+<specular red="1" green="1" blue="1"/>
+</Light>
+
+<Light>
+<ambient red="1" green=".1" blue="0"/>
+<!--<diffuse red="1" green=".7" blue="0"/>-->
+<!--<attenuated red=".00000001" blue=".00000015"/>-->
+<attenuated red="0" blue=".000000002"/>
+</Light>	
+<Light>
+<ambient red="1" green=".1" blue="0"/>
+<!--<diffuse red="1" green=".7" blue="0"/>-->
+<!--<attenuated red=".00000001" blue=".00000015"/>-->
+<attenuated red="0" blue=".0000001"/>
+</Light>	
+
+
+	<Planet name="Die Stern" file="sol/sun.png" ri="0" rj="0" rk="0" si="0" sj="0" sk="0" radius="10000" x="0" y="0" z="0" year= "28090314.000000" day="14282713.000000"  Red="0.750000" Green="0.693103" Blue="0.700932" ReflectNoLight="true" light="0 1l">
+	</planet>
+
+
+</system>
+

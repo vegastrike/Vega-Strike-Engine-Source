@@ -1,0 +1,17 @@
+<AggressiveAI close=".05" time="7">
+
+<hull max="70" script="veer away" time="2" timetointerrupt="2"> 
+  <fshield max=".15" script="barrel roll" time="10" timetointerrupt="7">
+  </fshield>
+</hull>
+<hull max="70" script="evade" time="7" timetointerrupt="5"> 
+  <bshield max=".15" script="afterburner slide" time="7" timetointerrupt="4">
+  </bshield>
+</hull>
+<meterdistance max="30" script="turn away" time="5" timetointerrupt="5">
+<meterdistance max="30" script="shelton slide" time="7" timetointerrupt="7">
+	<hull min="0" script="loop around" time="14" timetointerrupt="12"/>
+</meterdistance>
+</meterdistance>
+  
+</AggressiveAI>

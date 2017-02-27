@@ -1,0 +1,304 @@
+Sector Aantlbzz
+	rlaan owns 46 systems
+	unknown owns 17 systems
+Sector Aantutpt
+	rlaan owns 49 systems
+	unknown owns 11 systems
+Sector Aeneth
+	aera owns 47 systems
+	unknown owns 16 systems
+Sector Ahbz
+	aera owns 11 systems
+	rlaan owns 32 systems
+	uln owns 2 systems
+	unknown owns 21 systems
+Sector Ahbzeentk
+	rlaan owns 43 systems
+	unknown owns 10 systems
+Sector Ailzzptpt
+	unknown owns 63 systems
+Sector Alleethuh
+	aera owns 20 systems
+	andolian owns 18 systems
+	luddites owns 1 systems
+	unknown owns 12 systems
+Sector Baja
+	pirates owns 1 systems
+	purist owns 24 systems
+	shaper owns 12 systems
+	unknown owns 110 systems
+Sector Beckett
+	andolian owns 5 systems
+	klkk owns 2 systems
+	purist owns 2 systems
+	rlaan owns 4 systems
+	shaper owns 14 systems
+	unknown owns 29 systems
+Sector Bribztkaber
+	andolian owns 6 systems
+	klkk owns 6 systems
+	rlaan owns 8 systems
+	shaper owns 27 systems
+	uln owns 6 systems
+	unknown owns 11 systems
+Sector Bztutpt
+	rlaan owns 49 systems
+	unknown owns 15 systems
+Sector Bzzahbtktk
+	rlaan owns 34 systems
+	unknown owns 12 systems
+Sector Bzzeen
+	rlaan owns 41 systems
+	unknown owns 17 systems
+Sector Caldera
+	andolian owns 8 systems
+	luddites owns 2 systems
+	purist owns 3 systems
+	rlaan owns 1 systems
+	shaper owns 19 systems
+	unknown owns 19 systems
+Sector Crucible
+	andolian owns 4 systems
+	klkk owns 9 systems
+	shaper owns 13 systems
+	unknown owns 16 systems
+Sector Diaspora
+	LIHW owns 7 systems
+	forsaken owns 9 systems
+	unknown owns 19 systems
+Sector Eebzpt
+	rlaan owns 44 systems
+	unknown owns 21 systems
+Sector Eeruu
+	aera owns 46 systems
+	unknown owns 17 systems
+Sector Eeyenjylk
+	aera owns 53 systems
+	unknown owns 20 systems
+Sector Eilgohall
+	aera owns 38 systems
+	rlaan owns 8 systems
+	shmrn owns 2 systems
+	uln owns 1 systems
+	unknown owns 17 systems
+Sector Eilthut
+	aera owns 33 systems
+	andolian owns 7 systems
+	shmrn owns 3 systems
+	unknown owns 22 systems
+Sector Gohallruu
+	aera owns 46 systems
+	andolian owns 5 systems
+	unknown owns 12 systems
+Sector Gohthuhthuh
+	aera owns 44 systems
+	andolian owns 5 systems
+	unknown owns 12 systems
+Sector Ibpzez
+	rlaan owns 46 systems
+	unknown owns 21 systems
+Sector Ibzazz
+	aera owns 3 systems
+	rlaan owns 39 systems
+	unknown owns 14 systems
+Sector Ingatwa
+	aera owns 14 systems
+	rlaan owns 12 systems
+	shaper owns 7 systems
+	shmrn owns 1 systems
+	uln owns 6 systems
+	unknown owns 18 systems
+Sector Iyn
+	LIHW owns 7 systems
+	aera owns 11 systems
+	andolian owns 17 systems
+	unknown owns 20 systems
+Sector Izzptipt
+	andolian owns 3 systems
+	rlaan owns 30 systems
+	shaper owns 7 systems
+	unknown owns 9 systems
+Sector Maeell
+	ISO owns 1 systems
+	aera owns 30 systems
+	andolian owns 11 systems
+	unadorned owns 1 systems
+	unknown owns 16 systems
+Sector Magellan
+	andolian owns 6 systems
+	luddites owns 1 systems
+	pirates owns 1 systems
+	purist owns 16 systems
+	unadorned owns 11 systems
+	unknown owns 222 systems
+Sector Mahgoh
+	aera owns 39 systems
+	rlaan owns 3 systems
+	unknown owns 13 systems
+Sector Miyeeldah
+	aera owns 22 systems
+	rlaan owns 25 systems
+	uln owns 1 systems
+	unknown owns 9 systems
+Sector Ohzzz
+	rlaan owns 39 systems
+	unknown owns 17 systems
+Sector Ouulneh
+	aera owns 28 systems
+	andolian owns 13 systems
+	unknown owns 17 systems
+Sector Plymouth
+	LIHW owns 8 systems
+	purist owns 21 systems
+	shaper owns 4 systems
+	unknown owns 100 systems
+Sector Pzzaztahber
+	aera owns 6 systems
+	rlaan owns 60 systems
+	unknown owns 10 systems
+Sector RBL-1
+	aera owns 2 systems
+	unknown owns 65 systems
+Sector RBL-10
+	unknown owns 73 systems
+Sector RBL-11
+	andolian owns 2 systems
+	unknown owns 59 systems
+Sector RBL-12
+	rlaan owns 2 systems
+	unknown owns 53 systems
+Sector RBL-13
+	rlaan owns 1 systems
+	unknown owns 57 systems
+Sector RBL-14
+	unknown owns 57 systems
+Sector RBL-2
+	aera owns 3 systems
+	unknown owns 54 systems
+Sector RBL-3
+	aera owns 1 systems
+	unknown owns 68 systems
+Sector RBL-4
+	aera owns 1 systems
+	unknown owns 70 systems
+Sector RBL-5
+	unknown owns 54 systems
+Sector RBL-6
+	aera owns 1 systems
+	unknown owns 77 systems
+Sector RBL-7
+	unknown owns 80 systems
+Sector RBL-8
+	aera owns 1 systems
+	unknown owns 55 systems
+Sector RBL-9
+	aera owns 1 systems
+	unknown owns 71 systems
+Sector Redemption
+	aera owns 10 systems
+	andolian owns 11 systems
+	rlaan owns 1 systems
+	shaper owns 9 systems
+	shmrn owns 5 systems
+	uln owns 2 systems
+	unknown owns 16 systems
+Sector Rhubarb
+	LIHW owns 30 systems
+	unknown owns 16 systems
+Sector Rust
+	ISO owns 1 systems
+	LIHW owns 16 systems
+	aera owns 1 systems
+	andolian owns 12 systems
+	forsaken owns 1 systems
+	shaper owns 1 systems
+	unadorned owns 2 systems
+	unknown owns 19 systems
+Sector Sol
+	ISO owns 15 systems
+	andolian owns 1 systems
+	confed owns 4 systems
+	highborn owns 7 systems
+	luddites owns 11 systems
+	pirates owns 19 systems
+	purist owns 85 systems
+	shaper owns 3 systems
+	unknown owns 1568 systems
+Sector Solace
+	LIHW owns 5 systems
+	aera owns 7 systems
+	andolian owns 8 systems
+	pirates owns 1 systems
+	shaper owns 3 systems
+	unadorned owns 9 systems
+	unknown owns 15 systems
+Sector Thanatos
+	ISO owns 1 systems
+	LIHW owns 52 systems
+	forsaken owns 7 systems
+	unknown owns 16 systems
+Sector Thuhtmaah
+	aera owns 27 systems
+	rlaan owns 7 systems
+	unknown owns 19 systems
+Sector Torkelsen
+	ISO owns 2 systems
+	LIHW owns 2 systems
+	forsaken owns 2 systems
+	luddites owns 1 systems
+	mechanist owns 11 systems
+	pirates owns 1 systems
+	purist owns 2 systems
+	shaper owns 3 systems
+	unadorned owns 13 systems
+	unknown owns 222 systems
+Sector Tutbzzaz
+	andolian owns 3 systems
+	purist owns 3 systems
+	rlaan owns 41 systems
+	shaper owns 5 systems
+	unknown owns 13 systems
+Sector Uulmm
+	aera owns 39 systems
+	unknown owns 8 systems
+Sector Uumghemm
+	aera owns 50 systems
+	unknown owns 17 systems
+Sector Vega
+	ISO owns 5 systems
+	LIHW owns 1 systems
+	forsaken owns 2 systems
+	highborn owns 41 systems
+	luddites owns 7 systems
+	mechanist owns 12 systems
+	pirates owns 12 systems
+	purist owns 65 systems
+	shaper owns 2 systems
+	unadorned owns 3 systems
+	unknown owns 1164 systems
+Sector Vormund
+	LIHW owns 13 systems
+	forsaken owns 3 systems
+	unknown owns 33 systems
+Sector Zzyqqh
+	rlaan owns 29 systems
+	unknown owns 14 systems
+ISO owns 25 systems
+LIHW owns 141 systems
+aera owns 635 systems
+andolian owns 145 systems
+confed owns 4 systems
+forsaken owns 24 systems
+highborn owns 48 systems
+klkk owns 17 systems
+luddites owns 23 systems
+mechanist owns 23 systems
+pirates owns 35 systems
+purist owns 221 systems
+rlaan owns 694 systems
+shaper owns 129 systems
+shmrn owns 11 systems
+uln owns 18 systems
+unadorned owns 39 systems
+unknown owns 5038 systems
+Press any key to continue

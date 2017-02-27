@@ -1,0 +1,230 @@
+#!/usr/bin/perl
+#
+# Source Code Builder
+#       - David Ranger
+#
+# Version: 1.1
+#
+# Aug 09, 2001:   1.0 - Initial Release
+# Aug 14, 2001:   1.1 - Fixed bug where a changed include file didn't cause the source files to
+#                       recompile. Fixed display bug when compiling multiple source files
+# Jan 08, 2001:   1.2 - Added support for NoLink and $exec_bin
+# Jan 12, 2001:   1.3 - Added support for $do_c and $do_cpp (both default to 1)
+# Jan 14, 2001:   1.4 - Fixed bug where binary would be .cpp
+
+use POSIX;
+
+$do_c = 1;
+$do_cpp = 1;
+
+require 'Config.pl';
+
+sub ShowCompile;
+sub BuildSource;
+sub BuildInclude;
+sub BuildDir;
+sub BuildFile;
+sub InstallFile;
+sub BuildCont;
+sub GetFileName;
+sub ClearLine;
+sub ShowLine;
+
+$start_time = strftime "%s", localtime;
+$clean = 0; $do_install = 0; $sent_parm = 0;
+unless ($exec_bin) { $exec_bin = "gcc"; }
+
+@AVAIL_PARMS = ("Clean","Install","Details","NoLink");
+
+# You can pass the following parameters:
+# clean   - Removes all the compiled binaries and .o and compiles everything from scratch
+# install - Copies compiled binaries to the install path (This is so you can have a seperate
+#                  directory for new binaries. Very useful if you're working on a production machine
+# nolink  - Compile the .c to .o, but don't do any linking. This is useful if there are many errors
+
+while ($parm = shift) { $C{lc($parm)} = 1; }
+foreach $parm (@AVAIL_PARMS) {
+	unless ($C{lc($parm)}) { next; }
+	unless ($sent_parm) { print STDERR "Options:"; $sent_parm = 1; }
+	print STDERR " +".$parm;
+}
+if ($sent_parm) { print STDERR "\n"; }
+
+foreach $hash_ref (@BUILD) {
+	%data = %{$hash_ref};
+	my (@ar_included, $include);
+	$included = "";
+
+	ShowCompile(\%data);
+	$DID_INC = 0;
+	@ar_included = BuildInclude(\%data);
+	foreach $include (@ar_included) {
+		$include =~ s/\.[A-Za-z]{0,}$/\.o/;
+		$included .= $include.' ';
+	}
+	unless ($C{"nolink"}) { BuildSource(\%data); }
+}
+
+$end_time = strftime "%s", localtime;
+$dif = $end_time - $start_time;
+print "Time Elapsed: $dif second\n";
+
+
+sub ShowCompile {
+	my $data = shift;
+	print STDERR "Compiling";
+	if ($data->{name}) { print STDERR " $data->{name}"; }
+	elsif ($name) { print STDERR " $name"; }
+	print STDERR "... ";
+}
+
+sub BuildSource {
+	my %data = %{$_[0]};
+	my ($dir, @files);
+	if ($data{src}) { $dir = $data{src}; }
+	elsif ($src) { $dir = $src; }
+	else { return ""; }
+	return BuildDir($dir,"source",\%data);
+}
+
+sub BuildInclude {
+	my %data = %{$_[0]};
+	my ($dir, @files, $included);
+	if ($data{include}) { $dir = $data{include}; }
+	elsif ($include) { $dir = $include; }
+	else { return ""; }
+	@files = BuildDir($dir,"include",\%data);
+	return @files;
+}
+
+sub BuildDir {
+	my $dir = shift;
+	my $type = shift;
+	my $data_ref = shift;
+	my (@files, $exec, $file, $cont, $out, $f_name, $last, $max);
+	unless ($dir) { return ""; }
+	unless ($dir =~ /\/$/) { $dir .= "/"; }
+	@files = ();
+	if ($do_c) { @files = glob($dir."*.c"); }
+	if ($do_cpp) { push @files, glob($dir."*.cpp"); }
+	ClearLine;
+	if ($C{details}) { print "\n"; }
+	foreach $file (@files) {
+		BuildFile($file, $type, $data_ref);
+		if ($C{install} && $type =~ /source/i) { InstallFile($file,$data_ref); }
+		if ($type =~ /source/i) {
+			ShowLine("Done");
+			print STDERR "\n";
+			ClearLine;
+		}
+	}
+	unless ($C{details}) {
+	#	ShowLine("Done");
+		print STDERR "\n";
+		ClearLine;
+	}
+	return (@files);
+}
+
+sub BuildFile {
+	my $file = shift;
+	my $type = shift;
+	my $data_ref = shift;
+	my ($out, $exec, $SOURCE, $dir);
+	if ($DID{$file}) { return; }
+	$DID{$file} = 1;
+	unless (BuildCont($file,$type)) { return; }
+	if ($type =~ /include/i) { $DID_INC = 1; }
+	$out = $file;
+	$out =~ s/\.c(pp)?$/\.o/;
+	$f_name = GetFileName($file);
+	if ($data_ref->{build}) { $dir = $data_ref->{build}; }
+	elsif ($dir_build) { $dir = $dir_build; }
+	unless ($dir =~ /\/$/) { $dir .= "/"; }
+	if ($C{details}) { }
+	elsif ($type =~ /source/i) { print STDERR "\t$f_name... "; }
+	elsif ($type =~ /include/i) { ShowLine($f_name); }
+
+	if ($type =~ /source/i) { $SOURCE = 1; }
+
+	$exec = $exec_bin." ".$exec_include." -o $out -g ".$exec_defines." -c $file";
+	if ($C{details}) { print $exec."\n"; }
+	elsif ($SOURCE) { ShowLine("Building"); }
+	system($exec);
+	if ($SOURCE) {
+		ShowLine("Linking");
+		$exec = $exec_bin." -g -o $dir$f_name $out $included $exec_compile";
+		if ($C{details}) { print STDERR $exec."\n"; }
+		system($exec);
+	}
+	
+	return 1;
+}
+
+sub InstallFile {
+	my $file = shift;
+	my $data_ref = shift;
+	my ($exec, $dir, $f_name);
+	$f_name = GetFileName($file);
+	if ($data_ref->{build}) { $dir = $data_ref->{build}; }
+        elsif ($dir_build) { $dir = $dir_build; }
+        unless ($dir =~ /\/$/) { $dir .= "/"; }
+	if ($data_ref->{install}) { $exec = "cp $dir$f_name ".$data_ref->{install}.$f_name; }
+	elsif ($dir_install) { $exec = "cp $dir$f_name $dir_install$f_name"; }
+	else { return 0; }
+	if ($C{details}) { print STDERR $exec."\n"; }
+	else { ShowLine("Installing"); }
+	system($exec);
+	return 1;
+}
+
+sub BuildCont {
+	if ($C{clean}) { return 1; }
+	my $file = shift;
+	my $type = shift;
+	if ($type =~ /source/ && $DID_INC) { return 1; }
+	my $check = $file;
+	my $header = $file;
+	my (@stats, $a_time, $b_time, $out_time);
+	$check =~ s/\.c(pp)?$/\.o/;
+	unless (-e $check) { return 1; }
+
+	$header =~ s/\.c(pp)?$/\.h/;
+	@stats = stat($check);
+	$out_time = $stats[9];
+
+	@stats = stat($header);
+	$a_time = $stats[9];
+
+	@stats = stat($file);
+	$b_time = $stats[9];
+
+	if ($out_time < $a_time || $out_time < $b_time) { return 1; }
+	else { return 0; }
+}
+
+sub GetFileName {
+	my $file = shift;
+	my (@parts) = split(/\//,$file);
+	my $f_name = pop @parts;
+	$f_name =~ s/\.\w{1,3}$//i;
+	return $f_name;
+}
+
+sub ClearLine {
+	$last = "";
+	$max = 0;
+}
+
+sub ShowLine {
+	my $line = shift;
+	my ($current, $dif);
+	if ($C{details}) { print STDERR $line."\n"; return; }
+	$current = length($line);
+	$dif = 0;
+	print STDERR "\b" x length($last);
+	print STDERR $line;
+	if ($current >= $max) { $max = $current; }
+	else { $dif = $max - $current; print STDERR " " x $dif; print STDERR "\b" x $dif; }
+	$last = $line;
+}

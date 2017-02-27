@@ -1,0 +1,109 @@
+<Mesh animation="rlaan_purple.ani" reverse="1">
+<Points>
+	<Point> 
+		<Location x="1" y="1" z="1"/><!-- 0 -->
+	</Point>
+	<Point> 
+		<Location x="-.2" y="-.2" z="-.2"/><!-- 1 -->
+	</Point>
+	<Point> 
+		<Location x="-1" y="1" z="-1"/><!-- 2 -->
+	</Point>
+	<Point> 
+		<Location x=".2" y="-.2" z=".2"/><!-- 3 -->
+	</Point>
+	<Point> 
+		<Location x="1" y="-1" z="-1"/><!-- 4 -->
+	</Point>
+	<Point> 
+		<Location x="-.2" y=".2" z=".2"/><!-- 5 -->
+	</Point>
+	<Point> 
+		<Location x="-1" y="-1" z="1"/><!-- 6 -->
+	</Point>
+	<Point> 
+		<Location x=".2" y=".2" z="-.2"/><!-- 7 -->
+	</Point>
+</Points>
+<Polygons>
+	<Tri>
+		<Vertex point="0" s="1" t=".5"/>
+		<Vertex point="3" s="0" t="1"/>
+		<Vertex point="5" s="0" t="0"/>
+
+	</Tri>
+	<Tri>
+		<Vertex point="0" s="1" t=".5"/>
+		<Vertex point="5" s="0" t="1"/>
+		<Vertex point="7" s="0" t="0"/>
+
+	</Tri>
+	<Tri>
+		<Vertex point="0" s="1" t=".5"/>
+		<Vertex point="7" s="0" t="1"/>
+		<Vertex point="3" s="0" t="0"/>
+
+	</Tri>
+	<Tri>
+		<Vertex point="2" s="1" t=".5"/>
+		<Vertex point="5" s="0" t="1"/>
+		<Vertex point="1" s="0" t="0"/>
+
+	</Tri>
+	<Tri>
+		<Vertex point="2" s="1" t=".5"/>
+		<Vertex point="7" s="0" t="0"/>
+		<Vertex point="5"  s="0" t="1"/>
+
+
+	</Tri>
+	<Tri>
+		<Vertex point="2" s="1" t=".5"/>
+		<Vertex point="1" s="0" t="0"/>
+		<Vertex point="7" s="0" t="1"/>
+
+
+	</Tri>
+	<Tri>
+		<Vertex point="4" s="1" t=".5"/>
+		<Vertex point="7" s="0" t="0"/>
+		<Vertex point="1" s="0" t="1"/>
+
+
+	</Tri>
+	<Tri>
+		<Vertex point="4" s="1" t=".5"/>
+		<Vertex point="3" s="0" t="0"/>
+		<Vertex point="7" s="0" t="1"/>
+
+
+	</Tri>
+
+
+	<Tri>
+		<Vertex point="4" s="1" t=".5"/>
+		<Vertex point="1" s="0" t="1"/>
+		<Vertex point="3" s="0" t="0"/>
+
+	</Tri>
+	<Tri>
+		<Vertex point="6" s="1" t=".5"/>
+		<Vertex point="5" s="0" t="1"/>
+		<Vertex point="3" s="0" t="0"/>
+
+	</Tri>
+	<Tri>
+		<Vertex point="6" s="1" t=".5"/>
+		<Vertex point="3" s="0" t="1"/>
+		<Vertex point="1" s="0" t="0"/>
+
+	</Tri>
+	<Tri>
+		<Vertex point="6" s="1" t=".5"/>
+		<Vertex point="1" s="0" t="1"/>
+		<Vertex point="5" s="0" t="0"/>
+	</Tri>
+
+
+</Polygons>
+</Mesh>

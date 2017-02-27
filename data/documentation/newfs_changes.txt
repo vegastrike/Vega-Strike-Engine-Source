@@ -1,0 +1,13 @@
+
+- Mods' files have to be placed in datadir/mods/name_of_mod/ or in homedir/mods/name_of_mod/in order to be found and loaded
+- To specify a mod to play use vegastrike -M name_of_mod and be sure that the mod's config file is in its mods/name_of_mod/ subdir
+
+- Moved datadir/subdirs that contains sprites/textures into datadir/sprites/bases
+- Moved the nav stuff :
+	- moved meshes in datadir/meshes/nav/data
+	- moved textures in datadir/textures/nav/default
+	- moved nevdata.xml in datadir
+
+Now :
+- all bases graphics should be in datadir/sprites/bases
+- new nav stuff should be placed in the datadir/textures/nav/ and in datadir/meshes/nav/

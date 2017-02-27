@@ -1,0 +1,15 @@
+#EXTM3U
+#rlaan-specific
+../music/Bliss.ogg
+../music/BlackLlama.ogg
+../music/DepressionChamber.ogg
+#common threat files - remove when rlaan-specific variety permits it
+../music/battle1.ogg
+../music/battle2.ogg
+#fix weights
+../music/Bliss.ogg
+../music/BlackLlama.ogg
+../music/Bliss.ogg
+../music/BlackLlama.ogg
+../music/Bliss.ogg
+../music/BlackLlama.ogg

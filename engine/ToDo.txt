@@ -1,0 +1,182 @@
+Goals:
+*---------------------------------*
+Summer
+* August 18th
+
+** add spec interdictor to pirate vessels (make sure it's negative for no speed hit. Possibly between -10 and -20...but maybe only -5 or -2)
+***Test this heavily--don't change a value without verifying that pirates actually stop ships with it...
+
+
+**Fix the num of MILITARY flightgroups in any given system
+***make the faction_ships.max_flightgroups and faction_ships.min_flightgroups functions return different values for appropriate systems... 
+***make the fg_util.MinNmFlightgroupsInSystem and fg_util.MaxNumFlgihtgroupsInSystem return something other than 1 or 3 for boonies systems in case it's not in the hash table
+
+**fix the faction_ships.fightersPerFG so it's reasonable for civvies
+***Remember that when testing this stuff you need to delete savegames and view the resulting saved game :-)
+
+**Elasticity down
+***things could be crashing into each other a lot... maya s well not have them die needless deaths
+
+
+* Partial solutions exist for the following:
+** faction_ships.useBlank should be 0 for all civvie factions (the 1,1,1,1,1 without spaces between them) -- check, but capitals still iffy
+*** This will require making various variants of standard craft for civilians... they can be called llama.civvie or something. -- check.
+****remember to add any variants or new craft to faction_ships.stattableexp (then we have a logified version of it I think that we had some generator for) -- NOT DONE YET FIXME FIXME FIXME
+*** Armed is fine...but they should be lightly so--if unarmed should have a different role perhaps -- check.
+*** add these new ships to the appropriate faction_ships.fighters and faction_ships.capships list at the appropriate faction -- fighters ok, capitals not done, unit stats not done yet anyway...
+
+** add unit called "laser" in units.csv with default weakest multifaction bolt weapon (doesn't have to be a laser at alll) -- this has always been there - are you still getting the error???
+
+
+
+
+
+* - First pass completed on following
+**Change factions.xml to make no one attack civvies (unless they are mean...i'm talkin to you, pirates.) -- Should be good now.
+
+** currently code calls faction_ships.get_enemy_of_no_citizen... want to eventually change those calls to actually using the friends and enemy list without costly citizen checks...
+***To resolve this, fix the rabble list to actually not have rlaan_citizen and andolian_citizen as rabble of another faction (unless you really want to see them there, like the forsaken)...then we won't need this code wart and we can just make the function return faction_ships.get_enemy with the same args
+-- Should be good now.
+
+
+* DATASET BALANCING:
+** ------Much work to be done-------
+** check config value for insys warp_energy divisor (may need to make larger if players running out of juice - numbers not currently playbalanced - will fix balancing later - for now, set to higher value and ignore energy issues
+** Merge in Privateer vegastrike.config
+*** better tractor beams, and other graphical nuggets
+**** wait for John to import his config
+** make pirates... more pirate-like
+***Almost done--needs testing
+***need to make them only use tractor on cargo by changing the role of the tractor beam so it is used on cargo--and other weapons so they are not used on cargo
+** faction standing changes -- sanity?
+**upgrade space - upgrades need to be bigger
+
+
+*Developer tasks - do profiling to enumerate current load-time bottlenecks.
+**two sets of roles--- combat_role_attack, combat_role_defense
+***Fixed above... needs some testing--but has had some alrady
+**negative relation numbers affect the targetting algorithms so that only slightly negative relations don't cause indefinite pursuit
+
+
+
+*Systems and system generation
+** Fix station, wormhole, planet placement/generation (avoid too close together - make docking points at stations around/on planet)
+** tweak system scales
+** tweak system names
+** tweak system inhabitations, make more diverse set of planet types
+** Docking at planet (test fixed) vs "landing in BFE" on uninhabited world.
+** Homeworlds
+***Pick hierarchy of interest
+** Reduce Jump Points per system
+***Fix up starting system. Especially wrt Atlantis
+****Fixed? is it perfect?
+
+*Damage
+** Fix System Damage so it happens with reasonable frequency
+*** Check gemini gold for example how to do this (I think it's a new config var)
+
+
+*Loci of control
+**Speed Limiters
+**Auto selection of reference frames
+**Enforcement of speed limits
+
+*Factions
+**Neutral standing
+***For civilians
+
+
+*Graphics
+**New graphics engine (be it ogre or other)
+**Decoupling of geometry, materials, textures via indirection.
+***wait for ogre...?
+
+
+Future
+* Flightgroups
+** Classification (fleet, squadron, flotilla? etc. - something to differentiate between {5 plowshares} and {3 archimedes, 2 Tesla, 8 kahan, 20 schroedinger, 10 goddard, 5 watson} )
+** Flightgroups should have subsets of ships that spawn together (combined arms)
+** make news use new naming scheme
+** Organize news to group stories depending on "local" importance
+
+*AI
+** add another dimension to roles (attack AND defend/predator AND prey roles) instead of forcing both to be the same.
+** AI spec drive use, escorts...
+***Check?
+
+*Developer tasks - do profiling to enumerate current performance bottlenecks.
+
+*Release-as-patch-paradigm
+** Integrated update system?
+
+* Upgrades
+** user-warehouse for intermediate part storage
+** selection interface for activating/deactivating parts
+** fix displaying of irrelevant stats
+** decouple tags and names, more tag types
+
+*Debris Fields
+
+
+New Developers
+* Graphical stuff
+** make engine lights proportional to accel, not to speed - done
+*Run-time changeable configuration option and key-binding infrastructure
+*Remove duplicate tags/ move out of the way of text.
+
+*Map
+**More UI improvements always welcome
+
+
+
+
+
+
+
+* Cockpit
+**Highlight weapons in range in the gun VDU
+
+* File loading:
+** Load balance hash-table
+** Support full expressivity of BFXM animations
+** Install time generation of all BSP files
+** Per-System (versus strict per need) ship loading optimization
+
+* Vega Strike universe information:
+** Complete Ships list.
+** Complete histories.
+
+* UI:
+** Merge BaseComputer modes with NavScreen?
+** radio chatter from: to:
+** more colors on buy/sell screens
+
+
+
+* Resource management/organization:
+** trim redundant thrust animation images
+
+* Universe consistency
+** Area effect modeling
+** Bomb-pumped laser modeling?
+
+
+
+*Clydesdale (other capships too? -related to importing of cargo/missions?)
+http://vegastrike.sourceforge.net/forums/viewtopic.php?t=1467&postdays=0&postorder=asc&start=0
+Apparently upgrade system doesn't quite work right and jump drive doesn't quite install right and cargo sometimes grows without bounds...
+ECM apparently causes some of these problems
+Jump drive goes away after selling it can't buy it back
+
+
+Emacs mode info:
+Local Variables:
+mode: outline
+End:
+
+
+
+
+
+
+

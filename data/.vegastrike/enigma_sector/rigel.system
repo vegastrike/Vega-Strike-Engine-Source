@@ -1,0 +1,41 @@
+<system name="rigel" background="backgrounds/darkgreen" nearstars="500" stars="1000" starspread="150">
+<Light>
+	<ambient red="0.000000" green="0.000000" blue="0.000000"/>
+	<diffuse red="0.649367" green="0.714729" blue="1.000000"/>
+	<specular red="0.421677" green="0.510837" blue="1.000000"/>
+</Light>
+<Planet name="rigel A" file="stars/white_star.png" ri="0.000000" rj="0.000000" rk="0.000000" si="0.000000" sj="0.000000" sk="0.000000" radius="47359256.000000" x="0" y="0" z="0"  Red="0.421677" Green="0.510837" Blue="1.000000" ReflectNoLight="true" light="0">
+	<Planet name="Henrietta" file="planets/m_class3.png" ri="-143669744.000000" rj="92608312.000000" rk="-104149104.000000" si="145450224.000000" sj="171035584.000000" sk="-48560016.000000" radius="1304377.625000" x="-212380272.000000" y="137362880.000000" z="-75500448.000000" year= "203698800.000000" day="505.052522"  >
+	<Atmosphere file="sol/earthcloudmaptrans.png" alpha="SRCALPHA INVSRCALPHA" radius="1343508.953750"/>
+<Ring file="planets/ring.png" innerradius="2494238.560980" outerradius="4178699.730769"  wrapx="32" wrapy="1" />
+	</Planet>
+	<Planet name="Sino-" file="planets/Dirt.png" ri="-95908632.000000" rj="152196416.000000" rk="-132500936.000000" si="-163368880.000000" sj="-131339824.000000" sk="-32610814.000000" radius="1850966.875000" x="162769104.000000" y="-219905200.000000" z="115534504.000000" year= "222579744.000000" day="587.294289"  >
+	<CityLights file="planets/Dirt_light_repeat.png" wrapx="64" wrapy="64"/>
+<Ring file="planets/ring.png" innerradius="3899842.084980" outerradius="7451431.023242"  wrapx="36" wrapy="2" />
+<Ring file="planets/ring.png" ri="0.954865" rj="-0.177439" rk="-0.238219" si="0.170866" sj="-0.327902" sk="0.929131" innerradius="4193505.541235" outerradius="8012533.996298" wrapx="36" wrapy="2" />		<Unit name="" file="medical" ri="-2667436.000000" rj="-2953782.000000" rk="-530484.625000" si="2047362.375000" sj="-1967719.125000" sk="661669.750000" x="-4337790.000000" y="-2783822.000000" z="-5310438.500000" year= "3812132.379603" faction="pirates"  />
+	</Planet>
+	<Planet name="Djakarta" file="planets/Snow2.png" ri="-61470620.000000" rj="-54734316.000000" rk="8146858.500000" si="102308096.000000" sj="-107629280.000000" sk="48844236.000000" radius="1804788.375000" x="161655360.000000" y="85039768.000000" z="89567928.000000" year= "1394093440.000000" day="157.443281"  >
+	<CityLights file="planets/Dirt_light.png" wrapx="64" wrapy="64"/>
+		<Unit name="" file="fighter_barracks" ri="34700.976563" rj="3436784.750000" rk="-2342049.000000" si="293371.343750" sj="-2279916.250000" sk="-3341262.500000" x="-5640603.000000" y="4074834.000000" z="2426892.750000" year= "3636489.911610" faction="pirates"  />
+		<Planet name="Monaco" file="sol/pluto.png" ri="-1463811.500000" rj="399122.187500" rk="-6486645.000000" si="-1287037.000000" sj="-5151812.500000" sk="-26550.378906" radius="385269.750000" x="-2658656.250000" y="-6378975.000000" z="-4425376.000000" year= "66147972.000000" day="41.476852"  >
+		</Planet>
+		<Planet name="JumpToNiven" file="jump.png" ri="3480094.500000" rj="-28833.925781" rk="1702963.750000" si="1424965.500000" sj="972036.187500" sk="-2895532.500000" radius="279.138824" x="2041761.500000" y="-5280226.000000" z="3877203.750000" year= "3384939.250000" day="624.130374" alpha="ONE ONE" destination="enigma_sector/niven"  >
+		</Planet>
+	</Planet>
+	<Planet name="Salk" file="planets/university.png" ri="-33532442.000000" rj="-71063368.000000" rk="-66510228.000000" si="-59770560.000000" sj="59318916.000000" sk="-33245240.000000" radius="2357737.000000" x="-173554736.000000" y="-157553760.000000" z="-172615520.000000" year= "1798715136.000000" day="375.954832"  >
+	<CityLights file="planets/university_light.png" wrapx="1" wrapy="1"/>
+		<Unit name="" file="factory" ri="2943358.750000" rj="-4513464.500000" rk="1207473.375000" si="-464148.625000" sj="399934.937500" sk="2626350.000000" x="-6967071.000000" y="5942356.000000" z="-4929709.000000" year= "47437643.929740" faction="pirates"  />
+		<Planet name="JumpToGhorah_khar" file="jump.png" ri="-2526817.250000" rj="3500870.250000" rk="5760011.500000" si="5708055.500000" sj="2147530.000000" sk="1198780.500000" radius="177.422684" x="7007318.000000" y="2992010.750000" z="4995297.500000" year= "65420788.000000" day="83.243751" alpha="ONE ONE" destination="enigma_sector/ghorah_khar"  >
+		</Planet>
+	</Planet>
+	<Planet name="Hans" file="planets/m_class2.png" ri="69987184.000000" rj="-61667392.000000" rk="13760905.000000" si="-85841864.000000" sj="-99747864.000000" sk="-10417912.000000" radius="1844029.250000" x="139192560.000000" y="-172448000.000000" z="230187312.000000" year= "377356608.000000" day="595.732047"  >
+	<Atmosphere file="sol/earthcloudmaptrans.png" alpha="SRCALPHA INVSRCALPHA" radius="1899350.127500"/>
+	</Planet>
+	<Planet name="Runnymede" file="planets/gas_giant5.png" ri="-118896088.000000" rj="15042433.000000" rk="-111730248.000000" si="17792324.000000" sj="-205335312.000000" sk="-46578084.000000" radius="6484201.500000" x="184627936.000000" y="-240488064.000000" z="184471296.000000" year= "295364512.000000" day="515.916135"  >
+		<Planet name="Brainard" file="sol/io.png" ri="-2035415.750000" rj="-15643196.000000" rk="-11187285.000000" si="16176775.000000" sj="-14031191.000000" sk="16676628.000000" radius="2529327.500000" x="13607652.000000" y="-20636168.000000" z="36692080.000000" year= "21799318.000000" day="479.976561"  >
+		</Planet>
+		<Planet name="Donaldson" file="sol/janus.png" ri="29738514.000000" rj="8390615.000000" rk="15015477.000000" si="-901927.500000" sj="-13537219.000000" sk="9350856.000000" radius="2579195.250000" x="-20709908.000000" y="-12632154.000000" z="21006672.000000" year= "167148928.000000" day="100.593890"  >
+		</Planet>
+	</Planet>
+</Planet>
+</system>

@@ -1,0 +1,274 @@
+<Unit scale = "10" >
+<Description combatRole="BASE">
+</Description>
+	<Meshfile file = "miningbase.bfxm"  >
+	</Meshfile>
+	<Subunit file = "turretbeam" x = "-1.339288" y = "51.868393" z = "15.000998" ri = "0.046461" rj = "-0.998920" rk = "0.000000" qi = "0.000000" qj = "0.000000" qk = "1.000000"  >
+	</Subunit>
+	<Subunit file = "turretheavy" x = "21.621101" y = "-35.672886" z = "15.000999" ri = "-1.000000" rj = "0.000000" rk = "0.000000" qi = "0.000000" qj = "0.000000" qk = "1.000000"  >
+	</Subunit>
+	<Subunit file = "turretbeamheavy" x = "15.000999" y = "0.000998" z = "60.000996" ri = "1.000000" rj = "0.000000" rk = "0.000000" qi = "0.000000" qj = "0.000000" qk = "1.000000"  >
+	</Subunit>
+	<Thrust >
+		<Engine Afterburner = "0" Forward = "0" Retro = "0" Left = "0" Right = "0" Top = "0" Bottom = "0"  >
+		</Engine>
+		<Maneuver yaw = "0" pitch = "0" roll = "0"  >
+		</Maneuver>
+	</Thrust>
+	<Sound  >
+	</Sound>
+	<Defense HudImage = "aera-mine-hud.spr" >
+		<Shield front = "500" back = "500" left = "500" right = "500" recharge = "20"  >
+		</Shield>
+		<Armor front = "1000" right = "8000" left = "8000" back = "8000"  >
+		</Armor>
+		<Hull strength = "1000"  >
+		</Hull>
+	</Defense>
+	<Stats mass = "447181535" momentofinertia = "447181535" fuel = "20000"  >
+	</Stats>
+	<Computer yaw = "00000" pitch = "00000" roll = "0000" afterburner = "000000" maxspeed = "00000"  >
+	</Computer>
+	<Energy >
+		<Reactor recharge = "0" limit = "1000"  >
+		</Reactor>
+	</Energy>
+	<Dock x = "-92" y = "-158" z = "-123" size = "40"  >
+	</Dock>
+	<Dock x = "9" y = "1" z = "26.5" size = "8"  >
+	</Dock>
+	<Dock x = "9" y = "0" z = "26.5" size = "8"  >
+	</Dock>
+	<Dock x = "9" y = "-1" z = "26.5" size = "8"  >
+	</Dock>
+	<Hold volume = "100000000000" >
+		<Category file = "Natural_Products/Food" >
+			<import price = ".2" pricestddev = ".1" quantity = "0" quantitystddev = "0"  >
+			</import>
+		</Category>
+		<Category file = "Natural_Products/Aera_Food" >
+			<import price = "1.2" pricestddev = ".1" quantity = "5" quantitystddev = "3"  >
+			</import>
+		</Category>
+		<Category file = "Natural_Products/Liquor" >
+			<import price = ".5" pricestddev = ".1" quantity = "1" quantitystddev = "1"  >
+			</import>
+		</Category>
+		<Category file = "Natural_Products/Plants" >
+			<import price = ".5" pricestddev = ".1" quantity = "2" quantitystddev = "2"  >
+			</import>
+		</Category>
+		<Category file = "Natural_Products/Natural_Resources" >
+			<import price = ".4" pricestddev = ".1" quantity = "0" quantitystddev = "0"  >
+			</import>
+		</Category>
+		<Category file = "Raw_Materials/Metals/Crude" >
+			<import price = ".65" pricestddev = ".2" quantity = "42" quantitystddev = "15"  >
+			</import>
+		</Category>
+		<Category file = "Raw_Materials/Metals/Precious" >
+			<import price = ".65" pricestddev = ".2" quantity = "22" quantitystddev = "5"  >
+			</import>
+		</Category>
+		<Category file = "Raw_Materials/Metals/Alloys" >
+			<import price = ".8" pricestddev = ".2" quantity = "0" quantitystddev = "0"  >
+			</import>
+		</Category>
+		<Category file = "Raw_Materials/Metals/Aera_Alloys" >
+			<import price = ".7" pricestddev = ".2" quantity = "0" quantitystddev = "0"  >
+			</import>
+		</Category>
+		<Category file = "Raw_Materials/Metals/Radioactive" >
+			<import price = ".65" pricestddev = ".2" quantity = "25" quantitystddev = "5"  >
+			</import>
+		</Category>
+		<Category file = "Raw_Materials/Gems/Jewelry" >
+			<import price = ".95" pricestddev = ".1" quantity = "10" quantitystddev = "0"  >
+			</import>
+		</Category>
+		<Category file = "Raw_Materials/Gems/Industrial" >
+			<import price = ".7" pricestddev = ".2" quantity = "22" quantitystddev = "7"  >
+			</import>
+		</Category>
+		<Category file = "Raw_Materials/Stone" >
+			<import price = ".7" pricestddev = ".1" quantity = "7" quantitystddev = "3"  >
+			</import>
+		</Category>
+		<Category file = "Fuels/Crude" >
+			<import price = "0.7" pricestddev = ".2" quantity = "0" quantitystddev = "0"  >
+			</import>
+		</Category>
+		<Category file = "Fuels/Refined" >
+			<import price = "1" pricestddev = ".2" quantity = "3" quantitystddev = "2"  >
+			</import>
+		</Category>
+		<Category file = "Fuels/Refined" >
+			<import price = "1" pricestddev = ".2" quantity = "3" quantitystddev = "2"  >
+			</import>
+		</Category>
+		<Category file = "Compressed_Gasses" >
+			<import price = "1.2" pricestddev = ".1" quantity = "5" quantitystddev = "5"  >
+			</import>
+		</Category>
+		<Category file = "Recycled_Products" >
+			<import price = "1.1" pricestddev = ".1" quantity = "0" quantitystddev = "0"  >
+			</import>
+		</Category>
+		<Category file = "Machinery_Goods" >
+			<import price = "1.2" pricestddev = ".2" quantity = "0" quantitystddev = "0"  >
+			</import>
+		</Category>
+		<Category file = "Supplies/Aerospace_Supplies" >
+			<import price = ".8" pricestddev = ".1" quantity = "0" quantitystddev = "0"  >
+			</import>
+		</Category>
+		<Category file = "Supplies/Agriculteral_Supplies" >
+			<import price = ".7" pricestddev = ".1" quantity = "0" quantitystddev = "0"  >
+			</import>
+		</Category>
+		<Category file = "Supplies/Mining_Supplies" >
+			<import price = "1.3" pricestddev = ".1" quantity = "1" quantitystddev = "1"  >
+			</import>
+		</Category>
+		<Category file = "Supplies/Construction_Supplies" >
+			<import price = "1.2" pricestddev = ".1" quantity = "1" quantitystddev = "1"  >
+			</import>
+		</Category>
+		<Category file = "Supplies/Medical_Supplies" >
+			<import price = ".4" pricestddev = ".1" quantity = "0" quantitystddev = "0"  >
+			</import>
+		</Category>
+		<Category file = "Supplies/Aera_Medical_Supplies" >
+			<import price = "2" pricestddev = ".2" quantity = "5" quantitystddev = "3"  >
+			</import>
+		</Category>
+		<Category file = "Electronics" >
+			<import price = ".9" pricestddev = ".1" quantity = "0" quantitystddev = "0"  >
+			</import>
+		</Category>
+		<Category file = "Electronics/Robotics" >
+			<import price = "1.2" pricestddev = ".1" quantity = "1" quantitystddev = "1"  >
+			</import>
+		</Category>
+		<Category file = "Manufactured_Goods" >
+			<import price = ".7" pricestddev = ".2" quantity = "0" quantitystddev = "0"  >
+			</import>
+		</Category>
+		<Category file = "Entertainment" >
+			<import price = "1.8" pricestddev = ".1" quantity = "1" quantitystddev = "1"  >
+			</import>
+		</Category>
+		<Category file = "Entertainment" >
+			<import price = ".8" pricestddev = ".1" quantity = "1" quantitystddev = "1"  >
+			</import>
+		</Category>
+		<Category file = "Contraband" >
+			<import price = "1.1" pricestddev = ".4" quantity = "0" quantitystddev = "0"  >
+			</import>
+		</Category>
+		<Category file = "Contraband/Aera" >
+			<import price = "1.25" pricestddev = ".05" quantity = "0" quantitystddev = "0"  >
+			</import>
+		</Category>
+		<Category file = "starships/Aera/Light" >
+			<import price = "1" pricestdev = ".1" quantity = "12" quantitystddev = "5"  >
+			</import>
+		</Category>
+		<Category file = "starships/Aera/Medium" >
+			<import price = "1" pricestdev = ".1" quantity = "6" quantitystddev = "3"  >
+			</import>
+		</Category>
+		<Category file = "starships/Hunter/Light" >
+			<import price = "1" pricestdev = ".1" quantity = "12" quantitystddev = "5"  >
+			</import>
+		</Category>
+		<Category file = "starships/Hunter/Medium" >
+			<import price = "1" pricestdev = ".1" quantity = "6" quantitystddev = "3"  >
+			</import>
+		</Category>
+		<Category file = "upgrades/Weapons/Mounted_Guns_Light" >
+			<import price = "1" pricestddev = ".1" quantity = "12" quantitystddev = "5"  >
+			</import>
+		</Category>
+		<Category file = "upgrades/Weapons/Mounted_Guns_Medium" >
+			<import price = "1" pricestddev = ".1" quantity = "6" quantitystddev = "5"  >
+			</import>
+		</Category>
+		<Category file = "upgrades/Weapons/Beam_Arrays_Light" >
+			<import price = "1" pricestddev = ".1" quantity = "6" quantitystddev = "3"  >
+			</import>
+		</Category>
+		<Category file = "upgrades/Weapons/Beam_Arrays_Medium" >
+			<import price = "1" pricestddev = ".1" quantity = "-2" quantitystddev = "5"  >
+			</import>
+		</Category>
+		<Category file = "upgrades/Weapons/Mount_Enhancements" >
+			<import price = "1" pricestddev = ".1" quantity = "-12" quantitystddev = "15"  >
+			</import>
+		</Category>
+		<Category file = "upgrades/Weapons/Turrets" >
+			<import price = "1" pricestddev = ".1" quantity = "1" quantitystddev = "1"  >
+			</import>
+		</Category>
+		<Category file = "upgrades/Miscellaneous/SubUnits" >
+			<import price = "1" pricestddev = ".1" quantity = "1" quantitystddev = "1"  >
+			</import>
+		</Category>
+		<Category file = "upgrades/Reactors/Light" >
+			<import price = "1" pricestddev = ".1" quantity = "12" quantitystddev = "5"  >
+			</import>
+		</Category>
+		<Category file = "upgrades/Reactors/Medium" >
+			<import price = "1" pricestddev = ".1" quantity = "6" quantitystddev = "3"  >
+			</import>
+		</Category>
+		<Category file = "upgrades/Engines/Engine_Enhancements_Light" >
+			<import price = "1" pricestddev = ".1" quantity = "5" quantitystddev = "2"  >
+			</import>
+		</Category>
+		<Category file = "upgrades/Engines/Engine_Enhancements_Medium" >
+			<import price = "1" pricestddev = ".1" quantity = "-2" quantitystddev = "7"  >
+			</import>
+		</Category>
+		<Category file = "upgrades/Shield_Systems/Light" >
+			<import price = "1" pricestddev = ".1" quantity = "12" quantitystddev = "5"  >
+			</import>
+		</Category>
+		<Category file = "upgrades/Shield_Systems/Medium" >
+			<import price = "1" pricestddev = ".1" quantity = "6" quantitystddev = "3"  >
+			</import>
+		</Category>
+		<Category file = "upgrades/Armor_Modification" >
+			<import price = "1" pricestddev = ".1" quantity = "12" quantitystddev = "6"  >
+			</import>
+		</Category>
+		<Category file = "upgrades/Hull_Upgrades" >
+			<import price = "1" pricestddev = ".1" quantity = "12" quantitystddev = "6"  >
+			</import>
+		</Category>
+		<Category file = "upgrades/ECM_Systems" >
+			<import price = "1" pricestddev = ".1" quantity = "6" quantitystddev = "3"  >
+			</import>
+		</Category>
+		<Category file = "upgrades/Repair_Systems" >
+			<import price = "1" pricestddev = ".1" quantity = "2" quantitystddev = "1"  >
+			</import>
+		</Category>
+		<Category file = "upgrades/Radar/Basic" >
+			<import price = "1" pricestddev = ".1" quantity = "6" quantitystddev = "3"  >
+			</import>
+		</Category>
+		<Category file = "upgrades/Miscellaneous" >
+			<import price = "1" pricestddev = ".1" quantity = "3" quantitystddev = "2"  >
+			</import>
+		</Category>
+		<Category file = "upgrades/Ammunition" >
+			<import price = "1" pricestddev = ".1" quantity = "21" quantitystddev = "5"  >
+			</import>
+		</Category>
+	</Hold>
+	<Upgrade file = "standard_missions"  >
+	</Upgrade>
+	<Upgrade file = "aera_missions"  >
+	</Upgrade>
+</Unit>

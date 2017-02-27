@@ -1,0 +1,193 @@
+<!--Last Edited by: Daniel-->
+<!--23MAY01-->
+<Unit>
+	<Hold volume="100000000000">
+		<Category file="Natural_Products/Rlaan_Food">
+			<import price="1.5" pricestddev=".2" quantity="55" quantitystddev="25"/>
+		</Category>
+		<Category file="Natural_Products/Liquor">
+			<import price=".8" pricestddev=".2" quantity="30" quantitystddev="12"/>
+		</Category>
+		<Category file="Natural_Products/Plants">
+			<import price=".8" pricestddev=".2" quantity="20" quantitystddev="12"/>
+		</Category>
+		<Category file="Natural_Products/Natural_Resources">
+			<import price=".8" pricestddev=".2" quantity="35" quantitystddev="25"/>
+		</Category>
+		<Category file="Raw_Materials/Metals/Crude">
+			<import price="1" pricestddev=".1" quantity="12" quantitystddev="5"/>
+		</Category>
+		<Category file="Raw_Materials/Metals/Precious">
+			<import price="1" pricestddev=".1" quantity="12" quantitystddev="5"/>
+		</Category>
+		<Category file="Raw_Materials/Metals/Alloys">
+			<import price=".8" pricestddev=".1" quantity="2" quantitystddev="2"/>
+		</Category>
+		<Category file="Raw_Materials/Metals/Rlaan_Alloys">
+			<import price=".7" pricestddev=".1" quantity="0" quantitystddev="0"/>
+		</Category>
+		<Category file="Raw_Materials/Metals/Radioactive">
+			<import price=".8" pricestddev=".1" quantity="2" quantitystddev="1"/>
+		</Category>
+		<Category file="Raw_Materials/Gems/Jewelry">
+			<import price=".7" pricestddev=".1" quantity="0" quantitystddev="0"/>
+		</Category>
+		<Category file="Raw_Materials/Gems/Industrial">
+			<import price="1.2" pricestddev=".2" quantity="2" quantitystddev="1"/>
+		</Category>
+		<Category file="Raw_Materials/Stone">
+			<import price=".9" pricestddev=".1" quantity="16" quantitystddev="15"/>
+		</Category>
+		<Category file="Fuels/Crude">
+			<import price="0.8" pricestddev=".2" quantity="28" quantitystddev="25"/>
+		</Category>
+		<Category file="Fuels/Refined">
+			<import price="1.05" pricestddev=".3" quantity="8" quantitystddev="2"/>
+		</Category>
+		<Category file="Fuels/Rlaan_Refined">
+			<import price="1.05" pricestddev=".3" quantity="8" quantitystddev="2"/>
+		</Category>
+		<Category file="Compressed_Gasses">
+			<import price=".7" pricestddev=".2" quantity="70" quantitystddev="25"/>
+		</Category>
+		<Category file="Recycled_Products">
+			<import price="1.2" pricestddev=".1" quantity="10" quantitystddev="7"/>
+		</Category>
+		<Category file="Machinery_Goods">
+			<import price="1.1" pricestddev=".1" quantity="10" quantitystddev="4"/>
+		</Category>
+		<Category file="Supplies/Aerospace_Supplies">
+			<import price="1.2" pricestddev=".1" quantity="5" quantitystddev="2"/>
+		</Category>
+		<Category file="Supplies/Agriculteral_Supplies">
+			<import price="1.2" pricestddev=".1" quantity="12" quantitystddev="7"/>
+		</Category>
+		<Category file="Supplies/Mining_Supplies">
+			<import price=".6" pricestddev=".1" quantity="1" quantitystddev="1"/>
+		</Category>
+		<Category file="Supplies/Rlaan_Construction_Supplies">
+			<import price="1.6" pricestddev=".1" quantity="17" quantitystddev="5"/>
+		</Category>
+		<Category file="Supplies/Medical_Supplies">
+			<import price=".5" pricestddev=".1" quantity="15" quantitystddev="3"/>
+		</Category>
+		<Category file="Supplies/Rlaan_Medical_Supplies">
+			<import price="1.94" pricestddev=".1" quantity="15" quantitystddev="3"/>
+		</Category>
+		<Category file="Research/Environmental">
+			<import price="13" pricestddev="2" quantity="0" quantitystddev="0"/>
+		<!-- price these at 1/10 their normal price...-->
+		</Category>
+		<Category file="Electronics">
+			<import price="1.1" pricestddev=".1" quantity="5" quantitystddev="2"/>
+		</Category>
+		<Category file="Electronics/Bionics">
+			<import price=".87" pricestddev=".1" quantity="15" quantitystddev="25"/>
+		</Category>
+		<Category file="Electronics/Robotics">
+			<import price="1" pricestddev=".1" quantity="1" quantitystddev="1"/>
+		</Category>
+		<Category file="Manufactured_Goods">
+			<import price="1.1" pricestddev=".1" quantity="4" quantitystddev="2"/>
+		</Category>
+		<Category file="Entertainment">
+			<import price="1" pricestddev=".1" quantity="2" quantitystddev="1"/>
+		</Category>
+		<Category file="Contraband">
+			<import price="1.4" pricestddev=".3" quantity="0" quantitystddev="0"/>
+		</Category>
+		<Category file="Contraband/Rlaan">
+			<import price=".94" pricestddev=".15" quantity="12" quantitystddev="40"/>
+		</Category>
+		<Category file="starships/Rlaan/Light">
+ 			<import price="1" pricestdev=".1" quantity="12" quantitystddev="14"/>
+		</Category>
+		<Category file="starships/Merchant/Light">
+ 			<import price="1" pricestdev=".1" quantity="12" quantitystddev="5"/>
+		</Category>
+		<Category file="starships/Merchant/Medium">
+ 			<import price="1" pricestdev=".1" quantity="3" quantitystddev="5"/>
+		</Category>
+		<Category file="starships/ISO/Light">
+ 			<import price="1" pricestdev=".1" quantity="12" quantitystddev="5"/>
+		</Category>
+		<Category file="starships/ISO/Medium">
+ 			<import price="1" pricestdev=".1" quantity="4" quantitystddev="5"/>
+		</Category>
+		<Category file="starships/ISO/Heavy">
+ 			<import price="1" pricestdev=".1" quantity="0" quantitystddev="5"/>
+		</Category>
+		<Category file="upgrades/Weapons/Mounted_Guns_Light">
+			<import price="1" pricestddev=".1" quantity="12" quantitystddev="4"/>
+		</Category>
+		<Category file="upgrades/Weapons/Mounted_Guns_Medium">
+			<import price="1" pricestddev=".1" quantity="6" quantitystddev="3"/>
+		</Category>
+		<Category file="upgrades/Weapons/Beam_Arrays_Light">
+			<import price="1" pricestddev=".1" quantity="3" quantitystddev="5"/>
+		</Category>
+		<Category file="upgrades/Weapons/Beam_Arrays_Medium">
+			<import price="1" pricestddev=".1" quantity="-3" quantitystddev="5"/>
+		</Category>
+		<Category file="upgrades/Weapons/Mount_Enhancements">
+			<import price="1" pricestddev=".1" quantity="-50" quantitystddev="51"/>
+		</Category>
+		<Category file="upgrades/Weapons/Turrets">
+			<import price="1" pricestddev=".1" quantity="1" quantitystddev="1"/>
+		</Category>
+		<Category file="upgrades/Miscellaneous/SubUnits">
+			<import price="1" pricestddev=".1" quantity="1" quantitystddev="1"/>
+		</Category>
+		<Category file="upgrades/Reactors/Light">
+			<import price="1" pricestddev=".1" quantity="20" quantitystddev="6"/>
+		</Category>
+		<Category file="upgrades/Reactors/Medium">
+			<import price="1" pricestddev=".1" quantity="-2" quantitystddev="6"/>
+		</Category>
+		<Category file="upgrades/Capacitors/Reactors">		
+			<import price="1" pricestddev=".1" quantity="-3" quantitystddev="6"/>
+		</Category>
+		<Category file="upgrades/Shield_Systems/Light">
+			<import price="1" pricestddev=".1" quantity="20" quantitystddev="6"/>
+		</Category>
+		<Category file="upgrades/Shield_Systems/Medium">
+			<import price="1" pricestddev=".1" quantity="-2" quantitystddev="6"/>
+		</Category>
+		<Category file="upgrades/Armor_Modification">
+			<import price="1" pricestddev=".1" quantity="20" quantitystddev="5"/>
+		</Category>
+		<Category file="upgrades/Hull_Upgrades">
+			<import price="1" pricestddev=".1" quantity="20" quantitystddev="2"/>
+		</Category>
+		<Category file="upgrades/ECM_Systems">
+			<import price="1" pricestddev=".1" quantity="6" quantitystddev="3"/>
+		</Category>
+		<Category file="upgrades/Repair_Systems">
+			<import price="1" pricestddev=".1" quantity="-2" quantitystddev="4"/>
+		</Category>
+		<Category file="upgrades/Radar/Basic">
+			<import price="1" pricestddev=".1" quantity="20" quantitystddev="6"/>
+		</Category>
+		<Category file="upgrades/Radar/Intermediate">
+			<import price="1" pricestddev=".1" quantity="9" quantitystddev="8"/>
+		</Category>
+		<Category file="upgrades/Radar/Advanced">
+			<import price="1" pricestddev=".1" quantity="-12" quantitystddev="17"/>
+		</Category>
+		<Category file="upgrades/Miscellaneous">
+			<import price="1" pricestddev=".1" quantity="2" quantitystddev="1"/>
+		</Category>
+		<Category file="upgrades/Ammunition">
+			<import price="1" pricestddev=".1" quantity="52" quantitystddev="28"/>
+		</Category>
+		<Category file="upgrades/Engines/Engine_Enhancements_Light">
+			<import price="1" pricestddev=".1" quantity="3" quantitystddev="2"/>
+		</Category>
+		<Category file="upgrades/Engines/Engine_Enhancements_Medium">
+			<import price="1" pricestddev=".1" quantity="0" quantitystddev="2"/>
+		</Category>
+	</Hold>
+	<Upgrade file="standard_missions"/>
+	<Upgrade file="iso_missions"/>
+	<Upgrade file="rlaan_missions"/>
+</Unit>

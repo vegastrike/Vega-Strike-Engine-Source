@@ -1,0 +1,38 @@
+
+The sprite (spr) file has the following format:
+image alphaimage
+scaleX scaleY
+positionX positionY
+
+The helper image, hull.png, has dimensions of 800x800 pixels. Though this is of no importance, since it will be scaled relatively to the screen size where the complete screen is scale=2.
+We set the HUD dimensions for you own ship:
+* scaleX = 0.400
+Now, you would think that scaleY should have the same value. However the game is written for the usual screen ratio (800:600 = 4:3 = 1.333) though actual ratios may vary (1024:800 = 1.28, 1280/1024 = 1.25, 1280/960 = 1.33).
+Therefore, you must multiply the scaleY value by the screen ratio (0.4*1.33) to obtain:
+* scaleY = 0.533
+
+In addition if your helper image would have a ratio (e.g. 800:400 = 2), you'd need to divide scaleY by the image ratio (resulting in scaleY = 0.266)
+
+In the disabled-cockpit your own ship center on the HUD is located at:
+* positionX = -0.765
+* positionY = -0.700
+
+Now, to my shield. The full shield has 256x256 pixels.
+Front shield has dimensions of 180x71 pixels. This means:
+* scaleX = 0.400 * 180/256 = 0.281
+* scaleY = 0.533 * 71/256 = 0.148
+* positionX = -0.765
+* positionY = -0.700 - (128-71/2)*0.533/256 = -0.892
+
+Back shield:
+* positionY = -0.700 + (128-71/2)*0.533/256 = -0.508
+
+Right shield has dimensions of 71x180 pixels. This means:
+* scaleX = 0.400 * 71/256 = 0.111
+* scaleY = 0.533 * 180/256 = 0.375
+* positionX = -0.765 - (128-71/2)*0.400/256 = -0.765 - 0.145 = -0.910
+* positionY = -0.700
+
+Left Shield
+* positionX = -0.765 + (128-71/2)*0.400/256 = -0.765 + 0.145 = -0.620
+ 

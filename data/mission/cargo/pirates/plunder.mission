@@ -1,0 +1,28 @@
+<mission>
+	<settings>
+		<origin  planet="earth" x="0000" y="100" z="000.0"/>
+	</settings>
+
+	<variables>
+		<var name="defaultplayer" value="blue"/>
+		<var name="system" value="enigma_sector/rigel" />
+		<var name="mission_name" value="Base Contraband Cargo Delivery" />
+		<var name="description" value="A nearby operative on a base requires a resupply for his own purposes. We will disclose the location upon mission acceptance. The base lies within 4 systems. Your pay will be 1875 per system traversed in a minimal path to the destination."/>
+	</variables>
+        <flightgroups>
+                <flightgroup name="blue" faction="confed" type="nova" ainame="default" waves="1" nr_ships="2">
+			<pos x="0400" y="-35400" z="47200000"/>
+			<rot x="180.0" y="180.0" z="180.0"/>
+			<order order="tmptarget" target="omikron"/>
+			<order priority="0" order="superiority" target="enemy"/>
+			<order priority="1" order="bomber" target="omikron"/>
+			<order priority="2" order="escort" target="blue"/>
+		</flightgroup>
+        </flightgroups>
+	<python>
+import plunder
+newmission = plunder.plunder ( 0, 'pirates', 5, 'Contraband', True, 'pirate_mission3')
+newmission=0
+
+</python>
+</mission>

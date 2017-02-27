@@ -1,0 +1,1 @@
+planets/ocean.texture~ planets/ocean.texture^Snow_light.texturewrapx4wrapy2 planets/desert.texture planets/Snow2.texture^Snow_light.texturewrapx6wrapy3 planets/Dirt1.texture^planets/Dirt_light.texture planets/forest.texture planets/forest1.texture

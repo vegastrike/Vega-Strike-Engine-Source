@@ -1,0 +1,193 @@
+<mission>
+	<settings>
+		<origin  planet="earth" x="0000" y="100" z="000.0"/>
+	</settings>
+
+	<variables>
+<!--		<var name="continuousterrain" value="continuousterrain.txt"/>-->
+<!--		<var name="difficulty" value=".1" />-->
+		<var name="credits" value="10000"/>
+		<var name="defaultplayer" value="blue"/>
+		<var name="mission_name" value="4 versus 4" />
+		<var name="splashscreen" value="bad_guys_vs_good_guys.bmp" />
+                <var name="system" value="stage_sector/stage" />
+		<var name="description" value="4vs4.txt" />
+	</variables>
+
+        <flightgroups>
+            <flightgroup name="navajo" faction="confed" type="admonisher" ainame="sitting_duck" waves="1" nr_ships="1">
+                        <pos x="120000" y="40000" z="50000.0"/>
+			<rot x="180.0" y="180.0" z="180.0"/>
+		    </flightgroup>
+
+
+	    <flightgroup name="oro" faction="confed" type="aelar" ainame="macho" waves="1" nr_ships="2">
+                        <pos x="105000" y="30000" z="30000.0"/>
+			<rot x="180.0" y="180.0" z="180.0"/>
+		    </flightgroup>
+
+    <flightgroup name="zot" faction="confed" type="aeon" ainame="macho" waves="1" nr_ships="2">
+                        <pos x="105000" y="50000" z="30000.0"/>
+			<rot x="180.0" y="180.0" z="180.0"/>
+		    </flightgroup>
+
+    <flightgroup name="zot1" faction="confed" type="aevant" ainame="macho" waves="1" nr_ships="2">
+                        <pos x="105000" y="60000" z="30000.0"/>
+			<rot x="180.0" y="180.0" z="180.0"/>
+		    </flightgroup>
+
+    <flightgroup name="zot2" faction="confed" type="lancelot" ainame="macho" waves="1" nr_ships="2">
+                        <pos x="105000" y="70000" z="30000.0"/>
+			<rot x="180.0" y="180.0" z="180.0"/>
+		    </flightgroup>
+
+    <flightgroup name="zot3" faction="confed" type="mule" ainame="macho" waves="1" nr_ships="2">
+                        <pos x="105000" y="80000" z="30000.0"/>
+			<rot x="180.0" y="180.0" z="180.0"/>
+		    </flightgroup>
+
+    <flightgroup name="zot4" faction="confed" type="progeny" ainame="macho" waves="1" nr_ships="2">
+                        <pos x="105000" y="90000" z="30000.0"/>
+			<rot x="180.0" y="180.0" z="180.0"/>
+		    </flightgroup>
+
+    <flightgroup name="zot5" faction="confed" type="ancestor" ainame="macho" waves="1" nr_ships="2">
+                        <pos x="105000" y="100000" z="30000.0"/>
+			<rot x="180.0" y="180.0" z="180.0"/>
+		    </flightgroup>
+
+    <flightgroup name="zot6" faction="confed" type="pacifier" ainame="macho" waves="1" nr_ships="2">
+                        <pos x="105000" y="110000" z="30000.0"/>
+			<rot x="180.0" y="180.0" z="180.0"/>
+		    </flightgroup>
+
+    <flightgroup name="zot7" faction="confed" type="admonisher" ainame="macho" waves="1" nr_ships="2">
+                        <pos x="105000" y="120000" z="30000.0"/>
+			<rot x="180.0" y="180.0" z="180.0"/>
+		    </flightgroup>
+
+    <flightgroup name="zot8" faction="confed" type="schroedinger" ainame="macho" waves="1" nr_ships="2">
+                        <pos x="105000" y="130000" z="30000.0"/>
+			<rot x="180.0" y="180.0" z="180.0"/>
+		    </flightgroup>
+
+
+    <flightgroup name="zot9" faction="confed" type="plowshare" ainame="macho" waves="1" nr_ships="2">
+                        <pos x="105000" y="140000" z="30000.0"/>
+			<rot x="180.0" y="180.0" z="180.0"/>
+		    </flightgroup>
+	    <flightgroup name="yeardly" faction="confed" type="gawain" ainame="macho" waves="1" nr_ships="2">
+                        <pos x="105000" y="40000" z="30000.0"/>
+			<rot x="180.0" y="180.0" z="180.0"/>
+		    </flightgroup>
+
+	    <flightgroup name="oldgringo" faction="confed" type="clydesdale" ainame="macho" waves="1" nr_ships="2">
+                        <pos x="105000" y="20000" z="30000.0"/>
+			<rot x="180.0" y="180.0" z="180.0"/>
+		    </flightgroup>
+		    
+     <flightgroup name="pancho" faction="confed" type="vidar" ainame="macho" waves="1" nr_ships="2">
+                        <pos x="230000" y="30000" z="30000.0"/>
+			<rot x="180.0" y="180.0" z="180.0"/>
+		    </flightgroup>
+
+        
+                <flightgroup name="contras" faction="confed" type="thrud" ainame="macho" waves="1" nr_ships="2">
+                        <pos x="225000" y="30000" z="30000.0"/>
+			<rot x="180.0" y="180.0" z="180.0"/>
+		    </flightgroup>
+
+             <flightgroup name="yucatan" faction="confed" type="lodur" ainame="macho" waves="1" nr_ships="2">
+                        <pos x="235000" y="30000" z="15000.0"/>
+			<rot x="180.0" y="180.0" z="180.0"/>
+		    </flightgroup>
+
+		   
+                    <flightgroup name="losfederales" faction="confed" type="idun" ainame="macho" waves="1" nr_ships="2">
+                        <pos x="110000" y="30000" z="25000.0"/>
+			<rot x="180.0" y="180.0" z="180.0"/>
+		    </flightgroup>
+
+
+ 		    <flightgroup name="lospolicias" faction="confed" type="huldra" ainame="macho" waves="1" nr_ships="2">
+                        <pos x="115000" y="32000" z="32000.0"/>
+			<rot x="180.0" y="180.0" z="180.0"/>
+		    </flightgroup>
+
+ 		    <flightgroup name="lp2" faction="confed" type="ox" ainame="macho" waves="1" nr_ships="2">
+                        <pos x="115000" y="34000" z="32000.0"/>
+			<rot x="180.0" y="180.0" z="180.0"/>
+		    </flightgroup>
+
+ 		    <flightgroup name="lp3" faction="confed" type="kahan" ainame="macho" waves="1" nr_ships="2">
+                        <pos x="115000" y="36000" z="32000.0"/>
+			<rot x="180.0" y="180.0" z="180.0"/>
+		    </flightgroup>
+
+ 		    <flightgroup name="lp4" faction="confed" type="hyena" ainame="macho" waves="1" nr_ships="2">
+                        <pos x="115000" y="38000" z="32000.0"/>
+			<rot x="180.0" y="180.0" z="180.0"/>
+		    </flightgroup>
+
+ 		    <flightgroup name="lp5" faction="confed" type="llama" ainame="macho" waves="1" nr_ships="2">
+                        <pos x="115000" y="40000" z="32000.0"/>
+			<rot x="180.0" y="180.0" z="180.0"/>
+		    </flightgroup>
+
+ 		    <flightgroup name="lp6" faction="confed" type="watson" ainame="macho" waves="1" nr_ships="2">
+                        <pos x="115000" y="42000" z="32000.0"/>
+			<rot x="180.0" y="180.0" z="180.0"/>
+		    </flightgroup>
+
+ 		    <flightgroup name="lp7" faction="confed" type="hammer" ainame="macho" waves="1" nr_ships="2">
+                        <pos x="115000" y="44000" z="32000.0"/>
+			<rot x="180.0" y="180.0" z="180.0"/>
+		    </flightgroup>
+
+ 		    <flightgroup name="lp8" faction="confed" type="sickle" ainame="macho" waves="1" nr_ships="2">
+                        <pos x="115000" y="46000" z="32000.0"/>
+			<rot x="180.0" y="180.0" z="180.0"/>
+		    </flightgroup>
+
+ 		    <flightgroup name="lp9" faction="confed" type="tesla" ainame="macho" waves="1" nr_ships="2">
+                        <pos x="115000" y="48000" z="32000.0"/>
+			<rot x="180.0" y="180.0" z="180.0"/>
+		    </flightgroup>
+
+ 		    <flightgroup name="lp10" faction="confed" type="archimedes" ainame="macho" waves="1" nr_ships="2">
+                        <pos x="115000" y="52000" z="32000.0"/>
+			<rot x="180.0" y="180.0" z="180.0"/>
+		    </flightgroup>
+
+ 		    <flightgroup name="lp11" faction="confed" type="robin" ainame="macho" waves="1" nr_ships="2">
+                        <pos x="115000" y="56000" z="32000.0"/>
+			<rot x="180.0" y="180.0" z="180.0"/>
+		    </flightgroup>
+
+ 		    <flightgroup name="lp12" faction="confed" type="dodo" ainame="macho" waves="1" nr_ships="2">
+                        <pos x="115000" y="58000" z="32000.0"/>
+			<rot x="180.0" y="180.0" z="180.0"/>
+		    </flightgroup>
+
+ 		    <flightgroup name="lp13" faction="confed" type="derivative" ainame="macho" waves="1" nr_ships="2">
+                        <pos x="115000" y="60000" z="32000.0"/>
+			<rot x="180.0" y="180.0" z="180.0"/>
+		    </flightgroup>
+
+ 		    <flightgroup name="lp14" faction="confed" type="determinant" ainame="macho" waves="1" nr_ships="2">
+                        <pos x="115000" y="62000" z="32000.0"/>
+			<rot x="180.0" y="180.0" z="180.0"/>
+		    </flightgroup>
+
+ 		    <flightgroup name="lp15" faction="confed" type="convolution" ainame="macho" waves="1" nr_ships="2">
+                        <pos x="115000" y="64000" z="32000.0"/>
+			<rot x="180.0" y="180.0" z="180.0"/>
+		    </flightgroup>
+
+ 		    <flightgroup name="lp16" faction="confed" type="redeemer" ainame="macho" waves="1" nr_ships="2">
+                        <pos x="115000" y="66000" z="32000.0"/>
+			<rot x="180.0" y="180.0" z="180.0"/>
+		    </flightgroup>
+
+        </flightgroups>
+</mission>

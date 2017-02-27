@@ -1,0 +1,17 @@
+<?xml version="1.0"?>
+<technique>
+    <!-- Fixed-function technique.
+         Uses the built-in fixed function technique set (adaptive)
+         to render enabled effects with minimum passes.
+    -->
+
+    <!-- sequence 15 to go after Z-write prepasses (that's 10) -->
+    <pass type="fixed" sequence="15">
+        <texture_unit src="decal:0" target="0" name="diffuseMap"/>
+        <texture_unit src="decal:1" target="1" name="specMap"/>
+    </pass>
+
+    <pass type="fixed" sequence="16" blend="alpha_blend" polygon_offset_units="-1">
+        <texture_unit src="decal:2" target="0" name="cloudMap"/>
+    </pass>
+</technique>

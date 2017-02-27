@@ -1,0 +1,32 @@
+<Unit>
+	<Description combatRole="TSMALLCAP">
+	</Description>
+
+
+<Meshfile file="turretlauncher.bfxm" />
+
+
+
+		<Thrust>
+		<Engine Afterburner="000000" Forward="000000" Retro="0000" Left="0000" Right="0000" Top="00000" Bottom="000000"/>
+		<Maneuver yaw="113" pitch="0" roll="0000"/>
+	</Thrust>
+	<Sound></Sound>
+	<Defense>
+		<Armor front="80" right="80" left="80" back="80"/>
+		<Shields front="130" back="130" recharge="9.333333"/>
+		<Hull strength="110"/>
+		<Cloak cloakmin=".01" cloakrate=".2" cloakenergy="0"/>
+	</Defense>
+	<Stats mass="1" momentofinertia="1" fuel="20000"></Stats>
+	<Computer yaw="33" pitch="0" roll="0000" afterburner="000000" maxspeed="00000">
+		<Radar itts="true" range="30000" color="true" error="0" lockcone="0.1"/>
+	</Computer>
+
+	<Energy>
+		<Reactor recharge="10" limit="10"/>
+	</Energy>
+	<Subunit file="turret_capship_torplauncher_gun" y="1" ri="0" rj="1" rk="0" qi="0" qj="0" qk="-1" restricted="0"/>  
+	<Subunit file="turret_capship_pd_gun" y="1" ri="0" rj="1" rk="0" qi="0" qj="0" qk="-1" restricted="0"/>  
+
+</Unit>

@@ -1,0 +1,27 @@
+#EXTM3U
+#aera-specific
+../music/terranpeace.ogg
+../music/terranpeace2.ogg
+../music/Machina.ogg
+#common peace/away files
+../music/mission.ogg
+../music/steel_p.ogg
+../music/alienrockalectro2.ogg
+#avoid monotonous play
+../music/Machina.ogg
+../music/Machina.ogg
+../music/mission.ogg
+../music/steel_p.ogg
+../music/mission.ogg
+../music/steel_p.ogg
+../music/mission.ogg
+../music/steel_p.ogg
+../music/terranpeace.ogg
+../music/terranpeace.ogg
+../music/terranpeace.ogg
+../music/terranpeace2.ogg
+../music/peace1.ogg
+../music/peace2.ogg
+../music/peace3.ogg
+../music/peace6_p.ogg
+../music/peace5_p.ogg

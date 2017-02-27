@@ -1,0 +1,30 @@
+<mission>
+    <settings>
+        <origin planet="earth" x="0000" y="100" z="000.0"/>
+    </settings>
+
+    <variables>
+        <var name="defaultplayer" value="blue"/>
+        <var name="mission_name" value="4 versus 4" />
+        <var name="splashscreen" value="" />
+        <var name="system" value="testsystems/nothing" />
+        <var name="description" value="4vs4.txt" />
+    </variables>
+    <flightgroups>
+        <flightgroup name="Knight" faction="confed" type="Dostoevsky" ainame="ai_sitting_duck.py" waves="1" nr_ships="1">
+            <pos x="53460000" y="4019000" z="40000.0"/>
+            <rot x="180.0" y="180.0" z="180.0"/>
+        </flightgroup>
+    </flightgroups>
+    <python>
+import balancer
+bomber=["Areus","Goddard","Kierkegaard","Pacifier","Taizong"]
+interceptor=["Derivative","Dirge","Gawain","Nicander","Progeny","Schroedinger","Shizu"]
+fighter=["Admonisher","Ancestor","Ariston","Convolution","Determinant","Dostoevsky","Hammer","Hyena","Lancelot","Redeemer","Regret","Robin","Seaxbane","Sickle","Vendetta.hunter","Zhuangzong"]
+shuttle=["Dodo","Entourage","Franklin","H496","Kafka","Koala.civvie","Llama","Plowshare","Sartre"]
+support=["Charillus","Cultivator","Diligence","Gaozong","Gleaner","Hidalgo","Mule","Ox","Shenzong","Yeoman"]
+other=["MacGyver","Quicksilver","GTIO"]
+capships=["Corvette","huldra","kahan","vark","Vigilance","archimedes","Clydesdale","Hawking","shundi","tesla","yavok","Midwife","vitik","watson","yrilan"]
+my_obj=balancer.balancer(fighter+bomber+interceptor+shuttle+capships+other)
+    </python>
+</mission>

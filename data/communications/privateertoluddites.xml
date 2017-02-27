@@ -1,0 +1,223 @@
+<comm>
+	<node text="startingNode" relationship="0"><!-- node 0 (starting node: Don't link here)-->
+		<edge index="1"/>
+		<edge index="2"/>
+		<edge index="3"/>
+	</node>
+
+<!-- Starting Points -->
+	<node text="May man triumph over machine!" relationship=".2"><!-- node 1-->
+		<edge index="4"/>
+		<edge index="5"/>
+		<edge index="6"/>
+		<edge index="7"/>
+	</node>
+	<node text="I'm not looking for trouble, Martyr - maybe you can look elsewhere." relationship="0"><!-- node 2-->
+		<edge index="8"/>
+		<edge index="9"/>
+		<edge index="10"/>
+		<edge index="11"/>
+	</node>
+	<node text="Oh, I'll show YOU some life altering technology, you reactionary sod." relationship="-.2"><!-- node 3-->
+		<edge index="12"/>
+		<edge index="13"/>
+		<edge index="14"/>
+		<edge index="15"/>
+	</node>
+<!-- End of Starting Points -->
+
+<!-- Other Nodes -->
+	<node text="I don't want to fight, Martyr." relationship=".046875"><!-- node 4-->
+		<edge index="4"/>
+		<edge index="5"/>
+		<edge index="6"/>
+		<edge index="7"/>
+	</node>
+	<node text="The technology of my weaponry will surely change the way you live!" relationship="-.0625"><!-- node 5-->
+		<edge index="4"/>
+		<edge index="5"/>
+		<edge index="6"/>
+		<edge index="7"/>
+	</node>
+	<node text="Ever tasted plasma?" relationship="-.078125"><!-- node 6-->
+		<edge index="4"/>
+		<edge index="5"/>
+		<edge index="6"/>
+		<edge index="7"/>
+	</node>
+	<node text="Die, you reactionary zealot!" relationship="-.125"><!-- node 7-->
+		<edge index="4"/>
+		<edge index="5"/>
+		<edge index="6"/>
+		<edge index="7"/>
+	</node>
+	<node text="You cannot reverse the flow of progress!" relationship="-.03125"><!-- node 8-->
+		<edge index="8"/>
+		<edge index="9"/>
+		<edge index="10"/>
+		<edge index="11"/>
+	</node>
+	<node text="Out of my way, you religious nut!" relationship="-.03125"><!-- node 9-->
+		<edge index="8"/>
+		<edge index="9"/>
+		<edge index="10"/>
+		<edge index="11"/>
+	</node>
+	<node text="Don't make me show you what my machine is capable of." relationship="-.0625"><!-- node 10-->
+		<edge index="8"/>
+		<edge index="9"/>
+		<edge index="10"/>
+		<edge index="11"/>
+	</node>
+	<node text="Die, you lunatic!" relationship="-.125"><!-- node 11-->
+		<edge index="8"/>
+		<edge index="9"/>
+		<edge index="10"/>
+		<edge index="11"/>
+	</node>
+	<node text="I don't care for prattling terrorists." relationship="-.0625"><!-- node 12-->
+		<edge index="12"/>
+		<edge index="13"/>
+		<edge index="14"/>
+		<edge index="15"/>
+	</node>
+	<node text="Say your prayers, nutcase." relationship="-.0625"><!-- node 13-->
+		<edge index="12"/>
+		<edge index="13"/>
+		<edge index="14"/>
+		<edge index="15"/>
+	</node>
+	<node text="What's with you Luddites anyway?" relationship="-.0625"><!-- node 14-->
+		<edge index="12"/>
+		<edge index="13"/>
+		<edge index="14"/>
+		<edge index="15"/>
+	</node>
+	<node text="Redeem this!" relationship="-.125"><!-- node 15-->
+		<edge index="12"/>
+		<edge index="13"/>
+		<edge index="14"/>
+		<edge index="15"/>
+	</node>
+	<node text="Why don't you just leave me alone?" relationship="-.0625"><!-- node 16-->
+		<edge index="16"/>
+		<edge index="17"/>
+		<edge index="18"/>
+		<edge index="19"/>
+	</node>
+	<node text="Don't push it if you value your life." relationship="-.0625"><!-- node 17-->
+		<edge index="16"/>
+		<edge index="17"/>
+		<edge index="18"/>
+		<edge index="19"/>
+	</node>
+	<node text="Your True Form is about to become space dust!" relationship="-.0625"><!-- node 18-->
+		<edge index="12"/>
+		<edge index="13"/>
+		<edge index="14"/>
+		<edge index="15"/>
+	</node>
+	<node text="How's this for technology?!" relationship="-.125"><!-- node 19-->
+		<edge index="16"/>
+		<edge index="17"/>
+		<edge index="18"/>
+		<edge index="19"/>
+	</node>
+	<node text="Docking operation complete. You're free of the docking clamps." relationship="-0.01">
+		<edge index="4"/>
+		<edge index="5"/>
+		<edge index="6"/>
+		<edge index="7"/>
+	</node>
+	<node text="You are not in docking clamps. Move into one of the green guide boxes and try to dock again." relationship="-0">
+		<edge index="8"/>
+		<edge index="9"/>
+		<edge index="10"/>
+		<edge index="11"/>
+	</node>
+	<node text="Docking Operation begun; press 0 to step into airlock." relationship="-0">
+		<edge index="8"/>
+		<edge index="9"/>
+		<edge index="10"/>
+		<edge index="11"/>
+	</node>		
+	<node text="Docking denied. You are not authorized to land here!" relationship="-0">
+		<edge index="8"/>
+		<edge index="9"/>
+		<edge index="10"/>
+		<edge index="11"/>
+	</node>		
+	<node text="Agreed, move to docking port in green indicators." relationship="-0">
+		<edge index="8"/>
+		<edge index="9"/>
+		<edge index="10"/>
+		<edge index="11"/>
+	</node>		
+	<node text="Negative." relationship="-0">
+		<edge index="8"/>
+		<edge index="9"/>
+		<edge index="10"/>
+		<edge index="11"/>
+	</node>		
+	<node text="Affirmative." relationship="-0">
+		<edge index="4"/>
+		<edge index="5"/>
+		<edge index="6"/>
+		<edge index="7"/>
+	</node>		
+	<node text="My mission is to search you; hold still." relationship="-0">
+		<edge index="8"/>
+		<edge index="9"/>
+		<edge index="10"/>
+		<edge index="11"/>
+	</node>
+	<node text="Nothing is interesting in your hold." relationship="-0">
+		<edge index="8"/>
+		<edge index="9"/>
+		<edge index="10"/>
+		<edge index="11"/>
+	</node>
+	<node text="The treasures you carry could put me back in the black!" relationship="-.1">
+		<edge index="12"/>
+		<edge index="13"/>
+		<edge index="14"/>
+		<edge index="15"/>
+	</node>
+	<node text="Better clear out, trouble's brewing!" relationship="-0">
+		<edge index="12"/>
+		<edge index="13"/>
+		<edge index="14"/>
+		<edge index="15"/>
+	</node>	
+	<node text="Request Clearance To Land." relationship="-0">
+		<edge index="12"/>
+		<edge index="13"/>
+		<edge index="14"/>
+		<edge index="15"/>
+	</node>	
+	<node text="ScoreKill" relationship="-.125">
+		<edge index="12"/>
+		<edge index="13"/>
+		<edge index="14"/>
+		<edge index="15"/>
+	</node>
+	<node text="Dealt Damage" relationship="-.125">
+		<edge index="12"/>
+		<edge index="13"/>
+		<edge index="14"/>
+		<edge index="15"/>
+	</node>
+	<node text="Critical Damage" relationship="-.125">
+		<edge index="12"/>
+		<edge index="13"/>
+		<edge index="14"/>
+		<edge index="15"/>
+	</node>
+	<node text="*hit*" relationship="-.01">
+		<edge index="12"/>
+		<edge index="13"/>
+		<edge index="14"/>
+		<edge index="15"/>
+	</node>
+<!-- End of Built-in Conversations --> 
+</comm>

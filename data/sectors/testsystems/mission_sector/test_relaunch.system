@@ -1,0 +1,36 @@
+<system name="Mars" background="backgrounds/red_galaxy1" nearstars="500" stars="1000" starspread="150"  x="0" y="0" z="0">
+<Light>
+<ambient red=".5" green=".5" blue=".5"/>
+<diffuse red="1" green="1" blue="1"/>
+<specular red="1" green="1" blue="1"/>
+</Light>
+
+<Light>
+<ambient red="1" green=".1" blue="0"/>
+<!--<diffuse red="1" green=".7" blue="0"/>-->
+<!--<attenuated red=".00000001" blue=".00000015"/>-->
+<attenuated red="0" blue=".000000002"/>
+</Light>	
+<Light>
+<ambient red="1" green=".1" blue="0"/>
+<!--<diffuse red="1" green=".7" blue="0"/>-->
+<!--<attenuated red=".00000001" blue=".00000015"/>-->
+<attenuated red="0" blue=".0000001"/>
+</Light>	
+
+<planet name="sun" file="sol/sun.png" radius="25000" gravity="20" x="10000" z="-400000"  Red=".9" Green=".9" Blue=".9" ReflectNoLight="true" light="0 1l" />
+
+
+
+<planet name="Kalkos" file="sol/phobos.png" radius="500" gravity="20" x="3000" y="1000"  position="0" />			
+
+<planet name="Arados" file="sol/deimos.png" radius="500" gravity="20"  position="0" />			
+
+<planet name="Poniferos" file="sol/titan.png" radius="500" gravity="20" x="-3000"    position="0" />			
+
+
+<unit name= "arados-station"  file="station"  y="3000" position="0" faction="confed" />
+
+
+
+</system>

@@ -1,0 +1,13 @@
+<Unit>
+<!-- The subunits were generated with the following commands
+     asteroidgen asteroid200gap.xmesh 4000 160 60 140 .3 10 20 200 1028
+     asteroidgen asteroid200gap.lod1.xmesh 4000 160 60 140 .3 6 15 200 1028
+     asteroidgen asteroid200gap.lod2.xmesh 4000 160 60 140 .3 4 6 200 1028
+     
+     the command line arguments are in the same order as the questions asked.
+     to make a different LOD use a different seed
+ -->
+
+<Meshfile file="asteroid200gap.bfxm"/>
+
+</Unit>

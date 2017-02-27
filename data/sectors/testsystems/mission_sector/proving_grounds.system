@@ -1,0 +1,87 @@
+<system name="proving_grounds" background="backgrounds/bluegreen" nearstars="500" stars="1000" starspread="150">
+<Light>
+	<ambient red="0.095914" green="0.095914" blue="0.095914"/>
+	<diffuse red="0.866025" green="0.469537" blue="0.424857"/>
+	<specular red="1.000000" green="0.293953" blue="0.240671"/>
+</Light>
+<Light>
+	<ambient red="0.084469" green="0.084469" blue="0.084469"/>
+	<diffuse red="0.866025" green="0.427534" blue="0.284333"/>
+	<specular red="1.000000" green="0.243714" blue="0.107794"/>
+</Light>
+<Nebula name="red-nebula" file="red-nebula" nebfile="red-nebula.xml" ri="0.000000" rj="0.000000" rk="0.000000" si="0.000000" sj="0.000000" sk="0.000000" x="10111.484375" y="10850.612305" z="-12070.588867"  />
+<Enhancement name="powerup_missle" file="powerup_missle" nebfile="red-nebula.xml" ri="0.000000" rj="0.000000" rk="0.000000" si="0.000000" sj="0.000000" sk="0.000000" x="10111.484375" y="10850.612305" z="-12070.588867" faction="powerups"  />
+<Enhancement name="powerup_turretmaingun" file="powerup_turretmaingun" ri="0.000000" rj="0.000000" rk="0.000000" si="0.000000" sj="0.000000" sk="0.000000" x="-10352.304688" y="-14555.772461" z="19944.699219"  />
+<Planet name="mission_sector/proving_grounds" file="jump.png" ri="0.000000" rj="0.000000" rk="0.000000" si="0.000000" sj="0.000000" sk="0.000000" radius="100.000000" x="-10352.304688" y="-14555.772461" z="19944.699219" alpha="ONE ONE" destination="mission_sector/proving_grounds"  >
+</Planet>
+<Asteroid name="AFieldJumpSparse" file="AFieldJumpSparse" ri="0.000000" rj="0.000000" rk="0.000000" si="0.000000" sj="0.000000" sk="0.000000" x="20007.781250" y="-17471.419922" z="-19376.964844"  />
+<Planet name="mission_sector/proving_grounds" file="jump.png" ri="0.000000" rj="0.000000" rk="0.000000" si="0.000000" sj="0.000000" sk="0.000000" radius="200.000000" x="20007.781250" y="-17471.419922" z="-19376.964844" alpha="ONE ONE" destination="mission_sector/proving_grounds"  >
+</Planet>
+<Enhancement name="powerup_unknown_2" file="powerup_unknown_2" ri="0.000000" rj="0.000000" rk="0.000000" si="0.000000" sj="0.000000" sk="0.000000" x="20007.781250" y="-17471.419922" z="-19376.964844" faction="powerups"  />
+<Planet name="proving_grounds A" file="stars/red_star.png" ri="0.000000" rj="0.000000" rk="0.000000" si="0.000000" sj="0.000000" sk="0.000000" radius="10000.000000" x="0" y="0" z="0"  Red="0.750000" Green="0.220465" Blue="0.180504" ReflectNoLight="true" light="0">
+	<Planet name="Anderson" file="planets/m_class3.png" ri="-1812.037720" rj="20626.880859" rk="-8824.710938" si="25050.496094" sj="5293.036133" sk="7228.155273" radius="2272.820313" x="-28415.521484" y="-34393.242188" z="-29217.302734" year= "12428247.000000" day="7761823.000000"  >
+		<Enhancement name="powerup_0004" file="powerup_0004" ri="973.766724" rj="-3411.051758" rk="-3007.886230" si="1968.619019" sj="1602.698242" sk="-1180.201294" x="-4593.286621" y="3175.829590" z="2803.319824" year= "4217.826172" faction="powerups"  />
+		<Enhancement name="powerup_0001" file="powerup_0001" ri="1552.832764" rj="4882.252441" rk="1155.261597" si="4075.190918" sj="-1348.408691" sk="220.886322" x="2856.602783" y="2445.307617" z="3440.455566" year= "8211.782227" faction="powerups"  />
+		<Enhancement name="powerup_0002" file="powerup_0002" ri="-737.508667" rj="-1703.622314" rk="-2899.540283" si="-4705.705078" sj="2458.234131" sk="-247.419937" x="3337.090332" y="-3546.362305" z="3981.192139" year= "6873.787109" faction="powerups"  />
+		<Enhancement name="powerup_0004" file="powerup_0004" ri="490.663055" rj="-4713.688477" rk="2574.865234" si="1239.441772" sj="-1084.175171" sk="-2220.936523" x="2949.989014" y="-3394.232910" z="-4425.530273" year= "23397.416016" faction="powerups"  />
+		<Enhancement name="powerup_0003" file="powerup_0003" ri="4250.413086" rj="-1220.367065" rk="2188.551270" si="-822.396118" sj="1334.403198" sk="2341.268066" x="4780.059082" y="-5073.680664" z="-4773.469727" year= "17336.960938" faction="powerups"  />
+		<Planet name="mission_sector/proving_grounds" file="jump.png" ri="220.636612" rj="1843.445435" rk="-1895.481079" si="-2904.604004" sj="45.581593" sk="-293.769623" radius="333.906952" x="-5785.220703" y="5096.344238" z="2687.808105" year= "4568.935547" day="2918.836914" alpha="ONE ONE" destination="mission_sector/proving_grounds"  >
+		</Planet>
+	</Planet>
+	<Planet name="Fibonacci" file="planets/gas_midget2.png" ri="-5502.189453" rj="27997.718750" rk="-15776.858398" si="-16601.437500" sj="-3709.459473" sk="-793.069946" radius="1901.882935" x="26207.330078" y="-25214.224609" z="-34260.832031" year= "31715.199219" day="171.318405"  >
+		<Enhancement name="powerup_0004" file="powerup_0004" ri="166.645920" rj="-2170.031982" rk="-602.434204" si="2365.001953" sj="345.868774" sk="-591.647095" x="-3761.257324" y="-2696.594238" z="-2540.210693" year= "2468.459961" faction="powerups"  />
+		<Enhancement name="powerup_0002" file="powerup_0002" ri="2463.901367" rj="-2280.167480" rk="1616.494385" si="3244.812256" sj="2550.049316" sk="-1348.818848" x="4314.040039" y="-4199.909668" z="2452.528076" year= "4080.528320" faction="powerups"  />
+		<Enhancement name="powerup_0001" file="powerup_0001" ri="820.221497" rj="1421.555054" rk="-1441.770020" si="2246.479004" sj="-2473.585938" sk="-1160.884277" x="-3158.914551" y="2368.737061" z="3910.095947" year= "2830.142334" faction="powerups"  />
+		<Enhancement name="powerup_0001" file="powerup_0001" ri="-1244.136963" rj="-1626.675903" rk="1966.206177" si="1652.736938" sj="-1985.745728" sk="-597.055176" x="2898.407715" y="2408.130615" z="-4310.386719" year= "10067.541992" faction="powerups"  />
+		<Enhancement name="powerup_0000" file="powerup_0000" ri="822.626282" rj="1829.034180" rk="2346.539551" si="3445.268066" sj="1281.130981" sk="-2206.398193" x="3532.519531" y="-4318.090820" z="3653.401123" year= "6067.454590" faction="powerups"  />
+		<Planet name="mission_sector/proving_grounds" file="jump.png" ri="-1846.594849" rj="-1954.476685" rk="1691.522339" si="1747.523804" sj="-2014.036133" sk="-419.396240" radius="295.854919" x="3151.195313" y="-5003.788574" z="4012.838379" year= "6443.476563" day="3184.473877" alpha="ONE ONE" destination="mission_sector/proving_grounds"  >
+		</Planet>
+	</Planet>
+	<Planet name="Gail" file="sol/prometheus.png" ri="-2594.490723" rj="-8731.643555" rk="-28400.919922" si="20040.267578" sj="-32389.826172" sk="8127.277344" radius="5098.544434" x="26480.064453" y="-45603.890625" z="-24995.322266" year= "33110.746094" day="28098.712891"  >
+		<Enhancement name="powerup_0004" file="powerup_0004" ri="10405.221680" rj="6670.437500" rk="7064.667480" si="6677.888672" sj="338.422791" sk="-10155.090820" x="-11616.281250" y="15098.662109" z="13149.137695" year= "140871.203125" faction="powerups"  />
+		<Enhancement name="powerup_0003" file="powerup_0003" ri="16272.258789" rj="-14.272346" rk="-761.786499" si="452.503906" sj="8157.983398" sk="9512.936523" x="10067.917969" y="15149.203125" z="-10020.249023" year= "23199.128906" faction="powerups"  />
+		<Enhancement name="powerup_0007" file="powerup_0007" ri="-6094.481934" rj="13637.251953" rk="-4826.041016" si="-13834.834961" sj="-3502.987793" sk="7572.464844" x="-10577.913086" y="16081.895508" z="-11302.128906" year= "12786.423828" faction="powerups"  />
+		<Enhancement name="powerup_0003" file="powerup_0003" ri="1335.585205" rj="7065.365723" rk="-10173.709961" si="-13494.243164" sj="161.801315" sk="-1659.131958" x="-13146.266602" y="8487.105469" z="-7585.137695" year= "26558.189453" faction="powerups"  />
+		<Enhancement name="powerup_0001" file="powerup_0001" ri="2378.847168" rj="15591.729492" rk="-2582.911133" si="9322.750977" sj="-3135.577637" sk="-10341.696289" x="8363.339844" y="11184.106445" z="-8278.915039" year= "16083.019531" faction="powerups"  />
+	</Planet>
+	<Planet name="Oliver" file="planets/m_class19.png" ri="32974.640625" rj="-16600.671875" rk="19559.896484" si="6276.370117" sj="23804.253906" sk="9622.011719" radius="5094.881836" x="-42005.585938" y="22220.339844" z="23428.166016" year= "42332.222656" day="32482.652344"  >
+		<Enhancement name="powerup_unknown" file="powerup_unknown" ri="6774.474121" rj="-9405.655273" rk="8510.337891" si="13379.930664" sj="8684.857422" sk="-1052.276001" x="-12459.736328" y="7666.137695" z="-9308.386719" year= "27010.720703" faction="powerups"  />
+		<Enhancement name="powerup_0004" file="powerup_0004" ri="4031.709961" rj="-709.321777" rk="-10205.878906" si="1312.740723" sj="-16084.050781" sk="1636.444824" x="12528.605469" y="-11095.834961" z="-8973.222656" year= "12948.806641" faction="powerups"  />
+		<Enhancement name="powerup_0001" file="powerup_0001" ri="1712.610474" rj="8690.557617" rk="-11316.485352" si="-4376.311035" sj="7688.947266" sk="5242.469238" x="-14654.375000" y="15407.060547" z="-13045.700195" year= "23929.615234" faction="powerups"  />
+		<Enhancement name="powerup_0003" file="powerup_0003" ri="9421.005859" rj="-4847.631836" rk="10760.187500" si="346.056244" sj="-6785.282227" sk="-3359.861816" x="-9434.073242" y="-11196.842773" z="12122.850586" year= "12778.071289" faction="powerups"  />
+		<Enhancement name="powerup_0002" file="powerup_0002" ri="8399.506836" rj="8404.029297" rk="5718.332031" si="5619.686035" sj="-5835.007324" sk="320.894806" x="-15673.642578" y="-7868.155273" z="-15607.642578" year= "29295.738281" faction="powerups"  />
+	</Planet>
+	<Planet name="proving_grounds B" file="stars/red_star.png" ri="37263.246094" rj="-25160.986328" rk="-7569.169922" si="-23255.253906" sj="-35500.726563" sk="3523.109619" radius="7344.737305" x="0" y="0" z="0" year= "52443.988281" day="18121.000000"  Red="0.750000" Green="0.182785" Blue="0.080845" ReflectNoLight="true" light="1">
+		<Planet name="Cynthia" file="planets/frigid_mud.png" ri="8403.955078" rj="10899.845703" rk="7927.504395" si="4759.060059" sj="8052.331543" sk="-16116.560547" radius="1362.352661" x="15386.238281" y="-24931.607422" z="14459.941406" year= "17956.912109" day="10200.810547"  >
+			<Enhancement name="powerup_0002" file="powerup_0002" ri="946.980469" rj="-2095.750977" rk="2034.342773" si="-1094.387695" sj="-1913.204224" sk="-1461.521973" x="1577.517334" y="2897.936768" z="-1474.130127" year= "3260.875977" faction="powerups"  />
+			<Enhancement name="powerup_0003" file="powerup_0003" ri="-1542.365845" rj="1385.893921" rk="2353.077881" si="-2005.593384" sj="637.995483" sk="-1690.361694" x="-2935.590332" y="2470.000244" z="-2215.825439" year= "4957.534180" faction="powerups"  />
+			<Enhancement name="powerup_0001" file="powerup_0001" ri="-3140.921631" rj="-82.453384" rk="71.998764" si="36.543926" sj="-1895.707764" sk="-576.758667" x="-3283.694824" y="-2695.571777" z="-2422.831787" year= "5219.094727" faction="powerups"  />
+			<Enhancement name="powerup_0005" file="powerup_0005" ri="-1705.522095" rj="-1521.740723" rk="-2079.202393" si="-1934.799561" sj="283.698883" sk="1379.436157" x="-2621.831787" y="1673.536255" z="2095.149170" year= "3634.283203" faction="powerups"  />
+			<Enhancement name="powerup_0007" file="powerup_0007" ri="1552.525635" rj="-2288.998047" rk="-1102.824463" si="336.686066" sj="1050.513916" sk="-1706.446045" x="2851.116699" y="3206.125732" z="-3133.894043" year= "28734.769531" faction="powerups"  />
+		</Planet>
+		<Planet name="Milne" file="planets/gas_giant1.png" ri="-10481.001953" rj="-13626.375977" rk="6563.344238" si="-12044.270508" sj="7063.017578" sk="-4569.724609" radius="1979.763794" x="26088.416016" y="-15936.009766" z="25054.046875" year= "22369.947266" day="901.843323"  >
+			<Enhancement name="powerup_0002" file="powerup_0002" ri="-1477.302979" rj="1233.101074" rk="1742.921631" si="-3055.259521" sj="822.067139" sk="-3171.247803" x="3597.996826" y="2795.561035" z="4235.819824" year= "5534.135254" faction="powerups"  />
+			<Enhancement name="powerup_0003" file="powerup_0003" ri="1242.948242" rj="-1838.208740" rk="-68.000092" si="3536.676025" sj="2315.396729" sk="2054.745361" x="4299.024414" y="3639.170654" z="-4609.437500" year= "6052.875000" faction="powerups"  />
+			<Enhancement name="powerup_0000" file="powerup_0000" ri="3645.022461" rj="-1895.215820" rk="371.912537" si="704.951721" sj="1014.788940" sk="-1737.830078" x="3225.699463" y="3722.343506" z="-3884.645752" year= "4780.393066" faction="powerups"  />
+			<Enhancement name="powerup_0004" file="powerup_0004" ri="-774.433533" rj="-99.364426" rk="2796.965576" si="761.750732" sj="-2041.965820" sk="138.373764" x="3081.797363" y="3045.079346" z="4765.220703" year= "2717.274902" faction="powerups"  />
+			<Enhancement name="powerup_0006" file="powerup_0006" ri="2084.099365" rj="-2606.388916" rk="2139.332764" si="-1243.171753" sj="-1595.087891" sk="-732.249512" x="-3867.318115" y="-4311.153809" z="-4547.387695" year= "32847.480469" faction="powerups"  />
+		</Planet>
+		<Planet name="Bini" file="planets/gas_giant6.png" ri="183.357651" rj="17090.273438" rk="4525.803711" si="15352.230469" sj="2346.041260" sk="-9481.065430" radius="1757.283325" x="-23022.125000" y="17436.552734" z="20144.447266" year= "113918.242188" day="84467.835938"  >
+			<Enhancement name="powerup_0004" file="powerup_0004" ri="3645.585693" rj="49.494793" rk="-1063.280518" si="-360.230072" sj="3793.008789" sk="-1058.531128" x="-2196.459717" y="2603.132568" z="-3931.469482" year= "3413.916016" faction="powerups"  />
+			<Enhancement name="powerup_0002" file="powerup_0002" ri="-1829.068970" rj="2133.507813" rk="1475.710938" si="2855.642578" sj="346.354187" sk="3038.683105" x="-3968.460205" y="-1993.602417" z="-3034.269287" year= "4577.947754" faction="powerups"  />
+			<Enhancement name="powerup_0005" file="powerup_0005" ri="2049.527100" rj="2166.070557" rk="-765.198181" si="2903.467285" sj="-2800.659912" sk="-151.192932" x="-2646.828613" y="-2817.706299" z="2061.614746" year= "3187.509033" faction="powerups"  />
+			<Enhancement name="powerup_0006" file="powerup_0006" ri="-2948.951904" rj="-1862.648560" rk="404.395599" si="1792.690186" sj="-2456.760986" sk="1756.880615" x="-3060.648926" y="-2660.902344" z="3428.047119" year= "3726.132813" faction="powerups"  />
+			<Enhancement name="powerup_0001" file="powerup_0001" ri="-735.392029" rj="-1903.474243" rk="-264.287415" si="2424.540039" sj="-956.582764" sk="143.190613" x="-2795.379395" y="3937.733154" z="-2304.483643" year= "2147.547363" faction="powerups"  />
+		</Planet>
+		<Planet name="Matilda" file="planets/Dirt11.png" ri="-13980.820313" rj="13438.307617" rk="-8814.763672" si="-16451.978516" sj="-2241.564453" sk="22676.652344" radius="4348.944336" x="19533.503906" y="-32147.431641" z="-35307.164063" year= "49442.031250" day="17817.056641"  >
+			<Enhancement name="powerup_0002" file="powerup_0002" ri="7489.859863" rj="-1719.267700" rk="1027.188232" si="-481.121338" sj="3647.384521" sk="9613.000977" x="12179.302734" y="-9273.037109" z="13480.087891" year= "13213.077148" faction="powerups"  />
+			<Enhancement name="powerup_0004" file="powerup_0004" ri="103.177002" rj="-5879.598145" rk="2479.826416" si="-3502.256348" sj="-2708.512939" sk="-6276.090820" x="-9991.195313" y="-6503.528809" z="-12329.072266" year= "7496.569824" faction="powerups"  />
+			<Enhancement name="powerup_0003" file="powerup_0003" ri="-11363.912109" rj="141.470520" rk="3172.276855" si="-3461.460449" sj="-584.876343" sk="-12373.758789" x="-10568.666992" y="-9516.597656" z="-7909.643555" year= "110567.390625" faction="powerups"  />
+			<Enhancement name="powerup_0002" file="powerup_0002" ri="5660.208984" rj="5356.189453" rk="-1380.457031" si="-2558.853760" sj="4790.112305" sk="8093.770508" x="13911.718750" y="10266.917969" z="-8267.126953" year= "16228.982422" faction="powerups"  />
+			<Enhancement name="powerup_0001" file="powerup_0001" ri="4568.832520" rj="-6690.887207" rk="-7167.165039" si="3008.098389" sj="-3026.771240" sk="4743.197754" x="11975.026367" y="8754.491211" z="-13401.519531" year= "8982.851563" faction="powerups"  />
+		</Planet>
+		<Planet name="Engle" file="planets/Dirt12.png" ri="6333.613770" rj="-4756.037109" rk="-12658.570313" si="3466.457764" sj="-22350.949219" sk="10132.041016" radius="3843.865967" x="-21382.482422" y="-28357.982422" z="17596.103516" year= "77002.460938" day="41926.355469"  >
+		</Planet>
+	</Planet>
+</Planet>
+</system>

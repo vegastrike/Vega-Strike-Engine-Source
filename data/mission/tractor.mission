@@ -1,0 +1,38 @@
+
+<mission>
+	<settings>
+		<origin  planet="earth" x="0000" y="100" z="000.0"/>
+	</settings>
+
+	<variables>
+		<var name="credits" value="10000"/>
+		<var name="defaultplayer" value="blue"/>
+		<var name="mission_name" value="4 versus 4" />
+		<var name="splashscreen" value="bad_guys_vs_good_guys.bmp" />
+                <var name="system" value="stage_sector/stage" />
+		<var name="description" value="4vs4.txt" />
+	</variables>
+
+        <flightgroups>
+
+            <flightgroup name="navajo" faction="shaper" type="Mule" ainame="default" waves="1" nr_ships="1">
+                        <pos x="120000" y="80000" z="52000.0"/>
+			<rot x="270.0" y="180.0" z="180.0"/>
+		    </flightgroup>
+
+            <flightgroup name="a01" faction="shaper" type="Ancestor.stock" ainame="default" waves="1" nr_ships="1">
+                        <pos x="120000" y="80000" z="50000"/>
+			<rot x="180.0" y="180.0" z="180.0"/>
+		    </flightgroup>
+
+            <flightgroup name="a02" faction="shaper" type="eject" ainame="default" waves="1" nr_ships="10">
+                        <pos x="120000" y="80000" z="50000"/>
+			<rot x="180.0" y="180.0" z="180.0"/>
+		    </flightgroup>
+
+            <flightgroup name="a03" faction="shaper" type="generic_cargo" ainame="default" waves="1" nr_ships="10">
+                        <pos x="120000" y="80000" z="50000"/>
+			<rot x="180.0" y="180.0" z="180.0"/>
+		    </flightgroup>
+        </flightgroups>
+</mission>

@@ -1,0 +1,68 @@
+SHELL = /bin/sh
+
+.SUFFIXES:
+.SUFFIXES: .S .c .cpp .o .s
+
+.cpp.o:
+	$(CXX) $(CXXFLAGS) -c $<
+
+CC = cc
+CXX = CC
+RANLIB = :
+
+LFLAGS	= -n32 -mips3 -LANG:std
+DEFS	= -DIRIX -DHAVE_CONFIG_H -DUSE_STENCIL_BUFFER -MDupdate Makedepend
+COPT	= -O3 -OPT:Olimit=0 -OPT:IEEE_arithmetic=1 \
+	  -OPT:roundoff=0 -TENV:X=1 -OPT:wrap_around_unsafe_opt=off \
+	  -DEBUG:optimize_space=on -OPT:space=on -CG:unique_exit=on \
+	  -OPT:unroll_times=0
+
+INCLUDES = -I/usr/include -I/usr/freeware/include -I. -I..
+
+CFLAGS	 = ${LFLAGS} ${COPT} ${DEFS} ${INCLUDES}
+CXXFLAGS = ${LFLAGS} ${COPT} ${DEFS} ${INCLUDES}
+LDFLAGS	 = ${LFLAGS}
+LIBS	 = -lGL -lGLU -L/usr/freeware/lib32 -lglut -lexpat -lX11 -lm
+
+SOURCES =				\
+	atmosphere.cpp			\
+	asteroid.cpp			\
+	beam.cpp			\
+	bolt.cpp			\
+	building.cpp			\
+	cont_terrain.cpp		\
+	click_list.cpp			\
+	unit_collide.cpp		\
+	faction_xml.cpp			\
+	music.cpp			\
+	nebula.cpp			\
+	terrain.cpp			\
+	unit.cpp			\
+	unit_bsp.cpp			\
+	unit_cargo.cpp			\
+	unit_customize.cpp		\
+	unit_damage.cpp			\
+	unit_dock.cpp			\
+	unit_xml.cpp  			\
+	unit_click.cpp			\
+	unit_physics.cpp		\
+	unit_weapon.cpp			\
+	weapon_xml.cpp			\
+	planet.cpp 			\
+	collection.cpp			\
+	container.cpp			
+
+
+OBJECTS = ${SOURCES:.cpp=.o}
+
+all: libcmd.a
+
+libcmd.a:	${OBJECTS}
+	-rm -f $@
+	${CXX} -ar -WR,-v -o $@ ${OBJECTS}
+
+clean:;
+	-rm -f libcmd.a ${OBJECTS}
+
+include Makedepend
+

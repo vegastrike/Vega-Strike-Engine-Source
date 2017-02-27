@@ -1,0 +1,1 @@
+planets/m_class.texture~ planets/ocean.texture^planets/Snow_light.texturewrapx4wrapy2 planets/desert.texture planets/Snow2.texture^Snow_light.texturewrapx6wrapy3 planets/Dirt1.texture^planets/Dirt_light.texture planets/university2.texture^planets/university2_light.texture planets/university.texture^planets/university_light.texture

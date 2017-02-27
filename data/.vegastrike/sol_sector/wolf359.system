@@ -1,0 +1,18 @@
+<system name="wolf359" background="backgrounds/emerald" nearstars="500" stars="1000" starspread="150">
+<Light>
+	<ambient red="0.250000" green="0.250000" blue="0.250000"/>
+	<diffuse red="1.000000" green="1.000000" blue="1.000000"/>
+	<specular red="1.000000" green="1.000000" blue="1.000000"/>
+</Light>
+<Nebula name="purple-nebula" file="purple-nebula" nebfile="purple-nebula.xml" ri="0.000000" rj="0.000000" rk="0.000000" si="0.000000" sj="0.000000" sk="0.000000" x="-11659340.000000" y="-18733944.000000" z="8149989.000000"  />
+<Planet name="sol_sector/alpha_tauri" file="jump.png" ri="0.000000" rj="0.000000" rk="0.000000" si="0.000000" sj="0.000000" sk="0.000000" radius="300.000000" x="-11659340.000000" y="-18733944.000000" z="8149989.000000" alpha="ONE ONE" destination="sol_sector/alpha_tauri"  >
+</Planet>
+<Planet name="wolf359 A" file="stars/white_star.png" ri="0.000000" rj="0.000000" rk="0.000000" si="0.000000" sj="0.000000" sk="0.000000" radius="5705186.500000" x="0" y="0" z="0"  Red="1.000000" Green="1.000000" Blue="1.000000" ReflectNoLight="true" light="0">
+	<Planet name="sol_sector/tingvallir" file="jump.png" ri="10431887.000000" rj="8776887.000000" rk="6631104.500000" si="-15403705.000000" sj="4909895.500000" sk="17734016.000000" radius="168.375732" x="16422170.000000" y="23634258.000000" z="-13382897.000000" year= "21293952.000000" day="20085214.000000" alpha="ONE ONE" destination="sol_sector/tingvallir"  >
+	</Planet>
+	<Planet name="sol_sector/polaris" file="jump.png" ri="-3905306.000000" rj="19257580.000000" rk="-16936016.000000" si="-2128016.500000" sj="10115771.000000" sk="11993128.000000" radius="108.557709" x="9587663.000000" y="-18592604.000000" z="19545160.000000" year= "53615440.000000" day="48076688.000000" alpha="ONE ONE" destination="sol_sector/polaris"  >
+	</Planet>
+	<Planet name="sol_sector/zeta_orionis" file="jump.png" ri="-1710686.000000" rj="6024748.500000" rk="-21994324.000000" si="16574559.000000" sj="-18889744.000000" sk="-6463478.000000" radius="140.101334" x="-12490018.000000" y="-9185922.000000" z="-22799860.000000" year= "667802624.000000" day="418958656.000000" alpha="ONE ONE" destination="sol_sector/zeta_orionis"  >
+	</Planet>
+</Planet>
+</system>

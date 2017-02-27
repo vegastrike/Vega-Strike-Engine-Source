@@ -1,0 +1,26 @@
+<!-- Vega Strike - Upon The Coldest Sea -->
+<!-- Quest testing misson               -->
+<!-- Author: pyramid                    -->
+<!-- Version: 2008-04-21                -->
+<!-- start from your data4.x folder with: ./vegastrike test/quest_blockade.mission -->
+<mission>
+   <settings>
+      <origin  planet="Earth" x="10000" y="10000" z="1000"/>
+   </settings>
+
+   <variables>
+      <var name="defaultplayer" value="blue"/>
+      <var name="system" value="Crucible/Elohim" />
+      <var name="credits" value="13500"/>
+   </variables>
+        <flightgroups>
+                <flightgroup name="blue" faction="privateer" type="Areus" ainame="default" waves="1" nr_ships="2">
+         <pos x="-9915208653" y="-10411607084" z="15477750306"/>
+         <rot x="180.0" y="180.0" z="180.0"/>
+      </flightgroup>
+        </flightgroups>
+   <python>
+from quest_blockade import MissionExecutor, quest_blockade
+tmpvar=MissionExecutor([quest_blockade()])
+   </python> 
+</mission>

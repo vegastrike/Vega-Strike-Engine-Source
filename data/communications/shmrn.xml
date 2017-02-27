@@ -1,0 +1,203 @@
+<comm>
+	<node text="startingNode" relationship="0"><!-- node 0 (starting node: Don't link here)-->
+		<edge index="1"/>
+		<edge index="2"/>
+		<edge index="3"/>
+	</node>
+
+<!-- Starting Points -->
+	<node text="A strangely good day. I don't even hurt right now." relationship="0.2"><!-- node 1 (very happy)-->
+		<edge index="4"/>
+		<edge index="5"/>
+		<edge index="6"/>
+	</node>
+	<node text="Life is suffering, but do not make it worse." relationship="0"><!-- node 2 (neutral)-->
+		<edge index="8"/>
+		<edge index="9"/>
+		<edge index="10"/>
+	</node>
+	<node text="I will impart to you all my knowledge of sorrow!" relationship="-.2"><!-- node 3 (very mad)-->
+		<edge index="12"/>
+		<edge index="13"/>
+		<edge index="14"/>
+	</node>
+<!-- End of Starting Points -->
+
+<!-- Other Nodes -->
+
+	<node text="There are no clouds here to obscure the heavens. I feel naked sometimes." relationship=".03125"><!-- node 4(random good chatter)-->
+		<edge index="4"/>
+		<edge index="5"/>
+	</node>
+	<node text="You are not so bad, for your species." relationship=".0625"><!-- node 5 (random good chatter)-->
+		<edge index="4"/>
+		<edge index="6"/>
+	</node>
+	<node text="You are oddly undepressing in a trying time." relationship=".0625"><!-- node 6 (best node)-->
+		<edge index="5"/>
+		<edge index="6"/>
+	</node>
+	<node text="Must even this fleeting respite be false!?" relationship="-.03125"><!-- node 7 (hit while happy)-->
+		<edge index="4"/>
+		<edge index="8"/>
+		<edge index="9"/>
+		<edge index="10"/>
+	</node>
+	<node text="The price of vigilance is eternal boredom." relationship=".03125"><!-- node 8 (random neutral chatter)-->
+		<edge index="9"/>
+		<edge index="10"/>
+	</node>
+	<node text="Keep your pain to yourself, if you can. I have enough already." relationship=".04125"><!-- node 9 (neutral node after he has decided to be nicer after conflict)-->
+		<edge index="8"/>
+		<edge index="10"/>
+	</node>
+	<node text="You are pleasantly blank somehow. I must meditate on this further." relationship=".03125"><!-- node 10 (good node in neutral) -->
+		<edge index="8"/>
+		<edge index="9"/>
+	</node>
+	<node text="As it has always been, suffering seeks us out!" relationship="-.125"><!-- node 11 (got hit when neutral)-->
+		<edge index="9"/>
+		<edge index="12"/>
+		<edge index="13"/>
+		<edge index="14"/>
+	</node>
+	<node text="I bet you were a Light-Bearer in a past life!" relationship="-.0625"><!-- node 12 (taunt)-->
+		<edge index="13"/>
+		<edge index="15"/>
+		<edge index="19"/>
+	</node>
+	<node text="Suffer now, and know the pains of my daily existence!" relationship="-.125"><!-- node 13 (taunt)-->
+		<edge index="12"/>
+		<edge index="15"/>
+		<edge index="19"/>
+	</node>
+	<node text="I was bred for subserviance, not stupidity." relationship="-.0625"><!-- node 14 (trying to appease him, but failing)-->
+		<edge index="8"/>
+		<edge index="12"/>
+		<edge index="13"/>
+		<edge index="14"/>
+	</node>
+	<node text="Fool! Your worst cannot begin to approach the misery I already endure!" relationship="-.0625"><!-- node 15 hit while mad node-->
+		<edge index="11"/>
+		<edge index="13"/>
+		<edge index="12"/>
+		<edge index="19"/>
+	</node>
+	<node text="Leave your mortal coil now. It'll be less painful." relationship="-.0625"><!-- node 16 kill-->
+		<edge index="12"/>
+		<edge index="13"/>
+		<edge index="17"/>
+		<edge index="19"/>
+	</node>
+	<node text="Desist. Do not merely prolong agony for both of us." relationship="-.0625"><!-- node 17 kill-->
+		<edge index="12"/>
+		<edge index="13"/>
+		<edge index="16"/>
+		<edge index="19"/>
+	</node>
+	<node text="We have heard such lies before, and reject them." relationship="-.03125"><!-- node 18 (trying to appease, but failing)-->
+		<edge index="9"/>
+		<edge index="12"/>
+		<edge index="13"/>
+		<edge index="14"/>
+	</node>	
+	<node text="Had you merely asked politely, we would gladly have ended your suffering for a lesser expense!" relationship="-.0625"><!-- node 19 (taunt)-->
+		<edge index="12"/>
+		<edge index="13"/>
+		<edge index="14"/>
+	</node>
+
+<!-- Built-in Conversations --> 
+	<node text="Docking operation complete. You're free of the docking clamps." relationship="0.01">
+		<edge index="4"/>
+		<edge index="5"/>
+		<edge index="6"/>
+		<edge index="7"/>
+	</node>
+	<node text="You are not in docking clamps. Move into one of the green guide boxes and try to dock again." relationship="0">
+		<edge index="8"/>
+		<edge index="9"/>
+		<edge index="10"/>
+		<edge index="11"/>
+	</node>
+	<node text="Docking operation begun; press 0 to step into our starship." relationship="0">
+		<edge index="8"/>
+		<edge index="9"/>
+		<edge index="10"/>
+		<edge index="11"/>
+	</node>		
+	<node text="You are not authorized to land here!" relationship="0">
+		<edge index="8"/>
+		<edge index="9"/>
+		<edge index="10"/>
+		<edge index="11"/>
+	</node>		
+	<node text="Clearance code acknowledged; move into landing pattern and dock at the white indicators." relationship="0">
+		<edge index="8"/>
+		<edge index="9"/>
+		<edge index="10"/>
+		<edge index="11"/>
+	</node>		
+	<node text="Unable to comply." relationship="0">
+		<edge index="8"/>
+		<edge index="9"/>
+		<edge index="10"/>
+		<edge index="11"/>
+	</node>		
+	<node text="Acknowledged." relationship="0">
+		<edge index="4"/>
+		<edge index="5"/>
+		<edge index="6"/>
+		<edge index="7"/>
+	</node>		
+	<node text="Maintain speed and course for contraband search!" relationship="0"> <!-- maintain speed and course -->
+		<edge index="8"/>
+		<edge index="9"/>
+		<edge index="10"/>
+	</node>
+	<node text="No contraband detected, you may proceed." relationship="0"> <!-- no contraband detected you may proceed -->
+		<edge index="8"/>
+		<edge index="9"/>
+		<edge index="10"/>
+	</node>
+	<node text="Contraband detected, target offender and fire at will!" relationship="-.125"> <!-- contraband detected! all units close and engage -->
+		<edge index="12"/>
+		<edge index="13"/>
+		<edge index="14"/>
+	</node>
+	<node text="Your course is deviating. Maintain course!" relationship="0"> <!-- maintain your speed and course...DO NOT deviate -->
+		<edge index="8"/>
+		<edge index="9"/>
+		<edge index="10"/>
+	</node>	
+	<node text="Request Clearance To Land." relationship="0"> 
+		<edge index="8"/>
+		<edge index="9"/>
+		<edge index="10"/>
+	</node>	
+	<node text="I free you from your sorrows!" text1="Suffer no more." relationship="-.0625"><!-- dealt critical damage -->
+		<edge index="12"/>
+		<edge index="13"/>
+		<edge index="14"/>
+		<edge index="15"/>
+	</node>
+	<node text="Death is a blessing, do not fear it so." relationship="-.0625"><!-- dealt critical damage -->
+		<edge index="12"/>
+		<edge index="13"/>
+		<edge index="14"/>
+		<edge index="15"/>
+	</node>
+	<node text="The blessed end is come." text1="The pain is gone. At last, the agony is [garbled]" relationship="-.125">
+		<edge index="12"/>
+		<edge index="13"/>
+		<edge index="14"/>
+		<edge index="15"/>
+	</node>
+	<node text="*hit*" relationship="-.01">
+		<edge index="7"/>
+		<edge index="11"/>
+		<edge index="15"/>
+	</node>
+
+<!-- End of Built-in Conversations --> 
+</comm>

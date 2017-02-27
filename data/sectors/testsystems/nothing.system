@@ -1,0 +1,9 @@
+<system name="Nothing" background="backgrounds/green" nearstars="500" stars="1000" starspread="150"  x="0" y="0" z="0">
+<Light>
+	<ambient Red="0.750000" Green="0.728820" Blue="0.445198"/>
+	<diffuse Red="0.750000" Green="0.728820" Blue="0.445198"/>
+	<specular Red="0.750000" Green="0.728820" Blue="0.445198"/>
+</Light>
+<Planet name="Really Bright Nothing" file="stars/white_star.png" ri="0.000000" rj="0.000000" rk="0.000000" si="0.000000" sj="0.000000" sk="0.000000" radius="16600000.000000" x="0" y="0" z="0"  Red="0.750000" Green="0.728820" Blue="0.445198" ReflectNoLight="true" light="0">
+
+</system>

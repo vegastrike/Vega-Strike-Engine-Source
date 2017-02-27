@@ -1,0 +1,10 @@
+#EXTM3U
+#terran-specific
+../music/terranbattle.ogg
+../music/MezzaMessa.ogg
+#common threat files
+../music/battle3electro.ogg
+../music/battle5.ogg
+../music/galacticbattle.ogg
+#fix weights
+../music/terranbattle.ogg

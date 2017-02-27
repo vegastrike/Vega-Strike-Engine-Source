@@ -1,0 +1,51 @@
+<mission>
+	<settings>
+			<origin  planet="Nommos" x="0000" y="100" z="000.0"/>
+	</settings>
+
+	<variables>
+	<!--            <var name="continuousterrain" value="continuousterrain.txt"/>-->
+		<var name="defaultplayer" value="blue"/>
+		<var name="mission_name" value="4 versus 4" />
+		<var name="splashscreen" value="bad_guys_vs_good_guys.bmp" />
+		<var name="system" value="sol_sector/sirius" />
+		<var name="description" value="4vs4.txt" />
+	</variables>
+		<flightgroups>
+				<flightgroup name="brown" faction="aera" type="osprey" ainame="default" waves="1" nr_ships="1">
+			<pos x="51400" y="2000" z="23000.0"/>
+			<rot x="180.0" y="180.0" z="180.0"/>
+		</flightgroup>
+				<flightgroup name="brown" faction="aera" type="fleetcarrier" ainame="default" waves="1" nr_ships="1">
+			<pos x="51500" y="2000" z="23000.0"/>
+			<rot x="180.0" y="180.0" z="180.0"/>
+		</flightgroup>
+<!--				<flightgroup name="brown" faction="confed" type="yrilan" ainame="default" waves="1" nr_ships="1">
+			<pos x="53400" y="5000" z="28000.0"/>
+			<rot x="180.0" y="180.0" z="180.0"/>
+		</flightgroup>
+				<flightgroup name="gold" faction="confed" type="kira" ainame="default" waves="1" nr_ships="1">
+			<pos x="51400" y="1000" z="26000.0"/>
+			<rot x="180.0" y="180.0" z="180.0"/>
+		</flightgroup>
+
+		<flightgroup name="beta" faction="confed" type="fleetcarrier" ainame="default" waves="1" nr_ships="1">
+			<pos x="47400" y="-2000" z="39000.0"/>
+			<rot x="90.0" y="0.0" z="0.0"/>
+		</flightgroup>
+				<flightgroup name="beta" faction="confed" type="station" ainame="default" waves="1" nr_ships="1">
+			<pos x="53400" y="4000" z="36000.0"/>
+			<rot x="90.0" y="0.0" z="0.0"/>
+		</flightgroup>
+
+		<flightgroup name="gama" faction="aera" type="AsteroidFighterBase" ainame="default" waves="1" nr_ships="3">
+			<pos x="67400" y="9000" z="36000.0"/>
+			<rot x="90.0" y="0.0" z="0.0"/>
+		</flightgroup>
+				<flightgroup name="gama" faction="aera" type="cruiser" ainame="default" waves="1" nr_ships="4">
+			<pos x="68400" y="7000" z="36000.0"/>
+			<rot x="90.0" y="0.0" z="0.0"/>
+		</flightgroup>-->
+			</flightgroups>
+
+</mission>

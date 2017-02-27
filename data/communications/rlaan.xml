@@ -1,0 +1,240 @@
+<comm>
+	<node text="startingNode" relationship="0"><!-- node 0 (starting node: Don't link here)-->
+		<edge index="1"/>
+		<edge index="2"/>
+		<edge index="3"/>
+	</node>
+
+<!-- Starting Points -->
+	<node text="Fair weather and good growing, friend." relationship="0.2"><!-- node 1 (very happy)-->
+    <sound file="communications/sounds/rlaan/rlaan_fair-weather.ogg" sex="0"/>
+		<edge index="4"/>
+		<edge index="5"/>
+		<edge index="6"/>
+	</node>
+	<node text="Pardon me, I was told your kind would ask for mustard." relationship="0"><!-- node 2 (neutral)-->
+    <sound file="communications/sounds/rlaan/rlaan_pardon-me.ogg" sex="0"/>
+		<edge index="8"/>
+		<edge index="9"/>
+		<edge index="10"/>
+	</node>
+	<node text="Your mind seeks murder-thoughts. Your death shall follow." relationship="-.2"><!-- node 3 (very mad)-->
+    <sound file="communications/sounds/rlaan/rlaan_your-mind-seeks.ogg" sex="0"/>
+		<edge index="12"/>
+		<edge index="13"/>
+		<edge index="14"/>
+	</node>
+<!-- End of Starting Points -->
+
+<!-- Other Nodes -->
+
+	<node text="Roll your eyes again, it looks so funny!" relationship=".03125"><!-- node 4(random good chatter)-->
+    <sound file="communications/sounds/rlaan/rlaan_roll-your-eyes.ogg" sex="0"/>
+		<edge index="4"/>
+		<edge index="5"/>
+	</node>
+	<node text="You should one day... oh, you don't have enough arms - good day!" relationship=".0625"><!-- node 5 (random good chatter)-->
+    <sound file="communications/sounds/rlaan/rlaan_you-should-one-day.ogg" sex="0"/>
+		<edge index="4"/>
+		<edge index="6"/>
+	</node>
+	<node text="You look particularly cute and squishy today!" relationship=".0625"><!-- node 6 (best node)-->
+    <sound file="communications/sounds/rlaan/rlaan_you-look-particularly.ogg" sex="0"/>
+		<edge index="5"/>
+		<edge index="6"/>
+	</node>
+	<node text="Careful, you - the festival of discord was hours ago! Or were you beginning the rights of reciprocity?" relationship="-.03125"><!-- node 7 (hit while happy)-->
+    <sound file="communications/sounds/rlaan/rlaan_careful-you-the-festival.ogg" sex="0"/>
+		<edge index="4"/>
+		<edge index="8"/>
+		<edge index="9"/>
+		<edge index="10"/>
+	</node>
+	<node text="Boring, boring tiny one - you bring us no tupperware!" relationship=".03125"><!-- node 8 (random neutral chatter)-->
+    <sound file="communications/sounds/rlaan/rlaan_boring-boring.ogg" sex="0"/>
+		<edge index="9"/>
+		<edge index="10"/>
+	</node>
+	<node text="We all move on through. More space on the other side today." relationship=".04125"><!-- node 9 (neutral node after he has decided to be nicer after conflict)-->
+    <sound file="communications/sounds/rlaan/rlaan_we-all-move-on.ogg" sex="0"/>
+		<edge index="8"/>
+		<edge index="10"/>
+	</node>
+	<node text="Want to be in my next video? It's a montage of comm footage." relationship=".03125"><!-- node 10 (good node in neutral) -->
+    <sound file="communications/sounds/rlaan/rlaan_want-to-be-in.ogg" sex="0"/>
+		<edge index="8"/>
+		<edge index="9"/>
+	</node>
+	<node text="You will find I have no back to stab, rogue!" relationship="-.125"><!-- node 11 (got hit when neutral)-->
+    <sound file="communications/sounds/rlaan/rlaan_you-will-find-that.ogg" sex="0"/>
+		<edge index="9"/>
+		<edge index="12"/>
+		<edge index="13"/>
+		<edge index="14"/>
+	</node>
+	<node text="Your death will weigh heavy, but only until 4th meal." relationship="-.0625"><!-- node 12 (taunt)-->
+    <sound file="communications/sounds/rlaan/rlaan_your-death-will.ogg" sex="0"/>
+		<edge index="13"/>
+		<edge index="15"/>
+		<edge index="19"/>
+	</node>
+	<node text="Are you of two minds to fight then, but not now?" relationship="-.125"><!-- node 13 (taunt)-->
+    <sound file="communications/sounds/rlaan/rlaan_are-you-of-two.ogg" sex="0"/>
+		<edge index="12"/>
+		<edge index="15"/>
+		<edge index="19"/>
+	</node>
+	<node text="For what you have done, there is no forgiveness!" relationship="-.0625"><!-- node 14 (trying to appease him, but failing)-->
+    <sound file="communications/sounds/rlaan/rlaan_for-what-you-have.ogg" sex="0"/>
+		<edge index="8"/>
+		<edge index="12"/>
+		<edge index="13"/>
+		<edge index="14"/>
+	</node>
+	<node text="I put your flesh back inside your bones!" relationship="-.0625"><!-- node 16 kill-->
+    <sound file="communications/sounds/rlaan/rlaan_i-put-your-flesh.ogg" sex="0"/>
+		<edge index="11"/>
+		<edge index="13"/>
+		<edge index="12"/>
+		<edge index="19"/>
+	</node>
+	<node text="You torment without reason, clearly you have gone insane!" relationship="-.0625"><!-- node 15 hit while mad node-->
+    <sound file="communications/sounds/rlaan/rlaan_you-torment-without.ogg" sex="0"/>
+		<edge index="12"/>
+		<edge index="13"/>
+		<edge index="17"/>
+		<edge index="19"/>
+	</node>
+	<node text="You speak like dead philosophers, burned for turgid prose." relationship="-.0625"><!-- node 17 (trying to appease him, but failing)-->
+    <sound file="communications/sounds/rlaan/rlaan_you-speak-like-dead.ogg" sex="0"/>
+		<edge index="12"/>
+		<edge index="13"/>
+		<edge index="16"/>
+		<edge index="19"/>
+	</node>
+	<node text="Your female ancestor was promiscuous! Wait... how is that not a compliment?" relationship="-.0625"><!-- node 18 (taunt)-->
+    <sound file="communications/sounds/rlaan/rlaan_your-female-ancestor.ogg" sex="0"/>
+		<edge index="9"/>
+		<edge index="12"/>
+		<edge index="13"/>
+		<edge index="14"/>
+	</node>	
+	<node text="May you be ravaged by poor Hungarian-Rlaan dictionaries... computer! Reboot translation!" relationship="-.0625"><!-- node 19 (taunt)-->
+    <sound file="communications/sounds/rlaan/rlaan_may-you-be-ravaged.ogg" sex="0"/>
+		<edge index="12"/>
+		<edge index="13"/>
+		<edge index="14"/>
+	</node>
+
+<!-- Built-in Conversations --> 
+	<node text="Docking operation complete. You're free of the docking clamps." relationship="0.01">
+    <sound file="communications/sounds/rlaan/rlaan_docking-operation-complete.ogg" sex="0"/>
+		<edge index="4"/>
+		<edge index="5"/>
+		<edge index="6"/>
+		<edge index="7"/>
+	</node>
+	<node text="You are not in docking clamps. Move into one of the green guide boxes and try to dock again." relationship="0">
+    <sound file="communications/sounds/rlaan/rlaan_you-are-not-in.ogg" sex="0"/>
+		<edge index="8"/>
+		<edge index="9"/>
+		<edge index="10"/>
+		<edge index="11"/>
+	</node>
+	<node text="Docking operation begun; press 0 to step into our starship." relationship="0">
+    <sound file="communications/sounds/rlaan/rlaan_docking-operation-begun.ogg" sex="0"/>
+		<edge index="8"/>
+		<edge index="9"/>
+		<edge index="10"/>
+		<edge index="11"/>
+	</node>		
+	<node text="You are not authorized to land here!" relationship="0">
+    <sound file="communications/sounds/rlaan/rlaan_you-are-not-authorized.ogg" sex="0"/>
+		<edge index="8"/>
+		<edge index="9"/>
+		<edge index="10"/>
+		<edge index="11"/>
+	</node>		
+	<node text="Come on in, the weather is freezing." relationship="0">
+    <sound file="communications/sounds/rlaan/rlaan_come-on-in.ogg" sex="0"/>
+		<edge index="8"/>
+		<edge index="9"/>
+		<edge index="10"/>
+		<edge index="11"/>
+	</node>		
+	<node text="Unable to comply." relationship="0">
+    <sound file="communications/sounds/rlaan/rlaan_unable-to-comply.ogg" sex="0"/>
+		<edge index="8"/>
+		<edge index="9"/>
+		<edge index="10"/>
+		<edge index="11"/>
+	</node>		
+	<node text="Acknowledged." relationship="0">
+    <sound file="communications/sounds/rlaan/rlaan_acknowledged.ogg" sex="0"/>
+		<edge index="4"/>
+		<edge index="5"/>
+		<edge index="6"/>
+		<edge index="7"/>
+	</node>		
+	<node text="We scan you for illegal military items!" relationship="0"> <!-- maintain speed and course -->
+    <sound file="communications/sounds/rlaan/rlaan_we-scan-you.ogg" sex="0"/>
+		<edge index="8"/>
+		<edge index="9"/>
+		<edge index="10"/>
+	</node>
+	<node text="No contraband detected, you may proceed." relationship="0"> <!-- no contraband detected you may proceed -->
+    <sound file="communications/sounds/rlaan/rlaan_no-contraband.ogg" sex="0"/>
+		<edge index="8"/>
+		<edge index="9"/>
+		<edge index="10"/>
+	</node>
+	<node text="Contraband detected, target offender and fire at will!" relationship="-.125"> <!-- contraband detected! all units close and engage -->
+    <sound file="communications/sounds/rlaan/rlaan_contraband-detected.ogg" sex="0"/>
+		<edge index="12"/>
+		<edge index="13"/>
+		<edge index="14"/>
+	</node>
+	<node text="Your course is deviating. Maintain course!" relationship="0"> <!-- maintain your speed and course...DO NOT deviate -->
+    <sound file="communications/sounds/rlaan/rlaan_your-course-is-deviating.ogg" sex="0"/>
+		<edge index="8"/>
+		<edge index="9"/>
+		<edge index="10"/>
+	</node>	
+	<node text="Request Clearance To Land." relationship="0"> 
+    <sound file="communications/sounds/rlaan/rlaan_request-clearance.ogg" sex="0"/>
+		<edge index="8"/>
+		<edge index="9"/>
+		<edge index="10"/>
+	</node>	
+	<node text="Another death, so many gods to thank, this could take awhile." text1="Hulls pop like vibrant seeds. Splashing photons in a void. I am sticky." relationship="-.03125"><!-- node 18 (trying to appease, but failing)-->
+    <sound file="communications/sounds/rlaan/rlaan_another-death.ogg" sex="0"/>
+    <sound file="communications/sounds/rlaan/rlaan_hulls-pop-like.ogg" sex="0"/>
+		<edge index="12"/>
+		<edge index="13"/>
+		<edge index="14"/>
+		<edge index="15"/>
+	</node>
+	<node text="It seems there are no competent warriors among you." text1="Vexing vermin, you keep me from my meditiations on Jerry Lewis." relationship="-.03125"><!-- node 18 (trying to appease, but failing)-->
+    <sound file="communications/sounds/rlaan/rlaan_it-seems-there-are.ogg" sex="0"/>
+    <sound file="communications/sounds/rlaan/rlaan_vexing-vermin.ogg" sex="0"/>
+		<edge index="12"/>
+		<edge index="13"/>
+		<edge index="14"/>
+		<edge index="15"/>
+	</node>
+	<node text="I leak, but I do not run!" text1="You have the killer's blood after all." relationship="-.125">
+    <sound file="communications/sounds/rlaan/rlaan_i-leak-but.ogg" sex="0"/>
+    <sound file="communications/sounds/rlaan/rlaan_you-have-the-killers.ogg" sex="0"/>
+		<edge index="12"/>
+		<edge index="13"/>
+		<edge index="14"/>
+		<edge index="15"/>
+	</node>
+	<node text="*hit*" relationship="-.01">
+		<edge index="7"/>
+		<edge index="11"/>
+		<edge index="15"/>
+	</node>
+
+<!-- End of Built-in Conversations --> 
+</comm>

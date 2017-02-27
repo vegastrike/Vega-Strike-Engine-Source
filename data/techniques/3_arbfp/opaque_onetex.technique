@@ -1,0 +1,20 @@
+<!-- Former name: none. This is a pass-through to fallback. -->
+<?xml version="1.0"?>
+<technique fallback="../2_ps1.4/opaque_onetex">
+    <!-- Pseudo fixed-function shader pass. Does in one pass what
+         the fixed function does in many. Higher performance on
+         capable systems. Only caveat is that light attenuation
+         is a bit odd... 
+         
+         All lighting is per-vertex.
+         
+         This version handles up to 5 lights. 
+         Fallback is true fixed-function pipeline
+    -->
+
+    <!-- sequence 15 to go after Z-write prepasses (that's 10) -->
+    <pass type="shader" sequence="15">
+        <vertex_program src="none"/>
+        <fragment_program src="none"/>
+    </pass>
+</technique>

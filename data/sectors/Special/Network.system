@@ -1,0 +1,14 @@
+<system name="Simulation" background="backgrounds/green" nearstars="500" stars="1000" starspread="150"  x="0" y="0" z="0">
+<Light>
+<ambient red=".7" green=".7" blue=".7"/>
+<diffuse red="0.1" green="0.1" blue="0.1"/>
+<specular red=".75" green=".75" blue=".75"/>
+</Light>
+
+<Planet name="Sun" file="stars/white_star.texture" ri="0.000000" rj="0.000000" rk="0.000000" si="0.000000" sj="0.000000" sk="0.000000" radius="75000" x="0.000000" y="850000" z="0.000000" Red="0" Green="0" Blue="0" ReflectNoLight="true" light="0">
+</Planet>
+<Planet name="Market" file="planets/desert.texture" ri="0.000000" rj="0.000000" rk="0.000000" si="0.000000" sj="0.000000" sk="0.000000" radius="750000" x="0.000000" y="845000" z="0.000000">
+</Planet>
+
+
+</system>

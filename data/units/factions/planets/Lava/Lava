@@ -1,0 +1,14 @@
+<!-- Last Edited by: Vortis--> 
+<!-- 08MAY01-->
+<Unit>
+	<Hold volume="100000000000">
+		<Category file="Electronics/Robotics">
+			<import price="1.1" pricestddev=".1" quantity="1" quantitystddev="1"/>
+		</Category>
+		<Category file="Electronics/Bionics">
+			<import price="1.3" pricestddev=".1" quantity="1" quantitystddev="1"/>
+		</Category>
+	</Hold>
+	<Upgrade file="standard_missions"/>
+
+</Unit>

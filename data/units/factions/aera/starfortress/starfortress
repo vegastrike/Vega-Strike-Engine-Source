@@ -1,0 +1,321 @@
+<Unit scale="3">
+<Description combatRole="BASE">
+</Description>
+<Meshfile file="starfortress.bfxm"/>
+	<Thrust>
+		<Engine Afterburner="00.000000" Forward="0" Retro="0" Left="0" Right="0" Top="0" Bottom="0"/>
+		<Maneuver yaw="0000" pitch="0000" roll="10"/>
+	</Thrust>
+	<Defense HudImage="aerastarfortress-hud.spr">
+		<Shields front="800" right="800" left="800" back="800" recharge="100"/>
+		<Armor front="8000" right="8000" left="8000" back="8000"/>
+		<Hull strength="8000"/>
+	</Defense>
+
+<Stats mass="43911034000" momentofinertia="43911034000" fuel="20000"></Stats>
+       
+
+<!-- new elements added -->
+<Subunit file="turretheavy" x="-569.400696" y="337.419067" z="375.000305" ri="1.000000" rj="-0.000000" rk="0.000000" qi="0.000000" qj="0.000000" qk="-1.000000"/>
+<Subunit file="turretheavy" size="Light" x="604.729431" y="346.817444" z="375.000305" ri="-0.000000" rj="0.000000" rk="-1.000000" qi="-0.135850" qj="0.990729" qk="0.000000"/>
+<Subunit file="turretheavy" size="Light" x="572.495300" y="-340.637878" z="375.000305" ri="0.000000" rj="0.000000" rk="-1.000000" qi="-0.192772" qj="-0.981244" qk="-0.000000"/>
+<Subunit file="turretheavy" size="Light" x="-552.274109" y="-152.007675" z="375.000244" ri="0.000000" rj="0.000000" rk="-1.000000" qi="-0.192772" qj="-0.981244" qk="-0.000000"/>
+<Subunit file="turret" size="Light" x="-999.445679" y="-69.772247" z="-612.431030" ri="0.124033" rj="-0.000002" rk="-0.992278" qi="0.698922" qj="-0.709842" qk="0.087365"/>
+<Subunit file="turretLR_PminusBeam" size="Light" x="-1517.572876" y="-262.500000" z="675.897522" ri="-0.995882" rj="-0.000000" rk="-0.090662" qi="0.045191" qj="-0.866916" qk="-0.496401"/>
+<Subunit file="turretLR_PminusBeam" x="-1517.572876" y="262.500000" z="675.897522" ri="-0.995882" rj="0.000000" rk="-0.090662" qi="0.045191" qj="0.866916" qk="-0.496401"/>
+<Subunit file="turret" x="-1284.291260" y="16.650602" z="487.500000" ri="0.000000" rj="0.000000" rk="-1.000000" qi="-0.810475" qj="-0.585773" qk="-0.000000"/>
+<Subunit file="turret" x="-102.228752" y="-1090.169922" z="-623.771362" ri="0.784838" rj="-0.614916" rk="-0.076865" qi="-0.000002" qj="0.124033" qk="-0.992278"/>
+<Subunit file="turretLR_PminusBeam" x="262.500000" y="-1517.573120" z="675.897522" ri="-0.090166" rj="-0.090293" rk="0.991825" qi="0.000000" qj="-0.995882" qk="-0.090662"/>
+<Subunit file="turretLR_PminusBeam" x="-262.500000" y="-1517.572876" z="675.897522" ri="-0.498453" rj="-0.078596" rk="0.863346" qi="-0.000000" qj="-0.995882" qk="-0.090662"/>
+<Subunit file="turret" x="337.500000" y="-1077.565063" z="600.000000" ri="0.000000" rj="-0.882806" rk="-0.469737" qi="1.000000" qj="0.000000" qk="0.000000"/>
+<Subunit file="turretLR_PminusBeam" x="1517.573120" y="-262.500000" z="675.897522" ri="0.078596" rj="-0.498453" rk="0.863346" qi="0.995882" qj="0.000001" qk="-0.090662"/>
+<Subunit file="turretLR_PminusBeam" x="1517.573120" y="262.500000" z="675.897522" ri="-0.078596" rj="-0.498453" rk="-0.863346" qi="0.995882" qj="-0.000001" qk="-0.090662"/>
+<Subunit file="turret" x="-337.500000" y="1077.565308" z="600.000000" ri="-1.000000" rj="0.000000" rk="0.000000" qi="-0.000000" qj="-0.469737" qk="-0.882806"/>
+<Subunit file="turret" x="-125.000000" y="1053.349487" z="-619.168701" ri="0.000002" rj="-0.124038" rk="-0.992278" qi="-0.260700" qj="-0.957965" qk="0.119748"/>
+<Subunit file="turretLR_PminusBeam" x="262.500000" y="1517.573120" z="675.897400" ri="0.090166" rj="-0.090292" rk="-0.991825" qi="-0.000001" qj="0.995882" qk="-0.090662"/>
+<Subunit file="turretLR_PminusBeam" x="-262.500000" y="1517.572876" z="675.897400" ri="0.498453" rj="-0.078596" rk="-0.863347" qi="-0.000000" qj="0.995882" qk="-0.090662"/>
+<Subunit file="turret" x="1089.830322" y="130.688965" z="-623.728760" ri="0.691112" rj="-0.717566" rk="-0.086389" qi="-0.124033" qj="0.000002" qk="-0.992278"/>
+<Subunit file="turretbeamheavy" x="-612.451233" y="612.451538" z="600.000122" ri="-0.707107" rj="0.707107" rk="0.000000" qi="-0.000000" qj="0.000000" qk="-1.000000"/>
+<Subunit file="turretbeamheavy" x="-612.451111" y="-612.450867" z="600.000122" ri="-0.707107" rj="0.707107" rk="0.000000" qi="-0.707107" qj="-0.707107" qk="0.000001"/>
+<Subunit file="turretbeamheavy" x="612.450989" y="-612.451294" z="600.000122" ri="0.000000" rj="0.000000" rk="1.000000" qi="0.707107" qj="-0.707107" qk="0.000000"/>
+<Subunit file="turretbeamheavy" x="612.450806" y="612.451050" z="600.000122" ri="0.707107" rj="-0.707107" rk="0.000000" qi="0.707107" qj="0.707107" qk="0.000001"/>
+<Subunit file="turretmainheavy" x="-11.116958" y="84.176636" z="1949.999634" ri="-0.999583" rj="-0.028875" rk="0.000000" qi="0.000000" qj="0.000000" qk="1.000000"/>
+<Subunit file="turretbeam" x="-587.953369" y="587.953491" z="1050.000000" ri="0.707106" rj="0.707107" rk="0.000000" qi="-0.707107" qj="0.707106" qk="0.000000"/>
+<Subunit file="turretbeam" x="587.953064" y="587.953308" z="1050.000000" ri="0.707107" rj="-0.707107" rk="0.000000" qi="0.707107" qj="0.707107" qk="-0.000001"/>
+<Subunit file="turretbeam" x="-587.953003" y="-587.953247" z="1050.000000" ri="-0.707107" rj="0.707107" rk="0.000000" qi="-0.707107" qj="-0.707107" qk="-0.000001"/>
+<Subunit file="turretbeam" x="587.953308" y="-587.953369" z="1050.000000" ri="-0.707107" rj="-0.707107" rk="0.000000" qi="0.707107" qj="-0.707107" qk="0.000000"/>
+<Dock x="0" y="-1150" z="950.000000" size="300.000000" ri="-0.258822" rj="0.965925" rk="0.000000" qi="0.000000" qj="0.000000" qk="-1.000000"/> <!-- modifying--> 
+<Dock x="0" y="1150" z="950.000000" size="300.000000" ri="-0.258822" rj="0.965925" rk="0.000000" qi="0.000000" qj="0.000000" qk="-1.000000"/> <!-- modifying--> 
+<Dock x="1150" y="0" z="950.000000" size="300.000000" ri="-0.258822" rj="0.965925" rk="0.000000" qi="0.000000" qj="0.000000" qk="-1.000000"/> <!-- modifying--> 
+<Dock x="-1150" y="0" z="950.000000" size="300.000000" ri="-0.258822" rj="0.965925" rk="0.000000" qi="0.000000" qj="0.000000" qk="-1.000000"/> <!-- modifying--> 
+
+
+<Dock x="0" y="-950" z="950.000000" size="300.000000" ri="-0.258822" rj="0.965925" rk="0.000000" qi="0.000000" qj="0.000000" qk="-1.000000"/> <!-- modifying--> 
+<Dock x="0" y="950" z="950.000000" size="300.000000" ri="-0.258822" rj="0.965925" rk="0.000000" qi="0.000000" qj="0.000000" qk="-1.000000"/> <!-- modifying--> 
+<Dock x="950" y="0" z="950.000000" size="300.000000" ri="-0.258822" rj="0.965925" rk="0.000000" qi="0.000000" qj="0.000000" qk="-1.000000"/> <!-- modifying--> 
+<Dock x="-950" y="0" z="950.000000" size="300.000000" ri="-0.258822" rj="0.965925" rk="0.000000" qi="0.000000" qj="0.000000" qk="-1.000000"/> <!-- modifying--> 
+
+
+<Dock x="0" y="-750" z="950.000000" size="300.000000" ri="-0.258822" rj="0.965925" rk="0.000000" qi="0.000000" qj="0.000000" qk="-1.000000"/> <!-- modifying--> 
+<Dock x="0" y="750" z="950.000000" size="300.000000" ri="-0.258822" rj="0.965925" rk="0.000000" qi="0.000000" qj="0.000000" qk="-1.000000"/> <!-- modifying--> 
+<Dock x="750" y="0" z="950.000000" size="300.000000" ri="-0.258822" rj="0.965925" rk="0.000000" qi="0.000000" qj="0.000000" qk="-1.000000"/> <!-- modifying--> 
+<Dock x="-750" y="0" z="950.000000" size="300.000000" ri="-0.258822" rj="0.965925" rk="0.000000" qi="0.000000" qj="0.000000" qk="-1.000000"/> <!-- modifying--> 
+
+<Dock x="0" y="-550" z="950.000000" size="300.000000" ri="-0.258822" rj="0.965925" rk="0.000000" qi="0.000000" qj="0.000000" qk="-1.000000"/> <!-- modifying--> 
+<Dock x="0" y="550" z="950.000000" size="300.000000" ri="-0.258822" rj="0.965925" rk="0.000000" qi="0.000000" qj="0.000000" qk="-1.000000"/> <!-- modifying--> 
+<Dock x="550" y="0" z="950.000000" size="300.000000" ri="-0.258822" rj="0.965925" rk="0.000000" qi="0.000000" qj="0.000000" qk="-1.000000"/> <!-- modifying--> 
+<Dock x="-550" y="0" z="950.000000" size="300.000000" ri="-0.258822" rj="0.965925" rk="0.000000" qi="0.000000" qj="0.000000" qk="-1.000000"/> <!-- modifying--> 
+
+<Dock x="0" y="-250" z="950.000000" size="300.000000" ri="-0.258822" rj="0.965925" rk="0.000000" qi="0.000000" qj="0.000000" qk="-1.000000"/> <!-- modifying--> 
+<Dock x="0" y="250" z="950.000000" size="300.000000" ri="-0.258822" rj="0.965925" rk="0.000000" qi="0.000000" qj="0.000000" qk="-1.000000"/> <!-- modifying--> 
+<Dock x="250" y="0" z="950.000000" size="300.000000" ri="-0.258822" rj="0.965925" rk="0.000000" qi="0.000000" qj="0.000000" qk="-1.000000"/> <!-- modifying--> 
+<Dock x="-250" y="0" z="950.000000" size="300.000000" ri="-0.258822" rj="0.965925" rk="0.000000" qi="0.000000" qj="0.000000" qk="-1.000000"/> <!-- modifying--> 
+
+<Dock x="0" y="0" z="950.000000" size="300.000000" ri="-0.258822" rj="0.965925" rk="0.000000" qi="0.000000" qj="0.000000" qk="-1.000000"/> <!-- modifying--> 
+
+<Subunit file="turret" x="-2362.500488" y="-0.000582" z="-825.000183" ri="0.338722" rj="0.000000" rk="-0.940886" qi="-0.940886" qj="-0.000000" qk="-0.338722"/>
+<Subunit file="turret" x="-1020.000122" y="0.000000" z="2137.500244" ri="-1.000000" rj="0.000000" rk="0.000000" qi="0.000000" qj="0.000000" qk="1.000000"/>
+<Subunit file="turret" x="-1340.949341" y="0.000000" z="1725.000122" ri="-0.494333" rj="0.000000" rk="-0.869273" qi="-0.869273" qj="0.000000" qk="0.494333"/>
+<!--<Dock x="-6.389415" y="1193.196899" z="-1350.000122" size="150.000000" ri="-0.707107" rj="0.707107" rk="0.000000" qi="0.000000" qj="0.000000" qk="-1.000000"/>-->
+<Subunit file="turret" x="-0.000590" y="2362.500244" z="-825.000244" ri="1.000000" rj="0.000000" rk="-0.000001" qi="-0.000000" qj="0.940886" qk="-0.338722"/>
+<Subunit file="turret" x="0.000000" y="1020.000061" z="2137.500244" ri="-1.000000" rj="0.000000" rk="0.000000" qi="0.000000" qj="0.000000" qk="1.000000"/>
+<!--<Dock x="-3.060888" y="-1209.256592" z="-1350.000000" size="249.000000" ri="0.965925" rj="0.258822" rk="0.000000" qi="0.000000" qj="0.000000" qk="-1.000000"/>-->
+<Subunit file="turret" x="0.000514" y="-2362.500244" z="-825.000244" ri="1.000000" rj="0.000000" rk="0.000000" qi="0.000000" qj="-0.940887" qk="-0.338721"/>
+<Subunit file="turret" x="0.000000" y="-1020.000000" z="2137.500244" ri="-1.000000" rj="0.000000" rk="0.000000" qi="0.000000" qj="0.000000" qk="1.000000"/>
+<Subunit file="turret" x="0.000000" y="-1340.949341" z="1725.000122" ri="-1.000000" rj="0.000000" rk="0.000000" qi="0.000000" qj="-0.869273" qk="0.494333"/>
+<Subunit file="turret" x="0.000000" y="1340.949341" z="1725.000244" ri="-1.000000" rj="0.000000" rk="0.000000" qi="0.000000" qj="0.869273" qk="0.494333"/>
+<!--<Dock x="1206.570557" y="-1.250423" z="-1350.000000" size="150.000000" ri="0.707103" rj="0.707111" rk="0.000000" qi="0.000000" qj="0.000000" qk="-1.000000"/>-->
+<Subunit file="turret" x="2362.500244" y="0.000674" z="-825.000244" ri="-0.000000" rj="1.000000" rk="0.000000" qi="0.940887" qj="0.000000" qk="-0.338721"/>
+<Subunit file="turret" x="1019.999939" y="0.000000" z="2137.500244" ri="0.000000" rj="1.000000" rk="0.000000" qi="0.000000" qj="-0.000000" qk="1.000000"/>
+<Subunit file="turret" x="1340.949341" y="0.000000" z="1725.000122" ri="-0.494333" rj="0.000000" rk="0.869273" qi="0.869273" qj="0.000000" qk="0.494333"/>
+	<Hold volume="100000000000">
+		<Category file="Natural_Products/Food">
+			<import price="1.05" pricestddev=".2" quantity="150" quantitystddev="2"/>
+		</Category>
+		<Category file="Natural_Products/Aera_Food">
+			<import price="1.9" pricestddev=".2" quantity="150" quantitystddev="2"/>
+		</Category>
+		<Category file="Natural_Products/Liquor">
+			<import price=".9" pricestddev=".1" quantity="10" quantitystddev="1"/>
+		</Category>
+		<Category file="Natural_Products/Plants">
+			<import price=".95" pricestddev=".1" quantity="0" quantitystddev="0"/>
+		</Category>
+		<Category file="Natural_Products/Natural_Resources">
+			<import price=".8" pricestddev=".1" quantity="0" quantitystddev="0"/>
+		</Category>
+		<Category file="Raw_Materials/Metals/Crude">
+			<import price=".8" pricestddev=".1" quantity="0" quantitystddev="0"/>
+		</Category>
+		<Category file="Raw_Materials/Metals/Precious">
+			<import price=".8" pricestddev=".1" quantity="0" quantitystddev="0"/>
+		</Category>
+		<Category file="Raw_Materials/Metals/Alloys">
+			<import price="1.05" pricestddev=".1" quantity="20" quantitystddev="20"/>
+		</Category>
+		<Category file="Raw_Materials/Metals/Aera_Alloys">
+			<import price="1" pricestddev=".1" quantity="20" quantitystddev="20"/>
+		</Category>
+		<Category file="Raw_Materials/Metals/Radioactive">
+			<import price=".8" pricestddev=".1" quantity="0" quantitystddev="0"/>
+		</Category>
+		<Category file="Raw_Materials/Gems/Jewelry">
+			<import price=".8" pricestddev=".1" quantity="0" quantitystddev="0"/>
+		</Category>
+		<Category file="Raw_Materials/Gems/Industrial">
+			<import price="1.1" pricestddev=".1" quantity="0" quantitystddev="0"/>
+		</Category>
+		<Category file="Raw_Materials/Stone">
+			<import price=".8" pricestddev=".1" quantity="00" quantitystddev="0"/>
+		</Category>
+		<Category file="Fuels/Crude">
+			<import price=".8" pricestddev=".1" quantity="0" quantitystddev="0"/>
+		</Category>
+		<Category file="Fuels/Refined">
+			<import price="1.2" pricestddev=".3" quantity="10" quantitystddev="10"/>
+		</Category>
+		<Category file="Fuels/Aera_Refined">
+			<import price="1.05" pricestddev=".3" quantity="10" quantitystddev="10"/>
+		</Category>
+		<Category file="Compressed_Gasses">
+			<import price="1.1" pricestddev=".1" quantity="10" quantitystddev="10"/>
+		</Category>
+		<Category file="Recycled_Products">
+			<import price="1.1" pricestddev=".1" quantity="10" quantitystddev="7"/>
+		</Category>
+		<Category file="Machinery_Goods">
+			<import price="1.1" pricestddev=".1" quantity="50" quantitystddev="30"/>
+		</Category>
+		<Category file="Supplies/Aerospace_Supplies">
+			<import price="1.2" pricestddev=".1" quantity="30" quantitystddev="10"/>
+		</Category>
+		<Category file="Research/Electronics">
+		<!-- priced at 1/10 their normal price... heh -->
+			<import price="12" pricestddev="2" quantity="3" quantitystddev="10"/>
+		</Category>
+		<Category file="Supplies/Agriculteral_Supplies">
+			<import price=".8" pricestddev=".1" quantity="0" quantitystddev="0"/>
+		</Category>
+		<Category file="Supplies/Mining_Supplies">
+			<import price=".8" pricestddev=".1" quantity="0" quantitystddev="0"/>
+		</Category>
+		<Category file="Supplies/Construction_Supplies">
+			<import price="1.1" pricestddev=".2" quantity="10" quantitystddev="10"/>
+		</Category>
+		<Category file="Supplies/Medical_Supplies">
+			<import price=".8" pricestddev=".1" quantity="0" quantitystddev="0"/>
+		</Category>
+		<Category file="Supplies/Aera_Medical_Supplies">
+			<import price="1.9" pricestddev=".1" quantity="3" quantitystddev="3"/>
+		</Category>
+		<Category file="Electronics">
+			<import price="1.2" pricestddev=".2" quantity="50" quantitystddev="40"/>
+		</Category>
+		<Category file="Electronics/Robotics">
+			<import price="1.1" pricestddev=".2" quantity="20" quantitystddev="10"/>
+		</Category>
+		<Category file="Manufactured_Goods">
+			<import price=".9" pricestddev=".2" quantity="30" quantitystddev="20"/>
+		</Category>
+		<Category file="Entertainment">
+			<import price="1.1" pricestddev=".2" quantity="10" quantitystddev="10"/>
+		</Category>
+		<Category file="Contraband/Medical">
+			<import price="0" pricestddev="0" quantity="0" quantitystddev="0"/>
+		</Category>
+		<Category file="Contraband">
+			<Cargo file="Pilot" price="1000" quantity="0" mass=".01" volume="1"/>
+			<import price="0" pricestddev="0" quantity="0" quantitystddev="0"/>
+		</Category>
+		<Category file="starships/Aera/Light">
+			<import price="1" pricestdev=".1" quantity="20" quantitystddev="100" />
+		</Category>
+		<Category file="starships/Aera/Medium">
+			<import price="1" pricestdev=".1" quantity="15" quantitystddev="70" />
+		</Category>
+		<Category file="starships/Aera/Heavy">
+			<import price="1" pricestdev=".1" quantity="10" quantitystddev="050" />
+		</Category>
+		<Category file="starships/Aera/Milspec">
+			<import price="1" pricestdev=".1" quantity="5" quantitystddev="20" />
+		</Category>
+		<Category file="upgrades/Weapons/Mounted_Guns_Light">
+			<import price="1" pricestdev=".1" quantity="20" quantitystddev="100" />
+		</Category>
+		<Category file="upgrades/Weapons/Mounted_Guns_Medium">
+			<import price="1" pricestdev=".1" quantity="10" quantitystddev="50" />
+		</Category>
+		<Category file="upgrades/Weapons/Mounted_Guns_Heavy">
+			<import price="1" pricestddev=".1" quantity="8" quantitystddev="30"/>
+		</Category>
+		<Category file="upgrades/Weapons/Mounted_Guns_Aera_Milspec">
+			<import price="1" pricestddev=".1" quantity="5" quantitystddev="20"/>
+		</Category>
+		<Category file="upgrades/Weapons/Turrets/Aera">
+			<import price="1" pricestddev=".1" quantity="1" quantitystddev="2"/>
+		</Category>
+		<Category file="upgrades/Miscellaneous/SubUnits">
+			<import price="1" pricestddev=".1" quantity="1" quantitystddev="1"/>
+		</Category>
+		<Category file="upgrades/Weapons/Beam_Arrays_Light">
+			<import price="1" pricestdev=".1" quantity="10" quantitystddev="50" />
+		</Category>
+		<Category file="upgrades/Weapons/Beam_Arrays_Medium">
+			<import price="1" pricestddev=".1" quantity="5" quantitystddev="20"/>
+		</Category>
+		<Category file="upgrades/Weapons/Beam_Arrays_Heavy">
+			<import price="1" pricestddev=".1" quantity="2" quantitystddev="10"/>
+		</Category>
+		<Category file="upgrades/Weapons/Beam_Arrays_Aera_Milspec">
+			<import price="1" pricestddev=".1" quantity="-2" quantitystddev="50"/>
+		</Category>
+		<Category file="upgrades/Weapons/Mount_Enhancements">
+			<import price="1" pricestddev=".1" quantity="10" quantitystddev="50"/>
+		</Category>
+		<Category file="upgrades/Reactors/Light">
+			<import price="1" pricestdev=".1" quantity="20" quantitystddev="100" />
+		</Category>
+		<Category file="upgrades/Reactors/Medium">
+			<import price="1" pricestdev=".1" quantity="10" quantitystddev="50" />
+		</Category>
+		<Category file="upgrades/Reactors/Heavy">
+			<import price="1" pricestdev=".1" quantity="5" quantitystddev="20" />
+		</Category>
+		<Category file="upgrades/Engines/Aera_Milspec">
+			<import price="1" pricestddev=".1" quantity="2" quantitystddev="20"/>
+		</Category>
+		<Category file="upgrades/Engines/Engine_Enhancements_Light">
+			<import price="1" pricestddev=".1" quantity="10" quantitystddev="50"/>
+		</Category>
+		<Category file="upgrades/Engines/Engine_Enhancements_Medium">
+			<import price="1" pricestddev=".1" quantity="5" quantitystddev="20"/>
+		</Category>
+		<Category file="upgrades/Engines/Engine_Enhancements_Heavy">
+			<import price="1" pricestddev=".1" quantity="2" quantitystddev="10"/>
+		</Category>
+		<Category file="upgrades/Shield_Systems/Light">
+			<import price="1" pricestdev=".1" quantity="10" quantitystddev="50" />
+		</Category>
+		<Category file="upgrades/Shield_Systems/Medium">
+			<import price="1" pricestddev=".1" quantity="5" quantitystddev="20"/>
+		</Category>
+		<Category file="upgrades/Shield_Systems/Heavy">
+			<import price="1" pricestddev=".1" quantity="2" quantitystddev="10"/>
+		</Category>
+		<Category file="upgrades/Shield_Systems/Aera_Milspec">
+			<import price="1" pricestddev=".1" quantity="-2" quantitystddev="50"/>
+		</Category>
+		<Category file="upgrades/Armor_Modification">
+			<import price="1" pricestddev=".1" quantity="10" quantitystddev="50"/>
+		</Category>
+		<Category file="upgrades/Armor_Modification/Aera_Milspec">
+			<import price="1" pricestddev=".1" quantity="5" quantitystddev="20"/>
+		</Category>
+		<Category file="upgrades/Hull_Upgrades">
+			<import price="1" pricestddev=".1" quantity="10" quantitystddev="50"/>
+		</Category>
+		<Category file="upgrades/Hull_Upgrades/Aera_Milspec">
+			<import price="1" pricestddev=".1" quantity="5" quantitystddev="20"/>
+		</Category>
+		<Category file="upgrades/ECM_Systems">
+			<import price="1" pricestddev=".1" quantity="10" quantitystddev="50"/>
+		</Category>
+		<Category file="upgrades/ECM_Systems/Aera_Milspec">
+			<import price="1" pricestddev=".1" quantity="5" quantitystddev="20"/>
+		</Category>
+		<Category file="upgrades/Repair_Systems">
+			<import price="1" pricestddev=".1" quantity="10" quantitystddev="50"/>
+		</Category>
+		<Category file="upgrades/Repair_Systems/Research">
+			<import price="1.2" pricestddev=".1" quantity="0" quantitystddev="0"/>
+		</Category>
+		<Category file="upgrades/Repair_Systems/Advanced">
+			<import price="1" pricestddev=".1" quantity="5" quantitystddev="20"/>
+		</Category>
+		<Category file="upgrades/Radar/Basic">
+			<import price="1" pricestdev=".1" quantity="10" quantitystddev="50" />
+		</Category>
+		<Category file="upgrades/Radar/Intermediate">
+			<import price="1" pricestddev=".1" quantity="5" quantitystddev="20"/>
+		</Category>
+		<Category file="upgrades/Radar/Advanced">
+			<import price="1" pricestddev=".1" quantity="2" quantitystddev="10"/>
+		</Category>
+		<Category file="upgrades/Miscellaneous">
+			<import price="1" pricestddev=".1" quantity="10" quantitystddev="50"/>
+		</Category>
+		<Category file="upgrades/Miscellaneous/Aera_Milspec">
+			<import price="1" pricestddev=".1" quantity="2" quantitystddev="10"/>
+		</Category>
+		<Category file="upgrades/Ammunition">
+			<import price="1" pricestddev=".1" quantity="300" quantitystddev="250"/>
+		</Category>
+		<Category file="upgrades/Experimental">
+			<import price="1.4" pricestddev=".2" quantity="0" quantitystddev="0"/>
+		</Category>
+	</Hold>
+	<Upgrade file="standard_missions"/>
+	<Upgrade file="aera_missions"/>
+	<Upgrade file="aera_mil_missions"/>
+
+</Unit>

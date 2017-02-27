@@ -1,0 +1,9 @@
+<SCRIPT>
+	<Default>
+		<Vector position=""/>
+		<float value="1"/>
+	</Default>
+	<MoveTo afterburn="0" accuracy="3">
+		<Vector TargetPos=""/>
+	</MoveTo>
+</SCRIPT>

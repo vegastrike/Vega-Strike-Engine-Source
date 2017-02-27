@@ -1,0 +1,158 @@
+* = optional
+VSD = 5400 kJ (kilojoules)
+Things must start with <Unit scale="scalefactor"> scale factor affects the size
++Description
+	-combatRole :  combat role that the ship has (see ai/VegaPriorities.csv )
+
++Meshfile
+	-file  XMESH file to load
++ShieldMesh*
+	-file XMESH to load instead of sphere as shield
+	-tightness UNKNOWN
++RapidMesh*
+	-file: xmesh to load and use for collisions instead of xmeshes above (not drawn)
+	-rapid*: boolean whether to uose rapid collision system (defaults to true)
++BspMesh*:
+	-file*: xmesh to use for beam and bolt collisions
+	-usebsp*: whether to use bsp's for bolt collisions (else sphere is used)
++Thrust
+	+Engine:
+		-Afterburner [Engine]  Thrust with afterburners in metric tonnes meters per second squared
+		-Forward: Thrust without afterburners in metric tonnes meters per second squared
+		-Retro: Reverse thrust in kkg*m/s^2
+		-Left: Right thrust  in kkg*m/s^2
+		-Right: Left thrust  in kkg*m/s^2
+		-Top: Reverse thrust  in kkg*m/s^2
+		-Bottom: Reverse Thrust in kkg*m/s^2
+	+Maneuver
+		-yaw: Right yaw in kkg*deg/s^2
+		-pitch: Right pitch in kkg*deg/s^2
+		-roll: Right roll in kkg*deg/s^2
++Computer
+	+Radar
+		-itts: if the unit has ability to target track with lead
+		-color: if unit has color radar
+		-range: maximum range of radar
+		-error*: currently unused	
+		-trackingCone: cosine of cone at which guns may track
+		-lockcone: cosine of cone at which missiles gain locking time
+		-mintargetsize: unused...but supposedly minimum target this can do
+	-Afterburner: [Computer] Max safe speed with afterburners in meters per second
+	-maxspeed: Max safe speed without ab in m/s
+	-Yaw: max yaw in degrees per second
+	-Pitch: max pitch in dps
+	-Roll: max roll in dps
+	-SlideStart*: number of tenths of seconds before fully reacting to keyboard (smoothing)
+	-SlideEnd*: (number of tenths of seconds to stop)
++Cockpit
+	-file: file ot load cockpit from
+	-x: location of cockpit in meters
+	-y
+	-z
+
++Defense
+	-ExplosionAni*: special explosion to use
+	-RepairDroid*: strength of repair system (0-6)
+	-ECM*: type of ECM
+	
+	-HudImage: sprite file to use when targetted
+	+Cloak*
+		-missing: if 1, then no cloak is here. also missing in abserce of optional tag
+		-cloakmin: minimum percentage of cloakedness
+		-cloakglass: boolean whether or not effect 2 is used
+		-cloakrate: time per second to cloak in decimal per second
+		-cloakenergy: how much energy this takes in 100kJ
+	+Shields
+		-Front: Forward max shields in VSD
+		-Back: Back shields in VSD
+		-Leak*: how much leak these shields have (usually 0%) between 0 and 100
+		-Left*: left shields in VSD
+		-Right*: right shields in VSD
+		-Top*: top shields (if any) in VSD
+		-Bottom*: bottom shields (if any)
+		-Recharge: shield regeneration if not violating speed limit in VSD/s
+	+Armor
+		-Front: Forward max armor in VSD
+		-Back: Back armor in VSD
+		-Left: left armor in VSD
+		-Right: right armor in VSD
+	+Hull
+		-Strength: max hull in VSD
++Sound
+
++Stats
+	-mass: mass in metric tonnes (kkg)
+	-MomentOfInertia: mass*m*m in metric tonnes* meter * meter
+	-fuel: fuel in kJ
+
++Energy
+	+Reactor
+		-recharge: recharging of reactor in 100 kJ/s
+		-limit: max storage of reactor in 100 kJ/s
++Jump*
+	-delay: seconds before jump drive initiates
+	-jumpenergy: enerjy to jump
+	-wormhole: forces units to teleport upon touching this one
+	-missing: boolean whether the jump drive is missing (assumed missing in absence of tag)
++CockpitDamage**
+	-damage float damage between 0 and 1 of cockpit component
++Mount**
+	-weapon: weapon from weapon list
+	-size: size class (which sizes it can hold) and if it's autotracking (goes inside the long string)
+	-ri*: }
+	-rj*:  } R vector (forward vector) of gun (assume 0,0,1)
+	-rk*: }
+	-qi*: }
+	-qj*:  } Q vector (up vector) of gun (assume 0,1,0)
+	-qk*: }
+	-x: location of gun in meters
+	-y: "
+	-z: "
+	-ammo*: how much the gun DOES hold
+	-volume*: how much ammo the gun can hold if you refill
++SubUnit**
+	-file: unit file that can be referenced frmo toplevel units
+	-size: size class (which sizes it can hold)
+	-ri*: }
+	-rj*:  } R vector (forward vector) of subunit (assume 0,0,1)
+	-rk*: }
+	-qi*: }
+	-qj*:  } Q vector (up vector) of subunit (assume 0,1,0)
+	-qk*: }
+	-x: location of subunit in meters
+	-y: "
+	-z: "
+	-restricted*: minimum dot with rj that the turret can have so it can't turn inside itself
++Light**
+	-x: location of engine in meters
+	-y: location of engine
+	-z: location of engine
+	-red: dye of engine	
+	-blue: dye of engine	
+	-green: dye of engine
+	-size: size of engine (radius, meters)
+	-file: meshfile (sans .xmesh) for this engine model
++Dock**
+	-dockinternal*: whether the dock port makes the ship disappeared (unused)
+	-x: location of dock in meters
+	-y
+	-z
+	-size: size of dock port
+
++Hold
+	-volume: volume in cargo units
+	+Category**
+		+cargo**
+			-file:name of cargo
+			-price: price of cargo
+			-quantity: ammt of cargo
+			-mass: mass in tonnes
+			-volume: size of cargo in cargo units
+			-description*: IGNORED
+		+import*
+			-price: price scale (multiplied by price in list)
+			-pricestddev: price scale variation (above adjusted by this)
+			-quantity: quantity of this sort of cargo
+			-quantitystddev: quantity variation
++Upgrade**
+	-file: file to upgrade this unit with

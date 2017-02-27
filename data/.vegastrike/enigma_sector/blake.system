@@ -1,0 +1,43 @@
+<system name="blake" background="backgrounds/fiery_galaxy" nearstars="500" stars="1000" starspread="150">
+<Light>
+	<ambient red="0.000000" green="0.000000" blue="0.000000"/>
+	<diffuse red="1.000000" green="0.434031" blue="0.457243"/>
+	<specular red="1.000000" green="0.188383" blue="0.209071"/>
+</Light>
+<Planet name="blake A" file="stars/red_star.png" ri="0.000000" rj="0.000000" rk="0.000000" si="0.000000" sj="0.000000" sk="0.000000" radius="9715175.000000" x="0" y="0" z="0"  Red="1.000000" Green="0.188383" Blue="0.209071" ReflectNoLight="true" light="0">
+	<Planet name="Ruanda" file="planets/m_class3.png" ri="-3431287.000000" rj="-13078083.000000" rk="-22130420.000000" si="42879944.000000" sj="-11661059.000000" sk="242693.765625" radius="318225.562500" x="-40680612.000000" y="-19027176.000000" z="34047820.000000" year= "57285064.000000" day="105.762017"  >
+	</Planet>
+	<Planet name="Managua" file="planets/m_class1.png" ri="-6985537.000000" rj="24577640.000000" rk="14251957.000000" si="40740808.000000" sj="13350963.000000" sk="-3054929.000000" radius="468428.750000" x="35885432.000000" y="-28481066.000000" z="-43930848.000000" year= "63527196.000000" day="439.264381"  >
+	<Atmosphere file="sol/earthcloudmaptrans.png" alpha="SRCALPHA INVSRCALPHA" radius="482481.612500"/>
+		<Planet name="Yukon" file="planets/rock.png" ri="-475200.937500" rj="608381.062500" rk="695639.062500" si="-716206.437500" sj="-851842.875000" sk="255740.578125" radius="160609.859375" x="-657138.062500" y="-758046.250000" z="845892.312500" year= "1018828.375000" day="117.838557"  >
+		</Planet>
+	</Planet>
+	<Planet name="Bruegel" file="planets/m_class.png" ri="23296384.000000" rj="-7868497.500000" rk="-17225932.000000" si="16679103.000000" sj="33057974.000000" sk="7456564.000000" radius="394572.437500" x="38398964.000000" y="-16128028.000000" z="-31148944.000000" year= "75138928.000000" day="49.123569"  >
+	<Atmosphere file="sol/earthcloudmaptrans.png" alpha="SRCALPHA INVSRCALPHA" radius="406409.610625"/>
+		<Planet name="JumpToDefiance" file="jump.png" ri="-808404.937500" rj="388675.468750" rk="177651.609375" si="-260253.781250" sj="-475658.187500" sk="-143616.828125" radius="237.097107" x="762895.250000" y="-827241.312500" z="518213.250000" year= "1106971.875000" day="493.134189" alpha="ONE ONE" destination="enigma_sector/defiance"  >
+		</Planet>
+	</Planet>
+	<Planet name="Cretaceous" file="planets/carribean.png" ri="-22625028.000000" rj="23067910.000000" rk="-21577334.000000" si="-32648956.000000" sj="-32181564.000000" sk="-170450.718750" radius="472928.031250" x="19425418.000000" y="-19112030.000000" z="29178076.000000" year= "77826768.000000" day="79.578600"  >
+	<Atmosphere file="sol/earthcloudmaptrans.png" alpha="SRCALPHA INVSRCALPHA" radius="487115.872188"/>
+		<Planet name="JumpToEnigma" file="jump.png" ri="1175576.500000" rj="294817.062500" rk="761540.625000" si="-755695.687500" sj="554095.687500" sk="952045.437500" radius="117.941353" x="-1134873.750000" y="574942.625000" z="-717767.625000" year= "3254504.500000" day="609.970763" alpha="ONE ONE" destination="enigma_sector/enigma"  >
+		</Planet>
+	</Planet>
+	<Planet name="Stillwell" file="planets/university.png" ri="4230475.500000" rj="10746481.000000" rk="-9572431.000000" si="-14665255.000000" sj="13445627.000000" sk="8613504.000000" radius="289628.843750" x="19934588.000000" y="17396108.000000" z="17779976.000000" year= "20793718.000000" day="329.309854"  >
+	<CityLights file="planets/university_light.png" wrapx="1" wrapy="1"/>
+		<Unit name="" file="factory" ri="534399.625000" rj="353396.500000" rk="92884.640625" si="-183904.265625" sj="112417.492188" sk="630356.562500" x="737622.562500" y="-470364.375000" z="463289.750000" year= "11377250.341863" faction="confed"  />
+		<Planet name="Fleisher" file="planets/rock4.png" ri="272458.375000" rj="527153.625000" rk="-327454.250000" si="-248214.062500" sj="-100286.359375" sk="-367973.000000" radius="74651.000000" x="584274.562500" y="-658213.125000" z="-792572.687500" year= "1356255.000000" day="424.709250"  >
+		</Planet>
+		<Planet name="JumpToAdams" file="jump.png" ri="203932.781250" rj="-494741.750000" rk="277772.625000" si="-311883.406250" sj="37999.179688" sk="296656.406250" radius="223.434845" x="472069.500000" y="-439504.843750" z="560233.687500" year= "7841072.000000" day="399.211401" alpha="ONE ONE" destination="enigma_sector/adams"  >
+		</Planet>
+	</Planet>
+	<Planet name="Anglia" file="planets/gas_medium.png" ri="14239625.000000" rj="24622072.000000" rk="-20450580.000000" si="-1105489.125000" sj="19259724.000000" sk="22418558.000000" radius="1763360.500000" x="-49836224.000000" y="-30629444.000000" z="-36880940.000000" year= "42555292.000000" day="728.837671"  >
+		<Unit name="" file="medical" ri="2136150.250000" rj="1882986.000000" rk="-2175213.750000" si="419648.250000" sj="-3005188.000000" sk="-2189345.750000" x="6840873.500000" y="2962941.000000" z="-5370332.000000" year= "6275590.845844" faction="confed"  />
+		<Planet name="Hercules" file="sol/pluto.png" ri="-4925259.500000" rj="-5305402.500000" rk="2763477.250000" si="-5586032.500000" sj="2208238.750000" sk="-5716371.500000" radius="592687.562500" x="9320678.000000" y="-7624499.000000" z="-5528848.500000" year= "11027797.000000" day="463.496566"  >
+		</Planet>
+		<Planet name="Scrooge" file="planets/rock2.png" ri="-3402410.500000" rj="5229889.500000" rk="-113252.187500" si="3971848.000000" sj="2565407.000000" sk="-857045.937500" radius="364296.156250" x="-4894502.000000" y="-5994610.500000" z="-3738652.250000" year= "22798028.000000" day="352.012695"  >
+		</Planet>
+	</Planet>
+	<Nebula name="" file="nebula" nebfile="red-nebula.xml" ri="17803290.000000" rj="-26385280.000000" rk="-4216471.000000" si="2573124.750000" sj="8058711.000000" sk="-39564196.000000" x="23168026.000000" y="39051940.000000" z="14853886.000000" year= "1280703104.000000"  />
+	<Unit name="" file="refinery" nebfile="red-nebula.xml" ri="17803290.000000" rj="-26385280.000000" rk="-4216471.000000" si="2573124.750000" sj="8058711.000000" sk="-39564196.000000" x="23168026.000000" y="39051940.000000" z="14853886.000000" year= "1280703104.000000" faction="confed"  />
+</Planet>
+</system>

@@ -1,0 +1,28 @@
+<system name="Mars1" background="backgrounds/fiery_galaxy" nearstars="500" stars="1000" starspread="150"  x="0" y="0" z="0">
+<Light>
+<ambient red=".3" green=".3" blue=".3"/>
+<diffuse red="1" green=".8" blue=".8"/>
+<specular red="1" green="1" blue="1"/>
+</Light>
+
+<Light>
+<ambient red="1" green=".1" blue="0"/>
+<!--<diffuse red="1" green=".7" blue="0"/>-->
+<!--<attenuated red=".00000001" blue=".00000015"/>-->
+<attenuated red="0" blue=".0000001"/>
+</Light>
+
+        <planet name="sun" file="sol/sun.png" radius="2200" gravity="20" ri="0" rj="0" rk="0" si="0" sj="0" sk="0" velocity="0" position="0" Red=".7" Green=".5" Blue=".5" light="0 1l" faction="neutral">
+
+
+<planet name="Mars" file="sol/sun.png" radius="680" gravity="20" ri="12000" rj="0" rk="0" si="0" sj="0" sk="12000" velocity="20" position="0.750" faction="neutral">
+<!--		<unit name = "station-mars" file="station" faction="neutral" ri="4000" sk="3000"/>-->
+		</planet>
+	</planet>
+
+	<planet name="jumppoint-mars" file="jump.png" alpha="ONE ONE" radius="100" gravity="20"  x="8000" y="100" z="2000"  velocity="0" position="0" destination="blank_r">
+	<planet name="jumppoint-mars" file="jump.png" alpha="ONE ONE" radius="1000" gravity="20"  x="10000" y="100" z="2000"  velocity="0" position="0" destination="blank">
+	</planet>
+
+
+</system>

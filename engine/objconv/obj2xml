@@ -1,0 +1,195 @@
+#!/usr/bin/perl -w
+
+#obj2xml - 3d explorer variant
+
+#$float = "-?\\d*\\.?\\d*"; 
+$float = '\S+'; 
+$scale = 1;
+
+@point_list = ();
+@normal_list = ();
+@texcoord_list = ();
+%encountered_points = (); # hashmap associating textures with their vertices
+%point_output = ();
+%face_output = ();
+$num_polygons = 0;
+
+if(@ARGV < 1) {
+print STDERR "Usage: obj2xml <objfile>\n";
+exit;
+}
+
+$inputfile = $ARGV[0];
+$scale = $ARGV[1] if (@ARGV > 1);
+$inputfile =~ /(.*)\.obj/ or die "Bad extension on $inputfile";
+$basename = $1;
+$basename = `basename $basename`;
+chomp $basename;
+$unitoutfile =  $basename . ".xunit";
+open(INPUT, "<$inputfile") or die "Could not open $inputfile";
+open(UNITOUTPUT, ">$unitoutfile") or die "Could not create $unitoutfile";
+
+print UNITOUTPUT << 'HEAD' 
+<Unit>
+HEAD
+;
+
+$objname = $basename;
+$texture = $default_texture = "$basename-default";
+$in_strip = 0;
+sub finish_strip {
+	my $quad = 0;
+	if(@_ == 1) { $quad = $_[0]; }
+	@vertices = @strip_vertices;
+	if(!$quad && @vertices == 4) { # swap last two vertices if this is not a real quad
+		my $foo = $vertices[3];
+		$vertices[3] = $vertices[2];
+		$vertices[2] = $foo;
+	}
+		@output_vertices = ();
+		@output_texcoords = ();
+
+		while(@vertices) {
+			($point, $texcoord, $normal) = split m|/|, shift(@vertices);
+			$point--; $texcoord--; $normal--;
+			if($texcoord == -1 && $normal == -1) {
+				$texcoord = $normal = $point;
+			}
+			$point = << "POINT"
+	<Point>
+		<Location x="$point_list[$point][0]" y="$point_list[$point][1]" z="$point_list[$point][2]"/>
+		<Normal i="$normal_list[$normal][0]" j="$normal_list[$normal][1]" k="$normal_list[$normal][2]"/>
+	</Point>
+POINT
+;
+			unless(exists $encountered_points{$objname}{$texture}) {
+				$encountered_points{$objname}{$texture} = {};
+				$point_output{$objname}{$texture} = "<Points>\n";
+				$face_output{$objname}{$texture} = "<Polygons>\n";
+			}
+			unless(defined $encountered_points{$objname}{$texture}{$point}) {
+				$encountered_points{$objname}{$texture}{$point} = keys %{$encountered_points{$objname}{$texture}};
+				$point_output{$objname}{$texture} .= $point;
+			}
+			push @output_vertices, $encountered_points{$objname}{$texture}{$point};
+			push @output_texcoords, $texcoord;
+		}
+
+		if(@output_vertices==3) {
+			$face_output{$objname}{$texture} .= "<Tri>\n"
+		} elsif (@output_vertices==4) {
+			$face_output{$objname}{$texture} .= "<Quad>\n"
+		} else {
+			$face_output{$objname}{$texture} .= "<Tristrip>\n"
+		}
+		for($v=0;$v<@output_vertices;$v++) {
+			$face_output{$objname}{$texture} .= "	<Vertex point=\"$output_vertices[$v]\" s=\"$texcoord_list[$output_texcoords[$v]][0]\" t=\"$texcoord_list[$output_texcoords[$v]][1]\"/>\n"
+		}
+		if(@output_vertices==3) {
+			$face_output{$objname}{$texture} .= "</Tri>\n"
+		} elsif (@output_vertices==4) {
+			$face_output{$objname}{$texture} .= "</Quad>\n"
+		} else {
+			$face_output{$objname}{$texture} .= "</Tristrip>\n"
+		}
+		$num_polygons++;
+		print "strip vertices: " . join(" ", @strip_vertices) . "\n";
+$in_strip = 0;
+@strip_vertices = ();
+}
+
+while($line = <INPUT>) {
+	$line =~ s/#.*$//;
+	if($in_strip && $line =~ /^ *q (.+)$/) {
+		chomp $line;
+		my @new_vertices = split /\s/, $line;
+		shift @new_vertices;
+		push @strip_vertices, @new_vertices;
+	} else {
+	  if($in_strip) { 
+	  	finish_strip();
+	  }
+	  if ($line =~ /mtllib +(\S+)/) {
+		open(MTL, "<$1") or die "could not open materials file $1";
+		while($linea = <MTL>) {
+			if($linea =~ /newmtl +(\S+)/) {
+				$material = $1;
+				$materials{$1} = $default_texture;
+			} elsif ($linea =~ /map_Kd +(\S+)/) {
+				warn "Material not defined" unless defined $material;
+				$filename = $1;
+				if($filename =~ /(.+)\.[^.]+$/) {
+					$filename = $1;
+				}
+				$materials{$material} = $filename;
+			}
+		}
+		# should do more stuff
+	} elsif ($line =~ /g +(\S+)/) {
+		$objname = $1;
+	} elsif($line =~ /v +($float) +($float) +($float)/i) {
+		push @point_list, [$1*$scale, $2*$scale, $3*$scale];
+	} elsif($line =~ /vn +($float) +($float) +($float)/i) {
+		push @normal_list, [$1, $2, $3];
+	} elsif($line =~ /vt +($float) +($float)/i) {
+		push @texcoord_list, [$1, (1.0-$2)];
+	} elsif($line =~ / *usemtl +(\S+)/) {
+		if(defined $materials{$1}) {
+			$texture = $materials{$1};
+		} else {
+			warn "Material $1 not defined";
+			$texture = $default_texture;
+		}
+	} elsif($line =~ / *f/i) {
+		$in_strip = 1;
+		chomp $line;
+		@strip_vertices = split /\s/, $line;
+		shift @strip_vertices; # dump out the 'f'
+		finish_strip(1);
+	} elsif($line =~ /^ *t/) {
+		$in_strip = 1;
+		chomp $line;
+		@strip_vertices = split /\s/, $line;
+		shift @strip_vertices;
+	}
+	}
+}
+if($in_strip) {
+  finish_strip();
+}
+
+for $objname (keys %encountered_points) {
+	print "$objname\n";
+	if($objname ne $basename) {
+	$subfile = "$basename-$objname.xunit";
+	open(SUBUNITOUTPUT, ">$subfile");
+	print SUBUNITOUTPUT "<Unit>\n";
+	} else {
+		open(SUBUNITOUTPUT, ">&UNITOUTPUT");
+	}
+	for $texture (keys %{$encountered_points{$objname}}) {
+		if($basename eq $objname) {
+		$meshfilename = "$basename-$texture.xmesh";
+		} else {
+			$meshfilename = "$basename-$objname-$texture.xmesh";
+		}
+		open(MESHOUTPUT, ">$meshfilename");
+		print MESHOUTPUT "<Mesh texture=\"$texture.bmp\">\n";
+		print MESHOUTPUT $point_output{$objname}{$texture};
+		print MESHOUTPUT "</Points>\n\n";
+		print MESHOUTPUT $face_output{$objname}{$texture};
+		print MESHOUTPUT "</Polygons>\n\n";
+		print MESHOUTPUT "</Mesh>\n";
+		print SUBUNITOUTPUT "<Meshfile file=\"$meshfilename\"/>\n";
+	}
+	if($objname ne $basename) {
+	print SUBUNITOUTPUT "</Unit>\n";
+	print UNITOUTPUT "<SubUnit file=\"$subfile\"/>\n";
+	}
+}
+print UNITOUTPUT << "FOOT"
+</Unit>
+FOOT
+;
+print "$num_polygons polygons in model\n";
+

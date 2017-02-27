@@ -1,0 +1,43 @@
+<system name="canarus" background="backgrounds/mustard" nearstars="500" stars="1000" starspread="150">
+<Light>
+	<ambient red="0.000000" green="0.000000" blue="0.000000"/>
+	<diffuse red="1.000000" green="0.999209" blue="0.768261"/>
+	<specular red="1.000000" green="0.998419" blue="0.590225"/>
+</Light>
+<Planet name="canarus A" file="sol/sun.png" ri="0.000000" rj="0.000000" rk="0.000000" si="0.000000" sj="0.000000" sk="0.000000" radius="21000000.000000" x="0" y="0" z="0"  Red="1.000000" Green="0.998419" Blue="0.590225" ReflectNoLight="true" light="0">
+	<Planet name="Andromeda" file="planets/m_class4.png" ri="37234868.000000" rj="70863816.000000" rk="-27834592.000000" si="29454024.000000" sj="-8280847.500000" sk="18319086.000000" radius="875854.500000" x="92235264.000000" y="-93443320.000000" z="-34437444.000000" year= "1435968128.000000" day="535.164769"  >
+		<Planet name="Hecuba" file="sol/hyperion.png" ri="1581402.500000" rj="-1781319.750000" rk="-1236932.750000" si="-1298129.500000" sj="27180.113281" sk="-1698783.875000" radius="207952.296875" x="-1640429.000000" y="-1171589.250000" z="-1520848.750000" year= "7183264.000000" day="237.997497"  >
+		</Planet>
+		<Planet name="JumpToBeta_canarus" file="jump.png" ri="-669872.687500" rj="916859.187500" rk="-648195.375000" si="451753.656250" sj="-295178.843750" sk="-884386.000000" radius="174.312317" x="2340769.500000" y="-1560175.750000" z="-2169876.250000" year= "5006254.000000" day="436.205694" alpha="ONE ONE" destination="sol_sector/beta_canarus"  >
+		</Planet>
+	</Planet>
+	<Planet name="Clytaemnestra" file="planets/Dirt1.png" ri="-191048.375000" rj="-52744948.000000" rk="71596352.000000" si="38899192.000000" sj="44030136.000000" sk="32540748.000000" radius="778103.000000" x="39929068.000000" y="-39619804.000000" z="-34446808.000000" year= "203234672.000000" day="146.263253"  >
+	<CityLights file="planets/Dirt_light.png" wrapx="1" wrapy="1"/>
+<Ring file="planets/ring.png" innerradius="1229952.234965" outerradius="2712152.129898"  wrapx="36" wrapy="2" />
+		<Planet name="JumpToLuyten" file="jump.png" ri="-179421.265625" rj="-2134473.000000" rk="272126.750000" si="172692.515625" sj="170523.031250" sk="1451387.875000" radius="199.945374" x="1940413.000000" y="1244304.875000" z="1808593.000000" year= "1732157.750000" day="724.196905" alpha="ONE ONE" destination="sol_sector/luyten"  >
+		</Planet>
+	</Planet>
+	<Planet name="Poseidon" file="planets/Dirt.png" ri="45574092.000000" rj="-31031240.000000" rk="75376576.000000" si="-39841920.000000" sj="41712240.000000" sk="41261384.000000" radius="530880.125000" x="-59710704.000000" y="-76193552.000000" z="76443264.000000" year= "305964608.000000" day="266.343089"  >
+	<CityLights file="planets/Dirt_light.png" wrapx="1" wrapy="1"/>
+		<Unit name="" file="MiningBase" ri="-492476.937500" rj="779483.562500" rk="535353.000000" si="-1082612.750000" sj="-633357.937500" sk="-73726.570313" x="1241993.875000" y="-618825.875000" z="-1334326.750000" year= "1245367.162644" faction="confed"  />
+	</Planet>
+	<Planet name="Cepheus" file="planets/university.png" ri="-19282686.000000" rj="12697150.000000" rk="25792526.000000" si="9403468.000000" sj="80264952.000000" sk="-32482746.000000" radius="973221.562500" x="40792708.000000" y="50267840.000000" z="95479072.000000" year= "1143695232.000000" day="709.114413"  >
+	<CityLights file="planets/university_light.png" wrapx="1" wrapy="1"/>
+		<Planet name="JumpToVespus" file="jump.png" ri="-1368334.125000" rj="-817801.375000" rk="-522279.187500" si="-1638955.875000" sj="1790999.625000" sk="1489542.125000" radius="85.763451" x="2018288.625000" y="1080811.625000" z="1963262.250000" year= "3969740.250000" day="590.115665" alpha="ONE ONE" destination="enigma_sector/vespus"  >
+		</Planet>
+	</Planet>
+	<Planet name="Erebus" file="planets/Dirt.png" ri="-33153908.000000" rj="28328042.000000" rk="47285036.000000" si="48384388.000000" sj="40920172.000000" sk="9409808.000000" radius="958913.687500" x="-89628488.000000" y="-91334144.000000" z="-82122032.000000" year= "55187852.000000" day="307.345317"  >
+	<CityLights file="planets/Dirt_light_repeat.png" wrapx="64" wrapy="64"/>
+<Ring file="planets/ring.png" innerradius="1758796.132711" outerradius="2249563.750265"  wrapx="32" wrapy="1" />
+<Ring file="planets/ring.png" ri="0.857350" rj="-0.270154" rk="0.438141" si="0.507387" sj="0.586849" sk="-0.631005" innerradius="2105660.127488" outerradius="2693215.322161" wrapx="32" wrapy="1" />		<Unit name="" file="refinery" ri="1076599.125000" rj="-1019136.375000" rk="-804480.187500" si="-1159127.875000" sj="-1000014.437500" sk="-284363.687500" x="1380547.125000" y="-1521800.125000" z="-2595152.500000" year= "10650484.123577" faction="confed"  />
+		<Planet name="Clio" file="sol/phobos.png" ri="2235114.250000" rj="-680352.937500" rk="-1362784.750000" si="-734688.500000" sj="-2188477.250000" sk="-112399.156250" radius="258681.640625" x="-2462175.750000" y="1940678.000000" z="3305180.250000" year= "4868589.000000" day="815.192846"  >
+		</Planet>
+	</Planet>
+	<Planet name="Persephone" file="planets/gas_giant2.png" ri="-50085252.000000" rj="18839380.000000" rk="49696004.000000" si="2962487.000000" sj="-45894844.000000" sk="20384082.000000" radius="4161674.750000" x="-91288368.000000" y="-94647920.000000" z="-36809820.000000" year= "114933360.000000" day="38.787316"  >
+		<Planet name="Iphicles" file="sol/io.png" ri="11955629.000000" rj="-3114134.250000" rk="-5000486.000000" si="-3279659.500000" sj="-6011419.500000" sk="-4097607.000000" radius="1638125.125000" x="21194382.000000" y="-18004448.000000" z="-17989788.000000" year= "64396224.000000" day="679.450422"  >
+		</Planet>
+		<Planet name="Andromache" file="sol/europa.png" ri="-2482041.000000" rj="7370836.500000" rk="-3137766.250000" si="-12185226.000000" sj="-8835016.000000" sk="-11115305.000000" radius="1556738.375000" x="-15464074.000000" y="15338852.000000" z="13602001.000000" year= "95949664.000000" day="64.232429"  >
+		</Planet>
+	</Planet>
+</Planet>
+</system>

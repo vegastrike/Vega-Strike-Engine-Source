@@ -1,0 +1,42 @@
+<system name="Heavens Gate" background="backgrounds/plasma_galaxy" nearstars="500" ScaleSystem="1" stars="1000" starspread="150">
+	<Light>
+		<ambient red="0" green="0" blue="0"/>
+		<diffuse  red="0.7" green=".7" blue="0.7"/>
+		<specular  red="0.7" green=".7" blue="0.7"/>
+	</Light>
+	<Light>
+		<ambient red="0" green="0" blue="0"/>
+		<diffuse  red="0.5" green=".3" blue=".1"/>
+		<specular  red="0.5" green=".3" blue=".1"/>
+	</Light>
+
+	<planet name="Heavens Gate A" file="stars/orange_star.png" radius="5100000" x="-26000000" y="0" z="-26000000" gravity="2000" Red="1" Green="0.44" Blue=".13" ReflectNoLight="true" light="1">
+		<planet name="Heavens Gate B" file="stars/white_star.png" radius="4333333" gravity="2000" ri="86000000" rj="0" rk="0" si="0" sj="0" sk="67700000" day="85800000" year="85800000" Red="1" Green="1" Blue="1" ReflectNoLight="true" light="0">
+		</planet>
+		<planet name="Barnoose"	file="planets/university.png" radius="1281005" gravity="18" ri="26000000.0" rj="0" rk="26000000" si="26000000.0" sj="0" sk="-26000000.0" year="13661700" day="950" position="0">
+			<Atmosphere file="sol/earthcloudmaptrans2.png" alpha="SRCALPHA INVSRCALPHA" radius="1282000"/>  
+			<CityLights file="planets/university_light.png" wrapx="1" wrapy="1"/>
+			<Fog>
+				<FogElement file="sphereatm.xmesh" ScaleAtmosphereHeight="1.01" red=".5" blue=".9" green=".5" alpha=".5" dired=".5" diblue=".5" digreen=".5" dialpha=".5" concavity="0" focus=".4" minalpha="0" maxalpha="1" />
+				<FogElement file="sphereatm.xmesh" ScaleAtmosphereHeight="1.0175" red=".5" blue=".9" green=".5" alpha=".5" dired=".5" diblue=".5" digreen=".5" dialpha=".5" concavity="0" focus=".5" minalpha="0" maxalpha="1"/>
+				<FogElement file="sphereatm.xmesh" ScaleAtmosphereHeight="1.025" red=".5" blue=".9" green=".5" alpha=".5" dired=".5" diblue=".5" digreen=".5" dialpha=".5" concavity="0" focus=".5" minalpha="0" maxalpha="1"/>
+				<FogElement file="sphereatm.xmesh" ScaleAtmosphereHeight="1.0325" red=".5" blue=".9" green=".5" alpha=".5" dired=".5" diblue=".5" digreen=".5" dialpha=".5" concavity="0" focus=".5" minalpha="0" maxalpha="1"/>
+				<FogElement file="sphereatm.xmesh" ScaleAtmosphereHeight="1.04" red=".5" blue=".9" green=".5" alpha=".5" dired=".5" diblue=".5" digreen=".5" dialpha=".5" concavity="0" focus=".5" minalpha="0" maxalpha="1"/>
+			</Fog>
+			<Ring file="rings/planet_ring5.texture" innerradius="2259608" outerradius="2460058"  ri="-0.714508" rj="0.436248" rk="0.546960" si="-0.669016" sj="-0.197311" sk="-0.716580" wrapx="1" wrapy="2" year="3081"/>
+			<Ring file="rings/planet_ring6.texture" innerradius="1966615" outerradius="2177051"  wrapx="1" wrapy="2" year="-3081"/>
+			<Unit name="Inner Rings" file="MiningBase" ri="2059833" rj="-400" rk="0" si="0" sj="-400" sk="2059833" faction="confed"  year="1118260" day="20700" />
+			<planet name="JumpToNovayaKiev"	file="jump.png" ri="2059833" rj="0" rk="-8462" si="-8462" sj="0" sk="2059833" radius="200" year="1118260" day="16020" alpha="ONE ONE" destination="enigma_sector/novaya_kiev"/>
+			<planet name="JumpToAdams" file="jump.png" ri="2059833" rj="6086" rk="6086" si="6086" sj="6086" sk="2059833" radius="200" year="34154250" day="16020" alpha="ONE ONE" destination="enigma_sector/adams"/>
+			<planet name="JumpToAxis" file="jump.png" ri="2065362" rj="0" rk="14376" si="2065362" sj="0" sk="14376" radius="200" year="2405000" day="18500" alpha="ONE ONE" destination="enigma_sector/axis"/>
+			<planet name="JumpToCallimachius" file="jump.png" ri="2065362" rj="0" rk="6299" si="6299" sj="0" sk="2065362" radius="200" year="1118260" day="16020" alpha="ONE ONE" destination="enigma_sector/callimachius"/>
+			<Unit name="Outer Rings" file="MiningBase" ri="2071742" rj="400" rk="0" si="0" sj="400" sk="2071742" faction="confed"  year="1118260" day="16700" />
+			<planet name="JumpToTesla" file="jump.png" ri="2082021" rj="5360" rk="0" si="0" sj="5360" sk="2082021" radius="200" year="1118260" day="16020" alpha="ONE ONE" destination="enigma_sector/tesla"/>
+			<planet name="JumpToSterling" file="jump.png" ri="2076881" rj="2680" rk="6724" si="2076881" sj="2680" sk="6724" radius="200" year="1118260" day="16020" alpha="ONE ONE" destination="enigma_sector/sterling"/>
+			<planet name="JumpToVespus" file="jump.png" ri="2071742" rj="0" rk="8247" si="8247" sj="0" sk="2071742" radius="200" year="1118260" day="16020" alpha="ONE ONE" destination="enigma_sector/vespus"/>
+			<planet name="Nief" file="planets/Snow2.png" ri="2553705" rj="-481963" rk="0" si="0" sj="-481963" sk="2553705" radius="416000" gravity="5" year="7161700" day="950" position="0">
+			<Fog /> <!--red=".5" blue="1" green="1" alpha="0" concavity=".24" focus=".5"-->
+</planet>
+		</planet>
+	</planet>
+</system>

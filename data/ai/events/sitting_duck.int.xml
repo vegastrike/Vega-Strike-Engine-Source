@@ -1,0 +1,5 @@
+<AggressiveAI close=".05">
+  <distance max=".03" script="stop.xml">
+  </distance>
+  
+</AggressiveAI>

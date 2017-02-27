@@ -1,0 +1,42 @@
+<!-- Ok essentially duplicated the Evade script adding change heads and macthlins for Y position. Not sure why the vector
+	is opposite of the heading change, but kept it the same anyway, cause What do I know, lol. In this one I added the
+	Afterburner option. feh, we'll see if it works or not lol-->
+
+<SCRIPT>
+  <ChangeHead terminate="1" accuracy = "1">
+    <ADD>
+      <VECTOR Position="v"/>
+      <VECTOR x="1" y="0" z="1"/>
+    </ADD>
+  </ChangeHead>
+  <MatchLin afterburn="1" local="0" terminate="1">
+    <VECTOR x="-10000" y="0" z="10000"/>
+  </MatchLin>
+  <ChangeHead terminate="1" accuracy="1">
+    <ADD>
+      <VECTOR Position="v"/>
+      <VECTOR x="0" y="1" z="1"/>
+    </ADD>
+  </ChangeHead>
+  <MatchLin afterburn="1" local="0" terminate="1">
+    <VECTOR x="0" y="-10000" z="10000"/>
+  </MatchLin>
+  <ChangeHead terminate="1" accuracy="1">
+    <ADD>
+      <VECTOR Position="v"/>
+      <VECTOR x="-1" y="0" z="1"/>
+    </ADD>
+  </ChangeHead>
+  <MatchLin afterburn="1" local="0" terminate="1">
+    <VECTOR x="10000" y="0" z="10000"/>
+  </MatchLin>
+  <ChangeHead terminate="1" accuracy="1">
+    <ADD>
+      <VECTOR Position="v"/>
+      <VECTOR x="0" y="-1" z="1"/>
+    </ADD>
+  </ChangeHead>
+  <MatchLin afterburn="1" local="0" terminate="1">
+    <VECTOR x="0" y="10000" z="10000"/>
+  </MatchLin>
+</SCRIPT>

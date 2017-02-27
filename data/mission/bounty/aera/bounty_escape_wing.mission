@@ -1,0 +1,58 @@
+<mission>
+	<settings>
+		<origin  planet="earth" x="0000" y="100" z="000.0"/>
+	</settings>
+
+	<variables>
+		<var name="defaultplayer" value="blue"/>
+		<var name="system" value="enigma_sector/blake" />
+		<var name="mission_name" value="Bounty Mission" />
+		<var name="description" value="An aera wing has penetrated this system. We have a heavy placed a price on the leader's head, so make sure he does not escape alive!  His wingmen may go through lengths to protect him.  Upon leader's destruction you will earn 17392 credits." />
+	</variables>
+        <flightgroups>
+                <flightgroup name="blue" faction="confed" type="nova" ainame="default" waves="1" nr_ships="2">
+			<pos x="0400" y="-35400" z="47200000"/>
+			<rot x="180.0" y="180.0" z="180.0"/>
+			<order order="tmptarget" target="omikron"/>
+			<order priority="0" order="superiority" target="enemy"/>
+			<order priority="1" order="bomber" target="omikron"/>
+			<order priority="2" order="escort" target="blue"/>
+		</flightgroup>
+        </flightgroups>
+	<python>
+import bounty
+newmission = bounty.bounty (0, 0, 17392, 1, 3, 'aera')
+newmission=0
+
+</python>
+	<madule name="director">
+		<import name="bounty"/>
+		<script name="initgame">
+			<exec module="bounty" name="init">
+			<const type="int" value="0"/> <!--num systems away the delivery point is -->
+			<const type="int" value="0"/> <!--num systems away the delivery point is -->
+			<const type="float" value="17392"/> <!-- how much you are paid -->
+			<const type="bool" value="true"/> <!--does he run away -->
+			<const type="int" value="3"/> <!--difficulty-->
+			<const type="object" object="string" value="aera"/>
+			</exec>
+		</script>
+		<script name="gameloop">
+			<exec module="bounty" name="loop"/>
+		</script>
+		<script name="initbriefing">
+			<exec module="bounty" name="initbriefing">
+			</exec>
+		</script>
+		<script name="loopbriefing">
+			<exec module="bounty" name="loopbriefing">
+			</exec>
+		</script>
+		<script name="endbriefing">
+			<exec module="bounty" name="endbriefing">
+			</exec>
+		</script>
+
+
+	</module>
+</mission>

@@ -1,0 +1,83 @@
+<mission>
+	<settings>
+		<origin  planet="earth" x="0000" y="100" z="000.0"/>
+	</settings>
+
+	<variables>
+		<var name="credits" value="10000"/>
+		<var name="defaultplayer" value="blue"/>
+		<var name="mission_name" value="4 versus 4" />
+		<var name="splashscreen" value="bad_guys_vs_good_guys.bmp" />
+                <var name="system" value="stage_sector/stage" />
+		<var name="description" value="4vs4.txt" />
+	</variables>
+
+        <flightgroups>
+
+            <flightgroup name="navajo" faction="neutral" type="Lancelot" ainame="default" waves="1" nr_ships="1">
+                        <pos x="1000000000" y="10000" z="1000000000.0"/>
+			<rot x="180.0" y="180.0" z="180.0"/>
+		    </flightgroup>
+
+            <flightgroup name="comanche0" faction="confed" type="Lancelot" ainame="default" waves="1" nr_ships="500">
+                        <pos x="1000000000" y="4000" z="1000000000.0"/>
+			<rot x="180.0" y="180.0" z="180.0"/>
+		    </flightgroup>
+
+            <flightgroup name="cherokee0" faction="aera" type="Nicander" ainame="default" waves="1" nr_ships="500">
+                        <pos x="1000000000" y="-4000" z="1000000000.0"/>
+			<rot x="180.0" y="180.0" z="180.0"/>
+		    </flightgroup>
+
+            <flightgroup name="comanche1" faction="confed" type="Dostoevsky" ainame="default" waves="1" nr_ships="1000">
+                        <pos x="2000000000" y="4000" z="200000000.0"/>
+			<rot x="180.0" y="180.0" z="180.0"/>
+		    </flightgroup>
+
+            <flightgroup name="comanche2" faction="confed" type="Dostoevsky" ainame="default" waves="1" nr_ships="1000">
+                        <pos x="4000000000" y="4000" z="4000000000.0"/>
+			<rot x="180.0" y="180.0" z="180.0"/>
+		    </flightgroup>
+
+            <flightgroup name="comanche3" faction="confed" type="Dostoevsky" ainame="default" waves="1" nr_ships="1000">
+                        <pos x="6000000000" y="4000" z="6000000000.0"/>
+			<rot x="180.0" y="180.0" z="180.0"/>
+		    </flightgroup>
+
+            <flightgroup name="comanche4" faction="confed" type="Dostoevsky" ainame="default" waves="1" nr_ships="1000">
+                        <pos x="8000000000" y="4000" z="8000000000.0"/>
+			<rot x="180.0" y="180.0" z="180.0"/>
+		    </flightgroup>
+
+            <flightgroup name="comanche5" faction="confed" type="Dostoevsky" ainame="default" waves="1" nr_ships="1000">
+                        <pos x="10000000000" y="4000" z="10000000000.0"/>
+			<rot x="180.0" y="180.0" z="180.0"/>
+		    </flightgroup>
+
+            <flightgroup name="comanche6" faction="confed" type="Dostoevsky" ainame="default" waves="1" nr_ships="1000">
+                        <pos x="12000000000" y="4000" z="12000000000.0"/>
+			<rot x="180.0" y="180.0" z="180.0"/>
+		    </flightgroup>
+
+            <flightgroup name="comanche7" faction="confed" type="Dostoevsky" ainame="default" waves="1" nr_ships="1000">
+                        <pos x="14000000000" y="4000" z="14000000000.0"/>
+			<rot x="180.0" y="180.0" z="180.0"/>
+		    </flightgroup>
+
+            <flightgroup name="comanche8" faction="confed" type="Dostoevsky" ainame="default" waves="1" nr_ships="1000">
+                        <pos x="16000000000" y="4000" z="16000000000.0"/>
+			<rot x="180.0" y="180.0" z="180.0"/>
+		    </flightgroup>
+
+            <flightgroup name="comanche9" faction="confed" type="Dostoevsky" ainame="default" waves="1" nr_ships="1000">
+                        <pos x="18000000000" y="4000" z="18000000000.0"/>
+			<rot x="180.0" y="180.0" z="180.0"/>
+		    </flightgroup>
+
+            <flightgroup name="apache" faction="confed" type="MiningBase" ainame="default" waves="1" nr_ships="1">
+                        <pos x="12000" y="40000" z="500000"/>
+			<rot x="180.0" y="180.0" z="180.0"/>
+		    </flightgroup>
+
+        </flightgroups>
+</mission>

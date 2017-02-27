@@ -1,0 +1,33 @@
+<?xml version="1.0"?>
+<technique fallback="../2_ps1.4/default_simple">
+    <!-- Pseudo fixed-function shader pass. Does in one pass what
+         the fixed function does in many. Higher performance on
+         capable systems. Only caveat is that light attenuation
+         is a bit odd... 
+         
+         All lighting is per-vertex.
+         
+         This version handles up to 8 lights, and has environment-mapped
+         ambient lighting, to match the highend technique.
+    -->
+
+    <!-- Z-write prepasses go at sequence 10 -->
+    <pass type="shader" sequence="10" cwrite="false">
+        <vertex_program src="zwrite"/>
+        <fragment_program src="zwrite"/>
+        <texture_unit src="decal:0" default="file:white.bmp" name="diffuseMap"/>
+    </pass>
+    
+    <!-- sequence 15 to go after Z-write prepasses (that's 10) -->
+    <pass type="shader" sequence="15" zwrite="false">
+        <vertex_program src="fixed8"/>
+        <fragment_program src="ambientmapped_simple"/>
+        
+        <texture_unit src="decal:0" default="file:white.bmp" name="diffuseMap"/>
+        <texture_unit src="environment" name="envMap"/>
+        
+        <auto_param name="light_enabled" semantic="ActiveLightsArray" optional="true"/>
+        <auto_param name="max_light_enabled" semantic="NumLights" optional="true"/>
+        <auto_param name="cloaking" semantic="CloakingPhase" optional="true"/>
+    </pass>
+</technique>

@@ -1,0 +1,42 @@
+<system name="Aera Defensive Station" background="backgrounds/fiery_galaxy" nearstars="500" stars="1000" starspread="150"  x="0" y="0" z="0">
+<Light>
+<ambient red=".5" green=".5" blue=".5"/>
+<diffuse red="1" green="1" blue="1"/>
+<specular red="1" green="1" blue="1"/>
+</Light>
+
+<Light>
+<ambient red="1" green=".1" blue="0"/>
+<!--<diffuse red="1" green=".7" blue="0"/>-->
+<!--<attenuated red=".00000001" blue=".00000015"/>-->
+<attenuated red="0" blue=".000000002"/>
+</Light>	
+<Light>
+<ambient red="1" green=".1" blue="0"/>
+<!--<diffuse red="1" green=".7" blue="0"/>-->
+<!--<attenuated red=".00000001" blue=".00000015"/>-->
+<attenuated red="0" blue=".0000001"/>
+</Light>	
+
+<planet name="Hayay" file="stars/orange_star.png" radius="25000" gravity="20" x="100000" z="-100000"  Red=".9" Green=".9" Blue=".9" ReflectNoLight="true" light="0 1l" />
+
+<unit name= "defense-station"  file="station" x="000" y="00" z="000" position="0" faction="aera" />
+
+<!--
+<Nebula name="unknown-nebula" file="green-nebula" nebfile="green-nebula.xml" z="20000" />
+-->
+
+<planet name="Kradruk" file="planets/red_rocky.png" radius="300" gravity="20" z="5000" x="5000" >
+</planet>
+
+<planet name="Werk" file="planets/rocky.png" radius="370" gravity="20" x="2000" y="-1000"  z="-2000" position="0" />			
+
+
+<planet name="jumppoint-atralia" file="jump.png" alpha="ONE ONE" radius="500" gravity="20" x="000" y="000" z="-6000" destination="visit_from_the_aera/atralia" />
+
+<planet name="jumppoint-kiopi" file="jump.png" alpha="ONE ONE" radius="500" gravity="20" x="000" y="1000" z="6000" destination="visit_from_the_aera/kiopi_hq" />
+
+
+
+
+</system>

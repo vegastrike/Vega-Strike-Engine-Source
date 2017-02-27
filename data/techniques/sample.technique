@@ -1,0 +1,35 @@
+<?xml version="1.0"?>
+<technique fallback="fixed">
+    <pass type="shader" zwrite="true" cwrite="false" sequence="10">
+        <vertex_program src="highend.vp"/>
+        <fragment_program src="blank.fp"/>
+    </pass>
+    <pass type="shader" zwrite="auto" cwrite="true" iteration="1" maxiteration="4" >
+        <vertex_program src="highend.vp"/>
+        <fragment_program src="highend.fp"/>
+        
+        <texture_unit src="decal:0" target="0" default="file:white.bmp"/>
+        <texture_unit src="decal:1" target="1" default="file:white.bmp"/>
+        <texture_unit src="decal:2" target="2" default="decal:0"/>
+        <texture_unit src="decal:3" target="3" default="file:black.bmp"/>
+        <texture_unit src="decal:4" target="4" default="file:gray.bmp"/>
+        <texture_unit src="file:noise.bmp" target="5"/>
+        <texture_unit src="env" target="6"/>
+        
+        <param name="detailScale" value="3.0,2.0"/>
+        <auto_param name="detailPlane1" semantic="DetailPlane1"/>
+        <auto_param name="detailPlane2" semantic="DetailPlane2"/>
+        <auto_param name="envColor" semantic="EnvColor"/>
+    </pass>
+    <pass type="shader"> zwrite="false" cwrite="true" iteration="once" blend="add" >
+        <vertex_program src="highend.vp"/>
+        <fragment_program src="highend_hdr.fp"/>
+        
+        <texture_unit src="decal:0" target="0" default="file:white.bmp"/>
+        <texture_unit src="decal:1" target="1" default="file:white.bmp"/>
+        <texture_unit src="decal:2" target="2" default="decal:0"/>
+        <texture_unit src="decal:3" target="3" default="file:black.bmp"/>
+        <texture_unit src="decal:4" target="4" default="file:blue.bmp"/>
+        <texture_unit src="file:noise.bmp" target="5"/>
+    </pass>
+</technique>

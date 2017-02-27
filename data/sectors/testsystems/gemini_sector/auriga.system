@@ -1,0 +1,36 @@
+<system scalesystem="3" name="Auriga" background="backgrounds/blue_galaxy1" nearstars="500" stars="1000" starspread="150"  x="0" y="0" z="0">
+<Light>
+<ambient red="000.0" green="000.0" blue="000.0"/>
+<diffuse red="1" green="1" blue="1"/>
+<specular red="1" green="1" blue="1"/>
+</Light>
+
+<Planet name="auriga" file="sol/sun.png" radius="10000000" x="14594814.00
+0000" y="00.00" z="-14594814.000000"  Red="1" Green="1" Blue="1" ReflectNoLight="true" light="0"/>
+
+<Light>
+<ambient red="000.0" green="000.0" blue="000.0"/>
+<diffuse red="1" green="1" blue="1"/>
+<specular red="1" green="1" blue="1"/>
+</Light>
+
+<Light>
+<ambient red="1" green=".1" blue="0"/>
+<!--<diffuse red="1" green=".7" blue="0"/>-->
+<!--<attenuated red=".00000001" blue=".00000015"/>-->
+<attenuated red="0" blue=".000000002"/>
+</Light>	
+<Light>
+<ambient red="1" green=".1" blue="0"/>
+<!--<diffuse red="1" green=".7" blue="0"/>-->
+<!--<attenuated red=".00000001" blue=".00000015"/>-->
+<attenuated red="0" blue=".0000001"/>
+</Light>	
+
+        <unit name= "Beaconsfield"  file="refinery" faction="confed" z="11000" x="11000"/>
+        <planet name="JumpToNewcastle" file="jump.png" alpha="ONE ONE" radius="100" gravity="0" z="11000" x="-10500" day="240" destination="gemini_sector/newcastle"/>
+        <planet name="Nav 3" file="invisible.png" alpha="ONE ONE" radius="100" gravity="0" z="0" x="7500" day="240" />        
+        <planet name="Elysia" file="planets/m_class1.png" radius="300" gravity="20" z="-12000" x="0" day="300">
+                <planet name="Elysia Atmosphere" file="sol/earthcloudmaptrans2.png" alpha="true" radius="310" gravity="20" ri="0" rj="0" rk="0" si="0" sj="0" sk="0" day="600" position="0"/>
+        </planet>
+</system>

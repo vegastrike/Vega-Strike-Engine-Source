@@ -1,0 +1,195 @@
+<Unit scale="10">
+<Description combatRole="BASE">
+</Description>
+
+<Meshfile file="medical.bfxm"/>
+
+       	<Thrust>
+		<Engine Afterburner="00.000000" Forward="0" Retro="0" Left="0" Right="0" Top="0" Bottom="0"/>
+		<Maneuver yaw="0000" pitch="0000" roll="10"/>
+	</Thrust>
+	<Defense hudImage="aera_medium_base-hud.spr">
+		<Shields front="800" right="800" left="800" back="800" recharge="40"/>
+		<Armor front="1000" right="1000" left="1000" back="1000"/>
+		<Hull strength="2000"/>
+	</Defense>
+
+<Stats mass="8985909500" momentofinertia="8985909500" fuel="20000"></Stats>
+<Dock x="-60" y="69" z="-92" size="12"/>
+<Dock x="-46" y="69" z="-92" size="12"/>
+<Dock x="-32" y="69" z="-92" size="12"/>
+<Dock x="-18" y="69" z="-92" size="12"/>
+<Dock x="-4" y="69" z="-92" size="12"/>
+<Dock x="10" y="69" z="-92" size="12"/>
+<Dock x="24" y="69" z="-92" size="12"/>
+<Dock x="38" y="69" z="-92" size="12"/>
+<!-- new elements added -->
+<Subunit file="turret" x="99.811310" y="-100.000008" z="63.396221" ri="-1.000000" rj="0.000000" rk="0.000000" qi="-0.000000" qj="-1.000000" qk="-0.000000"/>
+<Subunit file="turret" x="-105.106529" y="-100.000000" z="87.946404" ri="-1.000000" rj="0.000000" rk="0.000000" qi="-0.000000" qj="-1.000000" qk="-0.000000"/>
+<Subunit file="turret" x="102.655571" y="-100.000008" z="-60.788597" ri="-1.000000" rj="0.000000" rk="0.000000" qi="-0.000000" qj="-1.000000" qk="-0.000000"/>
+<Subunit file="turret" x="-96.470474" y="-100.000008" z="-63.529339" ri="-1.000000" rj="0.000000" rk="0.000000" qi="-0.000000" qj="-1.000000" qk="-0.000000"/>
+<Subunit file="turretLR_PminusBeam" x="0.000000" y="-160.000000" z="240.000000" ri="0.554700" rj="0.000000" rk="-0.832050" qi="0.000000" qj="1.000000" qk="0.000000"/>
+<Subunit file="turretheavy" x="294.966278" y="-160.000000" z="-199.425720" ri="-0.996729" rj="0.000000" rk="-0.080816" qi="0.000000" qj="1.000000" qk="0.000000"/>
+<Subunit file="turretmain" x="-299.803467" y="-160.000000" z="-226.804413" ri="0.457956" rj="0.000000" rk="0.888975" qi="-0.000000" qj="1.000000" qk="0.000000"/>
+<Subunit file="turretheavy" x="294.966278" y="-220.000000" z="-199.425720" ri="-0.457956" rj="0.000000" rk="0.888975" qi="-0.000000" qj="-1.000000" qk="0.000000"/>
+<Subunit file="turretmain" x="-313.788391" y="-220.000015" z="-162.687042" ri="0.996729" rj="0.000000" rk="-0.080816" qi="0.000000" qj="-1.000000" qk="0.000000"/>
+<Subunit file="turretLR_PminusBeam" x="0.000000" y="-220.000000" z="240.000000" ri="-0.554700" rj="0.000000" rk="-0.832050" qi="0.000000" qj="-1.000000" qk="-0.000000"/>
+<Subunit file="turretLR_PminusBeam" x="0.000000" y="240.000000" z="240.000000" ri="-0.554700" rj="0.000000" rk="-0.832050" qi="0.000000" qj="-1.000000" qk="-0.000000"/>
+<Subunit file="turretmain" x="-322.353638" y="240.000000" z="-214.640915" ri="0.996729" rj="0.000000" rk="-0.080816" qi="0.000000" qj="-1.000000" qk="0.000000"/>
+<Subunit file="turretheavy" x="294.966278" y="240.000000" z="-199.425720" ri="-0.457956" rj="0.000000" rk="0.888975" qi="-0.000000" qj="-1.000000" qk="0.000000"/>
+<Subunit file="turretheavy" x="-294.966278" y="300.000000" z="-199.425720" ri="0.457956" rj="0.000000" rk="0.888975" qi="-0.000000" qj="1.000000" qk="0.000000"/>
+<Subunit file="turretheavy" x="294.966278" y="300.000000" z="-199.425720" ri="-0.996729" rj="0.000000" rk="-0.080816" qi="0.000000" qj="1.000000" qk="0.000000"/>
+<Subunit file="turretLR_PminusBeam" x="0.000000" y="300.000000" z="240.000000" ri="0.554700" rj="0.000000" rk="-0.832050" qi="0.000000" qj="1.000000" qk="0.000000"/>
+	<Hold volume="100000000">
+		<Category file="Natural_Products/Food">
+			<import price=".3" pricestddev=".2" quantity="0" quantitystddev="0"/>
+		</Category>
+		<Category file="Natural_Products/Aera_Food">
+			<import price="2.15" pricestddev=".2" quantity="20" quantitystddev="15"/>
+		</Category>
+		<Category file="Natural_Products/Liquor">
+			<import price=".4" pricestddev=".2" quantity="2" quantitystddev="2"/>
+		</Category>
+		<Category file="Natural_Products/Plants">
+			<import price="1" pricestddev=".2" quantity="0" quantitystddev="0"/>
+		</Category>
+		<Category file="Natural_Products/Natural_Resources">
+			<import price=".7" pricestddev=".2" quantity="0" quantitystddev="0"/>
+		</Category>
+		<Category file="Raw_Materials/Metals/Crude">
+			<import price=".8" pricestddev=".1" quantity="0" quantitystddev="0"/>
+		</Category>
+		<Category file="Raw_Materials/Metals/Precious">
+			<import price=".8" pricestddev=".1" quantity="0" quantitystddev="0"/>
+		</Category>
+		<Category file="Raw_Materials/Metals/Alloys">
+			<import price=".8" pricestddev=".1" quantity="0" quantitystddev="0"/>
+		</Category>
+		<Category file="Raw_Materials/Metals/Aera_Alloys">
+			<import price=".85" pricestddev=".1" quantity="0" quantitystddev="0"/>
+		</Category>
+		<Category file="Raw_Materials/Metals/Radioactive">
+			<import price=".8" pricestddev=".1" quantity="0" quantitystddev="0"/>
+		</Category>
+		<Category file="Raw_Materials/Gems/Jewelry">
+			<import price=".8" pricestddev=".1" quantity="0" quantitystddev="0"/>
+		</Category>
+		<Category file="Raw_Materials/Gems/Industrial">
+			<import price="1.25" pricestddev=".2" quantity="0" quantitystddev="0"/>
+		</Category>
+		<Category file="Raw_Materials/Stone">
+			<import price=".6" pricestddev=".1" quantity="0" quantitystddev="0"/>
+		</Category>
+		<Category file="Fuels/Refined">
+			<import price=".8" pricestddev=".3" quantity="0" quantitystddev="0"/>
+		</Category>
+		<Category file="Fuels/Aera_Refined">
+			<import price=".75" pricestddev=".3" quantity="0" quantitystddev="0"/>
+		</Category>
+		<Category file="Compressed_Gasses">
+			<import price=".7" pricestddev=".2" quantity="0" quantitystddev="0"/>
+		</Category>
+		<Category file="Recycled_Products">
+			<import price=".8" pricestddev=".1" quantity="0" quantitystddev="0"/>
+		</Category>
+		<Category file="Machinery_Goods">
+			<import price=".8" pricestddev=".1" quantity="0" quantitystddev="0"/>
+		</Category>
+		<Category file="Supplies/Aerospace_Supplies">
+			<import price=".8" pricestddev=".1" quantity="0" quantitystddev="0"/>
+		</Category>
+		<Category file="Supplies/Agriculteral_Supplies">
+			<import price=".4" pricestddev=".1" quantity="0" quantitystddev="0"/>
+		</Category>
+		<Category file="Supplies/Mining_Supplies">
+			<import price=".6" pricestddev=".1" quantity="0" quantitystddev="0"/>
+		</Category>
+		<Category file="Supplies/Construction_Supplies">
+			<import price=".2" pricestddev=".1" quantity="0" quantitystddev="0"/>
+		</Category>
+		<Category file="Supplies/Aera_Medical_Supplies">
+			<import price="1.6" pricestddev=".1" quantity="25" quantitystddev="20"/>
+		</Category>
+		<Category file="Research/Medical">
+			<import price="10" pricestddev="1" quantity="0" quantitystddev="2"/>
+		<!-- price these at 1/10 their normal price...-->
+		</Category>
+		<Category file="Research/Aera_Medical">
+			<import price="11.5" pricestddev="1" quantity="0" quantitystddev="2"/>
+		<!-- price these at 1/10 their normal price...-->
+		</Category>
+		<Category file="Research/Electronics">
+		<!-- price these at 1/10 their normal price...-->
+			<import price="10" pricestddev="1" quantity="0" quantitystddev="0"/>
+		</Category>
+		<Category file="Electronics">
+			<import price="1" pricestddev=".1" quantity="5" quantitystddev="2"/>
+		</Category>
+		<Category file="Electronics/Robotics">
+			<import price="1.1" pricestddev=".1" quantity="1" quantitystddev="1"/>
+		</Category>
+		<Category file="Electronics/Bionics">
+			<import price="1.2" pricestddev=".1" quantity="0" quantitystddev="0"/>
+		</Category>
+		<Category file="Manufactured_Goods">
+			<import price=".9" pricestddev=".1" quantity="0" quantitystddev="0"/>
+		</Category>
+		<Category file="Entertainment">
+			<import price=".5" pricestddev=".1" quantity="2" quantitystddev="1"/>
+		</Category>
+		<Category file="Entertainment/Aera">
+			<import price="1.65" pricestddev=".1" quantity="2" quantitystddev="1"/>
+		</Category>
+		<Category file="Contraband">
+			<import price=".6" pricestddev="0" quantity="0" quantitystddev="0"/>
+		</Category>
+		<Category file="Contraband/Medical">
+			<import price="1.4" pricestddev=".2" quantity="2" quantitystddev="1"/>
+		</Category>
+		<Category file="starships/Aera/Light">
+ 			<import price="1" pricestdev=".1" quantity="12" quantitystddev="5"/>
+		</Category>
+		<Category file="upgrades/Weapons/Beam_Arrays_Light">
+			<import price="1" pricestddev=".1" quantity="3" quantitystddev="5"/>
+		</Category>
+		<Category file="upgrades/Shield_Systems/Light">
+			<import price="1" pricestddev=".1" quantity="20" quantitystddev="6"/>
+		</Category>
+		<Category file="upgrades/Shield_Systems/Medium">
+			<import price="1" pricestddev=".1" quantity="-2" quantitystddev="6"/>
+		</Category>
+		<Category file="upgrades/Shield_Systems/Heavy">
+			<import price="1" pricestddev=".1" quantity="-2" quantitystddev="6"/>
+		</Category>
+		<Category file="upgrades/Armor_Modification">
+			<import price="1" pricestddev=".1" quantity="20" quantitystddev="5"/>
+		</Category>
+		<Category file="upgrades/Hull_Upgrades">
+			<import price="1" pricestddev=".1" quantity="20" quantitystddev="2"/>
+		</Category>
+		<Category file="upgrades/Repair_Systems">
+			<import price="1" pricestddev=".1" quantity="-2" quantitystddev="4"/>
+		</Category>
+		<Category file="upgrades/Radar/Basic">
+			<import price="1" pricestddev=".1" quantity="20" quantitystddev="6"/>
+		</Category>
+		<Category file="upgrades/Miscellaneous">
+			<import price="1" pricestddev=".1" quantity="2" quantitystddev="1"/>
+		</Category>
+		<Category file="upgrades/Miscellaneous/Aera_Milspec">
+			<import price="1" pricestddev=".1" quantity="2" quantitystddev="1"/>
+		</Category>
+		<Category file="upgrades/Miscellaneous/SubUnits">
+
+			<import price="1" pricestddev=".1" quantity="1" quantitystddev="1"/>
+
+		</Category>
+
+		<Category file="upgrades/Ammunition">
+			<import price="1" pricestddev=".1" quantity="52" quantitystddev="28"/>
+		</Category>
+
+	</Hold>
+	<Upgrade file="standard_missions"/>
+	<Upgrade file="aera_mil_missions"/>
+</Unit>

@@ -1,0 +1,34 @@
+<system scalesystem="3" name="119CE" background="backgrounds/plasma_galaxy" nearstars="500" stars="1000" starspread="150"  x="0" y="0" z="0">
+<Light>
+<ambient red="000.0" green="000.0" blue="000.0"/>
+<diffuse red="1" green="0.774596669241483" blue="0.774596669241483"/>
+<specular red="1" green="0.6" blue="0.6"/>
+</Light>
+
+<Planet name="119ce" file="sol/sun.png" radius="10000000" x="14594814.00
+0000" y="00.00" z="-14594814.000000"  Red="1" Green="0.6" Blue="0.6" ReflectNoLight="true" light="0"/>
+
+<Light>
+<ambient red="000.0" green="000.0" blue="000.0"/>
+<diffuse red="1" green="1" blue="1"/>
+<specular red="1" green="1" blue="1"/>
+</Light>
+
+<Light>
+<ambient red="1" green=".1" blue="0"/>
+<!--<diffuse red="1" green=".7" blue="0"/>-->
+<!--<attenuated red=".00000001" blue=".00000015"/>-->
+<attenuated red="0" blue=".000000002"/>
+</Light>	
+<Light>
+<ambient red="1" green=".1" blue="0"/>
+<!--<diffuse red="1" green=".7" blue="0"/>-->
+<!--<attenuated red=".00000001" blue=".00000015"/>-->
+<attenuated red="0" blue=".0000001"/>
+</Light>	
+
+        <planet name="JumpToJunction" file="jump.png" alpha="ONE ONE" radius="100" gravity="0" z="-12000" x="14500" day="240" destination="gemini_sector/junction"/>
+        <planet name="JumpToPadre" file="jump.png" alpha="ONE ONE" radius="100" gravity="0" z="11000" x="7500"  day="240" destination="gemini_sector/padre"/>
+        <planet name="JumpToXXN-1927" file="jump.png" alpha="ONE ONE" radius="100" gravity="0" z="-6000" x="-6500" day="240" destination="gemini_sector/xxn-1927" />
+        <planet name="JumpToPentonville" file="jump.png" alpha="ONE ONE" radius="100" gravity="0" z="8000" x="-17500" day="240" destination="gemini_sector/pentonville"/>
+</system>

@@ -1,0 +1,21 @@
+<mission>
+	<settings>
+		<origin  planet="earth" x="0000" y="100" z="000.0"/>
+	</settings>
+
+	<variables>
+<!--		<var name="continuousterrain" value="continuousterrain.txt"/>-->
+<!--		<var name="difficulty" value=".1" />-->
+		<var name="credits" value="10000"/>
+		<var name="defaultplayer" value="blue"/>
+		<var name="mission_name" value="4 versus 4" />
+		<var name="splashscreen" value="bad_guys_vs_good_guys.bmp" />
+		<var name="system" value="nothing" />
+		<var name="description" value="4vs4.txt" />
+	</variables>
+        <flightgroups>
+                <flightgroup name="blue" faction="confed" type="firefly" ainame="printhello.py" waves="1" nr_ships="10">
+			<pos x="210" y="000" z="0000.0"/>
+		</flightgroup>
+        </flightgroups>
+</mission>

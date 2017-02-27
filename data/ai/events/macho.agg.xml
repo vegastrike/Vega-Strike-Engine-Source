@@ -1,0 +1,52 @@
+<AggressiveAI time="10">
+<!-- well here we go - This is the Capital ship AI. When I think cap ship, I think big ships hitting eachother with big guns, so
+	Damage evasion will be minimal (too bulky), we'll focus more on setting up a superior position to do the most damage
+
+	Ok here's what we'll need:
+	Collision
+	Flee
+	Some sort of damage evasion - move out of larger ships range firing arc?
+	Attack script from 10K - hardcoded limit
+	Long distacne
+	
+	Priorities
+	Collision 8
+	Flee 7
+	damage evasion 6 -No sense in damage Evasion ATM
+	Attack 5
+	Long range 4
+	
+	Should damage evasion and attack be switched - Ie, I'm a huge ship no sense in manuevouring, just hit them harder than they
+	hit me?
+-->
+<!-- Collision evasion -->
+<meterdistance max="100" script="veer and turn away" time="10" timetointerrupt="10" priority="8">
+</meterdistance>
+
+<!-- Flee Part Generic Place holder - Better one in the Works-->
+<hull max=".2" script="afterburn turn away" time="20" timetointerrupt="10" priority="7">
+</hull>
+
+<!-- Attack 
+Ok - Most cap ship have fixed forward weapons + turrets. At long range the Ship will turn towards its target. Once in close,
+is gonna want to do some sort of circle around the target while keeping main guns pined on it.-->
+<meterdistance max="10000" script="turn towards" time="20" timetotinterrupt="10" priority="5">
+</meterdistance>
+
+<meterdistance max="5000" script="face perpendicular" time="30" timetointerrupt="20" priority="5">
+</meterdistance>
+
+<meterdistance max="7000" script="loop around" time="30" timetointerupt="12" priority="5">
+	<Target_Faces_You min=".5" script="loop around" time="15" priority="6">
+	</Target_Faces_You>
+</meterdistance>
+
+<meterdistance max="2500" script="veer away itts" time="30" priority="5">
+</meterdistance>
+
+<!-- Long range-->
+<meterdistance min="12000" script="turn towards" time="10">
+  <threat min="0" script="afterburn turn towards" time="20">
+  </threat>
+</meterdistance>
+</AggressiveAI>

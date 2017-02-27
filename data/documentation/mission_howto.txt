@@ -1,0 +1,1234 @@
+      * 28) Editing Missions*
+
+
+      Mission Scripting Tutorial:
+
+      Chapter 1: Introduction <#i28_1>
+      Chapter 2: Basic XML integration <#i28_2>
+      Chapter 3: Python Inheritance In Missions <#i28_3>
+      Chapter 5: Suppery about python-Vegastrike class relationships
+      <#i29_1>
+      Chapter 6: Python - Vega Strike Bindings <#i29_2>
+      Chapter 7: Writing Add On Adventures <#i29_3>
+      Chapter 8: Conclusion <#i29_4>
+
+
+      -------------------------------------------
+      Chapter 1: Introduction
+      -------------------------------------------
+
+      Vega Strike has a powerful missions scripting interface that
+      allows you to nearly modify Vega Strike at whatever level you
+      choose, from the AI scripts (and the physics thereof) to the
+      missions... to the overall plot and goal of the game.
+
+
+      -------------------------------------------
+      Chapter 2: Basic XML integration
+      -------------------------------------------
+
+      First let me start by explaining how to run a python class... in
+      this case we start with the prebuild "privateer.py" script to run
+      our mission.
+      Open up mission/exploration/explore_universe.mission
+      First come the variables that designate how the mission should
+      normally start. By normally I mean if they don't have any save
+      game present.
+
+<mission>
+
+    <variables>
+
+        <var name="defaultplayer" value="blue"/>
+
+        <var name="mission_name" value="Test Mission"  />
+
+        <var name="num_players" value="2"/>
+
+        <var name="credits" value="3500"/>
+
+        <var name="difficulty" value=".05"/>
+
+<!--good starting difficulty here-->
+
+        <var name="splashscreen" value="bad_guys_vs_good_guys.bmp"/>
+
+        <var name="system" value="sol_sector/celeste" />
+
+        <var name="description" value="This is a fun mission."  />
+
+        <var name="author" value="Me" />
+
+        <var name="briefing"
+
+value="In this mission, you will have to have fun, or you will fail."  />
+
+        <var name="savegame" value="explore_universe_difficulty"/>
+
+    </variables>
+
+
+      it loads sol_sector/celeste.system as the star system (which is in
+      XML and stores all present planets)
+      After this, comes the actors in the mission, the flightgroups of
+      fighters. If a mission has more than one player, then each player
+      is the leader (first ship) in each respective flightgroup.
+
+      <flightgroups>
+
+               
+<flightgroup name="blue" faction="privateer" type="llama.begin" ainame="default"
+waves="1" nr_ships="1">
+
+            <pos x="20400"
+y="-35400" z="84700000.0"/>
+
+
+
+            <rot x="180.0"
+y="180.0" z="180.0"/>
+
+        </flightgroup>
+
+    </flightgroups>
+
+
+      The rot flag is ignored, and the position specifies the x,y,z
+      coords of the blue flightgroup, which is of type llama.begin.
+      Notice that so far there are a lot of values you don't see for
+      long in the default vegastrike game. Credits, System, first
+      flightgroup fighter, difficulty--these are all initial values but
+      can change.... since there is specified a savegame. The savegame
+      makes the mission more of a campaign type mission where things may
+      be saved to disk and reloaded at a later point. If no savegame
+      variable is specified (this is where the autosave goes) then the
+      mission will not save and will be a one time play mission.
+      Future note:
+      If you wanted to add a campaign to the privateer mission you would
+      most likely modify privateer.py to have a campaign module get
+      loaded.... so you wouldn't necessarily need to modify
+      explore_universe.mission just to add a campaign... lets dig
+      further into the meat of the scripting.
+
+      If a mission has python tags...then it is a python mission and may
+      have some embedded python in it. In this case the python makes a
+      new python object of type privateer in the privateer.py module in
+      the modules/ directory.
+
+    <python>
+
+from privateer import privateer
+
+my_obj=privateer(20000,40000,500,3,2,.6,.25,.02,400000,2000)
+
+    </python>
+
+
+      You have to be careful about newlines, etc in the XML, but it
+      shoudl usually work just dandy. You notice that the mission may
+      pass in arguments to the privateer module that can make slight
+      changes in teh gameplay. This allows many cargo missions to use
+      the same module in order to change the parameters of the cargo
+      missions.
+      In this case the values I have selected appear to work relatively
+      well.
+
+      -------------------------------------------
+      Chapter 3: Python Inheritance In Missions
+      -------------------------------------------
+
+      Ok lets dig further into the privateer.py module:
+
+      It is a very short module written in more or less pure python... I
+      say more or less for a very specific reason: it inherits from a
+      C++ class!
+
+      Director is a C++ class exported to python. All missions must
+      inherit from director.... in this case the mission is very short
+      as it uses other (pure python) modules.
+      random_encounters.random_encounters, difficulty.difficulty and
+      ,trading.trading all do NOT inherit from C++ as this class takes
+      care of the C++ inheritance.
+
+      The constructor __init__ takes the arguments that we passed in
+      from the XML file and passes them on to the various submodules.
+      The only really really important thing you do in the constructor
+      is call
+
+      Director.Mission.__init__ (self)
+
+
+      if you do not do this, Vegastrike will not load your module and
+      will silently fail (this calls the C++ constructor, whcih actually
+      triggers the binding of your module to the python mission).
+
+      Each mission module must have an execute function so that
+      something can happen every physics frame. In this case it just
+      calls execute on all the submodules... not very interesting.
+
+
+      Missions also may have 2 functions Pickle (self) which returns a
+      string with a XML mission file that will load the mission properly
+      as well as a string representing the mission in serialized form...
+      if the mission were reloaded that mission would be loaded and its
+      corresponding python would be run, then Unpickle (self, str) would
+      be called (with str being a string) and the expectation that the
+      mission woudl be reloaded. data/newmission.py has an example of this.
+
+      You may also choose to save data in a float by float format as
+      follows (the advantage to this format is that it is saved on a PER
+      PLAYER basis... so that each player may have a different value):
+      there are 4 functions at your disposal for this older way to save
+      missions:
+      myindex=Director.pushSaveData(int whichplayer, stringkey,floatVal);
+      this function adds the key for later retrieval (even after VS
+      quits ) and pushes the float to the end of the hashtable indexed
+      by stringkey
+
+      This function modifies a index in a key that has already been
+      pushed back at one point
+      Director.putSaveData (intWhichPlayer, stringkey, myIndex, floatVal);
+
+      Director.getSaveDataLength (int whichplayer, string key) gets the
+      number of float values for a given player
+
+      Director.getSaveData(int whichplayer, stringkey, int num) gets
+      save data saved at that number
+
+      You can make up stringkeys and save only 1 float per key if you
+      wish... each key is allowed to have an vector of possible values.
+      Use as you wish! For the privateer mission I save things with key
+      31337ness and the one value in there is the difficulty that I
+      write out....
+      If a campaign is more global rather than player specific you may
+      just choose to pickle it...however if something is on a per-player
+      basis, it may be best going in these SaveData float vectors.
+
+
+      With the exception of AI modules from here on out it's straight
+      python.
+      I will go over some of hte functions you can call inside Vega
+      Strike in a minute.
+
+      * 29) Python Inheritance with AI Scripts*
+
+
+
+      Mission Scripting Tutorial:
+
+      Chapter 1: Introduction <#i28_1>
+      Chapter 2: Basic XML integration <#i28_2>
+      Chapter 3: Python Inheritance In Missions <#i28_3>
+      Chapter 5: Suppery about python-Vegastrike class relationships
+      <#i29_1>
+      Chapter 6: Python - Vega Strike Bindings <#i29_2>
+      Chapter 7: Writing Add On Adventures <#i29_3>
+      Chapter 8: Conclusion <#i29_4>
+
+
+      Let me talk about AI scripts briefly.
+
+      you'll notice a nice AI script named printhello.py in the
+      data/printhello.py
+      It is very similar to a mission with a few notable differences.
+      First of all the AI class you make must inherit from the class
+      VS.PythonAI
+      secondly instead of having an __init__ function it must have an
+      init() function. The reasons for this have something to do with
+      how inheritance works from C++, but this init function takes in
+      self of course and the unit to which thie AI script belongs.
+      init may start off some AI scripts from the get go, or you may
+      wait until you execute each frame. in this case printhello loads
+      the XML script ++turntowards.xml (which is the hard coded C++
+      equivalent to ai/scripts/turntowards.xml).
+      After loading that AI script it replaces its parents order with
+      the last AI script, in this case the XML script.
+      In the Execute function this AI script calls Execute on the hgiher
+      level (which takes care of responding to communications) and then
+      prints h to the console for no apparent reason.
+
+      Lastly and most importantly, the AI sxcript makes a new class for
+      itself...So when the C++ code executes printhello.py it will call
+      the C++ constructor which will take care of binding it.
+
+      so when you make a new unit like so:
+
+      VS.launch
+      (fgname,type,faction,"unit","printhello.py",nr_ships,nr_waves,vec,logo)
+
+      it will have this python AI attached to it....
+      However if you are too lazy to write AI's you can use the most
+      excellent default AI
+      VS.launch
+      (fgname,type,faction,"unit","default",nr_ships,nr_waves,vec,logo)
+
+      ---------------------------------------------------------------
+      Chapter 5: Suppery about python-Vegastrike class relationships
+      ---------------------------------------------------------------
+
+      Summary:
+      Missions must inherit from Director.Mission
+      AI's must inherit from VS.PythonAI
+
+      Missions must have an __init__ function with any number of
+      arguments that calls
+      Director.Mission.__init__ (self);
+      to trigger the C++ binding
+
+      AI's must have an init(self, un) function with those exact 2
+      arguments... the second one is the parent Unit. I don't recommend
+      you save the unit currently--I'm not sure if it will garbage
+      collect the unit in that case... just call the self.GetParent ()
+      function as the Ai script.
+
+      Both AI's and Missions may have an Execute(self) function that
+      does somethign each frame depending on the disired result.
+
+      Missions may have a Pickle and Unpickle function in order to save
+      and load the state of a campaign (this can be incredibly complex!)
+
+      ------------------------------------------------------------------
+      Chapter 6 Python Vegastrike Bindings
+      ------------------------------------------------------------------
+
+      Vegastrike Utility Functions:
+
+      Now that you can run complex python scripts that could even play
+      minesweeper at the prompt, you probably want to interact with
+      Vegastrike directly and "do" stuff like make ships, set
+      objectives, and generally give the player a hard time.
+
+      First of all let me talk about the "stubs". We have had a clever
+      idea to make missions somewhat testable outside the framework of
+      vegastrike by autogenerating stub functions.
+      The way you make stub functions is by using the C++ processor in 2
+      steps...
+
+cd src/python
+gcc -E -DPYTHON_STUB=1 unit_wrapper.cpp > ~/data/modules/stub/VS.py
+
+
+      then edit that file and replace ~ with (newline)(space)(space)
+      and you have a sample python stub so you can find out every
+      mission that vegastrike exports.
+      we try to keep these stubs as up to date as possible.
+      Anyhow this lets you test your missions at the prompt by adding
+      the two directories
+
+import sys
+sys.path = sys.path + ['/home/blah/data/modules']
+sys.path = sys.path + ['/home/blah/data/modules/stub']
+import VS
+...
+
+      and then you can run your mission and see if it at least sort of
+      works.
+
+      the stub file also gives you a good idea about what functions are
+      available for you in your missions.
+
+      I will try to give a brief description here...
+
+      Feel free to add to the descritptions or to ask me about any that
+      are unclear.
+      I give you as follows the VS functions C++ names so you get type
+      information as well!
+      Note that these comments are also included in src/universe_util.h
+
+//this function sets the "current" system to be "name"  where name may be something like
+//"sol_sector/sol"  or "vega_sector/vega"   this function may take some time if the system
+//has not been loaded before
+
+	void pushSystem (string name);
+
+//this function restores the active system.... there must be an equal number of pushSystems
+//and popSystems or else Vega Strike may behave unpredictably
+	void popSystem ();
+//This function gets the current system's official name
+	string getSystemFile();
+//this function gets the current system's nickname (not useful)
+	string getSystemName();
+//this function gets an iterator into the units in the current system... do NOT keep an iterator
+//across a frame--it may get deleted!
+	un_iter getUnitList();
+//This function gets a unit given a number (how many iterations to go down in the iterator)
+	Unit *getUnit(int index);
+//this function launches a wormhole or ajump point.
+	Unit *launchJumppoint(string name_string,
+			string faction_string,
+			string type_string,
+			string unittype_string,
+			string ai_string,
+			int nr_of_ships,
+			int nr_of_waves, 
+			QVector pos, 
+			string squadlogo, 
+			string destinations);
+//this function launches a normal fighter  the name is the flightgroup name, the type is the ship type,
+//the faction is who it belongs to, the unittype is usually "unit" unless you want to make asteroids or
+//nebulae or jump points or planets.  the aistring is either a python filename or "default"  the nr of
+//ships is the number of ships to be launched with this group, the number of waves is num reinforcements...
+//the position is a tuple (x,y,z) where they appear and the squadlogo is a squadron image...you can leave
+//this the empty string '' for the default squadron logo. 
+	Unit* launch (string name_string,string type_string,string faction_string,string unittype,
+		string ai_string,int nr_of_ships,int nr_of_waves, QVector pos, string sqadlogo);
+//this gets a random cargo type (useful for cargo missions) from either any category if category is ''
+//or else from a specific category  'Contraband'  comes to mind!
+	Cargo getRandCargo(int quantity, string category);
+//This gets the faction name of an index
+	string GetFactionName(int index);
+//this gets an index given a faction name
+	int GetFactionIndex(string name);
+//this gets a relationship between two factions
+	float GetRelation(string myfaction,string theirfaction);
+//this changes the relaationship based on the rank and how mad or happy they are (the relationship
+//is between 0 and 1... so a adjustment of .01 with a rank of 1 is QUITE significant.
+	void AdjustRelation(string myfaction,string theirfaction, float factor, float rank);
+//this gets the number of factions in game
+	int GetNumFactions ();
+//this gets the current time in seconds
+	float GetGameTime ();
+//this sets the time compresison value to zero
+	void SetTimeCompression ();
+//this gets a string which has in it a space delimited list of neighmoring systems
+	string GetAdjacentSystem (string str, int which);
+//this gets a specific property of this system as found in universe/milky_way.xml
+	string GetGalaxyProperty (string sys, string prop);
+//this gets the number of systems adjacent to the sysname
+	int GetNumAdjacentSystems (string sysname);
+//this adds a playlist to the music and may be triggered with an int
+	int musicAddList(string str);
+//this plays a specific song
+	void musicPlaySong(string str);
+//this plays msuci from a given list (where the int is what was returned by musicAddList)
+	void musicPlayList(int which);
+//this gets the difficutly of the game... ranges between 0 and 1... many missions depend on it
+//never going past .99 unless it's always at one.
+	float GetDifficulty ();
+//this sets the difficulty
+	void SetDifficulty (float diff);
+//this plays a sound at a location...if the sound has dual channels it will play in the center
+	void playSound(string soundName, QVector loc, Vector speed);
+//this plays an image (explosion or warp animation) at a location
+	void playAnimation(string aniName, QVector loc, float size);
+//this ends the mission with either success or failure
+	void terminateMission(bool term);
+//this gets the player belonging to this mission
+	Unit *getPlayer();
+//this gets a player number (if in splitscreen mode)
+	Unit *getPlayerX(int which);
+//this gets the number of active players
+	int getNumPlayers ();
+//this adds an objective for the cockpit to view ("go here and do this')
+	int addObjective(string objective);
+//this sets the objective's completeness (the int was returned by add objective)
+	void setObjective(int which, string newobjective);
+//this sets the completeness of a particular objective... chanigng the color onscreen
+	void setCompleteness(int which, float completeNess);
+//this gets that completeness
+	float getCompleteness(int which);
+//this sets the owner of a completeness
+	void setOwner(int which,Unit *owner);
+//this gets an owner of a completeness (NULL means all players can see this objective)
+	Unit* getOwner(int which);
+//this sends an IO message... I'm not sure if delay currently works, but from, to and message
+//do :-) ... if you want to send to the bar do "bar" as the to string... if you want to make
+//news for the news room specify "news"
+    void IOmessage(int delay,string from,string to,string message);
+//this gets a unit with 1 of each cargo type in it
+	Unit *GetMasterPartList ();
+//this gets a unit with a faction's contraband list... may be null (check with isNull)
+	Unit *GetContrabandList (string faction);
+//this sets whether or not a player may autopilot.  Normally they are both 0 and the autopiloting
+//is allowed based on if enemies are near... if you pass in 1 then autopilot will be allowed no
+//matter who is near... if you set -1 then autopilot is never allowed.  global affects all
+//players... player just affects the player who accepted the mission.
+	void SetAutoStatus (int global_auto, int player_auto);
+
+
+      Many of these functions return Unit * (for python just Unit)
+      However there is a very critical difference between a Python Unit
+      and a C++ Unit *.
+      If you have a Python Unit you may keep it across frames... it may
+      turn null (check with isNull()), but you can still keep it.... (if
+      it dies is when it turns null)... in C++ if you keep a Unit *
+      across a frame you WILL cause random segfaults (bad things, hard
+      to find)
+      but ya...Python it's safe to keep Unit's returned by
+      functions...just be aware that between frames they may die and
+      then bet tested Null with isNull().
+
+      The following comments are done with the python class as the
+      arguments are clearly lsited in VS.py stub function :-)
+
+class Unit:
+#don't call this one :-) it's just there in the stub ... really make units with the VS.launch above
+  def __init__(self):
+    print 'Unit constructor called with (self)'
+
+# 1 "python_unit_wrap.h" 1
+
+#make this unit warp to "un" and possibly ignore friendly targets. when computing if allowed
+  def AutoPilotTo(self,un,ignore_friendlies): 
+   print "AutoPilotTo" 
+   return 0
+ #sets the turret AI to actually fire a turret
+  def SetTurretAI(self): 
+   print "SetTurretAI"
+#tells teh turret AI never to fire   
+  def DisableTurretAI(self): 
+   print "DisableTurretAI"
+#drains power of a unit
+  def leach(self,XshieldPercent,YrechargePercent,ZenergyPercent): 
+   print "leach"
+#figures out what rank in the flightgroup is the unit (-1 if no flightgroup or unit dead)
+  def getFgSubnumber(self):
+   print "getFgSubnumber" 
+   return -1
+#gets the ID of the flightgroup
+  def getFgID(self):
+   print "getFgID" 
+   return string()
+#sets the unit's nickname
+  def setFullname(self,name): 
+   print "setFullname"
+#gets the unit's nickname
+  def getFullname(self):
+   print "getFullname" 
+   return string()
+#debug
+  def getFullAIDescription(self):
+   print "getFullAIDescription" 
+   return string()
+#not sure!!
+  def setTargetFg(self,primary,secondary,tertiary): 
+   print "setTargetFg"
+#not sure again..perhaps targets a flihgtgroup? probably slow
+  def ReTargetFg(self,which_target): 
+   print "ReTargetFg"
+#if self is a starship as opposed to planet, asteroid, etc
+  def isStarShip(self):
+   print "isStarShip" 
+   return 0
+#if the self is a planet
+  def isPlanet(self):
+   print "isPlanet" 
+   return 0
+#if the self is a jump point
+  def isJumppoint(self):
+   print "isJumppoint" 
+   return 0
+#if the other is an enemey
+  def isEnemy(self,other): 
+   print "isEnemy" 
+   return 0
+#if the enemy is a friend
+  def isFriend(self,other): 
+   print "isFriend" 
+   return 0
+#if enemy is neutral
+  def isNeutral(self,other): 
+   print "isNeutral" 
+   return 0
+#get the numerical relation btw -1 and 1 of this with other (may not be the same as other and this)
+  def getRelation(self,other): 
+   print "getRelation" 
+   return 0
+#switches missile
+  def ToggleWeapon(self,Missile): 
+   print "ToggleWeapon"
+#turns on all missiles
+  def SelectAllWeapon(self,Missile): 
+   print "SelectAllWeapon"
+#splits a unit into many shrapnel... not 100% sure this works
+  def Split(self,level): 
+   print "Split"
+#don't call
+  def Init(self): 
+   print "Init"
+#turns on the jump drive (provided energy) this will cause the unit to teleport upon hitting a jump point
+#this also causes the default AI to go for targetted jump points like there's no tomorrow.
+#Desintation should be 0 for now
+  def ActivateJumpDrive(self,destination): 
+   print "ActivateJumpDrive"
+#this turns off an active jump drive
+  def DeactivateJumpDrive(self): 
+   print "DeactivateJumpDrive"
+#destroys this unit with explosion...preferrable to deliver damage or to just plain call Kill()
+  def Destroy(self): 
+   print "Destroy"
+#finds the local coordinates of another unit in this unit's space
+  def LocalCoordinates(self,un): 
+   print "LocalCoordinates" 
+   return (0,0,0)
+#is another unit in range of this
+  def InRange(self,target,cone,cap): 
+   print "InRange" 
+   return 0
+#is this unit visible?
+  def CloakVisible(self):
+   print "CloakVisible" 
+   return 0
+#Please cloak this unit
+  def Cloak(self,cloak): 
+   print "Cloak"
+#debug I think!!
+  def RemoveFromSystem(self): 
+   print "RemoveFromSystem"
+#find this unit's position if a unit at local_posit fired a shot at speed "speed"
+  def PositionITTS(self,local_posit,speed): 
+   print "PositionITTS" 
+   return (0,0,0)
+#the actual position of this unit
+  def Position(self):
+   print "Position" 
+   return (0,0,0)
+#position of this unit based on its owning unit (i.e. if it is a turret) or else space for most units
+  def LocalPosition(self):
+   print "LocalPosition" 
+   return (0,0,0)
+#the unit that is threatening this unit
+  def Threat(self):
+   print "Threat" 
+   return Unit()
+#set the turrets to target the target passed in
+  def TargetTurret(self,targ): 
+   print "TargetTurret"
+#get an iterator to the subunits
+  def getSubUnits(self):
+   print "getSubUnits" 
+   return 0
+#threaten  the target (placing this unit in the Threat() variable)
+  def Threaten(self,targ,danger): 
+   print "Threaten"
+#set the threat level to zero
+  def ResetThreatLevel(self): 
+   print "ResetThreatLevel"
+#fire guns or (if missile is 1) missiles
+  def Fire(self,Missile): 
+   print "Fire"
+#turn off beams
+  def UnFire(self): 
+   print "UnFire"
+#how far have our missiles locked
+  def computeLockingPercent(self):
+   print "computeLockingPercent" 
+   return 0
+#what percent is our shield
+  def FShieldData(self):
+   print "FShieldData" 
+   return 0
+  def RShieldData(self):
+   print "RShieldData" 
+   return 0
+  def LShieldData(self):
+   print "LShieldData" 
+   return 0
+  def BShieldData(self):
+   print "BShieldData" 
+   return 0
+#how much fuel have we
+  def FuelData(self):
+   print "FuelData" 
+   return 0
+#how much energy
+  def EnergyData(self):
+   print "EnergyData" 
+   return 0
+#how much hull
+  def GetHull(self):
+   print "GetHull" 
+   return 0
+#how big is this unit
+  def rSize(self):
+   print "rSize" 
+   return 0
+#how far away is this unit from a point
+  def getMinDis(self,pnt): 
+   print "getMinDis" 
+   return 0
+#is a beam (starting at start, ending at end) going through a bubble around this unit
+  def querySphere(self,start,end,my_unit_radius): 
+   print "querySphere" 
+   return 0
+#is a beam starting at origin with direction going through this unit
+  def queryBoundingBox(self,origin,direction,err): 
+   print "queryBoundingBox" 
+   return 0
+#reset all orders to "sitting duck"
+  def PrimeOrders(self): 
+   print "PrimeOrders"
+#load an AI script given the name
+  def LoadAIScript(self,aiscript): 
+   print "LoadAIScript"
+#load the last script that was constructed from VS.PythonAI
+  def LoadLastPythonAIScript(self):
+   print "LoadLastPythonAIScript" 
+   return 0
+#enqueue that script into the end of the given scripts
+  def EnqueueLastPythonAIScript(self):
+   print "EnqueueLastPythonAIScript" 
+   return 0
+#set the position to be pos
+  def SetPosition(self,pos): 
+   print "SetPosition"
+#set the current position (causing the unit to streak over to that position in a number of frames)
+  def SetCurPosition(self,pos): 
+   print "SetCurPosition"
+#sets all positions to be that position 
+  def SetPosAndCumPos(self,pos): 
+   print "SetPosAndCumPos"
+#rotation on that axis
+  def Rotate(self,axis): 
+   print "Rotate"
+  def ApplyForce(self,Vforce): 
+   print "ApplyForce"
+  def ApplyLocalForce(self,Vforce): 
+   print "ApplyLocalForce"
+  def Accelerate(self,Vforce): 
+   print "Accelerate"
+  def ApplyTorque(self,Vforce,Location): 
+   print "ApplyTorque"
+  def ApplyBalancedLocalTorque(self,Vforce,Location): 
+   print "ApplyBalancedLocalTorque"
+  def ApplyLocalTorque(self,torque): 
+   print "ApplyLocalTorque"
+#deals damage to the hull based on a local coordinate point
+  def DealDamageToHull(self,pnt,Damage): 
+   print "DealDamageToHull" 
+   return 0
+#finds a thrust vector based on the thrust passed in (given the fact that thrusters are finite powered)
+  def ClampThrust(self,thrust,afterburn): 
+   print "ClampThrust" 
+   return (0,0,0)
+#thrust in a direction
+  def Thrust(self,amt,afterburn): 
+   print "Thrust"
+#give lateral thrust
+  def LateralThrust(self,amt): 
+   print "LateralThrust"
+  def VerticalThrust(self,amt): 
+   print "VerticalThrust"
+  def LongitudinalThrust(self,amt): 
+   print "LongitudinalThrust"
+#clamp the velocity of a unit to its max speed
+  def ClampVelocity(self,velocity,afterburn): 
+   print "ClampVelocity" 
+   return (0,0,0)
+#clamp a rotation of the unit to max yaw/pitch/roll
+  def ClampAngVel(self,vel): 
+   print "ClampAngVel" 
+   return (0,0,0)
+#clamp angular acceleration to a vector
+  def ClampTorque(self,torque): 
+   print "ClampTorque" 
+   return (0,0,0)
+#sets the orientation given the up and fore vector (q and r respectiveoly)
+  def SetOrientation(self,q,r): 
+   print "SetOrientation"
+#translate from the previous space to this space (without translation)
+  def UpCoordinateLevel(self,v): 
+   print "UpCoordinateLevel" 
+   return (0,0,0)
+#translate from this space down to the world space  (without translation)
+  def DownCoordinateLevel(self,v): 
+   print "DownCoordinateLevel" 
+   return (0,0,0)
+ #goes from world space to this coordinates including translation_
+  def ToLocalCoordinates(self,v): 
+   print "ToLocalCoordinates" 
+   return (0,0,0)
+ #goes from this coordinates to world coordinates including translation
+  def ToWorldCoordinates(self,v): 
+   print "ToWorldCoordinates" 
+   return (0,0,0)
+ #gets the angular velocity
+  def GetAngularVelocity(self):
+   print "GetAngularVelocity" 
+   return (0,0,0)
+ #gets velocity
+  def GetVelocity(self):
+   print "GetVelocity" 
+   return (0,0,0)
+  def SetVelocity(self,v): 
+   print "SetVelocity"
+  def SetAngularVelocity(self,v): 
+   print "SetAngularVelocity"
+  def GetMoment(self):
+   print "GetMoment" 
+   return 0
+  def GetMass(self):
+   print "GetMass" 
+   return 0
+ #is a missile locked?
+  def LockMissile(self):
+   print "LockMissile" 
+   return 0
+ #enject cargo with that index (-1 is ejector seat)
+  def EjectCargo(self,index): 
+   print "EjectCargo"
+#what would this unti pay for the cargo string passed in)
+  def PriceCargo(self,s): 
+   print "PriceCargo" 
+   return 0
+#how cargos does this unit have
+  def numCargo(self):
+   print "numCargo" 
+   return 0
+ #is the docking unit cleared with this one
+  def IsCleared(self,dockingunit): 
+   print "IsCleared" 
+   return 0
+ #get an entire category from teh master part list and add it to the hold
+  def ImportPartList(self,category,price,pricedev,quantity,quantdev): 
+   print "ImportPartList"
+   #docking unit wants to request clearence to self
+  def RequestClearance(self,dockingunit): 
+   print "RequestClearance" 
+   return 0
+ #is the unit docked already?
+  def isDocked(self,dockingUnit): 
+   print "isDocked" 
+   return 0
+ #try to dock (if in white square) with the unittoDockWith otherwise return false
+  def Dock(self,unitToDockWith): 
+   print "Dock" 
+   return 0
+ #try to undock with the unitToDockWith...on success return 1
+  def UnDock(self,unitToDockWith): 
+   print "UnDock" 
+   return 0
+ #get number of gunso n this ship (and missiles)
+  def GetNumMounts(self):
+   print "GetNumMounts" 
+   return 0
+#teleport to that other system (as a string) loads if necessary
+  def JumpTo(self,systemstring):
+   print "JumpTo" 
+   return 0
+#gets the faction name of this unit
+  def getFactionName(self):
+   print "getFactionName" 
+   return ''
+#gets the faciton index
+  def getFactionIndex(self);
+   print "getFactionIndex" 
+   return 0
+ #sets the faction name (who ownz this unit)
+  def setFactionName(self,strname):
+   print "setFactionName"
+   #who owns this 
+  def setFactionIndex(self,factionindex):
+   print "setFactionIndex"
+  def getName(self): 
+   print "getName" 
+   return ''
+  def getFlightgroupName(self): 
+   print "getFlightgroupName" 
+   return ''
+  def getFgDirective(self): 
+   print "getFgDirective" 
+   return ''
+ #gets a unit who is the leader of this flightgroup...returns this if no flightgroup
+  def getFlightgroupLeader(self): 
+   print "getFlightgroupLeader" 
+   return Unit()
+ #gimme (this unit) money (can be negative)
+  def addCredits(self,floatcache): 
+   print "addCredits"
+   #switch to another lfightgroup
+  def switchFg(self,fgname):
+   print "switchFg"
+   #how much cache do I have (money)
+  def getCredits(self): 
+   print "getCredits" 
+   return 0
+ #set the leader
+ def setFlightgroupLeader(self,leader):
+   print "setFlightgroupLeader" 
+   return 0
+ #not sure
+  def setFgDirective(a=None,b=None,c=None,d=None,e=None,f=None,g=None,h=None,i=None,j=None): 
+   print "setFgDirective" 
+   return 0
+ #how leaderful am I
+  def getFgSubnumber(self): 
+   print "getFgSubnumber" 
+   return -1
+ #is this unit a significant object (base, jump point, planet)
+  def isSignificant(self):
+   print "isSignificant" 
+   return 0
+ 
+  def isSun(self):
+   print "isSun" 
+   return 0
+ #communicate to other unit
+  def communicateTo(self,other): 
+   print "communicateTo" 
+   return 0
+ #maek comm animation appear on screen of target
+  def commAnimation(self, stringanimation):
+   print "commAnimation" 
+   return 0
+ #remove a crago from this unit
+  def removeCargo(self, stringcargo,quantity):
+   print "removeCargo" 
+   return 0
+ #add another units stats to my own... in the upgrades/unitfile/unitfile
+  def upgrade(self, unitfile,force, subunitoffset, mountoffset):
+   print "upgrade" 
+   return 0
+ #add cargo to my unit
+  def addCargo(self,Cargo carg):
+   print "addCargo" 
+   return 0
+ #get distance (minus radii) between self and other
+  def getDistance(self, other):
+   print "getDistance" 
+   return 0
+#increment random cargo
+  def incrementCargo(a=None,b=None,c=None,d=None,e=None,f=None,g=None,h=None,i=None,j=None): 
+   print "incrementCargo" 
+   return 0
+ #decrement random cargo
+  def decrementCargo(a=None,b=None,c=None,d=None,e=None,f=None,g=None,h=None,i=None,j=None): 
+   print "decrementCargo" 
+   return 0
+ #get distance plus atmospheric size if large planet (to prevent players from coming too close
+ #to surface when leaving autopilot
+  def getSignificantDistance(self,other):
+   print "getSignificantDistance" 
+   return 0
+ #is this unit a player starship...if not return -1  else return player number (starting at 0)
+  def isPlayerStarship(a=None,b=None,c=None,d=None,e=None,f=None,g=None,h=None,i=None,j=None): 
+   print "isPlayerStarship" 
+   return -1
+ #does this unit have some cargo
+  def hasCargo(self,mycarg):
+   print "hasCargo" 
+   return 0
+ #retuns cargo if the unit has it by that name else returns cargo with 0 quantity
+  def GetCargo(self,cargoname):
+   print "GetCargo" 
+   return Cargo("","",1,1,1,1)
+# 351 "unit_wrapper.cpp" 2
+#is this unti equal to another
+  def __eq__(self,oth): 
+   print "__eq__" 
+   return 0;
+ #is this unit notequal
+  def __ne__(self,oth): 
+   print "__ne__" 
+   return 1;
+ #remove unit from game the correct way
+  def Kill(self): 
+   print "Kill";
+   #set this unit to be null (doesnt' affect unit itself, only this pointer)
+  def setNull(self): 
+   print "setNull";
+   #is this unit not null
+  def __nonzero__(self):
+   print "__nonzero__" 
+   return random.randrange(0,2);
+ #is this unit NULL (i.e. dead or killed)
+  def isNull(self):
+   print "isNull" 
+   return random.randrange(0,2);
+ #set this units' target to un
+  def SetTarget(self,un): 
+   print "SetTarget";
+   #get this unit's current target
+  def GetTarget(self):
+   print "GetTarget" 
+   return Unit();
+ #get the unit that this unit is matching speed with
+  def GetVelocityReference(self):
+   print "GetVelocityReference" 
+   return Unit()
+ #set the unit this unit is matching speed with
+  def SetVelocityReference(self,un): 
+   print "SetVelocityReference";
+   #get orientation of this unit
+  def GetOrientation(self):
+   print "GetOrientation" 
+   return ((1,0,0),(0,1,0),(0,0,1))
+ #is the beam inside this ship
+  def rbCollide(self,start,end): 
+   print "rbCollide" 
+   return (un,(0,0,1),0)
+ #how far off is this unit to another unit with guns that have speed and range) (returns a tuple
+ #with a cosine and a range normalized between 0 and 1)
+  def cosAngleToITTS(self,un,speed,range): 
+   print "cosAngleToITTS" 
+   return (.95,10000)
+ #same as above but assuming guns are instant
+  def cosAngleTo(self,un): 
+   print "cosAngleTo" 
+   return (.93,10000)
+ #more specific to this ship and very slow 
+  def cosAngleFromMountTo(self,un): 
+   print "cosAngleFromMountTo" 
+   return (.93,10000)
+ #gets the gun speed of this ship
+  def getAverageGunSpeed(self):
+   print "getAverageGunSpeed" 
+   return (200,10000)
+ #is another unit inside this unit
+  def InsideCollideTree(self,un): 
+   print "InsideCollideTree" 
+   return ((0,0,0),(0,0,1),(0,0,0),(0,1,0))
+ #get a particular turret
+  def getSubUnit(self,which): 
+   print "getSubUnit" 
+   return Unit()
+
+#this is the unit iterator class...  it is returned in a number of functions... DO NOT keep this
+#across a frame (i.e. save it after Execute()
+class un_iter:
+  #dont' call this...stub only
+  def __init__(self):
+    print 'un_iter constructor called with (self)'
+ #the unit this iterator is pointing to (may well be null...that's how you know to stop checking)
+  def current(self):
+   print "current" 
+   return Unit()
+ #advance this iterator (check to see if null first!!)
+  def advance(self): 
+   print "advance"
+   #remove this unit from the collection in wchih it is in
+  def remove(self): 
+   print "remove"
+   #add a unit to this collection
+  def preinsert(self,un): 
+   print "preinsert"
+
+class Cargo:
+  def __init__ (self,a,b,c,d,e,f):
+    print 'Cargo constructor called with (self,%s,%s,%f,%d,%f,%f)' % (a,b,c,d,e,f)
+  def SetPrice(self,price): 
+   print "SetPrice"
+  def GetPrice(self):
+   print "GetPrice" 
+   return 1
+  def SetMass(self,mass): 
+   print "SetMass"
+  def GetMass(self):
+   print "GetMass" 
+   return 1
+  def SetVolume(self,volume): 
+   print "SetVolume"
+  def GetVolume(self):
+   print "GetVolume" 
+   return 1
+  def SetQuantity(self,quantity): 
+   print "SetQuantity"
+  def GetQuantity(self):
+   print "GetQuantity" 
+   return 1
+  def SetContent(self,content): 
+   print "SetContent"
+  def GetContent(self):
+   print "GetContent" 
+   return "weapons"
+  def SetCategory(self,category): 
+   print "SetCategory"
+  def GetCategory(self):
+   print "GetCategory" 
+   return "contraband"
+  def SetMissionFlag(self,flag): 
+   print "SetMissionFlag"
+  def GetMissionFlag(self):
+   print "GetMissionFlag" 
+   return 0
+
+  def GetCategory(self):
+   print "GetCategory" 
+   return "contraband"
+  def GetDescription(self):
+   print "GetDescription" 
+   return ""
+
+class PythonAI:
+  def init(self,un): 
+   print "init"
+  def Execute(self): 
+   print "Execute"
+  def GetParent(self):
+   print "GetParent" 
+   return Unit()
+  def __init__(self):
+    print 'PythonAI constructor called with (self)'
+    self.init(Unit())
+  def AddReplaceLastOrder(self,replace): 
+   print "AddReplaceLastOrder"
+  def ExecuteLastScriptFor(self,time): 
+   print "ExecuteLastScriptFor"
+  def FaceTarget(self,end): 
+   print "FaceTarget"
+  def FaceTargetITTS(self,end): 
+   print "FaceTargetITTS"
+  def MatchLinearVelocity(self,terminate,vec,afterburn,local): 
+   print "MatchLinearVelocity"
+  def MatchAngularVelocity(self,terminate,vec,local): 
+   print "MatchAngularVelocity"
+  def ChangeHeading(self,vec): 
+   print "ChangeHeading"
+  def ChangeLocalDirection(self,vec): 
+   print "ChangeLocalDirection"
+  def MoveTo(self,Targ,afterburn): 
+   print "MoveTo"
+  def MatchVelocity(self,terminate,vec,angvel,afterburn,local): 
+   print "MatchVelocity"
+  def Cloak(self,enable,seconds): 
+   print "Cloak"
+  def FormUp(self,pos): 
+   print "FormUp"
+  def FaceDirection(self,distToMatchFacing,finish): 
+   print "FaceDirection"
+  def XMLScript(self,script): 
+   print "XMLScript"
+  def LastPythonScript(self): 
+   print "LastPythonScript"
+
+
+      --------------------------------------------------------------------
+      Chapter 7: Writing Add On Adventures
+      --------------------------------------------------------------------
+      Honestly you merely need a basic understanding of python in order
+      to craft your own add on adventures...but I decided to write a
+      framework for consistently and speedily adding adventures to the
+      general exploration of Vega Strike.
+
+      I will define adventure as follows:
+      A minature mission that gets triggered by a player who goes in its
+      system.
+      This mission may either be persistent or nonpersistent... a
+      persistent mission will reload the next time the triggering player
+      launched it until the player beats the mission.
+
+      THE QUEST CLASS: THE ACTUAL QUEST LOGIC GOES HERE
+
+
+      the quest, quest_factory and lastly the adventure modules take
+      care of most of the dirty work...
+      all an quest class has to do is the following:
+
+class quest_my(quest.quest):
+      def __init__ (self):
+	  #do anything you need here
+      def Execute (self):
+	  #do anything you need here...return 1 if you wish to execute again, 0 if you wish to
+	  #terminate yourself
+
+      That's it.... Though there are some useful functions you may wish
+      to call in your superclass
+      self.removeQuest() #this prevents your player from EVER
+      encountering the quest again in his life
+      self.makeQuestPersistent() #this causes the quest to be loaded the
+      next time your player jumps in after rebooting vegastrike
+
+      generally before returing 0 (temrinating self) in a mission you
+      may wish to make the quest either persistent (comes back next time
+      he starts game) or removed... though you could also leave the
+      quest the way it is and the next time the player goes to the
+      system after rebooting vegastrike he'll get the same quest again :-)
+
+      but in order for your quest to be complete you must have two more
+      components
+
+      THE QUEST FACTORY: A CLASS THAT RETURNS THE QUEST NEEDED
+
+      each quest must have a factory that inherits from
+      quest.quest_factory. and must define both an init, and a create
+      function.
+      optionally there's a conditional function called precondition....
+      That returns a boolean whether or not the quest is ripe for
+      creation (when a player encounters it in its native system that is)
+
+class quest_my_factory (quest.quest_factory):
+    def __init__ (self):
+        quest.quest_factory.__init__ (self,"quest_my")
+    def create (self):
+        return quest_my()
+    def precondition(self,playernum):
+	return Director.getSaveData(playernum,"talked_to_sandra",0)>0
+
+      The factory must have 2 and can have all 3 of the above functions
+      first is the init function... y9ou must call your superclass's
+      init with your name. second is the create function... this must
+      simply return the quest class you painstakingly created above
+      third is the precondition...this is optional (by default it
+      returns 1...always true)
+
+      the precondition can look in the save variables and see if you
+      have done a task (set by some other quest perhaps) and only then
+      return 1... :-) in that case when a player encounters it for the
+      first time it will check the precondition before launchign the
+      quest.... note the precondition does NOT get checked once the
+      mission has been turned into a persistent mission.... this is
+      because the mission already made the decision to make itself
+      persistent I don't expect many missions to need to be
+      persistent.... I expect more lighthearted adventures that don't
+      drag out if a player quits, etc.
+
+      Anyhow... a good example is the persistent quest known as the
+      quest_drone (quest_drone.py)
+      that quest checks to see if you're near an unknown_derelect and if
+      so it launches the badguy drone.... it makes the drone jump and
+      follow you wherever you go until it is destroyed...it is
+      persistent and launches the drone every time you rerun the game....
+      Luckily if you're close to the derelect chances are you'll find
+      the gun that you can use to kill the drone.... which brings me
+      right smack into my next point: location location location!
+
+      THE LOCATION AND PERSISTENCE OF A GIVEN QUEST (i.e. HOOKING IT
+      INTO privateer.py)
+      adventure.py has the master list of all possible quests in vega
+      strike....
+      right now there are two (but one is stupid and will be removed
+      soon enough...that's the default one)
+
+
+adventures = {"gemini_sector/delta_prime":quest_drone.quest_drone_factory(),
+              "sol_sector/celeste":quest.quest_factory("default_quest",0)}
+
+persistent_adventures = [quest_drone.quest_drone_factory()]
+
+      These are the only 2 lists that will ever need to be changed in
+      the modules that are already there.
+      adventures contains a map of location to adventure. Note that
+      there can be only 1 adventure per location (hey players need to be
+      encouraged to actually EXPLORE)
+      the second list lists all possible persistent adventures (though
+      they are only loaded from if the given adventure has gotten around
+      to calling self.makeQuestPersistent)
+
+      Anyhow just adding more cool missions to this list will make it a
+      lot more fun to explore around and encounter strang epeople,
+      strange news, and a bunch 'o cash :-P
+
+      Note that we should eventually make the news reports line up with
+      the quests... :-) I have some ideas how to do that
+      Basically you can call
+      VS.IOmessage ("game","news","A drone was sighted in the delta
+      prime...blah blah blah")
+      and then epople will see it in the game when they click on GNN
+      likewise if you send it to
+      VS.IOmessage ("game","bar","A drone was sighted in the delta
+      prime...blah blah blah")
+      then you can hear it when you talk to the bartender :-)
+
+      -------------------------------------------------------------------------
+      Chapter 8: Conclusion
+      -------------------------------------------------------------------------
+
+      Well this is the best I can do so far... please read this
+      documentation over and let me know if you have any suggestions or
+      clarifications...adn best yet give it a shot and try it out-- and
+      at least look at modules/cargo_mission.py (whcih is called from a
+      number of missions I think) as well as modules/privateer.py
+      (called by mission/exploration/explore_universe.mission )
+      And certainly try to understand modules/quest_drone.py
+      before trying to write a quest (or while trying to write one)
+

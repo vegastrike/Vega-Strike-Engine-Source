@@ -1,0 +1,34 @@
+add_definitions(-DBOOST_PYTHON_NO_PY_SIGNATURES -DBOOST_PYTHON_STATIC_LIB)
+include_directories("${vsUTCS_SOURCE_DIR}/boost/1_53")
+add_library(boost_python
+  src/object/inheritance.cpp
+  src/object/function.cpp
+  src/object/stl_iterator.cpp
+  src/object/class.cpp
+  src/object/life_support.cpp
+  src/object/enum.cpp
+  src/object/function_doc_signature.cpp
+  src/object/pickle_support.cpp
+  src/object/iterator.cpp
+  src/object_protocol.cpp
+  src/list.cpp
+  src/tuple.cpp
+  src/exec.cpp
+  src/numeric.cpp
+  src/slice.cpp
+  src/wrapper.cpp
+  src/errors.cpp
+  src/long.cpp
+  src/dict.cpp
+  src/module.cpp
+  src/object_operators.cpp
+  src/import.cpp
+  src/str.cpp
+  src/converter/type_id.cpp
+  src/converter/from_python.cpp
+  src/converter/builtin_converters.cpp
+  src/converter/arg_to_python_base.cpp
+  src/converter/registry.cpp)
+
+add_library(boost_system
+  system/error_code.cpp)

@@ -1,0 +1,19 @@
+# LOGIN AND ADD IN GAME SEQUENCE
+
+CLIENT               							SERVER
+
+CMD_LOGIN								-->
+										<--		LOGIN_ACCEPT (+md5sum of initial files), LOGIN_ERROR, LOGIN_ALREADY, LOGIN_UNAVAIL
+CMD_ASKFILE	(list bad or missing files)	-->
+										<--		CMD_ASKFILE*needed_files with needed files' content
+CMD_ADDCLIENT							-->
+										<--		CMD_ASKFILE (if bad or missing files) or CMD_ADDEDYOU (with serial #)
+Enter the game
+
+
+# NETCOMM SESSION
+
+For now a client sends a STARTNETCOMM msg to the server
+The server broadcast it with the client's frequency to other clients in the same system
+after ???
+

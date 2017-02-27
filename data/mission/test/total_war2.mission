@@ -1,0 +1,43 @@
+<mission>
+   <variables>
+      <var name="defaultplayer" value="blue"/>
+      <var name="mission_name" value="Total War in Space" />
+      <var name="splashscreen" value="bad_guys_vs_good_guys.bmp" />
+      <var name="system" value="blank" />
+      <var name="description" value="4vs4.txt" />
+		<var name="author" value="Alexander Rawass" />
+   </variables>
+        <flightgroups>
+            <flightgroup name="makkarel" faction="confed" type="nova" ainame="default" waves="2" nr_ships="1">
+         	<pos x="8000.0" y="0.0" z="0.0"/>
+         	<rot x="180.0" y="180.0" z="180.0"/>
+      	    </flightgroup>
+            <flightgroup name="green" faction="confed" type="tian" ainame="default" waves="2" nr_ships="6">
+         	<pos offset="makkarel" x="-1000.0" y="0.0" z="200.0"/>
+         	<rot x="180.0" y="180.0" z="180.0"/>
+      	    </flightgroup>
+            <flightgroup name="alpha" faction="aera" type="dagger" ainame="default" waves="2" nr_ships="3">
+         	<pos offset="green" x="200.0" y="200.0" z="-200.0"/>
+         	<rot x="180.0" y="180.0" z="180.0"/>
+		<order order="tmptarget" target="green"/>
+      	    </flightgroup>
+	</flightgroups>
+
+	<module name="director">
+
+		<import name="total_war"/>
+
+		<script name="initgame">
+			<exec module="total_war" name="initgame"/>
+		</script>
+
+		<script name="gameloop">
+			<exec module="total_war" name="loop"/>
+		</script>
+
+		<script name="endgame">
+			<exec module="total_war" name="end"/>
+		</script>
+	</module>
+
+</mission>

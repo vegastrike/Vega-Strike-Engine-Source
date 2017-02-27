@@ -1,0 +1,13 @@
+#EXTM3U
+#aera-specific
+#../music/aerapeace.ogg #AyMambo and mission are long enough, reserve this for around_sig
+../music/AyMambo.ogg
+#this is to outweight other tracks
+../music/AyMambo.ogg
+../music/AyMambo.ogg
+../music/AyMambo.ogg
+../music/AyMambo.ogg
+#avoid monotonous play - quite generic tracks, they should be removed
+#   when enough variety in factionalized tracks has been achieved.
+../music/mission.ogg
+../music/peace5.ogg

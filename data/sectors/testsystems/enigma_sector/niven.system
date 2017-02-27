@@ -1,0 +1,49 @@
+<system name="niven" background="backgrounds/darkgreen" nearstars="500" stars="1000" starspread="150">
+<Light>
+	<ambient red="0.000000" green="0.000000" blue="0.000000"/>
+	<diffuse red="1.000000" green="0.980281" blue="0.800528"/>
+	<specular red="1.000000" green="0.960951" blue="0.640844"/>
+</Light>
+<Asteroid name="" file="AFieldBase" ri="0.000000" rj="0.000000" rk="0.000000" si="0.000000" sj="0.000000" sk="0.000000" x="52554664.000000" y="-31003066.000000" z="36052520.000000"  />
+<Unit name="Draul Bisa" file="MiningBase" ri="0.000000" rj="0.000000" rk="0.000000" si="0.000000" sj="0.000000" sk="0.000000" x="52554664.000000" y="-31003066.000000" z="36052520.000000" faction="confed"  />
+<Planet name="niven A" file="stars/orange_star.png" ri="0.000000" rj="0.000000" rk="0.000000" si="0.000000" sj="0.000000" sk="0.000000" radius="16000000.000000" x="0" y="0" z="0"  Red="1.000000" Green="0.960951" Blue="0.640844" ReflectNoLight="true" light="0">
+	<Planet name="Aengus" file="planets/ocean.png" ri="-2723487.250000" rj="61688904.000000" rk="46832752.000000" si="-22862176.000000" sj="-41769396.000000" sk="53689848.000000" radius="538144.500000" x="-56913000.000000" y="43798016.000000" z="70192168.000000" year= "246369360.000000" day="788.272766"  >
+		<Planet name="Adsullata" file="planets/red_rocky.png" ri="1331370.500000" rj="123755.273438" rk="1387742.875000" si="1212634.500000" sj="-508312.375000" sk="-1118045.500000" radius="185821.781250" x="2377806.250000" y="-1319788.000000" z="-1478572.625000" year= "2225991.000000" day="321.204559"  >
+		</Planet>
+		<Planet name="JumpToEnigma" file="jump.png" ri="471288.156250" rj="-377583.000000" rk="-1538262.625000" si="-1202071.500000" sj="810912.062500" sk="-567334.062500" radius="131.820587" x="1203659.125000" y="-871020.875000" z="-736397.812500" year= "2432100.250000" day="531.607727" alpha="ONE ONE" destination="enigma_sector/enigma"  >
+		</Planet>
+		<Planet name="JumpToSalayana" file="jump.png" ri="-570618.250000" rj="-143336.156250" rk="670614.687500" si="887123.000000" sj="420932.625000" sk="844812.125000" radius="102.731422" x="1144985.000000" y="-679701.312500" z="680722.187500" year= "3852889.750000" day="307.517639" alpha="ONE ONE" destination="enigma_sector/salayana"  >
+		</Planet>
+	</Planet>
+	<Planet name="Becuma" file="planets/Dirt.png" ri="-23811188.000000" rj="-55782460.000000" rk="-23227798.000000" si="33930384.000000" sj="-17464644.000000" sk="7159441.500000" radius="444270.625000" x="73777400.000000" y="-28828176.000000" z="43582924.000000" year= "53053408.000000" day="713.335754"  >
+	<CityLights file="planets/Dirt_light_repeat.png" wrapx="64" wrapy="64"/>
+		<Planet name="Dis Domnu" file="sol/ganymede.png" ri="-1160499.500000" rj="-469081.406250" rk="-841467.687500" si="345864.093750" sj="279852.250000" sk="-632999.500000" radius="108999.296875" x="597588.500000" y="1788124.500000" z="1600689.125000" year= "1927487.625000" day="480.240356"  >
+		</Planet>
+		<Planet name="JumpToRigel" file="jump.png" ri="617568.750000" rj="-707222.062500" rk="-687130.437500" si="-746394.500000" sj="-513367.218750" sk="-142455.171875" radius="143.332642" x="-1496841.000000" y="838611.937500" z="1468242.250000" year= "1605044.250000" day="396.198151" alpha="ONE ONE" destination="enigma_sector/rigel"  >
+		</Planet>
+	</Planet>
+	<Planet name="Arnemetia" file="planets/m_class1.png" ri="-24530020.000000" rj="10142595.000000" rk="-19969964.000000" si="24454536.000000" sj="-39879840.000000" sk="-50293296.000000" radius="554589.062500" x="-47622032.000000" y="36561296.000000" z="77436792.000000" year= "93962856.000000" day="796.963928"  >
+	<Atmosphere file="sol/earthcloudmaptrans.png" alpha="SRCALPHA INVSRCALPHA" radius="571226.734375"/>
+		<Planet name="JumpToAdams" file="jump.png" ri="751145.500000" rj="1292966.500000" rk="227308.062500" si="-738521.687500" sj="492901.750000" sk="-363244.000000" radius="242.565430" x="775666.062500" y="1054677.750000" z="-1754006.375000" year= "2072374.625000" day="777.897095" alpha="ONE ONE" destination="enigma_sector/adams"  >
+		</Planet>
+	</Planet>
+	<Planet name="Gwenn Teir Bronn" file="planets/Snow2.png" ri="56930140.000000" rj="-53308572.000000" rk="10671122.000000" si="26806942.000000" sj="32368306.000000" sk="18684562.000000" radius="456651.531250" x="55205124.000000" y="-56631828.000000" z="77792184.000000" year= "109840680.000000" day="226.712799"  >
+	<CityLights file="planets/Dirt_light_repeat.png" wrapx="64" wrapy="64"/>
+		<Planet name="JumpToGwynedd" file="jump.png" ri="-520806.218750" rj="-557401.125000" rk="-361997.437500" si="858460.562500" sj="-286096.218750" sk="-794539.500000" radius="179.979996" x="1242461.375000" y="-1129478.750000" z="1335314.625000" year= "1958083.000000" day="506.356964" alpha="ONE ONE" destination="enigma_sector/gwynedd"  >
+		</Planet>
+		<Planet name="JumpToGhorah_khar" file="jump.png" ri="-114201.195312" rj="-904118.625000" rk="-378352.562500" si="-536373.187500" sj="-60525.859375" sk="306531.593750" radius="145.931168" x="1024404.187500" y="-1176651.625000" z="1169631.750000" year= "1580569.750000" day="134.740082" alpha="ONE ONE" destination="enigma_sector/ghorah_khar"  >
+		</Planet>
+	</Planet>
+	<Planet name="Lug" file="planets/m_class4.png" ri="-20951404.000000" rj="-28600048.000000" rk="-10980116.000000" si="-34015156.000000" sj="3297593.250000" sk="56315796.000000" radius="661456.312500" x="50315396.000000" y="32118666.000000" z="74092728.000000" year= "93475280.000000" day="680.550232"  >
+	<Atmosphere file="sol/earthcloudmaptrans.png" alpha="SRCALPHA INVSRCALPHA" radius="681300.001875"/>
+		<Planet name="Aes Sidhe" file="sol/neptune.png" ri="976788.625000" rj="302743.937500" rk="-615038.625000" si="456128.781250" sj="1784171.625000" sk="1602645.000000" radius="195599.843750" x="1536750.500000" y="-2639485.250000" z="964605.062500" year= "5410000.500000" day="778.040039"  >
+		</Planet>
+	</Planet>
+	<Planet name="Balor" file="planets/gas_giant1.png" ri="-12811486.000000" rj="28460836.000000" rk="-27602354.000000" si="-11800350.000000" sj="36808484.000000" sk="43430360.000000" radius="3152820.250000" x="66690740.000000" y="-34222872.000000" z="-57036788.000000" year= "57925680.000000" day="24.819092"  >
+		<Planet name="Dewi" file="planets/rock4.png" ri="10312431.000000" rj="-2794746.000000" rk="-7414855.000000" si="1247654.750000" sj="12092698.000000" sk="-2822666.750000" radius="1123426.500000" x="-16336356.000000" y="-9231317.000000" z="-13848449.000000" year= "18661002.000000" day="241.873322"  >
+		</Planet>
+		<Planet name="Condatis" file="sol/pluto.png" ri="10565271.000000" rj="3615515.250000" rk="-4223320.500000" si="1994018.250000" sj="1931530.375000" sk="6641887.500000" radius="730635.750000" x="16665751.000000" y="6879309.000000" z="-10909180.000000" year= "12923141.000000" day="776.363464"  >
+		</Planet>
+	</Planet>
+</Planet>
+</system>

@@ -1,0 +1,27 @@
+<Unit>
+
+<Meshfile file="turretbeamgun.bfxm"/>
+<description combatrole="POINTDEF"/>
+	<Mount weapon="LR_Disruptorbeam" size="capship-light autotracking" x="0" y="0" z="1" ri="0.000000" rj="0.000000" rk="1.000000" qi="0.022849" qj="-0.999739" qk="0.000000"/>
+
+		<Thrust>
+		<Engine Afterburner="000000" Forward="000000" Retro="0000" Left="0000" Right="0000" Top="00000" Bottom="000000"/>
+		<Maneuver yaw="150" pitch="150" roll="0000"/>
+	</Thrust>
+	<Sound></Sound>
+	<Defense>
+		<Armor front="1" right="1" left="1" back="1"/>
+		<Shields front="10" back="10" recharge="4.333333"/>
+		<Hull strength="10"/>
+	</Defense>
+	<Stats mass="1" momentofinertia="1" fuel="20000"></Stats>
+	<Computer yaw="150" pitch="150" roll="0000" afterburner="000000" maxspeed="00000">
+		<Radar itts="true" range="17000000" color="true" error="0" trackingcone=".995"/>
+	</Computer>
+
+	<Energy>
+		<Reactor recharge="200" limit="715"/>
+	</Energy>
+
+
+</Unit>

@@ -1,0 +1,58 @@
+<mission>
+	<settings>
+		<origin  planet="earth" x="0000" y="100" z="000.0"/>
+	</settings>
+
+	<variables>
+		<var name="defaultplayer" value="blue"/>
+		<var name="system" value="enigma_sector/blake" />
+		<var name="mission_name" value="Fleet Cargo Delivery" />
+		<var name="description" value="One of the farther-ranged Aera fleets needs important cargo to be delivered. The fleet's precise location will be disclosed when you accpet. It lies lies over 9 systems away. Your pay will be 1620 per system traversed in a minimal path to the destination.  You must proceed in a timely fashion--20 minutes per system.  Failure will result in punishment."/>
+	</variables>
+        <flightgroups>
+                <flightgroup name="blue" faction="confed" type="nova" ainame="default" waves="1" nr_ships="2">
+			<pos x="0400" y="-35400" z="47200000"/>
+			<rot x="180.0" y="180.0" z="180.0"/>
+			<order order="tmptarget" target="omikron"/>
+			<order priority="0" order="superiority" target="enemy"/>
+			<order priority="1" order="bomber" target="omikron"/>
+			<order priority="2" order="escort" target="blue"/>
+		</flightgroup>
+        </flightgroups>
+	<python>
+import cargo_mission
+newmission = cargo_mission.initrandom ('aera', 6, 1620, 1, 9, 11, 1200, '')
+newmission=0
+
+</python>
+	<madule name="director">
+		<import name="cargo_mission"/>
+		<script name="initbriefing">
+			<exec module="cargo_mission" name="initbriefing">
+			</exec>
+		</script>
+		<script name="loopbriefing">
+			<exec module="cargo_mission" name="loopbriefing">
+			</exec>
+		</script>
+		<script name="endbriefing">
+			<exec module="cargo_mission" name="endbriefing">
+			</exec>
+		</script>
+		<script name="initgame">
+			<exec module="cargo_mission" name="initrandom">
+			<const type="object" object="string" value="aera"/>
+			<const type="int" value="6"/> <!--difficulty of mission(do they send peeps after you)-->
+			<const type="float" value="1620"/> <!-- how much you are paid -->
+			<const type="bool" value="true"/><!-- if they send a capship or prefer to have you drop it at a planet -->
+			<const type="int" value="9"/><!-- min systems away-->
+			<const type="int" value="11"/><!-- max systems away-->'
+			<const type="float" value="1200"/><!--time -->
+			<const type="object"  object="string" value=""/>
+			</exec>
+		</script>
+		<script name="gameloop">
+			<exec module="cargo_mission" name="loop"/>
+		</script>
+	</module>
+</mission>

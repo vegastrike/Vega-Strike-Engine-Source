@@ -1,0 +1,4 @@
+<Nebula density=".0004" index="0" mode="exp2" explosiontime="4">
+  <Color red=".5" green=".1" blue=".1"/>
+  <Limits near="1" far="1000"/>
+</Nebula>

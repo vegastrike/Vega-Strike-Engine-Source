@@ -1,0 +1,8 @@
+rings/planet_ring.texturewrapx1wrapy1
+rings/planet_ring1.texturewrapx1wrapy1
+rings/planet_ring2.texturewrapx1wrapy1
+rings/planet_ring3.texturewrapx1wrapy1
+rings/planet_ring4.texturewrapx1wrapy1
+rings/planet_ring5.texturewrapx1wrapy1
+rings/planet_ring6.texturewrapx1wrapy1
+rings/planet_ring7.texturewrapx1wrapy1

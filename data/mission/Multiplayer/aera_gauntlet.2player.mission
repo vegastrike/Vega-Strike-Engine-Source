@@ -1,0 +1,41 @@
+<mission>
+	<settings>
+		<origin  planet="earth" x="0000" y="100" z="000.0"/>
+	</settings>
+
+	<variables>
+<!--		<var name="continuousterrain" value="continuousterrain.txt"/>-->
+		<var name="credits" value="3500"/>
+		<var name="defaultplayer" value="blue"/>
+		<var name="mission_name" value="4 versus 4" />
+		<var name="num_players" value="2"/>
+		<var name="difficulty" value="1"/>
+		<var name="system" value="vega_sector/kursawa" />
+		<var name="description" value="Enjoy troy in a nova." />
+	</variables>
+        <flightgroups>
+
+                <flightgroup name="blue" faction="aera" type="Nicander" ainame="default" waves="1" nr_ships="1">
+			<pos x="254000000" y="-1000" z="14000"/>
+			<rot x="180.0" y="180.0" z="180.0"/>
+		</flightgroup>
+            <flightgroup name="green" faction="aera" type="Areus" ainame="default" waves="1" nr_ships="1">
+			<pos x="254000100" y="1000" z="14000"/>
+			<rot x="180.0" y="180.0" z="180.0"/>
+		</flightgroup>
+
+
+        </flightgroups>
+	<module name="director">
+		<import name="gauntlet"/>
+		<script name="initgame">
+			<exec module="gauntlet" name="initgame">
+			<const type="int" value="1"/>
+			<const type="int" value="3"/>
+			</exec>
+		</script>
+		<script name="gameloop">
+			<exec module="gauntlet" name="loop"/>
+		</script>
+	</module>
+</mission>

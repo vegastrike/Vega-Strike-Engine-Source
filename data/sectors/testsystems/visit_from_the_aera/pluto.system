@@ -1,0 +1,35 @@
+<system name="Pluto" background="backgrounds/darkgreen" nearstars="500" stars="1000" starspread="150"  x="0" y="0" z="0">
+<Light>
+<ambient red=".5" green=".5" blue=".5"/>
+<diffuse red="1" green="1" blue="1"/>
+<specular red="1" green="1" blue="1"/>
+</Light>
+
+<Light>
+<ambient red="1" green=".1" blue="0"/>
+<!--<diffuse red="1" green=".7" blue="0"/>-->
+<!--<attenuated red=".00000001" blue=".00000015"/>-->
+<attenuated red="0" blue=".000000002"/>
+</Light>	
+<Light>
+<ambient red="1" green=".1" blue="0"/>
+<!--<diffuse red="1" green=".7" blue="0"/>-->
+<!--<attenuated red=".00000001" blue=".00000015"/>-->
+<attenuated red="0" blue=".0000001"/>
+</Light>	
+
+<planet name="sun" file="sol/sun.png" radius="25000" gravity="20" x="400000" z="-800000"  Red=".9" Green=".9" Blue=".9" ReflectNoLight="true" light="0 1l" />
+
+
+<planet name="Pluto" file="sol/pluto.png" radius="3000" z="10000" gravity="20" >
+</planet>
+
+<planet name="jumppoint-mars" file="jump.png" alpha="ONE ONE" radius="500" gravity="20" x="2000" y="-1000" z="-7000" destination="visit_from_the_aera/mars" />
+
+<planet name="jumppoint-mbase" file="jump.png" alpha="ONE ONE" radius="500" gravity="20" x="-1000" y="5000" z="3000" destination="visit_from_the_aera/militia_base" />
+
+<unit name= "hq-pluto"  file="ConfedHq" x="2000" y="2000" z="-2000" position="0" faction="confed" />
+
+
+
+</system>

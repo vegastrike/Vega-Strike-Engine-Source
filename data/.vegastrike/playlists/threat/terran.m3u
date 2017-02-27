@@ -1,0 +1,8 @@
+#EXTM3U
+#terran-specific
+../music/terranpeace2.ogg
+../music/MezzaMessa.ogg
+../music/Trapped.ogg
+#common threat files
+../music/battle1.ogg
+../music/battle2.ogg

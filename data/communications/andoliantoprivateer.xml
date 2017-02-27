@@ -1,0 +1,237 @@
+<comm>
+	<node text="startingNode" relationship="0"><!-- node 0 (starting node: Don't link here)-->
+		<edge index="1"/>
+		<edge index="2"/>
+		<edge index="3"/>
+	</node>
+
+<!-- Starting Points -->
+	<node text="We are glad to see our step-brother is well." relationship="0.2"><!-- node 1 (very happy)-->
+    <sound file="communications/sounds/andolian/andolian_we-are-glad.ogg" sex="0"/>
+		<edge index="4"/>
+		<edge index="5"/>
+		<edge index="6"/>
+	</node>
+	<node text="We are hurried. Pleasantries must wait." relationship="0"><!-- node 2 (neutral)-->
+    <sound file="communications/sounds/andolian/andolian_we-are-hurried.ogg" sex="0"/>
+		<edge index="8"/>
+		<edge index="9"/>
+		<edge index="10"/>
+	</node>
+	<node text="We regret that progress demands your extermination." relationship="-.2"><!-- node 3 (very mad)-->
+    <sound file="communications/sounds/andolian/andolian_we-regret.ogg" sex="0"/>
+		<edge index="12"/>
+		<edge index="13"/>
+		<edge index="14"/>
+	</node>
+<!-- End of Starting Points -->
+
+<!-- Other Nodes -->
+
+	<node text="Stay clear step-brother, we ride quickly today!" relationship=".03125"><!-- node 4(random good chatter)-->
+    <sound file="communications/sounds/andolian/andolian_stay-clear-step-brother.ogg" sex="0"/>
+		<edge index="4"/>
+		<edge index="5"/>
+	</node>
+	<node text="All is remembered clearly today." relationship=".0625"><!-- node 5 (random good chatter)-->
+    <sound file="communications/sounds/andolian/andolian_all-is-remembered.ogg" sex="0"/>
+		<edge index="4"/>
+		<edge index="6"/>
+	</node>
+	<node text="We see you are Deucalion. We hope our step-brother finds himself well today." relationship=".0625"><!-- node 6 (best node)-->
+    <sound file="communications/sounds/andolian/andolian_we-see-you-are.ogg" sex="0"/>
+		<edge index="5"/>
+		<edge index="6"/>
+	</node>
+	<node text="Has your crash damaged your mind step-brother, or just your aim?" relationship="-.03125"><!-- node 7 (hit while happy)-->
+    <sound file="communications/sounds/andolian/andolian_has-your-crash.ogg" sex="0"/>
+		<edge index="4"/>
+		<edge index="8"/>
+		<edge index="9"/>
+		<edge index="10"/>
+	</node>
+	<node text="Your UniServe is long over. Let the ones with the hardware do the hard work." relationship=".03125"><!-- node 8 (random neutral chatter)-->
+    <sound file="communications/sounds/andolian/andolian_your-uniserve.ogg" sex="0"/>
+		<edge index="9"/>
+		<edge index="10"/>
+	</node>
+	<node text="We all have our failings, but try to have your next ones further away from us." relationship=".04125"><!-- node 9 (neutral node after he has decided to be nicer after conflict)-->
+    <sound file="communications/sounds/andolian/andolian_we-all-have.ogg" sex="0"/>
+		<edge index="8"/>
+		<edge index="10"/>
+	</node>
+	<node text="ID tags registered, move along." relationship=".03125"><!-- node 10 (good node in neutral) -->
+    <sound file="communications/sounds/andolian/andolian_id-tags-registered.ogg" sex="0"/>
+		<edge index="8"/>
+		<edge index="9"/>
+	</node>
+	<node text="Your actions have exhausted our patience. We regretfully must respond in kind." relationship="-.125"><!-- node 11 (got hit when neutral)-->
+    <sound file="communications/sounds/andolian/andolian_your-actions.ogg" sex="0"/>
+		<edge index="9"/>
+		<edge index="12"/>
+		<edge index="13"/>
+		<edge index="14"/>
+	</node>
+	<node text="You are no longer as we remember. That Deucalion is dead to us. Now so must you be too." relationship="-.0625"><!-- node 12 (taunt)-->
+    <sound file="communications/sounds/andolian/andolian_you-are-no-longer.ogg" sex="0"/>
+		<edge index="13"/>
+		<edge index="15"/>
+		<edge index="19"/>
+	</node>
+	<node text="You have gone mad step-brother! Submit for the sake of all who knew you with honor." relationship="-.125"><!-- node 13 (taunt)-->
+    <sound file="communications/sounds/andolian/andolian_you-have-gone-mad.ogg" sex="0"/>
+		<edge index="12"/>
+		<edge index="15"/>
+		<edge index="19"/>
+	</node>
+	<node text="What we have seen cannot be forgotten." relationship="-.0625"><!-- node 14 (trying to appease him, but failing)-->
+    <sound file="communications/sounds/andolian/andolian_what-we-have-seen.ogg" sex="0"/>
+		<edge index="8"/>
+		<edge index="12"/>
+		<edge index="13"/>
+		<edge index="14"/>
+	</node>
+	<node text="Necessity demands your cessation." relationship="-.0625"><!-- node 15 hit while mad node-->
+    <sound file="communications/sounds/andolian/andolian_necessity-demands.ogg" sex="0"/>
+		<edge index="11"/>
+		<edge index="13"/>
+		<edge index="12"/>
+		<edge index="19"/>
+	</node>
+	<node text="Cease now, and less will be wasted." relationship="-.0625"><!-- node 16 kill-->
+    <sound file="communications/sounds/andolian/andolian_cease-now.ogg" sex="0"/>
+		<edge index="12"/>
+		<edge index="13"/>
+		<edge index="17"/>
+		<edge index="19"/>
+	</node>
+	<node text="Foolish Deucalion, you have slain our hopes." relationship="-.0625"><!-- node 17 kill-->
+    <sound file="communications/sounds/andolian/andolian_foolish-deucalion.ogg" sex="0"/>
+		<edge index="12"/>
+		<edge index="13"/>
+		<edge index="16"/>
+		<edge index="19"/>
+	</node>
+	<node text="Further investment in your existence no longer interests us." relationship="-.03125"><!-- node 18 (trying to appease, but failing)-->
+    <sound file="communications/sounds/andolian/andolian_further-investment.ogg" sex="0"/>
+		<edge index="9"/>
+		<edge index="12"/>
+		<edge index="13"/>
+		<edge index="14"/>
+	</node>	
+	<node text="Poor, sad, broken thing. You knew there were easier routes to self-destruction - yet you chose this one." relationship="-.0625"><!-- node 19 (taunt)-->
+    <sound file="communications/sounds/andolian/andolian_poor-sad-broken-thing.ogg" sex="0"/>
+		<edge index="12"/>
+		<edge index="13"/>
+		<edge index="14"/>
+	</node>
+
+<!-- Built-in Conversations --> 
+	<node text="Docking operation complete. You're free of the docking clamps." relationship="0.01">
+    <sound file="communications/sounds/andolian/andolian_dock-complete.ogg" sex="0"/>
+		<edge index="4"/>
+		<edge index="5"/>
+		<edge index="6"/>
+		<edge index="7"/>
+	</node>
+	<node text="You are not in docking clamps. Move into one of the green guide boxes and try to dock again." relationship="0">
+    <sound file="communications/sounds/andolian/andolian_not-in-dock.ogg" sex="0"/>
+		<edge index="8"/>
+		<edge index="9"/>
+		<edge index="10"/>
+		<edge index="11"/>
+	</node>
+	<node text="Docking operation begun; press 0 to step into our starship." relationship="0">
+    <sound file="communications/sounds/andolian/andolian_dock-begun.ogg" sex="0"/>
+		<edge index="8"/>
+		<edge index="9"/>
+		<edge index="10"/>
+		<edge index="11"/>
+	</node>		
+	<node text="You are not authorized to land here!" relationship="0">
+    <sound file="communications/sounds/andolian/andolian_not-auth.ogg" sex="0"/>
+		<edge index="8"/>
+		<edge index="9"/>
+		<edge index="10"/>
+		<edge index="11"/>
+	</node>		
+	<node text="Clearance code acknowledged; move into landing pattern and dock at the white indicators." relationship="0">
+    <sound file="communications/sounds/andolian/andolian_clearance-code-acknowledged.ogg" sex="0"/>
+		<edge index="8"/>
+		<edge index="9"/>
+		<edge index="10"/>
+		<edge index="11"/>
+	</node>		
+	<node text="Unable to comply." relationship="0">
+    <sound file="communications/sounds/andolian/andolian_unable.ogg" sex="0"/>
+		<edge index="8"/>
+		<edge index="9"/>
+		<edge index="10"/>
+		<edge index="11"/>
+	</node>		
+	<node text="Acknowledged." relationship="0">
+    <sound file="communications/sounds/andolian/andolian_acknowledged.ogg" sex="0"/>
+		<edge index="4"/>
+		<edge index="5"/>
+		<edge index="6"/>
+		<edge index="7"/>
+	</node>		
+	<node text="Maintain speed and course for contraband search!" relationship="0"> <!-- maintain speed and course -->
+    <sound file="communications/sounds/andolian/andolian_contraband-scan.ogg" sex="0"/>
+		<edge index="8"/>
+		<edge index="9"/>
+		<edge index="10"/>
+	</node>
+	<node text="No contraband detected, you may proceed." relationship="0"> <!-- no contraband detected you may proceed -->
+    <sound file="communications/sounds/andolian/andolian_no-contraband.ogg" sex="0"/>
+		<edge index="8"/>
+		<edge index="9"/>
+		<edge index="10"/>
+	</node>
+	<node text="Contraband detected, target offender and fire at will!" relationship="-.125"> <!-- contraband detected! all units close and engage -->
+    <sound file="communications/sounds/andolian/andolian_contraband-detected.ogg" sex="0"/>
+		<edge index="12"/>
+		<edge index="13"/>
+		<edge index="14"/>
+	</node>
+	<node text="Your course is deviating. Maintain course!" relationship="0"> <!-- maintain your speed and course...DO NOT deviate -->
+    <sound file="communications/sounds/andolian/andolian_course-deviating.ogg" sex="0"/>
+		<edge index="8"/>
+		<edge index="9"/>
+		<edge index="10"/>
+	</node>	
+	<node text="Request Clearance To Land." relationship="0"> 
+    <sound file="communications/sounds/andolian/andolian_request-clearance.ogg" sex="0"/>
+		<edge index="8"/>
+		<edge index="9"/>
+		<edge index="10"/>
+	</node>	
+	<node text="Alas Deucalion, we knew you not well enough!" text1="We take no pleasure in this." relationship="-.0625"><!-- dealt critical damage -->
+    <sound file="communications/sounds/andolian/andolian_alas-deucalion.ogg" sex="0"/>
+		<edge index="12"/>
+		<edge index="13"/>
+		<edge index="14"/>
+		<edge index="15"/>
+	</node>
+	<node text="All is over now, save your realization that it is so." relationship="-.0625"><!-- dealt critical damage -->
+    <sound file="communications/sounds/andolian/andolian_all-is-over-now.ogg" sex="0"/>
+		<edge index="12"/>
+		<edge index="13"/>
+		<edge index="14"/>
+		<edge index="15"/>
+	</node>
+	<node text="All I was will be remembered. Will you?" text1="My death only delays the inevitable." relationship="-.125">
+    <sound file="communications/sounds/andolian/andolian_all-i-was.ogg" sex="0"/>
+		<edge index="12"/>
+		<edge index="13"/>
+		<edge index="14"/>
+		<edge index="15"/>
+	</node>
+	<node text="*hit*" relationship="-.01">
+		<edge index="7"/>
+		<edge index="11"/>
+		<edge index="15"/>
+	</node>
+
+<!-- End of Built-in Conversations --> 
+</comm>

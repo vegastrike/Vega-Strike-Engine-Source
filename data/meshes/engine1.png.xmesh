@@ -1,0 +1,38 @@
+<Mesh texture="engine1.png" blend="ONE ONE" scale="5">
+<Points>
+	<Point>
+		<Location x="0.0000" y="0.000000" z="-10.0000" s=".5" t="0"/>
+	</Point>
+	<Point>
+		<Location x="1.0000" y="0.000000" z="0.0000" s="0" t="1"/>
+	</Point>
+	<Point>
+		<Location x="0.5000" y="0.860000" z="0.0000" s="1" t="1"/>
+	</Point>
+	<Point>
+		<Location x="-0.5000" y="0.860000" z="0.0000" s="0" t="1"/>
+	</Point>
+
+	<Point>
+		<Location x="-1.0000" y="0.000000" z="0.0000" s="1" t="1"/>
+	</Point>
+	<Point>
+		<Location x="-0.5000" y="-0.860000" z="0.0000" s="0" t="1"/>
+	</Point>
+	<Point>
+		<Location x="0.5000" y="-0.860000" z="0.0000" s="1" t="1"/>
+	</Point>
+</Points>
+<Polygons>
+	<Trifan>
+		<Vertex point="0" s=".5.000000" t="0.000000"/>
+		<Vertex point="1" s="0.000000" t="1.000000"/>
+		<Vertex point="2" s="1.000000" t="1.000000"/>
+		<Vertex point="3" s="0.000000" t="1.000000"/>
+		<Vertex point="4" s="1.000000" t="1.000000"/>
+		<Vertex point="5" s="0.000000" t="1.000000"/>
+		<Vertex point="6" s="1.000000" t="1.000000"/>
+		<Vertex point="1" s="0.000000" t="1.000000"/>
+	</Trifan>
+</Polygons>
+</Mesh>

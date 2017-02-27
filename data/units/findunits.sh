@@ -1,0 +1,1 @@
+find . -not -name "*.blank" -and -not -name "*.template" -and -not -name "*~" -and -not -name "*.*" -and -not -name "*CVS*" -and -not -name "Root" -and -not -name "Repos*" -and -not -name "*Entr*" -and -not -type d

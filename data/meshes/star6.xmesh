@@ -1,0 +1,202 @@
+<Mesh animation="rlaan_purple.ani" >
+<Points>
+	<Point> 
+		<Location x="1" y="0" z="0"/><!-- 0 -->
+	</Point>
+	<Point> 
+		<Location x="-1" y="0" z="0"/><!-- 1 -->
+	</Point>
+	<Point> 
+		<Location x="0" y="1" z="0"/><!-- 2 -->
+	</Point>
+	<Point> 
+		<Location x="0" y="-1" z="0"/><!-- 3 -->
+	</Point>
+	<Point> 
+		<Location x="0" y="0" z="1"/><!-- 4 -->
+	</Point>
+	<Point> 
+		<Location x="0" y="0" z="-1"/><!-- 5 -->
+	</Point>
+	<Point>
+		<Location x=".2" y=".2" z=".2"/><!--6-->
+	</Point>
+	<Point>
+		<Location x=".2" y=".2" z="-.2"/><!--7-->
+	</Point>
+	<Point>
+		<Location x=".2" y="-.2" z=".2"/><!--8-->
+	</Point>
+	<Point>
+		<Location x=".2" y="-.2" z="-.2"/><!--9-->
+	</Point>
+	<Point>
+		<Location x="-.2" y=".2" z=".2"/><!--10-->
+	</Point>
+	<Point>
+		<Location x="-.2" y=".2" z="-.2"/><!--11-->
+	</Point>
+	<Point>
+		<Location x="-.2" y="-.2" z=".2"/><!--12-->
+	</Point>
+	<Point>
+		<Location x="-.2" y="-.2" z="-.2"/><!--13-->
+	</Point>
+</Points>
+<Polygons>
+	<Tri>
+		<Vertex point="0" s="1" t=".5"/>
+		<Vertex point="7" s="0" t="1"/>
+		<Vertex point="6" s="0" t="0"/>
+
+	</Tri>
+	<Tri>
+		<Vertex point="0" s="1" t=".5"/>
+		<Vertex point="9" s="0" t="1"/>
+		<Vertex point="7" s="0" t="0"/>
+
+	</Tri>
+	<Tri>
+		<Vertex point="0" s="1" t=".5"/>
+		<Vertex point="8" s="0" t="1"/>
+		<Vertex point="9" s="0" t="0"/>
+
+	</Tri>
+	<Tri>
+		<Vertex point="0" s="1" t=".5"/>
+		<Vertex point="6" s="0" t="1"/>
+		<Vertex point="8" s="0" t="0"/>
+
+	</Tri>
+	<Tri>
+		<Vertex point="1" s="1" t=".5"/>
+		<Vertex point="10" s="0" t="0"/>
+		<Vertex point="11"  s="0" t="1"/>
+
+
+	</Tri>
+	<Tri>
+		<Vertex point="1" s="1" t=".5"/>
+		<Vertex point="11" s="0" t="0"/>
+		<Vertex point="13" s="0" t="1"/>
+
+
+	</Tri>
+	<Tri>
+		<Vertex point="1" s="1" t=".5"/>
+		<Vertex point="13" s="0" t="0"/>
+		<Vertex point="12" s="0" t="1"/>
+
+
+	</Tri>
+	<Tri>
+		<Vertex point="1" s="1" t=".5"/>
+		<Vertex point="12" s="0" t="0"/>
+		<Vertex point="10" s="0" t="1"/>
+
+
+	</Tri>
+
+
+	<Tri>
+		<Vertex point="2" s="1" t=".5"/>
+		<Vertex point="10" s="0" t="1"/>
+		<Vertex point="6" s="0" t="0"/>
+
+	</Tri>
+	<Tri>
+		<Vertex point="2" s="1" t=".5"/>
+		<Vertex point="11" s="0" t="1"/>
+		<Vertex point="10" s="0" t="0"/>
+
+	</Tri>
+	<Tri>
+		<Vertex point="2" s="1" t=".5"/>
+		<Vertex point="7" s="0" t="1"/>
+		<Vertex point="11" s="0" t="0"/>
+
+	</Tri>
+	<Tri>
+		<Vertex point="2" s="1" t=".5"/>
+		<Vertex point="6" s="0" t="1"/>
+		<Vertex point="7" s="0" t="0"/>
+	</Tri>
+
+
+
+
+
+	<Tri>
+		<Vertex point="3" s="1" t=".5"/>
+		<Vertex point="8" s="0" t="0"/>
+		<Vertex point="12" s="0" t="1"/>
+	</Tri>
+	<Tri>
+		<Vertex point="3" s="1" t=".5"/>
+		<Vertex point="12" s="0" t="0"/>
+		<Vertex point="13" s="0" t="1"/>
+	</Tri>
+	<Tri>
+		<Vertex point="3" s="1" t=".5"/>
+		<Vertex point="13" s="0" t="0"/>
+		<Vertex point="9" s="0" t="1"/>
+	</Tri>
+	<Tri>
+		<Vertex point="3" s="1" t=".5"/>
+		<Vertex point="9" s="0" t="0"/>
+		<Vertex point="8" s="0" t="1"/>
+	</Tri>
+
+
+	<Tri>
+		<Vertex point="4" s="1" t=".5"/>
+		<Vertex point="6" s="0" t="1"/>
+		<Vertex point="10" s="0" t="0"/>
+
+	</Tri>
+	<Tri>
+		<Vertex point="4" s="1" t=".5"/>
+		<Vertex point="8" s="0" t="1"/>
+		<Vertex point="6" s="0" t="0"/>
+
+	</Tri>
+	<Tri>
+		<Vertex point="4" s="1" t=".5"/>
+		<Vertex point="12" s="0" t="1"/>
+		<Vertex point="8" s="0" t="0"/>
+
+	</Tri>
+	<Tri>
+		<Vertex point="4" s="1" t=".5"/>
+		<Vertex point="10" s="0" t="1"/>
+		<Vertex point="12" s="0" t="0"/>
+
+	</Tri>
+
+	<Tri>
+		<Vertex point="5" s="1" t=".5"/>
+		<Vertex point="11" s="0" t="1"/>
+		<Vertex point="7" s="0" t="0"/>
+
+	</Tri>
+	<Tri>
+		<Vertex point="5" s="1" t=".5"/>
+		<Vertex point="13" s="0" t="1"/>
+		<Vertex point="11" s="0" t="0"/>
+
+	</Tri>
+	<Tri>
+		<Vertex point="5" s="1" t=".5"/>
+		<Vertex point="9" s="0" t="1"/>
+		<Vertex point="13" s="0" t="0"/>
+
+	</Tri>
+	<Tri>
+		<Vertex point="5" s="1" t=".5"/>
+		<Vertex point="7" s="0" t="1"/>
+		<Vertex point="9" s="0" t="0"/>
+
+	</Tri>
+
+</Polygons>
+</Mesh>

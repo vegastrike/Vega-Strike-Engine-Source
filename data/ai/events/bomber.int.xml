@@ -1,0 +1,25 @@
+<!-- Ok, um What the heck is this file? When is it used? What the heck is AGGRESSIVEAI CLOSE=".05"?? 
+
+--Um ok... I removed the file to see what teh AI would do. It seems when the AI has no target (not in fight)
+This file might be defualted to. With the file removed, the bombers, just kinda, sit there and spin in circles... As oppossed
+to just sitting there when the file is there (ie match velocity would return 0 - nothing to match right?)
+
+-- Ok, I did some test where the bombers will always win - no draws. Everything, Bombers, fighters, just sitss and spins...
+
+SO I still have no clue the purpose of this file. There's no Fighter.init so It can't be required. Besides there's no 
+VegaPersonalities.csv to would set the AI as Init, right? 
+
+Sorta - According to the AI source code, the interrupt file name is name.int.xml IT looks like it tries to load a normal AI(specified
+by the CSV's) or an int (why?). Failing that it loads .agg. then default.agg.xml, then crashes-->
+
+<AggressiveAI close=".05" time="15">
+
+ <meterdistance max="1000" script="loop around" time="15" timetointerrupt="15" priority="1">
+  </meterdistance>
+
+  
+  <!-- New crap , perhaps turn towrds a new target and head that way? -->
+ <meterdistance min="1000" script="turn towards" time="15" timetointerrupt="10" priority="1">
+  </meterdistance>
+
+</AggressiveAI>

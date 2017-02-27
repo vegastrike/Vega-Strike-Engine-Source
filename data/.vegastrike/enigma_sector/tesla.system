@@ -1,0 +1,44 @@
+<system name="tesla" background="backgrounds/orange" nearstars="500" stars="1000" starspread="150">
+<Light>
+	<ambient red="0.000000" green="0.000000" blue="0.000000"/>
+	<diffuse red="0.866025" green="0.839463" blue="0.863496"/>
+	<specular red="1.000000" green="0.939598" blue="0.994168"/>
+</Light>
+<Light>
+	<ambient red="0.000000" green="0.000000" blue="0.000000"/>
+	<diffuse red="0.866025" green="0.862624" blue="0.775193"/>
+	<specular red="1.000000" green="0.992159" blue="0.801233"/>
+</Light>
+<Asteroid name="" file="AFieldBaseThin" ri="0.000000" rj="0.000000" rk="0.000000" si="0.000000" sj="0.000000" sk="0.000000" x="-14790707.000000" y="-8780050.000000" z="15585935.000000"  />
+<Unit name="" file="MiningBase" ri="0.000000" rj="0.000000" rk="0.000000" si="0.000000" sj="0.000000" sk="0.000000" x="-14790707.000000" y="-8780050.000000" z="15585935.000000" faction="confed"  />
+<Planet name="tesla A" file="sol/sun.png" ri="0.000000" rj="0.000000" rk="0.000000" si="0.000000" sj="0.000000" sk="0.000000" radius="5479358.000000" x="0" y="0" z="0"  Red="0.750000" Green="0.704698" Blue="0.745626" ReflectNoLight="true" light="0">
+	<Planet name="Collier" file="planets/m_class2.png" ri="12040602.000000" rj="-15554111.000000" rk="-5360933.000000" si="-1272902.125000" sj="7772734.500000" sk="-25410592.000000" radius="273850.843750" x="16092414.000000" y="16560458.000000" z="22808800.000000" year= "24079412.000000" day="607.755851"  >
+	<Atmosphere file="sol/earthcloudmaptrans.png" alpha="SRCALPHA INVSRCALPHA" radius="282066.369063"/>
+		<Planet name="JumpToEnigma" file="jump.png" ri="603296.500000" rj="368247.250000" rk="338929.468750" si="459404.156250" sj="-373171.937500" sk="-412290.500000" radius="98.323967" x="-939712.437500" y="-812717.125000" z="-653568.812500" year= "982102.437500" day="562.587481" alpha="ONE ONE" destination="enigma_sector/enigma"  >
+		</Planet>
+	</Planet>
+	<Planet name="Edmondson" file="planets/m_class2.png" ri="4138352.500000" rj="9972588.000000" rk="15081656.000000" si="8827518.000000" sj="-18939572.000000" sk="10101356.000000" radius="194332.687500" x="-20324492.000000" y="-19543334.000000" z="-15301848.000000" year= "129325800.000000" day="858.647297"  >
+	<Atmosphere file="sol/earthcloudmaptrans.png" alpha="SRCALPHA INVSRCALPHA" radius="200162.668125"/>
+		<Unit name="" file="factory" ri="-13564.088867" rj="-40667.238281" rk="580603.062500" si="-289855.187500" sj="210192.593750" sk="7950.925293" x="316033.125000" y="-239798.515625" z="421827.437500" year= "764899.231946" faction="confed"  />
+	</Planet>
+	<Planet name="Cessna" file="planets/gas_giant2.png" ri="6320345.500000" rj="-14530306.000000" rk="1032210.500000" si="-24586182.000000" sj="-10707490.000000" sk="-184017.671875" radius="967177.687500" x="16462355.000000" y="-17200734.000000" z="-25510760.000000" year= "31650256.000000" day="620.728904"  >
+		<Planet name="Fulbrights" file="sol/janus.png" ri="-676019.562500" rj="1835987.500000" rk="2369617.250000" si="-1033467.250000" sj="920593.812500" sk="-1008113.375000" radius="229847.500000" x="4726021.000000" y="3080177.500000" z="4865314.500000" year= "7374511.500000" day="128.412122"  >
+		</Planet>
+		<Planet name="Loki" file="planets/red_rocky.png" ri="-647219.562500" rj="-1304905.000000" rk="1472296.000000" si="3747753.000000" sj="-2280039.000000" sk="-373304.968750" radius="386806.156250" x="4471413.500000" y="4604975.500000" z="1832307.625000" year= "4039978.500000" day="508.005737"  >
+		</Planet>
+		<Planet name="JumpToHeavens_gate" file="jump.png" ri="-10674.426758" rj="1158175.375000" rk="-1095445.750000" si="3755218.000000" sj="-242865.218750" sk="-293364.843750" radius="165.778122" x="-3825248.000000" y="-3061942.750000" z="1611989.000000" year= "5727414.500000" day="490.207342" alpha="ONE ONE" destination="enigma_sector/heavens_gate"  >
+		</Planet>
+	</Planet>
+	<Planet name="tesla B" file="sol/sun.png" ri="-10972471.000000" rj="9377750.000000" rk="8989505.000000" si="21831984.000000" sj="9203406.000000" sk="17046944.000000" radius="3107316.250000" x="0" y="0" z="0" year= "92734360.000000" day="38959355.405472"  Red="0.750000" Green="0.744119" Blue="0.600925" ReflectNoLight="true" light="1">
+		<Planet name="Helmut" file="planets/carribean.png" ri="4219411.000000" rj="-1872869.500000" rk="8444513.000000" si="-1950007.125000" sj="11373970.000000" sk="3496926.750000" radius="116952.281250" x="7671575.000000" y="9969893.000000" z="-15272268.000000" year= "10890800.000000" day="67.554796"  >
+		<Atmosphere file="sol/earthcloudmaptrans.png" alpha="SRCALPHA INVSRCALPHA" radius="120460.849688"/>
+		</Planet>
+		<Planet name="Spica" file="planets/university2.png" ri="470696.812500" rj="2708159.000000" rk="14576916.000000" si="4701730.500000" sj="-10377675.000000" sk="1776185.500000" radius="113502.820313" x="9282468.000000" y="14222249.000000" z="4847897.500000" year= "19870730.000000" day="320.502945"  >
+		<CityLights file="planets/university2_light.png" wrapx="1" wrapy="1"/>
+			<Unit name="" file="research" ri="-60778.503906" rj="-319948.875000" rk="181864.125000" si="-385987.812500" sj="58391.273438" sk="-26269.835938" x="378108.375000" y="-139533.078125" z="-190704.234375" year= "460656.283872" faction="confed"  />
+			<Planet name="Hayes" file="sol/neptune.png" ri="105624.554688" rj="188326.156250" rk="350910.750000" si="-160675.078125" sj="162607.562500" sk="-38904.550781" radius="43500.121094" x="453730.593750" y="-196989.468750" z="181576.906250" year= "371001.906250" day="331.102878"  >
+			</Planet>
+		</Planet>
+	</Planet>
+</Planet>
+</system>

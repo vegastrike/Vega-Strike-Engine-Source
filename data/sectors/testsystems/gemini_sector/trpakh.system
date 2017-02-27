@@ -1,0 +1,33 @@
+<system scalesystem="3" name="Tr'Pakh" background="backgrounds/blue_galaxy1" nearstars="500" stars="1000" starspread="150"  x="0" y="0" z="0">
+<Light>
+<ambient red="000.0" green="000.0" blue="000.0"/>
+<diffuse red="0.707106781186548" green="0.707106781186548" blue="1"/>
+<specular red="0.5" green="0.5" blue="1"/>
+</Light>
+
+<Planet name="trpakh" file="sol/sun.png" radius="10000000" x="14594814.00
+0000" y="00.00" z="-14594814.000000"  Red="0.5" Green="0.5" Blue="1" ReflectNoLight="true" light="0"/>
+
+<Light>
+<ambient red="000.0" green="000.0" blue="000.0"/>
+<diffuse red="1" green="1" blue="1"/>
+<specular red="1" green="1" blue="1"/>
+</Light>
+
+<Light>
+<ambient red="1" green=".1" blue="0"/>
+<!--<diffuse red="1" green=".7" blue="0"/>-->
+<!--<attenuated red=".00000001" blue=".00000015"/>-->
+<attenuated red="0" blue=".000000002"/>
+</Light>	
+<Light>
+<ambient red="1" green=".1" blue="0"/>
+<!--<diffuse red="1" green=".7" blue="0"/>-->
+<!--<attenuated red=".00000001" blue=".00000015"/>-->
+<attenuated red="0" blue=".0000001"/>
+</Light>	
+
+        <planet name="JumpToSumn-Kp'ta" file="jump.png" alpha="ONE ONE" radius="100" gravity="0" z="-11500" x="11000" day="240" destination="gemini_sector/sumn-kpta" />
+        <asteroid  name=""  file="AFieldBaseSparse" faction="neutral"   z="-3200" x="-1900" day="-14000"  difficulty=".25"></asteroid>         
+        <planet name="JumpToBlockadePointAlpha" file="jump.png" alpha="ONE ONE" radius="100" gravity="0" z="5100" x="-14800"  day="240" destination="gemini_sector/blockadepointalpha"/>
+</system>

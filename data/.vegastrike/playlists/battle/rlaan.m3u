@@ -1,0 +1,11 @@
+#EXTM3U
+#rlaan-specific
+../music/BlackLlama.ogg
+#common threat files - remove when enough rlaan-specific variety is achieved
+../music/battle3electro.ogg
+../music/battle5.ogg
+#fix weights
+../music/BlackLlama.ogg
+../music/BlackLlama.ogg
+../music/BlackLlama.ogg
+../music/BlackLlama.ogg

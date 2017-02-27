@@ -1,0 +1,20 @@
+<system name="Mars" background="backgrounds/sky" nearstars="500" stars="1000" starspread="150"  x="0" y="0" z="0">
+<Light>
+<ambient red="0" green="0" blue="0"/>
+<diffuse red="1" green="1" blue="1"/>
+<specular red="1" green="1" blue="1"/>
+</Light>
+
+<Light>
+<ambient red="1" green=".1" blue="0"/>
+<!--<diffuse red="1" green=".7" blue="0"/>-->
+<!--<attenuated red=".00000001" blue=".00000015"/>-->
+<attenuated red="0" blue=".0000001"/>
+</Light>
+
+        <planet name="sun" file="sol/sun.png" radius="220000" x="00000010" y="1000000" z="400000" gravity="20" ri="0" rj="0" rk="0" si="0" sj="0" sk="0" velocity="0" position="0" Red="1" Green="1" Blue="1" light="0" faction="neutral">
+	</planet>
+	<unit name="Terrain" file="landscape" x="0" y="0" z="0" faction="neutral"/>
+
+
+</system>

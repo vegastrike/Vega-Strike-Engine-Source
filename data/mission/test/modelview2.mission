@@ -1,0 +1,103 @@
+<mission>
+	<settings>
+		<origin  planet="earth" x="0000" y="100" z="000.0"/>
+	</settings>
+
+	<variables>
+		<var name="credits" value="10000"/>
+		<var name="defaultplayer" value="blue"/>
+		<var name="mission_name" value="4 versus 4" />
+		<var name="splashscreen" value="bad_guys_vs_good_guys.bmp" />
+                <var name="system" value="stage_sector/stage" />
+		<var name="description" value="4vs4.txt" />
+	</variables>
+
+        <flightgroups>
+
+            <flightgroup name="navajo" faction="neutral" type="Dostoevsky" ainame="default" waves="1" nr_ships="1">
+                        <pos x="120000" y="60000" z="5020000.0"/>
+			<rot x="270.0" y="180.0" z="180.0"/>
+		    </flightgroup>
+
+            <flightgroup name="apache" faction="confed" type="Kierkegaard" ainame="default" waves="1" nr_ships="1">
+                        <pos x="120000" y="5000000" z="50000"/>
+			<rot x="180.0" y="180.0" z="180.0"/>
+		    </flightgroup>
+
+            <flightgroup name="inuit" faction="confed" type="Vendetta" ainame="default" waves="1" nr_ships="1">
+                        <pos x="12000000" y="30000" z="50000"/>
+			<rot x="180.0" y="180.0" z="180.0"/>
+		    </flightgroup>
+
+            <flightgroup name="apache2" faction="confed" type="Seaxbane" ainame="default" waves="1" nr_ships="1">
+                        <pos x="120000" y="20000" z="50000"/>
+			<rot x="180.0" y="180.0" z="180.0"/>
+		    </flightgroup>
+
+            <flightgroup name="apache3" faction="confed" type="Gaozong" ainame="default" waves="1" nr_ships="1">
+                        <pos x="120000" y="20000" z="49000"/>
+			<rot x="180.0" y="180.0" z="180.0"/>
+		    </flightgroup>
+
+            <flightgroup name="apache4" faction="confed" type="Skate" ainame="default" waves="1" nr_ships="1">
+                        <pos x="120000" y="20000" z="51000"/>
+			<rot x="180.0" y="180.0" z="180.0"/>
+		    </flightgroup>
+
+            <flightgroup name="apache5" faction="confed" type="Diligence" ainame="default" waves="1" nr_ships="1">
+                        <pos x="120000" y="20000" z="61000"/>
+			<rot x="180.0" y="180.0" z="180.0"/>
+		    </flightgroup>
+
+            <flightgroup name="apache6" faction="confed" type="Tridacna" ainame="default" waves="1" nr_ships="1">
+                        <pos x="120000" y="20000" z="71000"/>
+			<rot x="180.0" y="180.0" z="180.0"/>
+		    </flightgroup>
+
+            <flightgroup name="apache7" faction="confed" type="Mk32" ainame="default" waves="1" nr_ships="1">
+                        <pos x="120000" y="20000" z="81000"/>
+			<rot x="180.0" y="180.0" z="180.0"/>
+		    </flightgroup>
+
+            <flightgroup name="apache8" faction="confed" type="Midwife" ainame="default" waves="1" nr_ships="1">
+                        <pos x="120000" y="20000" z="91000"/>
+			<rot x="180.0" y="180.0" z="180.0"/>
+		    </flightgroup>
+
+            <flightgroup name="apache9" faction="confed" type="Hawking" ainame="default" waves="1" nr_ships="1">
+                        <pos x="120000" y="30000" z="91000"/>
+			<rot x="180.0" y="180.0" z="180.0"/>
+		    </flightgroup>
+
+            <flightgroup name="apache10" faction="confed" type="H496" ainame="default" waves="1" nr_ships="1">
+                        <pos x="120000" y="40000" z="91000"/>
+			<rot x="180.0" y="180.0" z="180.0"/>
+		    </flightgroup>
+
+            <flightgroup name="apache11" faction="confed" type="Koala" ainame="default" waves="1" nr_ships="1">
+                        <pos x="120000" y="50000" z="91000"/>
+			<rot x="180.0" y="180.0" z="180.0"/>
+		    </flightgroup>
+
+            <flightgroup name="apache12" faction="confed" type="Relaysat" ainame="default" waves="1" nr_ships="1">
+                        <pos x="120000" y="60000" z="91000"/>
+			<rot x="180.0" y="180.0" z="180.0"/>
+		    </flightgroup>
+
+            <flightgroup name="apache13" faction="confed" type="agricultural_station" ainame="default" waves="1" nr_ships="1">
+                        <pos x="120000" y="70000" z="91000"/>
+			<rot x="180.0" y="180.0" z="180.0"/>
+		    </flightgroup>
+
+            <flightgroup name="apache14" faction="confed" type="gasmine" ainame="default" waves="1" nr_ships="1">
+                        <pos x="120000" y="80000" z="91000"/>
+			<rot x="180.0" y="180.0" z="180.0"/>
+		    </flightgroup>
+
+
+        </flightgroups>
+</mission>
+
+
+
+

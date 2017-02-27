@@ -1,0 +1,22 @@
+<system name="zeta_orionis" background="backgrounds/somered" nearstars="500" stars="1000" starspread="150">
+<Light>
+	<ambient red="0.191479" green="0.191479" blue="0.191479"/>
+	<diffuse red="0.781812" green="0.828563" blue="1.000000"/>
+	<specular red="0.611230" green="0.686517" blue="1.000000"/>
+</Light>
+<Nebula name="nebula" file="nebula" nebfile="red-nebula.xml" ri="0.000000" rj="0.000000" rk="0.000000" si="0.000000" sj="0.000000" sk="0.000000" x="77641232.000000" y="-167258800.000000" z="-157886512.000000"  />
+<Planet name="zeta_orionis A" file="stars/white_star.png" ri="0.000000" rj="0.000000" rk="0.000000" si="0.000000" sj="0.000000" sk="0.000000" radius="68000000.000000" x="0" y="0" z="0"  Red="0.611230" Green="0.686517" Blue="1.000000" ReflectNoLight="true" light="0">
+	<Planet name="sol_sector/tingvallir" file="jump.png" ri="-73071520.000000" rj="-117793864.000000" rk="38780432.000000" si="-80419392.000000" sj="94609496.000000" sk="135843024.000000" radius="139.647568" x="-217073168.000000" y="-147901600.000000" z="203143616.000000" year= "257399440.000000" day="121005304.000000" alpha="ONE ONE" destination="sol_sector/tingvallir"  >
+	</Planet>
+	<Planet name="sol_sector/ross154" file="jump.png" ri="-19559428.000000" rj="64908884.000000" rk="-93115192.000000" si="23322716.000000" sj="152576368.000000" sk="101459096.000000" radius="133.694794" x="113990992.000000" y="249470912.000000" z="-186888704.000000" year= "201325040.000000" day="51776668.000000" alpha="ONE ONE" destination="sol_sector/ross154"  >
+	</Planet>
+	<Planet name="sol_sector/aquila" file="jump.png" ri="-119208056.000000" rj="-6572413.000000" rk="91478376.000000" si="-117374920.000000" sj="39363964.000000" sk="-150126400.000000" radius="173.646729" x="-140522240.000000" y="205155248.000000" z="-222250608.000000" year= "221480720.000000" day="208874704.000000" alpha="ONE ONE" destination="sol_sector/aquila"  >
+	</Planet>
+	<Planet name="sol_sector/procyon" file="jump.png" ri="190105872.000000" rj="20538334.000000" rk="-211382432.000000" si="115113208.000000" sj="202850688.000000" sk="123235928.000000" radius="105.756424" x="279005312.000000" y="273777536.000000" z="-125892168.000000" year= "1867651968.000000" day="1152555648.000000" alpha="ONE ONE" destination="sol_sector/procyon"  >
+	</Planet>
+	<Planet name="sol_sector/polaris" file="jump.png" ri="-165518272.000000" rj="-26518010.000000" rk="-144527360.000000" si="21743030.000000" sj="-114352880.000000" sk="-3919383.000000" radius="123.570389" x="-264700384.000000" y="-270566944.000000" z="170263968.000000" year= "481503264.000000" day="383474528.000000" alpha="ONE ONE" destination="sol_sector/polaris"  >
+	</Planet>
+	<Planet name="sol_sector/wolf359" file="jump.png" ri="-99616632.000000" rj="-116625840.000000" rk="135792240.000000" si="83082184.000000" sj="31145904.000000" sk="87698560.000000" radius="140.353912" x="163859536.000000" y="116540472.000000" z="-204303488.000000" year= "3104988672.000000" day="909597632.000000" alpha="ONE ONE" destination="sol_sector/wolf359"  >
+	</Planet>
+</Planet>
+</system>

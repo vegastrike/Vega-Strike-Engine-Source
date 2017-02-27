@@ -1,0 +1,383 @@
+<mission>
+	<settings>
+		<origin  planet="earth" x="0000" y="100" z="000.0"/>
+	</settings>
+
+	<variables>
+<!--		<var name="continuousterrain" value="continuousterrain.txt"/>-->
+		<var name="credits" value="13500"/>
+		<var name="defaultplayer" value="blue"/>
+		<var name="mission_name" value="Privateer Mission" />
+		<var name="difficulty" value=".05"/><!--good starting difficulty here-->
+		<var name="system" value="Crucible/Cephid_17" />
+		<var name="description" value="Like, as if." />
+		<var name="savegame" value="explore_universe_difficulty" />
+	</variables>
+        <flightgroups>
+                <flightgroup name="Shlimazel" faction="privateer" type="beholder" ainame="default" waves="1" nr_ships="1">
+			<pos x="-95124024.543917" y="412089916.256812" z="-110779667.398050"/>  
+			<rot x="180.0" y="180.0" z="180.0"/>
+			<order order="tmptarget" target="omikron"/>
+			<order priority="0" order="superiority" target="enemy"/>
+			<order priority="1" order="bomber" target="omikron"/>
+			<order priority="2" order="escort" target="blue"/>
+		</flightgroup>
+<!-- ADDED to pre-cache -->
+<flightgroup name="navajo" faction="neutral" type="Goddard" ainame="borken.py" waves="1" nr_ships="1">
+                        <pos x="-1000" y="30000" z="0"/>
+			<rot x="180.0" y="180.0" z="180.0"/>
+		    </flightgroup>
+
+<flightgroup name="Admonisher" faction="neutral" type="admonisher" ainame="borken.py" waves="1" nr_ships="1">
+                        <pos x="20000" y="-10000" z="0"/>
+		    <rot x="180" y="180" z="180"/>
+</flightgroup>
+
+
+<flightgroup name="Agasicles" faction="neutral" type="vark" ainame="borken.py" waves="1" nr_ships="1">
+                        <pos x="40000" y="-10000" z="0"/>
+		    <rot x="180" y="180" z="180"/>
+</flightgroup>
+
+<flightgroup name="Agesipolis" faction="neutral" type="vitik" ainame="borken.py" waves="1" nr_ships="1">
+                        <pos x="60000" y="-10000" z="0"/>
+		    <rot x="180" y="180" z="180"/>
+</flightgroup>
+
+<flightgroup name="Anaxidamus" faction="neutral" type="yrilan" ainame="borken.py" waves="1" nr_ships="1">
+                        <pos x="80000" y="-10000" z="0"/>
+		    <rot x="180" y="180" z="180"/>
+</flightgroup>
+
+<flightgroup name="Areus" faction="neutral" type="aevant" ainame="borken.py" waves="1" nr_ships="1">
+                        <pos x="100000" y="-10000" z="0"/>
+		    <rot x="180" y="180" z="180"/>
+</flightgroup>
+
+<flightgroup name="Ariston" faction="neutral" type="aelar" ainame="borken.py" waves="1" nr_ships="1">
+                        <pos x="120000" y="-10000" z="0"/>
+		    <rot x="180" y="180" z="180"/>
+</flightgroup>
+
+<flightgroup name="Ancestor" faction="neutral" type="ancestor" ainame="borken.py" waves="1" nr_ships="1">
+                        <pos x="140000" y="-10000" z="0"/>
+		    <rot x="180" y="180" z="180"/>
+</flightgroup>
+
+<flightgroup name="Archimedes" faction="neutral" type="archimedes" ainame="borken.py" waves="1" nr_ships="1">
+                        <pos x="160000" y="-10000" z="0"/>
+		    <rot x="180" y="180" z="180"/>
+</flightgroup>
+
+<flightgroup name="AeraAsteroidFighterBase" faction="Aera" type="AsteroidFighterBase" ainame="borken.py" waves="1" nr_ships="1">
+                        <pos x="180000" y="-10000" z="0"/>
+		    <rot x="180" y="180" z="180"/>
+</flightgroup>
+
+<flightgroup name="ConfedAsteroidfighterbase" faction="confed" type="AsteroidFighterBase" ainame="borken.py" waves="1" nr_ships="1">
+                        <pos x="200000" y="-10000" z="0"/>
+		    <rot x="180" y="180" z="180"/>
+</flightgroup>
+
+<flightgroup name="rlaanasteroidfighterbase" faction="rlaan" type="AsteroidFighterBase" ainame="borken.py" waves="1" nr_ships="1">
+                        <pos x="220000" y="-10000" z="0"/>
+		    <rot x="180" y="180" z="180"/>
+</flightgroup>
+
+<flightgroup name="beholder" faction="neutral" type="beholder" ainame="borken.py" waves="1" nr_ships="1">
+                        <pos x="240000" y="-10000" z="0"/>
+		    <rot x="180" y="180" z="180"/>
+</flightgroup>
+
+<flightgroup name="Clydesdale" faction="neutral" type="clydesdale" ainame="borken.py" waves="1" nr_ships="1">
+                        <pos x="260000" y="-10000" z="0"/>
+		    <rot x="180" y="180" z="180"/>
+</flightgroup>
+
+<flightgroup name="commercecenter" faction="confed" type="commerce_center" ainame="borken.py" waves="1" nr_ships="1">
+                        <pos x="280000" y="-10000" z="0"/>
+		    <rot x="180" y="180" z="180"/>
+</flightgroup>
+
+<flightgroup name="convolution" faction="neutral" type="convolution" ainame="borken.py" waves="1" nr_ships="1">
+                        <pos x="300000" y="-10000" z="0"/>
+		    <rot x="180" y="180" z="180"/>
+</flightgroup>
+
+<flightgroup name="Derivative" faction="neutral" type="derivative" ainame="borken.py" waves="1" nr_ships="1">
+                        <pos x="320000" y="-10000" z="0"/>
+		    <rot x="180" y="180" z="180"/>
+</flightgroup>
+
+<flightgroup name="Determinant" faction="neutral" type="determinant" ainame="borken.py" waves="1" nr_ships="1">
+                        <pos x="340000" y="-10000" z="0"/>
+		    <rot x="180" y="180" z="180"/>
+</flightgroup>
+
+<flightgroup name="dodo" faction="neutral" type="dodo" ainame="borken.py" waves="1" nr_ships="1">
+                        <pos x="360000" y="-10000" z="0"/>
+		    <rot x="180" y="180" z="180"/>
+</flightgroup>
+
+<flightgroup name="dostoevsky" faction="neutral" type="dostoevsky" ainame="borken.py" waves="1" nr_ships="1">
+                        <pos x="380000" y="-10000" z="0"/>
+		    <rot x="180" y="180" z="180"/>
+</flightgroup>
+
+<flightgroup name="aerafactory" faction="aera" type="factory" ainame="borken.py" waves="1" nr_ships="1">
+                        <pos x="400000" y="-10000" z="0"/>
+		    <rot x="180" y="180" z="180"/>
+</flightgroup>
+
+<flightgroup name="confedfactory" faction="confed" type="factory" ainame="borken.py" waves="1" nr_ships="1">
+                        <pos x="420000" y="-10000" z="0"/>
+		    <rot x="180" y="180" z="180"/>
+</flightgroup>
+
+<flightgroup name="rlaanfactory" faction="rlaan" type="factory" ainame="borken.py" waves="1" nr_ships="1">
+                        <pos x="440000" y="-10000" z="0"/>
+		    <rot x="180" y="180" z="180"/>
+</flightgroup>
+
+<flightgroup name="aerafighterbarracks" faction="aera" type="fighter_barracks" ainame="borken.py" waves="1" nr_ships="1">
+                        <pos x="460000" y="-10000" z="0"/>
+		    <rot x="180" y="180" z="180"/>
+</flightgroup>
+
+<flightgroup name="confedfighterbarracks" faction="confed" type="fighter_barracks" ainame="borken.py" waves="1" nr_ships="1">
+                        <pos x="480000" y="-10000" z="0"/>
+		    <rot x="180" y="180" z="180"/>
+</flightgroup>
+
+<flightgroup name="rlaanfighterbarracks" faction="rlaan" type="fighter_barracks" ainame="borken.py" waves="1" nr_ships="1">
+                        <pos x="500000" y="-10000" z="0"/>
+		    <rot x="180" y="180" z="180"/>
+</flightgroup>
+
+<flightgroup name="eject" faction="neutral" type="eject" ainame="borken.py" waves="1" nr_ships="1">
+                        <pos x="520000" y="-15000" z="0"/>
+		    <rot x="180" y="180" z="180"/>
+</flightgroup>
+
+<flightgroup name="franklin" faction="neutral" type="franklin" ainame="borken.py" waves="1" nr_ships="1">
+                        <pos x="520000" y="-10000" z="0"/>
+		    <rot x="180" y="180" z="180"/>
+</flightgroup>
+
+<flightgroup name="gawain" faction="neutral" type="gawain" ainame="borken.py" waves="1" nr_ships="1">
+                        <pos x="540000" y="-10000" z="0"/>
+		    <rot x="180" y="180" z="180"/>
+</flightgroup>
+
+<flightgroup name="goddard" faction="neutral" type="goddard" ainame="borken.py" waves="1" nr_ships="1">
+                        <pos x="560000" y="-10000" z="0"/>
+		    <rot x="180" y="180" z="180"/>
+</flightgroup>
+
+<flightgroup name="hammer" faction="neutral" type="hammer" ainame="borken.py" waves="1" nr_ships="1">
+                        <pos x="580000" y="-10000" z="0"/>
+		    <rot x="180" y="180" z="180"/>
+</flightgroup>
+
+<flightgroup name="hyena" faction="neutral" type="hyena" ainame="borken.py" waves="1" nr_ships="1">
+                        <pos x="600000" y="-10000" z="0"/>
+		    <rot x="180" y="180" z="180"/>
+</flightgroup>
+
+<flightgroup name="kahan" faction="neutral" type="kahan" ainame="borken.py" waves="1" nr_ships="1">
+                        <pos x="620000" y="-10000" z="0"/>
+		    <rot x="180" y="180" z="180"/>
+</flightgroup>
+
+<flightgroup name="lancelot" faction="neutral" type="lancelot" ainame="borken.py" waves="1" nr_ships="1">
+                        <pos x="640000" y="-10000" z="0"/>
+		    <rot x="180" y="180" z="180"/>
+</flightgroup>
+
+<flightgroup name="Leonidas" faction="neutral" type="yavok" ainame="borken.py" waves="1" nr_ships="1">
+                        <pos x="660000" y="-10000" z="0"/>
+		    <rot x="180" y="180" z="180"/>
+</flightgroup>
+
+<flightgroup name="llama" faction="neutral" type="llama" ainame="borken.py" waves="1" nr_ships="1">
+                        <pos x="680000" y="-10000" z="0"/>
+		    <rot x="180" y="180" z="180"/>
+</flightgroup>
+
+<flightgroup name="aeramedical" faction="aera" type="medical" ainame="borken.py" waves="1" nr_ships="1">
+                        <pos x="700000" y="-10000" z="0"/>
+		    <rot x="180" y="180" z="180"/>
+</flightgroup>
+
+<flightgroup name="confedmedical" faction="confed" type="medical" ainame="borken.py" waves="1" nr_ships="1">
+                        <pos x="720000" y="-10000" z="0"/>
+		    <rot x="180" y="180" z="180"/>
+</flightgroup>
+
+<flightgroup name="rlaanmedical" faction="rlaan" type="medical" ainame="borken.py" waves="1" nr_ships="1">
+                        <pos x="740000" y="-10000" z="0"/>
+		    <rot x="180" y="180" z="180"/>
+</flightgroup>
+
+<flightgroup name="aeraminingbase" faction="aera" type="MiningBase" ainame="borken.py" waves="1" nr_ships="1">
+                        <pos x="760000" y="-10000" z="0"/>
+		    <rot x="180" y="180" z="180"/>
+</flightgroup>
+
+<flightgroup name="confedminingbase" faction="confed" type="MiningBase" ainame="borken.py" waves="1" nr_ships="1">
+                        <pos x="780000" y="-10000" z="0"/>
+		    <rot x="180" y="180" z="180"/>
+</flightgroup>
+
+<flightgroup name="pirateminingbase" faction="pirates" type="MiningBase" ainame="borken.py" waves="1" nr_ships="1">
+                        <pos x="800000" y="-10000" z="0"/>
+		    <rot x="180" y="180" z="180"/>
+</flightgroup>
+
+<flightgroup name="rlaanminingbase" faction="rlaan" type="MiningBase" ainame="borken.py" waves="1" nr_ships="1">
+                        <pos x="820000" y="-10000" z="0"/>
+		    <rot x="180" y="180" z="180"/>
+</flightgroup>
+
+<flightgroup name="mule" faction="neutral" type="mule" ainame="borken.py" waves="1" nr_ships="1">
+                        <pos x="840000" y="-10000" z="0"/>
+		    <rot x="180" y="180" z="180"/>
+</flightgroup>
+
+<flightgroup name="Nicander" faction="neutral" type="aeon" ainame="borken.py" waves="1" nr_ships="1">
+                        <pos x="860000" y="-10000" z="0"/>
+		    <rot x="180" y="180" z="180"/>
+</flightgroup>
+
+<flightgroup name="Ox" faction="neutral" type="ox" ainame="borken.py" waves="1" nr_ships="1">
+                        <pos x="880000" y="-10000" z="0"/>
+		    <rot x="180" y="180" z="180"/>
+</flightgroup>
+
+<flightgroup name="pacifier" faction="neutral" type="pacifier" ainame="borken.py" waves="1" nr_ships="1">
+                        <pos x="900000" y="-10000" z="0"/>
+		    <rot x="180" y="180" z="180"/>
+</flightgroup>
+
+<flightgroup name="progeny" faction="neutral" type="progeny" ainame="borken.py" waves="1" nr_ships="1">
+                        <pos x="920000" y="-10000" z="0"/>
+		    <rot x="180" y="180" z="180"/>
+</flightgroup>
+
+<flightgroup name="redeemer" faction="neutral" type="redeemer" ainame="borken.py" waves="1" nr_ships="1">
+                        <pos x="940000" y="-10000" z="0"/>
+		    <rot x="180" y="180" z="180"/>
+</flightgroup>
+
+<flightgroup name="aerarefinery" faction="aera" type="refinery" ainame="borken.py" waves="1" nr_ships="1">
+                        <pos x="960000" y="-10000" z="0"/>
+		    <rot x="180" y="180" z="180"/>
+</flightgroup>
+
+<flightgroup name="confedrefinery" faction="confed" type="refinery" ainame="borken.py" waves="1" nr_ships="1">
+                        <pos x="980000" y="-10000" z="0"/>
+		    <rot x="180" y="180" z="180"/>
+</flightgroup>
+
+<flightgroup name="piraterefinery" faction="pirates" type="refinery" ainame="borken.py" waves="1" nr_ships="1">
+                        <pos x="1000000" y="-10000" z="0"/>
+		    <rot x="180" y="180" z="180"/>
+</flightgroup>
+
+<flightgroup name="rlaanrefinery" faction="rlaan" type="refinery" ainame="borken.py" waves="1" nr_ships="1">
+                        <pos x="1020000" y="-10000" z="0"/>
+		    <rot x="180" y="180" z="180"/>
+</flightgroup>
+
+<flightgroup name="relay" faction="neutral" type="relay" ainame="borken.py" waves="1" nr_ships="1">
+                        <pos x="1040000" y="-10000" z="0"/>
+		    <rot x="180" y="180" z="180"/>
+</flightgroup>
+
+<flightgroup name="aeraresearch" faction="aera" type="research" ainame="borken.py" waves="1" nr_ships="1">
+                        <pos x="1060000" y="-10000" z="0"/>
+		    <rot x="180" y="180" z="180"/>
+</flightgroup>
+
+<flightgroup name="confedresearch" faction="confed" type="research" ainame="borken.py" waves="1" nr_ships="1">
+                        <pos x="1080000" y="-10000" z="0"/>
+		    <rot x="180" y="180" z="180"/>
+</flightgroup>
+
+<flightgroup name="robin" faction="neutral" type="robin" ainame="borken.py" waves="1" nr_ships="1">
+                        <pos x="1100000" y="-10000" z="0"/>
+		    <rot x="180" y="180" z="180"/>
+</flightgroup>
+
+<flightgroup name="ruizong" faction="neutral" type="huldra" ainame="borken.py" waves="1" nr_ships="1">
+                        <pos x="1120000" y="-10000" z="0"/>
+		    <rot x="180" y="180" z="180"/>
+</flightgroup>
+
+<flightgroup name="schroedinger" faction="neutral" type="schroedinger" ainame="borken.py" waves="1" nr_ships="1">
+                        <pos x="1140000" y="-10000" z="0"/>
+		    <rot x="180" y="180" z="180"/>
+</flightgroup>
+
+<flightgroup name="Shizu" faction="neutral" type="idun" ainame="borken.py" waves="1" nr_ships="1">
+                        <pos x="1160000" y="-10000" z="0"/>
+		    <rot x="180" y="180" z="180"/>
+</flightgroup>
+
+<flightgroup name="Shundi" faction="neutral" type="lodur" ainame="borken.py" waves="1" nr_ships="1">
+                        <pos x="1180000" y="-10000" z="0"/>
+		    <rot x="180" y="180" z="180"/>
+</flightgroup>
+
+<flightgroup name="sickle" faction="neutral" type="sickle" ainame="borken.py" waves="1" nr_ships="1">
+                        <pos x="1200000" y="-10000" z="0"/>
+		    <rot x="180" y="180" z="180"/>
+</flightgroup>
+
+<flightgroup name="aerastarfortress" faction="aera" type="starfortress" ainame="borken.py" waves="1" nr_ships="1">
+                        <pos x="1220000" y="-1000000" z="0"/>
+		    <rot x="180" y="180" z="180"/>
+</flightgroup>
+
+<flightgroup name="confedstarfortress" faction="confed" type="starfortress" ainame="borken.py" waves="1" nr_ships="1">
+                        <pos x="1240000" y="-10000" z="0"/>
+		    <rot x="180" y="180" z="180"/>
+</flightgroup>
+
+<flightgroup name="rlaanstarfortress" faction="rlaan" type="starfortress" ainame="borken.py" waves="1" nr_ships="1">
+                        <pos x="1260000" y="-10000" z="0"/>
+		    <rot x="180" y="180" z="180"/>
+</flightgroup>
+
+<flightgroup name="Taizong" faction="neutral" type="vidar" ainame="borken.py" waves="1" nr_ships="1">
+                        <pos x="1280000" y="-10000" z="0"/>
+		    <rot x="180" y="180" z="180"/>
+</flightgroup>
+
+<flightgroup name="tesla" faction="neutral" type="tesla" ainame="borken.py" waves="1" nr_ships="1">
+                        <pos x="1300000" y="-10000" z="0"/>
+		    <rot x="180" y="180" z="180"/>
+</flightgroup>
+
+<flightgroup name="watson" faction="neutral" type="watson" ainame="borken.py" waves="1" nr_ships="1">
+                        <pos x="1320000" y="-10000" z="0"/>
+		    <rot x="180" y="180" z="180"/>
+</flightgroup>
+
+<flightgroup name="Zhuangzong" faction="neutral" type="thrud" ainame="borken.py" waves="1" nr_ships="1">
+                        <pos x="1340000" y="-10000" z="0"/>
+		    <rot x="180" y="180" z="180"/>
+</flightgroup>
+
+<!--end pre-cache -->
+
+
+
+
+        </flightgroups>
+<python>
+from privateer import privateer
+my_obj=privateer(20000,40000,500,3,2,.6,.25,.1,400000,2000)
+</python>
+
+</mission>

@@ -1,0 +1,849 @@
+<comm>
+	<node text="startingNode" relationship="0"><!-- node 0 (starting node: Don't link here)-->
+		<edge index="1"/>
+		<edge index="2"/>
+		<edge index="3"/>
+	</node>
+
+<!-- Starting Points -->
+	<node text="All systems are functional." relationship="0"><!-- node 1-->
+<sound file="communications/sounds/militia/militia_all-systems.ogg" sex="0"/>
+		<edge index="4"/>
+		<edge index="24"/>
+		<edge index="12"/>
+		<edge index="1"/>
+		<edge index="15"/>
+		<edge index="14"/>
+		<edge index="20"/>
+		<edge index="22"/>
+	</node>
+	<node text="It's always good to meet a respectable person such as yourself." relationship=".2"><!-- node 2-->
+<sound file="communications/sounds/militia/militia_its-always-good.ogg" sex="0"/>
+		<edge index="8"/>
+		<edge index="7"/>
+		<edge index="6"/>
+		<edge index="5"/>
+		<edge index="23"/>
+		<edge index="9"/>
+		<edge index="22"/>
+		<edge index="17"/>
+	</node>
+	<node text="I will kill you and all of your pirate friends." relationship="-.2"><!-- node 3-->
+<sound file="communications/sounds/militia/militia_i-will-kill.ogg" sex="0"/>
+		<edge index="18"/>
+		<edge index="23"/>
+		<edge index="22"/>
+		<edge index="16"/>
+		<edge index="25"/>
+		<edge index="26"/>
+		<edge index="17"/>
+		<edge index="27"/>
+	</node>
+<!-- End of Starting Points -->
+
+<!-- Other Nodes -->
+	<node text="Good day, citizen." relationship=".025"><!-- node 4-->
+<sound file="communications/sounds/militia/militia_good-day-citizen.ogg" sex="0"/>
+		<edge index="6"/>
+		<edge index="5"/>
+		<edge index="24"/>
+		<edge index="1"/>
+		<edge index="23"/>
+		<edge index="15"/>
+		<edge index="14"/>
+		<edge index="13"/>
+	</node>
+	<node text="How's business?" relationship=".03"><!-- node 5-->
+<sound file="communications/sounds/militia/militia_hows-business.ogg" sex="0"/>
+		<edge index="30"/>
+		<edge index="31"/>
+		<edge index="29"/>
+		<edge index="34"/>
+		<edge index="35"/>
+		<edge index="32"/>
+		<edge index="33"/>
+		<edge index="36"/>
+	</node>
+	<node text="Good to see you again, citizen." relationship=".05"><!-- node 6-->
+<sound file="communications/sounds/militia/militia_good-to-see-you.ogg" sex="0"/>
+		<edge index="4"/>
+		<edge index="5"/>
+		<edge index="24"/>
+		<edge index="1"/>
+		<edge index="23"/>
+		<edge index="15"/>
+		<edge index="14"/>
+		<edge index="13"/>
+	</node>
+	<node text="It's good to see a law abiding citizen." relationship=".058"><!-- node 7-->
+<sound file="communications/sounds/militia/militia_its-good-to-see-a.ogg" sex="0"/>
+		<edge index="8"/>
+		<edge index="4"/>
+		<edge index="6"/>
+		<edge index="5"/>
+		<edge index="23"/>
+		<edge index="9"/>
+		<edge index="22"/>
+		<edge index="17"/>
+	</node>
+	<node text="It's been a long time--I'm glad to hear from you again." relationship=".07"><!-- node 8-->
+<sound file="communications/sounds/militia/militia_its-been-a-long.ogg" sex="0"/>
+		<edge index="38"/>
+		<edge index="7"/>
+		<edge index="6"/>
+		<edge index="5"/>
+		<edge index="23"/>
+		<edge index="9"/>
+		<edge index="22"/>
+		<edge index="17"/>
+	</node>
+	<node text="Check where you're flying, citizen." relationship="-.025"><!-- node 9-->
+<sound file="communications/sounds/militia/militia_check-where.ogg" sex="0"/>
+		<edge index="28"/>
+		<edge index="5"/>
+		<edge index="23"/>
+		<edge index="32"/>
+		<edge index="14"/>
+		<edge index="19"/>
+		<edge index="39"/>
+		<edge index="11"/>
+	</node>
+	<node text="Killing no-good criminals like you is a waste of my skills." relationship="-.05"><!-- node 10-->
+<sound file="communications/sounds/militia/militia_killing-no-good.ogg" sex="0"/>
+		<edge index="18"/>
+		<edge index="40"/>
+		<edge index="23"/>
+		<edge index="14"/>
+		<edge index="26"/>
+		<edge index="39"/>
+		<edge index="11"/>
+		<edge index="3"/>
+	</node>
+	<node text="Your death will help make this system a better place to live." relationship="-.1"><!-- node 11-->
+<sound file="communications/sounds/militia/militia_your-death.ogg" sex="0"/>
+		<edge index="18"/>
+		<edge index="58"/>
+		<edge index="43"/>
+		<edge index="16"/>
+		<edge index="25"/>
+		<edge index="26"/>
+		<edge index="27"/>
+		<edge index="39"/>
+		<!--standard taunt-->
+	</node>
+	<node text="Communications link is open." relationship=".01"><!-- node 12-->
+<sound file="communications/sounds/militia/militia_communications-link.ogg" sex="0"/>
+		<edge index="4"/>
+		<edge index="24"/>
+		<edge index="41"/>
+		<edge index="1"/>
+		<edge index="15"/>
+		<edge index="14"/>
+		<edge index="13"/>
+		<edge index="22"/>
+	</node>
+	<node text="I don't associate with criminals." relationship="-.075"><!-- node 13-->
+<sound file="communications/sounds/militia/militia_i-dont-associate.ogg" sex="0"/>
+		<edge index="12"/>
+		<edge index="42"/>
+		<edge index="16"/>
+		<edge index="19"/>
+		<edge index="22"/>
+		<edge index="39"/>
+		<edge index="43"/>
+		<edge index="17"/>
+	</node>
+	<node text="Where did you get that artifact? You wont last for a second against pirates in it." relationship="-.02"><!-- node 14-->
+<sound file="communications/sounds/militia/militia_where-did-you-get-that-artifact.ogg" sex="0"/>
+		<edge index="45"/>
+		<edge index="44"/>
+		<edge index="47"/>
+		<edge index="40"/>
+		<edge index="15"/>
+		<edge index="46"/>
+		<edge index="39"/>
+		<edge index="27"/>
+	</node>
+	<node text="Where did you get that ship? It doesn't look powerful enough to survive for long in these parts." relationship="-.01"><!-- node 15-->
+<sound file="communications/sounds/militia/militia_where-did-you-get-that-ship.ogg" sex="0"/>
+		<edge index="45"/>
+		<edge index="44"/>
+		<edge index="47"/>
+		<edge index="40"/>
+		<edge index="14"/>
+		<edge index="46"/>
+		<edge index="39"/>
+		<edge index="27"/>
+	</node>
+	<node text="Your life is worth less than the clothing you wear." relationship="-.06"><!-- node 16-->
+<sound file="communications/sounds/militia/militia_your-life-is.ogg" sex="0"/>
+		<edge index="18"/>
+		<edge index="23"/>
+		<edge index="12"/>
+		<edge index="9"/>
+		<edge index="10"/>
+		<edge index="22"/>
+		<edge index="13"/>
+		<edge index="3"/>
+	</node>
+	<node text="Criminal scum!" relationship="-.1"><!-- node 17-->
+<sound file="communications/sounds/militia/militia_criminal-scum.ogg" sex="0"/>
+		<edge index="18"/>
+		<edge index="23"/>
+		<edge index="12"/>
+		<edge index="9"/>
+		<edge index="10"/>
+		<edge index="16"/>
+		<edge index="13"/>
+		<edge index="3"/>
+	</node>
+	<node text="Cease fire! I am not your enemy!" relationship=".05"><!-- node 18-->
+<sound file="communications/sounds/militia/militia_cease-fire.ogg" sex="0"/>
+		<edge index="59"/>
+		<edge index="1"/>
+		<edge index="12"/>
+		<edge index="9"/>
+		<edge index="36"/>
+		<edge index="22"/>
+		<edge index="13"/>
+		<edge index="3"/>
+	</node>
+	<node text="That does it, prepare for death!" relationship="-.05"><!-- node 19-->
+<sound file="communications/sounds/militia/militia_that-does-it.ogg" sex="0"/>
+		<edge index="18"/>
+		<edge index="58"/>
+		<edge index="43"/>
+		<edge index="16"/>
+		<edge index="25"/>
+		<edge index="26"/>
+		<edge index="27"/>
+		<edge index="39"/>
+		<!--standard taunt-->
+	</node>
+	<node text="What do we have here? Is it a smuggler flown off normal space lanes?" relationship="-.05"><!-- node 20-->
+<sound file="communications/sounds/militia/militia_what-do-we-have-here.ogg" sex="0"/>
+		<edge index="12"/>
+		<edge index="42"/>
+		<edge index="41"/>
+		<edge index="56"/>
+		<edge index="35"/>
+		<edge index="48"/>
+		<edge index="36"/>
+		<edge index="46"/>
+	</node>
+	<node text="If you kill me, every police force in the sector will be after your hide!" relationship="-.1"><!-- node 21-->
+<sound file="communications/sounds/militia/militia_if-you-kill-me.ogg" sex="0"/>
+		<edge index="18"/>
+		<edge index="58"/>
+		<edge index="43"/>
+		<edge index="16"/>
+		<edge index="25"/>
+		<edge index="26"/>
+		<edge index="27"/>
+		<edge index="39"/>
+		<!--standard taunt-->
+	</node>	
+	<node text="I will enjoy watching your death sentence carried out!" relationship="-.075"><!-- node 22-->
+<sound file="communications/sounds/militia/militia_i-will-enjoy-watching.ogg" sex="0"/>
+		<edge index="18"/>
+		<edge index="58"/>
+		<edge index="43"/>
+		<edge index="16"/>
+		<edge index="25"/>
+		<edge index="26"/>
+		<edge index="27"/>
+		<edge index="39"/>
+		<!--standard taunt-->
+	</node>
+	<node text="You're looking at a long time in prison, bub." relationship="-.01"><!-- node 23-->
+<sound file="communications/sounds/militia/militia_youre-looking-at-a.ogg" sex="0"/>
+		<edge index="2"/>
+		<edge index="6"/>
+		<edge index="1"/>
+		<edge index="12"/>
+		<edge index="33"/>
+		<edge index="9"/>
+		<edge index="22"/>
+		<edge index="16"/>
+	</node>
+	<node text="How are you today, citizen?" relationship=".01"><!-- node 24-->
+<sound file="communications/sounds/militia/militia_how-are-you-today.ogg" sex="0"/>
+		<edge index="31"/>
+		<edge index="24"/>
+		<edge index="42"/>
+		<edge index="35"/>
+		<edge index="34"/>
+		<edge index="32"/>
+		<edge index="33"/>
+		<edge index="51"/>
+	</node>
+	<node text="You will regret that, you Pirate!"  relationship="-.08"><!-- node 25-->
+<sound file="communications/sounds/militia/militia_you-will-regret-that.ogg" sex="0"/>
+		<edge index="18"/>
+		<edge index="58"/>
+		<edge index="43"/>
+		<edge index="16"/>
+		<edge index="11"/>
+		<edge index="26"/>
+		<edge index="27"/>
+		<edge index="39"/>
+		<!--standard taunt-->
+	</node>
+	<node text="I can't wait for your trial!" relationship="-.07"><!-- node 26-->
+<sound file="communications/sounds/militia/militia_i-cant-wait.ogg" sex="0"/>
+		<edge index="18"/>
+		<edge index="58"/>
+		<edge index="43"/>
+		<edge index="16"/>
+		<edge index="25"/>
+		<edge index="11"/>
+		<edge index="27"/>
+		<edge index="39"/>
+		<!--standard taunt-->
+	</node>
+	<node text="After I bust a murderer like you, I'll make captain!" relationship="-.08"><!-- node 27-->
+<sound file="communications/sounds/militia/militia_after-i-bust-a.ogg" sex="0"/>
+		<edge index="18"/>
+		<edge index="58"/>
+		<edge index="43"/>
+		<edge index="16"/>
+		<edge index="25"/>
+		<edge index="26"/>
+		<edge index="11"/>
+		<edge index="39"/>
+		<!--standard taunt-->
+	</node>
+	<node text="Good luck, citizen." relationship=".04"><!-- node 28-->
+<sound file="communications/sounds/militia/militia_good-luck-citizen.ogg" sex="0"/>
+		<edge index="8"/>
+		<edge index="38"/>
+		<edge index="30"/>
+		<edge index="28"/>
+		<edge index="23"/>
+		<edge index="60"/>
+		<edge index="13"/>
+		<edge index="27"/>
+	</node>
+	<node text="The crime rate has been fluctuating, but everything seems to be in order at the moment." relationship=".01"><!-- node 29-->
+<sound file="communications/sounds/militia/militia_the-crime-rate-has.ogg" sex="0"/>
+		<edge index="30"/>
+		<edge index="28"/>
+		<edge index="31"/>
+		<edge index="1"/>
+		<edge index="34"/>
+		<edge index="27"/>
+		<edge index="35"/>
+		<edge index="33"/>
+	</node>
+	<node text="Crime in this system is twenty points lower than the galactic average." relationship=".05"><!-- node 30-->
+<sound file="communications/sounds/militia/militia_crime-in-this-system.ogg" sex="0"/>
+		<edge index="38"/>
+		<edge index="28"/>
+		<edge index="31"/>
+		<edge index="1"/>
+		<edge index="34"/>
+		<edge index="27"/>
+		<edge index="35"/>
+		<edge index="33"/>
+	</node>
+	<node text="Crime is down and now I have more free time then I know what to do with!" relationship=".02"><!-- node 31-->
+<sound file="communications/sounds/militia/militia_crime-is-down.ogg" sex="0"/>
+		<edge index="38"/>
+		<edge index="28"/>
+		<edge index="30"/>
+		<edge index="1"/>
+		<edge index="34"/>
+		<edge index="27"/>
+		<edge index="35"/>
+		<edge index="33"/>
+	</node>
+	<node text="Are you trying to get police business out of me?" relationship="-.02"><!-- node 32-->
+<sound file="communications/sounds/militia/militia_are-you-trying-to.ogg" sex="0"/>
+		<edge index="8"/>
+		<edge index="24"/>
+		<edge index="23"/>
+		<edge index="1"/>
+		<edge index="34"/>
+		<edge index="15"/>
+		<edge index="20"/>
+		<edge index="16"/>
+	</node>
+	<node text="It's the scum like you that make my life hell." relationship="-.025"><!-- node 33-->
+<sound file="communications/sounds/militia/militia_its-scum-like.ogg" sex="0"/>
+		<edge index="18"/>
+		<edge index="58"/>
+		<edge index="43"/>
+		<edge index="16"/>
+		<edge index="25"/>
+		<edge index="26"/>
+		<edge index="27"/>
+		<edge index="39"/>
+		<!--standard taunt-->
+	</node>
+	<node text="Good, I'm busting criminals left and right!" relationship="-.01"><!-- node 34-->
+<sound file="communications/sounds/militia/militia_good-im-busting.ogg" sex="0"/>
+		<edge index="2"/><!-- like skills comment -->
+		<edge index="6"/>
+		<edge index="1"/>
+		<edge index="12"/>
+		<edge index="33"/>
+		<edge index="9"/>
+		<edge index="22"/>
+		<edge index="16"/>
+	</node>
+	<node text="Crime is on the rise, and it sucks!" relationship="-.015"><!-- node 35-->
+<sound file="communications/sounds/militia/militia_crime-is-on-the.ogg" sex="0"/>
+		<edge index="8"/>
+		<edge index="24"/>
+		<edge index="23"/>
+		<edge index="1"/>
+		<edge index="34"/>
+		<edge index="15"/>
+		<edge index="20"/>
+		<edge index="16"/>
+	</node>
+	<node text="You lowly Pirate! Always making life difficult for good citizens." relationship="-.04"><!-- node 36-->
+<sound file="communications/sounds/militia/militia_you-lowly-pirate.ogg" sex="0"/>
+		<edge index="18"/>
+		<edge index="58"/>
+		<edge index="43"/>
+		<edge index="16"/>
+		<edge index="25"/>
+		<edge index="26"/>
+		<edge index="27"/>
+		<edge index="39"/>
+		<!--standard taunt-->
+	</node>
+	<node text="UNUSED" relationship="0"><!-- node 37-->
+<sound file="communications/sounds/militia/militia_static.ogg" sex="0"/>
+		<edge index="18"/>
+		<edge index="58"/>
+		<edge index="43"/>
+		<edge index="16"/>
+		<edge index="25"/>
+		<edge index="26"/>
+		<edge index="27"/>
+		<edge index="39"/>
+	</node>
+	<node text="Good luck, Citizen." relationship=".04"><!-- node 38-->
+<sound file="communications/sounds/militia/militia_good-luck-citizen.ogg" sex="0"/>
+		<edge index="2"/>
+		<edge index="7"/>
+		<edge index="6"/>
+		<edge index="5"/>
+		<edge index="23"/>
+		<edge index="9"/>
+		<edge index="22"/>
+		<edge index="17"/>
+	</node>
+	<node text="There are some things you just shouldn't do." relationship="-.075"><!-- node 39-->
+<sound file="communications/sounds/militia/militia_there-are-some-things.ogg" sex="0"/>
+		<edge index="18"/>
+		<edge index="58"/>
+		<edge index="43"/>
+		<edge index="16"/>
+		<edge index="25"/>
+		<edge index="26"/>
+		<edge index="27"/>
+		<edge index="11"/>
+		<!--standard taunt-->
+	</node>
+	<node text="Calm down, citizen." relationship=".01"><!-- node 40-->
+<sound file="communications/sounds/militia/militia_calm-down.ogg" sex="0"/>
+		<edge index="6"/>
+		<edge index="1"/>
+		<edge index="23"/>
+		<edge index="41"/>
+		<edge index="36"/>
+		<edge index="43"/>
+		<edge index="39"/>
+		<edge index="13"/>
+
+	</node>
+	<node text="Stick to the space lane, or you risk running into pirates." relationship="0"><!-- node 41-->
+<sound file="communications/sounds/militia/militia_stick-to-the-space.ogg" sex="0"/>
+		<edge index="4"/>
+		<edge index="24"/>
+		<edge index="12"/>
+		<edge index="1"/>
+		<edge index="15"/>
+		<edge index="14"/>
+		<edge index="13"/>
+		<edge index="22"/>
+	</node>
+	<node text="..." relationship="0"><!-- node 42-->
+<sound file="communications/sounds/militia/militia_static.ogg" sex="0"/>
+		<edge index="4"/>
+		<edge index="24"/>
+		<edge index="12"/>
+		<edge index="1"/>
+		<edge index="15"/>
+		<edge index="49"/>
+		<edge index="13"/>
+		<edge index="22"/>
+	</node>
+	<node text="There is no escape from the law!" relationship="-.095"><!-- node 43-->
+<sound file="communications/sounds/militia/militia_there-is-no-escape.ogg" sex="0"/>
+		<edge index="18"/>
+		<edge index="12"/>
+		<edge index="23"/>
+		<edge index="16"/>
+		<edge index="17"/>
+		<edge index="13"/>
+		<edge index="11"/>
+		<edge index="3"/>
+	</node>
+	<node text="This is not a rich system, we have to get by with the ships we have." relationship=".015"><!-- node 44-->
+<sound file="communications/sounds/militia/militia_this-is-not-a-rich.ogg" sex="0"/>
+		<edge index="5"/>
+		<edge index="7"/>
+		<edge index="1"/>
+		<edge index="42"/>
+		<edge index="48"/>
+		<edge index="20"/>
+		<edge index="60"/>
+		<edge index="27"/>
+	</node>
+	<node text="Our militia is not much, but we can still do our share to fight piracy." relationship=".05"><!-- node 45-->
+<sound file="communications/sounds/militia/militia_our-militia-is-not.ogg" sex="0"/>
+		<edge index="5"/>
+		<edge index="7"/>
+		<edge index="1"/>
+		<edge index="42"/>
+		<edge index="48"/>
+		<edge index="20"/>
+		<edge index="60"/>
+		<edge index="27"/>
+	</node>
+	<node text="Don't think about messing with my ship, you criminal scum." relationship="-.075"><!-- node 46-->
+<sound file="communications/sounds/militia/militia_dont-think-about.ogg" sex="0"/>
+		<edge index="18"/>
+		<edge index="40"/>
+		<edge index="41"/>
+		<edge index="16"/>
+		<edge index="9"/>
+		<edge index="21"/>
+		<edge index="22"/>
+		<edge index="3"/>
+	</node>
+	<node text="You aren't the sharpest tool in the shed, are you?" relationship="-.01"><!-- node 47-->
+<sound file="communications/sounds/militia/militia_you-arent-the-sharpest.ogg" sex="0"/>
+		<edge index="5"/>
+		<edge index="7"/>
+		<edge index="1"/>
+		<edge index="42"/>
+		<edge index="48"/>
+		<edge index="20"/>
+		<edge index="60"/>
+		<edge index="27"/>
+	</node>
+	<node text="What is that you're trying to say?" relationship="0"><!-- node 48-->
+<sound file="communications/sounds/militia/militia_what-is-that.ogg" sex="0"/>
+		<edge index="8"/>
+		<edge index="34"/>
+		<edge index="56"/>
+		<edge index="42"/>
+		<edge index="49"/>
+		<edge index="32"/>
+		<edge index="13"/>
+		<edge index="17"/>
+	</node>
+	<node text="Is it a smuggler, flown off normal space lanes?  Maybe a bad smuggler with illegal contraband." relationship="-.02"><!-- node 49-->
+<sound file="communications/sounds/militia/militia_is-it-a-smuggler.ogg" sex="0"/>
+		<edge index="48"/>
+		<edge index="34"/>
+		<edge index="50"/>
+		<edge index="23"/>
+		<edge index="35"/>
+		<edge index="36"/>
+		<edge index="46"/>
+		<edge index="39"/>
+	</node>
+	<node text="Sorry citizen, my nav console was damaged by a pirate. Could you tell me where I am?" relationship="-.01"><!-- node 50-->
+<sound file="communications/sounds/militia/militia_sorry-citizen-but.ogg" sex="0"/>
+		<edge index="57"/>
+		<edge index="52"/>
+		<edge index="56"/>
+		<edge index="54"/>
+		<edge index="53"/>
+		<edge index="51"/>
+		<edge index="22"/>
+		<edge index="27"/>
+	</node>
+	<node text="Too close to the smuggler base we just discovered; prepare to be boarded and searched for contraband." relationship="-.03"><!-- node 51-->
+<sound file="communications/sounds/militia/militia_too-close-to-the.ogg" sex="0"/>
+		<edge index="58"/>
+		<edge index="28"/>
+		<edge index="40"/>
+		<edge index="47"/>
+		<edge index="46"/>
+		<edge index="55"/>
+		<edge index="22"/>
+		<edge index="11"/>
+	</node>
+	<node text="In the upper northern quadrant of the far galaxy beta minor." relationship=".01"><!-- node 52-->
+<sound file="communications/sounds/militia/militia_in-the-upper-north.ogg" sex="0"/>
+		<edge index="2"/>
+		<edge index="38"/>
+		<edge index="62"/><!--int index = ack (62);-->
+		<edge index="12"/>
+		<edge index="1"/>
+		<edge index="14"/>
+		<edge index="55"/>
+		<edge index="25"/>
+	</node>
+	<node text="Too far away from home -- go back to wherever you came from before I get a search warrant." relationship="-.025"><!-- node 53-->
+<sound file="communications/sounds/militia/militia_too-far-away-from.ogg" sex="0"/>
+		<edge index="18"/>
+		<edge index="58"/>
+		<edge index="43"/>
+		<edge index="16"/>
+		<edge index="25"/>
+		<edge index="26"/>
+		<edge index="27"/>
+		<edge index="39"/>
+		<!--standard taunt-->
+	</node>
+	<node text="Towards the center of the beta minor galaxy's outer rim, idiot!" relationship="-.01"><!-- node 54-->
+<sound file="communications/sounds/militia/militia_towards-the-center.ogg" sex="0"/>
+		<edge index="2"/>
+		<edge index="38"/>
+		<edge index="62"/><!--int index = ack (62);-->
+		<edge index="12"/>
+		<edge index="1"/>
+		<edge index="14"/>
+		<edge index="55"/>
+		<edge index="25"/>
+	</node>
+	<node text="Not a chance criminal, your under arrest!" relationship="-.05"><!-- node 55-->
+<sound file="communications/sounds/militia/militia_not-a-chance.ogg" sex="0"/>
+		<edge index="18"/>
+		<edge index="58"/>
+		<edge index="43"/>
+		<edge index="16"/>
+		<edge index="25"/>
+		<edge index="26"/>
+		<edge index="27"/>
+		<edge index="39"/>
+		<!--standard taunt-->
+	</node>
+	<node text="Sorry citizen...I don't know." relationship="0"><!-- node 56-->
+<sound file="communications/sounds/militia/militia_sorry-citizen-i.ogg" sex="0"/>
+		<edge index="57"/>
+		<edge index="52"/>
+		<edge index="56"/>
+		<edge index="54"/>
+		<edge index="53"/>
+		<edge index="51"/>
+		<edge index="22"/>
+		<edge index="27"/>
+	</node>
+	<node text="Here, you can use the readings from my nav computer... [Transmitting nav data.]" relationship=".05"><!-- node 57-->
+<sound file="communications/sounds/militia/militia_here-you-can-use.ogg" sex="0"/>
+		<edge index="2"/>
+		<edge index="38"/>
+		<edge index="62"/><!--int index = ack (62);-->
+		<edge index="12"/>
+		<edge index="1"/>
+		<edge index="14"/>
+		<edge index="55"/>
+		<edge index="25"/>
+	</node>
+	<node text="Stop! I have no quarrel with you!" relationship=".07"><!-- node 58-->
+<sound file="communications/sounds/militia/militia_stop-i-have-no.ogg" sex="0"/>
+		<edge index="18"/>
+		<edge index="59"/>
+		<edge index="12"/>
+		<edge index="9"/>
+		<edge index="36"/>
+		<edge index="22"/>
+		<edge index="13"/>
+		<edge index="3"/>
+	</node>
+	<node text="Sorry about that! Weapon systems malfunction." relationship=".05"><!-- node 59-->
+<sound file="communications/sounds/militia/militia_sorry-about.ogg" sex="0"/>
+		<edge index="18"/>
+		<edge index="12"/>
+		<edge index="15"/>
+		<edge index="9"/>
+		<edge index="25"/>
+		<edge index="22"/>
+		<edge index="17"/>
+		<edge index="3"/>
+	</node>
+	<node text="You're gonna need it, scumbag!" relationship="-.05"><!-- node 60-->
+<sound file="communications/sounds/militia/militia_youre-gonna-need.ogg" sex="0"/>
+		<edge index="18"/>
+		<edge index="58"/>
+		<edge index="43"/>
+		<edge index="16"/>
+		<edge index="25"/>
+		<edge index="26"/>
+		<edge index="27"/>
+		<edge index="39"/>
+		<!--standard taunt-->
+	</node>
+<!--End of Other Nodes -->
+
+<!-- Built-in Conversations --> 
+	<node text="Docking operation complete. You're free of the docking clamps." relationship="0.01">
+<sound file="communications/sounds/militia/militia_docking-complete.ogg" sex="0"/>
+		<edge index="8"/>
+		<edge index="7"/>
+		<edge index="6"/>
+		<edge index="5"/>
+		<edge index="23"/>
+		<edge index="9"/>
+		<edge index="22"/>
+		<edge index="17"/>
+	</node>
+	<node text="You are not in the docking clamps. Move into one of the white guide boxes and try to dock again." relationship="-.005">
+<sound file="communications/sounds/militia/militia_not-in-dock.ogg" sex="0"/>
+		<edge index="4"/>
+		<edge index="24"/>
+		<edge index="12"/>
+		<edge index="1"/>
+		<edge index="15"/>
+		<edge index="14"/>
+		<edge index="19"/>
+		<edge index="22"/>
+	</node>
+	<node text="Docking operation begun; press 0 to step into our starship." relationship="0.01">
+<sound file="communications/sounds/militia/militia_docking-begun.ogg" sex="0"/>
+		<edge index="8"/>
+		<edge index="7"/>
+		<edge index="6"/>
+		<edge index="5"/>
+		<edge index="23"/>
+		<edge index="9"/>
+		<edge index="22"/>
+		<edge index="17"/>
+	</node>
+	<node text="You are not authorized to land here!" relationship="-.005">
+<sound file="communications/sounds/militia/militia_not-authorized.ogg" sex="0"/>
+		<edge index="4"/>
+		<edge index="24"/>
+		<edge index="12"/>
+		<edge index="1"/>
+		<edge index="15"/>
+		<edge index="14"/>
+		<edge index="19"/>
+		<edge index="22"/>
+	</node>
+	<node text="Clearance code acknowledged; move into the landing pattern and dock at the green indicators." relationship="0.01">
+<sound file="communications/sounds/militia/militia_clearance-code.ogg" sex="0"/>
+		<edge index="8"/>
+		<edge index="7"/>
+		<edge index="6"/>
+		<edge index="5"/>
+		<edge index="23"/>
+		<edge index="9"/>
+		<edge index="22"/>
+		<edge index="17"/>
+	</node>
+	<node text="Unable to comply." relationship="-.005">
+<sound file="communications/sounds/militia/militia_unable-to-comply.ogg" sex="0"/>
+		<edge index="4"/>
+		<edge index="24"/>
+		<edge index="12"/>
+		<edge index="1"/>
+		<edge index="15"/>
+		<edge index="14"/>
+		<edge index="19"/>
+		<edge index="22"/>
+	</node>
+	<node text="Acknowledged." relationship="0.01">
+<sound file="communications/sounds/militia/militia_acknowledged.ogg" sex="0"/>
+		<edge index="8"/>
+		<edge index="7"/>
+		<edge index="6"/>
+		<edge index="5"/>
+		<edge index="23"/>
+		<edge index="9"/>
+		<edge index="22"/>
+		<edge index="17"/>
+	</node>
+	<node text="Prepare To Be Searched. Maintain Speed and Course." relationship="0">
+<sound file="communications/sounds/militia/militia_prepare-to-be-searched.ogg" sex="0"/>
+		<edge index="8"/>
+		<edge index="12"/>
+		<edge index="1"/>
+		<edge index="24"/>
+		<edge index="46"/>
+		<edge index="32"/>
+		<edge index="55"/>
+		<edge index="22"/>
+	</node>
+	<node text="No contraband detected: You may proceed." relationship="0">
+<sound file="communications/sounds/militia/militia_no-contraband-detected.ogg" sex="0"/>
+		<edge index="4"/>
+		<edge index="24"/>
+		<edge index="12"/>
+		<edge index="1"/>
+		<edge index="15"/>
+		<edge index="14"/>
+		<edge index="20"/>
+		<edge index="22"/>
+	</node>
+	<node text="Contraband detected! All units close and engage!" relationship="-.1">
+<sound file="communications/sounds/militia/militia_contraband-detected.ogg" sex="0"/>
+		<edge index="18"/>
+		<edge index="58"/>
+		<edge index="40"/>
+		<edge index="16"/>
+		<edge index="35"/>
+		<edge index="32"/>
+		<edge index="25"/>
+		<edge index="3"/>
+	</node>
+	<node text="Your course is deviating. Maintain course!" relationship="0">
+<sound file="communications/sounds/militia/militia_your-course-is.ogg" sex="0"/>
+		<edge index="8"/>
+		<edge index="12"/>
+		<edge index="1"/>
+		<edge index="24"/>
+		<edge index="46"/>
+		<edge index="32"/>
+		<edge index="55"/>
+		<edge index="22"/>
+	</node>	
+	<node text="Request clearance to land." relationship="0">
+<sound file="communications/sounds/militia/militia_request-clearance.ogg" sex="0"/>
+		<edge index="4"/>
+		<edge index="7"/>
+		<edge index="12"/>
+		<edge index="9"/>
+	</node>	
+	<node text="The militia wipes another traitor from space." relationship="-.0625">
+<sound file="communications/sounds/militia/militia_the-militia-wipes.ogg" sex="0"/>
+		<edge index="4"/>
+		<edge index="7"/>
+		<edge index="12"/>
+		<edge index="9"/>
+	</node>
+	<node text="Surrender now and you'll get a good plea bargain!" relationship="-.125">
+<sound file="communications/sounds/militia/militia_surrender-now.ogg" sex="0"/>
+		<edge index="4"/>
+		<edge index="7"/>
+		<edge index="12"/>
+		<edge index="9"/>
+	</node>
+	<node text="Militia unit requesting assistance!" relationship="-.125">
+<sound file="communications/sounds/militia/militia_requesting-assistance.ogg" sex="0"/>
+		<edge index="4"/>
+		<edge index="7"/>
+		<edge index="12"/>
+		<edge index="9"/>
+	</node>	
+	<node text="*hit*" relationship="-.1">
+		<edge index="18"/>
+		<edge index="58"/>
+		<edge index="47"/>
+		<edge index="19"/>
+		<edge index="22"/>
+		<edge index="46"/>
+		<edge index="36"/>
+		<edge index="25"/>
+	</node>
+<!-- End of Built-in Conversations --> 
+</comm>

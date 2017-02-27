@@ -1,0 +1,82 @@
+<mission>
+	<settings>
+		<origin  planet="earth" x="0000" y="100" z="000.0"/>
+	</settings>
+
+	<variables>
+<!--		<var name="continuousterrain" value="continuousterrain.txt"/>-->
+		<var name="defaultplayer" value="blue"/>
+		<var name="mission_name" value="4 versus 4" />
+		<var name="splashscreen" value="bad_guys_vs_good_guys.bmp" />
+		<var name="system" value="sol_sector/wolf359" />
+		<var name="description" value="4vs4.txt" />
+
+	</variables>
+        <flightgroups>
+                <flightgroup name="blue" faction="confed" type="eject" ainame="default" waves="1" nr_ships="50">
+			<pos x="50400" y="-35400" z="2470000"/>
+			<rot x="180.0" y="180.0" z="180.0"/>
+			<order order="tmptarget" target="omikron"/>
+			<order priority="0" order="superiority" target="enemy"/>
+			<order priority="1" order="bomber" target="omikron"/>
+			<order priority="2" order="escort" target="blue"/>
+		</flightgroup>
+                <flightgroup name="blue" faction="aera" type="eject" ainame="default" waves="1" nr_ships="50">
+			<pos x="50400" y="-34000" z="24000.0"/>
+			<rot x="180.0" y="180.0" z="180.0"/>
+			<order order="tmptarget" target="omikron"/>
+			<order priority="0" order="superiority" target="enemy"/>
+			<order priority="1" order="bomber" target="omikron"/>
+			<order priority="2" order="escort" target="blue"/>
+		</flightgroup>
+
+
+
+
+
+
+<!--                <flightgroup name="blue" faction="aera" type="firefly" ainame="default" waves="8" nr_ships="3">
+			<pos x="50000" y="5000.0" z="29000.0"/>
+			<rot x="180.0" y="180.0" z="180.0"/>
+			<order order="tmptarget" target="omikron"/>
+			<order priority="0" order="superiority" target="enemy"/>
+			<order priority="1" order="bomber" target="omikron"/>
+			<order priority="2" order="escort" target="blue"/>
+		</flightgroup>
+<!--
+                <flightgroup name="green" faction="confed" type="tian" ainame="default" waves="8" nr_ships="3">
+			<pos x="13000.0" y="0.0" z="3000.0"/>
+			<rot x="180.0" y="180.0" z="180.0"/>
+			<order order="tmptarget" target="omikron"/>
+			<order priority="0" order="superiority" target="enemy"/>
+			<order priority="1" order="bomber" target="omikron"/>
+			<order priority="2" order="escort" target="blue"/>
+		</flightgroup>
+
+                <flightgroup name="red" faction="confed" type="cruiser" ainame="default" waves="8" nr_ships="1">
+			<pos x="12000.0" y="0.0" z="3000.0"/>
+			<rot x="180.0" y="180.0" z="180.0"/>
+			<order order="tmptarget" target="omikron"/>
+			<order priority="0" order="superiority" target="enemy"/>
+			<order priority="1" order="bomber" target="omikron"/>
+			<order priority="2" order="escort" target="blue"/>
+		</flightgroup>
+                <flightgroup name="omikron" faction="aera" type="aeon" ainame="default" waves="8" nr_ships="3">
+ 			<pos  x="10000.0" y="500.0" z="0.0"/>
+			<rot x="90.0" y="90.0" z="180.0"/>
+			<order order="tmptarget" target="blue"/>
+		</flightgroup>
+                <flightgroup name="tau" faction="aera" type="aevant" ainame="default" waves="8" nr_ships="3">
+ 			<pos  x="10000.0" y="700.0" z="100.0"/>
+			<rot x="90.0" y="90.0" z="180.0"/>
+			<order order="tmptarget" target="blue"/>
+		</flightgroup>
+
+                <flightgroup name="pi" faction="aera" type="lekra" ainame="default" waves="8" nr_ships="1">
+ 			<pos  x="10000.0" y="800.0" z="200.0"/>
+			<rot x="90.0" y="90.0" z="180.0"/>
+			<order order="tmptarget" target="blue"/>
+		</flightgroup>
+-->
+        </flightgroups>
+</mission>

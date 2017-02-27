@@ -1,0 +1,37 @@
+<system name="Wasteland" background="backgrounds/purple_galaxy1" nearstars="500" stars="1000" starspread="150"  x="0" y="0" z="0">
+<Light>
+<ambient red=".3" green=".3" blue=".3"/>
+<diffuse red="1" green="1" blue="1"/>
+<specular red="1" green="1" blue="1"/>
+</Light>
+
+<Light>
+<ambient red="1" green=".1" blue="0"/>
+<!--<diffuse red="1" green=".7" blue="0"/>-->
+<!--<attenuated red=".00000001" blue=".00000015"/>-->
+<attenuated red="0" blue=".000000002"/>
+</Light>	
+<Light>
+<ambient red="1" green=".1" blue="0"/>
+<!--<diffuse red="1" green=".7" blue="0"/>-->
+<!--<attenuated red=".00000001" blue=".00000015"/>-->
+<attenuated red="0" blue=".0000001"/>
+</Light>	
+        <planet name="sun" file="sol/sun.png" radius="25000" gravity="20" z="30000"  Red=".7" Green=".7" Blue=".7" light="0 1l">
+	<Atmosphere radius="25000"/>
+	<ContinuousTerrain file="continuousterrain.txt" mass=".00000100" y="000
+0" z="30000" qi="0" qj="0" qk="1" ri="0" rj="1" rk="0">
+		<Vehicle file="hellcat" x="100" y="1000" z="100" faction="confed"/>
+		<Vehicle file="hellcat" x="200" y="4000" z="10000" faction="aera"/>
+		<Building file="hellcat" x="300" y="2000" z="300" faction="confed"/>
+		<Vehicle file="hellcat" x="500" y="3000" z="100" faction="aera"/>
+
+	</ContinuousTerrain>
+
+		<planet name="sargh" file="sol/earth.png" radius="1440" gravity="20" ri="100000" rk="100000">
+<!--		<atmosphere/>-->
+		</planet>
+	</planet>
+</system>
+
+

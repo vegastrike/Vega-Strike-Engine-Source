@@ -1,0 +1,229 @@
+<mission>
+	<settings>
+		<origin  planet="earth" x="0000" y="100" z="000.0"/>
+	</settings>
+
+	<variables>
+		<var name="credits" value="10000"/>
+		<var name="defaultplayer" value="blue"/>
+		<var name="mission_name" value="4 versus 4" />
+		<var name="splashscreen" value="bad_guys_vs_good_guys.bmp" />
+                <var name="system" value="stage_sector/stage" />
+		<var name="description" value="4vs4.txt" />
+	</variables>
+
+        <flightgroups>
+
+            <flightgroup name="tomcat" faction="neutral" type="Admonisher" ainame="default" waves="1" nr_ships="1">
+                        <pos x="110000" y="30000" z="40000"/>
+			<rot x="270.0" y="180.0" z="180.0"/>
+		    </flightgroup>
+
+            <flightgroup name="cerberuz" faction="neutral" type="Dirge" ainame="default" waves="1" nr_ships="1">
+                        <pos x="110000" y="30000" z="50000"/>
+			<rot x="270.0" y="180.0" z="180.0"/>
+		    </flightgroup>
+            <flightgroup name="cerberus" faction="pirates" type="Dirge" ainame="default" waves="1" nr_ships="1">
+                        <pos x="110000" y="30000" z="60000"/>
+			<rot x="270.0" y="180.0" z="180.0"/>
+		    </flightgroup>
+            <flightgroup name="cerberus2" faction="andolian_citizen" type="Dirge" ainame="default" waves="1" nr_ships="1">
+                        <pos x="110000" y="30000" z="70000"/>
+			<rot x="270.0" y="180.0" z="180.0"/>
+		    </flightgroup>
+            <flightgroup name="cerberus3" faction="shmrn_citizen" type="Dirge" ainame="default" waves="1" nr_ships="1">
+                        <pos x="110000" y="30000" z="80000"/>
+			<rot x="270.0" y="180.0" z="180.0"/>
+		    </flightgroup>
+            <flightgroup name="cerberus4" faction="hunter" type="Dirge" ainame="default" waves="1" nr_ships="1">
+                        <pos x="110000" y="30000" z="90000"/>
+			<rot x="270.0" y="180.0" z="180.0"/>
+		    </flightgroup>
+            <flightgroup name="cerberus5" faction="uln" type="Dirge" ainame="default" waves="1" nr_ships="1">
+                        <pos x="110000" y="30000" z="100000"/>
+			<rot x="270.0" y="180.0" z="180.0"/>
+		    </flightgroup>
+
+            <flightgroup name="camero" faction="neutral" type="GTIO" ainame="default" waves="1" nr_ships="1">
+                        <pos x="100000" y="30000" z="60000"/>
+			<rot x="270.0" y="180.0" z="180.0"/>
+		    </flightgroup>
+            <flightgroup name="camero2" faction="klkk_citizen" type="GTIO" ainame="default" waves="1" nr_ships="1">
+                        <pos x="100000" y="30000" z="70000"/>
+			<rot x="270.0" y="180.0" z="180.0"/>
+		    </flightgroup>
+            <flightgroup name="camero3" faction="LIHW_citizen" type="GTIO" ainame="default" waves="1" nr_ships="1">
+                        <pos x="100000" y="30000" z="80000"/>
+			<rot x="270.0" y="180.0" z="180.0"/>
+		    </flightgroup>
+            <flightgroup name="camero4" faction="purist_citizen" type="GTIO" ainame="default" waves="1" nr_ships="1">
+                        <pos x="100000" y="30000" z="90000"/>
+			<rot x="270.0" y="180.0" z="180.0"/>
+		    </flightgroup>
+            <flightgroup name="camero5" faction="uln_citizen" type="GTIO" ainame="default" waves="1" nr_ships="1">
+                        <pos x="100000" y="30000" z="100000"/>
+			<rot x="270.0" y="180.0" z="180.0"/>
+		    </flightgroup>
+
+            <flightgroup name="helm" faction="neutral" type="outpost" ainame="default" waves="1" nr_ships="1">
+                        <pos x="120000" y="30000" z="50000"/>
+			<rot x="180.0" y="180.0" z="180.0"/>
+		    </flightgroup>
+
+            <flightgroup name="helm2" faction="homeland-security" type="outpost" ainame="default" waves="1" nr_ships="1">
+                        <pos x="130000" y="30000" z="50000"/>
+			<rot x="180.0" y="180.0" z="180.0"/>
+		    </flightgroup>
+
+            <flightgroup name="helm3" faction="forsaken" type="outpost" ainame="default" waves="1" nr_ships="1">
+                        <pos x="140000" y="30000" z="50000"/>
+			<rot x="180.0" y="180.0" z="180.0"/>
+		    </flightgroup>
+
+            <flightgroup name="helm4" faction="hunter" type="outpost" ainame="default" waves="1" nr_ships="1">
+                        <pos x="150000" y="30000" z="50000"/>
+			<rot x="180.0" y="180.0" z="180.0"/>
+		    </flightgroup>
+
+            <flightgroup name="helm5" faction="merchant_guild" type="outpost" ainame="default" waves="1" nr_ships="1">
+                        <pos x="160000" y="30000" z="50000"/>
+			<rot x="180.0" y="180.0" z="180.0"/>
+		    </flightgroup>
+
+            <flightgroup name="ref" faction="neutral" type="refinery" ainame="default" waves="1" nr_ships="1">
+                        <pos x="120000" y="20000" z="60000"/>
+			<rot x="180.0" y="180.0" z="180.0"/>
+		    </flightgroup>
+
+            <flightgroup name="ref2" faction="ISO" type="refinery" ainame="default" waves="1" nr_ships="1">
+                        <pos x="120000" y="30000" z="60000"/>
+			<rot x="180.0" y="180.0" z="180.0"/>
+		    </flightgroup>
+
+            <flightgroup name="ref3" faction="luddites" type="refinery" ainame="default" waves="1" nr_ships="1">
+                        <pos x="120000" y="40000" z="60000"/>
+			<rot x="180.0" y="180.0" z="180.0"/>
+		    </flightgroup>
+
+ <flightgroup name="gas" faction="neutral" type="gasmine" ainame="default" waves="1" nr_ships="1">
+                        <pos x="120000" y="50000" z="60000"/>
+			<rot x="180.0" y="180.0" z="180.0"/>
+		    </flightgroup>
+
+            <flightgroup name="gas2" faction="forsaken" type="gasmine" ainame="default" waves="1" nr_ships="1">
+                        <pos x="120000" y="60000" z="60000"/>
+			<rot x="180.0" y="180.0" z="180.0"/>
+		    </flightgroup>
+
+            <flightgroup name="ham" faction="neutral" type="relay" ainame="default" waves="1" nr_ships="1">
+                        <pos x="120000" y="80000" z="50000"/>
+			<rot x="180.0" y="180.0" z="180.0"/>
+		    </flightgroup>
+
+            <flightgroup name="ham2" faction="andolian" type="relay" ainame="default" waves="1" nr_ships="1">
+                        <pos x="130000" y="80000" z="50000"/>
+			<rot x="180.0" y="180.0" z="180.0"/>
+		    </flightgroup>
+
+            <flightgroup name="ham3" faction="shmrn" type="relay" ainame="default" waves="1" nr_ships="1">
+                        <pos x="140000" y="80000" z="50000"/>
+			<rot x="180.0" y="180.0" z="180.0"/>
+		    </flightgroup>
+
+            <flightgroup name="ham4" faction="LIHW" type="relay" ainame="default" waves="1" nr_ships="1">
+                        <pos x="150000" y="80000" z="50000"/>
+			<rot x="180.0" y="180.0" z="180.0"/>
+		    </flightgroup>
+
+            <flightgroup name="ham5" faction="highborn" type="relay" ainame="default" waves="1" nr_ships="1">
+                        <pos x="160000" y="80000" z="50000"/>
+			<rot x="180.0" y="180.0" z="180.0"/>
+		    </flightgroup>
+
+           <flightgroup name="med" faction="neutral" type="medical" ainame="default" waves="1" nr_ships="1">
+                        <pos x="120000" y="10000" z="50000"/>
+			<rot x="180.0" y="180.0" z="180.0"/>
+		    </flightgroup>
+
+            <flightgroup name="med2" faction="klkk" type="medical" ainame="default" waves="1" nr_ships="1">
+                        <pos x="130000" y="10000" z="50000"/>
+			<rot x="180.0" y="180.0" z="180.0"/>
+		    </flightgroup>
+
+            <flightgroup name="med3" faction="purist" type="medical" ainame="default" waves="1" nr_ships="1">
+                        <pos x="140000" y="10000" z="50000"/>
+			<rot x="180.0" y="180.0" z="180.0"/>
+		    </flightgroup>
+
+            <flightgroup name="med4" faction="LIHW" type="medical" ainame="default" waves="1" nr_ships="1">
+                        <pos x="150000" y="10000" z="50000"/>
+			<rot x="180.0" y="180.0" z="180.0"/>
+		    </flightgroup>
+
+            <flightgroup name="med5" faction="shaper" type="medical" ainame="default" waves="1" nr_ships="1">
+                        <pos x="160000" y="10000" z="50000"/>
+			<rot x="180.0" y="180.0" z="180.0"/>
+		    </flightgroup>
+
+            <flightgroup name="med5" faction="merchant_guild" type="medical" ainame="default" waves="1" nr_ships="1">
+                        <pos x="170000" y="10000" z="50000"/>
+			<rot x="180.0" y="180.0" z="180.0"/>
+		    </flightgroup>
+
+  <flightgroup name="agg" faction="neutral" type="agricultural_station" ainame="default" waves="1" nr_ships="1">
+                        <pos x="150000" y="20000" z="60000"/>
+			<rot x="180.0" y="180.0" z="180.0"/>
+		    </flightgroup>
+
+            <flightgroup name="agg2" faction="LIHW" type="agricultural_station" ainame="default" waves="1" nr_ships="1">
+                        <pos x="150000" y="30000" z="60000"/>
+			<rot x="180.0" y="180.0" z="180.0"/>
+		    </flightgroup>
+
+            <flightgroup name="agg3" faction="luddites" type="agricultural_station" ainame="default" waves="1" nr_ships="1">
+                        <pos x="150000" y="40000" z="60000"/>
+			<rot x="180.0" y="180.0" z="180.0"/>
+		    </flightgroup>
+
+            <flightgroup name="agg4" faction="purist" type="agricultural_station" ainame="default" waves="1" nr_ships="1">
+                        <pos x="150000" y="50000" z="60000"/>
+			<rot x="180.0" y="180.0" z="180.0"/>
+		    </flightgroup>
+
+            <flightgroup name="agg5" faction="merchant_guild" type="agricultural_station" ainame="default" waves="1" nr_ships="1">
+                        <pos x="150000" y="60000" z="60000"/>
+			<rot x="180.0" y="180.0" z="180.0"/>
+		    </flightgroup>
+
+  <flightgroup name="com" faction="neutral" type="commerce_center" ainame="default" waves="1" nr_ships="1">
+                        <pos x="100000" y="20000" z="0"/>
+			<rot x="180.0" y="180.0" z="180.0"/>
+		    </flightgroup>
+
+            <flightgroup name="com2" faction="forsaken" type="commerce_center" ainame="default" waves="1" nr_ships="1">
+                        <pos x="100000" y="30000" z="0"/>
+			<rot x="180.0" y="180.0" z="180.0"/>
+		    </flightgroup>
+
+            <flightgroup name="com3" faction="klkk" type="commerce_center" ainame="default" waves="1" nr_ships="1">
+                        <pos x="100000" y="40000" z="0"/>
+			<rot x="180.0" y="180.0" z="180.0"/>
+		    </flightgroup>
+
+            <flightgroup name="com4" faction="LIHW" type="commerce_center" ainame="default" waves="1" nr_ships="1">
+                        <pos x="100000" y="50000" z="0"/>
+			<rot x="180.0" y="180.0" z="180.0"/>
+		    </flightgroup>
+
+            <flightgroup name="com5" faction="shmrn" type="commerce_center" ainame="default" waves="1" nr_ships="1">
+                        <pos x="100000" y="60000" z="0"/>
+			<rot x="180.0" y="180.0" z="180.0"/>
+		    </flightgroup>
+
+
+        </flightgroups>
+</mission>
+
+
+
+

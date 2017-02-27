@@ -1,0 +1,57 @@
+<mission>
+	<settings>
+		<origin  planet="earth" x="0000" y="100" z="000.0"/>
+	</settings>
+
+	<variables>
+		<var name="defaultplayer" value="blue"/>
+		<var name="system" value="enigma_sector/blake" />
+		<var name="mission_name" value="Patrol Mission" />
+		<var name="description" value="Patrol 7 locations in a neighboring star system. This data is vital to our strategic presence in this system.  You will be paid 9700 for a successful patrol." />
+	</variables>
+        <flightgroups>
+                <flightgroup name="blue" faction="confed" type="nova" ainame="default" waves="1" nr_ships="2">
+			<pos x="0400" y="-35400" z="47200000"/>
+			<rot x="180.0" y="180.0" z="180.0"/>
+			<order order="tmptarget" target="omikron"/>
+			<order priority="0" order="superiority" target="enemy"/>
+			<order priority="1" order="bomber" target="omikron"/>
+			<order priority="2" order="escort" target="blue"/>
+		</flightgroup>
+        </flightgroups>
+	<python>
+import patrol
+newmission = patrol.patrol (1, 7, 300, 9700)
+newmission=0
+
+</python>
+	<madule name="director">
+		<import name="patrol"/>
+		<script name="initgame">
+			<exec module="patrol" name="init">
+			<const type="int" value="1"/> <!--num systems away -->
+
+			<const type="int" value="7"/><!--num patrol points (not zero)-->
+			<const type="float" value="300"/> <!--the distance from the points you have to be to get credited -->
+			<const type="float" value="9700"/> <!-- how much you arepaid -->
+			</exec>
+		</script>
+		<script name="gameloop">
+			<exec module="patrol" name="loop"/>
+		</script>
+
+		<script name="initbriefing">
+			<exec module="patrol" name="initbriefing">
+			</exec>
+		</script>
+		<script name="loopbriefing">
+			<exec module="patrol" name="loopbriefing">
+			</exec>
+		</script>
+		<script name="endbriefing">
+			<exec module="patrol" name="endbriefing">
+			</exec>
+		</script>
+
+	</module>
+</mission>

@@ -1,0 +1,48 @@
+<system name="Kiopi HQ" background="backgrounds/mustard" nearstars="500" stars="1000" starspread="150"  x="0" y="0" z="0">
+<Light>
+<ambient red=".5" green=".5" blue=".5"/>
+<diffuse red="1" green="1" blue="1"/>
+<specular red="1" green="1" blue="1"/>
+</Light>
+
+<Light>
+<ambient red="1" green=".1" blue="0"/>
+<!--<diffuse red="1" green=".7" blue="0"/>-->
+<!--<attenuated red=".00000001" blue=".00000015"/>-->
+<attenuated red="0" blue=".000000002"/>
+</Light>	
+<Light>
+<ambient red="1" green=".1" blue="0"/>
+<!--<diffuse red="1" green=".7" blue="0"/>-->
+<!--<attenuated red=".00000001" blue=".00000015"/>-->
+<attenuated red="0" blue=".0000001"/>
+</Light>	
+
+<planet name="KiopiA" file="sol/sun.png" radius="25000" gravity="20" z="-300000"  Red=".9" Green=".9" Blue=".9" ReflectNoLight="true" light="0 1l" />
+
+<planet name="KiopiB" file="sol/sun.png" radius="25000" gravity="20" z="300000" y="5000"  Red=".9" Green=".9" Blue=".9" ReflectNoLight="true" light="0 1l" />
+
+
+<planet name="Tresten" file="planets/m_class10.png" radius="6000" z="20000" gravity="20" >
+	<planet name="Tresten" file="sol/earthcloudmaptrans.png" alpha="true" radius="6600" gravity="20" ri="0" rj="0" rk="0" si="0" sj="0" sk="0" day="600" position="0"/>
+<!--    <ContinuousTerrain file="demdata/grandcanyon/continuousterrain.txt" mass=".00000100" y="0000" z="30000" qi="0" qj="0" qk="1" ri="0" rj="1" rk="0" scalex="2" numwraps="4"/>
+ -->
+        <Atmosphere radius="10000"/>
+
+</planet>
+
+<planet name="Howo" file="planets/tundra.png" radius="1200" gravity="20" x="2000" y="5000"  z="-5000" position="0" />			
+
+<planet name="Ratwerp" file="planets/toxic_disaster.png" radius="400" gravity="20" x="-4000" y="-4000"  z="-5000" position="0" />			
+
+<planet name="Umkle" file="planets/wasteland.png" radius="700" gravity="20" x="-4000" y="5000"  z="-3000" position="0" />			
+
+<planet name="jumppoint-hayay" file="jump.png" alpha="ONE ONE" radius="500" gravity="20" x="2000" y="2000" z="-12000" destination="visit_from_the_aera/aera_station" />
+
+<unit name= "kiopi-hq"  file="ConfedHq" x="000" y="000" z="-4000" position="0" faction="aera" />
+<unit name= "station-north"  file="station" x="000" y="-3000" z="-10000" position="0" faction="aera" />
+<unit name= "station-south"  file="station" x="000" y="3000" z="-10000" position="0" faction="aera" />
+
+
+
+</system>

@@ -1,0 +1,46 @@
+<system name="Sirius" background="backgrounds/purple2" nearstars="500" stars="1000" starspread="150"  x="0" y="0" z="0" scalesystem="100">
+<Light>
+<ambient red=".3" green=".3" blue=".3"/>
+<diffuse red=".6" green=".6" blue=".6"/>
+<specular red=".8" green=".8" blue=".8"/>
+</Light>
+<Light>
+<ambient red=".1" green=".1" blue=".1"/>
+<diffuse red=".2" green=".2" blue=".2"/>
+<specular red=".8" green=".8" blue=".8"/>
+</Light>
+
+<Light>
+<ambient red="1" green=".1" blue="0"/>
+<!--<diffuse red="1" green=".7" blue="0"/>-->
+<!--<attenuated red=".00000001" blue=".00000015"/>-->
+<attenuated red="0" blue=".000000002"/>
+</Light>	
+<Light>
+<ambient red="1" green=".1" blue="0"/>
+<!--<diffuse red="1" green=".7" blue="0"/>-->
+<!--<attenuated red=".00000001" blue=".00000015"/>-->
+<attenuated red="0" blue=".0000001"/>
+</Light>	
+
+        <planet name="SiriusA" file="stars/white_star.png" radius="20000" gravity="20" z="00000"  Red=".9" Green=".9" Blue=".9" ReflectNoLight="true" light="0">
+	        <planet name="SiriusB" file="stars/white_star.png" radius="13920" gravity="20" ri="220000" sk="180000"  Red=".9" Green=".9" Blue=".9" ReflectNoLight="true" light="1" year="180000" day="1000"> 
+			<planet name="JumpToLuyten" file="jump.png" alpha="ONE ONE" radius="300" day="1000" year="20000" ri="-50000" sk="30000" destination="sol_sector/luyten"/>
+			<planet name="SiriusC" file="stars/red_star.png" radius="11045" Red=".9" Green=".2" Blue=".3" rk="50000" si="80000" ReflectNoLight="true" light="2" year="10000" day="300">
+			<planet name="JumpToTikopal" file="jump.png" alpha="ONE ONE" radius="300" day="1000" year="80000" rj="-50000" si="-30000" destination="sol_sector/tikopal"/>
+			</planet>
+		</planet>
+		<planet name="Dogon" file="planets/waterlava.png" radius="2000" ri="40000" sk="60000" year="10000" day="2000">
+			<planet name="JumpToProxima" file="jump.png" alpha="ONE ONE" radius="500" faction="neutral" sk="25000" ri="25555" day="100" year="7000" destination="vega_sector/proxima"/>
+			<planet name="Ridpath" file="sol/janus.png" radius="300" ri="15000" sj="18000" day="1000" year="1000"/>	
+		</planet>
+		<planet name="Nommos" file="planets/desertwater.png" radius="3000" ri="100000" sj="70000" day="1200" year="10000">
+			<planet name="Sagan" file="sol/prometheus.png" radius="600" ri="20000" sk="18000" day="1000" year="1000"/>
+			<planet name="JumpToSol" file="jump.png" radius="400" alpha="ONE ONE" faction="neutral" rk="25000" si="25555" day="100" year="6000" destination="sol_sector/sol"/>
+			<unit name="SiriusHeadquarters" file="starfortress" faction="confed" rk="30000" sj="19999" year="3000"/>
+		</planet>
+		<planet name="Isis" file="planets/gas_dwarf.png" radius="9000" ri="150000" sk="150000" sj="150000" day="500" year="4000">
+			<planet  name= "JumpToWeslyn"  file="jump.png" alpha="ONE ONE" radius="100" faction="neutral" ri="30000" sk="30000" year="10000" position=".25" destination="sol_sector/weslyn"/>
+		</planet>
+	</planet>
+</system>

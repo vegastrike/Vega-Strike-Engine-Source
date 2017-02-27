@@ -1,0 +1,14 @@
+<Unit>
+	<Meshfile file="nebula_veryhuge.bfxm"/>
+	<BSPmesh file="nebula_veryhuge.bfxm" RAPID="0" BSP="0"/>
+	<Thrust>
+		<Engine Afterburner="00.000000" Forward="0" Retro="0" Left="0" Right="0" Top="0" Bottom="0"/>
+		<Maneuver yaw="0000" pitch="0000" roll="0000"/>
+	</Thrust>
+	<Defense HudImage="nebula-hud.spr">
+		<Hull strength="400000000"/>
+	</Defense>
+
+<Stats mass="6" momentofinertia="6" fuel="20000"></Stats>
+
+</Unit>

@@ -1,0 +1,28 @@
+<mission>
+	<settings>
+		<origin  planet="earth" x="0000" y="100" z="000.0"/>
+	</settings>
+
+	<variables>
+		<var name="defaultplayer" value="blue"/>
+		<var name="system" value="Crucible/Cephid_17" />
+		<var name="mission_name" value="Tail Mission" />
+		<var name="description" value="Test the tail mission." />
+	</variables>
+        <flightgroups>
+                <flightgroup name="blue" faction="privateer" type="llama" ainame="default" waves="1" nr_ships="1">
+			<pos x="0400" y="-35400" z="47200000"/>
+			<rot x="180.0" y="180.0" z="180.0"/>
+			<order order="tmptarget" target="omikron"/>
+			<order priority="0" order="superiority" target="enemy"/>
+			<order priority="1" order="bomber" target="omikron"/>
+			<order priority="2" order="escort" target="blue"/>
+		</flightgroup>
+        </flightgroups>
+	<python>
+import tail
+#a=tail.tail("tail_test",7,50000,30000,7000,["Crucible/Cephid_17","Crucible/17-ar"], "pirates", "confed", "EnemyFG", "FriendlyFG")
+
+a=tail.tail("tail_test",50000,["Crucible/Cephid_17","Crucible/17-ar"],30000,7000,"pirates","confed","EnemyFG","FriendlyFG")
+</python>
+</mission>

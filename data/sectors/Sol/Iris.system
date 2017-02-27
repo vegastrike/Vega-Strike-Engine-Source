@@ -1,0 +1,33 @@
+<?xml version="1.0" ?>
+<system name="Iris" background="backgrounds/emerald">
+	<Light>
+		<ambient red="0.000000" green="0.000000" blue="0.000000"/>
+		<diffuse red="1.000000" green="0.508744" blue="0.434823"/>
+		<specular red="1.000000" green="0.258820" blue="0.189071"/>
+	</Light>
+	<Planet name="Iris A" file="stars/red_star.texture" ri="0.000000" rj="0.000000" rk="0.000000" si="0.000000" sj="0.000000" sk="0.000000" radius="500000000.000000" x="0" y="0" z="0"  Red="1.000000" Green="0.258820" Blue="0.189071" ReflectNoLight="true" light="0">
+<fog>
+	<FogElement file="atmXatm.bfxm" ScaleAtmosphereHeight=".900" red="1.000000" blue="0.258820" green="0.189071" alpha="1.0" dired="1.000000" diblue="0.258820" digreen="0.189071" dialpha="1" concavity=".3" focus=".6" minalpha=".7" maxalpha="1"/>
+	<FogElement file="atmXhalo.bfxm" ScaleAtmosphereHeight=".9000" red="1.000000" blue="0.258820" green="0.189071" alpha="1.0" dired="1.000000" diblue="0.258820" digreen="0.189071" dialpha="1" concavity=".3" focus=".6" minalpha=".7" maxalpha="1"/>
+</fog>
+		<Planet name="Inca" file="planets/desert.texture" ri="-25896916992.000000" rj="-3802174208.000000" rk="-10279310336.000000" si="-5137289216.000000" sj="27063652352.000000" sk="2932027136.000000" radius="3174980.250000" x="31284695040.000000" y="-19025672192.000000" z="8776983552.000000" year= "55686528848.998390" day="298.033044" >
+			<Planet name="Galt" file="planets/rock.texture" ri="2758991.500000" rj="-20568576.000000" rk="81151688.000000" si="14002938.000000" sj="8570740.000000" sk="1696254.625000" radius="864713.750000" x="-127568248.000000" y="-213120688.000000" z="-49992132.000000" year= "99574546.756073" day="194.517873" >
+				<Jump name="Jump_To_Cyclope" file="jump.texture" ri="41059012.000000" rj="40956388.000000" rk="55471000.000000" si="994839.250000" sj="-7678912.500000" sk="4933269.500000" radius="93.129311" x="-12819893.000000" y="87920000.000000" z="52344124.000000" year= "88872872.074633" day="633.800351" alpha="ONE ONE" destination="Sol/Cyclope" faction="purist" />
+			</Planet>
+			<Jump name="Jump_To_1_Pi(3)_Orion" file="jump.texture" ri="201938128.000000" rj="-105346424.000000" rk="-14194036.000000" si="58085104.000000" sj="100559584.000000" sk="80033808.000000" radius="87.165749" x="-59768612.000000" y="79878152.000000" z="303044192.000000" year= "211148815.070236" day="761.318472" alpha="ONE ONE" destination="Sol/1_Pi(3)_Orion" faction="purist" />
+		</Planet>
+		<Planet name="Scott" file="planets/university.texture" ri="15836869632.000000" rj="19680225280.000000" rk="-31268952064.000000" si="5777491456.000000" sj="-5639849984.000000" sk="-623498368.000000" radius="2738966.500000" x="34866434048.000000" y="11146264576.000000" z="1462814464.000000" year= "38348588483.574417" day="567.988241" >
+			<Jump name="Jump_To_Eta_Cassiopeia" file="jump.texture" ri="173679936.000000" rj="122277952.000000" rk="20257072.000000" si="126638760.000000" sj="-161249536.000000" sk="-112422312.000000" radius="102.900032" x="84378384.000000" y="-33675500.000000" z="226986704.000000" year= "259648043.979361" day="556.147027" alpha="ONE ONE" destination="Sol/Eta_Cassiopeia" faction="purist" />
+		</Planet>
+		<Planet name="Laka" file="planets/Dirt.texture" ri="-5301142016.000000" rj="26002309120.000000" rk="28666302464.000000" si="406213568.000000" sj="18531614720.000000" sk="-16734331904.000000" radius="4055573.750000" x="36714344448.000000" y="10677035008.000000" z="-11850952704.000000" year= "44064036606.700706" day="694.996143" >
+			<Planet name="Orin" file="planets/rock3.texture" ri="-148864352.000000" rj="-170573664.000000" rk="160047936.000000" si="83775016.000000" sj="-125244960.000000" sk="-55560708.000000" radius="1505042.250000" x="-139181504.000000" y="-210885104.000000" z="273114304.000000" year= "267768387.855162" day="634.272948" >
+			</Planet>
+		</Planet>
+        <Planet name="Collier" file="planets/gas_giant1.texture|black.png|planets/gas_giant1.texture" unit="gas_giant" technique="gas_giants" ri="-5742136320.000000" rj="11439428608.000000" rk="-8501962752.000000" si="-11336273920.000000" sj="-3791927296.000000" sk="2554345728.000000" radius="3555084.500000" x="25108017152.000000" y="9395918848.000000" z="-1040789504.000000" year= "33940578575.693371" day="2.394388" >
+		</Planet>
+        <Planet name="Lansing" file="planets/gas_giant.texture|black.png|planets/gas_giant.texture" unit="gas_giant" technique="gas_giants" ri="3653129472.000000" rj="-2158854912.000000" rk="-1593666816.000000" si="-3601927936.000000" sj="-20522782720.000000" sk="19544492032.000000" radius="3563189.000000" x="-40043245568.000000" y="-33750407168.000000" z="7172803072.000000" year= "119524281968.299790" day="470.561920" >
+			<Jump name="Jump_To_Vladimir" file="jump.texture" ri="90210944.000000" rj="103993048.000000" rk="170835264.000000" si="-146591872.000000" sj="246961904.000000" sk="-72924824.000000" radius="162.239807" x="52369804.000000" y="-343894112.000000" z="-14746486.000000" year= "261964284.342994" day="255.021361" alpha="ONE ONE" destination="Sol/Vladimir" faction="purist" />
+			<Jump name="Jump_To_Alcestis" file="jump.texture" ri="-128739952.000000" rj="117879520.000000" rk="-68111328.000000" si="27752034.000000" sj="-66349892.000000" sk="-167286288.000000" radius="130.024506" x="-66882616.000000" y="-103876216.000000" z="205106768.000000" year= "176486455.871990" day="859.490554" alpha="ONE ONE" destination="Sol/Alcestis" faction="purist" />
+		</Planet>
+	</Planet>
+</system>

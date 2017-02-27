@@ -1,0 +1,89 @@
+<AggressiveAI time="7">
+<!-- interrupts -->
+<hull max=".03" script="drop cargo" time="1" priority="8">
+  <hull max=".03" script="afterburn turn away" time="10" priority="8">
+  </hull>
+</hull>
+
+
+<hull max=".6" script="evade up down" time="4" timetointerrupt="3" priority="7"> 
+  <fshield max=".25" script="evade up down" time="1" timetointerrupt="0" priority="7">
+	<rand max=".13" script="evade up down" time=".5" timetointerrupt="0" priority="7"/>
+  </fshield>
+</hull>
+
+<hull max=".6" script="evade up down" time="5" timetointerrupt="5" priority="7"> 
+ <rand max=".13" script="evade up down" time=".5" timetointerrupt="0" priority="7">
+  <bshield max=".25" script="afterburn veer away" time="2" timetointerrupt="4" priority="7"> 
+  </bshield>
+ </rand>
+</hull>
+
+
+<hull max=".6" script="evade left right" time="4" timetointerrupt="3" priority="7"> 
+  <fshield max=".25" script="evade left right" time="1" timetointerrupt="0" priority="7">
+	<rand max=".23" script="evade left right" time=".5" timetointerrupt="0" priority="7"/>
+  </fshield>
+</hull>
+
+<hull max=".6" script="evade left right" time="4" timetointerrupt="5" priority="7"> 
+ <rand max=".23" script="evade left right" time=".5" timetointerrupt="0" priority="7">
+  <bshield max=".25" script="afterburn veer away" time="2" timetointerrupt="4" priority="7"> 
+  </bshield>
+ </rand>
+</hull>
+
+
+<hull max=".6" script="barrel roll" time="4" timetointerrupt="2" priority="7"> 
+  <fshield max=".25" script="barrel roll" time="1" timetointerrupt="7" priority="7">
+  </fshield>
+</hull>
+
+<hull max=".6" script="barrel roll" time="5" timetointerrupt="5" priority="7"> 
+  <bshield max=".25" script="afterburn veer away" time="2" timetointerrupt="4" priority="7"> 
+ </bshield>
+</hull>
+
+<meterdistance max="30" script="afterburn turn away" time="7" timetointerrupt="3" priority="6">
+	<rand min=".4" script="afterburn fly straight" time=".5" timetointerrupt="1" priority="6"/>
+</meterdistance>
+
+<meterdistance max="30" script="loop around" time="6" timetointerrupt="6" priority="6">
+</meterdistance>
+
+
+<!-- main script -->
+<meterdistance max="60" script="loop around" priority="4" time="15"/>
+
+
+<meterdistance min="60" max="500" script="turn towards itts" priority="4" time="5">
+  <meterdistance max="500" script="turn towards" priority="4" time="8">
+   <rand min=".5" script="loop around" priority="4" time="5">
+   </rand>
+  </meterdistance>
+</meterdistance>
+<meterdistance min="60" max="500" script="afterburn veer away" priority="4" time="2"> 
+  <meterdistance max="500" script="turn towards" priority="4" time="8">
+  </meterdistance>
+</meterdistance>
+
+<meterdistance min="500" max="5000" script="afterburn turn towards itts" priority="3" time="7">
+	<meterdistance min="500" max="5000" script="turn towards" priority="3" time="8">
+		<meterdistance min="500" max="5000" script="aggressive loop around" priority="3" time="15">
+		</meterdistance>
+	</meterdistance>
+</meterdistance>
+
+<!-- meterdistance far out-->
+<meterdistance min="5000" script="barrel roll" time="2" timetointerrupt="1">
+  <fshield max=".1"  script="barrel roll" time="1">
+  </fshield>
+</meterdistance>
+<meterdistance min="5000" script="barrel roll" time="2" timetointerrupt="1">
+  <bshield max=".1"  script="barrel roll" time="1">
+  </bshield>
+</meterdistance>
+<meterdistance min="5000" script="afterburn turn towards itts" priority="4" time="3">
+</meterdistance>
+
+</AggressiveAI>

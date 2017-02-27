@@ -1,0 +1,51 @@
+<system name="e_indi" background="backgrounds/mustard" nearstars="500" stars="1000" starspread="150">
+<Light>
+	<ambient red="0.000000" green="0.000000" blue="0.000000"/>
+	<diffuse red="0.667773" green="0.695398" blue="0.866025"/>
+	<specular red="0.594562" green="0.644771" blue="1.000000"/>
+</Light>
+<Light>
+	<ambient red="0.000000" green="0.000000" blue="0.000000"/>
+	<diffuse red="0.866025" green="0.863781" blue="0.839039"/>
+	<specular red="1.000000" green="0.994824" blue="0.938649"/>
+</Light>
+<Planet name="e_indi A" file="stars/white_star.png" ri="0.000000" rj="0.000000" rk="0.000000" si="0.000000" sj="0.000000" sk="0.000000" radius="47960952.000000" x="0" y="0" z="0"  Red="0.445921" Green="0.483578" Blue="0.750000" ReflectNoLight="true" light="0">
+	<Planet name="Alcmene" file="planets/m_class.png" ri="54303976.000000" rj="28489582.000000" rk="-54649276.000000" si="-3208106.000000" sj="-199471696.000000" sk="-107175768.000000" radius="1973282.875000" x="-170368992.000000" y="255395408.000000" z="253449808.000000" year= "548227584.000000" day="144.628437"  >
+<Ring file="planets/ring.png" innerradius="3999831.800331" outerradius="5056270.131654"  wrapx="36" wrapy="2" />
+		<Planet name="JumpToTingvallir" file="jump.png" ri="-1266695.000000" rj="-1754321.250000" rk="2655754.250000" si="2882489.750000" sj="-3059164.500000" sk="-645964.312500" radius="121.957520" x="2593823.750000" y="3909571.250000" z="3215336.250000" year= "6412069.000000" day="638.606402" alpha="ONE ONE" destination="sol_sector/tingvallir"  >
+		</Planet>
+	</Planet>
+	<Planet name="Lycus" file="planets/m_class3.png" ri="-172507920.000000" rj="-127541392.000000" rk="-161853648.000000" si="-116420672.000000" sj="-88474344.000000" sk="193802416.000000" radius="1518146.375000" x="-136930000.000000" y="147018768.000000" z="285391776.000000" year= "1487492736.000000" day="853.241858"  >
+	<Atmosphere file="sol/earthcloudmaptrans.png" alpha="SRCALPHA INVSRCALPHA" radius="1563690.766250"/>
+		<Planet name="Callen" file="sol/europa.png" ri="5842799.000000" rj="-4484690.000000" rk="1101872.625000" si="-2949971.250000" sj="-4275089.000000" sk="-1757334.750000" radius="365333.656250" x="7190714.500000" y="-7328314.000000" z="5416707.500000" year= "6307922.500000" day="601.849421"  >
+		</Planet>
+	</Planet>
+	<Planet name="Metope" file="planets/m_class1.png" ri="-7691169.000000" rj="189308416.000000" rk="120170232.000000" si="262267872.000000" sj="15608281.000000" sk="-7802536.000000" radius="2087963.625000" x="265247616.000000" y="-111429312.000000" z="-239607824.000000" year= "637866112.000000" day="204.905667"  >
+	<Atmosphere file="sol/earthcloudmaptrans.png" alpha="SRCALPHA INVSRCALPHA" radius="2150602.533750"/>
+	</Planet>
+	<Planet name="Hesiod" file="planets/gas_midget.png" ri="135706000.000000" rj="-240788576.000000" rk="98182792.000000" si="189337968.000000" sj="74127248.000000" sk="-79905064.000000" radius="9433380.000000" x="-213801376.000000" y="285613856.000000" z="244720944.000000" year= "16588814336.000000" day="609.206091"  >
+		<Unit name="" file="relay" ri="4260166.000000" rj="-15913236.000000" rk="20963976.000000" si="12166285.000000" sj="10103539.000000" sk="5196992.000000" x="-43714500.000000" y="14185087.000000" z="-20990184.000000" year= "30837914.372829" faction="confed"  />
+		<Planet name="Klytamnestra" file="sol/hyperion.png" ri="12784605.000000" rj="-12831478.000000" rk="18325174.000000" si="-13790294.000000" sj="-55315964.000000" sk="-29111982.000000" radius="3391030.500000" x="-46559328.000000" y="63935352.000000" z="-28228276.000000" year= "50750332.000000" day="574.321237"  >
+		</Planet>
+		<Planet name="Pasiphae" file="sol/io.png" ri="-720712.062500" rj="51511948.000000" rk="-34036868.000000" si="18747746.000000" sj="-32040930.000000" sk="-48888236.000000" radius="2330433.750000" x="-32259190.000000" y="34266752.000000" z="24329394.000000" year= "2124363008.000000" day="195.782342"  >
+		</Planet>
+		<Planet name="JumpToE_eridani" file="jump.png" ri="-27817896.000000" rj="-18420272.000000" rk="10769819.000000" si="-10968463.000000" sj="35929648.000000" sk="33121668.000000" radius="80.537827" x="-35327312.000000" y="50158472.000000" z="-35827416.000000" year= "41040668.000000" day="228.715964" alpha="ONE ONE" destination="sol_sector/e_eridani"  >
+		</Planet>
+		<Planet name="JumpToTinvallir" file="jump.png" ri="-13558028.000000" rj="8219124.000000" rk="-17371294.000000" si="-15763813.000000" sj="-6447997.000000" sk="9252584.000000" radius="141.989609" x="35555572.000000" y="-46029768.000000" z="32552488.000000" year= "34076400.000000" day="824.184331" alpha="ONE ONE" destination="sol_sector/tinvallir"  >
+		</Planet>
+	</Planet>
+	<Planet name="e_indi B" file="sol/sun.png" ri="-15785934.000000" rj="162161376.000000" rk="-114046776.000000" si="206115488.000000" sj="127645584.000000" sk="152967552.000000" radius="30825454.000000" x="0" y="0" z="0" year= "328739104.000000" day="130353928.473587"  Red="0.750000" Green="0.746118" Blue="0.703986" ReflectNoLight="true" light="1">
+		<Planet name="Persephone" file="planets/Dirt1.png" ri="-12366998.000000" rj="-85217272.000000" rk="-41545168.000000" si="-113293488.000000" sj="-44267924.000000" sk="124526928.000000" radius="780584.750000" x="133944720.000000" y="-183585056.000000" z="-160113280.000000" year= "161257648.000000" day="191.879879"  >
+		<CityLights file="planets/Dirt_light_repeat.png" wrapx="64" wrapy="64"/>
+<Ring file="planets/ring.png" innerradius="1522779.890473" outerradius="1803465.940716"  wrapx="32" wrapy="1" />
+<Ring file="planets/ring.png" ri="0.680174" rj="-0.731574" rk="-0.046499" si="-0.192586" sj="-0.239539" sk="0.951594" innerradius="1821182.850892" outerradius="2156871.957627" wrapx="32" wrapy="1" />		</Planet>
+		<Planet name="Patroclus" file="planets/ocean.png" ri="-34171068.000000" rj="94556712.000000" rk="-47571096.000000" si="164833360.000000" sj="14350062.000000" sk="-89878880.000000" radius="1395880.250000" x="161469440.000000" y="182793488.000000" z="143704512.000000" year= "1033315008.000000" day="428.189825"  >
+		<Atmosphere file="sol/earthcloudmaptrans.png" alpha="SRCALPHA INVSRCALPHA" radius="1437756.657500"/>
+<Ring file="planets/ring.png" innerradius="2887365.963633" outerradius="3033271.595878"  wrapx="36" wrapy="2" />
+		</Planet>
+		<Planet name="Silenus" file="planets/Snow1.png" ri="117283240.000000" rj="69290344.000000" rk="-123597456.000000" si="96514120.000000" sj="-28467262.000000" sk="75624376.000000" radius="1391247.125000" x="-78976752.000000" y="-70086360.000000" z="119245256.000000" year= "146547712.000000" day="211.840449"  >
+		<CityLights file="planets/Snow_light.png" wrapx="6" wrapy="3"/>
+		</Planet>
+	</Planet>
+</Planet>
+</system>

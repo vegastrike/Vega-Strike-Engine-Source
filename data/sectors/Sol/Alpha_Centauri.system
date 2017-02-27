@@ -1,0 +1,61 @@
+<?xml version="1.0" ?>
+<system name="Alpha_Centauri" background="backgrounds/bluegreen">
+    <Light>
+        <ambient red="0.000000" green="0.000000" blue="0.000000"/>
+        <diffuse red="1.000000" green="0.897361" blue="0.803613"/>
+        <specular red="1.000000" green="0.805257" blue="0.645794"/>
+    </Light>
+
+    <Light>
+    <ambient red=".1" green=".1" blue=".1"/>
+    <diffuse red=".5" green=".3" blue=".2"/>
+    <specular red=".8" green=".8" blue=".8"/>
+    </Light>
+
+    <Light>
+    <ambient red="1" green="0" blue="0"/>
+    <!--<diffuse red="1" green=".7" blue="0"/>-->
+    <!--<attenuated red=".00000001" blue=".00000015"/>-->
+    <attenuated red="0" blue=".000000002"/>
+    </Light>
+
+    <Light>
+    <ambient red="1" green=".1" blue="0"/>
+    <!--<diffuse red="1" green=".7" blue="0"/>-->
+    <!--<attenuated red=".00000001" blue=".00000015"/>-->
+    <attenuated red="0" blue=".0000001"/>
+    </Light>
+
+    <Planet name="Alpha_Centauri A" file="stars/white_star.texture" ri="0.000000" rj="0.000000" rk="0.000000" si="0.000000" sj="0.000000" sk="0.000000" radius="830000000.000000" x="0" y="0" z="0"  Red="1.000000" Green="0.805257" Blue="0.645794" ReflectNoLight="true" light="0">
+        <fog>
+            <FogElement file="atmXatm.bfxm" ScaleAtmosphereHeight=".900" red="1.000000" blue="0.805257" green="0.645794" alpha="1.0" dired="1.000000" diblue="0.805257" digreen="0.645794" dialpha="1" concavity=".3" focus=".6" minalpha=".7" maxalpha="1"/>
+            <FogElement file="atmXhalo.bfxm" ScaleAtmosphereHeight=".9000" red="1.000000" blue="0.805257" green="0.645794" alpha="1.0" dired="1.000000" diblue="0.805257" digreen="0.645794" dialpha="1" concavity=".3" focus=".6" minalpha=".7" maxalpha="1"/>
+        </fog>
+        <Planet name="Havilland" file="planets/Lava.texture" ri="22891448320.000000" rj="-34259130368.000000" rk="1283661312.000000" si="12016560128.000000" sj="7205096448.000000" sk="-21996570624.000000" radius="4705845.500000" x="34138935296.000000" y="-6052924416.000000" z="44432289792.000000" year= "37163831296.000000" day="202.778625" >
+            <Ring file="rings/planet_ring5.texture" innerradius="8030786.812927" outerradius="19194690.526767"  wrapx="1" wrapy="1" />
+            <Jump name="Jump_To_Uncultivable_907" file="jump.texture" ri="-230797760.000000" rj="153501424.000000" rk="36000324.000000" si="-60047024.000000" sj="-84152768.000000" sk="-26142754.000000" radius="201.211578" x="79102568.000000" y="198319728.000000" z="421610624.000000" year= "656945408.000000" day="666.376953" alpha="ONE ONE" destination="Sol/Uncultivable_907" faction="confed" />
+            <Jump name="Jump_To_Proxima_Centauri" file="jump.texture" ri="58437932.000000" rj="238738240.000000" rk="-112846288.000000" si="165997664.000000" sj="87697976.000000" sk="271496928.000000" radius="297.069855" x="-153139824.000000" y="226448544.000000" z="-71525592.000000" year= "872997824.000000" day="628.292969" alpha="ONE ONE" destination="Sol/Proxima_Centauri" faction="confed" />
+        </Planet>
+        <Planet name="Holman" file="planets/m_class.texture" radius="3500000" ri="52891448320.000000" rj="-54259130368.000000" rk="3283661312.000000" si="36838596608.000000" sj="-18521729024.000000" sk="-6924834304.000000" year="15000000" day="4000">
+            <unit name="Naval Shipyard" file="Shipyard" faction="confed" ri="245918320.000000" rj="-119120760.000000" rk="42769960.000000" si="-3008036.250000" sj="46667056.000000" sk="147270336.000000" />
+            <Planet name="Hart" file="sol/asteroid.texture" radius="300" ri="15000" sj="18000" day="1000" year="1000"/> 
+        </lanet>
+        <Planet name="Warsaw" file="planets/Lava.texture" ri="-6677787136.000000" rj="-19842785280.000000" rk="17548781568.000000" si="36838596608.000000" sj="-18521729024.000000" sk="-6924834304.000000" radius="4289471.000000" x="-39994597376.000000" y="-21584564224.000000" z="16331857920.000000" year= "2153952051200.000000" day="568.798523" >
+            <unit name="AlphaCentauriHq" file="Starfortress" ri="-30000" sk="28000" year="1000"/>
+            <Jump name="Jump_To_Alpha_Canis_Minor" file="jump.texture" ri="245918320.000000" rj="-119120760.000000" rk="42769960.000000" si="-3008036.250000" sj="46667056.000000" sk="147270336.000000" radius="278.554718" x="-348752032.000000" y="142612640.000000" z="-165407344.000000" year= "259997344.000000" day="597.037170" alpha="ONE ONE" destination="Sol/Alpha_Canis_Minor" faction="confed" />
+        </Planet>
+        <Planet name="Allison" file="planets/gas_midget.texture|black.png|planets/gas_midget.texture" unit="gas_midget" technique="gas_giants" ri="39018676224.000000" rj="-3225205248.000000" rk="8391810048.000000" si="-5961138688.000000" sj="33367562240.000000" sk="40541069312.000000" radius="4568478.500000" x="2750336256.000000" y="-44261711872.000000" z="-12046258176.000000" year= "76152242176.000000" day="269.506836" >
+            <Planet name="Berkshire" file="planets/rock3.texture" ri="-77025360.000000" rj="-3897163.500000" rk="-135924528.000000" si="-13835234.000000" sj="26995620.000000" sk="7066109.000000" radius="1322887.625000" x="-234631616.000000" y="80246464.000000" z="14705385.000000" year= "195985552.000000" day="259.642059" >
+                    <Jump name="Jump_To_Red" file="jump.texture" ri="-70094048.000000" rj="13421387.000000" rk="2813628.500000" si="-11005801.000000" sj="-47086948.000000" sk="-49569080.000000" radius="115.307144" x="-58305608.000000" y="4776852.500000" z="-119501864.000000" year= "131790512.000000" day="236.643738" alpha="ONE ONE" destination="Sol/Red" faction="confed" />
+            </Planet>
+            <Jump name="Jump_To_Uncultivable_1222" file="jump.texture" ri="-134331184.000000" rj="-63849860.000000" rk="-125570392.000000" si="-199402912.000000" sj="206122752.000000" sk="108505848.000000" radius="154.365433" x="19576154.000000" y="275613408.000000" z="385729696.000000" year= "10148471808.000000" day="129.192429" alpha="ONE ONE" destination="Vega/Uncultivable_1222" faction="confed" />
+            <Jump name="Jump_To_Sol" file="jump.texture" ri="67536896.000000" rj="-43145284.000000" rk="-8946753.000000" si="-96565408.000000" sj="-112486880.000000" sk="-186486624.000000" radius="148.736084" x="353110688.000000" y="-192528240.000000" z="61209792.000000" year= "234427248.000000" day="348.848022" alpha="ONE ONE" destination="Sol/Sol" faction="confed" />
+        </Planet>
+    </Planet>
+    <Planet name="ProximaCentauri" file="stars/red_star.texture" radius="12045" Red=".9" Green=".9" Blue=".9" ReflectNoLight="true" rj="200000" sk="200000" light="2" year="30000" day="300">
+        <planet name="Schultz" file="planets/Snow.texture" radius="4000" ri="-35000" sk="35000" day="1200" year="7000">
+        </planet>
+        <asteroid name="AsteroidField" file="AFieldBaseSparse" rk="47000" si="46000" sj="15000" year="80000" difficulty=".8"/>
+        <unit name="FighterBase" file="AsteroidFighterBase" rk="47000" si="46000" sj="15000" year="80000"/>
+    </Planet>
+</system>

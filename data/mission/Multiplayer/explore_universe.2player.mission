@@ -1,0 +1,65 @@
+<mission>
+	<settings>
+		<origin  planet="earth" x="0000" y="100" z="000.0"/>
+	</settings>
+
+	<variables>
+<!--		<var name="continuousterrain" value="continuousterrain.txt"/>-->
+		<var name="credits" value="3500"/>
+		<var name="defaultplayer" value="blue"/>
+		<var name="mission_name" value="4 versus 4" />
+		<var name="num_players" value="2"/>
+		<var name="difficulty" value=".05"/><!--good starting difficulty here-->
+		<var name="system" value="enigma_sector/niven" />
+		<var name="description" value="Enjoy troy in a nova." />
+		<var name="savegame" value="explore_universe_2pdifficulty" />
+	</variables>
+        <flightgroups>
+                <flightgroup name="blue" faction="privateer" type="wayfarer.begin" ainame="default" waves="1" nr_ships="1">
+			<pos x="20400" y="-35400" z="84700000.0"/>
+
+			<rot x="180.0" y="180.0" z="180.0"/>
+			<order order="tmptarget" target="omikron"/>
+			<order priority="0" order="superiority" target="enemy"/>
+			<order priority="1" order="bomber" target="omikron"/>
+			<order priority="2" order="escort" target="blue"/>
+		</flightgroup>
+                <flightgroup name="green" faction="privateer" type="wayfarer.blank" ainame="default" waves="1" nr_ships="2">
+			<pos x="954000" y="340000" z="84702000.0"/>
+			<rot x="180.0" y="180.0" z="180.0"/>
+			<order order="tmptarget" target="omikron"/>
+			<order priority="0" order="superiority" target="enemy"/>
+			<order priority="1" order="bomber" target="omikron"/>
+			<order priority="2" order="escort" target="blue"/>
+		</flightgroup>
+        </flightgroups>
+<python>
+from privateer import privateer
+my_obj=privateer(20000,40000,500,3,2,.6,.25,.02,400000,2000)
+</python>
+
+	<madule name="director">
+		<import name="privateer"/>
+		<script name="initgame">
+			<exec module="privateer" name="init">
+			<const type="float" value="20000.0"/><!-- significant distance-->
+			<const type="float" value="40000.0"/><!-- detection distance-->
+			<const type="float" value="500.0"/><!-- generation distance -->
+			<const type="int" value="3"/> <!-- min ships -->
+			<const type="int" value="2"/><!--gen ships-->
+			<const type="float" value="0.6"/><!--fighter prob-->
+			<const type="float" value="0.25"/><!--enemy prob-->
+			<const type="float" value="0.02"/><!--capship prob-->
+			<const type="float" value="400000.0"/><!--credits to maximize difficulty-->
+			<const type="float" value="2000.0"/><!--capship generation distance-->
+			</exec>
+		</script>
+		<script name="gameloop">
+			<exec module="privateer" name="loop"/>
+		</script>
+		<script name="initstarsystem">
+			<exec name="initstarsystem" module="privateer" />
+		</script>
+
+	</module>
+</mission>

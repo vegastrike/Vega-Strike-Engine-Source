@@ -1,0 +1,75 @@
+<system name="tag2" background="backgrounds/somered" nearstars="500" stars="1000" starspread="150">
+<Light>
+	<ambient red="0.113344" green="0.113344" blue="0.113344"/>
+	<diffuse red="1.000000" green="0.468383" blue="0.375164"/>
+	<specular red="1.000000" green="0.219382" blue="0.140748"/>
+</Light>
+<Planet name="tag2 A" file="stars/red_star.png" ri="0.000000" rj="0.000000" rk="0.000000" si="0.000000" sj="0.000000" sk="0.000000" radius="3000.000000" x="0" y="0" z="0"  Red="1.000000" Green="0.219382" Blue="0.140748" ReflectNoLight="true" light="0">
+	<Planet name="Perry" file="planets/gas_giant.png" ri="3133.648926" rj="4062.664551" rk="2654.563477" si="3970.411377" sj="-3789.159668" sk="1112.125977" radius="792.330688" x="5520.404785" y="-5344.790039" z="5523.666992" year= "8556.926758" day="1931.687012"  >
+		<Planet name="mission_sector/tag2" file="jump.png" ri="-68.520386" rj="956.766785" rk="194.894196" si="54.315624" sj="-186.985184" sk="937.036377" radius="100.514549" x="901.463806" y="-903.597412" z="899.354797" year= "966.398254" day="424.404755" alpha="ONE ONE" destination="mission_sector/tag2"  >
+		</Planet>
+		<Planet name="mission_sector/tag2" file="jump.png" ri="-491.993164" rj="-614.936646" rk="-473.685913" si="-171.588654" sj="644.953918" sk="-659.055481" radius="99.438507" x="-910.509766" y="-962.314392" z="939.254639" year= "767.660461" day="122.879089" alpha="ONE ONE" destination="mission_sector/tag2"  >
+		</Planet>
+	</Planet>
+	<Planet name="Bagrodia" file="planets/gas_giant7.png" ri="-210.248474" rj="1344.243042" rk="-5069.217285" si="1921.121094" sj="-4604.798828" sk="-1300.769287" radius="617.917419" x="5209.585938" y="-5377.881836" z="5602.094727" year= "5004.102539" day="2068.562012"  >
+		<Planet name="mission_sector/tag2" file="jump.png" ri="130.869873" rj="642.887329" rk="358.880493" si="268.100433" sj="-363.412415" sk="553.239807" radius="88.172081" x="-776.146790" y="-753.595947" z="-729.450500" year= "3936.824707" day="1665.944702" alpha="ONE ONE" destination="mission_sector/tag2"  >
+		</Planet>
+		<Planet name="mission_sector/tag2" file="jump.png" ri="147.010254" rj="667.523010" rk="92.657417" si="-483.969208" sj="34.893635" sk="516.484680" radius="70.345695" x="-755.936279" y="-746.078796" z="710.301270" year= "801.251526" day="369.362610" alpha="ONE ONE" destination="mission_sector/tag2"  >
+		</Planet>
+	</Planet>
+	<Planet name="Bolshevist" file="planets/gas_medium.png" ri="-3458.164551" rj="4354.542969" rk="-246.515579" si="-2094.365967" sj="-1921.430786" sk="-4560.727539" radius="801.229919" x="-5725.512695" y="-5616.388184" z="5516.518555" year= "31471.837891" day="29671.910156"  >
+		<Planet name="mission_sector/tag2" file="jump.png" ri="-149.183975" rj="-776.737671" rk="-653.430725" si="-535.878052" sj="-510.871674" sk="729.622314" radius="151.897964" x="-1015.222107" y="1034.719849" z="-1029.911621" year= "1186.071411" day="749.353027" alpha="ONE ONE" destination="mission_sector/tag2"  >
+		</Planet>
+		<Planet name="mission_sector/tag2" file="jump.png" ri="-556.669922" rj="-775.241882" rk="-295.501373" si="435.116608" sj="28.988739" sk="-895.730591" radius="128.665787" x="-962.991272" y="1018.191345" z="-997.142639" year= "2019.081299" day="587.910217" alpha="ONE ONE" destination="mission_sector/tag2"  >
+		</Planet>
+	</Planet>
+	<Planet name="McKeon" file="planets/gas_midget.png" ri="-3025.166260" rj="-3661.176514" rk="-3067.002930" si="-3352.056885" sj="-711.040100" sk="4155.122559" radius="793.813904" x="-5731.009766" y="5301.763184" z="-5346.013672" year= "7029.555176" day="5941.880371"  >
+		<Planet name="mission_sector/tag2" file="jump.png" ri="522.336853" rj="459.733398" rk="591.057251" si="-54.857018" sj="741.309753" sk="-528.123108" radius="95.770294" x="-921.226135" y="-896.376831" z="936.586914" year= "759.367554" day="737.560120" alpha="ONE ONE" destination="mission_sector/tag2"  >
+		</Planet>
+		<Planet name="mission_sector/tag2" file="jump.png" ri="836.371399" rj="-576.370667" rk="-94.981239" si="489.848724" sj="627.709534" sk="504.332703" radius="143.958267" x="-959.757568" y="998.803101" z="975.057495" year= "4049.513672" day="2761.509521" alpha="ONE ONE" destination="mission_sector/tag2"  >
+		</Planet>
+	</Planet>
+	<Planet name="Stephens" file="planets/gas_giant8.png" ri="3178.742188" rj="4184.823730" rk="-1209.216431" si="1686.394043" sj="160.980759" sk="4990.246582" radius="722.235779" x="-5372.063965" y="-5705.715332" z="5642.522949" year= "4419.077637" day="2881.362061"  >
+		<Planet name="mission_sector/tag2" file="jump.png" ri="623.555725" rj="578.812866" rk="-61.965225" si="-44.261395" sj="141.495239" sk="876.295105" radius="100.403717" x="-895.534058" y="842.387695" z="825.142578" year= "736.069885" day="624.088074" alpha="ONE ONE" destination="mission_sector/tag2"  >
+		</Planet>
+		<Planet name="mission_sector/tag2" file="jump.png" ri="-458.601044" rj="-302.583160" rk="-651.107727" si="-152.016479" sj="777.422363" sk="-254.212952" radius="102.385246" x="826.689697" y="905.034607" z="865.833191" year= "859.502258" day="141.357391" alpha="ONE ONE" destination="mission_sector/tag2"  >
+		</Planet>
+	</Planet>
+	<Planet name="Lutheran" file="planets/gas_dwarf.png" ri="45.828548" rj="2596.345947" rk="4531.581055" si="5129.945801" sj="-230.487366" sk="80.176643" radius="488.055054" x="-5344.588379" y="-5478.411621" z="5390.043945" year= "14889.963867" day="5871.554199"  >
+		<Planet name="mission_sector/tag2" file="jump.png" ri="-341.600433" rj="161.587524" rk="-510.519745" si="365.552246" sj="501.923553" sk="-85.732666" radius="96.547523" x="615.230591" y="628.645386" z="-604.657837" year= "2153.014648" day="361.255981" alpha="ONE ONE" destination="mission_sector/tag2"  >
+			<Planet name="Potsdam" file="sol/ganymede.png" ri="-104.945717" rj="134.305679" rk="-5.712208" si="-92.992935" sj="-78.324844" sk="-133.094040" radius="72.148849" x="170.160065" y="-179.393646" z="176.351486" year= "210.803146" day="102.052986"  >
+			</Planet>
+			<Planet name="mission_sector/tag2" file="jump.png" ri="83.599403" rj="-83.627007" rk="67.229019" si="95.475288" sj="86.427879" sk="-11.214983" radius="28.436541" x="-126.829811" y="128.953262" z="126.742088" year= "177.022537" day="56.974384" alpha="ONE ONE" destination="mission_sector/tag2"  >
+			</Planet>
+		</Planet>
+		<Planet name="mission_sector/tag2" file="jump.png" ri="180.785599" rj="-490.605530" rk="-157.539902" si="121.404182" sj="202.343170" sk="-490.812531" radius="54.906380" x="571.333252" y="597.121704" z="578.919128" year= "452.977570" day="373.930786" alpha="ONE ONE" destination="mission_sector/tag2"  >
+		</Planet>
+	</Planet>
+	<Planet name="Marlene" file="planets/gas_giant6.png" ri="-2584.945068" rj="-2435.076904" rk="3814.088623" si="4506.189453" sj="-1368.265991" sk="2180.447266" radius="530.188904" x="-5089.521973" y="-5086.682129" z="5479.723633" year= "10789.264648" day="323.016113"  >
+		<Planet name="mission_sector/tag2" file="jump.png" ri="-506.499969" rj="29.403769" rk="-330.122101" si="340.921600" sj="105.664917" sk="-513.657959" radius="56.463734" x="601.682861" y="637.803711" z="592.276245" year= "1581.270996" day="1326.806396" alpha="ONE ONE" destination="mission_sector/tag2"  >
+		</Planet>
+		<Planet name="mission_sector/tag2" file="jump.png" ri="295.506714" rj="458.518036" rk="427.793091" si="-107.840683" sj="-417.502747" sk="521.981750" radius="105.761093" x="-696.608582" y="637.535706" z="-685.557495" year= "686.464111" day="179.267960" alpha="ONE ONE" destination="mission_sector/tag2"  >
+		</Planet>
+	</Planet>
+	<Planet name="Gouda" file="planets/gas_giant2.png" ri="1848.046387" rj="-2341.820068" rk="-4490.439453" si="-2191.100586" sj="3916.041504" sk="-2944.014893" radius="781.179260" x="-5544.682129" y="-5511.012695" z="5662.951660" year= "19970.482422" day="19479.250000"  >
+		<Planet name="mission_sector/tag2" file="jump.png" ri="-738.802307" rj="-310.235596" rk="500.776703" si="-538.787903" sj="234.539536" sk="-649.581421" radius="86.407242" x="-886.859436" y="913.207092" z="920.649902" year= "15740.374023" day="8651.513672" alpha="ONE ONE" destination="mission_sector/tag2"  >
+		</Planet>
+		<Planet name="mission_sector/tag2" file="jump.png" ri="-233.797806" rj="-309.044678" rk="-802.804443" si="739.855225" sj="465.642853" sk="-394.717529" radius="91.182480" x="-955.537964" y="-955.822754" z="936.204163" year= "2374.690674" day="1353.270020" alpha="ONE ONE" destination="mission_sector/tag2"  >
+		</Planet>
+	</Planet>
+	<Planet name="Ruth" file="planets/toxic_disaster.png" ri="-5118.688965" rj="-2794.046387" rk="-137.820633" si="-1516.078369" sj="2525.542236" sk="5107.006348" radius="883.629883" x="-5721.710449" y="-5820.143555" z="-5587.280273" year= "10496.863281" day="1444.451904"  >
+		<Planet name="mission_sector/tag2" file="jump.png" ri="980.586243" rj="382.286957" rk="-283.469543" si="263.896210" sj="61.211494" sk="995.427368" radius="117.770576" x="1084.193970" y="1019.987793" z="1023.346436" year= "1014.211182" day="872.047668" alpha="ONE ONE" destination="mission_sector/tag2"  >
+		</Planet>
+		<Planet name="mission_sector/tag2" file="jump.png" ri="-745.808289" rj="451.694794" rk="654.091553" si="727.741516" sj="736.370483" sk="321.271393" radius="114.758354" x="1091.008911" y="-1080.658447" z="1065.664429" year= "4884.099609" day="1381.594849" alpha="ONE ONE" destination="mission_sector/tag2"  >
+		</Planet>
+	</Planet>
+	<Planet name="Holbrook" file="planets/gas_midget2.png" ri="3856.133545" rj="1398.551147" rk="-3484.270752" si="2133.345703" sj="-4817.337402" sk="427.398987" radius="739.100342" x="-5258.111328" y="-5708.216309" z="-5313.017090" year= "18954.824219" day="10385.325195"  >
+	</Planet>
+	<Planet name="Cahill" file="planets/Snow5.png" ri="-2986.079346" rj="-4543.282227" rk="2507.373535" si="-2273.377930" sj="3540.710693" sk="3708.247070" radius="967.760254" x="-5595.063477" y="5567.680664" z="-5659.842285" year= "8620.301758" day="4969.294922"  >
+	</Planet>
+	<Planet name="Bundoora" file="sol/venus.png" ri="-3256.566406" rj="-1045.587158" rk="4870.040039" si="-2151.490723" sj="5439.915039" sk="-270.750641" radius="1136.103394" x="-5998.656250" y="-5726.114258" z="-6138.497559" year= "89412.320313" day="43228.550781"  >
+	</Planet>
+	<Planet name="Bridgewater" file="planets/tundra.png" ri="4371.315918" rj="-4551.965820" rk="-2380.523438" si="-4403.667969" sj="-4555.629883" sk="624.756653" radius="1771.050171" x="-6632.898438" y="6677.279785" z="-6480.902344" year= "13110.197266" day="4170.280762"  >
+	</Planet>
+</Planet>
+</system>

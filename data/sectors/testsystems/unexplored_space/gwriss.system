@@ -1,0 +1,20 @@
+<system name="gwriss" background="backgrounds/darkgreen" nearstars="500" stars="1000" starspread="150">
+<Light>
+	<ambient red="0.248820" green="0.248820" blue="0.248820"/>
+	<diffuse red="0.999210" green="0.993690" blue="1.000000"/>
+	<specular red="0.998421" green="0.987420" blue="1.000000"/>
+</Light>
+<Planet name="gwriss A" file="sol/sun.png" ri="0.000000" rj="0.000000" rk="0.000000" si="0.000000" sj="0.000000" sk="0.000000" radius="24076.466797" x="0" y="0" z="0"  Red="0.998421" Green="0.987420" Blue="1.000000" ReflectNoLight="true" light="0">
+	<Asteroid name="AFieldBase" file="AFieldBase" ri="37277.734375" rj="7621.489258" rk="10281.821289" si="6866.265625" sj="44481.765625" sk="-57866.800781" x="57430.019531" y="-36693.605469" z="-68401.078125" year= "386964.500000" />
+	<Asteroid name="HiddenAsteroid" file="HiddenAsteroid" ri="37277.734375" rj="7621.489258" rk="10281.821289" si="6866.265625" sj="44481.765625" sk="-57866.800781" x="57430.019531" y="-36693.605469" z="-68401.078125" year= "386964.500000" faction="unknown"  />
+	<Enhancement name="unknown_derelict" file="unknown_derelict" ri="37277.734375" rj="7621.489258" rk="10281.821289" si="6866.265625" sj="44481.765625" sk="-57866.800781" x="57430.019531" y="-36693.605469" z="-68401.078125" year= "386964.500000" faction="unknown"  />
+	<Planet name="unexplored_space/alpha" file="jump.png" ri="-38833.589844" rj="59202.242188" rk="57352.410156" si="61855.894531" sj="52970.460938" sk="-12796.034180" radius="188.482651" x="-75882.640625" y="42390.382813" z="70152.125000" year= "418180.062500" day="399572.718750" alpha="ONE ONE" destination="unexplored_space/alpha"  >
+	</Planet>
+	<Planet name="unexplored_space/gamma" file="jump.png" ri="-18475.939453" rj="-30359.728516" rk="33716.714844" si="38688.851563" sj="-15738.067383" sk="7029.435059" radius="127.639397" x="43473.644531" y="-63925.492188" z="-68385.781250" year= "129519.843750" day="74374.992188" alpha="ONE ONE" destination="unexplored_space/gamma"  >
+	</Planet>
+	<Planet name="vega_sector/nephele" file="jump.png" ri="-14622.211914" rj="14856.920898" rk="-70570.921875" si="40884.296875" sj="31244.445313" sk="-1893.451538" radius="164.268234" x="44360.535156" y="45771.097656" z="-77960.531250" year= "226277.453125" day="53580.941406" alpha="ONE ONE" destination="vega_sector/nephele"  >
+	</Planet>
+	<Planet name="unexplored_space/delta" file="jump.png" ri="-63752.082031" rj="4414.270508" rk="45620.777344" si="22015.099609" sj="15090.535156" sk="29304.515625" radius="121.365631" x="60963.351563" y="43737.769531" z="-68458.304688" year= "66144.632813" day="52407.816406" alpha="ONE ONE" destination="unexplored_space/delta"  >
+	</Planet>
+</Planet>
+</system>

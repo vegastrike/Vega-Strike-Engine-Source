@@ -1,0 +1,89 @@
+uniform int light_enabled[gl_MaxLights];
+uniform int max_light_enabled;
+
+/* varyings:
+ *   gl_TexCoord[
+ *    0 - tex coord
+ *    1.xy - env coord
+ *    1.zw - env diffuse coord
+ *    2 - normal
+ **/
+
+#define lightPosAndAttenuation(name, lightno) \
+vec4 name(in vec4 vertex) \
+{ \
+  vec4 lpos = gl_LightSource[lightno].position; \
+  vec4 rv; \
+  rv.xyz    = lpos.xyz - vertex.xyz*lpos.w; \
+  rv.w      = length(rv.xyz); \
+  rv.xyz   /= rv.w; \
+  rv.w      = dot( vec3(1,rv.w,rv.w*rv.w), vec3(gl_LightSource[lightno].constantAttenuation, \
+                                                gl_LightSource[lightno].linearAttenuation, \
+                                                gl_LightSource[lightno].quadraticAttenuation) ); \
+  rv.w      = 1.0 / rv.w; \
+  return rv; \
+}
+
+
+lightPosAndAttenuation(lightPosAndAttenuation0, 0)
+lightPosAndAttenuation(lightPosAndAttenuation1, 1)
+lightPosAndAttenuation(lightPosAndAttenuation2, 2)
+lightPosAndAttenuation(lightPosAndAttenuation3, 3)
+lightPosAndAttenuation(lightPosAndAttenuation4, 4)
+
+//float selfshadowStep(float VNdotL) { return step(0.0,VNdotL); } // fast but hard selfshadow function
+float selfshadowStep(float VNdotL) { return smoothstep(0.0,0.25,VNdotL); } // costly but soft and nice selfshadow function
+
+#define lighting(name, lpattname, lightno) \
+void name(in vec4 vertex, in vec3 eye, in vec3 normal, inout vec4 pc, inout vec4 sc) \
+{ \
+  vec4 lpatt  = lpattname(vertex); \
+  vec3 refl   = reflect( eye, normal ); \
+  float NdotL = dot( lpatt.xyz, normal ); \
+  float RdotL = dot( lpatt.xyz, refl ); \
+  \
+  pc += lpatt.w*(  gl_FrontMaterial.ambient * gl_LightSource[lightno].ambient \
+                 + max(0.0, NdotL) * gl_LightSource[lightno].diffuse * gl_FrontMaterial.diffuse );  \
+  sc += lpatt.w*(  pow( max(0.0, RdotL) , max(1.0,gl_FrontMaterial.shininess) ) * selfshadowStep(NdotL) \
+                 * gl_LightSource[lightno].specular * gl_FrontMaterial.specular );  \
+}
+
+lighting(lighting0, lightPosAndAttenuation0, 0)
+lighting(lighting1, lightPosAndAttenuation1, 1)
+lighting(lighting2, lightPosAndAttenuation2, 2)
+lighting(lighting3, lightPosAndAttenuation3, 3)
+lighting(lighting4, lightPosAndAttenuation4, 4)
+
+void main() 
+{
+  // Compute position, eye-to-object direction and normalized world-space normal
+  vec4 position = gl_ModelViewMatrix * gl_Vertex;
+  vec3 eyetopos = normalize(position.xyz);
+  vec3 normal   = normalize(gl_NormalMatrix * gl_Normal);
+
+  // Load varyings
+  gl_TexCoord[0] = gl_MultiTexCoord0;
+//  gl_TexCoord[1].xyz = reflect(eyetopos, normal);
+//  gl_TexCoord[2].xyz = normal;
+
+  // init accumulators
+
+  vec4 pc = gl_FrontLightProduct[0].ambient 
+          + gl_FrontMaterial.emission
+          + gl_FrontLightModelProduct.sceneColor
+          + float(light_enabled[1]) * gl_FrontLightProduct[1].ambient;
+  vec4 sc = vec4(0.0);
+
+  if (light_enabled[0] != 0) lighting0(position, eyetopos, normal, pc, sc);
+  if (light_enabled[1] != 0) lighting1(position, eyetopos, normal, pc, sc);
+  if (max_light_enabled >= 2) {
+    if (light_enabled[2] != 0) lighting2(position, eyetopos, normal, pc, sc);
+    if (light_enabled[3] != 0) lighting3(position, eyetopos, normal, pc, sc);
+    if (light_enabled[4] != 0) lighting4(position, eyetopos, normal, pc, sc);
+  }
+
+  // Need this instead of ftransform() for invariance
+  gl_Position = gl_ModelViewProjectionMatrix * gl_Vertex;
+  gl_FrontColor = gl_BackColor = pc;
+  gl_FrontSecondaryColor = gl_BackSecondaryColor = sc;
+}

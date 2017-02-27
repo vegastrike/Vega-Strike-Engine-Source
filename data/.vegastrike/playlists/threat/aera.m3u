@@ -1,0 +1,14 @@
+#EXTM3U
+#aera-specific
+../music/aerapeace.ogg
+../music/AyMambo.ogg
+#confuse people
+../music/SonOfSandFleaRemix.ogg
+#common threat files - don't apply, they don't match with Aeran style
+#../music/battle1.ogg
+#../music/battle2.ogg
+#fix weights
+../music/AyMambo.ogg
+../music/AyMambo.ogg
+../music/AyMambo.ogg
+../music/AyMambo.ogg

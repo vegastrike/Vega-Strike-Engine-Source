@@ -1,0 +1,26 @@
+<system name="Pluto HQ" background="backgrounds/purple_galaxy1" nearstars="500" stars="1000" starspread="150"  x="0" y="0" z="0">
+<Light>
+<ambient red=".3" green=".3" blue=".3"/>
+<diffuse red="1" green=".8" blue=".8"/>
+<specular red="1" green="1" blue="1"/>
+</Light>
+
+<Light>
+<ambient red="1" green=".1" blue="0"/>
+<!--<diffuse red="1" green=".7" blue="0"/>-->
+<!--<attenuated red=".00000001" blue=".00000015"/>-->
+<attenuated red="0" blue=".0000001"/>
+</Light>
+
+        <planet name="sol" file="sol/sun.png" radius="2200" gravity="20" ri="0" rj="0" rk="0" si="0" sj="0" sk="0" velocity="0" position="0" Red=".7" Green=".5" Blue=".5" light="0 1l" faction="neutral">
+
+
+<planet name="pluto" file="sol/pluto.png" radius="680" gravity="20" ri="12000" rj="0" rk="0" si="0" sj="0" sk="12000" velocity="20" position="0.750" faction="neutral">
+		<unit name = "pluto-hq" file="ConfedHq" faction="confed" ri="4000" sk="3000"/>
+		</planet>
+	</planet>
+
+	<planet name="JumpPoint" file="jump.png" alpha="ONE ONE" radius="100" gravity="20"  x="10000" y="0" z="7000"  velocity="0" position="0" destination="blank">
+	</planet>
+
+</system>
