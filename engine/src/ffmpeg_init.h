@@ -47,11 +47,14 @@ extern "C" {
         #endif
     #endif
     #ifdef HAVE_LIBAVFORMAT_AVIO_H
+		#include <url.h> //fix
         #include <libavformat/avio.h>
     #else
         #ifdef HAVE_AVIO_H
+			#include <libavformat/url.h> //fix
             #include <avio.h>
         #else
+			#include <ffmpeg/url.h> //fix
             #include <ffmpeg/avio.h>
         #endif
     #endif
