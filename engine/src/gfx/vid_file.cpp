@@ -71,7 +71,7 @@ private:
         if (frameReady) {
 #ifdef DEPRECATED_IMG_CONVERT
             img_convert(
-                (AVPicture*) pFrameRGB, PIX_FMT_RGB24,
+                (AVPicture*) pFrameRGB, AV_PIX_FMT_RGB24,
                 (AVPicture*) pNextFrameYUV, pCodecCtx->pix_fmt,
                 pCodecCtx->width, pCodecCtx->height );
 #else
@@ -273,10 +273,10 @@ public:
         //Allocate RGB frame buffer
         pFrameRGB         = av_frame_alloc();
         if (pFrameRGB == 0) throw VidFile::Exception( "Problem during RGB framebuffer initialization" );
-        frameBufferSize   = avpicture_get_size( PIX_FMT_RGB24, width, height );
+        frameBufferSize   = avpicture_get_size( AV_PIX_FMT_RGB24, width, height );
         _frameBuffer      = new uint8_t[frameBufferSize];
         if (_frameBuffer == 0) throw VidFile::Exception( "Problem during RGB framebuffer initialization" );
-        avpicture_fill( (AVPicture*) pFrameRGB, _frameBuffer, PIX_FMT_RGB24, width, height );
+        avpicture_fill( (AVPicture*) pFrameRGB, _frameBuffer, AV_PIX_FMT_RGB24, width, height );
         frameBuffer       = pFrameRGB->data[0];
         frameBufferSize   = pFrameRGB->linesize[0]*height;
         frameBufferStride = pFrameRGB->linesize[0];
@@ -289,7 +289,7 @@ public:
 
 #ifndef DEPRECATED_IMG_CONVERT
         pSWSCtx = sws_getContext( pCodecCtx->width, pCodecCtx->height, pCodecCtx->pix_fmt,
-                                  width, height, PIX_FMT_RGB24, SWS_LANCZOS|SWS_PRINT_INFO, NULL, NULL, NULL );
+                                  width, height, AV_PIX_FMT_RGB24, SWS_LANCZOS|SWS_PRINT_INFO, NULL, NULL, NULL );
 #endif
     }
 
