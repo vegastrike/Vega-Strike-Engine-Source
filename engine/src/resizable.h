@@ -1,4 +1,8 @@
 #include <cstdlib>
+#include <cstring>
+
+using std::memcpy;
+
 template < class ITEM >
 class Resizable
 {
@@ -16,7 +20,7 @@ public: Resizable()
         num   = c.num;
         alloc = c.alloc;
         q     = (ITEM*) malloc( sizeof (ITEM)*alloc );
-        memcpy( q, c.q, sizeof (ITEM)*num );
+        std::memcpy( q, c.q, sizeof (ITEM)*num );
     }
     ~Resizable()
     {
