@@ -356,7 +356,7 @@ char* CPK3::ExtractFile( const char *lpname, int *file_size )
     }
     //if the file isn't in the archive
     if (index == -1)
-        return false;
+        return 0; //changed from false as it cannot convert bool to char*
     int flength = GetFileLen( index );
 
     buffer = new char[flength];
