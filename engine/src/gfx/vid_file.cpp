@@ -217,7 +217,7 @@ public:
         std::string npath   = std::string( "vsfile:" )+path;
         std::string errbase = std::string( "Cannot open URL \"" )+npath+"\"";
         if ( ( 0 != avformat_open_input( &pFormatCtx, npath.c_str(), NULL, NULL ) )
-            || ( 0 > av_find_stream_info( pFormatCtx ) ) ) throw VidFile::FileOpenException( errbase+" (wrong format or)" );
+            || ( 0 > avformat_find_stream_info( pFormatCtx, NULL ) ) ) throw VidFile::FileOpenException( errbase+" (wrong format or)" );
         //Dump format info in case we want to know...
         #ifdef VS_DEBUG
         dump_format( pFormatCtx, 0, npath.c_str(), false );
