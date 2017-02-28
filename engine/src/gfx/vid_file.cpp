@@ -11,8 +11,11 @@
 #include <math.h>
 #include <utility>
 
+/*
+ * Allowing ffmpeg to detect it's own buffer
 //define a 128k buffer for video streamers
 #define BUFFER_SIZE ( 128*(1<<10) )
+*/
 
 #ifndef ENOENT
 #define ENOENT (2)
@@ -213,7 +216,7 @@ public:
         //Open file
         std::string npath   = std::string( "vsfile:" )+path;
         std::string errbase = std::string( "Cannot open URL \"" )+npath+"\"";
-        if ( ( 0 != avformat_open_input( &pFormatCtx, npath.c_str(), NULL, BUFFER_SIZE, NULL ) )
+        if ( ( 0 != avformat_open_input( &pFormatCtx, npath.c_str(), NULL, NULL ) )
             || ( 0 > av_find_stream_info( pFormatCtx ) ) ) throw VidFile::FileOpenException( errbase+" (wrong format or)" );
         //Dump format info in case we want to know...
         #ifdef VS_DEBUG
