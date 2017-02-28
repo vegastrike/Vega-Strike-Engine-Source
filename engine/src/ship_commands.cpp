@@ -5,13 +5,16 @@
 #include "universe_util.h"
 #include "gldrv/winsys.h"
 
-static inline float fmin( float a, float b )
+namespace shipCommands
 {
-    return (a < b) ? a : b;
-}
-static inline float fmax( float a, float b )
-{
-    return (a > b) ? a : b;
+	static inline float fmin( float a, float b )
+	{
+		return (a < b) ? a : b;
+	}
+	static inline float fmax( float a, float b )
+	{
+		return (a > b) ? a : b;
+	}
 }
 
 class ShipCommands
@@ -132,7 +135,7 @@ void ShipCommands::setkps( const char *in )
 
         else
             kps /= display_in_meters ? 1.0f : 3.6f;
-        player->GetComputerData().set_speed = fmin( player->GetComputerData().max_speed(), kps );
+        player->GetComputerData().set_speed = shipCommands::fmin( player->GetComputerData().max_speed(), kps );
     }
 }
 
