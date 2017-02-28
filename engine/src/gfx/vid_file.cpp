@@ -11,8 +11,11 @@
 #include <math.h>
 #include <utility>
 
+/*
+ * Allowing ffmpeg to detect it's own buffer
 //define a 128k buffer for video streamers
 #define BUFFER_SIZE ( 128*(1<<10) )
+*/
 
 #ifndef ENOENT
 #define ENOENT (2)
@@ -213,8 +216,8 @@ public:
         //Open file
         std::string npath   = std::string( "vsfile:" )+path;
         std::string errbase = std::string( "Cannot open URL \"" )+npath+"\"";
-        if ( ( 0 != avformat_open_input( &pFormatCtx, npath.c_str(), NULL, BUFFER_SIZE, NULL ) )
-            || ( 0 > av_find_stream_info( pFormatCtx ) ) ) throw VidFile::FileOpenException( errbase+" (wrong format or)" );
+        if ( ( 0 != avformat_open_input( &pFormatCtx, npath.c_str(), NULL, NULL ) )
+            || ( 0 > avformat_find_stream_info( pFormatCtx, NULL ) ) ) throw VidFile::FileOpenException( errbase+" (wrong format or)" );
         //Dump format info in case we want to know...
         #ifdef VS_DEBUG
         dump_format( pFormatCtx, 0, npath.c_str(), false );
@@ -241,9 +244,9 @@ public:
         //Find codec for video stream and open it
         pCodec        = avcodec_find_decoder( pCodecCtx->codec_id );
         if (pCodec == 0) throw VidFile::UnsupportedCodecException( errbase+" (unsupported codec)" );
-        if (avcodec_open( pCodecCtx, pCodec ) < 0) throw VidFile::UnsupportedCodecException( errbase+" (unsupported codec)" );
-        pFrameYUV     = avcodec_alloc_frame();
-        pNextFrameYUV = avcodec_alloc_frame();
+        if (avcodec_open2( pCodecCtx, pCodec, NULL ) < 0) throw VidFile::UnsupportedCodecException( errbase+" (unsupported codec)" );
+        pFrameYUV     = av_frame_alloc();
+        pNextFrameYUV = av_frame_alloc();
         if ( (pFrameYUV == 0) || (pNextFrameYUV == 0) ) throw VidFile::Exception(
                 "Problem during YUV framebuffer initialization" );
         //Get some info
@@ -268,7 +271,7 @@ public:
         VSFileSystem::vs_dprintf(2, "  playing at %dx%d\n", width, height);
         
         //Allocate RGB frame buffer
-        pFrameRGB         = avcodec_alloc_frame();
+        pFrameRGB         = av_frame_alloc();
         if (pFrameRGB == 0) throw VidFile::Exception( "Problem during RGB framebuffer initialization" );
         frameBufferSize   = avpicture_get_size( PIX_FMT_RGB24, width, height );
         _frameBuffer      = new uint8_t[frameBufferSize];
