@@ -315,7 +315,7 @@ void GameCockpit::beginElement( const string &name, const AttributeList &attribu
         for (counter = 0; counter < 4; ++counter)
             if (!replaced[counter]) {
                 delete Pit[counter];
-                Pit[counter] = false;
+                Pit[counter] = 0;
             }
         break;
     case UnitImages< void >::SHIELD4:
