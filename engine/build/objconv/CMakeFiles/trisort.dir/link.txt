@@ -1,0 +1,1 @@
+/usr/bin/c++    -DNV_CUBE_MAP -DBOOST_PYTHON_NO_PY_SIGNATURES -include config.h -pipe -O2 -Wall -fvisibility=hidden  -Bsymbolic CMakeFiles/trisort.dir/trisort.o  -o trisort -rdynamic 
