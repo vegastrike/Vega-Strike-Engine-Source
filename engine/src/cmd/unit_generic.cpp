@@ -630,12 +630,15 @@ void Unit::DeactivateJumpDrive()
         jump.drive = -1;
 }
 
-float copysign( float x, float y )
+namespace vsphysics
 {
-    if (y > 0)
-        return x;
-    else
-        return -x;
+	float copysign( float x, float y )
+	{
+		if (y > 0)
+			return x;
+		else
+			return -x;
+	}
 }
 
 float rand01()
@@ -3267,9 +3270,9 @@ void Unit::ApplyLocalTorque( const Vector &torque )
 Vector Unit::MaxTorque( const Vector &torque )
 {
     //torque is a normal
-    return torque*(Vector( copysign( limits.pitch, torque.i ),
-                          copysign( limits.yaw, torque.j ),
-                          copysign( limits.roll, torque.k ) )*torque);
+    return torque*(Vector( vsphysics::copysign( limits.pitch, torque.i ),
+                          vsphysics::copysign( limits.yaw, torque.j ),
+                          vsphysics::copysign( limits.roll, torque.k ) )*torque);
 }
 
 float GetFuelUsage( bool afterburner )
@@ -3290,11 +3293,11 @@ Vector Unit::ClampTorque( const Vector &amt1 )
     static float staticfuelclamp = XMLSupport::parse_float( vs_config->getVariable( "physics", "NoFuelThrust", ".4" ) );
     float fuelclamp = (fuel <= 0) ? staticfuelclamp : 1;
     if (fabs( amt1.i ) > fuelclamp*limits.pitch)
-        Res.i = copysign( fuelclamp*limits.pitch, amt1.i );
+        Res.i = vsphysics::copysign( fuelclamp*limits.pitch, amt1.i );
     if (fabs( amt1.j ) > fuelclamp*limits.yaw)
-        Res.j = copysign( fuelclamp*limits.yaw, amt1.j );
+        Res.j = vsphysics::copysign( fuelclamp*limits.yaw, amt1.j );
     if (fabs( amt1.k ) > fuelclamp*limits.roll)
-        Res.k = copysign( fuelclamp*limits.roll, amt1.k );
+        Res.k = vsphysics::copysign( fuelclamp*limits.roll, amt1.k );
     static float Lithium6constant =
         XMLSupport::parse_float( vs_config->getVariable( "physics", "LithiumRelativeEfficiency_Lithium", "1" ) );
     //1/5,000,000 m/s
@@ -3400,8 +3403,8 @@ Vector Unit::ClampAngVel( const Vector &velocity )
 Vector Unit::MaxThrust( const Vector &amt1 )
 {
     //amt1 is a normal
-    return amt1*(Vector( copysign( limits.lateral, amt1.i ),
-                         copysign( limits.vertical, amt1.j ),
+    return amt1*(Vector( vsphysics::copysign( limits.lateral, amt1.i ),
+                         vsphysics::copysign( limits.vertical, amt1.j ),
                          amt1.k > 0 ? limits.forward : -limits.retro )*amt1);
 }
 
@@ -3438,9 +3441,9 @@ Vector Unit::ClampThrust( const Vector &amt1, bool afterburn )
     float  fuelclamp   = (fuel <= 0) ? staticfuelclamp : 1;
     float  abfuelclamp = (fuel <= 0) ? staticabfuelclamp : 1;
     if ( fabs( amt1.i ) > fabs( fuelclamp*limits.lateral ) )
-        Res.i = copysign( fuelclamp*limits.lateral, amt1.i );
+        Res.i = vsphysics::copysign( fuelclamp*limits.lateral, amt1.i );
     if ( fabs( amt1.j ) > fabs( fuelclamp*limits.vertical ) )
-        Res.j = copysign( fuelclamp*limits.vertical, amt1.j );
+        Res.j = vsphysics::copysign( fuelclamp*limits.vertical, amt1.j );
     float ablimit =
         afterburn
         ? ( (limits.afterburn-limits.forward)*abfuelclamp+limits.forward*fuelclamp )
