@@ -33,8 +33,9 @@
 #cmakedefine HAVE_AVFORMAT_H 1
 #cmakedefine HAVE_LIBAVFORMAT_AVFORMAT_H 1
 
-#cmakedefine HAVE_AVIO_H 1
 #cmakedefine HAVE_LIBAVFORMAT_AVIO_H 1
+#cmakedefine HAVE_AVIO_H 1
+
 
 
 #cmakedefine HAVE_TR1_UNORDERED_MAP 1
