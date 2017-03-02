@@ -52,6 +52,17 @@
 #include <iostream>
 #define DEBUG_MESH_ANI
 
+namespace vsphysics
+{
+	float copysign( float x, float y )
+	{
+		if (y > 0)
+			return x;
+		else
+			return -x;
+	}
+}
+
 //cannot seem to get min and max working properly across win and lin any other way...
 static float mymax( float a, float b )
 {
@@ -630,16 +641,7 @@ void Unit::DeactivateJumpDrive()
         jump.drive = -1;
 }
 
-namespace vsphysics
-{
-	float copysign( float x, float y )
-	{
-		if (y > 0)
-			return x;
-		else
-			return -x;
-	}
-}
+
 
 float rand01()
 {
