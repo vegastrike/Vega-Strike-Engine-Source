@@ -41,7 +41,16 @@
 #include "networking/lowlevel/vsnet_clientstate.h"
 #include "networking/netclient.h"
 
-extern float copysign( float x, float y );
+namespace vsphysics
+{
+	float copysign( float x, float y )
+	{
+		if (y > 0)
+			return x;
+		else
+			return -x;
+	}
+}
 
 extern unsigned int apply_float_to_unsigned_int( float tmp ); //short fix
 
