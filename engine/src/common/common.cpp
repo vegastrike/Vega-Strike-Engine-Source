@@ -31,7 +31,7 @@ const char *datadirs[] = {
     ".",
     "../data",
     "../../data",
-    "../../data",
+    "../../../data",
 //Added for MacOS X
     "../Resources/data",
 #ifdef DATA_DIR
