@@ -40,6 +40,8 @@
 #include "vs_random.h"
 #include "galaxy_xml.h"
 #include "gfx/camera.h"
+#include "util_vsphysics.h"
+
 
 #ifdef _WIN32
 #define strcasecmp stricmp
@@ -51,17 +53,6 @@
 #include "vsfilesystem.h"
 #include <iostream>
 #define DEBUG_MESH_ANI
-
-namespace vsphysics
-{
-	float copysign( float x, float y )
-	{
-		if (y > 0)
-			return x;
-		else
-			return -x;
-	}
-}
 
 //cannot seem to get min and max working properly across win and lin any other way...
 static float mymax( float a, float b )
