@@ -544,10 +544,10 @@ ELSEIF(CPUINTEL_native)
 ENDIF(CPUAMD_k8)
 
 # Debug target block. 
-SET(CMAKE_CXX_FLAGS_DEBUG " ${CPU_OPTS} -DNV_CUBE_MAP -DBOOST_PYTHON_NO_PY_SIGNATURES -include config.h -pipe -g2 -Wall -O0 -fvisibility=hidden" CACHE STRING
+SET(CMAKE_CXX_FLAGS_DEBUG " ${CPU_OPTS} -DNV_CUBE_MAP -DBOOST_PYTHON_NO_PY_SIGNATURES -include config.h -pipe -g2 -Wall -Werror -O0 -fvisibility=hidden" CACHE STRING
     "Flags used by the C++ compiler during debug builds."
      FORCE )
-SET( CMAKE_C_FLAGS_DEBUG "  ${CPU_OPTS} -DNV_CUBE_MAP -DBOOST_PYTHON_NO_PY_SIGNATURES -include config.h -pipe -g2 -Wall -Wno-unused-function -Wno-unused-variable -O0 -fvisibility=hidden" CACHE STRING
+SET( CMAKE_C_FLAGS_DEBUG "  ${CPU_OPTS} -DNV_CUBE_MAP -DBOOST_PYTHON_NO_PY_SIGNATURES -include config.h -pipe -g2 -Wall -Werror -Wno-unused-function -Wno-unused-variable -O0 -fvisibility=hidden" CACHE STRING
     "Flags used by the C compiler during debug builds."
      FORCE )
 MARK_AS_ADVANCED(
