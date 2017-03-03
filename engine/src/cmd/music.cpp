@@ -448,7 +448,9 @@ readerThread(
             if (foundcache) {
                 *me->music_load_info = wherecache->second;
                 me->freeWav = false;
-            }
+            } else if ( !AUDLoadSoundFile( songname, 
+						me->music_load_info, true))
+			{ VSFileSystem::vs_dprintf(1, "Failed to load music file \"%s\"", songname);}
         }
         if (me->freeWav && docacheme) {
             me->freeWav = false;
