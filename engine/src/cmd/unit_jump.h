@@ -108,7 +108,7 @@ bool GameUnit< UnitType >::TransferUnitToSystem( unsigned int kk, StarSystem* &s
                      (tester = *i) != NULL; ++i)
                     if (tester->isUnit() == UNITPTR && tester != this)
                         if ( ( this->LocalPosition()-tester->LocalPosition() ).Magnitude() < this->rSize()+tester->rSize() )
-                            SetCurPosition( this->LocalPosition()+this->cumulative_transformation_matrix.getR()
+                            this->SetCurPosition( this->LocalPosition()+this->cumulative_transformation_matrix.getR()
                                            *( 4*( this->rSize()+tester->rSize() ) ) );
             DealPossibleJumpDamage( this );
             static int jumparrive = AUDCreateSound( vs_config->getVariable( "unitaudio", "jumparrive", "sfx43.wav" ), false );
