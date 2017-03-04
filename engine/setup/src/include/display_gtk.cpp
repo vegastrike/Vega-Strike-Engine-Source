@@ -28,7 +28,11 @@ void ClickButton(GtkWidget *w, struct catagory *CUR);
 #include <unistd.h>
 #endif
 
-//#define USE_RADIO
+/** [Dealing with the warnings] #23
+ * This is leaving stray code behind that appears to have no effect
+ *
+ * #define USE_RADIO
+ **/
 
 
 static GtkWidget *window, *main_vbox;
@@ -73,12 +77,19 @@ void myexit(int exitval){
 
 void ShowMain(void) {
 	struct group *CURRENT;
-	struct catagory *CUR;
+	/** [Dealing with warnings] #23
+	 * struct catagory *CUR; 
+	 **/
 	int count = 1;
 	int column = 1;
 	GtkWidget *hbox, *vbox, *label, *button;
 	CURRENT = &GROUPS;
-	CUR = &CATS;
+	/** [Dealing with warnings] #23
+	 *  This also has to be commented out because otherwise it comes up
+	 *  with another error
+	 *
+	 * CUR = &CATS;
+	 */
 	hbox = 0;
 	do {
 		if (CURRENT->name == NULL) { continue; }
@@ -91,7 +102,10 @@ void ShowMain(void) {
 		label = gtk_label_new(CURRENT->name);
 		gtk_container_add(GTK_CONTAINER(vbox), label);
 		gtk_widget_show(label);
-#ifndef USE_RADIO
+/** [Dealing with the warnings] #23
+ * Commenting out Macro for deletion due to never being used
+ * #ifndef USE_RADIO
+ * */
 		GtkWidget *menu=gtk_option_menu_new();
 		GtkWidget *my_menu=gtk_menu_new();
 		AddCats(my_menu, CURRENT->name, CURRENT->setting);
@@ -100,22 +114,28 @@ void ShowMain(void) {
 		catagory *NEWCUR=&CATS;
 		int i=0;
 		do {
+			/**Debug code**/
 //			printf(" %d",i);
 			if (NEWCUR->name == NULL) { continue; }
 			if (strcmp(CURRENT->name, NEWCUR->group) != 0) { continue; }
 			if (strcmp(NEWCUR->name, CURRENT->setting) == 0) {
+				/**Debug code**/
 //				printf("|||%s|||",GetInfo(NEWCUR->name));
 				gtk_option_menu_set_history(GTK_OPTION_MENU(menu),i);
 				break;
 			}
 			i++;
 		} while ((NEWCUR = NEWCUR->next) > 0);
+		/**Debug code**/
 //		printf("\n\n");
 		gtk_widget_show (menu);
 		gtk_container_add(GTK_CONTAINER(vbox), menu);
-#else
-		AddCats(vbox, CURRENT->name, CURRENT->setting);
-#endif
+/** [Dealing with the warnings] #23
+ * Commenting out Macro for deletion due to never being used
+ * #else
+ *		AddCats(vbox, CURRENT->name, CURRENT->setting);
+ * #endif
+ **/
 		gtk_container_add(GTK_CONTAINER(hbox), vbox);
 		gtk_widget_show(vbox);
 		if (column == CONFIG.columns) {
@@ -147,7 +167,9 @@ void ShowMain(void) {
 
 void AddCats(GtkWidget *vbox, char *group, char *def) {
 	struct catagory *CUR;
+	/** [Dealing with the warnings] #23
 	GSList *radiogroup = NULL;
+	**/
 	CUR = &CATS;
 	do {
 		GtkWidget *button;
@@ -187,41 +209,56 @@ void ClickButton(GtkWidget *w, struct catagory *CUR) {
 	struct catagory *OLD;
 	struct group *NEW;
 	char *new_text, *old;
-	int length;
-	length = strlen(GetInfo(CUR->name))+3;
+    /** [Dealing with the warnings] #23
+     * Never used due to USE_RADIO being commented out
+	 * int length;
+     * length = strlen(GetInfo(CUR->name))+3;
+     **/
 
-#ifdef USE_RADIO
-	if (!gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (w))) {
-		// Deactivate event--we don't care.
-		return;
-	}
-	GtkWidget *label = GTK_BIN(CUR->button)->child;
-#endif
-
+/** [Dealing with the warnings] #23
+ * Never used due to USE_RADIO being commented out
+ * 
+ *	#ifdef USE_RADIO
+ *		if (!gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (w))) {
+ *			// Deactivate event--we don't care.
+ *			return;
+ *		}
+ *		GtkWidget *label = GTK_BIN(CUR->button)->child;
+ *	#endif
+ **/
 
 	old = GetSetting(CUR->group);
 	OLD = GetCatStruct(old);
 	NEW = GetGroupStruct(CUR->group);
 
 	if (OLD == CUR) { return; }
-#ifdef USE_RADIO
-	new_text = (char *)malloc(length+1);
-	sprintf(new_text, "[%s]", GetInfo(CUR->name));
-	new_text[length] = '\0';
-	gtk_label_set_text(GTK_LABEL(label), new_text);
-
-	// Reallocate just in case the GetInfo() is smaller than the name
-	free(new_text);
-#endif
+/**
+ * [Dealing with the warnings] #23
+ * USE_RADIO macro is commented out earlier so never used
+ * 
+ *#ifdef USE_RADIO
+ *	new_text = (char *)malloc(length+1);
+ *	sprintf(new_text, "[%s]", GetInfo(CUR->name));
+ *	new_text[length] = '\0';
+ *	gtk_label_set_text(GTK_LABEL(label), new_text);
+ *
+ *	// Reallocate just in case the GetInfo() is smaller than the name
+ *	free(new_text);
+ *#endif
+ **/ 
 	new_text = (char *)malloc(strlen(CUR->name)+1);
 	sprintf(new_text, "%s", CUR->name);
 
 	NEW->setting = new_text;
 
-#ifdef USE_RADIO
-	label = GTK_BIN(OLD->button)->child;
-	gtk_label_set_text(GTK_LABEL(label), GetInfo(OLD->name));
-#endif
+/** [Dealing with the warnings] #23
+ * Never used as USE_RADIO was commented out earlier
+ * 
+ *	#ifdef USE_RADIO
+ *		label = GTK_BIN(OLD->button)->child;
+ *		gtk_label_set_text(GTK_LABEL(label), GetInfo(OLD->name));
+ *	#endif
+ **/ 
 	DisableSetting(OLD->name, OLD->group);
 	EnableSetting(CUR->name, CUR->group);
 }
