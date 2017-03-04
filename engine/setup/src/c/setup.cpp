@@ -150,7 +150,12 @@ int main( int argc, char *argv[] )
  *               data_paths.push_back( "/opt/share/vegastrike/data4.x");
  */
         //Win32 data should be "."
-        char tmppath[16384];
+        
+        /**
+         * [Dealing with the warnings] Issue #22 
+         * 
+		   char tmppath[16384];
+         **/ 
         for (vector< string >::iterator vsit = data_paths.begin(); vsit != data_paths.end(); vsit++) {
             //Test if the dir exist and contains config_file
             bogus_int = chdir( origpath );
