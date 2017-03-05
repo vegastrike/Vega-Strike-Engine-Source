@@ -10,15 +10,19 @@ namespace Converter {
 	struct CRegistry {
 		ConversionImplList list;
 
-		CRegistry() 
+		CRegistry()
 		{
 		}
 
 		~CRegistry()
 		{
 			for (ConversionImplList::iterator it=list.begin(); it!=list.end(); ++it)
+			{
 				delete it->second;
+			}
+			
 			list.clear();
+			
 		}
 	};
 
