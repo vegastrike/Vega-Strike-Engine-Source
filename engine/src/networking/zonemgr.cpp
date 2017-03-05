@@ -908,7 +908,10 @@ void ZoneMgr::displayNPCs()
             Cockpit *cp = _Universe->AccessCockpit( i );
             if (cp->activeStarSystem != ss)
                 continue;
+            /* [zonemgr] #44 - Not used in this scope
+             * 
             Unit    *un;
+             */
             char     name[15];
             if ( !cp->GetParent() ) {
                 sprintf( name, "*Plr% 3d ", i );
