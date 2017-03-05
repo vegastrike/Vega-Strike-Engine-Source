@@ -1030,9 +1030,13 @@ int NetClient::recvMsg( Packet *outpacket, timeval *timeout )
                         un->pImage->UpgradeVolume = upgvol;
                     }
                     unsigned int numcargo = (unsigned int)netbuf.getInt32();
-                    bool mission = false;
+                    /* [netclient] #39
+                     * bool mission isn't actually used again
+					 *	bool mission = false;
+                     */
                     if (numcargo < 0) {
-                        mission  = true;
+						// [netclient] #39
+                        // mission  = true;
                         numcargo = -numcargo;
                     }
                     Cargo carg;
@@ -1164,11 +1168,17 @@ int NetClient::recvMsg( Packet *outpacket, timeval *timeout )
                 Cargo carg    = *cargptr;
                 bool  upgrade = false;
                 bool  repair  = false;
-                bool  weapon  = false;
+                // [netclient] #39
+                // It's never used later on. 
+                // bool  weapon  = false;
                 if (carg.GetCategory().find( "upgrades" ) == 0) {
                     upgrade = true;
-                    if ( isWeapon( carg.GetCategory() ) )
-                        weapon = true;
+                    if ( isWeapon( carg.GetCategory() ) ) 
+                    {
+						// [netclient] #39
+						// Not actually used after this. 
+                        //weapon = true;
+                    }
                     else if (!quantity && buyer == sender)
                         repair = true;
                 }
