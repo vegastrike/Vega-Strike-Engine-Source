@@ -152,7 +152,8 @@ vector< string >& NetClient::loginAcctLoop( string str_callsign, string str_pass
     //PacketMem m( netbuf.getData(), netbuf.getDataLength(), PacketMem::LeaveOwnership );
     //m.dump( cerr, 3 );
     acct_sock->sendstr( netbuf );
-    /*
+    /*[netclient login] #38 lots of unfixed code.
+     * 
      *  packet2.send( LOGIN_DATA, 0,
      *         netbuf.getData(), netbuf.getDataLength(),
      *         SENDRELIABLE, NULL, this->acct_sock,
@@ -227,10 +228,16 @@ void NetClient::loginAccept( Packet &p1 )
         <<_Universe->current_stardate.GetFullTrekDate()<<endl;
     lastsave.push_back( netbuf.getString() );
     lastsave.push_back( netbuf.getString() );
-    unsigned char *digest = 0;
-    unsigned short digest_length;
-
-    /*
+    
+    /* [netclient login] #38
+     * Basically only used by CRYPTO
+     * 
+     * unsigned char *digest = 0;
+	 *	
+     * unsigned short digest_length;
+     *
+     * Lots of stuff that has never been fixed [netclient login] #38
+     * 
      *  // Get universe file... not too useful.
      *  // But this is a good example of using VsnetDownload download manager.
      *
@@ -265,16 +272,24 @@ void NetClient::loginAccept( Packet &p1 )
     bool   autogen;
     string fullsys = VSFileSystem::GetCorrectStarSysPath( sysfile, autogen );
     if ( fullsys.empty() ) fullsys = sysfile;
-    digest_length = netbuf.getShort();
+    /* [netclient login] #38
+     * Additional commented out because nothing is done with it
+     * 
+     * digest_length = netbuf.getShort();
+     */
     COUT<<"Initial system = "<<fullsys;
-    if (digest_length) {
-        digest = netbuf.getBuffer( digest_length );
+    /* [netclient login] #38
+     * Not used since CRYPTO is commented out.
+     * if (digest_length) {
+	 *	
+     *	digest = netbuf.getBuffer( digest_length );
+     *
 #ifdef CRYPTO
-        cerr<<" - File Hash = "<<digest;
-        if ( FileUtil::HashCompare( fullsys, digest, SystemFile ) )
-            downloadsystem = false;
+     *	cerr<<" - File Hash = "<<digest;
+     *	if ( FileUtil::HashCompare( fullsys, digest, SystemFile ) )
+     *		downloadsystem = false;
 #endif
-    }
+    }*/
     //Set the zone number
     this->zone = netbuf.getShort();
     //Did the hash compare fail?
