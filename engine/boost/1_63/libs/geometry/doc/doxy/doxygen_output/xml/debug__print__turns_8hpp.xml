@@ -1,0 +1,70 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.8.6">
+  <compounddef id="debug__print__turns_8hpp" kind="file">
+    <compoundname>debug_print_turns.hpp</compoundname>
+    <includedby refid="is__simple_2linear_8hpp" local="no">/home/ubuntu/boost/boost/geometry/algorithms/detail/is_simple/linear.hpp</includedby>
+    <includedby refid="multipolygon_8hpp" local="no">/home/ubuntu/boost/boost/geometry/algorithms/detail/is_valid/multipolygon.hpp</includedby>
+    <includedby refid="algorithms_2detail_2is__valid_2polygon_8hpp" local="no">/home/ubuntu/boost/boost/geometry/algorithms/detail/is_valid/polygon.hpp</includedby>
+    <invincdepgraph>
+      <node id="24063">
+        <label>/home/ubuntu/boost/boost/geometry/algorithms/detail/is_simple/implementation.hpp</label>
+        <link refid="is__simple_2implementation_8hpp"/>
+        <childnode refid="24064" relation="include">
+        </childnode>
+      </node>
+      <node id="24065">
+        <label>/home/ubuntu/boost/boost/geometry/algorithms/detail/is_valid/multipolygon.hpp</label>
+        <link refid="multipolygon_8hpp"/>
+        <childnode refid="24066" relation="include">
+        </childnode>
+      </node>
+      <node id="24066">
+        <label>/home/ubuntu/boost/boost/geometry/algorithms/detail/is_valid/implementation.hpp</label>
+        <link refid="is__valid_2implementation_8hpp"/>
+        <childnode refid="24067" relation="include">
+        </childnode>
+      </node>
+      <node id="24067">
+        <label>/home/ubuntu/boost/boost/geometry/algorithms/is_valid.hpp</label>
+        <link refid="is__valid_8hpp"/>
+      </node>
+      <node id="24068">
+        <label>/home/ubuntu/boost/boost/geometry/algorithms/detail/is_valid/polygon.hpp</label>
+        <link refid="algorithms_2detail_2is__valid_2polygon_8hpp"/>
+        <childnode refid="24066" relation="include">
+        </childnode>
+        <childnode refid="24065" relation="include">
+        </childnode>
+      </node>
+      <node id="24062">
+        <label>/home/ubuntu/boost/boost/geometry/algorithms/detail/is_simple/linear.hpp</label>
+        <link refid="is__simple_2linear_8hpp"/>
+        <childnode refid="24063" relation="include">
+        </childnode>
+      </node>
+      <node id="24064">
+        <label>/home/ubuntu/boost/boost/geometry/algorithms/is_simple.hpp</label>
+        <link refid="is__simple_8hpp"/>
+      </node>
+      <node id="24061">
+        <label>/home/ubuntu/boost/boost/geometry/algorithms/detail/is_valid/debug_print_turns.hpp</label>
+        <link refid="debug_print_turns.hpp"/>
+        <childnode refid="24062" relation="include">
+        </childnode>
+        <childnode refid="24065" relation="include">
+        </childnode>
+        <childnode refid="24068" relation="include">
+        </childnode>
+      </node>
+    </invincdepgraph>
+    <innernamespace refid="namespaceboost">boost</innernamespace>
+    <innernamespace refid="namespaceboost_1_1geometry">boost::geometry</innernamespace>
+    <innernamespace refid="namespaceboost_1_1geometry_1_1detail">boost::geometry::detail</innernamespace>
+    <innernamespace refid="namespaceboost_1_1geometry_1_1detail_1_1is__valid">boost::geometry::detail::is_valid</innernamespace>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <location file="/home/ubuntu/boost/boost/geometry/algorithms/detail/is_valid/debug_print_turns.hpp"/>
+  </compounddef>
+</doxygen>

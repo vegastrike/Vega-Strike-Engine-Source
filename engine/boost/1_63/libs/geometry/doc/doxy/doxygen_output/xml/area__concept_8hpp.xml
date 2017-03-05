@@ -1,0 +1,328 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.8.6">
+  <compounddef id="area__concept_8hpp" kind="file">
+    <compoundname>area_concept.hpp</compoundname>
+    <includes local="no">boost/concept_check.hpp</includes>
+    <includedby refid="algorithms_2area_8hpp" local="no">/home/ubuntu/boost/boost/geometry/algorithms/area.hpp</includedby>
+    <incdepgraph>
+      <node id="60672">
+        <label>boost/concept_check.hpp</label>
+      </node>
+      <node id="60671">
+        <label>/home/ubuntu/boost/boost/geometry/strategies/concepts/area_concept.hpp</label>
+        <link refid="area_concept.hpp"/>
+        <childnode refid="60672" relation="include">
+        </childnode>
+      </node>
+    </incdepgraph>
+    <invincdepgraph>
+      <node id="60677">
+        <label>/home/ubuntu/boost/boost/geometry/algorithms/detail/buffer/get_piece_turns.hpp</label>
+        <link refid="get__piece__turns_8hpp"/>
+        <childnode refid="60678" relation="include">
+        </childnode>
+      </node>
+      <node id="60688">
+        <label>/home/ubuntu/boost/boost/geometry/algorithms/detail/is_simple/implementation.hpp</label>
+        <link refid="is__simple_2implementation_8hpp"/>
+        <childnode refid="60689" relation="include">
+        </childnode>
+      </node>
+      <node id="60711">
+        <label>/home/ubuntu/boost/boost/geometry/algorithms/touches.hpp</label>
+        <link refid="touches_8hpp"/>
+      </node>
+      <node id="60699">
+        <label>/home/ubuntu/boost/boost/geometry/algorithms/detail/overlay/linear_linear.hpp</label>
+        <link refid="overlay_2linear__linear_8hpp"/>
+        <childnode refid="60700" relation="include">
+        </childnode>
+        <childnode refid="60702" relation="include">
+        </childnode>
+      </node>
+      <node id="60712">
+        <label>/home/ubuntu/boost/boost/geometry/algorithms/detail/overlay/assign_parents.hpp</label>
+        <link refid="assign__parents_8hpp"/>
+        <childnode refid="60678" relation="include">
+        </childnode>
+        <childnode refid="60710" relation="include">
+        </childnode>
+      </node>
+      <node id="60713">
+        <label>/home/ubuntu/boost/boost/geometry/algorithms/detail/overlay/ring_properties.hpp</label>
+        <link refid="ring__properties_8hpp"/>
+        <childnode refid="60678" relation="include">
+        </childnode>
+        <childnode refid="60710" relation="include">
+        </childnode>
+        <childnode refid="60714" relation="include">
+        </childnode>
+      </node>
+      <node id="60673">
+        <label>/home/ubuntu/boost/boost/geometry/strategies/concepts/area_concept.hpp</label>
+        <link refid="area_concept.hpp"/>
+        <childnode refid="60674" relation="include">
+        </childnode>
+      </node>
+      <node id="60682">
+        <label>/home/ubuntu/boost/boost/geometry/algorithms/detail/distance/segment_to_box.hpp</label>
+        <link refid="segment__to__box_8hpp"/>
+        <childnode refid="60683" relation="include">
+        </childnode>
+      </node>
+      <node id="60681">
+        <label>/home/ubuntu/boost/boost/geometry/algorithms/detail/buffer/turn_in_piece_visitor.hpp</label>
+        <link refid="turn__in__piece__visitor_8hpp"/>
+        <childnode refid="60678" relation="include">
+        </childnode>
+      </node>
+      <node id="60675">
+        <label>/home/ubuntu/boost/boost/geometry/algorithms/correct.hpp</label>
+        <link refid="correct_8hpp"/>
+      </node>
+      <node id="60709">
+        <label>/home/ubuntu/boost/boost/geometry/algorithms/detail/overlay/add_rings.hpp</label>
+        <link refid="add__rings_8hpp"/>
+        <childnode refid="60678" relation="include">
+        </childnode>
+        <childnode refid="60710" relation="include">
+        </childnode>
+      </node>
+      <node id="60708">
+        <label>/home/ubuntu/boost/boost/geometry/algorithms/detail/intersection/multi.hpp</label>
+        <link refid="multi_8hpp"/>
+        <childnode refid="60707" relation="include">
+        </childnode>
+      </node>
+      <node id="60697">
+        <label>/home/ubuntu/boost/boost/geometry/algorithms/detail/is_valid/segment.hpp</label>
+        <link refid="algorithms_2detail_2is__valid_2segment_8hpp"/>
+        <childnode refid="60692" relation="include">
+        </childnode>
+      </node>
+      <node id="60686">
+        <label>/home/ubuntu/boost/boost/geometry/algorithms/comparable_distance.hpp</label>
+        <link refid="comparable__distance_8hpp"/>
+        <childnode refid="60678" relation="include">
+        </childnode>
+        <childnode refid="60681" relation="include">
+        </childnode>
+      </node>
+      <node id="60700">
+        <label>/home/ubuntu/boost/boost/geometry/algorithms/union.hpp</label>
+        <link refid="union_8hpp"/>
+        <childnode refid="60701" relation="include">
+        </childnode>
+      </node>
+      <node id="60685">
+        <label>/home/ubuntu/boost/boost/geometry/algorithms/detail/comparable_distance/implementation.hpp</label>
+        <link refid="comparable__distance_2implementation_8hpp"/>
+        <childnode refid="60686" relation="include">
+        </childnode>
+      </node>
+      <node id="60690">
+        <label>/home/ubuntu/boost/boost/geometry/algorithms/detail/is_valid/has_spikes.hpp</label>
+        <link refid="has__spikes_8hpp"/>
+        <childnode refid="60687" relation="include">
+        </childnode>
+        <childnode refid="60691" relation="include">
+        </childnode>
+        <childnode refid="60694" relation="include">
+        </childnode>
+      </node>
+      <node id="60696">
+        <label>/home/ubuntu/boost/boost/geometry/algorithms/detail/is_valid/multipolygon.hpp</label>
+        <link refid="multipolygon_8hpp"/>
+        <childnode refid="60692" relation="include">
+        </childnode>
+      </node>
+      <node id="60703">
+        <label>/home/ubuntu/boost/boost/geometry/algorithms/difference.hpp</label>
+        <link refid="difference_8hpp"/>
+      </node>
+      <node id="60684">
+        <label>/home/ubuntu/boost/boost/geometry/algorithms/distance.hpp</label>
+        <link refid="algorithms_2distance_8hpp"/>
+      </node>
+      <node id="60707">
+        <label>/home/ubuntu/boost/boost/geometry/algorithms/detail/intersection/implementation.hpp</label>
+        <link refid="intersection_2implementation_8hpp"/>
+        <childnode refid="60705" relation="include">
+        </childnode>
+      </node>
+      <node id="60714">
+        <label>/home/ubuntu/boost/boost/geometry/algorithms/detail/overlay/select_rings.hpp</label>
+        <link refid="select__rings_8hpp"/>
+        <childnode refid="60708" relation="include">
+        </childnode>
+        <childnode refid="60710" relation="include">
+        </childnode>
+      </node>
+      <node id="60692">
+        <label>/home/ubuntu/boost/boost/geometry/algorithms/detail/is_valid/implementation.hpp</label>
+        <link refid="is__valid_2implementation_8hpp"/>
+        <childnode refid="60693" relation="include">
+        </childnode>
+      </node>
+      <node id="60679">
+        <label>/home/ubuntu/boost/boost/geometry/algorithms/detail/buffer/buffer_inserter.hpp</label>
+        <link refid="buffer__inserter_8hpp"/>
+        <childnode refid="60680" relation="include">
+        </childnode>
+      </node>
+      <node id="60693">
+        <label>/home/ubuntu/boost/boost/geometry/algorithms/is_valid.hpp</label>
+        <link refid="is__valid_8hpp"/>
+      </node>
+      <node id="60695">
+        <label>/home/ubuntu/boost/boost/geometry/algorithms/detail/is_valid/polygon.hpp</label>
+        <link refid="algorithms_2detail_2is__valid_2polygon_8hpp"/>
+        <childnode refid="60692" relation="include">
+        </childnode>
+        <childnode refid="60696" relation="include">
+        </childnode>
+      </node>
+      <node id="60687">
+        <label>/home/ubuntu/boost/boost/geometry/algorithms/detail/is_simple/linear.hpp</label>
+        <link refid="is__simple_2linear_8hpp"/>
+        <childnode refid="60688" relation="include">
+        </childnode>
+      </node>
+      <node id="60683">
+        <label>/home/ubuntu/boost/boost/geometry/algorithms/detail/distance/implementation.hpp</label>
+        <link refid="distance_2implementation_8hpp"/>
+        <childnode refid="60684" relation="include">
+        </childnode>
+        <childnode refid="60685" relation="include">
+        </childnode>
+      </node>
+      <node id="60702">
+        <label>/home/ubuntu/boost/boost/geometry/algorithms/detail/overlay/intersection_insert.hpp</label>
+        <link refid="intersection__insert_8hpp"/>
+        <childnode refid="60703" relation="include">
+        </childnode>
+        <childnode refid="60704" relation="include">
+        </childnode>
+      </node>
+      <node id="60689">
+        <label>/home/ubuntu/boost/boost/geometry/algorithms/is_simple.hpp</label>
+        <link refid="is__simple_8hpp"/>
+      </node>
+      <node id="60704">
+        <label>/home/ubuntu/boost/boost/geometry/algorithms/detail/intersection/interface.hpp</label>
+        <link refid="intersection_2interface_8hpp"/>
+        <childnode refid="60705" relation="include">
+        </childnode>
+        <childnode refid="60706" relation="include">
+        </childnode>
+        <childnode refid="60708" relation="include">
+        </childnode>
+      </node>
+      <node id="60701">
+        <label>/home/ubuntu/boost/boost/geometry/algorithms/sym_difference.hpp</label>
+        <link refid="sym__difference_8hpp"/>
+      </node>
+      <node id="60691">
+        <label>/home/ubuntu/boost/boost/geometry/algorithms/detail/is_valid/linear.hpp</label>
+        <link refid="is__valid_2linear_8hpp"/>
+        <childnode refid="60692" relation="include">
+        </childnode>
+      </node>
+      <node id="60678">
+        <label>/home/ubuntu/boost/boost/geometry/algorithms/detail/buffer/buffered_piece_collection.hpp</label>
+        <link refid="buffered__piece__collection_8hpp"/>
+        <childnode refid="60679" relation="include">
+        </childnode>
+      </node>
+      <node id="60694">
+        <label>/home/ubuntu/boost/boost/geometry/algorithms/detail/is_valid/ring.hpp</label>
+        <link refid="algorithms_2detail_2is__valid_2ring_8hpp"/>
+        <childnode refid="60692" relation="include">
+        </childnode>
+        <childnode refid="60695" relation="include">
+        </childnode>
+      </node>
+      <node id="60698">
+        <label>/home/ubuntu/boost/boost/geometry/algorithms/detail/turns/remove_duplicate_turns.hpp</label>
+        <link refid="remove__duplicate__turns_8hpp"/>
+        <childnode refid="60699" relation="include">
+        </childnode>
+      </node>
+      <node id="60705">
+        <label>/home/ubuntu/boost/boost/geometry/algorithms/intersection.hpp</label>
+        <link refid="algorithms_2intersection_8hpp"/>
+        <childnode refid="60701" relation="include">
+        </childnode>
+      </node>
+      <node id="60710">
+        <label>/home/ubuntu/boost/boost/geometry/algorithms/detail/overlay/overlay.hpp</label>
+        <link refid="overlay_8hpp"/>
+        <childnode refid="60711" relation="include">
+        </childnode>
+        <childnode refid="60700" relation="include">
+        </childnode>
+        <childnode refid="60702" relation="include">
+        </childnode>
+      </node>
+      <node id="60676">
+        <label>/home/ubuntu/boost/boost/geometry/algorithms/equals.hpp</label>
+        <link refid="equals_8hpp"/>
+        <childnode refid="60677" relation="include">
+        </childnode>
+        <childnode refid="60681" relation="include">
+        </childnode>
+        <childnode refid="60682" relation="include">
+        </childnode>
+        <childnode refid="60687" relation="include">
+        </childnode>
+        <childnode refid="60690" relation="include">
+        </childnode>
+        <childnode refid="60691" relation="include">
+        </childnode>
+        <childnode refid="60694" relation="include">
+        </childnode>
+        <childnode refid="60697" relation="include">
+        </childnode>
+        <childnode refid="60698" relation="include">
+        </childnode>
+      </node>
+      <node id="60680">
+        <label>/home/ubuntu/boost/boost/geometry/algorithms/buffer.hpp</label>
+        <link refid="algorithms_2buffer_8hpp"/>
+      </node>
+      <node id="60706">
+        <label>/home/ubuntu/boost/boost/geometry/algorithms/detail/intersection/box_box.hpp</label>
+        <link refid="intersection_2box__box_8hpp"/>
+        <childnode refid="60707" relation="include">
+        </childnode>
+      </node>
+      <node id="60674">
+        <label>/home/ubuntu/boost/boost/geometry/algorithms/area.hpp</label>
+        <link refid="algorithms_2area_8hpp"/>
+        <childnode refid="60675" relation="include">
+        </childnode>
+        <childnode refid="60676" relation="include">
+        </childnode>
+        <childnode refid="60694" relation="include">
+        </childnode>
+        <childnode refid="60709" relation="include">
+        </childnode>
+        <childnode refid="60712" relation="include">
+        </childnode>
+        <childnode refid="60713" relation="include">
+        </childnode>
+        <childnode refid="60714" relation="include">
+        </childnode>
+      </node>
+    </invincdepgraph>
+    <innerclass refid="classboost_1_1geometry_1_1concepts_1_1_area_strategy" prot="public">boost::geometry::concepts::AreaStrategy</innerclass>
+    <innernamespace refid="namespaceboost">boost</innernamespace>
+    <innernamespace refid="namespaceboost_1_1geometry">boost::geometry</innernamespace>
+    <innernamespace refid="namespaceboost_1_1geometry_1_1concepts">boost::geometry::concepts</innernamespace>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <location file="/home/ubuntu/boost/boost/geometry/strategies/concepts/area_concept.hpp"/>
+  </compounddef>
+</doxygen>

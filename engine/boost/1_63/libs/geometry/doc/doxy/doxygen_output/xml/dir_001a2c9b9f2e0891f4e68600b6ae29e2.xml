@@ -1,0 +1,15 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.8.6">
+  <compounddef id="dir_001a2c9b9f2e0891f4e68600b6ae29e2" kind="dir">
+    <compoundname>/home/ubuntu/boost/boost/geometry/algorithms/detail/sections</compoundname>
+    <innerfile refid="range__by__section_8hpp">range_by_section.hpp</innerfile>
+    <innerfile refid="section__box__policies_8hpp">section_box_policies.hpp</innerfile>
+    <innerfile refid="section__functions_8hpp">section_functions.hpp</innerfile>
+    <innerfile refid="sectionalize_8hpp">sectionalize.hpp</innerfile>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <location file="/home/ubuntu/boost/boost/geometry/algorithms/detail/sections/"/>
+  </compounddef>
+</doxygen>

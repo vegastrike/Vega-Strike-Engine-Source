@@ -1,0 +1,165 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.8.6">
+  <compounddef id="validity__failure__type_8hpp" kind="file">
+    <compoundname>validity_failure_type.hpp</compoundname>
+    <includedby refid="failure__policy_8hpp" local="no">/home/ubuntu/boost/boost/geometry/algorithms/detail/is_simple/failure_policy.hpp</includedby>
+    <includedby refid="algorithms_2detail_2is__valid_2box_8hpp" local="no">/home/ubuntu/boost/boost/geometry/algorithms/detail/is_valid/box.hpp</includedby>
+    <includedby refid="has__duplicates_8hpp" local="no">/home/ubuntu/boost/boost/geometry/algorithms/detail/is_valid/has_duplicates.hpp</includedby>
+    <includedby refid="has__spikes_8hpp" local="no">/home/ubuntu/boost/boost/geometry/algorithms/detail/is_valid/has_spikes.hpp</includedby>
+    <includedby refid="is__valid_2linear_8hpp" local="no">/home/ubuntu/boost/boost/geometry/algorithms/detail/is_valid/linear.hpp</includedby>
+    <includedby refid="multipolygon_8hpp" local="no">/home/ubuntu/boost/boost/geometry/algorithms/detail/is_valid/multipolygon.hpp</includedby>
+    <includedby refid="pointlike_8hpp" local="no">/home/ubuntu/boost/boost/geometry/algorithms/detail/is_valid/pointlike.hpp</includedby>
+    <includedby refid="algorithms_2detail_2is__valid_2polygon_8hpp" local="no">/home/ubuntu/boost/boost/geometry/algorithms/detail/is_valid/polygon.hpp</includedby>
+    <includedby refid="algorithms_2detail_2is__valid_2ring_8hpp" local="no">/home/ubuntu/boost/boost/geometry/algorithms/detail/is_valid/ring.hpp</includedby>
+    <includedby refid="algorithms_2detail_2is__valid_2segment_8hpp" local="no">/home/ubuntu/boost/boost/geometry/algorithms/detail/is_valid/segment.hpp</includedby>
+    <invincdepgraph>
+      <node id="46284">
+        <label>/home/ubuntu/boost/boost/geometry/algorithms/detail/is_simple/implementation.hpp</label>
+        <link refid="is__simple_2implementation_8hpp"/>
+        <childnode refid="46285" relation="include">
+        </childnode>
+      </node>
+      <node id="46297">
+        <label>/home/ubuntu/boost/boost/geometry/algorithms/detail/is_valid/pointlike.hpp</label>
+        <link refid="pointlike_8hpp"/>
+        <childnode refid="46289" relation="include">
+        </childnode>
+      </node>
+      <node id="46298">
+        <label>/home/ubuntu/boost/boost/geometry/algorithms/detail/is_valid/segment.hpp</label>
+        <link refid="algorithms_2detail_2is__valid_2segment_8hpp"/>
+        <childnode refid="46289" relation="include">
+        </childnode>
+      </node>
+      <node id="46295">
+        <label>/home/ubuntu/boost/boost/geometry/algorithms/detail/is_valid/has_spikes.hpp</label>
+        <link refid="has__spikes_8hpp"/>
+        <childnode refid="46286" relation="include">
+        </childnode>
+        <childnode refid="46296" relation="include">
+        </childnode>
+        <childnode refid="46292" relation="include">
+        </childnode>
+      </node>
+      <node id="46294">
+        <label>/home/ubuntu/boost/boost/geometry/algorithms/detail/is_valid/multipolygon.hpp</label>
+        <link refid="multipolygon_8hpp"/>
+        <childnode refid="46289" relation="include">
+        </childnode>
+      </node>
+      <node id="46283">
+        <label>/home/ubuntu/boost/boost/geometry/algorithms/detail/is_simple/areal.hpp</label>
+        <link refid="areal_8hpp"/>
+        <childnode refid="46284" relation="include">
+        </childnode>
+      </node>
+      <node id="46289">
+        <label>/home/ubuntu/boost/boost/geometry/algorithms/detail/is_valid/implementation.hpp</label>
+        <link refid="is__valid_2implementation_8hpp"/>
+        <childnode refid="46290" relation="include">
+        </childnode>
+      </node>
+      <node id="46291">
+        <label>/home/ubuntu/boost/boost/geometry/algorithms/detail/is_valid/has_duplicates.hpp</label>
+        <link refid="has__duplicates_8hpp"/>
+        <childnode refid="46283" relation="include">
+        </childnode>
+        <childnode refid="46286" relation="include">
+        </childnode>
+        <childnode refid="46287" relation="include">
+        </childnode>
+        <childnode refid="46292" relation="include">
+        </childnode>
+      </node>
+      <node id="46290">
+        <label>/home/ubuntu/boost/boost/geometry/algorithms/is_valid.hpp</label>
+        <link refid="is__valid_8hpp"/>
+      </node>
+      <node id="46293">
+        <label>/home/ubuntu/boost/boost/geometry/algorithms/detail/is_valid/polygon.hpp</label>
+        <link refid="algorithms_2detail_2is__valid_2polygon_8hpp"/>
+        <childnode refid="46289" relation="include">
+        </childnode>
+        <childnode refid="46294" relation="include">
+        </childnode>
+      </node>
+      <node id="46286">
+        <label>/home/ubuntu/boost/boost/geometry/algorithms/detail/is_simple/linear.hpp</label>
+        <link refid="is__simple_2linear_8hpp"/>
+        <childnode refid="46284" relation="include">
+        </childnode>
+      </node>
+      <node id="46288">
+        <label>/home/ubuntu/boost/boost/geometry/algorithms/detail/is_valid/box.hpp</label>
+        <link refid="algorithms_2detail_2is__valid_2box_8hpp"/>
+        <childnode refid="46289" relation="include">
+        </childnode>
+      </node>
+      <node id="46285">
+        <label>/home/ubuntu/boost/boost/geometry/algorithms/is_simple.hpp</label>
+        <link refid="is__simple_8hpp"/>
+      </node>
+      <node id="46282">
+        <label>/home/ubuntu/boost/boost/geometry/algorithms/detail/is_simple/failure_policy.hpp</label>
+        <link refid="failure__policy_8hpp"/>
+        <childnode refid="46283" relation="include">
+        </childnode>
+        <childnode refid="46286" relation="include">
+        </childnode>
+        <childnode refid="46287" relation="include">
+        </childnode>
+      </node>
+      <node id="46296">
+        <label>/home/ubuntu/boost/boost/geometry/algorithms/detail/is_valid/linear.hpp</label>
+        <link refid="is__valid_2linear_8hpp"/>
+        <childnode refid="46289" relation="include">
+        </childnode>
+      </node>
+      <node id="46281">
+        <label>/home/ubuntu/boost/boost/geometry/algorithms/validity_failure_type.hpp</label>
+        <link refid="validity_failure_type.hpp"/>
+        <childnode refid="46282" relation="include">
+        </childnode>
+        <childnode refid="46288" relation="include">
+        </childnode>
+        <childnode refid="46291" relation="include">
+        </childnode>
+        <childnode refid="46295" relation="include">
+        </childnode>
+        <childnode refid="46296" relation="include">
+        </childnode>
+        <childnode refid="46294" relation="include">
+        </childnode>
+        <childnode refid="46297" relation="include">
+        </childnode>
+        <childnode refid="46293" relation="include">
+        </childnode>
+        <childnode refid="46292" relation="include">
+        </childnode>
+        <childnode refid="46298" relation="include">
+        </childnode>
+      </node>
+      <node id="46292">
+        <label>/home/ubuntu/boost/boost/geometry/algorithms/detail/is_valid/ring.hpp</label>
+        <link refid="algorithms_2detail_2is__valid_2ring_8hpp"/>
+        <childnode refid="46289" relation="include">
+        </childnode>
+        <childnode refid="46293" relation="include">
+        </childnode>
+      </node>
+      <node id="46287">
+        <label>/home/ubuntu/boost/boost/geometry/algorithms/detail/is_simple/multipoint.hpp</label>
+        <link refid="is__simple_2multipoint_8hpp"/>
+        <childnode refid="46284" relation="include">
+        </childnode>
+      </node>
+    </invincdepgraph>
+    <innernamespace refid="namespaceboost">boost</innernamespace>
+    <innernamespace refid="namespaceboost_1_1geometry">boost::geometry</innernamespace>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <location file="/home/ubuntu/boost/boost/geometry/algorithms/validity_failure_type.hpp"/>
+  </compounddef>
+</doxygen>

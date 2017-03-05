@@ -1,0 +1,134 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.8.6">
+  <compounddef id="is__areal_8hpp" kind="file">
+    <compoundname>is_areal.hpp</compoundname>
+    <includes local="no">boost/type_traits/integral_constant.hpp</includes>
+    <includes refid="tag_8hpp" local="no">boost/geometry/core/tag.hpp</includes>
+    <includes refid="core_2tags_8hpp" local="no">boost/geometry/core/tags.hpp</includes>
+    <includedby refid="union_8hpp" local="no">/home/ubuntu/boost/boost/geometry/algorithms/union.hpp</includedby>
+    <includedby refid="multi_8hpp" local="no">/home/ubuntu/boost/boost/geometry/algorithms/detail/intersection/multi.hpp</includedby>
+    <includedby refid="intersection__insert_8hpp" local="no">/home/ubuntu/boost/boost/geometry/algorithms/detail/overlay/intersection_insert.hpp</includedby>
+    <incdepgraph>
+      <node id="49981">
+        <label>boost/type_traits/remove_const.hpp</label>
+      </node>
+      <node id="49979">
+        <label>boost/geometry/core/tags.hpp</label>
+        <link refid="core_2tags_8hpp"/>
+      </node>
+      <node id="49976">
+        <label>/home/ubuntu/boost/boost/geometry/core/is_areal.hpp</label>
+        <link refid="is_areal.hpp"/>
+        <childnode refid="49977" relation="include">
+        </childnode>
+        <childnode refid="49978" relation="include">
+        </childnode>
+        <childnode refid="49979" relation="include">
+        </childnode>
+      </node>
+      <node id="49983">
+        <label>boost/type_traits/remove_reference.hpp</label>
+      </node>
+      <node id="49980">
+        <label>boost/geometry/util/bare_type.hpp</label>
+        <link refid="bare__type_8hpp"/>
+        <childnode refid="49981" relation="include">
+        </childnode>
+        <childnode refid="49982" relation="include">
+        </childnode>
+        <childnode refid="49983" relation="include">
+        </childnode>
+      </node>
+      <node id="49977">
+        <label>boost/type_traits/integral_constant.hpp</label>
+      </node>
+      <node id="49978">
+        <label>boost/geometry/core/tag.hpp</label>
+        <link refid="tag_8hpp"/>
+        <childnode refid="49979" relation="include">
+        </childnode>
+        <childnode refid="49980" relation="include">
+        </childnode>
+      </node>
+      <node id="49982">
+        <label>boost/type_traits/remove_pointer.hpp</label>
+      </node>
+    </incdepgraph>
+    <invincdepgraph>
+      <node id="49987">
+        <label>/home/ubuntu/boost/boost/geometry/algorithms/detail/intersection/multi.hpp</label>
+        <link refid="multi_8hpp"/>
+        <childnode refid="49988" relation="include">
+        </childnode>
+      </node>
+      <node id="49985">
+        <label>/home/ubuntu/boost/boost/geometry/algorithms/union.hpp</label>
+        <link refid="union_8hpp"/>
+        <childnode refid="49986" relation="include">
+        </childnode>
+      </node>
+      <node id="49984">
+        <label>/home/ubuntu/boost/boost/geometry/core/is_areal.hpp</label>
+        <link refid="is_areal.hpp"/>
+        <childnode refid="49985" relation="include">
+        </childnode>
+        <childnode refid="49987" relation="include">
+        </childnode>
+        <childnode refid="49990" relation="include">
+        </childnode>
+      </node>
+      <node id="49991">
+        <label>/home/ubuntu/boost/boost/geometry/algorithms/difference.hpp</label>
+        <link refid="difference_8hpp"/>
+      </node>
+      <node id="49988">
+        <label>/home/ubuntu/boost/boost/geometry/algorithms/detail/intersection/implementation.hpp</label>
+        <link refid="intersection_2implementation_8hpp"/>
+        <childnode refid="49989" relation="include">
+        </childnode>
+      </node>
+      <node id="49990">
+        <label>/home/ubuntu/boost/boost/geometry/algorithms/detail/overlay/intersection_insert.hpp</label>
+        <link refid="intersection__insert_8hpp"/>
+        <childnode refid="49991" relation="include">
+        </childnode>
+        <childnode refid="49992" relation="include">
+        </childnode>
+      </node>
+      <node id="49992">
+        <label>/home/ubuntu/boost/boost/geometry/algorithms/detail/intersection/interface.hpp</label>
+        <link refid="intersection_2interface_8hpp"/>
+        <childnode refid="49989" relation="include">
+        </childnode>
+        <childnode refid="49993" relation="include">
+        </childnode>
+        <childnode refid="49987" relation="include">
+        </childnode>
+      </node>
+      <node id="49986">
+        <label>/home/ubuntu/boost/boost/geometry/algorithms/sym_difference.hpp</label>
+        <link refid="sym__difference_8hpp"/>
+      </node>
+      <node id="49989">
+        <label>/home/ubuntu/boost/boost/geometry/algorithms/intersection.hpp</label>
+        <link refid="algorithms_2intersection_8hpp"/>
+        <childnode refid="49986" relation="include">
+        </childnode>
+      </node>
+      <node id="49993">
+        <label>/home/ubuntu/boost/boost/geometry/algorithms/detail/intersection/box_box.hpp</label>
+        <link refid="intersection_2box__box_8hpp"/>
+        <childnode refid="49988" relation="include">
+        </childnode>
+      </node>
+    </invincdepgraph>
+    <innerclass refid="structboost_1_1geometry_1_1is__areal" prot="public">boost::geometry::is_areal</innerclass>
+    <innernamespace refid="namespaceboost">boost</innernamespace>
+    <innernamespace refid="namespaceboost_1_1geometry">boost::geometry</innernamespace>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <location file="/home/ubuntu/boost/boost/geometry/core/is_areal.hpp"/>
+  </compounddef>
+</doxygen>

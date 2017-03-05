@@ -1,0 +1,45 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.8.6">
+  <compounddef id="structboost_1_1geometry_1_1strategy_1_1within_1_1box__covered__by__range_3_01_geometry_00_010_00_01spherical__tag_01_4" kind="struct" prot="public">
+    <compoundname>boost::geometry::strategy::within::box_covered_by_range&lt; Geometry, 0, spherical_tag &gt;</compoundname>
+    <basecompoundref refid="structboost_1_1geometry_1_1strategy_1_1within_1_1box__longitude__range" prot="public" virt="non-virtual">boost::geometry::strategy::within::box_longitude_range&lt; Geometry, box_covered_by_coord, box_covered_by_longitude_diff &gt;</basecompoundref>
+    <includes local="no">box_in_box.hpp</includes>
+    <templateparamlist>
+      <param>
+        <type>typename Geometry</type>
+      </param>
+    </templateparamlist>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <inheritancegraph>
+      <node id="1595">
+        <label>boost::geometry::strategy::within::box_longitude_range&lt; Geometry, box_covered_by_coord, box_covered_by_longitude_diff &gt;</label>
+        <link refid="structboost_1_1geometry_1_1strategy_1_1within_1_1box__longitude__range"/>
+      </node>
+      <node id="1594">
+        <label>boost::geometry::strategy::within::box_covered_by_range&lt; Geometry, 0, spherical_tag &gt;</label>
+        <link refid="structboost_1_1geometry_1_1strategy_1_1within_1_1box__covered__by__range_3_01_geometry_00_010_00_01spherical__tag_01_4"/>
+        <childnode refid="1595" relation="public-inheritance">
+        </childnode>
+      </node>
+    </inheritancegraph>
+    <collaborationgraph>
+      <node id="1597">
+        <label>boost::geometry::strategy::within::box_longitude_range&lt; Geometry, box_covered_by_coord, box_covered_by_longitude_diff &gt;</label>
+        <link refid="structboost_1_1geometry_1_1strategy_1_1within_1_1box__longitude__range"/>
+      </node>
+      <node id="1596">
+        <label>boost::geometry::strategy::within::box_covered_by_range&lt; Geometry, 0, spherical_tag &gt;</label>
+        <link refid="structboost_1_1geometry_1_1strategy_1_1within_1_1box__covered__by__range_3_01_geometry_00_010_00_01spherical__tag_01_4"/>
+        <childnode refid="1597" relation="public-inheritance">
+        </childnode>
+      </node>
+    </collaborationgraph>
+    <location file="/home/ubuntu/boost/boost/geometry/strategies/cartesian/box_in_box.hpp" line="157" column="1" bodyfile="/home/ubuntu/boost/boost/geometry/strategies/cartesian/box_in_box.hpp" bodystart="155" bodyend="157"/>
+    <listofallmembers>
+      <member refid="structboost_1_1geometry_1_1strategy_1_1within_1_1box__longitude__range_1a262f5e1af13a4ae049471a82ffd6a3e5" prot="public" virt="non-virtual"><scope>boost::geometry::strategy::within::box_covered_by_range&lt; Geometry, 0, spherical_tag &gt;</scope><name>apply</name></member>
+    </listofallmembers>
+  </compounddef>
+</doxygen>

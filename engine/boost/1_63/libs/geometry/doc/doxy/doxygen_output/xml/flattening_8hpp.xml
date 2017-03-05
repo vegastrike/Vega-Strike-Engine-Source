@@ -1,0 +1,103 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.8.6">
+  <compounddef id="flattening_8hpp" kind="file">
+    <compoundname>flattening.hpp</compoundname>
+    <includes refid="radius_8hpp" local="no">boost/geometry/core/radius.hpp</includes>
+    <includes refid="tag_8hpp" local="no">boost/geometry/core/tag.hpp</includes>
+    <includes refid="core_2tags_8hpp" local="no">boost/geometry/core/tags.hpp</includes>
+    <includes refid="not__implemented_8hpp" local="no">boost/geometry/algorithms/not_implemented.hpp</includes>
+    <incdepgraph>
+      <node id="22871">
+        <label>boost/type_traits/remove_const.hpp</label>
+      </node>
+      <node id="22866">
+        <label>boost/static_assert.hpp</label>
+      </node>
+      <node id="22869">
+        <label>boost/geometry/core/tags.hpp</label>
+        <link refid="core_2tags_8hpp"/>
+      </node>
+      <node id="22867">
+        <label>boost/type_traits/is_pointer.hpp</label>
+      </node>
+      <node id="22875">
+        <label>boost/mpl/assert.hpp</label>
+      </node>
+      <node id="22873">
+        <label>boost/type_traits/remove_reference.hpp</label>
+      </node>
+      <node id="22870">
+        <label>boost/geometry/util/bare_type.hpp</label>
+        <link refid="bare__type_8hpp"/>
+        <childnode refid="22871" relation="include">
+        </childnode>
+        <childnode refid="22872" relation="include">
+        </childnode>
+        <childnode refid="22873" relation="include">
+        </childnode>
+      </node>
+      <node id="22864">
+        <label>boost/geometry/core/radius.hpp</label>
+        <link refid="radius_8hpp"/>
+        <childnode refid="22865" relation="include">
+        </childnode>
+        <childnode refid="22866" relation="include">
+        </childnode>
+        <childnode refid="22867" relation="include">
+        </childnode>
+        <childnode refid="22868" relation="include">
+        </childnode>
+        <childnode refid="22869" relation="include">
+        </childnode>
+        <childnode refid="22870" relation="include">
+        </childnode>
+      </node>
+      <node id="22863">
+        <label>/home/ubuntu/boost/boost/geometry/algorithms/detail/flattening.hpp</label>
+        <link refid="flattening.hpp"/>
+        <childnode refid="22864" relation="include">
+        </childnode>
+        <childnode refid="22868" relation="include">
+        </childnode>
+        <childnode refid="22869" relation="include">
+        </childnode>
+        <childnode refid="22874" relation="include">
+        </childnode>
+      </node>
+      <node id="22868">
+        <label>boost/geometry/core/tag.hpp</label>
+        <link refid="tag_8hpp"/>
+        <childnode refid="22869" relation="include">
+        </childnode>
+        <childnode refid="22870" relation="include">
+        </childnode>
+      </node>
+      <node id="22876">
+        <label>boost/mpl/identity.hpp</label>
+      </node>
+      <node id="22874">
+        <label>boost/geometry/algorithms/not_implemented.hpp</label>
+        <link refid="not__implemented_8hpp"/>
+        <childnode refid="22875" relation="include">
+        </childnode>
+        <childnode refid="22876" relation="include">
+        </childnode>
+        <childnode refid="22869" relation="include">
+        </childnode>
+      </node>
+      <node id="22865">
+        <label>cstddef</label>
+      </node>
+      <node id="22872">
+        <label>boost/type_traits/remove_pointer.hpp</label>
+      </node>
+    </incdepgraph>
+    <innernamespace refid="namespaceboost">boost</innernamespace>
+    <innernamespace refid="namespaceboost_1_1geometry">boost::geometry</innernamespace>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <location file="/home/ubuntu/boost/boost/geometry/algorithms/detail/flattening.hpp"/>
+  </compounddef>
+</doxygen>

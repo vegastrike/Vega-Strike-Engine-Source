@@ -1,0 +1,13 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.8.6">
+  <compounddef id="dir_e10a884cfce9a00b7ac96c4db7962926" kind="dir">
+    <compoundname>/home/ubuntu/boost</compoundname>
+    <innerdir refid="dir_70241e0cb632ef83c95057df97d23a47">/home/ubuntu/boost/boost</innerdir>
+    <innerdir refid="dir_6536a3ae99e012220d1425d86ce10880">/home/ubuntu/boost/libs</innerdir>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <location file="/home/ubuntu/boost/"/>
+  </compounddef>
+</doxygen>

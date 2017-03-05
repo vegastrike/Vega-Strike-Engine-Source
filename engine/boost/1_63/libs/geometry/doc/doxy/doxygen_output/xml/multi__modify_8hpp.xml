@@ -1,0 +1,117 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.8.6">
+  <compounddef id="multi__modify_8hpp" kind="file">
+    <compoundname>multi_modify.hpp</compoundname>
+    <includes local="no">boost/range.hpp</includes>
+    <includedby refid="correct_8hpp" local="no">/home/ubuntu/boost/boost/geometry/algorithms/correct.hpp</includedby>
+    <includedby refid="reverse_8hpp" local="no">/home/ubuntu/boost/boost/geometry/algorithms/reverse.hpp</includedby>
+    <incdepgraph>
+      <node id="26056">
+        <label>/home/ubuntu/boost/boost/geometry/algorithms/detail/multi_modify.hpp</label>
+        <link refid="multi_modify.hpp"/>
+        <childnode refid="26057" relation="include">
+        </childnode>
+      </node>
+      <node id="26057">
+        <label>boost/range.hpp</label>
+      </node>
+    </incdepgraph>
+    <invincdepgraph>
+      <node id="26062">
+        <label>/home/ubuntu/boost/boost/geometry/algorithms/touches.hpp</label>
+        <link refid="touches_8hpp"/>
+      </node>
+      <node id="26058">
+        <label>/home/ubuntu/boost/boost/geometry/algorithms/detail/multi_modify.hpp</label>
+        <link refid="multi_modify.hpp"/>
+        <childnode refid="26059" relation="include">
+        </childnode>
+        <childnode refid="26060" relation="include">
+        </childnode>
+      </node>
+      <node id="26059">
+        <label>/home/ubuntu/boost/boost/geometry/algorithms/correct.hpp</label>
+        <link refid="correct_8hpp"/>
+      </node>
+      <node id="26071">
+        <label>/home/ubuntu/boost/boost/geometry/algorithms/detail/intersection/multi.hpp</label>
+        <link refid="multi_8hpp"/>
+        <childnode refid="26070" relation="include">
+        </childnode>
+      </node>
+      <node id="26063">
+        <label>/home/ubuntu/boost/boost/geometry/algorithms/union.hpp</label>
+        <link refid="union_8hpp"/>
+        <childnode refid="26064" relation="include">
+        </childnode>
+      </node>
+      <node id="26066">
+        <label>/home/ubuntu/boost/boost/geometry/algorithms/difference.hpp</label>
+        <link refid="difference_8hpp"/>
+      </node>
+      <node id="26070">
+        <label>/home/ubuntu/boost/boost/geometry/algorithms/detail/intersection/implementation.hpp</label>
+        <link refid="intersection_2implementation_8hpp"/>
+        <childnode refid="26068" relation="include">
+        </childnode>
+      </node>
+      <node id="26065">
+        <label>/home/ubuntu/boost/boost/geometry/algorithms/detail/overlay/intersection_insert.hpp</label>
+        <link refid="intersection__insert_8hpp"/>
+        <childnode refid="26066" relation="include">
+        </childnode>
+        <childnode refid="26067" relation="include">
+        </childnode>
+      </node>
+      <node id="26067">
+        <label>/home/ubuntu/boost/boost/geometry/algorithms/detail/intersection/interface.hpp</label>
+        <link refid="intersection_2interface_8hpp"/>
+        <childnode refid="26068" relation="include">
+        </childnode>
+        <childnode refid="26069" relation="include">
+        </childnode>
+        <childnode refid="26071" relation="include">
+        </childnode>
+      </node>
+      <node id="26064">
+        <label>/home/ubuntu/boost/boost/geometry/algorithms/sym_difference.hpp</label>
+        <link refid="sym__difference_8hpp"/>
+      </node>
+      <node id="26068">
+        <label>/home/ubuntu/boost/boost/geometry/algorithms/intersection.hpp</label>
+        <link refid="algorithms_2intersection_8hpp"/>
+        <childnode refid="26064" relation="include">
+        </childnode>
+      </node>
+      <node id="26061">
+        <label>/home/ubuntu/boost/boost/geometry/algorithms/detail/overlay/overlay.hpp</label>
+        <link refid="overlay_8hpp"/>
+        <childnode refid="26062" relation="include">
+        </childnode>
+        <childnode refid="26063" relation="include">
+        </childnode>
+        <childnode refid="26065" relation="include">
+        </childnode>
+      </node>
+      <node id="26060">
+        <label>/home/ubuntu/boost/boost/geometry/algorithms/reverse.hpp</label>
+        <link refid="reverse_8hpp"/>
+        <childnode refid="26061" relation="include">
+        </childnode>
+      </node>
+      <node id="26069">
+        <label>/home/ubuntu/boost/boost/geometry/algorithms/detail/intersection/box_box.hpp</label>
+        <link refid="intersection_2box__box_8hpp"/>
+        <childnode refid="26070" relation="include">
+        </childnode>
+      </node>
+    </invincdepgraph>
+    <innernamespace refid="namespaceboost">boost</innernamespace>
+    <innernamespace refid="namespaceboost_1_1geometry">boost::geometry</innernamespace>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <location file="/home/ubuntu/boost/boost/geometry/algorithms/detail/multi_modify.hpp"/>
+  </compounddef>
+</doxygen>
