@@ -275,14 +275,6 @@ void NetServer::start( int argc, char **argv )
         acctsrv = vs_config->getVariable( "network", "accountsrv", "" );
     if (!acctserver)
     {
-        /*
-         *  // Read data files ;)
-         *  cout<<"Loading accounts data... ";
-         *  LoadAccounts( "accounts.xml");
-         *  // Gets hashtable accounts elements and put them in vector Cltacct
-         *  Cltacct = getAllAccounts();
-         *  cout<<Cltacct.size()<<" accounts loaded."<<endl;
-         */
         cout<<"Not connecting to account server."<<endl;
     }
     else
@@ -298,7 +290,6 @@ void NetServer::start( int argc, char **argv )
             int acctport = atoi( vs_config->getVariable( "network", "accountsrvport", "" ).c_str() );
             if (!acctport)
                 acctport = ACCT_PORT;
-            //acct_sock = NetUITCP::createSocket( acctsrv.c_str(), acctport, _sock_set );
         }
         else
         {
@@ -306,7 +297,6 @@ void NetServer::start( int argc, char **argv )
         }
         if (acct_sock == NULL)
             cerr<<"Invalid Accountserver URL... "<<endl;
-//VSExit(1);
         else
             COUT<<"accountserver on socket "<<acct_sock<<" done."<<endl;
     }
@@ -347,10 +337,8 @@ void NetServer::start( int argc, char **argv )
         const AddressIP &adr = this->tcpNetwork->get_adr();
         cout<<"    Server Port: "<<ntohs( adr.sin_port )<<endl;
         cout<<"    Server IP Addresses: "<<endl;
-//cout << "        localhost (Local computer only)" << endl;
         int num = 0;
         if (hostName[0])
-//cout << "        " << hostName << " (requires DNS lookup) "
             local = gethostbyname( hostName );
         if (local)
         {
@@ -361,7 +349,6 @@ void NetServer::start( int argc, char **argv )
                 if (ipaddr.substr( 0, 4 ) == "127.")
                 {
                     continue;
-//cout << " (Local computer only)";
                 }
                 else
                 {
@@ -410,14 +397,10 @@ void NetServer::start( int argc, char **argv )
     //Server loop
     while (keeprun)
     {
-        //int       nb;
 
         UpdateTime();
         if (_Universe->numPlayers() > 0)
             ExecuteDirector();
-        //Check a key press
-        //keyset.setReadAlwaysTrue( 0);
-        //this->checkKey( keyset);
 
         //Check received communications
         checkMsg( _sock_set );
@@ -444,7 +427,6 @@ void NetServer::start( int argc, char **argv )
                 //Send a list of ingame clients
                 //Build a buffer with number of clients and client serials
                 //Put first the number of clients
-                //netbuf.addShort( nbclients);
                 addSimpleChar( netbuf, ACCT_RESYNC );
                 for (j = 0, i = allClients.begin(); i != allClients.end(); i++, j++)
                     //Add the current client's serial to the buffer
@@ -479,11 +461,6 @@ void NetServer::start( int argc, char **argv )
 //NETFIXME: Why was StarSystem->Update() commented out?
 
         unsigned int i;
-        /*
-         *  static float nonactivesystemtime = XMLSupport::parse_float (vs_config->getVariable ("physics","InactiveSystemTime",".3"));
-         *  static unsigned int numrunningsystems = XMLSupport::parse_int (vs_config->getVariable ("physics","NumRunningSystems","4"));
-         *  float systime=nonactivesystemtime;
-         */
         for (i = 0; i < _Universe->star_system.size(); i++)
 //NETFIXME: No Director for you!
             _Universe->star_system[i]->Update( 1, true /*need to run python serverside*/ );
@@ -491,7 +468,6 @@ void NetServer::start( int argc, char **argv )
         /****************************** VS STUFF TO DO ************************************/
         if (snapchanged && (curtime-snaptime) > NETWORK_ATOM)
         {
-            //COUT<<"SENDING SNAPSHOT ----------"<<end;
             //If planet time we send planet and nebula info
             if ( (curtime-planettime) > PLANET_ATOM )
             {
@@ -508,7 +484,6 @@ void NetServer::start( int argc, char **argv )
         }
         sendNewUnitQueue();
         //Check for automatic server status save time (in seconds)
-        //curtime = getNewTime();
         if ( (curtime-savetime) > SAVE_ATOM )
         {
             //Not implemented
@@ -653,29 +628,14 @@ bool NetServer::updateTimestamps( ClientPtr cltp, Packet &p )
     //A packet's timestamp is in ms whereas getNewTime is in seconds
     unsigned int int_ts = p.getTimestamp();
 
-//cerr<<"GOT TIMESTAMP="<<int_ts<<" latest is="<<clt->getLatestTimestamp() << " in " << p.getCommand() << endl;
     double curtime = getNewTime();
     //Check for late packet : compare received timestamp to the latest we have
-//assert( int_ts >= clt->getLatestTimestamp());
     if ( int_ts < clt->getLatestTimestamp() )
     {
-        //If ts > 0xFFFFFFF0 (15 seconds before the maxin an u_int)
         //This is not really a reliable test -> we may still have late packet in that range of timestamps
         //Only check for late packets when sent non reliable because we need others
-//if(p.getFlags() & SENDANDFORGET)
-//{
         ret = !(p.getCommand() == CMD_SNAPSHOT || p.getCommand() == CMD_POSUPDATE || p.getCommand() == CMD_PING);            //only invalidates updates if its a snapshot or posupdate--same reason it updates the timestamps to begin with
     }
-    //}
-    /*
-     *  else if( clt->isTcp())
-     *  {
-     *  COUT << "!!!ERROR : Late packet in TCP mode : this should not happen !!!" << endl
-     *  << "   Previous client timestamp: " << clt->getLatestTimestamp() << "ms" << endl
-     *  << "   Current  client timtstamp: " << int_ts << "ms" << endl;
-     *  //				VSExit(1);
-     *  }
-     */
     //If packet is late we don't update time vars but we process it if we have to
     else
     {
@@ -747,10 +707,6 @@ void NetServer::processPacket( ClientPtr clt, unsigned char cmd, const AddressIP
         else
         {
             SOCKETALT        tmpsock;
-            /* [netserver] #43 - This is only used for something to be
-             * assigned to it.
-            const AddressIP *iptmp;
-             */
             WaitListEntry    entry;
             NetBuffer        netbuf( packet.getData(), packet.getDataLength() );
             std::string      user   = netbuf.getString();
@@ -771,11 +727,6 @@ void NetServer::processPacket( ClientPtr clt, unsigned char cmd, const AddressIP
                 sendLoginAlready( clt );
                 break;
             }
-            /* [netserver] #43
-             * While assigned, nothing is done with it.
-             *
-            iptmp   = &clt->cltadr;
-             */
             tmpsock = clt->tcp_sock;
 
             //Redirect the login request packet to account server
@@ -833,13 +784,10 @@ void NetServer::processPacket( ClientPtr clt, unsigned char cmd, const AddressIP
         break;
     case CMD_POSUPDATE:
         //Received a position update from a client
-//cerr<<">>> POSITION UPDATE =( serial #"<<packet.getSerial()<<" )= --------------------------------------"<<endl;
         this->posUpdate( clt );
-//cerr<<"<<< POSITION UPDATE ---------------------------------------------------------------"<<endl;
         break;
     case CMD_PING:
         //Nothing to do here, just receiving the packet is enough
-        //COUT<<"Got PING from serial "<<packet.getSerial()<<endl;
         break;
     case CMD_SERVERTIME:
 
@@ -860,7 +808,6 @@ void NetServer::processPacket( ClientPtr clt, unsigned char cmd, const AddressIP
             if (!acctserver)
                 //NETFIXME: Trusted always true in deathmatch!
                 local = true;
-            //std::replace(message.begin(),message.end(),'#','$');
             int cp = _Universe->whichPlayerStarship( un );
             if (cp < 0)
             {
@@ -1001,11 +948,6 @@ void NetServer::processPacket( ClientPtr clt, unsigned char cmd, const AddressIP
             Cargo *cargptr = docked->GetCargo( cargoName, cargIndex );
             if (cargIndex == UINT_MAX || !cargptr) break;
             if (cargptr->price > cp->credits) break;
-            /* // Do the transaction.
-             *       cp->credits -= cargptr->price;
-             *       sendCredits(player->GetSerial(), cp->credits);
-             *       ...
-             */
             saveAccount( cpnum );
             player->hull = 0;
             player->Destroy();
@@ -1536,7 +1478,6 @@ void NetServer::processPacket( ClientPtr clt, unsigned char cmd, const AddressIP
     case CMD_CLOAK:
     {
         //Received a computer targetting request
-        //target_serial = netbuf.getSerial();
         char engage = netbuf.getChar();
         unclt = clt->game_unit.GetUnit();
         if (!unclt)
@@ -1556,21 +1497,15 @@ void NetServer::processPacket( ClientPtr clt, unsigned char cmd, const AddressIP
         //Get the unit that asked for target info
         netbuf.Reset();
         unclt = zonemgr->getUnit( packet.getSerial(), zone );
-        //float distance = UnitUtil::getDistance( unclt, un);
         //Add armor data
-        /*
-         *  netbuf.addShort();
-         *  netbuf.addShort();
-         *  netbuf.addShort();
-         *  netbuf.addShort();
-         */
+
         //Add shield data
-        //netbuf.addFloat();
-        //??
+
+
         //Add hull
-        //netbuf.addFloat( un->hull);
+
         //Add distance
-        //netbuf.addFloat( distance);
+
         break;
     case CMD_STARTNETCOMM:
     {
@@ -1593,7 +1528,6 @@ void NetServer::processPacket( ClientPtr clt, unsigned char cmd, const AddressIP
         un = clt->game_unit.GetUnit();
         if (!un) break;
         clt->comm_freq = -1;
-        //float freq = netbuf.getFloat();
         //Broadcast players with same frequency that this client is leaving the comm session
         p2.bc_create( packet.getCommand(), packet_serial,
                       packet.getData(), packet.getDataLength(), SENDRELIABLE,
