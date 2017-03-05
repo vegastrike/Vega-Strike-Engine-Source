@@ -48,7 +48,7 @@ namespace
   {
   public:
     generic_error_category(){}
-    const char *   name() const;
+    const char *   name() const noexcept;
     std::string    message( int ev ) const;
   };
 
@@ -56,14 +56,14 @@ namespace
   {
   public:
     system_error_category(){}
-    const char *        name() const;
+    const char *        name() const noexcept;
     std::string         message( int ev ) const;
-    error_condition     default_error_condition( int ev ) const;
+    error_condition     default_error_condition( int ev ) const noexcept;
   };
 
   //  generic_error_category implementation  ---------------------------------//
 
-  const char * generic_error_category::name() const
+  const char * generic_error_category::name() const noexcept
   {
     return "generic";
   }
@@ -154,12 +154,12 @@ namespace
   }
   //  system_error_category implementation  --------------------------------// 
 
-  const char * system_error_category::name() const
+  const char * system_error_category::name() const noexcept
   {
     return "system";
   }
 
-  error_condition system_error_category::default_error_condition( int ev ) const
+  error_condition system_error_category::default_error_condition( int ev ) const noexcept
   {
     switch ( ev )
     {
@@ -414,13 +414,13 @@ namespace boost
                                          //  address for comparison purposes
 # endif
 
-    BOOST_SYSTEM_DECL const error_category & system_category()
+    BOOST_SYSTEM_DECL const error_category & system_category() noexcept
     {
       static const system_error_category  system_category_const;
       return system_category_const;
     }
 
-    BOOST_SYSTEM_DECL const error_category & generic_category()
+    BOOST_SYSTEM_DECL const error_category & generic_category() noexcept
     {
       static const generic_error_category generic_category_const;
       return generic_category_const;
