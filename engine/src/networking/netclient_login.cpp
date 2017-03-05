@@ -623,15 +623,21 @@ void NetClient::synchronizeTime( SOCKETALT *udpsock )
 
 void NetClient::receiveLocations( const Packet* )
 {
-    unsigned char cmd;
-
+    /* [netclient login] #38
+     * This *looks* like it has the potential to do things but as it is...
+     *
+	 *	unsigned char cmd;
+     */
 #ifdef __DEBUG__
     COUT<<"Nb start locations : "<<nblocs<<endl;
 #endif
     //Choose starting location here
 
+	/* [netclient login] #38
+	 * Basically not being used. 
     //Send the chosen location to the server
     cmd = CMD_ADDCLIENT;
+    */
 }
 
 /*
