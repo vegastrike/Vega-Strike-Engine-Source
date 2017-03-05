@@ -21,9 +21,9 @@
 #include <time.h>
 #include <math.h>
 #if !defined (_WIN32) || defined (__CYGWIN__)
-        #include <unistd.h>
+#include <unistd.h>
 #else
-        #include <io.h>
+#include <io.h>
 #endif
 
 #include "cmd/unit_generic.h"
@@ -168,14 +168,16 @@ void NetServer::start( int argc, char **argv )
 {
     const char *serverport = NULL;
     int i;
-    for (i = 0; i < argc; ++i) {
+    for (i = 0; i < argc; ++i)
+    {
         char match = 1;
         int  j;
         if (strncmp( argv[i], "-p", 2 ) == 0)
             serverport = argv[i]+2;
         else
             match = 0;
-        if (match) {
+        if (match)
+        {
             for (j = i+1; j < argc; ++j)
                 argv[j-1] = argv[j];
             argc--;
@@ -198,9 +200,12 @@ void NetServer::start( int argc, char **argv )
     _sock_set.start();
 
     startMsg();
-    if (argc == 2) {
+    if (argc == 2)
+    {
         CONFIGFILE = argv[1];
-    } else {
+    }
+    else
+    {
         CONFIGFILE = new char[42];
         strcpy( CONFIGFILE, "vegastrike.config" );
     }
@@ -246,19 +251,21 @@ void NetServer::start( int argc, char **argv )
         serverport = configport.c_str();
     string tmp;
     acctserver = XMLSupport::parse_bool( vs_config->getVariable( "server", "useaccountserver",
-                                                                vs_config->getVariable( "network", "use_account_server",
-                                                                                        "false" ) ) );
+                                         vs_config->getVariable( "network", "use_account_server",
+                                                 "false" ) ) );
 
     //Create and bind sockets
     COUT<<"Initializing TCP server ..."<<endl;
     tcpNetwork = NetUITCP::createServerSocket( atoi( serverport ), _sock_set );
-    if (tcpNetwork == NULL) {
+    if (tcpNetwork == NULL)
+    {
         COUT<<"Couldn't create TCP server - quitting"<<endl;
         exit( -100 );
     }
     COUT<<"Initializing UDP server ..."<<endl;
     *udpNetwork = NetUIUDP::createServerSocket( atoi( serverport ), _sock_set );
-    if (*udpNetwork == NULL) {
+    if (*udpNetwork == NULL)
+    {
         COUT<<"Couldn't create UDP server - quitting"<<endl;
         exit( -100 );
     }
@@ -266,7 +273,8 @@ void NetServer::start( int argc, char **argv )
     std::string acctsrv = vs_config->getVariable( "network", "account_server_url", "" );
     if ( acctsrv.empty() )
         acctsrv = vs_config->getVariable( "network", "accountsrv", "" );
-    if (!acctserver) {
+    if (!acctserver)
+    {
         /*
          *  // Read data files ;)
          *  cout<<"Loading accounts data... ";
@@ -276,18 +284,24 @@ void NetServer::start( int argc, char **argv )
          *  cout<<Cltacct.size()<<" accounts loaded."<<endl;
          */
         cout<<"Not connecting to account server."<<endl;
-    } else {
+    }
+    else
+    {
         cout<<"Initializing connection to account server..."<<endl;
-        if ( acctsrv.empty() ) {
+        if ( acctsrv.empty() )
+        {
             cout<<"Account server IP not specified, exiting"<<endl;
             VSExit( 1 );
         }
-        if (acctsrv.find( '/' ) == std::string::npos) {
+        if (acctsrv.find( '/' ) == std::string::npos)
+        {
             int acctport = atoi( vs_config->getVariable( "network", "accountsrvport", "" ).c_str() );
             if (!acctport)
                 acctport = ACCT_PORT;
             //acct_sock = NetUITCP::createSocket( acctsrv.c_str(), acctport, _sock_set );
-        } else {
+        }
+        else
+        {
             acct_sock = new VsnetHTTPSocket( acctsrv, _sock_set );
         }
         if (acct_sock == NULL)
@@ -312,9 +326,12 @@ void NetServer::start( int argc, char **argv )
     string  dynpath = "dynaverse.dat";
     VSFile  f;
     VSError err     = f.OpenReadOnly( dynpath, ::VSFileSystem::UnknownFile );
-    if (err > Ok) {
+    if (err > Ok)
+    {
         cerr<<"!!! ERROR : opening dynamic universe file "<<dynpath.c_str()<<" !!!"<<endl;
-    } else {
+    }
+    else
+    {
         string dynaverse = f.ReadFull();
         char  *dynchar   = strdup( dynaverse.c_str() );
         globalsave->ReadSavedPackets( dynchar, true );
@@ -335,14 +352,19 @@ void NetServer::start( int argc, char **argv )
         if (hostName[0])
 //cout << "        " << hostName << " (requires DNS lookup) "
             local = gethostbyname( hostName );
-        if (local) {
+        if (local)
+        {
             in_addr **localaddr = (in_addr**) local->h_addr_list;
-            for (int i = 0; i < 5 && localaddr[i]; i++) {
+            for (int i = 0; i < 5 && localaddr[i]; i++)
+            {
                 string ipaddr = inet_ntoa( *(localaddr[i]) );
-                if (ipaddr.substr( 0, 4 ) == "127.") {
+                if (ipaddr.substr( 0, 4 ) == "127.")
+                {
                     continue;
 //cout << " (Local computer only)";
-                } else {
+                }
+                else
+                {
                     cout<<"        "<<ipaddr;
                     num++;
                     if (ipaddr.substr( 0, 8 ) == "169.254.")
@@ -356,7 +378,8 @@ void NetServer::start( int argc, char **argv )
                 cout<<endl;
             }
         }
-        if (!num) {
+        if (!num)
+        {
             cout<<"        No network interfaces found associated to your hostname."<<endl;
 #ifdef _WIN32
             cout<<"        (Consult Start-> Run-> 'cmd /k ipconfig' for your IP.)"<<endl;
@@ -365,13 +388,16 @@ void NetServer::start( int argc, char **argv )
 #endif
         }
         cout<<"        You can also connect locally using 'localhost'"<<endl;
-        if (acctserver) {
+        if (acctserver)
+        {
             cout<<"    Public Server: "<<endl<<"    ";
             if (acctsrv.length() > 75)
                 cout<<acctsrv.substr( 0, 50 )<<"..."<<acctsrv.substr( acctsrv.length()-20, 20 )<<endl;
             else
                 cout<<acctsrv<<endl;
-        } else {
+        }
+        else
+        {
             if ( this->server_password.empty() )
                 cout<<"    Private Server"<<endl;
             else
@@ -382,7 +408,8 @@ void NetServer::start( int argc, char **argv )
         cout<<endl<<"Have fun!"<<endl<<endl;
     }
     //Server loop
-    while (keeprun) {
+    while (keeprun)
+    {
         //int       nb;
 
         UpdateTime();
@@ -400,7 +427,8 @@ void NetServer::start( int argc, char **argv )
         //And send to it the login request we received
         //Then send clients confirmations or errors
         curtime = getNewTime();
-        if (acctserver && !acct_con && (curtime-reconnect_time) > periodrecon) {
+        if (acctserver && !acct_con && (curtime-reconnect_time) > periodrecon)
+        {
             std::string netbuf;
             reconnect_time = curtime+periodrecon;
             //We previously lost connection to account server
@@ -408,7 +436,8 @@ void NetServer::start( int argc, char **argv )
             if (acct_sock)
                 delete acct_sock;
             acct_sock = new VsnetHTTPSocket( acctsrv, _sock_set );
-            if ( acct_sock->valid() ) {
+            if ( acct_sock->valid() )
+            {
                 LI  i;
                 int j = 0;
                 COUT<<">>> Reconnected accountserver on socket "<<*acct_sock<<" done."<<endl;
@@ -424,7 +453,9 @@ void NetServer::start( int argc, char **argv )
                 //Use the serial packet's field to send the number of clients
                 if ( !acct_sock->sendstr( netbuf ) )
                     COUT<<"Failure to resync, SOCKET was : "<<*acct_sock<<endl;
-            } else {
+            }
+            else
+            {
                 cerr<<">>> Reconnection to account server failed."<<endl;
             }
         }
@@ -458,15 +489,18 @@ void NetServer::start( int argc, char **argv )
             _Universe->star_system[i]->Update( 1, true /*need to run python serverside*/ );
         StarSystem::ProcessPendingJumps();
         /****************************** VS STUFF TO DO ************************************/
-        if (snapchanged && (curtime-snaptime) > NETWORK_ATOM) {
+        if (snapchanged && (curtime-snaptime) > NETWORK_ATOM)
+        {
             //COUT<<"SENDING SNAPSHOT ----------"<<end;
             //If planet time we send planet and nebula info
-            if ( (curtime-planettime) > PLANET_ATOM ) {
+            if ( (curtime-planettime) > PLANET_ATOM )
+            {
                 zonemgr->broadcastSnapshots( true );
                 planettime = curtime;
             }
             //Otherwise we just send ships/bases... info
-            else {
+            else
+            {
                 zonemgr->broadcastSnapshots( false );
             }
             snapchanged = 0;
@@ -475,7 +509,8 @@ void NetServer::start( int argc, char **argv )
         sendNewUnitQueue();
         //Check for automatic server status save time (in seconds)
         //curtime = getNewTime();
-        if ( (curtime-savetime) > SAVE_ATOM ) {
+        if ( (curtime-savetime) > SAVE_ATOM )
+        {
             //Not implemented
             cout<<">>> Saving server status... Time="<<curtime<<endl;
             this->save();
@@ -501,16 +536,23 @@ void NetServer::checkKey( SocketSet &sets )
 #if 0
     int  memory_use = 0;
     char c;
-    if ( sets.select( 0, 0 ) ) {
+    if ( sets.select( 0, 0 ) )
+    {
         if (read( 0, &c, 1 ) == -1)
             cerr<<"Error reading char on std input "<<endl;
-        if (c != 0x0a) {
+        if (c != 0x0a)
+        {
             input_buffer[nbchars] = c;
             nbchars++;
-        } else {
-            if ( !strncmp( input_buffer, "quit", 4 ) || !strncmp( input_buffer, "QUIT", 4 ) ) {
+        }
+        else
+        {
+            if ( !strncmp( input_buffer, "quit", 4 ) || !strncmp( input_buffer, "QUIT", 4 ) )
+            {
                 VSExit( 0 );
-            } else if ( !strncmp( input_buffer, "stats", 4 ) || !strncmp( input_buffer, "STATS", 4 ) ) {
+            }
+            else if ( !strncmp( input_buffer, "stats", 4 ) || !strncmp( input_buffer, "STATS", 4 ) )
+            {
                 //Display server stats
                 cout<<endl;
                 cout<<"-----------------------------------------------"<<endl;
@@ -524,8 +566,10 @@ void NetServer::checkKey( SocketSet &sets )
                 cout<<"-----------------------------------------------"<<endl;
                 cout<<"| End stats                                   |"<<endl;
                 cout<<"-----------------------------------------------"<<endl<<endl;
-            } else if (!strncmp( input_buffer, "mem",
-                                 3 ) || !strncmp( input_buffer, "MEM", 3 ) || input_buffer[0] == 'm' && nbchars == 1) {
+            }
+            else if (!strncmp( input_buffer, "mem",
+                               3 ) || !strncmp( input_buffer, "MEM", 3 ) || input_buffer[0] == 'm' && nbchars == 1)
+            {
                 //Display memory usage
                 cout<<endl;
                 cout<<"-----------------------------------------------"<<endl;
@@ -562,16 +606,19 @@ void NetServer::checkMsg( SocketSet &sets )
     ostringstream ostr;
     bool printit = false;
     ostr<<"Checking activity on sockets, TCP=";
-    for (LI i = allClients.begin(); i != allClients.end(); i++) {
+    for (LI i = allClients.begin(); i != allClients.end(); i++)
+    {
         ClientPtr cl = *i;
-        if ( cl->sock.isActive() ) {
+        if ( cl->sock.isActive() )
+        {
             ostr<<cl->sock.get_fd()<<"+ ";
             printit = true;
             this->recvMsg_tcp( cl );
         }
     }
     ostr<<" ";
-    if ( udpNetwork->isActive() ) {
+    if ( udpNetwork->isActive() )
+    {
         ostr<<"UDP="<<udpNetwork->get_fd()<<"+"<<ends;
         recvMsg_udp();
         printit = true;
@@ -583,7 +630,8 @@ void NetServer::checkMsg( SocketSet &sets )
 }
 #else
 {
-    for (LI i = allClients.begin(); i != allClients.end(); i++) {
+    for (LI i = allClients.begin(); i != allClients.end(); i++)
+    {
         ClientPtr cl = *i;
         if ( cl->tcp_sock.isActive() )
             this->recvMsg_tcp( cl );
@@ -609,7 +657,8 @@ bool NetServer::updateTimestamps( ClientPtr cltp, Packet &p )
     double curtime = getNewTime();
     //Check for late packet : compare received timestamp to the latest we have
 //assert( int_ts >= clt->getLatestTimestamp());
-    if ( int_ts < clt->getLatestTimestamp() ) {
+    if ( int_ts < clt->getLatestTimestamp() )
+    {
         //If ts > 0xFFFFFFF0 (15 seconds before the maxin an u_int)
         //This is not really a reliable test -> we may still have late packet in that range of timestamps
         //Only check for late packets when sent non reliable because we need others
@@ -628,7 +677,8 @@ bool NetServer::updateTimestamps( ClientPtr cltp, Packet &p )
      *  }
      */
     //If packet is late we don't update time vars but we process it if we have to
-    else {
+    else
+    {
         //Update the timeout vals anytime we receive a packet
         //Set old_timeout to the old_latest one and latest_timeout to current time in seconds
         clt->old_timeout    = clt->latest_timeout;
@@ -667,32 +717,40 @@ void NetServer::processPacket( ClientPtr clt, unsigned char cmd, const AddressIP
     switch (cmd)
     {
     case CMD_CONNECT:
-        {
-            if (!clt) break;
-            clt->netversion = packet_serial;
-            if (clt->netversion > SERVER_NETVERSION)
-                clt->netversion = SERVER_NETVERSION;
-            Packet    psend;
-            NetBuffer netnewbuf;
-            netnewbuf.addSerial( SERVER_NETVERSION );
-            netnewbuf.addString( clt->cltadr.ipadr() );
-            psend.send( CMD_CONNECT, 0, netnewbuf.getData(), netnewbuf.getDataLength(), SENDRELIABLE,
-                       &ipadr, clt->tcp_sock, __FILE__, PSEUDO__LINE__( 656 ) );
-            break;
-        }
+    {
+        if (!clt) break;
+        clt->netversion = packet_serial;
+        if (clt->netversion > SERVER_NETVERSION)
+            clt->netversion = SERVER_NETVERSION;
+        Packet    psend;
+        NetBuffer netnewbuf;
+        netnewbuf.addSerial( SERVER_NETVERSION );
+        netnewbuf.addString( clt->cltadr.ipadr() );
+        psend.send( CMD_CONNECT, 0, netnewbuf.getData(), netnewbuf.getDataLength(), SENDRELIABLE,
+                    &ipadr, clt->tcp_sock, __FILE__, PSEUDO__LINE__( 656 ) );
+        break;
+    }
     case CMD_LOGIN:
         if (!clt) break;
         COUT<<">>> LOGIN REQUEST --------------------------------------"<<endl;
         //Authenticate client
         //Need to give the IP address of incoming message in UDP mode to store it
         //in the Client struct
-        if (!acctserver) {
+        if (!acctserver)
+        {
             this->localLogin( clt, packet );                    //NETFIXME--right now assume acctserver
-        } else if (!acct_con) {
+        }
+        else if (!acct_con)
+        {
             this->sendLoginUnavailable( clt );
-        } else {
+        }
+        else
+        {
             SOCKETALT        tmpsock;
+            /* [netserver] #43 - This is only used for something to be
+             * assigned to it.
             const AddressIP *iptmp;
+             */
             WaitListEntry    entry;
             NetBuffer        netbuf( packet.getData(), packet.getDataLength() );
             std::string      user   = netbuf.getString();
@@ -701,17 +759,23 @@ void NetServer::processPacket( ClientPtr clt, unsigned char cmd, const AddressIP
             entry.tcp  = true;
             entry.type = WaitListEntry::CONNECTING;
             entry.t    = clt;
-            if ( user.empty() ) {
+            if ( user.empty() )
+            {
                 sendLoginError( clt );
                 break;
             }
             if (clt->loginstate != Client::CONNECTED)
                 break;
-            if ( waitList.find( user ) != waitList.end() ) {
+            if ( waitList.find( user ) != waitList.end() )
+            {
                 sendLoginAlready( clt );
                 break;
             }
+            /* [netserver] #43
+             * While assigned, nothing is done with it.
+             *
             iptmp   = &clt->cltadr;
+             */
             tmpsock = clt->tcp_sock;
 
             //Redirect the login request packet to account server
@@ -719,18 +783,22 @@ void NetServer::processPacket( ClientPtr clt, unsigned char cmd, const AddressIP
                 <<"*** Packet to copy length : "<<packet.getDataLength()<<endl;
             char redirectcommand[2] = {ACCT_LOGIN, '\0'};
             std::string redirect( redirectcommand );
-            for (unsigned int i = 0; i < _Universe->numPlayers(); i++) {
+            for (unsigned int i = 0; i < _Universe->numPlayers(); i++)
+            {
                 Cockpit *cp = _Universe->AccessCockpit( i );
-                if (cp->savegame && cp->savegame->GetCallsign() == user) {
+                if (cp->savegame && cp->savegame->GetCallsign() == user)
+                {
                     COUT<<"Cannot login player "<<user<<": already exists on this server!";
                     sendLoginAlready( clt );
                     user = "";
                 }
             }
-            if ( !user.empty() ) {
+            if ( !user.empty() )
+            {
                 addSimpleString( redirect, user );
                 addSimpleString( redirect, passwd );
-                if ( !acct_sock->sendstr( redirect ) ) {
+                if ( !acct_sock->sendstr( redirect ) )
+                {
                     //NETFIXME is this in http format or binary format
                     perror( "FATAL ERROR sending redirected login request to ACCOUNT SERVER : " );
                     COUT<<"SOCKET was : "<<acct_sock<<endl;
@@ -779,55 +847,61 @@ void NetServer::processPacket( ClientPtr clt, unsigned char cmd, const AddressIP
         {}
         break;
     case CMD_TXTMESSAGE:
+    {
+        if (!clt) break;
+        un = clt->game_unit.GetUnit();
+        string message = netbuf.getString();
+        netbuf.Reset();
+        if ( message.empty() ) break;
+        if (message[0] == '/')
         {
-            if (!clt) break;
-            un = clt->game_unit.GetUnit();
-            string message = netbuf.getString();
-            netbuf.Reset();
-            if ( message.empty() ) break;
-            if (message[0] == '/') {
-                string cmd, args;
-                bool   local = (clt->cltadr.inaddr() == 0x0100007f);
-                if (!acctserver)
-                    //NETFIXME: Trusted always true in deathmatch!
-                    local = true;
-                //std::replace(message.begin(),message.end(),'#','$');
-                int cp = _Universe->whichPlayerStarship( un );
-                if (cp < 0) {
-                    if (local)
-                        cp = 0;
-                    else
-                        break;
-                }
-                std::replace( message.begin(), message.end(), '\n', ' ' );
-                std::replace( message.begin(), message.end(), '\r', ' ' );
-                string::size_type first_space = message.find( ' ' );
-                if (first_space == string::npos) {
-                    cmd = message.substr( 1 );
-                } else {
-                    cmd  = message.substr( 1, first_space-1 );
-                    args = message.substr( first_space+1 );
-                }
-                UniverseUtil::receivedCustom( cp, local, cmd, args, string() );
-                break;
+            string cmd, args;
+            bool   local = (clt->cltadr.inaddr() == 0x0100007f);
+            if (!acctserver)
+                //NETFIXME: Trusted always true in deathmatch!
+                local = true;
+            //std::replace(message.begin(),message.end(),'#','$');
+            int cp = _Universe->whichPlayerStarship( un );
+            if (cp < 0)
+            {
+                if (local)
+                    cp = 0;
+                else
+                    break;
             }
-            if (!un) break;
-            message = message.substr( 0, 160 );
-            std::replace( message.begin(), message.end(), '#', '$' );
             std::replace( message.begin(), message.end(), '\n', ' ' );
             std::replace( message.begin(), message.end(), '\r', ' ' );
-            netbuf.addString( clt->callsign );
-            netbuf.addString( message );
-            p2.bc_create( CMD_TXTMESSAGE, un->GetSerial(),
-                         netbuf.getData(), netbuf.getDataLength(), SENDRELIABLE,
-                         __FILE__, PSEUDO__LINE__( 1293 ) );
-            //Send to concerned clients
-            zonemgr->broadcast( un->getStarSystem()->GetZone(), un->GetSerial(), &p2, true );
-            COUT<<"Received text message from client "<<clt->callsign<<endl;
+            string::size_type first_space = message.find( ' ' );
+            if (first_space == string::npos)
+            {
+                cmd = message.substr( 1 );
+            }
+            else
+            {
+                cmd  = message.substr( 1, first_space-1 );
+                args = message.substr( first_space+1 );
+            }
+            UniverseUtil::receivedCustom( cp, local, cmd, args, string() );
             break;
         }
+        if (!un) break;
+        message = message.substr( 0, 160 );
+        std::replace( message.begin(), message.end(), '#', '$' );
+        std::replace( message.begin(), message.end(), '\n', ' ' );
+        std::replace( message.begin(), message.end(), '\r', ' ' );
+        netbuf.addString( clt->callsign );
+        netbuf.addString( message );
+        p2.bc_create( CMD_TXTMESSAGE, un->GetSerial(),
+                      netbuf.getData(), netbuf.getDataLength(), SENDRELIABLE,
+                      __FILE__, PSEUDO__LINE__( 1293 ) );
+        //Send to concerned clients
+        zonemgr->broadcast( un->getStarSystem()->GetZone(), un->GetSerial(), &p2, true );
+        COUT<<"Received text message from client "<<clt->callsign<<endl;
+        break;
+    }
     case CMD_LOGOUT:
-        if (clt->loginstate >= Client::LOGGEDIN) {
+        if (clt->loginstate >= Client::LOGGEDIN)
+        {
             COUT<<">>> LOGOUT REQUEST =( serial #"<<packet.getSerial()<<" )= --------------------------------------"<<endl;
             //Client wants to quit the game
             logoutList.push_back( clt );
@@ -835,27 +909,28 @@ void NetServer::processPacket( ClientPtr clt, unsigned char cmd, const AddressIP
         }
         break;
     case CMD_CUSTOM:
+    {
+        if (!clt) break;
+        un = clt->game_unit.GetUnit();
+        int  cp = _Universe->whichPlayerStarship( un );
+        //NETFIXME: CMD_CUSTOM should work with a dead unit.
+        bool trusted = (clt->cltadr.inaddr() == 0x0100007f);
+        if (!acctserver)
+            //NETFIXME: Trusted always true in deathmatch!
+            trusted = true;
+        if (cp < 0)
         {
-            if (!clt) break;
-            un = clt->game_unit.GetUnit();
-            int  cp = _Universe->whichPlayerStarship( un );
-            //NETFIXME: CMD_CUSTOM should work with a dead unit.
-            bool trusted = (clt->cltadr.inaddr() == 0x0100007f);
-            if (!acctserver)
-                //NETFIXME: Trusted always true in deathmatch!
-                trusted = true;
-            if (cp < 0) {
-                if (trusted)
-                    cp = 0;
-                else
-                    break;                     //You died or something... too bad.
-            }
-            string cmd  = netbuf.getString();
-            string args = netbuf.getString();
-            string id   = netbuf.getString();
-            UniverseUtil::receivedCustom( cp, trusted, cmd, args, id );
-            break;
+            if (trusted)
+                cp = 0;
+            else
+                break;                     //You died or something... too bad.
         }
+        string cmd  = netbuf.getString();
+        string args = netbuf.getString();
+        string id   = netbuf.getString();
+        UniverseUtil::receivedCustom( cp, trusted, cmd, args, id );
+        break;
+    }
     //SHOULD NOT BE USED ANYMORE
     case CMD_ASKFILE:
         break;
@@ -863,7 +938,8 @@ void NetServer::processPacket( ClientPtr clt, unsigned char cmd, const AddressIP
         COUT<<"Received a save request for "
             <<clt->callsign<<" ("<<packet_serial<<")..."<<endl;
         un = clt->game_unit.GetUnit();
-        if (un) {
+        if (un)
+        {
             int cpnum = _Universe->whichPlayerStarship( un );
             if (cpnum != -1)
                 saveAccount( cpnum );
@@ -871,7 +947,8 @@ void NetServer::processPacket( ClientPtr clt, unsigned char cmd, const AddressIP
         break;
     case CMD_KILL:
         un = clt->game_unit.GetUnit();
-        if (un) {
+        if (un)
+        {
             un->hull = 0;
             un->Destroy();
         }
@@ -882,54 +959,59 @@ void NetServer::processPacket( ClientPtr clt, unsigned char cmd, const AddressIP
         {
             //Remove the client from its current starsystem
             Unit *oldun = clt->game_unit.GetUnit();
-            if (oldun == NULL || oldun->GetHull() <= 0) {
+            if (oldun == NULL || oldun->GetHull() <= 0)
+            {
                 zonemgr->removeClient( clt );
                 if (oldun) oldun->Kill( true, true );
                 Cockpit *cp = loadCockpit( clt ); //Should find existing cp.
                 loadFromSavegame( clt, cp );
                 //actually cp not used
                 this->addClient( clt );
-            } else {
+            }
+            else
+            {
                 COUT<<clt->callsign<<"'s not quite dead yet laddie. Disallowing respawn\n";
             }
         }
         break;
     case CMD_SHIPDEALER:
-        {
-            std::string cargoName = netbuf.getString();
-            int      type   = netbuf.getChar();
+    {
+        std::string cargoName = netbuf.getString();
+        int      type   = netbuf.getChar();
 
-            Unit    *docked = NULL;
-            Unit    *player = clt->game_unit.GetUnit();
-            if (!player) break;
-            int      cpnum  = _Universe->whichPlayerStarship( player );
-            if (cpnum == -1) break;
-            Cockpit *cp     = _Universe->AccessCockpit( cpnum );
-            {
-                const Unit *un;
-                for (un_kiter ui = player->getStarSystem()->getUnitList().constIterator(); (un = *ui); ++ui)
-                    if ( un->isDocked( player ) ) {
-                        docked = const_cast< Unit* > (un);                      //Stupid STL.
-                        break;
-                    }
-            }
-            if (!docked) break;
-            if (type == Subcmd::BuyShip) {
-                unsigned int cargIndex = UINT_MAX;
-                Cargo *cargptr = docked->GetCargo( cargoName, cargIndex );
-                if (cargIndex == UINT_MAX || !cargptr) break;
-                if (cargptr->price > cp->credits) break;
-                /* // Do the transaction.
-                 *       cp->credits -= cargptr->price;
-                 *       sendCredits(player->GetSerial(), cp->credits);
-                 *       ...
-                 */
-                saveAccount( cpnum );
-                player->hull = 0;
-                player->Destroy();
-            }
-            break;
+        Unit    *docked = NULL;
+        Unit    *player = clt->game_unit.GetUnit();
+        if (!player) break;
+        int      cpnum  = _Universe->whichPlayerStarship( player );
+        if (cpnum == -1) break;
+        Cockpit *cp     = _Universe->AccessCockpit( cpnum );
+        {
+            const Unit *un;
+            for (un_kiter ui = player->getStarSystem()->getUnitList().constIterator(); (un = *ui); ++ui)
+                if ( un->isDocked( player ) )
+                {
+                    docked = const_cast< Unit* > (un);                      //Stupid STL.
+                    break;
+                }
         }
+        if (!docked) break;
+        if (type == Subcmd::BuyShip)
+        {
+            unsigned int cargIndex = UINT_MAX;
+            Cargo *cargptr = docked->GetCargo( cargoName, cargIndex );
+            if (cargIndex == UINT_MAX || !cargptr) break;
+            if (cargptr->price > cp->credits) break;
+            /* // Do the transaction.
+             *       cp->credits -= cargptr->price;
+             *       sendCredits(player->GetSerial(), cp->credits);
+             *       ...
+             */
+            saveAccount( cpnum );
+            player->hull = 0;
+            player->Destroy();
+        }
+        break;
+    }
     case CMD_DOWNLOAD:
         COUT<<">>> CMD DOWNLOAD =( serial #"<<packet.getSerial()<<" )= --------------------------------------"<<endl;
         if (_downloadManagerServer)
@@ -941,7 +1023,8 @@ void NetServer::processPacket( ClientPtr clt, unsigned char cmd, const AddressIP
         //target_serial is in fact the serial of the firing unit (client itself or turret)
         target_serial = netbuf.getSerial();
         un = clt->game_unit.GetUnit();
-        if (!un) {
+        if (!un)
+        {
             COUT<<"ERROR --> Received a fire order for dead UNIT"<<endl;
             break;                     //Don't fire from a dead unit...
         }
@@ -951,10 +1034,14 @@ void NetServer::processPacket( ClientPtr clt, unsigned char cmd, const AddressIP
         //Find the unit
         //Set the concerned mount as ACTIVE and others as INACTIVE
         un = zonemgr->getUnit( target_serial, zone );
-        if (un == NULL) {
+        if (un == NULL)
+        {
             COUT<<"ERROR --> Received a fire order for non-existing UNIT"<<endl;
-        } else {
-            if ( mount_num > un->mounts.size() ) {
+        }
+        else
+        {
+            if ( mount_num > un->mounts.size() )
+            {
                 COUT<<"ERROR recvd information about "<<mount_num<<" mounts, only "<<un->mounts.size()<<" on ship"<<std::endl;
                 mount_num = un->mounts.size();
             }
@@ -962,11 +1049,13 @@ void NetServer::processPacket( ClientPtr clt, unsigned char cmd, const AddressIP
 
             vector< Mount >
             ::iterator i = un->mounts.begin();                            //note to self: if vector<Mount *> is ever changed to vector<Mount> remove the const_ from the const_iterator
-            for (; i != un->mounts.end(); ++i) {
+            for (; i != un->mounts.end(); ++i)
+            {
                 printf( "%.1f, ", (*i).time_to_lock );
                 (*i).status = Mount::INACTIVE;
             }
-            for (unsigned int j = 0; j < mount_num; ++j) {
+            for (unsigned int j = 0; j < mount_num; ++j)
+            {
                 unsigned int mnt = (unsigned int)netbuf.getInt32();
                 if (mnt < un->mounts.size() && mnt >= 0)
                     un->mounts[mnt].status = Mount::ACTIVE;
@@ -986,7 +1075,8 @@ void NetServer::processPacket( ClientPtr clt, unsigned char cmd, const AddressIP
         target_serial = netbuf.getSerial();
         mount_num     = (unsigned int)netbuf.getInt32();
         un = clt->game_unit.GetUnit();
-        if (!un) {
+        if (!un)
+        {
             COUT<<"ERROR --> Received an unfire order for dead UNIT"<<endl;
             break;                     //Don't fire from a dead unit...
         }
@@ -994,18 +1084,23 @@ void NetServer::processPacket( ClientPtr clt, unsigned char cmd, const AddressIP
         //Find the unit
         //Set the concerned mount as ACTIVE and others as INACTIVE
         un   = zonemgr->getUnit( target_serial, zone );
-        if (un == NULL) {
+        if (un == NULL)
+        {
             COUT<<"ERROR --> Received an unfire order for non-existing UNIT"<<endl;
-        } else {
+        }
+        else
+        {
             vector< Mount >
             ::iterator i = un->mounts.begin();                            //note to self: if vector<Mount *> is ever changed to vector<Mount> remove the const_ from the const_iterator
-            if ( mount_num > un->mounts.size() ) {
+            if ( mount_num > un->mounts.size() )
+            {
                 COUT<<"ERROR recvd information about "<<mount_num<<" mounts, only "<<un->mounts.size()<<" on ship"<<std::endl;
                 mount_num = un->mounts.size();
             }
             for (; i != un->mounts.end(); ++i)
                 (*i).status = Mount::INACTIVE;
-            for (unsigned int j = 0; j < mount_num; j++) {
+            for (unsigned int j = 0; j < mount_num; j++)
+            {
                 unsigned int mnt = (unsigned int)netbuf.getInt32();
                 if (mnt < un->mounts.size() && mnt >= 0)
                     un->mounts[mnt].status = Mount::ACTIVE;
@@ -1018,347 +1113,402 @@ void NetServer::processPacket( ClientPtr clt, unsigned char cmd, const AddressIP
         }
         break;
     case CMD_JUMP:
+    {
+        if (clt && clt->loginstate > Client::LOGGEDIN)
         {
-            if (clt && clt->loginstate > Client::LOGGEDIN) {
-                un = clt->game_unit.GetUnit();
-                if (un)
-                    //Do Magic.
-                    un->ActivateJumpDrive();
-            }
-            break;
-            //Everything handled by Magic.  We don't need this any more.
-            string    newsystem        = netbuf.getString();
-#ifdef CRYPTO
-            unsigned char *server_hash = new unsigned char[FileUtil::Hash.DigestSize()];
-            unsigned char *client_hash = netbuf.getBuffer( FileUtil::Hash.DigestSize() );
-#endif
-            cerr<<"ATTEMPTING TO JUMP, BUT JUMP UNIMPLEMENTED"<<endl;
-            bool found = false;
-            NetBuffer   netbuf2;
-            Cockpit    *cp;
             un = clt->game_unit.GetUnit();
-            if (un == NULL) {
-                COUT<<"ERROR --> Received a jump request from non-existing UNIT"<<endl;
-            } else {
-                cp = _Universe->isPlayerStarship( un );
-                //Verify if there really is a jump point to the new starsystem
-                const vector< string > &adjacent = _Universe->getAdjacentStarSystems( cp->savegame->GetStarSystem()+".system" );
-                for (unsigned int i = 0; !found && i < adjacent.size(); i++)
-                    if (adjacent[i] == newsystem)
-                        found = true;
-                if (found) {
-                    //Then activate jump drive to say we want to jump
-                    un->ActivateJumpDrive();
-                    //The jump reply is sent in Unit::jumpReactToCollision()
-                    //In the meantime we create the star system if it isn't loaded yet
-                    //The starsystem maybe loaded for nothing if the client has not enough warp energy to jump
-                    //but that's no big deal since they all will be loaded finally
-                }
-            }
+            if (un)
+                //Do Magic.
+                un->ActivateJumpDrive();
+        }
+        break;
+        //Everything handled by Magic.  We don't need this any more.
+        string    newsystem        = netbuf.getString();
 #ifdef CRYPTO
-            delete[] server_hash;
+        unsigned char *server_hash = new unsigned char[FileUtil::Hash.DigestSize()];
+        unsigned char *client_hash = netbuf.getBuffer( FileUtil::Hash.DigestSize() );
 #endif
-            break;
-        }
-    case CMD_MISSION:
+        cerr<<"ATTEMPTING TO JUMP, BUT JUMP UNIMPLEMENTED"<<endl;
+        bool found = false;
+        NetBuffer   netbuf2;
+        Cockpit    *cp;
+        un = clt->game_unit.GetUnit();
+        if (un == NULL)
         {
-            Unit  *sender       = clt->game_unit.GetUnit();
-            if (!sender) break;
-            int    playernum    = _Universe->whichPlayerStarship( sender );
-            if (playernum < 0) break;
-            unsigned short type = netbuf.getShort();
-            string qualname     = netbuf.getString();
-            int    pos = netbuf.getInt32();
-            if (type == Subcmd::TerminateMission) {
-                //Abstracting number of actual missions running on server.
-                //(added 1 for player's main mission).
-                Mission *mis = Mission::getNthPlayerMission( playernum, (pos+1) );
-                if (mis)
-                    //Found it!
-                    mis->terminateMission();
-            } else if (type == Subcmd::AcceptMission) {
-                string finalScript;
-                unsigned int stringCount = getSaveStringLength( playernum, MISSION_NAMES_LABEL );
-                unsigned int temp = getSaveStringLength( playernum, MISSION_DESC_LABEL );
-                if (temp < stringCount) stringCount = temp;
-                temp = getSaveStringLength( playernum, MISSION_SCRIPTS_LABEL );
-                if (temp < stringCount) stringCount = temp;
-                for (unsigned int i = 0; i < stringCount; i++) {
-                    if (getSaveString( playernum, MISSION_NAMES_LABEL, i ) == qualname) {
-                        finalScript = getSaveString( playernum, MISSION_SCRIPTS_LABEL, i );
-                        eraseSaveString( playernum, MISSION_SCRIPTS_LABEL, i );
-                        eraseSaveString( playernum, MISSION_NAMES_LABEL, i );
-                        eraseSaveString( playernum, MISSION_DESC_LABEL, i );
-                        break;
-                    }
-                }
-                if ( finalScript.empty() ) break;
-                unsigned int oldcp = _Universe->CurrentCockpit();
-                _Universe->SetActiveCockpit( playernum );
-                _Universe->pushActiveStarSystem( _Universe->AccessCockpit()->activeStarSystem );
-                string nission     = string( "#" )+qualname;
-                LoadMission( nission.c_str(), finalScript, false );
-                _Universe->popActiveStarSystem();
-                _Universe->SetActiveCockpit( oldcp );
-            }
-            break;
+            COUT<<"ERROR --> Received a jump request from non-existing UNIT"<<endl;
         }
-    case CMD_COMM:
+        else
         {
-            ObjSerial send_to = netbuf.getSerial();
-            Unit     *targ    = UniverseUtil::GetUnitFromSerial( send_to );
-            if (!targ)
-                break;
-            char  newEdge     = netbuf.getChar();
-            int   node   = netbuf.getInt32();
-            Unit *parent = clt->game_unit.GetUnit();
-            if (!parent)
-                break;
-            FSM  *fsm    = FactionUtil::GetConversation( parent->faction, targ->faction );
-            int   oldNode;
-            int   newNode;
-            if (newEdge < 0) {
-                oldNode = fsm->getDefaultState( parent->getRelation( targ ) );
-                if ( node < 0 || (unsigned int) node >= fsm->nodes.size() )
-                    break;
-                newNode = node; //fixme make sure it's a default node, or go to a special one.
-            } else {
-                oldNode = node; //fixme validate
-                if ( oldNode < 0 || (unsigned int) node >= fsm->nodes.size() )
-                    break;
-                if ( (unsigned int) newEdge >= fsm->nodes[oldNode].edges.size() )
-                    break;
-                newNode = fsm->nodes[oldNode].edges[newEdge];
-            }
-            unsigned char sex = 0;
-            if (parent->pilot)
-                sex = parent->pilot->getGender();
-            CommunicationMessage c( parent, targ, oldNode, newNode, NULL, sex );
-            Order *oo = targ->getAIState();
-            if (oo)
-                oo->Communicate( c );
-            break;
-        }
-    case CMD_CARGOUPGRADE:
-        {
-            ObjSerial   buyer_ser  = netbuf.getSerial();
-            ObjSerial   seller_ser = netbuf.getSerial();
-            int quantity = netbuf.getInt32();
-            std::string cargoName  = netbuf.getString();
-            int      mountOffset   = ( (int) netbuf.getInt32() );
-            int      subunitOffset = ( (int) netbuf.getInt32() );
-            Unit    *sender     = clt->game_unit.GetUnit();
-            Cockpit *sender_cpt = _Universe->isPlayerStarship( sender );
-            if (!sender || !sender->getStarSystem() || !sender_cpt) break;
-            zone = sender->getStarSystem()->GetZone();
-            unsigned int cargIndex = UINT_MAX;
-            Unit *seller = zonemgr->getUnit( seller_ser, zone );
-            Unit *buyer  = zonemgr->getUnit( buyer_ser, zone );
-            Unit *docked = NULL;
+            cp = _Universe->isPlayerStarship( un );
+            //Verify if there really is a jump point to the new starsystem
+            const vector< string > &adjacent = _Universe->getAdjacentStarSystems( cp->savegame->GetStarSystem()+".system" );
+            for (unsigned int i = 0; !found && i < adjacent.size(); i++)
+                if (adjacent[i] == newsystem)
+                    found = true;
+            if (found)
             {
-                const Unit *un;
-                for (un_kiter ui = sender->getStarSystem()->getUnitList().constIterator(); (un = *ui); ++ui) {
-                    if ( un->isDocked( sender ) ) {
-                        docked = const_cast< Unit* > (un); //Stupid STL.
-                        break;
-                    }
-                }
+                //Then activate jump drive to say we want to jump
+                un->ActivateJumpDrive();
+                //The jump reply is sent in Unit::jumpReactToCollision()
+                //In the meantime we create the star system if it isn't loaded yet
+                //The starsystem maybe loaded for nothing if the client has not enough warp energy to jump
+                //but that's no big deal since they all will be loaded finally
             }
-            if (docked) {
-                if (seller == sender) {
-                    buyer = docked;
-                } else {
-                    seller = docked;
-                    buyer  = sender;
-                }
-            } else {
-                if (seller == sender)
-                    buyer = NULL;
-                else
-                    seller = NULL;
-            }
-            Cockpit *buyer_cpt   = _Universe->isPlayerStarship( buyer );
-            Cockpit *seller_cpt  = _Universe->isPlayerStarship( seller );
-
-            bool     sellerEmpty = false;
-            Cargo   *cargptr     = NULL;
-            if (seller)
-                cargptr = seller->GetCargo( cargoName, cargIndex );
-            if (!cargptr) {
-                cargIndex   = UINT_MAX;
-                cargptr     = GetMasterPartList( cargoName.c_str() );
-                sellerEmpty = true;
-                if (!cargptr) {
-                    fprintf( stderr, "Player id %d attempted transaction with NULL cargo %s, %d->%d\n",
-                             sender ? sender->GetSerial() : -1, cargoName.c_str(),
-                             buyer ? buyer->GetSerial() : -1, seller ? seller->GetSerial() : -1 );
-                    //Return the credits.
-                    sendCredits( sender->GetSerial(), sender_cpt->credits );
+        }
+#ifdef CRYPTO
+        delete[] server_hash;
+#endif
+        break;
+    }
+    case CMD_MISSION:
+    {
+        Unit  *sender       = clt->game_unit.GetUnit();
+        if (!sender) break;
+        int    playernum    = _Universe->whichPlayerStarship( sender );
+        if (playernum < 0) break;
+        unsigned short type = netbuf.getShort();
+        string qualname     = netbuf.getString();
+        int    pos = netbuf.getInt32();
+        if (type == Subcmd::TerminateMission)
+        {
+            //Abstracting number of actual missions running on server.
+            //(added 1 for player's main mission).
+            Mission *mis = Mission::getNthPlayerMission( playernum, (pos+1) );
+            if (mis)
+                //Found it!
+                mis->terminateMission();
+        }
+        else if (type == Subcmd::AcceptMission)
+        {
+            string finalScript;
+            unsigned int stringCount = getSaveStringLength( playernum, MISSION_NAMES_LABEL );
+            unsigned int temp = getSaveStringLength( playernum, MISSION_DESC_LABEL );
+            if (temp < stringCount) stringCount = temp;
+            temp = getSaveStringLength( playernum, MISSION_SCRIPTS_LABEL );
+            if (temp < stringCount) stringCount = temp;
+            for (unsigned int i = 0; i < stringCount; i++)
+            {
+                if (getSaveString( playernum, MISSION_NAMES_LABEL, i ) == qualname)
+                {
+                    finalScript = getSaveString( playernum, MISSION_SCRIPTS_LABEL, i );
+                    eraseSaveString( playernum, MISSION_SCRIPTS_LABEL, i );
+                    eraseSaveString( playernum, MISSION_NAMES_LABEL, i );
+                    eraseSaveString( playernum, MISSION_DESC_LABEL, i );
                     break;
                 }
             }
-            Cargo carg       = *cargptr;
-            bool  upgrade    = false;
-            bool  weapon     = false;
-            bool  didMoney   = false;
-            bool  didUpgrade = false;
-            bool  repair     = false;
-            if (carg.GetCategory().find( "upgrades" ) == 0) {
-                upgrade = true;
-                if ( isWeapon( carg.GetCategory() ) )
-                    weapon = true;
-                else if (!quantity && buyer == sender)
-                    repair = true;
+            if ( finalScript.empty() ) break;
+            unsigned int oldcp = _Universe->CurrentCockpit();
+            _Universe->SetActiveCockpit( playernum );
+            _Universe->pushActiveStarSystem( _Universe->AccessCockpit()->activeStarSystem );
+            string nission     = string( "#" )+qualname;
+            LoadMission( nission.c_str(), finalScript, false );
+            _Universe->popActiveStarSystem();
+            _Universe->SetActiveCockpit( oldcp );
+        }
+        break;
+    }
+    case CMD_COMM:
+    {
+        ObjSerial send_to = netbuf.getSerial();
+        Unit     *targ    = UniverseUtil::GetUnitFromSerial( send_to );
+        if (!targ)
+            break;
+        char  newEdge     = netbuf.getChar();
+        int   node   = netbuf.getInt32();
+        Unit *parent = clt->game_unit.GetUnit();
+        if (!parent)
+            break;
+        FSM  *fsm    = FactionUtil::GetConversation( parent->faction, targ->faction );
+        int   oldNode;
+        int   newNode;
+        if (newEdge < 0)
+        {
+            oldNode = fsm->getDefaultState( parent->getRelation( targ ) );
+            if ( node < 0 || (unsigned int) node >= fsm->nodes.size() )
+                break;
+            newNode = node; //fixme make sure it's a default node, or go to a special one.
+        }
+        else
+        {
+            oldNode = node; //fixme validate
+            if ( oldNode < 0 || (unsigned int) node >= fsm->nodes.size() )
+                break;
+            if ( (unsigned int) newEdge >= fsm->nodes[oldNode].edges.size() )
+                break;
+            newNode = fsm->nodes[oldNode].edges[newEdge];
+        }
+        unsigned char sex = 0;
+        if (parent->pilot)
+            sex = parent->pilot->getGender();
+        CommunicationMessage c( parent, targ, oldNode, newNode, NULL, sex );
+        Order *oo = targ->getAIState();
+        if (oo)
+            oo->Communicate( c );
+        break;
+    }
+    case CMD_CARGOUPGRADE:
+    {
+        ObjSerial   buyer_ser  = netbuf.getSerial();
+        ObjSerial   seller_ser = netbuf.getSerial();
+        int quantity = netbuf.getInt32();
+        std::string cargoName  = netbuf.getString();
+        int      mountOffset   = ( (int) netbuf.getInt32() );
+        int      subunitOffset = ( (int) netbuf.getInt32() );
+        Unit    *sender     = clt->game_unit.GetUnit();
+        Cockpit *sender_cpt = _Universe->isPlayerStarship( sender );
+        if (!sender || !sender->getStarSystem() || !sender_cpt) break;
+        zone = sender->getStarSystem()->GetZone();
+        unsigned int cargIndex = UINT_MAX;
+        Unit *seller = zonemgr->getUnit( seller_ser, zone );
+        Unit *buyer  = zonemgr->getUnit( buyer_ser, zone );
+        Unit *docked = NULL;
+        {
+            const Unit *un;
+            for (un_kiter ui = sender->getStarSystem()->getUnitList().constIterator(); (un = *ui); ++ui)
+            {
+                if ( un->isDocked( sender ) )
+                {
+                    docked = const_cast< Unit* > (un); //Stupid STL.
+                    break;
+                }
             }
-            if (weapon && quantity) {
+        }
+        if (docked)
+        {
+            if (seller == sender)
+            {
+                buyer = docked;
+            }
+            else
+            {
+                seller = docked;
+                buyer  = sender;
+            }
+        }
+        else
+        {
+            if (seller == sender)
+                buyer = NULL;
+            else
+                seller = NULL;
+        }
+        Cockpit *buyer_cpt   = _Universe->isPlayerStarship( buyer );
+        Cockpit *seller_cpt  = _Universe->isPlayerStarship( seller );
+
+        bool     sellerEmpty = false;
+        Cargo   *cargptr     = NULL;
+        if (seller)
+            cargptr = seller->GetCargo( cargoName, cargIndex );
+        if (!cargptr)
+        {
+            cargIndex   = UINT_MAX;
+            cargptr     = GetMasterPartList( cargoName.c_str() );
+            sellerEmpty = true;
+            if (!cargptr)
+            {
+                fprintf( stderr, "Player id %d attempted transaction with NULL cargo %s, %d->%d\n",
+                         sender ? sender->GetSerial() : -1, cargoName.c_str(),
+                         buyer ? buyer->GetSerial() : -1, seller ? seller->GetSerial() : -1 );
                 //Return the credits.
                 sendCredits( sender->GetSerial(), sender_cpt->credits );
                 break;
             }
-            if (!weapon && sellerEmpty) {
-                //Cargo does not exist... allowed only for mounted cargo.
-                sendCredits( sender->GetSerial(), sender_cpt->credits );
-                break;
-            }
-            if (!weapon && !quantity && !repair) {
-                sendCredits( sender->GetSerial(), sender_cpt->credits );
-                break;
-            }
-            if (seller == NULL) {
-                sendCredits( sender->GetSerial(), sender_cpt->credits );
-                break;
-            }
-            //Guaranteed: seller, sender, sender_cpt are not NULL.
-            if (buyer == NULL) {
-                if (cargIndex != UINT_MAX)
-                    seller->EjectCargo( cargIndex );
-                quantity = 0;               //So that the cargo won't be bought/sold again.
-            }
-            if (quantity && cargIndex != UINT_MAX) {
-                //Guaranteed: buyer, sender, seller, and one cockpit are not null.
-                //Guaranteed: Not a weapon: (weapon && quantity) is disallowed.
-                _Universe->netLock( true );
-                if (buyer == sender && buyer_cpt) {
-                    float  creds_before = buyer_cpt->credits;
-                    float &creds = buyer_cpt->credits;
-                    if ( buyer->BuyCargo( cargIndex, quantity, seller, creds ) ) {
-                        didMoney = true;
-                        if (seller_cpt)
-                            seller_cpt->credits += (creds_before-creds);
-                    }
-                } else if (seller == sender && seller_cpt) {
-                    float  creds_before = seller_cpt->credits;
-                    float &creds   = seller_cpt->credits;
-                    bool   success = false;
-                    if ( !carg.GetMissionFlag() )
-                        success = seller->SellCargo( cargIndex, quantity, creds, carg, buyer );
-                    else
-                        success = seller->RemoveCargo( cargIndex, quantity, true );
-                    didMoney = success;
-                    if (success)
-                        if (buyer_cpt)
-                            buyer_cpt->credits += (creds_before-creds);
-                }
-                _Universe->netLock( false );
-            }
-            if ( (didMoney || weapon) && upgrade && (seller == sender || buyer == sender) ) {
-                double percent;                 //not used.
-                const Unit *unitCarg = getUnitFromUpgradeName( carg.GetContent(), seller->faction );
-                if (!unitCarg) {
-                    //Return the credits.
-                    sendCredits( sender->GetSerial(), sender_cpt->credits );
-                    break;                     //not an upgrade, and already did cargo transactions.
-                }
-                int multAddMode = GetModeFromName( carg.GetContent().c_str() );
-
-                //Now we're sure it's an authentic upgrade...
-                //Wow! So much code just to perform an upgrade!
-
-                string templateName;
-                int    faction; //FIXME If neither the seller nor the buyer is the sender, faction is uninitialized!!!
-                faction = 0; //FIXME This line temporarily added by chuck_starchaser
-                const string unitDir = GetUnitDir( sender->name.get().c_str() );
-                if (seller == sender) {
-                    templateName = unitDir+".blank";
-                    faction = seller->faction;
-                } else if (buyer == sender) {
-                    faction = buyer->faction;
-                    templateName = unitDir+".template";
-                }
-                //Get the "limiter" for the upgrade.  Stats can't increase more than this.
-                const Unit *templateUnit = UnitConstCache::getCachedConst( StringIntKey( templateName, faction ) ); //FIXME faction uninitialized!!!
-                if (!templateUnit)
-                    templateUnit = UnitConstCache::setCachedConst( StringIntKey( templateName, faction ), //FIXME faction uninitialized!!!
-                                                                  UnitFactory::createUnit( templateName.c_str(), true, faction ) );
-                if (templateUnit->name == LOAD_FAILED)
-                    templateUnit = NULL;
-                if (unitCarg->name == LOAD_FAILED) {
-                    //Return money.
-                    sendCredits( sender->GetSerial(), sender_cpt->credits );
-                    break;
-                }
-                if (seller == sender) {
-                    //Selling it... Downgrade time!
-                    if ( seller->canDowngrade( unitCarg, mountOffset, subunitOffset, percent, templateUnit ) ) {
-                        if (weapon) {
-                            if (seller_cpt) {
-                                didMoney = true;
-                                seller_cpt->credits += carg.GetPrice();
-                            }
-                            if (buyer && didMoney)
-                                buyer->AddCargo( carg, true );
-                        }
-                        if (didMoney) {
-                            _Universe->netLock( true );
-                            seller->Downgrade( unitCarg, mountOffset, subunitOffset, percent, templateUnit );
-                            _Universe->netLock( false );
-                            didUpgrade = true;
-                        }
-                    }
-                } else if (buyer == sender) {
-                    //Buying it... Upgrade time!
-                    if ( buyer->canUpgrade( unitCarg, mountOffset, subunitOffset, multAddMode, true, percent,
-                                            templateUnit ) ) {
-                        if (weapon) {
-                            if ( buyer_cpt && buyer_cpt->credits > carg.GetPrice() ) {
-                                buyer_cpt->credits -= carg.GetPrice();
-                                didMoney = true;
-                            }
-                            if (seller && didMoney && cargIndex != UINT_MAX)
-                                seller->RemoveCargo( cargIndex, 1, true );
-                        }
-                        if (didMoney) {
-                            _Universe->netLock( true );
-                            buyer->Upgrade( unitCarg, mountOffset, subunitOffset, multAddMode, true, percent, templateUnit );
-                            _Universe->netLock( false );
-                            didUpgrade = true;
-                        }
-                    }
-                }
-            }
-            if (repair && !didMoney)
-                didMoney = sender->RepairUpgradeCargo( &carg, seller, sender_cpt ? &sender_cpt->credits : NULL );
-            if (sender_cpt)
-                //The client always needs to get credits back, no matter what.
-                sendCredits( sender->GetSerial(), sender_cpt->credits );
-            //Otherwise, it will get stuck with 0 credits.
-            if (didMoney) {
-                ObjSerial buyer_ser = buyer ? buyer->GetSerial() : 0;
-                if (!upgrade) {
-                    BroadcastCargoUpgrade( sender->GetSerial(), buyer_ser, seller->GetSerial(), cargoName,
-                                           carg.GetPrice(), carg.GetMass(), carg.GetVolume(), carg.GetMissionFlag(),
-                                           quantity, 0, 0, zone );
-                } else if (didUpgrade) {
-                    BroadcastCargoUpgrade( sender->GetSerial(), buyer_ser, seller->GetSerial(), cargoName,
-                                           carg.GetPrice(), carg.GetMass(), carg.GetVolume(), false,
-                                           weapon || repair ? 0 : 1, mountOffset, subunitOffset, zone );
-                }
-            }
-            //Completed transaction.
-            //Send player new amount of credits.
-            //Broadcast out cargo request.
+        }
+        Cargo carg       = *cargptr;
+        bool  upgrade    = false;
+        bool  weapon     = false;
+        bool  didMoney   = false;
+        bool  didUpgrade = false;
+        bool  repair     = false;
+        if (carg.GetCategory().find( "upgrades" ) == 0)
+        {
+            upgrade = true;
+            if ( isWeapon( carg.GetCategory() ) )
+                weapon = true;
+            else if (!quantity && buyer == sender)
+                repair = true;
+        }
+        if (weapon && quantity)
+        {
+            //Return the credits.
+            sendCredits( sender->GetSerial(), sender_cpt->credits );
             break;
         }
+        if (!weapon && sellerEmpty)
+        {
+            //Cargo does not exist... allowed only for mounted cargo.
+            sendCredits( sender->GetSerial(), sender_cpt->credits );
+            break;
+        }
+        if (!weapon && !quantity && !repair)
+        {
+            sendCredits( sender->GetSerial(), sender_cpt->credits );
+            break;
+        }
+        if (seller == NULL)
+        {
+            sendCredits( sender->GetSerial(), sender_cpt->credits );
+            break;
+        }
+        //Guaranteed: seller, sender, sender_cpt are not NULL.
+        if (buyer == NULL)
+        {
+            if (cargIndex != UINT_MAX)
+                seller->EjectCargo( cargIndex );
+            quantity = 0;               //So that the cargo won't be bought/sold again.
+        }
+        if (quantity && cargIndex != UINT_MAX)
+        {
+            //Guaranteed: buyer, sender, seller, and one cockpit are not null.
+            //Guaranteed: Not a weapon: (weapon && quantity) is disallowed.
+            _Universe->netLock( true );
+            if (buyer == sender && buyer_cpt)
+            {
+                float  creds_before = buyer_cpt->credits;
+                float &creds = buyer_cpt->credits;
+                if ( buyer->BuyCargo( cargIndex, quantity, seller, creds ) )
+                {
+                    didMoney = true;
+                    if (seller_cpt)
+                        seller_cpt->credits += (creds_before-creds);
+                }
+            }
+            else if (seller == sender && seller_cpt)
+            {
+                float  creds_before = seller_cpt->credits;
+                float &creds   = seller_cpt->credits;
+                bool   success = false;
+                if ( !carg.GetMissionFlag() )
+                    success = seller->SellCargo( cargIndex, quantity, creds, carg, buyer );
+                else
+                    success = seller->RemoveCargo( cargIndex, quantity, true );
+                didMoney = success;
+                if (success)
+                    if (buyer_cpt)
+                        buyer_cpt->credits += (creds_before-creds);
+            }
+            _Universe->netLock( false );
+        }
+        if ( (didMoney || weapon) && upgrade && (seller == sender || buyer == sender) )
+        {
+            double percent;                 //not used.
+            const Unit *unitCarg = getUnitFromUpgradeName( carg.GetContent(), seller->faction );
+            if (!unitCarg)
+            {
+                //Return the credits.
+                sendCredits( sender->GetSerial(), sender_cpt->credits );
+                break;                     //not an upgrade, and already did cargo transactions.
+            }
+            int multAddMode = GetModeFromName( carg.GetContent().c_str() );
+
+            //Now we're sure it's an authentic upgrade...
+            //Wow! So much code just to perform an upgrade!
+
+            string templateName;
+            int    faction; //FIXME If neither the seller nor the buyer is the sender, faction is uninitialized!!!
+            faction = 0; //FIXME This line temporarily added by chuck_starchaser
+            const string unitDir = GetUnitDir( sender->name.get().c_str() );
+            if (seller == sender)
+            {
+                templateName = unitDir+".blank";
+                faction = seller->faction;
+            }
+            else if (buyer == sender)
+            {
+                faction = buyer->faction;
+                templateName = unitDir+".template";
+            }
+            //Get the "limiter" for the upgrade.  Stats can't increase more than this.
+            const Unit *templateUnit = UnitConstCache::getCachedConst( StringIntKey( templateName, faction ) ); //FIXME faction uninitialized!!!
+            if (!templateUnit)
+                templateUnit = UnitConstCache::setCachedConst( StringIntKey( templateName, faction ), //FIXME faction uninitialized!!!
+                               UnitFactory::createUnit( templateName.c_str(), true, faction ) );
+            if (templateUnit->name == LOAD_FAILED)
+                templateUnit = NULL;
+            if (unitCarg->name == LOAD_FAILED)
+            {
+                //Return money.
+                sendCredits( sender->GetSerial(), sender_cpt->credits );
+                break;
+            }
+            if (seller == sender)
+            {
+                //Selling it... Downgrade time!
+                if ( seller->canDowngrade( unitCarg, mountOffset, subunitOffset, percent, templateUnit ) )
+                {
+                    if (weapon)
+                    {
+                        if (seller_cpt)
+                        {
+                            didMoney = true;
+                            seller_cpt->credits += carg.GetPrice();
+                        }
+                        if (buyer && didMoney)
+                            buyer->AddCargo( carg, true );
+                    }
+                    if (didMoney)
+                    {
+                        _Universe->netLock( true );
+                        seller->Downgrade( unitCarg, mountOffset, subunitOffset, percent, templateUnit );
+                        _Universe->netLock( false );
+                        didUpgrade = true;
+                    }
+                }
+            }
+            else if (buyer == sender)
+            {
+                //Buying it... Upgrade time!
+                if ( buyer->canUpgrade( unitCarg, mountOffset, subunitOffset, multAddMode, true, percent,
+                                        templateUnit ) )
+                {
+                    if (weapon)
+                    {
+                        if ( buyer_cpt && buyer_cpt->credits > carg.GetPrice() )
+                        {
+                            buyer_cpt->credits -= carg.GetPrice();
+                            didMoney = true;
+                        }
+                        if (seller && didMoney && cargIndex != UINT_MAX)
+                            seller->RemoveCargo( cargIndex, 1, true );
+                    }
+                    if (didMoney)
+                    {
+                        _Universe->netLock( true );
+                        buyer->Upgrade( unitCarg, mountOffset, subunitOffset, multAddMode, true, percent, templateUnit );
+                        _Universe->netLock( false );
+                        didUpgrade = true;
+                    }
+                }
+            }
+        }
+        if (repair && !didMoney)
+            didMoney = sender->RepairUpgradeCargo( &carg, seller, sender_cpt ? &sender_cpt->credits : NULL );
+        if (sender_cpt)
+            //The client always needs to get credits back, no matter what.
+            sendCredits( sender->GetSerial(), sender_cpt->credits );
+        //Otherwise, it will get stuck with 0 credits.
+        if (didMoney)
+        {
+            ObjSerial buyer_ser = buyer ? buyer->GetSerial() : 0;
+            if (!upgrade)
+            {
+                BroadcastCargoUpgrade( sender->GetSerial(), buyer_ser, seller->GetSerial(), cargoName,
+                                       carg.GetPrice(), carg.GetMass(), carg.GetVolume(), carg.GetMissionFlag(),
+                                       quantity, 0, 0, zone );
+            }
+            else if (didUpgrade)
+            {
+                BroadcastCargoUpgrade( sender->GetSerial(), buyer_ser, seller->GetSerial(), cargoName,
+                                       carg.GetPrice(), carg.GetMass(), carg.GetVolume(), false,
+                                       weapon || repair ? 0 : 1, mountOffset, subunitOffset, zone );
+            }
+        }
+        //Completed transaction.
+        //Send player new amount of credits.
+        //Broadcast out cargo request.
+        break;
+    }
     case CMD_TARGET:
         //Received a computer targetting request
         target_serial = netbuf.getSerial();
@@ -1367,7 +1517,8 @@ void NetServer::processPacket( ClientPtr clt, unsigned char cmd, const AddressIP
             break;
         {
             StarSystem *ss = unclt->getStarSystem();
-            if (!ss) {
+            if (!ss)
+            {
                 COUT<<"StarSystem for client "<<clt->callsign
                     <<", "<<unclt->GetSerial()<<" not found!"<<endl;
                 break;
@@ -1383,16 +1534,16 @@ void NetServer::processPacket( ClientPtr clt, unsigned char cmd, const AddressIP
         _Universe->popActiveStarSystem();
         break;
     case CMD_CLOAK:
-        {
-            //Received a computer targetting request
-            //target_serial = netbuf.getSerial();
-            char engage = netbuf.getChar();
-            unclt = clt->game_unit.GetUnit();
-            if (!unclt)
-                break;
-            unclt->Cloak( engage );
+    {
+        //Received a computer targetting request
+        //target_serial = netbuf.getSerial();
+        char engage = netbuf.getChar();
+        unclt = clt->game_unit.GetUnit();
+        if (!unclt)
             break;
-        }
+        unclt->Cloak( engage );
+        break;
+    }
     case CMD_SCAN:
         //Received a target scan request
         //NETFIXME: WE SHOULD FIND A WAY TO CHECK THAT THE CLIENT HAS THE RIGHT SCAN SYSTEM FOR THAT
@@ -1422,22 +1573,22 @@ void NetServer::processPacket( ClientPtr clt, unsigned char cmd, const AddressIP
         //netbuf.addFloat( distance);
         break;
     case CMD_STARTNETCOMM:
-        {
-            un = clt->game_unit.GetUnit();
-            if (!un) break;
-            float freq = netbuf.getFloat();
-            clt->comm_freq = freq;
-            clt->secured   = netbuf.getChar();
-            clt->webcam    = netbuf.getChar();
-            clt->portaudio = netbuf.getChar();
-            //Broadcast players with same frequency that there is a new one listening to it
-            p2.bc_create( packet.getCommand(), packet_serial,
-                         packet.getData(), packet.getDataLength(), SENDRELIABLE,
-                         __FILE__, PSEUDO__LINE__( 1293 ) );
-            //Send to concerned clients
-            zonemgr->broadcast( un->getStarSystem()->GetZone(), packet_serial, &p2, true );
-            break;
-        }
+    {
+        un = clt->game_unit.GetUnit();
+        if (!un) break;
+        float freq = netbuf.getFloat();
+        clt->comm_freq = freq;
+        clt->secured   = netbuf.getChar();
+        clt->webcam    = netbuf.getChar();
+        clt->portaudio = netbuf.getChar();
+        //Broadcast players with same frequency that there is a new one listening to it
+        p2.bc_create( packet.getCommand(), packet_serial,
+                      packet.getData(), packet.getDataLength(), SENDRELIABLE,
+                      __FILE__, PSEUDO__LINE__( 1293 ) );
+        //Send to concerned clients
+        zonemgr->broadcast( un->getStarSystem()->GetZone(), packet_serial, &p2, true );
+        break;
+    }
     case CMD_STOPNETCOMM:
         un = clt->game_unit.GetUnit();
         if (!un) break;
@@ -1445,8 +1596,8 @@ void NetServer::processPacket( ClientPtr clt, unsigned char cmd, const AddressIP
         //float freq = netbuf.getFloat();
         //Broadcast players with same frequency that this client is leaving the comm session
         p2.bc_create( packet.getCommand(), packet_serial,
-                     packet.getData(), packet.getDataLength(), SENDRELIABLE,
-                     __FILE__, PSEUDO__LINE__( 1302 ) );
+                      packet.getData(), packet.getDataLength(), SENDRELIABLE,
+                      __FILE__, PSEUDO__LINE__( 1302 ) );
         //Send to concerned clients
         zonemgr->broadcast( un->getStarSystem()->GetZone(), packet_serial, &p2, true );
         break;
@@ -1455,8 +1606,8 @@ void NetServer::processPacket( ClientPtr clt, unsigned char cmd, const AddressIP
         if (!un) break;
         //Broadcast sound sample to the clients in the same zone and the have PortAudio support
         p2.bc_create( packet.getCommand(), packet_serial,
-                     packet.getData(), packet.getDataLength(), SENDRELIABLE,
-                     __FILE__, PSEUDO__LINE__( 1341 ) );
+                      packet.getData(), packet.getDataLength(), SENDRELIABLE,
+                      __FILE__, PSEUDO__LINE__( 1341 ) );
         zonemgr->broadcastSample( un->getStarSystem()->GetZone(), packet_serial, &p2, clt->comm_freq );
 #if 0
     //NETFIXME maybe this code just works fine
@@ -1465,63 +1616,75 @@ void NetServer::processPacket( ClientPtr clt, unsigned char cmd, const AddressIP
         if (!un) break;
         //Broadcast sound sample to the clients in the same zone and the have PortAudio support
         p2.bc_create( packet.getCommand(), packet_serial, ,
-                     SENDRELIABLE,
-                     __FILE__, PSEUDO__LINE__( 1341 ) );
+                      SENDRELIABLE,
+                      __FILE__, PSEUDO__LINE__( 1341 ) );
         zonemgr->broadcastText( un->getStarSystem()->GetZone(), packet_serial, &p2, clt->comm_freq );
 #endif
     case CMD_DOCK:
+    {
+        Unit     *docking_unit;
+        un = clt->game_unit.GetUnit();
+        if (!un) break;
+        ObjSerial utdwserial   = netbuf.getSerial();
+        unsigned short zonenum = un->getStarSystem()->GetZone();
+        cerr<<"RECEIVED a DockRequest from unit "<<un->GetSerial()<<" to unit "<<utdwserial<<" in zone "<<zonenum<<endl;
+        docking_unit = zonemgr->getUnit( utdwserial, zonenum );
+        if (docking_unit)
         {
-            Unit     *docking_unit;
-            un = clt->game_unit.GetUnit();
-            if (!un) break;
-            ObjSerial utdwserial   = netbuf.getSerial();
-            unsigned short zonenum = un->getStarSystem()->GetZone();
-            cerr<<"RECEIVED a DockRequest from unit "<<un->GetSerial()<<" to unit "<<utdwserial<<" in zone "<<zonenum<<endl;
-            docking_unit = zonemgr->getUnit( utdwserial, zonenum );
-            if (docking_unit) {
-                docking_unit->RequestClearance( un );
-                int dockport = un->Dock( docking_unit )-1;                  //For some reason Unit::Dock adds 1.
-                if (dockport >= 0) {
-                    this->sendDockAuthorize( un->GetSerial(), utdwserial, dockport, zonenum );
-                    int cpt = UnitUtil::isPlayerStarship( un );
-                    if (cpt >= 0) {
-                        vector< string >vec;
-                        vec.push_back( docking_unit->name );
-                        saveStringList( cpt, mission_key, vec );
-                    }
-                } else {
-                    this->sendDockDeny( un->GetSerial(), zonenum );
+            docking_unit->RequestClearance( un );
+            int dockport = un->Dock( docking_unit )-1;                  //For some reason Unit::Dock adds 1.
+            if (dockport >= 0)
+            {
+                this->sendDockAuthorize( un->GetSerial(), utdwserial, dockport, zonenum );
+                int cpt = UnitUtil::isPlayerStarship( un );
+                if (cpt >= 0)
+                {
+                    vector< string >vec;
+                    vec.push_back( docking_unit->name );
+                    saveStringList( cpt, mission_key, vec );
                 }
-            } else {
-                cerr<<"!!! ERROR : cannot dock with unit serial="<<utdwserial<<endl;
             }
-            break;
+            else
+            {
+                this->sendDockDeny( un->GetSerial(), zonenum );
+            }
         }
+        else
+        {
+            cerr<<"!!! ERROR : cannot dock with unit serial="<<utdwserial<<endl;
+        }
+        break;
+    }
     case CMD_UNDOCK:
+    {
+        Unit     *docking_unit;
+        un = clt->game_unit.GetUnit();
+        if (!un) break;
+        ObjSerial utdwserial   = netbuf.getSerial();
+        unsigned short zonenum = un->getStarSystem()->GetZone();
+        cerr<<"RECEIVED an UnDockRequest from unit "<<un->GetSerial()<<" to unit "<<utdwserial<<" in zone "<<zonenum<<endl;
+        docking_unit = zonemgr->getUnit( utdwserial, zonenum );
+        if (docking_unit)
         {
-            Unit     *docking_unit;
-            un = clt->game_unit.GetUnit();
-            if (!un) break;
-            ObjSerial utdwserial   = netbuf.getSerial();
-            unsigned short zonenum = un->getStarSystem()->GetZone();
-            cerr<<"RECEIVED an UnDockRequest from unit "<<un->GetSerial()<<" to unit "<<utdwserial<<" in zone "<<zonenum<<endl;
-            docking_unit = zonemgr->getUnit( utdwserial, zonenum );
-            if (docking_unit) {
-                bool undocked = un->UnDock( docking_unit );
-                if (undocked) {
-                    int cpt = UnitUtil::isPlayerStarship( un );
-                    if (un && cpt >= 0) {
-                        vector< string >vec;
-                        vec.push_back( string() );
-                        saveStringList( cpt, mission_key, vec );
-                    }
-                    this->sendUnDock( un->GetSerial(), utdwserial, zonenum );
+            bool undocked = un->UnDock( docking_unit );
+            if (undocked)
+            {
+                int cpt = UnitUtil::isPlayerStarship( un );
+                if (un && cpt >= 0)
+                {
+                    vector< string >vec;
+                    vec.push_back( string() );
+                    saveStringList( cpt, mission_key, vec );
                 }
-            } else {
-                cerr<<"!!! ERROR : cannot dock with unit serial="<<utdwserial<<endl;
+                this->sendUnDock( un->GetSerial(), utdwserial, zonenum );
             }
-            break;
         }
+        else
+        {
+            cerr<<"!!! ERROR : cannot dock with unit serial="<<utdwserial<<endl;
+        }
+        break;
+    }
     default:
         un = clt->game_unit.GetUnit();
         COUT<<"Unknown command "<<Cmd( cmd )<<" ! "<<"from client ";
@@ -1544,8 +1707,8 @@ void NetServer::broadcast( NetBuffer &netbuf, ObjSerial serial, unsigned short z
 {
     Packet p;
     p.bc_create( command, serial,
-                netbuf.getData(), netbuf.getDataLength(), SENDRELIABLE,
-                __FILE__, PSEUDO__LINE__( 902 ) );
+                 netbuf.getData(), netbuf.getDataLength(), SENDRELIABLE,
+                 __FILE__, PSEUDO__LINE__( 902 ) );
     zonemgr->broadcast( zone, 0, &p, isTcp );
 }
 
@@ -1559,7 +1722,8 @@ void NetServer::closeAllSockets()
 {
     tcpNetwork->disconnect( "Closing sockettcp" );
     udpNetwork->disconnect( "Closing socketudp" );
-    for (LI i = allClients.begin(); i != allClients.end(); i++) {
+    for (LI i = allClients.begin(); i != allClients.end(); i++)
+    {
         ClientPtr cl = *i;
         cl->tcp_sock.disconnect( cl->callsign.c_str() );
     }
