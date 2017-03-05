@@ -47,7 +47,11 @@ bool NetServer::loginAccept( const string &_inetbuf, ClientPtr clt, int newacct,
     string    callsign;
     string    unused;
     NetBuffer netbuf;
-    ObjSerial cltserial;
+    /* [netserver login] #41
+     * Simply never used. Never has the chance to be called. 
+     * 
+    //ObjSerial cltserial;
+     */
     callsign = getSimpleString( inetbuf );
     unused   = getSimpleString( inetbuf );
     string    serverip   = getSimpleString( inetbuf );
@@ -55,7 +59,8 @@ bool NetServer::loginAccept( const string &_inetbuf, ClientPtr clt, int newacct,
     string    savestr    = getSimpleString( inetbuf );
     string    xmlstr     = getSimpleString( inetbuf );
     if (!clt) {
-        /*
+        /* If the code is broken why include it to a formal release? [netserver login] #41
+         * 
          *  // This must be UDP mode, because the client would exist otherwise.
          *  // In UDP mode, client is created here.
          *  clt = newConnection_udp(  ); // WARNING: ipadr is null.  This code is broken anyway.
@@ -70,7 +75,9 @@ bool NetServer::loginAccept( const string &_inetbuf, ClientPtr clt, int newacct,
     clt->savegame.push_back( savestr );
     clt->savegame.push_back( xmlstr );
     Cockpit *cp = loadCockpit( clt );
-    /*
+    /* [netserver login] #41
+     * Code not in use. 
+     * 
      *  if (_Universe->star_system.size()) {
      *  std::string system = _Universe->star_system[0]->getFileName();
      *  std::string newsystem=savestr.substr(0,savestr.find("^"));
@@ -82,10 +89,15 @@ bool NetServer::loginAccept( const string &_inetbuf, ClientPtr clt, int newacct,
      *
      *  }
      */
+     
+     /* [netserver login] #41
+      * More code that was commented out. 
+      * 
 //memcpy( &clt->cltadr, &ipadr, sizeof( AddressIP)); // ipadr is uninitialized... see above.
 
     //clt->callsign = callsign;
     //clt->passwd = passwd;
+      */
     COUT<<"LOGIN REQUEST SUCCESS for <"<<callsign<<">"<<endl;
     if (newacct) {
         COUT<<"This account has no ship/char so create one"<<"(UNIMPLEMENTED)"<<endl;
@@ -400,7 +412,11 @@ bool NetServer::loadFromSavegame( ClientPtr clt, Cockpit *cp )
         un->Kill();
     }
     if (!exist) {
+		/* [netserver login] #41
+		 * Not used in this scope. 
+		 * 
         unsigned short serial = cltserial;
+         */
         std::string    logoutnetbuf;
         addSimpleChar( logoutnetbuf, ACCT_LOGOUT );
         addSimpleString( logoutnetbuf, clt->callsign );
