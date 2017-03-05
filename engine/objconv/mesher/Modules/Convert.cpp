@@ -12,6 +12,7 @@ namespace Converter {
 
 		CRegistry()
 		{
+			//It is important these empty braces remain here.
 		}
 
 		~CRegistry()
