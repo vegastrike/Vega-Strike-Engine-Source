@@ -129,7 +129,9 @@ public: VSRandom( unsigned int s ) : mti( N()+1 )
     unsigned int genrand_int32( void )
     {
         unsigned int y;
-        static unsigned int mag01[2] = {0x0UL, MATRIX_A()};
+        
+        //The literal and the MATRIX_A had to be static_cast after C++11
+        static unsigned int mag01[2] = {static_cast<unsigned int>(0x0UL), static_cast<unsigned int>(MATRIX_A())};
         /* mag01[x] = x * MATRIX_A  for x=0,1 */
         if ( mti >= N() ) {
             /* generate N words at one time */
