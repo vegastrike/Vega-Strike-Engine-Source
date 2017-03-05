@@ -1,0 +1,320 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.8.6">
+  <compounddef id="boost__fusion_8hpp" kind="file">
+    <compoundname>boost_fusion.hpp</compoundname>
+    <includes local="no">cstddef</includes>
+    <includes local="no">boost/core/enable_if.hpp</includes>
+    <includes local="no">boost/fusion/include/is_sequence.hpp</includes>
+    <includes local="no">boost/fusion/include/size.hpp</includes>
+    <includes local="no">boost/fusion/include/tag_of.hpp</includes>
+    <includes local="no">boost/fusion/include/front.hpp</includes>
+    <includes local="no">boost/fusion/include/at.hpp</includes>
+    <includes local="no">boost/fusion/mpl.hpp</includes>
+    <includes local="no">boost/mpl/and.hpp</includes>
+    <includes local="no">boost/mpl/count_if.hpp</includes>
+    <includes local="no">boost/mpl/front.hpp</includes>
+    <includes local="no">boost/mpl/placeholders.hpp</includes>
+    <includes local="no">boost/mpl/pop_front.hpp</includes>
+    <includes local="no">boost/mpl/size.hpp</includes>
+    <includes local="no">boost/type_traits/is_same.hpp</includes>
+    <includes local="no">boost/type_traits/remove_reference.hpp</includes>
+    <includes refid="access_8hpp" local="no">boost/geometry/core/access.hpp</includes>
+    <includes refid="coordinate__dimension_8hpp" local="no">boost/geometry/core/coordinate_dimension.hpp</includes>
+    <includes refid="coordinate__system_8hpp" local="no">boost/geometry/core/coordinate_system.hpp</includes>
+    <includes refid="coordinate__type_8hpp" local="no">boost/geometry/core/coordinate_type.hpp</includes>
+    <includes refid="point__type_8hpp" local="no">boost/geometry/core/point_type.hpp</includes>
+    <includes refid="core_2tags_8hpp" local="no">boost/geometry/core/tags.hpp</includes>
+    <incdepgraph>
+      <node id="52635">
+        <label>boost/mpl/size.hpp</label>
+      </node>
+      <node id="52655">
+        <label>boost/geometry/core/coordinate_dimension.hpp</label>
+        <link refid="coordinate__dimension_8hpp"/>
+        <childnode refid="52622" relation="include">
+        </childnode>
+        <childnode refid="52640" relation="include">
+        </childnode>
+        <childnode refid="52656" relation="include">
+        </childnode>
+        <childnode refid="52644" relation="include">
+        </childnode>
+        <childnode refid="52652" relation="include">
+        </childnode>
+      </node>
+      <node id="52646">
+        <label>boost/type_traits/remove_const.hpp</label>
+      </node>
+      <node id="52644">
+        <label>boost/geometry/core/point_type.hpp</label>
+        <link refid="point__type_8hpp"/>
+        <childnode refid="52640" relation="include">
+        </childnode>
+        <childnode refid="52645" relation="include">
+        </childnode>
+        <childnode refid="52646" relation="include">
+        </childnode>
+        <childnode refid="52647" relation="include">
+        </childnode>
+        <childnode refid="52650" relation="include">
+        </childnode>
+        <childnode refid="52651" relation="include">
+        </childnode>
+        <childnode refid="52652" relation="include">
+        </childnode>
+      </node>
+      <node id="52625">
+        <label>boost/fusion/include/size.hpp</label>
+      </node>
+      <node id="52649">
+        <label>boost/type_traits/is_const.hpp</label>
+      </node>
+      <node id="52634">
+        <label>boost/mpl/pop_front.hpp</label>
+      </node>
+      <node id="52648">
+        <label>boost/mpl/if.hpp</label>
+      </node>
+      <node id="52656">
+        <label>boost/static_assert.hpp</label>
+      </node>
+      <node id="52647">
+        <label>boost/geometry/core/ring_type.hpp</label>
+        <link refid="ring__type_8hpp"/>
+        <childnode refid="52640" relation="include">
+        </childnode>
+        <childnode refid="52648" relation="include">
+        </childnode>
+        <childnode refid="52645" relation="include">
+        </childnode>
+        <childnode refid="52649" relation="include">
+        </childnode>
+        <childnode refid="52646" relation="include">
+        </childnode>
+        <childnode refid="52637" relation="include">
+        </childnode>
+        <childnode refid="52650" relation="include">
+        </childnode>
+        <childnode refid="52651" relation="include">
+        </childnode>
+      </node>
+      <node id="52651">
+        <label>boost/geometry/core/tags.hpp</label>
+        <link refid="core_2tags_8hpp"/>
+      </node>
+      <node id="52641">
+        <label>boost/type_traits/is_pointer.hpp</label>
+      </node>
+      <node id="52640">
+        <label>boost/mpl/assert.hpp</label>
+      </node>
+      <node id="52628">
+        <label>boost/fusion/include/at.hpp</label>
+      </node>
+      <node id="52638">
+        <label>boost/geometry/core/access.hpp</label>
+        <link refid="access_8hpp"/>
+        <childnode refid="52622" relation="include">
+        </childnode>
+        <childnode refid="52639" relation="include">
+        </childnode>
+        <childnode refid="52640" relation="include">
+        </childnode>
+        <childnode refid="52641" relation="include">
+        </childnode>
+        <childnode refid="52642" relation="include">
+        </childnode>
+        <childnode refid="52643" relation="include">
+        </childnode>
+        <childnode refid="52644" relation="include">
+        </childnode>
+        <childnode refid="52650" relation="include">
+        </childnode>
+        <childnode refid="52652" relation="include">
+        </childnode>
+      </node>
+      <node id="52637">
+        <label>boost/type_traits/remove_reference.hpp</label>
+      </node>
+      <node id="52639">
+        <label>boost/core/ignore_unused.hpp</label>
+      </node>
+      <node id="52652">
+        <label>boost/geometry/util/bare_type.hpp</label>
+        <link refid="bare__type_8hpp"/>
+        <childnode refid="52646" relation="include">
+        </childnode>
+        <childnode refid="52642" relation="include">
+        </childnode>
+        <childnode refid="52637" relation="include">
+        </childnode>
+      </node>
+      <node id="52657">
+        <label>boost/geometry/core/coordinate_system.hpp</label>
+        <link refid="coordinate__system_8hpp"/>
+        <childnode refid="52640" relation="include">
+        </childnode>
+        <childnode refid="52644" relation="include">
+        </childnode>
+        <childnode refid="52652" relation="include">
+        </childnode>
+      </node>
+      <node id="52623">
+        <label>boost/core/enable_if.hpp</label>
+      </node>
+      <node id="52653">
+        <label>boost/geometry/util/promote_floating_point.hpp</label>
+        <link refid="promote__floating__point_8hpp"/>
+        <childnode refid="52648" relation="include">
+        </childnode>
+        <childnode refid="52654" relation="include">
+        </childnode>
+      </node>
+      <node id="52632">
+        <label>boost/mpl/front.hpp</label>
+      </node>
+      <node id="52633">
+        <label>boost/mpl/placeholders.hpp</label>
+      </node>
+      <node id="52627">
+        <label>boost/fusion/include/front.hpp</label>
+      </node>
+      <node id="52650">
+        <label>boost/geometry/core/tag.hpp</label>
+        <link refid="tag_8hpp"/>
+        <childnode refid="52651" relation="include">
+        </childnode>
+        <childnode refid="52652" relation="include">
+        </childnode>
+      </node>
+      <node id="52645">
+        <label>boost/range/value_type.hpp</label>
+      </node>
+      <node id="52621">
+        <label>/home/ubuntu/boost/boost/geometry/geometries/adapted/boost_fusion.hpp</label>
+        <link refid="boost_fusion.hpp"/>
+        <childnode refid="52622" relation="include">
+        </childnode>
+        <childnode refid="52623" relation="include">
+        </childnode>
+        <childnode refid="52624" relation="include">
+        </childnode>
+        <childnode refid="52625" relation="include">
+        </childnode>
+        <childnode refid="52626" relation="include">
+        </childnode>
+        <childnode refid="52627" relation="include">
+        </childnode>
+        <childnode refid="52628" relation="include">
+        </childnode>
+        <childnode refid="52629" relation="include">
+        </childnode>
+        <childnode refid="52630" relation="include">
+        </childnode>
+        <childnode refid="52631" relation="include">
+        </childnode>
+        <childnode refid="52632" relation="include">
+        </childnode>
+        <childnode refid="52633" relation="include">
+        </childnode>
+        <childnode refid="52634" relation="include">
+        </childnode>
+        <childnode refid="52635" relation="include">
+        </childnode>
+        <childnode refid="52636" relation="include">
+        </childnode>
+        <childnode refid="52637" relation="include">
+        </childnode>
+        <childnode refid="52638" relation="include">
+        </childnode>
+        <childnode refid="52655" relation="include">
+        </childnode>
+        <childnode refid="52657" relation="include">
+        </childnode>
+        <childnode refid="52643" relation="include">
+        </childnode>
+        <childnode refid="52644" relation="include">
+        </childnode>
+        <childnode refid="52651" relation="include">
+        </childnode>
+      </node>
+      <node id="52622">
+        <label>cstddef</label>
+      </node>
+      <node id="52654">
+        <label>boost/type_traits/is_integral.hpp</label>
+      </node>
+      <node id="52624">
+        <label>boost/fusion/include/is_sequence.hpp</label>
+      </node>
+      <node id="52629">
+        <label>boost/fusion/mpl.hpp</label>
+      </node>
+      <node id="52626">
+        <label>boost/fusion/include/tag_of.hpp</label>
+      </node>
+      <node id="52630">
+        <label>boost/mpl/and.hpp</label>
+      </node>
+      <node id="52643">
+        <label>boost/geometry/core/coordinate_type.hpp</label>
+        <link refid="coordinate__type_8hpp"/>
+        <childnode refid="52640" relation="include">
+        </childnode>
+        <childnode refid="52644" relation="include">
+        </childnode>
+        <childnode refid="52650" relation="include">
+        </childnode>
+        <childnode refid="52652" relation="include">
+        </childnode>
+        <childnode refid="52653" relation="include">
+        </childnode>
+      </node>
+      <node id="52642">
+        <label>boost/type_traits/remove_pointer.hpp</label>
+      </node>
+      <node id="52631">
+        <label>boost/mpl/count_if.hpp</label>
+      </node>
+      <node id="52636">
+        <label>boost/type_traits/is_same.hpp</label>
+      </node>
+    </incdepgraph>
+    <innerclass refid="structboost_1_1geometry_1_1fusion__adapt__detail_1_1all__same" prot="public">boost::geometry::fusion_adapt_detail::all_same</innerclass>
+    <innerclass refid="structboost_1_1geometry_1_1fusion__adapt__detail_1_1is__coordinate__size" prot="public">boost::geometry::fusion_adapt_detail::is_coordinate_size</innerclass>
+    <innerclass refid="structboost_1_1geometry_1_1fusion__adapt__detail_1_1is__fusion__sequence" prot="public">boost::geometry::fusion_adapt_detail::is_fusion_sequence</innerclass>
+    <innernamespace refid="namespaceboost">boost</innernamespace>
+    <innernamespace refid="namespaceboost_1_1geometry">boost::geometry</innernamespace>
+    <innernamespace refid="namespaceboost_1_1geometry_1_1fusion__adapt__detail">boost::geometry::fusion_adapt_detail</innernamespace>
+      <sectiondef kind="define">
+      <memberdef kind="define" id="boost__fusion_8hpp_1ab5908ecfb179abbdb503651c127f8a43" prot="public" static="no">
+        <name>BOOST_GEOMETRY_REGISTER_BOOST_FUSION_CS</name>
+        <param><defname>CoordinateSystem</defname></param>
+        <initializer>namespace boost { namespace geometry { namespace traits { \
+    template &lt;typename Sequence&gt; \
+    struct coordinate_system \
+               &lt; \
+                   Sequence, \
+                   typename boost::enable_if \
+                       &lt; \
+                           fusion_adapt_detail::is_fusion_sequence&lt;Sequence&gt; \
+                       &gt;::type \
+               &gt; \
+    { typedef CoordinateSystem type; }; \
+    }}}</initializer>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/ubuntu/boost/boost/geometry/geometries/adapted/boost_fusion.hpp" line="163" column="9" bodyfile="/home/ubuntu/boost/boost/geometry/geometries/adapted/boost_fusion.hpp" bodystart="163" bodyend="-1"/>
+      </memberdef>
+      </sectiondef>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <location file="/home/ubuntu/boost/boost/geometry/geometries/adapted/boost_fusion.hpp"/>
+  </compounddef>
+</doxygen>

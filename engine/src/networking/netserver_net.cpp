@@ -24,14 +24,17 @@ ClientPtr NetServer::newConnection_tcp()
 
     //Get new connections if there are - do nothing in standard UDP mode
     bool valid = false;
-    do {
+    do
+    {
         SOCKETALT sock = tcpNetwork->acceptNewConn();
         valid = sock.valid();
-        if (valid) {
+        if (valid)
+        {
             ret = addNewClient( sock );
             nbclients++;
         }
-    } while (valid);
+    }
+    while (valid);
     return ret;
 }
 
@@ -44,23 +47,16 @@ ClientPtr NetServer::newConnection_tcp()
 void NetServer::checkTimedoutClients_udp()
 {
     /********* Method 1 : compare latest_timestamp to current time and see if > CLIENTTIMEOUT */
-    double curtime  = getNewTime();
-    double deltatmp = 0;
-    for (LI i = allClients.begin(); i != allClients.end(); i++) {
+    for (LI i = allClients.begin(); i != allClients.end(); i++)
+    {
         ClientPtr cl = *i;
-        if ( !cl->lossy_socket->isTcp() ) {
-            //NETFIXME: Does this delta and latest_timeout actually only check UDP or does this include TCP?
-            //Time elapsed since latest packet in seconds
-            deltatmp = ( fabs( curtime-cl->latest_timeout ) );
-            if (cl->latest_timeout != 0) {
-                //COUT<<"DELTATMP = "<<deltatmp<<" - clienttimeout = "<<clienttimeout<<endl;
-                //Here considering a delta > 0xFFFFFFFX where X should be at least something like 0.9
-                //This allows a packet not to be considered as "old" if timestamp has been "recycled" on client
-                //side -> when timestamp has grown enough to became bigger than what an u_int can store
-
-                //if( cl->ingame && deltatmp > clienttimeout && deltatmp < (0xFFFFFFFF*0.9) )
+        if ( !cl->lossy_socket->isTcp() )
+        {
+            if (cl->latest_timeout != 0)
+            {
 #ifdef TIMEOUT_USING_UDP_EVEN_THOUGH_THEY_USE_TCP
-                if (cl->ingame == true && deltatmp > clienttimeout) {
+                if (cl->ingame == true && deltatmp > clienttimeout)
+                {
                     Unit *un;
                     un = cl->game_unit.GetUnit();
                     COUT<<"ACTIVITY TIMEOUT for client number ";
@@ -102,18 +98,24 @@ void NetServer::recvMsg_tcp( ClientPtr clt )
     Packet    packet;
     AddressIP ipadr;
     int recvbytes = sockclt.recvbuf( &packet, &ipadr );
-    if (recvbytes < 0) {
+    if (recvbytes < 0)
+    {
         cerr<<", disconnecting(error)"<<endl;
         clt->_disconnectReason = "TCP error";
         discList.push_back( clt );
-    } else if (recvbytes == 0) {
+    }
+    else if (recvbytes == 0)
+    {
         cerr<<", disconnecting(eof)"<<endl;
         clt->_disconnectReason = "TCP peer closed";
         discList.push_back( clt );
-    } else {
+    }
+    else
+    {
         //NETFIXME: Cheat: We may want to check the serial of this packet and make sure it is what we expect.
         command = packet.getCommand();
-        if (command != CMD_POSUPDATE && command != CMD_TARGET) {
+        if (command != CMD_POSUPDATE && command != CMD_TARGET)
+        {
             COUT<<"Rcvd TCP: "<<Cmd( command )<<" from serial ";
             if ( clt->game_unit.GetUnit() )
                 cout<<clt->game_unit.GetUnit()->GetSerial();
@@ -135,9 +137,9 @@ void NetServer::recvMsg_udp()
 
     Packet    packet;
     AddressIP ipadr;
-//int ret = sockclt.recvbuf( &packet, &ipadr );
     int ret = udpNetwork->recvbuf( &packet, &ipadr );
-    if (ret > 0) {
+    if (ret > 0)
+    {
         ObjSerial nserial = packet.getSerial();         //Extract the serial from buffer received so we know who it is
         char command = packet.getCommand();
         if (command != CMD_POSUPDATE)
@@ -145,39 +147,41 @@ void NetServer::recvMsg_udp()
         //Find the corresponding client
         ClientPtr tmp;
         bool found = false;
-        for (LI i = allClients.begin(); i != allClients.end(); i++) {
+        for (LI i = allClients.begin(); i != allClients.end(); i++)
+        {
             tmp = (*i);
             Unit *myun = tmp->game_unit.GetUnit();
             //NETFIXME: Cheat: We have to check the address and port of the sender to make sure it matches that of our client socket.
-            if (myun && myun->GetSerial() == nserial) {
+            if (myun && myun->GetSerial() == nserial)
+            {
                 clt   = tmp;
                 found = 1;
-//COUT << " found client " << *(clt.get()) << endl;
                 break;
             }
         }
-        if (!found) {
+        if (!found)
+        {
             COUT<<"Error : UDP message received from unknown client !"<<endl;
             //Maybe send an error packet handled by the client
             return;
         }
         //Check if the client's IP is still the same (a very little and unaccurate in some cases protection
         //against spoofing client serial#)
-        if ( clt && (ipadr != clt->cltudpadr) ) {
+        if ( clt && (ipadr != clt->cltudpadr) )
+        {
             COUT<<"Error : IP changed for client "<<clt->callsign<<endl;
-//clt->_disconnectReason = "possible IP spoofing";
         }
-        //discList.push_back( clt );
         /* It is not entirely impossible for this to happen; it would be nice
          * to add an additional identity check. For now we consider it an error.
          */
-        else {
+        else
+        {
             if (command == CMD_LOGIN || command == CMD_CONNECT)
                 //clt should be 0 because ObjSerial was 0
                 return;
             //NETFIXME: Only allow lossy packets!!!
             if (command != CMD_SNAPSHOT && command != CMD_PING
-                && command != CMD_POSUPDATE && command != CMD_SERVERTIME)
+                    && command != CMD_POSUPDATE && command != CMD_SERVERTIME)
                 return;
             if (clt)
                 process = this->updateTimestamps( clt, packet );

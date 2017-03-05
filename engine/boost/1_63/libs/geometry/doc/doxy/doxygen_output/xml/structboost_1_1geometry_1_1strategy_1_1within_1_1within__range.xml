@@ -1,0 +1,53 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.8.6">
+  <compounddef id="structboost_1_1geometry_1_1strategy_1_1within_1_1within__range" kind="struct" prot="public">
+    <compoundname>boost::geometry::strategy::within::within_range</compoundname>
+    <basecompoundref refid="structboost_1_1geometry_1_1strategy_1_1within_1_1within__coord" prot="public" virt="non-virtual">boost::geometry::strategy::within::within_coord</basecompoundref>
+    <includes local="no">point_in_box.hpp</includes>
+    <templateparamlist>
+      <param>
+        <type>typename Geometry</type>
+      </param>
+      <param>
+        <type>std::size_t</type>
+        <declname>Dimension</declname>
+        <defname>Dimension</defname>
+      </param>
+      <param>
+        <type>typename CSTag</type>
+      </param>
+    </templateparamlist>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <inheritancegraph>
+      <node id="1686">
+        <label>boost::geometry::strategy::within::within_coord</label>
+        <link refid="structboost_1_1geometry_1_1strategy_1_1within_1_1within__coord"/>
+      </node>
+      <node id="1685">
+        <label>boost::geometry::strategy::within::within_range&lt; Geometry, Dimension, CSTag &gt;</label>
+        <link refid="structboost_1_1geometry_1_1strategy_1_1within_1_1within__range"/>
+        <childnode refid="1686" relation="public-inheritance">
+        </childnode>
+      </node>
+    </inheritancegraph>
+    <collaborationgraph>
+      <node id="1688">
+        <label>boost::geometry::strategy::within::within_coord</label>
+        <link refid="structboost_1_1geometry_1_1strategy_1_1within_1_1within__coord"/>
+      </node>
+      <node id="1687">
+        <label>boost::geometry::strategy::within::within_range&lt; Geometry, Dimension, CSTag &gt;</label>
+        <link refid="structboost_1_1geometry_1_1strategy_1_1within_1_1within__range"/>
+        <childnode refid="1688" relation="public-inheritance">
+        </childnode>
+      </node>
+    </collaborationgraph>
+    <location file="/home/ubuntu/boost/boost/geometry/strategies/cartesian/point_in_box.hpp" line="57" column="1" bodyfile="/home/ubuntu/boost/boost/geometry/strategies/cartesian/point_in_box.hpp" bodystart="55" bodyend="57"/>
+    <listofallmembers>
+      <member refid="structboost_1_1geometry_1_1strategy_1_1within_1_1within__coord_1aa82ee48878da20f2bd4e8c00c6cb6098" prot="public" virt="non-virtual"><scope>boost::geometry::strategy::within::within_range</scope><name>apply</name></member>
+    </listofallmembers>
+  </compounddef>
+</doxygen>

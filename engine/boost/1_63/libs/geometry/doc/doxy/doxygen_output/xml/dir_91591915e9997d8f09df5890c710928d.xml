@@ -1,0 +1,12 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.8.6">
+  <compounddef id="dir_91591915e9997d8f09df5890c710928d" kind="dir">
+    <compoundname>/home/ubuntu</compoundname>
+    <innerdir refid="dir_e10a884cfce9a00b7ac96c4db7962926">/home/ubuntu/boost</innerdir>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <location file="/home/ubuntu/"/>
+  </compounddef>
+</doxygen>

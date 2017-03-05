@@ -1,0 +1,267 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.8.6">
+  <compounddef id="compare__circular_8hpp" kind="file">
+    <compoundname>compare_circular.hpp</compoundname>
+    <includes local="no">boost/math/constants/constants.hpp</includes>
+    <includes refid="cs_8hpp" local="no">boost/geometry/core/cs.hpp</includes>
+    <includes refid="core_2tags_8hpp" local="no">boost/geometry/core/tags.hpp</includes>
+    <includes refid="strategies_2compare_8hpp" local="no">boost/geometry/strategies/compare.hpp</includes>
+    <includes refid="math_8hpp" local="no">boost/geometry/util/math.hpp</includes>
+    <includedby refid="strategies_8hpp" local="no">/home/ubuntu/boost/boost/geometry/strategies/strategies.hpp</includedby>
+    <incdepgraph>
+      <node id="61940">
+        <label>boost/geometry/core/cs.hpp</label>
+        <link refid="cs_8hpp"/>
+        <childnode refid="61941" relation="include">
+        </childnode>
+        <childnode refid="61942" relation="include">
+        </childnode>
+        <childnode refid="61943" relation="include">
+        </childnode>
+        <childnode refid="61944" relation="include">
+        </childnode>
+        <childnode refid="61953" relation="include">
+        </childnode>
+      </node>
+      <node id="61947">
+        <label>boost/type_traits/remove_const.hpp</label>
+      </node>
+      <node id="61957">
+        <label>functional</label>
+      </node>
+      <node id="61964">
+        <label>limits</label>
+      </node>
+      <node id="61939">
+        <label>boost/math/constants/constants.hpp</label>
+      </node>
+      <node id="61945">
+        <label>boost/geometry/core/point_type.hpp</label>
+        <link refid="point__type_8hpp"/>
+        <childnode refid="61942" relation="include">
+        </childnode>
+        <childnode refid="61946" relation="include">
+        </childnode>
+        <childnode refid="61947" relation="include">
+        </childnode>
+        <childnode refid="61948" relation="include">
+        </childnode>
+        <childnode refid="61952" relation="include">
+        </childnode>
+        <childnode refid="61953" relation="include">
+        </childnode>
+        <childnode refid="61954" relation="include">
+        </childnode>
+      </node>
+      <node id="61961">
+        <label>boost/geometry/strategies/tags.hpp</label>
+        <link refid="strategies_2tags_8hpp"/>
+      </node>
+      <node id="61950">
+        <label>boost/type_traits/is_const.hpp</label>
+      </node>
+      <node id="61963">
+        <label>cmath</label>
+      </node>
+      <node id="61949">
+        <label>boost/mpl/if.hpp</label>
+      </node>
+      <node id="61948">
+        <label>boost/geometry/core/ring_type.hpp</label>
+        <link refid="ring__type_8hpp"/>
+        <childnode refid="61942" relation="include">
+        </childnode>
+        <childnode refid="61949" relation="include">
+        </childnode>
+        <childnode refid="61946" relation="include">
+        </childnode>
+        <childnode refid="61950" relation="include">
+        </childnode>
+        <childnode refid="61947" relation="include">
+        </childnode>
+        <childnode refid="61951" relation="include">
+        </childnode>
+        <childnode refid="61952" relation="include">
+        </childnode>
+        <childnode refid="61953" relation="include">
+        </childnode>
+      </node>
+      <node id="61956">
+        <label>boost/geometry/strategies/compare.hpp</label>
+        <link refid="strategies_2compare_8hpp"/>
+        <childnode refid="61941" relation="include">
+        </childnode>
+        <childnode refid="61957" relation="include">
+        </childnode>
+        <childnode refid="61949" relation="include">
+        </childnode>
+        <childnode refid="61940" relation="include">
+        </childnode>
+        <childnode refid="61958" relation="include">
+        </childnode>
+        <childnode refid="61961" relation="include">
+        </childnode>
+      </node>
+      <node id="61953">
+        <label>boost/geometry/core/tags.hpp</label>
+        <link refid="core_2tags_8hpp"/>
+      </node>
+      <node id="61966">
+        <label>boost/math/special_functions/fpclassify.hpp</label>
+      </node>
+      <node id="61942">
+        <label>boost/mpl/assert.hpp</label>
+      </node>
+      <node id="61938">
+        <label>/home/ubuntu/boost/boost/geometry/strategies/spherical/compare_circular.hpp</label>
+        <link refid="compare_circular.hpp"/>
+        <childnode refid="61939" relation="include">
+        </childnode>
+        <childnode refid="61940" relation="include">
+        </childnode>
+        <childnode refid="61953" relation="include">
+        </childnode>
+        <childnode refid="61956" relation="include">
+        </childnode>
+        <childnode refid="61962" relation="include">
+        </childnode>
+      </node>
+      <node id="61951">
+        <label>boost/type_traits/remove_reference.hpp</label>
+      </node>
+      <node id="61965">
+        <label>boost/core/ignore_unused.hpp</label>
+      </node>
+      <node id="61954">
+        <label>boost/geometry/util/bare_type.hpp</label>
+        <link refid="bare__type_8hpp"/>
+        <childnode refid="61947" relation="include">
+        </childnode>
+        <childnode refid="61955" relation="include">
+        </childnode>
+        <childnode refid="61951" relation="include">
+        </childnode>
+      </node>
+      <node id="61943">
+        <label>boost/type_traits/integral_constant.hpp</label>
+      </node>
+      <node id="61944">
+        <label>boost/geometry/core/coordinate_system.hpp</label>
+        <link refid="coordinate__system_8hpp"/>
+        <childnode refid="61942" relation="include">
+        </childnode>
+        <childnode refid="61945" relation="include">
+        </childnode>
+        <childnode refid="61954" relation="include">
+        </childnode>
+      </node>
+      <node id="61959">
+        <label>boost/geometry/util/promote_floating_point.hpp</label>
+        <link refid="promote__floating__point_8hpp"/>
+        <childnode refid="61949" relation="include">
+        </childnode>
+        <childnode refid="61960" relation="include">
+        </childnode>
+      </node>
+      <node id="61968">
+        <label>boost/type_traits/is_fundamental.hpp</label>
+      </node>
+      <node id="61952">
+        <label>boost/geometry/core/tag.hpp</label>
+        <link refid="tag_8hpp"/>
+        <childnode refid="61953" relation="include">
+        </childnode>
+        <childnode refid="61954" relation="include">
+        </childnode>
+      </node>
+      <node id="61946">
+        <label>boost/range/value_type.hpp</label>
+      </node>
+      <node id="61941">
+        <label>cstddef</label>
+      </node>
+      <node id="61960">
+        <label>boost/type_traits/is_integral.hpp</label>
+      </node>
+      <node id="61962">
+        <label>boost/geometry/util/math.hpp</label>
+        <link refid="math_8hpp"/>
+        <childnode refid="61963" relation="include">
+        </childnode>
+        <childnode refid="61964" relation="include">
+        </childnode>
+        <childnode refid="61965" relation="include">
+        </childnode>
+        <childnode refid="61939" relation="include">
+        </childnode>
+        <childnode refid="61966" relation="include">
+        </childnode>
+        <childnode refid="61967" relation="include">
+        </childnode>
+        <childnode refid="61968" relation="include">
+        </childnode>
+        <childnode refid="61960" relation="include">
+        </childnode>
+        <childnode refid="61940" relation="include">
+        </childnode>
+        <childnode refid="61969" relation="include">
+        </childnode>
+      </node>
+      <node id="61970">
+        <label>boost/type_traits/is_floating_point.hpp</label>
+      </node>
+      <node id="61969">
+        <label>boost/geometry/util/select_most_precise.hpp</label>
+        <link refid="select__most__precise_8hpp"/>
+        <childnode refid="61949" relation="include">
+        </childnode>
+        <childnode refid="61970" relation="include">
+        </childnode>
+        <childnode refid="61968" relation="include">
+        </childnode>
+      </node>
+      <node id="61958">
+        <label>boost/geometry/core/coordinate_type.hpp</label>
+        <link refid="coordinate__type_8hpp"/>
+        <childnode refid="61942" relation="include">
+        </childnode>
+        <childnode refid="61945" relation="include">
+        </childnode>
+        <childnode refid="61952" relation="include">
+        </childnode>
+        <childnode refid="61954" relation="include">
+        </childnode>
+        <childnode refid="61959" relation="include">
+        </childnode>
+      </node>
+      <node id="61955">
+        <label>boost/type_traits/remove_pointer.hpp</label>
+      </node>
+      <node id="61967">
+        <label>boost/numeric/conversion/cast.hpp</label>
+      </node>
+    </incdepgraph>
+    <invincdepgraph>
+      <node id="61971">
+        <label>/home/ubuntu/boost/boost/geometry/strategies/spherical/compare_circular.hpp</label>
+        <link refid="compare_circular.hpp"/>
+        <childnode refid="61972" relation="include">
+        </childnode>
+      </node>
+      <node id="61972">
+        <label>/home/ubuntu/boost/boost/geometry/strategies/strategies.hpp</label>
+        <link refid="strategies_8hpp"/>
+      </node>
+    </invincdepgraph>
+    <innerclass refid="structboost_1_1geometry_1_1strategy_1_1compare_1_1circular__comparator" prot="public">boost::geometry::strategy::compare::circular_comparator</innerclass>
+    <innernamespace refid="namespaceboost">boost</innernamespace>
+    <innernamespace refid="namespaceboost_1_1geometry">boost::geometry</innernamespace>
+    <innernamespace refid="namespaceboost_1_1geometry_1_1strategy">boost::geometry::strategy</innernamespace>
+    <innernamespace refid="namespaceboost_1_1geometry_1_1strategy_1_1compare">boost::geometry::strategy::compare</innernamespace>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <location file="/home/ubuntu/boost/boost/geometry/strategies/spherical/compare_circular.hpp"/>
+  </compounddef>
+</doxygen>

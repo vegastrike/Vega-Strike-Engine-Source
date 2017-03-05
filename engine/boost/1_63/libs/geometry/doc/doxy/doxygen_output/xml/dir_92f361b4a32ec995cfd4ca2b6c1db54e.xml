@@ -1,0 +1,66 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.8.6">
+  <compounddef id="dir_92f361b4a32ec995cfd4ca2b6c1db54e" kind="dir">
+    <compoundname>/home/ubuntu/boost/boost/geometry/algorithms/detail</compoundname>
+    <innerdir refid="dir_076a6b668c7dcb869625ada646dca203">/home/ubuntu/boost/boost/geometry/algorithms/detail/buffer</innerdir>
+    <innerdir refid="dir_ce8ec053dbd9d0374ec05a4b3ae9c526">/home/ubuntu/boost/boost/geometry/algorithms/detail/comparable_distance</innerdir>
+    <innerdir refid="dir_240371d377791d61f55b0e0bf5a0dd09">/home/ubuntu/boost/boost/geometry/algorithms/detail/disjoint</innerdir>
+    <innerdir refid="dir_9b3be21ff36a80560a8760bf277967e5">/home/ubuntu/boost/boost/geometry/algorithms/detail/distance</innerdir>
+    <innerdir refid="dir_426bed0270696b40148e4d7a86fb3b35">/home/ubuntu/boost/boost/geometry/algorithms/detail/envelope</innerdir>
+    <innerdir refid="dir_d8db61fb33ec460327d34e99ebd1b883">/home/ubuntu/boost/boost/geometry/algorithms/detail/equals</innerdir>
+    <innerdir refid="dir_5db56d367dd6a19f5d5ea1327d78a650">/home/ubuntu/boost/boost/geometry/algorithms/detail/expand</innerdir>
+    <innerdir refid="dir_f3ff23821d89b6fcf74835f1ec514cb0">/home/ubuntu/boost/boost/geometry/algorithms/detail/intersection</innerdir>
+    <innerdir refid="dir_6d87660168227ca8feae46798c5be5fc">/home/ubuntu/boost/boost/geometry/algorithms/detail/is_simple</innerdir>
+    <innerdir refid="dir_8b1317c99384b64629dc3eea5dfb7133">/home/ubuntu/boost/boost/geometry/algorithms/detail/is_valid</innerdir>
+    <innerdir refid="dir_4364810b03ed3439587f82726112547a">/home/ubuntu/boost/boost/geometry/algorithms/detail/overlay</innerdir>
+    <innerdir refid="dir_320e89c529fcce765d69aac70816711d">/home/ubuntu/boost/boost/geometry/algorithms/detail/relate</innerdir>
+    <innerdir refid="dir_e27e4dfc26ea67af8e0a1787aa051f36">/home/ubuntu/boost/boost/geometry/algorithms/detail/relation</innerdir>
+    <innerdir refid="dir_001a2c9b9f2e0891f4e68600b6ae29e2">/home/ubuntu/boost/boost/geometry/algorithms/detail/sections</innerdir>
+    <innerdir refid="dir_6a3c5298e5d503d74f80bff40f75e2a4">/home/ubuntu/boost/boost/geometry/algorithms/detail/turns</innerdir>
+    <innerdir refid="dir_efb8585ef907f7b2af426d00e9dda44b">/home/ubuntu/boost/boost/geometry/algorithms/detail/within</innerdir>
+    <innerfile refid="as__range_8hpp">as_range.hpp</innerfile>
+    <innerfile refid="assign__box__corners_8hpp">assign_box_corners.hpp</innerfile>
+    <innerfile refid="assign__indexed__point_8hpp">assign_indexed_point.hpp</innerfile>
+    <innerfile refid="assign__values_8hpp">assign_values.hpp</innerfile>
+    <innerfile refid="azimuth_8hpp">azimuth.hpp</innerfile>
+    <innerfile refid="calculate__null_8hpp">calculate_null.hpp</innerfile>
+    <innerfile refid="calculate__sum_8hpp">calculate_sum.hpp</innerfile>
+    <innerfile refid="check__iterator__range_8hpp">check_iterator_range.hpp</innerfile>
+    <innerfile refid="convert__indexed__to__indexed_8hpp">convert_indexed_to_indexed.hpp</innerfile>
+    <innerfile refid="convert__point__to__point_8hpp">convert_point_to_point.hpp</innerfile>
+    <innerfile refid="counting_8hpp">counting.hpp</innerfile>
+    <innerfile refid="course_8hpp">course.hpp</innerfile>
+    <innerfile refid="direction__code_8hpp">direction_code.hpp</innerfile>
+    <innerfile refid="expand__by__epsilon_8hpp">expand_by_epsilon.hpp</innerfile>
+    <innerfile refid="extreme__points_8hpp">extreme_points.hpp</innerfile>
+    <innerfile refid="flattening_8hpp">flattening.hpp</innerfile>
+    <innerfile refid="for__each__range_8hpp">for_each_range.hpp</innerfile>
+    <innerfile refid="get__left__turns_8hpp">get_left_turns.hpp</innerfile>
+    <innerfile refid="get__max__size_8hpp">get_max_size.hpp</innerfile>
+    <innerfile refid="has__self__intersections_8hpp">has_self_intersections.hpp</innerfile>
+    <innerfile refid="interior__iterator_8hpp">interior_iterator.hpp</innerfile>
+    <innerfile refid="max__interval__gap_8hpp">max_interval_gap.hpp</innerfile>
+    <innerfile refid="multi__modify_8hpp">multi_modify.hpp</innerfile>
+    <innerfile refid="multi__modify__with__predicate_8hpp">multi_modify_with_predicate.hpp</innerfile>
+    <innerfile refid="multi__sum_8hpp">multi_sum.hpp</innerfile>
+    <innerfile refid="normalize_8hpp">normalize.hpp</innerfile>
+    <innerfile refid="not_8hpp">not.hpp</innerfile>
+    <innerfile refid="num__distinct__consecutive__points_8hpp">num_distinct_consecutive_points.hpp</innerfile>
+    <innerfile refid="occupation__info_8hpp">occupation_info.hpp</innerfile>
+    <innerfile refid="partition_8hpp">partition.hpp</innerfile>
+    <innerfile refid="point__is__spike__or__equal_8hpp">point_is_spike_or_equal.hpp</innerfile>
+    <innerfile refid="point__on__border_8hpp">point_on_border.hpp</innerfile>
+    <innerfile refid="recalculate_8hpp">recalculate.hpp</innerfile>
+    <innerfile refid="ring__identifier_8hpp">ring_identifier.hpp</innerfile>
+    <innerfile refid="signed__size__type_8hpp">signed_size_type.hpp</innerfile>
+    <innerfile refid="single__geometry_8hpp">single_geometry.hpp</innerfile>
+    <innerfile refid="sub__range_8hpp">sub_range.hpp</innerfile>
+    <innerfile refid="sweep_8hpp">sweep.hpp</innerfile>
+    <innerfile refid="throw__on__empty__input_8hpp">throw_on_empty_input.hpp</innerfile>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <location file="/home/ubuntu/boost/boost/geometry/algorithms/detail/"/>
+  </compounddef>
+</doxygen>
