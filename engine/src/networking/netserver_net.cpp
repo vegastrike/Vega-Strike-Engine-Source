@@ -47,43 +47,13 @@ ClientPtr NetServer::newConnection_tcp()
 void NetServer::checkTimedoutClients_udp()
 {
     /********* Method 1 : compare latest_timestamp to current time and see if > CLIENTTIMEOUT */
-    /* [netserver net] #42
-     * Never actually used due to Macro
-     * 
-    //double curtime  = getNewTime();
-     */
-
-    /* [netserver net] #42
-     * While deltatmp is assigned to it is never called due to debug code.
-    double deltatmp = 0;
-     */
     for (LI i = allClients.begin(); i != allClients.end(); i++)
     {
         ClientPtr cl = *i;
         if ( !cl->lossy_socket->isTcp() )
         {
-            /* [netserver net] #42
-             * Debug code to be removed
-            //NETFIXME: Does this delta and latest_timeout actually only check UDP or does this include TCP?
-            //Time elapsed since latest packet in seconds
-            */
-
-            /* [netserver net] #42
-             * While assigned nothing is done with it due to debug code,
-             * thus unnecessary.
-            deltatmp = ( fabs( curtime-cl->latest_timeout ) );
-             */
             if (cl->latest_timeout != 0)
             {
-                /* [netserver net] #42
-                 * Broken code left behind.
-                //COUT<<"DELTATMP = "<<deltatmp<<" - clienttimeout = "<<clienttimeout<<endl;
-                //Here considering a delta > 0xFFFFFFFX where X should be at least something like 0.9
-                //This allows a packet not to be considered as "old" if timestamp has been "recycled" on client
-                //side -> when timestamp has grown enough to became bigger than what an u_int can store
-
-                //if( cl->ingame && deltatmp > clienttimeout && deltatmp < (0xFFFFFFFF*0.9) )
-                 */
 #ifdef TIMEOUT_USING_UDP_EVEN_THOUGH_THEY_USE_TCP
                 if (cl->ingame == true && deltatmp > clienttimeout)
                 {
@@ -167,7 +137,6 @@ void NetServer::recvMsg_udp()
 
     Packet    packet;
     AddressIP ipadr;
-//int ret = sockclt.recvbuf( &packet, &ipadr );
     int ret = udpNetwork->recvbuf( &packet, &ipadr );
     if (ret > 0)
     {
@@ -187,7 +156,6 @@ void NetServer::recvMsg_udp()
             {
                 clt   = tmp;
                 found = 1;
-//COUT << " found client " << *(clt.get()) << endl;
                 break;
             }
         }
@@ -202,9 +170,7 @@ void NetServer::recvMsg_udp()
         if ( clt && (ipadr != clt->cltudpadr) )
         {
             COUT<<"Error : IP changed for client "<<clt->callsign<<endl;
-//clt->_disconnectReason = "possible IP spoofing";
         }
-        //discList.push_back( clt );
         /* It is not entirely impossible for this to happen; it would be nice
          * to add an additional identity check. For now we consider it an error.
          */
