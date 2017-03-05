@@ -31,27 +31,31 @@ int NetClient::authenticate()
     string    str_callsign, str_passwd;
     NetBuffer netbuf;
 
-    //Get the name and password from vegastrike.config
-    //Maybe someday use a default Guest account if no callsign or password is provided thus allowing
-    //Player to wander but not interact with the universe
+    /*Get the name and password from vegastrike.config
+     *Maybe someday use a default Guest account if no callsign or password is provided thus allowing
+     *Player to wander but not interact with the universe
+     */
     this->callsign = str_callsign = vs_config->getVariable( "player", "callsign", "" );
     this->password = str_passwd = vs_config->getVariable( "player", "password", "" );
     if ( global_username.length() )
         this->callsign = global_username;
     if ( global_password.length() )
         this->password = global_password;
-    if ( str_callsign.length() && str_passwd.length() ) {
+    if ( str_callsign.length() && str_passwd.length() )
+    {
         netbuf.addString( str_callsign );
         netbuf.addString( str_passwd );
 
         packet2.send( CMD_LOGIN, 0,
-                     netbuf.getData(), netbuf.getDataLength(),
-                     SENDRELIABLE, NULL, *this->clt_tcp_sock,
-                     __FILE__, PSEUDO__LINE__( 165 ) );
+                      netbuf.getData(), netbuf.getDataLength(),
+                      SENDRELIABLE, NULL, *this->clt_tcp_sock,
+                      __FILE__, PSEUDO__LINE__( 165 ) );
         COUT<<"Send login for player <"<<str_callsign<<">:<*******"
-        "> - buffer length : "<<packet2.getDataLength()
+            "> - buffer length : "<<packet2.getDataLength()
             <<" (+"<<packet2.getHeaderLength()<<" header len"<<endl;
-    } else {
+    }
+    else
+    {
         cerr<<"Callsign and/or password not specified in vegastrike.config, please check this."<<endl<<endl;
         return -1;
     }
@@ -73,14 +77,13 @@ int NetClient::loginAuth( string str_callsign, string str_passwd, string &error 
     Packet    packet2;
     NetBuffer netbuf;
 
-    //memset( buffer, 0, tmplen+1);
     netbuf.addString( str_callsign );
     netbuf.addString( str_passwd );
 
     packet2.send( CMD_LOGIN, 0,
-                 netbuf.getData(), netbuf.getDataLength(),
-                 SENDRELIABLE, NULL, *this->clt_tcp_sock,
-                 __FILE__, PSEUDO__LINE__( 316 ) );
+                  netbuf.getData(), netbuf.getDataLength(),
+                  SENDRELIABLE, NULL, *this->clt_tcp_sock,
+                  __FILE__, PSEUDO__LINE__( 316 ) );
     COUT<<"Sent login for player <"<<str_callsign<<">:<*******"
         <<">"<<endl
         <<"   - buffer length : "<<packet2.getDataLength()<<endl;
@@ -93,18 +96,20 @@ int NetClient::loginAuth( string str_callsign, string str_passwd, string &error 
 int NetClient::loginLoop( string &error )
 {
     int     timeout = 0, recv = 0;
-    //int ret=0;
-
     Packet  packet;
 
     string  login_tostr = vs_config->getVariable( "network", "logintimeout", "100" );
     timeval tv = {atoi( login_tostr.c_str() ), 0};
-    while (!timeout) {
+    while (!timeout)
+    {
         recv = this->recvMsg( &packet, &tv );
-        if (recv == 0) {
+        if (recv == 0)
+        {
             error   = "NETWORK ERROR : Login procedeure timed out.";
             timeout = 1;
-        } else if (recv < 0) {
+        }
+        else if (recv < 0)
+        {
             char str[127];
             sprintf( str, "NETWORK ERROR in recieving login data (error number %d)!!!",
 #ifdef _WIN32
@@ -115,18 +120,19 @@ int NetClient::loginLoop( string &error )
                    );
             error   = (str);
             timeout = 1;
-        } else {
+        }
+        else
+        {
             break;
         }
     }
     COUT<<"End of login loop"<<endl;
-    if (lastsave.empty() || lastsave[0] == "") {
+    if (lastsave.empty() || lastsave[0] == "")
+    {
         if ( ship_select_list.empty() )
             error = "Login failure!";
         return ship_select_list.size();
     }
-    //cout<<"GLOBALSAVES[0] : "
-    //cout<<"GLOBALSAVES[1] : "<<globalsaves[1]<<endl;
     return 1;
 }
 
@@ -144,39 +150,28 @@ vector< string >& NetClient::loginAcctLoop( string str_callsign, string str_pass
 
     std::string netbuf;
     addSimpleChar( netbuf, ACCT_LOGIN_DATA );
-    //memset( buffer, 0, tmplen+1);
     addSimpleString( netbuf, str_callsign );
     addSimpleString( netbuf, str_passwd );
 
     COUT<<"Buffering to send with LOGIN_DATA for "<<str_callsign<<endl;
-    //PacketMem m( netbuf.getData(), netbuf.getDataLength(), PacketMem::LeaveOwnership );
-    //m.dump( cerr, 3 );
     acct_sock->sendstr( netbuf );
-    /*[netclient login] #38 lots of unfixed code.
-     * 
-     *  packet2.send( LOGIN_DATA, 0,
-     *         netbuf.getData(), netbuf.getDataLength(),
-     *         SENDRELIABLE, NULL, this->acct_sock,
-     *         __FILE__, PSEUDO__LINE__(378) );
-     */
+
     //Now the loop
     int    timeout = 0, recv = 0;
-    //int ret=0;
-
     Packet packet;
-
     double initial     = queryTime();
     double newtime     = 0;
     double elapsed     = 0;
     string login_tostr = vs_config->getVariable( "network", "logintimeout", "20" );
     int    login_to    = atoi( login_tostr.c_str() );
-    while (!timeout && !recv) {
+
+    while (!timeout && !recv)
+    {
         //If we have no response in "login_to" seconds -> fails
         newtime = queryTime();
         elapsed = newtime-initial;
-        //COUT<<elapsed<<" seconds since login request"<<endl;
-        if (elapsed > login_to) {
-            //lastsave.push_back( "");
+        if (elapsed > login_to)
+        {
             COUT<<"!!! NETWORK ERROR : Connection to account server timed out !!!"<<endl;
             timeout = 1;
             break;
@@ -186,9 +181,8 @@ vector< string >& NetClient::loginAcctLoop( string str_callsign, string str_pass
     }
     COUT<<"End of loginAcct loop"<<endl;
     //globalsaves should be empty otherwise we filled it with an empty string followed by the error message
-    if (lastsave.empty() || lastsave[0] != "") {
-        //this->callsign = str_callsign;
-        //savefiles = globalsaves;
+    if (lastsave.empty() || lastsave[0] != "")
+    {
         COUT<<"Trying to connect to game server..."<<endl
             <<"\tIP="<<_serverip<<":"<<_serverport<<endl;
     }
@@ -228,43 +222,6 @@ void NetClient::loginAccept( Packet &p1 )
         <<_Universe->current_stardate.GetFullTrekDate()<<endl;
     lastsave.push_back( netbuf.getString() );
     lastsave.push_back( netbuf.getString() );
-    
-    /* [netclient login] #38
-     * Basically only used by CRYPTO
-     * 
-     * unsigned char *digest = 0;
-	 *	
-     * unsigned short digest_length;
-     *
-     * Lots of stuff that has never been fixed [netclient login] #38
-     * 
-     *  // Get universe file... not too useful.
-     *  // But this is a good example of using VsnetDownload download manager.
-     *
-     *  // Get the galaxy file from buffer with relative path to datadir !
-     *  digest_length = netbuf.getShort();
-     *  string univfile = netbuf.getString();
-     *  if (digest_length) {
-     *       digest = netbuf.getBuffer( digest_length );
-     * #ifdef CRYPTO
-     *       cerr<<"Initial system = "<<VSFileSystem::datadir+univfile<<" - File Hash = "<<digest<<endl;
-     *       // Compare to local hash and ask for the good file if we don't have it or bad version
-     *       if( !FileUtil::HashCompare( univfile, digest, UniverseFile))
-     *       {
-     *               VsnetDownload::Client::NoteFile f( this->clt_tcp_sock, univfile, VSFileSystem::UniverseFile);
-     *               _downloadManagerClient->addItem( &f);
-     *               timeval timeout={10,0};
-     *               while( !f.done())
-     *               {
-     *                       if (recvMsg( NULL, &timeout )<=0) {
-     *  //NETFIXME: What to do if the download times out?
-     *                               break;
-     *                       }
-     *               }
-     *       }
-     * #endif
-     *  }
-     */
 
     //Get the initial system file...
     string sysfile = netbuf.getString();
@@ -272,28 +229,14 @@ void NetClient::loginAccept( Packet &p1 )
     bool   autogen;
     string fullsys = VSFileSystem::GetCorrectStarSysPath( sysfile, autogen );
     if ( fullsys.empty() ) fullsys = sysfile;
-    /* [netclient login] #38
-     * Additional commented out because nothing is done with it
-     * 
-     * digest_length = netbuf.getShort();
-     */
+
     COUT<<"Initial system = "<<fullsys;
-    /* [netclient login] #38
-     * Not used since CRYPTO is commented out.
-     * if (digest_length) {
-	 *	
-     *	digest = netbuf.getBuffer( digest_length );
-     *
-#ifdef CRYPTO
-     *	cerr<<" - File Hash = "<<digest;
-     *	if ( FileUtil::HashCompare( fullsys, digest, SystemFile ) )
-     *		downloadsystem = false;
-#endif
-    }*/
+
     //Set the zone number
     this->zone = netbuf.getShort();
     //Did the hash compare fail?
-    if (downloadsystem) {
+    if (downloadsystem)
+    {
         cerr<<": Downloading system from server..."<<endl;
         VsnetDownload::Client::NoteFile f( fullsys, *this->clt_tcp_sock, sysfile, VSFileSystem::SystemFile );
         _downloadManagerClient->addItem( &f );
@@ -312,9 +255,9 @@ void NetClient::respawnRequest()
     NetBuffer netbuf;
     //No data.
     packet2.send( CMD_RESPAWN, 0,
-                 netbuf.getData(), netbuf.getDataLength(),
-                 SENDRELIABLE, NULL, *this->clt_tcp_sock,
-                 __FILE__, PSEUDO__LINE__( 165 ) );
+                  netbuf.getData(), netbuf.getDataLength(),
+                  SENDRELIABLE, NULL, *this->clt_tcp_sock,
+                  __FILE__, PSEUDO__LINE__( 165 ) );
 }
 void NetClient::textMessage( const std::string &data )
 {
@@ -323,9 +266,9 @@ void NetClient::textMessage( const std::string &data )
     netbuf.addString( data );
     //No data.
     packet2.send( CMD_TXTMESSAGE, 0,
-                 netbuf.getData(), netbuf.getDataLength(),
-                 SENDRELIABLE, NULL, *this->clt_tcp_sock,
-                 __FILE__, PSEUDO__LINE__( 165 ) );
+                  netbuf.getData(), netbuf.getDataLength(),
+                  SENDRELIABLE, NULL, *this->clt_tcp_sock,
+                  __FILE__, PSEUDO__LINE__( 165 ) );
 }
 
 void NetClient::GetCurrentServerAddress( string &addr, unsigned short &port )
@@ -343,10 +286,11 @@ void NetClient::SetCurrentServerAddress( string addr, unsigned short port )
 void NetClient::SetConfigServerAddress( string &addr, unsigned short &port )
 {
     bool use_acctserver = XMLSupport::parse_bool( vs_config->getVariable( "network", "use_account_server", "false" ) );
-    if (use_acctserver) {
+    if (use_acctserver)
+    {
         this->_serverport = port = 0;
         this->_serverip   = addr = vs_config->getVariable( "network", "account_server_url",
-                                                           "http://localhost/cgi-bin/accountserver.py" );
+                                   "http://localhost/cgi-bin/accountserver.py" );
         cout<<endl<<"Account Server URL : "<<addr<<endl<<endl;
         return;
     }
@@ -394,7 +338,8 @@ SOCKETALT NetClient::init( const char *addr, unsigned short port, std::string &e
     if ( clt_udp_sock && clt_udp_sock->valid() ) NetUIUDP::disconnectSaveUDP( *clt_udp_sock );
     lastsave.clear();
     netversion = 0;
-    if (addr == NULL) {
+    if (addr == NULL)
+    {
         addr = _serverip.c_str();
         port = _serverport;
     }
@@ -415,28 +360,25 @@ SOCKETALT NetClient::init( const char *addr, unsigned short port, std::string &e
         return *this->clt_tcp_sock;
     COUT<<"created TCP socket ("<<addr<<","<<port<<") -> "<<this->clt_tcp_sock<<endl;
 
-    /*
-     *  if( this->authenticate() == -1)
-     *  {
-     *       perror( "Error login in ");
-     *       return -1;
-     *  }
-     */
     Packet join;
     join.send( CMD_CONNECT, CLIENT_NETVERSION, "", 0, SENDRELIABLE, NULL,
-              *this->clt_tcp_sock, __FILE__, PSEUDO__LINE__( 407 ) );
+               *this->clt_tcp_sock, __FILE__, PSEUDO__LINE__( 407 ) );
     this->enabled = 1;
 
     string  login_tostr = vs_config->getVariable( "network", "connecttimeout", "10" );
     timeval tv = {atoi( login_tostr.c_str() ), 0};
     int     timeout     = 0;
     Packet  packet;
-    while (!timeout) {
+    while (!timeout)
+    {
         int recvd = this->recvMsg( &packet, &tv );
-        if (recvd == 0) {
+        if (recvd == 0)
+        {
             error   = "Connection to game server timed out!";
             timeout = 1;
-        } else if (recvd < 0) {
+        }
+        else if (recvd < 0)
+        {
             char str[127];
             sprintf( str, "NETWORK ERROR in recieving socket (error number %d)!!!",
 #ifdef _WIN32
@@ -447,11 +389,14 @@ SOCKETALT NetClient::init( const char *addr, unsigned short port, std::string &e
                    );
             error   = str;
             timeout = 1;
-        } else if (this->netversion) {
+        }
+        else if (this->netversion)
+        {
             break;
         }
     }
-    if (!this->netversion) {
+    if (!this->netversion)
+    {
         if ( error.empty() )
             error = "Unable to receive a valid version from this server.";
         timeout = 1;
@@ -499,22 +444,26 @@ void NetClient::synchronizeTime( SOCKETALT *udpsock )
         clt_port_max = clt_port;
     static string  nettransport      = vs_config->getVariable( "network", "transport", "udp" );
 
-    //std::string addr;
     unsigned short port = this->_serverport;
-    //getConfigServerAddress(addr, port);
-    if ( !( udpsock != NULL && udpsock->setRemoteAddress( NetUIBase::lookupHost( this->_serverip.c_str(), port ) ) ) ) {
+    if ( !( udpsock != NULL && udpsock->setRemoteAddress( NetUIBase::lookupHost( this->_serverip.c_str(), port ) ) ) )
+    {
         do
             *this->clt_udp_sock = NetUIUDP::createSocket( this->_serverip.c_str(), port, clt_port, _sock_set );
         while ( ( !this->clt_udp_sock->valid() ) && (clt_port++) );
-    } else {
+    }
+    else
+    {
         this->clt_udp_sock = udpsock;
     }
     COUT<<"created UDP socket ("<<this->_serverip<<","<<port<<", listen on "<<clt_port<<") -> "<<this->clt_udp_sock<<endl;
-    if (nettransport == "udp") {
+    if (nettransport == "udp")
+    {
         //NETFIXME:  Keep trying ports until a connection is established.
         COUT<<"Default lossy transport configured to UDP."<<endl;
         this->lossy_socket = clt_udp_sock;
-    } else {
+    }
+    else
+    {
         COUT<<"Default lossy transport configured to TCP (behind firewall)."<<endl;
         this->lossy_socket = clt_tcp_sock;
         clt_port = 0;
@@ -523,27 +472,34 @@ void NetClient::synchronizeTime( SOCKETALT *udpsock )
     this->clt_udp_sock->set_block();
     //Wait for NUM_TIMES (10) successful tries, or 10 consecutive 1-second timeouts
     //(we use UDP on the response (SENDANDFORGET) to improve timing accuracy).
-    while (i < NUM_TIMES && timeout < UDP_TIMEOUT) {
+    while (i < NUM_TIMES && timeout < UDP_TIMEOUT)
+    {
         Packet    packet;
         NetBuffer outData;
         outData.addShort( clt_port );
         packet.send( CMD_SERVERTIME, 0,
-                    outData.getData(), outData.getDataLength(),                      //No data.
-                    SENDRELIABLE, NULL, *this->clt_tcp_sock,
-                    __FILE__, PSEUDO__LINE__( 343 ) );
+                     outData.getData(), outData.getDataLength(),                      //No data.
+                     SENDRELIABLE, NULL, *this->clt_tcp_sock,
+                     __FILE__, PSEUDO__LINE__( 343 ) );
         recv = this->recvMsg( &packet, &tv );
         //If we have no response.
-        if (recv <= 0) {
+        if (recv <= 0)
+        {
             COUT<<"synchronizeTime() Timed out"<<endl;
             ++timeout;
-            if (timeout >= UDP_TIMEOUT) {
-                if (this->lossy_socket->isTcp() == false) {
-                    if (clt_port < clt_port_max && !udpsock) {
+            if (timeout >= UDP_TIMEOUT)
+            {
+                if (this->lossy_socket->isTcp() == false)
+                {
+                    if (clt_port < clt_port_max && !udpsock)
+                    {
                         NetUIUDP::disconnectSaveUDP( *this->clt_udp_sock );
                         *this->clt_udp_sock = NetUIUDP::createSocket( this->_serverip.c_str(), port, clt_port, _sock_set );
                         clt_port++;
                         COUT<<"Trying UDP port "<<clt_port<<"."<<endl;
-                    } else {
+                    }
+                    else
+                    {
                         //no UDP requests made it, fallback to TCP.
                         this->lossy_socket = this->clt_tcp_sock;
                         clt_port = 0;
@@ -552,11 +508,13 @@ void NetClient::synchronizeTime( SOCKETALT *udpsock )
                     timeout = 0;
                 }
             }
-        } else if (packet.getCommand() == CMD_SERVERTIME) {
+        }
+        else if (packet.getCommand() == CMD_SERVERTIME)
+        {
             //NETFIXME: obtain actual ping time
-            //ping = getPingTime( &tv );
             ping = exp( vsrandom.uniformInc( -10, 0 ) );
-            if (ping > 0 && ping < 1.) {
+            if (ping > 0 && ping < 1.)
+            {
                 ++i;
                 NetBuffer data( packet.getData(), packet.getDataLength() );
                 double    serverTime  = data.getDouble();
@@ -564,24 +522,29 @@ void NetClient::synchronizeTime( SOCKETALT *udpsock )
                 serverTime += initialTime-currentTime;
                 times.insert( std::multimap< double, double >::value_type( ping, serverTime-ping ) );
                 timeout     = 0;
-            } else {
+            }
+            else
+            {
                 ++timeout;
             }
         }
     }
     this->clt_tcp_sock->set_nonblock();
     this->clt_udp_sock->set_nonblock();
-//std::sort(times[0], times[i]);
-    if (i >= NUM_TIMES) {
+    if (i >= NUM_TIMES)
+    {
         int    mid      = i/2;
         double median   = 0.;
         double tot      = 0.;
         int    location = 0;
         std::map< double, double >::const_iterator iter;
-        for (iter = times.begin(); iter != times.end(); ++iter) {
-            if (location == mid) {
+        for (iter = times.begin(); iter != times.end(); ++iter)
+        {
+            if (location == mid)
+            {
                 median = iter->first;
-                if (i%2 == 1) {
+                if (i%2 == 1)
+                {
                     ++iter;
                     median += iter->first;
                 }
@@ -591,7 +554,8 @@ void NetClient::synchronizeTime( SOCKETALT *udpsock )
         }
         if (i%2 == 1)
             median /= 2;
-        for (iter = times.begin(); iter != times.end(); ++iter) {
+        for (iter = times.begin(); iter != times.end(); ++iter)
+        {
             double wdiff = exp( -10*(median-iter->first)*(median-iter->first) );
             pingavg += wdiff*iter->first;
             timeavg += wdiff*iter->second;
@@ -599,7 +563,9 @@ void NetClient::synchronizeTime( SOCKETALT *udpsock )
         }
         pingavg /= tot;
         timeavg /= tot;
-    } else {
+    }
+    else
+    {
         COUT<<"Error in time synchronization: connection ended or timed out.";
     }
     this->deltatime = pingavg;
@@ -623,21 +589,10 @@ void NetClient::synchronizeTime( SOCKETALT *udpsock )
 
 void NetClient::receiveLocations( const Packet* )
 {
-    /* [netclient login] #38
-     * This *looks* like it has the potential to do things but as it is...
-     *
-	 *	unsigned char cmd;
-     */
 #ifdef __DEBUG__
     COUT<<"Nb start locations : "<<nblocs<<endl;
 #endif
     //Choose starting location here
-
-	/* [netclient login] #38
-	 * Basically not being used. 
-    //Send the chosen location to the server
-    cmd = CMD_ADDCLIENT;
-    */
 }
 
 /*
@@ -647,7 +602,8 @@ void NetClient::receiveLocations( const Packet* )
  */
 bool NetClient::selectShip( unsigned int ship )
 {
-    if (lastsave.empty() || lastsave[0] == "") {
+    if (lastsave.empty() || lastsave[0] == "")
+    {
         NetBuffer netbuf;
         string    shipname;
         netbuf.addShort( (unsigned short) ship );
@@ -656,10 +612,11 @@ bool NetClient::selectShip( unsigned int ship )
         netbuf.addString( shipname );
         Packet p;
         p.send( CMD_CHOOSESHIP, 0, netbuf.getData(), netbuf.getDataLength(), SENDRELIABLE,
-               NULL, *clt_tcp_sock, __FILE__, PSEUDO__LINE__( 628 ) );
+                NULL, *clt_tcp_sock, __FILE__, PSEUDO__LINE__( 628 ) );
         string err;
         int    ret = loginLoop( err );
-        if (ret != 1 || lastsave.size() < 2 || lastsave[0] == "") {
+        if (ret != 1 || lastsave.size() < 2 || lastsave[0] == "")
+        {
             cout<<"Error in CHOOSEHIP: "<<err
                 <<"choice="<<ship<<"("<<shipname<<"), max="<<ret<<endl;
             return false;
@@ -681,7 +638,8 @@ int NetClient::connectLoad( string username, string passwd, string &error )
     bool   ret = false;
     //Are we using the directly account server to identify us ?
     GetCurrentServerAddress( srvipadr, port );
-    if (!port) {
+    if (!port)
+    {
         //using account server.
         string srvipadr = vs_config->getVariable( "network", "account_server_url", "http://localhost/cgi-bin/accountserver.py" );
         bootstrap_draw( "#cc66ffNETWORK: Connecting to account server.", NULL );
@@ -689,7 +647,8 @@ int NetClient::connectLoad( string username, string passwd, string &error )
         init_acct( srvipadr );
         vector< string > &savetmp = loginAcctLoop( username, passwd );
         //We don't expect a saved game...
-        if ( savetmp.size() >= 2 && savetmp[0].empty() ) {
+        if ( savetmp.size() >= 2 && savetmp[0].empty() )
+        {
             //But this is the way the acctserver code indicates an error.
             error = savetmp[1];
             return 0;
@@ -697,13 +656,16 @@ int NetClient::connectLoad( string username, string passwd, string &error )
         bootstrap_draw( "#cc66ffNETWORK: Connecting to VegaServer.", NULL );
         cout<<"NETWORK: Connecting to VegaServer."<<endl;
         ret = init( NULL, 0, error ).valid();
-    } else {
+    }
+    else
+    {
         //Or are we going through a game server to do so ?
         bootstrap_draw( "#cc66ffNETWORK: Connecting to VegaServer.", NULL );
         cout<<"NETWORK: Connecting to VegaServer."<<endl;
         ret = init( srvipadr.c_str(), port, error ).valid();
     }
-    if (ret == false) {
+    if (ret == false)
+    {
         //If network initialization fails, exit
         if ( error.empty() ) error = "Network connection error";
         if ( !this->error_message.empty() )
@@ -712,11 +674,11 @@ int NetClient::connectLoad( string username, string passwd, string &error )
         return 0;
     }
     cout<<"Successfully connected!";
-    //sleep( 3);
     cout<<"Waiting for player "<<username<<": login response..."<<endl;
     bootstrap_draw( "#cc66ffNETWORK: Successful connection! Waiting to log in.", NULL );
     int loggedin = loginAuth( username, passwd, error );
-    if ( !this->error_message.empty() ) {
+    if ( !this->error_message.empty() )
+    {
         cout<<"Warning: "<<this->error_message<<endl;
         if ( !error.empty() )
             error += "\n";
@@ -759,15 +721,15 @@ void NetClient::startGame()
     _Universe->clearAllSystems();
     _Universe->AccessCockpit( 0 )->savegame->SetStarSystem( string() );
     _Universe->AccessCockpit( 0 )->savegame->ParseSaveGame( "",
-                                                            mysystem,
-                                                            "",
-                                                            pos,
-                                                            setplayerXloc,
-                                                            credits,
-                                                            savedships,
-                                                            0,
-                                                            lastsave[0],
-                                                            false );
+            mysystem,
+            "",
+            pos,
+            setplayerXloc,
+            credits,
+            savedships,
+            0,
+            lastsave[0],
+            false );
 
     ss.push_back( _Universe->Init( mysystem, Vector( 0, 0, 0 ), string() ) );
 
@@ -782,6 +744,5 @@ void NetClient::startGame()
     bootstrap_draw( "#cc66ffNETWORK: Loading system.", NULL );
     cout<<"NETWORK: Loading system."<<endl;
     inGame();
-    //PacketLoop(CMD_ADDEDYOU); // Wait for the command before stopping.
 }
 
