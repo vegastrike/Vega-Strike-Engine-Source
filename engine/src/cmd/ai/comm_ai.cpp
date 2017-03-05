@@ -26,19 +26,23 @@ CommunicatingAI::CommunicatingAI( int ttype,
     , randomresponse( randomresp )
     , mood( mood )
 {
-    if (appease > 665 && appease < 667) {
+    if (appease > 665 && appease < 667)
+    {
         static float appeas = XMLSupport::parse_float( vs_config->getVariable( "AI", "EaseToAppease", ".5" ) );
         this->appease = appeas;
     }
-    if ( (anger > 665 && anger < 667) || (anger > -667 && anger < -665) ) {
+    if ( (anger > 665 && anger < 667) || (anger > -667 && anger < -665) )
+    {
         static float ang = XMLSupport::parse_float( vs_config->getVariable( "AI", "EaseToAnger", "-.5" ) );
         this->anger = ang;
     }
-    if (moodswingyness > 665 && moodswingyness < 667) {
+    if (moodswingyness > 665 && moodswingyness < 667)
+    {
         static float ang1 = XMLSupport::parse_float( vs_config->getVariable( "AI", "MoodSwingLevel", ".2" ) );
         this->moodswingyness = ang1;
     }
-    if (randomresp > 665 && moodswingyness < 667) {
+    if (randomresp > 665 && moodswingyness < 667)
+    {
         static float ang2 = XMLSupport::parse_float( vs_config->getVariable( "AI", "RandomResponseRange", ".8" ) );
         this->randomresponse = ang2;
     }
@@ -47,16 +51,17 @@ CommunicatingAI::CommunicatingAI( int ttype,
 bool MatchingMood( const CommunicationMessage &c, float mood, float randomresponse, float relationship )
 {
     static float     pos_limit = XMLSupport::parse_float( vs_config->getVariable( "AI",
-                                                                                  "LowestPositiveCommChoice",
-                                                                                  "0" ) );
+                                 "LowestPositiveCommChoice",
+                                 "0" ) );
     static float     neg_limit = XMLSupport::parse_float( vs_config->getVariable( "AI",
-                                                                                  "LowestNegativeCommChoice",
-                                                                                  "-.00001" ) );
+                                 "LowestNegativeCommChoice",
+                                 "-.00001" ) );
     const FSM::Node *n = (unsigned int) c.curstate
                          < c.fsm->nodes.size() ? (&c.fsm->nodes[c.curstate]) : (&c.fsm->nodes[c.fsm->getDefaultState(
-                                                                                                  relationship )]);
+                                     relationship )]);
     std::vector< unsigned int >::const_iterator iend = n->edges.end();
-    for (std::vector< unsigned int >::const_iterator i = n->edges.begin(); i != iend; ++i) {
+    for (std::vector< unsigned int >::const_iterator i = n->edges.begin(); i != iend; ++i)
+    {
         if (c.fsm->nodes[*i].messagedelta >= pos_limit && relationship >= 0)
             return true;
         if (c.fsm->nodes[*i].messagedelta <= neg_limit && relationship < 0)
@@ -69,7 +74,8 @@ int CommunicatingAI::selectCommunicationMessageMood( CommunicationMessage &c, fl
 {
     Unit *targ = c.sender.GetUnit();
     float relationship = 0;
-    if (targ) {
+    if (targ)
+    {
         relationship = parent->pilot->GetEffectiveRelationship( parent, targ );
         if (targ == parent->Target() && relationship > -1.0)
             relationship = -1.0;
@@ -85,7 +91,8 @@ using std::pair;
 
 void GetMadAt( Unit *un, Unit *parent, int numhits = 0 )
 {
-    if (numhits == 0) {
+    if (numhits == 0)
+    {
         static int snumhits = XMLSupport::parse_int( vs_config->getVariable( "AI", "ContrabandMadness", "5" ) );
         numhits = snumhits;
     }
@@ -105,7 +112,8 @@ void AllUnitsCloseAndEngage( Unit *un, int faction )
     static float adj    = XMLSupport::parse_float( vs_config->getVariable( "AI", "faction_contraband_relation_adjust", "-.025" ) );
     float delta;
     int   cp = _Universe->whichPlayerStarship( un );
-    if (cp != -1) {
+    if (cp != -1)
+    {
         if ( ( relation = UnitUtil::getRelationFromFaction( un, faction ) ) > minrel )
             delta = minrel-relation;
         else
@@ -113,18 +121,24 @@ void AllUnitsCloseAndEngage( Unit *un, int faction )
         UniverseUtil::adjustRelationModifierInt( cp, faction, delta );
     }
     for (un_iter i = _Universe->activeStarSystem()->getUnitList().createIterator();
-         (ally = *i) != NULL;
-         ++i)
+            (ally = *i) != NULL;
+            ++i)
         //Vector loc;
-        if (ally->faction == faction) {
-            if ( ( ally->Position()-un->Position() ).Magnitude() < contraband_assist_range ) {
+        if (ally->faction == faction)
+        {
+            if ( ( ally->Position()-un->Position() ).Magnitude() < contraband_assist_range )
+            {
                 GetMadAt( un, ally );
                 Flightgroup *fg = ally->getFlightgroup();
-                if (fg) {
-                    if ( fg->directive.empty() ? true : toupper( *fg->directive.begin() ) != *fg->directive.begin() ) {
+                if (fg)
+                {
+                    if ( fg->directive.empty() ? true : toupper( *fg->directive.begin() ) != *fg->directive.begin() )
+                    {
                         ally->Target( un );
                         ally->TargetTurret( un );
-                    } else {
+                    }
+                    else
+                    {
                         ally->Target( un );
                         ally->TargetTurret( un );
                     }
@@ -140,13 +154,17 @@ void CommunicatingAI::TerminateContrabandSearch( bool contraband_detected )
     Unit *un;
     unsigned char gender;
     std::vector< Animation* > *comm_face = parent->pilot->getCommFaces( gender );
-    if ( ( un = contraband_searchee.GetUnit() ) ) {
+    if ( ( un = contraband_searchee.GetUnit() ) )
+    {
         CommunicationMessage c( parent, un, comm_face, gender );
-        if (contraband_detected) {
+        if (contraband_detected)
+        {
             c.SetCurrentState( c.fsm->GetContrabandDetectedNode(), comm_face, gender );
             GetMadAt( un, 0 );
             AllUnitsCloseAndEngage( un, parent->faction );
-        } else {
+        }
+        else
+        {
             c.SetCurrentState( c.fsm->GetContrabandUnDetectedNode(), comm_face, gender );
         }
         Order *o = un->getAIState();
@@ -164,7 +182,8 @@ void CommunicatingAI::GetMadAt( Unit *un, int numHitsPerContrabandFail )
 static int InList( std::string item, Unit *un )
 {
     float numcontr = 0;
-    if (un) {
+    if (un)
+    {
         for (unsigned int i = 0; i < un->numCargo(); i++)
             if (un->GetCargo( i ).content == item)
                 if (un->GetCargo( i ).quantity > 0)
@@ -177,19 +196,24 @@ void CommunicatingAI::UpdateContrabandSearch()
 {
     static unsigned int contraband_search_batch_update =
         XMLSupport::parse_int( vs_config->getVariable( "AI", "num_contraband_scans_per_search", "10" ) );
-    for (unsigned int rep = 0; rep < contraband_search_batch_update; ++rep) {
+    for (unsigned int rep = 0; rep < contraband_search_batch_update; ++rep)
+    {
         Unit *u = contraband_searchee.GetUnit();
-        if ( u && (u->faction != parent->faction) ) {
+        if ( u && (u->faction != parent->faction) )
+        {
             //don't scan your buddies
-            if ( which_cargo_item < (int) u->numCargo() ) {
-                if (u->GetCargo( which_cargo_item ).quantity > 0) {
+            if ( which_cargo_item < (int) u->numCargo() )
+            {
+                if (u->GetCargo( which_cargo_item ).quantity > 0)
+                {
                     int which_carg_item_bak = which_cargo_item;
                     std::string  item = u->GetManifest( which_cargo_item++, parent, SpeedAndCourse );
                     static bool  use_hidden_cargo_space =
                         XMLSupport::parse_bool( vs_config->getVariable( "physics", "use_hidden_cargo_space", "true" ) );
                     static float speed_course_change    =
                         XMLSupport::parse_float( vs_config->getVariable( "AI", "PercentageSpeedChangeToStopSearch", "1" ) );
-                    if (u->CourseDeviation( SpeedAndCourse, u->GetVelocity() ) > speed_course_change) {
+                    if (u->CourseDeviation( SpeedAndCourse, u->GetVelocity() ) > speed_course_change)
+                    {
                         unsigned char gender;
                         std::vector< Animation* > *comm_face = parent->pilot->getCommFaces( gender );
                         CommunicationMessage c( parent, u, comm_face, gender );
@@ -202,24 +226,32 @@ void CommunicatingAI::UpdateContrabandSearch()
                     }
                     float HiddenTotal    = use_hidden_cargo_space ? ( u->getHiddenCargoVolume() ) : (0);
                     Unit *contrabandlist = FactionUtil::GetContraband( parent->faction );
-                    if (InList( item, contrabandlist ) > 0) {
+                    if (InList( item, contrabandlist ) > 0)
+                    {
                         //inlist now returns an integer so that we can do this at all...
-                        if (HiddenTotal == 0 || u->GetCargo( which_carg_item_bak ).quantity > HiddenTotal) {
+                        if (HiddenTotal == 0 || u->GetCargo( which_carg_item_bak ).quantity > HiddenTotal)
+                        {
                             TerminateContrabandSearch( true );                             //BUCO this is where we want to check against free hidden cargo space.
-                        } else {
+                        }
+                        else
+                        {
                             unsigned int max = u->numCargo();
                             unsigned int quantity = 0;
                             for (unsigned int i = 0; i < max; ++i)
-                                if (InList( u->GetCargo( i ).content, contrabandlist ) > 0) {
+                                if (InList( u->GetCargo( i ).content, contrabandlist ) > 0)
+                                {
                                     quantity += u->GetCargo( i ).quantity;
-                                    if (quantity > HiddenTotal) {
+                                    if (quantity > HiddenTotal)
+                                    {
                                         TerminateContrabandSearch( true );
                                         break;
                                     }
                                 }
                         }
                     }
-                } else {
+                }
+                else
+                {
                     TerminateContrabandSearch( false );
                 }
             }
@@ -234,11 +266,14 @@ static bool isDockedAtAll( Unit *un )
 
 void CommunicatingAI::Destroy()
 {
-    for (unsigned int i = 0; i < _Universe->numPlayers(); ++i) {
+    for (unsigned int i = 0; i < _Universe->numPlayers(); ++i)
+    {
         Unit *target = _Universe->AccessCockpit( i )->GetParent();
-        if (target) {
+        if (target)
+        {
             FSM *fsm = FactionUtil::GetConversation( this->parent->faction, target->faction );
-            if ( fsm->StopAllSounds( (unsigned char) ( parent->pilot->getGender() ) ) ) {
+            if ( fsm->StopAllSounds( (unsigned char) ( parent->pilot->getGender() ) ) )
+            {
                 _Universe->AccessCockpit( i )->SetStaticAnimation();
                 _Universe->AccessCockpit( i )->SetStaticAnimation();
             }
@@ -250,13 +285,17 @@ void CommunicatingAI::Destroy()
 void CommunicatingAI::InitiateContrabandSearch( float playaprob, float targprob )
 {
     Unit *u = GetRandomUnit( playaprob, targprob );
-    if (u) {
+    if (u)
+    {
         Unit *un = FactionUtil::GetContraband( parent->faction );
-        if (un) {
+        if (un)
+        {
             if ( un->numCargo() > 0 && UnitUtil::getUnitSystemFile( u ) == UnitUtil::getUnitSystemFile( parent )
-                && !UnitUtil::isDockableUnit( parent ) ) {
+                    && !UnitUtil::isDockableUnit( parent ) )
+            {
                 Unit *v;
-                if ( ( v = contraband_searchee.GetUnit() ) ) {
+                if ( ( v = contraband_searchee.GetUnit() ) )
+                {
                     if (v == u)
                         return;
                     TerminateContrabandSearch( false );
@@ -288,16 +327,20 @@ void CommunicatingAI::AdjustRelationTo( Unit *un, float factor )
         Flightgroup *toFg;
         int   toFaction;
         float oRlyFactor = factor;
-        if (whichCp != -1) {
+        if (whichCp != -1)
+        {
             toFg = un->getFlightgroup();
             toFaction = un->faction;
-        } else {
+        }
+        else
+        {
             /* Instead use the Aggressor's cockpit? */
             whichCp   = _Universe->whichPlayerStarship( un );
             toFg      = parent->getFlightgroup();
             toFaction = parent->faction;
         }
-        if (whichCp != -1) {
+        if (whichCp != -1)
+        {
             if (toFg && un->faction != parent->faction)
                 oRlyFactor = factor*0.5;
             if (toFg)
@@ -306,14 +349,20 @@ void CommunicatingAI::AdjustRelationTo( Unit *un, float factor )
                 UniverseUtil::adjustRelationModifierInt( whichCp, toFaction, oRlyFactor*parent->pilot->getRank() );
         }
     }
-    if ( newrel < anger || (parent->Target() == NULL && newrel+UnitUtil::getFactionRelation( parent, un ) < 0) ) {
+    if ( newrel < anger || (parent->Target() == NULL && newrel+UnitUtil::getFactionRelation( parent, un ) < 0) )
+    {
         if ( parent->Target() == NULL
-            || (parent->getFlightgroup() == NULL || parent->getFlightgroup()->directive.find( "." ) == string::npos) ) {
+                || (parent->getFlightgroup() == NULL || parent->getFlightgroup()->directive.find( "." ) == string::npos) )
+        {
             parent->Target( un );             //he'll target you--even if he's friendly
             parent->TargetTurret( un );             //he'll target you--even if he's friendly
-        } else if (newrel > appease) {
-            if (parent->Target() == un) {
-                if (parent->getFlightgroup() == NULL || parent->getFlightgroup()->directive.find( "." ) == string::npos) {
+        }
+        else if (newrel > appease)
+        {
+            if (parent->Target() == un)
+            {
+                if (parent->getFlightgroup() == NULL || parent->getFlightgroup()->directive.find( "." ) == string::npos)
+                {
                     parent->Target( NULL );
                     parent->TargetTurret( NULL );                     //he'll target you--even if he's friendly
                 }
@@ -326,7 +375,8 @@ void CommunicatingAI::AdjustRelationTo( Unit *un, float factor )
 //modified not to check player when hostiles are around--unless player IS the hostile
 Unit* CommunicatingAI::GetRandomUnit( float playaprob, float targprob )
 {
-    if (vsrandom.uniformInc( 0, 1 ) < playaprob) {
+    if (vsrandom.uniformInc( 0, 1 ) < playaprob)
+    {
         Unit *playa = _Universe->AccessCockpit( rand()%_Universe->numPlayers() )->GetParent();
         if (playa)
             if ( ( playa->Position()-parent->Position() ).Magnitude()-parent->rSize()-playa->rSize() )
@@ -334,15 +384,10 @@ Unit* CommunicatingAI::GetRandomUnit( float playaprob, float targprob )
     }
     if ( vsrandom.uniformInc( 0, 1 ) < targprob && parent->Target() )
         return parent->Target();
-    //FIXME FOR TESTING ONLY
-    //return parent->Target();
     QVector where = parent->Position()+parent->GetComputerData().radar.maxrange*QVector( vsrandom.uniformInc( -1, 1 ),
-                                                                                        vsrandom.uniformInc( -1, 1 ),
-                                                                                        vsrandom.uniformInc( -1, 1 ) );
+                    vsrandom.uniformInc( -1, 1 ),
+                    vsrandom.uniformInc( -1, 1 ) );
     Collidable   wherewrapper( 0, 0, where );
-
-    //FIXME cm and unitRad below cause unused variable warnings because VS_ENABLE_COLLIDE_KEY is obviously not defined.
-    //Anybody knows if this ifdef serves an important purpose or can be removed?
     CollideMap  *cm = _Universe->activeStarSystem()->collidemap[Unit::UNIT_ONLY];
     static float unitRad =
         XMLSupport::parse_float( vs_config->getVariable( "graphics", "hud", "radar_search_extra_radius", "1000" ) );
@@ -366,12 +411,15 @@ Unit* CommunicatingAI::GetRandomUnit( float playaprob, float targprob )
 void CommunicatingAI::RandomInitiateCommunication( float playaprob, float targprob )
 {
     Unit *target = GetRandomUnit( playaprob, targprob );
-    if (target != NULL) {
+    if (target != NULL)
+    {
         if (UnitUtil::getUnitSystemFile( target ) == UnitUtil::getUnitSystemFile( parent )
-            && UnitUtil::getFlightgroupName( parent ) != "Base" && !isDockedAtAll( target )
-            && UnitUtil::getDistance( parent, target ) <= target->GetComputerData().radar.maxrange) {
+                && UnitUtil::getFlightgroupName( parent ) != "Base" && !isDockedAtAll( target )
+                && UnitUtil::getDistance( parent, target ) <= target->GetComputerData().radar.maxrange)
+        {
             //warning--odd hack they can talk to you if you can sense them--it's like SETI@home
-            for (std::list< CommunicationMessage* >::iterator i = messagequeue.begin(); i != messagequeue.end(); i++) {
+            for (std::list< CommunicationMessage* >::iterator i = messagequeue.begin(); i != messagequeue.end(); i++)
+            {
                 Unit *un = (*i)->sender.GetUnit();
                 if (un == target)
                     return;
@@ -388,36 +436,44 @@ void CommunicatingAI::RandomInitiateCommunication( float playaprob, float targpr
 
 int CommunicatingAI::selectCommunicationMessage( CommunicationMessage &c, Unit *un )
 {
-    if (0 && mood == 0) {
+    if (0 && mood == 0)
+    {
         FSM::Node *n = c.getCurrentState();
         if (n)
             return rand()%n->edges.size();
         else
             return 0;
-    } else {
+    }
+    else
+    {
         static float moodmul = XMLSupport::parse_float( vs_config->getVariable( "AI", "MoodAffectsRespose", "0" ) );
         static float angermul     = XMLSupport::parse_float( vs_config->getVariable( "AI", "AngerAffectsRespose", "1" ) );
         static float staticrelmul =
             XMLSupport::parse_float( vs_config->getVariable( "AI", "StaticRelationshipAffectsResponse", "1" ) );
         return selectCommunicationMessageMood( c, moodmul*mood+angermul*parent->pilot->getAnger( parent,
-                                                                                                 un )+staticrelmul
-                                              *UnitUtil::getFactionRelation( parent, un ) );
+                                               un )+staticrelmul
+                                               *UnitUtil::getFactionRelation( parent, un ) );
     }
 }
 
 void CommunicatingAI::ProcessCommMessage( CommunicationMessage &c )
 {
-    if ( messagequeue.back()->curstate < messagequeue.back()->fsm->GetUnDockNode() ) {
+    if ( messagequeue.back()->curstate < messagequeue.back()->fsm->GetUnDockNode() )
+    {
         Order::ProcessCommMessage( c );
         FSM  *tmpfsm = c.fsm;
         Unit *targ   = c.sender.GetUnit();
-        if ( targ && UnitUtil::getUnitSystemFile( targ ) == UnitUtil::getUnitSystemFile( parent ) && !isDockedAtAll( targ ) ) {
+        if ( targ && UnitUtil::getUnitSystemFile( targ ) == UnitUtil::getUnitSystemFile( parent ) && !isDockedAtAll( targ ) )
+        {
             c.fsm = FactionUtil::GetConversation( parent->faction, targ->faction );
             FSM::Node *n = c.getCurrentState();
-            if (n) {
-                if ( n->edges.size() ) {
+            if (n)
+            {
+                if ( n->edges.size() )
+                {
                     Unit *un = c.sender.GetUnit();
-                    if (un) {
+                    if (un)
+                    {
                         int    b = selectCommunicationMessage( c, un );
                         Order *o = un->getAIState();
                         unsigned char gender;
