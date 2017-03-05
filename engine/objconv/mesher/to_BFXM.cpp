@@ -227,8 +227,11 @@ void beginElement( const string &name, const AttributeList &attributes, XML *xml
 
     AttributeList::const_iterator iter;
     XML::Names elem = (XML::Names) XML::element_map.lookup( name );
-    XML::Names top;
-    if (xml->state_stack.size() > 0) top = *xml->state_stack.rbegin();
+    /* [bfxm cleanup] #34
+     * Appears to do nothing.
+    //XML::Names top;
+    //if (xml->state_stack.size() > 0) top = *xml->state_stack.rbegin();
+     */
     xml->state_stack.push_back( elem );
     switch (elem)
     {
@@ -732,7 +735,9 @@ void beginElement( const string &name, const AttributeList &attributes, XML *xml
         {
             unsigned int32bit ind = 0;
             float32bit indweight  = 1;
-            bool foundindex = false;
+            /* [bfxm cleanup] #34
+             bool foundindex = false;
+            */
             for (iter = attributes.begin(); iter != attributes.end(); iter++) {
                 switch ( XML::attribute_map.lookup( (*iter).name ) )
                 {
@@ -741,10 +746,14 @@ void beginElement( const string &name, const AttributeList &attributes, XML *xml
                     break;
                 case XML::POINT:
                     ind = XMLSupport::parse_int( (*iter).value );
-                    foundindex = true;
+                    /* [bfxm cleanup] #34
+                     * Also removing due to not being needed.
+                     foundindex = true;
+                     */
                     break;
                 case XML::WEIGHT:
                     indweight  = float( XMLSupport::parse_float( (*iter).value ) );
+
                     break;
                 }
             }
@@ -803,8 +812,10 @@ void beginElement( const string &name, const AttributeList &attributes, XML *xml
 
 void endElement( const string &name, XML *xml )
 {
+	/* [bfxm cleanup] #34
     bool flips = atoi( Converter::getNamedOption( "flips" ).c_str() ) != 0;
     bool flipt = atoi( Converter::getNamedOption( "flipt" ).c_str() ) != 0;
+    */
 
     xml->state_stack.pop_back();
     XML::Names elem = (XML::Names) XML::element_map.lookup( name );
@@ -949,9 +960,11 @@ void xmeshToBFXM( XML memfile, FILE *Outputfile, char mode, bool forcenormals )
 
 int32bit writesuperheader( XML memfile, FILE *Outputfile )
 {
+	/* [bfxm cleanup] #34
     float    transx = float( atof( Converter::getNamedOption( "addx" ).c_str() ) );
     float    transy = float( atof( Converter::getNamedOption( "addy" ).c_str() ) );
     float    transz = float( atof( Converter::getNamedOption( "addz" ).c_str() ) );
+    */
     unsigned int32bit intbuf;
     int32bit versionnumber  = VSSwapHostIntToLittle( 20 );
     char8bit bytebuf;
