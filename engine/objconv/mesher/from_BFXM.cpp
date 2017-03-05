@@ -76,10 +76,15 @@ void BFXMToXmeshOrOBJ( FILE *Inputfile, FILE *Outputfile, FILE *OutputObj, FILE 
     rewind( Inputfile );
     bogus_return = fread( inmemfile, 1, Inputlength, Inputfile );
     fclose( Inputfile );
+    
+    /* [bfxm cleanup] #34
     int32bit Inputlength32 = Inputlength/4;
+    */
     //Extract superheader fields
     word32index += 1;
+    /* [bfxm cleanup] #34
     int32bit version = VSSwapHostIntToLittle( inmemfile[word32index].i32val );
+    */
     word32index += 2;
     int32bit Superheaderlength  = VSSwapHostIntToLittle( inmemfile[word32index].i32val );
     int32bit NUMFIELDSPERVERTEX = VSSwapHostIntToLittle( inmemfile[word32index+1].i32val );     //Number of fields per vertex:integer (8)
@@ -837,27 +842,35 @@ void BFXMtoBoxDims( FILE *Inputfile, const char *name )
     rewind( Inputfile );
     bogus_return = fread( inmemfile, 1, Inputlength, Inputfile );
     fclose( Inputfile );
+    /* [bfxm cleanup] #34
     int32bit Inputlength32 = Inputlength/4;
+    */
     //Extract superheader fields
     word32index += 1;
+    /* [bfxm cleanup] #34
     int32bit version = VSSwapHostIntToLittle( inmemfile[word32index].i32val );
+    */
     word32index += 2;
     int32bit Superheaderlength  = VSSwapHostIntToLittle( inmemfile[word32index].i32val );
     int32bit NUMFIELDSPERVERTEX = VSSwapHostIntToLittle( inmemfile[word32index+1].i32val );     //Number of fields per vertex:integer (8)
+    /* [bfxm cleanup] #34
     int32bit NUMFIELDSPERPOLYGONSTRUCTURE    = VSSwapHostIntToLittle( inmemfile[word32index+2].i32val );     //Number of fields per polygon structure: integer (1)
     int32bit NUMFIELDSPERREFERENCEDVERTEX    = VSSwapHostIntToLittle( inmemfile[word32index+3].i32val );     //Number of fields per referenced vertex: integer (3)
+    */
     int32bit NUMFIELDSPERREFERENCEDANIMATION = VSSwapHostIntToLittle( inmemfile[word32index+4].i32val );     //Number of fields per referenced animation: integer (1)
     int32bit numrecords = VSSwapHostIntToLittle( inmemfile[word32index+5].i32val );     //Number of records: integer
     int32bit NUMFIELDSPERANIMATIONDEF = VSSwapHostIntToLittle( inmemfile[word32index+6].i32val );     //Number of fields per animationdef: integer (1)
     word32index = (Superheaderlength/4);       //Go to first record
     //For each record
 
+	/* [bfxm cleanup] #34
     int vtxcount   = 1;
     int texcount   = 1;
     int normcount  = 1;
     int indoffset  = 1;
     int texoffset  = 1;
     int normoffset = 1;
+    */
     for (int32bit recordindex = 0; recordindex < numrecords; recordindex++) {
         int32bit recordbeginword    = word32index;
         //Extract Record Header
@@ -869,9 +882,11 @@ void BFXMtoBoxDims( FILE *Inputfile, const char *name )
         word32index  = recordbeginword+(recordheaderlength/4);
         //For each mesh
         for (int32bit meshindex = 0; meshindex < nummeshes; meshindex++) {
+			/* [bfxm cleanup] #34
             indoffset  = vtxcount;
             texoffset  = texcount;
             normoffset = normcount;
+            */
             if (recordindex > 0 || meshindex > 0) {
                 char     filenamebuf[56];             //Is more than enough characters - int can't be this big in decimal
                 int32bit error    = sprintf( filenamebuf, "%d_%d.xmesh", recordindex, meshindex );
@@ -885,6 +900,7 @@ void BFXMtoBoxDims( FILE *Inputfile, const char *name )
             word32index += 1;
             int32bit   meshlength    = VSSwapHostIntToLittle( inmemfile[word32index].i32val );           //length of record in bytes
             float32bit scale = VSSwapHostFloatToLittle( inmemfile[meshbeginword+2].f32val );             //scale
+            /* [bfxm cleanup] #34
             int32bit   reverse       = VSSwapHostIntToLittle( inmemfile[meshbeginword+3].i32val );           //reverse flag
             int32bit   forcetexture  = VSSwapHostIntToLittle( inmemfile[meshbeginword+4].i32val );           //force texture flag
             int32bit   sharevert     = VSSwapHostIntToLittle( inmemfile[meshbeginword+5].i32val );           //share vertex flag
@@ -912,6 +928,7 @@ void BFXMtoBoxDims( FILE *Inputfile, const char *name )
             int32bit   lighting   = (VSSwapHostIntToLittle( inmemfile[meshbeginword+27].i32val ) != 0) ? 1 : 0;             //lighting
             int32bit   reflect    = (VSSwapHostIntToLittle( inmemfile[meshbeginword+28].i32val ) != 0) ? 1 : 0;             //reflect
             int32bit   usenormals = (VSSwapHostIntToLittle( inmemfile[meshbeginword+29].i32val ) != 0) ? 1 : 0;             //usenormals
+            */
             //End Header
             //Go to Arbitrary Length Attributes section
             word32index  = meshbeginword+(meshheaderlength/4);
@@ -949,8 +966,10 @@ void BFXMtoBoxDims( FILE *Inputfile, const char *name )
             int32bit numtextures = VSSwapHostIntToLittle( inmemfile[word32index].i32val );             //number of textures
             word32index += 1;
             for (int32bit tex = 0; tex < numtextures; tex++) {
+				/* [bfxm cleanup] #34
                 int32bit textype    = VSSwapHostIntToLittle( inmemfile[word32index].i32val );                 //texture type
                 int32bit texindex   = VSSwapHostIntToLittle( inmemfile[word32index+1].i32val );                 //texture index
+				*/
                 int32bit texnamelen = VSSwapHostIntToLittle( inmemfile[word32index+2].i32val );                 //texture name length
                 word32index += 3;
                 string   texname    = "";
@@ -968,15 +987,19 @@ void BFXMtoBoxDims( FILE *Inputfile, const char *name )
             int32bit numlogos = VSSwapHostIntToLittle( inmemfile[word32index].i32val );             //number of logos
             word32index += 1;
             for (int32bit logo = 0; logo < numlogos; logo++) {
+				/* [bfxm cleanup] #34
                 float32bit size     = VSSwapHostFloatToLittle( inmemfile[word32index].f32val );                 //size
                 float32bit offset   = VSSwapHostFloatToLittle( inmemfile[word32index+1].f32val );                 //offset
                 float32bit rotation = VSSwapHostFloatToLittle( inmemfile[word32index+2].f32val );                 //rotation
                 int32bit   type     = VSSwapHostIntToLittle( inmemfile[word32index+3].i32val );               //type
+                */
                 int32bit   numrefs  = VSSwapHostIntToLittle( inmemfile[word32index+4].i32val );               //number of reference points
                 word32index += 5;
                 for (int32bit ref = 0; ref < numrefs; ref++) {
-                    int32bit   refnum = VSSwapHostIntToLittle( inmemfile[word32index].i32val );                   //Logo ref
+					/* [bfxm cleanup] #34
+                    int32bit   refnum = VSSwapHostIntToLittle( inmemfile[word32index].i32val );     //Logo ref
                     float32bit weight = VSSwapHostFloatToLittle( inmemfile[word32index+1].f32val );                     //reference weight
+                    */ 
                     word32index += 2;
                 }
             }
@@ -985,8 +1008,10 @@ void BFXMtoBoxDims( FILE *Inputfile, const char *name )
             int32bit numLODs = VSSwapHostIntToLittle( inmemfile[word32index].i32val );             //number of LODs
             word32index += 1;
             for (int32bit LOD = 0; LOD < numLODs; LOD++) {
+				/* [bfxm cleanup] #34
                 float32bit size  = VSSwapHostFloatToLittle( inmemfile[word32index].f32val );                 //Size
                 int32bit   index = VSSwapHostIntToLittle( inmemfile[word32index+1].i32val );               //Mesh index
+                */
                 word32index += 2;
             }
             //End LODs
@@ -1007,12 +1032,16 @@ void BFXMtoBoxDims( FILE *Inputfile, const char *name )
                     //Append char to end of string
                     word32index += 1;
                 }
+                /* [bfxm cleanup] #34
                 float32bit FPS = VSSwapHostFloatToLittle( inmemfile[word32index].f32val );                 //FPS
+                */
                 word32index += NUMFIELDSPERANIMATIONDEF;
                 int32bit   numframerefs = VSSwapHostIntToLittle( inmemfile[word32index].i32val );               //number of animation frame references
                 word32index += 1;
                 for (int32bit fref = 0; fref < numframerefs; fref++) {
+					/* [bfxm cleanup] #34
                     int32bit ref = VSSwapHostIntToLittle( inmemfile[word32index].i32val );                     //number of animation frame references
+                    */
                     word32index += NUMFIELDSPERREFERENCEDANIMATION;
                 }
             }
