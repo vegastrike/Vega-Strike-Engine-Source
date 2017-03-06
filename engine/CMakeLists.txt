@@ -544,10 +544,10 @@ ELSEIF(CPUINTEL_native)
 ENDIF(CPUAMD_k8)
 
 # Debug target block. 
-SET(CMAKE_CXX_FLAGS_DEBUG " ${CPU_OPTS} -DNV_CUBE_MAP -DBOOST_PYTHON_NO_PY_SIGNATURES -include config.h -pipe -g2 -Wall -O0 -fvisibility=hidden" CACHE STRING
+SET(CMAKE_CXX_FLAGS_DEBUG " ${CPU_OPTS} -DNV_CUBE_MAP -DBOOST_PYTHON_NO_PY_SIGNATURES -include config.h -pipe -g2 -Wall -Werror -O0 -fvisibility=hidden" CACHE STRING
     "Flags used by the C++ compiler during debug builds."
      FORCE )
-SET( CMAKE_C_FLAGS_DEBUG "  ${CPU_OPTS} -DNV_CUBE_MAP -DBOOST_PYTHON_NO_PY_SIGNATURES -include config.h -pipe -g2 -Wall -Wno-unused-function -Wno-unused-variable -O0 -fvisibility=hidden" CACHE STRING
+SET( CMAKE_C_FLAGS_DEBUG "  ${CPU_OPTS} -DNV_CUBE_MAP -DBOOST_PYTHON_NO_PY_SIGNATURES -include config.h -pipe -g2 -Wall -Werror -Wno-unused-function -Wno-unused-variable -O0 -fvisibility=hidden" CACHE STRING
     "Flags used by the C compiler during debug builds."
      FORCE )
 MARK_AS_ADVANCED(
@@ -710,7 +710,7 @@ ELSE(Boost_FOUND)
   SET(TST_INCLUDES ${TST_INCLUDES} ${vsUTCS_SOURCE_DIR}/boost/1_53)
   SET(TST_LIBS ${TST_LIBS} boost_python)
   include_directories(${TST_INCLUDES})
-  add_subdirectory(boost/1_53)
+  add_subdirectory(boost/1_63)
   IF(NOT DISABLE_CLIENT)
     add_dependencies(vegastrike boost_python)
   ENDIF(NOT DISABLE_CLIENT)
@@ -845,16 +845,16 @@ ENDIF (NOT BEOS)
 
 #Find Ogre
 
-find_package(OGRE)
-IF(OGRE_FOUND)
-    SET(TST_INCLUDES ${TST_INCLUDES} ${OGRE_INCLUDE_DIR})
-    SET(TST_LIBS ${TST_LIBS} ${OGRE_LIBRARY})
-    add_definitions(${OGRE_DEFINITIONS})
-    SET(HAVE_OGRE 1)
-    message("++ Found Ogre: ${OGRE_VERSION}")
-ELSE(OGRE_FOUND)
-    message("-- Ogre Not Found: compiling without")
-ENDIF(OGRE_FOUND)
+#find_package(OGRE)
+#IF(OGRE_FOUND)
+#    SET(TST_INCLUDES ${TST_INCLUDES} ${OGRE_INCLUDE_DIR})
+#    SET(TST_LIBS ${TST_LIBS} ${OGRE_LIBRARY})
+#    add_definitions(${OGRE_DEFINITIONS})
+#    SET(HAVE_OGRE 1)
+#    message("++ Found Ogre: ${OGRE_VERSION}")
+#ELSE(OGRE_FOUND)
+#    message("-- Ogre Not Found: compiling without")
+#ENDIF(OGRE_FOUND)
 
 IF(NOT BEOS)
 	FIND_LIBRARY(UTIL_LIB util)
