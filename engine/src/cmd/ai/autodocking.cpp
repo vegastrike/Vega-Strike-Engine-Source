@@ -212,8 +212,10 @@ void AutoDocking::ApproachState(Unit *player, Unit *station)
         // Another ship has docked at our port. Find a new port.
         state = &AutoDocking::SelectionState;
     }
-    else if (station->CanDockWithMe(player) == dockingPath.back())
+    //Careful here as the conversion could potentially return a docking point
+    else if ( (unsigned int)station->CanDockWithMe(player) == dockingPath.back())
     {
+		//Dock!
         state = &AutoDocking::DockingState;
     }
     else

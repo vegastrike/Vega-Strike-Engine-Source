@@ -5968,6 +5968,7 @@ int Unit::CanDockWithMe( Unit *un, bool force )
             if (!pImage->dockingports[i].IsOccupied())
                 return i;
     }
+    
     return -1;
 }
 
