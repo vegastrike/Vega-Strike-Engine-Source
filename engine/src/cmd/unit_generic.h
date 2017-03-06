@@ -179,11 +179,11 @@ public:
     }
 //Turns off a firing beam (upon key release for example)
     void UnFire();
-/**
- *  Fires a beam when the firing unit is at the Cumulative location/transformation
- * owner (won't crash into)  as owner and target as missile target. bool Missile indicates if it is a missile
- * should it fire
- */
+    /**
+     *  Fires a beam when the firing unit is at the Cumulative location/transformation
+     * owner (won't crash into)  as owner and target as missile target. bool Missile indicates if it is a missile
+     * should it fire
+     */
 //Uses Sound Forcefeedback and other stuff
     void PhysicsAlignedUnfire();
     bool PhysicsAlignedFire( Unit*caller,
@@ -233,11 +233,11 @@ public:
     StringPool::Reference name;
     StringPool::Reference filename;
 
-/*
- **************************************************************************************
- **** CONSTRUCTORS / DESCTRUCTOR                                                    ***
- **************************************************************************************
- */
+    /*
+     **************************************************************************************
+     **** CONSTRUCTORS / DESCTRUCTOR                                                    ***
+     **************************************************************************************
+     */
 
 protected:
 //forbidden
@@ -246,30 +246,31 @@ protected:
 //forbidden
     Unit& operator=( const Unit& );
 
-public: Unit();
+public:
+    Unit();
 
-/** Default constructor. This is just to figure out where default
- *  constructors are used. The useless argument will be removed
- *  again later.
- */
+    /** Default constructor. This is just to figure out where default
+     *  constructors are used. The useless argument will be removed
+     *  again later.
+     */
     Unit( int dummy );
 
-/** Constructor that creates aa mesh with meshes as submeshes (number
- *  of them) as either as subunit with faction faction
- */
+    /** Constructor that creates aa mesh with meshes as submeshes (number
+     *  of them) as either as subunit with faction faction
+     */
     Unit( std::vector< Mesh* > &meshes, bool Subunit, int faction );
 
-/** Constructor that creates a mesh from an XML file If it is a
- *  customizedUnit, it will check in that directory in the home dir for
- *  the unit.
- */
+    /** Constructor that creates a mesh from an XML file If it is a
+     *  customizedUnit, it will check in that directory in the home dir for
+     *  the unit.
+     */
 //Uses a lot of stuff that does not belong to here
     Unit( const char *filename, bool SubUnit, int faction, std::string customizedUnit = std::string(
-              "" ), Flightgroup *flightgroup = NULL, int fg_subnumber = 0, std::string *netxml = NULL );
+                "" ), Flightgroup *flightgroup = NULL, int fg_subnumber = 0, std::string *netxml = NULL );
 
 private:
-/** Fix all those uninitialized variables by calling this from every
- *  constructor.  */
+    /** Fix all those uninitialized variables by calling this from every
+     *  constructor.  */
     void ZeroAll();
 
 public:
@@ -282,11 +283,11 @@ public:
     void LoadRow( class CSVRow&row, std::string unitMod, std::string*netxml = NULL );
     virtual ~Unit();
 
-/*
- **************************************************************************************
- **** NETWORKING STUFF                                                              ***
- **************************************************************************************
- */
+    /*
+     **************************************************************************************
+     **** NETWORKING STUFF                                                              ***
+     **************************************************************************************
+     */
 
 protected:
 //Tell if networked unit
@@ -310,16 +311,16 @@ public:
     void SetSerial( ObjSerial );
     void BackupState();
 
-/*
- **************************************************************************************
- **** UPGRADE/CUSTOMIZE STUFF                                                       ***
- **************************************************************************************
- */
+    /*
+     **************************************************************************************
+     **** UPGRADE/CUSTOMIZE STUFF                                                       ***
+     **************************************************************************************
+     */
 
 //Uses mmm... stuff not desired here ?
     bool UpgradeSubUnitsWithFactory( const Unit*up, int subunitoffset, bool touchme, bool downgrade, int &numave,
-                                    double &percentage, Unit*(*createupgradesubunit)(std::string s,
-                                                                                     int faction) );
+                                     double &percentage, Unit*(*createupgradesubunit)(std::string s,
+                                             int faction) );
     virtual bool UpgradeSubUnits( const Unit *up,
                                   int subunitoffset,
                                   bool touchme,
@@ -336,12 +337,12 @@ public:
 //the turrets and spinning parts fun fun stuff
     UnitCollection SubUnits;
 
-/**
- * Contains information about a particular Mount on a unit.
- * And the weapons it has, where it is, where it's aimed,
- * The ammo and the weapon type. As well as the possible weapons it may fit
- * Warning: type has a string inside... cannot be memcpy'd
- */
+    /**
+     * Contains information about a particular Mount on a unit.
+     * And the weapons it has, where it is, where it's aimed,
+     * The ammo and the weapon type. As well as the possible weapons it may fit
+     * Warning: type has a string inside... cannot be memcpy'd
+     */
     un_iter getSubUnits();
     un_kiter viewSubUnits() const;
 #define NO_MOUNT_STAR
@@ -354,7 +355,7 @@ public:
     bool  autopilotactive;
     class graphic_options
     {
-public:
+    public:
         unsigned SubUnit : 1;
         unsigned RecurseIntoSubUnitsOnCollision : 1;
         unsigned missilelock : 1;
@@ -443,11 +444,11 @@ protected:
     friend class Mount;
 //no collision table presence.
 
-/*
- **************************************************************************************
- **** GFX/PLANET STUFF                                                              ***
- **************************************************************************************
- */
+    /*
+     **************************************************************************************
+     **** GFX/PLANET STUFF                                                              ***
+     **************************************************************************************
+     */
 
 public:
 //number of meshes (each with separate texture) this unit has
@@ -510,9 +511,9 @@ public:
         return ( (int) meshdata.size() )-1;
     }
 //Uses planet stuff
-/* Updates the collide Queue with any possible change in sectors
- *  Split this mesh with into 2^level submeshes at arbitrary planes
- *  Uses Mesh so only in Unit and maybe in NetUnit */
+    /* Updates the collide Queue with any possible change in sectors
+     *  Split this mesh with into 2^level submeshes at arbitrary planes
+     *  Uses Mesh so only in Unit and maybe in NetUnit */
     virtual void Split( int level ) {}
     virtual void addHalo( const char *filename,
                           const QVector &loc,
@@ -523,9 +524,9 @@ public:
 
 //Uses Mesh -> in NetUnit and Unit only
     std::vector< Mesh* >StealMeshes();
-/* Begin and continue explosion
- *  Uses GFX so only in Unit class
- *  But should always return true on server side = assuming explosion time=0 here */
+    /* Begin and continue explosion
+     *  Uses GFX so only in Unit class
+     *  But should always return true on server side = assuming explosion time=0 here */
     virtual bool Explode( bool draw, float timeit );
 //explodes then deletes
     void Destroy();
@@ -544,29 +545,29 @@ public:
         return NULL;
     }
 //Not needed just in Unit class
-    
-    // Uses GFX, so generic version is a no-op. 
+
+    // Uses GFX, so generic version is a no-op.
     // GameUnit variants (clientside) would apply the overrides to their GFX techniques
     virtual void applyTechniqueOverrides(const std::map<std::string, std::string> &overrides);
 
-/*
- **************************************************************************************
- **** NAVIGATION STUFF                                                              ***
- **************************************************************************************
- */
+    /*
+     **************************************************************************************
+     **** NAVIGATION STUFF                                                              ***
+     **************************************************************************************
+     */
 
 public:
     const std::vector< std::string >& GetDestinations() const;
     void AddDestination( const std::string& );
-/**
- * The computer holds all data in the navigation computer of the current unit
- * It is outside modifyable with GetComputerData() and holds only volatile
- * Information inside containers so that destruction of containers will not
- * result in segfaults.
- * Maximum speeds and turning restrictions are merely facts of the computer
- * and have nothing to do with the limitations of the physical nature
- * of space combat
- */
+    /**
+     * The computer holds all data in the navigation computer of the current unit
+     * It is outside modifyable with GetComputerData() and holds only volatile
+     * Information inside containers so that destruction of containers will not
+     * result in segfaults.
+     * Maximum speeds and turning restrictions are merely facts of the computer
+     * and have nothing to do with the limitations of the physical nature
+     * of space combat
+     */
     class Computer
     {
     public:
@@ -716,11 +717,11 @@ public:
     void ActivateJumpDrive( int destination = 0 );
     void DeactivateJumpDrive();
 
-/*
- **************************************************************************************
- **** XML STUFF                                                                     ***
- **************************************************************************************
- */
+    /*
+     **************************************************************************************
+     **** XML STUFF                                                                     ***
+     **************************************************************************************
+     */
 
 public:
 //Unit XML Load information
@@ -749,11 +750,11 @@ public:
     void LoadXML( const char *filename, const char *unitModifications = "", std::string *xmlbuffer = NULL );
     void LoadXML( VSFileSystem::VSFile &f, const char *unitModifications = "", std::string *xmlbuffer = NULL );
 
-/*
- **************************************************************************************
- **** PHYSICS STUFF                                                                 ***
- **************************************************************************************
- */
+    /*
+     **************************************************************************************
+     **** PHYSICS STUFF                                                                 ***
+     **************************************************************************************
+     */
 
 private:
     void RechargeEnergy();
@@ -821,7 +822,7 @@ protected:
 public:
     class Limits
     {
-public:
+    public:
 //max ypr--both pos/neg are symmetrical
         float  yaw;
         float  pitch;
@@ -888,7 +889,10 @@ public:
     {
         return killed;
     }
-    bool IsExploding() const { return pImage->timeexplode > 0; }
+    bool IsExploding() const
+    {
+        return pImage->timeexplode > 0;
+    }
     // 0 = not stated, 1 = done
     float ExplodingProgress() const;
 
@@ -969,11 +973,11 @@ public:
 
 //Rotates about the axis
     void Rotate( const Vector &axis );
-/**
- * Fire engine takes a unit vector for direction
- * and how fast the fuel speed and mass coming out are
- */
-/*unit vector... might default to "r"*/
+    /**
+     * Fire engine takes a unit vector for direction
+     * and how fast the fuel speed and mass coming out are
+     */
+    /*unit vector... might default to "r"*/
     void FireEngines( const Vector &Direction, float FuelSpeed, float FMass );
 //applies a force for the whole gameturn upon the center of mass
     void ApplyForce( const Vector &Vforce );
@@ -1129,11 +1133,11 @@ public:
 //Sets if forces should resolve on this unit or not
     void SetResolveForces( bool );
 
-/*
- **************************************************************************************
- **** WEAPONS/SHIELD STUFF                                                          ***
- **************************************************************************************
- */
+    /*
+     **************************************************************************************
+     **** WEAPONS/SHIELD STUFF                                                          ***
+     **************************************************************************************
+     */
 public:
 //Armor and shield structures
     Armor  armor;
@@ -1208,11 +1212,11 @@ public:
 //reduces shields to X percentage and reduces shield recharge to Y percentage
     void leach( float XshieldPercent, float YrechargePercent, float ZenergyPercent );
 
-/*
- **************************************************************************************
- **** TARGETTING STUFF                                                              ***
- **************************************************************************************
- */
+    /*
+     **************************************************************************************
+     **** TARGETTING STUFF                                                              ***
+     **************************************************************************************
+     */
 
 protected:
 //not used yet
@@ -1258,11 +1262,11 @@ public:
     void ReTargetFg( int which_target = 0 );
 //not used yet
 
-/*
- **************************************************************************************
- **** CARGO STUFF                                                                   ***
- **************************************************************************************
- */
+    /*
+     **************************************************************************************
+     **** CARGO STUFF                                                                   ***
+     **************************************************************************************
+     */
 
 protected:
     void SortCargo();
@@ -1292,16 +1296,16 @@ public:
     float getUpgradeVolume( void ) const;
     float getHiddenCargoVolume( void ) const;
 
-/*
- **************************************************************************************
- **** AI STUFF                                                                      ***
- **************************************************************************************
- */
+    /*
+     **************************************************************************************
+     **** AI STUFF                                                                      ***
+     **************************************************************************************
+     */
 
 public:
     class csOPCODECollider * getCollideTree( const Vector &scale = Vector( 1,
-                                                                           1,
-                                                                           1 ), const std::vector< struct mesh_polygon >* = NULL );
+                1,
+                1 ), const std::vector< struct mesh_polygon >* = NULL );
 //Because accessing in daughter classes member function from Unit * instances
     Order *aistate;
     Order * getAIState() const
@@ -1338,11 +1342,11 @@ public:
 //Executes 1 frame of physics-based AI
     void ExecuteAI();
 
-/*
- **************************************************************************************
- **** COLLISION STUFF                                                               ***
- **************************************************************************************
- */
+    /*
+     **************************************************************************************
+     **** COLLISION STUFF                                                               ***
+     **************************************************************************************
+     */
 
 public:
 //The information about the minimum and maximum ranges of this unit. Collide Tables point to this bit of information.
@@ -1383,12 +1387,12 @@ public:
         return false;
     }
 
-/**
- * Queries the bounding sphere with a duo of mouse coordinates that project
- * to the center of a ship and compare with a sphere...pretty fast
- * queries the sphere for weapons (world space point)
- * Only in Unit class
- */
+    /**
+     * Queries the bounding sphere with a duo of mouse coordinates that project
+     * to the center of a ship and compare with a sphere...pretty fast
+     * queries the sphere for weapons (world space point)
+     * Only in Unit class
+     */
     virtual bool querySphereClickList( int, int, float err, Camera *activeCam )
     {
         return false;
@@ -1415,11 +1419,11 @@ public:
 //checks for collisions with all beams and other units roughly and then more carefully
     void CollideAll();
 
-/*
- **************************************************************************************
- **** DOCKING STUFF                                                                 ***
- **************************************************************************************
- */
+    /*
+     **************************************************************************************
+     **** DOCKING STUFF                                                                 ***
+     **************************************************************************************
+     */
 
 public:
     unsigned char docked;
@@ -1444,11 +1448,11 @@ public:
     int Dock( Unit *unitToDockWith );
     void RestoreGodliness();
 
-/*
- **************************************************************************************
- **** FACTION/FLIGHTGROUP STUFF                                                     ***
- **************************************************************************************
- */
+    /*
+     **************************************************************************************
+     **** FACTION/FLIGHTGROUP STUFF                                                     ***
+     **************************************************************************************
+     */
 
 protected:
 //the flightgroup this ship is in
@@ -1472,17 +1476,17 @@ public:
     }
 //get the full flightgroup ID (i.e 'green-4')
     const std::string getFgID();
-	// Changed next two lines from struct CargoColor to class CargoColor to fit line 70 declaration
+    // Changed next two lines from struct CargoColor to class CargoColor to fit line 70 declaration
     std::vector< class CargoColor >& FilterDowngradeList( std::vector< class CargoColor > &mylist, bool downgrade = true );
     std::vector< class CargoColor >& FilterUpgradeList( std::vector< class CargoColor > &mylist );
 
     bool IsBase() const;
 
-/*
- **************************************************************************************
- **** MISC STUFF                                                                    ***
- **************************************************************************************
- */
+    /*
+     **************************************************************************************
+     **** MISC STUFF                                                                    ***
+     **************************************************************************************
+     */
 
 public:
     enum tractorHow {tractorImmune=0, tractorPush=1, tractorIn=2, tractorBoth=3};
@@ -1559,7 +1563,7 @@ public:
     **** ANIMATION STUFF                                                       ***
     **************************************************************************************
     */
-        MeshAnimation *pMeshAnimation;	
+    MeshAnimation *pMeshAnimation;
 };
 
 Unit * findUnitInStarsystem( void *unitDoNotDereference );
@@ -1595,11 +1599,13 @@ struct Unit::XML
 
 inline Unit* UnitContainer::GetUnit()
 {
-    if (unit != NULL) {
+    if (unit != NULL)
+    {
 #ifdef CONTAINER_DEBUG
         CheckUnit( unit );
 #endif
-        if ( unit->Killed() ) {
+        if ( unit->Killed() )
+        {
             unit->UnRef();
             unit = NULL;
         }
@@ -1635,12 +1641,12 @@ protected:
     unsigned int activeAnimation;
     double timeperframe;
     bool   done;
-	unsigned int activeMesh;
-	unsigned int nextactiveMesh;
-	bool infiniteLoop;
-	unsigned int    loopCount;
+    unsigned int activeMesh;
+    unsigned int nextactiveMesh;
+    bool infiniteLoop;
+    unsigned int    loopCount;
 
-	string uniqueUnitName;
+    string uniqueUnitName;
     Unit *unitDst;
 
 public:
@@ -1660,7 +1666,10 @@ public:
 
     void clear();
 
-    ~MeshAnimation() { clear(); }
+    ~MeshAnimation()
+    {
+        clear();
+    }
 
     string getAnimationName(unsigned int animationNumber) const;
 

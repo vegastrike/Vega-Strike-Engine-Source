@@ -40,7 +40,7 @@ boost::optional<size_t> FindWaypoint(Unit *player,
 
 // Find suitable docking port and associated waypoints.
 Orders::AutoDocking::DockingPath FindDockingPort(Unit *player,
-                                                 Unit *station)
+        Unit *station)
 {
     // FIXME: Prefer outside docking ports (because they are more safe to travel to)
     // FIXME: Ensure line-of-sight to first point
@@ -164,7 +164,7 @@ void AutoDocking::AbortState(Unit *player, Unit *station)
 {
     EraseOrders();
     state = &AutoDocking::EndState;
-    
+
     // Safety: full stop on abort
     KBData kbdata;
     FlyByKeyboard::StopKey(kbdata, PRESS);
@@ -215,7 +215,7 @@ void AutoDocking::ApproachState(Unit *player, Unit *station)
     //Careful here as the conversion could potentially return a docking point
     else if ( (unsigned int)station->CanDockWithMe(player) == dockingPath.back())
     {
-		//Dock!
+        //Dock!
         state = &AutoDocking::DockingState;
     }
     else
