@@ -12,8 +12,12 @@ void Order::AdjustRelationTo( Unit *un, float factor )
 
 void Order::Communicate( const CommunicationMessage &c )
 {
+	/* [Order Comm] #53
+	 * this is not a pointer, this is an "object" a non physical one.
+	 * Therefore we shouldn't be comparing to NULL in the first place. 
     if (this == NULL)
         return;
+        */
     if ( Network != NULL && !_Universe->netLocked() ) {
         //Stupid constness rules...
         int cp = _Universe->whichPlayerStarship( const_cast< UnitContainer& > (c.sender).GetUnit() );
