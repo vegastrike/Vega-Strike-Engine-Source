@@ -753,7 +753,7 @@ void Unit::LoadRow( CSVRow &row, string modification, string *netxml )
     DEF_OPTIMIZER( Armor_Front_Bottom_Right );
     DEF_OPTIMIZER( Armor_Back_Bottom_Left );
     DEF_OPTIMIZER( Armor_Back_Bottom_Right );
-    DEF_OPTIMIZER( Description );
+    //DEF_OPTIMIZER( Description );
     DEF_OPTIMIZER( Shield_Front_Top_Left );
     DEF_OPTIMIZER( Shield_Front_Top_Right );
     DEF_OPTIMIZER( Shield_Back_Top_Left );
@@ -876,7 +876,7 @@ void Unit::LoadRow( CSVRow &row, string modification, string *netxml )
             INIT_OPTIMIZER( keys, Armor_Front_Bottom_Right );
             INIT_OPTIMIZER( keys, Armor_Back_Bottom_Left );
             INIT_OPTIMIZER( keys, Armor_Back_Bottom_Right );
-            INIT_OPTIMIZER( keys, Description );
+            //INIT_OPTIMIZER( keys, Description );
             INIT_OPTIMIZER( keys, Shield_Front_Top_Left );
             INIT_OPTIMIZER( keys, Shield_Front_Top_Right );
             INIT_OPTIMIZER( keys, Shield_Back_Top_Left );
