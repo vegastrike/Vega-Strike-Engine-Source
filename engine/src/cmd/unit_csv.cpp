@@ -1494,10 +1494,10 @@ static string tos( double val )
     return XMLSupport::tostring( (float) val );
 }
 
-static string tos( unsigned int val )
+/*static string tos( unsigned int val )
 {
     return XMLSupport::tostring( val );
-}
+}*/
 
 static string tos( bool val )
 {
