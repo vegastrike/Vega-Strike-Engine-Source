@@ -15,6 +15,7 @@ void Order::Communicate( const CommunicationMessage &c )
     /* [Order Comm] #53
      * this is not a pointer, this is an "object" a non physical one.
      * Therefore we shouldn't be comparing to NULL in the first place.
+     * If we've got an order, then we also have an object...so... 
     if (this == NULL)
         return;
         */
