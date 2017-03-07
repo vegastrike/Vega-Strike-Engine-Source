@@ -39,7 +39,8 @@ string KillQuadZeros( string inp )
 string MakeUnitXMLPretty( string str, Unit *un )
 {
     string writestr;
-    if (un) {
+    if (un)
+    {
         writestr += "Name: "+un->name;
         writestr += " "+un->getFullname();
         Flightgroup *fg = un->getFlightgroup();
@@ -48,7 +49,8 @@ string MakeUnitXMLPretty( string str, Unit *un )
         writestr += "\n";
     }
     static std::set< string >lookfor;
-    if ( lookfor.empty() ) {
+    if ( lookfor.empty() )
+    {
         lookfor.insert( "Shie" );
         lookfor.insert( "Armo" );
 //lookfor.insert ("Hull");
@@ -66,13 +68,16 @@ string MakeUnitXMLPretty( string str, Unit *un )
         lookfor.insert( "Rada" );
     }
     std::string::size_type foundpos;
-    while ( ( foundpos = str.find( "<" ) ) != string::npos ) {
+    while ( ( foundpos = str.find( "<" ) ) != string::npos )
+    {
         if (str.size() <= foundpos+1)
             break;
         str = str.substr( foundpos+1 );
-        if (str.size() > 3) {
+        if (str.size() > 3)
+        {
             char mycomp[5] = {str[0], str[1], str[2], str[3], 0};
-            if ( lookfor.find( mycomp ) != lookfor.end() ) {
+            if ( lookfor.find( mycomp ) != lookfor.end() )
+            {
                 int newline = str.find( ">" );
                 if (newline > 0)
                     if (str[newline-1] == '/')
@@ -86,14 +91,15 @@ string MakeUnitXMLPretty( string str, Unit *un )
 
 int GetModeFromName( const char *input_buffer )
 {
-    if (strlen( input_buffer ) > 3) {
+    if (strlen( input_buffer ) > 3)
+    {
         if (input_buffer[0] == 'a'
-            && input_buffer[1] == 'd'
-            && input_buffer[2] == 'd')
+                && input_buffer[1] == 'd'
+                && input_buffer[2] == 'd')
             return 1;
         if (input_buffer[0] == 'm'
-            && input_buffer[1] == 'u'
-            && input_buffer[2] == 'l')
+                && input_buffer[1] == 'u'
+                && input_buffer[2] == 'l')
             return 2;
     }
     return 0;
@@ -266,7 +272,8 @@ enum Names
     TEXTURESTARTTIME
 };
 
-const EnumMap::Pair element_names[37] = {
+const EnumMap::Pair element_names[37] =
+{
     EnumMap::Pair( "UNKNOWN",       UNKNOWN ),
     EnumMap::Pair( "Unit",          UNIT ),
     EnumMap::Pair( "SubUnit",       SUBUNIT ),
@@ -306,7 +313,8 @@ const EnumMap::Pair element_names[37] = {
     EnumMap::Pair( "Description",   DESCRIPTION ),
 };
 
-const EnumMap::Pair attribute_names[119] = {
+const EnumMap::Pair attribute_names[119] =
+{
     EnumMap::Pair( "UNKNOWN",                 UNKNOWN ),
     EnumMap::Pair( "missing",                 MISSING ),
     EnumMap::Pair( "file",                    XFILE ),
@@ -454,7 +462,8 @@ void addShieldMesh( Unit::XML *xml, const char *filename, const float scale, int
 {
     static bool forceit = XMLSupport::parse_bool( vs_config->getVariable( "graphics", "forceOneOneShieldBlend", "true" ) );
     xml->shieldmesh = Mesh::LoadMesh( filename, Vector( scale, scale, scale ), faction, fg );
-    if (xml->shieldmesh && forceit) {
+    if (xml->shieldmesh && forceit)
+    {
         xml->shieldmesh->SetBlendMode( ONE, ONE, true );
         xml->shieldmesh->setEnvMap( false, true );
         xml->shieldmesh->setLighting( true, true );
@@ -477,27 +486,39 @@ void pushMesh( std::vector< Mesh* > &meshes,
                double texturestarttime )
 {
     vector< Mesh* >m = Mesh::LoadMeshes( filename, Vector( scale, scale, scale ), faction, fg );
-    for (unsigned int i = 0; i < m.size(); ++i) {
+    for (unsigned int i = 0; i < m.size(); ++i)
+    {
         meshes.push_back( m[i] );
-        if (startframe >= 0) {
+        if (startframe >= 0)
+        {
             meshes.back()->setCurrentFrame( startframe );
-        } else if (startframe == -2) {
+        }
+        else if (startframe == -2)
+        {
             float r = ( (float) rand() )/RAND_MAX;
             meshes.back()->setCurrentFrame( r*meshes.back()->getFramesPerSecond() );
-        } else if (startframe == -1) {
+        }
+        else if (startframe == -1)
+        {
             if (randomstartseconds == 0)
                 randomstartseconds = randomstartframe*meshes.back()->getNumLOD()/meshes.back()->getFramesPerSecond();
             meshes.back()->setCurrentFrame( randomstartseconds*meshes.back()->getFramesPerSecond() );
         }
-        if (texturestarttime > 0) {
+        if (texturestarttime > 0)
+        {
             meshes.back()->setTextureCumulativeTime( texturestarttime );
-        } else {
+        }
+        else
+        {
             float  fps    = meshes.back()->getTextureFramesPerSecond();
             int    frames = meshes.back()->getNumTextureFrames();
             double ran    = randomstartframe;
-            if (fps > 0 && frames > 1) {
+            if (fps > 0 && frames > 1)
+            {
                 ran *= frames/fps;
-            } else {
+            }
+            else
+            {
                 ran *= 1000;
             }
             meshes.back()->setTextureCumulativeTime( ran );
@@ -569,7 +590,8 @@ void Unit::beginElement( const string &name, const AttributeList &attributes )
         ADDTAG;
         assert( xml->unitlevel == 1 );
         xml->unitlevel++;
-        for (iter = attributes.begin(); iter != attributes.end(); iter++) {
+        for (iter = attributes.begin(); iter != attributes.end(); iter++)
+        {
             switch ( attribute_map.lookup( (*iter).name ) )
             {
             case XFILE:
@@ -587,7 +609,8 @@ void Unit::beginElement( const string &name, const AttributeList &attributes )
         ADDTAG;
         assert( xml->unitlevel == 1 );
         xml->unitlevel++;
-        for (iter = attributes.begin(); iter != attributes.end(); iter++) {
+        for (iter = attributes.begin(); iter != attributes.end(); iter++)
+        {
             switch ( attribute_map.lookup( (*iter).name ) )
             {
             case XFILE:
@@ -606,7 +629,8 @@ void Unit::beginElement( const string &name, const AttributeList &attributes )
         ADDTAG;
         assert( xml->unitlevel == 1 );
         xml->unitlevel++;
-        for (iter = attributes.begin(); iter != attributes.end(); iter++) {
+        for (iter = attributes.begin(); iter != attributes.end(); iter++)
+        {
             switch ( attribute_map.lookup( (*iter).name ) )
             {
             case VOLUME:
@@ -623,7 +647,8 @@ void Unit::beginElement( const string &name, const AttributeList &attributes )
     case IMPORT:
         Q.i = Q.k = 0;
         xml->unitlevel++;
-        for (iter = attributes.begin(); iter != attributes.end(); iter++) {
+        for (iter = attributes.begin(); iter != attributes.end(); iter++)
+        {
             switch ( attribute_map.lookup( (*iter).name ) )
             {
             case QUANTITY:
@@ -646,7 +671,8 @@ void Unit::beginElement( const string &name, const AttributeList &attributes )
     case CATEGORY:
         //this is autogenerated by the handler
         xml->unitlevel++;
-        for (iter = attributes.begin(); iter != attributes.end(); iter++) {
+        for (iter = attributes.begin(); iter != attributes.end(); iter++)
+        {
             switch ( attribute_map.lookup( (*iter).name ) )
             {
             case XFILE:
@@ -660,7 +686,8 @@ void Unit::beginElement( const string &name, const AttributeList &attributes )
         assert( xml->unitlevel >= 2 );
         xml->unitlevel++;
         carg.category = xml->cargo_category;
-        for (iter = attributes.begin(); iter != attributes.end(); iter++) {
+        for (iter = attributes.begin(); iter != attributes.end(); iter++)
+        {
             switch ( attribute_map.lookup( (*iter).name ) )
             {
             case QUANTITY:
@@ -690,143 +717,149 @@ void Unit::beginElement( const string &name, const AttributeList &attributes )
             AddCargo( carg, false );
         break;
     case MESHFILE:
+    {
+        std::string file  = "box.bfxm";
+        int    startframe = 0;
+        double texturestarttime = 0;
+        ADDTAG;
+        assert( xml->unitlevel == 1 );
+        xml->unitlevel++;
+        for (iter = attributes.begin(); iter != attributes.end(); iter++)
         {
-            std::string file  = "box.bfxm";
-            int    startframe = 0;
-            double texturestarttime = 0;
-            ADDTAG;
-            assert( xml->unitlevel == 1 );
-            xml->unitlevel++;
-            for (iter = attributes.begin(); iter != attributes.end(); iter++) {
-                switch ( attribute_map.lookup( (*iter).name ) )
-                {
-                case XFILE:
-                    ADDDEFAULT;
-                    file = (*iter).value;
-                    break;
-                case STARTFRAME:
-                    if (strtoupper( (*iter).value ) == "RANDOM")
-                        startframe = -1;
-                    else if (strtoupper( (*iter).value ) == "ASYNC")
-                        startframe = -2;
-                    else
-                        startframe = parse_int( (*iter).value );
-                    break;
-                case TEXTURESTARTTIME:
-                    if (strtoupper( (*iter).value ) == "RANDOM")
-                        texturestarttime = -1;
-                    else
-                        texturestarttime = parse_float( (*iter).value );
-                }
-            }
-            switch (current_unit_load_mode)
+            switch ( attribute_map.lookup( (*iter).name ) )
             {
-            case NO_MESH:
+            case XFILE:
+                ADDDEFAULT;
+                file = (*iter).value;
                 break;
-            default:
-                pushMesh( xml->meshes, xml->randomstartframe, xml->randomstartseconds,
-                          file.c_str(), xml->unitscale, faction, flightgroup, startframe, texturestarttime );
+            case STARTFRAME:
+                if (strtoupper( (*iter).value ) == "RANDOM")
+                    startframe = -1;
+                else if (strtoupper( (*iter).value ) == "ASYNC")
+                    startframe = -2;
+                else
+                    startframe = parse_int( (*iter).value );
+                break;
+            case TEXTURESTARTTIME:
+                if (strtoupper( (*iter).value ) == "RANDOM")
+                    texturestarttime = -1;
+                else
+                    texturestarttime = parse_float( (*iter).value );
             }
-            break;
         }
-    case UPGRADE:
+        switch (current_unit_load_mode)
         {
-            assert( xml->unitlevel >= 1 );
-            xml->unitlevel++;
-
-            double percent;
-            int    moffset = 0;
-            int    soffset = 0;
-            //don't serialize
-            for (iter = attributes.begin(); iter != attributes.end(); iter++) {
-                switch ( attribute_map.lookup( (*iter).name ) )
-                {
-                case XFILE:
-                    filename = (*iter).value.c_str();
-                    break;
-                case SUBUNITOFFSET:
-                    soffset  = parse_int( (*iter).value );
-                    break;
-                case MOUNTOFFSET:
-                    moffset  = parse_int( (*iter).value );
-                    break;
-                }
-            }
-            int   upgrfac  = FactionUtil::GetUpgradeFaction();
-            Unit *upgradee = UnitFactory::createUnit( filename.c_str(), true, upgrfac );
-            Unit::Upgrade( upgradee, moffset, soffset, GetModeFromName( filename.c_str() ), true, percent, NULL );
-            upgradee->Kill();
+        case NO_MESH:
             break;
-        }
-    case DOCK:
-        {
-            ADDTAG;
-            DockingPorts::Type::Value dockType = DockingPorts::Type::DEFAULT;
-            assert( xml->unitlevel == 1 );
-            xml->unitlevel++;
-            pos = QVector( 0, 0, 0 );
-            P   = QVector( 1, 1, 1 );
-            Q   = QVector( FLT_MAX, FLT_MAX, FLT_MAX );
-            R   = QVector( FLT_MAX, FLT_MAX, FLT_MAX );
-            for (iter = attributes.begin(); iter != attributes.end(); iter++) {
-                switch ( attribute_map.lookup( (*iter).name ) )
-                {
-                case DOCKINTERNAL:
-                    ADDDEFAULT;
-                    dockType = DockingPorts::Type::Value(parse_int((*iter).value));
-                    break;
-                case X:
-                    ADDDEFAULT;
-                    pos.i = xml->unitscale*parse_float( (*iter).value );
-                    break;
-                case Y:
-                    ADDDEFAULT;
-                    pos.j = xml->unitscale*parse_float( (*iter).value );
-                    break;
-                case Z:
-                    ADDDEFAULT;
-                    pos.k = xml->unitscale*parse_float( (*iter).value );
-                    break;
-                case TOP:
-                    ADDDEFAULT;
-                    R.j = xml->unitscale*parse_float( (*iter).value );
-                    break;
-                case BOTTOM:
-                    ADDDEFAULT;
-                    Q.j = xml->unitscale*parse_float( (*iter).value );
-                    break;
-                case LEFT:
-                    ADDDEFAULT;
-                    Q.i = xml->unitscale*parse_float( (*iter).value );
-                    break;
-                case RIGHT:
-                    ADDDEFAULT;
-                    R.i = parse_float( (*iter).value );
-                    break;
-                case BACK:
-                    ADDDEFAULT;
-                    Q.k = xml->unitscale*parse_float( (*iter).value );
-                    break;
-                case FRONT:
-                    ADDDEFAULT;
-                    R.k = xml->unitscale*parse_float( (*iter).value );
-                    break;
-                case MOUNTSIZE:
-                    ADDDEFAULT;
-                    P.i = xml->unitscale*parse_float( (*iter).value );
-                    P.j = xml->unitscale*parse_float( (*iter).value );
-                    break;
-                }
-            }
-            if (Q.i == FLT_MAX || Q.j == FLT_MAX || Q.k == FLT_MAX || R.i == FLT_MAX || R.j == FLT_MAX || R.k == FLT_MAX) {
-                pImage->dockingports.push_back( DockingPorts( pos.Cast(), P.i, 0, dockType ) );
-            } else {
-                QVector tQ = Q.Min( R );
-                QVector tR = R.Max( Q );
-                pImage->dockingports.push_back( DockingPorts( tQ.Cast(), tR.Cast(), 0, dockType ) );
-            }
+        default:
+            pushMesh( xml->meshes, xml->randomstartframe, xml->randomstartseconds,
+                      file.c_str(), xml->unitscale, faction, flightgroup, startframe, texturestarttime );
         }
         break;
+    }
+    case UPGRADE:
+    {
+        assert( xml->unitlevel >= 1 );
+        xml->unitlevel++;
+
+        double percent;
+        int    moffset = 0;
+        int    soffset = 0;
+        //don't serialize
+        for (iter = attributes.begin(); iter != attributes.end(); iter++)
+        {
+            switch ( attribute_map.lookup( (*iter).name ) )
+            {
+            case XFILE:
+                filename = (*iter).value.c_str();
+                break;
+            case SUBUNITOFFSET:
+                soffset  = parse_int( (*iter).value );
+                break;
+            case MOUNTOFFSET:
+                moffset  = parse_int( (*iter).value );
+                break;
+            }
+        }
+        int   upgrfac  = FactionUtil::GetUpgradeFaction();
+        Unit *upgradee = UnitFactory::createUnit( filename.c_str(), true, upgrfac );
+        Unit::Upgrade( upgradee, moffset, soffset, GetModeFromName( filename.c_str() ), true, percent, NULL );
+        upgradee->Kill();
+        break;
+    }
+    case DOCK:
+    {
+        ADDTAG;
+        DockingPorts::Type::Value dockType = DockingPorts::Type::DEFAULT;
+        assert( xml->unitlevel == 1 );
+        xml->unitlevel++;
+        pos = QVector( 0, 0, 0 );
+        P   = QVector( 1, 1, 1 );
+        Q   = QVector( FLT_MAX, FLT_MAX, FLT_MAX );
+        R   = QVector( FLT_MAX, FLT_MAX, FLT_MAX );
+        for (iter = attributes.begin(); iter != attributes.end(); iter++)
+        {
+            switch ( attribute_map.lookup( (*iter).name ) )
+            {
+            case DOCKINTERNAL:
+                ADDDEFAULT;
+                dockType = DockingPorts::Type::Value(parse_int((*iter).value));
+                break;
+            case X:
+                ADDDEFAULT;
+                pos.i = xml->unitscale*parse_float( (*iter).value );
+                break;
+            case Y:
+                ADDDEFAULT;
+                pos.j = xml->unitscale*parse_float( (*iter).value );
+                break;
+            case Z:
+                ADDDEFAULT;
+                pos.k = xml->unitscale*parse_float( (*iter).value );
+                break;
+            case TOP:
+                ADDDEFAULT;
+                R.j = xml->unitscale*parse_float( (*iter).value );
+                break;
+            case BOTTOM:
+                ADDDEFAULT;
+                Q.j = xml->unitscale*parse_float( (*iter).value );
+                break;
+            case LEFT:
+                ADDDEFAULT;
+                Q.i = xml->unitscale*parse_float( (*iter).value );
+                break;
+            case RIGHT:
+                ADDDEFAULT;
+                R.i = parse_float( (*iter).value );
+                break;
+            case BACK:
+                ADDDEFAULT;
+                Q.k = xml->unitscale*parse_float( (*iter).value );
+                break;
+            case FRONT:
+                ADDDEFAULT;
+                R.k = xml->unitscale*parse_float( (*iter).value );
+                break;
+            case MOUNTSIZE:
+                ADDDEFAULT;
+                P.i = xml->unitscale*parse_float( (*iter).value );
+                P.j = xml->unitscale*parse_float( (*iter).value );
+                break;
+            }
+        }
+        if (Q.i == FLT_MAX || Q.j == FLT_MAX || Q.k == FLT_MAX || R.i == FLT_MAX || R.j == FLT_MAX || R.k == FLT_MAX)
+        {
+            pImage->dockingports.push_back( DockingPorts( pos.Cast(), P.i, 0, dockType ) );
+        }
+        else
+        {
+            QVector tQ = Q.Min( R );
+            QVector tR = R.Max( Q );
+            pImage->dockingports.push_back( DockingPorts( tQ.Cast(), tR.Cast(), 0, dockType ) );
+        }
+    }
+    break;
     case MESHLIGHT:
         ADDTAG;
         vs_config->gethColor( "unit", "engine", halocolor, 0xffffffff );
@@ -835,7 +868,8 @@ void Unit::beginElement( const string &name, const AttributeList &attributes )
         P   = QVector( 1, 1, 1 );
         Q   = QVector( 1, 1, 1 );
         pos = QVector( 0, 0, 0 );
-        for (iter = attributes.begin(); iter != attributes.end(); iter++) {
+        for (iter = attributes.begin(); iter != attributes.end(); iter++)
+        {
             switch ( attribute_map.lookup( (*iter).name ) )
             {
             case LIGHTTYPE:
@@ -886,9 +920,9 @@ void Unit::beginElement( const string &name, const AttributeList &attributes )
             }
         }
         addHalo( filename.c_str(), pos, P.Cast(), GFXColor( halocolor[0],
-                                                            halocolor[1],
-                                                            halocolor[2],
-                                                            halocolor[3] ), light_type, act_speed );
+                 halocolor[1],
+                 halocolor[2],
+                 halocolor[3] ), light_type, act_speed );
         break;
     case MOUNT:
         ADDTAG;
@@ -899,7 +933,8 @@ void Unit::beginElement( const string &name, const AttributeList &attributes )
         pos = QVector( 0, 0, 0 );
         tempbool = false;
         ADDELEMNAME( "size", Unit::mountSerializer, XMLType( XMLSupport::tostring( xml->unitscale ), (int) xml->mountz.size() ) );
-        for (iter = attributes.begin(); iter != attributes.end(); iter++) {
+        for (iter = attributes.begin(); iter != attributes.end(); iter++)
+        {
             switch ( attribute_map.lookup( (*iter).name ) )
             {
             case VOLUME:
@@ -951,7 +986,8 @@ void Unit::beginElement( const string &name, const AttributeList &attributes )
             }
         }
         Q.Normalize();
-        if ( fabs( Q.i ) == fabs( R.i ) && fabs( Q.j ) == fabs( R.j ) && fabs( Q.k ) == fabs( R.k ) ) {
+        if ( fabs( Q.i ) == fabs( R.i ) && fabs( Q.j ) == fabs( R.j ) && fabs( Q.k ) == fabs( R.k ) )
+        {
             Q.i = -1;
             Q.j = 0;
             Q.k = 0;
@@ -979,7 +1015,8 @@ void Unit::beginElement( const string &name, const AttributeList &attributes )
         Q   = QVector( 0, 1, 0 );
         R   = QVector( 0, 0, 1 );
         pos = QVector( 0, 0, 0 );
-        for (iter = attributes.begin(); iter != attributes.end(); iter++) {
+        for (iter = attributes.begin(); iter != attributes.end(); iter++)
+        {
             switch ( attribute_map.lookup( (*iter).name ) )
             {
             case XFILE:
@@ -1029,12 +1066,13 @@ void Unit::beginElement( const string &name, const AttributeList &attributes )
         }
         indx = xml->units.size();
         xml->units.push_back( UnitFactory::createUnit( filename.c_str(), true, faction, xml->unitModifications, NULL ) ); //I set here the fg arg to NULL
-        if (xml->units.back()->name == "LOAD_FAILED") {
+        if (xml->units.back()->name == "LOAD_FAILED")
+        {
             xml->units.back()->limits.yaw = 0;
             xml->units.back()->limits.pitch = 0;
             xml->units.back()->limits.roll = 0;
             xml->units.back()->limits.lateral = xml->units.back()->limits.retro = xml->units.back()->limits.forward =
-                                                                                      xml->units.back()->limits.afterburn = 0.0;
+                                                    xml->units.back()->limits.afterburn = 0.0;
         }
         xml->units.back()->SetRecursiveOwner( this );
         xml->units[indx]->SetOrientation( Q, R );
@@ -1050,7 +1088,8 @@ void Unit::beginElement( const string &name, const AttributeList &attributes )
         break;
     case COCKPITDAMAGE:
         xml->unitlevel++;
-        for (iter = attributes.begin(); iter != attributes.end(); iter++) {
+        for (iter = attributes.begin(); iter != attributes.end(); iter++)
+        {
             switch ( attribute_map.lookup( (*iter).name ) )
             {
             case DAMAGE:
@@ -1060,89 +1099,92 @@ void Unit::beginElement( const string &name, const AttributeList &attributes )
         }
         break;
     case NETCOM:
+    {
+        string method;
+        assert( xml->unitlevel == 1 );
+        xml->unitlevel++;
+        for (iter = attributes.begin(); iter != attributes.end(); iter++)
         {
-            string method;
-            assert( xml->unitlevel == 1 );
-            xml->unitlevel++;
-            for (iter = attributes.begin(); iter != attributes.end(); iter++) {
-                switch ( attribute_map.lookup( (*iter).name ) )
-                {
-                case NETCOMM_MINFREQ:
-                    break;
-                case NETCOMM_MAXFREQ:
-                    break;
-                case NETCOMM_SECURED:
-                    break;
-                case NETCOMM_VIDEO:
-                    break;
-                case NETCOMM_CRYPTO:
-                    method  = (*iter).value;
-                    break;
-                }
+            switch ( attribute_map.lookup( (*iter).name ) )
+            {
+            case NETCOMM_MINFREQ:
+                break;
+            case NETCOMM_MAXFREQ:
+                break;
+            case NETCOMM_SECURED:
+                break;
+            case NETCOMM_VIDEO:
+                break;
+            case NETCOMM_CRYPTO:
+                method  = (*iter).value;
+                break;
             }
-            break;
         }
+        break;
+    }
     case JUMP:
+    {
+        static float insys_jump_cost =
+            XMLSupport::parse_float( vs_config->getVariable( "physics", "insystem_jump_cost", ".1" ) );
+        bool foundinsysenergy = false;
+        //serialization covered in LoadXML
+        assert( xml->unitlevel == 1 );
+        xml->unitlevel++;
+        jump.drive = -1;     //activate the jump unit
+        for (iter = attributes.begin(); iter != attributes.end(); iter++)
         {
-            static float insys_jump_cost =
-                XMLSupport::parse_float( vs_config->getVariable( "physics", "insystem_jump_cost", ".1" ) );
-            bool foundinsysenergy = false;
-            //serialization covered in LoadXML
-            assert( xml->unitlevel == 1 );
-            xml->unitlevel++;
-            jump.drive = -1;     //activate the jump unit
-            for (iter = attributes.begin(); iter != attributes.end(); iter++) {
-                switch ( attribute_map.lookup( (*iter).name ) )
-                {
-                case MISSING:
-                    //serialization covered in LoadXML
-                    if ( parse_bool( (*iter).value ) )
-                        jump.drive = -2;
-                    break;
-                case JUMPENERGY:
-                    //serialization covered in LoadXML
-                    jump.energy = parse_float( (*iter).value );               //short fix
-                    if (!foundinsysenergy)
-                        jump.insysenergy = jump.energy*insys_jump_cost;
-                    break;
-                case INSYSENERGY:
-                    //serialization covered in LoadXML
-                    jump.insysenergy     = parse_float( (*iter).value );               //short fix
-                    foundinsysenergy     = true;
-                    break;
-                case WARPDRIVERATING:
-                    jump.warpDriveRating = parse_float( (*iter).value );
-                    break;
-                case DAMAGE:
-                    jump.damage = float_to_int( parse_float( (*iter).value ) );               //short fix
-                    break;
-                case DELAY:
-                    //serialization covered in LoadXML
-                    {
-                        static int jumpdelaymult =
-                            XMLSupport::parse_int( vs_config->getVariable( "physics", "jump_delay_multiplier", "5" ) );
-                        jump.delay = parse_int( (*iter).value )*jumpdelaymult;
-                        break;
-                    }
-                case FUEL:
-                    //serialization covered in LoadXML
-                    jump.energy = -parse_float( (*iter).value );               //short fix
-                    break;
-                case WORMHOLE:
-                    //serialization covered in LoadXML
-                    pImage->forcejump = parse_bool( (*iter).value );
-                    if (pImage->forcejump)
-                        jump.drive = -2;
-                    break;
-                }
+            switch ( attribute_map.lookup( (*iter).name ) )
+            {
+            case MISSING:
+                //serialization covered in LoadXML
+                if ( parse_bool( (*iter).value ) )
+                    jump.drive = -2;
+                break;
+            case JUMPENERGY:
+                //serialization covered in LoadXML
+                jump.energy = parse_float( (*iter).value );               //short fix
+                if (!foundinsysenergy)
+                    jump.insysenergy = jump.energy*insys_jump_cost;
+                break;
+            case INSYSENERGY:
+                //serialization covered in LoadXML
+                jump.insysenergy     = parse_float( (*iter).value );               //short fix
+                foundinsysenergy     = true;
+                break;
+            case WARPDRIVERATING:
+                jump.warpDriveRating = parse_float( (*iter).value );
+                break;
+            case DAMAGE:
+                jump.damage = float_to_int( parse_float( (*iter).value ) );               //short fix
+                break;
+            case DELAY:
+                //serialization covered in LoadXML
+            {
+                static int jumpdelaymult =
+                    XMLSupport::parse_int( vs_config->getVariable( "physics", "jump_delay_multiplier", "5" ) );
+                jump.delay = parse_int( (*iter).value )*jumpdelaymult;
+                break;
             }
-            break;
+            case FUEL:
+                //serialization covered in LoadXML
+                jump.energy = -parse_float( (*iter).value );               //short fix
+                break;
+            case WORMHOLE:
+                //serialization covered in LoadXML
+                pImage->forcejump = parse_bool( (*iter).value );
+                if (pImage->forcejump)
+                    jump.drive = -2;
+                break;
+            }
         }
+        break;
+    }
     case SOUND:
         ADDTAG;
         assert( xml->unitlevel == 1 );
         xml->unitlevel++;
-        for (iter = attributes.begin(); iter != attributes.end(); iter++) {
+        for (iter = attributes.begin(); iter != attributes.end(); iter++)
+        {
             switch ( attribute_map.lookup( (*iter).name ) )
             {
             case CLOAKWAV:
@@ -1199,31 +1241,38 @@ void Unit::beginElement( const string &name, const AttributeList &attributes )
                 break;
             }
         }
-        if (sound->cloak == -1) {
+        if (sound->cloak == -1)
+        {
             static std::string ssound = vs_config->getVariable( "unitaudio", "cloak", "sfx43.wav" );
             sound->cloak = AUDCreateSound( ssound, false );
         }
-        if (sound->engine == -1) {
+        if (sound->engine == -1)
+        {
             static std::string ssound = vs_config->getVariable( "unitaudio", "afterburner", "sfx10.wav" );
             sound->engine = AUDCreateSound( ssound, false );
         }
-        if (sound->shield == -1) {
+        if (sound->shield == -1)
+        {
             static std::string ssound = vs_config->getVariable( "unitaudio", "shield", "sfx09.wav" );
             sound->shield = AUDCreateSound( ssound, false );
         }
-        if (sound->armor == -1) {
+        if (sound->armor == -1)
+        {
             static std::string ssound = vs_config->getVariable( "unitaudio", "armor", "sfx08.wav" );
             sound->armor = AUDCreateSound( ssound, false );
         }
-        if (sound->hull == -1) {
+        if (sound->hull == -1)
+        {
             static std::string ssound = vs_config->getVariable( "unitaudio", "armor", "sfx08.wav" );
             sound->hull = AUDCreateSound( ssound, false );
         }
-        if (sound->explode == -1) {
+        if (sound->explode == -1)
+        {
             static std::string ssound = vs_config->getVariable( "unitaudio", "explode", "explosion.wav" );
             sound->explode = AUDCreateSound( ssound, false );
         }
-        if (sound->jump == -1) {
+        if (sound->jump == -1)
+        {
             static std::string ssound = vs_config->getVariable( "unitaudio", "explode", "sfx43.wav" );
             sound->jump = AUDCreateSound( ssound, false );
         }
@@ -1236,7 +1285,8 @@ void Unit::beginElement( const string &name, const AttributeList &attributes )
         cloakmin = 1;
         pImage->cloakenergy = 0;
         cloaking = INT_MIN;         //lowest negative number  //short fix
-        for (iter = attributes.begin(); iter != attributes.end(); iter++) {
+        for (iter = attributes.begin(); iter != attributes.end(); iter++)
+        {
             switch ( attribute_map.lookup( (*iter).name ) )
             {
             case MISSING:
@@ -1270,7 +1320,8 @@ void Unit::beginElement( const string &name, const AttributeList &attributes )
     case ARMOR:
         assert( xml->unitlevel == 2 );
         xml->unitlevel++;
-        for (iter = attributes.begin(); iter != attributes.end(); iter++) {
+        for (iter = attributes.begin(); iter != attributes.end(); iter++)
+        {
             switch ( attribute_map.lookup( (*iter).name ) )
             {
             case FRONT:
@@ -1341,7 +1392,8 @@ void Unit::beginElement( const string &name, const AttributeList &attributes )
         //serialization covered in LoadXML
         assert( xml->unitlevel == 2 );
         xml->unitlevel++;
-        for (iter = attributes.begin(); iter != attributes.end(); iter++) {
+        for (iter = attributes.begin(); iter != attributes.end(); iter++)
+        {
             switch ( attribute_map.lookup( (*iter).name ) )
             {
             case FRONT:
@@ -1413,7 +1465,8 @@ void Unit::beginElement( const string &name, const AttributeList &attributes )
         assert( xml->unitlevel == 2 );
         xml->unitlevel++;
         maxhull = 0;
-        for (iter = attributes.begin(); iter != attributes.end(); iter++) {
+        for (iter = attributes.begin(); iter != attributes.end(); iter++)
+        {
             switch ( attribute_map.lookup( (*iter).name ) )
             {
             case STRENGTH:
@@ -1424,7 +1477,8 @@ void Unit::beginElement( const string &name, const AttributeList &attributes )
                 break;
             }
         }
-        if (maxhull == 0) {
+        if (maxhull == 0)
+        {
             maxhull = hull;
             if (maxhull == 0)
                 maxhull = 1;
@@ -1433,7 +1487,8 @@ void Unit::beginElement( const string &name, const AttributeList &attributes )
     case STATS:
         assert( xml->unitlevel == 1 );
         xml->unitlevel++;
-        for (iter = attributes.begin(); iter != attributes.end(); iter++) {
+        for (iter = attributes.begin(); iter != attributes.end(); iter++)
+        {
             switch ( attribute_map.lookup( (*iter).name ) )
             {
             case MASS:
@@ -1453,7 +1508,8 @@ void Unit::beginElement( const string &name, const AttributeList &attributes )
     case MANEUVER:
         assert( xml->unitlevel == 2 );
         xml->unitlevel++;
-        for (iter = attributes.begin(); iter != attributes.end(); iter++) {
+        for (iter = attributes.begin(); iter != attributes.end(); iter++)
+        {
             switch ( attribute_map.lookup( (*iter).name ) )
             {
             case YAW:
@@ -1471,7 +1527,8 @@ void Unit::beginElement( const string &name, const AttributeList &attributes )
     case ENGINE:
         assert( xml->unitlevel == 2 );
         xml->unitlevel++;
-        for (iter = attributes.begin(); iter != attributes.end(); iter++) {
+        for (iter = attributes.begin(); iter != attributes.end(); iter++)
+        {
             switch ( attribute_map.lookup( (*iter).name ) )
             {
             case AACCEL:
@@ -1504,7 +1561,8 @@ void Unit::beginElement( const string &name, const AttributeList &attributes )
         ADDTAG;
         assert( xml->unitlevel == 1 );
         xml->unitlevel++;
-        for (iter = attributes.begin(); iter != attributes.end(); iter++) {
+        for (iter = attributes.begin(); iter != attributes.end(); iter++)
+        {
             switch ( attribute_map.lookup( (*iter).name ) )
             {
             case MAXSPEED:
@@ -1551,7 +1609,8 @@ void Unit::beginElement( const string &name, const AttributeList &attributes )
         //handled above
         assert( xml->unitlevel == 2 );
         xml->unitlevel++;
-        for (iter = attributes.begin(); iter != attributes.end(); iter++) {
+        for (iter = attributes.begin(); iter != attributes.end(); iter++)
+        {
             switch ( attribute_map.lookup( (*iter).name ) )
             {
             case ITTS:
@@ -1573,7 +1632,7 @@ void Unit::beginElement( const string &name, const AttributeList &attributes )
                 computer.radar.maxrange     = parse_float( (*iter).value );
                 break;
             case ISCOLOR:
-               computer.radar.capability = atoi( (*iter).value.c_str() );
+                computer.radar.capability = atoi( (*iter).value.c_str() );
                 if (computer.radar.capability == 0)
                     computer.radar.capability = parse_bool( (*iter).value );
                 break;
@@ -1583,7 +1642,8 @@ void Unit::beginElement( const string &name, const AttributeList &attributes )
     case REACTOR:
         assert( xml->unitlevel == 2 );
         xml->unitlevel++;
-        for (iter = attributes.begin(); iter != attributes.end(); iter++) {
+        for (iter = attributes.begin(); iter != attributes.end(); iter++)
+        {
             switch ( attribute_map.lookup( (*iter).name ) )
             {
             case RECHARGE:
@@ -1603,7 +1663,8 @@ void Unit::beginElement( const string &name, const AttributeList &attributes )
         xml->yprrestricted += Unit::XML::YRESTR;
         assert( xml->unitlevel == 2 );
         xml->unitlevel++;
-        for (iter = attributes.begin(); iter != attributes.end(); iter++) {
+        for (iter = attributes.begin(); iter != attributes.end(); iter++)
+        {
             switch ( attribute_map.lookup( (*iter).name ) )
             {
             case MAX:
@@ -1623,7 +1684,8 @@ void Unit::beginElement( const string &name, const AttributeList &attributes )
         xml->yprrestricted += Unit::XML::PRESTR;
         assert( xml->unitlevel == 2 );
         xml->unitlevel++;
-        for (iter = attributes.begin(); iter != attributes.end(); iter++) {
+        for (iter = attributes.begin(); iter != attributes.end(); iter++)
+        {
             switch ( attribute_map.lookup( (*iter).name ) )
             {
             case MAX:
@@ -1640,7 +1702,8 @@ void Unit::beginElement( const string &name, const AttributeList &attributes )
     case DESCRIPTION:
         ADDTAG;
         xml->unitlevel++;
-        for (iter = attributes.begin(); iter != attributes.end(); iter++) {
+        for (iter = attributes.begin(); iter != attributes.end(); iter++)
+        {
             switch ( attribute_map.lookup( (*iter).name ) )
             {
             case RECURSESUBUNITCOLLISION:
@@ -1669,7 +1732,8 @@ void Unit::beginElement( const string &name, const AttributeList &attributes )
         xml->yprrestricted += Unit::XML::RRESTR;
         assert( xml->unitlevel == 2 );
         xml->unitlevel++;
-        for (iter = attributes.begin(); iter != attributes.end(); iter++) {
+        for (iter = attributes.begin(); iter != attributes.end(); iter++)
+        {
             switch ( attribute_map.lookup( (*iter).name ) )
             {
             case MAX:
@@ -1686,7 +1750,8 @@ void Unit::beginElement( const string &name, const AttributeList &attributes )
     case UNIT:
         assert( xml->unitlevel == 0 );
         xml->unitlevel++;
-        for (iter = attributes.begin(); iter != attributes.end(); iter++) {
+        for (iter = attributes.begin(); iter != attributes.end(); iter++)
+        {
             switch ( attribute_map.lookup( (*iter).name ) )
             {
             default:
@@ -1704,7 +1769,8 @@ void Unit::beginElement( const string &name, const AttributeList &attributes )
         ADDTAG;
         assert( xml->unitlevel == 1 );
         xml->unitlevel++;
-        for (iter = attributes.begin(); iter != attributes.end(); iter++) {
+        for (iter = attributes.begin(); iter != attributes.end(); iter++)
+        {
             switch ( attribute_map.lookup( (*iter).name ) )
             {
             case XFILE:
@@ -1729,17 +1795,20 @@ void Unit::beginElement( const string &name, const AttributeList &attributes )
     case DEFENSE:
         assert( xml->unitlevel == 1 );
         xml->unitlevel++;
-        for (iter = attributes.begin(); iter != attributes.end(); iter++) {
+        for (iter = attributes.begin(); iter != attributes.end(); iter++)
+        {
             switch ( attribute_map.lookup( (*iter).name ) )
             {
             case HUDIMAGE:
-                if ( (*iter).value.length() ) {
+                if ( (*iter).value.length() )
+                {
                     pImage->pHudImage = createVSSprite( (*iter).value.c_str() );
                     xml->hudimage     = (*iter).value;
                 }
                 break;
             case EXPLOSIONANI:
-                if ( (*iter).value.length() ) {
+                if ( (*iter).value.length() )
+                {
                     pImage->explosion_type = (*iter).value;
                     {
                         cache_ani( pImage->explosion_type );
@@ -1766,7 +1835,8 @@ void Unit::beginElement( const string &name, const AttributeList &attributes )
     case ENERGY:
         assert( xml->unitlevel == 1 );
         xml->unitlevel++;
-        for (iter = attributes.begin(); iter != attributes.end(); iter++) {
+        for (iter = attributes.begin(); iter != attributes.end(); iter++)
+        {
             switch ( attribute_map.lookup( (*iter).name ) )
             {
             case AFTERBURNENERGY:
@@ -1845,7 +1915,8 @@ void Unit::LoadXML( VSFileSystem::VSFile &f, const char *modifications, string *
     }
     {
         unsigned int i;
-        for (i = 0; i <= (UnitImages< void >::NUMGAUGES+MAXVDUS); i++) {
+        for (i = 0; i <= (UnitImages< void >::NUMGAUGES+MAXVDUS); i++)
+        {
             pImage->unitwriter->AddTag( "CockpitDamage" );
             pImage->unitwriter->AddElement( "damage", floatStarHandler, XMLType( &pImage->cockpit_damage[i] ) );
             pImage->unitwriter->EndTag( "CockpitDamage" );
@@ -1963,21 +2034,26 @@ void Unit::LoadXML( VSFileSystem::VSFile &f, const char *modifications, string *
     warpenergy = maxwarpenergy;
     *myhudim   = xml->hudimage;
     unsigned int a;
-    if ( xml->mountz.size() ) {
+    if ( xml->mountz.size() )
+    {
         //DO not destroy anymore, just affect address
         for (a = 0; a < xml->mountz.size(); a++)
             mounts.push_back( *xml->mountz[a] );
     }
     unsigned char parity = 0;
-    for (a = 0; a < xml->mountz.size(); a++) {
+    for (a = 0; a < xml->mountz.size(); a++)
+    {
         static bool half_sounds = XMLSupport::parse_bool( vs_config->getVariable( "audio", "every_other_mount", "false" ) );
-        if (a%2 == parity) {
+        if (a%2 == parity)
+        {
             int b = a;
             if ( a%4 == 2 && (int) a < (GetNumMounts()-1) )
                 if (mounts[a].type->type != weapon_info::PROJECTILE && mounts[a+1].type->type != weapon_info::PROJECTILE)
                     b = a+1;
             mounts[b].sound = AUDCreateSound( mounts[b].type->sound, mounts[b].type->type != weapon_info::PROJECTILE );
-        } else if ( (!half_sounds) || mounts[a].type->type == weapon_info::PROJECTILE ) {
+        }
+        else if ( (!half_sounds) || mounts[a].type->type == weapon_info::PROJECTILE )
+        {
             mounts[a].sound = AUDCreateSound( mounts[a].type->sound, mounts[a].type->type != weapon_info::PROJECTILE ); //lloping also flase in unit_customize
         }
         if (a > 0)
@@ -1994,16 +2070,21 @@ void Unit::LoadXML( VSFileSystem::VSFile &f, const char *modifications, string *
     if (this->colTrees)
         this->colTrees->Inc();
     csOPCODECollider *colShield = NULL;
-    if (xml->shieldmesh) {
+    if (xml->shieldmesh)
+    {
         meshdata.back() = xml->shieldmesh;
-        if (!this->colTrees) {
-            if ( meshdata.back() ) {
+        if (!this->colTrees)
+        {
+            if ( meshdata.back() )
+            {
                 meshdata.back()->GetPolys( polies );
                 colShield = new csOPCODECollider( polies );
             }
         }
-    } else {
-		/* [Unit XML] #60
+    }
+    else
+    {
+        /* [Unit XML] #60
         Mesh *tmp = NULL;
         static int shieldstacks = XMLSupport::parse_int( vs_config->getVariable( "graphics", "shield_detail", "16" ) );
         static std::string shieldtex = vs_config->getVariable( "graphics", "shield_texture", "shield.bmp" );
@@ -2013,7 +2094,8 @@ void Unit::LoadXML( VSFileSystem::VSFile &f, const char *modifications, string *
         */
     }
     meshdata.back()->EnableSpecialFX();
-    if (!this->colTrees) {
+    if (!this->colTrees)
+    {
         polies.clear();
         if (xml->rapidmesh)
             xml->rapidmesh->GetPolys( polies );
@@ -2027,10 +2109,11 @@ void Unit::LoadXML( VSFileSystem::VSFile &f, const char *modifications, string *
                                            colShield );
         if (xml->rapidmesh && xml->hasColTree)          //if we have a speciaal rapid mesh we need to generate things now
             for (unsigned int i = 1; i < collideTreesMaxTrees; ++i)
-                if (!this->colTrees->rapidColliders[i]) {
+                if (!this->colTrees->rapidColliders[i])
+                {
                     unsigned int which = 1<<i;
                     this->colTrees->rapidColliders[i] = getCollideTree( Vector( which, which, which ),
-                                                                        &polies );
+                                                        &polies );
                 }
     }
     if (xml->rapidmesh)
@@ -2046,9 +2129,11 @@ csOPCODECollider* Unit::getCollideTree( const Vector &scale, const std::vector< 
             meshdata[j]->GetPolys( polies );
     else
         polies = *pol;
-    if (scale.i != 1 || scale.j != 1 || scale.k != 1) {
+    if (scale.i != 1 || scale.j != 1 || scale.k != 1)
+    {
         for (vector< mesh_polygon >::iterator i = polies.begin(); i != polies.end(); ++i)
-            for (unsigned int j = 0; j < i->v.size(); ++j) {
+            for (unsigned int j = 0; j < i->v.size(); ++j)
+            {
                 i->v[j].i *= scale.i;
                 i->v[j].j *= scale.j;
                 i->v[j].k *= scale.k;
