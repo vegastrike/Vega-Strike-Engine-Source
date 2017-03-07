@@ -1061,8 +1061,6 @@ void Unit::beginElement( const string &name, const AttributeList &attributes )
         break;
     case NETCOM:
         {
-            float  minfreq   = 0, maxfreq = 0;
-            bool   video     = false, secured = false;
             string method;
             assert( xml->unitlevel == 1 );
             xml->unitlevel++;
@@ -1070,16 +1068,12 @@ void Unit::beginElement( const string &name, const AttributeList &attributes )
                 switch ( attribute_map.lookup( (*iter).name ) )
                 {
                 case NETCOMM_MINFREQ:
-                    minfreq = parse_float( (*iter).value );
                     break;
                 case NETCOMM_MAXFREQ:
-                    maxfreq = parse_float( (*iter).value );
                     break;
                 case NETCOMM_SECURED:
-                    secured = parse_bool( (*iter).value );
                     break;
                 case NETCOMM_VIDEO:
-                    video   = parse_bool( (*iter).value );
                     break;
                 case NETCOMM_CRYPTO:
                     method  = (*iter).value;
@@ -2009,12 +2003,14 @@ void Unit::LoadXML( VSFileSystem::VSFile &f, const char *modifications, string *
             }
         }
     } else {
+		/* [Unit XML] #60
         Mesh *tmp = NULL;
         static int shieldstacks = XMLSupport::parse_int( vs_config->getVariable( "graphics", "shield_detail", "16" ) );
         static std::string shieldtex = vs_config->getVariable( "graphics", "shield_texture", "shield.bmp" );
         static std::string shieldtechnique = vs_config->getVariable( "graphics", "shield_technique", "" );
         meshdata.back() = new SphereMesh( rSize(), shieldstacks, shieldstacks, shieldtex.c_str(), shieldtechnique, NULL, false, ONE, ONE );
         tmp = meshdata.back();
+        */
     }
     meshdata.back()->EnableSpecialFX();
     if (!this->colTrees) {
