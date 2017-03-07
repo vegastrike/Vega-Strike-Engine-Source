@@ -10156,12 +10156,6 @@ void MeshAnimation::addAnimation( std::vector<Mesh *> *meshes, const char* name 
 
 void MeshAnimation::StartAnimation( unsigned int how_many_times, int numAnimation )
 {
-    bool infiniteLoop;
-    if(!how_many_times)
-        infiniteLoop = true;
-    else
-        infiniteLoop = false;
-
     if(animationRuns())
         StopAnimation();
 
