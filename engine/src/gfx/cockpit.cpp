@@ -1649,9 +1649,9 @@ GameCockpit::GameCockpit( const char *file, Unit *parent, const std::string &pil
     , insidePanPitchSpeed( 0 )
     , shake_time( 0 )
     , shake_type( 0 )
-    , radarDisplay(0)
+    , radarDisplay( nullptr ) //Honest: Not a clue, but it appears that "unique_ptr" cannot take NULL like auto_ptr used to.
     , textcol( 1, 1, 1, 1 )
-    , text( NULL )
+    , text( 0 )
 {
     autoMessageTime    = 0;
     shield8 = armor8 = false;
