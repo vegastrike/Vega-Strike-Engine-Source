@@ -3,7 +3,7 @@ background color = #000000
 font color = #483855
 glow color = #BFB8FE
 
-font = Megalomania
+font = Xolonium
 font size = 72
 
 Create selection:
