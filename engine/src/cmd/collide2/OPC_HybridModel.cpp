@@ -157,7 +157,7 @@ bool HybridModel::Build(const OPCODECREATE& create)
 	// 1) Checkings
 	if(!create.mIMesh || !create.mIMesh->IsValid())	return false;
 
-	Release();	// Make sure previous tree has been discarded
+		Release();	// Make sure previous tree has been discarded
 
 	// 1-1) Setup mesh interface automatically
 	SetMeshInterface(create.mIMesh);
