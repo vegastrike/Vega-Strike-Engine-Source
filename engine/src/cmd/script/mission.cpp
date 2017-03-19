@@ -396,7 +396,6 @@ void Mission::checkFlightgroup( easyDomNode *node )
     int    nr_ships_i = atoi( nr_ships.c_str() );
 
     bool   have_pos   = false;
-    bool   have_rot   = false;
 
     double pos[3];
     float  rot[3];
@@ -409,7 +408,7 @@ void Mission::checkFlightgroup( easyDomNode *node )
         if ( (*siter)->Name() == "pos" )
             have_pos = doPosition( *siter, pos, &cf );
         else if ( (*siter)->Name() == "rot" )
-            have_rot = doRotation( *siter, rot, &cf );
+            {/*Empty, to be filled in appropriately later.*/}
         else if ( (*siter)->Name() == "order" )
             doOrder( *siter, cf.fg );
     }
