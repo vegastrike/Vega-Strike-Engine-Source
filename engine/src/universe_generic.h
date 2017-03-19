@@ -50,7 +50,7 @@ class Galaxy;
 class Universe
 {
 protected:
-    std::unique_ptr<GalaxyXML::Galaxy> galaxy;
+    std::auto_ptr<GalaxyXML::Galaxy> galaxy;
 ///The users cockpit
     unsigned int current_cockpit;
     std::vector< Cockpit* >cockpit;
