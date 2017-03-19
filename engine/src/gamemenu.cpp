@@ -677,8 +677,7 @@ bool NetActionConfirm::finalizeJoinGame( int launchShip )
 
     restore_main_loop();
     NetClient *playerClient = &Network[player];
-    Window    *parentWin    = m_parent;
-
+   
     globalWindowManager().shutDown();
     TerminateCurrentBase();
 
