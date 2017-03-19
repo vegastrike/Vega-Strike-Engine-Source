@@ -48,7 +48,8 @@ struct soundArray
     }
     void deallocate()
     {
-        if (ptr != NULL) {
+        if (ptr != NULL)
+        {
             delete[] ptr;
             ptr = NULL;
         }
@@ -67,10 +68,10 @@ struct soundArray
 class GameCockpit : public Cockpit
 {
     Camera    cam[NUM_CAM];
-    
+
     float     insidePanYaw, insidePanPitch;
     float     insidePanYawSpeed, insidePanPitchSpeed;
-    
+
     float     vdu_time[MAXVDUS];
     ///saved values to compare with current values (might need more for damage)
     std::list< Matrix >headtrans;
@@ -86,7 +87,7 @@ class GameCockpit : public Cockpit
     int       soundfile;
     VSSprite *Pit[4];
     VSSprite *radarSprites[2];
-    std::auto_ptr<Radar::Display> radarDisplay;
+    std::unique_ptr<Radar::Display> radarDisplay;
     ///Video Display Units (may need more than 2 in future)
     std::vector< VDU* >vdu;
     /// An information string displayed in the VDU.
@@ -110,7 +111,7 @@ class GameCockpit : public Cockpit
     bool     steady_itts;
     //colors of blips/targetting boxes
     GFXColor friendly, enemy, neutral, targeted, targetting, planet;
-    
+
     /// Used to display the arrow pointing to the currently selected target.
     float  projection_limit_x, projection_limit_y;
     float  inv_screen_aspect_ratio; //Precomputed division 1 / g_game.aspect.
@@ -212,7 +213,7 @@ public:
     {
         cam[currentcamera].UpdateGFX();
     }
-    
+
     virtual bool SetDrawNavSystem( bool );
     virtual bool CanDrawNavSystem();
     virtual bool DrawNavSystem();

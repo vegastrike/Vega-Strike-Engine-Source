@@ -388,11 +388,11 @@ Unit* CommunicatingAI::GetRandomUnit( float playaprob, float targprob )
                     vsrandom.uniformInc( -1, 1 ),
                     vsrandom.uniformInc( -1, 1 ) );
     Collidable   wherewrapper( 0, 0, where );
-    CollideMap  *cm = _Universe->activeStarSystem()->collidemap[Unit::UNIT_ONLY];
-    static float unitRad =
-        XMLSupport::parse_float( vs_config->getVariable( "graphics", "hud", "radar_search_extra_radius", "1000" ) );
-    NearestUnitLocator   unitLocator;
+    
+//See config.h.in in engine, comm_ai.cpp -> config_xml.h -> config.h.in
+/* For testing purposes only */
 #ifdef VS_ENABLE_COLLIDE_KEY
+	CollideMap  *cm = _Universe->activeStarSystem()->collidemap[Unit::UNIT_ONLY];
     CollideMap::iterator iter = cm->lower_bound( wherewrapper );
     if (iter != cm->end() && (*iter)->radius > 0)
         if ( (*iter)->ref.unit != parent )

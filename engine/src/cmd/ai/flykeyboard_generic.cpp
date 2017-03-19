@@ -1,5 +1,5 @@
-#include "flykeyboard.h"
 #include "cmd/unit_generic.h"
+#include "flykeyboard.h"
 #include "autodocking.h"
 #include "config_xml.h"
 #include "xml_support.h"

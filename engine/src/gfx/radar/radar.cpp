@@ -12,7 +12,7 @@
 namespace Radar
 {
 
-std::auto_ptr<Display> Factory(Type::Value type)
+std::unique_ptr<Display> Factory(Type::Value type)
 {
     switch (type)
     {

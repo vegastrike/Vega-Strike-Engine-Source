@@ -392,6 +392,9 @@ namespace ExpatHandlers
 *                                                                *
 ******************************************************************/
 
+/* Looks decidedly useful so just commenting this out for the time being
+ * It is flagged up  as it is never actually used
+ * 
 static void Doctype( void *userData,
                      const XML_Char *doctypeName,
                      const XML_Char *sysid,
@@ -405,6 +408,7 @@ static void Doctype( void *userData,
     internals->document->sysId   = sysid;
     internals->document->pubId   = pubid;
 }
+ */
 
 /* atts is array of name/value pairs, terminated by 0;
  *   names and values are 0 terminated. */

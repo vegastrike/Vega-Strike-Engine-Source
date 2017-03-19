@@ -31,7 +31,7 @@ const char* FactionUtil::GetFaction( int i )
 static int GetFactionLookup( const char *factionname )
 {
 #ifdef _WIN32
-  #define strcasecmp stricmp
+#define strcasecmp stricmp
 #endif
     for (unsigned int i = 0; i < factions.size(); i++)
         if (strcasecmp( factionname, factions[i]->factionname ) == 0)
@@ -79,7 +79,8 @@ string FactionUtil::GetFactionName( int index )
 static bool isPlayerFaction( const int MyFaction )
 {
     unsigned int numplayers = _Universe->numPlayers();
-    for (unsigned int i = 0; i < numplayers; ++i) {
+    for (unsigned int i = 0; i < numplayers; ++i)
+    {
         Unit *un = _Universe->AccessCockpit( i )->GetParent();
         if (un)
             if (un->faction == MyFaction)
@@ -90,12 +91,18 @@ static bool isPlayerFaction( const int MyFaction )
 void FactionUtil::AdjustIntRelation( const int Myfaction, const int TheirFaction, float factor, float rank )
 {
     assert( factions[Myfaction]->faction[TheirFaction].stats.index == TheirFaction );
-    if (strcmp( factions[Myfaction]->factionname, "neutral" ) != 0) {
-        if (strcmp( factions[Myfaction]->factionname, "upgrades" ) != 0) {
-            if (strcmp( factions[TheirFaction]->factionname, "neutral" ) != 0) {
-                if (strcmp( factions[TheirFaction]->factionname, "upgrades" ) != 0) {
-                    if (isPlayerFaction( TheirFaction ) || game_options.AllowNonplayerFactionChange) {
-                        if (game_options.AllowCivilWar || Myfaction != TheirFaction) {
+    if (strcmp( factions[Myfaction]->factionname, "neutral" ) != 0)
+    {
+        if (strcmp( factions[Myfaction]->factionname, "upgrades" ) != 0)
+        {
+            if (strcmp( factions[TheirFaction]->factionname, "neutral" ) != 0)
+            {
+                if (strcmp( factions[TheirFaction]->factionname, "upgrades" ) != 0)
+                {
+                    if (isPlayerFaction( TheirFaction ) || game_options.AllowNonplayerFactionChange)
+                    {
+                        if (game_options.AllowCivilWar || Myfaction != TheirFaction)
+                        {
                             factions[Myfaction]->faction[TheirFaction].relationship += factor*rank;
                             if (factions[Myfaction]->faction[TheirFaction].relationship > 1 && game_options.CappedFactionRating)
                                 factions[Myfaction]->faction[TheirFaction].relationship = 1;
@@ -125,7 +132,8 @@ unsigned int FactionUtil::GetNumFactions()
 }
 void FactionUtil::SerializeFaction( FILE *fp )
 {
-    for (unsigned int i = 0; i < factions.size(); i++) {
+    for (unsigned int i = 0; i < factions.size(); i++)
+    {
         for (unsigned int j = 0; j < factions[i]->faction.size(); j++)
             VSFileSystem::vs_fprintf( fp, "%g ", factions[i]->faction[j].relationship );
         VSFileSystem::vs_fprintf( fp, "\n" );
@@ -135,8 +143,10 @@ string FactionUtil::SerializeFaction()
 {
     char   temp[8192];
     string ret( "" );
-    for (unsigned int i = 0; i < factions.size(); i++) {
-        for (unsigned int j = 0; j < factions[i]->faction.size(); j++) {
+    for (unsigned int i = 0; i < factions.size(); i++)
+    {
+        for (unsigned int j = 0; j < factions[i]->faction.size(); j++)
+        {
             sprintf( temp, "%g ", factions[i]->faction[j].relationship );
             ret += string( temp );
         }
@@ -154,21 +164,23 @@ int FactionUtil::numnums( const char *str )
 }
 void FactionUtil::LoadSerializedFaction( FILE *fp )
 {
-    for (unsigned int i = 0; i < factions.size(); i++) {
+    for (unsigned int i = 0; i < factions.size(); i++)
+    {
         char *tmp  = new char[24*factions[i]->faction.size()];
-        static char *bogus_return; //added by chuck_starchaser to squash a warning
-        bogus_return = fgets( tmp, 24*factions[i]->faction.size()-1, fp );
         char *tmp2 = tmp;
-        if (numnums( tmp ) == 0) {
+        if (numnums( tmp ) == 0)
+        {
             i--;
             continue;
         }
-        for (unsigned int j = 0; j < factions[i]->faction.size(); j++) {
+        for (unsigned int j = 0; j < factions[i]->faction.size(); j++)
+        {
             if ( 1 != sscanf( tmp2, "%f ", &factions[i]->faction[j].relationship ) )
                 printf( "err" );
             int  k = 0;
             bool founddig = false;
-            while (tmp2[k]) {
+            while (tmp2[k])
+            {
                 if ( isdigit( tmp2[k] ) )
                     founddig = true;
                 if ( founddig && (!isdigit( tmp2[k] ) && tmp2[k] != '.') )
@@ -184,7 +196,8 @@ void FactionUtil::LoadSerializedFaction( FILE *fp )
 }
 bool whitespaceNewline( char *inp )
 {
-    for (; *inp; inp++) {
+    for (; *inp; inp++)
+    {
         if (inp[0] == '\n' || inp[0] == '\r')
             return true;
         if (inp[0] != ' ' && inp[0] != '\t')
@@ -195,25 +208,30 @@ bool whitespaceNewline( char *inp )
 string savedFactions;
 void FactionUtil::LoadSerializedFaction( char* &buf )
 {
-    if (buf == NULL) {
+    if (buf == NULL)
+    {
         char *bleh = strdup( savedFactions.c_str() );
         char *blah = bleh;
         LoadSerializedFaction( blah );
         free( bleh );
         return;
     }
-    if (factions.size() == 0) {
+    if (factions.size() == 0)
+    {
         savedFactions = buf;
         return;
     }
-    for (unsigned int i = 0; i < factions.size(); i++) {
+    for (unsigned int i = 0; i < factions.size(); i++)
+    {
         if (numnums( buf ) == 0)
             return;
-        for (unsigned int j = 0; j < factions[i]->faction.size(); j++) {
+        for (unsigned int j = 0; j < factions[i]->faction.size(); j++)
+        {
             sscanf( buf, "%f ", &factions[i]->faction[j].relationship );
             int  k = 0;
             bool founddig = false;
-            while (buf[k]) {
+            while (buf[k])
+            {
                 if ( isdigit( buf[k] ) )
                     founddig = true;
                 if ( founddig && (!isdigit( buf[k] ) && buf[k] != '.') )

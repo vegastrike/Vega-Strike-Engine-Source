@@ -448,22 +448,6 @@ static float SqrDistance(const Ray& rkLine, const Point& center, const Point& ex
     Point kPnt = kDiff;
     Point kDir = rkLine.mDir;
 
-    // Apply reflections so that direction vector has nonnegative components.
-    bool bReflect[3];
-    for(int i=0;i<3;i++)
-    {
-        if(kDir[i]<0.0f)
-        {
-            kPnt[i] = -kPnt[i];
-            kDir[i] = -kDir[i];
-            bReflect[i] = true;
-        }
-        else
-        {
-            bReflect[i] = false;
-        }
-    }
-
     float fSqrDistance = 0.0f;
 
     if(kDir.x>0.0f)
