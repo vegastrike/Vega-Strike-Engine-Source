@@ -262,12 +262,10 @@ bool StarSystem::RemoveUnit( Unit *un )
             collidemap[locind]->erase( un->location[locind] );
             set_null( un->location[locind] );
         }
-    bool  removed2 = false;
     Unit *unit;
     for (un_iter iter = gravitationalUnits().createIterator(); (unit = *iter); ++iter)
         if (unit == un) {
             iter.remove();
-            removed2 = true;
             break;                                       //Shouldn't be in there twice
         }
     //NOTE: not sure why if(1) was here, but safemode removed it
@@ -502,7 +500,6 @@ void StarSystem::UpdateUnitPhysics( bool firstframe )
     double aitime = 0;
     double phytime = 0;
     double collidetime     = 0;
-    double flattentime     = 0;
     double bolttime = 0;
     targetpick   = 0;
     aggfire      = 0;
@@ -567,11 +564,9 @@ void StarSystem::UpdateUnitPhysics( bool firstframe )
             Bolt::UpdatePhysics( this );
             double cc  = queryTime();
             last_collisions.clear();
-            double fl0 = queryTime();
             collidemap[Unit::UNIT_BOLT]->flatten();
             if (Unit::NUM_COLLIDE_MAPS > 1)
                 collidemap[Unit::UNIT_ONLY]->flatten( *collidemap[Unit::UNIT_BOLT] );
-            flattentime = queryTime()-fl0;
             Unit *unit;
             for (un_iter iter = physics_buffer[current_sim_location].createIterator(); (unit = *iter);) {
                 int   priority = unit->sim_atom_multiplier;
@@ -689,7 +684,6 @@ void StarSystem::Update( float priority )
 void StarSystem::Update( float priority, bool executeDirector )
 {
     bool   firstframe = true;
-    double pythontime = 0;
     ///this makes it so systems without players may be simulated less accurately
     for (unsigned int k = 0; k < _Universe->numPlayers(); ++k)
         if (_Universe->AccessCockpit( k )->activeStarSystem == this)
@@ -710,12 +704,10 @@ void StarSystem::Update( float priority, bool executeDirector )
                 TerrainCollide();
                 UpdateAnimatedTexture();
                 Unit::ProcessDeleteQueue();
-                double pythonidea = queryTime();
                 if ( (run_only_player_starsystem
                       && _Universe->getActiveStarSystem( 0 ) == this) || !run_only_player_starsystem )
                     if (executeDirector)
                         ExecuteDirector();
-                pythontime = queryTime()-pythonidea;
                 static int dothis = 0;
                 if ( this == _Universe->getActiveStarSystem( 0 ) )
                     if ( (++dothis)%2 == 0 )
