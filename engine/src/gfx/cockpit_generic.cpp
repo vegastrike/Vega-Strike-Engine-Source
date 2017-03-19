@@ -328,13 +328,12 @@ extern void SwitchUnits2( Unit *nw );
 void SwitchUnits( Unit *ol, Unit *nw )
 {
     bool pointingtool = false;
-    bool pointingtonw = false;
     for (unsigned int i = 0; i < _Universe->numPlayers(); ++i)
         if ( i != _Universe->CurrentCockpit() ) {
             if (_Universe->AccessCockpit( i )->GetParent() == ol)
                 pointingtool = true;
             if (_Universe->AccessCockpit( i )->GetParent() == nw)
-                pointingtonw = true;
+                { /* Empty */ }
         }
     if ( ol && (!pointingtool) ) {
         Unit *oltarg = ol->Target();
