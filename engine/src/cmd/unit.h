@@ -161,9 +161,7 @@ public: GameUnit( int dummy );
  ***************************************************************************
  */
 
-/////////////////////////////////////////////////////
-//forward declarations of explicit instantiations, added by chuck_starchaser:
-
+//! Forward declarations of explicit instatiations
 class Asteroid;
 template < class Asteroid >
 class GameUnit;
