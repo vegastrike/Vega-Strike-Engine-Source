@@ -78,14 +78,12 @@ void RText::renderconsole() //render buffer
 {
     int  nd = 0;
     vector< string >refs;
-    bool breaker = false;
     for (vector< cline >::iterator iter = conlines.begin(); iter < conlines.end(); iter++) {
         if (nd < ndraw)
             refs.push_back( ( *(iter) ).cref );
         else iter = conlines.end();
         nd++;
     }
-    size_t j = 0;
     float  x = -1;
     float  y = -0.5;
     string workIt;
