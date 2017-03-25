@@ -646,11 +646,6 @@ void GFXSphereVertexList::ProceduralModification()
         Vector vert[ROWS];
         int direction[ROWS/2];
 
-        int last_row_set[ROWS];
-        for(int i=0; i < ROWS; i++) {
-            last_row_set[i] = 0;
-        }
-
         for(int i=0; i < numVertices; i++) {
             for(int j=0; j < ROWS; j++)
                 if(row[j] < numVertices/ROWS*(j+1))
@@ -662,9 +657,6 @@ void GFXSphereVertexList::ProceduralModification()
                 for(int j=0; j < ROWS; j+=2) { 
                     if(direction[j/2] > 2) {
                         SetVector( 1.003, &vert[j] );
-                        last_row_set[j] = 1;
-                    } else {
-                        last_row_set[j] = -1;
                     }
                 }
 
@@ -674,9 +666,6 @@ void GFXSphereVertexList::ProceduralModification()
                 for(int j=1; j < ROWS; j+=2) {
                     if(direction[(j-1)/2] > 2) {
                         SetVector( 1.003, &vert[j] );
-                        last_row_set[j] = 1;
-                    } else {
-                        last_row_set[j] = -1;
                     }
                 }
             }
