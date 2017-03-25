@@ -227,7 +227,6 @@ public:
 //#define UPDATEDEBUG  //for hard to track down bugs
 void GameStarSystem::Draw( bool DrawCockpit )
 {
-    double starttime = queryTime();
     GFXEnable( DEPTHTEST );
     GFXEnable( DEPTHWRITE );
     saved_interpolation_blend_factor = interpolation_blend_factor =
@@ -238,7 +237,6 @@ void GameStarSystem::Draw( bool DrawCockpit )
     for (unsigned int i = 0; i < contterrains.size(); ++i)
         contterrains[i]->AdjustTerrain( this );
     Unit *par;
-    bool  alreadysetviewport = false;
     if ( ( par = _Universe->AccessCockpit()->GetParent() ) == NULL ) {
         _Universe->AccessCamera()->UpdateGFX( GFXTRUE );
     } else if ( !par->isSubUnit() ) {
@@ -253,7 +251,6 @@ void GameStarSystem::Draw( bool DrawCockpit )
                                                                   interpolation_blend_factor );
         }
         _Universe->AccessCockpit()->SetupViewPort( true );
-        alreadysetviewport = true;
     }
     double setupdrawtime = queryTime();
     {
@@ -293,10 +290,7 @@ void GameStarSystem::Draw( bool DrawCockpit )
     bg->Draw();
     double drawtime    = queryTime();
 
-    double maxdrawtime = 0;
-
     //Ballpark estimate of when an object of configurable size first becomes one pixel
-
     QVector    drawstartpos = _Universe->AccessCamera()->GetPosition();
 
     Collidable key_iterator( 0, 1, drawstartpos );
@@ -381,7 +375,6 @@ void GameStarSystem::Draw( bool DrawCockpit )
     ConditionalCursorDraw( false );
     if (DrawCockpit)
         _Universe->AccessCockpit()->Draw();
-    double fintime = queryTime()-starttime;
     MeshAnimation::UpdateFrames();
 }
 
