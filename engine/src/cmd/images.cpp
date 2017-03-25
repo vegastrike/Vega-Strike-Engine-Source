@@ -1,7 +1,7 @@
 #include "cmd/images.h"
 
-
-template < typename BOGUS > //added by chuck starchaser, to try to break dependency to VSSprite in vegaserver
+//Refactors code to otherwise break the dependency to VSSprite for the VegaServer.
+template < typename BOGUS >
 UnitImages<BOGUS>::~UnitImages()
 {
     if (pExplosion)
