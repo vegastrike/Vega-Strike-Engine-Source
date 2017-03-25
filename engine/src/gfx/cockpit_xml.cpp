@@ -1,7 +1,6 @@
 /*! Cockpit XML
  * Sets out how the cockpit works.
  */
-//#include "config.h"
 #include "cockpit.h"
 #include "xml_support.h"
 #include "gauge.h"
@@ -215,6 +214,9 @@ string getRes( string inp )
         return inp.substr( 0, where )+"_"+rez+".spr";
 }
 
+/*! beginElement
+ * Sets up the entire cockpit. 
+ */
 void GameCockpit::beginElement( const string &name, const AttributeList &attributes )
 {
     static bool cockpit_smooth   =
@@ -246,7 +248,7 @@ void GameCockpit::beginElement( const string &name, const AttributeList &attribu
     int       counter      = 0;
     switch (elem)
     {
-    case COCKPIT:
+    case CockpitXML::COCKPIT:
         for (iter = attributes.begin(); iter != attributes.end(); iter++) {
             attr = (Names) attribute_map.lookup( (*iter).name );
             switch (attr)
@@ -580,21 +582,20 @@ loadsprite:
 
 void GameCockpit::endElement( const string &name )
 {
+	//Nothing will be coming after the set up. 
 }
 
 using namespace VSFileSystem;
 
 void GameCockpit::LoadXML( const char *filename )
 {
-    const int chunk_size = 16384;
-
     VSFile    f;
-    VSError   err = Unspecified;
     if (filename[0] != '\0')
-        VSError err = f.OpenReadOnly( filename, CockpitFile );
+        f.OpenReadOnly( filename, CockpitFile );
     LoadXML( f );
 }
 
+//Pull it all together and send for publishing.
 void GameCockpit::LoadXML( VSFileSystem::VSFile &f )
 {
     if ( !f.Valid() ) {
