@@ -62,7 +62,7 @@ void Camera::UpdateGFX( GFXBOOL clip,
     lastGFXUpdate.overrideZFar     = overrideZFar;
 
     const float ZFARCONST = 1000000;
-    float ymin, ymax, znear, zfar;
+    float znear, zfar;
     if (1 || changed) {
         myPhysics.Update();
         GFXLoadIdentity( PROJECTION );
@@ -75,10 +75,6 @@ void Camera::UpdateGFX( GFXBOOL clip,
             GFXPerspective( zoom*fov, g_game.aspect, znear, zfar, cockpit_offset );             //set perspective to 78 degree FOV
             break;
         case Camera::PARALLEL:
-            ymax  = g_game.znear*tanf( zoom*fov*PI/( (float) 360.0 ) );
-
-            ymin  = -ymax;             //-4.7046
-
             znear = ( overrideZFrustum ? overrideZNear : -g_game.zfar*(clip ? 1 : ZFARCONST) );
             zfar  = ( overrideZFrustum ? overrideZFar : g_game.zfar*(clip ? 1 : ZFARCONST) );
 
@@ -107,26 +103,6 @@ void Camera::UpdateCameraSounds()
     AUDListenerOrientation( P, Q, R );
 #endif
 }
-
-#ifdef OLDUPDATEPLANEGFX
-/**
- *  Vector c (planet->InvTransform (Coord));
- *  Vector tt (planet->Transform (c));
- *  VSFileSystem::Fprintf (stderr,"t <%f,%f,%f>\n",tt.i,tt.j,tt.k);
- *  VSFileSystem::Fprintf (stderr,"Coord <%f,%f,%f>\n",Coord.i,Coord.j,Coord.k);
- *  Vector p (planet->InvTransform (Coord+P)-c);
- *  Vector q (planet->InvTransform (Coord+Q)-c);
- *  Vector r (planet->InvTransform (Coord+R)-c);
- *  r.Normalize();
- *
- *  //    p= q.Cross (r);
- *  //	  q = r.Cross (p);
- *  p.Normalize();
- *  q.Normalize();
- *  q = q-q.Dot (r)*r;
- *  q.Normalize();
- */
-#endif
 
 void Camera::GetView( Matrix &vw )
 {
@@ -158,9 +134,6 @@ void Camera::UpdateGLCenter()
 #define ITISDEPRECATED 0
     assert( ITISDEPRECATED );
 #undef ITISDEPRECATED
-//static float rotfactor = 0;
-    //glMatrixMode(GL_PROJECTION);
-    float xmin, xmax, ymin, ymax;
     if (changed) {
         GFXLoadIdentity( PROJECTION );
         GFXLoadIdentity( VIEW );
@@ -171,23 +144,13 @@ void Camera::UpdateGLCenter()
             GFXPerspective( zoom*fov, g_game.aspect, g_game.znear, g_game.zfar, cockpit_offset );             //set perspective to 78 degree FOV
             break;
         case Camera::PARALLEL:
-            ymax = g_game.znear*tanf( zoom*fov*PI/( (float) 360.0 ) );                //78.0 --> 4.7046
-
-            ymin = -ymax;             //-4.7046
-
-            xmin = ymin*g_game.aspect;               //-6.2571
-            xmax = ymax*g_game.aspect;               //6.2571
-
-            //GFXParallel(xmin,xmax,ymin,ymax,-znear,zfar);
             GFXParallel( g_game.aspect* -zoom, g_game.aspect*zoom, -zoom, zoom, -g_game.znear, g_game.zfar );
             break;
         }
         RestoreViewPort( 0, 0 );
 
         GFXLookAt( -R, QVector( 0, 0, 0 ), Q );
-        //changed = GFXFALSE;
     }
-    //glMultMatrixf(view);
 }
 
 void Camera::SetPosition( const QVector &origin, const Vector &vel, const Vector &angvel, const Vector &acceleration )

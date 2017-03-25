@@ -1,4 +1,8 @@
 #include "config.h"
+/*! Cockpit XML
+ * Sets out how the cockpit works.
+ */
+
 #include "cockpit.h"
 #include "xml_support.h"
 #include "gauge.h"
@@ -16,7 +20,6 @@ using XMLSupport::parse_int;
 
 namespace CockpitXML
 {
-//
 
 enum Names
 {
@@ -606,25 +609,6 @@ void GameCockpit::LoadXML( VSFileSystem::VSFile &f )
     XML_SetElementHandler( parser, &Cockpit::beginElement, &Cockpit::endElement );
 
     XML_Parse( parser, ( f.ReadFull() ).c_str(), f.Size(), 1 );
-    /*
-     *  do {
-     * #ifdef BIDBG
-     *  char *buf = (XML_Char*)XML_GetBuffer(parser, chunk_size);
-     * #else
-     *  char buf[chunk_size];
-     * #endif
-     *  int length;
-     *
-     *  length = VSFileSystem::vs_read (buf,1, chunk_size,inFile);
-     *  //length = inFile.gcount();
-     * #ifdef BIDBG
-     *  XML_ParseBuffer(parser, length, VSFileSystem::vs_feof(inFile));
-     * #else
-     *  XML_Parse (parser,buf,length,VSFileSystem::vs_feof(inFile));
-     * #endif
-     *  } while(!VSFileSystem::vs_feof(inFile));
-     *  VSFileSystem::vs_close (inFile);
-     */
     XML_ParserFree( parser );
 }
 
