@@ -1,5 +1,9 @@
 /**
- * A work around to overrule the cmath copysign function
+ * Util Vsphysics
+ * 
+ * Vega Strike overloads the copysign function from cmath, this 
+ * namespace is there to make sure that it is this method that is 
+ * preferred.
  */
 
 
