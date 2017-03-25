@@ -1,8 +1,7 @@
-#include "config.h"
 /*! Cockpit XML
  * Sets out how the cockpit works.
  */
-
+//#include "config.h"
 #include "cockpit.h"
 #include "xml_support.h"
 #include "gauge.h"
