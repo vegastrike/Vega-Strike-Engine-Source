@@ -22,10 +22,10 @@ https://github.com/Taose/Vegastrike-taose/wiki
 
 ## Installation
 
-Please see the file called INSTALL. 
+Please see the file called INSTALL.md
 
 ## Licensing
 
-Please see the file called LICENSE.
+Please see the file called LICENCE.
 
 
