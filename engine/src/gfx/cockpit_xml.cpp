@@ -1,4 +1,6 @@
-#include "config.h"
+/*! Cockpit XML
+ * Sets out how the cockpit works.
+ */
 #include "cockpit.h"
 #include "xml_support.h"
 #include "gauge.h"
@@ -16,7 +18,6 @@ using XMLSupport::parse_int;
 
 namespace CockpitXML
 {
-//
 
 enum Names
 {
@@ -213,6 +214,9 @@ string getRes( string inp )
         return inp.substr( 0, where )+"_"+rez+".spr";
 }
 
+/*! beginElement
+ * Sets up the entire cockpit. 
+ */
 void GameCockpit::beginElement( const string &name, const AttributeList &attributes )
 {
     static bool cockpit_smooth   =
@@ -244,7 +248,7 @@ void GameCockpit::beginElement( const string &name, const AttributeList &attribu
     int       counter      = 0;
     switch (elem)
     {
-    case COCKPIT:
+    case CockpitXML::COCKPIT:
         for (iter = attributes.begin(); iter != attributes.end(); iter++) {
             attr = (Names) attribute_map.lookup( (*iter).name );
             switch (attr)
@@ -578,21 +582,20 @@ loadsprite:
 
 void GameCockpit::endElement( const string &name )
 {
+	//Nothing will be coming after the set up. 
 }
 
 using namespace VSFileSystem;
 
 void GameCockpit::LoadXML( const char *filename )
 {
-    const int chunk_size = 16384;
-
     VSFile    f;
-    VSError   err = Unspecified;
     if (filename[0] != '\0')
-        VSError err = f.OpenReadOnly( filename, CockpitFile );
+        f.OpenReadOnly( filename, CockpitFile );
     LoadXML( f );
 }
 
+//Pull it all together and send for publishing.
 void GameCockpit::LoadXML( VSFileSystem::VSFile &f )
 {
     if ( !f.Valid() ) {
@@ -606,25 +609,6 @@ void GameCockpit::LoadXML( VSFileSystem::VSFile &f )
     XML_SetElementHandler( parser, &Cockpit::beginElement, &Cockpit::endElement );
 
     XML_Parse( parser, ( f.ReadFull() ).c_str(), f.Size(), 1 );
-    /*
-     *  do {
-     * #ifdef BIDBG
-     *  char *buf = (XML_Char*)XML_GetBuffer(parser, chunk_size);
-     * #else
-     *  char buf[chunk_size];
-     * #endif
-     *  int length;
-     *
-     *  length = VSFileSystem::vs_read (buf,1, chunk_size,inFile);
-     *  //length = inFile.gcount();
-     * #ifdef BIDBG
-     *  XML_ParseBuffer(parser, length, VSFileSystem::vs_feof(inFile));
-     * #else
-     *  XML_Parse (parser,buf,length,VSFileSystem::vs_feof(inFile));
-     * #endif
-     *  } while(!VSFileSystem::vs_feof(inFile));
-     *  VSFileSystem::vs_close (inFile);
-     */
     XML_ParserFree( parser );
 }
 

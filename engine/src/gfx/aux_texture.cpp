@@ -1,24 +1,3 @@
-/*
- * Vega Strike
- * Copyright (C) 2001-2002 Daniel Horn
- *
- * http://vegastrike.sourceforge.net/
- *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * as published by the Free Software Foundation; either version 2
- * of the License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
- */
-
 #include <stdio.h>
 #include <assert.h>
 #include "gfxlib.h"
@@ -307,7 +286,6 @@ void Texture::Load( const char *FileName,
             return;
         }
     }
-    //VSFileSystem::vs_fprintf (stderr,"1.Loading bmp file %s ",FileName);
     char *t   = strdup( FileName );
     int   tmp = strlen( FileName );
     if (tmp > 3) {
@@ -327,13 +305,12 @@ void Texture::Load( const char *FileName,
         }
     }
     if (err2 <= Ok) {
-        //texfilename += string(t);
+
     }
-    //this->texfilename = texfilename;
-    //strcpy (filename,texfilename.c_str());
+
     VSFile  f;
-    VSError err; //FIXME err not always initialized before use
-    err = Ok; //FIXME this line added temporarily by chuck_starchaser
+    VSError err; 
+    err = Ok;
     if (FileName)
         if (FileName[0])
             err = f.OpenReadOnly( FileName, TextureFile );
@@ -343,9 +320,9 @@ void Texture::Load( const char *FileName,
         f.Close();
         err = Unspecified;
     }
-    if (err > Ok) { //FIXME err not guaranteed to have been initialized!
+    if (err > Ok) {
         FileNotFound( texfn );
-//VSFileSystem::vs_fprintf (stderr, "\n%s, not found\n",FileName);
+
         if (err2 <= Ok)
             f2.Close();
         return;
@@ -357,7 +334,7 @@ void Texture::Load( const char *FileName,
     }
     if (texfn.find( "white" ) == string::npos)
         bootstrap_draw( "Loading "+string( FileName ) );
-    //strcpy(filename, FileName);
+
     if (err2 > Ok)
         data = this->ReadImage( &f, NULL, true, NULL );
     else
@@ -382,7 +359,7 @@ void Texture::Load( const char *FileName,
     f.Close();
     if ( f2.Valid() )
         f2.Close();
-    //VSFileSystem::vs_fprintf (stderr," Load Success\n");
+
 }
 
 Texture::Texture( const char *FileNameRGB,
@@ -451,9 +428,7 @@ void Texture::Load( const char *FileNameRGB,
             return;
         }
     }
-    //VSFileSystem::vs_fprintf (stderr,"2.Loading bmp file %s alp %s ",FileNameRGB,FileNameA);
-    //this->texfilename = texfilename;
-    //strcpy (filename,texfilename.c_str());
+
     VSFile  f;
     VSError err = Unspecified;
     err = f.OpenReadOnly( FileNameRGB, TextureFile );
@@ -473,7 +448,6 @@ void Texture::Load( const char *FileNameRGB,
     }
     VSFile  f1;
     VSError err1 = Unspecified;
-    bool    shared1;
     if (FileNameA) {
         static bool use_alphamap =
             parse_bool( vs_config->getVariable( "graphics",
@@ -483,8 +457,7 @@ void Texture::Load( const char *FileNameRGB,
             std::string tmp;
             f1.OpenReadOnly( FileNameA, TextureFile );
 
-            shared1 = (err1 == Shared);
-            if (err1 > Ok) {
+             if (err1 > Ok) {
                 data = NULL;
                 FileNameA = NULL;
             }
@@ -513,20 +486,12 @@ void Texture::Load( const char *FileNameRGB,
     f.Close();
     if (err1 <= Ok)
         f1.Close();
-    //VSFileSystem::vs_fprintf (stderr,"Load Success\n");
+
 }
 
 Texture::~Texture()
 {
     if (original == NULL) {
-        /**DEPRECATED
-         *     if(data != NULL)
-         *     {
-         *             delete [] data;
-         *
-         *             data = NULL;
-         *     }
-         */
         UnBind();
         if (palette != NULL) {
             free( palette );
@@ -546,14 +511,11 @@ void Texture::UnBind()
         GFXDeleteTexture( name );
         name = -1;
     }
-    //glDeleteTextures(1, &name);
 }
 
 void Texture::Transfer( int maxdimension, GFXBOOL detailtexture )
 {
-    //Implement this in D3D
-    //if(mode == _8BIT)
-    //glColorTable(GL_SHARED_TEXTURE_PALETTE_EXT, GL_RGB8, 256, GL_RGB, GL_UNSIGNED_BYTE, palette);
+
 
     TEXTUREFORMAT internformat;
     switch (mode)
@@ -664,7 +626,6 @@ static void ActivateWhite( int stage )
 
 void Texture::MakeActive( int stag, int pass )
 {
-    static bool missing = false;
     if ( (name == -1) || (pass != 0) ) {
         ActivateWhite( stag );
     } else {
