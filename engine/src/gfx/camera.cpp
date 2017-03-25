@@ -1,37 +1,12 @@
-/*
- * Vega Strike
- * Copyright (C) 2001-2002 Daniel Horn & Alan Shieh
- *
- * http://vegastrike.sourceforge.net/
- *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * as published by the Free Software Foundation; either version 2
- * of the License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
- */
 #include "camera.h"
 #include "cmd/unit_generic.h" ///for GetUnit ();
 #include "matrix.h"
-
-//Remove GL specific stuff here
 
 #include "vs_globals.h"
 #include "audiolib.h"
 #include "lin_time.h"
 
 #include <assert.h>     //needed for assert() calls
-//#include "planetary_transform.h"  commented out by chuck_starchaser; --never used
-
-//const float PI=3.1415926536;
 
 Camera::Camera( ProjectionType proj ) : projectionType( proj )
     , myPhysics( 0.1, 0.075, &Coord, &P, &Q, &R )
@@ -44,10 +19,7 @@ Camera::Camera( ProjectionType proj ) : projectionType( proj )
     velocity = angular_velocity = Vector( 0, 0, 0 );
     lastpos.Set( 0, 0, 0 );
     cockpit_offset = 0;
-    //////////////////////////////////////////SetPlanetaryTransform( NULL );
     changed = GFXTRUE;
-    //SetPosition();
-    //SetOrientation();
     Yaw( PI );
     x     = y = 0;
     xsize = ysize = 1.0;
@@ -90,11 +62,10 @@ void Camera::UpdateGFX( GFXBOOL clip,
     lastGFXUpdate.overrideZFar     = overrideZFar;
 
     const float ZFARCONST = 1000000;
-    float xmin, xmax, ymin, ymax, znear, zfar;
+    float ymin, ymax, znear, zfar;
     if (1 || changed) {
         myPhysics.Update();
         GFXLoadIdentity( PROJECTION );
-        //FIXMEGFXLoadIdentity(VIEW);
         switch (projectionType)
         {
         case Camera::PERSPECTIVE:
@@ -107,9 +78,6 @@ void Camera::UpdateGFX( GFXBOOL clip,
             ymax  = g_game.znear*tanf( zoom*fov*PI/( (float) 360.0 ) );
 
             ymin  = -ymax;             //-4.7046
-
-            xmin  = ymin*g_game.aspect;              //-6.2571
-            xmax  = ymax*g_game.aspect;              //6.2571
 
             znear = ( overrideZFrustum ? overrideZNear : -g_game.zfar*(clip ? 1 : ZFARCONST) );
             zfar  = ( overrideZFrustum ? overrideZFar : g_game.zfar*(clip ? 1 : ZFARCONST) );
