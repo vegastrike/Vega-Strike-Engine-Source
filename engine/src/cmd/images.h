@@ -129,6 +129,9 @@ private:
     bool isOccupied;
 };
 
+/*! DockedUnits
+ * Sets up a container area to store units temporarily.
+ */
 struct DockedUnits
 {
     UnitContainer uc;
