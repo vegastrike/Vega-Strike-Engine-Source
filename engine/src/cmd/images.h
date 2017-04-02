@@ -9,10 +9,14 @@
 #include "gfx/sprite.h"
 #include "gfx/animation.h"
 
+/*! This 'appears' to set up the "passable"/"transparent" area that is a docking but otherwise marked by the rounded green or in case of a waypoint light blue. Although its an area
+ * it is regarded as an object therefore a struct.*/
 struct DockingPorts
 {
+	/*! Type is really it's 'state'.*/
     struct Type
     {
+		/*! Mostly for readability, so maintainers can at a glance figure out what is we're referring to*/
         enum Value
         {
             CATEGORY_CONNECTED = 10,
@@ -69,6 +73,7 @@ struct DockingPorts
         }
     };
 
+	/*! Pre-constructor everything initted to a defaults state of none-existence */
     DockingPorts()
         : radius(0),
           isInside(false),
@@ -77,6 +82,8 @@ struct DockingPorts
           isOccupied(false)
     {}
 
+	/*! Constructs a Docking port and sets up its state.
+	 * We grab the data from other resources.*/
     DockingPorts(const Vector &center, float radius, float minradius, const Type::Value& type)
         : center(center),
           radius(radius),
@@ -86,6 +93,7 @@ struct DockingPorts
           isOccupied(isWaypoint) // Waypoints are always occupied
     {}
 
+	/*! Overloaded constructor */
     DockingPorts(const Vector &min, const Vector &max, float minradius, const Type::Value& type)
         : center((min + max) / 2.0f),
           radius((max - min).Magnitude() / 2.0f),
@@ -95,6 +103,7 @@ struct DockingPorts
           isOccupied(isWaypoint) // Waypoints are always occupied
     {}
 
+	//! Make the Radius accessible.
     float GetRadius() const { return radius; }
 
     const Vector& GetPosition() const { return center; }
@@ -305,7 +314,7 @@ struct UnitImages
     float        *cockpit_damage;     //0 is radar, 1 to MAXVDU is vdus and >MAXVDU is gauges
     ///how likely to fool missiles
     /// -2 = inactive L2, -1 = inactive L1, 0 = not available, 1 = active L1, 2 = active L2, etc...
-    int  ecm;    
+    int  ecm;
     ///holds the info for the repair bot type. 0 is no bot;
     unsigned char repair_droid;
     float next_repair_time;
