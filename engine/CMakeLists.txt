@@ -1,6 +1,6 @@
 # create a build directory somewhere outside of this source tree
 # run cmake <path to source tree> inside it
-# run ccmake and hand tune any config variables/paths you need to, save 
+# run ccmake and hand tune any config variables/paths you need to, save
 # run make ...or build your project files
 # valid targets are vegastrike, vssetup, and vegaserver (though it's broken right now)
 # ccmake will let you set the Build type (debug,release,basic)
@@ -12,10 +12,10 @@ project (vsUTCS)
 
 
 
-include_directories(${vsUTCS_SOURCE_DIR}/src 
+include_directories(${vsUTCS_SOURCE_DIR}/src
 					${vsUTCS_SOURCE_DIR}/src/cmd
-					${vsUTCS_BINARY_DIR} ) 
-					
+					${vsUTCS_BINARY_DIR} )
+
 add_library(netlowlevel    src/networking/lowlevel/netbuffer.cpp
 						   src/networking/lowlevel/netui.cpp
 						   src/networking/lowlevel/packet.cpp
@@ -39,10 +39,10 @@ add_library(netlowlevel    src/networking/lowlevel/netbuffer.cpp
 						   src/networking/lowlevel/vsnet_sockettcp.cpp
 						   src/networking/lowlevel/vsnet_socketudp.cpp
 						   src/networking/lowlevel/vsnet_thread_non.cpp
-						   src/networking/lowlevel/vsnet_thread_p.cpp 
+						   src/networking/lowlevel/vsnet_thread_p.cpp
 						   src/networking/lowlevel/vsnet_thread_sdl.cpp )
 
-SET(LIBNET_SOURCES src/networking/inet_file.cpp 
+SET(LIBNET_SOURCES src/networking/inet_file.cpp
 				   src/networking/inet.cpp )
 
 add_library(netgeneric    src/networking/accountsxml.cpp
@@ -52,7 +52,7 @@ add_library(netgeneric    src/networking/accountsxml.cpp
 						  src/networking/cubicsplines.cpp
 						  src/networking/mangle.cpp
 						  src/networking/netclient_clients.cpp
-						  src/networking/netclient_devices.cpp 
+						  src/networking/netclient_devices.cpp
 						  src/networking/netclient_login.cpp
 						  src/networking/netclient.cpp
 						  src/networking/netserver_acct.cpp
@@ -60,7 +60,7 @@ add_library(netgeneric    src/networking/accountsxml.cpp
 						  src/networking/netserver_devices.cpp
 						  src/networking/netserver_login.cpp
 						  src/networking/netserver_net.cpp
-						  src/networking/netserver.cpp 
+						  src/networking/netserver.cpp
 						  src/networking/prediction.cpp
 						  src/networking/zonemgr.cpp )
 
@@ -72,7 +72,7 @@ SET(LIBNETSERVER_SOURCES src/networking/networkcomm_server.cpp )
 SET(LIBGUI_SOURCES src/gui/button.cpp
 				   src/gui/control.cpp
 				   src/gui/eventmanager.cpp
-				   src/gui/eventresponder.cpp 
+				   src/gui/eventresponder.cpp
 				   src/gui/font.cpp
 				   src/gui/glut_support.cpp
 				   src/gui/groupcontrol.cpp
@@ -96,11 +96,11 @@ SET(LIBPYTHON_SOURCES src/python/init.cpp
 					  src/python/unit_exports.cpp
 					  src/python/unit_exports1.cpp
 					  src/python/unit_exports2.cpp
-					  src/python/unit_exports3.cpp 
+					  src/python/unit_exports3.cpp
 					  src/python/unit_method_defs.cpp
 					  src/python/unit_wrapper.cpp
 					  src/python/universe_util_export.cpp )
-					  				   
+
 SET(LIBSCRIPT_SOURCES src/cmd/script/director_generic.cpp
 					  src/cmd/script/mission_script.cpp
 					  src/cmd/script/mission.cpp
@@ -117,7 +117,7 @@ SET(LIBSCRIPT_SOURCES src/cmd/script/director_generic.cpp
 					  src/cmd/script/script_statement.cpp
 					  src/cmd/script/script_util.cpp
 					  src/cmd/script/script_variables.cpp )
-					  
+
 SET(LIBCMDSCRIPTSERVER_SOURCES src/cmd/script/flightgroup_server.cpp
 							   src/cmd/script/script_call_unit_server.cpp
 							   src/cmd/script/c_alike/c_alike.tab.cpp
@@ -158,7 +158,7 @@ add_library(OPcollide  src/cmd/collide2/Ice/IceAABB.cpp
 			   		   src/cmd/collide2/Ice/IceRandom.cpp
 			   		   src/cmd/collide2/Ice/IceRay.cpp
 			   		   src/cmd/collide2/Ice/IceRevisitedRadix.cpp
-			   		   src/cmd/collide2/Ice/IceSegment.cpp 
+			   		   src/cmd/collide2/Ice/IceSegment.cpp
 			   		   src/cmd/collide2/Ice/IceTriangle.cpp
 			   		   src/cmd/collide2/Ice/IceUtils.cpp
 			   		   src/cmd/collide2/csgeom2/opbox.cpp
@@ -168,22 +168,22 @@ add_library(OPcollide  src/cmd/collide2/Ice/IceAABB.cpp
 			   		   src/cmd/collide2/OPC_AABBTree.cpp
 			   		   src/cmd/collide2/OPC_BaseModel.cpp
 			   		   src/cmd/collide2/OPC_BoxPruning.cpp
-			   		   src/cmd/collide2/OPC_Collider.cpp 
+			   		   src/cmd/collide2/OPC_Collider.cpp
 			   		   src/cmd/collide2/OPC_Common.cpp
 			   		   src/cmd/collide2/OPC_HybridModel.cpp
 			   		   src/cmd/collide2/OPC_LSSCollider.cpp
-			   		   src/cmd/collide2/OPC_MeshInterface.cpp 
+			   		   src/cmd/collide2/OPC_MeshInterface.cpp
 			   		   src/cmd/collide2/OPC_Model.cpp
-			   		   src/cmd/collide2/OPC_OBBCollider.cpp 
-			   		   src/cmd/collide2/OPC_OptimizedTree.cpp 
-			   		   src/cmd/collide2/OPC_Picking.cpp 
-			   		   src/cmd/collide2/OPC_PlanesCollider.cpp 
-			   		   src/cmd/collide2/OPC_RayCollider.cpp 
-			   		   src/cmd/collide2/OPC_SphereCollider.cpp 
-			   		   src/cmd/collide2/OPC_SweepAndPrune.cpp 
-			   		   src/cmd/collide2/OPC_TreeBuilders.cpp 
-			   		   src/cmd/collide2/OPC_TreeCollider.cpp 
-			   		   src/cmd/collide2/OPC_VolumeCollider.cpp 
+			   		   src/cmd/collide2/OPC_OBBCollider.cpp
+			   		   src/cmd/collide2/OPC_OptimizedTree.cpp
+			   		   src/cmd/collide2/OPC_Picking.cpp
+			   		   src/cmd/collide2/OPC_PlanesCollider.cpp
+			   		   src/cmd/collide2/OPC_RayCollider.cpp
+			   		   src/cmd/collide2/OPC_SphereCollider.cpp
+			   		   src/cmd/collide2/OPC_SweepAndPrune.cpp
+			   		   src/cmd/collide2/OPC_TreeBuilders.cpp
+			   		   src/cmd/collide2/OPC_TreeCollider.cpp
+			   		   src/cmd/collide2/OPC_VolumeCollider.cpp
 			   		   src/cmd/collide2/CSopcodecollider.cpp )
 
 SET(LIBCMD_SOURCES src/cmd/alphacurve.cpp
@@ -204,12 +204,12 @@ SET(LIBCMD_SOURCES src/cmd/alphacurve.cpp
 				   src/cmd/unit_collide.cpp
 				   src/cmd/unit_const_cache.cpp
 				   src/cmd/unit_csv.cpp
-				   src/cmd/unit_factory_generic.cpp 
-				   src/cmd/unit_functions_generic.cpp 
-				   src/cmd/unit_generic.cpp 
+				   src/cmd/unit_factory_generic.cpp
+				   src/cmd/unit_functions_generic.cpp
+				   src/cmd/unit_generic.cpp
 				   src/cmd/fg_util.cpp
 				   src/cmd/unit_util_generic.cpp
-				   src/cmd/unit_xml.cpp 
+				   src/cmd/unit_xml.cpp
 				   src/cmd/weapon_xml.cpp )
 
 SET(LIBCMDSERVER_SOURCES src/cmd/atmosphere_server.cpp
@@ -219,9 +219,9 @@ SET(LIBCMDSERVER_SOURCES src/cmd/atmosphere_server.cpp
 						 src/cmd/unit_factory_server.cpp
 						 src/cmd/unit_functions_server.cpp
 						 src/cmd/unit_util_server.cpp
-                         src/cmd/unit_server.cpp 
-                         src/cmd/pilot_server.cpp 
-                         src/cmd/images_server.cpp 
+                         src/cmd/unit_server.cpp
+                         src/cmd/pilot_server.cpp
+                         src/cmd/images_server.cpp
                          src/cmd/faction_xml_server.cpp )
 
 
@@ -267,23 +267,23 @@ SET(LIBGFXCLIENT_SOURCES src/gfx/ani_texture.cpp
 						 src/gfx/nav/navpath.cpp
 						 src/gfx/nav/navscreen.cpp
 						 src/gfx/nav/navscreenoccupied.cpp
-						 src/gfx/radar/bubble_display.cpp 
-						 src/gfx/radar/bubble_display.h 
-						 src/gfx/radar/dual_display.cpp 
-						 src/gfx/radar/dual_display.h 
-						 src/gfx/radar/null_display.h 
-						 src/gfx/radar/plane_display.cpp 
-						 src/gfx/radar/plane_display.h 
-						 src/gfx/radar/radar.cpp 
-						 src/gfx/radar/radar.h 
-						 src/gfx/radar/sensor.cpp 
-						 src/gfx/radar/sensor.h 
-						 src/gfx/radar/sphere_display.cpp 
-						 src/gfx/radar/sphere_display.h 
-						 src/gfx/radar/track.cpp 
-						 src/gfx/radar/track.h 
-						 src/gfx/radar/viewarea.cpp 
-						 src/gfx/radar/viewarea.h 
+						 src/gfx/radar/bubble_display.cpp
+						 src/gfx/radar/bubble_display.h
+						 src/gfx/radar/dual_display.cpp
+						 src/gfx/radar/dual_display.h
+						 src/gfx/radar/null_display.h
+						 src/gfx/radar/plane_display.cpp
+						 src/gfx/radar/plane_display.h
+						 src/gfx/radar/radar.cpp
+						 src/gfx/radar/radar.h
+						 src/gfx/radar/sensor.cpp
+						 src/gfx/radar/sensor.h
+						 src/gfx/radar/sphere_display.cpp
+						 src/gfx/radar/sphere_display.h
+						 src/gfx/radar/track.cpp
+						 src/gfx/radar/track.h
+						 src/gfx/radar/viewarea.cpp
+						 src/gfx/radar/viewarea.h
 						 src/gfx/particle.cpp
 						 src/gfx/pipelined_texture.cpp
 						 src/gfx/quadsquare_cull.cpp
@@ -295,21 +295,21 @@ SET(LIBGFXCLIENT_SOURCES src/gfx/ani_texture.cpp
 						 src/gfx/ring.cpp
 						 src/gfx/screenshot.cpp
 						 src/gfx/sphere.cpp
-						 src/gfx/sprite.cpp 
+						 src/gfx/sprite.cpp
 						 src/gfx/star.cpp
 						 src/gfx/stream_texture.cpp
 						 src/gfx/technique.cpp
 						 src/gfx/tex_transform.cpp
 						 src/gfx/vdu.cpp
 						 src/gfx/vid_file.cpp
-						 src/ffmpeg_init.cpp 
+						 src/ffmpeg_init.cpp
 						 src/gfx/vsbox.cpp
-						 src/gfx/vsimage.cpp 
+						 src/gfx/vsimage.cpp
 						 src/gfx/warptrail.cpp )
 
 SET(LIBGFXSERVER_SOURCES src/gfx/sphere_server.cpp
 						 src/gfx/vsbox_server.cpp
-						 src/gfx/mesh_server.cpp 
+						 src/gfx/mesh_server.cpp
 						 src/gfx/background_server.cpp
                         src/gfx/mesh_bin_server.cpp )
 
@@ -318,7 +318,7 @@ SET(LIBGFXSERVER_SOURCES src/gfx/sphere_server.cpp
 SET(LIBROOTGENERIC_SOURCES src/configxml.cpp
 						   src/easydom.cpp
 						   src/endianness.cpp
-						   src/macosx_math.cpp 
+						   src/macosx_math.cpp
 						   src/faction_generic.cpp
 						   src/faction_util_generic.cpp
 						   src/galaxy_gen.cpp
@@ -326,12 +326,12 @@ SET(LIBROOTGENERIC_SOURCES src/configxml.cpp
 						   src/galaxy.cpp
 						   src/lin_time.cpp
 						   src/load_mission.cpp
-						   src/pk3.cpp 
+						   src/pk3.cpp
 						   src/posh.cpp
 						   src/savegame.cpp
 						   src/star_system_generic.cpp
 						   src/star_system_xml.cpp
-						   src/stardate.cpp 
+						   src/stardate.cpp
 						   src/universe_generic.cpp
 						   src/universe_util_generic.cpp
 						   src/vs_globals.cpp
@@ -354,7 +354,7 @@ SET(LIBROOTCLIENT_SOURCES src/cg_global.cpp
 						  src/in_kb.cpp
 						  src/in_main.cpp
 						  src/in_mouse.cpp
-						  src/in_sdl.cpp 
+						  src/in_sdl.cpp
 						  src/main_loop.cpp
 						  src/physics.cpp
 						  src/rendertext.cpp
@@ -363,14 +363,14 @@ SET(LIBROOTCLIENT_SOURCES src/cg_global.cpp
 						  src/star_system.cpp
 						  src/universe_util.cpp
 						  src/universe.cpp )
-						  
+
 SET(LIBROOTSERVER_SOURCES  src/force_feedback_server.cpp
 						   src/faction_util_server.cpp
 						   src/gfxlib_struct_server.cpp
 						   src/libaudioserver.cpp
 						   src/libserver.cpp
 						   src/universe_util_server.cpp )
-						   
+
 SET(LIBAUDIO_SOURCES src/audio/CodecRegistry.cpp
                      src/audio/Listener.cpp
                      src/audio/RenderableListener.cpp
@@ -412,7 +412,7 @@ add_library(engine_com ${LIBAI_SOURCES}
 					   ${LIBROOTGENERIC_SOURCES}
 					   ${LIBSCRIPT_SOURCES}
 					   ${LIBGFXGENERIC_SOURCES} )
-				   
+
 SET(VEGASTRIKE_SOURCES ${LIBGUI_SOURCES}
 					   ${LIBNETCLIENT_SOURCES}
 					   ${LIBROOTCLIENT_SOURCES}
@@ -420,7 +420,7 @@ SET(VEGASTRIKE_SOURCES ${LIBGUI_SOURCES}
 					   ${LIBAUDIO_SOURCES}
 					   src/aldrv/al_globals.cpp
 					   src/aldrv/al_init.cpp
-					   src/aldrv/al_listen.cpp 
+					   src/aldrv/al_listen.cpp
 					   src/aldrv/al_sound.cpp
 					   src/cmd/ai/firekeyboard.cpp
 					   src/cmd/ai/flyjoystick.cpp
@@ -442,16 +442,16 @@ SET(VEGASTRIKE_SOURCES ${LIBGUI_SOURCES}
 					   src/cmd/cont_terrain.cpp
 					   src/cmd/music.cpp
 					   src/cmd/nebula.cpp
-					   src/cmd/planet.cpp 
+					   src/cmd/planet.cpp
 					   src/cmd/script/c_alike/c_alike.tab.cpp
-					   src/cmd/script/c_alike/lex.yy.cpp 
-					   src/cmd/script/director.cpp 
+					   src/cmd/script/c_alike/lex.yy.cpp
+					   src/cmd/script/director.cpp
 					   src/cmd/script/flightgroup.cpp
 					   src/cmd/script/script_call_briefing.cpp
 					   src/cmd/script/script_call_unit.cpp
 					   src/cmd/terrain.cpp
-					   src/cmd/unit_factory.cpp 
-					   src/cmd/unit_functions.cpp 
+					   src/cmd/unit_factory.cpp
+					   src/cmd/unit_functions.cpp
 					   src/cmd/unit_util.cpp
                        src/cmd/faction_xml.cpp
                        src/cmd/pilot.cpp
@@ -475,7 +475,7 @@ SET(VEGASTRIKE_SOURCES ${LIBGUI_SOURCES}
 					   src/gldrv/gl_texture.cpp
 					   src/gldrv/gl_vertex_list.cpp
 					   src/gldrv/winsys.cpp
-					   src/main.cpp 
+					   src/main.cpp
 					   src/python/briefing_wrapper.cpp )
 
 SET(VEGASERVER_SOURCES ${LIBCMDSERVER_SOURCES}
@@ -488,9 +488,9 @@ SET(VEGASERVER_SOURCES ${LIBCMDSERVER_SOURCES}
 					   src/cmd/ai/flykeyboard_server.cpp
 					   src/gldrv/gl_vertex_list.cpp
 					   src/gldrv/gl_sphere_list_server.cpp)
-					   
-if(COMMAND cmake_policy)					   
-	cmake_policy(SET CMP0003 OLD) 
+
+if(COMMAND cmake_policy)
+	cmake_policy(SET CMP0003 OLD)
 endif(COMMAND cmake_policy)
 
 # Set the default build type to Release
@@ -502,7 +502,7 @@ ENDIF(NOT CMAKE_BUILD_TYPE)
 
 
 # Provide boolean options for enabling various cpu optimizations.
-OPTION(CPUAMD_k8  "Enable AMD K8 optimizations (Athlon through athlon64)" 
+OPTION(CPUAMD_k8  "Enable AMD K8 optimizations (Athlon through athlon64)"
     OFF )
 OPTION(CPUAMD_k9  "Enable AMD K9 (sse3) optimizations (Athlon64 AM3) "
     OFF )
@@ -523,7 +523,7 @@ OPTION(CPUINTEL_native "Enable host-specific optimizations for this machine"
 # Hide our temporary variable and initialize it to empty
 SET(CPU_OPTS  )
 MARK_AS_ADVANCED( CPU_OPTS )
-SET(CPU_SMP "1" CACHE STRING 
+SET(CPU_SMP "1" CACHE STRING
     "Number of CPU's in system")
 # Depending on the boolean chosen above, set CPU_OPTS to the correct cpu opts
 IF(CPUAMD_k8)
@@ -542,7 +542,7 @@ ELSEIF(CPUINTEL_native)
     SET(CPU_OPTS "-mtune=native -march=native -mfpmath=sse -msse3 -mmmx -ftree-vectorize -ffast-math -fassociative-math -funsafe-math-optimizations -funroll-loops -ftree-parallelize-loops=${CPU_SMP}")
 ENDIF(CPUAMD_k8)
 
-# Debug target block. 
+# Debug target block.
 SET(CMAKE_CXX_FLAGS_DEBUG " ${CPU_OPTS} -DNV_CUBE_MAP -DBOOST_PYTHON_NO_PY_SIGNATURES -include config.h -pipe -g2 -Wall -Werror -O0 -fvisibility=hidden" CACHE STRING
     "Flags used by the C++ compiler during debug builds."
      FORCE )
@@ -556,18 +556,18 @@ IF("${CMAKE_BUILD_TYPE}" STREQUAL "Debug")
 	MARK_AS_ADVANCED( CLEAR
     	CMAKE_CXX_FLAGS_DEBUG )
 ELSE("${CMAKE_BUILD_TYPE}" STREQUAL "Debug")
-    MARK_AS_ADVANCED( FORCE 
+    MARK_AS_ADVANCED( FORCE
     	CMAKE_CXX_FLAGS_DEBUG )
 ENDIF("${CMAKE_BUILD_TYPE}" STREQUAL "Debug")
 
 
 
-# Release Target block 
+# Release Target block
 SET(CMAKE_CXX_FLAGS_RELEASE  "${CPU_OPTS} -DNV_CUBE_MAP -DBOOST_PYTHON_NO_PY_SIGNATURES -include config.h -pipe -O2 -Wall -fvisibility=hidden" CACHE STRING
     "Flags used by the C++ compiler during release builds."
     FORCE)
 SET( CMAKE_C_FLAGS_RELEASE "${CPU_OPTS}  -DNV_CUBE_MAP -DBOOST_PYTHON_NO_PY_SIGNATURES -include config.h -pipe -O2 -Wall -Wno-unused-function -Wno-unused-variable -fvisibility=hidden" CACHE STRING
-    "Flags used by the C compiler during release builds." 
+    "Flags used by the C compiler during release builds."
     FORCE )
 SET(CMAKE_EXE_LINKER_FLAGS_RELEASE "-Bsymbolic" CACHE STRING "Release linker flags"
      FORCE )
@@ -629,7 +629,7 @@ IF("${CMAKE_BUILD_TYPE}" STREQUAL "Maintainer")
     	CMAKE_CXX_FLAGS_MAINTAINER )
 ELSE("${CMAKE_BUILD_TYPE}" STREQUAL "Maintainer")
 	MARK_AS_ADVANCED( FORCE
-		CMAKE_CXX_FLAGS_MAINTAINER )    
+		CMAKE_CXX_FLAGS_MAINTAINER )
 ENDIF("${CMAKE_BUILD_TYPE}" STREQUAL "Maintainer")
 
 
@@ -652,7 +652,7 @@ MARK_AS_ADVANCED(
 IF("${CMAKE_BUILD_TYPE}" STREQUAL "Profiler")
 	MARK_AS_ADVANCED( CLEAR
     	CMAKE_CXX_FLAGS_PROFILER )
-ELSE("${CMAKE_BUILD_TYPE}" STREQUAL "Profiler")   
+ELSE("${CMAKE_BUILD_TYPE}" STREQUAL "Profiler")
 	MARK_AS_ADVANCED( FORCE
 		 CMAKE_CXX_FLAGS_PROFILER )
 ENDIF("${CMAKE_BUILD_TYPE}" STREQUAL "Profiler")
@@ -684,7 +684,8 @@ include (CheckIncludeFileCXX)
 SET(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${vsUTCS_SOURCE_DIR})
 
 
-find_package(PythonLibs REQUIRED)
+# Python 3 has an SASL compatibility issue that causes an error on some installations that prefer Python3.
+find_package(PythonLibs 2.7 REQUIRED)
 IF(PYTHONLIBS_FOUND OR PYTHON_LIBRARIES AND PYTHON_INCLUDE_PATH)
     SET(TST_INCLUDES ${PYTHON_INCLUDE_PATH})
     SET(TST_LIBS ${PYTHON_LIBRARIES})
@@ -866,7 +867,7 @@ SET(TST_LIBS ${TST_LIBS} ${UTIL_LIB})
 # Still need to add CEGUI and OGRE find packages
 
 
-# Multiplayer networking option 
+# Multiplayer networking option
 OPTION(USE_NET_THREAD_POSIX "Enable Posix net threads" OFF)
 if(NOT USE_NET_THREAD_POSIX)
 	SET(USE_NET_THREAD_NONE 1)
@@ -888,7 +889,7 @@ CHECK_INCLUDE_FILE_CXX(tr1/unordered_map HAVE_TR1_UNORDERED_MAP)
 CHECK_FUNCTION_EXISTS(gettimeofday HAVE_GETTIMEOFDAY)
 if(HAVE_MATH_H)
 	CHECK_FUNCTION_EXISTS(isnan HAVE_ISNAN)
-	if(NOT HAVE_ISNAN)	
+	if(NOT HAVE_ISNAN)
 		CHECK_FUNCTION_EXISTS(_isnan HAVE__ISNAN)
 	endif(NOT HAVE_ISNAN)
 	CHECK_FUNCTION_EXISTS(finite HAVE_FINITE)
@@ -910,7 +911,7 @@ if(UNIX)
 	else(CMAKE_SYSTEM_NAME STREQUAL "Linux")
 		SET(HOSTOS "BSD")
 	endif(CMAKE_SYSTEM_NAME STREQUAL "Linux")
-	
+
 elseif(WIN32)
 	SET(HOSTOS "WIN32")
 elseif(BEOS)
@@ -921,20 +922,20 @@ endif(UNIX)
 
 CONFIGURE_FILE(${vsUTCS_SOURCE_DIR}/cmake-config.h.in ${vsUTCS_BINARY_DIR}/config.h)
 
-#end config.h generation 
+#end config.h generation
 #SET(CMAKE_CXX_FLAGS "-include config.h;-pipe;"${CMAKE_CXX_FLAGS})
 
 #Setup shared lib and include listings for vegastrike and vegaserver.
 SET(TST_LIBS engine_com OPcollide netgeneric netlowlevel ${TST_LIBS})
 SET(TST_SERVER_LIBS netgeneric engine_com netlowlevel OPcollide ${TST_LIBS})
-include_directories(${TST_INCLUDES})	
+include_directories(${TST_INCLUDES})
 
 IF(NOT DISABLE_CLIENT)
 	target_link_libraries(vegastrike ${TST_LIBS})
 	set_target_properties(vegastrike PROPERTIES LINK_FLAGS "-L/usr/lib ${TST_LFLAGS}")
 ENDIF(NOT DISABLE_CLIENT)
 
-# Vssetup Sub build file  
+# Vssetup Sub build file
 add_subdirectory(setup)
 
 #ADD_CUSTOM_TARGET(vssetup DEPENDS setup/vssetup COMMAND ln -fs ${vsUTCS_BINARY_DIR}/setup/vssetup vssetup || true)
@@ -953,13 +954,13 @@ add_dependencies(vegaserver mesh_tool)
 add_dependencies(vegaserver vssetup)
 ENDIF(NOT DISABLE_SERVER)
 
-# Debug crap 
+# Debug crap
 get_directory_property(TEMP_DIRECTORY INCLUDE_DIRECTORIES)
 message("Default build type is Release, no cpu opts enabled. ")
 #message("Building with CFLAGS: ${CMAKE_CXX_FLAGS}")
 #message("Linking with : ${TST_LIBS}")
 #message("including : ${TEMP_DIRECTORY}")
-# End Debug Crap 
+# End Debug Crap
 
 MARK_AS_ADVANCED(FORCE
 	AVCODEC_FOUND
