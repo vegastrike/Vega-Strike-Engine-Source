@@ -274,7 +274,7 @@ static void ConvertFormat( vector< char > &ogg )
             OggVorbis_File vf;
             ov_callbacks   callbacks;
             fake_file ff;
-            
+
             ff.data = &ogg[0];
             ff.loc  = 0;
             ff.size = ogg.size();
@@ -409,7 +409,7 @@ using namespace VSFileSystem;
 bool AUDLoadSoundFile( const char *s, struct AUDSoundProperties *info, bool use_fileptr )
 {
     VSFileSystem::vs_dprintf(3, "Loading sound file %s\n", s);
-    
+
     info->success = false;
     vector< char >dat;
     if (use_fileptr) {
@@ -427,8 +427,6 @@ bool AUDLoadSoundFile( const char *s, struct AUDSoundProperties *info, bool use_
             size_t siz = ftell( f );
             fseek( f, 0, SEEK_SET );
             dat.resize( siz );
-            size_t bogus_return_var; //added by chuck_starchaser to get rid of warning
-            bogus_return_var = fread( &dat[0], 1, siz, f );
             info->hashname = s;
             info->shared   = false;
             fclose( f );
@@ -684,7 +682,7 @@ void AUDAdjustSound( const int sound, const QVector &pos, const Vector &vel )
 {
     static float ref_distance = XMLSupport::parse_float( vs_config->getVariable( "audio", "audio_ref_distance", "4000" ) );
     static float max_distance = XMLSupport::parse_float( vs_config->getVariable( "audio", "audio_max_distance", "1000000" ) );
-    
+
 #ifdef HAVE_AL
     if ( sound >= 0 && sound < (int) sounds.size() ) {
         float p[] = {
@@ -876,11 +874,11 @@ void AUDPlay( const int sound, const QVector &pos, const Vector &vel, const floa
             AUDAdjustSound( sound, pos, vel );
             AUDSoundGain( sound, gain, sounds[sound].music );
             if (tmp != 2) {
-                VSFileSystem::vs_dprintf(3, "AUDPlay sound %d %d\n", 
+                VSFileSystem::vs_dprintf(3, "AUDPlay sound %d %d\n",
                     sounds[sound].source, sounds[sound].buffer );
                 AUDAddWatchedPlayed( sound, pos.Cast() );
             } else {
-                VSFileSystem::vs_dprintf(3, "AUDPlay stole sound %d %d\n", 
+                VSFileSystem::vs_dprintf(3, "AUDPlay stole sound %d %d\n",
                     sounds[sound].source, sounds[sound].buffer );
                 alSourceStop( sounds[sound].source );
             }

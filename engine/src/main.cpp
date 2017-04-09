@@ -1,20 +1,10 @@
 /*
  * Vega Strike
  * Copyright (C) 2001-2002 Daniel Horn
+ * Copyright (C) 2017- Taose <lucifer.stmichael@gmail.com>
  *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * as published by the Free Software Foundation; either version 2
- * of the License, or (at your option) any later version.
+ * GPL v3
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 #include "config.h"
 #include "cs_python.h"
@@ -192,10 +182,10 @@ void initSceneManager()
 {
     cout << "Creating scene manager..." << endl;
     Audio::SceneManager *sm = Audio::SceneManager::getSingleton();
-    
+
     cout << "Creating template manager..." << endl;
     Audio::TemplateManager::getSingleton();
-    
+
     if (Audio::SceneManager::getSingleton() == 0)
         throw Audio::Exception("Singleton null after SceneManager instantiation");
 
@@ -206,12 +196,12 @@ void initALRenderer()
 {
     cerr << "  Initializing renderer..." << endl;
     Audio::SceneManager *sm = Audio::SceneManager::getSingleton();
-    
+
     if (g_game.sound_enabled) {
         SharedPtr<Audio::Renderer> renderer(new Audio::BorrowedOpenALRenderer);
         renderer->setMeterDistance(1.0);
         renderer->setDopplerFactor(0.0);
-        
+
         sm->setRenderer( renderer );
     }
 }
@@ -219,13 +209,13 @@ void initALRenderer()
 void initScenes()
 {
     Audio::SceneManager *sm = Audio::SceneManager::getSingleton();
-    
+
     sm->createScene("video");
     sm->createScene("music");
     sm->createScene("cockpit");
     sm->createScene("base");
     sm->createScene("space");
-    
+
     sm->setSceneActive("video", true);
 }
 
@@ -300,7 +290,7 @@ int main( int argc, char *argv[] )
         mission_name[1023] = '\0';
         cerr<<"MISSION_NAME is empty using : "<<mission_name<<endl;
     }
-    
+
 
     int exitcode;
     if ((exitcode = readCommandLineOptions(argc,argv)) >= 0)
@@ -331,11 +321,11 @@ int main( int argc, char *argv[] )
     AUDInit();
     AUDListenerGain( XMLSupport::parse_float( vs_config->getVariable( "audio", "sound_gain", ".5" ) ) );
     Music::InitMuzak();
-    
+
     initSceneManager();
     initALRenderer();
     initScenes();
-    
+
     //Register commands
     //COmmand Interpretor Seems to break VC8, so I'm leaving disabled for now - Patrick, Dec 24
     if ( XMLSupport::parse_bool( vs_config->getVariable( "general", "command_interpretor", "false" ) ) ) {
@@ -347,7 +337,7 @@ int main( int argc, char *argv[] )
 
     //Unregister commands - and cleanup memory
     UninitShipCommands();
-    
+
     closeRenderer();
 
     cleanup();
@@ -387,7 +377,7 @@ void bootstrap_draw( const std::string &message, Animation *newSplashScreen )
         //this happens, when the splash screens texture is loaded
         return;
     }
-    
+
     reentryWatchdog = true;
     if (newSplashScreen != NULL)
         ani = newSplashScreen;
@@ -522,7 +512,6 @@ void bootstrap_main_loop()
         string  planetname;
 
         mission->GetOrigin( pos, planetname );
-        bool    setplayerloc = false;
         string  mysystem     = mission->getVariable( "system", "sol.system" );
 
         int     numplayers;
@@ -599,7 +588,7 @@ void bootstrap_main_loop()
             vector< SavedUnits >saved;
             /************* NETWORK PART ***************/
             vector< string > packedInfo;
-            
+
             if (Network != NULL) {
                 string err;
                 string srvipadr;
@@ -611,7 +600,7 @@ void bootstrap_main_loop()
                     VSExit( 1 );
                 }
                 savefiles.push_back( *Network[k].loginSavedGame( 0 ) );
-                
+
                 _Universe->AccessCockpit( k )->savegame->ParseSaveGame( "",
                                                                         mysystem,
                                                                         mysystem,
@@ -646,7 +635,6 @@ void bootstrap_main_loop()
                 playerNloc.push_back( pos );
             else
                 playerNloc.push_back( QVector( FLT_MAX, FLT_MAX, FLT_MAX ) );
-            setplayerloc = setplayerXloc;             //FIX ME will only set first player where he was
             for (unsigned int j = 0; j < saved.size(); j++)
                 savedun.push_back( saved[j] );
         }

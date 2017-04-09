@@ -230,13 +230,6 @@ void PngReadFunc( png_struct *Png, png_bytep buf, png_size_t size )
     PngFileBuffer->Pos += size;
 }
 
-/* We can't write in volumes yet so this is useless now
- *  void PngWriteFunc(png_struct *Png, png_bytep buf, png_size_t size)
- *  {
- *       std::cerr<<"PNG DEBUG : preparing to write "<<size<<" bytes from PngFileBuffer"<<std::endl;
- *  }
- */
-
 static void png_cexcept_error( png_structp png_ptr, png_const_charp msg )
 {
     if (png_ptr)
@@ -261,7 +254,7 @@ unsigned char* VSImage::ReadPNG()
         img_file->Begin();
         if ( !CheckPNGSignature( img_file ) ) {
             vs_dprintf(1,"VSImage::ReadPNG() ERROR : NOT A PNG FILE\n");
-            vs_dprintf( 1, "%s\n", img_file->GetFilename().c_str() ); 
+            vs_dprintf( 1, "%s\n", img_file->GetFilename().c_str() );
             throw (1);
         }
         //Go after sig since we already checked it
@@ -272,14 +265,14 @@ unsigned char* VSImage::ReadPNG()
         }
         png_ptr = png_create_read_struct( PNG_LIBPNG_VER_STRING, NULL, (png_error_ptr) png_cexcept_error, (png_error_ptr) NULL );
         if (png_ptr == NULL) {
-            vs_dprintf( 1, "%s\n", img_file->GetFilename().c_str() ); 
+            vs_dprintf( 1, "%s\n", img_file->GetFilename().c_str() );
             throw (1);
         }
         info_ptr = png_create_info_struct( png_ptr );
         if (info_ptr == NULL) {
             png_destroy_read_struct( &png_ptr, (png_infopp) NULL, (png_infopp) NULL );
             vs_dprintf(1,"VSImage ERROR : PNG info_ptr == NULL !!!\n");
-            vs_dprintf( 1, "%s\n", img_file->GetFilename().c_str() ); 
+            vs_dprintf( 1, "%s\n", img_file->GetFilename().c_str() );
             throw (1);
         }
         if ( setjmp( png_jmpbuf( png_ptr ) ) ) {
@@ -287,7 +280,7 @@ unsigned char* VSImage::ReadPNG()
             png_destroy_read_struct( &png_ptr, &info_ptr, (png_infopp) NULL );
             /* If we get here, we had a problem reading the file */
             vs_dprintf(1, "VSImage ERROR : problem reading file/buffer -> setjmp !!!\n");
-            vs_dprintf( 1, "%s\n", img_file->GetFilename().c_str() ); 
+            vs_dprintf( 1, "%s\n", img_file->GetFilename().c_str() );
             throw (1);
         }
         if ( !img_file->UseVolume() )
@@ -429,7 +422,7 @@ unsigned char* VSImage::ReadJPEG()
             //We need to clean up the JPEG object, and return.
             jpeg_destroy_decompress( &cinfo );
             vs_dprintf(1 ,"VSImage ERROR : error reading jpg file\n");
-            vs_dprintf( 1, "%s\n", img_file->GetFilename().c_str() ); 
+            vs_dprintf( 1, "%s\n", img_file->GetFilename().c_str() );
             throw (1);
         }
         jpeg_create_decompress( &cinfo );
@@ -513,7 +506,7 @@ unsigned char* VSImage::ReadBMP()
     try {
         if (CheckBMPSignature( img_file ) != Ok) {
             vs_dprintf(1, "VSImage ERROR : BMP signature check failed : this should not happen !!!\n");
-            vs_dprintf( 1,"%s\n", img_file->GetFilename().c_str() ); 
+            vs_dprintf( 1,"%s\n", img_file->GetFilename().c_str() );
             throw (1);
         }
         //seek back to beginning
@@ -525,25 +518,7 @@ unsigned char* VSImage::ReadBMP()
         this->sizeY     = le32_to_cpu( info.biHeight );
         this->img_sides = SIDE_SINGLE;
         this->img_nmips = 0;
-        /*
-         *  if (img_file2!=NULL)
-         *  {
-         *       img_file2->GoTo(SIZEOF_BITMAPFILEHEADER);
-         *
-         *         img_file2->Read(&info1,SIZEOF_BITMAPINFOHEADER);
-         *         if (tex->sizeX != (unsigned int) le32_to_cpu(info1.biWidth)||tex->sizeY!=(unsigned int)le32_to_cpu(info1.biHeight))
-         *         {
-         *             return NULL;
-         *         }
-         *         RGBQUAD ptemp1;
-         *         if (le16_to_cpu(info1.biBitCount) == 8)
-         *         {
-         *             for (int i=0; i<256; i++)
-         *                       img_file2->Read(&ptemp1, sizeof(RGBQUAD)); //get rid of the palette for a b&w greyscale alphamap
-         *
-         *         }
-         *  }
-         */
+
         if (le16_to_cpu( info.biBitCount ) == 24) {
             mode = _24BIT;             //Someone said _24BIT isn't supported by most cards, but PNG and JPEG use it widely without problems, so it must be untrue...
             if ( img_file2 && img_file2->Valid() )
@@ -631,7 +606,7 @@ unsigned char* VSImage::ReadBMP()
 unsigned char* VSImage::ReadDDS()
 {
     ddsHeader header;
-    unsigned int   internal  = GL_NONE, type = GL_RGB;
+    unsigned int  type = GL_RGB;
     int blockSize = 16;
     unsigned char *s = NULL;
     unsigned int   inputSize = 0;
@@ -730,7 +705,7 @@ unsigned char* VSImage::ReadDDS()
         default:
             vs_dprintf(1, "VSImage ERROR : DDS Compression Scheme, impossible.[%c ;%c;%c;%c]!\n",header.pixelFormat.fourcc[0],header.pixelFormat.fourcc[1],
                             header.pixelFormat.fourcc[2],header.pixelFormat.fourcc[3]);
-            vs_dprintf( 1,"%s\n", img_file->GetFilename().c_str() ); 
+            vs_dprintf( 1,"%s\n", img_file->GetFilename().c_str() );
             throw (1);
         }
         inputSize = 0;

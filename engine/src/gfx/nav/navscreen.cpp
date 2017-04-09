@@ -355,7 +355,7 @@ void NavigationSystem::Draw()
         return;
     if (_Universe->AccessCockpit()->GetParent() == NULL)
         return;
-    
+
     //DRAW THE SCREEN MODEL
     //**********************************
     Vector p, q, r;
@@ -401,7 +401,7 @@ void NavigationSystem::Draw()
 
         Matrix mat( p, q, r, pos );
         if (mesh[i]) {
-            mesh[i]->Draw( 
+            mesh[i]->Draw(
                 FLT_MAX, // lod
                 mat );
         }
@@ -579,13 +579,6 @@ void NavigationSystem::DrawMission()
     drawdescription( relationtext, ( originx+(0.2*deltax) ), ( originy-(0.95*deltay) ), 1, 1, 0, screenoccupation,
                     GFXColor( (1.0-relation), relation, ( 1.0-( 2.0*Delta( relation, 0.5 ) ) ), 1 ) );
 
-//drawdescription(" Terran : ", (originx + (0.1*deltax)),(originy - (0.1*deltay)), 1, 1, 0, screenoccupation, GFXColor(.3,1,.3,1));
-//drawdescription(" Rlaan : ", (originx + (0.1*deltax)),(originy - (0.1*deltay)), 1, 1, 0, screenoccupation, GFXColor(1,.3,.3,1));
-//drawdescription(" Aera : ", (originx + (0.1*deltax)),(originy - (0.1*deltay)), 1, 1, 0, screenoccupation, GFXColor(.3,.3,1,1));
-
-//float love_from_terran = FactionUtil::getRelation(1);
-//float love_from_rlaan = FactionUtil::getRelation(2);
-//float love_from_aera = FactionUtil::getRelation(3);
 
     TextPlane displayname;
     displayname.col = GFXColor( 1, 1, 1, 1 );
@@ -606,14 +599,7 @@ void NavigationSystem::DrawMission()
     displayname.SetText( text );
     displayname.SetCharSize( 1, 1 );
     displayname.Draw();
-/*
- *       string exitinfo("To exit help press #8080FFshift-M#000000\n#8080FFShift-M#000000 will bring up this\nhelp menu any time.\nThe right buttons access the galaxy and system maps");
- *
- *       displayname.SetSize (.6,-.8);
- *       displayname.SetPos(originx-.02,   originy-1.2);
- *       displayname.SetText (exitinfo);
- *       displayname.SetCharSize (1,1);
- *       displayname.Draw();*/
+
     GFXEnable( TEXTURE0 );
 }
 //**********************************
@@ -630,18 +616,16 @@ void NavigationSystem::DrawShip()
     navdrawlist factionlist( 0, screenoccupation, factioncolours );
 
     float     deltax   = screenskipby4[1]-screenskipby4[0];
-    float     deltay   = screenskipby4[3]-screenskipby4[2];
     float     originx  = screenskipby4[0]; //left
     float     originy  = screenskipby4[3]; //top
     string    writethis;
     Unit     *par;
-    int       foundpos = 0;
     if ( ( par = _Universe->AccessCockpit()->GetParent() ) )
         writethis = MakeUnitXMLPretty( par->WriteUnitString(), par );
     TextPlane displayname;
     displayname.col = GFXColor( .3, 1, .3, 1 );
     displayname.SetSize( .7, -.8 );
-    displayname.SetPos( originx-(.1*deltax), originy /*+(1*deltay)*/ );
+    displayname.SetPos( originx-(.1*deltax), originy );
     displayname.SetText( writethis );
     displayname.SetCharSize( 1, 1 );
     static float background_alpha =
@@ -652,7 +636,6 @@ void NavigationSystem::DrawShip()
     displayname.Draw( writethis, 0, true, false, automatte );
     displayname.bgcol = tpbg;
 
-//factionlist.drawdescription(writethis, (originx + (0.1*deltax)),(originy - (0.1*deltay)), 1, 1, 1, GFXColor(1,1,1,1));
 
     GFXEnable( TEXTURE0 );
 }
@@ -1763,13 +1746,6 @@ void NavigationSystem::TranslateCoordinates( QVector &pos,
                                              float &system_item_scale_temp,
                                              bool system_not_galaxy )
 {
-    float itemscale = CalculatePerspectiveAdjustment( zscale,
-                                                      zdistance,
-                                                      pos,
-                                                      pos_flat,
-                                                      system_item_scale_temp,
-                                                      system_not_galaxy );
-
     //TRANSLATE INTO SCREEN DISPLAY COORDINATES
     //**********************************
     the_x = (float) pos.i;
