@@ -669,8 +669,6 @@ void AUDDeleteSound( int sound, bool music )
         return;
     }
 #endif
-        //FIXME??
-        //alDeleteSources(1,&sounds[sound].source);
         if (music)
             alDeleteBuffers( 1, &sounds[sound].buffer );
         sounds[sound].buffer = (ALuint) 0;
@@ -686,7 +684,9 @@ void AUDAdjustSound( const int sound, const QVector &pos, const Vector &vel )
 #ifdef HAVE_AL
     if ( sound >= 0 && sound < (int) sounds.size() ) {
         float p[] = {
-            scalepos *pos.i, scalepos*pos.j, scalepos*pos.k
+
+			//QVector is sending a double, which leads to a narrowing conversion. We're confirming this is okay and casting to float.
+            scalepos *(float)pos.i, scalepos *(float)pos.j, scalepos *(float)pos.k
         }
         ;
         float v[] = {scalevel *vel.i, scalevel*vel.j, scalevel*vel.k};
