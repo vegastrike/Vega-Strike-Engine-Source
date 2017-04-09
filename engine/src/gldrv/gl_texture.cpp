@@ -674,7 +674,7 @@ const char * GetImageTargetName( TEXTURE_IMAGE_TARGET imagetarget )
 
     case TEXTURE_RECTANGLE:
         return "TEXTURE_RECTANGLE";
-        
+
     default:
         return "UNK";
     }
@@ -1168,7 +1168,7 @@ ENVMODE:
         glTexEnvi( GL_TEXTURE_ENV, GL_OPERAND2_ALPHA_ARB, GL_SRC_ALPHA );
         {
             GLfloat arg2v[4] = {
-                0, 0, 0, 1.0-arg2
+                0, 0, 0, 1.0f-arg2
             };
             glTexEnvfv( GL_TEXTURE_ENV, GL_TEXTURE_ENV_COLOR, arg2v );
         }
