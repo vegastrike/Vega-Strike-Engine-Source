@@ -881,8 +881,14 @@ void NavigationSystem::DrawGalaxy()
 
         ReplaceAxes( pos );             //poop
 
+        //Modify by old rotation amount
+        //*************************
+//if(galaxy_view==VIEW_3D){pos = dxyz(pos, 0, ry, 0);pos = dxyz(pos, rx, 0, 0);}
+        //*************************
+        //*************************
 
         GFXColor col    = systemIter->GetColor();
+        Vector   oldpos = pos;
         float    the_x, the_y, the_x_flat, the_y_flat, system_item_scale_temp;
         TranslateCoordinates( pos,
                               pos_flat,
@@ -901,10 +907,13 @@ void NavigationSystem::DrawGalaxy()
         {
             float tmp = ( 1-(zoom/MAXZOOM) );
             alphaadd = (tmp*tmp)-.5;
+//if (alphaadd<=0)
+//alphaadd=0;
+//else
             alphaadd *= 4;
         }
         col.a = (system_item_scale_temp-minimumitemscaledown)/(maximumitemscaleup-minimumitemscaledown)+alphaadd;
-
+//col.a=GetAlpha(oldpos,center_x,center_y,center_z,zdistance);
         //IGNORE DIM AND OFF SCREEN SYETEMS
         //**********************************
         if ( (col.a < .05)
@@ -971,6 +980,7 @@ void NavigationSystem::DrawGalaxy()
                 if ( oth.isDrawable() ) {
                     QVector posoth    = oth.Position();
                     ReplaceAxes( posoth );
+                    Vector  oldposoth = posoth;
                     float   the_new_x, the_new_y, new_system_item_scale_temp, the_new_x_flat, the_new_y_flat;
                     //WARNING: SOME VARIABLES FOR ORIGINAL SYSTEM MAY BE MODIFIED HERE!!!
                     TranslateCoordinates( posoth,

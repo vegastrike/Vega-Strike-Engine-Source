@@ -316,6 +316,7 @@ void NavigationSystem::DrawNavCircle( float x, float y, float size, float rot_x,
     GFXDisable( LIGHTING );
     GFXBlendMode( SRCALPHA, INVSRCALPHA );
 
+    float alpha   = 0.15;
     int   circles = 4;
 
     float i = 0.0;

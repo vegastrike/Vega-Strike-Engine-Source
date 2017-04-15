@@ -42,6 +42,8 @@ void RingMesh::InitRing( float iradius,
                                                                                            iradius ), 0 ), oldmesh );
     this->orig = oldmesh;
     radialSize = oradius;     //MAKE SURE FRUSTUM CLIPPING IS DONE CORRECTLY!!!!!
+    //mn = Vector (radialSize,radialSize,radialSize);
+    //mx = Vector (-radialSize,-radialSize,-radialSize);
     mn = Vector( 0, 0, 0 );
     mx = Vector( 0, 0, 0 );
     vector< MeshDrawContext > *odq = NULL;
@@ -54,10 +56,12 @@ void RingMesh::InitRing( float iradius,
         else
             slices -= 2;
         float theta, dtheta;
+        float ds;
         int   i, j, imin, imax;
         vlist  = NULL;
         /* Code below adapted from gluSphere */
         dtheta = (theta_max-theta_min)/(GLfloat) slices;
+        ds     = 1.0/slices;
         int numQuadstrips    = 2;
         imin   = 0;
         imax   = numQuadstrips;

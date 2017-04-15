@@ -1,3 +1,5 @@
+// -*- mode: c++; c-basic-offset: 4; indent-tabs-mode: nil -*-
+
 /// Draws cockpit parts
 /// Draws gauges, info strings, radar, ...
 
@@ -393,9 +395,9 @@ inline void DrawDockingBoxes( Unit *un, Unit *target, const Vector &CamP, const 
         for (unsigned int i = 0; i < d.size(); i++)
         {
             float rad = d[i].GetRadius() / sqrt( 2.0 );
-            QVector dockpos = Transform(
+            QVector dockpos = Transform( 
                     target->GetTransformation(),
-                    d[i].GetPosition().Cast()
+                    d[i].GetPosition().Cast() 
                 ) - _Universe->AccessCamera()->GetPosition();
 
             if (!d[i].IsDockable())
@@ -408,7 +410,7 @@ inline void DrawDockingBoxes( Unit *un, Unit *target, const Vector &CamP, const 
                 }
                 continue;
             }
-
+            
             GFXDisable( DEPTHTEST );
             GFXDisable( DEPTHWRITE );
             GFXColorf( dockboxstop );
@@ -521,9 +523,11 @@ void GameCockpit::DrawTargetBox(const Radar::Sensor& sensor)
         return;
 
     float speed, range;
+    static GFXColor black_and_white = DockBoxColor( "black_and_white" );
     int   neutral = FactionUtil::GetNeutralFaction();
     Vector  CamP, CamQ, CamR;
     _Universe->AccessCamera()->GetPQR( CamP, CamQ, CamR );
+    //Vector Loc (un->ToLocalCoordinates(target->Position()-un->Position()));
     QVector Loc( target->Position()-_Universe->AccessCamera()->GetPosition() );
 
     GFXDisable( TEXTURE0 );
@@ -534,6 +538,7 @@ void GameCockpit::DrawTargetBox(const Radar::Sensor& sensor)
     GFXDisable( LIGHTING );
     static bool draw_nav_symbol = XMLSupport::parse_bool( vs_config->getVariable( "graphics", "hud", "drawNavSymbol", "false" ) );
     if (draw_nav_symbol) {
+        static GFXColor suncol = RetrColor( "nav", GFXColor( 1, 1, 1, 1 ) );
         DrawNavigationSymbol(player->GetComputerData().NavPoint, CamP, CamQ,
                              CamR.Cast().Dot( (player->GetComputerData().NavPoint).Cast()-_Universe->AccessCamera()->GetPosition() ) );
     }
@@ -604,7 +609,7 @@ void GameCockpit::DrawTargetBox(const Radar::Sensor& sensor)
         if (ITTS_averageguns) {
             player->getAverageGunSpeed( speed, range, mrange );
             iLoc = target->PositionITTS( PlayerPosition, PlayerVelocity, speed, steady_itts ) - offs;
-            if (draw_line_to_itts)
+            if (draw_line_to_itts) 
                 DrawITTSLine(Loc, iLoc, trackcolor);
             DrawITTSMark(scatter, p, q, iLoc, trackcolor);
         }
@@ -612,7 +617,7 @@ void GameCockpit::DrawTargetBox(const Radar::Sensor& sensor)
             int nummounts = player->GetNumMounts();
             if (draw_line_to_itts) {
                 for (int i = 0; i < nummounts; i++) {
-                    if ( (player->mounts[i].status == Mount::ACTIVE)
+                    if ( (player->mounts[i].status == Mount::ACTIVE) 
                         && (ITTS_for_beams || (player->mounts[i].type->type != weapon_info::BEAM))
                         && (ITTS_for_locks || (player->mounts[i].type->LockTime == 0)) )
                     {
@@ -623,7 +628,7 @@ void GameCockpit::DrawTargetBox(const Radar::Sensor& sensor)
             }
             for (int i = 0; i < nummounts; i++) {
                 if ( (player->mounts[i].status == Mount::ACTIVE)
-                    && (ITTS_for_beams || (player->mounts[i].type->type != weapon_info::BEAM))
+                    && (ITTS_for_beams || (player->mounts[i].type->type != weapon_info::BEAM)) 
                     && (ITTS_for_locks || (player->mounts[i].type->LockTime == 0)) )
                 {
                     mntcolor = MountColor( &player->mounts[i] );
@@ -663,6 +668,8 @@ void GameCockpit::DrawTurretTargetBoxes(const Radar::Sensor& sensor)
     if (sensor.InsideNebula())
         return;
 
+    static GFXColor black_and_white = DockBoxColor( "black_and_white" );
+
     GFXDisable( TEXTURE0 );
     GFXDisable( TEXTURE1 );
     GFXDisable( DEPTHTEST );
@@ -682,6 +689,7 @@ void GameCockpit::DrawTurretTargetBoxes(const Radar::Sensor& sensor)
 
         Vector CamP, CamQ, CamR;
         _Universe->AccessCamera()->GetPQR( CamP, CamQ, CamR );
+        //Vector Loc (un->ToLocalCoordinates(target->Position()-un->Position()));
         QVector     Loc( target->Position()-_Universe->AccessCamera()->GetPosition() );
         Radar::Track track = sensor.CreateTrack(target, Loc);
         static bool draw_nav_symbol =
@@ -694,7 +702,9 @@ void GameCockpit::DrawTurretTargetBoxes(const Radar::Sensor& sensor)
         }
         GFXColorf(sensor.GetColor(track));
 
+        //DrawOneTargetBox (Loc, target->rSize(), CamP, CamQ, CamR,computeLockingSymbol(un),un->TargetLocked());
 
+        //** jay
         float rSize = track.GetSize();
 
         GFXEnable( SMOOTH );
@@ -722,12 +732,14 @@ void GameCockpit::DrawTacticalTargetBox(const Radar::Sensor& sensor)
         XMLSupport::parse_bool( vs_config->getVariable( "graphics", "hud", "DrawTacticalTarget", "false" ) );
     if (!drawtactarg)
         return;
+    static GFXColor black_and_white = DockBoxColor( "black_and_white" );
     if (sensor.GetPlayer()->getFlightgroup() == NULL)
         return;
     Unit *target = sensor.GetPlayer()->getFlightgroup()->target.GetUnit();
     if (target) {
         Vector  CamP, CamQ, CamR;
         _Universe->AccessCamera()->GetPQR( CamP, CamQ, CamR );
+        //Vector Loc (un->ToLocalCoordinates(target->Position()-un->Position()));
         QVector Loc( target->Position()-_Universe->AccessCamera()->GetPosition() );
         GFXDisable( TEXTURE0 );
         GFXDisable( TEXTURE1 );
@@ -743,6 +755,9 @@ void GameCockpit::DrawTacticalTargetBox(const Radar::Sensor& sensor)
         Radar::Track track = sensor.CreateTrack(target, Loc);
         GFXColorf(sensor.GetColor(track));
 
+        //DrawOneTargetBox (Loc, target->rSize(), CamP, CamQ, CamR,computeLockingSymbol(un),un->TargetLocked());
+
+        //** jay
         float rSize = track.GetSize();
 
         GFXBegin( GFXLINE );
@@ -1362,6 +1377,8 @@ float GameCockpit::LookupUnitStat( int stat, Unit *target )
 void GameCockpit::DrawTargetGauges( Unit *target )
 {
     int i;
+    //printf ("(debug)UNIT NAME:%s\n",UnitUtil::getName(target).c_str());
+    //printf ("(debug)TARGETSHIELDF:%1.2f\n",target->FShieldData());
     for (i = UnitImages< void >::TARGETSHIELDF; i < UnitImages< void >::KPS; i++)
         if (gauges[i])
             gauges[i]->Draw( LookupTargetStat( i, target ) );
@@ -1381,6 +1398,11 @@ void GameCockpit::DrawGauges( Unit *un )
                 if ( damage > .0001 && ( cockpit_time > ( gauge_time[i]+(1-damage) ) ) )
                     if (rand01() > SWITCH_CONST)
                         gauge_time[i] = -cockpit_time;
+                /*else {
+                 *  static string gauge_static = vs_config->getVariable("graphics","gauge_static","static.ani");
+                 *  static Animation vdu_ani(gauge_static.c_str(),true,.1,BILINEAR);
+                 *  vdu_ani.DrawAsVSSprite(gauges[i]);
+                 *  }*/
             } else if ( cockpit_time > ( ( ( 1-(-gauge_time[i]) )+damage ) ) ) {
                 if (rand01() > SWITCH_CONST)
                     gauge_time[i] = cockpit_time;
@@ -1402,9 +1424,19 @@ void GameCockpit::DrawGauges( Unit *un )
             gauges[i]->GetPosition( px, py );
             text->SetCharSize( sx, sy );
             text->SetPos( px, py );
+            float tmp  = LookupUnitStat( i, un );
+            float tmp2 = 0;
             char  ourchar[64];
-
-
+            int   len  = sprintf( ourchar, "%.0f", tmp );
+            if (i == UnitImages< void >::KPS) {
+                float c = 300000000.0f;
+                if (tmp > c/10) {
+                    tmp2 = tmp/c;
+                    len  = sprintf( ourchar, "%.2f C", tmp2 );
+                }
+            }
+            if (i == UnitImages< void >::MASSEFFECT)
+                len = sprintf( ourchar, "MASS:%.0f%% (base)", tmp );
             GFXColorf( textcol );
             text->SetSize( 2, -2 );
             text->Draw( string( ourchar ), 0, false, false, automatte );
@@ -1561,6 +1593,14 @@ void GameCockpit::Delete()
         AUDStopPlaying( soundfile );
         AUDDeleteSound( soundfile, false );
         soundfile = -1;
+    }
+    for (i = 0; i < 4; i++) {
+        /*
+         *  if (Pit[i]) {
+         *  delete Pit[i];
+         *  Pit[i] = NULL;
+         *  }
+         */
     }
     for (i = 0; i < UnitImages< void >::NUMGAUGES; i++)
         if (gauges[i]) {
@@ -2126,7 +2166,19 @@ void GameCockpit::Draw()
     GFXEnable( DEPTHTEST );
     GFXEnable( DEPTHWRITE );
     if (view < CP_CHASE) {
-
+/*broken velocity inidcator
+ *         static bool draw_velocity_indicator=XMLSupport::parse_bool(vs_config->getVariable("graphics","draw_velocity_indicator","true"));
+ *         if (draw_velocity_indicator) {
+ *                   Vector P,Q,R;
+ *                       Unit *par=GetParent();
+ *                       if (par ) {
+ *                               Vector vel=par->Velocity;
+ *                               float speed=vel.Magnitude();
+ *           static float nav_symbol_size = XMLSupport::parse_float(vs_config->getVariable("graphics","nav_symbol_size",".25"));
+ *                   AccessCamera()->GetPQR (P,Q,R);
+ *                DrawNavigationSymbol(vel,P,Q,speed*nav_symbol_size);
+ *                       }
+ *         }*/
         if ( mesh.size() ) {
             Unit *par = GetParent();
             if (par) {
@@ -2530,6 +2582,10 @@ void GameCockpit::Draw()
                     text->GetCharSize( x, y );
                     text->SetCharSize( x*4, y*4 );
                     text->SetPos( 0-(x*2*14), 0-(y*2) );
+                    char playr[3];
+                    playr[0] = 'p';
+                    playr[1] = '0'+_Universe->CurrentCockpit();
+                    playr[2] = '\0';
                 }
                 GFXColorf( textcol );
                 static bool show_died_text =
@@ -2571,6 +2627,10 @@ void GameCockpit::Draw()
         QuitAllow = false;
         dietime   = 0;
     }
+    //if(CommandInterpretor.console){
+    //GFXColorf(textcol);
+    //CommandInterpretor.renderconsole();
+    //}
     GFXAlphaTest( ALWAYS, 0 );
     static bool mouseCursor = XMLSupport::parse_bool( vs_config->getVariable( "joystick", "mouse_cursor", "false" ) );
     static bool mousecursor_pancam   =
@@ -2942,10 +3002,10 @@ void GameCockpit::SetupViewPort( bool clip )
         un->UpdateHudMatrix( CP_BACK );
         un->UpdateHudMatrix( CP_CHASE );
         un->UpdateHudMatrix( CP_PANINSIDE );
-
+        
         insidePanYaw += insidePanYawSpeed * GetElapsedTime();
         insidePanPitch += insidePanPitchSpeed * GetElapsedTime();
-
+        
         Vector p, q, r, tmp;
         _Universe->AccessCamera( CP_FRONT )->GetOrientation( p, q, r );
         _Universe->AccessCamera( CP_LEFT )->SetOrientation( r, q, -p );
@@ -2963,7 +3023,7 @@ void GameCockpit::SetupViewPort( bool clip )
             Transform(panMatrix, p),
             Transform(panMatrix, q),
             Transform(panMatrix, r) );
-
+        
         tgt = un->Target();
         if (tgt) {
             un->GetOrientation( p, q, r );
@@ -3199,6 +3259,8 @@ void GameCockpit::DrawArrowToTarget(const Radar::Sensor& sensor, Vector localcoo
         }                      //case s == 0, do nothing everything is ok.
     }
     //Compute points p1 and p2 composing the arrow. Hard code a 2D rotation.
+    //p1 = p - TARGET_ARROW_SIZE * p.normalize().rot(THETA), p being the arrow head position (s,t).
+    //p2 = p - TARGET_ARROW_SIZE * p.normalize().rot(-THETA)
     p_n.i = -TARGET_ARROW_SIZE*s_normalized;       //Vector p will be used to compute the two branches of the arrow.
     p_n.j = -TARGET_ARROW_SIZE*t_normalized;
     p1.i  = p_n.i*TARGET_ARROW_COS_THETA-p_n.j*TARGET_ARROW_SIN_THETA;      //p1 = p.rot(THETA)
@@ -3213,6 +3275,7 @@ void GameCockpit::DrawArrowToTarget(const Radar::Sensor& sensor, Vector localcoo
     p2.j += t;
     p2.k  = p1.k = 0;
 
+    static GFXColor black_and_white = DockBoxColor( "black_and_white" );
     GFXEnable( SMOOTH );
     GFXDisable( TEXTURE0 );
     GFXDisable( TEXTURE1 );
@@ -3277,7 +3340,7 @@ void GameCockpit::updateRadar(Unit*ship) {
 }
 void GameCockpit::SetParent( Unit *unit, const char *filename, const char *unitmodname, const QVector &startloc ){
     this->Cockpit::SetParent(unit,filename,unitmodname,startloc);
-    updateRadar(unit);
+    updateRadar(unit);    
 }
 void GameCockpit::OnDockEnd(Unit *station, Unit *ship)
 {

@@ -1,3 +1,5 @@
+// -*- mode: c++; c-basic-offset: 4; indent-tabs-mode: nil -*-
+
 #include "cmd/unit_generic.h"
 #include "cmd/planet_generic.h"
 #include "cmd/unit_util.h"
@@ -277,6 +279,7 @@ GFXColor Sensor::GetColor(const Track& track) const
     static GFXColor baseColor    = RetrColor("base", GFXColor( -1, -1, -1, -1 ));
     static GFXColor planetColor  = RetrColor("planet", GFXColor( -1, -1, -1, -1 ));
     static GFXColor jumpColor    = RetrColor("jump", GFXColor( 0, 1, 1, .8 ));
+    static GFXColor navColor     = RetrColor("nav", GFXColor( 1, 1, 1, 1 ));
     static GFXColor starColor    = RetrColor("star", GFXColor( 1, 1, 1, 1 ));
     static GFXColor missileColor = RetrColor("missile", GFXColor( .25, 0, .5, 1 ));
     static GFXColor cargoColor   = RetrColor("cargo", GFXColor( .6, .2, 0, 1 ));

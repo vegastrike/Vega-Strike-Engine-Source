@@ -9,6 +9,7 @@ string retrievedata( string data, string type )
         return "";
     if (type.size() == 0)
         return "";
+    int    testlength = type.size();
     char   testchar   = 'p';
     string teststring = "";
 
@@ -26,6 +27,8 @@ string retrievedata( string data, string type )
                     //found its start
                     if (tempcounter == 0)
                         teststring = testchar+teststring;
+                    //if(testchar == ' ')
+                    //teststring = ' ' + teststring;
 
                     //kill spaces at front and back
                     //***********************************
