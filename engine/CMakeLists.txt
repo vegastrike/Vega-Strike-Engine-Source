@@ -324,7 +324,6 @@ SET(LIBROOTGENERIC_SOURCES src/configxml.cpp
 						   src/galaxy_gen.cpp
 						   src/galaxy_xml.cpp
 						   src/galaxy.cpp
-						   src/hashtable.cpp
 						   src/lin_time.cpp
 						   src/load_mission.cpp
 						   src/pk3.cpp
