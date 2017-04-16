@@ -665,8 +665,6 @@ void GameCockpit::DrawTurretTargetBoxes(const Radar::Sensor& sensor)
     if (sensor.InsideNebula())
         return;
 
-    static GFXColor black_and_white = DockBoxColor( "black_and_white" );
-
     GFXDisable( TEXTURE0 );
     GFXDisable( TEXTURE1 );
     GFXDisable( DEPTHTEST );
