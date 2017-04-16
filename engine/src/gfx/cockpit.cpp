@@ -727,14 +727,12 @@ void GameCockpit::DrawTacticalTargetBox(const Radar::Sensor& sensor)
         XMLSupport::parse_bool( vs_config->getVariable( "graphics", "hud", "DrawTacticalTarget", "false" ) );
     if (!drawtactarg)
         return;
-    static GFXColor black_and_white = DockBoxColor( "black_and_white" );
     if (sensor.GetPlayer()->getFlightgroup() == NULL)
         return;
     Unit *target = sensor.GetPlayer()->getFlightgroup()->target.GetUnit();
     if (target) {
         Vector  CamP, CamQ, CamR;
         _Universe->AccessCamera()->GetPQR( CamP, CamQ, CamR );
-        //Vector Loc (un->ToLocalCoordinates(target->Position()-un->Position()));
         QVector Loc( target->Position()-_Universe->AccessCamera()->GetPosition() );
         GFXDisable( TEXTURE0 );
         GFXDisable( TEXTURE1 );
@@ -1393,11 +1391,6 @@ void GameCockpit::DrawGauges( Unit *un )
                 if ( damage > .0001 && ( cockpit_time > ( gauge_time[i]+(1-damage) ) ) )
                     if (rand01() > SWITCH_CONST)
                         gauge_time[i] = -cockpit_time;
-                /*else {
-                 *  static string gauge_static = vs_config->getVariable("graphics","gauge_static","static.ani");
-                 *  static Animation vdu_ani(gauge_static.c_str(),true,.1,BILINEAR);
-                 *  vdu_ani.DrawAsVSSprite(gauges[i]);
-                 *  }*/
             } else if ( cockpit_time > ( ( ( 1-(-gauge_time[i]) )+damage ) ) ) {
                 if (rand01() > SWITCH_CONST)
                     gauge_time[i] = cockpit_time;
@@ -1419,19 +1412,7 @@ void GameCockpit::DrawGauges( Unit *un )
             gauges[i]->GetPosition( px, py );
             text->SetCharSize( sx, sy );
             text->SetPos( px, py );
-            float tmp  = LookupUnitStat( i, un );
-            float tmp2 = 0;
             char  ourchar[64];
-            int   len  = sprintf( ourchar, "%.0f", tmp );
-            if (i == UnitImages< void >::KPS) {
-                float c = 300000000.0f;
-                if (tmp > c/10) {
-                    tmp2 = tmp/c;
-                    len  = sprintf( ourchar, "%.2f C", tmp2 );
-                }
-            }
-            if (i == UnitImages< void >::MASSEFFECT)
-                len = sprintf( ourchar, "MASS:%.0f%% (base)", tmp );
             GFXColorf( textcol );
             text->SetSize( 2, -2 );
             text->Draw( string( ourchar ), 0, false, false, automatte );
