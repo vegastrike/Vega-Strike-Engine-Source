@@ -523,11 +523,9 @@ void GameCockpit::DrawTargetBox(const Radar::Sensor& sensor)
         return;
 
     float speed, range;
-    static GFXColor black_and_white = DockBoxColor( "black_and_white" );
     int   neutral = FactionUtil::GetNeutralFaction();
     Vector  CamP, CamQ, CamR;
     _Universe->AccessCamera()->GetPQR( CamP, CamQ, CamR );
-    //Vector Loc (un->ToLocalCoordinates(target->Position()-un->Position()));
     QVector Loc( target->Position()-_Universe->AccessCamera()->GetPosition() );
 
     GFXDisable( TEXTURE0 );
