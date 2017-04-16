@@ -2142,19 +2142,6 @@ void GameCockpit::Draw()
     GFXEnable( DEPTHTEST );
     GFXEnable( DEPTHWRITE );
     if (view < CP_CHASE) {
-/*broken velocity inidcator
- *         static bool draw_velocity_indicator=XMLSupport::parse_bool(vs_config->getVariable("graphics","draw_velocity_indicator","true"));
- *         if (draw_velocity_indicator) {
- *                   Vector P,Q,R;
- *                       Unit *par=GetParent();
- *                       if (par ) {
- *                               Vector vel=par->Velocity;
- *                               float speed=vel.Magnitude();
- *           static float nav_symbol_size = XMLSupport::parse_float(vs_config->getVariable("graphics","nav_symbol_size",".25"));
- *                   AccessCamera()->GetPQR (P,Q,R);
- *                DrawNavigationSymbol(vel,P,Q,speed*nav_symbol_size);
- *                       }
- *         }*/
         if ( mesh.size() ) {
             Unit *par = GetParent();
             if (par) {
@@ -2255,16 +2242,8 @@ void GameCockpit::Draw()
                                                zfloor+zrange*j/COCKPITZ_PARTITIONS,
                                                zfloor+zrange*(j+1)/COCKPITZ_PARTITIONS );                                                                                       //cockpit-specific frustrum (with clipping, with frustrum update)
                     GFXClear( GFXFALSE, GFXTRUE, GFXFALSE );                     //only clear Z
-                    /*if (COCKPITZ_PARTITIONS>1) {
-                     *   //Setup stencil
-                     *   GFXStencilOp(KEEP,KEEP,REPLACE);
-                     *   GFXStencilFunc(LEQUAL,COCKPITZ_PARTITIONS-j,~0);
-                     *   GFXStencilMask(~0);
-                     *   GFXEnable(STENCIL);
-                     *  };*/
                     _Universe->activateLightMap();
                     for (i = 0; i < mesh.size(); ++i)
-                        //mesh[i]->DrawNow(1,true,headtrans.front());
                         mesh[i]->Draw( FLT_MAX, headtrans.front() );
                     //Whether cockpits shouldn't cull faces - not sure why, probably because
                     //modellers always set normals the wrong way for cockpits.
@@ -2276,7 +2255,6 @@ void GameCockpit::Draw()
                     Mesh::ProcessUndrawnMeshes( false, true );
                 }
                 headtrans.pop_front();
-                //if (COCKPITZ_PARTITIONS>1) GFXDisable(STENCIL);
                 GFXDisable( LIGHTING );
                 GFXDisable( TEXTURE0 );
                 GFXDisable( TEXTURE1 );
@@ -2396,7 +2374,6 @@ void GameCockpit::Draw()
                             && drawChaseVDU)
                         || (view == CP_PAN
                             && drawPanVDU) || (view == CP_TARGET && drawTgtVDU) || ((view == CP_VIEWTARGET || view == CP_PANINSIDE) && drawPadVDU) )                                                                //{ //only draw crosshairs for front view
-                        //if (!UnitUtil::isSignificant(target)&&!UnitUtil::isSun(target)||UnitUtil::isCapitalShip(target)) //{
                         DrawTargetGauges( target );
                 }
             }
@@ -2424,22 +2401,6 @@ void GameCockpit::Draw()
                                 if ( damage > .001 && ( cockpit_time > ( vdu_time[vd]+(1-damage) ) ) )
                                     if (rand01() > SWITCH_CONST)
                                         vdu_time[vd] = -cockpit_time;
-                                /*else {
-                                 *  static string vdustatic=vs_config->getVariable("graphics","vdu_static","static.ani");
-                                 *  static Animation vdu_ani(vdustatic.c_str(),true,.1,BILINEAR);
-                                 *  static soundContainer ejectstopsound;
-                                 *  if (ejectstopsound.sound<0) {
-                                 *  static string str=vs_config->getVariable("cockpitaudio","vdu_static","vdu_static");
-                                 *  ejectstopsound.loadsound(str);
-                                 *  }
-                                 *  if (!AUDIsPlaying(ejectstopsound.sound)) {
-                                 *  ejectstopsound.playsound();
-                                 *  }
-                                 *
-                                 *  GFXEnable(TEXTURE0);
-                                 *  vdu_ani.DrawAsVSSprite(vdu[vd]);
-                                 *
-                                 *  }*/
                             } else if ( cockpit_time > ( ( 1-(-vdu_time[vd]) )+(damage) ) ) {
                                 if (rand01() > SWITCH_CONST)
                                     vdu_time[vd] = cockpit_time;
@@ -2558,10 +2519,6 @@ void GameCockpit::Draw()
                     text->GetCharSize( x, y );
                     text->SetCharSize( x*4, y*4 );
                     text->SetPos( 0-(x*2*14), 0-(y*2) );
-                    char playr[3];
-                    playr[0] = 'p';
-                    playr[1] = '0'+_Universe->CurrentCockpit();
-                    playr[2] = '\0';
                 }
                 GFXColorf( textcol );
                 static bool show_died_text =
@@ -2603,10 +2560,6 @@ void GameCockpit::Draw()
         QuitAllow = false;
         dietime   = 0;
     }
-    //if(CommandInterpretor.console){
-    //GFXColorf(textcol);
-    //CommandInterpretor.renderconsole();
-    //}
     GFXAlphaTest( ALWAYS, 0 );
     static bool mouseCursor = XMLSupport::parse_bool( vs_config->getVariable( "joystick", "mouse_cursor", "false" ) );
     static bool mousecursor_pancam   =
@@ -2622,8 +2575,6 @@ void GameCockpit::Draw()
             GFXBlendMode( SRCALPHA, INVSRCALPHA );
             GFXColor4f( 1, 1, 1, 1 );
             GFXEnable( TEXTURE0 );
-            //GFXDisable (DEPTHTEST);
-            //GFXDisable(TEXTURE1);
             static float    deadband = game_options.mouse_deadband;
             static int      revspr   =
                 XMLSupport::parse_bool( vs_config->getVariable( "joystick", "reverse_mouse_spr", "true" ) ) ? 1 : -1;
@@ -2921,8 +2872,7 @@ static void FaceCamTarget( Cockpit *cp, int cam, Unit *un )
 
 static void ShoveCamBehindUnit( int cam, Unit *un, float zoomfactor )
 {
-    //commented out by chuck_starchaser; --never used
-    QVector unpos = (/*un->GetPlanetOrbit() && !un->isSubUnit()*/ NULL) ? un->LocalPosition() : un->Position();
+    QVector unpos = (NULL) ? un->LocalPosition() : un->Position();
     _Universe->AccessCamera( cam )->SetPosition(
         unpos-_Universe->AccessCamera()->GetR().Cast()*(un->rSize()+g_game.znear*2)*zoomfactor,
         un->GetWarpVelocity(), un->GetAngularVelocity(), un->GetAcceleration() );
@@ -2930,8 +2880,7 @@ static void ShoveCamBehindUnit( int cam, Unit *un, float zoomfactor )
 
 static void ShoveCamBelowUnit( int cam, Unit *un, float zoomfactor )
 {
-    //commented out by chuck_starchaser; --never used
-    QVector unpos = (/*un->GetPlanetOrbit() && !un->isSubUnit()*/ NULL) ? un->LocalPosition() : un->Position();
+    QVector unpos = (NULL) ? un->LocalPosition() : un->Position();
     Vector  p, q, r;
     _Universe->AccessCamera( cam )->GetOrientation( p, q, r );
     static float ammttoshovecam = XMLSupport::parse_float( vs_config->getVariable( "graphics", "shove_camera_down", ".3" ) );
@@ -3038,7 +2987,6 @@ void GameCockpit::SetupViewPort( bool clip )
                 un->UpdateHudMatrix( CP_VIEWTARGET );
             }
             _Universe->AccessCamera( CP_TARGET )->SetOrientation( tmp, q, r );
-            //_Universe->AccessCamera(CP_PANTARGET)->SetOrientation(tmp,q,r);
             ShoveCamBelowUnit( CP_TARGET, un, zoomfactor );
             ShoveCamBehindUnit( CP_PANTARGET, tgt, zoomfactor );
             FaceCamTarget( this, CP_FIXEDPOSTARGET, tgt );
@@ -3235,8 +3183,6 @@ void GameCockpit::DrawArrowToTarget(const Radar::Sensor& sensor, Vector localcoo
         }                      //case s == 0, do nothing everything is ok.
     }
     //Compute points p1 and p2 composing the arrow. Hard code a 2D rotation.
-    //p1 = p - TARGET_ARROW_SIZE * p.normalize().rot(THETA), p being the arrow head position (s,t).
-    //p2 = p - TARGET_ARROW_SIZE * p.normalize().rot(-THETA)
     p_n.i = -TARGET_ARROW_SIZE*s_normalized;       //Vector p will be used to compute the two branches of the arrow.
     p_n.j = -TARGET_ARROW_SIZE*t_normalized;
     p1.i  = p_n.i*TARGET_ARROW_COS_THETA-p_n.j*TARGET_ARROW_SIN_THETA;      //p1 = p.rot(THETA)
@@ -3251,7 +3197,6 @@ void GameCockpit::DrawArrowToTarget(const Radar::Sensor& sensor, Vector localcoo
     p2.j += t;
     p2.k  = p1.k = 0;
 
-    static GFXColor black_and_white = DockBoxColor( "black_and_white" );
     GFXEnable( SMOOTH );
     GFXDisable( TEXTURE0 );
     GFXDisable( TEXTURE1 );
