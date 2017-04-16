@@ -40,6 +40,8 @@ public:
     {
         return y*scale;
     }
+
+    virtual ~IdentityTransform() {}
 };
 
 extern float SphereTransformRenderlevel;
