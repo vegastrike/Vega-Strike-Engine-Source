@@ -395,9 +395,9 @@ inline void DrawDockingBoxes( Unit *un, Unit *target, const Vector &CamP, const 
         for (unsigned int i = 0; i < d.size(); i++)
         {
             float rad = d[i].GetRadius() / sqrt( 2.0 );
-            QVector dockpos = Transform( 
+            QVector dockpos = Transform(
                     target->GetTransformation(),
-                    d[i].GetPosition().Cast() 
+                    d[i].GetPosition().Cast()
                 ) - _Universe->AccessCamera()->GetPosition();
 
             if (!d[i].IsDockable())
@@ -410,7 +410,7 @@ inline void DrawDockingBoxes( Unit *un, Unit *target, const Vector &CamP, const 
                 }
                 continue;
             }
-            
+
             GFXDisable( DEPTHTEST );
             GFXDisable( DEPTHWRITE );
             GFXColorf( dockboxstop );
@@ -538,7 +538,6 @@ void GameCockpit::DrawTargetBox(const Radar::Sensor& sensor)
     GFXDisable( LIGHTING );
     static bool draw_nav_symbol = XMLSupport::parse_bool( vs_config->getVariable( "graphics", "hud", "drawNavSymbol", "false" ) );
     if (draw_nav_symbol) {
-        static GFXColor suncol = RetrColor( "nav", GFXColor( 1, 1, 1, 1 ) );
         DrawNavigationSymbol(player->GetComputerData().NavPoint, CamP, CamQ,
                              CamR.Cast().Dot( (player->GetComputerData().NavPoint).Cast()-_Universe->AccessCamera()->GetPosition() ) );
     }
@@ -609,7 +608,7 @@ void GameCockpit::DrawTargetBox(const Radar::Sensor& sensor)
         if (ITTS_averageguns) {
             player->getAverageGunSpeed( speed, range, mrange );
             iLoc = target->PositionITTS( PlayerPosition, PlayerVelocity, speed, steady_itts ) - offs;
-            if (draw_line_to_itts) 
+            if (draw_line_to_itts)
                 DrawITTSLine(Loc, iLoc, trackcolor);
             DrawITTSMark(scatter, p, q, iLoc, trackcolor);
         }
@@ -617,7 +616,7 @@ void GameCockpit::DrawTargetBox(const Radar::Sensor& sensor)
             int nummounts = player->GetNumMounts();
             if (draw_line_to_itts) {
                 for (int i = 0; i < nummounts; i++) {
-                    if ( (player->mounts[i].status == Mount::ACTIVE) 
+                    if ( (player->mounts[i].status == Mount::ACTIVE)
                         && (ITTS_for_beams || (player->mounts[i].type->type != weapon_info::BEAM))
                         && (ITTS_for_locks || (player->mounts[i].type->LockTime == 0)) )
                     {
@@ -628,7 +627,7 @@ void GameCockpit::DrawTargetBox(const Radar::Sensor& sensor)
             }
             for (int i = 0; i < nummounts; i++) {
                 if ( (player->mounts[i].status == Mount::ACTIVE)
-                    && (ITTS_for_beams || (player->mounts[i].type->type != weapon_info::BEAM)) 
+                    && (ITTS_for_beams || (player->mounts[i].type->type != weapon_info::BEAM))
                     && (ITTS_for_locks || (player->mounts[i].type->LockTime == 0)) )
                 {
                     mntcolor = MountColor( &player->mounts[i] );
@@ -3002,10 +3001,10 @@ void GameCockpit::SetupViewPort( bool clip )
         un->UpdateHudMatrix( CP_BACK );
         un->UpdateHudMatrix( CP_CHASE );
         un->UpdateHudMatrix( CP_PANINSIDE );
-        
+
         insidePanYaw += insidePanYawSpeed * GetElapsedTime();
         insidePanPitch += insidePanPitchSpeed * GetElapsedTime();
-        
+
         Vector p, q, r, tmp;
         _Universe->AccessCamera( CP_FRONT )->GetOrientation( p, q, r );
         _Universe->AccessCamera( CP_LEFT )->SetOrientation( r, q, -p );
@@ -3023,7 +3022,7 @@ void GameCockpit::SetupViewPort( bool clip )
             Transform(panMatrix, p),
             Transform(panMatrix, q),
             Transform(panMatrix, r) );
-        
+
         tgt = un->Target();
         if (tgt) {
             un->GetOrientation( p, q, r );
@@ -3340,7 +3339,7 @@ void GameCockpit::updateRadar(Unit*ship) {
 }
 void GameCockpit::SetParent( Unit *unit, const char *filename, const char *unitmodname, const QVector &startloc ){
     this->Cockpit::SetParent(unit,filename,unitmodname,startloc);
-    updateRadar(unit);    
+    updateRadar(unit);
 }
 void GameCockpit::OnDockEnd(Unit *station, Unit *ship)
 {
