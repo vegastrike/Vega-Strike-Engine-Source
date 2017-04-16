@@ -1,4 +1,4 @@
-#include <set>
+	#include <set>
 #include "vsfilesystem.h"
 #include "vs_globals.h"
 #include "vegastrike.h"
@@ -108,6 +108,7 @@ void NavigationSystem::Setup()
     rz     = 0.0;
     zoom   = 1.8;
 
+	//Declared in navscreen.h
     rx_s   = -0.5;              //system mode settings
     ry_s   = 1.5;
     rz_s   = 0.0;
@@ -355,7 +356,7 @@ void NavigationSystem::Draw()
         return;
     if (_Universe->AccessCockpit()->GetParent() == NULL)
         return;
-    
+
     //DRAW THE SCREEN MODEL
     //**********************************
     Vector p, q, r;
@@ -401,7 +402,7 @@ void NavigationSystem::Draw()
 
         Matrix mat( p, q, r, pos );
         if (mesh[i]) {
-            mesh[i]->Draw( 
+            mesh[i]->Draw(
                 FLT_MAX, // lod
                 mat );
         }
@@ -630,12 +631,10 @@ void NavigationSystem::DrawShip()
     navdrawlist factionlist( 0, screenoccupation, factioncolours );
 
     float     deltax   = screenskipby4[1]-screenskipby4[0];
-    float     deltay   = screenskipby4[3]-screenskipby4[2];
     float     originx  = screenskipby4[0]; //left
     float     originy  = screenskipby4[3]; //top
     string    writethis;
     Unit     *par;
-    int       foundpos = 0;
     if ( ( par = _Universe->AccessCockpit()->GetParent() ) )
         writethis = MakeUnitXMLPretty( par->WriteUnitString(), par );
     TextPlane displayname;
@@ -1389,9 +1388,9 @@ void NavigationSystem::Adjust3dTransformation( bool three_d, bool system_vs_gala
                 float ndy = -4.0*(mouse_x_current-mouse_x_previous);
                 float ndz = 0.0;
 
-                rx_s = rx_s += ndx;
-                ry_s = ry_s += ndy;
-                rz_s = rz_s += ndz;
+                rx_s += ndx;
+                ry_s += ndy;
+                rz_s += ndz;
                 if (rx_s > 0.0/2) rx_s = 0.0/2;
                 if (rx_s < -6.28/2) rx_s = -6.28/2;
                 if (ry_s >= 6.28) ry_s -= 6.28;
@@ -1405,13 +1404,11 @@ void NavigationSystem::Adjust3dTransformation( bool three_d, bool system_vs_gala
                 float ndz = 0.0;
 
                 //shift less when zoomed in more
-                //float zoom_modifier = ( (1-(((zoom_s-0.5*MAXZOOM)/MAXZOOM)*(0.85))) / 1 );
-//float _l2 = log(2.0);
                 float zoom_modifier = 1.;                 //(log(zoom_s)/_l2);
 
-                rx_s = rx_s -= ( (ndx*camera_z)/zoom_modifier );
-                ry_s = ry_s -= ( (ndy*camera_z)/zoom_modifier );
-                rz_s = rz_s -= ( (ndz*camera_z)/zoom_modifier );
+                rx_s -= ( (ndx*camera_z)/zoom_modifier );
+                ry_s -= ( (ndy*camera_z)/zoom_modifier );
+                rz_s -= ( (ndz*camera_z)/zoom_modifier );
             }
         } else {
             //galaxy
@@ -1420,9 +1417,9 @@ void NavigationSystem::Adjust3dTransformation( bool three_d, bool system_vs_gala
                 float ndy = -4.0*(mouse_x_current-mouse_x_previous);
                 float ndz = 0.0;
 
-                rx = rx += ndx;
-                ry = ry += ndy;
-                rz = rz += ndz;
+                rx += ndx;
+                ry += ndy;
+                rz += ndz;
                 if (rx > 0.0/2) rx = 0.0/2;
                 if (rx < -6.28/2) rx = -6.28/2;
                 if (ry >= 6.28) ry -= 6.28;
@@ -1440,9 +1437,9 @@ void NavigationSystem::Adjust3dTransformation( bool three_d, bool system_vs_gala
 //float _l2 = log(2.0);
                 float zoom_modifier = 1.;                 //(log(zoom)/_l2);
 
-                rx = rx -= ( (ndx*camera_z)/zoom_modifier );
-                ry = ry -= ( (ndy*camera_z)/zoom_modifier );
-                rz = rz -= ( (ndz*camera_z)/zoom_modifier );
+                rx -= ( (ndx*camera_z)/zoom_modifier );
+                ry -= ( (ndy*camera_z)/zoom_modifier );
+                rz -= ( (ndz*camera_z)/zoom_modifier );
             }
         }
     }
@@ -1763,13 +1760,6 @@ void NavigationSystem::TranslateCoordinates( QVector &pos,
                                              float &system_item_scale_temp,
                                              bool system_not_galaxy )
 {
-    float itemscale = CalculatePerspectiveAdjustment( zscale,
-                                                      zdistance,
-                                                      pos,
-                                                      pos_flat,
-                                                      system_item_scale_temp,
-                                                      system_not_galaxy );
-
     //TRANSLATE INTO SCREEN DISPLAY COORDINATES
     //**********************************
     the_x = (float) pos.i;
