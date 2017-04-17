@@ -39,7 +39,7 @@ class AttributeList : public std::vector< Attribute >
 public: AttributeList( const XML_Char **atts );
 };
 float parse_floatf( const std::string &str );
-double parse_float( const std::string &str );
+float parse_float( const std::string &str );
 void parse_floatfv( const std::string &str, int max, ... );
 void parse_floatv( const std::string &str, int max, ... );
 std::string replace_space( const std::string &str );
