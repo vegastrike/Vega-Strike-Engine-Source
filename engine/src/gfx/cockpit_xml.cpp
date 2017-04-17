@@ -215,7 +215,7 @@ string getRes( string inp )
 }
 
 /*! beginElement
- * Sets up the entire cockpit.
+ * Sets up the entire cockpit. 
  */
 void GameCockpit::beginElement( const string &name, const AttributeList &attributes )
 {
@@ -582,7 +582,8 @@ loadsprite:
 
 void GameCockpit::endElement( const string &name )
 {
-	//Nothing will be coming after the set up.
+	//Nothing will be coming after the set up. 
+
 }
 
 using namespace VSFileSystem;
