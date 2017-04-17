@@ -505,6 +505,11 @@ int main( int argc, char **argv )
             }
         }
     } else {
+		/* A number of warnings being produced here due to unused results
+		 * so commenting them out rather than removing as the likelihood
+		 * of this breaking something is high.
+		 */
+
         printf( "Enter Output File:\n" );
         scanf( "%s", filename );
         printf( "Enter Size of field?\n" );

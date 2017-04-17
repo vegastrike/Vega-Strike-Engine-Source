@@ -23,7 +23,7 @@
 
 using namespace XMLDOM;
 using std::map;
-using std::auto_ptr;
+using std::unique_ptr;
 
 #ifdef _MSC_VER
 //Undefine those nasty MS macros - why god why!?
@@ -176,7 +176,7 @@ static Technique::Pass::DepthFunction parseDepthFunction( const std::string &s )
     }
     return parseEnum(s, enumMap);
 }
-    
+
 static Technique::Pass::PolyMode parsePolyMode(const std::string &s)
 {
     static map<string, Technique::Pass::PolyMode> enumMap;
@@ -200,7 +200,7 @@ static Technique::Pass::ShaderParam::Semantic parseAutoParamSemantic( const std:
         enumMap["DetailPlane1"]      = Technique::Pass::ShaderParam::DetailPlane1;
         enumMap["NumLights"]         = Technique::Pass::ShaderParam::NumLights;
         enumMap["ActiveLightsArray"] = Technique::Pass::ShaderParam::ActiveLightsArray;
-        enumMap["ApparentLightSizeArray"] = 
+        enumMap["ApparentLightSizeArray"] =
                                        Technique::Pass::ShaderParam::ApparentLightSizeArray;
         enumMap["GameTime"]          = Technique::Pass::ShaderParam::GameTime;
     }
@@ -299,7 +299,7 @@ void Technique::Pass::addTextureUnit( const string &source,
     string::size_type ssep = string::npos, dsep = string::npos;
     newTU.sourceType = parseSourceType( source, ssep );
     newTU.defaultType     = parseSourceType( deflt, dsep );
-    newTU.targetIndex     = 
+    newTU.targetIndex     =
     newTU.origTargetIndex = target;
     newTU.targetParamName = paramName;
     newTU.targetParamId   = -1;
@@ -374,7 +374,7 @@ void Technique::Pass::compile()
 
         if (prog == 0) {
             std::string defines;
-            
+
             // Automatic defines
             if (sRGBAware) {
                 if (gl_options.ext_srgb_framebuffer)
@@ -384,11 +384,11 @@ void Technique::Pass::compile()
             }
             if (gl_options.nv_fp2)
                 defines += "#define VGL_NV_fragment_program2 1\n";
-            
+
             // Compile program
-            prog = GFXCreateProgram( vertexProgram.c_str(), fragmentProgram.c_str(), 
+            prog = GFXCreateProgram( vertexProgram.c_str(), fragmentProgram.c_str(),
                                      (defines.empty() ? NULL : defines.c_str()) );
-            if (prog == 0) 
+            if (prog == 0)
                 throw ProgramCompileError(
                     "Error compiling program vp:\""+vertexProgram
                     +"\" fp:\""+fragmentProgram+"\"" );
@@ -396,14 +396,14 @@ void Technique::Pass::compile()
                 VSFileSystem::vs_dprintf( 1, "Successfully compiled and linked program \"%s+%s\"\n",
                                           vertexProgram.c_str(), fragmentProgram.c_str() );
         }
-        
+
         for (ShaderParamList::iterator it = shaderParams.begin(); it != shaderParams.end(); ++it) {
             it->id = GFXNamedShaderConstant( prog, it->name.c_str() );
             if (it->id < 0) {
-                if (!it->optional) 
+                if (!it->optional)
                     throw ProgramCompileError( "Cannot resolve shader constant \""+it->name+"\"" );
                 else
-                    VSFileSystem::vs_dprintf( 1, "Cannot resolve <<optional>> shader constant \"%s\" in program \"%s+%s\"\n", 
+                    VSFileSystem::vs_dprintf( 1, "Cannot resolve <<optional>> shader constant \"%s\" in program \"%s+%s\"\n",
                                               it->name.c_str(), vertexProgram.c_str(), fragmentProgram.c_str() );
             }
         }
@@ -439,9 +439,9 @@ void Technique::Pass::compile()
                 }
             }
         }
-        
+
         // COMMIT ;-)
-        program = prog;         
+        program = prog;
         programVersion = GFXGetProgramVersion();
     }
 }
@@ -474,7 +474,7 @@ Technique::Technique( const string &nam ) :
     VSFileXMLSerializer serializer;
     serializer.options = 0;     //only tags interest us
     serializer.initialise();
-    
+
     try {
         // Try a specialized version
         serializer.importXML(
@@ -489,7 +489,7 @@ Technique::Technique( const string &nam ) :
             +name+".technique" );
     }
 
-    auto_ptr< XMLDOM::XMLDocument >doc( serializer.close() );
+    unique_ptr< XMLDOM::XMLDocument >doc( serializer.close() );
 
     //Search for the <technique> tag
     XMLElement *techniqueNode = 0;

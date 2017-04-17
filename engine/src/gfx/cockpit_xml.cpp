@@ -246,7 +246,7 @@ void GameCockpit::beginElement( const string &name, const AttributeList &attribu
     VSSprite *oldpit       = NULL;
     bool      replaced[4]  = {false, false, false, false};
     int       counter      = 0;
-    switch (elem)
+    switch ((int)elem)
     {
     case CockpitXML::COCKPIT:
         for (iter = attributes.begin(); iter != attributes.end(); iter++) {
@@ -583,6 +583,7 @@ loadsprite:
 void GameCockpit::endElement( const string &name )
 {
 	//Nothing will be coming after the set up. 
+
 }
 
 using namespace VSFileSystem;

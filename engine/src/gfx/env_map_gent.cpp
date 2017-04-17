@@ -31,65 +31,7 @@ static float power = 1;
 
 using namespace VSFileSystem;
 
-/*
-struct Vector {
-    float i;
-    float j;
-    float k;
-};
 
-#define NumLights 1
-
-struct RGBColor
-{
-    float r, b, g;
-};
-
-struct Light
-{
-    Vector   Dir;
-    RGBColor Ambient;
-    RGBColor Intensity;
-};
-
-struct Material
-{
-    RGBColor Ka;
-    RGBColor Kd;
-    RGBColor Ks;
-    int exp;
-};
-
-static Light    L[NumLights];
-static Material M;
-
-static float Power( float A, int B )
-{
-    float res = 1.;
-    for (int i = 0; i < B; i++)
-        res *= A;
-    return res;
-}
-
-static void Lighting( RGBColor &Col, const Vector &Norm )
-{
-    static float OONL = 1./NumLights;
-    Col.r = Col.g = Col.b = 0;
-    for (int i = 0; i < NumLights; i++) {
-        float dot = L[i].Dir.i*Norm.i+L[i].Dir.j*Norm.j+L[i].Dir.k*Norm.k;
-        if (dot < 0) dot = 0;
-        Col.r += OONL*L[i].Ambient.r*M.Ka.r+L[i].Intensity.r*( M.Kd.r*dot+M.Ks.r*Power( dot, M.exp ) );
-        Col.g += OONL*L[i].Ambient.g*M.Ka.g+L[i].Intensity.g*( M.Kd.g*dot+M.Ks.g*Power( dot, M.exp ) );
-        Col.b += OONL*L[i].Ambient.b*M.Ka.b+L[i].Intensity.b*( M.Kd.b*dot+M.Ks.b*Power( dot, M.exp ) );
-        if (Col.r > 1) Col.r = 1;
-        if (Col.b > 1) Col.b = 1;
-        if (Col.g > 1) Col.g = 1;
-        if (Col.r < 0) Col.r = 0;
-        if (Col.b < 0) Col.b = 0;
-        if (Col.g < 0) Col.g = 0;
-    }
-}
-*/
 
 const int   lmwid      = 512;
 const int   lmwido2    = lmwid/2;
@@ -102,7 +44,7 @@ struct CubeCoord
     float s;
     float t;
     unsigned int TexMap;    //0 = front, 1=back,2=right,3=left,4=up,5=down
-    unsigned int padding;  //added by chuck_starchaser
+    unsigned int padding;
 };
 
 static void gluSphereMap( CubeCoord &Tex, Vector Normal, float Theta )
@@ -184,7 +126,6 @@ static bool LoadTex( char *FileName, unsigned char scdata[lmwid][lmwid][3] )
 {
     using namespace VSFileSystem;
 
-    unsigned char ctemp;
     VSFile  f;
     VSError err = f.OpenReadOnly( FileName, TextureFile );
     if (err > Ok)
@@ -287,7 +228,6 @@ static char * makebgname( char *tmp, size_t size, const char *InputName, const c
 static void Spherize( CubeCoord Tex[lmwid][lmwid], CubeCoord gluSph[lmwid][lmwid], unsigned char Col[] )
 {
     Texmp *Data   = NULL;
-    bool   sphere = false;
     Data = new Texmp[6];
     if (!Data)
         return;          //borken down and down Data[5], right Data[3]
@@ -319,19 +259,16 @@ static void Spherize( CubeCoord Tex[lmwid][lmwid], CubeCoord gluSph[lmwid][lmwid
                        Data[3].D )
            && LoadTex( makebgname( tmp, tmpsize, InputName, "_up",
                                    suffix ),
-                       Data[4].D ) 
-           && LoadTex( makebgname( tmp, tmpsize, InputName, "_down", 
-                                   suffix ), Data[5].D ) ) ) 
+                       Data[4].D )
+           && LoadTex( makebgname( tmp, tmpsize, InputName, "_down",
+                                   suffix ), Data[5].D ) ) )
     {
         if ( !LoadTex( makebgname( tmp, tmpsize, InputName, "_sphere", suffix ), Data[0].D ) )
             LoadTex( makebgname( tmp, tmpsize, InputName, "", suffix ), Data[0].D );
-        sphere = true;
         Tex    = gluSph;
     }
     free( tmp );
     tmp = NULL;
-    //int NumPix;
-    float sleft, sright, tdown, tup;
     for (int t = 0; t < lmwid; t++)
         for (int s = 0; s < lmwid; s++) {
             float r = 0;

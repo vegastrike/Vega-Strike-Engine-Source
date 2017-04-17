@@ -9,7 +9,6 @@ string retrievedata( string data, string type )
         return "";
     if (type.size() == 0)
         return "";
-    int    testlength = type.size();
     char   testchar   = 'p';
     string teststring = "";
 

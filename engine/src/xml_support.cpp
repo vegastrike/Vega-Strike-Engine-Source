@@ -76,9 +76,10 @@ bool parse_bool( const string &str )
     else
         return false;
 }
-double parse_float( const string &str )
+
+float parse_float( const string &str )
 {
-    double ret = 0.0f;
+    float ret = 0.0f;
     std::stringstream ss( str );
     ss>>ret;
     return ret;
@@ -98,7 +99,7 @@ void parse_floatv(const std::string& input, size_t maxTokens, ...)
     va_start(arguments, maxTokens);
     Separator separator(SEPARATORS);
     Tokenizer tokens(input, separator);
-    
+
     for (Tokenizer::iterator it = tokens.begin(); maxTokens > 0 && it != tokens.end(); ++it, --maxTokens) {
         double *output = va_arg(arguments, double *);
         *output = boost::lexical_cast<double>(*it);
@@ -112,7 +113,7 @@ void parse_floatfv( const string &input, int maxTokens, ... )
     va_start(arguments, maxTokens);
     Separator separator(SEPARATORS);
     Tokenizer tokens(input, separator);
-    
+
     for (Tokenizer::iterator it = tokens.begin(); maxTokens > 0 && it != tokens.end(); ++it, --maxTokens) {
         float *output = va_arg(arguments, float *);
         *output = boost::lexical_cast<float>(*it);
