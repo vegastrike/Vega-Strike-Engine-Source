@@ -1106,8 +1106,6 @@ void BaseComputer::constructControls( void )
         netStatGroup->setHidden( true );
         networkGroup->addChild( netStatGroup );
 
-        GFXColor color = getColorForGroup( "NetworkGroup" );
-
         GameMenu::createNetworkControls( netJoinGroup, &base_keyboard_queue );
         if (Network)
         {
@@ -2704,6 +2702,9 @@ SimplePickerCell* BaseComputer::createCategoryCell( SimplePickerCells &cells,
     }
     assert( false );
     //Never get here.
+
+    //But returning nullptr for the sheer hell of it.
+    return nullptr;
 }
 
 //Load a picker with a list of items.
