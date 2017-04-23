@@ -1405,7 +1405,9 @@ void GameCockpit::DrawGauges( Unit *un )
         XMLSupport::parse_float( vs_config->getVariable( "graphics", "hud", "text_background_alpha", "0.0625" ) );
     bool automatte = (0 == origbgcol.a);
     if (automatte) text->bgcol = GFXColor( 0, 0, 0, background_alpha );
-    for (i = UnitImages< void >::KPS; i < UnitImages< void >::AUTOPILOT_MODAL; i++) {
+
+    for (i = UnitImages< void >::KPS; i < UnitImages< void >::AUTOPILOT_MODAL; i++)
+    {	//Print speed related text to display i.e how fast we're going.
         if (gauges[i]) {
             float sx, sy, px, py;
             gauges[i]->GetSize( sx, sy );
@@ -1413,6 +1415,26 @@ void GameCockpit::DrawGauges( Unit *un )
             text->SetCharSize( sx, sy );
             text->SetPos( px, py );
             char  ourchar[64];
+            float tmp    = LookupUnitStat( i, un );
+            float tmp2 = 0;
+            int len = sprintf( ourchar, "%.0f", tmp);
+            if (i == UnitImages< void >::KPS)
+            {
+				float c = 300000000.0f;
+				if (tmp > c/10)
+				{
+					tmp2 = tmp/c;
+					len  = sprintf( ourchar, "%.2f C", tmp2 );
+				}
+			}
+			if (i == UnitImages< void >::MASSEFFECT)
+			{
+				len = sprintf( ourchar, "MASS:%.0f%% (base)", tmp );
+			}
+			if(len)
+			{
+				//Do nothing; Sprintf produces error feedback that we're not handling.
+			}
             GFXColorf( textcol );
             text->SetSize( 2, -2 );
             text->Draw( string( ourchar ), 0, false, false, automatte );
