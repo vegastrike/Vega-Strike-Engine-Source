@@ -1,4 +1,4 @@
-	#include <set>
+#include <set>
 #include "vsfilesystem.h"
 #include "vs_globals.h"
 #include "vegastrike.h"
@@ -401,7 +401,8 @@ void NavigationSystem::Draw()
         //***************
 
         Matrix mat( p, q, r, pos );
-        if (mesh[i]) {
+        if (mesh[i])
+        {
             mesh[i]->Draw(
                 FLT_MAX, // lod
                 mat );
@@ -1725,8 +1726,6 @@ float NavigationSystem::CalculatePerspectiveAdjustment( float &zscale,
     } else {
         real_zoom = zoom*zoom*zscale;
         real_zoom_flat = zoom*zoom*zscale_flat;
-//real_zoom = (log(zoom)/_l2)*zscale;
-//real_zoom_flat = (log(zoom)/_l2)*zscale_flat;
     }
     pos.i *= real_zoom;
     pos.j *= real_zoom;
@@ -1760,6 +1759,9 @@ void NavigationSystem::TranslateCoordinates( QVector &pos,
                                              float &system_item_scale_temp,
                                              bool system_not_galaxy )
 {
+	//Set up the layout for the planets inside the nav area.
+	CalculatePerspectiveAdjustment( zscale, zdistance, pos, pos_flat, system_item_scale_temp, system_not_galaxy );
+
     //TRANSLATE INTO SCREEN DISPLAY COORDINATES
     //**********************************
     the_x = (float) pos.i;
