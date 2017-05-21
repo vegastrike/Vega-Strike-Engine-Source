@@ -172,12 +172,12 @@ void GFXVertexList::BeginDrawState( GFXBOOL lock )
 
         BindBuf( vbo_data );
         print_gl_error("VBO18.5a Error %d\n");
-        
+
         if (changed&HAS_INDEX) {
             BindInd( display_list );
             print_gl_error("VBO18.5b Error %d\n");
         }
-        
+
         if (changed&HAS_COLOR) {
             if (gl_options.Multitexture)
                 glClientActiveTextureARB_p( GL_TEXTURE0 );
@@ -345,7 +345,7 @@ void GFXVertexList::Draw( enum POLYTYPE *mode, const INDEX index, const int numl
             GFXPopBlendMode();
             GFXDisable( SMOOTH );
         }
-        
+
         ++gl_batches_this_frame;
     } else {
         int totoffset = 0;
@@ -385,8 +385,7 @@ void GFXVertexList::Draw( enum POLYTYPE *mode, const INDEX index, const int numl
                         for (int j = i, offs = totoffset; j < numlists; offs += offsets[j++]) {
                             totcount += offsets[j];
                             if ( !drawn[j] && (mode[j] == mode[i]) ) {
-                                glindices.push_back( use_vbo ? (GLvoid*) (stride*offs)
-                                                     : (GLvoid*) &index.b[stride*offs] );
+                                glindices.push_back( use_vbo ? reinterpret_cast<GLvoid*>(stride*offs) : (GLvoid*) &index.b[stride*offs] );
                                 glcounts.push_back( offsets[j] );
                                 drawn[j] = true;
                             }
@@ -402,9 +401,7 @@ void GFXVertexList::Draw( enum POLYTYPE *mode, const INDEX index, const int numl
                     }
             } else {
                 for (int i = 0; i < numlists; i++) {
-                    glDrawElements( PolyLookup( mode[i] ), offsets[i], indextype,
-                                    use_vbo ? (void*) (stride*totoffset)
-                                    : &index.b[stride*totoffset] );                     //changed&INDEX_BYTE == stride!
+                    glDrawElements( PolyLookup( mode[i] ), offsets[i], indextype, use_vbo ? reinterpret_cast<void*>(stride*totoffset) : &index.b[stride*totoffset] );                     //changed&INDEX_BYTE == stride!
                     totoffset += offsets[i];
                     ++gl_batches_this_frame;
                     gl_vertices_this_frame += offsets[i];
@@ -646,11 +643,6 @@ void GFXSphereVertexList::ProceduralModification()
         Vector vert[ROWS];
         int direction[ROWS/2];
 
-        int last_row_set[ROWS];
-        for(int i=0; i < ROWS; i++) {
-            last_row_set[i] = 0;
-        }
-
         for(int i=0; i < numVertices; i++) {
             for(int j=0; j < ROWS; j++)
                 if(row[j] < numVertices/ROWS*(j+1))
@@ -659,12 +651,9 @@ void GFXSphereVertexList::ProceduralModification()
             for(int j=0; j < ROWS/2; j++)
                 direction[j] = (int)vsrandom.uniformInc( 0.0, 5.0 );
             if(i % 4 == 1) {
-                for(int j=0; j < ROWS; j+=2) { 
+                for(int j=0; j < ROWS; j+=2) {
                     if(direction[j/2] > 2) {
                         SetVector( 1.003, &vert[j] );
-                        last_row_set[j] = 1;
-                    } else {
-                        last_row_set[j] = -1;
                     }
                 }
 
@@ -674,9 +663,6 @@ void GFXSphereVertexList::ProceduralModification()
                 for(int j=1; j < ROWS; j+=2) {
                     if(direction[(j-1)/2] > 2) {
                         SetVector( 1.003, &vert[j] );
-                        last_row_set[j] = 1;
-                    } else {
-                        last_row_set[j] = -1;
                     }
                 }
             }

@@ -888,7 +888,6 @@ void NavigationSystem::DrawGalaxy()
         //*************************
 
         GFXColor col    = systemIter->GetColor();
-        Vector   oldpos = pos;
         float    the_x, the_y, the_x_flat, the_y_flat, system_item_scale_temp;
         TranslateCoordinates( pos,
                               pos_flat,
@@ -980,7 +979,6 @@ void NavigationSystem::DrawGalaxy()
                 if ( oth.isDrawable() ) {
                     QVector posoth    = oth.Position();
                     ReplaceAxes( posoth );
-                    Vector  oldposoth = posoth;
                     float   the_new_x, the_new_y, new_system_item_scale_temp, the_new_x_flat, the_new_y_flat;
                     //WARNING: SOME VARIABLES FOR ORIGINAL SYSTEM MAY BE MODIFIED HERE!!!
                     TranslateCoordinates( posoth,

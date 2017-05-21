@@ -448,7 +448,7 @@ readerThread(
             if (foundcache) {
                 *me->music_load_info = wherecache->second;
                 me->freeWav = false;
-            } else if ( !AUDLoadSoundFile( songname, 
+            } else if ( !AUDLoadSoundFile( songname,
 						me->music_load_info, true))
 			{ VSFileSystem::vs_dprintf(1, "Failed to load music file \"%s\"", songname);}
         }
@@ -719,19 +719,19 @@ void Music::SkipRandSong( int whichlist, int layer )
 void Music::_SkipRandSong( int whichlist, int layer )
 {
     if (!g_game.music_enabled)
+    {
         return;
-    if (this != NULL) {
-        if ( whichlist != NOLIST && whichlist >= 0 && whichlist < (int) playlist.size() ) {
-            lastlist = whichlist;
-            static bool random = XMLSupport::parse_bool( vs_config->getVariable( "audio", "shuffle_songs", "true" ) );
-            if ( playlist[whichlist].size() )
-                GotoSong( whichlist, random ? randInt( playlist[whichlist].size() ) : playlist[whichlist].counter++
-                          %playlist[whichlist].size(), true, layer );
-            else
-                fprintf( stderr, "Error no songs in playlist %d\n", whichlist );
-            return;
-        }
     }
+	if ( whichlist != NOLIST && whichlist >= 0 && whichlist < (int) playlist.size() ) {
+		lastlist = whichlist;
+		static bool random = XMLSupport::parse_bool( vs_config->getVariable( "audio", "shuffle_songs", "true" ) );
+		if ( playlist[whichlist].size() )
+			GotoSong( whichlist, random ? randInt( playlist[whichlist].size() ) : playlist[whichlist].counter++
+					  %playlist[whichlist].size(), true, layer );
+		else
+			fprintf( stderr, "Error no songs in playlist %d\n", whichlist );
+		return;
+	}
     _SkipRandList( layer );
 }
 
@@ -891,7 +891,7 @@ void Music::MuzakCycle()
                 return;
             }
         }
-        
+
         for (int i = 0; i < muzak_count; i++)
             muzak[i].Listen();
     }

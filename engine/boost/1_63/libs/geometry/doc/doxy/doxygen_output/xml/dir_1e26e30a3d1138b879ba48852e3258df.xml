@@ -1,0 +1,40 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.8.6">
+  <compounddef id="dir_1e26e30a3d1138b879ba48852e3258df" kind="dir">
+    <compoundname>/home/ubuntu/boost/boost/geometry/strategies</compoundname>
+    <innerdir refid="dir_ec2048b5cea213e2cc722ca028d49e6a">/home/ubuntu/boost/boost/geometry/strategies/agnostic</innerdir>
+    <innerdir refid="dir_b953a48569803954c505a924ecd015c9">/home/ubuntu/boost/boost/geometry/strategies/cartesian</innerdir>
+    <innerdir refid="dir_ef5bc0061659e1a179d097305cf1ac7f">/home/ubuntu/boost/boost/geometry/strategies/concepts</innerdir>
+    <innerdir refid="dir_da02a38105763950155504ef82176910">/home/ubuntu/boost/boost/geometry/strategies/spherical</innerdir>
+    <innerdir refid="dir_60bbce529c31cb9c0d505297c3116180">/home/ubuntu/boost/boost/geometry/strategies/transform</innerdir>
+    <innerfile refid="strategies_2area_8hpp">area.hpp</innerfile>
+    <innerfile refid="strategies_2buffer_8hpp">buffer.hpp</innerfile>
+    <innerfile refid="strategies_2centroid_8hpp">centroid.hpp</innerfile>
+    <innerfile refid="comparable__distance__result_8hpp">comparable_distance_result.hpp</innerfile>
+    <innerfile refid="strategies_2compare_8hpp">compare.hpp</innerfile>
+    <innerfile refid="strategies_2convex__hull_8hpp">convex_hull.hpp</innerfile>
+    <innerfile refid="strategies_2covered__by_8hpp">covered_by.hpp</innerfile>
+    <innerfile refid="default__area__result_8hpp">default_area_result.hpp</innerfile>
+    <innerfile refid="default__comparable__distance__result_8hpp">default_comparable_distance_result.hpp</innerfile>
+    <innerfile refid="default__distance__result_8hpp">default_distance_result.hpp</innerfile>
+    <innerfile refid="default__length__result_8hpp">default_length_result.hpp</innerfile>
+    <innerfile refid="default__strategy_8hpp">default_strategy.hpp</innerfile>
+    <innerfile refid="strategies_2distance_8hpp">distance.hpp</innerfile>
+    <innerfile refid="distance__result_8hpp">distance_result.hpp</innerfile>
+    <innerfile refid="strategies_2intersection_8hpp">intersection.hpp</innerfile>
+    <innerfile refid="intersection__result_8hpp">intersection_result.hpp</innerfile>
+    <innerfile refid="intersection__strategies_8hpp">intersection_strategies.hpp</innerfile>
+    <innerfile refid="side_8hpp">side.hpp</innerfile>
+    <innerfile refid="side__info_8hpp">side_info.hpp</innerfile>
+    <innerfile refid="strategies_8hpp">strategies.hpp</innerfile>
+    <innerfile refid="strategy__transform_8hpp">strategy_transform.hpp</innerfile>
+    <innerfile refid="strategies_2tags_8hpp">tags.hpp</innerfile>
+    <innerfile refid="strategies_2transform_8hpp">transform.hpp</innerfile>
+    <innerfile refid="strategies_2within_8hpp">within.hpp</innerfile>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <location file="/home/ubuntu/boost/boost/geometry/strategies/"/>
+  </compounddef>
+</doxygen>

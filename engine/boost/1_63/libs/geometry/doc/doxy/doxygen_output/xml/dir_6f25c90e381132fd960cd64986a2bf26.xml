@@ -1,0 +1,21 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.8.6">
+  <compounddef id="dir_6f25c90e381132fd960cd64986a2bf26" kind="dir">
+    <compoundname>/home/ubuntu/boost/boost/geometry</compoundname>
+    <innerdir refid="dir_3f22f8f261c0d9328ee09f7cb5725856">/home/ubuntu/boost/boost/geometry/algorithms</innerdir>
+    <innerdir refid="dir_eea2e390c6b586e324421e3fad61506a">/home/ubuntu/boost/boost/geometry/arithmetic</innerdir>
+    <innerdir refid="dir_f73e9b2c9de8bd44a3adae2d08652f95">/home/ubuntu/boost/boost/geometry/core</innerdir>
+    <innerdir refid="dir_497000fd3b800405f7f32c9cbeb1465a">/home/ubuntu/boost/boost/geometry/geometries</innerdir>
+    <innerdir refid="dir_d61fc38811511f3891dfbb1732109fc6">/home/ubuntu/boost/boost/geometry/io</innerdir>
+    <innerdir refid="dir_2cfc9703d0a9e29b67ad67e1fc4f41b1">/home/ubuntu/boost/boost/geometry/iterators</innerdir>
+    <innerdir refid="dir_520a6077ae64aa67ed641adea0ae5c78">/home/ubuntu/boost/boost/geometry/policies</innerdir>
+    <innerdir refid="dir_1e26e30a3d1138b879ba48852e3258df">/home/ubuntu/boost/boost/geometry/strategies</innerdir>
+    <innerdir refid="dir_3f16df574dd8a8b6d0b01b742004fbc3">/home/ubuntu/boost/boost/geometry/util</innerdir>
+    <innerdir refid="dir_72c4062d208f9a8bee31299fb47de215">/home/ubuntu/boost/boost/geometry/views</innerdir>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <location file="/home/ubuntu/boost/boost/geometry/"/>
+  </compounddef>
+</doxygen>

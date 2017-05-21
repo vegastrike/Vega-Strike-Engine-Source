@@ -1,0 +1,53 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.8.6">
+  <compounddef id="structboost_1_1geometry_1_1strategy_1_1within_1_1box__covered__by__range" kind="struct" prot="public">
+    <compoundname>boost::geometry::strategy::within::box_covered_by_range</compoundname>
+    <basecompoundref refid="structboost_1_1geometry_1_1strategy_1_1within_1_1box__covered__by__coord" prot="public" virt="non-virtual">boost::geometry::strategy::within::box_covered_by_coord</basecompoundref>
+    <includes local="no">box_in_box.hpp</includes>
+    <templateparamlist>
+      <param>
+        <type>typename Geometry</type>
+      </param>
+      <param>
+        <type>std::size_t</type>
+        <declname>Dimension</declname>
+        <defname>Dimension</defname>
+      </param>
+      <param>
+        <type>typename CSTag</type>
+      </param>
+    </templateparamlist>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <inheritancegraph>
+      <node id="1591">
+        <label>boost::geometry::strategy::within::box_covered_by_coord</label>
+        <link refid="structboost_1_1geometry_1_1strategy_1_1within_1_1box__covered__by__coord"/>
+      </node>
+      <node id="1590">
+        <label>boost::geometry::strategy::within::box_covered_by_range&lt; Geometry, Dimension, CSTag &gt;</label>
+        <link refid="structboost_1_1geometry_1_1strategy_1_1within_1_1box__covered__by__range"/>
+        <childnode refid="1591" relation="public-inheritance">
+        </childnode>
+      </node>
+    </inheritancegraph>
+    <collaborationgraph>
+      <node id="1593">
+        <label>boost::geometry::strategy::within::box_covered_by_coord</label>
+        <link refid="structboost_1_1geometry_1_1strategy_1_1within_1_1box__covered__by__coord"/>
+      </node>
+      <node id="1592">
+        <label>boost::geometry::strategy::within::box_covered_by_range&lt; Geometry, Dimension, CSTag &gt;</label>
+        <link refid="structboost_1_1geometry_1_1strategy_1_1within_1_1box__covered__by__range"/>
+        <childnode refid="1593" relation="public-inheritance">
+        </childnode>
+      </node>
+    </collaborationgraph>
+    <location file="/home/ubuntu/boost/boost/geometry/strategies/cartesian/box_in_box.hpp" line="75" column="1" bodyfile="/home/ubuntu/boost/boost/geometry/strategies/cartesian/box_in_box.hpp" bodystart="73" bodyend="75"/>
+    <listofallmembers>
+      <member refid="structboost_1_1geometry_1_1strategy_1_1within_1_1box__covered__by__coord_1a14a04a15bad65e9bfb74e4a0f425539b" prot="public" virt="non-virtual"><scope>boost::geometry::strategy::within::box_covered_by_range</scope><name>apply</name></member>
+    </listofallmembers>
+  </compounddef>
+</doxygen>

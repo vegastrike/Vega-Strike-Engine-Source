@@ -42,7 +42,6 @@ SET(MESHER_SOURCES mesher/Converter.cpp
                    mesher/Modules/XMesh_to_BFXM.cpp
                    mesher/Modules/XMesh_to_Ogre.cpp
                    mesher/Modules/Wavefront_to_BFXM.cpp
-                   ${vsUTCS_SOURCE_DIR}/src/hashtable.cpp
                    ${vsUTCS_SOURCE_DIR}/src/xml_support.cpp)
 
 include_directories(${MSH_INCLUDES} mesher)

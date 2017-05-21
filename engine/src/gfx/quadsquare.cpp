@@ -50,8 +50,6 @@ unsigned int quadsquare::SetVertices( GFXVertex *vertexs, const quadcornerdata &
                                                                                (*textures)[Vertex[i].GetTex()].scales ),
                                                  nonlinear_trans->TransformT( v[i].k, (*textures)[Vertex[i].GetTex()].scalet ) );
         vertexs[Vertex[i].vertindex].SetVertex( nonlinear_trans->Transform( v[i].Cast() ).Cast() );
-        //if (vertexs[Vertex[i].vertindex].y>10000||vertexs[Vertex[i].vertindex].z>32768||vertexs[Vertex[i].vertindex].x>32768)
-        //not important...debug only to catch certain case	    VSFileSystem::Fprintf (stderr,"high %f", vertexs[Vertex[i].vertindex].y);
     }
     return half;
 }
@@ -75,21 +73,6 @@ static void InterpolateTextures( VertInfo res[5], VertInfo in[4], const quadcorn
     res[2].SetTex( 0.5*( ( ( (float) in[0].Rem )+in[1].Rem )/256.+(in[0].Tex)+in[1].Tex ) );
     res[3].SetTex( 0.5*( ( ( (float) in[1].Rem )+in[2].Rem )/256.+(in[1].Tex)+in[2].Tex ) );
     res[4].SetTex( 0.5*( ( ( (float) in[2].Rem )+in[3].Rem )/256.+(in[2].Tex)+in[3].Tex ) );
-    /*
-     *     float pos[5];
-     *     int half = 1<< cd.Level;
-     *     pos[0] = (cd.xorg + half+ cd.zorg + half);
-     *     pos[1] = (cd.xorg + half*2+ cd.zorg + half);
-     *     pos[2] = (cd.xorg + half+ cd.zorg);
-     *     pos[3] = (cd.xorg+ cd.zorg + half);
-     *     pos[4] = (cd.xorg + half+ cd.zorg + half*2);
-     *
-     *
-     *     for (int i = 0; i < 5; i++) {
-     *
-     *       res[i].SetTex(((int)((pos[i])/5000))%10);
-     *     }
-     */
     res[0].Y = (unsigned short) ( 0.25*( ( (float) in[0].Y )+in[1].Y+in[2].Y+in[3].Y ) );
     res[1].Y = (unsigned short) ( 0.5*( ( (float) in[3].Y )+in[0].Y ) );
     res[2].Y = (unsigned short) ( 0.5*( ( (float) in[0].Y )+in[1].Y ) );
@@ -217,7 +200,7 @@ float quadsquare::GetHeight( const quadcornerdata &cd, float x, float z, Vector 
     if (iz < 0) return -FLT_MAX;        //iz = 0;
     if (iz > 1) return -FLT_MAX;          ///iz = 1;
 
-    int index = ix^(iz^1)+(iz<<1); //FIXME gcc computes ix^((iz^1)+(iz<<1)).. Was this the intent? Who can understand this code?
+    int index = ix^((iz^1)+(iz<<1));
     if (Child[index] && Child[index]->Static) {
         //Pass the query down to the child which contains it.
         quadcornerdata q;
@@ -229,7 +212,7 @@ float quadsquare::GetHeight( const quadcornerdata &cd, float x, float z, Vector 
     if (lx < 0) lx = 0;
     if (lx > 1) lx = 1;
     lz -= iz;
-    if (lx < 0) lz = 0; //FIXME did this mean to say "if (lz < 0) lz = 0;" ? It says "if (lx..."
+    if (lx < 0) lz = 0;
     if (lz > 1) lz = 1;
     float s00, s01, s10, s11;
     switch (index)
@@ -315,10 +298,6 @@ void VertInfo::SetTex( float t )
 {
     Tex = (unsigned char) t;
     Rem = (unsigned char) ( (t-Tex)*256 );
-    /*
-     *  if (Rem==127||Rem==126||Rem==125)
-     *  Rem = 128;
-     */
     assert( t-Tex < 1 );
 }
 

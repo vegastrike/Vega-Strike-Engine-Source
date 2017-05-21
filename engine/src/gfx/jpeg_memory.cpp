@@ -16,9 +16,6 @@ jpeg_memory_dest( j_compress_ptr cinfo, JOCTET*buffer, int bufsize )
     dest = (mem_dest_ptr) cinfo->dest;
     dest->bufsize = bufsize;
     dest->buffer  = buffer;
-    dest->pub.init_destination    = init_destination;
-    dest->pub.empty_output_buffer = empty_output_buffer;
-    dest->pub.term_destination    = term_destination;
 }
 
 int jpeg_compress( char *dst, char *src, int width, int height, int dstsize, int quality )

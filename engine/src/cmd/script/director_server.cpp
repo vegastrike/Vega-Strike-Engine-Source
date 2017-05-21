@@ -71,7 +71,6 @@ void InitBriefing()
 
 void Mission::DirectorLoop()
 {
-    double oldgametime = gametime;
     gametime += SIMULATION_ATOM;     //elapsed;
 
     try {

@@ -29,16 +29,18 @@ class StarVlist;
 class Background
 {
     bool        Enabled;
+    StarVlist  *stars;
     bool        degamma;
     GFXColor    color;
-    StarVlist  *stars;
+    SphereMesh *SphereBackground;
     Texture    *up;
     Texture    *left;
     Texture    *front;
     Texture    *right;
     Texture    *back;
     Texture    *down;
-    SphereMesh *SphereBackground;
+
+    
 public: 
     Background( const char *file, int numstars, float spread, const std::string &starfilename, const GFXColor &color, bool degamma);
     ~Background();

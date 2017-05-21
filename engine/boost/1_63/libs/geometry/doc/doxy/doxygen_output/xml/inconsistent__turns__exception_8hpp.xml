@@ -1,0 +1,111 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.8.6">
+  <compounddef id="inconsistent__turns__exception_8hpp" kind="file">
+    <compoundname>inconsistent_turns_exception.hpp</compoundname>
+    <includes refid="exception_8hpp" local="no">boost/geometry/core/exception.hpp</includes>
+    <includedby refid="follow__linear__linear_8hpp" local="no">/home/ubuntu/boost/boost/geometry/algorithms/detail/overlay/follow_linear_linear.hpp</includedby>
+    <incdepgraph>
+      <node id="30767">
+        <label>boost/geometry/core/exception.hpp</label>
+        <link refid="exception_8hpp"/>
+        <childnode refid="30768" relation="include">
+        </childnode>
+      </node>
+      <node id="30768">
+        <label>exception</label>
+      </node>
+      <node id="30766">
+        <label>/home/ubuntu/boost/boost/geometry/algorithms/detail/overlay/inconsistent_turns_exception.hpp</label>
+        <link refid="inconsistent_turns_exception.hpp"/>
+        <childnode refid="30767" relation="include">
+        </childnode>
+      </node>
+    </incdepgraph>
+    <invincdepgraph>
+      <node id="30771">
+        <label>/home/ubuntu/boost/boost/geometry/algorithms/detail/overlay/linear_linear.hpp</label>
+        <link refid="overlay_2linear__linear_8hpp"/>
+        <childnode refid="30772" relation="include">
+        </childnode>
+        <childnode refid="30774" relation="include">
+        </childnode>
+      </node>
+      <node id="30780">
+        <label>/home/ubuntu/boost/boost/geometry/algorithms/detail/intersection/multi.hpp</label>
+        <link refid="multi_8hpp"/>
+        <childnode refid="30779" relation="include">
+        </childnode>
+      </node>
+      <node id="30772">
+        <label>/home/ubuntu/boost/boost/geometry/algorithms/union.hpp</label>
+        <link refid="union_8hpp"/>
+        <childnode refid="30773" relation="include">
+        </childnode>
+      </node>
+      <node id="30775">
+        <label>/home/ubuntu/boost/boost/geometry/algorithms/difference.hpp</label>
+        <link refid="difference_8hpp"/>
+      </node>
+      <node id="30779">
+        <label>/home/ubuntu/boost/boost/geometry/algorithms/detail/intersection/implementation.hpp</label>
+        <link refid="intersection_2implementation_8hpp"/>
+        <childnode refid="30777" relation="include">
+        </childnode>
+      </node>
+      <node id="30774">
+        <label>/home/ubuntu/boost/boost/geometry/algorithms/detail/overlay/intersection_insert.hpp</label>
+        <link refid="intersection__insert_8hpp"/>
+        <childnode refid="30775" relation="include">
+        </childnode>
+        <childnode refid="30776" relation="include">
+        </childnode>
+      </node>
+      <node id="30770">
+        <label>/home/ubuntu/boost/boost/geometry/algorithms/detail/overlay/follow_linear_linear.hpp</label>
+        <link refid="follow__linear__linear_8hpp"/>
+        <childnode refid="30771" relation="include">
+        </childnode>
+      </node>
+      <node id="30776">
+        <label>/home/ubuntu/boost/boost/geometry/algorithms/detail/intersection/interface.hpp</label>
+        <link refid="intersection_2interface_8hpp"/>
+        <childnode refid="30777" relation="include">
+        </childnode>
+        <childnode refid="30778" relation="include">
+        </childnode>
+        <childnode refid="30780" relation="include">
+        </childnode>
+      </node>
+      <node id="30773">
+        <label>/home/ubuntu/boost/boost/geometry/algorithms/sym_difference.hpp</label>
+        <link refid="sym__difference_8hpp"/>
+      </node>
+      <node id="30769">
+        <label>/home/ubuntu/boost/boost/geometry/algorithms/detail/overlay/inconsistent_turns_exception.hpp</label>
+        <link refid="inconsistent_turns_exception.hpp"/>
+        <childnode refid="30770" relation="include">
+        </childnode>
+      </node>
+      <node id="30777">
+        <label>/home/ubuntu/boost/boost/geometry/algorithms/intersection.hpp</label>
+        <link refid="algorithms_2intersection_8hpp"/>
+        <childnode refid="30773" relation="include">
+        </childnode>
+      </node>
+      <node id="30778">
+        <label>/home/ubuntu/boost/boost/geometry/algorithms/detail/intersection/box_box.hpp</label>
+        <link refid="intersection_2box__box_8hpp"/>
+        <childnode refid="30779" relation="include">
+        </childnode>
+      </node>
+    </invincdepgraph>
+    <innerclass refid="classboost_1_1geometry_1_1inconsistent__turns__exception" prot="public">boost::geometry::inconsistent_turns_exception</innerclass>
+    <innernamespace refid="namespaceboost">boost</innernamespace>
+    <innernamespace refid="namespaceboost_1_1geometry">boost::geometry</innernamespace>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <location file="/home/ubuntu/boost/boost/geometry/algorithms/detail/overlay/inconsistent_turns_exception.hpp"/>
+  </compounddef>
+</doxygen>

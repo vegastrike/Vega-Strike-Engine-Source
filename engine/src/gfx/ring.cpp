@@ -56,12 +56,10 @@ void RingMesh::InitRing( float iradius,
         else
             slices -= 2;
         float theta, dtheta;
-        float ds;
         int   i, j, imin, imax;
         vlist  = NULL;
         /* Code below adapted from gluSphere */
         dtheta = (theta_max-theta_min)/(GLfloat) slices;
-        ds     = 1.0/slices;
         int numQuadstrips    = 2;
         imin   = 0;
         imax   = numQuadstrips;

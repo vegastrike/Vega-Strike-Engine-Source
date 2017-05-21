@@ -14,11 +14,8 @@ string FileToString( const char *argv )
         fseek( fp, 0, SEEK_SET );
         char  *finder = new char[len+1];
         finder[len] = 0;
-        static size_t bogus_ret; //added by chuck_starchaser to squash a warning
-        bogus_ret = fread( finder, len, 1, fp );
         string ret( finder, len );
         fclose( fp );
-        //printf ("%s",ret.c_str());
         return ret;
     } else {
         return "";

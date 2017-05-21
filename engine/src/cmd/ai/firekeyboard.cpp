@@ -1246,7 +1246,6 @@ void Enslave( Unit*, bool );
 
 void abletodock( int dock )
 {
-    static bool play_anim = XMLSupport::parse_bool( vs_config->getVariable( "graphics", "docking_comm_anim", "false" ) );
     switch (dock)
     {
     case 5:

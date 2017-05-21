@@ -1,24 +1,3 @@
-/*
- * Vega Strike
- * Copyright (C) 2001-2002 Daniel Horn
- *
- * http://vegastrike.sourceforge.net/
- *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * as published by the Free Software Foundation; either version 2
- * of the License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
- */
-
 #include "cmd/unit_generic.h"
 #include "animation.h"
 #include "aux_texture.h"
@@ -252,11 +231,6 @@ bool Animation::CalculateOrientation( Matrix &result )
 }
 void Animation::DrawNow( const Matrix &final_orientation )
 {
-//  if (g_game.use_animations == 0 && g_game.use_textures == 0)
-//  {
-//  }
-//  else if ( !Done() || (options&ani_repeat) )
-//  {  //chuck_starchaser simplifying...
     if ( (g_game.use_animations || g_game.use_textures) && (!Done() || (options&ani_repeat)) )
     {
         GFXLoadMatrixModel( final_orientation );
@@ -364,7 +338,6 @@ void Animation::DrawAsVSSprite( VSSprite *spr )
 }
 void Animation::DrawNoTransform( bool cross, bool blendoption )
 {
-    bool doitagain = false;
     if (g_game.use_animations == 0 && g_game.use_textures == 0) {} else if ( !Done() || (options&ani_repeat) ) {
         size_t lyr;
         size_t numlayers = numLayers();
@@ -456,8 +429,6 @@ void Animation::Draw()
     if (g_game.use_animations != 0 || g_game.use_textures != 0) {
         Vector  camp, camq, camr;
         QVector pos( Position() );
-        float   hei = height;
-        float   wid = width;
         static float HaloOffset = XMLSupport::parse_float( vs_config->getVariable( "graphics", "HaloOffset", ".1" ) );
 
         /**/

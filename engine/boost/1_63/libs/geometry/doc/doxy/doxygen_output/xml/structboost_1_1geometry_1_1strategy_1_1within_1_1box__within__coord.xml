@@ -1,0 +1,67 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.8.6">
+  <compounddef id="structboost_1_1geometry_1_1strategy_1_1within_1_1box__within__coord" kind="struct" prot="public">
+    <compoundname>boost::geometry::strategy::within::box_within_coord</compoundname>
+    <derivedcompoundref refid="structboost_1_1geometry_1_1strategy_1_1within_1_1box__within__range" prot="public" virt="non-virtual">boost::geometry::strategy::within::box_within_range&lt; Geometry, Dimension, CSTag &gt;</derivedcompoundref>
+    <includes local="no">box_in_box.hpp</includes>
+      <sectiondef kind="public-static-func">
+      <memberdef kind="function" id="structboost_1_1geometry_1_1strategy_1_1within_1_1box__within__coord_1a210fcee4f3edafeb4793500d13a1c20d" prot="public" static="yes" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <templateparamlist>
+          <param>
+            <type>typename BoxContainedValue</type>
+          </param>
+          <param>
+            <type>typename BoxContainingValue</type>
+          </param>
+        </templateparamlist>
+        <type>bool</type>
+        <definition>static bool boost::geometry::strategy::within::box_within_coord::apply</definition>
+        <argsstring>(BoxContainedValue const &amp;bed_min, BoxContainedValue const &amp;bed_max, BoxContainingValue const &amp;bing_min, BoxContainingValue const &amp;bing_max)</argsstring>
+        <name>apply</name>
+        <param>
+          <type>BoxContainedValue const &amp;</type>
+          <declname>bed_min</declname>
+        </param>
+        <param>
+          <type>BoxContainedValue const &amp;</type>
+          <declname>bed_max</declname>
+        </param>
+        <param>
+          <type>BoxContainingValue const &amp;</type>
+          <declname>bing_min</declname>
+        </param>
+        <param>
+          <type>BoxContainingValue const &amp;</type>
+          <declname>bing_max</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/ubuntu/boost/boost/geometry/strategies/cartesian/box_in_box.hpp" line="42" column="1" bodyfile="/home/ubuntu/boost/boost/geometry/strategies/cartesian/box_in_box.hpp" bodystart="42" bodyend="49"/>
+      </memberdef>
+      </sectiondef>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <inheritancegraph>
+      <node id="1603">
+        <label>boost::geometry::strategy::within::box_within_range&lt; Geometry, Dimension, CSTag &gt;</label>
+        <link refid="structboost_1_1geometry_1_1strategy_1_1within_1_1box__within__range"/>
+        <childnode refid="1602" relation="public-inheritance">
+        </childnode>
+      </node>
+      <node id="1602">
+        <label>boost::geometry::strategy::within::box_within_coord</label>
+        <link refid="structboost_1_1geometry_1_1strategy_1_1within_1_1box__within__coord"/>
+      </node>
+    </inheritancegraph>
+    <location file="/home/ubuntu/boost/boost/geometry/strategies/cartesian/box_in_box.hpp" line="40" column="1" bodyfile="/home/ubuntu/boost/boost/geometry/strategies/cartesian/box_in_box.hpp" bodystart="39" bodyend="50"/>
+    <listofallmembers>
+      <member refid="structboost_1_1geometry_1_1strategy_1_1within_1_1box__within__coord_1a210fcee4f3edafeb4793500d13a1c20d" prot="public" virt="non-virtual"><scope>boost::geometry::strategy::within::box_within_coord</scope><name>apply</name></member>
+    </listofallmembers>
+  </compounddef>
+</doxygen>

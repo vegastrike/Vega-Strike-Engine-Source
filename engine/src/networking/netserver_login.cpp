@@ -8,7 +8,6 @@
 #include "networking/fileutil.h"
 #include "networking/savenet_util.h"
 #include "load_mission.h"
-//#include "cmd/script/mission.h"
 
 #include "networking/lowlevel/vsnet_sockethttp.h"
 
@@ -24,16 +23,17 @@ ClientPtr NetServer::getClientFromSerial( ObjSerial serial )
 {
     ClientPtr clt;
     bool found = false;
-    for (LI li = allClients.begin(); li != allClients.end(); li++) {
+    for (LI li = allClients.begin(); li != allClients.end(); li++)
+    {
         clt = (*li);
         Unit *un = clt->game_unit.GetUnit();
-        if ( un && serial == un->GetSerial() ) {
+        if ( un && serial == un->GetSerial() )
+        {
             found = true;
             break;
         }
     }
     if (!found)
-        //cerr<<"   WARNING client not found in getClientFromSerial !!!!"<<endl;
         clt.reset();
     return clt;
 }
@@ -47,54 +47,36 @@ bool NetServer::loginAccept( const string &_inetbuf, ClientPtr clt, int newacct,
     string    callsign;
     string    unused;
     NetBuffer netbuf;
-    ObjSerial cltserial;
     callsign = getSimpleString( inetbuf );
     unused   = getSimpleString( inetbuf );
     string    serverip   = getSimpleString( inetbuf );
     string    serverport = getSimpleString( inetbuf );
     string    savestr    = getSimpleString( inetbuf );
     string    xmlstr     = getSimpleString( inetbuf );
-    if (!clt) {
-        /*
-         *  // This must be UDP mode, because the client would exist otherwise.
-         *  // In UDP mode, client is created here.
-         *  clt = newConnection_udp(  ); // WARNING: ipadr is null.  This code is broken anyway.
-         *  if( !clt )
-         *  {*/
+
+    if (!clt)
+    {
         COUT<<"Error creating new client connection"<<endl;
         return false;
-        /*}*/
     }
     clt->savegame.resize( 0 );
     //Get the save parts in a string array
     clt->savegame.push_back( savestr );
     clt->savegame.push_back( xmlstr );
     Cockpit *cp = loadCockpit( clt );
-    /*
-     *  if (_Universe->star_system.size()) {
-     *  std::string system = _Universe->star_system[0]->getFileName();
-     *  std::string newsystem=savestr.substr(0,savestr.find("^"));
-     *  if (newsystem!=system) {
-     *  sendLoginError( clt );
-     *       logout(clt);
-     *  return false;
-     *  }
-     *
-     *  }
-     */
-//memcpy( &clt->cltadr, &ipadr, sizeof( AddressIP)); // ipadr is uninitialized... see above.
-
-    //clt->callsign = callsign;
-    //clt->passwd = passwd;
     COUT<<"LOGIN REQUEST SUCCESS for <"<<callsign<<">"<<endl;
-    if (newacct) {
+    if (newacct)
+    {
         COUT<<"This account has no ship/char so create one"<<"(UNIMPLEMENTED)"<<endl;
         sendLoginError( clt );
         logout( clt );
         return false;
         //Send a command to make the client create a new character/ship
-    } else if (cp) {
-        if ( loadFromSavegame( clt, cp ) ) {
+    }
+    else if (cp)
+    {
+        if ( loadFromSavegame( clt, cp ) )
+        {
             sendLoginAccept( clt, cp );
             COUT<<"<<< SENT LOGIN ACCEPT -----------------------------------------------------------------------"<<endl;
         }
@@ -107,7 +89,8 @@ void NetServer::sendLoginAccept( ClientPtr clt, Cockpit *cp )
     //Verify that client already has a character
     NetBuffer netbuf;
     Unit     *un = cp->GetParent();
-    if (!un) {
+    if (!un)
+    {
         sendLoginError( clt );
         return;
     }
@@ -157,9 +140,10 @@ void NetServer::sendLoginAccept( ClientPtr clt, Cockpit *cp )
     //netbuf.addString( zonemgr->getSystem(sysname) );
 
     packet2.send( LOGIN_ACCEPT, cltserial, netbuf.getData(),
-                 netbuf.getDataLength(), SENDRELIABLE, &clt->cltadr, clt->tcp_sock, __FILE__, PSEUDO__LINE__( 241 ) );
+                  netbuf.getDataLength(), SENDRELIABLE, &clt->cltadr, clt->tcp_sock, __FILE__, PSEUDO__LINE__( 241 ) );
     //Now that we have a starsystem, we will want to make a mission.
-    if (Mission::getNthPlayerMission( _Universe->whichPlayerStarship( un ), 0 ) == NULL) {
+    if (Mission::getNthPlayerMission( _Universe->whichPlayerStarship( un ), 0 ) == NULL)
+    {
         if (active_missions.size() == 1)
             active_missions[0]->DirectorInitgame();
         //Make a mission specially for this cockpit.
@@ -176,19 +160,19 @@ static void getShipList( vector< string > &ships )
 {
     Unit *mpl = &GetUnitMasterPartList();
     for (vector< Cargo >::const_iterator iter = mpl->pImage->cargo.begin(); iter != mpl->pImage->cargo.end(); iter++)
-        if ( (*iter).GetCategory().substr( 0, 10 ) == "starships/" ) {
+        if ( (*iter).GetCategory().substr( 0, 10 ) == "starships/" )
+        {
             std::string content = (*iter).GetContent();
             std::string::size_type dot = content.find( '.' );
-            //if (dot==std::string::npos) {
             ships.push_back( content );
-            //}
         }
 }
 
 void NetServer::chooseShip( ClientPtr clt, Packet &p )
 {
     if (!clt) return;
-    if ( clt->callsign.empty() ) {
+    if ( clt->callsign.empty() )
+    {
         sendLoginError( clt );
         return;
     }
@@ -198,7 +182,8 @@ void NetServer::chooseShip( ClientPtr clt, Packet &p )
     NetBuffer netbuf( p.getData(), p.getDataLength() );
     unsigned short selection = netbuf.getShort();
     string    shipname = netbuf.getString();
-    if ( selection >= ships.size() ) {
+    if ( selection >= ships.size() )
+    {
         sendLoginError( clt );
         return;
     }
@@ -215,13 +200,16 @@ void NetServer::localLogin( ClientPtr clt, Packet &p )
     NetBuffer netbuf( p.getData(), p.getDataLength() );
     clt->callsign = netbuf.getString();
     string    passwd = netbuf.getString();
-    if (!this->server_password.empty() && passwd != this->server_password) {
+    if (!this->server_password.empty() && passwd != this->server_password)
+    {
         this->sendLoginError( clt );
         return;
     }
-    for (unsigned int i = 0; i < _Universe->numPlayers(); i++) {
+    for (unsigned int i = 0; i < _Universe->numPlayers(); i++)
+    {
         Cockpit *cp = _Universe->AccessCockpit( i );
-        if (cp->savegame && cp->savegame->GetCallsign() == clt->callsign) {
+        if (cp->savegame && cp->savegame->GetCallsign() == clt->callsign)
+        {
             COUT<<"Cannot login player "<<clt->callsign<<": already exists on this server!";
             sendLoginAlready( clt );
             return;
@@ -235,30 +223,37 @@ void NetServer::localLogin( ClientPtr clt, Packet &p )
         netbuf.addString( *iter );
     Packet p1;
     p1.send( CMD_CHOOSESHIP, 0, netbuf.getData(),
-            netbuf.getDataLength(), SENDRELIABLE, &clt->cltadr, clt->tcp_sock, __FILE__, PSEUDO__LINE__( 202 ) );
+             netbuf.getDataLength(), SENDRELIABLE, &clt->cltadr, clt->tcp_sock, __FILE__, PSEUDO__LINE__( 202 ) );
 }
 
 Cockpit* NetServer::loadCockpit( ClientPtr clt )
 {
     Cockpit *cp = NULL;
-    for (unsigned int i = 1; i < _Universe->numPlayers(); i++) {
+    for (unsigned int i = 1; i < _Universe->numPlayers(); i++)
+    {
         cp = _Universe->AccessCockpit( i );
-        if (cp->savegame->GetCallsign() == clt->callsign) {
-            if (clt->loginstate == Client::CONNECTED) {
+        if (cp->savegame->GetCallsign() == clt->callsign)
+        {
+            if (clt->loginstate == Client::CONNECTED)
+            {
                 sendLoginAlready( clt );
                 return NULL;
-            } else {
+            }
+            else
+            {
                 //already logged in... it *should* already exist.
                 return cp;
             }
         }
     }
-    if (_Universe->numPlayers() == 0) {
+    if (_Universe->numPlayers() == 0)
+    {
         fprintf( stderr, "======= Creating Cockpit 0 for universe save data! =======\n" );
         _Universe->createCockpit( "" );         //create computer player (universe save data)
     }
     cp = NULL;
-    if ( !unused_players.empty() ) {
+    if ( !unused_players.empty() )
+    {
         cp = _Universe->AccessCockpit( unused_players.back() );
         unused_players.pop();
     }
@@ -277,7 +272,8 @@ bool NetServer::loadFromNewGame( ClientPtr clt, Cockpit *cp, string fighter )
     Mission  *mission   = NULL;
     if (active_missions.size() > 0)
         mission = active_missions[0];
-    if (!mission) {
+    if (!mission)
+    {
         COUT<<"Cannot login player without acctserver: No missions available";
         sendLoginError( clt );
         return false;
@@ -298,25 +294,30 @@ bool NetServer::loadFromNewGame( ClientPtr clt, Cockpit *cp, string fighter )
     string PLAYER_FACTION_STRING = cp->savegame->GetPlayerFaction();
     saved_faction = FactionUtil::GetFactionIndex( PLAYER_FACTION_STRING );
 
-    bool   exist = true;   //(VSFileSystem::LookForFile( savedships[0], VSFileSystem::UnitFile)<=VSFileSystem::Ok);
+    bool   exist = true;
     static std::string loadfailed( "LOAD_FAILED" );
     Unit  *un    = NULL;
-    if ( !PLAYER_SHIPNAME.empty() ) {
+    if ( !PLAYER_SHIPNAME.empty() )
+    {
         un = UnitFactory::createUnit( PLAYER_SHIPNAME.c_str(),
                                       false,
                                       saved_faction,
                                       string( "" ),
                                       Flightgroup::newFlightgroup( clt->callsign, PLAYER_SHIPNAME, PLAYER_FACTION_STRING,
-                                                                   "default", 1, 1, "", "", mission ),
+                                              "default", 1, 1, "", "", mission ),
                                       0 );
     }
-    if (!un) {
+    if (!un)
+    {
         exist = false;
-    } else if (un->name == loadfailed) {
+    }
+    else if (un->name == loadfailed)
+    {
         exist = false;
         un->Kill();
     }
-    if (!exist) {
+    if (!exist)
+    {
         //We can't find the unit saved for player -> send a login error
         this->sendLoginError( clt );
         cerr<<"WARNING : Unit file ("<<PLAYER_SHIPNAME<<") not found for "<<clt->callsign<<endl;
@@ -359,7 +360,8 @@ bool NetServer::loadFromSavegame( ClientPtr clt, Cockpit *cp )
     cp->savegame->SetStarSystem( string() );
     cp->savegame->ParseSaveGame( "", str, "", tmpvec, update, credits, savedships, cltserial, clt->savegame[0], false );
     //Generate the system we enter in if needed and add the client in it
-    if ( savedships.empty() ) {
+    if ( savedships.empty() )
+    {
         COUT<<"There are no saved ships... corrupted save file for "<<clt->callsign<<endl;
         std::string logoutnetbuf;
         addSimpleChar( logoutnetbuf, ACCT_LOGOUT );
@@ -380,27 +382,30 @@ bool NetServer::loadFromSavegame( ClientPtr clt, Cockpit *cp )
     string PLAYER_FACTION_STRING = cp->savegame->GetPlayerFaction();
 
     int    saved_faction   = FactionUtil::GetFactionIndex( PLAYER_FACTION_STRING );
-    //vector<vector <string> > path = lookforUnit( savedships[0].c_str(), saved_faction, false);
-    bool   exist = true;   //(VSFileSystem::LookForFile( savedships[0], VSFileSystem::UnitFile)<=VSFileSystem::Ok);
+    bool   exist = true;
     static std::string loadfailed( "LOAD_FAILED" );
     Unit  *un    = NULL;
-    if ( !PLAYER_SHIPNAME.empty() ) {
+    if ( !PLAYER_SHIPNAME.empty() )
+    {
         un = UnitFactory::createUnit( PLAYER_SHIPNAME.c_str(),
                                       false,
                                       saved_faction,
                                       string( "" ),
                                       Flightgroup::newFlightgroup( clt->callsign, PLAYER_SHIPNAME, PLAYER_FACTION_STRING,
-                                                                   "default", 1, 1, "", "", mission ),
+                                              "default", 1, 1, "", "", mission ),
                                       0, &clt->savegame[1] );
     }
-    if (!un) {
+    if (!un)
+    {
         exist = false;
-    } else if (un->name == loadfailed) {
+    }
+    else if (un->name == loadfailed)
+    {
         exist = false;
         un->Kill();
     }
-    if (!exist) {
-        unsigned short serial = cltserial;
+    if (!exist)
+    {
         std::string    logoutnetbuf;
         addSimpleChar( logoutnetbuf, ACCT_LOGOUT );
         addSimpleString( logoutnetbuf, clt->callsign );
@@ -457,8 +462,6 @@ void NetServer::sendLoginAlready( ClientPtr clt )
     //SHOULD NOT WE FREE THE MEMORY OCCUPIED BY A POSSIBLE CLIENT * ???
     Packet packet2;
     //Send a login error
-    //int		retsend;
-    //COUT<<"Creating packet... ";
     COUT<<">>> SEND LOGIN ALREADY =( serial #"<<packet.getSerial()<<" )= --------------------------------------"<<endl;
     packet2.send( LOGIN_ALREADY, 0, (char*) NULL, 0, SENDRELIABLE, &clt->cltadr, clt->tcp_sock, __FILE__, PSEUDO__LINE__( 283 ) );
     COUT<<"<<< SENT LOGIN ALREADY -----------------------------------------------------------------------"<<endl;

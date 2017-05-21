@@ -1,0 +1,13 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.8.6">
+  <compounddef id="dir_c2615b5acffe682b248992c9895e8655" kind="dir">
+    <compoundname>/home/ubuntu/boost/libs/geometry/doc/doxy/doxygen_input</compoundname>
+    <innerdir refid="dir_3a930f68218f9a74b5a922510cabe103">/home/ubuntu/boost/libs/geometry/doc/doxy/doxygen_input/groups</innerdir>
+    <innerdir refid="dir_049d2999acca6ee9ddd9926662db5e10">/home/ubuntu/boost/libs/geometry/doc/doxy/doxygen_input/pages</innerdir>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <location file="/home/ubuntu/boost/libs/geometry/doc/doxy/doxygen_input/"/>
+  </compounddef>
+</doxygen>

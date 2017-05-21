@@ -1,23 +1,3 @@
-/*
- * Vega Strike
- * Copyright (C) 2001-2002 Daniel Horn
- *
- * http://vegastrike.sourceforge.net/
- *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * as published by the Free Software Foundation; either version 2
- * of the License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
- */
 #include "vegastrike.h"
 #include "camera.h"
 #include "aux_texture.h"
@@ -187,24 +167,9 @@ void Background::Draw()
         GFXColorf(color);
         if (SphereBackground) {
             SphereBackground->DrawNow( FLT_MAX, true );
-            //Mesh::ProcessUndrawnMeshes();//background must be processed...dumb but necessary--otherwise might collide with other mehses
         } else {
             GFXCenterCamera( true );
             GFXLoadMatrixModel( identity_matrix );
-            //GFXLoadIdentity(MODEL);
-            //GFXTranslate (MODEL,_Universe->AccessCamera()->GetPosition());
-
-            //GFXTextureWrap(0,GFXCLAMPTEXTURE);
-            //glMatrixMode(GL_MODELVIEW);
-
-            /***********************?????????
-            *                        //Matrix oldproject;
-            *                        //GFXGetMatrix(VIEW, oldproject);
-            *                        //glPushMatrix();
-            *                        //gluPerspective (90,1.33,0.01,1500); //set perspective to 78 degree FOV
-            ********************************/
-            //_Universe->AccessCamera()->UpdateGLCenter();
-
             static struct skybox_rendering_record
             {
                 Texture *tex;
@@ -337,13 +302,10 @@ void Background::Draw()
             skybox_rendering_sequence[5].tex = down;
             for (size_t skr = 0; skr < sizeof (skybox_rendering_sequence)/sizeof (skybox_rendering_sequence[0]); skr++) {
                 Texture *tex = skybox_rendering_sequence[skr].tex;
-                int lyr;
 
 #ifdef NV_CUBE_MAP
                 if (tex == NULL)
                     tex = _Universe->getLightMap();
-                const int    numlayers = 1;
-                const bool   multitex  = true;
                 const int    numpasses = 1;
                 static const float edge_fixup =
                     XMLSupport::parse_float( vs_config->getVariable( "graphics", "background_edge_fixup", "0" ) );
@@ -386,7 +348,7 @@ void Background::Draw()
                         GFXTextureEnv( 0, GFXMODULATETEXTURE );
                         GFXTextureCoordGenMode( 0, NO_GEN, NULL, NULL );
 
-                        float s1, t1, s2, t2;
+                        float s1, t1, s2;
 
 #ifdef NV_CUBE_MAP
               #define VERTEX( i )                                    \

@@ -1,0 +1,42 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.8.6">
+  <compounddef id="structboost_1_1geometry_1_1fusion__adapt__detail_1_1all__same" kind="struct" prot="public">
+    <compoundname>boost::geometry::fusion_adapt_detail::all_same</compoundname>
+    <basecompoundref prot="public" virt="non-virtual">boost::mpl::bool_&lt; boost::mpl::count_if&lt; Sequence, boost::is_same&lt; boost::mpl::front&lt; Sequence &gt;::type, boost::mpl::_ &gt; &gt;::value==boost::mpl::size&lt; Sequence &gt;::value &gt;</basecompoundref>
+    <includes local="no">boost_fusion.hpp</includes>
+    <templateparamlist>
+      <param>
+        <type>class Sequence</type>
+      </param>
+    </templateparamlist>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <inheritancegraph>
+      <node id="379">
+        <label>boost::mpl::bool_&lt; boost::mpl::count_if&lt; Sequence, boost::is_same&lt; boost::mpl::front&lt; Sequence &gt;::type, boost::mpl::_ &gt; &gt;::value==boost::mpl::size&lt; Sequence &gt;::value &gt;</label>
+      </node>
+      <node id="378">
+        <label>boost::geometry::fusion_adapt_detail::all_same&lt; Sequence &gt;</label>
+        <link refid="structboost_1_1geometry_1_1fusion__adapt__detail_1_1all__same"/>
+        <childnode refid="379" relation="public-inheritance">
+        </childnode>
+      </node>
+    </inheritancegraph>
+    <collaborationgraph>
+      <node id="381">
+        <label>boost::mpl::bool_&lt; boost::mpl::count_if&lt; Sequence, boost::is_same&lt; boost::mpl::front&lt; Sequence &gt;::type, boost::mpl::_ &gt; &gt;::value==boost::mpl::size&lt; Sequence &gt;::value &gt;</label>
+      </node>
+      <node id="380">
+        <label>boost::geometry::fusion_adapt_detail::all_same&lt; Sequence &gt;</label>
+        <link refid="structboost_1_1geometry_1_1fusion__adapt__detail_1_1all__same"/>
+        <childnode refid="381" relation="public-inheritance">
+        </childnode>
+      </node>
+    </collaborationgraph>
+    <location file="/home/ubuntu/boost/boost/geometry/geometries/adapted/boost_fusion.hpp" line="65" column="1" bodyfile="/home/ubuntu/boost/boost/geometry/geometries/adapted/boost_fusion.hpp" bodystart="55" bodyend="65"/>
+    <listofallmembers>
+    </listofallmembers>
+  </compounddef>
+</doxygen>

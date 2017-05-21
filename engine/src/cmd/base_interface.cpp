@@ -140,7 +140,7 @@ static FILTER BlurBases()
 
 BaseInterface::Room::BaseVSSprite::BaseVSSprite( const std::string &spritefile, const std::string &ind ) :
     BaseObj( ind )
-    , spr( spritefile.c_str(), BlurBases(), GFXTRUE ) 
+    , spr( spritefile.c_str(), BlurBases(), GFXTRUE )
 {
 }
 
@@ -153,7 +153,7 @@ BaseInterface::Room::BaseVSSprite::~BaseVSSprite()
 
 
 BaseInterface::Room::BaseVSMovie::BaseVSMovie( const std::string &moviefile, const std::string &ind ) :
-    BaseVSSprite( ind, VSSprite( AnimatedTexture::CreateVideoTexture( moviefile ), 0, 0, 2, 2, 0, 0, true ) ) 
+    BaseVSSprite( ind, VSSprite( AnimatedTexture::CreateVideoTexture( moviefile ), 0, 0, 2, 2, 0, 0, true ) )
 {
     playing = false;
     soundscene = "video";
@@ -196,7 +196,7 @@ void BaseInterface::Room::BaseVSMovie::SetMovie( const std::string &moviefile )
     spr.~VSSprite();
     new (&spr)VSSprite( AnimatedTexture::CreateVideoTexture( moviefile ), x, y, w, h, 0, 0, true );
     spr.SetRotation( rot );
-    
+
     if (soundsource.get() != NULL)
         BaseUtil::DestroyVideoSoundStream(soundsource, soundscene);
     soundscene = "video";
@@ -228,7 +228,7 @@ void BaseInterface::Room::BaseVSSprite::Draw( BaseInterface *base )
     GFXEnable( TEXTURE0 );
     spr.Draw();
     GFXAlphaTest( ALWAYS, 0 );
-    
+
     // Play the associated source if it isn't playing
     if (soundsource.get() != NULL) {
         if (!soundsource->isPlaying())
@@ -246,7 +246,7 @@ void BaseInterface::Room::BaseVSMovie::Draw( BaseInterface *base )
             spr.Reset();
         }
     }
-    
+
     // Hide mouse pointer
     if (base && hidePointer && base->mousePointerStyle != MOUSE_POINTER_NONE) {
         double time = realTime();
@@ -257,9 +257,9 @@ void BaseInterface::Room::BaseVSMovie::Draw( BaseInterface *base )
             hidePointerTime = -1.0;
         }
     }
-    
+
     BaseInterface::Room::BaseVSSprite::Draw( base );
-    
+
     if (soundsource.get() == NULL) {
         // If there is no sound source, and the sprite is an animated sprite, and
         // it's finished, then we must invoke the callback
@@ -311,11 +311,11 @@ void BaseInterface::Room::BaseShip::Draw( BaseInterface *base )
                         GFXLight( true,
                                   GFXColor( 1, 1, 1, 1 ),
                                   GFXColor( 1, 1, 1, 1 ),
-                                  GFXColor( 1, 1, 1, 1 ), 
-                                  GFXColor( 0.1, 0.1, 0.1, 1 ), 
-                                  GFXColor( 1, 0, 0 ), 
-                                  GFXColor( 1, 1, 1, 0 ), 
-                                  24 ), 
+                                  GFXColor( 1, 1, 1, 1 ),
+                                  GFXColor( 0.1, 0.1, 0.1, 1 ),
+                                  GFXColor( 1, 0, 0 ),
+                                  GFXColor( 1, 1, 1, 0 ),
+                                  24 ),
                         true );
 
         (un)->DrawNow( final, FLT_MAX );
@@ -1043,15 +1043,8 @@ double compute_light_dot( Unit *base, Unit *un )
         for (; (st = *ui); ++ui)
             if ( st->isPlanet() ) {
                 if ( ( (Planet*) st )->hasLights() ) {
-                    QVector v1  = ( un->Position()-base->Position() ).Normalize();
-                    QVector v2  = ( st->Position()-base->Position() ).Normalize();
-#ifdef VS_DEBUG
-                    double  dot = v1.Dot( v2 );
-                    if (dot > ret) {
-                        VSFileSystem::vs_fprintf( stderr, "dot %lf", dot );
-                        ret = dot;
-                    }
-#endif
+                    ( un->Position()-base->Position() ).Normalize();
+                    ( st->Position()-base->Position() ).Normalize();
                 } else {
                     un_iter ui   = ( (Planet*) st )->satellites.createIterator();
                     Unit   *ownz = NULL;
@@ -1232,8 +1225,7 @@ void BaseInterface::Room::Launch::Click( BaseInterface *base, float x, float y, 
                 playa->getAIState()->Communicate( c );
             abletodock( 5 );
             if (playa->name == "return_to_cockpit")
-                if (playa->faction == playa->faction)
-                    playa->owner = bas;
+				playa->owner = bas;
         }
         base->Terminate();
     }
@@ -1430,7 +1422,7 @@ void BaseInterface::Draw()
 {
     // Some operations cannot be performed in the middle of a Draw() loop
     midloop = true;
-    
+
     GFXColor( 0, 0, 0, 0 );
     SetupViewport();
     StartGUIFrame( GFXTRUE );
@@ -1478,11 +1470,11 @@ void BaseInterface::Draw()
                 un->FreeDockingPort( i );
         Terminate();
     }
-    
+
     //Commit audio scene status to renderer
     if (g_game.sound_enabled)
         Audio::SceneManager::getSingleton()->commit();
-    
+
     // Some operations cannot be performed in the middle of a Draw() loop
     // If any of them are scheduled for deferred execution, do so now
     midloop = false;

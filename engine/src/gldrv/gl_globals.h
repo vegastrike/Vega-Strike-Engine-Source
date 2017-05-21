@@ -19,25 +19,25 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 #ifndef _GL_GLOBALS_H_
-#define _GL_GLOBALS_H_
-#include <queue>
-const static bool GFX_BUFFER_MAP_UNMAP = false;
-/* Hack for multitexture on Mac, here and in gl_init, ifdefined - griff */
-//Moved this because defining GL_EXT_texture... doesn't work under Jaguar
-#ifdef __APPLE_PANTHER_GCC33_CLI__
-    #define GL_EXT_texture_env_combine 1
-#endif /* __APPLE_PANTHER_GCC33_CLI__ */
-#undef __APPLE_PANTHER_GCC33_CLI__
-#if defined (__GNUC__) && defined (__APPLE__)
-    #if (__GNUC__ == 3 && __GNUC_MINOR__ > 2) || (__GNUC__ > 3)
-        #define __APPLE_PANTHER_GCC33_CLI__
-    #endif
-#endif
+	#define _GL_GLOBALS_H_
+	#include <queue>
+	const static bool GFX_BUFFER_MAP_UNMAP = false;
+	/* Hack for multitexture on Mac, here and in gl_init, ifdefined - griff */
+	//Moved this because defining GL_EXT_texture... doesn't work under Jaguar
+	#ifdef __APPLE_PANTHER_GCC33_CLI__
+		#define GL_EXT_texture_env_combine 1
+	#endif /* __APPLE_PANTHER_GCC33_CLI__ */
+	#undef __APPLE_PANTHER_GCC33_CLI__
+	#if defined (__GNUC__) && defined (__APPLE__)
+		#if (__GNUC__ == 3 && __GNUC_MINOR__ > 2) || (__GNUC__ > 3)
+			#define __APPLE_PANTHER_GCC33_CLI__
+		#endif
+	#endif
 
-#ifndef GFXSTAT
-#define GFXSTAT
-#ifdef STATS_QUEUE
-#include <time.h>
+	#ifndef GFXSTAT
+		#define GFXSTAT
+		#ifdef STATS_QUEUE
+			#include <time.h>
 
 struct GFXStats
 {
@@ -74,172 +74,168 @@ struct GFXStats
         return (int) (t-ztime);
     }
 };
-#endif
-#endif
+		#endif
+	#endif
 
-#define MAX_NUM_LIGHTS 4
-#define MAX_NUM_MATERIAL 4
-#define TEXTURE_CUBE_MAP_ARB 0x8513
+	#define MAX_NUM_LIGHTS 4
+	#define MAX_NUM_MATERIAL 4
+	#define TEXTURE_CUBE_MAP_ARB 0x8513
 
-//extern Matrix model;
-//extern Matrix view;
-#if defined (__CYGWIN__)
-#define GL_EXT_color_subtable 1
-#endif
 
-#ifndef _WIN32
-//#define GL_GLEXT_PROTOTYPES
+	#if defined (__CYGWIN__)
+		#define GL_EXT_color_subtable 1
+	#endif
 
-#endif
-#if defined (_WIN32) || defined (__CYGWIN__)
-#ifndef NOMINMAX
-#define NOMINMAX
-#endif //tells VCC not to generate min/max macros
-#include <windows.h>
-#include <GL/gl.h>
-#endif
-#if defined (__APPLE__) || defined (MACOSX)
-    #include <GLUT/glut.h>
-//#if defined( GL_INIT_CPP) || defined( GL_MISC_CPP) || defined( GL_STATE_CPP)
-#if defined (GL_ARB_vertex_program) && defined (GL_ARB_fragment_program)
-#define OSX_AT_LEAST_10_4
-#else
-#define OSX_LOWER_THAN_10_4
-#endif
-#define GL_GLEXT_PROTOTYPES
-//#endif
-    #include <OpenGL/glext.h>
-#else
-#define __glext_h_
-    #include <GL/glut.h>
-#include "gl_undefined_extensions.h"
-#undef __glext_h_
+	#if defined (_WIN32) || defined (__CYGWIN__)
+		#ifndef NOMINMAX
+			#define NOMINMAX
+		#endif //tells VCC not to generate min/max macros
+		#include <windows.h>
+		#include <GL/gl.h>
+	#endif
+	#if defined (__APPLE__) || defined (MACOSX)
+		#include <GLUT/glut.h>
+		#if defined (GL_ARB_vertex_program) && defined (GL_ARB_fragment_program)
+			#define OSX_AT_LEAST_10_4
+		#else
+			#define OSX_LOWER_THAN_10_4
+		#endif
 
-    #include <GL/glext.h>
-#endif
-#ifdef _WIN32
-#define GL_TEXTURE0_ARB 0x84C0
-#define GL_TEXTURE1_ARB 0x84C1
-#define GL_TEXTURE_CUBE_MAP_ARB 0x8513
-#define GL_TEXTURE_BINDING_CUBE_MAP_ARB 0x8514
-#define GL_TEXTURE_CUBE_MAP_POSITIVE_X_ARB 0x8515
-#define GL_TEXTURE_CUBE_MAP_NEGATIVE_X_ARB 0x8516
-#define GL_TEXTURE_CUBE_MAP_POSITIVE_Y_ARB 0x8517
-#define GL_TEXTURE_CUBE_MAP_NEGATIVE_Y_ARB 0x8518
-#define GL_TEXTURE_CUBE_MAP_POSITIVE_Z_ARB 0x8519
-#define GL_TEXTURE_CUBE_MAP_NEGATIVE_Z_ARB 0x851A
-#define GL_PROXY_TEXTURE_CUBE_MAP_ARB 0x851B
-#define GL_MAX_CUBE_MAP_TEXTURE_SIZE_ARB 0x851C
-#define GL_TEXTURE_CUBE_MAP_EXT 0x8513
-#define GL_TEXTURE_BINDING_CUBE_MAP_EXT 0x8514
-#define GL_TEXTURE_CUBE_MAP_POSITIVE_X_EXT 0x8515
-#define GL_TEXTURE_CUBE_MAP_NEGATIVE_X_EXT 0x8516
-#define GL_TEXTURE_CUBE_MAP_POSITIVE_Y_EXT 0x8517
-#define GL_TEXTURE_CUBE_MAP_NEGATIVE_Y_EXT 0x8518
-#define GL_TEXTURE_CUBE_MAP_POSITIVE_Z_EXT 0x8519
-#define GL_TEXTURE_CUBE_MAP_NEGATIVE_Z_EXT 0x851A
-#define GL_PROXY_TEXTURE_CUBE_MAP_EXT 0x851B
-#define GL_MAX_CUBE_MAP_TEXTURE_SIZE_EXT 0x851C
-#endif
+		#define GL_GLEXT_PROTOTYPES
+		#include <OpenGL/glext.h>
+	#else
+		#ifndef __glext_h_
+			#define __glext_h_
+			#include <GL/glut.h>
+			#include "gl_undefined_extensions.h"
+			#undef __glext_h_
+			#include <GL/glext.h>
+		#endif
+	#endif
+	#ifdef _WIN32
+		#define GL_TEXTURE0_ARB 0x84C0
+		#define GL_TEXTURE1_ARB 0x84C1
+		#define GL_TEXTURE_CUBE_MAP_ARB 0x8513
+		#define GL_TEXTURE_BINDING_CUBE_MAP_ARB 0x8514
+		#define GL_TEXTURE_CUBE_MAP_POSITIVE_X_ARB 0x8515
+		#define GL_TEXTURE_CUBE_MAP_NEGATIVE_X_ARB 0x8516
+		#define GL_TEXTURE_CUBE_MAP_POSITIVE_Y_ARB 0x8517
+		#define GL_TEXTURE_CUBE_MAP_NEGATIVE_Y_ARB 0x8518
+		#define GL_TEXTURE_CUBE_MAP_POSITIVE_Z_ARB 0x8519
+		#define GL_TEXTURE_CUBE_MAP_NEGATIVE_Z_ARB 0x851A
+		#define GL_PROXY_TEXTURE_CUBE_MAP_ARB 0x851B
+		#define GL_MAX_CUBE_MAP_TEXTURE_SIZE_ARB 0x851C
+		#define GL_TEXTURE_CUBE_MAP_EXT 0x8513
+		#define GL_TEXTURE_BINDING_CUBE_MAP_EXT 0x8514
+		#define GL_TEXTURE_CUBE_MAP_POSITIVE_X_EXT 0x8515
+		#define GL_TEXTURE_CUBE_MAP_NEGATIVE_X_EXT 0x8516
+		#define GL_TEXTURE_CUBE_MAP_POSITIVE_Y_EXT 0x8517
+		#define GL_TEXTURE_CUBE_MAP_NEGATIVE_Y_EXT 0x8518
+		#define GL_TEXTURE_CUBE_MAP_POSITIVE_Z_EXT 0x8519
+		#define GL_TEXTURE_CUBE_MAP_NEGATIVE_Z_EXT 0x851A
+		#define GL_PROXY_TEXTURE_CUBE_MAP_EXT 0x851B
+		#define GL_MAX_CUBE_MAP_TEXTURE_SIZE_EXT 0x851C
+	#endif
 
-#if defined (__APPLE__)
-#define glMultiDrawElements_p glMultiDrawElements
-#define glMultiDrawArrays_p glMultiDrawArrays
-#define glMultiTexCoord4fARB_p glMultiTexCoord4fARB
-#define glMultiTexCoord2fARB_p glMultiTexCoord2fARB
-#define glClientActiveTextureARB_p glClientActiveTextureARB
-#define glActiveTextureARB_p glActiveTextureARB
-#define glColorTable_p glColorTable
-#define glCompressedTexImage2D_p glCompressedTexImage2D
-#ifndef OSX_LOWER_THAN_10_4
-#define glGetShaderiv_p glGetShaderiv
-#define glGetProgramiv_p glGetProgramiv
-#define glGetShaderInfoLog_p glGetShaderInfoLog
-#define glGetProgramInfoLog_p glGetProgramInfoLog
-#define glCreateShader_p glCreateShader
-#define glShaderSource_p glShaderSource
-#define glCompileShader_p glCompileShader
-#define glCreateProgram_p glCreateProgram
-#define glAttachShader_p glAttachShader
-#define glLinkProgram_p glLinkProgram
-#define glUseProgram_p glUseProgram
-#define glGetUniformLocation_p glGetUniformLocation
-#define glUniform1f_p glUniform1f
-#define glUniform2f_p glUniform2f
-#define glUniform3f_p glUniform3f
-#define glUniform4f_p glUniform4f
-#define glUniform1i_p glUniform1i
-#define glUniform2i_p glUniform2i
-#define glUniform3i_p glUniform3i
-#define glUniform4i_p glUniform4i
-#define glUniform1fv_p glUniform1fv
-#define glUniform2fv_p glUniform2fv
-#define glUniform3fv_p glUniform3fv
-#define glUniform4fv_p glUniform4fv
-#define glUniform1iv_p glUniform1iv
-#define glUniform2iv_p glUniform2iv
-#define glUniform3iv_p glUniform3iv
-#define glUniform4iv_p glUniform4iv
+	#if defined (__APPLE__)
+		#define glMultiDrawElements_p glMultiDrawElements
+		#define glMultiDrawArrays_p glMultiDrawArrays
+		#define glMultiTexCoord4fARB_p glMultiTexCoord4fARB
+		#define glMultiTexCoord2fARB_p glMultiTexCoord2fARB
+		#define glClientActiveTextureARB_p glClientActiveTextureARB
+		#define glActiveTextureARB_p glActiveTextureARB
+		#define glColorTable_p glColorTable
+		#define glCompressedTexImage2D_p glCompressedTexImage2D
 
-#define glDeleteShader_p glDeleteShader
-#define glDeleteProgram_p glDeleteProgram
-#else
-#define glGetShaderiv_p( a, b, c )
-#define glGetProgramiv_p( a, b, c )
-#define glGetShaderInfoLog_p( a, b, c, d )
-#define glGetProgramInfoLog_p( a, b, c, d )
-#define glCreateShader_p( a ) 0
-#define glShaderSource_p( a, b, c, d )
-#define glCompileShader_p( a )
-#define glCreateProgram_p() 0
-#define glAttachShader_p( a, b )
-#define glLinkProgram_p( a )
-#define glUseProgram_p( a )
-#define glGetUniformLocation_p( a, b ) 0
-#define glUniform1f_p( a, b )
-#define glUniform2f_p( a, b, c )
-#define glUniform3f_p( a, b, c, d )
-#define glUniform4f_p( a, b, c, d, e )
-#define glUniform1i_p( a, b )
-#define glUniform2i_p( a, b, c )
-#define glUniform3i_p( a, b, c, d )
-#define glUniform4i_p( a, b, c, d, e )
-#define glUniform1fv_p( a, b, c )
-#define glUniform2fv_p( a, b, c )
-#define glUniform3fv_p( a, b, c )
-#define glUniform4fv_p( a, b, c )
-#define glUniform1iv_p( a, b, c )
-#define glUniform2iv_p( a, b, c )
-#define glUniform3iv_p( a, b, c )
-#define glUniform4iv_p( a, b, c )
+		#ifndef OSX_LOWER_THAN_10_4
+			#define glGetShaderiv_p glGetShaderiv
+			#define glGetProgramiv_p glGetProgramiv
+			#define glGetShaderInfoLog_p glGetShaderInfoLog
+			#define glGetProgramInfoLog_p glGetProgramInfoLog
+			#define glCreateShader_p glCreateShader
+			#define glShaderSource_p glShaderSource
+			#define glCompileShader_p glCompileShader
+			#define glCreateProgram_p glCreateProgram
+			#define glAttachShader_p glAttachShader
+			#define glLinkProgram_p glLinkProgram
+			#define glUseProgram_p glUseProgram
+			#define glGetUniformLocation_p glGetUniformLocation
+			#define glUniform1f_p glUniform1f
+			#define glUniform2f_p glUniform2f
+			#define glUniform3f_p glUniform3f
+			#define glUniform4f_p glUniform4f
+			#define glUniform1i_p glUniform1i
+			#define glUniform2i_p glUniform2i
+			#define glUniform3i_p glUniform3i
+			#define glUniform4i_p glUniform4i
+			#define glUniform1fv_p glUniform1fv
+			#define glUniform2fv_p glUniform2fv
+			#define glUniform3fv_p glUniform3fv
+			#define glUniform4fv_p glUniform4fv
+			#define glUniform1iv_p glUniform1iv
+			#define glUniform2iv_p glUniform2iv
+			#define glUniform3iv_p glUniform3iv
+			#define glUniform4iv_p glUniform4iv
 
-#define glDeleteProgram_p glIsTexture
+			#define glDeleteShader_p glDeleteShader
+			#define glDeleteProgram_p glDeleteProgram
+		#else
+			#define glGetShaderiv_p( a, b, c )
+			#define glGetProgramiv_p( a, b, c )
+			#define glGetShaderInfoLog_p( a, b, c, d )
+			#define glGetProgramInfoLog_p( a, b, c, d )
+			#define glCreateShader_p( a ) 0
+			#define glShaderSource_p( a, b, c, d )
+			#define glCompileShader_p( a )
+			#define glCreateProgram_p() 0
+			#define glAttachShader_p( a, b )
+			#define glLinkProgram_p( a )
+			#define glUseProgram_p( a )
+			#define glGetUniformLocation_p( a, b ) 0
+			#define glUniform1f_p( a, b )
+			#define glUniform2f_p( a, b, c )
+			#define glUniform3f_p( a, b, c, d )
+			#define glUniform4f_p( a, b, c, d, e )
+			#define glUniform1i_p( a, b )
+			#define glUniform2i_p( a, b, c )
+			#define glUniform3i_p( a, b, c, d )
+			#define glUniform4i_p( a, b, c, d, e )
+			#define glUniform1fv_p( a, b, c )
+			#define glUniform2fv_p( a, b, c )
+			#define glUniform3fv_p( a, b, c )
+			#define glUniform4fv_p( a, b, c )
+			#define glUniform1iv_p( a, b, c )
+			#define glUniform2iv_p( a, b, c )
+			#define glUniform3iv_p( a, b, c )
+			#define glUniform4iv_p( a, b, c )
 
-#endif
-#if !defined (glLockArraysEXT) || !defined (glUnlockArraysEXT)
-#define NO_COMPILEDVERTEXARRAY_SUPPORT
-#endif
+			#define glDeleteProgram_p glIsTexture
 
-#ifndef NO_COMPILEDVERTEXARRAY_SUPPORT
-#define glLockArraysEXT_p glLockArraysEXT
-#define glUnlockArraysEXT_p glUnlockArraysEXT
-#endif
+		#endif
+		#if !defined (glLockArraysEXT) || !defined (glUnlockArraysEXT)
+			#define NO_COMPILEDVERTEXARRAY_SUPPORT
+		#endif
 
-#if !defined (glDeleteBuffersARB) || !defined (glGenBuffersARB) || !defined (glBindBuffersARB) || !defined (glMapBufferARB) \
-    || !defined (glUnmapBufferARB)
-#define NO_VBO_SUPPORT
-#endif
+		#ifndef NO_COMPILEDVERTEXARRAY_SUPPORT
+			#define glLockArraysEXT_p glLockArraysEXT
+			#define glUnlockArraysEXT_p glUnlockArraysEXT
+		#endif
 
-#ifndef NO_VBO_SUPPORT
-#define glDeleteBuffersARB_p glDeleteBuffersARB
-#define glGenBuffersARB_p glGenBuffersARB
-#define glBindBufferARB_p glBindBufferARB
-#define glBufferDataARB_p glBufferDataARB
-#define glMapBufferARB_p glMapBufferARB
-#define glUnmapBufferARB_p glUnmapBufferARB
-#endif
+		#if !defined (glDeleteBuffersARB) || !defined (glGenBuffersARB) || !defined (glBindBuffersARB) || !defined (glMapBufferARB) \
+			|| !defined (glUnmapBufferARB)
+			#define NO_VBO_SUPPORT
+		#endif
 
-#else
+		#ifndef NO_VBO_SUPPORT
+			#define glDeleteBuffersARB_p glDeleteBuffersARB
+			#define glGenBuffersARB_p glGenBuffersARB
+			#define glBindBufferARB_p glBindBufferARB
+			#define glBufferDataARB_p glBufferDataARB
+			#define glMapBufferARB_p glMapBufferARB
+			#define glUnmapBufferARB_p glUnmapBufferARB
+		#endif
+
+	#else
 extern PFNGLBINDBUFFERARBPROC          glBindBufferARB_p;
 extern PFNGLGENBUFFERSARBPROC          glGenBuffersARB_p;
 extern PFNGLDELETEBUFFERSARBPROC       glDeleteBuffersARB_p;
@@ -291,12 +287,12 @@ extern PFNGLUNIFORM4IVPROC    glUniform4iv_p;
 extern PFNGLDELETESHADERPROC  glDeleteShader_p;
 extern PFNGLDELETEPROGRAMPROC glDeleteProgram_p;
 
-#endif /* __APPLE_PANTHER_GCC33_CLI__ */
+	#endif /* __APPLE_PANTHER_GCC33_CLI__ */
 
 //extern int sharedcolortable;
-#ifdef STATS_QUEUE
+	#ifdef STATS_QUEUE
 extern queue< GFXStats >statsqueue;
-#endif
+	#endif
 typedef struct
 {
     int  fullscreen;
@@ -331,8 +327,8 @@ extern int gl_vertices_this_frame;
 extern int gl_batches_this_frame;
 
 //Maximum number of things that can be returned in a pick operation
-#define MAX_PICK 2048
-#define GFX_SCALE 1./1024.
+	#define MAX_PICK 2048
+	#define GFX_SCALE 1./1024.
 #endif
 
 // Not all platforms define GL_TEXTURE_CUBE_MAP_EXT and friends
@@ -347,7 +343,7 @@ extern int gl_batches_this_frame;
         #define GL_TEXTURE_CUBE_MAP_NEGATIVE_Y_EXT GL_TEXTURE_CUBE_MAP_NEGATIVE_Y
         #define GL_TEXTURE_CUBE_MAP_POSITIVE_Z_EXT GL_TEXTURE_CUBE_MAP_POSITIVE_Z
         #define GL_TEXTURE_CUBE_MAP_NEGATIVE_Z_EXT GL_TEXTURE_CUBE_MAP_NEGATIVE_Z
-    #else 
+    #else
         #ifdef GL_TEXTURE_CUBE_MAP_ARB
             #define GL_TEXTURE_CUBE_MAP_EXT GL_TEXTURE_CUBE_MAP_ARB
             #define GL_TEXTURE_CUBE_MAP_POSITIVE_X_EXT GL_TEXTURE_CUBE_MAP_POSITIVE_X_ARB

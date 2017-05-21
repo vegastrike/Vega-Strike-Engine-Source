@@ -1,37 +1,12 @@
-/*
- * Vega Strike
- * Copyright (C) 2001-2002 Daniel Horn & Alan Shieh
- *
- * http://vegastrike.sourceforge.net/
- *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * as published by the Free Software Foundation; either version 2
- * of the License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
- */
 #include "camera.h"
 #include "cmd/unit_generic.h" ///for GetUnit ();
 #include "matrix.h"
-
-//Remove GL specific stuff here
 
 #include "vs_globals.h"
 #include "audiolib.h"
 #include "lin_time.h"
 
 #include <assert.h>     //needed for assert() calls
-//#include "planetary_transform.h"  commented out by chuck_starchaser; --never used
-
-//const float PI=3.1415926536;
 
 Camera::Camera( ProjectionType proj ) : projectionType( proj )
     , myPhysics( 0.1, 0.075, &Coord, &P, &Q, &R )
@@ -44,10 +19,7 @@ Camera::Camera( ProjectionType proj ) : projectionType( proj )
     velocity = angular_velocity = Vector( 0, 0, 0 );
     lastpos.Set( 0, 0, 0 );
     cockpit_offset = 0;
-    //////////////////////////////////////////SetPlanetaryTransform( NULL );
     changed = GFXTRUE;
-    //SetPosition();
-    //SetOrientation();
     Yaw( PI );
     x     = y = 0;
     xsize = ysize = 1.0;
@@ -90,11 +62,10 @@ void Camera::UpdateGFX( GFXBOOL clip,
     lastGFXUpdate.overrideZFar     = overrideZFar;
 
     const float ZFARCONST = 1000000;
-    float xmin, xmax, ymin, ymax, znear, zfar;
+    float znear, zfar;
     if (1 || changed) {
         myPhysics.Update();
         GFXLoadIdentity( PROJECTION );
-        //FIXMEGFXLoadIdentity(VIEW);
         switch (projectionType)
         {
         case Camera::PERSPECTIVE:
@@ -104,13 +75,6 @@ void Camera::UpdateGFX( GFXBOOL clip,
             GFXPerspective( zoom*fov, g_game.aspect, znear, zfar, cockpit_offset );             //set perspective to 78 degree FOV
             break;
         case Camera::PARALLEL:
-            ymax  = g_game.znear*tanf( zoom*fov*PI/( (float) 360.0 ) );
-
-            ymin  = -ymax;             //-4.7046
-
-            xmin  = ymin*g_game.aspect;              //-6.2571
-            xmax  = ymax*g_game.aspect;              //6.2571
-
             znear = ( overrideZFrustum ? overrideZNear : -g_game.zfar*(clip ? 1 : ZFARCONST) );
             zfar  = ( overrideZFrustum ? overrideZFar : g_game.zfar*(clip ? 1 : ZFARCONST) );
 
@@ -139,26 +103,6 @@ void Camera::UpdateCameraSounds()
     AUDListenerOrientation( P, Q, R );
 #endif
 }
-
-#ifdef OLDUPDATEPLANEGFX
-/**
- *  Vector c (planet->InvTransform (Coord));
- *  Vector tt (planet->Transform (c));
- *  VSFileSystem::Fprintf (stderr,"t <%f,%f,%f>\n",tt.i,tt.j,tt.k);
- *  VSFileSystem::Fprintf (stderr,"Coord <%f,%f,%f>\n",Coord.i,Coord.j,Coord.k);
- *  Vector p (planet->InvTransform (Coord+P)-c);
- *  Vector q (planet->InvTransform (Coord+Q)-c);
- *  Vector r (planet->InvTransform (Coord+R)-c);
- *  r.Normalize();
- *
- *  //    p= q.Cross (r);
- *  //	  q = r.Cross (p);
- *  p.Normalize();
- *  q.Normalize();
- *  q = q-q.Dot (r)*r;
- *  q.Normalize();
- */
-#endif
 
 void Camera::GetView( Matrix &vw )
 {
@@ -190,9 +134,6 @@ void Camera::UpdateGLCenter()
 #define ITISDEPRECATED 0
     assert( ITISDEPRECATED );
 #undef ITISDEPRECATED
-//static float rotfactor = 0;
-    //glMatrixMode(GL_PROJECTION);
-    float xmin, xmax, ymin, ymax;
     if (changed) {
         GFXLoadIdentity( PROJECTION );
         GFXLoadIdentity( VIEW );
@@ -203,23 +144,13 @@ void Camera::UpdateGLCenter()
             GFXPerspective( zoom*fov, g_game.aspect, g_game.znear, g_game.zfar, cockpit_offset );             //set perspective to 78 degree FOV
             break;
         case Camera::PARALLEL:
-            ymax = g_game.znear*tanf( zoom*fov*PI/( (float) 360.0 ) );                //78.0 --> 4.7046
-
-            ymin = -ymax;             //-4.7046
-
-            xmin = ymin*g_game.aspect;               //-6.2571
-            xmax = ymax*g_game.aspect;               //6.2571
-
-            //GFXParallel(xmin,xmax,ymin,ymax,-znear,zfar);
             GFXParallel( g_game.aspect* -zoom, g_game.aspect*zoom, -zoom, zoom, -g_game.znear, g_game.zfar );
             break;
         }
         RestoreViewPort( 0, 0 );
 
         GFXLookAt( -R, QVector( 0, 0, 0 ), Q );
-        //changed = GFXFALSE;
     }
-    //glMultMatrixf(view);
 }
 
 void Camera::SetPosition( const QVector &origin, const Vector &vel, const Vector &angvel, const Vector &acceleration )

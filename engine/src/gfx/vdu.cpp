@@ -1309,7 +1309,7 @@ void VDU::DrawDamage( Unit *parent )
     ecmstatus[0] = '\0';
     static bool print_ecm = XMLSupport::parse_bool( vs_config->getVariable( "graphics", "print_ecm_status", "true" ) );
     if (print_ecm) {
-        if (UnitUtil::getECM(parent) > 0) { 
+        if (UnitUtil::getECM(parent) > 0) {
             GFXColor4f( 0, 1, 0, .5 );
             strcpy( ecmstatus, "ECM Active" );
             static float s = 0;
@@ -1381,7 +1381,7 @@ void VDU::DrawDamage( Unit *parent )
             retval += string( " (" )+tostring( int(percent_working*100) )+string( "%)" ); \
         retval += trailer+std::string( "\n" ); \
     } while(0)
-    
+
 #define REPORTINTEGRATED(which, which_key, which_name_default) \
     do { \
         static string name = vs_config->getVariable( "graphics", "hud", which_key, which_name_default ); \
@@ -1404,16 +1404,16 @@ void VDU::DrawDamage( Unit *parent )
         } \
     } while(0)
 
-        
+
     for (unsigned int i = 0; i < numCargo; i++) {
         percent_working = 0.88;         //cargo.damage
         Cargo &the_cargo = parent->GetCargo( i );
         bool   damaged   = the_cargo.GetCategory().find( DamagedCategory ) == 0;
         if ( damaged
-            || (   the_cargo.GetCategory().find( "upgrades/" ) == 0 
+            || (   the_cargo.GetCategory().find( "upgrades/" ) == 0
                 && the_cargo.installed
                 && the_cargo.GetContent().find( "mult_" ) != 0
-                && the_cargo.GetContent().find( "add_" ) != 0 
+                && the_cargo.GetContent().find( "add_" ) != 0
                 && non_repair_screen_cargo.find( the_cargo.GetContent() )
                 == std::string::npos) ) {
             percent_working = UnitUtil::PercentOperational( parent, the_cargo.content, the_cargo.category, false );
@@ -1427,7 +1427,7 @@ void VDU::DrawDamage( Unit *parent )
         REPORTINTEGRATED(fireControl, "damage.names.fire_control", "Fire Control");
         REPORTINTEGRATED(SPECDrive, "damage.names.spec_drive", "SPEC Drive");
         REPORTINTEGRATED(Comm, "damage.names.comm", "Comm");
-        
+
         // Integrated system with boolean damage flags
         REPORTINTEGRATEDFLAG(Unit::LIMITS_DAMAGED, "damage.names.limits_name", "Thrusters");
         REPORTINTEGRATEDFLAG(Unit::SHIELD_DAMAGED, "damage.names.shield_name", ""); // default invisible, is an upgrade
@@ -1435,7 +1435,7 @@ void VDU::DrawDamage( Unit *parent )
         REPORTINTEGRATEDFLAG(Unit::JUMP_DAMAGED, "damage.names.jump_name", ""); // default invisible, is an upgrade
         REPORTINTEGRATEDFLAG(Unit::CLOAK_DAMAGED, "damage.names.cloak_name", ""); // default invisible, is an upgrade
     }
-        
+
     retval += ecmstatus;
     static float background_alpha =
         XMLSupport::parse_float( vs_config->getVariable( "graphics", "hud", "text_background_alpha", "0.0625" ) );
