@@ -683,16 +683,32 @@ include (CheckIncludeFileCXX)
 # Let cmake find our in-tree modules
 SET(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${vsUTCS_SOURCE_DIR})
 
-
-# Python 3 has an SASL compatibility issue that causes an error on some installations that prefer Python3.
-find_package(PythonLibs 2.7 REQUIRED)
-IF(PYTHONLIBS_FOUND OR PYTHON_LIBRARIES AND PYTHON_INCLUDE_PATH)
-    SET(TST_INCLUDES ${PYTHON_INCLUDE_PATH})
+# Python 3 has a SASL compatibility issue which causes an error
+# on some installations that prefer Python 3
+# -- Python 2.7 is default for now
+OPTION(USE_PYTHON_3 "Use Python 3 instead of Python 2.7 (default is 2.7)" OFF)
+IF(USE_PYTHON_3)
+# We want at least Python 3.4, but we prefer newer versions
+SET(Python_ADDITIONAL_VERSIONS 3.6 3.5 3.4)
+ELSE(USE_PYTHON_3)
+SET(Python_ADDITIONAL_VERSIONS 2.7)
+ENDIF(USE_PYTHON_3)
+# If we don't unset cache variables
+# ccmake won't pick up changes to the USE_PYTHON_3 option
+UNSET(PYTHON_INCLUDE_DIR CACHE)
+UNSET(PYTHON_LIBRARY CACHE)
+# The python version we want is set via Python_ADDITIONAL_VERSIONS
+find_package(PythonLibs REQUIRED)
+message("++ Python release(s) searched for : ${Python_ADDITIONAL_VERSIONS}")
+message("++ Python library : ${PYTHON_LIBRARY} (${PYTHONLIBS_VERSION_STRING})") 
+message("++ Python include dir : ${PYTHON_INCLUDE_DIR}")
+IF(PYTHONLIBS_FOUND OR PYTHON_LIBRARIES AND PYTHON_INCLUDE_DIRS)
+    SET(TST_INCLUDES ${PYTHON_INCLUDE_DIRS})
     SET(TST_LIBS ${PYTHON_LIBRARIES})
     SET(HAVE_PYTHON 1)
-ELSE(PYTHONLIBS_FOUND OR PYTHON_LIBRARIES AND PYTHON_INCLUDE_PATH)
+ELSE(PYTHONLIBS_FOUND OR PYTHON_LIBRARIES AND PYTHON_INCLUDE_DIRS)
     message(FATAL_ERROR "Can't find python")
-ENDIF(PYTHONLIBS_FOUND OR PYTHON_LIBRARIES AND PYTHON_INCLUDE_PATH)
+ENDIF(PYTHONLIBS_FOUND OR PYTHON_LIBRARIES AND PYTHON_INCLUDE_DIRS)
 
 # Find Boost with boost_python library
 OPTION(USE_SYSTEM_BOOST "Use system boost" OFF)
