@@ -1,0 +1,19 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.8.6">
+  <compounddef id="dir_ef67fc9629a2ce2087f73d1d24f131e1" kind="dir">
+    <compoundname>/home/ubuntu/boost/boost/geometry/index</compoundname>
+    <innerdir refid="dir_a9e91759b06c3469534fe3a2d2635516">/home/ubuntu/boost/boost/geometry/index/adaptors</innerdir>
+    <innerfile refid="distance__predicates_8hpp">distance_predicates.hpp</innerfile>
+    <innerfile refid="equal__to_8hpp">equal_to.hpp</innerfile>
+    <innerfile refid="indexable_8hpp">indexable.hpp</innerfile>
+    <innerfile refid="inserter_8hpp">inserter.hpp</innerfile>
+    <innerfile refid="parameters_8hpp">parameters.hpp</innerfile>
+    <innerfile refid="predicates_8hpp">predicates.hpp</innerfile>
+    <innerfile refid="rtree_8hpp">rtree.hpp</innerfile>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <location file="/home/ubuntu/boost/boost/geometry/index/"/>
+  </compounddef>
+</doxygen>

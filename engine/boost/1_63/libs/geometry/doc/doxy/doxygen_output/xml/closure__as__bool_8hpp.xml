@@ -1,0 +1,109 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.8.6">
+  <compounddef id="closure__as__bool_8hpp" kind="file">
+    <compoundname>closure_as_bool.hpp</compoundname>
+    <includes refid="closure_8hpp" local="no">boost/geometry/core/closure.hpp</includes>
+    <incdepgraph>
+      <node id="63782">
+        <label>boost/type_traits/remove_const.hpp</label>
+      </node>
+      <node id="63781">
+        <label>boost/type_traits/is_const.hpp</label>
+      </node>
+      <node id="63775">
+        <label>boost/geometry/core/closure.hpp</label>
+        <link refid="closure_8hpp"/>
+        <childnode refid="63776" relation="include">
+        </childnode>
+        <childnode refid="63777" relation="include">
+        </childnode>
+        <childnode refid="63778" relation="include">
+        </childnode>
+        <childnode refid="63779" relation="include">
+        </childnode>
+        <childnode refid="63784" relation="include">
+        </childnode>
+        <childnode refid="63785" relation="include">
+        </childnode>
+        <childnode refid="63786" relation="include">
+        </childnode>
+      </node>
+      <node id="63780">
+        <label>boost/mpl/if.hpp</label>
+      </node>
+      <node id="63779">
+        <label>boost/geometry/core/ring_type.hpp</label>
+        <link refid="ring__type_8hpp"/>
+        <childnode refid="63776" relation="include">
+        </childnode>
+        <childnode refid="63780" relation="include">
+        </childnode>
+        <childnode refid="63778" relation="include">
+        </childnode>
+        <childnode refid="63781" relation="include">
+        </childnode>
+        <childnode refid="63782" relation="include">
+        </childnode>
+        <childnode refid="63783" relation="include">
+        </childnode>
+        <childnode refid="63784" relation="include">
+        </childnode>
+        <childnode refid="63785" relation="include">
+        </childnode>
+      </node>
+      <node id="63785">
+        <label>boost/geometry/core/tags.hpp</label>
+        <link refid="core_2tags_8hpp"/>
+      </node>
+      <node id="63776">
+        <label>boost/mpl/assert.hpp</label>
+      </node>
+      <node id="63783">
+        <label>boost/type_traits/remove_reference.hpp</label>
+      </node>
+      <node id="63786">
+        <label>boost/geometry/util/bare_type.hpp</label>
+        <link refid="bare__type_8hpp"/>
+        <childnode refid="63782" relation="include">
+        </childnode>
+        <childnode refid="63787" relation="include">
+        </childnode>
+        <childnode refid="63783" relation="include">
+        </childnode>
+      </node>
+      <node id="63774">
+        <label>/home/ubuntu/boost/boost/geometry/util/closure_as_bool.hpp</label>
+        <link refid="closure_as_bool.hpp"/>
+        <childnode refid="63775" relation="include">
+        </childnode>
+      </node>
+      <node id="63777">
+        <label>boost/mpl/size_t.hpp</label>
+      </node>
+      <node id="63784">
+        <label>boost/geometry/core/tag.hpp</label>
+        <link refid="tag_8hpp"/>
+        <childnode refid="63785" relation="include">
+        </childnode>
+        <childnode refid="63786" relation="include">
+        </childnode>
+      </node>
+      <node id="63778">
+        <label>boost/range/value_type.hpp</label>
+      </node>
+      <node id="63787">
+        <label>boost/type_traits/remove_pointer.hpp</label>
+      </node>
+    </incdepgraph>
+    <innerclass refid="structboost_1_1geometry_1_1closure__as__bool" prot="public">boost::geometry::closure_as_bool</innerclass>
+    <innerclass refid="structboost_1_1geometry_1_1closure__as__bool_3_01closed_01_4" prot="public">boost::geometry::closure_as_bool&lt; closed &gt;</innerclass>
+    <innerclass refid="structboost_1_1geometry_1_1closure__as__bool_3_01open_01_4" prot="public">boost::geometry::closure_as_bool&lt; open &gt;</innerclass>
+    <innernamespace refid="namespaceboost">boost</innernamespace>
+    <innernamespace refid="namespaceboost_1_1geometry">boost::geometry</innernamespace>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <location file="/home/ubuntu/boost/boost/geometry/util/closure_as_bool.hpp"/>
+  </compounddef>
+</doxygen>

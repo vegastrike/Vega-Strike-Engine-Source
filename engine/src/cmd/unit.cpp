@@ -263,9 +263,7 @@ void GameUnit< UnitType >::DrawNow( const Matrix &mato, float lod )
         MultMatrix( submat, mat, temp );
         (un)->DrawNow( submat, lod );
     }
-    float  haloalpha   = 1;
-    if (cloak >= 0)
-        haloalpha = ( (float) cloak )/2147483647;
+
 #ifdef CAR_SIM
     Vector Scale( 1, pImage->ecm, computer.set_speed );
 #else
@@ -374,27 +372,27 @@ void GameUnit< UnitType >::Draw( const Transformation &parent, const Matrix &par
         cloak = (int) (this->cloaking-interpolation_blend_factor*this->pImage->cloakrate*SIMULATION_ATOM);
         cloak = cloakVal( cloak, this->cloakmin, this->pImage->cloakrate, this->pImage->cloakglass );
     }
-    
+
     unsigned int i;
     if ( (this->hull < 0) && (!cam_setup_phase) )
         Explode( true, GetElapsedTime() );
-    
+
     float damagelevel = 1.0f;
     unsigned char chardamage = 0;
     if (this->hull < this->maxhull && !cam_setup_phase) {
         damagelevel = this->hull/this->maxhull;
         chardamage  = ( 255-(unsigned char) (damagelevel*255) );
     }
-    
+
     bool On_Screen = false;
     if ( ( !(this->invisible&UnitType::INVISUNIT) ) && ( ( !(this->invisible&UnitType::INVISCAMERA) ) || (!myparent) ) ) {
         if (!cam_setup_phase) {
             Camera *camera = _Universe->AccessCamera();
             QVector camerapos = camera->GetPosition();
-            
+
             float minmeshradius =
                 ( camera->GetVelocity().Magnitude()+this->Velocity.Magnitude() )*SIMULATION_ATOM;
-            
+
             unsigned int numKeyFrames = this->graphicOptions.NumAnimationPoints;
             for (i = 0; i < this->meshdata.size(); i++) {
                 //NOTE LESS THAN OR EQUALS...to cover shield mesh
@@ -423,9 +421,9 @@ void GameUnit< UnitType >::Draw( const Transformation &parent, const Matrix &par
                     if (lod >= 0.5 && pixradius >= 2.5) {
                         //if the radius is at least half a pixel at detail 1 (equivalent to pixradius >= 0.5 / detail)
                         float currentFrame = this->meshdata[i]->getCurrentFrame();
-                        this->meshdata[i]->Draw( lod, this->WarpMatrix( *ctm ), d, 
+                        this->meshdata[i]->Draw( lod, this->WarpMatrix( *ctm ), d,
                                                  i == this->meshdata.size()-1 ? -1 : cloak,
-                                                 (camera->GetNebula() == this->nebula && this->nebula != NULL) ? -1 : 0, 
+                                                 (camera->GetNebula() == this->nebula && this->nebula != NULL) ? -1 : 0,
                                                  chardamage );                                                                                                                                                            //cloakign and nebula
                         On_Screen = true;
                         unsigned int numAnimFrames = 0;
@@ -435,7 +433,7 @@ void GameUnit< UnitType >::Draw( const Transformation &parent, const Matrix &par
                             float currentprogress = floor(
                                 this->meshdata[i]->getCurrentFrame()*numKeyFrames/(float) numAnimFrames );
                             if (numKeyFrames
-                                && floor( currentFrame*numKeyFrames/(float) numAnimFrames ) != currentprogress) 
+                                && floor( currentFrame*numKeyFrames/(float) numAnimFrames ) != currentprogress)
                             {
                                 this->graphicOptions.Animating = 0;
                                 this->meshdata[i]->setCurrentFrame( .1+currentprogress*numAnimFrames/(float) numKeyFrames );
@@ -523,12 +521,9 @@ void GameUnit< UnitType >::Draw( const Transformation &parent, const Matrix &par
                 this->mounts[i].ref.gun->Draw( *ct, this->WarpMatrix( *ctm ),
                                                ( (this->mounts[i].size&weapon_info::AUTOTRACKING)
                                                 && (this->mounts[i].time_to_lock <= 0)
-                                                && (this->computer.radar.trackingactive) ) ? Unit::Target() : NULL, 
+                                                && (this->computer.radar.trackingactive) ) ? Unit::Target() : NULL,
                                                this->computer.radar.trackingcone );
     }
-    float haloalpha = 1;
-    if (cloak >= 0)
-        haloalpha = ( (float) cloak )/2147483647;
     if ( On_Screen && (phalos->NumHalos() > 0) && !( this->docked&(UnitType::DOCKED|UnitType::DOCKED_INSIDE) ) ) {
         Vector accel    = this->GetAcceleration();
         float  maxaccel = this->GetMaxAccelerationInDirectionOf( this->WarpMatrix( *ctm ).getR(), true );
@@ -590,7 +585,7 @@ void GameUnit< UnitType >::Draw()
     Draw( identity_transformation, identity_matrix );
 }
 
-    
+
 static float parseFloat( const std::string &s )
 {
     if ( s.empty() ) {
@@ -631,10 +626,10 @@ void GameUnit< UnitType >::applyTechniqueOverrides(const map<string, string> &ov
                             doOverride = true;
                     }
                 }
-                
+
                 if (doOverride) {
                     // Prepare a new technique with the overrides
-                    // (make sure the technique has been compiled though - 
+                    // (make sure the technique has been compiled though -
                     // parameter values don't really need recompilation)
                     TechniquePtr newtechnique = TechniquePtr(new Technique(*technique));
                     for (int passno = 0; passno < technique->getNumPasses(); ++passno) {
@@ -642,11 +637,11 @@ void GameUnit< UnitType >::applyTechniqueOverrides(const map<string, string> &ov
                         for (size_t paramno = 0; paramno < pass.getNumShaderParams(); ++paramno) {
                             Technique::Pass::ShaderParam &param = pass.getShaderParam(paramno);
                             map<string, string>::const_iterator override = overrides.find(param.name);
-                            if (override != overrides.end()) 
+                            if (override != overrides.end())
                                 parseFloat4(override->second, param.value);
                         }
                     }
-                    
+
                     (*mesh)->setTechnique(newtechnique);
                 }
             }

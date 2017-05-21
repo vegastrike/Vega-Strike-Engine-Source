@@ -505,40 +505,44 @@ int main( int argc, char **argv )
             }
         }
     } else {
+		/* A number of warnings being produced here due to unused results
+		 * so commenting them out rather than removing as the likelihood
+		 * of this breaking something is high.
+		 */
+
         printf( "Enter Output File:\n" );
-        static int bogus_int;         //added by chuck_starchaser to get rid of ignored return warnings
-        bogus_int    = scanf( "%s", filename );
+        scanf( "%s", filename );
         printf( "Enter Size of field?\n" );
-        bogus_int    = scanf( "%f", &cube_sides.i );
+        scanf( "%f", &cube_sides.i );
         cube_sides.j = cube_sides.k = cube_sides.i;
         printf( "Enter number of asteroids\n" );
-        bogus_int    = scanf( "%d", &numroids );
+        scanf( "%d", &numroids );
         printf( "Enter asteroid minimum and max radius\n" );
-        bogus_int    = scanf( "%f %f", &radiusmin, &radiusmax );
+        scanf( "%f %f", &radiusmin, &radiusmax );
         printf( "Enter cragginess from 0 to 1\n" );
-        bogus_int    = scanf( "%f", &deviation );
+        scanf( "%f", &deviation );
         printf( "Enter minimum number of polys and max num polys\n" );
-        bogus_int    = scanf( "%d %d", &poly_min, &poly_max );
+        scanf( "%d %d", &poly_min, &poly_max );
         printf( "Enter size of safety zone (0 to disable)\n" );
-        bogus_int    = scanf( "%f", &safety_zone );
+        scanf( "%f", &safety_zone );
         printf( "Enter random seed (0 to use clock\n" );
-        bogus_int    = scanf( "%d", &randomseed );
+        scanf( "%d", &randomseed );
         printf( "Do you want a unit file? (y/n)\n" );
-        bogus_int    = scanf( "%c", (char*) &num_cubes );
+        scanf( "%c", (char*) &num_cubes );
         if ( (char) num_cubes == 'y' ) {
             printf( "Enter Output Unit File:\n" );
-            bogus_int = scanf( "%s", unitfilename );
+            scanf( "%s", unitfilename );
 #ifdef RAND
             printf( "Enter number of cubes?\n" );
-            bogus_int = scanf( "%d", &num_cubes );
+            scanf( "%d", &num_cubes );
 #else
             printf( "Enter offset of cubes?\n" );
-            bogus_int = scanf( "%f", &offset );
+            scanf( "%f", &offset );
 #endif
             printf( "Enter inner radius?\n" );
-            bogus_int = scanf( "%f", &innerRadius );
+            scanf( "%f", &innerRadius );
             printf( "Enter outer radius?\n" );
-            bogus_int = scanf( "%f", &outerRadius );
+            scanf( "%f", &outerRadius );
         } else {
             num_cubes = 0;
             offset    = 0;

@@ -1,0 +1,28 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.8.6">
+  <compounddef id="dir_497000fd3b800405f7f32c9cbeb1465a" kind="dir">
+    <compoundname>/home/ubuntu/boost/boost/geometry/geometries</compoundname>
+    <innerdir refid="dir_c4154bbc965a3059c1389d76fabb9909">/home/ubuntu/boost/boost/geometry/geometries/adapted</innerdir>
+    <innerdir refid="dir_35a555b0591d1b44c893e4edc123f3bc">/home/ubuntu/boost/boost/geometry/geometries/concepts</innerdir>
+    <innerdir refid="dir_e1c651de8fa4f334f23969000e17c580">/home/ubuntu/boost/boost/geometry/geometries/register</innerdir>
+    <innerfile refid="geometries_2box_8hpp">box.hpp</innerfile>
+    <innerfile refid="geometries_8hpp">geometries.hpp</innerfile>
+    <innerfile refid="helper__geometry_8hpp">helper_geometry.hpp</innerfile>
+    <innerfile refid="linestring_8hpp">linestring.hpp</innerfile>
+    <innerfile refid="multi__linestring_8hpp">multi_linestring.hpp</innerfile>
+    <innerfile refid="multi__point_8hpp">multi_point.hpp</innerfile>
+    <innerfile refid="multi__polygon_8hpp">multi_polygon.hpp</innerfile>
+    <innerfile refid="geometries_2point_8hpp">point.hpp</innerfile>
+    <innerfile refid="point__xy_8hpp">point_xy.hpp</innerfile>
+    <innerfile refid="pointing__segment_8hpp">pointing_segment.hpp</innerfile>
+    <innerfile refid="geometries_2polygon_8hpp">polygon.hpp</innerfile>
+    <innerfile refid="geometries_2ring_8hpp">ring.hpp</innerfile>
+    <innerfile refid="geometries_2segment_8hpp">segment.hpp</innerfile>
+    <innerfile refid="variant_8hpp">variant.hpp</innerfile>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <location file="/home/ubuntu/boost/boost/geometry/geometries/"/>
+  </compounddef>
+</doxygen>

@@ -1,0 +1,15 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.8.6">
+  <compounddef id="dir_f3ff23821d89b6fcf74835f1ec514cb0" kind="dir">
+    <compoundname>/home/ubuntu/boost/boost/geometry/algorithms/detail/intersection</compoundname>
+    <innerfile refid="intersection_2box__box_8hpp">box_box.hpp</innerfile>
+    <innerfile refid="intersection_2implementation_8hpp">implementation.hpp</innerfile>
+    <innerfile refid="intersection_2interface_8hpp">interface.hpp</innerfile>
+    <innerfile refid="multi_8hpp">multi.hpp</innerfile>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <location file="/home/ubuntu/boost/boost/geometry/algorithms/detail/intersection/"/>
+  </compounddef>
+</doxygen>

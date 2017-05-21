@@ -1,0 +1,12 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.8.6">
+  <compounddef id="dir_6f25c90e381132fd960cd64986a2bf26" kind="dir">
+    <compoundname>/home/ubuntu/boost/boost/geometry</compoundname>
+    <innerdir refid="dir_ef67fc9629a2ce2087f73d1d24f131e1">/home/ubuntu/boost/boost/geometry/index</innerdir>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <location file="/home/ubuntu/boost/boost/geometry/"/>
+  </compounddef>
+</doxygen>

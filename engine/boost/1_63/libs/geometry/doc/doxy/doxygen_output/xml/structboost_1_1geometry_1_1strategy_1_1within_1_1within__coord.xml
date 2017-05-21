@@ -1,0 +1,63 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.8.6">
+  <compounddef id="structboost_1_1geometry_1_1strategy_1_1within_1_1within__coord" kind="struct" prot="public">
+    <compoundname>boost::geometry::strategy::within::within_coord</compoundname>
+    <derivedcompoundref refid="structboost_1_1geometry_1_1strategy_1_1within_1_1within__range" prot="public" virt="non-virtual">boost::geometry::strategy::within::within_range&lt; Geometry, Dimension, CSTag &gt;</derivedcompoundref>
+    <includes local="no">point_in_box.hpp</includes>
+      <sectiondef kind="public-static-func">
+      <memberdef kind="function" id="structboost_1_1geometry_1_1strategy_1_1within_1_1within__coord_1aa82ee48878da20f2bd4e8c00c6cb6098" prot="public" static="yes" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <templateparamlist>
+          <param>
+            <type>typename Value1</type>
+          </param>
+          <param>
+            <type>typename Value2</type>
+          </param>
+        </templateparamlist>
+        <type>bool</type>
+        <definition>static bool boost::geometry::strategy::within::within_coord::apply</definition>
+        <argsstring>(Value1 const &amp;value, Value2 const &amp;min_value, Value2 const &amp;max_value)</argsstring>
+        <name>apply</name>
+        <param>
+          <type>Value1 const &amp;</type>
+          <declname>value</declname>
+        </param>
+        <param>
+          <type>Value2 const &amp;</type>
+          <declname>min_value</declname>
+        </param>
+        <param>
+          <type>Value2 const &amp;</type>
+          <declname>max_value</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/ubuntu/boost/boost/geometry/strategies/cartesian/point_in_box.hpp" line="39" column="1" bodyfile="/home/ubuntu/boost/boost/geometry/strategies/cartesian/point_in_box.hpp" bodystart="39" bodyend="42"/>
+      </memberdef>
+      </sectiondef>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <inheritancegraph>
+      <node id="1680">
+        <label>boost::geometry::strategy::within::within_coord</label>
+        <link refid="structboost_1_1geometry_1_1strategy_1_1within_1_1within__coord"/>
+      </node>
+      <node id="1681">
+        <label>boost::geometry::strategy::within::within_range&lt; Geometry, Dimension, CSTag &gt;</label>
+        <link refid="structboost_1_1geometry_1_1strategy_1_1within_1_1within__range"/>
+        <childnode refid="1680" relation="public-inheritance">
+        </childnode>
+      </node>
+    </inheritancegraph>
+    <location file="/home/ubuntu/boost/boost/geometry/strategies/cartesian/point_in_box.hpp" line="37" column="1" bodyfile="/home/ubuntu/boost/boost/geometry/strategies/cartesian/point_in_box.hpp" bodystart="36" bodyend="43"/>
+    <listofallmembers>
+      <member refid="structboost_1_1geometry_1_1strategy_1_1within_1_1within__coord_1aa82ee48878da20f2bd4e8c00c6cb6098" prot="public" virt="non-virtual"><scope>boost::geometry::strategy::within::within_coord</scope><name>apply</name></member>
+    </listofallmembers>
+  </compounddef>
+</doxygen>

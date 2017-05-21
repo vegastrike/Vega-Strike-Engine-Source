@@ -68,11 +68,13 @@ extern float simulation_atom_var;
   #include <OpenGL/glu.h>
   #include <GLUT/glut.h>
  #else
-  #define __glext_h_
-  #include <GL/gl.h>
-  #include <GL/glu.h>
-  #include <GL/glut.h>
-  #undef __glext_h_
+	#ifndef __glext_h_
+	  #define __glext_h_
+	  #include <GL/gl.h>
+	  #include <GL/glu.h>
+	  #include <GL/glut.h>
+	  #undef __glext_h_
+	#endif
  #endif
 #endif
 

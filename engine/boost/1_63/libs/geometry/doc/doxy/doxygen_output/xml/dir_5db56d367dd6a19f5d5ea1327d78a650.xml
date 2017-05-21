@@ -1,0 +1,17 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.8.6">
+  <compounddef id="dir_5db56d367dd6a19f5d5ea1327d78a650" kind="dir">
+    <compoundname>/home/ubuntu/boost/boost/geometry/algorithms/detail/expand</compoundname>
+    <innerfile refid="algorithms_2detail_2expand_2box_8hpp">box.hpp</innerfile>
+    <innerfile refid="expand_2implementation_8hpp">implementation.hpp</innerfile>
+    <innerfile refid="indexed_8hpp">indexed.hpp</innerfile>
+    <innerfile refid="expand_2interface_8hpp">interface.hpp</innerfile>
+    <innerfile refid="algorithms_2detail_2expand_2point_8hpp">point.hpp</innerfile>
+    <innerfile refid="algorithms_2detail_2expand_2segment_8hpp">segment.hpp</innerfile>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <location file="/home/ubuntu/boost/boost/geometry/algorithms/detail/expand/"/>
+  </compounddef>
+</doxygen>

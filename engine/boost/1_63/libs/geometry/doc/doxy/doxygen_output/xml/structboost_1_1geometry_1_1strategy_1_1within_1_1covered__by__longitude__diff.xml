@@ -1,0 +1,47 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.8.6">
+  <compounddef id="structboost_1_1geometry_1_1strategy_1_1within_1_1covered__by__longitude__diff" kind="struct" prot="public">
+    <compoundname>boost::geometry::strategy::within::covered_by_longitude_diff</compoundname>
+    <includes local="no">point_in_box.hpp</includes>
+      <sectiondef kind="public-static-func">
+      <memberdef kind="function" id="structboost_1_1geometry_1_1strategy_1_1within_1_1covered__by__longitude__diff_1ab8c4d729881ca173cd5806e7c38c1a62" prot="public" static="yes" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <templateparamlist>
+          <param>
+            <type>typename CalcT</type>
+          </param>
+        </templateparamlist>
+        <type>bool</type>
+        <definition>static bool boost::geometry::strategy::within::covered_by_longitude_diff::apply</definition>
+        <argsstring>(CalcT const &amp;diff_min, CalcT const &amp;min_value, CalcT const &amp;max_value)</argsstring>
+        <name>apply</name>
+        <param>
+          <type>CalcT const &amp;</type>
+          <declname>diff_min</declname>
+        </param>
+        <param>
+          <type>CalcT const &amp;</type>
+          <declname>min_value</declname>
+        </param>
+        <param>
+          <type>CalcT const &amp;</type>
+          <declname>max_value</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/ubuntu/boost/boost/geometry/strategies/cartesian/point_in_box.hpp" line="84" column="1" bodyfile="/home/ubuntu/boost/boost/geometry/strategies/cartesian/point_in_box.hpp" bodystart="84" bodyend="88"/>
+      </memberdef>
+      </sectiondef>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <location file="/home/ubuntu/boost/boost/geometry/strategies/cartesian/point_in_box.hpp" line="82" column="1" bodyfile="/home/ubuntu/boost/boost/geometry/strategies/cartesian/point_in_box.hpp" bodystart="81" bodyend="89"/>
+    <listofallmembers>
+      <member refid="structboost_1_1geometry_1_1strategy_1_1within_1_1covered__by__longitude__diff_1ab8c4d729881ca173cd5806e7c38c1a62" prot="public" virt="non-virtual"><scope>boost::geometry::strategy::within::covered_by_longitude_diff</scope><name>apply</name></member>
+    </listofallmembers>
+  </compounddef>
+</doxygen>

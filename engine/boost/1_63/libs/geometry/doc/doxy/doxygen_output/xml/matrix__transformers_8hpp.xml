@@ -1,0 +1,365 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.8.6">
+  <compounddef id="matrix__transformers_8hpp" kind="file">
+    <compoundname>matrix_transformers.hpp</compoundname>
+    <includes local="no">cstddef</includes>
+    <includes local="no">boost/numeric/conversion/cast.hpp</includes>
+    <includes local="no">boost/numeric/ublas/vector.hpp</includes>
+    <includes local="no">boost/numeric/ublas/matrix.hpp</includes>
+    <includes refid="access_8hpp" local="no">boost/geometry/core/access.hpp</includes>
+    <includes refid="coordinate__dimension_8hpp" local="no">boost/geometry/core/coordinate_dimension.hpp</includes>
+    <includes refid="cs_8hpp" local="no">boost/geometry/core/cs.hpp</includes>
+    <includes refid="math_8hpp" local="no">boost/geometry/util/math.hpp</includes>
+    <includes refid="promote__floating__point_8hpp" local="no">boost/geometry/util/promote_floating_point.hpp</includes>
+    <includes refid="select__coordinate__type_8hpp" local="no">boost/geometry/util/select_coordinate_type.hpp</includes>
+    <includes refid="select__most__precise_8hpp" local="no">boost/geometry/util/select_most_precise.hpp</includes>
+    <includedby refid="strategies_8hpp" local="no">/home/ubuntu/boost/boost/geometry/strategies/strategies.hpp</includedby>
+    <includedby refid="inverse__transformer_8hpp" local="no">/home/ubuntu/boost/boost/geometry/strategies/transform/inverse_transformer.hpp</includedby>
+    <includedby refid="map__transformer_8hpp" local="no">/home/ubuntu/boost/boost/geometry/strategies/transform/map_transformer.hpp</includedby>
+    <incdepgraph>
+      <node id="63096">
+        <label>boost/geometry/core/coordinate_dimension.hpp</label>
+        <link refid="coordinate__dimension_8hpp"/>
+        <childnode refid="63074" relation="include">
+        </childnode>
+        <childnode refid="63080" relation="include">
+        </childnode>
+        <childnode refid="63097" relation="include">
+        </childnode>
+        <childnode refid="63084" relation="include">
+        </childnode>
+        <childnode refid="63093" relation="include">
+        </childnode>
+      </node>
+      <node id="63098">
+        <label>boost/geometry/core/cs.hpp</label>
+        <link refid="cs_8hpp"/>
+        <childnode refid="63074" relation="include">
+        </childnode>
+        <childnode refid="63080" relation="include">
+        </childnode>
+        <childnode refid="63099" relation="include">
+        </childnode>
+        <childnode refid="63100" relation="include">
+        </childnode>
+        <childnode refid="63092" relation="include">
+        </childnode>
+      </node>
+      <node id="63086">
+        <label>boost/type_traits/remove_const.hpp</label>
+      </node>
+      <node id="63103">
+        <label>limits</label>
+      </node>
+      <node id="63104">
+        <label>boost/math/constants/constants.hpp</label>
+      </node>
+      <node id="63084">
+        <label>boost/geometry/core/point_type.hpp</label>
+        <link refid="point__type_8hpp"/>
+        <childnode refid="63080" relation="include">
+        </childnode>
+        <childnode refid="63085" relation="include">
+        </childnode>
+        <childnode refid="63086" relation="include">
+        </childnode>
+        <childnode refid="63087" relation="include">
+        </childnode>
+        <childnode refid="63091" relation="include">
+        </childnode>
+        <childnode refid="63092" relation="include">
+        </childnode>
+        <childnode refid="63093" relation="include">
+        </childnode>
+      </node>
+      <node id="63089">
+        <label>boost/type_traits/is_const.hpp</label>
+      </node>
+      <node id="63102">
+        <label>cmath</label>
+      </node>
+      <node id="63088">
+        <label>boost/mpl/if.hpp</label>
+      </node>
+      <node id="63097">
+        <label>boost/static_assert.hpp</label>
+      </node>
+      <node id="63087">
+        <label>boost/geometry/core/ring_type.hpp</label>
+        <link refid="ring__type_8hpp"/>
+        <childnode refid="63080" relation="include">
+        </childnode>
+        <childnode refid="63088" relation="include">
+        </childnode>
+        <childnode refid="63085" relation="include">
+        </childnode>
+        <childnode refid="63089" relation="include">
+        </childnode>
+        <childnode refid="63086" relation="include">
+        </childnode>
+        <childnode refid="63090" relation="include">
+        </childnode>
+        <childnode refid="63091" relation="include">
+        </childnode>
+        <childnode refid="63092" relation="include">
+        </childnode>
+      </node>
+      <node id="63092">
+        <label>boost/geometry/core/tags.hpp</label>
+        <link refid="core_2tags_8hpp"/>
+      </node>
+      <node id="63081">
+        <label>boost/type_traits/is_pointer.hpp</label>
+      </node>
+      <node id="63105">
+        <label>boost/math/special_functions/fpclassify.hpp</label>
+      </node>
+      <node id="63080">
+        <label>boost/mpl/assert.hpp</label>
+      </node>
+      <node id="63078">
+        <label>boost/geometry/core/access.hpp</label>
+        <link refid="access_8hpp"/>
+        <childnode refid="63074" relation="include">
+        </childnode>
+        <childnode refid="63079" relation="include">
+        </childnode>
+        <childnode refid="63080" relation="include">
+        </childnode>
+        <childnode refid="63081" relation="include">
+        </childnode>
+        <childnode refid="63082" relation="include">
+        </childnode>
+        <childnode refid="63083" relation="include">
+        </childnode>
+        <childnode refid="63084" relation="include">
+        </childnode>
+        <childnode refid="63091" relation="include">
+        </childnode>
+        <childnode refid="63093" relation="include">
+        </childnode>
+      </node>
+      <node id="63090">
+        <label>boost/type_traits/remove_reference.hpp</label>
+      </node>
+      <node id="63079">
+        <label>boost/core/ignore_unused.hpp</label>
+      </node>
+      <node id="63093">
+        <label>boost/geometry/util/bare_type.hpp</label>
+        <link refid="bare__type_8hpp"/>
+        <childnode refid="63086" relation="include">
+        </childnode>
+        <childnode refid="63082" relation="include">
+        </childnode>
+        <childnode refid="63090" relation="include">
+        </childnode>
+      </node>
+      <node id="63099">
+        <label>boost/type_traits/integral_constant.hpp</label>
+      </node>
+      <node id="63100">
+        <label>boost/geometry/core/coordinate_system.hpp</label>
+        <link refid="coordinate__system_8hpp"/>
+        <childnode refid="63080" relation="include">
+        </childnode>
+        <childnode refid="63084" relation="include">
+        </childnode>
+        <childnode refid="63093" relation="include">
+        </childnode>
+      </node>
+      <node id="63076">
+        <label>boost/numeric/ublas/vector.hpp</label>
+      </node>
+      <node id="63094">
+        <label>boost/geometry/util/promote_floating_point.hpp</label>
+        <link refid="promote__floating__point_8hpp"/>
+        <childnode refid="63088" relation="include">
+        </childnode>
+        <childnode refid="63095" relation="include">
+        </childnode>
+      </node>
+      <node id="63106">
+        <label>boost/type_traits/is_fundamental.hpp</label>
+      </node>
+      <node id="63091">
+        <label>boost/geometry/core/tag.hpp</label>
+        <link refid="tag_8hpp"/>
+        <childnode refid="63092" relation="include">
+        </childnode>
+        <childnode refid="63093" relation="include">
+        </childnode>
+      </node>
+      <node id="63085">
+        <label>boost/range/value_type.hpp</label>
+      </node>
+      <node id="63077">
+        <label>boost/numeric/ublas/matrix.hpp</label>
+      </node>
+      <node id="63073">
+        <label>/home/ubuntu/boost/boost/geometry/strategies/transform/matrix_transformers.hpp</label>
+        <link refid="matrix_transformers.hpp"/>
+        <childnode refid="63074" relation="include">
+        </childnode>
+        <childnode refid="63075" relation="include">
+        </childnode>
+        <childnode refid="63076" relation="include">
+        </childnode>
+        <childnode refid="63077" relation="include">
+        </childnode>
+        <childnode refid="63078" relation="include">
+        </childnode>
+        <childnode refid="63096" relation="include">
+        </childnode>
+        <childnode refid="63098" relation="include">
+        </childnode>
+        <childnode refid="63101" relation="include">
+        </childnode>
+        <childnode refid="63094" relation="include">
+        </childnode>
+        <childnode refid="63109" relation="include">
+        </childnode>
+        <childnode refid="63107" relation="include">
+        </childnode>
+      </node>
+      <node id="63074">
+        <label>cstddef</label>
+      </node>
+      <node id="63095">
+        <label>boost/type_traits/is_integral.hpp</label>
+      </node>
+      <node id="63101">
+        <label>boost/geometry/util/math.hpp</label>
+        <link refid="math_8hpp"/>
+        <childnode refid="63102" relation="include">
+        </childnode>
+        <childnode refid="63103" relation="include">
+        </childnode>
+        <childnode refid="63079" relation="include">
+        </childnode>
+        <childnode refid="63104" relation="include">
+        </childnode>
+        <childnode refid="63105" relation="include">
+        </childnode>
+        <childnode refid="63075" relation="include">
+        </childnode>
+        <childnode refid="63106" relation="include">
+        </childnode>
+        <childnode refid="63095" relation="include">
+        </childnode>
+        <childnode refid="63098" relation="include">
+        </childnode>
+        <childnode refid="63107" relation="include">
+        </childnode>
+      </node>
+      <node id="63108">
+        <label>boost/type_traits/is_floating_point.hpp</label>
+      </node>
+      <node id="63107">
+        <label>boost/geometry/util/select_most_precise.hpp</label>
+        <link refid="select__most__precise_8hpp"/>
+        <childnode refid="63088" relation="include">
+        </childnode>
+        <childnode refid="63108" relation="include">
+        </childnode>
+        <childnode refid="63106" relation="include">
+        </childnode>
+      </node>
+      <node id="63083">
+        <label>boost/geometry/core/coordinate_type.hpp</label>
+        <link refid="coordinate__type_8hpp"/>
+        <childnode refid="63080" relation="include">
+        </childnode>
+        <childnode refid="63084" relation="include">
+        </childnode>
+        <childnode refid="63091" relation="include">
+        </childnode>
+        <childnode refid="63093" relation="include">
+        </childnode>
+        <childnode refid="63094" relation="include">
+        </childnode>
+      </node>
+      <node id="63082">
+        <label>boost/type_traits/remove_pointer.hpp</label>
+      </node>
+      <node id="63109">
+        <label>boost/geometry/util/select_coordinate_type.hpp</label>
+        <link refid="select__coordinate__type_8hpp"/>
+        <childnode refid="63083" relation="include">
+        </childnode>
+        <childnode refid="63107" relation="include">
+        </childnode>
+      </node>
+      <node id="63075">
+        <label>boost/numeric/conversion/cast.hpp</label>
+      </node>
+    </incdepgraph>
+    <invincdepgraph>
+      <node id="63112">
+        <label>/home/ubuntu/boost/boost/geometry/strategies/transform/inverse_transformer.hpp</label>
+        <link refid="inverse__transformer_8hpp"/>
+        <childnode refid="63111" relation="include">
+        </childnode>
+      </node>
+      <node id="63114">
+        <label>/home/ubuntu/boost/boost/geometry/io/svg/svg_mapper.hpp</label>
+        <link refid="svg__mapper_8hpp"/>
+      </node>
+      <node id="63111">
+        <label>/home/ubuntu/boost/boost/geometry/strategies/strategies.hpp</label>
+        <link refid="strategies_8hpp"/>
+      </node>
+      <node id="63113">
+        <label>/home/ubuntu/boost/boost/geometry/strategies/transform/map_transformer.hpp</label>
+        <link refid="map__transformer_8hpp"/>
+        <childnode refid="63114" relation="include">
+        </childnode>
+        <childnode refid="63111" relation="include">
+        </childnode>
+      </node>
+      <node id="63110">
+        <label>/home/ubuntu/boost/boost/geometry/strategies/transform/matrix_transformers.hpp</label>
+        <link refid="matrix_transformers.hpp"/>
+        <childnode refid="63111" relation="include">
+        </childnode>
+        <childnode refid="63112" relation="include">
+        </childnode>
+        <childnode refid="63113" relation="include">
+        </childnode>
+      </node>
+    </invincdepgraph>
+    <innerclass refid="classboost_1_1geometry_1_1strategy_1_1transform_1_1rotate__transformer" prot="public">boost::geometry::strategy::transform::rotate_transformer</innerclass>
+    <innerclass refid="classboost_1_1geometry_1_1strategy_1_1transform_1_1scale__transformer" prot="public">boost::geometry::strategy::transform::scale_transformer</innerclass>
+    <innerclass refid="classboost_1_1geometry_1_1strategy_1_1transform_1_1scale__transformer_3_01_calculation_type_00_012_00_012_01_4" prot="public">boost::geometry::strategy::transform::scale_transformer&lt; CalculationType, 2, 2 &gt;</innerclass>
+    <innerclass refid="classboost_1_1geometry_1_1strategy_1_1transform_1_1scale__transformer_3_01_calculation_type_00_013_00_013_01_4" prot="public">boost::geometry::strategy::transform::scale_transformer&lt; CalculationType, 3, 3 &gt;</innerclass>
+    <innerclass refid="classboost_1_1geometry_1_1strategy_1_1transform_1_1translate__transformer" prot="public">boost::geometry::strategy::transform::translate_transformer</innerclass>
+    <innerclass refid="classboost_1_1geometry_1_1strategy_1_1transform_1_1translate__transformer_3_01_calculation_type_00_012_00_012_01_4" prot="public">boost::geometry::strategy::transform::translate_transformer&lt; CalculationType, 2, 2 &gt;</innerclass>
+    <innerclass refid="classboost_1_1geometry_1_1strategy_1_1transform_1_1translate__transformer_3_01_calculation_type_00_013_00_013_01_4" prot="public">boost::geometry::strategy::transform::translate_transformer&lt; CalculationType, 3, 3 &gt;</innerclass>
+    <innerclass refid="classboost_1_1geometry_1_1strategy_1_1transform_1_1ublas__transformer" prot="public">boost::geometry::strategy::transform::ublas_transformer</innerclass>
+    <innerclass refid="classboost_1_1geometry_1_1strategy_1_1transform_1_1ublas__transformer_3_01_calculation_type_00_012_00_012_01_4" prot="public">boost::geometry::strategy::transform::ublas_transformer&lt; CalculationType, 2, 2 &gt;</innerclass>
+    <innerclass refid="classboost_1_1geometry_1_1strategy_1_1transform_1_1ublas__transformer_3_01_calculation_type_00_013_00_012_01_4" prot="public">boost::geometry::strategy::transform::ublas_transformer&lt; CalculationType, 3, 2 &gt;</innerclass>
+    <innerclass refid="classboost_1_1geometry_1_1strategy_1_1transform_1_1ublas__transformer_3_01_calculation_type_00_013_00_013_01_4" prot="public">boost::geometry::strategy::transform::ublas_transformer&lt; CalculationType, 3, 3 &gt;</innerclass>
+    <innernamespace refid="namespaceboost">boost</innernamespace>
+    <innernamespace refid="namespaceboost_1_1geometry">boost::geometry</innernamespace>
+    <innernamespace refid="namespaceboost_1_1geometry_1_1strategy">boost::geometry::strategy</innernamespace>
+    <innernamespace refid="namespaceboost_1_1geometry_1_1strategy_1_1transform">boost::geometry::strategy::transform</innernamespace>
+      <sectiondef kind="define">
+      <memberdef kind="define" id="matrix__transformers_8hpp_1a20205a89cb81145766e74d5a1d27f049" prot="public" static="no">
+        <name>BOOST_UBLAS_TYPE_CHECK</name>
+        <initializer>0</initializer>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/ubuntu/boost/boost/geometry/strategies/transform/matrix_transformers.hpp" line="30" column="10" bodyfile="/home/ubuntu/boost/boost/geometry/strategies/transform/matrix_transformers.hpp" bodystart="30" bodyend="-1"/>
+      </memberdef>
+      </sectiondef>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <location file="/home/ubuntu/boost/boost/geometry/strategies/transform/matrix_transformers.hpp"/>
+  </compounddef>
+</doxygen>

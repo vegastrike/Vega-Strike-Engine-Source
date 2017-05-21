@@ -1,0 +1,87 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.8.6">
+  <compounddef id="num__distinct__consecutive__points_8hpp" kind="file">
+    <compoundname>num_distinct_consecutive_points.hpp</compoundname>
+    <includes local="no">cstddef</includes>
+    <includes local="no">algorithm</includes>
+    <includes local="no">boost/range.hpp</includes>
+    <includedby refid="is__valid_2linear_8hpp" local="no">/home/ubuntu/boost/boost/geometry/algorithms/detail/is_valid/linear.hpp</includedby>
+    <includedby refid="algorithms_2detail_2is__valid_2ring_8hpp" local="no">/home/ubuntu/boost/boost/geometry/algorithms/detail/is_valid/ring.hpp</includedby>
+    <incdepgraph>
+      <node id="26328">
+        <label>/home/ubuntu/boost/boost/geometry/algorithms/detail/num_distinct_consecutive_points.hpp</label>
+        <link refid="num_distinct_consecutive_points.hpp"/>
+        <childnode refid="26329" relation="include">
+        </childnode>
+        <childnode refid="26330" relation="include">
+        </childnode>
+        <childnode refid="26331" relation="include">
+        </childnode>
+      </node>
+      <node id="26331">
+        <label>boost/range.hpp</label>
+      </node>
+      <node id="26329">
+        <label>cstddef</label>
+      </node>
+      <node id="26330">
+        <label>algorithm</label>
+      </node>
+    </incdepgraph>
+    <invincdepgraph>
+      <node id="26338">
+        <label>/home/ubuntu/boost/boost/geometry/algorithms/detail/is_valid/multipolygon.hpp</label>
+        <link refid="multipolygon_8hpp"/>
+        <childnode refid="26334" relation="include">
+        </childnode>
+      </node>
+      <node id="26334">
+        <label>/home/ubuntu/boost/boost/geometry/algorithms/detail/is_valid/implementation.hpp</label>
+        <link refid="is__valid_2implementation_8hpp"/>
+        <childnode refid="26335" relation="include">
+        </childnode>
+      </node>
+      <node id="26332">
+        <label>/home/ubuntu/boost/boost/geometry/algorithms/detail/num_distinct_consecutive_points.hpp</label>
+        <link refid="num_distinct_consecutive_points.hpp"/>
+        <childnode refid="26333" relation="include">
+        </childnode>
+        <childnode refid="26336" relation="include">
+        </childnode>
+      </node>
+      <node id="26335">
+        <label>/home/ubuntu/boost/boost/geometry/algorithms/is_valid.hpp</label>
+        <link refid="is__valid_8hpp"/>
+      </node>
+      <node id="26337">
+        <label>/home/ubuntu/boost/boost/geometry/algorithms/detail/is_valid/polygon.hpp</label>
+        <link refid="algorithms_2detail_2is__valid_2polygon_8hpp"/>
+        <childnode refid="26334" relation="include">
+        </childnode>
+        <childnode refid="26338" relation="include">
+        </childnode>
+      </node>
+      <node id="26333">
+        <label>/home/ubuntu/boost/boost/geometry/algorithms/detail/is_valid/linear.hpp</label>
+        <link refid="is__valid_2linear_8hpp"/>
+        <childnode refid="26334" relation="include">
+        </childnode>
+      </node>
+      <node id="26336">
+        <label>/home/ubuntu/boost/boost/geometry/algorithms/detail/is_valid/ring.hpp</label>
+        <link refid="algorithms_2detail_2is__valid_2ring_8hpp"/>
+        <childnode refid="26334" relation="include">
+        </childnode>
+        <childnode refid="26337" relation="include">
+        </childnode>
+      </node>
+    </invincdepgraph>
+    <innernamespace refid="namespaceboost">boost</innernamespace>
+    <innernamespace refid="namespaceboost_1_1geometry">boost::geometry</innernamespace>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <location file="/home/ubuntu/boost/boost/geometry/algorithms/detail/num_distinct_consecutive_points.hpp"/>
+  </compounddef>
+</doxygen>

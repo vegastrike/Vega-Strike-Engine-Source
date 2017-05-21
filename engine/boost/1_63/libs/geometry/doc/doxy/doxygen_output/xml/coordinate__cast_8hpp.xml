@@ -1,0 +1,75 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.8.6">
+  <compounddef id="coordinate__cast_8hpp" kind="file">
+    <compoundname>coordinate_cast.hpp</compoundname>
+    <includes local="no">cstdlib</includes>
+    <includes local="no">string</includes>
+    <includes local="no">boost/lexical_cast.hpp</includes>
+    <includedby refid="read_8hpp" local="no">/home/ubuntu/boost/boost/geometry/io/wkt/read.hpp</includedby>
+    <includedby refid="rational_8hpp" local="no">/home/ubuntu/boost/boost/geometry/util/rational.hpp</includedby>
+    <incdepgraph>
+      <node id="63975">
+        <label>boost/lexical_cast.hpp</label>
+      </node>
+      <node id="63974">
+        <label>string</label>
+      </node>
+      <node id="63972">
+        <label>/home/ubuntu/boost/boost/geometry/util/coordinate_cast.hpp</label>
+        <link refid="coordinate_cast.hpp"/>
+        <childnode refid="63973" relation="include">
+        </childnode>
+        <childnode refid="63974" relation="include">
+        </childnode>
+        <childnode refid="63975" relation="include">
+        </childnode>
+      </node>
+      <node id="63973">
+        <label>cstdlib</label>
+      </node>
+    </incdepgraph>
+    <invincdepgraph>
+      <node id="63977">
+        <label>/home/ubuntu/boost/boost/geometry/io/wkt/read.hpp</label>
+        <link refid="read_8hpp"/>
+        <childnode refid="63978" relation="include">
+        </childnode>
+      </node>
+      <node id="63979">
+        <label>/home/ubuntu/boost/boost/geometry/strategies/cartesian/buffer_end_round.hpp</label>
+        <link refid="buffer__end__round_8hpp"/>
+        <childnode refid="63980" relation="include">
+        </childnode>
+      </node>
+      <node id="63980">
+        <label>/home/ubuntu/boost/boost/geometry/strategies/strategies.hpp</label>
+        <link refid="strategies_8hpp"/>
+      </node>
+      <node id="63978">
+        <label>/home/ubuntu/boost/boost/geometry/io/wkt/wkt.hpp</label>
+        <link refid="wkt_8hpp"/>
+        <childnode refid="63979" relation="include">
+        </childnode>
+      </node>
+      <node id="63976">
+        <label>/home/ubuntu/boost/boost/geometry/util/coordinate_cast.hpp</label>
+        <link refid="coordinate_cast.hpp"/>
+        <childnode refid="63977" relation="include">
+        </childnode>
+        <childnode refid="63981" relation="include">
+        </childnode>
+      </node>
+      <node id="63981">
+        <label>/home/ubuntu/boost/boost/geometry/util/rational.hpp</label>
+        <link refid="rational_8hpp"/>
+      </node>
+    </invincdepgraph>
+    <innernamespace refid="namespaceboost">boost</innernamespace>
+    <innernamespace refid="namespaceboost_1_1geometry">boost::geometry</innernamespace>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <location file="/home/ubuntu/boost/boost/geometry/util/coordinate_cast.hpp"/>
+  </compounddef>
+</doxygen>

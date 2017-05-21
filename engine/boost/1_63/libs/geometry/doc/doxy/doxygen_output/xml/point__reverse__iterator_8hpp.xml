@@ -1,0 +1,198 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.8.6">
+  <compounddef id="point__reverse__iterator_8hpp" kind="file">
+    <compoundname>point_reverse_iterator.hpp</compoundname>
+    <includes local="no">iterator</includes>
+    <includes local="no">boost/mpl/assert.hpp</includes>
+    <includes local="no">boost/type_traits/is_convertible.hpp</includes>
+    <includes refid="point__iterator_8hpp" local="no">boost/geometry/iterators/point_iterator.hpp</includes>
+    <incdepgraph>
+      <node id="57277">
+        <label>boost/type_traits/remove_const.hpp</label>
+      </node>
+      <node id="57269">
+        <label>iterator</label>
+      </node>
+      <node id="57276">
+        <label>boost/type_traits/is_const.hpp</label>
+      </node>
+      <node id="57279">
+        <label>boost/mpl/if.hpp</label>
+      </node>
+      <node id="57278">
+        <label>boost/geometry/core/ring_type.hpp</label>
+        <link refid="ring__type_8hpp"/>
+        <childnode refid="57270" relation="include">
+        </childnode>
+        <childnode refid="57279" relation="include">
+        </childnode>
+        <childnode refid="57280" relation="include">
+        </childnode>
+        <childnode refid="57276" relation="include">
+        </childnode>
+        <childnode refid="57277" relation="include">
+        </childnode>
+        <childnode refid="57281" relation="include">
+        </childnode>
+        <childnode refid="57282" relation="include">
+        </childnode>
+        <childnode refid="57283" relation="include">
+        </childnode>
+      </node>
+      <node id="57283">
+        <label>boost/geometry/core/tags.hpp</label>
+        <link refid="core_2tags_8hpp"/>
+      </node>
+      <node id="57273">
+        <label>boost/iterator/iterator_adaptor.hpp</label>
+      </node>
+      <node id="57270">
+        <label>boost/mpl/assert.hpp</label>
+      </node>
+      <node id="57291">
+        <label>boost/geometry/iterators/detail/point_iterator/iterator_type.hpp</label>
+      </node>
+      <node id="57281">
+        <label>boost/type_traits/remove_reference.hpp</label>
+      </node>
+      <node id="57284">
+        <label>boost/geometry/util/bare_type.hpp</label>
+        <link refid="bare__type_8hpp"/>
+        <childnode refid="57277" relation="include">
+        </childnode>
+        <childnode refid="57285" relation="include">
+        </childnode>
+        <childnode refid="57281" relation="include">
+        </childnode>
+      </node>
+      <node id="57275">
+        <label>boost/geometry/core/exterior_ring.hpp</label>
+        <link refid="exterior__ring_8hpp"/>
+        <childnode refid="57270" relation="include">
+        </childnode>
+        <childnode refid="57276" relation="include">
+        </childnode>
+        <childnode refid="57277" relation="include">
+        </childnode>
+        <childnode refid="57278" relation="include">
+        </childnode>
+        <childnode refid="57282" relation="include">
+        </childnode>
+        <childnode refid="57283" relation="include">
+        </childnode>
+        <childnode refid="57286" relation="include">
+        </childnode>
+      </node>
+      <node id="57286">
+        <label>boost/geometry/util/add_const_if_c.hpp</label>
+        <link refid="add__const__if__c_8hpp"/>
+        <childnode refid="57279" relation="include">
+        </childnode>
+      </node>
+      <node id="57274">
+        <label>boost/range.hpp</label>
+      </node>
+      <node id="57272">
+        <label>boost/geometry/iterators/point_iterator.hpp</label>
+        <link refid="point__iterator_8hpp"/>
+        <childnode refid="57273" relation="include">
+        </childnode>
+        <childnode refid="57270" relation="include">
+        </childnode>
+        <childnode refid="57271" relation="include">
+        </childnode>
+        <childnode refid="57274" relation="include">
+        </childnode>
+        <childnode refid="57275" relation="include">
+        </childnode>
+        <childnode refid="57287" relation="include">
+        </childnode>
+        <childnode refid="57283" relation="include">
+        </childnode>
+        <childnode refid="57290" relation="include">
+        </childnode>
+        <childnode refid="57291" relation="include">
+        </childnode>
+      </node>
+      <node id="57290">
+        <label>boost/geometry/iterators/dispatch/point_iterator.hpp</label>
+      </node>
+      <node id="57271">
+        <label>boost/type_traits/is_convertible.hpp</label>
+      </node>
+      <node id="57282">
+        <label>boost/geometry/core/tag.hpp</label>
+        <link refid="tag_8hpp"/>
+        <childnode refid="57283" relation="include">
+        </childnode>
+        <childnode refid="57284" relation="include">
+        </childnode>
+      </node>
+      <node id="57280">
+        <label>boost/range/value_type.hpp</label>
+      </node>
+      <node id="57289">
+        <label>boost/geometry/core/interior_type.hpp</label>
+        <link refid="interior__type_8hpp"/>
+        <childnode refid="57270" relation="include">
+        </childnode>
+        <childnode refid="57279" relation="include">
+        </childnode>
+        <childnode refid="57276" relation="include">
+        </childnode>
+        <childnode refid="57277" relation="include">
+        </childnode>
+        <childnode refid="57281" relation="include">
+        </childnode>
+        <childnode refid="57282" relation="include">
+        </childnode>
+        <childnode refid="57283" relation="include">
+        </childnode>
+      </node>
+      <node id="57288">
+        <label>cstddef</label>
+      </node>
+      <node id="57268">
+        <label>/home/ubuntu/boost/boost/geometry/iterators/point_reverse_iterator.hpp</label>
+        <link refid="point_reverse_iterator.hpp"/>
+        <childnode refid="57269" relation="include">
+        </childnode>
+        <childnode refid="57270" relation="include">
+        </childnode>
+        <childnode refid="57271" relation="include">
+        </childnode>
+        <childnode refid="57272" relation="include">
+        </childnode>
+      </node>
+      <node id="57287">
+        <label>boost/geometry/core/interior_rings.hpp</label>
+        <link refid="interior__rings_8hpp"/>
+        <childnode refid="57288" relation="include">
+        </childnode>
+        <childnode refid="57270" relation="include">
+        </childnode>
+        <childnode refid="57280" relation="include">
+        </childnode>
+        <childnode refid="57277" relation="include">
+        </childnode>
+        <childnode refid="57282" relation="include">
+        </childnode>
+        <childnode refid="57283" relation="include">
+        </childnode>
+        <childnode refid="57289" relation="include">
+        </childnode>
+      </node>
+      <node id="57285">
+        <label>boost/type_traits/remove_pointer.hpp</label>
+      </node>
+    </incdepgraph>
+    <innerclass refid="classboost_1_1geometry_1_1point__reverse__iterator" prot="public">boost::geometry::point_reverse_iterator</innerclass>
+    <innernamespace refid="namespaceboost">boost</innernamespace>
+    <innernamespace refid="namespaceboost_1_1geometry">boost::geometry</innernamespace>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <location file="/home/ubuntu/boost/boost/geometry/iterators/point_reverse_iterator.hpp"/>
+  </compounddef>
+</doxygen>
