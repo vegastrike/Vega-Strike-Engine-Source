@@ -543,6 +543,10 @@ ELSEIF(CPUINTEL_native)
     SET(CPU_OPTS "-mtune=native -march=native -mfpmath=sse -msse3 -mmmx -ftree-vectorize -ffast-math -fassociative-math -funsafe-math-optimizations -funroll-loops -ftree-parallelize-loops=${CPU_SMP}")
 ENDIF(CPUAMD_k8)
 
+if(CMAKE_COMPILER_IS_GNUCXX)
+    add_definitions(-std=gnu++03)
+endif()
+
 # Debug target block.
 SET(CMAKE_CXX_FLAGS_DEBUG " ${CPU_OPTS} -DNV_CUBE_MAP -DBOOST_PYTHON_NO_PY_SIGNATURES -include config.h -pipe -g2 -Wall -Werror -O0 -fvisibility=hidden" CACHE STRING
     "Flags used by the C++ compiler during debug builds."
