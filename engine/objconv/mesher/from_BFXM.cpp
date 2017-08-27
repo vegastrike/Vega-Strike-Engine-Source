@@ -949,7 +949,7 @@ void BFXMtoBoxDims( FILE *Inputfile, const char *name )
             int32bit numtextures = VSSwapHostIntToLittle( inmemfile[word32index].i32val );             //number of textures
             word32index += 1;
             for (int32bit tex = 0; tex < numtextures; tex++) {
-                int32bit textype    = VSSwapHostIntToLittle( inmemfile[word32index].i32val );                 //texture type
+                /*int32bit textype    =*/ VSSwapHostIntToLittle( inmemfile[word32index].i32val );                 //texture type
                 int32bit texindex   = VSSwapHostIntToLittle( inmemfile[word32index+1].i32val );                 //texture index
                 int32bit texnamelen = VSSwapHostIntToLittle( inmemfile[word32index+2].i32val );                 //texture name length
                 word32index += 3;
