@@ -976,7 +976,7 @@ void BFXMtoBoxDims( FILE *Inputfile, const char *name )
                 word32index += 5;
                 for (int32bit ref = 0; ref < numrefs; ref++) {
                     /*int32bit   refnum =*/ VSSwapHostIntToLittle( inmemfile[word32index].i32val );                   //Logo ref
-                    float32bit weight = VSSwapHostFloatToLittle( inmemfile[word32index+1].f32val );                     //reference weight
+                    /*float32bit weight =*/ VSSwapHostFloatToLittle( inmemfile[word32index+1].f32val );                     //reference weight
                     word32index += 2;
                 }
             }
