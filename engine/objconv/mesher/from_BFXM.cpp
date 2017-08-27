@@ -975,7 +975,7 @@ void BFXMtoBoxDims( FILE *Inputfile, const char *name )
                 int32bit   numrefs  = VSSwapHostIntToLittle( inmemfile[word32index+4].i32val );               //number of reference points
                 word32index += 5;
                 for (int32bit ref = 0; ref < numrefs; ref++) {
-                    int32bit   refnum = VSSwapHostIntToLittle( inmemfile[word32index].i32val );                   //Logo ref
+                    /*int32bit   refnum =*/ VSSwapHostIntToLittle( inmemfile[word32index].i32val );                   //Logo ref
                     float32bit weight = VSSwapHostFloatToLittle( inmemfile[word32index+1].f32val );                     //reference weight
                     word32index += 2;
                 }
