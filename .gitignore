@@ -1,3 +1,4 @@
 archives/
 bin/
+engine/build/
 *.pyc
