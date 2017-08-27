@@ -968,10 +968,10 @@ void BFXMtoBoxDims( FILE *Inputfile, const char *name )
             int32bit numlogos = VSSwapHostIntToLittle( inmemfile[word32index].i32val );             //number of logos
             word32index += 1;
             for (int32bit logo = 0; logo < numlogos; logo++) {
-                float32bit size     = VSSwapHostFloatToLittle( inmemfile[word32index].f32val );                 //size
-                float32bit offset   = VSSwapHostFloatToLittle( inmemfile[word32index+1].f32val );                 //offset
-                float32bit rotation = VSSwapHostFloatToLittle( inmemfile[word32index+2].f32val );                 //rotation
-                int32bit   type     = VSSwapHostIntToLittle( inmemfile[word32index+3].i32val );               //type
+                /*float32bit size     =*/ VSSwapHostFloatToLittle( inmemfile[word32index].f32val );                 //size
+                /*float32bit offset   =*/ VSSwapHostFloatToLittle( inmemfile[word32index+1].f32val );                 //offset
+                /*float32bit rotation =*/ VSSwapHostFloatToLittle( inmemfile[word32index+2].f32val );                 //rotation
+                /*int32bit   type     =*/ VSSwapHostIntToLittle( inmemfile[word32index+3].i32val );               //type
                 int32bit   numrefs  = VSSwapHostIntToLittle( inmemfile[word32index+4].i32val );               //number of reference points
                 word32index += 5;
                 for (int32bit ref = 0; ref < numrefs; ref++) {
