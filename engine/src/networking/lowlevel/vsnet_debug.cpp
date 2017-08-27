@@ -13,7 +13,7 @@ using std::clog;
 
 struct TimeTriggerStruct {};
 
-static TimeTriggerStruct time_trigger;
+//static TimeTriggerStruct time_trigger;
 ostream& operator<<( ostream &ostr, const TimeTriggerStruct &c )
 {
 #ifndef _WIN32
