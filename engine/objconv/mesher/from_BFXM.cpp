@@ -837,15 +837,15 @@ void BFXMtoBoxDims( FILE *Inputfile, const char *name )
     rewind( Inputfile );
     bogus_return = fread( inmemfile, 1, Inputlength, Inputfile );
     fclose( Inputfile );
-    int32bit Inputlength32 = Inputlength/4;
+    /*int32bit Inputlength32 =*/ Inputlength/4;
     //Extract superheader fields
     word32index += 1;
-    int32bit version = VSSwapHostIntToLittle( inmemfile[word32index].i32val );
+    /*int32bit version =*/ VSSwapHostIntToLittle( inmemfile[word32index].i32val );
     word32index += 2;
     int32bit Superheaderlength  = VSSwapHostIntToLittle( inmemfile[word32index].i32val );
     int32bit NUMFIELDSPERVERTEX = VSSwapHostIntToLittle( inmemfile[word32index+1].i32val );     //Number of fields per vertex:integer (8)
-    int32bit NUMFIELDSPERPOLYGONSTRUCTURE    = VSSwapHostIntToLittle( inmemfile[word32index+2].i32val );     //Number of fields per polygon structure: integer (1)
-    int32bit NUMFIELDSPERREFERENCEDVERTEX    = VSSwapHostIntToLittle( inmemfile[word32index+3].i32val );     //Number of fields per referenced vertex: integer (3)
+    /*int32bit NUMFIELDSPERPOLYGONSTRUCTURE    =*/ VSSwapHostIntToLittle( inmemfile[word32index+2].i32val );     //Number of fields per polygon structure: integer (1)
+    /*int32bit NUMFIELDSPERREFERENCEDVERTEX    =*/ VSSwapHostIntToLittle( inmemfile[word32index+3].i32val );     //Number of fields per referenced vertex: integer (3)
     int32bit NUMFIELDSPERREFERENCEDANIMATION = VSSwapHostIntToLittle( inmemfile[word32index+4].i32val );     //Number of fields per referenced animation: integer (1)
     int32bit numrecords = VSSwapHostIntToLittle( inmemfile[word32index+5].i32val );     //Number of records: integer
     int32bit NUMFIELDSPERANIMATIONDEF = VSSwapHostIntToLittle( inmemfile[word32index+6].i32val );     //Number of fields per animationdef: integer (1)
@@ -855,9 +855,9 @@ void BFXMtoBoxDims( FILE *Inputfile, const char *name )
     int vtxcount   = 1;
     int texcount   = 1;
     int normcount  = 1;
-    int indoffset  = 1;
-    int texoffset  = 1;
-    int normoffset = 1;
+    //int indoffset  = 1;
+    //int texoffset  = 1;
+    //int normoffset = 1;
     for (int32bit recordindex = 0; recordindex < numrecords; recordindex++) {
         int32bit recordbeginword    = word32index;
         //Extract Record Header
