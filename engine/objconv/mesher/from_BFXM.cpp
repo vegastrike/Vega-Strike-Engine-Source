@@ -1012,7 +1012,7 @@ void BFXMtoBoxDims( FILE *Inputfile, const char *name )
                 int32bit   numframerefs = VSSwapHostIntToLittle( inmemfile[word32index].i32val );               //number of animation frame references
                 word32index += 1;
                 for (int32bit fref = 0; fref < numframerefs; fref++) {
-                    int32bit ref = VSSwapHostIntToLittle( inmemfile[word32index].i32val );                     //number of animation frame references
+                    /*int32bit ref =*/ VSSwapHostIntToLittle( inmemfile[word32index].i32val );                     //number of animation frame references
                     word32index += NUMFIELDSPERREFERENCEDANIMATION;
                 }
             }
