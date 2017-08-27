@@ -79,7 +79,7 @@ void BFXMToXmeshOrOBJ( FILE *Inputfile, FILE *Outputfile, FILE *OutputObj, FILE 
     //int32bit Inputlength32 = Inputlength/4;   //Appears to do nothing?
     //Extract superheader fields
     word32index += 1;
-    int32bit version = VSSwapHostIntToLittle( inmemfile[word32index].i32val );
+    /*int32bit version =*/ VSSwapHostIntToLittle( inmemfile[word32index].i32val );
     word32index += 2;
     int32bit Superheaderlength  = VSSwapHostIntToLittle( inmemfile[word32index].i32val );
     int32bit NUMFIELDSPERVERTEX = VSSwapHostIntToLittle( inmemfile[word32index+1].i32val );     //Number of fields per vertex:integer (8)
