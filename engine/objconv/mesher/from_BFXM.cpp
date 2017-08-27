@@ -1007,7 +1007,7 @@ void BFXMtoBoxDims( FILE *Inputfile, const char *name )
                     //Append char to end of string
                     word32index += 1;
                 }
-                float32bit FPS = VSSwapHostFloatToLittle( inmemfile[word32index].f32val );                 //FPS
+                /*float32bit FPS =*/ VSSwapHostFloatToLittle( inmemfile[word32index].f32val );                 //FPS
                 word32index += NUMFIELDSPERANIMATIONDEF;
                 int32bit   numframerefs = VSSwapHostIntToLittle( inmemfile[word32index].i32val );               //number of animation frame references
                 word32index += 1;
