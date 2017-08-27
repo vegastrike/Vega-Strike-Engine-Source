@@ -340,7 +340,6 @@ bool VsnetHTTPSocket::lower_selected( int datalen )
         return false;
     }
     char rcvbuf[1440];
-    int  ret    = 0;
     int  bufpos = 0;
     while (datalen != 0) {
         int dataToRead;
