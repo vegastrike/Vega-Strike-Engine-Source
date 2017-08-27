@@ -480,11 +480,18 @@ void SaveGame::ReadMissionData( char* &buf, bool select_data, const std::set< st
         buf2 += hopto( buf2, ' ', '\n', 0 );
         vector< float > *vecfloat = 0;
         bool skip = true;
-        if ( !select_data || select_data_filter.count( mag_num ) ) {
+        // In rare instances (seen with wonky save game file),
+        // md_i_size can be < 0, which will cause the reserve call to fail hard
+        // Add a debug message to explain the issue and point out that the save
+        // game file is broken.
+        if ( md_i_size >= 0 && ( !select_data || select_data_filter.count( mag_num ) ) ) {
             vecfloat = &missiondata->m[mag_num];
             vecfloat->clear();
             vecfloat->reserve(md_i_size);
             skip = false;
+        } else {
+            //debugging attempt -- show why the allocation would fail
+            vs_dprintf(1, " SaveGame::ReadMissionTringData: vecstring->reserve(md_i_size = %d) will fail, bailing out (i = %d)", md_i_size, i);
         }
         for (int j = 0; j < md_i_size; j++) {
             if (!skip) {
