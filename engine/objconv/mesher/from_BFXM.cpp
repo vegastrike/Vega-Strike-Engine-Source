@@ -885,33 +885,33 @@ void BFXMtoBoxDims( FILE *Inputfile, const char *name )
             word32index += 1;
             int32bit   meshlength    = VSSwapHostIntToLittle( inmemfile[word32index].i32val );           //length of record in bytes
             float32bit scale = VSSwapHostFloatToLittle( inmemfile[meshbeginword+2].f32val );             //scale
-            int32bit   reverse       = VSSwapHostIntToLittle( inmemfile[meshbeginword+3].i32val );           //reverse flag
-            int32bit   forcetexture  = VSSwapHostIntToLittle( inmemfile[meshbeginword+4].i32val );           //force texture flag
-            int32bit   sharevert     = VSSwapHostIntToLittle( inmemfile[meshbeginword+5].i32val );           //share vertex flag
-            float32bit polygonoffset = VSSwapHostFloatToLittle( inmemfile[meshbeginword+6].f32val );             //polygonoffset
-            int32bit   bsrc       = VSSwapHostIntToLittle( inmemfile[meshbeginword+7].i32val );           //Blendmode source
-            int32bit   bdst       = VSSwapHostIntToLittle( inmemfile[meshbeginword+8].i32val );           //Blendmode destination
-            float32bit power      = VSSwapHostFloatToLittle( inmemfile[meshbeginword+9].f32val );             //Specular: power
-            float32bit ar         = VSSwapHostFloatToLittle( inmemfile[meshbeginword+10].f32val );             //Ambient: red
-            float32bit ag         = VSSwapHostFloatToLittle( inmemfile[meshbeginword+11].f32val );             //Ambient: green
-            float32bit ab         = VSSwapHostFloatToLittle( inmemfile[meshbeginword+12].f32val );             //Ambient: blue
-            float32bit aa         = VSSwapHostFloatToLittle( inmemfile[meshbeginword+13].f32val );             //Ambient: Alpha
-            float32bit dr         = VSSwapHostFloatToLittle( inmemfile[meshbeginword+14].f32val );             //Diffuse: red
-            float32bit dg         = VSSwapHostFloatToLittle( inmemfile[meshbeginword+15].f32val );             //Diffuse: green
-            float32bit db         = VSSwapHostFloatToLittle( inmemfile[meshbeginword+16].f32val );             //Diffuse: blue
-            float32bit da         = VSSwapHostFloatToLittle( inmemfile[meshbeginword+17].f32val );             //Diffuse: Alpha
-            float32bit er         = VSSwapHostFloatToLittle( inmemfile[meshbeginword+18].f32val );             //Emmissive: red
-            float32bit eg         = VSSwapHostFloatToLittle( inmemfile[meshbeginword+19].f32val );             //Emmissive: green
-            float32bit eb         = VSSwapHostFloatToLittle( inmemfile[meshbeginword+20].f32val );             //Emmissive: blue
-            float32bit ea         = VSSwapHostFloatToLittle( inmemfile[meshbeginword+21].f32val );             //Emmissive: Alpha
-            float32bit sr         = VSSwapHostFloatToLittle( inmemfile[meshbeginword+22].f32val );             //Specular: red
-            float32bit sg         = VSSwapHostFloatToLittle( inmemfile[meshbeginword+23].f32val );             //Specular: green
-            float32bit sb         = VSSwapHostFloatToLittle( inmemfile[meshbeginword+24].f32val );             //Specular: blue
-            float32bit sa         = VSSwapHostFloatToLittle( inmemfile[meshbeginword+25].f32val );             //Specular: Alpha
-            int32bit   cullface   = (VSSwapHostIntToLittle( inmemfile[meshbeginword+26].i32val ) != 0) ? 1 : 0;             //CullFace
-            int32bit   lighting   = (VSSwapHostIntToLittle( inmemfile[meshbeginword+27].i32val ) != 0) ? 1 : 0;             //lighting
-            int32bit   reflect    = (VSSwapHostIntToLittle( inmemfile[meshbeginword+28].i32val ) != 0) ? 1 : 0;             //reflect
-            int32bit   usenormals = (VSSwapHostIntToLittle( inmemfile[meshbeginword+29].i32val ) != 0) ? 1 : 0;             //usenormals
+            /*int32bit   reverse       =*/ VSSwapHostIntToLittle( inmemfile[meshbeginword+3].i32val );           //reverse flag
+            /*int32bit   forcetexture  =*/ VSSwapHostIntToLittle( inmemfile[meshbeginword+4].i32val );           //force texture flag
+            /*int32bit   sharevert     =*/ VSSwapHostIntToLittle( inmemfile[meshbeginword+5].i32val );           //share vertex flag
+            /*float32bit polygonoffset =*/ VSSwapHostFloatToLittle( inmemfile[meshbeginword+6].f32val );             //polygonoffset
+            /*int32bit   bsrc       =*/ VSSwapHostIntToLittle( inmemfile[meshbeginword+7].i32val );           //Blendmode source
+            /*int32bit   bdst       =*/ VSSwapHostIntToLittle( inmemfile[meshbeginword+8].i32val );           //Blendmode destination
+            /*float32bit power      =*/ VSSwapHostFloatToLittle( inmemfile[meshbeginword+9].f32val );             //Specular: power
+            /*float32bit ar         =*/ VSSwapHostFloatToLittle( inmemfile[meshbeginword+10].f32val );             //Ambient: red
+            /*float32bit ag         =*/ VSSwapHostFloatToLittle( inmemfile[meshbeginword+11].f32val );             //Ambient: green
+            /*float32bit ab         =*/ VSSwapHostFloatToLittle( inmemfile[meshbeginword+12].f32val );             //Ambient: blue
+            /*float32bit aa         =*/ VSSwapHostFloatToLittle( inmemfile[meshbeginword+13].f32val );             //Ambient: Alpha
+            /*float32bit dr         =*/ VSSwapHostFloatToLittle( inmemfile[meshbeginword+14].f32val );             //Diffuse: red
+            /*float32bit dg         =*/ VSSwapHostFloatToLittle( inmemfile[meshbeginword+15].f32val );             //Diffuse: green
+            /*float32bit db         =*/ VSSwapHostFloatToLittle( inmemfile[meshbeginword+16].f32val );             //Diffuse: blue
+            /*float32bit da         =*/ VSSwapHostFloatToLittle( inmemfile[meshbeginword+17].f32val );             //Diffuse: Alpha
+            /*float32bit er         =*/ VSSwapHostFloatToLittle( inmemfile[meshbeginword+18].f32val );             //Emmissive: red
+            /*float32bit eg         =*/ VSSwapHostFloatToLittle( inmemfile[meshbeginword+19].f32val );             //Emmissive: green
+            /*float32bit eb         =*/ VSSwapHostFloatToLittle( inmemfile[meshbeginword+20].f32val );             //Emmissive: blue
+            /*float32bit ea         =*/ VSSwapHostFloatToLittle( inmemfile[meshbeginword+21].f32val );             //Emmissive: Alpha
+            /*float32bit sr         =*/ VSSwapHostFloatToLittle( inmemfile[meshbeginword+22].f32val );             //Specular: red
+            /*float32bit sg         =*/ VSSwapHostFloatToLittle( inmemfile[meshbeginword+23].f32val );             //Specular: green
+            /*float32bit sb         =*/ VSSwapHostFloatToLittle( inmemfile[meshbeginword+24].f32val );             //Specular: blue
+            /*float32bit sa         =*/ VSSwapHostFloatToLittle( inmemfile[meshbeginword+25].f32val );             //Specular: Alpha
+            /*int32bit   cullface   =*/ (VSSwapHostIntToLittle( inmemfile[meshbeginword+26].i32val ) != 0) ? 1 : 0;             //CullFace
+            /*int32bit   lighting   =*/ (VSSwapHostIntToLittle( inmemfile[meshbeginword+27].i32val ) != 0) ? 1 : 0;             //lighting
+            /*int32bit   reflect    =*/ (VSSwapHostIntToLittle( inmemfile[meshbeginword+28].i32val ) != 0) ? 1 : 0;             //reflect
+            /*int32bit   usenormals =*/ (VSSwapHostIntToLittle( inmemfile[meshbeginword+29].i32val ) != 0) ? 1 : 0;             //usenormals
             //End Header
             //Go to Arbitrary Length Attributes section
             word32index  = meshbeginword+(meshheaderlength/4);
