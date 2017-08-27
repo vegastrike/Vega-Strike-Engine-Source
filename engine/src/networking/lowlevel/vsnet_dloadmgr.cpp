@@ -515,7 +515,6 @@ void Manager::addCmdDownload( SOCKETALT sock, NetBuffer &buffer )
             NetBuffer respbuffer;
             respbuffer.addChar( ResolveResponse );
             respbuffer.addShort( num );
-
             Adapter::ResolveRequest::iterator iter;
             for (iter = r->files.begin(); iter != r->files.end(); iter++) {
                 bool   ok;
@@ -528,7 +527,7 @@ void Manager::addCmdDownload( SOCKETALT sock, NetBuffer &buffer )
                     zoneid = atoi( file.c_str() );
                     if (zoneid == 0)
                     {
-                        //Do nothing?
+                        //Do nothing? {Review}
                     }
                     ok = true;
                 } else {
