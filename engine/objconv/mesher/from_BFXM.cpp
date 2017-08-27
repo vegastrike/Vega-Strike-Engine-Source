@@ -985,8 +985,8 @@ void BFXMtoBoxDims( FILE *Inputfile, const char *name )
             int32bit numLODs = VSSwapHostIntToLittle( inmemfile[word32index].i32val );             //number of LODs
             word32index += 1;
             for (int32bit LOD = 0; LOD < numLODs; LOD++) {
-                float32bit size  = VSSwapHostFloatToLittle( inmemfile[word32index].f32val );                 //Size
-                int32bit   index = VSSwapHostIntToLittle( inmemfile[word32index+1].i32val );               //Mesh index
+                /*float32bit size  =*/ VSSwapHostFloatToLittle( inmemfile[word32index].f32val );                 //Size
+                /*int32bit   index =*/ VSSwapHostIntToLittle( inmemfile[word32index+1].i32val );               //Mesh index
                 word32index += 2;
             }
             //End LODs
