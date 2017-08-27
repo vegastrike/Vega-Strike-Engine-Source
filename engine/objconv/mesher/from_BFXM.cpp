@@ -837,7 +837,7 @@ void BFXMtoBoxDims( FILE *Inputfile, const char *name )
     rewind( Inputfile );
     bogus_return = fread( inmemfile, 1, Inputlength, Inputfile );
     fclose( Inputfile );
-    /*int32bit Inputlength32 =*/ Inputlength/4;
+    //int32bit Inputlength32 = Inputlength/4;
     //Extract superheader fields
     word32index += 1;
     /*int32bit version =*/ VSSwapHostIntToLittle( inmemfile[word32index].i32val );
@@ -852,9 +852,9 @@ void BFXMtoBoxDims( FILE *Inputfile, const char *name )
     word32index = (Superheaderlength/4);       //Go to first record
     //For each record
 
-    int vtxcount   = 1;
-    int texcount   = 1;
-    int normcount  = 1;
+    //int vtxcount   = 1;
+    //int texcount   = 1;
+    //int normcount  = 1;
     //int indoffset  = 1;
     //int texoffset  = 1;
     //int normoffset = 1;
@@ -869,9 +869,9 @@ void BFXMtoBoxDims( FILE *Inputfile, const char *name )
         word32index  = recordbeginword+(recordheaderlength/4);
         //For each mesh
         for (int32bit meshindex = 0; meshindex < nummeshes; meshindex++) {
-            indoffset  = vtxcount;
-            texoffset  = texcount;
-            normoffset = normcount;
+            //indoffset  = vtxcount; //Indoffset and texoffset are not asked to do anything.
+            //texoffset  = texcount;
+            //normoffset = normcount;
             if (recordindex > 0 || meshindex > 0) {
                 char     filenamebuf[56];             //Is more than enough characters - int can't be this big in decimal
                 int32bit error    = sprintf( filenamebuf, "%d_%d.xmesh", recordindex, meshindex );
