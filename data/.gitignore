@@ -1,0 +1,5 @@
+archives/
+bin/
+engine/build/
+**.pyc
+*.pyc
