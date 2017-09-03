@@ -76,10 +76,10 @@ void BFXMToXmeshOrOBJ( FILE *Inputfile, FILE *Outputfile, FILE *OutputObj, FILE 
     rewind( Inputfile );
     bogus_return = fread( inmemfile, 1, Inputlength, Inputfile );
     fclose( Inputfile );
-    int32bit Inputlength32 = Inputlength/4;
+    //int32bit Inputlength32 = Inputlength/4;   //Appears to do nothing?
     //Extract superheader fields
     word32index += 1;
-    int32bit version = VSSwapHostIntToLittle( inmemfile[word32index].i32val );
+    /*int32bit version =*/ VSSwapHostIntToLittle( inmemfile[word32index].i32val );
     word32index += 2;
     int32bit Superheaderlength  = VSSwapHostIntToLittle( inmemfile[word32index].i32val );
     int32bit NUMFIELDSPERVERTEX = VSSwapHostIntToLittle( inmemfile[word32index+1].i32val );     //Number of fields per vertex:integer (8)
@@ -837,27 +837,27 @@ void BFXMtoBoxDims( FILE *Inputfile, const char *name )
     rewind( Inputfile );
     bogus_return = fread( inmemfile, 1, Inputlength, Inputfile );
     fclose( Inputfile );
-    int32bit Inputlength32 = Inputlength/4;
+    //int32bit Inputlength32 = Inputlength/4;
     //Extract superheader fields
     word32index += 1;
-    int32bit version = VSSwapHostIntToLittle( inmemfile[word32index].i32val );
+    /*int32bit version =*/ VSSwapHostIntToLittle( inmemfile[word32index].i32val );
     word32index += 2;
     int32bit Superheaderlength  = VSSwapHostIntToLittle( inmemfile[word32index].i32val );
     int32bit NUMFIELDSPERVERTEX = VSSwapHostIntToLittle( inmemfile[word32index+1].i32val );     //Number of fields per vertex:integer (8)
-    int32bit NUMFIELDSPERPOLYGONSTRUCTURE    = VSSwapHostIntToLittle( inmemfile[word32index+2].i32val );     //Number of fields per polygon structure: integer (1)
-    int32bit NUMFIELDSPERREFERENCEDVERTEX    = VSSwapHostIntToLittle( inmemfile[word32index+3].i32val );     //Number of fields per referenced vertex: integer (3)
+    /*int32bit NUMFIELDSPERPOLYGONSTRUCTURE    =*/ VSSwapHostIntToLittle( inmemfile[word32index+2].i32val );     //Number of fields per polygon structure: integer (1)
+    /*int32bit NUMFIELDSPERREFERENCEDVERTEX    =*/ VSSwapHostIntToLittle( inmemfile[word32index+3].i32val );     //Number of fields per referenced vertex: integer (3)
     int32bit NUMFIELDSPERREFERENCEDANIMATION = VSSwapHostIntToLittle( inmemfile[word32index+4].i32val );     //Number of fields per referenced animation: integer (1)
     int32bit numrecords = VSSwapHostIntToLittle( inmemfile[word32index+5].i32val );     //Number of records: integer
     int32bit NUMFIELDSPERANIMATIONDEF = VSSwapHostIntToLittle( inmemfile[word32index+6].i32val );     //Number of fields per animationdef: integer (1)
     word32index = (Superheaderlength/4);       //Go to first record
     //For each record
 
-    int vtxcount   = 1;
-    int texcount   = 1;
-    int normcount  = 1;
-    int indoffset  = 1;
-    int texoffset  = 1;
-    int normoffset = 1;
+    //int vtxcount   = 1;
+    //int texcount   = 1;
+    //int normcount  = 1;
+    //int indoffset  = 1;
+    //int texoffset  = 1;
+    //int normoffset = 1;
     for (int32bit recordindex = 0; recordindex < numrecords; recordindex++) {
         int32bit recordbeginword    = word32index;
         //Extract Record Header
@@ -869,9 +869,9 @@ void BFXMtoBoxDims( FILE *Inputfile, const char *name )
         word32index  = recordbeginword+(recordheaderlength/4);
         //For each mesh
         for (int32bit meshindex = 0; meshindex < nummeshes; meshindex++) {
-            indoffset  = vtxcount;
-            texoffset  = texcount;
-            normoffset = normcount;
+            //indoffset  = vtxcount; //Indoffset and texoffset are not asked to do anything.
+            //texoffset  = texcount;
+            //normoffset = normcount;
             if (recordindex > 0 || meshindex > 0) {
                 char     filenamebuf[56];             //Is more than enough characters - int can't be this big in decimal
                 int32bit error    = sprintf( filenamebuf, "%d_%d.xmesh", recordindex, meshindex );
@@ -885,33 +885,33 @@ void BFXMtoBoxDims( FILE *Inputfile, const char *name )
             word32index += 1;
             int32bit   meshlength    = VSSwapHostIntToLittle( inmemfile[word32index].i32val );           //length of record in bytes
             float32bit scale = VSSwapHostFloatToLittle( inmemfile[meshbeginword+2].f32val );             //scale
-            int32bit   reverse       = VSSwapHostIntToLittle( inmemfile[meshbeginword+3].i32val );           //reverse flag
-            int32bit   forcetexture  = VSSwapHostIntToLittle( inmemfile[meshbeginword+4].i32val );           //force texture flag
-            int32bit   sharevert     = VSSwapHostIntToLittle( inmemfile[meshbeginword+5].i32val );           //share vertex flag
-            float32bit polygonoffset = VSSwapHostFloatToLittle( inmemfile[meshbeginword+6].f32val );             //polygonoffset
-            int32bit   bsrc       = VSSwapHostIntToLittle( inmemfile[meshbeginword+7].i32val );           //Blendmode source
-            int32bit   bdst       = VSSwapHostIntToLittle( inmemfile[meshbeginword+8].i32val );           //Blendmode destination
-            float32bit power      = VSSwapHostFloatToLittle( inmemfile[meshbeginword+9].f32val );             //Specular: power
-            float32bit ar         = VSSwapHostFloatToLittle( inmemfile[meshbeginword+10].f32val );             //Ambient: red
-            float32bit ag         = VSSwapHostFloatToLittle( inmemfile[meshbeginword+11].f32val );             //Ambient: green
-            float32bit ab         = VSSwapHostFloatToLittle( inmemfile[meshbeginword+12].f32val );             //Ambient: blue
-            float32bit aa         = VSSwapHostFloatToLittle( inmemfile[meshbeginword+13].f32val );             //Ambient: Alpha
-            float32bit dr         = VSSwapHostFloatToLittle( inmemfile[meshbeginword+14].f32val );             //Diffuse: red
-            float32bit dg         = VSSwapHostFloatToLittle( inmemfile[meshbeginword+15].f32val );             //Diffuse: green
-            float32bit db         = VSSwapHostFloatToLittle( inmemfile[meshbeginword+16].f32val );             //Diffuse: blue
-            float32bit da         = VSSwapHostFloatToLittle( inmemfile[meshbeginword+17].f32val );             //Diffuse: Alpha
-            float32bit er         = VSSwapHostFloatToLittle( inmemfile[meshbeginword+18].f32val );             //Emmissive: red
-            float32bit eg         = VSSwapHostFloatToLittle( inmemfile[meshbeginword+19].f32val );             //Emmissive: green
-            float32bit eb         = VSSwapHostFloatToLittle( inmemfile[meshbeginword+20].f32val );             //Emmissive: blue
-            float32bit ea         = VSSwapHostFloatToLittle( inmemfile[meshbeginword+21].f32val );             //Emmissive: Alpha
-            float32bit sr         = VSSwapHostFloatToLittle( inmemfile[meshbeginword+22].f32val );             //Specular: red
-            float32bit sg         = VSSwapHostFloatToLittle( inmemfile[meshbeginword+23].f32val );             //Specular: green
-            float32bit sb         = VSSwapHostFloatToLittle( inmemfile[meshbeginword+24].f32val );             //Specular: blue
-            float32bit sa         = VSSwapHostFloatToLittle( inmemfile[meshbeginword+25].f32val );             //Specular: Alpha
-            int32bit   cullface   = (VSSwapHostIntToLittle( inmemfile[meshbeginword+26].i32val ) != 0) ? 1 : 0;             //CullFace
-            int32bit   lighting   = (VSSwapHostIntToLittle( inmemfile[meshbeginword+27].i32val ) != 0) ? 1 : 0;             //lighting
-            int32bit   reflect    = (VSSwapHostIntToLittle( inmemfile[meshbeginword+28].i32val ) != 0) ? 1 : 0;             //reflect
-            int32bit   usenormals = (VSSwapHostIntToLittle( inmemfile[meshbeginword+29].i32val ) != 0) ? 1 : 0;             //usenormals
+            /*int32bit   reverse       =*/ VSSwapHostIntToLittle( inmemfile[meshbeginword+3].i32val );           //reverse flag
+            /*int32bit   forcetexture  =*/ VSSwapHostIntToLittle( inmemfile[meshbeginword+4].i32val );           //force texture flag
+            /*int32bit   sharevert     =*/ VSSwapHostIntToLittle( inmemfile[meshbeginword+5].i32val );           //share vertex flag
+            /*float32bit polygonoffset =*/ VSSwapHostFloatToLittle( inmemfile[meshbeginword+6].f32val );             //polygonoffset
+            /*int32bit   bsrc       =*/ VSSwapHostIntToLittle( inmemfile[meshbeginword+7].i32val );           //Blendmode source
+            /*int32bit   bdst       =*/ VSSwapHostIntToLittle( inmemfile[meshbeginword+8].i32val );           //Blendmode destination
+            /*float32bit power      =*/ VSSwapHostFloatToLittle( inmemfile[meshbeginword+9].f32val );             //Specular: power
+            /*float32bit ar         =*/ VSSwapHostFloatToLittle( inmemfile[meshbeginword+10].f32val );             //Ambient: red
+            /*float32bit ag         =*/ VSSwapHostFloatToLittle( inmemfile[meshbeginword+11].f32val );             //Ambient: green
+            /*float32bit ab         =*/ VSSwapHostFloatToLittle( inmemfile[meshbeginword+12].f32val );             //Ambient: blue
+            /*float32bit aa         =*/ VSSwapHostFloatToLittle( inmemfile[meshbeginword+13].f32val );             //Ambient: Alpha
+            /*float32bit dr         =*/ VSSwapHostFloatToLittle( inmemfile[meshbeginword+14].f32val );             //Diffuse: red
+            /*float32bit dg         =*/ VSSwapHostFloatToLittle( inmemfile[meshbeginword+15].f32val );             //Diffuse: green
+            /*float32bit db         =*/ VSSwapHostFloatToLittle( inmemfile[meshbeginword+16].f32val );             //Diffuse: blue
+            /*float32bit da         =*/ VSSwapHostFloatToLittle( inmemfile[meshbeginword+17].f32val );             //Diffuse: Alpha
+            /*float32bit er         =*/ VSSwapHostFloatToLittle( inmemfile[meshbeginword+18].f32val );             //Emmissive: red
+            /*float32bit eg         =*/ VSSwapHostFloatToLittle( inmemfile[meshbeginword+19].f32val );             //Emmissive: green
+            /*float32bit eb         =*/ VSSwapHostFloatToLittle( inmemfile[meshbeginword+20].f32val );             //Emmissive: blue
+            /*float32bit ea         =*/ VSSwapHostFloatToLittle( inmemfile[meshbeginword+21].f32val );             //Emmissive: Alpha
+            /*float32bit sr         =*/ VSSwapHostFloatToLittle( inmemfile[meshbeginword+22].f32val );             //Specular: red
+            /*float32bit sg         =*/ VSSwapHostFloatToLittle( inmemfile[meshbeginword+23].f32val );             //Specular: green
+            /*float32bit sb         =*/ VSSwapHostFloatToLittle( inmemfile[meshbeginword+24].f32val );             //Specular: blue
+            /*float32bit sa         =*/ VSSwapHostFloatToLittle( inmemfile[meshbeginword+25].f32val );             //Specular: Alpha
+            /*int32bit   cullface   =*/ //(VSSwapHostIntToLittle( inmemfile[meshbeginword+26].i32val ) != 0) ? 1 : 0;             //CullFace
+            /*int32bit   lighting   =*/ //(VSSwapHostIntToLittle( inmemfile[meshbeginword+27].i32val ) != 0) ? 1 : 0;             //lighting
+            /*int32bit   reflect    =*/ //(VSSwapHostIntToLittle( inmemfile[meshbeginword+28].i32val ) != 0) ? 1 : 0;             //reflect
+            /*int32bit   usenormals =*/ //(VSSwapHostIntToLittle( inmemfile[meshbeginword+29].i32val ) != 0) ? 1 : 0;             //usenormals
             //End Header
             //Go to Arbitrary Length Attributes section
             word32index  = meshbeginword+(meshheaderlength/4);
@@ -949,8 +949,8 @@ void BFXMtoBoxDims( FILE *Inputfile, const char *name )
             int32bit numtextures = VSSwapHostIntToLittle( inmemfile[word32index].i32val );             //number of textures
             word32index += 1;
             for (int32bit tex = 0; tex < numtextures; tex++) {
-                int32bit textype    = VSSwapHostIntToLittle( inmemfile[word32index].i32val );                 //texture type
-                int32bit texindex   = VSSwapHostIntToLittle( inmemfile[word32index+1].i32val );                 //texture index
+                /*int32bit textype    =*/ VSSwapHostIntToLittle( inmemfile[word32index].i32val );                 //texture type
+                /*int32bit texindex   =*/ VSSwapHostIntToLittle( inmemfile[word32index+1].i32val );                 //texture index
                 int32bit texnamelen = VSSwapHostIntToLittle( inmemfile[word32index+2].i32val );                 //texture name length
                 word32index += 3;
                 string   texname    = "";
@@ -968,15 +968,15 @@ void BFXMtoBoxDims( FILE *Inputfile, const char *name )
             int32bit numlogos = VSSwapHostIntToLittle( inmemfile[word32index].i32val );             //number of logos
             word32index += 1;
             for (int32bit logo = 0; logo < numlogos; logo++) {
-                float32bit size     = VSSwapHostFloatToLittle( inmemfile[word32index].f32val );                 //size
-                float32bit offset   = VSSwapHostFloatToLittle( inmemfile[word32index+1].f32val );                 //offset
-                float32bit rotation = VSSwapHostFloatToLittle( inmemfile[word32index+2].f32val );                 //rotation
-                int32bit   type     = VSSwapHostIntToLittle( inmemfile[word32index+3].i32val );               //type
+                /*float32bit size     =*/ VSSwapHostFloatToLittle( inmemfile[word32index].f32val );                 //size
+                /*float32bit offset   =*/ VSSwapHostFloatToLittle( inmemfile[word32index+1].f32val );                 //offset
+                /*float32bit rotation =*/ VSSwapHostFloatToLittle( inmemfile[word32index+2].f32val );                 //rotation
+                /*int32bit   type     =*/ VSSwapHostIntToLittle( inmemfile[word32index+3].i32val );               //type
                 int32bit   numrefs  = VSSwapHostIntToLittle( inmemfile[word32index+4].i32val );               //number of reference points
                 word32index += 5;
                 for (int32bit ref = 0; ref < numrefs; ref++) {
-                    int32bit   refnum = VSSwapHostIntToLittle( inmemfile[word32index].i32val );                   //Logo ref
-                    float32bit weight = VSSwapHostFloatToLittle( inmemfile[word32index+1].f32val );                     //reference weight
+                    /*int32bit   refnum =*/ VSSwapHostIntToLittle( inmemfile[word32index].i32val );                   //Logo ref
+                    /*float32bit weight =*/ VSSwapHostFloatToLittle( inmemfile[word32index+1].f32val );                     //reference weight
                     word32index += 2;
                 }
             }
@@ -985,8 +985,8 @@ void BFXMtoBoxDims( FILE *Inputfile, const char *name )
             int32bit numLODs = VSSwapHostIntToLittle( inmemfile[word32index].i32val );             //number of LODs
             word32index += 1;
             for (int32bit LOD = 0; LOD < numLODs; LOD++) {
-                float32bit size  = VSSwapHostFloatToLittle( inmemfile[word32index].f32val );                 //Size
-                int32bit   index = VSSwapHostIntToLittle( inmemfile[word32index+1].i32val );               //Mesh index
+                /*float32bit size  =*/ VSSwapHostFloatToLittle( inmemfile[word32index].f32val );                 //Size
+                /*int32bit   index =*/ VSSwapHostIntToLittle( inmemfile[word32index+1].i32val );               //Mesh index
                 word32index += 2;
             }
             //End LODs
@@ -1007,12 +1007,12 @@ void BFXMtoBoxDims( FILE *Inputfile, const char *name )
                     //Append char to end of string
                     word32index += 1;
                 }
-                float32bit FPS = VSSwapHostFloatToLittle( inmemfile[word32index].f32val );                 //FPS
+                /*float32bit FPS =*/ VSSwapHostFloatToLittle( inmemfile[word32index].f32val );                 //FPS
                 word32index += NUMFIELDSPERANIMATIONDEF;
                 int32bit   numframerefs = VSSwapHostIntToLittle( inmemfile[word32index].i32val );               //number of animation frame references
                 word32index += 1;
                 for (int32bit fref = 0; fref < numframerefs; fref++) {
-                    int32bit ref = VSSwapHostIntToLittle( inmemfile[word32index].i32val );                     //number of animation frame references
+                    /*int32bit ref =*/ VSSwapHostIntToLittle( inmemfile[word32index].i32val );                     //number of animation frame references
                     word32index += NUMFIELDSPERREFERENCEDANIMATION;
                 }
             }

@@ -515,7 +515,6 @@ void Manager::addCmdDownload( SOCKETALT sock, NetBuffer &buffer )
             NetBuffer respbuffer;
             respbuffer.addChar( ResolveResponse );
             respbuffer.addShort( num );
-
             Adapter::ResolveRequest::iterator iter;
             for (iter = r->files.begin(); iter != r->files.end(); iter++) {
                 bool   ok;
@@ -524,7 +523,12 @@ void Manager::addCmdDownload( SOCKETALT sock, NetBuffer &buffer )
                 //If we want to download a memory buffer from server access is considered ok
                 if (ft == VSFileSystem::ZoneBuffer) {
                     //We receive a filename containing a zone id so we test it exists
-                    int zoneid = atoi( file.c_str() );
+                    int zoneid = 0;
+                    zoneid = atoi( file.c_str() );
+                    if (zoneid == 0)
+                    {
+                        //Do nothing? {Review}
+                    }
                     ok = true;
                 } else {
                     ok = private_test_access( file, (VSFileSystem::VSFileType) ft );

@@ -543,11 +543,15 @@ ELSEIF(CPUINTEL_native)
     SET(CPU_OPTS "-mtune=native -march=native -mfpmath=sse -msse3 -mmmx -ftree-vectorize -ffast-math -fassociative-math -funsafe-math-optimizations -funroll-loops -ftree-parallelize-loops=${CPU_SMP}")
 ENDIF(CPUAMD_k8)
 
+if(CMAKE_COMPILER_IS_GNUCXX)
+    add_definitions(-std=gnu++03)
+endif()
+
 # Debug target block.
-SET(CMAKE_CXX_FLAGS_DEBUG " ${CPU_OPTS} -DNV_CUBE_MAP -DBOOST_PYTHON_NO_PY_SIGNATURES -include config.h -pipe -g2 -Wall -Werror -O0 -fvisibility=hidden" CACHE STRING
+SET(CMAKE_CXX_FLAGS_DEBUG " ${CPU_OPTS} -DNV_CUBE_MAP -DBOOST_PYTHON_NO_PY_SIGNATURES -include config.h -pipe -g2 -std=c++11 -Wall -Werror -O0 -fvisibility=hidden" CACHE STRING
     "Flags used by the C++ compiler during debug builds."
      FORCE )
-SET( CMAKE_C_FLAGS_DEBUG "  ${CPU_OPTS} -DNV_CUBE_MAP -DBOOST_PYTHON_NO_PY_SIGNATURES -include config.h -pipe -g2 -Wall -Werror -Wno-unused-function -Wno-unused-variable -O0 -fvisibility=hidden" CACHE STRING
+SET( CMAKE_C_FLAGS_DEBUG "  ${CPU_OPTS} -DNV_CUBE_MAP -DBOOST_PYTHON_NO_PY_SIGNATURES -include config.h -pipe -g -Wall -Werror -Wno-unused-function -Wno-unused-variable -O0 -fvisibility=hidden" CACHE STRING
     "Flags used by the C compiler during debug builds."
      FORCE )
 MARK_AS_ADVANCED(
@@ -564,7 +568,7 @@ ENDIF("${CMAKE_BUILD_TYPE}" STREQUAL "Debug")
 
 
 # Release Target block
-SET(CMAKE_CXX_FLAGS_RELEASE  "${CPU_OPTS} -DNV_CUBE_MAP -DBOOST_PYTHON_NO_PY_SIGNATURES -include config.h -pipe -O2 -Wall -fvisibility=hidden" CACHE STRING
+SET(CMAKE_CXX_FLAGS_RELEASE  "${CPU_OPTS} -DNV_CUBE_MAP -DBOOST_PYTHON_NO_PY_SIGNATURES -include config.h -pipe -O2 -std=c++11 -Wall -fvisibility=hidden " CACHE STRING
     "Flags used by the C++ compiler during release builds."
     FORCE)
 SET( CMAKE_C_FLAGS_RELEASE "${CPU_OPTS}  -DNV_CUBE_MAP -DBOOST_PYTHON_NO_PY_SIGNATURES -include config.h -pipe -O2 -Wall -Wno-unused-function -Wno-unused-variable -fvisibility=hidden" CACHE STRING
@@ -586,10 +590,10 @@ ENDIF("${CMAKE_BUILD_TYPE}" STREQUAL "Release")
 
 
 # Release with debugging symbols Target block
-SET(CMAKE_CXX_FLAGS_RELWITHDEBINFO "  ${CPU_OPTS}  -DNV_CUBE_MAP -DBOOST_PYTHON_NO_PY_SIGNATURES -include config.h -pipe -O2 -g2 -Wall -Wno-unused-function -Wno-unused-variable -fvisibility=hidden" CACHE STRING
+SET(CMAKE_CXX_FLAGS_RELWITHDEBINFO "  ${CPU_OPTS}  -DNV_CUBE_MAP -DBOOST_PYTHON_NO_PY_SIGNATURES -include config.h -pipe -O2 -g2  -std=c++1 -Wall -Wno-unused-function -Wno-unused-variable -fvisibility=hidden1" CACHE STRING
     "Flags used by the C++ compiler during release builds."
      FORCE )
-SET( CMAKE_C_FLAGS_RELWITHDEBINFO "  ${CPU_OPTS}  -DNV_CUBE_MAP -DBOOST_PYTHON_NO_PY_SIGNATURES -include config.h -pipe -O2 -g2 -Wall -Wno-unused-function -Wno-unused-variable -fvisibility=hidden" CACHE STRING
+SET( CMAKE_C_FLAGS_RELWITHDEBINFO "  ${CPU_OPTS}  -DNV_CUBE_MAP -DBOOST_PYTHON_NO_PY_SIGNATURES -include config.h -pipe -O2 -g2  -std=c++1 -Wall -Wno-unused-function -Wno-unused-variable -fvisibility=hidden" CACHE STRING
     "Flags used by the C compiler during release builds."
      FORCE )
     MARK_AS_ADVANCED(
@@ -606,7 +610,7 @@ ENDIF("${CMAKE_BUILD_TYPE}" STREQUAL "RelWithDebInfo")
 
 
 # Maintainer Target block
-SET(CMAKE_CXX_FLAGS_MAINTAINER " -DNV_CUBE_MAP -DBOOST_PYTHON_NO_PY_SIGNATURES -include config.h -pipe -g2 -Wall -Wno-unused-function -Wno-unused-variable -O0 -fvisibility=hidden" CACHE STRING
+SET(CMAKE_CXX_FLAGS_MAINTAINER " -DNV_CUBE_MAP -DBOOST_PYTHON_NO_PY_SIGNATURES -include config.h -pipe -g2  -std=c++11 -Wall -Wno-unused-function -Wno-unused-variable -O0 -fvisibility=hidden" CACHE STRING
     "Flags used by the C++ compiler during maintainer builds."
     FORCE )
 SET( CMAKE_C_FLAGS_MAINTAINER " -DNV_CUBE_MAP -DBOOST_PYTHON_NO_PY_SIGNATURES -include config.h -pipe -g2 -Wall -Wno-unused-function -Wno-unused-variable -O0 -fvisibility=hidden" CACHE STRING
@@ -635,7 +639,7 @@ ENDIF("${CMAKE_BUILD_TYPE}" STREQUAL "Maintainer")
 
 
 # Profiler Target block
-SET(CMAKE_CXX_FLAGS_PROFILER " ${CPU_OPTS} -O2 -pg -g2 -DNV_CUBE_MAP -DBOOST_PYTHON_NO_PY_SIGNATURES -include config.h -pipe -Wall -Wno-unused-function -Wno-unused-variable -O3" CACHE STRING
+SET(CMAKE_CXX_FLAGS_PROFILER " ${CPU_OPTS} -O2 -pg -g2 -DNV_CUBE_MAP -DBOOST_PYTHON_NO_PY_SIGNATURES -include config.h -pipe -std=c++11 -Wall -Wno-unused-function -Wno-unused-variable -O3" CACHE STRING
     "Flags used by the C++ compiler during profiler builds."
      FORCE )
 SET( CMAKE_C_FLAGS_PROFILER " ${CPU_OPTS} -O2 -pg -g2 -DNV_CUBE_MAP -DBOOST_PYTHON_NO_PY_SIGNATURES -include config.h -pipe -Wall -Wno-unused-function -Wno-unused-variable -O3" CACHE STRING
@@ -684,16 +688,32 @@ include (CheckIncludeFileCXX)
 # Let cmake find our in-tree modules
 SET(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${vsUTCS_SOURCE_DIR})
 
-
-# Python 3 has an SASL compatibility issue that causes an error on some installations that prefer Python3.
-find_package(PythonLibs 2.7 REQUIRED)
-IF(PYTHONLIBS_FOUND OR PYTHON_LIBRARIES AND PYTHON_INCLUDE_PATH)
-    SET(TST_INCLUDES ${PYTHON_INCLUDE_PATH})
+# Python 3 has a SASL compatibility issue which causes an error
+# on some installations that prefer Python 3
+# -- Python 2.7 is default for now
+OPTION(USE_PYTHON_3 "Use Python 3 instead of Python 2.7 (default is 2.7)" OFF)
+IF(USE_PYTHON_3)
+# We want at least Python 3.4, but we prefer newer versions
+SET(Python_ADDITIONAL_VERSIONS 3.6 3.5 3.4)
+ELSE(USE_PYTHON_3)
+SET(Python_ADDITIONAL_VERSIONS 2.7)
+ENDIF(USE_PYTHON_3)
+# If we don't unset cache variables
+# ccmake won't pick up changes to the USE_PYTHON_3 option
+UNSET(PYTHON_INCLUDE_DIR CACHE)
+UNSET(PYTHON_LIBRARY CACHE)
+# The python version we want is set via Python_ADDITIONAL_VERSIONS
+find_package(PythonLibs REQUIRED)
+message("++ Python release(s) searched for : ${Python_ADDITIONAL_VERSIONS}")
+message("++ Python library : ${PYTHON_LIBRARY} (${PYTHONLIBS_VERSION_STRING})") 
+message("++ Python include dir : ${PYTHON_INCLUDE_DIR}")
+IF(PYTHONLIBS_FOUND OR PYTHON_LIBRARIES AND PYTHON_INCLUDE_DIRS)
+    SET(TST_INCLUDES ${PYTHON_INCLUDE_DIRS})
     SET(TST_LIBS ${PYTHON_LIBRARIES})
     SET(HAVE_PYTHON 1)
-ELSE(PYTHONLIBS_FOUND OR PYTHON_LIBRARIES AND PYTHON_INCLUDE_PATH)
+ELSE(PYTHONLIBS_FOUND OR PYTHON_LIBRARIES AND PYTHON_INCLUDE_DIRS)
     message(FATAL_ERROR "Can't find python")
-ENDIF(PYTHONLIBS_FOUND OR PYTHON_LIBRARIES AND PYTHON_INCLUDE_PATH)
+ENDIF(PYTHONLIBS_FOUND OR PYTHON_LIBRARIES AND PYTHON_INCLUDE_DIRS)
 
 # Find Boost with boost_python library
 OPTION(USE_SYSTEM_BOOST "Use system boost" OFF)
@@ -708,10 +728,10 @@ IF(Boost_FOUND)
 ELSE(Boost_FOUND)
   message("++ Using Internal Boost")
   SET(BOOST_PYTHON_NO_PY_SIGNATURES 1)
-  SET(TST_INCLUDES ${TST_INCLUDES} ${vsUTCS_SOURCE_DIR}/boost/1_53)
+  SET(TST_INCLUDES ${TST_INCLUDES} ${vsUTCS_SOURCE_DIR}/boost/1_64)
   SET(TST_LIBS ${TST_LIBS} boost_python)
   include_directories(${TST_INCLUDES})
-  add_subdirectory(boost/1_63)
+  add_subdirectory(boost/1_64)
   IF(NOT DISABLE_CLIENT)
     add_dependencies(vegastrike boost_python)
   ENDIF(NOT DISABLE_CLIENT)

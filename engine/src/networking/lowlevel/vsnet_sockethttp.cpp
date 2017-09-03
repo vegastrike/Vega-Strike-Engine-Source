@@ -271,13 +271,11 @@ bool VsnetHTTPSocket::parseHeaderByte( char rcvchr )
             _incompleteheadersection = 0;
         if ( _incompleteheadersection > 2 || !isspace( rcvchr ) ) {
             if ( _header.empty() ) {
-                std::string::size_type sp1, sp2;
+                std::string::size_type sp1;
                 sp1 = _incompleteheader.find( ' ' );
                 if (sp1 == std::string::npos) break;
-                //sp2 = _incompleteheader.find(' ', sp1+1);
-                //if (sp2==std::string::npos) break;
                 _header.insert( std::pair< std::string, std::string > (
-                                   "Status", _incompleteheader.substr( sp1+1 /*, sp2-sp1-1*/ ) ) );
+                                   "Status", _incompleteheader.substr( sp1+1 ) ) );
             } else {
                 std::string::size_type colon, colonsp;
                 colon   = _incompleteheader.find( ':' );
@@ -342,7 +340,6 @@ bool VsnetHTTPSocket::lower_selected( int datalen )
         return false;
     }
     char rcvbuf[1440];
-    int  ret    = 0;
     int  bufpos = 0;
     while (datalen != 0) {
         int dataToRead;

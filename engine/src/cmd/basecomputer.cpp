@@ -1760,12 +1760,16 @@ void BaseComputer::recalcTitle()
     string baseName;
     if (baseUnit) {
         if (baseUnit->isUnit() == PLANETPTR) {
-            string temp = ( (Planet*) baseUnit )->getHumanReadablePlanetType()+" Planet";
-            baseName = temp;
+            string temp = ( (Planet*) baseUnit )->getHumanReadablePlanetType()+" planet";
+            // think "<planet type> <name of planet>"
+            baseName = temp + " " + baseUnit->name;
         } else {
-            baseName = baseUnit->name;
+            // as above, but e.g. mining bases have 'mining_base' in baseUnit->name
+            // so we need to come up with something a little bit better
+            baseName = baseUnit->name + " " + baseUnit->getFullname();
         }
     }
+    // at this point, baseName will be e.g. "Agricultural planet Helen" or "mining_base Achilles"
     baseTitle += emergency_downgrade_mode;
     static bool includebasename =
         XMLSupport::parse_bool( vs_config->getVariable( "graphics", "include_base_name_on_dock", "true" ) );
@@ -3102,9 +3106,10 @@ void BaseComputer::loadMissionsMasterList( TransactionList &tlist )
     }
     //Number of strings to look at.  And make sure they match!
     const size_t stringCount = getSaveStringLength( playerNum, MISSION_NAMES_LABEL );
-    if (Network == NULL)
+    if (Network == NULL) {
         //these aren't sent over the network.
         assert( stringCount == getSaveStringLength( playerNum, MISSION_SCRIPTS_LABEL ) );
+    }
     assert( stringCount == getSaveStringLength( playerNum, MISSION_DESC_LABEL ) );
     //Make sure we have different names for all the missions.
     //This changes the savegame -- it removes ambiguity for good.
