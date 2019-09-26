@@ -8,14 +8,14 @@
 
 
 
-static inline float fmin( float a, float b )
-{
-    return (a < b) ? a : b;
-}
-static inline float fmax( float a, float b )
-{
-    return (a > b) ? a : b;
-}
+// static inline float fmin( float a, float b )
+// {
+//     return (a < b) ? a : b;
+// }
+// static inline float fmax( float a, float b )
+// {
+//     return (a > b) ? a : b;
+// }
 
 class ShipCommands
 {
