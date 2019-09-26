@@ -655,13 +655,13 @@ void Unit::DeactivateJumpDrive()
         jump.drive = -1;
 }
 
-float copysign( float x, float y )
-{
-    if (y > 0)
-        return x;
-    else
-        return -x;
-}
+// float copysign( float x, float y )
+// {
+//     if (y > 0)
+//         return x;
+//     else
+//         return -x;
+// }
 
 float rand01()
 {
