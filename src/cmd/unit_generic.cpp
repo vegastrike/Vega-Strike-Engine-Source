@@ -655,14 +655,6 @@ void Unit::DeactivateJumpDrive()
         jump.drive = -1;
 }
 
-// float copysign( float x, float y )
-// {
-//     if (y > 0)
-//         return x;
-//     else
-//         return -x;
-// }
-
 float rand01()
 {
     return (float) rand()/(float) RAND_MAX;

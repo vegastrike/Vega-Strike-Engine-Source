@@ -32,7 +32,7 @@
  *  };
  */
 
-static char NULL_CHAR = '\0';
+static char EMPTY_STR[] = "";
 
 TextArea::~TextArea() {}
 
@@ -246,7 +246,7 @@ char* TextArea::GetSelectedItem( int type )
     TextAreaItem *search;
     search = ItemList->FindCount( cur_selected, 0 );
     if (search == 0) {
-        return &NULL_CHAR;
+        return EMPTY_STR;
     }
     if (type == 1) {
         return search->name;
