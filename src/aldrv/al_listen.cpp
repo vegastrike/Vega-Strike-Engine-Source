@@ -67,10 +67,10 @@ QVector AUDListenerLocation()
 }
 
 static float EstimateGain(const Vector &pos, const float gain)
-{    
+{
     // Base priority is source gain
     float final_gain = gain;
-    
+
     // Account for distance attenuation
     float listener_size = sqrt(mylistener.rsize);
     float distance = (AUDListenerLocation() - pos.Cast()).Magnitude()
@@ -79,7 +79,7 @@ static float EstimateGain(const Vector &pos, const float gain)
     float ref = game_options.audio_ref_distance;
     float rolloff = 1.0f;
     final_gain *= (distance <= 0) ? 1.f : float(ref / (ref + rolloff * distance));
-    
+
     return final_gain;
 }
 
@@ -132,20 +132,20 @@ char AUDQueryAudability( const int sound, const Vector &pos, const Vector &vel, 
     if (min_index >= 0) {
         int target = min_index;
         int target1 = playingbuffers[hashed][target].soundname;
-        
+
         ALuint tmpsrc = sounds[target1].source;
-        
+
         sounds[target1].source = sounds[sound].source;
         sounds[sound].source   = tmpsrc;
         playingbuffers[hashed][target].soundname = sound;
         if (tmpsrc == 0) {
             playingbuffers[hashed].erase( playingbuffers[hashed].begin()+target );
         } else {
-            VSFileSystem::vs_dprintf (4, "stole %d",tmpsrc);
+            VSFileSystem::vs_dprintf(3, "stole %u\n", tmpsrc);
             return 2;
         }
     }
-    
+
     if (playingbuffers[hashed].size() > maxallowedsingle)
         return 0;
     if (totalplaying > maxallowedtotal)
@@ -280,4 +280,3 @@ float AUDGetListenerGain()
     return 0;
 #endif
 }
-
