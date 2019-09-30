@@ -4076,15 +4076,16 @@ Cargo CreateCargoForOwnerStarship( const Cockpit *cockpit, const Unit *base, int
             locationSystemName,
             destinationSystemName,
             jumps);
-        VSFileSystem::vs_dprintf(3, "Player ship needs transport from %s to %s across %d systems",
-            locationBaseName.c_str(),
-            destinationSystemName.c_str(),
-            jumps.size());
+        VSFileSystem::vs_dbg(3)
+            << boost::format("Player ship needs transport from %1% to %2% across %3% systems") %
+                   locationBaseName % destinationSystemName % jumps.size()
+            << std::endl;
         cargo.price += shipping_price_perjump * (jumps.size() - 1);
     } else if (needsInsysTransport) {
-        VSFileSystem::vs_dprintf(3, "Player ship needs insys transport from %s to %s",
-            locationBaseName.c_str(),
-            destinationBaseName.c_str());
+        VSFileSystem::vs_dbg(3) << boost::format(
+                                       "Player ship needs insys transport from %1% to %2%") %
+                                       locationBaseName % destinationBaseName
+                                << std::endl;
         cargo.price += shipping_price_insys;
     }
 
@@ -4207,10 +4208,9 @@ void trackPrice(int whichplayer, const Cargo &item, float price, const string &s
     static size_t toprank = (size_t)
         XMLSupport::parse_int( vs_config->getVariable( "general", "trade_interface_tracks_prices_toprank", "10" ) );
 
-    VSFileSystem::vs_dprintf(1, "Ranking item %s/%s at %s/%s\n",
-        item.category.get().c_str(), item.content.get().c_str(),
-        systemName.c_str(), baseName.c_str());
-    fflush(stderr);
+    VSFileSystem::vs_dbg(1) << boost::format("Ranking item %1%/%2% at %3%/%4%") %
+                                   item.category.get() % item.content.get() % systemName % baseName
+                            << std::endl;
 
     // Recorded prices are always sorted, so we first do a quick check to avoid
     // triggering savegame serialization without reason
@@ -4335,49 +4335,72 @@ void trackPrice(int whichplayer, const Cargo &item, float price, const string &s
         string prefix = "   ";
         char conversionBuffer[128];
 
-        VSFileSystem::vs_dprintf(1,"Tracking data:\n");
-        VSFileSystem::vs_dprintf(1,"  highest locs: (%d)\n", recordedHighestLocs.size());
-        { for (size_t i=0; i < recordedHighestLocs.size(); ++i) {
-            VSFileSystem::vs_dprintf(1, "    %d : %s\n", i, recordedHighestLocs[i].c_str());
-        } }
+        VSFileSystem::vs_dbg(1) << "Tracking data:" << std::endl;
+        VSFileSystem::vs_dbg(1) << boost::format("  highest locs: (%1%)") %
+                                       recordedHighestLocs.size()
+                                << std::endl;
+        {
+            for (size_t i = 0; i < recordedHighestLocs.size(); ++i) {
+                VSFileSystem::vs_dbg(1)
+                    << boost::format("    %1% : %2%") % i % recordedHighestLocs[i] << std::endl;
+            }
+        }
 
-        VSFileSystem::vs_dprintf(1,"  highest prices: (%d)\n", recordedHighestPrices.size());
-        { for (size_t i=0; i < recordedHighestPrices.size(); ++i) {
-            VSFileSystem::vs_dprintf(1, "    %d : %.2f\n", i, recordedHighestPrices[i]);
-        } }
+        VSFileSystem::vs_dbg(1) << boost::format("  highest prices: (%1%)") %
+                                       recordedHighestPrices.size()
+                                << std::endl;
+        {
+            for (size_t i = 0; i < recordedHighestPrices.size(); ++i) {
+                VSFileSystem::vs_dbg(1)
+                    << boost::format("    %1% : %2$.2f") % i % recordedHighestPrices[i]
+                    << std::endl;
+            }
+        }
 
-        VSFileSystem::vs_dprintf(1,"  loest locs: (%d)\n", recordedLowestLocs.size());
-        { for (size_t i=0; i < recordedLowestLocs.size(); ++i) {
-            VSFileSystem::vs_dprintf(1, "    %d : %s\n", i, recordedLowestLocs[i].c_str());
-        } }
+        VSFileSystem::vs_dbg(1) << boost::format("  lowest locs: (%1%)") % recordedLowestLocs.size()
+                                << std::endl;
+        {
+            for (size_t i = 0; i < recordedLowestLocs.size(); ++i) {
+                VSFileSystem::vs_dbg(1)
+                    << boost::format("    %1% : %2%") % i % recordedLowestLocs[i] << std::endl;
+            }
+        }
 
-        VSFileSystem::vs_dprintf(1,"  lowest prices: (%d)\n", recordedLowestPrices.size());
-        { for (size_t i=0; i < recordedLowestPrices.size(); ++i) {
-            VSFileSystem::vs_dprintf(1, "    %d : %.2f\n", i, recordedLowestPrices[i]);
-        } }
+        VSFileSystem::vs_dbg(1) << boost::format("  lowest prices: (%1%)") %
+                                       recordedLowestPrices.size()
+                                << std::endl;
+        {
+            for (size_t i = 0; i < recordedLowestPrices.size(); ++i) {
+                VSFileSystem::vs_dbg(1)
+                    << boost::format("    %1% : %2$.2f") % i % recordedLowestPrices[i] << std::endl;
+            }
+        }
 
         fflush(stderr);
 
-
         highest.clear();
         highest.resize(recordedHighestPrices.size());
-        { for (size_t i=0; i < recordedHighestPrices.size(); ++i) {
-            string &text = highest[i];
-            PRETTY_ADD( "", recordedHighestPrices[i], 2 );
-            text += " (at " + recordedHighestLocs[i] + ")";
+        {
+            for (size_t i = 0; i < recordedHighestPrices.size(); ++i) {
+                string &text = highest[i];
+                PRETTY_ADD("", recordedHighestPrices[i], 2);
+                text += " (at " + recordedHighestLocs[i] + ")";
 
-            VSFileSystem::vs_dprintf(1, "Highest item %s\n", text.c_str());
-        } }
+                VSFileSystem::vs_dbg(1) << boost::format("Highest item %1%") % text << std::endl;
+            }
+        }
 
         lowest.clear();
         lowest.resize(recordedLowestPrices.size());
-        { for (size_t i=0; i < recordedLowestPrices.size(); ++i) {
-            string &text = lowest[i];
-            PRETTY_ADD( "", recordedLowestPrices[i], 2 );
-            text += " (at " + recordedLowestLocs[i] + ")";
+        {
+            for (size_t i = 0; i < recordedLowestPrices.size(); ++i) {
+                string &text = lowest[i];
+                PRETTY_ADD("", recordedLowestPrices[i], 2);
+                text += " (at " + recordedLowestLocs[i] + ")";
 
-            VSFileSystem::vs_dprintf(1, "Lowest item %s\n", text.c_str());
-        } }
+                VSFileSystem::vs_dbg(1) << boost::format("Lowest item %1%") % text << std::endl;
+            }
+        }
     }
 }
 
@@ -6264,4 +6287,3 @@ bool BaseComputer::actionJoinGame( const EventCommandId &command, Control *contr
     return true;
 }
 //Process a command event from the Options Menu window.
-
