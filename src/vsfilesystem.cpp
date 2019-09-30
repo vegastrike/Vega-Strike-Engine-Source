@@ -35,6 +35,8 @@ struct dirent
 
 #include "options.h"
 
+#include "boost/iostreams/stream.hpp"
+#include "boost/iostreams/device/null.hpp"
 
 
 using VSFileSystem::VSVolumeType;
@@ -482,7 +484,22 @@ int vs_fprintf( FILE *fp, const char *format, ... )
 const char VS_MIN_DBG_LVL = 1;
 const char VS_MAX_DBG_LVL = 3;
 
-void vs_dprintf(char level, const char *format, ...) {
+static boost::iostreams::stream<boost::iostreams::null_sink>
+    nullOstream((boost::iostreams::null_sink()));
+
+std::ostream &vs_dbg(const char level)
+{
+    if (level < VS_MIN_DBG_LVL || level > VS_MAX_DBG_LVL) {
+        return std::cerr << "Vega Strike Error: dbg_out_fmt level out of range" << std::endl;
+    } else if (use_volumes || (level > g_game.vsdebug)) {
+        return nullOstream;
+    } else {
+        return std::cerr;
+    }
+}
+
+void vs_dprintf(char level, const char *format, ...)
+{
     if (level < VS_MIN_DBG_LVL || level > VS_MAX_DBG_LVL) {
         fprintf(stderr, "Vega Strike Error: vs_dprintf level out of range\n");
     } else if (!use_volumes && level <= g_game.vsdebug) {
@@ -491,19 +508,6 @@ void vs_dprintf(char level, const char *format, ...) {
         vfprintf(stderr, format, ap);
     }
 }
-
-#if 0
-int vs_fscanf( FILE *fp, const char *format, ... )
-{
-    if (!use_volumes) {
-        va_list arglist;
-        va_start( arglist, format );
-        //return _input(fp,(unsigned char*)format,arglist);
-        return vfscanf( fp, format, arglist );
-    } else {}
-    return 0;
-}
-#endif
 
 int vs_fseek( FILE *fp, long offset, int whence )
 {

@@ -13,6 +13,8 @@ using std::vector;
 #include "pk3.h"
 #include <gnuhash.h>
 
+#include "boost/format.hpp"
+
 class VegaConfig;
 class VSImage;
 
@@ -151,10 +153,9 @@ int vs_fprintf( FILE *fp, const char *format, ... );
  *  example usage.   vegastrike --debug=3       leaving --debug empty as an argument is the same as --debug=1
  *  all output is sent to stderr
  */
+std::ostream &vs_dbg(const char level);
 void vs_dprintf( char level, const char *format, ... );
-#if 0
-int vs_fscanf( FILE *fp, const char *format, ... );
-#endif
+
 template < class A >
 int vs_fscanf( FILE *fp, const char *format, A *a )
 {
@@ -612,4 +613,3 @@ int scandir( const char *dirname, struct dirent ***namelist,
 #endif
 
 #endif
-
