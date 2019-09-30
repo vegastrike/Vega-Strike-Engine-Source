@@ -278,7 +278,7 @@ static void ConvertFormat( vector< char > &ogg )
             OggVorbis_File vf;
             ov_callbacks   callbacks;
             fake_file ff;
-            
+
             ff.data = &ogg[0];
             ff.loc  = 0;
             ff.size = ogg.size();
@@ -386,8 +386,10 @@ static int LoadSound( ALuint buffer, bool looping, bool music )
         i = dirtysounds.back();
         dirtysounds.pop_back();
         //assert (sounds[i].buffer==(ALuint)0);
-        if (sounds[i].buffer != (ALuint) 0)
-            VSFileSystem::vs_dprintf( 3, "using claimed buffer %d\n", sounds[i].buffer );
+        if (sounds[i].buffer != (ALuint)0) {
+            VSFileSystem::vs_dbg(3)
+                << boost::format("using claimed buffer %1%") % sounds[i].buffer << std::endl;
+        }
         sounds[i].buffer = buffer;
     } else {
         i = sounds.size();
@@ -412,10 +414,10 @@ using namespace VSFileSystem;
 
 bool AUDLoadSoundFile( const char *s, struct AUDSoundProperties *info, bool use_fileptr )
 {
-    VSFileSystem::vs_dprintf(3, "Loading sound file %s\n", s);
-    
+    VSFileSystem::vs_dbg(3) << boost::format("Loading sound file %1%") % s << std::endl;
+
     info->success = false;
-    
+
 #ifdef HAVE_AL
     vector< char >dat;
     if (use_fileptr) {
@@ -692,7 +694,7 @@ void AUDDeleteSound( int sound, bool music )
 
 void AUDAdjustSound( const int sound, const QVector &pos, const Vector &vel )
 {
-    
+
 #ifdef HAVE_AL
     if ( sound >= 0 && sound < (int) sounds.size() ) {
         float p[] = {
@@ -884,12 +886,14 @@ void AUDPlay( const int sound, const QVector &pos, const Vector &vel, const floa
             AUDAdjustSound( sound, pos, vel );
             AUDSoundGain( sound, gain, sounds[sound].music );
             if (tmp != 2) {
-                VSFileSystem::vs_dprintf(3, "AUDPlay sound %d %d\n", 
-                    sounds[sound].source, sounds[sound].buffer );
+                VSFileSystem::vs_dbg(3) << boost::format("AUDPlay sound %1% %2%") %
+                                               sounds[sound].source % sounds[sound].buffer
+                                        << std::endl;
                 AUDAddWatchedPlayed( sound, pos.Cast() );
             } else {
-                VSFileSystem::vs_dprintf(3, "AUDPlay stole sound %d %d\n", 
-                    sounds[sound].source, sounds[sound].buffer );
+                VSFileSystem::vs_dbg(3) << boost::format("AUDPlay stole sound %1% %2%") %
+                                               sounds[sound].source % sounds[sound].buffer
+                                        << std::endl;
                 alSourceStop( sounds[sound].source );
             }
             alSourcePlay( sounds[sound].source );
@@ -922,4 +926,3 @@ void AUDPausePlaying( const int sound )
     }
 #endif
 }
-
