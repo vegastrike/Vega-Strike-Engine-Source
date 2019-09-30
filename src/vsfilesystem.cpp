@@ -479,12 +479,16 @@ int vs_fprintf( FILE *fp, const char *format, ... )
     return 0;
 }
 
-void vs_dprintf( char level, const char *format, ... )
-{
-    if (!use_volumes && level <= g_game.vsdebug) {
+const char VS_MIN_DBG_LVL = 1;
+const char VS_MAX_DBG_LVL = 3;
+
+void vs_dprintf(char level, const char *format, ...) {
+    if (level < VS_MIN_DBG_LVL || level > VS_MAX_DBG_LVL) {
+        fprintf(stderr, "Vega Strike Error: vs_dprintf level out of range\n");
+    } else if (!use_volumes && level <= g_game.vsdebug) {
         va_list ap;
-        va_start( ap, format );
-        vfprintf( stderr, format, ap );
+        va_start(ap, format);
+        vfprintf(stderr, format, ap);
     }
 }
 
@@ -542,23 +546,23 @@ void InitHomeDirectory()
 {
 	string userdir;
 	char szPath[MAX_PATH];
-	
+
 	// Get My Documents path the MS way
-    if(SUCCEEDED(SHGetFolderPathA(NULL, 
-                             CSIDL_PERSONAL, 
-                             NULL, 
-                             0, 
-                             szPath))) 
+    if(SUCCEEDED(SHGetFolderPathA(NULL,
+                             CSIDL_PERSONAL,
+                             NULL,
+                             0,
+                             szPath)))
 		userdir = string(szPath);
 
 	homedir = userdir + "/" + HOMESUBDIR;
 	CreateDirectoryAbs( homedir );
-	
+
 	#ifdef CLIENT
 	freopen((VSFileSystem::homedir+"/stderr_client.txt").c_str(), "w", stderr);
 	freopen((VSFileSystem::homedir+"/stdout_client.txt").c_str(), "w", stdout);
 	#endif
-	
+
 	#ifdef SERVER
 	freopen((VSFileSystem::homedir+"/stderr_server.txt").c_str(), "w", stderr);
 	freopen((VSFileSystem::homedir+"/stdout_server.txt").c_str(), "w", stdout);
@@ -634,7 +638,7 @@ void InitDataDirectory()
             } else {
                 VSFileSystem::vs_fprintf( stderr, "Cannot get current path: path too long");
             }
-            
+
             if (chdir( datadir.c_str() ) < 0) {
                 cerr<<"Error changing to datadir"<<endl;
                 exit( 1 );
@@ -851,7 +855,7 @@ void InitPaths( string conf, string subdir )
         Directories.push_back( "" );
         SubDirectories.push_back( vec );
     }
-    
+
     game_options.init();
 
     sharedsectors  = game_options.sectors;
@@ -1701,7 +1705,7 @@ string VSFile::ReadFull()
         long sz = this->Size();
         if (sz <= 0)
             return string();
-        
+
         char *content  = new char[this->Size()+1];
         content[this->Size()] = 0;
         int   readsize = fread( content, 1, this->Size(), this->fp );
@@ -2149,4 +2153,3 @@ int alphasort( struct dirent **a, struct dirent **b )
 }
 
 #endif
-
