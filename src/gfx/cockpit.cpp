@@ -1423,33 +1423,38 @@ void GameCockpit::TriggerEvents( Unit *un )
     else
         last.processing_time = curtime;
 
-    VSFileSystem::vs_dprintf(3, "Processing events\n");
+    VSFileSystem::vs_dbg(3) << "Processing events" << std::endl;
     for (EVENTID event = EVENTID_FIRST; event < NUM_EVENTS; event = (EVENTID)(event+1)) {
         GameSoundContainer *sound = static_cast<GameSoundContainer*>(GetSoundForEvent(event));
         if (sound != NULL) {
-            #define MODAL_TRIGGER(name, _triggervalue, _curvalue, lastvar) \
-                do { \
-                    bool triggervalue = _triggervalue; \
-                    bool curvalue = _curvalue; \
-                    VSFileSystem::vs_dprintf(3, "Processing event " name " (cur=%d last=%d)\n", \
-                        int(curvalue), int(last.lastvar) ); \
-                    \
-                    if (curvalue != last.lastvar) { \
-                        VSFileSystem::vs_dprintf(2, "Triggering event edge " name " (cur=%d last=%d on=%d)\n", \
-                            int(curvalue), int(last.lastvar), int(triggervalue) ); \
-                        last.lastvar = curvalue; \
-                        if (curvalue == triggervalue) \
-                            sound->play(); \
-                        else \
-                            sound->stop(); \
-                    } \
-                } while(0)
+#define MODAL_TRIGGER(name, _triggervalue, _curvalue, lastvar)                                     \
+    do {                                                                                           \
+        bool triggervalue = _triggervalue;                                                         \
+        bool curvalue = _curvalue;                                                                 \
+        VSFileSystem::vs_dbg(3) << boost::format("Processing event " name " (cur=%d last=%d)") %   \
+                                       int(curvalue) % int(last.lastvar)                           \
+                                << std::endl;                                                      \
+                                                                                                   \
+        if (curvalue != last.lastvar) {                                                            \
+            VSFileSystem::vs_dbg(2)                                                                \
+                << boost::format("Triggering event edge " name " (cur=%d last=%d on=%d)") %        \
+                       int(curvalue) % int(last.lastvar) % int(triggervalue)                       \
+                << std::endl;                                                                      \
+            last.lastvar = curvalue;                                                               \
+            if (curvalue == triggervalue)                                                          \
+                sound->play();                                                                     \
+            else                                                                                   \
+                sound->stop();                                                                     \
+        }                                                                                          \
+    } while (0)
 
-            #define MODAL_IMAGE_TRIGGER(image, itrigger, btrigger, lastvar) \
-                MODAL_TRIGGER(#image, btrigger, LookupUnitStat(UnitImages< void >::image, un) == UnitImages< void >::itrigger, lastvar)
+#define MODAL_IMAGE_TRIGGER(image, itrigger, btrigger, lastvar)                                    \
+    MODAL_TRIGGER(#image, btrigger,                                                                \
+                  LookupUnitStat(UnitImages<void>::image, un) == UnitImages<void>::itrigger,       \
+                  lastvar)
 
-            #define MODAL_RAWIMAGE_TRIGGER(image, itrigger, btrigger, lastvar) \
-                MODAL_TRIGGER(#image, btrigger, LookupUnitStat(UnitImages< void >::image, un) itrigger, lastvar)
+#define MODAL_RAWIMAGE_TRIGGER(image, itrigger, btrigger, lastvar)                                 \
+    MODAL_TRIGGER(#image, btrigger, LookupUnitStat(UnitImages<void>::image, un) itrigger, lastvar)
 
             switch((int)event) {
             case WARP_READY:
