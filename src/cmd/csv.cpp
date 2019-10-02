@@ -29,9 +29,9 @@ vector< string > readCSV( const string &s, string delim )
                 if (dp != string::npos) ddelim = delim[dp];
                 ep = (dp != string::npos);
             } else {
-                ep = s[epos] == ddelim; 
-            } 
-            
+                ep = s[epos] == ddelim;
+            }
+
             if (ep) {
                 insert = false;
                 l.push_back( as );
@@ -155,7 +155,7 @@ static string strip_white( const string &s )
     string::size_type start = s.find_first_not_of(" \t\r\n");
     if (start == string::npos)
         return "";
-    
+
     string::size_type end = s.find_last_not_of(" \t\r\n");
     if (end == string::npos)
         return s.substr(start);
@@ -163,20 +163,20 @@ static string strip_white( const string &s )
         return s.substr(start, end+1-start);
 }
 
-void 
+void
 CSVTable::Merge( const CSVTable &other )
 {
     // Remember in preparation to reshape
     size_t orig_cols = key.size();
-    
+
     // Merge columns
     std::vector<int> colmap;
     colmap.resize(other.key.size());
-    
+
     for (vsUMap<std::string, int>::const_iterator it = other.columns.begin(); it != other.columns.end(); ++it) {
         vsUMap<std::string, int>::const_iterator local = columns.find(it->first);
         if (local == columns.end()) {
-            VSFileSystem::vs_dprintf(2, "New column %s\n", it->first.c_str());
+            VSFileSystem::vs_dbg(2) << boost::format("New column %1%") % it->first << std::endl;
             key.push_back(it->first);
             local = columns.insert(std::pair<string, int>(it->first, key.size()-1)).first;
         }
@@ -184,18 +184,22 @@ CSVTable::Merge( const CSVTable &other )
             std::cerr << "WTF column " << it->second << "?" << std::endl;
             abort();
         }
-        VSFileSystem::vs_dprintf(2, "  %s (%d) -> %d\n", it->first.c_str(), it->second, local->second);
+        VSFileSystem::vs_dbg(2) << boost::format("  %1% (%2%) -> %3%") % it->first % it->second %
+                                       local->second
+                                << std::endl;
         colmap[it->second] = local->second;
     }
-    
+
     // Reshape if necessary
     if (orig_cols != key.size()) {
         std::vector<std::string> orig_table;
         orig_table.swap(table);
         std::vector<std::string>::const_iterator orig_it = orig_table.begin();
         const std::string empty;
-        
-        VSFileSystem::vs_dprintf(1, "Reshaping %d columns into %d\n", orig_cols, columns.size());
+
+        VSFileSystem::vs_dbg(1) << boost::format("Reshaping %1% columns into %2%") % orig_cols %
+                                       columns.size()
+                                << std::endl;
         table.reserve(rows.size() * key.size());
         while (orig_it != orig_table.end()) {
             size_t i,n;
@@ -205,10 +209,11 @@ CSVTable::Merge( const CSVTable &other )
                 table.push_back(empty);
         }
     }
-    VSFileSystem::vs_dprintf(2, "Reshaped table holds %d cells\n", table.size());
-    
+    VSFileSystem::vs_dbg(2) << boost::format("Reshaped table holds %1% cells") % table.size()
+                            << std::endl;
+
     // Merge rows
-    VSFileSystem::vs_dprintf(1, "Merging rows...\n");
+    VSFileSystem::vs_dbg(1) << "Merging rows..." << std::endl;
     size_t merged_rows = 0, new_rows = 0;
     for (vsUMap<std::string, int>::const_iterator it = other.rows.begin(); it != other.rows.end(); ++it) {
         vsUMap<std::string, int>::const_iterator local = rows.find(it->first);
@@ -225,8 +230,11 @@ CSVTable::Merge( const CSVTable &other )
             if (!strip_white(*(other_it + i)).empty())
                 *(table_it + colmap[i]) = *(other_it + i);
     }
-    VSFileSystem::vs_dprintf(1, "Rows Merged: %d, Rows Added: %d\n", merged_rows, new_rows);
-    VSFileSystem::vs_dprintf(2, "Merged table holds %d cells\n", table.size());
+    VSFileSystem::vs_dbg(1) << boost::format("Rows Merged: %1%, Rows Added: %2%") % merged_rows %
+                                   new_rows
+                            << std::endl;
+    VSFileSystem::vs_dbg(2) << boost::format("Merged table holds %1% cells") % table.size()
+                            << std::endl;
 }
 
 CSVRow::CSVRow( CSVTable *parent, const string &key )
@@ -309,25 +317,28 @@ CSVTable* loadCSVTableList(const string& csvfiles, VSFileSystem::VSFileType file
         if (where == string::npos)
             where = csvfiles.length();
         string tmp = csvfiles.substr( pwhere, where-pwhere );
-        
+
         if (!tmp.empty()) {
-            VSFileSystem::vs_dprintf(3, "Opening CSV database from '%s'\n", tmp.c_str());
-            
+            VSFileSystem::vs_dbg(3)
+                << boost::format("Opening CSV database from '%1%'") % tmp << std::endl;
+
             VSFileSystem::VSFile thisFile;
             VSFileSystem::VSError err = thisFile.OpenReadOnly( tmp, fileType );
             if (err <= VSFileSystem::Ok) {
-                VSFileSystem::vs_dprintf(1, "Loading CSV database from '%s'\n", tmp.c_str());
+                VSFileSystem::vs_dbg(1)
+                    << boost::format("Loading CSV database from '%1%'") % tmp << std::endl;
                 if (table == NULL)
                     table = new CSVTable( thisFile, thisFile.GetRoot() );
                 else
                     table->Merge(CSVTable( thisFile, thisFile.GetRoot() ));
                 thisFile.Close();
             } else if (critical) {
-                std::cerr << "Could not load CSV database at " << tmp << std::endl;
+                std::cerr << boost::format("Could not load CSV database at '%1%'") % tmp
+                          << std::endl;
                 exit(2);
             }
         }
-        if (where2 == string::npos) 
+        if (where2 == string::npos)
             break;
         pwhere = where+1;
     }
