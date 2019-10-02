@@ -34,20 +34,20 @@ void ParticleTrail::ChangeMax( unsigned int max )
 {
     unsigned int vertices_per_particle;
     unsigned int indices_per_particle;
-    
+
     if (config.use_points)
         vertices_per_particle = indices_per_particle = 1;
     else
         vertices_per_particle = indices_per_particle = 12;
-    
-    if (gl_options.max_array_vertices > 0 && 
+
+    if (gl_options.max_array_vertices > 0 &&
             (max * vertices_per_particle) > gl_options.max_array_vertices)
     {
         max = gl_options.max_array_vertices / vertices_per_particle;
         if (max > 0)
             max--; // for a margin
     }
-    if (gl_options.max_array_indices > 0 && 
+    if (gl_options.max_array_indices > 0 &&
             (max * indices_per_particle) > gl_options.max_array_indices)
     {
         max = gl_options.max_array_indices / indices_per_particle;
@@ -56,7 +56,7 @@ void ParticleTrail::ChangeMax( unsigned int max )
     }
     if (max < 4)
         max = 4;
-    
+
     this->maxparticles = max;
 }
 
@@ -92,7 +92,7 @@ static inline void SetPointVertex( const QVector &loc, const GFXColor &col, cons
     GFXColor c = col * ( col.a * trans * ( minsize / ( (maxsize > 0) ? maxsize : 1.f ) ) );
     QVector  l = loc - campos;
 
-    *v++ = l.x; *v++ = l.y; *v++ = l.y;  *v++ = c.r; *v++ = c.g; *v++ = c.b; *v++ = c.a; 
+    *v++ = l.x; *v++ = l.y; *v++ = l.y;  *v++ = c.r; *v++ = c.g; *v++ = c.b; *v++ = c.a;
 }
 
 //Write 12 * 3 pos and 12 * 4 col and 12 * 2 tex float values into v and increment v by 108
@@ -125,12 +125,12 @@ static inline void SetQuadVertex( const QVector &loc, const GFXColor &col, const
 
 template <typename R, typename T> class IndexCompare {
     const std::vector<R> &ref;
-    
+
 public:
-    IndexCompare(const std::vector<R> &ref_) : ref(ref_) 
+    IndexCompare(const std::vector<R> &ref_) : ref(ref_)
     {
     }
-    
+
     bool operator()(const T &a, const T &b) const
     {
         return ref[a] > ref[b];
@@ -154,14 +154,14 @@ void ParticleTrail::Config::init()
 {
     if (initialized)
         return;
-    
+
     use         = XMLSupport::parse_bool( vs_config->getVariable( "graphics", prefix, "true" ) );
     use_points  = XMLSupport::parse_bool( vs_config->getVariable( "graphics", prefix + "point", "false" ) );
     pblend      = XMLSupport::parse_bool( vs_config->getVariable( "graphics", prefix + "blend", "false" ) );
     pgrow       = XMLSupport::parse_float( vs_config->getVariable( "graphics", prefix + "growrate", "50.0" ) );     //50x size when disappearing
     ptrans      = XMLSupport::parse_float( vs_config->getVariable( "graphics", prefix + "alpha", "2.5" ) );     //NOTE: It's the base transparency, before surface attenuation, so it needn't be within the [0-1] range.
     pfade       = XMLSupport::parse_float( vs_config->getVariable( "graphics", prefix + "fade", "0.1" ) );
-    
+
     if (use_points) {
         psize       = XMLSupport::parse_float( vs_config->getVariable( "graphics", prefix + "size", "1.5" ) );
         psmooth     = XMLSupport::parse_bool( vs_config->getVariable( "graphics", prefix + "smooth", "false" ) );
@@ -169,7 +169,7 @@ void ParticleTrail::Config::init()
         std::string s = vs_config->getVariable( "graphics", prefix + "texture", "supernova.bmp" );
         texture     = new Texture( s.c_str() );
     }
-    
+
     initialized = true;
 }
 
@@ -190,8 +190,10 @@ void ParticleTrail::DrawAndUpdate()
     if (!config.initialized) {
         config.init();
         ChangeMax( maxparticles );
-        VSFileSystem::vs_dprintf(1, "Configured particle system %s with %d particles\n", 
-            config.prefix.c_str(), maxparticles);
+        VSFileSystem::vs_dbg(1) << boost::format(
+                                       "Configured particle system %1% with %2% particles") %
+                                       config.prefix % maxparticles
+                                << std::endl;
     }
     if (!config.use || particleLoc.empty())
         return;
@@ -201,10 +203,10 @@ void ParticleTrail::DrawAndUpdate()
     float pgrow = config.pgrow;
     float ptrans = config.ptrans;
     float pfade = config.pfade;
-    
+
     const QVector campos = _Universe->AccessCamera()->GetPosition();
     size_t nparticles = particleLoc.size();
-    
+
     // Draw particles
     GFXDisable( CULLFACE );
     GFXDisable( LIGHTING );
@@ -250,7 +252,7 @@ void ParticleTrail::DrawAndUpdate()
             GFXAlphaTest(GEQUAL, alphaMask);
         }
         t->MakeActive();
-    
+
         if (dosort) {
             // Must sort
             distances.clear();
@@ -259,7 +261,7 @@ void ParticleTrail::DrawAndUpdate()
                 distances.push_back((campos - *it).MagnitudeSquared());
             } }
             IndexCompare<float, unsigned short> dcomp(distances);
-            
+
             unsigned short nindices;
             if ( nparticles >= (size_t)std::numeric_limits< unsigned short >::max() / vertsPerParticle )
                 nindices = (unsigned short)std::numeric_limits< unsigned short >::max() / vertsPerParticle;
@@ -270,9 +272,9 @@ void ParticleTrail::DrawAndUpdate()
             { for (unsigned short i=0; i < nindices; ++i) {
                 pointIndices.push_back(i);
             } }
-            
+
             std::sort(pointIndices.begin(), pointIndices.end(), dcomp);
-            
+
             indices.clear();
             indices.reserve(nindices *  vertsPerParticle);
             { for (std::vector<unsigned short>::const_iterator it = pointIndices.begin(); it != pointIndices.end(); ++it) {
@@ -280,33 +282,37 @@ void ParticleTrail::DrawAndUpdate()
                     indices.push_back(*it * vertsPerParticle + i);
             } }
         }
-        
+
         particleVert.clear();
         particleVert.reserve(nparticles * vertsPerParticle * (3 + 4 + 2));
         std::back_insert_iterator<std::vector<float> > v(particleVert);
         for (size_t i = 0; i < nparticles; ++i) {
             SetQuadVertex( particleLoc[i], particleColor[i], particleSize[i], pgrow, ptrans, v, campos );
         }
-        
+
         if (dosort) {
-            VSFileSystem::vs_dprintf(3, "Drawing %d/%d sorted particles\n", nparticles, maxparticles);
-            GFXDrawElements( GFXQUAD, 
-                &particleVert[0], nparticles * vertsPerParticle, 
+            VSFileSystem::vs_dbg(3)
+                << boost::format("Drawing %1%/%2% sorted particles") % nparticles % maxparticles
+                << std::endl;
+            GFXDrawElements( GFXQUAD,
+                &particleVert[0], nparticles * vertsPerParticle,
                 &indices[0], indices.size(),
                 3, 4, 2 );
         } else {
-            VSFileSystem::vs_dprintf(3, "Drawing %d/%d unsorted particles\n", nparticles, maxparticles);
+            VSFileSystem::vs_dbg(3)
+                << boost::format("Drawing %1%/%2% unsorted particles") % nparticles % maxparticles
+                << std::endl;
             GFXDraw( GFXQUAD, &particleVert[0], nparticles * 12, 3, 4, 2 );
         }
-        
+
         if (alphaMask > 0) {
             GFXAlphaTest(ALWAYS, 0);
         }
-        
+
         GFXBlendMode( ONE, ZERO );
     }
     GFXLoadIdentity( MODEL );
-    
+
     // Update particles
     float mytime = GetElapsedTime();
     if (fadeColor) {
@@ -319,10 +325,13 @@ void ParticleTrail::DrawAndUpdate()
 
     // Compute alpha for dead particles
     float minalpha = (ptrans > 0.0f) ? sqrtf(alphaMask / ptrans) : 0.0f;
-    
-    if (nparticles) 
-        VSFileSystem::vs_dprintf(3, "Drawn %d particles, minalpha %f\n", nparticles, minalpha);
-    
+
+    if (nparticles) {
+        VSFileSystem::vs_dbg(3) << boost::format("Drawn %1% particles, minalpha %2%") % nparticles %
+                                       minalpha
+                                << std::endl;
+    }
+
     // Quickly remove dead particles at the end
     while ( !particleColor.empty() && !(particleColor.back().a > minalpha) ) {
         particleVel.pop_back();
@@ -330,7 +339,7 @@ void ParticleTrail::DrawAndUpdate()
         particleColor.pop_back();
         particleSize.pop_back();
     }
-    
+
     // Remove dead particles anywhere
     vector< Vector, aligned_allocator<Vector> >::iterator v = particleVel.begin();
     vector< QVector, aligned_allocator<QVector> >::iterator loc = particleLoc.begin();
@@ -371,7 +380,7 @@ void ParticleTrail::AddParticle( const ParticlePoint &P, const Vector &V, float 
     config.init();
     if (!config.use)
         return;
-    
+
     if (particleLoc.size() > maxparticles) {
         vector< Vector, aligned_allocator<Vector> >::iterator vel = particleVel.begin();
         vector< QVector, aligned_allocator<QVector> >::iterator loc = particleLoc.begin();
@@ -407,7 +416,7 @@ void ParticleEmitter::doParticles(const QVector& pos, float rSize, float percent
         Vector rand( r1, r2, r3 );
         rand.Normalize();
         pp.loc   = pos+rand*rSize*config.locSpread;
-        
+
         // Make randomization direction-centric
         Vector direction = velocity;
         direction.Normalize();
@@ -415,12 +424,12 @@ void ParticleEmitter::doParticles(const QVector& pos, float rSize, float percent
         rand += direction;
         rand.Normalize();
         rand *= 1.0 + config.spread * r4;
-        
+
         pp.col = color;
-        particleTrail.AddParticle( pp, 
+        particleTrail.AddParticle( pp,
             rand*( mymax( velocity.Magnitude(), config.absSpeed )*config.spread+config.absSpeed)
                 +velocity*config.speed+basevelocity,
-            config.fixedSize ? config.relSize : (pSize*config.relSize) 
+            config.fixedSize ? config.relSize : (pSize*config.relSize)
         );
     }
 }
