@@ -522,7 +522,7 @@ void Mesh::ProcessZFarMeshes( bool nocamerasetup )
 
     //clear Z buffer
     GFXClear( GFXFALSE, GFXTRUE, GFXFALSE );
-    
+
     static float far_margin = XMLSupport::parse_float( vs_config->getVariable( "graphics", "mesh_far_percent", ".8" ) );
     _Universe->AccessCamera()->UpdateGFXFrustum( GFXTRUE, g_game.zfar*far_margin, 0 );
 
@@ -562,7 +562,7 @@ void Mesh::ProcessUndrawnMeshes( bool pushSpecialEffects, bool nocamerasetup )
 {
     //clear Z buffer
     GFXClear( GFXFALSE, GFXTRUE, GFXFALSE );
-    
+
     for (int a = 0; a < NUM_ZBUF_SEQ; a++) {
         if (a == MESH_SPECIAL_FX_ONLY) {
             GFXPushGlobalEffects();
@@ -593,7 +593,7 @@ void Mesh::ProcessUndrawnMeshes( bool pushSpecialEffects, bool nocamerasetup )
         }
         undrawn_logos.clear();
     }
-    
+
     // Restore state
     GFXDeactivateShader();
     if (gl_options.ext_srgb_framebuffer)
@@ -785,7 +785,7 @@ void RestoreFirstPassState( Texture *detailTexture,
         unsigned int sizeplus1 = detailPlanes.size()/2+1;
         for (unsigned int i = 1; i < sizeplus1; i++)
             GFXToggleTexture( false, i+1 );              //turn off high detial tex
-        
+
         GFXTextureCoordGenMode( 1, NO_GEN, NULL, NULL );
     }
 }
@@ -1144,7 +1144,7 @@ static void setupGLState(const Technique::Pass &pass, bool zwrite, BLENDFUNC ble
         GFXEnable( DEPTHWRITE );
     else
         GFXDisable( DEPTHWRITE );
-    
+
     //Setup blend mode
     switch (pass.blendMode)
     {
@@ -1161,7 +1161,7 @@ static void setupGLState(const Technique::Pass &pass, bool zwrite, BLENDFUNC ble
     case Technique::Pass::Multiply:
         GFXBlendMode( DESTCOLOR, ZERO );
         break;
-    case Technique::Pass::PremultAlphaBlend: 
+    case Technique::Pass::PremultAlphaBlend:
         GFXBlendMode(ONE, INVSRCALPHA);
         break;
     case Technique::Pass::Default:
@@ -1169,18 +1169,18 @@ static void setupGLState(const Technique::Pass &pass, bool zwrite, BLENDFUNC ble
         GFXBlendMode( blendSrc, blendDst );
         break;
     }
-    
+
     GFXEnable( LIGHTING );
     GFXSelectMaterial( material );
-    
+
     //If we're doing zwrite, alpha test is more or less mandatory for correct results
     if (alphatest)
         GFXAlphaTest( GEQUAL, alphatest/255.0 );
     else if (zwrite)
         GFXAlphaTest( GREATER, 0 );
-    
+
     if (gl_options.ext_srgb_framebuffer) {
-        if (pass.sRGBAware) 
+        if (pass.sRGBAware)
             glEnable( GL_FRAMEBUFFER_SRGB_EXT );
         else
             glDisable( GL_FRAMEBUFFER_SRGB_EXT );
@@ -1194,12 +1194,13 @@ void Mesh::ProcessShaderDrawQueue( size_t whichpass, int whichdrawqueue, bool zs
             technique->compile();
         }
         catch (Exception &e) {
-            VSFileSystem::vs_dprintf(1, "Technique recompilation failed: %s\n", e.what());
+            VSFileSystem::vs_dbg(1)
+                << boost::format("Technique recompilation failed: %1%") % e.what() << std::endl;
         }
     }
 
     const Technique::Pass &pass = technique->getPass( whichpass );
-    
+
     //First of all, decide zwrite, so we can skip the pass if !zwrite && !cwrite
     bool zwrite;
     if (whichdrawqueue == MESH_SPECIAL_FX_ONLY) {
@@ -1227,12 +1228,12 @@ void Mesh::ProcessShaderDrawQueue( size_t whichpass, int whichdrawqueue, bool zs
     float noenvmaprgba[4] = {0.5, 0.5, 0.5, 1.0};
 
     vector< MeshDrawContext > &cur_draw_queue = draw_queue[whichdrawqueue];
-    
+
     GFXPushBlendMode();
     setupGLState(pass, zwrite, blendSrc, blendDst, myMatNum, alphatest, whichdrawqueue);
     if (pass.cullMode == Technique::Pass::DefaultFace)
         SelectCullFace( whichdrawqueue ); // Default not handled by setupGLState, it depends on mesh data
-    
+
     //Activate shader
     GFXActivateShader( pass.getCompiledProgram() );
 
@@ -1356,15 +1357,15 @@ void Mesh::ProcessShaderDrawQueue( size_t whichpass, int whichdrawqueue, bool zs
                 maxlights = pass.perLightIteration;
                 maxiter   = pass.maxIterations;
             }
-            
+
             int npasslights = 0;
             for (size_t iter = 0, lightnum = 0, nlights = lights.size();
                  (iter < maxiter) && ( (pass.perLightIteration == 0 && lightnum == 0) || (lightnum < nlights) );
-                 ++iter, lightnum += npasslights) 
+                 ++iter, lightnum += npasslights)
             {
                 //Setup transform and lights
                 npasslights = std::max( 0, std::min( int(nlights) - int(lightnum), int(maxlights) ) );
-                
+
                 //MultiAlphaBlend stuff
                 if (iter > 0) {
                     switch (pass.blendMode) {
@@ -1378,13 +1379,13 @@ void Mesh::ProcessShaderDrawQueue( size_t whichpass, int whichdrawqueue, bool zs
                             break;
                     }
                 }
-                
+
                 GFXLoadMatrixModel( c.mat );
                 if (lightnum == 0) {
                     GFXPushGlobalEffects();
                     popGlobals = true;
                 }
-                
+
                 //Set shader parameters (instance-specific only)
                 // NOTE: keep after GFXLoadMatrixModel
                 GFXUploadLightState(
@@ -1394,7 +1395,7 @@ void Mesh::ProcessShaderDrawQueue( size_t whichpass, int whichdrawqueue, bool zs
                     true,
                     lights.begin() + lightnum,
                     lights.begin() + lightnum + npasslights );
-                
+
                 for (unsigned int spi = 0; spi < pass.getNumShaderParams(); ++spi) {
                     const Technique::Pass::ShaderParam &sp = pass.getShaderParam( spi );
                     if (sp.id >= 0) {
@@ -1411,10 +1412,10 @@ void Mesh::ProcessShaderDrawQueue( size_t whichpass, int whichdrawqueue, bool zs
                             GFXShaderConstant( sp.id, c.damage/255.f );
                             break;
                         case Technique::Pass::ShaderParam::Damage4:
-                            GFXShaderConstant( sp.id, 
-                                               c.damage/255.f, 
-                                               c.damage/255.f, 
-                                               c.damage/255.f, 
+                            GFXShaderConstant( sp.id,
+                                               c.damage/255.f,
+                                               c.damage/255.f,
+                                               c.damage/255.f,
                                                c.damage/255.f );
                             break;
                         case Technique::Pass::ShaderParam::EnvColor: //chuck_starchaser
@@ -1465,7 +1466,7 @@ void Mesh::ProcessShaderDrawQueue( size_t whichpass, int whichdrawqueue, bool zs
 void Mesh::ProcessFixedDrawQueue( size_t techpass, int whichdrawqueue, bool zsort, const QVector &sortctr )
 {
     const Technique::Pass &pass = technique->getPass( techpass );
-    
+
     //First of all, decide zwrite, so we can skip the pass if !zwrite && !cwrite
     bool zwrite;
     if (whichdrawqueue == MESH_SPECIAL_FX_ONLY) {
@@ -1489,7 +1490,7 @@ void Mesh::ProcessFixedDrawQueue( size_t techpass, int whichdrawqueue, bool zsor
     //If we're not writing anything... why go on?
     if (!pass.colorWrite && !zwrite)
         return;
-    
+
     //Map texture units
     Texture *Decal[NUM_PASSES];
     memset( Decal, 0, sizeof (Decal) );
@@ -1553,11 +1554,11 @@ void Mesh::ProcessFixedDrawQueue( size_t techpass, int whichdrawqueue, bool zsor
     size_t DecalSize = NUM_PASSES;
     while ( (DecalSize > 0) && HASDECAL( DecalSize-1 ) )
         --DecalSize;
-    
+
     //Restore texture units
     for (unsigned int i = 2; i < gl_options.Multitexture; ++i)
         GFXToggleTexture( false, i );
-    
+
     // Set up GL state from technique-specified values
     setupGLState(pass, zwrite, blendSrc, blendDst, myMatNum, alphatest, whichdrawqueue);
     if (pass.cullMode == Technique::Pass::DefaultFace)
@@ -1566,7 +1567,7 @@ void Mesh::ProcessFixedDrawQueue( size_t techpass, int whichdrawqueue, bool zsor
         GFXDisable( LIGHTING );
         GFXColor4f( 1, 1, 1, 1 );
     }
-    
+
     GFXEnable( TEXTURE0 );
     if (alphatest)
         GFXAlphaTest( GEQUAL, alphatest/255.0 );
@@ -1595,7 +1596,7 @@ void Mesh::ProcessFixedDrawQueue( size_t techpass, int whichdrawqueue, bool zsor
     int  nomultienv_passno = 0;
 
     size_t whichpass = BASE_PASS;
-    
+
     if ( !gl_options.Multitexture && getEnvMap() ) {
         if ( HASDECAL( ENVSPEC_TEX ) ) {
             whichpass = ENVSPEC_PASS;
@@ -1880,4 +1881,3 @@ void Mesh::initTechnique( const std::string &xmltechnique )
         technique = Technique::getTechnique( xmltechnique );
     }
 }
-
