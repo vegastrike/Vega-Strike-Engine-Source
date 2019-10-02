@@ -4651,9 +4651,11 @@ void Unit::Kill( bool erasefromsave, bool quitting )
     for (un_iter iter = getSubUnits(); (un = *iter); ++iter)
         un->Kill();
 
-    if (isUnit() != MISSILEPTR)
-        VSFileSystem::vs_dprintf( 1, "UNIT HAS DIED: %s %s (file %s)\n", name.get().c_str(),
-               fullname.c_str(), filename.get().c_str() );
+    if (isUnit() != MISSILEPTR) {
+        VSFileSystem::vs_dbg(1) << boost::format("UNIT HAS DIED: %1% %2% (file %3%)") % name.get() %
+                                       fullname % filename.get()
+                                << std::endl;
+    }
 
     if (ucref == 0) {
         Unitdeletequeue.push_back( this );
@@ -4662,7 +4664,9 @@ void Unit::Kill( bool erasefromsave, bool quitting )
                 flightgroup->leader.SetUnit( NULL );
 
 #ifdef DESTRUCTDEBUG
-        VSFileSystem::vs_dprintf( 3, "%s 0x%x - %d\n", name.c_str(), this, Unitdeletequeue.size() );
+        VSFileSystem::vs_dbg(3) << boost::format("%s 0x%x - %d") % name.c_str() % this %
+                                       Unitdeletequeue.size()
+                                << std::endl;
 #endif
     }
 }
@@ -6055,7 +6059,7 @@ bool Unit::UnDock( Unit *utdw )
         else
             this->owner = NULL;
     }
-    VSFileSystem::vs_dprintf(3,"Asking to undock\n");
+    VSFileSystem::vs_dbg(3) << "Asking to undock" << std::endl;
     if ( Network != NULL && !SERVER && !_Universe->netLocked() ) {
         cerr<<"Sending an undock notification"<<endl;
         int playernum = _Universe->whichPlayerStarship( this );
