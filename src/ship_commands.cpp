@@ -5,17 +5,9 @@
 #include "universe_util.h"
 #include "gldrv/winsys.h"
 #include "options.h"
+#include <math.h>
 
 
-
-// static inline float fmin( float a, float b )
-// {
-//     return (a < b) ? a : b;
-// }
-// static inline float fmax( float a, float b )
-// {
-//     return (a > b) ? a : b;
-// }
 
 class ShipCommands
 {
@@ -146,4 +138,3 @@ void UninitShipCommands()
     if (ship_commands) delete ship_commands;
     ship_commands = NULL;
 }
-

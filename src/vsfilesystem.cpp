@@ -602,10 +602,6 @@ void InitDataDirectory()
     if ( !vegastrike_cwd.empty() ) {
         data_paths.push_back( vegastrike_cwd );
         data_paths.push_back( vegastrike_cwd+"/.." );
-        // DELETE 4.x no longer used since .5 release obsolete, removal required.
-        // data_paths.push_back( vegastrike_cwd+"/../data4.x" );
-        // data_paths.push_back( vegastrike_cwd+"/../../data4.x" );
-        // data_paths.push_back( vegastrike_cwd+"/data4.x" );
         data_paths.push_back( vegastrike_cwd+"/../../data" );
         data_paths.push_back( vegastrike_cwd+"/data" );
         data_paths.push_back( vegastrike_cwd+"/../data" );
@@ -616,14 +612,10 @@ void InitDataDirectory()
     }
     data_paths.push_back( "." );
     data_paths.push_back( ".." );
-    // DELETE 4.x no longer used since .5 release obsolete, removal required.
-    //data_paths.push_back( "../data4.x" );
-    //data_paths.push_back( "../../data4.x" );
     data_paths.push_back( "../data" );
     data_paths.push_back( "../../data" );
     data_paths.push_back( "../Resources" );
     data_paths.push_back( "../Resources/data" );
-    //data_paths.push_back( "../Resources/data4.x" );
     data_paths.push_back( "Assets-Production");
     data_paths.push_back( "../Assets-Production");
     data_paths.push_back( "../../Assets-Production");

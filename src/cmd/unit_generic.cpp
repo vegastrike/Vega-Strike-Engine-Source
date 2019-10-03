@@ -40,6 +40,7 @@
 #include "vs_random.h"
 #include "galaxy_xml.h"
 #include "gfx/camera.h"
+#include <math.h>
 
 #ifdef _WIN32
 #define strcasecmp stricmp
@@ -180,7 +181,7 @@ Vector Unit::GetWarpRefVelocity() const
     float  len = v.Magnitude();
     if (len > .01)      //only get velocity going in DIRECTIOn of cumulative transformation for warp calc...
         v = v*( cumulative_transformation_matrix.getR().Dot( v*(1./len) ) );
-    
+
     return v;
 }
 
@@ -293,7 +294,7 @@ bool Unit::InRange( const Unit *target, double &mm, bool cone, bool cap, bool lo
     return true;
 }
 
-Unit* Unit::Target() 
+Unit* Unit::Target()
 {
     return computer.target.GetUnit();
 }
@@ -654,14 +655,6 @@ void Unit::DeactivateJumpDrive()
     if (jump.drive >= 0)
         jump.drive = -1;
 }
-
-// float copysign( float x, float y )
-// {
-//     if (y > 0)
-//         return x;
-//     else
-//         return -x;
-// }
 
 float rand01()
 {
@@ -1352,7 +1345,7 @@ void Unit::Init( const char *filename,
 	} else {
 		delete pMeshAnimation;
 		pMeshAnimation = NULL;
-	}	
+	}
 }
 
 vector< Mesh* >Unit::StealMeshes()
@@ -2422,7 +2415,7 @@ void Unit::UpdatePhysics( const Transformation &trans,
         if (mounts[i].type->type == weapon_info::BEAM) {
             if (mounts[i].ref.gun) {
                 Unit *autotarg     =
-                    (   (mounts[i].size&weapon_info::AUTOTRACKING) 
+                    (   (mounts[i].size&weapon_info::AUTOTRACKING)
                      && (mounts[i].time_to_lock <= 0)
                      && TargetTracked() ) ? target : NULL;
                 float trackingcone = computer.radar.trackingcone;
@@ -2452,7 +2445,7 @@ void Unit::UpdatePhysics( const Transformation &trans,
             t1.to_matrix( m1 );
             int autotrack = 0;
             if (   ( 0 != (mounts[i].size&weapon_info::AUTOTRACKING) )
-                && (   (Network != NULL && !SERVER) 
+                && (   (Network != NULL && !SERVER)
                     || TargetTracked() )  )
                 autotrack = computer.itts ? 2 : 1;
             float trackingcone = computer.radar.trackingcone;
@@ -2695,7 +2688,7 @@ float CalculateNearestWarpUnit( const Unit *thus, float minmultiplier, Unit **ne
 float Unit::GetMaxWarpFieldStrength( float rampmult ) const
 {
     Vector v = GetWarpRefVelocity();
-    
+
     //Pi^2
     static float  warpMultiplierMin =
         XMLSupport::parse_float( vs_config->getVariable( "physics", "warpMultiplierMin", "9.86960440109" ) );
@@ -5315,7 +5308,7 @@ bool Unit::TargetLocked( const Unit *checktarget ) const
 
 bool Unit::TargetTracked( const Unit *checktarget )
 {
-    static bool must_lock_to_autotrack = XMLSupport::parse_bool( 
+    static bool must_lock_to_autotrack = XMLSupport::parse_bool(
         vs_config->getVariable( "physics", "must_lock_to_autotrack", "true" ) );
     bool we_do_track = computer.radar.trackingactive
         && ( !_Universe->isPlayerStarship(this) || TargetLocked() || !must_lock_to_autotrack);
@@ -5326,7 +5319,7 @@ bool Unit::TargetTracked( const Unit *checktarget )
     if (computer.target != checktarget)
         return false;
     float mycone = computer.radar.trackingcone;
-    we_do_track = CloseEnoughToAutotrack( this, computer.target.GetUnit(), mycone ); 
+    we_do_track = CloseEnoughToAutotrack( this, computer.target.GetUnit(), mycone );
     return we_do_track;
 }
 
@@ -6628,7 +6621,7 @@ bool Unit::UpgradeSubUnitsWithFactory( const Unit *up, int subunitoffset, bool t
                     Unit *un;                            //make garbage unit
                     //NOT 100% SURE A GENERIC UNIT CAN FIT (WAS GAME UNIT CREATION)
                     //give a default do-nothing unit
-                    ui.preinsert( un = UnitFactory::createUnit( "upgrading_dummy_unit", true, faction ) );                 
+                    ui.preinsert( un = UnitFactory::createUnit( "upgrading_dummy_unit", true, faction ) );
                     un->SetFaction( faction );
                     un->curr_physical_state = addToMeCur;
                     un->prev_physical_state = addToMePrev;
@@ -7145,8 +7138,8 @@ bool Unit::UpAndDownGrade( const Unit *up,
             STDUPGRADE( jump.delay, up->jump.delay, templ->jump.delay, 0 );
 
     }
-	
-	
+
+
     if ( !csv_cell_null_check || force_change_on_nothing
         || cell_has_recursive_data( upgrade_name, up->faction, "Armor_Front_Top_Right" ) ) {
         STDUPGRADE( armor.frontrighttop, up->armor.frontrighttop, templ->armor.frontrighttop, 0 );
@@ -8748,13 +8741,13 @@ const std::string& Unit::getCombatRole() const
     static unsigned char inert = ROLES::getRole( "INERT" );
     unsigned char retA = unitRole();
     unsigned char retB = attackPreference();
-    
+
     //often missions used this to render items either uninteresting or not attacking...so want to prioritize that behavior
     if (retA == inert || retB == inert) {
         static const std::string INERT("INERT");
         return INERT;
     }
-    
+
     return ROLES::getRole( retA );
 }
 
