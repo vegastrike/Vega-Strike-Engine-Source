@@ -20,6 +20,8 @@ struct catagory CATS;
 struct group GROUPS;
 struct global_settings CONFIG;
 
+static char EMPTY_STR[] = "";
+
 // Primary initialization function. Sets everything up and takes care of the program
 void Start(int * argc, char ***argv) {
 	LoadMainConfig();
@@ -65,7 +67,7 @@ char *GetSetting(char *group) {
 		if (CUR->name == NULL) { continue; }
 		if (strcmp(CUR->name, group) == 0) { return CUR->setting; }
 	} while ((CUR = CUR->next) > 0);
-	return '\0';
+	return EMPTY_STR;
 }
 
 struct catagory *GetCatStruct(char *name) {

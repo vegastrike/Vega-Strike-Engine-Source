@@ -32,6 +32,8 @@
  *  };
  */
 
+static char EMPTY_STR[] = "";
+
 TextArea::~TextArea() {}
 
 TextArea::TextArea()
@@ -243,10 +245,15 @@ char* TextArea::GetSelectedItem( int type )
 {
     TextAreaItem *search;
     search = ItemList->FindCount( cur_selected, 0 );
-    if (search == 0) return '\0';
-    if (type == 1) return search->name;
-
-    else return search->description;
+    if (search == 0) {
+        return EMPTY_STR;
+    }
+    if (type == 1) {
+        return search->name;
+    }
+    else {
+        return search->description;
+    }
 }
 
 void TextArea::SortList( void )

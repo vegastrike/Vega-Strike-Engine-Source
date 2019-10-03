@@ -602,23 +602,23 @@ void InitDataDirectory()
     if ( !vegastrike_cwd.empty() ) {
         data_paths.push_back( vegastrike_cwd );
         data_paths.push_back( vegastrike_cwd+"/.." );
-        data_paths.push_back( vegastrike_cwd+"/../data4.x" );
-        data_paths.push_back( vegastrike_cwd+"/../../data4.x" );
         data_paths.push_back( vegastrike_cwd+"/../../data" );
-        data_paths.push_back( vegastrike_cwd+"/data4.x" );
         data_paths.push_back( vegastrike_cwd+"/data" );
         data_paths.push_back( vegastrike_cwd+"/../data" );
         data_paths.push_back( vegastrike_cwd+"/../Resources" );
+        data_paths.push_back( vegastrike_cwd+"/Assets-Production");
+        data_paths.push_back( vegastrike_cwd+"/../Assets-Production");
+        data_paths.push_back( vegastrike_cwd+"/../../Assets-Production");
     }
     data_paths.push_back( "." );
     data_paths.push_back( ".." );
-    //data_paths.push_back( "../data4.x" ); DELETE 4.x no longer used since .5 release obsolete, removal required.
-    //data_paths.push_back( "../../data4.x" );
     data_paths.push_back( "../data" );
     data_paths.push_back( "../../data" );
     data_paths.push_back( "../Resources" );
     data_paths.push_back( "../Resources/data" );
-    //data_paths.push_back( "../Resources/data4.x" );
+    data_paths.push_back( "Assets-Production");
+    data_paths.push_back( "../Assets-Production");
+    data_paths.push_back( "../../Assets-Production");
 
     //Win32 data should be "."
     char tmppath[16384];
