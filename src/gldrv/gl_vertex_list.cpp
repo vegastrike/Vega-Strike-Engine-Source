@@ -50,14 +50,14 @@ struct VertexCompare
             // faster memcmp, since it gets unrolled by the compiler
             const unsigned int *ia = reinterpret_cast<const unsigned int*>(a);
             const unsigned int *ib = reinterpret_cast<const unsigned int*>(b);
-            
+
             for (size_t i=0; i < (sizeof(*a) / sizeof(*ia)); ++i) {
                 if (ia[i] < ib[i])
                     return true;
                 else if (ia[i] > ib[i])
                     return false;
             }
-            
+
             return false;
         }
     }
@@ -68,7 +68,7 @@ struct VertexCompare
 void GFXOptimizeList( GFXVertex *old, int numV, GFXVertex **nw, int *nnewV, unsigned int **ind )
 {
     std::map< GFXVertex*, int, VertexCompare >vtxcache;
-    
+
     *ind   = (unsigned int*) malloc( sizeof (unsigned int)*numV );
     *nw    = (GFXVertex*) malloc( numV*sizeof (GFXVertex) );
     int _nnewV = *nnewV = 0;
@@ -92,8 +92,10 @@ void GFXOptimizeList( GFXVertex *old, int numV, GFXVertex **nw, int *nnewV, unsi
     if (quickpath && i > 0)
         memcpy( *nw, old, sizeof(GFXVertex)*size_t(i) );
     *nnewV = _nnewV;
-    
-    VSFileSystem::vs_dprintf(3, "Optimized vertex list - vertices: %d -> %d\n", numV, *nnewV);
+
+    VSFileSystem::vs_dbg(3) << boost::format("Optimized vertex list - vertices: %1% -> %2%") %
+                                   numV % *nnewV
+                            << std::endl;
 }
 
 void GFXVertexList::Init( enum POLYTYPE *poly,
@@ -106,9 +108,9 @@ void GFXVertexList::Init( enum POLYTYPE *poly,
                           unsigned int *indices )
 {
     vbo_data = 0;
-    
+
     int stride = 0;
-    
+
     changed  = HAS_COLOR*( (colors != NULL) ? 1 : 0 );
     if (numlists > 0) {
         mode = new POLYTYPE[numlists];
@@ -161,22 +163,22 @@ void GFXVertexList::Init( enum POLYTYPE *poly,
             stride = INDEX_SHORT;
         if (numVertices > 65535)
             stride = INDEX_INT;
-                
+
         index.b = (unsigned char*) malloc( stride*numindices );
         switch (stride)
         {
         case INDEX_BYTE:
-            VSFileSystem::vs_dprintf(3, "Optimized vertex list - using 8-bit indices\n");
+            VSFileSystem::vs_dbg(3) << "Optimized vertex list - using 8-bit indices" << std::endl;
             for (unsigned int i = 0; i < numindices; i++)
                 index.b[i] = indices[i];
             break;
         case INDEX_SHORT:
-            VSFileSystem::vs_dprintf(3, "Optimized vertex list - using 16-bit indices\n");
+            VSFileSystem::vs_dbg(3) << "Optimized vertex list - using 16-bit indices" << std::endl;
             for (unsigned int i = 0; i < numindices; i++)
                 index.s[i] = indices[i];
             break;
         case INDEX_INT:
-            VSFileSystem::vs_dprintf(2, "Optimized vertex list - using 32-bit indices\n");
+            VSFileSystem::vs_dbg(2) << "Optimized vertex list - using 32-bit indices" << std::endl;
             for (unsigned int i = 0; i < numindices; i++)
                 index.i[i] = indices[i];
             break;
@@ -439,4 +441,3 @@ void GFXVertexList::GetPolys( GFXVertex **vert, int *numpolys, int *numtris )
 void GFXVertexList::LoadDrawState()
 {
 }
-
