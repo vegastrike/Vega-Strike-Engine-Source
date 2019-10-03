@@ -5,6 +5,7 @@
 #include "universe_util.h"
 #include "gldrv/winsys.h"
 #include "options.h"
+#include <math.h>
 
 
 
@@ -137,4 +138,3 @@ void UninitShipCommands()
     if (ship_commands) delete ship_commands;
     ship_commands = NULL;
 }
-
