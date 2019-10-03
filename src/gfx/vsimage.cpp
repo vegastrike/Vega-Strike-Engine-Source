@@ -51,8 +51,9 @@ typedef unsigned char boolean;
 using VSFileSystem::VSError;
 using VSFileSystem::BadFormat;
 using VSFileSystem::VSFileType;
-using VSFileSystem::vs_dprintf;
-//using VSFileSystem::img_file;
+using VSFileSystem::vs_dbg;
+using std::endl;
+using boost::format;
 
 int PNG_HAS_PALETTE = 1;
 int PNG_HAS_COLOR   = 2;
@@ -125,7 +126,7 @@ unsigned char* VSImage::ReadImage( VSFile *f, textureTransform *t, bool strip, V
             ret = this->ReadBMP();
             break;
         default:
-            vs_dprintf( 1, "%s\n", img_file->GetFilename().c_str() );
+            vs_dbg(1) << img_file->GetFilename() << endl;
             ret = NULL;
         }
         return ret;
@@ -202,22 +203,22 @@ VSError VSImage::CheckDDSSignature( VSFile *file )
 void VSImage::CheckFormat( VSFile *file )
 {
     if (this->CheckDDSSignature( file ) == Ok) {
-        vs_dprintf(3,"\tFound a DDS file\n");
+        vs_dbg(3) << "\tFound a DDS file" << endl;
         this->img_type = DdsImage;
         return;
     }
     if (this->CheckPNGSignature( file ) == Ok) {
-        vs_dprintf(3,"\tFound a PNG file\n");
+        vs_dbg(3) << "\tFound a PNG file" << endl;
         this->img_type = PngImage;
         return;
     }
     if (this->CheckBMPSignature( file ) == Ok) {
-        vs_dprintf(3,"\tFound a BMP file\n");
+        vs_dbg(3) << "\tFound a BMP file" << endl;
         this->img_type = BmpImage;
         return;
     }
     if (this->CheckJPEGSignature( file ) == Ok) {
-        vs_dprintf(3,"\tFound a JPEG file\n");
+        vs_dbg(3) << "\tFound a JPEG file" << endl;
         this->img_type = JpegImage;
         return;
     }
@@ -225,7 +226,7 @@ void VSImage::CheckFormat( VSFile *file )
 
 void PngReadFunc( png_struct *Png, png_bytep buf, png_size_t size )
 {
-    vs_dprintf(3,"Preparing to copy %u bytes from PngFileBuffer\n");
+    vs_dbg(3) << format("Preparing to copy %1% bytes from PngFileBuffer") % size << endl;
     TPngFileBuffer *PngFileBuffer = (TPngFileBuffer*) png_get_io_ptr( Png );
     memcpy( buf, PngFileBuffer->Buffer+PngFileBuffer->Pos, size );
     PngFileBuffer->Pos += size;
@@ -243,7 +244,7 @@ static void png_cexcept_error( png_structp png_ptr, png_const_charp msg )
     if (png_ptr)
         ;
 #ifndef PNG_NO_CONSOLE_IO
-    vs_dprintf(1,"libpng error: %s\n",msg);
+    vs_dbg(1) << format("libpng error: %1%") % msg << endl;
 #endif
 }
 
@@ -259,12 +260,12 @@ unsigned char* VSImage::ReadPNG()
         png_infop info_ptr;
         int interlace_type;
 
-        vs_dprintf( 2, "Loading PNG: %s\n", this->img_file->GetFilename().c_str() );
+        vs_dbg(2) << format("Loading PNG: %s") % this->img_file->GetFilename() << endl;
 
         img_file->Begin();
         if ( !CheckPNGSignature( img_file ) ) {
-            vs_dprintf(1,"VSImage::ReadPNG() ERROR : NOT A PNG FILE\n");
-            vs_dprintf( 1, "%s\n", img_file->GetFilename().c_str() ); 
+            vs_dbg(1) << "VSImage::ReadPNG() ERROR : NOT A PNG FILE" << endl;
+            vs_dbg(1) << img_file->GetFilename() << endl;
             throw (1);
         }
         //Go after sig since we already checked it
@@ -275,22 +276,23 @@ unsigned char* VSImage::ReadPNG()
         }
         png_ptr = png_create_read_struct( PNG_LIBPNG_VER_STRING, NULL, (png_error_ptr) png_cexcept_error, (png_error_ptr) NULL );
         if (png_ptr == NULL) {
-            vs_dprintf( 1, "%s\n", img_file->GetFilename().c_str() ); 
+            vs_dbg(1) << "VSImage ERROR : PNG ptr == NULL !!!" << endl;
+            vs_dbg(1) << img_file->GetFilename() << endl;
             throw (1);
         }
         info_ptr = png_create_info_struct( png_ptr );
         if (info_ptr == NULL) {
             png_destroy_read_struct( &png_ptr, (png_infopp) NULL, (png_infopp) NULL );
-            vs_dprintf(1,"VSImage ERROR : PNG info_ptr == NULL !!!\n");
-            vs_dprintf( 1, "%s\n", img_file->GetFilename().c_str() ); 
+            vs_dbg(1) << "VSImage ERROR : PNG info_ptr == NULL !!!" << endl;
+            vs_dbg(1) << img_file->GetFilename() << endl;
             throw (1);
         }
         if ( setjmp( png_jmpbuf( png_ptr ) ) ) {
             /* Free all of the memory associated with the png_ptr and info_ptr */
             png_destroy_read_struct( &png_ptr, &info_ptr, (png_infopp) NULL );
             /* If we get here, we had a problem reading the file */
-            vs_dprintf(1, "VSImage ERROR : problem reading file/buffer -> setjmp !!!\n");
-            vs_dprintf( 1, "%s\n", img_file->GetFilename().c_str() ); 
+            vs_dbg(1) << "VSImage ERROR : problem reading file/buffer -> setjmp !!!" << endl;
+            vs_dbg(1) << img_file->GetFilename() << endl;
             throw (1);
         }
         if ( !img_file->UseVolume() )
@@ -298,7 +300,7 @@ unsigned char* VSImage::ReadPNG()
         else
             png_set_read_fn( png_ptr, (png_voidp)&PngFileBuffer, (png_rw_ptr) PngReadFunc );
         png_set_sig_bytes( png_ptr, 8 );
-        vs_dprintf(3, "Loading Done.  Decompressing\n");
+        vs_dbg(3) << "Loading Done.  Decompressing" << endl;
         png_read_info( png_ptr, info_ptr );         /* read all PNG info up to image data */
         this->sizeX     = 1;
         this->sizeY     = 1;
@@ -315,7 +317,10 @@ unsigned char* VSImage::ReadPNG()
                       &interlace_type,
                       NULL,
                       NULL );
-        vs_dprintf(3, "1. Loading a PNG file: width = %u , height = %u , depth = %u , img color = %u , intelace = %u \n", sizeX, sizeY, img_depth, img_color_type, interlace_type);
+        vs_dbg(3) << format("1. Loading a PNG file: width = %1% , height = %2% , depth = %3% , img "
+                            "color = %4% , interlace = %5% ") %
+                         sizeX % sizeY % img_depth % img_color_type % interlace_type
+                  << endl;
 # if __BYTE_ORDER != __BIG_ENDIAN
         if (this->img_depth == 16)
             png_set_swap( png_ptr );
@@ -341,7 +346,10 @@ unsigned char* VSImage::ReadPNG()
                       &interlace_type,
                       NULL,
                       NULL );
-        vs_dprintf(3, "2. Loading a PNG file : width = %u , height = %u , depth = %u , img_color = %u , interlace = %u\n",sizeX, sizeY, img_depth, img_color_type, interlace_type);
+        vs_dbg(3) << format("2. Loading a PNG file : width = %1% , height = %2% , depth = %3% , "
+                            "img_color = %4% , interlace = %5%") %
+                         sizeX % sizeY % img_depth % img_color_type % interlace_type
+                  << endl;
         if (img_depth != 16)
             img_depth = 8;
         row_pointers = (unsigned char**) malloc( sizeof (unsigned char*)*this->sizeY );
@@ -358,15 +366,16 @@ unsigned char* VSImage::ReadPNG()
             mode = _24BIT;
         else
             mode = _24BITRGBA;
-        unsigned long stride = numchan*sizeof (unsigned char)*this->img_depth/8;
-        vs_dprintf(3, "3. Allocating image buffer of size = %u \n",(stride*sizeX*sizeY));
-        image = (unsigned char*) malloc( stride*this->sizeX*this->sizeY );
+        auto stride = numchan * sizeof(unsigned char) * this->img_depth / 8;
+        auto size_to_alloc = stride * this->sizeX * this->sizeY;
+        vs_dbg(3) << format("3. Allocating image buffer of size = %1% ") % size_to_alloc << endl;
+        image = (unsigned char *)malloc(size_to_alloc);
         for (unsigned int i = 0; i < this->sizeY; i++)
             row_pointers[i] = &image[i*stride*this->sizeX];
         png_read_image( png_ptr, row_pointers );
         unsigned char *result;
         if (tt) {
-            vs_dprintf(3, "4. Doing a transformation \n");
+            vs_dbg(3) << "4. Doing a transformation " << endl;
             result = (*tt)(this->img_depth, this->img_color_type, this->sizeX, this->sizeY, row_pointers);
             free( image );
             image  = NULL;
@@ -379,7 +388,7 @@ unsigned char* VSImage::ReadPNG()
         png_destroy_read_struct( &png_ptr, &info_ptr, NULL );
         png_ptr  = NULL;
         info_ptr = NULL;
-        vs_dprintf(3, "Decompressing Done.\n");
+        vs_dbg(3) << "Decompressing Done." << endl;
         if (result)
             this->AllocatePalette();
         return result;
@@ -425,7 +434,7 @@ unsigned char* VSImage::ReadJPEG()
 
         my_error_mgr jerr;
 
-        vs_dprintf( 2, "Loading JPEG: %s\n", this->img_file->GetFilename().c_str() );
+        vs_dbg(2) << format("Loading JPEG: %1%") % this->img_file->GetFilename() << endl;
 
         cinfo.err = jpeg_std_error( &jerr.pub );
         jerr.pub.error_exit = my_error_exit;
@@ -433,8 +442,8 @@ unsigned char* VSImage::ReadJPEG()
             //If we get here, the JPEG code has signaled an error.
             //We need to clean up the JPEG object, and return.
             jpeg_destroy_decompress( &cinfo );
-            vs_dprintf(1 ,"VSImage ERROR : error reading jpg file\n");
-            vs_dprintf( 1, "%s\n", img_file->GetFilename().c_str() ); 
+            vs_dbg(1) << "VSImage ERROR : error reading jpg file" << endl;
+            vs_dbg(1) << img_file->GetFilename() << endl;
             throw (1);
         }
         jpeg_create_decompress( &cinfo );
@@ -472,7 +481,10 @@ unsigned char* VSImage::ReadJPEG()
             this->mode = _8BIT;
             break;
         }
-        vs_dprintf(3, "1. Loading a JPEG file : width= %u , height = %u , img_color = %u \n",sizeX, sizeY, img_color_type);
+        vs_dbg(3) << format(
+                         "1. Loading a JPEG file : width= %1% , height = %2% , img_color = %3% ") %
+                         sizeX % sizeY % img_color_type
+                  << endl;
         row_pointers    = (unsigned char**) malloc( sizeof (unsigned char*)*cinfo.image_height );
 
         this->img_depth = 8;
@@ -516,11 +528,11 @@ unsigned char* VSImage::ReadBMP()
     unsigned char *adata = NULL;
 
     try {
-        vs_dprintf( 2, "Loading BMP: %s\n", this->img_file->GetFilename().c_str() );
+        vs_dbg(2) << format("Loading BMP: %1%") % this->img_file->GetFilename() << endl;
 
         if (CheckBMPSignature( img_file ) != Ok) {
-            vs_dprintf(1, "VSImage ERROR : BMP signature check failed : this should not happen !!!\n");
-            vs_dprintf( 1,"%s\n", img_file->GetFilename().c_str() ); 
+            vs_dbg(1) << "VSImage ERROR : BMP signature check failed : this should not happen !!!" << endl;
+            vs_dbg(1) << img_file->GetFilename() << endl;
             throw (1);
         }
         //seek back to beginning
@@ -645,7 +657,7 @@ unsigned char* VSImage::ReadDDS()
     int width  = 0;
     int height = 0;
     try {
-        vs_dprintf( 2, "Loading DDS: %s\n", this->img_file->GetFilename().c_str() );
+        vs_dbg(2) << format("Loading DDS: %1%") % this->img_file->GetFilename() << endl;
 
         //Skip what we already know.
         img_file->GoTo( 4 );
@@ -737,9 +749,13 @@ unsigned char* VSImage::ReadDDS()
             }
             break;
         default:
-            vs_dprintf(1, "VSImage ERROR : DDS Compression Scheme, impossible.[%c ;%c;%c;%c]!\n",header.pixelFormat.fourcc[0],header.pixelFormat.fourcc[1],
-                            header.pixelFormat.fourcc[2],header.pixelFormat.fourcc[3]);
-            vs_dprintf( 1,"%s\n", img_file->GetFilename().c_str() ); 
+            vs_dbg(1)
+                << format(
+                       "VSImage ERROR : DDS Compression Scheme, impossible.[%1% ;%2%;%3%;%4%]!") %
+                       header.pixelFormat.fourcc[0] % header.pixelFormat.fourcc[1] %
+                       header.pixelFormat.fourcc[2] % header.pixelFormat.fourcc[3]
+                << endl;
+            vs_dbg(1) << img_file->GetFilename() << endl;
             throw (1);
         }
         inputSize = 0;
@@ -758,7 +774,7 @@ unsigned char* VSImage::ReadDDS()
                 height >>= 1;
         }
         if ( header.dcaps2&(DDS_CUBEMAP|DDS_CUBEMAP_ALLFACES) ) {
-            vs_dprintf(3, "Reading Cubemap %s\n", img_file->GetFilename().c_str() );
+            vs_dbg(3) << format("Reading Cubemap %1%") % img_file->GetFilename() << endl;
             inputSize = inputSize*6;
             this->img_sides =
                 SIDE_POS_X|SIDE_NEG_X
@@ -815,8 +831,8 @@ VSError VSImage::WriteImage( char *filename,
     VSFile  f;
     VSError err = f.OpenCreateWrite( filename, ft );
     if (err > Ok) {
-        vs_dprintf(1,"VSImage ERROR : failed to open %s for writing \n",filename);
-        vs_dprintf( 1, img_file->GetFilename().c_str() );
+        vs_dbg(1) << format("VSImage ERROR : failed to open %1% for writing ") % filename << endl;
+        vs_dbg(1) << img_file->GetFilename() << endl;
         return VSFileSystem::FileNotFound;
     }
     VSError ret = this->WriteImage( &f, data, type, width, height, alpha, bpp, flip );
@@ -853,8 +869,8 @@ VSError VSImage::WriteImage( VSFile *pf,
         ret = this->WriteBMP( data );
         break;
     default:
-        vs_dprintf(1, "VSImage ERROR : Unknown image format\n");
-        vs_dprintf( 1, "%s\n", img_file->GetFilename().c_str() );
+        vs_dbg(1) << "VSImage ERROR : Unknown image format" << endl;
+        vs_dbg(1) << img_file->GetFilename() << endl;
         return VSFileSystem::BadFormat;
     }
     this->img_file  = NULL;
@@ -935,4 +951,3 @@ VSError VSImage::WriteBMP( unsigned char *data )
 {
     return BadFormat;
 }
-
