@@ -97,14 +97,14 @@ int GFXQuadList::AddQuad( const GFXVertex *vertices, const GFXColorVertex *color
             Dirty--;
             return i;
         }
-    VSFileSystem::vs_dprintf( 1, "Fatal Error adding quads" );
+    VSFileSystem::vs_dbg(1) << "Fatal Error adding quads" << std::endl;
     //should NOT get here!
     return -1;
 }
 void GFXQuadList::DelQuad( int which )
 {
     if (quadassignments[which] >= numQuads) {
-        VSFileSystem::vs_dprintf( 1, "error del" );
+        VSFileSystem::vs_dbg(1) << "error del" << std::endl;
         return;
     }
     if (which < 0 || which >= numVertices/4 || quadassignments[which] == -1)
@@ -121,7 +121,7 @@ void GFXQuadList::DelQuad( int which )
             numQuads--;
             return;
         }
-    VSFileSystem::vs_dprintf( 1, " error deleting engine flame\n" );
+    VSFileSystem::vs_dbg(1) << " error deleting engine flame" << std::endl;
 }
 void GFXQuadList::ModQuad( int which, const GFXVertex *vertices, float alpha )
 {
@@ -203,4 +203,3 @@ void GFXQuadList::ModQuad( int which, const GFXColorVertex *vertices )
                     ].y, vertices[3].z ) );
     }
 }
-
