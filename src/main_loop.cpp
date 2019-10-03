@@ -1021,17 +1021,16 @@ void main_loop()
     if (Network != NULL)
         for (size_t jj = 0; jj < _Universe->numPlayers(); jj++)
             Network[jj].checkMsg( NULL );
-    
+
 #ifndef NO_GFX
-    VSFileSystem::vs_dprintf(3, "Drawn %d vertices in %d batches\n", 
-                             gl_vertices_this_frame, 
-                             gl_batches_this_frame);
+    VSFileSystem::vs_dbg(3) << boost::format("Drawn %1% vertices in %2% batches") %
+                                   gl_vertices_this_frame % gl_batches_this_frame
+                            << std::endl;
     gl_vertices_this_frame = 0;
     gl_batches_this_frame = 0;
 #endif
-    
+
     //Commit audio scene status to renderer
     if (g_game.sound_enabled)
         Audio::SceneManager::getSingleton()->commit();
 }
-
