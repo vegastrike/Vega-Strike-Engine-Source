@@ -40,6 +40,7 @@
 #include "vs_random.h"
 #include "galaxy_xml.h"
 #include "gfx/camera.h"
+#include <math.h>
 
 #ifdef _WIN32
 #define strcasecmp stricmp
