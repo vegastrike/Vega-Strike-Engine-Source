@@ -553,7 +553,7 @@ SET(DATADIR "" CACHE STRING "Default vegastrike data directory")
 
 # Hide our temporary variable and initialize it to empty
 SET(CPU_OPTS  )
-SET(DEFINES " -DNV_CUBE_MAP -DBOOST_PYTHON_NO_PY_SIGNATURES ")
+SET(DEFINES " -D NV_CUBE_MAP=1 -D BOOST_PYTHON_NO_PY_SIGNATURES=1 ")
 MARK_AS_ADVANCED( CPU_OPTS )
 MARK_AS_ADVANCED( DEFINES )
 SET(CPU_SMP "1" CACHE STRING 
@@ -587,10 +587,10 @@ IF(DATADIR)
 ENDIF(DATADIR)
 
 # Debug target block. 
-SET(CMAKE_CXX_FLAGS_DEBUG " ${BUILD_OPT} ${CPU_OPTS} ${DEFINES} -include config.h -pipe -g2 -Wall -fvisibility=hidden" CACHE STRING
+SET(CMAKE_CXX_FLAGS_DEBUG " ${BUILD_OPT} ${CPU_OPTS} ${DEFINES} -D DESTRUCTDEBUG=1 -D DEBUG_RUN_PYTHON=1 -include config.h -pipe -g2 -Wall -fvisibility=hidden" CACHE STRING
     "Flags used by the C++ compiler during debug builds."
      FORCE )
-SET( CMAKE_C_FLAGS_DEBUG "  ${BUILD_OPT} ${CPU_OPTS} ${DEFINES} -include config.h -pipe -g2 -Wall -Wno-unused-function -Wno-unused-variable -fvisibility=hidden" CACHE STRING
+SET( CMAKE_C_FLAGS_DEBUG "  ${BUILD_OPT} ${CPU_OPTS} ${DEFINES} -D DESTRUCTDEBUG=1 -D DEBUG_RUN_PYTHON=1 -include config.h -pipe -g2 -Wall -Wno-unused-function -Wno-unused-variable -fvisibility=hidden" CACHE STRING
     "Flags used by the C compiler during debug builds."
      FORCE )
 SET( CMAKE_EXE_LINKER_FLAGS_DEBUG
@@ -611,10 +611,10 @@ ENDIF("${CMAKE_BUILD_TYPE}" STREQUAL "Debug")
 
 
 # Release Target block 
-SET(CMAKE_CXX_FLAGS_RELEASE  " ${BUILD_OPT} ${CPU_OPTS} -DNV_CUBE_MAP -DBOOST_PYTHON_NO_PY_SIGNATURES -include config.h -pipe -Wall -fvisibility=hidden" CACHE STRING
+SET(CMAKE_CXX_FLAGS_RELEASE  " ${BUILD_OPT} ${CPU_OPTS} -D NV_CUBE_MAP=1 -D BOOST_PYTHON_NO_PY_SIGNATURES=1 -include config.h -pipe -Wall -fvisibility=hidden" CACHE STRING
     "Flags used by the C++ compiler during release builds."
     FORCE)
-SET( CMAKE_C_FLAGS_RELEASE " ${BUILD_OPT} ${CPU_OPTS} -DNV_CUBE_MAP -DBOOST_PYTHON_NO_PY_SIGNATURES -include config.h -pipe -Wall -Wno-unused-function -Wno-unused-variable -fvisibility=hidden" CACHE STRING
+SET( CMAKE_C_FLAGS_RELEASE " ${BUILD_OPT} ${CPU_OPTS} -D NV_CUBE_MAP=1 -D BOOST_PYTHON_NO_PY_SIGNATURES=1 -include config.h -pipe -Wall -Wno-unused-function -Wno-unused-variable -fvisibility=hidden" CACHE STRING
     "Flags used by the C compiler during release builds." 
     FORCE )
 SET(CMAKE_EXE_LINKER_FLAGS_RELEASE "-Bsymbolic" CACHE STRING "Release linker flags"
@@ -632,10 +632,10 @@ ELSE("${CMAKE_BUILD_TYPE}" STREQUAL "Release")
 ENDIF("${CMAKE_BUILD_TYPE}" STREQUAL "Release")
 
 # Profiler Target block
-SET(CMAKE_CXX_FLAGS_PROFILER " ${BUILD_OPT} ${CPU_OPTS} -pg -g2 -DNV_CUBE_MAP -DBOOST_PYTHON_NO_PY_SIGNATURES -include config.h -pipe -Wall -Wno-unused-function -Wno-unused-variable" CACHE STRING
+SET(CMAKE_CXX_FLAGS_PROFILER " ${BUILD_OPT} ${CPU_OPTS} -pg -g2 -D NV_CUBE_MAP=1 -D BOOST_PYTHON_NO_PY_SIGNATURES=1 -include config.h -pipe -Wall -Wno-unused-function -Wno-unused-variable" CACHE STRING
     "Flags used by the C++ compiler during profiler builds."
      FORCE )
-SET( CMAKE_C_FLAGS_PROFILER " ${BUILD_OPT} ${CPU_OPTS} -pg -g2 -DNV_CUBE_MAP -DBOOST_PYTHON_NO_PY_SIGNATURES -include config.h -pipe -Wall -Wno-unused-function -Wno-unused-variable" CACHE STRING
+SET( CMAKE_C_FLAGS_PROFILER " ${BUILD_OPT} ${CPU_OPTS} -pg -g2 -D NV_CUBE_MAP=1 -D BOOST_PYTHON_NO_PY_SIGNATURES=1 -include config.h -pipe -Wall -Wno-unused-function -Wno-unused-variable" CACHE STRING
     "Flags used by the C compiler during profiler builds."
      FORCE )
 SET( CMAKE_EXE_LINKER_FLAGS_PROFILER
@@ -994,7 +994,7 @@ add_subdirectory(objconv)
 IF(NOT DISABLE_SERVER)
 target_link_libraries(vegaserver ${TST_SERVER_LIBS})
 set_target_properties(vegaserver PROPERTIES LINK_FLAGS "-L/usr/lib -L${vsUTCS_BINARY_DIR}"
-                                            COMPILE_FLAGS "-DNO_GFX")
+                                            COMPILE_FLAGS "-D NO_GFX=1")
 add_dependencies(vegaserver mesh_tool)
 add_dependencies(vegaserver vssetup)
 ENDIF(NOT DISABLE_SERVER)
