@@ -841,8 +841,6 @@ Unit::~Unit()
     fflush( stderr );
 #endif
 #ifdef DESTRUCTDEBUG
-    VSFileSystem::vs_fprintf( stderr, "%d %x ", 1, planet );
-    fflush( stderr );
     VSFileSystem::vs_fprintf( stderr, "%d %x\n", 2, pImage->pHudImage );
     fflush( stderr );
 #endif
@@ -864,10 +862,6 @@ Unit::~Unit()
     fflush( stderr );
 #endif
 
-#ifdef DESTRUCTDEBUG
-    VSFileSystem::vs_fprintf( stderr, "%d %x ", 9, halos );
-    fflush( stderr );
-#endif
 #ifdef DESTRUCTDEBUG
     VSFileSystem::vs_fprintf( stderr, "%d %x ", 1, &mounts );
     fflush( stderr );
@@ -4665,7 +4659,7 @@ void Unit::Kill( bool erasefromsave, bool quitting )
                 flightgroup->leader.SetUnit( NULL );
 
 #ifdef DESTRUCTDEBUG
-        VSFileSystem::vs_dbg(3) << boost::format("%s 0x%x - %d") % name.c_str() % this %
+        VSFileSystem::vs_dbg(3) << boost::format("%s 0x%x - %d") % name.get().c_str() % this %
                                        Unitdeletequeue.size()
                                 << std::endl;
 #endif
@@ -4714,7 +4708,7 @@ void Unit::UnRef()
         //delete
         Unitdeletequeue.push_back( this );
 #ifdef DESTRUCTDEBUG
-        VSFileSystem::vs_fprintf( stderr, "%s 0x%x - %d\n", name.c_str(), this, Unitdeletequeue.size() );
+        VSFileSystem::vs_fprintf( stderr, "%s 0x%x - %d\n", name.get().c_str(), this, Unitdeletequeue.size() );
 #endif
     }
 }
@@ -4898,7 +4892,7 @@ void Unit::ProcessDeleteQueue()
 #ifdef DESTRUCTDEBUG
         VSFileSystem::vs_fprintf( stderr, "Eliminatin' 0x%x - %d", Unitdeletequeue.back(), Unitdeletequeue.size() );
         fflush( stderr );
-        VSFileSystem::vs_fprintf( stderr, "Eliminatin' %s\n", Unitdeletequeue.back()->name.c_str() );
+        VSFileSystem::vs_fprintf( stderr, "Eliminatin' %s\n", Unitdeletequeue.back()->name.get().c_str() );
 #endif
 #ifdef DESTRUCTDEBUG
         if ( Unitdeletequeue.back()->isSubUnit() )
