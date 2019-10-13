@@ -610,7 +610,7 @@ void GameUnit< UnitType >::Draw()
 static float parseFloat( const std::string &s )
 {
     if ( s.empty() ) {
-        VSFileSystem::vs_dbg(1) << boost::format("WARNING: invalid float: %1%") % s << std::endl;
+        BOOST_LOG_TRIVIAL(info) << boost::format("WARNING: invalid float: %1%") % s;
         return 0.f;
     } else {
         return XMLSupport::parse_floatf( s );
@@ -626,7 +626,7 @@ static void parseFloat4( const std::string &s, float value[4] )
         ini = ( (end == string::npos) ? end : (end+1) );
     }
     if (i >= 4 && ini != string::npos) {
-        VSFileSystem::vs_dbg(1) << boost::format("WARNING: invalid float4: %1%") % s << std::endl;
+        BOOST_LOG_TRIVIAL(info) << boost::format("WARNING: invalid float4: %1%") % s;
     }
     while (i < 4) {
         value[i++] = 0;

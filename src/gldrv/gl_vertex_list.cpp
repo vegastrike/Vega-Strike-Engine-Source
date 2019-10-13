@@ -93,9 +93,7 @@ void GFXOptimizeList( GFXVertex *old, int numV, GFXVertex **nw, int *nnewV, unsi
         memcpy( *nw, old, sizeof(GFXVertex)*size_t(i) );
     *nnewV = _nnewV;
 
-    VSFileSystem::vs_dbg(3) << boost::format("Optimized vertex list - vertices: %1% -> %2%") %
-                                   numV % *nnewV
-                            << std::endl;
+    BOOST_LOG_TRIVIAL(trace) << boost::format("Optimized vertex list - vertices: %1% -> %2%") % numV % *nnewV;
 }
 
 void GFXVertexList::Init( enum POLYTYPE *poly,
@@ -168,17 +166,17 @@ void GFXVertexList::Init( enum POLYTYPE *poly,
         switch (stride)
         {
         case INDEX_BYTE:
-            VSFileSystem::vs_dbg(3) << "Optimized vertex list - using 8-bit indices" << std::endl;
+            BOOST_LOG_TRIVIAL(trace) << "Optimized vertex list - using 8-bit indices";
             for (unsigned int i = 0; i < numindices; i++)
                 index.b[i] = indices[i];
             break;
         case INDEX_SHORT:
-            VSFileSystem::vs_dbg(3) << "Optimized vertex list - using 16-bit indices" << std::endl;
+            BOOST_LOG_TRIVIAL(trace) << "Optimized vertex list - using 16-bit indices";
             for (unsigned int i = 0; i < numindices; i++)
                 index.s[i] = indices[i];
             break;
         case INDEX_INT:
-            VSFileSystem::vs_dbg(2) << "Optimized vertex list - using 32-bit indices" << std::endl;
+            BOOST_LOG_TRIVIAL(debug) << "Optimized vertex list - using 32-bit indices";
             for (unsigned int i = 0; i < numindices; i++)
                 index.i[i] = indices[i];
             break;

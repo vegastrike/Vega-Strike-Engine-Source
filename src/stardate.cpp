@@ -68,10 +68,7 @@ void StarDate::InitTrek( string date )
     initial_time = mission->getGametime();
     initial_star_time = new double[factions.size()];
     double init_time = this->ConvertTrekDate( date );
-    VSFileSystem::vs_dbg(3) << boost::format(
-                                   "Initializing stardate from a Trek date for %1% factions") %
-                                   factions.size()
-                            << std::endl;
+    BOOST_LOG_TRIVIAL(trace) << boost::format("Initializing stardate from a Trek date for %1% factions") % factions.size();
     for (unsigned int i = 0; i < factions.size(); i++)
         initial_star_time[i] = init_time;
 }
@@ -134,7 +131,7 @@ double StarDate::ConvertTrekDate( string date )
     pos = date.find( "." );
     date.replace( pos, 1, "a" );
     if ((nb = sscanf(date.c_str(), "%da%4d:%3d", &days, &tmphrs, &seconds)) != 3) {
-        VSFileSystem::vs_dbg(3) << "!!! ERROR reading date" << std::endl;
+        BOOST_LOG_TRIVIAL(trace) << "!!! ERROR reading date";
     }
 
     //Extract number of hours
@@ -144,9 +141,7 @@ double StarDate::ConvertTrekDate( string date )
 
     res     = days*2880000+hours*28800+minutes*480+seconds;
     std::string formatted = ConvertFullTrekDate(res);
-    VSFileSystem::vs_dbg(3) << boost::format("Converted date to %1%, which stardate is %2%") %
-                                   long(res) % formatted
-                            << std::endl;
+    BOOST_LOG_TRIVIAL(trace) << boost::format("Converted date to %1%, which stardate is %2%") % long(res) % formatted;
     return res;
 }
 

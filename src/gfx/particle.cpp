@@ -190,10 +190,7 @@ void ParticleTrail::DrawAndUpdate()
     if (!config.initialized) {
         config.init();
         ChangeMax( maxparticles );
-        VSFileSystem::vs_dbg(1) << boost::format(
-                                       "Configured particle system %1% with %2% particles") %
-                                       config.prefix % maxparticles
-                                << std::endl;
+        BOOST_LOG_TRIVIAL(info) << boost::format("Configured particle system %1% with %2% particles") % config.prefix % maxparticles;
     }
     if (!config.use || particleLoc.empty())
         return;
@@ -291,17 +288,13 @@ void ParticleTrail::DrawAndUpdate()
         }
 
         if (dosort) {
-            VSFileSystem::vs_dbg(3)
-                << boost::format("Drawing %1%/%2% sorted particles") % nparticles % maxparticles
-                << std::endl;
+            BOOST_LOG_TRIVIAL(trace) << boost::format("Drawing %1%/%2% sorted particles") % nparticles % maxparticles;
             GFXDrawElements( GFXQUAD,
                 &particleVert[0], nparticles * vertsPerParticle,
                 &indices[0], indices.size(),
                 3, 4, 2 );
         } else {
-            VSFileSystem::vs_dbg(3)
-                << boost::format("Drawing %1%/%2% unsorted particles") % nparticles % maxparticles
-                << std::endl;
+            BOOST_LOG_TRIVIAL(trace) << boost::format("Drawing %1%/%2% unsorted particles") % nparticles % maxparticles;
             GFXDraw( GFXQUAD, &particleVert[0], nparticles * 12, 3, 4, 2 );
         }
 
@@ -327,9 +320,7 @@ void ParticleTrail::DrawAndUpdate()
     float minalpha = (ptrans > 0.0f) ? sqrtf(alphaMask / ptrans) : 0.0f;
 
     if (nparticles) {
-        VSFileSystem::vs_dbg(3) << boost::format("Drawn %1% particles, minalpha %2%") % nparticles %
-                                       minalpha
-                                << std::endl;
+        BOOST_LOG_TRIVIAL(trace) << boost::format("Drawn %1% particles, minalpha %2%") % nparticles % minalpha;
     }
 
     // Quickly remove dead particles at the end

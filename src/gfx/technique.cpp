@@ -245,7 +245,7 @@ static void parseFloat4( const std::string &s, float value[4] )
         ini = ( (end == string::npos) ? end : (end+1) );
     }
     if (i >= 4 && ini != string::npos) {
-        VSFileSystem::vs_dbg(1) << boost::format("WARNING: invalid float4: %1%") % s << std::endl;
+        BOOST_LOG_TRIVIAL(info) << boost::format("WARNING: invalid float4: %1%") % s;
     }
     while (i < 4) {
         value[i++] = 0;
@@ -391,10 +391,8 @@ void Technique::Pass::compile()
                 throw ProgramCompileError("Error compiling program vp:\"" + vertexProgram +
                                           "\" fp:\"" + fragmentProgram + "\"");
             } else {
-                VSFileSystem::vs_dbg(1)
-                    << boost::format("Successfully compiled and linked program \"%1%+%2%\"") %
-                           vertexProgram % fragmentProgram
-                    << std::endl;
+                BOOST_LOG_TRIVIAL(info) << boost::format("Successfully compiled and linked program \"%1%+%2%\"") % vertexProgram %
+                                               fragmentProgram;
             }
         }
 
@@ -405,11 +403,9 @@ void Technique::Pass::compile()
                     throw ProgramCompileError("Cannot resolve shader constant \"" + it->name +
                                               "\"");
                 } else {
-                    VSFileSystem::vs_dbg(1)
-                        << boost::format("Cannot resolve <<optional>> shader constant \"%1%\" in "
-                                         "program \"%2%+%3%\"") %
-                               it->name % vertexProgram % fragmentProgram
-                        << std::endl;
+                    BOOST_LOG_TRIVIAL(info) << boost::format("Cannot resolve <<optional>> shader constant \"%1%\" in "
+                                                             "program \"%2%+%3%\"") %
+                                                   it->name % vertexProgram % fragmentProgram;
                 }
             }
         }
@@ -488,10 +484,7 @@ Technique::Technique( const string &nam ) :
             +game_options.techniquesSubPath+"/"
             +name+".technique" );
     } catch(Audio::FileOpenException e) {
-        VSFileSystem::vs_dbg(1) << boost::format(
-                                       "Cannot find specialized technique, trying generic: %1%") %
-                                       e.what()
-                                << std::endl;
+        BOOST_LOG_TRIVIAL(info) << boost::format("Cannot find specialized technique, trying generic: %1%") % e.what();
         // Else try a default
         serializer.importXML(
             game_options.techniquesBasePath+"/"
@@ -563,10 +556,8 @@ Technique::Technique( const string &nam ) :
                                 el->getAttributeValue( "default", "" ),
                                 el->getAttributeValue( "name", "" ),
                                 parseTexKind( el->getAttributeValue( "kind", "" ) ) );
-                            VSFileSystem::vs_dbg(2)
-                                << boost::format("Added texture unit #%1% \"%2%\"") %
-                                       pass.getNumTextureUnits() % el->getAttributeValue("name", "")
-                                << std::endl;
+                            BOOST_LOG_TRIVIAL(debug) << boost::format("Added texture unit #%1% \"%2%\"") % pass.getNumTextureUnits() %
+                                                            el->getAttributeValue("name", "");
                         } else if (el->tagName() == paramTag) {
                             float value[4];
                             parseFloat4( el->getAttributeValue( "value", "" ), value );
@@ -574,31 +565,20 @@ Technique::Technique( const string &nam ) :
                                 el->getAttributeValue( "name", "" ),
                                 value,
                                 parseBool( el->getAttributeValue( "optional", "false" ) ) );
-                            VSFileSystem::vs_dbg(2)
+                            BOOST_LOG_TRIVIAL(debug)
                                 << boost::format("Added constant #%1% \"%2%\" with value "
                                                  "(%3$.2f,%4$.2f,%5$.2f,%6$.2f) as %7%") %
-                                       pass.getNumShaderParams() %
-                                       el->getAttributeValue("name", "") % value[0] % value[1] %
-                                       value[2] % value[3] %
-                                       (parseBool(el->getAttributeValue("optional", "false"))
-                                            ? "optional"
-                                            : "required")
-                                << std::endl;
+                                       pass.getNumShaderParams() % el->getAttributeValue("name", "") % value[0] % value[1] % value[2] %
+                                       value[3] % (parseBool(el->getAttributeValue("optional", "false")) ? "optional" : "required");
                         } else if (el->tagName() == autoParamTag) {
                             pass.addShaderParam(
                                 el->getAttributeValue( "name", "" ),
                                 parseAutoParamSemantic( el->getAttributeValue( "semantic", "" ) ),
                                 parseBool( el->getAttributeValue( "optional", "false" ) ) );
-                            VSFileSystem::vs_dbg(2)
-                                << boost::format(
-                                       "Added param #%1% \"%2%\" with semantic %3% as %4%") %
-                                       pass.getNumShaderParams() %
-                                       el->getAttributeValue("name", "") %
-                                       el->getAttributeValue("semantic", "") %
-                                       (parseBool(el->getAttributeValue("optional", "false"))
-                                            ? "optional"
-                                            : "required")
-                                << std::endl;
+                            BOOST_LOG_TRIVIAL(debug)
+                                << boost::format("Added param #%1% \"%2%\" with semantic %3% as %4%") % pass.getNumShaderParams() %
+                                       el->getAttributeValue("name", "") % el->getAttributeValue("semantic", "") %
+                                       (parseBool(el->getAttributeValue("optional", "false")) ? "optional" : "required");
                         } else {
                             //TODO: Warn about unrecognized (hence ignored) tag
                         }

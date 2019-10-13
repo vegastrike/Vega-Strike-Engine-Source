@@ -150,7 +150,7 @@ void AnimatedTexture::MakeActive( int stage, int pass )
                     int ocompression = gl_options.compression;
                     gl_options.compression = 0;
 
-                    VSFileSystem::vs_dbg(1) << "Transferring video frame" << std::endl;
+                    BOOST_LOG_TRIVIAL(info) << "Transferring video frame";
                     Transfer( 65535, GFXFALSE );
 
                     gl_options.compression = ocompression;
@@ -166,7 +166,7 @@ void AnimatedTexture::MakeActive( int stage, int pass )
                 }
             }
             catch (::VidFile::Exception e) {
-                VSFileSystem::vs_dbg(1) << boost::format("\nVidFile exception: %1%") % e.what() << std::endl;
+                BOOST_LOG_TRIVIAL(info) << boost::format("\nVidFile exception: %1%") % e.what();
             }
             Texture::MakeActive( stage, pass );
         }

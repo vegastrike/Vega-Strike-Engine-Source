@@ -76,6 +76,7 @@
 #endif
 
 #include "options.h"
+#include <boost/log/expressions.hpp>
 
 extern std::string global_username;
 extern std::string global_password;
@@ -240,6 +241,25 @@ bool isVista = false;
 
 Unit *TheTopLevelUnit;
 
+void initLogging(char debugLevel)
+{
+    auto loggingCore = boost::log::core::get();
+    switch (debugLevel) {
+    case 1:
+        loggingCore->set_filter(boost::log::trivial::severity >= boost::log::trivial::info);
+        break;
+    case 2:
+        loggingCore->set_filter(boost::log::trivial::severity >= boost::log::trivial::debug);
+        break;
+    case 3:
+        loggingCore->set_filter(boost::log::trivial::severity >= boost::log::trivial::trace);
+        break;
+    default:
+        loggingCore->set_filter(boost::log::trivial::severity >= boost::log::trivial::warning);
+        break;
+    }
+}
+
 int main( int argc, char *argv[] )
 {
 
@@ -292,10 +312,13 @@ int main( int argc, char *argv[] )
         VSFileSystem::InitPaths( CONFIGFILE, subdir );
     }
 
-    //If no debug argument is supplied, set to what the config file has.
+    // If no debug argument is supplied, set to what the config file has.
     if (g_game.vsdebug == '0')
         g_game.vsdebug = game_options.vsdebug;
-    //can use the vegastrike config variable to read in the default mission
+
+    initLogging(g_game.vsdebug);
+
+    // can use the vegastrike config variable to read in the default mission
     if ( game_options.force_client_connect )
         ignore_network = false;
     if (mission_name[0] == '\0') {

@@ -280,8 +280,7 @@ readerThread(
                 *me->music_load_info = wherecache->second;
                 me->freeWav = false;
             } else if (!AUDLoadSoundFile(songname, me->music_load_info, true)) {
-                VSFileSystem::vs_dbg(1)
-                    << boost::format("Failed to load music file \"%1%\"") % songname << std::endl;
+                BOOST_LOG_TRIVIAL(info) << boost::format("Failed to load music file \"%1%\"") % songname;
             }
         }
         if (me->freeWav && docacheme) {

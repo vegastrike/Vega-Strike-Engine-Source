@@ -206,8 +206,7 @@ bool vsVendorMatch( const char *vendor )
     if (_glvendor == NULL) {
         _glvendor = glGetString( GL_VENDOR );
         if (_glvendor != NULL) {
-            VSFileSystem::vs_dbg(1)
-                << boost::format("OpenGL Vendor: %1%") % (const char *)_glvendor << std::endl;
+            BOOST_LOG_TRIVIAL(info) << boost::format("OpenGL Vendor: %1%") % (const char *)_glvendor;
         }
     }
 
@@ -240,8 +239,7 @@ void init_opengl_extensions()
 {
     const unsigned char *extensions = glGetString( GL_EXTENSIONS );
 
-    VSFileSystem::vs_dbg(3) << boost::format("OpenGL Extensions supported: %1%") % extensions
-                            << std::endl;
+    BOOST_LOG_TRIVIAL(trace) << boost::format("OpenGL Extensions supported: %1%") % extensions;
 
 #ifndef NO_COMPILEDVERTEXARRAY_SUPPORT
     if ( vsExtensionSupported( "GL_EXT_compiled_vertex_array" )
@@ -262,7 +260,7 @@ void init_opengl_extensions()
         glUnlockArraysEXT_p = (PFNGLUNLOCKARRAYSEXTPROC)
                               GET_GL_PROC( (GET_GL_PTR_TYP) "glUnlockArraysEXT" );
 #endif
-        VSFileSystem::vs_dbg(3) << "OpenGL::GL_EXT_compiled_vertex_array supported" << std::endl;
+        BOOST_LOG_TRIVIAL(trace) << "OpenGL::GL_EXT_compiled_vertex_array supported";
     } else {
 #ifdef __APPLE__
 #ifndef __APPLE_PANTHER_GCC33_CLI__
@@ -270,7 +268,7 @@ void init_opengl_extensions()
         glUnlockArraysEXT_p = 0;
 #endif /*__APPLE_PANTHER_GCC33_CLI__*/
 #endif
-        VSFileSystem::vs_dbg(2) << "OpenGL::GL_EXT_compiled_vertex_array unsupported" << std::endl;
+        BOOST_LOG_TRIVIAL(debug) << "OpenGL::GL_EXT_compiled_vertex_array unsupported";
     }
 #endif
 #ifndef __APPLE__
@@ -279,11 +277,11 @@ void init_opengl_extensions()
                                 GET_GL_PROC( (GET_GL_PTR_TYP) "glMultiDrawArraysEXT" );
         glMultiDrawElements_p = (PFNGLMULTIDRAWELEMENTSEXTPROC)
                                 GET_GL_PROC( (GET_GL_PTR_TYP) "glMultiDrawElementsEXT" );
-        VSFileSystem::vs_dbg(3) << "OpenGL::GL_EXT_multi_draw_arrays supported" << std::endl;
+        BOOST_LOG_TRIVIAL(trace) << "OpenGL::GL_EXT_multi_draw_arrays supported";
     } else {
         glMultiDrawArrays_p   = 0;
         glMultiDrawElements_p = 0;
-        VSFileSystem::vs_dbg(2) << "OpenGL::GL_EXT_multi_draw_arrays unsupported" << std::endl;
+        BOOST_LOG_TRIVIAL(debug) << "OpenGL::GL_EXT_multi_draw_arrays unsupported";
     }
 #endif
 
@@ -385,7 +383,7 @@ void init_opengl_extensions()
 
 #ifdef GL_FOG_DISTANCE_MODE_NV
     if ( vsExtensionSupported( "GL_NV_fog_distance" ) ) {
-        VSFileSystem::vs_dbg(3) << "OpenGL::Accurate Fog Distance supported" << std::endl;
+        BOOST_LOG_TRIVIAL(trace) << "OpenGL::Accurate Fog Distance supported";
         switch (game_options.fogdetail)
         {
         case 0:
@@ -400,22 +398,22 @@ void init_opengl_extensions()
         }
     } else {
 #endif
-        VSFileSystem::vs_dbg(2) << "OpenGL::Accurate Fog Distance unsupported" << std::endl;
+        BOOST_LOG_TRIVIAL(debug) << "OpenGL::Accurate Fog Distance unsupported";
 #ifdef GL_FOG_DISTANCE_MODE_NV
     }
 #endif
     if ( vsExtensionSupported( "GL_ARB_texture_compression" ) ) {
-        VSFileSystem::vs_dbg(3) << "OpenGL::Generic Texture Compression supported" << std::endl;
+        BOOST_LOG_TRIVIAL(trace) << "OpenGL::Generic Texture Compression supported";
     } else {
-        VSFileSystem::vs_dbg(1) << "OpenGL::Generic Texture Compression unsupported" << std::endl;
+        BOOST_LOG_TRIVIAL(info) << "OpenGL::Generic Texture Compression unsupported";
         gl_options.compression = 0;
     }
     if ( vsExtensionSupported( "GL_EXT_texture_compression_s3tc" ) ) {
-        VSFileSystem::vs_dbg(3) << "OpenGL::S3TC Texture Compression supported" << std::endl;
+        BOOST_LOG_TRIVIAL(trace) << "OpenGL::S3TC Texture Compression supported";
         //should be true;
     } else {
         gl_options.s3tc = false;
-        VSFileSystem::vs_dbg(1) << "OpenGL::S3TC Texture Compression unsupported" << std::endl;
+        BOOST_LOG_TRIVIAL(info) << "OpenGL::S3TC Texture Compression unsupported";
     }
     if ( (glMultiTexCoord2fARB_p && glMultiTexCoord4fARB_p && glClientActiveTextureARB_p && glActiveTextureARB_p)
         && ( vsExtensionSupported( "GL_ARB_multitexture" ) || vsExtensionSupported( "GL_EXT_multitexture" ) ) ) {
@@ -428,37 +426,35 @@ void init_opengl_extensions()
             gl_options.Multitexture = 0;
         //gl_options.Multitexture = 1*gl_options.Multitexture;//might be zero by input
         if (gl_options.Multitexture) {
-            VSFileSystem::vs_dbg(3) << boost::format("OpenGL::Multitexture supported (%1% units)") %
-                                           gl_options.Multitexture
-                                    << std::endl;
+            BOOST_LOG_TRIVIAL(trace) << boost::format("OpenGL::Multitexture supported (%1% units)") % gl_options.Multitexture;
         }
     } else {
         gl_options.Multitexture = 0;
-        VSFileSystem::vs_dbg(2) << "OpenGL::Multitexture unsupported" << std::endl;
+        BOOST_LOG_TRIVIAL(debug) << "OpenGL::Multitexture unsupported";
     }
     if ( vsExtensionSupported( "GL_ARB_texture_cube_map" ) || vsExtensionSupported( "GL_EXT_texture_cube_map" ) ) {
         gl_options.cubemap = 1;
-        VSFileSystem::vs_dbg(3) << "OpenGL::TextureCubeMapExt supported" << std::endl;
+        BOOST_LOG_TRIVIAL(trace) << "OpenGL::TextureCubeMapExt supported";
     } else {
         gl_options.cubemap = 0;
-        VSFileSystem::vs_dbg(1) << "OpenGL::TextureCubeMapExt unsupported" << std::endl;
+        BOOST_LOG_TRIVIAL(info) << "OpenGL::TextureCubeMapExt unsupported";
     }
     if ( vsExtensionSupported( "GL_EXT_texture_edge_clamp" ) || vsExtensionSupported( "GL_SGIS_texture_edge_clamp" ) ) {
-        VSFileSystem::vs_dbg(3) << "OpenGL::S3TC Texture Clamp-to-Edge supported" << std::endl;
+        BOOST_LOG_TRIVIAL(trace) << "OpenGL::S3TC Texture Clamp-to-Edge supported";
         // should be true
     } else {
         gl_options.ext_clamp_to_edge = false;
-        VSFileSystem::vs_dbg(1) << "OpenGL::S3TC Texture Clamp-to-Edge unsupported" << std::endl;
+        BOOST_LOG_TRIVIAL(info) << "OpenGL::S3TC Texture Clamp-to-Edge unsupported";
     }
     if ( vsExtensionSupported( "GL_ARB_texture_border_clamp" ) || vsExtensionSupported( "GL_SGIS_texture_border_clamp" ) ) {
-        VSFileSystem::vs_dbg(3) << "OpenGL::S3TC Texture Clamp-to-Border supported" << std::endl;
+        BOOST_LOG_TRIVIAL(trace) << "OpenGL::S3TC Texture Clamp-to-Border supported";
         // should be true
     } else {
         gl_options.ext_clamp_to_border = false;
-        VSFileSystem::vs_dbg(1) << "OpenGL::S3TC Texture Clamp-to-Border unsupported" << std::endl;
+        BOOST_LOG_TRIVIAL(info) << "OpenGL::S3TC Texture Clamp-to-Border unsupported";
     }
     if ( vsExtensionSupported( "GL_ARB_framebuffer_sRGB" ) || vsExtensionSupported( "GL_EXT_framebuffer_sRGB" ) ) {
-        VSFileSystem::vs_dbg(3) << "OpenGL::sRGB Framebuffer supported" << std::endl;
+        BOOST_LOG_TRIVIAL(trace) << "OpenGL::sRGB Framebuffer supported";
         GLboolean srgbCapable = true;
 
         if ( vsExtensionSupported( "GL_EXT_framebuffer_sRGB" ) ) {
@@ -473,20 +469,19 @@ void init_opengl_extensions()
         if (srgbCapable) {
             gl_options.ext_srgb_framebuffer = true;
         } else {
-            VSFileSystem::vs_dbg(1)
-                << "OpenGL::sRGB Framebuffer unsupported by visual" << std::endl;
+            BOOST_LOG_TRIVIAL(info) << "OpenGL::sRGB Framebuffer unsupported by visual";
             gl_options.ext_srgb_framebuffer = false;
         }
     } else {
         gl_options.ext_srgb_framebuffer = false;
-        VSFileSystem::vs_dbg(1) << "OpenGL::sRGB Framebuffer unsupported" << std::endl;
+        BOOST_LOG_TRIVIAL(info) << "OpenGL::sRGB Framebuffer unsupported";
     }
     if ( vsExtensionSupported( "GL_NV_fragment_program2" ) ) {
         gl_options.nv_fp2 = true;
-        VSFileSystem::vs_dbg(3) << "OpenGL::NV_fragment_program2 supported" << std::endl;
+        BOOST_LOG_TRIVIAL(trace) << "OpenGL::NV_fragment_program2 supported";
     } else {
         gl_options.nv_fp2 = false;
-        VSFileSystem::vs_dbg(1) << "OpenGL::NV_fragment_program2 unsupported" << std::endl;
+        BOOST_LOG_TRIVIAL(info) << "OpenGL::NV_fragment_program2 unsupported";
     }
     if ( GFXDefaultShaderSupported() )
         if (gl_options.Multitexture < 16)
@@ -500,12 +495,8 @@ void init_opengl_extensions()
     gl_options.max_array_indices = max_indices;
     gl_options.max_array_vertices = max_vertices;
 
-    VSFileSystem::vs_dbg(1) << boost::format("Max vertex array indices: %1%") %
-                                   gl_options.max_array_indices
-                            << std::endl;
-    VSFileSystem::vs_dbg(1) << boost::format("Max vertex array vertices: %1%") %
-                                   gl_options.max_array_vertices
-                            << std::endl;
+    BOOST_LOG_TRIVIAL(info) << boost::format("Max vertex array indices: %1%") % gl_options.max_array_indices;
+    BOOST_LOG_TRIVIAL(info) << boost::format("Max vertex array vertices: %1%") % gl_options.max_array_vertices;
 }
 
 static void initfov()
@@ -539,7 +530,7 @@ static void Reshape( int x, int y )
 {
     g_game.x_resolution = x;
     g_game.y_resolution = y;
-    VSFileSystem::vs_dbg(3) << boost::format("Reshaping %1% %2%") % x % y << std::endl;
+    BOOST_LOG_TRIVIAL(trace) << boost::format("Reshaping %1% %2%") % x % y;
 }
 
 extern void GFXInitTextureManager();
@@ -562,7 +553,7 @@ void GFXInit( int argc, char **argv )
     gl_options.rect_textures    = game_options.rect_textures ? true : textsupported;
 
     if (gl_options.rect_textures) {
-        VSFileSystem::vs_dbg(3) << "RECT textures supported" << std::endl;
+        BOOST_LOG_TRIVIAL(trace) << "RECT textures supported";
 
         // Fetch max rect textue dimension
         GLint max_rect_dimension = 65535;
@@ -571,9 +562,7 @@ void GFXInit( int argc, char **argv )
             &max_rect_dimension);
 
         gl_options.max_rect_dimension = max_rect_dimension;
-        VSFileSystem::vs_dbg(3) << boost::format("RECT max texture dimension: %1%") %
-                                       max_rect_dimension
-                                << std::endl;
+        BOOST_LOG_TRIVIAL(trace) << boost::format("RECT max texture dimension: %1%") % max_rect_dimension;
     }
 
     bool vidsupported = (   gl_options.rect_textures || (   vsExtensionSupported( "GL_ARB_texture_non_power_of_two" ) && vsVendorMatch("nvidia")));
@@ -587,9 +576,9 @@ void GFXInit( int argc, char **argv )
     }
 
     if (gl_options.pot_video_textures) {
-        VSFileSystem::vs_dbg(1) << "Forcing POT video textures" << std::endl;
+        BOOST_LOG_TRIVIAL(info) << "Forcing POT video textures";
     } else {
-        VSFileSystem::vs_dbg(3) << "Using NPOT video textures" << std::endl;
+        BOOST_LOG_TRIVIAL(trace) << "Using NPOT video textures";
     }
     // Removing gl_options soon
     gl_options.smooth_shade        = game_options.SmoothShade;
@@ -634,10 +623,10 @@ void GFXInit( int argc, char **argv )
 #endif
     if ( vsExtensionSupported( "GL_EXT_color_table" ) || vsExtensionSupported( "GL_EXT_shared_texture_palette" ) ) {
         gl_options.PaletteExt = 1;
-        VSFileSystem::vs_dbg(3) << "OpenGL::EXTColorTable supported" << std::endl;
+        BOOST_LOG_TRIVIAL(trace) << "OpenGL::EXTColorTable supported";
     } else {
         gl_options.PaletteExt = 0;
-        VSFileSystem::vs_dbg(2) << "OpenGL::EXTColorTable unsupported" << std::endl;
+        BOOST_LOG_TRIVIAL(debug) << "OpenGL::EXTColorTable unsupported";
     }
     glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT );
     glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT );

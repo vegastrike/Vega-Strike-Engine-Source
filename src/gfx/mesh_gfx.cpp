@@ -1194,8 +1194,7 @@ void Mesh::ProcessShaderDrawQueue( size_t whichpass, int whichdrawqueue, bool zs
             technique->compile();
         }
         catch (Exception &e) {
-            VSFileSystem::vs_dbg(1)
-                << boost::format("Technique recompilation failed: %1%") % e.what() << std::endl;
+            BOOST_LOG_TRIVIAL(info) << boost::format("Technique recompilation failed: %1%") % e.what();
         }
     }
 

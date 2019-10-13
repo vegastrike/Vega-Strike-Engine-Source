@@ -1023,9 +1023,7 @@ void main_loop()
             Network[jj].checkMsg( NULL );
 
 #ifndef NO_GFX
-    VSFileSystem::vs_dbg(3) << boost::format("Drawn %1% vertices in %2% batches") %
-                                   gl_vertices_this_frame % gl_batches_this_frame
-                            << std::endl;
+    BOOST_LOG_TRIVIAL(trace) << boost::format("Drawn %1% vertices in %2% batches") % gl_vertices_this_frame % gl_batches_this_frame;
     gl_vertices_this_frame = 0;
     gl_batches_this_frame = 0;
 #endif

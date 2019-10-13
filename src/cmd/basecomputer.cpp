@@ -4076,16 +4076,12 @@ Cargo CreateCargoForOwnerStarship( const Cockpit *cockpit, const Unit *base, int
             locationSystemName,
             destinationSystemName,
             jumps);
-        VSFileSystem::vs_dbg(3)
-            << boost::format("Player ship needs transport from %1% to %2% across %3% systems") %
-                   locationBaseName % destinationSystemName % jumps.size()
-            << std::endl;
+        BOOST_LOG_TRIVIAL(trace) << boost::format("Player ship needs transport from %1% to %2% across %3% systems") % locationBaseName %
+                                        destinationSystemName % jumps.size();
         cargo.price += shipping_price_perjump * (jumps.size() - 1);
     } else if (needsInsysTransport) {
-        VSFileSystem::vs_dbg(3) << boost::format(
-                                       "Player ship needs insys transport from %1% to %2%") %
-                                       locationBaseName % destinationBaseName
-                                << std::endl;
+        BOOST_LOG_TRIVIAL(trace) << boost::format("Player ship needs insys transport from %1% to %2%") % locationBaseName %
+                                        destinationBaseName;
         cargo.price += shipping_price_insys;
     }
 
@@ -4208,9 +4204,8 @@ void trackPrice(int whichplayer, const Cargo &item, float price, const string &s
     static size_t toprank = (size_t)
         XMLSupport::parse_int( vs_config->getVariable( "general", "trade_interface_tracks_prices_toprank", "10" ) );
 
-    VSFileSystem::vs_dbg(1) << boost::format("Ranking item %1%/%2% at %3%/%4%") %
-                                   item.category.get() % item.content.get() % systemName % baseName
-                            << std::endl;
+    BOOST_LOG_TRIVIAL(info) << boost::format("Ranking item %1%/%2% at %3%/%4%") % item.category.get() % item.content.get() % systemName %
+                                   baseName;
 
     // Recorded prices are always sorted, so we first do a quick check to avoid
     // triggering savegame serialization without reason
@@ -4335,44 +4330,32 @@ void trackPrice(int whichplayer, const Cargo &item, float price, const string &s
         string prefix = "   ";
         char conversionBuffer[128];
 
-        VSFileSystem::vs_dbg(1) << "Tracking data:" << std::endl;
-        VSFileSystem::vs_dbg(1) << boost::format("  highest locs: (%1%)") %
-                                       recordedHighestLocs.size()
-                                << std::endl;
+        BOOST_LOG_TRIVIAL(info) << "Tracking data:";
+        BOOST_LOG_TRIVIAL(info) << boost::format("  highest locs: (%1%)") % recordedHighestLocs.size();
         {
             for (size_t i = 0; i < recordedHighestLocs.size(); ++i) {
-                VSFileSystem::vs_dbg(1)
-                    << boost::format("    %1% : %2%") % i % recordedHighestLocs[i] << std::endl;
+                BOOST_LOG_TRIVIAL(info) << boost::format("    %1% : %2%") % i % recordedHighestLocs[i];
             }
         }
 
-        VSFileSystem::vs_dbg(1) << boost::format("  highest prices: (%1%)") %
-                                       recordedHighestPrices.size()
-                                << std::endl;
+        BOOST_LOG_TRIVIAL(info) << boost::format("  highest prices: (%1%)") % recordedHighestPrices.size();
         {
             for (size_t i = 0; i < recordedHighestPrices.size(); ++i) {
-                VSFileSystem::vs_dbg(1)
-                    << boost::format("    %1% : %2$.2f") % i % recordedHighestPrices[i]
-                    << std::endl;
+                BOOST_LOG_TRIVIAL(info) << boost::format("    %1% : %2$.2f") % i % recordedHighestPrices[i];
             }
         }
 
-        VSFileSystem::vs_dbg(1) << boost::format("  lowest locs: (%1%)") % recordedLowestLocs.size()
-                                << std::endl;
+        BOOST_LOG_TRIVIAL(info) << boost::format("  lowest locs: (%1%)") % recordedLowestLocs.size();
         {
             for (size_t i = 0; i < recordedLowestLocs.size(); ++i) {
-                VSFileSystem::vs_dbg(1)
-                    << boost::format("    %1% : %2%") % i % recordedLowestLocs[i] << std::endl;
+                BOOST_LOG_TRIVIAL(info) << boost::format("    %1% : %2%") % i % recordedLowestLocs[i];
             }
         }
 
-        VSFileSystem::vs_dbg(1) << boost::format("  lowest prices: (%1%)") %
-                                       recordedLowestPrices.size()
-                                << std::endl;
+        BOOST_LOG_TRIVIAL(info) << boost::format("  lowest prices: (%1%)") % recordedLowestPrices.size();
         {
             for (size_t i = 0; i < recordedLowestPrices.size(); ++i) {
-                VSFileSystem::vs_dbg(1)
-                    << boost::format("    %1% : %2$.2f") % i % recordedLowestPrices[i] << std::endl;
+                BOOST_LOG_TRIVIAL(info) << boost::format("    %1% : %2$.2f") % i % recordedLowestPrices[i];
             }
         }
 
@@ -4386,7 +4369,7 @@ void trackPrice(int whichplayer, const Cargo &item, float price, const string &s
                 PRETTY_ADD("", recordedHighestPrices[i], 2);
                 text += " (at " + recordedHighestLocs[i] + ")";
 
-                VSFileSystem::vs_dbg(1) << boost::format("Highest item %1%") % text << std::endl;
+                BOOST_LOG_TRIVIAL(info) << boost::format("Highest item %1%") % text;
             }
         }
 
@@ -4398,7 +4381,7 @@ void trackPrice(int whichplayer, const Cargo &item, float price, const string &s
                 PRETTY_ADD("", recordedLowestPrices[i], 2);
                 text += " (at " + recordedLowestLocs[i] + ")";
 
-                VSFileSystem::vs_dbg(1) << boost::format("Lowest item %1%") % text << std::endl;
+                BOOST_LOG_TRIVIAL(info) << boost::format("Lowest item %1%") % text;
             }
         }
     }

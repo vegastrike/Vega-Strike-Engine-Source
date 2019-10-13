@@ -190,8 +190,7 @@ Cargo getRandCargo( int quantity, string category )
             unsigned int i = Begin+( rand()%(End-Begin) );
             ret = &mpl->GetCargo( i );
         } else {
-            VSFileSystem::vs_dbg(1)
-                << boost::format("Cargo category %1% not found") % category << std::endl;
+            BOOST_LOG_TRIVIAL(info) << boost::format("Cargo category %1% not found") % category;
         }
     } else if ( mpl->numCargo() ) {
         for (unsigned int i = 0; i < 500; ++i) {

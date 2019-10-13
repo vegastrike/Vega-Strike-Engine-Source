@@ -13,7 +13,9 @@ using std::vector;
 #include "pk3.h"
 #include <gnuhash.h>
 
-#include "boost/format.hpp"
+#include <boost/format.hpp>
+#include <boost/log/core.hpp>
+#include <boost/log/trivial.hpp>
 
 class VegaConfig;
 class VSImage;
@@ -148,13 +150,6 @@ bool vs_feof( FILE *fp );
 long vs_getsize( FILE *fp );
 
 int vs_fprintf( FILE *fp, const char *format, ... );
-/* Debug level is a character, 1, 2, or 3.   1 is most important warnings only. 2 is warnings that are important but not hazardous to gameplay
- *  3 is for developer type messages, more akin to informational output but not relevant to anything an end user would care about.
- *  example usage.   vegastrike --debug=3       leaving --debug empty as an argument is the same as --debug=1
- *  all output is sent to stderr
- */
-std::ostream &vs_dbg(const char level);
-void vs_dprintf( char level, const char *format, ... );
 
 template < class A >
 int vs_fscanf( FILE *fp, const char *format, A *a )

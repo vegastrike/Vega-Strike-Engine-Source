@@ -104,10 +104,8 @@ private:
                         pCodecCtx, pNextFrameYUV, &frameFinished,
                         packetBuffer, packetBufferSize );
                     #endif
-                    VSFileSystem::vs_dbg(3)
-                        << boost::format("dts %1%: Decoded %2% bytes %3%") % int64_t(packet.dts) %
-                               int(bytesDecoded) % (frameFinished ? "Got frame" : "")
-                        << std::endl;
+                    BOOST_LOG_TRIVIAL(trace) << boost::format("dts %1%: Decoded %2% bytes %3%") % int64_t(packet.dts) % int(bytesDecoded) %
+                                                    (frameFinished ? "Got frame" : "");
                     );
                     //Was there an error?
                     if (bytesDecoded <= 0) throw VidFile::FrameDecodeException( "Error decoding frame" );
@@ -223,25 +221,18 @@ public:
         //Find first video stream
         pCodecCtx = 0;
         videoStreamIndex = -1;
-        VSFileSystem::vs_dbg(2) << boost::format("Loaded %1%") % path << std::endl;
+        BOOST_LOG_TRIVIAL(debug) << boost::format("Loaded %1%") % path;
         for (unsigned int i = 0; i < pFormatCtx->nb_streams; ++i) {
-            VSFileSystem::vs_dbg(3)
-                << boost::format("  Stream %1%: type %2% (%3%) first dts %4%") % i %
-                       ((pFormatCtx->streams[i]->codec->codec_type == CODEC_TYPE_VIDEO)
-                            ? "Video"
-                            : ((pFormatCtx->streams[i]->codec->codec_type == CODEC_TYPE_AUDIO)
-                                   ? "Audio"
-                                   : "unk")) %
-                       pFormatCtx->streams[i]->codec->codec_type %
-                       int64_t(pFormatCtx->streams[i]->start_time)
-                << std::endl;
+            BOOST_LOG_TRIVIAL(trace) << boost::format("  Stream %1%: type %2% (%3%) first dts %4%") % i %
+                                            ((pFormatCtx->streams[i]->codec->codec_type == CODEC_TYPE_VIDEO)
+                                                 ? "Video"
+                                                 : ((pFormatCtx->streams[i]->codec->codec_type == CODEC_TYPE_AUDIO) ? "Audio" : "unk")) %
+                                            pFormatCtx->streams[i]->codec->codec_type % int64_t(pFormatCtx->streams[i]->start_time);
             if ((pCodecCtx == 0) && (pFormatCtx->streams[i]->codec->codec_type == CODEC_TYPE_VIDEO))
                 pCodecCtx = (pStream = pFormatCtx->streams[videoStreamIndex = i])->codec;
         }
         if (pCodecCtx == 0) throw VidFile::FileOpenException( errbase+" (no video stream)" );
-        VSFileSystem::vs_dbg(3) << boost::format("  Codec Timebase: %1%/%2%") %
-                                       pCodecCtx->time_base.num % pCodecCtx->time_base.den
-                                << std::endl;
+        BOOST_LOG_TRIVIAL(trace) << boost::format("  Codec Timebase: %1%/%2%") % pCodecCtx->time_base.num % pCodecCtx->time_base.den;
 
         //Find codec for video stream and open it
         pCodec        = avcodec_find_decoder( pCodecCtx->codec_id );
@@ -254,12 +245,8 @@ public:
         //Get some info
         frameRate = float(pStream->r_frame_rate.num)/float(pStream->r_frame_rate.den);
         duration  = float(pStream->duration*pStream->time_base.num)/float(pStream->time_base.den);
-        VSFileSystem::vs_dbg(3) << boost::format("  Framerate: %1%/%2%") %
-                                       pStream->r_frame_rate.num % pStream->r_frame_rate.den
-                                << std::endl;
-        VSFileSystem::vs_dbg(3) << boost::format("  Stream timebase: %1%/%2%") %
-                                       pStream->time_base.num % pStream->time_base.den
-                                << std::endl;
+        BOOST_LOG_TRIVIAL(trace) << boost::format("  Framerate: %1%/%2%") % pStream->r_frame_rate.num % pStream->r_frame_rate.den;
+        BOOST_LOG_TRIVIAL(trace) << boost::format("  Stream timebase: %1%/%2%") % pStream->time_base.num % pStream->time_base.den;
 
         //Get POT dimensions
         if (fbForcePOT) {
@@ -274,8 +261,7 @@ public:
                 height /= 2;
             }
         }
-        VSFileSystem::vs_dbg(2) << boost::format("  playing at %1%x%2%") % width % height
-                                << std::endl;
+        BOOST_LOG_TRIVIAL(debug) << boost::format("  playing at %1%x%2%") % width % height;
 
         //Allocate RGB frame buffer
         pFrameRGB         = avcodec_alloc_frame();
@@ -307,8 +293,7 @@ public:
 
         //Translate float time to frametime
         uint64_t targetPTS = uint64_t( floor( double(time)*pStream->time_base.den/pStream->time_base.num ) );
-        VSFileSystem::vs_dbg(3) << boost::format("Seeking to %1$.3fs pts %2%") % time % targetPTS
-                                << std::endl;
+        BOOST_LOG_TRIVIAL(trace) << boost::format("Seeking to %1$.3fs pts %2%") % time % targetPTS;
         if ( (targetPTS >= prevPTS) && (targetPTS < pNextFrameYUV->pts) ) {
             //same frame
             if (targetPTS >= fbPTS) {
@@ -330,9 +315,7 @@ public:
                 if (backPTS < 0)
                     backPTS = 0;
 
-                VSFileSystem::vs_dbg(3) << boost::format("backseeking to %1% (at %2%)") % backPTS %
-                                               int64_t(pNextFrameYUV->pts)
-                                        << std::endl;
+                BOOST_LOG_TRIVIAL(trace) << boost::format("backseeking to %1% (at %2%)") % backPTS % int64_t(pNextFrameYUV->pts);
                 av_seek_frame( pFormatCtx, videoStreamIndex, backPTS, AVSEEK_FLAG_BACKWARD );
 
                 prevPTS = backPTS;
@@ -344,25 +327,21 @@ public:
                 if (pNextFrameYUV->pts < targetPTS) {
                     prevPTS = pNextFrameYUV->pts;
                     nextFrame();
-                    VSFileSystem::vs_dbg(3) << boost::format("decoding to %1% (at %2%-%3%)") %
-                                                   targetPTS % prevPTS % int64_t(pNextFrameYUV->pts)
-                                            << std::endl;
+                    BOOST_LOG_TRIVIAL(trace) << boost::format("decoding to %1% (at %2%-%3%)") % targetPTS % prevPTS %
+                                                    int64_t(pNextFrameYUV->pts);
                 }
                 // If we have to skip more frames, don't decode, only skip data
                 while (packet.dts < targetPTS) {
                     prevPTS = packet.dts;
                     nextFrame(true);
-                    VSFileSystem::vs_dbg(3) << boost::format("skipping to %1% (at %2%-%3%)") %
-                                                   targetPTS % prevPTS % int64_t(packet.dts)
-                                            << std::endl;
+                    BOOST_LOG_TRIVIAL(trace) << boost::format("skipping to %1% (at %2%-%3%)") % targetPTS % prevPTS % int64_t(packet.dts);
                 }
                 // we're close, decode now
                 while (pNextFrameYUV->pts < targetPTS) {
                     prevPTS = pNextFrameYUV->pts;
                     nextFrame();
-                    VSFileSystem::vs_dbg(3) << boost::format("decoding to %1% (at %2%-%3%)") %
-                                                   targetPTS % prevPTS % int64_t(pNextFrameYUV->pts)
-                                            << std::endl;
+                    BOOST_LOG_TRIVIAL(trace) << boost::format("decoding to %1% (at %2%-%3%)") % targetPTS % prevPTS %
+                                                    int64_t(pNextFrameYUV->pts);
                 }
                 convertFrame();
                 nextFrame();

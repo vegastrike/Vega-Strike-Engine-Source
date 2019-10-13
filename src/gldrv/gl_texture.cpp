@@ -325,12 +325,10 @@ GFXBOOL /*GFXDRVAPI*/ GFXCreateTexture( int width,
 {
     int dummy = 0;
     if ((mipmap & (MIPMAP | TRILINEAR)) && !isPowerOfTwo(width, dummy)) {
-        VSFileSystem::vs_dbg(1) << boost::format("Width %1% not a power of two") % width
-                                << std::endl;
+        BOOST_LOG_TRIVIAL(info) << boost::format("Width %1% not a power of two") % width;
     }
     if ((mipmap & (MIPMAP | TRILINEAR)) && !isPowerOfTwo(height, dummy)) {
-        VSFileSystem::vs_dbg(1) << boost::format("Height %1% not a power of two") % height
-                                << std::endl;
+        BOOST_LOG_TRIVIAL(info) << boost::format("Height %1% not a power of two") % height;
     }
     GFXActiveTexture( texturestage );
     *handle = 0;
@@ -398,7 +396,7 @@ GFXBOOL /*GFXDRVAPI*/ GFXCreateTexture( int width,
     textures[*handle].iheight = height;
     textures[*handle].palette = NULL;
     if (palette && textureformat == PALETTE8) {
-        VSFileSystem::vs_dbg(3) << " palette " << std::endl;
+        BOOST_LOG_TRIVIAL(trace) << " palette ";
         textures[*handle].palette = (GLubyte*) malloc( sizeof (GLubyte)*1024 );
         ConvertPalette( textures[*handle].palette, (unsigned char*) palette );
     }
@@ -762,17 +760,10 @@ GFXBOOL /*GFXDRVAPI*/ GFXTransferTexture( unsigned char *buffer,
     //Otherwise maxdimension is set by some user argument based on quality settings.
     if (maxdimension == 65536)
         maxdimension = gl_options.max_texture_dimension;
-    VSFileSystem::vs_dbg(3) << boost::format("Transferring %1%x%2% texture, page %3% (eff: %4%x%5% - limited at %6% - %7% mips), onto name %8% (%9%)") %
-                                    textures[handle].iwidth %
-                                    textures[handle].iheight %
-                                    pageIndex %
-                                    textures[handle].width %
-                                    textures[handle].height %
-                                    maxdimension %
-                                    mips %
-                                    textures[handle].name %
-                                    GetImageTargetName( imagetarget )
-                            << std::endl;
+    BOOST_LOG_TRIVIAL(trace)
+        << boost::format("Transferring %1%x%2% texture, page %3% (eff: %4%x%5% - limited at %6% - %7% mips), onto name %8% (%9%)") %
+               textures[handle].iwidth % textures[handle].iheight % pageIndex % textures[handle].width % textures[handle].height %
+               maxdimension % mips % textures[handle].name % GetImageTargetName(imagetarget);
     if (maxdimension == 44) {
         detail_texture = 0;
         maxdimension   = 256;
@@ -832,13 +823,9 @@ GFXBOOL /*GFXDRVAPI*/ GFXTransferTexture( unsigned char *buffer,
                                    maxdimension,
                                    1 );
                 buffer = tempbuf;
-                VSFileSystem::vs_dbg(2) << boost::format("Downsampled %1%x%2% texture (target: %3%x%4% - limited at %5%)") %
-                                                textures[handle].iwidth %
-                                                textures[handle].iheight %
-                                                textures[handle].width %
-                                                textures[handle].height %
-                                                maxdimension
-                                        << std::endl;
+                BOOST_LOG_TRIVIAL(debug) << boost::format("Downsampled %1%x%2% texture (target: %3%x%4% - limited at %5%)") %
+                                                textures[handle].iwidth % textures[handle].iheight % textures[handle].width %
+                                                textures[handle].height % maxdimension;
             }
             offset2 = 2;
         } else {
