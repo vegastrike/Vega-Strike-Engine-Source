@@ -481,34 +481,6 @@ int vs_fprintf( FILE *fp, const char *format, ... )
     return 0;
 }
 
-const char VS_MIN_DBG_LVL = 1;
-const char VS_MAX_DBG_LVL = 3;
-
-static boost::iostreams::stream<boost::iostreams::null_sink>
-    nullOstream((boost::iostreams::null_sink()));
-
-std::ostream &vs_dbg(const char level)
-{
-    if (level < VS_MIN_DBG_LVL || level > VS_MAX_DBG_LVL) {
-        return std::cerr << "Vega Strike Error: dbg_out_fmt level out of range" << std::endl;
-    } else if (use_volumes || (level > g_game.vsdebug)) {
-        return nullOstream;
-    } else {
-        return std::cerr;
-    }
-}
-
-void vs_dprintf(char level, const char *format, ...)
-{
-    if (level < VS_MIN_DBG_LVL || level > VS_MAX_DBG_LVL) {
-        fprintf(stderr, "Vega Strike Error: vs_dprintf level out of range\n");
-    } else if (!use_volumes && level <= g_game.vsdebug) {
-        va_list ap;
-        va_start(ap, format);
-        vfprintf(stderr, format, ap);
-    }
-}
-
 int vs_fseek( FILE *fp, long offset, int whence )
 {
     return fseek( fp, offset, whence );
