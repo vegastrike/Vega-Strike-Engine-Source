@@ -185,7 +185,7 @@ void winsys_warp_pointer( int x, int y )
  *  Sets up the SDL OpenGL rendering context
  *  \author  jfpatry
  *  \date    Created:  2000-10-20
- *  \date    Modified: 2019-10-02 - Stephen G Tuggy
+ *  \date    Modified: 2019-10-14 - stephengtuggy
  */
 static bool setup_sdl_video_mode()
 {
@@ -401,7 +401,7 @@ void winsys_show_cursor( bool visible )
  *  \date    Modified: 2000-10-19
  *  \date    Modified: 2005-8-16 - Rogue
  *  \date    Modified: 2005-12-24 - ace123
- *  \date    Modified: 2019-10-02 - Stephen G Tuggy
+ *  \date    Modified: 2019-10-14 - stephengtuggy
  */
 extern int shiftdown( int );
 extern int shiftup( int );
@@ -536,7 +536,7 @@ void winsys_process_events()
  *  function should only be called once.
  *  \author  jfpatry
  *  \date    Created:  2000-10-20
- *  \date    Modified: 2019-10-02 - Stephen G Tuggy
+ *  \date    Modified: 2019-10-14 - stephengtuggy
  */
 void winsys_atexit( winsys_atexit_func_t func )
 {
@@ -755,7 +755,7 @@ void winsys_warp_pointer( int x, int y )
  *  sets up fullscreen mode if selected)
  *  \author  jfpatry
  *  \date    Created:  2000-10-19
- *  \date    Modified: 2019-10-02 - Stephen G Tuggy
+ *  \date    Modified: 2019-10-14 - stephengtuggy
  */
 void winsys_init( int *argc, char **argv, char const *window_title, char const *icon_title )
 {
