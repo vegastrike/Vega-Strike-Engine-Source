@@ -25,8 +25,11 @@ UNSET(EXPAT_FOUND)
 UNSET(MATH_FOUND)
 UNSET(FFMPEG_FOUND)
 UNSET(OGRE_FOUND)
+# 2019-10-14 stephengtuggy - I think we need to allow specifying a custom Boost directory location, but provide a default value
+#                            (Default value not implemented yet)
 # UNSET(Boost_DIR)
 
+# 2019-10-14 stephengtuggy - The new Boost.Log stuff didn't work without these next two lines
 set(Boost_USE_STATIC_LIBS ON)
 set(Boost_USE_MULTITHREADED ON)
 
@@ -556,6 +559,7 @@ SET(DATADIR "" CACHE STRING "Default vegastrike data directory")
 
 # Hide our temporary variable and initialize it to empty
 SET(CPU_OPTS  )
+# 2019-10-14 stephengtuggy - Each -D clause needs a space between it and the variable name to take effect
 SET(DEFINES " -D NV_CUBE_MAP=1 -D BOOST_PYTHON_NO_PY_SIGNATURES=1 ")
 MARK_AS_ADVANCED( CPU_OPTS )
 MARK_AS_ADVANCED( DEFINES )
@@ -590,6 +594,8 @@ IF(DATADIR)
 ENDIF(DATADIR)
 
 # Debug target block. 
+# 2019-10-14 stephengtuggy - DESTRUCTDEBUG and DEBUG_RUN_PYTHON flags set temporarily for easier debugging. It looks like these flags must
+# 							 be set here, since this overrides whatever is specified to cmake on the commend line or using ccmake.
 SET(CMAKE_CXX_FLAGS_DEBUG " ${BUILD_OPT} ${CPU_OPTS} ${DEFINES} -D DESTRUCTDEBUG=1 -D DEBUG_RUN_PYTHON=1 -include config.h -pipe -g2 -Wall -fvisibility=hidden" CACHE STRING
     "Flags used by the C++ compiler during debug builds."
      FORCE )
@@ -614,6 +620,7 @@ ENDIF("${CMAKE_BUILD_TYPE}" STREQUAL "Debug")
 
 
 # Release Target block 
+# 2019-10-14 stephengtuggy - Each -D clause needs a space between it and the variable name to take effect
 SET(CMAKE_CXX_FLAGS_RELEASE  " ${BUILD_OPT} ${CPU_OPTS} -D NV_CUBE_MAP=1 -D BOOST_PYTHON_NO_PY_SIGNATURES=1 -include config.h -pipe -Wall -fvisibility=hidden" CACHE STRING
     "Flags used by the C++ compiler during release builds."
     FORCE)
@@ -635,6 +642,7 @@ ELSE("${CMAKE_BUILD_TYPE}" STREQUAL "Release")
 ENDIF("${CMAKE_BUILD_TYPE}" STREQUAL "Release")
 
 # Profiler Target block
+# 2019-10-14 stephengtuggy - Each -D clause needs a space between it and the variable name to take effect
 SET(CMAKE_CXX_FLAGS_PROFILER " ${BUILD_OPT} ${CPU_OPTS} -pg -g2 -D NV_CUBE_MAP=1 -D BOOST_PYTHON_NO_PY_SIGNATURES=1 -include config.h -pipe -Wall -Wno-unused-function -Wno-unused-variable" CACHE STRING
     "Flags used by the C++ compiler during profiler builds."
      FORCE )
@@ -718,6 +726,7 @@ ENDIF(PYTHONLIBS_FOUND OR PYTHON_LIBRARIES AND PYTHON_INCLUDE_PATH)
 # Find Boost with boost_python library
 OPTION(USE_SYSTEM_BOOST "Use system boost" OFF)
 IF(USE_SYSTEM_BOOST)
+  # 2019-10-14 stephengtuggy - Add Boost.Log stuff
   find_package( Boost COMPONENTS python log log_setup )
   IF(Boost_FOUND)
     message("++ Found System Boost : ${Boost_VERSION}")
@@ -732,7 +741,8 @@ ENDIF(USE_SYSTEM_BOOST)
 
 IF(NOT USE_SYSTEM_BOOST)
     message("++ Using Internal Boost")
-	# # This is just to cleanup advanced variable viewing, since they're not used anyway
+    # 2019-10-14 stephengtuggy - I think we need to allow specifying a custom Boost directory location
+    # # This is just to cleanup advanced variable viewing, since they're not used anyway
     # UNSET(Boost_INCLUDE_DIRS)
     # UNSET(Boost_LIBRARIES)
     # UNSET(Boost_INCLUDE_DIR)
@@ -746,11 +756,12 @@ IF(NOT USE_SYSTEM_BOOST)
     SET(TST_LIBS ${TST_LIBS} ${Boost_LIBRARIES})
     include_directories(${TST_INCLUDES})
     # add_subdirectory(boost/1_53)
+    # 2019-10-14 stephengtuggy - These clauses didn't work right
     # IF(NOT DISABLE_CLIENT)
-    #     add_dependencies(vegastrike boost_python boost_log boost_log_setup)
+    #     add_dependencies(vegastrike boost_python )
     # ENDIF(NOT DISABLE_CLIENT)
     # IF(NOT DISABLE_SERVER)
-    #     add_dependencies(vegaserver boost_python boost_log boost_log_setup)
+    #     add_dependencies(vegaserver boost_python )
     # ENDIF(NOT DISABLE_SERVER)
 ENDIF(NOT USE_SYSTEM_BOOST)
 
@@ -996,6 +1007,7 @@ add_subdirectory(objconv)
 
 IF(NOT DISABLE_SERVER)
 target_link_libraries(vegaserver ${TST_SERVER_LIBS})
+# 2019-10-14 stephengtuggy - Each -D clause needs a space between it and the variable name to take effect
 set_target_properties(vegaserver PROPERTIES LINK_FLAGS "-L/usr/lib -L${vsUTCS_BINARY_DIR}"
                                             COMPILE_FLAGS "-D NO_GFX=1")
 add_dependencies(vegaserver mesh_tool)
