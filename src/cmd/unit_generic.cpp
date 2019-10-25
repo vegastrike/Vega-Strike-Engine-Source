@@ -6452,7 +6452,7 @@ bool Unit::UpgradeMounts( const Unit *up,
                                         std::string weaponname = ammoname.substr(0, ammopos);
 
                                         /* Do NOT delete this Unit because it will be either fetched
-                                        * fetched from a cache or - if it has to be created - it will
+                                        * from a cache or - if it has to be created - it will
                                         * be automatically put in a cache.
                                         * Deletion will corrupt the cache!
                                         */
