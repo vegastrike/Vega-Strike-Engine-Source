@@ -6425,21 +6425,48 @@ bool Unit::UpgradeMounts( const Unit *up,
                                 int tmpammo = mounts[jmod].ammo;
                                 if (mounts[jmod].ammo != -1 && up->mounts[i].ammo != -1) {
                                     tmpammo += up->mounts[i].ammo;
-                                    if (templ) {
-                                        if (templ->GetNumMounts() > jmod) {
-                                            if (templ->mounts[jmod].volume != -1) {
-                                                if (templ->mounts[jmod].volume < mounts[jmod].type->volume*tmpammo) {
-                                                    tmpammo =
-                                                        (int) floor( .125
-                                                                    +( (0
-                                                                        +templ->mounts[jmod].volume)
-                                                                      /mounts[jmod].type->volume ) );
+                                    if (ismissiletype) {
+                                        if (templ) {
+                                            if (templ->GetNumMounts() > jmod) {
+                                                if (templ->mounts[jmod].volume != -1) {
+                                                    if (templ->mounts[jmod].volume < mounts[jmod].type->volume*tmpammo) {
+                                                        tmpammo =
+                                                            (int) floor( .125
+                                                                        +( (0
+                                                                            +templ->mounts[jmod].volume)
+                                                                          /mounts[jmod].type->volume ) );
+                                                    }
                                                 }
                                             }
                                         }
+                                        if (tmpammo*mounts[jmod].type->volume > mounts[jmod].volume)
+                                            tmpammo = (int) floor( .125+( (0+mounts[jmod].volume)/mounts[jmod].type->volume ) );
+                                    } else {
+                                        std::string ammoname = up->name.get();
+                                        std::size_t ammopos = ammoname.find("_ammo");
+                                        std::string weaponname = ammoname.substr(0, ammopos);
+
+                                        /* Do NOT delete this Unit because it will be either fetched
+                                        * from a cache or - if it has to be created - it will
+                                        * be automatically put in a cache.
+                                        * Deletion will corrupt the cache!
+                                        */
+                                        const Unit * weapon = getUnitFromUpgradeName(weaponname);
+
+                                        if (weapon == NULL || weapon->name == LOAD_FAILED) {
+                                            // this should not happen
+                                            VSFileSystem::vs_dprintf(1, "UpgradeMount(): FAILED to obtain weapon: %s\n", weaponname.c_str());
+                                            cancompletefully = false;
+                                            break;
+                                        }
+
+                                        int maxammo = weapon->mounts[0].ammo;
+
+                                        if (tmpammo > maxammo) {
+                                            tmpammo = maxammo;
+                                        }
                                     }
-                                    if (tmpammo*mounts[jmod].type->volume > mounts[jmod].volume)
-                                        tmpammo = (int) floor( .125+( (0+mounts[jmod].volume)/mounts[jmod].type->volume ) );
+
                                     if (tmpammo > mounts[jmod].ammo) {
                                         cancompletefully = true;
                                         if (touchme)
