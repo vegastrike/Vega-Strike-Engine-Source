@@ -313,7 +313,7 @@ bool Mount::PhysicsAlignedFire( Unit *caller,
                 //Affect the stored mount serial to the new missile
                 temp->SetSerial( this->serial );
 
-                VSFileSystem::vs_dprintf( 3, "Creating missile with SERIAL ID %d\n", this->serial );
+                BOOST_LOG_TRIVIAL(trace) << boost::format("Creating missile with SERIAL ID %1%") % this->serial;
 
                 this->serial = 0;
                 if (target && target != owner) {
@@ -484,4 +484,3 @@ void Mount::ReplaceSound()
 {
     sound = AUDCreateSound( sound, false );     //copy constructor basically
 }
-

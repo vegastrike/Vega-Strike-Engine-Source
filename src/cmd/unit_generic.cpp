@@ -841,8 +841,6 @@ Unit::~Unit()
     fflush( stderr );
 #endif
 #ifdef DESTRUCTDEBUG
-    VSFileSystem::vs_fprintf( stderr, "%d %x ", 1, planet );
-    fflush( stderr );
     VSFileSystem::vs_fprintf( stderr, "%d %x\n", 2, pImage->pHudImage );
     fflush( stderr );
 #endif
@@ -864,10 +862,6 @@ Unit::~Unit()
     fflush( stderr );
 #endif
 
-#ifdef DESTRUCTDEBUG
-    VSFileSystem::vs_fprintf( stderr, "%d %x ", 9, halos );
-    fflush( stderr );
-#endif
 #ifdef DESTRUCTDEBUG
     VSFileSystem::vs_fprintf( stderr, "%d %x ", 1, &mounts );
     fflush( stderr );
@@ -1289,8 +1283,9 @@ void Unit::Init( const char *filename,
     if (!foundFile) {
         bool istemplate = ( string::npos != ( string( filename ).find( ".template" ) ) );
         static bool usingtemplates = XMLSupport::parse_bool( vs_config->getVariable( "data", "usingtemplates", "true" ) );
-        if ( !istemplate || (istemplate && usingtemplates) )
-            cout<<"Unit file "<<filename<<" not found"<<endl;
+        if (!istemplate || (istemplate && usingtemplates)) {
+            std::cout << boost::format("Unit file %1% not found") % filename << std::endl;
+        }
         meshdata.clear();
         meshdata.push_back( NULL );
         this->fullname = filename;
@@ -4651,9 +4646,9 @@ void Unit::Kill( bool erasefromsave, bool quitting )
     for (un_iter iter = getSubUnits(); (un = *iter); ++iter)
         un->Kill();
 
-    if (isUnit() != MISSILEPTR)
-        VSFileSystem::vs_dprintf( 1, "UNIT HAS DIED: %s %s (file %s)\n", name.get().c_str(),
-               fullname.c_str(), filename.get().c_str() );
+    if (isUnit() != MISSILEPTR) {
+        BOOST_LOG_TRIVIAL(info) << boost::format("UNIT HAS DIED: %1% %2% (file %3%)") % name.get() % fullname % filename.get();
+    }
 
     if (ucref == 0) {
         Unitdeletequeue.push_back( this );
@@ -4662,7 +4657,7 @@ void Unit::Kill( bool erasefromsave, bool quitting )
                 flightgroup->leader.SetUnit( NULL );
 
 #ifdef DESTRUCTDEBUG
-        VSFileSystem::vs_dprintf( 3, "%s 0x%x - %d\n", name.c_str(), this, Unitdeletequeue.size() );
+        BOOST_LOG_TRIVIAL(trace) << boost::format("%s 0x%x - %d") % name.get().c_str() % this % Unitdeletequeue.size();
 #endif
     }
 }
@@ -4709,7 +4704,7 @@ void Unit::UnRef()
         //delete
         Unitdeletequeue.push_back( this );
 #ifdef DESTRUCTDEBUG
-        VSFileSystem::vs_fprintf( stderr, "%s 0x%x - %d\n", name.c_str(), this, Unitdeletequeue.size() );
+        VSFileSystem::vs_fprintf( stderr, "%s 0x%x - %d\n", name.get().c_str(), this, Unitdeletequeue.size() );
 #endif
     }
 }
@@ -4893,7 +4888,7 @@ void Unit::ProcessDeleteQueue()
 #ifdef DESTRUCTDEBUG
         VSFileSystem::vs_fprintf( stderr, "Eliminatin' 0x%x - %d", Unitdeletequeue.back(), Unitdeletequeue.size() );
         fflush( stderr );
-        VSFileSystem::vs_fprintf( stderr, "Eliminatin' %s\n", Unitdeletequeue.back()->name.c_str() );
+        VSFileSystem::vs_fprintf( stderr, "Eliminatin' %s\n", Unitdeletequeue.back()->name.get().c_str() );
 #endif
 #ifdef DESTRUCTDEBUG
         if ( Unitdeletequeue.back()->isSubUnit() )
@@ -6055,7 +6050,7 @@ bool Unit::UnDock( Unit *utdw )
         else
             this->owner = NULL;
     }
-    VSFileSystem::vs_dprintf(3,"Asking to undock\n");
+    BOOST_LOG_TRIVIAL(trace) << "Asking to undock";
     if ( Network != NULL && !SERVER && !_Universe->netLocked() ) {
         cerr<<"Sending an undock notification"<<endl;
         int playernum = _Universe->whichPlayerStarship( this );

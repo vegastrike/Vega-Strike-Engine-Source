@@ -279,8 +279,8 @@ readerThread(
             if (foundcache) {
                 *me->music_load_info = wherecache->second;
                 me->freeWav = false;
-            } else if ( !AUDLoadSoundFile( songname, me->music_load_info, true ) ) { 	 
-	        VSFileSystem::vs_dprintf(1, "Failed to load music file \"%s\"", songname);
+            } else if (!AUDLoadSoundFile(songname, me->music_load_info, true)) {
+                BOOST_LOG_TRIVIAL(info) << boost::format("Failed to load music file \"%1%\"") % songname;
             }
         }
         if (me->freeWav && docacheme) {
@@ -655,7 +655,7 @@ void Music::MuzakCycle()
                 return;
             }
         }
-        
+
         for (int i = 0; i < muzak_count; i++)
             muzak[i].Listen();
     }
@@ -768,4 +768,3 @@ void Music::SetLoops( int numloops, int layer )
         }
     }
 }
-

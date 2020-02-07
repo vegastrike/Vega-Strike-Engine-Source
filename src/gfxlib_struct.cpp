@@ -55,8 +55,9 @@ static void clear_gl_error()
 static void print_gl_error(const char *fmt)
 {
     GLenum gl_error;
-    if ((gl_error = glGetError()))
-        VSFileSystem::vs_dprintf(1, fmt, gl_error);
+    if ((gl_error = glGetError())) {
+        BOOST_LOG_TRIVIAL(info) << boost::format(fmt) % gl_error;
+    }
 }
 
 static void EnableArrays(const GFXColorVertex *data)
@@ -173,13 +174,13 @@ void GFXVertexList::BeginDrawState( GFXBOOL lock )
         clear_gl_error();
 
         GFXBindBuffer( vbo_data );
-        print_gl_error("VBO18.5a Error %d\n");
-        
+        print_gl_error("VBO18.5a Error %1%");
+
         if (changed&HAS_INDEX) {
             GFXBindElementBuffer( display_list );
-            print_gl_error("VBO18.5b Error %d\n");
+            print_gl_error("VBO18.5b Error %1%");
         }
-        
+
         if (changed&HAS_COLOR) {
             EnableArrays((GFXColorVertex*)NULL);
         } else {
@@ -313,7 +314,7 @@ void GFXVertexList::Draw( enum POLYTYPE *mode, const INDEX index, const int numl
             GFXPopBlendMode();
             GFXDisable( SMOOTH );
         }
-        
+
         ++gl_batches_this_frame;
     } else {
         int totoffset = 0;
@@ -622,8 +623,8 @@ void GFXSphereVertexList::ProceduralModification()
             for(int j=0; j < ROWS/2; j++)
                 direction[j] = (int)vsrandom.uniformInc( 0.0, 5.0 );
             if(i % 4 == 1) {
-                for(int j=0; j < ROWS; j+=2) { 
-                    if(direction[j/2] > 2) 
+                for(int j=0; j < ROWS; j+=2) {
+                    if(direction[j/2] > 2)
                         SetVector( 1.003, &vert[j] );
                 }
 
@@ -631,7 +632,7 @@ void GFXSphereVertexList::ProceduralModification()
 
             if(i % 4 == 0 ) {
                 for(int j=1; j < ROWS; j+=2) {
-                    if(direction[(j-1)/2] > 2) 
+                    if(direction[(j-1)/2] > 2)
                         SetVector( 1.003, &vert[j] );
                 }
             }

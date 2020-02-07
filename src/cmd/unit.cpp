@@ -118,7 +118,7 @@ template < class UnitType >GameUnit< UnitType >::~GameUnit()
 template < class UnitType >
 unsigned int GameUnit< UnitType >::nummesh() const
 {
-    // return number of meshes but not the shield 
+    // return number of meshes but not the shield
     return (this->meshdata.size() - 1 );
 }
 
@@ -366,13 +366,13 @@ void GameUnit< UnitType >::Draw( const Transformation &parent, const Matrix &par
     unsigned int i;
     if ( (this->hull < 0) && (!cam_setup_phase) )
         Explode( true, GetElapsedTime() );
-    
+
     float damagelevel = 1.0f;
     unsigned char chardamage = 0;
-    
+
     // We might need to scale rSize, this "average scale" takes the transform matrix into account
     float avgscale = 1.0f;
-    
+
     bool On_Screen = false;
     float Apparent_Size = 0.0f;
     int cloak = this->cloaking;
@@ -391,15 +391,15 @@ void GameUnit< UnitType >::Draw( const Transformation &parent, const Matrix &par
         avgscale = sqrt((ctm->getP().MagnitudeSquared() + ctm->getR().MagnitudeSquared()) * 0.5);
         wmat = this->WarpMatrix( *ctm );
     }
-    
+
     if ( ( !(this->invisible&UnitType::INVISUNIT) ) && ( ( !(this->invisible&UnitType::INVISCAMERA) ) || (!myparent) ) ) {
         if (!cam_setup_phase) {
             Camera *camera = _Universe->AccessCamera();
             QVector camerapos = camera->GetPosition();
-            
+
             float minmeshradius =
                 ( camera->GetVelocity().Magnitude()+this->Velocity.Magnitude() )*SIMULATION_ATOM;
-            
+
             unsigned int numKeyFrames = this->graphicOptions.NumAnimationPoints;
             for (i = 0; i <= this->nummesh(); i++) {
                 //NOTE LESS THAN OR EQUALS...to cover shield mesh
@@ -431,15 +431,15 @@ void GameUnit< UnitType >::Draw( const Transformation &parent, const Matrix &par
                     }
                 }
                 if (lod >= 0.5 && pixradius >= 2.5) {
-                    double frustd = GFXSphereInFrustum( 
+                    double frustd = GFXSphereInFrustum(
                         TransformedPosition,
                         minmeshradius+mSize );
                     if (frustd) {
                         //if the radius is at least half a pixel at detail 1 (equivalent to pixradius >= 0.5 / detail)
                         float currentFrame = this->meshdata[i]->getCurrentFrame();
-                        this->meshdata[i]->Draw( lod, wmat, d, 
+                        this->meshdata[i]->Draw( lod, wmat, d,
                                                  i == this->meshdata.size()-1 ? -1 : cloak,
-                                                 (camera->GetNebula() == this->nebula && this->nebula != NULL) ? -1 : 0, 
+                                                 (camera->GetNebula() == this->nebula && this->nebula != NULL) ? -1 : 0,
                                                  chardamage );                                                                                                                                                            //cloakign and nebula
                         On_Screen = true;
                         unsigned int numAnimFrames = 0;
@@ -449,7 +449,7 @@ void GameUnit< UnitType >::Draw( const Transformation &parent, const Matrix &par
                             float currentprogress = floor(
                                 this->meshdata[i]->getCurrentFrame()*numKeyFrames/(float) numAnimFrames );
                             if (numKeyFrames
-                                && floor( currentFrame*numKeyFrames/(float) numAnimFrames ) != currentprogress) 
+                                && floor( currentFrame*numKeyFrames/(float) numAnimFrames ) != currentprogress)
                             {
                                 this->graphicOptions.Animating = 0;
                                 this->meshdata[i]->setCurrentFrame( .1+currentprogress*numAnimFrames/(float) numKeyFrames );
@@ -544,7 +544,7 @@ void GameUnit< UnitType >::Draw( const Transformation &parent, const Matrix &par
                 this->mounts[i].ref.gun->Draw( *ct, wmat,
                                                ( (this->mounts[i].size&weapon_info::AUTOTRACKING)
                                                 && (this->mounts[i].time_to_lock <= 0)
-                                                && Unit::TargetTracked() ) ? Unit::Target() : NULL, 
+                                                && Unit::TargetTracked() ) ? Unit::Target() : NULL,
                                                this->computer.radar.trackingcone );
     }
     if ( On_Screen && (phalos->NumHalos() > 0) && !( this->docked&(UnitType::DOCKED|UnitType::DOCKED_INSIDE) ) && (Apparent_Size > 5.0f) ) {
@@ -606,11 +606,11 @@ void GameUnit< UnitType >::Draw()
     Draw( identity_transformation, identity_matrix );
 }
 
-    
+
 static float parseFloat( const std::string &s )
 {
     if ( s.empty() ) {
-        VSFileSystem::vs_dprintf(1, "WARNING: invalid float: %s\n", s.c_str());
+        BOOST_LOG_TRIVIAL(info) << boost::format("WARNING: invalid float: %1%") % s;
         return 0.f;
     } else {
         return XMLSupport::parse_floatf( s );
@@ -625,10 +625,12 @@ static void parseFloat4( const std::string &s, float value[4] )
         value[i++] = parseFloat( s.substr( ini, end = s.find_first_of( ',', ini ) ) );
         ini = ( (end == string::npos) ? end : (end+1) );
     }
-    if (i >= 4 && ini != string::npos)
-        VSFileSystem::vs_dprintf(1, "WARNING: invalid float4: %s\n", s.c_str());
-    while (i < 4)
+    if (i >= 4 && ini != string::npos) {
+        BOOST_LOG_TRIVIAL(info) << boost::format("WARNING: invalid float4: %1%") % s;
+    }
+    while (i < 4) {
         value[i++] = 0;
+    }
 }
 
 template < class UnitType >
@@ -647,10 +649,10 @@ void GameUnit< UnitType >::applyTechniqueOverrides(const map<string, string> &ov
                             doOverride = true;
                     }
                 }
-                
+
                 if (doOverride) {
                     // Prepare a new technique with the overrides
-                    // (make sure the technique has been compiled though - 
+                    // (make sure the technique has been compiled though -
                     // parameter values don't really need recompilation)
                     TechniquePtr newtechnique = TechniquePtr(new Technique(*technique));
                     for (int passno = 0; passno < technique->getNumPasses(); ++passno) {
@@ -658,11 +660,11 @@ void GameUnit< UnitType >::applyTechniqueOverrides(const map<string, string> &ov
                         for (size_t paramno = 0; paramno < pass.getNumShaderParams(); ++paramno) {
                             Technique::Pass::ShaderParam &param = pass.getShaderParam(paramno);
                             map<string, string>::const_iterator override = overrides.find(param.name);
-                            if (override != overrides.end()) 
+                            if (override != overrides.end())
                                 parseFloat4(override->second, param.value);
                         }
                     }
-                    
+
                     (*mesh)->setTechnique(newtechnique);
                 }
             }

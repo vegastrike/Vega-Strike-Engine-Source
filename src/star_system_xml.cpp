@@ -1544,7 +1544,8 @@ void StarSystem::LoadXML( const char *filename, const Vector &centroid, const fl
     XML_SetElementHandler( parser, &StarSystem::beginElement, &StarSystem::endElement );
     {
         string fcontents = f.ReadFull();
-        VSFileSystem::vs_dprintf( 2, "Contents of star system:\n%s\n", fcontents.c_str() );
+        BOOST_LOG_TRIVIAL(debug) << "Contents of star system:";
+        BOOST_LOG_TRIVIAL(debug) << fcontents;
         XML_Parse( parser, (fcontents).c_str(), f.Size(), 1 );
     }
     f.Close();
@@ -1562,4 +1563,3 @@ void StarSystem::LoadXML( const char *filename, const Vector &centroid, const fl
     createBackground( xml );
     delete xml;
 }
-

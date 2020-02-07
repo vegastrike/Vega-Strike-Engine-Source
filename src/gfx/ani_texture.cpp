@@ -91,7 +91,7 @@ void AnimatedTexture::MakeActive( int stage, int pass )
         }
         active = ( (unsigned int) (curtime/timeperframe) )%numframes;
     }
-    
+
     // Effectively activate texture units
     switch (pass)
     {
@@ -149,10 +149,10 @@ void AnimatedTexture::MakeActive( int stage, int pass )
                     //or double the code. Let's use this then.
                     int ocompression = gl_options.compression;
                     gl_options.compression = 0;
-                    
-                    VSFileSystem::vs_dprintf( 1, "Transferring video frame\n" );
+
+                    BOOST_LOG_TRIVIAL(info) << "Transferring video frame";
                     Transfer( 65535, GFXFALSE );
-                    
+
                     gl_options.compression = ocompression;
                 }
             }
@@ -166,7 +166,7 @@ void AnimatedTexture::MakeActive( int stage, int pass )
                 }
             }
             catch (::VidFile::Exception e) {
-                VSFileSystem::vs_dprintf( 1, "\nVidFile exception: %s\n", e.what() );
+                BOOST_LOG_TRIVIAL(info) << boost::format("\nVidFile exception: %1%") % e.what();
             }
             Texture::MakeActive( stage, pass );
         }
@@ -225,7 +225,7 @@ void AnimatedTexture::UpdateAllFrame()
             // lazy init
             if (ani->lastrealtime == 0)
                 ani->lastrealtime = realtime;
-            
+
             // de-jitter, playtime reporting tends to have some jitter
             double newcurtime = ani->GetTimeSource()->getPlayingTime();
             double delta = realtime - ani->lastrealtime;
@@ -466,21 +466,21 @@ void AnimatedTexture::LoadVideoSource( VSFileSystem::VSFile &f )
 			texture_target = TEXTURERECT;
 			image_target = TEXTURE_RECTANGLE;
 		}
-		
+
         Bind( 65535, GFXFALSE );
 
 		maxtcoord.x = sizeX-0.5f;
 		maxtcoord.y = sizeY-0.5f;
 		mintcoord.x = 0.5f;
 		mintcoord.y = 0.5f;
-		
+
 		if (image_target != TEXTURE_RECTANGLE) {
 			maxtcoord.x /= sizeX;
 			maxtcoord.y /= sizeY;
 			mintcoord.x /= sizeX;
 			mintcoord.y /= sizeY;
 		}
-		
+
         anis.insert( this );
     }
 }
@@ -497,10 +497,10 @@ AnimatedTexture* AnimatedTexture::CreateVideoTexture( const std::string &fname,
         rv->LoadVideoSource( f );
     else
         fprintf( stderr, "CreateVideoTexture could not find %s\n", fname.c_str() );
-    
+
     // Videos usually don't want to be looped, so set non-looping as default
     rv->SetLoop(false);
-    
+
     return rv;
 }
 

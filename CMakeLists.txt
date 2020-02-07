@@ -25,7 +25,13 @@ UNSET(EXPAT_FOUND)
 UNSET(MATH_FOUND)
 UNSET(FFMPEG_FOUND)
 UNSET(OGRE_FOUND)
-UNSET(Boost_DIR)
+# 2019-10-14 stephengtuggy - I think we need to allow specifying a custom Boost directory location, but provide a default value
+#                            (Default value not implemented yet)
+# UNSET(Boost_DIR)
+
+# 2019-10-14 stephengtuggy - The new Boost.Log stuff didn't work without these next two lines
+set(Boost_USE_STATIC_LIBS ON)
+set(Boost_USE_MULTITHREADED ON)
 
 include_directories(${vsUTCS_SOURCE_DIR}/src 
 					${vsUTCS_SOURCE_DIR}/src/cmd
@@ -553,7 +559,8 @@ SET(DATADIR "" CACHE STRING "Default vegastrike data directory")
 
 # Hide our temporary variable and initialize it to empty
 SET(CPU_OPTS  )
-SET(DEFINES " -DNV_CUBE_MAP -DBOOST_PYTHON_NO_PY_SIGNATURES ")
+# 2019-10-14 stephengtuggy - Each -D clause needs a space between it and the variable name to take effect
+SET(DEFINES " -D NV_CUBE_MAP=1 -D BOOST_PYTHON_NO_PY_SIGNATURES=1 ")
 MARK_AS_ADVANCED( CPU_OPTS )
 MARK_AS_ADVANCED( DEFINES )
 SET(CPU_SMP "1" CACHE STRING 
@@ -583,14 +590,16 @@ IF(CPU_SMP GREATER 1)
 ENDIF(CPU_SMP GREATER 1)
 
 IF(DATADIR)
-    SET(DEFINES "${DEFINES} -DDATA_DIR=\"${DATADIR}\"")
+    SET(DEFINES "${DEFINES} -D DATA_DIR=\"${DATADIR}\"")
 ENDIF(DATADIR)
 
 # Debug target block. 
-SET(CMAKE_CXX_FLAGS_DEBUG " ${BUILD_OPT} ${CPU_OPTS} ${DEFINES} -include config.h -pipe -g2 -Wall -fvisibility=hidden" CACHE STRING
+# 2019-10-14 stephengtuggy - DESTRUCTDEBUG and DEBUG_RUN_PYTHON flags set temporarily for easier debugging. It looks like these flags must
+# 							 be set here, since this overrides whatever is specified to cmake on the commend line or using ccmake.
+SET(CMAKE_CXX_FLAGS_DEBUG " ${BUILD_OPT} ${CPU_OPTS} ${DEFINES} -D DESTRUCTDEBUG=1 -D DEBUG_RUN_PYTHON=1 -include config.h -pipe -g2 -Wall -fvisibility=hidden" CACHE STRING
     "Flags used by the C++ compiler during debug builds."
      FORCE )
-SET( CMAKE_C_FLAGS_DEBUG "  ${BUILD_OPT} ${CPU_OPTS} ${DEFINES} -include config.h -pipe -g2 -Wall -Wno-unused-function -Wno-unused-variable -fvisibility=hidden" CACHE STRING
+SET( CMAKE_C_FLAGS_DEBUG "  ${BUILD_OPT} ${CPU_OPTS} ${DEFINES} -D DESTRUCTDEBUG=1 -D DEBUG_RUN_PYTHON=1 -include config.h -pipe -g2 -Wall -Wno-unused-function -Wno-unused-variable -fvisibility=hidden" CACHE STRING
     "Flags used by the C compiler during debug builds."
      FORCE )
 SET( CMAKE_EXE_LINKER_FLAGS_DEBUG
@@ -611,10 +620,11 @@ ENDIF("${CMAKE_BUILD_TYPE}" STREQUAL "Debug")
 
 
 # Release Target block 
-SET(CMAKE_CXX_FLAGS_RELEASE  " ${BUILD_OPT} ${CPU_OPTS} -DNV_CUBE_MAP -DBOOST_PYTHON_NO_PY_SIGNATURES -include config.h -pipe -Wall -fvisibility=hidden" CACHE STRING
+# 2019-10-14 stephengtuggy - Each -D clause needs a space between it and the variable name to take effect
+SET(CMAKE_CXX_FLAGS_RELEASE  " ${BUILD_OPT} ${CPU_OPTS} -D NV_CUBE_MAP=1 -D BOOST_PYTHON_NO_PY_SIGNATURES=1 -include config.h -pipe -Wall -fvisibility=hidden" CACHE STRING
     "Flags used by the C++ compiler during release builds."
     FORCE)
-SET( CMAKE_C_FLAGS_RELEASE " ${BUILD_OPT} ${CPU_OPTS} -DNV_CUBE_MAP -DBOOST_PYTHON_NO_PY_SIGNATURES -include config.h -pipe -Wall -Wno-unused-function -Wno-unused-variable -fvisibility=hidden" CACHE STRING
+SET( CMAKE_C_FLAGS_RELEASE " ${BUILD_OPT} ${CPU_OPTS} -D NV_CUBE_MAP=1 -D BOOST_PYTHON_NO_PY_SIGNATURES=1 -include config.h -pipe -Wall -Wno-unused-function -Wno-unused-variable -fvisibility=hidden" CACHE STRING
     "Flags used by the C compiler during release builds." 
     FORCE )
 SET(CMAKE_EXE_LINKER_FLAGS_RELEASE "-Bsymbolic" CACHE STRING "Release linker flags"
@@ -632,10 +642,11 @@ ELSE("${CMAKE_BUILD_TYPE}" STREQUAL "Release")
 ENDIF("${CMAKE_BUILD_TYPE}" STREQUAL "Release")
 
 # Profiler Target block
-SET(CMAKE_CXX_FLAGS_PROFILER " ${BUILD_OPT} ${CPU_OPTS} -pg -g2 -DNV_CUBE_MAP -DBOOST_PYTHON_NO_PY_SIGNATURES -include config.h -pipe -Wall -Wno-unused-function -Wno-unused-variable" CACHE STRING
+# 2019-10-14 stephengtuggy - Each -D clause needs a space between it and the variable name to take effect
+SET(CMAKE_CXX_FLAGS_PROFILER " ${BUILD_OPT} ${CPU_OPTS} -pg -g2 -D NV_CUBE_MAP=1 -D BOOST_PYTHON_NO_PY_SIGNATURES=1 -include config.h -pipe -Wall -Wno-unused-function -Wno-unused-variable" CACHE STRING
     "Flags used by the C++ compiler during profiler builds."
      FORCE )
-SET( CMAKE_C_FLAGS_PROFILER " ${BUILD_OPT} ${CPU_OPTS} -pg -g2 -DNV_CUBE_MAP -DBOOST_PYTHON_NO_PY_SIGNATURES -include config.h -pipe -Wall -Wno-unused-function -Wno-unused-variable" CACHE STRING
+SET( CMAKE_C_FLAGS_PROFILER " ${BUILD_OPT} ${CPU_OPTS} -pg -g2 -D NV_CUBE_MAP=1 -D BOOST_PYTHON_NO_PY_SIGNATURES=1 -include config.h -pipe -Wall -Wno-unused-function -Wno-unused-variable" CACHE STRING
     "Flags used by the C compiler during profiler builds."
      FORCE )
 SET( CMAKE_EXE_LINKER_FLAGS_PROFILER
@@ -715,7 +726,8 @@ ENDIF(PYTHONLIBS_FOUND OR PYTHON_LIBRARIES AND PYTHON_INCLUDE_PATH)
 # Find Boost with boost_python library
 OPTION(USE_SYSTEM_BOOST "Use system boost" OFF)
 IF(USE_SYSTEM_BOOST)
-  find_package( Boost 1.40.0 COMPONENTS python )
+  # 2019-10-14 stephengtuggy - Add Boost.Log stuff
+  find_package( Boost COMPONENTS python log log_setup )
   IF(Boost_FOUND)
     message("++ Found System Boost : ${Boost_VERSION}")
     SET(BOOST_PYTHON_NO_PY_SIGNATURES 1)
@@ -729,26 +741,28 @@ ENDIF(USE_SYSTEM_BOOST)
 
 IF(NOT USE_SYSTEM_BOOST)
     message("++ Using Internal Boost")
-# This is just to cleanup advanced variable viewing, since they're not used anyway
-    UNSET(Boost_INCLUDE_DIRS)
-    UNSET(Boost_LIBRARIES)
-    UNSET(Boost_INCLUDE_DIR)
-    UNSET(Boost_LIBRARY_DIRS)
-    UNSET(Boost_PYTHON_LIBRARY)
-    UNSET(Boost_PYTHON_LIBRARY_DEBUG)
-    UNSET(Boost_PYTHON_LIBRARY_RELEASE)
-    SET(Boost_DIR 1_53_0)
+    # 2019-10-14 stephengtuggy - I think we need to allow specifying a custom Boost directory location
+    # # This is just to cleanup advanced variable viewing, since they're not used anyway
+    # UNSET(Boost_INCLUDE_DIRS)
+    # UNSET(Boost_LIBRARIES)
+    # UNSET(Boost_INCLUDE_DIR)
+    # UNSET(Boost_LIBRARY_DIRS)
+    # UNSET(Boost_PYTHON_LIBRARY)
+    # UNSET(Boost_PYTHON_LIBRARY_DEBUG)
+    # UNSET(Boost_PYTHON_LIBRARY_RELEASE)
+    # SET(Boost_DIR 1_53_0)
     SET(BOOST_PYTHON_NO_PY_SIGNATURES 1)
-    SET(TST_INCLUDES ${TST_INCLUDES} ${vsUTCS_SOURCE_DIR}/boost/1_53)
-    SET(TST_LIBS ${TST_LIBS} boost_python)
+    # SET(TST_INCLUDES ${TST_INCLUDES} ${vsUTCS_SOURCE_DIR}/boost/1_53)
+    SET(TST_LIBS ${TST_LIBS} ${Boost_LIBRARIES})
     include_directories(${TST_INCLUDES})
-    add_subdirectory(boost/1_53)
-    IF(NOT DISABLE_CLIENT)
-	add_dependencies(vegastrike boost_python)
-    ENDIF(NOT DISABLE_CLIENT)
-    IF(NOT DISABLE_SERVER)
-	add_dependencies(vegaserver boost_python)
-    ENDIF(NOT DISABLE_SERVER)
+    # add_subdirectory(boost/1_53)
+    # 2019-10-14 stephengtuggy - These clauses didn't work right
+    # IF(NOT DISABLE_CLIENT)
+    #     add_dependencies(vegastrike boost_python )
+    # ENDIF(NOT DISABLE_CLIENT)
+    # IF(NOT DISABLE_SERVER)
+    #     add_dependencies(vegaserver boost_python )
+    # ENDIF(NOT DISABLE_SERVER)
 ENDIF(NOT USE_SYSTEM_BOOST)
 
 IF(NOT DISABLE_CLIENT) ##########
@@ -993,8 +1007,9 @@ add_subdirectory(objconv)
 
 IF(NOT DISABLE_SERVER)
 target_link_libraries(vegaserver ${TST_SERVER_LIBS})
+# 2019-10-14 stephengtuggy - Each -D clause needs a space between it and the variable name to take effect
 set_target_properties(vegaserver PROPERTIES LINK_FLAGS "-L/usr/lib -L${vsUTCS_BINARY_DIR}"
-                                            COMPILE_FLAGS "-DNO_GFX")
+                                            COMPILE_FLAGS "-D NO_GFX=1")
 add_dependencies(vegaserver mesh_tool)
 add_dependencies(vegaserver vssetup)
 ENDIF(NOT DISABLE_SERVER)

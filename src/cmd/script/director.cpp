@@ -118,13 +118,11 @@ void Mission::DirectorShipDestroyed( Unit *unit )
         sprintf( buf, "Ship destroyed: (ERROR)-%d", unit->getFgSubnumber() );
 
     msgcenter->add( "game", "all", buf );
-    
+
     if (fg->nr_ships_left == 0) {
-        VSFileSystem::vs_dprintf( 2, "no ships left in fg %s\n", fg->name.c_str() );
+        BOOST_LOG_TRIVIAL(debug) << boost::format("no ships left in fg %1%") % fg->name;
         if (fg->nr_waves_left > 0) {
-            //sprintf( buf, "Relaunching %s wave", fg->name.c_str() ); FIXME
-            //mission->msgcenter->add( "game", "all", buf );
-            VSFileSystem::vs_dprintf( 1, "Relaunching %s wave", fg->name.c_str() );
+            BOOST_LOG_TRIVIAL(info) << boost::format("Relaunching %1% wave") % fg->name;
 
             //launch new wave
             fg->nr_waves_left -= 1;
@@ -211,4 +209,3 @@ void Mission::DirectorBenchmark()
         winsys_exit( 0 );
     }
 }
-

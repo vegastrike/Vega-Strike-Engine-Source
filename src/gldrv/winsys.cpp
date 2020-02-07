@@ -185,7 +185,7 @@ void winsys_warp_pointer( int x, int y )
  *  Sets up the SDL OpenGL rendering context
  *  \author  jfpatry
  *  \date    Created:  2000-10-20
- *  \date    Modified: 2000-10-20
+ *  \date    Modified: 2019-10-14 - stephengtuggy
  */
 static bool setup_sdl_video_mode()
 {
@@ -238,15 +238,14 @@ static bool setup_sdl_video_mode()
     height = g_game.y_resolution;
     if ( ( screen = SDL_SetVideoMode( width, height, bpp, video_flags ) )
         == NULL ) {
-        VSFileSystem::vs_dprintf( 1, "Couldn't initialize video: %s",
-                                 SDL_GetError() );
+        BOOST_LOG_TRIVIAL(info) << boost::format("Couldn't initialize video: %1%") % SDL_GetError();
         for (int counter = 0; screen == NULL && counter < 2; ++counter) {
             for (int bpd = 4; bpd > 1; --bpd) {
                 SDL_GL_SetAttribute( SDL_GL_DEPTH_SIZE, bpd*8 );
                 if ( ( screen = SDL_SetVideoMode( width, height, bpp, video_flags|SDL_ANYFORMAT ) )
                     == NULL )
-                    VSFileSystem::vs_dprintf( 1, "Couldn't initialize video bpp %d depth %d: %s\n",
-                                             bpp, bpd*8, SDL_GetError() );
+                    BOOST_LOG_TRIVIAL(info) << boost::format("Couldn't initialize video bpp %1% depth %2%: %3%") % bpp % (bpd * 8) %
+                                                   SDL_GetError();
                 else
                     break;
             }
@@ -272,18 +271,14 @@ static bool setup_sdl_video_mode()
 	    game_options.gl_accelerated_visual = false;
             return false;
         } else {
-            VSFileSystem::vs_fprintf( stderr, 
+            VSFileSystem::vs_fprintf( stderr,
                 "GDI Generic software driver reported, reset failed.\n "
                 "Please make sure a graphics card driver is installed and functioning properly.\n" );
         }
     }
 
-    VSFileSystem::vs_dprintf( 3, "Setting Screen to w %d h %d and pitch of %d and %d bpp %d bytes per pix mode\n",
-            screen->w,
-            screen->h,
-            screen->pitch,
-            screen->format->BitsPerPixel,
-            screen->format->BytesPerPixel );
+    BOOST_LOG_TRIVIAL(trace) << boost::format("Setting Screen to w %1% h %2% and pitch of %3% and %4% bpp %5% bytes per pix mode") %
+                                    screen->w % screen->h % screen->pitch % screen->format->BitsPerPixel % screen->format->BytesPerPixel;
 
     return true;
 }
@@ -335,7 +330,7 @@ void winsys_init( int *argc, char **argv, char const *window_title, char const *
 
     SDL_WM_SetCaption( window_title, window_title );
     if (icon) SDL_WM_SetIcon( icon, 0 );
-    
+
     if (!setup_sdl_video_mode()) {
         winsys_init(argc, argv, window_title, icon_title);
     } else {
@@ -406,6 +401,7 @@ void winsys_show_cursor( bool visible )
  *  \date    Modified: 2000-10-19
  *  \date    Modified: 2005-8-16 - Rogue
  *  \date    Modified: 2005-12-24 - ace123
+ *  \date    Modified: 2019-10-14 - stephengtuggy
  */
 extern int shiftdown( int );
 extern int shiftup( int );
@@ -440,35 +436,29 @@ void winsys_process_events()
 
                     bool maybe_unicode = game_options.enable_unicode && !(event.key.keysym.sym&~0xFF);
                     bool is_unicode = maybe_unicode && event.key.keysym.unicode;
-                    
+
                     //Fix up ctrl unicode codes
                     if (is_unicode && event.key.keysym.unicode <= 0x1a && (event.key.keysym.sym&0xFF) > 0x1a && event.key.keysym.mod & (KMOD_LCTRL|KMOD_RCTRL))
                         event.key.keysym.unicode += 0x60; // 0x01 (^A) --> 0x61 (A)
-                        
+
                     //Translate untranslated release events
                     if (state && maybe_unicode
                         && keysym_to_unicode[event.key.keysym.sym&0xFF])
                         event.key.keysym.unicode = keysym_to_unicode[event.key.keysym.sym&0xFF];
-                    
+
                     //Remember translation for translating release events
                     if (is_unicode)
                         keysym_to_unicode[event.key.keysym.sym&0xFF] = event.key.keysym.unicode;
-                    
+
                     //Ugly hack: prevent shiftup/shiftdown screwups on intl keyboard
                     //Note: Thank god we'll have OIS for 0.5.x
                     bool shifton = event.key.keysym.mod&(KMOD_LSHIFT|KMOD_RSHIFT|KMOD_CAPS);
-                    
-                    VSFileSystem::vs_dprintf(2,
-                        "Kbd: %s mod:%x sym:%x unicode:%x sh:%c u:%c mu:%c\n",
-                        (event.type == SDL_KEYUP) ? "KEYUP" : "KEYDOWN",
-                        event.key.keysym.mod,
-                        event.key.keysym.sym,
-                        event.key.keysym.unicode,
-                        (shifton) ? 't' : 'f', 
-                        (is_unicode) ? 't' : 'f', 
-                        (maybe_unicode) ? 't' : 'f'
-                    );
-                    
+
+                    BOOST_LOG_TRIVIAL(debug) << boost::format("Kbd: %s mod:%x sym:%x unicode:%x sh:%c u:%c mu:%c") %
+                                                    ((event.type == SDL_KEYUP) ? "KEYUP" : "KEYDOWN") % event.key.keysym.mod %
+                                                    event.key.keysym.sym % event.key.keysym.unicode % ((shifton) ? 't' : 'f') %
+                                                    ((is_unicode) ? 't' : 'f') % ((maybe_unicode) ? 't' : 'f');
+
                     if (shifton && is_unicode
                         && shiftup( shiftdown( event.key.keysym.unicode ) ) != event.key.keysym.unicode) {
                         event.key.keysym.mod = SDLMod( event.key.keysym.mod&~(KMOD_LSHIFT|KMOD_RSHIFT|KMOD_CAPS) );
@@ -546,15 +536,15 @@ void winsys_process_events()
  *  function should only be called once.
  *  \author  jfpatry
  *  \date    Created:  2000-10-20
- *  \date Modified: 2000-10-20 */
+ *  \date    Modified: 2019-10-14 - stephengtuggy
+ */
 void winsys_atexit( winsys_atexit_func_t func )
 {
     static bool called = false;
-    if (called != false)
-        VSFileSystem::vs_dprintf( 1, "winsys_atexit called twice" );
+    if (called != false) {
+        BOOST_LOG_TRIVIAL(info) << "winsys_atexit called twice";
+    }
     called = true;
-    //atexit_func = func;
-    //atexit (func);
 }
 
 /*---------------------------------------------------------------------------*/
@@ -653,8 +643,9 @@ static void glut_keyboard_cb( unsigned char ch, int x, int y )
 {
     if (keyboard_func) {
         int gm = glutGetModifiers();
-        if (gm)
-            VSFileSystem::vs_dprintf('3', "Down Modifier %d for char %d %c\n", gm, (int) ch, ch );
+        if (gm) {
+            BOOST_LOG_TRIVIAL(trace) << boost::format("Down Modifier %d for char %d %c") % gm % (int)ch % ch;
+        }
         if (gm&GLUT_ACTIVE_CTRL)
             ch = AdjustKeyCtrl( ch );
         (*keyboard_func)(ch, gm, false, x, y);
@@ -671,8 +662,9 @@ static void glut_keyboard_up_cb( unsigned char ch, int x, int y )
 {
     if (keyboard_func) {
         int gm = glutGetModifiers();
-        if (gm)
-            VSFileSystem::vs_dprintf('3',"Up Modifier %d for char %d %c\n", gm, (int) ch, ch );
+        if (gm) {
+            BOOST_LOG_TRIVIAL(trace) << boost::format("Up Modifier %d for char %d %c") % gm % (int)ch % ch;
+        }
         if (gm&GLUT_ACTIVE_CTRL)
             ch = AdjustKeyCtrl( ch );
         (*keyboard_func)(ch, gm, true, x, y);
@@ -763,7 +755,7 @@ void winsys_warp_pointer( int x, int y )
  *  sets up fullscreen mode if selected)
  *  \author  jfpatry
  *  \date    Created:  2000-10-19
- *  \date    Modified: 2000-10-19
+ *  \date    Modified: 2019-10-14 - stephengtuggy
  */
 void winsys_init( int *argc, char **argv, char const *window_title, char const *icon_title )
 {
@@ -787,16 +779,16 @@ void winsys_init( int *argc, char **argv, char const *window_title, char const *
     char str[1024];
     sprintf( str, "%dx%d:%d@60", g_game.x_resolution, g_game.y_resolution, gl_options.color_depth );
     glutGameModeString( str );
-    VSFileSystem::vs_dprintf('3', "Game Mode Params %dx%d at depth %d @ %d Hz\n", glutGameModeGet( GLUT_GAME_MODE_WIDTH ),
-            glutGameModeGet( GLUT_GAME_MODE_WIDTH ), glutGameModeGet( GLUT_GAME_MODE_PIXEL_DEPTH ),
-            glutGameModeGet( GLUT_GAME_MODE_REFRESH_RATE ) );
+    BOOST_LOG_TRIVIAL(trace) << boost::format("Game Mode Params %1%x%2% at depth %3% @ %4% Hz") % glutGameModeGet(GLUT_GAME_MODE_WIDTH) %
+                                    glutGameModeGet(GLUT_GAME_MODE_HEIGHT) % glutGameModeGet(GLUT_GAME_MODE_PIXEL_DEPTH) %
+                                    glutGameModeGet(GLUT_GAME_MODE_REFRESH_RATE);
     /* Create a window */
     if ( gl_options.fullscreen && (glutGameModeGet( GLUT_GAME_MODE_POSSIBLE ) != -1) ) {
         glutInitWindowPosition( 0, 0 );
         glutEnterGameMode();
-        VSFileSystem::vs_dprintf('3', "Game Mode Params %dx%d at depth %d @ %d Hz\n", glutGameModeGet(
-                    GLUT_GAME_MODE_WIDTH ), glutGameModeGet( GLUT_GAME_MODE_WIDTH ), glutGameModeGet(
-                    GLUT_GAME_MODE_PIXEL_DEPTH ), glutGameModeGet( GLUT_GAME_MODE_REFRESH_RATE ) );
+        BOOST_LOG_TRIVIAL(trace) << boost::format("Game Mode Params %1%x%2% at depth %3% @ %4% Hz") %
+                                        glutGameModeGet(GLUT_GAME_MODE_WIDTH) % glutGameModeGet(GLUT_GAME_MODE_HEIGHT) %
+                                        glutGameModeGet(GLUT_GAME_MODE_PIXEL_DEPTH) % glutGameModeGet(GLUT_GAME_MODE_REFRESH_RATE);
     } else {
         /* Set the initial window size */
         glutInitWindowSize( g_game.x_resolution, g_game.y_resolution );
@@ -910,4 +902,3 @@ void winsys_exit( int code )
 #endif /* defined( SDL_WINDOWING ) */
 
 /* EOF */
-

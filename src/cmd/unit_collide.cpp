@@ -169,8 +169,8 @@ bool Unit::InsideCollideTree( Unit *smaller,
                                                  -bigger->cumulative_transformation_matrix.p ) );
     bigtransform.SetO2TTranslation( csVector3( 0, 0, 0 ) );
     //we're only gonna lerp the positions for speed here... gahh!
-    
-    // Check for shield collisions here prior to checking for mesh on mesh or ray collisions below. 
+
+    // Check for shield collisions here prior to checking for mesh on mesh or ray collisions below.
     csOPCODECollider *tmpCol = smaller->colTrees->colTree( smaller, bigger->GetWarpVelocity() );
     if ( tmpCol
         && ( tmpCol->Collide( *bigger->colTrees->colTree( bigger,
@@ -297,11 +297,11 @@ bool Unit::Collide( Unit *target )
             if ( !bigger->isDocked( smaller ) && !smaller->isDocked( bigger ) )
                 bigger->reactToCollision( smaller, bigger->Position(), normal, smaller->Position(), -normal, dist );
             else return false;
-        } else { 
+        } else {
             return(false);
         }
-        
-    } 
+
+    }
     return true;
 }
 
@@ -336,12 +336,12 @@ float globQuerySphere( QVector start, QVector end, QVector pos, float radius )
     return globQueryShell( st, end-start, radius );
 }
 
-/* 
-    * This is our ray / bolt collision routine for now.   
+/*
+    * This is our ray / bolt collision routine for now.
     * Basically, this is called on a ship unit to see if any ray or bolt given by some simple vectors collide with it
     *  We should probably first check against shields and then against the colTree to see if we hit the shields first
-    *  Not sure yet if that would work though...  more importantly, we might have to modify end in here in order 
-    *  to tell calling code that the bolt should stop at a given point. 
+    *  Not sure yet if that would work though...  more importantly, we might have to modify end in here in order
+    *  to tell calling code that the bolt should stop at a given point.
 */
 Unit* Unit::rayCollide( const QVector &start, const QVector &end, Vector &norm, float &distance)
 {
@@ -363,7 +363,7 @@ Unit* Unit::rayCollide( const QVector &start, const QVector &end, Vector &norm, 
     QVector  st( InvTransform( cumulative_transformation_matrix, start ) );
     QVector  ed( InvTransform( cumulative_transformation_matrix, end ) );
     static bool sphere_test = XMLSupport::parse_bool( vs_config->getVariable( "physics", "sphere_collision", "true" ) );
-    distance = querySphereNoRecurse( start, end );    
+    distance = querySphereNoRecurse( start, end );
     if (distance > 0.0f || (this->colTrees&&this->colTrees->colTree( this, this->GetWarpVelocity() )&&!sphere_test)) {
         Vector coord;
         /* Set up points and ray to send to ray collider. */
@@ -371,7 +371,7 @@ Unit* Unit::rayCollide( const QVector &start, const QVector &end, Vector &norm, 
         Opcode::Point rayDirection(ed.i,ed.j,ed.k);
         Opcode::Ray boltbeam(rayOrigin,rayDirection);
         if(this->colTrees){
-            // Retrieve the correct scale'd collider from the unit's collide tree. 
+            // Retrieve the correct scale'd collider from the unit's collide tree.
             csOPCODECollider *tmpCol  = this->colTrees->colTree( this, this->GetWarpVelocity() );
             QVector del(end-start);
             //Normalize(del);
@@ -379,22 +379,22 @@ Unit* Unit::rayCollide( const QVector &start, const QVector &end, Vector &norm, 
             Normalize(norm);
             //RAY COLLIDE does not yet set normal, use that of the sphere center to current loc
             if (tmpCol==NULL) {
-                
+
                 return this;
             }
             if(tmpCol->rayCollide(boltbeam,norm,distance)){
-                // compute real distance 
+                // compute real distance
                 distance = (end-start).Magnitude() * distance;
-                
+
                 // NOTE:   Here is where we need to retrieve the point on the ray that we collided with the mesh, and set it to end, create the normal and set distance
-                VSFileSystem::vs_dprintf(3,"Beam collide with %p, distance %f\n",this,distance);
+                BOOST_LOG_TRIVIAL(trace) << boost::format("Beam collide with %1$p, distance %2%") % this % distance;
                 return(this);
             }
         } else {//no col trees = a sphere
             // compute real distance
             distance = (end-start).Magnitude() * distance;
-            
-            VSFileSystem::vs_dprintf(3,"Beam collide with %p, distance %f\n",this,distance);
+
+            BOOST_LOG_TRIVIAL(trace) << boost::format("Beam collide with %1$p, distance %2%") % this % distance;
             return(this);
         }
     } else {
@@ -515,4 +515,3 @@ float Unit::querySphereNoRecurse( const QVector &start, const QVector &end, floa
     }
     return 0.0f;
 }
-

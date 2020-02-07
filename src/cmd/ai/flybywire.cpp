@@ -58,8 +58,9 @@ void MatchLinearVelocity::Execute()
 {
     if ( !suborders.empty() ) {
         static int i = 0;
-        if (i++%1000 == 0)
-            VSFileSystem::vs_fprintf( stderr, "cannot execute suborders as Linear Velocity Matcher" );              //error printout just in case
+        if (i++ % 1000 == 0) {
+            std::cerr << "cannot execute suborders as Linear Velocity Matcher" << std::endl;                                // error printout just in case
+        }
     }
     MATCHLINVELSETUP();
     if (willfinish) {
@@ -370,4 +371,3 @@ bool FlyByWire::InertialFlightEnable() const
 {
     return inertial_flight_enable;
 }
-

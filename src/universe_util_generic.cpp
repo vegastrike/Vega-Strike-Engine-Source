@@ -190,7 +190,7 @@ Cargo getRandCargo( int quantity, string category )
             unsigned int i = Begin+( rand()%(End-Begin) );
             ret = &mpl->GetCargo( i );
         } else {
-            VSFileSystem::vs_dprintf(1, "Cargo category %s not found\n", category.c_str());
+            BOOST_LOG_TRIVIAL(info) << boost::format("Cargo category %1% not found") % category;
         }
     } else if ( mpl->numCargo() ) {
         for (unsigned int i = 0; i < 500; ++i) {
@@ -1046,4 +1046,3 @@ vector< string > GetJumpPath( string from, string to )
 }
 
 #undef activeSys
-

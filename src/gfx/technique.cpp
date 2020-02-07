@@ -173,7 +173,7 @@ static Technique::Pass::DepthFunction parseDepthFunction( const std::string &s )
     }
     return parseEnum(s, enumMap);
 }
-    
+
 static Technique::Pass::PolyMode parsePolyMode(const std::string &s)
 {
     static map<string, Technique::Pass::PolyMode> enumMap;
@@ -197,7 +197,7 @@ static Technique::Pass::ShaderParam::Semantic parseAutoParamSemantic( const std:
         enumMap["DetailPlane1"]      = Technique::Pass::ShaderParam::DetailPlane1;
         enumMap["NumLights"]         = Technique::Pass::ShaderParam::NumLights;
         enumMap["ActiveLightsArray"] = Technique::Pass::ShaderParam::ActiveLightsArray;
-        enumMap["ApparentLightSizeArray"] = 
+        enumMap["ApparentLightSizeArray"] =
                                        Technique::Pass::ShaderParam::ApparentLightSizeArray;
         enumMap["GameTime"]          = Technique::Pass::ShaderParam::GameTime;
     }
@@ -244,10 +244,12 @@ static void parseFloat4( const std::string &s, float value[4] )
         value[i++] = parseFloat( s.substr( ini, end = s.find_first_of( ',', ini ) ) );
         ini = ( (end == string::npos) ? end : (end+1) );
     }
-    if (i >= 4 && ini != string::npos)
-        VSFileSystem::vs_dprintf(1, "WARNING: invalid float4: %s\n", s.c_str());
-    while (i < 4)
+    if (i >= 4 && ini != string::npos) {
+        BOOST_LOG_TRIVIAL(info) << boost::format("WARNING: invalid float4: %1%") % s;
+    }
+    while (i < 4) {
         value[i++] = 0;
+    }
 }
 
 //end namespace
@@ -296,7 +298,7 @@ void Technique::Pass::addTextureUnit( const string &source,
     string::size_type ssep = string::npos, dsep = string::npos;
     newTU.sourceType = parseSourceType( source, ssep );
     newTU.defaultType     = parseSourceType( deflt, dsep );
-    newTU.targetIndex     = 
+    newTU.targetIndex     =
     newTU.origTargetIndex = target;
     newTU.targetParamName = paramName;
     newTU.targetParamId   = -1;
@@ -371,7 +373,7 @@ void Technique::Pass::compile()
 
         if (prog == 0) {
             std::string defines;
-            
+
             // Automatic defines
             if (sRGBAware) {
                 if (gl_options.ext_srgb_framebuffer)
@@ -381,27 +383,30 @@ void Technique::Pass::compile()
             }
             if (gl_options.nv_fp2)
                 defines += "#define VGL_NV_fragment_program2 1\n";
-            
+
             // Compile program
-            prog = GFXCreateProgram( vertexProgram.c_str(), fragmentProgram.c_str(), 
+            prog = GFXCreateProgram( vertexProgram.c_str(), fragmentProgram.c_str(),
                                      (defines.empty() ? NULL : defines.c_str()) );
-            if (prog == 0) 
-                throw ProgramCompileError(
-                    "Error compiling program vp:\""+vertexProgram
-                    +"\" fp:\""+fragmentProgram+"\"" );
-            else
-                VSFileSystem::vs_dprintf( 1, "Successfully compiled and linked program \"%s+%s\"\n",
-                                          vertexProgram.c_str(), fragmentProgram.c_str() );
+            if (prog == 0) {
+                throw ProgramCompileError("Error compiling program vp:\"" + vertexProgram +
+                                          "\" fp:\"" + fragmentProgram + "\"");
+            } else {
+                BOOST_LOG_TRIVIAL(info) << boost::format("Successfully compiled and linked program \"%1%+%2%\"") % vertexProgram %
+                                               fragmentProgram;
+            }
         }
-        
+
         for (ShaderParamList::iterator it = shaderParams.begin(); it != shaderParams.end(); ++it) {
             it->id = GFXNamedShaderConstant( prog, it->name.c_str() );
             if (it->id < 0) {
-                if (!it->optional) 
-                    throw ProgramCompileError( "Cannot resolve shader constant \""+it->name+"\"" );
-                else
-                    VSFileSystem::vs_dprintf( 1, "Cannot resolve <<optional>> shader constant \"%s\" in program \"%s+%s\"\n", 
-                                              it->name.c_str(), vertexProgram.c_str(), fragmentProgram.c_str() );
+                if (!it->optional) {
+                    throw ProgramCompileError("Cannot resolve shader constant \"" + it->name +
+                                              "\"");
+                } else {
+                    BOOST_LOG_TRIVIAL(info) << boost::format("Cannot resolve <<optional>> shader constant \"%1%\" in "
+                                                             "program \"%2%+%3%\"") %
+                                                   it->name % vertexProgram % fragmentProgram;
+                }
             }
         }
         int lastTU = -1;
@@ -436,9 +441,9 @@ void Technique::Pass::compile()
                 }
             }
         }
-        
+
         // COMMIT ;-)
-        program = prog;         
+        program = prog;
         programVersion = GFXGetProgramVersion();
     }
 }
@@ -471,7 +476,7 @@ Technique::Technique( const string &nam ) :
     VSFileXMLSerializer serializer;
     serializer.options = 0;     //only tags interest us
     serializer.initialise();
-    
+
     try {
         // Try a specialized version
         serializer.importXML(
@@ -479,7 +484,7 @@ Technique::Technique( const string &nam ) :
             +game_options.techniquesSubPath+"/"
             +name+".technique" );
     } catch(Audio::FileOpenException e) {
-        VSFileSystem::vs_dprintf(1, "Cannot find specialized technique, trying generic: %s\n", e.what());
+        BOOST_LOG_TRIVIAL(info) << boost::format("Cannot find specialized technique, trying generic: %1%") % e.what();
         // Else try a default
         serializer.importXML(
             game_options.techniquesBasePath+"/"
@@ -551,9 +556,8 @@ Technique::Technique( const string &nam ) :
                                 el->getAttributeValue( "default", "" ),
                                 el->getAttributeValue( "name", "" ),
                                 parseTexKind( el->getAttributeValue( "kind", "" ) ) );
-                            VSFileSystem::vs_dprintf(2, "Added texture unit #%d \"%s\"\n",
-                                                     pass.getNumTextureUnits(),
-                                                     el->getAttributeValue( "name","" ).c_str());
+                            BOOST_LOG_TRIVIAL(debug) << boost::format("Added texture unit #%1% \"%2%\"") % pass.getNumTextureUnits() %
+                                                            el->getAttributeValue("name", "");
                         } else if (el->tagName() == paramTag) {
                             float value[4];
                             parseFloat4( el->getAttributeValue( "value", "" ), value );
@@ -561,21 +565,20 @@ Technique::Technique( const string &nam ) :
                                 el->getAttributeValue( "name", "" ),
                                 value,
                                 parseBool( el->getAttributeValue( "optional", "false" ) ) );
-                            VSFileSystem::vs_dprintf(2, "Added constant #%d \"%s\" with value (%.2f,%.2f,%.2f,%.2f) as %s\n",
-                                                     pass.getNumShaderParams(),
-                                                     el->getAttributeValue( "name","" ).c_str(),
-                                                     value[0], value[1], value[2], value[3],
-                                                     (parseBool( el->getAttributeValue( "optional", "false" ) ) ? "optional" : "required"));
+                            BOOST_LOG_TRIVIAL(debug)
+                                << boost::format("Added constant #%1% \"%2%\" with value "
+                                                 "(%3$.2f,%4$.2f,%5$.2f,%6$.2f) as %7%") %
+                                       pass.getNumShaderParams() % el->getAttributeValue("name", "") % value[0] % value[1] % value[2] %
+                                       value[3] % (parseBool(el->getAttributeValue("optional", "false")) ? "optional" : "required");
                         } else if (el->tagName() == autoParamTag) {
                             pass.addShaderParam(
                                 el->getAttributeValue( "name", "" ),
                                 parseAutoParamSemantic( el->getAttributeValue( "semantic", "" ) ),
                                 parseBool( el->getAttributeValue( "optional", "false" ) ) );
-                            VSFileSystem::vs_dprintf(2, "Added param #%d \"%s\" with semantic %s as %s\n",
-                                                     pass.getNumShaderParams(),
-                                                     el->getAttributeValue( "name","" ).c_str(),
-                                                     el->getAttributeValue( "semantic", "" ).c_str(),
-                                                     (parseBool( el->getAttributeValue( "optional", "false" ) ) ? "optional" : "required"));
+                            BOOST_LOG_TRIVIAL(debug)
+                                << boost::format("Added param #%1% \"%2%\" with semantic %3% as %4%") % pass.getNumShaderParams() %
+                                       el->getAttributeValue("name", "") % el->getAttributeValue("semantic", "") %
+                                       (parseBool(el->getAttributeValue("optional", "false")) ? "optional" : "required");
                         } else {
                             //TODO: Warn about unrecognized (hence ignored) tag
                         }
@@ -660,4 +663,3 @@ TechniquePtr Technique::getTechnique( const std::string &name )
         return ptr;
     }
 }
-
