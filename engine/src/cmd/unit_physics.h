@@ -30,6 +30,8 @@
 #include "audiolib.h"
 #include "configxml.h"
 #include "vs_globals.h"
+#include "vs_math.h"
+
 
 #ifdef FIX_TERRAIN
 #include "gfx/planetary_transform.h"
@@ -99,22 +101,24 @@ void GameUnit< UnitType >::UpdatePhysics2( const Transformation &trans,
     this->cumulative_transformation.Compose( trans, transmat );
     this->cumulative_transformation.to_matrix( this->cumulative_transformation_matrix );
     this->cumulative_velocity = TransformNormal( transmat, this->Velocity )+cum_vel;
-    unsigned int    i;
+    unsigned int i, n;
     if (lastframe) {
         char   tmp  = 0;
-//        double blah = queryTime();
-        for (i = 0; i < this->meshdata.size(); i++) {
+        //double blah = queryTime();
+        for (i = 0, n = this->meshdata.size(); i < n; i++) {
             if (!this->meshdata[i])
                 continue;
-            tmp |= this->meshdata[i]->HasBeenDrawn();
-            if ( !this->meshdata[i]->HasBeenDrawn() )
+            if ( !this->meshdata[i]->HasBeenDrawn() ) {
                 this->meshdata[i]->UpdateFX( SIMULATION_ATOM );
-            this->meshdata[i]->UnDraw();
+            } else {
+                this->meshdata[i]->UnDraw();
+                tmp = 1;
+            }
         }
-//        double blah1 = queryTime();
+        //double blah1 = queryTime();
         if (!tmp && this->hull < 0)
             Explode( false, SIMULATION_ATOM );
-//        double blah2 = queryTime();
+        //double blah2 = queryTime();
     }
 }
 

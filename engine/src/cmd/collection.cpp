@@ -39,10 +39,10 @@ UnitCollection::UnitIterator::UnitIterator( const UnitIterator &orig )
         col->reg( this );
 }
 
-UnitCollection::UnitIterator::UnitIterator( UnitCollection *orig )
-{
+UnitCollection::UnitIterator::UnitIterator( UnitCollection *orig ) {
     col = orig;
     it = col->u.begin();
+    col->reg(this);
     while(it != col->u.end()){
         if((*it) == NULL)
             ++it;
@@ -53,7 +53,6 @@ UnitCollection::UnitIterator::UnitIterator( UnitCollection *orig )
                 break;
         }
     }
-    col->reg(this);
 }
 
 UnitCollection::UnitIterator::~UnitIterator()

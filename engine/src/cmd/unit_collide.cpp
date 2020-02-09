@@ -19,6 +19,8 @@
 #include "vs_globals.h"
 #include "configxml.h"
 #include "collide.h"
+#include "vsfilesystem.h"
+
 static bool operator==( const Collidable &a, const Collidable &b )
 {
     return memcmp( &a, &b, sizeof (Collidable) ) == 0;
@@ -466,8 +468,13 @@ float Unit::querySphere( const QVector &start, const QVector &end, float min_rad
             if ( ( tmp = un->querySphere( start, end, min_radius ) ) != 0 )
                 return tmp;
         }
+        if (nummesh())
+            return querySphereNoRecurse( start, end, min_radius );
+        else
+            return 0.0f;
+    } else {
+        return querySphereNoRecurse( start, end, min_radius );
     }
-    return querySphereNoRecurse( start, end, min_radius );
 }
 
 //does not check inside sphere

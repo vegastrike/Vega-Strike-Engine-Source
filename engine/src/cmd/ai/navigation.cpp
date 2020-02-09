@@ -618,7 +618,7 @@ void AutoLongHaul::Execute()
     }
     static float min_warpfield_to_enter_warp =
         XMLSupport::parse_float( vs_config->getVariable( "AI", "min_warp_to_try", "1.5" ) );
-    if (parent->GetMaxWarpFieldStrength(1) < min_warpfield_to_enter_warp)
+    if (parent->GetMaxWarpFieldStrength() < min_warpfield_to_enter_warp)
         deactivatewarp = true;
     float maxspeed   = mymax (speed, parent->graphicOptions.WarpFieldStrength*parent->GetComputerData().max_combat_ab_speed);
     double dis     = UnitUtil::getSignificantDistance( parent, target );

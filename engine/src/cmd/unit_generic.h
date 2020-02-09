@@ -341,6 +341,7 @@ public:
  * The ammo and the weapon type. As well as the possible weapons it may fit
  * Warning: type has a string inside... cannot be memcpy'd
  */
+    bool hasSubUnits() const { return !SubUnits.empty(); };
     un_iter getSubUnits();
     un_kiter viewSubUnits() const;
 #define NO_MOUNT_STAR
@@ -504,8 +505,7 @@ public:
     void RemoveFromSystem();
     void RequestPhysics();               //Requeues the unit so that it is simulated ASAP
     bool InCorrectStarSystem( StarSystem* );
-    virtual unsigned int nummesh() const
-    {
+    unsigned int nummesh() const {
         // Return number of meshes except shield
         return ( meshdata.size() - 1 );
     }

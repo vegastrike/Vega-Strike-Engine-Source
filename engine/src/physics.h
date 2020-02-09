@@ -22,6 +22,7 @@
 #ifndef PHYSICS_H
 #define PHYSICS_H
 
+#include "vs_math.h"
 #include "gfx/vec.h"
 
 static const float oocc = (float) 0.0000000000000000111265005605; //1/c^2

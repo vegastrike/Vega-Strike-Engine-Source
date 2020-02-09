@@ -59,28 +59,33 @@ class GameUnit : public UnitType
 {
     friend class UnitFactory;
 protected:
-//Default constructor. This is just to figure out where default
-//constructors are used. The useless argument will be removed
-//again later.
-public: GameUnit( int dummy );
-//Constructor that creates aa mesh with meshes as submeshes (number
-//of them) as either as subunit with faction faction
+
+public:
+  //Default constructor. This is just to figure out where default
+  //constructors are used. The useless argument will be removed
+  //again later.
+  GameUnit( int dummy );
+  //Constructor that creates aa mesh with meshes as submeshes (number
+  //of them) as either as subunit with faction faction
     GameUnit( std::vector< Mesh* > &meshes, bool Subunit, int faction );
-//Constructor that creates a mesh from an XML file If it is a
-//customizedUnit, it will check in that directory in the home dir for
-//the unit.
+  //Constructor that creates a mesh from an XML file If it is a
+  //customizedUnit, it will check in that directory in the home dir for
+  //the unit.
     GameUnit( const char *filename, bool SubUnit, int faction, std::string customizedUnit = std::string(
                   "" ), Flightgroup *flightgroup = NULL, int fg_subnumber = 0, std::string *netxml = NULL );
     virtual ~GameUnit();
-    unsigned int nummesh() const;
-///fils in corner_min,corner_max and radial_size
-///returns -1 if unit cannot dock, otherwise returns which dock it can dock at
+    unsigned int nummesh() const {
+        return UnitType::nummesh();
+    }
+  ///fils in corner_min,corner_max and radial_size
+  ///returns -1 if unit cannot dock, otherwise returns which dock it can dock at
     UnitImages< void >& GetImageInformation();
     bool RequestClearance( Unit *dockingunit );
-///Loads a user interface for the user to upgrade his ship
+  ///Loads a user interface for the user to upgrade his ship
     void UpgradeInterface( Unit *base );
-///The name (type) of this unit shouldn't be public
+  ///The name (type) of this unit shouldn't be public
     virtual void Cloak( bool cloak );
+
 /*
  **************************************************************************************
  **** GFX/MESHES STUFF                                                              ***

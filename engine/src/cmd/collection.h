@@ -172,11 +172,12 @@ public:
     void insert_unique( Unit* );
     inline bool empty() const
     {
-        if (u.size()-removedIters.size() > 0) return false;
-        return true;
+        if (u.empty()) return true;
+        else if (removedIters.empty() || u.size() > removedIters.size()) return false;
+        else return true;
     }
 
-    /* Add a unit or iterator to the front of the list. */
+    // Add a unit or iterator to the front of the list. */
     void prepend( Unit* );
     void prepend( UnitIterator* );
 

@@ -11,6 +11,9 @@
 #include "ai/order.h"
 #include "faction_generic.h"
 #include "unit_util.h"
+#include "vsfilesystem.h"
+
+
 void StarSystem::UpdateMissiles()
 {
     //if false, missiles collide with rocks as units, but not harm them with explosions
@@ -37,10 +40,57 @@ void StarSystem::UpdateMissiles()
         dischargedMissiles.pop_back();
     }
 }
+
+void MissileEffect::DoApplyDamage(Unit *parent, Unit *un, float distance, float damage_fraction) { 
+    QVector norm = pos-un->Position();
+    norm.Normalize();
+    float damage_left = 1.f;
+    if (un->hasSubUnits()) {
+        /*
+         * Compute damage aspect ratio of each subunit with their apparent size ( (radius/distance)^2 )
+         * and spread damage across affected subunits based on their apparent size vs total spread surface
+         */
+        double total_area = 0.0f; {
+            un_kiter ki = un->viewSubUnits();
+            for (const Unit *subun; (subun = *ki); ++ki) {
+                if (subun->Killed()) continue;
+                double r = subun->rSize();
+                double d = (pos - subun->Position()).Magnitude() - r;
+                if (d > radius) continue;
+                if (d < 0.01) d = 0.01;
+                total_area += (r*r) / (d*d);
+            }
+        }
+        if (total_area > 0)
+            VSFileSystem::vs_dprintf( 1, "Missile subunit damage of %.3f%%\n", (total_area * (100.0 / 4.0*M_PI)) );
+        if (total_area < 4.0*M_PI) total_area = 4.0*M_PI;
+
+        un_iter i = un->getSubUnits();
+        for (Unit *subun; (subun = *i); ++i) {
+            if (subun->Killed()) continue;
+            double r = subun->rSize();
+            double d = (pos - subun->Position()).Magnitude() - r;
+            if (d > radius) continue;
+            if (d < 0.01) d = 0.01;
+            double a = (r*r) / (d*d*total_area);
+            DoApplyDamage(parent, subun, d, a * damage_fraction);
+            damage_left -= a;
+        }
+    }
+    if (damage_left > 0) {
+        VSFileSystem::vs_dprintf( 1, "Missile damaging %s/%s (dist=%.3f r=%.3f dmg=%.3f)\n",
+            parent->name.get().c_str(), ((un == parent) ? "." : un->name.get().c_str()),
+            distance, radius, damage*damage_fraction*damage_left);
+        parent->ApplyDamage( pos.Cast(), norm, damage*damage_fraction*damage_left, un, GFXColor( 1,1,1,1 ),
+                             ownerDoNotDereference, phasedamage*damage_fraction*damage_left );
+    }
+}
+
 void MissileEffect::ApplyDamage( Unit *smaller )
 {
     QVector norm = pos-smaller->Position();
-    float distance = norm.Magnitude()-smaller->rSize();         // no better check than the bounding sphere for now
+    float smaller_rsize = smaller->rSize();
+    float distance = norm.Magnitude()-smaller_rsize;            // no better check than the bounding sphere for now
     if ( distance < radius) {                                   // "smaller->isUnit() != MISSILEPTR &&" was removed - why disable antimissiles?
         if ( distance < 0)
             distance = 0.f;                                     //it's inside the bounding sphere, so we'll not reduce the effect
@@ -62,9 +112,7 @@ void MissileEffect::ApplyDamage( Unit *smaller )
          * Kfar   = longrange/(R/Rm)^2
          * or Kapprox = longrange/(longrange-(R/Rm)^3*(1-longrange)) ; obviously, with more checks preventing /0
          */
-        norm.Normalize();
-        smaller->ApplyDamage( pos.Cast(), norm, damage*damage_mul, smaller, GFXColor( 1,1,1,1 ),
-                                ownerDoNotDereference, phasedamage*damage_mul );
+        DoApplyDamage(smaller, smaller, distance, damage_mul);
     }
 }
 
@@ -80,28 +128,35 @@ void StarSystem::AddMissileToQueue( MissileEffect *me )
 {
     dischargedMissiles.push_back( me );
 }
-void Missile::Discharge()
-{
-    if ( (damage != 0 || phasedamage != 0) && !discharged )
-        _Universe->activeStarSystem()->AddMissileToQueue( new MissileEffect( Position(), damage, phasedamage,
-                                                                             radial_effect, radial_multiplier, owner ) );
+
+void Missile::Discharge() {
+    if ( (damage != 0 || phasedamage != 0) && !discharged ) {
+        Unit *targ = Unit::Target();
+        VSFileSystem::vs_dprintf( 1, "Missile discharged (target %s)\n",
+            (targ != NULL) ? targ->name.get().c_str() : "NULL");
+        _Universe->activeStarSystem()->AddMissileToQueue(
+            new MissileEffect( Position(), damage, phasedamage,
+            radial_effect, radial_multiplier, owner ) );
     discharged = true;
 }
-void Missile::Kill( bool erase )
-{
+
+void Missile::Kill( bool erase ) {
+    Unit *targ = Unit::Target();
+    VSFileSystem::vs_dprintf( 1, "Missile killed (target %s)\n", (targ != NULL) ? targ->name.get().c_str() : "NULL");
     Discharge();
     Unit::Kill( erase );
 }
+
 void Missile::reactToCollision( Unit *smaller,
                                 const QVector &biglocation,
                                 const Vector &bignormal,
                                 const QVector &smalllocation,
                                 const Vector &smallnormal,
-                                float dist )
-{
+                                float dist ) {
     static bool doesmissilebounce = XMLSupport::parse_bool( vs_config->getVariable( "physics", "missile_bounce", "false" ) );
     if (doesmissilebounce)
         Unit::reactToCollision( smaller, biglocation, bignormal, smalllocation, smallnormal, dist );
+    VSFileSystem::vs_dprintf( 1, "Missile collided with %s\n", smaller->name.get().c_str());
     if (smaller->isUnit() != MISSILEPTR) {
         //2 missiles in a row can't hit each other
         this->Velocity = smaller->Velocity;
@@ -205,16 +260,22 @@ void Missile::UpdatePhysics2( const Transformation &trans,
     }
     Unit::UpdatePhysics2( trans, old_physical_state, accel, difficulty, transmat, CumulativeVelocity, ResolveLast, uc );
     this->time -= SIMULATION_ATOM;
-    if (NULL != targ) {
-        float checker = targ->querySphere( Position()-( SIMULATION_ATOM*GetVelocity() ), Position(), rSize() );
-        if ( (checker
-              && detonation_radius >= 0)
-            || ( ( Position()-targ->Position() ).Magnitude()-targ->rSize()-rSize() < detonation_radius ) ) {
+    if (NULL != targ && !discharged) {
+        QVector endpos = Position();
+        QVector startpos = endpos-( SIMULATION_ATOM*GetVelocity() );
+        float checker = targ->querySphere( startpos, endpos, rSize() );
+        if ( checker && detonation_radius >= 0 ) {
+            // Set position to the collision point
+            SetPosition(startpos + (endpos - startpos) * checker);
+        }
+        if ( checker && detonation_radius >= 0 ) {
             //spiritplumber assumes that the missile is hitting a much larger object than itself
             static float percent_missile_match_target_velocity =
-                XMLSupport::parse_float( vs_config->getVariable( "physics", "percent_missile_match_target_velocity", ".5" ) );
+                XMLSupport::parse_float( vs_config->getVariable( "physics", "percent_missile_match_target_velocity", "1.0" ) );
 
             this->Velocity += percent_missile_match_target_velocity*(targ->Velocity-this->Velocity);
+
+            VSFileSystem::vs_dprintf( 1, "Missile hit target %s (time %.3f)\n", targ->name.get().c_str(), time);
             Discharge();
             time = -1;
             //Vector norm;

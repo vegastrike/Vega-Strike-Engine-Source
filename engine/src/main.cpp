@@ -241,9 +241,10 @@ bool isVista = false;
 
 Unit *TheTopLevelUnit;
 
-void initLogging(char debugLevel)
-{
-    auto loggingCore = boost::log::core::get();
+void initLogging(char debugLevel){
+    //auto loggingCore = boost::log::core::get();
+    boost::shared_ptr< logging::core > core = logging::core::get();
+
     switch (debugLevel) {
     case 1:
         loggingCore->set_filter(boost::log::trivial::severity >= boost::log::trivial::info);
@@ -316,7 +317,8 @@ int main( int argc, char *argv[] )
     if (g_game.vsdebug == '0')
         g_game.vsdebug = game_options.vsdebug;
 
-    initLogging(g_game.vsdebug);
+    // disabled, does not compile with boost 1.64 and c++11
+    //initLogging(g_game.vsdebug);
 
     // can use the vegastrike config variable to read in the default mission
     if ( game_options.force_client_connect )

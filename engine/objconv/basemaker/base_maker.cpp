@@ -2060,7 +2060,7 @@ void Base::DrawWin()
 int main( int argc, char **argv )
 {
     printf( "Loading...\n" );
-    Base::CurrentBase   = false;
+    Base::CurrentBase   = NULL;
     glutInit( &argc, argv );
     glutInitWindowSize( 800, 600 );
     g_game.x_resolution = 800;

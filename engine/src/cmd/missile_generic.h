@@ -2,14 +2,14 @@
 #define MISSILEGENERIC_H_
 #include "unit_generic.h"
 
-class MissileEffect
-{
+class MissileEffect {
     QVector pos;
     float  damage;
     float  phasedamage;
     float  radius;
     float  radialmultiplier;
     void  *ownerDoNotDereference;
+    void DoApplyDamage( Unit *parent, Unit *un, float distance, float damage_fraction );
 public:
     void ApplyDamage( Unit* );
     MissileEffect( const QVector &pos, float dam, float pdam, float radius, float radmult, void *owner ) : pos( pos )

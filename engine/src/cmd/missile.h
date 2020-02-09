@@ -77,19 +77,6 @@ public:
                                              CumulativeVelocity,
                                              ResolveLast,
                                              uc );
-        this->time -= SIMULATION_ATOM;
-        if (NULL != targ) {
-            float checker = targ->querySphere( Position()-( SIMULATION_ATOM*GetVelocity() ), Position(), rSize() );
-            if ( (checker
-                  && detonation_radius >= 0)
-                || ( ( Position()-targ->Position() ).Magnitude()-targ->rSize()-rSize() < detonation_radius ) ) {
-                Discharge();
-                time = -1;
-                //}
-            }
-        }
-        if (time < 0)
-            DealDamageToHull( Vector( .1, .1, .1 ), hull+1 );
     }
 
 private:

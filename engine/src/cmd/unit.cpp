@@ -115,12 +115,11 @@ template < class UnitType >GameUnit< UnitType >::~GameUnit()
     //delete phalos;
 }
 
-template < class UnitType >
-unsigned int GameUnit< UnitType >::nummesh() const
-{
+/*template < class UnitType >
+unsigned int GameUnit< UnitType >::nummesh() const {
     // return number of meshes but not the shield
     return (this->meshdata.size() - 1 );
-}
+}*/
 
 template < class UnitType >
 void GameUnit< UnitType >::UpgradeInterface( Unit *baseun )
@@ -262,12 +261,20 @@ void GameUnit< UnitType >::DrawNow( const Matrix &mato, float lod )
             this->meshdata[i]->Draw( lod, mat, d, cloak );
     }
     Unit *un;
-    for (un_iter iter = this->getSubUnits(); (un = *iter); ++iter) {
+    /*for (un_iter iter = this->getSubUnits(); (un = *iter); ++iter) {
         Matrix temp;
         un->curr_physical_state.to_matrix( temp );
         Matrix submat;
         MultMatrix( submat, mat, temp );
-        (un)->DrawNow( submat, lod );
+        (un)->DrawNow( submat, lod );*/
+    if (this->hasSubUnits()) {
+        for (un_iter iter = this->getSubUnits(); (un = *iter); ++iter) {
+            Matrix temp;
+            un->curr_physical_state.to_matrix( temp );
+            Matrix submat;
+            MultMatrix( submat, mat, temp );
+            (un)->DrawNow( submat, lod );
+        }
     }
     float  cmas = this->computer.max_ab_speed()*this->computer.max_ab_speed();
     if (cmas == 0)
@@ -363,7 +370,7 @@ void GameUnit< UnitType >::Draw( const Transformation &parent, const Matrix &par
     AUDAdjustSound( sound.engine, cumulative_transformation.position, GetVelocity() );
 #endif
 
-    unsigned int i;
+    unsigned int i, n;
     if ( (this->hull < 0) && (!cam_setup_phase) )
         Explode( true, GetElapsedTime() );
 
@@ -374,6 +381,7 @@ void GameUnit< UnitType >::Draw( const Transformation &parent, const Matrix &par
     float avgscale = 1.0f;
 
     bool On_Screen = false;
+    bool Unit_On_Screen = false;
     float Apparent_Size = 0.0f;
     int cloak = this->cloaking;
     Matrix wmat;
@@ -401,11 +409,11 @@ void GameUnit< UnitType >::Draw( const Transformation &parent, const Matrix &par
                 ( camera->GetVelocity().Magnitude()+this->Velocity.Magnitude() )*SIMULATION_ATOM;
 
             unsigned int numKeyFrames = this->graphicOptions.NumAnimationPoints;
-            for (i = 0; i <= this->nummesh(); i++) {
+            for (i = 0, n = this->nummesh(); i <= n; i++) {
                 //NOTE LESS THAN OR EQUALS...to cover shield mesh
                 if (this->meshdata[i] == NULL)
                     continue;
-                if (  i == this->nummesh() && (this->meshdata[i]->numFX() == 0 || this->hull < 0) )
+                if (  i == n && (this->meshdata[i]->numFX() == 0 || this->hull < 0) )
                     continue;
                 if (this->meshdata[i]->getBlendDst() == ONE) {
                     if ( (this->invisible & UnitType::INVISGLOW) != 0 )
@@ -460,8 +468,12 @@ void GameUnit< UnitType >::Draw( const Transformation &parent, const Matrix &par
                     }
                 }
             }
-        }
-        {
+
+            Unit_On_Screen = On_Screen || !!GFXSphereInFrustum(
+                ct->position,
+                minmeshradius+this->rSize() );
+        } else Unit_On_Screen = true;
+        if (Unit_On_Screen && this->hasSubUnits()) {
             Unit  *un;
             double backup = interpolation_blend_factor;
             int    cur_sim_frame = _Universe->activeStarSystem()->getCurrentSimFrame();

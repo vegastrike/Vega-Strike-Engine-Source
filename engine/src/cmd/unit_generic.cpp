@@ -187,25 +187,32 @@ Vector Unit::GetWarpRefVelocity() const
 
 Vector Unit::GetWarpVelocity() const
 {
-    Vector VelocityRef( 0, 0, 0 );
-    {
-        Unit *vr = const_cast< UnitContainer* > (&computer.velocity_ref)->GetUnit();
-        if (vr)
-            VelocityRef = vr->cumulative_velocity;
-    }
+    if (graphicOptions.WarpFieldStrength == 1.0) {
+        // Short circuit, most ships won't be at warp, so it simplifies math a lot
+        return cumulative_velocity;
+    } else {
+        Vector VelocityRef( 0, 0, 0 );
+        {
+            Unit *vr = const_cast< UnitContainer* > (&computer.velocity_ref)->GetUnit();
+            if (vr)
+                VelocityRef = vr->cumulative_velocity;
+        }
 
-    //return(cumulative_velocity*graphicOptions.WarpFieldStrength);
-    Vector vel   = cumulative_velocity-VelocityRef;
-    float  speed = vel.Magnitude();
-    //return vel*graphicOptions.WarpFieldStrength;
-    if (speed > 0) {
-        Vector veldir    = vel*(1./speed);
-        Vector facing    = cumulative_transformation_matrix.getR();
-        float  ang       = facing.Dot( veldir );
-        float  warpfield = graphicOptions.WarpFieldStrength;
-        if (ang < 0) warpfield = 1./warpfield;
-        return ang*facing*speed*(warpfield-1)+vel+VelocityRef;
-    } else {return VelocityRef; }
+        //return(cumulative_velocity*graphicOptions.WarpFieldStrength);
+        Vector vel   = cumulative_velocity-VelocityRef;
+        float  speed = vel.Magnitude();
+        //return vel*graphicOptions.WarpFieldStrength;
+        if (speed > 0) {
+            Vector veldir    = vel*(1./speed);
+            Vector facing    = cumulative_transformation_matrix.getR();
+            float  ang       = facing.Dot( veldir );
+            float  warpfield = graphicOptions.WarpFieldStrength;
+            if (ang < 0) warpfield = 1./warpfield;
+            return facing*(ang*speed*(warpfield-1.))+vel+VelocityRef;
+        } else {
+            return VelocityRef;
+        }
+    }
 }
 
 void Unit::SetPosition( const QVector &pos )
@@ -833,9 +840,12 @@ Unit::~Unit()
 
     free( pImage->cockpit_damage );
     if ( (!killed) )
-        VSFileSystem::vs_fprintf( stderr, "Assumed exit on unit %s(if not quitting, report error)\n", name.get().c_str() );
+        VSFileSystem::vs_fprintf( stderr, "Assumed exit on unit %s(if not quitting, report error)\n",
+            name.get().c_str() );
     if (ucref)
         VSFileSystem::vs_fprintf( stderr, "DISASTER AREA!!!!" );
+    VSFileSystem::vs_dprintf( 3, "Deallocating unit %s addr=0x%08x refs=%d\n",
+        name.get().c_str(), this, ucref );
 #ifdef DESTRUCTDEBUG
     VSFileSystem::vs_fprintf( stderr, "stage %d %x %d\n", 0, this, ucref );
     fflush( stderr );
@@ -2231,9 +2241,6 @@ void Unit::UpdatePhysics( const Transformation &trans,
     //Well, wasn't skipped actually, but...
     this->last_processed_sqs = cur_sim_frame;
     this->cur_sim_queue_slot = (cur_sim_frame+this->sim_atom_multiplier)%SIM_QUEUE_SIZE;
-    if (maxhull < 0) {
-        this->Explode( true, 0 );
-    }
     Transformation old_physical_state = curr_physical_state;
     if (docked&DOCKING_UNITS)
         PerformDockingOperations();
@@ -2508,7 +2515,10 @@ void Unit::UpdatePhysics( const Transformation &trans,
                                                                   curr_physical_state.position ), true, true );
         }
     }
-//Really kill the unit only in non-networking or on server side
+    if (maxhull < 0) {
+        this->Explode( true, 0 );
+    }
+    //Really kill the unit only in non-networking or on server side
     if (hull < 0) {
         dead &= (pImage->pExplosion == NULL);
         if (dead)
@@ -2724,7 +2734,13 @@ void Unit::AddVelocity( float difficulty )
     static float warprampdowntime    = XMLSupport::parse_float( vs_config->getVariable( "physics", "warprampdowntime", "0.5" ) );
     float  lastWarpField = graphicOptions.WarpFieldStrength;
 
-    bool   playa = _Universe->isPlayerStarship( this ) ? true : false;
+    bool   playa;
+    if (graphicOptions.WarpRamping || graphicOptions.InWarp == 1 || graphicOptions.RampCounter != 0) {
+        playa = _Universe->isPlayerStarship( this ) ? true : false;
+    } else {
+        playa = false;
+    }
+
     float  warprampuptime = playa ? humanwarprampuptime : compwarprampuptime;
     //Warp Turning on/off
     if (graphicOptions.WarpRamping) {
@@ -2783,11 +2799,9 @@ void Unit::UpdatePhysics2( const Transformation &trans,
                            const Matrix &transmat,
                            const Vector &cum_vel,
                            bool lastframe,
-                           UnitCollection *uc )
-{
-    Cockpit *cp = _Universe->isPlayerStarship( this );
+                           UnitCollection *uc ) {
     //Only in non-networking OR networking && is a player OR SERVER && not a player
-    if ( (Network == NULL && !SERVER) || (Network != NULL && cp && !SERVER) || (SERVER) )
+    if ( (SERVER) || (Network == NULL && !SERVER) || (Network != NULL && !SERVER && _Universe->isPlayerStarship( this ) ) )
         if (AngularVelocity.i || AngularVelocity.j || AngularVelocity.k)
             Rotate( SIMULATION_ATOM*(AngularVelocity) );
     //SERVERSIDE ONLY : If it is not a player, it is a unit controlled by server so compute changes
@@ -4630,7 +4644,6 @@ void Unit::Kill( bool erasefromsave, bool quitting )
     //eraticate everything. naturally (see previous line) we won't erraticate beams erraticated above
     if ( !isSubUnit() )
         RemoveFromSystem();
-    killed = true;
     computer.target.SetUnit( NULL );
 
     //God I can't believe this next line cost me 1 GIG of memory until I added it
@@ -4642,6 +4655,9 @@ void Unit::Kill( bool erasefromsave, bool quitting )
         aistate->Destroy();
     }
     aistate = NULL;
+
+    // The following we don't want to do twice
+    killed = true;
     Unit *un;
     for (un_iter iter = getSubUnits(); (un = *iter); ++iter)
         un->Kill();
@@ -4651,6 +4667,8 @@ void Unit::Kill( bool erasefromsave, bool quitting )
     }
 
     if (ucref == 0) {
+        VSFileSystem::vs_dprintf( 3, "UNIT DELETION QUEUED: %s %s (file %s, addr 0x%08x)\n", name.get().c_str(),
+               fullname.c_str(), filename.get().c_str(), this );
         Unitdeletequeue.push_back( this );
         if (flightgroup)
             if (flightgroup->leader.GetUnit() == this)

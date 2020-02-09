@@ -42,9 +42,9 @@ struct Quaternion
     }
     Quaternion& Normalize()
     {
-        float mag = Magnitude();
-        v *= 1.0f / mag;
-        s /= mag;
+        float rcpmag = 1.0f / Magnitude();
+        v *= rcpmag;
+        s *= rcpmag;
         return *this;
     }
 
@@ -74,17 +74,17 @@ struct Quaternion
 
 #define M( B, A ) mat.r[B*3+A]
 
-        M( 0, 0 ) = 1-(yy+zz);
-        M( 1, 0 ) = (xy+sz);
-        M( 2, 0 ) = (xz-sy);
-
+        M( 0, 0 ) = 1.0f-(yy+zz);
         M( 0, 1 ) = (xy-sz);
-        M( 1, 1 ) = 1-(xx+zz);
-        M( 2, 1 ) = (yz+sx);
-
         M( 0, 2 ) = (xz+sy);
+
+        M( 1, 0 ) = (xy+sz);
+        M( 1, 1 ) = 1.0f-(xx+zz);
         M( 1, 2 ) = (yz-sx);
-        M( 2, 2 ) = 1-(xx+yy);
+
+        M( 2, 0 ) = (xz-sy);
+        M( 2, 1 ) = (yz+sx);
+        M( 2, 2 ) = 1.0f-(xx+yy);
         //M(3,0)  = M(3,1) = M(3,2) = M(0,3) = M(1,3) = M(2,3) = 0;
         //M(3,3) = 1;
 
