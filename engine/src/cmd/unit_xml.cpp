@@ -20,13 +20,11 @@
 #include "role_bitmask.h"
 #include "cmd/collide2/Stdafx.h"
 #include "cmd/collide2/CSopcodecollider.h"
-
 #include "networking/netclient.h"
+#include "vs_math.h"
+
 
 using namespace XMLSupport;
-
-
-#define VS_PI (3.1415926536)
 
 /*ADDED FOR extensible use of unit pretty print and unit load */
 UNITLOADTYPE current_unit_load_mode = DEFAULT;

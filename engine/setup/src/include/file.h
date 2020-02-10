@@ -23,8 +23,8 @@
 
 void LoadMainConfig(void);
 void LoadConfig(void);
-void Modconfig(int setting, char *name, char *group);
-void EnableSetting(char *name, char *group);
-void DisableSetting(char *name, char *group);
+void Modconfig(int setting, const char *name, const char *group);
+void EnableSetting(const char *name, const char *group);
+void DisableSetting(const char *name, const char *group);
 
 #endif

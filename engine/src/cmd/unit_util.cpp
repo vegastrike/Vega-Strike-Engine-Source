@@ -8,11 +8,12 @@
 #include "config_xml.h"
 #include "vs_globals.h"
 #include "pilot.h"
+
+
 using std::string;
-namespace UnitUtil
-{
-void switchFg( Unit *my_unit, string arg )
-{
+namespace UnitUtil {
+
+void switchFg( Unit *my_unit, string arg ) {
     if (!my_unit) return;
     string type     = my_unit->name;
     int    nr_waves_left = 0;

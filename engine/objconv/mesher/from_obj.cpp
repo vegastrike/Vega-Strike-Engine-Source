@@ -556,16 +556,21 @@ void ObjToXMESH( FILE *obj, FILE *mtl, vector< XML > &xmllist, bool forcenormals
         if (buf[0] == '#' || buf[0] == 'g')
             continue;
         if ( 1 == sscanf( buf, "usemtl %s\n", str ) ) {
+            curmat    = str;
+            if (mtls.find(curmat) == mtls.end())
+                printf("WARNING: referenced material not found: %s\n", curmat.c_str());
             if (changemat) {
                 //append to facelistlist
                 facelistlist[curmat].insert( facelistlist[curmat].end(), facelist.begin(), facelist.end() );
                 facelist.clear();
             }
-            curmat    = str;
             changemat = true;
             continue;
         }
         if ( 1 == sscanf( buf, "usemat %s\n", str ) ) {
+            curmat    = str;
+            if (mtls.find(curmat) == mtls.end())
+                printf("WARNING: referenced material not found: %s\n", curmat.c_str());
             mtls[curmat].textures.clear();
             mtls[curmat].textures.push_back( makeTextureHolder( str, 0 ) );
         }

@@ -76,7 +76,6 @@
 #endif
 
 #include "options.h"
-#include <boost/log/expressions.hpp>
 
 extern std::string global_username;
 extern std::string global_password;
@@ -241,9 +240,10 @@ bool isVista = false;
 
 Unit *TheTopLevelUnit;
 
+/*
+// disabled as does not compile with boost 1.64
 void initLogging(char debugLevel){
-    //auto loggingCore = boost::log::core::get();
-    boost::shared_ptr< logging::core > core = logging::core::get();
+    auto loggingCore = boost::log::core::get();
 
     switch (debugLevel) {
     case 1:
@@ -259,7 +259,7 @@ void initLogging(char debugLevel){
         loggingCore->set_filter(boost::log::trivial::severity >= boost::log::trivial::warning);
         break;
     }
-}
+}*/
 
 int main( int argc, char *argv[] )
 {

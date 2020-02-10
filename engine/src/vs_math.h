@@ -52,4 +52,6 @@
  #define ISNAN( x ) ( _isnan( x ) )
 #endif
 
+#define VS_PI 3.1415926535897931
+
 #endif // _VS_MATH_H_

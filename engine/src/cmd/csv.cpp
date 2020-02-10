@@ -176,7 +176,7 @@ CSVTable::Merge( const CSVTable &other )
     for (vsUMap<std::string, int>::const_iterator it = other.columns.begin(); it != other.columns.end(); ++it) {
         vsUMap<std::string, int>::const_iterator local = columns.find(it->first);
         if (local == columns.end()) {
-            BOOST_LOG_TRIVIAL(debug) << boost::format("New column %1%") % it->first;
+            //BOOST_LOG_TRIVIAL(debug) << boost::format("New column %1%") % it->first;
             key.push_back(it->first);
             local = columns.insert(std::pair<string, int>(it->first, key.size()-1)).first;
         }
@@ -184,7 +184,7 @@ CSVTable::Merge( const CSVTable &other )
             std::cerr << "WTF column " << it->second << "?" << std::endl;
             abort();
         }
-        BOOST_LOG_TRIVIAL(debug) << boost::format("  %1% (%2%) -> %3%") % it->first % it->second % local->second;
+        //BOOST_LOG_TRIVIAL(debug) << boost::format("  %1% (%2%) -> %3%") % it->first % it->second % local->second;
         colmap[it->second] = local->second;
     }
 
@@ -195,7 +195,7 @@ CSVTable::Merge( const CSVTable &other )
         std::vector<std::string>::const_iterator orig_it = orig_table.begin();
         const std::string empty;
 
-        BOOST_LOG_TRIVIAL(info) << boost::format("Reshaping %1% columns into %2%") % orig_cols % columns.size();
+        //BOOST_LOG_TRIVIAL(info) << boost::format("Reshaping %1% columns into %2%") % orig_cols % columns.size();
         table.reserve(rows.size() * key.size());
         while (orig_it != orig_table.end()) {
             size_t i,n;
@@ -205,10 +205,10 @@ CSVTable::Merge( const CSVTable &other )
                 table.push_back(empty);
         }
     }
-    BOOST_LOG_TRIVIAL(debug) << boost::format("Reshaped table holds %1% cells") % table.size();
+    //BOOST_LOG_TRIVIAL(debug) << boost::format("Reshaped table holds %1% cells") % table.size();
 
     // Merge rows
-    BOOST_LOG_TRIVIAL(info) << "Merging rows...";
+    //BOOST_LOG_TRIVIAL(info) << "Merging rows...";
     size_t merged_rows = 0, new_rows = 0;
     for (vsUMap<std::string, int>::const_iterator it = other.rows.begin(); it != other.rows.end(); ++it) {
         vsUMap<std::string, int>::const_iterator local = rows.find(it->first);
@@ -225,8 +225,8 @@ CSVTable::Merge( const CSVTable &other )
             if (!strip_white(*(other_it + i)).empty())
                 *(table_it + colmap[i]) = *(other_it + i);
     }
-    BOOST_LOG_TRIVIAL(info) << boost::format("Rows Merged: %1%, Rows Added: %2%") % merged_rows % new_rows;
-    BOOST_LOG_TRIVIAL(debug) << boost::format("Merged table holds %1% cells") % table.size();
+    //BOOST_LOG_TRIVIAL(info) << boost::format("Rows Merged: %1%, Rows Added: %2%") % merged_rows % new_rows;
+    //BOOST_LOG_TRIVIAL(debug) << boost::format("Merged table holds %1% cells") % table.size();
 }
 
 CSVRow::CSVRow( CSVTable *parent, const string &key )
@@ -311,12 +311,12 @@ CSVTable* loadCSVTableList(const string& csvfiles, VSFileSystem::VSFileType file
         string tmp = csvfiles.substr( pwhere, where-pwhere );
 
         if (!tmp.empty()) {
-            BOOST_LOG_TRIVIAL(trace) << boost::format("Opening CSV database from '%1%'") % tmp;
+            //BOOST_LOG_TRIVIAL(trace) << boost::format("Opening CSV database from '%1%'") % tmp;
 
             VSFileSystem::VSFile thisFile;
             VSFileSystem::VSError err = thisFile.OpenReadOnly( tmp, fileType );
             if (err <= VSFileSystem::Ok) {
-                BOOST_LOG_TRIVIAL(info) << boost::format("Loading CSV database from '%1%'") % tmp;
+                //BOOST_LOG_TRIVIAL(info) << boost::format("Loading CSV database from '%1%'") % tmp;
                 if (table == NULL)
                     table = new CSVTable( thisFile, thisFile.GetRoot() );
                 else

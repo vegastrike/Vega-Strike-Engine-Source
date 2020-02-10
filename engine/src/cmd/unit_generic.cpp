@@ -4662,9 +4662,9 @@ void Unit::Kill( bool erasefromsave, bool quitting )
     for (un_iter iter = getSubUnits(); (un = *iter); ++iter)
         un->Kill();
 
-    if (isUnit() != MISSILEPTR) {
-        BOOST_LOG_TRIVIAL(info) << boost::format("UNIT HAS DIED: %1% %2% (file %3%)") % name.get() % fullname % filename.get();
-    }
+    //if (isUnit() != MISSILEPTR) {
+    //    BOOST_LOG_TRIVIAL(info) << boost::format("UNIT HAS DIED: %1% %2% (file %3%)") % name.get() % fullname % filename.get();
+    //}
 
     if (ucref == 0) {
         VSFileSystem::vs_dprintf( 3, "UNIT DELETION QUEUED: %s %s (file %s, addr 0x%08x)\n", name.get().c_str(),
@@ -4674,9 +4674,9 @@ void Unit::Kill( bool erasefromsave, bool quitting )
             if (flightgroup->leader.GetUnit() == this)
                 flightgroup->leader.SetUnit( NULL );
 
-#ifdef DESTRUCTDEBUG
-        BOOST_LOG_TRIVIAL(trace) << boost::format("%s 0x%x - %d") % name.get().c_str() % this % Unitdeletequeue.size();
-#endif
+//#ifdef DESTRUCTDEBUG
+//        BOOST_LOG_TRIVIAL(trace) << boost::format("%s 0x%x - %d") % name.get().c_str() % this % Unitdeletequeue.size();
+//#endif
     }
 }
 
@@ -6068,7 +6068,7 @@ bool Unit::UnDock( Unit *utdw )
         else
             this->owner = NULL;
     }
-    BOOST_LOG_TRIVIAL(trace) << "Asking to undock";
+    //BOOST_LOG_TRIVIAL(trace) << "Asking to undock";
     if ( Network != NULL && !SERVER && !_Universe->netLocked() ) {
         cerr<<"Sending an undock notification"<<endl;
         int playernum = _Universe->whichPlayerStarship( this );

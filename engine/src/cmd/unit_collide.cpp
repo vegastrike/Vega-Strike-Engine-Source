@@ -389,14 +389,14 @@ Unit* Unit::rayCollide( const QVector &start, const QVector &end, Vector &norm, 
                 distance = (end-start).Magnitude() * distance;
 
                 // NOTE:   Here is where we need to retrieve the point on the ray that we collided with the mesh, and set it to end, create the normal and set distance
-                BOOST_LOG_TRIVIAL(trace) << boost::format("Beam collide with %1$p, distance %2%") % this % distance;
+                //BOOST_LOG_TRIVIAL(trace) << boost::format("Beam collide with %1$p, distance %2%") % this % distance;
                 return(this);
             }
         } else {//no col trees = a sphere
             // compute real distance
             distance = (end-start).Magnitude() * distance;
 
-            BOOST_LOG_TRIVIAL(trace) << boost::format("Beam collide with %1$p, distance %2%") % this % distance;
+            //BOOST_LOG_TRIVIAL(trace) << boost::format("Beam collide with %1$p, distance %2%") % this % distance;
             return(this);
         }
     } else {

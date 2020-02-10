@@ -1415,43 +1415,44 @@ GameCockpit::LastState::LastState()
     flightcompon = flightcompoff = false;
 }
 
-void GameCockpit::TriggerEvents( Unit *un )
-{
+void GameCockpit::TriggerEvents( Unit *un ) {
     double curtime = UniverseUtil::GetGameTime();
     if ((curtime - AUDIO_ATOM) < last.processing_time)
         return;
     else
         last.processing_time = curtime;
 
-    BOOST_LOG_TRIVIAL(trace) << "Processing events";
+    VSFileSystem::vs_dprintf(3, "Processing events\n");
+    //BOOST_LOG_TRIVIAL(trace) << "Processing events";
     for (EVENTID event = EVENTID_FIRST; event < NUM_EVENTS; event = (EVENTID)(event+1)) {
         GameSoundContainer *sound = static_cast<GameSoundContainer*>(GetSoundForEvent(event));
         if (sound != NULL) {
-#define MODAL_TRIGGER(name, _triggervalue, _curvalue, lastvar)                                                                             \
-    do {                                                                                                                                   \
-        bool triggervalue = _triggervalue;                                                                                                 \
-        bool curvalue     = _curvalue;                                                                                                     \
-        BOOST_LOG_TRIVIAL(trace) << boost::format("Processing event " name " (cur=%d last=%d)") % int(curvalue) % int(last.lastvar);       \
-        if (curvalue != last.lastvar) {                                                                                                    \
-            BOOST_LOG_TRIVIAL(debug) << boost::format("Triggering event edge " name " (cur=%d last=%d on=%d)") % int(curvalue) %           \
-                                            int(last.lastvar) % int(triggervalue);                                                         \
-            last.lastvar = curvalue;                                                                                                       \
-            if (curvalue == triggervalue)                                                                                                  \
-                sound->play();                                                                                                             \
-            else                                                                                                                           \
-                sound->stop();                                                                                                             \
-        }                                                                                                                                  \
-    } while (0)
 
-#define MODAL_IMAGE_TRIGGER(image, itrigger, btrigger, lastvar)                                    \
-    MODAL_TRIGGER(#image, btrigger,                                                                \
-                  LookupUnitStat(UnitImages<void>::image, un) == UnitImages<void>::itrigger,       \
-                  lastvar)
+            #define MODAL_TRIGGER(name, _triggervalue, _curvalue, lastvar) \
+                do { \
+                    bool triggervalue = _triggervalue; \
+                    bool curvalue = _curvalue; \
+                    VSFileSystem::vs_dprintf(3, "Processing event " name " (cur=%d last=%d)\n", \
+                        int(curvalue), int(last.lastvar) ); \
+                    \
+                    if (curvalue != last.lastvar) { \
+                        VSFileSystem::vs_dprintf(2, "Triggering event edge " name " (cur=%d last=%d on=%d)\n", \
+                            int(curvalue), int(last.lastvar), int(triggervalue) ); \
+                        last.lastvar = curvalue; \
+                        if (curvalue == triggervalue) \
+                            sound->play(); \
+                        else \
+                            sound->stop(); \
+                    } \
+                } while(0)
 
-#define MODAL_RAWIMAGE_TRIGGER(image, itrigger, btrigger, lastvar)                                 \
-    MODAL_TRIGGER(#image, btrigger, LookupUnitStat(UnitImages<void>::image, un) itrigger, lastvar)
+            #define MODAL_IMAGE_TRIGGER(image, itrigger, btrigger, lastvar) \
+                MODAL_TRIGGER(#image, btrigger, LookupUnitStat(UnitImages< void >::image, un) == UnitImages< void >::itrigger, lastvar)
 
-            switch((int)event) {
+            #define MODAL_RAWIMAGE_TRIGGER(image, itrigger, btrigger, lastvar) \
+                MODAL_TRIGGER(#image, btrigger, LookupUnitStat(UnitImages< void >::image, un) itrigger, lastvar)
+
+        switch((int)event) {
             case WARP_READY:
                 MODAL_RAWIMAGE_TRIGGER(MAXWARPFIELDSTRENGTH, >= 2, true, warpready);
                 break;
@@ -1555,13 +1556,12 @@ void GameCockpit::TriggerEvents( Unit *un )
                 break;
             default:
                 break;
-            }
-        }
-    }
+            } // switch
+        } // if
+    } // for
 }
 
-void GameCockpit::DrawGauges( Unit *un )
-{
+void GameCockpit::DrawGauges( Unit *un ) {
     int i;
     for (i = 0; i < UnitImages< void >::TARGETSHIELDF; i++) {
         if (gauges[i]) {
@@ -1748,8 +1748,7 @@ void GameCockpit::Init( const char *file )
     }
 }
 
-void GameCockpit::Delete()
-{
+void GameCockpit::Delete() {
     Cockpit::Delete();
 
     int i;
@@ -1803,8 +1802,7 @@ void GameCockpit::Delete()
     Panel.clear();
 }
 
-void GameCockpit::InitStatic()
-{
+void GameCockpit::InitStatic() {
     int i;
     for (i = 0; i < UnitImages< void >::NUMGAUGES; i++)
         gauge_time[i] = 0;
@@ -1825,8 +1823,7 @@ GameCockpit::GameCockpit( const char *file, Unit *parent, const std::string &pil
     , shake_type( 0 )
     , radarDisplay(0)
     , textcol( 1, 1, 1, 1 )
-    , text( NULL )
-{
+    , text( NULL ) {
     autoMessageTime    = 0;
     shield8 = armor8 = false;
     editingTextMessage = false;
@@ -1893,14 +1890,12 @@ extern vector< int >respawnunit;
 extern vector< int >switchunit;
 extern vector< int >turretcontrol;
 
-void DoCockpitKeys()
-{
+void DoCockpitKeys() {
     CockpitKeys::Pan( KBData(), PRESS );
     CockpitKeys::Inside( KBData(), PRESS );
 }
 
-void GameCockpit::NavScreen( const KBData&, KBSTATE k )
-{
+void GameCockpit::NavScreen( const KBData&, KBSTATE k ) {
     //scheherazade
     if (k == PRESS) {
         //UniverseUtil::IOmessage(0,"game","all","hit key");
@@ -1919,19 +1914,16 @@ void GameCockpit::NavScreen( const KBData&, KBSTATE k )
     }
 }
 
-bool GameCockpit::SetDrawNavSystem( bool what )
-{
+bool GameCockpit::SetDrawNavSystem( bool what ) {
     ThisNav.SetDraw( what );
     return what;
 }
 
-bool GameCockpit::CanDrawNavSystem()
-{
+bool GameCockpit::CanDrawNavSystem() {
     return ThisNav.CheckDraw();
 }
 
-void GameCockpit::visitSystem( string systemname )
-{
+void GameCockpit::visitSystem( string systemname ) {
     Cockpit::visitSystem( systemname );
     if ( AccessNavSystem() ) {
         static bool AlwaysUpdateNavMap =
@@ -2431,7 +2423,7 @@ void GameCockpit::Draw()
                 headtrans.clear();
 
                 headtrans.push_back( Matrix() );
-                VectorAndPositionToMatrix( headtrans.back(), P, Q, R, QVector( 0, 0, 0 ) );
+                VectorAndPositionToMatrix( headtrans.back(), -P, Q, R, QVector( 0, 0, 0 ) );
                 static float theta = 0, wtheta = 0;
                 static float shake_speed =
                     XMLSupport::parse_float( vs_config->getVariable( "graphics", "shake_speed", "50" ) );
@@ -2468,11 +2460,11 @@ void GameCockpit::Draw()
                              ( (GetParent() != NULL) ? LookupUnitStat( UnitImages< void >::WARPFIELDSTRENGTH,
                                                                       GetParent() ) : 0.0f )/warp_shake_ref ) );
                 if (shakin > shake_limit) shakin = shake_limit;
-                headtrans.front().p.i = shake_mag*shakin*cos( theta )*cockpitradial/100;                 //AccessCamera()->GetPosition().i+shakin*cos(theta);
-                headtrans.front().p.j = shake_mag*shakin*cos( 1.3731*theta )*cockpitradial/100;                 //AccessCamera()->GetPosition().j+shakin*cos(theta);
-                headtrans.front().p.k = 0;                 //AccessCamera()->GetPosition().k;
-                headtrans.front().p.i += warp_shake_mag*cos( wtheta )*sqr( warp_strength )*cockpitradial/100;                 //AccessCamera()->GetPosition().i+shakin*cos(theta);
-                headtrans.front().p.j += warp_shake_mag*cos( 1.165864*wtheta )*sqr( warp_strength )*cockpitradial/100;                 //AccessCamera()->GetPosition().j+shakin*cos(theta);
+                headtrans.back().p.i = shake_mag*shakin*cos( theta )*cockpitradial/100;          //AccessCamera()->GetPosition().i+shakin*cos(theta);
+                headtrans.back().p.j = shake_mag*shakin*cos( 1.3731*theta )*cockpitradial/100;  //AccessCamera()->GetPosition().j+shakin*cos(theta);
+                headtrans.back().p.k = 0;                 //AccessCamera()->GetPosition().k;
+                headtrans.back().p.i += warp_shake_mag*cos( wtheta )*sqr( warp_strength )*cockpitradial/100;           //AccessCamera()->GetPosition().i+shakin*cos(theta);
+                headtrans.back().p.j += warp_shake_mag*cos( 1.165864*wtheta )*sqr( warp_strength )*cockpitradial/100;  //AccessCamera()->GetPosition().j+shakin*cos(theta);
                 if (shakin > 0) {
                     shakin -= GetElapsedTime()*shake_reduction*(shakin/5);                       //Fast convergence to 5% shaking, slow stabilization
                     if (shakin <= 0)
@@ -2487,7 +2479,7 @@ void GameCockpit::Draw()
                 else caccel = Vector( 0, 0, 0 );
                 float driftphase     = pow( 0.25, GetElapsedTime() );
                 oaccel = (1-driftphase)*caccel+driftphase*oaccel;
-                headtrans.front().p += -cockpitradial*oaccel;
+                headtrans.back().p += -cockpitradial*oaccel;
                 float driftmag = cockpitradial*oaccel.Magnitude();
 
                 //if (COCKPITZ_PARTITIONS>1) GFXClear(GFXFALSE,GFXFALSE,GFXTRUE);//only clear stencil buffer
@@ -2497,33 +2489,19 @@ void GameCockpit::Draw()
                 float zfloor = cockpitradial*VERYNEAR_CONST;
                 for (j = COCKPITZ_PARTITIONS; j > 0; j--) { //FIXME This is a program lockup!!! (actually, no; j is a size_t...)
                     AccessCamera()->UpdateGFX( GFXTRUE,
-                                               GFXTRUE,
-                                               GFXTRUE,
-                                               GFXTRUE,
-                                               zfloor+zrange*j/COCKPITZ_PARTITIONS,
-                                               zfloor+zrange*(j+1)/COCKPITZ_PARTITIONS );                                                                                       //cockpit-specific frustrum (with clipping, with frustrum update)
-                    GFXClear( GFXFALSE, GFXTRUE, GFXFALSE );                     //only clear Z
-                    /*if (COCKPITZ_PARTITIONS>1) {
-                     *   //Setup stencil
-                     *   GFXStencilOp(KEEP,KEEP,REPLACE);
-                     *   GFXStencilFunc(LEQUAL,COCKPITZ_PARTITIONS-j,~0);
-                     *   GFXStencilMask(~0);
-                     *   GFXEnable(STENCIL);
-                     *  };*/
-                    _Universe->activateLightMap();
+                        GFXTRUE,
+                        GFXTRUE,
+                        GFXTRUE,
+                        zfloor+zrange*(j-1)/COCKPITZ_PARTITIONS, 
+                        zfloor+zrange*j/COCKPITZ_PARTITIONS );                                                                                       //cockpit-specific frustrum (with clipping, with frustrum update) 
                     for (i = 0; i < mesh.size(); ++i)
-                        //mesh[i]->DrawNow(1,true,headtrans.front());
-                        mesh[i]->Draw( FLT_MAX, headtrans.front() );
-                    //Whether cockpits shouldn't cull faces - not sure why, probably because
-                    //modellers always set normals the wrong way for cockpits.
-                    static bool nocockpitcull =
-                        XMLSupport::parse_bool( vs_config->getVariable( "graphics", "cockpit_no_face_cull", "true" ) );
+                        mesh[i]->Draw( FLT_MAX, headtrans.back() );
 
                     Mesh::ProcessZFarMeshes( true );
-                    if (nocockpitcull) GFXDisable( CULLFACE );
+                    //if (nocockpitcull) GFXDisable( CULLFACE );
                     Mesh::ProcessUndrawnMeshes( false, true );
                 }
-                headtrans.pop_front();
+                headtrans.pop_back();
                 //if (COCKPITZ_PARTITIONS>1) GFXDisable(STENCIL);
                 GFXDisable( LIGHTING );
                 GFXDisable( TEXTURE0 );

@@ -11,8 +11,17 @@
 #define M_PI 3.14159265358979323846264338328
 #endif
 
-void GFXUploadLightState( int max_light_location, int active_light_array, int apparent_light_size_array, bool shader, vector<int>::const_iterator begin, vector<int>::const_iterator end )
-{
+QVector _light_offset(0,0,0);
+
+void GFXSetLightOffset( const QVector &offset ) {
+    _light_offset = offset;
+}
+
+QVector GFXGetLightOffset() { 
+    return _light_offset;
+}
+
+void GFXUploadLightState( int max_light_location, int active_light_array, int apparent_light_size_array, bool shader, vector<int>::const_iterator begin, vector<int>::const_iterator end ) {
     // FIXME: (klauss) Very bad thing: static variables initialized with heap-allocated arrays...
     static GLint *lightData = new GLint[GFX_MAX_LIGHTS];
     static float *lightSizes = new float[GFX_MAX_LIGHTS*4];
@@ -47,7 +56,7 @@ void GFXUploadLightState( int max_light_location, int active_light_array, int ap
                 // For two, scaling would be nullified when scaling both distance
                 // and light size, so it would only waste time.
                 
-                QVector lightPos = light.getPosition() - modelview.p;
+                QVector lightPos = light.getPosition() - modelview.p + _light_offset;
                 
                 double lightDistance = lightPos.Magnitude();
                 double lightSize = light.getSize() * 0.5;
@@ -222,9 +231,8 @@ void gfx_light::Kill()
 ** having two different lights with the same stats and pos is unlikely at best
 */
 
-void gfx_light::SendGLPosition( const GLenum target ) const
-{
-    float v[4] = {vect[0], vect[1], vect[2], 1};
+void gfx_light::SendGLPosition( const GLenum target ) const {
+    float v[4] = {vect[0] + _light_offset.x, vect[1] + _light_offset.y, vect[2] + _light_offset.z, 1};
     glLightfv( target, GL_POSITION, v );
 }
 

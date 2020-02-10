@@ -1007,7 +1007,7 @@ uint32bit appendrecordfromxml( XML memfile, FILE *Outputfile, bool forcenormals 
         XML    submesh  = LoadXML( animname.c_str(), 1 );
         runningbytenum += appendmeshfromxml( submesh, Outputfile, forcenormals );
     }
-    fseek( Outputfile, ( -1*(runningbytenum) )+4, SEEK_CUR );
+    fseek( Outputfile, ( -1*((long)runningbytenum) )+4, SEEK_CUR );
     intbuf = runningbytenum;
     intbuf = VSSwapHostIntToLittle( intbuf );
     fwrite( &intbuf, sizeof (uint32bit), 1, Outputfile );      //Correct number of bytes for total record
@@ -1045,14 +1045,17 @@ uint32bit appendmeshfromxml( XML memfile, FILE *Outputfile, bool forcenormals )
     float transx = float( atof( Converter::getNamedOption( "addx" ).c_str() ) );
     float transy = float( atof( Converter::getNamedOption( "addy" ).c_str() ) );
     float transz = float( atof( Converter::getNamedOption( "addz" ).c_str() ) );
+    long meshlengthpos, vsalengthpos, startpos;
     uint32bit intbuf;
     float32bit floatbuf;
     uchar8bit   bytebuf;
     uint32bit   runningbytenum = 0;
     //Mesh Header
+    startpos = ftell( Outputfile );
     intbuf   = VSSwapHostIntToLittle( 11*sizeof (uint32bit)+20*sizeof (float32bit) );
     runningbytenum += sizeof (uint32bit)*(uint32bit) fwrite( &intbuf, sizeof (uint32bit), 1, Outputfile );       //Size of Mesh header in Bytes
     intbuf   = VSSwapHostIntToLittle( 0 );     //Temp - rewind and fix.
+    meshlengthpos = ftell( Outputfile );
     runningbytenum += sizeof (uint32bit)*(uint32bit) fwrite( &intbuf, sizeof (uint32bit), 1, Outputfile );       //Size of this Mesh in Bytes
     floatbuf = VSSwapHostFloatToLittle( memfile.scale );
     runningbytenum += sizeof (float32bit)*(uint32bit) fwrite( &floatbuf, sizeof (float32bit), 1, Outputfile );       //Mesh Scale
@@ -1119,7 +1122,8 @@ uint32bit appendmeshfromxml( XML memfile, FILE *Outputfile, bool forcenormals )
     runningbytenum += sizeof (float32bit)*(uint32bit) fwrite( &floatbuf, sizeof (float32bit), 1, Outputfile );       //alpha test value
     //END HEADER
     //Begin Variable sized Attributes
-    uint32bit VSAstart = runningbytenum;
+    uint32bit VSAstart = ftell( Outputfile );
+    vsalengthpos = ftell( Outputfile );
     intbuf = VSSwapHostIntToLittle( 0 );     //Temp value will overwrite later
     runningbytenum += sizeof (uint32bit)*(uint32bit) fwrite( &intbuf, sizeof (uint32bit), 1, Outputfile );       //Length of Variable sized attribute section in bytes
     //Detail texture
@@ -1239,7 +1243,7 @@ uint32bit appendmeshfromxml( XML memfile, FILE *Outputfile, bool forcenormals )
         }
     }
     //End Variable sized Attributes
-    uint32bit VSAend = runningbytenum;
+    uint32bit VSAend = ftell( Outputfile );
     //GEOMETRY
     intbuf = VSSwapHostIntToLittle( (uint32bit) memfile.vertices.size() );
     runningbytenum += sizeof (uint32bit)*(uint32bit) fwrite( &intbuf, sizeof (uint32bit), 1, Outputfile );       //Number of vertices
@@ -1376,15 +1380,16 @@ uint32bit appendmeshfromxml( XML memfile, FILE *Outputfile, bool forcenormals )
         }
     }
     //END GEOMETRY
-    fseek( Outputfile, ( -1*(runningbytenum) )+4, SEEK_CUR );
-    intbuf = runningbytenum;
+    long endpos = ftell( Outputfile );
+    fseek( Outputfile, meshlengthpos, SEEK_SET );
+    intbuf = endpos - startpos;
     intbuf = VSSwapHostIntToLittle( intbuf );
-    fwrite( &intbuf, sizeof (uint32bit), 1, Outputfile );      //Correct number of bytes for total mesh
-    fseek( Outputfile, ( -1*(runningbytenum-VSAstart) ), SEEK_END );
+    fwrite( &intbuf, sizeof (uint32bit), 1, Outputfile );      // Correct number of bytes for total mesh
+    fseek( Outputfile, vsalengthpos, SEEK_SET ); 
     intbuf = VSAend-VSAstart;
     intbuf = VSSwapHostIntToLittle( intbuf );
-    fwrite( &intbuf, sizeof (uint32bit), 1, Outputfile );      //Correct number of bytes for Variable Sized Attribute section
-    fseek( Outputfile, 0, SEEK_END );
+    fwrite( &intbuf, sizeof (uint32bit), 1, Outputfile );      // Correct number of bytes for Variable Sized Attribute section
+    fseek( Outputfile, endpos, SEEK_SET );
     return runningbytenum;
 }
 

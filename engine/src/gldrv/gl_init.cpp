@@ -205,9 +205,9 @@ bool vsVendorMatch( const char *vendor )
 
     if (_glvendor == NULL) {
         _glvendor = glGetString( GL_VENDOR );
-        if (_glvendor != NULL) {
-            BOOST_LOG_TRIVIAL(info) << boost::format("OpenGL Vendor: %1%") % (const char *)_glvendor;
-        }
+        //if (_glvendor != NULL) {
+        //    BOOST_LOG_TRIVIAL(info) << boost::format("OpenGL Vendor: %1%") % (const char *)_glvendor;
+        //}
     }
 
     if (_glvendor != NULL) {
@@ -239,7 +239,7 @@ void init_opengl_extensions()
 {
     const unsigned char *extensions = glGetString( GL_EXTENSIONS );
 
-    BOOST_LOG_TRIVIAL(trace) << boost::format("OpenGL Extensions supported: %1%") % extensions;
+    //BOOST_LOG_TRIVIAL(trace) << boost::format("OpenGL Extensions supported: %1%") % extensions;
 
 #ifndef NO_COMPILEDVERTEXARRAY_SUPPORT
     if ( vsExtensionSupported( "GL_EXT_compiled_vertex_array" )
@@ -260,7 +260,7 @@ void init_opengl_extensions()
         glUnlockArraysEXT_p = (PFNGLUNLOCKARRAYSEXTPROC)
                               GET_GL_PROC( (GET_GL_PTR_TYP) "glUnlockArraysEXT" );
 #endif
-        BOOST_LOG_TRIVIAL(trace) << "OpenGL::GL_EXT_compiled_vertex_array supported";
+        //BOOST_LOG_TRIVIAL(trace) << "OpenGL::GL_EXT_compiled_vertex_array supported";
     } else {
 #ifdef __APPLE__
 #ifndef __APPLE_PANTHER_GCC33_CLI__
@@ -268,7 +268,7 @@ void init_opengl_extensions()
         glUnlockArraysEXT_p = 0;
 #endif /*__APPLE_PANTHER_GCC33_CLI__*/
 #endif
-        BOOST_LOG_TRIVIAL(debug) << "OpenGL::GL_EXT_compiled_vertex_array unsupported";
+        //BOOST_LOG_TRIVIAL(debug) << "OpenGL::GL_EXT_compiled_vertex_array unsupported";
     }
 #endif
 #ifndef __APPLE__
@@ -277,11 +277,11 @@ void init_opengl_extensions()
                                 GET_GL_PROC( (GET_GL_PTR_TYP) "glMultiDrawArraysEXT" );
         glMultiDrawElements_p = (PFNGLMULTIDRAWELEMENTSEXTPROC)
                                 GET_GL_PROC( (GET_GL_PTR_TYP) "glMultiDrawElementsEXT" );
-        BOOST_LOG_TRIVIAL(trace) << "OpenGL::GL_EXT_multi_draw_arrays supported";
+        //BOOST_LOG_TRIVIAL(trace) << "OpenGL::GL_EXT_multi_draw_arrays supported";
     } else {
         glMultiDrawArrays_p   = 0;
         glMultiDrawElements_p = 0;
-        BOOST_LOG_TRIVIAL(debug) << "OpenGL::GL_EXT_multi_draw_arrays unsupported";
+        //BOOST_LOG_TRIVIAL(debug) << "OpenGL::GL_EXT_multi_draw_arrays unsupported";
     }
 #endif
 
@@ -383,7 +383,7 @@ void init_opengl_extensions()
 
 #ifdef GL_FOG_DISTANCE_MODE_NV
     if ( vsExtensionSupported( "GL_NV_fog_distance" ) ) {
-        BOOST_LOG_TRIVIAL(trace) << "OpenGL::Accurate Fog Distance supported";
+        //BOOST_LOG_TRIVIAL(trace) << "OpenGL::Accurate Fog Distance supported";
         switch (game_options.fogdetail)
         {
         case 0:
@@ -398,22 +398,22 @@ void init_opengl_extensions()
         }
     } else {
 #endif
-        BOOST_LOG_TRIVIAL(debug) << "OpenGL::Accurate Fog Distance unsupported";
+        //BOOST_LOG_TRIVIAL(debug) << "OpenGL::Accurate Fog Distance unsupported";
 #ifdef GL_FOG_DISTANCE_MODE_NV
     }
 #endif
     if ( vsExtensionSupported( "GL_ARB_texture_compression" ) ) {
-        BOOST_LOG_TRIVIAL(trace) << "OpenGL::Generic Texture Compression supported";
+        //BOOST_LOG_TRIVIAL(trace) << "OpenGL::Generic Texture Compression supported";
     } else {
-        BOOST_LOG_TRIVIAL(info) << "OpenGL::Generic Texture Compression unsupported";
+        //BOOST_LOG_TRIVIAL(info) << "OpenGL::Generic Texture Compression unsupported";
         gl_options.compression = 0;
     }
     if ( vsExtensionSupported( "GL_EXT_texture_compression_s3tc" ) ) {
-        BOOST_LOG_TRIVIAL(trace) << "OpenGL::S3TC Texture Compression supported";
+        //BOOST_LOG_TRIVIAL(trace) << "OpenGL::S3TC Texture Compression supported";
         //should be true;
     } else {
         gl_options.s3tc = false;
-        BOOST_LOG_TRIVIAL(info) << "OpenGL::S3TC Texture Compression unsupported";
+        //BOOST_LOG_TRIVIAL(info) << "OpenGL::S3TC Texture Compression unsupported";
     }
     if ( (glMultiTexCoord2fARB_p && glMultiTexCoord4fARB_p && glClientActiveTextureARB_p && glActiveTextureARB_p)
         && ( vsExtensionSupported( "GL_ARB_multitexture" ) || vsExtensionSupported( "GL_EXT_multitexture" ) ) ) {
@@ -426,35 +426,35 @@ void init_opengl_extensions()
             gl_options.Multitexture = 0;
         //gl_options.Multitexture = 1*gl_options.Multitexture;//might be zero by input
         if (gl_options.Multitexture) {
-            BOOST_LOG_TRIVIAL(trace) << boost::format("OpenGL::Multitexture supported (%1% units)") % gl_options.Multitexture;
+            //BOOST_LOG_TRIVIAL(trace) << boost::format("OpenGL::Multitexture supported (%1% units)") % gl_options.Multitexture;
         }
     } else {
         gl_options.Multitexture = 0;
-        BOOST_LOG_TRIVIAL(debug) << "OpenGL::Multitexture unsupported";
+        //BOOST_LOG_TRIVIAL(debug) << "OpenGL::Multitexture unsupported";
     }
     if ( vsExtensionSupported( "GL_ARB_texture_cube_map" ) || vsExtensionSupported( "GL_EXT_texture_cube_map" ) ) {
         gl_options.cubemap = 1;
-        BOOST_LOG_TRIVIAL(trace) << "OpenGL::TextureCubeMapExt supported";
+        //BOOST_LOG_TRIVIAL(trace) << "OpenGL::TextureCubeMapExt supported";
     } else {
         gl_options.cubemap = 0;
-        BOOST_LOG_TRIVIAL(info) << "OpenGL::TextureCubeMapExt unsupported";
+        //BOOST_LOG_TRIVIAL(info) << "OpenGL::TextureCubeMapExt unsupported";
     }
     if ( vsExtensionSupported( "GL_EXT_texture_edge_clamp" ) || vsExtensionSupported( "GL_SGIS_texture_edge_clamp" ) ) {
-        BOOST_LOG_TRIVIAL(trace) << "OpenGL::S3TC Texture Clamp-to-Edge supported";
+        //BOOST_LOG_TRIVIAL(trace) << "OpenGL::S3TC Texture Clamp-to-Edge supported";
         // should be true
     } else {
         gl_options.ext_clamp_to_edge = false;
-        BOOST_LOG_TRIVIAL(info) << "OpenGL::S3TC Texture Clamp-to-Edge unsupported";
+        //BOOST_LOG_TRIVIAL(info) << "OpenGL::S3TC Texture Clamp-to-Edge unsupported";
     }
     if ( vsExtensionSupported( "GL_ARB_texture_border_clamp" ) || vsExtensionSupported( "GL_SGIS_texture_border_clamp" ) ) {
-        BOOST_LOG_TRIVIAL(trace) << "OpenGL::S3TC Texture Clamp-to-Border supported";
+        //BOOST_LOG_TRIVIAL(trace) << "OpenGL::S3TC Texture Clamp-to-Border supported";
         // should be true
     } else {
         gl_options.ext_clamp_to_border = false;
-        BOOST_LOG_TRIVIAL(info) << "OpenGL::S3TC Texture Clamp-to-Border unsupported";
+        //BOOST_LOG_TRIVIAL(info) << "OpenGL::S3TC Texture Clamp-to-Border unsupported";
     }
     if ( vsExtensionSupported( "GL_ARB_framebuffer_sRGB" ) || vsExtensionSupported( "GL_EXT_framebuffer_sRGB" ) ) {
-        BOOST_LOG_TRIVIAL(trace) << "OpenGL::sRGB Framebuffer supported";
+        //BOOST_LOG_TRIVIAL(trace) << "OpenGL::sRGB Framebuffer supported";
         GLboolean srgbCapable = true;
 
         if ( vsExtensionSupported( "GL_EXT_framebuffer_sRGB" ) ) {
@@ -469,19 +469,19 @@ void init_opengl_extensions()
         if (srgbCapable) {
             gl_options.ext_srgb_framebuffer = true;
         } else {
-            BOOST_LOG_TRIVIAL(info) << "OpenGL::sRGB Framebuffer unsupported by visual";
+            //BOOST_LOG_TRIVIAL(info) << "OpenGL::sRGB Framebuffer unsupported by visual";
             gl_options.ext_srgb_framebuffer = false;
         }
     } else {
         gl_options.ext_srgb_framebuffer = false;
-        BOOST_LOG_TRIVIAL(info) << "OpenGL::sRGB Framebuffer unsupported";
+        //BOOST_LOG_TRIVIAL(info) << "OpenGL::sRGB Framebuffer unsupported";
     }
     if ( vsExtensionSupported( "GL_NV_fragment_program2" ) ) {
         gl_options.nv_fp2 = true;
-        BOOST_LOG_TRIVIAL(trace) << "OpenGL::NV_fragment_program2 supported";
+        //BOOST_LOG_TRIVIAL(trace) << "OpenGL::NV_fragment_program2 supported";
     } else {
         gl_options.nv_fp2 = false;
-        BOOST_LOG_TRIVIAL(info) << "OpenGL::NV_fragment_program2 unsupported";
+        //BOOST_LOG_TRIVIAL(info) << "OpenGL::NV_fragment_program2 unsupported";
     }
     if ( GFXDefaultShaderSupported() )
         if (gl_options.Multitexture < 16)
@@ -495,8 +495,8 @@ void init_opengl_extensions()
     gl_options.max_array_indices = max_indices;
     gl_options.max_array_vertices = max_vertices;
 
-    BOOST_LOG_TRIVIAL(info) << boost::format("Max vertex array indices: %1%") % gl_options.max_array_indices;
-    BOOST_LOG_TRIVIAL(info) << boost::format("Max vertex array vertices: %1%") % gl_options.max_array_vertices;
+    //BOOST_LOG_TRIVIAL(info) << boost::format("Max vertex array indices: %1%") % gl_options.max_array_indices;
+    //BOOST_LOG_TRIVIAL(info) << boost::format("Max vertex array vertices: %1%") % gl_options.max_array_vertices;
 }
 
 static void initfov()
@@ -530,7 +530,7 @@ static void Reshape( int x, int y )
 {
     g_game.x_resolution = x;
     g_game.y_resolution = y;
-    BOOST_LOG_TRIVIAL(trace) << boost::format("Reshaping %1% %2%") % x % y;
+    //BOOST_LOG_TRIVIAL(trace) << boost::format("Reshaping %1% %2%") % x % y;
 }
 
 extern void GFXInitTextureManager();
@@ -553,7 +553,7 @@ void GFXInit( int argc, char **argv )
     gl_options.rect_textures    = game_options.rect_textures ? true : textsupported;
 
     if (gl_options.rect_textures) {
-        BOOST_LOG_TRIVIAL(trace) << "RECT textures supported";
+        //BOOST_LOG_TRIVIAL(trace) << "RECT textures supported";
 
         // Fetch max rect textue dimension
         GLint max_rect_dimension = 65535;
@@ -562,7 +562,7 @@ void GFXInit( int argc, char **argv )
             &max_rect_dimension);
 
         gl_options.max_rect_dimension = max_rect_dimension;
-        BOOST_LOG_TRIVIAL(trace) << boost::format("RECT max texture dimension: %1%") % max_rect_dimension;
+        //BOOST_LOG_TRIVIAL(trace) << boost::format("RECT max texture dimension: %1%") % max_rect_dimension;
     }
 
     bool vidsupported = (   gl_options.rect_textures || (   vsExtensionSupported( "GL_ARB_texture_non_power_of_two" ) && vsVendorMatch("nvidia")));
@@ -575,11 +575,11 @@ void GFXInit( int argc, char **argv )
             gl_options.max_movie_dimension = gl_options.max_rect_dimension;
     }
 
-    if (gl_options.pot_video_textures) {
+    /*if (gl_options.pot_video_textures) {
         BOOST_LOG_TRIVIAL(info) << "Forcing POT video textures";
     } else {
         BOOST_LOG_TRIVIAL(trace) << "Using NPOT video textures";
-    }
+    }*/
     // Removing gl_options soon
     gl_options.smooth_shade        = game_options.SmoothShade;
     gl_options.mipmap 		   = game_options.mipmapdetail;
@@ -623,10 +623,10 @@ void GFXInit( int argc, char **argv )
 #endif
     if ( vsExtensionSupported( "GL_EXT_color_table" ) || vsExtensionSupported( "GL_EXT_shared_texture_palette" ) ) {
         gl_options.PaletteExt = 1;
-        BOOST_LOG_TRIVIAL(trace) << "OpenGL::EXTColorTable supported";
+        //BOOST_LOG_TRIVIAL(trace) << "OpenGL::EXTColorTable supported";
     } else {
         gl_options.PaletteExt = 0;
-        BOOST_LOG_TRIVIAL(debug) << "OpenGL::EXTColorTable unsupported";
+        //BOOST_LOG_TRIVIAL(debug) << "OpenGL::EXTColorTable unsupported";
     }
     glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT );
     glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT );

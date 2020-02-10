@@ -138,6 +138,7 @@ void Missile::Discharge() {
             new MissileEffect( Position(), damage, phasedamage,
             radial_effect, radial_multiplier, owner ) );
     discharged = true;
+  }
 }
 
 void Missile::Kill( bool erase ) {

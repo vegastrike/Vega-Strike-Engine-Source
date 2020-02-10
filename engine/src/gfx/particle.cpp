@@ -190,7 +190,7 @@ void ParticleTrail::DrawAndUpdate()
     if (!config.initialized) {
         config.init();
         ChangeMax( maxparticles );
-        BOOST_LOG_TRIVIAL(info) << boost::format("Configured particle system %1% with %2% particles") % config.prefix % maxparticles;
+        //BOOST_LOG_TRIVIAL(info) << boost::format("Configured particle system %1% with %2% particles") % config.prefix % maxparticles;
     }
     if (!config.use || particleLoc.empty())
         return;
@@ -288,13 +288,13 @@ void ParticleTrail::DrawAndUpdate()
         }
 
         if (dosort) {
-            BOOST_LOG_TRIVIAL(trace) << boost::format("Drawing %1%/%2% sorted particles") % nparticles % maxparticles;
+            //BOOST_LOG_TRIVIAL(trace) << boost::format("Drawing %1%/%2% sorted particles") % nparticles % maxparticles;
             GFXDrawElements( GFXQUAD,
                 &particleVert[0], nparticles * vertsPerParticle,
                 &indices[0], indices.size(),
                 3, 4, 2 );
         } else {
-            BOOST_LOG_TRIVIAL(trace) << boost::format("Drawing %1%/%2% unsorted particles") % nparticles % maxparticles;
+            //BOOST_LOG_TRIVIAL(trace) << boost::format("Drawing %1%/%2% unsorted particles") % nparticles % maxparticles;
             GFXDraw( GFXQUAD, &particleVert[0], nparticles * 12, 3, 4, 2 );
         }
 
@@ -319,9 +319,9 @@ void ParticleTrail::DrawAndUpdate()
     // Compute alpha for dead particles
     float minalpha = (ptrans > 0.0f) ? sqrtf(alphaMask / ptrans) : 0.0f;
 
-    if (nparticles) {
-        BOOST_LOG_TRIVIAL(trace) << boost::format("Drawn %1% particles, minalpha %2%") % nparticles % minalpha;
-    }
+    //if (nparticles) {
+        //BOOST_LOG_TRIVIAL(trace) << boost::format("Drawn %1% particles, minalpha %2%") % nparticles % minalpha;
+    //}
 
     // Quickly remove dead particles at the end
     while ( !particleColor.empty() && !(particleColor.back().a > minalpha) ) {

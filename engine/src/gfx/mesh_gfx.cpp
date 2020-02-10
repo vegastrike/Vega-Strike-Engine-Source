@@ -520,23 +520,26 @@ void Mesh::ProcessZFarMeshes( bool nocamerasetup )
 {
     int a = NUM_ZBUF_SEQ;
 
-    //clear Z buffer
-    GFXClear( GFXFALSE, GFXTRUE, GFXFALSE );
+    if (!undrawn_meshes[a].empty()) {
+        //clear Z buffer
+        GFXClear( GFXFALSE, GFXTRUE, GFXFALSE );
 
-    static float far_margin = XMLSupport::parse_float( vs_config->getVariable( "graphics", "mesh_far_percent", ".8" ) );
-    _Universe->AccessCamera()->UpdateGFXFrustum( GFXTRUE, g_game.zfar*far_margin, 0 );
+        static float far_margin = XMLSupport::parse_float( vs_config->getVariable( "graphics", "mesh_far_percent", ".8" ) );
+        if (!nocamerasetup)
+            _Universe->AccessCamera()->UpdateGFXFrustum( GFXTRUE, g_game.zfar*far_margin, 0 );
 
-    std::sort( undrawn_meshes[a].begin(), undrawn_meshes[a].end() );
-    for (OrigMeshVector::iterator it = undrawn_meshes[a].begin(); it < undrawn_meshes[a].end(); ++it) {
-        Mesh *m = it->orig;
-        m->ProcessDrawQueue( it->passno, a, it->zsort, _Universe->AccessCamera()->GetPosition() );
-        m->will_be_drawn &= ( ~(1<<a) );           //not accurate any more
+        std::sort( undrawn_meshes[a].begin(), undrawn_meshes[a].end() );
+        for (OrigMeshVector::iterator it = undrawn_meshes[a].begin(); it < undrawn_meshes[a].end(); ++it) {
+            Mesh *m = it->orig;
+            m->ProcessDrawQueue( it->passno, a, it->zsort, _Universe->AccessCamera()->GetPosition() );
+            m->will_be_drawn &= ( ~(1<<a) );           //not accurate any more 
+        }
+        for (OrigMeshVector::iterator it = undrawn_meshes[a].begin(); it < undrawn_meshes[a].end(); ++it) {
+            Mesh *m = it->orig;
+            m->draw_queue[a].clear();
+        }
+        undrawn_meshes[a].clear();
     }
-    for (OrigMeshVector::iterator it = undrawn_meshes[a].begin(); it < undrawn_meshes[a].end(); ++it) {
-        Mesh *m = it->orig;
-        m->draw_queue[a].clear();
-    }
-    undrawn_meshes[a].clear();
 
     GFXDeactivateShader();
     if (gl_options.ext_srgb_framebuffer)
@@ -558,16 +561,21 @@ inline bool rangesOverlap( T min1, T max1, T min2, T max2 )
              && ( (min1 < min2) == (min1 < max2) ) );
 }
 
-void Mesh::ProcessUndrawnMeshes( bool pushSpecialEffects, bool nocamerasetup )
-{
-    //clear Z buffer
-    GFXClear( GFXFALSE, GFXTRUE, GFXFALSE );
+void Mesh::ProcessUndrawnMeshes( bool pushSpecialEffects, bool nocamerasetup ) {
+    bool zcleared = false;
 
     for (int a = 0; a < NUM_ZBUF_SEQ; a++) {
+        if (undrawn_meshes[a].empty() && undrawn_logos.empty())
+            continue;
+        if (!zcleared) {
+            //clear Z buffer
+            GFXClear( GFXFALSE, GFXTRUE, GFXFALSE );
+            zcleared = true;
+        }
         if (a == MESH_SPECIAL_FX_ONLY) {
             GFXPushGlobalEffects();
             GFXDisable( DEPTHWRITE );
-        } else {
+        } else if (!nocamerasetup) { 
             _Universe->AccessCamera()->UpdateGFXFrustum( GFXTRUE, g_game.znear, g_game.zfar );
         }
         std::sort( undrawn_meshes[a].begin(), undrawn_meshes[a].end() );
@@ -1194,7 +1202,8 @@ void Mesh::ProcessShaderDrawQueue( size_t whichpass, int whichdrawqueue, bool zs
             technique->compile();
         }
         catch (Exception &e) {
-            BOOST_LOG_TRIVIAL(info) << boost::format("Technique recompilation failed: %1%") % e.what();
+            VSFileSystem::vs_dprintf(1, "Technique recompilation failed: %s\n", e.what());
+            //BOOST_LOG_TRIVIAL(info) << boost::format("Technique recompilation failed: %1%") % e.what();
         }
     }
 

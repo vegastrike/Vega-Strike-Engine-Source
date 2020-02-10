@@ -244,9 +244,9 @@ static void parseFloat4( const std::string &s, float value[4] )
         value[i++] = parseFloat( s.substr( ini, end = s.find_first_of( ',', ini ) ) );
         ini = ( (end == string::npos) ? end : (end+1) );
     }
-    if (i >= 4 && ini != string::npos) {
-        BOOST_LOG_TRIVIAL(info) << boost::format("WARNING: invalid float4: %1%") % s;
-    }
+    //if (i >= 4 && ini != string::npos) {
+        //BOOST_LOG_TRIVIAL(info) << boost::format("WARNING: invalid float4: %1%") % s;
+    //}
     while (i < 4) {
         value[i++] = 0;
     }
@@ -390,10 +390,10 @@ void Technique::Pass::compile()
             if (prog == 0) {
                 throw ProgramCompileError("Error compiling program vp:\"" + vertexProgram +
                                           "\" fp:\"" + fragmentProgram + "\"");
-            } else {
-                BOOST_LOG_TRIVIAL(info) << boost::format("Successfully compiled and linked program \"%1%+%2%\"") % vertexProgram %
-                                               fragmentProgram;
-            }
+            } //else {
+                //BOOST_LOG_TRIVIAL(info) << boost::format("Successfully compiled and linked program \"%1%+%2%\"") % vertexProgram %
+                //   fragmentProgram;
+            //}
         }
 
         for (ShaderParamList::iterator it = shaderParams.begin(); it != shaderParams.end(); ++it) {
@@ -402,11 +402,11 @@ void Technique::Pass::compile()
                 if (!it->optional) {
                     throw ProgramCompileError("Cannot resolve shader constant \"" + it->name +
                                               "\"");
-                } else {
-                    BOOST_LOG_TRIVIAL(info) << boost::format("Cannot resolve <<optional>> shader constant \"%1%\" in "
-                                                             "program \"%2%+%3%\"") %
-                                                   it->name % vertexProgram % fragmentProgram;
-                }
+                } //else {
+                  //  BOOST_LOG_TRIVIAL(info) << boost::format("Cannot resolve <<optional>> shader constant \"%1%\" in "
+                  //                                           "program \"%2%+%3%\"") %
+                  //                                 it->name % vertexProgram % fragmentProgram;
+                //}
             }
         }
         int lastTU = -1;
@@ -484,7 +484,7 @@ Technique::Technique( const string &nam ) :
             +game_options.techniquesSubPath+"/"
             +name+".technique" );
     } catch(Audio::FileOpenException e) {
-        BOOST_LOG_TRIVIAL(info) << boost::format("Cannot find specialized technique, trying generic: %1%") % e.what();
+        //BOOST_LOG_TRIVIAL(info) << boost::format("Cannot find specialized technique, trying generic: %1%") % e.what();
         // Else try a default
         serializer.importXML(
             game_options.techniquesBasePath+"/"
@@ -556,8 +556,8 @@ Technique::Technique( const string &nam ) :
                                 el->getAttributeValue( "default", "" ),
                                 el->getAttributeValue( "name", "" ),
                                 parseTexKind( el->getAttributeValue( "kind", "" ) ) );
-                            BOOST_LOG_TRIVIAL(debug) << boost::format("Added texture unit #%1% \"%2%\"") % pass.getNumTextureUnits() %
-                                                            el->getAttributeValue("name", "");
+                            //BOOST_LOG_TRIVIAL(debug) << boost::format("Added texture unit #%1% \"%2%\"") % pass.getNumTextureUnits() %
+                            //                                el->getAttributeValue("name", "");
                         } else if (el->tagName() == paramTag) {
                             float value[4];
                             parseFloat4( el->getAttributeValue( "value", "" ), value );
@@ -565,20 +565,20 @@ Technique::Technique( const string &nam ) :
                                 el->getAttributeValue( "name", "" ),
                                 value,
                                 parseBool( el->getAttributeValue( "optional", "false" ) ) );
-                            BOOST_LOG_TRIVIAL(debug)
-                                << boost::format("Added constant #%1% \"%2%\" with value "
-                                                 "(%3$.2f,%4$.2f,%5$.2f,%6$.2f) as %7%") %
-                                       pass.getNumShaderParams() % el->getAttributeValue("name", "") % value[0] % value[1] % value[2] %
-                                       value[3] % (parseBool(el->getAttributeValue("optional", "false")) ? "optional" : "required");
+                            //BOOST_LOG_TRIVIAL(debug)
+                            //    << boost::format("Added constant #%1% \"%2%\" with value "
+                            //                     "(%3$.2f,%4$.2f,%5$.2f,%6$.2f) as %7%") %
+                            //           pass.getNumShaderParams() % el->getAttributeValue("name", "") % value[0] % value[1] % value[2] %
+                            //           value[3] % (parseBool(el->getAttributeValue("optional", "false")) ? "optional" : "required");
                         } else if (el->tagName() == autoParamTag) {
                             pass.addShaderParam(
                                 el->getAttributeValue( "name", "" ),
                                 parseAutoParamSemantic( el->getAttributeValue( "semantic", "" ) ),
                                 parseBool( el->getAttributeValue( "optional", "false" ) ) );
-                            BOOST_LOG_TRIVIAL(debug)
-                                << boost::format("Added param #%1% \"%2%\" with semantic %3% as %4%") % pass.getNumShaderParams() %
-                                       el->getAttributeValue("name", "") % el->getAttributeValue("semantic", "") %
-                                       (parseBool(el->getAttributeValue("optional", "false")) ? "optional" : "required");
+                            //BOOST_LOG_TRIVIAL(debug)
+                            //    << boost::format("Added param #%1% \"%2%\" with semantic %3% as %4%") % pass.getNumShaderParams() %
+                            //           el->getAttributeValue("name", "") % el->getAttributeValue("semantic", "") %
+                            //           (parseBool(el->getAttributeValue("optional", "false")) ? "optional" : "required");
                         } else {
                             //TODO: Warn about unrecognized (hence ignored) tag
                         }

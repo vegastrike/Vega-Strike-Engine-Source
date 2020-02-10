@@ -88,6 +88,10 @@ void /*GFXDRVAPI*/ GFXPickLights( vector< int >::const_iterator begin, vector< i
 void /*GFXDRVAPI*/ GFXGlobalLights( vector< int > &lights, const Vector &center, const float radius );
 ///loads "lights" with all enabled global lights
 void /*GFXDRVAPI*/ GFXGlobalLights( vector< int > &lights );
+///Sets light position offset, use when centering the camera off-origin
+void /*GFXDRVAPI*/ GFXSetLightOffset( const QVector &offset );
+///Sets light position offset, use when centering the camera off-origin
+QVector /*GFXDRVAPI*/ GFXGetLightOffset();
 ///Sets the light model to have separate specular color (if available)
 GFXBOOL /*GFXDRVAPI*/ GFXSetSeparateSpecularColor( const GFXBOOL spec );
 ///Sets the intensity cutoff before picked lights are ignored

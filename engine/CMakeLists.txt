@@ -25,18 +25,15 @@ UNSET(EXPAT_FOUND)
 UNSET(MATH_FOUND)
 UNSET(FFMPEG_FOUND)
 UNSET(OGRE_FOUND)
-# 2019-10-14 stephengtuggy - I think we need to allow specifying a custom Boost directory location, but provide a default value
-#                            (Default value not implemented yet)
-# UNSET(Boost_DIR)
+UNSET(Boost_DIR)
 
-# 2019-10-14 stephengtuggy - The new Boost.Log stuff didn't work without these next two lines
-set(Boost_USE_STATIC_LIBS ON)
-set(Boost_USE_MULTITHREADED ON)
+include_directories(
+    ${vsUTCS_SOURCE_DIR}/src 
+    ${vsUTCS_SOURCE_DIR}/src/cmd
+    ${vsUTCS_BINARY_DIR}
+    /usr/include/harfbuzz/
+) 
 
-include_directories(${vsUTCS_SOURCE_DIR}/src 
-					${vsUTCS_SOURCE_DIR}/src/cmd
-					${vsUTCS_BINARY_DIR} ) 
-					
 add_library(netlowlevel    src/networking/lowlevel/netbuffer.cpp
 						   src/networking/lowlevel/netui.cpp
 						   src/networking/lowlevel/packet.cpp
@@ -532,6 +529,9 @@ IF(NOT BUILD_OPT)
       FORCE )
 ENDIF(NOT BUILD_OPT)
 
+if(CMAKE_COMPILER_IS_GNUCXX)
+    add_definitions(-std=gnu++03)
+endif()
 
 
 # Provide boolean options for enabling various cpu optimizations.
@@ -543,7 +543,6 @@ OPTION(CPUAMD_k10  "Enable AMD K10 optimizations (Athlon2)"
     OFF )
 OPTION(CPUAMD_vishera  "Enable AMD Vishera optimizations"
     OFF )
-
 OPTION(CPUINTEL_p4 "Enable Intel P4 optimizations (1st gen P4's)"
     OFF )
 OPTION(CPUINTEL_prescott  "Enable Intel P4 (sse3) optimizations"
@@ -559,14 +558,13 @@ SET(DATADIR "" CACHE STRING "Default vegastrike data directory")
 
 # Hide our temporary variable and initialize it to empty
 SET(CPU_OPTS  )
-# 2019-10-14 stephengtuggy - Each -D clause needs a space between it and the variable name to take effect
-SET(DEFINES " -D NV_CUBE_MAP=1 -D BOOST_PYTHON_NO_PY_SIGNATURES=1 ")
+SET(DEFINES " -DNV_CUBE_MAP -DBOOST_PYTHON_NO_PY_SIGNATURES ")
 MARK_AS_ADVANCED( CPU_OPTS )
 MARK_AS_ADVANCED( DEFINES )
 SET(CPU_SMP "1" CACHE STRING 
     "Number of CPU's in system")
-# Depending on the boolean chosen above, set CPU_OPTS to the correct cpu opts
 
+# Depending on the boolean chosen above, set CPU_OPTS to the correct cpu opts
 IF(CPUAMD_k8)
     SET(CPU_OPTS "-mtune=athlon64 -mfpmath=sse -msse2 -mmmx -m3dnow -ftree-vectorize -ffast-math -fassociative-math -funsafe-math-optimizations -fprefetch-loop-arrays ")
 ELSEIF(CPUAMD_K9)
@@ -590,16 +588,15 @@ IF(CPU_SMP GREATER 1)
 ENDIF(CPU_SMP GREATER 1)
 
 IF(DATADIR)
-    SET(DEFINES "${DEFINES} -D DATA_DIR=\"${DATADIR}\"")
+    SET(DEFINES "${DEFINES} -DDATA_DIR=\"${DATADIR}\"")
 ENDIF(DATADIR)
 
+
 # Debug target block. 
-# 2019-10-14 stephengtuggy - DESTRUCTDEBUG and DEBUG_RUN_PYTHON flags set temporarily for easier debugging. It looks like these flags must
-# 							 be set here, since this overrides whatever is specified to cmake on the commend line or using ccmake.
-SET(CMAKE_CXX_FLAGS_DEBUG " ${BUILD_OPT} ${CPU_OPTS} ${DEFINES} -D DESTRUCTDEBUG=1 -D DEBUG_RUN_PYTHON=1 -include config.h -pipe -g2 -Wall -fvisibility=hidden" CACHE STRING
+SET(CMAKE_CXX_FLAGS_DEBUG " ${BUILD_OPT} ${CPU_OPTS} ${DEFINES} -include config.h -pipe -g2 -std=c++11 -Wall -fvisibility=hidden" CACHE STRING
     "Flags used by the C++ compiler during debug builds."
      FORCE )
-SET( CMAKE_C_FLAGS_DEBUG "  ${BUILD_OPT} ${CPU_OPTS} ${DEFINES} -D DESTRUCTDEBUG=1 -D DEBUG_RUN_PYTHON=1 -include config.h -pipe -g2 -Wall -Wno-unused-function -Wno-unused-variable -fvisibility=hidden" CACHE STRING
+SET( CMAKE_C_FLAGS_DEBUG "  ${BUILD_OPT} ${CPU_OPTS} ${DEFINES} -include config.h -pipe -g2 -Wall -Wno-unused-function -Wno-unused-variable -fvisibility=hidden" CACHE STRING
     "Flags used by the C compiler during debug builds."
      FORCE )
 SET( CMAKE_EXE_LINKER_FLAGS_DEBUG
@@ -607,24 +604,22 @@ SET( CMAKE_EXE_LINKER_FLAGS_DEBUG
     "Flags used for linking binaries during debug builds."
      FORCE )
 MARK_AS_ADVANCED(
-	CMAKE_CXX_FLAGS_DEBUG
-	CMAKE_C_FLAGS_DEBUG)
+    CMAKE_CXX_FLAGS_DEBUG
+    CMAKE_C_FLAGS_DEBUG)
 IF("${CMAKE_BUILD_TYPE}" STREQUAL "Debug")
-	MARK_AS_ADVANCED( CLEAR
-    	CMAKE_CXX_FLAGS_DEBUG )
+    MARK_AS_ADVANCED( CLEAR
+        CMAKE_CXX_FLAGS_DEBUG )
 ELSE("${CMAKE_BUILD_TYPE}" STREQUAL "Debug")
     MARK_AS_ADVANCED( FORCE 
-    	CMAKE_CXX_FLAGS_DEBUG )
+        CMAKE_CXX_FLAGS_DEBUG )
 ENDIF("${CMAKE_BUILD_TYPE}" STREQUAL "Debug")
 
 
-
 # Release Target block 
-# 2019-10-14 stephengtuggy - Each -D clause needs a space between it and the variable name to take effect
-SET(CMAKE_CXX_FLAGS_RELEASE  " ${BUILD_OPT} ${CPU_OPTS} -D NV_CUBE_MAP=1 -D BOOST_PYTHON_NO_PY_SIGNATURES=1 -include config.h -pipe -Wall -fvisibility=hidden" CACHE STRING
+SET(CMAKE_CXX_FLAGS_RELEASE  " ${BUILD_OPT} ${CPU_OPTS} -DNV_CUBE_MAP -DBOOST_PYTHON_NO_PY_SIGNATURES -include config.h -pipe -std=c++11 -Wall -fvisibility=hidden" CACHE STRING
     "Flags used by the C++ compiler during release builds."
     FORCE)
-SET( CMAKE_C_FLAGS_RELEASE " ${BUILD_OPT} ${CPU_OPTS} -D NV_CUBE_MAP=1 -D BOOST_PYTHON_NO_PY_SIGNATURES=1 -include config.h -pipe -Wall -Wno-unused-function -Wno-unused-variable -fvisibility=hidden" CACHE STRING
+SET( CMAKE_C_FLAGS_RELEASE " ${BUILD_OPT} ${CPU_OPTS} -DNV_CUBE_MAP -DBOOST_PYTHON_NO_PY_SIGNATURES -include config.h -pipe -Wall -Wno-unused-function -Wno-unused-variable -fvisibility=hidden" CACHE STRING
     "Flags used by the C compiler during release builds." 
     FORCE )
 SET(CMAKE_EXE_LINKER_FLAGS_RELEASE "-Bsymbolic" CACHE STRING "Release linker flags"
@@ -634,19 +629,19 @@ MARK_AS_ADVANCED(
     CMAKE_CXX_FLAGS_RELEASE
     CMAKE_EXE_LINKER_FLAGS_RELEASE)
 IF("${CMAKE_BUILD_TYPE}" STREQUAL "Release")
-	MARK_AS_ADVANCED( CLEAR
-    	CMAKE_CXX_FLAGS_RELEASE )
+    MARK_AS_ADVANCED( CLEAR
+        CMAKE_CXX_FLAGS_RELEASE )
 ELSE("${CMAKE_BUILD_TYPE}" STREQUAL "Release")
-	MARK_AS_ADVANCED( FORCE
-		CMAKE_CXX_FLAGS_RELEASE )
+    MARK_AS_ADVANCED( FORCE
+      CMAKE_CXX_FLAGS_RELEASE )
 ENDIF("${CMAKE_BUILD_TYPE}" STREQUAL "Release")
 
+
 # Profiler Target block
-# 2019-10-14 stephengtuggy - Each -D clause needs a space between it and the variable name to take effect
-SET(CMAKE_CXX_FLAGS_PROFILER " ${BUILD_OPT} ${CPU_OPTS} -pg -g2 -D NV_CUBE_MAP=1 -D BOOST_PYTHON_NO_PY_SIGNATURES=1 -include config.h -pipe -Wall -Wno-unused-function -Wno-unused-variable" CACHE STRING
+SET(CMAKE_CXX_FLAGS_PROFILER " ${BUILD_OPT} ${CPU_OPTS} -pg -g2 -DNV_CUBE_MAP -DBOOST_PYTHON_NO_PY_SIGNATURES -include config.h -pipe -std=c++11 -Wall -Wno-unused-function -Wno-unused-variable" CACHE STRING
     "Flags used by the C++ compiler during profiler builds."
      FORCE )
-SET( CMAKE_C_FLAGS_PROFILER " ${BUILD_OPT} ${CPU_OPTS} -pg -g2 -D NV_CUBE_MAP=1 -D BOOST_PYTHON_NO_PY_SIGNATURES=1 -include config.h -pipe -Wall -Wno-unused-function -Wno-unused-variable" CACHE STRING
+SET( CMAKE_C_FLAGS_PROFILER " ${BUILD_OPT} ${CPU_OPTS} -pg -g2 -DNV_CUBE_MAP -DBOOST_PYTHON_NO_PY_SIGNATURES -include config.h -pipe -Wall -Wno-unused-function -Wno-unused-variable" CACHE STRING
     "Flags used by the C compiler during profiler builds."
      FORCE )
 SET( CMAKE_EXE_LINKER_FLAGS_PROFILER
@@ -688,46 +683,39 @@ check_type_size("void*" SIZEOF_VOID_P BUILTIN_TYPES_ONLY)
 # Let cmake find our in-tree modules
 SET(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${vsUTCS_SOURCE_DIR})
 
-# Configurable python version (some data sets might need 3.x, some 2.x)
-SET(VS_PYTHON_VERSION 2 CACHE STRING "Python version to build against: 2, 3, 2.x, 3.x")
-SET(Python_ADDITIONAL_VERSIONS 3.3mu 3.3m 3.2mu 3.2m)
 
-find_package(PythonLibs ${VS_PYTHON_VERSION} REQUIRED)
-IF(PYTHONLIBS_FOUND OR PYTHON_LIBRARIES AND PYTHON_INCLUDE_PATH)
-    message("Found Python " ${PYTHONLIBS_VERSION_STRING})
-    # Multi-arch systems with python 3.3 need to check 64bit include dir
-    # and the regular generic include dir, cmake's python search doesn't do that
-    # This is a hack block to workaround it until we decide to include our own 
-    # python search and fix it.  
-    # If the additional include dir doesn't match everyone's setup, add other versions (mu)
-    string(REGEX MATCH "3\\.3\\..*" FOUND_33 "${PYTHONLIBS_VERSION_STRING}")
-    IF(FOUND_33 AND SIZEOF_VOID_P EQUAL 8)
-       #  THIS IS 64 bit and version 3.3 ####################
-       SET(TST_INCLUDES ${PYTHON_INCLUDE_PATH} "/usr/include/x86_64-linux-gnu/python3.3m")
-    ELSE(FOUND_33 AND SIZEOF_VOID_P EQUAL 8)
-       IF(FOUND_33)
-          #  THIS IS 32bit and 3.3       #######################
-          SET(TST_INCLUDES ${PYTHON_INCLUDE_PATH} "/usr/include/i386-linux-gnu/python3.3m")
-       ELSE(FOUND_33)
-          #  THIS IS NOT 3.3 so who cares   ####################
-          SET(TST_INCLUDES ${PYTHON_INCLUDE_PATH})
-       ENDIF(FOUND_33)
-   ENDIF(FOUND_33 AND SIZEOF_VOID_P EQUAL 8)
-   #  What the above block says is if we're 3.3 then our distro may be putting
-   #  pyconfig.h in a arch specific dir. This is not included by default yet
-   #  If we're not 3.3 then do the normal thing
-       
-   SET(TST_LIBS ${PYTHON_LIBRARIES})
-   SET(HAVE_PYTHON 1)
-ELSE(PYTHONLIBS_FOUND OR PYTHON_LIBRARIES AND PYTHON_INCLUDE_PATH)
-    message(FATAL_ERROR "Can't find python3")
-ENDIF(PYTHONLIBS_FOUND OR PYTHON_LIBRARIES AND PYTHON_INCLUDE_PATH)
+# Python 3 has a SASL compatibility issue which causes an error
+# on some installations that prefer Python 3
+# -- Python 2.7 is default for now
+OPTION(USE_PYTHON_3 "Use Python 3 instead of Python 2.7 (default is 2.7)" OFF)
+IF(USE_PYTHON_3)
+# We want at least Python 3.4, but we prefer newer versions
+    SET(Python_ADDITIONAL_VERSIONS 3.8 3.6 3.5 3.4)
+ELSE(USE_PYTHON_3)
+    SET(Python_ADDITIONAL_VERSIONS 2.7)
+ENDIF(USE_PYTHON_3)
+# If we don't unset cache variables
+# ccmake won't pick up changes to the USE_PYTHON_3 option
+UNSET(PYTHON_INCLUDE_DIR CACHE)
+UNSET(PYTHON_LIBRARY CACHE)
+# The python version we want is set via Python_ADDITIONAL_VERSIONS
+find_package(PythonLibs REQUIRED)
+message("++ Python release(s) searched for : ${Python_ADDITIONAL_VERSIONS}")
+message("++ Python library : ${PYTHON_LIBRARY} (${PYTHONLIBS_VERSION_STRING})") 
+message("++ Python include dir : ${PYTHON_INCLUDE_DIR}")
+IF(PYTHONLIBS_FOUND OR PYTHON_LIBRARIES AND PYTHON_INCLUDE_DIRS)
+    SET(TST_INCLUDES ${PYTHON_INCLUDE_DIRS})
+    SET(TST_LIBS ${PYTHON_LIBRARIES})
+    SET(HAVE_PYTHON 1)
+ELSE(PYTHONLIBS_FOUND OR PYTHON_LIBRARIES AND PYTHON_INCLUDE_DIRS)
+    message(FATAL_ERROR "Can't find python")
+ENDIF(PYTHONLIBS_FOUND OR PYTHON_LIBRARIES AND PYTHON_INCLUDE_DIRS)
+
 
 # Find Boost with boost_python library
 OPTION(USE_SYSTEM_BOOST "Use system boost" OFF)
 IF(USE_SYSTEM_BOOST)
-  # 2019-10-14 stephengtuggy - Add Boost.Log stuff
-  find_package( Boost COMPONENTS python log log_setup )
+  find_package(Boost COMPONENTS python)
   IF(Boost_FOUND)
     message("++ Found System Boost : ${Boost_VERSION}")
     SET(BOOST_PYTHON_NO_PY_SIGNATURES 1)
@@ -741,28 +729,27 @@ ENDIF(USE_SYSTEM_BOOST)
 
 IF(NOT USE_SYSTEM_BOOST)
     message("++ Using Internal Boost")
-    # 2019-10-14 stephengtuggy - I think we need to allow specifying a custom Boost directory location
-    # # This is just to cleanup advanced variable viewing, since they're not used anyway
-    # UNSET(Boost_INCLUDE_DIRS)
-    # UNSET(Boost_LIBRARIES)
-    # UNSET(Boost_INCLUDE_DIR)
-    # UNSET(Boost_LIBRARY_DIRS)
-    # UNSET(Boost_PYTHON_LIBRARY)
-    # UNSET(Boost_PYTHON_LIBRARY_DEBUG)
-    # UNSET(Boost_PYTHON_LIBRARY_RELEASE)
-    # SET(Boost_DIR 1_53_0)
+    # This is just to cleanup advanced variable viewing, since they're not used anyway
+    UNSET(Boost_INCLUDE_DIRS)
+    UNSET(Boost_LIBRARIES)
+    UNSET(Boost_INCLUDE_DIR)
+    UNSET(Boost_LIBRARY_DIRS)
+    UNSET(Boost_PYTHON_LIBRARY)
+    UNSET(Boost_PYTHON_LIBRARY_DEBUG)
+    UNSET(Boost_PYTHON_LIBRARY_RELEASE)
+    SET(Boost_DIR 1_64)
     SET(BOOST_PYTHON_NO_PY_SIGNATURES 1)
-    # SET(TST_INCLUDES ${TST_INCLUDES} ${vsUTCS_SOURCE_DIR}/boost/1_53)
-    SET(TST_LIBS ${TST_LIBS} ${Boost_LIBRARIES})
+    SET(TST_INCLUDES ${TST_INCLUDES} ${vsUTCS_SOURCE_DIR}/boost/${Boost_DIR})
+    SET(TST_LIBS ${TST_LIBS} boost_python)
     include_directories(${TST_INCLUDES})
-    # add_subdirectory(boost/1_53)
-    # 2019-10-14 stephengtuggy - These clauses didn't work right
-    # IF(NOT DISABLE_CLIENT)
-    #     add_dependencies(vegastrike boost_python )
-    # ENDIF(NOT DISABLE_CLIENT)
-    # IF(NOT DISABLE_SERVER)
-    #     add_dependencies(vegaserver boost_python )
-    # ENDIF(NOT DISABLE_SERVER)
+    add_subdirectory(boost/${Boost_DIR})
+    message("++ boost dir: boost/${Boost_DIR}")
+    IF(NOT DISABLE_CLIENT)
+      add_dependencies(vegastrike boost_python)
+    ENDIF(NOT DISABLE_CLIENT)
+    IF(NOT DISABLE_SERVER)
+      add_dependencies(vegaserver boost_python)
+    ENDIF(NOT DISABLE_SERVER)
 ENDIF(NOT USE_SYSTEM_BOOST)
 
 IF(NOT DISABLE_CLIENT) ##########
@@ -874,23 +861,23 @@ ENDIF (NOT BEOS)
 
 #Find FFMpeg
 
-OPTION(DISABLE_FFMPEG "Disable ffmpeg codecs" OFF)
+OPTION(DISABLE_FFMPEG "Disable ffmpeg codecs" ON)
 
 IF(NOT DISABLE_FFMPEG)
   find_package(FFMPEG)
   IF(FFMPEG_FOUND)
-	  SET(TST_INCLUDES ${TST_INCLUDES} ${FFMPEG_INCLUDE_DIRS})
-	  SET(TST_LIBS ${TST_LIBS} ${FFMPEG_LIBRARIES})
-	  add_definitions(${FFMPEG_DEFINITIONS})
-	  SET(HAVE_FFMPEG 1 )
+      SET(TST_INCLUDES ${TST_INCLUDES} ${FFMPEG_INCLUDE_DIRS})
+      SET(TST_LIBS ${TST_LIBS} ${FFMPEG_LIBRARIES})
+      add_definitions(${FFMPEG_DEFINITIONS})
+      SET(HAVE_FFMPEG 1 )
     message("++ FFmpeg found.")
-	  IF(swscale1_FOUND)
+     IF(swscale1_FOUND)
           message("++ FFmpeg's libswscale found.")
-	  ELSE(swscale1_FOUND)
+      ELSE(swscale1_FOUND)
           message("-- FFMpeg's libswscale not found... depending on your ffmpeg version, VS might not build.")
-	  ENDIF(swscale1_FOUND)
+      ENDIF(swscale1_FOUND)
   ELSE(FFMPEG_FOUND)
-	  message("-- FFMPEG Not Found")
+      message("-- FFMPEG Not Found")
   ENDIF(FFMPEG_FOUND)
 ELSE(NOT DISABLE_FFMPEG)
   message("-- FFMPEG disabled")
@@ -898,7 +885,8 @@ ENDIF(NOT DISABLE_FFMPEG)
 
 #Find Ogre
 
-OPTION(DISABLE_OGRE "Disable Ogre-mesh support in mesh tool" OFF)
+# current OGRE 1.12 is not compatible
+OPTION(DISABLE_OGRE "Disable Ogre-mesh support in mesh tool" ON)
 
 IF(NOT DISABLE_OGRE)
   find_package(OGRE)
@@ -931,7 +919,6 @@ OPTION(USE_NET_THREAD_POSIX "Enable Posix net threads" OFF)
 if(NOT USE_NET_THREAD_POSIX)
 	SET(USE_NET_THREAD_NONE 1)
 endif(NOT USE_NET_THREAD_POSIX)
-
 
 
 #config.h generation
@@ -1007,72 +994,72 @@ add_subdirectory(objconv)
 
 IF(NOT DISABLE_SERVER)
 target_link_libraries(vegaserver ${TST_SERVER_LIBS})
-# 2019-10-14 stephengtuggy - Each -D clause needs a space between it and the variable name to take effect
 set_target_properties(vegaserver PROPERTIES LINK_FLAGS "-L/usr/lib -L${vsUTCS_BINARY_DIR}"
-                                            COMPILE_FLAGS "-D NO_GFX=1")
+                                            COMPILE_FLAGS "-DNO_GFX")
 add_dependencies(vegaserver mesh_tool)
 add_dependencies(vegaserver vssetup)
 ENDIF(NOT DISABLE_SERVER)
 
-# Debug crap 
+# show debug output 
 get_directory_property(TEMP_DIRECTORY INCLUDE_DIRECTORIES)
 message("Default build type is Release, no cpu opts enabled. ")
+message("Building with BUILD_OPT: ${BUILD_OPT}")
 #message("Building with CFLAGS: ${CMAKE_CXX_FLAGS}")
 #message("Linking with : ${TST_LIBS}")
 #message("including : ${TEMP_DIRECTORY}")
-# End Debug Crap 
+# end debug output 
 
 MARK_AS_ADVANCED(FORCE
-	Boost_DIR
-	AVCODEC_FOUND
-	AVFORMAT_FOUND
-	AVUTIL_FOUND
-	AVCODEC_LIBRARY
-	AVCODEC_INCLUDE_DIR
-	AVUTIL_INCLUDE_DIR
-	AVFORMAT_LIBRARY
-	AVUTIL_LIBRARY
-	SWSCALE_INCLUDE_DIR
-	SWSCALE_LIBRARY
-	AVFORMAT_INCLUDE_DIR
-	HAVE_AVFORMAT_H
-	HAVE_AVCODEC_H
-	HAVE_AVIO_H
-	HAVE_FFMPEG_SWSCALE_H
-	CMAKE_BACKWARDS_COMPATIBILITY
-	FFMPEG_INCLUDE_DIR
-	FFMPEG_FOUND
-	FFMPEG_LIBRARIES
-	FFMPEG_DEFINITIONS
-	GTK2_ATK_INCLUDE_DIR
-	GTK2_ATK_LIBRARY
-	GTK2_CAIRO_INCLUDE_DIR
-	GTK2_CAIRO_LIBRARY
-	GTK2_GDK_INCLUDE_DIR
-	GTK2_GDK_LIBRARY
-	GTK2_GDK_PIXBUF_LIBRARY
-	GTK2_GDK_PIXBUF_INCLUDE_DIR
-	GTK2_GLIBCONFIG_INCLUDE_DIR
-	GTK2_GLIB_INCLUDE_DIR
-	GTK2_GLIB_LIBRARY
-	GTK2_GMODULE_LIBRARY
-	GTK2_GOBJECT_LIBRARY
-	GTK2_PANGO_INCLUDE_DIR
-	GTK2_PANGO_LIBRARY
-	GTK2_GTHREAD_LIBRARY
-	GTK2_GTKGL_INCLUDE_DIR
-	GTK2_GTKGL_LIBRARY
-	GTK2_GTK_INCLUDE_DIR
-	GTK2_GTK_LIBRARY
-	LIBRARY_OUTPUT_PATH
-	OPENAL_INCLUDE_DIR
-	OPENAL_LIBRARY
-	SDLMAIN_LIBRARY
-	SDL_INCLUDE_DIR
-	SDL_LIBRARY
-	UTIL_LIB
-	ogg_INCLUDE_DIR
-	ogg_LIBRARY
-	vorbis_INCLUDE_DIR
-	vorbis_LIBRARY
-	vorbisfile_LIBRARY )
+    Boost_DIR
+    AVCODEC_FOUND
+    AVFORMAT_FOUND
+    AVUTIL_FOUND
+    AVCODEC_LIBRARY
+    AVCODEC_INCLUDE_DIR
+    AVUTIL_INCLUDE_DIR
+    AVFORMAT_LIBRARY
+    AVUTIL_LIBRARY
+    SWSCALE_INCLUDE_DIR
+    SWSCALE_LIBRARY
+    AVFORMAT_INCLUDE_DIR
+    HAVE_AVFORMAT_H
+    HAVE_AVCODEC_H
+    HAVE_AVIO_H
+    HAVE_FFMPEG_SWSCALE_H
+    CMAKE_BACKWARDS_COMPATIBILITY
+    FFMPEG_INCLUDE_DIR
+    FFMPEG_FOUND
+    FFMPEG_LIBRARIES
+    FFMPEG_DEFINITIONS
+    GTK2_ATK_INCLUDE_DIR
+    GTK2_ATK_LIBRARY
+    GTK2_CAIRO_INCLUDE_DIR
+    GTK2_CAIRO_LIBRARY
+    GTK2_GDK_INCLUDE_DIR
+    GTK2_GDK_LIBRARY
+    GTK2_GDK_PIXBUF_LIBRARY
+    GTK2_GDK_PIXBUF_INCLUDE_DIR
+    GTK2_GLIBCONFIG_INCLUDE_DIR
+    GTK2_GLIB_INCLUDE_DIR
+    GTK2_GLIB_LIBRARY
+    GTK2_GMODULE_LIBRARY
+    GTK2_GOBJECT_LIBRARY
+    GTK2_PANGO_INCLUDE_DIR
+    GTK2_PANGO_LIBRARY
+    GTK2_GTHREAD_LIBRARY
+    GTK2_GTKGL_INCLUDE_DIR
+    GTK2_GTKGL_LIBRARY
+    GTK2_GTK_INCLUDE_DIR
+    GTK2_GTK_LIBRARY
+    LIBRARY_OUTPUT_PATH
+    OPENAL_INCLUDE_DIR
+    OPENAL_LIBRARY
+    SDLMAIN_LIBRARY
+    SDL_INCLUDE_DIR
+    SDL_LIBRARY
+    UTIL_LIB
+    ogg_INCLUDE_DIR
+    ogg_LIBRARY
+    vorbis_INCLUDE_DIR
+    vorbis_LIBRARY
+    vorbisfile_LIBRARY )

@@ -226,8 +226,7 @@ void LoadConfig( void )
     }
 }
 
-void Modconfig( int setting, char *name, char *group )
-{
+void Modconfig( int setting, const char *name, const char *group ) {
     FILE *rp, *wp;              //read and write
     char  line[MAX_READ+1], write[MAX_READ+1], mid[MAX_READ+1];
     char *p, *parm, *n_parm, *start_write, *end_write;
@@ -373,13 +372,10 @@ void Modconfig( int setting, char *name, char *group )
     fclose( wp );
 }
 
-void EnableSetting( char *name, char *group )
-{
+void EnableSetting( const char *name, const char *group ) {
     Modconfig( 2, name, group );
 }
 
-void DisableSetting( char *name, char *group )
-{
+void DisableSetting( const char *name, const char *group ) {
     Modconfig( 1, name, group );
 }
-

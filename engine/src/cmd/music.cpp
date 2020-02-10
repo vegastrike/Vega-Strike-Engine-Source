@@ -279,9 +279,9 @@ readerThread(
             if (foundcache) {
                 *me->music_load_info = wherecache->second;
                 me->freeWav = false;
-            } else if (!AUDLoadSoundFile(songname, me->music_load_info, true)) {
-                BOOST_LOG_TRIVIAL(info) << boost::format("Failed to load music file \"%1%\"") % songname;
-            }
+            } //else if (!AUDLoadSoundFile(songname, me->music_load_info, true)) {
+                //BOOST_LOG_TRIVIAL(info) << boost::format("Failed to load music file \"%1%\"") % songname;
+            //}
         }
         if (me->freeWav && docacheme) {
             me->freeWav = false;

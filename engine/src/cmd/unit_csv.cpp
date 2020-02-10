@@ -17,10 +17,10 @@
 #include <algorithm>
 #include "lin_time.h"
 #include "unit_const_cache.h"
-#define VS_PI 3.1415926535897931
+#include "vs_math.h"
 
-CSVRow LookupUnitRow( const string &unitname, const string &faction )
-{
+
+CSVRow LookupUnitRow( const string &unitname, const string &faction ) {
     string hashname = unitname+"__"+faction;
     for (vector< CSVTable* >::reverse_iterator i = unitTables.rbegin(); i != unitTables.rend(); ++i) {
         unsigned int where;

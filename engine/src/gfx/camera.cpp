@@ -124,7 +124,12 @@ void Camera::UpdateGFX( GFXBOOL clip,
 #ifdef PERFRAMESOUND
     AUDListenerOrientation( P, Q, R );
 #endif
-    
+
+    if (centerCamera)
+        GFXSetLightOffset(-Coord.Cast());
+    else
+        GFXSetLightOffset(Vector(0,0,0));
+   
 }
 
 void Camera::UpdateCameraSounds()
