@@ -1,7 +1,8 @@
 #====================================
 # @file   : CMakeLists.txt
 # @version: 2020-02-11
-# @created: ????
+# @created: 2008-06-08
+# @author : safemode
 # @author : Anth0rx
 # @author : pyramid
 # @author : vegastrike development team
@@ -46,398 +47,432 @@ include_directories(
     /usr/include/harfbuzz/
 ) 
 
-add_library(netlowlevel    src/networking/lowlevel/netbuffer.cpp
-						   src/networking/lowlevel/netui.cpp
-						   src/networking/lowlevel/packet.cpp
-						   src/networking/lowlevel/packetmem.cpp
-						   src/networking/lowlevel/vsnet_address.cpp
-						   src/networking/lowlevel/vsnet_clientstate.cpp
-						   src/networking/lowlevel/vsnet_cmd.cpp
-						   src/networking/lowlevel/vsnet_debug.cpp
-						   src/networking/lowlevel/vsnet_dloadenum.cpp
-						   src/networking/lowlevel/vsnet_dloadmgr.cpp
-						   src/networking/lowlevel/vsnet_notify.cpp
-						   src/networking/lowlevel/vsnet_oss.cpp
-						   src/networking/lowlevel/vsnet_parsecmd.cpp
-						   src/networking/lowlevel/vsnet_pipe.cpp
-						   src/networking/lowlevel/vsnet_serversocket.cpp
-						   src/networking/lowlevel/vsnet_socket.cpp
-						   src/networking/lowlevel/vsnet_socketbase.cpp
-						   src/networking/lowlevel/vsnet_socketflags.cpp
-						   src/networking/lowlevel/vsnet_sockethttp.cpp
-						   src/networking/lowlevel/vsnet_socketset.cpp
-						   src/networking/lowlevel/vsnet_sockettcp.cpp
-						   src/networking/lowlevel/vsnet_socketudp.cpp
-						   src/networking/lowlevel/vsnet_thread_non.cpp
-						   src/networking/lowlevel/vsnet_thread_p.cpp 
-						   src/networking/lowlevel/vsnet_thread_sdl.cpp )
+add_library(netlowlevel
+    src/networking/lowlevel/netbuffer.cpp
+    src/networking/lowlevel/netui.cpp
+    src/networking/lowlevel/packet.cpp
+    src/networking/lowlevel/packetmem.cpp
+    src/networking/lowlevel/vsnet_address.cpp
+    src/networking/lowlevel/vsnet_clientstate.cpp
+    src/networking/lowlevel/vsnet_cmd.cpp
+    src/networking/lowlevel/vsnet_debug.cpp
+    src/networking/lowlevel/vsnet_dloadenum.cpp
+    src/networking/lowlevel/vsnet_dloadmgr.cpp
+    src/networking/lowlevel/vsnet_notify.cpp
+    src/networking/lowlevel/vsnet_oss.cpp
+    src/networking/lowlevel/vsnet_parsecmd.cpp
+    src/networking/lowlevel/vsnet_pipe.cpp
+    src/networking/lowlevel/vsnet_serversocket.cpp
+    src/networking/lowlevel/vsnet_socket.cpp
+    src/networking/lowlevel/vsnet_socketbase.cpp
+    src/networking/lowlevel/vsnet_socketflags.cpp
+    src/networking/lowlevel/vsnet_sockethttp.cpp
+    src/networking/lowlevel/vsnet_socketset.cpp
+    src/networking/lowlevel/vsnet_sockettcp.cpp
+    src/networking/lowlevel/vsnet_socketudp.cpp
+    src/networking/lowlevel/vsnet_thread_non.cpp
+    src/networking/lowlevel/vsnet_thread_p.cpp 
+    src/networking/lowlevel/vsnet_thread_sdl.cpp
+)
 
-SET(LIBNET_SOURCES src/networking/inet_file.cpp 
-				   src/networking/inet.cpp )
+SET(LIBNET_SOURCES
+    src/networking/inet_file.cpp 
+    src/networking/inet.cpp
+)
 
-add_library(netgeneric    src/networking/accountsxml.cpp
-						  src/networking/client.cpp
-						  src/networking/fileutil.cpp
-						  src/networking/savenet_util.cpp
-						  src/networking/cubicsplines.cpp
-						  src/networking/mangle.cpp
-						  src/networking/netclient_clients.cpp
-						  src/networking/netclient_devices.cpp 
-						  src/networking/netclient_login.cpp
-						  src/networking/netclient.cpp
-						  src/networking/netserver_acct.cpp
-						  src/networking/netserver_clients.cpp
-						  src/networking/netserver_devices.cpp
-						  src/networking/netserver_login.cpp
-						  src/networking/netserver_net.cpp
-						  src/networking/netserver.cpp 
-						  src/networking/prediction.cpp
-						  src/networking/zonemgr.cpp )
+add_library(netgeneric
+    src/networking/accountsxml.cpp
+    src/networking/client.cpp
+    src/networking/fileutil.cpp
+    src/networking/savenet_util.cpp
+    src/networking/cubicsplines.cpp
+    src/networking/mangle.cpp
+    src/networking/netclient_clients.cpp
+    src/networking/netclient_devices.cpp 
+    src/networking/netclient_login.cpp
+    src/networking/netclient.cpp
+    src/networking/netserver_acct.cpp
+    src/networking/netserver_clients.cpp
+    src/networking/netserver_devices.cpp
+    src/networking/netserver_login.cpp
+    src/networking/netserver_net.cpp
+    src/networking/netserver.cpp 
+    src/networking/prediction.cpp
+    src/networking/zonemgr.cpp
+)
 
-SET(LIBNETCLIENT_SOURCES src/networking/networkcomm.cpp
-						 src/networking/webcam_support.cpp )
+SET(LIBNETCLIENT_SOURCES
+    src/networking/networkcomm.cpp
+    src/networking/webcam_support.cpp
+)
 
 SET(LIBNETSERVER_SOURCES src/networking/networkcomm_server.cpp )
 
-SET(LIBGUI_SOURCES src/gui/button.cpp
-				   src/gui/control.cpp
-				   src/gui/eventmanager.cpp
-				   src/gui/eventresponder.cpp 
-				   src/gui/font.cpp
-				   src/gui/glut_support.cpp
-				   src/gui/groupcontrol.cpp
-				   src/gui/guidefs.cpp
-				   src/gui/guitexture.cpp
-				   src/gui/modaldialog.cpp
-				   src/gui/newbutton.cpp
-				   src/gui/painttext.cpp
-				   src/gui/picker.cpp
-				   src/gui/scroller.cpp
-				   src/gui/simplepicker.cpp
-				   src/gui/slider.cpp
-				   src/gui/staticdisplay.cpp
-				   src/gui/text_area.cpp
-				   src/gui/textinputdisplay.cpp
-				   src/gui/window.cpp
-				   src/gui/windowcontroller.cpp )
+SET(LIBGUI_SOURCES
+    src/gui/button.cpp
+    src/gui/control.cpp
+    src/gui/eventmanager.cpp
+    src/gui/eventresponder.cpp 
+    src/gui/font.cpp
+    src/gui/glut_support.cpp
+    src/gui/groupcontrol.cpp
+    src/gui/guidefs.cpp
+    src/gui/guitexture.cpp
+    src/gui/modaldialog.cpp
+    src/gui/newbutton.cpp
+    src/gui/painttext.cpp
+    src/gui/picker.cpp
+    src/gui/scroller.cpp
+    src/gui/simplepicker.cpp
+    src/gui/slider.cpp
+    src/gui/staticdisplay.cpp
+    src/gui/text_area.cpp
+    src/gui/textinputdisplay.cpp
+    src/gui/window.cpp
+    src/gui/windowcontroller.cpp
+)
 
-SET(LIBPYTHON_SOURCES src/python/init.cpp
-					  src/python/python_compile.cpp
-					  src/python/unit_exports.cpp
-					  src/python/unit_exports1.cpp
-					  src/python/unit_exports2.cpp
-					  src/python/unit_exports3.cpp 
-					  src/python/unit_method_defs.cpp
-					  src/python/unit_wrapper.cpp
-					  src/python/universe_util_export.cpp )
-					  				   
-SET(LIBSCRIPT_SOURCES src/cmd/script/director_generic.cpp
-					  src/cmd/script/mission_script.cpp
-					  src/cmd/script/mission.cpp
-					  src/cmd/script/msgcenter.cpp
-					  src/cmd/script/pythonmission.cpp
-					  src/cmd/script/script_call_olist.cpp
-					  src/cmd/script/script_call_omap.cpp
-					  src/cmd/script/script_call_order.cpp
-					  src/cmd/script/script_call_string.cpp
-					  src/cmd/script/script_call_unit_generic.cpp
-					  src/cmd/script/script_callbacks.cpp
-					  src/cmd/script/script_expression.cpp
-					  src/cmd/script/script_generic.cpp
-					  src/cmd/script/script_statement.cpp
-					  src/cmd/script/script_util.cpp
-					  src/cmd/script/script_variables.cpp )
-					  
-SET(LIBCMDSCRIPTSERVER_SOURCES src/cmd/script/flightgroup_server.cpp
-							   src/cmd/script/script_call_unit_server.cpp
-							   src/cmd/script/c_alike/c_alike.tab.cpp
-							   src/cmd/script/c_alike/lex.yy.cpp )
+SET(LIBPYTHON_SOURCES
+    src/python/init.cpp
+    src/python/python_compile.cpp
+    src/python/unit_exports.cpp
+    src/python/unit_exports1.cpp
+    src/python/unit_exports2.cpp
+    src/python/unit_exports3.cpp 
+    src/python/unit_method_defs.cpp
+    src/python/unit_wrapper.cpp
+    src/python/universe_util_export.cpp
+)
 
+SET(LIBSCRIPT_SOURCES
+    src/cmd/script/director_generic.cpp
+    src/cmd/script/mission_script.cpp
+    src/cmd/script/mission.cpp
+    src/cmd/script/msgcenter.cpp
+    src/cmd/script/pythonmission.cpp
+    src/cmd/script/script_call_olist.cpp
+    src/cmd/script/script_call_omap.cpp
+    src/cmd/script/script_call_order.cpp
+    src/cmd/script/script_call_string.cpp
+    src/cmd/script/script_call_unit_generic.cpp
+    src/cmd/script/script_callbacks.cpp
+    src/cmd/script/script_expression.cpp
+    src/cmd/script/script_generic.cpp
+    src/cmd/script/script_statement.cpp
+    src/cmd/script/script_util.cpp
+    src/cmd/script/script_variables.cpp
+)
 
-SET(LIBAI_SOURCES src/cmd/ai/aggressive.cpp
-				  src/cmd/ai/autodocking.cpp
-				  src/cmd/ai/comm_ai.cpp
-				  src/cmd/ai/communication_xml.cpp
-				  src/cmd/ai/communication.cpp
-				  src/cmd/ai/docking.cpp
-				  src/cmd/ai/event_xml.cpp
-				  src/cmd/ai/fire.cpp
-				  src/cmd/ai/fireall.cpp
-				  src/cmd/ai/flybywire.cpp
-				  src/cmd/ai/hard_coded_scripts.cpp
-				  src/cmd/ai/ikarus.cpp
-				  src/cmd/ai/missionscript.cpp
-				  src/cmd/ai/navigation.cpp
-				  src/cmd/ai/order_comm.cpp
-				  src/cmd/ai/order.cpp
-				  src/cmd/ai/script.cpp
-				  src/cmd/ai/tactics.cpp
-				  src/cmd/ai/turretai.cpp
-				  src/cmd/ai/warpto.cpp
-				  src/cmd/ai/flykeyboard_generic.cpp)
-
-add_library(OPcollide  src/cmd/collide2/Ice/IceAABB.cpp
-			   		   src/cmd/collide2/Ice/IceContainer.cpp
-			   		   src/cmd/collide2/Ice/IceHPoint.cpp
-			   		   src/cmd/collide2/Ice/IceIndexedTriangle.cpp
-			   		   src/cmd/collide2/Ice/IceMatrix3x3.cpp
-			   		   src/cmd/collide2/Ice/IceMatrix4x4.cpp
-			   		   src/cmd/collide2/Ice/IceOBB.cpp
-			   		   src/cmd/collide2/Ice/IcePlane.cpp
-			   		   src/cmd/collide2/Ice/IcePoint.cpp
-			   		   src/cmd/collide2/Ice/IceRandom.cpp
-			   		   src/cmd/collide2/Ice/IceRay.cpp
-			   		   src/cmd/collide2/Ice/IceRevisitedRadix.cpp
-			   		   src/cmd/collide2/Ice/IceSegment.cpp 
-			   		   src/cmd/collide2/Ice/IceTriangle.cpp
-			   		   src/cmd/collide2/Ice/IceUtils.cpp
-			   		   src/cmd/collide2/csgeom2/opbox.cpp
-			   		   src/cmd/collide2/csgeom2/opmatrix3.cpp
-			   		   src/cmd/collide2/csgeom2/opvector3.cpp
-			   		   src/cmd/collide2/OPC_AABBCollider.cpp
-			   		   src/cmd/collide2/OPC_AABBTree.cpp
-			   		   src/cmd/collide2/OPC_BaseModel.cpp
-			   		   src/cmd/collide2/OPC_BoxPruning.cpp
-			   		   src/cmd/collide2/OPC_Collider.cpp 
-			   		   src/cmd/collide2/OPC_Common.cpp
-			   		   src/cmd/collide2/OPC_HybridModel.cpp
-			   		   src/cmd/collide2/OPC_LSSCollider.cpp
-			   		   src/cmd/collide2/OPC_MeshInterface.cpp 
-			   		   src/cmd/collide2/OPC_Model.cpp
-			   		   src/cmd/collide2/OPC_OBBCollider.cpp 
-			   		   src/cmd/collide2/OPC_OptimizedTree.cpp 
-			   		   src/cmd/collide2/OPC_Picking.cpp 
-			   		   src/cmd/collide2/OPC_PlanesCollider.cpp 
-			   		   src/cmd/collide2/OPC_RayCollider.cpp 
-			   		   src/cmd/collide2/OPC_SphereCollider.cpp 
-			   		   src/cmd/collide2/OPC_SweepAndPrune.cpp 
-			   		   src/cmd/collide2/OPC_TreeBuilders.cpp 
-			   		   src/cmd/collide2/OPC_TreeCollider.cpp 
-			   		   src/cmd/collide2/OPC_VolumeCollider.cpp 
-			   		   src/cmd/collide2/CSopcodecollider.cpp )
-
-SET(LIBCMD_SOURCES src/cmd/alphacurve.cpp
-				   src/cmd/asteroid_generic.cpp
-				   src/cmd/beam_generic.cpp
-				   src/cmd/bolt_generic.cpp
-				   src/cmd/building_generic.cpp
-				   src/cmd/collection.cpp
-				   src/cmd/collide_map.cpp
-				   src/cmd/collide.cpp
-				   src/cmd/container.cpp
-				   src/cmd/csv.cpp
-				   src/cmd/missile_generic.cpp
-				   src/cmd/mount.cpp
-				   src/cmd/nebula_generic.cpp
-				   src/cmd/planet_generic.cpp
-				   src/cmd/role_bitmask.cpp
-				   src/cmd/unit_collide.cpp
-				   src/cmd/unit_const_cache.cpp
-				   src/cmd/unit_csv.cpp
-				   src/cmd/unit_factory_generic.cpp 
-				   src/cmd/unit_functions_generic.cpp 
-				   src/cmd/unit_generic.cpp 
-				   src/cmd/fg_util.cpp
-				   src/cmd/unit_util_generic.cpp
-				   src/cmd/unit_xml.cpp 
-				   src/cmd/weapon_xml.cpp )
-
-SET(LIBCMDSERVER_SOURCES src/cmd/atmosphere_server.cpp
-						 src/cmd/base_util_server.cpp
-						 src/cmd/beam_server.cpp
-						 src/cmd/bolt_server.cpp
-						 src/cmd/unit_factory_server.cpp
-						 src/cmd/unit_functions_server.cpp
-						 src/cmd/unit_util_server.cpp
-                         src/cmd/unit_server.cpp 
-                         src/cmd/pilot_server.cpp 
-                         src/cmd/images_server.cpp 
-                         src/cmd/faction_xml_server.cpp )
+SET(LIBCMDSCRIPTSERVER_SOURCES
+    src/cmd/script/flightgroup_server.cpp
+    src/cmd/script/script_call_unit_server.cpp
+    src/cmd/script/c_alike/c_alike.tab.cpp
+    src/cmd/script/c_alike/lex.yy.cpp
+)
 
 
-SET(LIBGFXGENERIC_SOURCES src/gfx/cockpit_generic.cpp
-						  src/gfx/lerp.cpp
-						  src/gfx/matrix.cpp
-						  src/gfx/mesh_bxm.cpp
-						  src/gfx/mesh_poly.cpp
-						  src/gfx/mesh_xml.cpp
-						  src/gfx/mesh.cpp
-						  src/gfx/quaternion.cpp
-                                                  src/gfx/soundcontainer_generic.cpp
-						  src/gfx/sphere_generic.cpp
-						  src/gfx/vec.cpp )
+SET(LIBAI_SOURCES
+    src/cmd/ai/aggressive.cpp
+    src/cmd/ai/autodocking.cpp
+    src/cmd/ai/comm_ai.cpp
+    src/cmd/ai/communication_xml.cpp
+    src/cmd/ai/communication.cpp
+    src/cmd/ai/docking.cpp
+    src/cmd/ai/event_xml.cpp
+    src/cmd/ai/fire.cpp
+    src/cmd/ai/fireall.cpp
+    src/cmd/ai/flybywire.cpp
+    src/cmd/ai/hard_coded_scripts.cpp
+    src/cmd/ai/ikarus.cpp
+    src/cmd/ai/missionscript.cpp
+    src/cmd/ai/navigation.cpp
+    src/cmd/ai/order_comm.cpp
+    src/cmd/ai/order.cpp
+    src/cmd/ai/script.cpp
+    src/cmd/ai/tactics.cpp
+    src/cmd/ai/turretai.cpp
+    src/cmd/ai/warpto.cpp
+    src/cmd/ai/flykeyboard_generic.cpp
+)
 
-SET(LIBGFXCLIENT_SOURCES src/gfx/ani_texture.cpp
-						 src/gfx/animation.cpp
-						 src/gfx/aux_logo.cpp
-						 src/gfx/aux_palette.cpp
-						 src/gfx/aux_texture.cpp
-						 src/gfx/background.cpp
-						 src/gfx/camera.cpp
-						 src/gfx/cockpit_xml.cpp
-						 src/gfx/cockpit.cpp
-						 src/gfx/coord_select.cpp
-						 src/gfx/env_map_gent.cpp
-						 src/gfx/gauge.cpp
-						 src/gfx/halo_system.cpp
-						 src/gfx/halo.cpp
-						 src/gfx/hud.cpp
-						 src/gfx/jpeg_memory.cpp
-						 src/gfx/loc_select.cpp
-						 src/gfx/masks.cpp
-                                                 src/gfx/mesh_bin.cpp
-						 src/gfx/mesh_fx.cpp
-						 src/gfx/mesh_gfx.cpp
-						 src/gfx/nav/criteria_xml.cpp
-						 src/gfx/nav/criteria.cpp
-						 src/gfx/nav/drawgalaxy.cpp
-						 src/gfx/nav/drawlist.cpp
-						 src/gfx/nav/drawsystem.cpp
-						 src/gfx/nav/navcomputer.cpp
-						 src/gfx/nav/navgetxmldata.cpp
-						 src/gfx/nav/navpath.cpp
-						 src/gfx/nav/navscreen.cpp
-						 src/gfx/nav/navscreenoccupied.cpp
-						 src/gfx/radar/bubble_display.cpp 
-						 src/gfx/radar/bubble_display.h 
-						 src/gfx/radar/dual_display.cpp 
-						 src/gfx/radar/dual_display.h 
-						 src/gfx/radar/null_display.h 
-						 src/gfx/radar/plane_display.cpp 
-						 src/gfx/radar/plane_display.h 
-						 src/gfx/radar/radar.cpp 
-						 src/gfx/radar/radar.h 
-						 src/gfx/radar/sensor.cpp 
-						 src/gfx/radar/sensor.h 
-						 src/gfx/radar/sphere_display.cpp 
-						 src/gfx/radar/sphere_display.h 
-						 src/gfx/radar/track.cpp 
-						 src/gfx/radar/track.h 
-						 src/gfx/radar/viewarea.cpp 
-						 src/gfx/radar/viewarea.h 
-						 src/gfx/particle.cpp
-						 src/gfx/pipelined_texture.cpp
-						 src/gfx/quadsquare_cull.cpp
-						 src/gfx/quadsquare_render.cpp
-						 src/gfx/quadsquare_update.cpp
-						 src/gfx/quadsquare.cpp
-						 src/gfx/quadtree_xml.cpp
-						 src/gfx/quadtree.cpp
-						 src/gfx/ring.cpp
-                                                 src/gfx/occlusion.cpp
-						 src/gfx/screenshot.cpp
-                                                 src/gfx/soundcontainer.cpp
-                                                 src/gfx/soundcontainer_aldrv.cpp
-						 src/gfx/sphere.cpp
-						 src/gfx/sprite.cpp 
-						 src/gfx/star.cpp
-						 src/gfx/stream_texture.cpp
-						 src/gfx/technique.cpp
-						 src/gfx/tex_transform.cpp
-						 src/gfx/vdu.cpp
-						 src/gfx/vid_file.cpp
-						 src/ffmpeg_init.cpp 
-						 src/gfx/vsbox.cpp
-						 src/gfx/vsimage.cpp 
-						 src/gfx/warptrail.cpp )
+add_library(OPcollide
+    src/cmd/collide2/Ice/IceAABB.cpp
+    src/cmd/collide2/Ice/IceContainer.cpp
+    src/cmd/collide2/Ice/IceHPoint.cpp
+    src/cmd/collide2/Ice/IceIndexedTriangle.cpp
+    src/cmd/collide2/Ice/IceMatrix3x3.cpp
+    src/cmd/collide2/Ice/IceMatrix4x4.cpp
+    src/cmd/collide2/Ice/IceOBB.cpp
+    src/cmd/collide2/Ice/IcePlane.cpp
+    src/cmd/collide2/Ice/IcePoint.cpp
+    src/cmd/collide2/Ice/IceRandom.cpp
+    src/cmd/collide2/Ice/IceRay.cpp
+    src/cmd/collide2/Ice/IceRevisitedRadix.cpp
+    src/cmd/collide2/Ice/IceSegment.cpp 
+    src/cmd/collide2/Ice/IceTriangle.cpp
+    src/cmd/collide2/Ice/IceUtils.cpp
+    src/cmd/collide2/csgeom2/opbox.cpp
+    src/cmd/collide2/csgeom2/opmatrix3.cpp
+    src/cmd/collide2/csgeom2/opvector3.cpp
+    src/cmd/collide2/OPC_AABBCollider.cpp
+    src/cmd/collide2/OPC_AABBTree.cpp
+    src/cmd/collide2/OPC_BaseModel.cpp
+    src/cmd/collide2/OPC_BoxPruning.cpp
+    src/cmd/collide2/OPC_Collider.cpp 
+    src/cmd/collide2/OPC_Common.cpp
+    src/cmd/collide2/OPC_HybridModel.cpp
+    src/cmd/collide2/OPC_LSSCollider.cpp
+    src/cmd/collide2/OPC_MeshInterface.cpp 
+    src/cmd/collide2/OPC_Model.cpp
+    src/cmd/collide2/OPC_OBBCollider.cpp 
+    src/cmd/collide2/OPC_OptimizedTree.cpp 
+    src/cmd/collide2/OPC_Picking.cpp 
+    src/cmd/collide2/OPC_PlanesCollider.cpp 
+    src/cmd/collide2/OPC_RayCollider.cpp 
+    src/cmd/collide2/OPC_SphereCollider.cpp 
+    src/cmd/collide2/OPC_SweepAndPrune.cpp 
+    src/cmd/collide2/OPC_TreeBuilders.cpp 
+    src/cmd/collide2/OPC_TreeCollider.cpp 
+    src/cmd/collide2/OPC_VolumeCollider.cpp 
+    src/cmd/collide2/CSopcodecollider.cpp
+)
 
-SET(LIBGFXSERVER_SOURCES src/gfx/sphere_server.cpp
-						 src/gfx/vsbox_server.cpp
-						 src/gfx/mesh_server.cpp 
-						 src/gfx/background_server.cpp
-                        src/gfx/mesh_bin_server.cpp )
+SET(LIBCMD_SOURCES
+    src/cmd/alphacurve.cpp
+    src/cmd/asteroid_generic.cpp
+    src/cmd/beam_generic.cpp
+    src/cmd/bolt_generic.cpp
+    src/cmd/building_generic.cpp
+    src/cmd/collection.cpp
+    src/cmd/collide_map.cpp
+    src/cmd/collide.cpp
+    src/cmd/container.cpp
+    src/cmd/csv.cpp
+    src/cmd/missile_generic.cpp
+    src/cmd/mount.cpp
+    src/cmd/nebula_generic.cpp
+    src/cmd/planet_generic.cpp
+    src/cmd/role_bitmask.cpp
+    src/cmd/unit_collide.cpp
+    src/cmd/unit_const_cache.cpp
+    src/cmd/unit_csv.cpp
+    src/cmd/unit_factory_generic.cpp 
+    src/cmd/unit_functions_generic.cpp 
+    src/cmd/unit_generic.cpp 
+    src/cmd/fg_util.cpp
+    src/cmd/unit_util_generic.cpp
+    src/cmd/unit_xml.cpp 
+    src/cmd/weapon_xml.cpp
+)
 
-#add_library(posh  src/posh.cpp )
+SET(LIBCMDSERVER_SOURCES
+    src/cmd/atmosphere_server.cpp
+    src/cmd/base_util_server.cpp
+    src/cmd/beam_server.cpp
+    src/cmd/bolt_server.cpp
+    src/cmd/unit_factory_server.cpp
+    src/cmd/unit_functions_server.cpp
+    src/cmd/unit_util_server.cpp
+    src/cmd/unit_server.cpp 
+    src/cmd/pilot_server.cpp 
+    src/cmd/images_server.cpp 
+    src/cmd/faction_xml_server.cpp
+)
 
-SET(LIBROOTGENERIC_SOURCES src/configxml.cpp
-						   src/easydom.cpp
-						   src/endianness.cpp
-						   src/macosx_math.cpp 
-						   src/faction_generic.cpp
-						   src/faction_util_generic.cpp
-						   src/galaxy_gen.cpp
-						   src/galaxy_xml.cpp
-						   src/galaxy.cpp
-						   src/hashtable.cpp
-						   src/lin_time.cpp
-						   src/load_mission.cpp
-						   src/pk3.cpp 
-						   src/posh.cpp
-						   src/savegame.cpp
-						   src/star_system_generic.cpp
-						   src/star_system_xml.cpp
-						   src/stardate.cpp 
-						   src/universe_generic.cpp
-						   src/universe_util_generic.cpp
-						   src/vs_globals.cpp
-						   src/vsfilesystem.cpp
-						   src/VSFileXMLSerializer.cpp
-						   src/xml_serializer.cpp
-						   src/xml_support.cpp
-						   src/XMLDocument.cpp
-						   src/options.cpp )
+SET(LIBGFXGENERIC_SOURCES
+    src/gfx/cockpit_generic.cpp
+    src/gfx/lerp.cpp
+    src/gfx/matrix.cpp
+    src/gfx/mesh_bxm.cpp
+    src/gfx/mesh_poly.cpp
+    src/gfx/mesh_xml.cpp
+    src/gfx/mesh.cpp
+    src/gfx/quaternion.cpp
+    src/gfx/soundcontainer_generic.cpp
+    src/gfx/sphere_generic.cpp
+    src/gfx/vec.cpp
+)
 
-SET(LIBROOTCLIENT_SOURCES src/cg_global.cpp
-						  src/command.cpp
-						  src/config_xml.cpp
-						  src/debug_vs.cpp
-						  src/faction_util.cpp
-						  src/force_feedback.cpp
-						  src/gamemenu.cpp
-						  src/gfxlib_struct.cpp
-						  src/in_joystick.cpp
-						  src/in_kb.cpp
-						  src/in_main.cpp
-						  src/in_mouse.cpp
-						  src/in_sdl.cpp 
-						  src/main_loop.cpp
-						  src/physics.cpp
-						  src/rendertext.cpp
-						  src/ship_commands.cpp
-						  src/star_system_jump.cpp
-						  src/star_system.cpp
-						  src/universe_util.cpp
-						  src/universe.cpp )
-						  
-SET(LIBROOTSERVER_SOURCES  src/force_feedback_server.cpp
-						   src/faction_util_server.cpp
-						   src/gfxlib_struct_server.cpp
-						   src/libaudioserver.cpp
-						   src/libserver.cpp
-						   src/universe_util_server.cpp )
-						   
-SET(LIBAUDIO_SOURCES src/audio/CodecRegistry.cpp
-                     src/audio/Listener.cpp
-                     src/audio/RenderableListener.cpp
-                     src/audio/RenderableSource.cpp
-                     src/audio/Renderer.cpp
-                     src/audio/Scene.cpp
-                     src/audio/SceneManager.cpp
-                     src/audio/SimpleScene.cpp
-                     src/audio/SimpleSound.cpp
-                     src/audio/SimpleSource.cpp
-                     src/audio/SoundBuffer.cpp
-                     src/audio/Sound.cpp
-                     src/audio/Source.cpp
-                     src/audio/SourceTemplate.cpp
-                     src/audio/Stream.cpp
-                     src/audio/TemplateManager.cpp
-                     src/audio/test.cpp
-                     src/audio/utils.cpp
-                     src/audio/codecs/Codec.cpp
-                     src/audio/codecs/FFCodec.cpp
-                     src/audio/codecs/FFStream.cpp
-                     src/audio/codecs/OggCodec.cpp
-                     src/audio/codecs/OggData.cpp
-                     src/audio/codecs/OggStream.cpp
-                     src/audio/renderers/OpenAL/OpenALHelpers.cpp
-                     src/audio/renderers/OpenAL/OpenALRenderableListener.cpp
-                     src/audio/renderers/OpenAL/OpenALRenderableSource.cpp
-                     src/audio/renderers/OpenAL/OpenALRenderableStreamingSource.cpp
-                     src/audio/renderers/OpenAL/OpenALRenderer.cpp
-                     src/audio/renderers/OpenAL/OpenALSimpleSound.cpp
-                     src/audio/renderers/OpenAL/OpenALStreamingSound.cpp
-                     )
+SET(LIBGFXCLIENT_SOURCES
+    src/gfx/ani_texture.cpp
+    src/gfx/animation.cpp
+    src/gfx/aux_logo.cpp
+    src/gfx/aux_palette.cpp
+    src/gfx/aux_texture.cpp
+    src/gfx/background.cpp
+    src/gfx/camera.cpp
+    src/gfx/cockpit_xml.cpp
+    src/gfx/cockpit.cpp
+    src/gfx/coord_select.cpp
+    src/gfx/env_map_gent.cpp
+    src/gfx/gauge.cpp
+    src/gfx/halo_system.cpp
+    src/gfx/halo.cpp
+    src/gfx/hud.cpp
+    src/gfx/jpeg_memory.cpp
+    src/gfx/loc_select.cpp
+    src/gfx/masks.cpp
+    src/gfx/mesh_bin.cpp
+    src/gfx/mesh_fx.cpp
+    src/gfx/mesh_gfx.cpp
+    src/gfx/nav/criteria_xml.cpp
+    src/gfx/nav/criteria.cpp
+    src/gfx/nav/drawgalaxy.cpp
+    src/gfx/nav/drawlist.cpp
+    src/gfx/nav/drawsystem.cpp
+    src/gfx/nav/navcomputer.cpp
+    src/gfx/nav/navgetxmldata.cpp
+    src/gfx/nav/navpath.cpp
+    src/gfx/nav/navscreen.cpp
+    src/gfx/nav/navscreenoccupied.cpp
+    src/gfx/radar/bubble_display.cpp 
+    src/gfx/radar/bubble_display.h 
+    src/gfx/radar/dual_display.cpp 
+    src/gfx/radar/dual_display.h 
+    src/gfx/radar/null_display.h 
+    src/gfx/radar/plane_display.cpp 
+    src/gfx/radar/plane_display.h 
+    src/gfx/radar/radar.cpp 
+    src/gfx/radar/radar.h 
+    src/gfx/radar/sensor.cpp 
+    src/gfx/radar/sensor.h 
+    src/gfx/radar/sphere_display.cpp 
+    src/gfx/radar/sphere_display.h 
+    src/gfx/radar/track.cpp 
+    src/gfx/radar/track.h 
+    src/gfx/radar/viewarea.cpp 
+    src/gfx/radar/viewarea.h 
+    src/gfx/particle.cpp
+    src/gfx/pipelined_texture.cpp
+    src/gfx/quadsquare_cull.cpp
+    src/gfx/quadsquare_render.cpp
+    src/gfx/quadsquare_update.cpp
+    src/gfx/quadsquare.cpp
+    src/gfx/quadtree_xml.cpp
+    src/gfx/quadtree.cpp
+    src/gfx/ring.cpp
+    src/gfx/occlusion.cpp
+    src/gfx/screenshot.cpp
+    src/gfx/soundcontainer.cpp
+    src/gfx/soundcontainer_aldrv.cpp
+    src/gfx/sphere.cpp
+    src/gfx/sprite.cpp 
+    src/gfx/star.cpp
+    src/gfx/stream_texture.cpp
+    src/gfx/technique.cpp
+    src/gfx/tex_transform.cpp
+    src/gfx/vdu.cpp
+    src/gfx/vid_file.cpp
+    src/ffmpeg_init.cpp 
+    src/gfx/vsbox.cpp
+    src/gfx/vsimage.cpp 
+    src/gfx/warptrail.cpp
+)
+
+SET(LIBGFXSERVER_SOURCES
+    src/gfx/sphere_server.cpp
+    src/gfx/vsbox_server.cpp
+    src/gfx/mesh_server.cpp 
+    src/gfx/background_server.cpp
+    src/gfx/mesh_bin_server.cpp
+)
+
+SET(LIBROOTGENERIC_SOURCES
+    src/configxml.cpp
+    src/easydom.cpp
+    src/endianness.cpp
+    src/macosx_math.cpp 
+    src/faction_generic.cpp
+    src/faction_util_generic.cpp
+    src/galaxy_gen.cpp
+    src/galaxy_xml.cpp
+    src/galaxy.cpp
+    src/hashtable.cpp
+    src/lin_time.cpp
+    src/load_mission.cpp
+    src/pk3.cpp 
+    src/posh.cpp
+    src/savegame.cpp
+    src/star_system_generic.cpp
+    src/star_system_xml.cpp
+    src/stardate.cpp 
+    src/universe_generic.cpp
+    src/universe_util_generic.cpp
+    src/vs_globals.cpp
+    src/vsfilesystem.cpp
+    src/VSFileXMLSerializer.cpp
+    src/xml_serializer.cpp
+    src/xml_support.cpp
+    src/XMLDocument.cpp
+    src/options.cpp
+)
+
+SET(LIBROOTCLIENT_SOURCES
+    src/cg_global.cpp
+    src/command.cpp
+    src/config_xml.cpp
+    src/debug_vs.cpp
+    src/faction_util.cpp
+    src/force_feedback.cpp
+    src/gamemenu.cpp
+    src/gfxlib_struct.cpp
+    src/in_joystick.cpp
+    src/in_kb.cpp
+    src/in_main.cpp
+    src/in_mouse.cpp
+    src/in_sdl.cpp 
+    src/main_loop.cpp
+    src/physics.cpp
+    src/rendertext.cpp
+    src/ship_commands.cpp
+    src/star_system_jump.cpp
+    src/star_system.cpp
+    src/universe_util.cpp
+    src/universe.cpp
+)
+
+SET(LIBROOTSERVER_SOURCES 
+    src/force_feedback_server.cpp
+    src/faction_util_server.cpp
+    src/gfxlib_struct_server.cpp
+    src/libaudioserver.cpp
+    src/libserver.cpp
+    src/universe_util_server.cpp
+)
+
+SET(LIBAUDIO_SOURCES
+    src/audio/CodecRegistry.cpp
+    src/audio/Listener.cpp
+    src/audio/RenderableListener.cpp
+    src/audio/RenderableSource.cpp
+    src/audio/Renderer.cpp
+    src/audio/Scene.cpp
+    src/audio/SceneManager.cpp
+    src/audio/SimpleScene.cpp
+    src/audio/SimpleSound.cpp
+    src/audio/SimpleSource.cpp
+    src/audio/SoundBuffer.cpp
+    src/audio/Sound.cpp
+    src/audio/Source.cpp
+    src/audio/SourceTemplate.cpp
+    src/audio/Stream.cpp
+    src/audio/TemplateManager.cpp
+    src/audio/test.cpp
+    src/audio/utils.cpp
+    src/audio/codecs/Codec.cpp
+    src/audio/codecs/FFCodec.cpp
+    src/audio/codecs/FFStream.cpp
+    src/audio/codecs/OggCodec.cpp
+    src/audio/codecs/OggData.cpp
+    src/audio/codecs/OggStream.cpp
+    src/audio/renderers/OpenAL/OpenALHelpers.cpp
+    src/audio/renderers/OpenAL/OpenALRenderableListener.cpp
+    src/audio/renderers/OpenAL/OpenALRenderableSource.cpp
+    src/audio/renderers/OpenAL/OpenALRenderableStreamingSource.cpp
+    src/audio/renderers/OpenAL/OpenALRenderer.cpp
+    src/audio/renderers/OpenAL/OpenALSimpleSound.cpp
+    src/audio/renderers/OpenAL/OpenALStreamingSound.cpp
+)
 
 
 add_library(engine_com ${LIBAI_SOURCES}
@@ -753,7 +788,7 @@ IF(NOT USE_SYSTEM_BOOST)
     UNSET(Boost_PYTHON_LIBRARY)
     UNSET(Boost_PYTHON_LIBRARY_DEBUG)
     UNSET(Boost_PYTHON_LIBRARY_RELEASE)
-    SET(Boost_DIR ../ext/boost/1_64)
+    SET(Boost_DIR ../ext/boost/1_72_0)
     SET(BOOST_PYTHON_NO_PY_SIGNATURES 1)
     SET(TST_INCLUDES ${TST_INCLUDES} ${vsUTCS_SOURCE_DIR}/${Boost_DIR})
     SET(TST_LIBS ${TST_LIBS} boost_python)
