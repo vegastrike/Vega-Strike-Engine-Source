@@ -1,3 +1,14 @@
+/*
+#====================================
+# @file   : display.h
+# @version: 2020-02-11
+# @created: 2002-07-18
+# @author : David Ranger (sabarok@start.com.au)
+# @author : pyramid
+# @author : vegastrike development team
+# @brief  : setup configuration 
+#====================================
+*/
 /***************************************************************************
  *                           display_gtk  -  description
  *                           ----------------------------
@@ -26,9 +37,13 @@ void ShowMain();
 
 #define GET_TITLE char title[1000]="VegaStrike Configurator"; \
   if (strlen(CONFIG.program_name)+strlen(VERSION)<800) { \
-    sprintf(title, "Program Configuration - %s - Version 0.5.1 Build 13218", CONFIG.program_name); \
+    sprintf(title, "Program Configuration - %s - Version 0.5.3", \
+    CONFIG.program_name); \
   }
 
-#define GET_STATIC_TEXT char static_text[1000]="Vega Strike requires the latest drivers for your video card.\nIf you run into problems please upgrade your video drivers.\n\nTo adjust volume levels in-game, use F9/F10 for sound and F11/F12 for music."
+#define GET_STATIC_TEXT char static_text[1000]="Vega Strike requires \
+the latest drivers for your video card.\nIf you run into problems please \
+upgrade your video drivers.\n\nTo adjust volume levels in-game, use F9/F10 \
+for sound and F11/F12 for music."
 
 #endif    //DISPLAY_H

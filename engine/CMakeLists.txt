@@ -1,9 +1,21 @@
+#====================================
+# @file   : CMakeLists.txt
+# @version: 2020-02-11
+# @created: ????
+# @author : Anth0rx
+# @author : pyramid
+# @author : vegastrike development team
+# @brief  : cmake configuration file for VegaStrike
+# @usage  : cmake dir-with-this-file
+# @param  : none
+#====================================
 # create a build directory somewhere outside of this source tree
-# run cmake <path to source tree> inside it
-# run ccmake and hand tune any config variables/paths you need to, save 
-# run make ...or build your project files
-# valid targets are vegastrike, vssetup, and vegaserver (though it's broken right now)
-# ccmake will let you set the Build type (debug,release,basic)
+# > cd .. && mkdir build && cd build
+# run > cmake <path to source tree>
+# run > make
+# to change build target (in Release, Debug, Profiler)
+# > cmake -DCMAKE_BUILD_TYPE=Debug <path to source tree>
+#====================================
 
 
 cmake_minimum_required(VERSION 2.6)
@@ -513,8 +525,12 @@ SET(VEGASERVER_SOURCES ${LIBCMDSERVER_SOURCES}
 					   src/gldrv/gl_sphere_list_server.cpp)
 					   
 if(COMMAND cmake_policy)					   
-	cmake_policy(SET CMP0003 OLD) 
+	cmake_policy(SET CMP0003 NEW) 
 endif(COMMAND cmake_policy)
+
+if (POLICY CMP0072)
+  cmake_policy (SET CMP0072 NEW)
+endif()
 
 # Set the default build type to Release
 IF(NOT CMAKE_BUILD_TYPE)
@@ -737,13 +753,13 @@ IF(NOT USE_SYSTEM_BOOST)
     UNSET(Boost_PYTHON_LIBRARY)
     UNSET(Boost_PYTHON_LIBRARY_DEBUG)
     UNSET(Boost_PYTHON_LIBRARY_RELEASE)
-    SET(Boost_DIR 1_64)
+    SET(Boost_DIR ../ext/boost/1_64)
     SET(BOOST_PYTHON_NO_PY_SIGNATURES 1)
-    SET(TST_INCLUDES ${TST_INCLUDES} ${vsUTCS_SOURCE_DIR}/boost/${Boost_DIR})
+    SET(TST_INCLUDES ${TST_INCLUDES} ${vsUTCS_SOURCE_DIR}/${Boost_DIR})
     SET(TST_LIBS ${TST_LIBS} boost_python)
     include_directories(${TST_INCLUDES})
-    add_subdirectory(boost/${Boost_DIR})
-    message("++ boost dir: boost/${Boost_DIR}")
+    add_subdirectory(${Boost_DIR} build)
+    message("++ boost dir: ${Boost_DIR}")
     IF(NOT DISABLE_CLIENT)
       add_dependencies(vegastrike boost_python)
     ENDIF(NOT DISABLE_CLIENT)
