@@ -279,9 +279,9 @@ readerThread(
             if (foundcache) {
                 *me->music_load_info = wherecache->second;
                 me->freeWav = false;
-            } //else if (!AUDLoadSoundFile(songname, me->music_load_info, true)) {
-                //BOOST_LOG_TRIVIAL(info) << boost::format("Failed to load music file \"%1%\"") % songname;
-            //}
+            } else if ( !AUDLoadSoundFile( songname, me->music_load_info, true ) ) { 	 
+	        VSFileSystem::vs_dprintf(1, "Failed to load music file \"%s\"", songname);
+            }
         }
         if (me->freeWav && docacheme) {
             me->freeWav = false;
@@ -646,8 +646,7 @@ void Music::CleanupMuzak()
     }
 }
 
-void Music::MuzakCycle()
-{
+void Music::MuzakCycle() {
     if (muzak) {
         if (BaseInterface::CurrentBase != NULL) {
             if (!BaseInterface::CurrentBase->isDJEnabled()) {
@@ -655,7 +654,6 @@ void Music::MuzakCycle()
                 return;
             }
         }
-
         for (int i = 0; i < muzak_count; i++)
             muzak[i].Listen();
     }
@@ -768,3 +766,4 @@ void Music::SetLoops( int numloops, int layer )
         }
     }
 }
+
