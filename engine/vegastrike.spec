@@ -1,13 +1,13 @@
 # norootforbuild
 
 Name:           vegastrike
-Version:        0.5.1.beta2
+Version:        0.5.3
 Release:        1
 Summary:        3D OpenGL spaceflight simulator
 Group:          Amusements/Games
 License:        GPLv2+
 URL:            http://vegastrike.sourceforge.net/
-Source0:        http://master.dl.sourceforge.net/project/%{name}/%{name}/0.5.1/%{name}-src-%{version}.tar.bz2
+Source0:        http://master.dl.sourceforge.net/project/%{name}/%{name}/0.5.13/%{name}-src-%{version}.tar.bz2
 BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-build
 BuildRequires:  freeglut-devel gtk2-devel python-devel
 BuildRequires:  libjpeg-devel libpng-devel boost-devel 
@@ -80,13 +80,18 @@ rm -rf $RPM_BUILD_ROOT
 
 %files
 %defattr(-,root,root,-)
-%doc AUTHORS COPYING DOCUMENTATION README ToDo.txt
+%doc AUTHORS COPYING DOCUMENTATION README.md
 %{_bindir}/vega*
 %{_bindir}/vs*
 %{_libexecdir}/%{name}
 
 
 %changelog
+
+-------------------------------------------------------------------
+2020-02-11 14:23:00 +0000 - pyramid
+
+- Upgraded to upstream 0.5.3 source release
 
 -------------------------------------------------------------------
 Mon Jan 30 05:06:13 UTC 2012 - klaussfreire@gmail.com
