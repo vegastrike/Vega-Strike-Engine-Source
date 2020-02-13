@@ -1,6 +1,6 @@
 #====================================
 # @file   : CMakeLists.txt
-# @version: 2020-02-11
+# @version: 2020-02-12
 # @created: 2008-06-08
 # @author : safemode
 # @author : Anth0rx
@@ -483,83 +483,87 @@ add_library(engine_com ${LIBAI_SOURCES}
 					   ${LIBSCRIPT_SOURCES}
 					   ${LIBGFXGENERIC_SOURCES} )
 				   
-SET(VEGASTRIKE_SOURCES ${LIBGUI_SOURCES}
-					   ${LIBNETCLIENT_SOURCES}
-					   ${LIBROOTCLIENT_SOURCES}
-					   ${LIBGFXCLIENT_SOURCES}
-					   ${LIBAUDIO_SOURCES}
-					   src/aldrv/al_globals.cpp
-					   src/aldrv/al_init.cpp
-					   src/aldrv/al_listen.cpp 
-					   src/aldrv/al_sound.cpp
-					   src/cmd/ai/firekeyboard.cpp
-					   src/cmd/ai/flyjoystick.cpp
-					   src/cmd/ai/flykeyboard.cpp
-					   src/cmd/asteroid.cpp
-					   src/cmd/atmosphere.cpp
-					   src/cmd/base_init.cpp
-					   src/cmd/base_interface.cpp
-					   src/cmd/base_util.cpp
-					   src/cmd/base_write_python.cpp
-					   src/cmd/base_write_xml.cpp
-					   src/cmd/base_xml.cpp
-					   src/cmd/basecomputer.cpp
-					   src/cmd/beam.cpp
-					   src/cmd/bolt.cpp
-					   src/cmd/briefing.cpp
-					   src/cmd/building.cpp
-					   src/cmd/click_list.cpp
-					   src/cmd/cont_terrain.cpp
-					   src/cmd/music.cpp
-					   src/cmd/nebula.cpp
-					   src/cmd/planet.cpp 
-					   src/cmd/script/c_alike/c_alike.tab.cpp
-					   src/cmd/script/c_alike/lex.yy.cpp 
-					   src/cmd/script/director.cpp 
-					   src/cmd/script/flightgroup.cpp
-					   src/cmd/script/script_call_briefing.cpp
-					   src/cmd/script/script_call_unit.cpp
-					   src/cmd/terrain.cpp
-					   src/cmd/unit_factory.cpp 
-					   src/cmd/unit_functions.cpp 
-					   src/cmd/unit_util.cpp
-                       src/cmd/faction_xml.cpp
-                       src/cmd/pilot.cpp
-                       src/cmd/images.cpp
-                       src/cmd/unit.cpp
-					   src/gldrv/gl_program.cpp
-					   src/gldrv/gl_clip.cpp
-					   src/gldrv/gl_fog.cpp
-					   src/gldrv/gl_globals.cpp
-					   src/gldrv/gl_init.cpp
-					   src/gldrv/gl_light_pick.cpp
-					   src/gldrv/gl_light_state.cpp
-					   src/gldrv/gl_light.cpp
-					   src/gldrv/gl_material.cpp
-					   src/gldrv/gl_matrix.cpp
-					   src/gldrv/gl_misc.cpp
-					   src/gldrv/gl_quad_list.cpp
-					   src/gldrv/gl_sphere_list.cpp
-					   src/gldrv/gl_state.cpp
-					   src/gldrv/sdds.cpp
-					   src/gldrv/gl_texture.cpp
-					   src/gldrv/gl_vertex_list.cpp
-					   src/gldrv/winsys.cpp
-					   src/main.cpp 
-					   src/python/briefing_wrapper.cpp )
+SET(VEGASTRIKE_SOURCES
+    ${LIBGUI_SOURCES}
+    ${LIBNETCLIENT_SOURCES}
+    ${LIBROOTCLIENT_SOURCES}
+    ${LIBGFXCLIENT_SOURCES}
+    ${LIBAUDIO_SOURCES}
+    src/aldrv/al_globals.cpp
+    src/aldrv/al_init.cpp
+    src/aldrv/al_listen.cpp 
+    src/aldrv/al_sound.cpp
+    src/cmd/ai/firekeyboard.cpp
+    src/cmd/ai/flyjoystick.cpp
+    src/cmd/ai/flykeyboard.cpp
+    src/cmd/asteroid.cpp
+    src/cmd/atmosphere.cpp
+    src/cmd/base_init.cpp
+    src/cmd/base_interface.cpp
+    src/cmd/base_util.cpp
+    src/cmd/base_write_python.cpp
+    src/cmd/base_write_xml.cpp
+    src/cmd/base_xml.cpp
+    src/cmd/basecomputer.cpp
+    src/cmd/beam.cpp
+    src/cmd/bolt.cpp
+    src/cmd/briefing.cpp
+    src/cmd/building.cpp
+    src/cmd/click_list.cpp
+    src/cmd/cont_terrain.cpp
+    src/cmd/music.cpp
+    src/cmd/nebula.cpp
+    src/cmd/planet.cpp 
+    src/cmd/script/c_alike/c_alike.tab.cpp
+    src/cmd/script/c_alike/lex.yy.cpp 
+    src/cmd/script/director.cpp 
+    src/cmd/script/flightgroup.cpp
+    src/cmd/script/script_call_briefing.cpp
+    src/cmd/script/script_call_unit.cpp
+    src/cmd/terrain.cpp
+    src/cmd/unit_factory.cpp 
+    src/cmd/unit_functions.cpp 
+    src/cmd/unit_util.cpp
+    src/cmd/faction_xml.cpp
+    src/cmd/pilot.cpp
+    src/cmd/images.cpp
+    src/cmd/unit.cpp
+    src/gldrv/gl_program.cpp
+    src/gldrv/gl_clip.cpp
+    src/gldrv/gl_fog.cpp
+    src/gldrv/gl_globals.cpp
+    src/gldrv/gl_init.cpp
+    src/gldrv/gl_light_pick.cpp
+    src/gldrv/gl_light_state.cpp
+    src/gldrv/gl_light.cpp
+    src/gldrv/gl_material.cpp
+    src/gldrv/gl_matrix.cpp
+    src/gldrv/gl_misc.cpp
+    src/gldrv/gl_quad_list.cpp
+    src/gldrv/gl_sphere_list.cpp
+    src/gldrv/gl_state.cpp
+    src/gldrv/sdds.cpp
+    src/gldrv/gl_texture.cpp
+    src/gldrv/gl_vertex_list.cpp
+    src/gldrv/winsys.cpp
+    src/main.cpp 
+    src/python/briefing_wrapper.cpp
+)
 
-SET(VEGASERVER_SOURCES ${LIBCMDSERVER_SOURCES}
-					   ${LIBNETSERVER_SOURCES}
-					   ${LIBROOTSERVER_SOURCES}
-					   ${LIBCMDSCRIPTSERVER_SOURCES}
-					   ${LIBGFXSERVER_SOURCES}
-					   src/vegaserver.cpp
-					   src/cmd/script/director_server.cpp
-					   src/cmd/ai/flykeyboard_server.cpp
-					   src/gldrv/gl_vertex_list.cpp
-					   src/gldrv/gl_sphere_list_server.cpp)
-					   
-if(COMMAND cmake_policy)					   
+SET(VEGASERVER_SOURCES
+    ${LIBCMDSERVER_SOURCES}
+    ${LIBNETSERVER_SOURCES}
+    ${LIBROOTSERVER_SOURCES}
+    ${LIBCMDSCRIPTSERVER_SOURCES}
+    ${LIBGFXSERVER_SOURCES}
+    src/vegaserver.cpp
+    src/cmd/script/director_server.cpp
+    src/cmd/ai/flykeyboard_server.cpp
+    src/gldrv/gl_vertex_list.cpp
+    src/gldrv/gl_sphere_list_server.cpp
+)
+
+if(COMMAND cmake_policy)
 	cmake_policy(SET CMP0003 NEW) 
 endif(COMMAND cmake_policy)
 
@@ -795,12 +799,12 @@ IF(NOT USE_SYSTEM_BOOST)
     include_directories(${TST_INCLUDES})
     add_subdirectory(${Boost_DIR} build)
     message("++ boost dir: ${Boost_DIR}")
-    IF(NOT DISABLE_CLIENT)
-      add_dependencies(vegastrike boost_python)
-    ENDIF(NOT DISABLE_CLIENT)
-    IF(NOT DISABLE_SERVER)
-      add_dependencies(vegaserver boost_python)
-    ENDIF(NOT DISABLE_SERVER)
+    #IF(NOT DISABLE_CLIENT)
+    #  add_dependencies(vegastrike boost_python)
+    #ENDIF(NOT DISABLE_CLIENT)
+    #IF(NOT DISABLE_SERVER)
+    #  add_dependencies(vegaserver boost_python)
+    #ENDIF(NOT DISABLE_SERVER)
 ENDIF(NOT USE_SYSTEM_BOOST)
 
 IF(NOT DISABLE_CLIENT) ##########
