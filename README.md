@@ -6,7 +6,7 @@
 ```
 #====================================
 # @file   : README.md
-# @version: 2020-02-07
+# @version: 2020-02-14
 # @created: 2020-02-06
 # @author : pyramid
 # @brief  : quick repo guide
@@ -20,40 +20,119 @@
 **Basic Installation**
 =====================================
 
-1. Download everything or clone a copy to your system.
-2. Install make and cmake.
-3. Extract the Downloaded file to a directory of your choice. 
-4. Enter /Vegastrike
-5. Enter /engine
-6. Create a directory called `build`
-7. Enter /build
-8. run `cmake ../`
-9. run `make`
-10. return to /Vegastrike
-11. create directory called `bin`
-12. Copy vegastrike, vegaserver, vssetup from `/engine/build` to `/bin`
-13. Run command `./bin/vegastrike` or use the file in the bin as an 
-executable.
+1.  Download everything or clone a copy to your system.
+2.  Install make and cmake.
+3.  Extract the Downloaded file to a directory of your choice (/vegastrike). 
+4.  Enter /vegastrike
+5.  Run command `sh/vsbuild.sh`
+6.  Run command `bin/vegastrike`
+    or double-click the executable file in the bin directory.
+7.  Change settings with command `bin/vssetup`
+
+
+**Features**
+=====================================
+
+- All of the art assets are original.
+- Never before seen ships modelled by the Vegastrike team!
+- Astounding soundtrack!
+- Multiple Systems
+- Entire Sol sector and Vega sector included!
+- Fly through huge multilayered asteroid fields
+- Explore nebulae where your radar fritzes out
+- Jump to other systems at blue jump points with the 'j' key
+- Time compression
+- Sound effects that make starships roar as they pass and zap as they die
+- Bolt weapons with glowing lighting effects
+- Cloaking that renders a ship partially/fully invisible
+- Customizable fully working HUD with targetting displays, etc
+- Customizable Alien Race logos that will change on all starships by editing TerranPriA.bmp and TechPriA.bmp
+- Intelligent, Programmable AI
+- Encounter epic battles happening in many systems
+- The universe is fully dynamic and progresses on its own and independently of the player advancement
+- Varied weapons on different starships
+- Explosions that literally tear a starship into pieces
+- Shields That Glow upon hit (in the location hit)
+- Customizable missions
+- Stars that fly past as you explore the system
+- RAPID collision system that allows no problems with collisions
+- BSP Trees that allow one to fly close to a starship, and in the runway of (well formed) models...unlike the victory from WC3.
+- the Normal Force which bounces starships off of each other
+- Respawn with the ':' key (shift and semicolon)
+- Switch Ships with the '\[' key
+- Joystick support for a full featured joystick
 
 
 **Running Vegastrike**
 =====================================
 
+Run setup and then vegastrike
+
+```bash
+bin/vssetup
+bin/vegastrike
+```
+
+Vegastrike command line parameters allow for different start settings and are as follows
+
+```man
+  vegastrike [-ddata_dir] [-px,y,z] [-jsector/starsystem] missionname
+
+OPTIONS
+  -d/my/data/dir
+    specifies /my/data/dir as the path for finding the vega strike data.  De-
+    fault is /usr/local/share/vegastrike/data
+
+  -p1024,2405,1245090101
+    Forces  the  player's  starting  location  to  be  at  x=  1024, y= 2405,
+    z=1245090101
+
+  -jgemini_sector/troy
+    Forces the player to start in the troy system in gemini sector.
+
+  missionname
+    Specifies  a  mission  for  vegastrike  to  run.   Default  is   /usr/lo-
+    cal/share/vegastrike/data/mission/exploration/explore_universe.mission.
+```
+
 Vegastrike takes a single command parameter indicating which mission it should load
 
-```sh
-vegastrike mission/explore_universe.mission
+```bash
+bin/vegastrike mission/explore_universe.mission
 ```
 
 is an example of a valid mission call
 
-the -l flag (must be flush with the system) will force a player to begin in a star system.
+the -l flag (must be flushed with the system) will force a player to begin in a star system.
 
-```sh
-vegastrike -lvega_sector/vega mission/bomber.mission
+```bash
+bin/vegastrike -lvega_sector/vega mission/bomber.mission
 ```
 
 will force the bomber mission to run in the vega sector
+
+If you encounter any issues while playing, please create an issue with the Vega Strike development team by [posting a new issue](https://github.com/vegastrike/Vega-Strike-Engine-Source/issues).
+
+**REQUIRED FILES**
+
+```bash
+  /usr/local/bin/vegastrike
+      The vegastrike engine.
+  /usr/local/bin/vsinstall
+      The Setup utility.
+  /usr/local/bin/vslauncher
+      The vegastrike save game and mission selection utility
+  /usr/local/bin/vssetup
+      Internal installer program
+  /usr/local/share/vegastrike
+      The vegastrike data files
+  /usr/local/lib/man/man1
+      Directory containg the manual files
+  ~/.vegastrike
+      Directory containing user specific data managed by vegastrike.
+  ~/.vegastrike/vegastrike.config
+      User-specific configuration file
+```
 
 
 **Interstellar Warp Transit (Jump Drive)**
@@ -132,39 +211,6 @@ If you wish to transfer command to another starship, simply press '\[' to switch
 - \[ switch ships in battle (use to control allies)
 
 
-**Features**
-=====================================
-
-- All of the art assets are original.
-- Never before seen ships modelled by the Vegastrike team!
-- Astounding soundtrack!
-- Multiple Systems
-- Entire Sol sector and Vega sector included!
-- Fly through huge multilayered asteroid fields
-- Explore nebulae where your radar fritzes out
-- Jump to other systems at blue jump points with the 'j' key
-- Time compression
-- Sound effects that make starships roar as they pass and zap as they die
-- Bolt weapons with glowing lighting effects
-- Cloaking that renders a ship partially/fully invisible
-- Customizable fully working HUD with targetting displays, etc
-- Customizable Alien Race logos that will change on all starships by editing TerranPriA.bmp and TechPriA.bmp
-- Intelligent, Programmable AI
-- Encounter epic battles happening in many systems
-- The universe is fully dynamic and progresses on its own and independently of the player advancement
-- Varied weapons on different starships
-- Explosions that literally tear a starship into pieces
-- Shields That Glow upon hit (in the location hit)
-- Customizable missions
-- Stars that fly past as you explore the system
-- RAPID collision system that allows no problems with collisions
-- BSP Trees that allow one to fly close to a starship, and in the runway of (well formed) models...unlike the victory from WC3.
-- the Normal Force which bounces starships off of each other
-- Respawn with the ':' key (shift and semicolon)
-- Switch Ships with the '\[' key
-- Joystick support for a full featured joystick
-
-
 **Compiling Vegastrike**
 =====================================
 
@@ -176,15 +222,16 @@ use the vsbuild.sh script in the root directory.
 or manually
 
 ```bash
-engine> apt install cmake g++ python2-dev libgl1-mesa-glx freeglut3-dev libopenal-dev libsdl-gfx1.2-dev libvorbis-dev libjpeg-dev libpng-dev libgtk2.0-dev
-engine> mkdir build & cd build
-engine> cmake ..
-engine> make
+vegastrike> apt install cmake g++ python2-dev libgl1-mesa-glx freeglut3-dev libopenal-dev libsdl-gfx1.2-dev libvorbis-dev libjpeg-dev libpng-dev libgtk2.0-dev
+vegastrike> mkdir build & cd build
+vegastrike> cmake ../engine
+vegastrike> make
+vegastrike> mkdir ../bin && cp vegastrike ../bin/ && cp setup/vssetup ../bin/ && cd ..
 ```
 
 [Link to list of dependencies](http://vegastrike.sourceforge.net/wiki/HowTo:Compile_from_CVS)
 
-If there are any problems with this installation method, please immediately file an issue with the Vega Strike development team by [posting a new issue](https://github.com/vegastrike/Vega-Strike-Engine-Source/issues).
+If there are any problems with this installation method, please create an issue with the Vega Strike development team by [posting a new issue](https://github.com/vegastrike/Vega-Strike-Engine-Source/issues).
 
 
 **Compiling On Windows**
@@ -199,7 +246,8 @@ If there are any problems with this installation method, please immediately file
 [HowTo:Compile on OSX](http://vegastrike.sourceforge.net/wiki/HowTo:Compile_on_OSX)
 
 
-**Editing Missions**
+
+**Modding Vega Strike**
 =====================================
 
 **How to make Vegastrike Missions**
@@ -268,6 +316,7 @@ continue with any other flightgroups... you can have as many as you want from as
       </flightgroup>
 </mission>
 ```
+
 
 **Editing AI**
 =====================================
@@ -361,6 +410,48 @@ If you want to know more about writing actual maneuvers (like turnaway.xml  whic
 you need to have a heavy background in vector math.
 
 
+**Hacking Vega Strike**
+-------------------------------------
+
+In this guide, any coding is located in square brackets ([]).
+Number values may not be accurate.
+
+**Guide 1: Hacking cash**
+Step 1
+Locate you saved files. (Windows XP: Program files/VegaStrike/Vegastike-0.5.0/.vegastrike-0.5.0/save||||Mac: (disk)>Users>(user)>.vegastrike-0.5.0>saves>(savefile))
+Step 2
+Open the files using a word document editing program (preferably Notepad++)
+Step 3
+On the first line, you should see something roughly resembling this: [Crucible/Cephid_17^200000.000000^Llama.begin 119990000070.992740 -8999928.351833 -109989999927.749450]
+On this line, find the numbers surrounded by carets “^”. This is your cash. Change it to what you want, preferably in the high millions. Or possibly even trillions. Go nuts.
+Step 4
+In order for the game not to go mad about this, you need to add this ending:[.000000]
+Basically, if you have, say a quadrillion cash (1000000000000000) you still need to add .000000 on the end, making it stupidly long. Yes, we know, its annoying.
+Step 5
+Now you need to check if you are using commas or “‘” in your cash. Don’t.
+Then save the file. .txt files work, however when you see them on the loading screen they end in .txt.
+Step 6
+You’re now richer than a very rich man on International very rich day! Yay!
+
+**Guide 2: Getting the ship of your dreams**
+Step 1
+Get your saved file from Guide 1.
+Step 2
+Now, find the cash (numbers in carets “^”). There is a name after this. At the start of the game, it is always “Llama.begin”
+Step 3
+Now you can change this name into any ship you like. However, it must be in the same format.
+Step 4
+Here are some good ships:
+Goddard.milspec
+Clydesdale.stock
+Hyena.stock (Light, weak fighter. Good for getting used to combat with other fighters.)
+Mule.stock (trader)
+Step 5
+There is a ship list either in the game files or on the internet, check that out for some good models. (remember: add .stock or .milspec on the end!!!! (milspec is only on some specialised ships)) Finally, save the file as before.
+
+This guide was created by Munno 2010-10-08
+
+
 **Vegastrike Information**
 =====================================
 
@@ -369,10 +460,11 @@ Mail comments or suggestions to vegastrike-users@lists.sourceforge.net
 And if you can design some missions it would rock!
 
 
+
 **Vega Strike Code Repository**
 =====================================
- [https://github.com/vegastrike/Vega-Strike-Engine-Source](https://github.com/vegastrike/Vega-Strike-Engine-Source)
 
+[https://github.com/vegastrike/Vega-Strike-Engine-Source](https://github.com/vegastrike/Vega-Strike-Engine-Source)
 
 
 ```EOF```
