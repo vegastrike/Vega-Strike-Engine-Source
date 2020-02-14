@@ -1,3 +1,16 @@
+//====================================
+// @file   : mesh_gfx.cpp
+// @version: 2020-02-14
+// @created: 2002-12-14
+// @author : surfdargent
+// @author : hellcatv
+// @author : ace123
+// @author : klaussfreire
+// @author : dan_w
+// @author : pyramid
+// @brief  : draws meshes
+//====================================
+
 #include <algorithm>
 #include "mesh.h"
 #include "aux_texture.h"
@@ -516,8 +529,7 @@ void Mesh::DrawNow( float lod, bool centered, const Matrix &m, int cloak, float 
         GFXEnable( TEXTURE1 );
 }
 
-void Mesh::ProcessZFarMeshes( bool nocamerasetup )
-{
+void Mesh::ProcessZFarMeshes( bool nocamerasetup ) {
     int a = NUM_ZBUF_SEQ;
 
     if (!undrawn_meshes[a].empty()) {
@@ -544,18 +556,15 @@ void Mesh::ProcessZFarMeshes( bool nocamerasetup )
     GFXDeactivateShader();
     if (gl_options.ext_srgb_framebuffer)
         glDisable( GL_FRAMEBUFFER_SRGB_EXT );
-
     Animation::ProcessFarDrawQueue( -FLT_MAX );
 }
 
-const GFXMaterial& Mesh::GetMaterial() const
-{
+const GFXMaterial& Mesh::GetMaterial() const {
     return GFXGetMaterial( myMatNum );
 }
 
 template < typename T >
-inline bool rangesOverlap( T min1, T max1, T min2, T max2 )
-{
+inline bool rangesOverlap( T min1, T max1, T min2, T max2 ) {
     return !( ( (min1 < min2) == (max1 < min2) )
              && ( (min1 < max2) == (max1 < max2) )
              && ( (min1 < min2) == (min1 < max2) ) );
@@ -575,7 +584,13 @@ void Mesh::ProcessUndrawnMeshes( bool pushSpecialEffects, bool nocamerasetup ) {
         if (a == MESH_SPECIAL_FX_ONLY) {
             GFXPushGlobalEffects();
             GFXDisable( DEPTHWRITE );
-        } else if (!nocamerasetup) { 
+        // This is the more correct way to do it (svn r13722).
+        // Unfortunately it breaks the background of the nav computer (Shift+M).
+        // Therefore "else if (!nocamerasetup)" is replaced with
+        // "} else {" until fixed.
+        // The bug was introduced in (svn r13722)
+        //} else if (!nocamerasetup) { 
+        } else { // less correct (svn r13721) but working on nav computer
             _Universe->AccessCamera()->UpdateGFXFrustum( GFXTRUE, g_game.znear, g_game.zfar );
         }
         std::sort( undrawn_meshes[a].begin(), undrawn_meshes[a].end() );
@@ -608,15 +623,13 @@ void Mesh::ProcessUndrawnMeshes( bool pushSpecialEffects, bool nocamerasetup ) {
         glDisable( GL_FRAMEBUFFER_SRGB_EXT );
 }
 
-void Mesh::RestoreCullFace( int whichdrawqueue )
-{
+void Mesh::RestoreCullFace( int whichdrawqueue ) {
     if ( blendDst != ZERO || getCullFaceForcedOff() )
         if (blendSrc != SRCALPHA)
             GFXEnable( CULLFACE );
 }
 
-void Mesh::SelectCullFace( int whichdrawqueue )
-{
+void Mesh::SelectCullFace( int whichdrawqueue ) {
     if ( getCullFaceForcedOn() )
         GFXEnable( CULLFACE );
     else if ( getCullFaceForcedOff() )
