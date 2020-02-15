@@ -825,7 +825,7 @@ string SaveGame::WriteSaveGame( const char *systemname,
                                 bool write )
 {
     savestring  = string( "" );
-    printf( "Writing Save Game %s", outputsavegame.c_str() );
+    printf( "Writing Save Game %s\n", outputsavegame.c_str() );
     savestring += WritePlayerData( FP, unitname, systemname, credits, fact );
     savestring += WriteDynamicUniverse();
     if (outputsavegame.length() != 0) {
