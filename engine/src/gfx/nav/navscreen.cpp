@@ -1,3 +1,16 @@
+//====================================
+// @file   : navscreen.cpp
+// @version: 2020-02-15
+// @created: 2003-03-14
+// @author : hellcatv
+// @author : ace123
+// @author : surfdargent
+// @author : klaussfreire
+// @author : jacks
+// @author : pyramid
+// @brief  : draws nav map
+//====================================
+
 #include <set>
 #include "vsfilesystem.h"
 #include "vs_globals.h"
@@ -1751,8 +1764,19 @@ void NavigationSystem::TranslateCoordinates( QVector &pos,
                                              float &the_x_flat,
                                              float &the_y_flat,
                                              float &system_item_scale_temp,
-                                             bool system_not_galaxy )
-{
+                                             bool system_not_galaxy ) {
+
+    // This code is necessary to pan and zoom the nav star map
+    // as well as to display system names and make systems
+    // highlight their names on mouse hover
+    // and also make them clickable for setting jump routes
+    float itemscale = CalculatePerspectiveAdjustment(
+        zscale,
+        zdistance,
+        pos,
+        pos_flat,
+        system_item_scale_temp,
+        system_not_galaxy );
 
     //TRANSLATE INTO SCREEN DISPLAY COORDINATES
     //**********************************
