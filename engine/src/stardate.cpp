@@ -1,3 +1,25 @@
+//====================================
+// @file   : stardate.cpp
+// @version: 2020-02-26
+// @created: 2002-12-14
+// @author : surfdargent
+// @author : griwodz
+// @author : hellcatv
+// @author : dan_w
+// @author : pheonixstorm
+// @author : pyramid
+// @author : breese
+// @author : klaussfreire
+// @brief  : stardate and startime
+//====================================
+/// Provides functions for stardate and startime manipulation and conversion
+/// There are various time measurement systems in VS
+/// The stardate is an absolute time measurement in the game calendar
+/// Stardate is the in-game universe date in the format ddd.hhmm:sec
+/// Startime is the internal numeric representation of the stardate as number of seconds
+/// since the begin of initial universe time, which in Vega Strike UTCS universe is 3276800
+/// The formatting of the startime into faction specific output is done by the stardate.py script
+
 #include <assert.h>
 #include <iostream>
 #include <vector>
@@ -68,6 +90,7 @@ void StarDate::InitTrek( string date )
     initial_time = mission->getGametime();
     initial_star_time = new double[factions.size()];
     double init_time = this->ConvertTrekDate( date );
+    VSFileSystem::vs_dprintf( 3, "Initializing stardate from a Trek date for %d factions", factions.size() );
     //BOOST_LOG_TRIVIAL(trace) << boost::format("Initializing stardate from a Trek date for %1% factions") % factions.size();
     for (unsigned int i = 0; i < factions.size(); i++)
         initial_star_time[i] = init_time;
@@ -123,13 +146,15 @@ string StarDate::ConvertTrekDate( double date )
 }
 
 //Convert a StarDate into a number of seconds
-double StarDate::ConvertTrekDate( string date )
-{
+double StarDate::ConvertTrekDate( string date ) {
     unsigned int days, hours, minutes, tmphrs, seconds, nb, pos;
     double res;
     //Replace the dot with 'a' so sscanf won't take it for a decimal symbol
     pos = date.find( "." );
     date.replace( pos, 1, "a" );
+    if (( nb = sscanf( date.c_str(), "%da%4d:%3d", &days, &tmphrs, &seconds )) != 3 ) {
+        VSFileSystem::vs_dprintf( 3, "!!! ERROR reading date\n");
+    }
     //if ((nb = sscanf(date.c_str(), "%da%4d:%3d", &days, &tmphrs, &seconds)) != 3) {
     //    BOOST_LOG_TRIVIAL(trace) << "!!! ERROR reading date";
     //}
@@ -141,6 +166,7 @@ double StarDate::ConvertTrekDate( string date )
 
     res     = days*2880000+hours*28800+minutes*480+seconds;
     std::string formatted = ConvertFullTrekDate(res);
+    VSFileSystem::vs_dprintf( 3, "Converted date to %ld, which stardate is %s\n", long(res), formatted.c_str() );
     //BOOST_LOG_TRIVIAL(trace) << boost::format("Converted date to %1%, which stardate is %2%") % long(res) % formatted;
     return res;
 }
