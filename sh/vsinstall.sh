@@ -1,7 +1,7 @@
 #!/bin/sh
 #====================================
 # @file   : vsinstall.sh
-# @version: 2020-02-22
+# @version: 2020-02-26
 # @created: 2004-11-02
 # @author : dandandaman
 # @author : safemode
@@ -14,7 +14,7 @@
 #====================================
 
 echo "---------------------------------"
-echo "--- vsinstall.sh | 2020-02-22 ---"
+echo "--- vsinstall.sh | 2020-02-26 ---"
 echo "---------------------------------"
 
 #----------------------------------
@@ -88,7 +88,7 @@ if [ "x$LOGIN" = "xy" -o "x$LOGIN" = "xyes" ]; then
         mysudo=''
     else
         mysudo='sudo'
-        echo "Trying to using sudo..."
+        echo "Trying to use sudo..."
         sudo -v || DOSUDO=no
     fi
     if [ "$DOSUDO" = "yes" ]; then
