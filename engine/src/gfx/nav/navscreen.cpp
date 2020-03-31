@@ -341,15 +341,6 @@ void NavigationSystem::Setup()
         system_item_scale *= (screenskipby4[3]-screenskipby4[2]);
     screenoccupation = new navscreenoccupied( screenskipby4[0], screenskipby4[1], screenskipby4[2], screenskipby4[3], 1 );
 
-    //Get special colors from the config
-    static GFXColor currentcol = vs_config->getColor( "nav", "current_system",
-                                           GFXColor( 1, 0.3, 0.3, 1.0 ) );
-    static GFXColor destinationcol = vs_config->getColor( "nav", "destination_system",
-                                           GFXColor( 1, 0.77, 0.3, 1.0 ) );
-    static GFXColor selectcol = vs_config->getColor( "nav", "selection_system",
-                                           GFXColor( 0.3, 1, 0.3, 1.0 ) );
-    static GFXColor pathcol = vs_config->getColor( "nav", "path_system",
-                                           GFXColor( 1, 0.3, 0.3, 1.0 ) );
     navcomp->init();
 }
 
@@ -1765,18 +1756,6 @@ void NavigationSystem::TranslateCoordinates( QVector &pos,
                                              float &the_y_flat,
                                              float &system_item_scale_temp,
                                              bool system_not_galaxy ) {
-
-    // This code is necessary to pan and zoom the nav star map
-    // as well as to display system names and make systems
-    // highlight their names on mouse hover
-    // and also make them clickable for setting jump routes
-    float itemscale = CalculatePerspectiveAdjustment(
-        zscale,
-        zdistance,
-        pos,
-        pos_flat,
-        system_item_scale_temp,
-        system_not_galaxy );
 
     //TRANSLATE INTO SCREEN DISPLAY COORDINATES
     //**********************************

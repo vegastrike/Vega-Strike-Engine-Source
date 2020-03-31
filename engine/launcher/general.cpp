@@ -126,7 +126,7 @@ char *replace(char *line, char *search, char *replace, int LENGTH) {
 	current= new char [LENGTH+1];
 	length = strlen(line);
 	strcpy(current, line);
-	while ((location = strstr(current, search)) > 0) {
+	while ((location = strstr(current, search)) != NULL) {
 		chr_new[0] = '\0';
 		calc = strlen(current) - strlen(search) + strlen(replace);
 		if (calc > LENGTH) { strcpy(line, current); return line; }

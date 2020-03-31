@@ -487,8 +487,12 @@ inline void DrawITTSLine( QVector fromLoc, QVector aimLoc, GFXColor linecolor=GF
     GFXEnable( SMOOTH );
     GFXBlendMode( SRCALPHA, INVSRCALPHA );
     const float verts[2 * 3] = {
-        fromLoc.x, fromLoc.y, fromLoc.z,
-        aimLoc.x,   aimLoc.y,  aimLoc.z,
+        static_cast<float>(fromLoc.x),
+        static_cast<float>(fromLoc.y),
+        static_cast<float>(fromLoc.z),
+        static_cast<float>(aimLoc.x),
+        static_cast<float>(aimLoc.y),
+        static_cast<float>(aimLoc.z),
     };
     GFXDraw( GFXLINE, verts, 2 );
     GFXDisable( SMOOTH );
@@ -550,15 +554,25 @@ void GameCockpit::DrawTargetBox(const Radar::Sensor& sensor)
         if (draw_line_to_targets_target && targets_target != NULL) {
             QVector ttLoc = targets_target->Position();
             const float verts[3 * 3] = {
-                myLoc.x, myLoc.y, myLoc.z,
-                Loc.x,   Loc.y,   Loc.z,
-                ttLoc.x, ttLoc.x, ttLoc.x,
+                static_cast<float>(myLoc.x),
+                static_cast<float>(myLoc.y),
+                static_cast<float>(myLoc.z),
+                static_cast<float>(Loc.x),  
+                static_cast<float>(Loc.y),
+                static_cast<float>(Loc.z),
+                static_cast<float>(Loc.x),
+                static_cast<float>(ttLoc.x),
+                static_cast<float>(ttLoc.x),
             };
             GFXDraw( GFXLINESTRIP, verts, 3 );
         } else {
             const float verts[2 * 3] = {
-                myLoc.x, myLoc.y, myLoc.z,
-                Loc.x,   Loc.y,   Loc.z,
+                static_cast<float>(myLoc.x),
+                static_cast<float>(myLoc.y),
+                static_cast<float>(myLoc.z),
+                static_cast<float>(Loc.x),
+                static_cast<float>(Loc.y),
+                static_cast<float>(Loc.z),
             };
             GFXDraw( GFXLINESTRIP, verts, 2 );
         }
@@ -3154,7 +3168,7 @@ static void FaceCamTarget( Cockpit *cp, int cam, Unit *un )
 static void ShoveCamBehindUnit( int cam, Unit *un, float zoomfactor )
 {
     //commented out by chuck_starchaser; --never used
-    QVector unpos = (/*un->GetPlanetOrbit() && !un->isSubUnit()*/ NULL) ? un->LocalPosition() : un->Position();
+    QVector unpos = (/*un->GetPlanetOrbit() && !un->isSubUnit()*/ false) ? un->LocalPosition() : un->Position();
     _Universe->AccessCamera( cam )->SetPosition(
         unpos-_Universe->AccessCamera()->GetR().Cast()*(un->rSize()+g_game.znear*2)*zoomfactor,
         un->GetWarpVelocity(), un->GetAngularVelocity(), un->GetAcceleration() );
@@ -3163,7 +3177,7 @@ static void ShoveCamBehindUnit( int cam, Unit *un, float zoomfactor )
 static void ShoveCamBelowUnit( int cam, Unit *un, float zoomfactor )
 {
     //commented out by chuck_starchaser; --never used
-    QVector unpos = (/*un->GetPlanetOrbit() && !un->isSubUnit()*/ NULL) ? un->LocalPosition() : un->Position();
+    QVector unpos = (/*un->GetPlanetOrbit() && !un->isSubUnit()*/ false) ? un->LocalPosition() : un->Position();
     Vector  p, q, r;
     _Universe->AccessCamera( cam )->GetOrientation( p, q, r );
     static float ammttoshovecam = XMLSupport::parse_float( vs_config->getVariable( "graphics", "shove_camera_down", ".3" ) );

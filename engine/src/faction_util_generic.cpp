@@ -155,8 +155,11 @@ int FactionUtil::numnums( const char *str )
 void FactionUtil::LoadSerializedFaction( FILE *fp )
 {
     for (unsigned int i = 0; i < factions.size(); i++) {
+        char* ret = NULL;
         char *tmp  = new char[24*factions[i]->faction.size()];
-        fgets( tmp, 24*factions[i]->faction.size()-1, fp );
+        ret = fgets( tmp, 24*factions[i]->faction.size()-1, fp );
+        if (ret == NULL)
+            break;
         char *tmp2 = tmp;
         if (numnums( tmp ) == 0) {
             i--;

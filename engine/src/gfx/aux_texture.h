@@ -20,7 +20,6 @@
  */
 #ifndef _TEXTURE_H_
 #define _TEXTURE_H_
-#include "vsimage.h"
 #include "gfxlib.h"
 #include "gfxlib_struct.h"
 #include "../SharedPool.h"

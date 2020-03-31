@@ -12,8 +12,6 @@ void Order::AdjustRelationTo( Unit *un, float factor )
 
 void Order::Communicate( const CommunicationMessage &c )
 {
-    if (this == NULL)
-        return;
     if ( Network != NULL && !_Universe->netLocked() ) {
         //Stupid constness rules...
         int cp = _Universe->whichPlayerStarship( const_cast< UnitContainer& > (c.sender).GetUnit() );

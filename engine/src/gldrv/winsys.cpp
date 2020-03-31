@@ -541,9 +541,9 @@ void winsys_process_events()
 void winsys_atexit( winsys_atexit_func_t func )
 {
     static bool called = false;
-    //if (called != false) {
-        //BOOST_LOG_TRIVIAL(info) << "winsys_atexit called twice";
-    //}
+    if (called != false) {
+       // BOOST_LOG_TRIVIAL(info) << "winsys_atexit called twice";
+    }
     called = true;
 }
 

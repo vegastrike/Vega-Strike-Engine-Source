@@ -3644,7 +3644,7 @@ float totalShieldEnergyCapacitance( const Shield &shield )
         XMLSupport::parse_float( vs_config->getVariable( "physics", "shield_energy_capacitance", ".2" ) );
     static bool  use_max_shield_value =
         XMLSupport::parse_bool( vs_config->getVariable( "physics", "use_max_shield_energy_usage", "false" ) );
-    return shieldenergycap*use_max_shield_value ? totalShieldVal( shield ) : currentTotalShieldVal( shield );
+    return shieldenergycap && use_max_shield_value ? totalShieldVal( shield ) : currentTotalShieldVal( shield );
 }
 
 float Unit::MaxShieldVal() const
@@ -7632,7 +7632,7 @@ Vector Unit::MountPercentOperational( int whichmount )
     return Vector( mounts[whichmount].functionality,
                   mounts[whichmount].maxfunctionality,
                   ( (mounts[whichmount].status == Mount::ACTIVE || mounts[whichmount].status
-                     == Mount::INACTIVE) ? 0.0 : (Mount::UNCHOSEN ? 2.0 : 1.0) ) );
+                     == Mount::INACTIVE) ? 0.0 : (mounts[whichmount].status == Mount::UNCHOSEN ? 2.0 : 1.0) ) );
 }
 
 int Unit::RepairCost()

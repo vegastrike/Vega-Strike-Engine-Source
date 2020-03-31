@@ -323,7 +323,7 @@ GFXBOOL /*GFXDRVAPI*/ GFXCreateTexture( int width,
                                         enum TEXTURE_TARGET texture_target,
                                         enum ADDRESSMODE address_mode )
 {
-    int dummy = 0;
+    //int dummy = 0;
     //if ((mipmap & (MIPMAP | TRILINEAR)) && !isPowerOfTwo(width, dummy)) {
     //    BOOST_LOG_TRIVIAL(info) << boost::format("Width %1% not a power of two") % width;
     //}
@@ -353,11 +353,9 @@ GFXBOOL /*GFXDRVAPI*/ GFXCreateTexture( int width,
     case TEXTURE2D:
         textures[*handle].targets = GL_TEXTURE_2D;
         break;
-#ifdef GL_EXT_texture3D
     case TEXTURE3D:
         textures[*handle].targets = GL_TEXTURE_3D;
         break;
-#endif
     case CUBEMAP:
         textures[*handle].targets = GL_TEXTURE_CUBE_MAP_EXT;
         break;

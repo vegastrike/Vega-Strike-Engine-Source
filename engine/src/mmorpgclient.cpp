@@ -133,13 +133,15 @@ void mmoc::ParseRemoteInput( char *buf )
     }
     unsigned int end    = start.size();
     std::string  hackedup;
-    bool open = false, ignore2close = false;
+    bool open = false;
     unsigned int fopend = 0;
     unsigned int counter;
     //parse commands to be executed <FOO=BAR>
     for (counter = 0; counter < end; counter++) {
         if (open) {
-            if (start[counter] == '=') {hackedup.append( "\" " ); } else if (start[counter] == '>') {
+            if (start[counter] == '=') {
+                hackedup.append( "\" " );
+            } else if (start[counter] == '>') {
                 open    = false;
                 start.replace( fopend, (counter+1)-fopend, "" );
                 unsigned int offset = (counter+1)-fopend;

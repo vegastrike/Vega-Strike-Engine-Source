@@ -358,7 +358,7 @@ extern Cargo * GetMasterPartList( const char* );
 
 bool Beam::Collide( Unit *target, Unit *firer, Unit *superunit )
 {
-    if (this == NULL || target == NULL) {
+    if (target == NULL) {
         VSFileSystem::vs_fprintf( stderr, "Recovering from nonfatal beam error when beam inactive\n" );
         return false;
     }

@@ -25,14 +25,14 @@ void NavigationSystem::DrawCursor( float x, float y, float wid, float hei, const
         GFXBlendMode( SRCALPHA, INVSRCALPHA );
 
         const float verts[8 * 3] = {
-            x,          y,          0,
-            x,          y-hei,      0,
-            x,          y,          0,
-            x+wid,      y-0.75*hei, 0,
-            x,          y-hei,      0,
-            x+0.35*wid, y-0.6*hei,  0,
-            x+0.35*wid, y-0.6*hei,  0,
-            x+wid,      y-0.75*hei, 0,
+            x,                              y,                              0,
+            x,                              y-hei,                          0,
+            x,                              y,                              0,
+            x+wid,                          static_cast<float>(y-0.75*hei), 0,
+            x,                              y-hei,                          0,
+            static_cast<float>(x+0.35*wid), static_cast<float>(y-0.6*hei),  0,
+            static_cast<float>(x+0.35*wid), static_cast<float>(y-0.6*hei),  0,
+            x+wid,                          static_cast<float>(y-0.75*hei), 0,
         };
         GFXDraw( GFXLINE, verts, 8 );
 

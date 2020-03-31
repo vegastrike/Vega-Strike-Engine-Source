@@ -120,12 +120,14 @@ struct IntRef
     }
     bool operator<( const IntRef &o ) const
     {
-        if (v < o.v) {return true; } else if (v == o.v) {
-            if (n < o.n)
+        if (v < o.v) {
+            return true;
+        } else if (v == o.v) {
+            if (n < o.n) {
                 return true;
-
-            else if (n == o.n)
+            } else if (n == o.n) {
                 return t < o.t;
+            }
         }
         return false;
     }
@@ -133,11 +135,11 @@ struct IntRef
 struct VTX
 {
     VTX( float _x, float _y, float _z ) : x( _x )
-        , y( _y )
-        , z( _z ) {}
+                                          , y( _y )
+                                          , z( _z ) {}
     VTX() : x( 0 )
-        , y( 0 )
-        , z( 0 ) {}
+            , y( 0 )
+            , z( 0 ) {}
 
     bool operator==( const VTX &o ) const
     {

@@ -211,8 +211,6 @@ typedef std::vector< OrigMeshContainer >OrigMeshVector;
 #define NORMAL_TEX (4)
 #define NUM_TEX (5)
 
-const int UNDRAWN_MESHES_SIZE = NUM_MESH_SEQUENCE;
-
 OrigMeshVector undrawn_meshes[NUM_MESH_SEQUENCE];
 
 Texture* Mesh::TempGetTexture( MeshXML *xml, std::string filename, std::string factionname, GFXBOOL detail ) const

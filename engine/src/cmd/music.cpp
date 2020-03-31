@@ -507,17 +507,15 @@ void Music::_SkipRandSong( int whichlist, int layer )
 {
     if (!game_options.Music)
         return;
-    if (this != NULL) {
-        if ( whichlist != NOLIST && whichlist >= 0 && whichlist < (int) playlist.size() ) {
-            lastlist = whichlist;
-            static bool random = XMLSupport::parse_bool( vs_config->getVariable( "audio", "shuffle_songs", "true" ) );
-            if ( playlist[whichlist].size() )
-                GotoSong( whichlist, random ? randInt( playlist[whichlist].size() ) : playlist[whichlist].counter++
-                          %playlist[whichlist].size(), true, layer );
-            else
-                fprintf( stderr, "Error no songs in playlist %d\n", whichlist );
-            return;
-        }
+    if ( whichlist != NOLIST && whichlist >= 0 && whichlist < (int) playlist.size() ) {
+        lastlist = whichlist;
+        static bool random = XMLSupport::parse_bool( vs_config->getVariable( "audio", "shuffle_songs", "true" ) );
+        if ( playlist[whichlist].size() )
+            GotoSong( whichlist, random ? randInt( playlist[whichlist].size() ) : playlist[whichlist].counter++
+                    %playlist[whichlist].size(), true, layer );
+        else
+            fprintf( stderr, "Error no songs in playlist %d\n", whichlist );
+        return;
     }
     _SkipRandList( layer );
 }

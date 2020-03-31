@@ -177,7 +177,7 @@ static void getShipList( vector< string > &ships )
     for (vector< Cargo >::const_iterator iter = mpl->pImage->cargo.begin(); iter != mpl->pImage->cargo.end(); iter++)
         if ( (*iter).GetCategory().substr( 0, 10 ) == "starships/" ) {
             std::string content = (*iter).GetContent();
-            std::string::size_type dot = content.find( '.' );
+            //std::string::size_type dot = content.find( '.' );
             //if (dot==std::string::npos) {
             ships.push_back( content );
             //}

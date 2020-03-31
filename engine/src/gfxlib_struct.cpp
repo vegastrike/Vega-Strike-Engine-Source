@@ -1,6 +1,5 @@
 #include "gfxlib_struct.h"
 #include "gfxlib.h"
-#include "gldrv/gl_globals.h"
 #include <stdio.h>
 #include "xml_support.h"
 #include "config_xml.h"

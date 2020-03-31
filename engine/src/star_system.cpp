@@ -106,7 +106,7 @@ void GameStarSystem::activateLightMap( int stage )
     GFXToggleTexture( true, stage, CUBEMAP );
     GFXTextureCoordGenMode( stage, CUBE_MAP_GEN, NULL, NULL );
 #else
-    const float tempo[4] = {1, 0, 0, 0};
+    const float tempo[4] = {1.0f, 0.0f, 0.0f, 0.0f};
     GFXToggleTexture( true, stage, TEXTURE2D );
     GFXTextureCoordGenMode( stage, SPHERE_MAP_GEN, tempo, tempo );
 #endif

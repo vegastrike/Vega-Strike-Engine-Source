@@ -271,7 +271,8 @@ bool VsnetHTTPSocket::parseHeaderByte( char rcvchr )
             _incompleteheadersection = 0;
         if ( _incompleteheadersection > 2 || !isspace( rcvchr ) ) {
             if ( _header.empty() ) {
-                std::string::size_type sp1, sp2;
+                std::string::size_type sp1;
+		//std::string::size_type sp2;
                 sp1 = _incompleteheader.find( ' ' );
                 if (sp1 == std::string::npos) break;
                 //sp2 = _incompleteheader.find(' ', sp1+1);

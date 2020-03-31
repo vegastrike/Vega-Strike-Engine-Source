@@ -92,7 +92,7 @@ void Mesh::AddDamageFX( const Vector &pnt, const Vector &norm, const float damag
     }
 
     GFXColor tmp( col.r, col.g, col.b, col.a );
-    float    numsec = flickertime*(damage < mindamage) ? mindamage : damage;
+    float    numsec = flickertime && (damage < mindamage) ? mindamage : damage;
     MeshFX   newFX( numsec, (startpotency-endpotency)/( numsec*rSize()*rSize() ), true, 
                     GFXColor( loc.i, loc.j, loc.k, 1 ), 
                     tmp, 

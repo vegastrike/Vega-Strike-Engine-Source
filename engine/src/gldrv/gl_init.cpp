@@ -237,7 +237,7 @@ bool vsVendorMatch( const char *vendor )
 
 void init_opengl_extensions()
 {
-    const unsigned char *extensions = glGetString( GL_EXTENSIONS );
+    //const unsigned char *extensions = glGetString( GL_EXTENSIONS );
 
     //BOOST_LOG_TRIVIAL(trace) << boost::format("OpenGL Extensions supported: %1%") % extensions;
 

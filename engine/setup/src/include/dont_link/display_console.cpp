@@ -35,7 +35,7 @@ void ShowMain(void) {
 		if (CURRENT->name == NULL) { continue; }
 		cout << count << ") " << CURRENT->name << " [" << GetInfo(CURRENT->setting) << "]\n";
 		count++;
-	} while ((CURRENT = CURRENT->next) > 0);
+	} while ((CURRENT = CURRENT->next) != NULL);
 	cout << "Q) Quit\n";
 	count--;
 	while (loop) {
@@ -69,7 +69,7 @@ void ShowChoices(int val) {
 		if (CURRENT->name == NULL) { continue; }
 		if (count == val) { CHOICE = CURRENT; break; }
 		count++;
-	} while ((CURRENT = CURRENT->next) > 0);
+	} while ((CURRENT = CURRENT->next) != NULL);
 	if (CHOICE == 0) { return; }
 	cout << "__________\n";
 	cout << "Displaying choices for " << CHOICE->name << "\n";
@@ -81,7 +81,7 @@ void ShowChoices(int val) {
 		if (strcmp(CHOICE->setting, CUR->name) == 0) { cout << "[" << GetInfo(CUR->name) << "]\n"; setted = count; CHOICE_CAT = CUR; }
 		else { cout << GetInfo(CUR->name) << "\n"; }
 		count++;
-	} while ((CUR = CUR->next) > 0);
+	} while ((CUR = CUR->next) != NULL);
 	cout << "M) Main Menu\nQ) Quit\n";
 	count--;
 	while (loop) {
@@ -105,7 +105,7 @@ void ShowChoices(int val) {
 		EnableSetting(CUR->name, CUR->group);
 		CHOICE->setting = CUR->name;
 		break;
-	} while ((CUR = CUR->next) > 0);
+	} while ((CUR = CUR->next) != NULL);
 	return;
 }
 //#endif    //CONSOLE

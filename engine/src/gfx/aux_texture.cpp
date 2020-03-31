@@ -26,7 +26,6 @@
 #include "endianness.h"
 #include "hashtable.h"
 #include "vsfilesystem.h"
-#include "vsimage.h"
 #include "vs_globals.h"
 #include "in_kb.h"
 #include "main_loop.h"
@@ -673,9 +672,7 @@ void Texture::MakeActive( int stag, int pass )
             {
             case TEXTURE1D:
             case TEXTURE2D:
-        #ifdef GL_EXT_texture3D
             case TEXTURE3D:
-        #endif
             default:
                 address_mode = WRAP;
                 break;

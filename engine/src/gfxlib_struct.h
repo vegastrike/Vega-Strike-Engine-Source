@@ -21,6 +21,8 @@
 #ifndef _GFXLIB_STRUCT
 #define _GFXLIB_STRUCT
 #include "gfx/vec.h"
+#include "gfx/vsimage.h"
+#include "gldrv/gl_globals.h"
 #include "endianness.h"
 
 #include <vector>
