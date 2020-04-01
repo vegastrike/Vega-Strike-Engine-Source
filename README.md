@@ -2,11 +2,12 @@
 <p style="font-weight:600; font-size:36px">Vega Strike Space Simulation Engine</p>
 </header>
 
+[![Build Status](https://travis-ci.org/vegastrike/Vega-Strike-Engine-Source.svg?branch=master)](https://travis-ci.org/vegastrike/Vega-Strike-Engine-Source)
 
 ```
 #====================================
 # @file   : README.md
-# @version: 2020-02-14
+# @version: 2020-04-02
 # @created: 2020-02-06
 # @author : pyramid
 # @brief  : quick repo guide
@@ -222,7 +223,7 @@ use the vsbuild.sh script in the root directory.
 or manually
 
 ```bash
-vegastrike> apt install cmake g++ python2-dev libgl1-mesa-glx freeglut3-dev libopenal-dev libsdl-gfx1.2-dev libvorbis-dev libjpeg-dev libpng-dev libgtk2.0-dev
+vegastrike> apt install cmake g++ python-dev libboost-python-dev libgl1-mesa-glx freeglut3-dev libopenal-dev libsdl-gfx1.2-dev libvorbis-dev libjpeg-dev libpng-dev libgtk2.0-dev
 vegastrike> mkdir build & cd build
 vegastrike> cmake ../engine
 vegastrike> make

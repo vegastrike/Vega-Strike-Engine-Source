@@ -1,0 +1,48 @@
+language: cpp
+
+os: linux
+
+dist: bionic
+
+compiler:
+    - gcc
+    - clang
+    
+jobs:
+    include:
+        - os: linux
+          dist: trusty
+          compiler: gcc
+          name: "Ubuntu 14.04 LTS - GCC"
+        - os: linux
+          dist: trusty
+          compiler: clang
+          name: "Ubuntu 14.04 LTS - Clang"
+        - os: linux
+          dist: xenial
+          compiler: gcc
+          name: "Ubuntu 16.04 LTS - GCC"
+        - os: linux
+          dist: xenial
+          compiler: clang
+          name: "Ubuntu 16.04 LTS - Clang"
+    allow_failures:
+        - compiler: clang
+    fast_finish: true
+
+addons:
+  apt:
+    packages:
+      - python-dev
+      - libgl1-mesa-glx
+      - freeglut3-dev
+      - libopenal-dev
+      - libsdl-gfx1.2-dev
+      - libvorbis-dev
+      - libjpeg-dev
+      - libpng-dev
+      - libgtk2.0-dev
+      - libboost-python-dev
+
+script:
+  - ./sh/vsbuild.sh
