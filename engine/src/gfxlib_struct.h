@@ -211,7 +211,10 @@ inline GFXColor operator-( const GFXColor &c0, const GFXColor &c1 )
 {
     return GFXColor( c0.r-c1.r, c0.g-c1.g, c0.b-c1.b, c0.a-c1.a );
 }
-
+inline GFXColor operator-( GFXColor &c0, const GFXColor &c1 )
+{
+    return GFXColor( c0.r-c1.r, c0.g-c1.g, c0.b-c1.b, c0.a-c1.a );
+}
 inline bool operator==( const GFXColor &c0, const GFXColor &c1 )
 {
     return (c0.r==c1.r)&&(c0.g==c1.g)&&(c0.b==c1.b)&&(c0.a==c1.a);

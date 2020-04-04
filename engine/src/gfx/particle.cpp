@@ -12,23 +12,11 @@
 #include <limits>
 
 #include "aligned.h"
-#include "vectorize.h"
 
-ParticleTrail particleTrail( "sparkle", 500, SRCALPHA, ONE, 0.05, false, true );
+ParticleTrail particleTrail( "sparkle", 500, SRCALPHA, ONE, 0.05f, false, true );
 ParticleTrail smokeTrail( "smoke", 500, SRCALPHA, INVSRCALPHA );
 ParticleTrail debrisTrail( "debris", 500, SRCALPHA, INVSRCALPHA, 0.5, true );
 
-using vectorized::vectorize;
-
-static float mymin( float a, float b )
-{
-    return a > b ? b : a;
-}
-
-static float mymax( float a, float b )
-{
-    return a > b ? a : b;
-}
 
 void ParticleTrail::ChangeMax( unsigned int max )
 {
@@ -60,25 +48,41 @@ void ParticleTrail::ChangeMax( unsigned int max )
     this->maxparticles = max;
 }
 
-VECTORIZE_MEMBER_FUNC(color_clamp_func, GFXColor, GFXColor, clamp);
 
-template <typename LOC, typename VEL, typename COL>
-static inline void UpdateColor( LOC &vloc, const VEL &vvel, COL &vcol, typename COL::const_reference fadetime, const float time )
+
+static inline void UpdateColor( std::vector< QVector, aligned_allocator<QVector> > &vloc,
+                                const std::vector< Vector, aligned_allocator<Vector> > &vvel,
+                                std::vector< GFXColor, aligned_allocator<GFXColor> > &vcol,
+                                const GFXColor& fadetime,
+                                const float time )
 {
-    const double dtime = time;
-    vectorize(vloc) += vectorize(vvel) * dtime;
-    vectorize(vcol) = vectorized::map( vectorize(vcol) - fadetime, color_clamp_func() );
+    const double dtime = static_cast<double>(time);
+
+    for(unsigned long i=0;i<vloc.size();i++) {
+        vloc[i] += vvel[i] * dtime;
+    }
+
+    for (GFXColor& item : vcol) {
+        item = item - fadetime;
+        item = item.clamp();
+    }
 }
 
 template <typename LOC, typename VEL, typename COL>
 static inline void UpdateAlpha( LOC &vloc, const VEL &vvel, COL &vcol, const float time, const float fade )
 {
-    const double dtime = time;
-    vectorize(vloc) += vectorize(vvel) * dtime;
-    for (typename COL::iterator it = vcol.begin(); it != vcol.end(); ++it) {
-        it->a = mymax(0.0f, it->a - fade * time);
+    const double dtime = static_cast<double>(time);
+    for(unsigned long i=0;i<vloc.size();i++) {
+        vloc[i] += vvel[i] * dtime;
+    }
+
+    for(auto& item :  vcol)
+    {
+        item.a = std::max(0.0f, item.a - fade * time);
     }
 }
+
+
 
 //Write 3 pos and 4 col float values into v and increment v by 7
 static inline void SetPointVertex( const QVector &loc, const GFXColor &col, const float psize, const float grow, const float trans, std::back_insert_iterator<std::vector<float> > &v, const QVector &campos )
@@ -139,14 +143,14 @@ public:
 
 ParticleTrail::Config::Config(const std::string &prefix)
 {
-    texture = NULL;
+    texture = nullptr;
     initialized = false;
     this->prefix = prefix;
 }
 
 ParticleTrail::Config::~Config()
 {
-    if (texture != NULL)
+    if (texture != nullptr)
         delete texture;
 }
 
@@ -418,7 +422,7 @@ void ParticleEmitter::doParticles(const QVector& pos, float rSize, float percent
 
         pp.col = color;
         particleTrail.AddParticle( pp,
-            rand*( mymax( velocity.Magnitude(), config.absSpeed )*config.spread+config.absSpeed)
+            rand*( std::max( velocity.Magnitude(), config.absSpeed )*config.spread+config.absSpeed)
                 +velocity*config.speed+basevelocity,
             config.fixedSize ? config.relSize : (pSize*config.relSize)
         );
