@@ -3,3 +3,4 @@ build/
 data/
 ext/
 *.pyc
+build-engine-Desktop-Default/
