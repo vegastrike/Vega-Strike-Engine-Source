@@ -1,13 +1,15 @@
 language: cpp
-
-os: linux
+os:
+ - linux
+ - osx
 
 dist: bionic
 
 compiler:
     - gcc
     - clang
-    
+    - xcode
+
 jobs:
     include:
         - os: linux
@@ -26,8 +28,19 @@ jobs:
           dist: xenial
           compiler: clang
           name: "Ubuntu 16.04 LTS - Clang"
+        - os: linux
+          dist: bionic
+          compiler: gcc
+          name: "Ubuntu 18.04 LTS - GCC"
+        - os: linux
+          dist: bionic
+          compiler: clang
+          name: "Ubuntu 18.04 LTS - Clang"
+        - os: osx
+          osx_image: xcode11.3
     allow_failures:
-        - compiler: clang
+        - compiler: clang, xcode
+        - os: osx
     fast_finish: true
 
 addons:
@@ -43,6 +56,17 @@ addons:
       - libpng-dev
       - libgtk2.0-dev
       - libboost-python-dev
+  homebrew:
+     update: true
+     packages:
+      - mesa
+      - openal-soft
+      - sdl2
+      - libvorbis
+      - jpeg
+      - libpng
+      - gtk+3
+      - boost-python
 
 script:
   - ./sh/vsbuild.sh
