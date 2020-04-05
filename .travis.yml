@@ -39,8 +39,9 @@ jobs:
         - os: osx
           osx_image: xcode11.3
     allow_failures:
-        - compiler: clang, xcode
-        - os: osx
+        - compiler: clang
+        - compiler: xcode
+          os: osx
     fast_finish: true
 
 addons:
