@@ -26,6 +26,7 @@
 #include "macosx_math.h"
 #include <math.h>
 #include <float.h>
+#include <cmath>
 
 #ifdef HAVE_IEEEFP_H
  #include <ieeefp.h>
@@ -44,13 +45,8 @@
 #if defined (HAVE_MATH_H)
  #include <math.h>
 #endif
-#if  defined (HAVE_FINITE) || defined (BSD)
- #define FINITE( x ) ( finite( x ) )
- #define ISNAN( x ) ( isnan( x ) )
-#else
- #define FINITE( x ) ( _finite( x ) )
- #define ISNAN( x ) ( _isnan( x ) )
-#endif
+#define FINITE( x ) ( std::isfinite( x ) )
+#define ISNAN( x ) ( std:: isnan( x ) )
 
 #define VS_PI 3.1415926535897931
 
