@@ -59,6 +59,7 @@ addons:
       - jpeg
       - libpng
       - gtk+
+      - gtkglext
       - boost-python
 
 script:
