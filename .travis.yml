@@ -3,12 +3,13 @@ os:
  - linux
  - osx
 
+# When updating be sure to add a section
+# to the matrix to cover the distro
 dist: bionic
 
 compiler:
     - gcc
     - clang
-    - xcode
 
 jobs:
     include:
@@ -28,14 +29,6 @@ jobs:
           dist: xenial
           compiler: clang
           name: "Ubuntu 16.04 LTS - Clang"
-        - os: linux
-          dist: bionic
-          compiler: gcc
-          name: "Ubuntu 18.04 LTS - GCC"
-        - os: linux
-          dist: bionic
-          compiler: clang
-          name: "Ubuntu 18.04 LTS - Clang"
         - os: osx
           osx_image: xcode11.3
     allow_failures:
@@ -61,11 +54,11 @@ addons:
      packages:
       - mesa
       - openal-soft
-      - sdl2
+      - sdl
       - libvorbis
       - jpeg
       - libpng
-      - gtk+3
+      - gtk+
       - boost-python
 
 script:
