@@ -42,9 +42,6 @@
  #define M_1_PI (1/M_PI)
 #endif
 
-#if defined (HAVE_MATH_H)
- #include <math.h>
-#endif
 #define FINITE( x ) ( std::isfinite( x ) )
 #define ISNAN( x ) ( std:: isnan( x ) )
 
