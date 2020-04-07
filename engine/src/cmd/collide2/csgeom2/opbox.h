@@ -289,9 +289,12 @@ public:
   /// Add a new vertex and recalculate the bounding box.
   void AddBoundingVertex (float x, float y, float z)
   {
-    if (x < minbox.x) minbox.x = x; if (x > maxbox.x) maxbox.x = x;
-    if (y < minbox.y) minbox.y = y; if (y > maxbox.y) maxbox.y = y;
-    if (z < minbox.z) minbox.z = z; if (z > maxbox.z) maxbox.z = z;
+    if (x < minbox.x) minbox.x = x;
+	else  if (x > maxbox.x) maxbox.x = x;
+    if (y < minbox.y) minbox.y = y;
+	  else if (y > maxbox.y) maxbox.y = y;
+    if (z < minbox.z) minbox.z = z;
+	  else if (z > maxbox.z) maxbox.z = z;
   }
 
   /// Add a new vertex and recalculate the bounding box.
