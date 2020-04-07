@@ -212,7 +212,7 @@
 									if(y<min)	y=min;
 			                                                    else if(y>max)	y=max;
 									if(z<min)	z=min;
-			                                                     elseif(z>max)	z=max;
+			                                                     else if(z>max)	z=max;
 									return *this;
 								}
 
