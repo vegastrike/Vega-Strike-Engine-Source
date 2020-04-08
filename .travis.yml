@@ -1,13 +1,16 @@
 language: cpp
+os:
+ - linux
+ - osx
 
-os: linux
-
+# When updating be sure to add a section
+# to the matrix to cover the distro
 dist: bionic
 
 compiler:
     - gcc
     - clang
-    
+
 jobs:
     include:
         - os: linux
@@ -26,8 +29,11 @@ jobs:
           dist: xenial
           compiler: clang
           name: "Ubuntu 16.04 LTS - Clang"
+        - os: osx
+          osx_image: xcode11.3
     allow_failures:
         - compiler: clang
+        - os: osx
     fast_finish: true
 
 addons:
@@ -43,6 +49,18 @@ addons:
       - libpng-dev
       - libgtk2.0-dev
       - libboost-python-dev
+  homebrew:
+     update: true
+     packages:
+      - mesa
+      - openal-soft
+      - sdl
+      - libvorbis
+      - jpeg
+      - libpng
+      - gtk+
+      - gtkglext
+      - boost-python
 
 script:
   - ./sh/vsbuild.sh
