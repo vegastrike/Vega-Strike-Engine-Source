@@ -6,10 +6,9 @@
 #include <deque>
 #include <boost/shared_ptr.hpp>
 #include "cmd/ai/order.h"
-#include "gfx/vec.h"
 
 class Unit;
-
+class QVector;
 
 namespace Orders
 {

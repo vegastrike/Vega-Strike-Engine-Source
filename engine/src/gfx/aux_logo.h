@@ -24,13 +24,12 @@
 #include "matrix.h"
 #include "gfxlib.h"
 #include "hashtable.h"
-#include "vec.h"
-
 #include <vector>
 
 //struct glVertex;
 class Mesh;
 class Texture;
+class Vector;
 class Logo
 {
     int numlogos;

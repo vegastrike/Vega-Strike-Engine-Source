@@ -1,9 +1,8 @@
 #ifndef TERRAIN_H_
 #define TERRAIN_H_
 #include "gfx/quadtree.h"
-#include "gfx/vec.h"
-
 class Unit;
+class Vector;
 
 #define TERRAINRENDER 1
 #define TERRAINUPDATE 2

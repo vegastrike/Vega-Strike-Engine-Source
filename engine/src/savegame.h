@@ -97,7 +97,7 @@ public: ~SaveGame();
     }
     std::string WriteSavedUnit( SavedUnits *su );
     std::string WriteSaveGame( const char *systemname,
-                               const QVector &Pos,
+                               const class QVector &Pos,
                                float credits,
                                std::vector< std::string >unitname,
                                int player_num,
