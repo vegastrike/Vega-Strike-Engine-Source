@@ -291,7 +291,7 @@ SET(LIBGFXGENERIC_SOURCES
     src/gfx/quaternion.cpp
     src/gfx/soundcontainer_generic.cpp
     src/gfx/sphere_generic.cpp
-    src/gfx/vec.cpp
+    src/gfx/tvector.cpp
 )
 
 SET(LIBGFXCLIENT_SOURCES
