@@ -232,7 +232,12 @@ void gfx_light::Kill()
 */
 
 void gfx_light::SendGLPosition( const GLenum target ) const {
-    float v[4] = {vect[0] + _light_offset.x, vect[1] + _light_offset.y, vect[2] + _light_offset.z, 1};
+    float v[4] = {
+        static_cast<float>(vect[0] + _light_offset.x),
+        static_cast<float>(vect[1] + _light_offset.y),
+        static_cast<float>(vect[2] + _light_offset.z),
+        1
+    };
     glLightfv( target, GL_POSITION, v );
 }
 

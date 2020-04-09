@@ -32,7 +32,6 @@ jobs:
         - os: osx
           osx_image: xcode11.3
     allow_failures:
-        - compiler: clang
         - os: osx
     fast_finish: true
 
