@@ -698,8 +698,8 @@ void AUDAdjustSound( const int sound, const QVector &pos, const Vector &vel )
     if ( sound >= 0 && sound < (int) sounds.size() ) {
         float p[] = {
             static_cast<float>(scalepos *pos.i),
-	    static_cast<float>(scalepos*pos.j),
-	    static_cast<float>(scalepos*pos.k)
+            static_cast<float>(scalepos*pos.j),
+            static_cast<float>(scalepos*pos.k)
         }
         ;
         float v[] = {scalevel *vel.i, scalevel*vel.j, scalevel*vel.k};
