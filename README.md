@@ -3,6 +3,7 @@
 </header>
 
 [![Build Status](https://travis-ci.org/vegastrike/Vega-Strike-Engine-Source.svg?branch=master)](https://travis-ci.org/vegastrike/Vega-Strike-Engine-Source)
+[![Gitter](https://badges.gitter.im/vegastrike/community.svg)](https://gitter.im/vegastrike/community?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
 
 ```
 #====================================
