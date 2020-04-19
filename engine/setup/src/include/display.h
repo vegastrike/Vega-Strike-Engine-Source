@@ -37,7 +37,7 @@ void ShowMain();
 
 #define GET_TITLE char title[1000]="VegaStrike Configurator"; \
   if (strlen(CONFIG.program_name)+strlen(VERSION)<800) { \
-    sprintf(title, "Program Configuration - %s - Version 0.5.3", \
+    sprintf(title, "Program Configuration - %s - Version 0.6.0", \
     CONFIG.program_name); \
   }
 
