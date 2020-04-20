@@ -113,7 +113,7 @@ void ShowMain(void) {
 				break;
 			}
 			i++;
-		} while ((NEWCUR = NEWCUR->next) > 0);
+		} while ((NEWCUR = NEWCUR->next) != nullptr);
 //		printf("\n\n");
 		gtk_widget_show (menu);
 		gtk_container_add(GTK_CONTAINER(vbox), menu);
@@ -128,7 +128,7 @@ void ShowMain(void) {
 			gtk_widget_show(hbox);
 		}
 		column++;
-	} while ((CURRENT = CURRENT->next) > 0);
+	} while ((CURRENT = CURRENT->next) != nullptr);
 	if (column != 1) {
 		gtk_container_add(GTK_CONTAINER(main_vbox), hbox);
 		gtk_widget_show(hbox);
@@ -186,7 +186,7 @@ void AddCats(GtkWidget *vbox, char *group, char *def) {
 //		gtk_signal_connect(GTK_OBJECT(button), "clicked", GTK_SIGNAL_FUNC(ClickButton), CUR);
 #endif
 		CUR->button = button;
-	} while ((CUR = CUR->next) > 0);
+	} while ((CUR = CUR->next) != nullptr);
 }
 
 void ClickButton(GtkWidget *w, struct catagory *CUR) {
