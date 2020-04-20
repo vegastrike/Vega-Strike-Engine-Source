@@ -36,7 +36,7 @@ void SetGroup(char *group, char *setting) {
 	do {
 		if (CURRENT->name == NULL) { continue; }
 		if (strcmp(group, CURRENT->name) == 0) { CURRENT->setting = NewString(setting); return; }
-	} while ((CURRENT = CURRENT->next) > 0);
+	} while ((CURRENT = CURRENT->next) != nullptr);
 }
 void SetInfo(char *catagory, char *info) {
 	struct catagory *CURRENT;
@@ -44,7 +44,7 @@ void SetInfo(char *catagory, char *info) {
 	do {
 		if (CURRENT->name == NULL) { continue; }
 		if (strcmp(catagory, CURRENT->name) == 0) { CURRENT->info = NewString(info); return; }
-	} while ((CURRENT = CURRENT->next) > 0);
+	} while ((CURRENT = CURRENT->next) != nullptr);
 }
 
 char *GetInfo(char *catagory) {
@@ -56,7 +56,7 @@ char *GetInfo(char *catagory) {
 			if (CURRENT->info) { return CURRENT->info; }
 			else { return catagory; }
 		}
-	} while ((CURRENT = CURRENT->next) > 0);
+	} while ((CURRENT = CURRENT->next) != nullptr);
 	return catagory;
 }
 
@@ -66,7 +66,7 @@ char *GetSetting(char *group) {
 	do {
 		if (CUR->name == NULL) { continue; }
 		if (strcmp(CUR->name, group) == 0) { return CUR->setting; }
-	} while ((CUR = CUR->next) > 0);
+	} while ((CUR = CUR->next) != nullptr);
 	return EMPTY_STR;
 }
 
@@ -76,7 +76,7 @@ struct catagory *GetCatStruct(char *name) {
 	do {
 		if (CUR->name == NULL) { continue; }
 		if (strcmp(CUR->name, name) == 0) { return CUR; }
-	} while ((CUR = CUR->next) > 0);
+	} while ((CUR = CUR->next) != nullptr);
 	return 0;
 }
 
@@ -86,7 +86,6 @@ struct group *GetGroupStruct(char *name) {
         do {
                 if (CUR->name == NULL) { continue; }
                 if (strcmp(CUR->name, name) == 0) { return CUR; }
-        } while ((CUR = CUR->next) > 0);
+        } while ((CUR = CUR->next) != nullptr);
         return 0;
 }
-
