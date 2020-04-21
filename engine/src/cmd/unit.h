@@ -29,13 +29,12 @@
 #include <vector>
 #include <map>
 #include <memory>
+#include "gfx/vec.h"
 
 class HaloSystem;
 struct GFXColor; // labeled as class, declared as struct in gfxlib_struct.h
-class QVector;
 struct Transformation;
 class Matrix;
-class Vector;
 class StarSystem;
 
 class Mesh;

@@ -3,6 +3,7 @@
 
 /* #undef SOUND_DEBUG */
 
+#include "gfx/vec.h"
 #include <string>
 #include <vector>
 
@@ -52,7 +53,6 @@ struct AUDSoundProperties
 
 #ifdef HAVE_AL
 
-class Vector;
 
 struct OurSound
 {
