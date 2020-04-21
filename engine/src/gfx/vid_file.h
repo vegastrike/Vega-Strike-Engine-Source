@@ -21,8 +21,8 @@ private:
 public: Exception() {}
         Exception( const Exception &other ) : _message( other._message ) {}
         explicit Exception( const std::string &message ) : _message( message ) {}
-        virtual ~Exception() throw () {}
-        virtual const char * what() const throw ()
+        virtual ~Exception() {}
+        virtual const char * what() const
         {
             return _message.c_str();
         }
@@ -57,13 +57,13 @@ public: EndOfStreamException() {}
     };
 
 public: 
-    VidFile() throw ();
+    VidFile();
     ~VidFile();
 
-    bool isOpen() const throw ();
+    bool isOpen() const;
 
     void open( const std::string &path, size_t maxDimension = 65535, bool forcePOT = false );
-    void close() throw ();
+    void close();
 
 /** Seeks to the specified time
  * @Returns true if frame changed, false otherwise.
@@ -72,12 +72,12 @@ public:
  */
     bool seek( float time );
 
-    float getFrameRate() const throw ();
-    float getDuration() const throw ();
-    int getWidth() const throw ();
-    int getHeight() const throw ();
-    void * getFrameBuffer() const throw ();
-    int getFrameBufferStride() const throw ();
+    float getFrameRate() const;
+    float getDuration() const;
+    int getWidth() const;
+    int getHeight() const;
+    void * getFrameBuffer() const;
+    int getFrameBufferStride() const;
 
 private:
     VidFileImpl *impl;

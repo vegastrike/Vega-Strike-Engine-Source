@@ -85,7 +85,7 @@ private:
         }
     }
 
-    void nextFrame(bool skip=false) throw (VidFile::Exception)
+    void nextFrame(bool skip=false)
     {
         int bytesDecoded;
         int frameFinished;
@@ -202,7 +202,7 @@ public:
             av_close_input_file( pFormatCtx );
     }
 
-    void open( const std::string &path ) throw (VidFile::Exception)
+    void open( const std::string &path )
     {
         if (pCodecCtx != 0) throw VidFile::Exception( "Already open" );
         //Initialize libavcodec/libavformat if necessary
@@ -375,7 +375,7 @@ public:
 #endif /* !HAVE_FFMPEG */
 /* ************************************ */
 
-VidFile::VidFile() throw () :
+VidFile::VidFile() :
     impl( NULL )
 {}
 
@@ -385,7 +385,7 @@ VidFile::~VidFile()
         delete impl;
 }
 
-bool VidFile::isOpen() const throw ()
+bool VidFile::isOpen() const
 {
     return impl != NULL;
 }
@@ -400,7 +400,7 @@ void VidFile::open( const std::string &path, size_t maxDimension, bool forcePOT 
 #endif
 }
 
-void VidFile::close() throw ()
+void VidFile::close()
 {
     if (impl) {
         delete impl;
@@ -408,32 +408,32 @@ void VidFile::close() throw ()
     }
 }
 
-float VidFile::getFrameRate() const throw ()
+float VidFile::getFrameRate() const
 {
     return impl ? impl->frameRate : 0;
 }
 
-float VidFile::getDuration() const throw ()
+float VidFile::getDuration() const
 {
     return impl ? impl->duration : 0;
 }
 
-int VidFile::getWidth() const throw ()
+int VidFile::getWidth() const
 {
     return impl ? impl->width : 0;
 }
 
-int VidFile::getHeight() const throw ()
+int VidFile::getHeight() const
 {
     return impl ? impl->height : 0;
 }
 
-void* VidFile::getFrameBuffer() const throw ()
+void* VidFile::getFrameBuffer() const
 {
     return impl ? impl->frameBuffer : 0;
 }
 
-int VidFile::getFrameBufferStride() const throw ()
+int VidFile::getFrameBufferStride() const
 {
     return impl ? impl->frameBufferStride : 0;
 }
