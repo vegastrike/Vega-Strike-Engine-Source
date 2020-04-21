@@ -40,7 +40,7 @@ namespace Audio {
                  */
                 Duration expirationTime;
                 
-                void computeExpirationTime() throw()
+                void computeExpirationTime()
                 {
                     assert(parsed.get());
                     expirationTime = 10 + min(600UL, 2UL * parsed->root.numChildren());
@@ -55,7 +55,7 @@ namespace Audio {
                     touch();
                 }
                 
-                void touch() const throw()
+                void touch() const
                 {
                     lastUsageTime = getRealTime();
                 }
@@ -73,7 +73,6 @@ namespace Audio {
             string defaultDefinitionFile;
             
             SharedPtr<XMLDOM::XMLDocument> getDefinitionFile(const std::string &path)
-               
             {
                 DefinitionMap::iterator it = loadedDefinitions.find(path);
                 if (it != loadedDefinitions.end()) {
@@ -87,7 +86,6 @@ namespace Audio {
             }
             
             SharedPtr<XMLDOM::XMLDocument> getDefinitionFile(const std::string &path) const
-               
             {
                 DefinitionMap::const_iterator it = loadedDefinitions.find(path);
                 if (it != loadedDefinitions.end()) {
@@ -151,7 +149,7 @@ namespace Audio {
     
     using namespace __impl;
 
-    TemplateManager::TemplateManager() throw() :
+    TemplateManager::TemplateManager() :
         data(new TemplateManagerData)
     {
     }
@@ -180,13 +178,11 @@ namespace Audio {
     }
 
     SharedPtr<XMLDOM::XMLDocument> TemplateManager::getDefinitionFile(const std::string &path) const 
-        throw(ResourceNotLoadedException)
     {
         return ((const TemplateManagerData &)*data).getDefinitionFile(path);
     }
     
     SharedPtr<XMLDOM::XMLDocument> TemplateManager::getDefinitionFile(const std::string &path) 
-       
     {
         try {
             return data->getDefinitionFile(path);
@@ -197,19 +193,16 @@ namespace Audio {
     }
 
     void TemplateManager::setDefaultDefinitionFile(const std::string &x) 
-        throw()
     {
         data->defaultDefinitionFile = x;
     }
     
     const std::string& TemplateManager::getDefaultDefinitionFile() const 
-        throw()
     {
         return data->defaultDefinitionFile;
     }
 
     SharedPtr<SourceTemplate> TemplateManager::getSourceTemplate(const std::string &name) 
-       
     {
         SharedPtr<SourceTemplate> rv;
         
@@ -226,7 +219,6 @@ namespace Audio {
     }
     
     SharedPtr<SourceTemplate> TemplateManager::loadSourceTemplate(const std::string &name) 
-       
     {
         string::size_type sep = name.find_first_of(':');
         SharedPtr<XMLDOM::XMLDocument> def;
@@ -285,14 +277,12 @@ namespace Audio {
     
     
     void TemplateManager::addSourceTemplate(const string &name, SharedPtr<SourceTemplate> tpl, bool perm) 
-        throw(ResourceAlreadyLoadedException)
     {
         static string empty;
         addSourceTemplate(empty, name, tpl, perm);
     }
 
     void TemplateManager::addSourceTemplate(const string &path, const string &name, SharedPtr<SourceTemplate> tpl, bool perm) 
-        throw(ResourceAlreadyLoadedException)
     {
         string key(path + ":" + name);
         SharedPtr<SourceTemplate> rv;

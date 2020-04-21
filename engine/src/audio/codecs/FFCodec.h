@@ -20,7 +20,7 @@ namespace Audio {
         virtual ~FFCodec();
         
         /** @see Codec::canHandle */
-        virtual bool canHandle(const std::string& path, bool canOpen, VSFileSystem::VSFileType type = VSFileSystem::UnknownFile) throw();
+        virtual bool canHandle(const std::string& path, bool canOpen, VSFileSystem::VSFileType type = VSFileSystem::UnknownFile);
         
         /** @see Codec::open */
         virtual Stream* open(const std::string& path, VSFileSystem::VSFileType type = VSFileSystem::UnknownFile);

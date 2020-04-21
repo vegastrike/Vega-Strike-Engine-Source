@@ -22,7 +22,7 @@ namespace Audio {
     {
     }
     
-    bool FFCodec::canHandle(const std::string& path, bool canOpen, VSFileSystem::VSFileType type) throw()
+    bool FFCodec::canHandle(const std::string& path, bool canOpen, VSFileSystem::VSFileType type)
     {
         if (canOpen) {
             // I don't really know a way to test files in ffmpeg

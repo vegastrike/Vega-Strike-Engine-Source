@@ -8,7 +8,7 @@
 
 namespace Audio {
 
-    RenderableSource::RenderableSource(Source *_source) throw() : 
+    RenderableSource::RenderableSource(Source *_source) :
         source(_source)
     {
     }
@@ -20,7 +20,6 @@ namespace Audio {
     }
     
     void RenderableSource::startPlaying(Timestamp start) 
-       
     {
         try {
             startPlayingImpl(start);
@@ -32,7 +31,6 @@ namespace Audio {
     }
     
     void RenderableSource::stopPlaying() 
-        throw()
     {
         // Cannot be playing if an exception rises, 
         // as that implies a problem with the underlying API
@@ -43,7 +41,6 @@ namespace Audio {
     }
     
     bool RenderableSource::isPlaying() const 
-        throw()
     {
         try {
             return isPlayingImpl();
@@ -55,13 +52,11 @@ namespace Audio {
     }
     
     Timestamp RenderableSource::getPlayingTime() const 
-       
     {
         return getPlayingTimeImpl();
     }
     
     void RenderableSource::update(int flags, const Listener& sceneListener) 
-        throw()
     {
         try {
             updateImpl(flags, sceneListener);
@@ -71,7 +66,6 @@ namespace Audio {
     }
     
     void RenderableSource::seek(Timestamp time) 
-       
     {
         seekImpl(time);
     }

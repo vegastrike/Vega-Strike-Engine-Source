@@ -51,7 +51,7 @@ namespace Audio {
         return duration;
     }
     
-    double OggStream::getPositionImpl() const throw()
+    double OggStream::getPositionImpl() const
     {
         return ov_time_tell( &oggData->vorbisFile );
     }

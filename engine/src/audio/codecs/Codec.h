@@ -31,7 +31,7 @@ namespace Audio {
     
     protected:
         /** Internal constructor */
-        Codec(const std::string& name) throw();
+        Codec(const std::string& name);
     
     public:
         /** Back-appendable collection of std::string, optimally for static readonly data */
@@ -41,7 +41,7 @@ namespace Audio {
         virtual ~Codec();
         
         /** Return the descriptive name of the codec. */
-        const std::string& getName() const throw();
+        const std::string& getName() const;
         
         /** Return a list of supported extensions. 
          * @remarks 
@@ -58,7 +58,7 @@ namespace Audio {
          *      the final test canHandle(path,true) should never be skipped, even if the file
          *      includes an extension within the returned set.
          */
-        virtual const Extensions* getExtensions() const throw();
+        virtual const Extensions* getExtensions() const;
         
         /**
          * Returns whether this codec instanc can handle the specified file.
@@ -80,7 +80,7 @@ namespace Audio {
          *      value will be less accurate. Whenever in doubt, the function will return
          *      success (true).
          */
-        virtual bool canHandle(const std::string& path, bool canOpen, VSFileSystem::VSFileType type = VSFileSystem::UnknownFile) throw() = 0;
+        virtual bool canHandle(const std::string& path, bool canOpen, VSFileSystem::VSFileType type = VSFileSystem::UnknownFile) = 0;
         
         /**
          * Returns an instance of the Stream class attached to this codec and the specified

@@ -21,7 +21,6 @@ namespace Audio {
     }
     
     void OpenALRenderableListener::updateImpl(int flags) 
-        throw(Exception)
     {
         if (flags & UPDATE_LOCATION) {
             const Vector3 pos(getListener()->getPosition()); // no option but to cast it down to float :(

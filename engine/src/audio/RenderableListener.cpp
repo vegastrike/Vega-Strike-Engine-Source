@@ -7,7 +7,7 @@
 
 namespace Audio {
 
-    RenderableListener::RenderableListener(Listener *_listener) throw() : 
+    RenderableListener::RenderableListener(Listener *_listener) :
         listener(_listener)
     {
     }
@@ -19,7 +19,6 @@ namespace Audio {
     }
     
     void RenderableListener::update(int flags) 
-        throw()
     {
         try {
             updateImpl(flags);

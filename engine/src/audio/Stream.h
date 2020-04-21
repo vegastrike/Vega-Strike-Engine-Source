@@ -47,16 +47,16 @@ namespace Audio {
         Stream(const std::string& path);
         
         /** Internal write access to stream format, for derived classes */
-        Format& getFormatInternal() throw() { return streamFormat; }
+        Format& getFormatInternal() { return streamFormat; }
     
     public:
         virtual ~Stream();
         
         /** Return the path of the associated file. */
-        const std::string& getPath() const throw() { return filePath; };
+        const std::string& getPath() const { return filePath; };
         
         /** Return the format of the stream. */
-        const Format& getFormat() const throw() { return streamFormat; }
+        const Format& getFormat() const { return streamFormat; }
         
         /** 
          * Return the length of the stream.
@@ -78,7 +78,7 @@ namespace Audio {
         unsigned int read(void *buffer, unsigned int bufferSize);
         
         /** Get the stream's current position, in seconds */
-        double getPosition() const throw();
+        double getPosition() const;
         
         /** 
          * Set the stream's position, in seconds
@@ -97,7 +97,7 @@ namespace Audio {
         virtual double getLengthImpl() const = 0;
         
         /** @see getPosition */
-        virtual double getPositionImpl() const throw() = 0;
+        virtual double getPositionImpl() const = 0;
         
         /** @see seek */
         virtual void seekImpl(double position) = 0;

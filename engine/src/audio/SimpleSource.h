@@ -33,13 +33,13 @@ namespace Audio {
         virtual ~SimpleSource();
     
         /** Construct a simple source */
-        SimpleSource(SharedPtr<Sound> sound, bool looping = false) throw();
+        SimpleSource(SharedPtr<Sound> sound, bool looping = false);
         
         /** Notify attachment to a scene */
-        void notifySceneAttached(SimpleScene *scene) throw();
+        void notifySceneAttached(SimpleScene *scene);
         
         /** Get the scene to which it is attached */
-        SimpleScene* getScene() const throw();
+        SimpleScene* getScene() const;
         
         // The following section contains all the virtual functions that need be implemented
         // by a concrete Sound class. All are protected, so the stream interface is independent

@@ -11,19 +11,19 @@ namespace Audio {
     {
     }
 
-    SimpleSource::SimpleSource(SharedPtr<Sound> sound, bool looping) throw() :
+    SimpleSource::SimpleSource(SharedPtr<Sound> sound, bool looping) :
         Source(sound, looping),
         playing(false),
         scene(0)
     {
     }
     
-    void SimpleSource::notifySceneAttached(SimpleScene *scn) throw()
+    void SimpleSource::notifySceneAttached(SimpleScene *scn)
     {
         scene = scn;
     }
     
-    SimpleScene* SimpleSource::getScene() const throw()
+    SimpleScene* SimpleSource::getScene() const
     {
         return scene;
     }

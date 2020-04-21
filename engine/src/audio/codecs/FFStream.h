@@ -48,7 +48,7 @@ namespace Audio {
         virtual double getLengthImpl() const;
         
         /** @see Stream::getPositionImpl */
-        virtual double getPositionImpl() const throw();
+        virtual double getPositionImpl() const;
         
         /** @see Stream::seekImpl */
         virtual void seekImpl(double position);

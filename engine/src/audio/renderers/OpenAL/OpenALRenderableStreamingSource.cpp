@@ -42,7 +42,6 @@ namespace Audio {
     }
     
     void OpenALRenderableStreamingSource::startPlayingImpl(Timestamp start) 
-        throw(Exception)
     {
         if (!isPlayingImpl()) {
             SharedPtr<Sound> sound = getSource()->getSound();
@@ -72,7 +71,6 @@ namespace Audio {
     }
     
     void OpenALRenderableStreamingSource::stopPlayingImpl() 
-        throw(Exception)
     {
         shouldPlay = false;
         startedPlaying = false;
@@ -81,7 +79,6 @@ namespace Audio {
     }
     
     bool OpenALRenderableStreamingSource::isPlayingImpl() const 
-        throw(Exception)
     {
         // According to the AL, streaming sounds can cease to be 
         // in the playing state because of buffer starvation. However,
@@ -97,7 +94,6 @@ namespace Audio {
     }
     
     Timestamp OpenALRenderableStreamingSource::getPlayingTimeImpl() const 
-        throw(Exception)
     {
         ALfloat offs = -1.f;
         alGetSourcef(getALSource(), AL_SEC_OFFSET, &offs);
@@ -112,7 +108,6 @@ namespace Audio {
     }
     
     void OpenALRenderableStreamingSource::seekImpl(Timestamp time) 
-        throw(Exception)
     {
         // Seek the stream to the specified position
         atEos = false;
@@ -121,7 +116,6 @@ namespace Audio {
     }
     
     void OpenALRenderableStreamingSource::updateImpl(int flags, const Listener& sceneListener) 
-        throw(Exception)
     {
         Source *source = getSource();
         ALSourceHandle als = getALSource();
@@ -204,7 +198,6 @@ namespace Audio {
     }
     
     void OpenALRenderableStreamingSource::queueALBuffers()
-        throw(Exception)
     {
         SharedPtr<Sound> sound = getSource()->getSound();
         

@@ -39,7 +39,6 @@ namespace Audio {
     }
     
     void OpenALRenderableSource::startPlayingImpl(Timestamp start) 
-        throw(Exception)
     {
         if (!isPlayingImpl()) {
             // Make sure we have an attached sound
@@ -57,13 +56,11 @@ namespace Audio {
     }
     
     void OpenALRenderableSource::stopPlayingImpl() 
-        throw(Exception)
     {
         alSourceStop(alSource);
     }
     
     bool OpenALRenderableSource::isPlayingImpl() const 
-        throw(Exception)
     {
         ALint state = 0;
         alGetSourcei(getALSource(), AL_SOURCE_STATE, &state);
@@ -71,7 +68,6 @@ namespace Audio {
     }
     
     Timestamp OpenALRenderableSource::getPlayingTimeImpl() const 
-        throw(Exception)
     {
         ALfloat offs = -1.f;
         alGetSourcef(getALSource(), AL_SEC_OFFSET, &offs);
@@ -83,7 +79,6 @@ namespace Audio {
     }
     
     void OpenALRenderableSource::updateImpl(int flags, const Listener& sceneListener) 
-        throw(Exception)
     {
         Source *source = getSource();
         ALSourceHandle als = getALSource();
@@ -137,7 +132,6 @@ namespace Audio {
     }
     
     void OpenALRenderableSource::attachALBuffers()
-        throw(Exception)
     {
         if (!alBuffersAttached) {
             SharedPtr<Sound> sound = getSource()->getSound();
@@ -158,7 +152,6 @@ namespace Audio {
     }
     
     void OpenALRenderableSource::seekImpl(Timestamp time)
-        throw(Exception)
     {
         // Tell the AL to jump to the specified position
         // NOTE: lots of implementations don't support it

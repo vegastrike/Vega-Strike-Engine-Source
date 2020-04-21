@@ -23,7 +23,7 @@ namespace Audio {
     {
     }
     
-    const Codec::Extensions* OggCodec::getExtensions() const throw()
+    const Codec::Extensions* OggCodec::getExtensions() const
     {
         static Extensions ext;
         if (ext.empty() == 0) {
@@ -32,7 +32,7 @@ namespace Audio {
         return &ext;
     }
     
-    bool OggCodec::canHandle(const std::string& path, bool canOpen, VSFileSystem::VSFileType type) throw()
+    bool OggCodec::canHandle(const std::string& path, bool canOpen, VSFileSystem::VSFileType type)
     {
         if (canOpen) {
             try {

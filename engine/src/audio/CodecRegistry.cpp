@@ -12,8 +12,7 @@
 template<> Audio::CodecRegistry* Singleton<Audio::CodecRegistry>::_singletonInstance = 0;
 
 namespace Audio {
-
-    CodecRegistry::CodecRegistry() throw()
+    CodecRegistry::CodecRegistry()
     {
     }
     
@@ -28,7 +27,7 @@ namespace Audio {
         codecPriority.clear();
     }
     
-    void CodecRegistry::add(Codec* codec, int priority) throw()
+    void CodecRegistry::add(Codec* codec, int priority)
     {
         if (codecPriority.find(codec) == codecPriority.end()) {
             codecPriority[codec] = priority;
@@ -53,7 +52,7 @@ namespace Audio {
         }
     }
     
-    void CodecRegistry::remove(Codec* codec) throw()
+    void CodecRegistry::remove(Codec* codec)
     {
         if (codecPriority.find(codec) != codecPriority.end()) {
             codecPriority.erase(codec);
@@ -68,7 +67,7 @@ namespace Audio {
         }
     }
     
-    Codec* CodecRegistry::findByName(const std::string& name) const throw(CodecNotFoundException)
+    Codec* CodecRegistry::findByName(const std::string& name) const
     {
         NameCodec::const_iterator it = nameCodec.find(name);
         if (it != nameCodec.end())
@@ -99,7 +98,7 @@ namespace Audio {
         }
     };
     
-    Codec* CodecRegistry::findByFile(const std::string& path, VSFileSystem::VSFileType type) const throw(CodecNotFoundException)
+    Codec* CodecRegistry::findByFile(const std::string& path, VSFileSystem::VSFileType type) const
     {
         std::vector<Codec*> candidates;
         
@@ -139,13 +138,12 @@ namespace Audio {
     }
     
     Stream* CodecRegistry::open(const std::string& path, VSFileSystem::VSFileType type) const 
-       
     {
         Codec *codec = findByFile(path, type);
 		return codec->open(path, type);
     }
     
-    CodecRegistration::CodecRegistration(Codec* _codec, int priority) throw()
+    CodecRegistration::CodecRegistration(Codec* _codec, int priority)
         : codec(_codec)
     {
         if (!CodecRegistry::getSingleton())

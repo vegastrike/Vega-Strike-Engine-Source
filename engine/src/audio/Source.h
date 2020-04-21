@@ -104,50 +104,50 @@ namespace Audio {
         
     protected:
         /** Internal constructor used by derived classes */
-        Source(SharedPtr<Sound> sound, bool looping = false) throw();
+        Source(SharedPtr<Sound> sound, bool looping = false);
         
     public:
         virtual ~Source();
         
         /** Return the source's central position in 3D space */
-        LVector3 getPosition() const throw() { return position; }
+        LVector3 getPosition() const { return position; }
         
         /** Set the source's central position in 3D space */
-        void setPosition(LVector3 x) throw() { position = x; dirty.location = 1; }
+        void setPosition(LVector3 x) { position = x; dirty.location = 1; }
         
         /** Return the source's main propagation direction */
-        Vector3 getDirection() const throw() { return direction; }
+        Vector3 getDirection() const { return direction; }
         
         /** Set the source's main propagation direction */
-        void setDirection(Vector3 x) throw() { direction = x; dirty.location = 1; }
+        void setDirection(Vector3 x) { direction = x; dirty.location = 1; }
         
         /** Return the source's velocity */
-        Vector3 getVelocity() const throw() { return velocity; }
+        Vector3 getVelocity() const { return velocity; }
         
         /** Set the source's velocity */
-        void setVelocity(Vector3 x) throw() { velocity = x; dirty.location = 1; }
+        void setVelocity(Vector3 x) { velocity = x; dirty.location = 1; }
         
         /** Return the source's minimum/maximum propagation angle
          * @remarks Sound will fully propagate in directions within minimum
          *      directional drift. Further drift will attenuate the sound
          *      until it (practically) disappears by the maximum propagation angle.
          */
-        Range<Scalar> getAngleRange() const throw();
+        Range<Scalar> getAngleRange() const;
         
         /** @see getAngleRange */
-        void setAngleRange(Range<Scalar> r) throw();
+        void setAngleRange(Range<Scalar> r);
         
         /** @see getAngleRange @remarks This version returns cosine-angles rather than radians, much quicker */
-        Range<Scalar> getCosAngleRange() const throw() { return cosAngleRange; }
+        Range<Scalar> getCosAngleRange() const { return cosAngleRange; }
         
         /** @see getAngleRange @remarks This version takes cosine-angles rather than radians, much quicker */
-        void setCosAngleRange(Range<Scalar> r) throw() { cosAngleRange = r; dirty.attributes = 1; }
+        void setCosAngleRange(Range<Scalar> r) { cosAngleRange = r; dirty.attributes = 1; }
         
         /** Get the source's radius */
-        Scalar getRadius() const throw() { return radius; }
+        Scalar getRadius() const { return radius; }
         
         /** Set the source's radius */
-        void setRadius(Scalar r) throw() { radius = r; dirty.attributes = 1; }
+        void setRadius(Scalar r) { radius = r; dirty.attributes = 1; }
         
         /** Get the source's frequency-dependant radius ratios 
          * @remarks Sound propagation goes different for low and high frequencies than
@@ -155,46 +155,46 @@ namespace Audio {
          *      volume that is generating high/low frequency vibrations. This will affect
          *      propagation of those frequencies over distance.
          */
-        PerFrequency<Scalar> getPerFrequencyRadiusRatios() const throw() { return pfRadiusRatios; }
+        PerFrequency<Scalar> getPerFrequencyRadiusRatios() const { return pfRadiusRatios; }
         
         /** Set the source's frequency-dependant radius ratios
          * @see getRadiusRatios 
          */
-        void setPerFrequencyRadiusRatios(PerFrequency<Scalar> val) throw() { pfRadiusRatios = val; dirty.attributes = 1; }
+        void setPerFrequencyRadiusRatios(PerFrequency<Scalar> val) { pfRadiusRatios = val; dirty.attributes = 1; }
         
         /** Get the source's refernece frequencies */
-        PerFrequency<Scalar> getReferenceFreqs() const throw() { return referenceFreqs; }
+        PerFrequency<Scalar> getReferenceFreqs() const { return referenceFreqs; }
         
         /** Set the source's reference frequencies */
-        void setReferenceFreqs(PerFrequency<Scalar> val) throw() { referenceFreqs = val; dirty.attributes = 1; }
+        void setReferenceFreqs(PerFrequency<Scalar> val) { referenceFreqs = val; dirty.attributes = 1; }
         
         /** Get the source's main gain */
-        Scalar getGain() const throw() { return gain; }
+        Scalar getGain() const { return gain; }
         
         /** Set the source's main gain */
-        void setGain(Scalar g) throw() { gain = g; dirty.gain = 1; }
+        void setGain(Scalar g) { gain = g; dirty.gain = 1; }
         
         /** Is the source in looping mode? */
-        bool isLooping() const throw() { return flags.looping != 0; }
+        bool isLooping() const { return flags.looping != 0; }
         
         /** Set the source's looping mode */
-        void setLooping(bool loop) throw() { flags.looping = loop ? 1 : 0; dirty.soundAttributes = 1; }
+        void setLooping(bool loop) { flags.looping = loop ? 1 : 0; dirty.soundAttributes = 1; }
         
         /** Is the source using distance attenuation? */
-        bool isAttenuated() const throw() { return flags.attenuated != 0; }
+        bool isAttenuated() const { return flags.attenuated != 0; }
         
         /** Set whether the source uses distance attenuation */
-        void setAttenuated(bool attenuated) throw() { flags.attenuated = attenuated ? 1 : 0; dirty.attributes = 1; }
+        void setAttenuated(bool attenuated) { flags.attenuated = attenuated ? 1 : 0; dirty.attributes = 1; }
         
         /** Is the source's position always relative to the root listener?
          * @remarks Relative sources are useful for interphase sounds, music,
          *      comm streams, and all those sources which are not anchored
          *      to a real 3D object, but rather to the listener itself.
          */
-        bool isRelative() const throw() { return flags.relative != 0; }
+        bool isRelative() const { return flags.relative != 0; }
         
         /** Set whether the source's position is always relative to the root listener. */
-        void setRelative(bool relative) throw() { flags.relative = relative ? 1 : 0; dirty.attributes = 1; }
+        void setRelative(bool relative) { flags.relative = relative ? 1 : 0; dirty.attributes = 1; }
         
         /** Play the source
          * @param start an optional timestamp to start playing from.
@@ -208,7 +208,7 @@ namespace Audio {
          *      @par Remembers the playing time so that a call to getWouldbePlayingTime can
          *      return the correct time.
          */
-        void stopPlaying() throw();
+        void stopPlaying();
         
         /** Pause a playing source
          * @remarks If the source is active, make it inactive. Otherwise, do nothing.
@@ -217,7 +217,7 @@ namespace Audio {
          *      as if the source hadn't been stopped (at getWouldBePlayingTime).
          * @see getWouldBePlayingTime
          */
-        void pausePlaying() throw();
+        void pausePlaying();
         
         /** Continue playing a source
          * @remarks If the source is playing but inactive, continue playing. Otherwise, do nothing.
@@ -226,54 +226,54 @@ namespace Audio {
         void continuePlaying();
         
         /** Is the source still playing? */
-        bool isPlaying() const throw();
+        bool isPlaying() const;
         
         /** Is the attached renderable playing this source? */
-        bool isActive() const throw();
+        bool isActive() const;
         
         /** Get the playing position of a playing or paused source */
-        Timestamp getPlayingTime() const throw();
+        Timestamp getPlayingTime() const;
         
         /** Get the playing position of a playing or paused source. For a paused source, extrapolate
          * from the last known playing time and elapsed time since the measurement was done.
          */
-        Timestamp getWouldbePlayingTime() const throw();
+        Timestamp getWouldbePlayingTime() const;
         
         /** Get renderer-specific data associated (and destroyed) with this sound source */
-        SharedPtr<RenderableSource> getRenderable() const throw() { return rendererDataPtr; }
+        SharedPtr<RenderableSource> getRenderable() const { return rendererDataPtr; }
         
         /** Set renderer-specific data to be associated (and destroyed) with this sound source */
-        void setRenderable(SharedPtr<RenderableSource> ptr) throw();
+        void setRenderable(SharedPtr<RenderableSource> ptr);
         
         /** Get user-specific data associated (and destroyed) with this sound source */
-        SharedPtr<UserData> getUserDataPtr() const throw() { return userDataPtr; }
+        SharedPtr<UserData> getUserDataPtr() const { return userDataPtr; }
         
         /** Set user-specific data to be associated (and destroyed) with this sound source */
-        void setUserDataLong(SharedPtr<UserData> ptr) throw() { userDataPtr = ptr; }
+        void setUserDataLong(SharedPtr<UserData> ptr) { userDataPtr = ptr; }
         
         /** Get user-specific data associated with this sound source */
-        long getUserDataLong() const throw() { return userDataLong; }
+        long getUserDataLong() const { return userDataLong; }
         
         /** Get user-specific data associated with this sound source */
-        void setUserDataLong(long data) throw() { userDataLong = data; }
+        void setUserDataLong(long data) { userDataLong = data; }
         
         /** Get an event listener associated with this sound source */
-        SharedPtr<SourceListener> getSourceListener() const throw() { return sourceListenerPtr; }
+        SharedPtr<SourceListener> getSourceListener() const { return sourceListenerPtr; }
         
         /** Set an event listener to be associated with this sound source */
-        void setSourceListener(SharedPtr<SourceListener> ptr) throw() { sourceListenerPtr = ptr; }
+        void setSourceListener(SharedPtr<SourceListener> ptr) { sourceListenerPtr = ptr; }
         
         /** Get the associated sound stream */
-        SharedPtr<Sound> getSound() const throw() { return soundPtr; }
+        SharedPtr<Sound> getSound() const { return soundPtr; }
         
         /** Set the associated sound stream - Only for SceneManagers to call */
-        void setSound(SharedPtr<Sound> ptr) throw() { soundPtr = ptr; dirty.soundPtr = 1; }
+        void setSound(SharedPtr<Sound> ptr) { soundPtr = ptr; dirty.soundPtr = 1; }
         
         /** Convenience function to update the attached renderable, if present, and active. 
          * @param flags see RenderableSource::UpdateFlags
          * @param sceneListener the listener to which this source is associated
          */
-        void updateRenderable(int flags, const Listener& sceneListener) throw();
+        void updateRenderable(int flags, const Listener& sceneListener);
         
         /** Seek to the specified position
          * @note It may not be supported by the renderer on all sources.
@@ -289,7 +289,7 @@ namespace Audio {
         /** Set the last known playing time, update the measurement timestamp as well.
          * @return the parameter, for chaining.
          */
-        Timestamp setLastKnownPlayingTime(Timestamp timestamp) throw();
+        Timestamp setLastKnownPlayingTime(Timestamp timestamp);
         
         // The following section contains all the virtual functions that need be implemented
         // by a concrete Sound class. All are protected, so the stream interface is independent
@@ -323,7 +323,7 @@ namespace Audio {
          *          All other events take place immediately, so they're
          *      automatically handled by Source's implementation.
          */
-        void _notifyPlaying() throw();
+        void _notifyPlaying();
     };
 
 };

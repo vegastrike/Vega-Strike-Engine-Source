@@ -75,30 +75,30 @@ namespace Audio {
         
     public:
         /** Construct a default listener with default parameters */
-        Listener() throw();
+        Listener();
         
         virtual ~Listener();
         
         /** Return the listener's central position in 3D space */
-        LVector3 getPosition() const throw() { return position; }
+        LVector3 getPosition() const { return position; }
         
         /** Set the listener's central position in 3D space */
-        void setPosition(LVector3 x) throw() { position = x; dirty.location = 1; }
+        void setPosition(LVector3 x) { position = x; dirty.location = 1; }
         
         /** Return the listener's front direction */
-        Vector3 getAtDirection() const throw() { return atDirection; }
+        Vector3 getAtDirection() const { return atDirection; }
         
         /** Return the listener's up direction */
-        Vector3 getUpDirection() const throw() { return upDirection; }
+        Vector3 getUpDirection() const { return upDirection; }
         
         /** Set the listener's orientation */
-        void setOrientation(Vector3 at, Vector3 up) throw() { atDirection = at; upDirection = up; dirty.location = 1; }
+        void setOrientation(Vector3 at, Vector3 up) { atDirection = at; upDirection = up; dirty.location = 1; }
         
         /** Return the listener's velocity */
-        Vector3 getVelocity() const throw() { return velocity; }
+        Vector3 getVelocity() const { return velocity; }
         
         /** Set the listener's velocity */
-        void setVelocity(Vector3 x) throw() { velocity = x; dirty.location = 1; }
+        void setVelocity(Vector3 x) { velocity = x; dirty.location = 1; }
         
         
         /** Return the listener's minimum/maximum perception angle
@@ -107,42 +107,42 @@ namespace Audio {
          *      will attenuate the sound until it reaches maximum attenuation by the maximum 
          *      perception angle. Notice that maximum attenuation may not be full silence.
          */
-        Range<Scalar> getAngleRange() const throw();
+        Range<Scalar> getAngleRange() const;
         
         /** @see getAngleRange */
-        void setAngleRange(Range<Scalar> r) throw();
+        void setAngleRange(Range<Scalar> r);
         
         /** @see getAngleRange @remarks This version returns cosine-angles rather than radians, much quicker */
-        Range<Scalar> getCosAngleRange() const throw() { return cosAngleRange; }
+        Range<Scalar> getCosAngleRange() const { return cosAngleRange; }
         
         /** @see getAngleRange @remarks This version takes cosine-angles rather than radians, much quicker */
-        void setCosAngleRange(Range<Scalar> r) throw() { cosAngleRange = r; dirty.attributes = 1; }
+        void setCosAngleRange(Range<Scalar> r) { cosAngleRange = r; dirty.attributes = 1; }
         
         /** Get the listener's radius */
-        Scalar getRadius() const throw() { return radius; }
+        Scalar getRadius() const { return radius; }
         
         /** Set the listener's radius */
-        void setRadius(Scalar r) throw() { radius = r; dirty.attributes = 1; }
+        void setRadius(Scalar r) { radius = r; dirty.attributes = 1; }
         
         
         /** Get the listener's gain */
-        Scalar getGain() const throw() { return gain; }
+        Scalar getGain() const { return gain; }
         
         /** Set the listener's gain */
-        void setGain(Scalar g) throw() { gain = g; dirty.gain = 1; }
+        void setGain(Scalar g) { gain = g; dirty.gain = 1; }
         
         
         /** Get renderer-specific data associated (and destroyed) with this sound source */
-        SharedPtr<RenderableListener> getRenderable() const throw() { return rendererDataPtr; }
+        SharedPtr<RenderableListener> getRenderable() const { return rendererDataPtr; }
         
         /** Set renderer-specific data to be associated (and destroyed) with this sound source */
-        void setRenderable(SharedPtr<RenderableListener> ptr) throw() { rendererDataPtr = ptr; dirty.setAll(); }
+        void setRenderable(SharedPtr<RenderableListener>) { rendererDataPtr = ptr; dirty.setAll(); }
         
         /** Get user-specific data associated (and destroyed) with this listener */
-        SharedPtr<UserData> getUserData() const throw() { return userDataPtr; }
+        SharedPtr<UserData> getUserData() const { return userDataPtr; }
         
         /** Set user-specific data to be associated (and destroyed) with this listener */
-        void setUserData(SharedPtr<UserData> ptr) throw() { userDataPtr = ptr; }
+        void setUserData(SharedPtr<UserData> ptr) { userDataPtr = ptr; }
         
         
         /** @see RenderableListener::update
@@ -150,7 +150,7 @@ namespace Audio {
          * @note It's not just a convenience, the abstract listener has to update
          *      its internal dirty flags and other things as well.
          */
-        void update(int flags) throw();
+        void update(int flags);
 
         
         /**
@@ -160,7 +160,7 @@ namespace Audio {
          * @note The attributes used are those set during the last update()
          * @note The behavior is unspecified if there was no previous call to update().
          */
-        Vector3 toLocalDirection(Vector3 dir) const throw();
+        Vector3 toLocalDirection(Vector3 dir) const;
         
         
     };

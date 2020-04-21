@@ -37,8 +37,8 @@ public:
     
     static const int _OVERHEAD = (sizeof(T) + ALIGN-1) / ALIGN + sizeof(size_t);
     
-    aligned_allocator() throw() {}
-    template<typename A> explicit aligned_allocator(const A &other) throw() : std::allocator<T>(other) {}
+    aligned_allocator() {}
+    template<typename A> explicit aligned_allocator(const A &other) : std::allocator<T>(other) {}
     
     typename std::allocator<T>::pointer address ( typename std::allocator<T>::reference x ) const
     {

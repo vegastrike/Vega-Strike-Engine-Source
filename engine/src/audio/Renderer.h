@@ -88,12 +88,12 @@ namespace Audio {
         /** Detach a source from this renderer.
          * @remarks Immediately frees any allocated resources.
          */
-        virtual void detach(SharedPtr<Source> source) throw() = 0;
+        virtual void detach(SharedPtr<Source> source) = 0;
         
         /** Detach a listener from this renderer.
          * @remarks Immediately frees any allocated resources.
          */
-        virtual void detach(SharedPtr<Listener> listener) throw() = 0;
+        virtual void detach(SharedPtr<Listener> listener) = 0;
         
         
         
@@ -101,12 +101,12 @@ namespace Audio {
          * @remarks This reference distance is required by environmental effect processing
          *      to accurately account for distance factors beyond simple gain falloff.
          */
-        virtual void setMeterDistance(Scalar distance) throw();
+        virtual void setMeterDistance(Scalar distance);
         
         /** Gets the distance in world units that represents one meter.
          * @see setMeterDistance
          */
-        virtual Scalar getMeterDistance() const throw();
+        virtual Scalar getMeterDistance() const;
         
         
         /** Sets how much the doppler effect will be accounted for.
@@ -116,12 +116,12 @@ namespace Audio {
          *      a disimulated effect, and above 1 an exaggerated effect.
          *          The spec is purposefully vague on the specifics.
          */
-        virtual void setDopplerFactor(Scalar factor) throw();
+        virtual void setDopplerFactor(Scalar factor);
         
         /** Gets how much the doppler effect will be accounted for.
          * @see setDopplerFactor
          */
-        virtual Scalar getDopplerFactor() const throw();
+        virtual Scalar getDopplerFactor() const;
         
         
         
@@ -137,7 +137,7 @@ namespace Audio {
         /** Gets the distance in world units that represents one meter.
          * @see setMeterDistance
          */
-        virtual const Format& getOutputFormat() const throw();
+        virtual const Format& getOutputFormat() const;
         
         /**
          * Begins a transaction

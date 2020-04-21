@@ -34,7 +34,7 @@ namespace Audio {
         
     protected:
         /** Internal constructor used by derived classes */
-        RenderableListener(Listener *listener) throw();
+        RenderableListener(Listener *listener);
         
     public:
         virtual ~RenderableListener();
@@ -48,7 +48,7 @@ namespace Audio {
         };
         
         /** Get the attached listener */
-        Listener* getListener() const throw() { return listener; }
+        Listener* getListener() const { return listener; }
         
         /** Update the underlying API with dirty attributes 
          * @param flags You may specify which attributes to update. Not all attributes are
@@ -58,7 +58,7 @@ namespace Audio {
          *      ignore them (just log them or something like that). Updates are non-critical
          *      and may fail silently.
          */
-        void update(int flags) throw();
+        void update(int flags);
         
         // The following section contains all the virtual functions that need be implemented
         // by a concrete class. All are protected, so the interface is independent

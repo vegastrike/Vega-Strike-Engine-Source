@@ -38,7 +38,7 @@ namespace Audio {
         
     protected:
         /** Internal constructor used by derived classes */
-        RenderableSource(Source *source) throw();
+        RenderableSource(Source *source);
         
     public:
         virtual ~RenderableSource();
@@ -61,10 +61,10 @@ namespace Audio {
         /** Stop a playing source
          * @remarks If the source is playing, stop it. Otherwise, do nothing.
          */
-        void stopPlaying() throw();
+        void stopPlaying();
         
         /** Is the source still playing? */
-        bool isPlaying() const throw();
+        bool isPlaying() const;
         
         /** Get the playing position of a playing source 
          * @remarks Will throw if it's not playing!
@@ -72,7 +72,7 @@ namespace Audio {
         Timestamp getPlayingTime() const;
         
         /** Get the attached source */
-        Source* getSource() const throw() { return source; }
+        Source* getSource() const { return source; }
         
         /** Seek to the specified position
          * @note It may not be supported by the renderer on all sources.
@@ -95,7 +95,7 @@ namespace Audio {
          *      ignore them (just log them or something like that). Updates are non-critical
          *      and may fail silently.
          */
-        void update(int flags, const Listener& sceneListener) throw();
+        void update(int flags, const Listener& sceneListener);
         
         // The following section contains all the virtual functions that need be implemented
         // by a concrete Sound class. All are protected, so the interface is independent

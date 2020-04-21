@@ -40,7 +40,7 @@ namespace Audio {
         
     protected:
         /** Internal constructor used by derived classes */
-        SimpleSound(const std::string& name, VSFileSystem::VSFileType type = VSFileSystem::UnknownFile, bool streaming = false) throw();
+        SimpleSound(const std::string& name, VSFileSystem::VSFileType type = VSFileSystem::UnknownFile, bool streaming = false);
         
     public:
         virtual ~SimpleSound();
@@ -66,13 +66,13 @@ namespace Audio {
          * @remarks Calling this when isStreamLoaded() returns false will raise an
          *      ResourceNotLoadedException.
          */
-        void closeStream() throw(ResourceNotLoadedException);
+        void closeStream();
         
         /** Get a pointer to the stream
          * @remarks Calling this when isStreamLoaded() returns false will raise an
          *      ResourceNotLoadedException.
          */
-        SharedPtr<Stream> getStream() const throw(ResourceNotLoadedException);
+        SharedPtr<Stream> getStream() const;
         
         /** Read from the stream into the buffer 
          * @remarks Will throw EndOfStreamException when the end of the stream
@@ -84,7 +84,7 @@ namespace Audio {
         // functions provided by SimpleSound.
     protected:
         /** @copydoc Sound::abortLoad */
-        virtual void abortLoad() throw();
+        virtual void abortLoad();
 
     };
 

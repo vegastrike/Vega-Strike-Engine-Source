@@ -34,15 +34,15 @@ namespace Audio {
          * @param device The OpenAL device associated to this context
          * @param context The OpenAL context associated to this renderer
          */
-        BorrowedOpenALRenderer(ALCdevice *device = 0, ALCcontext *context = 0) throw(Exception);
+        BorrowedOpenALRenderer(ALCdevice *device = 0, ALCcontext *context = 0);
         
         ~BorrowedOpenALRenderer();
         
         
-        virtual void setOutputFormat(const Format &format) throw(Exception);
+        virtual void setOutputFormat(const Format &format);
         
     protected:
-        virtual void checkContext() throw(Exception);
+        virtual void checkContext();
     };
 
 };

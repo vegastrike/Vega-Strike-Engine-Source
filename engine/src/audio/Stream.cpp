@@ -27,7 +27,7 @@ namespace Audio {
         return getLengthImpl();
     }
 
-    double Stream::getPosition() const throw()
+    double Stream::getPosition() const
     {
         return getPositionImpl();
     }
