@@ -94,7 +94,7 @@ namespace Audio {
          *      requires less bytes only the used bytes count will be modified leaving
          *      the same byte capacity.
          */
-        void reformat(const Format &newFormat) throw(Exception);
+        void reformat(const Format &newFormat);
         
         /** Copy the given buffer as if SoundBuffer(buffer) was called */
         SoundBuffer& operator=(const SoundBuffer &other) throw(OutOfMemoryException);

@@ -22,7 +22,7 @@ namespace Audio {
     }
 
     void SimpleSound::loadStream() 
-        throw(Exception)
+       
     {
         if (isStreamLoaded())
             throw(ResourceAlreadyLoadedException());
@@ -56,7 +56,7 @@ namespace Audio {
     }
     
     void SimpleSound::readBuffer(SoundBuffer &buffer) 
-        throw(Exception)
+       
     {
         if (buffer.getFormat() == getFormat()) {
             // Same formats, so all we have to do is read bytes ;)

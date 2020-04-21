@@ -60,7 +60,7 @@ namespace Audio {
          * @remarks Calling this when the stream has already been initialized will
          *      raise an ReasourceAlreadyLoadedException.
          */
-        void loadStream() throw(Exception);
+        void loadStream();
         
         /** Uninitialize the stream
          * @remarks Calling this when isStreamLoaded() returns false will raise an
@@ -78,7 +78,7 @@ namespace Audio {
          * @remarks Will throw EndOfStreamException when the end of the stream
          *      is reached. Any other exception is probably fatal.
          */
-        void readBuffer(SoundBuffer &buffer) throw(Exception);
+        void readBuffer(SoundBuffer &buffer);
         
         // The following section contains basic Sound interface implementation 
         // functions provided by SimpleSound.

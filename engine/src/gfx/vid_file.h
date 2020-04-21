@@ -62,7 +62,7 @@ public:
 
     bool isOpen() const throw ();
 
-    void open( const std::string &path, size_t maxDimension = 65535, bool forcePOT = false ) throw (Exception);
+    void open( const std::string &path, size_t maxDimension = 65535, bool forcePOT = false );
     void close() throw ();
 
 /** Seeks to the specified time
@@ -70,7 +70,7 @@ public:
  * @Throws EndOfStreamException when time lays past the end.
  * @Throws FrameDecodeException when an error occurs during frame decode.
  */
-    bool seek( float time ) throw (Exception);
+    bool seek( float time );
 
     float getFrameRate() const throw ();
     float getDuration() const throw ();

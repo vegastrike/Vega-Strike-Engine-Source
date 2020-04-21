@@ -71,7 +71,7 @@ namespace Audio {
     }
     
     void SoundBuffer::reformat(const Format &newFormat) 
-        throw(Exception)
+       
     {
         if (newFormat != format)
             throw(NotImplementedException("Format conversion"));

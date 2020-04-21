@@ -139,7 +139,7 @@ namespace Audio {
     }
     
     Stream* CodecRegistry::open(const std::string& path, VSFileSystem::VSFileType type) const 
-        throw(Exception)
+       
     {
         Codec *codec = findByFile(path, type);
 		return codec->open(path, type);

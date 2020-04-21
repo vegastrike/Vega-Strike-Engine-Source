@@ -89,7 +89,7 @@ namespace Audio {
          * Open the specified file with a suitable codec.
          * @see findByFile
          */
-        Stream* open(const std::string& path, VSFileSystem::VSFileType type = VSFileSystem::UnknownFile) const throw(Exception);
+        Stream* open(const std::string& path, VSFileSystem::VSFileType type = VSFileSystem::UnknownFile) const;
         
     };
     

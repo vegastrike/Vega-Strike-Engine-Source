@@ -26,7 +26,7 @@ namespace Audio {
         virtual bool canHandle(const std::string& path, bool canOpen, VSFileSystem::VSFileType type = VSFileSystem::UnknownFile) throw();
         
         /** @see Codec::open */
-        virtual Stream* open(const std::string& path, VSFileSystem::VSFileType type = VSFileSystem::UnknownFile) throw(Exception);
+        virtual Stream* open(const std::string& path, VSFileSystem::VSFileType type = VSFileSystem::UnknownFile);
     };
 
 };

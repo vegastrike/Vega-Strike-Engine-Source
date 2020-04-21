@@ -130,7 +130,7 @@ namespace Audio {
     }
     
     SharedPtr<Source> SceneManager::createSource(SharedPtr<Sound> sound, bool looping) 
-        throw(Exception)
+       
     {
         if (!internalRenderer()->owns(sound))
             throw Exception("Invalid sound: incompatible renderers used");
@@ -139,13 +139,13 @@ namespace Audio {
     }
     
     SharedPtr<Source> SceneManager::createSource(SharedPtr<SourceTemplate> tpl) 
-        throw(Exception)
+       
     {
         return createSource(tpl, tpl->getSoundName());
     }
     
     SharedPtr<Source> SceneManager::createSource(SharedPtr<SourceTemplate> tpl, const std::string &name) 
-        throw(Exception)
+       
     {
         SharedPtr<Source> source = createSource(
             internalRenderer()->getSound(
@@ -250,7 +250,7 @@ namespace Audio {
     }
     
     void SceneManager::setRenderer(SharedPtr<Renderer> renderer) 
-        throw(Exception)
+       
     {
         if (data->renderer.get()) {
             // Detach all active sources
@@ -287,7 +287,7 @@ namespace Audio {
     }
     
     void SceneManager::setMaxSources(unsigned int n) 
-        throw(Exception)
+       
     {
         data->maxSources = n;
     }
@@ -298,7 +298,7 @@ namespace Audio {
             LVector3 position,
             Vector3 direction,
             Vector3 velocity,
-            Scalar radius) throw(Exception)
+            Scalar radius)
     {
         if (tpl->isLooping())
             throw(Exception("Cannot fire a looping source and forget!"));
@@ -322,7 +322,7 @@ namespace Audio {
             LVector3 position,
             Vector3 direction,
             Vector3 velocity,
-            Scalar radius) throw(Exception)
+            Scalar radius)
     {
         if (tpl->isLooping())
             throw(Exception("Cannot fire a looping source and forget!"));
@@ -346,7 +346,7 @@ namespace Audio {
     }
 
     void SceneManager::setMinGain(float gain) 
-        throw(Exception)
+       
     {
         assert(gain >= 0.f);
         data->minGain = gain;
@@ -359,7 +359,7 @@ namespace Audio {
     }
 
     void SceneManager::setMaxDistance(double distance) 
-        throw(Exception)
+       
     {
         assert(distance >= 0.f);
         data->maxDistance = distance;
@@ -389,7 +389,7 @@ namespace Audio {
                 data->activeScenes.end() ) );
     }
     
-    void SceneManager::commit() throw(Exception)
+    void SceneManager::commit()
     {
         Timestamp realTime         = getRealTime();
         bool needActivation        = ((realTime - getActivationFrequency()) >= data->lastActivationTime);
@@ -452,7 +452,7 @@ namespace Audio {
     };
     
     void SceneManager::activationPhaseImpl() 
-        throw(Exception)
+       
     {
         // Just clear the active source set and recreate it from scratch.
         // Use a "source ref heap" to find the most relevant sources (using the approximated
@@ -560,7 +560,7 @@ namespace Audio {
     }
     
     void SceneManager::updateSourcesImpl(bool withAttributes) 
-        throw(Exception)
+       
     {
         // Two-pass stuff.
         
@@ -585,7 +585,7 @@ namespace Audio {
     }
     
     void SceneManager::updateListenerImpl(bool withAttributes)
-        throw(Exception)
+       
     {
         // Update root listener
         RenderableListener::UpdateFlags updateFlags = 
@@ -655,7 +655,7 @@ namespace Audio {
     }
 
     void SceneManager::notifySourcePlaying(SharedPtr<Source> source, SharedPtr<Scene> scene, bool playing) 
-        throw(Exception)
+       
     {
         // If the source is within maxDistance from its scene's listener,
         // schedule an immediate activation phase

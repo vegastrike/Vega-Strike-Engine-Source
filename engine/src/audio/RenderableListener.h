@@ -66,7 +66,7 @@ namespace Audio {
     protected:
         
         /** @see update. */
-        virtual void updateImpl(int flags) throw(Exception) = 0;
+        virtual void updateImpl(int flags) = 0;
     };
 
 };

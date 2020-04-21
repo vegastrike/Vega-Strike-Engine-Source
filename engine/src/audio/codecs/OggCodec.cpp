@@ -53,7 +53,7 @@ namespace Audio {
         }
     }
     
-    Stream* OggCodec::open(const std::string& path, VSFileSystem::VSFileType type) throw(Exception)
+    Stream* OggCodec::open(const std::string& path, VSFileSystem::VSFileType type)
     {
         return new OggStream(path, type);
     }

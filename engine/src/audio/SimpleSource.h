@@ -47,13 +47,13 @@ namespace Audio {
     protected:
         
         /** @copydoc Source::startPlayingImpl */
-        virtual void startPlayingImpl(Timestamp start) throw(Exception);
+        virtual void startPlayingImpl(Timestamp start);
         
         /** @copydoc Source::stopPlayingImpl */
-        virtual void stopPlayingImpl() throw(Exception);
+        virtual void stopPlayingImpl();
         
         /** @copydoc Source::isPlayingImpl*/
-        virtual bool isPlayingImpl() const throw(Exception);
+        virtual bool isPlayingImpl() const;
     };
 
 };

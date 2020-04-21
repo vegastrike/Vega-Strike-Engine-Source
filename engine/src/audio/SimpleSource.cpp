@@ -28,7 +28,7 @@ namespace Audio {
         return scene;
     }
     
-    void SimpleSource::startPlayingImpl(Timestamp start) throw(Exception)
+    void SimpleSource::startPlayingImpl(Timestamp start)
     {
         // If it's playing, must stop and restart - cannot simply play again.
         if (isPlaying())
@@ -41,7 +41,7 @@ namespace Audio {
             getScene()->notifySourcePlaying(shared_from_this(), true);
     }
     
-    void SimpleSource::stopPlayingImpl() throw(Exception)
+    void SimpleSource::stopPlayingImpl()
     {
         if (isPlaying()) {
             playing = false;
@@ -51,7 +51,7 @@ namespace Audio {
         }
     }
     
-    bool SimpleSource::isPlayingImpl() const throw(Exception)
+    bool SimpleSource::isPlayingImpl() const
     {
         return playing;
     }

@@ -83,7 +83,7 @@ namespace Audio {
          *      unloaded (memory short), or an error ocurred during load and it never
          *      became loaded.
          */
-        void load(bool wait = true) throw(Exception);
+        void load(bool wait = true);
         
         /** Unload the resource if loaded */
         void unload() throw();
@@ -106,12 +106,12 @@ namespace Audio {
          *      Implementations are likely to have better ways to do this, so they're
          *      welcome to override this method.
          */
-        virtual void waitLoad() throw(Exception);
+        virtual void waitLoad();
         
         /** Load the resource
          * @note Assume it is unloaded and not loading
          */
-        virtual void loadImpl(bool wait) throw(Exception) = 0;
+        virtual void loadImpl(bool wait) = 0;
         
         /** Abort an in-progress background load procedure
          * @note Although no exceptions should be risen, the abort request may

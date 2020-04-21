@@ -390,7 +390,7 @@ bool VidFile::isOpen() const throw ()
     return impl != NULL;
 }
 
-void VidFile::open( const std::string &path, size_t maxDimension, bool forcePOT ) throw (Exception)
+void VidFile::open( const std::string &path, size_t maxDimension, bool forcePOT )
 {
 #ifdef HAVE_FFMPEG
     if (!impl)
@@ -438,7 +438,7 @@ int VidFile::getFrameBufferStride() const throw ()
     return impl ? impl->frameBufferStride : 0;
 }
 
-bool VidFile::seek( float time ) throw (Exception)
+bool VidFile::seek( float time )
 {
     return (impl != 0) && impl->seek( time );
 }

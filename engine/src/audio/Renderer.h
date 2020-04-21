@@ -44,7 +44,7 @@ namespace Audio {
         /** Initialize the renderer with default or config-driven settings.
          * @remarks End-users might want to use specific constructors of specific renderers.
          */
-        Renderer() throw(Exception);
+        Renderer();
         
         virtual ~Renderer();
         
@@ -64,7 +64,7 @@ namespace Audio {
         virtual SharedPtr<Sound> getSound(
             const std::string &name, 
             VSFileSystem::VSFileType type = VSFileSystem::UnknownFile, 
-            bool streaming = false) throw(Exception) = 0;
+            bool streaming = false) = 0;
         
         /** Return whether the specified sound has been created using this renderer or not */
         virtual bool owns(SharedPtr<Sound> sound) = 0;
@@ -75,7 +75,7 @@ namespace Audio {
          *      @par Attachment may mean resource allocation. Either immediate or deferred. So it may
          *      fail if resources are scarce.
          */
-        virtual void attach(SharedPtr<Source> source) throw(Exception) = 0;
+        virtual void attach(SharedPtr<Source> source) = 0;
         
         /** Attach a listener to this renderer
          * @remarks A listener may only be attached to one renderer. If the listener was attached already,
@@ -83,7 +83,7 @@ namespace Audio {
          *      @par Attachment may mean resource allocation. Either immediate or deferred. So it may
          *      fail if resources are scarce.
          */
-        virtual void attach(SharedPtr<Listener> listener) throw(Exception) = 0;
+        virtual void attach(SharedPtr<Listener> listener) = 0;
         
         /** Detach a source from this renderer.
          * @remarks Immediately frees any allocated resources.
@@ -132,7 +132,7 @@ namespace Audio {
          *          The effective output format, if known, must be reflected in
          *      subsequent calls to getOutputFormat.
          */
-        virtual void setOutputFormat(const Format &format) throw(Exception);
+        virtual void setOutputFormat(const Format &format);
         
         /** Gets the distance in world units that represents one meter.
          * @see setMeterDistance
@@ -146,10 +146,10 @@ namespace Audio {
          *      not to implement it, and perform state changes immediately. In any
          *      case, the result ought to be the same.
          */
-        virtual void beginTransaction() throw(Exception);
+        virtual void beginTransaction();
         
         /** @see begin() */
-        virtual void commitTransaction() throw(Exception);
+        virtual void commitTransaction();
     };
 
 };

@@ -22,7 +22,7 @@ namespace Audio {
         unload();
     }
 
-    void Sound::load(bool wait) throw(Exception)
+    void Sound::load(bool wait)
     {
         if (!isLoaded()) {
             if (!isLoading())
@@ -33,7 +33,7 @@ namespace Audio {
     }
     
     void Sound::waitLoad() 
-        throw(Exception)
+       
     {
         while (isLoading())
             Audio::sleep(10);

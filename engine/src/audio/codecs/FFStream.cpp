@@ -75,7 +75,7 @@ namespace Audio {
             VSFileSystem::VSFileType filetype;
             int audioStreamIndex;
             
-            FFData(const std::string &path, VSFileSystem::VSFileType type, Format &fmt, int streamIdx) throw(Exception) :
+            FFData(const std::string &path, VSFileSystem::VSFileType type, Format &fmt, int streamIdx) :
                 pFormatCtx(0),
                 pCodecCtx(0),
                 pCodec(0),
@@ -298,7 +298,7 @@ namespace Audio {
         };
     }
 
-    FFStream::FFStream(const std::string& path, int streamIndex, VSFileSystem::VSFileType type) throw(Exception)
+    FFStream::FFStream(const std::string& path, int streamIndex, VSFileSystem::VSFileType type)
         : Stream(path)
     {
         ffData = new __impl::FFData(path, type, getFormatInternal(), streamIndex);
@@ -310,7 +310,7 @@ namespace Audio {
         delete ffData;
     }
 
-    double FFStream::getLengthImpl() const throw(Exception)
+    double FFStream::getLengthImpl() const
     {
         return double(ffData->streamSize) / getFormat().sampleFrequency;
     }
@@ -320,7 +320,7 @@ namespace Audio {
         return double(ffData->sampleBufferStart) / getFormat().sampleFrequency;
     }
     
-    void FFStream::seekImpl(double position) throw(Exception)
+    void FFStream::seekImpl(double position)
     {
         if (position < 0)
             position = 0;
@@ -367,7 +367,7 @@ namespace Audio {
         }
     }
     
-    void FFStream::getBufferImpl(void *&buffer, unsigned int &bufferSize) throw(Exception)
+    void FFStream::getBufferImpl(void *&buffer, unsigned int &bufferSize)
     {
         if (!ffData->hasFrame())
             throw NoBufferException();
@@ -376,7 +376,7 @@ namespace Audio {
         bufferSize = ffData->sampleSize * ffData->sampleBufferSize;
     }
     
-    void FFStream::nextBufferImpl() throw(Exception)
+    void FFStream::nextBufferImpl()
     {
         if (!ffData->hasPacket())
             ffData->readPacket();

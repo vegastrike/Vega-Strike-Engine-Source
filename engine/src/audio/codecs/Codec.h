@@ -92,7 +92,7 @@ namespace Audio {
          *      if it returns true, this can still fail. Be prepared to catch exceptions
          *      and deal with them accordingly.
          */
-        virtual Stream* open(const std::string& path, VSFileSystem::VSFileType type = VSFileSystem::UnknownFile) throw(Exception) = 0;
+        virtual Stream* open(const std::string& path, VSFileSystem::VSFileType type = VSFileSystem::UnknownFile) = 0;
     };
 
 };

@@ -7,7 +7,7 @@
 
 namespace Audio {
 
-    Renderer::Renderer() throw(Exception)
+    Renderer::Renderer()
     {
     }
     
@@ -40,7 +40,7 @@ namespace Audio {
     }
     
     void Renderer::setOutputFormat(const Format &format) 
-        throw(Exception)
+       
     {
         outputFormat = format;
     }
@@ -52,13 +52,13 @@ namespace Audio {
     }
     
     void Renderer::beginTransaction() 
-        throw(Exception)
+       
     {
         // intentionally blank
     }
     
     void Renderer::commitTransaction() 
-        throw(Exception)
+       
     {
         // intentionally blank
     }

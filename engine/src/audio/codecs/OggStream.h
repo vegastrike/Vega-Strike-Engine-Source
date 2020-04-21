@@ -43,26 +43,26 @@ namespace Audio {
          *      using the special path form "[path]|[stream number]". By default, the
          *      first audio stream is opened.
          */
-        OggStream(const std::string& path, VSFileSystem::VSFileType type = VSFileSystem::UnknownFile) throw(Exception);
+        OggStream(const std::string& path, VSFileSystem::VSFileType type = VSFileSystem::UnknownFile);
         
         virtual ~OggStream();
         
     protected:
         
         /** @see Stream::getLengthImpl */
-        virtual double getLengthImpl() const throw(Exception);
+        virtual double getLengthImpl() const;
         
         /** @see Stream::getPositionImpl */
         virtual double getPositionImpl() const throw();
         
         /** @see Stream::seekImpl */
-        virtual void seekImpl(double position) throw(Exception);
+        virtual void seekImpl(double position);
         
         /** @see Stream::getBufferImpl */
-        virtual void getBufferImpl(void *&buffer, unsigned int &bufferSize) throw(Exception);
+        virtual void getBufferImpl(void *&buffer, unsigned int &bufferSize);
         
         /** @see Stream::nextBufferImpl */
-        virtual void nextBufferImpl() throw(Exception);
+        virtual void nextBufferImpl();
     };
 
 };

@@ -38,26 +38,26 @@ namespace Audio {
          *      default, the first audio stream is opened.
          * @param type the file type, used by resource management APIs
          */
-        FFStream(const std::string& path, int streamIndex = 0, VSFileSystem::VSFileType type = VSFileSystem::UnknownFile) throw(Exception);
+        FFStream(const std::string& path, int streamIndex = 0, VSFileSystem::VSFileType type = VSFileSystem::UnknownFile);
         
         virtual ~FFStream();
         
     protected:
         
         /** @see Stream::getLengthImpl */
-        virtual double getLengthImpl() const throw(Exception);
+        virtual double getLengthImpl() const;
         
         /** @see Stream::getPositionImpl */
         virtual double getPositionImpl() const throw();
         
         /** @see Stream::seekImpl */
-        virtual void seekImpl(double position) throw(Exception);
+        virtual void seekImpl(double position);
         
         /** @see Stream::getBufferImpl */
-        virtual void getBufferImpl(void *&buffer, unsigned int &bufferSize) throw(Exception);
+        virtual void getBufferImpl(void *&buffer, unsigned int &bufferSize);
         
         /** @see Stream::nextBufferImpl */
-        virtual void nextBufferImpl() throw(Exception);
+        virtual void nextBufferImpl();
     };
 
 };

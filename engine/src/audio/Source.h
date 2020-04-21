@@ -201,7 +201,7 @@ namespace Audio {
          * @remarks Rewind and play from the beginning. If the source is playing, it is reset.
          *      May not take effect immediately.
          */
-        void startPlaying(Timestamp start = 0) throw(Exception);
+        void startPlaying(Timestamp start = 0);
         
         /** Stop a playing source
          * @remarks If the source is playing, stop it. Otherwise, do nothing.
@@ -223,7 +223,7 @@ namespace Audio {
          * @remarks If the source is playing but inactive, continue playing. Otherwise, do nothing.
          * @see pausePlaying
          */
-        void continuePlaying() throw(Exception);
+        void continuePlaying();
         
         /** Is the source still playing? */
         bool isPlaying() const throw();
@@ -283,7 +283,7 @@ namespace Audio {
          *       Seeking in non-streaming sources may not be supported at all.
          * @throws EndOfStreamException if you try to seek past the end
          */
-        void seek(Timestamp time) throw(Exception);
+        void seek(Timestamp time);
         
     protected:
         /** Set the last known playing time, update the measurement timestamp as well.
@@ -299,13 +299,13 @@ namespace Audio {
         /** @see startPlaying 
          * @param start The starting position.
          */
-        virtual void startPlayingImpl(Timestamp start) throw(Exception) = 0;
+        virtual void startPlayingImpl(Timestamp start) = 0;
         
         /** @see stopPlaying.*/
-        virtual void stopPlayingImpl() throw(Exception) = 0;
+        virtual void stopPlayingImpl() = 0;
         
         /** @see isPlaying.*/
-        virtual bool isPlayingImpl() const throw(Exception) = 0;
+        virtual bool isPlayingImpl() const = 0;
     
         // The following section contains package-private stuff
         // They're intended for plugin developers, and not end users

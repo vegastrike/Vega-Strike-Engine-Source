@@ -56,7 +56,7 @@ namespace Audio {
          * @remarks It just plays. Will not synchronize attributes with the underlying API.
          *      That must be done through a separate update() call.
          */
-        void startPlaying(Timestamp start = 0) throw(Exception);
+        void startPlaying(Timestamp start = 0);
         
         /** Stop a playing source
          * @remarks If the source is playing, stop it. Otherwise, do nothing.
@@ -69,7 +69,7 @@ namespace Audio {
         /** Get the playing position of a playing source 
          * @remarks Will throw if it's not playing!
          */
-        Timestamp getPlayingTime() const throw(Exception);
+        Timestamp getPlayingTime() const;
         
         /** Get the attached source */
         Source* getSource() const throw() { return source; }
@@ -82,7 +82,7 @@ namespace Audio {
          *       Seeking in non-streaming sources may not be supported at all.
          * @throws EndOfStreamException if you try to seek past the end
          */
-        void seek(Timestamp time) throw(Exception);
+        void seek(Timestamp time);
         
         /** Update the underlying API with dirty attributes 
          * @param flags You may specify which attributes to update. Not all attributes are
@@ -105,22 +105,22 @@ namespace Audio {
         /** @see startPlaying 
          * @param start The starting position.
          */
-        virtual void startPlayingImpl(Timestamp start) throw(Exception) = 0;
+        virtual void startPlayingImpl(Timestamp start) = 0;
         
         /** @see stopPlaying.*/
-        virtual void stopPlayingImpl() throw(Exception) = 0;
+        virtual void stopPlayingImpl() = 0;
         
         /** @see isPlaying.*/
-        virtual bool isPlayingImpl() const throw(Exception) = 0;
+        virtual bool isPlayingImpl() const = 0;
         
         /** @see getPlayingTime.*/
-        virtual Timestamp getPlayingTimeImpl() const throw(Exception) = 0;
+        virtual Timestamp getPlayingTimeImpl() const = 0;
         
         /** @see update. */
-        virtual void updateImpl(int flags, const Listener& sceneListener) throw(Exception) = 0;
+        virtual void updateImpl(int flags, const Listener& sceneListener) = 0;
         
         /** @see seek. */
-        virtual void seekImpl(Timestamp time) throw(Exception) = 0;
+        virtual void seekImpl(Timestamp time) = 0;
     };
 
 };

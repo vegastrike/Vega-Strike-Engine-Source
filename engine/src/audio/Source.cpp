@@ -48,7 +48,7 @@ namespace Audio {
         return timestamp;
     }
 
-    void Source::startPlaying(Timestamp start) throw(Exception)
+    void Source::startPlaying(Timestamp start)
     {
         dirty.setAll();
         startPlayingImpl( setLastKnownPlayingTime(start) );
@@ -80,7 +80,7 @@ namespace Audio {
         }
     }
     
-    void Source::continuePlaying() throw(Exception)
+    void Source::continuePlaying()
     {
         if (rendererDataPtr.get() && isPlaying() && !isActive()) {
             // Must notify the listener, if any
@@ -207,7 +207,7 @@ namespace Audio {
     }
     
     void Source::seek(Timestamp time) 
-        throw(Exception)
+       
     {
         if (rendererDataPtr.get() && isPlaying() && isActive()) {
             rendererDataPtr->seek(time);

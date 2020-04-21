@@ -20,7 +20,7 @@ namespace Audio {
     }
     
     void RenderableSource::startPlaying(Timestamp start) 
-        throw(Exception)
+       
     {
         try {
             startPlayingImpl(start);
@@ -55,7 +55,7 @@ namespace Audio {
     }
     
     Timestamp RenderableSource::getPlayingTime() const 
-        throw(Exception)
+       
     {
         return getPlayingTimeImpl();
     }
@@ -71,7 +71,7 @@ namespace Audio {
     }
     
     void RenderableSource::seek(Timestamp time) 
-        throw(Exception)
+       
     {
         seekImpl(time);
     }

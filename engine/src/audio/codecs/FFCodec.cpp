@@ -34,7 +34,7 @@ namespace Audio {
         }
     }
     
-    Stream* FFCodec::open(const std::string& path, VSFileSystem::VSFileType type) throw(Exception)
+    Stream* FFCodec::open(const std::string& path, VSFileSystem::VSFileType type)
     {
         size_t sep = path.find_last_of('|');
         int streamIndex = (sep != std::string::npos) ? atoi(path.c_str() + sep + 1) : 0;
