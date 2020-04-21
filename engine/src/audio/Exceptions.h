@@ -26,7 +26,7 @@ namespace Audio {
         Exception(const Exception &other) : _message(other._message) {}
         explicit Exception(const std::string &message) : _message(message) {}
         virtual ~Exception() {}
-        virtual const char* what() const { return _message.c_str(); }
+        virtual const char* what() const noexcept { return _message.c_str(); }
     };
     
     /**

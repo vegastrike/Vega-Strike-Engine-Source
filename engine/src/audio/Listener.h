@@ -136,7 +136,7 @@ namespace Audio {
         SharedPtr<RenderableListener> getRenderable() const { return rendererDataPtr; }
         
         /** Set renderer-specific data to be associated (and destroyed) with this sound source */
-        void setRenderable(SharedPtr<RenderableListener>) { rendererDataPtr = ptr; dirty.setAll(); }
+        void setRenderable(SharedPtr<RenderableListener> ptr) { rendererDataPtr = ptr; dirty.setAll(); }
         
         /** Get user-specific data associated (and destroyed) with this listener */
         SharedPtr<UserData> getUserData() const { return userDataPtr; }
