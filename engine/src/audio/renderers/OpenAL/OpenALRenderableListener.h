@@ -27,7 +27,7 @@ namespace Audio {
     
     protected:
         /** @see RenderableListener::update. */
-        virtual void updateImpl(int flags) throw(Exception);
+        virtual void updateImpl(int flags);
     };
 
 };

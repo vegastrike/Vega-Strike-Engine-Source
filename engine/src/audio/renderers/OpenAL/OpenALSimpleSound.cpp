@@ -22,8 +22,7 @@ using namespace Audio::__impl::OpenAL;
 
 namespace Audio {
 
-    OpenALSimpleSound::OpenALSimpleSound(const std::string& name, VSFileSystem::VSFileType type)
-        throw() :
+    OpenALSimpleSound::OpenALSimpleSound(const std::string& name, VSFileSystem::VSFileType type) :
         SimpleSound(name, type, false),
         bufferHandle(AL_NULL_BUFFER)
     {
@@ -34,7 +33,6 @@ namespace Audio {
     }
 
     void OpenALSimpleSound::loadImpl(bool wait) 
-        throw(Exception)
     {
         // just in case
         unloadImpl();
@@ -151,7 +149,6 @@ namespace Audio {
     }
     
     void OpenALSimpleSound::unloadImpl() 
-        throw()
     {
         if (bufferHandle == AL_NULL_BUFFER) 
             return;

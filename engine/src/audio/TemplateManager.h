@@ -55,37 +55,37 @@ namespace Audio {
         /** Construct a new manager 
          * @remarks End-users of the class shouldn't be using this. Singletons need it.
          */
-        TemplateManager() throw();
+        TemplateManager();
         
         ~TemplateManager();
         
         
         /** Add a definition file, persistent or not */
-        void addDefinitionFile(const std::string &path, bool persistent) throw(Exception);
+        void addDefinitionFile(const std::string &path, bool persistent);
         
         /** Add a definition document under a specified path, always persistent (as there is no way to reload) */
-        void addDefinitionFile(const std::string &path, SharedPtr<XMLDOM::XMLDocument> definition) throw(Exception);
+        void addDefinitionFile(const std::string &path, SharedPtr<XMLDOM::XMLDocument> definition);
         
         /** Get an already loaded definition file, fail if not found or not loaded */
-        SharedPtr<XMLDOM::XMLDocument> getDefinitionFile(const std::string &path) const throw(ResourceNotLoadedException);
+        SharedPtr<XMLDOM::XMLDocument> getDefinitionFile(const std::string &path) const;
         
         /** Get an already loaded definition file, load if not loaded */
-        SharedPtr<XMLDOM::XMLDocument> getDefinitionFile(const std::string &path) throw(Exception);
+        SharedPtr<XMLDOM::XMLDocument> getDefinitionFile(const std::string &path);
         
         
         /** Set default definition file
          * @remarks when a template named without its source definition file is requested, it is assumed
          *      to come from this definition file.
          */
-        void setDefaultDefinitionFile(const std::string &x) throw();
+        void setDefaultDefinitionFile(const std::string &x);
         
         /** Get the default definition file
          * @see setDefaultDefinitionFile
          */
-        const std::string& getDefaultDefinitionFile() const throw();
+        const std::string& getDefaultDefinitionFile() const;
         
         /** Get a source template by its key */
-        SharedPtr<SourceTemplate> getSourceTemplate(const std::string &name) throw(Exception);
+        SharedPtr<SourceTemplate> getSourceTemplate(const std::string &name);
         
         /** Add a manually-created template 
           * @param name the name portion of the template's key
@@ -99,7 +99,7 @@ namespace Audio {
           *       this resource.
           * @throws ResourceAlreadyLoadedException, when the key already has an associated template.
           */
-        void addSourceTemplate(const std::string &name, SharedPtr<SourceTemplate> tpl, bool perm = true) throw(ResourceAlreadyLoadedException);
+        void addSourceTemplate(const std::string &name, SharedPtr<SourceTemplate> tpl, bool perm = true);
     
         /** Add a manually-created template 
           * @param path the path portion of the template's key
@@ -115,12 +115,12 @@ namespace Audio {
           *       this resource.
           * @throws ResourceAlreadyLoadedException, when the key already has an associated template.
           */
-        void addSourceTemplate(const std::string &path, const std::string &name, SharedPtr<SourceTemplate> tpl, bool perm = true) throw(ResourceAlreadyLoadedException);
+        void addSourceTemplate(const std::string &path, const std::string &name, SharedPtr<SourceTemplate> tpl, bool perm = true);
     
     protected:
     
         /** Get a source template by its key */
-        SharedPtr<SourceTemplate> loadSourceTemplate(const std::string &name) throw(Exception);
+        SharedPtr<SourceTemplate> loadSourceTemplate(const std::string &name);
         
         
     };
