@@ -53,8 +53,8 @@ private:
 public: Exception() {}
     Exception( const Exception &other ) : _message( other._message ) {}
     explicit Exception( const std::string &message ) : _message( message ) {}
-    virtual ~Exception() throw () {}
-    virtual const char * what() const throw ()
+    virtual ~Exception() {}
+    virtual const char * what() const noexcept
     {
         return _message.c_str();
     }

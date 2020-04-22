@@ -42,22 +42,22 @@ namespace Audio {
         //
     
         /** Construct a new, empty scene */
-        SimpleScene(const std::string &name) throw();
+        SimpleScene(const std::string &name);
         
         virtual ~SimpleScene();
         
         /** @copydoc Scene::add 
          * @remarks source MUST be a SimpleSource
          */
-        virtual void add(SharedPtr<Source> source) throw(Exception);
+        virtual void add(SharedPtr<Source> source);
         
         /** @copydoc Scene::remove 
          * @remarks source MUST be a SimpleSource
          */
-        virtual void remove(SharedPtr<Source> source) throw(NotFoundException);
+        virtual void remove(SharedPtr<Source> source);
         
         /** @copydoc Scene::getListener */
-        virtual Listener& getListener() throw();
+        virtual Listener& getListener();
         
         
         //
@@ -65,17 +65,17 @@ namespace Audio {
         //
         
         /** Notify the scene of a source that starts or stops playing. */
-        virtual void notifySourcePlaying(SharedPtr<Source> source, bool playing) throw(Exception);
+        virtual void notifySourcePlaying(SharedPtr<Source> source, bool playing);
         
         /** Gets an iterator over active sources */ 
-        SourceIterator getActiveSources() throw();
+        SourceIterator getActiveSources();
         
         /** Gets the ending iterator of active sources */
-        SourceIterator getActiveSourcesEnd() throw();
+        SourceIterator getActiveSourcesEnd();
         
     protected:
-        void attach(SimpleSource *source) throw();
-        void detach(SimpleSource *source) throw();
+        void attach(SimpleSource *source);
+        void detach(SimpleSource *source);
     };
 
 };

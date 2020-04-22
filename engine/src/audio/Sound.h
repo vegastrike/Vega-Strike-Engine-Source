@@ -46,29 +46,29 @@ namespace Audio {
         
     protected:
         /** Internal constructor used by derived classes */
-        Sound(const std::string& name, bool streaming) throw();
+        Sound(const std::string& name, bool streaming);
         
         /** Protected Write access to the sound's format, for implementations. */
-        Format& getFormat() throw() { return format; };
+        Format& getFormat() { return format; };
         
         
     public:
         virtual ~Sound();
         
         /** Return the path of the associated file. */
-        const std::string& getName() const throw() { return name; };
+        const std::string& getName() const { return name; };
         
         /** Return the format of the sound resource. */
-        const Format& getFormat() const throw() { return format; };
+        const Format& getFormat() const { return format; };
         
         /** Return whether the resource has been loaded or not */
-        bool isLoaded() const throw() { return flags.loaded; }
+        bool isLoaded() const { return flags.loaded; }
         
         /** Return whether the resource is being loaded in the background */
-        bool isLoading() const throw() { return flags.loading; }
+        bool isLoading() const { return flags.loading; }
         
         /** Return whether the resource is being loaded in the background */
-        bool isStreaming() const throw() { return flags.streaming; }
+        bool isStreaming() const { return flags.streaming; }
         
         /** Load the resource if not loaded 
          * @param wait If true, the function will return only when the resource
@@ -83,10 +83,10 @@ namespace Audio {
          *      unloaded (memory short), or an error ocurred during load and it never
          *      became loaded.
          */
-        void load(bool wait = true) throw(Exception);
+        void load(bool wait = true);
         
         /** Unload the resource if loaded */
-        void unload() throw();
+        void unload();
         
         // The following section contains all the virtual functions that need be implemented
         // by a concrete Sound class. All are protected, so the stream interface is independent
@@ -99,32 +99,32 @@ namespace Audio {
          *      The method guaranteed to be threadsafe.
          * @param success Whether or not the process succeeded in loading the resource
          */
-        virtual void onLoaded(bool success) throw();
+        virtual void onLoaded(bool success);
         
         /** Wait for background loading to finish
          * @remarks The base implementation checks for completion periodically.
          *      Implementations are likely to have better ways to do this, so they're
          *      welcome to override this method.
          */
-        virtual void waitLoad() throw(Exception);
+        virtual void waitLoad();
         
         /** Load the resource
          * @note Assume it is unloaded and not loading
          */
-        virtual void loadImpl(bool wait) throw(Exception) = 0;
+        virtual void loadImpl(bool wait) = 0;
         
         /** Abort an in-progress background load procedure
          * @note Although no exceptions should be risen, the abort request may
          *      not be carried out for various reasons. The caller should check
          *      that on return by calling isLoaded() / isLoading().
          */
-        virtual void abortLoad() throw() = 0;
+        virtual void abortLoad() = 0;
         
         
         /** Unload the resource.
          * @note Assume it is loaded
          */
-        virtual void unloadImpl() throw() = 0;
+        virtual void unloadImpl() = 0;
         
     };
 

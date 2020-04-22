@@ -44,7 +44,7 @@ namespace Audio {
         /** Initialize the renderer with default or config-driven settings.
          * @remarks End-users might want to use specific constructors of specific renderers.
          */
-        Renderer() throw(Exception);
+        Renderer();
         
         virtual ~Renderer();
         
@@ -64,7 +64,7 @@ namespace Audio {
         virtual SharedPtr<Sound> getSound(
             const std::string &name, 
             VSFileSystem::VSFileType type = VSFileSystem::UnknownFile, 
-            bool streaming = false) throw(Exception) = 0;
+            bool streaming = false) = 0;
         
         /** Return whether the specified sound has been created using this renderer or not */
         virtual bool owns(SharedPtr<Sound> sound) = 0;
@@ -75,7 +75,7 @@ namespace Audio {
          *      @par Attachment may mean resource allocation. Either immediate or deferred. So it may
          *      fail if resources are scarce.
          */
-        virtual void attach(SharedPtr<Source> source) throw(Exception) = 0;
+        virtual void attach(SharedPtr<Source> source) = 0;
         
         /** Attach a listener to this renderer
          * @remarks A listener may only be attached to one renderer. If the listener was attached already,
@@ -83,17 +83,17 @@ namespace Audio {
          *      @par Attachment may mean resource allocation. Either immediate or deferred. So it may
          *      fail if resources are scarce.
          */
-        virtual void attach(SharedPtr<Listener> listener) throw(Exception) = 0;
+        virtual void attach(SharedPtr<Listener> listener) = 0;
         
         /** Detach a source from this renderer.
          * @remarks Immediately frees any allocated resources.
          */
-        virtual void detach(SharedPtr<Source> source) throw() = 0;
+        virtual void detach(SharedPtr<Source> source) = 0;
         
         /** Detach a listener from this renderer.
          * @remarks Immediately frees any allocated resources.
          */
-        virtual void detach(SharedPtr<Listener> listener) throw() = 0;
+        virtual void detach(SharedPtr<Listener> listener) = 0;
         
         
         
@@ -101,12 +101,12 @@ namespace Audio {
          * @remarks This reference distance is required by environmental effect processing
          *      to accurately account for distance factors beyond simple gain falloff.
          */
-        virtual void setMeterDistance(Scalar distance) throw();
+        virtual void setMeterDistance(Scalar distance);
         
         /** Gets the distance in world units that represents one meter.
          * @see setMeterDistance
          */
-        virtual Scalar getMeterDistance() const throw();
+        virtual Scalar getMeterDistance() const;
         
         
         /** Sets how much the doppler effect will be accounted for.
@@ -116,12 +116,12 @@ namespace Audio {
          *      a disimulated effect, and above 1 an exaggerated effect.
          *          The spec is purposefully vague on the specifics.
          */
-        virtual void setDopplerFactor(Scalar factor) throw();
+        virtual void setDopplerFactor(Scalar factor);
         
         /** Gets how much the doppler effect will be accounted for.
          * @see setDopplerFactor
          */
-        virtual Scalar getDopplerFactor() const throw();
+        virtual Scalar getDopplerFactor() const;
         
         
         
@@ -132,12 +132,12 @@ namespace Audio {
          *          The effective output format, if known, must be reflected in
          *      subsequent calls to getOutputFormat.
          */
-        virtual void setOutputFormat(const Format &format) throw(Exception);
+        virtual void setOutputFormat(const Format &format);
         
         /** Gets the distance in world units that represents one meter.
          * @see setMeterDistance
          */
-        virtual const Format& getOutputFormat() const throw();
+        virtual const Format& getOutputFormat() const;
         
         /**
          * Begins a transaction
@@ -146,10 +146,10 @@ namespace Audio {
          *      not to implement it, and perform state changes immediately. In any
          *      case, the result ought to be the same.
          */
-        virtual void beginTransaction() throw(Exception);
+        virtual void beginTransaction();
         
         /** @see begin() */
-        virtual void commitTransaction() throw(Exception);
+        virtual void commitTransaction();
     };
 
 };

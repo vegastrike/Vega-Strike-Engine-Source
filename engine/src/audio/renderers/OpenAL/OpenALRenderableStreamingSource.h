@@ -43,22 +43,22 @@ namespace Audio {
         
     protected:
         /** @see RenderableSource::startPlayingImpl. */
-        virtual void startPlayingImpl(Timestamp start) throw(Exception);
+        virtual void startPlayingImpl(Timestamp start);
         
         /** @see RenderableSource::stopPlayingImpl. */
-        virtual void stopPlayingImpl() throw(Exception);
+        virtual void stopPlayingImpl();
         
         /** @see RenderableSource::isPlayingImpl. */
-        virtual bool isPlayingImpl() const throw(Exception);
+        virtual bool isPlayingImpl() const;
         
         /** @see RenderableSource::getPlayingTimeImpl. */
-        virtual Timestamp getPlayingTimeImpl() const throw(Exception);
+        virtual Timestamp getPlayingTimeImpl() const;
         
         /** @see RenderableSource::updateImpl. */
-        virtual void updateImpl(int flags, const Listener& sceneListener) throw(Exception);
+        virtual void updateImpl(int flags, const Listener& sceneListener);
         
         /** @see RenderableSource::seekImpl. */
-        virtual void seekImpl(Timestamp time) throw(Exception);
+        virtual void seekImpl(Timestamp time);
         
         /** Derived classes may use the underlying AL source handle to set additional attributes */
         ALuint getALSource() const { return alSource; }
@@ -68,7 +68,7 @@ namespace Audio {
          * @note It will not throw an EndOfStream exception, even if the sound reaches the end 
          *      and it's not a looping source.
          */
-        void queueALBuffers() throw(Exception);
+        void queueALBuffers();
     };
 
 };

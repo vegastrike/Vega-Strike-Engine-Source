@@ -113,7 +113,7 @@ namespace Audio {
     
     using namespace __impl;
 
-    SceneManager::SceneManager() throw() :
+    SceneManager::SceneManager() :
         data(new SceneManagerData)
     {
     }
@@ -130,7 +130,6 @@ namespace Audio {
     }
     
     SharedPtr<Source> SceneManager::createSource(SharedPtr<Sound> sound, bool looping) 
-        throw(Exception)
     {
         if (!internalRenderer()->owns(sound))
             throw Exception("Invalid sound: incompatible renderers used");
@@ -139,13 +138,11 @@ namespace Audio {
     }
     
     SharedPtr<Source> SceneManager::createSource(SharedPtr<SourceTemplate> tpl) 
-        throw(Exception)
     {
         return createSource(tpl, tpl->getSoundName());
     }
     
     SharedPtr<Source> SceneManager::createSource(SharedPtr<SourceTemplate> tpl, const std::string &name) 
-        throw(Exception)
     {
         SharedPtr<Source> source = createSource(
             internalRenderer()->getSound(
@@ -165,7 +162,6 @@ namespace Audio {
     }
     
     void SceneManager::destroySource(SharedPtr<Source> source) 
-        throw()
     {
         // By simply unreferencing, it should get destroyed when all references are released.
         // Which is good for multithreading - never destroy something that is being referenced.
@@ -184,7 +180,6 @@ namespace Audio {
     }
     
     void SceneManager::addScene(SharedPtr<Scene> scene) 
-        throw(DuplicateObjectException)
     {
         if (   data->activeScenes.count(scene->getName()) 
             || data->inactiveScenes.count(scene->getName()) )
@@ -194,7 +189,6 @@ namespace Audio {
     }
     
     SharedPtr<Scene> SceneManager::createScene(const std::string &name) 
-        throw(DuplicateObjectException)
     {
         SharedPtr<Scene> scenePtr(new SimpleScene(name));
         addScene(scenePtr);
@@ -202,7 +196,6 @@ namespace Audio {
     }
     
     SharedPtr<Scene> SceneManager::getScene(const std::string &name) const 
-        throw(NotFoundException)
     {
         SceneManagerData::SceneMap::const_iterator it;
         
@@ -218,7 +211,6 @@ namespace Audio {
     }
     
     void SceneManager::destroyScene(const std::string &name) 
-        throw(NotFoundException)
     {
         // By simply unreferencing, it should get destroyed when all references are released.
         // Which is good for multithreading - never destroy something that is being referenced.
@@ -229,7 +221,6 @@ namespace Audio {
     }
     
     void SceneManager::setSceneActive(const std::string &name, bool active) 
-        throw(NotFoundException)
     {
         // Simply move the pointer from one map to the other.
         // The next update will take care of activating sources as necessary.
@@ -244,13 +235,11 @@ namespace Audio {
     }
     
     bool SceneManager::getSceneActive(const std::string &name) 
-        throw(NotFoundException)
     {
         return data->activeScenes.count(name) > 0;
     }
     
     void SceneManager::setRenderer(SharedPtr<Renderer> renderer) 
-        throw(Exception)
     {
         if (data->renderer.get()) {
             // Detach all active sources
@@ -275,19 +264,16 @@ namespace Audio {
     }
     
     SharedPtr<Renderer> SceneManager::getRenderer() const 
-        throw()
     {
         return data->renderer;
     }
     
     unsigned int SceneManager::getMaxSources() const 
-        throw()
     {
         return data->maxSources;
     }
     
     void SceneManager::setMaxSources(unsigned int n) 
-        throw(Exception)
     {
         data->maxSources = n;
     }
@@ -298,7 +284,7 @@ namespace Audio {
             LVector3 position,
             Vector3 direction,
             Vector3 velocity,
-            Scalar radius) throw(Exception)
+            Scalar radius)
     {
         if (tpl->isLooping())
             throw(Exception("Cannot fire a looping source and forget!"));
@@ -322,7 +308,7 @@ namespace Audio {
             LVector3 position,
             Vector3 direction,
             Vector3 velocity,
-            Scalar radius) throw(Exception)
+            Scalar radius)
     {
         if (tpl->isLooping())
             throw(Exception("Cannot fire a looping source and forget!"));
@@ -340,33 +326,28 @@ namespace Audio {
     }
     
     float SceneManager::getMinGain() const 
-        throw()
     {
         return data->minGain;
     }
 
     void SceneManager::setMinGain(float gain) 
-        throw(Exception)
     {
         assert(gain >= 0.f);
         data->minGain = gain;
     }
     
     double SceneManager::getMaxDistance() const 
-        throw()
     {
         return data->maxDistance;
     }
 
     void SceneManager::setMaxDistance(double distance) 
-        throw(Exception)
     {
         assert(distance >= 0.f);
         data->maxDistance = distance;
     }
     
     SharedPtr<SceneManager::SceneIterator> SceneManager::getSceneIterator() const
-        throw()
     {
         return SharedPtr<SceneIterator>(
             new ChainingIterator<VirtualValuesIterator<SceneManagerData::SceneMap::iterator> >(
@@ -381,7 +362,6 @@ namespace Audio {
     }
     
     SharedPtr<SceneManager::SceneIterator> SceneManager::getActiveSceneIterator() const
-        throw()
     {
         return SharedPtr<SceneIterator>(
             new VirtualValuesIterator<SceneManagerData::SceneMap::iterator>(
@@ -389,7 +369,7 @@ namespace Audio {
                 data->activeScenes.end() ) );
     }
     
-    void SceneManager::commit() throw(Exception)
+    void SceneManager::commit()
     {
         Timestamp realTime         = getRealTime();
         bool needActivation        = ((realTime - getActivationFrequency()) >= data->lastActivationTime);
@@ -452,7 +432,6 @@ namespace Audio {
     };
     
     void SceneManager::activationPhaseImpl() 
-        throw(Exception)
     {
         // Just clear the active source set and recreate it from scratch.
         // Use a "source ref heap" to find the most relevant sources (using the approximated
@@ -560,7 +539,6 @@ namespace Audio {
     }
     
     void SceneManager::updateSourcesImpl(bool withAttributes) 
-        throw(Exception)
     {
         // Two-pass stuff.
         
@@ -585,7 +563,6 @@ namespace Audio {
     }
     
     void SceneManager::updateListenerImpl(bool withAttributes)
-        throw(Exception)
     {
         // Update root listener
         RenderableListener::UpdateFlags updateFlags = 
@@ -601,61 +578,51 @@ namespace Audio {
     }
 
     Duration SceneManager::getPositionUpdateFrequency() const
-        throw()
     {
         return data->positionUpdateFrequency;
     }
     
     Duration SceneManager::getListenerUpdateFrequency() const
-        throw()
     {
         return data->listenerUpdateFrequency;
     }
     
     Duration SceneManager::getAttributeUpdateFrequency() const
-        throw()
     {
         return data->attributeUpdateFrequency;
     }
     
     Duration SceneManager::getActivationFrequency() const
-        throw()
     {
         return data->activationFrequency;
     }
     
     void SceneManager::setPositionUpdateFrequency(Duration interval) const
-        throw()
     {
         data->positionUpdateFrequency = interval;
     }
     
     void SceneManager::setListenerUpdateFrequency(Duration interval) const
-        throw()
     {
         data->listenerUpdateFrequency = interval;
     }
     
     void SceneManager::setAttributeUpdateFrequency(Duration interval) const
-        throw()
     {
         data->attributeUpdateFrequency = interval;
     }
     
     void SceneManager::setActivationFrequency(Duration interval) const
-        throw()
     {
         data->activationFrequency = interval;
     }
     
     SharedPtr<Listener> SceneManager::getRootListener() const
-        throw()
     {
         return data->rootListener;
     }
 
     void SceneManager::notifySourcePlaying(SharedPtr<Source> source, SharedPtr<Scene> scene, bool playing) 
-        throw(Exception)
     {
         // If the source is within maxDistance from its scene's listener,
         // schedule an immediate activation phase

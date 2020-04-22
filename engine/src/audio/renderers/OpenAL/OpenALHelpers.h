@@ -12,9 +12,9 @@ namespace Audio {
     namespace __impl {
         namespace OpenAL {
             
-            void _checkAlErrorAt(ALenum error, const char *filename, int lineno) throw (Exception);
-            void _clearAlError() throw();
-            ALenum asALFormat(const Format &format) throw(Exception);
+            void _checkAlErrorAt(ALenum error, const char *filename, int lineno);
+            void _clearAlError();
+            ALenum asALFormat(const Format &format);
             
         }
     }

@@ -10,7 +10,7 @@
 
 namespace Audio {
 
-    SimpleScene::SimpleScene(const std::string &name) throw() :
+    SimpleScene::SimpleScene(const std::string &name) :
         Scene(name)
     {
     }
@@ -26,25 +26,21 @@ namespace Audio {
     }
 
     void SimpleScene::add(SharedPtr<Source> source) 
-        throw(Exception)
     {
         attach(dynamic_cast<SimpleSource*>(source.get()));
     }
     
     void SimpleScene::remove(SharedPtr<Source> source) 
-        throw(NotFoundException)
     {
         detach(dynamic_cast<SimpleSource*>(source.get()));
     }
     
     Listener& SimpleScene::getListener() 
-        throw()
     {
         return listener;
     }
     
     void SimpleScene::notifySourcePlaying(SharedPtr<Source> source, bool playing) 
-        throw(Exception)
     {
         if (playing) 
             activeSources.insert(source);
@@ -55,27 +51,23 @@ namespace Audio {
     }
     
     void SimpleScene::attach(SimpleSource *source) 
-        throw()
     {
         source->notifySceneAttached(this);
     }
     
     void SimpleScene::detach(SimpleSource *source) 
-        throw()
     {
         source->notifySceneAttached(0);
     }
     
     /** Gets an iterator over active sources */ 
     SimpleScene::SourceIterator SimpleScene::getActiveSources() 
-        throw()
     {
         return activeSources.begin();
     }
     
     /** Gets the ending iterator of active sources */
     SimpleScene::SourceIterator SimpleScene::getActiveSourcesEnd() 
-        throw()
     {
         return activeSources.end();
     }
