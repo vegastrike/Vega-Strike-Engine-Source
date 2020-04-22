@@ -1838,7 +1838,6 @@ GameCockpit::GameCockpit( const char *file, Unit *parent, const std::string &pil
     , insidePanPitchSpeed( 0 )
     , shake_time( 0 )
     , shake_type( 0 )
-    , radarDisplay(0)
     , textcol( 1, 1, 1, 1 )
     , text( NULL ) {
     autoMessageTime    = 0;
