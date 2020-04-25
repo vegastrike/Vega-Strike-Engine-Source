@@ -336,7 +336,7 @@ void FlyByWire::Execute()
     if ( ( (sheltonslide || inertial_flight_model
             || !controltype)
           && (!desireThrust) )
-        || ( tempcp && Network == NULL && ( (getNewTime()-tempcp->TimeOfLastCollision) < collidepanic ) ) ) {
+        || ( tempcp && ( (getNewTime()-tempcp->TimeOfLastCollision) < collidepanic ) ) ) {
         MatchAngularVelocity::Execute();         //only match turning
         if (inertial_flight_model)
             parent->Thrust( DirectThrust, afterburn );

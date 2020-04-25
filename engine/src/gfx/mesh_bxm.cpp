@@ -3,6 +3,8 @@
 #include "mesh.h"
 #include "mesh_xml.h"
 
+#include "configxml.h"
+
 #ifndef STANDALONE
 #include "aux_texture.h"
 #include "animation.h"

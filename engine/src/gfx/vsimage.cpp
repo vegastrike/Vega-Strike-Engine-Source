@@ -57,11 +57,25 @@ int PNG_HAS_PALETTE = 1;
 int PNG_HAS_COLOR   = 2;
 int PNG_HAS_ALPHA   = 4;
 
+#if !defined (_WIN32) || defined (__CYGWIN__) || defined (__MINGW32__)
+  #define LOCALCONST_DECL( Type, cName, Value ) static const Type cName = Value;
+  #define LOCALCONST_DEF( Class, Type, cName, Value )
+#else
+  #define LOCALCONST_DECL( Type, cName, Value ) static Type cName;
+  #define LOCALCONST_DEF( Class, Type, cName, Value ) Type Class::cName = Value;
+#endif
+
+static const int SIZEOF_BITMAPFILEHEADER = 80;
+static const int SIZEOF_RGBQUAD = 32;
+
 LOCALCONST_DEF( VSImage, int, SIZEOF_BITMAPFILEHEADER, sizeof (WORD)+sizeof (DWORD)+sizeof (WORD)+sizeof (WORD)
                +sizeof (DWORD) )
 LOCALCONST_DEF( VSImage, int, SIZEOF_BITMAPINFOHEADER, sizeof (DWORD)+sizeof (LONG)+sizeof (LONG)+2*sizeof (WORD)+2
                *sizeof (DWORD)+2*sizeof (LONG)+2*sizeof (DWORD) )
-LOCALCONST_DEF( VSImage, int, SIZEOF_RGBQUAD, sizeof (BYTE)*4 ) VSImage::VSImage()
+LOCALCONST_DEF( VSImage, int, SIZEOF_RGBQUAD, sizeof (BYTE)*4 )
+
+
+VSImage::VSImage()
 {
     this->img_depth = 8;
     this->img_color_type = 8;

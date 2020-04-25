@@ -63,8 +63,6 @@ protected:
 
 //the system currently used by the scripting
     StarSystem *script_system;
-    bool is_server;
-    bool network_lock;
 
 private:
 ///Many C++ implementations count classes within as friends. (not all)
@@ -79,7 +77,7 @@ public:
     StarDate current_stardate;
     bool isServer()
     {
-        return is_server;
+        return false;
     }
     Cockpit * isPlayerStarship( const Unit *fighter );
     Cockpit * isPlayerStarshipVoid( const void *pointercompare )

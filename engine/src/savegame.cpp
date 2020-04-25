@@ -12,7 +12,6 @@
 #include <algorithm>
 #include "cmd/script/mission.h"
 #include "gfx/cockpit_generic.h"
-#include "networking/const.h"
 #include "vsfilesystem.h"
 #include "cmd/fg_util.h"
 
@@ -31,89 +30,84 @@ using std::cerr;
 std::string CurrentSaveGameName = "";
 std::string GetHelperPlayerSaveGame( int num )
 {
-    if (Network == NULL) {
-        if (CurrentSaveGameName.length() > 0) {
-            if (game_options.remember_savegame) {
-                VSFile  f;
-                VSError err = f.OpenCreateWrite( "save.4.x.txt", UnknownFile );
-                if (err <= Ok) {
-                    f.Write( CurrentSaveGameName );
-                    f.Close();
-                }
-            }
-            if (num != 0)
-                return CurrentSaveGameName+XMLSupport::tostring( num );
-            return CurrentSaveGameName;
-        }
-        cout<<"Hi helper play "<<num<<endl;
-        static string *res = NULL;
-        if (res == NULL) {
-            res = new std::string;
+    if (CurrentSaveGameName.length() > 0) {
+        if (game_options.remember_savegame) {
             VSFile  f;
-            //TRY TO OPEN THE save.4.x.txt FILE WHICH SHOULD CONTAIN THE NAME OF THE SAVE TO USE
-            VSError err = f.OpenReadOnly( "save.4.x.txt", UnknownFile ); // DELETE .4.x no longer used
-            if (err > Ok) {
-                //IF save.4.x.txt DOES NOT EXIST WE CREATE ONE WITH "default" AS SAVENAME
-                err = f.OpenCreateWrite( "save.4.x.txt", UnknownFile );
-                if (err <= Ok) {
-                    f.Write( game_options.new_game_save_name.c_str(), game_options.new_game_save_name.length() );
-                    f.Write( "\n", 1 );
-                    f.Close();
-                } else {
-                    fprintf( stderr, "!!! ERROR : Creating default save.4.x.txt file : %s\n", f.GetFullPath().c_str() );
-                    exit( 1 );
-                }
-                err = f.OpenReadOnly( "save.4.x.txt", UnknownFile );
-                if (err > Ok) {
-                    fprintf( stderr, "!!! ERROR : Opening the default save we just created\n" );
-                    exit( 1 );
-                }
-            }
+            VSError err = f.OpenCreateWrite( "save.4.x.txt", UnknownFile );
             if (err <= Ok) {
-                long length = f.Size();
-                if (length > 0) {
-                    char *temp = (char*) malloc( length+1 );
-                    temp[length] = '\0';
-                    f.Read( temp, length );
-                    bool  end  = true;
-                    for (int i = length-1; i >= 0; i--) {
-                        if (temp[i] == '\r' || temp[i] == '\n')
-                            temp[i] = (end ? '\0' : '_');
-                        else if (temp[i] == '\0' || temp[i] == ' ' || temp[i] == '\t')
-                            temp[i] = (end ? '\0' : '_');
-                        else
-                            end = false;
-                    }
-                    *res = (temp);
-                    free( temp );
-                }
+                f.Write( CurrentSaveGameName );
                 f.Close();
-            }
-            if ( game_options.remember_savegame && !res->empty() ) {
-                //Set filetype to Unknown so that it is searched in homedir/
-                if (*res->begin() == '~') {
-                    err = f.OpenCreateWrite( "save.4.x.txt", VSFileSystem::UnknownFile );
-                    if (err <= Ok) {
-                        for (unsigned int i = 1; i < res->length(); i++) {
-                            char cc = *(res->begin()+i);
-                            f.Write( &cc, sizeof (char) );
-                        }
-                        char cc = 0;
+              }
+          }
+        if (num != 0)
+          return CurrentSaveGameName+XMLSupport::tostring( num );
+        return CurrentSaveGameName;
+      }
+    cout<<"Hi helper play "<<num<<endl;
+    static string *res = NULL;
+    if (res == NULL) {
+        res = new std::string;
+        VSFile  f;
+        //TRY TO OPEN THE save.4.x.txt FILE WHICH SHOULD CONTAIN THE NAME OF THE SAVE TO USE
+        VSError err = f.OpenReadOnly( "save.4.x.txt", UnknownFile ); // DELETE .4.x no longer used
+        if (err > Ok) {
+            //IF save.4.x.txt DOES NOT EXIST WE CREATE ONE WITH "default" AS SAVENAME
+            err = f.OpenCreateWrite( "save.4.x.txt", UnknownFile );
+            if (err <= Ok) {
+                f.Write( game_options.new_game_save_name.c_str(), game_options.new_game_save_name.length() );
+                f.Write( "\n", 1 );
+                f.Close();
+              } else {
+                fprintf( stderr, "!!! ERROR : Creating default save.4.x.txt file : %s\n", f.GetFullPath().c_str() );
+                exit( 1 );
+              }
+            err = f.OpenReadOnly( "save.4.x.txt", UnknownFile );
+            if (err > Ok) {
+                fprintf( stderr, "!!! ERROR : Opening the default save we just created\n" );
+                exit( 1 );
+              }
+          }
+        if (err <= Ok) {
+            long length = f.Size();
+            if (length > 0) {
+                char *temp = (char*) malloc( length+1 );
+                temp[length] = '\0';
+                f.Read( temp, length );
+                bool  end  = true;
+                for (int i = length-1; i >= 0; i--) {
+                    if (temp[i] == '\r' || temp[i] == '\n')
+                      temp[i] = (end ? '\0' : '_');
+                    else if (temp[i] == '\0' || temp[i] == ' ' || temp[i] == '\t')
+                      temp[i] = (end ? '\0' : '_');
+                    else
+                      end = false;
+                  }
+                *res = (temp);
+                free( temp );
+              }
+            f.Close();
+          }
+        if ( game_options.remember_savegame && !res->empty() ) {
+            //Set filetype to Unknown so that it is searched in homedir/
+            if (*res->begin() == '~') {
+                err = f.OpenCreateWrite( "save.4.x.txt", VSFileSystem::UnknownFile );
+                if (err <= Ok) {
+                    for (unsigned int i = 1; i < res->length(); i++) {
+                        char cc = *(res->begin()+i);
                         f.Write( &cc, sizeof (char) );
-                        f.Close();
-                    }
-                }
-            }
-        }
-        if ( num == 0 || res->empty() ) {
-            cout<<"Here";
-            return *res;
-        }
-        return (*res)+XMLSupport::tostring( num );
-    } else {
-        //Return "" so that the filename argument to ParseSavegame will be used
-        return "";
-    }
+                      }
+                    char cc = 0;
+                    f.Write( &cc, sizeof (char) );
+                    f.Close();
+                  }
+              }
+          }
+      }
+    if ( num == 0 || res->empty() ) {
+        cout<<"Here";
+        return *res;
+      }
+    return (*res)+XMLSupport::tostring( num );
 }
 
 std::string GetWritePlayerSaveGame( int num )
@@ -677,7 +671,7 @@ void SaveGame::ReadSavedPackets( char* &buf,
             if (commitfactions) ReadNewsData( buf, skip_news );
         } else if ( a == 0 && 0 == strcmp( unitname, "stardate" ) && 0 == strcmp( factname, "data" ) ) {
             //On server side we expect the latest saved stardate in dynaverse.dat too
-            if (commitfactions && !SERVER /*server never wants to take "orders" from shapeshifters...*/)
+            if (commitfactions)
                 ReadStardate( buf );
             else
                 AnyStringScanInString( buf );
@@ -737,6 +731,9 @@ static char * tmprealloc( char *var, int &oldlength, int newlength )
     return var;
 }
 
+// Taken from /networking/const.h
+#define MAXBUFFER 16384
+
 string SaveGame::WritePlayerData( const QVector &FP,
                                   std::vector< std::string >unitname,
                                   const char *systemname,
@@ -775,9 +772,7 @@ string SaveGame::WriteDynamicUniverse()
     memset( tmp, 0, MB );
     //Write mission data
     //we save the stardate
-    if (SERVER) {
-        cerr<<"SAVING STARDATE - SERVER="<<SERVER<<endl;
-    }
+
     string stardate = AnyStringWriteString( _Universe->current_stardate.GetFullTrekDate() );
     dyn_univ += "\n0 stardate data " + stardate;
 

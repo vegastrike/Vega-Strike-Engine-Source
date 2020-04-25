@@ -7,14 +7,16 @@ extern int PNG_HAS_PALETTE;
 extern int PNG_HAS_COLOR;
 extern int PNG_HAS_ALPHA;
 
+
+
 #ifndef WIN32
 typedef unsigned int   DWORD;
 typedef int            LONG;
 typedef unsigned short WORD;
 typedef unsigned char  BYTE;
+
 /**
- * Windows Bitmap format.  Caution about mips systems which cannot handle
- * misaligned structs
+ * Windows Bitmap format.
  * Caution about big endian systems (use endianness.h to read in things)
  */
 typedef struct
@@ -33,8 +35,7 @@ typedef struct
 } BITMAPINFOHEADER;
 
 /**
- * File header of a bitmap. Won't work on mips architecture with
- * misaligned structs
+ * File header of a bitmap.
  */
 typedef struct
 {
@@ -216,17 +217,10 @@ public: VSImage();
     unsigned long sizeY;
 
 //Defined for gcc which pads the size of structs
-//const static int SIZEOF_BITMAPFILEHEADER;
-    LOCALCONST_DECL( int, SIZEOF_BITMAPFILEHEADER, sizeof (WORD)+sizeof (DWORD)+sizeof (WORD)+sizeof (WORD)+sizeof (DWORD) )
-//Defined for gcc which pads the size of structs
-    LOCALCONST_DECL(
-        int, SIZEOF_BITMAPINFOHEADER, sizeof (DWORD)+sizeof (LONG)+sizeof (LONG)+2*sizeof (WORD)+2*sizeof (DWORD)+2
-        *sizeof (LONG)
-        +2*sizeof (DWORD) )
-//const static int SIZEOF_BITMAPINFOHEADER;
-//Defined for gcc which pads size of structs (not entirely necessary)
-//const static int SIZEOF_RGBQUAD;
-    LOCALCONST_DECL( int, SIZEOF_RGBQUAD, sizeof (BYTE)*4 )
+//LOCALCONST_DECL(int, SIZEOF_BITMAPINFOHEADER, sizeof (DWORD)+sizeof (LONG)+sizeof (LONG)+2*sizeof (WORD)+2*sizeof (DWORD)+2
+//            +2*sizeof (DWORD) )
+static const int SIZEOF_BITMAPINFOHEADER = 80;
+
 
 //f2 is needed for bmp loading
     unsigned char*ReadImage( VSFileSystem::VSFile*f,

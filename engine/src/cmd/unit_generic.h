@@ -54,8 +54,6 @@ void UncheckUnit( class Unit*un );
 #include "script/flightgroup.h"
 #include "faction_generic.h"
 #include "star_system_generic.h"
-#include "networking/const.h"
-#include "networking/lowlevel/vsnet_clientstate.h"
 #include "gfx/cockpit_generic.h"
 #include "vsfilesystem.h"
 #include "collide_map.h"
@@ -114,8 +112,6 @@ protected:
     double last_sound_refire_time;
     void ReplaceSound();
 public:
-//Serial used to store missiles serial id before they are really created
-    ObjSerial serial;
 //for guns!
     float     xyscale;
     float     zscale;
@@ -281,33 +277,7 @@ public:
     void LoadRow( class CSVRow&row, std::string unitMod, std::string*netxml = NULL );
     virtual ~Unit();
 
-/*
- **************************************************************************************
- **** NETWORKING STUFF                                                              ***
- **************************************************************************************
- */
 
-protected:
-//Tell if networked unit
-    bool networked;
-    ObjSerial   serial;
-    Vector      net_accel;
-public:
-    ClientState old_state;
-    enum DAMAGES
-    {
-        NO_DAMAGE   =0x00, SHIELD_DAMAGED=0x01, COMPUTER_DAMAGED=0x02, MOUNT_DAMAGED=0x04, CARGOFUEL_DAMAGED=0x08,
-        JUMP_DAMAGED=0x10, CLOAK_DAMAGED=0x20, LIMITS_DAMAGED=0x40, ARMOR_DAMAGED=0x80
-    };
-    unsigned short damages;
-
-    void SetNetworkMode( bool mode = true );
-    ObjSerial GetSerial() const
-    {
-        return serial;
-    }
-    void SetSerial( ObjSerial );
-    void BackupState();
 
 /*
  **************************************************************************************

@@ -8,6 +8,7 @@
 #include "cmd/unit_generic.h"
 #include "gfx/cockpit_generic.h"
 #include "options.h"
+#include "posh.h"
 
 
 

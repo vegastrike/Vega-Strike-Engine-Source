@@ -29,7 +29,6 @@
 #include "cmd/unit_collide.h"
 #include "vs_random.h"
 #include "savegame.h"
-#include "networking/netclient.h"
 #include "in_kb_data.h"
 #include "universe_util.h"               //get galaxy faction, dude
 #include "options.h"
@@ -233,7 +232,6 @@ void StarSystem::AddUnit( Unit *unit )
     }
     drawList.prepend( unit );
     unit->activeStarSystem = this;     //otherwise set at next physics frame...
-    UnitFactory::broadcastUnit( unit, GetZone() );
     unsigned int priority = UnitUtil::getPhysicsPriority( unit );
     //Do we need the +1 here or not - need to look at when current_sim_location is changed relative to this function
     //and relative to this function, when the bucket is processed...
@@ -794,44 +792,32 @@ void StarSystem::ProcessPendingJumps()
 #endif
             _Universe->activeStarSystem()->VolitalizeJumpAnimation( pendingjump[kk]->animation );
         }
-        int playernum = _Universe->whichPlayerStarship( un );
-        //In non-networking mode or in networking mode or a netplayer wants to jump and is ready or a non-player jump
-        if ( Network == NULL || playernum < 0 || ( Network != NULL && playernum >= 0 && Network[playernum].readyToJump() ) ) {
-            Unit *un = pendingjump[kk]->un.GetUnit();
-            StarSystem *savedStarSystem = _Universe->activeStarSystem();
-            //Download client descriptions of the new zone (has to be blocking)
-            if (Network != NULL)
-                Network[playernum].downloadZoneInfo();
-            if ( un == NULL || !_Universe->StillExists( pendingjump[kk]->dest )
-                || !_Universe->StillExists( pendingjump[kk]->orig ) ) {
+
+
+        StarSystem *savedStarSystem = _Universe->activeStarSystem();
+
+        if ( un == NULL || !_Universe->StillExists( pendingjump[kk]->dest )
+             || !_Universe->StillExists( pendingjump[kk]->orig ) ) {
 #ifdef JUMP_DEBUG
                 VSFileSystem::vs_fprintf( stderr, "Adez Mon! Unit destroyed during jump!\n" );
 #endif
-                delete pendingjump[kk];
-                pendingjump.erase( pendingjump.begin()+kk );
-                --kk;
-                continue;
-            }
-            bool dosightandsound = ( (pendingjump[kk]->dest == savedStarSystem) || _Universe->isPlayerStarship( un ) );
-            _Universe->setActiveStarSystem( pendingjump[kk]->orig );
-            if ( un->TransferUnitToSystem( kk, savedStarSystem, dosightandsound ) )
-                un->DecreaseWarpEnergy( false, 1.0f );
-            if (dosightandsound)
-                _Universe->activeStarSystem()->DoJumpingComeSightAndSound( un );
-	    _Universe->AccessCockpit()->OnJumpEnd(un);
             delete pendingjump[kk];
             pendingjump.erase( pendingjump.begin()+kk );
             --kk;
-            _Universe->setActiveStarSystem( savedStarSystem );
-            //In networking mode we tell the server we want to go back in game
-            if (Network != NULL) {
-                //Find the corresponding networked player
-                if (playernum >= 0) {
-                    Network[playernum].inGame();
-                    Network[playernum].unreadyToJump();
-                }
-            }
+            continue;
         }
+        bool dosightandsound = ( (pendingjump[kk]->dest == savedStarSystem) || _Universe->isPlayerStarship( un ) );
+        _Universe->setActiveStarSystem( pendingjump[kk]->orig );
+        if ( un->TransferUnitToSystem( kk, savedStarSystem, dosightandsound ) )
+          un->DecreaseWarpEnergy( false, 1.0f );
+        if (dosightandsound)
+          _Universe->activeStarSystem()->DoJumpingComeSightAndSound( un );
+        _Universe->AccessCockpit()->OnJumpEnd(un);
+        delete pendingjump[kk];
+        pendingjump.erase( pendingjump.begin()+kk );
+        --kk;
+        _Universe->setActiveStarSystem( savedStarSystem );
+
     }
 }
 
@@ -885,7 +871,7 @@ bool StarSystem::JumpTo( Unit *un, Unit *jumppoint, const std::string &system, b
 {
     if ( ( un->DockedOrDocking()&(~Unit::DOCKING_UNITS) ) != 0 )
         return false;
-    if (Network == NULL || force) {
+    if (force) {
         if (un->jump.drive >= 0)
             un->jump.drive = -1;
 #ifdef JUMP_DEBUG
@@ -922,10 +908,7 @@ bool StarSystem::JumpTo( Unit *un, Unit *jumppoint, const std::string &system, b
         if (jumppoint)
             ActivateAnimation( jumppoint );
     } else
-    //Networking mode
-    if (jumppoint) {
-        Network->jumpRequest( system, jumppoint->GetSerial() );
-    }
+
     return true;
 }
 

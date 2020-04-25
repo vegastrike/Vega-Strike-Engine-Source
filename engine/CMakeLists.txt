@@ -48,66 +48,7 @@ include_directories(
     /usr/include/harfbuzz/
 ) 
 
-add_library(netlowlevel
-    src/networking/lowlevel/netbuffer.cpp
-    src/networking/lowlevel/netui.cpp
-    src/networking/lowlevel/packet.cpp
-    src/networking/lowlevel/packetmem.cpp
-    src/networking/lowlevel/vsnet_address.cpp
-    src/networking/lowlevel/vsnet_clientstate.cpp
-    src/networking/lowlevel/vsnet_cmd.cpp
-    src/networking/lowlevel/vsnet_debug.cpp
-    src/networking/lowlevel/vsnet_dloadenum.cpp
-    src/networking/lowlevel/vsnet_dloadmgr.cpp
-    src/networking/lowlevel/vsnet_notify.cpp
-    src/networking/lowlevel/vsnet_oss.cpp
-    src/networking/lowlevel/vsnet_parsecmd.cpp
-    src/networking/lowlevel/vsnet_pipe.cpp
-    src/networking/lowlevel/vsnet_serversocket.cpp
-    src/networking/lowlevel/vsnet_socket.cpp
-    src/networking/lowlevel/vsnet_socketbase.cpp
-    src/networking/lowlevel/vsnet_socketflags.cpp
-    src/networking/lowlevel/vsnet_sockethttp.cpp
-    src/networking/lowlevel/vsnet_socketset.cpp
-    src/networking/lowlevel/vsnet_sockettcp.cpp
-    src/networking/lowlevel/vsnet_socketudp.cpp
-    src/networking/lowlevel/vsnet_thread_non.cpp
-    src/networking/lowlevel/vsnet_thread_p.cpp 
-    src/networking/lowlevel/vsnet_thread_sdl.cpp
-)
 
-SET(LIBNET_SOURCES
-    src/networking/inet_file.cpp 
-    src/networking/inet.cpp
-)
-
-add_library(netgeneric
-    src/networking/accountsxml.cpp
-    src/networking/client.cpp
-    src/networking/fileutil.cpp
-    src/networking/savenet_util.cpp
-    src/networking/cubicsplines.cpp
-    src/networking/mangle.cpp
-    src/networking/netclient_clients.cpp
-    src/networking/netclient_devices.cpp 
-    src/networking/netclient_login.cpp
-    src/networking/netclient.cpp
-    src/networking/netserver_acct.cpp
-    src/networking/netserver_clients.cpp
-    src/networking/netserver_devices.cpp
-    src/networking/netserver_login.cpp
-    src/networking/netserver_net.cpp
-    src/networking/netserver.cpp 
-    src/networking/prediction.cpp
-    src/networking/zonemgr.cpp
-)
-
-SET(LIBNETCLIENT_SOURCES
-    src/networking/networkcomm.cpp
-    src/networking/webcam_support.cpp
-)
-
-SET(LIBNETSERVER_SOURCES src/networking/networkcomm_server.cpp )
 
 SET(LIBGUI_SOURCES
     src/gui/button.cpp
@@ -551,18 +492,7 @@ SET(VEGASTRIKE_SOURCES
     src/python/briefing_wrapper.cpp
 )
 
-SET(VEGASERVER_SOURCES
-    ${LIBCMDSERVER_SOURCES}
-    ${LIBNETSERVER_SOURCES}
-    ${LIBROOTSERVER_SOURCES}
-    ${LIBCMDSCRIPTSERVER_SOURCES}
-    ${LIBGFXSERVER_SOURCES}
-    src/vegaserver.cpp
-    src/cmd/script/director_server.cpp
-    src/cmd/ai/flykeyboard_server.cpp
-    src/gldrv/gl_vertex_list.cpp
-    src/gldrv/gl_sphere_list_server.cpp
-)
+
 
 if(COMMAND cmake_policy)
 	cmake_policy(SET CMP0003 NEW) 
@@ -724,12 +654,6 @@ OPTION(DISABLE_CLIENT "Disable building the vegastrike bin"
 IF(NOT DISABLE_CLIENT)
 	add_executable(vegastrike ${VEGASTRIKE_SOURCES})
 ENDIF(NOT DISABLE_CLIENT)
-
-OPTION(DISABLE_SERVER "Disable building the vegaserver bin"
-        OFF )
-IF(NOT DISABLE_SERVER)
-    add_executable(vegaserver ${VEGASERVER_SOURCES})
-ENDIF(NOT DISABLE_SERVER)
 
 
 include (CheckIncludeFile)
@@ -1027,34 +951,23 @@ CONFIGURE_FILE(${vsUTCS_SOURCE_DIR}/cmake-config.h.in ${vsUTCS_BINARY_DIR}/confi
 #end config.h generation 
 #SET(CMAKE_CXX_FLAGS "-include config.h;-pipe;"${CMAKE_CXX_FLAGS})
 
-#Setup shared lib and include listings for vegastrike and vegaserver.
-SET(TST_LIBS engine_com OPcollide netgeneric netlowlevel ${TST_LIBS})
-SET(TST_SERVER_LIBS netgeneric engine_com netlowlevel OPcollide ${TST_LIBS})
+#Setup shared lib and include listings for vegastrike.
+SET(TST_LIBS engine_com OPcollide ${TST_LIBS})
 include_directories(${TST_INCLUDES})	
 
-IF(NOT DISABLE_CLIENT)
-	target_link_libraries(vegastrike ${TST_LIBS})
-	set_target_properties(vegastrike PROPERTIES LINK_FLAGS "-L/usr/lib ${TST_LFLAGS}")
-ENDIF(NOT DISABLE_CLIENT)
+
+target_link_libraries(vegastrike ${TST_LIBS})
+set_target_properties(vegastrike PROPERTIES LINK_FLAGS "-L/usr/lib ${TST_LFLAGS}")
+
 
 # Vssetup Sub build file  
 add_subdirectory(setup)
 
-#ADD_CUSTOM_TARGET(vssetup DEPENDS setup/vssetup COMMAND ln -fs ${vsUTCS_BINARY_DIR}/setup/vssetup vssetup || true)
-
 # Add other utilies here
 add_subdirectory(objconv)
 
-#ADD_CUSTOM_TARGET(mesher DEPENDS objconv/mesher COMMAND ln -fs ${vsUTCS_BINARY_DIR}/objconv/mesher mesher || true)
 
 
-IF(NOT DISABLE_SERVER)
-target_link_libraries(vegaserver ${TST_SERVER_LIBS})
-set_target_properties(vegaserver PROPERTIES LINK_FLAGS "-L/usr/lib -L${vsUTCS_BINARY_DIR}"
-                                            COMPILE_FLAGS "-DNO_GFX")
-add_dependencies(vegaserver mesh_tool)
-add_dependencies(vegaserver vssetup)
-ENDIF(NOT DISABLE_SERVER)
 
 # show debug output 
 get_directory_property(TEMP_DIRECTORY INCLUDE_DIRECTORIES)
