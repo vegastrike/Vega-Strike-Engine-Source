@@ -156,7 +156,7 @@ void AnimatedTexture::MakeActive( int stage, int pass )
                     gl_options.compression = ocompression;
                 }
             }
-            catch (::VidFile::EndOfStreamException e) {
+            catch (const ::VidFile::EndOfStreamException& e) {
                 if (GetLoop() && curtime > 0) {
                     setTime( 0 );
                     MakeActive( stage, pass );
@@ -165,7 +165,7 @@ void AnimatedTexture::MakeActive( int stage, int pass )
                     done = true;
                 }
             }
-            catch (::VidFile::Exception e) {
+            catch (const ::VidFile::Exception& e) {
                 //BOOST_LOG_TRIVIAL(info) << boost::format("\nVidFile exception: %1%") % e.what();
             }
             Texture::MakeActive( stage, pass );
@@ -454,7 +454,7 @@ void AnimatedTexture::LoadVideoSource( VSFileSystem::VSFile &f )
 
         loadSuccess   = true;
     }
-    catch (::VidFile::Exception e) {
+    catch (const ::VidFile::Exception& e) {
         loadSuccess = false;
     }
     if (loadSuccess) {

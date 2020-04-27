@@ -767,7 +767,7 @@ namespace Audio {
                 // Tidy close
                 closeRenderer();
                 
-            } catch(Exception e) {
+            } catch(const Exception& e) {
                 cerr << "Uncaught exception: "
                      << e.what()
                      << endl;

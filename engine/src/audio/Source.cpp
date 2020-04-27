@@ -66,7 +66,7 @@ namespace Audio {
         if (rendererDataPtr.get() && isActive()) {
             try {
                 setLastKnownPlayingTime( getPlayingTime() );
-            } catch(Exception e) { }
+            } catch(const Exception& e) { }
             
             // Must notify the listener, if any
             if (sourceListenerPtr.get() != 0 && sourceListenerPtr->wantPlayEvents())
@@ -103,7 +103,7 @@ namespace Audio {
                 return rendererDataPtr->getPlayingTime();
             else
                 return lastKnownPlayingTime;
-        } catch(Exception e) {
+        } catch(const Exception& e) {
             return lastKnownPlayingTime;
         }
     }
@@ -113,7 +113,7 @@ namespace Audio {
         try {
             if (rendererDataPtr.get() && isActive())
                 return rendererDataPtr->getPlayingTime();
-        } catch(Exception e) { }
+        } catch(const Exception& e) { }
         return lastKnownPlayingTime + getRealTime() - lastKnownPlayingTimeTime;
     }
 
@@ -121,7 +121,7 @@ namespace Audio {
     {
         try {
             return isPlayingImpl();
-        } catch(Exception e) {
+        } catch(const Exception& e) {
             return false;
         }
     }
@@ -130,7 +130,7 @@ namespace Audio {
     {
         try {
             return rendererDataPtr.get() && rendererDataPtr->isPlaying();
-        } catch(Exception e) {
+        } catch(const Exception& e) {
             return false;
         }
     }

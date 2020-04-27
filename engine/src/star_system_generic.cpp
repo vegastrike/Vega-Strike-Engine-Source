@@ -272,7 +272,7 @@ void StarSystem::ExecuteUnitAI()
             unit->ResetThreatLevel();
         }
     }
-    catch (const boost::python::error_already_set) {
+    catch (const boost::python::error_already_set&) {
         if ( PyErr_Occurred() ) {
             PyErr_Print();
             PyErr_Clear();
@@ -523,7 +523,7 @@ void StarSystem::UpdateUnitPhysics( bool firstframe )
                     unit->predicted_priority = predprior;
                 }
             }
-            catch (const boost::python::error_already_set) {
+            catch (const boost::python::error_already_set&) {
                 if ( PyErr_Occurred() ) {
                     PyErr_Print();
                     PyErr_Clear();
