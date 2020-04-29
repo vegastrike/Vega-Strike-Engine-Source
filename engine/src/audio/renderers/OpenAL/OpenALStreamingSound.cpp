@@ -51,7 +51,7 @@ namespace Audio {
             // load the stream
             try {
                 loadStream();
-            } catch(ResourceAlreadyLoadedException e) {
+            } catch(const ResourceAlreadyLoadedException& e) {
                 // Weird...
                 getStream()->seek(0);
             }
@@ -83,7 +83,7 @@ namespace Audio {
             flushBuffers();
             
             onLoaded(true);
-        } catch(Exception e) {
+        } catch(const Exception& e) {
             onLoaded(false);
             throw e;
         }

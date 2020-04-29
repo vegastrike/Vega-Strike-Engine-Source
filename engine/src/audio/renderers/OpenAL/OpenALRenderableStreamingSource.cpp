@@ -234,7 +234,7 @@ namespace Audio {
         do {
             try {
                 buffer = streamingSound->readAndFlip();
-            } catch(EndOfStreamException e) {
+            } catch(const EndOfStreamException& e) {
                 fprintf(stderr, "EOS!\n");
                 if (source->isLooping()) {
                     streamingSound->seek(0);

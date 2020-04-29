@@ -22,7 +22,7 @@ namespace Audio {
     {
         try {
             updateImpl(flags);
-        } catch(Exception e) {}
+        } catch(const Exception& e) {}
     }
 
 };

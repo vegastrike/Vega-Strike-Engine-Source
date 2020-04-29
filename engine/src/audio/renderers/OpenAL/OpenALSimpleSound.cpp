@@ -44,7 +44,7 @@ namespace Audio {
             // load the stream
             try {
                 loadStream();
-            } catch(ResourceAlreadyLoadedException e) {
+            } catch(const ResourceAlreadyLoadedException& e) {
                 // Weird...
                 getStream()->seek(0);
             }
@@ -87,9 +87,9 @@ namespace Audio {
                     }
                 }
                 closeStream();
-            } catch(EndOfStreamException e) {
+            } catch(const EndOfStreamException& e) {
                 closeStream();
-            } catch(Exception e) {
+            } catch(const Exception& e) {
                 closeStream();
                 throw e;
             }
@@ -142,7 +142,7 @@ namespace Audio {
             checkAlError();
             
             onLoaded(true);
-        } catch(Exception e) {
+        } catch(const Exception& e) {
             onLoaded(false);
             throw e;
         }

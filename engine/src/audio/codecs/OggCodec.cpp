@@ -44,7 +44,7 @@ namespace Audio {
                 __impl::OggData test(file, fmt, 0);
                 
                 return true;
-            } catch(Exception e) {
+            } catch(const Exception& e) {
                 return false;
             }
         } else {

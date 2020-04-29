@@ -303,7 +303,7 @@ public:
                     nextFrame();
                     return true;
                 }
-                catch (VidFile::EndOfStreamException e) {
+                catch (const VidFile::EndOfStreamException& e) {
                     sizePTS = fbPTS+1; throw e;
                 }
             }
@@ -346,7 +346,7 @@ public:
                 convertFrame();
                 nextFrame();
             }
-            catch (VidFile::EndOfStreamException e) {
+            catch (const VidFile::EndOfStreamException& e) {
                 sizePTS = fbPTS+1; throw e;
             }
 
