@@ -1,0 +1,29 @@
+```
+#====================================
+# @file   : integrating.txt
+# @version: 2020-02-11
+# @created: 2008-05-06
+# @author : safemode
+# @author : pyramid
+# @brief  : quick repo guide
+#====================================
+```
+
+
+This file describes the integration process for adding new versions of the boost
+python integration library to the Vega Strike build system.
+Assuming that the version of boost works with Vega Strike, very little
+developer time should be required.
+
+1.  Create new directory under ext/boost of $VER, where $Ver has the dot (".") replaced with underscore ("_").
+    For example ext/boost/1_72_0
+
+2.  Download the release from here https://www.boost.org/users/download/
+    and extract it to the above directory.
+
+3.  Edit engine/CMakeLists.txt (search for Boost_DIR) and adjust the path
+    SET(Boost_DIR ../ext/boost/1_72_0)
+
+5.  Test new boost sources.
+    a)  remove the build directory
+    b)  run sh/vsbuild.sh

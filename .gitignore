@@ -1,4 +1,6 @@
-boost/
-!boost/1_53/CMakeLists.txt
-/**/build/
-.vscode/
+bin/
+build/
+data/
+ext/
+*.pyc
+build-engine-Desktop-Default/
