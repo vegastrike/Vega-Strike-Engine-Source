@@ -235,10 +235,10 @@ sudo apt-get -y install git cmake python-dev build-essential automake autoconf l
 or manually
 
 ```bash
-vegastrike> mkdir build & cd build
-vegastrike> cmake ../engine
-vegastrike> make
-vegastrike> mkdir ../bin && cp vegastrike ../bin/ && cp setup/vssetup ../bin/ && cd ..
+mkdir build & cd build
+cmake ../engine
+make
+mkdir ../bin && cp vegastrike ../bin/ && cp setup/vssetup ../bin/ && cd ..
 ```
 
 [Link to list of dependencies in wiki](http://vegastrike.sourceforge.net/wiki/HowTo:Compile_from_CVS)
