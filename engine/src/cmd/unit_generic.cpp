@@ -390,15 +390,13 @@ bool CrashForceDock( Unit *thus, Unit *dockingUn, bool force )
     Unit *un = dockingUn;
     int   whichdockport = thus->CanDockWithMe( un, force );
     if (whichdockport != -1) {
-
-            QVector place = UniverseUtil::SafeEntrancePoint( un->Position(), un->rSize()*1.5 );
-            un->SetPosAndCumPos( place );
-            if (un->ForceDock( thus, whichdockport ) > 0) {
-                abletodock( 3 );
-                un->UpgradeInterface( thus );
-                return true;
-            }
-
+        QVector place = UniverseUtil::SafeEntrancePoint( un->Position(), un->rSize()*1.5 );
+        un->SetPosAndCumPos( place );
+        if (un->ForceDock( thus, whichdockport ) > 0) {
+            abletodock( 3 );
+            un->UpgradeInterface( thus );
+            return true;
+        }
     }
     return false;
 }
@@ -2216,6 +2214,7 @@ void Unit::UpdatePhysics( const Transformation &trans,
     }
     if (resolveforces) {
         //clamp velocity
+        ResolveForces(trans, transmat);
         if (Velocity.i > VELOCITY_MAX)
             Velocity.i = VELOCITY_MAX;
 

@@ -792,20 +792,20 @@ void StarSystem::ProcessPendingJumps()
 #endif
             _Universe->activeStarSystem()->VolitalizeJumpAnimation( pendingjump[kk]->animation );
         }
-
-
+        int playernum = _Universe->whichPlayerStarship( un );
+        //In non-networking mode or in networking mode or a netplayer wants to jump and is ready or a non-player jump
         StarSystem *savedStarSystem = _Universe->activeStarSystem();
-
+        //Download client descriptions of the new zone (has to be blocking)
         if ( un == NULL || !_Universe->StillExists( pendingjump[kk]->dest )
              || !_Universe->StillExists( pendingjump[kk]->orig ) ) {
 #ifdef JUMP_DEBUG
-                VSFileSystem::vs_fprintf( stderr, "Adez Mon! Unit destroyed during jump!\n" );
+            VSFileSystem::vs_fprintf( stderr, "Adez Mon! Unit destroyed during jump!\n" );
 #endif
             delete pendingjump[kk];
             pendingjump.erase( pendingjump.begin()+kk );
             --kk;
             continue;
-        }
+          }
         bool dosightandsound = ( (pendingjump[kk]->dest == savedStarSystem) || _Universe->isPlayerStarship( un ) );
         _Universe->setActiveStarSystem( pendingjump[kk]->orig );
         if ( un->TransferUnitToSystem( kk, savedStarSystem, dosightandsound ) )
@@ -871,43 +871,42 @@ bool StarSystem::JumpTo( Unit *un, Unit *jumppoint, const std::string &system, b
 {
     if ( ( un->DockedOrDocking()&(~Unit::DOCKING_UNITS) ) != 0 )
         return false;
-    if (force) {
-        if (un->jump.drive >= 0)
-            un->jump.drive = -1;
+
+    if (un->jump.drive >= 0)
+      un->jump.drive = -1;
 #ifdef JUMP_DEBUG
-        VSFileSystem::vs_fprintf( stderr, "jumping to %s.  ", system.c_str() );
+    VSFileSystem::vs_fprintf( stderr, "jumping to %s.  ", system.c_str() );
 #endif
-        StarSystem *ss = star_system_table.Get( system );
-        std::string ssys( system+".system" );
-        if (!ss)
-            ss = star_system_table.Get( ssys );
-        bool justloaded = false;
-        if (!ss) {
-            justloaded = true;
-            ss = _Universe->GenerateStarSystem( ssys.c_str(), filename.c_str(), Vector( 0, 0, 0 ) );
-            //NETFIXME: Do we want to generate the system if an AI unit jumps?
-        }
-        if ( ss && !isJumping( pendingjump, un ) ) {
+    StarSystem *ss = star_system_table.Get( system );
+    std::string ssys( system+".system" );
+    if (!ss)
+      ss = star_system_table.Get( ssys );
+    bool justloaded = false;
+    if (!ss) {
+        justloaded = true;
+        ss = _Universe->GenerateStarSystem( ssys.c_str(), filename.c_str(), Vector( 0, 0, 0 ) );
+        //NETFIXME: Do we want to generate the system if an AI unit jumps?
+      }
+    if ( ss && !isJumping( pendingjump, un ) ) {
 #ifdef JUMP_DEBUG
-            VSFileSystem::vs_fprintf( stderr, "Pushing back to pending queue!\n" );
+        VSFileSystem::vs_fprintf( stderr, "Pushing back to pending queue!\n" );
 #endif
-            bool dosightandsound = ( ( this == _Universe->getActiveStarSystem( 0 ) ) || _Universe->isPlayerStarship( un ) );
-            int  ani = -1;
-            if (dosightandsound)
-                ani = _Universe->activeStarSystem()->DoJumpingLeaveSightAndSound( un );
-	    _Universe->AccessCockpit()->OnJumpBegin(un);
-            pendingjump.push_back( new unorigdest( un, jumppoint, this, ss, un->GetJumpStatus().delay, ani, justloaded,
-                                                  save_coordinates ? ComputeJumpPointArrival( un->Position(), this->getFileName(),
-                                                                                              system ) : QVector( 0, 0, 0 ) ) );
-        } else {
+        bool dosightandsound = ( ( this == _Universe->getActiveStarSystem( 0 ) ) || _Universe->isPlayerStarship( un ) );
+        int  ani = -1;
+        if (dosightandsound)
+          ani = _Universe->activeStarSystem()->DoJumpingLeaveSightAndSound( un );
+        _Universe->AccessCockpit()->OnJumpBegin(un);
+        pendingjump.push_back( new unorigdest( un, jumppoint, this, ss, un->GetJumpStatus().delay, ani, justloaded,
+                                               save_coordinates ? ComputeJumpPointArrival( un->Position(), this->getFileName(),
+                                                                                           system ) : QVector( 0, 0, 0 ) ) );
+      } else {
 #ifdef JUMP_DEBUG
-            VSFileSystem::vs_fprintf( stderr, "Failed to retrieve!\n" );
+        VSFileSystem::vs_fprintf( stderr, "Failed to retrieve!\n" );
 #endif
-            return false;
-        }
-        if (jumppoint)
-            ActivateAnimation( jumppoint );
-    } else
+        return false;
+      }
+    if (jumppoint)
+      ActivateAnimation( jumppoint );
 
     return true;
 }

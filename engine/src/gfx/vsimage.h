@@ -15,6 +15,14 @@ typedef int            LONG;
 typedef unsigned short WORD;
 typedef unsigned char  BYTE;
 
+#if !defined (_WIN32) || defined (__CYGWIN__) || defined (__MINGW32__)
+  #define LOCALCONST_DECL( Type, cName, Value ) static const Type cName = Value;
+  #define LOCALCONST_DEF( Class, Type, cName, Value )
+#else
+  #define LOCALCONST_DECL( Type, cName, Value ) static Type cName;
+  #define LOCALCONST_DEF( Class, Type, cName, Value ) Type Class::cName = Value;
+#endif
+
 /**
  * Windows Bitmap format.
  * Caution about big endian systems (use endianness.h to read in things)
@@ -217,9 +225,17 @@ public: VSImage();
     unsigned long sizeY;
 
 //Defined for gcc which pads the size of structs
-//LOCALCONST_DECL(int, SIZEOF_BITMAPINFOHEADER, sizeof (DWORD)+sizeof (LONG)+sizeof (LONG)+2*sizeof (WORD)+2*sizeof (DWORD)+2
-//            +2*sizeof (DWORD) )
-static const int SIZEOF_BITMAPINFOHEADER = 80;
+    //const static int SIZEOF_BITMAPFILEHEADER;
+        LOCALCONST_DECL( int, SIZEOF_BITMAPFILEHEADER, sizeof (WORD)+sizeof (DWORD)+sizeof (WORD)+sizeof (WORD)+sizeof (DWORD) )
+    //Defined for gcc which pads the size of structs
+        LOCALCONST_DECL(
+            int, SIZEOF_BITMAPINFOHEADER, sizeof (DWORD)+sizeof (LONG)+sizeof (LONG)+2*sizeof (WORD)+2*sizeof (DWORD)+2
+            *sizeof (LONG)
+            +2*sizeof (DWORD) )
+    //const static int SIZEOF_BITMAPINFOHEADER;
+    //Defined for gcc which pads size of structs (not entirely necessary)
+    //const static int SIZEOF_RGBQUAD;
+        LOCALCONST_DECL( int, SIZEOF_RGBQUAD, sizeof (BYTE)*4 )
 
 
 //f2 is needed for bmp loading
