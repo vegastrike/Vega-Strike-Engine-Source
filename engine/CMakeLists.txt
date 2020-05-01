@@ -769,7 +769,7 @@ ENDIF(PYTHONLIBS_FOUND OR PYTHON_LIBRARIES AND PYTHON_INCLUDE_DIRS)
 
 
 # Find Boost with boost_python library
-OPTION(USE_SYSTEM_BOOST "Use system boost" OFF)
+OPTION(USE_SYSTEM_BOOST "Use system boost" ON)
 IF(USE_SYSTEM_BOOST)
   find_package(Boost COMPONENTS python)
   IF(Boost_FOUND)
@@ -781,9 +781,7 @@ IF(USE_SYSTEM_BOOST)
   ELSE(Boost_FOUND)
     SET(USE_SYSTEM_BOOST OFF)
   ENDIF(Boost_FOUND)
-ENDIF(USE_SYSTEM_BOOST)
-
-IF(NOT USE_SYSTEM_BOOST)
+ELSEIF(USE_SYSTEM_BOOST)
     message("++ Using Internal Boost")
     # This is just to cleanup advanced variable viewing, since they're not used anyway
     UNSET(Boost_INCLUDE_DIRS)
@@ -793,7 +791,7 @@ IF(NOT USE_SYSTEM_BOOST)
     UNSET(Boost_PYTHON_LIBRARY)
     UNSET(Boost_PYTHON_LIBRARY_DEBUG)
     UNSET(Boost_PYTHON_LIBRARY_RELEASE)
-    SET(Boost_DIR ../ext/boost/1_72_0)
+    SET(Boost_DIR ../ext/)
     SET(BOOST_PYTHON_NO_PY_SIGNATURES 1)
     SET(TST_INCLUDES ${TST_INCLUDES} ${vsUTCS_SOURCE_DIR}/${Boost_DIR})
     SET(TST_LIBS ${TST_LIBS} boost_python)

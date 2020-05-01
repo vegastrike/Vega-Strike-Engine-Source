@@ -26,10 +26,14 @@
 2.  Install make and cmake.
 3.  Extract the Downloaded file to a directory of your choice (/vegastrike). 
 4.  Enter /vegastrike
-5.  Run command `sh/vsbuild.sh`
-6.  Run command `bin/vegastrike`
+5.  Run command `./sh/vsbuild.sh`
+6.  Change settings with command `./bin/vssetup`
+7.  Run command `./bin/vegastrike`
     or double-click the executable file in the bin directory.
-7.  Change settings with command `bin/vssetup`
+
+If you get compilation issues with the system `libboost`, download it manually to from
+[here](https://dl.bintray.com/boostorg/release/1.72.0/source/boost_1_72_0.tar.gz) to `./ext/boost/`
+and run `./sh/vsbuild.sh -DUSE_SYSTEM_BOOST=NO`
 
 
 **Features**
