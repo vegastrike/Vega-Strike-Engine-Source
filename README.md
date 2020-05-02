@@ -16,13 +16,13 @@
 =====================================
 
 
-**Basic Installation**
+**How to Run**
 =====================================
 
-Either install Vega Strike from the binary installer for your platform, or follow the instructions for compiling from source. (`Compiling Vegastrike`, below.)
+Either install Vega Strike from the binary installer for your platform, if available, or follow the instructions for compiling from source. (`Compiling Vegastrike`, below.)
 
-- Run command `bin/vegastrike` or double-click the executable file in the bin directory.
 - Change settings with command `bin/vssetup`
+- Run command `bin/vegastrike` or double-click the executable file in the bin directory.
 
 
 **Features**
@@ -215,19 +215,29 @@ If you wish to transfer command to another starship, simply press '\[' to switch
 1. Install the dependencies. Something like this:
 
 ```bash
-sudo apt-get -y install cmake g++ python-dev libboost-python-dev libgl1-mesa-glx freeglut3-dev libopenal-dev libsdl-gfx1.2-dev libvorbis-dev libjpeg-dev libpng-dev libgtk2.0-dev
+sudo apt-get -y install cmake g++ python-dev libboost-python-dev libgl1-mesa-glx freeglut3-dev \
+                libopenal-dev libsdl-gfx1.2-dev libvorbis-dev libjpeg-dev libpng-dev libgtk2.0-dev
 ```
 
 Or on Debian 10:
 
 ```bash
-sudo apt-get -y install git cmake python-dev build-essential automake autoconf libpng16-16 libpng-dev libpng-tools libjpeg62-turbo-dev libexpat1-dev libgtk2.0-dev libopenal-dev libogg-dev libvorbis-dev libgl1-mesa-dev libsdl1.2-dev libavcodec-dev libavcodec-extra libavformat-dev libavresample-dev libavutil-dev libavdevice-dev libpostproc-dev freeglut3-dev libxmu-dev libxi-dev libboost-python1.67-dev
+sudo apt-get -y install git cmake python-dev build-essential automake autoconf libpng16-16 \
+                libpng-dev libpng-tools libjpeg62-turbo-dev libexpat1-dev libgtk2.0-dev \
+                libopenal-dev libogg-dev libvorbis-dev libgl1-mesa-dev libsdl1.2-dev \
+                libavcodec-dev libavcodec-extra libavformat-dev libavresample-dev libavutil-dev \
+                libavdevice-dev libpostproc-dev freeglut3-dev libxmu-dev libxi-dev \
+                libboost-python1.67-dev
 ```
 
 Or on Ubuntu 20.04:
 
 ```bash
-sudo apt-get -y install git cmake python-dev build-essential automake autoconf libpng16-16 libpng-dev libpng-tools libjpeg62-dev libexpat1-dev libgtk2.0-dev libopenal-dev libogg-dev libvorbis-dev libgl1-mesa-dev libsdl1.2-dev libavcodec-dev libavcodec-extra libavformat-dev libavresample-dev libavutil-dev libavdevice-dev libpostproc-dev freeglut3-dev libxmu-dev libxi-dev libboost1.67-all-dev
+sudo apt-get -y install git cmake python-dev build-essential automake autoconf libpng16-16 \
+                libpng-dev libpng-tools libjpeg62-dev libexpat1-dev libgtk2.0-dev libopenal-dev \
+                libogg-dev libvorbis-dev libgl1-mesa-dev libsdl1.2-dev libavcodec-dev \
+                libavcodec-extra libavformat-dev libavresample-dev libavutil-dev libavdevice-dev \
+                libpostproc-dev freeglut3-dev libxmu-dev libxi-dev libboost1.67-all-dev
 ```
 
 2. use the `vsbuild.sh` script in the `sh` directory.
