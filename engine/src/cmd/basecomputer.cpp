@@ -4375,7 +4375,7 @@ void trackPrice(int whichplayer, const Cargo &item, float price, const string &s
         }
 
         //BOOST_LOG_TRIVIAL(info) << boost::format("  lowest locs: (%1%)") % recordedLowestLocs.size();
-        VSFileSystem::vs_dprintf(1,"  loest locs: (%d)\n", recordedLowestLocs.size());
+        VSFileSystem::vs_dprintf(1,"  lowest locs: (%d)\n", recordedLowestLocs.size());
         {
             for (size_t i = 0; i < recordedLowestLocs.size(); ++i) {
                 //BOOST_LOG_TRIVIAL(info) << boost::format("    %1% : %2%") % i % recordedLowestLocs[i];
