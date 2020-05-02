@@ -87,7 +87,7 @@ class GameCockpit : public Cockpit
     int       soundfile;
     VSSprite *Pit[4];
     VSSprite *radarSprites[2];
-    std::auto_ptr<Radar::Display> radarDisplay;
+    std::unique_ptr<Radar::Display> radarDisplay;
     ///Video Display Units (may need more than 2 in future)
     std::vector< VDU* >vdu;
     /// An information string displayed in the VDU.

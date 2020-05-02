@@ -480,7 +480,7 @@ unsigned char* VSImage::ReadJPEG()
             break;
         }
         //BOOST_LOG_TRIVIAL(trace) << format("1. Loading a JPEG file : width= %1% , height = %2% , img_color = %3% ") % sizeX % sizeY %
-                                        img_color_type;
+                                        //img_color_type;
         row_pointers    = (unsigned char**) malloc( sizeof (unsigned char*)*cinfo.image_height );
 
         this->img_depth = 8;

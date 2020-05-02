@@ -58,37 +58,37 @@ namespace Audio {
         SourceTemplate(
             const std::string &soundName, 
             VSFileSystem::VSFileType type = VSFileSystem::UnknownFile, 
-            bool looping = false) throw();
+            bool looping = false);
         
         ~SourceTemplate();
         
         /** Get the sound resource name */
-        std::string getSoundName() const throw() { return soundName; }
+        std::string getSoundName() const { return soundName; }
         
         /** Set the sound resource name */
-        void setSoundName(const std::string &newName) throw() { soundName = newName; }
+        void setSoundName(const std::string &newName) { soundName = newName; }
         
         /** Get the sound file type */
-        VSFileSystem::VSFileType getSoundType() const throw() { return soundType; }
+        VSFileSystem::VSFileType getSoundType() const { return soundType; }
         
         /** Set the sound file type */
-        void setSoundType(VSFileSystem::VSFileType type) throw() { soundType = type; }
+        void setSoundType(VSFileSystem::VSFileType type) { soundType = type; }
         
         /** Return the source's minimum/maximum propagation angle
          * @remarks Sound will fully propagate in directions within minimum
          *      directional drift. Further drift will attenuate the sound
          *      until it (practically) disappears by the maximum propagation angle.
          */
-        Range<Scalar> getAngleRange() const throw();
+        Range<Scalar> getAngleRange() const;
         
         /** @see getAngleRange */
-        void setAngleRange(Range<Scalar> r) throw();
+        void setAngleRange(Range<Scalar> r);
         
         /** @see getAngleRange @remarks This version returns cosine-angles rather than radians, much quicker */
-        Range<Scalar> getCosAngleRange() const throw() { return cosAngleRange; }
+        Range<Scalar> getCosAngleRange() const { return cosAngleRange; }
         
         /** @see getAngleRange @remarks This version takes cosine-angles rather than radians, much quicker */
-        void setCosAngleRange(Range<Scalar> r) throw() { cosAngleRange = r; }
+        void setCosAngleRange(Range<Scalar> r) { cosAngleRange = r; }
         
         /** Get the source's frequency-dependant radius ratios 
          * @remarks Sound propagation goes different for low and high frequencies than
@@ -96,50 +96,50 @@ namespace Audio {
          *      volume that is generating high/low frequency vibrations. This will affect
          *      propagation of those frequencies over distance.
          */
-        PerFrequency<Scalar> getPerFrequencyRadiusRatios() const throw() { return pfRadiusRatios; }
+        PerFrequency<Scalar> getPerFrequencyRadiusRatios() const { return pfRadiusRatios; }
         
         /** Set the source's frequency-dependant radius ratios
          * @see getRadiusRatios 
          */
-        void setPerFrequencyRadiusRatios(PerFrequency<Scalar> val) throw() { pfRadiusRatios = val; }
+        void setPerFrequencyRadiusRatios(PerFrequency<Scalar> val) { pfRadiusRatios = val; }
         
         /** Get the source's refernece frequencies */
-        PerFrequency<Scalar> getReferenceFreqs() const throw() { return referenceFreqs; }
+        PerFrequency<Scalar> getReferenceFreqs() const { return referenceFreqs; }
         
         /** Set the source's reference frequencies */
-        void setReferenceFreqs(PerFrequency<Scalar> val) throw() { referenceFreqs = val; }
+        void setReferenceFreqs(PerFrequency<Scalar> val) { referenceFreqs = val; }
         
         /** Get the source's main gain */
-        Scalar getGain() const throw() { return gain; }
+        Scalar getGain() const { return gain; }
         
         /** Set the source's main gain */
-        void setGain(Scalar g) throw() { gain = g; }
+        void setGain(Scalar g) { gain = g; }
         
         /** Is the source in looping mode? */
-        bool isLooping() const throw() { return flags.looping != 0; }
+        bool isLooping() const { return flags.looping != 0; }
         
         /** Set the source's looping mode */
-        void setLooping(bool loop) throw() { flags.looping = loop ? 1 : 0; }
+        void setLooping(bool loop) { flags.looping = loop ? 1 : 0; }
         
         /** Is the source's position always relative to the root listener?
          * @see Source::isRelative()
          */
-        bool isRelative() const throw() { return flags.relative != 0; }
+        bool isRelative() const { return flags.relative != 0; }
         
         /** Set whether the source's position is always relative to the root listener */
-        void setRelative(bool relative) throw() { flags.relative = relative ? 1 : 0; }
+        void setRelative(bool relative) { flags.relative = relative ? 1 : 0; }
         
         /** Is the source using distance attenuation? */
-        bool isAttenuated() const throw() { return flags.attenuated != 0; }
+        bool isAttenuated() const { return flags.attenuated != 0; }
         
         /** Set whether the source will use distance attenuation */
-        void setAttenuated(bool loop) throw() { flags.attenuated = (loop ? 1 : 0); }
+        void setAttenuated(bool loop) { flags.attenuated = (loop ? 1 : 0); }
         
         /** Is the source in streaming mode? */
-        bool isStreaming() const throw() { return flags.streaming != 0; }
+        bool isStreaming() const { return flags.streaming != 0; }
         
         /** Set the source's streaming mode */
-        void setStreaming(bool stream) throw() { flags.streaming = stream ? 1 : 0; }
+        void setStreaming(bool stream) { flags.streaming = stream ? 1 : 0; }
         
     };
 

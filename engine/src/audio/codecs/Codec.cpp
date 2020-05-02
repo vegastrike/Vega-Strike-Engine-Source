@@ -11,16 +11,16 @@ namespace Audio {
     {
     }
     
-    Codec::Codec(const std::string &_name) throw() : name(_name)
+    Codec::Codec(const std::string &_name) : name(_name)
     {
     }
     
-    const std::string& Codec::getName() const throw()
+    const std::string& Codec::getName() const
     {
         return name;
     }
     
-    const std::vector<std::string>* Codec::getExtensions() const throw()
+    const std::vector<std::string>* Codec::getExtensions() const
     {
         return 0;
     }

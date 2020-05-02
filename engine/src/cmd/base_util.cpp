@@ -183,9 +183,9 @@ bool Video( int room, std::string index, std::string vfile, std::string afile, f
                 baseSprite->soundscene = "video";
                 baseSprite->soundsource = CreateVideoSoundStream( afile, baseSprite->soundscene );
                 baseSprite->spr.SetTimeSource( baseSprite->soundsource );
-            } catch(Audio::FileOpenException e) {
+            } catch(const Audio::FileOpenException& e) {
                 baseSprite->spr.Reset();
-            } catch(VidFile::FileOpenException e) {
+            } catch(const VidFile::FileOpenException& e) {
                 baseSprite->spr.Reset();
             }
         } else {

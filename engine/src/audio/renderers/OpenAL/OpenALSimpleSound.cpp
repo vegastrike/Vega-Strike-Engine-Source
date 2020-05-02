@@ -22,8 +22,7 @@ using namespace Audio::__impl::OpenAL;
 
 namespace Audio {
 
-    OpenALSimpleSound::OpenALSimpleSound(const std::string& name, VSFileSystem::VSFileType type)
-        throw() :
+    OpenALSimpleSound::OpenALSimpleSound(const std::string& name, VSFileSystem::VSFileType type) :
         SimpleSound(name, type, false),
         bufferHandle(AL_NULL_BUFFER)
     {
@@ -34,7 +33,6 @@ namespace Audio {
     }
 
     void OpenALSimpleSound::loadImpl(bool wait) 
-        throw(Exception)
     {
         // just in case
         unloadImpl();
@@ -46,7 +44,7 @@ namespace Audio {
             // load the stream
             try {
                 loadStream();
-            } catch(ResourceAlreadyLoadedException e) {
+            } catch(const ResourceAlreadyLoadedException& e) {
                 // Weird...
                 getStream()->seek(0);
             }
@@ -89,9 +87,9 @@ namespace Audio {
                     }
                 }
                 closeStream();
-            } catch(EndOfStreamException e) {
+            } catch(const EndOfStreamException& e) {
                 closeStream();
-            } catch(Exception e) {
+            } catch(const Exception& e) {
                 closeStream();
                 throw e;
             }
@@ -144,14 +142,13 @@ namespace Audio {
             checkAlError();
             
             onLoaded(true);
-        } catch(Exception e) {
+        } catch(const Exception& e) {
             onLoaded(false);
             throw e;
         }
     }
     
     void OpenALSimpleSound::unloadImpl() 
-        throw()
     {
         if (bufferHandle == AL_NULL_BUFFER) 
             return;

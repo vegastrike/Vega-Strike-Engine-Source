@@ -81,7 +81,7 @@ public:
 class ccoords
 {
     float x_, y_, z_;
-    void check_invariants(); //throw() ... but only for debugging
+    void check_invariants();
 public:
     //default ctor & dtor ok
     ccoords( float x, foat y, float z ): x_(x), y_(y), z(_z)

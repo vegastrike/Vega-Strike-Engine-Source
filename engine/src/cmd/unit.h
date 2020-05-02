@@ -29,13 +29,12 @@
 #include <vector>
 #include <map>
 #include <memory>
+#include "gfx/vec.h"
 
 class HaloSystem;
 struct GFXColor; // labeled as class, declared as struct in gfxlib_struct.h
-class QVector;
 struct Transformation;
 class Matrix;
-class Vector;
 class StarSystem;
 
 class Mesh;
@@ -92,7 +91,7 @@ public:
  **************************************************************************************
  */
  	double sparkle_accum;
-    std::auto_ptr< HaloSystem >phalos;
+    std::unique_ptr< HaloSystem >phalos;
 ///Process all meshes to be deleted
 ///Split this mesh with into 2^level submeshes at arbitrary planes
     void Split( int level );

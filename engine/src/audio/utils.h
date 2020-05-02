@@ -12,10 +12,10 @@ namespace Audio {
     class Source;
 
     /** Get the game time stamp - ie, the time as it elapses in the game's universe */
-    Timestamp getGameTime() throw();
+    Timestamp getGameTime();
     
     /** Get the current real time stamp */
-    Timestamp getRealTime() throw();
+    Timestamp getRealTime();
 
     /** Estimate a distant source's gain
      * @remarks Computes source attenuation relative to a listener.
@@ -24,7 +24,7 @@ namespace Audio {
      *      may make the final attenuation differ significantly, so this should only
      *      be used for culling purposes.
      */
-    Scalar estimateGain(const Source &src, const Listener &listener) throw();
+    Scalar estimateGain(const Source &src, const Listener &listener);
     
     /** Make the thread sleep for at least 'ms' milliseconds.
      * @remarks sleep(0) is a very common way to implement a waiting loop:

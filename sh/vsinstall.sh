@@ -57,7 +57,7 @@ fi
 SOURCE_PATH="$PWD"
 cd "$SOURCE_PATH"
 
-echo '                     ==== VEGA STRIKE 0.5.3 ===='
+echo '                     ==== VEGA STRIKE 0.6.0 ===='
 echo ''
 echo ''
 if [ "x" = "x$BINARY_APPEND" ]; then

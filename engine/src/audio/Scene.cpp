@@ -7,7 +7,7 @@
 
 namespace Audio {
 
-    Scene::Scene(const std::string &nam) throw() :
+    Scene::Scene(const std::string &nam) :
         name(nam)
     {
     }
