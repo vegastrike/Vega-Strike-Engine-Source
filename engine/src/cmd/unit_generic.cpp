@@ -5835,8 +5835,6 @@ int Unit::Dock( Unit *utdw )
         }
     }
     return 0;
-
-    return 0;
 }
 
 inline bool insideDock( const DockingPorts &dock, const QVector &pos, float radius )

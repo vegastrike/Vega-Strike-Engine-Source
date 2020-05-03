@@ -795,7 +795,6 @@ void StarSystem::ProcessPendingJumps()
         int playernum = _Universe->whichPlayerStarship( un );
         //In non-networking mode or in networking mode or a netplayer wants to jump and is ready or a non-player jump
         StarSystem *savedStarSystem = _Universe->activeStarSystem();
-        //Download client descriptions of the new zone (has to be blocking)
         if ( un == NULL || !_Universe->StillExists( pendingjump[kk]->dest )
              || !_Universe->StillExists( pendingjump[kk]->orig ) ) {
 #ifdef JUMP_DEBUG
@@ -885,7 +884,6 @@ bool StarSystem::JumpTo( Unit *un, Unit *jumppoint, const std::string &system, b
     if (!ss) {
         justloaded = true;
         ss = _Universe->GenerateStarSystem( ssys.c_str(), filename.c_str(), Vector( 0, 0, 0 ) );
-        //NETFIXME: Do we want to generate the system if an AI unit jumps?
       }
     if ( ss && !isJumping( pendingjump, un ) ) {
 #ifdef JUMP_DEBUG

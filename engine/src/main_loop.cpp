@@ -848,10 +848,6 @@ void createObjects( std::vector< std::string > &fighter0name,
                             dat->clear();
                         }
                         fighter0mods.push_back( modifications = game_options.getCallsign( squadnum ) );
-//                        if ( squadnum == 0 && global_username.length() ) {
-//                            fighter0mods.back() = global_username;
-//                            modifications = global_username;
-//                        }
                         fprintf( stderr, "FOUND MODIFICATION = %s FOR PLAYER #%d\n", modifications.c_str(), squadnum );
                     } else {
                         fighter0mods.push_back( "" );
