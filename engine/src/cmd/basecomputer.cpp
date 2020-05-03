@@ -1771,11 +1771,15 @@ void BaseComputer::recalcTitle()
     if (baseUnit) {
         if (baseUnit->isUnit() == PLANETPTR) {
             string temp = ( (Planet*) baseUnit )->getHumanReadablePlanetType()+" Planet";
-            baseName = temp;
+            // think "<planet type> <name of planet>"
+            baseName = temp + " " + baseUnit->name;
         } else {
-            baseName = baseUnit->name;
+            // as above, but e.g. mining bases have 'mining_base' in baseUnit->name
+            // so we need to come up with something a little bit better
+            baseName = baseUnit->name + " " + baseUnit->getFullname();
         }
     }
+    // at this point, baseName will be e.g. "Agricultural planet Helen" or "mining_base Achilles"
     baseTitle += emergency_downgrade_mode;
     static bool includebasename =
         XMLSupport::parse_bool( vs_config->getVariable( "graphics", "include_base_name_on_dock", "true" ) );
@@ -4371,7 +4375,7 @@ void trackPrice(int whichplayer, const Cargo &item, float price, const string &s
         }
 
         //BOOST_LOG_TRIVIAL(info) << boost::format("  lowest locs: (%1%)") % recordedLowestLocs.size();
-        VSFileSystem::vs_dprintf(1,"  loest locs: (%d)\n", recordedLowestLocs.size());
+        VSFileSystem::vs_dprintf(1,"  lowest locs: (%d)\n", recordedLowestLocs.size());
         {
             for (size_t i = 0; i < recordedLowestLocs.size(); ++i) {
                 //BOOST_LOG_TRIVIAL(info) << boost::format("    %1% : %2%") % i % recordedLowestLocs[i];
