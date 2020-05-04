@@ -556,20 +556,27 @@ void SaveGame::ReadMissionStringData( char* &buf, bool select_data, const std::s
         int    md_i_size;
         string mag_num( AnyStringScanInString( buf2 ) );
         md_i_size = strtol( buf2, (char**) NULL, 10 );
+
         //Put ptr to point after the number we just read
         buf2 += hopto( buf2, ' ', '\n', 0 );
         vector< string > *vecstring = 0;
         bool skip = true;
-        if ( !select_data || select_data_filter.count( mag_num ) ) {
+        // In rare instances (seen with wonky save game file),
+        // md_i_size can be < 0, which will cause the reserve call to fail hard
+        // Add a debug message to explain the issue and point out that the save
+        // game file is broken.
+        if ( md_i_size >= 0 && ( !select_data || select_data_filter.count( mag_num ) ) ) {
             vecstring = &missionstringdata->m[mag_num];
             vecstring->clear();
             vecstring->reserve(md_i_size);
             skip = false;
+        } else {
+            // debugging attempt -- show why the allocation would fail
+            vs_dprintf(1, " SaveGame::ReadMissionStringData: vecstring->reserve(md_i_size = %d) will fail, bailing out (i = %d)\n", md_i_size, i);
         }
         for (int j = 0; j < md_i_size; j++) {
             if (skip)
                 AnyStringSkipInString( buf2 );
-
             else
                 vecstring->push_back( AnyStringScanInString( buf2 ) );
         }
