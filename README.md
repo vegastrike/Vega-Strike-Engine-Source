@@ -240,36 +240,34 @@ sudo apt-get -y install git cmake python-dev build-essential automake autoconf l
                 libpostproc-dev freeglut3-dev libxmu-dev libxi-dev libboost1.67-all-dev
 ```
 
-2. use the `vsbuild.sh` script in the `sh` directory.
+2. Build Vega Strike:
 
-OR
+   a. Use the `vsbuild.sh` script in the `sh` directory.
 
-2a. Configure and compile VS manually using the ncurses ccmake frontend:
+   b. *OR* configure and compile VS manually, using the ncurses ccmake frontend:
 
-```bash
-mkdir build & cd build
-ccmake ../engine
-# (configure/edit options to taste in ccmake, press 'c' to save the selected options
-# and press 'g' to update the build configuration files used by the make build tool)
-make -jN # (where N is the number of available CPU threads/cores on your system)
-mkdir ../bin && cp vegastrike ../bin/ && cp setup/vssetup ../bin/ && cd ..
-```
+   ```bash
+   mkdir build & cd build
+   ccmake ../engine
+   # (configure/edit options to taste in ccmake, press 'c' to save the selected options
+   # and press 'g' to update the build configuration files used by the make build tool)
+   make -jN # (where N is the number of available CPU threads/cores on your system)
+   mkdir ../bin && cp vegastrike ../bin/ && cp setup/vssetup ../bin/ && cd ..
+   ```
 
-OR
+   c. *OR* configure and compile VS manually, using the command-line cmake frontend:
 
-2b. Configure and compile VS manually, using the command-line cmake frontend:
+   ```bash
+   mkdir build & cd build
+   cmake ../engine
+   make -jN # (where N is the number of available CPU threads/cores on your system)
+   mkdir ../bin && cp vegastrike ../bin/ && cp setup/vssetup ../bin/ && cd ..
+   ```
+   To enable/disable compile-time options with cmake, use `cmake -D<option>`. Example:
 
-```bash
-mkdir build & cd build
-cmake ../engine 
-make -jN # (where N is the number of available CPU threads/cores on your system)
-mkdir ../bin && cp vegastrike ../bin/ && cp setup/vssetup ../bin/ && cd ..
-```
-To enable/disable compile-time options with cmake, use `cmake -D<option>`. Example:
-
-```bash
-cmake ../engine -DSYSTEM_BOOST=ON -DUSE_PYTHON_3=ON -DCPU_SMP=2 -DCPUINTEL_native=ON -CMAKE_BUILD_TYPE=Debug
-```
+   ```bash
+   cmake ../engine -DSYSTEM_BOOST=ON -DUSE_PYTHON_3=ON -DCPU_SMP=2 -DCPUINTEL_native=ON -CMAKE_BUILD_TYPE=Debug
+   ```
 
 [Link to list of dependencies in wiki](http://vegastrike.sourceforge.net/wiki/HowTo:Compile_from_CVS)
 
