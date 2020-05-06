@@ -251,7 +251,7 @@ mkdir build & cd build
 ccmake ../engine
 # (configure/edit options to taste in ccmake, press 'c' to save the selected options
 # and press 'g' to update the build configuration files used by the make build tool)
-make -jN (where N is the number of available CPU threads/cores on your system)
+make -jN # (where N is the number of available CPU threads/cores on your system)
 mkdir ../bin && cp vegastrike ../bin/ && cp setup/vssetup ../bin/ && cd ..
 ```
 
