@@ -244,7 +244,7 @@ sudo apt-get -y install git cmake python-dev build-essential automake autoconf l
 
 OR
 
-2a. Configure and compile VS manually using the ncurses ccmake front-end:
+2a. Configure and compile VS manually using the ncurses ccmake frontend:
 
 ```bash
 mkdir build & cd build
