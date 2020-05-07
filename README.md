@@ -271,7 +271,13 @@ sudo apt-get -y install git cmake python-dev build-essential automake autoconf l
 
 [Link to list of dependencies in wiki](http://vegastrike.sourceforge.net/wiki/HowTo:Compile_from_CVS)
 
-If there are any problems with this installation method, please create an issue with the Vega Strike development team by [posting a new issue](https://github.com/vegastrike/Vega-Strike-Engine-Source/issues).
+If there are any problems with this installation method,
+please create an issue with the Vega Strike development team
+by [posting a new issue](https://github.com/vegastrike/Vega-Strike-Engine-Source/issues).
+
+If you get compilation issues with the system `libboost`, download it manually from
+[here](https://dl.bintray.com/boostorg/release/1.72.0/source/boost_1_72_0.tar.gz) to `./ext/boost/`
+and run `./sh/vsbuild.sh -DUSE_SYSTEM_BOOST=NO`
 
 
 **Compiling On Windows**
