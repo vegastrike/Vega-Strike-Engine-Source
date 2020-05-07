@@ -880,6 +880,8 @@ void Unit::ZeroAll()
     SavedAngAccel.i = 0;
     SavedAngAccel.j = 0;
     SavedAngAccel.k = 0;
+    //old_state has a constructor
+        damages      = Damages::NO_DAMAGE;
     //SubUnits has a constructor
     attack_preference = unit_role = 0;
     nebula            = NULL;
@@ -968,6 +970,7 @@ void Unit::Init()
     cur_sim_queue_slot    = rand()%SIM_QUEUE_SIZE;
     last_processed_sqs    = 0;
     do_subunit_scheduling = false;
+    damages = Damages::NO_DAMAGE;
 
     graphicOptions.RecurseIntoSubUnitsOnCollision = false;
     graphicOptions.WarpFieldStrength = 1;
@@ -4268,7 +4271,7 @@ void Unit::DamageRandSys( float dam, const Vector &vec, float randnum, float deg
             if (pImage->cockpit_damage[which] < .1)
                 pImage->cockpit_damage[which] = 0;
         }
-
+        damages |= Damages::COMPUTER_DAMAGED;
         return;
     }
     static float thruster_hit_chance = XMLSupport::parse_float( vs_config->getVariable( "physics", "thruster_hit_chance", ".25" ) );
@@ -4295,7 +4298,7 @@ void Unit::DamageRandSys( float dam, const Vector &vec, float randnum, float deg
             limits.pitch *= dam;
         else
             limits.lateral *= dam;
-
+        damages |= Damages::LIMITS_DAMAGED;
         return;
     }
     if (degrees >= 20 && degrees < 35) {
@@ -4315,7 +4318,7 @@ void Unit::DamageRandSys( float dam, const Vector &vec, float randnum, float deg
             else
                 mounts[whichmount].maxfunctionality *= dam;
         }
-
+        damages |= Damages::MOUNT_DAMAGED;
         return;
     }
     if (degrees >= 35 && degrees < 60) {
@@ -4361,7 +4364,7 @@ void Unit::DamageRandSys( float dam, const Vector &vec, float randnum, float deg
                 pImage->cargo[cargorand].quantity *= float_to_int( dam );
             }
         }
-
+        damages |= Damages::CARGOFUEL_DAMAGED;
         return;
     }
     if (degrees >= 90 && degrees < 120) {
@@ -4369,13 +4372,13 @@ void Unit::DamageRandSys( float dam, const Vector &vec, float randnum, float deg
         //DAMAGE cloak
         if (randnum >= .95) {
             this->cloaking = -1;
-
+            damages |= Damages::CLOAK_DAMAGED;
           } else if (randnum >= .78) {
             pImage->cloakenergy += ( (1-dam)*recharge );
-
+            damages |= Damages::CLOAK_DAMAGED;
           } else if (randnum >= .7) {
             cloakmin += ( rand()%(32000-cloakmin) );
-
+            damages  |= Damages::CLOAK_DAMAGED;
           }
         switch (shield.number)
         {
@@ -4414,7 +4417,7 @@ void Unit::DamageRandSys( float dam, const Vector &vec, float randnum, float deg
                 shield.shield8.backrightbottommax *= dam;
             break;
         }
-
+        damages |= Damages::SHIELD_DAMAGED;
         return;
     }
     if (degrees >= 120 && degrees < 150) {
@@ -4446,7 +4449,7 @@ void Unit::DamageRandSys( float dam, const Vector &vec, float randnum, float deg
         } else if (pImage->repair_droid > 0) {
             pImage->repair_droid--;
         }
-
+        damages |= Damages::JUMP_DAMAGED;
         return;
     }
     if (degrees >= 150 && degrees <= 180) {
@@ -4461,7 +4464,7 @@ void Unit::DamageRandSys( float dam, const Vector &vec, float randnum, float deg
             limits.vertical *= dam;
         else
             limits.forward *= dam;
-
+        damages |= Damages::LIMITS_DAMAGED;
         return;
     }
 }
@@ -5272,6 +5275,7 @@ void Unit::SetOwner( Unit *target )
 
 void Unit::Cloak( bool loak )
 {
+    damages |= Damages::CLOAK_DAMAGED;
     if (loak) {
         static bool warp_energy_for_cloak =
             XMLSupport::parse_bool( vs_config->getVariable( "physics", "warp_energy_for_cloak", "true" ) );
@@ -7557,7 +7561,7 @@ int Unit::RepairUpgrade()
         pct = 1;
         success += 1;
     }
-
+    damages = Damages::NO_DAMAGE;
     bool ret = success && pct > 0;
     static bool ComponentBasedUpgrades =
         XMLSupport::parse_bool( vs_config->getVariable( "physics", "component_based_upgrades", "false" ) );

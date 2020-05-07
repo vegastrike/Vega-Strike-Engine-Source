@@ -277,7 +277,21 @@ public:
     void LoadRow( class CSVRow&row, std::string unitMod, std::string*netxml = NULL );
     virtual ~Unit();
 
-
+    // TODO: implement enum class as type safe bitmask...
+    // http://blog.bitwigglers.org/using-enum-classes-as-type-safe-bitmasks/
+    enum Damages
+    {
+      NO_DAMAGE = 0x0,
+      SHIELD_DAMAGED = 0x1,
+      COMPUTER_DAMAGED = 0x2,
+      MOUNT_DAMAGED = 0x4,
+      CARGOFUEL_DAMAGED = 0x8,
+      JUMP_DAMAGED = 0x10,
+      CLOAK_DAMAGED = 0x20,
+      LIMITS_DAMAGED = 0x40,
+      ARMOR_DAMAGED = 0x80
+    };
+    unsigned int damages;
 
 /*
  **************************************************************************************

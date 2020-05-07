@@ -594,6 +594,7 @@ void VDU::DrawVDUShield( Unit *parent )
                    parent->GetHullPercent(), true, invert_friendly_sprite );
 }
 
+// TODO: make into function
 #define RETURN_STATIC_SPRITE( name )            \
     do {                                        \
         static VSSprite s( name ".sprite" );    \
@@ -1304,6 +1305,7 @@ void VDU::DrawDamage( Unit *parent )
     static bool print_percent_working =
         XMLSupport::parse_bool( vs_config->getVariable( "graphics", "hud", "print_damage_percent", "true" ) );
 
+// TODO: make into function
 #define REPORTITEM(percent_working, max_functionality, print_percent_working, component_string) \
     do { \
         GFXColor final_color = colLerp( cdamaged, chdamaged, percent_working ); \
@@ -1321,6 +1323,7 @@ void VDU::DrawDamage( Unit *parent )
         retval += trailer+std::string( "\n" ); \
     } while(0)
 
+// TODO: make into function
 #define REPORTINTEGRATED(which, which_key, which_name_default) \
     do { \
         static string name = vs_config->getVariable( "graphics", "hud", which_key, which_name_default ); \
@@ -1332,6 +1335,7 @@ void VDU::DrawDamage( Unit *parent )
         } \
     } while(0)
 
+// TODO: make into function
 #define REPORTINTEGRATEDFLAG(which, which_key, which_name_default) \
     do { \
         static string name = vs_config->getVariable( "graphics", "hud", which_key, which_name_default ); \
@@ -1368,12 +1372,11 @@ void VDU::DrawDamage( Unit *parent )
         REPORTINTEGRATED(Comm, "damage.names.comm", "Comm");
 
         // Integrated system with boolean damage flags
-        // TODO: delete this
-//        REPORTINTEGRATEDFLAG(Unit::LIMITS_DAMAGED, "damage.names.limits_name", "Thrusters");
-//        REPORTINTEGRATEDFLAG(Unit::SHIELD_DAMAGED, "damage.names.shield_name", ""); // default invisible, is an upgrade
-//        REPORTINTEGRATEDFLAG(Unit::COMPUTER_DAMAGED, "damage.names.computer_name", "Targetting Computer");
-//        REPORTINTEGRATEDFLAG(Unit::JUMP_DAMAGED, "damage.names.jump_name", ""); // default invisible, is an upgrade
-//        REPORTINTEGRATEDFLAG(Unit::CLOAK_DAMAGED, "damage.names.cloak_name", ""); // default invisible, is an upgrade
+        REPORTINTEGRATEDFLAG(Unit::LIMITS_DAMAGED, "damage.names.limits_name", "Thrusters");
+        REPORTINTEGRATEDFLAG(Unit::SHIELD_DAMAGED, "damage.names.shield_name", ""); // default invisible, is an upgrade
+        REPORTINTEGRATEDFLAG(Unit::COMPUTER_DAMAGED, "damage.names.computer_name", "Targetting Computer");
+        REPORTINTEGRATEDFLAG(Unit::JUMP_DAMAGED, "damage.names.jump_name", ""); // default invisible, is an upgrade
+        REPORTINTEGRATEDFLAG(Unit::CLOAK_DAMAGED, "damage.names.cloak_name", ""); // default invisible, is an upgrade
     }
 
     retval += ecmstatus;

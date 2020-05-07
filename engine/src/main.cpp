@@ -233,7 +233,25 @@ bool isVista = false;
 
 Unit *TheTopLevelUnit;
 
-
+/*
+// disabled as does not compile with boost 1.64
+void initLogging(char debugLevel){
+    auto loggingCore = boost::log::core::get();
+    switch (debugLevel) {
+    case 1:
+        loggingCore->set_filter(boost::log::trivial::severity >= boost::log::trivial::info);
+        break;
+    case 2:
+        loggingCore->set_filter(boost::log::trivial::severity >= boost::log::trivial::debug);
+        break;
+    case 3:
+        loggingCore->set_filter(boost::log::trivial::severity >= boost::log::trivial::trace);
+        break;
+    default:
+        loggingCore->set_filter(boost::log::trivial::severity >= boost::log::trivial::warning);
+        break;
+    }
+}*/
 
 int main( int argc, char *argv[] )
 {
