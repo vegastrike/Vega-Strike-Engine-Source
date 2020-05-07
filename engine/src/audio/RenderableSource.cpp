@@ -8,7 +8,7 @@
 
 namespace Audio {
 
-    RenderableSource::RenderableSource(Source *_source) throw() : 
+    RenderableSource::RenderableSource(Source *_source) :
         source(_source)
     {
     }
@@ -20,11 +20,10 @@ namespace Audio {
     }
     
     void RenderableSource::startPlaying(Timestamp start) 
-        throw(Exception)
     {
         try {
             startPlayingImpl(start);
-        } catch(EndOfStreamException) {
+        } catch(const EndOfStreamException&) {
             // Silently discard EOS, results in the more transparent
             // behavior of simply notifying listeners of source
             // termination ASAP, which is also accurate.
@@ -32,22 +31,20 @@ namespace Audio {
     }
     
     void RenderableSource::stopPlaying() 
-        throw()
     {
         // Cannot be playing if an exception rises, 
         // as that implies a problem with the underlying API
         try {
             if (isPlaying())
                 stopPlayingImpl();
-        } catch(Exception e) {}
+        } catch(const Exception& e) {}
     }
     
     bool RenderableSource::isPlaying() const 
-        throw()
     {
         try {
             return isPlayingImpl();
-        } catch(Exception e) {
+        } catch(const Exception& e) {
             // Cannot be playing if an exception rises, 
             // as that implies a problem with the underlying API
             return false;
@@ -55,23 +52,20 @@ namespace Audio {
     }
     
     Timestamp RenderableSource::getPlayingTime() const 
-        throw(Exception)
     {
         return getPlayingTimeImpl();
     }
     
     void RenderableSource::update(int flags, const Listener& sceneListener) 
-        throw()
     {
         try {
             updateImpl(flags, sceneListener);
-        } catch(Exception e) {
+        } catch(const Exception& e) {
             fprintf(stderr, "Ignoring exception in renderable update: %s", e.what());
         }
     }
     
     void RenderableSource::seek(Timestamp time) 
-        throw(Exception)
     {
         seekImpl(time);
     }

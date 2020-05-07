@@ -30,7 +30,7 @@ public:
 
 private:
     struct Impl;
-    std::auto_ptr< Impl > impl;
+    std::unique_ptr< Impl > impl;
     
 protected: 
     typedef std::vector<float> AngleSequence;

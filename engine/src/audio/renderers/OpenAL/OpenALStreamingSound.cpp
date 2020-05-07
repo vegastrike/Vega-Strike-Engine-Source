@@ -27,8 +27,7 @@ using namespace Audio::__impl::OpenAL;
 namespace Audio {
     
     OpenALStreamingSound::OpenALStreamingSound(const std::string& name, VSFileSystem::VSFileType type,
-            unsigned int _bufferSamples)
-        throw() :
+            unsigned int _bufferSamples) :
         SimpleSound(name, type, true),
         bufferSamples(_bufferSamples)
     {
@@ -41,7 +40,6 @@ namespace Audio {
     }
 
     void OpenALStreamingSound::loadImpl(bool wait) 
-        throw(Exception)
     {
         // just in case
         unloadImpl();
@@ -53,7 +51,7 @@ namespace Audio {
             // load the stream
             try {
                 loadStream();
-            } catch(ResourceAlreadyLoadedException e) {
+            } catch(const ResourceAlreadyLoadedException& e) {
                 // Weird...
                 getStream()->seek(0);
             }
@@ -85,14 +83,13 @@ namespace Audio {
             flushBuffers();
             
             onLoaded(true);
-        } catch(Exception e) {
+        } catch(const Exception& e) {
             onLoaded(false);
             throw e;
         }
     }
     
     void OpenALStreamingSound::flushBuffers()
-        throw()
     {
         // Mark as detached, so that readAndFlip() knows to initialize the source
         // and streaming indices
@@ -104,7 +101,6 @@ namespace Audio {
     }
     
     void OpenALStreamingSound::unloadImpl() 
-        throw()
     {
         if (isStreamLoaded())
             closeStream();
@@ -113,7 +109,6 @@ namespace Audio {
     }
     
     ALBufferHandle OpenALStreamingSound::readAndFlip()
-        throw(Exception)
     {
         if (!isLoaded())
             throw ResourceNotLoadedException(getName());
@@ -147,7 +142,6 @@ namespace Audio {
     }
     
     void OpenALStreamingSound::unqueueBuffer(ALBufferHandle buffer) 
-        throw(Exception)
     {
         if (playBufferIndex < NUM_BUFFERS && buffer == bufferHandles[playBufferIndex]) {
             playBufferIndex = (playBufferIndex + 1) % NUM_BUFFERS;
@@ -155,7 +149,6 @@ namespace Audio {
     }
     
     void OpenALStreamingSound::seek(double position)
-        throw(Exception)
     {
         if (!isLoaded())
             throw ResourceNotLoadedException(getName());
@@ -164,7 +157,6 @@ namespace Audio {
     }
     
     Timestamp OpenALStreamingSound::getTimeBase() const
-        throw()
     {
         return bufferStarts[playBufferIndex];
     }

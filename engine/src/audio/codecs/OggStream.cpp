@@ -24,7 +24,7 @@
 
 namespace Audio {
 
-    OggStream::OggStream(const std::string& path, VSFileSystem::VSFileType type) throw(Exception)
+    OggStream::OggStream(const std::string& path, VSFileSystem::VSFileType type)
         : Stream(path)
     {
         if ( file.OpenReadOnly(path, type) <= VSFileSystem::Ok )
@@ -46,17 +46,17 @@ namespace Audio {
         delete oggData;
     }
 
-    double OggStream::getLengthImpl() const throw(Exception)
+    double OggStream::getLengthImpl() const
     {
         return duration;
     }
     
-    double OggStream::getPositionImpl() const throw()
+    double OggStream::getPositionImpl() const
     {
         return ov_time_tell( &oggData->vorbisFile );
     }
     
-    void OggStream::seekImpl(double position) throw(Exception)
+    void OggStream::seekImpl(double position)
     {
         if (position >= duration)
             throw EndOfStreamException();
@@ -74,7 +74,7 @@ namespace Audio {
         }
     }
     
-    void OggStream::getBufferImpl(void *&buffer, unsigned int &bufferSize) throw(Exception)
+    void OggStream::getBufferImpl(void *&buffer, unsigned int &bufferSize)
     {
         if (readBufferAvail == 0)
             throw NoBufferException();
@@ -83,7 +83,7 @@ namespace Audio {
         bufferSize = readBufferAvail;
     }
     
-    void OggStream::nextBufferImpl() throw(Exception)
+    void OggStream::nextBufferImpl()
     {
         int curStream = oggData->streamIndex;
         long ovr;

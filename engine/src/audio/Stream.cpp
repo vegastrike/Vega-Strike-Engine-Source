@@ -14,7 +14,7 @@ namespace Audio {
 
     using std::min;
 
-    Stream::Stream(const std::string& path) throw(Exception)
+    Stream::Stream(const std::string& path)
     {
     }
     
@@ -22,22 +22,22 @@ namespace Audio {
     {
     }
 
-    double Stream::getLength() throw(Exception)
+    double Stream::getLength()
     {
         return getLengthImpl();
     }
 
-    double Stream::getPosition() const throw()
+    double Stream::getPosition() const
     {
         return getPositionImpl();
     }
 
-    void Stream::seek(double position) throw(Exception)
+    void Stream::seek(double position)
     {
         seekImpl(position);
     }
 
-    unsigned int Stream::read(void *buffer, unsigned int bufferSize) throw(Exception)
+    unsigned int Stream::read(void *buffer, unsigned int bufferSize)
     {
         void *rbuffer;
         void *rbufferEnd;
@@ -46,7 +46,7 @@ namespace Audio {
         
         try {
             getBufferImpl(rbuffer, rbufferSize);
-        } catch (NoBufferException) {
+        } catch (const NoBufferException&) {
             nextBufferImpl();
             getBufferImpl(rbuffer, rbufferSize);
             curBufferPos = rbuffer;

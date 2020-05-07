@@ -9,7 +9,7 @@
 
 namespace Audio {
 
-    SourceTemplate::SourceTemplate(const std::string &sound, VSFileSystem::VSFileType type, bool _looping) throw() :
+    SourceTemplate::SourceTemplate(const std::string &sound, VSFileSystem::VSFileType type, bool _looping) :
         soundName(sound),
         soundType(type),
         cosAngleRange(-1,-1),
@@ -27,13 +27,13 @@ namespace Audio {
     {
     }
 
-    Range<Scalar> SourceTemplate::getAngleRange() const throw() 
+    Range<Scalar> SourceTemplate::getAngleRange() const
     { 
         return Range<Scalar>(Scalar(acos(cosAngleRange.min)), 
                              Scalar(acos(cosAngleRange.max))); 
     }
     
-    void SourceTemplate::setAngleRange(Range<Scalar> r) throw() 
+    void SourceTemplate::setAngleRange(Range<Scalar> r)
     { 
         cosAngleRange.min = Scalar(cos(r.min)); 
         cosAngleRange.max = Scalar(cos(r.max));

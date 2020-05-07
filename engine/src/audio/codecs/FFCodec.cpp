@@ -22,7 +22,7 @@ namespace Audio {
     {
     }
     
-    bool FFCodec::canHandle(const std::string& path, bool canOpen, VSFileSystem::VSFileType type) throw()
+    bool FFCodec::canHandle(const std::string& path, bool canOpen, VSFileSystem::VSFileType type)
     {
         if (canOpen) {
             // I don't really know a way to test files in ffmpeg
@@ -34,7 +34,7 @@ namespace Audio {
         }
     }
     
-    Stream* FFCodec::open(const std::string& path, VSFileSystem::VSFileType type) throw(Exception)
+    Stream* FFCodec::open(const std::string& path, VSFileSystem::VSFileType type)
     {
         size_t sep = path.find_last_of('|');
         int streamIndex = (sep != std::string::npos) ? atoi(path.c_str() + sep + 1) : 0;

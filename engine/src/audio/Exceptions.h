@@ -25,8 +25,8 @@ namespace Audio {
         Exception() {};
         Exception(const Exception &other) : _message(other._message) {}
         explicit Exception(const std::string &message) : _message(message) {}
-        virtual ~Exception() throw() {}
-        virtual const char* what() const throw() { return _message.c_str(); }
+        virtual ~Exception() {}
+        virtual const char* what() const noexcept { return _message.c_str(); }
     };
     
     /**
@@ -87,7 +87,7 @@ namespace Audio {
     public:
         CorruptStreamException(const CorruptStreamException &other) : Exception(other) {}
         explicit CorruptStreamException(bool _fatal) 
-            : Exception(fatal ? "Fatal corruption on stream" : "Recoverable corruption on stream"),
+            : Exception(_fatal ? "Fatal corruption on stream" : "Recoverable corruption on stream"),
               fatal(_fatal) 
         {}
         
@@ -168,7 +168,7 @@ namespace Audio {
             format(fmt)
         {}
         
-        const Format& getFormat() const throw() { return format; }
+        const Format& getFormat() const { return format; }
     };
 
     /**

@@ -44,19 +44,19 @@ namespace Audio {
         
     protected:
         /** Internal constructor used by derived classes */
-        Stream(const std::string& path) throw(Exception);
+        Stream(const std::string& path);
         
         /** Internal write access to stream format, for derived classes */
-        Format& getFormatInternal() throw() { return streamFormat; }
+        Format& getFormatInternal() { return streamFormat; }
     
     public:
         virtual ~Stream();
         
         /** Return the path of the associated file. */
-        const std::string& getPath() const throw() { return filePath; };
+        const std::string& getPath() const { return filePath; };
         
         /** Return the format of the stream. */
-        const Format& getFormat() const throw() { return streamFormat; }
+        const Format& getFormat() const { return streamFormat; }
         
         /** 
          * Return the length of the stream.
@@ -64,7 +64,7 @@ namespace Audio {
          *      a file without parsing it entirely, and as such it cannot be const. 
          *      So use sparingly.
          */
-        double getLength() throw(Exception);
+        double getLength();
         
         /**
          * Fill the specified buffer with data from the stream, and advance.
@@ -75,10 +75,10 @@ namespace Audio {
          * @param bufferSize the size of the memory area pointed to by buffer, and the maximum amount
          *      of data to be extracted from the stream, if available.
          */
-        unsigned int read(void *buffer, unsigned int bufferSize) throw(Exception);
+        unsigned int read(void *buffer, unsigned int bufferSize);
         
         /** Get the stream's current position, in seconds */
-        double getPosition() const throw();
+        double getPosition() const;
         
         /** 
          * Set the stream's position, in seconds
@@ -86,7 +86,7 @@ namespace Audio {
          *      to be as requested, but an approximation given codec limitations. The only exception
          *      being seek(0), which is guaranteed to seek to the beginning of the stream.
          */
-        void seek(double position) throw(Exception);
+        void seek(double position);
         
         // The following section contains all the virtual functions that need be implemented
         // by a concrete Stream class. All are protected, so the stream interface is independent
@@ -94,13 +94,13 @@ namespace Audio {
     protected:
         
         /** @see getLength */
-        virtual double getLengthImpl() const throw(Exception) = 0;
+        virtual double getLengthImpl() const = 0;
         
         /** @see getPosition */
-        virtual double getPositionImpl() const throw() = 0;
+        virtual double getPositionImpl() const = 0;
         
         /** @see seek */
-        virtual void seekImpl(double position) throw(Exception) = 0;
+        virtual void seekImpl(double position) = 0;
         
         /**
          * Get the stream's current reading buffer.
@@ -112,7 +112,7 @@ namespace Audio {
          *      @par Asking the buffer where nextBufferImpl() has never been called would raise
          *      a NoBuffer exception.
          */
-        virtual void getBufferImpl(void *&buffer, unsigned int &bufferSize) throw(Exception) = 0;
+        virtual void getBufferImpl(void *&buffer, unsigned int &bufferSize) = 0;
         
         /**
          * Advance the stream by reading a new buffer.
@@ -121,7 +121,7 @@ namespace Audio {
          *      a NoBuffer exception.
          * @see getBufferImpl
          */
-        virtual void nextBufferImpl() throw(Exception) = 0;
+        virtual void nextBufferImpl() = 0;
     };
 
 };

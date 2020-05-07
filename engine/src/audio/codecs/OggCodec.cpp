@@ -23,7 +23,7 @@ namespace Audio {
     {
     }
     
-    const Codec::Extensions* OggCodec::getExtensions() const throw()
+    const Codec::Extensions* OggCodec::getExtensions() const
     {
         static Extensions ext;
         if (ext.empty() == 0) {
@@ -32,7 +32,7 @@ namespace Audio {
         return &ext;
     }
     
-    bool OggCodec::canHandle(const std::string& path, bool canOpen, VSFileSystem::VSFileType type) throw()
+    bool OggCodec::canHandle(const std::string& path, bool canOpen, VSFileSystem::VSFileType type)
     {
         if (canOpen) {
             try {
@@ -44,7 +44,7 @@ namespace Audio {
                 __impl::OggData test(file, fmt, 0);
                 
                 return true;
-            } catch(Exception e) {
+            } catch(const Exception& e) {
                 return false;
             }
         } else {
@@ -53,7 +53,7 @@ namespace Audio {
         }
     }
     
-    Stream* OggCodec::open(const std::string& path, VSFileSystem::VSFileType type) throw(Exception)
+    Stream* OggCodec::open(const std::string& path, VSFileSystem::VSFileType type)
     {
         return new OggStream(path, type);
     }

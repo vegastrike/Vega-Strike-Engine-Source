@@ -8,9 +8,6 @@
 ```
 #====================================
 # @file   : README.md
-# @version: 2020-04-02
-# @created: 2020-02-06
-# @author : pyramid
 # @brief  : quick repo guide
 #====================================
 ```
@@ -19,21 +16,13 @@
 =====================================
 
 
-**Basic Installation**
+**How to Run**
 =====================================
 
-1.  Download everything or clone a copy to your system.
-2.  Install make and cmake.
-3.  Extract the Downloaded file to a directory of your choice (/vegastrike). 
-4.  Enter /vegastrike
-5.  Run command `./sh/vsbuild.sh`
-6.  Change settings with command `./bin/vssetup`
-7.  Run command `./bin/vegastrike`
-    or double-click the executable file in the bin directory.
+Either install Vega Strike from the binary installer for your platform, if available, or follow the instructions for compiling from source. (`Compiling Vegastrike`, below.)
 
-If you get compilation issues with the system `libboost`, download it manually to from
-[here](https://dl.bintray.com/boostorg/release/1.72.0/source/boost_1_72_0.tar.gz) to `./ext/boost/`
-and run `./sh/vsbuild.sh -DUSE_SYSTEM_BOOST=NO`
+- Change settings with command `bin/vssetup`
+- Run command `bin/vegastrike` or double-click the executable file in the bin directory.
 
 
 **Features**
@@ -223,21 +212,54 @@ If you wish to transfer command to another starship, simply press '\[' to switch
 **Compiling On Linux**
 -------------------------------------
 
-use the vsbuild.sh script in the root directory.
+1. Install the dependencies. Something like this:
+
+```bash
+sudo apt-get -y install cmake g++ python-dev libboost-python-dev libgl1-mesa-glx freeglut3-dev \
+                libopenal-dev libsdl-gfx1.2-dev libvorbis-dev libjpeg-dev libpng-dev libgtk2.0-dev
+```
+
+Or on Debian 10:
+
+```bash
+sudo apt-get -y install git cmake python-dev build-essential automake autoconf libpng16-16 \
+                libpng-dev libpng-tools libjpeg62-turbo-dev libexpat1-dev libgtk2.0-dev \
+                libopenal-dev libogg-dev libvorbis-dev libgl1-mesa-dev libsdl1.2-dev \
+                libavcodec-dev libavcodec-extra libavformat-dev libavresample-dev libavutil-dev \
+                libavdevice-dev libpostproc-dev freeglut3-dev libxmu-dev libxi-dev \
+                libboost-python1.67-dev
+```
+
+Or on Ubuntu 20.04:
+
+```bash
+sudo apt-get -y install git cmake python-dev build-essential automake autoconf libpng16-16 \
+                libpng-dev libpng-tools libjpeg62-dev libexpat1-dev libgtk2.0-dev libopenal-dev \
+                libogg-dev libvorbis-dev libgl1-mesa-dev libsdl1.2-dev libavcodec-dev \
+                libavcodec-extra libavformat-dev libavresample-dev libavutil-dev libavdevice-dev \
+                libpostproc-dev freeglut3-dev libxmu-dev libxi-dev libboost1.67-all-dev
+```
+
+2. use the `vsbuild.sh` script in the `sh` directory.
 
 or manually
 
 ```bash
-vegastrike> apt install cmake g++ python-dev libboost-python-dev libgl1-mesa-glx freeglut3-dev libopenal-dev libsdl-gfx1.2-dev libvorbis-dev libjpeg-dev libpng-dev libgtk2.0-dev
-vegastrike> mkdir build & cd build
-vegastrike> cmake ../engine
-vegastrike> make
-vegastrike> mkdir ../bin && cp vegastrike ../bin/ && cp setup/vssetup ../bin/ && cd ..
+mkdir build & cd build
+cmake ../engine
+make
+mkdir ../bin && cp vegastrike ../bin/ && cp setup/vssetup ../bin/ && cd ..
 ```
 
-[Link to list of dependencies](http://vegastrike.sourceforge.net/wiki/HowTo:Compile_from_CVS)
+[Link to list of dependencies in wiki](http://vegastrike.sourceforge.net/wiki/HowTo:Compile_from_CVS)
 
-If there are any problems with this installation method, please create an issue with the Vega Strike development team by [posting a new issue](https://github.com/vegastrike/Vega-Strike-Engine-Source/issues).
+If there are any problems with this installation method,
+please create an issue with the Vega Strike development team
+by [posting a new issue](https://github.com/vegastrike/Vega-Strike-Engine-Source/issues).
+
+If you get compilation issues with the system `libboost`, download it manually from
+[here](https://dl.bintray.com/boostorg/release/1.72.0/source/boost_1_72_0.tar.gz) to `./ext/boost/`
+and run `./sh/vsbuild.sh -DUSE_SYSTEM_BOOST=NO`
 
 
 **Compiling On Windows**

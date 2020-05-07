@@ -14,14 +14,6 @@ compiler:
 jobs:
     include:
         - os: linux
-          dist: trusty
-          compiler: gcc
-          name: "Ubuntu 14.04 LTS - GCC"
-        - os: linux
-          dist: trusty
-          compiler: clang
-          name: "Ubuntu 14.04 LTS - Clang"
-        - os: linux
           dist: xenial
           compiler: gcc
           name: "Ubuntu 16.04 LTS - GCC"

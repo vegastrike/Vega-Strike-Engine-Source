@@ -44,7 +44,7 @@ namespace Audio {
     public:
         /** Construct an empty registry 
          * @remarks End-users of the class shouldn't be using this. Singletons need it*/
-        CodecRegistry() throw();
+        CodecRegistry();
         
         ~CodecRegistry();
         
@@ -54,14 +54,14 @@ namespace Audio {
          *      that any further call will be a no-op. Previos priority will still apply.
          * @param codec The codec to be added to the registry.
          */
-        void add(Codec* codec, int priority = 0) throw();
+        void add(Codec* codec, int priority = 0);
         
         /**
          * Remove a codec from the registry
          * @remarks If the codec had already been removed, this is a no-op.
          * @param codec The codec to be removed from the registry.
          */
-        void remove(Codec* codec) throw();
+        void remove(Codec* codec);
         
         /**
          * Find a codec by its name
@@ -71,7 +71,7 @@ namespace Audio {
          *      @par Instead of returning null, if a codec of such characteristics cannot be found, 
          *      a CodecNotFound exception is risen.
          */
-        Codec* findByName(const std::string& name) const throw(CodecNotFoundException);
+        Codec* findByName(const std::string& name) const;
         
         /**
          * Find a codec that can handle the file.
@@ -83,13 +83,13 @@ namespace Audio {
          *      @par Instead of returning null, if a codec of such characteristics cannot be found, 
          *      an CodecNotFound exception is risen.
          */
-        Codec* findByFile(const std::string& path, VSFileSystem::VSFileType type = VSFileSystem::UnknownFile) const throw(CodecNotFoundException);
+        Codec* findByFile(const std::string& path, VSFileSystem::VSFileType type = VSFileSystem::UnknownFile) const;
         
         /**
          * Open the specified file with a suitable codec.
          * @see findByFile
          */
-        Stream* open(const std::string& path, VSFileSystem::VSFileType type = VSFileSystem::UnknownFile) const throw(Exception);
+        Stream* open(const std::string& path, VSFileSystem::VSFileType type = VSFileSystem::UnknownFile) const;
         
     };
     
@@ -97,7 +97,7 @@ namespace Audio {
     {
         Codec *codec;
     public:
-        CodecRegistration(Codec* codec, int priority = 0) throw();
+        CodecRegistration(Codec* codec, int priority = 0);
         ~CodecRegistration();
     };
 

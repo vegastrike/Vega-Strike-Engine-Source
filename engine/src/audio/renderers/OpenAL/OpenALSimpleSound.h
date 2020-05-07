@@ -28,7 +28,7 @@ namespace Audio {
         
     public:
         /** Internal constructor used by derived classes */
-        OpenALSimpleSound(const std::string& name, VSFileSystem::VSFileType type = VSFileSystem::UnknownFile) throw();
+        OpenALSimpleSound(const std::string& name, VSFileSystem::VSFileType type = VSFileSystem::UnknownFile);
         
         /** Package-private: the OpenAL renderer package uses this, YOU DON'T */
         ALBufferHandle getAlBuffer() const { return bufferHandle; }
@@ -41,10 +41,10 @@ namespace Audio {
         // about sending the samples to where they're needed.
     protected:
         /** @copydoc Sound::loadImpl */
-        virtual void loadImpl(bool wait) throw(Exception);
+        virtual void loadImpl(bool wait);
         
         /** @copydoc Sound::unloadImpl */
-        virtual void unloadImpl() throw();
+        virtual void unloadImpl();
     };
 
 };

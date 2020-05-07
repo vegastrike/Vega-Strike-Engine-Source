@@ -53,8 +53,8 @@ private:
 public: Exception() {}
     Exception( const Exception &other ) : _message( other._message ) {}
     explicit Exception( const std::string &message ) : _message( message ) {}
-    virtual ~Exception() throw () {}
-    virtual const char * what() const throw ()
+    virtual ~Exception() {}
+    virtual const char * what() const noexcept
     {
         return _message.c_str();
     }
@@ -1214,7 +1214,7 @@ void Mesh::ProcessShaderDrawQueue( size_t whichpass, int whichdrawqueue, bool zs
         try {
             technique->compile();
         }
-        catch (Exception &e) {
+        catch (const Exception& e) {
             VSFileSystem::vs_dprintf(1, "Technique recompilation failed: %s\n", e.what());
             //BOOST_LOG_TRIVIAL(info) << boost::format("Technique recompilation failed: %1%") % e.what();
         }
@@ -1313,7 +1313,7 @@ void Mesh::ProcessShaderDrawQueue( size_t whichpass, int whichdrawqueue, bool zs
             activateTextureUnit( tu );
             tuimask |= (1<<tu.targetIndex);
         }
-        catch (MissingTexture e) {
+        catch (const MissingTexture& e) {
             if (tu.defaultType == Technique::Pass::TextureUnit::Decal && tu.defaultIndex == 0) {
                 //Global default for decal 0 is white, this allows textureless objects
                 //that would otherwise not be possible

@@ -11,7 +11,7 @@
 
 namespace Audio {
 
-    Source::Source(SharedPtr<Sound> sound, bool _looping) throw() :
+    Source::Source(SharedPtr<Sound> sound, bool _looping) :
         soundPtr(sound),
         
         // Some safe defaults
@@ -41,32 +41,32 @@ namespace Audio {
     {
     }
 
-    Timestamp Source::setLastKnownPlayingTime(Timestamp timestamp) throw()
+    Timestamp Source::setLastKnownPlayingTime(Timestamp timestamp)
     {
         lastKnownPlayingTime = timestamp;
         lastKnownPlayingTimeTime = getRealTime();
         return timestamp;
     }
 
-    void Source::startPlaying(Timestamp start) throw(Exception)
+    void Source::startPlaying(Timestamp start)
     {
         dirty.setAll();
         startPlayingImpl( setLastKnownPlayingTime(start) );
     }
     
-    void Source::stopPlaying() throw()
+    void Source::stopPlaying()
     {
         // Pause first to stop the renderable
         pausePlaying();
         stopPlayingImpl();
     }
     
-    void Source::pausePlaying() throw()
+    void Source::pausePlaying()
     {
         if (rendererDataPtr.get() && isActive()) {
             try {
                 setLastKnownPlayingTime( getPlayingTime() );
-            } catch(Exception e) { }
+            } catch(const Exception& e) { }
             
             // Must notify the listener, if any
             if (sourceListenerPtr.get() != 0 && sourceListenerPtr->wantPlayEvents())
@@ -80,7 +80,7 @@ namespace Audio {
         }
     }
     
-    void Source::continuePlaying() throw(Exception)
+    void Source::continuePlaying()
     {
         if (rendererDataPtr.get() && isPlaying() && !isActive()) {
             // Must notify the listener, if any
@@ -96,52 +96,52 @@ namespace Audio {
         }
     }
     
-    Timestamp Source::getPlayingTime() const throw()
+    Timestamp Source::getPlayingTime() const
     {
         try {
             if (rendererDataPtr.get() && isActive())
                 return rendererDataPtr->getPlayingTime();
             else
                 return lastKnownPlayingTime;
-        } catch(Exception e) {
+        } catch(const Exception& e) {
             return lastKnownPlayingTime;
         }
     }
 
-    Timestamp Source::getWouldbePlayingTime() const throw()
+    Timestamp Source::getWouldbePlayingTime() const
     {
         try {
             if (rendererDataPtr.get() && isActive())
                 return rendererDataPtr->getPlayingTime();
-        } catch(Exception e) { }
+        } catch(const Exception& e) { }
         return lastKnownPlayingTime + getRealTime() - lastKnownPlayingTimeTime;
     }
 
-    bool Source::isPlaying() const throw()
+    bool Source::isPlaying() const
     {
         try {
             return isPlayingImpl();
-        } catch(Exception e) {
+        } catch(const Exception& e) {
             return false;
         }
     }
 
-    bool Source::isActive() const throw()
+    bool Source::isActive() const
     {
         try {
             return rendererDataPtr.get() && rendererDataPtr->isPlaying();
-        } catch(Exception e) {
+        } catch(const Exception& e) {
             return false;
         }
     }
 
-    Range<Scalar> Source::getAngleRange() const throw() 
+    Range<Scalar> Source::getAngleRange() const
     { 
         return Range<Scalar>(Scalar(acos(cosAngleRange.min)), 
                              Scalar(acos(cosAngleRange.max))); 
     }
     
-    void Source::setAngleRange(Range<Scalar> r) throw() 
+    void Source::setAngleRange(Range<Scalar> r)
     { 
         cosAngleRange.min = Scalar(cos(r.min)); 
         cosAngleRange.max = Scalar(cos(r.max));
@@ -149,7 +149,6 @@ namespace Audio {
     }
     
     void Source::updateRenderable(int flags, const Listener& sceneListener) 
-        throw()
     {
         if (rendererDataPtr.get()) {
             int oflags = flags;
@@ -193,7 +192,6 @@ namespace Audio {
     }
     
     void Source::setRenderable(SharedPtr<RenderableSource> ptr) 
-        throw() 
     { 
         // Notify at/detachment to listener, if any
         if (sourceListenerPtr.get() != 0 && sourceListenerPtr->wantAttachEvents())
@@ -207,7 +205,6 @@ namespace Audio {
     }
     
     void Source::seek(Timestamp time) 
-        throw(Exception)
     {
         if (rendererDataPtr.get() && isPlaying() && isActive()) {
             rendererDataPtr->seek(time);

@@ -75,7 +75,7 @@ namespace Audio {
             VSFileSystem::VSFileType filetype;
             int audioStreamIndex;
             
-            FFData(const std::string &path, VSFileSystem::VSFileType type, Format &fmt, int streamIdx) throw(Exception) :
+            FFData(const std::string &path, VSFileSystem::VSFileType type, Format &fmt, int streamIdx) :
                 pFormatCtx(0),
                 pCodecCtx(0),
                 pCodec(0),
@@ -179,27 +179,27 @@ namespace Audio {
                     av_close_input_file(pFormatCtx);
             }
             
-            bool saneTimeStamps() const throw()
+            bool saneTimeStamps() const
             {
                 return pStream->time_base.num != 0;
             }
             
-            int64_t timeToPts(double time) const throw()
+            int64_t timeToPts(double time) const
             {
                 return int64_t(floor(time * pStream->time_base.den / pStream->time_base.num));
             }
             
-            double ptsToTime(int64_t pts) const throw()
+            double ptsToTime(int64_t pts) const
             {
                 return double(pts) * pStream->time_base.num / pStream->time_base.den;
             }
             
-            bool hasFrame() const throw()
+            bool hasFrame() const
             {
                 return sampleBuffer && sampleBufferSize;
             }
             
-            bool hasPacket() const throw()
+            bool hasPacket() const
             {
                 #if (LIBAVCODEC_VERSION_MAJOR >= 53)
                 return packetBuffer && packetBufferSize 
@@ -209,7 +209,7 @@ namespace Audio {
                 #endif                
             }
             
-            void readPacket() throw(EndOfStreamException)
+            void readPacket()
             {
                 // Read the next packet, skipping all packets that aren't for this stream
                 #if (LIBAVCODEC_VERSION_MAJOR >= 53)
@@ -233,7 +233,7 @@ namespace Audio {
                     sampleBufferStart = uint64_t(floor(ptsToTime(packet.pts) * pCodecCtx->sample_rate));
             }
             
-            void syncPts() throw(EndOfStreamException)
+            void syncPts()
             {
                 if (!hasPacket())
                     throw EndOfStreamException();
@@ -245,7 +245,7 @@ namespace Audio {
                     streamSize = sampleBufferStart;
             }
             
-            void decodeFrame() throw(PacketDecodeException)
+            void decodeFrame()
             {
                 if (!hasPacket())
                     throw PacketDecodeException();
@@ -298,7 +298,7 @@ namespace Audio {
         };
     }
 
-    FFStream::FFStream(const std::string& path, int streamIndex, VSFileSystem::VSFileType type) throw(Exception)
+    FFStream::FFStream(const std::string& path, int streamIndex, VSFileSystem::VSFileType type)
         : Stream(path)
     {
         ffData = new __impl::FFData(path, type, getFormatInternal(), streamIndex);
@@ -310,17 +310,17 @@ namespace Audio {
         delete ffData;
     }
 
-    double FFStream::getLengthImpl() const throw(Exception)
+    double FFStream::getLengthImpl() const
     {
         return double(ffData->streamSize) / getFormat().sampleFrequency;
     }
     
-    double FFStream::getPositionImpl() const throw()
+    double FFStream::getPositionImpl() const
     {
         return double(ffData->sampleBufferStart) / getFormat().sampleFrequency;
     }
     
-    void FFStream::seekImpl(double position) throw(Exception)
+    void FFStream::seekImpl(double position)
     {
         if (position < 0)
             position = 0;
@@ -367,7 +367,7 @@ namespace Audio {
         }
     }
     
-    void FFStream::getBufferImpl(void *&buffer, unsigned int &bufferSize) throw(Exception)
+    void FFStream::getBufferImpl(void *&buffer, unsigned int &bufferSize)
     {
         if (!ffData->hasFrame())
             throw NoBufferException();
@@ -376,7 +376,7 @@ namespace Audio {
         bufferSize = ffData->sampleSize * ffData->sampleBufferSize;
     }
     
-    void FFStream::nextBufferImpl() throw(Exception)
+    void FFStream::nextBufferImpl()
     {
         if (!ffData->hasPacket())
             ffData->readPacket();

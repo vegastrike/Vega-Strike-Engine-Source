@@ -20,7 +20,7 @@
 
 using namespace XMLDOM;
 using std::map;
-using std::auto_ptr;
+using std::unique_ptr;
 
 #ifdef _MSC_VER
 //Undefine those nasty MS macros - why god why!?
@@ -37,11 +37,11 @@ class Exception : public std::exception
 private:
     std::string _message;
 public:
-    virtual ~Exception() throw () {}
+    virtual ~Exception() {}
     Exception() {}
     Exception( const Exception &other ) : _message( other._message ) {}
     explicit Exception( const std::string &message ) : _message( message ) {}
-    virtual const char * what() const throw ()
+    virtual const char * what() const noexcept
     {
         return _message.c_str();
     }
@@ -483,7 +483,7 @@ Technique::Technique( const string &nam ) :
             game_options.techniquesBasePath+"/"
             +game_options.techniquesSubPath+"/"
             +name+".technique" );
-    } catch(Audio::FileOpenException e) {
+    } catch(const Audio::FileOpenException& e) {
         //BOOST_LOG_TRIVIAL(info) << boost::format("Cannot find specialized technique, trying generic: %1%") % e.what();
         // Else try a default
         serializer.importXML(
@@ -491,7 +491,7 @@ Technique::Technique( const string &nam ) :
             +name+".technique" );
     }
 
-    auto_ptr< XMLDOM::XMLDocument >doc( serializer.close() );
+    unique_ptr< XMLDOM::XMLDocument >doc( serializer.close() );
 
     //Search for the <technique> tag
     XMLElement *techniqueNode = 0;
@@ -642,7 +642,7 @@ TechniquePtr Technique::getTechnique( const std::string &name )
                                          "Compilation of technique %s successful\n",
                                          ptr->getName().c_str() );
             }
-            catch (ProgramCompileError e) {
+            catch (const ProgramCompileError& e) {
                 std::string fallback = ptr->getFallback();
                 VSFileSystem::vs_fprintf( stderr,
                                          "Compilation of technique %s failed... trying %s\n"

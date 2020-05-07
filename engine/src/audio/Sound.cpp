@@ -9,7 +9,7 @@
 
 namespace Audio {
 
-    Sound::Sound(const std::string& _name, bool streaming) throw() :
+    Sound::Sound(const std::string& _name, bool streaming) :
         name(_name)
     {
         flags.loaded = false;
@@ -22,7 +22,7 @@ namespace Audio {
         unload();
     }
 
-    void Sound::load(bool wait) throw(Exception)
+    void Sound::load(bool wait)
     {
         if (!isLoaded()) {
             if (!isLoading())
@@ -33,14 +33,12 @@ namespace Audio {
     }
     
     void Sound::waitLoad() 
-        throw(Exception)
     {
         while (isLoading())
             Audio::sleep(10);
     }
     
     void Sound::unload() 
-        throw()
     {
         if (isLoading()) {
             abortLoad();
@@ -54,14 +52,12 @@ namespace Audio {
     }
 
     void Sound::onLoaded(bool success) 
-        throw()
     {
         flags.loaded = success;
         flags.loading = false;
     }
     
     void Sound::abortLoad() 
-        throw()
     {
         // Do nothing, there's no background load
     }
