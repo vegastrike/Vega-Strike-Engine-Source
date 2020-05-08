@@ -1023,7 +1023,7 @@ void main_loop()
             Network[jj].checkMsg( NULL );
 
 #ifndef NO_GFX
-    //BOOST_LOG_TRIVIAL(trace) << boost::format("Drawn %1% vertices in %2% batches") % gl_vertices_this_frame % gl_batches_this_frame;
+    BOOST_LOG_TRIVIAL(trace) << boost::format("Drawn %1% vertices in %2% batches") % gl_vertices_this_frame % gl_batches_this_frame;
     gl_vertices_this_frame = 0;
     gl_batches_this_frame = 0;
 #endif

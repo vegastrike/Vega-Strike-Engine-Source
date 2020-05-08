@@ -6068,7 +6068,7 @@ bool Unit::UnDock( Unit *utdw )
         else
             this->owner = NULL;
     }
-    //BOOST_LOG_TRIVIAL(trace) << "Asking to undock";
+    BOOST_LOG_TRIVIAL(trace) << "Asking to undock";
     if ( Network != NULL && !SERVER && !_Universe->netLocked() ) {
         cerr<<"Sending an undock notification"<<endl;
         int playernum = _Universe->whichPlayerStarship( this );

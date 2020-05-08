@@ -569,7 +569,7 @@ void BaseInterface::Room::BasePython::Draw( BaseInterface *base )
     timeleft += GetElapsedTime()/getTimeCompression();
     if (timeleft >= maxtime) {
         timeleft = 0;
-        //BOOST_LOG_TRIVIAL(debug) << "Running python script...";
+        BOOST_LOG_TRIVIAL(debug) << "Running python script...";
         RunPython( this->pythonfile.c_str() );
         return;         //do not do ANYTHING with 'this' after the previous statement...
     }

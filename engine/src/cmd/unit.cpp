@@ -622,7 +622,7 @@ void GameUnit< UnitType >::Draw()
 static float parseFloat( const std::string &s )
 {
     if ( s.empty() ) {
-        //BOOST_LOG_TRIVIAL(info) << boost::format("WARNING: invalid float: %1%") % s;
+        BOOST_LOG_TRIVIAL(info) << boost::format("WARNING: invalid float: %1%") % s;
         return 0.f;
     } else {
         return XMLSupport::parse_floatf( s );
