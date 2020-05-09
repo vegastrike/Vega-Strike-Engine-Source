@@ -43,6 +43,10 @@ UNSET(FFMPEG_FOUND)
 UNSET(OGRE_FOUND)
 UNSET(Boost_DIR)
 
+# 2019-10-14 stephengtuggy - The new Boost.Log stuff didn't work without these next two lines
+set(Boost_USE_STATIC_LIBS                       ON)
+set(Boost_USE_MULTITHREADED                     ON)
+
 include_directories(
     ${vsUTCS_SOURCE_DIR}/src 
     ${vsUTCS_SOURCE_DIR}/src/cmd
