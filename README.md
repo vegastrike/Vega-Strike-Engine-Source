@@ -266,7 +266,7 @@ sudo apt-get -y install git cmake python-dev build-essential automake autoconf l
    To enable/disable compile-time options with cmake, use `cmake -D<option>`. Example:
 
    ```bash
-   cmake ../engine -DSYSTEM_BOOST=ON -DUSE_PYTHON_3=ON -DCPU_SMP=2 -DCPUINTEL_native=ON -CMAKE_BUILD_TYPE=Debug
+   cmake ../engine -DUSE_SYSTEM_BOOST=ON -DUSE_PYTHON_3=ON -DCPU_SMP=2 -DCPUINTEL_native=ON -CMAKE_BUILD_TYPE=Debug
    ```
 
 [Link to list of dependencies in wiki](http://vegastrike.sourceforge.net/wiki/HowTo:Compile_from_CVS)
