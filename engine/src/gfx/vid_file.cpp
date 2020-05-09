@@ -106,6 +106,7 @@ private:
                     #endif
                     BOOST_LOG_TRIVIAL(trace) << boost::format("dts %1%: Decoded %2% bytes %3%") % int64_t(packet.dts) % int(bytesDecoded) %
                                                     (frameFinished ? "Got frame" : "");
+                    );
                     //Was there an error?
                     if (bytesDecoded <= 0) throw VidFile::FrameDecodeException( "Error decoding frame" );
                     //Crappy ffmpeg!
