@@ -245,8 +245,8 @@ static bool setup_sdl_video_mode()
                     == NULL )
                     BOOST_LOG_TRIVIAL(info) << boost::format("Couldn't initialize video bpp %1% depth %2%: %3%") % bpp % (bpd * 8) %
                                                 SDL_GetError();
-                    VSFileSystem::vs_dprintf( 1, "Couldn't initialize video bpp %d depth %d: %s\n",
-                        bpp, bpd*8, SDL_GetError() );
+                    // VSFileSystem::vs_dprintf( 1, "Couldn't initialize video bpp %d depth %d: %s\n",
+                    //     bpp, bpd*8, SDL_GetError() );
                 else
                     break;
             }

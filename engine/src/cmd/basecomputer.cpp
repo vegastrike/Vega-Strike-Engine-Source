@@ -4100,8 +4100,8 @@ Cargo CreateCargoForOwnerStarship( const Cockpit *cockpit, const Unit *base, int
     } else if (needsInsysTransport) {
         BOOST_LOG_TRIVIAL(trace) << boost::format("Player ship needs insys transport from %1% to %2%") % locationBaseName %
                                        destinationBaseName;
-        // VSFileSystem::vs_dprintf(3, "Player ship needs insys transport from %s to %s", \
-        //     locationBaseName.c_str(), \
+        // VSFileSystem::vs_dprintf(3, "Player ship needs insys transport from %s to %s",
+        //     locationBaseName.c_str(),
         //     destinationBaseName.c_str());
         cargo.price += shipping_price_insys;
     }
