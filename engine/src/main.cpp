@@ -321,8 +321,7 @@ int main( int argc, char *argv[] )
     if (g_game.vsdebug == '0')
         g_game.vsdebug = game_options.vsdebug;
 
-    // disabled, does not compile with boost 1.64 and c++11
-    //initLogging(g_game.vsdebug);
+    initLogging(g_game.vsdebug);
 
     // can use the vegastrike config variable to read in the default mission
     if ( game_options.force_client_connect )
