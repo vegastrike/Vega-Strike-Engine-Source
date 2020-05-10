@@ -39,7 +39,7 @@ fi
 cd $BUILD_DIR
 
 # configure libraries
-cmake -DCMAKE_BUILD_TYPE=Release $SRC_DIR
+cmake -DCMAKE_BUILD_TYPE=Release $@ $SRC_DIR
 
 # for a clean build only
 # mut we can do it manually
