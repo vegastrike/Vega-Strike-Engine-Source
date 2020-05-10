@@ -43,10 +43,6 @@ UNSET(FFMPEG_FOUND)
 UNSET(OGRE_FOUND)
 UNSET(Boost_DIR)
 
-# 2019-10-14 stephengtuggy - The new Boost.Log stuff didn't work without these next two lines
-set(Boost_USE_STATIC_LIBS                       ON)
-set(Boost_USE_MULTITHREADED                     ON)
-
 include_directories(
     ${vsUTCS_SOURCE_DIR}/src 
     ${vsUTCS_SOURCE_DIR}/src/cmd
@@ -620,7 +616,7 @@ SET(DATADIR "" CACHE STRING "Default vegastrike data directory")
 
 # Hide our temporary variable and initialize it to empty
 SET(CPU_OPTS  )
-SET(DEFINES " -DNV_CUBE_MAP -DBOOST_PYTHON_NO_PY_SIGNATURES ")
+SET(DEFINES " -DNV_CUBE_MAP -DBOOST_PYTHON_NO_PY_SIGNATURES -DBOOST_LOG_DYN_LINK ")
 MARK_AS_ADVANCED( CPU_OPTS )
 MARK_AS_ADVANCED( DEFINES )
 SET(CPU_SMP "1" CACHE STRING 
@@ -678,10 +674,10 @@ ENDIF("${CMAKE_BUILD_TYPE}" STREQUAL "Debug")
 
 
 # Release Target block 
-SET(CMAKE_CXX_FLAGS_RELEASE  " ${BUILD_OPT} ${CPU_OPTS} -DNV_CUBE_MAP -DBOOST_PYTHON_NO_PY_SIGNATURES -include config.h -pipe -std=c++11 -Wall -fvisibility=hidden" CACHE STRING
+SET(CMAKE_CXX_FLAGS_RELEASE  " ${BUILD_OPT} ${CPU_OPTS} ${DEFINES} -include config.h -pipe -std=c++11 -Wall -fvisibility=hidden" CACHE STRING
     "Flags used by the C++ compiler during release builds."
     FORCE)
-SET( CMAKE_C_FLAGS_RELEASE " ${BUILD_OPT} ${CPU_OPTS} -DNV_CUBE_MAP -DBOOST_PYTHON_NO_PY_SIGNATURES -include config.h -pipe -Wall -Wno-unused-function -Wno-unused-variable -fvisibility=hidden" CACHE STRING
+SET( CMAKE_C_FLAGS_RELEASE " ${BUILD_OPT} ${CPU_OPTS} ${DEFINES} -include config.h -pipe -Wall -Wno-unused-function -Wno-unused-variable -fvisibility=hidden" CACHE STRING
     "Flags used by the C compiler during release builds." 
     FORCE )
 SET(CMAKE_EXE_LINKER_FLAGS_RELEASE "-Bsymbolic" CACHE STRING "Release linker flags"
@@ -700,10 +696,10 @@ ENDIF("${CMAKE_BUILD_TYPE}" STREQUAL "Release")
 
 
 # Profiler Target block
-SET(CMAKE_CXX_FLAGS_PROFILER " ${BUILD_OPT} ${CPU_OPTS} -pg -g2 -DNV_CUBE_MAP -DBOOST_PYTHON_NO_PY_SIGNATURES -include config.h -pipe -std=c++11 -Wall -Wno-unused-function -Wno-unused-variable" CACHE STRING
+SET(CMAKE_CXX_FLAGS_PROFILER " ${BUILD_OPT} ${CPU_OPTS} ${DEFINES} -pg -g2 -include config.h -pipe -std=c++11 -Wall -Wno-unused-function -Wno-unused-variable" CACHE STRING
     "Flags used by the C++ compiler during profiler builds."
      FORCE )
-SET( CMAKE_C_FLAGS_PROFILER " ${BUILD_OPT} ${CPU_OPTS} -pg -g2 -DNV_CUBE_MAP -DBOOST_PYTHON_NO_PY_SIGNATURES -include config.h -pipe -Wall -Wno-unused-function -Wno-unused-variable" CACHE STRING
+SET( CMAKE_C_FLAGS_PROFILER " ${BUILD_OPT} ${CPU_OPTS} ${DEFINES} -pg -g2 -include config.h -pipe -Wall -Wno-unused-function -Wno-unused-variable" CACHE STRING
     "Flags used by the C compiler during profiler builds."
      FORCE )
 SET( CMAKE_EXE_LINKER_FLAGS_PROFILER
@@ -787,10 +783,10 @@ IF(USE_SYSTEM_BOOST)
     UNSET(Boost_python_FOUND CACHE)
     IF(USE_PYTHON_3)
         message("++ Looking for System Boost::python3")
-        find_package(Boost COMPONENTS python3)
+        find_package(Boost COMPONENTS python3 program_options log log_setup REQUIRED)
     ELSE(USE_PYTHON_3)
         message("++ Looking for System Boost::python (py2)")
-        find_package(Boost COMPONENTS python)
+        find_package(Boost COMPONENTS python program_options log log_setup REQUIRED)
     ENDIF(USE_PYTHON_3)
     IF(Boost_FOUND)
         message("++ Found System Boost version : ${Boost_VERSION}")
