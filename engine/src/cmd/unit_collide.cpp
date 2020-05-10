@@ -261,8 +261,7 @@ bool Unit::Collide( Unit *target )
               && thisisUnit != NEBULAPTR)
             && ( owner == target || target->owner == this
                 || (owner != NULL
-                    && target->owner == owner) ) )
-        || (Network != NULL && _Universe->isPlayerStarship( target ) == NULL && _Universe->isPlayerStarship( this ) == NULL) )
+                    && target->owner == owner) ) ))
         return false;
     if (targetisUnit == ASTEROIDPTR && thisisUnit == ASTEROIDPTR)
         return false;

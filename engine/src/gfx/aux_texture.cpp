@@ -31,6 +31,7 @@
 #include "in_kb.h"
 #include "main_loop.h"
 #include "aux_texture.h"
+#include "configxml.h"
 
 using std::string;
 using namespace VSFileSystem;

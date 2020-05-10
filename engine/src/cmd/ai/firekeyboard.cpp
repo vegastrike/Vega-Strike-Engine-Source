@@ -26,7 +26,6 @@
 //for getatmospheric
 #include "cmd/role_bitmask.h"
 #include "cmd/script/pythonmission.h"
-#include "networking/netclient.h"
 #include "universe_util.h"
 
 extern bool toggle_pause();
@@ -1080,11 +1079,7 @@ bool getNearestTargetUnit( Unit *me, int iType )
     if (targ == NULL)
         return false;
     me->Target( targ );
-    if (Network != NULL) {
-        int player = _Universe->whichPlayerStarship( me );
-        if (player >= 0)
-            Network[player].targetRequest( targ );
-    }
+
     return true;
 }
 
@@ -1107,11 +1102,7 @@ bool ChooseTargets( Unit *me, bool (*typeofunit)( Unit*, Unit* ), bool reverse )
         while ( veciter != vec.end() ) {
             if ( ( (*veciter) != me ) && ( (*veciter)->GetHull() >= 0 ) && typeofunit( me, (*veciter) ) ) {
                 me->Target( *veciter );
-                if (Network != NULL) {
-                    int player = _Universe->whichPlayerStarship( me );
-                    if (player >= 0)
-                        Network[player].targetRequest( *veciter );
-                }
+
                 if ( (*veciter) != NULL ) {
                     if (reverse) {
                         static soundContainer foosound;
@@ -1608,24 +1599,24 @@ void FireKeyboard::Execute()
     ProcessCommunicationMessages( SIMULATION_ATOM, true );
     Unit *targ = parent->Target();
     DoDockingOps( parent, targ, whichplayer, parent->pilot->getGender() );
-    if (SERVER || Network == NULL) {
-        if (targ) {
-            double mm = 0.0;
-            ShouldFire( targ );
-            if (targ->GetHull() < 0) {
-                parent->Target( NULL );
-                ForceChangeTarget( parent );
-                refresh_target = true;
-            } else if ( false == parent->InRange( targ, mm, true, true, true ) && !parent->TargetLocked() ) {
-                ChooseTargets( parent, TargUn, false );                 //only go for other active units in cone
-                if (parent->Target() == NULL)
-                    parent->Target( targ );
-            }
-        } else {
+
+    if (targ) {
+        double mm = 0.0;
+        ShouldFire( targ );
+        if (targ->GetHull() < 0) {
+            parent->Target( NULL );
             ForceChangeTarget( parent );
             refresh_target = true;
+        } else if ( false == parent->InRange( targ, mm, true, true, true ) && !parent->TargetLocked() ) {
+            ChooseTargets( parent, TargUn, false );                 //only go for other active units in cone
+            if (parent->Target() == NULL)
+              parent->Target( targ );
         }
+    } else {
+        ForceChangeTarget( parent );
+        refresh_target = true;
     }
+
     if (f().shieldpowerstate != 1) {
         Shield *shield = &parent->shield;
         PowerDownShield( shield, f().shieldpowerstate );
@@ -1719,7 +1710,7 @@ void FireKeyboard::Execute()
             if ( tmp->owner == getTopLevelOwner() )
                 sysobj = true;
         ChooseTargets( parent, TargUn, false );
-        if ( (Network == NULL || parent->Target() == NULL) && tmp == parent->Target() && sysobj && smart_targetting ) {
+        if ( ( parent->Target() == NULL) && tmp == parent->Target() && sysobj && smart_targetting ) {
             ChooseTargets( parent, TargSig, false );
             if ( tmp == parent->Target() )
                 ChooseTargets( parent, TargAll, false );

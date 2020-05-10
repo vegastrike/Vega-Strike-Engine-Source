@@ -9,9 +9,6 @@ VegaConfig    *vs_config        = NULL;
 bool cleanexit = false;
 bool run_only_player_starsystem = true;
 
-NetClient *Network      = NULL;
-NetServer *VSServer     = NULL;
-
 FILE       *fpread      = NULL;
 
 float       simulation_atom_var = (float) (1.0/10.0);

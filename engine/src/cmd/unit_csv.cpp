@@ -359,12 +359,6 @@ static vector< SubUnitStruct >GetSubUnits( const std::string &subunits )
 
 static void AddSubUnits( Unit *thus, Unit::XML &xml, const std::string &subunits, int faction, const std::string &modification )
 {
-    if (SERVER || Network) {
-        //Semihack: Keep loading if thus is already a subunit...
-        //A planet can have a wormhole subunit, which itself has more subunits.
-        if (!thus->graphicOptions.SubUnit)
-            return;              //subvert all subunits in MP
-    }
     vector< SubUnitStruct >su = GetSubUnits( subunits );
     xml.units.reserve( subunits.size()+xml.units.size() );
     for (vector< SubUnitStruct >::iterator i = su.begin(); i != su.end(); ++i) {
@@ -414,9 +408,8 @@ void AddDocks( Unit *thus, Unit::XML &xml, const string &docks )
     string::size_type where, when;
     string::size_type ofs = 0;
     int overlap = 1;
-    if (SERVER)
-        //NETFIXME: Shouldn't need to know this option on client side, but server references docking port by absolute number.
-        overlap = XMLSupport::parse_int( vs_config->getVariable( "server", "players_per_docking_port", "10" ) );
+
+    // TODO: Someone should check blame here. It doesn't look right.
     {
         int nelem = 0;
         while ( ( ofs = docks.find( '{', ofs ) ) != string::npos )
@@ -496,9 +489,6 @@ void AddLights( Unit *thus, Unit::XML &xml, const string &lights )
 
 static void ImportCargo( Unit *thus, const string &imports )
 {
-    if (Network != NULL)
-        return;          //Server takes care of this.
-
     string::size_type where, when, ofs = 0;
     {
         int nelem = 0;

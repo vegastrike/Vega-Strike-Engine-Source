@@ -20,7 +20,6 @@
 #include "vs_globals.h"
 #include "vsfilesystem.h"
 #include "cmd/unit_util.h"
-#include "networking/netserver.h"
 #include "cmd/csv.h"
 #include "linecollide.h"
 #include "cmd/unit_collide.h"
@@ -30,12 +29,15 @@
 #include "cs_python.h"
 #include "options.h"
 
-
+#include <iostream>
 
 extern Unit& GetUnitMasterPartList();
 extern int num_delayed_missions();
 using std::string;
 using std::set;
+using std::cout;
+using std::cerr;
+using std::endl;
 
 //less to write
 #define activeSys _Universe->activeStarSystem()
@@ -120,19 +122,7 @@ void PythonUnitIter::advanceNJumppoint( int n )
     }
 }
 
-Unit * GetUnitFromSerial( ObjSerial serial )
-{
-    Unit *un;
-    if (serial == 0)
-        return NULL;
-    //Find the unit
-    for (un_iter it = UniverseUtil::getUnitList(); (un = *it); ++it)
-        if ( (*it)->GetSerial() == serial )
-            break;
-    if (un == NULL)
-        cout<<"ERROR --> no unit for serial "<<serial<<endl;
-    return un;
-}
+
 std::string vsConfig( std::string category, std::string option, std::string def )
 {
     return vs_config->getVariable( category, option, def );
@@ -149,7 +139,6 @@ Unit * launchJumppoint( string name_string,
                         string squadlogo,
                         string destinations )
 {
-    if (Network) return NULL;
     int clstype = UNITPTR;
     if (unittype_string == "planet")
         clstype = PLANETPTR;
@@ -539,27 +528,19 @@ static string dontBlankOut( string objective )
 int addObjective( string objective )
 {
     float status = 0;
-    if (SERVER)
-        VSServer->sendSaveData( mission->player_num, Subcmd::Objective|Subcmd::SetValue,
-                                mission->objectives.size(), NULL, mission, &objective, &status );
+
     mission->objectives.push_back( Mission::Objective( status, dontBlankOut( objective ) ) );
     return mission->objectives.size()-1;
 }
 void setObjective( int which, string newobjective )
 {
     if (which < (int) mission->objectives.size() && which >= 0) {
-        if (SERVER)
-            VSServer->sendSaveData( mission->player_num, Subcmd::Objective|Subcmd::SetValue,
-                                    which, NULL, mission, &newobjective, &mission->objectives[which].completeness );
         mission->objectives[which].objective = dontBlankOut( newobjective );
     }
 }
 void setCompleteness( int which, float completeNess )
 {
     if (which < (int) mission->objectives.size() && which >= 0) {
-        if (SERVER)
-            VSServer->sendSaveData( mission->player_num, Subcmd::Objective|Subcmd::SetValue,
-                                    which, NULL, mission, &mission->objectives[which].objective, &completeNess );
         mission->objectives[which].completeness = completeNess;
     }
 }
@@ -581,9 +562,6 @@ std::string getTargetLabel()
 void eraseObjective( int which )
 {
     if (which < (int) mission->objectives.size() && which >= 0) {
-        if (SERVER)
-            VSServer->sendSaveData( mission->player_num, Subcmd::Objective|Subcmd::EraseValue,
-                                    which, NULL, mission, NULL, NULL );
         mission->objectives.erase( mission->objectives.begin()+which );
     }
 }
@@ -591,9 +569,6 @@ void clearObjectives()
 {
     if ( mission->objectives.size() ) {
         mission->objectives.clear();
-        if (SERVER)
-            VSServer->sendSaveData( mission->player_num, Subcmd::Objective|Subcmd::EraseValue,
-                                    -1, NULL, mission, NULL, NULL );
     }
 }
 void setOwnerII( int which, Unit *owner )
@@ -710,7 +685,6 @@ Unit * launch( string name_string,
                QVector pos,
                string sqadlogo )
 {
-    if (Network) return NULL;
     return launchJumppoint( name_string,
                             faction_string,
                             type_string,
@@ -744,11 +718,11 @@ Unit * getPlayer()
 }
 bool networked()
 {
-    return Network != NULL;
+    return false;
 }
 bool isserver()
 {
-    return SERVER;
+    return false;
 }
 void securepythonstr( string &message )
 {
@@ -767,7 +741,7 @@ void receivedCustom( int cp, bool trusted, string cmd, string args, string id )
     securepythonstr( id );
     string pythonCode = game_options.custompython+"("+(trusted ? "True" : "False")
                         +", r\'"+cmd+"\', r\'"+args+"\', r\'"+id+"\')\n";
-    COUT<<"Executing python command: "<<endl;
+    cout<<"Executing python command: "<<endl;
     cout<<"    "<<pythonCode;
     const char *cpycode = pythonCode.c_str();
     ::Python::reseterrors();
@@ -843,91 +817,6 @@ void micro_sleep( int n )
     ::micro_sleep( n );
 }
 
-void ComputeSystemSerials( std::string &systempath )
-{
-    using namespace VSFileSystem;
-    //Read the file
-    VSFile  f;
-    VSError err = f.OpenReadOnly( systempath, SystemFile );
-    if (err <= Ok) {
-        cout<<"\t\tcomputing serials for "<<systempath<<"...";
-        std::string system = f.ReadFull();
-
-        //Now looking for "<planet ", "<Planet ", "<PLANET ", "<unit ", "<Unit ", "<UNIT ", same for nebulas
-        std::vector< std::string >search_patterns;
-
-        bool newserials = true;
-        if (system.find( "serial=", 0 ) != std::string::npos) {
-            newserials = false;
-            cout<<"Found serial in system file : replacing serials..."<<endl;
-        } else {
-            cout<<"Found no serial in system file : generating..."<<endl;
-        }
-        search_patterns.push_back( "<planet " );
-        search_patterns.push_back( "<Planet " );
-        search_patterns.push_back( "<PLANET " );
-        search_patterns.push_back( "<unit " );
-        search_patterns.push_back( "<Unit " );
-        search_patterns.push_back( "<UNIT " );
-        search_patterns.push_back( "<nebula " );
-        search_patterns.push_back( "<Nebula " );
-        search_patterns.push_back( "<NEBULA " );
-        search_patterns.push_back( "<jump " );
-        search_patterns.push_back( "<Jump " );
-        search_patterns.push_back( "<JUMP " );
-        for (std::vector< std::string >::iterator ti = search_patterns.begin(); ti != search_patterns.end(); ++ti) {
-            std::string search( (*ti) );
-            std::string::size_type search_length = (*ti).length();
-            std::string::size_type curpos = 0;
-            int nboc = 0;
-            while ( ( curpos = system.find( search, curpos ) ) != std::string::npos ) {
-                ObjSerial   new_serial = getUniqueSerial();
-                std::string serial_str( (*ti)+"serial=\""+XMLSupport::tostring5( new_serial )+"\" " );
-                //If there are already serial in the file we replace that kind of string : <planet serial="XXXXX"
-                //of length search_length + 14 (length of serial="XXXXX")
-                if (newserials)
-                    system.replace( curpos, search_length, serial_str );
-                else
-                    system.replace( curpos, search_length+15, serial_str );
-                ++nboc;
-                curpos += search_length;
-            }
-            cerr<<"\t\tFound "<<nboc<<" occurences of "<<search<<endl;
-        }
-        //Add the system xml string to the server
-        if (SERVER) VSServer->addSystem( systempath, system );
-        //Overwrite the system files with the buffer containing serials
-        f.Close();
-        //Should generate the modified system file in homedir
-        err = f.OpenCreateWrite( systempath, SystemFile );
-        if (err > Ok) {
-            cerr<<"!!! ERROR : opening "<<systempath<<" for writing"<<endl;
-            VSExit( 1 );
-        }
-        if ( f.Write( system ) != system.length() ) {
-            cerr<<"!!! ERROR : writing system file"<<endl;
-            VSExit( 1 );
-        }
-        f.Close();
-
-        cout<<" OK !"<<endl;
-    } else {
-        cerr<<"ERROR cannot open system file : "<<systempath<<endl;
-        VSExit( 1 );
-    }
-}
-
-void ComputeGalaxySerials( std::vector< std::string > &stak )
-{
-    cout<<"Going through "<<stak.size()<<" sectors"<<endl;
-    cout<<"Generating random serial numbers :"<<endl;
-    for (; !stak.empty();) {
-        string sys( stak.back()+".system" );
-        stak.pop_back();
-        ComputeSystemSerials( sys );
-    }
-    cout<<"Computing done."<<endl;
-}
 
 string getSaveDir()
 {

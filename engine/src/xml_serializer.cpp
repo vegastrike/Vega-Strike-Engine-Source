@@ -5,7 +5,6 @@
 #include "configxml.h"
 #include "vs_globals.h"
 #include "vegastrike.h"
-#include "networking/const.h"
 
 ///Assumes that the tag is  <Mount type=\"  and that it will finish with " ></Mount>
 using namespace XMLSupport;
@@ -165,6 +164,7 @@ string XMLSerializer::WriteString()
 }
 string XMLnode::WriteString( void *mythis, int level )
 {
+    const int MAXBUFFER = 16384;
     string ret;
     char   buffer[MAXBUFFER];
     memset( buffer, 0, MAXBUFFER );
@@ -196,10 +196,7 @@ XMLSerializer::XMLSerializer( const char *filename, const char *modificationname
     curnode = &topnode;
     //In network mode we don't care about saving filename, we want always to save with modification
     //name since we only work with savegames
-    if (Network != NULL)
-        this->filename = string( modificationname );
-    else
-        this->filename = string( filename );
+    this->filename = string( filename );
 }
 void XMLSerializer::AddTag( const std::string &tag )
 {

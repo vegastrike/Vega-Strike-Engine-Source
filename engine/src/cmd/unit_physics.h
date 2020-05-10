@@ -40,8 +40,7 @@
 #include "unit_util.h"
 #include "universe_util.h"
 #include "cmd/script/mission.h"
-#include "networking/lowlevel/vsnet_clientstate.h"
-#include "networking/netclient.h"
+
 
 extern unsigned int apply_float_to_unsigned_int( float tmp ); //short fix
 
@@ -58,35 +57,9 @@ void GameUnit< UnitType >::UpdatePhysics2( const Transformation &trans,
     int player = -1;
 
     UnitType::UpdatePhysics2( trans, old_physical_state, accel, difficulty, transmat, cum_vel, lastframe, uc );
-    //Here send (new position + direction = curr_physical_state.position and .orientation)
-    //+ speed to server (which velocity is to consider ?)
-    //+ maybe Angular velocity to anticipate rotations in the other network clients
-    if (Network != NULL) {
-        //Check if this is a player, because in network mode we should only send updates of our moves
-        player = _Universe->whichPlayerStarship( this );
-        if (player >= 0 /* && this->networked */) {
-            if ( Network[0].isTime() ) {
-                /* If you're going to send an alive message, you might as well send your position while you're at it. */
-                ClientState cstmp( this->serial, this->curr_physical_state, this->Velocity, accel, this->AngularVelocity, 0 );
-                Network[player].sendPosition( &cstmp );
-            }
-            this->AddVelocity( difficulty );
-        } else {
-            //Not a player so update the unit's position and stuff with the last received snapshot from the server
-            //This may be be a bot or a unit controlled by the server
-            if (!this->networked) {
-                //Case it is a local unit
-                this->AddVelocity( difficulty );
-            } else {
-                //Networked unit so interpolate its position
-                this->AddVelocity( difficulty );
 
-                this->curr_physical_state = Network[0].Interpolate( this, SIMULATION_ATOM );
-            }
-        }
-    } else {
-        this->AddVelocity( difficulty );
-    }
+    this->AddVelocity( difficulty );
+
 #ifdef DEPRECATEDPLANETSTUFF
     if (planet) {
         Matrix basis;

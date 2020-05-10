@@ -54,4 +54,4 @@ if [ ! -d "$BIN_DIR" ]; then
     mkdir $BIN_DIR
 fi
 
-cp $BUILD_DIR/{vegastrike,vegaserver,setup/vssetup,objconv/mesh_tool} $BIN_DIR
+cp $BUILD_DIR/{vegastrike,setup/vssetup,objconv/mesh_tool} $BIN_DIR
