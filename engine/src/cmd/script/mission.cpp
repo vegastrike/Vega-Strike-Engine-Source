@@ -42,7 +42,6 @@
 
 #include "python/python_class.h"
 #include "savegame.h"
-#include "networking/netserver.h"
 
 /* *********************************************************** */
 using std::cout;
@@ -251,12 +250,7 @@ void Mission::terminateMission()
     int queuenum = -1;
     if ( f != active_missions->end() ) {
         queuenum = getPlayerMissionNumber();          //-1 used as error code, 0 is first player mission
-        if (Network != NULL || SERVER) {
-            int num = queuenum;
-            if (num >= 0)
-                if (SERVER && num > 0)
-                    VSServer->sendMission( player_num, Subcmd::TerminateMission, string(), num-1 );
-        }
+
         active_missions->erase( f );
     }
     if (this != (*active_missions)[0])        //Shouldn't this always be true?

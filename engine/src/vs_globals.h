@@ -26,7 +26,6 @@ extern Universe *_Universe;
 extern void cleanup();
 extern void VSExit( int code );
 extern bool   STATIC_VARS_DESTROYED;
-extern char   SERVER;
 extern int    loop_count;
 extern double avg_loop;
 extern int    nb_checks;
@@ -74,10 +73,6 @@ extern Music *muzak;
 extern int    muzak_count;
 class VegaConfig;
 extern VegaConfig *vs_config;
-class NetServer;
-class NetClient;
-extern NetClient  *Network;
-extern NetServer  *VSServer;
 
 class Mission;
 extern Mission    *mission;

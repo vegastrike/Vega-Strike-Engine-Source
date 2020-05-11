@@ -52,7 +52,6 @@
 #include "cmd/script/flightgroup.h"
 #include "force_feedback.h"
 #include "universe_util.h"
-#include "networking/netclient.h"
 #include "save_util.h"
 #include "in_kb_data.h"
 #include "vs_random.h"
@@ -65,9 +64,12 @@
 #include "gldrv/gl_globals.h"
 #endif
 
+using std::cout;
+using std::cerr;
+using std::endl;
+
 extern vs_options  game_options;
 
-extern std::string global_username;
 #define KEYDOWN( name, key ) (name[key]&0x80)
 
 static Texture    *tmpcockpittexture;
@@ -193,12 +195,7 @@ void TextMessageCallback( unsigned int ch, unsigned int mod, bool release, int x
         } else if (ch == WSK_RETURN || ch == WSK_KP_ENTER) {
             if (gcp->textMessage.length() != 0) {
                 std::string name = gcp->savegame->GetCallsign();
-                if (Network != NULL) {
-                    Unit *par = gcp->GetParent();
-                    if (0 && par)
-                        name = getUnitNameAndFgNoBase( par );
-                    Network[textmessager].textMessage( gcp->textMessage );
-                } else if (gcp->textMessage[0] == '/') {
+                if (gcp->textMessage[0] == '/') {
                     string cmd;
                     string args;
                     std::string::size_type space = gcp->textMessage.find( ' ' );
@@ -226,7 +223,7 @@ void TextMessageCallback( unsigned int ch, unsigned int mod, bool release, int x
 void TextMessageKey( const KBData&, KBSTATE newState )
 {
     if (newState == PRESS) {
-        if ( (Network == NULL) && game_options.chat_only_in_network)
+        if ( game_options.chat_only_in_network)
             return;
         winsys_set_keyboard_func( TextMessageCallback );
         textmessager = _Universe->CurrentCockpit();
@@ -237,7 +234,7 @@ void QuitNow()
     if (!cleanexit)
     {
         cleanexit = true;
-        if (Network == NULL && game_options.write_savegame_on_exit)
+        if ( game_options.write_savegame_on_exit)
             _Universe->WriteSaveGame( true );              //gotta do important stuff first
         for (unsigned int i = 0; i < active_missions.size(); i++)
             if (active_missions[i])
@@ -851,10 +848,6 @@ void createObjects( std::vector< std::string > &fighter0name,
                             dat->clear();
                         }
                         fighter0mods.push_back( modifications = game_options.getCallsign( squadnum ) );
-                        if ( squadnum == 0 && global_username.length() ) {
-                            fighter0mods.back() = global_username;
-                            modifications = global_username;
-                        }
                         fprintf( stderr, "FOUND MODIFICATION = %s FOR PLAYER #%d\n", modifications.c_str(), squadnum );
                     } else {
                         fighter0mods.push_back( "" );
@@ -865,28 +858,10 @@ void createObjects( std::vector< std::string > &fighter0name,
                     _Universe->pushActiveStarSystem( _Universe->AccessCockpit( squadnum )->activeStarSystem );
                     _Universe->SetActiveCockpit( _Universe->AccessCockpit( squadnum ) );
                 }
-                //In networking mode we name the ship save with .xml as they are xml files
-                if ( Network != NULL && squadnum < (int) fighter0name.size() ) {
-                    if (Network[squadnum].getCallsign() != modifications) {
-                        cout<<"Not CREATING A NETWORK PLAYER "<<fightername<<" FOR "<<modifications<<endl;
-                        break;
-                    }
-                    cout<<"CREATING A NETWORK PLAYER : "<<fightername<<endl;
-                    fighters[a] = UnitFactory::createUnit( fightername, false, tmptarget[a], "", fg, s, &savefiles[squadnum][1] );
-                    //Set the faction we have in the save file instead of the mission file (that is to be ignored in networking mode)
-                    fighters[a]->faction = FactionUtil::GetFactionIndex( cp->savegame->GetPlayerFaction() );
-                    fighters[a]->SetNetworkMode();
-                    fighters[a]->SetSerial( Network[squadnum].serial );
-                    Network[squadnum].setUnit( fighters[a] );
-                    cout<<"Creating fighter["<<squadnum<<"] from "<<modifications<<" on Network["<<squadnum<<"] named "
-                        <<Network[squadnum].getCallsign()<<endl;
-                } else if (Network != NULL) {
-                    cout<<"Not CREATING A LOCAL SHIP : "<<fightername<<endl;
-                    break;
-                } else {
-                    cout<<"CREATING A LOCAL SHIP : "<<fightername<<endl;
-                    fighters[a] = UnitFactory::createUnit( fightername, false, tmptarget[a], modifications, fg, s );
-                }
+
+                cout<<"CREATING A LOCAL SHIP : "<<fightername<<endl;
+                fighters[a] = UnitFactory::createUnit( fightername, false, tmptarget[a], modifications, fg, s );
+
                 _Universe->activeStarSystem()->AddUnit( fighters[a] );
                 if ( s == 0 && squadnum < (int) fighter0name.size() ) {
                     _Universe->AccessCockpit( squadnum )->Init( fighters[a]->getCockpit().c_str() );
@@ -1018,9 +993,6 @@ void main_loop()
     _Universe->StartDraw();
     if (myterrain)
         myterrain->AdjustTerrain( _Universe->activeStarSystem() );
-    if (Network != NULL)
-        for (size_t jj = 0; jj < _Universe->numPlayers(); jj++)
-            Network[jj].checkMsg( NULL );
 
 #ifndef NO_GFX
     //BOOST_LOG_TRIVIAL(trace) << boost::format("Drawn %1% vertices in %2% batches") % gl_vertices_this_frame % gl_batches_this_frame;

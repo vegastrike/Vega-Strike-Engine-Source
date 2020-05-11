@@ -969,7 +969,7 @@ Unit* Mission::call_unit_launch( CreateFlightgroup *fg, int type, const string &
                                                  0, 0, radius, tex, "", "", s,
                                                  d, ParseDestinations( destinations ),
                                                  QVector( 0, 0, 0 ), NULL, mat,
-                                                 vector< GFXLightLocal > (), faction_nr, nam, getUniqueSerial() );
+                                                 vector< GFXLightLocal > (), faction_nr, nam );
             free( bsrc );
             free( bdst );
             free( tex );
@@ -977,13 +977,13 @@ Unit* Mission::call_unit_launch( CreateFlightgroup *fg, int type, const string &
             free( citylights );
         } else if (type == NEBULAPTR) {
             my_unit = UnitFactory::createNebula(
-                fg->fg->type.c_str(), false, faction_nr, fg->fg, u+fg->fg->nr_ships-fg->nr_ships, getUniqueSerial() );
+                fg->fg->type.c_str(), false, faction_nr, fg->fg, u+fg->fg->nr_ships-fg->nr_ships );
         } else if (type == ASTEROIDPTR) {
             my_unit = UnitFactory::createAsteroid(
-                fg->fg->type.c_str(), faction_nr, fg->fg, u+fg->fg->nr_ships-fg->nr_ships, .01, getUniqueSerial() );
+                fg->fg->type.c_str(), faction_nr, fg->fg, u+fg->fg->nr_ships-fg->nr_ships, .01 );
         } else {
             my_unit = UnitFactory::createUnit( fg->fg->type.c_str(), false, faction_nr, string(
-                                                  "" ), fg->fg, u+fg->fg->nr_ships-fg->nr_ships, NULL, getUniqueSerial() );
+                                                  "" ), fg->fg, u+fg->fg->nr_ships-fg->nr_ships, NULL );
         }
         units[u] = my_unit;
     }

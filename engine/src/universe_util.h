@@ -4,7 +4,6 @@
 #define _UNIVERSE_UTILGENERIC_H__
 #include "cmd/collection.h"
 #include "gfx/vec.h"
-#include "networking/const.h"
 #include "cmd/unit_util.h"
 
 #include <string>
@@ -60,7 +59,6 @@ public: PythonUnitIter() : UnitIterator() {}
 
 std::string LookupUnitStat( const std::string &unitname, const std::string &faction, const std::string &statname );
 
-Unit * GetUnitFromSerial( ObjSerial serial );
 
 ///this gets a unit with 1 of each cargo type in it
 Unit * GetMasterPartList();
@@ -404,9 +402,6 @@ double atan( double );
 double tan( double );
 void micro_sleep( int n );
 void addParticle( QVector loc, Vector velocity, Vector color, float size );
-
-void ComputeGalaxySerials( std::vector< std::string > &stak );
-void ComputeSystemSerials( std::string &systempath );
 
 std::string getSaveDir();
 std::string getSaveInfo( const std::string &filename, bool formatForTextbox );

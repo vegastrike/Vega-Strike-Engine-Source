@@ -61,7 +61,10 @@ LOCALCONST_DEF( VSImage, int, SIZEOF_BITMAPFILEHEADER, sizeof (WORD)+sizeof (DWO
                +sizeof (DWORD) )
 LOCALCONST_DEF( VSImage, int, SIZEOF_BITMAPINFOHEADER, sizeof (DWORD)+sizeof (LONG)+sizeof (LONG)+2*sizeof (WORD)+2
                *sizeof (DWORD)+2*sizeof (LONG)+2*sizeof (DWORD) )
-LOCALCONST_DEF( VSImage, int, SIZEOF_RGBQUAD, sizeof (BYTE)*4 ) VSImage::VSImage()
+LOCALCONST_DEF( VSImage, int, SIZEOF_RGBQUAD, sizeof (BYTE)*4 )
+
+
+VSImage::VSImage()
 {
     this->img_depth = 8;
     this->img_color_type = 8;

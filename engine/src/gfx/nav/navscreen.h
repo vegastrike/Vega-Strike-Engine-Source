@@ -11,6 +11,8 @@
 #include "gfx/hud.h"
 #include "gnuhash.h"
 
+#include <map>
+
 #define NAVTOTALMESHCOUNT 8     //same as the button count, 1 mesh for screen and 1 per button(1+7)
 #define MAXZOOM 10
 
@@ -60,7 +62,7 @@ public:
                         const QVector &position,
                         const std::vector< std::string > &destinations,
                         CachedSystemIterator *csi );
-            void loadData( map< string, unsigned > *index_table );
+            void loadData( std::map< string, unsigned > *index_table );
         };
 
 private:
