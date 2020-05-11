@@ -476,7 +476,6 @@ void StarSystem::beginElement( const string &name, const AttributeList &attribut
     xml->cursun.j = 0;
     string       citylights;
     string       technique;
-    ObjSerial    serial     = 0;
     float        scaleatmos = 10;
     char        *nebfile;
     bool         insideout  = false;
@@ -1036,13 +1035,9 @@ addlightprop:
         blendSrc    = ONE;
         blendDst    = ZERO;
         paramOverrides.clear();
-        serial = 0;
         for (iter = attributes.begin(); iter != attributes.end(); ++iter) {
             switch ( attribute_map.lookup( (*iter).name ) )
             {
-            case SERIAL:
-                serial   = parse_int( (*iter).value );
-                break;
             case NAME:
                 fullname = (*iter).value;
                 bootstrap_draw( "Loading "+fullname );
@@ -1203,7 +1198,6 @@ addlightprop:
                                                                       fullname, insideout );
             if (un) {
                 un->SetOwner( getTopLevelOwner() );
-                un->SetSerial( serial );
                 un->applyTechniqueOverrides(paramOverrides);
             }
         } else {
@@ -1224,7 +1218,6 @@ addlightprop:
 
             xml->moons[xml->moons.size()-1]->SetPosAndCumPos( R+S+xml->cursun.Cast()+xml->systemcentroid.Cast() );
             xml->moons.back()->SetOwner( getTopLevelOwner() );
-            planet->SetSerial( serial );
             planet->applyTechniqueOverrides(paramOverrides);
 
             break;
@@ -1248,10 +1241,6 @@ addlightprop:
     case UNIT:
     case BUILDING:
     case VEHICLE:
-        if (Network && !SERVER) {
-            ++xml->unitlevel;
-            break;                                       //don't spawn these clientside
-        }
     case NEBULA:
     case ASTEROID:
     case ENHANCEMENT:
@@ -1267,9 +1256,6 @@ addlightprop:
         for (iter = attributes.begin(); iter != attributes.end(); ++iter) {
             switch ( attribute_map.lookup( (*iter).name ) )
             {
-            case SERIAL:
-                serial   = parse_int( (*iter).value );
-                break;
             case NAME:
                 fullname = (*iter).value;
                 break;
@@ -1358,21 +1344,17 @@ addlightprop:
                 if (elem == UNIT) {
                     Flightgroup *fg = getStaticBaseFlightgroup( faction );
                     plan->AddSatellite( un = UnitFactory::createUnit( filename.c_str(), false, faction, "", fg, fg->nr_ships-1 ) );
-                    un->SetSerial( serial ); //FIXME un de-referenced before allocation
                     un->setFullname( fullname ); //FIXME un de-referenced before allocation
                 } else if (elem == NEBULA) {
                     Flightgroup *fg = getStaticNebulaFlightgroup( faction );
                     plan->AddSatellite( un = UnitFactory::createNebula( filename.c_str(), false, faction, fg, fg->nr_ships-1 ) );
-                    un->SetSerial( serial ); //FIXME un de-referenced before allocation
                 } else if (elem == ASTEROID) {
                     Flightgroup *fg = getStaticAsteroidFlightgroup( faction );
                     plan->AddSatellite( un =
                                            UnitFactory::createAsteroid( filename.c_str(), faction, fg, fg->nr_ships-1, scalex
                                                                         < 0 ? -scalex : scalex ) );
-                    un->SetSerial( serial ); //FIXME un de-referenced before allocation
                 } else if (elem == ENHANCEMENT) {
                     plan->AddSatellite( un = UnitFactory::createEnhancement( filename.c_str(), faction, string( "" ) ) );
-                    un->SetSerial( serial ); //FIXME un de-referenced before allocation
                 }
                 {
                     for (unsigned int i = 0; i < dest.size(); ++i)
@@ -1393,7 +1375,6 @@ addlightprop:
                 if ( (elem == BUILDING || elem == VEHICLE) && xml->ct == NULL && xml->parentterrain != NULL ) {
                     Unit *b = UnitFactory::createBuilding(
                             xml->parentterrain, elem == VEHICLE, filename.c_str(), false, faction, string("") );
-                    b->SetSerial( serial );
                     b->SetPosAndCumPos( xml->cursun.Cast()+xml->systemcentroid.Cast() );
                     b->EnqueueAI( new Orders::AggressiveAI( "default.agg.xml" ) );
                     AddUnit( b );
@@ -1405,7 +1386,6 @@ addlightprop:
                 } else if ( (elem == BUILDING || elem == VEHICLE) && xml->ct != NULL ) {
                     Unit *b = UnitFactory::createBuilding(
                             xml->ct, elem == VEHICLE, filename.c_str(), false, faction );
-                    b->SetSerial( serial );
                     b->SetPosAndCumPos( xml->cursun.Cast()+xml->systemcentroid.Cast() );
                     b->EnqueueAI( new Orders::AggressiveAI( "default.agg.xml" ) );
                     b->SetTurretAI();
@@ -1420,7 +1400,6 @@ addlightprop:
                     if (elem == UNIT) {
                         Flightgroup *fg = getStaticBaseFlightgroup( faction );
                         Unit *moon_unit = UnitFactory::createUnit( filename.c_str(), false, faction, "", fg, fg->nr_ships-1 );
-                        moon_unit->SetSerial( serial );
                         moon_unit->setFullname( fullname );
                         xml->moons.push_back( (Planet*) moon_unit );
                     } else if (elem == NEBULA) {
@@ -1432,11 +1411,9 @@ addlightprop:
                         xml->moons.push_back( ast =
                                                  (Planet*) UnitFactory::createAsteroid( filename.c_str(), faction, fg, fg->nr_ships-1,
                                                                                         scalex ) );
-                        ast->SetSerial( serial );
                     } else if (elem == ENHANCEMENT) {
                         Planet *enh;
                         xml->moons.push_back( enh = (Planet*) UnitFactory::createEnhancement( filename.c_str(), faction, string( "" ) ) );
-                        enh->SetSerial( serial );
                     }
                     {
                         Unit *un = xml->moons.back();

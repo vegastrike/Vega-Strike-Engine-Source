@@ -276,9 +276,6 @@ SGalaxy::SGalaxy( const char *configfile )
         f.Close();
 
         XML_ParserFree( parser );
-    } else if (SERVER) {
-        std::cerr<<"!!! ERROR : couldn't find galaxy file : "<<configfile<<std::endl;
-        exit( 1 );
     }
 }
 

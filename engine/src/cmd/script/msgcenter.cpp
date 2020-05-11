@@ -36,7 +36,6 @@
 
 #include <expat.h>
 #include "xml_support.h"
-#include "networking/netserver.h"
 #include "vegastrike.h"
 
 #include "cmd/unit_generic.h"
@@ -55,8 +54,7 @@ void MessageCenter::add( string from, string to, string message, double delay )
     msg.message = message;
 
     msg.time    = mission->getGametime()+delay;
-    if (SERVER)
-        VSServer->sendMessage( from, to, message, (float) delay );
+
     messages.push_back( msg );
 }
 void MessageCenter::clear( const std::vector< std::string > &who, const std::vector< std::string > &whoNOT )

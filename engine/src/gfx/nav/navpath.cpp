@@ -28,6 +28,7 @@
 #include "navpath.h"
 #include "gfx/cockpit.h"
 #include "navscreen.h"
+#include "configxml.h"
 
 #include <vector>
 using std::vector;

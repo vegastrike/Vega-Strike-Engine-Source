@@ -48,7 +48,6 @@ using VSFileSystem::SaveFile;
 #include "gui/simplepicker.h"
 #include "gui/groupcontrol.h"
 #include "gui/scroller.h"
-#include "networking/netclient.h"
 #include "unit_xml.h"
 #include "gfx/sprite.h"
 #include "gfx/aux_texture.h"
@@ -546,13 +545,8 @@ void BaseComputer::constructControls( void )
         //Options button.
         NewButton *options = new NewButton;
         options->setRect( Rect( .64, .85, .32, .1 ) );
-        if (Network) {
-            options->setLabel( "Net Play" );
-            options->setCommand( "ShowNetworkMenu" );
-        } else {
-            options->setLabel( "Save/Load" );
-            options->setCommand( "ShowOptionsMenu" );
-        }
+        options->setLabel( "Save/Load" );
+        options->setCommand( "ShowOptionsMenu" );
         options->setColor( UnsaturatedColor( saveLoadColor.r, saveLoadColor.g, saveLoadColor.b, .25 ) );
         options->setTextColor( GUI_OPAQUE_WHITE() );
         options->setDownColor( UnsaturatedColor( saveLoadColor.r, saveLoadColor.g, saveLoadColor.b, .6 ) );
@@ -1032,24 +1026,23 @@ void BaseComputer::constructControls( void )
 
         loadSaveGroup->addChild( inputTextScroller ); //Want scroller "over" description box.
         //Accept button.
-        if (!Network) {
-            //no save in network mode!
-            NewButton *buy10 = new NewButton;
-            buy10->setRect( Rect( -.11, 0, .22, .12 ) );
-            buy10->setColor( GFXColor( 0, 1, 1, .1 ) );
-            buy10->setTextColor( GUI_OPAQUE_WHITE() );
-            buy10->setDownColor( GFXColor( 0, 1, 1, .4 ) );
-            buy10->setDownTextColor( GFXColor( .2, .2, .2 ) );
-            buy10->setVariableBorderCycleTime( 1.0 );
-            buy10->setBorderColor( GFXColor( .2, .2, .2 ) );
-            buy10->setEndBorderColor( GFXColor( .4, .4, .4 ) );
-            buy10->setShadowWidth( 2.0 );
-            buy10->setFont( Font( .08, BOLD_STROKE ) );
-            buy10->setId( "Commit10" );
-            buy10->setLabel( "Save" );
-            buy10->setCommand( "Save" );
-            loadSaveGroup->addChild( buy10 );
-        }
+        //no save in network mode!
+        NewButton *buy10 = new NewButton;
+        buy10->setRect( Rect( -.11, 0, .22, .12 ) );
+        buy10->setColor( GFXColor( 0, 1, 1, .1 ) );
+        buy10->setTextColor( GUI_OPAQUE_WHITE() );
+        buy10->setDownColor( GFXColor( 0, 1, 1, .4 ) );
+        buy10->setDownTextColor( GFXColor( .2, .2, .2 ) );
+        buy10->setVariableBorderCycleTime( 1.0 );
+        buy10->setBorderColor( GFXColor( .2, .2, .2 ) );
+        buy10->setEndBorderColor( GFXColor( .4, .4, .4 ) );
+        buy10->setShadowWidth( 2.0 );
+        buy10->setFont( Font( .08, BOLD_STROKE ) );
+        buy10->setId( "Commit10" );
+        buy10->setLabel( "Save" );
+        buy10->setCommand( "Save" );
+        loadSaveGroup->addChild( buy10 );
+
         NewButton *accept = new NewButton;
         accept->setRect( Rect( -.11, -.2, .22, .12 ) );
         accept->setColor( GFXColor( 0, 1, 1, .1 ) );
@@ -1126,222 +1119,8 @@ void BaseComputer::constructControls( void )
         netStatGroup->setHidden( true );
         networkGroup->addChild( netStatGroup );
 
-        GameMenu::createNetworkControls( netJoinGroup, &base_keyboard_queue );
-        if (Network) {
-            NetClient &nc = Network[0];             //Hack?: Assume 0th player.
-            netStatGroup->setHidden( false );
-            netJoinGroup->setHidden( true );
+        //GameMenu::createNetworkControls( netJoinGroup, &base_keyboard_queue );
 
-            std::string    serverip;
-            unsigned short serverport;
-            nc.GetCurrentServerAddress( serverip, serverport );
-
-            StaticDisplay *mplayTitle = new StaticDisplay;
-            mplayTitle->setRect( Rect( -.7, .6, 1, .1 ) );
-            mplayTitle->setText( "Independent Server IP Address:" );
-            mplayTitle->setTextColor( GUI_OPAQUE_WHITE() );
-            mplayTitle->setColor( GUI_CLEAR );
-            mplayTitle->setFont( Font( .07, 2 ) );
-            netStatGroup->addChild( mplayTitle );
-
-            //Description box.
-            StaticDisplay *serverInputText = new StaticDisplay;
-            serverInputText->setRect( Rect( -.6, .5, 1.2, .1 ) );
-            serverInputText->setColor( GUI_CLEAR );
-            serverInputText->setFont( Font( .07 ) );
-            serverInputText->setMultiLine( false );
-            if (serverip == "localhost" || serverip == "127.0.0.1") {
-                serverInputText->setText( "Locally Hosted Game" );
-                serverInputText->setTextColor( GFXColor( .5, 1, .5 ) );
-            } else if (serverip.substr( 0, 3 ) == "10." || serverip.substr( 0, 8 ) == "192.168."
-                       || serverip.substr( 0, 8 ) == "169.254." || serverip.find( '.' ) == std::string::npos) {
-                serverInputText->setText( "LAN: "+serverip );
-                serverInputText->setTextColor( GFXColor( 1, 1, .5 ) );
-            } else {
-                serverInputText->setText( serverip );
-                serverInputText->setTextColor( GFXColor( 1, .8, .5 ) );
-            }
-            netStatGroup->addChild( serverInputText );
-
-            mplayTitle = new StaticDisplay;
-            mplayTitle->setRect( Rect( -.7, .4, 1, .1 ) );
-            mplayTitle->setText( "Server Port: (default 6777)" );
-            mplayTitle->setTextColor( GUI_OPAQUE_WHITE() );
-            mplayTitle->setColor( GUI_CLEAR );
-            mplayTitle->setFont( Font( .07, 2 ) );
-            netStatGroup->addChild( mplayTitle );
-
-            StaticDisplay *portInputText = new StaticDisplay;
-            portInputText->setRect( Rect( -.6, .3, .4, .1 ) );
-            portInputText->setColor( GUI_CLEAR );
-            portInputText->setFont( Font( .07 ) );
-            portInputText->setMultiLine( false );
-            portInputText->setTextColor( GFXColor( .7, .7, 1 ) );
-            {
-                char portstr[15];
-                sprintf( portstr, "%d", (int) (serverport) );
-                portInputText->setText( portstr );
-            }
-            netStatGroup->addChild( portInputText );
-
-            mplayTitle = new StaticDisplay;
-            mplayTitle->setRect( Rect( -.7, .2, 1, .1 ) );
-            mplayTitle->setText( "Account Server:" );
-            mplayTitle->setTextColor( GUI_OPAQUE_WHITE() );
-            mplayTitle->setColor( GUI_CLEAR );
-            mplayTitle->setFont( Font( .07, 2 ) );
-            netStatGroup->addChild( mplayTitle );
-
-            StaticDisplay *acctserverInput = new StaticDisplay;
-            acctserverInput->setRect( Rect( -.6, .1, 1.2, .1 ) );
-            acctserverInput->setColor( GUI_CLEAR );
-            acctserverInput->setFont( Font( .07 ) );
-            acctserverInput->setMultiLine( false );
-            acctserverInput->setTextColor( GFXColor( .9, 1, .6 ) );
-
-            std::string acctserver;
-            bool useacctserver = XMLSupport::parse_bool( vs_config->getVariable( "network", "use_account_server", "true" ) );
-            if (useacctserver) {
-                acctserver = vs_config->getVariable( "network", "account_server_url", "http://vegastrike.sourceforge.net/" );
-                std::string::size_type s1, s3, q;
-                s1 = acctserver.find( '/' );
-                if (s1 != std::string::npos) {
-                    if (s1+1 < acctserver.length() && acctserver[s1+1] == '/') {
-                        s3 = acctserver.find( '/', s1+3 );
-                        if (s3 != std::string::npos) {
-                            std::string mod;
-                            q = acctserver.find( '?', s3 );
-                            if (q != std::string::npos)
-                                mod = "; "+acctserver.substr( q+1 );
-                            acctserver = acctserver.substr( s1+2, s3-s1-2 )+mod;
-                        }
-                    }
-                }
-            } else {
-                acctserverInput->setTextColor( GFXColor( .7, 1, .6 ) );
-                acctserver = "(Private Game)";
-            }
-            acctserverInput->setText( acctserver );
-            netStatGroup->addChild( acctserverInput );
-
-            mplayTitle = new StaticDisplay;
-            mplayTitle->setRect( Rect( -.7, 0, .7, .1 ) );
-            mplayTitle->setText( "Callsign:" );
-            mplayTitle->setTextColor( GUI_OPAQUE_WHITE() );
-            mplayTitle->setColor( GUI_CLEAR );
-            mplayTitle->setFont( Font( .07, 2 ) );
-            netStatGroup->addChild( mplayTitle );
-
-            StaticDisplay *usernameInput = new StaticDisplay;
-            usernameInput->setRect( Rect( -.6, -.1, .6, .1 ) );
-            usernameInput->setColor( GUI_CLEAR );
-            usernameInput->setFont( Font( .07 ) );
-            usernameInput->setMultiLine( false );
-            usernameInput->setTextColor( GFXColor( 1, .7, .9 ) );
-            usernameInput->setText( nc.getCallsign() );
-            netStatGroup->addChild( usernameInput );
-
-            mplayTitle = new StaticDisplay;
-            mplayTitle->setRect( Rect( 0, 0, .7, .1 ) );
-            mplayTitle->setText( "Serial Number:" );
-            mplayTitle->setTextColor( GUI_OPAQUE_WHITE() );
-            mplayTitle->setColor( GUI_CLEAR );
-            mplayTitle->setFont( Font( .07, 2 ) );
-            netStatGroup->addChild( mplayTitle );
-
-            StaticDisplay *currentSerial = new StaticDisplay;
-            currentSerial->setRect( Rect( .1, -.1, .6, .1 ) );
-            currentSerial->setColor( GUI_CLEAR );
-            currentSerial->setFont( Font( .07 ) );
-            currentSerial->setMultiLine( false );
-            currentSerial->setTextColor( GFXColor( 1, .7, .9 ) );
-            {
-                char serial[15];
-                sprintf( serial, "%d", (int) nc.serial );
-                currentSerial->setText( serial );
-            }
-            netStatGroup->addChild( currentSerial );
-
-            mplayTitle = new StaticDisplay;
-            mplayTitle->setRect( Rect( -.7, -.2, .7, .1 ) );
-            mplayTitle->setText( "Current Ship:" );
-            mplayTitle->setTextColor( GUI_OPAQUE_WHITE() );
-            mplayTitle->setColor( GUI_CLEAR );
-            mplayTitle->setFont( Font( .07, 2 ) );
-            netStatGroup->addChild( mplayTitle );
-
-            StaticDisplay *currentFighter = new StaticDisplay;
-            currentFighter->setRect( Rect( -.6, -.3, .6, .1 ) );
-            currentFighter->setColor( GUI_CLEAR );
-            currentFighter->setFont( Font( .07 ) );
-            currentFighter->setMultiLine( false );
-            currentFighter->setTextColor( GFXColor( 1, .7, .9 ) );
-            Unit *player = nc.getUnit();
-            if (player) {
-                currentFighter->setText( player->getFullname() );
-            } else {
-                currentFighter->setTextColor( GFXColor( 1, .6, .6 ) );
-                currentFighter->setText( "(Currently Destroyed)" );
-            }
-            netStatGroup->addChild( currentFighter );
-
-            mplayTitle = new StaticDisplay;
-            mplayTitle->setRect( Rect( 0, -.2, .7, .1 ) );
-            mplayTitle->setText( "Faction:" );
-            mplayTitle->setTextColor( GUI_OPAQUE_WHITE() );
-            mplayTitle->setColor( GUI_CLEAR );
-            mplayTitle->setFont( Font( .07, 2 ) );
-            netStatGroup->addChild( mplayTitle );
-
-            StaticDisplay *currentFaction = new StaticDisplay;
-            currentFaction->setRect( Rect( .1, -.3, .6, .1 ) );
-            currentFaction->setColor( GUI_CLEAR );
-            currentFaction->setFont( Font( .07 ) );
-            currentFaction->setMultiLine( false );
-            if (player) {
-                int fact = player->faction;
-                const float *col = FactionUtil::GetSparkColor( fact );
-                currentFaction->setTextColor( GFXColor( col[0], col[1], col[2] ) );
-                currentFaction->setText( FactionUtil::GetFaction( fact ) );
-            } else {
-                currentFaction->setTextColor( GFXColor( 1, .6, .6 ) );
-                currentFaction->setText( "(Currently Destroyed)" );
-            }
-            netStatGroup->addChild( currentFaction );
-
-            NewButton *saveNetGame = new NewButton;
-            saveNetGame->setRect( Rect( -.7, -.65, .4, .13 ) );
-            saveNetGame->setColor( GFXColor( .2, 1, 0, .1 ) );
-            saveNetGame->setTextColor( GUI_OPAQUE_WHITE() );
-            saveNetGame->setDownColor( GFXColor( .2, 1, 0, .4 ) );
-            saveNetGame->setDownTextColor( GFXColor( .2, .2, .2 ) );
-            saveNetGame->setFont( Font( .07, 1 ) );
-            saveNetGame->setCommand( "NetworkSaveGame" );
-            saveNetGame->setLabel( "Save Progress" );
-            netStatGroup->addChild( saveNetGame );
-
-            NewButton *reloadNet = new NewButton;
-            reloadNet->setRect( Rect( .3, -.65, .4, .13 ) );
-            reloadNet->setColor( GFXColor( 1, .2, 0, .1 ) );
-            reloadNet->setTextColor( GUI_OPAQUE_WHITE() );
-            reloadNet->setDownColor( GFXColor( 1, .2, 0, .4 ) );
-            reloadNet->setDownTextColor( GFXColor( .2, .2, .2 ) );
-            reloadNet->setFont( Font( .07, 1 ) );
-            reloadNet->setCommand( "NetworkDie" );
-            reloadNet->setLabel( "Die and Reload" );
-            netStatGroup->addChild( reloadNet );
-
-            NewButton *hideNetStatus = new NewButton;
-            hideNetStatus->setRect( Rect( -.2, -.65, .4, .13 ) );
-            hideNetStatus->setColor( GFXColor( .2, .8, 1, .1 ) );
-            hideNetStatus->setTextColor( GUI_OPAQUE_WHITE() );
-            hideNetStatus->setDownColor( GFXColor( .2, .8, 1, .4 ) );
-            hideNetStatus->setDownTextColor( GFXColor( .2, .2, .2 ) );
-            hideNetStatus->setFont( Font( .07, 1 ) );
-            hideNetStatus->setCommand( "HideNetworkStatus" );
-            hideNetStatus->setLabel( "Join Another Server" );
-            netStatGroup->addChild( hideNetStatus );
-        }
         if (m_displayModes.size() != 1 || m_displayModes[0] != NETWORK) {
             NewButton *loadsave = new NewButton;
             loadsave->setRect( Rect( .7, -.9, .25, .1 ) );
@@ -1355,14 +1134,11 @@ void BaseComputer::constructControls( void )
             loadsave->setShadowWidth( 2.0 );
             loadsave->setFont( Font( .07, 1 ) );
             loadsave->setId( "CommitAll" );
-            if (Network != NULL)
-                loadsave->setLabel( "Single Player" );
-            else
-                loadsave->setLabel( "Save/Load" );
+            loadsave->setLabel( "Save/Load" );
             loadsave->setCommand( "ShowOptionsMenu" );
             networkGroup->addChild( loadsave );
         }
-        if ( (m_displayModes.size() == 1 && m_displayModes[0] == NETWORK) || Network != NULL ) {
+        if ( (m_displayModes.size() == 1 && m_displayModes[0] == NETWORK) ) {
             NewButton *quit = new NewButton;
             quit->setRect( Rect( -.95, -.9, .3, .1 ) );
             quit->setColor( GFXColor( .8, 1, .1, .1 ) );
@@ -1730,10 +1506,7 @@ bool BaseComputer::changeToNetworkMode( const EventCommandId &command, Control *
 {
     if (m_currentDisplay != NETWORK)
         switchToControls( NETWORK );
-    if (Network)
-        showNetworkStatus( true );
-    else
-        showNetworkStatus( false );
+    showNetworkStatus( false );
     loadNetworkControls();
     return true;
 }
@@ -3003,7 +2776,7 @@ void BaseComputer::loadNewsControls( void )
     //Load the picker.
     static const bool newsFromCargolist =
         XMLSupport::parse_bool( vs_config->getVariable( "cargo", "news_from_cargolist", "false" ) );
-    if (newsFromCargolist && Network == NULL) {
+    if (newsFromCargolist ) {
         gameMessage last;
         int i = 0;
         vector< std::string >who;
@@ -3121,9 +2894,9 @@ void BaseComputer::loadMissionsMasterList( TransactionList &tlist )
     }
     //Number of strings to look at.  And make sure they match!
     const size_t stringCount = getSaveStringLength( playerNum, MISSION_NAMES_LABEL );
-    if (Network == NULL)
-        //these aren't sent over the network.
-        assert( stringCount == getSaveStringLength( playerNum, MISSION_SCRIPTS_LABEL ) );
+
+    //these aren't sent over the network.
+    assert( stringCount == getSaveStringLength( playerNum, MISSION_SCRIPTS_LABEL ) );
     assert( stringCount == getSaveStringLength( playerNum, MISSION_DESC_LABEL ) );
     //Make sure we have different names for all the missions.
     //This changes the savegame -- it removes ambiguity for good.
@@ -3145,11 +2918,11 @@ void BaseComputer::loadMissionsMasterList( TransactionList &tlist )
     for (size_t i = 0; i < stringCount; i++) {
         CargoColor c;
         //Take any categories out of the name and put them in the cargo.category.
-        if (Network == NULL) {
-            const string finalScript = getSaveString( playerNum, MISSION_SCRIPTS_LABEL, i );
-            if (finalScript[0] == '#')
-                continue;                  //Ignore any missions with comments. (those are fixer missions.)
-        }
+
+        const string finalScript = getSaveString( playerNum, MISSION_SCRIPTS_LABEL, i );
+        if (finalScript[0] == '#')
+          continue;                  //Ignore any missions with comments. (those are fixer missions.)
+
         const string originalName = getSaveString( playerNum, MISSION_NAMES_LABEL, i );
         const string::size_type lastCategorySep = originalName.rfind( CATEGORY_SEP );
         if (lastCategorySep != string::npos) {
@@ -3222,26 +2995,19 @@ bool BaseComputer::acceptMission( const EventCommandId &command, Control *contro
         unsigned int whichmission = atoi( item->GetContent().c_str() );
         if ( whichmission > 0 && whichmission < active_missions.size() ) {
             Mission *miss = active_missions[whichmission];
-            if (Network == NULL) {
                 miss->terminateMission();
                 if (miss == mission)
                     mission = active_missions[0];
                 refresh();
-            } else if ( m_player.GetUnit() ) {
-                int cp  = _Universe->whichPlayerStarship( m_player.GetUnit() );
-                if (cp < 0) cp = 0;
-                int num = miss->getPlayerMissionNumber();
 
-                Network[cp].missionRequest( Subcmd::TerminateMission, string(), num );
-            }
             return true;
         }
         return false;
     }
     const int playernum   = UnitUtil::isPlayerStarship( playerUnit );
     const size_t stringCount = getSaveStringLength( playernum, MISSION_NAMES_LABEL );
-    if (Network == NULL)
-        assert( stringCount == getSaveStringLength( playernum, MISSION_SCRIPTS_LABEL ) );
+
+    assert( stringCount == getSaveStringLength( playernum, MISSION_SCRIPTS_LABEL ) );
     string    qualifiedName;
     if ( item->GetCategory().empty() )
         qualifiedName = item->content;
@@ -3250,28 +3016,21 @@ bool BaseComputer::acceptMission( const EventCommandId &command, Control *contro
     string finalScript;
     for (size_t i = 0; i < stringCount; i++)
         if (getSaveString( playernum, MISSION_NAMES_LABEL, i ) == qualifiedName) {
-            if (Network == NULL) {
-                finalScript = getSaveString( playernum, MISSION_SCRIPTS_LABEL, i );
-                eraseSaveString( playernum, MISSION_SCRIPTS_LABEL, i );
-                eraseSaveString( playernum, MISSION_NAMES_LABEL, i );
-                eraseSaveString( playernum, MISSION_DESC_LABEL, i );
-            } else {
-                finalScript = "#";
-            }
+
+            finalScript = getSaveString( playernum, MISSION_SCRIPTS_LABEL, i );
+            eraseSaveString( playernum, MISSION_SCRIPTS_LABEL, i );
+            eraseSaveString( playernum, MISSION_NAMES_LABEL, i );
+            eraseSaveString( playernum, MISSION_DESC_LABEL, i );
+
             break;
         }
     if ( finalScript.empty() ) {
         return false;
     } else {
-        if (Network == NULL) {
             LoadMission( ("#"+item->category).c_str(),
                         finalScript, false );
             refresh();
-        } else if ( m_player.GetUnit() ) {
-            int cp = _Universe->whichPlayerStarship( m_player.GetUnit() );
-            if (cp < 0) cp = 0;
-            Network[cp].missionRequest( Subcmd::AcceptMission, qualifiedName, active_missions.size() );
-        }
+
     }
     //We handled the command, whether we successfully accepted the mission or not.
     return true;
@@ -3747,8 +3506,7 @@ void BaseComputer::BuyUpgradeOperation::concludeTransaction( void )
         if (_Universe->AccessCockpit()->credits >= price) {
             //Have enough money.  Buy it.
             _Universe->AccessCockpit()->credits -= price;
-            if (Network)
-                _Universe->AccessCockpit()->credits = 0;
+
             //Upgrade the ship.
             playerUnit->Upgrade( m_newPart, m_selectedMount, m_selectedTurret, m_addMultMode, true, percent, m_theTemplate );
             static bool allow_special_with_weapons =
@@ -3951,8 +3709,7 @@ void BaseComputer::SellUpgradeOperation::concludeTransaction( void )
     playerUnit->canDowngrade( m_newPart, m_selectedMount, m_selectedTurret, percent, m_downgradeLimiter );
     const float price = m_part.price*usedValue( percent );
     //Adjust the money.
-    if (!Network)
-        _Universe->AccessCockpit()->credits += price;
+    _Universe->AccessCockpit()->credits += price;
     //Change the ship.
     if ( playerUnit->Downgrade( m_newPart, m_selectedMount, m_selectedTurret, percent, m_downgradeLimiter ) ) {
         //Remove the item from the ship, since we sold it, and add it to the base.
@@ -4497,10 +4254,7 @@ bool sellShip( Unit *baseUnit, Unit *playerUnit, std::string shipname, BaseCompu
         //now we can actually do the selling
         for (size_t i = 1, n = cockpit->GetNumUnits(); i < n; ++i)
             if (cockpit->GetUnitFileName(i) == shipname) {
-                if ( Network && !_Universe->netLocked() ) {
-                    Network[0].shipRequest( shipname, Subcmd::SellShip );
-                    return false;
-                }
+
                 float xtra = 0;
                 if ( cockpit->GetUnitSystemName(i) == _Universe->activeStarSystem()->getFileName() ) {
                     static const float shipping_price =
@@ -4565,10 +4319,7 @@ bool buyShip( Unit *baseUnit,
     }
     if (shipCargo) {
         if (shipCargo->price < _Universe->AccessCockpit()->credits) {
-            if ( Network && !_Universe->netLocked() ) {
-                Network[0].shipRequest( content, myfleet ? Subcmd::SwitchShip : Subcmd::BuyShip );
-                return false;
-            }
+
             Flightgroup *flightGroup = playerUnit->getFlightgroup();
             int fgsNumber = 0;
             if (flightGroup != NULL) {
@@ -4610,7 +4361,7 @@ bool buyShip( Unit *baseUnit,
                         for (int i = playerUnit->numCargo()-1; i >= 0; --i) {
                             Cargo c = playerUnit->GetCargo( i );
                             if (    (c.mission != 0 && j == 0)
-                                 || (c.mission == 0 && j == 1 && (!myfleet || Network) && c.GetCategory().find( "upgrades" ) != 0) ) {
+                                 || (c.mission == 0 && j == 1 && (!myfleet) && c.GetCategory().find( "upgrades" ) != 0) ) {
                                 for (int k = c.quantity; k > 0; --k) {
                                     c.quantity = k;
                                     if ( newPart->CanAddCargo( c ) ) {
@@ -6208,7 +5959,6 @@ bool BaseComputer::actionConfirmedLoadGame()
             if (player && cockpit) {
                 UniverseUtil::showSplashScreen( "" );
                 UniverseUtil::showSplashMessage( "Loading saved game." );
-                NetClient::CleanUp();
                 UniverseUtil::setCurrentSaveGame( tmp );
                 player->Kill();
                 RespawnNow( cockpit );
@@ -6277,34 +6027,18 @@ bool BaseComputer::actionShowAccountMenu( const EventCommandId &command, Control
 
 bool BaseComputer::actionNetDie( const EventCommandId &command, Control *control )
 {
-    if (Network != NULL) {
-        NetActionConfirm *nak = new NetActionConfirm( 0, window(), NetActionConfirm::DIE );
-        nak->init();
-        nak->run();
-    }
     return true;
 }
 
 bool BaseComputer::actionNetSaveGame( const EventCommandId &command, Control *control )
 {
-    if (Network != NULL) {
-        NetActionConfirm *nak = new NetActionConfirm( 0, window(), NetActionConfirm::SAVEACCT );
-        nak->init();
-        nak->run();
-    }
     return true;
 }
 
 bool BaseComputer::actionJoinGame( const EventCommandId &command, Control *control )
 {
     NetActionConfirm *nak = new NetActionConfirm( 0, window(), NetActionConfirm::JOINGAME );
-    if (Network != NULL) {
-        //confirm.
-        nak->init();
-        nak->run();
-    } else {
-        nak->confirmedJoinGame();
-    }
+    nak->confirmedJoinGame();
     return true;
 }
 //Process a command event from the Options Menu window.

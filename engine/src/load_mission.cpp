@@ -2,7 +2,6 @@
 #include "cmd/script/mission.h"
 #include "cmd/script/pythonmission.h"
 #include "vs_globals.h"
-#include "networking/netserver.h"
 #include "star_system_generic.h"
 #include "vs_globals.h"
 #include "cmd/unit_generic.h"
@@ -259,60 +258,12 @@ void LoadMission( const char *nission_name, const std::string &script, bool load
     vector< Flightgroup* >::const_iterator siter;
     vector< Flightgroup* >fg = active_missions.back()->flightgroups;
     Unit *fighter;
-    if (Network != NULL) {
-        for (siter = fg.begin(); siter != fg.end(); siter++) {
-            Flightgroup *fg = *siter;
-            string fg_name  = fg->name;
-            string fullname = fg->type;
-            strncpy( fightername, fullname.c_str(), 1023 );
-            fightername[1023] = '\0';
-            int    a = 0;
-            int    tmptarget = 0;
-            string ainame    = fg->ainame;
-            float  fg_radius = 0.0;
-            for (int s = 0; s < fg->nr_ships; s++) {
-                QVector pox;
 
-                pox.i = fg->pos.i+s*fg_radius*3;
-                pox.j = fg->pos.i+s*fg_radius*3;
-                pox.k = fg->pos.i+s*fg_radius*3;
-                if (pox.i == pox.j && pox.j == pox.k && pox.k == 0) {
-                    pox.i = rand()*10000./RAND_MAX-5000;
-                    pox.j = rand()*10000./RAND_MAX-5000;
-                    pox.k = rand()*10000./RAND_MAX-5000;
-                }
-                if ( _Universe->AccessCockpit()->GetParent() ) {
-                    QVector fposs = _Universe->AccessCockpit()->GetParent()->Position();
-                    pox = pox+fposs;                     //adds our own position onto this
-                }
-                tmptarget = FactionUtil::GetFactionIndex( fg->faction );                 //that should not be in xml?
-                string modifications( "" );
-                if (a != 0 || loadFirstUnit)
-                    fighter = UnitFactory::createUnit( fightername, false, tmptarget, modifications, fg, s );
-                else
-                    continue;
-                fighter->SetPosAndCumPos( pox );
-
-                fg_radius = fighter->rSize();
-                if (benchmark > 0.0 || a != 0) {
-                    fighter->LoadAIScript( ainame );
-                    fighter->SetTurretAI();
-                }
-                _Universe->activeStarSystem()->AddUnit( fighter );
-                a++;
-            }             //for nr_ships
-        }         //end of for flightgroups
-    }
     if (active_missions.size() > 0)
         //Give the mission a name.
         active_missions.back()->mission_name = friendly_mission_name;
     active_missions.back()->player_num = _Universe->CurrentCockpit();
-    if (SERVER) {
-        int num = active_missions.back()->getPlayerMissionNumber();
-        if (num > 0)
-            VSServer->sendMission( _Universe->CurrentCockpit(), Subcmd::AcceptMission,
-                                   friendly_mission_name, num-1 );
-    }
+
     active_missions.back()->DirectorInitgame();
     mission = active_missions[0];
     //return true;

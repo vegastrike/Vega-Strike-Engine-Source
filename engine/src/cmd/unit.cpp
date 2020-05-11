@@ -160,15 +160,7 @@ void GameUnit< UnitType >::addHalo( const char *filename,
 template < class UnitType >
 void GameUnit< UnitType >::Cloak( bool engage )
 {
-    if (Network != NULL && !SERVER) {
-        int which = UnitUtil::isPlayerStarship( this );
-        if (which >= 0)
-            Network[which].sendCloak( engage );
-        else
-            UnitType::Cloak( engage );              //client side unit
-    } else {
-        UnitType::Cloak( engage );         //client side unit
-    }
+    UnitType::Cloak( engage );         //client side unit
 }
 
 template < class UnitType >
