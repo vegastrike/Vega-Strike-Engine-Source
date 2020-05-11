@@ -49,7 +49,6 @@
 #include "gfx/hud.h"
 #include "gldrv/winsys.h"
 #include "universe_util.h"
-#include "networking/netclient.h"
 #include "universe.h"
 #include "save_util.h"
 #include "gfx/masks.h"
@@ -75,12 +74,19 @@
 #include "cg_global.h"
 #endif
 
+#include <boost/log/core.hpp>
+#include <boost/log/trivial.hpp>
+#include <boost/log/expressions.hpp>
+
 #include "options.h"
 
-extern std::string global_username;
-extern std::string global_password;
+using std::cout;
+using std::cerr;
+using std::endl;
 
 vs_options game_options;
+
+namespace logging = boost::log;
 
 /*
  * Globals
@@ -146,8 +152,7 @@ void cleanup( void )
 {
     STATIC_VARS_DESTROYED = true;
     printf( "Thank you for playing!\n" );
-    //In network mode, we may not do the save since it is useless
-    if (_Universe != NULL && Network == NULL)
+    if (_Universe != NULL )
         _Universe->WriteSaveGame( true );
 #ifdef _WIN32
 #if defined (_MSC_VER) && defined (_DEBUG)
@@ -159,13 +164,7 @@ void cleanup( void )
     while (!cleanexit)
         usleep(10000);
 #endif
-    if (Network != NULL) {
-        cout<<"Number of players"<<_Universe->numPlayers()<<endl;
-        for (size_t i = 0; i < _Universe->numPlayers(); i++)
-            if ( Network[i].isInGame() )
-                Network[i].logout( false );
-        delete[] Network;
-    }
+
 #if defined (CG_SUPPORT)
     if (cloak_cg->vertexProgram) cgDestroyProgram( cloak_cg->vertexProgram );
     if (cloak_cg->shaderContext) cgDestroyContext( cloak_cg->shaderContext );
@@ -240,26 +239,24 @@ bool isVista = false;
 
 Unit *TheTopLevelUnit;
 
-/*
-// disabled as does not compile with boost 1.64
 void initLogging(char debugLevel){
-    auto loggingCore = boost::log::core::get();
+    auto loggingCore = logging::core::get();
 
     switch (debugLevel) {
     case 1:
-        loggingCore->set_filter(boost::log::trivial::severity >= boost::log::trivial::info);
+        loggingCore->set_filter(logging::trivial::severity >= logging::trivial::info);
         break;
     case 2:
-        loggingCore->set_filter(boost::log::trivial::severity >= boost::log::trivial::debug);
+        loggingCore->set_filter(logging::trivial::severity >= logging::trivial::debug);
         break;
     case 3:
-        loggingCore->set_filter(boost::log::trivial::severity >= boost::log::trivial::trace);
+        loggingCore->set_filter(logging::trivial::severity >= logging::trivial::trace);
         break;
     default:
-        loggingCore->set_filter(boost::log::trivial::severity >= boost::log::trivial::warning);
+        loggingCore->set_filter(logging::trivial::severity >= logging::trivial::warning);
         break;
     }
-}*/
+}
 
 int main( int argc, char *argv[] )
 {
@@ -317,8 +314,7 @@ int main( int argc, char *argv[] )
     if (g_game.vsdebug == '0')
         g_game.vsdebug = game_options.vsdebug;
 
-    // disabled, does not compile with boost 1.64 and c++11
-    //initLogging(g_game.vsdebug);
+    initLogging(g_game.vsdebug);
 
     // can use the vegastrike config variable to read in the default mission
     if ( game_options.force_client_connect )
@@ -556,10 +552,7 @@ void bootstrap_main_loop()
         for (int p = 0; p < numplayers; p++) {
             pname   = game_options.getPlayer(p);
             ppasswd = game_options.getPassword(p);
-            if ( p == 0 && global_username.length() )
-                pname = global_username;
-            if ( p == 0 && global_password.length() )
-                ppasswd = global_password;
+
             if (!ignore_network) {
                 //In network mode, test if all player sections are present
                 if (pname == "") {
@@ -580,98 +573,54 @@ void bootstrap_main_loop()
         vector< string >     starsysname;
         vector< QVector >    playerNloc;
 
-        /************************* NETWORK INIT ***************************/
-        vector< vector< std::string > >savefiles;
-        if (!ignore_network) {
-            cout<<"Number of local players = "<<numplayers<<endl;
-            //Initiate the network if in networking play mode for each local player
-            if (!ignore_network) {
-                setNewTime( 0. );
-                //Get the number of local players
-                Network = new NetClient[numplayers];
 
-                //Here we say we want to only handle activity in 1 starsystem not more
-                run_only_player_starsystem = true;
-            } else {
-                Network = NULL;
-                cout<<"Non-networking mode"<<endl;
-                //Here we say we want to only handle activity in 1 starsystem not more
-                run_only_player_starsystem = true;
-            }
-        }
+        vector< vector< std::string > >savefiles;
+
         _Universe->SetupCockpits( playername );
 
-        /************************* NETWORK INIT ***************************/
         vector< std::string >::iterator it, jt;
         unsigned int k = 0;
-        for (k = 0, it = playername.begin(), jt = playerpasswd.begin();
-             k < (unsigned int) _Universe->numPlayers();
-             k++, it++, jt++) {
-            Cockpit    *cp = _Universe->AccessCockpit( k );
-            SetStartupView( cp );
-            bool        setplayerXloc = false;
-            std::string psu;
-            if (k == 0) {
-                QVector     myVec;
-                if ( SetPlayerLoc( myVec, false ) )
-                    _Universe->AccessCockpit( 0 )->savegame->SetPlayerLocation( myVec );
-                std::string st;
-                if ( SetPlayerSystem( st, false ) )
-                    _Universe->AccessCockpit( 0 )->savegame->SetStarSystem( st );
-            }
-            vector< SavedUnits >saved;
-            /************* NETWORK PART ***************/
-            vector< string > packedInfo;
-            
-            if (Network != NULL) {
-                string err;
-                string srvipadr;
-                unsigned short port;
-                //Are we using the directly account server to identify us ?
-                Network[k].SetConfigServerAddress( srvipadr, port );                 //Sets from the config vars.
-                if ( !Network[k].connectLoad( pname, ppasswd, err ) ) {
-                    cout<<"error while connecting: "<<err<<endl;
-                    VSExit( 1 );
-                }
-                savefiles.push_back( *Network[k].loginSavedGame( 0 ) );
-                
-                _Universe->AccessCockpit( k )->savegame->ParseSaveGame( "",
-                                                                        mysystem,
-                                                                        mysystem,
-                                                                        pos,
-                                                                        setplayerXloc,
-                                                                        credits,
-                                                                        packedInfo,
-                                                                        k,
-                                                                        savefiles[k][0],
-                                                                        false );
-                _Universe->AccessCockpit( k )->TimeOfLastCollision = getNewTime();
-            } else {
-                if (game_options.load_last_savegame) {
-                    _Universe->AccessCockpit( k )->savegame->ParseSaveGame( savegamefile,
-                                                                            mysystem,
-                                                                            mysystem,
-                                                                            pos,
-                                                                            setplayerXloc,
-                                                                            credits,
-                                                                            packedInfo,
-                                                                            k );
-                } else {
-                    _Universe->AccessCockpit( k )->savegame->SetOutputFileName( savegamefile );
-                }
-            }
-            _Universe->AccessCockpit( k )->UnpackUnitInfo(packedInfo);
-            CopySavedShips( playername[k], k, packedInfo, true );
-            playersaveunit.push_back( _Universe->AccessCockpit( k )->GetUnitFileName() );
-            _Universe->AccessCockpit( k )->credits = credits;
-            ss.push_back( _Universe->Init( mysystem, Vector( 0, 0, 0 ), planetname ) );
-            if (setplayerXloc)
-                playerNloc.push_back( pos );
-            else
-                playerNloc.push_back( QVector( FLT_MAX, FLT_MAX, FLT_MAX ) );
-            for (unsigned int j = 0; j < saved.size(); j++)
-                savedun.push_back( saved[j] );
+
+        Cockpit    *cp = _Universe->AccessCockpit( k );
+        SetStartupView( cp );
+        bool        setplayerXloc = false;
+        std::string psu;
+        if (k == 0) {
+            QVector     myVec;
+            if ( SetPlayerLoc( myVec, false ) )
+              _Universe->AccessCockpit( 0 )->savegame->SetPlayerLocation( myVec );
+            std::string st;
+            if ( SetPlayerSystem( st, false ) )
+              _Universe->AccessCockpit( 0 )->savegame->SetStarSystem( st );
+          }
+        vector< SavedUnits >saved;
+        vector< string > packedInfo;
+
+        if (game_options.load_last_savegame) {
+            _Universe->AccessCockpit( k )->savegame->ParseSaveGame( savegamefile,
+                                                                    mysystem,
+                                                                    mysystem,
+                                                                    pos,
+                                                                    setplayerXloc,
+                                                                    credits,
+                                                                    packedInfo,
+                                                                    k );
+        } else {
+          _Universe->AccessCockpit( k )->savegame->SetOutputFileName( savegamefile );
         }
+
+        _Universe->AccessCockpit( k )->UnpackUnitInfo(packedInfo);
+        CopySavedShips( playername[k], k, packedInfo, true );
+        playersaveunit.push_back( _Universe->AccessCockpit( k )->GetUnitFileName() );
+        _Universe->AccessCockpit( k )->credits = credits;
+        ss.push_back( _Universe->Init( mysystem, Vector( 0, 0, 0 ), planetname ) );
+        if (setplayerXloc)
+          playerNloc.push_back( pos );
+        else
+          playerNloc.push_back( QVector( FLT_MAX, FLT_MAX, FLT_MAX ) );
+        for (unsigned int j = 0; j < saved.size(); j++)
+          savedun.push_back( saved[j] );
+
         SetStarSystemLoading( true );
         InitializeInput();
 
@@ -702,9 +651,8 @@ void bootstrap_main_loop()
                 }
             }
         }
-        //Never dock on load in networking if it was said so in the save file NETFIXME--this may change
-        if ( Network == NULL
-            && mission->getVariable( "savegame",
+
+        if ( mission->getVariable( "savegame",
                                      "" ).length() != 0
             && game_options.dockOnLoad) {
             for (size_t i = 0; i < _Universe->numPlayers(); i++) {
@@ -712,15 +660,7 @@ void bootstrap_main_loop()
                 DockToSavedBases( i, vec );
             }
         }
-        cout<<"Loading completed, now network init"<<endl;
-        //Send a network msg saying we are ready and also send position info
-        if (Network != NULL) {
-            size_t l;
-            //Downloading zone info before setting inGame (CMD_ADDCLIENT) causes a race condition.
-            //CMD_ADDEDYOU (response to CMD_ADDCLIENT) now sends zone info.
-            for (l = 0; l < _Universe->numPlayers(); l++)
-                Network[l].inGame();
-        }
+
         if (game_options.load_last_savegame) {
             //Don't write if we didn't load...
             for (unsigned int i = 0; i < _Universe->numPlayers(); ++i)
@@ -799,11 +739,9 @@ std::string ParseCommandLine( int argc, char **lpCmdLine )
                 break;
             case 'U':
             case 'u':
-                global_username = lpCmdLine[i]+2;
                 break;
             case 'P':
             case 'p':
-                global_password = lpCmdLine[i]+2;
                 break;
             case 'L':
             case 'l':

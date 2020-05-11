@@ -277,9 +277,6 @@ void CommunicatingAI::InitiateContrabandSearch( float playaprob, float targprob 
 
 void CommunicatingAI::AdjustRelationTo( Unit *un, float factor )
 {
-    if (Network)
-        return;          //Server will handle this.
-
     Order::AdjustRelationTo( un, factor );
     float newrel = parent->pilot->adjustSpecificRelationship( parent, un, factor, un->faction );
 

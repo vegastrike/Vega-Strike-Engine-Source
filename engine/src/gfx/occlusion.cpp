@@ -228,8 +228,8 @@ namespace Occlusion {
 
     void /*GFXDRVAPI*/ end( )
     {
-        //BOOST_LOG_TRIVIAL(trace) << boost::format("Occluders: %1% forced and %2% dynamic") % forced_occluders.size() %
-        //      dynamic_occluders.size();
+        BOOST_LOG_TRIVIAL(trace) << boost::format("Occluders: %1% forced and %2% dynamic") % forced_occluders.size() %
+             dynamic_occluders.size();
         // FIXME - I think these three lines are memory leaks -- stephengtuggy 2019-10-01
         forced_occluders.clear();
         forced_occluders_set.clear();

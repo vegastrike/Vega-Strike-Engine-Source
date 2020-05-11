@@ -36,16 +36,6 @@ std::string getMasterPartListUnitName()
     return mpl;
 }
 
-void KillDuplicateUnits( ObjSerial likeSerial )
-{
-    if ( likeSerial != 0 && (Network || SERVER) ) {
-        Unit *un; 
-        for (un_iter it = _Universe->activeStarSystem()->getUnitList().createIterator(); (un=*it)!=NULL; ++it)
-            if ( un->GetSerial() == likeSerial )
-                un->Kill();
-    }
-}
-
 Unit* UnitFactory::createUnit()
 {
     return new GameUnit< Unit > ( 0 );
@@ -57,8 +47,7 @@ Unit* UnitFactory::createUnit( const char *filename,
                                std::string customizedUnit,
                                Flightgroup *flightgroup,
                                int fg_subnumber,
-                               string *netxml,
-                               ObjSerial netcreate )
+                               string *netxml )
 {
     Unit *un = new GameUnit< Unit > ( filename,
                                       SubUnit,
@@ -66,10 +55,7 @@ Unit* UnitFactory::createUnit( const char *filename,
                                       customizedUnit,
                                       flightgroup,
                                       fg_subnumber, netxml );
-    if (netcreate) {
-        KillDuplicateUnits( netcreate );
-        un->SetSerial( netcreate );
-    }
+
     return un;
 }
 Unit* UnitFactory::createServerSideUnit( const char *filename,
@@ -98,18 +84,14 @@ Nebula* UnitFactory::createNebula( const char *unitfile,
                                    bool SubU,
                                    int faction,
                                    Flightgroup *fg,
-                                   int fg_snumber,
-                                   ObjSerial netcreate )
+                                   int fg_snumber )
 {
     Nebula *neb = new GameNebula( unitfile,
                                   SubU,
                                   faction,
                                   fg,
                                   fg_snumber );
-    if (netcreate) {
-        KillDuplicateUnits( netcreate );
-        neb->SetSerial( netcreate );
-    }
+
     return neb;
 }
 
@@ -121,8 +103,7 @@ Missile* UnitFactory::createMissile( const char *filename,
                                      float time,
                                      float radialeffect,
                                      float radmult,
-                                     float detonation_radius,
-                                     ObjSerial netcreate )
+                                     float detonation_radius )
 {
     Missile *un = new GameMissile( filename,
                                    faction,
@@ -133,10 +114,7 @@ Missile* UnitFactory::createMissile( const char *filename,
                                    radialeffect,
                                    radmult,
                                    detonation_radius );
-    if (netcreate) {
-        KillDuplicateUnits( netcreate );
-        un->SetSerial( netcreate );
-    }
+
     return un;
 }
 
@@ -164,8 +142,7 @@ Planet* UnitFactory::createPlanet( QVector x,
                                    const std::vector< GFXLightLocal > &ligh,
                                    int faction,
                                    string fullname,
-                                   bool inside_out,
-                                   ObjSerial netcreate )
+                                   bool inside_out )
 {
     Planet *p = new GamePlanet( x, y, vely, rotvel,
                                 pos,
@@ -176,10 +153,7 @@ Planet* UnitFactory::createPlanet( QVector x,
                                 orbitcent, parent,
                                 ourmat, ligh,
                                 faction, fullname, inside_out );
-    if (netcreate) {
-        KillDuplicateUnits( netcreate );
-        p->SetSerial( netcreate );
-    }
+
     return p;
 }
 
@@ -234,22 +208,17 @@ Asteroid* UnitFactory::createAsteroid( const char *filename,
                                        int faction,
                                        Flightgroup *fg,
                                        int fg_snumber,
-                                       float difficulty,
-                                       ObjSerial netcreate )
+                                       float difficulty )
 {
     Asteroid *ast = new GameAsteroid( filename,
                                       faction,
                                       fg,
                                       fg_snumber,
                                       difficulty );
-    if (netcreate) {
-        KillDuplicateUnits( netcreate );
-        ast->SetSerial( netcreate );
-    }
+
     return ast;
 }
 
-void UnitFactory::broadcastUnit( Unit *un, unsigned short zone ) {}
 
 Terrain* UnitFactory::createTerrain( const char *file, Vector scale, float position, float radius, Matrix &t )
 {

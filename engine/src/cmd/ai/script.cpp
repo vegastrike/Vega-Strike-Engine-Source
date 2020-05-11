@@ -10,6 +10,7 @@
 #include "cmd/unit_generic.h"
 #include "hard_coded_scripts.h"
 #include "universe_util.h"
+#include "configxml.h"
 #include <assert.h>
 
 using namespace XMLSupport;

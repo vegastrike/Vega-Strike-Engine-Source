@@ -1,7 +1,6 @@
 #include "order.h"
 #include "communication.h"
-#include "networking/netserver.h"
-#include "networking/netclient.h"
+#include "configxml.h"
 
 using std::list;
 using std::vector;
@@ -12,15 +11,6 @@ void Order::AdjustRelationTo( Unit *un, float factor )
 
 void Order::Communicate( const CommunicationMessage &c )
 {
-    if (this == NULL)
-        return;
-    if ( Network != NULL && !_Universe->netLocked() ) {
-        //Stupid constness rules...
-        int cp = _Universe->whichPlayerStarship( const_cast< UnitContainer& > (c.sender).GetUnit() );
-        if (cp != -1 && parent && parent->GetSerial() != 0)
-            Network[cp].communicationRequest( c, parent->GetSerial() );
-        return;
-    }
     int completed  = 0;
     unsigned int i = 0;
     CommunicationMessage *newC = new CommunicationMessage( c );
@@ -49,12 +39,6 @@ void Order::Communicate( const CommunicationMessage &c )
                 AdjustRelationTo( un, newC->getDeltaRelation()*talk_factor );
             messagequeue.push_back( newC );
         }
-    }
-    if (SERVER) {
-        Unit *plr = const_cast< UnitContainer& > (c.sender).GetUnit();
-        int   cp  = _Universe->whichPlayerStarship( parent );
-        if (cp >= 1)
-            VSServer->sendCommunication( plr, parent, &c );
     }
 }
 

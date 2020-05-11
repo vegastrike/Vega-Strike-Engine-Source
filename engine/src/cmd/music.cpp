@@ -29,8 +29,7 @@
 #include "vsfilesystem.h"
 #include "music.h"
 #include "base.h"
-#include "networking/inet_file.h"
-#include "networking/inet.h"
+
 #include "python/python_compile.h"
 
 //To allow for loading in another thread, we must handle some AL vars ourselves...

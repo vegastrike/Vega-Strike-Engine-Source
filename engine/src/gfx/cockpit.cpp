@@ -45,7 +45,6 @@
 #include "universe_util.h"
 #include "in_mouse.h"
 #include "gui/glut_support.h"
-#include "networking/netclient.h"
 #include "audiolib.h"
 #include "save_util.h"
 #include "cmd/base.h"
@@ -1439,8 +1438,8 @@ void GameCockpit::TriggerEvents( Unit *un ) {
     else
         last.processing_time = curtime;
 
-    VSFileSystem::vs_dprintf(3, "Processing events\n");
-    //BOOST_LOG_TRIVIAL(trace) << "Processing events";
+    // VSFileSystem::vs_dprintf(3, "Processing events\n");
+    BOOST_LOG_TRIVIAL(trace) << "Processing events";
     for (EVENTID event = EVENTID_FIRST; event < NUM_EVENTS; event = (EVENTID)(event+1)) {
         GameSoundContainer *sound = static_cast<GameSoundContainer*>(GetSoundForEvent(event));
         if (sound != NULL) {

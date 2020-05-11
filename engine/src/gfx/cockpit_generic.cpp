@@ -27,7 +27,6 @@
 #include "background.h"
 //#include "in_mouse.h"
 //#include "gui/glut_support.h"
-#include "networking/netclient.h"
 #include "save_util.h"
 
 #include <algorithm>
@@ -121,8 +120,7 @@ void Cockpit::SetParent( Unit *unit, const char *filename, const char *unitmodna
 {
     if (unit->getFlightgroup() != NULL)
         fg = unit->getFlightgroup();
-    if (!SERVER)
-        activeStarSystem = _Universe->activeStarSystem();          //cannot switch to units in other star systems.
+    activeStarSystem = _Universe->activeStarSystem();          //cannot switch to units in other star systems.
     parent.SetUnit( unit );
     savegame->SetPlayerLocation( pos );
     if (filename[0] != '\0') {
@@ -493,7 +491,7 @@ void PowerDownShield( Shield *shield, float howmuch )
 
 bool Cockpit::Update()
 {
-    if (retry_dock && !SERVER && Network == NULL) {
+    if (retry_dock) {
         QVector vec;
         DockToSavedBases( _Universe->CurrentCockpit(), vec );
     }
@@ -712,10 +710,7 @@ bool Cockpit::Update()
                 static float initialzoom =
                     XMLSupport::parse_float( vs_config->getVariable( "graphics", "inital_zoom_factor", "2.25" ) );
                 zoomfactor = initialzoom;
-                if (Network != NULL) {
-                    Network[_Universe->CurrentCockpit()].respawnRequest();
-                    respawnunit[_Universe->CurrentCockpit()] = 0;
-                } else {
+
                     parentturret.SetUnit( NULL );
                     respawnunit[_Universe->CurrentCockpit()] = 0;
                     std::string  savegamefile = mission->getVariable( "savegame", "" );
@@ -809,7 +804,7 @@ bool Cockpit::Update()
                     _Universe->pushActiveStarSystem( ss );
                     savegame->ReloadPickledData();
                     savegame->LoadSavedMissions();
-                    if (actually_have_save && !SERVER && Network == NULL) {
+                    if (actually_have_save) {
                         QVector vec;
                         DockToSavedBases( whichcp, vec );
                     }
@@ -818,7 +813,7 @@ bool Cockpit::Update()
                     if (!persistent_on_load)
                         _Universe->pushActiveStarSystem( ss );
                     return true;
-                }
+
             }
         }
     }

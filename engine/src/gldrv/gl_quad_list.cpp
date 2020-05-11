@@ -97,14 +97,14 @@ int GFXQuadList::AddQuad( const GFXVertex *vertices, const GFXColorVertex *color
             Dirty--;
             return i;
         }
-    //BOOST_LOG_TRIVIAL(info) << "Fatal Error adding quads";
+    BOOST_LOG_TRIVIAL(info) << "Fatal Error adding quads";
     //should NOT get here!
     return -1;
 }
 void GFXQuadList::DelQuad( int which )
 {
     if (quadassignments[which] >= numQuads) {
-        //BOOST_LOG_TRIVIAL(info) << "error del";
+        BOOST_LOG_TRIVIAL(info) << "error del";
         return;
     }
     if (which < 0 || which >= numVertices/4 || quadassignments[which] == -1)
@@ -121,7 +121,7 @@ void GFXQuadList::DelQuad( int which )
             numQuads--;
             return;
         }
-    //BOOST_LOG_TRIVIAL(info) << " error deleting engine flame";
+    BOOST_LOG_TRIVIAL(info) << " error deleting engine flame";
 }
 void GFXQuadList::ModQuad( int which, const GFXVertex *vertices, float alpha )
 {
