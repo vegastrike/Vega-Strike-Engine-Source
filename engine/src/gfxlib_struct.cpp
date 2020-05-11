@@ -56,7 +56,7 @@ static void print_gl_error(const char *fmt)
 {
     GLenum gl_error;
     if ((gl_error = glGetError())) {
-        //BOOST_LOG_TRIVIAL(info) << boost::format(fmt) % gl_error;
+        BOOST_LOG_TRIVIAL(info) << boost::format(fmt) % gl_error;
     }
 }
 

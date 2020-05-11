@@ -141,7 +141,7 @@ char AUDQueryAudability( const int sound, const Vector &pos, const Vector &vel, 
         if (tmpsrc == 0) {
             playingbuffers[hashed].erase( playingbuffers[hashed].begin()+target );
         } else {
-            //BOOST_LOG_TRIVIAL(trace) << boost::format("stole %1%\n") % tmpsrc;
+            BOOST_LOG_TRIVIAL(trace) << boost::format("stole %1%\n") % tmpsrc;
             return 2;
         }
     }

@@ -74,6 +74,10 @@
 #include "cg_global.h"
 #endif
 
+#include <boost/log/core.hpp>
+#include <boost/log/trivial.hpp>
+#include <boost/log/expressions.hpp>
+
 #include "options.h"
 
 using std::cout;
@@ -81,6 +85,8 @@ using std::cerr;
 using std::endl;
 
 vs_options game_options;
+
+namespace logging = boost::log;
 
 /*
  * Globals
@@ -233,25 +239,24 @@ bool isVista = false;
 
 Unit *TheTopLevelUnit;
 
-/*
-// disabled as does not compile with boost 1.64
 void initLogging(char debugLevel){
-    auto loggingCore = boost::log::core::get();
+    auto loggingCore = logging::core::get();
+
     switch (debugLevel) {
     case 1:
-        loggingCore->set_filter(boost::log::trivial::severity >= boost::log::trivial::info);
+        loggingCore->set_filter(logging::trivial::severity >= logging::trivial::info);
         break;
     case 2:
-        loggingCore->set_filter(boost::log::trivial::severity >= boost::log::trivial::debug);
+        loggingCore->set_filter(logging::trivial::severity >= logging::trivial::debug);
         break;
     case 3:
-        loggingCore->set_filter(boost::log::trivial::severity >= boost::log::trivial::trace);
+        loggingCore->set_filter(logging::trivial::severity >= logging::trivial::trace);
         break;
     default:
-        loggingCore->set_filter(boost::log::trivial::severity >= boost::log::trivial::warning);
+        loggingCore->set_filter(logging::trivial::severity >= logging::trivial::warning);
         break;
     }
-}*/
+}
 
 int main( int argc, char *argv[] )
 {
@@ -309,8 +314,7 @@ int main( int argc, char *argv[] )
     if (g_game.vsdebug == '0')
         g_game.vsdebug = game_options.vsdebug;
 
-    // disabled, does not compile with boost 1.64 and c++11
-    //initLogging(g_game.vsdebug);
+    initLogging(g_game.vsdebug);
 
     // can use the vegastrike config variable to read in the default mission
     if ( game_options.force_client_connect )
