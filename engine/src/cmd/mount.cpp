@@ -306,8 +306,6 @@ bool Mount::PhysicsAlignedFire( Unit *caller,
             temp->SetVelocity( caller->GetVelocity()+adder );
 
 
-                BOOST_LOG_TRIVIAL(trace) << boost::format("Creating missile with SERIAL ID %1%") % this->serial;
-
             if (target && target != owner) {
                 temp->Target( target );
                 temp->TargetTurret( target );
