@@ -230,9 +230,9 @@ void Mission::terminateMission()
     vector< Mission* >::iterator f;
 
     f = std::find( Mission_delqueue.begin(), Mission_delqueue.end(), this );
-    //if (f != Mission_delqueue.end()) {
-    //    BOOST_LOG_TRIVIAL(info) << boost::format("Not deleting mission twice: %1%") % this->mission_name;
-    //}
+    if (f != Mission_delqueue.end()) {
+        BOOST_LOG_TRIVIAL(info) << boost::format("Not deleting mission twice: %1%") % this->mission_name;
+    }
 
     f = std::find( active_missions->begin(), active_missions->end(), this );
 
@@ -242,7 +242,7 @@ void Mission::terminateMission()
         for (vector< Mission* >::iterator i = active_missions->begin(); i != active_missions->end(); ++i) {
             if ((*i)->player_num == player_num) {
                 ++misnum;
-                //BOOST_LOG_TRIVIAL(info) << boost::format("   Mission #%1%: %2%") % misnum % (*i)->mission_name;
+                BOOST_LOG_TRIVIAL(info) << boost::format("   Mission #%1%: %2%") % misnum % (*i)->mission_name;
             }
         }
     }
@@ -256,7 +256,7 @@ void Mission::terminateMission()
     if (this != (*active_missions)[0])        //Shouldn't this always be true?
         Mission_delqueue.push_back( this );          //only delete if we arent' the base mission
     //NETFIXME: This routine does not work properly yet.
-    //BOOST_LOG_TRIVIAL(info) << boost::format("Terminating mission %1% #%2%") % this->mission_name % queuenum;
+    BOOST_LOG_TRIVIAL(info) << boost::format("Terminating mission %1% #%2%") % this->mission_name % queuenum;
     if (queuenum >= 0) {
         // queuenum - 1 since mission #0 is the base mission (main_menu) and is persisted
         // in savegame.cpp:LoadSavedMissions, and it has no correspondin active_scripts/active_missions entry,
@@ -265,16 +265,16 @@ void Mission::terminateMission()
 
         vector< std::string > *scripts = &_Universe->AccessCockpit( player_num )->savegame->getMissionStringData(
             "active_scripts" );
-        //BOOST_LOG_TRIVIAL(info) << boost::format("Terminating mission #%1% - got %2% scripts") % queuenum % scripts->size();
+        BOOST_LOG_TRIVIAL(info) << boost::format("Terminating mission #%1% - got %2% scripts") % queuenum % scripts->size();
         if ( num < scripts->size() )
             scripts->erase( scripts->begin()+num );
         vector< std::string > *missions = &_Universe->AccessCockpit( player_num )->savegame->getMissionStringData(
             "active_missions" );
-        //BOOST_LOG_TRIVIAL(info) << boost::format("Terminating mission #%1% - got %2% missions") % queuenum % missions->size();
+        BOOST_LOG_TRIVIAL(info) << boost::format("Terminating mission #%1% - got %2% missions") % queuenum % missions->size();
         if ( num < missions->size() )
             missions->erase( missions->begin()+num );
-        //BOOST_LOG_TRIVIAL(info) << boost::format("Terminating mission #%1% - %2% scripts remain") % queuenum % scripts->size();
-        //BOOST_LOG_TRIVIAL(info) << boost::format("Terminating mission #%1% - %2% missions remain") % queuenum % missions->size();
+        BOOST_LOG_TRIVIAL(info) << boost::format("Terminating mission #%1% - %2% scripts remain") % queuenum % scripts->size();
+        BOOST_LOG_TRIVIAL(info) << boost::format("Terminating mission #%1% - %2% missions remain") % queuenum % missions->size();
     }
     if (runtime.pymissions)
         runtime.pymissions->Destroy();

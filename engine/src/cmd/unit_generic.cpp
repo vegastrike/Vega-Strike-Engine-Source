@@ -5926,8 +5926,7 @@ bool Unit::UnDock( Unit *utdw )
         else
             this->owner = NULL;
     }
-    //BOOST_LOG_TRIVIAL(trace) << "Asking to undock";
-
+    BOOST_LOG_TRIVIAL(trace) << "Asking to undock";
     for (i = 0; i < utdw->pImage->dockedunits.size(); ++i)
         if (utdw->pImage->dockedunits[i]->uc.GetUnit() == this) {
             utdw->FreeDockingPort( i );

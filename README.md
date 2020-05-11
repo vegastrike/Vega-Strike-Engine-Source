@@ -215,7 +215,7 @@ If you wish to transfer command to another starship, simply press '\[' to switch
 1. Install the dependencies. Something like this:
 
 ```bash
-sudo apt-get -y install cmake g++ python-dev libboost-python-dev libgl1-mesa-glx freeglut3-dev \
+sudo apt-get -y install cmake g++ python-dev libboost-python-dev libboost-log-dev libgl1-mesa-glx freeglut3-dev \
                 libopenal-dev libsdl-gfx1.2-dev libvorbis-dev libjpeg-dev libpng-dev libgtk2.0-dev
 ```
 
@@ -227,7 +227,7 @@ sudo apt-get -y install git cmake python-dev build-essential automake autoconf l
                 libopenal-dev libogg-dev libvorbis-dev libgl1-mesa-dev libsdl1.2-dev \
                 libavcodec-dev libavcodec-extra libavformat-dev libavresample-dev libavutil-dev \
                 libavdevice-dev libpostproc-dev freeglut3-dev libxmu-dev libxi-dev \
-                libboost-python1.67-dev
+                libboost-python1.67-dev libboost-log1.67-dev
 ```
 
 Or on Ubuntu 20.04:
