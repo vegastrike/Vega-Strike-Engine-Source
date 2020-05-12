@@ -650,6 +650,36 @@ ELSE("${CMAKE_BUILD_TYPE}" STREQUAL "Profiler")
 ENDIF("${CMAKE_BUILD_TYPE}" STREQUAL "Profiler")
 
 
+# On some Ubuntu versions and derivatives, a bug exists whereby enabling
+# PIE compilation (Position Independent Executables) results in the
+# `file` utility incorrectly recognising the compiled vegastrike binary
+# as a shared library instead of a position independent shared executable
+# object.
+#
+# To avoid this scenario, turn off this flag by default and let packagers
+# on other distributions turn this on if their OS is able to correctly deal
+# with Position Independent Executables.
+#
+# For more info, see:
+#
+# - https://bugs.launchpad.net/ubuntu/+source/file/+bug/1747711
+#
+# - https://github.com/vegastrike/Vega-Strike-Engine-Source/issues/94
+#
+UNSET(COMPILE_WITH_FPIE CACHE)
+UNSET(CMAKE_POSITION_INDEPENDENT_CODE)
+OPTION(COMPILE_WITH_FPIE
+  "Enable Position Independent Executables (NOT RECOMMENDED on Debian/Ubuntu/Mint)"
+  OFF)
+IF(COMPILE_WITH_FPIE)
+  message("!! Enabling Position Independent Executables (NOT RECOMMENDED on Debian/Ubuntu/Mint) !!")
+  SET(CMAKE_POSITION_INDEPENDENT_CODE ON)
+ELSE(COMPILE_WITH_FPIE)
+  message("++ Disabling Position Independent Executables (Recommended on Debian/Ubuntu/Mint)")
+  add_compile_options(-fno-PIE)
+ENDIF(COMPILE_WITH_FPIE)
+
+
 # Turn off compiling vegastrike bin
 OPTION(DISABLE_CLIENT "Disable building the vegastrike bin"
 		OFF )

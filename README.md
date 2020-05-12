@@ -251,7 +251,7 @@ sudo apt-get -y install git cmake python-dev build-essential automake autoconf l
    ccmake ../engine
    # (configure/edit options to taste in ccmake, press 'c' to save the selected options
    # and press 'g' to update the build configuration files used by the make build tool)
-   make -jN # (where N is the number of available CPU threads/cores on your system)
+   cmake --build . -jN # (where N is the number of available CPU threads/cores on your system)
    mkdir ../bin && cp vegastrike ../bin/ && cp setup/vssetup ../bin/ && cd ..
    ```
 
@@ -260,13 +260,24 @@ sudo apt-get -y install git cmake python-dev build-essential automake autoconf l
    ```bash
    mkdir build & cd build
    cmake ../engine
-   make -jN # (where N is the number of available CPU threads/cores on your system)
+   cmake --build . -jN # (where N is the number of available CPU threads/cores on your system)
    mkdir ../bin && cp vegastrike ../bin/ && cp setup/vssetup ../bin/ && cd ..
    ```
+
+   *TIPS:*
+
    To enable/disable compile-time options with cmake, use `cmake -D<option>`. Example:
 
    ```bash
-   cmake ../engine -DUSE_PYTHON_3=ON -DCPU_SMP=2 -DCPUINTEL_native=ON -CMAKE_BUILD_TYPE=Debug
+   cmake ../engine -COMPILE_WITH_FPIE=ON -DUSE_PYTHON_3=ON -DCPU_SMP=2 -DCPUINTEL_native=ON -CMAKE_BUILD_TYPE=Debug
+   ```
+   In the above example, a non-Ubuntu/Mint packager has wisely decided to compile a
+   Position Independent Executable because his OS isn't
+   [buggy](https://bugs.launchpad.net/ubuntu/+source/file/+bug/1747711) when doing so.
+
+   To enable verbose output for debugging purposes (will show compilation commands), supply the `-v` flag:
+   ```bash
+   cmake --build . -v
    ```
 
 [Link to list of dependencies in wiki](http://vegastrike.sourceforge.net/wiki/HowTo:Compile_from_CVS)
