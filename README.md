@@ -251,7 +251,7 @@ sudo apt-get -y install git cmake python-dev build-essential automake autoconf l
    ccmake ../engine
    # (configure/edit options to taste in ccmake, press 'c' to save the selected options
    # and press 'g' to update the build configuration files used by the make build tool)
-   make -jN # (where N is the number of available CPU threads/cores on your system)
+   cmake --build . -j $(nproc) # (where $(nproc) returns the number of available CPU threads/cores on the system)
    mkdir ../bin && cp vegastrike ../bin/ && cp setup/vssetup ../bin/ && cd ..
    ```
 
@@ -260,14 +260,44 @@ sudo apt-get -y install git cmake python-dev build-essential automake autoconf l
    ```bash
    mkdir build & cd build
    cmake ../engine
-   make -jN # (where N is the number of available CPU threads/cores on your system)
+   cmake --build . -j $(nproc) # (where $(nproc) returns the number of available CPU threads/cores on the system)
    mkdir ../bin && cp vegastrike ../bin/ && cp setup/vssetup ../bin/ && cd ..
    ```
-   To enable/disable compile-time options with cmake, use `cmake -D<option>`. Example:
+
+   __TIPS__:
+
+   To enable verbose output for debugging purposes (will show compilation commands), pass the `-- VERBOSE=1` argument:
 
    ```bash
-   cmake ../engine -DUSE_PYTHON_3=ON -DCPU_SMP=2 -DCPUINTEL_native=ON -CMAKE_BUILD_TYPE=Debug
+   cmake --build . -- VERBOSE=1
    ```
+
+   To enable/disable compile-time options with cmake, use `cmake -D<option>=<value>`. Example:
+
+   ```bash
+   cmake ../engine -DENABLE_PIE=ON -DUSE_PYTHON_3=ON -DCPU_SMP=2 -DCPUINTEL_native=ON -CMAKE_BUILD_TYPE=Debug
+   ```
+
+   __NOTE__:
+
+   On some Ubuntu versions and derivatives, a bug exists whereby enabling
+   PIE compilation (Position Independent Executables) results in the
+   `file` utility incorrectly recognising the compiled vegastrike binary
+   as a shared library instead of a position independent shared executable
+   object.
+
+   The effect of the bug is that vegastrike can still be started from the
+   command line but that it will not be recognised as an executable by GUI
+   file managers such as Nautilus and Dolphin.
+
+   To avoid this scenario, turn off this flag by default and let packagers
+   on other distributions turn this on if their OS is able to correctly deal
+   with Position Independent Executables.
+
+   For more info, see:
+
+   - https://bugs.launchpad.net/ubuntu/+source/file/+bug/1747711
+   - https://github.com/vegastrike/Vega-Strike-Engine-Source/issues/94
 
 [Link to list of dependencies in wiki](http://vegastrike.sourceforge.net/wiki/HowTo:Compile_from_CVS)
 

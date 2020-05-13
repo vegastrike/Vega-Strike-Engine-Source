@@ -580,6 +580,40 @@ IF(DATADIR)
 ENDIF(DATADIR)
 
 
+# On some Ubuntu versions and derivatives, a bug exists whereby enabling
+# PIE compilation (Position Independent Executables) results in the
+# `file` utility incorrectly recognising the compiled vegastrike binary
+# as a shared library instead of a position independent shared executable
+# object.
+#
+# The effect of the bug is that vegastrike can still be started from the
+# command line but that it will not be recognised as an executable by GUI
+# file managers such as Nautilus and Dolphin.
+#
+# To avoid this scenario, turn off this flag by default and let packagers
+# on other distributions turn this on if their OS is able to correctly deal
+# with Position Independent Executables.
+
+# For more info, see:
+# - https://bugs.launchpad.net/ubuntu/+source/file/+bug/1747711
+# - https://github.com/vegastrike/Vega-Strike-Engine-Source/issues/94
+#
+#UNSET(CMAKE_POSITION_INDEPENDENT_CODE)
+OPTION(ENABLE_PIE
+  "Enable Position Independent Executables/Shared Libraries (NOT RECOMMENDED on Ubuntu/Mint)"
+  OFF)
+IF(ENABLE_PIE)
+  message("!! Enabling Position Independent Executables/Shared Libraries (NOT RECOMMENDED on Ubuntu/Mint) !!")
+  #SET(CMAKE_POSITION_INDEPENDENT_CODE ON)
+  add_compile_options("-pie")
+  link_libraries("-pie")
+ELSE(ENABLE_PIE)
+  message("++ Disabling Position Independent Executables/Shared Libraries (Recommended on Ubuntu/Mint)")
+  add_compile_options("-no-pie")
+  link_libraries("-no-pie")
+ENDIF(ENABLE_PIE)
+
+
 # Debug target block. 
 SET(CMAKE_CXX_FLAGS_DEBUG " ${BUILD_OPT} ${CPU_OPTS} ${DEFINES} -include config.h -pipe -g2 -std=c++11 -Wall -fvisibility=hidden" CACHE STRING
     "Flags used by the C++ compiler during debug builds."
@@ -1000,13 +1034,11 @@ add_subdirectory(setup)
 add_subdirectory(objconv)
 
 
-
-
 # show debug output 
 get_directory_property(TEMP_DIRECTORY INCLUDE_DIRECTORIES)
-message("Default build type is Release, no cpu opts enabled. ")
-message("Building with BUILD_OPT: ${BUILD_OPT}")
-#message("Building with CFLAGS: ${CMAKE_CXX_FLAGS}")
+message("-- Default build type is Release, no cpu opts enabled. ")
+message("++ Building with BUILD_OPT: ${BUILD_OPT}")
+#message("++ Building with CMAKE_CXX_FLAGS: ${CMAKE_CXX_FLAGS}")
 #message("Linking with : ${TST_LIBS}")
 #message("including : ${TEMP_DIRECTORY}")
 # end debug output 
