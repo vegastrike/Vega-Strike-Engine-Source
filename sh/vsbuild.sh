@@ -51,4 +51,4 @@ cd $ROOT_DIR
 
 mkdir -pv $BIN_DIR
 
-cp -v $BUILD_DIR/{vegastrike,setup/vssetup,objconv/mesh_tool} $BIN_DIR
+cp -v $BUILD_DIR/{vegastrike,setup/vegasettings,objconv/mesh_tool} $BIN_DIR

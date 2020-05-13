@@ -377,7 +377,7 @@ void GameMenu::createControls()
 
     //Single Player button
     //Options button (Requires restart if not done at the beginning... static variables)
-    //Options button requires porting vssetup code to be used inside VS... should be simple to do.  Is it worth it?
+    //Options button requires porting vegasettings code to be used inside VS... should be simple to do.  Is it worth it?
     //Network button
     //About
     //Exit game

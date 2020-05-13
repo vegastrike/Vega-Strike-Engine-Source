@@ -5,7 +5,7 @@
 #
 # Instructions:
 #
-# Copy the loki_setup/ folder in the same directory as copies of your data dir, music dir, vssetup and vegastrike.
+# Copy the loki_setup/ folder in the same directory as copies of your data dir, music dir, vegasettings and vegastrike.
 # Note: this script will move the the data and music dirs, not copy...so don't use your cvs masters :-)
 # Have the relevant binaries compiled statically.
 # 
@@ -65,7 +65,7 @@ MUSICDIR=$CURPWD/../vegastrike-music
 
 if [ $SETUPARG = "prepare" ] || [ $SETUPARG = "release" ]; then
   
-  for BINFILE in $CURPWD/../vegastrike/vegastrike $CURPWD/../vegastrike/vegaserver $CURPWD/../vegastrike/soundserver $CURPWD/../vegastrike/vssetup $CURPWD/vsinstall.sh $CURPWD/vegastrike.sh ; do
+  for BINFILE in $CURPWD/../vegastrike/vegastrike $CURPWD/../vegastrike/vegaserver $CURPWD/../vegastrike/soundserver $CURPWD/../vegastrike/vegasettings $CURPWD/vsinstall.sh $CURPWD/vegastrike.sh ; do
     {
     if [ \! -s $BINFILE ]; then
       echo Binary $BINFILE not built.
@@ -146,13 +146,13 @@ if [ $SETUPARG = "organise" ] || [ $SETUPARG = "release" ]; then
 # Copy the vegastrike binaries
   mkdir -p $BASEDIR/bin
   
-  for BINFILE in $CURPWD/../vegastrike/vegastrike $CURPWD/../vegastrike/vegaserver $CURPWD/../vegastrike/soundserver $CURPWD/../vegastrike/vssetup $CURPWD/vsinstall.sh $CURPWD/vegastrike.sh ; do
+  for BINFILE in $CURPWD/../vegastrike/vegastrike $CURPWD/../vegastrike/vegaserver $CURPWD/../vegastrike/soundserver $CURPWD/../vegastrike/vegasettings $CURPWD/vsinstall.sh $CURPWD/vegastrike.sh ; do
     if [ $DESTRUCTIVE = 1 ] ; then
       mv $BINFILE $BASEDIR/bin/
     else
       cp $BINFILE $BASEDIR/bin
     fi ; done
-mv $BASEDIR/bin/vssetup $BASEDIR/bin/setup
+mv $BASEDIR/bin/vegasettings $BASEDIR/bin/setup
 #cant call it that in source directory cus there is a dir by that name
 
 
