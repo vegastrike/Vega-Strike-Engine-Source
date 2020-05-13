@@ -598,26 +598,20 @@ ENDIF(DATADIR)
 # - https://bugs.launchpad.net/ubuntu/+source/file/+bug/1747711
 # - https://github.com/vegastrike/Vega-Strike-Engine-Source/issues/94
 #
-UNSET(CMAKE_POSITION_INDEPENDENT_CODE)
-UNSET(ENV_CFLAGS)
-UNSET(ENV_CXXFLAGS)
-SET(ENV_CFLAGS "${CMAKE_C_FLAGS}")
-SET(ENV_CXXFLAGS "${CMAKE_CXX_FLAGS}")
-OPTION(COMPILE_WITH_FPIE
+#UNSET(CMAKE_POSITION_INDEPENDENT_CODE)
+OPTION(ENABLE_PIE
   "Enable Position Independent Executables/Shared Libraries (NOT RECOMMENDED on Ubuntu/Mint)"
   OFF)
-IF(COMPILE_WITH_FPIE)
+IF(ENABLE_PIE)
   message("!! Enabling Position Independent Executables/Shared Libraries (NOT RECOMMENDED on Ubuntu/Mint) !!")
   #SET(CMAKE_POSITION_INDEPENDENT_CODE ON)
-  SET(CMAKE_C_FLAGS "${ENV_CFLAGS} -fPIC -fPIE")
-  SET(CMAKE_CXX_FLAGS "${ENV_CXXFLAGS} -fPIC -fPIE")
-ELSE(COMPILE_WITH_FPIE)
+  add_compile_options("-pie")
+  link_libraries("-pie")
+ELSE(ENABLE_PIE)
   message("++ Disabling Position Independent Executables/Shared Libraries (Recommended on Ubuntu/Mint)")
-  #add_compile_options(-fno-PIE)
-  #add_compile_options(-fno-PIC)
-  SET(CMAKE_C_FLAGS "${ENV_CFLAGS} -fno-PIC -fno-PIE")
-  SET(CMAKE_CXX_FLAGS "${ENV_CXXFLAGS} -fno-PIC -fno-PIE")
-ENDIF(COMPILE_WITH_FPIE)
+  add_compile_options("-no-pie")
+  link_libraries("-no-pie")
+ENDIF(ENABLE_PIE)
 
 
 # Debug target block. 

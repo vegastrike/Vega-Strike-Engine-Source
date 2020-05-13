@@ -275,7 +275,7 @@ sudo apt-get -y install git cmake python-dev build-essential automake autoconf l
    To enable/disable compile-time options with cmake, use `cmake -D<option>=<value>`. Example:
 
    ```bash
-   cmake ../engine -DCOMPILE_WITH_FPIE=ON -DUSE_PYTHON_3=ON -DCPU_SMP=2 -DCPUINTEL_native=ON -CMAKE_BUILD_TYPE=Debug
+   cmake ../engine -DENABLE_PIE=ON -DUSE_PYTHON_3=ON -DCPU_SMP=2 -DCPUINTEL_native=ON -CMAKE_BUILD_TYPE=Debug
    ```
 
    __NOTE__:
