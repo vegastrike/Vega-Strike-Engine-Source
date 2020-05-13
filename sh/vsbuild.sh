@@ -49,7 +49,7 @@ cmake -DCMAKE_BUILD_TYPE=Debug $@ $SRC_DIR
 
 # compile now using all cpus and show the compiler command line for each
 # compilation unit for easier troubleshooting in case of failures.
-cmake --build -v -j$(nproc) .
+cmake --build . -v -j$(nproc)
 
 cd $ROOT_DIR
 
