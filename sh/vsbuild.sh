@@ -19,7 +19,7 @@
 
 
 echo "-------------------------------"
-echo "--- vsbuild.sh | 2020-02-09 ---"
+echo "--- vsbuild.sh | 2020-05-13 ---"
 echo "-------------------------------"
 
 #----------------------------------
@@ -38,15 +38,18 @@ fi
 
 cd $BUILD_DIR
 
-# configure libraries
-cmake -DCMAKE_BUILD_TYPE=Release $@ $SRC_DIR
+# configure libraries and prepare for the Debug build having -Werror set,
+# thus gating VS commits on being warning-free at some point in the near
+# future -- see https://github.com/vegastrike/Vega-Strike-Engine-Source/issues/50
+cmake -DCMAKE_BUILD_TYPE=Debug $@ $SRC_DIR
 
 # for a clean build only
 # mut we can do it manually
 #make clean
 
-# compile now using all cpus
-make -j$(nproc)
+# compile now using all cpus and show the compiler command line for each
+# compilation unit for easier troubleshooting in case of failures.
+cmake --build -v -j$(nproc) .
 
 cd $ROOT_DIR
 
