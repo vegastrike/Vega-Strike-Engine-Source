@@ -671,14 +671,15 @@ ENDIF("${CMAKE_BUILD_TYPE}" STREQUAL "Profiler")
 UNSET(COMPILE_WITH_FPIE CACHE)
 UNSET(CMAKE_POSITION_INDEPENDENT_CODE)
 OPTION(COMPILE_WITH_FPIE
-  "Enable Position Independent Executables (NOT RECOMMENDED on Debian/Ubuntu/Mint)"
+  "Enable Position Independent Executables/Shared Libraries (NOT RECOMMENDED on Ubuntu/Mint)"
   OFF)
 IF(COMPILE_WITH_FPIE)
-  message("!! Enabling Position Independent Executables (NOT RECOMMENDED on Debian/Ubuntu/Mint) !!")
+  message("!! Enabling Position Independent Executables/Shared Libraries (NOT RECOMMENDED on Ubuntu/Mint) !!")
   SET(CMAKE_POSITION_INDEPENDENT_CODE ON)
 ELSE(COMPILE_WITH_FPIE)
-  message("++ Disabling Position Independent Executables (Recommended on Debian/Ubuntu/Mint)")
+  message("++ Disabling Position Independent Executables/Shared Libraries (Recommended on Ubuntu/Mint)")
   add_compile_options(-fno-PIE)
+  add_compile_options(-fno-PIC)
 ENDIF(COMPILE_WITH_FPIE)
 
 
