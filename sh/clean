@@ -36,4 +36,4 @@ find $DATA_DIR -name "*.pyc" -delete
 # delete home vegastrike config
 echo "deleting home vegastrike.config"
 rm ~/.vegastrike/vegastrike.config
-echo "run bin/vssetup to create a new setup"
+echo "run bin/vegasettings to create a new setup"

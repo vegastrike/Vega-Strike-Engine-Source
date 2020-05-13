@@ -335,7 +335,7 @@ void hello( GtkWidget *widget, gpointer   data ) {
 #else
 		pid=fork();
 		if (pid==-1) {
-			execlp("vssetup","vssetup",NULL);
+			execlp("vegasettings","vegasettings",NULL);
 			return;
 		}
 #endif

@@ -21,7 +21,7 @@
 
 Either install Vega Strike from the binary installer for your platform, if available, or follow the instructions for compiling from source. (`Compiling Vegastrike`, below.)
 
-- Change settings with command `bin/vssetup`
+- Change settings with command `bin/vegasettings`
 - Run command `bin/vegastrike` or double-click the executable file in the bin directory.
 
 
@@ -64,7 +64,7 @@ Either install Vega Strike from the binary installer for your platform, if avail
 Run setup and then vegastrike
 
 ```bash
-bin/vssetup
+bin/vegasettings
 bin/vegastrike
 ```
 
@@ -117,7 +117,7 @@ If you encounter any issues while playing, please create an issue with the Vega 
       The Setup utility.
   /usr/local/bin/vslauncher
       The vegastrike save game and mission selection utility
-  /usr/local/bin/vssetup
+  /usr/local/bin/vegasettings
       Internal installer program
   /usr/local/share/vegastrike
       The vegastrike data files
@@ -252,7 +252,7 @@ sudo apt-get -y install git cmake python-dev build-essential automake autoconf l
    # (configure/edit options to taste in ccmake, press 'c' to save the selected options
    # and press 'g' to update the build configuration files used by the make build tool)
    cmake --build . -j $(nproc) # (where $(nproc) returns the number of available CPU threads/cores on the system)
-   mkdir ../bin && cp vegastrike ../bin/ && cp setup/vssetup ../bin/ && cd ..
+   mkdir ../bin && cp vegastrike ../bin/ && cp setup/vegasettings ../bin/ && cd ..
    ```
 
    c. *OR* configure and compile VS manually, using the command-line cmake frontend:
@@ -261,7 +261,7 @@ sudo apt-get -y install git cmake python-dev build-essential automake autoconf l
    mkdir build & cd build
    cmake ../engine
    cmake --build . -j $(nproc) # (where $(nproc) returns the number of available CPU threads/cores on the system)
-   mkdir ../bin && cp vegastrike ../bin/ && cp setup/vssetup ../bin/ && cd ..
+   mkdir ../bin && cp vegastrike ../bin/ && cp setup/vegasettings ../bin/ && cd ..
    ```
 
    __TIPS__:

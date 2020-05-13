@@ -14,7 +14,7 @@
 *   (at your option) any later version.                                   *
 *                                                                         *
 ***************************************************************************/
-/* This file is for common (as in shared between vegastrike, vssetup as vsconfig) stuff
+/* This file is for common (as in shared between vegastrike, vegasettings as vsconfig) stuff
  * that is not import enought to warrant it's own file.
  */
 
