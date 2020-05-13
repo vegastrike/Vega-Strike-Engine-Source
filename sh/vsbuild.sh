@@ -32,11 +32,8 @@ BIN_DIR=$ROOT_DIR/bin
 SRC_DIR=$ROOT_DIR/engine
 COMMAND=""
 
-if [ ! -d "$BUILD_DIR" ]; then
-    mkdir $BUILD_DIR
-fi
-
-cd $BUILD_DIR
+# -p creates if the target doesn't exist, noop otherwise
+mkdir -pv $BUILD_DIR && cd $BUILD_DIR
 
 # configure libraries and prepare for the Debug build having -Werror set,
 # thus gating VS commits on being warning-free at some point in the near
@@ -49,12 +46,10 @@ cmake -DCMAKE_BUILD_TYPE=Debug $@ $SRC_DIR
 
 # compile now using all cpus and show the compiler command line for each
 # compilation unit for easier troubleshooting in case of failures.
-cmake --build . -v -j$(nproc)
+cmake --build $BUILD_DIR -v -j$(nproc)
 
 cd $ROOT_DIR
 
-if [ ! -d "$BIN_DIR" ]; then
-    mkdir $BIN_DIR
-fi
+mkdir -pv $BIN_DIR
 
-cp $BUILD_DIR/{vegastrike,setup/vssetup,objconv/mesh_tool} $BIN_DIR
+cp -v $BUILD_DIR/{vegastrike,setup/vssetup,objconv/mesh_tool} $BIN_DIR

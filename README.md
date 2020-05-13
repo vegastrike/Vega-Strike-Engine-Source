@@ -251,7 +251,7 @@ sudo apt-get -y install git cmake python-dev build-essential automake autoconf l
    ccmake ../engine
    # (configure/edit options to taste in ccmake, press 'c' to save the selected options
    # and press 'g' to update the build configuration files used by the make build tool)
-   cmake --build . -j$(nproc) # (where $(nproc) returns the number of available CPU threads/cores on your system)
+   cmake --build . -j$(nproc) # (where $(nproc) returns the number of available CPU threads/cores on the system)
    mkdir ../bin && cp vegastrike ../bin/ && cp setup/vssetup ../bin/ && cd ..
    ```
 
@@ -260,7 +260,7 @@ sudo apt-get -y install git cmake python-dev build-essential automake autoconf l
    ```bash
    mkdir build & cd build
    cmake ../engine
-   cmake --build . -j$(nproc) # (where $(nproc) returns the number of available CPU threads/cores on your system)
+   cmake --build . -j$(nproc) # (where $(nproc) returns the number of available CPU threads/cores on the system)
    mkdir ../bin && cp vegastrike ../bin/ && cp setup/vssetup ../bin/ && cd ..
    ```
 
