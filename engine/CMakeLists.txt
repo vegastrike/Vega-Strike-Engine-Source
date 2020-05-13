@@ -656,14 +656,16 @@ ENDIF("${CMAKE_BUILD_TYPE}" STREQUAL "Profiler")
 # as a shared library instead of a position independent shared executable
 # object.
 #
+# The effect of the bug is that vegastrike can still be started from the
+# command line but that it will not be recognised as an executable by GUI
+# file managers such as Nautilus and Dolphin.
+#
 # To avoid this scenario, turn off this flag by default and let packagers
 # on other distributions turn this on if their OS is able to correctly deal
 # with Position Independent Executables.
-#
+
 # For more info, see:
-#
 # - https://bugs.launchpad.net/ubuntu/+source/file/+bug/1747711
-#
 # - https://github.com/vegastrike/Vega-Strike-Engine-Source/issues/94
 #
 UNSET(COMPILE_WITH_FPIE CACHE)

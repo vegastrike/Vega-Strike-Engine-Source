@@ -264,21 +264,40 @@ sudo apt-get -y install git cmake python-dev build-essential automake autoconf l
    mkdir ../bin && cp vegastrike ../bin/ && cp setup/vssetup ../bin/ && cd ..
    ```
 
-   *TIPS:*
+   __TIPS__:
 
-   To enable/disable compile-time options with cmake, use `cmake -D<option>`. Example:
+   To enable verbose output for debugging purposes (will show compilation commands), supply the `-v` flag:
+
+   ```bash
+   cmake --build . -v
+   ```
+
+   To enable/disable compile-time options with cmake, use `cmake -D<option>=<value>`. Example:
 
    ```bash
    cmake ../engine -COMPILE_WITH_FPIE=ON -DUSE_PYTHON_3=ON -DCPU_SMP=2 -DCPUINTEL_native=ON -CMAKE_BUILD_TYPE=Debug
    ```
-   In the above example, a non-Ubuntu/Mint packager has wisely decided to compile a
-   Position Independent Executable because his OS isn't
-   [buggy](https://bugs.launchpad.net/ubuntu/+source/file/+bug/1747711) when doing so.
 
-   To enable verbose output for debugging purposes (will show compilation commands), supply the `-v` flag:
-   ```bash
-   cmake --build . -v
-   ```
+   __NOTE__:
+
+   On some Ubuntu versions and derivatives, a bug exists whereby enabling
+   PIE compilation (Position Independent Executables) results in the
+   `file` utility incorrectly recognising the compiled vegastrike binary
+   as a shared library instead of a position independent shared executable
+   object.
+
+   The effect of the bug is that vegastrike can still be started from the
+   command line but that it will not be recognised as an executable by GUI
+   file managers such as Nautilus and Dolphin.
+
+   To avoid this scenario, turn off this flag by default and let packagers
+   on other distributions turn this on if their OS is able to correctly deal
+   with Position Independent Executables.
+
+   For more info, see:
+
+   - https://bugs.launchpad.net/ubuntu/+source/file/+bug/1747711
+   - https://github.com/vegastrike/Vega-Strike-Engine-Source/issues/94
 
 [Link to list of dependencies in wiki](http://vegastrike.sourceforge.net/wiki/HowTo:Compile_from_CVS)
 
