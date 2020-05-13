@@ -668,18 +668,21 @@ ENDIF("${CMAKE_BUILD_TYPE}" STREQUAL "Profiler")
 # - https://bugs.launchpad.net/ubuntu/+source/file/+bug/1747711
 # - https://github.com/vegastrike/Vega-Strike-Engine-Source/issues/94
 #
-UNSET(COMPILE_WITH_FPIE CACHE)
 UNSET(CMAKE_POSITION_INDEPENDENT_CODE)
 OPTION(COMPILE_WITH_FPIE
   "Enable Position Independent Executables/Shared Libraries (NOT RECOMMENDED on Ubuntu/Mint)"
   OFF)
 IF(COMPILE_WITH_FPIE)
   message("!! Enabling Position Independent Executables/Shared Libraries (NOT RECOMMENDED on Ubuntu/Mint) !!")
-  SET(CMAKE_POSITION_INDEPENDENT_CODE ON)
+  #SET(CMAKE_POSITION_INDEPENDENT_CODE ON)
+  SET(CMAKE_C_FLAGS "-fPIC -fPIE" ${CMAKE_C_FLAGS})
+  SET(CMAKE_CXX_FLAGS "-fPIC -fPIE" ${CMAKE_CXX_FLAGS})
 ELSE(COMPILE_WITH_FPIE)
   message("++ Disabling Position Independent Executables/Shared Libraries (Recommended on Ubuntu/Mint)")
-  add_compile_options(-fno-PIE)
-  add_compile_options(-fno-PIC)
+  #add_compile_options(-fno-PIE)
+  #add_compile_options(-fno-PIC)
+  SET(CMAKE_C_FLAGS "-fno-PIC -fno-PIE" ${CMAKE_C_FLAGS})
+  SET(CMAKE_CXX_FLAGS "-fno-PIC -fno-PIE" ${CMAKE_CXX_FLAGS})
 ENDIF(COMPILE_WITH_FPIE)
 
 
@@ -1033,13 +1036,11 @@ add_subdirectory(setup)
 add_subdirectory(objconv)
 
 
-
-
 # show debug output 
 get_directory_property(TEMP_DIRECTORY INCLUDE_DIRECTORIES)
-message("Default build type is Release, no cpu opts enabled. ")
-message("Building with BUILD_OPT: ${BUILD_OPT}")
-#message("Building with CFLAGS: ${CMAKE_CXX_FLAGS}")
+message("-- Default build type is Release, no cpu opts enabled. ")
+message("++ Building with BUILD_OPT: ${BUILD_OPT}")
+#message("++ Building with CMAKE_CXX_FLAGS: ${CMAKE_CXX_FLAGS}")
 #message("Linking with : ${TST_LIBS}")
 #message("including : ${TEMP_DIRECTORY}")
 # end debug output 

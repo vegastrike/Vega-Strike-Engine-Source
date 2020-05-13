@@ -44,8 +44,8 @@ cmake -DCMAKE_BUILD_TYPE=Debug $@ $SRC_DIR
 # mut we can do it manually
 #make clean
 
-# compile now using all cpus. 
-cmake --build $BUILD_DIR -j $(nproc)  
+# compile now using all cpus and show compilation commands
+cmake --build . -j $(nproc) -- VERBOSE=1
 
 cd $ROOT_DIR
 

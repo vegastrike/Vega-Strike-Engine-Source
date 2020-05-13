@@ -266,10 +266,10 @@ sudo apt-get -y install git cmake python-dev build-essential automake autoconf l
 
    __TIPS__:
 
-   To enable verbose output for debugging purposes (will show compilation commands), supply the `-v` flag:
+   To enable verbose output for debugging purposes (will show compilation commands), pass the `-- VERBOSE=1` argument:
 
    ```bash
-   cmake --build . -v
+   cmake --build . -- VERBOSE=1
    ```
 
    To enable/disable compile-time options with cmake, use `cmake -D<option>=<value>`. Example:
