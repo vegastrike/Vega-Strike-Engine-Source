@@ -580,6 +580,46 @@ IF(DATADIR)
 ENDIF(DATADIR)
 
 
+# On some Ubuntu versions and derivatives, a bug exists whereby enabling
+# PIE compilation (Position Independent Executables) results in the
+# `file` utility incorrectly recognising the compiled vegastrike binary
+# as a shared library instead of a position independent shared executable
+# object.
+#
+# The effect of the bug is that vegastrike can still be started from the
+# command line but that it will not be recognised as an executable by GUI
+# file managers such as Nautilus and Dolphin.
+#
+# To avoid this scenario, turn off this flag by default and let packagers
+# on other distributions turn this on if their OS is able to correctly deal
+# with Position Independent Executables.
+
+# For more info, see:
+# - https://bugs.launchpad.net/ubuntu/+source/file/+bug/1747711
+# - https://github.com/vegastrike/Vega-Strike-Engine-Source/issues/94
+#
+UNSET(CMAKE_POSITION_INDEPENDENT_CODE)
+UNSET(ENV_CFLAGS)
+UNSET(ENV_CXXFLAGS)
+SET(ENV_CFLAGS "${CMAKE_C_FLAGS}")
+SET(ENV_CXXFLAGS "${CMAKE_CXX_FLAGS}")
+OPTION(COMPILE_WITH_FPIE
+  "Enable Position Independent Executables/Shared Libraries (NOT RECOMMENDED on Ubuntu/Mint)"
+  OFF)
+IF(COMPILE_WITH_FPIE)
+  message("!! Enabling Position Independent Executables/Shared Libraries (NOT RECOMMENDED on Ubuntu/Mint) !!")
+  #SET(CMAKE_POSITION_INDEPENDENT_CODE ON)
+  SET(CMAKE_C_FLAGS "${ENV_CFLAGS} -fPIC -fPIE")
+  SET(CMAKE_CXX_FLAGS "${ENV_CXXFLAGS} -fPIC -fPIE")
+ELSE(COMPILE_WITH_FPIE)
+  message("++ Disabling Position Independent Executables/Shared Libraries (Recommended on Ubuntu/Mint)")
+  #add_compile_options(-fno-PIE)
+  #add_compile_options(-fno-PIC)
+  SET(CMAKE_C_FLAGS "${ENV_CFLAGS} -fno-PIC -fno-PIE")
+  SET(CMAKE_CXX_FLAGS "${ENV_CXXFLAGS} -fno-PIC -fno-PIE")
+ENDIF(COMPILE_WITH_FPIE)
+
+
 # Debug target block. 
 SET(CMAKE_CXX_FLAGS_DEBUG " ${BUILD_OPT} ${CPU_OPTS} ${DEFINES} -include config.h -pipe -g2 -std=c++11 -Wall -fvisibility=hidden" CACHE STRING
     "Flags used by the C++ compiler during debug builds."
@@ -648,42 +688,6 @@ ELSE("${CMAKE_BUILD_TYPE}" STREQUAL "Profiler")
 	MARK_AS_ADVANCED( FORCE
 		 CMAKE_CXX_FLAGS_PROFILER )
 ENDIF("${CMAKE_BUILD_TYPE}" STREQUAL "Profiler")
-
-
-# On some Ubuntu versions and derivatives, a bug exists whereby enabling
-# PIE compilation (Position Independent Executables) results in the
-# `file` utility incorrectly recognising the compiled vegastrike binary
-# as a shared library instead of a position independent shared executable
-# object.
-#
-# The effect of the bug is that vegastrike can still be started from the
-# command line but that it will not be recognised as an executable by GUI
-# file managers such as Nautilus and Dolphin.
-#
-# To avoid this scenario, turn off this flag by default and let packagers
-# on other distributions turn this on if their OS is able to correctly deal
-# with Position Independent Executables.
-
-# For more info, see:
-# - https://bugs.launchpad.net/ubuntu/+source/file/+bug/1747711
-# - https://github.com/vegastrike/Vega-Strike-Engine-Source/issues/94
-#
-UNSET(CMAKE_POSITION_INDEPENDENT_CODE)
-OPTION(COMPILE_WITH_FPIE
-  "Enable Position Independent Executables/Shared Libraries (NOT RECOMMENDED on Ubuntu/Mint)"
-  OFF)
-IF(COMPILE_WITH_FPIE)
-  message("!! Enabling Position Independent Executables/Shared Libraries (NOT RECOMMENDED on Ubuntu/Mint) !!")
-  #SET(CMAKE_POSITION_INDEPENDENT_CODE ON)
-  SET(CMAKE_C_FLAGS "-fPIC -fPIE" ${CMAKE_C_FLAGS})
-  SET(CMAKE_CXX_FLAGS "-fPIC -fPIE" ${CMAKE_CXX_FLAGS})
-ELSE(COMPILE_WITH_FPIE)
-  message("++ Disabling Position Independent Executables/Shared Libraries (Recommended on Ubuntu/Mint)")
-  #add_compile_options(-fno-PIE)
-  #add_compile_options(-fno-PIC)
-  SET(CMAKE_C_FLAGS "-fno-PIC -fno-PIE" ${CMAKE_C_FLAGS})
-  SET(CMAKE_CXX_FLAGS "-fno-PIC -fno-PIE" ${CMAKE_CXX_FLAGS})
-ENDIF(COMPILE_WITH_FPIE)
 
 
 # Turn off compiling vegastrike bin
