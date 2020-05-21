@@ -10,7 +10,7 @@
 #if defined (_MSC_VER) && _MSC_VER <= 1200
 #define Vector Vactor
 #endif
-#include "cs_boostpython.h"
+#include <boost/python.hpp>
 #if defined (_MSC_VER) && _MSC_VER <= 1200
 #undef Vector
 #endif

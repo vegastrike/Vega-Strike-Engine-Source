@@ -6,7 +6,7 @@
 #include <boost/python/objects.hpp>
 #endif
 
-#include "cs_python.h"
+#include <Python.h>
 #include <vector>
 #include <string>
 #include <math.h>

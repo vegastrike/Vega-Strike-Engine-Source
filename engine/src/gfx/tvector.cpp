@@ -1,14 +1,14 @@
 #include "tvector.h"
 #include "matrix.h"
 
-#include "cs_boostpythonclass.h"
+#include <boost/python/class.hpp>
 #include <boost/python/to_python_converter.hpp>
 #include <boost/python/to_python_indirect.hpp>
 #include <boost/python/to_python_value.hpp>
 #include <boost/python/converter/builtin_converters.hpp>
 #include "vegastrike.h"
 #include <math.h>
-#include "cs_boostpython.h"
+#include <boost/python.hpp>
 #define _CZ (761.465325527)
 
 // Specialization comes first (actually only for declaration)

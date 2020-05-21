@@ -1,5 +1,5 @@
 #include "command.h"
-#include "cs_python.h"
+#include <Python.h>
 #include <pyerrors.h>
 #include <pythonrun.h>
 #include "gldrv/winsys.h"
