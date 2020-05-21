@@ -23,7 +23,6 @@
   c_alike scripting written by Alexander Rawass <alexannika@users.sourceforge.net>
 */
 
-#include "config.h"
 
 #include <stdio.h>
 

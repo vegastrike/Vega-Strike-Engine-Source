@@ -3,7 +3,6 @@
 //
 
 #include "RenderableListener.h"
-#include "config.h"
 
 namespace Audio {
 

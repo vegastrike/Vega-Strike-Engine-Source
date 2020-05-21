@@ -3,7 +3,6 @@
 //
 
 #include "Scene.h"
-#include "config.h"
 
 namespace Audio {
 

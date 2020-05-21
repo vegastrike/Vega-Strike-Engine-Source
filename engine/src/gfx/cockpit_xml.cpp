@@ -1,4 +1,3 @@
-#include "config.h"
 #include "cockpit.h"
 #include "xml_support.h"
 #include "gauge.h"

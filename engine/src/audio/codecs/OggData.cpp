@@ -2,7 +2,6 @@
 // C++ implementation: Audio::__impl::OggData
 //
 
-#include "config.h"
 
 #ifdef HAVE_OGG
 #include <sys/types.h>
@@ -10,7 +9,6 @@
 #include <stdint.h>
 #endif
 #include "OggData.h"
-#include "config.h"
 #include "../Format.h"
 #include "../Exceptions.h"
 

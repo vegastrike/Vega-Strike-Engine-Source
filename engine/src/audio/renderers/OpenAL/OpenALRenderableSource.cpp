@@ -4,7 +4,6 @@
 #include "OpenALRenderableSource.h"
 #include "OpenALSimpleSound.h"
 #include "OpenALHelpers.h"
-#include "config.h"
 
 #include "al.h"
 

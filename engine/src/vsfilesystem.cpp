@@ -22,7 +22,6 @@ struct dirent
 #include <dirent.h>
 #endif
 #include <sys/stat.h>
-#include "config.h"
 #include "configxml.h"
 #include "vsfilesystem.h"
 #include "vs_globals.h"

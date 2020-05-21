@@ -1,7 +1,6 @@
 //
 // C++ Implementation: Audio::Test
 //
-#include "config.h"
 
 #include "Types.h"
 #include "Exceptions.h"

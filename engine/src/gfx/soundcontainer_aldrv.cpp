@@ -1,4 +1,3 @@
-#include "config.h"
 
 #include "soundcontainer_aldrv.h"
 #include "audiolib.h"
