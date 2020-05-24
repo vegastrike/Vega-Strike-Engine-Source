@@ -1,4 +1,3 @@
-#include "config.h"
 #include "gnuhash.h"
 #include <vector>
 class Animation;

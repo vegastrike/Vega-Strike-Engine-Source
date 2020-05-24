@@ -4,7 +4,6 @@
 
 #include "vid_file.h"
 #include "vsfilesystem.h"
-#include "config.h"
 #include "ffmpeg_init.h"
 
 #include <string.h>

@@ -22,7 +22,6 @@
 /*
  *  xml Mission Scripting written by Alexander Rawass <alexannika@users.sourceforge.net>
  */
-#include "config.h"
 #include <boost/version.hpp>
 #include <boost/python/class.hpp>
 #include "python/python_class.h"

@@ -4,7 +4,6 @@
 
 #include "Source.h"
 #include "SourceListener.h"
-#include "config.h"
 #include "utils.h"
 
 #include <math.h>

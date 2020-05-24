@@ -2,7 +2,6 @@
 // C++ Implementation: Audio::TemplateManager
 //
 #include "TemplateManager.h"
-#include "config.h"
 
 #include <utility>
 #include <assert.h>

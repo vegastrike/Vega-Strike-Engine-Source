@@ -2,7 +2,6 @@
 #define _ENDIANNESS_H
 double DONTUSE__NXSwapBigDoubleToLittleEndian( double x );
 
-#include "config.h"
 
 #if defined (__HAIKU__) //For unknow reasons, Haiku don't fit into any case below
     #include <endian.h>

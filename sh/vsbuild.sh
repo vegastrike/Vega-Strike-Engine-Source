@@ -45,7 +45,7 @@ cmake -DCMAKE_BUILD_TYPE=Debug $@ $SRC_DIR
 #make clean
 
 # compile now using all cpus and show compilation commands
-cmake --build . -j $(nproc) -- VERBOSE=1
+make -j $(nproc) VERBOSE=1
 
 cd $ROOT_DIR
 

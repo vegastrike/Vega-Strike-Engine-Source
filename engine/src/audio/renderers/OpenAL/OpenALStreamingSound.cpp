@@ -4,7 +4,6 @@
 
 #include "OpenALStreamingSound.h"
 #include "OpenALHelpers.h"
-#include "config.h"
 
 #include "../../CodecRegistry.h"
 #include "../../Stream.h"

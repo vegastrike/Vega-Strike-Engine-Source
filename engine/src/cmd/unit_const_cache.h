@@ -1,6 +1,5 @@
 #ifndef __UNIT_CONST_CACHE_H
 #define __UNIT_CONST_CACHE_H
-#include "config.h"
 #include "hashtable.h"
 #include <string>
 #include <gnuhash.h>
