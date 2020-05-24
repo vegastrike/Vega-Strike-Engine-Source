@@ -76,10 +76,10 @@ Bug, Feature Requests, etc for the Vega Strike Core Engine can be filed at `Vega
 Pull Requests
 =============
 
-We use a fork model of development for changes with all changes required to be submitted via a pull request in the Git Hub
+We use a fork model of development for changes with all changes required to be submitted via a pull request in the GitHub
 repository:
 
-1. Fork the Git Hub repository into your own Git Hub user
+1. Fork the GitHub repository into your own GitHub user
 2. Make your desired changes.
 3. Ensure you've documented your code.
 4. Test using the procedures outlined at `Vega Strike: Pull Request Validation`_
