@@ -3,7 +3,6 @@
 //
 
 #include "SimpleSound.h"
-#include "config.h"
 
 #include "CodecRegistry.h"
 #include "Stream.h"

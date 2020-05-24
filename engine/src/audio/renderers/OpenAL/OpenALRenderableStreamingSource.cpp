@@ -4,7 +4,6 @@
 #include "OpenALRenderableStreamingSource.h"
 #include "OpenALStreamingSound.h"
 #include "OpenALHelpers.h"
-#include "config.h"
 
 #include "al.h"
 

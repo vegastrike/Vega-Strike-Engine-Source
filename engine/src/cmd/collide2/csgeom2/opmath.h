@@ -23,7 +23,6 @@
 #define HAVE_ISNORMAL 1  
 
 
-#include "config.h"
 #include <math.h>
 #include <float.h>
 #include "cmd/collide2/opcodealgorithms.h"

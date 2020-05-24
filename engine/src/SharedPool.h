@@ -1,6 +1,5 @@
 #ifndef __STRINGPOOL_H__INCLUDED__
 #define __STRINGPOOL_H__INCLUDED__
-#include "config.h"
 #include <string>
 #include "gnuhash.h"
 

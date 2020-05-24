@@ -3,7 +3,6 @@
 //
 
 #include "Codec.h"
-#include "config.h"
 
 namespace Audio {
 
