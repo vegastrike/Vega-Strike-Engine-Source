@@ -2,13 +2,11 @@
 // C++ Implementation: Audio::OggStream
 //
 
-#include "config.h"
 
 #ifdef HAVE_OGG
 
 #include "OggStream.h"
 #include "OggData.h"
-#include "config.h"
 
 #include <utility>
 #include <limits>

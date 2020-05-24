@@ -251,7 +251,7 @@ sudo apt-get -y install git cmake python-dev build-essential automake autoconf l
    ccmake ../engine
    # (configure/edit options to taste in ccmake, press 'c' to save the selected options
    # and press 'g' to update the build configuration files used by the make build tool)
-   cmake --build . -j $(nproc) # (where $(nproc) returns the number of available CPU threads/cores on the system)
+   make -j $(nproc) # (where $(nproc) returns the number of available CPU threads/cores on the system)
    mkdir ../bin && cp vegastrike ../bin/ && cp setup/vegasettings ../bin/ && cd ..
    ```
 
@@ -260,16 +260,16 @@ sudo apt-get -y install git cmake python-dev build-essential automake autoconf l
    ```bash
    mkdir build & cd build
    cmake ../engine
-   cmake --build . -j $(nproc) # (where $(nproc) returns the number of available CPU threads/cores on the system)
+   make -j $(nproc) # (where $(nproc) returns the number of available CPU threads/cores on the system)
    mkdir ../bin && cp vegastrike ../bin/ && cp setup/vegasettings ../bin/ && cd ..
    ```
 
    __TIPS__:
 
-   To enable verbose output for debugging purposes (will show compilation commands), pass the `-- VERBOSE=1` argument:
+   To enable verbose output for debugging purposes (will show compilation commands), pass the `VERBOSE=1` argument:
 
    ```bash
-   cmake --build . -- VERBOSE=1
+   make VERBOSE=1
    ```
 
    To enable/disable compile-time options with cmake, use `cmake -D<option>=<value>`. Example:

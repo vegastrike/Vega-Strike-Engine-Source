@@ -1,4 +1,3 @@
-#include "config.h"
 #ifdef HAVE_PYTHON
 #include <boost/version.hpp>
 #if defined (_MSC_VER) && _MSC_VER <= 1200

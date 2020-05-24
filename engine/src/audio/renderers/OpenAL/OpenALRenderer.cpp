@@ -5,7 +5,6 @@
 #include "OpenALRenderer.h"
 #include "BorrowedOpenALRenderer.h"
 #include "OpenALHelpers.h"
-#include "config.h"
 
 #include "al.h"
 

@@ -11,7 +11,6 @@
 // Include Guard
 #ifndef __ICEPREPROCESSOR_H__
 #define __ICEPREPROCESSOR_H__
-#include "config.h"
 
 	// Check platform
 	#if defined( _WIN32 ) || defined( WIN32 )

@@ -25,7 +25,6 @@
 
 #ifndef _EASYDOM_H_
 #define _EASYDOM_H_
-#include "config.h"
 #include <expat.h>
 #include <string>
 #include <vector>

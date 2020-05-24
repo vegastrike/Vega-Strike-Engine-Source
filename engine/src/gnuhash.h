@@ -1,6 +1,5 @@
 #ifndef _GNUHASH_H_
 #define _GNUHASH_H_
-#include "config.h"
 #include <unordered_map>
 
 #define vsUMap     std::unordered_map

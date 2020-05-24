@@ -1,6 +1,5 @@
 #ifndef __FACTIONGENERIC_H
 #define __FACTIONGENERIC_H
-#include "config.h"
 #include <string>
 #include <boost/shared_ptr.hpp>
 //#include <gnuhash.h>

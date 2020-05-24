@@ -1,4 +1,3 @@
-#include "config.h"
 #include <algorithm>
 #include "cs_python.h"
 #include "base.h"

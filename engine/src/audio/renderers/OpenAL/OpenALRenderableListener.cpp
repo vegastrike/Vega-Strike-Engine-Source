@@ -3,7 +3,6 @@
 //
 
 #include "OpenALRenderableListener.h"
-#include "config.h"
 
 #include "al.h"
 

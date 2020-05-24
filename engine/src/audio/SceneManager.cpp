@@ -2,7 +2,6 @@
 // C++ Implementation: Audio::SceneManager
 //
 #include "SceneManager.h"
-#include "config.h"
 
 #include "Renderer.h"
 #include "RenderableSource.h"
