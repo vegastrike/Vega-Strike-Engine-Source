@@ -19,7 +19,6 @@
 #include "gfx/vsimage.h"
 #include "galaxy_gen.h"
 #include "universe_util.h"
-#include "networking/netclient.h"
 #include "vsfilesystem.h"
 #include "cmd/ai/communication.h"
 
@@ -104,9 +103,6 @@ string getUnitNameAndFgNoBase( Unit *target )
                     }
                 }
             }
-        } else if (Network != NULL) {
-            std::string retval( reformatName( target->name )+":"+target->getFullname() );
-            return retval;
         }
     }
     return reformatName( target->name );
@@ -161,10 +157,7 @@ VDU::VDU( const char *file, TextPlane *textp, unsigned short modes, short rwws, 
     viewStyle  = CP_TARGET;
     StartArmor = ma;
     maxhull    = mh;
-    if (Network != NULL)
-        got_target_info = false;
-    else
-        got_target_info = true;
+    got_target_info = true;
     SwitchMode( NULL );
 
     //printf("\nVDU rows=%d,col=%d\n",rows,cols);
@@ -601,6 +594,7 @@ void VDU::DrawVDUShield( Unit *parent )
                    parent->GetHullPercent(), true, invert_friendly_sprite );
 }
 
+// TODO: make into function
 #define RETURN_STATIC_SPRITE( name )            \
     do {                                        \
         static VSSprite s( name ".sprite" );    \
@@ -850,9 +844,7 @@ void VDU::DrawMessages( GameCockpit *parentcp, Unit *target )
     static bool network_draw_messages = XMLSupport::parse_bool( vs_config->getVariable( "graphics", "network_chat_text", "true" ) );
     static bool draw_messages = XMLSupport::parse_bool( vs_config->getVariable( "graphics", "chat_text", "true" ) );
 
-    if (Network != NULL && network_draw_messages == false)
-        return;
-    if (Network == NULL && draw_messages == false)
+    if (draw_messages == false)
         return;
 
     string fullstr;
@@ -1313,6 +1305,7 @@ void VDU::DrawDamage( Unit *parent )
     static bool print_percent_working =
         XMLSupport::parse_bool( vs_config->getVariable( "graphics", "hud", "print_damage_percent", "true" ) );
 
+// TODO: make into function
 #define REPORTITEM(percent_working, max_functionality, print_percent_working, component_string) \
     do { \
         GFXColor final_color = colLerp( cdamaged, chdamaged, percent_working ); \
@@ -1330,6 +1323,7 @@ void VDU::DrawDamage( Unit *parent )
         retval += trailer+std::string( "\n" ); \
     } while(0)
 
+// TODO: make into function
 #define REPORTINTEGRATED(which, which_key, which_name_default) \
     do { \
         static string name = vs_config->getVariable( "graphics", "hud", which_key, which_name_default ); \
@@ -1341,6 +1335,7 @@ void VDU::DrawDamage( Unit *parent )
         } \
     } while(0)
 
+// TODO: make into function
 #define REPORTINTEGRATEDFLAG(which, which_key, which_name_default) \
     do { \
         static string name = vs_config->getVariable( "graphics", "hud", which_key, which_name_default ); \
@@ -1745,28 +1740,10 @@ void VDU::DrawWebcam( Unit *parent )
     using VSFileSystem::JPEGBuffer;
     int   length;
     char *netcam;
-    int   playernum = _Universe->whichPlayerStarship( parent );
-    if ( Network[playernum].hasWebcam() ) {
-        netcam = Network[playernum].getWebcamFromNetwork( length );
-        if (netcam) {
-            //Delete the previous displayed webcam shot if any
-            if (this->webcam)
-                delete webcam;
-            //Read the new one
-            VSFile f( netcam, length, JPEGBuffer );
-            this->webcam = new Animation( &f );
-            delete netcam;
-            GFXDisable( TEXTURE1 );
-            GFXEnable( TEXTURE0 );
-            GFXDisable( LIGHTING );
-            //Draw it
-            webcam->DrawAsVSSprite( this );
-            GFXDisable( TEXTURE0 );
-        }
-    } else {
-        tp->Draw( MangleString( "No webcam to view",
+
+    tp->Draw( MangleString( "No webcam to view",
                                 _Universe->AccessCamera()->GetNebula() != NULL ? .4 : 0 ), scrolloffset, true );
-    }
+
 }
 
 void VDU::Draw( GameCockpit *parentcp, Unit *parent, const GFXColor &color )
@@ -1827,48 +1804,8 @@ void VDU::Draw( GameCockpit *parentcp, Unit *parent, const GFXColor &color )
     switch ( thismode.back() )
     {
     case NETWORK:
-        if (Network != NULL) {
-            int    playernum = _Universe->whichPlayerStarship( parent );
-            char   buf[32];
-            string str( "Lag: " );
-            unsigned int lag = Network[playernum].getLag();
-            memset( buf, 0, 32 );
-            sprintf( buf, "%.1Lf", (long double) lag );
-            if (lag < 50)
-                str += "#00FF00";
-            else if (lag < 150)
-                str += "#FFFF00";
-            else if (lag > 0)
-                str += "#FF0000";
-            str += string( buf )+"#000000 ms\n";
-            if ( Network[playernum].IsNetcommSecured() )
-                str += "#DD0000";
-            memset( buf, 0, 32 );
-            sprintf( buf, "%g", Network[playernum].getCurrentFrequency() );
-            str += string( buf )+"/";
-            memset( buf, 0, 32 );
-            sprintf( buf, "%g", Network[playernum].getSelectedFrequency() );
-            str += string( buf )+" GHz";
-            if ( Network[playernum].IsNetcommSecured() )
-                str += "#000000";
-            if ( Network[playernum].IsNetcommActive() )
-                str += " - #0000FFON";
-            else
-                str += " - #FF0000OFF";
-            str += "#000000\n";
-            str += "SD: "+_Universe->current_stardate.GetFullTrekDate();
-            static float background_alpha =
-                XMLSupport::parse_float( vs_config->getVariable( "graphics", "hud", "text_background_alpha", "0.0625" ) );
-            GFXColor     tpbg = tp->bgcol;
-            bool automatte    = (0 == tpbg.a);
-            if (automatte) tp->bgcol = GFXColor( 0, 0, 0, background_alpha );
-            tp->Draw( MangleString( str, _Universe->AccessCamera()->GetNebula() != NULL ? .4 : 0 ), 0, true, false, automatte );
-            tp->bgcol = tpbg;
-        }
         break;
     case WEBCAM:
-        if (Network != NULL)
-            DrawWebcam( parent );
         break;
     case SCANNING:
         if (!got_target_info)
@@ -1965,14 +1902,7 @@ void VDU::SwitchMode( Unit *parent )
     if (!posmodes)
         return;
     scrolloffset = 0;
-    //If we switch from SCANNING VDU VIEW_MODE we loose target info
-    if (thismode.back() == SCANNING && Network != NULL)
-        got_target_info = false;
-    //If we switch from WEBCAM VDU VIEW_MODE we stop dlding images
-    if (thismode.back() == WEBCAM && Network != NULL && parent != NULL) {
-        int playernum = _Universe->whichPlayerStarship( parent );
-        Network[playernum].stopWebcamTransfer();
-    }
+
     if ( thismode.back() == VIEW && viewStyle != CP_CHASE && (thismode.back()&posmodes) ) {
         UpdateViewstyle( viewStyle );
     } else {
@@ -1984,14 +1914,6 @@ void VDU::SwitchMode( Unit *parent )
             else
                 thismode.back() <<= 1;
         }
-    }
-    //If we switch to SCANNING MODE we consider we lost target info
-    if (thismode.back() == SCANNING && Network != NULL)
-        got_target_info = false;
-    //If we switch to WEBCAM MODE we start dlding images
-    if (thismode.back() == WEBCAM && Network != NULL && parent != NULL) {
-        int playernum = _Universe->whichPlayerStarship( parent );
-        Network[playernum].startWebcamTransfer();
     }
 }
 

@@ -7,6 +7,7 @@
 #include "viewarea.h"
 #include "sphere_display.h"
 #include <physics.h>
+#include "configxml.h"
 
 #define TRACK_SIZE 2.0
 

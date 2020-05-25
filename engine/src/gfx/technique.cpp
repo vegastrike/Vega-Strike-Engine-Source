@@ -1,7 +1,6 @@
 //
 //C++ Implementation: Technique
 //
-#include "config.h"
 
 #include <exception>
 #include <map>
@@ -484,7 +483,7 @@ Technique::Technique( const string &nam ) :
             +game_options.techniquesSubPath+"/"
             +name+".technique" );
     } catch(const Audio::FileOpenException& e) {
-        //BOOST_LOG_TRIVIAL(info) << boost::format("Cannot find specialized technique, trying generic: %1%") % e.what();
+        BOOST_LOG_TRIVIAL(info) << boost::format("Cannot find specialized technique, trying generic: %1%") % e.what();
         // Else try a default
         serializer.importXML(
             game_options.techniquesBasePath+"/"
@@ -556,8 +555,8 @@ Technique::Technique( const string &nam ) :
                                 el->getAttributeValue( "default", "" ),
                                 el->getAttributeValue( "name", "" ),
                                 parseTexKind( el->getAttributeValue( "kind", "" ) ) );
-                            //BOOST_LOG_TRIVIAL(debug) << boost::format("Added texture unit #%1% \"%2%\"") % pass.getNumTextureUnits() %
-                            //                                el->getAttributeValue("name", "");
+                            BOOST_LOG_TRIVIAL(debug) << boost::format("Added texture unit #%1% \"%2%\"") % pass.getNumTextureUnits() %
+                                                           el->getAttributeValue("name", "");
                         } else if (el->tagName() == paramTag) {
                             float value[4];
                             parseFloat4( el->getAttributeValue( "value", "" ), value );
@@ -565,20 +564,20 @@ Technique::Technique( const string &nam ) :
                                 el->getAttributeValue( "name", "" ),
                                 value,
                                 parseBool( el->getAttributeValue( "optional", "false" ) ) );
-                            //BOOST_LOG_TRIVIAL(debug)
-                            //    << boost::format("Added constant #%1% \"%2%\" with value "
-                            //                     "(%3$.2f,%4$.2f,%5$.2f,%6$.2f) as %7%") %
-                            //           pass.getNumShaderParams() % el->getAttributeValue("name", "") % value[0] % value[1] % value[2] %
-                            //           value[3] % (parseBool(el->getAttributeValue("optional", "false")) ? "optional" : "required");
+                            BOOST_LOG_TRIVIAL(debug)
+                               << boost::format("Added constant #%1% \"%2%\" with value "
+                                                "(%3$.2f,%4$.2f,%5$.2f,%6$.2f) as %7%") %
+                                      pass.getNumShaderParams() % el->getAttributeValue("name", "") % value[0] % value[1] % value[2] %
+                                      value[3] % (parseBool(el->getAttributeValue("optional", "false")) ? "optional" : "required");
                         } else if (el->tagName() == autoParamTag) {
                             pass.addShaderParam(
                                 el->getAttributeValue( "name", "" ),
                                 parseAutoParamSemantic( el->getAttributeValue( "semantic", "" ) ),
                                 parseBool( el->getAttributeValue( "optional", "false" ) ) );
-                            //BOOST_LOG_TRIVIAL(debug)
-                            //    << boost::format("Added param #%1% \"%2%\" with semantic %3% as %4%") % pass.getNumShaderParams() %
-                            //           el->getAttributeValue("name", "") % el->getAttributeValue("semantic", "") %
-                            //           (parseBool(el->getAttributeValue("optional", "false")) ? "optional" : "required");
+                            BOOST_LOG_TRIVIAL(debug)
+                               << boost::format("Added param #%1% \"%2%\" with semantic %3% as %4%") % pass.getNumShaderParams() %
+                                      el->getAttributeValue("name", "") % el->getAttributeValue("semantic", "") %
+                                      (parseBool(el->getAttributeValue("optional", "false")) ? "optional" : "required");
                         } else {
                             //TODO: Warn about unrecognized (hence ignored) tag
                         }

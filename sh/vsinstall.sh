@@ -70,7 +70,7 @@ if [ "x" = "x$BINARY_APPEND" ]; then
     fi
 fi
 
-BINARIES="vegastrike vegaserver vssetup mesher"
+BINARIES="vegastrike vegaserver vegasettings mesher"
 
 echo ''
 echo 'This script needs your password to link the following commands '
@@ -149,11 +149,11 @@ if [ "x$LOGIN" = "xy" -o "x$LOGIN" = "xyes" ]; then
         RUNSETUP=y
         echo "Installation successful!"
         echo ""
-        read -p "Do you want to run 'vssetup'? [yes]/no? " RUNSETUP
+        read -p "Do you want to run 'vegasettings'? [yes]/no? " RUNSETUP
         if [ "x$RUNSETUP" = "xn" -o "x$RUNSETUP" = "xno" ]; then
             true
         else
-            vssetup
+            vegasettings
             echo "Settings should now be configured."
 
         fi
@@ -167,16 +167,16 @@ if [ "x$LOGIN" = "xy" -o "x$LOGIN" = "xyes" ]; then
         exit 1
     fi
 else
-    VSSETUP="./bin/vssetup${BINARY_APPEND}"
+    VEGASETTINGS="./bin/vegasettings${BINARY_APPEND}"
     echo ""
     echo "I am not installing the executables at this time."
     echo "Binaries can be found in the 'bin' folder."
     echo ""
-    read -p "Do you want to run '$VSSETUP' to configure the game? [yes]/no? " RUNSETUP
+    read -p "Do you want to run '$VEGASETTINGS' to configure the game? [yes]/no? " RUNSETUP
     if [ "x$RUNSETUP" = "xn" -o "x$RUNSETUP" = "xno" ]; then
         true
     else
-        "$VSSETUP"
+        "$VEGASETTINGS"
     fi
     echo ""
     echo "To install the executables, either rerun this script,"

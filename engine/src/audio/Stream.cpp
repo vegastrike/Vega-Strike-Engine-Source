@@ -3,7 +3,6 @@
 //
 
 #include "Stream.h"
-#include "config.h"
 
 #include <utility>
 #include <cstring>

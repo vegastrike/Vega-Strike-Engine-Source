@@ -35,9 +35,9 @@
 void InitGraphics(int*,char***);
 void ShowMain();
 
-#define GET_TITLE char title[1000]="VegaStrike Configurator"; \
+#define GET_TITLE char title[1000]="Vega Strike Settings"; \
   if (strlen(CONFIG.program_name)+strlen(VERSION)<800) { \
-    sprintf(title, "Program Configuration - %s - Version 0.6.0", \
+    sprintf(title, "Settings - %s - Version 0.6.0", \
     CONFIG.program_name); \
   }
 

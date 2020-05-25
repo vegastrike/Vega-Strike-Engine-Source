@@ -138,10 +138,10 @@ void Universe::SetActiveCockpit( Cockpit *cp )
         }
 }
 
-void Universe::SetupCockpits( vector< string >playerNames )
+// TODO: candidate for deletion
+void Universe::SetupCockpits(std::vector< std::string >players)
 {
-    for (unsigned int i = 0; i < playerNames.size(); i++)
-        cockpit.push_back( new Cockpit( "", NULL, playerNames[i] ) );
+    cockpit.push_back( new Cockpit( "", NULL, players[0] ) );
 }
 
 void SortStarSystems( std::vector< StarSystem* > &ss, StarSystem *drawn )
@@ -179,16 +179,12 @@ Universe::Universe( int argc, char **argv, const char *galaxy_str, bool server )
     , script_system( NULL )
 {
     this->Init( galaxy_str );
-    network_lock = false;
-    is_server    = server;
 }
 
 Universe::Universe()
     : current_cockpit( 0 )
     , script_system( NULL )
-{
-    is_server = false;
-}
+{}
 
 Universe::~Universe()
 {
@@ -210,14 +206,11 @@ bool Universe::StillExists( StarSystem *s )
 
 bool Universe::netLocked()
 {
-    return (Network || SERVER) && network_lock;
+    return false;
 }
 
 void Universe::netLock( bool enable )
 {
-    network_lock = false;
-    if (Network || SERVER)
-        network_lock = enable;
 }
 
 void Universe::UnloadStarSystem( StarSystem *s )
@@ -271,10 +264,6 @@ void Universe::Generate1( const char *file, const char *jumpback )
     //If the file is not found we generate a system
     if (err > Ok)
         MakeStarSystem( file, galaxy.get(), RemoveDotSystem( jumpback ), count );
-    if (SERVER) {
-        string filestr( file );
-        UniverseUtil::ComputeSystemSerials( filestr );
-    }
 }
 
 void Universe::Generate2( StarSystem *ss )

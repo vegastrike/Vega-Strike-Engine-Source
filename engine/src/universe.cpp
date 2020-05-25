@@ -100,7 +100,6 @@ void GameUniverse::Init( int argc, char **argv, const char *galaxy )
 GameUniverse::GameUniverse( int argc, char **argv, const char *galaxy )
 {
     this->Init( argc, argv, galaxy );
-    is_server = false;
 }
 
 GameUniverse::GameUniverse() : Universe()

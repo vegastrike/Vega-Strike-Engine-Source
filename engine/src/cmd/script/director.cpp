@@ -22,7 +22,6 @@
 /*
  *  xml Mission Scripting written by Alexander Rawass <alexannika@users.sourceforge.net>
  */
-#include "config.h"
 #include <boost/version.hpp>
 #include <boost/python/class.hpp>
 #include "python/python_class.h"
@@ -120,9 +119,9 @@ void Mission::DirectorShipDestroyed( Unit *unit )
     msgcenter->add( "game", "all", buf );
 
     if (fg->nr_ships_left == 0) {
-        //BOOST_LOG_TRIVIAL(debug) << boost::format("no ships left in fg %1%") % fg->name;
+        BOOST_LOG_TRIVIAL(debug) << boost::format("no ships left in fg %1%") % fg->name;
         if (fg->nr_waves_left > 0) {
-            //BOOST_LOG_TRIVIAL(info) << boost::format("Relaunching %1% wave") % fg->name;
+            BOOST_LOG_TRIVIAL(info) << boost::format("Relaunching %1% wave") % fg->name;
 
             //launch new wave
             fg->nr_waves_left -= 1;

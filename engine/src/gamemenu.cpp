@@ -13,11 +13,11 @@
 #include "gui/simplepicker.h"
 #include "gui/groupcontrol.h"
 #include "gui/scroller.h"
-#include "networking/netclient.h"
 #include "gamemenu.h"
 #include "gfxlib_struct.h"
 #include "cmd/music.h"
 #include "options.h"
+#include "configxml.h"
 
 
 
@@ -377,7 +377,7 @@ void GameMenu::createControls()
 
     //Single Player button
     //Options button (Requires restart if not done at the beginning... static variables)
-    //Options button requires porting vssetup code to be used inside VS... should be simple to do.  Is it worth it?
+    //Options button requires porting vegasettings code to be used inside VS... should be simple to do.  Is it worth it?
     //Network button
     //About
     //Exit game
@@ -402,7 +402,6 @@ extern void enableNetwork( bool usenet );
 
 bool GameMenu::processSinglePlayerButton( const EventCommandId &command, Control *control )
 {
-    NetClient::CleanUp();
     enableNetwork( false );
 
     restore_main_loop();
@@ -561,87 +560,23 @@ bool NetActionConfirm::processWindowCommand( const EventCommandId &command, Cont
     return true;
 }
 
+// TODO: delete
 void GameMenu::readJoinGameControls( Window *window, string &user, string &pass )
 {
-    //Magic goes here!
-    user = static_cast< TextInputDisplay* > ( window->findControlById( "Username" ) )->text();
-    string::size_type pos = user.find( ' ' );
-    while (pos != string::npos) {
-        user[pos] = '_';
-        pos = user.find( ' ', pos );
-    }
-    pass = static_cast< TextInputDisplay* > ( window->findControlById( "Password" ) )->text();
-    vs_config->setVariable( "player", "callsign", user );
-    vs_config->setVariable( "player", "password", pass );
-    if ( window->findControlById( "MultiPlayerAccountServer" )->hidden() ) {
-        vs_config->setVariable( "network", "use_account_server", "false" );
-        vs_config->setVariable( "network", "server_ip",
-                               static_cast< TextInputDisplay* > ( window->findControlById( "VegaserverHost" ) )->text() );
-        vs_config->setVariable( "network", "server_port",
-                               static_cast< TextInputDisplay* > ( window->findControlById( "VegaserverPort" ) )->text() );
-    } else {
-        vs_config->setVariable( "network", "use_account_server", "true" );
-        vs_config->setVariable( "network", "account_server_url",
-                               static_cast< TextInputDisplay* > ( window->findControlById( "AccountServer" ) )->text() );
-    }
-    enableNetwork( true );
-    if (Network != NULL)
-        for (unsigned int i = 0; i < _Universe->numPlayers(); i++)
-            Network[i].Reinitialize();
-    else
-        Network = new NetClient[_Universe->numPlayers()];          //Hardcode 1 player anyway.
 }
 
 bool NetActionConfirm::confirmedNetSaveGame()
 {
-    if (!Network) return false;
-    Network[player].saveRequest();
-    return true;
+    return false;
 }
 
 bool NetActionConfirm::confirmedNetDie()
 {
-    if (!Network) return false;
-    Network[player].dieRequest();
-    return true;
+    return false;
 }
 
 bool NetActionConfirm::confirmedJoinGame()
 {
-    string user, pass, err;
-    NetClient::CleanUp();
-    GameMenu::readJoinGameControls( m_parent, user, pass );
-
-    UniverseUtil::showSplashScreen( string() );
-    if (!Network) return false;
-    string srvipadr;
-    unsigned short port;
-    //Are we using the directly account server to identify us ?
-    Network[player].SetConfigServerAddress( srvipadr, port );     //Sets from the config vars.
-
-    int numships = Network[player].connectLoad( user, pass, err );
-    if (numships) {
-        const vector< string > &shipList = Network[player].shipSelections();
-        if (shipList.size() > 1) {
-            UniverseUtil::hideSplashScreen();
-            showListQuestion( err+"  Select a ship to fly, or hit cancel  ", shipList,
-                              new ShipSelectorCallback( this, false ), "ShipSelected" );
-        } else {
-            if ( err.empty() )
-                finalizeJoinGame( 0 );
-            else
-                showYesNoQuestion( "Warning: "+err+"\n\nDo you want to join to this server?",
-                                   new ShipSelectorCallback( this, true ), "ServerWarning" );
-        }
-    } else {
-        UniverseUtil::hideSplashScreen();
-        if ( window() ) window()->close();
-        if ( !err.empty() )
-            err = "\nThe server said: "+err;
-        showAlert( "Error when joining game!\n"+err );
-        NetClient::CleanUp();
-        return false;
-    }
     return true;
 }
 
@@ -649,50 +584,11 @@ bool NetActionConfirm::confirmedJoinGame()
 //static
 bool NetActionConfirm::finalizeJoinGame( int launchShip )
 {
-    if (launchShip == -1) {
-        if ( window() ) window()->close();
-        NetClient::CleanUp();
-        return false;
-    }
-    if ( !UniverseUtil::isSplashScreenShowing() ) {
-        UniverseUtil::showSplashScreen( "" );
-        UniverseUtil::showSplashMessage( "#cc66ffNETWORK: Loading saved game." );
-    }
-    if ( !Network[player].loginSavedGame( launchShip ) ) {
-        showAlert( "Error when logging into game with this ship!" );
-        if ( window() ) window()->close();
-        NetClient::CleanUp();
-        return false;
-    }
-    Cockpit *cp     = NULL;
-    Unit    *playun = NULL;
-    if (_Universe)
-        cp = _Universe->AccessCockpit( player );
-    if (cp)
-        playun = cp->GetParent();
-    if (playun)
-        playun->Kill();
-    if (_Universe)
-        _Universe->clearAllSystems();
-    string err;
-
-    restore_main_loop();
-    NetClient *playerClient = &Network[player];
-
-    globalWindowManager().shutDown();
-    TerminateCurrentBase();
-
-    playerClient->startGame();
-
-    return true;
-    
+    return true;   
 }
 
 bool GameMenu::processJoinGameButton( const EventCommandId &command, Control *control )
 {
-    NetActionConfirm *nak = new NetActionConfirm( 0, window(), NetActionConfirm::JOINGAME );
-    nak->confirmedJoinGame();
-
-    return true;
+  return true;
 }
 

@@ -2,7 +2,6 @@
 // C++ Implementation: Audio::OggCodec
 //
 
-#include "config.h"
 
 #ifdef HAVE_OGG
 
@@ -11,7 +10,6 @@
 #include "OggCodec.h"
 #include "OggStream.h"
 #include "OggData.h"
-#include "config.h"
 
 namespace Audio {
 

@@ -1,4 +1,3 @@
-#include "config.h"
 #include "cockpit.h"
 #include "xml_support.h"
 #include "gauge.h"
@@ -6,6 +5,7 @@
 #include "hud.h"
 #include "vdu.h"
 #include "mesh.h"
+#include "configxml.h"
 
 using XMLSupport::EnumMap;
 using XMLSupport::Attribute;
@@ -433,7 +433,7 @@ pastarmor8:
                 gaugename = (*iter).value;
                 break;
             case NETWORK:
-                if ( (Network != NULL) != XMLSupport::parse_bool( (*iter).value ) )
+                if ( XMLSupport::parse_bool( (*iter).value ) != false )
                     return;                      //Don't show if not in multiplayer (or single if false)
 
                 break;
@@ -519,8 +519,7 @@ pastarmor8:
 #ifdef NETCOMM_WEBCAM
         mymodes = mymodes|VDU::WEBCAM;
 #endif
-        if (Network != NULL)
-            mymodes = mymodes|VDU::NETWORK;
+
         goto loadsprite;
     case RVDU:
         vdu.push_back( NULL );
@@ -552,7 +551,7 @@ loadsprite:
             switch ( attribute_map.lookup( (*iter).name ) )
             {
             case NETWORK:
-                if ( (Network != NULL) != XMLSupport::parse_bool( (*iter).value ) )
+                if ( XMLSupport::parse_bool( (*iter).value ) != false )
                     return;                      //Don't show if not in multiplayer (or single if false)
 
                 break;

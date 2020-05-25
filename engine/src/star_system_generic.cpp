@@ -29,7 +29,6 @@
 #include "cmd/unit_collide.h"
 #include "vs_random.h"
 #include "savegame.h"
-#include "networking/netclient.h"
 #include "in_kb_data.h"
 #include "universe_util.h"               //get galaxy faction, dude
 #include "options.h"
@@ -233,7 +232,6 @@ void StarSystem::AddUnit( Unit *unit )
     }
     drawList.prepend( unit );
     unit->activeStarSystem = this;     //otherwise set at next physics frame...
-    UnitFactory::broadcastUnit( unit, GetZone() );
     unsigned int priority = UnitUtil::getPhysicsPriority( unit );
     //Do we need the +1 here or not - need to look at when current_sim_location is changed relative to this function
     //and relative to this function, when the bucket is processed...
@@ -796,42 +794,29 @@ void StarSystem::ProcessPendingJumps()
         }
         int playernum = _Universe->whichPlayerStarship( un );
         //In non-networking mode or in networking mode or a netplayer wants to jump and is ready or a non-player jump
-        if ( Network == NULL || playernum < 0 || ( Network != NULL && playernum >= 0 && Network[playernum].readyToJump() ) ) {
-            Unit *un = pendingjump[kk]->un.GetUnit();
-            StarSystem *savedStarSystem = _Universe->activeStarSystem();
-            //Download client descriptions of the new zone (has to be blocking)
-            if (Network != NULL)
-                Network[playernum].downloadZoneInfo();
-            if ( un == NULL || !_Universe->StillExists( pendingjump[kk]->dest )
-                || !_Universe->StillExists( pendingjump[kk]->orig ) ) {
+        StarSystem *savedStarSystem = _Universe->activeStarSystem();
+        if ( un == NULL || !_Universe->StillExists( pendingjump[kk]->dest )
+             || !_Universe->StillExists( pendingjump[kk]->orig ) ) {
 #ifdef JUMP_DEBUG
-                VSFileSystem::vs_fprintf( stderr, "Adez Mon! Unit destroyed during jump!\n" );
+            VSFileSystem::vs_fprintf( stderr, "Adez Mon! Unit destroyed during jump!\n" );
 #endif
-                delete pendingjump[kk];
-                pendingjump.erase( pendingjump.begin()+kk );
-                --kk;
-                continue;
-            }
-            bool dosightandsound = ( (pendingjump[kk]->dest == savedStarSystem) || _Universe->isPlayerStarship( un ) );
-            _Universe->setActiveStarSystem( pendingjump[kk]->orig );
-            if ( un->TransferUnitToSystem( kk, savedStarSystem, dosightandsound ) )
-                un->DecreaseWarpEnergy( false, 1.0f );
-            if (dosightandsound)
-                _Universe->activeStarSystem()->DoJumpingComeSightAndSound( un );
-	    _Universe->AccessCockpit()->OnJumpEnd(un);
             delete pendingjump[kk];
             pendingjump.erase( pendingjump.begin()+kk );
             --kk;
-            _Universe->setActiveStarSystem( savedStarSystem );
-            //In networking mode we tell the server we want to go back in game
-            if (Network != NULL) {
-                //Find the corresponding networked player
-                if (playernum >= 0) {
-                    Network[playernum].inGame();
-                    Network[playernum].unreadyToJump();
-                }
-            }
-        }
+            continue;
+          }
+        bool dosightandsound = ( (pendingjump[kk]->dest == savedStarSystem) || _Universe->isPlayerStarship( un ) );
+        _Universe->setActiveStarSystem( pendingjump[kk]->orig );
+        if ( un->TransferUnitToSystem( kk, savedStarSystem, dosightandsound ) )
+          un->DecreaseWarpEnergy( false, 1.0f );
+        if (dosightandsound)
+          _Universe->activeStarSystem()->DoJumpingComeSightAndSound( un );
+        _Universe->AccessCockpit()->OnJumpEnd(un);
+        delete pendingjump[kk];
+        pendingjump.erase( pendingjump.begin()+kk );
+        --kk;
+        _Universe->setActiveStarSystem( savedStarSystem );
+
     }
 }
 
@@ -885,47 +870,42 @@ bool StarSystem::JumpTo( Unit *un, Unit *jumppoint, const std::string &system, b
 {
     if ( ( un->DockedOrDocking()&(~Unit::DOCKING_UNITS) ) != 0 )
         return false;
-    if (Network == NULL || force) {
-        if (un->jump.drive >= 0)
-            un->jump.drive = -1;
+
+    if (un->jump.drive >= 0)
+      un->jump.drive = -1;
 #ifdef JUMP_DEBUG
-        VSFileSystem::vs_fprintf( stderr, "jumping to %s.  ", system.c_str() );
+    VSFileSystem::vs_fprintf( stderr, "jumping to %s.  ", system.c_str() );
 #endif
-        StarSystem *ss = star_system_table.Get( system );
-        std::string ssys( system+".system" );
-        if (!ss)
-            ss = star_system_table.Get( ssys );
-        bool justloaded = false;
-        if (!ss) {
-            justloaded = true;
-            ss = _Universe->GenerateStarSystem( ssys.c_str(), filename.c_str(), Vector( 0, 0, 0 ) );
-            //NETFIXME: Do we want to generate the system if an AI unit jumps?
-        }
-        if ( ss && !isJumping( pendingjump, un ) ) {
+    StarSystem *ss = star_system_table.Get( system );
+    std::string ssys( system+".system" );
+    if (!ss)
+      ss = star_system_table.Get( ssys );
+    bool justloaded = false;
+    if (!ss) {
+        justloaded = true;
+        ss = _Universe->GenerateStarSystem( ssys.c_str(), filename.c_str(), Vector( 0, 0, 0 ) );
+      }
+    if ( ss && !isJumping( pendingjump, un ) ) {
 #ifdef JUMP_DEBUG
-            VSFileSystem::vs_fprintf( stderr, "Pushing back to pending queue!\n" );
+        VSFileSystem::vs_fprintf( stderr, "Pushing back to pending queue!\n" );
 #endif
-            bool dosightandsound = ( ( this == _Universe->getActiveStarSystem( 0 ) ) || _Universe->isPlayerStarship( un ) );
-            int  ani = -1;
-            if (dosightandsound)
-                ani = _Universe->activeStarSystem()->DoJumpingLeaveSightAndSound( un );
-	    _Universe->AccessCockpit()->OnJumpBegin(un);
-            pendingjump.push_back( new unorigdest( un, jumppoint, this, ss, un->GetJumpStatus().delay, ani, justloaded,
-                                                  save_coordinates ? ComputeJumpPointArrival( un->Position(), this->getFileName(),
-                                                                                              system ) : QVector( 0, 0, 0 ) ) );
-        } else {
+        bool dosightandsound = ( ( this == _Universe->getActiveStarSystem( 0 ) ) || _Universe->isPlayerStarship( un ) );
+        int  ani = -1;
+        if (dosightandsound)
+          ani = _Universe->activeStarSystem()->DoJumpingLeaveSightAndSound( un );
+        _Universe->AccessCockpit()->OnJumpBegin(un);
+        pendingjump.push_back( new unorigdest( un, jumppoint, this, ss, un->GetJumpStatus().delay, ani, justloaded,
+                                               save_coordinates ? ComputeJumpPointArrival( un->Position(), this->getFileName(),
+                                                                                           system ) : QVector( 0, 0, 0 ) ) );
+      } else {
 #ifdef JUMP_DEBUG
-            VSFileSystem::vs_fprintf( stderr, "Failed to retrieve!\n" );
+        VSFileSystem::vs_fprintf( stderr, "Failed to retrieve!\n" );
 #endif
-            return false;
-        }
-        if (jumppoint)
-            ActivateAnimation( jumppoint );
-    } else
-    //Networking mode
-    if (jumppoint) {
-        Network->jumpRequest( system, jumppoint->GetSerial() );
-    }
+        return false;
+      }
+    if (jumppoint)
+      ActivateAnimation( jumppoint );
+
     return true;
 }
 

@@ -20,7 +20,6 @@
 #include "role_bitmask.h"
 #include "cmd/collide2/Stdafx.h"
 #include "cmd/collide2/CSopcodecollider.h"
-#include "networking/netclient.h"
 #include "vs_math.h"
 
 

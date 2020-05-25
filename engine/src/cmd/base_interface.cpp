@@ -1,4 +1,3 @@
-#include "config.h"
 #include <algorithm>
 #include "cs_python.h"
 #include "base.h"
@@ -15,7 +14,6 @@
 #include "config_xml.h"
 #include "save_util.h"
 #include "unit_util.h"
-#include "networking/netclient.h"
 #include "gfx/cockpit.h"
 #include "gfx/ani_texture.h"
 #include "music.h"
@@ -32,6 +30,9 @@
 
 #include "ai/communication.h"
 #include "audio/SceneManager.h"
+
+using std::cerr;
+using std::endl;
 
 
 static unsigned int& getMouseButtonMask()
@@ -569,7 +570,7 @@ void BaseInterface::Room::BasePython::Draw( BaseInterface *base )
     timeleft += GetElapsedTime()/getTimeCompression();
     if (timeleft >= maxtime) {
         timeleft = 0;
-        //BOOST_LOG_TRIVIAL(debug) << "Running python script...";
+        BOOST_LOG_TRIVIAL(debug) << "Running python script...";
         RunPython( this->pythonfile.c_str() );
         return;         //do not do ANYTHING with 'this' after the previous statement...
     }
@@ -655,9 +656,7 @@ void base_main_loop()
 {
     UpdateTime();
     Music::MuzakCycle();
-    if (Network != NULL)
-        for (size_t jj = 0; jj < _Universe->numPlayers(); jj++)
-            Network[jj].checkMsg( NULL );
+
     GFXBeginScene();
     if (createdbase) {
         createdbase = false;
@@ -1217,14 +1216,7 @@ void BaseInterface::Room::Launch::Click( BaseInterface *base, float x, float y, 
         bool  auto_undock = auto_undock_var;
         Unit *bas   = base->baseun.GetUnit();
         Unit *playa = base->caller.GetUnit();
-        if (Network != NULL && auto_undock && playa && bas) {
-            cerr<<"Sending an undock notification"<<endl;
-            int playernum = _Universe->whichPlayerStarship( playa );
-            if (playernum >= 0) {
-                Network[playernum].undockRequest( bas->GetSerial() );
-                auto_undock = false;
-            }
-        }
+
         if (playa && bas) {
             if ( ( (playa->name == "eject") || (playa->name == "ejecting") || (playa->name == "pilot")
                   || (playa->name == "Pilot") || (playa->name == "Eject") ) && (bas->faction == playa->faction) )

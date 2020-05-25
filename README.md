@@ -21,7 +21,7 @@
 
 Either install Vega Strike from the binary installer for your platform, if available, or follow the instructions for compiling from source. (`Compiling Vegastrike`, below.)
 
-- Change settings with command `bin/vssetup`
+- Change settings with command `bin/vegasettings`
 - Run command `bin/vegastrike` or double-click the executable file in the bin directory.
 
 
@@ -64,7 +64,7 @@ Either install Vega Strike from the binary installer for your platform, if avail
 Run setup and then vegastrike
 
 ```bash
-bin/vssetup
+bin/vegasettings
 bin/vegastrike
 ```
 
@@ -117,7 +117,7 @@ If you encounter any issues while playing, please create an issue with the Vega 
       The Setup utility.
   /usr/local/bin/vslauncher
       The vegastrike save game and mission selection utility
-  /usr/local/bin/vssetup
+  /usr/local/bin/vegasettings
       Internal installer program
   /usr/local/share/vegastrike
       The vegastrike data files
@@ -215,7 +215,7 @@ If you wish to transfer command to another starship, simply press '\[' to switch
 1. Install the dependencies. Something like this:
 
 ```bash
-sudo apt-get -y install cmake g++ python-dev libboost-python-dev libgl1-mesa-glx freeglut3-dev \
+sudo apt-get -y install cmake g++ python-dev libboost-python-dev libboost-log-dev libgl1-mesa-glx freeglut3-dev \
                 libopenal-dev libsdl-gfx1.2-dev libvorbis-dev libjpeg-dev libpng-dev libgtk2.0-dev
 ```
 
@@ -227,7 +227,7 @@ sudo apt-get -y install git cmake python-dev build-essential automake autoconf l
                 libopenal-dev libogg-dev libvorbis-dev libgl1-mesa-dev libsdl1.2-dev \
                 libavcodec-dev libavcodec-extra libavformat-dev libavresample-dev libavutil-dev \
                 libavdevice-dev libpostproc-dev freeglut3-dev libxmu-dev libxi-dev \
-                libboost-python1.67-dev
+                libboost-python1.67-dev libboost-log1.67-dev
 ```
 
 Or on Ubuntu 20.04:
@@ -240,20 +240,74 @@ sudo apt-get -y install git cmake python-dev build-essential automake autoconf l
                 libpostproc-dev freeglut3-dev libxmu-dev libxi-dev libboost1.67-all-dev
 ```
 
-2. use the `vsbuild.sh` script in the `sh` directory.
+2. Build Vega Strike:
 
-or manually
+   a. Use the `vsbuild.sh` script in the `sh` directory.
 
-```bash
-mkdir build & cd build
-cmake ../engine
-make
-mkdir ../bin && cp vegastrike ../bin/ && cp setup/vssetup ../bin/ && cd ..
-```
+   b. *OR* configure and compile VS manually, using the ncurses ccmake frontend:
+
+   ```bash
+   mkdir build & cd build
+   ccmake ../engine
+   # (configure/edit options to taste in ccmake, press 'c' to save the selected options
+   # and press 'g' to update the build configuration files used by the make build tool)
+   make -j $(nproc) # (where $(nproc) returns the number of available CPU threads/cores on the system)
+   mkdir ../bin && cp vegastrike ../bin/ && cp setup/vegasettings ../bin/ && cd ..
+   ```
+
+   c. *OR* configure and compile VS manually, using the command-line cmake frontend:
+
+   ```bash
+   mkdir build & cd build
+   cmake ../engine
+   make -j $(nproc) # (where $(nproc) returns the number of available CPU threads/cores on the system)
+   mkdir ../bin && cp vegastrike ../bin/ && cp setup/vegasettings ../bin/ && cd ..
+   ```
+
+   __TIPS__:
+
+   To enable verbose output for debugging purposes (will show compilation commands), pass the `VERBOSE=1` argument:
+
+   ```bash
+   make VERBOSE=1
+   ```
+
+   To enable/disable compile-time options with cmake, use `cmake -D<option>=<value>`. Example:
+
+   ```bash
+   cmake ../engine -DENABLE_PIE=ON -DUSE_PYTHON_3=ON -DCPU_SMP=2 -DCPUINTEL_native=ON -CMAKE_BUILD_TYPE=Debug
+   ```
+
+   __NOTE__:
+
+   On some Ubuntu versions and derivatives, a bug exists whereby enabling
+   PIE compilation (Position Independent Executables) results in the
+   `file` utility incorrectly recognising the compiled vegastrike binary
+   as a shared library instead of a position independent shared executable
+   object.
+
+   The effect of the bug is that vegastrike can still be started from the
+   command line but that it will not be recognised as an executable by GUI
+   file managers such as Nautilus and Dolphin.
+
+   To avoid this scenario, turn off this flag by default and let packagers
+   on other distributions turn this on if their OS is able to correctly deal
+   with Position Independent Executables.
+
+   For more info, see:
+
+   - https://bugs.launchpad.net/ubuntu/+source/file/+bug/1747711
+   - https://github.com/vegastrike/Vega-Strike-Engine-Source/issues/94
 
 [Link to list of dependencies in wiki](http://vegastrike.sourceforge.net/wiki/HowTo:Compile_from_CVS)
 
-If there are any problems with this installation method, please create an issue with the Vega Strike development team by [posting a new issue](https://github.com/vegastrike/Vega-Strike-Engine-Source/issues).
+If there are any problems with this installation method,
+please create an issue with the Vega Strike development team
+by [posting a new issue](https://github.com/vegastrike/Vega-Strike-Engine-Source/issues).
+
+If you get compilation issues with the system `libboost`, download it manually from
+[here](https://dl.bintray.com/boostorg/release/1.72.0/source/boost_1_72_0.tar.gz) to `./ext/boost/`
+and run `./sh/vsbuild.sh -DUSE_SYSTEM_BOOST=NO`
 
 
 **Compiling On Windows**

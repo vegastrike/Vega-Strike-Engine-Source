@@ -8,6 +8,7 @@
 #include "cmd/unit_generic.h"
 #include "gfx/cockpit_generic.h"
 #include "options.h"
+#include "posh.h"
 
 
 
@@ -413,7 +414,7 @@ using namespace VSFileSystem;
 
 bool AUDLoadSoundFile( const char *s, struct AUDSoundProperties *info, bool use_fileptr )
 {
-    //BOOST_LOG_TRIVIAL(trace) << boost::format("Loading sound file %1%") % s;
+    BOOST_LOG_TRIVIAL(trace) << boost::format("Loading sound file %1%") % s;
 
     info->success = false;
 
@@ -887,10 +888,10 @@ void AUDPlay( const int sound, const QVector &pos, const Vector &vel, const floa
             AUDAdjustSound( sound, pos, vel );
             AUDSoundGain( sound, gain, sounds[sound].music );
             if (tmp != 2) {
-                //BOOST_LOG_TRIVIAL(trace) << boost::format("AUDPlay sound %1% %2%") % sounds[sound].source % sounds[sound].buffer;
+                BOOST_LOG_TRIVIAL(trace) << boost::format("AUDPlay sound %1% %2%") % sounds[sound].source % sounds[sound].buffer;
                 AUDAddWatchedPlayed( sound, pos.Cast() );
             } else {
-                //BOOST_LOG_TRIVIAL(trace) << boost::format("AUDPlay stole sound %1% %2%") % sounds[sound].source % sounds[sound].buffer;
+                BOOST_LOG_TRIVIAL(trace) << boost::format("AUDPlay stole sound %1% %2%") % sounds[sound].source % sounds[sound].buffer;
                 alSourceStop( sounds[sound].source );
             }
             alSourcePlay( sounds[sound].source );

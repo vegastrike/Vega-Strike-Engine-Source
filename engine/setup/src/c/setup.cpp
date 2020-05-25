@@ -112,7 +112,7 @@ int main( int argc, char *argv[] )
             if (strcmp( argv[1], "--target" ) == 0 && argc > 2) {
                 data_paths.push_back( argv[2] );
             } else {
-                fprintf( stderr, "Usage: vssetup [--target DATADIR]\n" );
+                fprintf( stderr, "Usage: vegasettings [--target DATADIR]\n" );
                 return 1;
             }
         }

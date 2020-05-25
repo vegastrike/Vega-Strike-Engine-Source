@@ -19,7 +19,7 @@
 
 
 echo "-------------------------------"
-echo "--- vsbuild.sh | 2020-02-09 ---"
+echo "--- vsbuild.sh | 2020-05-13 ---"
 echo "-------------------------------"
 
 #----------------------------------
@@ -32,26 +32,23 @@ BIN_DIR=$ROOT_DIR/bin
 SRC_DIR=$ROOT_DIR/engine
 COMMAND=""
 
-if [ ! -d "$BUILD_DIR" ]; then
-    mkdir $BUILD_DIR
-fi
+# -p creates if the target doesn't exist, noop otherwise
+mkdir -pv $BUILD_DIR && cd $BUILD_DIR
 
-cd $BUILD_DIR
-
-# configure libraries
-cmake -DCMAKE_BUILD_TYPE=Release $SRC_DIR
+# configure libraries and prepare for the Debug build having -Werror set,
+# thus gating VS commits on being warning-free at some point in the near
+# future -- see https://github.com/vegastrike/Vega-Strike-Engine-Source/issues/50
+cmake -DCMAKE_BUILD_TYPE=Debug $@ $SRC_DIR
 
 # for a clean build only
 # mut we can do it manually
 #make clean
 
-# compile now using all cpus
-make -j$(nproc)
+# compile now using all cpus and show compilation commands
+make -j $(nproc) VERBOSE=1
 
 cd $ROOT_DIR
 
-if [ ! -d "$BIN_DIR" ]; then
-    mkdir $BIN_DIR
-fi
+mkdir -pv $BIN_DIR
 
-cp $BUILD_DIR/{vegastrike,vegaserver,setup/vssetup,objconv/mesh_tool} $BIN_DIR
+cp -v $BUILD_DIR/{vegastrike,setup/vegasettings,objconv/mesh_tool} $BIN_DIR

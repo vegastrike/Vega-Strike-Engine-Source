@@ -134,7 +134,7 @@ void ShowMain(void) {
 		gtk_widget_show(hbox);
 	}
 	vbox = gtk_vbox_new(FALSE, 2);
-	button = gtk_button_new_with_label("Save Settings And View Readme");
+	button = gtk_button_new_with_label("Save Settings and View Readme");
 	gtk_signal_connect(GTK_OBJECT(button), "clicked", GTK_SIGNAL_FUNC(myexit), NULL);
 	gtk_widget_show(button);
 	gtk_container_add(GTK_CONTAINER(vbox), button);

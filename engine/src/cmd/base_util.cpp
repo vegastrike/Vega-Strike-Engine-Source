@@ -36,6 +36,8 @@ typedef boost::python::dictionary BoostPythonDictionary;
 #include "audio/Renderer.h"
 #include "audio/Scene.h"
 
+#include "configxml.h"
+
 extern float getFontHeight();
 
 using Audio::Source;

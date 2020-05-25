@@ -65,8 +65,7 @@ PlanetaryOrbit::PlanetaryOrbit( Unit *p,
         AttachOrder( centre );
     }
     const double div2pi = ( 1.0/(2.0*PI) );
-    if (Network != NULL || SERVER)
-        theta = inittheta+velocity * getNewTime()*div2pi;
+
     this->SetParent( p );
 }
 
@@ -164,10 +163,7 @@ void PlanetaryOrbit::Execute()
     }
     const double div2pi = ( 1.0/(2.0*PI) );
     theta += velocity*SIMULATION_ATOM*div2pi;
-    if (Network != NULL || SERVER) {
-        float truetheta = inittheta+velocity * getNewTime()*div2pi;
-        theta = theta*( (averaging-1.0f)/averaging )+truetheta*(1.0f/averaging);
-    }
+
     QVector x_offset    = cos( theta )*x_size;
     QVector y_offset    = sin( theta )*y_size;
 

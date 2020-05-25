@@ -3,7 +3,6 @@
 //
 
 #include "SimpleSource.h"
-#include "config.h"
 
 namespace Audio {
 

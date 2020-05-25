@@ -4,6 +4,7 @@
 #include "ai/order.h"
 #include "universe_util.h"
 #include "cmd/unit_util.h"
+#include "configxml.h"
 
 #include <vector>
 

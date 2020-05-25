@@ -3,7 +3,6 @@
 //
 
 #include "utils.h"
-#include "config.h"
 
 #include "universe_util.h"
 #include "lin_time.h"

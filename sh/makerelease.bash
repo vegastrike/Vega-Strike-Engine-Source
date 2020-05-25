@@ -9,7 +9,7 @@
 #       ../vegastrike        NO OTHER DIRECTORIES SHOULD BE PRESENT IN THIS PARENT DIRECTORY
 #       ../music
 # You should also have placed, in the data directory, the vslauncher binary, and in the vegastrike dir,
-# the vssetup binary.
+# the vegasettings binary.
 # Now, make sure that the vegastrike source is prepared for compile, including the removal of all non-essential
 # directories (such as objconv, launcher and the extra boost dir -- depending on your srpm options).  And make
 # sure the data dir is also ready, by removing all non-linux files from all modules -- some of this is accounted

@@ -26,7 +26,6 @@
 #ifndef _VEGACONFIG_H_
 #define _VEGACONFIG_H_
 
-#include "config.h"
 #include <expat.h>
 #include <string>
 #include <gnuhash.h>

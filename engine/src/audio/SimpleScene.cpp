@@ -4,7 +4,6 @@
 
 #include "SimpleScene.h"
 #include "SimpleSource.h"
-#include "config.h"
 
 #include "SceneManager.h"
 
