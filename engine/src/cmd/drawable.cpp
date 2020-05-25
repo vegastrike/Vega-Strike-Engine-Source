@@ -1,12 +1,13 @@
 #include "drawable.h"
 #include "vsfilesystem.h"
 #include "gfx/mesh.h"
+#include "gfx/quaternion.h"
 #include "unit_generic.h"
 
 #include <boost/algorithm/string.hpp>
 
 
-Drawable::Drawable(Unit *_unitDst) :
+Drawable::Drawable() :
                    animatedMesh(true),
                    activeAnimation(0),
                    timeperframe(3.0),
@@ -15,12 +16,11 @@ Drawable::Drawable(Unit *_unitDst) :
                    nextactiveMesh(1),
                    infiniteLoop(true),
                    loopCount(0),
-                   unitDst(_unitDst),
                    curtime(0.0)
 
 {}
 
-bool Drawable::Init(const char *filename, int faction,
+bool Drawable::DrawableInit(const char *filename, int faction,
         Flightgroup *flightgrp, const char *animationExt)
 {
     string fnam(filename);
@@ -81,8 +81,8 @@ bool Drawable::Init(const char *filename, int faction,
 		int numFrames = meshes->size();
 		++Drawable::unitCount;
 		sprintf( count, "%u", unitCount );
-		uniqueUnitName = unitDst->name + string(count);
-		Units[uniqueUnitName] = unitDst;
+		uniqueUnitName = drawableGetName() + string(count);
+		Units[uniqueUnitName] = static_cast<Unit*>(this);
 		std::cerr << "Animation data loaded for unit: " << string(filename) << ", named " << uniqueUnitName << " - with: " << numFrames << " frames." << std::endl;
 		return true;
 	} else {
@@ -102,13 +102,13 @@ void Drawable::AnimationStep()
         int numvold = 0;
         int numvertices = 0;
         //copy reference to data
-        unitDst->meshdata.at(0) = vecAnimations.at(activeAnimation)->at(activeMesh);
+        meshdata.at(0) = vecAnimations.at(activeAnimation)->at(activeMesh);
 
 #ifdef DEBUG_MESH_ANI
         std::cerr << "vertices changed from: " << numvold << " to: " << numvertices << std::endl;
 #endif
 
-        unitDst->Draw();
+        Draw();
 
 #ifdef DEBUG_MESH_ANI
         std::cerr << "Drawed mesh: " << uniqueUnitName << std::endl;
@@ -131,10 +131,10 @@ void Drawable::UpdateFrames()
 	std::map< string, Unit * >::iterator pos;
 	for(pos = Units.begin(); pos != Units.end(); ++pos)
 	{
-	pos->second->pMeshAnimation->curtime += GetElapsedTime();
-	if (pos->second->pMeshAnimation->curtime >= pos->second->pMeshAnimation->timePerFrame()) {
-		pos->second->pMeshAnimation->AnimationStep();
-		pos->second->pMeshAnimation->curtime = 0.0;
+	pos->second->curtime += GetElapsedTime();
+	if (pos->second->curtime >= pos->second->timePerFrame()) {
+		pos->second->AnimationStep();
+		pos->second->curtime = 0.0;
 	}
 	}
 }

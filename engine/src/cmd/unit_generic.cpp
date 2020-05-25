@@ -708,11 +708,6 @@ Unit::Unit( const char *filename,
 
 Unit::~Unit()
 {
-    if(pMeshAnimation) {
-        delete pMeshAnimation;
-        pMeshAnimation = NULL;
-    }
-
     free( pImage->cockpit_damage );
     if ( (!killed) )
         VSFileSystem::vs_fprintf( stderr, "Assumed exit on unit %s(if not quitting, report error)\n",
@@ -853,8 +848,6 @@ void Unit::ZeroAll()
     flightgroup           = NULL;
     flightgroup_subnumber = 0;
     setTractorability( tractorImmune );
-
-    pMeshAnimation = NULL;
 }
 
 void Unit::Init()
@@ -1208,14 +1201,10 @@ void Unit::Init( const char *filename,
     calculate_extent( false );
     pilot->SetComm( this );
 
-    this->pMeshAnimation = new Drawable(this);
-	bool initsucc = pMeshAnimation->Init(filename, faction, flightgrp);
+	bool initsucc = DrawableInit(filename, faction, flightgrp);
 	if(initsucc) {
-		pMeshAnimation->SetAniSpeed( 0.05 );
-		pMeshAnimation->StartAnimation();
-	} else {
-		delete pMeshAnimation;
-		pMeshAnimation = NULL;
+		SetAniSpeed( 0.05 );
+		StartAnimation();
 	}
 }
 

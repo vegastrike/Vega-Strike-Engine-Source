@@ -28,6 +28,8 @@
 
 #ifndef _UNIT_H_
 #define _UNIT_H_
+
+#include "damageable.h"
 #include "drawable.h"
 #include "movable.h"
 #include "computer.h"
@@ -220,7 +222,7 @@ struct PlanetaryOrbitData;
  * the aistate indicates how the unit will behave in the upcoming phys frame
  */
 
-class Unit : public Movable
+class Unit : public Drawable, public Damageable, public Movable
 {
 protected:
 //How many lists are referencing us
@@ -419,9 +421,7 @@ protected:
  */
 
 public:
-//number of meshes (each with separate texture) this unit has
 
-    std::vector< Mesh* >meshdata;
     unsigned attackPreference() const
     {
         return attack_preference;
@@ -502,6 +502,7 @@ public:
 //Uses GFX so only in Unit class
     virtual void Draw( const Transformation &quat = identity_transformation, const Matrix &m = identity_matrix ) {}
     virtual void DrawNow( const Matrix &m = identity_matrix, float lod = 1000000000 ) {}
+    virtual std::string drawableGetName() { return name; };
 
 //Sets the camera to be within this unit.
 //Uses Universe & GFX so not needed here -> only in Unit class
@@ -1286,14 +1287,6 @@ public:
     float getRelation( const Unit *other ) const;
 
     void TurretFAW();
-
-    /*
-    **************************************************************************************
-    **** ANIMATION STUFF                                                       ***
-    **************************************************************************************
-    */
-    // TODO: std::unique_ptr<Drawable> pMeshAnimation;
-    Drawable *pMeshAnimation;
 };
 
 Unit * findUnitInStarsystem( const void *unitDoNotDereference );

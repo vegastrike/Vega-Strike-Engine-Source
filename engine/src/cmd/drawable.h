@@ -1,7 +1,7 @@
 #ifndef DRAWABLE_H
 #define DRAWABLE_H
 
-//#include "gfx/mesh.h"
+#include "gfx/quaternion.h"
 #include <vector>
 #include <map>
 #include <string>
@@ -9,6 +9,7 @@
 class Mesh;
 class Flightgroup;
 class Unit;
+//class Transformation;
 
 using std::vector;
 using std::string;
@@ -16,6 +17,9 @@ using std::map;
 
 class Drawable
 {
+public:
+  //number of meshes (each with separate texture) this unit has
+  std::vector< Mesh* >meshdata;
 
 protected:
     vector< vector<Mesh *> *> vecAnimations;
@@ -31,7 +35,6 @@ protected:
     unsigned int    loopCount;
 
     string uniqueUnitName;
-    Unit *unitDst;
 
 public:
     double curtime;
@@ -40,9 +43,9 @@ public:
 
     static std::map< string, Unit * > Units;
 
-    Drawable(Unit* _unitDst);
+    Drawable();
 
-    bool Init(const char *filename, int faction, Flightgroup *flightgrp = NULL, const char *animationExt = NULL);
+    bool DrawableInit(const char *filename, int faction, Flightgroup *flightgrp = NULL, const char *animationExt = NULL);
 
     static void UpdateFrames();
 
@@ -83,7 +86,10 @@ public:
 
     void SetAniSpeed( float speed );
 
-
+    //Uses GFX so only in Unit class
+    virtual void Draw( const Transformation &quat = identity_transformation, const Matrix &m = identity_matrix ) = 0;
+    virtual void DrawNow( const Matrix &m = identity_matrix, float lod = 1000000000 ) = 0;
+    virtual std::string drawableGetName() = 0;
 };
 
 /*
