@@ -1,4 +1,3 @@
-#include "config.h"
 #include <boost/version.hpp>
 #include <boost/python.hpp>
 #include "python_class.h"

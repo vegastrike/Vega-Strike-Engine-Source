@@ -2,7 +2,6 @@
 #ifndef _BASE_UTIL_H_
 #define _BASE_UTIL_H_
 
-#include "config.h"
 #include <string>
 #include <boost/version.hpp>
 #if BOOST_VERSION != 102800

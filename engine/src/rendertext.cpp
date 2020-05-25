@@ -1,6 +1,5 @@
 //rendertext.cpp: based on Don's gl_text.cpp
 //Based on Aardarples rendertext
-#include "config.h"
 #include "command.h"
 
 #include "vegastrike.h"

@@ -1,4 +1,3 @@
-#include "config.h"
 #include <boost/version.hpp>
 #include <Python.h>
 #include <math.h>

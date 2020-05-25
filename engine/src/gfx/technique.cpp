@@ -1,7 +1,6 @@
 //
 //C++ Implementation: Technique
 //
-#include "config.h"
 
 #include <exception>
 #include <map>
