@@ -18,11 +18,10 @@
 # > cmake -DCMAKE_BUILD_TYPE=Debug <path to source tree>
 #====================================
 
+CMAKE_MINIMUM_REQUIRED(VERSION 2.6)
+SET(CMAKE_CXX_STANDARD 11)
 
-cmake_minimum_required(VERSION 2.6)
-set (CMAKE_CXX_STANDARD 11)
-
-project (vsUTCS)
+PROJECT(vsUTCS)
 
 UNSET(PYTHONLIBS_FOUND)
 UNSET(Boost_FOUND)
@@ -43,20 +42,18 @@ UNSET(FFMPEG_FOUND)
 UNSET(OGRE_FOUND)
 UNSET(Boost_DIR)
 
-include_directories(
-    ${vsUTCS_SOURCE_DIR}/src 
+INCLUDE_DIRECTORIES(
+    ${vsUTCS_SOURCE_DIR}/src
     ${vsUTCS_SOURCE_DIR}/src/cmd
     ${vsUTCS_BINARY_DIR}
     /usr/include/harfbuzz/
-) 
-
-
+)
 
 SET(LIBGUI_SOURCES
     src/gui/button.cpp
     src/gui/control.cpp
     src/gui/eventmanager.cpp
-    src/gui/eventresponder.cpp 
+    src/gui/eventresponder.cpp
     src/gui/font.cpp
     src/gui/glut_support.cpp
     src/gui/groupcontrol.cpp
@@ -82,7 +79,7 @@ SET(LIBPYTHON_SOURCES
     src/python/unit_exports.cpp
     src/python/unit_exports1.cpp
     src/python/unit_exports2.cpp
-    src/python/unit_exports3.cpp 
+    src/python/unit_exports3.cpp
     src/python/unit_method_defs.cpp
     src/python/unit_wrapper.cpp
     src/python/universe_util_export.cpp
@@ -114,7 +111,6 @@ SET(LIBCMDSCRIPTSERVER_SOURCES
     src/cmd/script/c_alike/lex.yy.cpp
 )
 
-
 SET(LIBAI_SOURCES
     src/cmd/ai/aggressive.cpp
     src/cmd/ai/autodocking.cpp
@@ -139,7 +135,7 @@ SET(LIBAI_SOURCES
     src/cmd/ai/flykeyboard_generic.cpp
 )
 
-add_library(OPcollide
+ADD_LIBRARY(OPcollide
     src/cmd/collide2/Ice/IceAABB.cpp
     src/cmd/collide2/Ice/IceContainer.cpp
     src/cmd/collide2/Ice/IceHPoint.cpp
@@ -152,7 +148,7 @@ add_library(OPcollide
     src/cmd/collide2/Ice/IceRandom.cpp
     src/cmd/collide2/Ice/IceRay.cpp
     src/cmd/collide2/Ice/IceRevisitedRadix.cpp
-    src/cmd/collide2/Ice/IceSegment.cpp 
+    src/cmd/collide2/Ice/IceSegment.cpp
     src/cmd/collide2/Ice/IceTriangle.cpp
     src/cmd/collide2/Ice/IceUtils.cpp
     src/cmd/collide2/csgeom2/opbox.cpp
@@ -162,22 +158,22 @@ add_library(OPcollide
     src/cmd/collide2/OPC_AABBTree.cpp
     src/cmd/collide2/OPC_BaseModel.cpp
     src/cmd/collide2/OPC_BoxPruning.cpp
-    src/cmd/collide2/OPC_Collider.cpp 
+    src/cmd/collide2/OPC_Collider.cpp
     src/cmd/collide2/OPC_Common.cpp
     src/cmd/collide2/OPC_HybridModel.cpp
     src/cmd/collide2/OPC_LSSCollider.cpp
-    src/cmd/collide2/OPC_MeshInterface.cpp 
+    src/cmd/collide2/OPC_MeshInterface.cpp
     src/cmd/collide2/OPC_Model.cpp
-    src/cmd/collide2/OPC_OBBCollider.cpp 
-    src/cmd/collide2/OPC_OptimizedTree.cpp 
-    src/cmd/collide2/OPC_Picking.cpp 
-    src/cmd/collide2/OPC_PlanesCollider.cpp 
-    src/cmd/collide2/OPC_RayCollider.cpp 
-    src/cmd/collide2/OPC_SphereCollider.cpp 
-    src/cmd/collide2/OPC_SweepAndPrune.cpp 
-    src/cmd/collide2/OPC_TreeBuilders.cpp 
-    src/cmd/collide2/OPC_TreeCollider.cpp 
-    src/cmd/collide2/OPC_VolumeCollider.cpp 
+    src/cmd/collide2/OPC_OBBCollider.cpp
+    src/cmd/collide2/OPC_OptimizedTree.cpp
+    src/cmd/collide2/OPC_Picking.cpp
+    src/cmd/collide2/OPC_PlanesCollider.cpp
+    src/cmd/collide2/OPC_RayCollider.cpp
+    src/cmd/collide2/OPC_SphereCollider.cpp
+    src/cmd/collide2/OPC_SweepAndPrune.cpp
+    src/cmd/collide2/OPC_TreeBuilders.cpp
+    src/cmd/collide2/OPC_TreeCollider.cpp
+    src/cmd/collide2/OPC_VolumeCollider.cpp
     src/cmd/collide2/CSopcodecollider.cpp
 )
 
@@ -200,12 +196,12 @@ SET(LIBCMD_SOURCES
     src/cmd/unit_collide.cpp
     src/cmd/unit_const_cache.cpp
     src/cmd/unit_csv.cpp
-    src/cmd/unit_factory_generic.cpp 
-    src/cmd/unit_functions_generic.cpp 
-    src/cmd/unit_generic.cpp 
+    src/cmd/unit_factory_generic.cpp
+    src/cmd/unit_functions_generic.cpp
+    src/cmd/unit_generic.cpp
     src/cmd/fg_util.cpp
     src/cmd/unit_util_generic.cpp
-    src/cmd/unit_xml.cpp 
+    src/cmd/unit_xml.cpp
     src/cmd/weapon_xml.cpp
 )
 
@@ -217,9 +213,9 @@ SET(LIBCMDSERVER_SOURCES
     src/cmd/unit_factory_server.cpp
     src/cmd/unit_functions_server.cpp
     src/cmd/unit_util_server.cpp
-    src/cmd/unit_server.cpp 
-    src/cmd/pilot_server.cpp 
-    src/cmd/images_server.cpp 
+    src/cmd/unit_server.cpp
+    src/cmd/pilot_server.cpp
+    src/cmd/images_server.cpp
     src/cmd/faction_xml_server.cpp
 )
 
@@ -269,23 +265,23 @@ SET(LIBGFXCLIENT_SOURCES
     src/gfx/nav/navpath.cpp
     src/gfx/nav/navscreen.cpp
     src/gfx/nav/navscreenoccupied.cpp
-    src/gfx/radar/bubble_display.cpp 
-    src/gfx/radar/bubble_display.h 
-    src/gfx/radar/dual_display.cpp 
-    src/gfx/radar/dual_display.h 
-    src/gfx/radar/null_display.h 
-    src/gfx/radar/plane_display.cpp 
-    src/gfx/radar/plane_display.h 
-    src/gfx/radar/radar.cpp 
-    src/gfx/radar/radar.h 
-    src/gfx/radar/sensor.cpp 
-    src/gfx/radar/sensor.h 
-    src/gfx/radar/sphere_display.cpp 
-    src/gfx/radar/sphere_display.h 
-    src/gfx/radar/track.cpp 
-    src/gfx/radar/track.h 
-    src/gfx/radar/viewarea.cpp 
-    src/gfx/radar/viewarea.h 
+    src/gfx/radar/bubble_display.cpp
+    src/gfx/radar/bubble_display.h
+    src/gfx/radar/dual_display.cpp
+    src/gfx/radar/dual_display.h
+    src/gfx/radar/null_display.h
+    src/gfx/radar/plane_display.cpp
+    src/gfx/radar/plane_display.h
+    src/gfx/radar/radar.cpp
+    src/gfx/radar/radar.h
+    src/gfx/radar/sensor.cpp
+    src/gfx/radar/sensor.h
+    src/gfx/radar/sphere_display.cpp
+    src/gfx/radar/sphere_display.h
+    src/gfx/radar/track.cpp
+    src/gfx/radar/track.h
+    src/gfx/radar/viewarea.cpp
+    src/gfx/radar/viewarea.h
     src/gfx/particle.cpp
     src/gfx/pipelined_texture.cpp
     src/gfx/quadsquare_cull.cpp
@@ -300,23 +296,23 @@ SET(LIBGFXCLIENT_SOURCES
     src/gfx/soundcontainer.cpp
     src/gfx/soundcontainer_aldrv.cpp
     src/gfx/sphere.cpp
-    src/gfx/sprite.cpp 
+    src/gfx/sprite.cpp
     src/gfx/star.cpp
     src/gfx/stream_texture.cpp
     src/gfx/technique.cpp
     src/gfx/tex_transform.cpp
     src/gfx/vdu.cpp
     src/gfx/vid_file.cpp
-    src/ffmpeg_init.cpp 
+    src/ffmpeg_init.cpp
     src/gfx/vsbox.cpp
-    src/gfx/vsimage.cpp 
+    src/gfx/vsimage.cpp
     src/gfx/warptrail.cpp
 )
 
 SET(LIBGFXSERVER_SOURCES
     src/gfx/sphere_server.cpp
     src/gfx/vsbox_server.cpp
-    src/gfx/mesh_server.cpp 
+    src/gfx/mesh_server.cpp
     src/gfx/background_server.cpp
     src/gfx/mesh_bin_server.cpp
 )
@@ -325,7 +321,7 @@ SET(LIBROOTGENERIC_SOURCES
     src/configxml.cpp
     src/easydom.cpp
     src/endianness.cpp
-    src/macosx_math.cpp 
+    src/macosx_math.cpp
     src/faction_generic.cpp
     src/faction_util_generic.cpp
     src/galaxy_gen.cpp
@@ -334,12 +330,12 @@ SET(LIBROOTGENERIC_SOURCES
     src/hashtable.cpp
     src/lin_time.cpp
     src/load_mission.cpp
-    src/pk3.cpp 
+    src/pk3.cpp
     src/posh.cpp
     src/savegame.cpp
     src/star_system_generic.cpp
     src/star_system_xml.cpp
-    src/stardate.cpp 
+    src/stardate.cpp
     src/universe_generic.cpp
     src/universe_util_generic.cpp
     src/vs_globals.cpp
@@ -364,7 +360,7 @@ SET(LIBROOTCLIENT_SOURCES
     src/in_kb.cpp
     src/in_main.cpp
     src/in_mouse.cpp
-    src/in_sdl.cpp 
+    src/in_sdl.cpp
     src/main_loop.cpp
     src/physics.cpp
     src/rendertext.cpp
@@ -375,7 +371,7 @@ SET(LIBROOTCLIENT_SOURCES
     src/universe.cpp
 )
 
-SET(LIBROOTSERVER_SOURCES 
+SET(LIBROOTSERVER_SOURCES
     src/force_feedback_server.cpp
     src/faction_util_server.cpp
     src/gfxlib_struct_server.cpp
@@ -419,14 +415,16 @@ SET(LIBAUDIO_SOURCES
 )
 
 
-add_library(engine_com ${LIBAI_SOURCES}
-					   ${LIBCMD_SOURCES}
-					   ${LIBNET_SOURCES}
-					   ${LIBPYTHON_SOURCES}
-					   ${LIBROOTGENERIC_SOURCES}
-					   ${LIBSCRIPT_SOURCES}
-					   ${LIBGFXGENERIC_SOURCES} )
-				   
+ADD_LIBRARY(engine_com
+    ${LIBAI_SOURCES}
+    ${LIBCMD_SOURCES}
+    ${LIBNET_SOURCES}
+    ${LIBPYTHON_SOURCES}
+    ${LIBROOTGENERIC_SOURCES}
+    ${LIBSCRIPT_SOURCES}
+    ${LIBGFXGENERIC_SOURCES}
+)
+
 SET(VEGASTRIKE_SOURCES
     ${LIBGUI_SOURCES}
     ${LIBNETCLIENT_SOURCES}
@@ -435,7 +433,7 @@ SET(VEGASTRIKE_SOURCES
     ${LIBAUDIO_SOURCES}
     src/aldrv/al_globals.cpp
     src/aldrv/al_init.cpp
-    src/aldrv/al_listen.cpp 
+    src/aldrv/al_listen.cpp
     src/aldrv/al_sound.cpp
     src/cmd/ai/firekeyboard.cpp
     src/cmd/ai/flyjoystick.cpp
@@ -457,16 +455,16 @@ SET(VEGASTRIKE_SOURCES
     src/cmd/cont_terrain.cpp
     src/cmd/music.cpp
     src/cmd/nebula.cpp
-    src/cmd/planet.cpp 
+    src/cmd/planet.cpp
     src/cmd/script/c_alike/c_alike.tab.cpp
-    src/cmd/script/c_alike/lex.yy.cpp 
-    src/cmd/script/director.cpp 
+    src/cmd/script/c_alike/lex.yy.cpp
+    src/cmd/script/director.cpp
     src/cmd/script/flightgroup.cpp
     src/cmd/script/script_call_briefing.cpp
     src/cmd/script/script_call_unit.cpp
     src/cmd/terrain.cpp
-    src/cmd/unit_factory.cpp 
-    src/cmd/unit_functions.cpp 
+    src/cmd/unit_factory.cpp
+    src/cmd/unit_functions.cpp
     src/cmd/unit_util.cpp
     src/cmd/faction_xml.cpp
     src/cmd/pilot.cpp
@@ -490,57 +488,42 @@ SET(VEGASTRIKE_SOURCES
     src/gldrv/gl_texture.cpp
     src/gldrv/gl_vertex_list.cpp
     src/gldrv/winsys.cpp
-    src/main.cpp 
+    src/main.cpp
     src/python/briefing_wrapper.cpp
 )
 
+IF (COMMAND cmake_policy)
+    CMAKE_POLICY(SET CMP0003 NEW)
+ENDIF (COMMAND cmake_policy)
 
-
-if(COMMAND cmake_policy)
-	cmake_policy(SET CMP0003 NEW) 
-endif(COMMAND cmake_policy)
-
-if (POLICY CMP0072)
-  cmake_policy (SET CMP0072 NEW)
-endif()
+IF (POLICY CMP0072)
+  CMAKE_POLICY (SET CMP0072 NEW)
+ENDIF ()
 
 # Set the default build type to Release
-IF(NOT CMAKE_BUILD_TYPE)
-	SET(CMAKE_BUILD_TYPE Release CACHE STRING
-      "Release, Debug, Profiler"
-      FORCE )
-ENDIF(NOT CMAKE_BUILD_TYPE)
+IF (NOT CMAKE_BUILD_TYPE)
+    SET(CMAKE_BUILD_TYPE Release CACHE STRING "Release, Debug, Profiler" FORCE )
+ENDIF (NOT CMAKE_BUILD_TYPE)
 
-IF(NOT BUILD_OPT)
-	SET(BUILD_OPT -O2 CACHE STRING
-      "-O0, -O1, -O2, -O3, -Os, -Ofast"
-      FORCE )
-ENDIF(NOT BUILD_OPT)
+IF (NOT BUILD_OPT)
+    SET(BUILD_OPT -O2 CACHE STRING "-O0, -O1, -O2, -O3, -Os, -Ofast" FORCE )
+ENDIF (NOT BUILD_OPT)
 
-if(CMAKE_COMPILER_IS_GNUCXX)
-    add_definitions(-std=gnu++03)
-endif()
+IF (CMAKE_COMPILER_IS_GNUCXX)
+    ADD_DEFINITIONS(-std=gnu++03)
+ENDIF ()
 
 
 # Provide boolean options for enabling various cpu optimizations.
-OPTION(CPUAMD_k8  "Enable AMD K8 optimizations (Athlon through athlon64)" 
-    OFF )
-OPTION(CPUAMD_k9  "Enable AMD K9 (sse3) optimizations (Athlon64 AM3) "
-    OFF )
-OPTION(CPUAMD_k10  "Enable AMD K10 optimizations (Athlon2)"
-    OFF )
-OPTION(CPUAMD_vishera  "Enable AMD Vishera optimizations"
-    OFF )
-OPTION(CPUINTEL_p4 "Enable Intel P4 optimizations (1st gen P4's)"
-    OFF )
-OPTION(CPUINTEL_prescott  "Enable Intel P4 (sse3) optimizations"
-    OFF )
-OPTION(CPUINTEL_nocona "Enable Intel P4 (64bit) optimizations"
-    OFF )
-OPTION(CPUINTEL_core2 "Enable Intel Core2 optimizations"
-    OFF )
-OPTION(CPUINTEL_native "Enable host-specific optimizations for this machine"
-    OFF )
+OPTION(CPUAMD_k8  "Enable AMD K8 optimizations (Athlon through athlon64)" OFF )
+OPTION(CPUAMD_k9  "Enable AMD K9 (sse3) optimizations (Athlon64 AM3) " OFF )
+OPTION(CPUAMD_k10  "Enable AMD K10 optimizations (Athlon2)" OFF )
+OPTION(CPUAMD_vishera  "Enable AMD Vishera optimizations" OFF )
+OPTION(CPUINTEL_p4 "Enable Intel P4 optimizations (1st gen P4's)" OFF )
+OPTION(CPUINTEL_prescott  "Enable Intel P4 (sse3) optimizations" OFF )
+OPTION(CPUINTEL_nocona "Enable Intel P4 (64bit) optimizations" OFF )
+OPTION(CPUINTEL_core2 "Enable Intel Core2 optimizations" OFF )
+OPTION(CPUINTEL_native "Enable host-specific optimizations for this machine" OFF )
 
 SET(DATADIR "" CACHE STRING "Default vegastrike data directory")
 
@@ -549,36 +532,34 @@ SET(CPU_OPTS  )
 SET(DEFINES " -DNV_CUBE_MAP -DBOOST_PYTHON_NO_PY_SIGNATURES -DBOOST_LOG_DYN_LINK ")
 MARK_AS_ADVANCED( CPU_OPTS )
 MARK_AS_ADVANCED( DEFINES )
-SET(CPU_SMP "1" CACHE STRING 
-    "Number of CPU's in system")
+SET(CPU_SMP "1" CACHE STRING "Number of CPU's in system")
 
 # Depending on the boolean chosen above, set CPU_OPTS to the correct cpu opts
-IF(CPUAMD_k8)
+IF (CPUAMD_k8)
     SET(CPU_OPTS "-mtune=athlon64 -mfpmath=sse -msse2 -mmmx -m3dnow -ftree-vectorize -ffast-math -fassociative-math -funsafe-math-optimizations -fprefetch-loop-arrays ")
-ELSEIF(CPUAMD_K9)
+ELSEIF (CPUAMD_K9)
     SET(CPU_OPTS "-mtune=k8-sse3 -mfpmath=sse -msse3 -mmmx -m3dnow -ftree-vectorize -ffast-math -fassociative-math -funsafe-math-optimizations -funroll-loops ")
-ELSEIF(CPUINTEL_p4)
+ELSEIF (CPUINTEL_p4)
     SET(CPU_OPTS "-mtune=pentium4 -mfpmath=sse -msse2 -mmmx -ftree-vectorize -ffast-math -fassociative-math -funsafe-math-optimizations -funroll-loops ")
-ELSEIF(CPUINTEL_prescott)
+ELSEIF (CPUINTEL_prescott)
     SET(CPU_OPTS "-mtune=prescott -mfpmath=sse -msse3 -mmmx -ftree-vectorize -ffast-math -fassociative-math -funsafe-math-optimizations -funroll-loops " )
-ELSEIF(CPUINTEL_nocona)
+ELSEIF (CPUINTEL_nocona)
     SET(CPU_OPTS "-mtune=nocona -mfpmath=sse -msse3 -mmmx -ftree-vectorize -ffast-math -fassociative-math -funsafe-math-optimizations -funroll-loops ")
-ELSEIF(CPUINTEL_core2)
+ELSEIF (CPUINTEL_core2)
     SET(CPU_OPTS "-mtune=core2 -mfpmath=sse -msse3 -mmmx -ftree-vectorize -ffast-math -fassociative-math -funsafe-math-optimizations -funroll-loops ")
-ELSEIF(CPUINTEL_native)
+ELSEIF (CPUINTEL_native)
     SET(CPU_OPTS "-mtune=native -march=native -mfpmath=sse -msse3 -mmmx -ftree-vectorize -ffast-math -fassociative-math -funsafe-math-optimizations -funroll-loops ")
-ELSEIF(CPUAMD_vishera)
-    SET(CPU_OPTS "-march=bdver2 -mfpmath=both -mmmx -msse4a -msse4.2 -maes -mpclmul -mfsgsbase -mrdrnd -mf16c -mfma -mfma4 -m3dnow -mxop -mlwp -mtbm -mavx2 -mvzeroupper -msahf -mcx16 -funsafe-loop-optimizations ") 
-ENDIF(CPUAMD_k8)
+ELSEIF (CPUAMD_vishera)
+    SET(CPU_OPTS "-march=bdver2 -mfpmath=both -mmmx -msse4a -msse4.2 -maes -mpclmul -mfsgsbase -mrdrnd -mf16c -mfma -mfma4 -m3dnow -mxop -mlwp -mtbm -mavx2 -mvzeroupper -msahf -mcx16 -funsafe-loop-optimizations ")
+ENDIF (CPUAMD_k8)
 
-IF(CPU_SMP GREATER 1)
+IF (CPU_SMP GREATER 1)
     SET(CPU_OPTS " ${CPU_OPTS} -ftree-parallelize-loops=${CPU_SMP} ")
-ENDIF(CPU_SMP GREATER 1)
+ENDIF (CPU_SMP GREATER 1)
 
-IF(DATADIR)
+IF (DATADIR)
     SET(DEFINES "${DEFINES} -DDATA_DIR=\"${DATADIR}\"")
-ENDIF(DATADIR)
-
+ENDIF (DATADIR)
 
 # On some Ubuntu versions and derivatives, a bug exists whereby enabling
 # PIE compilation (Position Independent Executables) results in the
@@ -599,138 +580,136 @@ ENDIF(DATADIR)
 # - https://github.com/vegastrike/Vega-Strike-Engine-Source/issues/94
 #
 #UNSET(CMAKE_POSITION_INDEPENDENT_CODE)
-OPTION(ENABLE_PIE
-  "Enable Position Independent Executables/Shared Libraries (NOT RECOMMENDED on Ubuntu/Mint)"
-  OFF)
-IF(ENABLE_PIE)
-  message("!! Enabling Position Independent Executables/Shared Libraries (NOT RECOMMENDED on Ubuntu/Mint) !!")
+OPTION(ENABLE_PIE "Enable Position Independent Executables/Shared Libraries (NOT RECOMMENDED on Ubuntu/Mint)" OFF)
+IF (ENABLE_PIE)
+  MESSAGE("!! Enabling Position Independent Executables/Shared Libraries (NOT RECOMMENDED on Ubuntu/Mint) !!")
   #SET(CMAKE_POSITION_INDEPENDENT_CODE ON)
-  add_compile_options("-pie")
-  link_libraries("-pie")
-ELSE(ENABLE_PIE)
-  message("++ Disabling Position Independent Executables/Shared Libraries (Recommended on Ubuntu/Mint)")
-  add_compile_options("-no-pie")
-  link_libraries("-no-pie")
-ENDIF(ENABLE_PIE)
+  ADD_COMPILE_OPTIONS("-pie")
+  LINK_LIBRARIES("-pie")
+ELSE (ENABLE_PIE)
+  MESSAGE("++ Disabling Position Independent Executables/Shared Libraries (Recommended on Ubuntu/Mint)")
+  ADD_COMPILE_OPTIONS("-no-pie")
+  LINK_LIBRARIES("-no-pie")
+ENDIF (ENABLE_PIE)
 
 
-# Debug target block. 
+# Debug target block.
 SET(CMAKE_CXX_FLAGS_DEBUG " ${BUILD_OPT} ${CPU_OPTS} ${DEFINES} -include config.h -pipe -g2 -std=c++11 -Wall -fvisibility=hidden" CACHE STRING
     "Flags used by the C++ compiler during debug builds."
-     FORCE )
-SET( CMAKE_C_FLAGS_DEBUG "  ${BUILD_OPT} ${CPU_OPTS} ${DEFINES} -include config.h -pipe -g2 -Wall -Wno-unused-function -Wno-unused-variable -fvisibility=hidden" CACHE STRING
+    FORCE
+)
+SET(CMAKE_C_FLAGS_DEBUG "  ${BUILD_OPT} ${CPU_OPTS} ${DEFINES} -include config.h -pipe -g2 -Wall -Wno-unused-function -Wno-unused-variable -fvisibility=hidden" CACHE STRING
     "Flags used by the C compiler during debug builds."
-     FORCE )
-SET( CMAKE_EXE_LINKER_FLAGS_DEBUG
+    FORCE
+)
+SET(CMAKE_EXE_LINKER_FLAGS_DEBUG
     "-Bsymbolic " CACHE STRING
     "Flags used for linking binaries during debug builds."
-     FORCE )
+    FORCE
+)
 MARK_AS_ADVANCED(
     CMAKE_CXX_FLAGS_DEBUG
-    CMAKE_C_FLAGS_DEBUG)
-IF("${CMAKE_BUILD_TYPE}" STREQUAL "Debug")
-    MARK_AS_ADVANCED( CLEAR
-        CMAKE_CXX_FLAGS_DEBUG )
-ELSE("${CMAKE_BUILD_TYPE}" STREQUAL "Debug")
-    MARK_AS_ADVANCED( FORCE 
-        CMAKE_CXX_FLAGS_DEBUG )
-ENDIF("${CMAKE_BUILD_TYPE}" STREQUAL "Debug")
+    CMAKE_C_FLAGS_DEBUG
+)
+IF ("${CMAKE_BUILD_TYPE}" STREQUAL "Debug")
+    MARK_AS_ADVANCED( CLEAR CMAKE_CXX_FLAGS_DEBUG )
+ELSE ("${CMAKE_BUILD_TYPE}" STREQUAL "Debug")
+    MARK_AS_ADVANCED( FORCE CMAKE_CXX_FLAGS_DEBUG )
+ENDIF ("${CMAKE_BUILD_TYPE}" STREQUAL "Debug")
 
-
-# Release Target block 
+# Release Target block
 SET(CMAKE_CXX_FLAGS_RELEASE  " ${BUILD_OPT} ${CPU_OPTS} ${DEFINES} -include config.h -pipe -std=c++11 -Wall -fvisibility=hidden" CACHE STRING
     "Flags used by the C++ compiler during release builds."
-    FORCE)
-SET( CMAKE_C_FLAGS_RELEASE " ${BUILD_OPT} ${CPU_OPTS} ${DEFINES} -include config.h -pipe -Wall -Wno-unused-function -Wno-unused-variable -fvisibility=hidden" CACHE STRING
-    "Flags used by the C compiler during release builds." 
-    FORCE )
+    FORCE
+)
+SET(CMAKE_C_FLAGS_RELEASE " ${BUILD_OPT} ${CPU_OPTS} ${DEFINES} -include config.h -pipe -Wall -Wno-unused-function -Wno-unused-variable -fvisibility=hidden" CACHE STRING
+    "Flags used by the C compiler during release builds."
+    FORCE
+)
 SET(CMAKE_EXE_LINKER_FLAGS_RELEASE "-Bsymbolic" CACHE STRING "Release linker flags"
-     FORCE )
+    FORCE
+)
 MARK_AS_ADVANCED(
     CMAKE_C_FLAGS_RELEASE
     CMAKE_CXX_FLAGS_RELEASE
-    CMAKE_EXE_LINKER_FLAGS_RELEASE)
-IF("${CMAKE_BUILD_TYPE}" STREQUAL "Release")
-    MARK_AS_ADVANCED( CLEAR
-        CMAKE_CXX_FLAGS_RELEASE )
-ELSE("${CMAKE_BUILD_TYPE}" STREQUAL "Release")
-    MARK_AS_ADVANCED( FORCE
-      CMAKE_CXX_FLAGS_RELEASE )
-ENDIF("${CMAKE_BUILD_TYPE}" STREQUAL "Release")
+    CMAKE_EXE_LINKER_FLAGS_RELEASE
+)
+IF ("${CMAKE_BUILD_TYPE}" STREQUAL "Release")
+    MARK_AS_ADVANCED( CLEAR CMAKE_CXX_FLAGS_RELEASE )
+ELSE ("${CMAKE_BUILD_TYPE}" STREQUAL "Release")
+    MARK_AS_ADVANCED( FORCE CMAKE_CXX_FLAGS_RELEASE )
+ENDIF ("${CMAKE_BUILD_TYPE}" STREQUAL "Release")
 
 
 # Profiler Target block
 SET(CMAKE_CXX_FLAGS_PROFILER " ${BUILD_OPT} ${CPU_OPTS} ${DEFINES} -pg -g2 -include config.h -pipe -std=c++11 -Wall -Wno-unused-function -Wno-unused-variable" CACHE STRING
     "Flags used by the C++ compiler during profiler builds."
-     FORCE )
-SET( CMAKE_C_FLAGS_PROFILER " ${BUILD_OPT} ${CPU_OPTS} ${DEFINES} -pg -g2 -include config.h -pipe -Wall -Wno-unused-function -Wno-unused-variable" CACHE STRING
+    FORCE
+)
+SET(CMAKE_C_FLAGS_PROFILER " ${BUILD_OPT} ${CPU_OPTS} ${DEFINES} -pg -g2 -include config.h -pipe -Wall -Wno-unused-function -Wno-unused-variable" CACHE STRING
     "Flags used by the C compiler during profiler builds."
-     FORCE )
-SET( CMAKE_EXE_LINKER_FLAGS_PROFILER
+    FORCE
+)
+SET(CMAKE_EXE_LINKER_FLAGS_PROFILER
     "-Bsymbolic " CACHE STRING
     "Flags used for linking binaries during profiler builds."
-     FORCE )
+    FORCE
+)
 MARK_AS_ADVANCED(
     CMAKE_CXX_FLAGS_PROFILER
     CMAKE_C_FLAGS_PROFILER
     CMAKE_EXE_LINKER_FLAGS_PROFILER
-    CMAKE_SHARED_LINKER_FLAGS_PROFILER )
-IF("${CMAKE_BUILD_TYPE}" STREQUAL "Profiler")
-	MARK_AS_ADVANCED( CLEAR
-    	CMAKE_CXX_FLAGS_PROFILER )
-ELSE("${CMAKE_BUILD_TYPE}" STREQUAL "Profiler")   
-	MARK_AS_ADVANCED( FORCE
-		 CMAKE_CXX_FLAGS_PROFILER )
-ENDIF("${CMAKE_BUILD_TYPE}" STREQUAL "Profiler")
-
+    CMAKE_SHARED_LINKER_FLAGS_PROFILER
+)
+IF ("${CMAKE_BUILD_TYPE}" STREQUAL "Profiler")
+    MARK_AS_ADVANCED( CLEAR CMAKE_CXX_FLAGS_PROFILER )
+ELSE ("${CMAKE_BUILD_TYPE}" STREQUAL "Profiler")
+    MARK_AS_ADVANCED( FORCE CMAKE_CXX_FLAGS_PROFILER )
+ENDIF ("${CMAKE_BUILD_TYPE}" STREQUAL "Profiler")
 
 # Turn off compiling vegastrike bin
-OPTION(DISABLE_CLIENT "Disable building the vegastrike bin"
-		OFF )
-IF(NOT DISABLE_CLIENT)
-	add_executable(vegastrike ${VEGASTRIKE_SOURCES})
-ENDIF(NOT DISABLE_CLIENT)
+OPTION(DISABLE_CLIENT "Disable building the vegastrike bin" OFF )
+IF (NOT DISABLE_CLIENT)
+    ADD_EXECUTABLE(vegastrike ${VEGASTRIKE_SOURCES})
+ENDIF (NOT DISABLE_CLIENT)
 
-
-include (CheckIncludeFile)
-include (CheckIncludeFileCXX)
+INCLUDE(CheckIncludeFile)
+INCLUDE(CheckIncludeFileCXX)
 INCLUDE(CheckTypeSize)
-check_type_size("void*" SIZEOF_VOID_P BUILTIN_TYPES_ONLY)
+CHECK_TYPE_SIZE("void*" SIZEOF_VOID_P BUILTIN_TYPES_ONLY)
 # Let cmake find our in-tree modules
 SET(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${vsUTCS_SOURCE_DIR})
-
 
 # Python 3 has a SASL compatibility issue which causes an error
 # on some installations that prefer Python 3
 # -- Python 2.7 is default for now
 OPTION(USE_PYTHON_3 "Use Python 3 instead of Python 2.7 (default is 2.7)" OFF)
-IF(USE_PYTHON_3)
-# We want at least Python 3.4, but we prefer newer versions
+IF (USE_PYTHON_3)
+    # We want at least Python 3.4, but we prefer newer versions
     SET(Python_ADDITIONAL_VERSIONS 3.8 3.7 3.6 3.5 3.4)
-ELSE(USE_PYTHON_3)
+ELSE (USE_PYTHON_3)
     SET(Python_ADDITIONAL_VERSIONS 2.7)
-ENDIF(USE_PYTHON_3)
+ENDIF (USE_PYTHON_3)
 # If we don't unset cache variables
 # ccmake won't pick up changes to the USE_PYTHON_3 option
 UNSET(PYTHON_INCLUDE_DIR CACHE)
 UNSET(PYTHON_LIBRARY CACHE)
 # The python version we want is set via Python_ADDITIONAL_VERSIONS
-message("++ Python release(s) searched for : ${Python_ADDITIONAL_VERSIONS}")
-find_package(PythonLibs REQUIRED)
-message("++ Python library : ${PYTHON_LIBRARY} (${PYTHONLIBS_VERSION_STRING})") 
-message("++ Python include dir : ${PYTHON_INCLUDE_DIR}")
-IF(PYTHONLIBS_FOUND OR PYTHON_LIBRARIES AND PYTHON_INCLUDE_DIRS)
+MESSAGE("++ Python release(s) searched for : ${Python_ADDITIONAL_VERSIONS}")
+FIND_PACKAGE(PythonLibs REQUIRED)
+MESSAGE("++ Python library : ${PYTHON_LIBRARY} (${PYTHONLIBS_VERSION_STRING})")
+MESSAGE("++ Python include dir : ${PYTHON_INCLUDE_DIR}")
+IF (PYTHONLIBS_FOUND OR PYTHON_LIBRARIES AND PYTHON_INCLUDE_DIRS)
     SET(TST_INCLUDES ${PYTHON_INCLUDE_DIRS})
     SET(TST_LIBS ${PYTHON_LIBRARIES})
     SET(HAVE_PYTHON 1)
-ELSE(PYTHONLIBS_FOUND OR PYTHON_LIBRARIES AND PYTHON_INCLUDE_DIRS)
-    message(FATAL_ERROR "Can't find python")
-ENDIF(PYTHONLIBS_FOUND OR PYTHON_LIBRARIES AND PYTHON_INCLUDE_DIRS)
-
+ELSE (PYTHONLIBS_FOUND OR PYTHON_LIBRARIES AND PYTHON_INCLUDE_DIRS)
+    MESSAGE(FATAL_ERROR "Can't find python")
+ENDIF (PYTHONLIBS_FOUND OR PYTHON_LIBRARIES AND PYTHON_INCLUDE_DIRS)
 
 # Find Boost with boost_python library
 OPTION(USE_SYSTEM_BOOST "Use system boost" ON)
-IF(USE_SYSTEM_BOOST)
+IF (USE_SYSTEM_BOOST)
     UNSET(Boost_PYTHON_LIBRARY CACHE)
     UNSET(Boost_PYTHON_LIBRARY_DEBUG CACHE)
     UNSET(Boost_PYTHON_LIBRARY_RELEASE CACHE)
@@ -739,32 +718,33 @@ IF(USE_SYSTEM_BOOST)
     UNSET(Boost_PYTHON3_LIBRARY_RELEASE CACHE)
     UNSET(Boost_python3_FOUND CACHE)
     UNSET(Boost_python_FOUND CACHE)
-    IF(USE_PYTHON_3)
-        message("++ Looking for System Boost::python3")
-        find_package(Boost COMPONENTS python3 log log_setup REQUIRED)
-    ELSE(USE_PYTHON_3)
-        message("++ Looking for System Boost::python (py2)")
-        find_package(Boost COMPONENTS python log log_setup REQUIRED)
-    ENDIF(USE_PYTHON_3)
-    IF(Boost_FOUND)
-        message("++ Found System Boost version : ${Boost_VERSION}")
-        IF(Boost_python3_FOUND)
-            message("++ Found System Boost::python3 : ${Boost_PYTHON3_LIBRARY}")
-        ENDIF(Boost_python3_FOUND)
-        IF(Boost_python_FOUND)
-            message("++ Found System Boost::python (py2) : ${Boost_PYTHON_LIBRARY}")
-        ENDIF(Boost_python_FOUND)
+    IF (USE_PYTHON_3)
+        MESSAGE("++ Looking for System Boost::python3")
+        FIND_PACKAGE(Boost COMPONENTS python3 log log_setup REQUIRED)
+    ELSE (USE_PYTHON_3)
+        MESSAGE("++ Looking for System Boost::python (py2)")
+        FIND_PACKAGE(Boost COMPONENTS python log log_setup REQUIRED)
+    ENDIF (USE_PYTHON_3)
+
+    IF (Boost_FOUND)
+        MESSAGE("++ Found System Boost version : ${Boost_VERSION}")
+        IF (Boost_python3_FOUND)
+            MESSAGE("++ Found System Boost::python3 : ${Boost_PYTHON3_LIBRARY}")
+        ENDIF (Boost_python3_FOUND)
+        IF (Boost_python_FOUND)
+            MESSAGE("++ Found System Boost::python (py2) : ${Boost_PYTHON_LIBRARY}")
+        ENDIF (Boost_python_FOUND)
         SET(BOOST_PYTHON_NO_PY_SIGNATURES 1)
         SET(TST_INCLUDES ${TST_INCLUDES} ${Boost_INCLUDE_DIRS})
         SET(TST_LIBS ${TST_LIBS} ${Boost_LIBRARIES})
-        include_directories(${TST_INCLUDES})
-    ELSE(Boost_FOUND)
+        INCLUDE_DIRECTORIES(${TST_INCLUDES})
+    ELSE (Boost_FOUND)
         SET(USE_SYSTEM_BOOST OFF)
-    ENDIF(Boost_FOUND)
-ENDIF(USE_SYSTEM_BOOST)
+    ENDIF (Boost_FOUND)
+ENDIF (USE_SYSTEM_BOOST)
 
-IF(NOT USE_SYSTEM_BOOST)
-    message("++ Using Internal Boost")
+IF (NOT USE_SYSTEM_BOOST)
+    MESSAGE("++ Using Internal Boost")
     # This is just to cleanup advanced variable viewing, since they're not used anyway
     UNSET(Boost_INCLUDE_DIRS)
     UNSET(Boost_LIBRARIES)
@@ -781,196 +761,190 @@ IF(NOT USE_SYSTEM_BOOST)
     SET(Boost_DIR ../ext/)
     SET(BOOST_PYTHON_NO_PY_SIGNATURES 1)
     SET(TST_INCLUDES ${TST_INCLUDES} ${vsUTCS_SOURCE_DIR}/${Boost_DIR})
-    IF(USE_PYTHON_3)
-        message("++ Using Internal Boost::python3")
+    IF (USE_PYTHON_3)
+        MESSAGE("++ Using Internal Boost::python3")
         SET(TST_LIBS ${TST_LIBS} boost_python3)
-    ELSE(USE_PYTHON_3)
-        message("++ Using Internal Boost::python (py2)")
+    ELSE (USE_PYTHON_3)
+        MESSAGE("++ Using Internal Boost::python (py2)")
         SET(TST_LIBS ${TST_LIBS} boost_python)
-    ENDIF(USE_PYTHON_3)
-    include_directories(${TST_INCLUDES})
-    add_subdirectory(${Boost_DIR} build)
-    message("++ boost dir: ${Boost_DIR}")
-    #IF(NOT DISABLE_CLIENT)
-    #  add_dependencies(vegastrike boost_python)
-    #ENDIF(NOT DISABLE_CLIENT)
-    #IF(NOT DISABLE_SERVER)
-    #  add_dependencies(vegaserver boost_python)
-    #ENDIF(NOT DISABLE_SERVER)
-ENDIF(NOT USE_SYSTEM_BOOST)
+    ENDIF (USE_PYTHON_3)
+    INCLUDE_DIRECTORIES(${TST_INCLUDES})
+    ADD_SUBDIRECTORY(${Boost_DIR} build)
+    MESSAGE("++ boost dir: ${Boost_DIR}")
+    #IF (NOT DISABLE_CLIENT)
+    #  ADD_DEPENDENCIES(vegastrike boost_python)
+    #ENDIF (NOT DISABLE_CLIENT)
+    #IF (NOT DISABLE_SERVER)
+    #  ADD_DEPENDENCIES(vegaserver boost_python)
+    #ENDIF (NOT DISABLE_SERVER)
+ENDIF (NOT USE_SYSTEM_BOOST)
 
-IF(NOT DISABLE_CLIENT) ##########
+IF (NOT DISABLE_CLIENT) ##########
 
 #Find GL
-find_package(OpenGL REQUIRED)
-IF(OPENGL_FOUND AND OPENGL_GLU_FOUND)
-	SET(TST_INCLUDES ${TST_INCLUDES} ${OPENL_INCLUDE_DIR})
-	SET(TST_LIBS ${TST_LIBS} ${OPENGL_LIBRARIES})
-	message("++ OpenGL found : ${OPENGL_LIBRARIES}")
-ELSE(OPENGL_FOUND AND OPENGL_GLU_FOUND)
-	message("!! Why you no have GL?")
-ENDIF(OPENGL_FOUND AND OPENGL_GLU_FOUND)
+FIND_PACKAGE(OpenGL REQUIRED)
+IF (OPENGL_FOUND AND OPENGL_GLU_FOUND)
+    SET(TST_INCLUDES ${TST_INCLUDES} ${OPENL_INCLUDE_DIR})
+    SET(TST_LIBS ${TST_LIBS} ${OPENGL_LIBRARIES})
+    MESSAGE("++ OpenGL found : ${OPENGL_LIBRARIES}")
+ELSE (OPENGL_FOUND AND OPENGL_GLU_FOUND)
+    MESSAGE("!! Why you no have GL?")
+ENDIF (OPENGL_FOUND AND OPENGL_GLU_FOUND)
 
 #Find GLUT
-find_package(GLUT REQUIRED)
-IF(GLUT_FOUND)
-	SET(TST_INCLUDES ${TST_INCLUDES} ${GLUT_INCLUDE_DIR})
-	SET(TST_LIBS ${TST_LIBS} ${GLUT_LIBRARIES})
-	message("++ GLUT found : ${GLUT_LIBRARIES}")
-ELSE(GLUT_FOUND)
-	message("!! I can't build this, missing GLUT")
-ENDIF(GLUT_FOUND)
-
+FIND_PACKAGE(GLUT REQUIRED)
+IF (GLUT_FOUND)
+    SET(TST_INCLUDES ${TST_INCLUDES} ${GLUT_INCLUDE_DIR})
+    SET(TST_LIBS ${TST_LIBS} ${GLUT_LIBRARIES})
+    MESSAGE("++ GLUT found : ${GLUT_LIBRARIES}")
+ELSE (GLUT_FOUND)
+    MESSAGE("!! I can't build this, missing GLUT")
+ENDIF (GLUT_FOUND)
 
 #Find OpenAL
-find_package(OpenAL REQUIRED)
-IF(OPENAL_FOUND)
-	message("++ Found OpenAL")
-	SET(TST_INCLUDES ${TST_INCLUDES} ${OPENAL_INCLUDE_DIR})
-	SET(TST_LIBS ${TST_LIBS} ${OPENAL_LIBRARY})
-	SET(HAVE_AL 1)
-ELSE(OPENAL_FOUND)
-	message("!! We aint got no sound")
-ENDIF(OPENAL_FOUND)
+FIND_PACKAGE(OpenAL REQUIRED)
+IF (OPENAL_FOUND)
+    MESSAGE("++ Found OpenAL")
+    SET(TST_INCLUDES ${TST_INCLUDES} ${OPENAL_INCLUDE_DIR})
+    SET(TST_LIBS ${TST_LIBS} ${OPENAL_LIBRARY})
+    SET(HAVE_AL 1)
+ELSE (OPENAL_FOUND)
+    MESSAGE("!! We aint got no sound")
+ENDIF (OPENAL_FOUND)
 
 IF (NOT BEOS)
-#Find SDL
-find_package(SDL)
-IF(SDL_FOUND)
-	SET(TST_INCLUDES ${TST_INCLUDES} ${SDL_INCLUDE_DIR})
-	SET(TST_LIBS ${TST_LIBS} ${SDL_LIBRARY})
-	message("++ SDL Found")
-	SET(HAVE_SDL 1)
-	SET(SDL_WINDOWING 1)
-ELSE(SDL_FOUND)
-	message("!! How will we render to OpenGL without SDL?")
-ENDIF(SDL_FOUND)
+    #Find SDL
+    FIND_PACKAGE(SDL)
+    IF (SDL_FOUND)
+        SET(TST_INCLUDES ${TST_INCLUDES} ${SDL_INCLUDE_DIR})
+        SET(TST_LIBS ${TST_LIBS} ${SDL_LIBRARY})
+        MESSAGE("++ SDL Found")
+        SET(HAVE_SDL 1)
+        SET(SDL_WINDOWING 1)
+    ELSE (SDL_FOUND)
+        MESSAGE("!! How will we render to OpenGL without SDL?")
+    ENDIF (SDL_FOUND)
 ENDIF (NOT BEOS)
 
 #find Vorbis
-find_package(Vorbis REQUIRED)
-IF(Vorbis_FOUND)
-	SET(TST_INCLUDES ${TST_INCLUDES} ${Vorbis_INCLUDE_DIRS})
-	SET(TST_LIBS ${TST_LIBS} ${Vorbis_LIBRARIES})
-	SET(HAVE_OGG 1)
-ELSE(Vorbis_FOUND)
-	message("!! Can't find Vorbis libs")
-ENDIF(Vorbis_FOUND)
+FIND_PACKAGE(Vorbis REQUIRED)
+IF (Vorbis_FOUND)
+    SET(TST_INCLUDES ${TST_INCLUDES} ${Vorbis_INCLUDE_DIRS})
+    SET(TST_LIBS ${TST_LIBS} ${Vorbis_LIBRARIES})
+    SET(HAVE_OGG 1)
+ELSE (Vorbis_FOUND)
+    MESSAGE("!! Can't find Vorbis libs")
+ENDIF (Vorbis_FOUND)
 
 #Find JPEG
-find_package(JPEG REQUIRED)
-IF(JPEG_FOUND)
-	SET(TST_INCLUDES ${TST_INCLUDES} ${JPEG_INCLUDE_DIR})
-	SET(TST_LIBS ${TST_LIBS} ${JPEG_LIBRARIES})
-ELSE(JPEG_FOUND)
-	message("!! How are we gonna open jpegs?")
-ENDIF(JPEG_FOUND)
+FIND_PACKAGE(JPEG REQUIRED)
+IF (JPEG_FOUND)
+    SET(TST_INCLUDES ${TST_INCLUDES} ${JPEG_INCLUDE_DIR})
+    SET(TST_LIBS ${TST_LIBS} ${JPEG_LIBRARIES})
+ELSE (JPEG_FOUND)
+    MESSAGE("!! How are we gonna open jpegs?")
+ENDIF (JPEG_FOUND)
 
 #Find PNG
-find_package(PNG REQUIRED)
-IF(PNG_FOUND)
-	SET(TEST_INCLUDES ${TST_INCLUDES} ${PNG_INCLUDE_DIRS})
-	SET(TST_LIBS ${TST_LIBS} ${PNG_LIBRARIES})
-ELSE(PNG_FOUND)
-	message("!! Can't find PNG lib")
-ENDIF(PNG_FOUND)
+FIND_PACKAGE(PNG REQUIRED)
+IF (PNG_FOUND)
+    SET(TEST_INCLUDES ${TST_INCLUDES} ${PNG_INCLUDE_DIRS})
+    SET(TST_LIBS ${TST_LIBS} ${PNG_LIBRARIES})
+ELSE (PNG_FOUND)
+    MESSAGE("!! Can't find PNG lib")
+ENDIF (PNG_FOUND)
 
 ENDIF(NOT DISABLE_CLIENT) ##########
 
 #find Zlib
-find_package(ZLIB REQUIRED)
-IF(ZLIB_FOUND)
-	SET(TST_INCLUDES ${TST_INCLUDES} ${ZLIB_INCLUDE_DIR})
-	SET(TST_LIBS ${TST_LIBS} ${ZLIB_LIBRARIES})
-ELSE(ZLIB_FOUND)
-	message("!! For the love of god, no zlib here")
-ENDIF(ZLIB_FOUND)
+FIND_PACKAGE(ZLIB REQUIRED)
+IF (ZLIB_FOUND)
+    SET(TST_INCLUDES ${TST_INCLUDES} ${ZLIB_INCLUDE_DIR})
+    SET(TST_LIBS ${TST_LIBS} ${ZLIB_LIBRARIES})
+ELSE (ZLIB_FOUND)
+    MESSAGE("!! For the love of god, no zlib here")
+ENDIF (ZLIB_FOUND)
 
 #find Expat
-find_package(EXPAT REQUIRED)
-IF(EXPAT_FOUND)
-	SET(TST_INCLUDES ${TST_INCLUDES} ${EXPAT_INCLUDE_DIRS})
-	SET(TST_LIBS ${TST_LIBS} ${EXPAT_LIBRARIES})
-ELSE(EXPAT_FOUND)
-	message("!! We can't find expat for XML crap")
-ENDIF(EXPAT_FOUND)
+FIND_PACKAGE(EXPAT REQUIRED)
+IF (EXPAT_FOUND)
+    SET(TST_INCLUDES ${TST_INCLUDES} ${EXPAT_INCLUDE_DIRS})
+    SET(TST_LIBS ${TST_LIBS} ${EXPAT_LIBRARIES})
+ELSE (EXPAT_FOUND)
+    MESSAGE("!! We can't find expat for XML crap")
+ENDIF (EXPAT_FOUND)
 
 #find Math
 IF (NOT BEOS)
-find_package(MATH REQUIRED)
-IF(MATH_FOUND)
-	SET(TST_INCLUDES ${TST_INCLUDES} ${MATH_INCLUDE_DIRS})
-	SET(TST_LIBS ${TST_LIBS} ${MATH_LIBRARIES})
-ELSE(MATH_FOUND)
-	message("!! Without math we have nothing")
-ENDIF(MATH_FOUND)
+    FIND_PACKAGE(MATH REQUIRED)
+    IF (MATH_FOUND)
+        SET(TST_INCLUDES ${TST_INCLUDES} ${MATH_INCLUDE_DIRS})
+        SET(TST_LIBS ${TST_LIBS} ${MATH_LIBRARIES})
+    ELSE (MATH_FOUND)
+        MESSAGE("!! Without math we have nothing")
+    ENDIF (MATH_FOUND)
 ENDIF (NOT BEOS)
 
 #Find FFMpeg
-
 OPTION(DISABLE_FFMPEG "Disable ffmpeg codecs" ON)
-
-IF(NOT DISABLE_FFMPEG)
-  find_package(FFMPEG)
-  IF(FFMPEG_FOUND)
-      SET(TST_INCLUDES ${TST_INCLUDES} ${FFMPEG_INCLUDE_DIRS})
-      SET(TST_LIBS ${TST_LIBS} ${FFMPEG_LIBRARIES})
-      add_definitions(${FFMPEG_DEFINITIONS})
-      SET(HAVE_FFMPEG 1 )
-    message("++ FFmpeg found.")
-     IF(swscale1_FOUND)
-          message("++ FFmpeg's libswscale found.")
-      ELSE(swscale1_FOUND)
-          message("-- FFMpeg's libswscale not found... depending on your ffmpeg version, VS might not build.")
-      ENDIF(swscale1_FOUND)
-  ELSE(FFMPEG_FOUND)
-      message("-- FFMPEG Not Found")
-  ENDIF(FFMPEG_FOUND)
-ELSE(NOT DISABLE_FFMPEG)
-  message("-- FFMPEG disabled")
-ENDIF(NOT DISABLE_FFMPEG)
+IF (NOT DISABLE_FFMPEG)
+    FIND_PACKAGE(FFMPEG)
+    IF (FFMPEG_FOUND)
+        SET(TST_INCLUDES ${TST_INCLUDES} ${FFMPEG_INCLUDE_DIRS})
+        SET(TST_LIBS ${TST_LIBS} ${FFMPEG_LIBRARIES})
+        ADD_DEFINITIONS(${FFMPEG_DEFINITIONS})
+        SET(HAVE_FFMPEG 1 )
+        MESSAGE("++ FFmpeg found.")
+        IF (swscale1_FOUND)
+            MESSAGE("++ FFmpeg's libswscale found.")
+        ELSE (swscale1_FOUND)
+            MESSAGE("-- FFMpeg's libswscale not found... depending on your ffmpeg version, VS might not build.")
+        ENDIF (swscale1_FOUND)
+    ELSE (FFMPEG_FOUND)
+        MESSAGE("-- FFMPEG Not Found")
+    ENDIF (FFMPEG_FOUND)
+ELSE (NOT DISABLE_FFMPEG)
+    MESSAGE("-- FFMPEG disabled")
+ENDIF (NOT DISABLE_FFMPEG)
 
 #Find Ogre
-
 # current OGRE 1.12 is not compatible
 OPTION(DISABLE_OGRE "Disable Ogre-mesh support in mesh tool" ON)
+IF (NOT DISABLE_OGRE)
+    FIND_PACKAGE(OGRE)
+    IF (OGRE_FOUND)
+        SET(TST_INCLUDES ${TST_INCLUDES} ${OGRE_INCLUDE_DIR})
+        SET(TST_LIBS ${TST_LIBS} ${OGRE_LIBRARY})
+        ADD_DEFINITIONS(${OGRE_DEFINITIONS})
+        SET(HAVE_OGRE 1)
+        MESSAGE("++ Found Ogre: ${OGRE_VERSION}")
+    ELSE (OGRE_FOUND)
+        MESSAGE("-- Ogre Not Found: compiling without")
+    ENDIF (OGRE_FOUND)
+ELSE (NOT DISABLE_OGRE)
+    MESSAGE("-- Ogre disabled")
+ENDIF (NOT DISABLE_OGRE)
 
-IF(NOT DISABLE_OGRE)
-  find_package(OGRE)
-  IF(OGRE_FOUND)
-      SET(TST_INCLUDES ${TST_INCLUDES} ${OGRE_INCLUDE_DIR})
-      SET(TST_LIBS ${TST_LIBS} ${OGRE_LIBRARY})
-      add_definitions(${OGRE_DEFINITIONS})
-      SET(HAVE_OGRE 1)
-      message("++ Found Ogre: ${OGRE_VERSION}")
-  ELSE(OGRE_FOUND)
-      message("-- Ogre Not Found: compiling without")
-  ENDIF(OGRE_FOUND)
-ELSE(NOT DISABLE_OGRE)
-  message("-- Ogre disabled")
-ENDIF(NOT DISABLE_OGRE)
-
-IF(NOT BEOS)
-	FIND_LIBRARY(UTIL_LIB util)
+IF (NOT BEOS)
+    FIND_LIBRARY(UTIL_LIB util)
 ELSE (NOT BEOS)
-	FIND_LIBRARY(UTIL_LIB network)
-ENDIF(NOT BEOS)
+    FIND_LIBRARY(UTIL_LIB network)
+ENDIF (NOT BEOS)
 
 SET(TST_LIBS ${TST_LIBS} ${UTIL_LIB})
 
 # Still need to add CEGUI and OGRE find packages
 
-
-# Multiplayer networking option 
+# Multiplayer networking option
 OPTION(USE_NET_THREAD_POSIX "Enable Posix net threads" OFF)
-if(NOT USE_NET_THREAD_POSIX)
-	SET(USE_NET_THREAD_NONE 1)
-endif(NOT USE_NET_THREAD_POSIX)
+IF (NOT USE_NET_THREAD_POSIX)
+    SET(USE_NET_THREAD_NONE 1)
+ENDIF (NOT USE_NET_THREAD_POSIX)
 
 
 #config.h generation
 INCLUDE(CheckFunctionExists)
-INCLUDE (CheckSymbolExists)
+INCLUDE(CheckSymbolExists)
 CHECK_INCLUDE_FILE(wchar.h HAVE_WCHAR_H)
 CHECK_INCLUDE_FILE(float.h HAVE_FLOAT_H)
 CHECK_INCLUDE_FILE(wctype.h HAVE_WCTYPE_H)
@@ -980,68 +954,65 @@ CHECK_INCLUDE_FILE(math.h HAVE_MATH_H)
 CHECK_INCLUDE_FILE_CXX(tr1/unordered_map HAVE_TR1_UNORDERED_MAP)
 
 CHECK_FUNCTION_EXISTS(gettimeofday HAVE_GETTIMEOFDAY)
-if(HAVE_MATH_H)
-	CHECK_FUNCTION_EXISTS(isnan HAVE_ISNAN)
-	if(NOT HAVE_ISNAN)	
-		CHECK_FUNCTION_EXISTS(_isnan HAVE__ISNAN)
-	endif(NOT HAVE_ISNAN)
-	CHECK_FUNCTION_EXISTS(finite HAVE_FINITE)
-	if(NOT HAVE_FINITE)
-		CHECK_FUNCTION_EXISTS(_finite HAVE__finite)
-	endif(NOT HAVE_FINITE)
-endif(HAVE_MATH_H)
+IF (HAVE_MATH_H)
+    CHECK_FUNCTION_EXISTS(isnan HAVE_ISNAN)
+    IF (NOT HAVE_ISNAN)
+        CHECK_FUNCTION_EXISTS(_isnan HAVE__ISNAN)
+    ENDIF (NOT HAVE_ISNAN)
+    CHECK_FUNCTION_EXISTS(finite HAVE_FINITE)
+    IF (NOT HAVE_FINITE)
+        CHECK_FUNCTION_EXISTS(_finite HAVE__finite)
+    ENDIF (NOT HAVE_FINITE)
+ENDIF (HAVE_MATH_H)
+
 CHECK_INCLUDE_FILE(sys/stat.h HAVE_STAT_H)
-if(HAVE_STAT_H)
-	CHECK_FUNCTION_EXISTS(lstat HAVE_LSTAT)
-endif(HAVE_STAT_H)
+IF (HAVE_STAT_H)
+    CHECK_FUNCTION_EXISTS(lstat HAVE_LSTAT)
+ENDIF (HAVE_STAT_H)
 
 CHECK_SYMBOL_EXISTS(GLX_ARB_get_proc_address GL/glx.h HAVE_GLXGETPROCADDRESSARB)
 
-if(UNIX)
-	if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
-		SET(HOSTOS "LINUX")
-		SET(_GNU_SOURCE 1)
-	else(CMAKE_SYSTEM_NAME STREQUAL "Linux")
-		SET(HOSTOS "BSD")
-	endif(CMAKE_SYSTEM_NAME STREQUAL "Linux")
-	
-elseif(WIN32)
-	SET(HOSTOS "WIN32")
-elseif(BEOS)
-	SET(HOSTOS "HAIKU")
-else(UNIX)
-	SET(HOSTOS "APPLE")
-endif(UNIX)
+IF (UNIX)
+    IF (CMAKE_SYSTEM_NAME STREQUAL "Linux")
+        SET(HOSTOS "LINUX")
+        SET(_GNU_SOURCE 1)
+    ELSE (CMAKE_SYSTEM_NAME STREQUAL "Linux")
+        SET(HOSTOS "BSD")
+    ENDIF (CMAKE_SYSTEM_NAME STREQUAL "Linux")
+ELSEIF (WIN32)
+    SET(HOSTOS "WIN32")
+ELSEIF (BEOS)
+    SET(HOSTOS "HAIKU")
+ELSE (UNIX)
+    SET(HOSTOS "APPLE")
+ENDIF (UNIX)
 
 CONFIGURE_FILE(${vsUTCS_SOURCE_DIR}/cmake-config.h.in ${vsUTCS_BINARY_DIR}/config.h)
 
-#end config.h generation 
+#end config.h generation
 #SET(CMAKE_CXX_FLAGS "-include config.h;-pipe;"${CMAKE_CXX_FLAGS})
 
 #Setup shared lib and include listings for vegastrike.
 SET(TST_LIBS engine_com OPcollide ${TST_LIBS})
-include_directories(${TST_INCLUDES})	
+INCLUDE_DIRECTORIES(${TST_INCLUDES})
 
+TARGET_LINK_LIBRARIES(vegastrike ${TST_LIBS})
+SET_TARGET_PROPERTIES(vegastrike PROPERTIES LINK_FLAGS "-L/usr/lib ${TST_LFLAGS}")
 
-target_link_libraries(vegastrike ${TST_LIBS})
-set_target_properties(vegastrike PROPERTIES LINK_FLAGS "-L/usr/lib ${TST_LFLAGS}")
-
-
-# Vssetup Sub build file  
-add_subdirectory(setup)
+# Vssetup Sub build file
+ADD_SUBDIRECTORY(setup)
 
 # Add other utilies here
-add_subdirectory(objconv)
+ADD_SUBDIRECTORY(objconv)
 
-
-# show debug output 
-get_directory_property(TEMP_DIRECTORY INCLUDE_DIRECTORIES)
-message("-- Default build type is Release, no cpu opts enabled. ")
-message("++ Building with BUILD_OPT: ${BUILD_OPT}")
-#message("++ Building with CMAKE_CXX_FLAGS: ${CMAKE_CXX_FLAGS}")
-#message("Linking with : ${TST_LIBS}")
-#message("including : ${TEMP_DIRECTORY}")
-# end debug output 
+# show debug output
+GET_DIRECTORY_PROPERTY(TEMP_DIRECTORY INCLUDE_DIRECTORIES)
+MESSAGE("-- Default build type is Release, no cpu opts enabled. ")
+MESSAGE("++ Building with BUILD_OPT: ${BUILD_OPT}")
+#MESSAGE("++ Building with CMAKE_CXX_FLAGS: ${CMAKE_CXX_FLAGS}")
+#MESSAGE("Linking with : ${TST_LIBS}")
+#MESSAGE("including : ${TEMP_DIRECTORY}")
+# end debug output
 
 MARK_AS_ADVANCED(FORCE
     Boost_DIR
@@ -1096,4 +1067,5 @@ MARK_AS_ADVANCED(FORCE
     ogg_LIBRARY
     vorbis_INCLUDE_DIR
     vorbis_LIBRARY
-    vorbisfile_LIBRARY )
+    vorbisfile_LIBRARY
+)
