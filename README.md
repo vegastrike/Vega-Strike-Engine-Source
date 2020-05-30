@@ -173,7 +173,7 @@ If you wish to transfer command to another starship, simply press '\[' to switch
 - backspace  stop
 - TAB Afterburners
 - j engage interstellar warp drive (use at clear blue balls)
-- *,ins Spin Right
+- \*,ins Spin Right
 - /,del Spin Left
 - ~ (hold down, engage shelton slide)
 - y match speed
@@ -308,6 +308,15 @@ by [posting a new issue](https://github.com/vegastrike/Vega-Strike-Engine-Source
 If you get compilation issues with the system `libboost`, download it manually from
 [here](https://dl.bintray.com/boostorg/release/1.72.0/source/boost_1_72_0.tar.gz) to `./ext/boost/`
 and run `./sh/vsbuild.sh -DUSE_SYSTEM_BOOST=NO`
+
+
+3. Packaging Vega Strike:
+
+	After building Vega Strike, then packages can be built using:
+
+```bash
+make package
+```
 
 
 **Compiling On Windows**

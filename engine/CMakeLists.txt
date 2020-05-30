@@ -1069,3 +1069,77 @@ MARK_AS_ADVANCED(FORCE
     vorbis_LIBRARY
     vorbisfile_LIBRARY
 )
+
+SET(CPACK_PACKAGE_DESCRIPTION_SUMMARY "3D OpenGL spaceflight simulator")
+SET(CPACK_PACKAGE_VENDOR "Vega Strike")
+SET(CPACK_PACKAGE_DESCRIPTION_FILE "${CMAKE_CURRENT_SOURCE_DIR}/../README.md")
+SET(CPACK_RESOURCE_FILE_LICENSE "${CMAKE_CURRENT_SOURCE_DIR}/../LICENSE")
+SET(CPACK_PACKAGE_VERSION_MAJOR "0")
+SET(CPACK_PACKAGE_VERSION_MINOR "6")
+SET(CPACK_PACKAGE_VERSION_PATCH "0")
+SET(CPACK_PACKAGE_INSTALL_DIRECTORY "VegaStrike-${CPACK_PACKAGE_VERSION_MAJOR}.${CPACK_PACKAGE_VERSION_MINOR}")
+SET(CPACK_PACKAGE_EXECUTABLES "vegastrike" "mesh_tool" "vegasettings")
+SET(CPACK_CONTACT "maintainers@vega-strike.org")
+# See https://gitlab.kitware.com/cmake/community/-/wikis/doc/cpack/PackageGenerators for generator lists
+IF (WIN32 AND NOT UNIX)
+	MESSAGE("-- Configuring Packaging for Windows")
+	# NSIS - See https://cmake.org/cmake/help/v3.3/module/CPackNSIS.html
+	# NSI bug requires at least 1 set of 4 forwards slashes??
+	SET(CPACK_PACKAGE_ICON "${CMAKE_CURRENT_SOURCE_DIR}\\\\icon4.ico")
+	SET(CPACK_NSIS_INSTALLED_ICON_NAME "bin\\\\VegaStrike.exe")
+	SET(CPACK_NSIS_DISPLAY_NAME "Vega Strike")
+	SET(CPACK_NSIS_HELP_LINK "https:\\\\vega-strike.org")
+	SET(CPACK_NSIS_URL_INFO_ABOUT "https:\\\\vega-strike.org/about")
+	SET(CPACK_NSIS_CONTACT "TBD@vega-strike.org")
+	SET(CPACK_NSIS_MODIFY_PATH ON)
+
+	# NSIS, Wix, and compressed archives (7z, Zip)
+	SET(CPACK_GENERATOR "NSIS" "NSIS64" "WIX" "7Z" "ZIP")
+	SET(CPACK_PACKAGE_EXECUTABLES "vegastrike.exe" "mesh_tool.exe" "vegasettings.exe")
+ELSEIF (XCODE)
+	MESSAGE("-- Configuring Packaging for Mac OS X")
+	# Mac OS X
+	# There's a few options for MacOSX; not sure what we want to use
+	# DragNDrop -> DMG
+	#  See https://cmake.org/cmake/help/v3.3/module/CPackDMG.html
+	# Bundle -> Compressed Disk Image
+	# PackageMaker - see https://cmake.org/cmake/help/v3.3/module/CPackPackageMaker.html
+	SET(CPACK_GENERATOR "DragNDrop" "BUNDLE" "TBZ2" "TGZ" "TXZ")
+ELSEIF (CMAKE_SYSTEM_NAME STREQUAL Linux)
+	MESSAGE("-- Configuring Packaging for Linux")
+	SET(CPACK_GENERATOR "TBZ2" "TGZ" "TXZ")
+	# Linux
+	# lsb_release -i --> but then it'll find `Ubuntu` instead of Debian so will have to map more
+	# we can probably more reliably detect via checking for different packager commands
+
+	# "DEB"
+	FIND_PROGRAM(HAS_APT NAMES apt-get apt)
+	IF (HAS_APT)
+		MESSAGE("-- Configuring Debian Packaging")
+		# See https://cmake.org/cmake/help/v3.3/module/CPackDeb.html
+		SET(CPACK_DEBIAN_PACKAGE_MAINTAINER "maintainers@vega-strike.org")
+		# Should detect Debian/Ubuntu as deps may change
+		SET(CPACK_DEBIAN_PACKAGE_DEPENDS "python2, libjpeg, libpng, freeglut, gtk2, libvorbis, openal, SDL_mixer, xdg-utils, opengl-games-utils")
+		SET(CPACK_DEBIAN_PACKAGE_SECTION "Amusements/Games")
+		SET(CPACK_DEBIAN_PACKAGE_HOMEPAGE "https://www.vega-strike.org")
+		LIST(APPEND CPACK_GENERATOR "DEB")
+	ENDIF (HAS_APT)
+
+	#  "RPM"
+	FIND_PROGRAM(HAS_RPMBUILD rpmbuild)
+	IF (HAS_RPMBUILD)
+		MESSAGE("-- Configuring RPM Packaging")
+		# See https://cmake.org/cmake/help/v3.3/module/CPackRPM.html
+		SET(CPACK_RPM_PACKAGE_LICENSE "GPLv3") # See ../LICENSE
+		SET(CPACK_RPM_PACKAGE_URL "https://www.vega-strike.org")
+		# Should detect whether SuSe or RH/CentOS/Fedora as deps may change
+		SET(CPACK_RPM_PACKAGE_REQUIRES "python2, libjpeg, libpng, freeglut, gtk2, libvorbis, openal, SDL_mixer")
+		LIST(APPEND CPACK_GENERATOR "RPM")
+	ENDIF (HAS_RPMBUILD)
+ELSE ()
+	MESSAGE("-- Configuring Packaging for Unknown Platforms - \"${CMAKE_SYSTEM_NAME}\"")
+	# Unknown Platform --> Just do the various compressed tarballs
+	SET(CPACK_GENERATOR "TBZ2" "TGZ" "TXZ")
+ENDIF (WIN32 AND NOT UNIX)
+
+INCLUDE(CPack)
