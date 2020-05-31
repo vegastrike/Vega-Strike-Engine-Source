@@ -144,44 +144,7 @@ void GameUnit< UnitType >::Split( int level )
 
 extern float rand01();
 
-template < class UnitType >
-void GameUnit< UnitType >::ArmorDamageSound( const Vector &pnt )
-{
-    if ( !_Universe->isPlayerStarship( this ) ) {
-        if ( AUDIsPlaying( this->sound->armor ) )
-            AUDStopPlaying( this->sound->armor );
-        if (game_options.ai_sound)
-            AUDPlay( this->sound->armor, this->ToWorldCoordinates(
-                         pnt ).Cast()+this->cumulative_transformation.position, this->Velocity, 1 );
-    } else {
-        static int playerarmorsound =
-            AUDCreateSoundWAV( game_options.player_armor_hit );
-        int sound = playerarmorsound != -1 ? playerarmorsound : this->sound->armor;
-        if ( AUDIsPlaying( sound ) )
-            AUDStopPlaying( sound );
-        AUDPlay( sound, this->ToWorldCoordinates(
-            pnt ).Cast()+this->cumulative_transformation.position, this->Velocity, 1 );
-    }
-}
 
-template < class UnitType >
-void GameUnit< UnitType >::HullDamageSound( const Vector &pnt )
-{
-    if ( !_Universe->isPlayerStarship( this ) ) {
-        if ( AUDIsPlaying( this->sound->hull ) )
-            AUDStopPlaying( this->sound->hull );
-        if (game_options.ai_sound)
-            AUDPlay( this->sound->hull, this->ToWorldCoordinates(
-                         pnt ).Cast()+this->cumulative_transformation.position, this->Velocity, 1 );
-    } else {
-        static int playerhullsound = AUDCreateSoundWAV( game_options.player_hull_hit );
-        int sound = playerhullsound != -1 ? playerhullsound : this->sound->hull;
-        if ( AUDIsPlaying( sound ) )
-            AUDStopPlaying( sound );
-        AUDPlay( sound, this->ToWorldCoordinates(
-            pnt ).Cast()+this->cumulative_transformation.position, this->Velocity, 1 );
-    }
-}
 
 template < class UnitType >
 float GameUnit< UnitType >::DealDamageToShield( const Vector &pnt, float &damage )

@@ -37,6 +37,8 @@
 #include "vs_random.h"
 #include "galaxy_xml.h"
 #include "gfx/camera.h"
+#include "options.h"
+
 #include <math.h>
 #include <list>
 
@@ -162,11 +164,7 @@ void Unit::SetMaxEnergy( float maxen )
 
 
 
-float Unit::DealDamageToHull( const Vector &pnt, float Damage )
-{
-    float *nullvar = NULL;               //short fix
-    return DealDamageToHullReturnArmor( pnt, Damage, nullvar );
-}
+
 
 
 
@@ -2862,78 +2860,9 @@ static bool applyto( float &shield, const float max, const float amt )
     return (shield >= max) ? 1 : 0;
 }
 
-float totalShieldVal( const Shield &shield )
-{
-    float maxshield = 0;
-    switch (shield.number)
-    {
-    case 2:
-        maxshield = shield.shield2fb.frontmax+shield.shield2fb.backmax;
-        break;
-    case 4:
-        maxshield = shield.shield4fbrl.frontmax+shield.shield4fbrl.backmax+shield.shield4fbrl.leftmax
-                    +shield.shield4fbrl.rightmax;
-        break;
-    case 8:
-        maxshield = shield.shield8.frontrighttopmax+shield.shield8.backrighttopmax+shield.shield8.frontlefttopmax
-                    +shield.shield8.backlefttopmax+shield.shield8.frontrightbottommax+shield.shield8.backrightbottommax
-                    +shield.shield8.frontleftbottommax+shield.shield8.backleftbottommax;
-        break;
-    }
-    return maxshield;
-}
 
-float currentTotalShieldVal( const Shield &shield )
-{
-    float maxshield = 0;
-    switch (shield.number)
-    {
-    case 2:
-        maxshield = shield.shield2fb.front+shield.shield2fb.back;
-        break;
-    case 4:
-        maxshield = shield.shield4fbrl.front+shield.shield4fbrl.back+shield.shield4fbrl.left+shield.shield4fbrl.right;
-        break;
-    case 8:
-        maxshield = shield.shield8.frontrighttop+shield.shield8.backrighttop+shield.shield8.frontlefttop
-                    +shield.shield8.backlefttop+shield.shield8.frontrightbottom+shield.shield8.backrightbottom
-                    +shield.shield8.frontleftbottom+shield.shield8.backleftbottom;
-        break;
-    }
-    return maxshield;
-}
 
-float totalShieldEnergyCapacitance( const Shield &shield )
-{
-    static float shieldenergycap =
-        XMLSupport::parse_float( vs_config->getVariable( "physics", "shield_energy_capacitance", ".2" ) );
-    static bool  use_max_shield_value =
-        XMLSupport::parse_bool( vs_config->getVariable( "physics", "use_max_shield_energy_usage", "false" ) );
-    return shieldenergycap*use_max_shield_value ? totalShieldVal( shield ) : currentTotalShieldVal( shield );
-}
 
-float Unit::MaxShieldVal() const
-{
-    float maxshield = 0;
-    switch (shield.number)
-    {
-    case 2:
-        maxshield = .5*(shield.shield2fb.frontmax+shield.shield2fb.backmax);
-        break;
-    case 4:
-        maxshield = .25
-                    *(shield.shield4fbrl.frontmax+shield.shield4fbrl.backmax+shield.shield4fbrl.leftmax
-                      +shield.shield4fbrl.rightmax);
-        break;
-    case 8:
-        maxshield = .125
-                    *(shield.shield8.frontrighttopmax+shield.shield8.backrighttopmax+shield.shield8.frontlefttopmax
-                      +shield.shield8.backlefttopmax+shield.shield8.frontrightbottommax+shield.shield8.backrightbottommax
-                      +shield.shield8.frontleftbottommax+shield.shield8.backleftbottommax);
-        break;
-    }
-    return maxshield;
-}
 
 void Unit::RechargeEnergy()
 {
@@ -2942,246 +2871,7 @@ void Unit::RechargeEnergy()
         energy += recharge*SIMULATION_ATOM;
 }
 
-void Unit::RegenShields()
-{
-    static bool  shields_in_spec = XMLSupport::parse_bool( vs_config->getVariable( "physics", "shields_in_spec", "false" ) );
-    static float shieldenergycap =
-        XMLSupport::parse_float( vs_config->getVariable( "physics", "shield_energy_capacitance", ".2" ) );
-    static bool  energy_before_shield     =
-        XMLSupport::parse_bool( vs_config->getVariable( "physics", "engine_energy_priority", "true" ) );
-    static bool  apply_difficulty_shields =
-        XMLSupport::parse_bool( vs_config->getVariable( "physics", "difficulty_based_shield_recharge", "true" ) );
-    static float shield_maintenance_cost  =
-        XMLSupport::parse_float( vs_config->getVariable( "physics", "shield_maintenance_charge", ".25" ) );
-    static bool  shields_require_power    =
-        XMLSupport::parse_bool( vs_config->getVariable( "physics", "shields_require_passive_recharge_maintenance", "true" ) );
-    static float discharge_per_second     =
-        XMLSupport::parse_float( vs_config->getVariable( "physics", "speeding_discharge", ".25" ) );
-    //approx
-    const float  dischargerate  = (1-(1-discharge_per_second)*SIMULATION_ATOM);
-    static float min_shield_discharge =
-        XMLSupport::parse_float( vs_config->getVariable( "physics", "min_shield_speeding_discharge", ".1" ) );
-    static float low_power_mode =
-        XMLSupport::parse_float( vs_config->getVariable( "physics", "low_power_mode_energy", "10" ) );
-    static float max_shield_lowers_recharge    =
-        XMLSupport::parse_float( vs_config->getVariable( "physics", "max_shield_recharge_drain", "0" ) );
-    static bool  max_shield_lowers_capacitance =
-        XMLSupport::parse_bool( vs_config->getVariable( "physics", "max_shield_lowers_capacitance", "false" ) );
-    static bool  reactor_uses_fuel       =
-        XMLSupport::parse_bool( vs_config->getVariable( "physics", "reactor_uses_fuel", "false" ) );
-    static float reactor_idle_efficiency =
-        XMLSupport::parse_float( vs_config->getVariable( "physics", "reactor_idle_efficiency", "0.98" ) );
-    static float VSD = XMLSupport::parse_float( vs_config->getVariable( "physics", "VSD_MJ_yield", "5.4" ) );
-    //Fuel Mass in metric tons expended per generation of 100MJ
-    static float FMEC_factor     = XMLSupport::parse_float( vs_config->getVariable( "physics", "FMEC_factor", "0.000000008" ) );
-    int   rechargesh = 1; //used ... oddly
-    float maxshield = totalShieldEnergyCapacitance( shield );
-    bool  velocity_discharge     = false;
-    float rec = 0;
-    float precharge = energy;
-    //Reactor energy
-    if (!energy_before_shield)
-        RechargeEnergy();
-    //Shield energy drain
-    if (shield.number) {
-        //GAHHH reactor in units of 100MJ, shields in units of VSD=5.4MJ to make 1MJ of shield use 1/shieldenergycap MJ
-        if (shields_in_spec || !graphicOptions.InWarp) {
-            energy -= shield.recharge*VSD
-                      /( 100
-                        *(shield.efficiency ? shield.efficiency : 1) )/shieldenergycap*shield.number*shield_maintenance_cost
-                      *SIMULATION_ATOM*( (apply_difficulty_shields) ? g_game.difficulty : 1 );
-            if (energy < 0) {
-                velocity_discharge = true;
-                energy = 0;
-            }
-        }
-        rec =
-            (velocity_discharge) ? 0 : ( (shield.recharge*VSD/100*SIMULATION_ATOM*shield.number/shieldenergycap)
-                                        > energy ) ? (energy*shieldenergycap*100/VSD
-                                                      /shield.number) : shield.recharge*SIMULATION_ATOM;
-        if (apply_difficulty_shields) {
-            if ( !_Universe->isPlayerStarship( this ) )
-                rec *= g_game.difficulty;
-            else
-                rec *= g_game.difficulty;
-        }
-        if (graphicOptions.InWarp && !shields_in_spec) {
-            rec = 0;
-            velocity_discharge = true;
-        }
-        if (GetNebula() != NULL) {
-            static float nebshields =
-                XMLSupport::parse_float( vs_config->getVariable( "physics", "nebula_shield_recharge", ".5" ) );
-            rec *= nebshields;
-        }
-    }
-    //ECM energy drain
-    if (computer.ecmactive) {
-        static float ecmadj = XMLSupport::parse_float( vs_config->getVariable( "physics", "ecm_energy_cost", ".05" ) );
-        float sim_atom_ecm  = ecmadj*pImage->ecm*SIMULATION_ATOM;
-        if (energy > sim_atom_ecm)
-            energy -= sim_atom_ecm;
-        else
-            energy = 0;
-    }
-    //Shield regeneration
-    switch (shield.number)
-    {
-    case 2:
-        shield.shield2fb.front += rec;
-        shield.shield2fb.back  += rec;
-        if (shield.shield2fb.front > shield.shield2fb.frontmax)
-            shield.shield2fb.front = shield.shield2fb.frontmax;
-        else
-            rechargesh = 0;
-        if (shield.shield2fb.back > shield.shield2fb.backmax)
-            shield.shield2fb.back = shield.shield2fb.backmax;
 
-        else
-            rechargesh = 0;
-        if (velocity_discharge) {
-            if (shield.shield2fb.back > min_shield_discharge*shield.shield2fb.backmax)
-                shield.shield2fb.back *= dischargerate;
-            if (shield.shield2fb.front > min_shield_discharge*shield.shield2fb.frontmax)
-                shield.shield2fb.front *= dischargerate;
-        }
-        rec = rec*2/shieldenergycap*VSD/100;
-        break;
-    case 4:
-        rechargesh =
-            applyto( shield.shield4fbrl.front, shield.shield4fbrl.frontmax,
-                     rec )*( applyto( shield.shield4fbrl.back, shield.shield4fbrl.backmax, rec ) )*applyto(
-                shield.shield4fbrl.right,
-                shield.shield4fbrl.
-                rightmax,
-                rec )*applyto(
-                shield.shield4fbrl.left,
-                shield.shield4fbrl.leftmax,
-                rec );
-        if (velocity_discharge) {
-            if (shield.shield4fbrl.front > min_shield_discharge*shield.shield4fbrl.frontmax)
-                shield.shield4fbrl.front *= dischargerate;
-            if (shield.shield4fbrl.left > min_shield_discharge*shield.shield4fbrl.leftmax)
-                shield.shield4fbrl.left *= dischargerate;
-            if (shield.shield4fbrl.back > min_shield_discharge*shield.shield4fbrl.backmax)
-                shield.shield4fbrl.back *= dischargerate;
-            if (shield.shield4fbrl.right > min_shield_discharge*shield.shield4fbrl.rightmax)
-                shield.shield4fbrl.right *= dischargerate;
-        }
-        rec = rec*4/shieldenergycap*VSD/100;
-        break;
-    case 8:
-        rechargesh =
-            applyto( shield.shield8.frontrighttop, shield.shield8.frontrighttopmax,
-                     rec )*( applyto( shield.shield8.backrighttop, shield.shield8.backrighttopmax, rec ) )*applyto(
-                shield.shield8.frontlefttop,
-                shield.shield8.frontlefttopmax,
-                rec )*applyto( shield.shield8.backlefttop, shield.shield8.backlefttopmax, rec )*applyto(
-                shield.shield8.frontrightbottom,
-                shield.shield8.
-                frontrightbottommax,
-                rec )
-            *( applyto( shield.shield8.backrightbottom, shield.shield8.backrightbottommax, rec ) )*applyto(
-                shield.shield8.frontleftbottom,
-                shield.shield8.frontleftbottommax,
-                rec )*applyto( shield.shield8.backleftbottom, shield.shield8.backleftbottommax, rec );
-        if (velocity_discharge) {
-            if (shield.shield8.frontrighttop > min_shield_discharge*shield.shield8.frontrighttopmax)
-                shield.shield8.frontrighttop *= dischargerate;
-            if (shield.shield8.frontlefttop > min_shield_discharge*shield.shield8.frontlefttopmax)
-                shield.shield8.frontlefttop *= dischargerate;
-            if (shield.shield8.backrighttop > min_shield_discharge*shield.shield8.backrighttopmax)
-                shield.shield8.backrighttop *= dischargerate;
-            if (shield.shield8.backlefttop > min_shield_discharge*shield.shield8.backlefttopmax)
-                shield.shield8.backlefttop *= dischargerate;
-            if (shield.shield8.frontrightbottom > min_shield_discharge*shield.shield8.frontrightbottommax)
-                shield.shield8.frontrightbottom *= dischargerate;
-            if (shield.shield8.frontleftbottom > min_shield_discharge*shield.shield8.frontleftbottommax)
-                shield.shield8.frontleftbottom *= dischargerate;
-            if (shield.shield8.backrightbottom > min_shield_discharge*shield.shield8.backrightbottommax)
-                shield.shield8.backrightbottom *= dischargerate;
-            if (shield.shield8.backleftbottom > min_shield_discharge*shield.shield8.backleftbottommax)
-                shield.shield8.backleftbottom *= dischargerate;
-        }
-        rec = rec*8/shieldenergycap*VSD/100;
-        break;
-    }
-    if (shield.number) {
-        if (rechargesh == 0)
-            energy -= rec;
-        if (shields_require_power)
-            maxshield = 0;
-        if (max_shield_lowers_recharge)
-            energy -= max_shield_lowers_recharge*SIMULATION_ATOM*maxshield*VSD
-                      /( 100*(shield.efficiency ? shield.efficiency : 1) );
-        if (!max_shield_lowers_capacitance)
-            maxshield = 0;
-    }
-    //Reactor energy
-    if (energy_before_shield)
-        RechargeEnergy();
-    //Final energy computations
-    float menergy = maxenergy;
-    if ( shield.number && (menergy-maxshield < low_power_mode) ) {
-        menergy = maxshield+low_power_mode;
-        if ( _Universe->isPlayerStarship( this ) ) {
-            if (rand() < .00005*RAND_MAX) {
-                UniverseUtil::IOmessage(
-                    0,
-                    "	game",
-                    "all",
-                    "**Warning** Power Supply Overdrawn: downgrade shield or purchase reactor capacitance!" );
-            }
-        }
-    }
-    if (graphicOptions.InWarp) {
-        //FIXME FIXME FIXME
-        static float bleedfactor = XMLSupport::parse_float( vs_config->getVariable( "physics", "warpbleed", "20" ) );
-        float bleed = jump.insysenergy/bleedfactor*SIMULATION_ATOM;
-        if (warpenergy > bleed) {
-            warpenergy -= bleed;
-        } else {
-            graphicOptions.InWarp = 0;
-            graphicOptions.WarpRamping = 1;
-        }
-    }
-    float excessenergy = 0;
-    //NOTE: !shield.number => maxshield==0
-    if (menergy > maxshield) {
-        //allow warp caps to absorb xtra power
-        if (energy > menergy-maxshield) {
-            excessenergy = energy-(menergy-maxshield);
-            energy = menergy-maxshield;
-            if (excessenergy > 0) {
-                warpenergy = warpenergy+WARPENERGYMULTIPLIER( this )*excessenergy;
-                float mwe = maxwarpenergy;
-                if (mwe < jump.energy && mwe == 0)
-                    mwe = jump.energy;
-                if (warpenergy > mwe) {
-                    excessenergy = (warpenergy-mwe)/WARPENERGYMULTIPLIER( this );
-                    warpenergy   = mwe;
-                }
-            }
-        }
-    } else {
-        energy = 0;
-    }
-    excessenergy = (excessenergy > precharge) ? excessenergy-precharge : 0;
-    if (reactor_uses_fuel) {
-        static float min_reactor_efficiency =
-            XMLSupport::parse_float( vs_config->getVariable( "physics", "min_reactor_efficiency", ".00001" ) );
-        fuel -= FMEC_factor
-                *( ( recharge*SIMULATION_ATOM
-                    -(reactor_idle_efficiency
-                      *excessenergy) )/( min_reactor_efficiency+( pImage->LifeSupportFunctionality*(1-min_reactor_efficiency) ) ) );
-        if (fuel < 0) fuel = 0;
-        if ( !FINITE( fuel ) ) {
-            fprintf( stderr, "Fuel is nan C\n" );
-            fuel = 0;
-        }
-    }
-    energy = energy < 0 ? 0 : energy;
-}
 
 
 
@@ -3253,10 +2943,10 @@ float Unit::ApplyLocalDamage( const Vector &pnt,
     }
     //If shields failing or... => WE COMPUTE DAMAGE TO HULL
     if (shield.leak > 0 || !meshdata.back() || spercentage == 0 || absamt > 0 || phasedamage) {
-        float tmp = this->GetHull();
+        float tmp = this->hull;
         ppercentage = DealDamageToHull( pnt, leakamt+amt );
         if (cpt)
-            cpt->Shake( amt+leakamt, tmp != this->GetHull() ? 2 : 1 );
+            cpt->Shake( amt+leakamt, tmp != this->hull ? 2 : 1 );
         if (ppercentage != -1) {
             //returns -1 on death--could delete
             for (unsigned int i = 0; i < nummesh(); ++i)
@@ -3751,34 +3441,7 @@ void Unit::Kill( bool erasefromsave, bool quitting )
     }
 }
 
-void Unit::leach( float damShield, float damShieldRecharge, float damEnRecharge )
-{
-    recharge *= damEnRecharge;
-    shield.recharge *= damShieldRecharge;
-    switch (shield.number)
-    {
-    case 2:
-        shield.shield2fb.frontmax   *= damShield;
-        shield.shield2fb.backmax    *= damShield;
-        break;
-    case 4:
-        shield.shield4fbrl.frontmax *= damShield;
-        shield.shield4fbrl.backmax  *= damShield;
-        shield.shield4fbrl.leftmax  *= damShield;
-        shield.shield4fbrl.rightmax *= damShield;
-        break;
-    case 8:
-        shield.shield8.frontrighttopmax    *= damShield;
-        shield.shield8.backrighttopmax     *= damShield;
-        shield.shield8.frontlefttopmax     *= damShield;
-        shield.shield8.backlefttopmax      *= damShield;
-        shield.shield8.frontrightbottommax *= damShield;
-        shield.shield8.backrightbottommax  *= damShield;
-        shield.shield8.frontleftbottommax  *= damShield;
-        shield.shield8.backleftbottommax   *= damShield;
-        break;
-    }
-}
+
 
 void Unit::UnRef()
 {
@@ -3804,18 +3467,7 @@ float Unit::ExplosionRadius()
     return expsize*rSize();
 }
 
-//short fix
-void Unit::ArmorData( float armor[8] ) const
-{
-    armor[0] = this->armor.frontrighttop;
-    armor[1] = this->armor.backrighttop;
-    armor[2] = this->armor.frontlefttop;
-    armor[3] = this->armor.backlefttop;
-    armor[4] = this->armor.frontrightbottom;
-    armor[5] = this->armor.backrightbottom;
-    armor[6] = this->armor.frontleftbottom;
-    armor[7] = this->armor.backleftbottom;
-}
+
 
 float Unit::WarpCapData() const
 {
@@ -3849,127 +3501,7 @@ float Unit::EnergyData() const
     }
 }
 
-float Unit::FShieldData() const
-{
-    switch (shield.number)
-    {
-    case 2:
-        {
-            if (shield.shield2fb.frontmax != 0)
-                return shield.shield2fb.front/shield.shield2fb.frontmax;
-            break;
-        }
-    case 4:
-        {
-            if (shield.shield4fbrl.frontmax != 0)
-                return (shield.shield4fbrl.front)/shield.shield4fbrl.frontmax;
-            break;
-        }
-    case 8:
-        {
-            if (shield.shield8.frontrighttopmax != 0 || shield.shield8.frontrightbottommax != 0
-                || shield.shield8.frontlefttopmax != 0 || shield.shield8.frontleftbottommax
-                != 0) {
-                return (shield.shield8.frontrighttop+shield.shield8.frontrightbottom+shield.shield8.frontlefttop
-                        +shield.shield8.frontleftbottom)
-                       /(shield.shield8.frontrighttopmax+shield.shield8.frontrightbottommax+shield.shield8.frontlefttopmax
-                         +shield.shield8.frontleftbottommax);
-            }
-            break;
-        }
-    }
-    return 0;
-}
 
-float Unit::BShieldData() const
-{
-    switch (shield.number)
-    {
-    case 2:
-        {
-            if (shield.shield2fb.backmax != 0)
-                return shield.shield2fb.back/shield.shield2fb.backmax;
-            break;
-        }
-    case 4:
-        {
-            if (shield.shield4fbrl.backmax != 0)
-                return (shield.shield4fbrl.back)/shield.shield4fbrl.backmax;
-            break;
-        }
-    case 8:
-        {
-            if (shield.shield8.backrighttopmax != 0 || shield.shield8.backrightbottommax != 0
-                || shield.shield8.backlefttopmax != 0 || shield.shield8.backleftbottommax
-                != 0) {
-                return (shield.shield8.backrighttop+shield.shield8.backrightbottom+shield.shield8.backlefttop
-                        +shield.shield8.backleftbottom)
-                       /(shield.shield8.backrighttopmax+shield.shield8.backrightbottommax+shield.shield8.backlefttopmax
-                         +shield.shield8.backleftbottommax);
-            }
-            break;
-        }
-    }
-    return 0;
-}
-
-float Unit::LShieldData() const
-{
-    switch (shield.number)
-    {
-    case 2:
-        return 0;                                //no data, captain
-
-    case 4:
-        {
-            if (shield.shield4fbrl.leftmax != 0)
-                return (shield.shield4fbrl.left)/shield.shield4fbrl.leftmax;
-            break;
-        }
-    case 8:
-        {
-            if (shield.shield8.backlefttopmax != 0 || shield.shield8.backleftbottommax != 0
-                || shield.shield8.frontlefttopmax != 0 || shield.shield8.frontleftbottommax
-                != 0) {
-                return (shield.shield8.backlefttop+shield.shield8.backleftbottom+shield.shield8.frontlefttop
-                        +shield.shield8.frontleftbottom)
-                       /(shield.shield8.backlefttopmax+shield.shield8.backleftbottommax+shield.shield8.frontlefttopmax
-                         +shield.shield8.frontleftbottommax);
-            }
-            break;
-        }
-    }
-    return 0;
-}
-
-float Unit::RShieldData() const
-{
-    switch (shield.number)
-    {
-    case 2:
-        return 0;                                //don't react to stuff we have no data on
-
-    case 4:
-        {
-            if (shield.shield4fbrl.rightmax != 0)
-                return (shield.shield4fbrl.right)/shield.shield4fbrl.rightmax;
-            break;
-        }
-    case 8:
-        {
-            if (shield.shield8.backrighttopmax != 0 || shield.shield8.backrightbottommax != 0
-                || shield.shield8.frontrighttopmax != 0 || shield.shield8.frontrightbottommax
-                != 0) {
-                return (shield.shield8.backrighttop+shield.shield8.backrightbottom+shield.shield8.frontrighttop
-                        +shield.shield8.frontrightbottom)
-                       /(shield.shield8.backrighttopmax+shield.shield8.backrightbottommax+shield.shield8.frontrighttopmax
-                         +shield.shield8.frontrightbottommax);
-            }
-            break;
-        }
-    }
-    return 0;
-}
 
 void Unit::ProcessDeleteQueue()
 {
@@ -4072,273 +3604,13 @@ bool DestroyPlayerSystem( float hull, float maxhull, float numhits )
 }
 
 const char *DamagedCategory = "upgrades/Damaged/";
-//short fix
-float Unit::DealDamageToHullReturnArmor( const Vector &pnt, float damage, float* &targ )
-{
-    float percent;
-#ifndef ISUCK
-    if (hull < 0)
-        return -1;
-#endif
-    if (pnt.i > 0) {
-        if (pnt.j > 0) {
-            if (pnt.k > 0)
-                targ = &armor.frontlefttop;
-            else
-                targ = &armor.backlefttop;
-        } else {
-            if (pnt.k > 0)
-                targ = &armor.frontleftbottom;
-            else
-                targ = &armor.backleftbottom;
-        }
-    } else {
-        if (pnt.j > 0) {
-            if (pnt.k > 0)
-                targ = &armor.frontrighttop;
-            else
-                targ = &armor.backrighttop;
-        } else {
-            if (pnt.k > 0)
-                targ = &armor.frontrightbottom;
-            else
-                targ = &armor.backrightbottom;
-        }
-    }
-    //short fix
-    float absdamage = damage >= 0 ? damage : -damage;
-    float denom     = (*targ+hull);
-    percent = (denom > absdamage && denom != 0) ? absdamage/denom : (denom == 0 ? 0.0 : 1.0);
-    //ONLY APLY DAMAGE ON SERVER SIDE
-    if (percent == -1)
-      return -1;
-    static float damage_factor_for_sound =
-        XMLSupport::parse_float( vs_config->getVariable( "audio", "damage_factor_for_sound", ".001" ) );
-    bool did_hull_damage = true;
-    if (absdamage < *targ) {
-        if ( (*targ)*damage_factor_for_sound <= absdamage )
-          ArmorDamageSound( pnt );
-        //short fix
-        *targ -= apply_float_to_unsigned_int( absdamage );
-        did_hull_damage = false;
-      }
-    static bool system_damage_on_armor =
-        XMLSupport::parse_bool( vs_config->getVariable( "physics", "system_damage_on_armor", "false" ) );
-    if (system_damage_on_armor || did_hull_damage) {
-        if (did_hull_damage) {
-            absdamage -= *targ;
-            damage     = damage >= 0 ? absdamage : -absdamage;
-            *targ      = 0;
-          }
-        if (numCargo() > 0) {
-            if ( DestroySystem( hull, maxhull, numCargo() ) ) {
-                int which = rand()%numCargo();
-                static std::string Restricted_items = vs_config->getVariable( "physics", "indestructable_cargo_items", "" );
-                //why not downgrade _add GetCargo(which).content.find("add_")!=0&&
-                if (GetCargo( which ).GetCategory().find( "upgrades/" ) == 0
-                    && GetCargo( which ).GetCategory().find( DamagedCategory ) != 0
-                    && GetCargo( which ).GetContent().find( "mult_" ) != 0
-                    && Restricted_items.find( GetCargo( which ).GetContent() ) == string::npos) {
-                    int lenupgrades = strlen( "upgrades/" );
-                    GetCargo( which ).category = string( DamagedCategory )+GetCargo( which ).GetCategory().substr(
-                          lenupgrades );
-                    static bool NotActuallyDowngrade =
-                        XMLSupport::parse_bool( vs_config->getVariable( "physics", "separate_system_flakiness_component",
-                                                                        "false" ) );
-                    if (!NotActuallyDowngrade) {
-                        const Unit *downgrade =
-                            loadUnitByCache( GetCargo( which ).content, FactionUtil::GetFactionIndex( "upgrades" ) );
-                        if (downgrade) {
-                            if ( 0 == downgrade->GetNumMounts() && downgrade->SubUnits.empty() ) {
-                                double percentage = 0;
-                                this->Downgrade( downgrade, 0, 0, percentage, NULL );
-                              }
-                          }
-                      }
-                  }
-              }
-          }
-        bool isplayer = _Universe->isPlayerStarship( this );
-        //hull > damage is similar to hull>absdamage|| damage<0
-        if ( (!isplayer) || _Universe->AccessCockpit()->godliness <= 0 || hull > damage || system_damage_on_armor ) {
-            static float system_failure =
-                XMLSupport::parse_float( vs_config->getVariable( "physics", "indiscriminate_system_destruction", ".25" ) );
-            if ( (!isplayer) && DestroySystem( hull, maxhull, 1 ) )
-              DamageRandSys( system_failure*rand01()+(1-system_failure)*( 1-(hull > 0 ? absdamage/hull : 1.0f) ), pnt );
-            else if ( isplayer && DestroyPlayerSystem( hull, maxhull, 1 ) )
-              DamageRandSys( system_failure*rand01()+(1-system_failure)*( 1-(hull > 0 ? absdamage/hull : 1.0f) ), pnt );
-            if (did_hull_damage) {
-                if (damage > 0) {
-                    if (hull*damage_factor_for_sound <= damage)
-                      HullDamageSound( pnt );
-                    //FIXME
-                    hull -= damage;
-                  } else {
-                    //DISABLING WEAPON CODE HERE
-                    static float disabling_constant =
-                        XMLSupport::parse_float( vs_config->getVariable( "physics", "disabling_weapon_constant", "1" ) );
-                    if (hull > 0)
-                      pImage->LifeSupportFunctionality += disabling_constant*damage/hull;
-                    if (pImage->LifeSupportFunctionality < 0) {
-                        pImage->LifeSupportFunctionalityMax += pImage->LifeSupportFunctionality;
-                        pImage->LifeSupportFunctionality     = 0;
-                        if (pImage->LifeSupportFunctionalityMax < 0)
-                          pImage->LifeSupportFunctionalityMax = 0;
-                      }
-                  }
-              }
-          } else {
-            _Universe->AccessCockpit()->godliness -= absdamage;
-            if ( DestroyPlayerSystem( hull, maxhull, 1 ) )
-              //get system damage...but live!
-              DamageRandSys( rand01()*.5+.2, pnt );
-          }
-      }
-    if (hull < 0) {
-        int neutralfac  = FactionUtil::GetNeutralFaction();
-        int upgradesfac = FactionUtil::GetUpgradeFaction();
 
-        static float cargoejectpercent =
-            XMLSupport::parse_float( vs_config->getVariable( "physics", "eject_cargo_percent", "1" ) );
 
-        static float hulldamtoeject    =
-            XMLSupport::parse_float( vs_config->getVariable( "physics", "hull_damage_to_eject", "100" ) );
-        if (hull > -hulldamtoeject) {
-            static float autoejectpercent =
-                XMLSupport::parse_float( vs_config->getVariable( "physics", "autoeject_percent", ".5" ) );
 
-            if (rand() < (RAND_MAX*autoejectpercent) && isUnit() == UNITPTR) {
-                static bool player_autoeject =
-                    XMLSupport::parse_bool( vs_config->getVariable( "physics", "player_autoeject", "true" ) );
-                if ( faction != neutralfac && faction != upgradesfac
-                     && ( player_autoeject || NULL == _Universe->isPlayerStarship( this ) ) )
-                  EjectCargo( (unsigned int) -1 );
-            }
 
-          }
-        static unsigned int max_dump_cargo =
-            XMLSupport::parse_int( vs_config->getVariable( "physics", "max_dumped_cargo", "15" ) );
-        unsigned int dumpedcargo = 0;
 
-        if (faction != neutralfac && faction != upgradesfac) {
-            for (unsigned int i = 0; i < numCargo(); ++i)
-                if (vsrandom.rand() < (VS_RAND_MAX*cargoejectpercent) && dumpedcargo++ < max_dump_cargo)
-                    EjectCargo( i );
-        }
 
-#ifdef ISUCK
-            Destroy();
-#endif
-            PrimeOrders();
-            maxenergy = energy = 0;
-            Split( rand()%3+1 );
-#ifndef ISUCK
-            Destroy();
-            return -1;
-#endif
-        }
 
-    /////////////////////////////
-    if ( !FINITE( percent ) )
-        percent = 0;
-    return percent;
-}
-
-bool withinShield( const ShieldFacing &facing, float theta, float rho )
-{
-    float theta360 = theta+2*3.1415926536;
-    return rho >= facing.rhomin && rho < facing.rhomax
-           && ( (theta >= facing.thetamin
-                 && theta < facing.thetamax) || (theta360 >= facing.thetamin && theta360 < facing.thetamax) );
-}
-
-float Unit::DealDamageToShield( const Vector &pnt, float &damage )
-{
-    float  percent = 0;
-    float *targ    = NULL;                       //short fix
-    float  theta   = atan2( pnt.i, pnt.k );
-    float  rho     = atan( pnt.j/sqrt( pnt.k*pnt.k+pnt.i*pnt.i ) );
-    //ONLY APPLY DAMAGES IN NON-NETWORKING OR ON SERVER SIDE
-    for (int i = 0; i < shield.number; ++i)
-        if ( withinShield( shield.range[i], theta, rho ) ) {
-            if (shield.shield.max[i]) {
-                //comparing with max
-                float tmp = damage/shield.shield.max[i];
-                if (tmp > percent) percent = tmp;
-            }
-            targ = &shield.shield.cur[i];
-
-            if (damage > *targ) {
-                damage -= *targ;
-                *targ   = 0;
-              } else {
-                //short fix
-                *targ -= damage;
-                damage = 0;
-                break;
-              }
-
-        }
-    if ( !FINITE( percent ) )
-        percent = 0;
-    return percent;
-}
-
-bool Unit::ShieldUp( const Vector &pnt ) const
-{
-    const int    shieldmin  = 5;
-    static float nebshields = XMLSupport::parse_float( vs_config->getVariable( "physics", "nebula_shield_recharge", ".5" ) );
-    if (nebula != NULL || nebshields > 0)
-        return false;
-    switch (shield.number)
-    {
-    case 2:
-        return ( (pnt.k > 0) ? (shield.shield2fb.front) : (shield.shield2fb.back) ) > shieldmin;
-    case 8:
-        if (pnt.i > 0) {
-            if (pnt.j > 0) {
-                if (pnt.k > 0)
-                    return shield.shield8.frontlefttop > shieldmin;
-                else
-                    return shield.shield8.backlefttop > shieldmin;
-            } else {
-                if (pnt.k > 0)
-                    return shield.shield8.frontleftbottom > shieldmin;
-                else
-                    return shield.shield8.backleftbottom > shieldmin;
-            }
-        } else {
-            if (pnt.j > 0) {
-                if (pnt.k > 0)
-                    return shield.shield8.frontrighttop > shieldmin;
-                else
-                    return shield.shield8.backrighttop > shieldmin;
-            } else {
-                if (pnt.k > 0)
-                    return shield.shield8.frontrightbottom > shieldmin;
-                else
-                    return shield.shield8.backrightbottom > shieldmin;
-            }
-        }
-        break;
-    case 4:
-        if ( fabs( pnt.k ) > fabs( pnt.i ) ) {
-            if (pnt.k > 0)
-                return shield.shield4fbrl.front > shieldmin;
-            else
-                return shield.shield4fbrl.back > shieldmin;
-        } else {
-            if (pnt.i > 0)
-                return shield.shield4fbrl.left > shieldmin;
-            else
-                return shield.shield4fbrl.right > shieldmin;
-        }
-        return false;
-
-    default:
-        return false;
-    }
-}
 
 /*
  **********************************************************************************
@@ -8493,4 +7765,438 @@ float Unit::CalculateNearestWarpUnit( float minmultiplier, Unit **nearest_unit, 
         }
     }
     return minmultiplier;
+}
+
+float Unit::DealDamageToHull( const Vector &pnt, float damage)
+{
+  float _hull = hull; // Store the old value for did_hull_damage
+
+  // Not sure why damage can be negative
+  damage = std::abs(damage);
+
+  // unit is already destroyed
+  if (hull < 0)
+      return -1;
+
+  bool did_hull_damage = hull < _hull;
+
+  float percent = Damageable::DealDamageToHull( pnt, damage);
+
+  bool isplayer = isPlayerShip();
+
+  // Damage things in the ship
+  if(did_hull_damage && hull >0) {
+      // Removed this for now XMLSupport::parse_bool( vs_config->getVariable( "physics", "system_damage_on_armor", "false" ) );
+      // Destroy systems
+
+      // I really don't understand this comment
+      //hull > damage is similar to hull>absdamage|| damage<0
+      if ( (!isplayer) || _Universe->AccessCockpit()->godliness <= 0 ) { // || system_damage_on_armor ) {
+          static float system_failure =
+              XMLSupport::parse_float( vs_config->getVariable( "physics", "indiscriminate_system_destruction", ".25" ) );
+          if ( (!isplayer) && DestroySystem( hull, maxhull, 1 ) )
+            DamageRandSys( system_failure*rand01()+(1-system_failure)*( 1-(hull > 0 ? damage/hull : 1.0f) ), pnt );
+          else if ( isplayer && DestroyPlayerSystem( hull, maxhull, 1 ) )
+            DamageRandSys( system_failure*rand01()+(1-system_failure)*( 1-(hull > 0 ? damage/hull : 1.0f) ), pnt );
+
+          if (did_hull_damage) {
+              if (damage > 0) {
+
+                } else {
+
+                }
+            }
+        } else {
+          _Universe->AccessCockpit()->godliness -= damage;
+          if ( DestroyPlayerSystem( hull, maxhull, 1 ) )
+            //get system damage...but live!
+            DamageRandSys( rand01()*.5+.2, pnt );
+        }
+
+      // Non-lethal/Disabling Weapon code here
+      // TODO: enable
+      /*static float disabling_constant =
+          XMLSupport::parse_float( vs_config->getVariable( "physics", "disabling_weapon_constant", "1" ) );
+      if (hull > 0)
+        pImage->LifeSupportFunctionality += disabling_constant*damage/hull;
+      if (pImage->LifeSupportFunctionality < 0) {
+          pImage->LifeSupportFunctionalityMax += pImage->LifeSupportFunctionality;
+          pImage->LifeSupportFunctionality     = 0;
+          if (pImage->LifeSupportFunctionalityMax < 0)
+            pImage->LifeSupportFunctionalityMax = 0;
+        }*/
+
+      // Destroy cargo
+      // TODO: move this to cargo
+      if (numCargo() > 0) {
+          if ( DestroySystem( hull, maxhull, numCargo() ) ) {
+              int which = rand()%numCargo();
+              static std::string Restricted_items = vs_config->getVariable( "physics", "indestructable_cargo_items", "" );
+              //why not downgrade _add GetCargo(which).content.find("add_")!=0&&
+              if (GetCargo( which ).GetCategory().find( "upgrades/" ) == 0
+                  && GetCargo( which ).GetCategory().find( DamagedCategory ) != 0
+                  && GetCargo( which ).GetContent().find( "mult_" ) != 0
+                  && Restricted_items.find( GetCargo( which ).GetContent() ) == string::npos) {
+                  int lenupgrades = strlen( "upgrades/" );
+                  GetCargo( which ).category = string( DamagedCategory )+GetCargo( which ).GetCategory().substr(
+                        lenupgrades );
+                  static bool NotActuallyDowngrade =
+                      XMLSupport::parse_bool( vs_config->getVariable( "physics", "separate_system_flakiness_component",
+                                                                      "false" ) );
+                  if (!NotActuallyDowngrade) {
+                      const Unit *downgrade =
+                          loadUnitByCache( GetCargo( which ).content, FactionUtil::GetFactionIndex( "upgrades" ) );
+                      if (downgrade) {
+                          if ( 0 == downgrade->GetNumMounts() && downgrade->SubUnits.empty() ) {
+                              double percentage = 0;
+                              this->Downgrade( downgrade, 0, 0, percentage, NULL );
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+  // Play Damage Sound
+  static float damage_factor_for_sound =
+      XMLSupport::parse_float( vs_config->getVariable( "audio", "damage_factor_for_sound", ".001" ) );
+  if(did_hull_damage) {
+      HullDamageSound ( pnt );
+  } else {
+      ArmorDamageSound( pnt );
+      // Previous code read damage_factor_for_sound and only played ArmorDamageSound if factor exceeded as per the code below
+      // if ( (*targ)*damage_factor_for_sound <= absdamage )
+  }
+
+  // Ship was destroyed
+  if (hull < 0) {
+      // Effect on factions
+      int neutralfac  = FactionUtil::GetNeutralFaction();
+      int upgradesfac = FactionUtil::GetUpgradeFaction();
+
+      // Eject cargo
+      static float cargoejectpercent =
+          XMLSupport::parse_float( vs_config->getVariable( "physics", "eject_cargo_percent", "1" ) );
+
+      static float hulldamtoeject    =
+          XMLSupport::parse_float( vs_config->getVariable( "physics", "hull_damage_to_eject", "100" ) );
+      if (hull > -hulldamtoeject) {
+          static float autoejectpercent =
+              XMLSupport::parse_float( vs_config->getVariable( "physics", "autoeject_percent", ".5" ) );
+
+          if (rand() < (RAND_MAX*autoejectpercent) && isUnit() == UNITPTR) {
+              static bool player_autoeject =
+                  XMLSupport::parse_bool( vs_config->getVariable( "physics", "player_autoeject", "true" ) );
+              if ( faction != neutralfac && faction != upgradesfac
+                   && ( player_autoeject || NULL == _Universe->isPlayerStarship( this ) ) )
+                EjectCargo( (unsigned int) -1 );
+          }
+
+        }
+
+      static unsigned int max_dump_cargo =
+          XMLSupport::parse_int( vs_config->getVariable( "physics", "max_dumped_cargo", "15" ) );
+      unsigned int dumpedcargo = 0;
+
+      if (faction != neutralfac && faction != upgradesfac) {
+          for (unsigned int i = 0; i < numCargo(); ++i)
+            if (vsrandom.rand() < (VS_RAND_MAX*cargoejectpercent) && dumpedcargo++ < max_dump_cargo)
+                EjectCargo( i );
+        }
+
+
+          PrimeOrders();
+          maxenergy = energy = 0;
+          Split( rand()%3+1 );
+
+          Destroy();
+          return -1;
+
+    }
+
+  // Zero out an infinite floating point
+  if ( !std::isfinite( percent ) )
+    percent = 0;
+  return percent;
+}
+
+
+
+void Unit::RegenShields()
+{
+    static bool  shields_in_spec = XMLSupport::parse_bool( vs_config->getVariable( "physics", "shields_in_spec", "false" ) );
+    static float shieldenergycap =
+        XMLSupport::parse_float( vs_config->getVariable( "physics", "shield_energy_capacitance", ".2" ) );
+    static bool  energy_before_shield     =
+        XMLSupport::parse_bool( vs_config->getVariable( "physics", "engine_energy_priority", "true" ) );
+    static bool  apply_difficulty_shields =
+        XMLSupport::parse_bool( vs_config->getVariable( "physics", "difficulty_based_shield_recharge", "true" ) );
+    static float shield_maintenance_cost  =
+        XMLSupport::parse_float( vs_config->getVariable( "physics", "shield_maintenance_charge", ".25" ) );
+    static bool  shields_require_power    =
+        XMLSupport::parse_bool( vs_config->getVariable( "physics", "shields_require_passive_recharge_maintenance", "true" ) );
+    static float discharge_per_second     =
+        XMLSupport::parse_float( vs_config->getVariable( "physics", "speeding_discharge", ".25" ) );
+    //approx
+    const float  dischargerate  = (1-(1-discharge_per_second)*SIMULATION_ATOM);
+    static float min_shield_discharge =
+        XMLSupport::parse_float( vs_config->getVariable( "physics", "min_shield_speeding_discharge", ".1" ) );
+    static float low_power_mode =
+        XMLSupport::parse_float( vs_config->getVariable( "physics", "low_power_mode_energy", "10" ) );
+    static float max_shield_lowers_recharge    =
+        XMLSupport::parse_float( vs_config->getVariable( "physics", "max_shield_recharge_drain", "0" ) );
+    static bool  max_shield_lowers_capacitance =
+        XMLSupport::parse_bool( vs_config->getVariable( "physics", "max_shield_lowers_capacitance", "false" ) );
+    static bool  reactor_uses_fuel       =
+        XMLSupport::parse_bool( vs_config->getVariable( "physics", "reactor_uses_fuel", "false" ) );
+    static float reactor_idle_efficiency =
+        XMLSupport::parse_float( vs_config->getVariable( "physics", "reactor_idle_efficiency", "0.98" ) );
+    static float VSD = XMLSupport::parse_float( vs_config->getVariable( "physics", "VSD_MJ_yield", "5.4" ) );
+    //Fuel Mass in metric tons expended per generation of 100MJ
+    static float FMEC_factor     = XMLSupport::parse_float( vs_config->getVariable( "physics", "FMEC_factor", "0.000000008" ) );
+    int   rechargesh = 1; //used ... oddly
+    float maxshield = totalShieldEnergyCapacitance( shield );
+    bool  velocity_discharge     = false;
+    float rec = 0;
+    float precharge = energy;
+    //Reactor energy
+    if (!energy_before_shield)
+        RechargeEnergy();
+    //Shield energy drain
+    if (shield.number) {
+        //GAHHH reactor in units of 100MJ, shields in units of VSD=5.4MJ to make 1MJ of shield use 1/shieldenergycap MJ
+        if (shields_in_spec || !graphicOptions.InWarp) {
+            energy -= shield.recharge*VSD
+                      /( 100
+                        *(shield.efficiency ? shield.efficiency : 1) )/shieldenergycap*shield.number*shield_maintenance_cost
+                      *SIMULATION_ATOM*( (apply_difficulty_shields) ? g_game.difficulty : 1 );
+            if (energy < 0) {
+                velocity_discharge = true;
+                energy = 0;
+            }
+        }
+        rec =
+            (velocity_discharge) ? 0 : ( (shield.recharge*VSD/100*SIMULATION_ATOM*shield.number/shieldenergycap)
+                                        > energy ) ? (energy*shieldenergycap*100/VSD
+                                                      /shield.number) : shield.recharge*SIMULATION_ATOM;
+        if (apply_difficulty_shields) {
+            if ( !_Universe->isPlayerStarship( this ) )
+                rec *= g_game.difficulty;
+            else
+                rec *= g_game.difficulty;
+        }
+        if (graphicOptions.InWarp && !shields_in_spec) {
+            rec = 0;
+            velocity_discharge = true;
+        }
+        if (GetNebula() != NULL) {
+            static float nebshields =
+                XMLSupport::parse_float( vs_config->getVariable( "physics", "nebula_shield_recharge", ".5" ) );
+            rec *= nebshields;
+        }
+    }
+    //ECM energy drain
+    if (computer.ecmactive) {
+        static float ecmadj = XMLSupport::parse_float( vs_config->getVariable( "physics", "ecm_energy_cost", ".05" ) );
+        float sim_atom_ecm  = ecmadj*pImage->ecm*SIMULATION_ATOM;
+        if (energy > sim_atom_ecm)
+            energy -= sim_atom_ecm;
+        else
+            energy = 0;
+    }
+    //Shield regeneration
+    switch (shield.number)
+    {
+    case 2:
+        shield.shield2fb.front += rec;
+        shield.shield2fb.back  += rec;
+        if (shield.shield2fb.front > shield.shield2fb.frontmax)
+            shield.shield2fb.front = shield.shield2fb.frontmax;
+        else
+            rechargesh = 0;
+        if (shield.shield2fb.back > shield.shield2fb.backmax)
+            shield.shield2fb.back = shield.shield2fb.backmax;
+
+        else
+            rechargesh = 0;
+        if (velocity_discharge) {
+            if (shield.shield2fb.back > min_shield_discharge*shield.shield2fb.backmax)
+                shield.shield2fb.back *= dischargerate;
+            if (shield.shield2fb.front > min_shield_discharge*shield.shield2fb.frontmax)
+                shield.shield2fb.front *= dischargerate;
+        }
+        rec = rec*2/shieldenergycap*VSD/100;
+        break;
+    case 4:
+        rechargesh =
+            applyto( shield.shield4fbrl.front, shield.shield4fbrl.frontmax,
+                     rec )*( applyto( shield.shield4fbrl.back, shield.shield4fbrl.backmax, rec ) )*applyto(
+                shield.shield4fbrl.right,
+                shield.shield4fbrl.
+                rightmax,
+                rec )*applyto(
+                shield.shield4fbrl.left,
+                shield.shield4fbrl.leftmax,
+                rec );
+        if (velocity_discharge) {
+            if (shield.shield4fbrl.front > min_shield_discharge*shield.shield4fbrl.frontmax)
+                shield.shield4fbrl.front *= dischargerate;
+            if (shield.shield4fbrl.left > min_shield_discharge*shield.shield4fbrl.leftmax)
+                shield.shield4fbrl.left *= dischargerate;
+            if (shield.shield4fbrl.back > min_shield_discharge*shield.shield4fbrl.backmax)
+                shield.shield4fbrl.back *= dischargerate;
+            if (shield.shield4fbrl.right > min_shield_discharge*shield.shield4fbrl.rightmax)
+                shield.shield4fbrl.right *= dischargerate;
+        }
+        rec = rec*4/shieldenergycap*VSD/100;
+        break;
+    case 8:
+        rechargesh =
+            applyto( shield.shield8.frontrighttop, shield.shield8.frontrighttopmax,
+                     rec )*( applyto( shield.shield8.backrighttop, shield.shield8.backrighttopmax, rec ) )*applyto(
+                shield.shield8.frontlefttop,
+                shield.shield8.frontlefttopmax,
+                rec )*applyto( shield.shield8.backlefttop, shield.shield8.backlefttopmax, rec )*applyto(
+                shield.shield8.frontrightbottom,
+                shield.shield8.
+                frontrightbottommax,
+                rec )
+            *( applyto( shield.shield8.backrightbottom, shield.shield8.backrightbottommax, rec ) )*applyto(
+                shield.shield8.frontleftbottom,
+                shield.shield8.frontleftbottommax,
+                rec )*applyto( shield.shield8.backleftbottom, shield.shield8.backleftbottommax, rec );
+        if (velocity_discharge) {
+            if (shield.shield8.frontrighttop > min_shield_discharge*shield.shield8.frontrighttopmax)
+                shield.shield8.frontrighttop *= dischargerate;
+            if (shield.shield8.frontlefttop > min_shield_discharge*shield.shield8.frontlefttopmax)
+                shield.shield8.frontlefttop *= dischargerate;
+            if (shield.shield8.backrighttop > min_shield_discharge*shield.shield8.backrighttopmax)
+                shield.shield8.backrighttop *= dischargerate;
+            if (shield.shield8.backlefttop > min_shield_discharge*shield.shield8.backlefttopmax)
+                shield.shield8.backlefttop *= dischargerate;
+            if (shield.shield8.frontrightbottom > min_shield_discharge*shield.shield8.frontrightbottommax)
+                shield.shield8.frontrightbottom *= dischargerate;
+            if (shield.shield8.frontleftbottom > min_shield_discharge*shield.shield8.frontleftbottommax)
+                shield.shield8.frontleftbottom *= dischargerate;
+            if (shield.shield8.backrightbottom > min_shield_discharge*shield.shield8.backrightbottommax)
+                shield.shield8.backrightbottom *= dischargerate;
+            if (shield.shield8.backleftbottom > min_shield_discharge*shield.shield8.backleftbottommax)
+                shield.shield8.backleftbottom *= dischargerate;
+        }
+        rec = rec*8/shieldenergycap*VSD/100;
+        break;
+    }
+    if (shield.number) {
+        if (rechargesh == 0)
+            energy -= rec;
+        if (shields_require_power)
+            maxshield = 0;
+        if (max_shield_lowers_recharge)
+            energy -= max_shield_lowers_recharge*SIMULATION_ATOM*maxshield*VSD
+                      /( 100*(shield.efficiency ? shield.efficiency : 1) );
+        if (!max_shield_lowers_capacitance)
+            maxshield = 0;
+    }
+    //Reactor energy
+    if (energy_before_shield)
+        RechargeEnergy();
+    //Final energy computations
+    float menergy = maxenergy;
+    if ( shield.number && (menergy-maxshield < low_power_mode) ) {
+        menergy = maxshield+low_power_mode;
+        if ( _Universe->isPlayerStarship( this ) ) {
+            if (rand() < .00005*RAND_MAX) {
+                UniverseUtil::IOmessage(
+                    0,
+                    "	game",
+                    "all",
+                    "**Warning** Power Supply Overdrawn: downgrade shield or purchase reactor capacitance!" );
+            }
+        }
+    }
+    if (graphicOptions.InWarp) {
+        //FIXME FIXME FIXME
+        static float bleedfactor = XMLSupport::parse_float( vs_config->getVariable( "physics", "warpbleed", "20" ) );
+        float bleed = jump.insysenergy/bleedfactor*SIMULATION_ATOM;
+        if (warpenergy > bleed) {
+            warpenergy -= bleed;
+        } else {
+            graphicOptions.InWarp = 0;
+            graphicOptions.WarpRamping = 1;
+        }
+    }
+    float excessenergy = 0;
+    //NOTE: !shield.number => maxshield==0
+    if (menergy > maxshield) {
+        //allow warp caps to absorb xtra power
+        if (energy > menergy-maxshield) {
+            excessenergy = energy-(menergy-maxshield);
+            energy = menergy-maxshield;
+            if (excessenergy > 0) {
+                warpenergy = warpenergy+WARPENERGYMULTIPLIER( this )*excessenergy;
+                float mwe = maxwarpenergy;
+                if (mwe < jump.energy && mwe == 0)
+                    mwe = jump.energy;
+                if (warpenergy > mwe) {
+                    excessenergy = (warpenergy-mwe)/WARPENERGYMULTIPLIER( this );
+                    warpenergy   = mwe;
+                }
+            }
+        }
+    } else {
+        energy = 0;
+    }
+    excessenergy = (excessenergy > precharge) ? excessenergy-precharge : 0;
+    if (reactor_uses_fuel) {
+        static float min_reactor_efficiency =
+            XMLSupport::parse_float( vs_config->getVariable( "physics", "min_reactor_efficiency", ".00001" ) );
+        fuel -= FMEC_factor
+                *( ( recharge*SIMULATION_ATOM
+                    -(reactor_idle_efficiency
+                      *excessenergy) )/( min_reactor_efficiency+( pImage->LifeSupportFunctionality*(1-min_reactor_efficiency) ) ) );
+        if (fuel < 0) fuel = 0;
+        if ( !FINITE( fuel ) ) {
+            fprintf( stderr, "Fuel is nan C\n" );
+            fuel = 0;
+        }
+    }
+    energy = energy < 0 ? 0 : energy;
+}
+
+void Unit::ArmorDamageSound( const Vector &pnt )
+{
+    if ( !_Universe->isPlayerStarship( this ) ) {
+        if ( AUDIsPlaying( this->sound->armor ) )
+            AUDStopPlaying( this->sound->armor );
+        if (game_options.ai_sound)
+            AUDPlay( this->sound->armor, this->ToWorldCoordinates(
+                         pnt ).Cast()+this->cumulative_transformation.position, this->Velocity, 1 );
+    } else {
+        static int playerarmorsound =
+            AUDCreateSoundWAV( game_options.player_armor_hit );
+        int sound = playerarmorsound != -1 ? playerarmorsound : this->sound->armor;
+        if ( AUDIsPlaying( sound ) )
+            AUDStopPlaying( sound );
+        AUDPlay( sound, this->ToWorldCoordinates(
+            pnt ).Cast()+this->cumulative_transformation.position, this->Velocity, 1 );
+    }
+}
+
+void Unit::HullDamageSound( const Vector &pnt )
+{
+    if ( !_Universe->isPlayerStarship( this ) ) {
+        if ( AUDIsPlaying( this->sound->hull ) )
+            AUDStopPlaying( this->sound->hull );
+        if (game_options.ai_sound)
+            AUDPlay( this->sound->hull, this->ToWorldCoordinates(
+                         pnt ).Cast()+this->cumulative_transformation.position, this->Velocity, 1 );
+    } else {
+        static int playerhullsound = AUDCreateSoundWAV( game_options.player_hull_hit );
+        int sound = playerhullsound != -1 ? playerhullsound : this->sound->hull;
+        if ( AUDIsPlaying( sound ) )
+            AUDStopPlaying( sound );
+        AUDPlay( sound, this->ToWorldCoordinates(
+            pnt ).Cast()+this->cumulative_transformation.position, this->Velocity, 1 );
+    }
 }

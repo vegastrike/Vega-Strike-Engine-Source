@@ -34,6 +34,8 @@
 #include "movable.h"
 #include "computer.h"
 
+
+
 #ifdef VS_DEBUG
 #define CONTAINER_DEBUG
 #endif
@@ -809,14 +811,15 @@ public:
                       const GFXColor&,
                       void *ownerDoNotDereference,
                       float phasedamage = 0 );
+
+    virtual float DealDamageToHull( const Vector &pnt, float Damage );
+
 //Lights the shields, without applying damage or making the AI mad - useful for special effects
     void LightShields( const Vector &pnt, const Vector &normal, float amt, const GFXColor &color );
 //Deals remaining damage to the hull at point and applies lighting effects
 //short fix
-    float DealDamageToHullReturnArmor( const Vector &pnt, float Damage, float* &targ );
-    virtual void ArmorDamageSound( const Vector &pnt ) {}
-    virtual void HullDamageSound( const Vector &pnt ) {}
-    float DealDamageToHull( const Vector &pnt, float Damage );
+//    virtual void ArmorDamageSound( const Vector &pnt ) {}
+//    virtual void HullDamageSound( const Vector &pnt ) {}
 //Clamps thrust to the limits struct
     Vector ClampThrust( const Vector &thrust, bool afterburn );
 //Takes a unit vector for direction of thrust and scales to limits
@@ -870,21 +873,16 @@ public:
  **************************************************************************************
  */
 public:
-//Armor and shield structures
-    Armor  armor;
-    Shield shield;
-//The structual integ of the current unit
-    float  hull;
+    void RegenShields() override;
+    void ArmorDamageSound( const Vector &pnt ) override;
+    void HullDamageSound( const Vector &pnt ) override;
+
 //current energy
     float  energy;
 protected:
 //Activates all guns of that size
     void ActivateGuns( const weapon_info*, bool Missile );
-    float MaxShieldVal() const;
-//regenerates all 2,4, or 6 shields for 1 SIMULATION_ATOM
-    void RegenShields();
-//Original hull
-    float maxhull;
+
 //The radar limits (range, cone range, etc)
 //the current order
 //how much the energy recharges per second
@@ -896,10 +894,8 @@ protected:
     float maxwarpenergy;                 //short fix
 //current energy
     float warpenergy;                            //short fix
-//applies damage from the given pnt to the shield, and returns % damage applied and applies lighitn
-    virtual float DealDamageToShield( const Vector &pnt, float &Damage );
-//If the shields are up from this position
-    bool ShieldUp( const Vector& ) const;
+
+
 public:
 //resets average gun speed (in event of weapon change
     void setAverageGunSpeed();
@@ -918,28 +914,13 @@ public:
 //Finds the position from the local position if guns are aimed at it with speed
     QVector PositionITTS( const QVector &firingposit, Vector firingvelocity, float gunspeed, bool smooth_itts ) const;
 //returns percentage of course deviation for contraband searches.  .5 causes error and 1 causes them to get mad
-    float FShieldData() const;
-    float RShieldData() const;
-    float LShieldData() const;
-    float BShieldData() const;
-//short fix
-    void ArmorData( float armor[8] ) const;
-//Gets the current status of the hull
-    float GetHull() const
-    {
-        return hull;
-    }
-    float GetHullPercent() const
-    {
-        return maxhull != 0 ? hull/maxhull : hull;
-    }
+
 //Fires all active guns that are or arent Missiles
 //if bitmask is (1<<31) then fire off autotracking of that type;
     void Fire( unsigned int bitmask, bool beams_target_owner = false );
 //Stops all active guns from firing
     void UnFire();
-//reduces shields to X percentage and reduces shield recharge to Y percentage
-    void leach( float XshieldPercent, float YrechargePercent, float ZenergyPercent );
+
 
 /*
  **************************************************************************************
@@ -1351,6 +1332,7 @@ extern void ClearDowngradeMap();
  **** MESH ANIMATION STUFF                                                       ***
  **************************************************************************************
  */
+
 
 
 #endif
