@@ -89,3 +89,17 @@ struct group *GetGroupStruct(char *name) {
         } while ((CUR = CUR->next) != nullptr);
         return 0;
 }
+
+struct catagory *GetNameFromInfo(char *info) {
+	struct catagory *CUR;
+	CUR = &CATS;
+	do {
+		if (CUR->name == NULL) { continue; }
+        if (CUR->info != NULL) {
+		    if (strcmp(CUR->info, info) == 0) { return CUR; }
+        } else {
+		    if (strcmp(CUR->name, info) == 0) { return CUR; }
+        }
+	} while ((CUR = CUR->next) != nullptr);
+	return 0;
+}
