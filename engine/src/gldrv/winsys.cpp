@@ -19,7 +19,6 @@
 #include <assert.h>
 #include <sstream>
 
-#include "config.h"
 #include "gl_globals.h"
 #include "winsys.h"
 #include "vs_globals.h"

@@ -1,4 +1,3 @@
-#include "config.h"
 
 #ifdef HAVE_PYTHON
 #include <boost/version.hpp>

@@ -21,7 +21,6 @@
 
 #ifndef _HASHTABLE_H_
 #define _HASHTABLE_H_
-#include "config.h"
 #include "gnuhash.h"
 #include <math.h>
 #include <string>

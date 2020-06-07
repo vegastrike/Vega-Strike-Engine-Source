@@ -2,7 +2,6 @@
 // C++ Implementation: Audio::FFCodec
 //
 
-#include "config.h"
 
 #ifdef HAVE_FFMPEG
 
@@ -10,7 +9,6 @@
 
 #include "FFCodec.h"
 #include "FFStream.h"
-#include "config.h"
 
 namespace Audio {
 

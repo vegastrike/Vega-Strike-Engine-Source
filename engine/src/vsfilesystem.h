@@ -1,6 +1,5 @@
 #ifndef __VSFILESYS_H
 #define __VSFILESYS_H
-#include "config.h"
 #include <stdio.h>
 #include <string>
 #include <vector>

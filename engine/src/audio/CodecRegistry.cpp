@@ -4,7 +4,6 @@
 
 #include "CodecRegistry.h"
 #include "codecs/Codec.h"
-#include "config.h"
 
 #include <algorithm>
 #include <iostream>
