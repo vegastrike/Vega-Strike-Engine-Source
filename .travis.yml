@@ -55,6 +55,9 @@ addons:
 
 script:
   - ./sh/vsbuild.sh
+  # Enable this once we've figured out where to put the packages
+  # after they've been built
+  # - ./sh/vspackage.sh
 
 notifications:
   webhooks:
