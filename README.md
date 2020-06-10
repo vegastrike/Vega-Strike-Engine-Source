@@ -4,6 +4,7 @@
 
 [![Build Status](https://travis-ci.org/vegastrike/Vega-Strike-Engine-Source.svg?branch=master)](https://travis-ci.org/vegastrike/Vega-Strike-Engine-Source)
 [![Gitter](https://badges.gitter.im/vegastrike/community.svg)](https://gitter.im/vegastrike/community?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
+[![Vega Strike](https://img.shields.io/badge/-Website-informational)](https://www.vega-strike.org)
 
 ```
 #====================================
@@ -12,21 +13,14 @@
 #====================================
 ```
 
-**Vega Strike Space Simulation Engine**
-=====================================
+Vega Strike Space Simulation Engine
+===================================
+
+Vega Strike is Space Flight Simulator that allows a player to explore, trade, and fight in the vast open space. You start in an old beat up cargo ship, with endless possibilities before you and just enough cash to scrape together a life. Yet danger lurks in the space beyond. 
 
 
-**How to Run**
-=====================================
-
-Either install Vega Strike from the binary installer for your platform, if available, or follow the instructions for compiling from source. (`Compiling Vegastrike`, below.)
-
-- Change settings with command `bin/vegasettings`
-- Run command `bin/vegastrike` or double-click the executable file in the bin directory.
-
-
-**Features**
-=====================================
+Features
+========
 
 - All of the art assets are original.
 - Never before seen ships modelled by the Vegastrike team!
@@ -58,15 +52,13 @@ Either install Vega Strike from the binary installer for your platform, if avail
 - Joystick support for a full featured joystick
 
 
-**Running Vegastrike**
-=====================================
+How to Run
+==========
 
-Run setup and then vegastrike
+Either install Vega Strike from the binary installer for your platform, if available, or follow the instructions for compiling from source. (`Compiling Vegastrike`, below.)
 
-```bash
-bin/vegasettings
-bin/vegastrike
-```
+- First change settings with `bin/vegasettings`
+- Then run `bin/vegastrike` or double-click on the executable file in the bin directory.
 
 Vegastrike command line parameters allow for different start settings and are as follows
 
@@ -108,7 +100,8 @@ will force the bomber mission to run in the vega sector
 
 If you encounter any issues while playing, please create an issue with the Vega Strike development team by [posting a new issue](https://github.com/vegastrike/Vega-Strike-Engine-Source/issues).
 
-**REQUIRED FILES**
+REQUIRED FILES
+--------------
 
 ```bash
   /usr/local/bin/vegastrike
@@ -129,88 +122,11 @@ If you encounter any issues while playing, please create an issue with the Vega 
       User-specific configuration file
 ```
 
+Compiling Vegastrike
+====================
 
-**Interstellar Warp Transit (Jump Drive)**
-=====================================
-
-Most starships come equipped with a warp drive.  Unfortunately they can only be used at large singularities in the space-time continuum.  Your computer signals these points by placing glowing blue balls in those areas.  Their relative size indicates how small a starship must be to fit through the jump point.
-
-To engage a jump drive, position your ship inside and press 'j'.
-
-Regulations state that starships should be stopped before jumping-- disasters have resulted from starships travelling at any great speed into a jump point.
-
-
-**Time Compression**
-=====================================
-
-Often interstellar travel requires going great distances. To facilitate this, we have provided time compression.  Press F9 to increase time compression to get where you're going.  Press F10 to drop out of time compression.  F10 will happen automatically if enemies are nearby.
-
-
-**Respawn**
-=====================================
-
-If you sadly lose your life in combat you may respawn by pressing ':'
-
-A new starship will be created for you by Bob.
-
-
-**Transfer Ship Command**
-=====================================
-
-If you wish to transfer command to another starship, simply press '\[' to switch over.  This is useful if you have died and do not wish to call on Bob for help.
-
-
-**Controls**
-=====================================
-
-- Arrow keys: Flight Sim style turning
-- \ full throttle
-- backspace zero throttle
-- =,+ accel
-- \- decel
-- ENTER fire missile
-- space Fire Guns
-- backspace  stop
-- TAB Afterburners
-- j engage interstellar warp drive (use at clear blue balls)
-- \*,ins Spin Right
-- /,del Spin Left
-- ~ (hold down, engage shelton slide)
-- y match speed
-- t target
-- p target nearest to center of screen
-- n target enemy targetting you
-- T target enemies for your turret
-- m change active missile
-- g change active gun
-- v switch targetting computer mode to navigation mode and then view mode
-- w switch left targetting cpu
-- Shift-W shift weapons computer mode to damage mode
-
-- F1 toggle cockpit/background display
-- F2 left
-- F3 right
-- F4 back
-- F5 Chasecam
-- F6 Panning Cam (s,a,w,z pan)
-- F7 Target Cam
-- F8 Strange Cam
-- F9 Increase Time Compression
-- F10 Reset Time Compression
-- F11 Zoom in
-- F12 Zoom out
-
-- a,d,w,z pan ghost cam
-
-- : respawn -- use after death to recreate your starship
-- \[ switch ships in battle (use to control allies)
-
-
-**Compiling Vegastrike**
-=====================================
-
-**Compiling On Linux**
--------------------------------------
+Compiling On Linux
+------------------
 
 1. Install the dependencies. Something like this:
 
@@ -310,6 +226,17 @@ If you get compilation issues with the system `libboost`, download it manually f
 and run `./sh/vsbuild.sh -DUSE_SYSTEM_BOOST=NO`
 
 
+Compiling On Windows
+--------------------
+
+Currently VegaStrike is not compiling on Windows. Any help will be appreciated to get it fix. For more information go [here](https://github.com/vegastrike/Vega-Strike-Engine-Source/issues/53)
+
+
+Compiling On MacOS
+------------------
+
+Currently VegaStrike is not compiling on MacOS. Any help will be appreciated to get it fix. For more information go [here](https://github.com/vegastrike/Vega-Strike-Engine-Source/issues/78)
+
 3. Packaging Vega Strike:
 
 	After building Vega Strike, then packages can be built using:
@@ -318,25 +245,84 @@ and run `./sh/vsbuild.sh -DUSE_SYSTEM_BOOST=NO`
 make package
 ```
 
+Gameplay
+========
 
-**Compiling On Windows**
--------------------------------------
+Interstellar Warp Transit (Jump Drive)
+--------------------------------------
 
-[HowTo:VCPP Compiling](http://vegastrike.sourceforge.net/wiki/HowTo:VCPP_Compiling)
+Most starships come equipped with a warp drive.  Unfortunately they can only be used at large singularities in the space-time continuum.  Your computer signals these points by placing glowing blue balls in those areas.  Their relative size indicates how small a starship must be to fit through the jump point.
+
+To engage a jump drive, position your ship inside and press 'j'.
+
+Regulations state that starships should be stopped before jumping-- disasters have resulted from starships travelling at any great speed into a jump point.
+
+Intrastellar SPEC Drive
+-----------------------
+
+To travel inside start system, there ships are equiped with the SPEC driver that allow faster-than-light travel. This alows efficient travel between planets and station inside the same star system. To toggle it press 'Shift-A'. To activate auto-pilot, that will handle this automatically, press 'A'.
+
+Respawn
+-------
+
+If you sadly lose your life in combat you may respawn by pressing ':'
+
+A new starship will be created for you by Bob.
 
 
-**Compiling On OSX**
--------------------------------------
+Transfer Ship Command
+---------------------
 
-[HowTo:Compile on OSX](http://vegastrike.sourceforge.net/wiki/HowTo:Compile_on_OSX)
+If you wish to transfer command to another starship, simply press '\[' to switch over.  This is useful if you have died and do not wish to call on Bob for help.
 
 
+Controls
+--------
 
-**Modding Vega Strike**
-=====================================
+- `Arrow keys` - Flight Sim style turning
+- `\` - Full throttle
+- `Backspace` - Zero throttle
+- `=,+` - Accelerate
+- `\,-` - Decelerate
+- `Enter`- Fire missile
+- `Space` - Fire Guns
+- `Tab` - Afterburners
+- `J` - Engage interstellar warp drive (use at clear blue balls)
+- `*, Insert` - Spin Right
+- `/, Delete` - Spin Left
+- `~` (hold down) - Engage shelton slide
+- `Y` - Match speed
+- `T`- Target
+- `P` - Target nearest to center of screen
+- `N` - Target enemy targetting you
+- `Shift-T` - Target enemies for your turret
+- `M` - Change active missile
+- `G` - Change active gun
+- `V` - Switch targetting computer mode to navigation mode and then view mode
+- `W` - Switch left targetting cpu
+- `Shift-W` - Shift weapons computer mode to damage mode
+- `:` - Respawn (Use after death to recreate your starship)
+- `\[` - switch ships in battle (use to control allies)
+- `F1` toggle cockpit/background display
+- `F2` - Left camera
+- `F3` - Right camera
+- `F4` - Back camera
+- `F5` -Chase camera
+- `F6` - Panning camera (s,a,w,z pan)
+- `F7` - Target camera
+- `F8` - Strange camera
+- `a,d,w,z` - Pan ghost camera
+- `F9` - Lower music volume
+- `F10` - Raise music volume
+- `F11` - Lower game volume
+- `F12` - Raise game volume
 
-**How to make Vegastrike Missions**
--------------------------------------
+
+Modding Vega Strike
+===================
+
+How to make Vegastrike Missions
+-------------------------------
 
 An example mission(this is stored in the test1.mission file)
 
@@ -403,8 +389,8 @@ continue with any other flightgroups... you can have as many as you want from as
 ```
 
 
-**Editing AI**
-=====================================
+Editing AI
+==========
 
 The AI is completely scriptable, and I have not spent all that long perfecting it.  There are included instructions about editing the AI scripts yourself.
 
@@ -495,13 +481,14 @@ If you want to know more about writing actual maneuvers (like turnaway.xml  whic
 you need to have a heavy background in vector math.
 
 
-**Hacking Vega Strike**
--------------------------------------
+Hacking Vega Strike
+-------------------
 
 In this guide, any coding is located in square brackets ([]).
 Number values may not be accurate.
 
-**Guide 1: Hacking cash**
+### Guide 1: Hacking cash
+
 Step 1
 Locate you saved files. (Windows XP: Program files/VegaStrike/Vegastike-0.5.0/.vegastrike-0.5.0/save||||Mac: (disk)>Users>(user)>.vegastrike-0.5.0>saves>(savefile))
 Step 2
@@ -518,7 +505,8 @@ Then save the file. .txt files work, however when you see them on the loading sc
 Step 6
 You’re now richer than a very rich man on International very rich day! Yay!
 
-**Guide 2: Getting the ship of your dreams**
+### Guide 2: Getting the ship of your dreams
+
 Step 1
 Get your saved file from Guide 1.
 Step 2
@@ -537,19 +525,36 @@ There is a ship list either in the game files or on the internet, check that out
 This guide was created by Munno 2010-10-08
 
 
-**Vegastrike Information**
-=====================================
+Vega Strike Information
+=======================
 
-Mail comments or suggestions to vegastrike-users@lists.sourceforge.net
+Submit comments or suggestions by openning and [issue](https://github.com/vegastrike/Vega-Strike-Engine-Source/issues)
 
 And if you can design some missions it would rock!
 
-
-
-**Vega Strike Code Repository**
-=====================================
+Vega Strike Code Repository
+===========================
 
 [https://github.com/vegastrike/Vega-Strike-Engine-Source](https://github.com/vegastrike/Vega-Strike-Engine-Source)
 
+Contributors
+------------
+
+This project exists thanks to all the people who contribute. [[Contribute](CONTRIBUTING.md)].
+<a href="https://github.com/vegastrike/Vega-Strike-Engine-Source/graphs/contributors"><img src="https://opencollective.com/vega-strike/contributors.svg?width=890" /></a>
+
+Backers
+-------
+
+Thank you to all our backers! 🙏 [[Become a backer](https://opencollective.com/vega-strike#backer)]
+
+<a href="https://opencollective.com/vega-strike#backers" target="_blank"><img src="https://opencollective.com/vega-strike/backers.svg?width=890"></a>
+
+Sponsors
+--------
+
+Support this project by becoming a sponsor. Your logo will show up here with a link to your website. [[Become a sponsor](https://opencollective.com/vega-strike#sponsor)]
+
+<a href="https://opencollective.com/vega-strike/sponsor/0/website" target="_blank"><img src="https://opencollective.com/vega-strike/sponsor/0/avatar.svg"></a>
 
 ```EOF```
