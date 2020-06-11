@@ -56,9 +56,31 @@ addons:
 
 script:
   - ./sh/vsbuild.sh
-  # Enable this once we've figured out where to put the packages
-  # after they've been built
-  # - ./sh/vspackage.sh
+
+# CI/CD hookups
+# See https://docs.travis-ci.com/user/deployment/releases/
+# for what to do for `before_deploy` and `deploy` sections
+#before_deploy:
+#  - pull the submodule here
+#  - ./sh/vspackage.sh
+#  - export TRAVIS_TAG="composite tag name here"
+#  - git tag ${TRAVIS_TAG}
+#deploy:
+#    # GitHub Releases
+#    provider: releases
+#    api_key:
+#        secure: "Encrypted GitHub Auth Key" <-- put this in the secrets
+#    file:
+#       # Upload files in the `packages` directory
+#       - packages/*
+#    # Ensure the build doesn't get cleaned up so the files are avialable
+#    # for the release build
+#    skip_clean: true
+#    # release is a draft so it can be edited, updated, etc.
+#    draft: true
+#    # GitHub Releases requires a tag; this guarnatees a tag is set
+#    on:
+#        tags: true
 
 notifications:
   webhooks:
