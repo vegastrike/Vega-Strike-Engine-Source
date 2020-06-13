@@ -318,6 +318,7 @@ SET(LIBGFXSERVER_SOURCES
 )
 
 SET(LIBROOTGENERIC_SOURCES
+    src/game_config.cpp
     src/configxml.cpp
     src/easydom.cpp
     src/endianness.cpp
