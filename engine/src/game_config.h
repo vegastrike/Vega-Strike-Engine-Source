@@ -7,6 +7,7 @@
 #include <boost/foreach.hpp>
 #include <string>
 #include <set>
+#include <map>
 #include <exception>
 #include <iostream>
 
