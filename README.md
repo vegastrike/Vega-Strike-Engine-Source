@@ -237,6 +237,14 @@ Compiling On MacOS
 
 Currently VegaStrike is not compiling on MacOS. Any help will be appreciated to get it fix. For more information go [here](https://github.com/vegastrike/Vega-Strike-Engine-Source/issues/78)
 
+3. Packaging Vega Strike:
+
+	After building Vega Strike, then packages can be built using:
+
+```bash
+make package
+```
+
 Gameplay
 ========
 
