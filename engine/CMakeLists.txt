@@ -1170,17 +1170,80 @@ ELSEIF (CMAKE_SYSTEM_NAME STREQUAL Linux)
 	MESSAGE("-- Configuring Packaging for Linux")
 	SET(CPACK_GENERATOR "TBZ2" "TGZ" "TXZ")
 	# Linux
+
 	# lsb_release -i --> but then it'll find `Ubuntu` instead of Debian so will have to map more
 	# we can probably more reliably detect via checking for different packager commands
+	# `lsb_release` doesn't always work correctly, so it's easier to read the underlying file
+	# if it exists. It doesn't always exist. Debian doesn't use it, but Ubuntu does.
+	SET(LSB_EXISTS "LSB Data is NOT available" OFF)
+	SET(LSB_LINUX_DISTRIBUTION "Unknown")
+	SET(LSB_LINUX_DISTRIBUTION_CODENAME "Unknown")
+
+	# Lookup the LSB Data - this is known for Ubuntu, but also used by other distros too.
+	# and may help with distro-sub-selection
+	IF (EXISTS "/etc/lsb-release" )
+		MESSAGE("Found /etc/lsb-release")
+		SET(LSB_EXISTS "LSB Data IS available" ON)
+		# Ubuntu Version: /etc/lsb-release - DISTRIB_ID=Ubuntu, DISTRIB_CODENAME=<name>
+		FILE(STRINGS "/etc/lsb-release" LSB_DATA)
+		FOREACH(LSB_DATA_ENTRY IN LISTS LSB_DATA)
+			MESSAGE("Checking ${LSB_DATA_ENTRY} for match...")
+			IF ("${LSB_DATA_ENTRY}" MATCHES "^DISTRIB_ID=(.+)$")
+				SET(LSB_LINUX_DISTRIBUTION "${CMAKE_MATCH_1}")
+			ELSEIF ("${LSB_DATA_ENTRY}" MATCHES "^DISTRIB_CODENAME=(.+)$")
+				SET(LSB_LINUX_DISTRIBUTION_CODENAME "${CMAKE_MATCH_1}")
+			ENDIF ("${LSB_DATA_ENTRY}" MATCHES "^DISTRIB_ID=(.+)$")
+		ENDFOREACH(LSB_DATA_ENTRY)
+		MESSAGE("Found Linux Distribution: ${LSB_LINUX_DISTRIBUTION}")
+		MESSAGE("Found Linux Distribution Release Name: ${LSB_LINUX_DISTRIBUTION_CODENAME}")
+	ENDIF (EXISTS "/etc/lsb-release")
 
 	# "DEB"
 	FIND_PROGRAM(HAS_APT NAMES apt-get apt)
-	IF (HAS_APT)
+	IF(HAS_APT)
 		MESSAGE("-- Configuring Debian Packaging")
 		# See https://cmake.org/cmake/help/v3.3/module/CPackDeb.html
+		# TODO: Add the platform (Ubuntu, Debian, etc) to the filename; perhaps version (f.e stretch, jessie, etc) too?
 		SET(CPACK_DEBIAN_PACKAGE_MAINTAINER "maintainers@vega-strike.org")
-		# Should detect Debian/Ubuntu as deps may change
-		SET(CPACK_DEBIAN_PACKAGE_DEPENDS "python2, libjpeg, libpng, freeglut, gtk2, libvorbis, openal, SDL_mixer, xdg-utils, opengl-games-utils")
+		# Debian Version: /etc/debian_version - <name>/<junk>
+		IF (NOT LSB_EXISTS)
+			SET(USE_DEBIAN_VERSION "Use the Debian Version" ON)
+			FILE(READ "/etc/debian_version" DEBIAN_VERSION_DATA)
+			STRING(REGEX MATCH "^(.+)\/.*$" DEBIAN_VERSION_DATA DEBIAN_RELEASE_VERSION)
+		ELSE (NOT LSB_EXISTS)
+			SET(USE_DEBIAN_VERSION "Use the Debian Version" OFF)
+			SET(DEBIAN_RELEASE_VERSION "Debian Derivative Release Version" ${LSB_LINUX_DISTRIBUTION_CODENAME})
+		ENDIF (NOT LSB_EXISTS)
+		# Try to detect the Ubuntu version
+
+		# Should auto-detect Debian/Ubuntu as deps may change
+		# This would be awesome if coupled with providing versions for specific (or at least compatible) distros.
+		MESSAGE("Looking for ${CMAKE_BINARY_DIR}/dependency.list")
+		IF (EXISTS "${CMAKE_BINARY_DIR}/dependency.list")
+			MESSAGE("Found Dependency file at ${CMAKE_BINARY_DIR}/dependency.list")
+			# Load the dependencies from the file into the CPack variable:
+			FILE(STRINGS "${CMAKE_BINARY_DIR}/dependency.list" AUTOMATED_DEBIAN_DEPENDENCY_LIST)
+			FOREACH(DLD_DEPENDENCY IN LISTS AUTOMATED_DEBIAN_DEPENDENCY_LIST)
+				MESSAGE("** Found Dependency ${DLD_DEPENDENCY}")
+				IF (DEFINED CPACK_DEBIAN_PACKAGE_DEPENDS)
+					SET(CPACK_DEBIAN_PACKAGE_DEPENDS "${CPACK_DEBIAN_PACKAGE_DEPENDS}, ${DLD_DEPENDENCY}")
+				ELSE(DEFINED CPACK_DEBIAN_PACKAGE_DEPENDS)
+					IF (NOT "${DLD_DEPENDENCY}" STREQUAL "")
+						SET(CPACK_DEBIAN_PACKAGE_DEPENDS "${DLD_DEPENDENCY}")
+					ENDIF (NOT "${DLD_DEPENDENCY}" STREQUAL "")
+				ENDIF(DEFINED CPACK_DEBIAN_PACKAGE_DEPENDS)
+			ENDFOREACH(DLD_DEPENDENCY)
+		ELSE (EXISTS "${CMAKE_BINARY_DIR}/dependency.list")
+			MESSAGE("Still need to generate dependency list")
+		ENDIF (EXISTS "${CMAKE_BINARY_DIR}/dependency.list")
+		# Alternatively, just set a hard-coded set of dependencies...requires more logic for various platforms.
+		#IF (USE_DEBIAN_VERSION)
+		#	# Debian Dependency Chain
+		#	SET(CPACK_DEBIAN_PACKAGE_DEPENDS "python2, libjpeg, libpng, freeglut, gtk2, libvorbis, openal, SDL_mixer, xdg-utils, opengl-games-utils")
+		#ELSE (USE_DEBIAN_VERSION)
+		#	# Ubuntu Dependency Chain
+		#	SET(CPACK_DEBIAN_PACKAGE_DEPENDS "python2, libjpeg62, libpng16-16, freeglut, gtk2, libvorbis, openal, SDL_mixer, xdg-utils, opengl-games-utils")
+		#ENDIF (USE_DEBIAN_VERSION)
 		SET(CPACK_DEBIAN_PACKAGE_SECTION "Amusements/Games")
 		SET(CPACK_DEBIAN_PACKAGE_HOMEPAGE "https://www.vega-strike.org")
 		LIST(APPEND CPACK_GENERATOR "DEB")
