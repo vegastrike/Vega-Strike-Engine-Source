@@ -173,7 +173,7 @@ If you wish to transfer command to another starship, simply press '\[' to switch
 - backspace  stop
 - TAB Afterburners
 - j engage interstellar warp drive (use at clear blue balls)
-- *,ins Spin Right
+- \*,ins Spin Right
 - /,del Spin Left
 - ~ (hold down, engage shelton slide)
 - y match speed
@@ -254,6 +254,15 @@ mkdir ../bin && cp vegastrike ../bin/ && cp setup/vssetup ../bin/ && cd ..
 [Link to list of dependencies in wiki](http://vegastrike.sourceforge.net/wiki/HowTo:Compile_from_CVS)
 
 If there are any problems with this installation method, please create an issue with the Vega Strike development team by [posting a new issue](https://github.com/vegastrike/Vega-Strike-Engine-Source/issues).
+
+
+3. Packaging Vega Strike:
+
+	After building Vega Strike, then packages can be built using:
+
+```bash
+make package
+```
 
 
 **Compiling On Windows**
