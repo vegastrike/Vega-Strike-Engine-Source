@@ -240,6 +240,15 @@ inline Vector Transform( const Matrix &t, const Vector &v )
                    t.p.j+v.i*t.r[1]+v.j*t.r[4]+v.k*t.r[7],
                    t.p.k+v.i*t.r[2]+v.j*t.r[5]+v.k*t.r[8] );
 }
+inline const QVector QVector::Transform( const class Matrix &m1 ) const
+{
+    return ::Transform( m1, *this );
+}
+inline const Vector Vector::Transform( const class Matrix &m1 ) const
+{
+    QVector ret = ::Transform( m1, QVector( i, j, k ) );
+    return Vector( ret.i, ret.j, ret.k );
+}
 
 //these vectors are going to be just normals...
 inline Vector InvTransformNormal( const Matrix &t, const Vector &v )

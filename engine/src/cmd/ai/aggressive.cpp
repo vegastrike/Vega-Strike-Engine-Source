@@ -1436,7 +1436,7 @@ void AggressiveAI::ExecuteNoEnemies()
                     dir += (unitdir*safetyspacing);
                     dir +=
                         ( (randVector()*randspacingfactor
-                           /4.0f)
+                           /4)
                          +(unitdir
                            *randspacingfactor) )
                         *( ( parent->rSize() > (safetyspacing/5) ) ? (safetyspacing/5) : ( parent->rSize() ) );
