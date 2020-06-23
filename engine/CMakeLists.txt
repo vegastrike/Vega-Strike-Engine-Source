@@ -325,9 +325,10 @@ SET(LIBROOTGENERIC_SOURCES
     src/macosx_math.cpp
     src/faction_generic.cpp
     src/faction_util_generic.cpp
+    src/galaxy.cpp
     src/galaxy_gen.cpp
     src/galaxy_xml.cpp
-    src/galaxy.cpp
+    src/galaxy_utils.cpp
     src/hashtable.cpp
     src/lin_time.cpp
     src/load_mission.cpp

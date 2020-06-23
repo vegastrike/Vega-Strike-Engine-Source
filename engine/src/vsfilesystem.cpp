@@ -34,6 +34,8 @@ struct dirent
 
 #include "options.h"
 
+#include "galaxy.h"
+
 #include "boost/iostreams/stream.hpp"
 #include "boost/iostreams/device/null.hpp"
 
@@ -722,6 +724,9 @@ void LoadConfig( string subdir )
     } else {
         cout<<"DATADIR - No datadir specified in config file, using ; "<<datadir<<endl;
     }
+
+    string universe_file = datadir + "/universe/milky_way.xml";
+    Galaxy galaxy = Galaxy(universe_file);
 }
 
 void InitMods()
