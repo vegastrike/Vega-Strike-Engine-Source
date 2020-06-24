@@ -119,7 +119,7 @@ void Mesh::ProcessDrawQueue( size_t, int, bool, const QVector& ) {}
 
 void Mesh::EnableSpecialFX() {}
 
-void Mesh::AddDamageFX( Vector const&, Vector const&, float, struct GFXColor const& ) {}
+void Mesh::AddDamageFX( class Vector const&, class Vector const&, float, struct GFXColor const& ) {}
 
 void Mesh::initTechnique( const std::string& ) {}
 
