@@ -22,7 +22,7 @@
 /*
  *  xml Mission written by Alexander Rawass <alexannika@users.sourceforge.net>
  */
-#include "cs_python.h"
+#include <Python.h>
 #include <math.h>
 #include <stdlib.h>
 #include <stdio.h>

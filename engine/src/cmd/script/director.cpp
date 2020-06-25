@@ -59,7 +59,7 @@
 #include "cmd/briefing.h"
 #include "pythonmission.h"
 #ifdef HAVE_PYTHON
-#include "cs_python.h"
+#include <Python.h>
 #endif
 #include "flightgroup.h"
 #include "gldrv/winsys.h"

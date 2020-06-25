@@ -1,7 +1,7 @@
 #include <boost/version.hpp>
 #include <boost/python/class.hpp>
 
-#include "cs_python.h"
+#include <Python.h>
 #include <compile.h>
 #include <eval.h>
 #include <stdio.h>
