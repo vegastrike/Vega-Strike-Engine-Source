@@ -341,6 +341,8 @@ public: VSFile();
         return this->pk3_extracted_file;
     }
 
+    const string GetSystemDirectoryPath(string& file);
+
 /********************************** OPEN A FILE *********************************/
 //Open an existing file read only
     VSError OpenReadOnly( const char *filename, VSFileType type = UnknownFile );

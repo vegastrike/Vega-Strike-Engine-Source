@@ -1426,6 +1426,19 @@ void VSFile::checkExtracted()
     }
 }
 
+const string VSFile::GetSystemDirectoryPath(string& file)
+{
+    this->file_type = VSFileType::SystemFile;
+    this->file_mode = ReadOnly;
+    this->filename  = file;
+    VSError err = VSFileSystem::LookForFile( *this, VSFileType::SystemFile, ReadOnly );
+    if (err > Ok) {
+        this->valid = false;
+        return file;
+    }
+    return this->GetFullPath();
+}
+
 //Open a read only file
 VSError VSFile::OpenReadOnly( const char *file, VSFileType type )
 {
