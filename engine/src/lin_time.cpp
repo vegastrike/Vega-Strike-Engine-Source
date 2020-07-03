@@ -123,7 +123,7 @@ bool toggle_pause()
     else
     {
         fprintf(stderr, "toggle_pause() in lin_time.cpp: Pausing\n");
-        setTimeCompression(.0001);
+        setTimeCompression(.00001);
         paused = true;
     }
     return paused;
