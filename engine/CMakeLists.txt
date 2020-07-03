@@ -714,7 +714,7 @@ ENDIF ("${CMAKE_BUILD_TYPE}" STREQUAL "Release")
 
 
 # Profiler Target block
-SET(CMAKE_CXX_FLAGS_PROFILER " ${BUILD_OPT} ${CPU_OPTS} -pg -g2 -DNV_CUBE_MAP -DBOOST_PYTHON_NO_PY_SIGNATURES -include config.h -pipe -std=c++11 -Wall -Wno-unused-function -Wno-unused-variable" CACHE STRING
+SET(CMAKE_CXX_FLAGS_PROFILER " ${BUILD_OPT} ${CPU_OPTS} ${DEFINES} -pg -g2 -include config.h -pipe -std=c++11 -Wall -Wno-unused-function -Wno-unused-variable" CACHE STRING
     "Flags used by the C++ compiler during profiler builds."
     FORCE
 )
