@@ -529,9 +529,12 @@ void FireKeyboard::ECMKey( const KBData&, KBSTATE k )
 
 void FireKeyboard::FireKey( const KBData&, KBSTATE k )
 {
-    if (g().firekey == DOWN && k == UP)
+    if (g().firekey == DOWN && k == UP) {
         return;
-    if (k == UP && g().firekey == RELEASE) {} else {
+    }
+    if (k == UP && g().firekey == RELEASE) {
+        
+    } else {
         g().firekey = k;
     }
 }
@@ -732,8 +735,10 @@ void FireKeyboard::NearestJumpKey( const KBData&, KBSTATE k )
 
 void FireKeyboard::TogglePause( const KBData&, KBSTATE k )
 {
-    if (g().togglepausekey != PRESS)
+    if (k == PRESS) {
+        VSFileSystem::vs_dprintf(1, "FireKeyboard::TogglePause(): Pause key detected\n");
         g().togglepausekey = k;
+    }
 }
 
 
@@ -1873,15 +1878,18 @@ void FireKeyboard::Execute()
         refresh_target     = true;
     }
     if (f().togglepausekey == PRESS) {
+        VSFileSystem::vs_dprintf(1, "Pause key pressed\n");
         f().togglepausekey = DOWN;
         if (toggle_pause())
-	{
-	    _Universe->AccessCockpit()->OnPauseBegin();
-	}
-	else
-	{
-	    _Universe->AccessCockpit()->OnPauseEnd();
-	}
+        {
+            VSFileSystem::vs_dprintf(1, "Calling _Universe->AccessCockpit()->OnPauseBegin();\n");
+            _Universe->AccessCockpit()->OnPauseBegin();
+        }
+        else
+        {
+            VSFileSystem::vs_dprintf(1, "Calling _Universe->AccessCockpit()->OnPauseEnd();\n");
+            _Universe->AccessCockpit()->OnPauseEnd();
+        }
     }
     if (f().weapk == PRESS || f().rweapk == PRESS) {
         bool forward;
