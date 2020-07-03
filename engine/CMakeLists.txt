@@ -572,9 +572,9 @@ IF (POLICY CMP0072)
   CMAKE_POLICY (SET CMP0072 NEW)
 ENDIF ()
 
-# Set the default build type to Release
+# Set the default build type to Debug
 IF (NOT CMAKE_BUILD_TYPE)
-    SET(CMAKE_BUILD_TYPE RelWithDebInfo CACHE STRING "Release, Debug, Profiler" FORCE )
+    SET(CMAKE_BUILD_TYPE Debug CACHE STRING "Release, Debug, Profiler" FORCE )
 ENDIF (NOT CMAKE_BUILD_TYPE)
 
 IF (NOT BUILD_OPT)
