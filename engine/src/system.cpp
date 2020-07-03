@@ -37,6 +37,12 @@ void System::recursiveProcess(pt::ptree tree, Object object)
         inner_object.type = iterator.first;
         //cout << iterator.first << endl;
 
+        // Process system
+        if(object.type == "system" && inner_object.type == "<xmlattr>") {
+            processSystem(tree);
+            return;
+        }
+
         // Process attributes
         if(inner_object.type == "<xmlattr>")
         {
@@ -56,5 +62,19 @@ void System::recursiveProcess(pt::ptree tree, Object object)
         object.objects.push_back(inner_object);
         if(iterator.second.empty()) continue;
         recursiveProcess(iterator.second, inner_object);
+    }
+}
+
+void System::processSystem(pt::ptree tree)
+{
+    for (const auto& attributes_iterator : tree)
+    {
+        string key = attributes_iterator.first.data();
+        string value = attributes_iterator.second.data();
+        cout << "Adding attribute " <<  key << "=" << value << endl;
+        if(key == "name") { system_struct.name = value; continue; }
+        if(key == "background") { system_struct.background = value; continue; }
+        if(key == "name") { system_struct.name = value; continue; }
+        if(key == "name") { system_struct.name = value; continue; }
     }
 }

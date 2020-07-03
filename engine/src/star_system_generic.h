@@ -8,7 +8,9 @@
 #include "gfx/vec.h"
 #include "cmd/collection.h"
 #include "cmd/container.h"
+#include "star_xml.h"
 #include <map>
+
 class Stars;
 class Planet;
 class ClickList;
@@ -79,6 +81,24 @@ protected:
     void LoadXML( const char*, const Vector &centroid, const float timeofyear );
     void beginElement( const std::string &name, const XMLSupport::AttributeList &attributes );
     void endElement( const std::string &name );
+
+    // Refactor - split beginElement
+    void processSystem(const XMLSupport::AttributeList &attributes);
+    void processRing(const XMLSupport::AttributeList &attributes);
+    void processSpaceElevator(const XMLSupport::AttributeList &attributes,
+                              std::string truncatedfilename);
+    void processFog(const XMLSupport::AttributeList &attributes);
+    void processFogElement(const XMLSupport::AttributeList &attributes);
+    void processCityLights(const XMLSupport::AttributeList &attributes);
+    void processAtmosphere(const XMLSupport::AttributeList &attributes);
+    void processTerrain(const XMLSupport::AttributeList &attributes);
+    void processLightProp(const XMLSupport::AttributeList &attributes,
+                          LIGHT_TARGET target);
+    void processPlanet(const XMLSupport::AttributeList &attributes,
+                       std::string truncatedfilename);
+    void processEnhancement(const XMLSupport::AttributeList &attributes,
+                            std::string truncatedfilename,
+                            int elem);
 
 public:
     struct Statistics

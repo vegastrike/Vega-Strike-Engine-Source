@@ -2,6 +2,7 @@
 #define SYSTEM_H
 
 #include "gfx/vec.h"
+#include "gfxlib_struct.h"
 #include <string>
 #include <vector>
 #include <map>
@@ -22,14 +23,35 @@ class System
 
     Object root;
 
-    /*class Color {
+    struct Background {
+        string name;
+        int num_stars;
+        int num_near_stars;
+        GFXColor backgroundColor;
+        bool   backgroundDegamma;
+        float  star_spread;
+    };
+
+    struct Color {
         double red;
         double green;
         double blue;
+        double alpha;
     };
 
+    struct SystemStruct {
+        string name;
+        string background;
+        Color background_color;
+        bool background_degamma;
+        float scale;
+        float reflectivity;
+    } system_struct;
 
-    class Light
+
+
+
+    /*class Light
     {
         Color ambient;
         Color diffuse;
@@ -96,6 +118,9 @@ public:
     System(string const &system_file);
 
     void recursiveProcess(boost::property_tree::ptree tree, Object object);
+
+    void processSystem(boost::property_tree::ptree tree);
+
 };
 
 #endif // SYSTEM_H
