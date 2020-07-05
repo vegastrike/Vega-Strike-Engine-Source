@@ -1024,6 +1024,7 @@ void main_loop()
 
 #ifndef NO_GFX
     //BOOST_LOG_TRIVIAL(trace) << boost::format("Drawn %1% vertices in %2% batches") % gl_vertices_this_frame % gl_batches_this_frame;
+    VSFileSystem::vs_dprintf(3, "Drawn X vertices in Y batches\n");
     gl_vertices_this_frame = 0;
     gl_batches_this_frame = 0;
 #endif

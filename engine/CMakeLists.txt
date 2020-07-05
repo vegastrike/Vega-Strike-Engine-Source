@@ -572,9 +572,9 @@ IF (POLICY CMP0072)
   CMAKE_POLICY (SET CMP0072 NEW)
 ENDIF ()
 
-# Set the default build type to Release
+# Set the default build type to Debug
 IF (NOT CMAKE_BUILD_TYPE)
-    SET(CMAKE_BUILD_TYPE RelWithDebInfo CACHE STRING "Release, Debug, Profiler" FORCE )
+    SET(CMAKE_BUILD_TYPE Debug CACHE STRING "Release, Debug, Profiler" FORCE )
 ENDIF (NOT CMAKE_BUILD_TYPE)
 
 IF (NOT BUILD_OPT)
@@ -714,7 +714,7 @@ ENDIF ("${CMAKE_BUILD_TYPE}" STREQUAL "Release")
 
 
 # Profiler Target block
-SET(CMAKE_CXX_FLAGS_PROFILER " ${BUILD_OPT} ${CPU_OPTS} -pg -g2 -DNV_CUBE_MAP -DBOOST_PYTHON_NO_PY_SIGNATURES -include config.h -pipe -std=c++11 -Wall -Wno-unused-function -Wno-unused-variable" CACHE STRING
+SET(CMAKE_CXX_FLAGS_PROFILER " ${BUILD_OPT} ${CPU_OPTS} ${DEFINES} -pg -g2 -include config.h -pipe -std=c++11 -Wall -Wno-unused-function -Wno-unused-variable" CACHE STRING
     "Flags used by the C++ compiler during profiler builds."
     FORCE
 )
