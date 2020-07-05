@@ -123,6 +123,10 @@ bool toggle_pause()
     else
     {
         fprintf(stderr, "toggle_pause() in lin_time.cpp: Pausing\n");
+        
+        // If you make this value too small, then when the user presses the
+        // Pause key again to resume, the game will take too long to respond.
+        // It will effectively stay frozen.
         setTimeCompression(.00001);
         paused = true;
     }
