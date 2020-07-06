@@ -1,6 +1,6 @@
 #====================================
 # @file   : CMakeLists.txt
-# @version: 2020-02-12
+# @version: 2020-06-07
 # @created: 2008-06-08
 # @author : safemode
 # @author : Anth0rx
@@ -18,7 +18,7 @@
 # > cmake -DCMAKE_BUILD_TYPE=Debug <path to source tree>
 #====================================
 
-CMAKE_MINIMUM_REQUIRED(VERSION 2.6)
+CMAKE_MINIMUM_REQUIRED(VERSION 2.8.8)
 SET(CMAKE_CXX_STANDARD 11)
 
 PROJECT(vsUTCS)
@@ -710,30 +710,34 @@ ENDIF (PYTHONLIBS_FOUND OR PYTHON_LIBRARIES AND PYTHON_INCLUDE_DIRS)
 # Find Boost with boost_python library
 OPTION(USE_SYSTEM_BOOST "Use system boost" ON)
 IF (USE_SYSTEM_BOOST)
-    UNSET(Boost_PYTHON_LIBRARY CACHE)
-    UNSET(Boost_PYTHON_LIBRARY_DEBUG CACHE)
-    UNSET(Boost_PYTHON_LIBRARY_RELEASE CACHE)
-    UNSET(Boost_PYTHON3_LIBRARY CACHE)
-    UNSET(Boost_PYTHON3_LIBRARY_DEBUG CACHE)
-    UNSET(Boost_PYTHON3_LIBRARY_RELEASE CACHE)
-    UNSET(Boost_python3_FOUND CACHE)
-    UNSET(Boost_python_FOUND CACHE)
-    IF (USE_PYTHON_3)
-        MESSAGE("++ Looking for System Boost::python3")
-        FIND_PACKAGE(Boost COMPONENTS python3 log log_setup REQUIRED)
-    ELSE (USE_PYTHON_3)
-        MESSAGE("++ Looking for System Boost::python (py2)")
-        FIND_PACKAGE(Boost COMPONENTS python log log_setup REQUIRED)
-    ENDIF (USE_PYTHON_3)
-
+    FIND_PACKAGE(Boost)
     IF (Boost_FOUND)
         MESSAGE("++ Found System Boost version : ${Boost_VERSION}")
+
+        # With boost version 1.67 and above, python components are specified with a version suffix
+        # (`python27`, `python38`) instead of their invocation name (`python`, `python3`)
+        if (Boost_VERSION VERSION_GREATER_EQUAL 1.67) # >= 1.67
+            STRING(REPLACE "." ";" PYTHONLIBS_VERSION_LIST ${PYTHONLIBS_VERSION_STRING})
+            LIST(GET PYTHONLIBS_VERSION_LIST 0 PYTHON_VERSION_MAJOR)
+            LIST(GET PYTHONLIBS_VERSION_LIST 1 PYTHON_VERSION_MINOR)
+            SET(BOOST_PYTHON_COMPONENT "python${PYTHON_VERSION_MAJOR}${PYTHON_VERSION_MINOR}")
+        ELSEIF (USE_PYTHON_3)
+                SET(BOOST_PYTHON_COMPONENT "python3")
+        ELSE (Boost_VERSION VERSION_GREATER_EQUAL 1.67) # >= 1.67
+                SET(BOOST_PYTHON_COMPONENT "python")
+        ENDIF (Boost_VERSION VERSION_GREATER_EQUAL 1.67) # >= 1.67
+
+        UNSET(Boost_${BOOST_PYTHON_COMPONENT}_FOUND)
+        MESSAGE("++ Looking for System Boost::python")
+        FIND_PACKAGE(Boost COMPONENTS ${BOOST_PYTHON_COMPONENT} log log_setup REQUIRED)
         IF (Boost_python3_FOUND)
             MESSAGE("++ Found System Boost::python3 : ${Boost_PYTHON3_LIBRARY}")
-        ENDIF (Boost_python3_FOUND)
-        IF (Boost_python_FOUND)
+        ELSEIF (Boost_python_FOUND)
             MESSAGE("++ Found System Boost::python (py2) : ${Boost_PYTHON_LIBRARY}")
-        ENDIF (Boost_python_FOUND)
+        ELSEIF (Boost_${BOOST_PYTHON_COMPONENT}_FOUND)
+            MESSAGE("++ Found System Boost::python")
+        ENDIF (Boost_python3_FOUND)
+
         SET(BOOST_PYTHON_NO_PY_SIGNATURES 1)
         SET(TST_INCLUDES ${TST_INCLUDES} ${Boost_INCLUDE_DIRS})
         SET(TST_LIBS ${TST_LIBS} ${Boost_LIBRARIES})
@@ -750,14 +754,6 @@ IF (NOT USE_SYSTEM_BOOST)
     UNSET(Boost_LIBRARIES)
     UNSET(Boost_INCLUDE_DIR)
     UNSET(Boost_LIBRARY_DIRS)
-    UNSET(Boost_PYTHON_LIBRARY CACHE)
-    UNSET(Boost_PYTHON_LIBRARY_DEBUG CACHE)
-    UNSET(Boost_PYTHON_LIBRARY_RELEASE CACHE)
-    UNSET(Boost_PYTHON3_LIBRARY CACHE)
-    UNSET(Boost_PYTHON3_LIBRARY_DEBUG CACHE)
-    UNSET(Boost_PYTHON3_LIBRARY_RELEASE CACHE)
-    UNSET(Boost_python3_FOUND CACHE)
-    UNSET(Boost_python_FOUND CACHE)
     SET(Boost_DIR ../ext/)
     SET(BOOST_PYTHON_NO_PY_SIGNATURES 1)
     SET(TST_INCLUDES ${TST_INCLUDES} ${vsUTCS_SOURCE_DIR}/${Boost_DIR})
