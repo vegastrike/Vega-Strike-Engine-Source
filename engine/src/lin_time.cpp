@@ -113,15 +113,22 @@ void setTimeCompression( float tc )
 bool toggle_pause()
 {
     static bool paused = false;
+    fprintf(stderr, "toggle_pause() called in lin_time.cpp\n");
     if (paused)
     {
+        fprintf(stderr, "toggle_pause() in lin_time.cpp: Resuming (unpausing)\n");
         setTimeCompression(1);
         paused = false;
     }
     else
     {
-        setTimeCompression(.0000001);
-	paused = true;
+        fprintf(stderr, "toggle_pause() in lin_time.cpp: Pausing\n");
+
+        // If you make this value too small, then when the user presses the
+        // Pause key again to resume, the game will take too long to respond.
+        // It will effectively stay frozen.
+        setTimeCompression(.00001);
+        paused = true;
     }
     return paused;
 }
