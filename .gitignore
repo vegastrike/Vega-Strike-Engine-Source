@@ -5,3 +5,5 @@ ext/
 *.pyc
 build-engine-Desktop-Default/
 packages/
+*.log
+*.bak
