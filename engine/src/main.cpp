@@ -76,6 +76,11 @@
 #include <boost/log/core.hpp>
 #include <boost/log/trivial.hpp>
 #include <boost/log/expressions.hpp>
+#include <boost/log/sinks/text_file_backend.hpp>
+#include <boost/log/utility/setup/file.hpp>
+#include <boost/log/utility/setup/common_attributes.hpp>
+#include <boost/log/sources/severity_logger.hpp>
+#include <boost/log/sources/record_ostream.hpp>
 
 #include "options.h"
 
@@ -86,6 +91,9 @@ using std::endl;
 vs_options game_options;
 
 namespace logging = boost::log;
+namespace src = boost::log::sources;
+namespace sinks = boost::log::sinks;
+namespace keywords = boost::log::keywords;
 
 /*
  * Globals
@@ -241,6 +249,16 @@ Unit *TheTopLevelUnit;
 void initLogging(char debugLevel){
     auto loggingCore = logging::core::get();
 
+    logging::add_file_log
+    (
+        keywords::file_name = "vegastrike_%Y-%m-%d_%H_%M_%S.%f-%q.log",                 /*< file name pattern >*/
+        keywords::rotation_size = 10 * 1024 * 1024,                                     /*< rotate files every 10 MiB... >*/
+        keywords::time_based_rotation = sinks::file::rotation_at_time_point(0, 0, 0),   /*< ...or at midnight >*/
+        keywords::format = "[%TimeStamp%]: %Message%",                                  /*< log record format >*/
+        keywords::auto_flush = false,                                                   /*< whether to auto flush to the file after every line >*/
+        keywords::min_free_space = 1 * 1024 * 1024 * 1024                               /*< stop logging if there's only 1 GiB free space left >*/
+    );
+
     switch (debugLevel) {
     case 1:
         loggingCore->set_filter(logging::trivial::severity >= logging::trivial::info);
@@ -255,6 +273,8 @@ void initLogging(char debugLevel){
         loggingCore->set_filter(logging::trivial::severity >= logging::trivial::warning);
         break;
     }
+    
+    logging::add_common_attributes();
 }
 
 int main( int argc, char *argv[] )
