@@ -77,6 +77,8 @@
 #include <boost/log/trivial.hpp>
 #include <boost/log/expressions.hpp>
 #include <boost/log/sinks/text_file_backend.hpp>
+#include <boost/log/sinks/text_ostream_backend.hpp>
+#include <boost/log/utility/setup/console.hpp>
 #include <boost/log/utility/setup/file.hpp>
 #include <boost/log/utility/setup/common_attributes.hpp>
 #include <boost/log/sources/severity_logger.hpp>
@@ -249,15 +251,7 @@ Unit *TheTopLevelUnit;
 void initLogging(char debugLevel){
     auto loggingCore = logging::core::get();
 
-    logging::add_file_log
-    (
-        keywords::file_name = "vegastrike_%Y-%m-%d_%H_%M_%S.%f-%q.log",                 /*< file name pattern >*/
-        keywords::rotation_size = 10 * 1024 * 1024,                                     /*< rotate files every 10 MiB... >*/
-        keywords::time_based_rotation = sinks::file::rotation_at_time_point(0, 0, 0),   /*< ...or at midnight >*/
-        keywords::format = "[%TimeStamp%]: %Message%",                                  /*< log record format >*/
-        keywords::auto_flush = false,                                                   /*< whether to auto flush to the file after every line >*/
-        keywords::min_free_space = 1 * 1024 * 1024 * 1024                               /*< stop logging if there's only 1 GiB free space left >*/
-    );
+    string loggingDir = VSFileSystem::homedir + "/" + "logs";                                           /*< $HOME/.vegastrike/logs, typically >*/
 
     switch (debugLevel) {
     case 1:
@@ -275,6 +269,24 @@ void initLogging(char debugLevel){
     }
     
     logging::add_common_attributes();
+
+    logging::add_file_log
+    (
+        keywords::file_name             = loggingDir + "/" + "vegastrike_%Y-%m-%d_%H_%M_%S.%f.log",     /*< file name pattern >*/
+        keywords::rotation_size         = 10 * 1024 * 1024,                                             /*< rotate files every 10 MiB... >*/
+        keywords::time_based_rotation   = sinks::file::rotation_at_time_point(0, 0, 0),                 /*< ...or at midnight >*/
+        keywords::format                = "[%TimeStamp%]: %Message%",                                   /*< log record format >*/
+        keywords::auto_flush            = false,                                                        /*< whether to auto flush to the file after every line >*/
+        keywords::min_free_space        = 1 * 1024 * 1024 * 1024                                        /*< stop logging when there's only 1 GiB free space left >*/
+    );
+
+    logging::add_console_log
+    (
+        std::cerr,
+        keywords::filter                = (logging::trivial::severity >= logging::trivial::fatal),      /*< on the console, only show messages that are fatal to Vega Strike >*/
+        keywords::format                = "[%TimeStamp%]: %Message%",                                   /*< log record format specific to the console >*/
+        keywords::auto_flush            = true                                                          /*< whether to do the equivalent of fflush(stdout) after every msg >*/
+    );
 }
 
 int main( int argc, char *argv[] )
