@@ -38,7 +38,7 @@ addons:
       - libvorbis-dev
       - libjpeg-dev
       - libpng-dev
-      - libgtk2.0-dev
+      - libgtk-3-dev
       - libboost-python-dev
       - libboost-log-dev
   homebrew:
@@ -50,7 +50,7 @@ addons:
       - libvorbis
       - jpeg
       - libpng
-      - gtk+
+      - gtk+3
       - gtkglext
       - boost-python
 

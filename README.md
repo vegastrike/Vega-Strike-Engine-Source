@@ -132,14 +132,14 @@ Compiling On Linux
 
 ```bash
 sudo apt-get -y install cmake g++ python-dev libboost-python-dev libboost-log-dev libgl1-mesa-glx freeglut3-dev \
-                libopenal-dev libsdl-gfx1.2-dev libvorbis-dev libjpeg-dev libpng-dev libgtk2.0-dev
+                libopenal-dev libsdl-gfx1.2-dev libvorbis-dev libjpeg-dev libpng-dev libgtk-3-dev
 ```
 
 Or on Debian 10:
 
 ```bash
 sudo apt-get -y install git cmake python-dev build-essential automake autoconf libpng16-16 \
-                libpng-dev libpng-tools libjpeg62-turbo-dev libexpat1-dev libgtk2.0-dev \
+                libpng-dev libpng-tools libjpeg62-turbo-dev libexpat1-dev libgtk-3-dev \
                 libopenal-dev libogg-dev libvorbis-dev libgl1-mesa-dev libsdl1.2-dev \
                 libavcodec-dev libavcodec-extra libavformat-dev libavresample-dev libavutil-dev \
                 libavdevice-dev libpostproc-dev freeglut3-dev libxmu-dev libxi-dev \
@@ -150,7 +150,7 @@ Or on Ubuntu 20.04:
 
 ```bash
 sudo apt-get -y install git cmake python-dev build-essential automake autoconf libpng16-16 \
-                libpng-dev libpng-tools libjpeg62-dev libexpat1-dev libgtk2.0-dev libopenal-dev \
+                libpng-dev libpng-tools libjpeg62-dev libexpat1-dev libgtk-3-dev libopenal-dev \
                 libogg-dev libvorbis-dev libgl1-mesa-dev libsdl1.2-dev libavcodec-dev \
                 libavcodec-extra libavformat-dev libavresample-dev libavutil-dev libavdevice-dev \
                 libpostproc-dev freeglut3-dev libxmu-dev libxi-dev libboost1.67-all-dev
