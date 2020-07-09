@@ -100,11 +100,7 @@ extern string GetUnitDir( string filename );
 
 string selectcurrentdir;
 
-#if defined (__APPLE__)
-int selectdirs( struct dirent *entry )
-#else
 int selectdirs( const struct dirent * entry )
-#endif
 {
     if (string( entry->d_name ) == "." && string( entry->d_name ) == "..")
         return 0;
