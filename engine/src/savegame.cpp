@@ -566,7 +566,7 @@ void SaveGame::ReadMissionStringData( char* &buf, bool select_data, const std::s
             skip = false;
         } else {
             // debugging attempt -- show why the allocation would fail
-            vs_dprintf(1, " SaveGame::ReadMissionStringData: vecstring->reserve(md_i_size = %d) will fail, bailing out (i = %d)\n", md_i_size, i);
+            BOOST_LOG_TRIVIAL(info) << boost::format(" SaveGame::ReadMissionStringData: vecstring->reserve(md_i_size = %1%) will fail, bailing out (i = %2%)") % md_i_size % i;
         }
         for (int j = 0; j < md_i_size; j++) {
             if (skip)
