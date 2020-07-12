@@ -27,8 +27,6 @@ ELSE (OGRE_FOUND)
     MESSAGE("-- Compiling mesh_tool without OgreMesh support: Ogre not found")
 ENDIF (OGRE_FOUND)
 
-INSTALL(TARGETS mesh_tool DESTINATION bin)
-
 SET(MESHER_SOURCES
     mesher/Converter.cpp
     mesher/from_BFXM.cpp
@@ -61,3 +59,4 @@ IF (OGRE_FOUND AND NOT USE_SYSTEM_BOOST)
 ENDIF (OGRE_FOUND AND NOT USE_SYSTEM_BOOST)
 
 TARGET_LINK_LIBRARIES(mesh_tool ${MSH_LIBS})
+INSTALL(TARGETS mesh_tool DESTINATION bin)
