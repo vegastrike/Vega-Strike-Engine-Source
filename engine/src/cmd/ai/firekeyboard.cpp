@@ -731,8 +731,10 @@ void FireKeyboard::NearestJumpKey( const KBData&, KBSTATE k )
 
 void FireKeyboard::TogglePause( const KBData&, KBSTATE k )
 {
-    if (g().togglepausekey != PRESS)
+    if (k == PRESS) {
+        BOOST_LOG_TRIVIAL(info) << "FireKeyboard::TogglePause(): Pause key detected";
         g().togglepausekey = k;
+    }
 }
 
 
@@ -1865,14 +1867,17 @@ void FireKeyboard::Execute()
     }
     if (f().togglepausekey == PRESS) {
         f().togglepausekey = DOWN;
+        BOOST_LOG_TRIVIAL(info) << "Pause key pressed";
         if (toggle_pause())
-	{
-	    _Universe->AccessCockpit()->OnPauseBegin();
-	}
-	else
-	{
-	    _Universe->AccessCockpit()->OnPauseEnd();
-	}
+    	{
+    	    BOOST_LOG_TRIVIAL(info) << "Calling _Universe->AccessCockpit()->OnPauseBegin();";
+            _Universe->AccessCockpit()->OnPauseBegin();
+    	}
+    	else
+    	{
+    	    BOOST_LOG_TRIVIAL(info) << "Calling _Universe->AccessCockpit()->OnPauseEnd();";
+            _Universe->AccessCockpit()->OnPauseEnd();
+    	}
     }
     if (f().weapk == PRESS || f().rweapk == PRESS) {
         bool forward;

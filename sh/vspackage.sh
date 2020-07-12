@@ -1,0 +1,178 @@
+#!/bin/bash
+#============ DESCRIPTION ===========
+# This file generates the packages
+# for the build platform.
+#
+# NOTE: This relies on the build
+# happening first.
+#====================================
+
+#----------------------------------
+# validate parameters
+#----------------------------------
+
+ROOT_DIR=$(pwd)
+BUILD_DIR=$ROOT_DIR/build
+BIN_DIR=$ROOT_DIR/bin
+SRC_DIR=$ROOT_DIR/engine
+PACKAGE_DIR=$ROOT_DIR/packages
+VS_EXECUTABLE=${BUILD_DIR}/vegastrike
+VS_CONFIG_EXECUTABLE=${BUILD_DIR}/vegasettings
+VS_MESH_EXECUTABLE=${BUILD_DIR}/mesh_tool
+DEPS_LOOKUP_FILE=${BUILD_DIR}/dependency.lookup
+DEPS_FINALIZED=${BUILD_DIR}/dependency.list
+
+function lookUpDebianDependency()
+{
+	# This just looks up the owning package for a given library
+	# Duplicates here are okay.
+	local DEP_LIBRARY="${1}"
+	local DEP_OUTPUT_FILE="${2}"
+	local DEP_PACKAGE=`dpkg-query -S ${DEP_LIBRARY} | cut -f 1 -d ':' | grep -v 386 | sort | uniq`
+	if [ -z "${DEP_PACKAGE}" ]; then
+		echo "Debian Dependency: '/usr${DEP_LIBRARY}' -> ${DEP_PACKAGE}"
+		DEP_PACKAGE=`dpkg-query -S /usr${DEP_LIBRARY} | cut -f 1 -d ':'`
+	else
+		echo "Debian Dependency: '${DEP_LIBRARY}' -> ${DEP_PACKAGE}"
+	fi
+	echo ${DEP_PACKAGE} >> ${DEP_OUTPUT_FILE}
+}
+
+function lookUpRpmDependency()
+{
+	# This just looks up the owning package for a given library
+	# Duplicates here are okay.
+	local DEP_LIBRARY="${1}"
+	local DEP_OUTPUT_FILE="${2}"
+	# TODO: Adjust this for RPM tooling
+	local DEP_PACKAGE=`dpkg-query -S ${DEP_LIBRARY} | cut -f 1 -d ':'`
+	if [ -z "${DEP_PACKAGE}" ]; then
+		echo "RPM Dependency: '/usr${DEP_LIBRARY}' -> ${DEP_PACKAGE}"
+		DEP_PACKAGE=`dpkg-query -S /usr${DEP_LIBRARY} | cut -f 1 -d ':'`
+	else
+		echo "RPM Dependency: '${DEP_LIBRARY}' -> ${DEP_PACKAGE}"
+	fi
+	echo ${DEP_PACKAGE} >> ${DEP_OUTPUT_FILE}
+}
+
+function buildDependencyList()
+{
+	local dependency_lookup=${1}
+	local DEPS_INPUT_FILE=${BUILD_DIR}/dependency.mixmash
+	local DEPS_FILTERED_FILE=${BUILD_DIR}/dependency.filtered
+
+	# Build a list of all the dependencies based on the
+	# binaries. This probably doesn't account for dependencies
+	# already filled by the libraries, but it's a good start
+	# for automated detection.
+	ldd ${VS_EXECUTABLE} ${VS_CONFIG_EXECUTABLE} ${VS_MESH_EXECUTABLE} > ${DEPS_INPUT_FILE}
+	cat ${DEPS_INPUT_FILE} | grep "=>" | tr -s '\t ' ';' | cut -f 4 -d ';' | sort | uniq > ${DEPS_FILTERED_FILE}
+
+	# clear the dependency file
+	echo > ${DEPS_LOOKUP_FILE}
+	for DEPENDENCY_LIBRARY in `cat ${DEPS_FILTERED_FILE}`
+	do
+		echo "Looking up dependency in package system: ${DEPENDENCY_LIBRARY}"
+		# Add each dependency
+		${dependency_lookup} ${DEPENDENCY_LIBRARY} "${DEPS_LOOKUP_FILE}"
+	done
+
+	# Final filtering in case of duplicate packages
+	cat "${DEPS_LOOKUP_FILE}" | sort | uniq > ${DEPS_FINALIZED}
+}
+
+function buildDependencies()
+{
+	which apt
+	if [ $? -eq 0 ]; then
+		# Build the dependency list based on the executable
+		buildDependencyList lookUpDebianDependency
+	else
+		which rpm
+		if [ $? -eq 0 ]; then
+			# Build the dependency list based on the executable
+			buildDependencyList lookUpRpmDependency
+		fi
+	fi
+}
+
+function copyDebFiles()
+{
+	# Verify that there are Debian files to copy
+	local DEB_FILES=`ls *.deb`
+	if [[ ${#DEB_FILES} ]]; then
+		# Copy the Debian Package files
+		for DEB_FILE in ${DEB_FILES}
+		do
+			echo "Copying ${DEB_FILE} to ${PACKAGE_DIR}"
+			cp "${DEB_FILE}" "${PACKAGE_DIR}"
+		done
+	else
+		echo "No Debian Package files"
+	fi
+}
+
+function copyRpmFiles()
+{
+	local RPM_FILES=`ls *.rpm *.srpm`
+	if [[ ${#RPM_FILES} ]]; then
+		# Copy the Red Hat RPM Package files
+		for RPM_FILE in ${RPM_FILES}
+		do
+			echo "Copying ${RPM_FILE} to ${PACKAGE_DIR}"
+			cp "${RPM_FILE}" "${PACKAGE_DIR}"
+		done
+	else
+		echo "No RPM Package files"
+	fi
+}
+
+function copyTarballs()
+{
+	local TAR_FILES=`ls *.tar.*`
+	if [[ ${#TAR_FILES} ]]; then
+		# Copy the Tarball Package files
+		for TAR_FILE in ${TAR_FILES}
+		do
+			echo "Copying ${TAR_FILE} to ${PACKAGE_DIR}"
+			cp "${TAR_FILE}" "${PACKAGE_DIR}"
+		done
+	else
+		echo "No Tarball Package files"
+	fi
+}
+
+function copyFiles()
+{
+	# Ensure the package output directory exists
+	mkdir -p ${PACKAGE_DIR}
+
+	copyDebFiles
+	copyRpmFiles
+	copyTarballs
+}
+
+function buildPackages()
+{
+	make package
+	make package_source
+}
+
+echo "---------------------------------"
+echo "--- vspackage.sh | 2020-06-09 ---"
+echo "---------------------------------"
+
+if [ ! -f ${VS_EXECUTABLE} ]; then
+	echo "***************************************"
+	echo "*** Please build Vega Strike first. ***"
+	echo "***************************************"
+	exit 1
+fi
+
+cd $BUILD_DIR
+
+buildDependencies
+buildPackages
+copyFiles
+
+cd $ROOT_DIR

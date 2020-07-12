@@ -22,6 +22,7 @@
 #include "vegastrike.h"
 #include "in_kb.h"
 #include "vs_random.h"
+#include "vsfilesystem.h"
 static double firsttime;
 VSRandom vsrandom( time( NULL ) );
 
@@ -113,15 +114,22 @@ void setTimeCompression( float tc )
 bool toggle_pause()
 {
     static bool paused = false;
+    BOOST_LOG_TRIVIAL(debug) << "toggle_pause() called in lin_time.cpp";
     if (paused)
     {
+        BOOST_LOG_TRIVIAL(debug) << "toggle_pause() in lin_time.cpp: Resuming (unpausing)";
         setTimeCompression(1);
         paused = false;
     }
     else
     {
-        setTimeCompression(.0000001);
-	paused = true;
+        BOOST_LOG_TRIVIAL(debug) << "toggle_pause() in lin_time.cpp: Pausing";
+
+        // If you make this value too small, then when the user presses the
+        // Pause key again to resume, the game will take too long to respond.
+        // It will effectively stay frozen.
+        setTimeCompression(.00001);
+        paused = true;
     }
     return paused;
 }

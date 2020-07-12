@@ -26,7 +26,7 @@
 #include <boost/version.hpp>
 #include <boost/python/class.hpp>
 #ifdef HAVE_PYTHON
-#include "cs_python.h"
+#include <Python.h>
 #endif
 
 #include <math.h>

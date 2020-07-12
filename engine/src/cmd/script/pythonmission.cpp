@@ -1,5 +1,5 @@
 #include <boost/version.hpp>
-#include "cs_python.h"
+#include <Python.h>
 #include <math.h>
 #include "pythonmission.h"
 #include "python/python_compile.h"
