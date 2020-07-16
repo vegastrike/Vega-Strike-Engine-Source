@@ -565,7 +565,7 @@ void WriteUnit( const string &tag,
                 float thisloy = 0 )
 {
     Tab();
-    f.Fprintf( "<%s name=\"%s\" file=\"%s\" ", tag.c_str(), name.c_str(), filename.c_str() );
+    f.Fprintf( "<%s name=\"%s\" file=\"%s\" ", tag.c_str(), getRandName( names ).c_str(), filename.c_str() );
     if (nebfile.length() > 0)
         f.Fprintf( "nebfile=\"%s\" ", nebfile.c_str() );
     f.Fprintf( "ri=\"%f\" rj=\"%f\" rk=\"%f\" si=\"%f\" sj=\"%f\" sk=\"%f\" ", r.i, r.j, r.k, s.i, s.j, s.k );
