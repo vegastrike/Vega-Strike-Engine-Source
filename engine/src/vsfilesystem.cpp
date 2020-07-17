@@ -111,6 +111,8 @@ namespace VSFileSystem
 {
 std::string vegastrike_cwd;
 
+// SGT 2020-07-16 This gets called from main() before initLogging,
+//                so it gets a pass on not using the Boost logging stuff
 void ChangeToProgramDirectory( char *argv0 )
 {
     {
@@ -524,6 +526,8 @@ void InitHomeDirectory()
     cerr<<"USING HOMEDIR : "<<homedir<<" As the home directory "<<endl;
 }
 #else
+// SGT 2020-07-16 This gets called from main before initLogging, at least on Windows,
+//                so it gets a pass on not using the Boost logging stuff
 void InitHomeDirectory()
 {
     //Setup home directory
@@ -543,6 +547,8 @@ void InitHomeDirectory()
 }
 #endif
 
+// SGT 2020-07-16   This gets called from InitPaths(), in turn from main(), before initLogging().
+//                  So it gets a pass on not using the Boost logging stuff.
 void InitDataDirectory()
 {
     vector< string >data_paths;
@@ -583,6 +589,7 @@ void InitDataDirectory()
         //Test if the dir exist and contains config_file
         if (FileExists( (*vsit), config_file ) >= 0) {
             cerr<<"Found data in "<<(*vsit)<<endl;
+            // FIXME: Should be 16383
             if (NULL != getcwd( tmppath, 16384 )) {
                 if ( (*vsit).substr( 0, 1 ) == "." )
                     datadir = string( tmppath )+"/"+(*vsit);
@@ -596,6 +603,7 @@ void InitDataDirectory()
                 cerr<<"Error changing to datadir"<<endl;
                 exit( 1 );
             }
+            // FIXME: Should be 16383
             if (NULL != getcwd( tmppath, 16384 )) {
                 datadir = string( tmppath );
             } else {
@@ -635,6 +643,9 @@ void InitDataDirectory()
 
 //Config file has been loaded from data dir but now we look at the specified moddir in order
 //to see if we should use a mod config file
+//
+// SGT 2020-07-16   This gets called before initLogging(),
+//                  so it gets a pass on not using the Boost logging stuff
 void LoadConfig( string subdir )
 {
     bool found = false;
@@ -715,6 +726,8 @@ void LoadConfig( string subdir )
     }
 }
 
+// SGT 2020-07-16   This, too, gets called before initLogging(),
+//                  so it gets a pass on not using the Boost logging stuff.
 void InitMods()
 {
     string curpath;
@@ -771,6 +784,8 @@ void InitMods()
     free( dirlist );
 }
 
+// SGT 2020-07-16   This gets called from main() before initLogging(),
+//                  so it gets a pass on not using the Boost logging stuff
 void InitPaths( string conf, string subdir )
 {
     config_file = conf;
@@ -959,6 +974,8 @@ void InitPaths( string conf, string subdir )
     }
 }
 
+// SGT 2020-07-16   This can get called before initLogging(),
+//                  so it gets a pass on not using the Boost logging stuff
 void CreateDirectoryAbs( const char *filename )
 {
     int err;
@@ -1014,6 +1031,9 @@ bool DirectoryExists( const string &filename )
 
 //root is the path to the type directory or the type volume
 //filename is the subdirectory+"/"+filename
+//
+// SGT 2020-07-16   This, too, gets called before initLogging(),
+//                  so I guess it gets a pass on the Boost logging stuff.
 int FileExists( const string &root, const char *filename, VSFileType type, bool lookinvolume )
 {
     int    found = -1;

@@ -104,6 +104,8 @@ Universe  *_Universe;
 TextPlane *bs_tp = NULL;
 char SERVER = 0;
 
+boost::shared_ptr< boost::log::sinks::synchronous_sink< boost::log::sinks::text_file_backend > > VSFileSystem::pFileLogSink = nullptr;
+
 //false if command line option --net is given to start without network
 static bool ignore_network = true;
 
@@ -154,6 +156,9 @@ int readCommandLineOptions(int argc, char ** argv);
 void VSExit( int code)
 {
     Music::CleanupMuzak();
+    if (VSFileSystem::pFileLogSink) {
+        VSFileSystem::pFileLogSink->flush();
+    }
     winsys_exit( code );
 }
 
@@ -270,7 +275,7 @@ void initLogging(char debugLevel){
     
     logging::add_common_attributes();
 
-    logging::add_file_log
+    VSFileSystem::pFileLogSink = logging::add_file_log
     (
         keywords::file_name             = loggingDir + "/" + "vegastrike_%Y-%m-%d_%H_%M_%S.%f.log",     /*< file name pattern >*/
         keywords::rotation_size         = 10 * 1024 * 1024,                                             /*< rotate files every 10 MiB... >*/
@@ -353,7 +358,7 @@ int main( int argc, char *argv[] )
     if (mission_name[0] == '\0') {
         strncpy( mission_name, game_options.default_mission.c_str(), 1023 );
         mission_name[1023] = '\0';
-        cerr<<"MISSION_NAME is empty using : "<<mission_name<<endl;
+        BOOST_LOG_TRIVIAL(info) << "MISSION_NAME is empty using : " << mission_name;
     }
     
 
@@ -373,7 +378,8 @@ int main( int argc, char *argv[] )
 #if defined(HAVE_SDL)
 #ifndef NO_SDL_JOYSTICK
     if ( SDL_InitSubSystem( SDL_INIT_JOYSTICK ) ) {
-        VSFileSystem::vs_fprintf( stderr, "Couldn't initialize SDL: %s\n", SDL_GetError() );
+        BOOST_LOG_TRIVIAL(fatal) << boost::format("Couldn't initialize SDL: %1%") % SDL_GetError();
+        VSFileSystem::pFileLogSink->flush();
         winsys_exit( 1 );
     }
 #endif
@@ -587,7 +593,8 @@ void bootstrap_main_loop()
             if (!ignore_network) {
                 //In network mode, test if all player sections are present
                 if (pname == "") {
-                    cout<<"Missing or incomlpete section for player "<<p<<endl;
+                    BOOST_LOG_TRIVIAL(fatal) << "Missing or incomplete section for player " << p;
+                    VSFileSystem::pFileLogSink->flush();
                     cleanexit = true;
                     winsys_exit( 1 );
                 }
@@ -708,6 +715,8 @@ void bootstrap_main_loop()
     ///Draw Texture
 }
 
+// SGT 2020-07-16   This gets called from main() before initLogging, 
+//                  so it gets a pass on not using the Boost logging stuff
 const char helpmessage[] =
     "Command line options for vegastrike\n"
     "\n"

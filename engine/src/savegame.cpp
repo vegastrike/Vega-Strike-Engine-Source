@@ -43,7 +43,7 @@ std::string GetHelperPlayerSaveGame( int num )
           return CurrentSaveGameName+XMLSupport::tostring( num );
         return CurrentSaveGameName;
       }
-    cout<<"Hi helper play "<<num<<endl;
+    BOOST_LOG_TRIVIAL(info) << "Hi helper play " << num;
     static string *res = NULL;
     if (res == NULL) {
         res = new std::string;
@@ -58,12 +58,14 @@ std::string GetHelperPlayerSaveGame( int num )
                 f.Write( "\n", 1 );
                 f.Close();
               } else {
-                fprintf( stderr, "!!! ERROR : Creating default save.4.x.txt file : %s\n", f.GetFullPath().c_str() );
+                BOOST_LOG_TRIVIAL(fatal) << boost::format("!!! ERROR : Creating default save.4.x.txt file : %1%") % f.GetFullPath();
+                pFileLogSink->flush();
                 exit( 1 );
               }
             err = f.OpenReadOnly( "save.4.x.txt", UnknownFile );
             if (err > Ok) {
-                fprintf( stderr, "!!! ERROR : Opening the default save we just created\n" );
+                BOOST_LOG_TRIVIAL(fatal) << "!!! ERROR : Opening the default save we just created";
+                pFileLogSink->flush();
                 exit( 1 );
               }
           }
@@ -104,7 +106,7 @@ std::string GetHelperPlayerSaveGame( int num )
           }
       }
     if ( num == 0 || res->empty() ) {
-        cout<<"Here";
+        BOOST_LOG_TRIVIAL(info) << "Here";
         return *res;
       }
     return (*res)+XMLSupport::tostring( num );
@@ -142,10 +144,10 @@ void SaveFileCopy( const char *src, const char *dst )
                 f.Write( savecontent );
                 f.Close();
             } else {
-                fprintf( stderr, "WARNING : couldn't open savegame to copy to : %s as SaveFile", dst );
+                BOOST_LOG_TRIVIAL(warning) << boost::format("WARNING : couldn't open savegame to copy to : %1% as SaveFile") % dst;
             }
         } else {
-            fprintf( stderr, "WARNING : couldn't find the savegame to copy : %s as SaveFile", src );
+            BOOST_LOG_TRIVIAL(warning) << boost::format("WARNING : couldn't find the savegame to copy : %1% as SaveFile") % src;
         }
     }
 }
@@ -199,7 +201,8 @@ void SaveGame::SetPlayerLocation( const QVector &v )
     if ( ( FINITE( v.i ) && FINITE( v.j ) && FINITE( v.k ) ) ) {
         PlayerLocation = v;
     } else {
-        VSFileSystem::vs_fprintf( stderr, "NaN ERROR saving unit\n" );
+        BOOST_LOG_TRIVIAL(fatal) << "NaN ERROR saving unit";
+        pFileLogSink->flush();
         assert( FINITE( v.i ) && FINITE( v.j ) && FINITE( v.k ) );
         PlayerLocation.Set( 1, 1, 1 );
     }
@@ -247,12 +250,12 @@ vector< string >parsePipedString( string s )
     vector< string >  ret;
     while ( ( loc = s.find( "|" ) ) != string::npos ) {
         ret.push_back( s.substr( 0, loc ) );
-        cout<<"Found ship named : "<<s.substr( 0, loc )<<endl;
+        BOOST_LOG_TRIVIAL(info) << "Found ship named : " << s.substr( 0, loc );
         s = s.substr( loc+1 );
     }
     if ( s.length() ) {
         ret.push_back( s );
-        cout<<"Found ship named : "<<s<<endl;
+        BOOST_LOG_TRIVIAL(info) << "Found ship named : " << s;
     }
     return ret;
 }
@@ -288,15 +291,15 @@ void CopySavedShips( std::string filename, int player_num, const std::vector< st
                 string srcdata = src.ReadFull();
                 dst.Write( srcdata );
             } else {
-                printf( "Error: Cannot Copy Unit %s from save file %s to %s\n",
-                       starships[i].c_str(),
-                       srcnam.c_str(),
-                       dstnam.c_str() );
+                BOOST_LOG_TRIVIAL(error) << boost::format("Error: Cannot Copy Unit %1% from save file %2% to %3%")
+                        % starships[i]
+                        % srcnam
+                        % dstnam;
             }
         } else {
-            printf( "Error: Cannot Open Unit %s from save file %s.\n",
-                   starships[i].c_str(),
-                   srcnam.c_str() );
+            BOOST_LOG_TRIVIAL(error) << boost::format("Error: Cannot Open Unit %1% from save file %2%.")
+                    % starships[i]
+                    % srcnam;
         }
     }
 }
@@ -645,7 +648,7 @@ void SaveGame::WriteMissionStringData( std::vector< char > &ret )
 void SaveGame::ReadStardate( char* &buf )
 {
     string stardate( AnyStringScanInString( buf ) );
-    cout<<"Read stardate: "<<stardate<<endl;
+    BOOST_LOG_TRIVIAL(info) << "Read stardate: " << stardate;
     _Universe->current_stardate.InitTrek( stardate );
 }
 
@@ -685,7 +688,7 @@ void SaveGame::ReadSavedPackets( char* &buf,
         } else {
             char output[31] = {0};
             strncpy( output, buf, 30 );
-            printf( "buf unrecognized %s...\n", output );
+            BOOST_LOG_TRIVIAL(warning) << boost::format("buf unrecognized %1%...") % output;
         }
     }
 }
@@ -827,7 +830,7 @@ string SaveGame::WriteSaveGame( const char *systemname,
                                 bool write )
 {
     savestring  = string( "" );
-    printf( "Writing Save Game %s\n", outputsavegame.c_str() );
+    BOOST_LOG_TRIVIAL(info) << boost::format("Writing Save Game %1%") % outputsavegame;
     savestring += WritePlayerData( FP, unitname, systemname, credits, fact );
     savestring += WriteDynamicUniverse();
     if (outputsavegame.length() != 0) {
@@ -847,7 +850,7 @@ string SaveGame::WriteSaveGame( const char *systemname,
                 }
             } else {
                 //error occured while opening file
-                cerr<<"occured while opening file: "<<outputsavegame<<endl;
+                BOOST_LOG_TRIVIAL(error) << "Error occurred while opening file: " << outputsavegame;
             }
         }
     }
@@ -956,11 +959,11 @@ void SaveGame::ParseSaveGame( const string &filename_p,
                 //In networking save we include the faction at the end of the first line
                 if (res == 5) {
                     playerfaction = string( factionname );
-                    cout<<"Found faction in save file : "<<playerfaction<<endl;
+                    BOOST_LOG_TRIVIAL(info) << "Found faction in save file : " << playerfaction;
                 } else {
                     //If no faction -> default to privateer
                     playerfaction = string( "privateer" );
-                    cout<<"Faction not found assigning default one: privateer"<<endl;
+                    BOOST_LOG_TRIVIAL(info) << "Faction not found assigning default one: privateer";
                 }
                 free( factionname );
                 if (ForceStarSystem.length() == 0)

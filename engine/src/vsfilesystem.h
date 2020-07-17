@@ -11,9 +11,12 @@ using std::vector;
 #include "pk3.h"
 #include <gnuhash.h>
 
+#include <boost/smart_ptr/shared_ptr.hpp>
 #include <boost/format.hpp>
 #include <boost/log/core.hpp>
 #include <boost/log/trivial.hpp>
+#include <boost/log/sinks/sync_frontend.hpp>
+#include <boost/log/sinks/text_file_backend.hpp>
 
 class VegaConfig;
 class VSImage;
@@ -130,6 +133,9 @@ extern vector< int >UseVolumes;                                                 
 
 extern string failed;
 extern vsUMap< string, CPK3* >pk3_opened_files;                                 //Map of the currently opened PK3 volume/resource files
+
+extern boost::shared_ptr< boost::log::sinks::synchronous_sink< boost::log::sinks::text_file_backend > > pFileLogSink;
+
 /*
  ***********************************************************************************************
  **** VSFileSystem wrappers to stdio calls                                                   ***
