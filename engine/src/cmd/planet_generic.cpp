@@ -7,6 +7,9 @@
 #include "universe_util.h"
 #include "lin_time.h"
 
+using std::cout;
+using std::endl;
+
 char * getnoslash( char *inp )
 {
     char *tmp = inp;
@@ -339,6 +342,19 @@ Unit* Planet::beginElement( QVector x,
             (*satiterator)->SetAI( new PlanetaryOrbit( *satiterator, vely, pos, x, y, QVector( 0, 0, 0 ), this ) );
             (*satiterator)->SetOwner( this );
         } else {
+            // For debug
+//            cout << "name" << " : " << filename << " : " << unitname << endl;
+//            cout << "R/X: " << x.i << " : " << x.j << " : " << x.k << endl;
+//            cout << "S/Y: " << y.i << " : " << y.j << " : " << y.k << endl;
+//            cout << "CmpRotVel: " << rotvel.i << " : " <<
+//                    rotvel.j << " : " << rotvel.k << endl;
+//            cout << vely << " : " << pos << " : " << gravity << " : " << radius << endl;
+//            cout << dest.size() << " : " << "orbit_center" << " : " << ligh.size() << endl;
+//            cout << blendSrc << " : " << blendDst << " : " << inside_out << endl;
+
+
+
+
             Planet *p;
             if (dest.size() != 0)
                 radius = ScaleJumpRadius( radius );
@@ -348,6 +364,8 @@ Unit* Planet::beginElement( QVector x,
                                                                QVector( 0, 0, 0 ), this, ourmat, ligh, faction, fullname, inside_out ) );
             un = p;
             p->SetOwner( this );
+            cout << "Created planet " << fullname << " of type " << p->fullname << " orbiting " << this->fullname << endl;
+
         }
     }
     return un;
@@ -545,3 +563,28 @@ void Planet::Kill( bool erasefromsave )
     Unit::Kill( erasefromsave );
 }
 
+bool operator==(const Planet& lhs, const Planet& rhs)
+{
+    bool equal = true;
+    if(lhs.inside != rhs.inside) {
+        equal = false;
+        cout << "inside: " << lhs.inside << " != " << rhs.inside << endl;
+    }
+
+    if(lhs.atmospheric != rhs.atmospheric) {
+        equal = false;
+        cout << "atmospheric: " << lhs.atmospheric << " != " << rhs.atmospheric << endl;
+    }
+
+    if(std::fabs(lhs.radius - rhs.radius) > 0.001f) {
+        equal = false;
+        cout << "radius: " << lhs.radius << " != " << rhs.radius << endl;
+    }
+
+    if(std::fabs(lhs.gravity - rhs.gravity) > 0.001f) {
+        equal = false;
+        cout << "gravity: " << lhs.gravity << " != " << rhs.gravity << endl;
+    }
+
+    return equal;
+}

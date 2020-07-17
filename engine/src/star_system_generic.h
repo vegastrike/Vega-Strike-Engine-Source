@@ -54,30 +54,7 @@ class StarSystem
 {
 protected:
 ///Starsystem XML Struct For use with XML loading
-    struct StarXML
-    {
-        Terrain *parentterrain;
-        ContinuousTerrain     *ct;
-        int unitlevel;
-        std::vector< GFXLight >lights;
-        std::vector< Planet* > moons;
-        std::string backgroundname;
-        GFXColor backgroundColor;
-        bool   backgroundDegamma;
-        Vector systemcentroid;
-        Vector cursun;
-        float  timeofyear;
-        float  reflectivity;
-        int    numnearstars;
-        int    numstars;
-        bool   fade;
-        float  starsp;
-        float  scale;
-        std::vector< AtmosphericFogMesh >fog;
-        std::vector< bool >conditionStack;
-        int    fogopticalillusion;
-    }
-    *xml;
+    Star_XML *xml;
     void LoadXML( const char*, const Vector &centroid, const float timeofyear );
     void beginElement( const std::string &name, const XMLSupport::AttributeList &attributes );
     void endElement( const std::string &name );
@@ -257,7 +234,7 @@ public:
         return -1;
     }
 //friend class Atmosphere;
-    virtual void createBackground( StarSystem::StarXML *xml ) {}
+    virtual void createBackground( Star_XML *xml ) {}
 };
 bool PendingJumpsEmpty();
 double calc_blend_factor( double frac, int priority, unsigned int when_it_will_be_simulated, int cur_simulation_frame );

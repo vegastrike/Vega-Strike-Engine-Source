@@ -5,6 +5,36 @@
 
 using namespace XMLSupport;
 
+class Terrain;
+class ContinuousTerrain;
+class Planet;
+class AtmosphericFogMesh;
+
+struct Star_XML
+{
+    std::string name;
+    Terrain *parentterrain;
+    ContinuousTerrain     *ct;
+    int unitlevel;
+    std::vector< GFXLight >lights;
+    std::vector< Planet* > moons;
+    std::string backgroundname;
+    GFXColor backgroundColor;
+    bool   backgroundDegamma;
+    Vector systemcentroid;
+    Vector cursun;
+    float  timeofyear;
+    float  reflectivity;
+    int    numnearstars;
+    int    numstars;
+    bool   fade;
+    float  starsp;
+    float  scale;
+    std::vector< AtmosphericFogMesh >fog;
+    std::vector< bool >conditionStack;
+    int    fogopticalillusion = 0;
+};
+
 namespace StarXML
 {
 
