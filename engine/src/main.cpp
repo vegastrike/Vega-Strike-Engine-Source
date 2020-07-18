@@ -202,10 +202,10 @@ void nothinghappens( unsigned int, unsigned int, bool, int, int ) {}
 
 void initSceneManager()
 {
-    cout << "Creating scene manager..." << endl;
+    BOOST_LOG_TRIVIAL(info) << "Creating scene manager...";
     Audio::SceneManager *sm = Audio::SceneManager::getSingleton();
     
-    cout << "Creating template manager..." << endl;
+    BOOST_LOG_TRIVIAL(info) << "Creating template manager...";
     Audio::TemplateManager::getSingleton();
     
     if (Audio::SceneManager::getSingleton() == 0)
@@ -216,7 +216,7 @@ void initSceneManager()
 
 void initALRenderer()
 {
-    cerr << "  Initializing renderer..." << endl;
+    BOOST_LOG_TRIVIAL(info) << "  Initializing renderer...";
     Audio::SceneManager *sm = Audio::SceneManager::getSingleton();
     
     if (g_game.sound_enabled) {
@@ -243,7 +243,7 @@ void initScenes()
 
 void closeRenderer()
 {
-    cerr << "Shutting down renderer..." << endl;
+    BOOST_LOG_TRIVIAL(info) << "Shutting down renderer...";
     Audio::SceneManager::getSingleton()->setRenderer( SharedPtr<Audio::Renderer>() );
 }
 
