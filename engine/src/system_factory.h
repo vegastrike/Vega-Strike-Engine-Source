@@ -1,5 +1,5 @@
-#ifndef SYSTEM_H
-#define SYSTEM_H
+#ifndef SYSTEM_FACTORY_H
+#define SYSTEM_FACTORY_H
 
 #include "gfx/vec.h"
 #include "gfxlib_struct.h"
@@ -15,7 +15,7 @@ using std::map;
 class Star_XML;
 class Planet;
 
-class System
+class SystemFactory
 {
     Planet* current_top_planet = nullptr;
 
@@ -122,7 +122,7 @@ public:
     int scale_system;
 
     // Constructor
-    System(string const &relative_filename, string& system_file, Star_XML *xml);
+    SystemFactory(string const &relative_filename, string& system_file, Star_XML *xml);
 
     void recursiveParse(boost::property_tree::ptree tree, Object& object);
     void recursiveProcess(Star_XML *xml, Object& object, Planet* owner, int level = 0);
@@ -160,4 +160,4 @@ public:
     void debug(Object& object, string path);
 };
 
-#endif // SYSTEM_H
+#endif // SYSTEM_FACTORY_H

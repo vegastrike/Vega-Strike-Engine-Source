@@ -22,7 +22,7 @@
 
 #include "options.h"
 
-#include "system.h"
+#include "system_factory.h"
 
 #include <stdlib.h>
 
@@ -1528,7 +1528,7 @@ void StarSystem::LoadXML( const char *filename, const Vector &centroid, const fl
 
     VSFile other_file;
     string full_path = other_file.GetSystemDirectoryPath(file);
-    System sys = System(file, full_path, xml2);
+    SystemFactory sys = SystemFactory(file, full_path, xml2);
 
     cout << "Processed system " << this->name << endl;
     // End of new code

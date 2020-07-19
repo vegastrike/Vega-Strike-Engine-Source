@@ -1,4 +1,4 @@
-#include "system.h"
+#include "system_factory.h"
 
 #include "star_xml.h"
 #include "planet.h"
@@ -80,7 +80,7 @@ string truncateFilename(string filename) {
     return filename;
 }
 
-System::System(string const &relative_filename, string& system_file, Star_XML *xml)
+SystemFactory::SystemFactory(string const &relative_filename, string& system_file, Star_XML *xml)
 {
     root = Object();
     root.type = ("root");
@@ -95,7 +95,7 @@ System::System(string const &relative_filename, string& system_file, Star_XML *x
 
 
 
-void System::recursiveParse(pt::ptree tree, Object& object)
+void SystemFactory::recursiveParse(pt::ptree tree, Object& object)
 {
     for (const auto& iterator : tree)
     {
@@ -128,7 +128,7 @@ void System::recursiveParse(pt::ptree tree, Object& object)
     }
 }
 
-void System::recursiveProcess(Star_XML *xml, Object& object, Planet* owner, int level)
+void SystemFactory::recursiveProcess(Star_XML *xml, Object& object, Planet* owner, int level)
 {
     xml->unitlevel = level;
 //    cout << "recursiveProcess: " << object.type << ":"  << endl;
@@ -161,7 +161,7 @@ void System::recursiveProcess(Star_XML *xml, Object& object, Planet* owner, int 
     }
 }
 
-void System::processLight(Star_XML *xml, Object& object)
+void SystemFactory::processLight(Star_XML *xml, Object& object)
 {
     Light light;
     for (const auto& child_object : object.objects)
@@ -180,7 +180,7 @@ void System::processLight(Star_XML *xml, Object& object)
 //    cout << "processLight done - " << this->lights.size() << endl;
 }
 
-void System::processSystem(Star_XML *xml, Object& object)
+void SystemFactory::processSystem(Star_XML *xml, Object& object)
 {
 //    cout << "processSystem\n";
     xml->unitlevel++;
@@ -197,7 +197,7 @@ void System::processSystem(Star_XML *xml, Object& object)
 //    xml->backgroundColor.a = std::stof(backgroundColor["a"]);
 }
 
-void System::processRing(Star_XML *xml, Object& object, Planet* owner)
+void SystemFactory::processRing(Star_XML *xml, Object& object, Planet* owner)
 {
 //    cout << "processRing\n";
     xml->unitlevel++;
@@ -233,7 +233,7 @@ void System::processRing(Star_XML *xml, Object& object, Planet* owner)
                          wrapx, wrapy, blend_source, blend_destination );
 }
 
-Planet* System::processPlanet(Star_XML *xml, Object& object, Planet* owner)
+Planet* SystemFactory::processPlanet(Star_XML *xml, Object& object, Planet* owner)
 {
     QVector S( 0, 1, 0 );
     QVector R( 0, 0, 1 );
@@ -450,7 +450,7 @@ Planet* System::processPlanet(Star_XML *xml, Object& object, Planet* owner)
     return planet;
 }
 
-void System::processSpaceElevator(Star_XML *xml, Object& object)
+void SystemFactory::processSpaceElevator(Star_XML *xml, Object& object)
 {
     xml->unitlevel++;
     string myfile = getStringAttribute(object, "file", "elevator");
@@ -497,7 +497,7 @@ void System::processSpaceElevator(Star_XML *xml, Object& object)
     xml->fog.clear();
 }
 
-void System::processFogElement(Star_XML *xml, Object& object)
+void SystemFactory::processFogElement(Star_XML *xml, Object& object)
 {
     xml->unitlevel++;
 
@@ -532,7 +532,7 @@ void System::processFogElement(Star_XML *xml, Object& object)
     xml->fog.push_back( AtmosphericFogMesh() );
 }*/
 
-void System::processEnhancement(string element, Star_XML *xml, Object& object, Planet* owner)
+void SystemFactory::processEnhancement(string element, Star_XML *xml, Object& object, Planet* owner)
 {
     cout << "Processing enhancement of type " << element << endl;
 
@@ -695,7 +695,7 @@ void System::processEnhancement(string element, Star_XML *xml, Object& object, P
     for (auto& destination : destinations)
         unit->AddDestination(destination);
  */
-void System::processAsteroid(Star_XML *xml, Object& object, Planet* owner)
+void SystemFactory::processAsteroid(Star_XML *xml, Object& object, Planet* owner)
 {
     QVector S( 0, 1, 0 );
     QVector R( 0, 0, 1 );
@@ -751,21 +751,21 @@ void System::processAsteroid(Star_XML *xml, Object& object, Planet* owner)
     }
 }
 
-string System::getStringAttribute(Object object, string key, string default_value)
+string SystemFactory::getStringAttribute(Object object, string key, string default_value)
 {
     alg::to_lower(key);
     if(object.attributes.count(key)) return object.attributes[key];
     return default_value;
 }
 
-bool System::getBoolAttribute(Object object, string key, bool default_value)
+bool SystemFactory::getBoolAttribute(Object object, string key, bool default_value)
 {
     alg::to_lower(key);
     if(object.attributes.count(key)) return object.attributes[key] == "true";
     return default_value;
 }
 
-char System::getCharAttribute(Object object, string key, char default_value)
+char SystemFactory::getCharAttribute(Object object, string key, char default_value)
 {
     alg::to_lower(key);
     if(object.attributes.count(key) && object.attributes[key].size()>0) return object.attributes[key][0];
@@ -773,7 +773,7 @@ char System::getCharAttribute(Object object, string key, char default_value)
 }
 
 // TODO: this should really be a template for all three functions
-int System::getIntAttribute(Object object, string key, int default_value,
+int SystemFactory::getIntAttribute(Object object, string key, int default_value,
                                 int multiplier, int default_multiplier)
 {
     alg::to_lower(key);
@@ -781,7 +781,7 @@ int System::getIntAttribute(Object object, string key, int default_value,
     return default_value * default_multiplier;
 }
 
-float System::getFloatAttribute(Object object, string key, float default_value,
+float SystemFactory::getFloatAttribute(Object object, string key, float default_value,
                                 float multiplier, float default_multiplier)
 {
     alg::to_lower(key);
@@ -789,7 +789,7 @@ float System::getFloatAttribute(Object object, string key, float default_value,
     return default_value * default_multiplier;
 }
 
-double System::getDoubleAttribute(Object object, string key, double default_value,
+double SystemFactory::getDoubleAttribute(Object object, string key, double default_value,
                                 double multiplier, double default_multiplier)
 {
     alg::to_lower(key);
@@ -797,14 +797,14 @@ double System::getDoubleAttribute(Object object, string key, double default_valu
     return default_value * default_multiplier;
 }
 
-void System::initializeQVector(Object object, string key_prefix, QVector& vector, double multiplier)
+void SystemFactory::initializeQVector(Object object, string key_prefix, QVector& vector, double multiplier)
 {
     vector.i = getDoubleAttribute(object, key_prefix + "i", vector.i, multiplier);
     vector.j = getDoubleAttribute(object, key_prefix + "j", vector.j, multiplier);
     vector.k = getDoubleAttribute(object, key_prefix + "k", vector.k, multiplier);
 }
 
-void System::initializeMaterial(Object object, GFXMaterial& material)
+void SystemFactory::initializeMaterial(Object object, GFXMaterial& material)
 {
     // Possible bug - we're initializing 1.0f by default.
     // If no value is present, this could change the default value to something not wanted.
@@ -830,7 +830,7 @@ void System::initializeMaterial(Object object, GFXMaterial& material)
 // If we do but it's invalid, we use ONE/ZERO
 // Otherwise we actually parse it
 // This doesn't seem right
-void System::initializeAlpha(Object object, BLENDFUNC blend_source, BLENDFUNC blend_destination)
+void SystemFactory::initializeAlpha(Object object, BLENDFUNC blend_source, BLENDFUNC blend_destination)
 {
     if(!object.attributes.count("alpha")) return;
 
@@ -858,7 +858,7 @@ void System::initializeAlpha(Object object, BLENDFUNC blend_source, BLENDFUNC bl
     free( d );
 }
 
-GFXColor System::initializeColor(Object object)
+GFXColor SystemFactory::initializeColor(Object object)
 {
     return GFXColor(getFloatAttribute(object, "red", 0),
                     getFloatAttribute(object, "green", 0),
@@ -940,7 +940,7 @@ void compareMoons(std::vector< Planet* >first, std::vector< Planet* >second)
     }
 }
 
-void System::compare(Star_XML* xml1, Star_XML* xml2)
+void SystemFactory::compare(Star_XML* xml1, Star_XML* xml2)
 {
     //compareString("name", xml1->name, xml2->name);
     compareString("backgroundname", xml1->backgroundname, xml2->backgroundname);
@@ -958,7 +958,7 @@ void System::compare(Star_XML* xml1, Star_XML* xml2)
     compareMoons(xml1->moons, xml2->moons);
 }
 
-void System::debug(Object& object, string path)
+void SystemFactory::debug(Object& object, string path)
 {
     cout << path << "/" << object.type << " " << object.objects.size() << endl;
     for (auto& child_object : object.objects)

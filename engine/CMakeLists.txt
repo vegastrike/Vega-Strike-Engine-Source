@@ -335,7 +335,7 @@ SET(LIBROOTGENERIC_SOURCES
     src/pk3.cpp
     src/posh.cpp
     src/savegame.cpp
-    src/system.cpp
+    src/system_factory.cpp
     src/star_system_generic.cpp
     src/star_system_xml.cpp
     src/stardate.cpp
