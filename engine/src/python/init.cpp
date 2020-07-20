@@ -1,4 +1,3 @@
-#include "config.h"
 #ifdef HAVE_PYTHON
 #include <boost/version.hpp>
 #if defined (_MSC_VER) && _MSC_VER <= 1200
@@ -9,7 +8,7 @@
 #if defined (_MSC_VER) && _MSC_VER <= 1200
 #undef Vector
 #endif
-#include "cs_python.h"
+#include <Python.h>
 #include <pyerrors.h>
 #include <pythonrun.h>
 #include <compile.h>

@@ -19,7 +19,6 @@
  */
 #ifndef _UNIT_FACTORY_H_
 #define _UNIT_FACTORY_H_
-#include "config.h"
 #include <string>
 
 #include "cmd/planet_generic.h"

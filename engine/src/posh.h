@@ -797,7 +797,7 @@
 #  define POSH_LITTLE_ENDIAN
 #  define POSH_BIG_ENDIAN
 #elif defined POSH_CPU_X86 || defined POSH_CPU_AXP || defined POSH_CPU_STRONGARM || defined POSH_OS_WIN32 \
-    || defined POSH_OS_WINCE || defined __MIPSEL__
+    || defined POSH_OS_WINCE || defined __MIPSEL__ || (defined POSH_CPU_PPC && defined __LITTLE_ENDIAN__)
 #  define POSH_LITTLE_ENDIAN 1
 #  define POSH_ENDIAN_STRING "little"
 #else

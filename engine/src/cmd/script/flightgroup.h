@@ -1,6 +1,5 @@
 #ifndef _FLIGHTGROUP_H_
 #define _FLIGHTGROUP_H_
-#include "config.h"
 #include "cmd/container.h"
 #include "mission.h"
 #include <string>

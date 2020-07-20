@@ -6,7 +6,7 @@
 #undef _POSIX_C_SOURCE
 #endif
 
-#include "cs_python.h"
+#include <Python.h>
 #include "hashtable.h"
 #include <string>
 #include <compile.h>

@@ -3,7 +3,6 @@
 //
 
 #include "SoundBuffer.h"
-#include "config.h"
 
 #include <stdlib.h>
 #include <memory.h>

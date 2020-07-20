@@ -26,7 +26,7 @@
 #include "cmd/unit_find.h"
 
 #include "python/init.h"
-#include "cs_python.h"
+#include <Python.h>
 #include "options.h"
 
 #include <iostream>

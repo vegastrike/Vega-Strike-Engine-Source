@@ -2,11 +2,10 @@
 #ifndef _BASE_UTIL_H_
 #define _BASE_UTIL_H_
 
-#include "config.h"
 #include <string>
 #include <boost/version.hpp>
 #if BOOST_VERSION != 102800
-#include "cs_boostpythonobj.h"
+#include <boost/python/object.hpp>
 #include <boost/python/dict.hpp>
 typedef boost::python::dict       BoostPythonDictionary;
 #else

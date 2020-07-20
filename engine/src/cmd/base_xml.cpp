@@ -1,4 +1,3 @@
-#include "config.h"
 #include <boost/version.hpp>
 #if BOOST_VERSION != 102800
 #include <boost/python/object.hpp>
@@ -6,7 +5,7 @@
 #include <boost/python/objects.hpp>
 #endif
 
-#include "cs_python.h"
+#include <Python.h>
 #include <vector>
 #include <string>
 #include <math.h>

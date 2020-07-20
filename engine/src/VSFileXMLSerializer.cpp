@@ -1,5 +1,4 @@
 #include "VSFileXMLSerializer.h"
-#include "config.h"
 
 #include "vsfilesystem.h"
 #include "audio/Exceptions.h"

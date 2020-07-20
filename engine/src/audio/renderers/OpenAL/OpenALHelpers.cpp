@@ -7,7 +7,6 @@
 #include "../../Types.h"
 #include "../../Exceptions.h"
 
-#include "config.h"
 #include "al.h"
 
 #include <string>

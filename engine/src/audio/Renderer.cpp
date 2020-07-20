@@ -3,7 +3,6 @@
 //
 
 #include "Renderer.h"
-#include "config.h"
 
 namespace Audio {
 

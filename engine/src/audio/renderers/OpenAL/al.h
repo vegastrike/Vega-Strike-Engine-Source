@@ -1,7 +1,6 @@
 #ifndef __AL_INCLUDES__INCLUDED__
 #define __AL_INCLUDES__INCLUDED__
 
-#include "config.h"
 
 #ifdef __APPLE__
     #include <al.h>

@@ -1,4 +1,3 @@
-#include "config.h"
 #include <list>
 #include <vector>
 #include "aggressive.h"

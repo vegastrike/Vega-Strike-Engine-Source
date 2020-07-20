@@ -1,6 +1,5 @@
 #ifndef _GENERICSYSTEM_H_
 #define _GENERICSYSTEM_H_
-#include "config.h"
 #include <expat.h>
 #include <string>
 #include <vector>

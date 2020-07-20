@@ -1,6 +1,5 @@
-#include "config.h"
 #include <algorithm>
-#include "cs_python.h"
+#include <Python.h>
 #include "base.h"
 #include "gldrv/winsys.h"
 #include "vsfilesystem.h"

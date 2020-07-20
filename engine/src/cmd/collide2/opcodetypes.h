@@ -20,7 +20,6 @@
 #define __CS_CSTYPES_H__
 
 // config.h is the VS ./configure determined header.
-#include "config.h" 
 #include <float.h>
 #include <wchar.h>
 #if defined(_WIN32) && !defined(__CYGWIN__) // && defined(_MSC_VER)

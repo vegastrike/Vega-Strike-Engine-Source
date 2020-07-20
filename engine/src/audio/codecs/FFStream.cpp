@@ -2,7 +2,6 @@
 // C++ Implementation: Audio::OggStream
 //
 
-#include "config.h"
 
 #ifdef HAVE_FFMPEG
 
