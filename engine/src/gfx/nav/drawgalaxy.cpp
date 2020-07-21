@@ -720,6 +720,11 @@ float vsmax( float x, float y )
 void NavigationSystem::DrawGalaxy()
 {
 //systemdrawlist mainlist;//(0, screenoccupation, factioncolours);	//	lists of items to draw that are in mouse range
+//copied from navscreen to check if the variables initialize properly now.
+    static GFXColor currentcol = GFXColor( 1, 0.3, 0.3, 1.0 );
+    static GFXColor destinationcol = GFXColor( 1, 0.77, 0.3, 1.0 );
+    static GFXColor selectcol = GFXColor( 0.3, 1, 0.3, 1.0 );
+    static GFXColor pathcol =   GFXColor( 1, 0.3, 0.3, 1.0 );
 
     systemdrawlist mouselist;     //(1, screenoccupation, factioncolours);	//	lists of items to draw that are in mouse range
 
@@ -734,7 +739,7 @@ void NavigationSystem::DrawGalaxy()
 //int length = systemnamestring.size();
 //float offset = (float(length)*0.005);
     systemname.col = GFXColor( 1, 1, .7, 1 );
-    pathcol = GFXColor( 1, 1, 1, 1 );
+//    pathcol = GFXColor( 1, 1, 1, 1 );
     systemname.SetPos( screenskipby4[0], screenskipby4[3] );     //Looks ugly when name is too long and goes off the edge.
 //systemname.SetPos( (((screenskipby4[0]+screenskipby4[1])/2)-offset) , screenskipby4[3]);
     systemname.SetText( systemnamestring );

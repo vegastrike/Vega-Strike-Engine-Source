@@ -340,15 +340,7 @@ void NavigationSystem::Setup()
         system_item_scale *= (screenskipby4[3]-screenskipby4[2]);
     screenoccupation = new navscreenoccupied( screenskipby4[0], screenskipby4[1], screenskipby4[2], screenskipby4[3], 1 );
 
-    //Get special colors from the config
-    static GFXColor currentcol = vs_config->getColor( "nav", "current_system",
-                                           GFXColor( 1, 0.3, 0.3, 1.0 ) );
-    static GFXColor destinationcol = vs_config->getColor( "nav", "destination_system",
-                                           GFXColor( 1, 0.77, 0.3, 1.0 ) );
-    static GFXColor selectcol = vs_config->getColor( "nav", "selection_system",
-                                           GFXColor( 0.3, 1, 0.3, 1.0 ) );
-    static GFXColor pathcol = vs_config->getColor( "nav", "path_system",
-                                           GFXColor( 1, 0.3, 0.3, 1.0 ) );
+  
     navcomp->init();
 }
 
@@ -679,6 +671,11 @@ void NavigationSystem::DrawSectorList()
     float    the_x, the_y, the_x1, the_y1, the_x2, the_y2;
     GFXColor color;
     unsigned count, index, row;
+    
+    static GFXColor currentcol = GFXColor( 1, 0.3, 0.3, 1.0 );
+    static GFXColor destinationcol = GFXColor( 1, 0.77, 0.3, 1.0 );
+    static GFXColor selectcol = GFXColor( 0.3, 1, 0.3, 1.0 );
+    static GFXColor pathcol =   GFXColor( 1, 0.3, 0.3, 1.0 );
 
     //Draw Title of Column
     drawdescription( "Sectors", originx+(0.5*width), originy-(0.0*deltay), 1, 1, 1, screenoccupation,
