@@ -675,7 +675,6 @@ void NavigationSystem::DrawSectorList()
     static GFXColor currentcol = GFXColor( 1, 0.3, 0.3, 1.0 );
     static GFXColor destinationcol = GFXColor( 1, 0.77, 0.3, 1.0 );
     static GFXColor selectcol = GFXColor( 0.3, 1, 0.3, 1.0 );
-    static GFXColor pathcol =   GFXColor( 1, 0.3, 0.3, 1.0 );
 
     //Draw Title of Column
     drawdescription( "Sectors", originx+(0.5*width), originy-(0.0*deltay), 1, 1, 1, screenoccupation,
