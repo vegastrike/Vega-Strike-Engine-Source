@@ -143,7 +143,10 @@ template <typename S, typename T>
 void Normalize( TVector<S,T> &r );
 
 template <typename S, typename T>
-bool IsShorterThan(const TVector<S,T>& a, float delta);
+bool IsShorterThan(const TVector<S,T>& a, S delta);
+
+template <typename S, typename T>
+bool IsShorterThan(const TVector<S,T>& a, T delta);
 
 template <typename S, typename T>
 TVector<S,T> PolygonNormal( TVector<S,T> v1, TVector<S,T> v2, TVector<S,T> v3 );
