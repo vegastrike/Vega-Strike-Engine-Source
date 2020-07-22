@@ -502,8 +502,10 @@ void StarSystem::UpdateUnitPhysics( bool firstframe )
                         priority  = 1+( ( (unsigned int) vsrandom.genrand_int32() )%priority );
                     }
                     float backup = SIMULATION_ATOM;
+                    BOOST_LOG_TRIVIAL(trace) << boost::format("void StarSystem::UpdateUnitPhysics( bool firstframe ): SIMULATION_ATOM as backed up:      %1%") % SIMULATION_ATOM;
                     theunitcounter   = theunitcounter+1;
                     SIMULATION_ATOM *= priority;
+                    BOOST_LOG_TRIVIAL(trace) << boost::format("void StarSystem::UpdateUnitPhysics( bool firstframe ): SIMULATION_ATOM after multiplying: %1%") % SIMULATION_ATOM;
                     unit->sim_atom_multiplier = priority;
                     double aa = queryTime();
                     unit->ExecuteAI();
@@ -518,6 +520,7 @@ void StarSystem::UpdateUnitPhysics( bool firstframe )
                     aitime  += bb-aa;
                     phytime += cc-bb;
                     SIMULATION_ATOM = backup;
+                    BOOST_LOG_TRIVIAL(trace) << boost::format("void StarSystem::UpdateUnitPhysics( bool firstframe ): SIMULATION_ATOM restored:          %1%") % SIMULATION_ATOM;
                     unit->predicted_priority = predprior;
                 }
             }
