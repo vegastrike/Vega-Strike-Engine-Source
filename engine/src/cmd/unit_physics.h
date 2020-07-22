@@ -54,8 +54,6 @@ void GameUnit< UnitType >::UpdatePhysics2( const Transformation &trans,
                                            bool lastframe,
                                            UnitCollection *uc )
 {
-    int player = -1;
-
     UnitType::UpdatePhysics2( trans, old_physical_state, accel, difficulty, transmat, cum_vel, lastframe, uc );
 
     this->AddVelocity( difficulty );

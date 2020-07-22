@@ -792,7 +792,7 @@ void StarSystem::ProcessPendingJumps()
 #endif
             _Universe->activeStarSystem()->VolitalizeJumpAnimation( pendingjump[kk]->animation );
         }
-        int playernum = _Universe->whichPlayerStarship( un );
+        // int playernum = _Universe->whichPlayerStarship( un );
         //In non-networking mode or in networking mode or a netplayer wants to jump and is ready or a non-player jump
         StarSystem *savedStarSystem = _Universe->activeStarSystem();
         if ( un == NULL || !_Universe->StillExists( pendingjump[kk]->dest )
