@@ -45,6 +45,7 @@ public:
 // Constructors
     TVector() : i(0),j(0),k(0){}
     TVector( const TVector<T,S> &a );
+    TVector( const TVector<S,T> &a );
     TVector( S i, S j, S k );
     TVector( struct _object* );
 

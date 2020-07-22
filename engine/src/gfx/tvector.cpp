@@ -29,7 +29,7 @@ double _netswap(double d) {
 
 template <typename T>
 T _sqrt(T t) {
-  return t;
+  return sqrtf(t);
 }
 
 template <>
@@ -39,7 +39,7 @@ float _sqrt(float f) {
 
 template <>
 double _sqrt(double d) {
-  return sqrtf(d);
+  return sqrt(d);
 }
 
 // Constructors
@@ -49,6 +49,14 @@ TVector<S,T>::TVector( const TVector<T,S> &a )
     i = static_cast<S>(a.i);
     j = static_cast<S>(a.j);
     k = static_cast<S>(a.k);
+}
+
+template <typename S, typename T>
+TVector<S,T>::TVector( const TVector<S,T> &a )
+{
+    i = a.i;
+    j = a.j;
+    k = a.k;
 }
 
 template <typename S, typename T>
@@ -190,7 +198,7 @@ S TVector<S,T>::Dot( const TVector &b ) const
 template <typename S, typename T>
 S TVector<S,T>::Magnitude() const
 {
-    return 1;
+    return sqrtf( i*i+j*j+k*k );
 }
 
 template <>
@@ -513,9 +521,9 @@ const TVector<float, double> TVector<float, double>::Transform( const Matrix &m1
 template <typename S, typename T>
 void Normalize( TVector<S,T> &r )
 {
-    T size = r.i*r.i+r.j*r.j+r.k*r.k;
+    S size = r.i*r.i+r.j*r.j+r.k*r.k;
     if (size > 0.00000000001) {
-        T isize = T(1.0) / _sqrt(size);
+        S isize = S(1.0) / _sqrt(size);
         r.i *= isize;
         r.j *= isize;
         r.k *= isize;
