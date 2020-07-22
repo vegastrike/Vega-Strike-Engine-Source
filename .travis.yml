@@ -24,6 +24,11 @@ jobs:
           dist: xenial
           compiler: clang
           name: "Ubuntu 16.04 LTS - Clang"
+        - os: linux
+          dist: xenial
+          compiler: clang
+          name: "Ubuntu 16.04 LTS - Py3"
+          env: FLAGS='-DUSE_PYTHON_3=ON'
         - os: osx
           osx_image: xcode11.3
           env: FLAGS='-DUSE_PYTHON_3=OFF -DBoost_NO_BOOST_CMAKE=ON'
@@ -32,6 +37,8 @@ jobs:
           env: FLAGS='-DUSE_PYTHON_3=ON'
     allow_failures:
         - os: osx
+        - dist: xenial
+          env: FLAGS='-DUSE_PYTHON_3=ON'
     fast_finish: true
 
 addons:
