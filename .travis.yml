@@ -68,19 +68,20 @@ deploy:
 #    # GitHub Releases
     provider: releases
     api_key:
-#        secure: "Encrypted GitHub Auth Key" <-- put this in the secrets
+        secure: m79xOkFq1yArD2c2rBVmbDTEly8jaKgmPy8CsncavCgD1d4pAq+FPdTKFgAhUrGBqOB3f/DP/J2W6VIvYiOs+x9bhCLS07OGE/euylm7UFjWX1dQenPMlTNaTb15YOthWsM8zYPSeb4sOl5aURedenV8sYK9kOU6OQ4ALBsCjNmVHo/3KMPxVoC+jIqsihl4Gc6Lkz2JW/Q/fQYg7gwDEKErq1L7UiiUfo9z5qs9z3ru6ZNkXmtedZpKyf0RsaUX769+POwF+CE2FDpK1t2gm+ga6dLu3au8NhS+FZZvQPk7ns9fbmNE/qb8c+DtGzZkIPDoDRtpZEHGcK3JZFdRatNnx4I1LleSNaTYOi/U+BmEtaEp7jL5MhVbYszodzAKeNaw9ZKnsmVFiOBsa/Rt5YLgHFtJ4g5UwAOPuPvEpgJhgE1lLxyjPyZ0P2LDrmIRIyKbMd7Ox1QAMFSd1RDvf7IubF+/Kt4nO8xmG3J1M/vUJBxKu+oJcbjR4fNo2GVbQfJ+uIU0z7vHm0b7mX/k7NVrnw22A4iy5Omu8XFDtVWRSQZvRlcsua4w1egEBfW0F/txh+7gUOhlo6O4hXVawBqZlUt04EiVUNKOtpGRpCNItk5TixN08gWbRIMzDNg6ZeWLuA0aMs5GhYImurE6dBu7NZ+Z7xakAy72SUxq09g=
     file:
        # Upload files in the `packages` directory
        - packages/*
 #    # Ensure the build doesn't get cleaned up so the files are avialable
 #    # for the release build
-    skip_clean: true
+    skip_cleanup: true
 #    # release is a draft so it can be edited, updated, etc.
     draft: true
     prerelease: true
 #    # GitHub Releases requires a tag; this guarnatees a tag is set
     on:
         tags: true
+        repo: vegastrike/Vega-Strike-Engine-Source
 
 notifications:
   webhooks:
