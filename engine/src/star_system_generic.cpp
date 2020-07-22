@@ -250,7 +250,7 @@ bool StarSystem::RemoveUnit( Unit *un )
 
     if (drawList.remove(un) ) {
         // regardless of being drawn, it should be in physics list
-        for (unsigned int i = 0; i <= SIM_QUEUE_SIZE; ++i) {    
+        for (unsigned int i = 0; i <= SIM_QUEUE_SIZE; ++i) {
             if(physics_buffer[i].remove(un)){
                 i = SIM_QUEUE_SIZE +1;
             }
@@ -282,9 +282,9 @@ void StarSystem::ExecuteUnitAI()
 
 extern Unit *TheTopLevelUnit;
 //sorry boyz...I'm just a tourist with a frag nav console--could you tell me where I am?
-Unit * getTopLevelOwner() 
+Unit * getTopLevelOwner()
 {
-    return (TheTopLevelUnit) ;  // Now we return a pointer to a new game unit created in main(), outside of any lists 
+    return (TheTopLevelUnit) ;  // Now we return a pointer to a new game unit created in main(), outside of any lists
 }
 
 void CarSimUpdate( Unit *un, float height )
