@@ -200,15 +200,18 @@ public:
         if ( parenttarget == unit || (parenttarget && parenttarget->isSubUnit() && parenttarget->owner == unit) )
             parenttarget = NULL;
         float backup = SIMULATION_ATOM;
+        BOOST_LOG_TRIVIAL(trace) << boost::format("UnitDrawer::draw(): SIMULATION_ATOM as backed up  = %1%") % SIMULATION_ATOM;
         unsigned int cur_sim_frame = _Universe->activeStarSystem()->getCurrentSimFrame();
         interpolation_blend_factor = calc_blend_factor( saved_interpolation_blend_factor,
                                                         unit->sim_atom_multiplier,
                                                         unit->cur_sim_queue_slot,
                                                         cur_sim_frame );
         SIMULATION_ATOM = backup*unit->sim_atom_multiplier;
+        BOOST_LOG_TRIVIAL(trace) << boost::format("UnitDrawer::draw(): SIMULATION_ATOM as multiplied = %1%") % SIMULATION_ATOM;
         (/*(GameUnit< Unit >*)*/ unit)->Draw();
         interpolation_blend_factor = saved_interpolation_blend_factor;
         SIMULATION_ATOM = backup;
+        BOOST_LOG_TRIVIAL(trace) << boost::format("UnitDrawer::draw(): SIMULATION_ATOM as restored   = %1%") % SIMULATION_ATOM;
         return true;
     }
     bool grav_acquire( Unit *unit )
@@ -249,7 +252,7 @@ void GameStarSystem::Draw( bool DrawCockpit )
     double setupdrawtime = queryTime();
     {
         cam_setup_phase = true;
-        
+
         Unit *saveparent = _Universe->AccessCockpit()->GetSaveParent();
         Unit *targ = NULL;
         if (saveparent)
@@ -257,6 +260,7 @@ void GameStarSystem::Draw( bool DrawCockpit )
         //Array containing the two interesting units, so as not to have to copy-paste code
         Unit *camunits[2] = {saveparent, targ};
         float backup = SIMULATION_ATOM;
+        BOOST_LOG_TRIVIAL(trace) << boost::format("GameStarSystem::Draw(): SIMULATION_ATOM as backed up  = %1%") % SIMULATION_ATOM;
         unsigned int cur_sim_frame = _Universe->activeStarSystem()->getCurrentSimFrame();
         for (int i = 0; i < 2; ++i) {
             Unit *unit = camunits[i];
@@ -267,11 +271,13 @@ void GameStarSystem::Draw( bool DrawCockpit )
                                                                 unit->cur_sim_queue_slot,
                                                                 cur_sim_frame );
                 SIMULATION_ATOM = backup*unit->sim_atom_multiplier;
+                BOOST_LOG_TRIVIAL(trace) << boost::format("GameStarSystem::Draw(): SIMULATION_ATOM as multiplied = %1%") % SIMULATION_ATOM;
                 ( (GameUnit< Unit >*)unit )->GameUnit< Unit >::Draw();
             }
         }
         interpolation_blend_factor = saved_interpolation_blend_factor;
         SIMULATION_ATOM = backup;
+        BOOST_LOG_TRIVIAL(trace) << boost::format("GameStarSystem::Draw(): SIMULATION_ATOM as restored   = %1%") % SIMULATION_ATOM;
 
 
         ///this is the final, smoothly calculated cam

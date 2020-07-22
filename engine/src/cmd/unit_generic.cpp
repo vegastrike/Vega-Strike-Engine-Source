@@ -2466,6 +2466,7 @@ void Unit::UpdateSubunitPhysics( const Transformation &trans,
     if ( !SubUnits.empty() ) {
         Unit *su;
         float backup = SIMULATION_ATOM;
+        BOOST_LOG_TRIVIAL(trace) << boost::format("Unit::UpdateSubunitPhysics(): SIMULATION_ATOM as backed up  = %1%") % SIMULATION_ATOM;
         float basesimatom = (this->sim_atom_multiplier ? backup/(float) this->sim_atom_multiplier : backup);
         unsigned int cur_sim_frame = _Universe->activeStarSystem()->getCurrentSimFrame();
         for (un_iter iter = getSubUnits(); (su = *iter); ++iter)
@@ -2497,6 +2498,7 @@ void Unit::UpdateSubunitPhysics( const Transformation &trans,
                         su->sim_atom_multiplier = this->sim_atom_multiplier;
                     }
                     SIMULATION_ATOM = basesimatom*(float) su->sim_atom_multiplier;
+                    BOOST_LOG_TRIVIAL(trace) << boost::format("Unit::UpdateSubunitPhysics(): SIMULATION_ATOM as multiplied = %1%") % SIMULATION_ATOM;
                     Unit::UpdateSubunitPhysics( su,
                                                 cumulative_transformation,
                                                 cumulative_transformation_matrix,
@@ -2507,6 +2509,7 @@ void Unit::UpdateSubunitPhysics( const Transformation &trans,
                 }
             }
         SIMULATION_ATOM = backup;
+        BOOST_LOG_TRIVIAL(trace) << boost::format("Unit::UpdateSubunitPhysics(): SIMULATION_ATOM as restored   = %1%") % SIMULATION_ATOM;
     }
 }
 

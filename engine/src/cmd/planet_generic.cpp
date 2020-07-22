@@ -6,6 +6,7 @@
 #include <sys/stat.h>
 #include "universe_util.h"
 #include "lin_time.h"
+#include "vsfilesystem.h"
 
 char * getnoslash( char *inp )
 {
@@ -103,6 +104,7 @@ void PlanetaryOrbit::Execute()
                 orbit_list_filled     = false;
             } else {
                 if (SIMULATION_ATOM != orbiting_last_simatom) {
+                    BOOST_LOG_TRIVIAL(trace) << "void PlanetaryOrbit::Execute(): SIMULATION_ATOM != orbiting_last_simatom";
                     QVector sum_diff( 0, 0, 0 );
                     QVector sum_position;
                     int     limit;
