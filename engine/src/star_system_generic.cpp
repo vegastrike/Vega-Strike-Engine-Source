@@ -503,29 +503,35 @@ void StarSystem::UpdateUnitPhysics( bool firstframe )
                     }
                     float backup = SIMULATION_ATOM;
                     BOOST_LOG_TRIVIAL(trace) << boost::format("void StarSystem::UpdateUnitPhysics( bool firstframe ): SIMULATION_ATOM as backed up:      %1%") % SIMULATION_ATOM;
-                    theunitcounter   = theunitcounter+1;
-                    SIMULATION_ATOM *= priority;
-                    BOOST_LOG_TRIVIAL(trace) << boost::format("void StarSystem::UpdateUnitPhysics( bool firstframe ): SIMULATION_ATOM after multiplying: %1%") % SIMULATION_ATOM;
-                    unit->sim_atom_multiplier = priority;
-                    double aa = queryTime();
-                    unit->ExecuteAI();
-                    double bb = queryTime();
-                    unit->ResetThreatLevel();
-                    //FIXME "firstframe"-- assume no more than 2 physics updates per frame.
-                    unit->UpdatePhysics( identity_transformation, identity_matrix, Vector( 0,
-                                                                                           0,
-                                                                                           0 ), priority
-                                         == 1 ? firstframe : true, &this->gravitationalUnits(), unit );
-                    double cc = queryTime();
-                    aitime  += bb-aa;
-                    phytime += cc-bb;
-                    SIMULATION_ATOM = backup;
+                    try {
+                        theunitcounter   = theunitcounter+1;
+                        SIMULATION_ATOM *= priority;
+                        BOOST_LOG_TRIVIAL(trace) << boost::format("void StarSystem::UpdateUnitPhysics( bool firstframe ): SIMULATION_ATOM after multiplying: %1%") % SIMULATION_ATOM;
+                        unit->sim_atom_multiplier = priority;
+                        double aa = queryTime();
+                        unit->ExecuteAI();
+                        double bb = queryTime();
+                        unit->ResetThreatLevel();
+                        //FIXME "firstframe"-- assume no more than 2 physics updates per frame.
+                        unit->UpdatePhysics( identity_transformation, identity_matrix, Vector( 0,
+                                                                                               0,
+                                                                                               0 ), priority
+                                             == 1 ? firstframe : true, &this->gravitationalUnits(), unit );
+                        double cc = queryTime();
+                        aitime  += bb-aa;
+                        phytime += cc-bb;
+                        SIMULATION_ATOM = backup;
+                    } catch (...) {
+                        SIMULATION_ATOM = backup;
+                        throw;
+                    }
                     BOOST_LOG_TRIVIAL(trace) << boost::format("void StarSystem::UpdateUnitPhysics( bool firstframe ): SIMULATION_ATOM restored:          %1%") % SIMULATION_ATOM;
                     unit->predicted_priority = predprior;
                 }
             }
             catch (const boost::python::error_already_set&) {
                 if ( PyErr_Occurred() ) {
+                    BOOST_LOG_TRIVIAL(error) << "void StarSystem::UpdateUnitPhysics( bool firstframe ): Python error occurred";
                     PyErr_Print();
                     PyErr_Clear();
                     fflush( stderr );
