@@ -9,6 +9,8 @@
 #include "ai/fire.h"
 #include "asteroid.h"
 #include "ai/aggressive.h"
+#include "enhancement.h"
+#include "building.h"
 
 // TODO: For comparison only - remove
 #include "terrain.h"
@@ -31,7 +33,6 @@ namespace alg = boost::algorithm;
 using std::string;
 using std::map;
 using std::vector;
-using std::cout;
 using std::endl;
 
 
@@ -101,7 +102,7 @@ void SystemFactory::recursiveParse(pt::ptree tree, Object& object)
     {
         Object inner_object = Object();
         inner_object.type = iterator.first;
-        //cout << "recursiveParse " << object.type << ":" << inner_object.type << endl;
+        //BOOST_LOG_TRIVIAL(debug) << "recursiveParse " << object.type << ":" << inner_object.type << endl;
 
         // Process attributes
         if(inner_object.type == "<xmlattr>")
@@ -112,7 +113,7 @@ void SystemFactory::recursiveParse(pt::ptree tree, Object& object)
                 string value = attributes_iterator.second.data();
                 alg::to_lower(key); // to avoid various bugs, we turn all keys to lowercase
 
-                //cout << "Adding to " << object.type << " attribute " <<  key << "=" << value << endl;
+                //BOOST_LOG_TRIVIAL(debug) << "Adding to " << object.type << " attribute " <<  key << "=" << value << endl;
                 object.attributes[key] = value;
             }
 
@@ -131,17 +132,17 @@ void SystemFactory::recursiveParse(pt::ptree tree, Object& object)
 void SystemFactory::recursiveProcess(Star_XML *xml, Object& object, Planet* owner, int level)
 {
     xml->unitlevel = level;
-//    cout << "recursiveProcess: " << object.type << ":"  << endl;
-//    cout << "Object of type " << object.type << " has " << object.objects.size() << " children.\n";
+//    BOOST_LOG_TRIVIAL(debug) << "recursiveProcess: " << object.type << ":"  << endl;
+//    BOOST_LOG_TRIVIAL(debug) << "Object of type " << object.type << " has " << object.objects.size() << " children.\n";
 
     if(boost::iequals(object.type, "light"))
     {
-        processLight(xml, object);
+        processLight(object);
         return; // We don't bother processing children of light, as it's done in processLight
     }
     else if(boost::iequals(object.type, "system")) processSystem(xml, object);
     else if(boost::iequals(object.type, "ring")) processRing(xml, object, owner);
-    else if(boost::iequals(object.type, "SpaceElevator")) processSpaceElevator(xml, object);
+    else if(boost::iequals(object.type, "SpaceElevator")) processSpaceElevator(object, owner);
     else if(boost::iequals(object.type, "planet") || boost::iequals(object.type, "jump"))
             owner = processPlanet(xml, object, owner);
 //    else if(boost::iequals(object.type, "asteroid"))
@@ -156,13 +157,15 @@ void SystemFactory::recursiveProcess(Star_XML *xml, Object& object, Planet* owne
     // Now we process children
     for (auto& child_object : object.objects)
     {
-//        cout << "recursiveProcess: iterating over child object " << child_object.type << endl;
+        //BOOST_LOG_TRIVIAL(debug) << "recursiveProcess: iterating over child object "
+        //<< child_object.type << endl;
         recursiveProcess(xml, child_object, owner, level+1);
     }
 }
 
-void SystemFactory::processLight(Star_XML *xml, Object& object)
+void SystemFactory::processLight(Object& object)
 {
+    BOOST_LOG_TRIVIAL(debug) << "processLight\n";
     Light light;
     for (const auto& child_object : object.objects)
     {
@@ -172,18 +175,17 @@ void SystemFactory::processLight(Star_XML *xml, Object& object)
         if(child_object.type == "specular") light.specular = color;
         if(child_object.type == "ambient") light.ambient = color;
 
-//        cout << "Parsed color (" << color.r << "-" << color.g << "-" << color.b
+//        BOOST_LOG_TRIVIAL(debug) << "Parsed color (" << color.r << "-" << color.g << "-" << color.b
 //             << "-" << color.a << ") - target: " << child_object.type << endl;
     }
 
     lights.push_back(light);
-//    cout << "processLight done - " << this->lights.size() << endl;
+//    BOOST_LOG_TRIVIAL(debug) << "processLight done - " << this->lights.size() << endl;
 }
 
 void SystemFactory::processSystem(Star_XML *xml, Object& object)
 {
-//    cout << "processSystem\n";
-    xml->unitlevel++;
+    BOOST_LOG_TRIVIAL(debug) << "processSystem\n";
     xml->name = getStringAttribute(object, "name");
     xml->backgroundname = getStringAttribute(object, "background");
     xml->scale *= getFloatAttribute(object, "ScaleSystem"); // Size of the sun
@@ -199,8 +201,7 @@ void SystemFactory::processSystem(Star_XML *xml, Object& object)
 
 void SystemFactory::processRing(Star_XML *xml, Object& object, Planet* owner)
 {
-//    cout << "processRing\n";
-    xml->unitlevel++;
+    BOOST_LOG_TRIVIAL(debug) << "processRing\n";
 
     BLENDFUNC blend_source = SRCALPHA;
     BLENDFUNC blend_destination = INVSRCALPHA;
@@ -235,6 +236,8 @@ void SystemFactory::processRing(Star_XML *xml, Object& object, Planet* owner)
 
 Planet* SystemFactory::processPlanet(Star_XML *xml, Object& object, Planet* owner)
 {
+    BOOST_LOG_TRIVIAL(debug) << "processPlanet\n";
+
     QVector S( 0, 1, 0 );
     QVector R( 0, 0, 1 );
 
@@ -248,7 +251,7 @@ Planet* SystemFactory::processPlanet(Star_XML *xml, Object& object, Planet* owne
     string unitname = getStringAttribute(object, "unit");
     string fullname = getStringAttribute(object, "name", "unknw");
 
-    cout << "Processing planet " << fullname << " orbiting " << owner << endl;
+    BOOST_LOG_TRIVIAL(debug) << "Processing planet " << fullname << " orbiting " << owner << endl;
 
     BLENDFUNC blend_source = ONE;
     BLENDFUNC blend_destination = ZERO;
@@ -298,7 +301,7 @@ Planet* SystemFactory::processPlanet(Star_XML *xml, Object& object, Planet* owne
                 ourmat.db = ourmat.ar = ourmat.ag = ourmat.ab = 0;
     }
 
-    cout << fullname << " ourmat: " << ourmat.sr << " : " << ourmat.sg << " : " << ourmat.sb << " : " <<
+    BOOST_LOG_TRIVIAL(debug) << fullname << " ourmat: " << ourmat.sr << " : " << ourmat.sg << " : " << ourmat.sb << " : " <<
             ourmat.dr << " : " << ourmat.dg << " : " << ourmat.db << " : " << ourmat.ar <<
             " : " << ourmat.ag << " : " << ourmat.ab << endl;
 
@@ -335,13 +338,13 @@ Planet* SystemFactory::processPlanet(Star_XML *xml, Object& object, Planet* owne
     }
 
     for(auto& local_light : curlights) {
-        cout << "Light " << 7 << " : " << local_light.islocal << endl;
+        BOOST_LOG_TRIVIAL(debug) << "Light " << 7 << " : " << local_light.islocal << endl;
         auto& light = local_light.ligh;
-        cout << "Ambient: " << light.ambient[0] << ":" << light.ambient[1] << ":"
+        BOOST_LOG_TRIVIAL(debug) << "Ambient: " << light.ambient[0] << ":" << light.ambient[1] << ":"
                  << light.ambient[2] << ":" << light.ambient[3] << endl;
-        cout << "Diffuse: " << light.diffuse[0] << ":" << light.diffuse[1] << ":"
+        BOOST_LOG_TRIVIAL(debug) << "Diffuse: " << light.diffuse[0] << ":" << light.diffuse[1] << ":"
                  << light.diffuse[2] << ":" << light.diffuse[3] << endl;
-        cout << "Specular: " << light.specular[0] << ":" << light.specular[1] << ":"
+        BOOST_LOG_TRIVIAL(debug) << "Specular: " << light.specular[0] << ":" << light.specular[1] << ":"
                  << light.specular[2] << ":" << light.specular[3] << endl;
     }
 
@@ -397,7 +400,7 @@ Planet* SystemFactory::processPlanet(Star_XML *xml, Object& object, Planet* owne
     // A lot of the issues with the old code were due to the fact each XML element was parsed separately
     // with no awareness of other elements before. Therefore, state needed to be saved during processing.
     // Here we see this with the planet "owner" - I assume it is what the planet is orbiting.
-    cout << "Creating planet " << fullname << " with texture " << filename <<
+    BOOST_LOG_TRIVIAL(debug) << "Creating planet " << fullname << " with texture " << filename <<
             " and technique " << technique << endl;
 
     // Top level objects orbit the center?
@@ -439,28 +442,27 @@ Planet* SystemFactory::processPlanet(Star_XML *xml, Object& object, Planet* owne
     planet->applyTechniqueOverrides(paramOverrides);
 
     // For debug
-//    cout << name << " : " << filename << " : " << unitname << endl;
-//    cout << "R/X: " << R.i << " : " << R.j << " : " << R.k << endl;
-//    cout << "S/Y: " << S.i << " : " << S.j << " : " << S.k << endl;
-//    cout << "CmpRotVel: " << computed_rotational_velocity.i << " : " <<
+//    BOOST_LOG_TRIVIAL(debug) << name << " : " << filename << " : " << unitname << endl;
+//    BOOST_LOG_TRIVIAL(debug) << "R/X: " << R.i << " : " << R.j << " : " << R.k << endl;
+//    BOOST_LOG_TRIVIAL(debug) << "S/Y: " << S.i << " : " << S.j << " : " << S.k << endl;
+//    BOOST_LOG_TRIVIAL(debug) << "CmpRotVel: " << computed_rotational_velocity.i << " : " <<
 //            computed_rotational_velocity.j << " : " << computed_rotational_velocity.k << endl;
-//    cout << velocity << " : " << position << " : " << gravity << " : " << radius << endl;
-//    cout << destination.size() << " : " << "orbit_center" << " : " << curlights.size() << endl;
-//    cout << blend_source << " : " << blend_destination << " : " << insideout << endl;
+//    BOOST_LOG_TRIVIAL(debug) << velocity << " : " << position << " : " << gravity << " : " << radius << endl;
+//    BOOST_LOG_TRIVIAL(debug) << destination.size() << " : " << "orbit_center" << " : " << curlights.size() << endl;
+//    BOOST_LOG_TRIVIAL(debug) << blend_source << " : " << blend_destination << " : " << insideout << endl;
     return planet;
 }
 
-void SystemFactory::processSpaceElevator(Star_XML *xml, Object& object)
+void SystemFactory::processSpaceElevator(Object& object, Planet* owner)
 {
-    xml->unitlevel++;
+    BOOST_LOG_TRIVIAL(debug) << "processSpaceElevator\n";
     string myfile = getStringAttribute(object, "file", "elevator");
     string varname = getStringAttribute(object, "varname");
     float  varvalue = getFloatAttribute(object, "varvalue", 0.0f);
 
-    Planet *planet = xml->moons.back()->GetTopPlanet( xml->unitlevel-1 );
-    Unit *unit = static_cast<Unit*>(planet);
+    Unit *unit = static_cast<Unit*>(owner);
 
-    if (planet == nullptr || unit->isUnit() != PLANETPTR) return;
+    if (owner == nullptr || unit->isUnit() != PLANETPTR) return;
 
 
     char direction = getCharAttribute(object, "direction", 'b');
@@ -481,15 +483,13 @@ void SystemFactory::processSpaceElevator(Star_XML *xml, Object& object)
     }
 
     if(ConfigAllows( varname, varvalue ) )
-        planet->AddSpaceElevator(myfile, faction, direction);
+        owner->AddSpaceElevator(myfile, faction, direction);
 }
 
 // Disabling for now
 // Fog not actually used
 /*void System::processFog(Star_XML *xml, Object& object)
 {
-    xml->unitlevel++;
-
     if (!game_options.usePlanetFog)
         return;
 
@@ -499,8 +499,6 @@ void SystemFactory::processSpaceElevator(Star_XML *xml, Object& object)
 
 void SystemFactory::processFogElement(Star_XML *xml, Object& object)
 {
-    xml->unitlevel++;
-
     if (!game_options.usePlanetFog)
         return;
 
@@ -534,7 +532,7 @@ void SystemFactory::processFogElement(Star_XML *xml, Object& object)
 
 void SystemFactory::processEnhancement(string element, Star_XML *xml, Object& object, Planet* owner)
 {
-    cout << "Processing enhancement of type " << element << endl;
+    BOOST_LOG_TRIVIAL(debug) << "Processing enhancement of type " << element << endl;
 
     QVector S( 0, 1, 0 );
     QVector R( 0, 0, 1 );
@@ -544,27 +542,28 @@ void SystemFactory::processEnhancement(string element, Star_XML *xml, Object& ob
     initializeQVector(object, "r", R, scales_product);
     initializeQVector(object, "s", S, scales_product);
 
-    cout << element << endl;
-    cout << "R/X: " << R.i << " : " << R.j << " : " << R.k << endl;
-    cout << "S/Y: " << S.i << " : " << S.j << " : " << S.k << endl;
+    BOOST_LOG_TRIVIAL(debug) << element << endl;
+    BOOST_LOG_TRIVIAL(debug) << "R/X: " << R.i << " : " << R.j << " : " << R.k << endl;
+    BOOST_LOG_TRIVIAL(debug) << "S/Y: " << S.i << " : " << S.j << " : " << S.k << endl;
 
     string filename = getStringAttribute(object, "file");
     string fullname = getStringAttribute(object, "name", "unkn-unit");
     string condition = getStringAttribute(object, "condition");
 
     string varname = getStringAttribute(object, "varname");
-    float  varvalue = getFloatAttribute(object, "varvalue", 0.0f);
+    // float  varvalue = getFloatAttribute(object, "varvalue", 0.0f);
 
     vector< string > destinations;
 
     int faction = 0;
     int neutralfaction = FactionUtil::GetNeutralFaction();
 
-    float scalex = getFloatAttribute(object, "difficulty", game_options.AsteroidDifficulty);
+    float scalex = getFloatAttribute(object, "difficulty",
+                                     static_cast<float>(game_options.AsteroidDifficulty));
     float absolute_scalex = std::fabs(scalex);
-    float velocity = getFloatAttribute(object, "year", 0.0f);
+    double velocity = getDoubleAttribute(object, "year", 0.0);
     float rotational_velocity = getFloatAttribute(object, "day", 0.0f);
-    float position = getFloatAttribute(object, "position", 0.0f);
+    double position = getDoubleAttribute(object, "position", 0.0);
 
     // Parse destinations (jump only?)
     if(object.attributes.count("destination") )
@@ -601,8 +600,8 @@ void SystemFactory::processEnhancement(string element, Star_XML *xml, Object& ob
     if(std::fabs(rotational_velocity) > .00001f)
         rotational_velocity = 2.0f * float_pi / ( float_year_scale * rotational_velocity);
 
-    if(std::fabs(velocity) > .00001f)
-        velocity = 2.0f * float_pi / ( float_year_scale * velocity);
+    if(std::fabs(velocity) > .00001)
+        velocity = 2.0 * M_PI / (game_options.YearScale * velocity);
 
 
     if(boost::iequals(element, "nebula"))
@@ -629,7 +628,7 @@ void SystemFactory::processEnhancement(string element, Star_XML *xml, Object& ob
         }
     } else if(boost::iequals(element, "asteroid")) {
         Flightgroup *fg = getStaticAsteroidFlightgroup(faction);
-        unit = reinterpret_cast<Unit*>(
+        unit = static_cast<Unit*>(
                     UnitFactory::createAsteroid( filename.c_str(),
                                                  faction, fg, fg->nr_ships-1,
                                                  absolute_scalex ));
@@ -637,20 +636,20 @@ void SystemFactory::processEnhancement(string element, Star_XML *xml, Object& ob
             SetSubunitRotation(unit, absolute_scalex); //FIXME un de-referenced before allocation
 
     } else if(boost::iequals(element, "enhancement")) {
-        unit = reinterpret_cast<Unit*>(
+        unit = static_cast<Unit*>(
                     UnitFactory::createEnhancement(filename.c_str(), faction, string("")));
 
     } else if(boost::iequals(element, "building") ||
               boost::iequals(element, "vehicle")) {
 
         if (xml->ct == nullptr && xml->parentterrain != nullptr) // Terrain
-            unit = reinterpret_cast<Unit*>(
+            unit = static_cast<Unit*>(
                         UnitFactory::createBuilding(xml->parentterrain,
                                                     boost::iequals(element, "vehicle"),
                                                     filename.c_str(), false, faction,
                                                     string("")));
         else if(xml->ct != nullptr) // Continuous terrain
-            unit = reinterpret_cast<Unit*>(
+            unit = static_cast<Unit*>(
                         UnitFactory::createBuilding(xml->ct,
                                                     boost::iequals(element, "vehicle"),
                                                     filename.c_str(), false, faction,
@@ -670,7 +669,7 @@ void SystemFactory::processEnhancement(string element, Star_XML *xml, Object& ob
 
         unit->SetPosAndCumPos( R+S+xml->cursun.Cast()+xml->systemcentroid.Cast() );
         unit->SetOwner( getTopLevelOwner() );
-        xml->moons.push_back(reinterpret_cast<Planet*>(unit)); // Calling factory will call AddUnit using this
+        xml->moons.push_back(static_cast<Planet*>(unit)); // Calling factory will call AddUnit using this
     } else {
         // Some kind of satellite. We add to the top owner and not the immediate one
         current_top_planet->AddSatellite(unit);
@@ -685,72 +684,13 @@ void SystemFactory::processEnhancement(string element, Star_XML *xml, Object& ob
 
 }
 
-/*
- // Parse destinations (jump only?)
-    vector< string > destinations;
-    if(object.attributes.count("destination") )
-    {
-        destinations = ParseDestinations( object.attributes["destination"] );
-    }
-    for (auto& destination : destinations)
-        unit->AddDestination(destination);
- */
-void SystemFactory::processAsteroid(Star_XML *xml, Object& object, Planet* owner)
-{
-    QVector S( 0, 1, 0 );
-    QVector R( 0, 0, 1 );
 
-    double const scales_product = static_cast<double>(xml->scale * ScaleOrbitDist( xml->fade ));
-    initializeQVector(object, "r", R, scales_product);
-    initializeQVector(object, "s", S, scales_product);
 
-    string filename = getStringAttribute(object, "file");
-
-    float velocity = getFloatAttribute(object, "year", 0.0f);
-    float rotational_velocity = getFloatAttribute(object, "day", 0.0f);
-    float position = getFloatAttribute(object, "position", 0.0f);
-
-    // Factions
-    int neutralfaction = FactionUtil::GetNeutralFaction();
-    int faction = 0;
-    if(object.attributes.count("faction") )
-    {
-        faction = FactionUtil::GetFactionIndex(getStringAttribute(object, "faction", "0"));
-        int original_owner = FactionUtil::GetFactionIndex( UniverseUtil::GetGalaxyProperty(
-                                                              this->fullname, "faction" ) );
-        if (faction == original_owner) {
-            int owner_faction = FactionUtil::GetFactionIndex( UniverseUtil::GetGalaxyFaction(
-                                                                 this->fullname ) );
-            faction = owner_faction;
-        }
-    }
-
-    float scalex = game_options.AsteroidDifficulty;
-    Flightgroup *fg = getStaticAsteroidFlightgroup(faction);
-
-    Asteroid* asteroid = UnitFactory::createAsteroid(filename.c_str(), faction, fg, fg->nr_ships-1,
-                                             scalex < 0 ? -scalex : scalex);
-
-    if(owner == nullptr)
-    {
-        // Sun
-        asteroid->SetAI( new PlanetaryOrbit(asteroid, velocity, position, R, S, xml->cursun.Cast()+xml->systemcentroid.Cast(), nullptr));
-
-        asteroid->SetPosAndCumPos( R+S+xml->cursun.Cast()+xml->systemcentroid.Cast() );
-        asteroid->SetOwner( getTopLevelOwner() );
-        xml->moons.push_back(reinterpret_cast<Planet*>(asteroid)); // Calling factory will call AddUnit using this
-
-    } else {
-        // Planet or other satellite
-        owner->AddSatellite(asteroid);
-        asteroid->SetOwner(owner);
-        //cheating so nothing collides at top level - is this comment still relevant?
-        // FIXME un de-referenced before allocation - is this comment still relevant?
-        asteroid->SetAngularVelocity(ComputeRotVel(rotational_velocity, R, S));
-        asteroid->SetAI(new PlanetaryOrbit(asteroid, velocity, position, R, S, QVector(0, 0, 0), owner));
-    }
-}
-
+// Discussion (Roy Falk): I initially thought to make this a template. Then you would automatically
+// get the value required. i.e. T t = getAttribute(...) would return T.
+// However, we would still need to specialize the string conversion (e.g. std:stof)
+// More important, this is dangerous. Changing T would change the function called and
+// this would not be obvious to somewhat not familiar with the code.
 string SystemFactory::getStringAttribute(Object object, string key, string default_value)
 {
     alg::to_lower(key);
@@ -772,12 +712,11 @@ char SystemFactory::getCharAttribute(Object object, string key, char default_val
     return default_value;
 }
 
-// TODO: this should really be a template for all three functions
 int SystemFactory::getIntAttribute(Object object, string key, int default_value,
                                 int multiplier, int default_multiplier)
 {
     alg::to_lower(key);
-    if(object.attributes.count(key)) return std::stof(object.attributes[key]) * multiplier;
+    if(object.attributes.count(key)) return std::stoi(object.attributes[key]) * multiplier;
     return default_value * default_multiplier;
 }
 
@@ -868,75 +807,78 @@ GFXColor SystemFactory::initializeColor(Object object)
 
 void compareString(string field, string first, string second)
 {
-    if(first != second) cout << field << " : " << first << "!=" << second << endl;
+    if(first != second) BOOST_LOG_TRIVIAL(debug) << field << " : " << first << "!=" << second << endl;
 }
 
 void compareInt(string field, int first, int second)
 {
-    if(first != second) cout << field << " : " << first << "!=" << second << endl;
+    if(first != second) BOOST_LOG_TRIVIAL(debug) << field << " : " << first << "!=" << second << endl;
 }
 
 void compareFloat(string field, float first, float second)
 {
-    if(first != second) cout << field << " : " << first << "!=" << second << endl;
+    bool result = std::fabs(first - second) < 0.001f;
+    if(!result) BOOST_LOG_TRIVIAL(debug) << field << " : " << first << "!=" << second << endl;
+}
+
+bool compareFloat(float first, float second)
+{
+    return std::fabs(first - second) < 0.001f;
 }
 
 void compareTerrain(Terrain* first, Terrain* second)
 {
     if(first == nullptr && second == nullptr) return;
     if(first == nullptr && second != nullptr) {
-        cout << "Terrain doesn't match. First is null but second isn't\n";
+        BOOST_LOG_TRIVIAL(debug) << "Terrain doesn't match. First is null but second isn't\n";
         return;
     }
     if(first == nullptr && second == nullptr) {
-        cout << "Terrain doesn't match. Second is null but first isn't\n";
+        BOOST_LOG_TRIVIAL(debug) << "Terrain doesn't match. Second is null but first isn't\n";
         return;
     }
 
-    if(first->TotalSizeX == second->TotalSizeX &&
-            first->TotalSizeZ == second->TotalSizeZ &&
-            first->mass == second->mass &&
+    if(compareFloat(first->TotalSizeX, second->TotalSizeX) &&
+            compareFloat(first->TotalSizeZ, second->TotalSizeZ) &&
+            compareFloat(first->mass, second->mass) &&
             first->whichstage == second->whichstage &&
             first->draw == second->draw) return;
-    cout << "Terrain doesn't match\n";
+    BOOST_LOG_TRIVIAL(debug) << "Terrain doesn't match\n";
 }
 
 void compareContinuousTerrain(ContinuousTerrain* first, ContinuousTerrain* second)
 {
     if(first == nullptr && second == nullptr) return;
     if(first == nullptr && second != nullptr) {
-        cout << "Terrain doesn't match. First is null but second isn't\n";
+        BOOST_LOG_TRIVIAL(debug) << "Terrain doesn't match. First is null but second isn't\n";
         return;
     }
     if(first == nullptr && second == nullptr) {
-        cout << "Terrain doesn't match. Second is null but first isn't\n";
+        BOOST_LOG_TRIVIAL(debug) << "Terrain doesn't match. Second is null but first isn't\n";
         return;
     }
 
     if(first->Scales == second->Scales &&
-            first->sizeX == second->sizeX &&
-            first->sizeZ == second->sizeZ &&
+            compareFloat(first->sizeX, second->sizeX) &&
+            compareFloat(first->sizeZ, second->sizeZ) &&
             first->width == second->width &&
             first->numcontterr == second->numcontterr) return;
-    cout << "ContinuousTerrain doesn't match\n";
+    BOOST_LOG_TRIVIAL(debug) << "ContinuousTerrain doesn't match\n";
 }
 
 void compareLights(std::vector< GFXLight >first, std::vector< GFXLight >second)
 {
     if(first.size() != second.size()) {
-        cout << "Light sizes dont match (" << first.size() << "!=" << second.size() << ")\n";
+        BOOST_LOG_TRIVIAL(debug) << "Light sizes dont match (" << first.size() << "!=" << second.size() << ")\n";
     }
 }
 
-void compareMoon(Planet* first, Planet* second)
-{
-
-}
+//void compareMoon(Planet* first, Planet* second) {}
 
 void compareMoons(std::vector< Planet* >first, std::vector< Planet* >second)
 {
     if(first.size() != second.size()) {
-        cout << "Moon sizes dont match (" << first.size() << "!=" << second.size() << ")\n";
+        BOOST_LOG_TRIVIAL(debug) << "Moon sizes dont match (" << first.size() << "!=" << second.size() << ")\n";
     }
 }
 
@@ -955,12 +897,12 @@ void SystemFactory::compare(Star_XML* xml1, Star_XML* xml2)
     compareTerrain(xml1->parentterrain, xml2->parentterrain);
     compareContinuousTerrain(xml1->ct, xml2->ct);
     compareLights(xml1->lights, xml2->lights);
-    compareMoons(xml1->moons, xml2->moons);
+//    compareMoons(xml1->moons, xml2->moons);
 }
 
 void SystemFactory::debug(Object& object, string path)
 {
-    cout << path << "/" << object.type << " " << object.objects.size() << endl;
+    BOOST_LOG_TRIVIAL(debug) << path << "/" << object.type << " " << object.objects.size() << endl;
     for (auto& child_object : object.objects)
     {
         debug(child_object, path + object.type);
