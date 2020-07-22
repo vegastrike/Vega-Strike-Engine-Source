@@ -342,8 +342,8 @@ Unit* Planet::beginElement( QVector x,
             Planet *p;
             if (dest.size() != 0)
                 radius = ScaleJumpRadius( radius );
-            satellites.prepend( p = UnitFactory::createPlanet( x, y, vely, rotvel, pos, gravity, radius, 
-                                                               filename, technique, unitname, 
+            satellites.prepend( p = UnitFactory::createPlanet( x, y, vely, rotvel, pos, gravity, radius,
+                                                               filename, technique, unitname,
                                                                blendSrc, blendDst, dest,
                                                                QVector( 0, 0, 0 ), this, ourmat, ligh, faction, fullname, inside_out ) );
             un = p;

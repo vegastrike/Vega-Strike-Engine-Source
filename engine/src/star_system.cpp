@@ -186,7 +186,7 @@ public:
             parent = UnitUtil::owner( parent );
         if (parent)
             draw(parent);
-        
+
         if (parenttarget && parenttarget->isSubUnit())
             parenttarget = UnitUtil::owner( parenttarget );
         if (parenttarget)
@@ -338,7 +338,7 @@ void GameStarSystem::Draw( bool DrawCockpit )
     WarpTrailDraw();
 
     GFXFogMode( FOG_OFF );
-    
+
     // At this point, we've set all occluders
     // Mesh::ProcessXMeshes will query it
 
@@ -376,7 +376,7 @@ void GameStarSystem::Draw( bool DrawCockpit )
     if (DrawCockpit)
         _Universe->AccessCockpit()->Draw();
     MeshAnimation::UpdateFrames();
-    
+
     // And now we're done with the occluder set
     Occlusion::end();
 }
@@ -455,10 +455,10 @@ void GameStarSystem::createBackground( StarSystem::StarXML *xml )
     LightMap[0] = new Texture( bgfile.c_str(), 1, MIPMAP, TEXTURE2D, TEXTURE_2D, GFXTRUE );
 #endif
 
-    bg = new Background( 
-        xml->backgroundname.c_str(), 
-        xml->numstars, 
-        g_game.zfar*.9, 
+    bg = new Background(
+        xml->backgroundname.c_str(),
+        xml->numstars,
+        g_game.zfar*.9,
         filename,
         xml->backgroundColor,
         xml->backgroundDegamma );
