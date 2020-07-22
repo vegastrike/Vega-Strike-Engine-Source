@@ -275,6 +275,7 @@ void UpdateTime()
     lasttime    = newtime;
     newtime     = (double)ts.tv_sec + ((double)ts.tv_nsec) * 1.e-9;
     elapsedtime = newtime-lasttime;
+    BOOST_LOG_TRIVIAL(trace) << boost::format("lin_time.cpp: UpdateTime(): lasttime is %1%; newtime is %2%; elapsedtime before time compression is %3%") % lasttime % newtime % elapsedtime;
     if (first) {
         firsttime = newtime;
     }
@@ -296,6 +297,7 @@ void UpdateTime()
 # error "We have no way to determine the time on this system."
 #endif
     elapsedtime *= timecompression;
+    BOOST_LOG_TRIVIAL(trace) << boost::format("lin_time.cpp: UpdateTime():                                  elapsedtime after  time compression is %1%") % elapsedtime;
     first=false;
 }
 
