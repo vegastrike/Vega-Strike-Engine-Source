@@ -611,12 +611,13 @@ void InitDataDirectory()
     data_paths.push_back( "../../Assets-Production");
 
     //Win32 data should be "."
-    char tmppath[16384];
+    const size_t TMP_PATH_MAX = 16384;
+    char tmppath[TMP_PATH_MAX];
     for (vector< string >::iterator vsit = data_paths.begin(); vsit != data_paths.end(); vsit++)
         //Test if the dir exist and contains config_file
         if (FileExists( (*vsit), config_file ) >= 0) {
             cerr<<"Found data in "<<(*vsit)<<endl;
-            if (NULL != getcwd( tmppath, 16384 )) {
+            if (NULL != getcwd( tmppath, TMP_PATH_MAX - 1 )) {
                 if ( (*vsit).substr( 0, 1 ) == "." )
                     datadir = string( tmppath )+"/"+(*vsit);
                 else
@@ -629,7 +630,7 @@ void InitDataDirectory()
                 cerr<<"Error changing to datadir"<<endl;
                 exit( 1 );
             }
-            if (NULL != getcwd( tmppath, 16384 )) {
+            if (NULL != getcwd( tmppath, TMP_PATH_MAX - 1 )) {
                 datadir = string( tmppath );
             } else {
                 VSFileSystem::vs_fprintf( stderr, "Cannot get current path: path too long");
