@@ -381,7 +381,7 @@ void GameUnit< UnitType >::Draw( const Transformation &parent, const Matrix &par
     if (!cam_setup_phase) {
         // Following stuff is only needed in actual drawing phase
         if (this->cloaking > this->cloakmin) {
-            cloak = (int) (this->cloaking-interpolation_blend_factor*this->pImage->cloakrate*SIMULATION_ATOM);
+            cloak = (int) (this->cloaking-interpolation_blend_factor*this->pImage->cloakrate*simulation_atom_var);
             cloak = cloakVal( cloak, this->cloakmin, this->pImage->cloakrate, this->pImage->cloakglass );
         }
         if (this->hull < this->maxhull) {
@@ -398,7 +398,7 @@ void GameUnit< UnitType >::Draw( const Transformation &parent, const Matrix &par
             QVector camerapos = camera->GetPosition();
 
             float minmeshradius =
-                ( camera->GetVelocity().Magnitude()+this->Velocity.Magnitude() )*SIMULATION_ATOM;
+                ( camera->GetVelocity().Magnitude()+this->Velocity.Magnitude() )*simulation_atom_var;
 
             unsigned int numKeyFrames = this->graphicOptions.NumAnimationPoints;
             for (i = 0, n = this->nummesh(); i <= n; i++) {
@@ -470,11 +470,11 @@ void GameUnit< UnitType >::Draw( const Transformation &parent, const Matrix &par
             double backup = interpolation_blend_factor;
             int    cur_sim_frame = _Universe->activeStarSystem()->getCurrentSimFrame();
             for (un_iter iter = this->getSubUnits(); (un = *iter); ++iter) {
-                float backup = SIMULATION_ATOM;
+                float sim_atom_backup = simulation_atom_var;
                 if (this->sim_atom_multiplier && un->sim_atom_multiplier) {
-                    BOOST_LOG_TRIVIAL(trace) << boost::format("void GameUnit< UnitType >::Draw( const Transformation &parent, const Matrix &parentMatrix ): SIMULATION_ATOM as backed up  = %1%") % SIMULATION_ATOM;
-                    SIMULATION_ATOM = SIMULATION_ATOM*un->sim_atom_multiplier/this->sim_atom_multiplier;
-                    BOOST_LOG_TRIVIAL(trace) << boost::format("void GameUnit< UnitType >::Draw( const Transformation &parent, const Matrix &parentMatrix ): SIMULATION_ATOM as multiplied = %1%") % SIMULATION_ATOM;
+                    BOOST_LOG_TRIVIAL(trace) << boost::format("void GameUnit< UnitType >::Draw( const Transformation &parent, const Matrix &parentMatrix ): simulation_atom_var as backed up  = %1%") % simulation_atom_var;
+                    simulation_atom_var = simulation_atom_var * un->sim_atom_multiplier / this->sim_atom_multiplier;
+                    BOOST_LOG_TRIVIAL(trace) << boost::format("void GameUnit< UnitType >::Draw( const Transformation &parent, const Matrix &parentMatrix ): simulation_atom_var as multiplied = %1%") % simulation_atom_var;
                 }
                 interpolation_blend_factor = calc_blend_factor( saved_interpolation_blend_factor,
                                                                 un->sim_atom_multiplier,
@@ -482,7 +482,7 @@ void GameUnit< UnitType >::Draw( const Transformation &parent, const Matrix &par
                                                                 cur_sim_frame );
                 (un)->Draw( *ct, *ctm );
 
-                SIMULATION_ATOM = backup;
+                simulation_atom_var = sim_atom_backup;
             }
             interpolation_blend_factor = backup;
         }

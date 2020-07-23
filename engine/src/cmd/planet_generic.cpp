@@ -46,7 +46,7 @@ PlanetaryOrbit::PlanetaryOrbit( Unit *p,
 {
     for (unsigned int t = 0; t < NUM_ORBIT_AVERAGE; ++t)
         orbiting_average[t] = QVector( 0, 0, 0 );
-    orbiting_last_simatom = SIMULATION_ATOM;
+    orbiting_last_simatom = simulation_atom_var;
     orbit_list_filled     = false;
     p->SetResolveForces( false );
     double delta = x_size.Magnitude()-y_size.Magnitude();
@@ -99,12 +99,12 @@ void PlanetaryOrbit::Execute()
                 //clear all of them.
                 for (o = 0; o < NUM_ORBIT_AVERAGE; o++)
                     orbiting_average[o] = desired;
-                orbiting_last_simatom = SIMULATION_ATOM;
+                orbiting_last_simatom = simulation_atom_var;
                 current_orbit_frame   = 2;
                 orbit_list_filled     = false;
             } else {
-                if (SIMULATION_ATOM != orbiting_last_simatom) {
-                    BOOST_LOG_TRIVIAL(trace) << "void PlanetaryOrbit::Execute(): SIMULATION_ATOM != orbiting_last_simatom";
+                if (simulation_atom_var != orbiting_last_simatom) {
+                    BOOST_LOG_TRIVIAL(trace) << "void PlanetaryOrbit::Execute(): simulation_atom_var != orbiting_last_simatom";
                     QVector sum_diff( 0, 0, 0 );
                     QVector sum_position;
                     int     limit;
@@ -126,7 +126,7 @@ void PlanetaryOrbit::Execute()
                         sum_diff *= ( 1./(limit) );
                     sum_position  *= ( 1./(limit+1) );
 
-                    float ratio_simatom = (SIMULATION_ATOM/orbiting_last_simatom);
+                    float ratio_simatom = (simulation_atom_var/orbiting_last_simatom);
                     sum_diff      *= ratio_simatom;
                     unsigned int number_to_fill;
                     number_to_fill = (int) ( (NUM_ORBIT_AVERAGE/ratio_simatom)+.99 );
@@ -142,7 +142,7 @@ void PlanetaryOrbit::Execute()
                     orbit_list_filled     = (o >= NUM_ORBIT_AVERAGE-1);
                     o %= NUM_ORBIT_AVERAGE;
                     current_orbit_frame   = (o+1)%NUM_ORBIT_AVERAGE;
-                    orbiting_last_simatom = SIMULATION_ATOM;
+                    orbiting_last_simatom = simulation_atom_var;
                 }
                 orbiting_average[o] = desired;
             }
@@ -164,7 +164,7 @@ void PlanetaryOrbit::Execute()
         sum_orbiting_average *= 1./(limit == 0 ? 1 : limit);
     }
     const double div2pi = ( 1.0/(2.0*PI) );
-    theta += velocity*SIMULATION_ATOM*div2pi;
+    theta += velocity*simulation_atom_var*div2pi;
 
     QVector x_offset    = cos( theta )*x_size;
     QVector y_offset    = sin( theta )*y_size;
@@ -180,10 +180,10 @@ void PlanetaryOrbit::Execute()
                 destination.j,
                 destination.k,
                 mag,
-                mag*(1./SIMULATION_ATOM)
+                mag*(1./simulation_atom_var)
               );
     }
-    parent->Velocity = parent->cumulative_velocity = ( ( ( destination-parent->LocalPosition() )*(1./SIMULATION_ATOM) ).Cast() );
+    parent->Velocity = parent->cumulative_velocity = ( ( ( destination-parent->LocalPosition() )*(1./simulation_atom_var) ).Cast() );
     static float Unreasonable_value =
         XMLSupport::parse_float( vs_config->getVariable( "physics", "planet_ejection_stophack", "2000" ) );
     float v2 = parent->Velocity.Dot( parent->Velocity );

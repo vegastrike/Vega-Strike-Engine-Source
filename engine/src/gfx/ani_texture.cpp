@@ -212,7 +212,7 @@ bool AnimatedTexture::SetupPass( int pass, int stage, const enum BLENDFUNC src, 
 void AnimatedTexture::UpdateAllPhysics()
 {
     for (set< AnimatedTexture* >::iterator iter = anis.begin(); iter != anis.end(); iter++)
-        (*iter)->physicsactive -= SIMULATION_ATOM;
+        (*iter)->physicsactive -= SIMULATION_ATOM;                      // simulation_atom_var?
 }
 
 void AnimatedTexture::UpdateAllFrame()
