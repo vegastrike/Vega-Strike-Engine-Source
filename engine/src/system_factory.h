@@ -21,8 +21,6 @@ class Planet;
 
 class SystemFactory
 {
-    Planet* current_top_planet = nullptr;
-
     struct Object {
         string type;
         map<string, string> attributes;

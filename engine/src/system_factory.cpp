@@ -188,7 +188,7 @@ void SystemFactory::processSystem(Star_XML *xml, Object& object)
     BOOST_LOG_TRIVIAL(debug) << "processSystem\n";
     xml->name = getStringAttribute(object, "name");
     xml->backgroundname = getStringAttribute(object, "background");
-    xml->scale *= getFloatAttribute(object, "ScaleSystem"); // Size of the sun
+    xml->scale *= getFloatAttribute(object, "ScaleSystem"); // Size multiplier of planets, rings and some other units
     xml->reflectivity *= getFloatAttribute(object, "reflectivity");
     xml->backgroundDegamma = getBoolAttribute(object, "backgroundDegamma", xml->backgroundDegamma);
 
@@ -408,10 +408,6 @@ Planet* SystemFactory::processPlanet(Star_XML *xml, Object& object, Planet* owne
     if(owner == nullptr) {
         // For top level, we introduce this instead
         orbit_center = xml->cursun.Cast()+xml->systemcentroid.Cast();
-    } else {
-        // For non-top level, they are added not to their parent but to the actual top level
-        // element.
-        owner = current_top_planet;
     }
 
     Vector computed_rotational_velocity = ComputeRotVel( rotational_velocity, R, S );
@@ -429,14 +425,13 @@ Planet* SystemFactory::processPlanet(Star_XML *xml, Object& object, Planet* owne
         // Does it really orbit or is it stationary?
         planet->SetPosAndCumPos(R+S+xml->cursun.Cast()+xml->systemcentroid.Cast());
         planet->SetOwner(getTopLevelOwner());
-        current_top_planet = planet;
         xml->moons.push_back(planet); // We store top level in moons and AddUnit them in
         // star_system_xml
     } else {
         // It's a planet or moon or some other satellite
-        current_top_planet->satellites.prepend(planet);
-        planet->SetOwner(current_top_planet);
-        current_top_planet->SetOwner(getTopLevelOwner());
+        owner->satellites.prepend(planet);
+        planet->SetOwner(owner);
+        owner->SetOwner(getTopLevelOwner());
     }
 
     planet->applyTechniqueOverrides(paramOverrides);
@@ -672,8 +667,8 @@ void SystemFactory::processEnhancement(string element, Star_XML *xml, Object& ob
         xml->moons.push_back(static_cast<Planet*>(unit)); // Calling factory will call AddUnit using this
     } else {
         // Some kind of satellite. We add to the top owner and not the immediate one
-        current_top_planet->AddSatellite(unit);
-        unit->SetOwner(current_top_planet);
+        owner->AddSatellite(unit);
+        unit->SetOwner(owner);
         //cheating so nothing collides at top level - is this comment still relevant?
         // FIXME un de-referenced before allocation - is this comment still relevant?
         unit->SetAngularVelocity(ComputeRotVel(rotational_velocity, R, S));
@@ -745,9 +740,6 @@ void SystemFactory::initializeQVector(Object object, string key_prefix, QVector&
 
 void SystemFactory::initializeMaterial(Object object, GFXMaterial& material)
 {
-    // Possible bug - we're initializing 1.0f by default.
-    // If no value is present, this could change the default value to something not wanted.
-    // TODO: check actual default value of GFXMaterial
     material.er = getFloatAttribute(object, "Red", material.er);
     material.eg = getFloatAttribute(object, "Green", material.eg);
     material.eb = getFloatAttribute(object, "Blue", material.eb);
