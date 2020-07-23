@@ -472,9 +472,9 @@ void GameUnit< UnitType >::Draw( const Transformation &parent, const Matrix &par
             for (un_iter iter = this->getSubUnits(); (un = *iter); ++iter) {
                 float sim_atom_backup = simulation_atom_var;
                 if (this->sim_atom_multiplier && un->sim_atom_multiplier) {
-                    BOOST_LOG_TRIVIAL(trace) << boost::format("void GameUnit< UnitType >::Draw( const Transformation &parent, const Matrix &parentMatrix ): simulation_atom_var as backed up  = %1%") % simulation_atom_var;
+                    //BOOST_LOG_TRIVIAL(trace) << boost::format("void GameUnit< UnitType >::Draw( const Transformation &parent, const Matrix &parentMatrix ): simulation_atom_var as backed up  = %1%") % simulation_atom_var;
                     simulation_atom_var = simulation_atom_var * un->sim_atom_multiplier / this->sim_atom_multiplier;
-                    BOOST_LOG_TRIVIAL(trace) << boost::format("void GameUnit< UnitType >::Draw( const Transformation &parent, const Matrix &parentMatrix ): simulation_atom_var as multiplied = %1%") % simulation_atom_var;
+                    //BOOST_LOG_TRIVIAL(trace) << boost::format("void GameUnit< UnitType >::Draw( const Transformation &parent, const Matrix &parentMatrix ): simulation_atom_var as multiplied = %1%") % simulation_atom_var;
                 }
                 interpolation_blend_factor = calc_blend_factor( saved_interpolation_blend_factor,
                                                                 un->sim_atom_multiplier,

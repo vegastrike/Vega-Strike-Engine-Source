@@ -2466,7 +2466,7 @@ void Unit::UpdateSubunitPhysics( const Transformation &trans,
     if ( !SubUnits.empty() ) {
         Unit *su;
         float backup = simulation_atom_var;
-        BOOST_LOG_TRIVIAL(trace) << boost::format("Unit::UpdateSubunitPhysics(): simulation_atom_var as backed up  = %1%") % simulation_atom_var;
+        //BOOST_LOG_TRIVIAL(trace) << boost::format("Unit::UpdateSubunitPhysics(): simulation_atom_var as backed up  = %1%") % simulation_atom_var;
         float basesimatom = (this->sim_atom_multiplier ? backup/(float) this->sim_atom_multiplier : backup);
         unsigned int cur_sim_frame = _Universe->activeStarSystem()->getCurrentSimFrame();
         for (un_iter iter = getSubUnits(); (su = *iter); ++iter)
@@ -2487,6 +2487,7 @@ void Unit::UpdateSubunitPhysics( const Transformation &trans,
                     if (do_subunit_scheduling) {
                         int priority = UnitUtil::getPhysicsPriority( su );
                         //Add some scattering
+                        BOOST_LOG_TRIVIAL(trace) << "Unit::UpdateSubunitPhysics(): Doing some scattering inside skipped-frames handler";
                         priority = (priority+rand()%priority)/2;
                         if (priority < 1) priority = 1;
                         su->sim_atom_multiplier = this->sim_atom_multiplier*priority;
@@ -2498,7 +2499,7 @@ void Unit::UpdateSubunitPhysics( const Transformation &trans,
                         su->sim_atom_multiplier = this->sim_atom_multiplier;
                     }
                     simulation_atom_var = basesimatom*(float) su->sim_atom_multiplier;
-                    BOOST_LOG_TRIVIAL(trace) << boost::format("Unit::UpdateSubunitPhysics(): simulation_atom_var as multiplied = %1%") % simulation_atom_var;
+                    //BOOST_LOG_TRIVIAL(trace) << boost::format("Unit::UpdateSubunitPhysics(): simulation_atom_var as multiplied = %1%") % simulation_atom_var;
                     Unit::UpdateSubunitPhysics( su,
                                                 cumulative_transformation,
                                                 cumulative_transformation_matrix,
@@ -2509,7 +2510,7 @@ void Unit::UpdateSubunitPhysics( const Transformation &trans,
                 }
             }
         simulation_atom_var = backup;
-        BOOST_LOG_TRIVIAL(trace) << boost::format("Unit::UpdateSubunitPhysics(): simulation_atom_var as restored   = %1%") % simulation_atom_var;
+        //BOOST_LOG_TRIVIAL(trace) << boost::format("Unit::UpdateSubunitPhysics(): simulation_atom_var as restored   = %1%") % simulation_atom_var;
     }
 }
 

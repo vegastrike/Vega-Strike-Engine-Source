@@ -200,18 +200,18 @@ public:
         if ( parenttarget == unit || (parenttarget && parenttarget->isSubUnit() && parenttarget->owner == unit) )
             parenttarget = NULL;
         float backup = simulation_atom_var;
-        BOOST_LOG_TRIVIAL(trace) << boost::format("UnitDrawer::draw(): simulation_atom_var as backed up  = %1%") % simulation_atom_var;
+        //BOOST_LOG_TRIVIAL(trace) << boost::format("UnitDrawer::draw(): simulation_atom_var as backed up  = %1%") % simulation_atom_var;
         unsigned int cur_sim_frame = _Universe->activeStarSystem()->getCurrentSimFrame();
         interpolation_blend_factor = calc_blend_factor( saved_interpolation_blend_factor,
                                                         unit->sim_atom_multiplier,
                                                         unit->cur_sim_queue_slot,
                                                         cur_sim_frame );
         simulation_atom_var = backup*unit->sim_atom_multiplier;
-        BOOST_LOG_TRIVIAL(trace) << boost::format("UnitDrawer::draw(): simulation_atom_var as multiplied = %1%") % simulation_atom_var;
+        //BOOST_LOG_TRIVIAL(trace) << boost::format("UnitDrawer::draw(): simulation_atom_var as multiplied = %1%") % simulation_atom_var;
         (/*(GameUnit< Unit >*)*/ unit)->Draw();
         interpolation_blend_factor = saved_interpolation_blend_factor;
         simulation_atom_var = backup;
-        BOOST_LOG_TRIVIAL(trace) << boost::format("UnitDrawer::draw(): simulation_atom_var as restored   = %1%") % simulation_atom_var;
+        //BOOST_LOG_TRIVIAL(trace) << boost::format("UnitDrawer::draw(): simulation_atom_var as restored   = %1%") % simulation_atom_var;
         return true;
     }
     bool grav_acquire( Unit *unit )
@@ -221,7 +221,7 @@ public:
     }
 };
 
-//#define UPDATEDEBUG  //for hard to track down bugs
+#define UPDATEDEBUG  //for hard to track down bugs
 void GameStarSystem::Draw( bool DrawCockpit )
 {
     GFXEnable( DEPTHTEST );
@@ -260,7 +260,7 @@ void GameStarSystem::Draw( bool DrawCockpit )
         //Array containing the two interesting units, so as not to have to copy-paste code
         Unit *camunits[2] = {saveparent, targ};
         float backup = simulation_atom_var;
-        BOOST_LOG_TRIVIAL(trace) << boost::format("GameStarSystem::Draw(): simulation_atom_var as backed up  = %1%") % simulation_atom_var;
+        //BOOST_LOG_TRIVIAL(trace) << boost::format("GameStarSystem::Draw(): simulation_atom_var as backed up  = %1%") % simulation_atom_var;
         unsigned int cur_sim_frame = _Universe->activeStarSystem()->getCurrentSimFrame();
         for (int i = 0; i < 2; ++i) {
             Unit *unit = camunits[i];
@@ -271,13 +271,13 @@ void GameStarSystem::Draw( bool DrawCockpit )
                                                                 unit->cur_sim_queue_slot,
                                                                 cur_sim_frame );
                 simulation_atom_var = backup*unit->sim_atom_multiplier;
-                BOOST_LOG_TRIVIAL(trace) << boost::format("GameStarSystem::Draw(): simulation_atom_var as multiplied = %1%") % simulation_atom_var;
+                //BOOST_LOG_TRIVIAL(trace) << boost::format("GameStarSystem::Draw(): simulation_atom_var as multiplied = %1%") % simulation_atom_var;
                 ( (GameUnit< Unit >*)unit )->GameUnit< Unit >::Draw();
             }
         }
         interpolation_blend_factor = saved_interpolation_blend_factor;
         simulation_atom_var = backup;
-        BOOST_LOG_TRIVIAL(trace) << boost::format("GameStarSystem::Draw(): simulation_atom_var as restored   = %1%") % simulation_atom_var;
+        //BOOST_LOG_TRIVIAL(trace) << boost::format("GameStarSystem::Draw(): simulation_atom_var as restored   = %1%") % simulation_atom_var;
 
 
         ///this is the final, smoothly calculated cam
