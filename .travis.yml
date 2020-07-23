@@ -67,20 +67,23 @@ before_deploy:
 deploy:
 #    # GitHub Releases
     provider: releases
-    api_key: $GITHUB_TOKEN
+    token: $GITHUB_TOKEN
     file:
        # Upload files in the `packages` directory
        - packages/*
 #    # Ensure the build doesn't get cleaned up so the files are avialable
 #    # for the release build
-    skip_cleanup: true
+    cleanup: false
 #    # release is a draft so it can be edited, updated, etc.
-    draft: true
-    prerelease: true
+#    # Not needed as we'll do that manually when we'll begin the release.
+#    draft: true
+#    prerelease: true
 #    # GitHub Releases requires a tag; this guarnatees a tag is set
     on:
         tags: true
         repo: vegastrike/Vega-Strike-Engine-Source
+        # We're compiling the same thing twice, no need to deploy it twice.
+        condition: "$CC != gcc"
 
 notifications:
   webhooks:
