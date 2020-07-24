@@ -1309,7 +1309,7 @@ void Unit::Init( const char *filename,
     calculate_extent( false );
     pilot->SetComm( this );
 
-    this->pMeshAnimation = new MeshAnimation(this);
+    this->pMeshAnimation = new Drawable(this);
 	bool initsucc = pMeshAnimation->Init(filename, faction, flightgrp);
 	if(initsucc) {
 		pMeshAnimation->SetAniSpeed( 0.05 );
@@ -8845,21 +8845,8 @@ void Unit::applyTechniqueOverrides(const std::map<std::string, std::string> &ove
 	// FIXME ?
 }
 
-std::map< string, Unit * > MeshAnimation::Units;
+std::map< string, Unit * > Drawable::Units;
 
-MeshAnimation::MeshAnimation(Unit *_unitDst) :
-                   animatedMesh(true),
-                   activeAnimation(0),
-                   timeperframe(3.0),
-                   done(true),
-                   activeMesh(0),
-               	   nextactiveMesh(1),
-               	   infiniteLoop(true),
-               	   loopCount(0),
-               	   unitDst(_unitDst),
-               	   curtime(0.0)
-
-{}
 
 //helper func for Init
 string toLowerCase( string in )
@@ -8902,230 +8889,10 @@ string toLowerCase( string in )
     return out;
 }
 
-unsigned int MeshAnimation::unitCount = 0;
-
-bool MeshAnimation::Init(const char *filename, int faction,
-        Flightgroup *flightgrp, const char *animationExt)
-{
-    string fnam(filename);
-    string::size_type pos = fnam.find('.');
-    string anifilename = fnam.substr(0, pos);
-
-    if(animationExt)
-    	anifilename += string("_") + string(animationExt);
-
-	std::vector< Mesh* > *meshes = new vector<Mesh *>();
-	int i = 1;
-	char count[30] = "1";
-	string dir = anifilename;
-	while(true)
-	{
-		sprintf( count, "%d", i );
-		string unit_name = toLowerCase(anifilename) + "_";
-		if(i < 10)
-			unit_name += "0";
-		if(i < 100)
-			unit_name += "0";
-		if(i < 1000)
-			unit_name += "0";
-		if(i < 10000)
-			unit_name += "0";
-		if(i < 100000)
-			unit_name += "0";
-
-		unit_name += count;
-		string path = dir + "/" + unit_name + ".bfxm";
-		if( VSFileSystem::FileExistsData( path, VSFileSystem::MeshFile ) != -1 )
-		{
-			Mesh *m = Mesh::LoadMesh( path.c_str(), Vector(1,1,1), faction, flightgrp );
-			meshes->push_back( m );
-	#ifdef DEBUG_MESH_ANI
-			cerr << "Animated Mesh: " << path << " loaded - with: " << m->getVertexList()->GetNumVertices() << " vertices." << endl;
-	#endif
-		}
-		else
-			break;
-		i++;
-	}
+unsigned int Drawable::unitCount = 0;
 
 
-	if( meshes->size() != 0 )
-	{
-		//FIXME: an animation is created only for the first submesh
-		string animationName;
-		sprintf( count, "%lu", (unsigned long)meshes->size() );
-		if(!animationExt)
-			animationName = string(count); //if there is no extension given, the animations are called by their load order, 1, 2 ,3 ....10..
-		else
-			animationName = animationExt;
-		addAnimation(meshes, animationName.c_str());
 
-		int numFrames = meshes->size();
-		++MeshAnimation::unitCount;
-		sprintf( count, "%u", unitCount );
-		uniqueUnitName = unitDst->name + string(count);
-		Units[uniqueUnitName] = unitDst;
-		cerr << "Animation data loaded for unit: " << string(filename) << ", named " << uniqueUnitName << " - with: " << numFrames << " frames." << endl;
-		return true;
-	} else {
-		delete meshes;
-		return false;
-	}
-}
-
-void MeshAnimation::AnimationStep()
-{
-#ifdef DEBUG_MESH_ANI
-	std::cerr << "Starting animation step of Unit: " << uniqueUnitName << std::endl;
-#endif
-   	if((!this->isContinuousLoop())&&(loopCount==0))
-   	    return;
-
-    	int numvold = 0;
-    	int numvertices = 0;
-    	//copy reference to data
-    	unitDst->meshdata.at(0) = vecAnimations.at(activeAnimation)->at(activeMesh);
-
-#ifdef DEBUG_MESH_ANI
-    	std::cerr << "vertices changed from: " << numvold << " to: " << numvertices << std::endl;
-#endif
-
-    	unitDst->Draw();
-
-#ifdef DEBUG_MESH_ANI
-       	std::cerr << "Drawed mesh: " << uniqueUnitName << std::endl;
-#endif
-
-    	activeMesh = nextactiveMesh;
-    	nextactiveMesh++;
-    	if(nextactiveMesh >= vecAnimations.at(activeAnimation)->size())
-    	    nextactiveMesh = 0;
-
-  	    if(loopCount > 0)
-  	        loopCount--;
-#ifdef DEBUG_MESH_ANI
-	std::cerr << "Ending animation step of Unit: " << uniqueUnitName << std::endl;
-#endif
-}
-
-void MeshAnimation::UpdateFrames()
-{
-	std::map< string, Unit * >::iterator pos;
-	for(pos = Units.begin(); pos != Units.end(); ++pos)
-	{
-    	pos->second->pMeshAnimation->curtime += GetElapsedTime();
-        if (pos->second->pMeshAnimation->curtime >= pos->second->pMeshAnimation->timePerFrame()) {
-        	pos->second->pMeshAnimation->AnimationStep();
-        	pos->second->pMeshAnimation->curtime = 0.0;
-        }
-	}
-}
-
-void MeshAnimation::addAnimation( std::vector<Mesh *> *meshes, const char* name )
-{
-    if( (meshes->size() > 0) && animatedMesh ) {
-        vecAnimations.push_back( meshes );
-        vecAnimationNames.push_back(string(name));
-    }
-}
-
-void MeshAnimation::StartAnimation( unsigned int how_many_times, int numAnimation )
-{
-    if(animationRuns())
-    	StopAnimation();
-
-    done = false;
-}
-
-void MeshAnimation::StopAnimation()
-{
-    done = true;
-}
-
-string MeshAnimation::getAnimationName(unsigned int animationNumber) const
-{
-	return vecAnimationNames.at(animationNumber);
-}
-
-unsigned int MeshAnimation::getAnimationNumber(const char *name) const
-{
-	string strname(name);
-	for(unsigned int i=0;i<vecAnimationNames.size();i++)
-		if(strname == vecAnimationNames[i])
-			return i;
-
-	return 0; //NOT FOUND!
-}
-
-void MeshAnimation::ChangeAnimation( const char *name )
-{
-	unsigned int AnimNumber = getAnimationNumber(name);
-    if( (AnimNumber < numAnimations()) && isAnimatedMesh() )
-        activeAnimation = AnimNumber;
-}
-
-void MeshAnimation::ChangeAnimation( unsigned int AnimNumber )
-{
-    if( (AnimNumber < numAnimations()) && isAnimatedMesh() )
-        activeAnimation = AnimNumber;
-}
-
-bool MeshAnimation::isAnimatedMesh() const
-{
-    return animatedMesh;
-}
-
-double MeshAnimation::framesPerSecond() const
-{
-    return 1/timeperframe;
-}
-
-double MeshAnimation::timePerFrame() const
-{
-    return timeperframe;
-}
-
-unsigned int MeshAnimation::numAnimations()
-{
-    return vecAnimations.size();
-}
-
-void MeshAnimation::ToggleAnimatedMesh( bool on )
-{
-    animatedMesh = on;
-}
-
-bool MeshAnimation::isContinuousLoop() const
-{
-	return infiniteLoop;
-}
-
-void MeshAnimation::SetAniSpeed( float speed )
-{
-    timeperframe = speed;
-}
-
-void MeshAnimation::clear()
-{
-    StopAnimation();
-
-    for (unsigned int i = 0; i < vecAnimations.size(); i++) {
-    	for(unsigned int j = 0; j < vecAnimations[i]->size(); j++) {
-    		delete vecAnimations[i]->at(j);
-    	}
-    	delete vecAnimations[i];
-		vecAnimations[i]->clear();
-    }
-    vecAnimations.clear();
-    vecAnimationNames.clear();
-
-    Units.erase(uniqueUnitName);
-}
-
-bool MeshAnimation::animationRuns() const
-{
-    return !done;
-}
 
 Unit::Computer::RADARLIM::Brand::Value Unit::Computer::RADARLIM::GetBrand() const
 {
