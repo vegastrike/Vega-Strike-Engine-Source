@@ -363,7 +363,7 @@ bool Beam::Collide( Unit *target, Unit *firer, Unit *superunit )
         return false;
     }
     float distance;
-    Vector normal;     //apply shields                            
+    Vector normal;     //apply shields
 
     QVector direction( this->direction.Cast() );
     QVector end( center+direction.Scale( curlength ) );

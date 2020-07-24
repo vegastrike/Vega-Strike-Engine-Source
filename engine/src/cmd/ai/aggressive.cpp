@@ -685,14 +685,14 @@ bool AggressiveAI::ProcessCurrentFgDirective( Flightgroup *fg )
                     for (unsigned int i = 0; i < suborders.size(); i++)
                         suborders[i]->AttachSelfOrder( leader );
                 }
-            }       
-            //IAmDave - hold position command         
+            }
+            //IAmDave - hold position command
             else if (fg->directive.find( "s" ) != string::npos || fg->directive.find( "S" ) != string::npos) {
                Order * ord = new Orders::MatchVelocity(Vector(0,0,0),Vector(0,0,0),true,false);
                ord->SetParent( parent );
                ReplaceOrder( ord );
             }
-            //IAmDave - dock at target command start... 
+            //IAmDave - dock at target command start...
             else if (fg->directive.find( "t" ) != string::npos || fg->directive.find( "T" ) != string::npos) {
                Unit *targ   = fg->target.GetUnit();
                if ( targ->InCorrectStarSystem( _Universe->activeStarSystem() ) ) {
@@ -706,8 +706,8 @@ bool AggressiveAI::ProcessCurrentFgDirective( Flightgroup *fg )
                                 ord->SetParent( parent );
                                 ReplaceOrder( ord );
                }
-                
-            
+
+
             }
             //IAmDave - ...dock at target command end.
             else if (fg->directive.find( "l" ) != string::npos || fg->directive.find( "L" ) != string::npos) {
