@@ -104,7 +104,7 @@ void PlanetaryOrbit::Execute()
                 orbit_list_filled     = false;
             } else {
                 if (simulation_atom_var != orbiting_last_simatom) {
-                    BOOST_LOG_TRIVIAL(trace) << "void PlanetaryOrbit::Execute(): simulation_atom_var != orbiting_last_simatom";
+                    //BOOST_LOG_TRIVIAL(trace) << boost::format("void PlanetaryOrbit::Execute(): simulation_atom_var, %1$.6f, != orbiting_last_simatom, %2$.6f, for planet %3$s") % simulation_atom_var % orbiting_last_simatom % this->parent->name;
                     QVector sum_diff( 0, 0, 0 );
                     QVector sum_position;
                     int     limit;
@@ -188,6 +188,7 @@ void PlanetaryOrbit::Execute()
         XMLSupport::parse_float( vs_config->getVariable( "physics", "planet_ejection_stophack", "2000" ) );
     float v2 = parent->Velocity.Dot( parent->Velocity );
     if (v2 > Unreasonable_value*Unreasonable_value ) {
+        BOOST_LOG_TRIVIAL(debug) << boost::format("void PlanetaryOrbit::Execute(): A velocity value considered unreasonable was calculated for planet %1%; zeroing it out") % this->parent->name;
         parent->Velocity.Set( 0, 0, 0 );
         parent->cumulative_velocity.Set( 0, 0, 0 );
         parent->SetCurPosition( origin-focus+sum_orbiting_average+x_offset+y_offset );

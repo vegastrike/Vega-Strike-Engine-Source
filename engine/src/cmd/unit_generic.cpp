@@ -2469,6 +2469,7 @@ void Unit::UpdateSubunitPhysics( const Transformation &trans,
         //BOOST_LOG_TRIVIAL(trace) << boost::format("Unit::UpdateSubunitPhysics(): simulation_atom_var as backed up  = %1%") % simulation_atom_var;
         float basesimatom = (this->sim_atom_multiplier ? backup/(float) this->sim_atom_multiplier : backup);
         unsigned int cur_sim_frame = _Universe->activeStarSystem()->getCurrentSimFrame();
+        bool didSomeScattering = false;
         for (un_iter iter = getSubUnits(); (su = *iter); ++iter)
             if (this->sim_atom_multiplier && su->sim_atom_multiplier) {
                 //This ugly thing detects skipped frames.
@@ -2487,7 +2488,6 @@ void Unit::UpdateSubunitPhysics( const Transformation &trans,
                     if (do_subunit_scheduling) {
                         int priority = UnitUtil::getPhysicsPriority( su );
                         //Add some scattering
-                        BOOST_LOG_TRIVIAL(trace) << "Unit::UpdateSubunitPhysics(): Doing some scattering inside skipped-frames handler";
                         priority = (priority+rand()%priority)/2;
                         if (priority < 1) priority = 1;
                         su->sim_atom_multiplier = this->sim_atom_multiplier*priority;
@@ -2495,6 +2495,7 @@ void Unit::UpdateSubunitPhysics( const Transformation &trans,
                             su->sim_atom_multiplier = (SIM_QUEUE_SIZE/su->sim_atom_multiplier)*su->sim_atom_multiplier;
                         if (su->sim_atom_multiplier < this->sim_atom_multiplier)
                             su->sim_atom_multiplier = this->sim_atom_multiplier;
+                        didSomeScattering = true;
                     } else {
                         su->sim_atom_multiplier = this->sim_atom_multiplier;
                     }
@@ -2509,6 +2510,9 @@ void Unit::UpdateSubunitPhysics( const Transformation &trans,
                                                 superunit );
                 }
             }
+        if (didSomeScattering) {
+            BOOST_LOG_TRIVIAL(trace) << "Unit::UpdateSubunitPhysics(): Did some scattering inside skipped-frames handler";
+        }
         simulation_atom_var = backup;
         //BOOST_LOG_TRIVIAL(trace) << boost::format("Unit::UpdateSubunitPhysics(): simulation_atom_var as restored   = %1%") % simulation_atom_var;
     }
