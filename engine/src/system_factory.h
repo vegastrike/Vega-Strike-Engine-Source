@@ -66,11 +66,7 @@ public:
     void processRing(Star_XML *xml, Object& object, Planet* owner);
     Planet* processPlanet(Star_XML *xml, Object& object, Planet* owner);
     void processSpaceElevator(Object& object, Planet* owner);
-
-    // Disabling for now
-    // Fog not actually used
-    //    void processFog(Star_XML *xml, Object& object);
-    //    void processFogElement(Star_XML *xml, Object& object);
+    void processFog(Star_XML *xml, Object& object, Planet* owner);
     void processEnhancement(string element, Star_XML *xml, Object& object, Planet* owner);
     void processAsteroid(Star_XML *xml, Object& object, Planet* owner);
 
@@ -90,9 +86,6 @@ public:
     void initializeAlpha(Object object, BLENDFUNC blend_source,
                          BLENDFUNC blend_destination);
     GFXColor initializeColor(Object object);
-
-    void compare(Star_XML* xml1, Star_XML* xml2);
-    void debug(Object& object, string path);
 };
 
 #endif // SYSTEM_FACTORY_H
