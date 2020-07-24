@@ -874,9 +874,9 @@ void InitPaths( string conf, string subdir )
     Directories[AccountFile] = "accounts";
 
     SIMULATION_ATOM     = game_options.simulation_atom;
-    simulation_atom_var = game_options.simulation_atom;
+    simulation_atom_var = SIMULATION_ATOM;
     AUDIO_ATOM          = game_options.audio_atom;
-    audio_atom_var      = game_options.audio_atom;
+    audio_atom_var      = AUDIO_ATOM;
     BOOST_LOG_TRIVIAL(info) << "SIMULATION_ATOM: " << SIMULATION_ATOM;
 
     /************************* Home directory subdirectories creation ************************/
