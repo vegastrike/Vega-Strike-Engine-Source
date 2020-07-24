@@ -1336,7 +1336,7 @@ bool CloseEnoughToNavOrDest( Unit *parent, Unit *navUnit, QVector nav )
         XMLSupport::parse_float( vs_config->getVariable( "AI", "how_far_to_stop_navigating", "100" ) );
     if (navUnit && navUnit->isUnit() != PLANETPTR) {
         float dist = UnitUtil::getDistance( navUnit, parent );
-        if (dist < SIMULATION_ATOM*parent->Velocity.Magnitude()*parent->predicted_priority*how_far_to_stop_moving)
+        if (dist < SIMULATION_ATOM*parent->Velocity.Magnitude() /* * parent->predicted_priority */ * how_far_to_stop_moving)
             return true;
     }
     return ( nav-parent->Position() ).MagnitudeSquared() < 4*parent->rSize()*parent->rSize();

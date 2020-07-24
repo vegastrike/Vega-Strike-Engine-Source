@@ -104,7 +104,8 @@ void PlanetaryOrbit::Execute()
                 orbit_list_filled     = false;
             } else {
                 if (simulation_atom_var != orbiting_last_simatom) {
-                    //BOOST_LOG_TRIVIAL(trace) << boost::format("void PlanetaryOrbit::Execute(): simulation_atom_var, %1$.6f, != orbiting_last_simatom, %2$.6f, for planet %3$s") % simulation_atom_var % orbiting_last_simatom % this->parent->name;
+                    // ** stephengtuggy 2020-07-24: Uncommenting so I get some indication if my attempts to make sim_atom constant are not working **
+                    BOOST_LOG_TRIVIAL(trace) << boost::format("void PlanetaryOrbit::Execute(): simulation_atom_var, %1$.6f, != orbiting_last_simatom, %2$.6f, for planet %3$s") % simulation_atom_var % orbiting_last_simatom % this->parent->name;
                     QVector sum_diff( 0, 0, 0 );
                     QVector sum_position;
                     int     limit;
@@ -164,7 +165,7 @@ void PlanetaryOrbit::Execute()
         sum_orbiting_average *= 1./(limit == 0 ? 1 : limit);
     }
     const double div2pi = ( 1.0/(2.0*PI) );
-    theta += velocity*simulation_atom_var*div2pi;
+    theta += velocity * SIMULATION_ATOM /*simulation_atom_var*/ * div2pi;
 
     QVector x_offset    = cos( theta )*x_size;
     QVector y_offset    = sin( theta )*y_size;
@@ -180,10 +181,10 @@ void PlanetaryOrbit::Execute()
                 destination.j,
                 destination.k,
                 mag,
-                mag*(1./simulation_atom_var)
+                mag*(1. / SIMULATION_ATOM /*simulation_atom_var*/ )
               );
     }
-    parent->Velocity = parent->cumulative_velocity = ( ( ( destination-parent->LocalPosition() )*(1./simulation_atom_var) ).Cast() );
+    parent->Velocity = parent->cumulative_velocity = ( ( ( destination-parent->LocalPosition() )*(1. / SIMULATION_ATOM /*simulation_atom_var*/ ) ).Cast() );
     static float Unreasonable_value =
         XMLSupport::parse_float( vs_config->getVariable( "physics", "planet_ejection_stophack", "2000" ) );
     float v2 = parent->Velocity.Dot( parent->Velocity );
