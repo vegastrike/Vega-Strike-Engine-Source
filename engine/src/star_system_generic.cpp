@@ -498,8 +498,8 @@ void StarSystem::UpdateUnitPhysics( bool firstframe )
                             unit->curr_physical_state = unit->cumulative_transformation;
                         //Save priority value as prediction for next scheduling, but don't overwrite yet.
                         predprior = priority;
-                        //Scatter, so as to achieve uniform distribution
-                        priority  = 1+( ( (unsigned int) vsrandom.genrand_int32() )%priority );
+                        ////Scatter, so as to achieve uniform distribution
+                        //priority  = 1+( ( (unsigned int) vsrandom.genrand_int32() )%priority );
                     }
                     float backup = simulation_atom_var;
                     //BOOST_LOG_TRIVIAL(trace) << boost::format("void StarSystem::UpdateUnitPhysics( bool firstframe ): Msg A: simulation_atom_var as backed up:  %1%") % simulation_atom_var;
