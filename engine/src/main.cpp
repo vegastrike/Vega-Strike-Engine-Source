@@ -204,10 +204,10 @@ void initSceneManager()
 {
     BOOST_LOG_TRIVIAL(info) << "Creating scene manager...";
     Audio::SceneManager *sm = Audio::SceneManager::getSingleton();
-    
+
     BOOST_LOG_TRIVIAL(info) << "Creating template manager...";
     Audio::TemplateManager::getSingleton();
-    
+
     if (Audio::SceneManager::getSingleton() == 0)
         throw Audio::Exception("Singleton null after SceneManager instantiation");
 
@@ -218,12 +218,12 @@ void initALRenderer()
 {
     BOOST_LOG_TRIVIAL(info) << "  Initializing renderer...";
     Audio::SceneManager *sm = Audio::SceneManager::getSingleton();
-    
+
     if (g_game.sound_enabled) {
         SharedPtr<Audio::Renderer> renderer(new Audio::BorrowedOpenALRenderer);
         renderer->setMeterDistance(1.0);
         renderer->setDopplerFactor(0.0);
-        
+
         sm->setRenderer( renderer );
     }
 }
@@ -231,13 +231,13 @@ void initALRenderer()
 void initScenes()
 {
     Audio::SceneManager *sm = Audio::SceneManager::getSingleton();
-    
+
     sm->createScene("video");
     sm->createScene("music");
     sm->createScene("cockpit");
     sm->createScene("base");
     sm->createScene("space");
-    
+
     sm->setSceneActive("video", true);
 }
 
@@ -360,7 +360,7 @@ int main( int argc, char *argv[] )
         mission_name[1023] = '\0';
         BOOST_LOG_TRIVIAL(info) << "MISSION_NAME is empty using : " << mission_name;
     }
-    
+
 
     int exitcode;
     if ((exitcode = readCommandLineOptions(argc,argv)) >= 0)
@@ -392,11 +392,11 @@ int main( int argc, char *argv[] )
     AUDInit();
     AUDListenerGain( game_options.sound_gain );
     Music::InitMuzak();
-    
+
     initSceneManager();
     initALRenderer();
     initScenes();
-    
+
     //Register commands
     //COmmand Interpretor Seems to break VC8, so I'm leaving disabled for now - Patrick, Dec 24
     if ( game_options.command_interpretor ) {
@@ -409,7 +409,7 @@ int main( int argc, char *argv[] )
 
     //Unregister commands - and cleanup memory
     UninitShipCommands();
-    
+
     closeRenderer();
 
     cleanup();
@@ -449,7 +449,7 @@ void bootstrap_draw( const std::string &message, Animation *newSplashScreen )
         //this happens, when the splash screens texture is loaded
         return;
     }
-    
+
     reentryWatchdog = true;
     if (newSplashScreen != NULL)
         ani = newSplashScreen;
@@ -484,8 +484,8 @@ void bootstrap_draw( const std::string &message, Animation *newSplashScreen )
         ani->DrawNow( tmp ); //VSFileSystem::vs_fprintf( stderr, "(new?) splash screen ('animation'?) %d.  ", (long long)ani ); //temporary, by chuck
         }
     }
-    bs_tp->Draw( game_options.default_boot_message.length() > 0 ? 
-		 game_options.default_boot_message : message.length() > 0 ? 
+    bs_tp->Draw( game_options.default_boot_message.length() > 0 ?
+		 game_options.default_boot_message : message.length() > 0 ?
 		 message : game_options.initial_boot_message );
 
     GFXHudMode( GFXFALSE );
@@ -715,7 +715,7 @@ void bootstrap_main_loop()
     ///Draw Texture
 }
 
-// SGT 2020-07-16   This gets called from main() before initLogging, 
+// SGT 2020-07-16   This gets called from main() before initLogging,
 //                  so it gets a pass on not using the Boost logging stuff
 const char helpmessage[] =
     "Command line options for vegastrike\n"
