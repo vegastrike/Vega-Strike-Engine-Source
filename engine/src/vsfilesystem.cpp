@@ -973,8 +973,6 @@ void InitPaths( string conf, string subdir )
     }
 }
 
-// SGT 2020-07-16   This can get called before initLogging(),
-//                  so it gets a pass on not using the Boost logging stuff
 void CreateDirectoryAbs( const char *filename )
 {
     int err;
@@ -985,7 +983,7 @@ void CreateDirectoryAbs( const char *filename )
 #endif
                    );
         if (err < 0 && errno != EEXIST) {
-            cerr<<"Errno="<<errno<<" - FAILED TO CREATE : "<<filename<<endl;
+            BOOST_LOG_TRIVIAL(fatal) << "Errno=" << errno << " - FAILED TO CREATE : " << filename;
             GetError( "CreateDirectory" );
             VSExit( 1 );
         }
@@ -1030,9 +1028,6 @@ bool DirectoryExists( const string &filename )
 
 //root is the path to the type directory or the type volume
 //filename is the subdirectory+"/"+filename
-//
-// SGT 2020-07-16   This, too, gets called before initLogging(),
-//                  so I guess it gets a pass on the Boost logging stuff.
 int FileExists( const string &root, const char *filename, VSFileType type, bool lookinvolume )
 {
     int    found = -1;
@@ -1052,7 +1047,7 @@ int FileExists( const string &root, const char *filename, VSFileType type, bool 
         struct stat s;
         if (stat( fullpath.c_str(), &s ) >= 0) {
             if (s.st_mode&S_IFDIR) {
-                cerr<<" File is a directory ! ";
+                BOOST_LOG_TRIVIAL(error) << " File is a directory ! ";
                 found = -1;
             } else {
                 isin_bigvolumes = VSFSNone;
@@ -1168,20 +1163,23 @@ int FileExistsHome( const string &filename, VSFileType type )
 
 VSError GetError( const char *str )
 {
-    cerr<<"!!! ERROR/WARNING VSFile : ";
-    if (str)
-        cerr<<"on "<<str<<" : ";
+    std::string prefix = "!!! ERROR/WARNING VSFile : ";
+    if (str) {
+        prefix += "on ";
+        prefix += str;
+        prefix += " : ";
+    }
     if (errno == ENOENT) {
-        cerr<<"File not found"<<endl;
+        BOOST_LOG_TRIVIAL(error) << prefix + "File not found";
         return FileNotFound;
     } else if (errno == EPERM) {
-        cerr<<"Permission denied"<<endl;
+        BOOST_LOG_TRIVIAL(error) << prefix + "Permission denied";
         return LocalPermissionDenied;
     } else if (errno == EACCES) {
-        cerr<<"Access denied"<<endl;
+        BOOST_LOG_TRIVIAL(error) << prefix + "Access denied";
         return LocalPermissionDenied;
     } else {
-        cerr<<"Unspecified error (maybe to document in VSFile ?)"<<endl;
+        BOOST_LOG_TRIVIAL(error) << prefix + "Unspecified error (maybe to document in VSFile ?)";
         return Unspecified;
     }
 }
@@ -1408,7 +1406,7 @@ void VSFile::checkExtracted()
                 //File is not opened so we open it and add it in the pk3 file map
                 CPK3 *pk3newfile = new CPK3;
                 if ( !pk3newfile->Open( full_vol_path.c_str() ) ) {
-                    cerr<<"!!! ERROR : opening volume : "<<full_vol_path<<endl;
+                    BOOST_LOG_TRIVIAL(fatal) << "!!! ERROR : opening volume : " << full_vol_path;
                     VSExit( 1 );
                 }
                 std::pair< std::string, CPK3* >pk3_pair( full_vol_path, pk3newfile );
@@ -1425,7 +1423,7 @@ void VSFile::checkExtracted()
                 pk3_extracted_file = (char*) pk3_file->ExtractFile(
                     (this->subdirectoryname+"/"+this->filename).c_str(), &pk3size );
             this->size = pk3size;
-            cerr<<"EXTRACTING "
+            BOOST_LOG_TRIVIAL(info)<<"EXTRACTING "
                 <<(this->subdirectoryname+"/"+this->filename)<<" WITH INDEX="<<this->file_index<<" SIZE="<<pk3size<<endl;
         }
     }
@@ -1443,7 +1441,7 @@ VSError VSFile::OpenReadOnly( const char *file, VSFileType type )
 
     VSError err = Ok;
     if ( VSFS_DEBUG() )
-        cerr<<"Loading a "<<type<<" : "<<file<<endl;
+        BOOST_LOG_TRIVIAL(debug)<<"Loading a "<<type<<" : "<<file;
     if (type < ZoneBuffer || type == UnknownFile) {
         //It is a "classic file"
         if (!UseVolumes[type]) {
@@ -1477,12 +1475,12 @@ VSError VSFile::OpenReadOnly( const char *file, VSFileType type )
                     err = FileNotFound;
                 } else {
                     if ( ( this->fp = fopen( filestr.c_str(), "rb" ) ) == NULL ) {
-                        cerr<<"!!! SERIOUS ERROR : failed to open Unknown file "<<filestr<<" - this should not happen"<<endl;
+                        BOOST_LOG_TRIVIAL(fatal)<<"!!! SERIOUS ERROR : failed to open Unknown file "<<filestr<<" - this should not happen";
                         VSExit( 1 );
                     }
                     this->valid = true;
                     if (VSFS_DEBUG() > 1)
-                        cerr<<filestr<<" SUCCESS !!!"<<endl;
+                        BOOST_LOG_TRIVIAL(debug)<<filestr<<" SUCCESS !!!"<<endl;
                 }
             } else {
                 err = VSFileSystem::LookForFile( *this, type, file_mode );
@@ -1493,7 +1491,7 @@ VSError VSFile::OpenReadOnly( const char *file, VSFileType type )
                 filestr  = this->GetFullPath();
                 this->fp = fopen( filestr.c_str(), "rb" );
                 if (!this->fp) {
-                    cerr<<"!!! SERIOUS ERROR : failed to open "<<filestr<<" - this should not happen"<<endl;
+                    BOOST_LOG_TRIVIAL(error)<<"!!! SERIOUS ERROR : failed to open "<<filestr<<" - this should not happen";
                     this->valid = false;
                     return FileNotFound;                     //fault!
                 }
@@ -1513,7 +1511,7 @@ VSError VSFile::OpenReadOnly( const char *file, VSFileType type )
                     filestr  = this->GetFullPath();
                     this->fp = fopen( filestr.c_str(), "rb" );
                     if (!this->fp) {
-                        cerr<<"!!! SERIOUS ERROR : failed to open "<<filestr<<" - this should not happen"<<endl;
+                        BOOST_LOG_TRIVIAL(error)<<"!!! SERIOUS ERROR : failed to open "<<filestr<<" - this should not happen";
                         this->valid = false;
                         return FileNotFound;                         //fault
                     }
@@ -1527,6 +1525,7 @@ VSError VSFile::OpenReadOnly( const char *file, VSFileType type )
                 current_path.push_back( this->rootname );
                 current_subdirectory.push_back( this->subdirectoryname );
                 current_type.push_back( this->alt_type );
+                // stephengtuggy 2020-07-24 Leaving this boost logging conversion for later
                 if (VSFS_DEBUG() > 1) {
                     cerr<<endl<<"BEGINNING OF ";
                     DisplayType( type );
@@ -1670,7 +1669,7 @@ VSError VSFile::ReadLine( void *ptr, size_t length )
 string VSFile::ReadFull()
 {
     if (this->Size() < 0) {
-        cerr<<"Attempt to call ReadFull on a bad file "<<this->filename<<" "<<this->Size()<<" "<<this->GetFullPath().c_str()<<endl;
+        BOOST_LOG_TRIVIAL(error)<<"Attempt to call ReadFull on a bad file "<<this->filename<<" "<<this->Size()<<" "<<this->GetFullPath().c_str();
         return string();
     }
     if (!UseVolumes[alt_type] || this->volume_type == VSFSNone) {
@@ -1682,7 +1681,7 @@ string VSFile::ReadFull()
         content[this->Size()] = 0;
         int   readsize = fread( content, 1, this->Size(), this->fp );
         if (this->Size() != readsize) {
-            cerr<<"Only read "<<readsize<<" out of "<<this->Size()<<" bytes of "<<this->filename<<endl;
+            BOOST_LOG_TRIVIAL(error)<<"Only read "<<readsize<<" out of "<<this->Size()<<" bytes of "<<this->filename;
             GetError( "ReadFull" );
             if (readsize <= 0)
                 content[0] = '\0';
@@ -1708,7 +1707,7 @@ size_t VSFile::Write( const void *ptr, size_t length )
         size_t nbwritten = fwrite( ptr, 1, length, this->fp );
         return nbwritten;
     } else {
-        cerr<<"!!! ERROR : Writing is not supported within resource/volume files"<<endl;
+        BOOST_LOG_TRIVIAL(fatal)<<"!!! ERROR : Writing is not supported within resource/volume files";
         VSExit( 1 );
     }
     return Ok;
@@ -1725,7 +1724,7 @@ VSError VSFile::WriteLine( const void *ptr )
     if (!UseVolumes[alt_type] || this->volume_type == VSFSNone) {
         fputs( (const char*) ptr, this->fp );
     } else {
-        cerr<<"!!! ERROR : Writing is not supported within resource/volume files"<<endl;
+        BOOST_LOG_TRIVIAL(fatal)<<"!!! ERROR : Writing is not supported within resource/volume files";
         VSExit( 1 );
     }
     return Ok;
@@ -1742,7 +1741,7 @@ int VSFile::Fprintf( const char *format, ... )
 
         return vfprintf( this->fp, format, ap );
     } else {
-        cerr<<"!!! ERROR : Writing is not supported within resource/volume files"<<endl;
+        BOOST_LOG_TRIVIAL(fatal)<<"!!! ERROR : Writing is not supported within resource/volume files";
         VSExit( 1 );
     }
     return 0;
@@ -1849,7 +1848,7 @@ void VSFile::Clear()
             VSExit( 1 );
         }
     } else {
-        cerr<<"!!! ERROR : Writing is not supported within resource/volume files"<<endl;
+        BOOST_LOG_TRIVIAL(fatal)<<"!!! ERROR : Writing is not supported within resource/volume files";
         VSExit( 1 );
     }
 }

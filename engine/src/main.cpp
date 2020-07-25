@@ -253,7 +253,21 @@ bool isVista = false;
 
 Unit *TheTopLevelUnit;
 
-void initLogging(char debugLevel){
+void initLoggingPart1()
+{
+    logging::add_common_attributes();
+
+    logging::add_console_log
+    (
+        std::cerr,
+        keywords::filter                = (logging::trivial::severity >= logging::trivial::fatal),      /*< on the console, only show messages that are fatal to Vega Strike >*/
+        keywords::format                = "[%TimeStamp%]: %Message%",                                   /*< log record format specific to the console >*/
+        keywords::auto_flush            = true                                                          /*< whether to do the equivalent of fflush(stdout) after every msg >*/
+    );
+}
+
+void initLoggingPart2(char debugLevel)
+{
     auto loggingCore = logging::core::get();
 
     string loggingDir = VSFileSystem::homedir + "/" + "logs";                                           /*< $HOME/.vegastrike/logs, typically >*/
@@ -272,8 +286,6 @@ void initLogging(char debugLevel){
         loggingCore->set_filter(logging::trivial::severity >= logging::trivial::warning);
         break;
     }
-    
-    logging::add_common_attributes();
 
     VSFileSystem::pFileLogSink = logging::add_file_log
     (
@@ -284,18 +296,11 @@ void initLogging(char debugLevel){
         keywords::auto_flush            = false,                                                        /*< whether to auto flush to the file after every line >*/
         keywords::min_free_space        = 1 * 1024 * 1024 * 1024                                        /*< stop logging when there's only 1 GiB free space left >*/
     );
-
-    logging::add_console_log
-    (
-        std::cerr,
-        keywords::filter                = (logging::trivial::severity >= logging::trivial::fatal),      /*< on the console, only show messages that are fatal to Vega Strike >*/
-        keywords::format                = "[%TimeStamp%]: %Message%",                                   /*< log record format specific to the console >*/
-        keywords::auto_flush            = true                                                          /*< whether to do the equivalent of fflush(stdout) after every msg >*/
-    );
 }
 
 int main( int argc, char *argv[] )
 {
+    initLoggingPart1();
 
     VSFileSystem::ChangeToProgramDirectory( argv[0] );
 
@@ -350,7 +355,7 @@ int main( int argc, char *argv[] )
     if (g_game.vsdebug == '0')
         g_game.vsdebug = game_options.vsdebug;
 
-    initLogging(g_game.vsdebug);
+    initLoggingPart2(g_game.vsdebug);
 
     // can use the vegastrike config variable to read in the default mission
     if ( game_options.force_client_connect )
