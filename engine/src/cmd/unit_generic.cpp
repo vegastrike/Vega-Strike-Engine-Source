@@ -132,10 +132,7 @@ bool Unit::TransferUnitToSystem( unsigned int whichJumpQueue,
     return false;
 }
 
-Unit::Computer& Unit::GetComputerData()
-{
-    return computer;
-}
+
 
 bool Unit::AutoPilotTo( Unit *un, bool automaticenergyrealloc )
 {
@@ -163,57 +160,7 @@ void Unit::SetMaxEnergy( float maxen )
     maxenergy = maxen;
 }
 
-Vector Unit::GetWarpRefVelocity() const
-{
-    //Velocity
-    Vector VelocityRef( 0, 0, 0 );
-    {
-        const Unit *vr = computer.velocity_ref.GetConstUnit();
-        if (vr)
-            VelocityRef = vr->cumulative_velocity;
-    }
-    Vector v   = Velocity-VelocityRef;
-    float  len = v.Magnitude();
-    if (len > .01)      //only get velocity going in DIRECTIOn of cumulative transformation for warp calc...
-        v = v*( cumulative_transformation_matrix.getR().Dot( v*(1./len) ) );
 
-    return v;
-}
-
-Vector Unit::GetWarpVelocity() const
-{
-    if (graphicOptions.WarpFieldStrength == 1.0) {
-        // Short circuit, most ships won't be at warp, so it simplifies math a lot
-        return cumulative_velocity;
-    } else {
-        Vector VelocityRef( 0, 0, 0 );
-        {
-            Unit *vr = const_cast< UnitContainer* > (&computer.velocity_ref)->GetUnit();
-            if (vr)
-                VelocityRef = vr->cumulative_velocity;
-        }
-
-        //return(cumulative_velocity*graphicOptions.WarpFieldStrength);
-        Vector vel   = cumulative_velocity-VelocityRef;
-        float  speed = vel.Magnitude();
-        //return vel*graphicOptions.WarpFieldStrength;
-        if (speed > 0) {
-            Vector veldir    = vel*(1./speed);
-            Vector facing    = cumulative_transformation_matrix.getR();
-            float  ang       = facing.Dot( veldir );
-            float  warpfield = graphicOptions.WarpFieldStrength;
-            if (ang < 0) warpfield = 1./warpfield;
-            return facing*(ang*speed*(warpfield-1.))+vel+VelocityRef;
-        } else {
-            return VelocityRef;
-        }
-    }
-}
-
-void Unit::SetPosition( const QVector &pos )
-{
-    prev_physical_state.position = curr_physical_state.position = pos;
-}
 
 float Unit::DealDamageToHull( const Vector &pnt, float Damage )
 {
@@ -221,55 +168,7 @@ float Unit::DealDamageToHull( const Vector &pnt, float Damage )
     return DealDamageToHullReturnArmor( pnt, Damage, nullvar );
 }
 
-void Unit::GetOrientation( Vector &p, Vector &q, Vector &r ) const
-{
-    Matrix m;
-    curr_physical_state.to_matrix( m );
-    p = m.getP();
-    q = m.getQ();
-    r = m.getR();
-}
 
-Vector Unit::GetNetAcceleration() const
-{
-    Vector p, q, r;
-    GetOrientation( p, q, r );
-    Vector res( NetLocalForce.i*p+NetLocalForce.j*q+NetLocalForce.k*r );
-    res += NetForce;
-    return res/GetMass();
-}
-
-Vector Unit::GetNetAngularAcceleration() const
-{
-    Vector p, q, r;
-    GetOrientation( p, q, r );
-    Vector res( NetLocalTorque.i*p+NetLocalTorque.j*q+NetLocalTorque.k*r );
-    res += NetTorque;
-    return res/GetMoment();
-}
-
-float Unit::GetMaxAccelerationInDirectionOf( const Vector &ref, bool afterburn ) const
-{
-    Vector p, q, r;
-    GetOrientation( p, q, r );
-    Vector lref( ref*p, ref*q, ref*r );
-    float  tp     = (lref.i == 0) ? 0 : fabs( Limits().lateral/lref.i );
-    float  tq     = (lref.j == 0) ? 0 : fabs( Limits().vertical/lref.j );
-    float  tr     = (lref.k == 0) ? 0 : fabs( ( (lref.k > 0) ? Limits().forward : Limits().retro )/lref.k );
-    float  trqmin = (tr < tq) ? tr : tq;
-    float  tm     = tp < trqmin ? tp : trqmin;
-    return lref.Magnitude()*tm/GetMass();
-}
-
-void Unit::SetVelocity( const Vector &v )
-{
-    Velocity = v;
-}
-
-void Unit::SetAngularVelocity( const Vector &v )
-{
-    AngularVelocity = v;
-}
 
 bool Unit::InRange( const Unit *target, double &mm, bool cone, bool cap, bool lock ) const
 {
@@ -746,7 +645,7 @@ std::string lookupMountSize( int s )
  **** UNIT STUFF
  **********************************************************************************
  */
-Unit::Unit( int /*dummy*/ ) : cumulative_transformation_matrix( identity_matrix )
+Unit::Unit( int /*dummy*/ )
 {
     ZeroAll();
     pImage  = (new UnitImages< void >);
@@ -757,7 +656,7 @@ Unit::Unit( int /*dummy*/ ) : cumulative_transformation_matrix( identity_matrix 
     Init();
 }
 
-Unit::Unit() : cumulative_transformation_matrix( identity_matrix )
+Unit::Unit() //: cumulative_transformation_matrix( identity_matrix )
 {
     ZeroAll();
     pImage  = (new UnitImages< void >);
@@ -768,7 +667,7 @@ Unit::Unit() : cumulative_transformation_matrix( identity_matrix )
     Init();
 }
 
-Unit::Unit( std::vector< Mesh* > &meshes, bool SubU, int fact ) : cumulative_transformation_matrix( identity_matrix )
+Unit::Unit( std::vector< Mesh* > &meshes, bool SubU, int fact ) //: cumulative_transformation_matrix( identity_matrix )
 {
     ZeroAll();
     pImage  = (new UnitImages< void >);
@@ -795,7 +694,7 @@ Unit::Unit( const char *filename,
             std::string unitModifications,
             Flightgroup *flightgrp,
             int fg_subnumber,
-            string *netxml ) : cumulative_transformation_matrix( identity_matrix )
+            string *netxml ) //: cumulative_transformation_matrix( identity_matrix )
 {
     ZeroAll();
     pImage  = (new UnitImages< void >);
@@ -1537,11 +1436,6 @@ void Unit::SetFaction( int faction )
         (*ui)->SetFaction( faction );
 }
 
-//FIXME Daughter units should be able to be turrets (have y/p/r)
-void Unit::SetResolveForces( bool ys )
-{
-    resolveforces = ys;
-}
 
 void Unit::SetFg( Flightgroup *fg, int fg_subnumber )
 {
@@ -1812,10 +1706,7 @@ void Unit::SetGlowVisible( bool vis )
         invisible |= INVISGLOW;
 }
 
-float Unit::GetElasticity()
-{
-    return .5;
-}
+
 
 /*
  **********************************************************************************
@@ -2145,316 +2036,7 @@ static std::string NearestSystem( std::string currentsystem, QVector pos )
     return closest_system;
 }
 
-void Unit::UpdatePhysics( const Transformation &trans,
-                          const Matrix &transmat,
-                          const Vector &cum_vel,
-                          bool lastframe,
-                          UnitCollection *uc,
-                          Unit *superunit )
-{
-    static float VELOCITY_MAX = XMLSupport::parse_float( vs_config->getVariable( "physics", "velocity_max", "10000" ) );
-    static float SPACE_DRAG   = XMLSupport::parse_float( vs_config->getVariable( "physics", "unit_space_drag", "0.000000" ) );
-    static float EXTRA_CARGO_SPACE_DRAG =
-        XMLSupport::parse_float( vs_config->getVariable( "physics", "extra_space_drag_for_cargo", "0.005" ) );
 
-    //Save information about when this happened
-    unsigned int cur_sim_frame = _Universe->activeStarSystem()->getCurrentSimFrame();
-    //Well, wasn't skipped actually, but...
-    this->last_processed_sqs = cur_sim_frame;
-    this->cur_sim_queue_slot = (cur_sim_frame+this->sim_atom_multiplier)%SIM_QUEUE_SIZE;
-    Transformation old_physical_state = curr_physical_state;
-    if (docked&DOCKING_UNITS)
-        PerformDockingOperations();
-    Repair();
-    if (fuel < 0)
-        fuel = 0;
-    if (cloaking >= cloakmin) {
-        static bool warp_energy_for_cloak =
-            XMLSupport::parse_bool( vs_config->getVariable( "physics", "warp_energy_for_cloak", "true" ) );
-        if ( pImage->cloakenergy*SIMULATION_ATOM > (warp_energy_for_cloak ? warpenergy : energy) ) {
-            Cloak( false );                      //Decloak
-        } else {
-            SetShieldZero( this );
-            if (pImage->cloakrate > 0 || cloaking == cloakmin) {
-                if (warp_energy_for_cloak)
-                    warpenergy -= (SIMULATION_ATOM*pImage->cloakenergy);
-                else
-                    energy -= (SIMULATION_ATOM*pImage->cloakenergy);
-            }
-            if (cloaking > cloakmin) {
-                AUDAdjustSound( sound->cloak, cumulative_transformation.position, cumulative_velocity );
-                //short fix
-                if ( (cloaking == (2147483647)
-                      && pImage->cloakrate > 0) || (cloaking == cloakmin+1 && pImage->cloakrate < 0) )
-                    AUDStartPlaying( sound->cloak );
-                //short fix
-                cloaking -= (int) (pImage->cloakrate*SIMULATION_ATOM);
-                if (cloaking <= cloakmin && pImage->cloakrate > 0)
-                    cloaking = cloakmin;
-                if (cloaking < 0 && pImage->cloakrate < 0) {
-                    cloaking = -2147483647-1;
-                }
-            }
-        }
-    }
-    //Only on server or non-networking
-    //Do it everywhere -- "interpolation" for client-side.
-    //if( SERVER || Network==NULL)
-    RegenShields();
-    if (lastframe) {
-        if ( !( docked&(DOCKED|DOCKED_INSIDE) ) )
-            //the AIscript should take care
-            prev_physical_state = curr_physical_state;
-#ifdef FIX_TERRAIN
-        if (planet) {
-            if (!planet->dirty)
-                SetPlanetOrbitData( NULL );
-            else
-                planet->pps = planet->cps;
-        }
-#endif
-    }
-    if (resolveforces) {
-        //clamp velocity
-        ResolveForces(trans, transmat);
-        if (Velocity.i > VELOCITY_MAX)
-            Velocity.i = VELOCITY_MAX;
-
-        else if (Velocity.i < -VELOCITY_MAX)
-            Velocity.i = -VELOCITY_MAX;
-        if (Velocity.j > VELOCITY_MAX)
-            Velocity.j = VELOCITY_MAX;
-
-        else if (Velocity.j < -VELOCITY_MAX)
-            Velocity.j = -VELOCITY_MAX;
-        if (Velocity.k > VELOCITY_MAX)
-            Velocity.k = VELOCITY_MAX;
-
-        else if (Velocity.k < -VELOCITY_MAX)
-            Velocity.k = -VELOCITY_MAX;
-    }
-    float    difficulty;
-    Cockpit *player_cockpit = GetVelocityDifficultyMult( difficulty );
-
-    this->UpdatePhysics2( trans, old_physical_state, Vector(), difficulty, transmat, cum_vel, lastframe, uc );
-    if (EXTRA_CARGO_SPACE_DRAG > 0) {
-        int upgfac = FactionUtil::GetUpgradeFaction();
-        if ( (this->faction == upgfac) || (this->name == "eject") || (this->name == "Pilot") )
-            Velocity = Velocity*(1-EXTRA_CARGO_SPACE_DRAG);
-    }
-    if (SPACE_DRAG > 0)
-        Velocity = Velocity*(1-SPACE_DRAG);
-    float dist_sqr_to_target = FLT_MAX;
-    Unit *target = Unit::Target();
-    bool  increase_locking   = false;
-    if (target && cloaking < 0 /*-1 or -32768*/) {
-        if (target->isUnit() != PLANETPTR) {
-            Vector TargetPos( InvTransform( cumulative_transformation_matrix, ( target->Position() ) ).Cast() );
-            dist_sqr_to_target = TargetPos.MagnitudeSquared();
-            TargetPos.Normalize();
-            if (TargetPos.k > computer.radar.lockcone)
-                increase_locking = true;
-        }
-        /* Update the velocity reference to the nearer significant unit/planet. */
-        if (!computer.force_velocity_ref && activeStarSystem) {
-            Unit *nextVelRef = activeStarSystem->nextSignificantUnit();
-            if (nextVelRef) {
-                if ( computer.velocity_ref.GetUnit() ) {
-                    double dist = UnitUtil::getSignificantDistance( this, computer.velocity_ref.GetUnit() );
-                    double next_dist = UnitUtil::getSignificantDistance( this, nextVelRef );
-                    if (next_dist < dist)
-                        computer.velocity_ref = nextVelRef;
-                } else {
-                    computer.velocity_ref = nextVelRef;
-                }
-            }
-        }
-    }
-    static string LockingSoundName     = vs_config->getVariable( "unitaudio", "locking", "locking.wav" );
-    //enables spiffy wc2 torpedo music, default to normal though
-    static string LockingSoundTorpName = vs_config->getVariable( "unitaudio", "locking_torp", "locking.wav" );
-    static int    LockingSound = AUDCreateSoundWAV( LockingSoundName, true );
-    static int    LockingSoundTorp     = AUDCreateSoundWAV( LockingSoundTorpName, true );
-
-    bool locking = false;
-    bool touched = false;
-    for (int i = 0; (int) i < GetNumMounts(); ++i) {
-        // TODO: simplify this if
-        if ( ( (false
-                && mounts[i].status
-                == Mount::INACTIVE) || mounts[i].status == Mount::ACTIVE ) && cloaking < 0 && mounts[i].ammo != 0 ) {
-            if (player_cockpit)
-                touched = true;
-            if ( increase_locking && (dist_sqr_to_target < mounts[i].type->Range*mounts[i].type->Range) ) {
-                mounts[i].time_to_lock -= SIMULATION_ATOM;
-                static bool ai_lock_cheat = XMLSupport::parse_bool( vs_config->getVariable( "physics", "ai_lock_cheat", "true" ) );
-                if (!player_cockpit) {
-                    if (ai_lock_cheat)
-                        mounts[i].time_to_lock = -1;
-                } else {
-                    int LockingPlay = LockingSound;
-
-                    //enables spiffy wc2 torpedo music, default to normal though
-                    static bool LockTrumpsMusic     =
-                        XMLSupport::parse_bool( vs_config->getVariable( "unitaudio", "locking_trumps_music", "false" ) );
-                    //enables spiffy wc2 torpedo music, default to normal though
-                    static bool TorpLockTrumpsMusic =
-                        XMLSupport::parse_bool( vs_config->getVariable( "unitaudio", "locking_torp_trumps_music", "false" ) );
-                    if (mounts[i].type->LockTime > 0) {
-                        static string LockedSoundName = vs_config->getVariable( "unitaudio", "locked", "locked.wav" );
-                        static int    LockedSound     = AUDCreateSoundWAV( LockedSoundName, false );
-                        if (mounts[i].type->size == weapon_info::SPECIALMISSILE)
-                            LockingPlay = LockingSoundTorp;
-
-                        else
-                            LockingPlay = LockingSound;
-                        if (mounts[i].time_to_lock > -SIMULATION_ATOM && mounts[i].time_to_lock <= 0) {
-                            if ( !AUDIsPlaying( LockedSound ) ) {
-                                UniverseUtil::musicMute( false );
-                                AUDStartPlaying( LockedSound );
-                                AUDStopPlaying( LockingSound );
-                                AUDStopPlaying( LockingSoundTorp );
-                            }
-                            AUDAdjustSound( LockedSound, Position(), GetVelocity() );
-                        } else if (mounts[i].time_to_lock > 0) {
-                            locking = true;
-                            if ( !AUDIsPlaying( LockingPlay ) ) {
-                                if (LockingPlay == LockingSoundTorp)
-                                    UniverseUtil::musicMute( TorpLockTrumpsMusic );
-
-                                else
-                                    UniverseUtil::musicMute( LockTrumpsMusic );
-                                AUDStartPlaying( LockingSound );
-                            }
-                            AUDAdjustSound( LockingSound, Position(), GetVelocity() );
-                        }
-                    }
-                }
-            } else if (mounts[i].ammo != 0) {
-                mounts[i].time_to_lock = mounts[i].type->LockTime;
-            }
-        } else if (mounts[i].ammo != 0) {
-            mounts[i].time_to_lock = mounts[i].type->LockTime;
-        }
-        if (mounts[i].type->type == weapon_info::BEAM) {
-            if (mounts[i].ref.gun) {
-                Unit *autotarg     =
-                    (   (mounts[i].size&weapon_info::AUTOTRACKING)
-                     && (mounts[i].time_to_lock <= 0)
-                     && TargetTracked() ) ? target : NULL;
-                float trackingcone = computer.radar.trackingcone;
-                if ( CloseEnoughToAutotrack( this, target, trackingcone ) ) {
-                    if (autotarg)
-                        if (computer.radar.trackingcone < trackingcone)
-                            trackingcone = computer.radar.trackingcone;
-                    autotarg = target;
-                }
-                mounts[i].ref.gun->UpdatePhysics( cumulative_transformation,
-                                                  cumulative_transformation_matrix,
-                                                  autotarg,
-                                                  trackingcone,
-                                                  target,
-                                                  (HeatSink ? HeatSink : 1.0f)*mounts[i].functionality,
-                                                  this,
-                                                  superunit );
-            }
-        } else {
-            mounts[i].ref.refire += SIMULATION_ATOM*(HeatSink ? HeatSink : 1.0f)*mounts[i].functionality;
-        }
-        if (mounts[i].processed == Mount::FIRED) {
-            Transformation t1;
-            Matrix m1;
-            t1 = prev_physical_state;             //a hack that will not work on turrets
-            t1.Compose( trans, transmat );
-            t1.to_matrix( m1 );
-            int autotrack = 0;
-            if (   ( 0 != (mounts[i].size&weapon_info::AUTOTRACKING) )
-                && TargetTracked() )
-                autotrack = computer.itts ? 2 : 1;
-            float trackingcone = computer.radar.trackingcone;
-            if ( CloseEnoughToAutotrack( this, target, trackingcone ) ) {
-                if (autotrack)
-                    if (trackingcone > computer.radar.trackingcone)
-                        trackingcone = computer.radar.trackingcone;
-                autotrack = 2;
-            }
-            CollideMap::iterator hint[Unit::NUM_COLLIDE_MAPS];
-            for (unsigned int locind = 0; locind < Unit::NUM_COLLIDE_MAPS; ++locind)
-                hint[locind] =
-                    ( !is_null( superunit->location[locind] ) ) ? superunit->location[locind] : _Universe->activeStarSystem()->
-                    collidemap[locind]->begin();
-            if ( !mounts[i].PhysicsAlignedFire( this, t1, m1, cumulative_velocity,
-                                                (!isSubUnit() || owner == NULL) ? this : owner, target, autotrack,
-                                                trackingcone,
-                                                hint ) ) {
-                const weapon_info *typ = mounts[i].type;
-                energy += typ->EnergyRate*(typ->type == weapon_info::BEAM ? SIMULATION_ATOM : 1);
-            }
-        } else if ( mounts[i].processed == Mount::UNFIRED || mounts[i].ref.refire > 2*mounts[i].type->Refire() ) {
-            mounts[i].processed = Mount::UNFIRED;
-            mounts[i].PhysicsAlignedUnfire();
-        }
-    }
-    if (locking == false && touched == true) {
-        if ( AUDIsPlaying( LockingSound ) ) {
-            UniverseUtil::musicMute( false );
-            AUDStopPlaying( LockingSound );
-        }
-        if ( AUDIsPlaying( LockingSoundTorp ) ) {
-            UniverseUtil::musicMute( false );
-            AUDStopPlaying( LockingSoundTorp );
-        }
-    }
-    bool dead = true;
-
-    UpdateSubunitPhysics( cumulative_transformation,
-                          cumulative_transformation_matrix,
-                          cumulative_velocity,
-                          lastframe,
-                          uc,
-                          superunit );
-    //can a unit get to another system without jumping?.
-    static bool warp_is_interstellar =
-        XMLSupport::parse_bool( vs_config->getVariable( "physics", "warp_is_interstellar", "false" ) );
-    if ( warp_is_interstellar
-        && ( curr_physical_state.position.MagnitudeSquared() > howFarToJump()*howFarToJump() && !isSubUnit() ) ) {
-        static bool direct = XMLSupport::parse_bool( vs_config->getVariable( "physics", "direct_interstellar_journey", "true" ) );
-        bool jumpDirect    = false;
-        if (direct) {
-            Cockpit *cp = _Universe->isPlayerStarship( this );
-            if (NULL != cp) {
-                std::string sys = cp->GetNavSelectedSystem();
-                if ( !sys.empty() ) {
-                    jumpDirect = true;
-                    _Universe->activeStarSystem()->JumpTo( this, NULL, sys, true, true );
-                }
-            }
-        }
-        if (!jumpDirect) {
-            _Universe->activeStarSystem()->JumpTo( this, NULL,
-                                                   NearestSystem( _Universe->activeStarSystem()->getFileName(),
-                                                                  curr_physical_state.position ), true, true );
-        }
-    }
-    if (maxhull < 0) {
-        this->Explode( true, 0 );
-    }
-    //Really kill the unit only in non-networking or on server side
-    if (hull < 0) {
-        dead &= (pImage->pExplosion == NULL);
-        if (dead)
-            Kill();
-    } else
-    if ( !isSubUnit() ) {
-        for (unsigned int locind = 0; locind < Unit::NUM_COLLIDE_MAPS; ++locind) {
-            if ( is_null( this->location[locind] ) )
-                this->getStarSystem()->collidemap[locind]->insert( Collidable( this ) );
-            else if (locind == Unit::UNIT_BOLT)
-                //that update will propagate with the flatten
-                this->getStarSystem()->collidemap[Unit::UNIT_BOLT]->changeKey( this->location[locind], Collidable( this ) );
-        }
-    }
-}
 
 void Unit::UpdateSubunitPhysics( const Transformation &trans,
                                  const Matrix &transmat,
@@ -2532,199 +2114,16 @@ void Unit::UpdateSubunitPhysics( Unit *subunit,
     }
 }
 
-float CalculateNearestWarpUnit( const Unit *thus, float minmultiplier, Unit **nearest_unit, bool count_negative_warp_units )
+
+
+
+
+
+QVector Unit::realPosition( )
 {
-    static float  smallwarphack     = XMLSupport::parse_float( vs_config->getVariable( "physics", "minwarpeffectsize", "100" ) );
-    static float  bigwarphack       =
-        XMLSupport::parse_float( vs_config->getVariable( "physics", "maxwarpeffectsize", "10000000" ) );
-    //Boundary between multiplier regions 1&2. 2 is "high" mult
-    static double warpregion1       = XMLSupport::parse_float( vs_config->getVariable( "physics", "warpregion1", "5000000" ) );
-    //Boundary between multiplier regions 0&1 0 is mult=1
-    static double warpregion0       = XMLSupport::parse_float( vs_config->getVariable( "physics", "warpregion0", "5000" ) );
-    //Mult at 1-2 boundary
-    static double warpcruisemult    = XMLSupport::parse_float( vs_config->getVariable( "physics", "warpcruisemult", "5000" ) );
-    //degree of curve
-    static double curvedegree       = XMLSupport::parse_float( vs_config->getVariable( "physics", "warpcurvedegree", "1.5" ) );
-    //coefficient so as to agree with above
-    static double upcurvek = warpcruisemult/pow( (warpregion1-warpregion0), curvedegree );
-    //inverse fractional effect of ship vs real big object
-    static float  def_inv_interdiction = 1.
-                                         /XMLSupport::parse_float( vs_config->getVariable( "physics", "default_interdiction",
-                                                                                           ".125" ) );
-    Unit *planet;
-    Unit *testthis = NULL;
-    {
-        NearestUnitLocator locatespec;
-        findObjects( _Universe->activeStarSystem()->collidemap[Unit::UNIT_ONLY], thus->location[Unit::UNIT_ONLY], &locatespec );
-        testthis = locatespec.retval.unit;
-    }
-    for (un_fiter iter = _Universe->activeStarSystem()->gravitationalUnits().fastIterator();
-         (planet = *iter) || testthis;
-         ++iter) {
-        if ( !planet || !planet->Killed() ) {
-            if (planet == NULL) {
-                planet   = testthis;
-                testthis = NULL;
-            }
-            if (planet == thus)
-                continue;
-            float shiphack = 1;
-            if (planet->isUnit() != PLANETPTR) {
-                shiphack = def_inv_interdiction;
-                if ( planet->specInterdiction != 0 && planet->graphicOptions.specInterdictionOnline != 0
-                    && (planet->specInterdiction > 0 || count_negative_warp_units) ) {
-                    shiphack = 1/fabs( planet->specInterdiction );
-                    if (thus->specInterdiction != 0 && thus->graphicOptions.specInterdictionOnline != 0)
-                        //only counters artificial interdiction ... or maybe it cheap ones shouldn't counter expensive ones!? or
-                        // expensive ones should counter planets...this is safe now, for gameplay
-                        shiphack *= fabs( thus->specInterdiction );
-                }
-            }
-            float   multipliertemp = 1;
-            float   minsizeeffect  = (planet->rSize() > smallwarphack) ? planet->rSize() : smallwarphack;
-            float   effectiverad   = minsizeeffect*( 1.0f+UniverseUtil::getPlanetRadiusPercent() )+thus->rSize();
-            if (effectiverad > bigwarphack)
-                effectiverad = bigwarphack;
-            QVector dir     = thus->Position()-planet->Position();
-            double  udist   = dir.Magnitude();
-            float   sigdist = UnitUtil::getSignificantDistance( thus, planet );
-            if ( planet->isPlanet() && udist < (1<<28) ) //If distance is viable as a float approximation and it's an actual celestial body
-                udist = sigdist;
-            do {
-                double dist = udist;
-                if (dist < 0) dist = 0;
-                dist *= shiphack;
-                if ( dist > (effectiverad+warpregion0) )
-                    multipliertemp = pow( (dist-effectiverad-warpregion0), curvedegree )*upcurvek;
-                else
-                    multipliertemp = 1;
-                if (multipliertemp < minmultiplier) {
-                    minmultiplier = multipliertemp;
-                    *nearest_unit = planet;
-                    //eventually use new multiplier to compute
-                } else {break; }
-            } while (0);
-            if (!testthis)
-                break; //don't want the ++
-        }
-    }
-    return minmultiplier;
-}
-
-float Unit::GetMaxWarpFieldStrength( float rampmult ) const
-{
-    Vector v = GetWarpRefVelocity();
-
-    //Pi^2
-    static float  warpMultiplierMin =
-        XMLSupport::parse_float( vs_config->getVariable( "physics", "warpMultiplierMin", "9.86960440109" ) );
-    //C
-    static float  warpMultiplierMax =
-        XMLSupport::parse_float( vs_config->getVariable( "physics", "warpMultiplierMax", "300000000" ) );
-    //Pi^2 * C
-    static float  warpMaxEfVel   = XMLSupport::parse_float( vs_config->getVariable( "physics", "warpMaxEfVel", "2960881320" ) );
-    //inverse fractional effect of ship vs real big object
-    float minmultiplier = warpMultiplierMax*graphicOptions.MaxWarpMultiplier;
-    Unit *nearest_unit  = NULL;
-    minmultiplier = CalculateNearestWarpUnit( this, minmultiplier, &nearest_unit, true );
-    float minWarp = warpMultiplierMin*graphicOptions.MinWarpMultiplier;
-    float maxWarp = warpMultiplierMax*graphicOptions.MaxWarpMultiplier;
-    if (minmultiplier < minWarp)
-        minmultiplier = minWarp;
-    if (minmultiplier > maxWarp)
-        minmultiplier = maxWarp; //SOFT LIMIT
-    minmultiplier *= rampmult;
-    if (minmultiplier < 1)
-        minmultiplier = 1;
-    v *= minmultiplier;
-    float vmag = sqrt( v.i*v.i+v.j*v.j+v.k*v.k );
-    if (vmag > warpMaxEfVel) {
-        v *= warpMaxEfVel/vmag; //HARD LIMIT
-        minmultiplier *= warpMaxEfVel/vmag;
-    }
-    return minmultiplier;
-}
-
-void Unit::AddVelocity( float difficulty )
-{
-    //for the heck of it.
-    static float humanwarprampuptime = XMLSupport::parse_float( vs_config->getVariable( "physics", "warprampuptime", "5" ) );
-    //for the heck of it.
-    static float compwarprampuptime  =
-        XMLSupport::parse_float( vs_config->getVariable( "physics", "computerwarprampuptime", "10" ) );
-    static float warprampdowntime    = XMLSupport::parse_float( vs_config->getVariable( "physics", "warprampdowntime", "0.5" ) );
-    float  lastWarpField = graphicOptions.WarpFieldStrength;
-
-    bool   playa;
-    if (graphicOptions.WarpRamping || graphicOptions.InWarp == 1 || graphicOptions.RampCounter != 0) {
-        playa = _Universe->isPlayerStarship( this ) ? true : false;
-    } else {
-        playa = false;
-    }
-
-    float  warprampuptime = playa ? humanwarprampuptime : compwarprampuptime;
-    //Warp Turning on/off
-    if (graphicOptions.WarpRamping) {
-        float  oldrampcounter = graphicOptions.RampCounter;
-        if (graphicOptions.InWarp == 1)             //Warp Turning on
-            graphicOptions.RampCounter = warprampuptime;
-        else                                        //Warp Turning off
-            graphicOptions.RampCounter = warprampdowntime;
-        //switched mid - ramp time; we also know old mode's ramptime != 0, or there won't be ramping
-        if (oldrampcounter != 0 && graphicOptions.RampCounter != 0 ) {
-            if (graphicOptions.InWarp == 1)             //Warp is turning on before it turned off
-                graphicOptions.RampCounter *= (1 - oldrampcounter/warprampdowntime);
-            else                                        //Warp is turning off before it turned on
-                graphicOptions.RampCounter *= (1 - oldrampcounter/warprampuptime);
-        }
-        graphicOptions.WarpRamping = 0;
-    }
-    if (graphicOptions.InWarp == 1 || graphicOptions.RampCounter != 0) {
-        float rampmult = 1.f;
-        if (graphicOptions.RampCounter != 0) {
-            graphicOptions.RampCounter -= SIMULATION_ATOM;
-            if (graphicOptions.RampCounter <= 0)
-                graphicOptions.RampCounter = 0;
-            if (graphicOptions.InWarp == 0 && graphicOptions.RampCounter > warprampdowntime)
-                graphicOptions.RampCounter = (1-graphicOptions.RampCounter/warprampuptime)*warprampdowntime;
-            if (graphicOptions.InWarp == 1 && graphicOptions.RampCounter > warprampuptime)
-                graphicOptions.RampCounter = warprampuptime;
-            rampmult = (graphicOptions.InWarp) ? 1.0
-                        -( (graphicOptions.RampCounter
-                            /warprampuptime)
-                            *(graphicOptions.RampCounter
-                            /warprampuptime) ) : (graphicOptions.RampCounter
-                                                    /warprampdowntime)*(graphicOptions.RampCounter/warprampdowntime);
-        }
-        graphicOptions.WarpFieldStrength = GetMaxWarpFieldStrength(rampmult);
-    } else {
-        graphicOptions.WarpFieldStrength = 1;
-    }
-    //not any more? lastWarpField=1;
-    Vector v;
-    if (graphicOptions.WarpFieldStrength != 1.0)
-        v = GetWarpVelocity();
-    else
-        v = Velocity;
-    static float WARPMEMORYEFFECT = XMLSupport::parse_float( vs_config->getVariable( "physics", "WarpMemoryEffect", "0.9" ) );
-    graphicOptions.WarpFieldStrength = lastWarpField*WARPMEMORYEFFECT+(1.0-WARPMEMORYEFFECT)*graphicOptions.WarpFieldStrength;
-    curr_physical_state.position     = curr_physical_state.position+(v*SIMULATION_ATOM*difficulty).Cast();
-    //now we do this later in update physics
-    //I guess you have to, to be robust}
-}
-
-void Unit::UpdatePhysics2( const Transformation &trans,
-                           const Transformation &old_physical_state,
-                           const Vector &accel,
-                           float difficulty,
-                           const Matrix &transmat,
-                           const Vector &cum_vel,
-                           bool lastframe,
-                           UnitCollection *uc ) {
-    //Only in non-networking OR networking && is a player OR SERVER && not a player
-    if (AngularVelocity.i || AngularVelocity.j || AngularVelocity.k)
-      Rotate( SIMULATION_ATOM*(AngularVelocity) );
-
+    if ( isSubUnit() )
+        return Position();
+    return LocalPosition();
 }
 
 static QVector RealPosition( const Unit *un )
@@ -3118,24 +2517,6 @@ Cockpit* Unit::GetVelocityDifficultyMult( float &difficulty ) const
     return player_cockpit;
 }
 
-void Unit::Rotate( const Vector &axis )
-{
-    double     theta   = axis.Magnitude();
-    double     ootheta = 0;
-    if (theta == 0) return;
-    ootheta = 1/theta;
-    float      s   = cos( theta*.5 );
-    Quaternion rot = Quaternion( s, axis*(sinf( theta*.5 )*ootheta) );
-    if (theta < 0.0001)
-        rot = identity_quaternion;
-    curr_physical_state.orientation *= rot;
-    if (limits.limitmin > -1) {
-        Matrix mat;
-        curr_physical_state.orientation.to_matrix( mat );
-        if (limits.structurelimits.Dot( mat.getR() ) < limits.limitmin)
-            curr_physical_state.orientation = prev_physical_state.orientation;
-    }
-}
 
 void Unit::FireEngines( const Vector &Direction /*unit vector... might default to "r"*/, float FuelSpeed, float FMass )
 {
@@ -3248,18 +2629,7 @@ Vector Unit::ClampTorque( const Vector &amt1 )
     return Res;
 }
 
-float Unit::Computer::max_speed() const
-{
-    static float combat_mode_mult = XMLSupport::parse_float( vs_config->getVariable( "physics", "combat_speed_boost", "100" ) );
-    return (!combat_mode) ? combat_mode_mult*max_combat_speed : max_combat_speed;
-}
 
-float Unit::Computer::max_ab_speed() const
-{
-    static float combat_mode_mult = XMLSupport::parse_float( vs_config->getVariable( "physics", "combat_speed_boost", "100" ) );
-    //same capped big speed as combat...else different
-    return (!combat_mode) ? combat_mode_mult*max_combat_speed : max_combat_ab_speed;
-}
 
 void Unit::SwitchCombatFlightMode()
 {
@@ -3824,177 +3194,7 @@ void Unit::RegenShields()
     energy = energy < 0 ? 0 : energy;
 }
 
-Vector Unit::ResolveForces( const Transformation &trans, const Matrix &transmat )
-{
-    //First, save theoretical instantaneous acceleration (not time-quantized) for GetAcceleration()
-    SavedAccel = GetNetAcceleration();
-    SavedAngAccel = GetNetAngularAcceleration();
 
-    Vector p, q, r;
-    GetOrientation( p, q, r );
-    Vector temp1( NetLocalTorque.i*p+NetLocalTorque.j*q+NetLocalTorque.k*r );
-    if (NetTorque.i || NetTorque.j || NetTorque.k)
-        temp1 += InvTransformNormal( transmat, NetTorque );
-    if ( GetMoment() )
-        temp1 = temp1/GetMoment();
-    else
-        VSFileSystem::vs_fprintf( stderr, "zero moment of inertia %s\n", name.get().c_str() );
-    Vector temp( temp1*SIMULATION_ATOM );
-    AngularVelocity += temp;
-    static float maxplayerrotationrate    =
-        XMLSupport::parse_float( vs_config->getVariable( "physics", "maxplayerrot", "24" ) );
-    static float maxnonplayerrotationrate = XMLSupport::parse_float( vs_config->getVariable( "physics", "maxNPCrot", "360" ) );
-    float caprate;
-    if ( _Universe->isPlayerStarship( this ) )         //clamp to avoid vomit-comet effects
-        caprate = maxplayerrotationrate;
-    else
-        caprate = maxnonplayerrotationrate;
-    if (AngularVelocity.MagnitudeSquared() > caprate*caprate)
-        AngularVelocity = AngularVelocity.Normalize()*caprate;
-    //acceleration
-    Vector temp2 = (NetLocalForce.i*p+NetLocalForce.j*q+NetLocalForce.k*r);
-    if ( !( FINITE( NetForce.i ) && FINITE( NetForce.j ) && FINITE( NetForce.k ) ) )
-        cout<<"NetForce skrewed";
-    if (NetForce.i || NetForce.j || NetForce.k)
-        temp2 += InvTransformNormal( transmat, NetForce );
-    temp2 = temp2/GetMass();
-    temp  = temp2*SIMULATION_ATOM;
-    if ( !( FINITE( temp2.i ) && FINITE( temp2.j ) && FINITE( temp2.k ) ) )
-        cout<<"NetForce transform skrewed";
-    float oldmagsquared = Velocity.MagnitudeSquared();
-        Velocity += temp;
-    //}
-
-    float newmagsquared = Velocity.MagnitudeSquared();
-    static float warpstretchcutoff =
-        XMLSupport::parse_float( vs_config->getVariable( "graphics", "warp_stretch_cutoff",
-                                                         "500000" ) )*XMLSupport::parse_float(
-            vs_config->getVariable( "physics", "game_speed", "1" ) );
-    static float warpstretchoutcutoff =
-        XMLSupport::parse_float( vs_config->getVariable( "graphics", "warp_stretch_decel_cutoff",
-                                                         "500000" ) )
-        *XMLSupport::parse_float( vs_config->getVariable( "physics", "game_speed", "1" ) );
-    static float cutsqr    = warpstretchcutoff*warpstretchcutoff;
-    static float outcutsqr = warpstretchoutcutoff*warpstretchoutcutoff;
-    bool oldbig    = oldmagsquared > cutsqr;
-    bool newbig    = newmagsquared > cutsqr;
-    bool oldoutbig = oldmagsquared > outcutsqr;
-    bool newoutbig = newmagsquared > outcutsqr;
-    if ( (newbig && !oldbig) || (oldoutbig && !newoutbig) ) {
-        static string insys_jump_ani = vs_config->getVariable( "graphics", "insys_jump_animation", "warp.ani" );
-        static bool   docache = true;
-        if (docache) {
-            UniverseUtil::cacheAnimation( insys_jump_ani );
-            docache = false;
-        }
-        Vector v( GetVelocity() );
-        v.Normalize();
-        Vector p, q, r;
-        GetOrientation( p, q, r );
-        static float sec =
-            XMLSupport::parse_float( vs_config->getVariable( "graphics", "insys_jump_ani_second_ahead",
-                                                             "4" ) )
-            /( XMLSupport::parse_float( vs_config->getVariable( "physics", "game_speed",
-                                                                "1" ) )
-              *XMLSupport::parse_float( vs_config->getVariable( "physics", "game_accel", "1" ) ) );
-        static float endsec =
-            XMLSupport::parse_float( vs_config->getVariable( "graphics", "insys_jump_ani_second_ahead_end",
-                                                             ".03" ) )
-            /( XMLSupport::parse_float( vs_config->getVariable( "physics", "game_speed",
-                                                                "1" ) )
-              *XMLSupport::parse_float( vs_config->getVariable( "physics", "game_accel", "1" ) ) );
-        float tmpsec = oldbig ? endsec : sec;
-        UniverseUtil::playAnimationGrow( insys_jump_ani, RealPosition( this ).Cast()+Velocity*tmpsec+v*rSize(), rSize()*8, 1 );
-    }
-    static float air_res_coef = XMLSupport::parse_float( active_missions[0]->getVariable( "air_resistance", "0" ) );
-    static float lateral_air_res_coef = XMLSupport::parse_float( active_missions[0]->getVariable( "lateral_air_resistance", "0" ) );
-    if (air_res_coef || lateral_air_res_coef) {
-        float  velmag = Velocity.Magnitude();
-        Vector AirResistance = Velocity
-                               *( air_res_coef*velmag/GetMass() )*(corner_max.i-corner_min.i)*(corner_max.j-corner_min.j);
-        if (AirResistance.Magnitude() > velmag) {
-            Velocity.Set( 0, 0, 0 );
-        } else {
-            Velocity = Velocity-AirResistance;
-            if (lateral_air_res_coef) {
-                Vector p, q, r;
-                GetOrientation( p, q, r );
-                Vector lateralVel = p*Velocity.Dot( p )+q*Velocity.Dot( q );
-                AirResistance = lateralVel
-                                *( lateral_air_res_coef*velmag
-                                  /GetMass() )*(corner_max.i-corner_min.i)*(corner_max.j-corner_min.j);
-                if ( AirResistance.Magnitude() > lateralVel.Magnitude() )
-                    Velocity = r*Velocity.Dot( r );
-                else
-                    Velocity = Velocity-AirResistance;
-            }
-        }
-    }
-    NetForce = NetLocalForce = NetTorque = NetLocalTorque = Vector( 0, 0, 0 );
-
-    return temp2;
-}
-
-void Unit::SetOrientation( QVector q, QVector r )
-{
-    q.Normalize();
-    r.Normalize();
-    QVector p;
-    CrossProduct( q, r, p );
-    CrossProduct( r, p, q );
-    curr_physical_state.orientation = Quaternion::from_vectors( p.Cast(), q.Cast(), r.Cast() );
-}
-
-void Unit::SetOrientation( QVector p, QVector q, QVector r )
-{
-    q.Normalize();
-    r.Normalize();
-    p.Normalize();
-    curr_physical_state.orientation = Quaternion::from_vectors( p.Cast(), q.Cast(), r.Cast() );
-}
-
-void Unit::SetOrientation( Quaternion Q )
-{
-    curr_physical_state.orientation = Q;
-}
-
-#define MM( A, B ) m.r[B*3+A]
-
-Vector Unit::UpCoordinateLevel( const Vector &v ) const
-{
-    Matrix m;
-    curr_physical_state.to_matrix( m );
-    return Vector( v.i*MM( 0, 0 )+v.j*MM( 1, 0 )+v.k*MM( 2, 0 ),
-                  v.i*MM( 0, 1 )+v.j*MM( 1, 1 )+v.k*MM( 2, 1 ),
-                  v.i*MM( 0, 2 )+v.j*MM( 1, 2 )+v.k*MM( 2, 2 ) );
-}
-
-#undef MM
-
-Vector Unit::DownCoordinateLevel( const Vector &v ) const
-{
-    Matrix m;
-    curr_physical_state.to_matrix( m );
-    return TransformNormal( m, v );
-}
-
-#define MM( A, B ) ( (cumulative_transformation_matrix.r[B*3+A]) )
-
-Vector Unit::ToLocalCoordinates( const Vector &v ) const
-{
-    //Matrix m;
-    //062201: not a cumulative transformation...in prev unit space  curr_physical_state.to_matrix(m);
-    return Vector( v.i*MM( 0, 0 )+v.j*MM( 1, 0 )+v.k*MM( 2, 0 ),
-                  v.i*MM( 0, 1 )+v.j*MM( 1, 1 )+v.k*MM( 2, 1 ),
-                  v.i*MM( 0, 2 )+v.j*MM( 1, 2 )+v.k*MM( 2, 2 ) );
-}
-
-#undef MM
-
-Vector Unit::ToWorldCoordinates( const Vector &v ) const
-{
-    return TransformNormal( cumulative_transformation_matrix, v );
-}
 
 /*
  **********************************************************************************
@@ -8892,47 +8092,416 @@ string toLowerCase( string in )
 unsigned int Drawable::unitCount = 0;
 
 
-
-
-Unit::Computer::RADARLIM::Brand::Value Unit::Computer::RADARLIM::GetBrand() const
+// TODO: move to ship
+Vector Unit::GetWarpRefVelocity() const
 {
-    switch (capability & Capability::IFF_UPPER_MASK)
+    //Velocity
+    Vector VelocityRef( 0, 0, 0 );
     {
-    case Capability::IFF_SPHERE:
-        return Brand::SPHERE;
-    case Capability::IFF_BUBBLE:
-        return Brand::BUBBLE;
-    case Capability::IFF_PLANE:
-        return Brand::PLANE;
-    default:
-        assert(false);
-        return Brand::SPHERE;
+        const Unit *vr = computer.velocity_ref.GetConstUnit();
+        if (vr)
+            VelocityRef = vr->cumulative_velocity;
+    }
+    Vector v   = Velocity-VelocityRef;
+    float  len = v.Magnitude();
+    if (len > .01)      //only get velocity going in DIRECTIOn of cumulative transformation for warp calc...
+        v = v*( cumulative_transformation_matrix.getR().Dot( v*(1./len) ) );
+
+    return v;
+}
+
+// TODO: move to ship
+Vector Unit::GetWarpVelocity() const
+{
+    if (graphicOptions.WarpFieldStrength == 1.0) {
+        // Short circuit, most ships won't be at warp, so it simplifies math a lot
+        return cumulative_velocity;
+    } else {
+        Vector VelocityRef( 0, 0, 0 );
+        {
+            Unit *vr = const_cast< UnitContainer* > (&computer.velocity_ref)->GetUnit();
+            if (vr)
+                VelocityRef = vr->cumulative_velocity;
+        }
+
+        //return(cumulative_velocity*graphicOptions.WarpFieldStrength);
+        Vector vel   = cumulative_velocity-VelocityRef;
+        float  speed = vel.Magnitude();
+        //return vel*graphicOptions.WarpFieldStrength;
+        if (speed > 0) {
+            Vector veldir    = vel*(1./speed);
+            Vector facing    = cumulative_transformation_matrix.getR();
+            float  ang       = facing.Dot( veldir );
+            float  warpfield = graphicOptions.WarpFieldStrength;
+            if (ang < 0) warpfield = 1./warpfield;
+            return facing*(ang*speed*(warpfield-1.))+vel+VelocityRef;
+        } else {
+            return VelocityRef;
+        }
     }
 }
 
-bool Unit::Computer::RADARLIM::UseFriendFoe() const
-{
-    // Backwardscompatibility
-    if (capability == 0)
-        return false;
-    else if ((capability == 1) || (capability == 2))
-        return true;
+void Unit::UpdatePhysics3(const Transformation &trans,
+                          const Matrix &transmat,
+                          bool lastframe,
+                          UnitCollection *uc,
+                          Unit *superunit) {
+  if (docked&DOCKING_UNITS)
+      PerformDockingOperations();
+  Repair();
+  if (fuel < 0)
+      fuel = 0;
+  if (cloaking >= cloakmin) {
+      static bool warp_energy_for_cloak =
+          XMLSupport::parse_bool( vs_config->getVariable( "physics", "warp_energy_for_cloak", "true" ) );
+      if ( pImage->cloakenergy*SIMULATION_ATOM > (warp_energy_for_cloak ? warpenergy : energy) ) {
+          Cloak( false );                      //Decloak
+      } else {
+          SetShieldZero( this );
+          if (pImage->cloakrate > 0 || cloaking == cloakmin) {
+              if (warp_energy_for_cloak)
+                  warpenergy -= (SIMULATION_ATOM*pImage->cloakenergy);
+              else
+                  energy -= (SIMULATION_ATOM*pImage->cloakenergy);
+          }
+          if (cloaking > cloakmin) {
+              AUDAdjustSound( sound->cloak, cumulative_transformation.position, cumulative_velocity );
+              //short fix
+              if ( (cloaking == (2147483647)
+                    && pImage->cloakrate > 0) || (cloaking == cloakmin+1 && pImage->cloakrate < 0) )
+                  AUDStartPlaying( sound->cloak );
+              //short fix
+              cloaking -= (int) (pImage->cloakrate*SIMULATION_ATOM);
+              if (cloaking <= cloakmin && pImage->cloakrate > 0)
+                  cloaking = cloakmin;
+              if (cloaking < 0 && pImage->cloakrate < 0) {
+                  cloaking = -2147483647-1;
+              }
+          }
+      }
+  }
+  RegenShields();
+  if (lastframe) {
+      if ( !( docked&(DOCKED|DOCKED_INSIDE) ) )
+          //the AIscript should take care
+          prev_physical_state = curr_physical_state;
+#ifdef FIX_TERRAIN
+      if (planet) {
+          if (!planet->dirty)
+              SetPlanetOrbitData( NULL );
+          else
+              planet->pps = planet->cps;
+      }
+#endif
+  }
 
-    return (capability & Capability::IFF_FRIEND_FOE);
+  float    difficulty;
+  Cockpit *player_cockpit = GetVelocityDifficultyMult( difficulty );
+  static float EXTRA_CARGO_SPACE_DRAG =
+      XMLSupport::parse_float( vs_config->getVariable( "physics", "extra_space_drag_for_cargo", "0.005" ) );
+  if (EXTRA_CARGO_SPACE_DRAG > 0) {
+      int upgfac = FactionUtil::GetUpgradeFaction();
+      if ( (this->faction == upgfac) || (this->name == "eject") || (this->name == "Pilot") )
+          Velocity = Velocity*(1-EXTRA_CARGO_SPACE_DRAG);
+  }
+
+  float dist_sqr_to_target = FLT_MAX;
+  Unit *target = Unit::Target();
+  bool  increase_locking   = false;
+  if (target && cloaking < 0 /*-1 or -32768*/) {
+      if (target->isUnit() != PLANETPTR) {
+          Vector TargetPos( InvTransform( cumulative_transformation_matrix, ( target->Position() ) ).Cast() );
+          dist_sqr_to_target = TargetPos.MagnitudeSquared();
+          TargetPos.Normalize();
+          if (TargetPos.k > computer.radar.lockcone)
+              increase_locking = true;
+      }
+      /* Update the velocity reference to the nearer significant unit/planet. */
+      if (!computer.force_velocity_ref && activeStarSystem) {
+          Unit *nextVelRef = activeStarSystem->nextSignificantUnit();
+          if (nextVelRef) {
+              if ( computer.velocity_ref.GetUnit() ) {
+                  double dist = UnitUtil::getSignificantDistance( this, computer.velocity_ref.GetUnit() );
+                  double next_dist = UnitUtil::getSignificantDistance( this, nextVelRef );
+                  if (next_dist < dist)
+                      computer.velocity_ref = nextVelRef;
+              } else {
+                  computer.velocity_ref = nextVelRef;
+              }
+          }
+      }
+  }
+  static float SPACE_DRAG   = XMLSupport::parse_float( vs_config->getVariable( "physics", "unit_space_drag", "0.000000" ) );
+
+  if (SPACE_DRAG > 0)
+      Velocity = Velocity*(1-SPACE_DRAG);
+
+  static string LockingSoundName     = vs_config->getVariable( "unitaudio", "locking", "locking.wav" );
+  //enables spiffy wc2 torpedo music, default to normal though
+  static string LockingSoundTorpName = vs_config->getVariable( "unitaudio", "locking_torp", "locking.wav" );
+  static int    LockingSound = AUDCreateSoundWAV( LockingSoundName, true );
+  static int    LockingSoundTorp     = AUDCreateSoundWAV( LockingSoundTorpName, true );
+
+  bool locking = false;
+  bool touched = false;
+  for (int i = 0; (int) i < GetNumMounts(); ++i) {
+      // TODO: simplify this if
+      if ( ( (false
+              && mounts[i].status
+              == Mount::INACTIVE) || mounts[i].status == Mount::ACTIVE ) && cloaking < 0 && mounts[i].ammo != 0 ) {
+          if (player_cockpit)
+              touched = true;
+          if ( increase_locking && (dist_sqr_to_target < mounts[i].type->Range*mounts[i].type->Range) ) {
+              mounts[i].time_to_lock -= SIMULATION_ATOM;
+              static bool ai_lock_cheat = XMLSupport::parse_bool( vs_config->getVariable( "physics", "ai_lock_cheat", "true" ) );
+              if (!player_cockpit) {
+                  if (ai_lock_cheat)
+                      mounts[i].time_to_lock = -1;
+              } else {
+                  int LockingPlay = LockingSound;
+
+                  //enables spiffy wc2 torpedo music, default to normal though
+                  static bool LockTrumpsMusic     =
+                      XMLSupport::parse_bool( vs_config->getVariable( "unitaudio", "locking_trumps_music", "false" ) );
+                  //enables spiffy wc2 torpedo music, default to normal though
+                  static bool TorpLockTrumpsMusic =
+                      XMLSupport::parse_bool( vs_config->getVariable( "unitaudio", "locking_torp_trumps_music", "false" ) );
+                  if (mounts[i].type->LockTime > 0) {
+                      static string LockedSoundName = vs_config->getVariable( "unitaudio", "locked", "locked.wav" );
+                      static int    LockedSound     = AUDCreateSoundWAV( LockedSoundName, false );
+                      if (mounts[i].type->size == weapon_info::SPECIALMISSILE)
+                          LockingPlay = LockingSoundTorp;
+
+                      else
+                          LockingPlay = LockingSound;
+                      if (mounts[i].time_to_lock > -SIMULATION_ATOM && mounts[i].time_to_lock <= 0) {
+                          if ( !AUDIsPlaying( LockedSound ) ) {
+                              UniverseUtil::musicMute( false );
+                              AUDStartPlaying( LockedSound );
+                              AUDStopPlaying( LockingSound );
+                              AUDStopPlaying( LockingSoundTorp );
+                          }
+                          AUDAdjustSound( LockedSound, Position(), GetVelocity() );
+                      } else if (mounts[i].time_to_lock > 0) {
+                          locking = true;
+                          if ( !AUDIsPlaying( LockingPlay ) ) {
+                              if (LockingPlay == LockingSoundTorp)
+                                  UniverseUtil::musicMute( TorpLockTrumpsMusic );
+
+                              else
+                                  UniverseUtil::musicMute( LockTrumpsMusic );
+                              AUDStartPlaying( LockingSound );
+                          }
+                          AUDAdjustSound( LockingSound, Position(), GetVelocity() );
+                      }
+                  }
+              }
+          } else if (mounts[i].ammo != 0) {
+              mounts[i].time_to_lock = mounts[i].type->LockTime;
+          }
+      } else if (mounts[i].ammo != 0) {
+          mounts[i].time_to_lock = mounts[i].type->LockTime;
+      }
+      if (mounts[i].type->type == weapon_info::BEAM) {
+          if (mounts[i].ref.gun) {
+              Unit *autotarg     =
+                  (   (mounts[i].size&weapon_info::AUTOTRACKING)
+                   && (mounts[i].time_to_lock <= 0)
+                   && TargetTracked() ) ? target : NULL;
+              float trackingcone = computer.radar.trackingcone;
+              if ( CloseEnoughToAutotrack( this, target, trackingcone ) ) {
+                  if (autotarg)
+                      if (computer.radar.trackingcone < trackingcone)
+                          trackingcone = computer.radar.trackingcone;
+                  autotarg = target;
+              }
+              mounts[i].ref.gun->UpdatePhysics( cumulative_transformation,
+                                                cumulative_transformation_matrix,
+                                                autotarg,
+                                                trackingcone,
+                                                target,
+                                                (HeatSink ? HeatSink : 1.0f)*mounts[i].functionality,
+                                                this,
+                                                superunit );
+          }
+      } else {
+          mounts[i].ref.refire += SIMULATION_ATOM*(HeatSink ? HeatSink : 1.0f)*mounts[i].functionality;
+      }
+      if (mounts[i].processed == Mount::FIRED) {
+          Transformation t1;
+          Matrix m1;
+          t1 = prev_physical_state;             //a hack that will not work on turrets
+          t1.Compose( trans, transmat );
+          t1.to_matrix( m1 );
+          int autotrack = 0;
+          if (   ( 0 != (mounts[i].size&weapon_info::AUTOTRACKING) )
+              && TargetTracked() )
+              autotrack = computer.itts ? 2 : 1;
+          float trackingcone = computer.radar.trackingcone;
+          if ( CloseEnoughToAutotrack( this, target, trackingcone ) ) {
+              if (autotrack)
+                  if (trackingcone > computer.radar.trackingcone)
+                      trackingcone = computer.radar.trackingcone;
+              autotrack = 2;
+          }
+          CollideMap::iterator hint[Unit::NUM_COLLIDE_MAPS];
+          for (unsigned int locind = 0; locind < Unit::NUM_COLLIDE_MAPS; ++locind)
+              hint[locind] =
+                  ( !is_null( superunit->location[locind] ) ) ? superunit->location[locind] : _Universe->activeStarSystem()->
+                  collidemap[locind]->begin();
+          if ( !mounts[i].PhysicsAlignedFire( this, t1, m1, cumulative_velocity,
+                                              (!isSubUnit() || owner == NULL) ? this : owner, target, autotrack,
+                                              trackingcone,
+                                              hint ) ) {
+              const weapon_info *typ = mounts[i].type;
+              energy += typ->EnergyRate*(typ->type == weapon_info::BEAM ? SIMULATION_ATOM : 1);
+          }
+      } else if ( mounts[i].processed == Mount::UNFIRED || mounts[i].ref.refire > 2*mounts[i].type->Refire() ) {
+          mounts[i].processed = Mount::UNFIRED;
+          mounts[i].PhysicsAlignedUnfire();
+      }
+  }
+  if (locking == false && touched == true) {
+      if ( AUDIsPlaying( LockingSound ) ) {
+          UniverseUtil::musicMute( false );
+          AUDStopPlaying( LockingSound );
+      }
+      if ( AUDIsPlaying( LockingSoundTorp ) ) {
+          UniverseUtil::musicMute( false );
+          AUDStopPlaying( LockingSoundTorp );
+      }
+  }
+  bool dead = true;
+
+  UpdateSubunitPhysics( cumulative_transformation,
+                        cumulative_transformation_matrix,
+                        cumulative_velocity,
+                        lastframe,
+                        uc,
+                        superunit );
+  //can a unit get to another system without jumping?.
+  static bool warp_is_interstellar =
+      XMLSupport::parse_bool( vs_config->getVariable( "physics", "warp_is_interstellar", "false" ) );
+  if ( warp_is_interstellar
+      && ( curr_physical_state.position.MagnitudeSquared() > howFarToJump()*howFarToJump() && !isSubUnit() ) ) {
+      static bool direct = XMLSupport::parse_bool( vs_config->getVariable( "physics", "direct_interstellar_journey", "true" ) );
+      bool jumpDirect    = false;
+      if (direct) {
+          Cockpit *cp = _Universe->isPlayerStarship( this );
+          if (NULL != cp) {
+              std::string sys = cp->GetNavSelectedSystem();
+              if ( !sys.empty() ) {
+                  jumpDirect = true;
+                  _Universe->activeStarSystem()->JumpTo( this, NULL, sys, true, true );
+              }
+          }
+      }
+      if (!jumpDirect) {
+          _Universe->activeStarSystem()->JumpTo( this, NULL,
+                                                 NearestSystem( _Universe->activeStarSystem()->getFileName(),
+                                                                curr_physical_state.position ), true, true );
+      }
+  }
+  if (maxhull < 0) {
+      this->Explode( true, 0 );
+  }
+  //Really kill the unit only in non-networking or on server side
+  if (hull < 0) {
+      dead &= (pImage->pExplosion == NULL);
+      if (dead)
+          Kill();
+  } else
+  if ( !isSubUnit() ) {
+      for (unsigned int locind = 0; locind < Unit::NUM_COLLIDE_MAPS; ++locind) {
+          if ( is_null( this->location[locind] ) )
+              this->getStarSystem()->collidemap[locind]->insert( Collidable( this ) );
+          else if (locind == Unit::UNIT_BOLT)
+              //that update will propagate with the flatten
+              this->getStarSystem()->collidemap[Unit::UNIT_BOLT]->changeKey( this->location[locind], Collidable( this ) );
+      }
+  }
 }
 
-bool Unit::Computer::RADARLIM::UseObjectRecognition() const
+bool Unit::isPlayerShip()
 {
-    // Backwardscompatibility
-    if ((capability == 0) || (capability == 1))
-        return false;
-    else if (capability == 2)
-        return true;
-
-    return (capability & Capability::IFF_OBJECT_RECOGNITION);
+    return _Universe->isPlayerStarship( this ) ? true : false;
 }
 
-bool Unit::Computer::RADARLIM::UseThreatAssessment() const
+float Unit::CalculateNearestWarpUnit( float minmultiplier, Unit **nearest_unit, bool count_negative_warp_units ) const
 {
-    return (capability & Capability::IFF_THREAT_ASSESSMENT);
+    static float  smallwarphack     = XMLSupport::parse_float( vs_config->getVariable( "physics", "minwarpeffectsize", "100" ) );
+    static float  bigwarphack       =
+        XMLSupport::parse_float( vs_config->getVariable( "physics", "maxwarpeffectsize", "10000000" ) );
+    //Boundary between multiplier regions 1&2. 2 is "high" mult
+    static double warpregion1       = XMLSupport::parse_float( vs_config->getVariable( "physics", "warpregion1", "5000000" ) );
+    //Boundary between multiplier regions 0&1 0 is mult=1
+    static double warpregion0       = XMLSupport::parse_float( vs_config->getVariable( "physics", "warpregion0", "5000" ) );
+    //Mult at 1-2 boundary
+    static double warpcruisemult    = XMLSupport::parse_float( vs_config->getVariable( "physics", "warpcruisemult", "5000" ) );
+    //degree of curve
+    static double curvedegree       = XMLSupport::parse_float( vs_config->getVariable( "physics", "warpcurvedegree", "1.5" ) );
+    //coefficient so as to agree with above
+    static double upcurvek = warpcruisemult/pow( (warpregion1-warpregion0), curvedegree );
+    //inverse fractional effect of ship vs real big object
+    static float  def_inv_interdiction = 1.
+                                         /XMLSupport::parse_float( vs_config->getVariable( "physics", "default_interdiction",
+                                                                                           ".125" ) );
+    Unit *planet;
+    Unit *testthis = NULL;
+    {
+        NearestUnitLocator locatespec;
+        findObjects( _Universe->activeStarSystem()->collidemap[Unit::UNIT_ONLY], location[Unit::UNIT_ONLY], &locatespec );
+        testthis = locatespec.retval.unit;
+    }
+    for (un_fiter iter = _Universe->activeStarSystem()->gravitationalUnits().fastIterator();
+         (planet = *iter) || testthis;
+         ++iter) {
+        if ( !planet || !planet->Killed() ) {
+            if (planet == NULL) {
+                planet   = testthis;
+                testthis = NULL;
+            }
+            if (planet == this)
+                continue;
+            float shiphack = 1;
+            if (planet->isUnit() != PLANETPTR) {
+                shiphack = def_inv_interdiction;
+                if ( planet->specInterdiction != 0 && planet->graphicOptions.specInterdictionOnline != 0
+                    && (planet->specInterdiction > 0 || count_negative_warp_units) ) {
+                    shiphack = 1/fabs( planet->specInterdiction );
+                    if (specInterdiction != 0 && graphicOptions.specInterdictionOnline != 0)
+                        //only counters artificial interdiction ... or maybe it cheap ones shouldn't counter expensive ones!? or
+                        // expensive ones should counter planets...this is safe now, for gameplay
+                        shiphack *= fabs( specInterdiction );
+                }
+            }
+            float   multipliertemp = 1;
+            float   minsizeeffect  = (planet->rSize() > smallwarphack) ? planet->rSize() : smallwarphack;
+            float   effectiverad   = minsizeeffect*( 1.0f+UniverseUtil::getPlanetRadiusPercent() )+rSize();
+            if (effectiverad > bigwarphack)
+                effectiverad = bigwarphack;
+            QVector dir     = Position()-planet->Position();
+            double  udist   = dir.Magnitude();
+            float   sigdist = UnitUtil::getSignificantDistance( this, planet );
+            if ( planet->isPlanet() && udist < (1<<28) ) //If distance is viable as a float approximation and it's an actual celestial body
+                udist = sigdist;
+            do {
+                double dist = udist;
+                if (dist < 0) dist = 0;
+                dist *= shiphack;
+                if ( dist > (effectiverad+warpregion0) )
+                    multipliertemp = pow( (dist-effectiverad-warpregion0), curvedegree )*upcurvek;
+                else
+                    multipliertemp = 1;
+                if (multipliertemp < minmultiplier) {
+                    minmultiplier = multipliertemp;
+                    *nearest_unit = planet;
+                    //eventually use new multiplier to compute
+                } else {break; }
+            } while (0);
+            if (!testthis)
+                break; //don't want the ++
+        }
+    }
+    return minmultiplier;
 }

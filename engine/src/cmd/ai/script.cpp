@@ -788,7 +788,7 @@ void AIScript::LoadXML()
                     value = ( pdmag-parent->rSize()-targ->rSize() );
                     float  myvel = pdmag > 0 ? PosDifference.Dot( parent->GetVelocity()-targ->GetVelocity() )/pdmag : 0;
                     if (myvel > 0)
-                        value -= myvel*myvel/( 2*( parent->Limits().retro/parent->GetMass() ) );
+                        value -= myvel*myvel/( 2*( parent->limits.retro/parent->GetMass() ) );
                 } else {
                     value = 10000;
                 }

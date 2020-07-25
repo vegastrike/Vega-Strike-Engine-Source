@@ -205,6 +205,8 @@ SET(LIBCMD_SOURCES
     src/cmd/weapon_xml.cpp
 
     src/cmd/drawable.cpp
+    src/cmd/movable.cpp
+    src/cmd/computer.cpp
 )
 
 SET(LIBCMDSERVER_SOURCES

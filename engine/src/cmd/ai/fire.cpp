@@ -78,11 +78,11 @@ bool CanFaceTarget( Unit *su, Unit *targ, const Matrix &matrix )
 {
     return true;
 
-    float limitmin = su->Limits().limitmin;
+    float limitmin = su->limits.limitmin;
     if (limitmin > -.99) {
         QVector pos   = ( targ->Position()-su->Position() ).Normalize();
         QVector pnorm = pos.Cast();
-        Vector  structurelimits = su->Limits().structurelimits;
+        Vector  structurelimits = su->limits.structurelimits;
         Vector  worldlimit = TransformNormal( matrix, structurelimits );
         if (pnorm.Dot( worldlimit ) < limitmin)
             return false;

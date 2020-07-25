@@ -137,8 +137,8 @@ bool MoveToParent::Execute( Unit *parent, const QVector &targetlocation )
 
     last_velocity = local_vel;
     Vector heading      = parent->ToLocalCoordinates( ( targetlocation-parent->Position() ).Cast() );
-    Vector thrust( parent->Limits().lateral, parent->Limits().vertical,
-                   afterburn ? parent->Limits().afterburn : parent->Limits().forward );
+    Vector thrust( parent->limits.lateral, parent->limits.vertical,
+                   afterburn ? parent->limits.afterburn : parent->limits.forward );
     float  max_speed    =
         ( afterburn ? parent->GetComputerData().max_ab_speed() : parent->GetComputerData().max_speed() );
     Vector normheading  = heading;
@@ -179,18 +179,18 @@ bool MoveToParent::Execute( Unit *parent, const QVector &targetlocation )
             thrust.k /= div;
         }
         //start with Forward/Reverse:
-        float t = CalculateDecelTime( heading.k, last_velocity.k, thrust.k, parent->Limits().retro/div, parent->GetMass() );
+        float t = CalculateDecelTime( heading.k, last_velocity.k, thrust.k, parent->limits.retro/div, parent->GetMass() );
         if (t < THRESHOLD) {
             thrust.k =
-                ( thrust.k > 0 ? -parent->Limits().retro
-                 /div : ( afterburn ? parent->Limits().afterburn/div : parent->Limits().forward/div ) );
+                ( thrust.k > 0 ? -parent->limits.retro
+                 /div : ( afterburn ? parent->limits.afterburn/div : parent->limits.forward/div ) );
         } else if (t < SIMULATION_ATOM) {
             thrust.k *= t/SIMULATION_ATOM;
             thrust.k +=
                 (SIMULATION_ATOM
                  -t)
-                *( thrust.k > 0 ? -parent->Limits().retro
-                  /div : ( afterburn ? parent->Limits().afterburn/div : parent->Limits().forward/div ) )/SIMULATION_ATOM;
+                *( thrust.k > 0 ? -parent->limits.retro
+                  /div : ( afterburn ? parent->limits.afterburn/div : parent->limits.forward/div ) )/SIMULATION_ATOM;
         }
         OptimizeSpeed( parent, last_velocity.k, thrust.k, max_velocity.k/vdiv );
         t = CalculateBalancedDecelTime( heading.i, last_velocity.i, thrust.i, parent->GetMass() );
@@ -294,7 +294,7 @@ void ChangeHeading::Execute()
     static bool AICheat = XMLSupport::parse_bool( vs_config->getVariable( "AI", "turn_cheat", "true" ) );
     bool   cheater = false;
     static float min_for_no_oversteer = XMLSupport::parse_float( vs_config->getVariable( "AI", "min_angular_accel_cheat", "50" ) );
-    if ( AICheat && ( (parent->Limits().yaw+parent->Limits().pitch)*180/( PI*parent->GetMass() ) > min_for_no_oversteer )
+    if ( AICheat && ( (parent->limits.yaw+parent->limits.pitch)*180/( PI*parent->GetMass() ) > min_for_no_oversteer )
         && !parent->isSubUnit() ) {
         if (xswitch || yswitch) {
             Vector P, Q, R;
@@ -332,7 +332,7 @@ void ChangeHeading::Execute()
     last_velocity = local_velocity;
     if (done /*||(xswitch&&yswitch)*/)
         return;
-    Vector torque( parent->Limits().pitch, parent->Limits().yaw, 0 );     //set torque to max accel in any direction
+    Vector torque( parent->limits.pitch, parent->limits.yaw, 0 );     //set torque to max accel in any direction
     if (terminatingX > switchbacks && terminatingY > switchbacks) {
         if ( Done( local_velocity ) ) {
             if (this->terminating) {
@@ -435,7 +435,6 @@ FaceTarget::~FaceTarget()
     fflush( stderr );
 #endif
 }
-extern float CalculateNearestWarpUnit( const Unit *thus, float minmultiplier, Unit **nearest_unit, bool negative_spec_units );
 AutoLongHaul::AutoLongHaul( bool fini, int accuracy ) : ChangeHeading( QVector( 0, 0, 1 ), accuracy )
     , finish( fini )
 {
@@ -557,7 +556,7 @@ void AutoLongHaul::Execute()
     if ((parent->graphicOptions.WarpFieldStrength < enough_warp_for_cruise) && ( parent->graphicOptions.RampCounter == 0)) {
         //face target unless warp ramping is done and warp is less than some intolerable ammt
         Unit *obstacle = NULL;
-        float maxmultiplier = CalculateNearestWarpUnit( parent, FLT_MAX, &obstacle, compensate_for_interdiction );         //find the unit affecting our spec
+        float maxmultiplier = parent->CalculateNearestWarpUnit( FLT_MAX, &obstacle, compensate_for_interdiction );         //find the unit affecting our spec
         bool  currently_inside_landing_zone = false;
         if (obstacle)
             currently_inside_landing_zone = InsideLandingPort( obstacle );

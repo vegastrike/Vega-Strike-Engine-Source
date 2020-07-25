@@ -211,13 +211,13 @@ void FlyByWire::RollRight( float per )
 
 void FlyByWire::Afterburn( float per )
 {
-    Unit::Computer *cpu = &parent->GetComputerData();
+    Computer *cpu = &parent->GetComputerData();
 
     afterburn = (per > .1);
     if (!sheltonslide && !inertial_flight_model)
         desired_velocity = Vector( 0, 0, cpu->set_speed+per*(cpu->max_ab_speed()-cpu->set_speed) );
     else if (inertial_flight_model)
-        DirectThrust += Vector( 0, 0, parent->Limits().afterburn*per );
+        DirectThrust += Vector( 0, 0, parent->limits.afterburn*per );
     if ( parent == _Universe->AccessCockpit()->GetParent() ) {
         //printf("afterburn is %d\n",afterburn); // DELETEME WTF all this force feedback code and its unused.
         //COMMENTED BECAUSE OF SERVER -- NEED TO REINTEGRATE IT IN ANOTHER WAY
@@ -232,7 +232,7 @@ void FlyByWire::SheltonSlide( bool onoff )
 
 void FlyByWire::MatchSpeed( const Vector &vec )
 {
-    Unit::Computer *cpu = &parent->GetComputerData();
+    Computer *cpu = &parent->GetComputerData();
 
     cpu->set_speed = (vec).Magnitude();
     if ( cpu->set_speed > cpu->max_speed() )
@@ -241,7 +241,7 @@ void FlyByWire::MatchSpeed( const Vector &vec )
 
 void FlyByWire::Accel( float per )
 {
-    Unit::Computer *cpu = &parent->GetComputerData();
+    Computer *cpu = &parent->GetComputerData();
 
     cpu->set_speed += per*cpu->max_speed()*SIMULATION_ATOM;
     if ( cpu->set_speed > cpu->max_speed() )
@@ -273,20 +273,20 @@ void FlyByWire::ThrustFront( float percent )
 
 void FlyByWire::DirectThrustRight( float percent )
 {
-    DirectThrust.i = parent->Limits().lateral*percent;
+    DirectThrust.i = parent->limits.lateral*percent;
 }
 
 void FlyByWire::DirectThrustUp( float percent )
 {
-    DirectThrust.j = parent->Limits().vertical*percent;
+    DirectThrust.j = parent->limits.vertical*percent;
 }
 
 void FlyByWire::DirectThrustFront( float percent )
 {
     if (percent > 0)
-        DirectThrust.k = parent->Limits().forward*percent;
+        DirectThrust.k = parent->limits.forward*percent;
     else
-        DirectThrust.k = parent->Limits().retro*percent;
+        DirectThrust.k = parent->limits.retro*percent;
 }
 
 void FlyByWire::Execute()
@@ -296,8 +296,8 @@ void FlyByWire::Execute()
     if (!inertial_flight_model) {
         //Must translate the thrust values to velocities, which is somewhat cumbersome.
         Vector Limit(
-            parent->Limits().lateral, parent->Limits().vertical,
-            ( (DirectThrust.k > 0) ? parent->Limits().forward : parent->Limits().retro )
+            parent->limits.lateral, parent->limits.vertical,
+            ( (DirectThrust.k > 0) ? parent->limits.forward : parent->limits.retro )
                     );
         if (Limit.i <= 1) Limit.i = 1;
         if (Limit.j <= 1) Limit.j = 1;

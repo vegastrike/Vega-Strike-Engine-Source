@@ -4778,8 +4778,8 @@ void showUnitStats( Unit *playerUnit, string &text, int subunitlevel, int mode, 
     }
     //const Unit::Computer uc  = playerUnit->ViewComputerData();
     //const Unit::Computer buc = blankUnit->ViewComputerData();
-    const Unit::Computer &uc  = playerUnit->ViewComputerData();
-    const Unit::Computer &buc = blankUnit->ViewComputerData();
+    const Computer &uc  = playerUnit->ViewComputerData();
+    const Computer &buc = blankUnit->ViewComputerData();
     if (!mode) {
         text += "#n##n#"+prefix+"#c0:1:.5#[FLIGHT CHARACTERISTICS]#n##-c";
         text += "#n#"+prefix+statcolor+"Turning response: #-c";
