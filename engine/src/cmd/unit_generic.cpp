@@ -2463,7 +2463,7 @@ void Unit::UpdateSubunitPhysics( const Transformation &trans,
                                  UnitCollection *uc,
                                  Unit *superunit )
 {
-    /*if ( !SubUnits.empty() ) {
+    if ( !SubUnits.empty() ) {
         Unit *su;
         float backup = simulation_atom_var;
         //BOOST_LOG_TRIVIAL(trace) << boost::format("Unit::UpdateSubunitPhysics(): simulation_atom_var as backed up  = %1%") % simulation_atom_var;
@@ -2486,16 +2486,18 @@ void Unit::UpdateSubunitPhysics( const Transformation &trans,
                         && ( (su->cur_sim_queue_slot <= cur_sim_frame) || (su->last_processed_sqs < su->cur_sim_queue_slot) ) )
                      ) {
                     if (do_subunit_scheduling) {
-                        int priority = UnitUtil::getPhysicsPriority( su );
-                        //Add some scattering
-                        priority = (priority+rand()%priority)/2;
-                        if (priority < 1) priority = 1;
-                        su->sim_atom_multiplier = this->sim_atom_multiplier*priority;
-                        if (su->sim_atom_multiplier > SIM_QUEUE_SIZE)
-                            su->sim_atom_multiplier = (SIM_QUEUE_SIZE/su->sim_atom_multiplier)*su->sim_atom_multiplier;
-                        if (su->sim_atom_multiplier < this->sim_atom_multiplier)
-                            su->sim_atom_multiplier = this->sim_atom_multiplier;
-                        didSomeScattering = true;
+                        #if defined(RANDOMIZE_SIM_ATOMS)
+                            int priority = UnitUtil::getPhysicsPriority( su );
+                            //Add some scattering
+                            priority = (priority+rand()%priority)/2;
+                            if (priority < 1) priority = 1;
+                            su->sim_atom_multiplier = this->sim_atom_multiplier*priority;
+                            if (su->sim_atom_multiplier > SIM_QUEUE_SIZE)
+                                su->sim_atom_multiplier = (SIM_QUEUE_SIZE/su->sim_atom_multiplier)*su->sim_atom_multiplier;
+                            if (su->sim_atom_multiplier < this->sim_atom_multiplier)
+                                su->sim_atom_multiplier = this->sim_atom_multiplier;
+                            didSomeScattering = true;
+                        #endif
                     } else {
                         su->sim_atom_multiplier = this->sim_atom_multiplier;
                     }
@@ -2511,11 +2513,11 @@ void Unit::UpdateSubunitPhysics( const Transformation &trans,
                 }
             }
         if (didSomeScattering) {
-            BOOST_LOG_TRIVIAL(trace) << "Unit::UpdateSubunitPhysics(): Did some scattering inside skipped-frames handler";
+            BOOST_LOG_TRIVIAL(trace) << "Unit::UpdateSubunitPhysics(): Did some random scattering inside skipped-frames handler";
         }
         simulation_atom_var = backup;
         //BOOST_LOG_TRIVIAL(trace) << boost::format("Unit::UpdateSubunitPhysics(): simulation_atom_var as restored   = %1%") % simulation_atom_var;
-    }*/
+    }
 }
 
 void Unit::UpdateSubunitPhysics( Unit *subunit,
