@@ -78,8 +78,8 @@ bool hasDockingUnits( const Unit *my_unit )
 
 int getPhysicsPriority( Unit *un )
 {
-    static const bool FORCE_TOP_PRIORITY = true; //XMLSupport::parse_bool(
-        //vs_config->getVariable( "physics", "priorities", "force_top_priority", "false" ) );
+    static bool FORCE_TOP_PRIORITY = XMLSupport::parse_bool(
+        vs_config->getVariable( "physics", "priorities", "force_top_priority", "false" ) );
     if (FORCE_TOP_PRIORITY)
         return 1;
     //Some other comment mentions these need special treatment for subunit scheduling

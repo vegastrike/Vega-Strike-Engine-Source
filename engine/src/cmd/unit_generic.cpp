@@ -507,8 +507,8 @@ void Unit::reactToCollision( Unit *smalle,
         Vector smforce =
             (SmallerFinalVelocity
              -small_velocity)*smalle->GetMass()
-            / SIMULATION_ATOM; //( simulation_atom_var*( (float) smalle->sim_atom_multiplier )/( (float) this->sim_atom_multiplier ) );
-        Vector thisforce = (ThisFinalVelocity-big_velocity)*GetMass() / SIMULATION_ATOM; //simulation_atom_var;
+            / ( simulation_atom_var*( (float) smalle->sim_atom_multiplier )/( (float) this->sim_atom_multiplier ) );
+        Vector thisforce = (ThisFinalVelocity-big_velocity)*GetMass() / simulation_atom_var;
         if (thcp) {
             if ( (getNewTime()-thcp->TimeOfLastCollision) > mintime )
                 thcp->TimeOfLastCollision = getNewTime();
@@ -538,8 +538,8 @@ void Unit::reactToCollision( Unit *smalle,
             float  maxTorque = maxTorqueMultiplier*(smalle->limits.yaw
                                                     +smalle->limits.pitch+smalle->limits.roll);
             //Convert from frames to seconds, so that the specified value is meaningful
-            maxForce  = maxForce / SIMULATION_ATOM; //(smalle->sim_atom_multiplier*simulation_atom_var);
-            maxTorque = maxTorque / SIMULATION_ATOM; //(smalle->sim_atom_multiplier*simulation_atom_var);
+            maxForce  = maxForce / (smalle->sim_atom_multiplier*simulation_atom_var);
+            maxTorque = maxTorque / (smalle->sim_atom_multiplier*simulation_atom_var);
             float tMag = torque.Magnitude();
             float fMag = force.Magnitude();
             if (tMag > maxTorque)
@@ -557,8 +557,8 @@ void Unit::reactToCollision( Unit *smalle,
                                                    +limits.lateral+limits.vertical);
             float  maxTorque = maxTorqueMultiplier*(limits.yaw+limits.pitch+limits.roll);
             //Convert from frames to seconds, so that the specified value is meaningful
-            maxForce  = maxForce / SIMULATION_ATOM; //(this->sim_atom_multiplier*simulation_atom_var);
-            maxTorque = maxTorque / SIMULATION_ATOM; //(this->sim_atom_multiplier*simulation_atom_var);
+            maxForce  = maxForce / (this->sim_atom_multiplier*simulation_atom_var);
+            maxTorque = maxTorque / (this->sim_atom_multiplier*simulation_atom_var);
             float tMag = torque.Magnitude();
             float fMag = force.Magnitude();
             if (tMag > maxTorque)
@@ -1466,7 +1466,7 @@ void Unit::Fire( unsigned int weapon_type_bitmask, bool listen_to_owner )
             && ( (ROLES::EVERYTHING_ELSE&weapon_type_bitmask&i->type->role_bits) || i->type->role_bits == 0 )
             && ( (locked_on && missile_and_want_to_fire_missiles) || gun_and_want_to_fire_guns );
         if ( (*i).type->type == weapon_info::BEAM ) {
-            if ( (*i).type->EnergyRate * SIMULATION_ATOM /*simulation_atom_var*/ > energy ) {
+            if ( (*i).type->EnergyRate * simulation_atom_var > energy ) {
                 //NOT ONLY IN non-networking mode : anyway, the server will tell everyone including us to stop if not already done
                 (*i).UnFire();
                 continue;
@@ -1493,7 +1493,7 @@ void Unit::Fire( unsigned int weapon_type_bitmask, bool listen_to_owner )
                     if (i->type->type == weapon_info::BEAM) {
                         if (i->ref.gun)
                             if ( ( !i->ref.gun->Dissolved() ) || i->ref.gun->Ready() )
-                                energy -= i->type->EnergyRate * SIMULATION_ATOM; //*simulation_atom_var;
+                                energy -= i->type->EnergyRate*simulation_atom_var;
                     } else if ( i->type->isMissile() ) {    // FIXME  other than beams, only missiles are processed here?
                         energy -= i->type->EnergyRate;
                     }
@@ -1683,9 +1683,9 @@ float Unit::cosAngleTo( Unit *targ, float &dist, float speed, float range, bool 
     //Trial code
     float turnlimit =
         tmpmax( tmpmax( computer.max_yaw_left, computer.max_yaw_right ), tmpmax( computer.max_pitch_up, computer.max_pitch_down ) );
-    float turnangle = SIMULATION_ATOM /*simulation_atom_var*/
+    float turnangle = simulation_atom_var
                       *tmpmax( turnlimit,
-                              tmpmax( SIMULATION_ATOM /*simulation_atom_var*/ *.5*(limits.yaw+limits.pitch),
+                              tmpmax( simulation_atom_var *.5*(limits.yaw+limits.pitch),
                                      sqrtf( AngularVelocity.i*AngularVelocity.i+AngularVelocity.j*AngularVelocity.j ) ) );
     float   ittsangle    = safeacos( Normal.Cast().Dot( totarget.Scale( 1./totarget.Magnitude() ) ) );
     QVector edgeLocation = (targ->cumulative_transformation_matrix.getP()*targ->rSize()+totarget);
@@ -2171,15 +2171,15 @@ void Unit::UpdatePhysics( const Transformation &trans,
     if (cloaking >= cloakmin) {
         static bool warp_energy_for_cloak =
             XMLSupport::parse_bool( vs_config->getVariable( "physics", "warp_energy_for_cloak", "true" ) );
-        if ( pImage->cloakenergy * SIMULATION_ATOM /*simulation_atom_var*/ > (warp_energy_for_cloak ? warpenergy : energy) ) {
+        if ( pImage->cloakenergy * simulation_atom_var > (warp_energy_for_cloak ? warpenergy : energy) ) {
             Cloak( false );                      //Decloak
         } else {
             SetShieldZero( this );
             if (pImage->cloakrate > 0 || cloaking == cloakmin) {
                 if (warp_energy_for_cloak)
-                    warpenergy -= (SIMULATION_ATOM /*simulation_atom_var*/ * pImage->cloakenergy);
+                    warpenergy -= (simulation_atom_var * pImage->cloakenergy);
                 else
-                    energy -= (SIMULATION_ATOM /*simulation_atom_var*/ * pImage->cloakenergy);
+                    energy -= (simulation_atom_var * pImage->cloakenergy);
             }
             if (cloaking > cloakmin) {
                 AUDAdjustSound( sound->cloak, cumulative_transformation.position, cumulative_velocity );
@@ -2188,7 +2188,7 @@ void Unit::UpdatePhysics( const Transformation &trans,
                       && pImage->cloakrate > 0) || (cloaking == cloakmin+1 && pImage->cloakrate < 0) )
                     AUDStartPlaying( sound->cloak );
                 //short fix
-                cloaking -= (int) (pImage->cloakrate * SIMULATION_ATOM /*simulation_atom_var*/ );
+                cloaking -= (int) (pImage->cloakrate * simulation_atom_var );
                 if (cloaking <= cloakmin && pImage->cloakrate > 0)
                     cloaking = cloakmin;
                 if (cloaking < 0 && pImage->cloakrate < 0) {
@@ -2286,7 +2286,7 @@ void Unit::UpdatePhysics( const Transformation &trans,
             if (player_cockpit)
                 touched = true;
             if ( increase_locking && (dist_sqr_to_target < mounts[i].type->Range*mounts[i].type->Range) ) {
-                mounts[i].time_to_lock -= SIMULATION_ATOM; //simulation_atom_var;
+                mounts[i].time_to_lock -= simulation_atom_var;
                 static bool ai_lock_cheat = XMLSupport::parse_bool( vs_config->getVariable( "physics", "ai_lock_cheat", "true" ) );
                 if (!player_cockpit) {
                     if (ai_lock_cheat)
@@ -2308,7 +2308,7 @@ void Unit::UpdatePhysics( const Transformation &trans,
 
                         else
                             LockingPlay = LockingSound;
-                        if (mounts[i].time_to_lock > -SIMULATION_ATOM /*-simulation_atom_var*/ && mounts[i].time_to_lock <= 0) {
+                        if (mounts[i].time_to_lock > -simulation_atom_var && mounts[i].time_to_lock <= 0) {
                             if ( !AUDIsPlaying( LockedSound ) ) {
                                 UniverseUtil::musicMute( false );
                                 AUDStartPlaying( LockedSound );
@@ -2359,7 +2359,7 @@ void Unit::UpdatePhysics( const Transformation &trans,
                                                   superunit );
             }
         } else {
-            mounts[i].ref.refire += SIMULATION_ATOM /*simulation_atom_var*/ * (HeatSink ? HeatSink : 1.0f)*mounts[i].functionality;
+            mounts[i].ref.refire += simulation_atom_var * (HeatSink ? HeatSink : 1.0f)*mounts[i].functionality;
         }
         if (mounts[i].processed == Mount::FIRED) {
             Transformation t1;
@@ -2388,7 +2388,7 @@ void Unit::UpdatePhysics( const Transformation &trans,
                                                 trackingcone,
                                                 hint ) ) {
                 const weapon_info *typ = mounts[i].type;
-                energy += typ->EnergyRate*(typ->type == weapon_info::BEAM ? SIMULATION_ATOM /*simulation_atom_var*/ : 1);
+                energy += typ->EnergyRate*(typ->type == weapon_info::BEAM ? simulation_atom_var : 1);
             }
         } else if ( mounts[i].processed == Mount::UNFIRED || mounts[i].ref.refire > 2*mounts[i].type->Refire() ) {
             mounts[i].processed = Mount::UNFIRED;
@@ -2690,7 +2690,7 @@ void Unit::AddVelocity( float difficulty )
     if (graphicOptions.InWarp == 1 || graphicOptions.RampCounter != 0) {
         float rampmult = 1.f;
         if (graphicOptions.RampCounter != 0) {
-            graphicOptions.RampCounter -= SIMULATION_ATOM; //simulation_atom_var;
+            graphicOptions.RampCounter -= simulation_atom_var;
             if (graphicOptions.RampCounter <= 0)
                 graphicOptions.RampCounter = 0;
             if (graphicOptions.InWarp == 0 && graphicOptions.RampCounter > warprampdowntime)
@@ -2716,7 +2716,7 @@ void Unit::AddVelocity( float difficulty )
         v = Velocity;
     static float WARPMEMORYEFFECT = XMLSupport::parse_float( vs_config->getVariable( "physics", "WarpMemoryEffect", "0.9" ) );
     graphicOptions.WarpFieldStrength = lastWarpField*WARPMEMORYEFFECT+(1.0-WARPMEMORYEFFECT)*graphicOptions.WarpFieldStrength;
-    curr_physical_state.position     = curr_physical_state.position+(v * SIMULATION_ATOM /*simulation_atom_var*/ * difficulty).Cast();
+    curr_physical_state.position     = curr_physical_state.position+(v * simulation_atom_var * difficulty).Cast();
     //now we do this later in update physics
     //I guess you have to, to be robust}
 }
@@ -2731,7 +2731,7 @@ void Unit::UpdatePhysics2( const Transformation &trans,
                            UnitCollection *uc ) {
     //Only in non-networking OR networking && is a player OR SERVER && not a player
     if (AngularVelocity.i || AngularVelocity.j || AngularVelocity.k)
-      Rotate( SIMULATION_ATOM /*simulation_atom_var*/ * (AngularVelocity) );
+      Rotate( simulation_atom_var * (AngularVelocity) );
 
 }
 
@@ -3243,7 +3243,7 @@ Vector Unit::ClampTorque( const Vector &amt1 )
     static float FMEC_exit_vel_inverse =
         XMLSupport::parse_float( vs_config->getVariable( "physics", "FMEC_exit_vel", "0.0000002" ) );
     //HACK this forces the reaction to be Li-6+D fusion with efficiency governed by the getFuelUsage function
-    fuel -= GetFuelUsage( false ) * SIMULATION_ATOM /*simulation_atom_var*/ * Res.Magnitude()*FMEC_exit_vel_inverse/Lithium6constant;
+    fuel -= GetFuelUsage( false ) * simulation_atom_var * Res.Magnitude()*FMEC_exit_vel_inverse/Lithium6constant;
 #ifndef __APPLE__
     if ( ISNAN( fuel ) ) {
         fprintf( stderr, "FUEL is NAN\n" );
@@ -3287,7 +3287,7 @@ Vector Unit::ClampVelocity( const Vector &velocity, const bool afterburn )
     static float staticfuelclamp   = XMLSupport::parse_float( vs_config->getVariable( "physics", "NoFuelThrust", ".4" ) );
     static float staticabfuelclamp = XMLSupport::parse_float( vs_config->getVariable( "physics", "NoFuelAfterburn", ".1" ) );
     float fuelclamp   = (fuel <= 0) ? staticfuelclamp : 1;
-    float abfuelclamp = ( fuel <= 0 || (energy < afterburnenergy * SIMULATION_ATOM /*simulation_atom_var*/ ) ) ? staticabfuelclamp : 1;
+    float abfuelclamp = ( fuel <= 0 || (energy < afterburnenergy * simulation_atom_var ) ) ? staticabfuelclamp : 1;
     float limit =
         afterburn ? ( abfuelclamp
                      *( computer.max_ab_speed()
@@ -3362,7 +3362,7 @@ Vector Unit::ClampThrust( const Vector &amt1, bool afterburn )
         if (fuel < warpenergy)
             warpenergy = fuel;
     }
-    float instantenergy = afterburnenergy * SIMULATION_ATOM; //*simulation_atom_var;
+    float instantenergy = afterburnenergy*simulation_atom_var;
     if ( (afterburntype == 0) && energy < instantenergy )
         afterburn = false;
     if ( (afterburntype == 1) && fuel < 0 ) {
@@ -3399,7 +3399,7 @@ Vector Unit::ClampThrust( const Vector &amt1, bool afterburn )
     if (afterburntype == 2) {
         //Energy-consuming afterburner
         //HACK this forces the reaction to be Li-6+Li-6 fusion with efficiency governed by the getFuelUsage function
-        warpenergy -= afterburnenergy*GetFuelUsage( afterburn ) * SIMULATION_ATOM /*simulation_atom_var*/ * Res.Magnitude()*FMEC_exit_vel_inverse
+        warpenergy -= afterburnenergy*GetFuelUsage( afterburn ) * simulation_atom_var * Res.Magnitude()*FMEC_exit_vel_inverse
                       /Lithium6constant;
     }
     if (3 == afterburntype || afterburntype == 1) {
@@ -3407,7 +3407,7 @@ Vector Unit::ClampThrust( const Vector &amt1, bool afterburn )
         //HACK this forces the reaction to be Li-6+Li-6 fusion with efficiency governed by the getFuelUsage function
         fuel -=
             ( (afterburn
-               && finegrainedFuelEfficiency) ? afterburnenergy : GetFuelUsage( afterburn ) ) * SIMULATION_ATOM /*simulation_atom_var*/ * Res.Magnitude()
+               && finegrainedFuelEfficiency) ? afterburnenergy : GetFuelUsage( afterburn ) ) * simulation_atom_var * Res.Magnitude()
             *FMEC_exit_vel_inverse/Lithium6constant;
 #ifndef __APPLE__
         if ( ISNAN( fuel ) ) {
@@ -3419,7 +3419,7 @@ Vector Unit::ClampThrust( const Vector &amt1, bool afterburn )
     if (afterburntype == 0) {
         //fuel-burning afterburner - uses default efficiency - appears to check for available energy? FIXME
         //HACK this forces the reaction to be Li-6+Li-6 fusion with efficiency governed by the getFuelUsage function
-        fuel -= GetFuelUsage( false ) * SIMULATION_ATOM /*simulation_atom_var*/ * Res.Magnitude()*FMEC_exit_vel_inverse/Lithium6constant;
+        fuel -= GetFuelUsage( false ) * simulation_atom_var * Res.Magnitude()*FMEC_exit_vel_inverse/Lithium6constant;
 #ifndef __APPLE__
         if ( ISNAN( fuel ) ) {
             fprintf( stderr, "Fuel is NAN B\n" );
@@ -3588,7 +3588,7 @@ void Unit::RechargeEnergy()
 {
     static bool reactor_uses_fuel = XMLSupport::parse_bool( vs_config->getVariable( "physics", "reactor_uses_fuel", "false" ) );
     if ( (!reactor_uses_fuel) || (fuel > 0) )
-        energy += recharge * SIMULATION_ATOM; //simulation_atom_var;
+        energy += recharge * simulation_atom_var;
 }
 
 void Unit::RegenShields()
@@ -3607,7 +3607,7 @@ void Unit::RegenShields()
     static float discharge_per_second     =
         XMLSupport::parse_float( vs_config->getVariable( "physics", "speeding_discharge", ".25" ) );
     //approx
-    const float  dischargerate  = (1-(1-discharge_per_second) * SIMULATION_ATOM /*simulation_atom_var*/ );
+    const float  dischargerate  = (1-(1-discharge_per_second) * simulation_atom_var );
     static float min_shield_discharge =
         XMLSupport::parse_float( vs_config->getVariable( "physics", "min_shield_speeding_discharge", ".1" ) );
     static float low_power_mode =
@@ -3638,16 +3638,16 @@ void Unit::RegenShields()
             energy -= shield.recharge*VSD
                       /( 100
                         *(shield.efficiency ? shield.efficiency : 1) )/shieldenergycap*shield.number*shield_maintenance_cost
-                      * SIMULATION_ATOM /*simulation_atom_var*/ * ( (apply_difficulty_shields) ? g_game.difficulty : 1 );
+                      * simulation_atom_var * ( (apply_difficulty_shields) ? g_game.difficulty : 1 );
             if (energy < 0) {
                 velocity_discharge = true;
                 energy = 0;
             }
         }
         rec =
-            (velocity_discharge) ? 0 : ( (shield.recharge*VSD/100 * SIMULATION_ATOM /*simulation_atom_var*/ * shield.number/shieldenergycap)
+            (velocity_discharge) ? 0 : ( (shield.recharge*VSD/100 * simulation_atom_var * shield.number/shieldenergycap)
                                         > energy ) ? (energy*shieldenergycap*100/VSD
-                                                      /shield.number) : shield.recharge * SIMULATION_ATOM; //simulation_atom_var;
+                                                      /shield.number) : shield.recharge * simulation_atom_var;
         if (apply_difficulty_shields) {
             if ( !_Universe->isPlayerStarship( this ) )
                 rec *= g_game.difficulty;
@@ -3667,7 +3667,7 @@ void Unit::RegenShields()
     //ECM energy drain
     if (computer.ecmactive) {
         static float ecmadj = XMLSupport::parse_float( vs_config->getVariable( "physics", "ecm_energy_cost", ".05" ) );
-        float sim_atom_ecm  = ecmadj*pImage->ecm * SIMULATION_ATOM; //simulation_atom_var;
+        float sim_atom_ecm  = ecmadj*pImage->ecm * simulation_atom_var;
         if (energy > sim_atom_ecm)
             energy -= sim_atom_ecm;
         else
@@ -3761,7 +3761,7 @@ void Unit::RegenShields()
         if (shields_require_power)
             maxshield = 0;
         if (max_shield_lowers_recharge)
-            energy -= max_shield_lowers_recharge * SIMULATION_ATOM /*simulation_atom_var*/ * maxshield*VSD
+            energy -= max_shield_lowers_recharge * simulation_atom_var * maxshield*VSD
                       /( 100*(shield.efficiency ? shield.efficiency : 1) );
         if (!max_shield_lowers_capacitance)
             maxshield = 0;
@@ -3786,7 +3786,7 @@ void Unit::RegenShields()
     if (graphicOptions.InWarp) {
         //FIXME FIXME FIXME
         static float bleedfactor = XMLSupport::parse_float( vs_config->getVariable( "physics", "warpbleed", "20" ) );
-        float bleed = jump.insysenergy/bleedfactor * SIMULATION_ATOM; //simulation_atom_var;
+        float bleed = jump.insysenergy/bleedfactor * simulation_atom_var;
         if (warpenergy > bleed) {
             warpenergy -= bleed;
         } else {
@@ -3820,7 +3820,7 @@ void Unit::RegenShields()
         static float min_reactor_efficiency =
             XMLSupport::parse_float( vs_config->getVariable( "physics", "min_reactor_efficiency", ".00001" ) );
         fuel -= FMEC_factor
-                *( ( recharge * SIMULATION_ATOM /*simulation_atom_var*/
+                *( ( recharge * simulation_atom_var
                     -(reactor_idle_efficiency
                       *excessenergy) )/( min_reactor_efficiency+( pImage->LifeSupportFunctionality*(1-min_reactor_efficiency) ) ) );
         if (fuel < 0) fuel = 0;
@@ -3847,7 +3847,7 @@ Vector Unit::ResolveForces( const Transformation &trans, const Matrix &transmat 
         temp1 = temp1/GetMoment();
     else
         VSFileSystem::vs_fprintf( stderr, "zero moment of inertia %s\n", name.get().c_str() );
-    Vector temp( temp1 * SIMULATION_ATOM /*simulation_atom_var*/ );
+    Vector temp( temp1 * simulation_atom_var );
     AngularVelocity += temp;
     static float maxplayerrotationrate    =
         XMLSupport::parse_float( vs_config->getVariable( "physics", "maxplayerrot", "24" ) );
@@ -3866,7 +3866,7 @@ Vector Unit::ResolveForces( const Transformation &trans, const Matrix &transmat 
     if (NetForce.i || NetForce.j || NetForce.k)
         temp2 += InvTransformNormal( transmat, NetForce );
     temp2 = temp2/GetMass();
-    temp  = temp2 * SIMULATION_ATOM; //simulation_atom_var;
+    temp  = temp2 * simulation_atom_var;
     if ( !( FINITE( temp2.i ) && FINITE( temp2.j ) && FINITE( temp2.k ) ) )
         cout<<"NetForce transform skrewed";
     float oldmagsquared = Velocity.MagnitudeSquared();
@@ -5534,7 +5534,7 @@ void Unit::Destroy()
             DestroyMount( &mounts[beamcount] );
 
 
-        if ( !Explode( false, SIMULATION_ATOM /*simulation_atom_var*/ ) )
+        if ( !Explode( false, simulation_atom_var ) )
             Kill();
     }
 }
@@ -8770,7 +8770,7 @@ void Unit::Repair()
                 }
             }
         }
-        float ammt_repair = SIMULATION_ATOM /*simulation_atom_var*/ / repairtime*pImage->repair_droid;
+        float ammt_repair = simulation_atom_var / repairtime*pImage->repair_droid;
         REPAIRINTEGRATED( pImage->LifeSupportFunctionality, pImage->LifeSupportFunctionalityMax );
         REPAIRINTEGRATED( pImage->fireControlFunctionality, pImage->fireControlFunctionalityMax );
         REPAIRINTEGRATED( pImage->SPECDriveFunctionality, pImage->SPECDriveFunctionalityMax );
