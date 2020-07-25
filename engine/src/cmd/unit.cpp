@@ -471,9 +471,9 @@ void GameUnit< UnitType >::Draw( const Transformation &parent, const Matrix &par
             int    cur_sim_frame = _Universe->activeStarSystem()->getCurrentSimFrame();
             for (un_iter iter = this->getSubUnits(); (un = *iter); ++iter) {
                 float sim_atom_backup = simulation_atom_var;
-                if (sim_atom_backup != 1) {
-                    BOOST_LOG_TRIVIAL(debug) << boost::format("void GameUnit< UnitType >::Draw( const Transformation &parent, const Matrix &parentMatrix ): sim_atom as backed up != 1: %1%") % sim_atom_backup;
-                }
+                /*if (sim_atom_backup != SIMULATION_ATOM) {
+                    BOOST_LOG_TRIVIAL(debug) << boost::format("void GameUnit< UnitType >::Draw( const Transformation &parent, const Matrix &parentMatrix ): sim_atom as backed up != SIMULATION_ATOM: %1%") % sim_atom_backup;
+                }*/
                 if (this->sim_atom_multiplier && un->sim_atom_multiplier) {
                     //BOOST_LOG_TRIVIAL(trace) << boost::format("void GameUnit< UnitType >::Draw( const Transformation &parent, const Matrix &parentMatrix ): simulation_atom_var as backed up  = %1%") % simulation_atom_var;
                     simulation_atom_var = simulation_atom_var * un->sim_atom_multiplier / this->sim_atom_multiplier;
