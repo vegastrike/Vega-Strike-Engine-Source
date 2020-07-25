@@ -150,9 +150,6 @@ void micro_sleep( unsigned int n )
 
 #elif defined (IRIX)
 
-// Now included above, for all operating systems except Windows
-// #include <unistd.h>
-
 void micro_sleep( unsigned int n )
 {
     (void) usleep( (useconds_t) n );
