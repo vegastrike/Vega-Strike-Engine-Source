@@ -4113,7 +4113,7 @@ void trackPrice(int whichplayer, const Cargo &item, float price, const string &s
         {
             for (size_t i = 0; i < recordedHighestPrices.size(); ++i) {
                                                                     // POSIX-printf style
-                BOOST_LOG_TRIVIAL(info) << boost::format("    %1% : %2$.2f") % i % recordedHighestPrices[i];
+                BOOST_LOG_TRIVIAL(info) << boost::format("    %1$d : %2$.2f") % i % recordedHighestPrices[i];
             }
         }
 
@@ -4128,11 +4128,11 @@ void trackPrice(int whichplayer, const Cargo &item, float price, const string &s
         {
             for (size_t i = 0; i < recordedLowestPrices.size(); ++i) {
                                                                     // POSIX-printf style
-                BOOST_LOG_TRIVIAL(info) << boost::format("    %1% : %2$.2f") % i % recordedLowestPrices[i];
+                BOOST_LOG_TRIVIAL(info) << boost::format("    %1$d : %2$.2f") % i % recordedLowestPrices[i];
             }
         }
 
-        // TODO: Find a way to flush the Boost logs? Console log specifically?
+        VSFileSystem::pFileLogSink->flush();
 
         highest.clear();
         highest.resize(recordedHighestPrices.size());
@@ -4771,7 +4771,7 @@ void showUnitStats( Unit *playerUnit, string &text, int subunitlevel, int mode, 
         if (!mode) {
             text += conversionBuffer;
             text += " radians/second^2#n#"+expstatcolor+"  (yaw, pitch, roll)#-c";
-        } else if (MODIFIES(replacement_mode, playerUnit, blankUnit, limits.yaw)) { 
+        } else if (MODIFIES(replacement_mode, playerUnit, blankUnit, limits.yaw)) {
             switch (replacement_mode)
             {
             case 0:                     //Replacement or new Module
