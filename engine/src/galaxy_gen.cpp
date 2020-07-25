@@ -656,14 +656,16 @@ void MakeSmallUnit()
     Vector R, S;
 
     string nam;
+    string base_type;
     string s = string( "" );
+    nam = getRandName( names );
     while (s.length() == 0) {
-        nam = getRandName( starbases );
-        if (nam.length() == 0)
+        base_type = getRandName( starbases );
+        if (base_type.length() == 0)
             return;
         string tmp;
-        if ( ( tmp = starin( nam ) ).length() > 0 ) {
-            nam = (tmp);
+        if ( ( tmp = starin( base_type ) ).length() > 0 ) {
+            base_type = (tmp);
             s   = getRandName( jumps );
         } else {
             break;
@@ -672,10 +674,9 @@ void MakeSmallUnit()
     numstarbases--;
     string nebfile( "" );
     float  radius;
-    string type   = AnalyzeType( nam, nebfile, radius );
+    string type   = AnalyzeType( base_type, nebfile, radius );
     Vector center = generateAndUpdateRS( R, S, radius, true );
-
-    WriteUnit( type, "", nam, R, S, center, nebfile, s, true );
+    WriteUnit( type, nam, base_type, R, S, center, nebfile, s, true );
 }
 
 void MakeJump( float radius, bool forceRS = false, Vector R = Vector( 0, 0, 0 ), Vector S = Vector( 0,
