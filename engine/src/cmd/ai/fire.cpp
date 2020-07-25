@@ -659,7 +659,7 @@ unsigned int FireBitmask( Unit *parent, bool shouldfire, bool firemissile )
 void FireAt::FireWeapons( bool shouldfire, bool lockmissile )
 {
     static float missiledelay     = XMLSupport::parse_float( vs_config->getVariable( "AI", "MissileGunDelay", "4" ) );
-    //FIXME - rand() will not return a value in the expected range here - stephengtuggy 2020-07-25
+    //Will rand() be in the expected range here? -- stephengtuggy 2020-07-25
     bool fire_missile = lockmissile && rand() < RAND_MAX*missileprobability*SIMULATION_ATOM;
     delay += SIMULATION_ATOM; //simulation_atom_var?
     if ( shouldfire && delay < parent->pilot->getReactionTime() )
@@ -707,11 +707,11 @@ void FireAt::Execute()
     Unit *targ;
     if (parent->isUnit() == UNITPTR) {
         static float cont_update_time   = XMLSupport::parse_float( vs_config->getVariable( "AI", "ContrabandUpdateTime", "1" ) );
-        // FIXME - I don't think rand()'s return value will be in the right range here -- stephengtuggy 2020-07-25
+        //Will rand() be in the expected range here? -- stephengtuggy 2020-07-25
         if (rand() < RAND_MAX*SIMULATION_ATOM/cont_update_time)
             UpdateContrabandSearch();
         static float cont_initiate_time = XMLSupport::parse_float( vs_config->getVariable( "AI", "CommInitiateTime", "300" ) );
-        // FIXME - Or here
+        //Or here?
         if ( (float) rand() < ( (float) RAND_MAX*(SIMULATION_ATOM/cont_initiate_time) ) ) {
             static float contraband_initiate_time =
                 XMLSupport::parse_float( vs_config->getVariable( "AI", "ContrabandInitiateTime", "3000" ) );
