@@ -83,9 +83,9 @@ void Beam::Init( const Transformation &trans, const weapon_info &cln, void *own,
     static int  radslices  = XMLSupport::parse_int( vs_config->getVariable( "graphics", "tractor.scoop_rad_slices", "10" ) )|1;    //Must be odd
     static int  longslices = XMLSupport::parse_int( vs_config->getVariable( "graphics", "tractor.scoop_long_slices", "10" ) );
     lastlength = 0;
-    curlength  = SIMULATION_ATOM*speed;
+    curlength  = simulation_atom_var*speed;
     lastthick  = 0;
-    curthick   = SIMULATION_ATOM*radialspeed;
+    curthick   = simulation_atom_var*radialspeed;
     if (curthick > thickness)      //clamp to max thickness - needed for large simulation atoms
         curthick = thickness;
     static GFXVertexList *_vlist = 0;
@@ -139,16 +139,16 @@ void Beam::RecalculateVertices( const Matrix &trans )
     const float fadeinlength = 4;
     const bool  tractor = (damagerate < 0 && phasedamage > 0);
     const bool  repulsor     = (damagerate > 0 && phasedamage < 0);
-    float leftex             = -texturespeed*(numframes*SIMULATION_ATOM+interpolation_blend_factor*SIMULATION_ATOM);
+    float leftex             = -texturespeed*(numframes*simulation_atom_var+interpolation_blend_factor*simulation_atom_var);
     float righttex           = leftex+texturestretch*curlength/curthick;           //how long compared to how wide!
     float len                = (impact == ALIVE)
-                               ? (curlength < range ? curlength-speed*SIMULATION_ATOM*(1-interpolation_blend_factor) : range)
+                               ? (curlength < range ? curlength-speed*simulation_atom_var*(1-interpolation_blend_factor) : range)
                                : curlength;
     float fadelen            = (impact == ALIVE) ? len*fadelocation : len*hitfadelocation;
     const bool doscoop       = ( scoop && (tractor || repulsor) );
     float fadetex            = leftex+(righttex-leftex)*fadelocation;
     const float touchtex     = leftex-fadeinlength*.5*texturestretch;
-    float thick              = curthick != thickness ? curthick-radialspeed*SIMULATION_ATOM
+    float thick              = curthick != thickness ? curthick-radialspeed*simulation_atom_var
                                *(1-interpolation_blend_factor) : thickness;
     float ethick             = ( thick/( (thickness > 0) ? thickness : 1.0f ) )*(doscoop ? curlength*scooptanangle : 0);
     const float invfadelen   = thick*fadeinlength;
@@ -281,18 +281,18 @@ void Beam::UpdatePhysics( const Transformation &trans,
                           Unit *firer,
                           Unit *superunit )
 {
-    curlength += SIMULATION_ATOM*speed;
+    curlength += simulation_atom_var*speed;
     if (curlength < 0)
         curlength = 0;
     if (curlength > range)
         curlength = range;
     if (curthick == 0) {
-        if (AUDIsPlaying( sound ) && refiretime >= SIMULATION_ATOM)
+        if (AUDIsPlaying( sound ) && refiretime >= simulation_atom_var)
             AUDStopPlaying( sound );
-        refiretime += SIMULATION_ATOM*HeatSink;
+        refiretime += simulation_atom_var*HeatSink;
         return;
     }
-    if (stability && numframes*SIMULATION_ATOM > stability)
+    if (stability && numframes*simulation_atom_var > stability)
         impact |= UNSTABLE;
     numframes++;
     Matrix cumulative_transformation_matrix;
@@ -310,7 +310,7 @@ void Beam::UpdatePhysics( const Transformation &trans,
 #ifndef PERFRAMESOUND
     AUDAdjustSound( sound, cumulative_transformation.position, speed*cumulative_transformation_matrix.getR() );
 #endif
-    curthick += (impact&UNSTABLE) ? -radialspeed*SIMULATION_ATOM : radialspeed*SIMULATION_ATOM;
+    curthick += (impact&UNSTABLE) ? -radialspeed*simulation_atom_var : radialspeed*simulation_atom_var;
     if (curthick > thickness)
         curthick = thickness;
     if (curthick <= 0) {
@@ -438,8 +438,8 @@ bool Beam::Collide( Unit *target, Unit *firer, Unit *superunit )
         impact |= IMPACT;
         GFXColor coltmp( Col );
         float tmp = (curlength/range);
-        float appldam     = (damagerate*SIMULATION_ATOM*curthick/thickness)*( (1-tmp)+tmp*rangepenalty );
-        float phasdam     = (phasedamage*SIMULATION_ATOM*curthick/thickness)*( (1-tmp)+tmp*rangepenalty );
+        float appldam     = (damagerate*simulation_atom_var*curthick/thickness)*( (1-tmp)+tmp*rangepenalty );
+        float phasdam     = (phasedamage*simulation_atom_var*curthick/thickness)*( (1-tmp)+tmp*rangepenalty );
         float owner_rsize = superunit->rSize();
         int owner_faction = superunit->faction;
         if (tractor || repulsor) {

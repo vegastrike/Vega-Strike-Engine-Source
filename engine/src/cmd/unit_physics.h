@@ -80,7 +80,7 @@ void GameUnit< UnitType >::UpdatePhysics2( const Transformation &trans,
             if (!this->meshdata[i])
                 continue;
             if ( !this->meshdata[i]->HasBeenDrawn() ) {
-                this->meshdata[i]->UpdateFX( SIMULATION_ATOM );
+                this->meshdata[i]->UpdateFX( simulation_atom_var /*SIMULATION_ATOM?*/ );
             } else {
                 this->meshdata[i]->UnDraw();
                 tmp = 1;
@@ -88,7 +88,7 @@ void GameUnit< UnitType >::UpdatePhysics2( const Transformation &trans,
         }
         //double blah1 = queryTime();
         if (!tmp && this->hull < 0)
-            Explode( false, SIMULATION_ATOM );
+            Explode( false, simulation_atom_var /*SIMULATION_ATOM?*/ );
         //double blah2 = queryTime();
     }
 }
@@ -99,7 +99,7 @@ template < class UnitType >
 void GameUnit< UnitType >::Thrust( const Vector &amt1, bool afterburn )
 {
     if (this->afterburntype == 0)
-        afterburn = afterburn && this->energy > this->afterburnenergy*SIMULATION_ATOM;
+        afterburn = afterburn && this->energy > this->afterburnenergy*simulation_atom_var; //SIMULATION_ATOM; ?
     if (this->afterburntype == 1)
         afterburn = afterburn && this->fuel > 0;
     if (this->afterburntype == 2)
