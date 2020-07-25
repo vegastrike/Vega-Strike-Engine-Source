@@ -13,6 +13,7 @@
 #include "gfx/cockpit_generic.h"
 #include "role_bitmask.h"
 #include "lin_time.h"
+#include "planetary_orbit.h"
 
 #include "cmd/script/pythonmission.h"
 #ifndef NO_GFX

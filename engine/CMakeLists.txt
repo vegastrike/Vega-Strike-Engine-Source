@@ -208,6 +208,8 @@ SET(LIBCMD_SOURCES
     src/cmd/drawable.cpp
     src/cmd/movable.cpp
     src/cmd/computer.cpp
+
+    src/cmd/planetary_orbit.cpp
 )
 
 SET(LIBCMDSERVER_SOURCES
