@@ -62,6 +62,9 @@ script:
 before_deploy:
 #  - pull the submodule here
   - ./sh/vspackage.sh
+  - pwd
+  - ls
+  - ls packages
 #  - export TRAVIS_TAG="composite tag name here"
 #  - git tag ${TRAVIS_TAG}
 deploy:
@@ -70,10 +73,10 @@ deploy:
     token: $GITHUB_TOKEN
     file:
        # Upload files in the `packages` directory
-       - packages/*
+       - ./packages/*
 #    # Ensure the build doesn't get cleaned up so the files are avialable
 #    # for the release build
-    cleanup: false
+    skip_cleanup: true
 #    # release is a draft so it can be edited, updated, etc.
 #    # Not needed as we'll do that manually when we'll begin the release.
 #    draft: true
