@@ -674,7 +674,7 @@ void StarSystem::Update( float priority, bool executeDirector )
             priority = 1;
     float normal_simulation_atom = simulation_atom_var;
     //BOOST_LOG_TRIVIAL(trace) << boost::format("void StarSystem::Update( float priority, bool executeDirector ): Msg A: simulation_atom_var as backed up  = %1%") % simulation_atom_var;
-    //simulation_atom_var /= ( priority/getTimeCompression() );
+    simulation_atom_var /= ( priority/getTimeCompression() );
     //BOOST_LOG_TRIVIAL(trace) << boost::format("void StarSystem::Update( float priority, bool executeDirector ): Msg B: simulation_atom_var as multiplied = %1%") % simulation_atom_var;
     ///just be sure to restore this at the end
     time += GetElapsedTime();
