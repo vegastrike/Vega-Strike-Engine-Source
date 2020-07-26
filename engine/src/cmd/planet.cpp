@@ -27,6 +27,8 @@
 #include "vsfilesystem.h"
 #include "gfx/camera.h"
 
+#include "game_config.h"
+
 GamePlanet::GamePlanet() :
     GameUnit< Planet > ( 0 )
 {
@@ -42,7 +44,7 @@ GamePlanet::GamePlanet() :
 
 static void SetFogMaterialColor( Mesh *thus, const GFXColor &color, const GFXColor &dcolor )
 {
-    static float emm  = XMLSupport::parse_float( vs_config->getVariable( "graphics", "atmosphere_emmissive", "1" ) );
+    static float emm  = GameConfig::GetVariable( "graphics", "atmosphere_emmissive", 1.0f);
     static float diff = XMLSupport::parse_float( vs_config->getVariable( "graphics", "atmosphere_diffuse", "1" ) );
     GFXMaterial  m;
     setMaterialAmbient( m, 0.0);

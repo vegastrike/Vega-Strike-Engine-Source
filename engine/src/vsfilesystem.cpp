@@ -37,6 +37,11 @@ struct dirent
 #include "boost/iostreams/stream.hpp"
 #include "boost/iostreams/device/null.hpp"
 
+#include "game_config.h"
+
+#include <string>
+
+
 
 using VSFileSystem::VSVolumeType;
 using VSFileSystem::VSFSNone;
@@ -703,6 +708,10 @@ void LoadConfig( string subdir )
         fprintf( stderr, "reallocating vs_config \n" );
         delete vs_config;
     }
+
+    // This is a replacement for the old config xml files
+    GameConfig::LoadGameConfig(config_file);
+
     vs_config = createVegaConfig( config_file.c_str() );
 
     //Now check if there is a data directory specified in it
