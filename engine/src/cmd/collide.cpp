@@ -36,7 +36,7 @@ csOPCODECollider* collideTrees::colTree( Unit *un, const Vector &othervelocity )
     float newmagsqr    = (un->GetVelocity()-othervelocity).MagnitudeSquared();
     float speedsquared = const_factor*const_factor*(magsqr > newmagsqr ? newmagsqr : magsqr);
     static unsigned int max_collide_trees = static_cast<unsigned int>(XMLSupport::parse_int( vs_config->getVariable( "physics", "max_collide_trees", "16384" ) ));
-    if (un->rSize()*un->rSize() > SIMULATION_ATOM*SIMULATION_ATOM*speedsquared || max_collide_trees == 1)
+    if (un->rSize()*un->rSize() > simulation_atom_var*simulation_atom_var*speedsquared || max_collide_trees == 1)
         return rapidColliders[0];
     if (rapidColliders[0] == NULL)
         return NULL;

@@ -115,12 +115,12 @@ Vector Vabs( const Vector &in )
 //Slated for removal 0.5
 Matrix WarpMatrixForCollisions( Unit *un, const Matrix &ctm )
 {
-    if ( un->GetWarpVelocity().MagnitudeSquared()*SIMULATION_ATOM*SIMULATION_ATOM < un->rSize()*un->rSize() ) {
+    if ( un->GetWarpVelocity().MagnitudeSquared()*simulation_atom_var*simulation_atom_var < un->rSize()*un->rSize() ) {
         return ctm;
     } else {
         Matrix k( ctm );
         const Vector v( Vector( 1, 1, 1 )+Vabs( ctm.getR()*ctm.getR().Dot( un->GetWarpVelocity().Scale(
-                                                                              100*SIMULATION_ATOM/un->rSize() ) ) ) );
+                                                                              100*simulation_atom_var/un->rSize() ) ) ) );
         k.r[0] *= v.i;
         k.r[1] *= v.j;
         k.r[2] *= v.k;

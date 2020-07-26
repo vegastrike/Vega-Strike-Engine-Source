@@ -44,9 +44,9 @@ void Terrain::SetTransformation( const Matrix &Mat )
 void Terrain::ApplyForce( Unit *un, const Vector &normal, float dist )
 {
     un->ApplyForce( normal*.4*un->GetMass()
-                   *fabs( normal.Dot( (un->GetVelocity()/SIMULATION_ATOM) )+fabs( dist )/(SIMULATION_ATOM) ) );
+                   *fabs( normal.Dot( (un->GetVelocity()/simulation_atom_var) )+fabs( dist )/(simulation_atom_var) ) );
     un->ApplyDamage( un->Position().Cast()-normal*un->rSize(), -normal, .5*fabs( normal.Dot(
-                                                                                    un->GetVelocity() ) )*mass*SIMULATION_ATOM,
+                                                                                    un->GetVelocity() ) )*mass*simulation_atom_var,
                      un, GFXColor( 1, 1, 1, 1 ), NULL );
 }
 void Terrain::Collide( Unit *un, const Matrix &t )
