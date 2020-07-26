@@ -71,6 +71,7 @@ deploy:
 #    # GitHub Releases
     provider: releases
     token: $GITHUB_TOKEN
+    file_glob: true
     file:
        # Upload files in the `packages` directory
        - ./packages/*
