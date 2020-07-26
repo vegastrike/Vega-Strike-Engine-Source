@@ -66,10 +66,11 @@ void TurretAI::Execute()
                    && dot > dot_cutoff)
                  && ( isplayerstarship == false || targ->faction == upg
                      || ( isplayerstarship
-                         && (targ->getRelation( (Unit*) parent->owner ) < 0 /*now that it is a player, we know it's dereferencable*/ 
-                             || targ->Target() == (Unit*) parent->owner) ) ) 
+                         && (targ->getRelation( (Unit*) parent->owner ) < 0 /*now that it is a player, we know it's dereferencable*/
+                             || targ->Target() == (Unit*) parent->owner) ) )
                  && targ->faction != neu );
 
+            //FIXME - rand() is not going to be in the expected range here - stephengtuggy 2020-07-25
             parent->Fire( FireBitmask( parent, shouldfire, rand() < missile_prob*RAND_MAX*SIMULATION_ATOM ), true );
             if (!shouldfire)
                 parent->UnFire();

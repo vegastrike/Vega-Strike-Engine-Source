@@ -3525,6 +3525,7 @@ bool GameCockpit::CheckCommAnimation( Unit *un )
 
 bool GameCockpit::IsPaused() const
 {
+    // stephengtuggy 2020-07-21 FIXME - I don't think this is correct
     return (GetElapsedTime() <= 0.001);
 }
 

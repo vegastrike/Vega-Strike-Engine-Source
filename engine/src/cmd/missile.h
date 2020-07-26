@@ -58,7 +58,7 @@ public:
     {
         Unit *targ;
         if ( ( targ = ( Unit::Target() ) ) )
-            if (rand()/( (float) RAND_MAX ) < ( (float) UnitUtil::getECM(targ) )*SIMULATION_ATOM/32768)
+            if (rand()/( (float) RAND_MAX ) < ( (float) UnitUtil::getECM(targ) )*SIMULATION_ATOM/32768) //simulation_atom_var?
                 Target( NULL );
         //go wild
         if (retarget == -1) {

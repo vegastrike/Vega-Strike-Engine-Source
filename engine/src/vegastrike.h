@@ -85,6 +85,8 @@ extern float AUDIO_ATOM;
 
 #define BUFF_LEN 512
 
+//#define RANDOMIZE_SIM_ATOMS 1
+
 #endif
 
 #ifdef __cplusplus

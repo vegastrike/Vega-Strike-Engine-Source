@@ -28,8 +28,8 @@ void StarSystem::UpdateMissiles()
     if ( !dischargedMissiles.empty() ) {
         if ( dischargedMissiles.back()->GetRadius() > 0 ) {           //we can avoid this iterated check for kinetic projectiles even if they "discharge" on hit
             Unit *un;
-            for ( un_iter ui = getUnitList().createIterator(); 
-                  NULL != ( un = (*ui) ); 
+            for ( un_iter ui = getUnitList().createIterator();
+                  NULL != ( un = (*ui) );
                   ++ui ) {
                 enum clsptr type = un->isUnit();
                 if (collideroids || type != ASTEROIDPTR )           // could check for more, unless someone wants planet-killer missiles, but what it would change?
@@ -41,7 +41,7 @@ void StarSystem::UpdateMissiles()
     }
 }
 
-void MissileEffect::DoApplyDamage(Unit *parent, Unit *un, float distance, float damage_fraction) { 
+void MissileEffect::DoApplyDamage(Unit *parent, Unit *un, float distance, float damage_fraction) {
     QVector norm = pos-un->Position();
     norm.Normalize();
     float damage_left = 1.f;
@@ -111,7 +111,7 @@ void MissileEffect::ApplyDamage( Unit *smaller )
         /*
          *  contrived formula to create paraboloid falloff rather than quadratic peaking at 2x damage at origin
          *  k = 2-distance^2/radmul^2
-         * 
+         *
          * if the explosion itself was a weapon, it would have double the base damage, longrange=0.5 (counted at Rm) and more generic form:
          * Kclose = 1-(1-longrange)*(R/Rm)^2
          * Kfar   = longrange/(R/Rm)^2
@@ -125,7 +125,7 @@ float Missile::ExplosionRadius()
 {
     static float missile_multiplier =
         XMLSupport::parse_float( vs_config->getVariable( "graphics", "missile_explosion_radius_mult", "1" ) );
-    
+
     return radial_effect*(missile_multiplier);
 }
 
@@ -266,10 +266,10 @@ void Missile::UpdatePhysics2( const Transformation &trans,
             time = max_lost_target_live_time;
     }
     Unit::UpdatePhysics2( trans, old_physical_state, accel, difficulty, transmat, CumulativeVelocity, ResolveLast, uc );
-    this->time -= SIMULATION_ATOM;
+    this->time -= simulation_atom_var;
     if (NULL != targ && !discharged) {
         QVector endpos = Position();
-        QVector startpos = endpos-( SIMULATION_ATOM*GetVelocity() );
+        QVector startpos = endpos-( simulation_atom_var*GetVelocity() );
         float checker = targ->querySphere( startpos, endpos, rSize() );
         if ( checker && detonation_radius >= 0 ) {
             // Set position to the collision point
