@@ -316,7 +316,7 @@ void WriteSaveGame( Cockpit *cp, bool auto_save )
     if (un->GetHull() > 0) {
         vector< string > packedInfo;
         cp->PackUnitInfo(packedInfo);
-        
+
         cp->savegame->WriteSaveGame( cp->activeStarSystem->getFileName().c_str(),
                                      un->LocalPosition(), cp->credits, packedInfo, auto_save ? -1 : player_num );
         un->WriteUnit( cp->GetUnitModifications().c_str() );
@@ -429,12 +429,12 @@ string SaveGame::WriteMissionData()
     ret += XMLSupport::tostring( (int) missiondata->m.size() );
     for (MissionFloatDat::MFD::iterator i = missiondata->m.begin(); i != missiondata->m.end(); i++) {
         unsigned int siz = (*i).second.size();
-        
+
         // Escape spaces within the key by replacing them with a special char ¬
         string k = (*i).first;
         { for (size_t i=0,len=k.length(); i<len; ++i)
             if (k[i] == ' ') k[i] = '`'; }
-        
+
         ret += string( "\n" )+k+string( " " )+XMLSupport::tostring( siz )+" ";
         for (unsigned int j = 0; j < siz; j++)
             ret += XMLSupport::tostring( (*i).second[j] )+" ";
@@ -467,11 +467,11 @@ void SaveGame::ReadMissionData( char* &buf, bool select_data, const std::set< st
     for (int i = 0; i < mdsize; i++) {
         int    md_i_size;
         string mag_num( scanInString( buf2 ) );
-        
+
         // Unescape spaces within the key by replacing the special char ¬
         { for (size_t i=0,len=mag_num.length(); i<len; ++i)
             if (mag_num[i] == '`') mag_num[i] = ' '; }
-        
+
         sscanf( buf2, "%d ", &md_i_size );
         //Put ptr to point after the number we just read
         buf2 += hopto( buf2, ' ', '\n', 0 );
