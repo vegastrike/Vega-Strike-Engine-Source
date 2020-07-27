@@ -502,6 +502,17 @@ long vs_getsize( FILE *fp )
  **** VSFileSystem functions                                                                 ***
  ***********************************************************************************************
  */
+
+void flushLogs()
+{
+    if (pConsoleLogSink) {
+        pConsoleLogSink->flush();
+    }
+    if (pFileLogSink) {
+        flushLogs();
+    }
+}
+
 #ifdef WIN32
 void InitHomeDirectory()
 {

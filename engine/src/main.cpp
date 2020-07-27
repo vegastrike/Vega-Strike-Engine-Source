@@ -73,6 +73,8 @@
 #include "cg_global.h"
 #endif
 
+#include <boost/smart_ptr/shared_ptr.hpp>
+#include <boost/smart_ptr/make_shared_object.hpp>
 #include <boost/log/core.hpp>
 #include <boost/log/trivial.hpp>
 #include <boost/log/expressions.hpp>
@@ -104,7 +106,8 @@ Universe  *_Universe;
 TextPlane *bs_tp = NULL;
 char SERVER = 0;
 
-boost::shared_ptr< boost::log::sinks::synchronous_sink< boost::log::sinks::text_file_backend > > VSFileSystem::pFileLogSink = nullptr;
+boost::shared_ptr<VSFileSystem::file_log_sink>    VSFileSystem::pFileLogSink    = boost::make_shared<VSFileSystem::file_log_sink>();
+boost::shared_ptr<VSFileSystem::console_log_sink> VSFileSystem::pConsoleLogSink = boost::make_shared<VSFileSystem::console_log_sink>();
 
 //false if command line option --net is given to start without network
 static bool ignore_network = true;
@@ -156,9 +159,7 @@ int readCommandLineOptions(int argc, char ** argv);
 void VSExit( int code)
 {
     Music::CleanupMuzak();
-    if (VSFileSystem::pFileLogSink) {
-        VSFileSystem::pFileLogSink->flush();
-    }
+    VSFileSystem::flushLogs();
     winsys_exit( code );
 }
 
@@ -257,12 +258,12 @@ void initLoggingPart1()
 {
     logging::add_common_attributes();
 
-    logging::add_console_log
+    VSFileSystem::pConsoleLogSink = logging::add_console_log
     (
         std::cerr,
-        keywords::filter                = (logging::trivial::severity >= logging::trivial::fatal),      /*< on the console, only show messages that are fatal to Vega Strike >*/
-        keywords::format                = "[%TimeStamp%]: %Message%",                                   /*< log record format specific to the console >*/
-        keywords::auto_flush            = true                                                          /*< whether to do the equivalent of fflush(stdout) after every msg >*/
+        //keywords::filter              = (logging::trivial::severity >= logging::trivial::fatal),      /*< on the console, only show messages that are fatal to Vega Strike >*/
+        keywords::format                = "%Message%",                                                  /*< log record format specific to the console >*/
+        keywords::auto_flush            = false /*true*/                                                /*< whether to do the equivalent of fflush(stdout) after every msg >*/
     );
 }
 
@@ -296,6 +297,8 @@ void initLoggingPart2(char debugLevel)
         keywords::auto_flush            = false,                                                        /*< whether to auto flush to the file after every line >*/
         keywords::min_free_space        = 1 * 1024 * 1024 * 1024                                        /*< stop logging when there's only 1 GiB free space left >*/
     );
+
+    VSFileSystem::pConsoleLogSink->set_filter(logging::trivial::severity >= logging::trivial::fatal);
 }
 
 int main( int argc, char *argv[] )
@@ -384,7 +387,7 @@ int main( int argc, char *argv[] )
 #ifndef NO_SDL_JOYSTICK
     if ( SDL_InitSubSystem( SDL_INIT_JOYSTICK ) ) {
         BOOST_LOG_TRIVIAL(fatal) << boost::format("Couldn't initialize SDL: %1%") % SDL_GetError();
-        VSFileSystem::pFileLogSink->flush();
+        VSFileSystem::flushLogs();
         winsys_exit( 1 );
     }
 #endif
@@ -599,7 +602,7 @@ void bootstrap_main_loop()
                 //In network mode, test if all player sections are present
                 if (pname == "") {
                     BOOST_LOG_TRIVIAL(fatal) << "Missing or incomplete section for player " << p;
-                    VSFileSystem::pFileLogSink->flush();
+                    VSFileSystem::flushLogs();
                     cleanexit = true;
                     winsys_exit( 1 );
                 }

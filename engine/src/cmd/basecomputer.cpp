@@ -4132,7 +4132,7 @@ void trackPrice(int whichplayer, const Cargo &item, float price, const string &s
             }
         }
 
-        VSFileSystem::pFileLogSink->flush();
+        VSFileSystem::flushLogs();
 
         highest.clear();
         highest.resize(recordedHighestPrices.size());

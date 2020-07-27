@@ -59,13 +59,13 @@ std::string GetHelperPlayerSaveGame( int num )
                 f.Close();
               } else {
                 BOOST_LOG_TRIVIAL(fatal) << boost::format("!!! ERROR : Creating default save.4.x.txt file : %1%") % f.GetFullPath();
-                pFileLogSink->flush();
+                flushLogs();
                 exit( 1 );
               }
             err = f.OpenReadOnly( "save.4.x.txt", UnknownFile );
             if (err > Ok) {
                 BOOST_LOG_TRIVIAL(fatal) << "!!! ERROR : Opening the default save we just created";
-                pFileLogSink->flush();
+                flushLogs();
                 exit( 1 );
               }
           }
@@ -202,7 +202,7 @@ void SaveGame::SetPlayerLocation( const QVector &v )
         PlayerLocation = v;
     } else {
         BOOST_LOG_TRIVIAL(fatal) << "NaN ERROR saving unit";
-        pFileLogSink->flush();
+        flushLogs();
         assert( FINITE( v.i ) && FINITE( v.j ) && FINITE( v.k ) );
         PlayerLocation.Set( 1, 1, 1 );
     }
