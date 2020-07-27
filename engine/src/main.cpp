@@ -424,6 +424,7 @@ int main( int argc, char *argv[] )
 
     delete _Universe;
     CleanupUnitTables();
+    VSFileSystem::flushLogs();  // Just to be sure -- stephengtuggy 2020-07-27
     return 0;
 }
 

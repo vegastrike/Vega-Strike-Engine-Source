@@ -511,6 +511,8 @@ void flushLogs()
     if (pFileLogSink) {
         pFileLogSink->flush();
     }
+    fflush(stdout);
+    fflush(stderr);
 }
 
 #ifdef WIN32
@@ -617,7 +619,7 @@ void InitDataDirectory()
 
             if (chdir( datadir.c_str() ) < 0) {
                 cerr<<"Error changing to datadir"<<endl;
-                exit( 1 );
+                VSExit( 1 );
             }
             if (NULL != getcwd( tmppath, VS_PATH_BUF_SIZE - 1 )) {
                 datadir = string( tmppath );

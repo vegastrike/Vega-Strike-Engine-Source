@@ -84,7 +84,7 @@ void Mission::DirectorLoop()
     }
     catch (...) {
         if ( PyErr_Occurred() ) {
-            BOOST_LOG_TRIVIAL(error) << "void Mission::DirectorLoop(): Python error occurred";
+            BOOST_LOG_TRIVIAL(fatal) << "void Mission::DirectorLoop(): Python error occurred";
             PyErr_Print();
             PyErr_Clear();
             VSFileSystem::flushLogs();

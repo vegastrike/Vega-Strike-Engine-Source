@@ -74,7 +74,7 @@ static HardCodedMap MakeHardCodedScripts()
     tmp.insert( MyPair( "roll perpendicular slow", &RollFacePerpendicularSlow ) );
     tmp.insert( MyPair( "roll perpendicular fast", &RollFacePerpendicularFast ) );
     if (tmp.find("roll perpendicular fast")==tmp.end()){
-        exit(1);
+        VSExit(1);
     }
     return tmp;
 }

@@ -713,10 +713,10 @@ void SaveGame::LoadSavedMissions()
         }
         catch (...) {
             if ( PyErr_Occurred() ) {
+                BOOST_LOG_TRIVIAL(error) << "void SaveGame::LoadSavedMissions(): Python error occurred";
                 PyErr_Print();
                 PyErr_Clear();
-                fflush( stderr );
-                fflush( stdout );
+                VSFileSystem::flushLogs();
             } else {throw; }}
     }
     PyRun_SimpleString( "import VS\nVS.loading_active_missions=False\n" );

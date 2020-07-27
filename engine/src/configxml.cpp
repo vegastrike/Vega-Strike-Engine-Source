@@ -40,7 +40,8 @@ VegaConfig::VegaConfig( const char *configfile )
     configNodeFactory domf;
     configNode *top = (configNode*) domf.LoadXML( configfile );
     if (top == NULL) {
-        cout<<"Panic exit - no configuration"<<endl;
+        BOOST_LOG_TRIVIAL(fatal)<<"Panic exit - no configuration";
+        VSFileSystem::flushLogs();
         exit( 0 );
     }
     variables = NULL;
