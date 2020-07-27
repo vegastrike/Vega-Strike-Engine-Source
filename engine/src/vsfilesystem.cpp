@@ -509,7 +509,7 @@ void flushLogs()
         pConsoleLogSink->flush();
     }
     if (pFileLogSink) {
-        flushLogs();
+        pFileLogSink->flush();
     }
 }
 
