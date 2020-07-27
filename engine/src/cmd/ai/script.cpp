@@ -772,9 +772,9 @@ void AIScript::LoadXML()
                 RollLeft( this, parent );
         }
         if (aidebug > 1) {
-            VSFileSystem::vs_fprintf( stderr, "%f using hcs %s for %s threat %f\n",
-                                      mission->getGametime(), filename, parent->name.get().c_str(),
-                                      parent->GetComputerData().threatlevel );
+            BOOST_LOG_TRIVIAL(debug) << boost::format("%1% using hcs %2% for %3% threat %4%")
+                                      % mission->getGametime() % filename % parent->name
+                                      % parent->GetComputerData().threatlevel;
         }
         if ( _Universe->isPlayerStarship( parent->Target() ) ) {
             float value;
@@ -804,32 +804,32 @@ void AIScript::LoadXML()
         return;
     } else {
         if (aidebug > 1)
-            VSFileSystem::vs_fprintf( stderr, "using soft coded script %s", filename );
+            BOOST_LOG_TRIVIAL(debug) << boost::format("using soft coded script %1%") % filename;
         if (aidebug > 0)
             UniverseUtil::IOmessage( 0, parent->name, "all", string( "FAILED(or missile) script " )+string(
                                         filename )+" threat "+XMLSupport::tostring( parent->GetComputerData().threatlevel ) );
     }
 #ifdef AIDBG
-    VSFileSystem::vs_fprintf( stderr, "chd" );
+    BOOST_LOG_TRIVIAL(debug) << "chd";
 #endif
 
 #ifdef AIDBG
-    VSFileSystem::vs_fprintf( stderr, "echd" );
+    BOOST_LOG_TRIVIAL(debug) << "echd";
 #endif
     VSFile    f;
     VSError   err = f.OpenReadOnly( filename, AiFile );
 #ifdef AIDBG
-    VSFileSystem::vs_fprintf( stderr, "backup " );
+    BOOST_LOG_TRIVIAL(debug) << "backup ";
 #endif
     if (err > Ok) {
-        VSFileSystem::vs_fprintf( stderr, "cannot find AI script %s\n", filename );
+        BOOST_LOG_TRIVIAL(error) << boost::format("cannot find AI script %1%") % filename;
         if (hard_coded_scripts.find(filename)!=hard_coded_scripts.end()) {
             assert(0);
         }
         return;
     }
 #ifdef BIDBG
-    VSFileSystem::vs_fprintf( stderr, "nxml" );
+    BOOST_LOG_TRIVIAL(debug) << "nxml";
 #endif
     xml = new AIScriptXML;
     xml->unitlevel  = 0;
@@ -839,48 +839,48 @@ void AIScript::LoadXML()
     xml->defaultvec = QVector( 0, 0, 0 );
     xml->defaultf   = 0;
 #ifdef BIDBG
-    VSFileSystem::vs_fprintf( stderr, "parscrea" );
+    BOOST_LOG_TRIVIAL(debug) << "parscrea";
 #endif
     XML_Parser parser = XML_ParserCreate( NULL );
 #ifdef BIDBG
-    VSFileSystem::vs_fprintf( stderr, "usdat %x", parser );
+    BOOST_LOG_TRIVIAL(debug) << boost::format("usdat %1$x") % parser;
 #endif
     XML_SetUserData( parser, this );
 #ifdef BIDBG
-    VSFileSystem::vs_fprintf( stderr, "elha" );
+    BOOST_LOG_TRIVIAL(debug) << "elha";
 #endif
     XML_SetElementHandler( parser, &AIScript::beginElement, &AIScript::endElement );
 #ifdef BIDBG
-    VSFileSystem::vs_fprintf( stderr, "do" );
+    BOOST_LOG_TRIVIAL(debug) << "do";
 #endif
     XML_Parse( parser, ( f.ReadFull() ).c_str(), f.Size(), 1 );
 #ifdef BIDBG
-    VSFileSystem::vs_fprintf( stderr, "%xxml_free", parser );
+    BOOST_LOG_TRIVIAL(debug) << boost::format("%1$xxml_free") % parser;
     fflush( stderr );
 #endif
     XML_ParserFree( parser );
 #ifdef BIDBG
-    VSFileSystem::vs_fprintf( stderr, "xml_freed" );
+    BOOST_LOG_TRIVIAL(debug) << "xml_freed";
 #endif
     f.Close();
     for (unsigned int i = 0; i < xml->orders.size(); i++) {
 #ifdef BIDBG
-        VSFileSystem::vs_fprintf( stderr, "parset" );
+        BOOST_LOG_TRIVIAL(debug) << "parset";
 #endif
         xml->orders[i]->SetParent( parent );
         EnqueueOrder( xml->orders[i] );
 #ifdef BIDBG
-        VSFileSystem::vs_fprintf( stderr, "cachunkx" );
+        BOOST_LOG_TRIVIAL(debug) << "cachunkx";
 #endif
     }
 #ifdef BIDBG
-    VSFileSystem::vs_fprintf( stderr, "xml%x", xml );
-    fflush( stderr );
+    BOOST_LOG_TRIVIAL(debug) << boost::format("xml%1$x") % xml;
+    VSFileSystem::flushLogs();
 #endif
     delete xml;
 #ifdef BIDBG
-    VSFileSystem::vs_fprintf( stderr, "\\xml\n" );
-    fflush( stderr );
+    BOOST_LOG_TRIVIAL(debug) << "\\xml\n";
+    VSFileSystem::flushLogs();
 #endif
 }
 
