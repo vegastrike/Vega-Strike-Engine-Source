@@ -45,7 +45,7 @@ void GameNebula::UpdatePhysics2( const Transformation &trans,
 {
     static float nebdelta = XMLSupport::parse_float( vs_config->getVariable( "graphics", "fog_time", ".01" ) );
     lastfadein   = fadeinvalue;
-    fadeinvalue -= nebdelta*SIMULATION_ATOM;
+    fadeinvalue -= nebdelta*simulation_atom_var;
     if (fadeinvalue < 0)
         fadeinvalue = 0;
     this->GameUnit< Nebula >::UpdatePhysics2( trans,
@@ -67,8 +67,8 @@ void GameNebula::UpdatePhysics2( const Transformation &trans,
     if (nummesh() > 0) {
         i = rand()%( nummesh() );
         Vector randexpl( rand()%2*rSize()-rSize(), rand()%2*rSize()-rSize(), rand()%2*rSize()-rSize() );
-        if ( ( (int) (explosiontime/SIMULATION_ATOM) ) != 0 )
-            if ( !( rand()%( (int) (explosiontime/SIMULATION_ATOM) ) ) )
+        if ( ( (int) (explosiontime/simulation_atom_var) ) != 0 )
+            if ( !( rand()%( (int) (explosiontime/simulation_atom_var) ) ) )
                 meshdata[i]->AddDamageFX( randexpl, Vector( 0, 0, 0 ), .00001, color );
     }
 }
@@ -78,7 +78,7 @@ void GameNebula::PutInsideCam( int i )
     static float nebdelta   = XMLSupport::parse_float( vs_config->getVariable( "graphics", "fog_time", ".01" ) );
     static float fadeinrate = XMLSupport::parse_float( vs_config->getVariable( "graphics", "fog_fade_in_percent", "0.5" ) );
     if ( _Universe->AccessCamera() == _Universe->AccessCamera( i ) ) {
-        fadeinvalue += (1+fadeinrate)*nebdelta*SIMULATION_ATOM;
+        fadeinvalue += (1+fadeinrate)*nebdelta*simulation_atom_var;
         if (fadeinvalue > 1)
             fadeinvalue = 1;
     }

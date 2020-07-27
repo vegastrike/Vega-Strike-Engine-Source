@@ -24,8 +24,8 @@ bool UpdatePosition( Vector &res, Vector cur, Vector fin, float speed )
     Vector direction( fin-cur );
     float  dirmag = direction.Magnitude();
     bool   ret    = true;
-    if (dirmag > 0 && dirmag > speed*SIMULATION_ATOM) {
-        direction = direction*(speed*SIMULATION_ATOM/dirmag);
+    if (dirmag > 0 && dirmag > speed*simulation_atom_var) {
+        direction = direction*(speed*simulation_atom_var/dirmag);
         ret = false;
     }
     res = direction+cur;
@@ -182,7 +182,7 @@ void Briefing::Ship::OverrideOrder( const Vector &destination, float time )
 void Briefing::Ship::EnqueueOrder( const Vector &destination, float time )
 {
     if (time < .00001)
-        time = SIMULATION_ATOM;
+        time = SIMULATION_ATOM; // simulation_atom_var?
     orders.push_back( BriefingOrder( destination, ( destination-Position() ).Magnitude()/time ) );
 }
 

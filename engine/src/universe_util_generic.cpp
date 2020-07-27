@@ -198,9 +198,10 @@ Cargo getRandCargo( int quantity, string category )
         return newret;
     }
 }
+
 float GetGameTime()
 {
-    return mission->gametime;
+    return mission->getGametime();
 }
 
 float getStarTime()

@@ -88,7 +88,7 @@ public: RadiusUpdate( CollideArray *cm )
                 last_radius     = rad;
                 last_radius_key = key;
             } else {last_radius_key = key; }}
-        if (last_big_radius && fabs( key-last_big_radius_key ) > 2*cm->max_bolt_radius*SIMULATION_ATOM) {
+        if (last_big_radius && fabs( key-last_big_radius_key ) > 2*cm->max_bolt_radius*simulation_atom_var) {
             last_big_radius     = last_radius;
             last_big_radius_key = last_radius_key;
             last_radius = 0;
@@ -131,7 +131,7 @@ void CollideArray::flatten()
             sorted[--index] = *tmp;
             collideUpdate( *tmp, index );
         }
-        
+
         std::list< CollidableBackref >::iterator listend = toflattenhints[i].end();
         for (std::list< CollidableBackref >::iterator j = toflattenhints[i].begin();
              j != listend;
@@ -210,8 +210,8 @@ void CollideArray::flatten( CollideArray &hint )
 
 CollideArray::iterator CollideArray::insert( const Collidable &newKey, iterator hint )
 {
-    if (newKey.radius < -max_bolt_radius*SIMULATION_ATOM)
-        max_bolt_radius = -newKey.radius/SIMULATION_ATOM;
+    if (newKey.radius < -max_bolt_radius*simulation_atom_var)
+        max_bolt_radius = -newKey.radius/simulation_atom_var;
     if ( this->begin() == this->end() ) {
         count += 1;
         this->unsorted.push_back( newKey );
