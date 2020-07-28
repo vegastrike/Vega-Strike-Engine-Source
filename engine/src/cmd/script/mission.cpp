@@ -83,8 +83,8 @@ void Mission::ConstructMission( const char *configfile, const std::string &scrip
     top = domf.LoadXML(configfile);
     static bool dontpanic = false;
     if (top == NULL && !dontpanic) {
-        cout<<"Panic exit - mission file "<<configfile<<" not found"<<endl;
-        exit( 0 );
+        BOOST_LOG_TRIVIAL(fatal)<<"Panic exit - mission file "<<configfile<<" not found";
+        VSExit( 0 );
     } else {
         dontpanic = true;
     }

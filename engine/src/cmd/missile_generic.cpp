@@ -61,8 +61,9 @@ void MissileEffect::DoApplyDamage(Unit *parent, Unit *un, float distance, float 
                 total_area += (r*r) / (d*d);
             }
         }
-        if (total_area > 0)
-            VSFileSystem::vs_dprintf( 1, "Missile subunit damage of %.3f%%\n", (total_area * (100.0 / 4.0*M_PI)) );
+        if (total_area > 0) {
+            BOOST_LOG_TRIVIAL(info) << boost::format("Missile subunit damage of %1$.3f%%") % (total_area * (100.0 / 4.0*M_PI));
+        }
         if (total_area < 4.0*M_PI) total_area = 4.0*M_PI;
 
         un_iter i = un->getSubUnits();
@@ -78,9 +79,13 @@ void MissileEffect::DoApplyDamage(Unit *parent, Unit *un, float distance, float 
         }
     }
     if (damage_left > 0) {
-        VSFileSystem::vs_dprintf( 1, "Missile damaging %s/%s (dist=%.3f r=%.3f dmg=%.3f)\n",
-            parent->name.get().c_str(), ((un == parent) ? "." : un->name.get().c_str()),
-            distance, radius, damage*damage_fraction*damage_left);
+        BOOST_LOG_TRIVIAL(info)
+                << boost::format("Missile damaging %1%/%2% (dist=%3$.3f r=%4$.3f dmg=%5$.3f)")
+                % parent->name.get()
+                % ((un == parent) ? "." : un->name.get())
+                % distance
+                % radius
+                % (damage*damage_fraction*damage_left);
         parent->ApplyDamage( pos.Cast(), norm, damage*damage_fraction*damage_left, un, GFXColor( 1,1,1,1 ),
                              ownerDoNotDereference, phasedamage*damage_fraction*damage_left );
     }
@@ -132,8 +137,7 @@ void StarSystem::AddMissileToQueue( MissileEffect *me )
 void Missile::Discharge() {
     if ( (damage != 0 || phasedamage != 0) && !discharged ) {
         Unit *targ = Unit::Target();
-        VSFileSystem::vs_dprintf( 1, "Missile discharged (target %s)\n",
-            (targ != NULL) ? targ->name.get().c_str() : "NULL");
+        BOOST_LOG_TRIVIAL(info) << boost::format("Missile discharged (target %1%)") % (targ != NULL) ? targ->name.get().c_str() : "NULL";
         _Universe->activeStarSystem()->AddMissileToQueue(
             new MissileEffect( Position(), damage, phasedamage,
             radial_effect, radial_multiplier, owner ) );
@@ -143,7 +147,9 @@ void Missile::Discharge() {
 
 void Missile::Kill( bool erase ) {
     Unit *targ = Unit::Target();
-    VSFileSystem::vs_dprintf( 1, "Missile killed (target %s)\n", (targ != NULL) ? targ->name.get().c_str() : "NULL");
+    BOOST_LOG_TRIVIAL(info)
+            << boost::format("Missile killed (target %1%)")
+            % (targ != NULL) ? targ->name.get().c_str() : "NULL";
     Discharge();
     Unit::Kill( erase );
 }
@@ -157,7 +163,7 @@ void Missile::reactToCollision( Unit *smaller,
     static bool doesmissilebounce = XMLSupport::parse_bool( vs_config->getVariable( "physics", "missile_bounce", "false" ) );
     if (doesmissilebounce)
         Unit::reactToCollision( smaller, biglocation, bignormal, smalllocation, smallnormal, dist );
-    VSFileSystem::vs_dprintf( 1, "Missile collided with %s\n", smaller->name.get().c_str());
+    BOOST_LOG_TRIVIAL(info) << boost::format("Missile collided with %1%") % smaller->name.get();
     if (smaller->isUnit() != MISSILEPTR) {
         //2 missiles in a row can't hit each other
         this->Velocity = smaller->Velocity;
@@ -276,7 +282,10 @@ void Missile::UpdatePhysics2( const Transformation &trans,
 
             this->Velocity += percent_missile_match_target_velocity*(targ->Velocity-this->Velocity);
 
-            VSFileSystem::vs_dprintf( 1, "Missile hit target %s (time %.3f)\n", targ->name.get().c_str(), time);
+            BOOST_LOG_TRIVIAL(info)
+                    << boost::format("Missile hit target %1% (time %2$.3f)")
+                    % targ->name.get()
+                    % time;
             Discharge();
             time = -1;
             //Vector norm;

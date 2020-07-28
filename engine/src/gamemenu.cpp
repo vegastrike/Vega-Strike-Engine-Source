@@ -447,6 +447,7 @@ bool GameMenu::processMainMenuButton( const EventCommandId &command, Control *co
 
 bool GameMenu::processExitGameButton( const EventCommandId &command, Control *control )
 {
+    VSFileSystem::flushLogs();
     winsys_exit( 0 );
     return true;
 }
@@ -584,7 +585,7 @@ bool NetActionConfirm::confirmedJoinGame()
 //static
 bool NetActionConfirm::finalizeJoinGame( int launchShip )
 {
-    return true;   
+    return true;
 }
 
 bool GameMenu::processJoinGameButton( const EventCommandId &command, Control *control )

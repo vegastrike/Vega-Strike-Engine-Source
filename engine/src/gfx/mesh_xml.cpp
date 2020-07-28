@@ -1138,12 +1138,12 @@ void LaunchConverter( const char *input, const char *output, const char *args = 
         soundserver_path = VSFileSystem::datadir+"/mesher";
         firstarg = string( "\"" )+soundserver_path+string( "\"" );
         pid = execlp( soundserver_path.c_str(), soundserver_path.c_str(), input, output, args, NULL );
-        VSFileSystem::vs_fprintf( stderr, "Unable to spawn converter\n" );
-        exit( -1 );
+        BOOST_LOG_TRIVIAL(fatal) << "Unable to spawn converter";
+        VSExit( -1 );
     } else {
         if (pid == -1) {
-            VSFileSystem::vs_fprintf( stderr, "Unable to spawn converter\n" );
-            exit( -1 );
+            BOOST_LOG_TRIVIAL(fatal) << "Unable to spawn converter";
+            VSExit( -1 );
         }
         int mystat = 0;
         waitpid( pid, &mystat, 0 );
@@ -1221,7 +1221,7 @@ bool loadObj( VSFile &f, std::string str )
     f.Close();
     inputmtl.Close();
     LaunchConverter( inputpath.c_str(), outputpath.c_str() );
-   
+
     output.OpenReadOnly( "output.bfxm", BSPFile );
     if ( isBFXM( output ) ) {
         output.Close();
@@ -1377,8 +1377,8 @@ void Mesh::LoadXML( VSFileSystem::VSFile &f,
     XML_ParserFree( parser );
     //Now, copy everything into the mesh data structures
     if (xml->load_stage != 5) {
-        VSFileSystem::vs_fprintf( stderr, "Warning: mesh load possibly failed\n" );
-        exit( -1 );
+        BOOST_LOG_TRIVIAL(fatal) << "Warning: mesh load possibly failed";
+        VSExit( -1 );
     }
     PostProcessLoading( xml, textureOverride );
     numlods = xml->lod.size()+1;
@@ -1526,7 +1526,7 @@ static float faceTSWeight( vector< GFXVertex > &vertices, int i1, int i2, int i3
     const GFXVertex &vtx1 = vertices[i1];
     const GFXVertex &vtx2 = vertices[i2];
     const GFXVertex &vtx3 = vertices[i3];
-    
+
     Vector v1( vtx2.x-vtx1.x,
                vtx2.y-vtx1.y,
                vtx2.z-vtx1.z );
@@ -1543,7 +1543,7 @@ static void computeTangentspace( vector< GFXVertex > &vertices, int i1, int i2, 
     const GFXVertex &v1 = vertices[i1];
     const GFXVertex &v2 = vertices[i2];
     const GFXVertex &v3 = vertices[i3];
-    
+
     //compute deltas. I think that the fact we use (*2-*1) and (*3-*1) is arbitrary, but I could be wrong
     Vector p0( v1.x, v1.y, v1.z );
     Vector p1( v2.x, v2.y, v2.z );
@@ -1577,7 +1577,7 @@ static void SumTangent( vector< GFXVertex > &vertices, int i1, int i2, int i3, v
 
     float  p = faceTSPolarity( T, B, N )*w;
     T *= w;
-    
+
     GFXVertex &v1 = vertices[i1];
     GFXVertex &v2 = vertices[i2];
     GFXVertex &v3 = vertices[i3];
@@ -1656,7 +1656,7 @@ static void NormalizeTangents( vector< GFXVertex > &vertices, vector< float > &w
     for (size_t i = 0, n = vertices.size(); i < n; ++i) {
         GFXVertex &v = vertices[i];
         float w = weights[i];
-        
+
         if (w > 0) {
             //Average (shader will normalize)
             float iw = (w < 0.001) ? 1.f : (1.f / w);
@@ -1665,7 +1665,7 @@ static void NormalizeTangents( vector< GFXVertex > &vertices, vector< float > &w
             v.tz *= iw;
             v.tw *= iw;
         }
-        
+
         // Don't let null vectors around (they create NaNs within shaders when normalized)
         // Since they happen regularly on sphere polar caps, replace them with a suitable value there (+x)
         if (Vector(v.tx, v.ty, v.tz).MagnitudeSquared() < 0.00001)
@@ -1678,7 +1678,7 @@ static void NormalizeNormals( vector< GFXVertex > &vertices, vector< float > &we
     for (size_t i = 0, n = vertices.size(); i < n; ++i) {
         GFXVertex &v = vertices[i];
         float w = weights[i];
-        
+
         if (w > 0) {
             //Renormalize
             float mag = v.GetNormal().MagnitudeSquared();
