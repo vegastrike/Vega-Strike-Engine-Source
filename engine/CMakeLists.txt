@@ -1182,9 +1182,9 @@ ELSEIF (CMAKE_SYSTEM_NAME STREQUAL Linux)
 
 	# Lookup the LSB Data - this is known for Ubuntu, but also used by other distros too.
 	# and may help with distro-sub-selection
-    find_program(LSB_RELEASE_EXEC lsb_release)
+    FIND_PROGRAM(LSB_RELEASE_EXEC lsb_release)
     IF (LSB_RELEASE_EXEC)
-        execute_process(COMMAND ${LSB_RELEASE_EXEC} --codename --short
+        EXECUTE_PROCESS(COMMAND ${LSB_RELEASE_EXEC} --codename --short
             OUTPUT_VARIABLE LSB_LINUX_DISTRIBUTION_CODENAME
             OUTPUT_STRIP_TRAILING_WHITESPACE)
         SET(LSB_EXISTS "LSB Data IS available" ON)
