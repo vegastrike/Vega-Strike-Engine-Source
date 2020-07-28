@@ -1,6 +1,6 @@
 #====================================
 # @file   : CMakeLists.txt
-# @version: 2020-02-12
+# @version: 2020-07-27
 # @created: 2008-06-08
 # @author : safemode
 # @author : Anth0rx
@@ -1144,117 +1144,118 @@ SET(CPACK_PACKAGE_EXECUTABLES "vegastrike" "mesh_tool" "vegasettings")
 SET(CPACK_CONTACT "maintainers@vega-strike.org")
 # See https://gitlab.kitware.com/cmake/community/-/wikis/doc/cpack/PackageGenerators for generator lists
 IF (WIN32 AND NOT UNIX)
-	MESSAGE("-- Configuring Packaging for Windows")
-	# NSIS - See https://cmake.org/cmake/help/v3.3/module/CPackNSIS.html
-	# NSI bug requires at least 1 set of 4 forwards slashes??
-	SET(CPACK_PACKAGE_ICON "${CMAKE_CURRENT_SOURCE_DIR}\\\\icon4.ico")
-	SET(CPACK_NSIS_INSTALLED_ICON_NAME "bin\\\\VegaStrike.exe")
-	SET(CPACK_NSIS_DISPLAY_NAME "Vega Strike")
-	SET(CPACK_NSIS_HELP_LINK "https:\\\\vega-strike.org")
-	SET(CPACK_NSIS_URL_INFO_ABOUT "https:\\\\vega-strike.org/about")
-	SET(CPACK_NSIS_CONTACT "TBD@vega-strike.org")
-	SET(CPACK_NSIS_MODIFY_PATH ON)
+    MESSAGE("-- Configuring Packaging for Windows")
+    # NSIS - See https://cmake.org/cmake/help/v3.3/module/CPackNSIS.html
+    # NSI bug requires at least 1 set of 4 forwards slashes??
+    SET(CPACK_PACKAGE_ICON "${CMAKE_CURRENT_SOURCE_DIR}\\\\icon4.ico")
+    SET(CPACK_NSIS_INSTALLED_ICON_NAME "bin\\\\VegaStrike.exe")
+    SET(CPACK_NSIS_DISPLAY_NAME "Vega Strike")
+    SET(CPACK_NSIS_HELP_LINK "https:\\\\vega-strike.org")
+    SET(CPACK_NSIS_URL_INFO_ABOUT "https:\\\\vega-strike.org/about")
+    SET(CPACK_NSIS_CONTACT "TBD@vega-strike.org")
+    SET(CPACK_NSIS_MODIFY_PATH ON)
 
-	# NSIS, Wix, and compressed archives (7z, Zip)
-	SET(CPACK_GENERATOR "NSIS" "NSIS64" "WIX" "7Z" "ZIP")
-	SET(CPACK_PACKAGE_EXECUTABLES "vegastrike.exe" "mesh_tool.exe" "vegasettings.exe")
+    # NSIS, Wix, and compressed archives (7z, Zip)
+    SET(CPACK_GENERATOR "NSIS" "NSIS64" "WIX" "7Z" "ZIP")
+    SET(CPACK_PACKAGE_EXECUTABLES "vegastrike.exe" "mesh_tool.exe" "vegasettings.exe")
 ELSEIF (XCODE)
-	MESSAGE("-- Configuring Packaging for Mac OS X")
-	# Mac OS X
-	# There's a few options for MacOSX; not sure what we want to use
-	# DragNDrop -> DMG
-	#  See https://cmake.org/cmake/help/v3.3/module/CPackDMG.html
-	# Bundle -> Compressed Disk Image
-	# PackageMaker - see https://cmake.org/cmake/help/v3.3/module/CPackPackageMaker.html
-	SET(CPACK_GENERATOR "DragNDrop" "BUNDLE" "TBZ2" "TGZ" "TXZ")
+    MESSAGE("-- Configuring Packaging for Mac OS X")
+    # Mac OS X
+    # There's a few options for MacOSX; not sure what we want to use
+    # DragNDrop -> DMG
+    #  See https://cmake.org/cmake/help/v3.3/module/CPackDMG.html
+    # Bundle -> Compressed Disk Image
+    # PackageMaker - see https://cmake.org/cmake/help/v3.3/module/CPackPackageMaker.html
+    SET(CPACK_GENERATOR "DragNDrop" "BUNDLE" "TBZ2" "TGZ" "TXZ")
 ELSEIF (CMAKE_SYSTEM_NAME STREQUAL Linux)
-	MESSAGE("-- Configuring Packaging for Linux")
-	SET(CPACK_GENERATOR "TBZ2" "TGZ" "TXZ")
-	# Linux
+    MESSAGE("-- Configuring Packaging for Linux")
+    SET(CPACK_GENERATOR "TBZ2" "TGZ" "TXZ")
+    # Linux
 
-	# lsb_release -i --> but then it'll find `Ubuntu` instead of Debian so will have to map more
-	# we can probably more reliably detect via checking for different packager commands
-	# `lsb_release` doesn't always work correctly, so it's easier to read the underlying file
-	# if it exists. It doesn't always exist. Debian doesn't use it, but Ubuntu does.
-	SET(LSB_EXISTS "LSB Data is NOT available" OFF)
-	SET(LSB_LINUX_DISTRIBUTION "Unknown")
-	SET(LSB_LINUX_DISTRIBUTION_CODENAME "Unknown")
+    # lsb_release -i --> but then it'll find `Ubuntu` instead of Debian so will have to map more
+    # we can probably more reliably detect via checking for different packager commands
+    # `lsb_release` doesn't always work correctly, so it's easier to read the underlying file
+    # if it exists. It doesn't always exist. Debian doesn't use it, but Ubuntu does.
+    SET(LSB_EXISTS FALSE)
+    SET(LSB_LINUX_DISTRIBUTION "Unknown")
+    SET(LSB_LINUX_DISTRIBUTION_CODENAME "Unknown")
 
-	# Lookup the LSB Data - this is known for Ubuntu, but also used by other distros too.
-	# and may help with distro-sub-selection
+    # Lookup the LSB Data - this is known for Ubuntu, but also used by other distros too.
+    # and may help with distro-sub-selection
     FIND_PROGRAM(LSB_RELEASE_EXEC lsb_release)
     IF (LSB_RELEASE_EXEC)
         EXECUTE_PROCESS(COMMAND ${LSB_RELEASE_EXEC} --codename --short
             OUTPUT_VARIABLE LSB_LINUX_DISTRIBUTION_CODENAME
             OUTPUT_STRIP_TRAILING_WHITESPACE)
-        SET(LSB_EXISTS "LSB Data IS available" ON)
+        SET(LSB_EXISTS TRUE)
         MESSAGE("Found Linux Distribution Release Name: ${LSB_LINUX_DISTRIBUTION_CODENAME}")
     ENDIF (LSB_RELEASE_EXEC)
     MESSAGE("Found Linux Distribution Release Name: ${LSB_LINUX_DISTRIBUTION_CODENAME}")
 
-	# IF (EXISTS "/etc/lsb-release" )
-	# 	MESSAGE("Found /etc/lsb-release")
-	# 	SET(LSB_EXISTS "LSB Data IS available" ON)
-	# 	# Ubuntu Version: /etc/lsb-release - DISTRIB_ID=Ubuntu, DISTRIB_CODENAME=<name>
-	# 	FILE(STRINGS "/etc/lsb-release" LSB_DATA)
-	# 	FOREACH(LSB_DATA_ENTRY IN LISTS LSB_DATA)
-	# 		MESSAGE("Checking ${LSB_DATA_ENTRY} for match...")
-	# 		IF ("${LSB_DATA_ENTRY}" MATCHES "^DISTRIB_ID=(.+)$")
-	# 			SET(LSB_LINUX_DISTRIBUTION "${CMAKE_MATCH_1}")
-	# 		ELSEIF ("${LSB_DATA_ENTRY}" MATCHES "^DISTRIB_CODENAME=(.+)$")
-	# 			SET(LSB_LINUX_DISTRIBUTION_CODENAME "${CMAKE_MATCH_1}")
-	# 		ENDIF ("${LSB_DATA_ENTRY}" MATCHES "^DISTRIB_ID=(.+)$")
-	# 	ENDFOREACH(LSB_DATA_ENTRY)
-	# 	MESSAGE("Found Linux Distribution: ${LSB_LINUX_DISTRIBUTION}")
-	# 	MESSAGE("Found Linux Distribution Release Name: ${LSB_LINUX_DISTRIBUTION_CODENAME}")
-	# ENDIF (EXISTS "/etc/lsb-release")
+    # IF (EXISTS "/etc/lsb-release" )
+    #     MESSAGE("Found /etc/lsb-release")
+    #     SET(LSB_EXISTS "LSB Data IS available" ON)
+    #     # Ubuntu Version: /etc/lsb-release - DISTRIB_ID=Ubuntu, DISTRIB_CODENAME=<name>
+    #     FILE(STRINGS "/etc/lsb-release" LSB_DATA)
+    #     FOREACH(LSB_DATA_ENTRY IN LISTS LSB_DATA)
+    #         MESSAGE("Checking ${LSB_DATA_ENTRY} for match...")
+    #         IF ("${LSB_DATA_ENTRY}" MATCHES "^DISTRIB_ID=(.+)$")
+    #             SET(LSB_LINUX_DISTRIBUTION "${CMAKE_MATCH_1}")
+    #         ELSEIF ("${LSB_DATA_ENTRY}" MATCHES "^DISTRIB_CODENAME=(.+)$")
+    #             SET(LSB_LINUX_DISTRIBUTION_CODENAME "${CMAKE_MATCH_1}")
+    #         ENDIF ("${LSB_DATA_ENTRY}" MATCHES "^DISTRIB_ID=(.+)$")
+    #     ENDFOREACH(LSB_DATA_ENTRY)
+    #     MESSAGE("Found Linux Distribution: ${LSB_LINUX_DISTRIBUTION}")
+    #     MESSAGE("Found Linux Distribution Release Name: ${LSB_LINUX_DISTRIBUTION_CODENAME}")
+    # ENDIF (EXISTS "/etc/lsb-release")
 
-	# "DEB"
-	FIND_PROGRAM(HAS_APT NAMES apt-get apt)
-	IF(HAS_APT)
-		MESSAGE("-- Configuring Debian Packaging")
-		# See https://cmake.org/cmake/help/v3.3/module/CPackDeb.html
-		# TODO: Add the platform (Ubuntu, Debian, etc) to the filename; perhaps version (f.e stretch, jessie, etc) too?
-		SET(CPACK_DEBIAN_PACKAGE_MAINTAINER "maintainers@vega-strike.org")
-		# Debian Version: /etc/debian_version - <name>/<junk>
-		IF (NOT LSB_EXISTS)
-			SET(USE_DEBIAN_VERSION "Use the Debian Version" ON)
-			FILE(READ "/etc/debian_version" DEBIAN_VERSION_DATA)
-			STRING(REGEX MATCH "^(.+)\/.*$" DEBIAN_VERSION_DATA DEBIAN_RELEASE_VERSION)
-		ELSE (NOT LSB_EXISTS)
-			SET(USE_DEBIAN_VERSION "Use the Debian Version" OFF)
-			SET(DEBIAN_RELEASE_VERSION "Debian Derivative Release Version" ${LSB_LINUX_DISTRIBUTION_CODENAME})
-		ENDIF (NOT LSB_EXISTS)
-		# Try to detect the Ubuntu version
+    # "DEB"
+    FIND_PROGRAM(HAS_APT NAMES apt-get apt)
+    IF(HAS_APT)
+        MESSAGE("-- Configuring Debian Packaging")
+        # See https://cmake.org/cmake/help/v3.3/module/CPackDeb.html
+        # TODO: Add the platform (Ubuntu, Debian, etc) to the filename; perhaps version (f.e stretch, jessie, etc) too?
+        SET(CPACK_DEBIAN_PACKAGE_MAINTAINER "maintainers@vega-strike.org")
+        # Debian Version: /etc/debian_version - <name>/<junk>
+        IF (NOT LSB_EXISTS)
+            SET(USE_DEBIAN_VERSION TRUE)
+            FILE(READ "/etc/debian_version" DEBIAN_VERSION_DATA)
+            STRING(REGEX MATCH "^(.+)\/.*$" DEBIAN_VERSION_DATA DEBIAN_RELEASE_VERSION)
+        ELSE (NOT LSB_EXISTS)
+            SET(USE_DEBIAN_VERSION FALSE)
+            SET(DEBIAN_RELEASE_VERSION "Debian Derivative Release Version ${LSB_LINUX_DISTRIBUTION_CODENAME}")
+        ENDIF (NOT LSB_EXISTS)
+        # Try to detect the Ubuntu version
 
-		# Should auto-detect Debian/Ubuntu as deps may change
-		# This would be awesome if coupled with providing versions for specific (or at least compatible) distros.
-		MESSAGE("Looking for ${CMAKE_BINARY_DIR}/dependency.list")
-		IF (EXISTS "${CMAKE_BINARY_DIR}/dependency.list")
-			MESSAGE("Found Dependency file at ${CMAKE_BINARY_DIR}/dependency.list")
-			# Load the dependencies from the file into the CPack variable:
-			FILE(STRINGS "${CMAKE_BINARY_DIR}/dependency.list" AUTOMATED_DEBIAN_DEPENDENCY_LIST)
-			FOREACH(DLD_DEPENDENCY IN LISTS AUTOMATED_DEBIAN_DEPENDENCY_LIST)
-				MESSAGE("** Found Dependency ${DLD_DEPENDENCY}")
-				IF (DEFINED CPACK_DEBIAN_PACKAGE_DEPENDS)
-					SET(CPACK_DEBIAN_PACKAGE_DEPENDS "${CPACK_DEBIAN_PACKAGE_DEPENDS}, ${DLD_DEPENDENCY}")
-				ELSE(DEFINED CPACK_DEBIAN_PACKAGE_DEPENDS)
-					IF (NOT "${DLD_DEPENDENCY}" STREQUAL "")
-						SET(CPACK_DEBIAN_PACKAGE_DEPENDS "${DLD_DEPENDENCY}")
-					ENDIF (NOT "${DLD_DEPENDENCY}" STREQUAL "")
-				ENDIF(DEFINED CPACK_DEBIAN_PACKAGE_DEPENDS)
-			ENDFOREACH(DLD_DEPENDENCY)
-		ELSE (EXISTS "${CMAKE_BINARY_DIR}/dependency.list")
-			MESSAGE("Still need to generate dependency list")
-		ENDIF (EXISTS "${CMAKE_BINARY_DIR}/dependency.list")
-		# Alternatively, just set a hard-coded set of dependencies...requires more logic for various platforms.
-		IF (USE_DEBIAN_VERSION)
-			# Debian Dependency Chain
+        # Should auto-detect Debian/Ubuntu as deps may change
+        # This would be awesome if coupled with providing versions for specific (or at least compatible) distros.
+        MESSAGE("Looking for ${CMAKE_BINARY_DIR}/dependency.list")
+        IF (EXISTS "${CMAKE_BINARY_DIR}/dependency.list")
+            MESSAGE("Found Dependency file at ${CMAKE_BINARY_DIR}/dependency.list")
+            # Load the dependencies from the file into the CPack variable:
+            FILE(STRINGS "${CMAKE_BINARY_DIR}/dependency.list" AUTOMATED_DEBIAN_DEPENDENCY_LIST)
+            FOREACH(DLD_DEPENDENCY IN LISTS AUTOMATED_DEBIAN_DEPENDENCY_LIST)
+                MESSAGE("** Found Dependency ${DLD_DEPENDENCY}")
+                IF (DEFINED CPACK_DEBIAN_PACKAGE_DEPENDS)
+                    SET(CPACK_DEBIAN_PACKAGE_DEPENDS "${CPACK_DEBIAN_PACKAGE_DEPENDS}, ${DLD_DEPENDENCY}")
+                ELSE(DEFINED CPACK_DEBIAN_PACKAGE_DEPENDS)
+                    IF (NOT "${DLD_DEPENDENCY}" STREQUAL "")
+                        SET(CPACK_DEBIAN_PACKAGE_DEPENDS "${DLD_DEPENDENCY}")
+                    ENDIF (NOT "${DLD_DEPENDENCY}" STREQUAL "")
+                ENDIF(DEFINED CPACK_DEBIAN_PACKAGE_DEPENDS)
+            ENDFOREACH(DLD_DEPENDENCY)
+        ELSE (EXISTS "${CMAKE_BINARY_DIR}/dependency.list")
+            MESSAGE("Still need to generate dependency list")
+        ENDIF (EXISTS "${CMAKE_BINARY_DIR}/dependency.list")
+        # Alternatively, just set a hard-coded set of dependencies...requires more logic for various platforms.
+        IF (USE_DEBIAN_VERSION)
+            # Debian Dependency Chain
             IF (DEBIAN_RELEASE_VERSION STREQUAL "buster")
                 SET(CPACK_DEBIAN_PACKAGE_DEPENDS "python, libjpeg62-turbo, libpng16-16, freeglut3, libgtk2.0-0, libvorbis0a, libopenal1, libsdl-mixer1.2, libsdl-gfx1.2-5, xdg-utils, libgl1, libboost-python1.67.0")
             ENDIF ()
-		ELSE (USE_DEBIAN_VERSION)
-			# Ubuntu Dependency Chain
+            SET(CPACK_DEBIAN_FILE_NAME "vsUTCS_${CPACK_PACKAGE_VERSION_MAJOR}.${CPACK_PACKAGE_VERSION_MINOR}.${CPACK_PACKAGE_VERSION_PATCH}-debian-${DEBIAN_RELEASE_VERSION}_x86_64.deb")
+        ELSE (USE_DEBIAN_VERSION)
+            # Ubuntu Dependency Chain
             IF (LSB_LINUX_DISTRIBUTION_CODENAME STREQUAL "xenial")
                 SET(CPACK_DEBIAN_PACKAGE_DEPENDS "python, libjpeg62, libpng16-16, freeglut3, libgtk2.0-0, libvorbis0a, libopenal1, libsdl-mixer1.2, libsdl-gfx1.2-5, xdg-utils, libgl1-mesa-glx, libboost-python1.58.0")
             ELSEIF (LSB_LINUX_DISTRIBUTION_CODENAME STREQUAL "bionic")
@@ -1262,27 +1263,28 @@ ELSEIF (CMAKE_SYSTEM_NAME STREQUAL Linux)
             ELSEIF (LSB_LINUX_DISTRIBUTION_CODENAME STREQUAL "focal")
                 SET(CPACK_DEBIAN_PACKAGE_DEPENDS "python2, libjpeg62, libpng16-16, freeglut3, libgtk2.0-0, libvorbis0a, libopenal1, libsdl-mixer1.2, libsdl-gfx1.2-5, xdg-utils, libgl1, libboost-python1.67.0")
             ENDIF ()
-		ENDIF (USE_DEBIAN_VERSION)
-		SET(CPACK_DEBIAN_PACKAGE_SECTION "Amusements/Games")
-		SET(CPACK_DEBIAN_PACKAGE_HOMEPAGE "https://www.vega-strike.org")
-		LIST(APPEND CPACK_GENERATOR "DEB")
-	ENDIF (HAS_APT)
+            SET(CPACK_DEBIAN_FILE_NAME "vsUTCS_${CPACK_PACKAGE_VERSION_MAJOR}.${CPACK_PACKAGE_VERSION_MINOR}.${CPACK_PACKAGE_VERSION_PATCH}-ubuntu-${LSB_LINUX_DISTRIBUTION_CODENAME}_x86_64.deb")
+        ENDIF (USE_DEBIAN_VERSION)
+        SET(CPACK_DEBIAN_PACKAGE_SECTION "Amusements/Games")
+        SET(CPACK_DEBIAN_PACKAGE_HOMEPAGE "https://www.vega-strike.org")
+        LIST(APPEND CPACK_GENERATOR "DEB")
+    ENDIF (HAS_APT)
 
-	#  "RPM"
-	FIND_PROGRAM(HAS_RPMBUILD rpmbuild)
-	IF (HAS_RPMBUILD)
-		MESSAGE("-- Configuring RPM Packaging")
-		# See https://cmake.org/cmake/help/v3.3/module/CPackRPM.html
-		SET(CPACK_RPM_PACKAGE_LICENSE "GPLv3") # See ../LICENSE
-		SET(CPACK_RPM_PACKAGE_URL "https://www.vega-strike.org")
-		# Should detect whether SuSe or RH/CentOS/Fedora as deps may change
-		SET(CPACK_RPM_PACKAGE_REQUIRES "python2, libjpeg, libpng, freeglut, gtk2, libvorbis, openal, SDL_mixer")
-		LIST(APPEND CPACK_GENERATOR "RPM")
-	ENDIF (HAS_RPMBUILD)
+    #  "RPM"
+    FIND_PROGRAM(HAS_RPMBUILD rpmbuild)
+    IF (HAS_RPMBUILD)
+        MESSAGE("-- Configuring RPM Packaging")
+        # See https://cmake.org/cmake/help/v3.3/module/CPackRPM.html
+        SET(CPACK_RPM_PACKAGE_LICENSE "GPLv3") # See ../LICENSE
+        SET(CPACK_RPM_PACKAGE_URL "https://www.vega-strike.org")
+        # Should detect whether SuSe or RH/CentOS/Fedora as deps may change
+        SET(CPACK_RPM_PACKAGE_REQUIRES "python2, libjpeg, libpng, freeglut, gtk2, libvorbis, openal, SDL_mixer")
+        LIST(APPEND CPACK_GENERATOR "RPM")
+    ENDIF (HAS_RPMBUILD)
 ELSE ()
-	MESSAGE("-- Configuring Packaging for Unknown Platforms - \"${CMAKE_SYSTEM_NAME}\"")
-	# Unknown Platform --> Just do the various compressed tarballs
-	SET(CPACK_GENERATOR "TBZ2" "TGZ" "TXZ")
+    MESSAGE("-- Configuring Packaging for Unknown Platforms - \"${CMAKE_SYSTEM_NAME}\"")
+    # Unknown Platform --> Just do the various compressed tarballs
+    SET(CPACK_GENERATOR "TBZ2" "TGZ" "TXZ")
 ENDIF (WIN32 AND NOT UNIX)
 
 INCLUDE(CPack)
