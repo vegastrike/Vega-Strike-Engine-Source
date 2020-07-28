@@ -816,8 +816,9 @@ Unit::~Unit()
 
     free( pImage->cockpit_damage );
     if ( (!killed) )
-        VSFileSystem::vs_fprintf( stderr, "Assumed exit on unit %s(if not quitting, report error)\n",
-            name.get().c_str() );
+        // stephengtuggy 2020-07-27 - I think this message was mistakenly put in. This happens all the time when buying and selling cargo or ship upgrades.
+        //VSFileSystem::vs_fprintf( stderr, "Assumed exit on unit %s(if not quitting, report error)\n",
+        //    name.get().c_str() );
     if (ucref)
         VSFileSystem::vs_fprintf( stderr, "DISASTER AREA!!!!" );
     VSFileSystem::vs_dprintf( 3, "Deallocating unit %s addr=0x%08x refs=%d\n",

@@ -2889,7 +2889,7 @@ void BaseComputer::loadMissionsMasterList( TransactionList &tlist )
     Unit *unit = _Universe->AccessCockpit()->GetParent();
     int   playerNum = UnitUtil::isPlayerStarship( unit );
     if (playerNum < 0) {
-        VSFileSystem::vs_fprintf( stderr, "Docked ship not a player." );
+        BOOST_LOG_TRIVIAL(error) << "Docked ship not a player.";
         return;
     }
     //Number of strings to look at.  And make sure they match!
@@ -3849,17 +3849,10 @@ Cargo CreateCargoForOwnerStarship( const Cockpit *cockpit, const Unit *base, int
             jumps);
         BOOST_LOG_TRIVIAL(trace) << boost::format("Player ship needs transport from %1% to %2% across %3% systems") % locationBaseName %
                                        destinationSystemName % jumps.size();
-        // VSFileSystem::vs_dprintf(3, "Player ship needs transport from %s to %s across %d systems",
-        //     locationBaseName.c_str(),
-        //     destinationSystemName.c_str(),
-        //     jumps.size());
         cargo.price += shipping_price_perjump * (jumps.size() - 1);
     } else if (needsInsysTransport) {
         BOOST_LOG_TRIVIAL(trace) << boost::format("Player ship needs insys transport from %1% to %2%") % locationBaseName %
                                        destinationBaseName;
-        // VSFileSystem::vs_dprintf(3, "Player ship needs insys transport from %s to %s",
-        //     locationBaseName.c_str(),
-        //     destinationBaseName.c_str());
         cargo.price += shipping_price_insys;
     }
 
@@ -3984,9 +3977,6 @@ void trackPrice(int whichplayer, const Cargo &item, float price, const string &s
 
     BOOST_LOG_TRIVIAL(info) << boost::format("Ranking item %1%/%2% at %3%/%4%") % item.category.get() % item.content.get() % systemName %
                                   baseName;
-    // VSFileSystem::vs_dprintf(1, "Ranking item %s/%s at %s/%s\n",
-    //     item.category.get().c_str(), item.content.get().c_str(),
-    //     systemName.c_str(), baseName.c_str());
 
     // Recorded prices are always sorted, so we first do a quick check to avoid
     // triggering savegame serialization without reason
@@ -4113,43 +4103,36 @@ void trackPrice(int whichplayer, const Cargo &item, float price, const string &s
 
         BOOST_LOG_TRIVIAL(info) << "Tracking data:";
         BOOST_LOG_TRIVIAL(info) << boost::format("  highest locs: (%1%)") % recordedHighestLocs.size();
-        // VSFileSystem::vs_dprintf(1,"Tracking data:\n");
-        // VSFileSystem::vs_dprintf(1,"  highest locs: (%d)\n", recordedHighestLocs.size());
         {
             for (size_t i = 0; i < recordedHighestLocs.size(); ++i) {
                 BOOST_LOG_TRIVIAL(info) << boost::format("    %1% : %2%") % i % recordedHighestLocs[i];
-                // VSFileSystem::vs_dprintf(1, "    %d : %s\n", i, recordedHighestLocs[i].c_str());
             }
         }
 
-        //BOOST_LOG_TRIVIAL(info) << boost::format("  highest prices: (%1%)") % recordedHighestPrices.size();
-        VSFileSystem::vs_dprintf(1,"  highest prices: (%d)\n", recordedHighestPrices.size());
+        BOOST_LOG_TRIVIAL(info) << boost::format("  highest prices: (%1%)") % recordedHighestPrices.size();
         {
             for (size_t i = 0; i < recordedHighestPrices.size(); ++i) {
-                BOOST_LOG_TRIVIAL(info) << boost::format("    %1% : %2$.2f") % i % recordedHighestPrices[i];
-                // VSFileSystem::vs_dprintf(1, "    %d : %.2f\n", i, recordedHighestPrices[i]);
+                                                                    // POSIX-printf style
+                BOOST_LOG_TRIVIAL(info) << boost::format("    %1$d : %2$.2f") % i % recordedHighestPrices[i];
             }
         }
 
-        //BOOST_LOG_TRIVIAL(info) << boost::format("  lowest locs: (%1%)") % recordedLowestLocs.size();
-        VSFileSystem::vs_dprintf(1,"  lowest locs: (%d)\n", recordedLowestLocs.size());
+        BOOST_LOG_TRIVIAL(info) << boost::format("  lowest locs: (%1%)") % recordedLowestLocs.size();
         {
             for (size_t i = 0; i < recordedLowestLocs.size(); ++i) {
                 BOOST_LOG_TRIVIAL(info) << boost::format("    %1% : %2%") % i % recordedLowestLocs[i];
-                // VSFileSystem::vs_dprintf(1, "    %d : %s\n", i, recordedLowestLocs[i].c_str());
             }
         }
 
-        //BOOST_LOG_TRIVIAL(info) << boost::format("  lowest prices: (%1%)") % recordedLowestPrices.size();
-        VSFileSystem::vs_dprintf(1,"  lowest prices: (%d)\n", recordedLowestPrices.size());
+        BOOST_LOG_TRIVIAL(info) << boost::format("  lowest prices: (%1%)") % recordedLowestPrices.size();
         {
             for (size_t i = 0; i < recordedLowestPrices.size(); ++i) {
-                BOOST_LOG_TRIVIAL(info) << boost::format("    %1% : %2$.2f") % i % recordedLowestPrices[i];
-                // VSFileSystem::vs_dprintf(1, "    %d : %.2f\n", i, recordedLowestPrices[i]);
+                                                                    // POSIX-printf style
+                BOOST_LOG_TRIVIAL(info) << boost::format("    %1$d : %2$.2f") % i % recordedLowestPrices[i];
             }
         }
 
-        fflush(stderr);
+        VSFileSystem::flushLogs();
 
         highest.clear();
         highest.resize(recordedHighestPrices.size());
@@ -4160,7 +4143,6 @@ void trackPrice(int whichplayer, const Cargo &item, float price, const string &s
                 text += " (at " + recordedHighestLocs[i] + ")";
 
                 BOOST_LOG_TRIVIAL(info) << boost::format("Highest item %1%") % text;
-                // VSFileSystem::vs_dprintf(1, "Highest item %s\n", text.c_str());
             }
         }
 
@@ -4173,7 +4155,6 @@ void trackPrice(int whichplayer, const Cargo &item, float price, const string &s
                 text += " (at " + recordedLowestLocs[i] + ")";
 
                 BOOST_LOG_TRIVIAL(info) << boost::format("Lowest item %1%") % text;
-                // VSFileSystem::vs_dprintf(1, "Lowest item %s\n", text.c_str());
             }
         }
     }
@@ -4790,7 +4771,7 @@ void showUnitStats( Unit *playerUnit, string &text, int subunitlevel, int mode, 
         if (!mode) {
             text += conversionBuffer;
             text += " radians/second^2#n#"+expstatcolor+"  (yaw, pitch, roll)#-c";
-        } else if (MODIFIES(replacement_mode, playerUnit, blankUnit, limits.yaw)) { 
+        } else if (MODIFIES(replacement_mode, playerUnit, blankUnit, limits.yaw)) {
             switch (replacement_mode)
             {
             case 0:                     //Replacement or new Module

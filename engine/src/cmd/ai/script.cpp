@@ -74,7 +74,7 @@ static HardCodedMap MakeHardCodedScripts()
     tmp.insert( MyPair( "roll perpendicular slow", &RollFacePerpendicularSlow ) );
     tmp.insert( MyPair( "roll perpendicular fast", &RollFacePerpendicularFast ) );
     if (tmp.find("roll perpendicular fast")==tmp.end()){
-        exit(1);
+        VSExit(1);
     }
     return tmp;
 }
@@ -104,14 +104,14 @@ float& AIScript::topf()
 {
     if ( !xml->floats.size() ) {
         xml->floats.push( xml->defaultf );
-        VSFileSystem::vs_fprintf( stderr, "\nERROR: Float stack is empty... Will return %f\n", xml->defaultf );
+        BOOST_LOG_TRIVIAL(error) << boost::format("ERROR: Float stack is empty... Will return %1%") % xml->defaultf;
     }
     return xml->floats.top();
 }
 void AIScript::popf()
 {
     if (xml->floats.size() <= 0) {
-        VSFileSystem::vs_fprintf( stderr, "\nERROR: Float stack is empty... Will not delete\n" );
+        BOOST_LOG_TRIVIAL(error) << "ERROR: Float stack is empty... Will not delete";
         return;
     }
     xml->floats.pop();
@@ -120,18 +120,18 @@ QVector& AIScript::topv()
 {
     if ( !xml->vectors.size() ) {
         xml->vectors.push( xml->defaultvec );
-        VSFileSystem::vs_fprintf( stderr,
-                                  "\nERROR: Vector stack is empty... Will return <%f, %f, %f>\n",
-                                  xml->defaultvec.i,
-                                  xml->defaultvec.j,
-                                  xml->defaultvec.k );
+        BOOST_LOG_TRIVIAL(error) << boost::format(
+                                  "ERROR: Vector stack is empty... Will return <%1%, %2%, %3%>")
+                                  % xml->defaultvec.i
+                                  % xml->defaultvec.j
+                                  % xml->defaultvec.k;
     }
     return xml->vectors.top();
 }
 void AIScript::popv()
 {
     if (xml->vectors.size() <= 0) {
-        VSFileSystem::vs_fprintf( stderr, "\nERROR: Vector stack is empty... Will not delete\n" );
+        BOOST_LOG_TRIVIAL(error) << "ERROR: Vector stack is empty... Will not delete";
         return;
     }
     xml->vectors.pop();
@@ -270,11 +270,11 @@ void AIScript::beginElement( const string &name, const AttributeList &attributes
     xml->itts = false;
     Unit *tmp;
 #ifdef AIDBG
-    VSFileSystem::vs_fprintf( stderr, "0" );
+    BOOST_LOG_TRIVIAL(debug) << "0";
 #endif
     Names elem = (Names) element_map.lookup( name );
 #ifdef AIDBG
-    VSFileSystem::vs_fprintf( stderr, "1%x ", &elem );
+    BOOST_LOG_TRIVIAL(debug) << boost::format("1%1$x ") % &elem;
 #endif
     AttributeList::const_iterator iter;
     switch (elem)
@@ -308,7 +308,7 @@ void AIScript::beginElement( const string &name, const AttributeList &attributes
                 break;
             case DUPLIC:
 #ifdef AIDBG
-                VSFileSystem::vs_fprintf( stderr, "1%x ", &elem );
+                BOOST_LOG_TRIVIAL(debug) << boost::format("1%1$x ") % &elem;
 #endif
                 xml->vectors.pop();                 //get rid of dummy vector pushed on above
                 xml->vectors.push( xml->vectors.top() );
@@ -374,7 +374,7 @@ void AIScript::beginElement( const string &name, const AttributeList &attributes
         break;
     case FACETARGET:
 #ifdef AIDBG
-        VSFileSystem::vs_fprintf( stderr, "ft" );
+        BOOST_LOG_TRIVIAL(debug) << "ft";
 #endif
         xml->unitlevel++;
         xml->acc  = 3;
@@ -396,7 +396,7 @@ void AIScript::beginElement( const string &name, const AttributeList &attributes
             }
         }
 #ifdef AIDBG
-        VSFileSystem::vs_fprintf( stderr, "eft" );
+        BOOST_LOG_TRIVIAL(debug) << "eft";
 #endif
 
         break;
@@ -478,7 +478,7 @@ void AIScript::beginElement( const string &name, const AttributeList &attributes
     case MATCHANG:
     case MATCHVEL:
 #ifdef AIDBG
-        VSFileSystem::vs_fprintf( stderr, "mlv" );
+        BOOST_LOG_TRIVIAL(debug) << "mlv";
 #endif
 
         xml->unitlevel++;
@@ -500,7 +500,7 @@ void AIScript::beginElement( const string &name, const AttributeList &attributes
             }
         }
 #ifdef AIDBG
-        VSFileSystem::vs_fprintf( stderr, "emlv " );
+        BOOST_LOG_TRIVIAL(debug) << "emlv ";
 #endif
 
         break;
@@ -666,7 +666,7 @@ void AIScript::endElement( const string &name )
         topv() = -topv();
         break;
     case MOVETO:
-        VSFileSystem::vs_fprintf( stderr, "Moveto <%f,%f,%f>", topv().i, topv().j, topv().k );
+        BOOST_LOG_TRIVIAL(debug) << boost::format("Moveto <%1%,%2%,%3%>") % topv().i % topv().j % topv().k;
         xml->unitlevel--;
         xml->orders.push_back( new Orders::MoveTo( topv(), xml->afterburn, xml->acc ) );
         popv();
@@ -772,9 +772,9 @@ void AIScript::LoadXML()
                 RollLeft( this, parent );
         }
         if (aidebug > 1) {
-            VSFileSystem::vs_fprintf( stderr, "%f using hcs %s for %s threat %f\n",
-                                      mission->getGametime(), filename, parent->name.get().c_str(),
-                                      parent->GetComputerData().threatlevel );
+            BOOST_LOG_TRIVIAL(debug) << boost::format("%1% using hcs %2% for %3% threat %4%")
+                                      % mission->getGametime() % filename % parent->name
+                                      % parent->GetComputerData().threatlevel;
         }
         if ( _Universe->isPlayerStarship( parent->Target() ) ) {
             float value;
@@ -804,32 +804,32 @@ void AIScript::LoadXML()
         return;
     } else {
         if (aidebug > 1)
-            VSFileSystem::vs_fprintf( stderr, "using soft coded script %s", filename );
+            BOOST_LOG_TRIVIAL(debug) << boost::format("using soft coded script %1%") % filename;
         if (aidebug > 0)
             UniverseUtil::IOmessage( 0, parent->name, "all", string( "FAILED(or missile) script " )+string(
                                         filename )+" threat "+XMLSupport::tostring( parent->GetComputerData().threatlevel ) );
     }
 #ifdef AIDBG
-    VSFileSystem::vs_fprintf( stderr, "chd" );
+    BOOST_LOG_TRIVIAL(debug) << "chd";
 #endif
 
 #ifdef AIDBG
-    VSFileSystem::vs_fprintf( stderr, "echd" );
+    BOOST_LOG_TRIVIAL(debug) << "echd";
 #endif
     VSFile    f;
     VSError   err = f.OpenReadOnly( filename, AiFile );
 #ifdef AIDBG
-    VSFileSystem::vs_fprintf( stderr, "backup " );
+    BOOST_LOG_TRIVIAL(debug) << "backup ";
 #endif
     if (err > Ok) {
-        VSFileSystem::vs_fprintf( stderr, "cannot find AI script %s\n", filename );
+        BOOST_LOG_TRIVIAL(error) << boost::format("cannot find AI script %1%") % filename;
         if (hard_coded_scripts.find(filename)!=hard_coded_scripts.end()) {
             assert(0);
         }
         return;
     }
 #ifdef BIDBG
-    VSFileSystem::vs_fprintf( stderr, "nxml" );
+    BOOST_LOG_TRIVIAL(debug) << "nxml";
 #endif
     xml = new AIScriptXML;
     xml->unitlevel  = 0;
@@ -839,48 +839,48 @@ void AIScript::LoadXML()
     xml->defaultvec = QVector( 0, 0, 0 );
     xml->defaultf   = 0;
 #ifdef BIDBG
-    VSFileSystem::vs_fprintf( stderr, "parscrea" );
+    BOOST_LOG_TRIVIAL(debug) << "parscrea";
 #endif
     XML_Parser parser = XML_ParserCreate( NULL );
 #ifdef BIDBG
-    VSFileSystem::vs_fprintf( stderr, "usdat %x", parser );
+    BOOST_LOG_TRIVIAL(debug) << boost::format("usdat %1$x") % parser;
 #endif
     XML_SetUserData( parser, this );
 #ifdef BIDBG
-    VSFileSystem::vs_fprintf( stderr, "elha" );
+    BOOST_LOG_TRIVIAL(debug) << "elha";
 #endif
     XML_SetElementHandler( parser, &AIScript::beginElement, &AIScript::endElement );
 #ifdef BIDBG
-    VSFileSystem::vs_fprintf( stderr, "do" );
+    BOOST_LOG_TRIVIAL(debug) << "do";
 #endif
     XML_Parse( parser, ( f.ReadFull() ).c_str(), f.Size(), 1 );
 #ifdef BIDBG
-    VSFileSystem::vs_fprintf( stderr, "%xxml_free", parser );
-    fflush( stderr );
+    BOOST_LOG_TRIVIAL(debug) << boost::format("%1$xxml_free") % parser;
+    VSFileSystem::flushLogs();
 #endif
     XML_ParserFree( parser );
 #ifdef BIDBG
-    VSFileSystem::vs_fprintf( stderr, "xml_freed" );
+    BOOST_LOG_TRIVIAL(debug) << "xml_freed";
 #endif
     f.Close();
     for (unsigned int i = 0; i < xml->orders.size(); i++) {
 #ifdef BIDBG
-        VSFileSystem::vs_fprintf( stderr, "parset" );
+        BOOST_LOG_TRIVIAL(debug) << "parset";
 #endif
         xml->orders[i]->SetParent( parent );
         EnqueueOrder( xml->orders[i] );
 #ifdef BIDBG
-        VSFileSystem::vs_fprintf( stderr, "cachunkx" );
+        BOOST_LOG_TRIVIAL(debug) << "cachunkx";
 #endif
     }
 #ifdef BIDBG
-    VSFileSystem::vs_fprintf( stderr, "xml%x", xml );
-    fflush( stderr );
+    BOOST_LOG_TRIVIAL(debug) << boost::format("xml%1$x") % xml;
+    VSFileSystem::flushLogs();
 #endif
     delete xml;
 #ifdef BIDBG
-    VSFileSystem::vs_fprintf( stderr, "\\xml\n" );
-    fflush( stderr );
+    BOOST_LOG_TRIVIAL(debug) << "\\xml\n";
+    VSFileSystem::flushLogs();
 #endif
 }
 
@@ -893,14 +893,14 @@ AIScript::AIScript( const char *scriptname ) : Order( Order::MOVEMENT|Order::FAC
 AIScript::~AIScript()
 {
 #ifdef ORDERDEBUG
-    VSFileSystem::vs_fprintf( stderr, "sc%x", this );
-    fflush( stderr );
+    BOOST_LOG_TRIVIAL(debug) << boost::format("sc%1$x") % this;
+    VSFileSystem::flushLogs();
 #endif
     if (filename)
         delete[] filename;
 #ifdef ORDERDEBUG
-    VSFileSystem::vs_fprintf( stderr, "sc\n" );
-    fflush( stderr );
+    BOOST_LOG_TRIVIAL(debug) << "sc";
+    VSFileSystem::flushLogs();
 #endif
 }
 
@@ -909,14 +909,14 @@ void AIScript::Execute()
     if (filename) {
         LoadXML();
 #ifdef ORDERDEBUG
-        VSFileSystem::vs_fprintf( stderr, "fn%x", this );
-        fflush( stderr );
+        BOOST_LOG_TRIVIAL(debug) << boost::format("fn%1$x") % this;
+        VSFileSystem::flushLogs();
 #endif
         delete[] filename;
         filename = NULL;
 #ifdef ORDERDEBUG
-        VSFileSystem::vs_fprintf( stderr, "fn" );
-        fflush( stderr );
+        BOOST_LOG_TRIVIAL(debug) << "fn";
+        VSFileSystem::flushLogs();
 #endif
     }
     Order::Execute();

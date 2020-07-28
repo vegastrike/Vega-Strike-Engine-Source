@@ -94,14 +94,11 @@ void Python::initpaths()
 void Python::reseterrors()
 {
     if ( PyErr_Occurred() ) {
+        BOOST_LOG_TRIVIAL(error) << "void Python::reseterrors(): Python error occurred";
         PyErr_Print();
         PyErr_Clear();
-        fflush( stderr );
-        fflush( stdout );
+        VSFileSystem::flushLogs();
     }
-#ifdef _DEBUG
-    fflush( stderr );
-#endif
 }
 
 #if BOOST_VERSION != 102800

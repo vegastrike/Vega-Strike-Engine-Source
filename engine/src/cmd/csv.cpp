@@ -323,8 +323,8 @@ CSVTable* loadCSVTableList(const string& csvfiles, VSFileSystem::VSFileType file
                     table->Merge(CSVTable( thisFile, thisFile.GetRoot() ));
                 thisFile.Close();
             } else if (critical) {
-                std::cerr << boost::format("Could not load CSV database at '%1%'") % tmp
-                          << std::endl;
+                BOOST_LOG_TRIVIAL(fatal) << boost::format("Could not load CSV database at '%1%'") % tmp;
+                VSFileSystem::flushLogs();
                 exit(2);
             }
         }
