@@ -45,7 +45,7 @@ INCLUDE_DIRECTORIES(
     ${vsUTCS_SOURCE_DIR}/src/cmd
     ${vsUTCS_BINARY_DIR}
     /usr/include/harfbuzz/
-) 
+)
 
 ADD_LIBRARY(netlowlevel
     src/networking/lowlevel/netbuffer.cpp
@@ -71,12 +71,12 @@ ADD_LIBRARY(netlowlevel
     src/networking/lowlevel/vsnet_sockettcp.cpp
     src/networking/lowlevel/vsnet_socketudp.cpp
     src/networking/lowlevel/vsnet_thread_non.cpp
-    src/networking/lowlevel/vsnet_thread_p.cpp 
+    src/networking/lowlevel/vsnet_thread_p.cpp
     src/networking/lowlevel/vsnet_thread_sdl.cpp
 )
 
 SET(LIBNET_SOURCES
-    src/networking/inet_file.cpp 
+    src/networking/inet_file.cpp
     src/networking/inet.cpp
 )
 
@@ -88,7 +88,7 @@ ADD_LIBRARY(netgeneric
     src/networking/cubicsplines.cpp
     src/networking/mangle.cpp
     src/networking/netclient_clients.cpp
-    src/networking/netclient_devices.cpp 
+    src/networking/netclient_devices.cpp
     src/networking/netclient_login.cpp
     src/networking/netclient.cpp
     src/networking/netserver_acct.cpp
@@ -96,7 +96,7 @@ ADD_LIBRARY(netgeneric
     src/networking/netserver_devices.cpp
     src/networking/netserver_login.cpp
     src/networking/netserver_net.cpp
-    src/networking/netserver.cpp 
+    src/networking/netserver.cpp
     src/networking/prediction.cpp
     src/networking/zonemgr.cpp
 )
@@ -1066,14 +1066,14 @@ ADD_DEPENDENCIES(vegaserver mesh_tool)
 ADD_DEPENDENCIES(vegaserver vssetup)
 ENDIF(NOT DISABLE_SERVER)
 
-# show debug output 
+# show debug output
 GET_DIRECTORY_PROPERTY(TEMP_DIRECTORY INCLUDE_DIRECTORIES)
 MESSAGE("Default build type is Release, no cpu opts enabled. ")
 MESSAGE("Building with BUILD_OPT: ${BUILD_OPT}")
 #MESSAGE("Building with CFLAGS: ${CMAKE_CXX_FLAGS}")
 #MESSAGE("Linking with : ${TST_LIBS}")
 #MESSAGE("including : ${TEMP_DIRECTORY}")
-# end debug output 
+# end debug output
 
 MARK_AS_ADVANCED(FORCE
     Boost_DIR
@@ -1182,22 +1182,32 @@ ELSEIF (CMAKE_SYSTEM_NAME STREQUAL Linux)
 
 	# Lookup the LSB Data - this is known for Ubuntu, but also used by other distros too.
 	# and may help with distro-sub-selection
-	IF (EXISTS "/etc/lsb-release" )
-		MESSAGE("Found /etc/lsb-release")
-		SET(LSB_EXISTS "LSB Data IS available" ON)
-		# Ubuntu Version: /etc/lsb-release - DISTRIB_ID=Ubuntu, DISTRIB_CODENAME=<name>
-		FILE(STRINGS "/etc/lsb-release" LSB_DATA)
-		FOREACH(LSB_DATA_ENTRY IN LISTS LSB_DATA)
-			MESSAGE("Checking ${LSB_DATA_ENTRY} for match...")
-			IF ("${LSB_DATA_ENTRY}" MATCHES "^DISTRIB_ID=(.+)$")
-				SET(LSB_LINUX_DISTRIBUTION "${CMAKE_MATCH_1}")
-			ELSEIF ("${LSB_DATA_ENTRY}" MATCHES "^DISTRIB_CODENAME=(.+)$")
-				SET(LSB_LINUX_DISTRIBUTION_CODENAME "${CMAKE_MATCH_1}")
-			ENDIF ("${LSB_DATA_ENTRY}" MATCHES "^DISTRIB_ID=(.+)$")
-		ENDFOREACH(LSB_DATA_ENTRY)
-		MESSAGE("Found Linux Distribution: ${LSB_LINUX_DISTRIBUTION}")
-		MESSAGE("Found Linux Distribution Release Name: ${LSB_LINUX_DISTRIBUTION_CODENAME}")
-	ENDIF (EXISTS "/etc/lsb-release")
+    find_program(LSB_RELEASE_EXEC lsb_release)
+    IF (LSB_RELEASE_EXEC)
+        execute_process(COMMAND ${LSB_RELEASE_EXEC} --codename --short
+            OUTPUT_VARIABLE LSB_LINUX_DISTRIBUTION_CODENAME
+            OUTPUT_STRIP_TRAILING_WHITESPACE)
+        SET(LSB_EXISTS "LSB Data IS available" ON)
+        MESSAGE("Found Linux Distribution Release Name: ${LSB_LINUX_DISTRIBUTION_CODENAME}")
+    ENDIF (LSB_RELEASE_EXEC)
+    MESSAGE("Found Linux Distribution Release Name: ${LSB_LINUX_DISTRIBUTION_CODENAME}")
+
+	# IF (EXISTS "/etc/lsb-release" )
+	# 	MESSAGE("Found /etc/lsb-release")
+	# 	SET(LSB_EXISTS "LSB Data IS available" ON)
+	# 	# Ubuntu Version: /etc/lsb-release - DISTRIB_ID=Ubuntu, DISTRIB_CODENAME=<name>
+	# 	FILE(STRINGS "/etc/lsb-release" LSB_DATA)
+	# 	FOREACH(LSB_DATA_ENTRY IN LISTS LSB_DATA)
+	# 		MESSAGE("Checking ${LSB_DATA_ENTRY} for match...")
+	# 		IF ("${LSB_DATA_ENTRY}" MATCHES "^DISTRIB_ID=(.+)$")
+	# 			SET(LSB_LINUX_DISTRIBUTION "${CMAKE_MATCH_1}")
+	# 		ELSEIF ("${LSB_DATA_ENTRY}" MATCHES "^DISTRIB_CODENAME=(.+)$")
+	# 			SET(LSB_LINUX_DISTRIBUTION_CODENAME "${CMAKE_MATCH_1}")
+	# 		ENDIF ("${LSB_DATA_ENTRY}" MATCHES "^DISTRIB_ID=(.+)$")
+	# 	ENDFOREACH(LSB_DATA_ENTRY)
+	# 	MESSAGE("Found Linux Distribution: ${LSB_LINUX_DISTRIBUTION}")
+	# 	MESSAGE("Found Linux Distribution Release Name: ${LSB_LINUX_DISTRIBUTION_CODENAME}")
+	# ENDIF (EXISTS "/etc/lsb-release")
 
 	# "DEB"
 	FIND_PROGRAM(HAS_APT NAMES apt-get apt)
@@ -1238,13 +1248,21 @@ ELSEIF (CMAKE_SYSTEM_NAME STREQUAL Linux)
 			MESSAGE("Still need to generate dependency list")
 		ENDIF (EXISTS "${CMAKE_BINARY_DIR}/dependency.list")
 		# Alternatively, just set a hard-coded set of dependencies...requires more logic for various platforms.
-		#IF (USE_DEBIAN_VERSION)
-		#	# Debian Dependency Chain
-		#	SET(CPACK_DEBIAN_PACKAGE_DEPENDS "python2, libjpeg, libpng, freeglut, gtk2, libvorbis, openal, SDL_mixer, xdg-utils, opengl-games-utils")
-		#ELSE (USE_DEBIAN_VERSION)
-		#	# Ubuntu Dependency Chain
-		#	SET(CPACK_DEBIAN_PACKAGE_DEPENDS "python2, libjpeg62, libpng16-16, freeglut, gtk2, libvorbis, openal, SDL_mixer, xdg-utils, opengl-games-utils")
-		#ENDIF (USE_DEBIAN_VERSION)
+		IF (USE_DEBIAN_VERSION)
+			# Debian Dependency Chain
+            IF (DEBIAN_RELEASE_VERSION STREQUAL "buster")
+                SET(CPACK_DEBIAN_PACKAGE_DEPENDS "python, libjpeg62-turbo, libpng16-16, freeglut3, libgtk2.0-0, libvorbis0a, libopenal1, libsdl-mixer1.2, libsdl-gfx1.2-5, xdg-utils, libgl1, libboost-python1.67.0")
+            ENDIF (DEBIAN_RELEASE_VERSION)
+		ELSE (USE_DEBIAN_VERSION)
+			# Ubuntu Dependency Chain
+            IF (LSB_LINUX_DISTRIBUTION_CODENAME STREQUAL "xenial")
+                SET(CPACK_DEBIAN_PACKAGE_DEPENDS "python, libjpeg62, libpng16-16, freeglut3, libgtk2.0-0, libvorbis0a, libopenal1, libsdl-mixer1.2, libsdl-gfx1.2-5, xdg-utils, libgl1-mesa-glx, libboost-python1.58.0")
+            ELSEIF (LSB_LINUX_DISTRIBUTION_CODENAME STREQUAL "bionic")
+                SET(CPACK_DEBIAN_PACKAGE_DEPENDS "python, libjpeg62, libpng16-16, freeglut3, libgtk2.0-0, libvorbis0a, libopenal1, libsdl-mixer1.2, libsdl-gfx1.2-5, xdg-utils, libgl1, libboost-python1.65.1")
+            ELSEIF (LSB_LINUX_DISTRIBUTION_CODENAME STREQUAL "focal")
+                SET(CPACK_DEBIAN_PACKAGE_DEPENDS "python2, libjpeg62, libpng16-16, freeglut3, libgtk2.0-0, libvorbis0a, libopenal1, libsdl-mixer1.2, libsdl-gfx1.2-5, xdg-utils, libgl1, libboost-python1.67.0")
+            ENDIF (LSB_LINUX_DISTRIBUTION_CODENAME)
+		ENDIF (USE_DEBIAN_VERSION)
 		SET(CPACK_DEBIAN_PACKAGE_SECTION "Amusements/Games")
 		SET(CPACK_DEBIAN_PACKAGE_HOMEPAGE "https://www.vega-strike.org")
 		LIST(APPEND CPACK_GENERATOR "DEB")
