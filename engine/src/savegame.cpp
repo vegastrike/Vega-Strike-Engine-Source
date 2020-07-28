@@ -43,7 +43,7 @@ std::string GetHelperPlayerSaveGame( int num )
           return CurrentSaveGameName+XMLSupport::tostring( num );
         return CurrentSaveGameName;
       }
-    cout<<"Hi helper play "<<num<<endl;
+    BOOST_LOG_TRIVIAL(info) << "Hi helper play " << num;
     static string *res = NULL;
     if (res == NULL) {
         res = new std::string;
@@ -58,12 +58,14 @@ std::string GetHelperPlayerSaveGame( int num )
                 f.Write( "\n", 1 );
                 f.Close();
               } else {
-                fprintf( stderr, "!!! ERROR : Creating default save.4.x.txt file : %s\n", f.GetFullPath().c_str() );
+                BOOST_LOG_TRIVIAL(fatal) << boost::format("!!! ERROR : Creating default save.4.x.txt file : %1%") % f.GetFullPath();
+                flushLogs();
                 exit( 1 );
               }
             err = f.OpenReadOnly( "save.4.x.txt", UnknownFile );
             if (err > Ok) {
-                fprintf( stderr, "!!! ERROR : Opening the default save we just created\n" );
+                BOOST_LOG_TRIVIAL(fatal) << "!!! ERROR : Opening the default save we just created";
+                flushLogs();
                 exit( 1 );
               }
           }
@@ -104,7 +106,7 @@ std::string GetHelperPlayerSaveGame( int num )
           }
       }
     if ( num == 0 || res->empty() ) {
-        cout<<"Here";
+        BOOST_LOG_TRIVIAL(info) << "Here";
         return *res;
       }
     return (*res)+XMLSupport::tostring( num );
@@ -142,10 +144,10 @@ void SaveFileCopy( const char *src, const char *dst )
                 f.Write( savecontent );
                 f.Close();
             } else {
-                fprintf( stderr, "WARNING : couldn't open savegame to copy to : %s as SaveFile", dst );
+                BOOST_LOG_TRIVIAL(warning) << boost::format("WARNING : couldn't open savegame to copy to : %1% as SaveFile") % dst;
             }
         } else {
-            fprintf( stderr, "WARNING : couldn't find the savegame to copy : %s as SaveFile", src );
+            BOOST_LOG_TRIVIAL(warning) << boost::format("WARNING : couldn't find the savegame to copy : %1% as SaveFile") % src;
         }
     }
 }
@@ -199,7 +201,8 @@ void SaveGame::SetPlayerLocation( const QVector &v )
     if ( ( FINITE( v.i ) && FINITE( v.j ) && FINITE( v.k ) ) ) {
         PlayerLocation = v;
     } else {
-        VSFileSystem::vs_fprintf( stderr, "NaN ERROR saving unit\n" );
+        BOOST_LOG_TRIVIAL(fatal) << "NaN ERROR saving unit";
+        flushLogs();
         assert( FINITE( v.i ) && FINITE( v.j ) && FINITE( v.k ) );
         PlayerLocation.Set( 1, 1, 1 );
     }
@@ -247,12 +250,12 @@ vector< string >parsePipedString( string s )
     vector< string >  ret;
     while ( ( loc = s.find( "|" ) ) != string::npos ) {
         ret.push_back( s.substr( 0, loc ) );
-        cout<<"Found ship named : "<<s.substr( 0, loc )<<endl;
+        BOOST_LOG_TRIVIAL(info) << "Found ship named : " << s.substr( 0, loc );
         s = s.substr( loc+1 );
     }
     if ( s.length() ) {
         ret.push_back( s );
-        cout<<"Found ship named : "<<s<<endl;
+        BOOST_LOG_TRIVIAL(info) << "Found ship named : " << s;
     }
     return ret;
 }
@@ -288,15 +291,15 @@ void CopySavedShips( std::string filename, int player_num, const std::vector< st
                 string srcdata = src.ReadFull();
                 dst.Write( srcdata );
             } else {
-                printf( "Error: Cannot Copy Unit %s from save file %s to %s\n",
-                       starships[i].c_str(),
-                       srcnam.c_str(),
-                       dstnam.c_str() );
+                BOOST_LOG_TRIVIAL(error) << boost::format("Error: Cannot Copy Unit %1% from save file %2% to %3%")
+                        % starships[i]
+                        % srcnam
+                        % dstnam;
             }
         } else {
-            printf( "Error: Cannot Open Unit %s from save file %s.\n",
-                   starships[i].c_str(),
-                   srcnam.c_str() );
+            BOOST_LOG_TRIVIAL(error) << boost::format("Error: Cannot Open Unit %1% from save file %2%.")
+                    % starships[i]
+                    % srcnam;
         }
     }
 }
@@ -313,7 +316,7 @@ void WriteSaveGame( Cockpit *cp, bool auto_save )
     if (un->GetHull() > 0) {
         vector< string > packedInfo;
         cp->PackUnitInfo(packedInfo);
-        
+
         cp->savegame->WriteSaveGame( cp->activeStarSystem->getFileName().c_str(),
                                      un->LocalPosition(), cp->credits, packedInfo, auto_save ? -1 : player_num );
         un->WriteUnit( cp->GetUnitModifications().c_str() );
@@ -426,12 +429,12 @@ string SaveGame::WriteMissionData()
     ret += XMLSupport::tostring( (int) missiondata->m.size() );
     for (MissionFloatDat::MFD::iterator i = missiondata->m.begin(); i != missiondata->m.end(); i++) {
         unsigned int siz = (*i).second.size();
-        
+
         // Escape spaces within the key by replacing them with a special char ¬
         string k = (*i).first;
         { for (size_t i=0,len=k.length(); i<len; ++i)
             if (k[i] == ' ') k[i] = '`'; }
-        
+
         ret += string( "\n" )+k+string( " " )+XMLSupport::tostring( siz )+" ";
         for (unsigned int j = 0; j < siz; j++)
             ret += XMLSupport::tostring( (*i).second[j] )+" ";
@@ -464,11 +467,11 @@ void SaveGame::ReadMissionData( char* &buf, bool select_data, const std::set< st
     for (int i = 0; i < mdsize; i++) {
         int    md_i_size;
         string mag_num( scanInString( buf2 ) );
-        
+
         // Unescape spaces within the key by replacing the special char ¬
         { for (size_t i=0,len=mag_num.length(); i<len; ++i)
             if (mag_num[i] == '`') mag_num[i] = ' '; }
-        
+
         sscanf( buf2, "%d ", &md_i_size );
         //Put ptr to point after the number we just read
         buf2 += hopto( buf2, ' ', '\n', 0 );
@@ -566,7 +569,7 @@ void SaveGame::ReadMissionStringData( char* &buf, bool select_data, const std::s
             skip = false;
         } else {
             // debugging attempt -- show why the allocation would fail
-            vs_dprintf(1, " SaveGame::ReadMissionStringData: vecstring->reserve(md_i_size = %d) will fail, bailing out (i = %d)\n", md_i_size, i);
+            BOOST_LOG_TRIVIAL(info) << boost::format(" SaveGame::ReadMissionStringData: vecstring->reserve(md_i_size = %1%) will fail, bailing out (i = %2%)") % md_i_size % i;
         }
         for (int j = 0; j < md_i_size; j++) {
             if (skip)
@@ -645,7 +648,7 @@ void SaveGame::WriteMissionStringData( std::vector< char > &ret )
 void SaveGame::ReadStardate( char* &buf )
 {
     string stardate( AnyStringScanInString( buf ) );
-    cout<<"Read stardate: "<<stardate<<endl;
+    BOOST_LOG_TRIVIAL(info) << "Read stardate: " << stardate;
     _Universe->current_stardate.InitTrek( stardate );
 }
 
@@ -685,7 +688,7 @@ void SaveGame::ReadSavedPackets( char* &buf,
         } else {
             char output[31] = {0};
             strncpy( output, buf, 30 );
-            printf( "buf unrecognized %s...\n", output );
+            BOOST_LOG_TRIVIAL(warning) << boost::format("buf unrecognized %1%...") % output;
         }
     }
 }
@@ -710,10 +713,10 @@ void SaveGame::LoadSavedMissions()
         }
         catch (...) {
             if ( PyErr_Occurred() ) {
+                BOOST_LOG_TRIVIAL(error) << "void SaveGame::LoadSavedMissions(): Python error occurred";
                 PyErr_Print();
                 PyErr_Clear();
-                fflush( stderr );
-                fflush( stdout );
+                VSFileSystem::flushLogs();
             } else {throw; }}
     }
     PyRun_SimpleString( "import VS\nVS.loading_active_missions=False\n" );
@@ -827,7 +830,7 @@ string SaveGame::WriteSaveGame( const char *systemname,
                                 bool write )
 {
     savestring  = string( "" );
-    printf( "Writing Save Game %s\n", outputsavegame.c_str() );
+    BOOST_LOG_TRIVIAL(info) << boost::format("Writing Save Game %1%") % outputsavegame;
     savestring += WritePlayerData( FP, unitname, systemname, credits, fact );
     savestring += WriteDynamicUniverse();
     if (outputsavegame.length() != 0) {
@@ -847,7 +850,7 @@ string SaveGame::WriteSaveGame( const char *systemname,
                 }
             } else {
                 //error occured while opening file
-                cerr<<"occured while opening file: "<<outputsavegame<<endl;
+                BOOST_LOG_TRIVIAL(error) << "Error occurred while opening file: " << outputsavegame;
             }
         }
     }
@@ -956,11 +959,11 @@ void SaveGame::ParseSaveGame( const string &filename_p,
                 //In networking save we include the faction at the end of the first line
                 if (res == 5) {
                     playerfaction = string( factionname );
-                    cout<<"Found faction in save file : "<<playerfaction<<endl;
+                    BOOST_LOG_TRIVIAL(info) << "Found faction in save file : " << playerfaction;
                 } else {
                     //If no faction -> default to privateer
                     playerfaction = string( "privateer" );
-                    cout<<"Faction not found assigning default one: privateer"<<endl;
+                    BOOST_LOG_TRIVIAL(info) << "Faction not found assigning default one: privateer";
                 }
                 free( factionname );
                 if (ForceStarSystem.length() == 0)

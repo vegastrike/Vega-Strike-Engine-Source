@@ -272,10 +272,10 @@ void StarSystem::ExecuteUnitAI()
     }
     catch (const boost::python::error_already_set&) {
         if ( PyErr_Occurred() ) {
+            BOOST_LOG_TRIVIAL(fatal) << "void StarSystem::ExecuteUnitAI(): Python error occurred";
             PyErr_Print();
             PyErr_Clear();
-            fflush( stderr );
-            fflush( stdout );
+            VSFileSystem::flushLogs();
         } throw;
     }
 }
@@ -534,11 +534,10 @@ void StarSystem::UpdateUnitPhysics( bool firstframe )
             }
             catch (const boost::python::error_already_set&) {
                 if ( PyErr_Occurred() ) {
-                    BOOST_LOG_TRIVIAL(error) << "void StarSystem::UpdateUnitPhysics( bool firstframe ): Msg D: Python error occurred";
+                    BOOST_LOG_TRIVIAL(fatal) << "void StarSystem::UpdateUnitPhysics( bool firstframe ): Msg D: Python error occurred";
                     PyErr_Print();
                     PyErr_Clear();
-                    fflush( stderr );
-                    fflush( stdout );
+                    VSFileSystem::flushLogs();
                 } throw;
             }
             double c0  = queryTime();
