@@ -187,7 +187,7 @@ public:
             parent = UnitUtil::owner( parent );
         if (parent)
             draw(parent);
-        
+
         if (parenttarget && parenttarget->isSubUnit())
             parenttarget = UnitUtil::owner( parenttarget );
         if (parenttarget)
@@ -200,16 +200,19 @@ public:
             parent = NULL;
         if ( parenttarget == unit || (parenttarget && parenttarget->isSubUnit() && parenttarget->owner == unit) )
             parenttarget = NULL;
-        float backup = SIMULATION_ATOM;
+        float backup = simulation_atom_var;
+        //BOOST_LOG_TRIVIAL(trace) << boost::format("UnitDrawer::draw(): simulation_atom_var as backed up  = %1%") % simulation_atom_var;
         unsigned int cur_sim_frame = _Universe->activeStarSystem()->getCurrentSimFrame();
         interpolation_blend_factor = calc_blend_factor( saved_interpolation_blend_factor,
                                                         unit->sim_atom_multiplier,
                                                         unit->cur_sim_queue_slot,
                                                         cur_sim_frame );
-        SIMULATION_ATOM = backup*unit->sim_atom_multiplier;
+        simulation_atom_var = backup*unit->sim_atom_multiplier;
+        //BOOST_LOG_TRIVIAL(trace) << boost::format("UnitDrawer::draw(): simulation_atom_var as multiplied = %1%") % simulation_atom_var;
         (/*(GameUnit< Unit >*)*/ unit)->Draw();
         interpolation_blend_factor = saved_interpolation_blend_factor;
-        SIMULATION_ATOM = backup;
+        simulation_atom_var = backup;
+        //BOOST_LOG_TRIVIAL(trace) << boost::format("UnitDrawer::draw(): simulation_atom_var as restored   = %1%") % simulation_atom_var;
         return true;
     }
     bool grav_acquire( Unit *unit )
@@ -219,13 +222,13 @@ public:
     }
 };
 
-//#define UPDATEDEBUG  //for hard to track down bugs
+#define UPDATEDEBUG  //for hard to track down bugs
 void GameStarSystem::Draw( bool DrawCockpit )
 {
     GFXEnable( DEPTHTEST );
     GFXEnable( DEPTHWRITE );
     saved_interpolation_blend_factor = interpolation_blend_factor =
-                                           (1./PHY_NUM)*( (PHY_NUM*time)/SIMULATION_ATOM+current_stage );
+                                           (1./PHY_NUM)*( (PHY_NUM*time) / simulation_atom_var + current_stage );
     GFXColor4f( 1, 1, 1, 1 );
     if (DrawCockpit)
         AnimatedTexture::UpdateAllFrame();
@@ -250,14 +253,15 @@ void GameStarSystem::Draw( bool DrawCockpit )
     double setupdrawtime = queryTime();
     {
         cam_setup_phase = true;
-        
+
         Unit *saveparent = _Universe->AccessCockpit()->GetSaveParent();
         Unit *targ = NULL;
         if (saveparent)
             targ = saveparent->Target();
         //Array containing the two interesting units, so as not to have to copy-paste code
         Unit *camunits[2] = {saveparent, targ};
-        float backup = SIMULATION_ATOM;
+        float backup = simulation_atom_var;
+        //BOOST_LOG_TRIVIAL(trace) << boost::format("GameStarSystem::Draw(): simulation_atom_var as backed up  = %1%") % simulation_atom_var;
         unsigned int cur_sim_frame = _Universe->activeStarSystem()->getCurrentSimFrame();
         for (int i = 0; i < 2; ++i) {
             Unit *unit = camunits[i];
@@ -267,12 +271,15 @@ void GameStarSystem::Draw( bool DrawCockpit )
                                                                 unit->sim_atom_multiplier,
                                                                 unit->cur_sim_queue_slot,
                                                                 cur_sim_frame );
-                SIMULATION_ATOM = backup*unit->sim_atom_multiplier;
+                // stephengtuggy 2020-07-25 - Should we just use the standard SIMULATION_ATOM here?
+                simulation_atom_var = backup*unit->sim_atom_multiplier;
+                //BOOST_LOG_TRIVIAL(trace) << boost::format("GameStarSystem::Draw(): simulation_atom_var as multiplied = %1%") % simulation_atom_var;
                 ( (GameUnit< Unit >*)unit )->GameUnit< Unit >::Draw();
             }
         }
         interpolation_blend_factor = saved_interpolation_blend_factor;
-        SIMULATION_ATOM = backup;
+        simulation_atom_var = backup;
+        //BOOST_LOG_TRIVIAL(trace) << boost::format("GameStarSystem::Draw(): simulation_atom_var as restored   = %1%") % simulation_atom_var;
 
 
         ///this is the final, smoothly calculated cam
@@ -316,7 +323,7 @@ void GameStarSystem::Draw( bool DrawCockpit )
         double tmp    = queryTime();
         Unit  *unit;
         UnitCollection::UnitIterator iter = physics_buffer[sim_counter].createIterator();
-        float  backup = SIMULATION_ATOM;
+        float  backup = simulation_atom_var;
         unsigned int cur_sim_frame = _Universe->activeStarSystem()->getCurrentSimFrame();
         while ( ( unit = iter.current() ) != NULL ) {
             interpolation_blend_factor = calc_blend_factor( saved_interpolation_blend_factor,
@@ -326,12 +333,12 @@ void GameStarSystem::Draw( bool DrawCockpit )
             //if (par&&par->Target()==unit) {
             //printf ("i:%f s:%f m:%d c:%d l:%d\n",interpolation_blend_factor,saved_interpolation_blend_factor,unit->sim_atom_multiplier,sim_counter,current_sim_location);
             //}
-            SIMULATION_ATOM = backup*unit->sim_atom_multiplier;
+            simulation_atom_var = backup*unit->sim_atom_multiplier;
             ( (GameUnit< Unit >*)unit )->Draw();
             iter.advance();
         }
         interpolation_blend_factor = saved_interpolation_blend_factor;
-        SIMULATION_ATOM = backup;
+        simulation_atom_var = backup;
         tmp = queryTime()-tmp;
     }
 #endif
@@ -339,7 +346,7 @@ void GameStarSystem::Draw( bool DrawCockpit )
     WarpTrailDraw();
 
     GFXFogMode( FOG_OFF );
-    
+
     // At this point, we've set all occluders
     // Mesh::ProcessXMeshes will query it
 
@@ -377,7 +384,7 @@ void GameStarSystem::Draw( bool DrawCockpit )
     if (DrawCockpit)
         _Universe->AccessCockpit()->Draw();
     MeshAnimation::UpdateFrames();
-    
+
     // And now we're done with the occluder set
     Occlusion::end();
 }
@@ -461,10 +468,10 @@ void GameStarSystem::createBackground( Star_XML *xml )
     LightMap[0] = new Texture( bgfile.c_str(), 1, MIPMAP, TEXTURE2D, TEXTURE_2D, GFXTRUE );
 #endif
 
-    bg = new Background( 
-        xml->backgroundname.c_str(), 
-        xml->numstars, 
-        g_game.zfar*.9, 
+    bg = new Background(
+        xml->backgroundname.c_str(),
+        xml->numstars,
+        g_game.zfar*.9,
         filename,
         xml->backgroundColor,
         xml->backgroundDegamma );

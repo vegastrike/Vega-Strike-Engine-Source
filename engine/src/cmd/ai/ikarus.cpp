@@ -36,7 +36,7 @@ void Ikarus::ExecuteStrategy( Unit *target )
     if (0)
         ReplaceOrder( new AIScript( "++turntowards.xml" ) );          //find this list of names in script.cpp
 
-    cur_time += SIMULATION_ATOM;
+    cur_time += simulation_atom_var; //SIMULATION_ATOM;
     if (cur_time-last_time > 5) {
         //dosomething
 

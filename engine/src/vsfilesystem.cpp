@@ -59,7 +59,8 @@ int VSFS_DEBUG()
     return 0;
 }
 char *CONFIGFILE;
-char  pwd[65536];
+const size_t VS_PATH_BUF_SIZE = 65536;
+char  pwd[VS_PATH_BUF_SIZE];
 VSVolumeType isin_bigvolumes = VSFSNone;
 string curmodpath = "";
 
@@ -121,10 +122,10 @@ std::string vegastrike_cwd;
 void ChangeToProgramDirectory( char *argv0 )
 {
     {
-        char pwd[8192];
+        char pwd[VS_PATH_BUF_SIZE];
         pwd[0]    = '\0';
-        if (NULL != getcwd( pwd, 8191 )) {
-            pwd[8191] = '\0';
+        if (NULL != getcwd( pwd, VS_PATH_BUF_SIZE - 1 )) {
+            pwd[VS_PATH_BUF_SIZE - 1] = '\0';
             vegastrike_cwd = pwd;
         } else {
             VSFileSystem::vs_fprintf( stderr, "Cannot change to program directory: path too long");
@@ -133,7 +134,7 @@ void ChangeToProgramDirectory( char *argv0 )
     int   ret     = -1;       /* Should it use argv[0] directly? */
     char *program = argv0;
 #ifndef _WIN32
-    char  buf[65536];
+    char  buf[VS_PATH_BUF_SIZE];
     {
         char  linkname[128];                /* /proc/<pid>/exe */
         linkname[0] = '\0';
@@ -143,13 +144,13 @@ void ChangeToProgramDirectory( char *argv0 )
         pid = getpid();
 
         sprintf( linkname, "/proc/%d/exe", pid );
-        ret = readlink( linkname, buf, 65535 );
+        ret = readlink( linkname, buf, VS_PATH_BUF_SIZE - 1 );
         if (ret <= 0) {
             sprintf( linkname, "/proc/%d/file", pid );
-            ret = readlink( linkname, buf, 65535 );
+            ret = readlink( linkname, buf, VS_PATH_BUF_SIZE - 1 );
         }
         if (ret <= 0)
-            ret = readlink( program, buf, 65535 );
+            ret = readlink( program, buf, VS_PATH_BUF_SIZE - 1 );
         if (ret > 0) {
             buf[ret] = '\0';
             /* Ensure proper NUL termination */
@@ -585,12 +586,12 @@ void InitDataDirectory()
     data_paths.push_back( "../../Assets-Production");
 
     //Win32 data should be "."
-    char tmppath[16384];
+    char tmppath[VS_PATH_BUF_SIZE];
     for (vector< string >::iterator vsit = data_paths.begin(); vsit != data_paths.end(); vsit++)
         //Test if the dir exist and contains config_file
         if (FileExists( (*vsit), config_file ) >= 0) {
             cerr<<"Found data in "<<(*vsit)<<endl;
-            if (NULL != getcwd( tmppath, 16384 )) {
+            if (NULL != getcwd( tmppath, VS_PATH_BUF_SIZE - 1 )) {
                 if ( (*vsit).substr( 0, 1 ) == "." )
                     datadir = string( tmppath )+"/"+(*vsit);
                 else
@@ -603,7 +604,7 @@ void InitDataDirectory()
                 cerr<<"Error changing to datadir"<<endl;
                 exit( 1 );
             }
-            if (NULL != getcwd( tmppath, 16384 )) {
+            if (NULL != getcwd( tmppath, VS_PATH_BUF_SIZE - 1 )) {
                 datadir = string( tmppath );
             } else {
                 VSFileSystem::vs_fprintf( stderr, "Cannot get current path: path too long");
@@ -886,9 +887,11 @@ void InitPaths( string conf, string subdir )
     Directories[PythonFile]  = "bases";
     Directories[AccountFile] = "accounts";
 
-    SIMULATION_ATOM = game_options.simulation_atom;
-    AUDIO_ATOM = game_options.audio_atom;
-    cout<<"SIMULATION_ATOM: "<< SIMULATION_ATOM<<endl;
+    SIMULATION_ATOM     = game_options.simulation_atom;
+    simulation_atom_var = SIMULATION_ATOM;
+    AUDIO_ATOM          = game_options.audio_atom;
+    audio_atom_var      = AUDIO_ATOM;
+    BOOST_LOG_TRIVIAL(info) << "SIMULATION_ATOM: " << SIMULATION_ATOM;
 
     /************************* Home directory subdirectories creation ************************/
     CreateDirectoryHome( savedunitpath );

@@ -7,7 +7,7 @@ Welcome to Vega Strike!
 There are many ways to contribute - coding, art work, documentation, testing, and much more.
 This repository covers the core Vega Strike Engine that sits at the heart of it all, and
 the guidlines here are specific to working with this repository. Please see the
-`Vega Strike Community Contribution`_ guidelines for other areas of contribution.
+`Vega Strike: Community Contribution`_ guidelines for other areas of contribution.
 
 Overview
 ========
@@ -30,7 +30,7 @@ Communications
 There are a variety of places that the Vega Strike developers have been located throughout the project history.
 Below are the official places to find the current developers:
 
-* Gitter.im: https://gitter.im/vegastrike/community
+* Gitter.im: https://gitter.im/vegastrike/community, https://gitter.im/vegastrike/vegastrike-packaging
 * FreeNode IRC: #vegastrike
 * Vega Strike Forums: https://forums.vega-strike.org/
 
@@ -83,7 +83,7 @@ repository:
 2. Make your desired changes.
 3. Ensure you've documented your code.
 4. Test using the procedures outlined at `Vega Strike: Pull Request Validation`_
-5. Submit a pull request at `Vega Strike:: Pull Requests`_.
+5. Submit a pull request at `Vega Strike: Pull Requests`_.
 
 .. note:: Documentation only changes (RST, MD, etc) do not require step 4.
 
@@ -92,11 +92,40 @@ When submitting a Pull Request please document:
 * What you're changing and why
 * Note any related `Vega Strike: Issues`_ or `Vega Strike: Milestones`_.
 
-.. _`Vega Strike Community Contribution` :: https://wiki.vega-strike.org/HowTo:Contribute
+Packaging
+=========
+|gitter-packagers| `Vega Strike: Gitter - Packgers`_
+
+We directly support packaging on a few platforms. Packaging for addition platforms is more than welcome.
+We greatly appreciate the work you do as we would not be able to reach our users without you.
+
+Originally Vega Strike was packaged as a single package for the Vega Strike: Under the Coldest Sea game; however,
+we would like to migrate to using two packages:
+
+* Vega Strike Game Engine
+* Vega Strike: Under the Coldest Sea
+
+The Vega Strike Game Engine package would provide the core functionality provided by this repository, and should be of minimal size.
+The Vega Strike: Under the Coldest Sea package would provide the game assets, icons, desktop integrations, etc for the original game
+and depend on the Vega Strike Game Engine package to operate. This change is a work in progress; a release has not yet been set for
+when it will take effect.
+
+This model would allow additional games to be developed using the Vega Strike Game Engine with just swapping out the game asset
+package and setting a dependency on the Vega Strike Game Engine package.
+
+.. note:: Source Packages would will be very large especially for the data packages. This cannot be avoided. Both source and binary
+    packages should be provided.
+
+Please join us at `Vega Strike: Gitter - Packgers`_ to if you have any questions.
+
+.. |gitter-packagers| image:: https://badges.gitter.im/vegastrike/vegastrike-packaging.svg
+
+.. _`Vega Strike: Community Contribution` :: https://wiki.vega-strike.org/HowTo:Contribute
 .. _`Vega Strike: Under the Coldest Sea` :: https://github.com/vegastrike/Assets-Masters
 .. _`Vega Strike: UtCS Production` :: https://github.com/vegastrike/Assets-Production
 .. _`Vega Srike: Licensing` :: https://wiki.vega-strike.org/Development:Graphics_Requirements#Licenses
 .. _`Vega Strike: Issues` :: https://github.com/vegastrike/Vega-Strike-Engine-Source/issues
 .. _`Vega Strike: Milestones` :: https://github.com/vegastrike/Vega-Strike-Engine-Source/milestones
 .. _`Vega Strike: Pull Request Validation` :: https://github.com/vegastrike/Vega-Strike-Engine-Source/wiki/Pull-Request-Validation
-.. _`Vega Strike:: Pull Requests` :: https://github.com/vegastrike/Vega-Strike-Engine-Source/pulls
+.. _`Vega Strike: Pull Requests` :: https://github.com/vegastrike/Vega-Strike-Engine-Source/pulls
+.. _`Vega Strike: Gitter - Packgers` :: https://gitter.im/vegastrike/vegastrike-packaging?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge

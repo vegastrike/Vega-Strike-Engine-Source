@@ -6,7 +6,7 @@
 #ifdef _POSIX_C_SOURCE
 #undef _POSIX_C_SOURCE
 #endif
-#include "cs_python.h"
+#include <Python.h>
 
 #include <boost/version.hpp>
 
@@ -16,7 +16,7 @@
 #include "boost/python/object.hpp"
 #include "boost/python/class.hpp"
 #include "boost/python/call_method.hpp"
-#include "cs_boostpython.h"///module.hpp>
+#include <boost/python.hpp>///module.hpp>
 #if defined (_MSC_VER) && _MSC_VER<=1200
 #undef Vector
 #endif

@@ -59,7 +59,7 @@
 #include "cmd/briefing.h"
 #include "pythonmission.h"
 #ifdef HAVE_PYTHON
-#include "cs_python.h"
+#include <Python.h>
 #endif
 #include "flightgroup.h"
 #include "gldrv/winsys.h"
@@ -71,9 +71,12 @@ void Mission::DirectorLoop()
 {
     double oldgametime = gametime;
     gametime += SIMULATION_ATOM;     //elapsed;
+    //BOOST_LOG_TRIVIAL(trace) << boost::format("void Mission::DirectorLoop(): oldgametime = %1$.6f; SIMULATION_ATOM = %2$.6f; gametime = %3$.6f") % oldgametime % SIMULATION_ATOM % gametime;
     if (getTimeCompression() >= .1)
-        if (gametime <= oldgametime)
+        if (gametime <= oldgametime) {
+            BOOST_LOG_TRIVIAL(warning) << "void Mission::DirectorLoop(): gametime is before oldgametime!";
             gametime = SIMULATION_ATOM;
+        }
     try {
         BriefingLoop();
         if (runtime.pymissions)
@@ -81,6 +84,7 @@ void Mission::DirectorLoop()
     }
     catch (...) {
         if ( PyErr_Occurred() ) {
+            BOOST_LOG_TRIVIAL(error) << "void Mission::DirectorLoop(): Python error occurred";
             PyErr_Print();
             PyErr_Clear();
             fflush( stderr );
