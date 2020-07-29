@@ -1209,6 +1209,8 @@ ELSEIF (CMAKE_SYSTEM_NAME STREQUAL Linux)
                 SET(CPACK_DEBIAN_PACKAGE_DEPENDS "libpython2.7, libjpeg62, libpng16-16, freeglut3, libgtk-3-0, libvorbis0a, libopenal1, libsdl-gfx1.2-5, xdg-utils, libgl1, libopengl0, libboost-python1.65.1, libboost-log1.65.1")
             ELSEIF (LSB_LINUX_DISTRIBUTION_CODENAME STREQUAL "focal")
                 SET(CPACK_DEBIAN_PACKAGE_DEPENDS "libpython2.7, libjpeg62, libpng16-16, freeglut3, libgtk-3-0, libvorbis0a, libopenal1, libsdl-gfx1.2-5, xdg-utils, libgl1, libopengl0, libboost-python1.67.0, libboost-log1.67.0")
+            ELSEIF (LSB_LINUX_DISTRIBUTION_CODENAME STREQUAL "buster")                                                                                                                                                                      # Apparently Debian Buster has lsb_release after all
+                SET(CPACK_DEBIAN_PACKAGE_DEPENDS "libpython2.7, libjpeg62-turbo, libpng16-16, freeglut3, libgtk-3-0, libvorbis0a, libopenal1, libsdl-gfx1.2-5, xdg-utils, libgl1, libopengl0, libboost-python1.67.0, libboost-log1.67.0")
             ENDIF ()
             IF (DEFINED ENV{TRAVIS_TAG})
                 SET(CPACK_PACKAGE_FILE_NAME "vsUTCS_$ENV{TRAVIS_TAG}-${LSB_LINUX_DISTRIBUTION}-${LSB_LINUX_DISTRIBUTION_CODENAME}_x86_64")
