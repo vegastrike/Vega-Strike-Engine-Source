@@ -1227,7 +1227,6 @@ ELSEIF (CMAKE_SYSTEM_NAME STREQUAL Linux)
             SET(USE_DEBIAN_VERSION FALSE)
             SET(DEBIAN_RELEASE_VERSION "Debian Derivative Release Version ${LSB_LINUX_DISTRIBUTION_CODENAME}")
         ENDIF (NOT LSB_EXISTS)
-        # Try to detect the Ubuntu version
 
         # Should auto-detect Debian/Ubuntu as deps may change
         # This would be awesome if coupled with providing versions for specific (or at least compatible) distros.
@@ -1255,7 +1254,7 @@ ELSEIF (CMAKE_SYSTEM_NAME STREQUAL Linux)
             IF (DEBIAN_RELEASE_VERSION STREQUAL "buster")
                 SET(CPACK_DEBIAN_PACKAGE_DEPENDS "python, libjpeg62-turbo, libpng16-16, freeglut3, libgtk2.0-0, libvorbis0a, libopenal1, libsdl-gfx1.2-5, xdg-utils, libgl1, libboost-python1.67.0")
             ENDIF ()
-            SET(CPACK_PACKAGE_FILE_NAME "vsUTCS_${CPACK_PACKAGE_VERSION_MAJOR}.${CPACK_PACKAGE_VERSION_MINOR}.${CPACK_PACKAGE_VERSION_PATCH}-debian-${DEBIAN_RELEASE_VERSION}_x86_64")
+            SET(CPACK_PACKAGE_FILE_NAME "vsUTCS_${CPACK_PACKAGE_VERSION_MAJOR}.${CPACK_PACKAGE_VERSION_MINOR}.${CPACK_PACKAGE_VERSION_PATCH}-$ENV{TRAVIS_TAG}-debian-${DEBIAN_RELEASE_VERSION}_x86_64")
         ELSE (USE_DEBIAN_VERSION)
             # Ubuntu Dependency Chain
             IF (LSB_LINUX_DISTRIBUTION_CODENAME STREQUAL "xenial")
@@ -1265,7 +1264,7 @@ ELSEIF (CMAKE_SYSTEM_NAME STREQUAL Linux)
             ELSEIF (LSB_LINUX_DISTRIBUTION_CODENAME STREQUAL "focal")
                 SET(CPACK_DEBIAN_PACKAGE_DEPENDS "python2, libjpeg62, libpng16-16, freeglut3, libgtk2.0-0, libvorbis0a, libopenal1, libsdl-gfx1.2-5, xdg-utils, libgl1, libboost-python1.67.0")
             ENDIF ()
-            SET(CPACK_PACKAGE_FILE_NAME "vsUTCS_${CPACK_PACKAGE_VERSION_MAJOR}.${CPACK_PACKAGE_VERSION_MINOR}.${CPACK_PACKAGE_VERSION_PATCH}-${LSB_LINUX_DISTRIBUTION}-${LSB_LINUX_DISTRIBUTION_CODENAME}_x86_64")
+            SET(CPACK_PACKAGE_FILE_NAME "vsUTCS_${CPACK_PACKAGE_VERSION_MAJOR}.${CPACK_PACKAGE_VERSION_MINOR}.${CPACK_PACKAGE_VERSION_PATCH}-$ENV{TRAVIS_TAG}-${LSB_LINUX_DISTRIBUTION}-${LSB_LINUX_DISTRIBUTION_CODENAME}_x86_64")
         ENDIF (USE_DEBIAN_VERSION)
         SET(CPACK_DEBIAN_PACKAGE_SECTION "Amusements/Games")
         SET(CPACK_DEBIAN_PACKAGE_HOMEPAGE "https://www.vega-strike.org")
