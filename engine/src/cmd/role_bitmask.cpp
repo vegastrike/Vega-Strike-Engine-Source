@@ -30,8 +30,8 @@ vector< vector< char > >& getAllRolePriorities()
 vector< char >& getPriority( unsigned char rolerow )
 {
     if ( rolerow > getAllRolePriorities().size() ) {
-        VSFileSystem::vs_fprintf( stderr, "FATAL ERROR ROLE OUT OF RANGE" );
-        exit( 1 );
+        BOOST_LOG_TRIVIAL(fatal) << "FATAL ERROR ROLE OUT OF RANGE";
+        VSExit( 1 );
     }
     return getAllRolePriorities()[rolerow];
 }
@@ -49,7 +49,7 @@ unsigned char InternalGetRole( const std::string &s )
 const std::string& InternalGetStrRole( unsigned char c )
 {
     static const std::string empty;
-    
+
     vsUMap< int, string >::const_iterator i = irolemap.find( c );
     if ( i != irolemap.end() )
         return (*i).second;

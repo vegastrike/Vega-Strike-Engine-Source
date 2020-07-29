@@ -221,8 +221,8 @@ void BoltDestroyGeneric( Bolt *whichbolt, unsigned int index, int decal, bool is
             (*vec)[index] = vec->back();                //just a memcopy, yo
         vec->pop_back();         //pop that back up
     } else {
-        VSFileSystem::vs_fprintf( stderr, "Bolt Fault Nouveau! Not found in draw queue! No Chance to recover\n" );
-        fflush( stderr );
+        BOOST_LOG_TRIVIAL(fatal) << "Bolt Fault Nouveau! Not found in draw queue! No Chance to recover";
+        VSFileSystem::flushLogs();
         assert( 0 );
     }
 }

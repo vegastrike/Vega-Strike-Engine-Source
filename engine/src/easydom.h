@@ -305,7 +305,8 @@ public: easyDomFactory() {}
         doTextBuffer();
         domNodeType *stacktop = nodestack.top();
         if (stacktop->Name() != name) {
-            std::cout<<"error: expected "<<stacktop->Name()<<" , got "<<name<<std::endl;
+            BOOST_LOG_TRIVIAL(fatal)<<"error: expected "<<stacktop->Name()<<" , got "<<name;
+            VSFileSystem::flushLogs();
             exit( 1 );
         } else {
             nodestack.pop();
