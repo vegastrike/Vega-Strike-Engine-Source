@@ -348,7 +348,7 @@ public: NavigationSystem();
     {
         return mousestat;
     }
-    static class QVector dxyz( class QVector, double x_, double y_, double z_ );
+    static QVector dxyz( QVector, double x_, double y_, double z_ );
 
 //float Delta(float a, float b);
 };
