@@ -579,6 +579,7 @@ bool operator==(const Planet& lhs, const Planet& rhs)
         cout << "atmospheric: " << lhs.atmospheric << " != " << rhs.atmospheric << endl;
     }
 
+    // TODO: turn floating point comparisons into a function
     if(std::fabs(lhs.radius - rhs.radius) > 0.001f) {
         equal = false;
         cout << "radius: " << lhs.radius << " != " << rhs.radius << endl;

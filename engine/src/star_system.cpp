@@ -42,7 +42,6 @@
 
 #include "options.h"
 
-using std::cout;
 using std::endl;
 
 GameStarSystem::GameStarSystem( const char *filename, const Vector &centr, const float timeofyear )
@@ -425,11 +424,6 @@ void NebulaUpdate( StarSystem *ss )
 
 void GameStarSystem::createBackground( Star_XML *xml )
 {
-    cout << "bgname " << xml->backgroundname << endl;
-    cout << "numstars " << xml->numstars << endl;
-    cout << "backgroundDegamma " << xml->backgroundDegamma << endl;
-    cout << "numnearstars " << xml->numnearstars << endl;
-    cout << "starsp " << xml->starsp << endl;
 #ifdef NV_CUBE_MAP
     printf( "using NV_CUBE_MAP\n" );
     LightMap[0] = new Texture( (xml->backgroundname+"_light.cube").c_str(), 1, TRILINEAR, CUBEMAP, CUBEMAP_POSITIVE_X,
