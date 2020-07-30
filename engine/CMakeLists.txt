@@ -1,6 +1,6 @@
 #====================================
 # @file   : CMakeLists.txt
-# @version: 2020-07-29
+# @version: 2020-07-30
 # @created: 2008-06-08
 # @author : safemode
 # @author : Anth0rx
@@ -41,6 +41,28 @@ UNSET(MATH_FOUND)
 UNSET(FFMPEG_FOUND)
 UNSET(OGRE_FOUND)
 UNSET(Boost_DIR)
+
+# With boost version 1.67 and above, python components are specified with a version suffix
+# (`python27`, `python38`) instead of their invocation name (`python`, `python3`)
+FUNCTION(Boost_1_67_Or_Later Boost_VERSION)
+    IF (Boost_VERSION MATCHES ^[0-9][.][0-9][0-9][.][0-9]$)
+        IF (Boost_VERSION VERSION_EQUAL "1.67.0")
+            SET(${Boost_1_67_Or_Later_Result} TRUE PARENT_SCOPE)
+        ELSEIF (Boost_VERSION VERSION_GREATER "1.67.0")
+            SET(${Boost_1_67_Or_Later_Result} TRUE PARENT_SCOPE)
+        ELSE (Boost_VERSION VERSION_EQUAL "1.67.0")
+            SET(${Boost_1_67_Or_Later_Result} FALSE PARENT_SCOPE)
+        ENDIF (Boost_VERSION VERSION_EQUAL "1.67.0")
+    ELSE (Boost_VERSION MATCHES ^[0-9][.][0-9][0-9][.][0-9]$)
+        IF (Boost_VERSION VERSION_EQUAL "106700")
+            SET(${Boost_1_67_Or_Later_Result} TRUE PARENT_SCOPE)
+        ELSEIF (Boost_VERSION VERSION_GREATER "106700")
+            SET(${Boost_1_67_Or_Later_Result} TRUE PARENT_SCOPE)
+        ELSE (Boost_VERSION VERSION_EQUAL "106700")
+            SET(${Boost_1_67_Or_Later_Result} FALSE PARENT_SCOPE)
+        ENDIF (Boost_VERSION VERSION_EQUAL "106700")
+    ENDIF (Boost_VERSION MATCHES ^[0-9][.][0-9][0-9][.][0-9]$)
+ENDFUNCTION(Boost_1_67_Or_Later)
 
 INCLUDE_DIRECTORIES(
     ${vsUTCS_SOURCE_DIR}/src
@@ -742,16 +764,18 @@ IF (USE_SYSTEM_BOOST)
 
         # With boost version 1.67 and above, python components are specified with a version suffix
         # (`python27`, `python38`) instead of their invocation name (`python`, `python3`)
-        IF ((Boost_VERSION VERSION_EQUAL 106700) OR (Boost_VERSION VERSION_GREATER 106700))
+        Boost_1_67_Or_Later(Boost_VERSION)
+        IF (Boost_1_67_Or_Later_Result)
             STRING(REPLACE "." ";" PYTHONLIBS_VERSION_LIST ${PYTHONLIBS_VERSION_STRING})
             LIST(GET PYTHONLIBS_VERSION_LIST 0 PYTHON_VERSION_MAJOR)
             LIST(GET PYTHONLIBS_VERSION_LIST 1 PYTHON_VERSION_MINOR)
             SET(BOOST_PYTHON_COMPONENT "python${PYTHON_VERSION_MAJOR}${PYTHON_VERSION_MINOR}")
         ELSEIF (USE_PYTHON_3)
-                SET(BOOST_PYTHON_COMPONENT "python3")
-        ELSE ((Boost_VERSION VERSION_EQUAL 106700) OR (Boost_VERSION VERSION_GREATER 106700))
-                SET(BOOST_PYTHON_COMPONENT "python")
-        ENDIF ((Boost_VERSION VERSION_EQUAL 106700) OR (Boost_VERSION VERSION_GREATER 106700))
+            SET(BOOST_PYTHON_COMPONENT "python3")
+        ELSE (Boost_1_67_Or_Later_Result)
+            SET(BOOST_PYTHON_COMPONENT "python")
+        ENDIF (Boost_1_67_Or_Later_Result)
+        UNSET(Boost_1_67_Or_Later_Result)
 
         UNSET(Boost_${BOOST_PYTHON_COMPONENT}_FOUND)
         MESSAGE("++ Looking for System Boost::python")
