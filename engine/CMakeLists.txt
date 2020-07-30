@@ -1,6 +1,6 @@
 #====================================
 # @file   : CMakeLists.txt
-# @version: 2020-07-28
+# @version: 2020-07-29
 # @created: 2008-06-08
 # @author : safemode
 # @author : Anth0rx
@@ -14,7 +14,7 @@
 # > cd .. && mkdir build && cd build
 # run > cmake <path to source tree>
 # run > make
-# to change build target (in Release, Debug, Profiler)
+# to change build target (in Release, RelWithDebInfo, Debug, Profiler)
 # > cmake -DCMAKE_BUILD_TYPE=Debug <path to source tree>
 #====================================
 
@@ -501,9 +501,9 @@ IF (POLICY CMP0072)
   CMAKE_POLICY (SET CMP0072 NEW)
 ENDIF ()
 
-# Set the default build type to Release
+# Set the default build type
 IF (NOT CMAKE_BUILD_TYPE)
-    SET(CMAKE_BUILD_TYPE Release CACHE STRING "Release, Debug, Profiler" FORCE )
+    SET(CMAKE_BUILD_TYPE "RelWithDebInfo" CACHE STRING "Release, RelWithDebInfo, Debug, Profiler" FORCE )
 ENDIF (NOT CMAKE_BUILD_TYPE)
 
 IF (NOT BUILD_OPT)
@@ -618,6 +618,7 @@ ELSE ("${CMAKE_BUILD_TYPE}" STREQUAL "Debug")
     MARK_AS_ADVANCED( FORCE CMAKE_CXX_FLAGS_DEBUG )
 ENDIF ("${CMAKE_BUILD_TYPE}" STREQUAL "Debug")
 
+
 # Release Target block
 SET(CMAKE_CXX_FLAGS_RELEASE  " ${BUILD_OPT} ${CPU_OPTS} ${DEFINES} -include config.h -pipe -std=c++11 -Wall -fvisibility=hidden" CACHE STRING
     "Flags used by the C++ compiler during release builds."
@@ -640,6 +641,30 @@ IF ("${CMAKE_BUILD_TYPE}" STREQUAL "Release")
 ELSE ("${CMAKE_BUILD_TYPE}" STREQUAL "Release")
     MARK_AS_ADVANCED( FORCE CMAKE_CXX_FLAGS_RELEASE )
 ENDIF ("${CMAKE_BUILD_TYPE}" STREQUAL "Release")
+
+
+# RelWithDebInfo Target block
+SET(CMAKE_CXX_FLAGS_RELWITHDEBINFO  " ${BUILD_OPT} ${CPU_OPTS} ${DEFINES} -g3 -include config.h -pipe -std=c++11 -Wall -fvisibility=hidden" CACHE STRING
+    "Flags used by the C++ compiler during release-with-debug-info builds."
+    FORCE
+)
+SET(CMAKE_C_FLAGS_RELWITHDEBINFO " ${BUILD_OPT} ${CPU_OPTS} ${DEFINES} -g3 -include config.h -pipe -Wall -Wno-unused-function -Wno-unused-variable -fvisibility=hidden" CACHE STRING
+    "Flags used by the C compiler during release-with-debug-info builds."
+    FORCE
+)
+SET(CMAKE_EXE_LINKER_FLAGS_RELWITHDEBINFO "-Bsymbolic" CACHE STRING "RelWithDebInfo linker flags"
+    FORCE
+)
+MARK_AS_ADVANCED(
+    CMAKE_C_FLAGS_RELWITHDEBINFO
+    CMAKE_CXX_FLAGS_RELWITHDEBINFO
+    CMAKE_EXE_LINKER_FLAGS_RELWITHDEBINFO
+)
+IF ("${CMAKE_BUILD_TYPE}" STREQUAL "RelWithDebInfo")
+    MARK_AS_ADVANCED( CLEAR CMAKE_CXX_FLAGS_RELWITHDEBINFO )
+ELSE ("${CMAKE_BUILD_TYPE}" STREQUAL "RelWithDebInfo")
+    MARK_AS_ADVANCED( FORCE CMAKE_CXX_FLAGS_RELWITHDEBINFO )
+ENDIF ("${CMAKE_BUILD_TYPE}" STREQUAL "RelWithDebInfo")
 
 
 # Profiler Target block
@@ -1004,7 +1029,7 @@ ADD_SUBDIRECTORY(objconv)
 
 # show debug output
 GET_DIRECTORY_PROPERTY(TEMP_DIRECTORY INCLUDE_DIRECTORIES)
-MESSAGE("-- Default build type is Release, no cpu opts enabled. ")
+MESSAGE("-- Default build type is RelWithDebInfo, no cpu opts enabled. ")
 MESSAGE("++ Building with BUILD_OPT: ${BUILD_OPT}")
 #MESSAGE("++ Building with CMAKE_CXX_FLAGS: ${CMAKE_CXX_FLAGS}")
 #MESSAGE("Linking with : ${TST_LIBS}")
