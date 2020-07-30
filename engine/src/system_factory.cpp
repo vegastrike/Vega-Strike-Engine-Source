@@ -329,6 +329,7 @@ Planet* SystemFactory::processPlanet(Star_XML *xml, Object& object, Planet* owne
     // by multiplying
     float float_pi = static_cast<float>(M_PI);
     float float_year_scale = static_cast<float>(game_options.YearScale);
+    // TODO: turn floating point comparisons into a function
     if(std::fabs(rotational_velocity) > .00001f)
         rotational_velocity = 2.0f * float_pi / (float_year_scale * rotational_velocity);
 
@@ -538,6 +539,7 @@ void SystemFactory::processEnhancement(string element, Star_XML *xml, Object& ob
     // TODO: this code is repeated. Refactor into function
     float float_pi = static_cast<float>(M_PI);
     float float_year_scale = static_cast<float>(game_options.YearScale);
+    // TODO: turn floating point comparisons into a function
     if(std::fabs(rotational_velocity) > .00001f)
         rotational_velocity = 2.0f * float_pi / ( float_year_scale * rotational_velocity);
 

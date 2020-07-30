@@ -15,7 +15,7 @@ typedef boost::python::dictionary BoostPythonDictionary;
 #include <boost/python/objects.hpp>
 #endif
 
-#include "cs_python.h"
+#include <Python.h>
 #include "python/python_class.h"
 #include "base.h"
 #include "base_util.h"

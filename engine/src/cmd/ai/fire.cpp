@@ -443,8 +443,7 @@ void FireAt::ChooseTargets( int numtargs, bool force )
     Unit *curtarg = parent->Target();
     int   hastarg = (curtarg == NULL) ? 0 : 1;
     //Following code exists to limit the number of craft polling for a target in a given frame - this is an expensive operation, and needs to be spread out, or there will be pauses.
-    static float simatom = XMLSupport::parse_float( vs_config->getVariable( "general", "simulation_atom", "0.1" ) );
-    if ( ( UniverseUtil::GetGameTime() )-targettimer >= simatom*.99 ) {
+    if ( ( UniverseUtil::GetGameTime() )-targettimer >= SIMULATION_ATOM*.99 ) {
         //Check if one or more physics frames have passed
         numpolled[0] = numpolled[1] = 0;         //reset counters
         prevpollindex[0]   = pollindex[0];
@@ -660,8 +659,9 @@ unsigned int FireBitmask( Unit *parent, bool shouldfire, bool firemissile )
 void FireAt::FireWeapons( bool shouldfire, bool lockmissile )
 {
     static float missiledelay     = XMLSupport::parse_float( vs_config->getVariable( "AI", "MissileGunDelay", "4" ) );
+    //Will rand() be in the expected range here? -- stephengtuggy 2020-07-25
     bool fire_missile = lockmissile && rand() < RAND_MAX*missileprobability*SIMULATION_ATOM;
-    delay += SIMULATION_ATOM;
+    delay += SIMULATION_ATOM; //simulation_atom_var?
     if ( shouldfire && delay < parent->pilot->getReactionTime() )
         return;
     else if (!shouldfire)
@@ -686,7 +686,7 @@ using std::string;
 void FireAt::PossiblySwitchTarget( bool unused )
 {
     static float targettime = XMLSupport::parse_float( vs_config->getVariable( "AI", "Targetting", "TimeUntilSwitch", "20" ) );
-    if ( (targettime <= 0) || (vsrandom.uniformInc( 0, 1 ) < SIMULATION_ATOM/targettime) ) {
+    if ( (targettime <= 0) || (vsrandom.uniformInc( 0, 1 ) < simulation_atom_var/targettime) ) {
         bool ct = true;
         Flightgroup *fg;
         if ( ( fg = parent->getFlightgroup() ) )
@@ -707,9 +707,11 @@ void FireAt::Execute()
     Unit *targ;
     if (parent->isUnit() == UNITPTR) {
         static float cont_update_time   = XMLSupport::parse_float( vs_config->getVariable( "AI", "ContrabandUpdateTime", "1" ) );
+        //Will rand() be in the expected range here? -- stephengtuggy 2020-07-25
         if (rand() < RAND_MAX*SIMULATION_ATOM/cont_update_time)
             UpdateContrabandSearch();
         static float cont_initiate_time = XMLSupport::parse_float( vs_config->getVariable( "AI", "CommInitiateTime", "300" ) );
+        //Or here?
         if ( (float) rand() < ( (float) RAND_MAX*(SIMULATION_ATOM/cont_initiate_time) ) ) {
             static float contraband_initiate_time =
                 XMLSupport::parse_float( vs_config->getVariable( "AI", "ContrabandInitiateTime", "3000" ) );

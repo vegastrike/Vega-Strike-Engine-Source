@@ -184,7 +184,7 @@ void winsys_warp_pointer( int x, int y )
  *  Sets up the SDL OpenGL rendering context
  *  \author  jfpatry
  *  \date    Created:  2000-10-20
- *  \date    Modified: 2019-10-14 - stephengtuggy
+ *  \date    Modified: 2020-07-27 - stephengtuggy
  */
 static bool setup_sdl_video_mode()
 {
@@ -257,8 +257,8 @@ static bool setup_sdl_video_mode()
             }
         }
         if (screen == NULL) {
-            VSFileSystem::vs_fprintf( stderr, "FAILED to initialize video\n" );
-            exit( 1 );
+            BOOST_LOG_TRIVIAL(fatal) << "FAILED to initialize video";
+            VSExit( 1 );
         }
     }
 
@@ -288,7 +288,7 @@ static bool setup_sdl_video_mode()
  *  sets up fullscreen mode if selected)
  *  \author  jfpatry
  *  \date    Created:  2000-10-19
- *  \date    Modified: 2000-10-19
+ *  \date    Modified: 2020-07-27 stephengtuggy
  */
 
 void winsys_init( int *argc, char **argv, char const *window_title, char const *icon_title )
@@ -305,8 +305,9 @@ void winsys_init( int *argc, char **argv, char const *window_title, char const *
      * Initialize SDL
      */
     if (SDL_Init( sdl_flags ) < 0) {
-        VSFileSystem::vs_fprintf( stderr, "Couldn't initialize SDL: %s", SDL_GetError() );
-        exit( 1 );
+        BOOST_LOG_TRIVIAL(fatal) << boost::format("Couldn't initialize SDL: %1%") % SDL_GetError();
+        VSFileSystem::flushLogs();
+        exit( 1 );              // stephengtuggy 2020-07-27 - I would use VSExit here, but that calls winsys_exit, which I'm not sure will work if winsys_init hasn't finished yet.
     }
     SDL_EnableUNICODE( 1 );     //supposedly fixes int'l keyboards.
 
@@ -754,7 +755,7 @@ void winsys_warp_pointer( int x, int y )
  *  sets up fullscreen mode if selected)
  *  \author  jfpatry
  *  \date    Created:  2000-10-19
- *  \date    Modified: 2019-10-14 - stephengtuggy
+ *  \date    Modified: 2020-07-27 - stephengtuggy
  */
 void winsys_init( int *argc, char **argv, char const *window_title, char const *icon_title )
 {
@@ -794,8 +795,9 @@ void winsys_init( int *argc, char **argv, char const *window_title, char const *
 
         glutWindow = glutCreateWindow( window_title );
         if (glutWindow == 0) {
-            (void) VSFileSystem::vs_fprintf( stderr, "Couldn't create a window.\n" );
-            exit( 1 );
+            BOOST_LOG_TRIVIAL(fatal) << "Couldn't create a window.";
+            VSFileSystem::flushLogs();
+            exit( 1 );                  // stephengtuggy 2020-07-27 - I would use VSExit here, but that calls winsys_exit, which I'm not sure will work if winsys_init hasn't finished yet.
         }
     }
 }

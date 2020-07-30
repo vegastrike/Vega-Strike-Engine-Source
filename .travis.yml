@@ -1,7 +1,6 @@
 language: cpp
 os:
  - linux
- - osx
 
 # When updating be sure to add a section
 # to the matrix to cover the distro
@@ -10,6 +9,10 @@ dist: bionic
 compiler:
     - gcc
     - clang
+
+env:
+    - {}
+    - FLAGS='-DUSE_PYTHON_3=ON'
 
 jobs:
     include:
@@ -21,10 +24,21 @@ jobs:
           dist: xenial
           compiler: clang
           name: "Ubuntu 16.04 LTS - Clang"
+        - os: linux
+          dist: xenial
+          compiler: clang
+          name: "Ubuntu 16.04 LTS - Py3"
+          env: FLAGS='-DUSE_PYTHON_3=ON'
         - os: osx
           osx_image: xcode11.3
+          env: FLAGS='-DUSE_PYTHON_3=OFF -DBoost_NO_BOOST_CMAKE=ON'
+        - os: osx
+          osx_image: xcode11.3
+          env: FLAGS='-DUSE_PYTHON_3=ON'
     allow_failures:
         - os: osx
+        - dist: xenial
+          env: FLAGS='-DUSE_PYTHON_3=ON'
     fast_finish: true
 
 addons:
@@ -38,7 +52,7 @@ addons:
       - libvorbis-dev
       - libjpeg-dev
       - libpng-dev
-      - libgtk2.0-dev
+      - libgtk-3-dev
       - libboost-python-dev
       - libboost-log-dev
   homebrew:
@@ -50,15 +64,41 @@ addons:
       - libvorbis
       - jpeg
       - libpng
-      - gtk+
+      - gtk+3
       - gtkglext
       - boost-python
 
 script:
-  - ./sh/vsbuild.sh
+  - ./sh/vsbuild.sh $FLAGS
+
+# CI/CD hookups
+# See https://docs.travis-ci.com/user/deployment/releases/
+# for what to do for `before_deploy` and `deploy` sections
+#before_deploy:
+#  - pull the submodule here
+#  - ./sh/vspackage.sh
+#  - export TRAVIS_TAG="composite tag name here"
+#  - git tag ${TRAVIS_TAG}
+#deploy:
+#    # GitHub Releases
+#    provider: releases
+#    api_key:
+#        secure: "Encrypted GitHub Auth Key" <-- put this in the secrets
+#    file:
+#       # Upload files in the `packages` directory
+#       - packages/*
+#    # Ensure the build doesn't get cleaned up so the files are avialable
+#    # for the release build
+#    skip_clean: true
+#    # release is a draft so it can be edited, updated, etc.
+#    draft: true
+#    # GitHub Releases requires a tag; this guarnatees a tag is set
+#    on:
+#        tags: true
 
 notifications:
   webhooks:
+    if: repo = vegastrike/Vega-Strike-Engine-Source
     urls:
       - https://webhooks.gitter.im/e/1361517953461007f39a  # community room
     on_success: change  # options: [always|never|change] default: always

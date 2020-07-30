@@ -28,10 +28,10 @@ using namespace Orders;
  * t = -v0/accel (+/-) sqrtf (.5*v0^2 + Length*accel)/accel;
  *
  * 8/15/05 Patched Calulate BalancedDecel time: our previous quantization factor ignored the quantization during ACCEL phase and also ignored the fact that we overestimated the integral rather than underestimated
- *         new quantization factor is .5*accel*SIMULATION_ATOM*SIMULATION_ATOM-.5*initialVelocity*SIMULATION_ATOM
+ *         new quantization factor is .5*accel*simulation_atom_var*simulation_atom_var-.5*initialVelocity*simulation_atom_var
  *            also this threshold idea is silly--accelerate if t>SIM_ATOM decel if t<0  still havent fixed t between 0 and SIM_ATOM...have decent approx for now.
  * 3/2/02  Patched CalculateBalancedDecel time with the fact that length should be more by a
- * quantity of .5*initialVelocity*SIMULATION_ATOM
+ * quantity of .5*initialVelocity*simulation_atom_var
  *
  */
 
@@ -45,7 +45,7 @@ static float CalculateBalancedDecelTime( float l, float v, float &F, float mass 
         v = -v;
         F = -F;
     }
-    double temp = .5*v*v+(l-v*SIMULATION_ATOM*(.5)+.5*SIMULATION_ATOM*SIMULATION_ATOM*accel)*accel;
+    double temp = .5*v*v+(l-v*simulation_atom_var*(.5)+.5*simulation_atom_var*simulation_atom_var*accel)*accel;
     if (temp < 0)
         temp = 0;
     return ( -v+sqrtf( temp ) )/accel;
@@ -76,7 +76,7 @@ static float CalculateDecelTime( float l, float v, float &F, float D, float mass
         F     = -D;
     }
     float vsqr   = v*v;
-    float fourac = 2*accel*( (.5*v*v/decel)-v*SIMULATION_ATOM*.5-l )/(1+accel/decel);
+    float fourac = 2*accel*( (.5*v*v/decel)-v*simulation_atom_var*.5-l )/(1+accel/decel);
     if (fourac > vsqr) return FLT_MAX;       //FIXME avoid sqrt negative  not sure if this is right
 
     return ( -v+sqrtf( vsqr-fourac ) )/accel;
@@ -104,15 +104,15 @@ void MoveTo::SetDest( const QVector &target )
 
 bool MoveToParent::OptimizeSpeed( Unit *parent, float v, float &a, float max_speed )
 {
-    v += ( a/parent->GetMass() )*SIMULATION_ATOM;
+    v += ( a/parent->GetMass() )*simulation_atom_var;
     if ( (!max_speed) || fabs( v ) <= max_speed )
         return true;
-    float deltaa = parent->GetMass()*(fabs( v )-max_speed)/SIMULATION_ATOM;       //clamping should take care of it
+    float deltaa = parent->GetMass()*(fabs( v )-max_speed)/simulation_atom_var;       //clamping should take care of it
     a += (v > 0) ? -deltaa : deltaa;
     return false;
 }
 
-float MOVETHRESHOLD = SIMULATION_ATOM/1.9;
+float MOVETHRESHOLD = simulation_atom_var/1.9;
 bool MoveToParent::Done( const Vector &ang_vel )
 {
     if (fabs( ang_vel.i ) < THRESHOLD
@@ -162,7 +162,7 @@ bool MoveToParent::Execute( Unit *parent, const QVector &targetlocation )
             }
             return done;
         }
-        thrust = (-parent->GetMass()/SIMULATION_ATOM)*last_velocity;
+        thrust = (-parent->GetMass()/simulation_atom_var)*last_velocity;
     } else {
         float div  = 1.0f;
         float vdiv = 1.0f;
@@ -184,26 +184,26 @@ bool MoveToParent::Execute( Unit *parent, const QVector &targetlocation )
             thrust.k =
                 ( thrust.k > 0 ? -parent->limits.retro
                  /div : ( afterburn ? parent->limits.afterburn/div : parent->limits.forward/div ) );
-        } else if (t < SIMULATION_ATOM) {
-            thrust.k *= t/SIMULATION_ATOM;
+        } else if (t < simulation_atom_var) {
+            thrust.k *= t/simulation_atom_var;
             thrust.k +=
-                (SIMULATION_ATOM
+                (simulation_atom_var
                  -t)
                 *( thrust.k > 0 ? -parent->limits.retro
-                  /div : ( afterburn ? parent->limits.afterburn/div : parent->limits.forward/div ) )/SIMULATION_ATOM;
+                  /div : ( afterburn ? parent->limits.afterburn/div : parent->limits.forward/div ) )/simulation_atom_var;
         }
         OptimizeSpeed( parent, last_velocity.k, thrust.k, max_velocity.k/vdiv );
         t = CalculateBalancedDecelTime( heading.i, last_velocity.i, thrust.i, parent->GetMass() );
         if (t < THRESHOLD)
             thrust.i = -thrust.i;
-        else if (t < SIMULATION_ATOM)
-            thrust.i *= ( t-(SIMULATION_ATOM-t) )/SIMULATION_ATOM;
+        else if (t < simulation_atom_var)
+            thrust.i *= ( t-(simulation_atom_var-t) )/simulation_atom_var;
         OptimizeSpeed( parent, last_velocity.i, thrust.i, max_velocity.i/vdiv );
         t = CalculateBalancedDecelTime( heading.j, last_velocity.j, thrust.j, parent->GetMass() );
         if (t < THRESHOLD)
             thrust.j = -thrust.j;
-        else if (t < SIMULATION_ATOM)
-            thrust.j *= ( t-(SIMULATION_ATOM-t) )/SIMULATION_ATOM;
+        else if (t < simulation_atom_var)
+            thrust.j *= ( t-(simulation_atom_var-t) )/simulation_atom_var;
         OptimizeSpeed( parent, last_velocity.j, thrust.j, max_velocity.j/vdiv );
     }
     parent->ApplyLocalForce( thrust );
@@ -220,14 +220,14 @@ MoveTo::~MoveTo()
 
 bool ChangeHeading::OptimizeAngSpeed( float optimal_speed_pos, float optimal_speed_neg, float v, float &a )
 {
-    v += ( a/parent->GetMoment() )*SIMULATION_ATOM;
+    v += ( a/parent->GetMoment() )*simulation_atom_var;
     if ( (optimal_speed_pos == 0 && optimal_speed_neg == 0) || (v >= -optimal_speed_neg && v <= optimal_speed_pos) )
         return true;
     if (v > 0) {
-        float deltaa = parent->GetMoment()*(v-optimal_speed_pos)/SIMULATION_ATOM;           //clamping should take care of it
+        float deltaa = parent->GetMoment()*(v-optimal_speed_pos)/simulation_atom_var;           //clamping should take care of it
         a -= deltaa;
     } else {
-        float deltaa = parent->GetMoment()*(-v-optimal_speed_neg)/SIMULATION_ATOM;           //clamping should take care of it
+        float deltaa = parent->GetMoment()*(-v-optimal_speed_neg)/simulation_atom_var;           //clamping should take care of it
         a += deltaa;
     }
     return false;
@@ -239,12 +239,12 @@ bool ChangeHeading::OptimizeAngSpeed( float optimal_speed_pos, float optimal_spe
  */
 void ChangeHeading::TurnToward( float atancalc, float ang_veli, float &torquei )
 {
-    //We need to end up at destination with positive velocity, but no more than we can decelerate from in a single SIMULATION_ATOM
+    //We need to end up at destination with positive velocity, but no more than we can decelerate from in a single simulation_atom_var
     if (1) {
         float mass = parent->GetMoment();
-        float max_arrival_speed = torquei*SIMULATION_ATOM/mass;
-        float accel_needed = (atancalc/SIMULATION_ATOM-ang_veli)/SIMULATION_ATOM;
-        float arrival_velocity  = accel_needed*SIMULATION_ATOM+ang_veli;
+        float max_arrival_speed = torquei*simulation_atom_var/mass;
+        float accel_needed = (atancalc/simulation_atom_var-ang_veli)/simulation_atom_var;
+        float arrival_velocity  = accel_needed*simulation_atom_var+ang_veli;
         if (fabs( arrival_velocity ) <= max_arrival_speed && fabs( accel_needed ) < torquei/mass) {
             torquei = accel_needed*mass;
             return;
@@ -257,10 +257,10 @@ void ChangeHeading::TurnToward( float atancalc, float ang_veli, float &torquei )
         t = CalculateBalancedDecelTime( atancalc > 0 ? atancalc-2*PI : atancalc+2*PI, ang_veli, torquei, parent->GetMoment() );
     }
     if (t > 0) {
-        if (t < SIMULATION_ATOM)
-            torquei *= ( (t/SIMULATION_ATOM)-( (SIMULATION_ATOM-t)/SIMULATION_ATOM ) );
+        if (t < simulation_atom_var)
+            torquei *= ( (t/simulation_atom_var)-( (simulation_atom_var-t)/simulation_atom_var ) );
     } else {
-        torquei = -parent->GetMoment()*ang_veli/SIMULATION_ATOM;         //clamping should take care of it
+        torquei = -parent->GetMoment()*ang_veli/simulation_atom_var;         //clamping should take care of it
     }
 }
 void ChangeHeading::SetDest( const QVector &target )
@@ -268,7 +268,7 @@ void ChangeHeading::SetDest( const QVector &target )
     final_heading = target;
     ResetDone();
 }
-float TURNTHRESHOLD = SIMULATION_ATOM/1.9;
+float TURNTHRESHOLD = simulation_atom_var/1.9;
 ///if velocity is lower than threshold
 bool ChangeHeading::Done( const Vector &ang_vel )
 {
@@ -343,7 +343,7 @@ void ChangeHeading::Execute()
             }
             return;
         }
-        torque = (-parent->GetMoment()/SIMULATION_ATOM)*local_velocity;
+        torque = (-parent->GetMoment()/simulation_atom_var)*local_velocity;
     } else {
         TurnToward( atan2( local_heading.j, local_heading.k ), local_velocity.i, torque.i );         //find angle away from axis 0,0,1 in yz plane
         OptimizeAngSpeed( turningspeed*parent->GetComputerData().max_pitch_down,
@@ -356,7 +356,7 @@ void ChangeHeading::Execute()
                           turningspeed*parent->GetComputerData().max_yaw_right,
                           local_velocity.j,
                           torque.j );
-        torque.k = -parent->GetMoment()*local_velocity.k/SIMULATION_ATOM;         //try to counteract roll;
+        torque.k = -parent->GetMoment()*local_velocity.k/simulation_atom_var;         //try to counteract roll;
     }
     if (!cheater)
         parent->ApplyLocalTorque( torque );
@@ -625,7 +625,7 @@ void AutoLongHaul::Execute()
 
     static bool rampdown = XMLSupport::parse_bool( vs_config->getVariable( "physics", "autopilot_ramp_warp_down", "true" ) );
     static float warprampdowntime    = XMLSupport::parse_float( vs_config->getVariable( "physics", "warprampdowntime", "0.5" ) );
-    float time_to_stop = SIMULATION_ATOM;
+    float time_to_stop = simulation_atom_var;
     if (rampdown)
         time_to_stop += warprampdowntime;
     if (time_to_destination <= time_to_stop)

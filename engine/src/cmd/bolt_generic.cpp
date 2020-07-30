@@ -39,7 +39,7 @@ Bolt::Bolt( const weapon_info *typ,
                                                                                                              false ).bolt_index,
                                                                                             (shipspeed+orientationpos.getR()
                                                                                              *typ->Speed).Magnitude()*.5,
-                                                                                            cur_position+vel*SIMULATION_ATOM*.5 ),
+                                                                                            cur_position+vel*simulation_atom_var*.5 ),
                                                                                 hint );
         q->bolts[decal].push_back( *this );
     } else {
@@ -53,7 +53,7 @@ Bolt::Bolt( const weapon_info *typ,
                                                                                                              true ).bolt_index,
                                                                                             (shipspeed+orientationpos.getR()
                                                                                              *typ->Speed).Magnitude()*.5,
-                                                                                            cur_position+vel*SIMULATION_ATOM*.5 ),
+                                                                                            cur_position+vel*simulation_atom_var*.5 ),
                                                                                 hint );
         q->balls[decal].push_back( *this );
     }
@@ -68,12 +68,12 @@ bool Bolt::Update( Collidable::CollideRef index )
 {
     const weapon_info *type = this->type;
     float speed = type->Speed;
-    curdist += speed*SIMULATION_ATOM;
+    curdist += speed*simulation_atom_var;
     prev_position = cur_position;
     cur_position +=
         ( ( ShipSpeed+drawmat.getR()*speed
            /( (type->type
-               == weapon_info::BALL)*type->Radius+(type->type != weapon_info::BALL)*type->Length ) ).Cast()*SIMULATION_ATOM );
+               == weapon_info::BALL)*type->Radius+(type->type != weapon_info::BALL)*type->Length ) ).Cast()*simulation_atom_var );
     if (curdist > type->Range) {
         this->Destroy( nondecal_index( index ) );         //risky
         return false;
@@ -221,8 +221,8 @@ void BoltDestroyGeneric( Bolt *whichbolt, unsigned int index, int decal, bool is
             (*vec)[index] = vec->back();                //just a memcopy, yo
         vec->pop_back();         //pop that back up
     } else {
-        VSFileSystem::vs_fprintf( stderr, "Bolt Fault Nouveau! Not found in draw queue! No Chance to recover\n" );
-        fflush( stderr );
+        BOOST_LOG_TRIVIAL(fatal) << "Bolt Fault Nouveau! Not found in draw queue! No Chance to recover";
+        VSFileSystem::flushLogs();
         assert( 0 );
     }
 }

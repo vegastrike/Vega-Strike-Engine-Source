@@ -16,7 +16,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
-#include "cs_python.h"
+#include <Python.h>
 #include "audio/test.h"
 #if defined (HAVE_SDL)
 #include <SDL/SDL.h>
@@ -73,9 +73,18 @@
 #include "cg_global.h"
 #endif
 
+#include <boost/smart_ptr/shared_ptr.hpp>
+#include <boost/smart_ptr/make_shared_object.hpp>
 #include <boost/log/core.hpp>
 #include <boost/log/trivial.hpp>
 #include <boost/log/expressions.hpp>
+#include <boost/log/sinks/text_file_backend.hpp>
+#include <boost/log/sinks/text_ostream_backend.hpp>
+#include <boost/log/utility/setup/console.hpp>
+#include <boost/log/utility/setup/file.hpp>
+#include <boost/log/utility/setup/common_attributes.hpp>
+#include <boost/log/sources/severity_logger.hpp>
+#include <boost/log/sources/record_ostream.hpp>
 
 #include "options.h"
 
@@ -86,6 +95,9 @@ using std::endl;
 vs_options game_options;
 
 namespace logging = boost::log;
+namespace src = boost::log::sources;
+namespace sinks = boost::log::sinks;
+namespace keywords = boost::log::keywords;
 
 /*
  * Globals
@@ -93,6 +105,9 @@ namespace logging = boost::log;
 Universe  *_Universe;
 TextPlane *bs_tp = NULL;
 char SERVER = 0;
+
+boost::shared_ptr<VSFileSystem::file_log_sink>    VSFileSystem::pFileLogSink    = boost::make_shared<VSFileSystem::file_log_sink>();
+boost::shared_ptr<VSFileSystem::console_log_sink> VSFileSystem::pConsoleLogSink = boost::make_shared<VSFileSystem::console_log_sink>();
 
 //false if command line option --net is given to start without network
 static bool ignore_network = true;
@@ -144,6 +159,7 @@ int readCommandLineOptions(int argc, char ** argv);
 void VSExit( int code)
 {
     Music::CleanupMuzak();
+    VSFileSystem::flushLogs();
     winsys_exit( code );
 }
 
@@ -187,12 +203,12 @@ void nothinghappens( unsigned int, unsigned int, bool, int, int ) {}
 
 void initSceneManager()
 {
-    cout << "Creating scene manager..." << endl;
+    BOOST_LOG_TRIVIAL(info) << "Creating scene manager...";
     Audio::SceneManager *sm = Audio::SceneManager::getSingleton();
-    
-    cout << "Creating template manager..." << endl;
+
+    BOOST_LOG_TRIVIAL(info) << "Creating template manager...";
     Audio::TemplateManager::getSingleton();
-    
+
     if (Audio::SceneManager::getSingleton() == 0)
         throw Audio::Exception("Singleton null after SceneManager instantiation");
 
@@ -201,14 +217,14 @@ void initSceneManager()
 
 void initALRenderer()
 {
-    cerr << "  Initializing renderer..." << endl;
+    BOOST_LOG_TRIVIAL(info) << "  Initializing renderer...";
     Audio::SceneManager *sm = Audio::SceneManager::getSingleton();
-    
+
     if (g_game.sound_enabled) {
         SharedPtr<Audio::Renderer> renderer(new Audio::BorrowedOpenALRenderer);
         renderer->setMeterDistance(1.0);
         renderer->setDopplerFactor(0.0);
-        
+
         sm->setRenderer( renderer );
     }
 }
@@ -216,19 +232,19 @@ void initALRenderer()
 void initScenes()
 {
     Audio::SceneManager *sm = Audio::SceneManager::getSingleton();
-    
+
     sm->createScene("video");
     sm->createScene("music");
     sm->createScene("cockpit");
     sm->createScene("base");
     sm->createScene("space");
-    
+
     sm->setSceneActive("video", true);
 }
 
 void closeRenderer()
 {
-    cerr << "Shutting down renderer..." << endl;
+    BOOST_LOG_TRIVIAL(info) << "Shutting down renderer...";
     Audio::SceneManager::getSingleton()->setRenderer( SharedPtr<Audio::Renderer>() );
 }
 
@@ -238,8 +254,24 @@ bool isVista = false;
 
 Unit *TheTopLevelUnit;
 
-void initLogging(char debugLevel){
+void initLoggingPart1()
+{
+    logging::add_common_attributes();
+
+    VSFileSystem::pConsoleLogSink = logging::add_console_log
+    (
+        std::cerr,
+        //keywords::filter              = (logging::trivial::severity >= logging::trivial::fatal),      /*< on the console, only show messages that are fatal to Vega Strike >*/
+        keywords::format                = "%Message%",                                                  /*< log record format specific to the console >*/
+        keywords::auto_flush            = false /*true*/                                                /*< whether to do the equivalent of fflush(stdout) after every msg >*/
+    );
+}
+
+void initLoggingPart2(char debugLevel)
+{
     auto loggingCore = logging::core::get();
+
+    string loggingDir = VSFileSystem::homedir + "/" + "logs";                                           /*< $HOME/.vegastrike/logs, typically >*/
 
     switch (debugLevel) {
     case 1:
@@ -255,10 +287,23 @@ void initLogging(char debugLevel){
         loggingCore->set_filter(logging::trivial::severity >= logging::trivial::warning);
         break;
     }
+
+    VSFileSystem::pFileLogSink = logging::add_file_log
+    (
+        keywords::file_name             = loggingDir + "/" + "vegastrike_%Y-%m-%d_%H_%M_%S.%f.log",     /*< file name pattern >*/
+        keywords::rotation_size         = 10 * 1024 * 1024,                                             /*< rotate files every 10 MiB... >*/
+        keywords::time_based_rotation   = sinks::file::rotation_at_time_point(0, 0, 0),                 /*< ...or at midnight >*/
+        keywords::format                = "[%TimeStamp%]: %Message%",                                   /*< log record format >*/
+        keywords::auto_flush            = false,                                                        /*< whether to auto flush to the file after every line >*/
+        keywords::min_free_space        = 1 * 1024 * 1024 * 1024                                        /*< stop logging when there's only 1 GiB free space left >*/
+    );
+
+    VSFileSystem::pConsoleLogSink->set_filter(logging::trivial::severity >= logging::trivial::fatal);
 }
 
 int main( int argc, char *argv[] )
 {
+    initLoggingPart1();
 
     VSFileSystem::ChangeToProgramDirectory( argv[0] );
 
@@ -313,7 +358,7 @@ int main( int argc, char *argv[] )
     if (g_game.vsdebug == '0')
         g_game.vsdebug = game_options.vsdebug;
 
-    initLogging(g_game.vsdebug);
+    initLoggingPart2(g_game.vsdebug);
 
     // can use the vegastrike config variable to read in the default mission
     if ( game_options.force_client_connect )
@@ -321,9 +366,9 @@ int main( int argc, char *argv[] )
     if (mission_name[0] == '\0') {
         strncpy( mission_name, game_options.default_mission.c_str(), 1023 );
         mission_name[1023] = '\0';
-        cerr<<"MISSION_NAME is empty using : "<<mission_name<<endl;
+        BOOST_LOG_TRIVIAL(info) << "MISSION_NAME is empty using : " << mission_name;
     }
-    
+
 
     int exitcode;
     if ((exitcode = readCommandLineOptions(argc,argv)) >= 0)
@@ -341,7 +386,8 @@ int main( int argc, char *argv[] )
 #if defined(HAVE_SDL)
 #ifndef NO_SDL_JOYSTICK
     if ( SDL_InitSubSystem( SDL_INIT_JOYSTICK ) ) {
-        VSFileSystem::vs_fprintf( stderr, "Couldn't initialize SDL: %s\n", SDL_GetError() );
+        BOOST_LOG_TRIVIAL(fatal) << boost::format("Couldn't initialize SDL: %1%") % SDL_GetError();
+        VSFileSystem::flushLogs();
         winsys_exit( 1 );
     }
 #endif
@@ -354,11 +400,11 @@ int main( int argc, char *argv[] )
     AUDInit();
     AUDListenerGain( game_options.sound_gain );
     Music::InitMuzak();
-    
+
     initSceneManager();
     initALRenderer();
     initScenes();
-    
+
     //Register commands
     //COmmand Interpretor Seems to break VC8, so I'm leaving disabled for now - Patrick, Dec 24
     if ( game_options.command_interpretor ) {
@@ -371,13 +417,14 @@ int main( int argc, char *argv[] )
 
     //Unregister commands - and cleanup memory
     UninitShipCommands();
-    
+
     closeRenderer();
 
     cleanup();
 
     delete _Universe;
     CleanupUnitTables();
+    VSFileSystem::flushLogs();  // Just to be sure -- stephengtuggy 2020-07-27
     return 0;
 }
 
@@ -411,7 +458,7 @@ void bootstrap_draw( const std::string &message, Animation *newSplashScreen )
         //this happens, when the splash screens texture is loaded
         return;
     }
-    
+
     reentryWatchdog = true;
     if (newSplashScreen != NULL)
         ani = newSplashScreen;
@@ -446,8 +493,8 @@ void bootstrap_draw( const std::string &message, Animation *newSplashScreen )
         ani->DrawNow( tmp ); //VSFileSystem::vs_fprintf( stderr, "(new?) splash screen ('animation'?) %d.  ", (long long)ani ); //temporary, by chuck
         }
     }
-    bs_tp->Draw( game_options.default_boot_message.length() > 0 ? 
-		 game_options.default_boot_message : message.length() > 0 ? 
+    bs_tp->Draw( game_options.default_boot_message.length() > 0 ?
+		 game_options.default_boot_message : message.length() > 0 ?
 		 message : game_options.initial_boot_message );
 
     GFXHudMode( GFXFALSE );
@@ -555,7 +602,8 @@ void bootstrap_main_loop()
             if (!ignore_network) {
                 //In network mode, test if all player sections are present
                 if (pname == "") {
-                    cout<<"Missing or incomlpete section for player "<<p<<endl;
+                    BOOST_LOG_TRIVIAL(fatal) << "Missing or incomplete section for player " << p;
+                    VSFileSystem::flushLogs();
                     cleanexit = true;
                     winsys_exit( 1 );
                 }
@@ -676,6 +724,8 @@ void bootstrap_main_loop()
     ///Draw Texture
 }
 
+// SGT 2020-07-16   This gets called from main() before initLogging,
+//                  so it gets a pass on not using the Boost logging stuff
 const char helpmessage[] =
     "Command line options for vegastrike\n"
     "\n"

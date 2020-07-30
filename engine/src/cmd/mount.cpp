@@ -49,7 +49,7 @@ float Mount::ComputeAnimatedFrame( Mesh *gun )
     if (type->type == weapon_info::BEAM) {
         if (ref.gun) {
             if ( ref.gun->Ready() )
-                return getNewTime()+type->Refire()-ref.gun->refireTime()-interpolation_blend_factor*SIMULATION_ATOM;
+                return getNewTime()+type->Refire()-ref.gun->refireTime()-interpolation_blend_factor*simulation_atom_var;
             else
                 return getNewTime()*gun->getFramesPerSecond();
         } else {
@@ -59,7 +59,7 @@ float Mount::ComputeAnimatedFrame( Mesh *gun )
         if ( ref.refire < type->Refire() )
             return getNewTime()*gun->getFramesPerSecond();
         else
-            return getNewTime()+type->Refire()-ref.refire-interpolation_blend_factor*SIMULATION_ATOM;
+            return getNewTime()+type->Refire()-ref.refire-interpolation_blend_factor*simulation_atom_var;
     }
 }
 Mount::Mount( const string &filename, int am, int vol, float xyscale, float zscale, float func, float maxfunc,

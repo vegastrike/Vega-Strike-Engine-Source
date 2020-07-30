@@ -28,8 +28,8 @@ void StarSystem::UpdateMissiles()
     if ( !dischargedMissiles.empty() ) {
         if ( dischargedMissiles.back()->GetRadius() > 0 ) {           //we can avoid this iterated check for kinetic projectiles even if they "discharge" on hit
             Unit *un;
-            for ( un_iter ui = getUnitList().createIterator(); 
-                  NULL != ( un = (*ui) ); 
+            for ( un_iter ui = getUnitList().createIterator();
+                  NULL != ( un = (*ui) );
                   ++ui ) {
                 enum clsptr type = un->isUnit();
                 if (collideroids || type != ASTEROIDPTR )           // could check for more, unless someone wants planet-killer missiles, but what it would change?
@@ -41,7 +41,7 @@ void StarSystem::UpdateMissiles()
     }
 }
 
-void MissileEffect::DoApplyDamage(Unit *parent, Unit *un, float distance, float damage_fraction) { 
+void MissileEffect::DoApplyDamage(Unit *parent, Unit *un, float distance, float damage_fraction) {
     QVector norm = pos-un->Position();
     norm.Normalize();
     float damage_left = 1.f;
@@ -61,8 +61,9 @@ void MissileEffect::DoApplyDamage(Unit *parent, Unit *un, float distance, float 
                 total_area += (r*r) / (d*d);
             }
         }
-        if (total_area > 0)
-            VSFileSystem::vs_dprintf( 1, "Missile subunit damage of %.3f%%\n", (total_area * (100.0 / 4.0*M_PI)) );
+        if (total_area > 0) {
+            BOOST_LOG_TRIVIAL(info) << boost::format("Missile subunit damage of %1$.3f%%") % (total_area * (100.0 / 4.0*M_PI));
+        }
         if (total_area < 4.0*M_PI) total_area = 4.0*M_PI;
 
         un_iter i = un->getSubUnits();
@@ -78,9 +79,13 @@ void MissileEffect::DoApplyDamage(Unit *parent, Unit *un, float distance, float 
         }
     }
     if (damage_left > 0) {
-        VSFileSystem::vs_dprintf( 1, "Missile damaging %s/%s (dist=%.3f r=%.3f dmg=%.3f)\n",
-            parent->name.get().c_str(), ((un == parent) ? "." : un->name.get().c_str()),
-            distance, radius, damage*damage_fraction*damage_left);
+        BOOST_LOG_TRIVIAL(info)
+                << boost::format("Missile damaging %1%/%2% (dist=%3$.3f r=%4$.3f dmg=%5$.3f)")
+                % parent->name.get()
+                % ((un == parent) ? "." : un->name.get())
+                % distance
+                % radius
+                % (damage*damage_fraction*damage_left);
         parent->ApplyDamage( pos.Cast(), norm, damage*damage_fraction*damage_left, un, GFXColor( 1,1,1,1 ),
                              ownerDoNotDereference, phasedamage*damage_fraction*damage_left );
     }
@@ -106,7 +111,7 @@ void MissileEffect::ApplyDamage( Unit *smaller )
         /*
          *  contrived formula to create paraboloid falloff rather than quadratic peaking at 2x damage at origin
          *  k = 2-distance^2/radmul^2
-         * 
+         *
          * if the explosion itself was a weapon, it would have double the base damage, longrange=0.5 (counted at Rm) and more generic form:
          * Kclose = 1-(1-longrange)*(R/Rm)^2
          * Kfar   = longrange/(R/Rm)^2
@@ -120,7 +125,7 @@ float Missile::ExplosionRadius()
 {
     static float missile_multiplier =
         XMLSupport::parse_float( vs_config->getVariable( "graphics", "missile_explosion_radius_mult", "1" ) );
-    
+
     return radial_effect*(missile_multiplier);
 }
 
@@ -132,8 +137,7 @@ void StarSystem::AddMissileToQueue( MissileEffect *me )
 void Missile::Discharge() {
     if ( (damage != 0 || phasedamage != 0) && !discharged ) {
         Unit *targ = Unit::Target();
-        VSFileSystem::vs_dprintf( 1, "Missile discharged (target %s)\n",
-            (targ != NULL) ? targ->name.get().c_str() : "NULL");
+        BOOST_LOG_TRIVIAL(info) << boost::format("Missile discharged (target %1%)") % (targ != NULL) ? targ->name.get().c_str() : "NULL";
         _Universe->activeStarSystem()->AddMissileToQueue(
             new MissileEffect( Position(), damage, phasedamage,
             radial_effect, radial_multiplier, owner ) );
@@ -143,7 +147,9 @@ void Missile::Discharge() {
 
 void Missile::Kill( bool erase ) {
     Unit *targ = Unit::Target();
-    VSFileSystem::vs_dprintf( 1, "Missile killed (target %s)\n", (targ != NULL) ? targ->name.get().c_str() : "NULL");
+    BOOST_LOG_TRIVIAL(info)
+            << boost::format("Missile killed (target %1%)")
+            % (targ != NULL) ? targ->name.get().c_str() : "NULL";
     Discharge();
     Unit::Kill( erase );
 }
@@ -157,7 +163,7 @@ void Missile::reactToCollision( Unit *smaller,
     static bool doesmissilebounce = XMLSupport::parse_bool( vs_config->getVariable( "physics", "missile_bounce", "false" ) );
     if (doesmissilebounce)
         Unit::reactToCollision( smaller, biglocation, bignormal, smalllocation, smallnormal, dist );
-    VSFileSystem::vs_dprintf( 1, "Missile collided with %s\n", smaller->name.get().c_str());
+    BOOST_LOG_TRIVIAL(info) << boost::format("Missile collided with %1%") % smaller->name.get();
     if (smaller->isUnit() != MISSILEPTR) {
         //2 missiles in a row can't hit each other
         this->Velocity = smaller->Velocity;
@@ -260,10 +266,10 @@ void Missile::UpdatePhysics2( const Transformation &trans,
             time = max_lost_target_live_time;
     }
     Unit::UpdatePhysics2( trans, old_physical_state, accel, difficulty, transmat, CumulativeVelocity, ResolveLast, uc );
-    this->time -= SIMULATION_ATOM;
+    this->time -= simulation_atom_var;
     if (NULL != targ && !discharged) {
         QVector endpos = Position();
-        QVector startpos = endpos-( SIMULATION_ATOM*GetVelocity() );
+        QVector startpos = endpos-( simulation_atom_var*GetVelocity() );
         float checker = targ->querySphere( startpos, endpos, rSize() );
         if ( checker && detonation_radius >= 0 ) {
             // Set position to the collision point
@@ -276,7 +282,10 @@ void Missile::UpdatePhysics2( const Transformation &trans,
 
             this->Velocity += percent_missile_match_target_velocity*(targ->Velocity-this->Velocity);
 
-            VSFileSystem::vs_dprintf( 1, "Missile hit target %s (time %.3f)\n", targ->name.get().c_str(), time);
+            BOOST_LOG_TRIVIAL(info)
+                    << boost::format("Missile hit target %1% (time %2$.3f)")
+                    % targ->name.get()
+                    % time;
             Discharge();
             time = -1;
             //Vector norm;

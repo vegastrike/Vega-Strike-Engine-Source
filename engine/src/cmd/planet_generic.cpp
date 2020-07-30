@@ -7,6 +7,7 @@
 #include "universe_util.h"
 #include "lin_time.h"
 #include "planetary_orbit.h"
+#include "vsfilesystem.h"
 
 using std::cout;
 using std::endl;
@@ -32,8 +33,6 @@ string getCargoUnitName( const char *textname )
     free( tmp2 );
     return retval;
 }
-
-
 
 string GetElMeshName( string name, string faction, char direction )
 {
@@ -198,8 +197,8 @@ Unit* Planet::beginElement( QVector x,
             Planet *p;
             if (dest.size() != 0)
                 radius = ScaleJumpRadius( radius );
-            satellites.prepend( p = UnitFactory::createPlanet( x, y, vely, rotvel, pos, gravity, radius, 
-                                                               filename, technique, unitname, 
+            satellites.prepend( p = UnitFactory::createPlanet( x, y, vely, rotvel, pos, gravity, radius,
+                                                               filename, technique, unitname,
                                                                blendSrc, blendDst, dest,
                                                                QVector( 0, 0, 0 ), this, ourmat, ligh, faction, fullname, inside_out ) );
             un = p;
@@ -416,6 +415,7 @@ bool operator==(const Planet& lhs, const Planet& rhs)
         cout << "atmospheric: " << lhs.atmospheric << " != " << rhs.atmospheric << endl;
     }
 
+    // TODO: turn floating point comparisons into a function
     if(std::fabs(lhs.radius - rhs.radius) > 0.001f) {
         equal = false;
         cout << "radius: " << lhs.radius << " != " << rhs.radius << endl;

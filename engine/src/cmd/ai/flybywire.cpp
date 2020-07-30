@@ -41,7 +41,7 @@ using Orders::MatchAngularVelocity;
     do {                                                                                             \
         parent->Thrust( (parent->GetMass()                                                           \
                          *(parent->ClampVelocity( desired,                                           \
-                                                  afterburn )+FrameOfRef-velocity)/SIMULATION_ATOM), \
+                                                  afterburn )+FrameOfRef-velocity)/simulation_atom_var), \
                        afterburn );                                                                  \
     }                                                                                                \
     while (0)
@@ -89,8 +89,8 @@ void Orders::MatchRoll::Execute()
         if (fabs( desired_roll-angvel.k ) < ANGVELTHRESHOLD)
             return;
     //prevent matchangvel from resetting this (kinda a hack)
-    parent->ApplyLocalTorque( parent->GetMoment()*Vector( 0, 0, desired_roll-angvel.k )/SIMULATION_ATOM );
-    parent->ApplyLocalTorque( parent->GetMoment()*Vector( 0, 0, desired_roll-angvel.k )/SIMULATION_ATOM );
+    parent->ApplyLocalTorque( parent->GetMoment()*Vector( 0, 0, desired_roll-angvel.k )/simulation_atom_var );
+    parent->ApplyLocalTorque( parent->GetMoment()*Vector( 0, 0, desired_roll-angvel.k )/simulation_atom_var );
 }
 
 void MatchAngularVelocity::Execute()
@@ -109,7 +109,7 @@ void MatchAngularVelocity::Execute()
             return;
     }
     parent->ApplyLocalTorque( parent->GetMoment()*( desired-parent->UpCoordinateLevel(
-                                                       parent->GetAngularVelocity() ) )/SIMULATION_ATOM );
+                                                       parent->GetAngularVelocity() ) )/simulation_atom_var );
 }
 
 MatchAngularVelocity::~MatchAngularVelocity()
@@ -243,7 +243,7 @@ void FlyByWire::Accel( float per )
 {
     Computer *cpu = &parent->GetComputerData();
 
-    cpu->set_speed += per*cpu->max_speed()*SIMULATION_ATOM;
+    cpu->set_speed += per*cpu->max_speed()*simulation_atom_var; //SIMULATION_ATOM?
     if ( cpu->set_speed > cpu->max_speed() )
         cpu->set_speed = cpu->max_speed();
     static float reverse_speed_limit = XMLSupport::parse_float( vs_config->getVariable( "physics", "reverse_speed_limit", "1.0" ) );

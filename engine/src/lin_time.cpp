@@ -22,6 +22,7 @@
 #include "vegastrike.h"
 #include "in_kb.h"
 #include "vs_random.h"
+#include "vsfilesystem.h"
 static double firsttime;
 VSRandom vsrandom( time( NULL ) );
 
@@ -43,6 +44,7 @@ static double lasttime;
 
 #include <sys/time.h>
 #include <sys/types.h>
+#include <unistd.h>
 #endif
 static double elapsedtime     = .1;
 static double timecompression = 1;
@@ -113,15 +115,22 @@ void setTimeCompression( float tc )
 bool toggle_pause()
 {
     static bool paused = false;
+    BOOST_LOG_TRIVIAL(debug) << "toggle_pause() called in lin_time.cpp";
     if (paused)
     {
+        BOOST_LOG_TRIVIAL(debug) << "toggle_pause() in lin_time.cpp: Resuming (unpausing)";
         setTimeCompression(1);
         paused = false;
     }
     else
     {
-        setTimeCompression(.0000001);
-	paused = true;
+        BOOST_LOG_TRIVIAL(debug) << "toggle_pause() in lin_time.cpp: Pausing";
+
+        // If you make this value too small, then when the user presses the
+        // Pause key again to resume, the game will take too long to respond.
+        // It will effectively stay frozen.
+        setTimeCompression(.00001);
+        paused = true;
     }
     return paused;
 }
@@ -140,8 +149,6 @@ void micro_sleep( unsigned int n )
 }
 
 #elif defined (IRIX)
-
-#include <unistd.h>
 
 void micro_sleep( unsigned int n )
 {
@@ -167,6 +174,12 @@ void InitTime()
 #ifdef WIN32
     QueryPerformanceFrequency( (LARGE_INTEGER*) &freq );
     QueryPerformanceCounter( (LARGE_INTEGER*) &ttime );
+
+#elif defined (_POSIX_MONOTONIC_CLOCK)
+    struct timespec ts;
+    clock_gettime(CLOCK_MONOTONIC, &ts);
+    newtime  = (double)ts.tv_sec + ((double)ts.tv_nsec) * 1.e-9;
+    lasttime = newtime-.0001;
 
 #elif defined (HAVE_GETTIMEOFDAY)
     struct timeval tv;
@@ -196,6 +209,11 @@ double queryTime()
     LONGLONG tmpnewtime;
     QueryPerformanceCounter( (LARGE_INTEGER*) &tmpnewtime );
     return ( (double) tmpnewtime )/(double) freq-firsttime;
+#elif defined (_POSIX_MONOTONIC_CLOCK)
+    struct timespec ts;
+    clock_gettime(CLOCK_MONOTONIC, &ts);
+    double tmpnewtime = (double)ts.tv_sec + ((double)ts.tv_nsec) * 1.e-9;
+    return tmpnewtime-firsttime;
 #elif defined (HAVE_GETTIMEOFDAY)
     struct timeval tv;
     (void) gettimeofday( &tv, NULL );
@@ -216,6 +234,10 @@ double realTime()
     LONGLONG tmpnewtime;
     QueryPerformanceCounter( (LARGE_INTEGER*) &tmpnewtime );
     return ( (double) tmpnewtime )/(double) freq;
+#elif defined (_POSIX_MONOTONIC_CLOCK)
+    struct timespec ts;
+    clock_gettime(CLOCK_MONOTONIC, &ts);
+    double tmpnewtime = (double)ts.tv_sec + ((double)ts.tv_nsec) * 1.e-9;
 #elif defined (HAVE_GETTIMEOFDAY)
     struct timeval tv;
     (void) gettimeofday( &tv, NULL );
@@ -244,6 +266,16 @@ void UpdateTime()
         dblnewtime = ( (double) newtime )/( (double) freq );
     if (first)
         firsttime = dblnewtime;
+#elif defined(_POSIX_MONOTONIC_CLOCK)
+    struct timespec ts;
+    clock_gettime(CLOCK_MONOTONIC, &ts);
+    lasttime    = newtime;
+    newtime     = (double)ts.tv_sec + ((double)ts.tv_nsec) * 1.e-9;
+    elapsedtime = newtime-lasttime;
+    // BOOST_LOG_TRIVIAL(trace) << boost::format("lin_time.cpp: UpdateTime(): lasttime is %1%; newtime is %2%; elapsedtime before time compression is %3%") % lasttime % newtime % elapsedtime;
+    if (first) {
+        firsttime = newtime;
+    }
 #elif defined (HAVE_GETTIMEOFDAY)
     struct timeval tv;
     (void) gettimeofday( &tv, NULL );
@@ -262,6 +294,7 @@ void UpdateTime()
 # error "We have no way to determine the time on this system."
 #endif
     elapsedtime *= timecompression;
+    // BOOST_LOG_TRIVIAL(trace) << boost::format("lin_time.cpp: UpdateTime():                                  elapsedtime after  time compression is %1%") % elapsedtime;
     first=false;
 }
 

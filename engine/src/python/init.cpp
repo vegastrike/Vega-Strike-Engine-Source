@@ -8,7 +8,7 @@
 #if defined (_MSC_VER) && _MSC_VER <= 1200
 #undef Vector
 #endif
-#include "cs_python.h"
+#include <Python.h>
 #include <pyerrors.h>
 #include <pythonrun.h>
 #include <compile.h>
@@ -94,14 +94,11 @@ void Python::initpaths()
 void Python::reseterrors()
 {
     if ( PyErr_Occurred() ) {
+        BOOST_LOG_TRIVIAL(error) << "void Python::reseterrors(): Python error occurred";
         PyErr_Print();
         PyErr_Clear();
-        fflush( stderr );
-        fflush( stdout );
+        VSFileSystem::flushLogs();
     }
-#ifdef _DEBUG
-    fflush( stderr );
-#endif
 }
 
 #if BOOST_VERSION != 102800

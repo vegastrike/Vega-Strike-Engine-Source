@@ -685,14 +685,14 @@ bool AggressiveAI::ProcessCurrentFgDirective( Flightgroup *fg )
                     for (unsigned int i = 0; i < suborders.size(); i++)
                         suborders[i]->AttachSelfOrder( leader );
                 }
-            }       
-            //IAmDave - hold position command         
+            }
+            //IAmDave - hold position command
             else if (fg->directive.find( "s" ) != string::npos || fg->directive.find( "S" ) != string::npos) {
                Order * ord = new Orders::MatchVelocity(Vector(0,0,0),Vector(0,0,0),true,false);
                ord->SetParent( parent );
                ReplaceOrder( ord );
             }
-            //IAmDave - dock at target command start... 
+            //IAmDave - dock at target command start...
             else if (fg->directive.find( "t" ) != string::npos || fg->directive.find( "T" ) != string::npos) {
                Unit *targ   = fg->target.GetUnit();
                if ( targ->InCorrectStarSystem( _Universe->activeStarSystem() ) ) {
@@ -706,8 +706,8 @@ bool AggressiveAI::ProcessCurrentFgDirective( Flightgroup *fg )
                                 ord->SetParent( parent );
                                 ReplaceOrder( ord );
                }
-                
-            
+
+
             }
             //IAmDave - ...dock at target command end.
             else if (fg->directive.find( "l" ) != string::npos || fg->directive.find( "L" ) != string::npos) {
@@ -1139,7 +1139,7 @@ void AggressiveAI::ReCommandWing( Flightgroup *fg )
         if ( overridable( fg->directive ) ) {
             //computer won't override capital orders
             if ( NULL != ( lead = fg->leader.GetUnit() ) ) {
-                if (float( rand() )/RAND_MAX < SIMULATION_ATOM/time_to_recommand_wing) {
+                if (float( rand() )/RAND_MAX < simulation_atom_var/time_to_recommand_wing) {
                     if ( parent->Threat() && (parent->FShieldData() < .2 || parent->RShieldData() < .2) ) {
                         fg->directive = string( "h" );
                         LeadMe( parent, "h", "I need help here!", false );
@@ -1336,7 +1336,7 @@ bool CloseEnoughToNavOrDest( Unit *parent, Unit *navUnit, QVector nav )
         XMLSupport::parse_float( vs_config->getVariable( "AI", "how_far_to_stop_navigating", "100" ) );
     if (navUnit && navUnit->isUnit() != PLANETPTR) {
         float dist = UnitUtil::getDistance( navUnit, parent );
-        if (dist < SIMULATION_ATOM*parent->Velocity.Magnitude()*parent->predicted_priority*how_far_to_stop_moving)
+        if (dist < SIMULATION_ATOM /*simulation_atom_var?*/ * parent->Velocity.Magnitude() * parent->predicted_priority * how_far_to_stop_moving)
             return true;
     }
     return ( nav-parent->Position() ).MagnitudeSquared() < 4*parent->rSize()*parent->rSize();
@@ -1435,7 +1435,7 @@ void AggressiveAI::ExecuteNoEnemies()
                     dir += (unitdir*safetyspacing);
                     dir +=
                         ( (randVector()*randspacingfactor
-                           /4)
+                           /4.0f)
                          +(unitdir
                            *randspacingfactor) )
                         *( ( parent->rSize() > (safetyspacing/5) ) ? (safetyspacing/5) : ( parent->rSize() ) );
@@ -1483,9 +1483,9 @@ void AggressiveAI::ExecuteNoEnemies()
                 //go dock to the nav point
             }
         } else if (lurk_on_arrival > 0) {
-            lurk_on_arrival -= SIMULATION_ATOM;
+            lurk_on_arrival -= simulation_atom_var;
             //slowdown
-            parent->Thrust( -parent->GetMass()*parent->UpCoordinateLevel( parent->GetVelocity() )/SIMULATION_ATOM, false );
+            parent->Thrust( -parent->GetMass()*parent->UpCoordinateLevel( parent->GetVelocity() )/simulation_atom_var, false );
             parent->graphicOptions.InWarp = 0;
             if (lurk_on_arrival <= 0) {
                 nav = QVector( 0, 0, 0 );
@@ -1581,14 +1581,14 @@ void AggressiveAI::Execute()
                         parent->jump.drive = 0;
                 }
             }
-            last_jump_time += SIMULATION_ATOM;
+            last_jump_time += simulation_atom_var;
         } else {
             last_jump_time = 0;
         }
         if ( (!isjumpable) && interruptcurtime <= 0 && target )
             ProcessLogic( *logic, true );
         if (!target) {
-            logiccurtime -= SIMULATION_ATOM;
+            logiccurtime -= simulation_atom_var;
             if (logiccurtime < 0) {
                 logiccurtime    = 20;
                 currentpriority = -FLT_MAX;
@@ -1610,8 +1610,8 @@ void AggressiveAI::Execute()
                 static bool can_warp_to = XMLSupport::parse_bool( vs_config->getVariable( "AI", "warp_to_enemies", "true" ) );
                 if ( can_warp_to || _Universe->AccessCockpit()->autoInProgress() )
                     WarpToP( parent, target, false );
-                logiccurtime     -= SIMULATION_ATOM;
-                interruptcurtime -= SIMULATION_ATOM;
+                logiccurtime     -= simulation_atom_var;
+                interruptcurtime -= simulation_atom_var;
                 if (logiccurtime <= 0) {
                     eraseType( Order::FACING );
                     eraseType( Order::MOVEMENT );
