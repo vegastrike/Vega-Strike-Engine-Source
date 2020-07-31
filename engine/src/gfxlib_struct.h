@@ -153,10 +153,10 @@ struct GFXVertex
 //Stores a color (or any 4 valued vector)
 struct GFXColor
 {
-    float r;
-    float g;
-    float b;
-    float a;
+    float r = 0;
+    float g = 0;
+    float b = 0;
+    float a = 0;
     GFXColor() {}
     GFXColor( const Vector &v, float a = 1.0 )
     {

@@ -11,6 +11,7 @@ struct MeshDat
 };
 class ContinuousTerrain
 {
+public:
     Vector    Scales;
     float     sizeX;
     float     sizeZ;

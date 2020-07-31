@@ -206,7 +206,7 @@ void Mission::DirectorBenchmark()
 {
     total_nr_frames++;
     if (benchmark > 0.0 && benchmark < gametime) {
-        std::cout<<"Game was running for "<<gametime<<" secs,   av. framerate "<<( (double) total_nr_frames )/gametime
+        BOOST_LOG_TRIVIAL(trace) << "Game was running for "<<gametime<<" secs,   av. framerate "<<( (double) total_nr_frames )/gametime
                  <<std::endl;
         winsys_exit( 0 );
     }

@@ -34,6 +34,8 @@ struct dirent
 
 #include "options.h"
 
+#include "galaxy.h"
+
 #include "boost/iostreams/stream.hpp"
 #include "boost/iostreams/device/null.hpp"
 
@@ -745,6 +747,9 @@ void LoadConfig( string subdir )
     } else {
         cout<<"DATADIR - No datadir specified in config file, using ; "<<datadir<<endl;
     }
+
+    string universe_file = datadir + "/universe/milky_way.xml";
+    Galaxy galaxy = Galaxy(universe_file);
 }
 
 // SGT 2020-07-16   This, too, gets called before initLogging(),
@@ -1451,6 +1456,19 @@ void VSFile::checkExtracted()
                 <<(this->subdirectoryname+"/"+this->filename)<<" WITH INDEX="<<this->file_index<<" SIZE="<<pk3size<<endl;
         }
     }
+}
+
+const string VSFile::GetSystemDirectoryPath(string& file)
+{
+    this->file_type = VSFileType::SystemFile;
+    this->file_mode = ReadOnly;
+    this->filename  = file;
+    VSError err = VSFileSystem::LookForFile( *this, VSFileType::SystemFile, ReadOnly );
+    if (err > Ok) {
+        this->valid = false;
+        return file;
+    }
+    return this->GetFullPath();
 }
 
 //Open a read only file

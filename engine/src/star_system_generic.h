@@ -8,7 +8,9 @@
 #include "gfx/vec.h"
 #include "cmd/collection.h"
 #include "cmd/container.h"
+#include "star_xml.h"
 #include <map>
+
 class Stars;
 class Planet;
 class ClickList;
@@ -52,33 +54,28 @@ class StarSystem
 {
 protected:
 ///Starsystem XML Struct For use with XML loading
-    struct StarXML
-    {
-        Terrain *parentterrain;
-        ContinuousTerrain     *ct;
-        int unitlevel;
-        std::vector< GFXLight >lights;
-        std::vector< Planet* > moons;
-        std::string backgroundname;
-        GFXColor backgroundColor;
-        bool   backgroundDegamma;
-        Vector systemcentroid;
-        Vector cursun;
-        float  timeofyear;
-        float  reflectivity;
-        int    numnearstars;
-        int    numstars;
-        bool   fade;
-        float  starsp;
-        float  scale;
-        std::vector< AtmosphericFogMesh >fog;
-        std::vector< bool >conditionStack;
-        int    fogopticalillusion;
-    }
-    *xml;
+    Star_XML *xml;
     void LoadXML( const char*, const Vector &centroid, const float timeofyear );
     void beginElement( const std::string &name, const XMLSupport::AttributeList &attributes );
     void endElement( const std::string &name );
+
+    // Refactor - split beginElement
+    void processSystem(const XMLSupport::AttributeList &attributes);
+    void processRing(const XMLSupport::AttributeList &attributes);
+    void processSpaceElevator(const XMLSupport::AttributeList &attributes,
+                              std::string truncatedfilename);
+    void processFog(const XMLSupport::AttributeList &attributes);
+    void processFogElement(const XMLSupport::AttributeList &attributes);
+    void processCityLights(const XMLSupport::AttributeList &attributes);
+    void processAtmosphere(const XMLSupport::AttributeList &attributes);
+    void processTerrain(const XMLSupport::AttributeList &attributes);
+    void processLightProp(const XMLSupport::AttributeList &attributes,
+                          LIGHT_TARGET target);
+    void processPlanet(const XMLSupport::AttributeList &attributes,
+                       std::string truncatedfilename);
+    void processEnhancement(const XMLSupport::AttributeList &attributes,
+                            std::string truncatedfilename,
+                            int elem);
 
 public:
     struct Statistics
@@ -237,7 +234,7 @@ public:
         return -1;
     }
 //friend class Atmosphere;
-    virtual void createBackground( StarSystem::StarXML *xml ) {}
+    virtual void createBackground( Star_XML *xml ) {}
 };
 bool PendingJumpsEmpty();
 double calc_blend_factor( double frac, int priority, unsigned int when_it_will_be_simulated, int cur_simulation_frame );
