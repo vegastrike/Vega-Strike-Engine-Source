@@ -58,6 +58,7 @@ bool Drawable::DrawableInit(const char *filename, int faction,
 			Mesh *m = Mesh::LoadMesh( path.c_str(), Vector(1,1,1), faction, flightgrp );
 			meshes->push_back( m );
 	#ifdef DEBUG_MESH_ANI
+            // TODO: search and replace cerr with BOOST_LOG_TRIVIAL(error)
 			cerr << "Animated Mesh: " << path << " loaded - with: " << m->getVertexList()->GetNumVertices() << " vertices." << endl;
 	#endif
 		}
