@@ -1,6 +1,6 @@
 #====================================
 # @file   : CMakeLists.txt
-# @version: 2020-07-28
+# @version: 2020-07-30
 # @created: 2008-06-08
 # @author : safemode
 # @author : Anth0rx
@@ -14,11 +14,11 @@
 # > cd .. && mkdir build && cd build
 # run > cmake <path to source tree>
 # run > make
-# to change build target (in Release, Debug, Profiler)
+# to change build target (in Release, RelWithDebInfo, Debug, Profiler)
 # > cmake -DCMAKE_BUILD_TYPE=Debug <path to source tree>
 #====================================
 
-CMAKE_MINIMUM_REQUIRED(VERSION 2.8.8)
+CMAKE_MINIMUM_REQUIRED(VERSION 3.5)
 SET(CMAKE_CXX_STANDARD 11)
 
 PROJECT(vsUTCS)
@@ -500,12 +500,13 @@ IF (COMMAND cmake_policy)
 ENDIF (COMMAND cmake_policy)
 
 IF (POLICY CMP0072)
-  CMAKE_POLICY (SET CMP0072 NEW)
-ENDIF ()
+    CMAKE_POLICY (SET CMP0072 NEW)
+ENDIF (POLICY CMP0072)
 
-# Set the default build type to Release
+
+# Set the default build type
 IF (NOT CMAKE_BUILD_TYPE)
-    SET(CMAKE_BUILD_TYPE RelWithDebInfo CACHE STRING "Release, Debug, Profiler" FORCE )
+    SET(CMAKE_BUILD_TYPE "RelWithDebInfo" CACHE STRING "Release, RelWithDebInfo, Debug, Profiler" FORCE )
 ENDIF (NOT CMAKE_BUILD_TYPE)
 
 IF (NOT BUILD_OPT)
@@ -620,6 +621,7 @@ ELSE ("${CMAKE_BUILD_TYPE}" STREQUAL "Debug")
     MARK_AS_ADVANCED( FORCE CMAKE_CXX_FLAGS_DEBUG )
 ENDIF ("${CMAKE_BUILD_TYPE}" STREQUAL "Debug")
 
+
 # Release Target block
 SET(CMAKE_CXX_FLAGS_RELEASE  " ${BUILD_OPT} ${CPU_OPTS} ${DEFINES} -include config.h -pipe -std=c++11 -Wall -fvisibility=hidden" CACHE STRING
     "Flags used by the C++ compiler during release builds."
@@ -642,6 +644,30 @@ IF ("${CMAKE_BUILD_TYPE}" STREQUAL "Release")
 ELSE ("${CMAKE_BUILD_TYPE}" STREQUAL "Release")
     MARK_AS_ADVANCED( FORCE CMAKE_CXX_FLAGS_RELEASE )
 ENDIF ("${CMAKE_BUILD_TYPE}" STREQUAL "Release")
+
+
+# RelWithDebInfo Target block
+SET(CMAKE_CXX_FLAGS_RELWITHDEBINFO  " ${BUILD_OPT} ${CPU_OPTS} ${DEFINES} -g3 -include config.h -pipe -std=c++11 -Wall -fvisibility=hidden" CACHE STRING
+    "Flags used by the C++ compiler during release-with-debug-info builds."
+    FORCE
+)
+SET(CMAKE_C_FLAGS_RELWITHDEBINFO " ${BUILD_OPT} ${CPU_OPTS} ${DEFINES} -g3 -include config.h -pipe -Wall -Wno-unused-function -Wno-unused-variable -fvisibility=hidden" CACHE STRING
+    "Flags used by the C compiler during release-with-debug-info builds."
+    FORCE
+)
+SET(CMAKE_EXE_LINKER_FLAGS_RELWITHDEBINFO "-Bsymbolic" CACHE STRING "RelWithDebInfo linker flags"
+    FORCE
+)
+MARK_AS_ADVANCED(
+    CMAKE_C_FLAGS_RELWITHDEBINFO
+    CMAKE_CXX_FLAGS_RELWITHDEBINFO
+    CMAKE_EXE_LINKER_FLAGS_RELWITHDEBINFO
+)
+IF ("${CMAKE_BUILD_TYPE}" STREQUAL "RelWithDebInfo")
+    MARK_AS_ADVANCED( CLEAR CMAKE_CXX_FLAGS_RELWITHDEBINFO )
+ELSE ("${CMAKE_BUILD_TYPE}" STREQUAL "RelWithDebInfo")
+    MARK_AS_ADVANCED( FORCE CMAKE_CXX_FLAGS_RELWITHDEBINFO )
+ENDIF ("${CMAKE_BUILD_TYPE}" STREQUAL "RelWithDebInfo")
 
 
 # Profiler Target block
@@ -715,20 +741,34 @@ OPTION(USE_SYSTEM_BOOST "Use system boost" ON)
 IF (USE_SYSTEM_BOOST)
     FIND_PACKAGE(Boost)
     IF (Boost_FOUND)
-        MESSAGE("++ Found System Boost version : ${Boost_VERSION}")
+
+        # VERSION_EQUAL / VERSION_GREATER requires a version in the form X.Y.Z
+        # Until CMake v3.15, Boost_VERSION is in the form as written in boost/version.hpp (e.g. 106700)
+        # Thus, build the version from parts, which should work across all supported CMake versions
+        SET(Boost_DERIVED_VERSION "${Boost_MAJOR_VERSION}.${Boost_MINOR_VERSION}.${Boost_SUBMINOR_VERSION}")
+        MESSAGE("++ Found System Boost version : ${Boost_DERIVED_VERSION}")
 
         # With boost version 1.67 and above, python components are specified with a version suffix
         # (`python27`, `python38`) instead of their invocation name (`python`, `python3`)
-        IF ((Boost_VERSION VERSION_EQUAL 106700) OR (Boost_VERSION VERSION_GREATER 106700))
-            STRING(REPLACE "." ";" PYTHONLIBS_VERSION_LIST ${PYTHONLIBS_VERSION_STRING})
-            LIST(GET PYTHONLIBS_VERSION_LIST 0 PYTHON_VERSION_MAJOR)
-            LIST(GET PYTHONLIBS_VERSION_LIST 1 PYTHON_VERSION_MINOR)
+        IF (Boost_DERIVED_VERSION VERSION_EQUAL 1.67.0)
+            SET(Boost_1_67_Or_Later_Result TRUE)
+        ELSEIF (Boost_DERIVED_VERSION VERSION_GREATER 1.67.0)
+            SET(Boost_1_67_Or_Later_Result TRUE)
+        ELSE (Boost_DERIVED_VERSION VERSION_EQUAL 1.67.0)
+            SET(Boost_1_67_Or_Later_Result FALSE)
+        ENDIF (Boost_DERIVED_VERSION VERSION_EQUAL 1.67.0)
+        STRING(REPLACE "." ";" PYTHONLIBS_VERSION_LIST ${PYTHONLIBS_VERSION_STRING})
+        LIST(GET PYTHONLIBS_VERSION_LIST 0 PYTHON_VERSION_MAJOR)
+        LIST(GET PYTHONLIBS_VERSION_LIST 1 PYTHON_VERSION_MINOR)
+        MESSAGE("-- Boost_1_67_Or_Later_Result: ${Boost_1_67_Or_Later_Result}")
+        IF (Boost_1_67_Or_Later_Result)
             SET(BOOST_PYTHON_COMPONENT "python${PYTHON_VERSION_MAJOR}${PYTHON_VERSION_MINOR}")
         ELSEIF (USE_PYTHON_3)
-                SET(BOOST_PYTHON_COMPONENT "python3")
-        ELSE ((Boost_VERSION VERSION_EQUAL 106700) OR (Boost_VERSION VERSION_GREATER 106700))
-                SET(BOOST_PYTHON_COMPONENT "python")
-        ENDIF ((Boost_VERSION VERSION_EQUAL 106700) OR (Boost_VERSION VERSION_GREATER 106700))
+            SET(BOOST_PYTHON_COMPONENT "python-py${PYTHON_VERSION_MAJOR}${PYTHON_VERSION_MINOR}")   # This may be specific to Ubuntu xenial
+        ELSE (Boost_1_67_Or_Later_Result)
+            SET(BOOST_PYTHON_COMPONENT "python")
+        ENDIF (Boost_1_67_Or_Later_Result)
+        UNSET(Boost_1_67_Or_Later_Result)
 
         UNSET(Boost_${BOOST_PYTHON_COMPONENT}_FOUND)
         MESSAGE("++ Looking for System Boost::python")
@@ -1006,7 +1046,7 @@ ADD_SUBDIRECTORY(objconv)
 
 # show debug output
 GET_DIRECTORY_PROPERTY(TEMP_DIRECTORY INCLUDE_DIRECTORIES)
-MESSAGE("-- Default build type is Release, no cpu opts enabled. ")
+MESSAGE("-- Default build type is RelWithDebInfo, no cpu opts enabled. ")
 MESSAGE("++ Building with BUILD_OPT: ${BUILD_OPT}")
 #MESSAGE("++ Building with CMAKE_CXX_FLAGS: ${CMAKE_CXX_FLAGS}")
 #MESSAGE("Linking with : ${TST_LIBS}")
