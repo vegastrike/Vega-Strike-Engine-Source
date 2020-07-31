@@ -1,6 +1,6 @@
 #====================================
 # @file   : CMakeLists.txt
-# @version: 2020-06-07
+# @version: 2020-07-30
 # @created: 2008-06-08
 # @author : safemode
 # @author : Anth0rx
@@ -14,11 +14,11 @@
 # > cd .. && mkdir build && cd build
 # run > cmake <path to source tree>
 # run > make
-# to change build target (in Release, Debug, Profiler)
+# to change build target (in Release, RelWithDebInfo, Debug, Profiler)
 # > cmake -DCMAKE_BUILD_TYPE=Debug <path to source tree>
 #====================================
 
-CMAKE_MINIMUM_REQUIRED(VERSION 2.8.8)
+CMAKE_MINIMUM_REQUIRED(VERSION 3.5)
 SET(CMAKE_CXX_STANDARD 11)
 
 PROJECT(vsUTCS)
@@ -325,15 +325,17 @@ SET(LIBROOTGENERIC_SOURCES
     src/macosx_math.cpp
     src/faction_generic.cpp
     src/faction_util_generic.cpp
+    src/galaxy.cpp
     src/galaxy_gen.cpp
     src/galaxy_xml.cpp
-    src/galaxy.cpp
+    src/galaxy_utils.cpp
     src/hashtable.cpp
     src/lin_time.cpp
     src/load_mission.cpp
     src/pk3.cpp
     src/posh.cpp
     src/savegame.cpp
+    src/system_factory.cpp
     src/star_system_generic.cpp
     src/star_system_xml.cpp
     src/stardate.cpp
@@ -498,12 +500,13 @@ IF (COMMAND cmake_policy)
 ENDIF (COMMAND cmake_policy)
 
 IF (POLICY CMP0072)
-  CMAKE_POLICY (SET CMP0072 NEW)
-ENDIF ()
+    CMAKE_POLICY (SET CMP0072 NEW)
+ENDIF (POLICY CMP0072)
 
-# Set the default build type to Release
+
+# Set the default build type
 IF (NOT CMAKE_BUILD_TYPE)
-    SET(CMAKE_BUILD_TYPE RelWithDebInfo CACHE STRING "Release, Debug, Profiler" FORCE )
+    SET(CMAKE_BUILD_TYPE "RelWithDebInfo" CACHE STRING "Release, RelWithDebInfo, Debug, Profiler" FORCE )
 ENDIF (NOT CMAKE_BUILD_TYPE)
 
 IF (NOT BUILD_OPT)
@@ -618,6 +621,7 @@ ELSE ("${CMAKE_BUILD_TYPE}" STREQUAL "Debug")
     MARK_AS_ADVANCED( FORCE CMAKE_CXX_FLAGS_DEBUG )
 ENDIF ("${CMAKE_BUILD_TYPE}" STREQUAL "Debug")
 
+
 # Release Target block
 SET(CMAKE_CXX_FLAGS_RELEASE  " ${BUILD_OPT} ${CPU_OPTS} ${DEFINES} -include config.h -pipe -std=c++11 -Wall -fvisibility=hidden" CACHE STRING
     "Flags used by the C++ compiler during release builds."
@@ -640,6 +644,30 @@ IF ("${CMAKE_BUILD_TYPE}" STREQUAL "Release")
 ELSE ("${CMAKE_BUILD_TYPE}" STREQUAL "Release")
     MARK_AS_ADVANCED( FORCE CMAKE_CXX_FLAGS_RELEASE )
 ENDIF ("${CMAKE_BUILD_TYPE}" STREQUAL "Release")
+
+
+# RelWithDebInfo Target block
+SET(CMAKE_CXX_FLAGS_RELWITHDEBINFO  " ${BUILD_OPT} ${CPU_OPTS} ${DEFINES} -g3 -include config.h -pipe -std=c++11 -Wall -fvisibility=hidden" CACHE STRING
+    "Flags used by the C++ compiler during release-with-debug-info builds."
+    FORCE
+)
+SET(CMAKE_C_FLAGS_RELWITHDEBINFO " ${BUILD_OPT} ${CPU_OPTS} ${DEFINES} -g3 -include config.h -pipe -Wall -Wno-unused-function -Wno-unused-variable -fvisibility=hidden" CACHE STRING
+    "Flags used by the C compiler during release-with-debug-info builds."
+    FORCE
+)
+SET(CMAKE_EXE_LINKER_FLAGS_RELWITHDEBINFO "-Bsymbolic" CACHE STRING "RelWithDebInfo linker flags"
+    FORCE
+)
+MARK_AS_ADVANCED(
+    CMAKE_C_FLAGS_RELWITHDEBINFO
+    CMAKE_CXX_FLAGS_RELWITHDEBINFO
+    CMAKE_EXE_LINKER_FLAGS_RELWITHDEBINFO
+)
+IF ("${CMAKE_BUILD_TYPE}" STREQUAL "RelWithDebInfo")
+    MARK_AS_ADVANCED( CLEAR CMAKE_CXX_FLAGS_RELWITHDEBINFO )
+ELSE ("${CMAKE_BUILD_TYPE}" STREQUAL "RelWithDebInfo")
+    MARK_AS_ADVANCED( FORCE CMAKE_CXX_FLAGS_RELWITHDEBINFO )
+ENDIF ("${CMAKE_BUILD_TYPE}" STREQUAL "RelWithDebInfo")
 
 
 # Profiler Target block
@@ -713,20 +741,34 @@ OPTION(USE_SYSTEM_BOOST "Use system boost" ON)
 IF (USE_SYSTEM_BOOST)
     FIND_PACKAGE(Boost)
     IF (Boost_FOUND)
-        MESSAGE("++ Found System Boost version : ${Boost_VERSION}")
+
+        # VERSION_EQUAL / VERSION_GREATER requires a version in the form X.Y.Z
+        # Until CMake v3.15, Boost_VERSION is in the form as written in boost/version.hpp (e.g. 106700)
+        # Thus, build the version from parts, which should work across all supported CMake versions
+        SET(Boost_DERIVED_VERSION "${Boost_MAJOR_VERSION}.${Boost_MINOR_VERSION}.${Boost_SUBMINOR_VERSION}")
+        MESSAGE("++ Found System Boost version : ${Boost_DERIVED_VERSION}")
 
         # With boost version 1.67 and above, python components are specified with a version suffix
         # (`python27`, `python38`) instead of their invocation name (`python`, `python3`)
-        IF (Boost_VERSION VERSION_GREATER_EQUAL 1.67)
-            STRING(REPLACE "." ";" PYTHONLIBS_VERSION_LIST ${PYTHONLIBS_VERSION_STRING})
-            LIST(GET PYTHONLIBS_VERSION_LIST 0 PYTHON_VERSION_MAJOR)
-            LIST(GET PYTHONLIBS_VERSION_LIST 1 PYTHON_VERSION_MINOR)
+        IF (Boost_DERIVED_VERSION VERSION_EQUAL 1.67.0)
+            SET(Boost_1_67_Or_Later_Result TRUE)
+        ELSEIF (Boost_DERIVED_VERSION VERSION_GREATER 1.67.0)
+            SET(Boost_1_67_Or_Later_Result TRUE)
+        ELSE (Boost_DERIVED_VERSION VERSION_EQUAL 1.67.0)
+            SET(Boost_1_67_Or_Later_Result FALSE)
+        ENDIF (Boost_DERIVED_VERSION VERSION_EQUAL 1.67.0)
+        STRING(REPLACE "." ";" PYTHONLIBS_VERSION_LIST ${PYTHONLIBS_VERSION_STRING})
+        LIST(GET PYTHONLIBS_VERSION_LIST 0 PYTHON_VERSION_MAJOR)
+        LIST(GET PYTHONLIBS_VERSION_LIST 1 PYTHON_VERSION_MINOR)
+        MESSAGE("-- Boost_1_67_Or_Later_Result: ${Boost_1_67_Or_Later_Result}")
+        IF (Boost_1_67_Or_Later_Result)
             SET(BOOST_PYTHON_COMPONENT "python${PYTHON_VERSION_MAJOR}${PYTHON_VERSION_MINOR}")
         ELSEIF (USE_PYTHON_3)
-                SET(BOOST_PYTHON_COMPONENT "python3")
-        ELSE (Boost_VERSION VERSION_GREATER_EQUAL 1.67)
-                SET(BOOST_PYTHON_COMPONENT "python")
-        ENDIF (Boost_VERSION VERSION_GREATER_EQUAL 1.67)
+            SET(BOOST_PYTHON_COMPONENT "python-py${PYTHON_VERSION_MAJOR}${PYTHON_VERSION_MINOR}")   # This may be specific to Ubuntu xenial
+        ELSE (Boost_1_67_Or_Later_Result)
+            SET(BOOST_PYTHON_COMPONENT "python")
+        ENDIF (Boost_1_67_Or_Later_Result)
+        UNSET(Boost_1_67_Or_Later_Result)
 
         UNSET(Boost_${BOOST_PYTHON_COMPONENT}_FOUND)
         MESSAGE("++ Looking for System Boost::python")
@@ -1004,7 +1046,7 @@ ADD_SUBDIRECTORY(objconv)
 
 # show debug output
 GET_DIRECTORY_PROPERTY(TEMP_DIRECTORY INCLUDE_DIRECTORIES)
-MESSAGE("-- Default build type is Release, no cpu opts enabled. ")
+MESSAGE("-- Default build type is RelWithDebInfo, no cpu opts enabled. ")
 MESSAGE("++ Building with BUILD_OPT: ${BUILD_OPT}")
 #MESSAGE("++ Building with CMAKE_CXX_FLAGS: ${CMAKE_CXX_FLAGS}")
 #MESSAGE("Linking with : ${TST_LIBS}")
@@ -1080,127 +1122,164 @@ SET(CPACK_PACKAGE_EXECUTABLES "vegastrike" "mesh_tool" "vegasettings")
 SET(CPACK_CONTACT "maintainers@vega-strike.org")
 # See https://gitlab.kitware.com/cmake/community/-/wikis/doc/cpack/PackageGenerators for generator lists
 IF (WIN32 AND NOT UNIX)
-	MESSAGE("-- Configuring Packaging for Windows")
-	# NSIS - See https://cmake.org/cmake/help/v3.3/module/CPackNSIS.html
-	# NSI bug requires at least 1 set of 4 forwards slashes??
-	SET(CPACK_PACKAGE_ICON "${CMAKE_CURRENT_SOURCE_DIR}\\\\icon4.ico")
-	SET(CPACK_NSIS_INSTALLED_ICON_NAME "bin\\\\VegaStrike.exe")
-	SET(CPACK_NSIS_DISPLAY_NAME "Vega Strike")
-	SET(CPACK_NSIS_HELP_LINK "https:\\\\vega-strike.org")
-	SET(CPACK_NSIS_URL_INFO_ABOUT "https:\\\\vega-strike.org/about")
-	SET(CPACK_NSIS_CONTACT "TBD@vega-strike.org")
-	SET(CPACK_NSIS_MODIFY_PATH ON)
+    MESSAGE("-- Configuring Packaging for Windows")
+    # NSIS - See https://cmake.org/cmake/help/v3.3/module/CPackNSIS.html
+    # NSI bug requires at least 1 set of 4 forwards slashes??
+    SET(CPACK_PACKAGE_ICON "${CMAKE_CURRENT_SOURCE_DIR}\\\\icon4.ico")
+    SET(CPACK_NSIS_INSTALLED_ICON_NAME "bin\\\\VegaStrike.exe")
+    SET(CPACK_NSIS_DISPLAY_NAME "Vega Strike")
+    SET(CPACK_NSIS_HELP_LINK "https:\\\\vega-strike.org")
+    SET(CPACK_NSIS_URL_INFO_ABOUT "https:\\\\vega-strike.org/about")
+    SET(CPACK_NSIS_CONTACT "TBD@vega-strike.org")
+    SET(CPACK_NSIS_MODIFY_PATH ON)
 
-	# NSIS, Wix, and compressed archives (7z, Zip)
-	SET(CPACK_GENERATOR "NSIS" "NSIS64" "WIX" "7Z" "ZIP")
-	SET(CPACK_PACKAGE_EXECUTABLES "vegastrike.exe" "mesh_tool.exe" "vegasettings.exe")
+    # NSIS, Wix, and compressed archives (7z, Zip)
+    SET(CPACK_GENERATOR "NSIS" "NSIS64" "WIX" "7Z" "ZIP")
+    SET(CPACK_PACKAGE_EXECUTABLES "vegastrike.exe" "mesh_tool.exe" "vegasettings.exe")
 ELSEIF (XCODE)
-	MESSAGE("-- Configuring Packaging for Mac OS X")
-	# Mac OS X
-	# There's a few options for MacOSX; not sure what we want to use
-	# DragNDrop -> DMG
-	#  See https://cmake.org/cmake/help/v3.3/module/CPackDMG.html
-	# Bundle -> Compressed Disk Image
-	# PackageMaker - see https://cmake.org/cmake/help/v3.3/module/CPackPackageMaker.html
-	SET(CPACK_GENERATOR "DragNDrop" "BUNDLE" "TBZ2" "TGZ" "TXZ")
+    MESSAGE("-- Configuring Packaging for Mac OS X")
+    # Mac OS X
+    # There's a few options for MacOSX; not sure what we want to use
+    # DragNDrop -> DMG
+    #  See https://cmake.org/cmake/help/v3.3/module/CPackDMG.html
+    # Bundle -> Compressed Disk Image
+    # PackageMaker - see https://cmake.org/cmake/help/v3.3/module/CPackPackageMaker.html
+    SET(CPACK_GENERATOR "DragNDrop" "BUNDLE" "TBZ2" "TGZ" "TXZ")
 ELSEIF (CMAKE_SYSTEM_NAME STREQUAL Linux)
-	MESSAGE("-- Configuring Packaging for Linux")
-	SET(CPACK_GENERATOR "TBZ2" "TGZ" "TXZ")
-	# Linux
+    MESSAGE("-- Configuring Packaging for Linux")
+    SET(CPACK_GENERATOR "TBZ2" "TGZ" "TXZ")
+    # Linux
 
-	# lsb_release -i --> but then it'll find `Ubuntu` instead of Debian so will have to map more
-	# we can probably more reliably detect via checking for different packager commands
-	# `lsb_release` doesn't always work correctly, so it's easier to read the underlying file
-	# if it exists. It doesn't always exist. Debian doesn't use it, but Ubuntu does.
-	SET(LSB_EXISTS "LSB Data is NOT available" OFF)
-	SET(LSB_LINUX_DISTRIBUTION "Unknown")
-	SET(LSB_LINUX_DISTRIBUTION_CODENAME "Unknown")
+    # lsb_release -i --> but then it'll find `Ubuntu` instead of Debian so will have to map more
+    # we can probably more reliably detect via checking for different packager commands
+    # `lsb_release` doesn't always work correctly, so it's easier to read the underlying file
+    # if it exists. It doesn't always exist. Debian doesn't use it, but Ubuntu does.
+    SET(LSB_EXISTS FALSE)
+    SET(LSB_LINUX_DISTRIBUTION "Unknown")
+    SET(LSB_LINUX_DISTRIBUTION_CODENAME "Unknown")
 
-	# Lookup the LSB Data - this is known for Ubuntu, but also used by other distros too.
-	# and may help with distro-sub-selection
-	IF (EXISTS "/etc/lsb-release" )
-		MESSAGE("Found /etc/lsb-release")
-		SET(LSB_EXISTS "LSB Data IS available" ON)
-		# Ubuntu Version: /etc/lsb-release - DISTRIB_ID=Ubuntu, DISTRIB_CODENAME=<name>
-		FILE(STRINGS "/etc/lsb-release" LSB_DATA)
-		FOREACH(LSB_DATA_ENTRY IN LISTS LSB_DATA)
-			MESSAGE("Checking ${LSB_DATA_ENTRY} for match...")
-			IF ("${LSB_DATA_ENTRY}" MATCHES "^DISTRIB_ID=(.+)$")
-				SET(LSB_LINUX_DISTRIBUTION "${CMAKE_MATCH_1}")
-			ELSEIF ("${LSB_DATA_ENTRY}" MATCHES "^DISTRIB_CODENAME=(.+)$")
-				SET(LSB_LINUX_DISTRIBUTION_CODENAME "${CMAKE_MATCH_1}")
-			ENDIF ("${LSB_DATA_ENTRY}" MATCHES "^DISTRIB_ID=(.+)$")
-		ENDFOREACH(LSB_DATA_ENTRY)
-		MESSAGE("Found Linux Distribution: ${LSB_LINUX_DISTRIBUTION}")
-		MESSAGE("Found Linux Distribution Release Name: ${LSB_LINUX_DISTRIBUTION_CODENAME}")
-	ENDIF (EXISTS "/etc/lsb-release")
+    # Lookup the LSB Data - this is known for Ubuntu, but also used by other distros too.
+    # and may help with distro-sub-selection
+    FIND_PROGRAM(LSB_RELEASE_EXEC lsb_release)
+    IF (LSB_RELEASE_EXEC)
+        EXECUTE_PROCESS(COMMAND ${LSB_RELEASE_EXEC} --codename --short
+            OUTPUT_VARIABLE LSB_LINUX_DISTRIBUTION_CODENAME
+            OUTPUT_STRIP_TRAILING_WHITESPACE)
+        EXECUTE_PROCESS(COMMAND ${LSB_RELEASE_EXEC} --id --short
+            OUTPUT_VARIABLE LSB_LINUX_DISTRIBUTION
+            OUTPUT_STRIP_TRAILING_WHITESPACE)
+        SET(LSB_EXISTS TRUE)
+        MESSAGE("Found Linux Distribution Release Name: ${LSB_LINUX_DISTRIBUTION_CODENAME}")
+    ENDIF (LSB_RELEASE_EXEC)
 
-	# "DEB"
-	FIND_PROGRAM(HAS_APT NAMES apt-get apt)
-	IF(HAS_APT)
-		MESSAGE("-- Configuring Debian Packaging")
-		# See https://cmake.org/cmake/help/v3.3/module/CPackDeb.html
-		# TODO: Add the platform (Ubuntu, Debian, etc) to the filename; perhaps version (f.e stretch, jessie, etc) too?
-		SET(CPACK_DEBIAN_PACKAGE_MAINTAINER "maintainers@vega-strike.org")
-		# Debian Version: /etc/debian_version - <name>/<junk>
-		IF (NOT LSB_EXISTS)
-			SET(USE_DEBIAN_VERSION "Use the Debian Version" ON)
-			FILE(READ "/etc/debian_version" DEBIAN_VERSION_DATA)
-			STRING(REGEX MATCH "^(.+)\/.*$" DEBIAN_VERSION_DATA DEBIAN_RELEASE_VERSION)
-		ELSE (NOT LSB_EXISTS)
-			SET(USE_DEBIAN_VERSION "Use the Debian Version" OFF)
-			SET(DEBIAN_RELEASE_VERSION "Debian Derivative Release Version" ${LSB_LINUX_DISTRIBUTION_CODENAME})
-		ENDIF (NOT LSB_EXISTS)
-		# Try to detect the Ubuntu version
+    # IF (EXISTS "/etc/lsb-release" )
+    #     MESSAGE("Found /etc/lsb-release")
+    #     SET(LSB_EXISTS "LSB Data IS available" ON)
+    #     # Ubuntu Version: /etc/lsb-release - DISTRIB_ID=Ubuntu, DISTRIB_CODENAME=<name>
+    #     FILE(STRINGS "/etc/lsb-release" LSB_DATA)
+    #     FOREACH(LSB_DATA_ENTRY IN LISTS LSB_DATA)
+    #         MESSAGE("Checking ${LSB_DATA_ENTRY} for match...")
+    #         IF ("${LSB_DATA_ENTRY}" MATCHES "^DISTRIB_ID=(.+)$")
+    #             SET(LSB_LINUX_DISTRIBUTION "${CMAKE_MATCH_1}")
+    #         ELSEIF ("${LSB_DATA_ENTRY}" MATCHES "^DISTRIB_CODENAME=(.+)$")
+    #             SET(LSB_LINUX_DISTRIBUTION_CODENAME "${CMAKE_MATCH_1}")
+    #         ENDIF ("${LSB_DATA_ENTRY}" MATCHES "^DISTRIB_ID=(.+)$")
+    #     ENDFOREACH(LSB_DATA_ENTRY)
+    #     MESSAGE("Found Linux Distribution: ${LSB_LINUX_DISTRIBUTION}")
+    #     MESSAGE("Found Linux Distribution Release Name: ${LSB_LINUX_DISTRIBUTION_CODENAME}")
+    # ENDIF (EXISTS "/etc/lsb-release")
 
-		# Should auto-detect Debian/Ubuntu as deps may change
-		# This would be awesome if coupled with providing versions for specific (or at least compatible) distros.
-		MESSAGE("Looking for ${CMAKE_BINARY_DIR}/dependency.list")
-		IF (EXISTS "${CMAKE_BINARY_DIR}/dependency.list")
-			MESSAGE("Found Dependency file at ${CMAKE_BINARY_DIR}/dependency.list")
-			# Load the dependencies from the file into the CPack variable:
-			FILE(STRINGS "${CMAKE_BINARY_DIR}/dependency.list" AUTOMATED_DEBIAN_DEPENDENCY_LIST)
-			FOREACH(DLD_DEPENDENCY IN LISTS AUTOMATED_DEBIAN_DEPENDENCY_LIST)
-				MESSAGE("** Found Dependency ${DLD_DEPENDENCY}")
-				IF (DEFINED CPACK_DEBIAN_PACKAGE_DEPENDS)
-					SET(CPACK_DEBIAN_PACKAGE_DEPENDS "${CPACK_DEBIAN_PACKAGE_DEPENDS}, ${DLD_DEPENDENCY}")
-				ELSE(DEFINED CPACK_DEBIAN_PACKAGE_DEPENDS)
-					IF (NOT "${DLD_DEPENDENCY}" STREQUAL "")
-						SET(CPACK_DEBIAN_PACKAGE_DEPENDS "${DLD_DEPENDENCY}")
-					ENDIF (NOT "${DLD_DEPENDENCY}" STREQUAL "")
-				ENDIF(DEFINED CPACK_DEBIAN_PACKAGE_DEPENDS)
-			ENDFOREACH(DLD_DEPENDENCY)
-		ELSE (EXISTS "${CMAKE_BINARY_DIR}/dependency.list")
-			MESSAGE("Still need to generate dependency list")
-		ENDIF (EXISTS "${CMAKE_BINARY_DIR}/dependency.list")
-		# Alternatively, just set a hard-coded set of dependencies...requires more logic for various platforms.
-		#IF (USE_DEBIAN_VERSION)
-		#	# Debian Dependency Chain
-		#	SET(CPACK_DEBIAN_PACKAGE_DEPENDS "python2, libjpeg, libpng, freeglut, gtk2, libvorbis, openal, SDL_mixer, xdg-utils, opengl-games-utils")
-		#ELSE (USE_DEBIAN_VERSION)
-		#	# Ubuntu Dependency Chain
-		#	SET(CPACK_DEBIAN_PACKAGE_DEPENDS "python2, libjpeg62, libpng16-16, freeglut, gtk2, libvorbis, openal, SDL_mixer, xdg-utils, opengl-games-utils")
-		#ENDIF (USE_DEBIAN_VERSION)
-		SET(CPACK_DEBIAN_PACKAGE_SECTION "Amusements/Games")
-		SET(CPACK_DEBIAN_PACKAGE_HOMEPAGE "https://www.vega-strike.org")
-		LIST(APPEND CPACK_GENERATOR "DEB")
-	ENDIF (HAS_APT)
+    # "DEB"
+    FIND_PROGRAM(HAS_APT NAMES apt-get apt)
+    IF(HAS_APT)
+        MESSAGE("-- Configuring Debian Packaging")
+        # See https://cmake.org/cmake/help/v3.3/module/CPackDeb.html
+        SET(CPACK_DEBIAN_PACKAGE_MAINTAINER "maintainers@vega-strike.org")
+        # Debian Version: /etc/debian_version - <name>/<junk>
+        IF (NOT LSB_EXISTS)
+            SET(USE_DEBIAN_VERSION TRUE)
+            FILE(READ "/etc/debian_version" DEBIAN_VERSION_DATA)
+            STRING(REGEX MATCH "^(.+)\/.*$" DEBIAN_VERSION_DATA DEBIAN_RELEASE_VERSION)
+        ELSE (NOT LSB_EXISTS)
+            SET(USE_DEBIAN_VERSION FALSE)
+            SET(DEBIAN_RELEASE_VERSION "Debian Derivative Release Version ${LSB_LINUX_DISTRIBUTION_CODENAME}")
+        ENDIF (NOT LSB_EXISTS)
 
-	#  "RPM"
-	FIND_PROGRAM(HAS_RPMBUILD rpmbuild)
-	IF (HAS_RPMBUILD)
-		MESSAGE("-- Configuring RPM Packaging")
-		# See https://cmake.org/cmake/help/v3.3/module/CPackRPM.html
-		SET(CPACK_RPM_PACKAGE_LICENSE "GPLv3") # See ../LICENSE
-		SET(CPACK_RPM_PACKAGE_URL "https://www.vega-strike.org")
-		# Should detect whether SuSe or RH/CentOS/Fedora as deps may change
-		SET(CPACK_RPM_PACKAGE_REQUIRES "python2, libjpeg, libpng, freeglut, gtk2, libvorbis, openal, SDL_mixer")
-		LIST(APPEND CPACK_GENERATOR "RPM")
-	ENDIF (HAS_RPMBUILD)
+        # Should auto-detect Debian/Ubuntu as deps may change
+        # This would be awesome if coupled with providing versions for specific (or at least compatible) distros -- Done 2020-07-28 stephengtuggy
+        MESSAGE("Looking for ${CMAKE_BINARY_DIR}/dependency.list")
+        IF (EXISTS "${CMAKE_BINARY_DIR}/dependency.list")
+            MESSAGE("Found Dependency file at ${CMAKE_BINARY_DIR}/dependency.list")
+            # Load the dependencies from the file into the CPack variable:
+            FILE(STRINGS "${CMAKE_BINARY_DIR}/dependency.list" AUTOMATED_DEBIAN_DEPENDENCY_LIST)
+            FOREACH(DLD_DEPENDENCY IN LISTS AUTOMATED_DEBIAN_DEPENDENCY_LIST)
+                MESSAGE("** Found Dependency ${DLD_DEPENDENCY}")
+                IF (DEFINED CPACK_DEBIAN_PACKAGE_DEPENDS)
+                    SET(CPACK_DEBIAN_PACKAGE_DEPENDS "${CPACK_DEBIAN_PACKAGE_DEPENDS}, ${DLD_DEPENDENCY}")
+                ELSE(DEFINED CPACK_DEBIAN_PACKAGE_DEPENDS)
+                    IF (NOT "${DLD_DEPENDENCY}" STREQUAL "")
+                        SET(CPACK_DEBIAN_PACKAGE_DEPENDS "${DLD_DEPENDENCY}")
+                    ENDIF (NOT "${DLD_DEPENDENCY}" STREQUAL "")
+                ENDIF(DEFINED CPACK_DEBIAN_PACKAGE_DEPENDS)
+            ENDFOREACH(DLD_DEPENDENCY)
+        ELSE (EXISTS "${CMAKE_BINARY_DIR}/dependency.list")
+            MESSAGE("Still need to generate dependency list")
+        ENDIF (EXISTS "${CMAKE_BINARY_DIR}/dependency.list")
+
+        # IF (DEFINED CPACK_DEBIAN_PACKAGE_DEPENDS)
+        #     SET(CPACK_DEBIAN_PACKAGE_DEPENDS "${CPACK_DEBIAN_PACKAGE_DEPENDS}, ")
+        # ELSE (DEFINED CPACK_DEBIAN_PACKAGE_DEPENDS)
+        #     SET(CPACK_DEBIAN_PACKAGE_DEPENDS "")
+        # ENDIF (DEFINED CPACK_DEBIAN_PACKAGE_DEPENDS)
+
+        # Alternatively, just set a hard-coded set of dependencies...requires more logic for various platforms.
+        IF (USE_DEBIAN_VERSION)
+            # Debian Dependency Chain
+            IF (DEBIAN_RELEASE_VERSION STREQUAL "buster")
+                SET(CPACK_DEBIAN_PACKAGE_DEPENDS "libpython2.7, libjpeg62-turbo, libpng16-16, freeglut3, libgtk-3-0, libvorbis0a, libopenal1, libsdl-gfx1.2-5, xdg-utils, libgl1, libopengl0, libboost-python1.67.0, libboost-log1.67.0")
+            ENDIF ()
+            IF (DEFINED ENV{TRAVIS_TAG})
+                SET(CPACK_PACKAGE_FILE_NAME "vsUTCS_$ENV{TRAVIS_TAG}-debian-${DEBIAN_RELEASE_VERSION}_x86_64")
+            ELSE (DEFINED ENV{TRAVIS_TAG})
+                SET(CPACK_PACKAGE_FILE_NAME "vsUTCS_${CPACK_PACKAGE_VERSION_MAJOR}.${CPACK_PACKAGE_VERSION_MINOR}.${CPACK_PACKAGE_VERSION_PATCH}-debian-${DEBIAN_RELEASE_VERSION}_x86_64")
+            ENDIF (DEFINED ENV{TRAVIS_TAG})
+        ELSE (USE_DEBIAN_VERSION)
+            # Ubuntu Dependency Chain
+            IF (LSB_LINUX_DISTRIBUTION_CODENAME STREQUAL "xenial")
+                SET(CPACK_DEBIAN_PACKAGE_DEPENDS "libpython2.7, libjpeg62, libpng16-16, freeglut3, libgtk-3-0, libvorbis0a, libopenal1, libsdl-gfx1.2-5, xdg-utils, libgl1-mesa-glx, libboost-python1.58.0, libboost-log1.58.0")
+            ELSEIF (LSB_LINUX_DISTRIBUTION_CODENAME STREQUAL "bionic")
+                SET(CPACK_DEBIAN_PACKAGE_DEPENDS "libpython2.7, libjpeg62, libpng16-16, freeglut3, libgtk-3-0, libvorbis0a, libopenal1, libsdl-gfx1.2-5, xdg-utils, libgl1, libopengl0, libboost-python1.65.1, libboost-log1.65.1")
+            ELSEIF (LSB_LINUX_DISTRIBUTION_CODENAME STREQUAL "focal")
+                SET(CPACK_DEBIAN_PACKAGE_DEPENDS "libpython2.7, libjpeg62, libpng16-16, freeglut3, libgtk-3-0, libvorbis0a, libopenal1, libsdl-gfx1.2-5, xdg-utils, libgl1, libopengl0, libboost-python1.67.0, libboost-log1.67.0")
+            ELSEIF (LSB_LINUX_DISTRIBUTION_CODENAME STREQUAL "buster")                                                                                                                                                                      # Apparently Debian Buster has lsb_release after all
+                SET(CPACK_DEBIAN_PACKAGE_DEPENDS "libpython2.7, libjpeg62-turbo, libpng16-16, freeglut3, libgtk-3-0, libvorbis0a, libopenal1, libsdl-gfx1.2-5, xdg-utils, libgl1, libopengl0, libboost-python1.67.0, libboost-log1.67.0")
+            ENDIF ()
+            IF (DEFINED ENV{TRAVIS_TAG})
+                SET(CPACK_PACKAGE_FILE_NAME "vsUTCS_$ENV{TRAVIS_TAG}-${LSB_LINUX_DISTRIBUTION}-${LSB_LINUX_DISTRIBUTION_CODENAME}_x86_64")
+            ELSE (DEFINED ENV{TRAVIS_TAG})
+                SET(CPACK_PACKAGE_FILE_NAME "vsUTCS_${CPACK_PACKAGE_VERSION_MAJOR}.${CPACK_PACKAGE_VERSION_MINOR}.${CPACK_PACKAGE_VERSION_PATCH}-${LSB_LINUX_DISTRIBUTION}-${LSB_LINUX_DISTRIBUTION_CODENAME}_x86_64")
+            ENDIF (DEFINED ENV{TRAVIS_TAG})
+        ENDIF (USE_DEBIAN_VERSION)
+        SET(CPACK_DEBIAN_PACKAGE_SECTION "Amusements/Games")
+        SET(CPACK_DEBIAN_PACKAGE_HOMEPAGE "https://www.vega-strike.org")
+        LIST(APPEND CPACK_GENERATOR "DEB")
+    ENDIF (HAS_APT)
+
+    #  "RPM"
+    FIND_PROGRAM(HAS_RPMBUILD rpmbuild)
+    IF (HAS_RPMBUILD)
+        MESSAGE("-- Configuring RPM Packaging")
+        # See https://cmake.org/cmake/help/v3.3/module/CPackRPM.html
+        SET(CPACK_RPM_PACKAGE_LICENSE "GPLv3") # See ../LICENSE
+        SET(CPACK_RPM_PACKAGE_URL "https://www.vega-strike.org")
+        # Should detect whether SuSe or RH/CentOS/Fedora as deps may change
+        SET(CPACK_RPM_PACKAGE_REQUIRES "python2, libjpeg, libpng, freeglut, gtk2, libvorbis, openal, SDL_mixer")
+        LIST(APPEND CPACK_GENERATOR "RPM")
+    ENDIF (HAS_RPMBUILD)
 ELSE ()
-	MESSAGE("-- Configuring Packaging for Unknown Platforms - \"${CMAKE_SYSTEM_NAME}\"")
-	# Unknown Platform --> Just do the various compressed tarballs
-	SET(CPACK_GENERATOR "TBZ2" "TGZ" "TXZ")
+    MESSAGE("-- Configuring Packaging for Unknown Platforms - \"${CMAKE_SYSTEM_NAME}\"")
+    # Unknown Platform --> Just do the various compressed tarballs
+    SET(CPACK_GENERATOR "TBZ2" "TGZ" "TXZ")
 ENDIF (WIN32 AND NOT UNIX)
 
 INCLUDE(CPack)

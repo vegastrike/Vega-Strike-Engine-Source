@@ -16,7 +16,7 @@
 Vega Strike Space Simulation Engine
 ===================================
 
-Vega Strike is Space Flight Simulator that allows a player to explore, trade, and fight in the vast open space. You start in an old beat up cargo ship, with endless possibilities before you and just enough cash to scrape together a life. Yet danger lurks in the space beyond. 
+Vega Strike is Space Flight Simulator that allows a player to explore, trade, and fight in the vast open space. You start in an old beat up cargo ship, with endless possibilities before you and just enough cash to scrape together a life. Yet danger lurks in the space beyond.
 
 
 Features
@@ -214,6 +214,20 @@ sudo apt-get -y install git cmake python-dev build-essential automake autoconf l
 
    - https://bugs.launchpad.net/ubuntu/+source/file/+bug/1747711
    - https://github.com/vegastrike/Vega-Strike-Engine-Source/issues/94
+
+3. Download a copy of the assets/game data from [here](https://github.com/vegastrike/Assets-Production). You can either `git clone` this repository, or download it as a ZIP file and unzip it.
+
+4. When you run vegasettings, specify the path to the assets/game data on the command line with `--target` followed by a space. E.g.:
+
+   ```bash
+   ./bin/vegasettings --target ../Assets-Production
+   ```
+
+   Do the same with vegastrike using `-d` and no space. E.g.:
+
+   ```bash
+   ./bin/vegastrike -d../Assets-Production
+   ```
 
 [Link to list of dependencies in wiki](http://vegastrike.sourceforge.net/wiki/HowTo:Compile_from_CVS)
 

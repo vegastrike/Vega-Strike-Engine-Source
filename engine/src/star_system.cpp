@@ -42,7 +42,7 @@
 
 #include "options.h"
 
-
+using std::endl;
 
 GameStarSystem::GameStarSystem( const char *filename, const Vector &centr, const float timeofyear )
 {
@@ -422,7 +422,7 @@ void NebulaUpdate( StarSystem *ss )
     }
 }
 
-void GameStarSystem::createBackground( StarSystem::StarXML *xml )
+void GameStarSystem::createBackground( Star_XML *xml )
 {
 #ifdef NV_CUBE_MAP
     printf( "using NV_CUBE_MAP\n" );
