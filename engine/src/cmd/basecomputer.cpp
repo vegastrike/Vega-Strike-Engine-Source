@@ -1570,8 +1570,7 @@ void BaseComputer::recalcTitle()
     baseTitleDisplay->setText( baseTitle );
 
     //Generic player title for display
-    char playerTitle[256];
-    playerTitle[0] = '\0';              //Start with an empty string.
+    std::string playerTitle = "";
 
     static bool showStardate =
         XMLSupport::parse_bool( vs_config->getVariable( "graphics", "show_stardate", "true" ) );
@@ -1583,18 +1582,24 @@ void BaseComputer::recalcTitle()
     {
     default:
         if (showStardate) {
-            sprintf( playerTitle, "Stardate: %s      Credits: %.2f", stardate, playerCredits );
+            playerTitle = (boost::format("Stardate: %1$s      Credits: %2$.2f")
+                                         % stardate % playerCredits)
+                                         .str();
         } else {
-            sprintf( playerTitle, "Credits: %.2f", playerCredits );
+            playerTitle = (boost::format("Credits: %1$.2f") % playerCredits).str();
         }
         break;
     case MISSIONS:
         {
             const int count = guiMax( 0, int(active_missions.size())-1 );
             if (showStardate) {
-                sprintf( playerTitle, "Stardate: %s      Credits: %.2f      Active missions: %d", stardate, playerCredits, count );
+                playerTitle = (boost::format("Stardate: %1$s      Credits: %2$.2f      Active missions: %3$d")
+                                             % stardate % playerCredits % count)
+                                             .str();
             } else {
-                sprintf( playerTitle, "Credits: %.2f      Active missions: %d", playerCredits, count );
+                playerTitle = (boost::format("Credits: %1$.2f      Active missions: %2$d")
+                                             % playerCredits % count)
+                                             .str();
             }
             break;
         }
@@ -1615,9 +1620,22 @@ void BaseComputer::recalcTitle()
                 if (basemass > 0)
                     massEffect = 100 * playerUnit->Mass / basemass;
                 if (showStardate) {
-                    sprintf( playerTitle, "Stardate: %s      Credits: %.2f      Space left: %.6g of %.6g cubic meters   Mass: %.0f%% (base)", stardate, playerCredits, volumeLeft, emptyVolume, massEffect );
+                    playerTitle = (boost::format("Stardate: %1$s      Credits: %2$.2f      "
+                                    "Space left: %3$.6g of %4$.6g cubic meters   Mass: %5$.0f%% (base)")
+                                                % stardate
+                                                % playerCredits
+                                                % volumeLeft
+                                                % emptyVolume
+                                                % massEffect)
+                                                .str();
                 } else {
-                    sprintf( playerTitle, "Credits: %.2f      Space left: %.6g of %.6g cubic meters   Mass: %.0f%% (base)", playerCredits, volumeLeft, emptyVolume, massEffect);
+                    playerTitle = (boost::format("Credits: %1$.2f      "
+                                    "Space left: %2$.6g of %3$.6g cubic meters   Mass: %4$.0f%% (base)")
+                                    % playerCredits
+                                    % volumeLeft
+                                    % emptyVolume
+                                    % massEffect)
+                                    .str();
                 }
             }
             break;
