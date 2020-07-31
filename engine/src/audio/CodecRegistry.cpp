@@ -32,22 +32,22 @@ namespace Audio {
             codecPriority[codec] = priority;
             nameCodec[codec->getName()] = codec;
             
-            std::cout << "Registering codec " << codec->getName().c_str();
+            BOOST_LOG_TRIVIAL(trace) << "Registering codec " << codec->getName().c_str();
             
             const Codec::Extensions *ext = codec->getExtensions();
             if (ext) {
                 for (Codec::Extensions::const_iterator it = ext->begin(); it != ext->end(); ++it) {
-                    std::cout << " " << it->c_str();
+                    BOOST_LOG_TRIVIAL(trace) << " " << it->c_str();
                     extensionCodecs[*it].insert(codec);
                 }
             } else {
-                std::cout << " as universal";
+                BOOST_LOG_TRIVIAL(trace) << " as universal";
                 universalCodecs.insert(codec);
             }
             
-            std::cout << "." << std::endl;
+            BOOST_LOG_TRIVIAL(trace) << "." << std::endl;
         } else {
-            std::cout << "Codec " << codec->getName().c_str() << " already registered" << std::endl;
+            BOOST_LOG_TRIVIAL(trace) << "Codec " << codec->getName().c_str() << " already registered" << std::endl;
         }
     }
     
