@@ -203,12 +203,10 @@ Flightgroup * getStaticUnknownFlightgroup( int faction )
 
 void StarSystem::beginElement( void *userData, const XML_Char *name, const XML_Char **atts )
 {
-    ( (StarSystem*) userData )->beginElement( name, AttributeList( atts ) );
 }
 
 void StarSystem::endElement( void *userData, const XML_Char *name )
 {
-    ( (StarSystem*) userData )->endElement( name );
 }
 
 extern string RemoveDotSystem( const char *input );

@@ -267,6 +267,8 @@ private:
     Planet( const Planet& );
 /// assignment operator forbidden
     Planet& operator=( const Planet& );
+
+    friend bool operator==(const Planet& lhs, const Planet& rhs);
 };
 
 #endif

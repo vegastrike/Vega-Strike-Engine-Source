@@ -20,6 +20,7 @@ void ViewArea::SetSprite(VSSprite *sprite)
         sprite->GetPosition(position.x, position.y);
         position.z = 0;
         sprite->GetSize(size.x, size.y);
+        // TODO: turn floating point comparisons into a function
         size.x = std::fabs(size.x);
         size.y = std::fabs(size.y);
         size.z = 0;

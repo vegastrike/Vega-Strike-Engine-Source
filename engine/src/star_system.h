@@ -74,7 +74,7 @@ public:
     virtual void DoJumpingComeSightAndSound( Unit *un );
     virtual int DoJumpingLeaveSightAndSound( Unit *un );
     friend class Atmosphere;
-    void createBackground( StarSystem::StarXML *xml );
+    void createBackground( Star_XML *xml );
 };
 #endif
 

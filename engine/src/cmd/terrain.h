@@ -9,6 +9,7 @@ class Unit;
 #define TERRAINUPDATE 2
 class Terrain : public QuadTree
 {
+public:
     updateparity *updatetransform;
     float TotalSizeX;
     float TotalSizeZ;

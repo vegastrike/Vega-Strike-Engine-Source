@@ -79,7 +79,7 @@ class tagDomNode : public easyDomNode {
   void Tag(tagMap *tagmap) { 
     tag=(*tagmap)[Name()];
     if(tag==0){
-      cout << "cannot translate tag " << Name() << endl;
+      BOOST_LOG_TRIVIAL(trace) << "cannot translate tag " << Name() << endl;
     }
 
     vector<easyDomNode *>::const_iterator siter;
@@ -112,7 +112,7 @@ template<class domNodeType> class easyDomFactory {
 
   FILE * inFile = fopen (filename, "r");
   if(!inFile) {
-    //cout << "warning: could not open file: " << filename << endl;
+    //BOOST_LOG_TRIVIAL(trace) << "warning: could not open file: " << filename << endl;
     //    assert(0);
     return NULL;
   }
@@ -153,7 +153,7 @@ domNodeType *LoadCalike(const char *filename) {
 
   string module_str=parseCalike(filename);
   if(module_str.empty()) {
-    //cout << "warning: could not open file: " << filename << endl;
+    //BOOST_LOG_TRIVIAL(trace) << "warning: could not open file: " << filename << endl;
     //    assert(0);
     return NULL;
   }
@@ -231,7 +231,7 @@ domNodeType *LoadCalike(const char *filename) {
   thisnode->set(parent,name,(AttributeList *) &attributes);
 
   for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
-    //cout <<  name << "::" << (*iter).name << endl;
+    //BOOST_LOG_TRIVIAL(trace) <<  name << "::" << (*iter).name << endl;
   }
 
   if(parent==NULL){
@@ -249,7 +249,7 @@ domNodeType *LoadCalike(const char *filename) {
   domNodeType *stacktop=nodestack.top();
 
   if(stacktop->Name()!=name){
-    cout << "error: expected " << stacktop->Name() << " , got " << name << endl;
+    BOOST_LOG_TRIVIAL(trace) << "error: expected " << stacktop->Name() << " , got " << name << endl;
     exit(0);
   }
   else{

@@ -52,7 +52,6 @@
 #include <iostream>
 #define DEBUG_MESH_ANI
 
-using std::cout;
 using std::cerr;
 using std::endl;
 using std::list;
@@ -1262,7 +1261,7 @@ void Unit::Init( const char *filename,
         bool istemplate = ( string::npos != ( string( filename ).find( ".template" ) ) );
         static bool usingtemplates = XMLSupport::parse_bool( vs_config->getVariable( "data", "usingtemplates", "true" ) );
         if (!istemplate || (istemplate && usingtemplates)) {
-            std::cout << boost::format("Unit file %1% not found") % filename << std::endl;
+            BOOST_LOG_TRIVIAL(trace) << boost::format("Unit file %1% not found") % filename << std::endl;
         }
         meshdata.clear();
         meshdata.push_back( NULL );
@@ -3865,13 +3864,13 @@ Vector Unit::ResolveForces( const Transformation &trans, const Matrix &transmat 
     //acceleration
     Vector temp2 = (NetLocalForce.i*p+NetLocalForce.j*q+NetLocalForce.k*r);
     if ( !( FINITE( NetForce.i ) && FINITE( NetForce.j ) && FINITE( NetForce.k ) ) )
-        cout<<"NetForce skrewed";
+        BOOST_LOG_TRIVIAL(trace)<<"NetForce skrewed";
     if (NetForce.i || NetForce.j || NetForce.k)
         temp2 += InvTransformNormal( transmat, NetForce );
     temp2 = temp2/GetMass();
     temp  = temp2 * simulation_atom_var;
     if ( !( FINITE( temp2.i ) && FINITE( temp2.j ) && FINITE( temp2.k ) ) )
-        cout<<"NetForce transform skrewed";
+        BOOST_LOG_TRIVIAL(trace)<<"NetForce transform skrewed";
     float oldmagsquared = Velocity.MagnitudeSquared();
         Velocity += temp;
     //}
