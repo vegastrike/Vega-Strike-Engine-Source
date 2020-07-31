@@ -1778,8 +1778,7 @@ void BaseComputer::configureCargoCommitControls( const Cargo &item, TransactionT
 
         //Total price display.
         const double   totalPrice   = item.price*maxQuantity;
-        char tempString[2048];
-        sprintf( tempString, "Total: #b#%.2f#-b", totalPrice );
+        std::string tempString = (boost::format("Total: #b#%1$.2f#-b") % totalPrice).str();
         StaticDisplay *totalDisplay = static_cast< StaticDisplay* > ( window()->findControlById( "TotalPrice" ) );
         assert( totalDisplay != NULL );
         totalDisplay->setText( tempString );
@@ -1791,8 +1790,7 @@ void BaseComputer::configureCargoCommitControls( const Cargo &item, TransactionT
             //No limits, so let's not mention anything.
             maxForPlayer->setText( "" );
         } else {
-            char maxString[2048];
-            sprintf( maxString, "Max: #b#%d#-b", maxQuantity );
+            std::string maxString = (boost::format("Max: #b#%1$d#-b") % maxQuantity).str();
             maxForPlayer->setText( maxString );
         }
     } else {
@@ -1821,8 +1819,7 @@ void BaseComputer::configureCargoCommitControls( const Cargo &item, TransactionT
 
         //Total price display.
         const double   totalPrice   = item.price*item.quantity*(item.mission ? 0 : 1);
-        char tempString[2048];
-        sprintf( tempString, "Total: #b#%.2f#-b", totalPrice );
+        std::string tempString = (boost::format("Total: #b#%1$.2f#-b") % totalPrice).str();
         StaticDisplay *totalDisplay = static_cast< StaticDisplay* > ( window()->findControlById( "TotalPrice" ) );
         assert( totalDisplay != NULL );
         totalDisplay->setText( tempString );
@@ -1999,7 +1996,7 @@ void BaseComputer::updateTransactionControlsForSelection( TransactionList *tlist
     string text = "";
     string descString;
     string tailString;
-    char   tempString[2048];
+    string tempString = "";
     Unit  *baseUnit = m_base.GetUnit();
     if (tlist->transaction != ACCEPT_MISSION) {
         //Do the money.
@@ -2016,11 +2013,13 @@ void BaseComputer::updateTransactionControlsForSelection( TransactionList *tlist
             if (item.GetCategory().find( "My_Fleet" ) != string::npos) {
                 //This ship is in my fleet -- the price is just the transport cost to get it to
                 //the current base.  "Buying" this ship makes it my current ship.
-                sprintf( tempString, "#b#Transport cost: %.2f#-b#n1.5#", item.price );
+                tempString = (boost::format("#b#Transport cost: %$1.2f#-b#n1.5#") % item.price).str();
             } else {
-                sprintf( tempString, "Price: #b#%.2f#-b#n#", baseUnit->PriceCargo( item.content ) );
+                tempString = (boost::format("Price: #b#%1$.2f#-b#n#")
+                                % baseUnit->PriceCargo(item.content)).str();
                 descString += tempString;
-                sprintf( tempString, "Cargo volume: %.2f cubic meters;  Mass: %.2f metric tons#n1.5#", item.volume, item.mass );
+                tempString = (boost::format("Cargo volume: %1$.2f cubic meters;  "
+                                "Mass: %2$.2f metric tons#n1.5#") % item.volume % item.mass).str();
             }
             descString += tempString;
             tailString = buildCargoDescription( item, *this, item.price );
@@ -2033,9 +2032,12 @@ void BaseComputer::updateTransactionControlsForSelection( TransactionList *tlist
                 int   multiplier = 1;
                 if (playerUnit)
                     multiplier = playerUnit->RepairCost();
-                sprintf( tempString, "Price: #b#%.2f#-b#n1.5#", basicRepairPrice()*multiplier );
+                tempString = (boost::format("Price: #b#%1$.2f#-b#n1.5#")
+                                % (basicRepairPrice()*multiplier))
+                                .str();
             } else {
-                sprintf( tempString, "Price: #b#%.2f#-b#n1.5#", baseUnit->PriceCargo( item.content ) );
+                tempString = (boost::format("Price: #b#%1$.2f#-b#n1.5#") % baseUnit->PriceCargo(item.content))
+                                .str();
             }
             descString += tempString;
             if (item.GetDescription() == "" || item.GetDescription()[0] != '#')
@@ -2056,15 +2058,16 @@ void BaseComputer::updateTransactionControlsForSelection( TransactionList *tlist
             if (item.GetCategory().find( "My_Fleet" ) != string::npos) {
                 //This ship is in my fleet -- the price is just the transport cost to get it to
                 //the current base.  "Buying" this ship makes it my current ship.
-                sprintf( tempString, "#b#Transport cost: %.2f#-b#n1.5#", item.price );
+                tempString = (boost::format("#b#Transport cost: %1$.2f#-b#n1.5#") % item.price).str();
             } else {
                 PRETTY_ADDN("", baseUnit->PriceCargo(item.content), 2);
-                sprintf( tempString, "Price: #b#%s#-b#n#", text.c_str() );
+                tempString = (boost::format("Price: #b#%1%#-b#n#") % text).str();
                 static bool printvolume =
                     XMLSupport::parse_bool( vs_config->getVariable( "graphics", "base_print_cargo_volume", "true" ) );
                 if (printvolume) {
                     descString += tempString;
-                    sprintf( tempString, "Vessel volume: %.2f cubic meters;  Mass: %.2f metric tons#n1.5#", item.volume, item.mass );
+                    tempString = (boost::format("Vessel volume: %1$.2f cubic meters;  "
+                                    "Mass: %2$.2f metric tons#n1.5#") % item.volume % item.mass).str();
                 }
             }
             descString += tempString;
@@ -2078,12 +2081,15 @@ void BaseComputer::updateTransactionControlsForSelection( TransactionList *tlist
                 item.description = temp;
             }
             if (item.mission)
-                sprintf( tempString, "Destroy evidence of mission cargo. Credit received: 0.00." );
+                tempString = "Destroy evidence of mission cargo. Credit received: 0.00.";
             else
-                sprintf( tempString, "Value: #b#%.2f#-b, purchased for %.2f#n#",
-                         baseUnit->PriceCargo( item.content ), item.price );
+                tempString = (boost::format("Value: #b#%1$.2f#-b, purchased for %2$.2f#n#")
+                         % baseUnit->PriceCargo(item.content)
+                         % item.price)
+                         .str();
             descString += tempString;
-            sprintf( tempString, "Cargo volume: %.2f cubic meters;  Mass: %.2f metric tons#n1.5#", item.volume, item.mass );
+            tempString = (boost::format("Cargo volume: %1$.2f cubic meters;  Mass: %2$.2f metric tons#n1.5#")
+                            % item.volume % item.mass).str();
             descString += tempString;
             if (!item.mission)
                 tailString = buildCargoDescription( item, *this, baseUnit->PriceCargo( item.content ) );
@@ -2096,21 +2102,27 @@ void BaseComputer::updateTransactionControlsForSelection( TransactionList *tlist
                     m_player.GetUnit(), item.content, item.category, false ) : 0.0;
                 if (percent_working < 1) {
                     //IF DAMAGED
-                    sprintf( tempString, "Damaged and Used value: #b#%.2f#-b, purchased for %.2f#n1.5#",
-                             SellPrice( percent_working, baseUnit->PriceCargo( item.content ) ), item.price );
+                    tempString = (boost::format("Damaged and Used value: #b#%1$.2f#-b, purchased for %2$.2f#n1.5#")
+                             % SellPrice(percent_working, baseUnit->PriceCargo(item.content))
+                             % item.price)
+                             .str();
                     descString += tempString;
 
-                    sprintf( tempString, "Percent Working: #b#%.2f#-b, Repair Cost: %.2f#n1.5#",
-                            percent_working*100, RepairPrice( percent_working, baseUnit->PriceCargo( item.content ) ) );
+                    tempString = (boost::format("Percent Working: #b#%1$.2f#-b, Repair Cost: %2$.2f#n1.5#")
+                            % (percent_working*100)
+                            % RepairPrice(percent_working, baseUnit->PriceCargo(item.content)))
+                            .str();
                     descString += tempString;
                 } else {
-                    sprintf( tempString, "Used value: #b#%.2f#-b, purchased for %.2f#n1.5#",
-                             usedValue( baseUnit->PriceCargo( item.content ) ), item.price );
+                    tempString = (boost::format("Used value: #b#%1$.2f#-b, purchased for %2$.2f#n1.5#")
+                             % usedValue(baseUnit->PriceCargo(item.content)) % item.price).str();
                     descString += tempString;
                 }
                 if (damaged_mode)
                     descString +=
-                        "#c1:0:0#Warning: #b#Because pieces of your ship are damaged, you will not be able to sell this item until you fix those damaged items in this column in order to allow the mechanics to remove this item.#-c#-b#n1.5#";
+                        "#c1:0:0#Warning: #b#Because pieces of your ship are damaged, you will not be able to "
+                        "sell this item until you fix those damaged items in this column in order to allow the "
+                        "mechanics to remove this item.#-c#-b#n1.5#";
                 //********************************************************************************************
                 if (item.GetDescription() == "" || item.GetDescription()[0] != '#')
                     item.description = buildUpgradeDescription( item );
@@ -5663,8 +5675,7 @@ void showUnitStats( Unit *playerUnit, string &text, int subunitlevel, int mode, 
                 text += "#n#"+prefix+statcolor+"Reactor recharge slowdown caused by shield maintenance: #-c";
                 float maint_draw_percent = playerUnit->shield.recharge*VSDM*100.0/shieldenergycap*shield_maintenance_cost
                                            *playerUnit->shield.number/(playerUnit->EnergyRechargeData()*RSconverter);
-                sprintf( conversionBuffer, "%.2f", maint_draw_percent );
-                text += conversionBuffer;
+                text += (boost::format("%1$.2f") % maint_draw_percent).str();
                 text += " %.";
                 if (maint_draw_percent > 60) {
                     text += "#n##c1:1:.1#"+prefix
