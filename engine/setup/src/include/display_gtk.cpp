@@ -86,7 +86,7 @@ void ShowMain(void) {
 	hbox = 0;
 	do {
 		if (CURRENT->name == NULL) { continue; }
-//		cout << count << ") " << CURRENT->name << " [" << GetInfo(CURRENT->setting) << "]\n";
+//		BOOST_LOG_TRIVIAL(trace) << count << ") " << CURRENT->name << " [" << GetInfo(CURRENT->setting) << "]\n";
 		count++;
 		if (column == 1) {
 			hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 2);

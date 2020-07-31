@@ -40,7 +40,7 @@ void BaseInterface::Load( const char *filename, const char *time_of_day_hint, co
     full_filename     += BASE_EXTENSION;
     daynight_filename += BASE_EXTENSION;
     std::string newfile = daynight_filename;
-    cout<<"BaseInterface::LoadXML "<<full_filename<<endl;
+    BOOST_LOG_TRIVIAL(trace) << "BaseInterface::LoadXML "<<full_filename<<endl;
     FILE *inFile = VSFileSystem::vs_open( daynight_filename.c_str(), "r" );
     if (!inFile) {
         newfile = full_filename;

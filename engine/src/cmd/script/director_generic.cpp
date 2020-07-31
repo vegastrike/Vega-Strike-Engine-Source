@@ -18,7 +18,6 @@
 #include "savegame.h"
 #include "gnuhash.h"
 
-using std::cout;
 using std::cerr;
 using std::endl;
 PYTHON_INIT_INHERIT_GLOBALS( Director, PythonMissionBaseClass );
@@ -348,7 +347,7 @@ void Mission::loadModule( string modulename )
 
     debug( 3, node, SCRIPT_PARSE, "loading module "+modulename );
 
-    cout<<"  loading module "<<modulename<<endl;
+    BOOST_LOG_TRIVIAL(trace)<<"  loading module "<<modulename<<endl;
 
     string filename = "modules/"+modulename+".module";
     missionNode *import_top = importf->LoadXML( filename.c_str() );
@@ -428,7 +427,7 @@ void Mission::UnPickle( string pickled )
 
 void Mission::DirectorStart( missionNode *node )
 {
-    cout<<"DIRECTOR START"<<endl;
+    BOOST_LOG_TRIVIAL(trace)<<"DIRECTOR START"<<endl;
 
     static int  st_debuglevel = atoi( vs_config->getVariable( "interpreter", "debuglevel", "0" ).c_str() );
     static bool st_start_game = XMLSupport::parse_bool( vs_config->getVariable( "interpreter", "startgame", "true" ) );
@@ -456,7 +455,7 @@ void Mission::DirectorStart( missionNode *node )
     if ( !doparse.empty() )
         if (XMLSupport::parse_bool( doparse ) == false)
             return;
-    cout<<"parsing declarations for director"<<endl;
+    BOOST_LOG_TRIVIAL(trace)<<"parsing declarations for director"<<endl;
 
     parsemode = PARSE_DECL;
 
@@ -475,7 +474,7 @@ void Mission::DirectorStart( missionNode *node )
         string mname = (*iter).first;
         missionNode *mnode = (*iter).second;
         if (mname != "director") {
-            cout<<"  parsing full module "<<mname<<endl;
+            BOOST_LOG_TRIVIAL(trace)<<"  parsing full module "<<mname<<endl;
             doModule( mnode, SCRIPT_PARSE );
         }
     }

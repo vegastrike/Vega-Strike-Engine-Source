@@ -54,7 +54,6 @@
 #include <iostream>
 #define DEBUG_MESH_ANI
 
-using std::cout;
 using std::cerr;
 using std::endl;
 using std::list;
@@ -1152,7 +1151,7 @@ void Unit::Init( const char *filename,
         bool istemplate = ( string::npos != ( string( filename ).find( ".template" ) ) );
         static bool usingtemplates = XMLSupport::parse_bool( vs_config->getVariable( "data", "usingtemplates", "true" ) );
         if (!istemplate || (istemplate && usingtemplates)) {
-            std::cout << boost::format("Unit file %1% not found") % filename << std::endl;
+            BOOST_LOG_TRIVIAL(trace) << boost::format("Unit file %1% not found") % filename << std::endl;
         }
         meshdata.clear();
         meshdata.push_back( NULL );
@@ -2876,8 +2875,6 @@ void Unit::RechargeEnergy()
     if ( (!reactor_uses_fuel) || (fuel > 0) )
         energy += recharge * simulation_atom_var;
 }
-
-
 
 
 /*

@@ -285,17 +285,16 @@ void Faction::LoadXML( const char *filename, char *xmlbuffer, int buflength )
 {
     using namespace FactionXML;
     using namespace VSFileSystem;
-    using std::cout;
     using std::endl;
     using std::pair;    
     unitlevel = 0;
     VSFile    f;
     VSError   err;
     if (buflength == 0 || xmlbuffer == NULL) {
-        cout<<"FactionXML:LoadXML "<<filename<<endl;
+        BOOST_LOG_TRIVIAL(trace) << "FactionXML:LoadXML "<<filename<<endl;
         err = f.OpenReadOnly( filename, UnknownFile );
         if (err > Ok) {
-            cout<<"Failed to open '"<<filename<<"' this probably means it can't find the data directory"<<endl;
+            BOOST_LOG_TRIVIAL(trace) << "Failed to open '"<<filename<<"' this probably means it can't find the data directory"<<endl;
             assert( 0 );
         }
     }

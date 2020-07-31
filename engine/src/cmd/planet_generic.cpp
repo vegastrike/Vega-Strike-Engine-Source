@@ -9,7 +9,6 @@
 #include "planetary_orbit.h"
 #include "vsfilesystem.h"
 
-using std::cout;
 using std::endl;
 
 char * getnoslash( char *inp )
@@ -182,14 +181,14 @@ Unit* Planet::beginElement( QVector x,
             (*satiterator)->SetOwner( this );
         } else {
             // For debug
-//            cout << "name" << " : " << filename << " : " << unitname << endl;
-//            cout << "R/X: " << x.i << " : " << x.j << " : " << x.k << endl;
-//            cout << "S/Y: " << y.i << " : " << y.j << " : " << y.k << endl;
-//            cout << "CmpRotVel: " << rotvel.i << " : " <<
+//            BOOST_LOG_TRIVIAL(trace) << "name" << " : " << filename << " : " << unitname << endl;
+//            BOOST_LOG_TRIVIAL(trace) << "R/X: " << x.i << " : " << x.j << " : " << x.k << endl;
+//            BOOST_LOG_TRIVIAL(trace) << "S/Y: " << y.i << " : " << y.j << " : " << y.k << endl;
+//            BOOST_LOG_TRIVIAL(trace) << "CmpRotVel: " << rotvel.i << " : " <<
 //                    rotvel.j << " : " << rotvel.k << endl;
-//            cout << vely << " : " << pos << " : " << gravity << " : " << radius << endl;
-//            cout << dest.size() << " : " << "orbit_center" << " : " << ligh.size() << endl;
-//            cout << blendSrc << " : " << blendDst << " : " << inside_out << endl;
+//            BOOST_LOG_TRIVIAL(trace) << vely << " : " << pos << " : " << gravity << " : " << radius << endl;
+//            BOOST_LOG_TRIVIAL(trace) << dest.size() << " : " << "orbit_center" << " : " << ligh.size() << endl;
+//            BOOST_LOG_TRIVIAL(trace) << blendSrc << " : " << blendDst << " : " << inside_out << endl;
 
 
 
@@ -203,7 +202,7 @@ Unit* Planet::beginElement( QVector x,
                                                                QVector( 0, 0, 0 ), this, ourmat, ligh, faction, fullname, inside_out ) );
             un = p;
             p->SetOwner( this );
-            cout << "Created planet " << fullname << " of type " << p->fullname << " orbiting " << this->fullname << endl;
+            BOOST_LOG_TRIVIAL(trace) << "Created planet " << fullname << " of type " << p->fullname << " orbiting " << this->fullname << endl;
 
         }
     }
@@ -407,23 +406,23 @@ bool operator==(const Planet& lhs, const Planet& rhs)
     bool equal = true;
     if(lhs.inside != rhs.inside) {
         equal = false;
-        cout << "inside: " << lhs.inside << " != " << rhs.inside << endl;
+        BOOST_LOG_TRIVIAL(trace) << "inside: " << lhs.inside << " != " << rhs.inside << endl;
     }
 
     if(lhs.atmospheric != rhs.atmospheric) {
         equal = false;
-        cout << "atmospheric: " << lhs.atmospheric << " != " << rhs.atmospheric << endl;
+        BOOST_LOG_TRIVIAL(trace) << "atmospheric: " << lhs.atmospheric << " != " << rhs.atmospheric << endl;
     }
 
     // TODO: turn floating point comparisons into a function
     if(std::fabs(lhs.radius - rhs.radius) > 0.001f) {
         equal = false;
-        cout << "radius: " << lhs.radius << " != " << rhs.radius << endl;
+        BOOST_LOG_TRIVIAL(trace) << "radius: " << lhs.radius << " != " << rhs.radius << endl;
     }
 
     if(std::fabs(lhs.gravity - rhs.gravity) > 0.001f) {
         equal = false;
-        cout << "gravity: " << lhs.gravity << " != " << rhs.gravity << endl;
+        BOOST_LOG_TRIVIAL(trace) << "gravity: " << lhs.gravity << " != " << rhs.gravity << endl;
     }
 
     return equal;
