@@ -131,8 +131,9 @@ Compiling On Linux
 1. Install the dependencies. Something like this:
 
 ```bash
-sudo apt-get -y install cmake g++ python-dev libboost-python-dev libboost-log-dev libgl1-mesa-glx freeglut3-dev \
-                libopenal-dev libsdl-gfx1.2-dev libvorbis-dev libjpeg-dev libpng-dev libgtk-3-dev
+sudo apt-get -y install cmake g++ python-dev libboost-python-dev libboost-log-dev \
+                libboost-regex-dev libgl1-mesa-glx freeglut3-dev libopenal-dev \
+                libsdl-gfx1.2-dev libvorbis-dev libjpeg-dev libpng-dev libgtk-3-dev
 ```
 
 On Debian 10 "buster":
