@@ -157,7 +157,7 @@ void Movable::AddVelocity( float difficulty )
     if (graphicOptions.InWarp == 1 || graphicOptions.RampCounter != 0) {
         float rampmult = 1.f;
         if (graphicOptions.RampCounter != 0) {
-            graphicOptions.RampCounter -= SIMULATION_ATOM;
+            graphicOptions.RampCounter -= simulation_atom_var;
             if (graphicOptions.RampCounter <= 0)
                 graphicOptions.RampCounter = 0;
             if (graphicOptions.InWarp == 0 && graphicOptions.RampCounter > warprampdowntime)
@@ -183,7 +183,7 @@ void Movable::AddVelocity( float difficulty )
         v = Velocity;
     static float WARPMEMORYEFFECT = XMLSupport::parse_float( vs_config->getVariable( "physics", "WarpMemoryEffect", "0.9" ) );
     graphicOptions.WarpFieldStrength = lastWarpField*WARPMEMORYEFFECT+(1.0-WARPMEMORYEFFECT)*graphicOptions.WarpFieldStrength;
-    curr_physical_state.position     = curr_physical_state.position+(v*SIMULATION_ATOM*difficulty).Cast();
+    curr_physical_state.position     = curr_physical_state.position+(v*simulation_atom_var*difficulty).Cast();
     //now we do this later in update physics
     //I guess you have to, to be robust}
 }
@@ -198,7 +198,7 @@ void Movable::UpdatePhysics2( const Transformation &trans,
                            UnitCollection *uc ) {
     //Only in non-networking OR networking && is a player OR SERVER && not a player
     if (AngularVelocity.i || AngularVelocity.j || AngularVelocity.k)
-      Rotate( SIMULATION_ATOM*(AngularVelocity) );
+      Rotate( simulation_atom_var*(AngularVelocity) );
 
 }
 
@@ -239,7 +239,7 @@ Vector Movable::ResolveForces( const Transformation &trans, const Matrix &transm
     // TODO: restore this with the unit name
     //    else
     //        VSFileSystem::vs_fprintf( stderr, "zero moment of inertia %s\n", name.get().c_str() );
-    Vector temp( temp1*SIMULATION_ATOM );
+    Vector temp( temp1*simulation_atom_var );
     AngularVelocity += temp;
     static float maxplayerrotationrate    =
         XMLSupport::parse_float( vs_config->getVariable( "physics", "maxplayerrot", "24" ) );
@@ -258,7 +258,7 @@ Vector Movable::ResolveForces( const Transformation &trans, const Matrix &transm
     if (NetForce.i || NetForce.j || NetForce.k)
         temp2 += InvTransformNormal( transmat, NetForce );
     temp2 = temp2/GetMass();
-    temp  = temp2*SIMULATION_ATOM;
+    temp  = temp2*simulation_atom_var;
     if ( !( FINITE( temp2.i ) && FINITE( temp2.j ) && FINITE( temp2.k ) ) )
         std::cout<<"NetForce transform skrewed";
     float oldmagsquared = Velocity.MagnitudeSquared();
