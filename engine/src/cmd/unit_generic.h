@@ -71,6 +71,8 @@ void UncheckUnit( class Unit*un );
 extern char * GetUnitDir( const char *filename );
 extern float capship_size;
 
+Unit* getMasterPartList();
+
 //A stupid struct that is only for grouping 2 different types of variables together in one return value
 class CargoColor
 {

@@ -26,7 +26,7 @@ class GamePlanet : public GameUnit< class Planet >
 {
 private:
     Animation *shine;
-protected:
+public:
 /// default constructor - only to be called by UnitFactory
     GamePlanet();
 

@@ -5,11 +5,13 @@
 #include "ai/communication.h"
 #include "savegame.h"
 #include "xml_support.h"
-#include "unit_factory.h"
 #include "unit_util.h"
 #include "universe_util.h"
 #include "unit_const_cache.h"
 #include "pilot.h"
+#include "unit.h"
+#include "cmd/ai/order.h"
+
 //Various functions that were used in .cpp files that are now included because of
 //the temple GameUnit class
 //If not separated from those files functions would be defined in multiple places
@@ -41,13 +43,13 @@ const Unit * getUnitFromUpgradeName( const string &upgradeName, int myUnitFactio
     if (!partUnit) {
         partUnit = UnitConstCache::setCachedConst( StringIntKey( name,
                                                                 FactionUtil::GetUpgradeFaction() ),
-                                                  UnitFactory::createUnit( name, true, FactionUtil::GetUpgradeFaction() ) );
+                                                  new GameUnit< Unit >( name, true, FactionUtil::GetUpgradeFaction() ) );
     }
     if (partUnit->name == "LOAD_FAILED") {
         partUnit = UnitConstCache::getCachedConst( StringIntKey( name, myUnitFaction ) );
         if (!partUnit)
             partUnit = UnitConstCache::setCachedConst( StringIntKey( name, myUnitFaction ),
-                                                      UnitFactory::createUnit( name, true, myUnitFaction ) );
+                                                      new GameUnit< Unit >( name, true, myUnitFaction ) );
     }
     return partUnit;
 }
@@ -72,7 +74,7 @@ int SelectDockPort( Unit *utdw, Unit *parent )
 //From unit_customize.cpp
 Unit * CreateGameTurret( std::string tur, int faction )
 {
-    return UnitFactory::createUnit( tur.c_str(), true, faction );
+    return new GameUnit< Unit >( tur.c_str(), true, faction );
 }
 
 void SetShieldZero( Unit *un )
