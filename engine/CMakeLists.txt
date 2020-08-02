@@ -778,7 +778,7 @@ IF (USE_SYSTEM_BOOST)
 
         UNSET(Boost_${BOOST_PYTHON_COMPONENT}_FOUND)
         MESSAGE("++ Looking for System Boost::python")
-        FIND_PACKAGE(Boost COMPONENTS ${BOOST_PYTHON_COMPONENT} log log_setup date_time system filesystem regex thread chrono atomic REQUIRED)
+        FIND_PACKAGE(Boost COMPONENTS ${BOOST_PYTHON_COMPONENT} log log_setup date_time system filesystem thread chrono atomic REQUIRED)
         IF (Boost_python3_FOUND)
             MESSAGE("++ Found System Boost::python3 : ${Boost_PYTHON3_LIBRARY}")
         ELSEIF (Boost_python_FOUND)
