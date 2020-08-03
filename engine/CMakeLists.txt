@@ -771,7 +771,21 @@ IF (USE_SYSTEM_BOOST)
         IF (Boost_1_67_Or_Later_Result)
             SET(BOOST_PYTHON_COMPONENT "python${PYTHON_VERSION_MAJOR}${PYTHON_VERSION_MINOR}")
         ELSEIF (USE_PYTHON_3)
-            SET(BOOST_PYTHON_COMPONENT "python-py${PYTHON_VERSION_MAJOR}${PYTHON_VERSION_MINOR}")   # This may be specific to Ubuntu xenial
+            SET(BOOST_PYTHON_COMPONENT "python3")
+
+            # Xenial lacks libboost_python3.{so|a} but has libboost_python-py{major}{minor}.{so|a}
+            # (This is common to all Debian and Debian-based systems up to Boost 1.67,
+            #   it's just not needed for any other Debian-based system (at the moment).)
+            IF (CMAKE_SYSTEM_NAME STREQUAL Linux)
+                EXECUTE_PROCESS(
+                    COMMAND sh -c "cat /etc/os-release | grep ^VERSION_CODENAME= | sed 's/^VERSION_CODENAME=//' | tr -d '\n'"
+                    OUTPUT_VARIABLE LINUX_CODENAME)
+                IF (LINUX_CODENAME STREQUAL xenial)
+                    SET(BOOST_PYTHON_COMPONENT "python-py3${PYTHON_VERSION_MINOR}")
+                ENDIF (LINUX_CODENAME STREQUAL xenial)
+                UNSET(LINUX_CODENAME)
+            ENDIF (CMAKE_SYSTEM_NAME STREQUAL Linux)
+
         ELSE (Boost_1_67_Or_Later_Result)
             SET(BOOST_PYTHON_COMPONENT "python")
         ENDIF (Boost_1_67_Or_Later_Result)
