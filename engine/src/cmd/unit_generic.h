@@ -502,9 +502,9 @@ public:
     void Destroy();
 
 //Uses GFX so only in Unit class
-    virtual void Draw( const Transformation &quat = identity_transformation, const Matrix &m = identity_matrix ) {}
-    virtual void DrawNow( const Matrix &m = identity_matrix, float lod = 1000000000 ) {}
-    virtual std::string drawableGetName() { return name; };
+    virtual void Draw( const Transformation &quat = identity_transformation, const Matrix &m = identity_matrix ) override {}
+    virtual void DrawNow( const Matrix &m = identity_matrix, float lod = 1000000000 ) override {}
+    virtual std::string drawableGetName() override { return name; }
 
 //Sets the camera to be within this unit.
 //Uses Universe & GFX so not needed here -> only in Unit class
@@ -612,18 +612,18 @@ private:
 protected:
     virtual float ExplosionRadius();
 public:
-    QVector realPosition( );
+    QVector realPosition( ) override;
 
     // TODO: move up to ship
     void UpdatePhysics3(const Transformation &trans,
                         const Matrix &transmat,
                         bool lastframe,
                         UnitCollection *uc,
-                        Unit *superunit);
-    bool isPlayerShip();
+                        Unit *superunit) override;
+    bool isPlayerShip() override;
 
-    Vector GetWarpRefVelocity() const;
-    Vector GetWarpVelocity() const;
+    Vector GetWarpRefVelocity() const override;
+    Vector GetWarpVelocity() const override;
 
     bool AutoPilotToErrorMessage( const Unit *un, bool automaticenergyrealloc, std::string &failuremessage, int recursive_level = 2 );
     bool AutoPilotTo( Unit *un, bool automaticenergyrealloc );
@@ -729,7 +729,7 @@ public:
         return warpenergy;
     }
 
-    float CalculateNearestWarpUnit( float minmultiplier, Unit **nearest_unit, bool count_negative_warp_units ) const;
+    float CalculateNearestWarpUnit( float minmultiplier, Unit **nearest_unit, bool count_negative_warp_units ) const override;
     //float GetMaxWarpFieldStrength( float rampmult = 1.f ) const;
     void DecreaseWarpEnergy( bool insys, float time );
     void IncreaseWarpEnergy( bool insys, float time );
@@ -812,7 +812,7 @@ public:
                       void *ownerDoNotDereference,
                       float phasedamage = 0 );
 
-    virtual float DealDamageToHull( const Vector &pnt, float Damage );
+    virtual float DealDamageToHull( const Vector &pnt, float Damage ) override;
 
 //Lights the shields, without applying damage or making the AI mad - useful for special effects
     void LightShields( const Vector &pnt, const Vector &normal, float amt, const GFXColor &color );
