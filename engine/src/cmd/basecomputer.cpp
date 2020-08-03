@@ -3896,6 +3896,7 @@ void SwapInNewShipName( Cockpit *cockpit, Unit *base, const std::string &newFile
 
 string buildShipDescription( Cargo &item, std::string &texturedescription )
 {
+    BOOST_LOG_TRIVIAL(debug) << "Entering buildShipDescription";
     //load the Unit
     string newModifications;
     if (item.GetCategory().find( "My_Fleet" ) != string::npos)
@@ -3904,8 +3905,8 @@ string buildShipDescription( Cargo &item, std::string &texturedescription )
     Flightgroup *flightGroup = new Flightgroup();
     int    fgsNumber = 0;
     current_unit_load_mode = NO_MESH;
-    Unit  *newPart   = UnitFactory::createUnit( item.GetContent().c_str(), false, 0, newModifications,
-                                                flightGroup, fgsNumber );
+    std::unique_ptr<Unit> newPart(UnitFactory::createUnit( item.GetContent().c_str(), false, 0, newModifications,
+                                                flightGroup, fgsNumber ));
     current_unit_load_mode = DEFAULT;
     string sHudImage;
     string sImage;
@@ -3924,10 +3925,11 @@ string buildShipDescription( Cargo &item, std::string &texturedescription )
         }
     }
     std::string str;
-    showUnitStats( newPart, str, 0, 0, item );
-    delete newPart;
+    showUnitStats( newPart.get(), str, 0, 0, item );
     if ( texturedescription != "" && ( string::npos == str.find( '@' ) ) )
         str = "@"+texturedescription+"@"+str;
+    BOOST_LOG_TRIVIAL(debug) << boost::format("buildShipDescription: texturedescription == %1%") % texturedescription;
+    BOOST_LOG_TRIVIAL(debug) << "Leaving buildShipDescription";
     return str;
 }
 
