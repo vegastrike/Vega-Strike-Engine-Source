@@ -298,7 +298,7 @@ void initLoggingPart2(char debugLevel)
         keywords::min_free_space        = 1 * 1024 * 1024 * 1024                                        /*< stop logging when there's only 1 GiB free space left >*/
     );
 
-    //VSFileSystem::pConsoleLogSink->set_filter(logging::trivial::severity >= logging::trivial::fatal);
+    VSFileSystem::pConsoleLogSink->set_filter(logging::trivial::severity >= logging::trivial::fatal);
 }
 
 int main( int argc, char *argv[] )
