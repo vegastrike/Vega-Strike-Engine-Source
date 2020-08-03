@@ -3936,8 +3936,9 @@ string buildShipDescription( Cargo &item, std::string &texturedescription )
     Flightgroup *flightGroup = new Flightgroup();
     int    fgsNumber = 0;
     current_unit_load_mode = NO_MESH;
-    std::unique_ptr<Unit> newPart(UnitFactory::createUnit( item.GetContent().c_str(), false, 0, newModifications,
-                                                flightGroup, fgsNumber ));
+    BOOST_LOG_TRIVIAL(debug) << "buildShipDescription: creating newPart";
+    Unit* newPart = UnitFactory::createUnit( item.GetContent().c_str(), false, 0, newModifications,
+                                                flightGroup, fgsNumber );
     current_unit_load_mode = DEFAULT;
     string sHudImage;
     string sImage;
@@ -3956,10 +3957,16 @@ string buildShipDescription( Cargo &item, std::string &texturedescription )
         }
     }
     std::string str;
-    showUnitStats( newPart.get(), str, 0, 0, item );
+    showUnitStats( newPart, str, 0, 0, item );
+    BOOST_LOG_TRIVIAL(debug) << "buildShipDescription: killing newPart";
+    newPart->Kill();
+    // BOOST_LOG_TRIVIAL(debug) << "buildShipDescription: deleting newPart";
+    // delete newPart;
+    // newPart = nullptr;
     if ( texturedescription != "" && ( string::npos == str.find( '@' ) ) )
         str = "@"+texturedescription+"@"+str;
     BOOST_LOG_TRIVIAL(debug) << boost::format("buildShipDescription: texturedescription == %1%") % texturedescription;
+    BOOST_LOG_TRIVIAL(debug) << boost::format("buildShipDescription: return value       == %1%") % str;
     BOOST_LOG_TRIVIAL(debug) << "Leaving buildShipDescription";
     return str;
 }
@@ -3978,7 +3985,8 @@ string buildUpgradeDescription( Cargo &item )
     string str = "";
     str += item.description;
     showUnitStats( newPart, str, 0, 1, item );
-    delete newPart;
+    newPart->Kill();
+    // delete newPart;
     return str;
 }
 
