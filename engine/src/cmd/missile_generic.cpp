@@ -137,7 +137,8 @@ void StarSystem::AddMissileToQueue( MissileEffect *me )
 void Missile::Discharge() {
     if ( (damage != 0 || phasedamage != 0) && !discharged ) {
         Unit *targ = Unit::Target();
-        BOOST_LOG_TRIVIAL(info) << boost::format("Missile discharged (target %1%)") % (targ != NULL) ? targ->name.get().c_str() : "NULL";
+        BOOST_LOG_TRIVIAL(info) << boost::format("Missile discharged (target %1%)")
+                                % ((targ != NULL) ? targ->name.get() : "NULL");
         _Universe->activeStarSystem()->AddMissileToQueue(
             new MissileEffect( Position(), damage, phasedamage,
             radial_effect, radial_multiplier, owner ) );
@@ -149,7 +150,7 @@ void Missile::Kill( bool erase ) {
     Unit *targ = Unit::Target();
     BOOST_LOG_TRIVIAL(info)
             << boost::format("Missile killed (target %1%)")
-            % (targ != NULL) ? targ->name.get().c_str() : "NULL";
+            % ((targ != NULL) ? targ->name.get() : "NULL");
     Discharge();
     Unit::Kill( erase );
 }
