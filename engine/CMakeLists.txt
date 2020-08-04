@@ -1,14 +1,6 @@
 #====================================
 # @file   : CMakeLists.txt
-# @version: 2020-07-30
-# @created: 2008-06-08
-# @author : safemode
-# @author : Anth0rx
-# @author : pyramid
-# @author : vegastrike development team
 # @brief  : cmake configuration file for VegaStrike
-# @usage  : cmake dir-with-this-file
-# @param  : none
 #====================================
 # create a build directory somewhere outside of this source tree
 # > cd .. && mkdir build && cd build
@@ -793,7 +785,7 @@ IF (USE_SYSTEM_BOOST)
 
         UNSET(Boost_${BOOST_PYTHON_COMPONENT}_FOUND)
         MESSAGE("++ Looking for System Boost::python")
-        FIND_PACKAGE(Boost COMPONENTS ${BOOST_PYTHON_COMPONENT} log log_setup REQUIRED)
+        FIND_PACKAGE(Boost COMPONENTS ${BOOST_PYTHON_COMPONENT} log log_setup date_time system filesystem thread chrono atomic REQUIRED)
         IF (Boost_python3_FOUND)
             MESSAGE("++ Found System Boost::python3 : ${Boost_PYTHON3_LIBRARY}")
         ELSEIF (Boost_python_FOUND)

@@ -131,29 +131,63 @@ Compiling On Linux
 1. Install the dependencies. Something like this:
 
 ```bash
-sudo apt-get -y install cmake g++ python-dev libboost-python-dev libboost-log-dev libgl1-mesa-glx freeglut3-dev \
-                libopenal-dev libsdl-gfx1.2-dev libvorbis-dev libjpeg-dev libpng-dev libgtk-3-dev
+sudo apt-get -y install cmake g++ python-dev libboost-python-dev libboost-log-dev \
+                libboost-regex-dev libgl1-mesa-glx freeglut3-dev libopenal-dev \
+                libsdl-gfx1.2-dev libvorbis-dev libjpeg-dev libpng-dev libgtk-3-dev
 ```
 
-Or on Debian 10:
+On Debian 10 "buster":
 
 ```bash
 sudo apt-get -y install git cmake python-dev build-essential automake autoconf libpng16-16 \
                 libpng-dev libpng-tools libjpeg62-turbo-dev libexpat1-dev libgtk-3-dev \
                 libopenal-dev libogg-dev libvorbis-dev libgl1-mesa-dev libsdl1.2-dev \
-                libavcodec-dev libavcodec-extra libavformat-dev libavresample-dev libavutil-dev \
-                libavdevice-dev libpostproc-dev freeglut3-dev libxmu-dev libxi-dev \
-                libboost-python1.67-dev libboost-log1.67-dev
+                libpostproc-dev freeglut3-dev libboost-python1.67-dev libboost-log1.67-dev \
+                libboost-regex1.67-dev
 ```
 
-Or on Ubuntu 20.04:
+On Ubuntu 20.04 LTS "focal":
 
 ```bash
 sudo apt-get -y install git cmake python-dev build-essential automake autoconf libpng16-16 \
                 libpng-dev libpng-tools libjpeg62-dev libexpat1-dev libgtk-3-dev libopenal-dev \
-                libogg-dev libvorbis-dev libgl1-mesa-dev libsdl1.2-dev libavcodec-dev \
-                libavcodec-extra libavformat-dev libavresample-dev libavutil-dev libavdevice-dev \
-                libpostproc-dev freeglut3-dev libxmu-dev libxi-dev libboost1.67-all-dev
+                libogg-dev libvorbis-dev libgl1-mesa-dev libsdl1.2-dev libopengl0 \
+                libpostproc-dev freeglut3-dev libboost-python1.67-dev libboost-log1.67-dev \
+                libboost-regex1.67-dev
+```
+
+On openSUSE Leap 15.2:
+
+```bash
+sudo zypper install libboost_log1_66_0-devel \
+                    libboost_python-py2_7-1_66_0-devel \
+                    libboost_python-py3-1_66_0-devel \
+                    libboost_system1_66_0-devel \
+                    libboost_filesystem1_66_0-devel \
+                    libboost_thread1_66_0-devel \
+                    libboost_regex1_66_0-devel \
+                    libboost_chrono1_66_0-devel \
+                    libboost_atomic1_66_0-devel \
+                    cmake \
+                    gcc-c++ \
+                    freeglut-devel \
+                    libopenal0 \
+                    openal-soft-devel \
+                    libSDL-1_2-0 \
+                    libSDL-devel \
+                    libvorbis-devel \
+                    libjpeg-turbo \
+                    libjpeg62-devel \
+                    libpng16-devel \
+                    expat \
+                    libexpat-devel \
+                    libgtk-2_0-0 \
+                    gtk2-devel \
+                    libgtk-3-0 \
+                    gtk3-devel \
+                    python-devel \
+                    python3-devel \
+                    git
 ```
 
 2. Build Vega Strike:
