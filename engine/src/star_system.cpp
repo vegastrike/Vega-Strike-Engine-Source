@@ -39,6 +39,7 @@
 #include "vsfilesystem.h"
 #include "cmd/unit_find.h"
 #include "gfx/occlusion.h"
+#include "drawable.h"
 
 #include "options.h"
 
@@ -382,8 +383,9 @@ void GameStarSystem::Draw( bool DrawCockpit )
     ConditionalCursorDraw( false );
     if (DrawCockpit)
         _Universe->AccessCockpit()->Draw();
-    MeshAnimation::UpdateFrames();
 
+    Drawable::UpdateFrames();
+    
     // And now we're done with the occluder set
     Occlusion::end();
 }

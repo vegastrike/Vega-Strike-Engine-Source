@@ -203,6 +203,13 @@ SET(LIBCMD_SOURCES
     src/cmd/unit_util_generic.cpp
     src/cmd/unit_xml.cpp
     src/cmd/weapon_xml.cpp
+
+    src/cmd/damageable.cpp
+    src/cmd/drawable.cpp
+    src/cmd/movable.cpp
+    src/cmd/computer.cpp
+
+    src/cmd/planetary_orbit.cpp
 )
 
 SET(LIBCMDSERVER_SOURCES
