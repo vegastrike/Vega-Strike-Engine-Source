@@ -195,6 +195,13 @@ SET(LIBCMD_SOURCES
     src/cmd/unit_util_generic.cpp
     src/cmd/unit_xml.cpp
     src/cmd/weapon_xml.cpp
+
+    src/cmd/damageable.cpp
+    src/cmd/drawable.cpp
+    src/cmd/movable.cpp
+    src/cmd/computer.cpp
+
+    src/cmd/planetary_orbit.cpp
 )
 
 SET(LIBCMDSERVER_SOURCES
@@ -778,7 +785,7 @@ IF (USE_SYSTEM_BOOST)
 
         UNSET(Boost_${BOOST_PYTHON_COMPONENT}_FOUND)
         MESSAGE("++ Looking for System Boost::python")
-        FIND_PACKAGE(Boost COMPONENTS ${BOOST_PYTHON_COMPONENT} log log_setup REQUIRED)
+        FIND_PACKAGE(Boost COMPONENTS ${BOOST_PYTHON_COMPONENT} log log_setup date_time system filesystem thread chrono atomic REQUIRED)
         IF (Boost_python3_FOUND)
             MESSAGE("++ Found System Boost::python3 : ${Boost_PYTHON3_LIBRARY}")
         ELSEIF (Boost_python_FOUND)
