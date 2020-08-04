@@ -78,11 +78,11 @@ bool CanFaceTarget( Unit *su, Unit *targ, const Matrix &matrix )
 {
     return true;
 
-    float limitmin = su->Limits().limitmin;
+    float limitmin = su->limits.limitmin;
     if (limitmin > -.99) {
         QVector pos   = ( targ->Position()-su->Position() ).Normalize();
         QVector pnorm = pos.Cast();
-        Vector  structurelimits = su->Limits().structurelimits;
+        Vector  structurelimits = su->limits.structurelimits;
         Vector  worldlimit = TransformNormal( matrix, structurelimits );
         if (pnorm.Dot( worldlimit ) < limitmin)
             return false;
@@ -234,7 +234,7 @@ float Priority( Unit *me, Unit *targ, float gunrange, float rangetotarget, float
 {
     if (relationship >= 0)
         return -1;
-    if (targ->GetHull() < 0)
+    if (targ->hull < 0)
         return -1;
     *rolepriority = ROLES::getPriority( me->attackPreference() )[targ->unitRole()];     //number btw 0 and 31 higher better
     char invrolepriority = 31-*rolepriority;
@@ -735,7 +735,7 @@ void FireAt::Execute()
     bool istargetjumpableplanet = false;
     if ( ( targ = parent->Target() ) ) {
         istargetjumpableplanet = isJumpablePlanet( targ );
-        if (targ->CloakVisible() > .8 && targ->GetHull() >= 0) {
+        if (targ->CloakVisible() > .8 && targ->hull >= 0) {
             had_target = true;
             if (parent->GetNumMounts() > 0)
                 if (!istargetjumpableplanet)
