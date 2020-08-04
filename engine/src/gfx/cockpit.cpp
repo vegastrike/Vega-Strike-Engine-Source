@@ -19,6 +19,7 @@
 #include "universe.h"
 #include "star_system.h"
 #include "cmd/unit_generic.h"
+#include "cmd/movable.h"
 #include "cmd/unit_factory.h"
 #include "cmd/collection.h"
 #include "cmd/unit_util.h"
@@ -1169,7 +1170,7 @@ float GameCockpit::LookupUnitStat( int stat, Unit *target )
         return target->graphicOptions.WarpFieldStrength;
 
     case UnitImages< void >::MAXWARPFIELDSTRENGTH:
-        return target->GetMaxWarpFieldStrength();
+        return target->GetMaxWarpFieldStrength(1.f);
 
     case UnitImages< void >::JUMP:
         return jumpok ? 1 : 0;
@@ -3546,11 +3547,11 @@ void GameCockpit::updateRadar(Unit*ship) {
         // radar display is instantiated when we undock.
         switch (ship->GetComputerData().radar.GetBrand())
         {
-        case Unit::Computer::RADARLIM::Brand::BUBBLE:
+        case Computer::RADARLIM::Brand::BUBBLE:
             radarDisplay = Radar::Factory(Radar::Type::BubbleDisplay);
             break;
 
-        case Unit::Computer::RADARLIM::Brand::PLANE:
+        case Computer::RADARLIM::Brand::PLANE:
             radarDisplay = Radar::Factory(Radar::Type::PlaneDisplay);
             break;
 

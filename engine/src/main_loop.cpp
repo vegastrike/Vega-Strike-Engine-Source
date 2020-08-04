@@ -8,6 +8,7 @@
 #include <stdlib.h>
 #include "lin_time.h"
 #include "cmd/unit.h"
+#include "cmd/movable.h"
 #include "cmd/unit_factory.h"
 #include "vegastrike.h"
 #include "vs_globals.h"

@@ -11,6 +11,7 @@
 #include "ai/aggressive.h"
 #include "enhancement.h"
 #include "building.h"
+#include "planetary_orbit.h"
 
 // TODO: For comparison only - remove
 #include "terrain.h"

@@ -5,6 +5,8 @@
 #include "universe_util.h"
 #include "gldrv/winsys.h"
 #include "options.h"
+#include "computer.h"
+
 #include <math.h>
 
 
