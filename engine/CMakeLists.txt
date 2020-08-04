@@ -1123,6 +1123,7 @@ MARK_AS_ADVANCED(FORCE
 )
 INSTALL(TARGETS vegastrike DESTINATION bin)
 
+SET(CPACK_PACKAGE_NAME "Vega-Strike")
 SET(CPACK_PACKAGE_DESCRIPTION_SUMMARY "3D OpenGL spaceflight simulator")
 SET(CPACK_PACKAGE_VENDOR "Vega Strike")
 SET(CPACK_PACKAGE_DESCRIPTION_FILE "${CMAKE_CURRENT_SOURCE_DIR}/../README.md")
@@ -1185,23 +1186,6 @@ ELSEIF (CMAKE_SYSTEM_NAME STREQUAL Linux)
         MESSAGE("Found Linux Distribution Release Name: ${LSB_LINUX_DISTRIBUTION_CODENAME}")
     ENDIF (LSB_RELEASE_EXEC)
 
-    # IF (EXISTS "/etc/lsb-release" )
-    #     MESSAGE("Found /etc/lsb-release")
-    #     SET(LSB_EXISTS "LSB Data IS available" ON)
-    #     # Ubuntu Version: /etc/lsb-release - DISTRIB_ID=Ubuntu, DISTRIB_CODENAME=<name>
-    #     FILE(STRINGS "/etc/lsb-release" LSB_DATA)
-    #     FOREACH(LSB_DATA_ENTRY IN LISTS LSB_DATA)
-    #         MESSAGE("Checking ${LSB_DATA_ENTRY} for match...")
-    #         IF ("${LSB_DATA_ENTRY}" MATCHES "^DISTRIB_ID=(.+)$")
-    #             SET(LSB_LINUX_DISTRIBUTION "${CMAKE_MATCH_1}")
-    #         ELSEIF ("${LSB_DATA_ENTRY}" MATCHES "^DISTRIB_CODENAME=(.+)$")
-    #             SET(LSB_LINUX_DISTRIBUTION_CODENAME "${CMAKE_MATCH_1}")
-    #         ENDIF ("${LSB_DATA_ENTRY}" MATCHES "^DISTRIB_ID=(.+)$")
-    #     ENDFOREACH(LSB_DATA_ENTRY)
-    #     MESSAGE("Found Linux Distribution: ${LSB_LINUX_DISTRIBUTION}")
-    #     MESSAGE("Found Linux Distribution Release Name: ${LSB_LINUX_DISTRIBUTION_CODENAME}")
-    # ENDIF (EXISTS "/etc/lsb-release")
-
     # "DEB"
     FIND_PROGRAM(HAS_APT NAMES apt-get apt)
     IF(HAS_APT)
@@ -1239,22 +1223,18 @@ ELSEIF (CMAKE_SYSTEM_NAME STREQUAL Linux)
             MESSAGE("Still need to generate dependency list")
         ENDIF (EXISTS "${CMAKE_BINARY_DIR}/dependency.list")
 
-        # IF (DEFINED CPACK_DEBIAN_PACKAGE_DEPENDS)
-        #     SET(CPACK_DEBIAN_PACKAGE_DEPENDS "${CPACK_DEBIAN_PACKAGE_DEPENDS}, ")
-        # ELSE (DEFINED CPACK_DEBIAN_PACKAGE_DEPENDS)
-        #     SET(CPACK_DEBIAN_PACKAGE_DEPENDS "")
-        # ENDIF (DEFINED CPACK_DEBIAN_PACKAGE_DEPENDS)
-
         # Alternatively, just set a hard-coded set of dependencies...requires more logic for various platforms.
         IF (USE_DEBIAN_VERSION)
             # Debian Dependency Chain
             IF (DEBIAN_RELEASE_VERSION STREQUAL "buster")
                 SET(CPACK_DEBIAN_PACKAGE_DEPENDS "libpython2.7, libjpeg62-turbo, libpng16-16, freeglut3, libgtk-3-0, libvorbis0a, libopenal1, libsdl-gfx1.2-5, xdg-utils, libgl1, libopengl0, libboost-python1.67.0, libboost-log1.67.0")
             ENDIF ()
+
+            # Add the platform (Ubuntu, Debian, etc) to the filename, including the version (stretch, jessie, etc)
             IF (DEFINED ENV{TRAVIS_TAG})
-                SET(CPACK_PACKAGE_FILE_NAME "vsUTCS_$ENV{TRAVIS_TAG}-debian-${DEBIAN_RELEASE_VERSION}_x86_64")
+                SET(CPACK_PACKAGE_FILE_NAME "${CPACK_DEBIAN_PACKAGE_NAME}_$ENV{TRAVIS_TAG}-debian-${DEBIAN_RELEASE_VERSION}_x86_64")
             ELSE (DEFINED ENV{TRAVIS_TAG})
-                SET(CPACK_PACKAGE_FILE_NAME "vsUTCS_${CPACK_PACKAGE_VERSION_MAJOR}.${CPACK_PACKAGE_VERSION_MINOR}.${CPACK_PACKAGE_VERSION_PATCH}-debian-${DEBIAN_RELEASE_VERSION}_x86_64")
+                SET(CPACK_PACKAGE_FILE_NAME "${CPACK_DEBIAN_PACKAGE_NAME}_${CPACK_PACKAGE_VERSION_MAJOR}.${CPACK_PACKAGE_VERSION_MINOR}.${CPACK_PACKAGE_VERSION_PATCH}-debian-${DEBIAN_RELEASE_VERSION}_x86_64")
             ENDIF (DEFINED ENV{TRAVIS_TAG})
         ELSE (USE_DEBIAN_VERSION)
             # Ubuntu Dependency Chain
@@ -1267,10 +1247,12 @@ ELSEIF (CMAKE_SYSTEM_NAME STREQUAL Linux)
             ELSEIF (LSB_LINUX_DISTRIBUTION_CODENAME STREQUAL "buster")                                                                                                                                                                      # Apparently Debian Buster has lsb_release after all
                 SET(CPACK_DEBIAN_PACKAGE_DEPENDS "libpython2.7, libjpeg62-turbo, libpng16-16, freeglut3, libgtk-3-0, libvorbis0a, libopenal1, libsdl-gfx1.2-5, xdg-utils, libgl1, libopengl0, libboost-python1.67.0, libboost-log1.67.0")
             ENDIF ()
+
+            # Add the platform (Ubuntu, Debian, etc) to the filename, including the version (stretch, jessie, etc)
             IF (DEFINED ENV{TRAVIS_TAG})
-                SET(CPACK_PACKAGE_FILE_NAME "vsUTCS_$ENV{TRAVIS_TAG}-${LSB_LINUX_DISTRIBUTION}-${LSB_LINUX_DISTRIBUTION_CODENAME}_x86_64")
+                SET(CPACK_PACKAGE_FILE_NAME "${CPACK_DEBIAN_PACKAGE_NAME}_$ENV{TRAVIS_TAG}-${LSB_LINUX_DISTRIBUTION}-${LSB_LINUX_DISTRIBUTION_CODENAME}_x86_64")
             ELSE (DEFINED ENV{TRAVIS_TAG})
-                SET(CPACK_PACKAGE_FILE_NAME "vsUTCS_${CPACK_PACKAGE_VERSION_MAJOR}.${CPACK_PACKAGE_VERSION_MINOR}.${CPACK_PACKAGE_VERSION_PATCH}-${LSB_LINUX_DISTRIBUTION}-${LSB_LINUX_DISTRIBUTION_CODENAME}_x86_64")
+                SET(CPACK_PACKAGE_FILE_NAME "${CPACK_DEBIAN_PACKAGE_NAME}_${CPACK_PACKAGE_VERSION_MAJOR}.${CPACK_PACKAGE_VERSION_MINOR}.${CPACK_PACKAGE_VERSION_PATCH}-${LSB_LINUX_DISTRIBUTION}-${LSB_LINUX_DISTRIBUTION_CODENAME}_x86_64")
             ENDIF (DEFINED ENV{TRAVIS_TAG})
         ENDIF (USE_DEBIAN_VERSION)
         SET(CPACK_DEBIAN_PACKAGE_SECTION "Amusements/Games")
