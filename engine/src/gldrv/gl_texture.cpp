@@ -353,11 +353,9 @@ GFXBOOL /*GFXDRVAPI*/ GFXCreateTexture( int width,
     case TEXTURE2D:
         textures[*handle].targets = GL_TEXTURE_2D;
         break;
-#ifdef GL_EXT_texture3D
     case TEXTURE3D:
         textures[*handle].targets = GL_TEXTURE_3D;
         break;
-#endif
     case CUBEMAP:
         textures[*handle].targets = GL_TEXTURE_CUBE_MAP_EXT;
         break;
