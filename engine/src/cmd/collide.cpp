@@ -74,12 +74,12 @@ void collideTrees::Dec()
 
 bool TableLocationChanged( const QVector &Mini, const QVector &minz )
 {
-    return _Universe->activeStarSystem()->collidetable->c.hash_int( Mini.i )
-           != _Universe->activeStarSystem()->collidetable->c.hash_int( minz.i )
-           || _Universe->activeStarSystem()->collidetable->c.hash_int( Mini.j )
-           != _Universe->activeStarSystem()->collidetable->c.hash_int( minz.j )
-           || _Universe->activeStarSystem()->collidetable->c.hash_int( Mini.k )
-           != _Universe->activeStarSystem()->collidetable->c.hash_int( minz.k );
+    return _Universe->activeStarSystem()->collide_table->c.hash_int( Mini.i )
+           != _Universe->activeStarSystem()->collide_table->c.hash_int( minz.i )
+           || _Universe->activeStarSystem()->collide_table->c.hash_int( Mini.j )
+           != _Universe->activeStarSystem()->collide_table->c.hash_int( minz.j )
+           || _Universe->activeStarSystem()->collide_table->c.hash_int( Mini.k )
+           != _Universe->activeStarSystem()->collide_table->c.hash_int( minz.k );
 }
 
 bool TableLocationChanged( const LineCollide &lc, const QVector &minx, const QVector &maxx )
@@ -90,7 +90,7 @@ bool TableLocationChanged( const LineCollide &lc, const QVector &minx, const QVe
 void KillCollideTable( LineCollide *lc, StarSystem *ss )
 {
     if (lc->type == LineCollide::UNIT)
-        ss->collidetable->c.Remove( lc, lc->object.u );
+        ss->collide_table->c.Remove( lc, lc->object.u );
     else
         printf( "such collide types as %d not allowed", lc->type );
 }
@@ -98,7 +98,7 @@ void KillCollideTable( LineCollide *lc, StarSystem *ss )
 bool EradicateCollideTable( LineCollide *lc, StarSystem *ss )
 {
     if (lc->type == LineCollide::UNIT) {
-        return ss->collidetable->c.Eradicate( lc->object.u );
+        return ss->collide_table->c.Eradicate( lc->object.u );
     } else {
         printf( "such collide types as %d not allowed", lc->type );
         return false;
@@ -108,7 +108,7 @@ bool EradicateCollideTable( LineCollide *lc, StarSystem *ss )
 void AddCollideQueue( LineCollide &tmp, StarSystem *ss )
 {
     if (tmp.type == LineCollide::UNIT)
-        ss->collidetable->c.Put( &tmp, tmp.object.u );
+        ss->collide_table->c.Put( &tmp, tmp.object.u );
     else
         printf( "such collide types as %d not allowed", tmp.type );
 }
@@ -135,7 +135,7 @@ bool usehuge_table()
 
 bool Bolt::Collide( Collidable::CollideRef index )
 {
-    return _Universe->activeStarSystem()->collidemap[Unit::UNIT_BOLT]->CheckCollisions( this, **location );
+    return _Universe->activeStarSystem()->collide_map[Unit::UNIT_BOLT]->CheckCollisions( this, **location );
 }
 
 static bool beamCheckCollision( QVector pos, float len, const Collidable &un )
@@ -151,7 +151,7 @@ void Beam::CollideHuge( const LineCollide &lc, Unit *targetToCollideWith, Unit *
         if (targetToCollideWith)
             this->Collide( targetToCollideWith, firer, superunit );
     } else if (curlength) {
-        CollideMap *cm = _Universe->activeStarSystem()->collidemap[Unit::UNIT_ONLY];
+        CollideMap *cm = _Universe->activeStarSystem()->collide_map[Unit::UNIT_ONLY];
 
         CollideMap::iterator superloc = superunit->location[Unit::UNIT_ONLY];
         CollideMap::iterator tmore    = superloc;

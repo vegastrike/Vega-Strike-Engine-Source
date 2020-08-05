@@ -532,7 +532,7 @@ void FireAt::ChooseTargets( int numtargs, bool force )
     }
     if (unitLocator.action.mytarg == NULL)      //decided to rechoose or did not have initial target
         findObjects(
-            _Universe->activeStarSystem()->collidemap[Unit::UNIT_ONLY], parent->location[Unit::UNIT_ONLY], &unitLocator );
+            _Universe->activeStarSystem()->collide_map[Unit::UNIT_ONLY], parent->location[Unit::UNIT_ONLY], &unitLocator );
     Unit *mytarg = unitLocator.action.mytarg;
     targetpick += queryTime()-pretable;
     if (mytarg) {

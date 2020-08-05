@@ -325,7 +325,7 @@ void GameUnit< UnitType >::DrawNow()
     DrawNow( identity_matrix, 1000000000 );
 }
 
-extern double calc_blend_factor( double frac, int priority, int when_it_will_be_simulated, int cur_simulation_frame );
+extern double calc_blend_factor( double frac, unsigned int priority, unsigned int when_it_will_be_simulated, unsigned int cur_simulation_frame );
 
 template < class UnitType >
 void GameUnit< UnitType >::Draw( const Transformation &parent, const Matrix &parentMatrix )

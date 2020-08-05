@@ -14,6 +14,7 @@
 #include "gfx/cockpit_generic.h"
 #include "vsfilesystem.h"
 #include "cmd/fg_util.h"
+#include "star_system.h"
 
 #include "options.h"
 

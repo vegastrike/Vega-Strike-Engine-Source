@@ -25,6 +25,7 @@
 #include "cmd/unit_find.h"
 #include "faction_generic.h"
 #include "docking.h"
+#include "star_system.h"
 
 extern double aggfire;
 
@@ -1189,7 +1190,7 @@ static Unit * ChooseNavPoint( Unit *parent, Unit **otherdest, float *lurk_on_arr
             return ret;
     }
     StarSystem *ss = _Universe->activeStarSystem();
-    StarSystem::Statistics *stats = &ss->stats;
+    Statistics *stats = &ss->stats;
 
     float sysrel   = UnitUtil::getRelationFromFaction( parent, stats->system_faction );
     static float lurk_time   = XMLSupport::parse_float( vs_config->getVariable( "AI", "lurk_time", "600" ) );
@@ -1311,7 +1312,7 @@ static Unit * ChooseNearNavPoint( Unit *parent, Unit *suggestion, QVector locati
     float dist = FLT_MAX;
     Unit *un;
     NearestNavOrCapshipLocator nnl;
-    findObjects( _Universe->activeStarSystem()->collidemap[Unit::UNIT_ONLY],
+    findObjects( _Universe->activeStarSystem()->collide_map[Unit::UNIT_ONLY],
                  parent->location[Unit::UNIT_ONLY],
                  &nnl );
     return nnl.retval.unit;

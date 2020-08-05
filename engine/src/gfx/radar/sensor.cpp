@@ -193,7 +193,7 @@ const Sensor::TrackCollection& Sensor::FindTracksInRange() const
     unitLocator.action.init(this, &collection, player);
     if (! is_null(player->location[Unit::UNIT_ONLY]))
     {
-        findObjects(_Universe->activeStarSystem()->collidemap[Unit::UNIT_ONLY],
+        findObjects(_Universe->activeStarSystem()->collide_map[Unit::UNIT_ONLY],
                     player->location[Unit::UNIT_ONLY],
                     &unitLocator);
     }

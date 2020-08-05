@@ -28,6 +28,7 @@
 //#include "in_mouse.h"
 //#include "gui/glut_support.h"
 #include "save_util.h"
+#include "star_system.h"
 
 #include <algorithm>
 

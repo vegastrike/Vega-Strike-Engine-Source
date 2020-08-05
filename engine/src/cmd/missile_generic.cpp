@@ -12,34 +12,10 @@
 #include "faction_generic.h"
 #include "unit_util.h"
 #include "vsfilesystem.h"
+#include "star_system.h"
 
 
-void StarSystem::UpdateMissiles()
-{
-    //if false, missiles collide with rocks as units, but not harm them with explosions
-    //FIXME that's how it's used now, but not really correct, as there could be separate AsteroidWeaponDamage for this
-    static bool collideroids = XMLSupport::parse_bool( vs_config->getVariable( "physics", "AsteroidWeaponCollision", "false" ) );
 
-    //WARNING: This is a big performance problem...
-    //...responsible for many hiccups.
-    //TODO: Make it use the collidemap to only iterate through potential hits...
-    //PROBLEM: The current collidemap does not allow this efficiently (no way of
-    //taking the other unit's rSize() into account).
-    if ( !dischargedMissiles.empty() ) {
-        if ( dischargedMissiles.back()->GetRadius() > 0 ) {           //we can avoid this iterated check for kinetic projectiles even if they "discharge" on hit
-            Unit *un;
-            for ( un_iter ui = getUnitList().createIterator();
-                  NULL != ( un = (*ui) );
-                  ++ui ) {
-                enum clsptr type = un->isUnit();
-                if (collideroids || type != ASTEROIDPTR )           // could check for more, unless someone wants planet-killer missiles, but what it would change?
-                    dischargedMissiles.back()->ApplyDamage( un );
-            }
-        }
-        delete dischargedMissiles.back();
-        dischargedMissiles.pop_back();
-    }
-}
 
 void MissileEffect::DoApplyDamage(Unit *parent, Unit *un, float distance, float damage_fraction) {
     QVector norm = pos-un->Position();
@@ -129,10 +105,7 @@ float Missile::ExplosionRadius()
     return radial_effect*(missile_multiplier);
 }
 
-void StarSystem::AddMissileToQueue( MissileEffect *me )
-{
-    dischargedMissiles.push_back( me );
-}
+
 
 void Missile::Discharge() {
     if ( (damage != 0 || phasedamage != 0) && !discharged ) {

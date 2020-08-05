@@ -3,6 +3,7 @@
 #include "unit_generic.h"
 #include "universe_util.h"
 #include "unit_find.h"
+#include "star_system.h"
 
 #include <iostream>
 

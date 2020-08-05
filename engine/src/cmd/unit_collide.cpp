@@ -39,11 +39,11 @@ void Unit::RemoveFromSystem()
             if (collidemap_sanity_check) {
                 if (0) {
                     CollideMap::iterator i;
-                    CollideMap::iterator j = activeStarSystem->collidemap[locind]->begin();
+                    CollideMap::iterator j = activeStarSystem->collide_map[locind]->begin();
 
                     bool found = false;
-                    for (i = activeStarSystem->collidemap[locind]->begin();
-                         i != activeStarSystem->collidemap[locind]->end(); ++i) {
+                    for (i = activeStarSystem->collide_map[locind]->begin();
+                         i != activeStarSystem->collide_map[locind]->end(); ++i) {
                         if (i == this->location[locind]) {
                             printf( "hussah %d\n", *i == *this->location[locind] );
                             found = true;
@@ -64,11 +64,11 @@ void Unit::RemoveFromSystem()
                         j = i;
                     }
                     printf( "fin %d %d ", *(int*) &i, found );
-                    activeStarSystem->collidemap[locind]->checkSet();
+                    activeStarSystem->collide_map[locind]->checkSet();
                     assert( 0 );
                 }
             }
-            activeStarSystem->collidemap[locind]->erase( this->location[locind] );
+            activeStarSystem->collide_map[locind]->erase( this->location[locind] );
             set_null( this->location[locind] );
         }
     for (int j = 0; j < GetNumMounts(); ++j)
@@ -89,7 +89,7 @@ void Unit::UpdateCollideQueue( StarSystem *ss, CollideMap::iterator hint[NUM_COL
         if ( is_null( location[locind] ) ) {
             assert( !isSubUnit() );
             if ( !isSubUnit() )
-                location[locind] = ss->collidemap[locind]->insert( Collidable( this ), hint[locind] );
+                location[locind] = ss->collide_map[locind]->insert( Collidable( this ), hint[locind] );
         }
 }
 
@@ -100,8 +100,8 @@ void Unit::CollideAll()
         return;
     for (unsigned int locind = 0; locind < NUM_COLLIDE_MAPS; ++locind)
         if ( is_null( this->location[locind] ) )
-            this->location[locind] = this->getStarSystem()->collidemap[locind]->insert( Collidable( this ) );
-    CollideMap *cm = this->getStarSystem()->collidemap[Unit::UNIT_BOLT];
+            this->location[locind] = this->getStarSystem()->collide_map[locind]->insert( Collidable( this ) );
+    CollideMap *cm = this->getStarSystem()->collide_map[Unit::UNIT_BOLT];
     cm->CheckCollisions( this, *this->location[Unit::UNIT_BOLT] );
 }
 

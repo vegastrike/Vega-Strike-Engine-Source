@@ -48,6 +48,8 @@
 #include "msgcenter.h"
 #include "pythonmission.h"
 
+#include "star_system.h"
+
 using std::cout;
 using std::cerr;
 using std::endl;

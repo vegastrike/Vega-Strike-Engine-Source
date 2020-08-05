@@ -12,6 +12,7 @@
 #include "warpto.h"
 #include "flybywire.h"
 #include "cmd/unit_util.h"
+#include "star_system.h"
 
 using namespace Orders;
 /**
