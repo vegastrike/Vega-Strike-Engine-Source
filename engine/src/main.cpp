@@ -261,7 +261,7 @@ void initLoggingPart1()
         std::cerr,
         //keywords::filter              = (logging::trivial::severity >= logging::trivial::fatal),      /*< on the console, only show messages that are fatal to Vega Strike >*/
         keywords::format                = "%Message%",                                                  /*< log record format specific to the console >*/
-        keywords::auto_flush            = false /*true*/                                                /*< whether to do the equivalent of fflush(stdout) after every msg >*/
+        keywords::auto_flush            = true /*false*/                                                /*< whether to do the equivalent of fflush(stdout) after every msg >*/
     );
 }
 
@@ -292,7 +292,7 @@ void initLoggingPart2(char debugLevel)
         keywords::rotation_size         = 10 * 1024 * 1024,                                             /*< rotate files every 10 MiB... >*/
         keywords::time_based_rotation   = sinks::file::rotation_at_time_point(0, 0, 0),                 /*< ...or at midnight >*/
         keywords::format                = "[%TimeStamp%]: %Message%",                                   /*< log record format >*/
-        keywords::auto_flush            = false,                                                        /*< whether to auto flush to the file after every line >*/
+        keywords::auto_flush            = true, /*false,*/                                              /*< whether to auto flush to the file after every line >*/
         keywords::min_free_space        = 1 * 1024 * 1024 * 1024                                        /*< stop logging when there's only 1 GiB free space left >*/
     );
 

@@ -5,11 +5,11 @@
 #include "vs_limits.h"
 #include "gfx/quaternion.h"
 
-class Transformation;
+struct Transformation;
 class Matrix;
 class Unit;
 class UnitCollection;
-class Quaternion;
+struct Quaternion;
 
 
 class Movable

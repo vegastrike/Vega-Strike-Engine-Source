@@ -678,7 +678,7 @@ void StarSystem::Update( float priority, bool executeDirector )
     double bolttime = 0;
     if (time > simulation_atom_var ){
         if (time > simulation_atom_var * 2) {
-            BOOST_LOG_TRIVIAL(trace) << boost::format("void StarSystem::Update( float priority, bool executeDirector ): time, %1$.6f, is more than twice simulation_atom_var, %2$.6f") % time % simulation_atom_var;
+            //BOOST_LOG_TRIVIAL(trace) << boost::format("void StarSystem::Update( float priority, bool executeDirector ): time, %1$.6f, is more than twice simulation_atom_var, %2$.6f") % time % simulation_atom_var;
         }
         //Chew up all sim_atoms that have elapsed since last update
         // ** stephengtuggy 2020-07-23: We definitely need this block of code! **

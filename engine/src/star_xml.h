@@ -8,7 +8,7 @@ using namespace XMLSupport;
 class Terrain;
 class ContinuousTerrain;
 class Planet;
-class AtmosphericFogMesh;
+struct AtmosphericFogMesh;
 
 struct Star_XML
 {

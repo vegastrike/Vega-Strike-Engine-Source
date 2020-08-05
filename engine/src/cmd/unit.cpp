@@ -109,8 +109,10 @@ template < class UnitType >GameUnit< UnitType >::GameUnit( const char *filename,
 template < class UnitType >GameUnit< UnitType >::~GameUnit()
 {
     for (unsigned int meshcount = 0; meshcount < this->meshdata.size(); meshcount++)
-        if (this->meshdata[meshcount])
+        if (this->meshdata[meshcount]) {
             delete this->meshdata[meshcount];
+            this->meshdata[meshcount] = nullptr;
+        }
     this->meshdata.clear();
     //delete phalos;
 }

@@ -728,14 +728,18 @@ Unit::Unit( const char *filename,
 Unit::~Unit()
 {
     free( pImage->cockpit_damage );
-    if ( (!killed) )
+    if ( (!killed) ) {
         // stephengtuggy 2020-07-27 - I think this message was mistakenly put in. This happens all the time when buying and selling cargo or ship upgrades.
-        //VSFileSystem::vs_fprintf( stderr, "Assumed exit on unit %s(if not quitting, report error)\n",
-        //    name.get().c_str() );
-    if (ucref)
-        VSFileSystem::vs_fprintf( stderr, "DISASTER AREA!!!!" );
-    VSFileSystem::vs_dprintf( 3, "Deallocating unit %s addr=0x%08x refs=%d\n",
-        name.get().c_str(), this, ucref );
+        // stephengtuggy 2020-08-03 - Maybe not.
+        BOOST_LOG_TRIVIAL(error) << boost::format("Assumed exit on unit %1%(if not quitting, report error)")
+                                    % name;
+    }
+    if (ucref) {
+        BOOST_LOG_TRIVIAL(fatal) << "DISASTER AREA!!!!";
+        VSFileSystem::flushLogs();
+    }
+    BOOST_LOG_TRIVIAL(trace) << boost::format("Deallocating unit %1$s addr=0x%2$08x refs=%3$d")
+                                % name.get().c_str() % this % ucref;
 #ifdef DESTRUCTDEBUG
     VSFileSystem::vs_fprintf( stderr, "stage %d %x %d\n", 0, this, ucref );
     fflush( stderr );
@@ -3451,8 +3455,8 @@ void Unit::Kill( bool erasefromsave, bool quitting )
     //}
 
     if (ucref == 0) {
-        VSFileSystem::vs_dprintf( 3, "UNIT DELETION QUEUED: %s %s (file %s, addr 0x%08x)\n", name.get().c_str(),
-               fullname.c_str(), filename.get().c_str(), this );
+        BOOST_LOG_TRIVIAL(trace) << boost::format("UNIT DELETION QUEUED: %1$s %2$s (file %3$s, addr 0x%4$08x)")
+                                    % name.get().c_str() % fullname.c_str() % filename.get().c_str() % this;
         Unitdeletequeue.push_back( this );
         if (flightgroup)
             if (flightgroup->leader.GetUnit() == this)

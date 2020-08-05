@@ -481,17 +481,26 @@ GFXVertexList::~GFXVertexList()
             (*glDeleteBuffersARB_p)(1, (GLuint*) &display_list);
     } else
 #endif
-    if (display_list)
+    if (display_list) {
         GFXDeleteList( display_list );          //delete dis
-    if (offsets)
+        display_list = 0;
+    }
+    if (offsets) {
         delete[] offsets;
-    if (mode)
+        offsets = nullptr;
+    }
+    if (mode) {
         delete[] mode;
+        mode = nullptr;
+    }
     if (changed&HAS_COLOR) {
-        if (data.colors)
+        if (data.colors) {
             free( data.colors );
+            data.colors = nullptr;
+        }
     } else if (data.vertices) {
         free( data.vertices );
+        data.vertices = nullptr;
     }
 }
 
