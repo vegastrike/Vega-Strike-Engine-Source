@@ -275,7 +275,7 @@ public:
     bool isNull()
     {
         Unit *un = GetUnit();
-        if (un) if (un->GetHull() <= 0) return true;
+        if (un) if (un->hull <= 0) return true;
         return un == 0;
     }
     bool notNull()

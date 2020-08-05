@@ -19,6 +19,7 @@
 #include "universe_util.h"
 #include "cmd/atmosphere.h"
 #include "star_xml.h"
+#include "planetary_orbit.h"
 
 #include "options.h"
 

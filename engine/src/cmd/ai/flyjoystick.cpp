@@ -164,7 +164,7 @@ void FlyByJoystick::Execute()
                     bool  inverse       = joystick[joy_nr]->axis_inverse[AXIS_THROTTLE];
                     float axis_value    = -joystick[joy_nr]->joy_axis[config_axis];
                     if (inverse) axis_value = -axis_value;
-                    Unit::Computer *cpu = &parent->GetComputerData();
+                    Computer *cpu = &parent->GetComputerData();
                     if (axis_value > 1)
                         axis_value = 1;
                     if (axis_value < -1)

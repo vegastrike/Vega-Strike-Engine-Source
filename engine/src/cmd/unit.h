@@ -155,9 +155,7 @@ public:
     void Thrust( const Vector &amt, bool afterburn = false );
 ///Resolves forces of given unit on a physics frame
     Vector ResolveForces( const Transformation&, const Matrix& );
-//these functions play the damage sounds
-    virtual void ArmorDamageSound( const Vector &pnt );
-    virtual void HullDamageSound( const Vector &pnt );
+
 ///applies damage from the given pnt to the shield, and returns % damage applied and applies lighitn
     float DealDamageToShield( const Vector &pnt, float &Damage );
 /*

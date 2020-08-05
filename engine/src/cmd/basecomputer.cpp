@@ -54,6 +54,7 @@ using VSFileSystem::SaveFile;
 #include "gamemenu.h" //network menu.
 #include "audiolib.h"
 #include "vs_math.h"
+#include "damageable.h"
 //#define VS_PI 3.1415926535897931
 
 
@@ -3927,6 +3928,7 @@ void SwapInNewShipName( Cockpit *cockpit, Unit *base, const std::string &newFile
 
 string buildShipDescription( Cargo &item, std::string &texturedescription )
 {
+    BOOST_LOG_TRIVIAL(debug) << "Entering buildShipDescription";
     //load the Unit
     string newModifications;
     if (item.GetCategory().find( "My_Fleet" ) != string::npos)
@@ -3935,7 +3937,8 @@ string buildShipDescription( Cargo &item, std::string &texturedescription )
     Flightgroup *flightGroup = new Flightgroup();
     int    fgsNumber = 0;
     current_unit_load_mode = NO_MESH;
-    Unit  *newPart   = UnitFactory::createUnit( item.GetContent().c_str(), false, 0, newModifications,
+    BOOST_LOG_TRIVIAL(debug) << "buildShipDescription: creating newPart";
+    Unit* newPart = UnitFactory::createUnit( item.GetContent().c_str(), false, 0, newModifications,
                                                 flightGroup, fgsNumber );
     current_unit_load_mode = DEFAULT;
     string sHudImage;
@@ -3956,9 +3959,16 @@ string buildShipDescription( Cargo &item, std::string &texturedescription )
     }
     std::string str;
     showUnitStats( newPart, str, 0, 0, item );
-    delete newPart;
+    BOOST_LOG_TRIVIAL(debug) << "buildShipDescription: killing newPart";
+    newPart->Kill();
+    // BOOST_LOG_TRIVIAL(debug) << "buildShipDescription: deleting newPart";
+    // delete newPart;
+    // newPart = nullptr;
     if ( texturedescription != "" && ( string::npos == str.find( '@' ) ) )
         str = "@"+texturedescription+"@"+str;
+    BOOST_LOG_TRIVIAL(debug) << boost::format("buildShipDescription: texturedescription == %1%") % texturedescription;
+    BOOST_LOG_TRIVIAL(debug) << boost::format("buildShipDescription: return value       == %1%") % str;
+    BOOST_LOG_TRIVIAL(debug) << "Leaving buildShipDescription";
     return str;
 }
 
@@ -3976,7 +3986,8 @@ string buildUpgradeDescription( Cargo &item )
     string str = "";
     str += item.description;
     showUnitStats( newPart, str, 0, 1, item );
-    delete newPart;
+    newPart->Kill();
+    // delete newPart;
     return str;
 }
 
@@ -4790,8 +4801,8 @@ void showUnitStats( Unit *playerUnit, string &text, int subunitlevel, int mode, 
     }
     //const Unit::Computer uc  = playerUnit->ViewComputerData();
     //const Unit::Computer buc = blankUnit->ViewComputerData();
-    const Unit::Computer &uc  = playerUnit->ViewComputerData();
-    const Unit::Computer &buc = blankUnit->ViewComputerData();
+    const Computer &uc  = playerUnit->ViewComputerData();
+    const Computer &buc = blankUnit->ViewComputerData();
     if (!mode) {
         text += "#n##n#"+prefix+"#c0:1:.5#[FLIGHT CHARACTERISTICS]#n##-c";
         text += "#n#"+prefix+statcolor+"Turning response: #-c";
@@ -5136,7 +5147,7 @@ void showUnitStats( Unit *playerUnit, string &text, int subunitlevel, int mode, 
     const Unit::UnitJump &uj  = playerUnit->GetJumpStatus();
     const Unit::UnitJump &buj = blankUnit->GetJumpStatus();
     if (!mode) {
-        float maxshield = totalShieldEnergyCapacitance( playerUnit->shield );
+        float maxshield = Damageable::totalShieldEnergyCapacitance( playerUnit->shield );
         if (shields_require_power)
             maxshield = 0;
         PRETTY_ADDU( statcolor+"Recharge: #-c", playerUnit->EnergyRechargeData()*RSconverter, 0, "MJ/s" );
@@ -5641,7 +5652,7 @@ void showUnitStats( Unit *playerUnit, string &text, int subunitlevel, int mode, 
         return;
     if (subunitlevel == 0 && mode == 0) {
         text += "#n##n##c0:1:.5#"+prefix+"[KEY FIGURES]#n##-c";
-        float maxshield = totalShieldEnergyCapacitance( playerUnit->shield );
+        float maxshield = Damageable::totalShieldEnergyCapacitance( playerUnit->shield );
         if (shields_require_power)
             maxshield = 0;
         PRETTY_ADDU( statcolor+"Minimum time to reach full overthrust speed: #-c",
