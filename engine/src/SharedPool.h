@@ -2,6 +2,7 @@
 #define __STRINGPOOL_H__INCLUDED__
 #include <string>
 #include "gnuhash.h"
+//#include "vsfilesystem.h"
 
 
 #ifndef INITIAL_STRINGPOOL_SIZE
@@ -46,19 +47,21 @@ public:
         void unref()
         {
             if ( _rc && ( _it != _rc->end() ) ) {
-                if ( (_it->second == 0) || ( ( --(_it->second) ) == 0 ) )
+                if ( (_it->second == 0) || ( ( --(_it->second) ) == 0 ) ) {
                     _rc->erase( _it );
-                _it = _rc->end();
+                }
+                _it = _rc->end(); // Should this be inside the if block?
             }
         }
 
         void ref()
         {
-            if ( _rc && ( _it != _rc->end() ) )
+            if ( _rc && ( _it != _rc->end() ) ) {
                 ++(_it->second);
+            }
         }
 
-    public: 
+    public:
         Reference() :
             _it( SharedPool::getSingleton().referenceCounter.end() )
             , _rc( &SharedPool::getSingleton().referenceCounter )
@@ -98,7 +101,11 @@ public:
         const T& get() const
         {
             static T empty_value;
-            return ( _rc && ( _it != _rc->end() ) ) ? _it->first : empty_value;
+            if ( _rc && ( _it != _rc->end() ) && (_it->second > 0) ) {
+                return _it->first;
+            } else {
+                return empty_value;
+            }
         }
 
         Reference& set( const T &s )
