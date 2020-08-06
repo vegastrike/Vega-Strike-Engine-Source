@@ -6305,7 +6305,7 @@ void Unit::EjectCargo( unsigned int index )
 
     Cockpit *cp = NULL;
     if ( index == (UINT_MAX-1) ) {
-        _Universe->CurrentCockpit();
+//        _Universe->CurrentCockpit();
         //this calls the unit's existence, by the way.
         name = "return_to_cockpit";
         if ( NULL != ( cp = _Universe->isPlayerStarship( this ) ) ) {
