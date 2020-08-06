@@ -7855,7 +7855,6 @@ float Unit::DealDamageToHull( const Vector &pnt, float damage)
     }
 
   // Play Damage Sound
-      XMLSupport::parse_float( vs_config->getVariable( "audio", "damage_factor_for_sound", ".001" ) );
   if(did_hull_damage) {
       HullDamageSound ( pnt );
   } else {
