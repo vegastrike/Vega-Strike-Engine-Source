@@ -889,7 +889,8 @@ void Takeoff( Order *aisc, Unit *un )
     ord = ( new Orders::FaceTargetITTS( 0, 3 ) );
     AddOrd( aisc, un, ord );
     un->SelectAllWeapon( false );
-    un->Fire( (weapon_info::LIGHT || weapon_info::MEDIUM), false );
+    un->Fire( (weapon_info::LIGHT), false );
+    un->Fire( (weapon_info::MEDIUM), false );
     TurnTowards( aisc, un );
 }
 
