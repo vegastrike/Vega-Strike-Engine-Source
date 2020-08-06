@@ -1312,7 +1312,6 @@ void Unit::Fire( unsigned int weapon_type_bitmask, bool listen_to_owner )
         return;
     }
     unsigned int mountssize = mounts.size();
-//    int playernum = 
     _Universe->whichPlayerStarship( this );
     vector< int >gunFireRequests;
     vector< int >missileFireRequests;
