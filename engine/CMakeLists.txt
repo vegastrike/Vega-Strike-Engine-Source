@@ -1,14 +1,6 @@
 #====================================
 # @file   : CMakeLists.txt
-# @version: 2020-07-27
-# @created: 2008-06-08
-# @author : safemode
-# @author : Anth0rx
-# @author : pyramid
-# @author : vegastrike development team
 # @brief  : cmake configuration file for VegaStrike
-# @usage  : cmake dir-with-this-file
-# @param  : none
 #====================================
 # create a build directory somewhere outside of this source tree
 # > cd .. && mkdir build && cd build
@@ -1132,6 +1124,7 @@ MARK_AS_ADVANCED(FORCE
 )
 INSTALL(TARGETS vegastrike DESTINATION bin)
 
+SET(CPACK_PACKAGE_NAME "Vega-Strike")
 SET(CPACK_PACKAGE_DESCRIPTION_SUMMARY "3D OpenGL spaceflight simulator")
 SET(CPACK_PACKAGE_VENDOR "Vega Strike")
 SET(CPACK_PACKAGE_DESCRIPTION_FILE "${CMAKE_CURRENT_SOURCE_DIR}/../README.md")
@@ -1140,7 +1133,7 @@ SET(CPACK_PACKAGE_VERSION_MAJOR "0")
 SET(CPACK_PACKAGE_VERSION_MINOR "6")
 SET(CPACK_PACKAGE_VERSION_PATCH "0")
 SET(CPACK_PACKAGE_INSTALL_DIRECTORY "VegaStrike-${CPACK_PACKAGE_VERSION_MAJOR}.${CPACK_PACKAGE_VERSION_MINOR}")
-SET(CPACK_PACKAGE_EXECUTABLES "vegastrike" "mesh_tool" "vegasettings")
+SET(CPACK_PACKAGE_EXECUTABLES "vegastrike" "mesh_tool" "vssetup")
 SET(CPACK_CONTACT "maintainers@vega-strike.org")
 # See https://gitlab.kitware.com/cmake/community/-/wikis/doc/cpack/PackageGenerators for generator lists
 IF (WIN32 AND NOT UNIX)
@@ -1194,30 +1187,13 @@ ELSEIF (CMAKE_SYSTEM_NAME STREQUAL Linux)
         MESSAGE("Found Linux Distribution Release Name: ${LSB_LINUX_DISTRIBUTION_CODENAME}")
     ENDIF (LSB_RELEASE_EXEC)
 
-    # IF (EXISTS "/etc/lsb-release" )
-    #     MESSAGE("Found /etc/lsb-release")
-    #     SET(LSB_EXISTS "LSB Data IS available" ON)
-    #     # Ubuntu Version: /etc/lsb-release - DISTRIB_ID=Ubuntu, DISTRIB_CODENAME=<name>
-    #     FILE(STRINGS "/etc/lsb-release" LSB_DATA)
-    #     FOREACH(LSB_DATA_ENTRY IN LISTS LSB_DATA)
-    #         MESSAGE("Checking ${LSB_DATA_ENTRY} for match...")
-    #         IF ("${LSB_DATA_ENTRY}" MATCHES "^DISTRIB_ID=(.+)$")
-    #             SET(LSB_LINUX_DISTRIBUTION "${CMAKE_MATCH_1}")
-    #         ELSEIF ("${LSB_DATA_ENTRY}" MATCHES "^DISTRIB_CODENAME=(.+)$")
-    #             SET(LSB_LINUX_DISTRIBUTION_CODENAME "${CMAKE_MATCH_1}")
-    #         ENDIF ("${LSB_DATA_ENTRY}" MATCHES "^DISTRIB_ID=(.+)$")
-    #     ENDFOREACH(LSB_DATA_ENTRY)
-    #     MESSAGE("Found Linux Distribution: ${LSB_LINUX_DISTRIBUTION}")
-    #     MESSAGE("Found Linux Distribution Release Name: ${LSB_LINUX_DISTRIBUTION_CODENAME}")
-    # ENDIF (EXISTS "/etc/lsb-release")
-
     # "DEB"
     FIND_PROGRAM(HAS_APT NAMES apt-get apt)
     IF(HAS_APT)
         MESSAGE("-- Configuring Debian Packaging")
         # See https://cmake.org/cmake/help/v3.3/module/CPackDeb.html
-        # TODO: Add the platform (Ubuntu, Debian, etc) to the filename; perhaps version (f.e stretch, jessie, etc) too?
         SET(CPACK_DEBIAN_PACKAGE_MAINTAINER "maintainers@vega-strike.org")
+        SET(CPACK_DEBIAN_PACKAGE_NAME "vega-strike")
         # Debian Version: /etc/debian_version - <name>/<junk>
         IF (NOT LSB_EXISTS)
             SET(USE_DEBIAN_VERSION TRUE)
@@ -1248,16 +1224,19 @@ ELSEIF (CMAKE_SYSTEM_NAME STREQUAL Linux)
         ELSE (EXISTS "${CMAKE_BINARY_DIR}/dependency.list")
             MESSAGE("Still need to generate dependency list")
         ENDIF (EXISTS "${CMAKE_BINARY_DIR}/dependency.list")
+
         # Alternatively, just set a hard-coded set of dependencies...requires more logic for various platforms.
         IF (USE_DEBIAN_VERSION)
             # Debian Dependency Chain
             IF (DEBIAN_RELEASE_VERSION STREQUAL "buster")
                 SET(CPACK_DEBIAN_PACKAGE_DEPENDS "libpython2.7, libjpeg62-turbo, libpng16-16, freeglut3, libgtk2.0-0, libvorbis0a, libopenal1, libsdl-gfx1.2-5, xdg-utils, libgl1, libopengl0, libboost-python1.67.0")
             ENDIF ()
+
+            # Add the platform (Ubuntu, Debian, etc) to the filename, including the version (stretch, jessie, etc)
             IF (DEFINED ENV{TRAVIS_TAG})
-                SET(CPACK_PACKAGE_FILE_NAME "vsUTCS_$ENV{TRAVIS_TAG}-debian-${DEBIAN_RELEASE_VERSION}_x86_64")
+                SET(CPACK_PACKAGE_FILE_NAME "${CPACK_DEBIAN_PACKAGE_NAME}_$ENV{TRAVIS_TAG}-debian-${DEBIAN_RELEASE_VERSION}_x86_64")
             ELSE (DEFINED ENV{TRAVIS_TAG})
-                SET(CPACK_PACKAGE_FILE_NAME "vsUTCS_${CPACK_PACKAGE_VERSION_MAJOR}.${CPACK_PACKAGE_VERSION_MINOR}.${CPACK_PACKAGE_VERSION_PATCH}-debian-${DEBIAN_RELEASE_VERSION}_x86_64")
+                SET(CPACK_PACKAGE_FILE_NAME "${CPACK_DEBIAN_PACKAGE_NAME}_${CPACK_PACKAGE_VERSION_MAJOR}.${CPACK_PACKAGE_VERSION_MINOR}.${CPACK_PACKAGE_VERSION_PATCH}-debian-${DEBIAN_RELEASE_VERSION}_x86_64")
             ENDIF (DEFINED ENV{TRAVIS_TAG})
         ELSE (USE_DEBIAN_VERSION)
             # Ubuntu Dependency Chain
@@ -1270,14 +1249,21 @@ ELSEIF (CMAKE_SYSTEM_NAME STREQUAL Linux)
             ELSEIF (LSB_LINUX_DISTRIBUTION_CODENAME STREQUAL "buster")                                                                                                                                                  # Apparently Debian Buster has lsb_release after all
                 SET(CPACK_DEBIAN_PACKAGE_DEPENDS "libpython2.7, libjpeg62-turbo, libpng16-16, freeglut3, libgtk2.0-0, libvorbis0a, libopenal1, libsdl-gfx1.2-5, xdg-utils, libgl1, libopengl0, libboost-python1.67.0")
             ENDIF ()
+
+            # Add the platform (Ubuntu, Debian, etc) to the filename, including the version (stretch, jessie, etc)
             IF (DEFINED ENV{TRAVIS_TAG})
-                SET(CPACK_PACKAGE_FILE_NAME "vsUTCS_$ENV{TRAVIS_TAG}-${LSB_LINUX_DISTRIBUTION}-${LSB_LINUX_DISTRIBUTION_CODENAME}_x86_64")
+                SET(CPACK_PACKAGE_FILE_NAME "${CPACK_DEBIAN_PACKAGE_NAME}_$ENV{TRAVIS_TAG}-${LSB_LINUX_DISTRIBUTION}-${LSB_LINUX_DISTRIBUTION_CODENAME}_x86_64")
             ELSE (DEFINED ENV{TRAVIS_TAG})
-                SET(CPACK_PACKAGE_FILE_NAME "vsUTCS_${CPACK_PACKAGE_VERSION_MAJOR}.${CPACK_PACKAGE_VERSION_MINOR}.${CPACK_PACKAGE_VERSION_PATCH}-${LSB_LINUX_DISTRIBUTION}-${LSB_LINUX_DISTRIBUTION_CODENAME}_x86_64")
+                SET(CPACK_PACKAGE_FILE_NAME "${CPACK_DEBIAN_PACKAGE_NAME}_${CPACK_PACKAGE_VERSION_MAJOR}.${CPACK_PACKAGE_VERSION_MINOR}.${CPACK_PACKAGE_VERSION_PATCH}-${LSB_LINUX_DISTRIBUTION}-${LSB_LINUX_DISTRIBUTION_CODENAME}_x86_64")
             ENDIF (DEFINED ENV{TRAVIS_TAG})
         ENDIF (USE_DEBIAN_VERSION)
         SET(CPACK_DEBIAN_PACKAGE_SECTION "Amusements/Games")
         SET(CPACK_DEBIAN_PACKAGE_HOMEPAGE "https://www.vega-strike.org")
+
+        # Turns out that the Debian versioning scheme and SemVer are not compatible.
+        # IF (DEFINED ENV{TRAVIS_TAG})
+        #     SET(CPACK_DEBIAN_PACKAGE_VERSION "$ENV{TRAVIS_TAG}")
+        # ENDIF (DEFINED ENV{TRAVIS_TAG})
         LIST(APPEND CPACK_GENERATOR "DEB")
     ENDIF (HAS_APT)
 
