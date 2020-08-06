@@ -1312,7 +1312,8 @@ void Unit::Fire( unsigned int weapon_type_bitmask, bool listen_to_owner )
         return;
     }
     unsigned int mountssize = mounts.size();
-    int playernum = _Universe->whichPlayerStarship( this );
+//    int playernum = 
+    _Universe->whichPlayerStarship( this );
     vector< int >gunFireRequests;
     vector< int >missileFireRequests;
     vector< int >serverUnfireRequests;
@@ -1397,15 +1398,6 @@ void Unit::Fire( unsigned int weapon_type_bitmask, bool listen_to_owner )
             && (i->processed == Mount::FIRED || i->processed == Mount::REQUESTED || i->processed == Mount::PROCESSED) ) {
             i->UnFire();
         }
-    }
-    if ( !gunFireRequests.empty() ) {
-
-            char mis2 = false;
-    }
-
-    //Client missile requests can be grouped because clients only send a boolean, not a serial.
-    if ( !missileFireRequests.empty() ) {
-        char mis2 = true;
     }
 }
 
@@ -3791,7 +3783,7 @@ void Unit::UnFire()
         for (un_iter i = this->getSubUnits(); (tur = *i) != NULL; ++i)
             tur->UnFire();
     } else {
-        int playernum = _Universe->whichPlayerStarship( this );
+        _Universe->whichPlayerStarship( this );
         vector< int >unFireRequests;
         for (int i = 0; i < GetNumMounts(); ++i) {
             if (mounts[i].status != Mount::ACTIVE)
@@ -6314,12 +6306,11 @@ void Unit::EjectCargo( unsigned int index )
 
     Cockpit *cp = NULL;
     if ( index == (UINT_MAX-1) ) {
-        int pilotnum = _Universe->CurrentCockpit();
+        _Universe->CurrentCockpit();
         //this calls the unit's existence, by the way.
         name = "return_to_cockpit";
         if ( NULL != ( cp = _Universe->isPlayerStarship( this ) ) ) {
             isplayer = true;
-            string playernum = string( "player" )+( (pilotnum == 0) ? string( "" ) : XMLSupport::tostring( pilotnum ) );
         }
         //we will have to check for this on undock to return to the parent unit!
         dockedPilot.content = "return_to_cockpit";
@@ -7865,14 +7856,11 @@ float Unit::DealDamageToHull( const Vector &pnt, float damage)
     }
 
   // Play Damage Sound
-  static float damage_factor_for_sound =
       XMLSupport::parse_float( vs_config->getVariable( "audio", "damage_factor_for_sound", ".001" ) );
   if(did_hull_damage) {
       HullDamageSound ( pnt );
   } else {
       ArmorDamageSound( pnt );
-      // Previous code read damage_factor_for_sound and only played ArmorDamageSound if factor exceeded as per the code below
-      // if ( (*targ)*damage_factor_for_sound <= absdamage )
   }
 
   // Ship was destroyed

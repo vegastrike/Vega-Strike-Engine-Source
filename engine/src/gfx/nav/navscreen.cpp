@@ -1769,7 +1769,7 @@ void NavigationSystem::TranslateCoordinates( QVector &pos,
     // as well as to display system names and make systems
     // highlight their names on mouse hover
     // and also make them clickable for setting jump routes
-    float itemscale = CalculatePerspectiveAdjustment(
+    CalculatePerspectiveAdjustment(
         zscale,
         zdistance,
         pos,
