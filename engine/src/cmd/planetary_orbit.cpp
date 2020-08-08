@@ -37,8 +37,7 @@ PlanetaryOrbit::PlanetaryOrbit( Unit *p,
         subtype = (SLOCATION);
         AttachOrder( centre );
     }
-    const double div2pi = ( 1.0/(2.0*PI) );
-
+    
     this->SetParent( p );
 }
 

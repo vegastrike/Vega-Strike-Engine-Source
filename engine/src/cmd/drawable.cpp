@@ -29,43 +29,43 @@ bool Drawable::DrawableInit(const char *filename, int faction,
 
     if(animationExt)
         anifilename += string("_") + string(animationExt);
+    
+    std::vector< Mesh* > *meshes = new vector<Mesh *>();
+    int i = 1;
+    char count[30] = "1";
+    string dir = anifilename;
+    while(true)
+    {
+            sprintf( count, "%d", i );
+            string unit_name = anifilename;
+            boost::algorithm::to_lower(unit_name); //toLowerCase(anifilename) + "_";
 
-	std::vector< Mesh* > *meshes = new vector<Mesh *>();
-	int i = 1;
-	char count[30] = "1";
-	string dir = anifilename;
-	while(true)
-	{
-		sprintf( count, "%d", i );
-		string unit_name = anifilename;
-		boost::algorithm::to_lower(unit_name); //toLowerCase(anifilename) + "_";
+            if(i < 10)
+                    unit_name += "0";
+            if(i < 100)
+                    unit_name += "0";
+            if(i < 1000)
+                    unit_name += "0";
+            if(i < 10000)
+                    unit_name += "0";
+            if(i < 100000)
+                    unit_name += "0";
 
-		if(i < 10)
-			unit_name += "0";
-		if(i < 100)
-			unit_name += "0";
-		if(i < 1000)
-			unit_name += "0";
-		if(i < 10000)
-			unit_name += "0";
-		if(i < 100000)
-			unit_name += "0";
-
-		unit_name += count;
-		string path = dir + "/" + unit_name + ".bfxm";
-		if( VSFileSystem::FileExistsData( path, VSFileSystem::MeshFile ) != -1 )
-		{
-			Mesh *m = Mesh::LoadMesh( path.c_str(), Vector(1,1,1), faction, flightgrp );
-			meshes->push_back( m );
-	#ifdef DEBUG_MESH_ANI
-            // TODO: search and replace cerr with BOOST_LOG_TRIVIAL(error)
-			cerr << "Animated Mesh: " << path << " loaded - with: " << m->getVertexList()->GetNumVertices() << " vertices." << endl;
-	#endif
-		}
-		else
-			break;
-		i++;
-	}
+            unit_name += count;
+            string path = dir + "/" + unit_name + ".bfxm";
+            if( VSFileSystem::FileExistsData( path, VSFileSystem::MeshFile ) != -1 )
+            {
+                    Mesh *m = Mesh::LoadMesh( path.c_str(), Vector(1,1,1), faction, flightgrp );
+                    meshes->push_back( m );
+    #ifdef DEBUG_MESH_ANI
+        // TODO: search and replace cerr with BOOST_LOG_TRIVIAL(error)
+                    cerr << "Animated Mesh: " << path << " loaded - with: " << m->getVertexList()->GetNumVertices() << " vertices." << endl;
+    #endif
+            }
+            else
+                    break;
+            i++;
+    }
 
 
 	if( meshes->size() != 0 )
@@ -120,8 +120,8 @@ void Drawable::AnimationStep()
         if(nextactiveMesh >= vecAnimations.at(activeAnimation)->size())
             nextactiveMesh = 0;
 
-            if(loopCount > 0)
-                loopCount--;
+        if(loopCount > 0)
+            loopCount--;
 #ifdef DEBUG_MESH_ANI
         std::cerr << "Ending animation step of Unit: " << uniqueUnitName << std::endl;
 #endif
