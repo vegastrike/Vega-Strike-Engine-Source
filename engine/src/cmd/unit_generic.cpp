@@ -5930,7 +5930,7 @@ Vector Unit::MountPercentOperational( int whichmount )
     return Vector( mounts[whichmount].functionality,
                   mounts[whichmount].maxfunctionality,
                   ( (mounts[whichmount].status == Mount::ACTIVE || mounts[whichmount].status
-                     == Mount::INACTIVE) ? 0.0 : (Mount::UNCHOSEN ? 2.0 : 1.0) ) );
+                     == Mount::INACTIVE) ? 0.0 : (mounts[whichmount].status == Mount::UNCHOSEN ? 2.0 : 1.0) ) );
 }
 
 int Unit::RepairCost()
