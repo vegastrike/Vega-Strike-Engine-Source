@@ -13,7 +13,7 @@
 CMAKE_MINIMUM_REQUIRED(VERSION 2.6)
 SET(CMAKE_CXX_STANDARD 11)
 
-PROJECT(vsUTCS)
+PROJECT(Vega_Strike)
 
 UNSET(PYTHONLIBS_FOUND)
 UNSET(Boost_FOUND)
@@ -33,9 +33,9 @@ UNSET(OGRE_FOUND)
 UNSET(Boost_DIR)
 
 INCLUDE_DIRECTORIES(
-    ${vsUTCS_SOURCE_DIR}/src
-    ${vsUTCS_SOURCE_DIR}/src/cmd
-    ${vsUTCS_BINARY_DIR}
+    ${Vega_Strike_SOURCE_DIR}/src
+    ${Vega_Strike_SOURCE_DIR}/src/cmd
+    ${Vega_Strike_BINARY_DIR}
     /usr/include/harfbuzz/
 )
 
@@ -748,7 +748,7 @@ INCLUDE(CheckIncludeFileCXX)
 INCLUDE(CheckTypeSize)
 CHECK_TYPE_SIZE("void*" SIZEOF_VOID_P BUILTIN_TYPES_ONLY)
 # Let cmake find our in-tree modules
-SET(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${vsUTCS_SOURCE_DIR})
+SET(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${Vega_Strike_SOURCE_DIR})
 
 # Python 3 has a SASL compatibility issue which causes an error
 # on some installations that prefer Python 3
@@ -804,7 +804,7 @@ IF (NOT USE_SYSTEM_BOOST)
     UNSET(Boost_PYTHON_LIBRARY_RELEASE)
     SET(Boost_DIR ../ext/boost/1_72_0)
     SET(BOOST_PYTHON_NO_PY_SIGNATURES 1)
-    SET(TST_INCLUDES ${TST_INCLUDES} ${vsUTCS_SOURCE_DIR}/${Boost_DIR})
+    SET(TST_INCLUDES ${TST_INCLUDES} ${Vega_Strike_SOURCE_DIR}/${Boost_DIR})
     SET(TST_LIBS ${TST_LIBS} boost_python)
     INCLUDE_DIRECTORIES(${TST_INCLUDES})
     ADD_SUBDIRECTORY(${Boost_DIR} build)
@@ -1025,7 +1025,7 @@ ELSE (UNIX)
     SET(HOSTOS "APPLE")
 ENDIF (UNIX)
 
-CONFIGURE_FILE(${vsUTCS_SOURCE_DIR}/cmake-config.h.in ${vsUTCS_BINARY_DIR}/config.h)
+CONFIGURE_FILE(${Vega_Strike_SOURCE_DIR}/cmake-config.h.in ${Vega_Strike_BINARY_DIR}/config.h)
 
 #end config.h generation
 #SET(CMAKE_CXX_FLAGS "-include config.h;-pipe;"${CMAKE_CXX_FLAGS})
@@ -1043,16 +1043,16 @@ ENDIF(NOT DISABLE_CLIENT)
 # Vssetup Sub build file
 ADD_SUBDIRECTORY(setup)
 
-#ADD_CUSTOM_TARGET(vssetup DEPENDS setup/vssetup COMMAND ln -fs ${vsUTCS_BINARY_DIR}/setup/vssetup vssetup || true)
+#ADD_CUSTOM_TARGET(vssetup DEPENDS setup/vssetup COMMAND ln -fs ${Vega_Strike_BINARY_DIR}/setup/vssetup vssetup || true)
 
 # Add other utilies here
 ADD_SUBDIRECTORY(objconv)
 
-#ADD_CUSTOM_TARGET(mesher DEPENDS objconv/mesher COMMAND ln -fs ${vsUTCS_BINARY_DIR}/objconv/mesher mesher || true)
+#ADD_CUSTOM_TARGET(mesher DEPENDS objconv/mesher COMMAND ln -fs ${Vega_Strike_BINARY_DIR}/objconv/mesher mesher || true)
 
 IF(NOT DISABLE_SERVER)
 TARGET_LINK_LIBRARIES(vegaserver ${TST_SERVER_LIBS})
-SET_TARGET_PROPERTIES(vegaserver PROPERTIES LINK_FLAGS "-L/usr/lib -L${vsUTCS_BINARY_DIR}"
+SET_TARGET_PROPERTIES(vegaserver PROPERTIES LINK_FLAGS "-L/usr/lib -L${Vega_Strike_BINARY_DIR}"
                                             COMPILE_FLAGS "-DNO_GFX")
 ADD_DEPENDENCIES(vegaserver mesh_tool)
 ADD_DEPENDENCIES(vegaserver vssetup)

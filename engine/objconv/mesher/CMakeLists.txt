@@ -17,8 +17,8 @@ IF (EXPAT_FOUND)
         Modules/XMesh_to_Ogre.cpp
         Modules/Wavefront_to_BFXM.cpp
         PrecompiledHeaders/Converter.cpp
-        ${vsUTCS_SOURCE_DIR}/src/hashtable.cpp
-        ${vsUTCS_SOURCE_DIR}/src/xml_support.cpp
+        ${Vega_Strike_SOURCE_DIR}/src/hashtable.cpp
+        ${Vega_Strike_SOURCE_DIR}/src/xml_support.cpp
     )
 
     # Still need to add CEGUI and OGRE find packages
