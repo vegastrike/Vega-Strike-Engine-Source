@@ -24,9 +24,9 @@ IF (NOT BEOS)
 
     ADD_DEFINITIONS(${GTK_CFLAGS})
     INCLUDE_DIRECTORIES(
-        ${vsUTCS_SOURCE_DIR}/setup/src/include
-        ${vsUTCS_SOURCE_DIR}/src/common
-        ${vsUTCS_BINARY_DIR}
+        ${Vega_Strike_SOURCE_DIR}/setup/src/include
+        ${Vega_Strike_SOURCE_DIR}/src/common
+        ${Vega_Strike_BINARY_DIR}
         ${GTK2_INCLUDE_DIRS}
     )
     TARGET_LINK_LIBRARIES(vssetup ${GTK_LIBS})
