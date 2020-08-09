@@ -18,6 +18,8 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
+#pragma once
+
 #ifndef _GL_GLOBALS_H_
 #define _GL_GLOBALS_H_
 #include <queue>
@@ -315,8 +317,8 @@ typedef struct
     int  max_texture_dimension;
     int  max_movie_dimension;
     int  max_rect_dimension;
-    int  max_array_indices;
-    int  max_array_vertices;
+    unsigned int  max_array_indices;
+    unsigned int  max_array_vertices;
     bool rect_textures;
     bool pot_video_textures;
     bool s3tc;
