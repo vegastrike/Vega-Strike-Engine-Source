@@ -1,5 +1,3 @@
-#pragma once
-
 #include <stdio.h>
 #define JPEG_SUPPORT
 #ifdef JPEG_SUPPORT   /* Always true? */
@@ -26,7 +24,7 @@
 #endif //tells VCC not to generate min/max macros
 #include <windows.h>
 #endif
-#include "../vsfilesystem.h"
+#include "vsfilesystem.h"
 #ifdef _WIN32
 #define XMD_H
 #undef HAVE_BOOLEAN

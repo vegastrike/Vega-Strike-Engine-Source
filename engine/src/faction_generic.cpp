@@ -22,7 +22,6 @@ void Faction::ParseAllAllies()
 void Faction::ParseAllies( unsigned int thisfaction )
 {
     unsigned int i, j;
-    std::vector< faction_stuff >faction;
     vector< faction_stuff >tempvec;
     for (i = 0; i < faction.size(); i++){
         for (j = 0; j < factions.size(); j++){
@@ -32,6 +31,7 @@ void Faction::ParseAllies( unsigned int thisfaction )
                 break;
             }
         }
+    }
     for (i = 0; i < factions.size(); i++) {
         tempvec.push_back( faction_stuff() );
         tempvec[i].stats.index  = i;
@@ -43,7 +43,6 @@ void Faction::ParseAllies( unsigned int thisfaction )
         tempvec[faction[i].stats.index].stats = tmp;
     }
     faction.swap( tempvec );
-    }
 
 }
 

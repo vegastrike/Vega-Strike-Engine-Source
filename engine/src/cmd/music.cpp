@@ -475,12 +475,13 @@ void Music::GotoSong( int whichlist, int whichsong, bool skip, int layer )
                     recent.clear();
                 }
             }
-            if ( (layer < 0) && (muzak_count >= 2) )
+            if ( (layer < 0) && (muzak_count >= 2) ){
                 muzak[0].lastlist = muzak[1].lastlist = whichlist;
-
-            else
+            }
+            else{
                 lastlist = whichlist;
             GotoSong( playlist[whichlist][whichsong], layer );
+            }
         } else {
             _SkipRandList( layer );
         }
@@ -491,11 +492,12 @@ void Music::SkipRandSong( int whichlist, int layer )
 {
     if (muzak) {
         if (layer < 0) {
-            if (muzak_count >= 2)
+            if (muzak_count >= 2){
                 muzak[muzak_cross_index]._SkipRandSong( whichlist );
-
-            else
+            }
+            else{
                 muzak->_SkipRandSong( whichlist );
+            }
         } else if ( (layer >= 0) && (layer < muzak_count) ) {
             muzak[layer]._SkipRandSong( whichlist, layer );
         }
@@ -504,17 +506,20 @@ void Music::SkipRandSong( int whichlist, int layer )
 
 void Music::_SkipRandSong( int whichlist, int layer )
 {
-    if (!game_options.Music)
+    if (!game_options.Music){
         return;
+    }
     if ( whichlist != NOLIST && whichlist >= 0 && whichlist < (int) playlist.size() ) {
         lastlist = whichlist;
         static bool random = XMLSupport::parse_bool( vs_config->getVariable( "audio", "shuffle_songs", "true" ) );
-        if ( playlist[whichlist].size() )
+        if ( playlist[whichlist].size() ){
             GotoSong( whichlist, random ? randInt( playlist[whichlist].size() ) : playlist[whichlist].counter++
                         %playlist[whichlist].size(), true, layer );
-        else
+        }
+        else{
             fprintf( stderr, "Error no songs in playlist %d\n", whichlist );
-        return;
+            return;
+        }
     }
     _SkipRandList( layer );
 }

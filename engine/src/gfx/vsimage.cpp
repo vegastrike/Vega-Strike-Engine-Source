@@ -10,11 +10,11 @@
 
 #include "cmd/unit_generic.h"
 
-#include "../vsfilesystem.h"
-#include "../vs_globals.h"
+#include "vsfilesystem.h"
+#include "vs_globals.h"
 #include <string.h>
 #include <png.h>
-#include "../posh.h"
+#include "posh.h"
 
 #ifndef png_jmpbuf
 #  define png_jmpbuf( png_ptr ) ( (png_ptr)->jmpbuf )
@@ -45,7 +45,7 @@ typedef unsigned char boolean;
      |DDS_CUBEMAP_POSITIVEZ|DDS_CUBEMAP_NEGATIVEZ)
 #endif
 
-#include "../gfx/jpeg_memory.h"
+#include "gfx/jpeg_memory.h"
 #include <iostream>
 
 using VSFileSystem::VSError;
