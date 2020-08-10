@@ -5,7 +5,7 @@
 #include "audiolib.h"
 #include "configxml.h"
 #include "images.h"
-#include "../gfx/camera.h"
+#include "gfx/camera.h"
 
 using namespace XMLSupport;
 extern double interpolation_blend_factor;

@@ -674,9 +674,7 @@ void Texture::MakeActive( int stag, int pass )
             {
             case TEXTURE1D:
             case TEXTURE2D:
-        #ifdef GL_EXT_texture3D
             case TEXTURE3D:
-        #endif
             default:
                 address_mode = WRAP;
                 break;
