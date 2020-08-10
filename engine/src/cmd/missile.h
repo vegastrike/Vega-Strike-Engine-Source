@@ -80,6 +80,15 @@ public:
                                              ResolveLast,
                                              uc );
     }
+
+private:
+    // TODO: consider if this is really necessary and if so, use = delete
+/// default constructor forbidden
+    GameMissile();
+/// copy constructor forbidden
+    GameMissile( const Missile& );
+/// assignment operator forbidden
+    GameMissile& operator=( const Missile& );
 };
 
 #endif
