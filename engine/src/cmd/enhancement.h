@@ -7,8 +7,7 @@
 class GameEnhancement : public GameUnit< Enhancement >
 {
     friend class UnitFactory;
-protected:
-/// constructor only to be called by UnitFactory
+public:
     GameEnhancement( const char *filename,
                      int faction,
                      const string &modifications,

@@ -5,7 +5,7 @@
 
 class GameNebula : public GameUnit< Nebula >
 {
-protected:
+public:
 /// constructor only to be called by UnitFactory
     GameNebula( const char *unitfile, bool SubU, int faction, Flightgroup *fg = NULL, int fg_snumber = 0 );
 

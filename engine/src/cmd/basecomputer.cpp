@@ -37,7 +37,7 @@ using VSFileSystem::SaveFile;
 #include "cmd/unit_util.h"
 #include "cmd/music.h"
 #include "cmd/unit_const_cache.h"
-#include "cmd/unit_factory.h"
+#include "unit.h"
 #include "gui/modaldialog.h"
 #include "main_loop.h"              //For QuitNow().
 #include "lin_time.h"
@@ -3937,9 +3937,9 @@ string buildShipDescription( Cargo &item, std::string &texturedescription )
     Flightgroup *flightGroup = new Flightgroup();
     int    fgsNumber = 0;
     current_unit_load_mode = NO_MESH;
+
     BOOST_LOG_TRIVIAL(debug) << "buildShipDescription: creating newPart";
-    Unit* newPart = UnitFactory::createUnit( item.GetContent().c_str(), false, 0, newModifications,
-                                                flightGroup, fgsNumber );
+    Unit  *newPart   = new GameUnit< Unit >( item.GetContent().c_str(), false, 0, newModifications, flightGroup, fgsNumber );
     current_unit_load_mode = DEFAULT;
     string sHudImage;
     string sImage;
@@ -3980,7 +3980,7 @@ string buildUpgradeDescription( Cargo &item )
     Flightgroup *flightGroup = new Flightgroup();     //sigh
     int    fgsNumber = 0;
     current_unit_load_mode = NO_MESH;
-    Unit  *newPart   = UnitFactory::createUnit( item.GetContent().c_str(), false,
+    Unit  *newPart   = new GameUnit< Unit >( item.GetContent().c_str(), false,
                                                 FactionUtil::GetUpgradeFaction(), blnk, flightGroup, fgsNumber );
     current_unit_load_mode = DEFAULT;
     string str = "";
@@ -4364,7 +4364,7 @@ bool buyShip( Unit *baseUnit,
                                                                                                                         0 ),
                                     Vector( 0, 0, 0 ) );
             Unit *newPart =
-                UnitFactory::createUnit( content.c_str(),
+                new GameUnit< Unit >( content.c_str(),
                                          false,
                                          baseUnit->faction,
                                          newModifications,
@@ -4638,7 +4638,7 @@ static const char *WeaponTypeStrings[] = {
 
 void showUnitStats( Unit *playerUnit, string &text, int subunitlevel, int mode, Cargo &item )
 {
-    static Unit *blankUnit   = UnitFactory::createUnit( "upgrading_dummy_unit", 1, FactionUtil::GetFactionIndex( "upgrades" ) );
+    static Unit *blankUnit   = new GameUnit< Unit >( "upgrading_dummy_unit", 1, FactionUtil::GetFactionIndex( "upgrades" ) );
     static float warpenratio = XMLSupport::parse_float( vs_config->getVariable( "physics", "warp_energy_multiplier", "0.12" ) );
     static float warpbleed   = XMLSupport::parse_float( vs_config->getVariable( "physics", "warpbleed", "20" ) );
     static float shield_maintenance_cost =
