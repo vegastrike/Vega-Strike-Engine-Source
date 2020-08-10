@@ -13,7 +13,7 @@
 CMAKE_MINIMUM_REQUIRED(VERSION 3.5)
 SET(CMAKE_CXX_STANDARD 11)
 
-PROJECT(vsUTCS)
+PROJECT(Vega_Strike)
 
 UNSET(PYTHONLIBS_FOUND)
 UNSET(Boost_FOUND)
@@ -35,9 +35,9 @@ UNSET(OGRE_FOUND)
 UNSET(Boost_DIR)
 
 INCLUDE_DIRECTORIES(
-    ${vsUTCS_SOURCE_DIR}/src
-    ${vsUTCS_SOURCE_DIR}/src/cmd
-    ${vsUTCS_BINARY_DIR}
+    ${Vega_Strike_SOURCE_DIR}/src
+    ${Vega_Strike_SOURCE_DIR}/src/cmd
+    ${Vega_Strike_BINARY_DIR}
     /usr/include/harfbuzz/
 )
 
@@ -704,7 +704,7 @@ INCLUDE(CheckIncludeFileCXX)
 INCLUDE(CheckTypeSize)
 CHECK_TYPE_SIZE("void*" SIZEOF_VOID_P BUILTIN_TYPES_ONLY)
 # Let cmake find our in-tree modules
-SET(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${vsUTCS_SOURCE_DIR})
+SET(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${Vega_Strike_SOURCE_DIR})
 
 # Python 3 has a SASL compatibility issue which causes an error
 # on some installations that prefer Python 3
@@ -810,7 +810,7 @@ IF (NOT USE_SYSTEM_BOOST)
     UNSET(Boost_LIBRARY_DIRS)
     SET(Boost_DIR ../ext/)
     SET(BOOST_PYTHON_NO_PY_SIGNATURES 1)
-    SET(TST_INCLUDES ${TST_INCLUDES} ${vsUTCS_SOURCE_DIR}/${Boost_DIR})
+    SET(TST_INCLUDES ${TST_INCLUDES} ${Vega_Strike_SOURCE_DIR}/${Boost_DIR})
     IF (USE_PYTHON_3)
         MESSAGE("++ Using Internal Boost::python3")
         SET(TST_LIBS ${TST_LIBS} boost_python3)
@@ -1037,7 +1037,7 @@ ELSE (UNIX)
     SET(HOSTOS "APPLE")
 ENDIF (UNIX)
 
-CONFIGURE_FILE(${vsUTCS_SOURCE_DIR}/cmake-config.h.in ${vsUTCS_BINARY_DIR}/config.h)
+CONFIGURE_FILE(${Vega_Strike_SOURCE_DIR}/cmake-config.h.in ${Vega_Strike_BINARY_DIR}/config.h)
 
 #end config.h generation
 #SET(CMAKE_CXX_FLAGS "-include config.h;-pipe;"${CMAKE_CXX_FLAGS})

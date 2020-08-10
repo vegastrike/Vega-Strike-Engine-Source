@@ -351,7 +351,7 @@ float Damageable::totalShieldEnergyCapacitance( const Shield &shield )
         XMLSupport::parse_float( vs_config->getVariable( "physics", "shield_energy_capacitance", ".2" ) );
     static bool  use_max_shield_value =
         XMLSupport::parse_bool( vs_config->getVariable( "physics", "use_max_shield_energy_usage", "false" ) );
-    return shieldenergycap*use_max_shield_value ? totalShieldVal( shield ) : currentTotalShieldVal( shield );
+    return shieldenergycap*(use_max_shield_value ? totalShieldVal( shield ) : currentTotalShieldVal( shield ));
 }
 
 
