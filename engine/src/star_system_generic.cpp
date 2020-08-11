@@ -25,7 +25,6 @@
 #include "cmd/script/flightgroup.h"
 #include "load_mission.h"
 #include "cmd/unit_util.h"
-#include "cmd/unit_factory.h"
 #include "cmd/unit_collide.h"
 #include "vs_random.h"
 #include "savegame.h"

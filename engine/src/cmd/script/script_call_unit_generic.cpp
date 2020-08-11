@@ -34,7 +34,7 @@
 #include <unistd.h>
 #endif
 #include "cmd/unit_generic.h"
-#include "cmd/unit_factory.h"
+#include "unit.h"
 #include <expat.h>
 #include "xml_support.h"
 
@@ -56,11 +56,13 @@
 #include "cmd/nebula_generic.h"
 #include "hashtable.h"
 #include "flightgroup.h"
-#include "cmd/unit_factory.h"
+#include "nebula.h"
 #include "cmd/asteroid_generic.h"
 #include "gfxlib.h"
 #include "cmd/pilot.h"
 #include "cmd/unit_util.h"
+#include "planet.h"
+#include "asteroid.h"
 
 extern const vector< string >& ParseDestinations( const string &value );
 extern Unit& GetUnitMasterPartList();
@@ -965,7 +967,7 @@ Unit* Mission::call_unit_launch( CreateFlightgroup *fg, int type, const string &
                 d = parse_alpha( bdst );
             if (bsrc[0] != '\0')
                 s = parse_alpha( bsrc );
-            my_unit = UnitFactory::createPlanet( QVector( 0, 0, 0 ), QVector( 0, 0, 0 ), 0, Vector( 0, 0, 0 ), 
+            my_unit = new GamePlanet( QVector( 0, 0, 0 ), QVector( 0, 0, 0 ), 0, Vector( 0, 0, 0 ),
                                                  0, 0, radius, tex, "", "", s,
                                                  d, ParseDestinations( destinations ),
                                                  QVector( 0, 0, 0 ), NULL, mat,
@@ -976,13 +978,13 @@ Unit* Mission::call_unit_launch( CreateFlightgroup *fg, int type, const string &
             free( nam );
             free( citylights );
         } else if (type == NEBULAPTR) {
-            my_unit = UnitFactory::createNebula(
+            my_unit = new GameNebula(
                 fg->fg->type.c_str(), false, faction_nr, fg->fg, u+fg->fg->nr_ships-fg->nr_ships );
         } else if (type == ASTEROIDPTR) {
-            my_unit = UnitFactory::createAsteroid(
+            my_unit = new GameAsteroid(
                 fg->fg->type.c_str(), faction_nr, fg->fg, u+fg->fg->nr_ships-fg->nr_ships, .01 );
         } else {
-            my_unit = UnitFactory::createUnit( fg->fg->type.c_str(), false, faction_nr, string(
+            my_unit = new GameUnit< Unit >( fg->fg->type.c_str(), false, faction_nr, string(
                                                   "" ), fg->fg, u+fg->fg->nr_ships-fg->nr_ships, NULL );
         }
         units[u] = my_unit;

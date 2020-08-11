@@ -5,7 +5,6 @@
 #include "faction_generic.h"
 #include "savegame.h"
 #include "xml_support.h"
-#include "unit_factory.h"
 #include "gfx/halo.h"
 #include "gfx/mesh.h"
 #include "gfx/sphere.h"

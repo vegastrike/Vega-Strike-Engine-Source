@@ -5,7 +5,6 @@
 #include "universe_util.h"
 #include "universe_generic.h"
 #include "cmd/unit_generic.h"
-#include "cmd/unit_factory.h"    //for UnitFactory::getMasterPartList()
 #include "cmd/collection.h"
 #include "star_system_generic.h"
 #include <string>
@@ -24,6 +23,7 @@
 #include "linecollide.h"
 #include "cmd/unit_collide.h"
 #include "cmd/unit_find.h"
+#include "unit.h"
 
 #include "python/init.h"
 #include <Python.h>
@@ -223,7 +223,7 @@ static QVector scratch_vector;
 
 Unit * GetMasterPartList()
 {
-    return UnitFactory::getMasterPartList();
+    return getMasterPartList();
 }
 Unit * getScratchUnit()
 {
@@ -711,7 +711,7 @@ string LookupUnitStat( const string &unitname, const string &faction, const stri
 static std::vector< Unit* >cachedUnits;
 void precacheUnit( string type_string, string faction_string )
 {
-    cachedUnits.push_back( UnitFactory::createUnit( type_string.c_str(), true, FactionUtil::GetFactionIndex( faction_string ) ) );
+    cachedUnits.push_back( new GameUnit< Unit >( type_string.c_str(), true, FactionUtil::GetFactionIndex( faction_string ) ) );
 }
 Unit * getPlayer()
 {

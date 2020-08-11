@@ -20,7 +20,6 @@
 #include "star_system.h"
 #include "cmd/unit_generic.h"
 #include "cmd/movable.h"
-#include "cmd/unit_factory.h"
 #include "cmd/collection.h"
 #include "cmd/unit_util.h"
 #include "cmd/unit_find.h" //for radar iteration.
@@ -57,6 +56,7 @@
 #include "options.h"
 #include "soundcontainer_aldrv.h"
 #include "configxml.h"
+#include "planet_generic.h"
 
 
 

@@ -6,7 +6,7 @@
 #include "universe_generic.h"
 #include "star_system_generic.h"
 #include "cmd/unit_generic.h"
-#include "cmd/unit_factory.h"
+#include "unit.h"
 #include "cmd/unit_util.h"
 #include "cmd/collection.h"
 #include "lin_time.h" //for fps
@@ -791,7 +791,7 @@ bool Cockpit::Update()
                         fg->nr_ships++;
                         fg->nr_ships_left++;
                     }
-                    Unit *un = UnitFactory::createUnit(
+                    Unit *un = new GameUnit< Unit >(
                         GetUnitFileName().c_str(), false, this->unitfaction, unitmodname, fg, fgsnumber );
                     un->SetCurPosition( UniverseUtil::SafeEntrancePoint( savegame->GetPlayerLocation() ) );
                     ss->AddUnit( un );
