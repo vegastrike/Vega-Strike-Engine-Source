@@ -480,8 +480,8 @@ void Music::GotoSong( int whichlist, int whichsong, bool skip, int layer )
             }
             else{
                 lastlist = whichlist;
-            GotoSong( playlist[whichlist][whichsong], layer );
             }
+            GotoSong( playlist[whichlist][whichsong], layer );
         } 
         else {
             _SkipRandList( layer );
