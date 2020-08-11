@@ -94,7 +94,7 @@ void Beam::Init( const Transformation &trans, const weapon_info &cln, void *own,
         GFXColorVertex *beam = new GFXColorVertex[numvertex];         //regretably necessary: radslices and longslices come from the config file... so it's at runtime.
 //        memset( beam, 0, sizeof (*beam)*numvertex );
         _vlist = new GFXVertexList( GFXQUAD, numvertex, beam, numvertex, true );         //mutable color contained list
-//        delete[] beam;
+       delete[] beam;
     }
     //Shared vlist - we recalculate it every time, so no loss
     vlist = _vlist;
