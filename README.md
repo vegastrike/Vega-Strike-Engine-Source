@@ -187,7 +187,8 @@ sudo zypper install libboost_log1_66_0-devel \
                     gtk3-devel \
                     python-devel \
                     python3-devel \
-                    git
+                    git \
+                    rpm-build
 ```
 
 2. Build Vega Strike:
