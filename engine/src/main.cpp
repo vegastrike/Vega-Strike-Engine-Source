@@ -54,8 +54,6 @@
 #include "cmd/music.h"
 #include "ship_commands.h"
 #include "gamemenu.h"
-#include "cmd/unit_factory.h"
-
 #include "audio/SceneManager.h"
 #include "audio/TemplateManager.h"
 #include "audio/renderers/OpenAL/BorrowedOpenALRenderer.h"
@@ -412,7 +410,7 @@ int main( int argc, char *argv[] )
         InitShipCommands();
     }
     _Universe = new GameUniverse( argc, argv, game_options.galaxy.c_str() );
-    TheTopLevelUnit = UnitFactory::createUnit();
+    TheTopLevelUnit = new GameUnit<Unit>(0);
     _Universe->Loop( bootstrap_first_loop );
 
     //Unregister commands - and cleanup memory

@@ -29,7 +29,7 @@
 #include "gfx/technique.h"
 #include "gfx/occlusion.h"
 
-#include "unit_factory.h"
+
 
 #include "gfx/sprite.h"
 #include "lin_time.h"

@@ -188,7 +188,6 @@ SET(LIBCMD_SOURCES
     src/cmd/unit_collide.cpp
     src/cmd/unit_const_cache.cpp
     src/cmd/unit_csv.cpp
-    src/cmd/unit_factory_generic.cpp
     src/cmd/unit_functions_generic.cpp
     src/cmd/unit_generic.cpp
     src/cmd/fg_util.cpp
@@ -465,7 +464,6 @@ SET(VEGASTRIKE_SOURCES
     src/cmd/script/script_call_briefing.cpp
     src/cmd/script/script_call_unit.cpp
     src/cmd/terrain.cpp
-    src/cmd/unit_factory.cpp
     src/cmd/unit_functions.cpp
     src/cmd/unit_util.cpp
     src/cmd/faction_xml.cpp

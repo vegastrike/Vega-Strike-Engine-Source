@@ -2,7 +2,6 @@
 #define __UNIT_CUSTOMIZE_CPP__
 
 #include "unit.h"
-#include "unit_factory.h"
 #include "images.h"
 #include "universe.h"
 #include "vegastrike.h"

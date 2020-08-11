@@ -6,7 +6,8 @@
 
 class GameBuilding : public GameUnit< Building >
 {
-protected: GameBuilding( ContinuousTerrain *parent,
+public:
+    GameBuilding( ContinuousTerrain *parent,
                          bool vehicle,
                          const char *filename,
                          bool SubUnit,
