@@ -1281,7 +1281,7 @@ ELSEIF (CMAKE_SYSTEM_NAME STREQUAL Linux)
                 ELSE (USE_PYTHON_3)
                     SET(CPACK_DEBIAN_PACKAGE_DEPENDS "libpython2.7")
                 ENDIF (USE_PYTHON_3)
-                SET(CPACK_DEBIAN_PACKAGE_DEPENDS "${CPACK_DEBIAN_PACKAGE_DEPENDS}, libjpeg62, libpng16-16, freeglut3, libgtk-3-0, libvorbis0a, libopenal1, libsdl-gfx1.2-5, xdg-utils, libgl1, libopengl0, libboost-python1.67.0, libboost-log1.67.0, libboost-date-time1.67.0")
+                SET(CPACK_DEBIAN_PACKAGE_DEPENDS "${CPACK_DEBIAN_PACKAGE_DEPENDS}, libjpeg62, libpng16-16, freeglut3, libgtk-3-0, libvorbis0a, libopenal1, libsdl-gfx1.2-5, xdg-utils, libgl1, libopengl0, libboost-python1.67.0, libboost-log1.67.0, libboost-date-time1.67.0, libboost-chrono1.67.0, libboost-atomic1.67.0")
             ELSEIF (LSB_LINUX_DISTRIBUTION_CODENAME STREQUAL "buster") # Apparently Debian Buster has lsb_release after all
                 IF (USE_PYTHON_3)
                     SET(CPACK_DEBIAN_PACKAGE_DEPENDS "libpython3.7")
