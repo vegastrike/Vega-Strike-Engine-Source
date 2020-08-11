@@ -1320,7 +1320,7 @@ ELSEIF (CMAKE_SYSTEM_NAME STREQUAL Linux)
         SET(CPACK_PACKAGE_FILE_NAME "${CPACK_RPM_PACKAGE_NAME}_${VEGA_STRIKE_PACKAGE_VERSION_STR}-${VEGA_STRIKE_PYTHON_VERSION_STR}-${LINUX_ID}-${VEGA_STRIKE_LINUX_VERSION_STR}_x86_64")
 
         # Detect whether SuSe or RH/CentOS/Fedora as deps may change
-        IF (LINUX_ID STREQUAL opensuse AND LINUX_CODENAME STREQUAL Leap)
+        IF (LINUX_ID STREQUAL opensuse-leap)
             IF (USE_PYTHON_3)
                 SET(CPACK_RPM_PACKAGE_REQUIRES "libboost_python-py3-1_66_0, libpython3_6m1_0")
             ELSE (USE_PYTHON_3)
