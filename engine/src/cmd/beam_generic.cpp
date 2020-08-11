@@ -92,9 +92,9 @@ void Beam::Init( const Transformation &trans, const weapon_info &cln, void *own,
     if (!_vlist) {
         int numvertex = float_to_int( mymax( 48, ( (4*radslices)+1 )*longslices*4 ) );
         GFXColorVertex *beam = new GFXColorVertex[numvertex];         //regretably necessary: radslices and longslices come from the config file... so it's at runtime.
-        memset( beam, 0, sizeof (*beam)*numvertex );
+//        memset( beam, 0, sizeof (*beam)*numvertex );
         _vlist = new GFXVertexList( GFXQUAD, numvertex, beam, numvertex, true );         //mutable color contained list
-        delete[] beam;
+//        delete[] beam;
     }
     //Shared vlist - we recalculate it every time, so no loss
     vlist = _vlist;
@@ -358,7 +358,7 @@ extern Cargo * GetMasterPartList( const char* );
 
 bool Beam::Collide( Unit *target, Unit *firer, Unit *superunit )
 {
-    if (this == NULL || target == NULL) {
+    if (target == NULL) {
         VSFileSystem::vs_fprintf( stderr, "Recovering from nonfatal beam error when beam inactive\n" );
         return false;
     }
