@@ -70,7 +70,7 @@ addons:
       - boost-python
 
 script:
-  - ./sh/vsbuild.sh $FLAGS
+  - ./sh/travis-build.sh $FLAGS
 
 # CI/CD hookups
 # See https://docs.travis-ci.com/user/deployment/releases/
