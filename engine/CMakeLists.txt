@@ -568,7 +568,7 @@ IF (CMAKE_SYSTEM_NAME STREQUAL Linux)
         COMMAND sh -c "cat /etc/os-release | grep ^ID= | sed 's/^ID=//' | tr -d '\"\n'"
         OUTPUT_VARIABLE LINUX_ID)
     EXECUTE_PROCESS(
-        COMMAND sh -c "cat /etc/os-release | grep ^VERSION_CODENAME= | sed 's/^VERSION_CODENAME=//' | tr -d '\n'"
+        COMMAND sh -c "cat /etc/os-release | grep ^VERSION_CODENAME= | sed 's/^VERSION_CODENAME=//' | tr -d '\"\n'"
         OUTPUT_VARIABLE LINUX_CODENAME)
     EXECUTE_PROCESS(
         COMMAND sh -c "cat /etc/os-release | grep ^VERSION_ID= | sed 's/^VERSION_ID=//' | tr -d '\"\n'"
@@ -1327,28 +1327,28 @@ ELSEIF (CMAKE_SYSTEM_NAME STREQUAL Linux)
                 SET(CPACK_RPM_PACKAGE_REQUIRES "libboost_python-py2_7-1_66_0, libpython2_7-1_0")
             ENDIF (USE_PYTHON_3)
             SET(CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES}, libjpeg-turbo, libpng16-16, libglut3, libgtk-3-0, libvorbis0, libopenal0, libSDL-1_2-0, libglvnd, expat, libboost_log1_66_0, libboost_system1_66_0, libboost_filesystem1_66_0, libboost_thread1_66_0, libboost_regex1_66_0, libboost_chrono1_66_0, libboost_atomic1_66_0")
-        ELSEIF (LINUX_ID STREQUAL fedora AND LINUX_VERSION_ID STREQUAL "32")    # Not yet tested
+        ELSEIF (LINUX_ID STREQUAL fedora AND LINUX_VERSION_ID STREQUAL "32")
             IF (USE_PYTHON_3)
-                SET(CPACK_RPM_PACKAGE_REQUIRES "python39, boost-python3")
+                SET(CPACK_RPM_PACKAGE_REQUIRES "python38, boost-python3")       # python39
             ELSE (USE_PYTHON_3)
                 MESSAGE(AUTHOR_WARNING "!! boost-python2 does not appear to be available on this platform.")
                 SET(CPACK_RPM_PACKAGE_REQUIRES "python27")
             ENDIF (USE_PYTHON_3)
-            SET(CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES}, libjpeg-turbo, libpng15, freeglut, gtk3, libvorbis, openal-soft, SDL, libglvnd, expat, boost-log, boost-system, boost-filesystem, boost-thread, boost-regex, boost-chrono, boost-atomic")
+            SET(CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES}, libjpeg-turbo, libpng, freeglut, gtk3, libvorbis, openal-soft, SDL, libglvnd, expat, boost-log, boost-system, boost-filesystem, boost-thread, boost-regex, boost-chrono, boost-atomic")
         ELSEIF (LINUX_ID STREQUAL fedora AND LINUX_VERSION_ID STREQUAL "31")    # Not yet tested
             IF (USE_PYTHON_3)
                 SET(CPACK_RPM_PACKAGE_REQUIRES "python38, boost-python3")
             ELSE (USE_PYTHON_3)
                 SET(CPACK_RPM_PACKAGE_REQUIRES "python26, boost-python2")
             ENDIF (USE_PYTHON_3)
-            SET(CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES}, libjpeg-turbo, libpng15, freeglut, gtk3, libvorbis, openal-soft, SDL, libglvnd, expat, boost-log, boost-system, boost-filesystem, boost-thread, boost-regex, boost-chrono, boost-atomic")
+            SET(CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES}, libjpeg-turbo, libpng, freeglut, gtk3, libvorbis, openal-soft, SDL, libglvnd, expat, boost-log, boost-system, boost-filesystem, boost-thread, boost-regex, boost-chrono, boost-atomic")
         ELSEIF (LINUX_ID STREQUAL fedora AND LINUX_VERSION_ID STREQUAL "30")    # Not yet tested
             IF (USE_PYTHON_3)
                 SET(CPACK_RPM_PACKAGE_REQUIRES "python38, boost-python3")
             ELSE (USE_PYTHON_3)
                 SET(CPACK_RPM_PACKAGE_REQUIRES "python26, boost-python2")
             ENDIF (USE_PYTHON_3)
-            SET(CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES}, libjpeg-turbo, libpng15, freeglut, gtk3, libvorbis, openal-soft, SDL, libglvnd, expat, boost-log, boost-system, boost-filesystem, boost-thread, boost-regex, boost-chrono, boost-atomic")
+            SET(CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES}, libjpeg-turbo, libpng, freeglut, gtk3, libvorbis, openal-soft, SDL, libglvnd, expat, boost-log, boost-system, boost-filesystem, boost-thread, boost-regex, boost-chrono, boost-atomic")
         ELSEIF (LINUX_ID STREQUAL centos AND LINUX_VERSION_ID STREQUAL "8")     # Not yet tested
             IF (USE_PYTHON_3)
                 SET(CPACK_RPM_PACKAGE_REQUIRES "boost-python3")
