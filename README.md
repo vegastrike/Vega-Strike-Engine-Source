@@ -191,6 +191,27 @@ sudo zypper install libboost_log1_66_0-devel \
                     rpm-build
 ```
 
+On Fedora 32:
+
+```bash
+sudo dnf install    git \
+                    cmake \
+                    boost-devel \
+                    boost-python3-devel \
+                    freeglut-devel \
+                    gcc-c++ \
+                    openal-soft-devel \
+                    SDL-devel \
+                    libvorbis-devel \
+                    libjpeg-turbo-devel \
+                    libpng-devel \
+                    expat-devel \
+                    gtk3-devel \
+                    python3-devel \
+                    rpm-build \
+                    make
+```
+
 2. Build Vega Strike:
 
    a. Use the `vsbuild.sh` script in the `sh` directory.
