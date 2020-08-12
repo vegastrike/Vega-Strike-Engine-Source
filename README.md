@@ -191,7 +191,7 @@ sudo zypper install libboost_log1_66_0-devel \
                     rpm-build
 ```
 
-On Fedora 32:
+On Fedora 30/31/32:
 
 ```bash
 sudo dnf install    git \
@@ -207,6 +207,7 @@ sudo dnf install    git \
                     libpng-devel \
                     expat-devel \
                     gtk3-devel \
+                    python2-devel \
                     python3-devel \
                     rpm-build \
                     make
