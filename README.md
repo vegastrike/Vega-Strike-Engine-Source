@@ -213,6 +213,9 @@ sudo dnf install    git \
                     make
 ```
 
+On Fedora 30 or 31, also install `boost-python2-devel`. (Apparently not available
+on Fedora 32.)
+
 2. Build Vega Strike:
 
    a. Use the `vsbuild.sh` script in the `sh` directory.
