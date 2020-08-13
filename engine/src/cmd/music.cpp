@@ -558,7 +558,6 @@ void Music::_SkipRandSong( int whichlist, int layer )
                         %playlist[whichlist].size(), true, layer );
         } else {
             fprintf( stderr, "Error no songs in playlist %d\n", whichlist );
-            return;
         }
     }
     _SkipRandList( layer );

@@ -102,12 +102,6 @@ void Drawable::AnimationStep()
         //copy reference to data
         meshdata.at(0) = vecAnimations.at(activeAnimation)->at(activeMesh);
 
-#ifdef DEBUG_MESH_ANI
-        int numvold = 0;
-        int numvertices = 0;        
-        std::cerr << "vertices changed from: " << numvold << " to: " << numvertices << std::endl;
-#endif
-
         Draw();
 
 #ifdef DEBUG_MESH_ANI
