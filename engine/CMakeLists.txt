@@ -562,6 +562,19 @@ IF (DATADIR)
     SET(DEFINES "${DEFINES} -DDATA_DIR=\"${DATADIR}\"")
 ENDIF (DATADIR)
 
+# Gather info about Linux distro and release (if applicable) for later use down below.
+IF (CMAKE_SYSTEM_NAME STREQUAL Linux)
+    EXECUTE_PROCESS(
+        COMMAND sh -c "cat /etc/os-release | grep ^ID= | sed 's/^ID=//' | tr -d '\"\n'"
+        OUTPUT_VARIABLE LINUX_ID)
+    EXECUTE_PROCESS(
+        COMMAND sh -c "cat /etc/os-release | grep ^VERSION_CODENAME= | sed 's/^VERSION_CODENAME=//' | tr -d '\"\n'"
+        OUTPUT_VARIABLE LINUX_CODENAME)
+    EXECUTE_PROCESS(
+        COMMAND sh -c "cat /etc/os-release | grep ^VERSION_ID= | sed 's/^VERSION_ID=//' | tr -d '\"\n'"
+        OUTPUT_VARIABLE LINUX_VERSION_ID)
+ENDIF (CMAKE_SYSTEM_NAME STREQUAL Linux)
+
 # On some Ubuntu versions and derivatives, a bug exists whereby enabling
 # PIE compilation (Position Independent Executables) results in the
 # `file` utility incorrectly recognising the compiled vegastrike binary
@@ -767,13 +780,9 @@ IF (USE_SYSTEM_BOOST)
             # (This is common to all Debian and Debian-based systems up to Boost 1.67,
             #   it's just not needed for any other Debian-based system (at the moment).)
             IF (CMAKE_SYSTEM_NAME STREQUAL Linux)
-                EXECUTE_PROCESS(
-                    COMMAND sh -c "cat /etc/os-release | grep ^VERSION_CODENAME= | sed 's/^VERSION_CODENAME=//' | tr -d '\n'"
-                    OUTPUT_VARIABLE LINUX_CODENAME)
                 IF (LINUX_CODENAME STREQUAL xenial)
                     SET(BOOST_PYTHON_COMPONENT "python-py3${PYTHON_VERSION_MINOR}")
                 ENDIF (LINUX_CODENAME STREQUAL xenial)
-                UNSET(LINUX_CODENAME)
             ENDIF (CMAKE_SYSTEM_NAME STREQUAL Linux)
 
         ELSE (Boost_1_67_Or_Later_Result)
@@ -1162,6 +1171,18 @@ ELSEIF (CMAKE_SYSTEM_NAME STREQUAL Linux)
     SET(CPACK_GENERATOR "TBZ2" "TGZ" "TXZ")
     # Linux
 
+    IF (DEFINED ENV{TRAVIS_TAG})
+        SET(VEGA_STRIKE_PACKAGE_VERSION_STR "$ENV{TRAVIS_TAG}")
+    ELSE (DEFINED ENV{TRAVIS_TAG})
+        SET(VEGA_STRIKE_PACKAGE_VERSION_STR "${CPACK_PACKAGE_VERSION_MAJOR}.${CPACK_PACKAGE_VERSION_MINOR}.${CPACK_PACKAGE_VERSION_PATCH}")
+    ENDIF (DEFINED ENV{TRAVIS_TAG})
+
+    IF (USE_PYTHON_3)
+        SET(VEGA_STRIKE_PYTHON_VERSION_STR "py3")
+    ELSE (USE_PYTHON_3)
+        SET(VEGA_STRIKE_PYTHON_VERSION_STR "py2")
+    ENDIF (USE_PYTHON_3)
+
     # lsb_release -i --> but then it'll find `Ubuntu` instead of Debian so will have to map more
     # we can probably more reliably detect via checking for different packager commands
     # `lsb_release` doesn't always work correctly, so it's easier to read the underlying file
@@ -1189,6 +1210,7 @@ ELSEIF (CMAKE_SYSTEM_NAME STREQUAL Linux)
     IF(HAS_APT)
         MESSAGE("-- Configuring Debian Packaging")
         # See https://cmake.org/cmake/help/v3.3/module/CPackDeb.html
+        SET(CPACK_DEBIAN_PACKAGE_NAME "Vega-Strike")
         SET(CPACK_DEBIAN_PACKAGE_MAINTAINER "maintainers@vega-strike.org")
         # Debian Version: /etc/debian_version - <name>/<junk>
         IF (NOT LSB_EXISTS)
@@ -1225,33 +1247,54 @@ ELSEIF (CMAKE_SYSTEM_NAME STREQUAL Linux)
         IF (USE_DEBIAN_VERSION)
             # Debian Dependency Chain
             IF (DEBIAN_RELEASE_VERSION STREQUAL "buster")
-                SET(CPACK_DEBIAN_PACKAGE_DEPENDS "libpython2.7, libjpeg62-turbo, libpng16-16, freeglut3, libgtk-3-0, libvorbis0a, libopenal1, libsdl-gfx1.2-5, xdg-utils, libgl1, libopengl0, libboost-python1.67.0, libboost-log1.67.0")
-            ENDIF ()
+                IF (USE_PYTHON_3)
+                    SET(CPACK_DEBIAN_PACKAGE_DEPENDS "libpython3.7")
+                ELSE (USE_PYTHON_3)
+                    SET(CPACK_DEBIAN_PACKAGE_DEPENDS "libpython2.7")
+                ENDIF (USE_PYTHON_3)
+                SET(CPACK_DEBIAN_PACKAGE_DEPENDS "${CPACK_DEBIAN_PACKAGE_DEPENDS}, libjpeg62-turbo, libpng16-16, freeglut3, libgtk-3-0, libvorbis0a, libopenal1, libsdl-gfx1.2-5, xdg-utils, libgl1, libopengl0, libboost-python1.67.0, libboost-log1.67.0")
+            ELSE (DEBIAN_RELEASE_VERSION STREQUAL "buster")
+                MESSAGE(AUTHOR_WARNING "!! Unsupported Debian version.")
+            ENDIF (DEBIAN_RELEASE_VERSION STREQUAL "buster")
 
             # Add the platform (Ubuntu, Debian, etc) to the filename, including the version (stretch, jessie, etc)
-            IF (DEFINED ENV{TRAVIS_TAG})
-                SET(CPACK_PACKAGE_FILE_NAME "${CPACK_DEBIAN_PACKAGE_NAME}_$ENV{TRAVIS_TAG}-debian-${DEBIAN_RELEASE_VERSION}_x86_64")
-            ELSE (DEFINED ENV{TRAVIS_TAG})
-                SET(CPACK_PACKAGE_FILE_NAME "${CPACK_DEBIAN_PACKAGE_NAME}_${CPACK_PACKAGE_VERSION_MAJOR}.${CPACK_PACKAGE_VERSION_MINOR}.${CPACK_PACKAGE_VERSION_PATCH}-debian-${DEBIAN_RELEASE_VERSION}_x86_64")
-            ENDIF (DEFINED ENV{TRAVIS_TAG})
+            SET(CPACK_PACKAGE_FILE_NAME "${CPACK_DEBIAN_PACKAGE_NAME}_${VEGA_STRIKE_PACKAGE_VERSION_STR}-${VEGA_STRIKE_PYTHON_VERSION_STR}-debian-${DEBIAN_RELEASE_VERSION}_x86_64")
         ELSE (USE_DEBIAN_VERSION)
             # Ubuntu Dependency Chain
             IF (LSB_LINUX_DISTRIBUTION_CODENAME STREQUAL "xenial")
-                SET(CPACK_DEBIAN_PACKAGE_DEPENDS "libpython2.7, libjpeg62, libpng16-16, freeglut3, libgtk-3-0, libvorbis0a, libopenal1, libsdl-gfx1.2-5, xdg-utils, libgl1-mesa-glx, libboost-python1.58.0, libboost-log1.58.0")
+                IF (USE_PYTHON_3)
+                    SET(CPACK_DEBIAN_PACKAGE_DEPENDS "libpython3.5")
+                ELSE (USE_PYTHON_3)
+                    SET(CPACK_DEBIAN_PACKAGE_DEPENDS "libpython2.7")
+                ENDIF (USE_PYTHON_3)
+                SET(CPACK_DEBIAN_PACKAGE_DEPENDS "${CPACK_DEBIAN_PACKAGE_DEPENDS}, libjpeg62, libpng16-16, freeglut3, libgtk-3-0, libvorbis0a, libopenal1, libsdl-gfx1.2-5, xdg-utils, libgl1-mesa-glx, libboost-python1.58.0, libboost-log1.58.0")
             ELSEIF (LSB_LINUX_DISTRIBUTION_CODENAME STREQUAL "bionic")
-                SET(CPACK_DEBIAN_PACKAGE_DEPENDS "libpython2.7, libjpeg62, libpng16-16, freeglut3, libgtk-3-0, libvorbis0a, libopenal1, libsdl-gfx1.2-5, xdg-utils, libgl1, libopengl0, libboost-python1.65.1, libboost-log1.65.1")
+                IF (USE_PYTHON_3)
+                    SET(CPACK_DEBIAN_PACKAGE_DEPENDS "libpython3.7")
+                ELSE (USE_PYTHON_3)
+                    SET(CPACK_DEBIAN_PACKAGE_DEPENDS "libpython2.7")
+                ENDIF (USE_PYTHON_3)
+                SET(CPACK_DEBIAN_PACKAGE_DEPENDS "${CPACK_DEBIAN_PACKAGE_DEPENDS}, libjpeg62, libpng16-16, freeglut3, libgtk-3-0, libvorbis0a, libopenal1, libsdl-gfx1.2-5, xdg-utils, libgl1, libopengl0, libboost-python1.65.1, libboost-log1.65.1")
             ELSEIF (LSB_LINUX_DISTRIBUTION_CODENAME STREQUAL "focal")
-                SET(CPACK_DEBIAN_PACKAGE_DEPENDS "libpython2.7, libjpeg62, libpng16-16, freeglut3, libgtk-3-0, libvorbis0a, libopenal1, libsdl-gfx1.2-5, xdg-utils, libgl1, libopengl0, libboost-python1.67.0, libboost-log1.67.0")
-            ELSEIF (LSB_LINUX_DISTRIBUTION_CODENAME STREQUAL "buster")                                                                                                                                                                      # Apparently Debian Buster has lsb_release after all
-                SET(CPACK_DEBIAN_PACKAGE_DEPENDS "libpython2.7, libjpeg62-turbo, libpng16-16, freeglut3, libgtk-3-0, libvorbis0a, libopenal1, libsdl-gfx1.2-5, xdg-utils, libgl1, libopengl0, libboost-python1.67.0, libboost-log1.67.0")
-            ENDIF ()
+                IF (USE_PYTHON_3)
+                    SET(CPACK_DEBIAN_PACKAGE_DEPENDS "libpython3.8")
+                ELSE (USE_PYTHON_3)
+                    SET(CPACK_DEBIAN_PACKAGE_DEPENDS "libpython2.7")
+                ENDIF (USE_PYTHON_3)
+                SET(CPACK_DEBIAN_PACKAGE_DEPENDS "${CPACK_DEBIAN_PACKAGE_DEPENDS}, libjpeg62, libpng16-16, freeglut3, libgtk-3-0, libvorbis0a, libopenal1, libsdl-gfx1.2-5, xdg-utils, libgl1, libopengl0, libboost-python1.67.0, libboost-log1.67.0, libboost-date-time1.67.0, libboost-chrono1.67.0, libboost-atomic1.67.0")
+            ELSEIF (LSB_LINUX_DISTRIBUTION_CODENAME STREQUAL "buster") # Apparently Debian Buster has lsb_release after all
+                IF (USE_PYTHON_3)
+                    SET(CPACK_DEBIAN_PACKAGE_DEPENDS "libpython3.7")
+                ELSE (USE_PYTHON_3)
+                    SET(CPACK_DEBIAN_PACKAGE_DEPENDS "libpython2.7")
+                ENDIF (USE_PYTHON_3)
+                SET(CPACK_DEBIAN_PACKAGE_DEPENDS "${CPACK_DEBIAN_PACKAGE_DEPENDS}, libjpeg62-turbo, libpng16-16, freeglut3, libgtk-3-0, libvorbis0a, libopenal1, libsdl-gfx1.2-5, xdg-utils, libgl1, libopengl0, libboost-python1.67.0, libboost-log1.67.0")
+            ELSE (LSB_LINUX_DISTRIBUTION_CODENAME STREQUAL "xenial")
+                MESSAGE(AUTHOR_WARNING "!! Unsupported Debian derivative.")
+            ENDIF (LSB_LINUX_DISTRIBUTION_CODENAME STREQUAL "xenial")
 
             # Add the platform (Ubuntu, Debian, etc) to the filename, including the version (stretch, jessie, etc)
-            IF (DEFINED ENV{TRAVIS_TAG})
-                SET(CPACK_PACKAGE_FILE_NAME "${CPACK_DEBIAN_PACKAGE_NAME}_$ENV{TRAVIS_TAG}-${LSB_LINUX_DISTRIBUTION}-${LSB_LINUX_DISTRIBUTION_CODENAME}_x86_64")
-            ELSE (DEFINED ENV{TRAVIS_TAG})
-                SET(CPACK_PACKAGE_FILE_NAME "${CPACK_DEBIAN_PACKAGE_NAME}_${CPACK_PACKAGE_VERSION_MAJOR}.${CPACK_PACKAGE_VERSION_MINOR}.${CPACK_PACKAGE_VERSION_PATCH}-${LSB_LINUX_DISTRIBUTION}-${LSB_LINUX_DISTRIBUTION_CODENAME}_x86_64")
-            ENDIF (DEFINED ENV{TRAVIS_TAG})
+            SET(CPACK_PACKAGE_FILE_NAME "${CPACK_DEBIAN_PACKAGE_NAME}_${VEGA_STRIKE_PACKAGE_VERSION_STR}-${VEGA_STRIKE_PYTHON_VERSION_STR}-${LSB_LINUX_DISTRIBUTION}-${LSB_LINUX_DISTRIBUTION_CODENAME}_x86_64")
         ENDIF (USE_DEBIAN_VERSION)
         SET(CPACK_DEBIAN_PACKAGE_SECTION "Amusements/Games")
         SET(CPACK_DEBIAN_PACKAGE_HOMEPAGE "https://www.vega-strike.org")
@@ -1265,8 +1308,70 @@ ELSEIF (CMAKE_SYSTEM_NAME STREQUAL Linux)
         # See https://cmake.org/cmake/help/v3.3/module/CPackRPM.html
         SET(CPACK_RPM_PACKAGE_LICENSE "GPLv3") # See ../LICENSE
         SET(CPACK_RPM_PACKAGE_URL "https://www.vega-strike.org")
-        # Should detect whether SuSe or RH/CentOS/Fedora as deps may change
-        SET(CPACK_RPM_PACKAGE_REQUIRES "python2, libjpeg, libpng, freeglut, gtk2, libvorbis, openal, SDL_mixer")
+        SET(CPACK_RPM_PACKAGE_NAME "Vega-Strike")
+
+        # Figure out the filename
+        IF (LINUX_CODENAME)
+            SET(VEGA_STRIKE_LINUX_VERSION_STR "${LINUX_CODENAME}")
+        ELSE (LINUX_CODENAME)
+            SET(VEGA_STRIKE_LINUX_VERSION_STR "${LINUX_VERSION_ID}")
+        ENDIF (LINUX_CODENAME)
+
+        SET(CPACK_PACKAGE_FILE_NAME "${CPACK_RPM_PACKAGE_NAME}_${VEGA_STRIKE_PACKAGE_VERSION_STR}-${VEGA_STRIKE_PYTHON_VERSION_STR}-${LINUX_ID}-${VEGA_STRIKE_LINUX_VERSION_STR}_x86_64")
+
+        # Detect whether SuSe or RH/CentOS/Fedora as deps may change
+        IF (LINUX_ID STREQUAL opensuse-leap)
+            IF (USE_PYTHON_3)
+                SET(CPACK_RPM_PACKAGE_REQUIRES "libboost_python-py3-1_66_0, libpython3_6m1_0")
+            ELSE (USE_PYTHON_3)
+                SET(CPACK_RPM_PACKAGE_REQUIRES "libboost_python-py2_7-1_66_0, libpython2_7-1_0")
+            ENDIF (USE_PYTHON_3)
+            SET(CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES}, libjpeg-turbo, libpng16-16, libglut3, libgtk-3-0, libvorbis0, libopenal0, libSDL-1_2-0, libglvnd, expat, libboost_log1_66_0, libboost_system1_66_0, libboost_filesystem1_66_0, libboost_thread1_66_0, libboost_regex1_66_0, libboost_chrono1_66_0, libboost_atomic1_66_0")
+        ELSEIF (LINUX_ID STREQUAL fedora AND (LINUX_VERSION_ID VERSION_EQUAL 30 OR LINUX_VERSION_ID VERSION_EQUAL 31 OR LINUX_VERSION_ID VERSION_EQUAL 32))
+            IF (LINUX_VERSION_ID VERSION_EQUAL 32)
+                IF (USE_PYTHON_3)
+                    SET(CPACK_RPM_PACKAGE_REQUIRES "python38, boost-python3")       # python39
+                ELSE (USE_PYTHON_3)
+                    MESSAGE(AUTHOR_WARNING "!! boost-python2 does not appear to be available on this platform.")
+                    SET(CPACK_RPM_PACKAGE_REQUIRES "python27")
+                ENDIF (USE_PYTHON_3)
+            ELSEIF (LINUX_VERSION_ID VERSION_EQUAL 31)
+                IF (USE_PYTHON_3)
+                    SET(CPACK_RPM_PACKAGE_REQUIRES "python38, boost-python3")
+                ELSE (USE_PYTHON_3)
+                    SET(CPACK_RPM_PACKAGE_REQUIRES "python27, boost-python2")
+                ENDIF (USE_PYTHON_3)
+            ELSE (LINUX_VERSION_ID VERSION_EQUAL 32)
+                IF (USE_PYTHON_3)
+                    SET(CPACK_RPM_PACKAGE_REQUIRES "python37, boost-python3")
+                ELSE (USE_PYTHON_3)
+                    SET(CPACK_RPM_PACKAGE_REQUIRES "python27, boost-python2")
+                ENDIF (USE_PYTHON_3)
+            ENDIF (LINUX_VERSION_ID VERSION_EQUAL 32)
+            SET(CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES}, libjpeg-turbo, libpng, freeglut, gtk3, libvorbis, openal-soft, SDL, libglvnd, expat, boost-log, boost-system, boost-filesystem, boost-thread, boost-regex, boost-chrono, boost-atomic")
+        ELSEIF (LINUX_ID STREQUAL centos AND LINUX_VERSION_ID STREQUAL "8")     # Not yet tested
+            IF (USE_PYTHON_3)
+                SET(CPACK_RPM_PACKAGE_REQUIRES "boost-python3")
+            ELSE (USE_PYTHON_3)
+                MESSAGE(AUTHOR_WARNING "!! boost-python2 does not appear to be available on this platform.")
+            ENDIF (USE_PYTHON_3)
+            SET(CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES}, libjpeg-turbo, libpng15, freeglut, gtk3, libvorbis, openal-soft, SDL, libglvnd, expat, boost-log, boost-system, boost-filesystem, boost-thread, boost-regex, boost-chrono, boost-atomic")
+        ELSEIF (LINUX_ID STREQUAL rhel AND LINUX_VERSION_ID STREQUAL "8")       # Not yet tested
+            IF (USE_PYTHON_3)
+                SET(CPACK_RPM_PACKAGE_REQUIRES "boost-python3")
+            ELSE (USE_PYTHON_3)
+                MESSAGE(AUTHOR_WARNING "!! boost-python2 does not appear to be available on this platform.")
+            ENDIF (USE_PYTHON_3)
+            SET(CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES}, libjpeg-turbo, libpng15, freeglut, gtk3, libvorbis, openal-soft, SDL, libglvnd, expat, boost-log, boost-system, boost-filesystem, boost-thread, boost-regex, boost-chrono, boost-atomic")
+        ELSE (LINUX_ID STREQUAL opensuse-leap)
+            MESSAGE(AUTHOR_WARNING "!! RPM Dependencies may be wrong for this platform.")
+            IF (USE_PYTHON_3)
+                SET(CPACK_RPM_PACKAGE_REQUIRES "python3")
+            ELSE (USE_PYTHON_3)
+                SET(CPACK_RPM_PACKAGE_REQUIRES "python2")
+            ENDIF (USE_PYTHON_3)
+            SET(CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES}, libjpeg, libpng, freeglut, gtk3, libvorbis, openal, SDL_mixer")
+        ENDIF (LINUX_ID STREQUAL opensuse-leap)
         LIST(APPEND CPACK_GENERATOR "RPM")
     ENDIF (HAS_RPMBUILD)
 ELSE ()
