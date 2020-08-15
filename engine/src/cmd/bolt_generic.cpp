@@ -11,6 +11,7 @@
 #include "audiolib.h"
 #include "config_xml.h"
 #include "star_system.h"
+#include "universe.h"
 
 using std::vector;
 using std::string;

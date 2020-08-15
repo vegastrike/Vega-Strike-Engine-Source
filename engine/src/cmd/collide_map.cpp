@@ -4,6 +4,7 @@
 #include "unit_generic.h"
 #include "bolt.h"
 #include "star_system.h"
+#include "universe.h"
 
 volatile bool apart_return = true;
 void CollideArray::erase( iterator target )

@@ -13,6 +13,7 @@
 #include "flybywire.h"
 #include "cmd/unit_util.h"
 #include "star_system.h"
+#include "universe.h"
 
 using namespace Orders;
 /**

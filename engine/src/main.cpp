@@ -100,7 +100,7 @@ namespace keywords = boost::log::keywords;
 /*
  * Globals
  */
-Universe  *_Universe;
+GameUniverse  *_Universe;
 TextPlane *bs_tp = NULL;
 char SERVER = 0;
 

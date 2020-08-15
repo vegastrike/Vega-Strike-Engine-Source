@@ -64,6 +64,7 @@
 #include "planet.h"
 #include "asteroid.h"
 #include "star_system.h"
+#include "universe.h"
 
 
 extern const vector< string >& ParseDestinations( const string &value );

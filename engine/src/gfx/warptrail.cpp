@@ -4,6 +4,7 @@
 #include "cmd/unit_generic.h"
 #include "gfx/camera.h"
 #include "config_xml.h"
+#include "universe.h"
 
 struct warptrails
 {

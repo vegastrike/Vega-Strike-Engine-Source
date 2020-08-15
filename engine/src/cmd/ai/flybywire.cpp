@@ -7,6 +7,8 @@
 #include "gfx/cockpit_generic.h"
 #include "vs_globals.h"
 #include "config_xml.h"
+#include "universe.h"
+
 #define VELTHRESHOLD .1
 #define ANGVELTHRESHOLD .01
 

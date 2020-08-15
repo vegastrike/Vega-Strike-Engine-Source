@@ -5,6 +5,7 @@
 #include "script/mission.h"
 #include "gfx/ani_texture.h"
 #include "gfx/matrix.h"
+#include "universe.h"
 Briefing::Ship::Ship( const char *filename, int faction, const Vector &position )
 {
     VSCONSTRUCT2( 's' )

@@ -14,6 +14,7 @@
 #include "vs_random.h"
 #include "lin_time.h" //DEBUG ONLY
 #include "cmd/pilot.h"
+#include "universe.h"
 
 extern int numprocessed;
 extern double targetpick;

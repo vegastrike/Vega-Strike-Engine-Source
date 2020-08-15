@@ -18,7 +18,7 @@
 #include "vsfilesystem.h"
 #include "unit.h"
 #include "star_system.h"
-
+#include "universe.h"
 
 
 extern char SERVER;

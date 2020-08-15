@@ -26,6 +26,7 @@
 #include "faction_generic.h"
 #include "docking.h"
 #include "star_system.h"
+#include "universe.h"
 
 extern double aggfire;
 

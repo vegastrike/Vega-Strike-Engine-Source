@@ -11,6 +11,8 @@
 #include "hard_coded_scripts.h"
 #include "universe_util.h"
 #include "configxml.h"
+#include "universe.h"
+
 #include <assert.h>
 
 using namespace XMLSupport;

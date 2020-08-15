@@ -9,6 +9,7 @@
 #include "vsfilesystem.h"
 #include "unit.h"
 #include "planet.h"
+#include "universe.h"
 
 using std::endl;
 

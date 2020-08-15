@@ -21,6 +21,7 @@
 #include "universe_util.h"
 #include "vsfilesystem.h"
 #include "cmd/ai/communication.h"
+#include "universe.h"
 
 template < typename T >
 inline T mymin( T a, T b )

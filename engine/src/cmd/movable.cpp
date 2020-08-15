@@ -4,6 +4,7 @@
 #include "universe_util.h"
 #include "unit_find.h"
 #include "star_system.h"
+#include "universe.h"
 
 #include <iostream>
 

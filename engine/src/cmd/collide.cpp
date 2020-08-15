@@ -6,6 +6,7 @@
 #include "gfx/mesh.h"
 #include "unit_collide.h"
 #include "physics.h"
+#include "universe.h"
 
 #include "collide2/CSopcodecollider.h"
 #include "collide2/csgeom2/optransfrm.h"

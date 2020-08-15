@@ -5,6 +5,7 @@
 #include "cmd/unit_util.h"
 #include "cmd/unit_find.h"
 #include "sensor.h"
+#include "universe.h"
 
 extern Unit *getTopLevelOwner(); // WTF... located in star_system_generic.cpp
 

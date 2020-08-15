@@ -40,6 +40,7 @@
 #include "unit.h"
 #include "missile.h"
 #include "star_system.h"
+#include "universe.h"
 
 #include <math.h>
 #include <list>

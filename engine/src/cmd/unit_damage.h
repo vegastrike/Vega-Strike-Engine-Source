@@ -30,6 +30,7 @@
 #include "base.h"
 #include "options.h"
 #include "star_system.h"
+#include "universe.h"
 
 extern unsigned int apply_float_to_unsigned_int( float tmp );  //Short fix
 extern vector< Mesh* >MakeMesh( unsigned int mysize );

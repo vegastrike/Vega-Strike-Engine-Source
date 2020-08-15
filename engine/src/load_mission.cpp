@@ -14,7 +14,7 @@
 #include "savegame.h"
 #include "save_util.h"
 #include "load_mission.h"
-
+#include "universe.h"
 #include "options.h"
 
 
