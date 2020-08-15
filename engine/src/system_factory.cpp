@@ -453,7 +453,7 @@ void SystemFactory::processFog(Star_XML *xml, Object& object, Planet* owner)
         fogMesh.meshname = getStringAttribute(object, "file");
         fogMesh.scale = 1.1-.075+.075* (xml->fog.size()+1);
 
-        GFXColor color = initializeColor(child_object);
+        initializeColor(child_object);
 
         fogMesh.er = getFloatAttribute(object, "red", fogMesh.er);
         fogMesh.eg = getFloatAttribute(object, "green", fogMesh.eg);

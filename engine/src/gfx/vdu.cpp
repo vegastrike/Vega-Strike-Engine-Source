@@ -842,7 +842,6 @@ void VDU::DrawTarget( GameCockpit *cp, Unit *parent, Unit *target )
 
 void VDU::DrawMessages( GameCockpit *parentcp, Unit *target )
 {
-    static bool network_draw_messages = XMLSupport::parse_bool( vs_config->getVariable( "graphics", "network_chat_text", "true" ) );
     static bool draw_messages = XMLSupport::parse_bool( vs_config->getVariable( "graphics", "chat_text", "true" ) );
 
     if (draw_messages == false)
@@ -1739,9 +1738,6 @@ bool VDU::SetWebcamAnimation()
 void VDU::DrawWebcam( Unit *parent )
 {
     using VSFileSystem::JPEGBuffer;
-    int   length;
-    char *netcam;
-
     tp->Draw( MangleString( "No webcam to view",
                                 _Universe->AccessCamera()->GetNebula() != NULL ? .4 : 0 ), scrolloffset, true );
 

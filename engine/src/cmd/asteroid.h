@@ -20,8 +20,6 @@ public:
                                  bool ResolveLast,
                                  UnitCollection *uc = NULL );
 
-/** Constructor that can only be called by the UnitFactory.
- */
     GameAsteroid( const char *filename, int faction, Flightgroup *fg = NULL, int fg_snumber = 0, float difficulty = .01 );
 
     friend class UnitFactory;

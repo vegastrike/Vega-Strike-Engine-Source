@@ -1231,7 +1231,7 @@ void BaseInterface::Room::Launch::Click( BaseInterface *base, float x, float y, 
                 playa->getAIState()->Communicate( c );
             abletodock( 5 );
             if (playa->name == "return_to_cockpit")
-                if (playa->faction == playa->faction)
+                if (playa->faction == bas->faction)
                     playa->owner = bas;
         }
         base->Terminate();

@@ -16,7 +16,7 @@
 Vega Strike Space Simulation Engine
 ===================================
 
-Vega Strike is Space Flight Simulator that allows a player to explore, trade, and fight in the vast open space. You start in an old beat up cargo ship, with endless possibilities before you and just enough cash to scrape together a life. Yet danger lurks in the space beyond.
+Vega Strike is a Space Flight Simulator that allows a player to explore, trade, and fight in the vast open space. You start in an old beat up cargo ship, with endless possibilities in front of you and just enough cash to scrape together a life. Yet danger lurks in the space beyond.
 
 
 Features
@@ -45,7 +45,7 @@ Features
 - Customizable missions
 - Stars that fly past as you explore the system
 - RAPID collision system that allows no problems with collisions
-- BSP Trees that allow one to fly close to a starship, and in the runway of (well formed) models...unlike the victory from WC3.
+- BSP Trees that allow one to fly close to a starship, and in the runway of (well formed) models... unlike the victory from WC3.
 - the Normal Force which bounces starships off of each other
 - Respawn with the ':' key (shift and semicolon)
 - Switch Ships with the '\[' key
@@ -131,30 +131,90 @@ Compiling On Linux
 1. Install the dependencies. Something like this:
 
 ```bash
-sudo apt-get -y install cmake g++ python-dev libboost-python-dev libboost-log-dev libgl1-mesa-glx freeglut3-dev \
-                libopenal-dev libsdl-gfx1.2-dev libvorbis-dev libjpeg-dev libpng-dev libgtk-3-dev
+sudo apt-get -y install cmake g++ python-dev libboost-python-dev libboost-log-dev \
+                libboost-regex-dev libgl1-mesa-glx freeglut3-dev libopenal-dev \
+                libsdl-gfx1.2-dev libvorbis-dev libjpeg-dev libpng-dev libgtk-3-dev
 ```
 
-Or on Debian 10:
+On Debian 10 "buster":
 
 ```bash
 sudo apt-get -y install git cmake python-dev build-essential automake autoconf libpng16-16 \
                 libpng-dev libpng-tools libjpeg62-turbo-dev libexpat1-dev libgtk-3-dev \
                 libopenal-dev libogg-dev libvorbis-dev libgl1-mesa-dev libsdl1.2-dev \
-                libavcodec-dev libavcodec-extra libavformat-dev libavresample-dev libavutil-dev \
-                libavdevice-dev libpostproc-dev freeglut3-dev libxmu-dev libxi-dev \
-                libboost-python1.67-dev libboost-log1.67-dev
+                libpostproc-dev freeglut3-dev libboost-python1.67-dev libboost-log1.67-dev \
+                libboost-regex1.67-dev
 ```
 
-Or on Ubuntu 20.04:
+On Ubuntu 20.04 LTS "focal":
 
 ```bash
 sudo apt-get -y install git cmake python-dev build-essential automake autoconf libpng16-16 \
                 libpng-dev libpng-tools libjpeg62-dev libexpat1-dev libgtk-3-dev libopenal-dev \
-                libogg-dev libvorbis-dev libgl1-mesa-dev libsdl1.2-dev libavcodec-dev \
-                libavcodec-extra libavformat-dev libavresample-dev libavutil-dev libavdevice-dev \
-                libpostproc-dev freeglut3-dev libxmu-dev libxi-dev libboost1.67-all-dev
+                libogg-dev libvorbis-dev libgl1-mesa-dev libsdl1.2-dev libopengl0 \
+                libpostproc-dev freeglut3-dev libboost-python1.67-dev libboost-log1.67-dev \
+                libboost-regex1.67-dev
 ```
+
+On openSUSE Leap 15.2:
+
+```bash
+sudo zypper install libboost_log1_66_0-devel \
+                    libboost_python-py2_7-1_66_0-devel \
+                    libboost_python-py3-1_66_0-devel \
+                    libboost_system1_66_0-devel \
+                    libboost_filesystem1_66_0-devel \
+                    libboost_thread1_66_0-devel \
+                    libboost_regex1_66_0-devel \
+                    libboost_chrono1_66_0-devel \
+                    libboost_atomic1_66_0-devel \
+                    cmake \
+                    gcc-c++ \
+                    freeglut-devel \
+                    libopenal0 \
+                    openal-soft-devel \
+                    libSDL-1_2-0 \
+                    libSDL-devel \
+                    libvorbis-devel \
+                    libjpeg-turbo \
+                    libjpeg62-devel \
+                    libpng16-devel \
+                    expat \
+                    libexpat-devel \
+                    libgtk-2_0-0 \
+                    gtk2-devel \
+                    libgtk-3-0 \
+                    gtk3-devel \
+                    python-devel \
+                    python3-devel \
+                    git \
+                    rpm-build
+```
+
+On Fedora 30/31/32:
+
+```bash
+sudo dnf install    git \
+                    cmake \
+                    boost-devel \
+                    boost-python3-devel \
+                    freeglut-devel \
+                    gcc-c++ \
+                    openal-soft-devel \
+                    SDL-devel \
+                    libvorbis-devel \
+                    libjpeg-turbo-devel \
+                    libpng-devel \
+                    expat-devel \
+                    gtk3-devel \
+                    python2-devel \
+                    python3-devel \
+                    rpm-build \
+                    make
+```
+
+On Fedora 30 or 31, also install `boost-python2-devel`. (Apparently not available
+on Fedora 32.)
 
 2. Build Vega Strike:
 
@@ -274,7 +334,7 @@ Regulations state that starships should be stopped before jumping-- disasters ha
 Intrastellar SPEC Drive
 -----------------------
 
-To travel inside start system, there ships are equiped with the SPEC driver that allow faster-than-light travel. This alows efficient travel between planets and station inside the same star system. To toggle it press 'Shift-A'. To activate auto-pilot, that will handle this automatically, press 'A'.
+To travel inside star system, the ships are equiped with a SPEC drive that allow faster-than-light travel. This allows efficient travel between planets and stations inside the same star system. To toggle it press 'Shift-A'. To activate auto-pilot, that will handle this automatically, press 'A'.
 
 Respawn
 -------
@@ -306,7 +366,7 @@ Controls
 - `/, Delete` - Spin Left
 - `~` (hold down) - Engage shelton slide
 - `Y` - Match speed
-- `T`- Target
+- `T` - Target
 - `P` - Target nearest to center of screen
 - `N` - Target enemy targetting you
 - `Shift-T` - Target enemies for your turret
@@ -317,11 +377,11 @@ Controls
 - `Shift-W` - Shift weapons computer mode to damage mode
 - `:` - Respawn (Use after death to recreate your starship)
 - `\[` - switch ships in battle (use to control allies)
-- `F1` toggle cockpit/background display
+- `F1` - toggle cockpit/background display
 - `F2` - Left camera
 - `F3` - Right camera
 - `F4` - Back camera
-- `F5` -Chase camera
+- `F5` - Chase camera
 - `F6` - Panning camera (s,a,w,z pan)
 - `F7` - Target camera
 - `F8` - Strange camera
@@ -338,7 +398,7 @@ Modding Vega Strike
 How to make Vegastrike Missions
 -------------------------------
 
-An example mission(this is stored in the test1.mission file)
+An example mission (this is stored in the test1.mission file)
 
 A mission must begin with the headers:
 
@@ -353,7 +413,7 @@ A mission must begin with the headers:
     </variables>
 ```
 
-Currently all of these options are ignored except for the "system".  it loads sol.system  as the star system (which is in XML and stores all present planets)
+Currently all of these options are ignored except for the "system".  It loads sol.system as the star system (which is in XML and stores all present planets)
 
 The only other system included in this beta release is the blank.mission
 
@@ -371,7 +431,7 @@ You must begin the flight group tag as above, and terminate it after all of your
                 <flightgroup name="blue" faction="confed" type="nova" ainame="default" waves="8" nr_ships="3">
 ```
 
-The name will be used later for targetting and offset purposes.  The faction is a faction listed in factions.xml (should be self explanatory 0 is neutral 1 is happy -1 is mad) Currently confed and aera are the two active factions.  AI must be default in this version as no ohter AI scripts are yet written.  nr_ships indicates how many starships will be in this flight squadron.
+The name will be used later for targetting and offset purposes.  The faction is a faction listed in factions.xml (should be self explanatory 0 is neutral 1 is happy -1 is mad) Currently confed and aera are the two active factions.  AI must be default in this version as no other AI scripts are yet written.  nr_ships indicates how many starships will be in this flight squadron.
 
 ```xml
             <pos x="10000.0" y="0.0" z="3000.0"/>
@@ -398,7 +458,7 @@ you must end all flight group tags
 continue with any other flightgroups... you can have as many as you want from as many named factions are you want...
 
 ```xml
-      </flightgroup>
+      </flightgroups>
 </mission>
 ```
 
@@ -430,7 +490,7 @@ that's how often the AI checks if it should change its strategy.  This time can 
 
 underneath the beginning tag exist a list of tags that describes the logic the AI uses to figure out its next strategy.
 
-there are a number of tags you can specify for the aggressive AI: distance, threat, hull, fshield lshield rshield bshield rand
+there are a number of tags you can specify for the aggressive AI: distance, threat, hull, fshield, lshield, rshield, bshield, rand.
 
 Each tag asserts if one of the tag-values above is between min and max.
 
@@ -490,7 +550,7 @@ this will interrupt the current progress of any scripts
 
 So that's how to use AI scripts.
 
-If you want to know more about writing actual maneuvers (like turnaway.xml  which as you can see is in the directory) please contact me at hellcatv@hotmail.com
+If you want to know more about writing actual maneuvers (like turnaway.xml which as you can see is in the directory) please contact me at hellcatv@hotmail.com
 
 you need to have a heavy background in vector math.
 
@@ -542,7 +602,7 @@ This guide was created by Munno 2010-10-08
 Vega Strike Information
 =======================
 
-Submit comments or suggestions by openning and [issue](https://github.com/vegastrike/Vega-Strike-Engine-Source/issues)
+Submit comments or suggestions by opening an [issue](https://github.com/vegastrike/Vega-Strike-Engine-Source/issues)
 
 And if you can design some missions it would rock!
 

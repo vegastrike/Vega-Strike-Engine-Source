@@ -253,10 +253,8 @@ void LoadMission( const char *nission_name, const std::string &script, bool load
     mission = active_missions.back();
     active_missions.back()->initMission();
 
-    char  fightername[1024];
     vector< Flightgroup* >::const_iterator siter;
     vector< Flightgroup* >fg = active_missions.back()->flightgroups;
-    Unit *fighter;
 
     if (active_missions.size() > 0)
         //Give the mission a name.

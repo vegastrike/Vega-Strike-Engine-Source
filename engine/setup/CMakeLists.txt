@@ -24,6 +24,11 @@ IF (NOT BEOS)
 	ENDIF(GTK3_FOUND)
 
 	ADD_DEFINITIONS(${GTK_CFLAGS})
-	INCLUDE_DIRECTORIES(${vsUTCS_SOURCE_DIR}/setup/src/include ${vsUTCS_SOURCE_DIR}/src/common ${vsUTCS_BINARY_DIR} ${GTK3_INCLUDE_DIRS})
+	INCLUDE_DIRECTORIES(
+        ${Vega_Strike_SOURCE_DIR}/setup/src/include
+        ${Vega_Strike_SOURCE_DIR}/src/common
+        ${Vega_Strike_BINARY_DIR}
+        ${GTK3_INCLUDE_DIRS}
+    )
 	TARGET_LINK_LIBRARIES(vegasettings ${GTK_LIBS})
 ENDIF (NOT BEOS)

@@ -377,9 +377,12 @@ Mesh::~Mesh()
             for (OrigMeshVector::iterator it = undrawn_meshes[j].begin(); it != undrawn_meshes[j].end(); ++it)
                 if (it->orig == this) {
                     undrawn_meshes[j].erase( it-- );
-                    VSFileSystem::vs_fprintf( stderr, "stale mesh found in draw queue--removed!\n" );
+                    BOOST_LOG_TRIVIAL(debug) << "stale mesh found in draw queue--removed!";
                 }
-        delete vlist;
+        if (vlist) {
+            delete vlist;
+            vlist = nullptr;
+        }
         for (unsigned int i = 0; i < Decal.size(); i++)
             if (Decal[i] != NULL) {
                 delete Decal[i];
@@ -404,16 +407,21 @@ Mesh::~Mesh()
                     if ( hashers->empty() ) {
                         bfxmHashTable.Delete( hash_name );
                         delete hashers;
+                        hashers = nullptr;
                     }
                 }
         }
-        if (draw_queue != NULL)
+        if (draw_queue != nullptr) {
             delete[] draw_queue;
+            draw_queue = nullptr;
+        }
     } else {
         orig->refcount--;
-        //printf ("orig refcount: %d",refcount);
-        if (orig->refcount == 0)
+        BOOST_LOG_TRIVIAL(debug) << boost::format("orig refcount: %1%") % refcount;
+        if (orig->refcount == 0) {
             delete[] orig;
+            orig = nullptr;
+        }
     }
 }
 
@@ -545,7 +553,7 @@ void Mesh::ProcessZFarMeshes( bool nocamerasetup ) {
         for (OrigMeshVector::iterator it = undrawn_meshes[a].begin(); it < undrawn_meshes[a].end(); ++it) {
             Mesh *m = it->orig;
             m->ProcessDrawQueue( it->passno, a, it->zsort, _Universe->AccessCamera()->GetPosition() );
-            m->will_be_drawn &= ( ~(1<<a) );           //not accurate any more 
+            m->will_be_drawn &= ( ~(1<<a) );           //not accurate any more
         }
         for (OrigMeshVector::iterator it = undrawn_meshes[a].begin(); it < undrawn_meshes[a].end(); ++it) {
             Mesh *m = it->orig;
@@ -590,7 +598,7 @@ void Mesh::ProcessUndrawnMeshes( bool pushSpecialEffects, bool nocamerasetup ) {
         // Therefore "else if (!nocamerasetup)" is replaced with
         // "} else {" until fixed.
         // The bug was introduced in (svn r13722)
-        //} else if (!nocamerasetup) { 
+        //} else if (!nocamerasetup) {
         } else { // less correct (svn r13721) but working on nav computer
             _Universe->AccessCamera()->UpdateGFXFrustum( GFXTRUE, g_game.znear, g_game.zfar );
         }
