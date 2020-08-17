@@ -113,15 +113,6 @@ void myGlutJoystickCallback( unsigned int buttonmask, int x, int y, int z )
     }
 }
 
-JoyStick::JoyStick()
-{
-    for (int j = 0; j < MAX_AXES; ++j) {
-        axis_axis[j]    = -1;
-        axis_inverse[j] = false;
-        joy_axis[j]     = axis_axis[j] = 0;
-    }
-    joy_buttons = 0;
-}
 int JoystickPollingRate()
 {
     return game_options.polling_rate;
