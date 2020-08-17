@@ -134,7 +134,8 @@ void InitJoystick()
 #ifdef HAVE_SDL
     num_joysticks = SDL_NumJoysticks();
     printf( "%i joysticks were found.\n\n", num_joysticks );
-    printf( "The names of the joysticks are:\n" );
+    if (num_joysticks > 0)
+        printf( "The names of the joysticks are:\n" );
 #else
     //use glut
     if (glutDeviceGet( GLUT_HAS_JOYSTICK ) || game_options.force_use_of_joystick) {
