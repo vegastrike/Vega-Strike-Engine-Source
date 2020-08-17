@@ -11,7 +11,9 @@ compiler:
     - clang
 
 env:
-    - {}
+# Seems like Python2 doesn't work well on Focal.
+# Should be uncommented if someone fixes that
+#    - {}
     - FLAGS='-DUSE_PYTHON_3=ON'
 
 jobs:
