@@ -49,6 +49,7 @@
 #include "gfx/cockpit_generic.h"
 #include "mission.h"
 #include "easydom.h"
+#include "universe.h"
 
 #include "vs_globals.h"
 #include "configxml.h"

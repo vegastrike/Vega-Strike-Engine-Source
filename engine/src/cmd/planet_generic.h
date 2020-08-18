@@ -10,7 +10,7 @@
 class Atmosphere;
 class PlanetaryTransform;
 class ContinuousTerrain;
-
+class AtmosphericFogMesh;
 
 
 class Planet : public Unit

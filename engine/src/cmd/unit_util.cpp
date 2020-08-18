@@ -8,7 +8,7 @@
 #include "config_xml.h"
 #include "vs_globals.h"
 #include "pilot.h"
-
+#include "universe.h"
 
 using std::string;
 namespace UnitUtil {

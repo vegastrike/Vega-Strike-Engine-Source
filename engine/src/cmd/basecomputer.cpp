@@ -55,6 +55,7 @@ using VSFileSystem::SaveFile;
 #include "audiolib.h"
 #include "vs_math.h"
 #include "damageable.h"
+#include "universe.h"
 //#define VS_PI 3.1415926535897931
 
 

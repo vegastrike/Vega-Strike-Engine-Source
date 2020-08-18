@@ -5,7 +5,7 @@
 #include "universe_util.h"
 #include "cmd/unit_util.h"
 #include "configxml.h"
-
+#include "universe.h"
 #include <vector>
 
 Pilot::Pilot( int faction )

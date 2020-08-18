@@ -29,6 +29,9 @@
 #include <Python.h>
 #include "options.h"
 
+#include "star_system.h"
+#include "universe.h"
+
 #include <iostream>
 
 extern Unit& GetUnitMasterPartList();
@@ -422,7 +425,7 @@ Unit * getUnitByPtr( void *ptr, Unit *finder, bool allowslowness )
 {
     if (finder) {
         UnitPtrLocator unitLocator( ptr );
-        findObjects( activeSys->collidemap[Unit::UNIT_ONLY], finder->location[Unit::UNIT_ONLY], &unitLocator );
+        findObjects( activeSys->collide_map[Unit::UNIT_ONLY], finder->location[Unit::UNIT_ONLY], &unitLocator );
         if (unitLocator.retval)
             return reinterpret_cast< Unit* > (ptr);
 
