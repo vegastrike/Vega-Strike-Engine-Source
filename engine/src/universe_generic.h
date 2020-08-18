@@ -61,11 +61,9 @@ protected:
 //Camera hud_camera;
 ///init proc
 //void StartGL();
-///currently only 1 star system is stored
-    std::vector< StarSystem* >active_star_system;
 
-//the system currently used by the scripting
-    StarSystem *script_system;
+
+
 
 private:
 ///Many C++ implementations count classes within as friends. (not all)
@@ -142,30 +140,30 @@ public:
     bool StillExists( StarSystem *ss );
     void setActiveStarSystem( StarSystem *ss )
     {
-        if ( active_star_system.empty() )
+        if ( _active_star_systems.empty() )
             pushActiveStarSystem( ss );
         else
-            active_star_system.back() = ss;
+            _active_star_systems.back() = ss;
     }
     void pushActiveStarSystem( StarSystem *ss )
     {
-        active_star_system.push_back( ss );
+        _active_star_systems.push_back( ss );
     }
     void popActiveStarSystem()
     {
-        if ( !active_star_system.empty() )
-            active_star_system.pop_back();
+        if ( !_active_star_systems.empty() )
+            _active_star_systems.pop_back();
     }
     void clearAllSystems();
 //void SetActiveCockpit (int whichcockpit);
 //void SetActiveCockpit (Cockpit * which);
     StarSystem * getActiveStarSystem( unsigned int size )
     {
-        return size >= active_star_system.size() ? NULL : active_star_system[size];
+        return size >= _active_star_systems.size() ? NULL : _active_star_systems[size];
     }
     unsigned int getNumActiveStarSystem()
     {
-        return active_star_system.size();
+        return _active_star_systems.size();
     }
     void LoadStarSystem( StarSystem *ss );
     void UnloadStarSystem( StarSystem *ss );
@@ -200,8 +198,8 @@ public:
 ///returns active star system
     StarSystem * activeStarSystem()
     {
-        return active_star_system.empty() ? NULL
-               : active_star_system.back();
+        return _active_star_systems.empty() ? NULL
+               : _active_star_systems.back();
     }
 
     UnitCollection& getActiveStarSystemUnitList() {
@@ -247,7 +245,7 @@ public:
     StarSystem * getStarSystem( string name );
     StarSystem * scriptStarSystem()
     {
-        if (script_system != NULL) return script_system;
+        if (_script_system != NULL) return _script_system;
 
         else return activeStarSystem();
         ;
@@ -255,12 +253,12 @@ public:
     bool setScriptSystem( string name )
     {
         if (name == "-active-") {
-            script_system = NULL;
+            _script_system = NULL;
             return true;
         }
         StarSystem *ss = getStarSystem( name );
-        if (script_system != NULL) {
-            script_system = ss;
+        if (_script_system != NULL) {
+            _script_system = ss;
             return true;
         }
         return false;

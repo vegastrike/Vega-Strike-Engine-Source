@@ -260,9 +260,9 @@ void GameUniverse::StartDraw()
         CalculateCoords( i, _cockpits.size(), x, y, w, h );
         AccessCamera()->SetSubwindow( x, y, w, h );
         if (_cockpits.size() > 1 && AccessCockpit( i )->activeStarSystem != lastStarSystem) {
-            active_star_system[0]->SwapOut();
+            _active_star_systems[0]->SwapOut();
             lastStarSystem = AccessCockpit()->activeStarSystem;
-            active_star_system[0] = lastStarSystem;
+            _active_star_systems[0] = lastStarSystem;
             lastStarSystem->SwapIn();
         }
         AccessCockpit()->SelectProperCamera();
@@ -299,10 +299,10 @@ void GameUniverse::StartDraw()
         //don't want to delete something when there is something pending to jump therexo
         if ( PendingJumpsEmpty() ) {
             if ( (++sorttime)%game_options.garbagecollectfrequency == 1 ) {
-                SortStarSystems( star_system, active_star_system.back() );
+                SortStarSystems( star_system, _active_star_systems.back() );
                 if (star_system.size() > game_options.numoldsystems && game_options.deleteoldsystems) {
-                    if ( std::find( active_star_system.begin(), active_star_system.end(),
-                                   star_system.back() ) == active_star_system.end() ) {
+                    if ( std::find( _active_star_systems.begin(), _active_star_systems.end(),
+                                   star_system.back() ) == _active_star_systems.end() ) {
                         delete star_system.back();
                         star_system.pop_back();
                     } else {

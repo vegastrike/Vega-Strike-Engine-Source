@@ -36,8 +36,8 @@ void Universe::clearAllSystems()
         delete star_system.back();
         star_system.pop_back();
     }
-    active_star_system.clear();
-    script_system = NULL;
+    _active_star_systems.clear();
+    _script_system = NULL;
 }
 
 Cockpit* Universe::createCockpit( std::string player )
@@ -173,20 +173,20 @@ void Universe::Init( const char *gal )
         LoadFactionXML( "factions.xml" );
         firsttime = true;
     }
-    script_system = NULL;
+    _script_system = NULL;
 }
 
 Universe::Universe( int argc, char **argv, const char *galaxy_str, bool server )
-    : script_system( NULL )
 {
     this->Init( galaxy_str );
     _current_cockpit = 0;
+    _script_system = nullptr;
 }
 
 Universe::Universe()
-    : script_system( NULL )
 {
     _current_cockpit = 0;
+    _script_system = nullptr;
 }
 
 Universe::~Universe()
@@ -277,8 +277,8 @@ void Universe::Generate2( StarSystem *ss )
     for (unsigned int tume = 0; tume <= game_options.num_times_to_simulate_new_star_system*SIM_QUEUE_SIZE+1; ++tume)
         ss->UpdateUnitPhysics( true );
     //notify the director that a new system is loaded (gotta have at least one active star system)
-    StarSystem *old_script_system = script_system;
-    script_system = ss;
+    StarSystem *old_script_system = _script_system;
+    _script_system = ss;
     VSFileSystem::vs_fprintf( stderr, "Loading Star System %s\n", ss->getFileName().c_str() );
     const vector< std::string > &adjacent = getAdjacentStarSystems( ss->getFileName() );
     for (unsigned int i = 0; i < adjacent.size(); i++) {
@@ -288,9 +288,9 @@ void Universe::Generate2( StarSystem *ss )
     if (!first)
         mission->DirectorStartStarSystem( ss );
     first = false;
-    script_system = old_script_system;
+    _script_system = old_script_system;
     popActiveStarSystem();
-    if ( active_star_system.empty() ) {
+    if ( _active_star_systems.empty() ) {
         pushActiveStarSystem( ss );
     } else {
         ss->SwapOut();
