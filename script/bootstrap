@@ -197,7 +197,7 @@ then
                         python3-devel \
                         rpm-build \
                         make
-elif [ $LINUX_ID == "fedora" ] && ([ $LINUX_VERSION_ID -eq 31 || $LINUX_VERSION_ID -eq 30])
+elif [ $LINUX_ID == "fedora" ] && ([ $LINUX_VERSION_ID -ge 30 && $LINUX_VERSION_ID -lt 32])
 then
     sudo dnf install -y git \
                         cmake \
