@@ -773,7 +773,7 @@ void Unit::LoadRow( CSVRow &row, string modification, string *netxml )
     DEF_OPTIMIZER( Armor_Front_Bottom_Right );
     DEF_OPTIMIZER( Armor_Back_Bottom_Left );
     DEF_OPTIMIZER( Armor_Back_Bottom_Right );
-    DEF_OPTIMIZER( Description );  // What was this supposed to describe?
+//    DEF_OPTIMIZER( Description );  // What was this supposed to describe? - compiler complained that it's not used.
     DEF_OPTIMIZER( Shield_Front_Top_Left );
     DEF_OPTIMIZER( Shield_Front_Top_Right );
     DEF_OPTIMIZER( Shield_Back_Top_Left );
@@ -896,7 +896,7 @@ void Unit::LoadRow( CSVRow &row, string modification, string *netxml )
             INIT_OPTIMIZER( keys, Armor_Front_Bottom_Right );
             INIT_OPTIMIZER( keys, Armor_Back_Bottom_Left );
             INIT_OPTIMIZER( keys, Armor_Back_Bottom_Right );
-            INIT_OPTIMIZER( keys, Description );
+//            INIT_OPTIMIZER( keys, Description );      // Compiler complained that this is not used
             INIT_OPTIMIZER( keys, Shield_Front_Top_Left );
             INIT_OPTIMIZER( keys, Shield_Front_Top_Right );
             INIT_OPTIMIZER( keys, Shield_Back_Top_Left );
@@ -1054,9 +1054,11 @@ void Unit::LoadRow( CSVRow &row, string modification, string *netxml )
     Shield two;
     Shield four;
     Shield eight;
-    memset( &two, 0, sizeof (Shield) );
-    memset( &four, 0, sizeof (Shield) );
-    memset( &eight, 0, sizeof (Shield) );
+/*    It looks like the shields are initialized properly anyways
+ *    memset( &two, 0, sizeof (Shield) );
+ *    memset( &four, 0, sizeof (Shield) );
+ *    memset( &eight, 0, sizeof (Shield) );
+ */
     shieldcount += AssignIf( OPTIM_GET( row, table, Shield_Front_Top_Right ),
                              two.shield2fb.front, four.shield4fbrl.front, eight.shield8.frontrighttop );
     shieldcount += AssignIf( OPTIM_GET( row, table, Shield_Front_Top_Left ),
@@ -1098,7 +1100,7 @@ void Unit::LoadRow( CSVRow &row, string modification, string *netxml )
     int   iter;
     if (shieldcount > MAX_SHIELD_NUMBER)
         shieldcount = MAX_SHIELD_NUMBER;
-    memset( shield.range, 0, sizeof (shield.range) );
+ //   memset( shield.range, 0, sizeof (shield.range) );   The range is properly initialized anyways
     if (shieldcount == 8) {
         shield.number = 8;
         shield.shield.cur[0]     = shield.shield.max[0] = eight.shield8.frontlefttopmax;
