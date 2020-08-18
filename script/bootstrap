@@ -1,0 +1,20 @@
+#!/bin/bash
+set -e
+
+if [ -f /etc/os-release ]
+then
+    export OS_RELEASE_LOCATION="/etc/os-release"
+elif [ -f /usr/lib/os-release ]
+then
+    export OS_RELEASE_LOCATION="/usr/lib/os-release"
+else
+    echo "os-release file not found; unable to continue"
+    exit 1
+fi
+export LINUX_ID=$(cat $OS_RELEASE_LOCATION | grep ^ID= | sed 's/^ID=//' | tr -d '"\n')
+echo "LINUX_ID = ${LINUX_ID}"
+export LINUX_CODENAME=$(cat $OS_RELEASE_LOCATION | grep ^VERSION_CODENAME= | sed 's/^VERSION_CODENAME=//' | tr -d '"\n')
+echo "LINUX_CODENAME = ${LINUX_CODENAME}"
+export LINUX_VERSION_ID=$(cat $OS_RELEASE_LOCATION | grep ^VERSION_ID= | sed 's/^VERSION_ID=//' | tr -d '"\n')
+echo "LINUX_VERSION_ID = ${LINUX_VERSION_ID}"
+
