@@ -1,6 +1,6 @@
 language: cpp
-os:
- - linux
+os: linux
+distro: focal
 
 # When updating be sure to add a section
 # to the matrix to cover the distro
@@ -11,11 +11,26 @@ compiler:
     - clang
 
 env:
-    - {}
+# Seems like Python2 doesn't work well on Focal.
+# Should be uncommented if someone fixes that
+#    - {}
     - FLAGS='-DUSE_PYTHON_3=ON'
 
 jobs:
-    include:
+    include: 
+        - os: linux
+          dist: bionic
+          compiler: gcc
+          name: "Ubuntu 18.04 LTS - GCC"
+        - os: linux
+          dist: bionic
+          compiler: clang
+          name: "Ubuntu 18.04 LTS - Clang"
+        - os: linux
+          dist: bionic
+          compiler: clang
+          name: "Ubuntu 18.04 LTS - Py3"
+          env: FLAGS='-DUSE_PYTHON_3=ON'
         - os: linux
           dist: xenial
           compiler: gcc
@@ -45,6 +60,7 @@ addons:
   apt:
     packages:
       - python-dev
+#      - python2-dev
       - libgl1-mesa-glx
       - freeglut3-dev
       - libopenal-dev
