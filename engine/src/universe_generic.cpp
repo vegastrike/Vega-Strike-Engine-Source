@@ -43,7 +43,7 @@ void Universe::clearAllSystems()
 Cockpit* Universe::createCockpit( std::string player )
 {
     Cockpit *cp = new Cockpit( "", NULL, player );
-    cockpit.push_back( cp );
+    _cockpits.push_back( cp );
     return cp;
 }
 
@@ -106,7 +106,7 @@ Cockpit* Universe::isPlayerStarship( const Unit *doNotDereference )
     using std::vector;
     if (!doNotDereference)
         return NULL;
-    for (std::vector< Cockpit* >::iterator iter = cockpit.begin(); iter < cockpit.end(); iter++)
+    for (std::vector< Cockpit* >::iterator iter = _cockpits.begin(); iter < _cockpits.end(); iter++)
         if ( doNotDereference == ( *(iter) )->GetParent() )
             return *(iter);
     return NULL;
@@ -116,8 +116,8 @@ int Universe::whichPlayerStarship( const Unit *doNotDereference )
 {
     if (!doNotDereference)
         return -1;
-    for (unsigned int i = 0; i < cockpit.size(); i++)
-        if ( doNotDereference == cockpit[i]->GetParent() )
+    for (unsigned int i = 0; i < _cockpits.size(); i++)
+        if ( doNotDereference == _cockpits[i]->GetParent() )
             return i;
     return -1;
 }
@@ -128,13 +128,13 @@ void Universe::SetActiveCockpit( int i )
     if ( i < 0 || i >= cockpit.size() )
         VSFileSystem::vs_fprintf( stderr, "ouch invalid cockpit %d", i );
 #endif
-    current_cockpit = i;
+    _current_cockpit = i;
 }
 
 void Universe::SetActiveCockpit( Cockpit *cp )
 {
-    for (unsigned int i = 0; i < cockpit.size(); i++)
-        if (cockpit[i] == cp) {
+    for (unsigned int i = 0; i < _cockpits.size(); i++)
+        if (_cockpits[i] == cp) {
             SetActiveCockpit( i );
             return;
         }
@@ -143,7 +143,7 @@ void Universe::SetActiveCockpit( Cockpit *cp )
 // TODO: candidate for deletion
 void Universe::SetupCockpits(std::vector< std::string >players)
 {
-    cockpit.push_back( new Cockpit( "", NULL, players[0] ) );
+    _cockpits.push_back( new Cockpit( "", NULL, players[0] ) );
 }
 
 void SortStarSystems( std::vector< StarSystem* > &ss, StarSystem *drawn )
@@ -177,21 +177,22 @@ void Universe::Init( const char *gal )
 }
 
 Universe::Universe( int argc, char **argv, const char *galaxy_str, bool server )
-    : current_cockpit( 0 )
-    , script_system( NULL )
+    : script_system( NULL )
 {
     this->Init( galaxy_str );
+    _current_cockpit = 0;
 }
 
 Universe::Universe()
-    : current_cockpit( 0 )
-    , script_system( NULL )
-{}
+    : script_system( NULL )
+{
+    _current_cockpit = 0;
+}
 
 Universe::~Universe()
 {
     factions.clear();
-    cockpit.clear();
+    _cockpits.clear();
 }
 
 void Universe::LoadStarSystem( StarSystem *s )

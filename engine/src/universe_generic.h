@@ -30,6 +30,7 @@
 #include "stardate.h"
 #include "cmd/collection.h"
 #include "star_system.h"
+#include "universe_globals.h"
 
 class Cockpit;
 class Camera;
@@ -55,8 +56,7 @@ class Universe
 protected:
     std::unique_ptr<GalaxyXML::Galaxy> galaxy;
 ///The users cockpit
-    unsigned int current_cockpit;
-    std::vector< Cockpit* >cockpit;
+
 ///a generic camera facing the HUD
 //Camera hud_camera;
 ///init proc
@@ -92,15 +92,15 @@ public:
     int whichPlayerStarship( const Unit *fighter );
     Cockpit * AccessCockpit()
     {
-        return cockpit[current_cockpit];
+        return _cockpits[_current_cockpit];
     }
     Cockpit * AccessCockpit( int i )
     {
-        return cockpit[i];
+        return _cockpits[i];
     }
     unsigned int CurrentCockpit()
     {
-        return current_cockpit;
+        return _current_cockpit;
     }
 ///Wrapper function for Star System
     virtual Camera * AccessCamera( int num )
@@ -220,7 +220,7 @@ public:
 //Cockpit *AccessCockpit() {return cockpit[current_cockpit];}
     unsigned int numPlayers()
     {
-        return cockpit.size();
+        return _cockpits.size();
     }
 //Cockpit *AccessCockpit (int i) {return cockpit[i];}
 ///Wrapper function for Star System

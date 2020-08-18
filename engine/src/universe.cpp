@@ -75,7 +75,7 @@ extern void bootstrap_first_loop();
 
 void GameUniverse::Init( int argc, char **argv, const char *galaxy )
 {
-    current_cockpit = 0;
+    _current_cockpit = 0;
     //Select drivers
 #if defined (__APPLE__)
     //get the current working directory so when glut trashes it we can restore.
@@ -117,8 +117,8 @@ GameUniverse::~GameUniverse()
 void GameUniverse::SetupCockpits( vector< string >playerNames )
 {
     for (unsigned int i = 0; i < playerNames.size(); ++i) {
-        cockpit.push_back( NULL );
-        cockpit.back() = new GameCockpit( "", NULL, playerNames[i] );
+        _cockpits.push_back( NULL );
+        _cockpits.back() = new GameCockpit( "", NULL, playerNames[i] );
     }
 }
 
@@ -254,19 +254,19 @@ void GameUniverse::StartDraw()
     GFXBeginScene();
     size_t i;
     StarSystem  *lastStarSystem = NULL;
-    for (i = 0; i < cockpit.size(); ++i) {
+    for (i = 0; i < _cockpits.size(); ++i) {
         SetActiveCockpit( i );
         float x, y, w, h;
-        CalculateCoords( i, cockpit.size(), x, y, w, h );
+        CalculateCoords( i, _cockpits.size(), x, y, w, h );
         AccessCamera()->SetSubwindow( x, y, w, h );
-        if (cockpit.size() > 1 && AccessCockpit( i )->activeStarSystem != lastStarSystem) {
+        if (_cockpits.size() > 1 && AccessCockpit( i )->activeStarSystem != lastStarSystem) {
             active_star_system[0]->SwapOut();
             lastStarSystem = AccessCockpit()->activeStarSystem;
             active_star_system[0] = lastStarSystem;
             lastStarSystem->SwapIn();
         }
         AccessCockpit()->SelectProperCamera();
-        if (cockpit.size() > 0)
+        if (_cockpits.size() > 0)
             AccessCamera()->UpdateGFX();
         if ( !RefreshGUI() && !UniverseUtil::isSplashScreenShowing() )
             activeStarSystem()->Draw();
@@ -274,11 +274,11 @@ void GameUniverse::StartDraw()
     }
     UpdateTime();
     UpdateTimeCompressionSounds();
-    _Universe->SetActiveCockpit( ( (int) ( rand01()*cockpit.size() ) )%cockpit.size() );
+    _Universe->SetActiveCockpit( ( (int) ( rand01()*_cockpits.size() ) )%_cockpits.size() );
     for (i = 0; i < star_system.size() && i < game_options.NumRunningSystems; ++i)
         star_system[i]->Update( (i == 0) ? 1 : game_options.InactiveSystemTime/i, true );
     StarSystem::ProcessPendingJumps();
-    for (i = 0; i < cockpit.size(); ++i) {
+    for (i = 0; i < _cockpits.size(); ++i) {
         SetActiveCockpit( i );
         pushActiveStarSystem( AccessCockpit( i )->activeStarSystem );
         ProcessInput( i );                       //input neesd to be taken care of;
@@ -316,7 +316,7 @@ void GameUniverse::StartDraw()
 
 void GameUniverse::WriteSaveGame( bool auto_save )
 {
-    for (unsigned int i = 0; i < cockpit.size(); ++i) {
+    for (unsigned int i = 0; i < _cockpits.size(); ++i) {
         if ( AccessCockpit( i ) ) {
             ::WriteSaveGame( AccessCockpit( i ), auto_save );
 #if 0
