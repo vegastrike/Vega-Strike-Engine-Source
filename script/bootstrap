@@ -197,7 +197,7 @@ then
                         python3-devel \
                         rpm-build \
                         make
-elif [ $LINUX_ID == "fedora" ] && ([ $LINUX_VERSION_ID -ge 30 && $LINUX_VERSION_ID -lt 32])
+elif [ $LINUX_ID == "fedora" ] && ([ $LINUX_VERSION_ID -ge 30 ] && [ $LINUX_VERSION_ID -lt 32])
 then
     sudo dnf install -y git \
                         cmake \
@@ -238,7 +238,7 @@ then
                         python3-devel \
                         rpm-build \
                         make
-elif ([ $LINUX_ID == "rhel" || $LINUX_ID == "redhat"]) && [ $LINUX_VERSION_ID -eq 8 ]
+elif ([ $LINUX_ID == "rhel" ] || [ $LINUX_ID == "redhat" ]) && [ $LINUX_VERSION_ID -eq 8 ]
 then
     echo "Work in progress"
     sudo dnf install -y git \
