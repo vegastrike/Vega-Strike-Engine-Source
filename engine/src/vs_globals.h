@@ -5,14 +5,14 @@
 #include "universe_generic.h"
 #include "command.h"
 extern commandI *CommandInterpretor;
-extern GameUniverse *_Universe;
+extern Universe *_Universe;
 /*
  * #ifdef _SERVER
  * #include "universe_generic.h"
  *       extern Universe _Universe;
  * #else
  * #include "universe.h"
- *       extern GameUniverse _Universe;
+ *       extern Universe _Universe;
  * #endif
  */
 
