@@ -1,5 +1,16 @@
 #!/bin/bash
+#====================================
+# @file   : bootstrap
+# @brief  : installs dependencies for building Vega Strike
+# @usage  : ./script/bootstrap
+# @param  : none
+#====================================
+
 set -e
+
+echo "------------------------------"
+echo "--- bootstrap | 2020-08-17 ---"
+echo "------------------------------"
 
 if [ -f /etc/os-release ]
 then
