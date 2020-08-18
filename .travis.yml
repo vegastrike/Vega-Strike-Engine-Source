@@ -52,8 +52,6 @@ jobs:
           env: FLAGS='-DUSE_PYTHON_3=ON'
     allow_failures:
         - os: osx
-        - dist: xenial
-          env: FLAGS='-DUSE_PYTHON_3=ON'
     fast_finish: true
 
 addons:
