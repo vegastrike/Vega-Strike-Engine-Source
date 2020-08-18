@@ -1,0 +1,18 @@
+#!/bin/bash
+#====================================
+# @file   : setup
+# @brief  : Sets up the Vega Strike project
+#           in an initial state for
+#           building/development
+# @usage  : ./script/setup
+# @param  : none
+#====================================
+
+set -e
+
+echo "--------------------------"
+echo "--- setup | 2020-08-17 ---"
+echo "--------------------------"
+
+./script/bootstrap
+./script/clean
