@@ -3,7 +3,6 @@
 #include "vs_globals.h"
 #include "vegastrike.h"
 #include "cockpit_generic.h"
-#include "universe_generic.h"
 #include "star_system_generic.h"
 #include "cmd/unit_generic.h"
 #include "unit.h"

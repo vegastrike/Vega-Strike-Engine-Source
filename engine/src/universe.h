@@ -21,12 +21,12 @@
 #ifndef _WrapGFX_H
 #define _WrapGFX_H
 
-#include "universe_generic.h"
 #include "gfx/camera.h"
 #include "star_system.h"
 #include "gfx/cockpit.h"
 #include "faction_generic.h"
 #include "galaxy_xml.h"
+#include "stardate.h"
 
 /**
  * Class Universe Deals with universal constants. It is a global,

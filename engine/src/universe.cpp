@@ -49,6 +49,7 @@
 #include "save_util.h"
 #include "cmd/csv.h"
 #include "cmd/role_bitmask.h"
+#include "universe_globals.h"
 
 #include <algorithm>
 #include <string>
