@@ -15,6 +15,7 @@
 #include "config_xml.h"
 #include "gfx/camera.h"
 #include "options.h"
+#include "universe.h"
 
 using std::vector;
 using std::string;

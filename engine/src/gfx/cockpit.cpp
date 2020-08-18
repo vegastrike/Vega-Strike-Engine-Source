@@ -948,7 +948,7 @@ void GameCockpit::AutoLanding()
         if (player == NULL)
             return;
 
-        CollideMap *collideMap = _Universe->activeStarSystem()->collidemap[Unit::UNIT_ONLY];
+        CollideMap *collideMap = _Universe->activeStarSystem()->collide_map[Unit::UNIT_ONLY];
         for (CollideMap::iterator it = collideMap->begin(); it != collideMap->end(); ++it)
         {
             if (it->radius <= 0)

@@ -27,6 +27,7 @@
 #include "main_loop.h"
 #include "in_mouse.h"
 #include "in_kb.h"
+#include "universe.h"
 
 #include "ai/communication.h"
 #include "audio/SceneManager.h"

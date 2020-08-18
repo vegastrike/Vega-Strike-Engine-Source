@@ -3,6 +3,8 @@
 #include "collide_map.h"
 #include "unit_generic.h"
 #include "bolt.h"
+#include "star_system.h"
+#include "universe.h"
 
 volatile bool apart_return = true;
 void CollideArray::erase( iterator target )
@@ -314,7 +316,7 @@ public:
                             CollideMap::iterator tmptmore = ref.unit->location[Unit::UNIT_ONLY];
                             CollideMap::iterator tmptless = tmptmore;
                             ++tmptmore;
-                            CollideMap *tmpcm = _Universe->activeStarSystem()->collidemap[Unit::UNIT_ONLY];
+                            CollideMap *tmpcm = _Universe->activeStarSystem()->collide_map[Unit::UNIT_ONLY];
                             return CollideChecker< T, false >::CheckCollisionsInner( tmpcm->begin(), tmpcm->end(),
                                                                                      un, collider, Unit::UNIT_ONLY,
                                                                                      tmptless, tmptmore,
@@ -334,7 +336,7 @@ public:
                             CollideMap::iterator tmptmore = ref.unit->location[Unit::UNIT_ONLY];
                             CollideMap::iterator tmptless = tmptmore;
                             ++tmptmore;
-                            CollideMap *tmpcm = _Universe->activeStarSystem()->collidemap[Unit::UNIT_ONLY];
+                            CollideMap *tmpcm = _Universe->activeStarSystem()->collide_map[Unit::UNIT_ONLY];
                             return CollideChecker< T, false >::CheckCollisionsInner( tmpcm->begin(), tmpcm->end(),
                                                                                      un, collider, Unit::UNIT_ONLY,
                                                                                      tmptless, tmptmore,
@@ -363,7 +365,7 @@ public:
                     CollideMap::iterator tmptmore = ref.unit->location[Unit::UNIT_ONLY];
                     CollideMap::iterator tmptless = tmptmore;
                     ++tmptmore;
-                    CollideMap *tmpcm = _Universe->activeStarSystem()->collidemap[Unit::UNIT_ONLY];
+                    CollideMap *tmpcm = _Universe->activeStarSystem()->collide_map[Unit::UNIT_ONLY];
                     return CollideChecker< T, false >::CheckCollisionsInner( tmpcm->begin(), tmpcm->end(),
                                                                              un, collider, Unit::UNIT_ONLY,
                                                                              tmptless, tmptmore,

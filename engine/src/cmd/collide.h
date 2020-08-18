@@ -3,7 +3,7 @@
 
 #include "gfx/vec.h"
 #include "linecollide.h"
-#include "star_system_generic.h"
+#include "star_system.h"
 
 bool TableLocationChanged( const QVector &Mini, const QVector &minz );
 bool TableLocationChanged( const LineCollide &lc, const QVector &minx, const QVector &maxx );

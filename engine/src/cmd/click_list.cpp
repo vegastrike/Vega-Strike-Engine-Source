@@ -4,6 +4,7 @@
 #include "vegastrike.h"
 #include "vs_globals.h"
 #include "gfx/camera.h"
+#include "universe.h"
 extern Vector mouseline;
 extern vector< Vector >perplines;
 

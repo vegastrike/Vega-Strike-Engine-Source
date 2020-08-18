@@ -28,11 +28,14 @@
 #include "star_system_generic.h"
 #include "faction_generic.h"
 #include "stardate.h"
+#include "cmd/collection.h"
+#include "star_system.h"
 
 class Cockpit;
 class Camera;
 class Unit;
 class Texture;
+class StarSystem;
 
 /**
  * Class Universe Deals with universal constants. It is a global,
@@ -200,6 +203,12 @@ public:
         return active_star_system.empty() ? NULL
                : active_star_system.back();
     }
+
+    UnitCollection& getActiveStarSystemUnitList() {
+        return activeStarSystem()->getUnitList();
+    }
+
+
 ///Wrapper function for Star System
 /*
  *  void SelectCamera(int cam) {

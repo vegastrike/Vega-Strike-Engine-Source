@@ -10,6 +10,8 @@
 #include "unit_generic.h"
 #include "audiolib.h"
 #include "config_xml.h"
+#include "star_system.h"
+#include "universe.h"
 
 using std::vector;
 using std::string;
@@ -33,7 +35,7 @@ Bolt::Bolt( const weapon_info *typ,
         ScaleMatrix( drawmat, Vector( typ->Radius, typ->Radius, typ->Length ) );
         decal = Bolt::AddTexture( q, typ->file );
         this->location =
-            _Universe->activeStarSystem()->collidemap[Unit::UNIT_BOLT]->insert( Collidable( Bolt::BoltIndex( q->bolts[decal].
+            _Universe->activeStarSystem()->collide_map[Unit::UNIT_BOLT]->insert( Collidable( Bolt::BoltIndex( q->bolts[decal].
                                                                                                              size(),
                                                                                                              decal,
                                                                                                              false ).bolt_index,
@@ -47,7 +49,7 @@ Bolt::Bolt( const weapon_info *typ,
         decal = Bolt::AddAnimation( q, typ->file, cur_position );
 
         this->location =
-            _Universe->activeStarSystem()->collidemap[Unit::UNIT_BOLT]->insert( Collidable( Bolt::BoltIndex( q->balls[decal].
+            _Universe->activeStarSystem()->collide_map[Unit::UNIT_BOLT]->insert( Collidable( Bolt::BoltIndex( q->balls[decal].
                                                                                                              size(),
                                                                                                              decal,
                                                                                                              true ).bolt_index,
@@ -80,24 +82,24 @@ bool Bolt::Update( Collidable::CollideRef index )
     }
     Collidable updated( **location );
     updated.SetPosition( .5*(prev_position+cur_position) );
-    location = _Universe->activeStarSystem()->collidemap[Unit::UNIT_BOLT]->changeKey( location, updated );
+    location = _Universe->activeStarSystem()->collide_map[Unit::UNIT_BOLT]->changeKey( location, updated );
     return true;
 }
 
 class UpdateBolt
 {
-    CollideMap *collidemap;
+    CollideMap *collide_map;
     StarSystem *starSystem;
-public: UpdateBolt( StarSystem *ss, CollideMap *collidemap )
+public: UpdateBolt( StarSystem *ss, CollideMap *collide_map )
     {
         this->starSystem = ss;
-        this->collidemap = collidemap;
+        this->collide_map = collide_map;
     }
     void operator()( Collidable &collidable )
     {
         if (collidable.radius < 0) {
             Bolt *thus = Bolt::BoltFromIndex( starSystem, collidable.ref );
-            if ( !collidemap->CheckCollisions( thus, collidable ) )
+            if ( !collide_map->CheckCollisions( thus, collidable ) )
                 thus->Update( collidable.ref );
         }
     }
@@ -122,7 +124,7 @@ void for_each( IT start, IT end, F f )
 class UpdateBolts
 {
     UpdateBolt sub;
-public: UpdateBolts( StarSystem *ss, CollideMap *collidemap ) : sub( ss, collidemap ) {}
+public: UpdateBolts( StarSystem *ss, CollideMap *collide_map ) : sub( ss, collide_map ) {}
     template < class T >
     void operator()( T &collidableList )
     {
@@ -132,7 +134,7 @@ public: UpdateBolts( StarSystem *ss, CollideMap *collidemap ) : sub( ss, collide
 
 void Bolt::UpdatePhysics( StarSystem *ss )
 {
-    CollideMap *cm = ss->collidemap[Unit::UNIT_BOLT];
+    CollideMap *cm = ss->collide_map[Unit::UNIT_BOLT];
     vsalg::for_each( cm->sorted.begin(), cm->sorted.end(), UpdateBolt( ss, cm ) );
     vsalg::for_each( cm->toflattenhints.begin(), cm->toflattenhints.end(), UpdateBolts( ss, cm ) );
 }
@@ -212,7 +214,7 @@ void BoltDestroyGeneric( Bolt *whichbolt, unsigned int index, int decal, bool is
     vector< Bolt > *vec = &(*target)[decal];
     if (&(*vec)[index] == whichbolt) {
         unsigned int tsize = vec->size();
-        CollideMap  *cm    = _Universe->activeStarSystem()->collidemap[Unit::UNIT_BOLT];
+        CollideMap  *cm    = _Universe->activeStarSystem()->collide_map[Unit::UNIT_BOLT];
         cm->UpdateBoltInfo( vec->back().location, (*(*vec)[index].location)->ref );
 
         assert( index < tsize );

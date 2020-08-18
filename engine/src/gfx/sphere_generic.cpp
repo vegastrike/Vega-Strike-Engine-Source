@@ -9,6 +9,7 @@
 #define M_PI (3.1415926536F)
 #endif
 #include "gfx/camera.h"
+#include "universe.h"
 
 extern Texture * createTexture( const char *filename,
                                 int stage = 0,

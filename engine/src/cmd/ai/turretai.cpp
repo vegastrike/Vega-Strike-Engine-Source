@@ -3,6 +3,7 @@
 #include "turretai.h"
 #include "cmd/unit_generic.h"
 #include "cmd/role_bitmask.h"
+#include "universe.h"
 
 using namespace Orders;
 TurretAI::TurretAI() : FaceTargetITTS( false )

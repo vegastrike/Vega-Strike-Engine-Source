@@ -8,6 +8,7 @@
 #include "vs_globals.h"
 #include "gfx/cockpit.h"
 #include "lin_time.h"
+#include "universe.h"
 
 struct StarShipControlKeyboard
 {

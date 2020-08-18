@@ -8,6 +8,7 @@
 #include "xml_support.h"
 #include "gfx/mesh.h"
 #include "gfx/cockpit.h"
+#include "universe.h"
 
 #undef BOOST_NO_CWCHAR
 
