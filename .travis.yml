@@ -60,7 +60,7 @@ addons:
   apt:
     packages:
       - python-dev
-      - python2-dev
+#      - python2-dev
       - libgl1-mesa-glx
       - freeglut3-dev
       - libopenal-dev
