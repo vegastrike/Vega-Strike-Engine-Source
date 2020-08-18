@@ -20,7 +20,6 @@
 #include "star_system.h"
 #include "cmd/unit_generic.h"
 #include "cmd/movable.h"
-#include "cmd/unit_factory.h"
 #include "cmd/collection.h"
 #include "cmd/unit_util.h"
 #include "cmd/unit_find.h" //for radar iteration.
@@ -57,6 +56,7 @@
 #include "options.h"
 #include "soundcontainer_aldrv.h"
 #include "configxml.h"
+#include "planet_generic.h"
 
 
 
@@ -948,7 +948,7 @@ void GameCockpit::AutoLanding()
         if (player == NULL)
             return;
 
-        CollideMap *collideMap = _Universe->activeStarSystem()->collidemap[Unit::UNIT_ONLY];
+        CollideMap *collideMap = _Universe->activeStarSystem()->collide_map[Unit::UNIT_ONLY];
         for (CollideMap::iterator it = collideMap->begin(); it != collideMap->end(); ++it)
         {
             if (it->radius <= 0)

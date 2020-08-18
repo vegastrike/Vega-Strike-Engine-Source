@@ -8,6 +8,7 @@
 #include "star_system.h"
 #include "cmd/collection.h"
 #include "cmd/unit_generic.h"
+#include "universe.h"
 
 Atmosphere::SunBox::~SunBox()
 {

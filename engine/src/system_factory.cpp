@@ -5,13 +5,17 @@
 #include "gfxlib_struct.h"
 #include "universe_util.h"
 #include "options.h"
-#include "cmd/unit_factory.h"
 #include "ai/fire.h"
 #include "asteroid.h"
 #include "ai/aggressive.h"
 #include "enhancement.h"
 #include "building.h"
 #include "planetary_orbit.h"
+#include "unit.h"
+#include "enhancement.h"
+#include "building.h"
+#include "asteroid.h"
+
 
 // TODO: For comparison only - remove
 #include "terrain.h"
@@ -374,7 +378,7 @@ Planet* SystemFactory::processPlanet(Star_XML *xml, Object& object, Planet* owne
     }
 
     Vector computed_rotational_velocity = ComputeRotVel( rotational_velocity, R, S );
-    Planet *planet = UnitFactory::createPlanet(R, S, velocity,
+    Planet *planet = new GamePlanet(R, S, velocity,
                                                computed_rotational_velocity,
                                                position, gravity, radius,
                                                filename, technique, unitname,
@@ -562,7 +566,7 @@ void SystemFactory::processEnhancement(string element, Star_XML *xml, Object& ob
 
     if(boost::iequals(element, "unit")) {
         Flightgroup *fg = getStaticBaseFlightgroup(faction);
-        unit = UnitFactory::createUnit( filename.c_str(), false, faction, "", fg, fg->nr_ships-1 );
+        unit = new GameUnit< Unit >( filename.c_str(), false, faction, "", fg, fg->nr_ships-1 );
         unit->setFullname(fullname);
 
         if(unit->faction != neutralfaction) {
@@ -572,7 +576,7 @@ void SystemFactory::processEnhancement(string element, Star_XML *xml, Object& ob
     } else if(boost::iequals(element, "asteroid")) {
         Flightgroup *fg = getStaticAsteroidFlightgroup(faction);
         unit = static_cast<Unit*>(
-                    UnitFactory::createAsteroid( filename.c_str(),
+                    new GameAsteroid( filename.c_str(),
                                                  faction, fg, fg->nr_ships-1,
                                                  absolute_scalex ));
         if (scalex < 0) // This was almost certainly fixed by the above line. TODO: refactor
@@ -580,20 +584,20 @@ void SystemFactory::processEnhancement(string element, Star_XML *xml, Object& ob
 
     } else if(boost::iequals(element, "enhancement")) {
         unit = static_cast<Unit*>(
-                    UnitFactory::createEnhancement(filename.c_str(), faction, string("")));
+                    new GameEnhancement(filename.c_str(), faction, string("")));
 
     } else if(boost::iequals(element, "building") ||
               boost::iequals(element, "vehicle")) {
 
         if (xml->ct == nullptr && xml->parentterrain != nullptr) // Terrain
             unit = static_cast<Unit*>(
-                        UnitFactory::createBuilding(xml->parentterrain,
+                        new GameBuilding(xml->parentterrain,
                                                     boost::iequals(element, "vehicle"),
                                                     filename.c_str(), false, faction,
                                                     string("")));
         else if(xml->ct != nullptr) // Continuous terrain
             unit = static_cast<Unit*>(
-                        UnitFactory::createBuilding(xml->ct,
+                        new GameBuilding(xml->ct,
                                                     boost::iequals(element, "vehicle"),
                                                     filename.c_str(), false, faction,
                                                     string("")));

@@ -1,5 +1,4 @@
 #include "planet_generic.h"
-#include "unit_factory.h"
 #include "gfx/mesh.h"
 #include "galaxy_xml.h"
 #include <sys/types.h>
@@ -8,6 +7,9 @@
 #include "lin_time.h"
 #include "planetary_orbit.h"
 #include "vsfilesystem.h"
+#include "unit.h"
+#include "planet.h"
+#include "universe.h"
 
 using std::endl;
 
@@ -90,7 +92,7 @@ Vector Planet::AddSpaceElevator( const std::string &name, const std::string &fac
             ElevatorLoc.p.Set( dir.i*mx.i, dir.j*mx.j, dir.k*mx.k );
         else
             ElevatorLoc.p.Set( -dir.i*mn.i, -dir.j*mn.j, -dir.k*mn.k );
-        Unit *un = UnitFactory::createUnit( name.c_str(), true, FactionUtil::GetFactionIndex( faction ), "", NULL );
+        Unit *un = new GameUnit< Unit >( name.c_str(), true, FactionUtil::GetFactionIndex( faction ), "", NULL );
         if (pImage->dockingports.back().GetPosition().MagnitudeSquared() < 10)
             pImage->dockingports.clear();
         pImage->dockingports.push_back( DockingPorts( ElevatorLoc.p, un->rSize()*1.5, 0, DockingPorts::Type::INSIDE ) );
@@ -173,7 +175,7 @@ Unit* Planet::beginElement( QVector x,
         if (isunit == true) {
             Unit *sat_unit  = NULL;
             Flightgroup *fg = getStaticBaseFlightgroup( faction );
-            satellites.prepend( sat_unit = UnitFactory::createUnit( filename.c_str(), false, faction, "", fg, fg->nr_ships-1 ) );
+            satellites.prepend( sat_unit = new GameUnit< Unit >( filename.c_str(), false, faction, "", fg, fg->nr_ships-1 ) );
             sat_unit->setFullname( fullname );
             un = sat_unit;
             un_iter satiterator( satellites.createIterator() );
@@ -196,7 +198,7 @@ Unit* Planet::beginElement( QVector x,
             Planet *p;
             if (dest.size() != 0)
                 radius = ScaleJumpRadius( radius );
-            satellites.prepend( p = UnitFactory::createPlanet( x, y, vely, rotvel, pos, gravity, radius,
+            satellites.prepend( p = new GamePlanet( x, y, vely, rotvel, pos, gravity, radius,
                                                                filename, technique, unitname,
                                                                blendSrc, blendDst, dest,
                                                                QVector( 0, 0, 0 ), this, ourmat, ligh, faction, fullname, inside_out ) );
@@ -289,7 +291,7 @@ void Planet::InitPlanet( QVector x,
     int    tmpfac   = faction;
     if (UniverseUtil::LookupUnitStat( tempname, FactionUtil::GetFactionName( faction ), "Cargo_Import" ).length() == 0)
         tmpfac = FactionUtil::GetPlanetFaction();
-    Unit  *un = UnitFactory::createUnit( tempname.c_str(), true, tmpfac );
+    Unit  *un = new GameUnit< Unit >( tempname.c_str(), true, tmpfac );
 
     static bool smartplanets = XMLSupport::parse_bool( vs_config->getVariable( "physics", "planets_can_have_subunits", "false" ) );
     if ( un->name != string( "LOAD_FAILED" ) ) {

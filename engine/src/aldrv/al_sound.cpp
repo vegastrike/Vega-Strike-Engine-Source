@@ -9,7 +9,7 @@
 #include "gfx/cockpit_generic.h"
 #include "options.h"
 #include "posh.h"
-
+#include "universe.h"
 
 
 #ifdef HAVE_AL

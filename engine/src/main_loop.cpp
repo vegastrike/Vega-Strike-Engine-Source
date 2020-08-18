@@ -9,7 +9,7 @@
 #include "lin_time.h"
 #include "cmd/unit.h"
 #include "cmd/movable.h"
-#include "cmd/unit_factory.h"
+#include "unit.h"
 #include "vegastrike.h"
 #include "vs_globals.h"
 #include "in.h"
@@ -56,6 +56,7 @@
 #include "save_util.h"
 #include "in_kb_data.h"
 #include "vs_random.h"
+#include "enhancement.h"
 
 #include "options.h"
 
@@ -861,7 +862,7 @@ void createObjects( std::vector< std::string > &fighter0name,
                 }
 
                 cout<<"CREATING A LOCAL SHIP : "<<fightername<<endl;
-                fighters[a] = UnitFactory::createUnit( fightername, false, tmptarget[a], modifications, fg, s );
+                fighters[a] = new GameUnit< Unit >( fightername, false, tmptarget[a], modifications, fg, s );
 
                 _Universe->activeStarSystem()->AddUnit( fighters[a] );
                 if ( s == 0 && squadnum < (int) fighter0name.size() ) {
@@ -877,7 +878,7 @@ void createObjects( std::vector< std::string > &fighter0name,
                 bool isvehicle = false;
                 if (fg_terrain == -2) {
                     fighters[a] =
-                        UnitFactory::createBuilding( myterrain, isvehicle, fightername, false, tmptarget[a], string( "" ), fg );
+                        new GameBuilding( myterrain, isvehicle, fightername, false, tmptarget[a], string( "" ), fg );
                 } else {
                     if ( fg_terrain >= (int) _Universe->activeStarSystem()->numTerrain() ) {
                         ContinuousTerrain *t;
@@ -885,11 +886,11 @@ void createObjects( std::vector< std::string > &fighter0name,
                             fg_terrain-_Universe->activeStarSystem()->numTerrain()
                             < _Universe->activeStarSystem()->numContTerrain() );
                         t = _Universe->activeStarSystem()->getContTerrain( fg_terrain-_Universe->activeStarSystem()->numTerrain() );
-                        fighters[a] = UnitFactory::createBuilding( t, isvehicle, fightername, false, tmptarget[a], string(
+                        fighters[a] = new GameBuilding( t, isvehicle, fightername, false, tmptarget[a], string(
                                                                        "" ), fg );
                     } else {
                         Terrain *t = _Universe->activeStarSystem()->getTerrain( fg_terrain );
-                        fighters[a] = UnitFactory::createBuilding( t, isvehicle, fightername, false, tmptarget[a], string(
+                        fighters[a] = new GameBuilding( t, isvehicle, fightername, false, tmptarget[a], string(
                                                                        "" ), fg );
                     }
                 }
@@ -935,12 +936,12 @@ void AddUnitToSystem( const SavedUnits *su )
     {
     case ENHANCEMENTPTR:
         un =
-            UnitFactory::createEnhancement( su->filename.get().c_str(), FactionUtil::GetFactionIndex( su->faction ), string( "" ) );
+            new GameEnhancement( su->filename.get().c_str(), FactionUtil::GetFactionIndex( su->faction ), string( "" ) );
         un->SetPosition( QVector( 0, 0, 0 ) );
         break;
     case UNITPTR:
     default:
-        un = UnitFactory::createUnit( su->filename.get().c_str(), false, FactionUtil::GetFactionIndex( su->faction ) );
+        un = new GameUnit< Unit >( su->filename.get().c_str(), false, FactionUtil::GetFactionIndex( su->faction ) );
         un->EnqueueAI( new Orders::AggressiveAI( "default.agg.xml" ) );
         un->SetTurretAI();
         if ( _Universe->AccessCockpit()->GetParent() )

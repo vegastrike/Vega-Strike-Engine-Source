@@ -1,14 +1,15 @@
 #include "briefing.h"
 #include "unit_generic.h"
-#include "unit_factory.h"
+#include "unit.h"
 #include "gfx/mesh.h"
 #include "script/mission.h"
 #include "gfx/ani_texture.h"
 #include "gfx/matrix.h"
+#include "universe.h"
 Briefing::Ship::Ship( const char *filename, int faction, const Vector &position )
 {
     VSCONSTRUCT2( 's' )
-    Unit*tmp = UnitFactory::createUnit( filename, true, faction );
+    Unit*tmp = new GameUnit< Unit >( filename, true, faction );
     meshdata = tmp->StealMeshes();
     tmp->Kill();
     cloak    = 1;

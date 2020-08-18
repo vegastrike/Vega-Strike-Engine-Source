@@ -1,6 +1,6 @@
 #include <math.h>
 #include "vegastrike.h"
-#include "unit_factory.h"
+#include "unit.h"
 #include "planet.h"
 #include "gfxlib.h"
 #include "gfx/sphere.h"
@@ -26,7 +26,7 @@
 #include "gfx/vsimage.h"
 #include "vsfilesystem.h"
 #include "gfx/camera.h"
-
+#include "universe.h"
 #include "game_config.h"
 
 GamePlanet::GamePlanet() :
@@ -127,7 +127,7 @@ void GamePlanet::AddFog( const std::vector< AtmosphericFogMesh > &v, bool optica
     if (opticalillusion)
         fawg = new AtmosphereHalo( this->rSize(), fogs, 0 );
     else
-        fawg = UnitFactory::createUnit( fogs, true, 0 );
+        fawg = new GameUnit< Unit >( fogs, true, 0 );
     fawg->setFaceCamera();
     getSubUnits().preinsert( fawg );
     fawg->hull /= fawg->GetHullPercent();
@@ -265,11 +265,11 @@ GamePlanet::GamePlanet( QVector x,
             stab = ".unstable";
         string wormholename   = wormhole_unit+stab;
         string wormholeneutralname = wormhole_unit+".neutral"+stab;
-        Unit  *jum = UnitFactory::createUnit( wormholename.c_str(), true, faction );
+        Unit  *jum = new GameUnit< Unit >( wormholename.c_str(), true, faction );
         int    neutralfaction = FactionUtil::GetNeutralFaction();
         faction = neutralfaction;
 
-        Unit  *neujum  = UnitFactory::createUnit( wormholeneutralname.c_str(), true, neutralfaction );
+        Unit  *neujum  = new GameUnit< Unit >( wormholeneutralname.c_str(), true, neutralfaction );
         Unit  *jump    = jum;
         bool   anytrue = false;
         while (jump != NULL) {

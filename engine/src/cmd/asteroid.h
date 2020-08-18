@@ -6,7 +6,6 @@
 #include "cmd/script/flightgroup.h"
 #include "cmd/collection.h"
 #include "cmd/asteroid_generic.h"
-#include "cmd/unit_factory.h"
 #include "cmd/unit.h"
 
 class GameAsteroid : public GameUnit< Asteroid >
@@ -20,9 +19,7 @@ public:
                                  const Vector &CumulativeVelocity,
                                  bool ResolveLast,
                                  UnitCollection *uc = NULL );
-protected:
-/** Constructor that can only be called by the UnitFactory.
- */
+
     GameAsteroid( const char *filename, int faction, Flightgroup *fg = NULL, int fg_snumber = 0, float difficulty = .01 );
 
     friend class UnitFactory;

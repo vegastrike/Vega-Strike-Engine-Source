@@ -11,6 +11,7 @@
 #include "config_xml.h"
 #include "xml_support.h"
 #include "camera.h"
+#include "universe.h"
 
 #include "../gldrv/gl_globals.h"
 #include <physics.h>

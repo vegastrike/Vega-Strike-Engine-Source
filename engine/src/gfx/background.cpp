@@ -30,6 +30,8 @@
 #include "../gldrv/gl_globals.h"
 #include "config_xml.h"
 #include "universe_util.h"
+#include "universe.h"
+
 #include <float.h>
 const float size = 100;
 Background::Background( const char *file, int numstars, float spread, const std::string &filename, const GFXColor &color_, bool degamma_ ) 

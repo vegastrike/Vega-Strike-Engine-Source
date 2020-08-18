@@ -3,7 +3,6 @@
 #include <string>
 #include <vector>
 #include "unit.h"
-#include "unit_factory.h"
 #include "ai/order.h"
 #include "gfx/animation.h"
 #include "gfx/mesh.h"
@@ -30,6 +29,8 @@
 #include "unit_csv.h"
 #include "base.h"
 #include "options.h"
+#include "star_system.h"
+#include "universe.h"
 
 extern unsigned int apply_float_to_unsigned_int( float tmp );  //Short fix
 extern vector< Mesh* >MakeMesh( unsigned int mysize );
@@ -120,7 +121,7 @@ void GameUnit< UnitType >::Split( int level )
         tempmeshes.reserve( meshsizes[i] );
         for (unsigned int j = 0; j < meshsizes[i] && k < old.size(); ++j, ++k)
             tempmeshes.push_back( old[k] );
-        this->SubUnits.prepend( splitsub = UnitFactory::createUnit( tempmeshes, true, this->faction ) );
+        this->SubUnits.prepend( splitsub = new GameUnit< Unit >( tempmeshes, true, this->faction ) );
         splitsub->hull = 1000;
         splitsub->name = "debris";
         splitsub->Mass = game_options.debris_mass*splitsub->Mass/level;

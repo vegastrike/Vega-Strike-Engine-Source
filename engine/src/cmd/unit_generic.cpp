@@ -22,7 +22,6 @@
 #include "cmd/ai/flybywire.h"
 #include "cmd/ai/aggressive.h"
 #include "python/python_class.h"
-#include "cmd/unit_factory.h"
 #include "missile_generic.h"
 #include "gfx/cockpit_generic.h"
 #include "gfx/vsbox.h"
@@ -38,6 +37,10 @@
 #include "galaxy_xml.h"
 #include "gfx/camera.h"
 #include "options.h"
+#include "unit.h"
+#include "missile.h"
+#include "star_system.h"
+#include "universe.h"
 
 #include <math.h>
 #include <list>
@@ -57,6 +60,27 @@
 using std::cerr;
 using std::endl;
 using std::list;
+
+std::string getMasterPartListUnitName()
+{
+    static std::string mpl = vs_config->getVariable( "data", "master_part_list", "master_part_list" );
+    return mpl;
+}
+
+Unit *_masterPartList = nullptr;
+
+Unit* getMasterPartList()
+{
+    if (_masterPartList == NULL) {
+        static bool making = true;
+        if (making) {
+            making = false;
+            _masterPartList = Unit::makeMasterPartList();
+            making = true;
+        }
+    }
+    return _masterPartList;
+}
 
 //cannot seem to get min and max working properly across win and lin any other way...
 static float mymax( float a, float b )
@@ -1053,7 +1077,6 @@ void Unit::Init()
     }
 }
 
-std::string getMasterPartListUnitName();
 using namespace VSFileSystem;
 extern std::string GetReadPlayerSaveGame( int );
 CSVRow GetUnitRow( string filename, bool subu, int faction, bool readLast, bool &read );
@@ -3525,7 +3548,7 @@ void Unit::ProcessDeleteQueue()
 
 Unit * makeBlankUpgrade( string templnam, int faction )
 {
-    Unit *bl = UnitFactory::createServerSideUnit( templnam.c_str(), true, faction );
+    Unit *bl = new Unit( templnam.c_str(), true, faction );
     for (int i = bl->numCargo()-1; i >= 0; i--) {
         int q = bl->GetCargo( i ).quantity;
         bl->RemoveCargo( i, q );
@@ -3560,7 +3583,7 @@ const Unit * makeTemplateUpgrade( string name, int faction )
     if (!lim) {
         lim =
             UnitConstCache::setCachedConst( StringIntKey( limiternam,
-                                                          faction ), UnitFactory::createUnit( limiternam.c_str(), true, faction ) );
+                                                          faction ), new GameUnit< Unit >( limiternam.c_str(), true, faction ) );
     }
     if (lim->name == LOAD_FAILED)
         lim = NULL;
@@ -3572,7 +3595,7 @@ const Unit * loadUnitByCache( std::string name, int faction )
     const Unit *temprate = UnitConstCache::getCachedConst( StringIntKey( name, faction ) );
     if (!temprate)
         temprate =
-            UnitConstCache::setCachedConst( StringIntKey( name, faction ), UnitFactory::createUnit( name.c_str(), true, faction ) );
+            UnitConstCache::setCachedConst( StringIntKey( name, faction ), new GameUnit< Unit >( name.c_str(), true, faction ) );
     return temprate;
 }
 
@@ -4967,7 +4990,7 @@ bool Unit::UpgradeSubUnitsWithFactory( const Unit *up, int subunitoffset, bool t
                     Unit *un;                            //make garbage unit
                     //NOT 100% SURE A GENERIC UNIT CAN FIT (WAS GAME UNIT CREATION)
                     //give a default do-nothing unit
-                    ui.preinsert( un = UnitFactory::createUnit( "upgrading_dummy_unit", true, faction ) );
+                    ui.preinsert( un = new GameUnit< Unit >( "upgrading_dummy_unit", true, faction ) );
                     un->SetFaction( faction );
                     un->curr_physical_state = addToMeCur;
                     un->prev_physical_state = addToMePrev;
@@ -5127,7 +5150,7 @@ double Unit::Upgrade( const std::string &file, int mountoffset, int subunitoffse
     const Unit *up = UnitConstCache::getCachedConst( StringIntKey( file, upgradefac ) );
     if (!up)
         up = UnitConstCache::setCachedConst( StringIntKey( file, upgradefac ),
-                                            UnitFactory::createUnit( file.c_str(), true, upgradefac ) );
+                                            new GameUnit< Unit >( file.c_str(), true, upgradefac ) );
     unsigned int cargonum;
     Cargo *cargo = GetCargo(file, cargonum);
     if (cargo)
@@ -5139,7 +5162,7 @@ double Unit::Upgrade( const std::string &file, int mountoffset, int subunitoffse
         templ =
             UnitConstCache::setCachedConst( StringIntKey( templnam,
                                                           this->faction ),
-                                           UnitFactory::createUnit( templnam.c_str(), true, this->faction ) );
+                                           new GameUnit< Unit >( templnam.c_str(), true, this->faction ) );
     }
     free( unitdir );
     double percentage = 0;
@@ -5398,7 +5421,7 @@ bool Unit::UpAndDownGrade( const Unit *up,
     if (!initblankship) {
         blankship     = this;
         initblankship = true;
-        blankship     = UnitFactory::createServerSideUnit( "upgrading_dummy_unit", true, FactionUtil::GetUpgradeFaction() );
+        blankship     = new Unit( "upgrading_dummy_unit", true, FactionUtil::GetUpgradeFaction() );
     }
     //set up vars for "LookupUnitStat" to check for empty cells
     string upgrade_name = up->name;
@@ -6031,7 +6054,7 @@ int Unit::RepairUpgrade()
     } else if (ret) {
         const Unit *maxrecharge = makeTemplateUpgrade( name.get()+".template", faction );
 
-        Unit *mpl = UnitFactory::getMasterPartList();
+        Unit *mpl = getMasterPartList();
         for (unsigned int i = 0; i < mpl->numCargo(); ++i)
             if (mpl->GetCargo( i ).GetCategory().find( "upgrades" ) == 0) {
                 const Unit *up = loadUnitByCache( mpl->GetCargo( i ).content, upfac );
@@ -6135,7 +6158,7 @@ float Unit::PriceCargo( const std::string &s )
     tmp.content = s;
     vector< Cargo >::iterator mycargo = std::find( pImage->cargo.begin(), pImage->cargo.end(), tmp );
     if ( mycargo == pImage->cargo.end() ) {
-        Unit *mpl = UnitFactory::getMasterPartList();
+        Unit *mpl = getMasterPartList();
         if (this != mpl) {
             return mpl->PriceCargo( s );
         } else {
@@ -6169,7 +6192,7 @@ vector< CargoColor >& Unit::FilterDowngradeList( vector< CargoColor > &mylist, b
                 NewPart = UnitConstCache::setCachedConst( StringIntKey(
                                                              mylist[i].cargo.GetContent(),
                                                              upgrfac ),
-                                                         UnitFactory::createUnit( mylist[i].cargo.GetContent().c_str(), false,
+                                                         new GameUnit< Unit >( mylist[i].cargo.GetContent().c_str(), false,
                                                                                   upgrfac ) );
             }
             if ( NewPart->name == string( "LOAD_FAILED" ) ) {
@@ -6177,7 +6200,7 @@ vector< CargoColor >& Unit::FilterDowngradeList( vector< CargoColor > &mylist, b
                     UnitConstCache::getCachedConst( StringIntKey( mylist[i].cargo.GetContent().c_str(), faction ) );
                 if (!NewPart) {
                     NewPart = UnitConstCache::setCachedConst( StringIntKey( mylist[i].cargo.content, faction ),
-                                                             UnitFactory::createUnit( mylist[i].cargo.GetContent().c_str(),
+                                                             new GameUnit< Unit >( mylist[i].cargo.GetContent().c_str(),
                                                                                       false, faction ) );
                 }
             }
@@ -6192,7 +6215,7 @@ vector< CargoColor >& Unit::FilterDowngradeList( vector< CargoColor > &mylist, b
                         templ =
                             UnitConstCache::setCachedConst( StringIntKey( templnam,
                                                                           faction ),
-                                                           UnitFactory::createUnit( templnam.c_str(), true, this->faction ) );
+                                                           new GameUnit< Unit >( templnam.c_str(), true, this->faction ) );
                     }
                     if ( templ->name == std::string( "LOAD_FAILED" ) )
                         templ = NULL;
@@ -6201,7 +6224,7 @@ vector< CargoColor >& Unit::FilterDowngradeList( vector< CargoColor > &mylist, b
                     if (downgradelimit == NULL) {
                         downgradelimit = UnitConstCache::setCachedConst( StringIntKey( limiternam,
                                                                                        faction ),
-                                                                        UnitFactory::createUnit( limiternam.c_str(), true,
+                                                                        new GameUnit< Unit >( limiternam.c_str(), true,
                                                                                                  this->faction ) );
                     }
                     if ( downgradelimit->name == std::string( "LOAD_FAILED" ) )
@@ -6357,7 +6380,7 @@ void Unit::EjectCargo( unsigned int index )
                         ++(fg->nr_ships);
                         ++(fg->nr_ships_left);
                     }
-                    cargo = UnitFactory::createUnit( ans.c_str(), false, faction, "", fg, fgsnumber, NULL );
+                    cargo = new GameUnit< Unit >( ans.c_str(), false, faction, "", fg, fgsnumber, NULL );
                     cargo->PrimeOrders();
                     cargo->SetAI( new Orders::AggressiveAI( "default.agg.xml" ) );
                     cargo->SetTurretAI();
@@ -6384,10 +6407,10 @@ void Unit::EjectCargo( unsigned int index )
                             ++(fg->nr_ships);
                             ++(fg->nr_ships_left);
                         }
-                        cargo = UnitFactory::createUnit( "eject", false, faction, "", fg, fgsnumber, NULL);
+                        cargo = new GameUnit< Unit >( "eject", false, faction, "", fg, fgsnumber, NULL);
                     } else {
                         int fac = FactionUtil::GetUpgradeFaction();
-                        cargo = UnitFactory::createUnit( "eject", false, fac, "", NULL, 0, NULL );
+                        cargo = new GameUnit< Unit >( "eject", false, fac, "", NULL, 0, NULL );
                     }
                     if (owner)
                         cargo->owner = owner;
@@ -6411,7 +6434,7 @@ void Unit::EjectCargo( unsigned int index )
                             ++(fg->nr_ships);
                             ++(fg->nr_ships_left);
                         }
-                        cargo = UnitFactory::createUnit( "return_to_cockpit", false, faction, "", fg, fgsnumber, NULL);
+                        cargo = new GameUnit< Unit >( "return_to_cockpit", false, faction, "", fg, fgsnumber, NULL);
                         if (owner)
                             cargo->owner = owner;
                         else
@@ -6421,9 +6444,9 @@ void Unit::EjectCargo( unsigned int index )
                         static float ejectcargotime =
                             XMLSupport::parse_float( vs_config->getVariable( "physics", "eject_live_time", "0" ) );
                         if (cargotime == 0.0) {
-                            cargo = UnitFactory::createUnit( "eject", false, fac, "", NULL, 0, NULL);
+                            cargo = new GameUnit< Unit >( "eject", false, fac, "", NULL, 0, NULL);
                         } else {
-                            cargo = UnitFactory::createMissile( "eject",
+                            cargo = new GameMissile( "eject",
                                                                fac, "",
                                                                0,
                                                                0,
@@ -6445,7 +6468,7 @@ void Unit::EjectCargo( unsigned int index )
                         rot    = grot;
                     }
                     int upgrfac = FactionUtil::GetUpgradeFaction();
-                    cargo = UnitFactory::createMissile( tmpnam.c_str(),
+                    cargo = new GameMissile( tmpnam.c_str(),
                                                         upgrfac,
                                                         "",
                                                         0,
@@ -6459,7 +6482,7 @@ void Unit::EjectCargo( unsigned int index )
             }
             if (cargo->name == "LOAD_FAILED") {
                 cargo->Kill();
-                cargo = UnitFactory::createMissile( "generic_cargo",
+                cargo = new GameMissile( "generic_cargo",
                                                    FactionUtil::GetUpgradeFaction(), "",
                                                    0,
                                                    0,
@@ -6705,7 +6728,7 @@ void Unit::GetSortedCargoCat( const std::string &cat, size_t &begin, size_t &end
 
 Unit& GetUnitMasterPartList()
 {
-    return *UnitFactory::getMasterPartList();
+    return *getMasterPartList();
 }
 
 bool myless( const Cargo &a, const Cargo &b )
@@ -6724,7 +6747,7 @@ Cargo* Unit::GetCargo( const std::string &s, unsigned int &i )
 const Cargo* Unit::GetCargo( const std::string &s, unsigned int &i ) const
 {
     static Hashtable< string, unsigned int, 2047 >index_cache_table;
-    Unit *mpl = UnitFactory::getMasterPartList();
+    Unit *mpl = getMasterPartList();
     if (this == mpl) {
         unsigned int *ind = index_cache_table.Get( s );
         if (ind) {
@@ -7605,7 +7628,7 @@ void Unit::UpdatePhysics3(const Transformation &trans,
           for (unsigned int locind = 0; locind < Unit::NUM_COLLIDE_MAPS; ++locind)
               hint[locind] =
                   ( !is_null( superunit->location[locind] ) ) ? superunit->location[locind] : _Universe->activeStarSystem()->
-                  collidemap[locind]->begin();
+                  collide_map[locind]->begin();
           if ( !mounts[i].PhysicsAlignedFire( this, t1, m1, cumulative_velocity,
                                               (!isSubUnit() || owner == NULL) ? this : owner, target, autotrack,
                                               trackingcone,
@@ -7671,10 +7694,10 @@ void Unit::UpdatePhysics3(const Transformation &trans,
   if ( !isSubUnit() ) {
       for (unsigned int locind = 0; locind < Unit::NUM_COLLIDE_MAPS; ++locind) {
           if ( is_null( this->location[locind] ) )
-              this->getStarSystem()->collidemap[locind]->insert( Collidable( this ) );
+              this->getStarSystem()->collide_map[locind]->insert( Collidable( this ) );
           else if (locind == Unit::UNIT_BOLT)
               //that update will propagate with the flatten
-              this->getStarSystem()->collidemap[Unit::UNIT_BOLT]->changeKey( this->location[locind], Collidable( this ) );
+              this->getStarSystem()->collide_map[Unit::UNIT_BOLT]->changeKey( this->location[locind], Collidable( this ) );
       }
   }
 }
@@ -7707,7 +7730,7 @@ float Unit::CalculateNearestWarpUnit( float minmultiplier, Unit **nearest_unit, 
     Unit *testthis = NULL;
     {
         NearestUnitLocator locatespec;
-        findObjects( _Universe->activeStarSystem()->collidemap[Unit::UNIT_ONLY], location[Unit::UNIT_ONLY], &locatespec );
+        findObjects( _Universe->activeStarSystem()->collide_map[Unit::UNIT_ONLY], location[Unit::UNIT_ONLY], &locatespec );
         testthis = locatespec.retval.unit;
     }
     for (un_fiter iter = _Universe->activeStarSystem()->gravitationalUnits().fastIterator();

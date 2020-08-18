@@ -27,6 +27,7 @@
 #include "cmd/role_bitmask.h"
 #include "cmd/script/pythonmission.h"
 #include "universe_util.h"
+#include "universe.h"
 
 extern bool toggle_pause();
 

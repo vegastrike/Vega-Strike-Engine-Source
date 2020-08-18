@@ -12,6 +12,7 @@
 #include "cmd/unit_find.h"
 #include "cmd/pilot.h"
 #include "universe_util.h"
+#include "universe.h"
 
 CommunicatingAI::CommunicatingAI( int ttype,
                                   int stype,

@@ -187,8 +187,34 @@ sudo zypper install libboost_log1_66_0-devel \
                     gtk3-devel \
                     python-devel \
                     python3-devel \
-                    git
+                    git \
+                    rpm-build
 ```
+
+On Fedora 30/31/32:
+
+```bash
+sudo dnf install    git \
+                    cmake \
+                    boost-devel \
+                    boost-python3-devel \
+                    freeglut-devel \
+                    gcc-c++ \
+                    openal-soft-devel \
+                    SDL-devel \
+                    libvorbis-devel \
+                    libjpeg-turbo-devel \
+                    libpng-devel \
+                    expat-devel \
+                    gtk3-devel \
+                    python2-devel \
+                    python3-devel \
+                    rpm-build \
+                    make
+```
+
+On Fedora 30 or 31, also install `boost-python2-devel`. (Apparently not available
+on Fedora 32.)
 
 2. Build Vega Strike:
 

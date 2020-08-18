@@ -4,7 +4,7 @@
 #include "bolt.h"
 #include "weapon_xml.h"
 #include "audiolib.h"
-#include "unit_factory.h"
+#include "missile.h"
 #include "ai/order.h"
 #include "ai/fireall.h"
 #include "ai/script.h"
@@ -16,6 +16,10 @@
 #include "ai/aggressive.h"
 #include "lin_time.h"
 #include "vsfilesystem.h"
+#include "unit.h"
+#include "star_system.h"
+#include "universe.h"
+
 
 extern char SERVER;
 Mount::Mount()
@@ -254,7 +258,7 @@ bool Mount::PhysicsAlignedFire( Unit *caller,
             string skript   = /*string("ai/script/")+*/ type->file+string( ".xai" );
             VSError     err = LookForFile( skript, AiFile );
             if (err <= Ok) {
-                temp = UnitFactory::createMissile(
+                temp = new GameMissile(
                     type->file.c_str(), caller->faction, "", type->Damage, type->PhaseDamage, type->Range/type->Speed,
                     type->Radius, type->RadialSpeed, type->PulseSpeed /*detonation_radius*/);
                 if (!match_speed_with_target) {
@@ -288,8 +292,7 @@ bool Mount::PhysicsAlignedFire( Unit *caller,
                         fg->nr_ships      = 1;
                         fg->nr_ships_left = 1;
                     }
-                    temp = UnitFactory::createUnit(
-                        type->file.c_str(), false, caller->faction, "", fg, fgsnumber, nullptr );
+                    temp = new GameUnit< Unit > (type->file.c_str(), false, caller->faction, "", fg, fgsnumber, nullptr );
                 } else {
                     Flightgroup *fg = caller->getFlightgroup();
                     int fgsnumber   = 0;
@@ -298,8 +301,7 @@ bool Mount::PhysicsAlignedFire( Unit *caller,
                         fg->nr_ships++;
                         fg->nr_ships_left++;
                     }
-                    temp = UnitFactory::createUnit(
-                        type->file.c_str(), false, caller->faction, "", fg, fgsnumber, nullptr);
+                    temp = new GameUnit<Unit>(type->file.c_str(), false, caller->faction, "", fg, fgsnumber, nullptr);
                 }
             }
             Vector adder = Vector( mat.r[6], mat.r[7], mat.r[8] )*type->Speed;

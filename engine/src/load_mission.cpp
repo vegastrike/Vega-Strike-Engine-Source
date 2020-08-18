@@ -5,7 +5,6 @@
 #include "star_system_generic.h"
 #include "vs_globals.h"
 #include "cmd/unit_generic.h"
-#include "cmd/unit_factory.h"
 #include "gfx/cockpit_generic.h"
 #include "cmd/ai/aggressive.h"
 #include "cmd/ai/script.h"
@@ -15,7 +14,7 @@
 #include "savegame.h"
 #include "save_util.h"
 #include "load_mission.h"
-
+#include "universe.h"
 #include "options.h"
 
 

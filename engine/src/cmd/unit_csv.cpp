@@ -8,7 +8,6 @@
 #include "unit_collide.h"
 #include "collide2/Stdafx.h"
 #include "collide2/CSopcodecollider.h"
-#include "unit_factory.h"
 #include "audiolib.h"
 #include "unit_xml.h"
 #include "gfx/quaternion.h"
@@ -18,7 +17,8 @@
 #include "lin_time.h"
 #include "unit_const_cache.h"
 #include "vs_math.h"
-
+#include "unit.h"
+#include "universe.h"
 
 CSVRow LookupUnitRow( const string &unitname, const string &faction ) {
     string hashname = unitname+"__"+faction;
@@ -69,7 +69,7 @@ static void UpgradeUnit( Unit *un, const std::string &upgrades )
         const Unit *upgradee = UnitConstCache::getCachedConst( StringIntKey( upgrade, FactionUtil::GetUpgradeFaction() ) );
         if (!upgradee) {
             upgradee = UnitConstCache::setCachedConst( StringIntKey( upgrade, FactionUtil::GetUpgradeFaction() ),
-                                                      UnitFactory::createUnit( upgrade.c_str(),
+                                                      new GameUnit< Unit >( upgrade.c_str(),
                                                                               true,
                                                                               FactionUtil::GetUpgradeFaction() ) );
         }
@@ -367,7 +367,7 @@ static void AddSubUnits( Unit *thus, Unit::XML &xml, const std::string &subunits
         QVector Q   = (*i).Q;
         QVector R   = (*i).R;
         double  restricted = (*i).restricted;
-        xml.units.push_back( UnitFactory::createUnit( filename.c_str(), true, faction, modification, NULL ) );         //I set here the fg arg to NULL
+        xml.units.push_back( new GameUnit< Unit >( filename.c_str(), true, faction, modification, NULL ) );         //I set here the fg arg to NULL
         if (xml.units.back()->name == "LOAD_FAILED") {
             xml.units.back()->limits.yaw = 0;
             xml.units.back()->limits.pitch = 0;

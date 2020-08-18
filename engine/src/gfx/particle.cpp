@@ -7,6 +7,7 @@
 #include "camera.h"
 #include "aux_texture.h"
 #include "gldrv/gl_globals.h"
+#include "universe.h"
 
 #include <iterator>
 #include <limits>

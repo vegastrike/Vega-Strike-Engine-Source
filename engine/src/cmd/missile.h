@@ -2,11 +2,13 @@
 #define MISSILE_H_
 
 #include "missile_generic.h"
+#include "unit.h"
 #include "cmd/unit_util.h"
+
 
 class GameMissile : public GameUnit< Missile >
 {
-protected:
+public:
 /// constructor only to be called by UnitFactory
     GameMissile( const char *filename,
                  int faction,
@@ -80,6 +82,7 @@ public:
     }
 
 private:
+    // TODO: consider if this is really necessary and if so, use = delete
 /// default constructor forbidden
     GameMissile();
 /// copy constructor forbidden

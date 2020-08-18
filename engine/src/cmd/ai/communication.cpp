@@ -4,7 +4,7 @@
 #include <assert.h>
 #include "audiolib.h"
 #include "options.h"
-
+#include "universe.h"
 
 using namespace XMLSupport;
 FSM::FSM(const std::string& filename)
