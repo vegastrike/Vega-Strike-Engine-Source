@@ -5,6 +5,8 @@
 #include "audiolib.h"
 #include "configxml.h"
 #include "images.h"
+#include "universe.h"
+
 #include "../gfx/camera.h"
 
 using namespace XMLSupport;

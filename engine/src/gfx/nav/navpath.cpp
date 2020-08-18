@@ -29,6 +29,7 @@
 #include "gfx/cockpit.h"
 #include "navscreen.h"
 #include "configxml.h"
+#include "universe.h"
 
 #include <vector>
 using std::vector;

@@ -33,6 +33,7 @@
 #include "galaxy_xml.h"
 #include "savegame.h"
 #include "universe_util.h"
+#include "universe.h"
 
 using std::string;
 using std::set;

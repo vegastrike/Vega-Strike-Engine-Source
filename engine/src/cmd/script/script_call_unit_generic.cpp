@@ -63,6 +63,9 @@
 #include "cmd/unit_util.h"
 #include "planet.h"
 #include "asteroid.h"
+#include "star_system.h"
+#include "universe.h"
+
 
 extern const vector< string >& ParseDestinations( const string &value );
 extern Unit& GetUnitMasterPartList();
@@ -939,8 +942,8 @@ Unit* Mission::call_unit_launch( CreateFlightgroup *fg, int type, const string &
     int    u;
     Unit  *par   = _Universe->AccessCockpit()->GetParent();
     CollideMap::iterator  metahint[2] = {
-        _Universe->scriptStarSystem()->collidemap[Unit::UNIT_ONLY]->begin(),
-        _Universe->scriptStarSystem()->collidemap[Unit::UNIT_BOLT]->begin()
+        _Universe->scriptStarSystem()->collide_map[Unit::UNIT_ONLY]->begin(),
+        _Universe->scriptStarSystem()->collide_map[Unit::UNIT_BOLT]->begin()
     };
     CollideMap::iterator *hint = metahint;
     if ( par && !is_null( par->location[Unit::UNIT_ONLY] ) && !is_null( par->location[Unit::UNIT_BOLT] )

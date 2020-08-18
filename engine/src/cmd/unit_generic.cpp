@@ -39,6 +39,8 @@
 #include "options.h"
 #include "unit.h"
 #include "missile.h"
+#include "star_system.h"
+#include "universe.h"
 
 #include <math.h>
 #include <list>
@@ -7626,7 +7628,7 @@ void Unit::UpdatePhysics3(const Transformation &trans,
           for (unsigned int locind = 0; locind < Unit::NUM_COLLIDE_MAPS; ++locind)
               hint[locind] =
                   ( !is_null( superunit->location[locind] ) ) ? superunit->location[locind] : _Universe->activeStarSystem()->
-                  collidemap[locind]->begin();
+                  collide_map[locind]->begin();
           if ( !mounts[i].PhysicsAlignedFire( this, t1, m1, cumulative_velocity,
                                               (!isSubUnit() || owner == NULL) ? this : owner, target, autotrack,
                                               trackingcone,
@@ -7692,10 +7694,10 @@ void Unit::UpdatePhysics3(const Transformation &trans,
   if ( !isSubUnit() ) {
       for (unsigned int locind = 0; locind < Unit::NUM_COLLIDE_MAPS; ++locind) {
           if ( is_null( this->location[locind] ) )
-              this->getStarSystem()->collidemap[locind]->insert( Collidable( this ) );
+              this->getStarSystem()->collide_map[locind]->insert( Collidable( this ) );
           else if (locind == Unit::UNIT_BOLT)
               //that update will propagate with the flatten
-              this->getStarSystem()->collidemap[Unit::UNIT_BOLT]->changeKey( this->location[locind], Collidable( this ) );
+              this->getStarSystem()->collide_map[Unit::UNIT_BOLT]->changeKey( this->location[locind], Collidable( this ) );
       }
   }
 }
@@ -7728,7 +7730,7 @@ float Unit::CalculateNearestWarpUnit( float minmultiplier, Unit **nearest_unit, 
     Unit *testthis = NULL;
     {
         NearestUnitLocator locatespec;
-        findObjects( _Universe->activeStarSystem()->collidemap[Unit::UNIT_ONLY], location[Unit::UNIT_ONLY], &locatespec );
+        findObjects( _Universe->activeStarSystem()->collide_map[Unit::UNIT_ONLY], location[Unit::UNIT_ONLY], &locatespec );
         testthis = locatespec.retval.unit;
     }
     for (un_fiter iter = _Universe->activeStarSystem()->gravitationalUnits().fastIterator();

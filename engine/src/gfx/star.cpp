@@ -8,6 +8,7 @@
 #include "config_xml.h"
 #include "lin_time.h"
 #include "galaxy_xml.h"
+#include "universe.h"
 
 #if defined (__APPLE__) || defined (MACOSX)
     #include <OpenGL/gl.h>

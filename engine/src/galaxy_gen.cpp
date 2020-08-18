@@ -15,7 +15,7 @@
 #include "galaxy_gen.h"
 #include "vs_random.h"
 #include "options.h"
-
+#include "universe.h"
 
 
 #ifndef _WIN32

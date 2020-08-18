@@ -2,7 +2,7 @@
 #define PLANETARY_ORBIT_H
 
 #include "gfx/vec.h"
-#include "star_system_generic.h"
+#include "star_system.h"
 #include "ai/order.h"
 
 class PlanetaryOrbit : public Order
