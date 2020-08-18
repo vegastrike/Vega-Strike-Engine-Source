@@ -22,10 +22,12 @@ jobs:
           dist: bionic
           compiler: gcc
           name: "Ubuntu 18.04 LTS - GCC"
+          env: FLAGS='-DUSE_PYTHON_3=OFF'
         - os: linux
           dist: bionic
           compiler: clang
           name: "Ubuntu 18.04 LTS - Clang"
+          env: FLAGS='-DUSE_PYTHON_3=OFF'
         - os: linux
           dist: bionic
           compiler: clang
@@ -35,10 +37,12 @@ jobs:
           dist: xenial
           compiler: gcc
           name: "Ubuntu 16.04 LTS - GCC"
+          env: FLAGS='-DUSE_PYTHON_3=OFF'
         - os: linux
           dist: xenial
           compiler: clang
           name: "Ubuntu 16.04 LTS - Clang"
+          env: FLAGS='-DUSE_PYTHON_3=OFF'
         - os: linux
           dist: xenial
           compiler: clang
