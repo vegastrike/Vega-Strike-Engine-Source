@@ -5,6 +5,8 @@
 #include "vs_globals.h"
 #include "in_kb.h"
 #include "gfx/camera.h"
+#include "universe.h"
+
 int CoordinateSelectChange = 0;
 int CoordinateSelectmousex;
 int CoordinateSelectmousey;

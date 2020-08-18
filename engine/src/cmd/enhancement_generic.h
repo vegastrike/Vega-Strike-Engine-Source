@@ -2,6 +2,7 @@
 #define _ENHANCERGENERIC_H_
 #include "cmd/unit_generic.h"
 #include "savegame.h"
+#include "universe.h"
 
 class Enhancement : public Unit
 {

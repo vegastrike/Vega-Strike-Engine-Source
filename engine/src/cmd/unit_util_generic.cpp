@@ -14,6 +14,7 @@
 #include "role_bitmask.h"
 #include "lin_time.h"
 #include "planetary_orbit.h"
+#include "universe.h"
 
 #include "cmd/script/pythonmission.h"
 #ifndef NO_GFX

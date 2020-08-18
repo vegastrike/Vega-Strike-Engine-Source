@@ -18,6 +18,7 @@
 #include "unit_const_cache.h"
 #include "vs_math.h"
 #include "unit.h"
+#include "universe.h"
 
 CSVRow LookupUnitRow( const string &unitname, const string &faction ) {
     string hashname = unitname+"__"+faction;

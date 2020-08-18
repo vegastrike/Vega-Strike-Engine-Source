@@ -48,6 +48,9 @@
 #include "msgcenter.h"
 #include "pythonmission.h"
 
+#include "star_system.h"
+#include "universe.h"
+
 using std::cout;
 using std::cerr;
 using std::endl;

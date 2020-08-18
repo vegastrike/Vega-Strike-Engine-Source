@@ -26,7 +26,7 @@
 #include "gfx/vsimage.h"
 #include "vsfilesystem.h"
 #include "gfx/camera.h"
-
+#include "universe.h"
 #include "game_config.h"
 
 GamePlanet::GamePlanet() :

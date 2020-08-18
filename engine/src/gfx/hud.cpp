@@ -30,6 +30,7 @@
 #include "xml_support.h"
 #include "cmd/base.h"
 //#include "glut.h"
+#include "universe.h"
 
 #include "gldrv/gl_globals.h"
 
