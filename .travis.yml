@@ -120,6 +120,13 @@ jobs:
             - FROM='fedora:31'
             - COMPILER='clang'
             - FLAGS='-DUSE_PYTHON_3=ON'
+        - os: linux
+          compiler: clang
+          name: "CentOS 8 - Py3"
+          env:
+            - FROM='centos:8'
+            - COMPILER='clang'
+            - FLAGS='-DUSE_PYTHON_3=ON'
         - os: osx
           osx_image: xcode11.3
           env:
