@@ -94,6 +94,13 @@ jobs:
             - FLAGS='-DUSE_PYTHON_3=ON'
         - os: linux
           compiler: clang
+          name: "Debian 10 - Py3"
+          env:
+            - FROM='debian:buster'
+            - COMPILER='clang'
+            - FLAGS='-DUSE_PYTHON_3=ON'
+        - os: linux
+          compiler: clang
           name: "openSUSE Leap 15.2 - Py3"
           env:
             - FROM='opensuse/leap'
@@ -103,7 +110,14 @@ jobs:
           compiler: clang
           name: "Fedora 32 - Py3"
           env:
-            - FROM='fedora/32'
+            - FROM='fedora:32'
+            - COMPILER='clang'
+            - FLAGS='-DUSE_PYTHON_3=ON'
+        - os: linux
+          compiler: clang
+          name: "Fedora 31 - Py3"
+          env:
+            - FROM='fedora:31'
             - COMPILER='clang'
             - FLAGS='-DUSE_PYTHON_3=ON'
         - os: osx
