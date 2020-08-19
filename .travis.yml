@@ -4,6 +4,9 @@ os: linux
 services:
   - docker
 
+git:
+  submodules: false
+
 distro: focal
 
 # compiler:
