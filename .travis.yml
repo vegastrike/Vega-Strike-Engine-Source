@@ -17,15 +17,17 @@ env:
     - FLAGS='-DUSE_PYTHON_3=ON'
 
 jobs:
-    include: 
+    include:
         - os: linux
           dist: bionic
           compiler: gcc
           name: "Ubuntu 18.04 LTS - GCC"
+          env: FLAGS='-DUSE_PYTHON_3=OFF'
         - os: linux
           dist: bionic
           compiler: clang
           name: "Ubuntu 18.04 LTS - Clang"
+          env: FLAGS='-DUSE_PYTHON_3=OFF'
         - os: linux
           dist: bionic
           compiler: clang
@@ -35,10 +37,12 @@ jobs:
           dist: xenial
           compiler: gcc
           name: "Ubuntu 16.04 LTS - GCC"
+          env: FLAGS='-DUSE_PYTHON_3=OFF'
         - os: linux
           dist: xenial
           compiler: clang
           name: "Ubuntu 16.04 LTS - Clang"
+          env: FLAGS='-DUSE_PYTHON_3=OFF'
         - os: linux
           dist: xenial
           compiler: clang
@@ -52,8 +56,6 @@ jobs:
           env: FLAGS='-DUSE_PYTHON_3=ON'
     allow_failures:
         - os: osx
-        - dist: xenial
-          env: FLAGS='-DUSE_PYTHON_3=ON'
     fast_finish: true
 
 addons:
@@ -86,14 +88,14 @@ addons:
       - boost-python
 
 script:
-  - ./sh/travis-build.sh $FLAGS
+  - ./script/cibuild $FLAGS
 
 # CI/CD hookups
 # See https://docs.travis-ci.com/user/deployment/releases/
 # for what to do for `before_deploy` and `deploy` sections
 #before_deploy:
 #  - pull the submodule here
-#  - ./sh/vspackage.sh
+#  - ./script/package
 #  - export TRAVIS_TAG="composite tag name here"
 #  - git tag ${TRAVIS_TAG}
 #deploy:

@@ -1,0 +1,17 @@
+#!/bin/bash
+#====================================
+# @file   : cibuild
+# @brief  : Builds Vega Strike for
+#           purposes of CI/CD (Travis)
+# @usage  : ./script/cibuild
+# @param  : none
+#====================================
+
+set -ev
+
+if [ -z "$TRAVIS_TAG" ]
+then
+    ./script/build.sh -DCMAKE_BUILD_TYPE=Debug $@
+else
+    ./script/build.sh -DCMAKE_BUILD_TYPE=RelWithDebInfo $@
+fi

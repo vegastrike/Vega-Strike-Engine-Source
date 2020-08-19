@@ -1,13 +1,8 @@
 #!/bin/bash
 #====================================
-# @file   : vsbuild.sh
-# @version: 2020-07-30
-# @created: 2017-08-21
-# @author : Anth0rx
-# @author : pyramid
-# @author : stephengtuggy
-# @brief  : clean build VegaStrike
-# @usage  : ./vsbuild.sh
+# @file   : build.sh
+# @brief  : build VegaStrike
+# @usage  : ./script/build.sh
 # @param  : none
 #====================================
 
@@ -21,9 +16,9 @@
 
 set -e
 
-echo "-------------------------------"
-echo "--- vsbuild.sh | 2020-07-30 ---"
-echo "-------------------------------"
+echo "-----------------------------"
+echo "--- build.sh | 2020-08-17 ---"
+echo "-----------------------------"
 
 #----------------------------------
 # validate parameters
