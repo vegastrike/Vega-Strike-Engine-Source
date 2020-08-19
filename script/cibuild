@@ -23,12 +23,11 @@ then
         export CC=clang
         export CXX=clang++
     fi
-    docker run --env CC=$CC --env CXX=$CXX --env FLAGS=$FLAGS --name $DOCKER_CONTAINER_NAME $DOCKER_IMG_NAME $FLAGS
+    docker run --env CC=$CC --env CXX=$CXX --env FLAGS=$FLAGS --env TRAVIS_TAG=$TRAVIS_TAG --name $DOCKER_CONTAINER_NAME $DOCKER_IMG_NAME $FLAGS
     docker cp $DOCKER_CONTAINER_NAME:/usr/src/Vega-Strike-Engine-Source/bin .
     if ! [ -z "$TRAVIS_TAG" ]
     then
-        mkdir -p ./package
-        docker cp $DOCKER_CONTAINER_NAME:/usr/src/Vega-Strike-Engine-Source/package .
+        docker cp $DOCKER_CONTAINER_NAME:/usr/src/Vega-Strike-Engine-Source/packages .
     fi
     docker rm $DOCKER_CONTAINER_NAME
 else
