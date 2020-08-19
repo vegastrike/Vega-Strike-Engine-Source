@@ -246,7 +246,10 @@ then
                         clang
 elif [ $LINUX_ID == "centos" ] && [ $LINUX_VERSION_ID -eq 8 ]
 then
-    dnf install -y \
+    dnf -y install dnf-plugins-core
+    dnf -y install https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm
+    dnf config-manager --set-enabled PowerTools
+    dnf -y install \
                         git \
                         cmake \
                         boost-devel \
@@ -267,7 +270,10 @@ then
                         clang
 elif ([ $LINUX_ID == "rhel" ] || [ $LINUX_ID == "redhat" ]) && [ $LINUX_VERSION_ID -eq 8 ]
 then
-    dnf install -y \
+    dnf -y install dnf-plugins-core
+    dnf -y install https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm
+    dnf config-manager --set-enabled PowerTools
+    dnf -y install \
                         git \
                         cmake \
                         boost-devel \

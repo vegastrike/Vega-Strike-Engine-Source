@@ -23,7 +23,7 @@ then
         export CC=clang
         export CXX=clang++
     fi
-    docker run --env CC=$CC --env CXX=$CXX --env $FLAGS --name $DOCKER_CONTAINER_NAME $DOCKER_IMG_NAME
+    docker run --env CC=$CC --env CXX=$CXX --env FLAGS=$FLAGS --name $DOCKER_CONTAINER_NAME $DOCKER_IMG_NAME $FLAGS
     docker cp $DOCKER_CONTAINER_NAME:/usr/src/Vega-Strike-Engine-Source/bin .
     if ! [ -z "$TRAVIS_TAG" ]
     then
