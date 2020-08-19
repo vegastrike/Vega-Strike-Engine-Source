@@ -86,17 +86,24 @@ jobs:
             - FLAGS='-DUSE_PYTHON_3=OFF'
         - os: linux
           # dist: xenial
-          compiler: clang
+          compiler: gcc
           name: "Ubuntu 16.04 LTS - Py3"
           env:
             - FROM='ubuntu:xenial'
-            - COMPILER='clang'
+            - COMPILER='gcc'
             - FLAGS='-DUSE_PYTHON_3=ON'
         - os: linux
           compiler: clang
           name: "openSUSE Leap 15.2 - Py3"
           env:
             - FROM='opensuse/leap'
+            - COMPILER='clang'
+            - FLAGS='-DUSE_PYTHON_3=ON'
+        - os: linux
+          compiler: clang
+          name: "Fedora 32 - Py3"
+          env:
+            - FROM='fedora/32'
             - COMPILER='clang'
             - FLAGS='-DUSE_PYTHON_3=ON'
         - os: osx
@@ -109,24 +116,32 @@ jobs:
             - FLAGS='-DUSE_PYTHON_3=ON'
     allow_failures:
         - os: osx
+        - os: linux
+          # dist: xenial
+          compiler: clang
+          name: "Ubuntu 16.04 LTS - Clang"
+          env:
+            - FROM='ubuntu:xenial'
+            - COMPILER='clang'
+            - FLAGS='-DUSE_PYTHON_3=OFF'
     fast_finish: true
 
 addons:
-  apt:
-    packages:
-      - python-dev
-#      - python2-dev
-      - libgl1-mesa-glx
-      - freeglut3-dev
-      - libopenal-dev
-      - libsdl-gfx1.2-dev
-      - libvorbis-dev
-      - libjpeg-dev
-      - libpng-dev
-      - libgtk-3-dev
-      - libboost-python-dev
-      - libboost-log-dev
-      - libboost-regex-dev
+#   apt:
+#     packages:
+#       - python-dev
+# #      - python2-dev
+#       - libgl1-mesa-glx
+#       - freeglut3-dev
+#       - libopenal-dev
+#       - libsdl-gfx1.2-dev
+#       - libvorbis-dev
+#       - libjpeg-dev
+#       - libpng-dev
+#       - libgtk-3-dev
+#       - libboost-python-dev
+#       - libboost-log-dev
+#       - libboost-regex-dev
   homebrew:
      update: true
      packages:
