@@ -1,59 +1,112 @@
 language: cpp
 os: linux
+
+services:
+  - docker
+
 distro: focal
+
+# compiler:
+#     - gcc
+#     - clang
+
+# env:
+# # Seems like Python2 doesn't work well on Focal.
+# # Should be uncommented if someone fixes that
+# #    - {}
+#     - FLAGS='-DUSE_PYTHON_3=ON'
 
 # When updating be sure to add a section
 # to the matrix to cover the distro
-dist: bionic
-
-compiler:
-    - gcc
-    - clang
-
-env:
-# Seems like Python2 doesn't work well on Focal.
-# Should be uncommented if someone fixes that
-#    - {}
-    - FLAGS='-DUSE_PYTHON_3=ON'
-
 jobs:
     include:
         - os: linux
-          dist: bionic
+          # dist: focal
+          compiler: gcc
+          name: "Ubuntu 20.04 LTS - GCC"
+          env:
+            - FROM='ubuntu:focal'
+            - COMPILER='gcc'
+            - FLAGS='-DUSE_PYTHON_3=OFF'
+        - os: linux
+          # dist: focal
+          compiler: clang
+          name: "Ubuntu 20.04 LTS - Clang"
+          env:
+            - FROM='ubuntu:focal'
+            - COMPILER='clang'
+            - FLAGS='-DUSE_PYTHON_3=OFF'
+        - os: linux
+          # dist: focal
+          compiler: clang
+          name: "Ubuntu 20.04 LTS - Py3"
+          env:
+            - FROM='ubuntu:focal'
+            - COMPILER='clang'
+            - FLAGS='-DUSE_PYTHON_3=ON'
+        - os: linux
+          # dist: bionic
           compiler: gcc
           name: "Ubuntu 18.04 LTS - GCC"
-          env: FLAGS='-DUSE_PYTHON_3=OFF'
+          env:
+            - FROM='ubuntu:bionic'
+            - COMPILER='gcc'
+            - FLAGS='-DUSE_PYTHON_3=OFF'
         - os: linux
-          dist: bionic
+          # dist: bionic
           compiler: clang
           name: "Ubuntu 18.04 LTS - Clang"
-          env: FLAGS='-DUSE_PYTHON_3=OFF'
+          env:
+            - FROM='ubuntu:bionic'
+            - COMPILER='clang'
+            - FLAGS='-DUSE_PYTHON_3=OFF'
         - os: linux
-          dist: bionic
+          # dist: bionic
           compiler: clang
           name: "Ubuntu 18.04 LTS - Py3"
-          env: FLAGS='-DUSE_PYTHON_3=ON'
+          env:
+            - FROM='ubuntu:bionic'
+            - COMPILER='clang'
+            - FLAGS='-DUSE_PYTHON_3=ON'
         - os: linux
-          dist: xenial
+          # dist: xenial
           compiler: gcc
           name: "Ubuntu 16.04 LTS - GCC"
-          env: FLAGS='-DUSE_PYTHON_3=OFF'
+          env:
+            - FROM='ubuntu:xenial'
+            - COMPILER='gcc'
+            - FLAGS='-DUSE_PYTHON_3=OFF'
         - os: linux
-          dist: xenial
+          # dist: xenial
           compiler: clang
           name: "Ubuntu 16.04 LTS - Clang"
-          env: FLAGS='-DUSE_PYTHON_3=OFF'
+          env:
+            - FROM='ubuntu:xenial'
+            - COMPILER='clang'
+            - FLAGS='-DUSE_PYTHON_3=OFF'
         - os: linux
-          dist: xenial
+          # dist: xenial
           compiler: clang
           name: "Ubuntu 16.04 LTS - Py3"
-          env: FLAGS='-DUSE_PYTHON_3=ON'
+          env:
+            - FROM='ubuntu:xenial'
+            - COMPILER='clang'
+            - FLAGS='-DUSE_PYTHON_3=ON'
+        - os: linux
+          compiler: clang
+          name: "openSUSE Leap 15.2 - Py3"
+          env:
+            - FROM='opensuse/leap'
+            - COMPILER='clang'
+            - FLAGS='-DUSE_PYTHON_3=ON'
         - os: osx
           osx_image: xcode11.3
-          env: FLAGS='-DUSE_PYTHON_3=OFF -DBoost_NO_BOOST_CMAKE=ON'
+          env:
+            - FLAGS='-DUSE_PYTHON_3=OFF -DBoost_NO_BOOST_CMAKE=ON'
         - os: osx
           osx_image: xcode11.3
-          env: FLAGS='-DUSE_PYTHON_3=ON'
+          env:
+            - FLAGS='-DUSE_PYTHON_3=ON'
     allow_failures:
         - os: osx
     fast_finish: true

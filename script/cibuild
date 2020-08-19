@@ -7,11 +7,32 @@
 # @param  : none
 #====================================
 
-set -ev
+# set -e
 
-if [ -z "$TRAVIS_TAG" ]
+if [ "$TRAVIS_OS_NAME" == "linux" ]
 then
-    ./script/build.sh -DCMAKE_BUILD_TYPE=Debug $@
+    DOCKER_IMG_NAME="vega-strike-docker:$(echo $FROM | sed s/:/_/)"
+    DOCKER_CONTAINER_NAME="vega-strike-docker_$(echo $FROM | sed s/:/_/)"
+    docker build --build-arg from=$FROM -t $DOCKER_IMG_NAME .
+    if [ "$COMPILER" == "gcc" ]
+    then
+        export CC=gcc
+        export CXX=g++
+    elif [ "$COMPILER" == "clang" ]
+    then
+        export CC=clang
+        export CXX=clang++
+    fi
+    docker run --env CC=$CC --env CXX=$CXX --env $FLAGS --name $DOCKER_CONTAINER_NAME $DOCKER_IMG_NAME
+    docker cp $DOCKER_CONTAINER_NAME:/usr/src/Vega-Strike-Engine-Source/bin .
+    if ! [ -z "$TRAVIS_TAG" ]
+    then
+        mkdir -p ./package
+        docker cp $DOCKER_CONTAINER_NAME:/usr/src/Vega-Strike-Engine-Source/package .
+    fi
+    docker rm $DOCKER_CONTAINER_NAME
 else
-    ./script/build.sh -DCMAKE_BUILD_TYPE=RelWithDebInfo $@
+    script/docker-entrypoint.sh $@
 fi
+
+echo "cibuild Done!"
