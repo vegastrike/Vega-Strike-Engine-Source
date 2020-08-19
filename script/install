@@ -1,21 +1,14 @@
-#!/bin/sh
+#!/bin/bash
 #====================================
-# @file   : vsinstall.sh
-# @version: 2020-02-26
-# @created: 2004-11-02
-# @author : dandandaman
-# @author : safemode
-# @author : hellcatv
-# @author : ace123
-# @author : pyramid
+# @file   : install
 # @brief  : installs Vega Strike build
-# @usage  : sh/vsinstall.sh
+# @usage  : script/install
 # @param  : none
 #====================================
 
-echo "---------------------------------"
-echo "--- vsinstall.sh | 2020-02-26 ---"
-echo "---------------------------------"
+echo "----------------------------"
+echo "--- install | 2020-08-17 ---"
+echo "----------------------------"
 
 #----------------------------------
 # validate parameters
@@ -37,7 +30,7 @@ until [ "x" = "x$1" ]; do
         echo "Usage: $0 [--prefix PATH] [-32|-64]"
         echo "    Installs Vega Strike binaries into PATH (default /usr/bin)"
         echo "    Specifying -32 or -64 will install binaries for that architecture."
-        exit 
+        exit
     fi
     shift
 done
