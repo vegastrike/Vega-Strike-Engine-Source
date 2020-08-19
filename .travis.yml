@@ -100,6 +100,13 @@ jobs:
             - COMPILER='clang'
             - FLAGS='-DUSE_PYTHON_3=ON'
         - os: linux
+          compiler: gcc
+          name: "Debian 9 - GCC"
+          env:
+            - FROM='debian:buster'
+            - COMPILER='gcc'
+            - FLAGS='-DUSE_PYTHON_3=OFF'
+        - os: linux
           compiler: clang
           name: "openSUSE Leap 15.2 - Py3"
           env:
