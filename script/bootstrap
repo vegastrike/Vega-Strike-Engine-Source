@@ -165,7 +165,8 @@ then
                     libboost-regex-dev \
                     libxmu-dev \
                     clang \
-                    lsb-release
+                    lsb-release \
+                    python3-dev
 elif [ $LINUX_ID == "opensuse-leap" ]
 then
     zypper --non-interactive install -y \
