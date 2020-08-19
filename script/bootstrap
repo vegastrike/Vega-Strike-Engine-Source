@@ -57,7 +57,8 @@ then
                     libboost-log1.67-dev \
                     libboost-regex1.67-dev \
                     libxmu-dev \
-                    clang
+                    clang \
+                    lsb-release
 elif [ $LINUX_ID == "debian" ] && [ $LINUX_CODENAME == "stretch" ]
 then
     apt-get update
@@ -86,7 +87,8 @@ then
                     libboost-log-dev \
                     libboost-regex-dev \
                     libxmu-dev \
-                    clang
+                    clang \
+                    lsb-release
 elif [ $LINUX_ID == "ubuntu" ] && [ $LINUX_CODENAME == "focal" ]
 then
     apt-get update
@@ -116,7 +118,8 @@ then
                     libboost-log1.67-dev \
                     libboost-regex1.67-dev \
                     libxmu-dev \
-                    clang
+                    clang \
+                    lsb-release
 elif [ $LINUX_ID == "ubuntu" ] && [ $LINUX_CODENAME == "bionic" ]
 then
     apt-get update
@@ -138,7 +141,8 @@ then
                     libboost-log-dev \
                     libboost-regex-dev \
                     libxmu-dev \
-                    clang
+                    clang \
+                    lsb-release
 elif [ $LINUX_ID == "ubuntu" ] && [ $LINUX_CODENAME == "xenial" ]
 then
     apt-get update
@@ -160,7 +164,8 @@ then
                     libboost-log-dev \
                     libboost-regex-dev \
                     libxmu-dev \
-                    clang
+                    clang \
+                    lsb-release
 elif [ $LINUX_ID == "opensuse-leap" ]
 then
     zypper --non-interactive install -y \
