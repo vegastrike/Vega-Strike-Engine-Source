@@ -11,8 +11,8 @@ set -e
 
 if [ "$TRAVIS_OS_NAME" == "linux" ]
 then
-    DOCKER_IMG_NAME="vega-strike-docker:$(echo $FROM | sed 's/:/_/' | sed 's/\//_/')"
-    DOCKER_CONTAINER_NAME="vega-strike-docker_$(echo $FROM | sed 's/:/_/' | sed 's/\//_/')"
+    DOCKER_IMG_NAME="vegastrike/vega-strike-build-env:$(echo $FROM | sed 's/:/_/' | sed 's/\//_/')"
+    DOCKER_CONTAINER_NAME="vega-strike-build-env_$(echo $FROM | sed 's/:/_/' | sed 's/\//_/')"
     docker build --build-arg from=$FROM -t $DOCKER_IMG_NAME .
     if [ "$COMPILER" == "gcc" ]
     then
