@@ -1,6 +1,6 @@
 #include "star_system_generic.h"
 #include "cmd/script/mission.h"
-#include "universe_generic.h"
+#include "universe.h"
 #include "galaxy_xml.h"
 #include "galaxy_gen.h"
 #include "vsfilesystem.h"

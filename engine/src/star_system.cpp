@@ -15,7 +15,6 @@
 #include "drawable.h"
 #include "options.h"
 #include "configxml.h"
-#include "universe_generic.h"
 #include "vs_random.h"
 #include "savegame.h"
 #include "in_kb_data.h"

@@ -1,5 +1,6 @@
 #include "in_kb.h"
 #include "vs_globals.h"
+#include "xml_support.h"
 #include "vsimage.h"
 #ifndef __APPLE__
 #include <GL/glut.h>
