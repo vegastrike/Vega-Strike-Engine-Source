@@ -303,8 +303,6 @@ int main( int argc, char *argv[] )
 {
     initLoggingPart1();
 
-    VSFileSystem::ChangeToProgramDirectory( argv[0] );
-
 #ifdef WIN32
 	VSFileSystem::InitHomeDirectory();
 #endif
