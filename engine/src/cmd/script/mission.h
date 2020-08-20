@@ -46,6 +46,8 @@ class Order;
 class MessageCenter;
 #endif
 
+#include "star_system.h"
+
 #include <assert.h>
 using std::string;
 
