@@ -31,7 +31,6 @@
 #include "unit_const_cache.h"
 #include "gfx/warptrail.h"
 #include "gfx/cockpit_generic.h"
-#include "universe_generic.h"
 #include "csv.h"
 #include "vs_random.h"
 #include "galaxy_xml.h"

@@ -222,8 +222,13 @@ Planet::Planet() :
     terraintrans = NULL;
     atmospheric  = false;
     //Force shields to 0
-    memset( &(this->shield), 0, sizeof (Unit::shield) );
-    this->shield.number = 2;
+//    memset( &(this->shield), 0, sizeof (Unit::shield) ); //Let's not use memset on non-trivial stuff
+    this->shield.number=2;
+    this->shield.recharge=0;
+    this->shield.shield2fb.frontmax=0;
+    this->shield.shield2fb.backmax=0;
+    this->shield.shield2fb.front=0;
+    this->shield.shield2fb.back=0;
 }
 
 void Planet::InitPlanet( QVector x,
@@ -360,16 +365,12 @@ Planet::Planet( QVector x,
         lights.push_back( l );
     }
     //Force shields to 0
-    /*
-     *  this->shield.number=2;
-     *  this->shield.recharge=0;
-     *  this->shield.shield2fb.frontmax=0;
-     *  this->shield.shield2fb.backmax=0;
-     *  this->shield.shield2fb.front=0;
-     *  this->shield.shield2fb.back=0;
-     */
-    memset( &(this->shield), 0, sizeof (Unit::shield) );
-    this->shield.number = 2;
+    this->shield.number=2;
+    this->shield.recharge=0;
+    this->shield.shield2fb.frontmax=0;
+    this->shield.shield2fb.backmax=0;
+    this->shield.shield2fb.front=0;
+    this->shield.shield2fb.back=0;
     if ( meshdata.empty() ) meshdata.push_back( NULL );
 }
 

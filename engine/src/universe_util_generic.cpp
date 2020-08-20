@@ -3,7 +3,6 @@
 #include "lin_time.h"
 #include "cmd/script/mission.h"
 #include "universe_util.h"
-#include "universe_generic.h"
 #include "cmd/unit_generic.h"
 #include "cmd/collection.h"
 #include "star_system_generic.h"

@@ -1,77 +1,185 @@
 language: cpp
 os: linux
+
+services:
+  - docker
+
+git:
+  submodules: false
+
 distro: focal
+
+# compiler:
+#     - gcc
+#     - clang
+
+# env:
+# # Seems like Python2 doesn't work well on Focal.
+# # Should be uncommented if someone fixes that
+# #    - {}
+#     - FLAGS='-DUSE_PYTHON_3=ON'
 
 # When updating be sure to add a section
 # to the matrix to cover the distro
-dist: bionic
-
-compiler:
-    - gcc
-    - clang
-
-env:
-# Seems like Python2 doesn't work well on Focal.
-# Should be uncommented if someone fixes that
-#    - {}
-    - FLAGS='-DUSE_PYTHON_3=ON'
-
 jobs:
-    include: 
+    include:
         - os: linux
-          dist: bionic
+          # dist: focal
+          compiler: gcc
+          name: "Ubuntu 20.04 LTS - GCC"
+          env:
+            - FROM='ubuntu:focal'
+            - COMPILER='gcc'
+            - FLAGS='-DUSE_PYTHON_3=OFF'
+        - os: linux
+          # dist: focal
+          compiler: clang
+          name: "Ubuntu 20.04 LTS - Clang"
+          env:
+            - FROM='ubuntu:focal'
+            - COMPILER='clang'
+            - FLAGS='-DUSE_PYTHON_3=OFF'
+        - os: linux
+          # dist: focal
+          compiler: clang
+          name: "Ubuntu 20.04 LTS - Py3"
+          env:
+            - FROM='ubuntu:focal'
+            - COMPILER='clang'
+            - FLAGS='-DUSE_PYTHON_3=ON'
+        - os: linux
+          # dist: bionic
           compiler: gcc
           name: "Ubuntu 18.04 LTS - GCC"
+          env:
+            - FROM='ubuntu:bionic'
+            - COMPILER='gcc'
+            - FLAGS='-DUSE_PYTHON_3=OFF'
         - os: linux
-          dist: bionic
+          # dist: bionic
           compiler: clang
           name: "Ubuntu 18.04 LTS - Clang"
+          env:
+            - FROM='ubuntu:bionic'
+            - COMPILER='clang'
+            - FLAGS='-DUSE_PYTHON_3=OFF'
         - os: linux
-          dist: bionic
+          # dist: bionic
           compiler: clang
           name: "Ubuntu 18.04 LTS - Py3"
-          env: FLAGS='-DUSE_PYTHON_3=ON'
+          env:
+            - FROM='ubuntu:bionic'
+            - COMPILER='clang'
+            - FLAGS='-DUSE_PYTHON_3=ON'
         - os: linux
-          dist: xenial
+          # dist: xenial
           compiler: gcc
           name: "Ubuntu 16.04 LTS - GCC"
+          env:
+            - FROM='ubuntu:xenial'
+            - COMPILER='gcc'
+            - FLAGS='-DUSE_PYTHON_3=OFF'
         - os: linux
-          dist: xenial
+          # dist: xenial
           compiler: clang
           name: "Ubuntu 16.04 LTS - Clang"
+          env:
+            - FROM='ubuntu:xenial'
+            - COMPILER='clang'
+            - FLAGS='-DUSE_PYTHON_3=OFF'
         - os: linux
-          dist: xenial
-          compiler: clang
+          # dist: xenial
+          compiler: gcc
           name: "Ubuntu 16.04 LTS - Py3"
-          env: FLAGS='-DUSE_PYTHON_3=ON'
+          env:
+            - FROM='ubuntu:xenial'
+            - COMPILER='gcc'
+            - FLAGS='-DUSE_PYTHON_3=ON'
+        - os: linux
+          compiler: clang
+          name: "Debian 10 - Py3"
+          env:
+            - FROM='debian:buster'
+            - COMPILER='clang'
+            - FLAGS='-DUSE_PYTHON_3=ON'
+        - os: linux
+          compiler: gcc
+          name: "Debian 9 - GCC"
+          env:
+            - FROM='debian:buster'
+            - COMPILER='gcc'
+            - FLAGS='-DUSE_PYTHON_3=OFF'
+        - os: linux
+          compiler: clang
+          name: "openSUSE Leap 15.2 - Py3"
+          env:
+            - FROM='opensuse/leap'
+            - COMPILER='clang'
+            - FLAGS='-DUSE_PYTHON_3=ON'
+        - os: linux
+          compiler: clang
+          name: "Fedora 32 - Py3"
+          env:
+            - FROM='fedora:32'
+            - COMPILER='clang'
+            - FLAGS='-DUSE_PYTHON_3=ON'
+        - os: linux
+          compiler: clang
+          name: "Fedora 31 - Py3"
+          env:
+            - FROM='fedora:31'
+            - COMPILER='clang'
+            - FLAGS='-DUSE_PYTHON_3=ON'
+        - os: linux
+          compiler: clang
+          name: "Fedora 30 - Py3"
+          env:
+            - FROM='fedora:30'
+            - COMPILER='clang'
+            - FLAGS='-DUSE_PYTHON_3=ON'
+        - os: linux
+          compiler: clang
+          name: "CentOS 8 - Py3"
+          env:
+            - FROM='centos:8'
+            - COMPILER='clang'
+            - FLAGS='-DUSE_PYTHON_3=ON'
         - os: osx
           osx_image: xcode11.3
-          env: FLAGS='-DUSE_PYTHON_3=OFF -DBoost_NO_BOOST_CMAKE=ON'
+          env:
+            - FLAGS='-DUSE_PYTHON_3=OFF -DBoost_NO_BOOST_CMAKE=ON'
         - os: osx
           osx_image: xcode11.3
-          env: FLAGS='-DUSE_PYTHON_3=ON'
+          env:
+            - FLAGS='-DUSE_PYTHON_3=ON'
     allow_failures:
         - os: osx
-        - dist: xenial
-          env: FLAGS='-DUSE_PYTHON_3=ON'
+        - os: linux
+          # dist: xenial
+          compiler: clang
+          name: "Ubuntu 16.04 LTS - Clang"
+          env:
+            - FROM='ubuntu:xenial'
+            - COMPILER='clang'
+            - FLAGS='-DUSE_PYTHON_3=OFF'
     fast_finish: true
 
 addons:
-  apt:
-    packages:
-      - python-dev
-#      - python2-dev
-      - libgl1-mesa-glx
-      - freeglut3-dev
-      - libopenal-dev
-      - libsdl-gfx1.2-dev
-      - libvorbis-dev
-      - libjpeg-dev
-      - libpng-dev
-      - libgtk-3-dev
-      - libboost-python-dev
-      - libboost-log-dev
-      - libboost-regex-dev
+#   apt:
+#     packages:
+#       - python-dev
+# #      - python2-dev
+#       - libgl1-mesa-glx
+#       - freeglut3-dev
+#       - libopenal-dev
+#       - libsdl-gfx1.2-dev
+#       - libvorbis-dev
+#       - libjpeg-dev
+#       - libpng-dev
+#       - libgtk-3-dev
+#       - libboost-python-dev
+#       - libboost-log-dev
+#       - libboost-regex-dev
   homebrew:
      update: true
      packages:
@@ -86,14 +194,14 @@ addons:
       - boost-python
 
 script:
-  - ./sh/travis-build.sh $FLAGS
+  - ./script/cibuild $FLAGS
 
 # CI/CD hookups
 # See https://docs.travis-ci.com/user/deployment/releases/
 # for what to do for `before_deploy` and `deploy` sections
 #before_deploy:
 #  - pull the submodule here
-#  - ./sh/vspackage.sh
+#  - ./script/package
 #  - export TRAVIS_TAG="composite tag name here"
 #  - git tag ${TRAVIS_TAG}
 #deploy:

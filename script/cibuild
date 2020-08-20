@@ -1,0 +1,37 @@
+#!/bin/bash
+#====================================
+# @file   : cibuild
+# @brief  : Builds Vega Strike for
+#           purposes of CI/CD (Travis)
+# @usage  : ./script/cibuild
+# @param  : none
+#====================================
+
+set -e
+
+if [ "$TRAVIS_OS_NAME" == "linux" ]
+then
+    DOCKER_IMG_NAME="vegastrike/vega-strike-build-env:$(echo $FROM | sed 's/:/_/' | sed 's/\//_/')"
+    DOCKER_CONTAINER_NAME="vega-strike-build-env_$(echo $FROM | sed 's/:/_/' | sed 's/\//_/')"
+    docker build --build-arg from=$FROM -t $DOCKER_IMG_NAME .
+    if [ "$COMPILER" == "gcc" ]
+    then
+        export CC=gcc
+        export CXX=g++
+    elif [ "$COMPILER" == "clang" ]
+    then
+        export CC=clang
+        export CXX=clang++
+    fi
+    docker run --env CC=$CC --env CXX=$CXX --env FLAGS=$FLAGS --env TRAVIS_TAG=$TRAVIS_TAG --name $DOCKER_CONTAINER_NAME $DOCKER_IMG_NAME $FLAGS
+    docker cp $DOCKER_CONTAINER_NAME:/usr/src/Vega-Strike-Engine-Source/bin .
+    if ! [ -z "$TRAVIS_TAG" ]
+    then
+        docker cp $DOCKER_CONTAINER_NAME:/usr/src/Vega-Strike-Engine-Source/packages .
+    fi
+    docker rm $DOCKER_CONTAINER_NAME
+else
+    script/docker-entrypoint.sh $@
+fi
+
+echo "cibuild Done!"
