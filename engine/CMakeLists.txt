@@ -337,7 +337,7 @@ SET(LIBROOTGENERIC_SOURCES
     src/star_system_generic.cpp
     src/star_system_xml.cpp
     src/stardate.cpp
-    src/universe_generic.cpp
+    src/universe_globals.cpp
     src/universe_util_generic.cpp
     src/vs_globals.cpp
     src/vsfilesystem.cpp

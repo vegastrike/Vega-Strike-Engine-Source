@@ -5,6 +5,10 @@
 #include "vegastrike.h"
 #include "vs_globals.h"
 
+#include <string>
+
+using std::string;
+
 namespace Orders
 {
 const float bleed_threshold = 0.0001;

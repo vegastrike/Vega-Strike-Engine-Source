@@ -31,7 +31,7 @@ class Terrain;
 class TextPlane;
 class Texture;
 class Unit;
-class GameUniverse;
+class Universe;
 class StarSystem;
 
 const unsigned int SIM_QUEUE_SIZE = 128;
@@ -143,7 +143,7 @@ public:
     // Constructors
     StarSystem( const string filename, const Vector &centroid = Vector( 0, 0, 0 ), const float timeofyear = 0 );
     ~StarSystem();
-    friend class GameUniverse;
+    friend class Universe;
 
     // Methods
     void AddStarsystemToUniverse( const string &filename );
