@@ -1,16 +1,13 @@
-#!/bin/sh
+#!/bin/bash
 #====================================
 # @file   : clean
-# @version: 2020-02-12
-# @created: 2020-02-12
-# @author : pyramid
 # @brief  : cleans VegaStrike build
-# @usage  : sh/clean
+# @usage  : ./script/clean
 # @param  : none
 #====================================
 
 echo "--------------------------"
-echo "--- clean | 2020-02-12 ---"
+echo "--- clean | 2020-08-17 ---"
 echo "--------------------------"
 echo "!!!warning!!! for strict developer use"
 echo "--------------------------"

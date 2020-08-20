@@ -6,6 +6,7 @@
 #include "configxml.h"
 #include "images.h"
 #include "gfx/camera.h"
+#include "universe.h"
 
 using namespace XMLSupport;
 extern double interpolation_blend_factor;

@@ -17,6 +17,7 @@
 #include "mission.h"
 #include "savegame.h"
 #include "gnuhash.h"
+#include "universe.h"
 
 using std::cerr;
 using std::endl;

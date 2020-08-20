@@ -5,6 +5,7 @@
 #include "cmd/unit_util.h"
 #include "cmd/unit_find.h"
 #include "sensor.h"
+#include "universe.h"
 
 extern Unit *getTopLevelOwner(); // WTF... located in star_system_generic.cpp
 
@@ -193,7 +194,7 @@ const Sensor::TrackCollection& Sensor::FindTracksInRange() const
     unitLocator.action.init(this, &collection, player);
     if (! is_null(player->location[Unit::UNIT_ONLY]))
     {
-        findObjects(_Universe->activeStarSystem()->collidemap[Unit::UNIT_ONLY],
+        findObjects(_Universe->activeStarSystem()->collide_map[Unit::UNIT_ONLY],
                     player->location[Unit::UNIT_ONLY],
                     &unitLocator);
     }

@@ -28,7 +28,7 @@
 #include "in_joystick.h"
 #include "gldrv/winsys.h"
 #include "options.h"
-
+#include "universe.h"
 
 
 using std::deque;

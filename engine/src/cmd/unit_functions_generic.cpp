@@ -11,6 +11,7 @@
 #include "pilot.h"
 #include "unit.h"
 #include "cmd/ai/order.h"
+#include "universe.h"
 
 //Various functions that were used in .cpp files that are now included because of
 //the temple GameUnit class

@@ -33,6 +33,8 @@
 #include "sprite.h"
 #include <algorithm>
 #include "../gldrv/gl_globals.h"
+#include "universe.h"
+
 using std::vector;
 using std::stack;
 

@@ -41,6 +41,7 @@
 
 #include "python/python_class.h"
 #include "savegame.h"
+#include "universe.h"
 
 /* *********************************************************** */
 using std::cout;

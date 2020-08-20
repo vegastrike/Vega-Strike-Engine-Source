@@ -20,6 +20,8 @@
 #include "cmd/role_bitmask.h"
 #include "options.h"
 #include <boost/graph/graph_concepts.hpp>
+#include "star_system.h"
+#include "universe.h"
 
 using namespace GalaxyXML;
 

@@ -74,7 +74,7 @@ static unsigned int AddJumpAnimation( const QVector &pos, const float size, bool
     return AddAnimation( pos, size, mvolatile, game_options.jumpgate, .95 );
 }
 
-void GameStarSystem::VolitalizeJumpAnimation( const int ani )
+void StarSystem::VolitalizeJumpAnimation( const int ani )
 {
     if (ani != -1) {
         VolatileJumpAnimations.push_back( ResizeAni( JumpAnimations[ani].a, game_options.jumpanimationshrink ) );
@@ -83,7 +83,7 @@ void GameStarSystem::VolitalizeJumpAnimation( const int ani )
     }
 }
 
-void GameStarSystem::DrawJumpStars()
+void StarSystem::DrawJumpStars()
 {
     for (unsigned int kk = 0; kk < pendingjump.size(); ++kk) {
         int k = pendingjump[kk]->animation;
@@ -121,7 +121,7 @@ void GameStarSystem::DrawJumpStars()
         }
 }
 
-void GameStarSystem::DoJumpingComeSightAndSound( Unit *un )
+void StarSystem::DoJumpingComeSightAndSound( Unit *un )
 {
     Vector p, q, r;
     un->GetOrientation( p, q, r );
@@ -129,7 +129,7 @@ void GameStarSystem::DoJumpingComeSightAndSound( Unit *un )
     VolatileJumpAnimations[myani].a->SetOrientation( p, q, r );
 }
 
-int GameStarSystem::DoJumpingLeaveSightAndSound( Unit *un )
+int StarSystem::DoJumpingLeaveSightAndSound( Unit *un )
 {
     int        ani;
     Vector     p, q, r;

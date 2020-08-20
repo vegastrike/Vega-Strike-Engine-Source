@@ -29,6 +29,7 @@
 #include "cg_global.h"
 #endif
 #include "universe_util.h"
+#include "universe.h"
 #include <utility>
 #include <unistd.h>
 #include <signal.h>
