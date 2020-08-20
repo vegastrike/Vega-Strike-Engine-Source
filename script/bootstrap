@@ -2,14 +2,14 @@
 #====================================
 # @file   : bootstrap
 # @brief  : installs dependencies for building Vega Strike
-# @usage  : ./script/bootstrap
+# @usage  : sudo script/bootstrap
 # @param  : none
 #====================================
 
 set -e
 
 echo "------------------------------"
-echo "--- bootstrap | 2020-08-17 ---"
+echo "--- bootstrap | 2020-08-19 ---"
 echo "------------------------------"
 
 if [ -f /etc/os-release ]
@@ -31,7 +31,8 @@ echo "LINUX_VERSION_ID = ${LINUX_VERSION_ID}"
 
 if [ $LINUX_ID == "debian" ] && [ $LINUX_CODENAME == "buster" ]
 then
-    sudo apt-get -y install \
+    apt-get update
+    apt-get -qy install \
                     git \
                     cmake \
                     python-dev \
@@ -55,10 +56,13 @@ then
                     libboost-python1.67-dev \
                     libboost-log1.67-dev \
                     libboost-regex1.67-dev \
-                    libxmu-dev
+                    libxmu-dev \
+                    clang \
+                    lsb-release
 elif [ $LINUX_ID == "debian" ] && [ $LINUX_CODENAME == "stretch" ]
 then
-    sudo apt-get -y install \
+    apt-get update
+    apt-get -qy install \
                     git \
                     cmake \
                     python-dev \
@@ -82,10 +86,13 @@ then
                     libboost-python-dev \
                     libboost-log-dev \
                     libboost-regex-dev \
-                    libxmu-dev
+                    libxmu-dev \
+                    clang \
+                    lsb-release
 elif [ $LINUX_ID == "ubuntu" ] && [ $LINUX_CODENAME == "focal" ]
 then
-    sudo apt-get -y install \
+    apt-get update
+    apt-get -qy install \
                     git \
                     cmake \
                     python-dev \
@@ -110,10 +117,13 @@ then
                     libboost-python1.67-dev \
                     libboost-log1.67-dev \
                     libboost-regex1.67-dev \
-                    libxmu-dev
+                    libxmu-dev \
+                    clang \
+                    lsb-release
 elif [ $LINUX_ID == "ubuntu" ] && [ $LINUX_CODENAME == "bionic" ]
 then
-    sudo apt-get -y install \
+    apt-get update
+    apt-get -qy install \
                     git \
                     cmake \
                     build-essential \
@@ -130,10 +140,13 @@ then
                     libboost-python-dev \
                     libboost-log-dev \
                     libboost-regex-dev \
-                    libxmu-dev
+                    libxmu-dev \
+                    clang \
+                    lsb-release
 elif [ $LINUX_ID == "ubuntu" ] && [ $LINUX_CODENAME == "xenial" ]
 then
-    sudo apt-get -y install \
+    apt-get update
+    apt-get -qy install \
                     git \
                     cmake \
                     build-essential \
@@ -150,10 +163,14 @@ then
                     libboost-python-dev \
                     libboost-log-dev \
                     libboost-regex-dev \
-                    libxmu-dev
+                    libxmu-dev \
+                    clang \
+                    lsb-release \
+                    python3-dev
 elif [ $LINUX_ID == "opensuse-leap" ]
 then
-    sudo zypper install -y  libboost_log1_66_0-devel \
+    zypper --non-interactive install -y \
+                            libboost_log1_66_0-devel \
                             libboost_python-py2_7-1_66_0-devel \
                             libboost_python-py3-1_66_0-devel \
                             libboost_system1_66_0-devel \
@@ -182,10 +199,12 @@ then
                             python-devel \
                             python3-devel \
                             git \
-                            rpm-build
+                            rpm-build \
+                            clang
 elif [ $LINUX_ID == "fedora" ] && [ $LINUX_VERSION_ID -eq 32 ]
 then
-    sudo dnf install -y git \
+    dnf install -y \
+                        git \
                         cmake \
                         boost-devel \
                         boost-python3-devel \
@@ -201,10 +220,12 @@ then
                         gtk3-devel \
                         python3-devel \
                         rpm-build \
-                        make
+                        make \
+                        clang
 elif [ $LINUX_ID == "fedora" ] && ([ $LINUX_VERSION_ID -ge 30 ] && [ $LINUX_VERSION_ID -lt 32 ])
 then
-    sudo dnf install -y git \
+    dnf install -y \
+                        git \
                         cmake \
                         boost-devel \
                         boost-python2-devel \
@@ -222,11 +243,15 @@ then
                         python2-devel \
                         python3-devel \
                         rpm-build \
-                        make
+                        make \
+                        clang
 elif [ $LINUX_ID == "centos" ] && [ $LINUX_VERSION_ID -eq 8 ]
 then
-    echo "Work in progress"
-    sudo dnf install -y git \
+    dnf -y install dnf-plugins-core
+    dnf -y install https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm
+    dnf config-manager --set-enabled PowerTools
+    dnf -y install \
+                        git \
                         cmake \
                         boost-devel \
                         boost-python3-devel \
@@ -242,11 +267,15 @@ then
                         gtk3-devel \
                         python3-devel \
                         rpm-build \
-                        make
+                        make \
+                        clang
 elif ([ $LINUX_ID == "rhel" ] || [ $LINUX_ID == "redhat" ]) && [ $LINUX_VERSION_ID -eq 8 ]
 then
-    echo "Work in progress"
-    sudo dnf install -y git \
+    dnf -y install dnf-plugins-core
+    dnf -y install https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm
+    dnf config-manager --set-enabled PowerTools
+    dnf -y install \
+                        git \
                         cmake \
                         boost-devel \
                         boost-python3-devel \
@@ -262,7 +291,8 @@ then
                         gtk3-devel \
                         python3-devel \
                         rpm-build \
-                        make
+                        make \
+                        clang
 else
     echo "Unsupported Linux distribution"
     exit 2

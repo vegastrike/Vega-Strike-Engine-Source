@@ -4,15 +4,15 @@
 # @brief  : Sets up the Vega Strike project
 #           in an initial state for
 #           building/development
-# @usage  : ./script/setup
+# @usage  : sudo script/setup
 # @param  : none
 #====================================
 
-set -e
+# set -e
 
 echo "--------------------------"
-echo "--- setup | 2020-08-17 ---"
+echo "--- setup | 2020-08-19 ---"
 echo "--------------------------"
 
-./script/bootstrap
-./script/clean
+script/bootstrap $@
+script/clean
