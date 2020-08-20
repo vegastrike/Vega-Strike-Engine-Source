@@ -535,8 +535,7 @@ void Music::SkipRandSong( int whichlist, int layer )
         if (layer < 0) {
             if (muzak_count >= 2){
                 muzak[muzak_cross_index]._SkipRandSong( whichlist );
-            }
-            else{
+            } else {
                 muzak->_SkipRandSong( whichlist );
             }
         } else if ( (layer >= 0) && (layer < muzak_count) ) {
