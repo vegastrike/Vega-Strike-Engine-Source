@@ -161,7 +161,7 @@ static GFXColorVertex * AllocVerticesForSystem( std::string our_system_name, flo
     if ( !our_system_name.empty() )
         *num = NumStarsInGalaxy();
     GFXColorVertex *tmpvertex = new GFXColorVertex[(*num)*repetition];
-    memset( tmpvertex, 0, sizeof (GFXVertex)*(*num)*repetition );
+//    memset( tmpvertex, 0, sizeof (GFXVertex)*(*num)*repetition ); //This is already initialized
     StarIter si;
     int starcount = 0;
     int j = 0;
