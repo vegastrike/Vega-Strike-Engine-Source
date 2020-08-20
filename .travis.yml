@@ -7,7 +7,7 @@ services:
 git:
   submodules: false
 
-distro: focal
+dist: focal
 
 # When updating be sure to add a section
 # to the matrix to cover the distro
