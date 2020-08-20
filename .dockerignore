@@ -1,0 +1,10 @@
+.git/
+bin/
+build/
+data/
+ext/
+*.pyc
+build-engine-Desktop-Default/
+*.log
+*.bak
+packages/

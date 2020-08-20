@@ -259,7 +259,24 @@ struct GFXColorVertex
     float tz;
     float tw;
 
-    GFXColorVertex() {}
+    GFXColorVertex() {
+        this->x = 0.f;
+        this->y = 0.f;
+        this->z = 0.f;
+        this->i = 0.f;
+        this->j = 0.f;
+        this->k = 0.f;
+        this->r = 0.f;
+        this->g = 0.f;
+        this->b = 0.f;
+        this->a = 0.f;
+        this->s = 0.f;
+        this->t = 0.f;
+        this->tx = 0.f;
+        this->ty = 0.f;
+        this->tz = 0.f;
+        this->tw = 1.f;
+    }
     GFXColorVertex( const Vector &vert, const Vector &norm, const GFXColor &rgba, float s, float t )
     {
         SetVertex( vert );
