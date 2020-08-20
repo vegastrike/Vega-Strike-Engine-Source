@@ -87,7 +87,7 @@ jobs:
           compiler: gcc
           name: "Debian 9 - GCC"
           env:
-            - FROM='debian:buster'
+            - FROM='debian:stretch'
             - COMPILER='gcc'
             - FLAGS='-DUSE_PYTHON_3=OFF'
         - os: linux
