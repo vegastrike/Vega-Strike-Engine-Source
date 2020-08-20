@@ -34,7 +34,9 @@ public:
         ///A value between 0 and 1 indicating my attitude towards index
         float relationship;
         boost::shared_ptr<FSM> conversation;  //a conversation any two factions can have
-        faction_stuff() : relationship(0.0) {}
+        faction_stuff() : relationship(0.0) {
+            stats.index = 0;
+        }
     };
 public:
 /**
