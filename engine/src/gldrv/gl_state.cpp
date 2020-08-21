@@ -58,11 +58,9 @@ GLenum GetGLTextureTarget( enum TEXTURE_TARGET texture_target )
     case TEXTURE2D:
         tt = GL_TEXTURE_2D;
         break;
-#ifdef GL_EXT_texture3D
     case TEXTURE3D:
         tt = GL_TEXTURE_3D;
         break;
-#endif
 #ifdef NV_CUBE_MAP
     case CUBEMAP:
         tt = GL_TEXTURE_CUBE_MAP_EXT;

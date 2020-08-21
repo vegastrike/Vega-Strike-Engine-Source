@@ -3,7 +3,7 @@
 std::map<string, string> GameConfig::variables;
 
 // This is probably unique enough to ensure no collision
-string const DEFAULT_ERROR_VALUE = "GameConfig::_GetVariable DEFAULT_ERROR_VALUE";
+string GameConfig::DEFAULT_ERROR_VALUE = "GameConfig::_GetVariable DEFAULT_ERROR_VALUE";
 
 void GameConfig::LoadGameConfig(const string &filename)
 {
@@ -29,34 +29,3 @@ void GameConfig::LoadGameConfig(const string &filename)
     }
 }
 
-string GameConfig::_GetVariable(string const &section, string const &name)
-{
-    string const key = section + "." + name;
-    if (variables.count(key))
-        return variables[key];
-    return DEFAULT_ERROR_VALUE;
-}
-
-template <>
-float GameConfig::GetVariable(string const &section, string const &name, float default_value)
-{
-    string result = _GetVariable(section, name);
-    if(result == DEFAULT_ERROR_VALUE) return default_value;
-    return std::stof(result);
-}
-
-template <>
-double GameConfig::GetVariable(string const &section, string const &name, double default_value)
-{
-    string result = _GetVariable(section, name);
-    if(result == DEFAULT_ERROR_VALUE) return default_value;
-    return std::stod(result);
-}
-
-template <>
-int GameConfig::GetVariable(string const &section, string const &name, int default_value)
-{
-    string result = _GetVariable(section, name);
-    if(result == DEFAULT_ERROR_VALUE) return default_value;
-    return std::stoi(result);
-}
