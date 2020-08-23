@@ -867,9 +867,12 @@ void unsetMissionRelevant( Unit *un )
 {
     if (un && mission->runtime.pymissions) {
         vector< UnitContainer* > *relevant = &mission->runtime.pymissions->relevant_units;
-        for (vector< UnitContainer* >::iterator ir = relevant->begin(), end = relevant->end(); ir != end; ++ir) {
-            if (**ir == un) {
-                relevant->erase(ir);
+        auto i = relevant->begin();
+        while (i != relevant->end()) {
+            if (**i == un) {
+                i = relevant->erase(i);
+            } else {
+                ++i;
             }
         }
     }
