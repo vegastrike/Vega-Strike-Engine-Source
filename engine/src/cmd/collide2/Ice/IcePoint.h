@@ -59,6 +59,20 @@
 		//! Destructor
 		inline_					~Point()													{}
 
+		inline_                 Vals(enum PointComponent pointComponent)
+        {
+            switch (pointComponent) {
+                case _X:
+                    return x;
+                case _Y:
+                    return y;
+                case _Z:
+                    return z;
+                default:
+                    break;
+            }
+        }
+
 		//! Clears the vector
 		inline_	Point&			Zero()									{ x =			y =			z = 0.0f;			return *this;	}
 
@@ -362,30 +376,39 @@
 		//! Returns largest axis
 		inline_	PointComponent	LargestAxis()						const
 								{
-									const float* Vals = &x;
 									PointComponent m = _X;
-									if(Vals[_Y] > Vals[m]) m = _Y;
-									if(Vals[_Z] > Vals[m]) m = _Z;
+									if (Vals(_Y) > Vals(m)) {
+                                        m = _Y;
+                                    }
+									if (Vals(_Z) > Vals(m)) {
+                                        m = _Z;
+                                    }
 									return m;
 								}
 
 		//! Returns closest axis
 		inline_	PointComponent	ClosestAxis()						const
 								{
-									const float* Vals = &x;
 									PointComponent m = _X;
-									if(AIR(Vals[_Y]) > AIR(Vals[m])) m = _Y;
-									if(AIR(Vals[_Z]) > AIR(Vals[m])) m = _Z;
+									if (AIR(Vals(_Y)) > AIR(Vals(m))) {
+                                        m = _Y;
+                                    }
+									if (AIR(Vals(_Z)) > AIR(Vals(m))) {
+                                        m = _Z;
+                                    }
 									return m;
 								}
 
 		//! Returns smallest axis
 		inline_	PointComponent	SmallestAxis()						const
 								{
-									const float* Vals = &x;
 									PointComponent m = _X;
-									if(Vals[_Y] < Vals[m]) m = _Y;
-									if(Vals[_Z] < Vals[m]) m = _Z;
+									if (Vals(_Y) < Vals(m)) {
+                                        m = _Y;
+                                    }
+									if (Vals(_Z) < Vals(m)) {
+                                        m = _Z;
+                                    }
 									return m;
 								}
 
