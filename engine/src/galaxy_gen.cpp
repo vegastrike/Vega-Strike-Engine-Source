@@ -1,3 +1,26 @@
+/**
+ * galaxy_gen.cpp
+ *
+ * Copyright (C) 2020 pyramid3d, Evert Vorster, Roy Falk, Stephen G. Tuggy,
+ * and other Vega Strike contributors.
+ *
+ * This file is part of Vega Strike.
+ *
+ * Vega Strike is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Vega Strike is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <vector>
@@ -994,8 +1017,8 @@ void MakeMoons( float callingradius, int callingentitytype )
     while (planetoffset < stars[staroffset].planets.size() && stars[staroffset].planets[planetoffset].moonlevel == moonlevel) {
         PlanetInfo &infos = stars[staroffset].planets[planetoffset++];
         MakePlanet(
-            ( .5+.5*grand() )*callingradius, callingentitytype == STAR ? PLANET : MOON, 
-                   infos.name, infos.unitname, infos.technique, 
+            ( .5+.5*grand() )*callingradius, callingentitytype == STAR ? PLANET : MOON,
+                   infos.name, infos.unitname, infos.technique,
                    infos.num, infos.numjumps,
             infos.numstarbases );
     }
@@ -1213,46 +1236,46 @@ void readplanetentity( vector< StarInfo > &starinfos, string planetlist, unsigne
         starinfos[u%numstars].planets.back().moonlevel = nummoon;
         {
             GalaxyXML::Galaxy *galaxy = _Universe->getGalaxy();
-            
+
             static const string numtag("#num#");
             static const string empty;
             static const string::size_type numlen = numtag.length();
             string::size_type numpos;
-            
+
             // Get planet name and texture
             string planetname  = galaxy->getPlanetNameFromInitial( planetlist.substr( j, i == string::npos ? string::npos : i-j ) );
             string texturename = galaxy->getPlanetVariable( planetname, "texture", "No texture supplied in <planets>!" );
-            
+
             // Get unit name, deriving a default name from its texture
             string defunitname = texturename.substr(0, texturename.find_first_of('|'));
             if (defunitname.find_last_of('/') != string::npos)
                 defunitname = defunitname.substr(defunitname.find_last_of('/')+1);
             defunitname = defunitname.substr(0, defunitname.find_last_of('.'));
-            
+
             numpos=0;
             while ((numpos = defunitname.find(numtag, numpos)) != string::npos)
                 defunitname.replace(numpos, numlen, empty);
-            
+
             string unitname    = galaxy->getPlanetVariable( planetname, "unit", defunitname );
-            
+
             // Get planet rendering technique
             string techniquename=galaxy->getPlanetVariable( planetname, "technique", "" );
-            
+
             // Replace randomized number placeholder tags
             starinfos[u%numstars].planets.back().num =
                 rnd( XMLSupport::parse_int( galaxy->getPlanetVariable( planetname, "texture_min", "0" ) ),
                      XMLSupport::parse_int( galaxy->getPlanetVariable( planetname, "texture_max", "0" ) ) );
-            
+
             char num[32];
             if (starinfos[u%numstars].planets.back().num == 0)
                 num[0] = 0;
             else
                 snprintf(num, sizeof(num), "%d", starinfos[u%numstars].planets.back().num);
-            
+
             numpos=0;
             while ((numpos = texturename.find(numtag, numpos)) != string::npos)
                 texturename.replace(numpos, numlen, num);
-            
+
             // Store info
             starinfos[u%numstars].planets.back().name = texturename;
             starinfos[u%numstars].planets.back().unitname = unitname;
@@ -1390,7 +1413,7 @@ int main( int argc, char **argv )
     bool   asteroid   = true;
     float  srad;
     float  comp;
-    sscanf( argv[3], "%f/%f", &srad&comp );
+    sscanf( argv[3], "%f/%f", &srad, &comp );
     vector< string >jumps;
     for (unsigned int i = 12; i < argc; i++)
         jumps.push_back( string( argv[i] ) );
