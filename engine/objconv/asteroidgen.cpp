@@ -1,3 +1,26 @@
+/**
+ * asteroidgen.cpp
+ *
+ * Copyright (C) 2020 pyramid3d, Evert Vorser, Stephen G. Tuggy,
+ * and other Vega Strike contributors.
+ *
+ * This file is part of Vega Strike.
+ *
+ * Vega Strike is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Vega Strike is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
+
 #include <vector>
 #include <stdio.h>
 #include <stdlib.h>
@@ -48,7 +71,7 @@ public:
     }
     void Yaw( float rad ) //only works with unit vector
     {
-        float theta;
+        float theta = 0.0f;
         float m = Mag();
         if (i > 0)
             theta = (float) atan( k/i );
@@ -65,7 +88,7 @@ public:
 
     void Roll( float rad )
     {
-        float theta;
+        float theta = 0.0f;
         float m = Mag();
         if (i > 0)
             theta = (float) atan( j/i );
@@ -82,7 +105,7 @@ public:
 
     void Pitch( float rad )
     {
-        float theta;
+        float theta = 0.0f;
         float m = Mag();
         if (k > 0)
             theta = (float) atan( j/k );
