@@ -1,6 +1,28 @@
-/* example-start entry entry.c */
+/**
+ * saveinterface.cpp
+ *
+ * Copyright (C) 2020 pyramid3d, Rune Morling, Stephen G. Tuggy,
+ * and other Vega Strike contributors.
+ *
+ * This file is part of Vega Strike.
+ *
+ * Vega Strike is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Vega Strike is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
+
 #include <string>
-#if defined(_WIN32) && _MSC_VER > 1300 
+#if defined(_WIN32) && _MSC_VER > 1300
 #define __restrict
 #endif
 #include <gtk/gtk.h>
@@ -57,10 +79,10 @@ std::string ParentDir () {
       parentdir[pathlen]='\0';
       strncpy ( parentdir, prog_arg, pathlen );
       c = (char*) parentdir;
-      
+
       while (*c != '\0')     /* go to end */
         c++;
-      
+
       while ((*c != '/')&&(*c != '\\')&&(c>parentdir))      /* back up to parent */
         c--;
       if (c>parentdir+1) {
@@ -69,7 +91,7 @@ std::string ParentDir () {
 	}
       }
       *c = '\0';             /* cut off last part (binary name) */
-      
+
       mypwd = parentdir;
       delete []parentdir;
       final = (char *)malloc(1000);
@@ -99,6 +121,12 @@ void GoToParentDir () {
   FILE * fp2 = fopen ("vegastrike.config","r");
   if ((!fp2)&&fp1) {
 	  chdir ("..");
+  }
+  if (fp1) {
+      fclose(fp1);
+  }
+  if (fp2) {
+      fclose(fp2);
   }
 }
 #endif // _WIN32
@@ -201,7 +229,11 @@ void changeToData () {
 
 		   chdir ("/usr/vegastrike/data");
 		   //   FILE * fp = fopen ("vegastrike.config","r");
-	   }
+	   } else {
+           fclose(fp);
+       }
+   } else {
+       fclose(fp);
    }
 }
 #endif
@@ -220,7 +252,7 @@ void launch_mission () {
    fflush (stdout);
 #ifndef _WIN32
    changeToData();
-   execlp ("vegastrike","/usr/local/bin/vegastrike",num,my_mission.c_str(),NULL);   
+   execlp ("vegastrike","/usr/local/bin/vegastrike",num,my_mission.c_str(),NULL);
 #else
    DWORD id;
    HANDLE hThr=CreateThread(NULL,0,DrawStartupDialog,(void *)new stupod (strdup (my_mission.c_str()),strdup (num)),0,&id);
@@ -232,7 +264,7 @@ void launch_mission () {
 #ifndef _WIN32
 
    changeToData();
-   execlp ("vegastrike","/usr/local/bin/vegastrike",my_mission.c_str(),NULL);   
+   execlp ("vegastrike","/usr/local/bin/vegastrike",my_mission.c_str(),NULL);
 #else
    DWORD id;
    HANDLE hThr=CreateThread(NULL,0,DrawStartupDialog,(void *)new stupod (strdup (my_mission.c_str()),NULL),0,&id);
@@ -388,7 +420,7 @@ int main( int   argc,
 		if (hsd.length()) {
 			HOMESUBDIR=hsd;
 			//fprintf (STD_OUT,"Using %s as the home directory\n",hsd.c_str());
-		}			
+		}
 	}
     //    chdir ("./.vegastrike/save");
     gtk_init (&argc, (char***)(&argv));
@@ -407,7 +439,7 @@ int main( int   argc,
     gtk_signal_connect(GTK_OBJECT(window), "delete_event", GTK_SIGNAL_FUNC(gtk_exit), NULL);
     for (int i=0;i<NUM_TITLES;i++) {
         button = gtk_button_new_with_label (titles[i]);
-         
+
          /* When the button receives the "clicked" signal, it will call the
           * function hello() passing it NULL as its argument.  The hello()
           * function is defined above. */
@@ -418,7 +450,7 @@ int main( int   argc,
     }
     gtk_widget_show (vbox);
     gtk_container_add (GTK_CONTAINER (window), vbox);
-         
+
          /* and the window */
          gtk_widget_show (window);
 #if defined(_WIN32)&& (!defined(_WINDOWS)) && !defined(__MINGW32__) && !defined(__CYGWIN__)
@@ -880,9 +912,9 @@ void changehome() {
 #endif
   if (chdir (HOMESUBDIR.c_str())==-1) {
     mkdir (HOMESUBDIR.c_str()
-#ifndef _WIN32		  
+#ifndef _WIN32
 	     , 0xFFFFFFFF
-#endif		  
+#endif
 	     );
     chdir (HOMESUBDIR.c_str());
   }
@@ -890,7 +922,7 @@ void changehome() {
     mkdir ("save"
 #ifndef _WIN32
 	   , 0xFFFFFFFF
-#endif		  
+#endif
 	   );
     //system ("mkdir " HOMESUBDIR "/generatedbsp");
     chdir ("save");
