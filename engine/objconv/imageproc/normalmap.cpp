@@ -1,3 +1,25 @@
+/**
+ * normalmap.cpp
+ *
+ * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike contributors
+ *
+ * This file is part of Vega Strike.
+ *
+ * Vega Strike is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Vega Strike is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
+
 #include <png.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -207,7 +229,7 @@ void ModifyImage( unsigned int sizex,
     float  minval    = 0.0f;
     for (int j = 0; j < sizey; ++j)
         for (int i = 0; i < sizex; ++i) {
-            float candidate;
+            float candidate = 0.0f;
             if (j == 0) {
                 if (i != 0)
                     *readimg( heightmap, i, j,
