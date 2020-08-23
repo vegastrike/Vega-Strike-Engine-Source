@@ -118,12 +118,21 @@ char *replace(char *line, char *search, char *replace, int LENGTH) {
 	chr_new = (char *) malloc (sizeof (char)*LENGTH);
 	current = (char *) malloc (sizeof (char)*LENGTH);
 	calc = strlen(line) - strlen(search) + strlen(replace);
-	if (calc > LENGTH) { return line; }
+	if (calc > LENGTH) {
+        free(chr_new);
+        free(current);
+        return line;
+    }
 	strcpy(current, line);
 	while ((location = strstr(current, search)) != nullptr) {
 		chr_new[0] = '\0';
 		calc = strlen(current) - strlen(search) + strlen(replace);
-		if (calc > LENGTH) { strcpy(line, current); free(current); free(chr_new); return line; }
+		if (calc > LENGTH) {
+            strcpy(line, current);
+            free(current);
+            free(chr_new);
+            return line;
+        }
 		dif = location - current;
 		strncat(chr_new, current, dif);
 		strncat(chr_new, replace, strlen(replace));
