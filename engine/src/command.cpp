@@ -420,10 +420,13 @@ public:
     }
     void popProc( commandI *proc2use )
     {
-        for (vector< procs >::iterator iter = cmds.begin(); iter < cmds.end(); iter++) {
-            if (proc2use == ( *(iter) ).proc)
-                cmds.erase( iter );
-            ;
+        auto i = cmds.begin();
+        while (i != cmds.end()) {
+            if (proc2use == (*(i)).proc) {
+                i = cmds.erase(i);
+            } else {
+                ++i;
+            }
         }
         if (cmds.size() == 0) finishmeoff = true;
     }
