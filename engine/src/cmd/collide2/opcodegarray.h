@@ -44,14 +44,16 @@
         if (limit != 0) {                                                   \
             ga_type* newRoot = (ga_type*) realloc (root, limit * sizeof (ga_type)); \
             if (newRoot == nullptr) {                                       \
-                free(root);                                                 \
-                root = nullptr;                                             \
+                if (root != nullptr) {                                      \
+                    free (root);                                            \
+                    root = nullptr;                                         \
+                }                                                           \
                 CS_ASSERT(newRoot != nullptr); /* going to be false */      \
             } else {                                                        \
                 root = newRoot;                                             \
             }                                                               \
         } else {                                                            \
-            if (root) {                                                     \
+            if (root != nullptr) {                                          \
                 free (root);                                                \
                 root = nullptr;                                             \
             }                                                               \
