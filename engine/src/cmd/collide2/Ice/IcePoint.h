@@ -43,7 +43,22 @@
 
 	class ICEMATHS_API Point
 	{
-		public:
+    protected:
+        inline_ const float&    Vals(enum PointComponent pointComponent) const
+        {
+            switch (pointComponent) {
+                case _X:
+                    return x;
+                case _Y:
+                    return y;
+                case _Z:
+                    return z;
+                default:
+                    return x;   // ?
+            }
+        }
+
+    public:
 
 		//! Empty constructor
 		inline_					Point()														{}
@@ -58,20 +73,6 @@
 		inline_					Point(const Point& p) : x(p.x), y(p.y), z(p.z)				{}
 		//! Destructor
 		inline_					~Point()													{}
-
-		inline_                 Vals(enum PointComponent pointComponent)
-        {
-            switch (pointComponent) {
-                case _X:
-                    return x;
-                case _Y:
-                    return y;
-                case _Z:
-                    return z;
-                default:
-                    break;
-            }
-        }
 
 		//! Clears the vector
 		inline_	Point&			Zero()									{ x =			y =			z = 0.0f;			return *this;	}
