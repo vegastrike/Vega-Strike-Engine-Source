@@ -4,6 +4,9 @@
  *                           begin                : December 28, 2001
  *                           copyright            : (C) 2001 by David Ranger
  *                           email                : reliant@canshell.com
+ *                           copyright            : (C) 2020 pyramid3d,
+ *                              Nachum Barcohen, Roy Falk, Stephen G. Tuggy,
+ *                              and other Vega Strike contributors
  **************************************************************************/
 
 /***************************************************************************
@@ -15,7 +18,7 @@
  *                                                                         *
  **************************************************************************/
 
-/* This include has been designed to act independant of the other modules. 
+/* This include has been designed to act independant of the other modules.
  * This allows it to be used with other programs with minimal changes */
 
 #include "general.h"
@@ -118,7 +121,7 @@ char *replace(char *line, char *search, char *replace, int LENGTH) {
 	chr_new = (char *) malloc (sizeof (char)*LENGTH);
 	current = (char *) malloc (sizeof (char)*LENGTH);
 	calc = strlen(line) - strlen(search) + strlen(replace);
-	if (calc > LENGTH) {
+    if (calc > LENGTH) {
         free(chr_new);
         free(current);
         return line;
@@ -127,7 +130,7 @@ char *replace(char *line, char *search, char *replace, int LENGTH) {
 	while ((location = strstr(current, search)) != nullptr) {
 		chr_new[0] = '\0';
 		calc = strlen(current) - strlen(search) + strlen(replace);
-		if (calc > LENGTH) {
+        if (calc > LENGTH) {
             strcpy(line, current);
             free(current);
             free(chr_new);
@@ -138,7 +141,7 @@ char *replace(char *line, char *search, char *replace, int LENGTH) {
 		strncat(chr_new, replace, strlen(replace));
 		ptr_new = current + dif + strlen(search);
 		strncat(chr_new, ptr_new, strlen(ptr_new));
-		strcpy(current, chr_new); 
+		strcpy(current, chr_new);
 	}
 	strcpy(line, current);
 	free(chr_new);
