@@ -4,6 +4,9 @@
  *                           begin                : December 28, 2001
  *                           copyright            : (C) 2001 by David Ranger
  *                           email                : ussreliant@users.sourceforge.net
+ *                           copyright            : (C) 2002 Daniel Horn & ace123
+ *                           copyright            : (C) 2020 pyramid3d
+ *                           copyright            : (C) 2020 Stephen G. Tuggy
  **************************************************************************/
 
 /***************************************************************************
@@ -151,7 +154,7 @@ char *NewString(char *string);
 #endif    // __cplusplus
 #endif    // _G_STRING_MANAGE
 
-void ShowError(char *error_msg, char *error_code, int is_fatal);
+void ShowError(const char *error_msg, const char *error_code, int is_fatal);
 
 #ifdef _G_XML
 char *xml_pre_chomp_comment(char *string);
