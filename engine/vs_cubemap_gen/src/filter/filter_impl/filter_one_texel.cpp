@@ -200,7 +200,7 @@ inline void filter_one_texel::plane_min_max( float len_sqr, float x, float y, fl
             UPD_MAX_Y( p2y );
         }
     }
-} 
+}
 #undef UPD_MAX_Y
 #undef UPD_MAX_X
 #undef UPD_MIN_Y
@@ -234,8 +234,8 @@ fRGBAcol filter_one_texel::operator()( fvector const * ray /*normalized*/ )
     //ranges for each of the six sides
     if( maxx == +0.5f ) //--i.e., if positive x side is included in the filter input range
     {
-        side_and_coords snc1 = side_and_coords( ccoords( 0.5f, miny, minz );
-        side_and_coords snc2 = side_and_coords( ccoords( 0.5f, maxy, maxz );
+        side_and_coords snc1 = side_and_coords( ccoords( 0.5f, miny, minz ));
+        side_and_coords snc2 = side_and_coords( ccoords( 0.5f, maxy, maxz ));
         assert( snc1.get_side() == snc2.get_side() ||! "weirdness..." );
         RectIterRanges source_.get_iteration_ranges( snc1, snc2 );
     }
