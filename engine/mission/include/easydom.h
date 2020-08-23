@@ -1,22 +1,24 @@
-/* 
- * Vega Strike
- * Copyright (C) 2001-2002 Daniel Horn
- * 
- * http://vegastrike.sourceforge.net/
+/*
+ * easydom.h
  *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * as published by the Free Software Foundation; either version 2
- * of the License, or (at your option) any later version.
- * 
- * This program is distributed in the hope that it will be useful,
+ * Copyright (C) 2001-2002 Daniel Horn
+ * Copyright (C) 2020 pyramid3d, Roy Falk, Stephen G. Tuggy,
+ * and other Vega Strike contributors.
+ *
+ * This file is part of Vega Strike.
+ *
+ * Vega Strike is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * Vega Strike is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+ * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 /*
@@ -76,14 +78,14 @@ class tagDomNode : public easyDomNode {
  public:
   int tag;
 
-  void Tag(tagMap *tagmap) { 
+  void Tag(tagMap *tagmap) {
     tag=(*tagmap)[Name()];
     if(tag==0){
       BOOST_LOG_TRIVIAL(trace) << "cannot translate tag " << Name() << endl;
     }
 
     vector<easyDomNode *>::const_iterator siter;
-  
+
     for(siter= subnodes.begin() ; siter!=subnodes.end() ; siter++){
       tagDomNode *tnode=(tagDomNode *)(*siter);
       tnode->Tag(tagmap);
@@ -123,7 +125,7 @@ template<class domNodeType> class easyDomFactory {
   XML_SetUserData(parser, this);
   XML_SetElementHandler(parser, &easyDomFactory::beginElement, &easyDomFactory::endElement);
   XML_SetCharacterDataHandler(parser,&easyDomFactory::charHandler);
-  
+
   do {
     char *buf = (XML_Char*)XML_GetBuffer(parser, chunk_size);
     int length;
@@ -164,7 +166,7 @@ domNodeType *LoadCalike(const char *filename) {
   XML_SetUserData(parser, this);
   XML_SetElementHandler(parser, &easyDomFactory::beginElement, &easyDomFactory::endElement);
   XML_SetCharacterDataHandler(parser,&easyDomFactory::charHandler);
-  
+
   int index=0;
   int string_size=module_str.size();
   int incr=chunk_size-2;
@@ -256,7 +258,7 @@ domNodeType *LoadCalike(const char *filename) {
   else{
     nodestack.pop();
   }
-  
+
 }
 ;
 
