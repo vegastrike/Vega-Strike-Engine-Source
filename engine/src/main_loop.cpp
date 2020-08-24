@@ -41,7 +41,6 @@
 #include "main_loop.h"
 #include "cmd/music.h"
 #include "audiolib.h"
-#include "cmd/nebula.h"
 #include "vsfilesystem.h"
 #include "cmd/script/mission.h"
 #include "xml_support.h"

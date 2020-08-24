@@ -53,7 +53,6 @@
 #include "gfx/cockpit_generic.h"
 #include "cmd/images.h"
 #include "savegame.h"
-#include "cmd/nebula_generic.h"
 #include "hashtable.h"
 #include "flightgroup.h"
 #include "cmd/unit_factory.h"
@@ -143,7 +142,7 @@ varInst* Mission::call_unit( missionNode *node, int mode )
         debug( 3, node, mode, "unit getUnit: " );
         printVarInst( 3, viret );
         return viret;
-    } else if (method_id == CMT_UNIT_launch || method_id == CMT_UNIT_launchNebula || method_id == CMT_UNIT_launchPlanet
+    } else if (method_id == CMT_UNIT_launch || method_id == CMT_UNIT_launchPlanet
                || method_id == CMT_UNIT_launchJumppoint) {
         missionNode *name_node    = getArgument( node, mode, 0 );
         varInst     *name_vi      = checkObjectExpr( name_node, mode );
@@ -179,8 +178,7 @@ varInst* Mission::call_unit( missionNode *node, int mode )
             clsptr clstyp = UNITPTR;
             if (method_id == CMT_UNIT_launchJumppoint || method_id == CMT_UNIT_launchPlanet)
                 clstyp = PLANETPTR;
-            else if (method_id == CMT_UNIT_launchNebula)
-                clstyp = NEBULAPTR;
+
             string name_string    = *( (string*) name_vi->object );
             string faction_string = *( (string*) faction_vi->object );
             string type_string    = *( (string*) type_vi->object );
@@ -975,9 +973,6 @@ Unit* Mission::call_unit_launch( CreateFlightgroup *fg, int type, const string &
             free( tex );
             free( nam );
             free( citylights );
-        } else if (type == NEBULAPTR) {
-            my_unit = UnitFactory::createNebula(
-                fg->fg->type.c_str(), false, faction_nr, fg->fg, u+fg->fg->nr_ships-fg->nr_ships );
         } else if (type == ASTEROIDPTR) {
             my_unit = UnitFactory::createAsteroid(
                 fg->fg->type.c_str(), faction_nr, fg->fg, u+fg->fg->nr_ships-fg->nr_ships, .01 );
@@ -996,7 +991,7 @@ Unit* Mission::call_unit_launch( CreateFlightgroup *fg, int type, const string &
         pox.j = fg->fg->pos.j+u*fg_radius*3;
         pox.k = fg->fg->pos.k+u*fg_radius*3;
         my_unit->SetPosAndCumPos( pox );
-        if (type == ASTEROIDPTR || type == NEBULAPTR) {
+        if (type == ASTEROIDPTR) {
             my_unit->PrimeOrders();
         } else {
             my_unit->LoadAIScript( fg->fg->ainame );

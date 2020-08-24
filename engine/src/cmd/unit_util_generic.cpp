@@ -714,7 +714,7 @@ bool isSignificant( const Unit *my_unit )
     bool   res = false;
     clsptr typ = my_unit->isUnit();
     const string &s = getFlightgroupNameCR( my_unit );
-    res = (typ == PLANETPTR || typ == ASTEROIDPTR || typ == NEBULAPTR || s == "Base");
+    res = (typ == PLANETPTR || typ == ASTEROIDPTR || s == "Base");
     return res && !isSun( my_unit );
 }
 

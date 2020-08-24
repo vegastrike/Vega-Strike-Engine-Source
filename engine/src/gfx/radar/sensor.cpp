@@ -91,12 +91,7 @@ bool Sensor::IsTracking(const Track& track) const
     return (track.target == player->Target());
 }
 
-bool Sensor::InsideNebula() const
-{
-    assert(player);
 
-    return (player->GetNebula() != NULL);
-}
 
 bool Sensor::InRange(const Track& track) const
 {
@@ -292,7 +287,6 @@ GFXColor Sensor::GetColor(const Track& track) const
     {
         switch (trackType)
         {
-        case Track::Type::Nebula:
         case Track::Type::Star:
             return starColor;
 

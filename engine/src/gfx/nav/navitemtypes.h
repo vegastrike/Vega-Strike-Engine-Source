@@ -12,7 +12,6 @@ enum NAVITEMTYPES
     navcapship,
     navmissile,
     navasteroid,
-    navnebula,
     navjump,
     navambiguous
 };
@@ -26,7 +25,6 @@ enum NAVITEMTYPES
 #define navcapshipsize 0.0125
 #define navmissilesize 0.005
 #define navasteroidsize 0.015
-#define navnebulasize 0.03
 #define navjumpsize 0.0125
 #define navambiguoussize 0.01
 

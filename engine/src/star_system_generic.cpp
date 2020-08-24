@@ -18,7 +18,6 @@
 #include "vs_globals.h"
 #include "vegastrike.h"
 #include "universe_generic.h"
-#include "cmd/nebula_generic.h"
 #include "galaxy_gen.h"
 #include "cmd/script/mission.h"
 #include "in_kb.h"
@@ -180,12 +179,6 @@ Flightgroup * getStaticStarFlightgroup( int faction )
     return fg[faction];
 }
 
-Flightgroup * getStaticNebulaFlightgroup( int faction )
-{
-    static vector< Flightgroup* >fg;
-    setStaticFlightgroup( fg, "Nebula", faction );
-    return fg[faction];
-}
 
 Flightgroup * getStaticAsteroidFlightgroup( int faction )
 {
@@ -636,8 +629,7 @@ void StarSystem::Update( float priority )
             Unit::ProcessDeleteQueue();
             current_stage = MISSION_SIMULATION;
             collidetable->Update();
-            for (un_iter iter = drawList.createIterator(); (unit = *iter); ++iter)
-                unit->SetNebula( NULL );
+
             UpdateMissiles();                    //do explosions
             UpdateUnitPhysics( firstframe );
 

@@ -62,7 +62,6 @@ public:
 
     // I am tracking target
     bool IsTracking(const Track&) const;
-    bool InsideNebula() const;
     bool InRange(const Track&) const;
 
     const TrackCollection& FindTracksInRange() const;

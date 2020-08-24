@@ -332,10 +332,6 @@ void NavigationSystem::DrawSystem()
             //an asteroid
             insert_type = navasteroid;
             insert_size = navasteroidsize;
-        } else if ( (*blah)->isUnit() == NEBULAPTR ) {
-            //a nebula
-            insert_type = navnebula;
-            insert_size = navnebulasize;
         } else {
             //undefined non unit
             insert_type = navambiguous;

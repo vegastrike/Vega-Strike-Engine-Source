@@ -27,7 +27,6 @@
 #define _CAMERA_H_
 //class PlanetaryTransform; commented out by chuck_starchaser --never used
 #include "cmd/container.h"
-class Nebula;
 
 class Camera
 {
@@ -42,7 +41,6 @@ class Camera
     float   zoom;
     float   fov;
     float   cockpit_offset;
-    UnitContainer nebula;
 public:
     void setCockpitOffset( float c )
     {
@@ -76,8 +74,7 @@ public:
     explicit Camera( ProjectionType proj = PERSPECTIVE );
     void LookDirection( const Vector &forevec, const Vector &up );
     Vector P, Q, R;
-    void SetNebula( Nebula *neb );
-    Nebula * GetNebula(); //this function can't be const, as it must return a non-const ptr --chuck_starchaser
+
 /*    PlanetaryTransform const * GetPlanetaryTransform() const   commented out by chuck_starchaser; --never used
     {
         return planet;

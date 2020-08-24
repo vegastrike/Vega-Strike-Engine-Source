@@ -40,9 +40,6 @@ void Asteroid::reactToCollision(Unit * smaller, const QVector& biglocation, cons
 		case ASTEROIDPTR:
 		case ENHANCEMENTPTR:
 			break;
-		case NEBULAPTR:
-			smaller->reactToCollision(this,smalllocation,smallnormal,biglocation,bignormal,dist);
-			break;
 		default:
 			/***** DOES THAT STILL WORK WITH UNIT:: ?????????? *******/
 			Unit::reactToCollision (smaller,biglocation,bignormal,smalllocation,smallnormal,dist);

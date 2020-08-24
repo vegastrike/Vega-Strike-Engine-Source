@@ -144,8 +144,7 @@ Unit * launchJumppoint( string name_string,
         clstype = PLANETPTR;
     else if (unittype_string == "asteroid")
         clstype = ASTEROIDPTR;
-    else if (unittype_string == "nebula")
-        clstype = NEBULAPTR;
+
     CreateFlightgroup cf;
     cf.fg = Flightgroup::newFlightgroup( name_string,
                                          type_string,
@@ -644,7 +643,7 @@ QVector SafeStarSystemEntrancePoint( StarSystem *sts, QVector pos, float radial_
         {
             //fixme, make me faster, use collide map
             for (un_iter i = sts->getUnitList().createIterator(); (un = *i) != NULL; ++i) {
-                if (UnitUtil::isAsteroid( un ) || un->isUnit() == NEBULAPTR)
+                if (UnitUtil::isAsteroid( un ))
                     continue;
                 double dist = ( pos-un->LocalPosition() ).Magnitude()-un->rSize()-/*def_un_size-*/ radial_size;
                 if (dist < 0) {

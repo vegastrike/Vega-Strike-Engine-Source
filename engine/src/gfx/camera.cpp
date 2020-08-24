@@ -165,16 +165,6 @@ void Camera::GetView( Matrix &vw )
     GFXGetMatrixView( vw );
 }
 
-void Camera::SetNebula( Nebula *neb )
-{
-    nebula.SetUnit( (Unit*) neb );
-}
-
-Nebula * Camera::GetNebula() //this function can't be const, as it must return a non-const ptr
-{
-    return reinterpret_cast<Nebula*>( nebula.GetUnit() ); //changed by chuck from (Nebula*) cast
-}
-
 void Camera::UpdatePlanetGFX()
 {
     Identity( planetview );

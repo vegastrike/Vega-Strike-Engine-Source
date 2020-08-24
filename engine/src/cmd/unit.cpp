@@ -248,9 +248,9 @@ void GameUnit< UnitType >::DrawNow( const Matrix &mato, float lod )
         QVector TransformedPosition = Transform( mat,
                                                 this->meshdata[i]->Position().Cast() );
         float   d = GFXSphereInFrustum( TransformedPosition, this->meshdata[i]->clipRadialSize()*vlpqrScaleFactor );
-        if (d)          //d can be used for level of detail
-                        //this->meshdata[i]->DrawNow(lod,false,mat,cloak);//cloakign and nebula
+        if (d) { //d can be used for level of detail
             this->meshdata[i]->Draw( lod, mat, d, cloak );
+        }
     }
     Unit *un;
     /*for (un_iter iter = this->getSubUnits(); (un = *iter); ++iter) {
@@ -290,17 +290,11 @@ void GameUnit< UnitType >::DrawNow( const Matrix &mato, float lod )
                             (d-gun->rSize() < g_game.znear) ? g_game.znear : d-gun->rSize() );
                         ScaleMatrix( mmat, Vector( mahnt->xyscale, mahnt->xyscale, mahnt->zscale ) );
                         gun->setCurrentFrame( this->mounts[i].ComputeAnimatedFrame( gun ) );
-                        gun->Draw( lod, mmat, d, cloak,
-                                   (_Universe->AccessCamera()->GetNebula() == this->nebula && this->nebula != NULL) ? -1 : 0,
-                                   chardamage,
-                                   true );                                                                                                                                       //cloakign and nebula
+                        gun->Draw( lod, mmat, d, cloak, 0,chardamage, true ); //cloaking
                         if (mahnt->type->gun1) {
                             gun = mahnt->type->gun1;
                             gun->setCurrentFrame( this->mounts[i].ComputeAnimatedFrame( gun ) );
-                            gun->Draw( lod, mmat, d, cloak,
-                                       (_Universe->AccessCamera()->GetNebula() == this->nebula && this->nebula
-                                        != NULL) ? -1 : 0,
-                                       chardamage, true );                                                                                                                               //cloakign and nebula
+                            gun->Draw( lod, mmat, d, cloak, 0, chardamage, true ); //cloaking
                         }
                     }
                 }
@@ -437,10 +431,7 @@ void GameUnit< UnitType >::Draw( const Transformation &parent, const Matrix &par
                     if (frustd) {
                         //if the radius is at least half a pixel at detail 1 (equivalent to pixradius >= 0.5 / detail)
                         float currentFrame = this->meshdata[i]->getCurrentFrame();
-                        this->meshdata[i]->Draw( lod, wmat, d,
-                                                 i == this->meshdata.size()-1 ? -1 : cloak,
-                                                 (camera->GetNebula() == this->nebula && this->nebula != NULL) ? -1 : 0,
-                                                 chardamage );                                                                                                                                                            //cloakign and nebula
+                        this->meshdata[i]->Draw( lod, wmat, d, i == this->meshdata.size()-1 ? -1 : cloak,0 ,chardamage ); //cloaking
                         On_Screen = true;
                         unsigned int numAnimFrames = 0;
                         static const string default_animation;
@@ -522,10 +513,7 @@ void GameUnit< UnitType >::Draw( const Transformation &parent, const Matrix &par
                         if (lod > 0.5 && pixradius > 2.5) {
                             ScaleMatrix( mat, Vector( mahnt->xyscale, mahnt->xyscale, mahnt->zscale ) );
                             gun->setCurrentFrame( this->mounts[i].ComputeAnimatedFrame( gun ) );
-                            gun->Draw( lod, mat, d, cloak,
-                                       (_Universe->AccessCamera()->GetNebula() == this->nebula && this->nebula != NULL) ? -1 : 0,
-                                       chardamage,
-                                       true );                                                                                                                                      //cloakign and nebula
+                            gun->Draw( lod, mat, d, cloak, 0,chardamage, true ); //cloaking
                         }
                         if (mahnt->type->gun1) {
                             pixradius = gun->rSize()*perspectiveFactor(
@@ -534,10 +522,7 @@ void GameUnit< UnitType >::Draw( const Transformation &parent, const Matrix &par
                             if (lod > 0.5 && pixradius > 2.5) {
                                 gun = mahnt->type->gun1;
                                 gun->setCurrentFrame( this->mounts[i].ComputeAnimatedFrame( gun ) );
-                                gun->Draw( lod, mat, d, cloak,
-                                           (_Universe->AccessCamera()->GetNebula() == this->nebula && this->nebula
-                                            != NULL) ? -1 : 0,
-                                           chardamage, true );                                                                                                                              //cloakign and nebula
+                                gun->Draw( lod, mat, d, cloak, 0,chardamage, true ); //cloaking
                             }
                         }
                     }
@@ -563,7 +548,7 @@ void GameUnit< UnitType >::Draw( const Transformation &parent, const Matrix &par
         Vector Scale( 1, 1, 1 );         //Now, HaloSystem handles that
         //WARNING: cmas is not a valid maximum speed for the upcoming multi-direction thrusters,
         //nor is maxaccel. Instead, each halo should have its own limits specified in units.csv
-        float nebd = (_Universe->AccessCamera()->GetNebula() == this->nebula && this->nebula != NULL) ? -1 : 0;
+        float nebd = 0;
         float hulld = this->GetHull() > 0 ? damagelevel : 1.0;
         phalos->Draw( wmat, Scale, cloak, nebd, hulld, velocity, linaccel, angaccel, maxaccel, cmas, this->faction );
     }
@@ -739,9 +724,6 @@ template class GameUnit< Unit >;
 
  #include "cmd/missile_generic.h"
 template class GameUnit< Missile >;
-
- #include "cmd/nebula.h"
-template class GameUnit< Nebula >;
 
  #include "cmd/enhancement.h"
 template class GameUnit< Enhancement >;

@@ -383,17 +383,7 @@ void drawlistitem( int type,
             else
                 NavigationSystem::DrawCircle( x, y, size, highlighted_untail_col );
         }
-    } else if (type == navnebula) {
-        if (!inmouserange) {
-            NavigationSystem::DrawCircle( x, y, size, unhighlighted_nebula_col );
-            drawdescription( source, x, y, 1.0, 1.0, false, screenoccupation, unhighlighted_nebula_text );
-        } else {
-            if (currentistail)
-                NavigationSystem::DrawCircle( x, y, size, highlighted_tail_col );
-            else
-                NavigationSystem::DrawCircle( x, y, size, highlighted_untail_col );
-        }
-    } else if (type == navjump) {
+   } else if (type == navjump) {
         if (!inmouserange) {
             NavigationSystem::DrawJump( x, y, size, unhighlighted_jump_col );
             drawdescription( source, x, y, 1.0, 1.0, false, screenoccupation, unhighlighted_jump_text );

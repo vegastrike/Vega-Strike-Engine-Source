@@ -425,9 +425,6 @@ inline void DrawDockingBoxes( Unit *un, const Unit *target, const Vector &CamP, 
 
 void GameCockpit::DrawTargetBoxes(const Radar::Sensor& sensor)
 {
-    if (sensor.InsideNebula())
-        return;
-
     StarSystem     *ssystem  = _Universe->activeStarSystem();
     UnitCollection *unitlist = &ssystem->getUnitList();
     //UnitCollection::UnitIterator *uiter=unitlist->createIterator();
@@ -515,8 +512,6 @@ inline void DrawITTSMark( float Size, QVector p, QVector q, QVector aimLoc, GFXC
 
 void GameCockpit::DrawTargetBox(const Radar::Sensor& sensor)
 {
-    if (sensor.InsideNebula())
-        return;
     Unit *player = sensor.GetPlayer();
     assert(player);
     Unit *target = player->Target();
@@ -684,10 +679,6 @@ void GameCockpit::DrawCommunicatingBoxes()
 
 void GameCockpit::DrawTurretTargetBoxes(const Radar::Sensor& sensor)
 {
-    if (sensor.InsideNebula())
-        return;
-
-
     GFXDisable( TEXTURE0 );
     GFXDisable( TEXTURE1 );
     GFXDisable( DEPTHTEST );

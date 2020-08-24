@@ -190,7 +190,6 @@ SET(LIBCMD_SOURCES
     src/cmd/csv.cpp
     src/cmd/missile_generic.cpp
     src/cmd/mount.cpp
-    src/cmd/nebula_generic.cpp
     src/cmd/planet_generic.cpp
     src/cmd/role_bitmask.cpp
     src/cmd/unit_collide.cpp
@@ -455,7 +454,6 @@ SET(VEGASTRIKE_SOURCES
     src/cmd/click_list.cpp
     src/cmd/cont_terrain.cpp
     src/cmd/music.cpp
-    src/cmd/nebula.cpp
     src/cmd/planet.cpp
     src/cmd/script/c_alike/c_alike.tab.cpp
     src/cmd/script/c_alike/lex.yy.cpp

@@ -368,7 +368,7 @@ bool Beam::Collide( Unit *target, Unit *firer, Unit *superunit )
     QVector direction( this->direction.Cast() );
     QVector end( center+direction.Scale( curlength ) );
     enum clsptr type = target->isUnit();
-    if (target == owner || type == NEBULAPTR || type == ASTEROIDPTR) {
+    if (target == owner || type == ASTEROIDPTR) {
         static bool collideroids =
             XMLSupport::parse_bool( vs_config->getVariable( "physics", "AsteroidWeaponCollision", "false" ) );
         if ( type != ASTEROIDPTR || (!collideroids) )

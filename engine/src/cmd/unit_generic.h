@@ -78,7 +78,6 @@ class UnitCollection;
 class Order;
 class Beam;
 class Animation;
-class Nebula;
 class Animation;
 class VSSprite;
 class Box;
@@ -97,7 +96,6 @@ enum clsptr
     UNITPTR,
     PLANETPTR,
     BUILDINGPTR,
-    NEBULAPTR,
     ASTEROIDPTR,
     ENHANCEMENTPTR,
     MISSILEPTR
@@ -458,7 +456,6 @@ public:
 protected:
     unsigned char attack_preference;
     unsigned char unit_role;
-    Nebula *nebula;
 //The orbit needs to have access to the velocity directly to disobey physics laws to precalculate orbits
     friend class PlanetaryOrbit;
     friend class ContinuousTerrain;
@@ -469,11 +466,7 @@ protected:
 public:
 //Have to pass the randnum and degrees in networking and client side since they must not be random in that case
     void DamageRandSys( float dam, const Vector &vec, float randum = 1, float degrees = 1 );
-    void SetNebula( Nebula* );
-    inline Nebula * GetNebula() const
-    {
-        return nebula;
-    }
+
 //Should draw selection box?
 //Process all meshes to be deleted
     static void ProcessDeleteQueue();

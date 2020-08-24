@@ -71,7 +71,7 @@ string getUnitNameAndFgNoBase( Unit *target )
             static bool confignums =
                 XMLSupport::parse_bool( vs_config->getVariable( "graphics", "hud", "print_fg_sub_id", "false" ) );
             string fgname;
-            if (fg->name != "Base" && fg->name != "Asteroid" && fg->name != "Nebula") {
+            if (fg->name != "Base" && fg->name != "Asteroid") {
                 static bool printfgname   =
                     XMLSupport::parse_bool( vs_config->getVariable( "graphics", "hud", "print_fg_name", "true" ) );
                 static bool printshiptype =
@@ -769,7 +769,7 @@ void VDU::DrawTarget( GameCockpit *cp, Unit *parent, Unit *target )
     GFXColor     tpbg = tp->bgcol;
     bool automatte    = (0 == tpbg.a);
     if (automatte) tp->bgcol = GFXColor( 0, 0, 0, background_alpha );
-    tp->Draw( MangleString( unitandfg, _Universe->AccessCamera()->GetNebula() != NULL ? .4 : 0 ), 0, true, false, automatte );
+    tp->Draw( MangleString( unitandfg, 0 ), 0, true, false, automatte );
     tp->bgcol = tpbg;
     static float auto_message_lim = XMLSupport::parse_float( vs_config->getVariable( "graphics", "auto_message_time_lim", "5" ) );
     float delautotime = UniverseUtil::GetGameTime()-cp->autoMessageTime;
@@ -800,7 +800,7 @@ void VDU::DrawTarget( GameCockpit *cp, Unit *parent, Unit *target )
         GFXColor     tpbg = tp->bgcol;
         bool automatte    = (0 == tpbg.a);
         if (automatte) tp->bgcol = GFXColor( 0, 0, 0, background_alpha );
-        tp->Draw( MangleString( newst, _Universe->AccessCamera()->GetNebula() != NULL ? .4 : 0 ), 0, true, false, automatte );
+        tp->Draw( MangleString( newst, 0 ), 0, true, false, automatte );
         tp->bgcol = tpbg;
         static float ishieldcolor[4]    = {.4, .4, 1, 1};
         static float mshieldcolor[4]    = {.4, .4, 1, 1};
@@ -830,11 +830,10 @@ void VDU::DrawTarget( GameCockpit *cp, Unit *parent, Unit *target )
         bool automatte    = (0 == tpbg.a);
         if (automatte) tp->bgcol = GFXColor( 0, 0, 0, background_alpha );
         if (draw_auto_message)
-            tp->Draw( MangleString( std::string( "\n" )+cp->autoMessage, _Universe->AccessCamera()->GetNebula()
-                                    != NULL ? .4 : 0 ), 0, true, false, automatte );
+            tp->Draw( MangleString( std::string( "\n" )+cp->autoMessage, 0 ), 0, true, false, automatte );
         else
             tp->Draw( MangleString( "\n[OutOfRange]",
-                                    _Universe->AccessCamera()->GetNebula() != NULL ? .4 : 0 ), 0, true, false, automatte );
+                                    0 ), 0, true, false, automatte );
         tp->bgcol = tpbg;
     }
 }
@@ -929,14 +928,12 @@ void VDU::DrawMessages( GameCockpit *parentcp, Unit *target )
     GFXColor tpbg = tp->bgcol;
     bool     automatte = (0 == tpbg.a);
     if (automatte) tp->bgcol = GFXColor( 0, 0, 0, background_alpha );
-    tp->Draw( message_prefix+MangleString( fullstr,
-                                           _Universe->AccessCamera()->GetNebula() != NULL ? .4 : 0 ), 0, true, false, automatte );
+    tp->Draw( message_prefix+MangleString( fullstr, 0 ), 0, true, false, automatte );
     tp->bgcol = tpbg;
 }
 
 void VDU::DrawScanningMessage()
 {
-    //tp->Draw(MangleString ("Scanning target...",_Universe->AccessCamera()->GetNebula()!=NULL?.4:0),0,true);
 }
 
 bool VDU::SetCommAnimation( Animation *ani, Unit *un, bool force )
@@ -1004,8 +1001,7 @@ void VDU::DrawNav( GameCockpit *cp, Unit *you, Unit *targ, const Vector &nav )
     GFXColor     tpbg = tp->bgcol;
     bool automatte    = (0 == tpbg.a);
     if (automatte) tp->bgcol = GFXColor( 0, 0, 0, background_alpha );
-    tp->Draw( MangleString( navdata+( draw_auto_message ? msg : std::string() ), _Universe->AccessCamera()->GetNebula()
-                            != NULL ? .4 : 0 ), scrolloffset, true, true, automatte );
+    tp->Draw( MangleString( navdata+( draw_auto_message ? msg : std::string() ), 0 ), scrolloffset, true, true, automatte );
     tp->bgcol = tpbg;
 }
 
@@ -1044,8 +1040,7 @@ void VDU::DrawComm()
         if (automatte) tp->bgcol = GFXColor( 0, 0, 0, background_alpha );
         tp->Draw( message_prefix
                   +MangleString( _Universe->AccessCockpit()->communication_choices.c_str(),
-                                 _Universe->AccessCamera()->GetNebula()
-                                 != NULL ? .4 : 0 ), scrolloffset, true, false, automatte );
+                                 0 ), scrolloffset, true, false, automatte );
         tp->bgcol = tpbg;
     }
 }
@@ -1107,8 +1102,7 @@ void VDU::DrawManifest( Unit *parent, Unit *target )
     GFXColor     tpbg = tp->bgcol;
     bool automatte    = (0 == tpbg.a);
     if (automatte) tp->bgcol = GFXColor( 0, 0, 0, background_alpha );
-    tp->Draw( MangleString( retval,
-                            _Universe->AccessCamera()->GetNebula() != NULL ? .4 : 0 ), scrolloffset, true, false, automatte );
+    tp->Draw( MangleString( retval, 0 ), scrolloffset, true, false, automatte );
     tp->bgcol = tpbg;
 }
 
@@ -1250,7 +1244,7 @@ void VDU::DrawDamage( Unit *parent )
     parent->Threat();
     std::string fullname( getUnitNameAndFgNoBase( parent ) );
     //sprintf (st,"%s\nHull: %.3f",blah.c_str(),parent->GetHull());
-    //tp->Draw (MangleString (st,_Universe->AccessCamera()->GetNebula()!=NULL?.5:0),0,true);
+    //tp->Draw (MangleString (st,0),0,true);
     char ecmstatus[256];
     ecmstatus[0] = '\0';
     static bool print_ecm = XMLSupport::parse_bool( vs_config->getVariable( "graphics", "print_ecm_status", "true" ) );
@@ -1386,8 +1380,7 @@ void VDU::DrawDamage( Unit *parent )
     bool automatte    = (0 == tpbg.a);
     if (automatte)
         tp->bgcol = GFXColor( 0, 0, 0, background_alpha );
-    tp->Draw( MangleString( retval,
-                            _Universe->AccessCamera()->GetNebula() != NULL ? .4 : 0 ), scrolloffset, true, false, automatte );
+    tp->Draw( MangleString( retval, 0 ), scrolloffset, true, false, automatte );
     tp->bgcol = tpbg;
     //*******************************************************
 }
@@ -1439,7 +1432,7 @@ void VDU::DrawStarSystemAgain( float x, float y, float w, float h, VIEWSTYLE vie
     GFXColor     tpbg = tp->bgcol;
     bool automatte    = (0 == tpbg.a);
     if (automatte) tp->bgcol = GFXColor( 0, 0, 0, background_alpha );
-    tp->Draw( MangleString( buf, _Universe->AccessCamera()->GetNebula() != NULL ? .4 : 0 ), 0, true, false, automatte );
+    tp->Draw( MangleString( buf, 0 ), 0, true, false, automatte );
     tp->bgcol = tpbg;
     if (inrange) {
         int  i = 0;
@@ -1453,7 +1446,7 @@ void VDU::DrawStarSystemAgain( float x, float y, float w, float h, VIEWSTYLE vie
         GFXColor tpbg = tp->bgcol;
         bool     automatte = (0 == tpbg.a);
         if (automatte) tp->bgcol = GFXColor( 0, 0, 0, background_alpha );
-        tp->Draw( MangleString( st, _Universe->AccessCamera()->GetNebula() != NULL ? .4 : 0 ), 0, true, false, automatte );
+        tp->Draw( MangleString( st, 0 ), 0, true, false, automatte );
         tp->bgcol = tpbg;
         GFXColor4f( .4, .4, 1, 1 );
         GetPosition( x, y );
@@ -1490,8 +1483,7 @@ void VDU::DrawStarSystemAgain( float x, float y, float w, float h, VIEWSTYLE vie
         GFXColor     tpbg = tp->bgcol;
         bool automatte    = (0 == tpbg.a);
         if (automatte) tp->bgcol = GFXColor( 0, 0, 0, background_alpha );
-        tp->Draw( MangleString( "\n[OutOfRange]",
-                                _Universe->AccessCamera()->GetNebula() != NULL ? .4 : 0 ), 0, true, false, automatte );
+        tp->Draw( MangleString( "\n[OutOfRange]", 0 ), 0, true, false, automatte );
         tp->bgcol = tpbg;
     }
     //_Universe->AccessCockpit()->RestoreViewPort();
@@ -1741,8 +1733,7 @@ void VDU::DrawWebcam( Unit *parent )
     int   length;
     char *netcam;
 
-    tp->Draw( MangleString( "No webcam to view",
-                                _Universe->AccessCamera()->GetNebula() != NULL ? .4 : 0 ), scrolloffset, true );
+    tp->Draw( MangleString( "No webcam to view", 0 ), scrolloffset, true );
 
 }
 

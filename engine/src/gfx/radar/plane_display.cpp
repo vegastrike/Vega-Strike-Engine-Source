@@ -398,21 +398,14 @@ void PlaneDisplay::DrawTrack(const Sensor& sensor,
     // FIXME: Integrate radar into damage/repair system
     // FIXME: Jitter does not work when entering a nebula
     // FIXME: Jitter does not work close by
-    if (sensor.InsideNebula())
+    const bool isEcmActive = track.HasActiveECM();
+    if (isEcmActive)
     {
-        Jitter(0.0, 0.01, scaledPosition);
+        const float errorOffset = (scaledPosition.x > 0.0 ? 0.01 : -0.01);
+        const float errorRange = 0.03;
+        Jitter(errorOffset, errorRange, scaledPosition);
     }
-    else
-    {
-        const bool isNebula = (track.GetType() == Track::Type::Nebula);
-        const bool isEcmActive = track.HasActiveECM();
-        if (isNebula || isEcmActive)
-        {
-            const float errorOffset = (scaledPosition.x > 0.0 ? 0.01 : -0.01);
-            const float errorRange = 0.03;
-            Jitter(errorOffset, errorRange, scaledPosition);
-        }
-    }
+
 
     Vector head = Projection(radarView, scaledPosition);
 

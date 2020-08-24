@@ -21,7 +21,6 @@
 
 #include "unit_factory.h"
 #include "unit.h"
-#include "nebula.h"
 #include "missile.h"
 #include "enhancement.h"
 #include "planet.h"
@@ -80,20 +79,7 @@ Unit* UnitFactory::createUnit( vector< Mesh* > &meshes, bool Subunit, int factio
                                   faction );
 }
 
-Nebula* UnitFactory::createNebula( const char *unitfile,
-                                   bool SubU,
-                                   int faction,
-                                   Flightgroup *fg,
-                                   int fg_snumber )
-{
-    Nebula *neb = new GameNebula( unitfile,
-                                  SubU,
-                                  faction,
-                                  fg,
-                                  fg_snumber );
 
-    return neb;
-}
 
 Missile* UnitFactory::createMissile( const char *filename,
                                      int faction,

@@ -4,7 +4,6 @@
 #include "planet_generic.h"
 #include "asteroid_generic.h"
 #include "missile_generic.h"
-#include "nebula_generic.h"
 
 Unit*UnitFactory::_masterPartList = NULL;
 Unit* UnitFactory::getMasterPartList()

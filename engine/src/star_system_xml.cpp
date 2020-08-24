@@ -12,7 +12,6 @@
 #include "cmd/building_generic.h"
 #include "cmd/ai/aggressive.h"
 #include "cmd/ai/fire.h"
-#include "cmd/nebula_generic.h"
 #include "cmd/asteroid_generic.h"
 #include "cmd/enhancement_generic.h"
 #include "cmd/script/flightgroup.h"
@@ -111,7 +110,6 @@ enum Names
     BUILDING,
     VEHICLE,
     ATMOSPHERE,
-    NEBULA,
     NEBFILE,
     ASTEROID,
     SCALEX,
@@ -169,7 +167,6 @@ const EnumMap::Pair element_names[] = {
     EnumMap::Pair( "Building",          BUILDING ),
     EnumMap::Pair( "Vehicle",           VEHICLE ),
     EnumMap::Pair( "Atmosphere",        ATMOSPHERE ),
-    EnumMap::Pair( "Nebula",            NEBULA ),
     EnumMap::Pair( "Asteroid",          ASTEROID ),
     EnumMap::Pair( "RING",              RING ),
     EnumMap::Pair( "citylights",        CITYLIGHTS ),
@@ -1241,7 +1238,6 @@ addlightprop:
     case UNIT:
     case BUILDING:
     case VEHICLE:
-    case NEBULA:
     case ASTEROID:
     case ENHANCEMENT:
         assert( xml->unitlevel > 0 );
@@ -1336,7 +1332,7 @@ addlightprop:
         if ( ( !xml->conditionStack.size() || xml->conditionStack.back() )
             && ConfigAllows( varname, varvalue )
             && ConfigCondition( condition ) ) {
-            if ( ( (elem == UNIT || elem == NEBULA || elem == ENHANCEMENT
+            if ( ( (elem == UNIT || elem == ENHANCEMENT
                     || elem == ASTEROID) || (xml->ct == NULL && xml->parentterrain == NULL) ) && (xml->unitlevel > 2) ) {
                 assert( xml->moons.size() != 0 );
                 Unit   *un = NULL; //FIXME !!! un appears to never be allocated memory !!! "= NULL" added by chuck_starchaser
@@ -1345,9 +1341,6 @@ addlightprop:
                     Flightgroup *fg = getStaticBaseFlightgroup( faction );
                     plan->AddSatellite( un = UnitFactory::createUnit( filename.c_str(), false, faction, "", fg, fg->nr_ships-1 ) );
                     un->setFullname( fullname ); //FIXME un de-referenced before allocation
-                } else if (elem == NEBULA) {
-                    Flightgroup *fg = getStaticNebulaFlightgroup( faction );
-                    plan->AddSatellite( un = UnitFactory::createNebula( filename.c_str(), false, faction, fg, fg->nr_ships-1 ) );
                 } else if (elem == ASTEROID) {
                     Flightgroup *fg = getStaticAsteroidFlightgroup( faction );
                     plan->AddSatellite( un =
@@ -1402,9 +1395,6 @@ addlightprop:
                         Unit *moon_unit = UnitFactory::createUnit( filename.c_str(), false, faction, "", fg, fg->nr_ships-1 );
                         moon_unit->setFullname( fullname );
                         xml->moons.push_back( (Planet*) moon_unit );
-                    } else if (elem == NEBULA) {
-                        Flightgroup *fg = getStaticNebulaFlightgroup( faction );
-                        xml->moons.push_back( (Planet*) UnitFactory::createNebula( filename.c_str(), false, faction, fg, fg->nr_ships-1 ) );
                     } else if (elem == ASTEROID) {
                         Flightgroup *fg = getStaticAsteroidFlightgroup( faction );
                         Planet *ast;

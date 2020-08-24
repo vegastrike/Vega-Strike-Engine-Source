@@ -18,7 +18,6 @@
 #include "lin_time.h"
 #include "configxml.h"
 #include "vs_globals.h"
-#include "cmd/nebula_generic.h"
 #include "gfx/camera.h"
 #include "gfx/animation.h"
 #include "gfx/technique.h"
@@ -479,9 +478,6 @@ void Mesh::DrawNow( float lod, bool centered, const Matrix &m, int cloak, float 
     Mesh *o = getLOD( lod );
     //fixme: cloaking not delt with.... not needed for backgroudn anyway
     if (nebdist < 0) {
-        Nebula *t = _Universe->AccessCamera()->GetNebula();
-        if (t)
-            t->SetFogState();
     } else {
         GFXFogMode( FOG_OFF );
     }
@@ -707,9 +703,6 @@ static void RestoreCloakState( char cloaked, bool envMap, unsigned char damage )
 static void SetupFogState( char cloaked )
 {
     if (cloaked&MeshDrawContext::FOG) {
-        Nebula *t = _Universe->AccessCamera()->GetNebula();
-        if (t)
-            t->SetFogState();
     } else {
         GFXFogMode( FOG_OFF );
     }

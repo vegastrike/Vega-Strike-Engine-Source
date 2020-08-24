@@ -139,20 +139,13 @@ void SphereDisplay::DrawTrack(const Sensor& sensor,
     }
 
     // FIXME: Jitter only on boundary, not in center
-    if (sensor.InsideNebula())
+    const bool isEcmActive = track.HasActiveECM();
+    if (isEcmActive)
     {
-        Jitter(0.02, 0.04, position);
+        float error = 0.02 * TRACK_SIZE;
+        Jitter(error, error, position);
     }
-    else
-    {
-        const bool isNebula = (track.GetType() == Track::Type::Nebula);
-        const bool isEcmActive = track.HasActiveECM();
-        if (isNebula || isEcmActive)
-        {
-            float error = 0.02 * TRACK_SIZE;
-            Jitter(error, error, position);
-        }
-    }
+
 
     // The magnitude is used to calculate the unit vector. With subtle scaling
     // of the magnitude we generate a unit vector whose length will vary from

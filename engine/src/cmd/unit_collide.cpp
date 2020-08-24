@@ -252,16 +252,9 @@ bool Unit::Collide( Unit *target )
         return false;
     clsptr targetisUnit = target->isUnit();
     clsptr thisisUnit   = this->isUnit();
-    static float NEBULA_SPACE_DRAG = XMLSupport::parse_float( vs_config->getVariable( "physics", "nebula_space_drag", "0.01" ) );
-    if (targetisUnit == NEBULAPTR)
-        //why? why not?
-        this->Velocity *= (1-NEBULA_SPACE_DRAG);
-    if ( target == this
-        || ( (targetisUnit != NEBULAPTR
-              && thisisUnit != NEBULAPTR)
-            && ( owner == target || target->owner == this
-                || (owner != NULL
-                    && target->owner == owner) ) ))
+    if(target == this || ( owner == target || target->owner == this
+                || (owner != nullptr
+                    && target->owner == owner) ))
         return false;
     if (targetisUnit == ASTEROIDPTR && thisisUnit == ASTEROIDPTR)
         return false;

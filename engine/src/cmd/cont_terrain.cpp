@@ -220,7 +220,7 @@ void ContinuousTerrain::Draw()
                                            md[i].mesh->rSize()
                                          );
             if (d)
-                md[i].mesh->Draw( 1000, md[i].mat, d, -1, (_Universe->AccessCamera()->GetNebula() != NULL) ? -1 : 0 );
+                md[i].mesh->Draw( 1000, md[i].mat, d, -1, 0 );
         }
     }
 }

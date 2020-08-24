@@ -209,7 +209,7 @@ enum callback_module_unit_type
     CMT_UNIT_getSaveData,     //gets saved data for this unit
     CMT_UNIT_addCredits,
     CMT_UNIT_launch,
-    CMT_UNIT_launchNebula,
+    CMT_UNIT_launchNebula, // TODO: candidate for deletion
     CMT_UNIT_launchPlanet,
     CMT_UNIT_launchJumppoint,
     CMT_UNIT_getPosition,

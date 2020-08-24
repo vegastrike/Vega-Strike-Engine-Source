@@ -23,7 +23,6 @@ public:
         enum Value
         {
             Unknown,
-            Nebula,
             Star,
             Planet,
             DeadPlanet,

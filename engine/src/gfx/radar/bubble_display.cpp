@@ -225,10 +225,6 @@ void BubbleDisplay::DrawTrack(const Sensor& sensor,
         magnitude /= (1.0 - scaleFactor);
     }
 
-    if (sensor.InsideNebula())
-    {
-        magnitude /= (1.0 - 0.04 * Jitter(0.0, 1.0));
-    }
     Vector scaledPosition = sphereZoom * Vector(-position.x, position.y, position.z) / magnitude;
 
     Vector head = radarView.Scale(scaledPosition);
@@ -262,9 +258,8 @@ void BubbleDisplay::DrawTrack(const Sensor& sensor,
         DrawTargetMarker(head, headColor, trackSize);
     }
 
-    const bool isNebula = (track.GetType() == Track::Type::Nebula);
     const bool isEcmActive = track.HasActiveECM();
-    if (isNebula || isEcmActive)
+    if (isEcmActive)
     {
         // Vary size between 50% and 150%
         trackSize *= Jitter(0.5, 1.0);

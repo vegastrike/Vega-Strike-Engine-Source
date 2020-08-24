@@ -146,7 +146,7 @@ bool Bolt::Collide( Unit *target )
         //ignore return
         if (target == owner) return false;
         enum clsptr type = target->isUnit();
-        if (type == NEBULAPTR || type == ASTEROIDPTR) {
+        if (type == ASTEROIDPTR) {
             static bool collideroids =
                 XMLSupport::parse_bool( vs_config->getVariable( "physics", "AsteroidWeaponCollision", "false" ) );
             if ( type != ASTEROIDPTR || (!collideroids) )

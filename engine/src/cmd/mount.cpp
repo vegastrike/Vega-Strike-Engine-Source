@@ -474,3 +474,13 @@ void Mount::ReplaceSound()
 {
     sound = AUDCreateSound( sound, false );     //copy constructor basically
 }
+
+void Mount::SetMountPosition( const Vector &v )
+{
+    pos = v;
+}
+
+void Mount::SetMountOrientation( const Quaternion &t )
+{
+    orient = t;
+}

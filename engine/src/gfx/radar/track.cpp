@@ -117,8 +117,6 @@ Track::Type::Value Track::IdentifyType() const
 
     switch (target->isUnit())
     {
-    case NEBULAPTR:
-        return Type::Nebula;
 
     case PLANETPTR:
         {

@@ -870,7 +870,7 @@ void Mission::initCallbackMaps()
     module_unit_map["getPlayer"]                = CMT_UNIT_getPlayer;
     module_unit_map["getPlayerX"]               = CMT_UNIT_getPlayerX;
     module_unit_map["launch"]                   = CMT_UNIT_launch;
-    module_unit_map["launchNebula"]             = CMT_UNIT_launchPlanet;
+    module_unit_map["launchNebula"]             = CMT_UNIT_launchPlanet; // Bug???
     module_unit_map["launchPlanet"]             = CMT_UNIT_launchNebula;
     module_unit_map["launchJumppoint"]          = CMT_UNIT_launchJumppoint;
     module_unit_map["getPosition"]              = CMT_UNIT_getPosition;
