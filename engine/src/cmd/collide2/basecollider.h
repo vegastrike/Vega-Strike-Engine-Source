@@ -1,3 +1,25 @@
+/**
+ * basecollider.h
+ *
+ * Copyright (C) 2020 Stephen G Tuggy and other Vega Strike contributors
+ *
+ * This file is part of Vega Strike.
+ *
+ * Vega Strike is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Vega Strike is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
+
 #ifndef _BASECOLLIDER_H__
 #define _BASECOLLIDER_H__
 
@@ -12,9 +34,17 @@
  */
 struct csCollisionPair
 {
-  Opcode::Point a1, b1, c1;	// First triangle
-  Opcode::Point a2, b2, c2;	// Second triangle
+    csCollisionPair()
+        : a1(0.0f, 0.0f, 0.0f),
+          b1(0.0f, 0.0f, 0.0f),
+          c1(0.0f, 0.0f, 0.0f),
+          a2(0.0f, 0.0f, 0.0f),
+          b2(0.0f, 0.0f, 0.0f),
+          c2(0.0f, 0.0f, 0.0f)
+          { }
+    Opcode::Point a1, b1, c1;   // First triangle
+    Opcode::Point a2, b2, c2;   // Second triangle
 };
 
-#endif 
+#endif
 

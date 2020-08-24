@@ -6,6 +6,8 @@
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+#pragma once
+
 //chuck starchaser shutting up the warnings about violations of strict aliasing...
 #ifndef _WIN32 // pheonixstorm shutting up pragma warnings on win32
 #pragma GCC diagnostic ignored "-Wstrict-aliasing"
@@ -17,7 +19,9 @@
 //also
 //    assert( (dword&)float(0.0f) == (dword&)int(0) ) must pass or this library will blow on your face
 
+#include <memory>
 #include "opcodetypes.h"
 #include "opcodesysdef.h"
 #include "Opcode.h"
+#include "vs_collections.hpp"
 
