@@ -19,28 +19,48 @@ using pt::ptree;
 
 
 class GameConfig
-{ 
+{
 private:
     static std::map<string, string> variables;
-    static string _GetVariable(string const &section, string const &name);
-
+    static string DEFAULT_ERROR_VALUE;
+    static inline string _GetVariable(string const &section, string const &name)
+    {
+        string const key = section + "." + name;
+        if (variables.count(key))
+            return variables[key];
+        return DEFAULT_ERROR_VALUE;
+    }
 public:
     static void LoadGameConfig(const string &filename);
     template <class T>
-    static T GetVariable(string const &section, string const &name, T default_value) = delete;
+    static inline T GetVariable(string const &section, string const &name, T default_value) = delete;
 };
 
 
 
 
+template <>
+inline float GameConfig::GetVariable(string const &section, string const &name, float default_value)
+{
+    string result = _GetVariable(section, name);
+    if(result == DEFAULT_ERROR_VALUE) return default_value;
+    return std::stof(result);
+}
 
 template <>
-float GameConfig::GetVariable(string const &section, string const &name, float default_value);
+inline double GameConfig::GetVariable(string const &section, string const &name, double default_value)
+{
+    string result = _GetVariable(section, name);
+    if(result == DEFAULT_ERROR_VALUE) return default_value;
+    return std::stod(result);
+}
 
 template <>
-double GameConfig::GetVariable(string const &section, string const &name, double default_value);
-
-template <>
-int GameConfig::GetVariable(string const &section, string const &name, int default_value);
+inline int GameConfig::GetVariable(string const &section, string const &name, int default_value)
+{
+    string result = _GetVariable(section, name);
+    if(result == DEFAULT_ERROR_VALUE) return default_value;
+    return std::stoi(result);
+}
 
 #endif // GAME_CONFIG_H
