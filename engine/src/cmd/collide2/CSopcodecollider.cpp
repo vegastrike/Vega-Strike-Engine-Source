@@ -23,6 +23,13 @@
 *                  ported to VS from CS by Ed Sweetman
 -------------------------------------------------------------------------
 */
+
+/*
+ * Copyright (C) 2020 pyramid3d
+ * Copyright (C) 2020 Stephen G. Tuggy
+ */
+
+
 #include "CSopcodecollider.h"
 #include "opcodeqsqrt.h"
 #include "opcodeqint.h"
@@ -47,7 +54,7 @@ csOPCODECollider::csOPCODECollider (const std::vector <mesh_polygon> &polygons)
 	GeometryInitialize (polygons);
     CollisionFace collFace;
     rCollider.SetFirstContact(true);
-    
+
 }
 
 
@@ -69,13 +76,13 @@ void csOPCODECollider::GeometryInitialize (const std::vector <mesh_polygon> &pol
 		m_pCollisionModel = new Opcode::Model;
 		if (!m_pCollisionModel)
 			return;
-			
+
 		vertholder = new Point [vert_count];
 
 		csBox3 tmp;
 		tmp.StartBoundingBox ();
 		unsigned int last = 0;
-		
+
 		/* Copies the Vector's in mesh_polygon to Point's in vertholder.
 		* This sucks but i dont see anyway around it */
 		for (std::vector<mesh_polygon>::size_type i = 0; i < polygons.size(); ++i) {
@@ -93,7 +100,7 @@ void csOPCODECollider::GeometryInitialize (const std::vector <mesh_polygon> &pol
 		// Mesh data
 		OPCC.mIMesh = &opcMeshInt;
 		OPCC.mSettings.mRules = SPLIT_SPLATTER_POINTS | SPLIT_GEOM_CENTER;
-		/* NoLeaf and quantized creates an optimized, both in organization and 
+		/* NoLeaf and quantized creates an optimized, both in organization and
 		* memory overhead, tree.*/
 		OPCC.mNoLeaf = true;
 		OPCC.mQuantized = true;
@@ -144,7 +151,7 @@ bool csOPCODECollider::rayCollide(const Ray &boltbeam, Vector&norm, float&distan
             distance=collFace.mDistance;
 #ifdef VS_DEBUG
             printf("Opcode actually reported a hit at %f meters!\n",distance);
-#endif            
+#endif
         } else {
             return true;//FIXME: buggy! this should return FALSE but the math is obviously broken with opcode, so opcode is rarely telling us about intersections
         }
@@ -235,7 +242,7 @@ void csOPCODECollider::ResetCollisionPairs()
 	pairs.SetLength(0);
 }
 
-csCollisionPair* csOPCODECollider::GetCollisions() 
+csCollisionPair* csOPCODECollider::GetCollisions()
 {
 	return(pairs.GetArray());
 }
@@ -276,7 +283,7 @@ void csOPCODECollider::CopyCollisionPairs(csOPCODECollider* col1,
 	int j;
 	size_t oldlen = pairs.Length ();
 	pairs.SetLength (oldlen + N_pairs);
-	
+
 	for (unsigned int i = 0 ; i < N_pairs ; ++i) {
 		j = 3 * colPairs[i].id0;
 		pairs[oldlen].a1 = vertholder0[j];

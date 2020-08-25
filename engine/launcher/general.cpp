@@ -4,6 +4,8 @@
  *                           begin                : December 28, 2001
  *                           copyright            : (C) 2001 by David Ranger
  *                           email                : ussreliant@users.sourceforge.net
+ *                           copyright            : (C) 2020 pyramid3d
+ *                           copyright            : (C) 2020 Stephen G. Tuggy
  **************************************************************************/
 
 /***************************************************************************
@@ -15,11 +17,11 @@
  *                                                                         *
  **************************************************************************/
 
-/* This include has been designed to act independant of the other modules. 
+/* This include has been designed to act independant of the other modules.
  * This allows it to be used with other programs with minimal changes */
 
 #include "general.h"
-#if defined(__APPLE__) || defined(MACOSX) 
+#if defined(__APPLE__) || defined(MACOSX)
 #include <sys/param.h> // For MAXPATHLEN
 #endif
 #ifdef __MINGW32__
@@ -135,7 +137,7 @@ char *replace(char *line, char *search, char *replace, int LENGTH) {
 		strncat(chr_new, replace, strlen(replace));
 		ptr_new = current + dif + strlen(search);
 		strncat(chr_new, ptr_new, strlen(ptr_new));
-		strcpy(current, chr_new); 
+		strcpy(current, chr_new);
 	}
 	strcpy(line, current);
 	delete [] chr_new;
@@ -186,7 +188,7 @@ char *StripExtension(char *filename) {
 	int length, cur;
 	char *last = filename;
 	length = strlen(filename) - 1;
-	if (length <= 0) { return "\0"; }
+	if (length <= 0) { return const_cast<char *>(""); }
 	for (cur = 0; cur <= length; cur++) {
 		if (filename[cur] == '.') { last = &filename[cur]; }
 	}
@@ -344,12 +346,16 @@ char *NewString(char *line) {
 
 #ifdef __cplusplus
 char *GetString(char *line) {
-        if (line == 0) { return '\0'; }
+        if (line == 0) {
+            return const_cast<char *>("");
+        }
         return line;
 }
 
 void SetString(char **ptr, char *line) {
-        if (*ptr > 0) { delete *ptr; }
+        if (*ptr != nullptr) {
+            delete *ptr;
+        }
         *ptr = strdup(line);
 }
 

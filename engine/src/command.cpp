@@ -1,3 +1,26 @@
+/**
+ * command.cpp
+ *
+ * Copyright (C) 2020 pyramid3d, Nachum Barcohen, Stephen G. Tuggy,
+ * and other Vega Strike contributors.
+ *
+ * This file is part of Vega Strike.
+ *
+ * Vega Strike is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Vega Strike is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
+
 #include "command.h"
 #include <Python.h>
 #include <pyerrors.h>
@@ -397,10 +420,13 @@ public:
     }
     void popProc( commandI *proc2use )
     {
-        for (vector< procs >::iterator iter = cmds.begin(); iter < cmds.end(); iter++) {
-            if (proc2use == ( *(iter) ).proc)
-                cmds.erase( iter );
-            ;
+        auto i = cmds.begin();
+        while (i != cmds.end()) {
+            if (proc2use == (*(i)).proc) {
+                i = cmds.erase(i);
+            } else {
+                ++i;
+            }
         }
         if (cmds.size() == 0) finishmeoff = true;
     }

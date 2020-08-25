@@ -1,3 +1,26 @@
+/**
+ * unit_util_generic.cpp
+ *
+ * Copyright (C) 2020 pyramid3d, Roy Falk, Stephen G. Tuggy,
+ * and other Vega Strike contributors.
+ *
+ * This file is part of Vega Strike.
+ *
+ * Vega Strike is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Vega Strike is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
+
 #include <string>
 #include "cmd/unit_generic.h"
 #include "cmd/unit_util.h"
@@ -835,17 +858,23 @@ float PercentOperational( Unit *un, std::string name, std::string category, bool
 
 void setMissionRelevant( Unit *un )
 {
-    if (un && mission->runtime.pymissions)
+    if (un && mission->runtime.pymissions) {
         mission->runtime.pymissions->relevant_units.push_back( new UnitContainer( un ) );
+    }
 }
 
 void unsetMissionRelevant( Unit *un )
 {
     if (un && mission->runtime.pymissions) {
         vector< UnitContainer* > *relevant = &mission->runtime.pymissions->relevant_units;
-        for (vector< UnitContainer* >::iterator ir = relevant->begin(), end = relevant->end(); ir != end; ++ir)
-            if (**ir == un)
-                relevant->erase(ir);
+        auto i = relevant->begin();
+        while (i != relevant->end()) {
+            if (**i == un) {
+                i = relevant->erase(i);
+            } else {
+                ++i;
+            }
+        }
     }
 }
 

@@ -4,6 +4,25 @@
  *	\file		IcePoint.h
  *	\author		Pierre Terdiman
  *	\date		April, 4, 2000
+ *
+ * Copyright (C) 2000 Pierre Terdiman
+ * Copyright (C) 2020 pyramid3d, LifWirser, Benjamen Meyer, Stephen G. Tuggy,
+ * and other Vega Strike contributors.
+ *
+ * This file is part of Vega Strike.
+ *
+ * Vega Strike is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Vega Strike is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -24,7 +43,22 @@
 
 	class ICEMATHS_API Point
 	{
-		public:
+    protected:
+        inline_ const float&    Vals(enum PointComponent pointComponent) const
+        {
+            switch (pointComponent) {
+                case _X:
+                    return x;
+                case _Y:
+                    return y;
+                case _Z:
+                    return z;
+                default:
+                    return x;   // ?
+            }
+        }
+
+    public:
 
 		//! Empty constructor
 		inline_					Point()														{}
@@ -343,30 +377,39 @@
 		//! Returns largest axis
 		inline_	PointComponent	LargestAxis()						const
 								{
-									const float* Vals = &x;
 									PointComponent m = _X;
-									if(Vals[_Y] > Vals[m]) m = _Y;
-									if(Vals[_Z] > Vals[m]) m = _Z;
+									if (Vals(_Y) > Vals(m)) {
+                                        m = _Y;
+                                    }
+									if (Vals(_Z) > Vals(m)) {
+                                        m = _Z;
+                                    }
 									return m;
 								}
 
 		//! Returns closest axis
 		inline_	PointComponent	ClosestAxis()						const
 								{
-									const float* Vals = &x;
 									PointComponent m = _X;
-									if(AIR(Vals[_Y]) > AIR(Vals[m])) m = _Y;
-									if(AIR(Vals[_Z]) > AIR(Vals[m])) m = _Z;
+									if (AIR(Vals(_Y)) > AIR(Vals(m))) {
+                                        m = _Y;
+                                    }
+									if (AIR(Vals(_Z)) > AIR(Vals(m))) {
+                                        m = _Z;
+                                    }
 									return m;
 								}
 
 		//! Returns smallest axis
 		inline_	PointComponent	SmallestAxis()						const
 								{
-									const float* Vals = &x;
 									PointComponent m = _X;
-									if(Vals[_Y] < Vals[m]) m = _Y;
-									if(Vals[_Z] < Vals[m]) m = _Z;
+									if (Vals(_Y) < Vals(m)) {
+                                        m = _Y;
+                                    }
+									if (Vals(_Z) < Vals(m)) {
+                                        m = _Z;
+                                    }
 									return m;
 								}
 

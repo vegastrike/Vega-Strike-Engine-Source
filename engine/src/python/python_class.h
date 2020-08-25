@@ -1,3 +1,26 @@
+/**
+ * python_class.h
+ *
+ * Copyright (C) 2020 pyramid3d, Nachum Barcohen, Stephen G. Tuggy,
+ * and other Vega Strike contributors.
+ *
+ * This file is part of Vega Strike.
+ *
+ * Vega Strike is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Vega Strike is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
+
 #ifndef __PYTHON_CLASS_H__
 #define __PYTHON_CLASS_H__
 //This takes care of the fact that several systems use the _POSIX_C_SOURCES
@@ -38,7 +61,7 @@
 /*
 These following #defines will create a module for python
 call them with:
-     
+
 PYTHON_BEGIN_MODULE(VS)
        PYTHON_BEGIN_INHERIT_CLASS(VS,FireAt,"PythonFire") //begins an inherited class with a virtual Execute function...
        //You can call any other virtual functions by defining:
@@ -67,7 +90,7 @@ int main (int argc,char *argv[]) {
        ...
        return 0;
 }
-     
+
 */
 
 
@@ -138,18 +161,18 @@ boost::python::class_builder <SuperClass, NewClass, boost::noncopyable > Class (
 #define PYTHON_END_CLASS(name,SuperClass) }
 
 
-template <class SuperClass> 
-class PythonClass:public SuperClass 
+template <class SuperClass>
+class PythonClass:public SuperClass
 {
  protected:
   PyObject * self;
-  virtual void Destructor() 
+  virtual void Destructor()
   {
     Py_XDECREF(self);
   }
  public:
   static PythonClass< SuperClass > * last_instance;
-  PythonClass (PyObject * self_):SuperClass() 
+  PythonClass (PyObject * self_):SuperClass()
   {
     self = self_;
     Py_XINCREF(self);
@@ -161,16 +184,16 @@ class PythonClass:public SuperClass
     last_instance=NULL;
     return myclass;
   }
-  virtual void callFunction (std::string str) 
+  virtual void callFunction (std::string str)
   {
     PYTHONCALLBACK(void, self, str.c_str());
   }
-  static PythonClass * Factory(const std::string &file) 
+  static PythonClass * Factory(const std::string &file)
   {
     CompileRunPython (file);
     return LastPythonClass();
   }
-  static PythonClass * FactoryString(char * code) 
+  static PythonClass * FactoryString(char * code)
   {
 	  Python::reseterrors();
 	  PyRun_SimpleString (code); //For some reason, PyRun_SimpleString() takes in a char *, not a const char *
@@ -183,91 +206,91 @@ class PythonClass:public SuperClass
   }
 };
 
-template <class SuperClass> 
-class PythonAI: public PythonClass <SuperClass> 
+template <class SuperClass>
+class PythonAI: public PythonClass <SuperClass>
 {
 public:
-  PythonAI (PyObject * self_):PythonClass<SuperClass>(self_) 
+  PythonAI (PyObject * self_):PythonClass<SuperClass>(self_)
   {
   }
-  virtual void Execute () 
+  virtual void Execute ()
   {
     PYTHONCALLBACK(void, this->self, "Execute");
   }
-  virtual void ChooseTarget () 
+  virtual void ChooseTarget ()
   {
     PYTHONCALLBACK(void, this->self, "ChooseTarget");
   }
-  virtual void SetParent (Unit * parent) 
+  virtual void SetParent (Unit * parent)
   {
     SuperClass::SetParent (parent);
     PYTHONCALLBACK2(void, this->self, "init", parent);
   }
-  static void default_Execute(SuperClass & self_) 
+  static void default_Execute(SuperClass & self_)
   {
     (self_).SuperClass::Execute();
   }
-  static void default_ChooseTarget(SuperClass & self_) 
+  static void default_ChooseTarget(SuperClass & self_)
   {
     (self_).SuperClass::ChooseTarget();
   }
-  static void default_SetParent (SuperClass &self_, Unit * parent) 
+  static void default_SetParent (SuperClass &self_, Unit * parent)
   {
   }
-  static PythonClass<SuperClass> * LastPythonClass () 
+  static PythonClass<SuperClass> * LastPythonClass ()
   {
-	  return PythonClass<SuperClass>::LastPythonClass();	  
+	  return PythonClass<SuperClass>::LastPythonClass();
   }
-  static PythonClass<SuperClass> * Factory (const std::string &file) 
+  static PythonClass<SuperClass> * Factory (const std::string &file)
   {
 	  return PythonClass<SuperClass>::Factory(file);
   }
-  static PythonClass<SuperClass> * FactoryString (char *code) 
+  static PythonClass<SuperClass> * FactoryString (char *code)
   {
 	  return PythonClass<SuperClass>::FactoryString(code);
   }
 };
 
-class pythonMission: public PythonClass <PythonMissionBaseClass> 
+class pythonMission: public PythonClass <PythonMissionBaseClass>
 {
 public:
-  pythonMission (PyObject * self_):PythonClass<PythonMissionBaseClass>(self_) 
+  pythonMission (PyObject * self_):PythonClass<PythonMissionBaseClass>(self_)
   {
   }
-  virtual void Execute () 
+  virtual void Execute ()
   {
     PYTHONCALLBACK(void, self, "Execute");
     Python::reseterrors();
   }
-  virtual std::string Pickle() 
+  virtual std::string Pickle()
   {
     Python::reseterrors();
     std::string ret=PYTHONCALLBACK(std::string, self, "Pickle");
     Python::reseterrors();
     return ret;
   }
-  virtual void UnPickle(std::string s)  
+  virtual void UnPickle(std::string s)
   {
     Python::reseterrors();
     PYTHONCALLBACK2(void, self, "UnPickle",s);
     Python::reseterrors();
   }
-  static void default_Execute(PythonMissionBaseClass & self_) 
+  static void default_Execute(PythonMissionBaseClass & self_)
   {
     (self_).PythonMissionBaseClass::Execute();
   }
-  static std::string default_Pickle(PythonMissionBaseClass & self_) 
+  static std::string default_Pickle(PythonMissionBaseClass & self_)
   {
     return (self_).PythonMissionBaseClass::Pickle();
   }
-  static void default_UnPickle(PythonMissionBaseClass & self_, std::string str) 
+  static void default_UnPickle(PythonMissionBaseClass & self_, std::string str)
   {
     (self_).PythonMissionBaseClass::UnPickle(str);
   }
-  static PythonClass<PythonMissionBaseClass> * Factory (const std::string &file) 
+  static PythonClass<PythonMissionBaseClass> * Factory (const std::string &file)
   {
 	  return PythonClass<PythonMissionBaseClass>::Factory(file);
-  }  
+  }
   static PythonClass<PythonMissionBaseClass> * FactoryString (char *code)
   {
 	  return PythonClass<PythonMissionBaseClass>::FactoryString(code);

@@ -1,3 +1,26 @@
+/**
+ * vsfilesystem.cpp
+ *
+ * Copyright (C) 2020 pyramid3d, Nachum Barcohen, Roy Falk, Stephen G. Tuggy,
+ * and other Vega Strike contributors.
+ *
+ * This file is part of Vega Strike.
+ *
+ * Vega Strike is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Vega Strike is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
+
 #include <stdio.h>
 #include <assert.h>
 #include <stdarg.h>
@@ -38,6 +61,7 @@ struct dirent
 
 #include "boost/iostreams/stream.hpp"
 #include "boost/iostreams/device/null.hpp"
+#include "boost/filesystem.hpp"
 
 #include "game_config.h"
 
@@ -119,65 +143,6 @@ namespace VSFileSystem
 {
 std::string vegastrike_cwd;
 
-// SGT 2020-07-16 This gets called from main() before initLogging,
-//                so it gets a pass on not using the Boost logging stuff
-void ChangeToProgramDirectory( char *argv0 )
-{
-    {
-        char pwd[VS_PATH_BUF_SIZE];
-        pwd[0]    = '\0';
-        if (NULL != getcwd( pwd, VS_PATH_BUF_SIZE - 1 )) {
-            pwd[VS_PATH_BUF_SIZE - 1] = '\0';
-            vegastrike_cwd = pwd;
-        } else {
-            VSFileSystem::vs_fprintf( stderr, "Cannot change to program directory: path too long");
-        }
-    }
-    int   ret     = -1;       /* Should it use argv[0] directly? */
-    char *program = argv0;
-#ifndef _WIN32
-    char  buf[VS_PATH_BUF_SIZE];
-    {
-        char  linkname[128];                /* /proc/<pid>/exe */
-        linkname[0] = '\0';
-        pid_t pid;
-
-        /* Get our PID and build the name of the link in /proc */
-        pid = getpid();
-
-        sprintf( linkname, "/proc/%d/exe", pid );
-        ret = readlink( linkname, buf, VS_PATH_BUF_SIZE - 1 );
-        if (ret <= 0) {
-            sprintf( linkname, "/proc/%d/file", pid );
-            ret = readlink( linkname, buf, VS_PATH_BUF_SIZE - 1 );
-        }
-        if (ret <= 0)
-            ret = readlink( program, buf, VS_PATH_BUF_SIZE - 1 );
-        if (ret > 0) {
-            buf[ret] = '\0';
-            /* Ensure proper NUL termination */
-            program  = buf;
-        }
-    }
-#endif
-
-    char *parentdir;
-    int   pathlen = strlen( program );
-    parentdir = new char[pathlen+1];
-    char *c;
-    strncpy( parentdir, program, pathlen+1 );
-    c = (char*) parentdir;
-    while (*c != '\0')                 /* go to end */
-        c++;
-    while ( (*c != '/') && (*c != '\\') && c > parentdir )          /* back up to parent */
-        c--;
-    *c = '\0';                         /* cut off last part (binary name) */
-    if (strlen( parentdir ) > 0) {
-        if (chdir( parentdir ))               /* chdir to the binary app's parent */
-            VSFileSystem::vs_fprintf( stderr, "Cannot change to program directory.");
-    }
-    delete[] parentdir;
-}
 
 VSError CachedFileLookup( FileLookupCache &cache, const string &file, VSFileType type )
 {
@@ -453,7 +418,9 @@ int vs_fprintf( FILE *fp, const char *format, ... )
         va_list ap;
         va_start( ap, format );
 
-        return vfprintf( fp, format, ap );
+        int retVal = vfprintf( fp, format, ap );
+        va_end(ap);
+        return retVal;
     } else {}
     return 0;
 }
@@ -464,6 +431,7 @@ void vs_dprintf( char level, const char *format, ... )
         va_list ap;
         va_start( ap, format );
         vfprintf( stderr, format, ap );
+        va_end(ap);
     }
 }
 
@@ -1781,7 +1749,9 @@ int VSFile::Fprintf( const char *format, ... )
         va_list ap;
         va_start( ap, format );
 
-        return vfprintf( this->fp, format, ap );
+        int retVal = vfprintf( this->fp, format, ap );
+        va_end(ap);
+        return retVal;
     } else {
         BOOST_LOG_TRIVIAL(fatal)<<"!!! ERROR : Writing is not supported within resource/volume files";
         VSExit( 1 );

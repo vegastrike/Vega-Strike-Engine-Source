@@ -111,9 +111,9 @@ front_or_back:
 
 void ccoords::check_invariants() //just for debugging; --should pass if code is correct
 {
-    vs_assert( x_ >= -0.5 && x_ <= 0.5, "bad range for x_ );
-    vs_assert( y_ >= -0.5 && y_ <= 0.5, "bad range for y_ );
-    vs_assert( z_ >= -0.5 && z_ <= 0.5, "bad range for z_ );
+    vs_assert( x_ >= -0.5 && x_ <= 0.5, "bad range for x_" );
+    vs_assert( y_ >= -0.5 && y_ <= 0.5, "bad range for y_" );
+    vs_assert( z_ >= -0.5 && z_ <= 0.5, "bad range for z_" );
     float magnitudesqrd = x_*x_ + y_*y_ + z_*z_ );
     vs_assert( magnitudesqrd >= 0.25, "point is inside the cube" );
     vs_assert( magnitudesqrd <= 0.75, "point is outside the cube" );

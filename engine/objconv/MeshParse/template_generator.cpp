@@ -1,3 +1,25 @@
+/**
+ * template_generator.cpp
+ *
+ * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike contributors.
+ *
+ * This file is part of Vega Strike.
+ *
+ * Vega Strike is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Vega Strike is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
+
 #include <string>
 #include <cstring>
 #include <vector>
@@ -1106,8 +1128,15 @@ int main( int argc, char **argv )
         blah.tfp = fopen( templatefilename.c_str(), "w" );
         string blankfilename    = argv[i]+string( ".blank" );
         blah.bfp = fopen( blankfilename.c_str(), "w" );
-        if (!blah.bfp || !blah.tfp)
+        if (!blah.bfp || !blah.tfp) {
+            if (blah.tfp) {
+                fclose(blah.tfp);
+            }
+            if (blah.bfp) {
+                fclose(blah.bfp);
+            }
             return 0;
+        }
         UnitLoadXML( argv[i], blah );
     }
     return 0;
