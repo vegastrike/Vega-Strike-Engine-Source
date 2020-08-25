@@ -38,6 +38,7 @@ struct dirent
 
 #include "boost/iostreams/stream.hpp"
 #include "boost/iostreams/device/null.hpp"
+#include "boost/filesystem.hpp"
 
 #include "game_config.h"
 
@@ -119,65 +120,6 @@ namespace VSFileSystem
 {
 std::string vegastrike_cwd;
 
-// SGT 2020-07-16 This gets called from main() before initLogging,
-//                so it gets a pass on not using the Boost logging stuff
-void ChangeToProgramDirectory( char *argv0 )
-{
-    {
-        char pwd[VS_PATH_BUF_SIZE];
-        pwd[0]    = '\0';
-        if (NULL != getcwd( pwd, VS_PATH_BUF_SIZE - 1 )) {
-            pwd[VS_PATH_BUF_SIZE - 1] = '\0';
-            vegastrike_cwd = pwd;
-        } else {
-            VSFileSystem::vs_fprintf( stderr, "Cannot change to program directory: path too long");
-        }
-    }
-    int   ret     = -1;       /* Should it use argv[0] directly? */
-    char *program = argv0;
-#ifndef _WIN32
-    char  buf[VS_PATH_BUF_SIZE];
-    {
-        char  linkname[128];                /* /proc/<pid>/exe */
-        linkname[0] = '\0';
-        pid_t pid;
-
-        /* Get our PID and build the name of the link in /proc */
-        pid = getpid();
-
-        sprintf( linkname, "/proc/%d/exe", pid );
-        ret = readlink( linkname, buf, VS_PATH_BUF_SIZE - 1 );
-        if (ret <= 0) {
-            sprintf( linkname, "/proc/%d/file", pid );
-            ret = readlink( linkname, buf, VS_PATH_BUF_SIZE - 1 );
-        }
-        if (ret <= 0)
-            ret = readlink( program, buf, VS_PATH_BUF_SIZE - 1 );
-        if (ret > 0) {
-            buf[ret] = '\0';
-            /* Ensure proper NUL termination */
-            program  = buf;
-        }
-    }
-#endif
-
-    char *parentdir;
-    int   pathlen = strlen( program );
-    parentdir = new char[pathlen+1];
-    char *c;
-    strncpy( parentdir, program, pathlen+1 );
-    c = (char*) parentdir;
-    while (*c != '\0')                 /* go to end */
-        c++;
-    while ( (*c != '/') && (*c != '\\') && c > parentdir )          /* back up to parent */
-        c--;
-    *c = '\0';                         /* cut off last part (binary name) */
-    if (strlen( parentdir ) > 0) {
-        if (chdir( parentdir ))               /* chdir to the binary app's parent */
-            VSFileSystem::vs_fprintf( stderr, "Cannot change to program directory.");
-    }
-    delete[] parentdir;
-}
 
 VSError CachedFileLookup( FileLookupCache &cache, const string &file, VSFileType type )
 {

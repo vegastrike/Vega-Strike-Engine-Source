@@ -83,6 +83,7 @@
 #include <boost/log/utility/setup/common_attributes.hpp>
 #include <boost/log/sources/severity_logger.hpp>
 #include <boost/log/sources/record_ostream.hpp>
+#include <boost/filesystem.hpp>
 
 #include "options.h"
 
@@ -301,9 +302,13 @@ void initLoggingPart2(char debugLevel)
 
 int main( int argc, char *argv[] )
 {
-    initLoggingPart1();
+    // Change to program directory if not already
+    std::string program_path_str(argv[0]);
+    boost::filesystem::path program_path(program_path_str);
+    boost::filesystem::path program_directory_path = program_path.parent_path();
+    boost::filesystem::current_path(program_directory_path);
 
-    VSFileSystem::ChangeToProgramDirectory( argv[0] );
+    initLoggingPart1();
 
 #ifdef WIN32
 	VSFileSystem::InitHomeDirectory();
