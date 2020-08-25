@@ -1,3 +1,25 @@
+/**
+ * director_generic.cpp
+ *
+ * Copyright (C) 2020 pyramid3d, Nachum Barcohen, Roy Falk, Stephen G. Tuggy,
+ * and other Vega Strike contributors.
+ *
+ * This file is part of Vega Strike.
+ *
+ * Vega Strike is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Vega Strike is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 
 #ifdef HAVE_PYTHON
 #include <boost/version.hpp>
@@ -156,10 +178,10 @@ vector< string > loadStringList( int playernum, const string &mykey )
 {
     if ( playernum < 0 || (unsigned int) playernum >= _Universe->numPlayers() )
         return vector< string > ();
-    
+
     SaveGame *savegame = _Universe->AccessCockpit( playernum )->savegame;
     vector< string >rez;
-        
+
     const vector< string > &ans = savegame->readMissionStringData( mykey );
     if (ans.size() > 0) {
         /* This is the modern way to store string data: as strings */
@@ -195,7 +217,7 @@ const vector< string >& getStringList( int playernum, const string &mykey )
         static const vector<string> empty;
         return empty;
     }
-    
+
     SaveGame *savegame = _Universe->AccessCockpit( playernum )->savegame;
 
     /* Should check old-style string lists, but it would defeat the purpose
@@ -210,11 +232,11 @@ void saveStringList( int playernum, const string &mykey, const vector< string > 
         return;
 
     SaveGame *savegame = _Universe->AccessCockpit( playernum )->savegame;
-    
+
     // Erase old-style string lists
     if (savegame->getMissionDataLength(mykey) != 0)
         clearSaveData(playernum, mykey);
-    
+
     vector< string > &ans = savegame->getMissionStringData( mykey );
     clearSaveString(playernum, mykey);
     for (vector<string>::const_iterator i = names.begin(); i != names.end(); ++i) {
@@ -227,9 +249,9 @@ void saveDataList( int whichcp, const string &key, const vector< float > &values
 {
     if ( whichcp < 0 || (unsigned int) whichcp >= _Universe->numPlayers() )
         return;
-    
+
     clearSaveData(whichcp, key);
-    
+
     vector< float > &ans = _Universe->AccessCockpit( whichcp )->savegame->getMissionData( key );
     for (vector<float>::const_iterator i = values.begin(); i != values.end(); ++i) {
 

@@ -84,7 +84,7 @@ class ccoords
     void check_invariants();
 public:
     //default ctor & dtor ok
-    ccoords( float x, foat y, float z ): x_(x), y_(y), z(_z)
+    ccoords( float x, float y, float z ): x_(x), y_(y), z_(z)
     {
         check_invariants();
     }

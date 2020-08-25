@@ -4,6 +4,8 @@
  *                           begin                : December 28, 2001
  *                           copyright            : (C) 2001 by David Ranger
  *                           email                : reliant@canshell.com
+ *                           copyright            : (C) 2020 pyramid3d
+ *                           copyright            : (C) 2020 Stephen G. Tuggy
  **************************************************************************/
 
 /***************************************************************************
@@ -15,10 +17,10 @@
  *                                                                         *
  **************************************************************************/
 
-/* This include has been designed to act independant of the other modules. 
+/* This include has been designed to act independant of the other modules.
  * This allows it to be used with other programs with minimal changes */
 
-#if defined(_WIN32) && _MSC_VER > 1300 
+#if defined(_WIN32) && _MSC_VER > 1300
 #define __restrict
 #endif
 #include "general.h"
@@ -129,19 +131,28 @@ char *replace(char *line, char *search, char *replace, int LENGTH) {
 	chr_new = (char *) malloc (sizeof (char)*LENGTH);
 	current = (char *) malloc (sizeof (char)*LENGTH);
 	calc = strlen(line) - strlen(search) + strlen(replace);
-	if (calc > LENGTH) { return line; }
+	if (calc > LENGTH) {
+        free(chr_new);
+        free(current);
+        return line;
+    }
 	length = strlen(line);
 	strcpy(current, line);
 	while ((location = strstr(current, search)) > 0) {
 		chr_new[0] = '\0';
 		calc = strlen(current) - strlen(search) + strlen(replace);
-		if (calc > LENGTH) { strcpy(line, current); free(current); free(chr_new); return line; }
+		if (calc > LENGTH) {
+            strcpy(line, current);
+            free(current);
+            free(chr_new);
+            return line;
+        }
 		dif = location - current;
 		strncat(chr_new, current, dif);
 		strncat(chr_new, replace, strlen(replace));
 		ptr_new = current + dif + strlen(search);
 		strncat(chr_new, ptr_new, strlen(ptr_new));
-		strcpy(current, chr_new); 
+		strcpy(current, chr_new);
 	}
 	strcpy(line, current);
 	free(chr_new);
@@ -371,7 +382,7 @@ char *NewString(char *line) {
 
 // if _G_ERROR is defined, it will print the error message
 // if EXIT_ON_FATAL is defined, and is_fatal is greater than 0, the program will exit
-void ShowError(char *error_msg, char *error_code, int is_fatal) {
+void ShowError(const char *error_msg, const char *error_code, int is_fatal) {
 #ifdef _G_ERROR
         if (is_fatal > 0) { fprintf(stderr, "Fatal "); }
         fprintf(stderr, "Error [%s]: %s\n", error_code, error_msg);
@@ -443,7 +454,7 @@ int isdir (const char * file) {
 		if (file[tmp-2]=='.'||file[tmp-2]=='/'||file[tmp-2]=='\\')
 			return -1;
 	}
-	
+
 	if (-1==_chdir ((string(file)+"/").c_str())) {
 		return 0;
 	}else {
@@ -477,7 +488,7 @@ glob_t *FindFiles(char *path, char *extension) {
 	vector <string> result;
 	if (dir) {
 		dirent *blah;
-		while (NULL!=(blah=readdir(dir))) {	
+		while (NULL!=(blah=readdir(dir))) {
 			if (0==isdir ((string(thispath)+"/"+mypath+"/"+blah->d_name).c_str())) {
 				result.push_back (mypath+blah->d_name);
 			}
@@ -519,7 +530,7 @@ glob_t *FindDirs(char *path) {
 	vector <string> result;
 	if (dir) {
 		dirent *blah;
-		while (NULL!=(blah=readdir(dir))) {	
+		while (NULL!=(blah=readdir(dir))) {
 			if (1==isdir ((string(thispath)+"/"+mypath+"/"+blah->d_name).c_str())) {
 				result.push_back (mypath+blah->d_name+"/");
 				_chdir (thispath);
