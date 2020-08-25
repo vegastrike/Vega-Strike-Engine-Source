@@ -303,10 +303,10 @@ void initLoggingPart2(char debugLevel)
 int main( int argc, char *argv[] )
 {
     // Change to program directory if not already
-    std::string argv0_string(argv[0]);
-    string program_directory = argv0_string.substr(0, argv0_string.length() - 11);
-    boost::filesystem::path program_directory_path(program_directory);
-    boost::filesystem::current_path(program_directory);
+    std::string program_path_str(argv[0]);
+    boost::filesystem::path program_path(program_path_str);
+    boost::filesystem::path program_directory_path = program_path.parent_path();
+    boost::filesystem::current_path(program_directory_path);
 
     initLoggingPart1();
 
