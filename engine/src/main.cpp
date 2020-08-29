@@ -307,7 +307,8 @@ int main( int argc, char *argv[] )
     boost::filesystem::path program_path(program_path_str);
     boost::filesystem::path program_directory_path = program_path.parent_path();
     if ( ! program_directory_path.empty())                  // Changing to an empty path does bad things
-    {    boost::filesystem::current_path(program_directory_path);
+    {    
+        boost::filesystem::current_path(program_directory_path);
     }
 
     initLoggingPart1();
