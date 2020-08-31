@@ -20,7 +20,8 @@
  */
 
 
-#pragma once
+#ifndef _VS_COLLECTIONS_HPP_
+#define _VS_COLLECTIONS_HPP_
 
 #include <cstddef>
 #include <memory>
@@ -44,3 +45,6 @@ namespace VegaStrike
     };
 
 }
+
+#endif	// _VS_COLLECTIONS_HPP_
+

@@ -6,7 +6,8 @@
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-#pragma once
+#ifndef _STDAFX_H_
+#define _STDAFX_H_
 
 //chuck starchaser shutting up the warnings about violations of strict aliasing...
 #ifndef _WIN32 // pheonixstorm shutting up pragma warnings on win32
@@ -24,4 +25,6 @@
 #include "opcodesysdef.h"
 #include "Opcode.h"
 #include "vs_collections.hpp"
+
+#endif	// _STDAFX_H_
 
