@@ -96,7 +96,7 @@ char *ptr_copy(char *string)
             fprintf(stderr, "Out of memory\n"); 
             exit(-1);
         }
-	strcpy (alloc, string);
+	alloc = string;
 	alloc[strlen(string)] = '\0';
 	return alloc;
 }
@@ -131,47 +131,47 @@ char *pre_chomp(char *line)
  * This function searches the first parameter for the second parameter
  * If the second parameter is found, it is replaced with the third parameter
  */
-
-char *replace(char *line, char *search, char *replace, int LENGTH) 
-{
-	int  dif, calc;
-	char *ptr_new, *location;
-
-	char *chr_new,*current;
-	chr_new = (char *) malloc (sizeof (char)*LENGTH);
-	current = (char *) malloc (sizeof (char)*LENGTH);
-	calc = strlen(line) - strlen(search) + strlen(replace);
-    if (calc > LENGTH) 
-    {
-        free(chr_new);
-        free(current);
-        return line;
-    }
-	strcpy(current, line);
-	while ((location = strstr(current, search)) != nullptr) 
-        {
-		chr_new[0] = '\0';
-		calc = strlen(current) - strlen(search) + strlen(replace);
-                if (calc > LENGTH) 
-                {
-                    strcpy(line, current);
-                    free(current);
-                    free(chr_new);
-                    return line;
-                }
-		dif = location - current;
-		strncat(chr_new, current, dif);
-		strcat(chr_new, replace);
-		ptr_new = current + dif + strlen(search);
-		strcat(chr_new, ptr_new);
-		strcpy(current, chr_new);
-	}
-	strcpy(line, current);
-	free(chr_new);
-	free(current);
-	return line;
-}
-
+/*    --- Seems this function is not used at all.
+*char *replace(char *line, char *search, char *replace, int LENGTH) 
+*{
+*	int  dif, calc;
+*	char *ptr_new, *location;
+*
+*	char *chr_new,*current;
+*	chr_new = (char *) malloc (sizeof (char)*LENGTH);
+*	current = (char *) malloc (sizeof (char)*LENGTH);
+*	calc = strlen(line) - strlen(search) + strlen(replace);
+*    if (calc > LENGTH) 
+*    {
+*        free(chr_new);
+*        free(current);
+*        return line;
+*    }
+*	strcpy(current, line);
+*	while ((location = strstr(current, search)) != nullptr) 
+*        {
+*		chr_new[0] = '\0';
+*		calc = strlen(current) - strlen(search) + strlen(replace);
+*                if (calc > LENGTH) 
+*                {
+*                    strcpy(line, current);
+*                    free(current);
+*                    free(chr_new);
+*                    return line;
+*                }
+*		dif = location - current;
+*		strncat(chr_new, current, dif);
+*		strcat(chr_new, replace);
+*		ptr_new = current + dif + strlen(search);
+*		strcat(chr_new, ptr_new);
+*		strcpy(current, chr_new);
+*	}
+*	strcpy(line, current);
+*	free(chr_new);
+*	free(current);
+*	return line;
+*}
+*/
 char *strmov(char *to, char *from) 
 {
 	char *end;
