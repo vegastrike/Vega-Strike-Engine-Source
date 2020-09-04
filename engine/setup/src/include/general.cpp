@@ -87,18 +87,28 @@ char *split_words(char *string, int max_words) {
 
 // Better yet, use glib
 
-char *ptr_copy(char *string) 
+char *ptr_copy(const char *string)
 {
-	char *alloc;
-	alloc = (char *)malloc(strlen(string) + 1);
-	if (alloc == 0) 
-        {
-            fprintf(stderr, "Out of memory\n"); 
-            exit(-1);
-        }
-	alloc = string;
-	alloc[strlen(string)] = '\0';
-	return alloc;
+#if _XOPEN_SOURCE >= 500 || _POSIX_C_SOURCE >= 200809L
+    return strdup(string);
+#else
+    size_t buf_size = strlen(string) + 1;
+    char *alloc;
+    alloc = (char *)malloc(buf_size);
+    if (alloc == nullptr)
+    {
+        fprintf(stderr, "Out of memory\n");
+        fflush(stderr);
+        exit(-1);
+    }
+#ifdef __STDC_LIB_EXT1__
+    strcpy_s(alloc, buf_size, string);
+#else
+    strncpy(alloc, string, buf_size);
+#endif
+    alloc[buf_size - 1] = '\0';
+    return alloc;
+#endif
 }
 
 /* chomp
