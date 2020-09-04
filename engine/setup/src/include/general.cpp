@@ -310,7 +310,7 @@ int pwr(int start, int end)
 {
 	int current, val_return;
 	val_return = 1;
-	for (current = 2; current <= end; current++) 
+	for (current = 2; current <= end; ++current) 
         {
 		val_return *= start;
 	}
