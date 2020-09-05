@@ -30,10 +30,6 @@ struct light_key
         intensity_key = inte;
     }
 };
-static bool operator<( light_key tmp1, light_key tmp2 )
-{
-    return tmp1.intensity_key < tmp2.intensity_key;
-}
 
 static priority_queue< light_key >lightQ;
 
