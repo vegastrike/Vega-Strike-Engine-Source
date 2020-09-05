@@ -5,11 +5,9 @@ using std::endl;
 
 #ifdef JPEG_SUPPORT
 
-
+//Moved the following three functions here from the .h file
 /*----------------------------------------------------------------------------
  *  /  Initialize destination --- called by jpeg_start_compress before any data is actually written. */
-
-//METHODDEF( void )
 void init_destination( j_compress_ptr cinfo )
 {
     mem_dest_ptr dest = (mem_dest_ptr) cinfo->dest;
@@ -20,7 +18,6 @@ void init_destination( j_compress_ptr cinfo )
 
 /*----------------------------------------------------------------------------
  *  /  Empty the output buffer --- called whenever buffer fills up. */
-// METHODDEF( boolean )
 boolean empty_output_buffer( j_compress_ptr cinfo )
 {
     mem_dest_ptr dest = (mem_dest_ptr) cinfo->dest;
@@ -33,7 +30,6 @@ boolean empty_output_buffer( j_compress_ptr cinfo )
 /*----------------------------------------------------------------------------
  *  /  Terminate destination --- called by jpeg_finish_compress
  *  /  after all data has been written.  Usually needs to flush buffer. */
-// METHODDEF( void )
 void term_destination( j_compress_ptr cinfo )
 {
     /* expose the finale compressed image size */

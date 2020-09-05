@@ -30,12 +30,12 @@
 #undef HAVE_BOOLEAN
 #define boolean boolean1
 #endif
-//extern "C" {
+extern "C" {
 //#define XMD_H
 #include <jconfig.h>
 #include <jmorecfg.h>
 #include <jpeglib.h>
-//}
+}
 /*--------------
  *  A hack to hijack JPEG's innards to write into a memory buffer
  *  ----------------
@@ -53,20 +53,16 @@ typedef memory_destination_mgr*mem_dest_ptr;
 
 /*----------------------------------------------------------------------------
  *  /  Initialize destination --- called by jpeg_start_compress before any data is actually written. */
-
-//METHODDEF( void )
 void init_destination( j_compress_ptr cinfo );
 
 /*----------------------------------------------------------------------------
  *  /  Empty the output buffer --- called whenever buffer fills up. */
-// METHODDEF( boolean )
 boolean empty_output_buffer( j_compress_ptr cinfo );
 
 
 /*----------------------------------------------------------------------------
  *  /  Terminate destination --- called by jpeg_finish_compress
  *  /  after all data has been written.  Usually needs to flush buffer. */
-// METHODDEF( void )
 void term_destination( j_compress_ptr cinfo );
 
 
