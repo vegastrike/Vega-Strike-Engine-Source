@@ -30,12 +30,12 @@
 #undef HAVE_BOOLEAN
 #define boolean boolean1
 #endif
-extern "C" {
+//extern "C" {
 //#define XMD_H
 #include <jconfig.h>
 #include <jmorecfg.h>
 #include <jpeglib.h>
-}
+//}
 /*--------------
  *  A hack to hijack JPEG's innards to write into a memory buffer
  *  ----------------
@@ -54,38 +54,21 @@ typedef memory_destination_mgr*mem_dest_ptr;
 /*----------------------------------------------------------------------------
  *  /  Initialize destination --- called by jpeg_start_compress before any data is actually written. */
 
-METHODDEF( void )
-init_destination( j_compress_ptr cinfo )
-{
-    mem_dest_ptr dest = (mem_dest_ptr) cinfo->dest;
-    dest->pub.next_output_byte = dest->buffer;
-    dest->pub.free_in_buffer   = dest->bufsize;
-    dest->datacount = 0;
-}
+//METHODDEF( void )
+void init_destination( j_compress_ptr cinfo );
 
 /*----------------------------------------------------------------------------
  *  /  Empty the output buffer --- called whenever buffer fills up. */
-METHODDEF( boolean )
-empty_output_buffer( j_compress_ptr cinfo )
-{
-    mem_dest_ptr dest = (mem_dest_ptr) cinfo->dest;
-    dest->pub.next_output_byte = dest->buffer;
-    dest->pub.free_in_buffer   = dest->bufsize;
+// METHODDEF( boolean )
+boolean empty_output_buffer( j_compress_ptr cinfo );
 
-    return TRUE;
-}
 
 /*----------------------------------------------------------------------------
  *  /  Terminate destination --- called by jpeg_finish_compress
  *  /  after all data has been written.  Usually needs to flush buffer. */
-METHODDEF( void )
-term_destination( j_compress_ptr cinfo )
-{
-    /* expose the finale compressed image size */
+// METHODDEF( void )
+void term_destination( j_compress_ptr cinfo );
 
-    mem_dest_ptr dest = (mem_dest_ptr) cinfo->dest;
-    dest->datacount = dest->bufsize-dest->pub.free_in_buffer;
-}
 
 GLOBAL( void ) jpeg_memory_dest( j_compress_ptr cinfo, JOCTET*buffer, int bufsize );
 int jpeg_compress( char *dst, char *src, int width, int height, int dstsize, int quality );
