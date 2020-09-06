@@ -9,7 +9,6 @@ class Asteroid: public Unit
 	public:
 		void Init( float difficulty);
 		virtual enum clsptr isUnit() const { return(ASTEROIDPTR);}
-		virtual void reactToCollision(Unit * smaller, const QVector& biglocation, const Vector& bignormal, const QVector& smalllocation, const Vector& smallnormal, float dist);
 
 		protected:
 		/** Constructor that can only be called by the UnitFactory.

@@ -35,20 +35,7 @@ public:
         Missile::Discharge();
         GameUnit< Missile >::Kill( erase );
     }
-    virtual void reactToCollision( Unit *smaller,
-                                   const QVector &biglocation,
-                                   const Vector &bignormal,
-                                   const QVector &smalllocation,
-                                   const Vector &smallnormal,
-                                   float dist )
-    {
-        static bool doesmissilebounce = XMLSupport::parse_bool( vs_config->getVariable( "physics", "missile_bounce", "false" ) );
-        if (doesmissilebounce)
-            GameUnit< Missile >::reactToCollision( smaller, biglocation, bignormal, smalllocation, smallnormal, dist );
-        Discharge();
-        if (!killed)
-            DealDamageToHull( smalllocation.Cast(), hull+1 );      //should kill, applying addmissile effect
-    }
+
     virtual void UpdatePhysics2( const Transformation &trans,
                                  const Transformation &old_physical_state,
                                  const Vector &accel,

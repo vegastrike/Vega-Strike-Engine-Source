@@ -319,7 +319,7 @@ bool CrashForceDock( Unit *thus, Unit *dockingUn, bool force )
     return false;
 }
 
-void Unit::reactToCollision( Unit *smalle,
+/*void Unit::reactToCollision( Unit *smalle,
                              const QVector &biglocation,
                              const Vector &bignormal,
                              const QVector &smalllocation,
@@ -544,7 +544,7 @@ void Unit::reactToCollision( Unit *smalle,
             }
         }
     }
-}
+}*/
 
 void Unit::ActivateJumpDrive( int destination )
 {

@@ -98,12 +98,6 @@ protected:
 
 public:
     virtual void Kill( bool eraseFromSave = true );
-    virtual void reactToCollision( Unit *smaller,
-                                   const QVector &biglocation,
-                                   const Vector &bignormal,
-                                   const QVector &smalllocation,
-                                   const Vector &smallnormal,
-                                   float dist );
     virtual void UpdatePhysics2( const Transformation &trans,
                                  const Transformation &old_physical_state,
                                  const Vector &accel,

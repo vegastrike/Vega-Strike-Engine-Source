@@ -135,7 +135,9 @@ Nebula::Nebula( const char *unitfile, bool SubU, int faction, Flightgroup *fg, i
     this->InitNebula( unitfile, SubU, faction, fg, fg_snumber );
 }
 
-void Nebula::reactToCollision( Unit *smaller,
+// Not sure what this does but disabled it for now
+// TODO: find out and do something with this code
+/*void Nebula::reactToCollision( Unit *smaller,
                                const QVector &biglocation,
                                const Vector &bignormal,
                                const QVector &smalllocation,
@@ -145,7 +147,7 @@ void Nebula::reactToCollision( Unit *smaller,
     if (fogme)
         SetNebula( this );
     smaller->SetNebula( this );
-}
+}*/
 
 void Nebula::UpdatePhysics2( const Transformation &trans,
                              const Transformation &old_physical_state,

@@ -30,12 +30,6 @@ public:
     {
         return NEBULAPTR;
     }
-    virtual void reactToCollision( Unit *smaller,
-                                   const QVector &biglocation,
-                                   const Vector &bignormal,
-                                   const QVector &smalllocation,
-                                   const Vector &smallnormal,
-                                   float dist );
 
 protected:
 /// constructor only to be called by UnitFactory
