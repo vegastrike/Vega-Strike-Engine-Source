@@ -18,15 +18,6 @@ class Cockpit;
 
 class Collision
 {
-    struct ReactionResult
-    {
-        bool apply_force = false;
-        bool deal_damage = false;
-
-        ReactionResult(bool apply_force, bool deal_damage):
-            apply_force(apply_force), deal_damage(deal_damage) {}
-    };
-
     // Stage 1
     Cockpit* cockpit;
     Unit* unit;
@@ -37,30 +28,13 @@ class Collision
     float mass;
     Vector position;
     Vector velocity;
-    Vector angular_velocity;
-    Vector linear_velocity; //Compute linear velocity of points of impact by taking into account angular velocities
-
-    // Stage 2
-    Vector aligned_velocity;
-    Vector elastic_vf;
-    Vector final_velocity;
-    float delta_e;
-
-    // Stage 3
-    float damage;
-    Vector force;
-    bool not_player_or_min_time_passed = true;
-    Vector delta;
-    float  magnitude;
+    bool apply_force = false;
+    bool deal_damage = false;
 
     Collision(Unit* unit, const QVector &location, const Vector& normal);
-    void Collision2(Matrix& from_new_reference, Matrix& to_new_reference,
-                      Vector inelastic_vf, Collision& other_collision);
-    void Collision3(Collision& other_collision);
-    ReactionResult reactionMatrix(Unit* other_unit);
-    void applyForce();
-    bool shouldDealDamage(float radial_size = 0.0);
-    void applyDamage(Collision other_collision);
+    void shouldApplyForceAndDealDamage(Unit* other_unit);
+    void applyForce(double elasticity, float& m2, Vector& v2);
+    void dealDamage(Collision other_collision, float factor=0.01);
     bool crashLand(Unit *base);
 public:
     static void collide( Unit* unit1,
@@ -70,14 +44,6 @@ public:
                            const QVector &location2,
                            const Vector &normal2,
                            float distance );
-
-
-    void dealDamageFromCollision(Unit* unit, Unit* other_unit,
-                                 const QVector &other_unit_location, // biglocation
-                                 const Vector &other_unit_normal, // bignormal
-                                 const QVector &unit_location, // smalllocation
-                                 const Vector &unit_normal, // smallernormal
-                                 float distance);
 };
 
 #endif // COLLISION_H
