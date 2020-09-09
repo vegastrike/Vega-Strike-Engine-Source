@@ -163,10 +163,11 @@ GFXLight gfx_light::operator=( const GFXLight &tmp )
             memcpy( this->specular, tmp.specular, sizeof (float)*4 );
             memcpy( this->ambient, tmp.ambient, sizeof (float)*4 );
             memcpy( this->attenuate, tmp.attenuate, sizeof (float)*3 );
-            memcpy( this->direction, tmp.direction, sizeof (this->direction) );
+            memcpy( this->direction, tmp.direction, sizeof (float)*3 );
             this->exp    = tmp.exp;
             this->cutoff = tmp.cutoff;
             this->size   = tmp.size;
+            this->occlusion = tmp.occlusion;
             apply_attenuate( attenuated() );
             if (GFX_LIGHT_ENABLED) //This is always true...No reason to define a light and not turn it on...
                 this->enable();
