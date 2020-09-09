@@ -481,13 +481,19 @@ void beginElement( const string &name, const AttributeList &attributes, XML *xml
     case XML::POLYGONS:
         break;
     case XML::LINE:
-        memset( &xml->linetemp, 0, sizeof (xml->linetemp) );
+        xml->linetemp.flatshade = 0;
+        memset(xml->linetemp.indexref, 0, sizeof(xml->linetemp.indexref) );
+        memset(xml->linetemp.s, 0, sizeof(xml->linetemp.s));
+        memset(xml->linetemp.t, 0, sizeof(xml->linetemp.t));
         xml->curpolytype  = LINE;
         xml->curpolyindex = 0;
         xml->linetemp.flatshade = 0;
         break;
     case XML::TRI:
-        memset( &xml->triangletemp, 0, sizeof (xml->triangletemp) );
+        xml->triangletemp.flatshade = 0;
+        memset(xml->triangletemp.indexref, 0, sizeof(xml->triangletemp.indexref) );
+        memset(xml->triangletemp.s, 0, sizeof(xml->triangletemp.s));
+        memset(xml->triangletemp.t, 0, sizeof(xml->triangletemp.t));
         xml->curpolytype  = TRIANGLE;
         xml->curpolyindex = 0;
         for (iter = attributes.begin(); iter != attributes.end(); iter++) {
@@ -503,7 +509,10 @@ void beginElement( const string &name, const AttributeList &attributes, XML *xml
         }
         break;
     case XML::QUAD:
-        memset( &xml->quadtemp, 0, sizeof (xml->quadtemp) );
+        xml->quadtemp.flatshade = 0;
+        memset(xml->quadtemp.indexref, 0, sizeof(xml->quadtemp.indexref) );
+        memset(xml->quadtemp.s, 0, sizeof(xml->quadtemp.s));
+        memset(xml->quadtemp.t, 0, sizeof(xml->quadtemp.t));
         xml->curpolytype  = QUAD;
         xml->curpolyindex = 0;
         for (iter = attributes.begin(); iter != attributes.end(); iter++) {
