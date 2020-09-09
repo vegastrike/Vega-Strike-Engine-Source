@@ -222,6 +222,9 @@ void Collision::applyForce(double elasticity, float& m2, Vector& v2)
 
     // Apply ratio
     new_velocity = new_velocity * elasticity;
+
+    // Apply force
+    unit->ApplyForce(new_velocity);
 }
 
 
