@@ -154,9 +154,25 @@ int _GLLightsEnabled    = 0;
 Hashtable3d< LineCollideStar, 20, CTACC, lighthuge >lighttable;
 
 GFXLight gfx_light::operator=( const GFXLight &tmp )
-{
-    memcpy( this, &tmp, sizeof (GFXLight) );
-    return tmp;
+{   // Let's see if I can write a better copy operator
+//    memcpy( this, &tmp, sizeof (GFXLight) );
+            this->target  = -1;
+            this->options = 0;
+            memcpy( this->vect, tmp.vect, sizeof (float)*3 );
+            memcpy( this->diffuse, tmp.diffuse, sizeof (float)*4 );
+            memcpy( this->specular, tmp.specular, sizeof (float)*4 );
+            memcpy( this->ambient, tmp.ambient, sizeof (float)*4 );
+            memcpy( this->attenuate, tmp.attenuate, sizeof (float)*3 );
+            memcpy( this->direction, tmp.direction, sizeof (this->direction) );
+            this->exp    = tmp.exp;
+            this->cutoff = tmp.cutoff;
+            this->size   = tmp.size;
+            apply_attenuate( attenuated() );
+            if (GFX_LIGHT_ENABLED) //This is always true...No reason to define a light and not turn it on...
+                this->enable();
+            else
+                this->disable();
+            return tmp;
 }
 
 int gfx_light::lightNum()
@@ -338,11 +354,11 @@ void gfx_light::ResetProperties( const enum LIGHT_TARGET light_targ, const GFXCo
 {
     bool changed = false;
     if ( LocalLight() ) {
-        GFXLight t;
-        memcpy( &t, this, sizeof (GFXLight) );
-        t.SetProperties( light_targ, color );
-        changed = RemoveFromTable( false, t );
-        memcpy( this, &t, sizeof (GFXLight) );
+        //GFXLight t;
+        //memcpy( &t, this, sizeof (GFXLight) );
+        this->SetProperties( light_targ, color );
+        changed = RemoveFromTable( false, *this );
+        //memcpy( this, &t, sizeof (GFXLight) );
         if (changed)
             AddToTable();
         if (target >= 0)
