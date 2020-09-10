@@ -1,7 +1,6 @@
 #include "PrecompiledHeaders/Converter.h"
 #include "mesh_io.h"
 #include "to_BFXM.h"
-
 #include <cstring>  //We are using C style string functions here
 
 //#define fprintf aprintf
@@ -481,19 +480,12 @@ void beginElement( const string &name, const AttributeList &attributes, XML *xml
     case XML::POLYGONS:
         break;
     case XML::LINE:
-        xml->linetemp.flatshade = 0;
-        memset(xml->linetemp.indexref, 0, sizeof(xml->linetemp.indexref) );
-        memset(xml->linetemp.s, 0, sizeof(xml->linetemp.s));
-        memset(xml->linetemp.t, 0, sizeof(xml->linetemp.t));
+        xml->linetemp = {};
         xml->curpolytype  = LINE;
         xml->curpolyindex = 0;
-        xml->linetemp.flatshade = 0;
         break;
     case XML::TRI:
-        xml->triangletemp.flatshade = 0;
-        memset(xml->triangletemp.indexref, 0, sizeof(xml->triangletemp.indexref) );
-        memset(xml->triangletemp.s, 0, sizeof(xml->triangletemp.s));
-        memset(xml->triangletemp.t, 0, sizeof(xml->triangletemp.t));
+        xml->triangletemp = {};
         xml->curpolytype  = TRIANGLE;
         xml->curpolyindex = 0;
         for (iter = attributes.begin(); iter != attributes.end(); iter++) {
@@ -509,10 +501,7 @@ void beginElement( const string &name, const AttributeList &attributes, XML *xml
         }
         break;
     case XML::QUAD:
-        xml->quadtemp.flatshade = 0;
-        memset(xml->quadtemp.indexref, 0, sizeof(xml->quadtemp.indexref) );
-        memset(xml->quadtemp.s, 0, sizeof(xml->quadtemp.s));
-        memset(xml->quadtemp.t, 0, sizeof(xml->quadtemp.t));
+        xml->quadtemp = {};
         xml->curpolytype  = QUAD;
         xml->curpolyindex = 0;
         for (iter = attributes.begin(); iter != attributes.end(); iter++) {
