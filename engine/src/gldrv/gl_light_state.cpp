@@ -355,11 +355,11 @@ void gfx_light::ResetProperties( const enum LIGHT_TARGET light_targ, const GFXCo
 {
     bool changed = false;
     if ( LocalLight() ) {
-        //GFXLight t;
-        //memcpy( &t, this, sizeof (GFXLight) );
-        this->SetProperties( light_targ, color );
-        changed = RemoveFromTable( false, *this );
-        //memcpy( this, &t, sizeof (GFXLight) );
+        GFXLight t;
+        t = *this;
+        t.SetProperties( light_targ, color );
+        changed = RemoveFromTable( false, t );
+        *this = t;
         if (changed)
             AddToTable();
         if (target >= 0)
