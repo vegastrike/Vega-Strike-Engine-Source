@@ -7,6 +7,7 @@
 #include "missile.h"
 #include "enhancement.h"
 #include <typeinfo>
+#include <boost/log/trivial.hpp>
 
 // TODO: convert all float to double and all Vector to QVector.
 
@@ -119,6 +120,7 @@ void Collision::shouldApplyForceAndDealDamage(Unit* other_unit)
         return;
 
     // Not sure what an enhancement is, but it looks like it's something that can increase the shields of the unit it collided with.
+    // TODO: refactor this.
     case ENHANCEMENTPTR:
         if (other_unit->isUnit() == ASTEROIDPTR)
         {
@@ -127,13 +129,13 @@ void Collision::shouldApplyForceAndDealDamage(Unit* other_unit)
         }
 
         double percent;
-        char tempdata[sizeof (unit->shield)];
-        memcpy( tempdata, &unit->shield, sizeof (unit->shield) );
+        char tempdata[sizeof(Shield)];
+        memcpy( tempdata, &unit->shield, sizeof(Shield));
         unit->shield.number = 0;     //don't want them getting our boosted shields!
         unit->shield.shield2fb.front = unit->shield.shield2fb.back =
                 unit->shield.shield2fb.frontmax = unit->shield.shield2fb.backmax = 0;
         other_unit->Upgrade( unit, 0, 0, true, true, percent );
-        memcpy( &unit->shield, tempdata, sizeof (unit->shield) );
+        memcpy( &unit->shield, tempdata, sizeof (Shield) );
         string fn( unit->filename );
         string fac( FactionUtil::GetFaction( unit->faction ) );
         unit->Kill();
@@ -204,9 +206,13 @@ void Collision::applyForce(double elasticity, float& m2, Vector& v2)
     This function adds an elasticity ratio to reduce velocity, due to heat, damage, etc.
     */
 
-    // Ratio must be between 0 and 1
-    assert(elasticity>=0);
-    assert(elasticity<=1);
+    // elasticity must be between 0 and 1
+    if(elasticity >1 || elasticity <0)
+    {
+        BOOST_LOG_TRIVIAL(warning) << "Collision::applyForce Expected an elasticity value between 0 and 1 but got " << elasticity;
+        elasticity = std::max(elasticity, 0.0);
+        elasticity = std::min(elasticity, 1.0);
+    }
 
     if(!apply_force)
     {
