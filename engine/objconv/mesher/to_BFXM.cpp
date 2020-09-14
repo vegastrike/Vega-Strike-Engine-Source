@@ -480,12 +480,12 @@ void beginElement( const string &name, const AttributeList &attributes, XML *xml
     case XML::POLYGONS:
         break;
     case XML::LINE:
-        xml->linetemp = {};
+        xml->linetemp.clear();
         xml->curpolytype  = LINE;
         xml->curpolyindex = 0;
         break;
     case XML::TRI:
-        xml->triangletemp = {};
+        xml->triangletemp.clear();
         xml->curpolytype  = TRIANGLE;
         xml->curpolyindex = 0;
         for (iter = attributes.begin(); iter != attributes.end(); iter++) {
@@ -501,7 +501,7 @@ void beginElement( const string &name, const AttributeList &attributes, XML *xml
         }
         break;
     case XML::QUAD:
-        xml->quadtemp = {};
+        xml->quadtemp.clear();
         xml->curpolytype  = QUAD;
         xml->curpolyindex = 0;
         for (iter = attributes.begin(); iter != attributes.end(); iter++) {
