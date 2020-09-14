@@ -246,7 +246,7 @@ void Modconfig( int setting, const char *name, const char *group ) {
     }
     while ( ( p = fgets( line, MAX_READ, rp ) ) != NULL ) {
         chomp( line );
-        strncpy( write, line, MAX_READ );
+        strncpy( write, line, MAX_READ + 1);
         skip = 0;
         start_write = line;
         parm = xml_pre_chomp_comment( start_write );         //Gets the start of the comment block
@@ -259,7 +259,7 @@ void Modconfig( int setting, const char *name, const char *group ) {
         end_write = xml_chomp_comment( parm );               //Gets the end of the comment block
                                                              //parm is everything inside <!-- -->, start_write and end_write
                                                              //is everything else (excluding <!-- -->
-        strncpy( mid, parm, MAX_READ );                      //Mid is used to keep the data inside the comments in memory
+        strncpy( mid, parm, MAX_READ + 1 );                      //Mid is used to keep the data inside the comments in memory
         mid[strlen( parm )] = '\0';
         n_parm = next_parm( parm );
         //if (parm[0] == '#' && parm[1] == '#') { fprintf(wp, "%s\n", write); continue; }   We no longer use double # for comments
