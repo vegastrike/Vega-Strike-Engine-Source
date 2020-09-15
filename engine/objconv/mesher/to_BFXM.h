@@ -78,6 +78,16 @@ struct line
         t[1] = t2;
         flatshade = fs;
     }
+    void clear()
+    {
+        flatshade = false;
+        indexref[0] = {0};
+        indexref[1] = {0};
+        s[0] = {0.0};
+        s[1] = {0.0};
+        t[0] = {0.0};
+        t[1] = {0.0};
+    }
 };
 
 struct triangle
@@ -102,6 +112,19 @@ struct triangle
         t[1] = t2;
         t[2] = t3;
         flatshade = fs;
+    }
+    void clear()
+    {
+        flatshade = false;
+        indexref[0] = {0};
+        indexref[1] = {0};
+        indexref[2] = {0};
+        s[0] = {0.0};
+        s[1] = {0.0};
+        s[2] = {0.0};
+        t[0] = {0.0};
+        t[1] = {0.0};
+        t[2] = {0.0};
     }
 };
 
@@ -142,6 +165,22 @@ struct quad
         t[2] = t3;
         t[3] = t4;
         flatshade = fs;
+    }
+    void clear()
+    {
+        flatshade = false;
+        indexref[0] = {0};
+        indexref[1] = {0};
+        indexref[2] = {0};
+        indexref[3] = {0};
+        s[0] = {0.0};
+        s[1] = {0.0};
+        s[2] = {0.0};
+        s[3] = {0.0};
+        t[0] = {0.0};
+        t[1] = {0.0};
+        t[2] = {0.0};
+        t[3] = {0.0};
     }
 };
 

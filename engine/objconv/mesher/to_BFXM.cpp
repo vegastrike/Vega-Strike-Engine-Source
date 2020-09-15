@@ -1,7 +1,6 @@
 #include "PrecompiledHeaders/Converter.h"
 #include "mesh_io.h"
 #include "to_BFXM.h"
-
 #include <cstring>  //We are using C style string functions here
 
 //#define fprintf aprintf
@@ -481,13 +480,12 @@ void beginElement( const string &name, const AttributeList &attributes, XML *xml
     case XML::POLYGONS:
         break;
     case XML::LINE:
-        memset( &xml->linetemp, 0, sizeof (xml->linetemp) );
+        xml->linetemp.clear();
         xml->curpolytype  = LINE;
         xml->curpolyindex = 0;
-        xml->linetemp.flatshade = 0;
         break;
     case XML::TRI:
-        memset( &xml->triangletemp, 0, sizeof (xml->triangletemp) );
+        xml->triangletemp.clear();
         xml->curpolytype  = TRIANGLE;
         xml->curpolyindex = 0;
         for (iter = attributes.begin(); iter != attributes.end(); iter++) {
@@ -503,7 +501,7 @@ void beginElement( const string &name, const AttributeList &attributes, XML *xml
         }
         break;
     case XML::QUAD:
-        memset( &xml->quadtemp, 0, sizeof (xml->quadtemp) );
+        xml->quadtemp.clear();
         xml->curpolytype  = QUAD;
         xml->curpolyindex = 0;
         for (iter = attributes.begin(); iter != attributes.end(); iter++) {

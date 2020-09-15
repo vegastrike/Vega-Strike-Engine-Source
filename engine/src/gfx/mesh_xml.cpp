@@ -518,8 +518,18 @@ void Mesh::beginElement( MeshXML *xml, const string &name, const AttributeList &
         break;
     case MeshXML::POINT:
         assert( top == MeshXML::POINTS ); //FIXME top was never initialized if state stack was empty
-
-        memset( &xml->vertex, 0, sizeof (xml->vertex) );
+        xml->vertex.s = 0.0;
+        xml->vertex.t = 0.0;
+        xml->vertex.i = 0.0;
+        xml->vertex.j = 0.0;
+        xml->vertex.k = 0.0;
+        xml->vertex.x = 0.0;
+        xml->vertex.y = 0.0;
+        xml->vertex.z = 0.0;
+        xml->vertex.tx = 0.0;
+        xml->vertex.ty = 0.0;
+        xml->vertex.tz = 0.0;
+        xml->vertex.tw = 0.0;
         xml->point_state = 0;         //Point state is used to check that all necessary attributes are recorded
         break;
     case MeshXML::LOCATION:
@@ -852,8 +862,18 @@ void Mesh::beginElement( MeshXML *xml, const string &name, const AttributeList &
                    |MeshXML::V_S
                    |MeshXML::V_T) );
         assert( index < xml->vertices.size() ); //FIXME not all switch cases initialize index
-
-        memset( &xml->vertex, 0, sizeof (xml->vertex) );
+        xml->vertex.s = 0.0;
+        xml->vertex.t = 0.0;
+        xml->vertex.i = 0.0;
+        xml->vertex.j = 0.0;
+        xml->vertex.k = 0.0;
+        xml->vertex.x = 0.0;
+        xml->vertex.y = 0.0;
+        xml->vertex.z = 0.0;
+        xml->vertex.tx = 0.0;
+        xml->vertex.ty = 0.0;
+        xml->vertex.tz = 0.0;
+        xml->vertex.tw = 0.0;
         xml->vertex = xml->vertices[index]; //FIXME not all switch cases initialize index
         xml->vertexcount[index] += 1; //FIXME not all switch cases initialize index
         if ( (!xml->vertex.i) && (!xml->vertex.j) && (!xml->vertex.k) )

@@ -646,6 +646,36 @@ public:
               float exp = 0.0f,
               float cutoff = 180.0f,
               float size = 0.0f );
+    
+    GFXLight(const GFXLight& other)
+    {
+        vect[0] = other.vect[0];
+        vect[1] = other.vect[1];
+        vect[2] = other.vect[2];
+        attenuate[0] = other.attenuate[0];
+        attenuate[1] = other.attenuate[1];
+        attenuate[2] = other.attenuate[2];
+        diffuse[0] = other.diffuse[0];
+        diffuse[1] = other.diffuse[1];
+        diffuse[2] = other.diffuse[2];
+        diffuse[3] = other.diffuse[3];
+        specular[0] = other.specular[0];
+        specular[1] = other.specular[1];
+        specular[2] = other.specular[2];
+        specular[3] = other.specular[3];
+        ambient[0] = other.ambient[0];
+        ambient[1] = other.ambient[1];
+        ambient[2] = other.ambient[2];
+        ambient[3] = other.ambient[3];
+        target = other.target;
+        direction[0] = other.direction[0];
+        direction[1] = other.direction[1];
+        direction[2] = other.direction[2];
+        exp = other.exp;
+        cutoff = other.cutoff;
+        size = other.size;
+        occlusion = other.occlusion;
+    };
 
     void SetProperties( enum LIGHT_TARGET, const GFXColor &color );
     GFXColor GetProperties( enum LIGHT_TARGET ) const;
