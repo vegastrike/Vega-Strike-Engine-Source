@@ -214,6 +214,7 @@ SET(LIBCMD_SOURCES
     src/cmd/unit_xml.cpp
     src/cmd/weapon_xml.cpp
 
+    src/cmd/collision.cpp
     src/cmd/damageable.cpp
     src/cmd/drawable.cpp
     src/cmd/movable.cpp
