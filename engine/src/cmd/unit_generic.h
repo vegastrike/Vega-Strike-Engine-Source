@@ -1119,12 +1119,13 @@ public:
                             Vector &smallNormal,
                             bool bigasteroid = false,
                             bool smallasteroid = false );
-    virtual void reactToCollision( Unit *smaller,
-                                   const QVector &biglocation,
-                                   const Vector &bignormal,
-                                   const QVector &smalllocation,
-                                   const Vector &smallnormal,
-                                   float dist );
+//    virtual void reactToCollision( Unit *smaller,
+//                                   const QVector &biglocation,
+//                                   const Vector &bignormal,
+//                                   const QVector &smalllocation,
+//                                   const Vector &smallnormal,
+//                                   float dist );
+
 //returns true if jump possible even if not taken
 //Uses Universe thing
     bool jumpReactToCollision( Unit *smaller );

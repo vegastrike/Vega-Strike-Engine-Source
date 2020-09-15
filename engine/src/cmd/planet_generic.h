@@ -149,15 +149,7 @@ public:
     {
         return NULL;
     }
-    virtual void reactToCollision( Unit *smaller,
-                                   const QVector &biglocation,
-                                   const Vector &bignormal,
-                                   const QVector &smalllocation,
-                                   const Vector &smallnormal,
-                                   float dist )
-    {
-        this->Unit::reactToCollision( smaller, biglocation, bignormal, smalllocation, smallnormal, dist );
-    }
+
 
     class PlanetIterator
     {

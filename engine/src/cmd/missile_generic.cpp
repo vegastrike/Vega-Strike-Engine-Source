@@ -128,25 +128,7 @@ void Missile::Kill( bool erase ) {
     Unit::Kill( erase );
 }
 
-void Missile::reactToCollision( Unit *smaller,
-                                const QVector &biglocation,
-                                const Vector &bignormal,
-                                const QVector &smalllocation,
-                                const Vector &smallnormal,
-                                float dist ) {
-    static bool doesmissilebounce = XMLSupport::parse_bool( vs_config->getVariable( "physics", "missile_bounce", "false" ) );
-    if (doesmissilebounce)
-        Unit::reactToCollision( smaller, biglocation, bignormal, smalllocation, smallnormal, dist );
-    BOOST_LOG_TRIVIAL(info) << boost::format("Missile collided with %1%") % smaller->name.get();
-    if (smaller->isUnit() != MISSILEPTR) {
-        //2 missiles in a row can't hit each other
-        this->Velocity = smaller->Velocity;
-        Velocity = smaller->Velocity;
-        Discharge();
-        if (!killed)
-            DealDamageToHull( smalllocation.Cast(), hull+1 );              //should kill, applying addmissile effect
-    }
-}
+
 
 Unit * getNearestTarget( Unit *me )
 {

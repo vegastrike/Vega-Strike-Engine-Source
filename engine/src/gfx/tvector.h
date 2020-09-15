@@ -63,8 +63,6 @@ public:
     TVector& operator-=( const TVector &obj );
     TVector& operator*=( const T &obj );
 
-
-private:
     const TVector<T,S>& operator=( const TVector<T,S> &a );
 
 // Methods
