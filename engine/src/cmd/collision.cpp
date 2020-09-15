@@ -89,6 +89,17 @@ void Collision::shouldApplyForceAndDealDamage(Unit* other_unit)
         return;
     }
 
+    // Collision with a jump point does nothing
+    if(other_unit->isJumppoint())
+    {
+        other_unit->jumpReactToCollision(unit);
+        return;
+    }
+
+    if(unit->isJumppoint())
+    {
+        return;
+    }
 
     switch(unit_type)
     {
