@@ -97,6 +97,8 @@ class StarSystem;
 struct colTrees;
 class Pilot;
 class Limits;
+class MissileGeneric;
+class AsteroidGeneric;
 
 /**
  * Currently the only inheriting function is planet

@@ -57,7 +57,6 @@
 #include "hashtable.h"
 #include "flightgroup.h"
 #include "nebula.h"
-#include "cmd/asteroid_generic.h"
 #include "gfxlib.h"
 #include "cmd/pilot.h"
 #include "cmd/unit_util.h"
@@ -984,7 +983,7 @@ Unit* Mission::call_unit_launch( CreateFlightgroup *fg, int type, const string &
             my_unit = new GameNebula(
                 fg->fg->type.c_str(), false, faction_nr, fg->fg, u+fg->fg->nr_ships-fg->nr_ships );
         } else if (type == ASTEROIDPTR) {
-            my_unit = new GameAsteroid(
+            my_unit = new Asteroid(
                 fg->fg->type.c_str(), faction_nr, fg->fg, u+fg->fg->nr_ships-fg->nr_ships, .01 );
         } else {
             my_unit = new GameUnit< Unit >( fg->fg->type.c_str(), false, faction_nr, string(

@@ -112,7 +112,8 @@ void Collision::shouldApplyForceAndDealDamage(Unit* other_unit)
         return;
 
     case ASTEROIDPTR:
-        unit->Kill();
+        apply_force = true;
+        deal_damage = true;
         return;
 
     // Planets and Nebulas can't be killed right now

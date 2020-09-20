@@ -576,7 +576,7 @@ void SystemFactory::processEnhancement(string element, Star_XML *xml, Object& ob
     } else if(boost::iequals(element, "asteroid")) {
         Flightgroup *fg = getStaticAsteroidFlightgroup(faction);
         unit = static_cast<Unit*>(
-                    new GameAsteroid( filename.c_str(),
+                    new Asteroid( filename.c_str(),
                                                  faction, fg, fg->nr_ships-1,
                                                  absolute_scalex ));
         if (scalex < 0) // This was almost certainly fixed by the above line. TODO: refactor

@@ -15,8 +15,8 @@
 #include "vsfilesystem.h"
 #include "star_system.h"
 #include "universe.h"
-#include "dummy_unit.h"
 #include "game_config.h"
+#include "unit_generics.h"
 
 
 ////////////////////////////////////////////////////////////////
@@ -138,7 +138,7 @@ Missile::Missile( const char *filename,
              float radialeffect,
              float radmult,
              float detonation_radius ) :
-    GameUnit< DummyUnit > ( filename, false, faction, modifications )
+    GameUnit< MissileGeneric > ( filename, false, faction, modifications )
   , time( time )
   , damage( damage )
   , phasedamage( phasedamage )
@@ -178,15 +178,15 @@ float Missile::ExplosionRadius()
 }
 
 
-enum clsptr Missile::isUnit() const
-{
-    return MISSILEPTR;
-}
+//enum clsptr Missile::isUnit() const
+//{
+//    return MISSILEPTR;
+//}
 
 
 void Missile::Kill( bool erase ) {
     Discharge();
-    GameUnit< DummyUnit >::Kill( erase );
+    GameUnit< MissileGeneric >::Kill( erase );
 }
 
 
@@ -200,7 +200,7 @@ void Missile::UpdatePhysics2( const Transformation &trans,
                               UnitCollection *uc )
 {
     // First we move the missile by calling the super
-    GameUnit<DummyUnit>::UpdatePhysics2( trans, old_physical_state, accel, difficulty, transmat, CumulativeVelocity, ResolveLast, uc );
+    GameUnit<MissileGeneric>::UpdatePhysics2( trans, old_physical_state, accel, difficulty, transmat, CumulativeVelocity, ResolveLast, uc );
 
 
     // Get the target
