@@ -7,11 +7,10 @@
 #include "enhancement_generic.h"
 #include "planet.h"
 #include "building_generic.h"
-#include "nebula_generic.h"
 #include "unit_generics.h"
 
 template class GameUnit< Enhancement >;
-template class GameUnit< Nebula >;
+template class GameUnit< NebulaGeneric >;
 template class GameUnit< Unit >;
 template class GameUnit< Building >;
 template class GameUnit< MissileGeneric >;

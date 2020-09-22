@@ -18,7 +18,7 @@
 #include "lin_time.h"
 #include "configxml.h"
 #include "vs_globals.h"
-#include "cmd/nebula_generic.h"
+#include "cmd/nebula.h"
 #include "gfx/camera.h"
 #include "gfx/animation.h"
 #include "gfx/technique.h"

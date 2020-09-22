@@ -53,7 +53,7 @@
 #include "gfx/cockpit_generic.h"
 #include "cmd/images.h"
 #include "savegame.h"
-#include "cmd/nebula_generic.h"
+#include "cmd/nebula.h"
 #include "hashtable.h"
 #include "flightgroup.h"
 #include "nebula.h"
@@ -980,7 +980,7 @@ Unit* Mission::call_unit_launch( CreateFlightgroup *fg, int type, const string &
             free( nam );
             free( citylights );
         } else if (type == NEBULAPTR) {
-            my_unit = new GameNebula(
+            my_unit = new Nebula(
                 fg->fg->type.c_str(), false, faction_nr, fg->fg, u+fg->fg->nr_ships-fg->nr_ships );
         } else if (type == ASTEROIDPTR) {
             my_unit = new Asteroid(

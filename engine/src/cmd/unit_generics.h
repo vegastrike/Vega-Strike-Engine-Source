@@ -25,6 +25,16 @@ public:
     friend class UnitFactory;
 };
 
+class NebulaGeneric : public Unit
+{
+public:
+    NebulaGeneric() {};
+    NebulaGeneric( std::vector< Mesh* >m, bool b, int i) :
+        Unit(m, b, i) {}
+
+    virtual enum clsptr isUnit() const { return NEBULAPTR; }
+    friend class UnitFactory;
+};
 
 class PlanetGeneric : public Unit
 {

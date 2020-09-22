@@ -28,7 +28,7 @@
 //#include "bsp.h"
 #include <assert.h>
 #include <math.h>
-#include "cmd/nebula_generic.h"
+#include "cmd/nebula.h"
 #include <list>
 #include <string>
 #include <fstream>
