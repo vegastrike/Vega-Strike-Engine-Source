@@ -732,25 +732,22 @@ void GameUnit< UnitType >::SwapInHalos()
 //explicit instantiations, added by chuck_starchaser:
 
 
- #include "cmd/building_generic.h"
+#include "cmd/building_generic.h"
 template class GameUnit< Building >;
 
- #include "cmd/planet_generic.h"
-template class GameUnit< Planet >;
-
- #include "cmd/unit_generic.h"
+#include "cmd/unit_generic.h"
 template class GameUnit< Unit >;
 
- #include "cmd/unit_generics.h"
-template class GameUnit< MissileGeneric >;
 
 #include "cmd/unit_generics.h"
 template class GameUnit< AsteroidGeneric >;
+template class GameUnit< MissileGeneric >;
+template class GameUnit< PlanetGeneric >;
 
- #include "cmd/nebula.h"
+#include "cmd/nebula.h"
 template class GameUnit< Nebula >;
 
- #include "cmd/enhancement.h"
+#include "cmd/enhancement.h"
 template class GameUnit< Enhancement >;
 
 /////////////////////////////////////////////////////

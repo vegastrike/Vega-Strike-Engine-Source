@@ -25,4 +25,16 @@ public:
     friend class UnitFactory;
 };
 
+
+class PlanetGeneric : public Unit
+{
+public:
+    PlanetGeneric() {};
+    PlanetGeneric( std::vector< Mesh* >m, bool b, int i) :
+        Unit(m, b, i) {}
+
+    virtual enum clsptr isUnit() const { return PLANETPTR; }
+    friend class UnitFactory;
+};
+
 #endif // UNIT_GENERICS_H

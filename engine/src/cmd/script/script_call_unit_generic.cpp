@@ -40,7 +40,7 @@
 
 #include "vegastrike.h"
 #include "cmd/collection.h"
-#include "cmd/planet_generic.h"
+#include "cmd/planet.h"
 #include "cmd/ai/order.h"
 #include "cmd/ai/aggressive.h"
 #include "cmd/ai/missionscript.h"
@@ -969,7 +969,7 @@ Unit* Mission::call_unit_launch( CreateFlightgroup *fg, int type, const string &
                 d = parse_alpha( bdst );
             if (bsrc[0] != '\0')
                 s = parse_alpha( bsrc );
-            my_unit = new GamePlanet( QVector( 0, 0, 0 ), QVector( 0, 0, 0 ), 0, Vector( 0, 0, 0 ),
+            my_unit = new Planet( QVector( 0, 0, 0 ), QVector( 0, 0, 0 ), 0, Vector( 0, 0, 0 ),
                                                  0, 0, radius, tex, "", "", s,
                                                  d, ParseDestinations( destinations ),
                                                  QVector( 0, 0, 0 ), NULL, mat,

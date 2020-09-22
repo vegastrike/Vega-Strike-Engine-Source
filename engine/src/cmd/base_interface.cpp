@@ -9,7 +9,7 @@
 #include "gfx/cockpit_generic.h"
 #include "python/init.h"
 #include "python/python_compile.h"
-#include "planet_generic.h"
+#include "planet.h"
 #include "base_util.h"
 #include "config_xml.h"
 #include "save_util.h"

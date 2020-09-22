@@ -378,7 +378,7 @@ Planet* SystemFactory::processPlanet(Star_XML *xml, Object& object, Planet* owne
     }
 
     Vector computed_rotational_velocity = ComputeRotVel( rotational_velocity, R, S );
-    Planet *planet = new GamePlanet(R, S, velocity,
+    Planet *planet = new Planet(R, S, velocity,
                                                computed_rotational_velocity,
                                                position, gravity, radius,
                                                filename, technique, unitname,

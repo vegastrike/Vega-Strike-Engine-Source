@@ -5,7 +5,7 @@
 #include "unit_generic.h"
 #include "unit.h"
 #include "enhancement_generic.h"
-#include "planet_generic.h"
+#include "planet.h"
 #include "building_generic.h"
 #include "nebula_generic.h"
 #include "unit_generics.h"

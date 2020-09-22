@@ -8,6 +8,6 @@
 
 bool PlanetHasLights( Unit *un )
 {
-    return ( (GamePlanet*) un )->hasLights();
+    return ( (Planet*) un )->hasLights();
 }
 
