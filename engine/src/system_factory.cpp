@@ -591,13 +591,13 @@ void SystemFactory::processEnhancement(string element, Star_XML *xml, Object& ob
 
         if (xml->ct == nullptr && xml->parentterrain != nullptr) // Terrain
             unit = static_cast<Unit*>(
-                        new GameBuilding(xml->parentterrain,
+                        new Building(xml->parentterrain,
                                                     boost::iequals(element, "vehicle"),
                                                     filename.c_str(), false, faction,
                                                     string("")));
         else if(xml->ct != nullptr) // Continuous terrain
             unit = static_cast<Unit*>(
-                        new GameBuilding(xml->ct,
+                        new Building(xml->ct,
                                                     boost::iequals(element, "vehicle"),
                                                     filename.c_str(), false, faction,
                                                     string("")));

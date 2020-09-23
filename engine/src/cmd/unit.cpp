@@ -732,8 +732,7 @@ void GameUnit< UnitType >::SwapInHalos()
 //explicit instantiations, added by chuck_starchaser:
 
 
-#include "cmd/building_generic.h"
-template class GameUnit< Building >;
+
 
 #include "cmd/unit_generic.h"
 template class GameUnit< Unit >;
@@ -741,6 +740,7 @@ template class GameUnit< Unit >;
 
 #include "cmd/unit_generics.h"
 template class GameUnit< AsteroidGeneric >;
+template class GameUnit< BuildingGeneric >;
 template class GameUnit< MissileGeneric >;
 template class GameUnit< NebulaGeneric >;
 template class GameUnit< PlanetGeneric >;

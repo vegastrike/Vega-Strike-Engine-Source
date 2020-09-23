@@ -8,7 +8,7 @@
 #include "vegastrike.h"
 #include <assert.h>                              /// needed for assert() calls.
 #include "gfx/mesh.h"
-#include "cmd/building_generic.h"
+#include "cmd/building.h"
 #include "cmd/ai/aggressive.h"
 #include "cmd/ai/fire.h"
 #include "cmd/nebula.h"

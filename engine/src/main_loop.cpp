@@ -878,7 +878,7 @@ void createObjects( std::vector< std::string > &fighter0name,
                 bool isvehicle = false;
                 if (fg_terrain == -2) {
                     fighters[a] =
-                        new GameBuilding( myterrain, isvehicle, fightername, false, tmptarget[a], string( "" ), fg );
+                        new Building( myterrain, isvehicle, fightername, false, tmptarget[a], string( "" ), fg );
                 } else {
                     if ( fg_terrain >= (int) _Universe->activeStarSystem()->numTerrain() ) {
                         ContinuousTerrain *t;
@@ -886,11 +886,11 @@ void createObjects( std::vector< std::string > &fighter0name,
                             fg_terrain-_Universe->activeStarSystem()->numTerrain()
                             < _Universe->activeStarSystem()->numContTerrain() );
                         t = _Universe->activeStarSystem()->getContTerrain( fg_terrain-_Universe->activeStarSystem()->numTerrain() );
-                        fighters[a] = new GameBuilding( t, isvehicle, fightername, false, tmptarget[a], string(
+                        fighters[a] = new Building( t, isvehicle, fightername, false, tmptarget[a], string(
                                                                        "" ), fg );
                     } else {
                         Terrain *t = _Universe->activeStarSystem()->getTerrain( fg_terrain );
-                        fighters[a] = new GameBuilding( t, isvehicle, fightername, false, tmptarget[a], string(
+                        fighters[a] = new Building( t, isvehicle, fightername, false, tmptarget[a], string(
                                                                        "" ), fg );
                     }
                 }
