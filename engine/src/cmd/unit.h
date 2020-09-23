@@ -30,6 +30,7 @@
 #include <map>
 #include <memory>
 #include "gfx/vec.h"
+#include "dummy_unit.h"
 
 class HaloSystem;
 struct GFXColor; // labeled as class, declared as struct in gfxlib_struct.h
@@ -202,8 +203,8 @@ class Unit;
 template < class Unit >
 class GameUnit;
 
-class Missile;
-template < class Missile >
+class DummyUnit;
+template < class DummyUnit >
 class GameUnit;
 
 class Nebula;
