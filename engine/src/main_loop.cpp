@@ -936,7 +936,7 @@ void AddUnitToSystem( const SavedUnits *su )
     {
     case ENHANCEMENTPTR:
         un =
-            new GameEnhancement( su->filename.get().c_str(), FactionUtil::GetFactionIndex( su->faction ), string( "" ) );
+            new Enhancement( su->filename.get().c_str(), FactionUtil::GetFactionIndex( su->faction ), string( "" ) );
         un->SetPosition( QVector( 0, 0, 0 ) );
         break;
     case UNITPTR:

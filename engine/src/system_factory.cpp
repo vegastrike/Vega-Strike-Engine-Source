@@ -584,7 +584,7 @@ void SystemFactory::processEnhancement(string element, Star_XML *xml, Object& ob
 
     } else if(boost::iequals(element, "enhancement")) {
         unit = static_cast<Unit*>(
-                    new GameEnhancement(filename.c_str(), faction, string("")));
+                    new Enhancement(filename.c_str(), faction, string("")));
 
     } else if(boost::iequals(element, "building") ||
               boost::iequals(element, "vehicle")) {

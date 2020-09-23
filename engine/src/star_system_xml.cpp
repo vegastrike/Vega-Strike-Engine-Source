@@ -12,7 +12,7 @@
 #include "cmd/ai/aggressive.h"
 #include "cmd/ai/fire.h"
 #include "cmd/nebula.h"
-#include "cmd/enhancement_generic.h"
+#include "cmd/enhancement.h"
 #include "cmd/script/flightgroup.h"
 #include "universe_util.h"
 #include "cmd/atmosphere.h"

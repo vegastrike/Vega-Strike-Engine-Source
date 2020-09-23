@@ -25,6 +25,17 @@ public:
     friend class UnitFactory;
 };
 
+class EnhancementGeneric : public Unit
+{
+public:
+    EnhancementGeneric() {};
+    EnhancementGeneric( std::vector< Mesh* >m, bool b, int i) :
+        Unit(m, b, i) {}
+
+    virtual enum clsptr isUnit() const { return ENHANCEMENTPTR; }
+    friend class UnitFactory;
+};
+
 class MissileGeneric : public Unit
 {
 public:

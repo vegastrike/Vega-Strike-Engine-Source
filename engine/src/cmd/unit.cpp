@@ -741,12 +741,12 @@ template class GameUnit< Unit >;
 #include "cmd/unit_generics.h"
 template class GameUnit< AsteroidGeneric >;
 template class GameUnit< BuildingGeneric >;
+template class GameUnit< EnhancementGeneric >;
 template class GameUnit< MissileGeneric >;
 template class GameUnit< NebulaGeneric >;
 template class GameUnit< PlanetGeneric >;
 
 
-#include "cmd/enhancement.h"
-template class GameUnit< Enhancement >;
+
 
 /////////////////////////////////////////////////////
