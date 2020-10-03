@@ -745,8 +745,8 @@ template class GameUnit< Planet >;
  #include "cmd/unit_generic.h"
 template class GameUnit< Unit >;
 
- #include "cmd/missile_generic.h"
-template class GameUnit< Missile >;
+ #include "cmd/dummy_unit.h"
+template class GameUnit< DummyUnit >;
 
  #include "cmd/nebula.h"
 template class GameUnit< Nebula >;

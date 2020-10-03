@@ -1,5 +1,5 @@
 #include "unit_generic.h"
-#include "missile_generic.h"
+#include "missile.h"
 #include "beam.h"
 #include "bolt.h"
 #include "weapon_xml.h"
@@ -258,7 +258,7 @@ bool Mount::PhysicsAlignedFire( Unit *caller,
             string skript   = /*string("ai/script/")+*/ type->file+string( ".xai" );
             VSError     err = LookForFile( skript, AiFile );
             if (err <= Ok) {
-                temp = new GameMissile(
+                temp = new Missile(
                     type->file.c_str(), caller->faction, "", type->Damage, type->PhaseDamage, type->Range/type->Speed,
                     type->Radius, type->RadialSpeed, type->PulseSpeed /*detonation_radius*/);
                 if (!match_speed_with_target) {

@@ -20,6 +20,8 @@ namespace Audio {
      */
     class Listener
     {
+        Range<Scalar> cosAngleRange;
+        
         LVector3 position;
         Vector3 atDirection;
         Vector3 upDirection;
@@ -29,7 +31,6 @@ namespace Audio {
         
         Scalar gain;
         
-        Range<Scalar> cosAngleRange;
         
         SharedPtr<UserData> userDataPtr;
         SharedPtr<RenderableListener> rendererDataPtr;

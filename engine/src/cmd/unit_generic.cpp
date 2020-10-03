@@ -22,7 +22,7 @@
 #include "cmd/ai/flybywire.h"
 #include "cmd/ai/aggressive.h"
 #include "python/python_class.h"
-#include "missile_generic.h"
+#include "missile.h"
 #include "gfx/cockpit_generic.h"
 #include "gfx/vsbox.h"
 #include <algorithm>
@@ -37,7 +37,6 @@
 #include "gfx/camera.h"
 #include "options.h"
 #include "unit.h"
-#include "missile.h"
 #include "star_system.h"
 #include "universe.h"
 
@@ -319,7 +318,7 @@ bool CrashForceDock( Unit *thus, Unit *dockingUn, bool force )
     return false;
 }
 
-void Unit::reactToCollision( Unit *smalle,
+/*void Unit::reactToCollision( Unit *smalle,
                              const QVector &biglocation,
                              const Vector &bignormal,
                              const QVector &smalllocation,
@@ -544,7 +543,7 @@ void Unit::reactToCollision( Unit *smalle,
             }
         }
     }
-}
+}*/
 
 void Unit::ActivateJumpDrive( int destination )
 {
@@ -6445,7 +6444,7 @@ void Unit::EjectCargo( unsigned int index )
                         if (cargotime == 0.0) {
                             cargo = new GameUnit< Unit >( "eject", false, fac, "", NULL, 0, NULL);
                         } else {
-                            cargo = new GameMissile( "eject",
+                            cargo = new Missile( "eject",
                                                                fac, "",
                                                                0,
                                                                0,
@@ -6467,7 +6466,7 @@ void Unit::EjectCargo( unsigned int index )
                         rot    = grot;
                     }
                     int upgrfac = FactionUtil::GetUpgradeFaction();
-                    cargo = new GameMissile( tmpnam.c_str(),
+                    cargo = new Missile( tmpnam.c_str(),
                                                         upgrfac,
                                                         "",
                                                         0,
@@ -6481,7 +6480,7 @@ void Unit::EjectCargo( unsigned int index )
             }
             if (cargo->name == "LOAD_FAILED") {
                 cargo->Kill();
-                cargo = new GameMissile( "generic_cargo",
+                cargo = new Missile( "generic_cargo",
                                                    FactionUtil::GetUpgradeFaction(), "",
                                                    0,
                                                    0,

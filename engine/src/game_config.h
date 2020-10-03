@@ -5,6 +5,8 @@
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/xml_parser.hpp>
 #include <boost/foreach.hpp>
+#include <boost/algorithm/string.hpp>
+
 #include <string>
 #include <set>
 #include <map>
@@ -38,6 +40,14 @@ public:
 
 
 
+template <>
+inline bool GameConfig::GetVariable(string const &section, string const &name, bool default_value)
+{
+    string result = _GetVariable(section, name);
+    if(result == DEFAULT_ERROR_VALUE) return default_value;
+    boost::algorithm::to_lower(result);
+    return result == "true";
+}
 
 template <>
 inline float GameConfig::GetVariable(string const &section, string const &name, float default_value)

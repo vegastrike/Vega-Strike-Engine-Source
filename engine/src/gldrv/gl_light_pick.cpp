@@ -30,10 +30,13 @@ struct light_key
         intensity_key = inte;
     }
 };
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-function"  // Disable the unused warning for this function only
 static bool operator<( light_key tmp1, light_key tmp2 )
 {
     return tmp1.intensity_key < tmp2.intensity_key;
 }
+#pragma GCC diagnostic pop
 
 static priority_queue< light_key >lightQ;
 

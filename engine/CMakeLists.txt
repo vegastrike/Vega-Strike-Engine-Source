@@ -199,7 +199,6 @@ SET(LIBCMD_SOURCES
     src/cmd/collide.cpp
     src/cmd/container.cpp
     src/cmd/csv.cpp
-    src/cmd/missile_generic.cpp
     src/cmd/mount.cpp
     src/cmd/nebula_generic.cpp
     src/cmd/planet_generic.cpp
@@ -214,10 +213,12 @@ SET(LIBCMD_SOURCES
     src/cmd/unit_xml.cpp
     src/cmd/weapon_xml.cpp
 
+    src/cmd/collision.cpp
     src/cmd/damageable.cpp
     src/cmd/drawable.cpp
     src/cmd/movable.cpp
     src/cmd/computer.cpp
+    src/cmd/dummy_unit.cpp
 
     src/cmd/planetary_orbit.cpp
 )
@@ -473,6 +474,7 @@ SET(VEGASTRIKE_SOURCES
     src/cmd/building.cpp
     src/cmd/click_list.cpp
     src/cmd/cont_terrain.cpp
+    src/cmd/missile.cpp
     src/cmd/music.cpp
     src/cmd/nebula.cpp
     src/cmd/planet.cpp
