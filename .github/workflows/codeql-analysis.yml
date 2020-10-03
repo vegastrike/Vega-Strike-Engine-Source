@@ -64,8 +64,8 @@ jobs:
     #    uses a compiled language
 
     - run: |
-      sudo script/bootstrap
-      script/build.sh
+        sudo script/bootstrap
+        script/build.sh
 
     - name: Perform CodeQL Analysis
       uses: github/codeql-action/analyze@v1
