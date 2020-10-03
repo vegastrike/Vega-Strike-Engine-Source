@@ -443,7 +443,10 @@ void GamePlanet::DrawTerrain()
 
 extern bool CrashForceDock( Unit *thus, Unit *dockingUn, bool force );
 extern void abletodock( int dock );
-void GamePlanet::reactToCollision( Unit *un,
+
+// Disabled this code.
+// Most of it does nothing at this point.
+/*void GamePlanet::reactToCollision( Unit *un,
                                    const QVector &biglocation,
                                    const Vector &bignormal,
                                    const QVector &smalllocation,
@@ -459,12 +462,12 @@ void GamePlanet::reactToCollision( Unit *un,
         un->SetPlanetOrbitData( terraintrans );
         Matrix top;
         Identity( top );
-        /*
-         *  Vector posRelToTerrain = terraintrans->InvTransform(un->LocalPosition());
-         *  top[12]=un->Position().i- posRelToTerrain.i;
-         *  top[13]=un->Position().j- posRelToTerrain.j;
-         *  top[14]=un->Position().k- posRelToTerrain.k;
-         */
+
+         //  Vector posRelToTerrain = terraintrans->InvTransform(un->LocalPosition());
+         // top[12]=un->Position().i- posRelToTerrain.i;
+         // top[13]=un->Position().j- posRelToTerrain.j;
+         // top[14]=un->Position().k- posRelToTerrain.k;
+
         Vector P, Q, R;
         un->GetOrientation( P, Q, R );
         terraintrans->InvTransformBasis( top, P, Q, R, un->Position() );
@@ -492,7 +495,8 @@ void GamePlanet::reactToCollision( Unit *un,
     }
     //nothing happens...you fail to do anythign :-)
     //maybe air reisstance here? or swithc dynamics to atmos mode
-}
+}*/
+
 void GamePlanet::EnableLights()
 {
     for (unsigned int i = 0; i < lights.size(); i++)

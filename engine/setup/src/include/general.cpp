@@ -28,14 +28,22 @@ int RANDOMIZED = 0;
 // Gets the next parameter from the string, sorted by a space
 // Sticks a \0 at the space and returns a pointer to the right side.
 
-char *next_parm(char *string) {
+char *next_parm(char *string) 
+{
 	char *next;
-	if (string[0] == '\0') { return 0; }
+	if (string[0] == '\0') 
+        { 
+            return 0; 
+        }
 	next = string;
-	while (next[0] != ' ' && next[0] != '\0') {
+	while (next[0] != ' ' && next[0] != '\0') 
+        {
 		next++;
 	}
-	if (next[0] == '\0') { return next; }
+	if (next[0] == '\0') 
+        { 
+            return next; 
+        }
 	next[0] = '\0';
 	next++;
 	return next;
@@ -79,21 +87,38 @@ char *split_words(char *string, int max_words) {
 
 // Better yet, use glib
 
-char *ptr_copy(char *string) {
-	char *alloc;
-	alloc = (char *)malloc(strlen(string)+1);
-	if (alloc == 0) { fprintf(stderr, "Out of memory\n"); exit(-1); }
-	strncpy(alloc, string, strlen(string));
-	alloc[strlen(string)] = '\0';
-	return alloc;
+char *ptr_copy(const char *string)
+{
+#if _XOPEN_SOURCE >= 500 || _POSIX_C_SOURCE >= 200809L
+    return strdup(string);
+#else
+    size_t buf_size = strlen(string) + 1;
+    char *alloc;
+    alloc = (char *)malloc(buf_size);
+    if (alloc == nullptr)
+    {
+        fprintf(stderr, "Out of memory\n");
+        fflush(stderr);
+        exit(-1);
+    }
+#ifdef __STDC_LIB_EXT1__
+    strcpy_s(alloc, buf_size, string);
+#else
+    strncpy(alloc, string, buf_size);
+#endif
+    alloc[buf_size - 1] = '\0';
+    return alloc;
+#endif
 }
 
 /* chomp
  * This function replaces trailing \n (carriage return) with the null character
  */
-void chomp(char *line) {
+void chomp(char *line) 
+{
 	int current;
-	for (current = strlen(line) -1; current>=0&&(line[current] == '\n' || line[current] == ' ' || line[current] == 13); current--) {
+	for (current = strlen(line) -1; current>=0&&(line[current] == '\n' || line[current] == ' ' || line[current] == 13); current--) 
+        {
 		line[current] = '\0';
 	}
 }
@@ -102,8 +127,12 @@ void chomp(char *line) {
  * returns a pointer to the new starting character
  */
 
-char *pre_chomp(char *line) {
-	while (line[0] == '=' || line[0] == ' ' || line[0] == 13 || line[0] == 9) { line++; }
+char *pre_chomp(char *line) 
+{
+	while (line[0] == '=' || line[0] == ' ' || line[0] == 13 || line[0] == 9) 
+        { 
+            line++; 
+        }
 	/* printf("Debug: (%c) (%d) %s\n", line[0], line[0], line); */
 	return line;
 }
@@ -112,44 +141,49 @@ char *pre_chomp(char *line) {
  * This function searches the first parameter for the second parameter
  * If the second parameter is found, it is replaced with the third parameter
  */
-
-char *replace(char *line, char *search, char *replace, int LENGTH) {
-	int  dif, calc;
-	char *ptr_new, *location;
-
-	char *chr_new,*current;
-	chr_new = (char *) malloc (sizeof (char)*LENGTH);
-	current = (char *) malloc (sizeof (char)*LENGTH);
-	calc = strlen(line) - strlen(search) + strlen(replace);
-    if (calc > LENGTH) {
-        free(chr_new);
-        free(current);
-        return line;
-    }
-	strcpy(current, line);
-	while ((location = strstr(current, search)) != nullptr) {
-		chr_new[0] = '\0';
-		calc = strlen(current) - strlen(search) + strlen(replace);
-        if (calc > LENGTH) {
-            strcpy(line, current);
-            free(current);
-            free(chr_new);
-            return line;
-        }
-		dif = location - current;
-		strncat(chr_new, current, dif);
-		strncat(chr_new, replace, strlen(replace));
-		ptr_new = current + dif + strlen(search);
-		strncat(chr_new, ptr_new, strlen(ptr_new));
-		strcpy(current, chr_new);
-	}
-	strcpy(line, current);
-	free(chr_new);
-	free(current);
-	return line;
-}
-
-char *strmov(char *to, char *from) {
+/*    --- Seems this function is not used at all.
+*char *replace(char *line, char *search, char *replace, int LENGTH) 
+*{
+*	int  dif, calc;
+*	char *ptr_new, *location;
+*
+*	char *chr_new,*current;
+*	chr_new = (char *) malloc (sizeof (char)*LENGTH);
+*	current = (char *) malloc (sizeof (char)*LENGTH);
+*	calc = strlen(line) - strlen(search) + strlen(replace);
+*    if (calc > LENGTH) 
+*    {
+*        free(chr_new);
+*        free(current);
+*        return line;
+*    }
+*	strcpy(current, line);
+*	while ((location = strstr(current, search)) != nullptr) 
+*        {
+*		chr_new[0] = '\0';
+*		calc = strlen(current) - strlen(search) + strlen(replace);
+*                if (calc > LENGTH) 
+*                {
+*                    strcpy(line, current);
+*                    free(current);
+*                    free(chr_new);
+*                    return line;
+*                }
+*		dif = location - current;
+*		strncat(chr_new, current, dif);
+*		strcat(chr_new, replace);
+*		ptr_new = current + dif + strlen(search);
+*		strcat(chr_new, ptr_new);
+*		strcpy(current, chr_new);
+*	}
+*	strcpy(line, current);
+*	free(chr_new);
+*	free(current);
+*	return line;
+*}
+*/
+char *strmov(char *to, char *from) 
+{
 	char *end;
 	strcpy(to, from);
 	end = to + strlen(to);
@@ -160,44 +194,69 @@ char *strmov(char *to, char *from) {
  * This function makes sure all characters are in lower case
  */
 
-void lower(char *line) {
+void lower(char *line) 
+{
 	int current;
-	for (current = 0; line[current] != '\0'; current++) {
-		if (line[current] >= 65 && line[current] <= 90) {
+	for (current = 0; line[current] != '\0'; current++) 
+        {
+		if (line[current] >= 65 && line[current] <= 90) 
+                {
 			line[current] += 32;
 		}
 	}
 }
 
-void strappend(char *dest, char *source, int length) {
+void strappend(char *dest, char *source, int length) 
+{
 	int DoLength;
 	DoLength = length - strlen(dest);
 	strncat(dest, source, DoLength);
 	return;
 }
 
-int randnum(int start, int end) {
+int randnum(int start, int end) 
+{
 	int random, dif, min, max;
-	if (RANDOMIZED == 0) { srand(time(NULL)); RANDOMIZED = 1; }
+	if (RANDOMIZED == 0) 
+        { 
+            srand(time(NULL)); RANDOMIZED = 1; 
+        }
 	min = start;
 	max = end;
-	if (end < start) { min = end; max = start; }
-	if (end == start) { return start; }
+	if (end < start) 
+        { 
+            min = end; max = start; 
+        }
+	if (end == start) 
+        { 
+            return start;
+        }
 	dif = max - min + 1;
 	random = rand() % dif;
 	random += min;
 	return random;
 }
 
-void randcode(char *line, int length) {
+void randcode(char *line, int length) 
+{
 	int current, randomA, randomB, test;
 	test = 2;
-	for (current = 0; current < length; current++) {
-		if (test % 5 == 1 && current > 1) { line[current] = '-'; test++; continue; }
+	for (current = 0; current < length; current++) 
+        {
+		if (test % 5 == 1 && current > 1) 
+                { 
+                    line[current] = '-'; test++; continue; 
+                }
 		randomA = randnum(1,2);
 		randomB = 60;
-		if (randomA == 1) { randomB = randnum(48,57); }
-		if (randomA == 2) { randomB = randnum(65,90); }
+		if (randomA == 1) 
+                { 
+                    randomB = randnum(48,57); 
+                }
+		if (randomA == 2) 
+                { 
+                    randomB = randnum(65,90); 
+                }
 		line[current] = randomB;
 		test++;
 	}
@@ -205,16 +264,24 @@ void randcode(char *line, int length) {
 	return;
 }
 
-void vs_itoa(char *line, int number, int length) {
+void vs_itoa(char *line, int number, int length) 
+{
 	int current, cur, multiplier, reduce, base;
 	base = number;
 	cur = 0;
 	line[0] = '\0';
-	while (1) {
+	while (1) 
+        {
 		multiplier = 0;
 		current = base;
-		while (current / 10 >= 1) { current /= 10; multiplier++; continue; }
-		if (base == 0) { break; }
+		while (current / 10 >= 1) 
+                { 
+                    current /= 10; multiplier++; continue; 
+                }
+		if (base == 0) 
+                { 
+                    break; 
+                }
 		current /= 10;
 		reduce = pwer(1,multiplier);
 		current = base / reduce;
@@ -228,19 +295,23 @@ void vs_itoa(char *line, int number, int length) {
 	return;
 }
 
-int pwer(int start, int end) {
+int pwer(int start, int end) 
+{
 	int current, val_return;
 	val_return = start;
-	for (current = 2; current <= end; current++) {
+	for (current = 2; current <= end; current++) 
+        {
 		val_return *= 10;
 	}
 	return val_return;
 }
 
-int pwr(int start, int end) {
+int pwr(int start, int end) 
+{
 	int current, val_return;
 	val_return = 1;
-	for (current = 2; current <= end; current++) {
+	for (current = 2; current <= end; ++current) 
+        {
 		val_return *= start;
 	}
 	return val_return;
@@ -248,10 +319,12 @@ int pwr(int start, int end) {
 
 #ifdef __cplusplus
 
-double pwer(double start, long end) {
+double pwer(double start, long end) 
+{
 	double current, val_return;
 	val_return = start;
-	for (current = 2; current <= end; current++) {
+	for (current = 2; current <= end; current++) 
+        {
 		val_return *= start;
 	}
 	return val_return;
@@ -259,7 +332,8 @@ double pwer(double start, long end) {
 
 #endif
 
-void btoa(char *dest, char *string) {
+void btoa(char *dest, char *string) 
+{
 	int max, cur, pos, new_val;
 	char *ptr_char;
 	char *new_string= (char *)malloc(strlen(string)+1);
@@ -268,10 +342,20 @@ void btoa(char *dest, char *string) {
 	pos = 0;
 	ptr_char = string;
 	new_val = 0;
-	while (ptr_char[0] != '\0') {
-		if (ptr_char[0] == '1') { new_val += pwr(2,cur); }
+	while (ptr_char[0] != '\0') 
+        {
+		if (ptr_char[0] == '1') 
+                { 
+                    new_val += pwr(2,cur); 
+                }
 		cur--;
-		if (cur < 0) { cur = max; new_string[pos] = new_val; new_val = 0; pos++; }
+		if (cur < 0) 
+                { 
+                    cur = max; 
+                    new_string[pos] = new_val; 
+                    new_val = 0; 
+                    pos++; 
+                }
 		ptr_char++;
 	}
 	new_string[pos] = '\0';
@@ -283,14 +367,23 @@ void btoa(char *dest, char *string) {
 #ifdef GLIB
 
 // Some handy wrappers for glib that help error handling which prevent segfaults
-char *GetString(GString *line) {
-	if (line == 0) { return ""; }
+char *GetString(GString *line) 
+{
+	if (line == 0) 
+        { 
+            return ""; 
+        }
 	return line->str;
 }
 
-void SetString(GString **ptr, char *line) {
-	if (ptr <= 0) { return; }
-	if (*ptr <= 0) {
+void SetString(GString **ptr, char *line) 
+{
+	if (ptr <= 0) 
+        { 
+            return; 
+        }
+	if (*ptr <= 0) 
+        {
 		*ptr = g_string_new(line);
 		return;
 	}
@@ -299,10 +392,14 @@ void SetString(GString **ptr, char *line) {
 
 #endif
 
-char *NewString(const char *line) {
+char *NewString(const char *line) 
+{
 	char *new_str;
 	new_str = (char *)malloc(strlen(line)+1);
-	if (new_str == 0) { fprintf(stderr, "Out of Memory\n"); exit(-1); }
+	if (new_str == 0) 
+        { 
+            fprintf(stderr, "Out of Memory\n"); exit(-1); 
+        }
 	strcpy(new_str, line);
 	new_str[strlen(line)] = '\0';
 	return new_str;
@@ -311,29 +408,53 @@ char *NewString(const char *line) {
 
 // Checks for a <!-- and returns a pointer to the next character
 // A \0 is placed at the < so that anything in front can be kept
-char *xml_pre_chomp_comment(char *string) {
+char *xml_pre_chomp_comment(char *string) 
+{
 	int length, cur;
-	if (string[0] == '<' && string[1] == '!') { string[0] = '\0'; return string += 5; }
+	if (string[0] == '<' && string[1] == '!') 
+        {
+            string[0] = '\0'; return string += 5; 
+        }
 	length = strlen(string) - 5;
 	for (cur = 0; cur <= length; cur++) {
-		if (string[cur] == '<' && string[cur+1] == '!') { string[cur] = '\0'; return &string[cur+5]; }
+		if (string[cur] == '<' && string[cur+1] == '!') 
+                { 
+                    string[cur] = '\0'; 
+                    return &string[cur+5]; 
+                }
 	}
 	return &string[length+5];
 }
-char *xml_chomp_comment(char *string) {
+char *xml_chomp_comment(char *string) 
+{
 	int len, cur;
-	if (string[0] == '\0') { return string; }
+	if (string[0] == '\0') 
+        { 
+            return string; 
+        }
 	len = strlen(string) - 1;
-	if (len <= 3) { return &string[len+1]; }
-	if (string[len] == '>' && string[len-1] == '-' && string[len-2] == '-') {
-		if (string[len-3] == ' ') { string[len-3] = '\0'; }
+	if (len <= 3) 
+        { 
+            return &string[len+1]; 
+        }
+	if (string[len] == '>' && string[len-1] == '-' && string[len-2] == '-') 
+        {
+		if (string[len-3] == ' ') 
+                { 
+                    string[len-3] = '\0'; 
+                }
 		string[len-2] = '\0';
 		return &string[len-2];
 	}
 	len -= 3;
-	for (cur = 0; cur <= len; cur++) {
-		if (string[cur] == '-' && string[cur+2] == '>') {
-			if (string[cur-1] == ' ') { string[cur-1] = '\0'; }
+	for (cur = 0; cur <= len; cur++) 
+        {
+		if (string[cur] == '-' && string[cur+2] == '>') 
+                {
+			if (string[cur-1] == ' ') 
+                        { 
+                            string[cur-1] = '\0'; 
+                        }
 			string[cur] = '\0';
 			string[cur+2] = '\0';
 			return &string[cur+3];

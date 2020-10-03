@@ -96,12 +96,7 @@ public:
     {
         return atmosphere;
     }
-    void reactToCollision( Unit *smaller,
-                           const QVector &biglocation,
-                           const Vector &bignormal,
-                           const QVector &smalllocation,
-                           const Vector &smallnormal,
-                           float dist );
+
 
     friend class Planet::PlanetIterator;
     friend class PlanetaryOrbit;

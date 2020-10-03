@@ -40,7 +40,7 @@
 #include "cmd/unit_generic.h"
 #include "cmd/nebula_generic.h"
 #include "cmd/unit_util.h"
-#include "cmd/missile_generic.h"
+#include "cmd/missile.h"
 
 #include "gfx/sphere.h"
 #include "gfx/particle.h"

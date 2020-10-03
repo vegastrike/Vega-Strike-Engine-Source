@@ -5,8 +5,39 @@
 #include "unit_find.h"
 #include "star_system.h"
 #include "universe.h"
+#include "game_config.h"
 
 #include <iostream>
+
+static const float VELOCITY_MAX = GameConfig::GetVariable( "physics", "velocity_max", 10000);
+
+//for the heck of it.
+static const float humanwarprampuptime = GameConfig::GetVariable( "physics", "warprampuptime", 5);
+
+//for the heck of it.
+static const float compwarprampuptime = GameConfig::GetVariable( "physics", "computerwarprampuptime", 10);
+
+static const float warprampdowntime = GameConfig::GetVariable( "physics", "warprampdowntime", 0.5f);
+static const float WARPMEMORYEFFECT = GameConfig::GetVariable( "physics", "WarpMemoryEffect", 0.9f);
+static const float maxplayerrotationrate = GameConfig::GetVariable( "physics", "maxplayerrot", 24);
+static const float maxnonplayerrotationrate = GameConfig::GetVariable( "physics", "maxNPCrot", 360);
+static const float warpstretchcutoff = GameConfig::GetVariable( "graphics", "warp_stretch_cutoff", 500000) * GameConfig::GetVariable( "physics", "game_speed", 1);
+static const float warpstretchoutcutoff = GameConfig::GetVariable( "graphics", "warp_stretch_decel_cutoff", 500000) * GameConfig::GetVariable( "physics", "game_speed", 1);
+static const float sec = GameConfig::GetVariable( "graphics", "insys_jump_ani_second_ahead", 4) / (GameConfig::GetVariable( "physics", "game_speed", 1) * GameConfig::GetVariable( "physics", "game_accel", 1));
+static const float endsec = GameConfig::GetVariable( "graphics", "insys_jump_ani_second_ahead_end",0.03f) /( GameConfig::GetVariable( "physics", "game_speed",1.0f) *GameConfig::GetVariable( "physics", "game_accel", 1.0f) );
+
+
+//Pi^2
+
+static const float  warpMultiplierMin = GameConfig::GetVariable( "physics", "warpMultiplierMin", 9.86960440109f);
+
+//C
+static const float  warpMultiplierMax = GameConfig::GetVariable( "physics", "warpMultiplierMax", 300000000 );
+
+//Pi^2 * C
+static const float warpMaxEfVel = GameConfig::GetVariable( "physics", "warpMaxEfVel", 2960881320.0f);
+
+
 
 Movable::Movable() : cumulative_transformation_matrix( identity_matrix ) {}
 
@@ -86,7 +117,7 @@ void Movable::UpdatePhysics( const Transformation &trans,
                           UnitCollection *uc,
                           Unit *superunit )
 {
-    static float VELOCITY_MAX = XMLSupport::parse_float( vs_config->getVariable( "physics", "velocity_max", "10000" ) );
+
 
 
     //Save information about when this happened
@@ -129,12 +160,7 @@ void Movable::UpdatePhysics( const Transformation &trans,
 
 void Movable::AddVelocity( float difficulty )
 {
-    //for the heck of it.
-    static float humanwarprampuptime = XMLSupport::parse_float( vs_config->getVariable( "physics", "warprampuptime", "5" ) );
-    //for the heck of it.
-    static float compwarprampuptime  =
-        XMLSupport::parse_float( vs_config->getVariable( "physics", "computerwarprampuptime", "10" ) );
-    static float warprampdowntime    = XMLSupport::parse_float( vs_config->getVariable( "physics", "warprampdowntime", "0.5" ) );
+
     float  lastWarpField = graphicOptions.WarpFieldStrength;
 
     bool   playa = isPlayerShip();
@@ -183,7 +209,7 @@ void Movable::AddVelocity( float difficulty )
         v = GetWarpVelocity();
     else
         v = Velocity;
-    static float WARPMEMORYEFFECT = XMLSupport::parse_float( vs_config->getVariable( "physics", "WarpMemoryEffect", "0.9" ) );
+
     graphicOptions.WarpFieldStrength = lastWarpField*WARPMEMORYEFFECT+(1.0-WARPMEMORYEFFECT)*graphicOptions.WarpFieldStrength;
     curr_physical_state.position     = curr_physical_state.position+(v*simulation_atom_var*difficulty).Cast();
     //now we do this later in update physics
@@ -243,9 +269,7 @@ Vector Movable::ResolveForces( const Transformation &trans, const Matrix &transm
     //        VSFileSystem::vs_fprintf( stderr, "zero moment of inertia %s\n", name.get().c_str() );
     Vector temp( temp1*simulation_atom_var );
     AngularVelocity += temp;
-    static float maxplayerrotationrate    =
-        XMLSupport::parse_float( vs_config->getVariable( "physics", "maxplayerrot", "24" ) );
-    static float maxnonplayerrotationrate = XMLSupport::parse_float( vs_config->getVariable( "physics", "maxNPCrot", "360" ) );
+
     float caprate;
     if ( isPlayerShip() )         //clamp to avoid vomit-comet effects
         caprate = maxplayerrotationrate;
@@ -268,14 +292,7 @@ Vector Movable::ResolveForces( const Transformation &trans, const Matrix &transm
     //}
 
     float newmagsquared = Velocity.MagnitudeSquared();
-    static float warpstretchcutoff =
-        XMLSupport::parse_float( vs_config->getVariable( "graphics", "warp_stretch_cutoff",
-                                                         "500000" ) )*XMLSupport::parse_float(
-            vs_config->getVariable( "physics", "game_speed", "1" ) );
-    static float warpstretchoutcutoff =
-        XMLSupport::parse_float( vs_config->getVariable( "graphics", "warp_stretch_decel_cutoff",
-                                                         "500000" ) )
-        *XMLSupport::parse_float( vs_config->getVariable( "physics", "game_speed", "1" ) );
+
     static float cutsqr    = warpstretchcutoff*warpstretchcutoff;
     static float outcutsqr = warpstretchoutcutoff*warpstretchoutcutoff;
     bool oldbig    = oldmagsquared > cutsqr;
@@ -293,23 +310,14 @@ Vector Movable::ResolveForces( const Transformation &trans, const Matrix &transm
         v.Normalize();
         Vector p, q, r;
         GetOrientation( p, q, r );
-        static float sec =
-            XMLSupport::parse_float( vs_config->getVariable( "graphics", "insys_jump_ani_second_ahead",
-                                                             "4" ) )
-            /( XMLSupport::parse_float( vs_config->getVariable( "physics", "game_speed",
-                                                                "1" ) )
-              *XMLSupport::parse_float( vs_config->getVariable( "physics", "game_accel", "1" ) ) );
-        static float endsec =
-            XMLSupport::parse_float( vs_config->getVariable( "graphics", "insys_jump_ani_second_ahead_end",
-                                                             ".03" ) )
-            /( XMLSupport::parse_float( vs_config->getVariable( "physics", "game_speed",
-                                                                "1" ) )
-              *XMLSupport::parse_float( vs_config->getVariable( "physics", "game_accel", "1" ) ) );
+
         float tmpsec = oldbig ? endsec : sec;
         UniverseUtil::playAnimationGrow( insys_jump_ani, realPosition().Cast()+Velocity*tmpsec+v*radial_size, radial_size*8, 1 );
     }
-    static float air_res_coef = XMLSupport::parse_float( active_missions[0]->getVariable( "air_resistance", "0" ) );
-    static float lateral_air_res_coef = XMLSupport::parse_float( active_missions[0]->getVariable( "lateral_air_resistance", "0" ) );
+
+    static const float air_res_coef = XMLSupport::parse_float( active_missions[0]->getVariable( "air_resistance", "0" ) );
+    static const float lateral_air_res_coef = XMLSupport::parse_float( active_missions[0]->getVariable( "lateral_air_resistance", "0"));
+
     if (air_res_coef || lateral_air_res_coef) {
         float  velmag = Velocity.Magnitude();
         Vector AirResistance = Velocity
@@ -402,14 +410,7 @@ float Movable::GetMaxWarpFieldStrength( float rampmult ) const
 {
     Vector v = GetWarpRefVelocity();
 
-    //Pi^2
-    static float  warpMultiplierMin =
-        XMLSupport::parse_float( vs_config->getVariable( "physics", "warpMultiplierMin", "9.86960440109" ) );
-    //C
-    static float  warpMultiplierMax =
-        XMLSupport::parse_float( vs_config->getVariable( "physics", "warpMultiplierMax", "300000000" ) );
-    //Pi^2 * C
-    static float  warpMaxEfVel   = XMLSupport::parse_float( vs_config->getVariable( "physics", "warpMaxEfVel", "2960881320" ) );
+
     //inverse fractional effect of ship vs real big object
     float minmultiplier = warpMultiplierMax*graphicOptions.MaxWarpMultiplier;
     Unit *nearest_unit  = NULL;
