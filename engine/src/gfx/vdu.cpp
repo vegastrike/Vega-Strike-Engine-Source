@@ -1615,7 +1615,7 @@ void VDU::DrawWeapon( Unit *parent )
     }
     if (mbuf.length() != mlen)
         buf += mbuf;
-    static float background_alpha
+    static float background_alpha = 
         XMLSupport::parse_float( vs_config->getVariable( "graphics", "hud", "text_background_alpha", "0.0625" ) );
     GFXColor     tpbg = tp->bgcol;
     bool automatte    = (0 == tpbg.a);
