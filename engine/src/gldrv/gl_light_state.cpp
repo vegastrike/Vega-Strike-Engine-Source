@@ -156,8 +156,8 @@ Hashtable3d< LineCollideStar, 20, CTACC, lighthuge >lighttable;
 GFXLight gfx_light::operator=( const GFXLight &tmp )
 {   // Let's see if I can write a better copy operator
 //    memcpy( this, &tmp, sizeof (GFXLight) );
-            this->target  = -1;
-            this->options = 0;
+            this->target  = tmp.target;
+            this->options = tmp.options;
             memcpy( this->vect, tmp.vect, sizeof (float)*3 );
             memcpy( this->diffuse, tmp.diffuse, sizeof (float)*4 );
             memcpy( this->specular, tmp.specular, sizeof (float)*4 );
@@ -168,11 +168,12 @@ GFXLight gfx_light::operator=( const GFXLight &tmp )
             this->cutoff = tmp.cutoff;
             this->size   = tmp.size;
             this->occlusion = tmp.occlusion;
-            apply_attenuate( attenuated() );
-            if (GFX_LIGHT_ENABLED) //This is always true...No reason to define a light and not turn it on...
-                this->enable();
-            else
-                this->disable();
+            apply_attenuate( tmp.attenuated() );
+            // if (tmp.enabled()) {
+            //     this->enable();
+            // } else {
+            //     this->disable();
+            // }
             return tmp;
 }
 
