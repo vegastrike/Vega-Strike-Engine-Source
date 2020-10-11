@@ -9,34 +9,6 @@
 
 #include <iostream>
 
-static float VELOCITY_MAX = GameConfig::GetVariable( "physics", "velocity_max", 10000);
-
-//for the heck of it.
-static float humanwarprampuptime = GameConfig::GetVariable( "physics", "warprampuptime", 5);
-
-//for the heck of it.
-static float compwarprampuptime = GameConfig::GetVariable( "physics", "computerwarprampuptime", 10);
-
-static float warprampdowntime = GameConfig::GetVariable( "physics", "warprampdowntime", 0.5f);
-static float WARPMEMORYEFFECT = GameConfig::GetVariable( "physics", "WarpMemoryEffect", 0.9f);
-static float maxplayerrotationrate = GameConfig::GetVariable( "physics", "maxplayerrot", 24);
-static float maxnonplayerrotationrate = GameConfig::GetVariable( "physics", "maxNPCrot", 360);
-static float warpstretchcutoff = GameConfig::GetVariable( "graphics", "warp_stretch_cutoff", 500000) * GameConfig::GetVariable( "physics", "game_speed", 1);
-static float warpstretchoutcutoff = GameConfig::GetVariable( "graphics", "warp_stretch_decel_cutoff", 500000) * GameConfig::GetVariable( "physics", "game_speed", 1);
-static float sec = GameConfig::GetVariable( "graphics", "insys_jump_ani_second_ahead", 4) / (GameConfig::GetVariable( "physics", "game_speed", 1) * GameConfig::GetVariable( "physics", "game_accel", 1));
-static float endsec = GameConfig::GetVariable( "graphics", "insys_jump_ani_second_ahead_end",0.03f) /( GameConfig::GetVariable( "physics", "game_speed",1.0f) *GameConfig::GetVariable( "physics", "game_accel", 1.0f) );
-
-
-//Pi^2
-
-static float  warpMultiplierMin = GameConfig::GetVariable( "physics", "warpMultiplierMin", 9.86960440109f);
-
-//C
-static float  warpMultiplierMax = GameConfig::GetVariable( "physics", "warpMultiplierMax", 300000000 );
-
-//Pi^2 * C
-static float warpMaxEfVel = GameConfig::GetVariable( "physics", "warpMaxEfVel", 2960881320.0f);
-
 
 
 Movable::Movable() : cumulative_transformation_matrix( identity_matrix ) {}
@@ -117,6 +89,8 @@ void Movable::UpdatePhysics( const Transformation &trans,
                           UnitCollection *uc,
                           Unit *superunit )
 {
+    static float VELOCITY_MAX = GameConfig::GetVariable( "physics", "velocity_max", 10000);
+
 
 
 
@@ -160,6 +134,12 @@ void Movable::UpdatePhysics( const Transformation &trans,
 
 void Movable::AddVelocity( float difficulty )
 {
+    //for the heck of it.
+    static float humanwarprampuptime = GameConfig::GetVariable( "physics", "warprampuptime", 5);
+    //for the heck of it.
+    static float compwarprampuptime = GameConfig::GetVariable( "physics", "computerwarprampuptime", 10);
+    static float warprampdowntime = GameConfig::GetVariable( "physics", "warprampdowntime", 0.5f);
+    static float WARPMEMORYEFFECT = GameConfig::GetVariable( "physics", "WarpMemoryEffect", 0.9f);
 
     float  lastWarpField = graphicOptions.WarpFieldStrength;
 
@@ -252,6 +232,13 @@ void Movable::Rotate( const Vector &axis )
 
 Vector Movable::ResolveForces( const Transformation &trans, const Matrix &transmat )
 {
+    static float maxplayerrotationrate = GameConfig::GetVariable( "physics", "maxplayerrot", 24);
+    static float maxnonplayerrotationrate = GameConfig::GetVariable( "physics", "maxNPCrot", 360);
+    static float warpstretchcutoff = GameConfig::GetVariable( "graphics", "warp_stretch_cutoff", 500000) * GameConfig::GetVariable( "physics", "game_speed", 1);
+    static float warpstretchoutcutoff = GameConfig::GetVariable( "graphics", "warp_stretch_decel_cutoff", 500000) * GameConfig::GetVariable( "physics", "game_speed", 1);
+    static float sec = GameConfig::GetVariable( "graphics", "insys_jump_ani_second_ahead", 4) / (GameConfig::GetVariable( "physics", "game_speed", 1) * GameConfig::GetVariable( "physics", "game_accel", 1));
+    static float endsec = GameConfig::GetVariable( "graphics", "insys_jump_ani_second_ahead_end",0.03f) /( GameConfig::GetVariable( "physics", "game_speed",1.0f) *GameConfig::GetVariable( "physics", "game_accel", 1.0f) );
+
     //First, save theoretical instantaneous acceleration (not time-quantized) for GetAcceleration()
     SavedAccel = GetNetAcceleration();
     SavedAngAccel = GetNetAngularAcceleration();
@@ -408,6 +395,15 @@ Vector Movable::ToWorldCoordinates( const Vector &v ) const
 
 float Movable::GetMaxWarpFieldStrength( float rampmult ) const
 {
+    //Pi^2
+    static float warpMultiplierMin = GameConfig::GetVariable( "physics", "warpMultiplierMin", 9.86960440109f);
+
+    //C
+    static float warpMultiplierMax = GameConfig::GetVariable( "physics", "warpMultiplierMax", 300000000 );
+
+    //Pi^2 * C
+    static float warpMaxEfVel = GameConfig::GetVariable( "physics", "warpMaxEfVel", 2960881320.0f);
+
     Vector v = GetWarpRefVelocity();
 
 
