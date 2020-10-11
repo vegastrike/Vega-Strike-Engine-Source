@@ -266,14 +266,16 @@ Vector Movable::ResolveForces( const Transformation &trans, const Matrix &transm
         AngularVelocity = AngularVelocity.Normalize()*caprate;
     //acceleration
     Vector temp2 = (NetLocalForce.i*p+NetLocalForce.j*q+NetLocalForce.k*r);
-    if ( !( FINITE( NetForce.i ) && FINITE( NetForce.j ) && FINITE( NetForce.k ) ) )
-        std::cout<<"NetForce skrewed";
+    if ( !( FINITE( NetForce.i ) && FINITE( NetForce.j ) && FINITE( NetForce.k ) ) ) {
+        BOOST_LOG_TRIVIAL(info) << "NetForce skrewed";
+    }
     if (NetForce.i || NetForce.j || NetForce.k)
         temp2 += InvTransformNormal( transmat, NetForce );
     temp2 = temp2/GetMass();
     temp  = temp2*simulation_atom_var;
-    if ( !( FINITE( temp2.i ) && FINITE( temp2.j ) && FINITE( temp2.k ) ) )
-        std::cout<<"NetForce transform skrewed";
+    if ( !( FINITE( temp2.i ) && FINITE( temp2.j ) && FINITE( temp2.k ) ) ) {
+        BOOST_LOG_TRIVIAL(info) << "NetForce transform skrewed";
+    }
     float oldmagsquared = Velocity.MagnitudeSquared();
         Velocity += temp;
     //}
