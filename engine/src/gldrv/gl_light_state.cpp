@@ -238,8 +238,9 @@ bool gfx_light::Create( const GFXLight &temp, bool global )
 void gfx_light::Kill()
 {
     Disable();     //first disables it...which _will_ remove it from the light table.
-    if (target >= 0)
+    if (target >= 0) {
         TrashFromGLLights();          //then if not already done, trash from GLlights;
+    }
     target  = -2;
     options = 0;
 }
@@ -361,10 +362,12 @@ void gfx_light::ResetProperties( const enum LIGHT_TARGET light_targ, const GFXCo
         t.SetProperties( light_targ, color );
         changed = RemoveFromTable( false, t );
         *this = t;
-        if (changed)
+        if (changed) {
             AddToTable();
-        if (target >= 0)
+        }
+        if (target >= 0) {
             TrashFromGLLights();
+        }
         return;
     }
     switch (light_targ)

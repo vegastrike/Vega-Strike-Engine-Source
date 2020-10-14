@@ -109,10 +109,11 @@ GFXLight::GFXLight( const bool enabled,
     this->cutoff = cutoff;
     this->size   = size;
     apply_attenuate( attenuated() );
-    if (enabled)
+    if (enabled) {
         this->enable();
-    else
+    } else {
         this->disable();
+    }
 }
 
 void GFXLight::disable()
@@ -372,8 +373,9 @@ void /*GFXDRVAPI*/ GFXSetLightContext( const int con_number )
 void GFXDestroyAllLights()
 {
     lighttable.Clear();
-    if (GLLights)
+    if (GLLights) {
         free( GLLights );
+    }
 }
 
 static void SetupGLLightGlobals()
@@ -382,8 +384,9 @@ static void SetupGLLightGlobals()
     glGetIntegerv( GL_MAX_LIGHTS, &GFX_MAX_LIGHTS );
     if (!GLLights) {
         GLLights = (OpenGLLights*) malloc( sizeof (OpenGLLights)*GFX_MAX_LIGHTS );
-        for (int i = 0; i < GFX_MAX_LIGHTS; i++)
+        for (int i = 0; i < GFX_MAX_LIGHTS; i++) {
             GLLights[i].index = -1;
+        }
     }
 
     GFXSetCutoff( game_options.lightcutoff );
