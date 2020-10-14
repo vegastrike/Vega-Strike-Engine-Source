@@ -626,7 +626,7 @@ public:
         attenuate[1] = attenuate[2] = 0;
         diffuse[0]   = diffuse[1] = diffuse[2] = 0; //openGL defaults
         specular[0]  = specular[1] = specular[2] = 0; //openGL defaults
-        ambient[0]   = ambient[1] = ambient[2] = options = 0;
+        ambient[0]   = ambient[1] = ambient[2] = 0;
         diffuse[3]   = specular[3] = ambient[3] = 1;
         target = -1; //physical GL light its saved in
 
@@ -635,6 +635,8 @@ public:
         cutoff = 180.0f;
         size = 0.0f;
         occlusion = 1.f;
+        options = 0;
+        apply_attenuate( attenuated() );
     }
 
     GFXLight( const bool enabled, const GFXColor &vect,
@@ -675,6 +677,7 @@ public:
         cutoff = other.cutoff;
         size = other.size;
         occlusion = other.occlusion;
+        options = other.options;
     };
 
     void SetProperties( enum LIGHT_TARGET, const GFXColor &color );
