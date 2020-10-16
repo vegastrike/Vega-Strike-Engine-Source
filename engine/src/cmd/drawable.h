@@ -53,8 +53,14 @@ public:
 
     void clear();
 
-    ~Drawable() { clear(); }
+protected:
+    virtual ~Drawable() { clear(); }
+    // forbidden
+    Drawable( const Drawable& ) = delete;
+    // forbidden
+    Drawable& operator=( const Drawable& ) = delete;
 
+public:
     string getAnimationName(unsigned int animationNumber) const;
 
     unsigned int getAnimationNumber(const char *name) const;

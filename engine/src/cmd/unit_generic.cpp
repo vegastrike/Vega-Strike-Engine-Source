@@ -664,7 +664,7 @@ std::string lookupMountSize( int s )
  **** UNIT STUFF
  **********************************************************************************
  */
-Unit::Unit( int /*dummy*/ )
+Unit::Unit( int /*dummy*/ ) : Drawable(), Damageable(), Movable()
 {
     ZeroAll();
     pImage  = (new UnitImages< void >);
@@ -675,7 +675,7 @@ Unit::Unit( int /*dummy*/ )
     Init();
 }
 
-Unit::Unit() //: cumulative_transformation_matrix( identity_matrix )
+Unit::Unit() : Drawable(), Damageable(), Movable() //: cumulative_transformation_matrix( identity_matrix )
 {
     ZeroAll();
     pImage  = (new UnitImages< void >);
@@ -686,7 +686,7 @@ Unit::Unit() //: cumulative_transformation_matrix( identity_matrix )
     Init();
 }
 
-Unit::Unit( std::vector< Mesh* > &meshes, bool SubU, int fact ) //: cumulative_transformation_matrix( identity_matrix )
+Unit::Unit( std::vector< Mesh* > &meshes, bool SubU, int fact ) : Drawable(), Damageable(), Movable() //: cumulative_transformation_matrix( identity_matrix )
 {
     ZeroAll();
     pImage  = (new UnitImages< void >);
@@ -713,7 +713,7 @@ Unit::Unit( const char *filename,
             std::string unitModifications,
             Flightgroup *flightgrp,
             int fg_subnumber,
-            string *netxml ) //: cumulative_transformation_matrix( identity_matrix )
+            string *netxml ) : Drawable(), Damageable(), Movable() //: cumulative_transformation_matrix( identity_matrix )
 {
     ZeroAll();
     pImage  = (new UnitImages< void >);
