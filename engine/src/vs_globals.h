@@ -97,7 +97,7 @@ public:
     }
     MyType operator[]( unsigned int i )
     {
-        // Enforce bounds checking
+        // stephengtuggy 2020-10-17: Enforce bounds checking
         return active_missions->at(i);
     }
     ~LeakVector()

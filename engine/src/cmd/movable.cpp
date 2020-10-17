@@ -57,8 +57,6 @@ Movable::Movable() : cumulative_transformation_matrix( identity_matrix ) {
         cutsqr    = warpstretchcutoff * warpstretchcutoff;
         outcutsqr = warpstretchoutcutoff * warpstretchoutcutoff;
         insys_jump_ani = vs_config->getVariable( "graphics", "insys_jump_animation", "warp.ani" );
-        air_res_coef = XMLSupport::parse_float( active_missions[0]->getVariable( "air_resistance", "0" ) );
-        lateral_air_res_coef = XMLSupport::parse_float( active_missions[0]->getVariable( "lateral_air_resistance", "0"));
         configLoaded = true;
     }
 }
@@ -331,6 +329,10 @@ Vector Movable::ResolveForces( const Transformation &trans, const Matrix &transm
         float tmpsec = oldbig ? endsec : sec;
         UniverseUtil::playAnimationGrow( insys_jump_ani, realPosition().Cast()+Velocity*tmpsec+v*radial_size, radial_size*8, 1 );
     }
+
+    // stephengtuggy 2020-10-17: These need to be initialized here, because they depend on having an active mission.
+    air_res_coef = XMLSupport::parse_float( active_missions[0]->getVariable( "air_resistance", "0" ) );
+    lateral_air_res_coef = XMLSupport::parse_float( active_missions[0]->getVariable( "lateral_air_resistance", "0"));
 
     if (air_res_coef || lateral_air_res_coef) {
         float  velmag = Velocity.Magnitude();
