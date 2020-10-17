@@ -97,7 +97,8 @@ public:
     }
     MyType operator[]( unsigned int i )
     {
-        return (*active_missions)[i];
+        // Enforce bounds checking
+        return active_missions->at(i);
     }
     ~LeakVector()
     {
