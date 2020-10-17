@@ -1,16 +1,45 @@
 #ifndef MISSILE_H_
 #define MISSILE_H_
 
-#include "missile_generic.h"
 #include "unit.h"
 #include "cmd/unit_util.h"
 
+class DummyUnit;
 
-class GameMissile : public GameUnit< Missile >
+class MissileEffect {
+private:
+    QVector pos;
+    float  damage;
+    float  phasedamage;
+    float  radius;
+    float  radialmultiplier;
+    void  *ownerDoNotDereference;
+
+public:
+    MissileEffect( const QVector &pos, float dam, float pdam, float radius, float radmult, void *owner );
+    void ApplyDamage( Unit* );
+    const QVector& GetCenter() const;
+    float GetRadius() const;
+
+private:
+    void DoApplyDamage( Unit *parent, Unit *un, float distance, float damage_fraction );
+};
+
+class Missile : public GameUnit< DummyUnit >
 {
+protected:
+    float time;
+    float damage;
+    float phasedamage;
+    float radial_effect;
+    float radial_multiplier;
+    float detonation_radius;
+    bool  discharged;
+    bool  had_target;
+    signed char retarget;
 public:
 /// constructor only to be called by UnitFactory
-    GameMissile( const char *filename,
+    Missile( const char *filename,
                  int faction,
                  const string &modifications,
                  const float damage,
@@ -18,37 +47,20 @@ public:
                  float time,
                  float radialeffect,
                  float radmult,
-                 float detonation_radius ) :
-        GameUnit< Missile > ( filename, false, faction, modifications )
-    {
-        this->InitMissile( time, damage, phasedamage, radialeffect, radmult, detonation_radius, false, -1 );
-        static bool missilesparkle = XMLSupport::parse_bool( vs_config->getVariable( "graphics", "missilesparkle", "false" ) );
-        if (missilesparkle)
-            maxhull *= 4;
-    }
+                 float detonation_radius );
+
+    Missile( std::vector< Mesh* >m, bool b, int i) :
+        GameUnit(m, b, i) {}
 
     friend class UnitFactory;
 
 public:
-    virtual void Kill( bool erase = true )
-    {
-        Missile::Discharge();
-        GameUnit< Missile >::Kill( erase );
-    }
-    virtual void reactToCollision( Unit *smaller,
-                                   const QVector &biglocation,
-                                   const Vector &bignormal,
-                                   const QVector &smalllocation,
-                                   const Vector &smallnormal,
-                                   float dist )
-    {
-        static bool doesmissilebounce = XMLSupport::parse_bool( vs_config->getVariable( "physics", "missile_bounce", "false" ) );
-        if (doesmissilebounce)
-            GameUnit< Missile >::reactToCollision( smaller, biglocation, bignormal, smalllocation, smallnormal, dist );
-        Discharge();
-        if (!killed)
-            DealDamageToHull( smalllocation.Cast(), hull+1 );      //should kill, applying addmissile effect
-    }
+    virtual void Kill( bool erase = true );
+    void Discharge();
+    float ExplosionRadius();
+
+    virtual enum clsptr isUnit() const;
+
     virtual void UpdatePhysics2( const Transformation &trans,
                                  const Transformation &old_physical_state,
                                  const Vector &accel,
@@ -56,39 +68,20 @@ public:
                                  const Matrix &transmat,
                                  const Vector &CumulativeVelocity,
                                  bool ResolveLast,
-                                 UnitCollection *uc = NULL )
-    {
-        Unit *targ;
-        if ( ( targ = ( Unit::Target() ) ) )
-            if (rand()/( (float) RAND_MAX ) < ( (float) UnitUtil::getECM(targ) )*SIMULATION_ATOM/32768) //simulation_atom_var?
-                Target( NULL );
-        //go wild
-        if (retarget == -1) {
-            if (targ)
-                retarget = 1;
-            else
-                retarget = 0;
-        }
-        if (retarget && targ == NULL)
-            Target( NULL );
-        GameUnit< Missile >::UpdatePhysics2( trans,
-                                             old_physical_state,
-                                             accel,
-                                             difficulty,
-                                             transmat,
-                                             CumulativeVelocity,
-                                             ResolveLast,
-                                             uc );
-    }
+                                 UnitCollection *uc = NULL );
+
+    Unit* breakECMLock(Unit* target);
+    bool proximityFuse(Unit* target);
+    bool useFuel(Unit* target, bool had_target);
 
 private:
     // TODO: consider if this is really necessary and if so, use = delete
 /// default constructor forbidden
-    GameMissile();
+    Missile();
 /// copy constructor forbidden
-    GameMissile( const Missile& );
+    Missile( const Missile& );
 /// assignment operator forbidden
-    GameMissile& operator=( const Missile& );
+    Missile& operator=( const Missile& );
 };
 
 #endif

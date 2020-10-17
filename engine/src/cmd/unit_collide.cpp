@@ -21,6 +21,7 @@
 #include "collide.h"
 #include "vsfilesystem.h"
 
+#include "collision.h"
 #include "universe.h"
 
 static bool operator==( const Collidable &a, const Collidable &b )
@@ -289,17 +290,20 @@ bool Unit::Collide( Unit *target )
         QVector bigpos, smallpos;
         Vector  bigNormal, smallNormal;
         if ( bigger->InsideCollideTree( smaller, bigpos, bigNormal, smallpos, smallNormal ) ) {
-            if ( !bigger->isDocked( smaller ) && !smaller->isDocked( bigger ) )
-                bigger->reactToCollision( smaller, bigpos, bigNormal, smallpos, smallNormal, 10 );
-            else return false;
+            if ( !bigger->isDocked( smaller ) && !smaller->isDocked( bigger ) ) {
+                //bigger->reactToCollision( smaller, bigpos, bigNormal, smallpos, smallNormal, 10 );
+                Collision::collide(bigger, bigpos, bigNormal, smaller, smallpos, smallNormal, 10);
+            } else return false;
         } else {return false; }
     } else {
         Vector normal( -1, -1, -1 );
         float  dist = 0.0;
         if ( bigger->Inside( smaller->Position(), smaller->rSize(), normal, dist ) ) {
-            if ( !bigger->isDocked( smaller ) && !smaller->isDocked( bigger ) )
-                bigger->reactToCollision( smaller, bigger->Position(), normal, smaller->Position(), -normal, dist );
-            else return false;
+            if ( !bigger->isDocked( smaller ) && !smaller->isDocked( bigger ) ) {
+                //bigger->reactToCollision( smaller, bigger->Position(), normal, smaller->Position(), -normal, dist );
+                Collision::collide(bigger, bigger->Position(), normal, smaller,
+                                            smaller->Position(), -normal, dist);
+            } else return false;
         } else {
             return(false);
         }
