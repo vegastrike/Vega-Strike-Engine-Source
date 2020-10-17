@@ -41,7 +41,7 @@
 using namespace Opcode;
 using namespace VegaStrike;
 
-static std::shared_ptr<vs_vector<csCollisionPair>> pairs = std::make_shared<vs_vector<csCollisionPair>>();
+static vs_vector<csCollisionPair> pairs;
 
 csOPCODECollider::csOPCODECollider (const std::vector <mesh_polygon> &polygons)
 {
@@ -244,17 +244,17 @@ bool csOPCODECollider::Collide( csOPCODECollider &otherCollider,
 
 void csOPCODECollider::ResetCollisionPairs()
 {
-    pairs->clear();
+    pairs.clear();
 }
 
 csCollisionPair* csOPCODECollider::GetCollisions()
 {
-    return pairs->data();
+    return pairs.data();
 }
 
 size_t csOPCODECollider::GetCollisionPairCount()
 {
-    return pairs->size();
+    return pairs.size();
 }
 
 
@@ -291,18 +291,18 @@ void csOPCODECollider::CopyCollisionPairs(csOPCODECollider* col1,
     Point* vertholder0 = col1->vertholder;
     Point* vertholder1 = col2->vertholder;
     int j;
-    size_t oldlen = pairs->size();
-    pairs->reserve(oldlen + N_pairs);
+    size_t oldlen = pairs.size();
+    pairs.reserve(oldlen + N_pairs);
 
     for (unsigned int i = 0 ; i < N_pairs ; ++i) {
         j = 3 * colPairs[i].id0;
-        pairs->at(oldlen).a1 = vertholder0[j];
-        pairs->at(oldlen).b1 = vertholder0[j+1];
-        pairs->at(oldlen).c1 = vertholder0[j+2];
+        pairs.at(oldlen).a1 = vertholder0[j];
+        pairs.at(oldlen).b1 = vertholder0[j+1];
+        pairs.at(oldlen).c1 = vertholder0[j+2];
         j = 3 * colPairs[i].id1;
-        pairs->at(oldlen).a2 = vertholder1[j];
-        pairs->at(oldlen).b2 = vertholder1[j+1];
-        pairs->at(oldlen).c2 = vertholder1[j+2];
+        pairs.at(oldlen).a2 = vertholder1[j];
+        pairs.at(oldlen).b2 = vertholder1[j+1];
+        pairs.at(oldlen).c2 = vertholder1[j+2];
         ++oldlen;
     }
 

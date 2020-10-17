@@ -109,15 +109,17 @@ class csOPCODECollider
 		* and VS likes Vector.  */
 		void CopyCollisionPairs (csOPCODECollider* col1, csOPCODECollider* col2);
 
+		// std::shared_ptr<VegaStrike::vs_vector<csCollisionPair>> pairs = std::make_shared<VegaStrike::vs_vector<csCollisionPair>>();
+
 	public:
 		csOPCODECollider (const std::vector <mesh_polygon> &polygons);
-		~csOPCODECollider ();
+		virtual ~csOPCODECollider ();
 
 		/* Not used in 0.5 */
 		int inline GetColliderType () const {return CS_MESH_COLLIDER;}
 
         /* Collides the bolt or beam with this collider, returning true if it occurred */
-    bool rayCollide (const Opcode::Ray &boltbeam, Vector&norm, float&distance);
+    	bool rayCollide (const Opcode::Ray &boltbeam, Vector&norm, float&distance);
 
 
 
