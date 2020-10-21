@@ -396,7 +396,7 @@ extern float RepairPrice( float operational, float price );
 
 static float basicRepairPrice( void )
 {
-    static const float price = XMLSupport::parse_float( vs_config->getVariable( "physics", "repair_price", "5000" ) );
+    static float price = XMLSupport::parse_float( vs_config->getVariable( "physics", "repair_price", "5000" ) );
     return price*g_game.difficulty;
 }
 
@@ -2807,7 +2807,7 @@ void BaseComputer::loadNewsControls( void )
     picker->clear();
 
     //Load the picker.
-    static const bool newsFromCargolist =
+    static bool newsFromCargolist =
         XMLSupport::parse_bool( vs_config->getVariable( "cargo", "news_from_cargolist", "false" ) );
     if (newsFromCargolist ) {
         gameMessage last;
@@ -3141,7 +3141,7 @@ void BaseComputer::loadSellUpgradeControls( void )
     loadMasterList( partListUnit, weapfiltervec, std::vector< std::string > (), false, tlist );
     ClearDowngradeMap();
     playerUnit->FilterDowngradeList( tlist.masterList );
-    static const bool clearDowngrades =
+    static bool clearDowngrades =
         XMLSupport::parse_bool( vs_config->getVariable( "physics", "only_show_best_downgrade", "true" ) );
     if (clearDowngrades) {
         std::set< std::string >downgradeMap = GetListOfDowngrades();
@@ -3863,11 +3863,11 @@ Cargo CreateCargoForOwnerStarship( const Cockpit *cockpit, const Unit *base, int
     bool needsJumpTransport = (locationSystemName != destinationSystemName);
     bool needsInsysTransport = (locationBaseName != destinationBaseName);
 
-    static const float shipping_price_base =
+    static float shipping_price_base =
         XMLSupport::parse_float( vs_config->getVariable( "physics", "shipping_price_base", "0" ) );
-    static const float shipping_price_insys =
+    static float shipping_price_insys =
         XMLSupport::parse_float( vs_config->getVariable( "physics", "shipping_price_insys", "1000" ) );
-    static const float shipping_price_perjump =
+    static float shipping_price_perjump =
         XMLSupport::parse_float( vs_config->getVariable( "physics", "shipping_price_perjump", "25000" ) );
 
     cargo.price = shipping_price_base;
@@ -4281,7 +4281,7 @@ bool sellShip( Unit *baseUnit, Unit *playerUnit, std::string shipname, BaseCompu
 
                 float xtra = 0;
                 if ( cockpit->GetUnitSystemName(i) == _Universe->activeStarSystem()->getFileName() ) {
-                    static const float shipping_price =
+                    static float shipping_price =
                         XMLSupport::parse_float( vs_config->getVariable( "physics", "sellback_shipping_price", "6000" ) );
                     xtra += shipping_price;
                 }

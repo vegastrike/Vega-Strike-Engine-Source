@@ -225,7 +225,7 @@ static void DrawHUDSprite( VDU *thus,
         s->SetSize( w, invertsprite ? -h : h );
         Texture *spritetex = s->getTexture();
         if (drawsprite && spritetex) {
-            static const float middle_point =
+            static float middle_point =
                 XMLSupport::parse_float( vs_config->getVariable( "graphics", "hud", "armor_hull_size", ".55" ) );
             static bool top_view = XMLSupport::parse_bool( vs_config->getVariable( "graphics", "hud", "top_view", "false" ) );
             float  middle_point_small = 1-middle_point;
@@ -1615,7 +1615,7 @@ void VDU::DrawWeapon( Unit *parent )
     }
     if (mbuf.length() != mlen)
         buf += mbuf;
-    static float background_alpha =
+    static float background_alpha = 
         XMLSupport::parse_float( vs_config->getVariable( "graphics", "hud", "text_background_alpha", "0.0625" ) );
     GFXColor     tpbg = tp->bgcol;
     bool automatte    = (0 == tpbg.a);

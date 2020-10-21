@@ -89,6 +89,28 @@ protected:
     float  Momentofinertia;
     Vector SavedAccel;
     Vector SavedAngAccel;
+    static bool configLoaded;
+    static float VELOCITY_MAX;
+    //for the heck of it.
+    static float humanwarprampuptime;
+    //for the heck of it.
+    static float compwarprampuptime;
+    static float warprampdowntime;
+    static float WARPMEMORYEFFECT;
+    static float maxplayerrotationrate;
+    static float maxnonplayerrotationrate;
+    static float warpstretchcutoff;
+    static float warpstretchoutcutoff;
+    static float sec;
+    static float endsec;
+    static float warpMultiplierMin;
+    static float warpMultiplierMax;
+    static float warpMaxEfVel;
+    static float cutsqr;
+    static float outcutsqr;
+    static std::string insys_jump_ani;
+    static float air_res_coef;
+    static float lateral_air_res_coef;
 
 
 // Methods
@@ -96,6 +118,14 @@ protected:
 public:
     Movable();
 
+protected:
+    // forbidden
+    Movable( const Movable& ) = delete;
+    // forbidden
+    Movable& operator= ( const Movable& ) = delete;
+    virtual ~Movable() = default;
+
+public:
     void AddVelocity( float difficulty );
 //Resolves forces of given unit on a physics frame
     virtual Vector ResolveForces( const Transformation&, const Matrix& );
