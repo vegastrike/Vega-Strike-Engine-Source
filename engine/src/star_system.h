@@ -142,7 +142,7 @@ protected:
 public:
     // Constructors
     StarSystem( const string filename, const Vector &centroid = Vector( 0, 0, 0 ), const float timeofyear = 0 );
-    ~StarSystem();
+    virtual ~StarSystem();
     friend class Universe;
 
     // Methods

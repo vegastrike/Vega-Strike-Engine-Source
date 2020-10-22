@@ -20,6 +20,14 @@ public:
 public:
   Damageable();
 
+protected:
+  virtual ~Damageable() = default;
+  // forbidden
+  Damageable( const Damageable& ) = delete;
+  // forbidden
+  Damageable& operator=( const Damageable& ) = delete;
+
+public:
   float GetHull() const { return hull;}
 
   void ArmorData( float armor[8] ) const;
