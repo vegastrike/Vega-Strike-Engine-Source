@@ -249,12 +249,15 @@ public:
 
 protected:
 //forbidden
-    Unit( const Unit& );
+    Unit( const Unit& ) = delete;
 
 //forbidden
-    Unit& operator=( const Unit& );
+    Unit& operator=( const Unit& ) = delete;
 
-public: Unit();
+    virtual ~Unit();
+
+public: 
+    Unit();
 
 /** Default constructor. This is just to figure out where default
  *  constructors are used. The useless argument will be removed
@@ -288,7 +291,6 @@ public:
     friend class UnitFactory;
 //table can be NULL, but setting it appropriately may increase performance
     void LoadRow( class CSVRow&row, std::string unitMod, std::string*netxml = NULL );
-    virtual ~Unit();
 
     // TODO: implement enum class as type safe bitmask...
     // http://blog.bitwigglers.org/using-enum-classes-as-type-safe-bitmasks/

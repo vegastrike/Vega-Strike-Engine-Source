@@ -526,9 +526,9 @@ IF (NOT BUILD_OPT)
     SET(BUILD_OPT -O2 CACHE STRING "-O0, -O1, -O2, -O3, -Os, -Ofast" FORCE )
 ENDIF (NOT BUILD_OPT)
 
-IF (CMAKE_COMPILER_IS_GNUCXX)
-    ADD_DEFINITIONS(-std=gnu++03)
-ENDIF ()
+# IF (CMAKE_COMPILER_IS_GNUCXX)
+#     ADD_DEFINITIONS(-std=gnu++03)
+# ENDIF ()
 
 
 # Provide boolean options for enabling various cpu optimizations.

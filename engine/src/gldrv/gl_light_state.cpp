@@ -154,9 +154,27 @@ int _GLLightsEnabled    = 0;
 Hashtable3d< LineCollideStar, 20, CTACC, lighthuge >lighttable;
 
 GFXLight gfx_light::operator=( const GFXLight &tmp )
-{
-    memcpy( this, &tmp, sizeof (GFXLight) );
-    return tmp;
+{   // Let's see if I can write a better copy operator
+//    memcpy( this, &tmp, sizeof (GFXLight) );
+            this->target  = tmp.target;
+            this->options = tmp.options;
+            memcpy( this->vect, tmp.vect, sizeof (float)*3 );
+            memcpy( this->diffuse, tmp.diffuse, sizeof (float)*4 );
+            memcpy( this->specular, tmp.specular, sizeof (float)*4 );
+            memcpy( this->ambient, tmp.ambient, sizeof (float)*4 );
+            memcpy( this->attenuate, tmp.attenuate, sizeof (float)*3 );
+            memcpy( this->direction, tmp.direction, sizeof (float)*3 );
+            this->exp    = tmp.exp;
+            this->cutoff = tmp.cutoff;
+            this->size   = tmp.size;
+            this->occlusion = tmp.occlusion;
+            apply_attenuate( tmp.attenuated() );
+            // if (tmp.enabled()) {
+            //     this->enable();
+            // } else {
+            //     this->disable();
+            // }
+            return tmp;
 }
 
 int gfx_light::lightNum()
@@ -220,8 +238,9 @@ bool gfx_light::Create( const GFXLight &temp, bool global )
 void gfx_light::Kill()
 {
     Disable();     //first disables it...which _will_ remove it from the light table.
-    if (target >= 0)
+    if (target >= 0) {
         TrashFromGLLights();          //then if not already done, trash from GLlights;
+    }
     target  = -2;
     options = 0;
 }
@@ -339,14 +358,16 @@ void gfx_light::ResetProperties( const enum LIGHT_TARGET light_targ, const GFXCo
     bool changed = false;
     if ( LocalLight() ) {
         GFXLight t;
-        memcpy( &t, this, sizeof (GFXLight) );
+        t = *this;
         t.SetProperties( light_targ, color );
         changed = RemoveFromTable( false, t );
-        memcpy( this, &t, sizeof (GFXLight) );
-        if (changed)
+        *this = t;
+        if (changed) {
             AddToTable();
-        if (target >= 0)
+        }
+        if (target >= 0) {
             TrashFromGLLights();
+        }
         return;
     }
     switch (light_targ)
