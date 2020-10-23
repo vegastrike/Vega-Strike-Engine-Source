@@ -56,7 +56,7 @@
 #include "options.h"
 #include "soundcontainer_aldrv.h"
 #include "configxml.h"
-#include "planet_generic.h"
+#include "planet.h"
 
 
 

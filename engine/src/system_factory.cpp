@@ -378,7 +378,7 @@ Planet* SystemFactory::processPlanet(Star_XML *xml, Object& object, Planet* owne
     }
 
     Vector computed_rotational_velocity = ComputeRotVel( rotational_velocity, R, S );
-    Planet *planet = new GamePlanet(R, S, velocity,
+    Planet *planet = new Planet(R, S, velocity,
                                                computed_rotational_velocity,
                                                position, gravity, radius,
                                                filename, technique, unitname,
@@ -576,7 +576,7 @@ void SystemFactory::processEnhancement(string element, Star_XML *xml, Object& ob
     } else if(boost::iequals(element, "asteroid")) {
         Flightgroup *fg = getStaticAsteroidFlightgroup(faction);
         unit = static_cast<Unit*>(
-                    new GameAsteroid( filename.c_str(),
+                    new Asteroid( filename.c_str(),
                                                  faction, fg, fg->nr_ships-1,
                                                  absolute_scalex ));
         if (scalex < 0) // This was almost certainly fixed by the above line. TODO: refactor
@@ -584,20 +584,20 @@ void SystemFactory::processEnhancement(string element, Star_XML *xml, Object& ob
 
     } else if(boost::iequals(element, "enhancement")) {
         unit = static_cast<Unit*>(
-                    new GameEnhancement(filename.c_str(), faction, string("")));
+                    new Enhancement(filename.c_str(), faction, string("")));
 
     } else if(boost::iequals(element, "building") ||
               boost::iequals(element, "vehicle")) {
 
         if (xml->ct == nullptr && xml->parentterrain != nullptr) // Terrain
             unit = static_cast<Unit*>(
-                        new GameBuilding(xml->parentterrain,
+                        new Building(xml->parentterrain,
                                                     boost::iequals(element, "vehicle"),
                                                     filename.c_str(), false, faction,
                                                     string("")));
         else if(xml->ct != nullptr) // Continuous terrain
             unit = static_cast<Unit*>(
-                        new GameBuilding(xml->ct,
+                        new Building(xml->ct,
                                                     boost::iequals(element, "vehicle"),
                                                     filename.c_str(), false, faction,
                                                     string("")));

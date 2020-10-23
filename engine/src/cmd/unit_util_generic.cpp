@@ -30,7 +30,7 @@
 #include "universe_util.h"
 #include "cmd/ai/docking.h"
 #include "savegame.h"
-#include "cmd/planet_generic.h"
+#include "cmd/planet.h"
 #include "faction_generic.h"
 #include "cmd/ai/fire.h"
 #include "gfx/cockpit_generic.h"
