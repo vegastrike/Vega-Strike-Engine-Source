@@ -1,31 +1,41 @@
 #ifndef _ENHANCER_H_
 #define _ENHANCER_H_
-#include "enhancement_generic.h"
-#include "cmd/unit.h"
+#include "unit.h"
 #include "savegame.h"
+#include "unit_generics.h"
+#include "universe.h"
 
-class GameEnhancement : public GameUnit< Enhancement >
+class Enhancement : public GameUnit< EnhancementGeneric >
 {
-    friend class UnitFactory;
 public:
-    GameEnhancement( const char *filename,
+    Enhancement( const char *filename,
                      int faction,
                      const string &modifications,
                      Flightgroup *flightgrp = NULL,
                      int fg_subnumber = 0 ) :
-        GameUnit< Enhancement > ( filename, false, faction, modifications, flightgrp, fg_subnumber )
+        GameUnit< EnhancementGeneric > ( filename, false, faction, modifications, flightgrp, fg_subnumber )
     {
         string file( filename );
         this->filename = filename;
     }
-private:
+
+    friend class UnitFactory;
+protected:
+    std::string filename;
+    virtual enum clsptr isUnit() const
+    {
+        return ENHANCEMENTPTR;
+    }
+
+protected:
 /// default constructor forbidden
-    GameEnhancement();
+    Enhancement();
 /// copy constructor forbidden
-    GameEnhancement( const Enhancement& );
+    Enhancement( const Enhancement& );
 /// assignment operator forbidden
-    GameEnhancement& operator=( const Enhancement& );
+    Enhancement& operator=( const Enhancement& );
 };
+
 
 #endif
 

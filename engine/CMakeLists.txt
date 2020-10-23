@@ -190,18 +190,14 @@ ADD_LIBRARY(OPcollide
 
 SET(LIBCMD_SOURCES
     src/cmd/alphacurve.cpp
-    src/cmd/asteroid_generic.cpp
     src/cmd/beam_generic.cpp
     src/cmd/bolt_generic.cpp
-    src/cmd/building_generic.cpp
     src/cmd/collection.cpp
     src/cmd/collide_map.cpp
     src/cmd/collide.cpp
     src/cmd/container.cpp
     src/cmd/csv.cpp
     src/cmd/mount.cpp
-    src/cmd/nebula_generic.cpp
-    src/cmd/planet_generic.cpp
     src/cmd/role_bitmask.cpp
     src/cmd/unit_collide.cpp
     src/cmd/unit_const_cache.cpp
@@ -218,7 +214,6 @@ SET(LIBCMD_SOURCES
     src/cmd/drawable.cpp
     src/cmd/movable.cpp
     src/cmd/computer.cpp
-    src/cmd/dummy_unit.cpp
 
     src/cmd/planetary_orbit.cpp
 )

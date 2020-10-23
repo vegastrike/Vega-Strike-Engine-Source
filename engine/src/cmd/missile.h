@@ -2,9 +2,8 @@
 #define MISSILE_H_
 
 #include "unit.h"
-#include "cmd/unit_util.h"
-
-class DummyUnit;
+#include "unit_util.h"
+#include "unit_generics.h"
 
 class MissileEffect {
 private:
@@ -25,7 +24,10 @@ private:
     void DoApplyDamage( Unit *parent, Unit *un, float distance, float damage_fraction );
 };
 
-class Missile : public GameUnit< DummyUnit >
+
+
+
+class Missile : public GameUnit< MissileGeneric >
 {
 protected:
     float time;
@@ -59,7 +61,7 @@ public:
     void Discharge();
     float ExplosionRadius();
 
-    virtual enum clsptr isUnit() const;
+//    virtual enum clsptr isUnit() const;
 
     virtual void UpdatePhysics2( const Transformation &trans,
                                  const Transformation &old_physical_state,

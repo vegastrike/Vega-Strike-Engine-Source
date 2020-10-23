@@ -1,33 +1,33 @@
 #include "building.h"
 #include "cont_terrain.h"
 
-GameBuilding::GameBuilding( ContinuousTerrain *parent,
+Building::Building( ContinuousTerrain *parent,
                             bool vehicle,
                             const char *filename,
                             bool SubUnit,
                             int faction,
                             const string &modifications,
-                            Flightgroup *fg ) : GameUnit< Building > ( filename, SubUnit, faction, modifications, fg )
+                            Flightgroup *fg ) : GameUnit< BuildingGeneric > ( filename, SubUnit, faction, modifications, fg )
 {
     this->vehicle = vehicle;
     continuous    = true;
     this->parent.plane = parent;
 }
 
-GameBuilding::GameBuilding( Terrain *parent,
+Building::Building( Terrain *parent,
                             bool vehicle,
                             const char *filename,
                             bool SubUnit,
                             int faction,
                             const string &modifications,
-                            Flightgroup *fg ) : GameUnit< Building > ( filename, SubUnit, faction, modifications, fg )
+                            Flightgroup *fg ) : GameUnit< BuildingGeneric > ( filename, SubUnit, faction, modifications, fg )
 {
     this->vehicle = vehicle;
     continuous    = false;
     this->parent.terrain = parent;
 }
 
-void GameBuilding::UpdatePhysics2( const Transformation &trans,
+void Building::UpdatePhysics2( const Transformation &trans,
                                    const Transformation &old_physical_state,
                                    const Vector &accel,
                                    float difficulty,
@@ -36,7 +36,7 @@ void GameBuilding::UpdatePhysics2( const Transformation &trans,
                                    bool ResolveLast,
                                    UnitCollection *uc )
 {
-    GameUnit< Building >::UpdatePhysics2( trans,
+    GameUnit< BuildingGeneric >::UpdatePhysics2( trans,
                                           old_physical_state,
                                           accel,
                                           difficulty,

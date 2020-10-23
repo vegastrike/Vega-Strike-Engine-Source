@@ -1,7 +1,7 @@
 #include <string>
 #include "unit_generic.h"
 #include "gfx/cockpit.h"
-#include "planet_generic.h"
+#include "planet.h"
 #include "gfx/animation.h"
 #include "config_xml.h"
 #include "unit_util.h"

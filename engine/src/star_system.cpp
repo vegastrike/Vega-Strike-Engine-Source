@@ -36,9 +36,9 @@
 #include "cmd/music.h"
 #include "cmd/bolt.h"
 #include "cmd/beam.h"
-#include "cmd/planet_generic.h"
+#include "cmd/planet.h"
 #include "cmd/unit_generic.h"
-#include "cmd/nebula_generic.h"
+#include "cmd/nebula.h"
 #include "cmd/unit_util.h"
 #include "cmd/missile.h"
 
@@ -415,7 +415,7 @@ void StarSystem::Draw( bool DrawCockpit )
     GFXEnable( DEPTHTEST );
     GFXEnable( DEPTHWRITE );
     //need to wait for lights to finish
-    GamePlanet::ProcessTerrains();
+    Planet::ProcessTerrains();
     Terrain::RenderAll();
     Mesh::ProcessUndrawnMeshes( true );
     processmesh = queryTime()-processmesh;

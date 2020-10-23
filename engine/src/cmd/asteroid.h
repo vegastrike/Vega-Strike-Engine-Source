@@ -5,34 +5,32 @@
 #include "gfx/matrix.h"
 #include "cmd/script/flightgroup.h"
 #include "cmd/collection.h"
-#include "cmd/asteroid_generic.h"
 #include "cmd/unit.h"
+#include "unit_generic.h"
 
-class GameAsteroid : public GameUnit< Asteroid >
+
+
+
+class Asteroid : public GameUnit< AsteroidGeneric >
 {
-public:
-    virtual void UpdatePhysics2( const Transformation &trans,
-                                 const Transformation &old_physical_state,
-                                 const Vector &accel,
-                                 float difficulty,
-                                 const Matrix &transmat,
-                                 const Vector &CumulativeVelocity,
-                                 bool ResolveLast,
-                                 UnitCollection *uc = NULL );
+private:
+    unsigned int asteroid_physics_offset;
 
-    GameAsteroid( const char *filename, int faction, Flightgroup *fg = NULL, int fg_snumber = 0, float difficulty = .01 );
+public:
+    Asteroid( const char *filename, int faction, Flightgroup *fg = NULL, int fg_snumber = 0, float difficulty = .01 );
 
     friend class UnitFactory;
 
 private:
 /// default constructor forbidden
-    GameAsteroid();
+    Asteroid();
+    Asteroid (std::vector <Mesh *> m,bool b,int i): GameUnit (m,b,i){}
 
 /// copy constructor forbidden
-    GameAsteroid( const Asteroid& );
+    Asteroid( const Asteroid& );
 
 /// assignment operator forbidden
-    GameAsteroid& operator=( const Asteroid& );
+    Asteroid& operator=( const Asteroid& );
 };
 #endif
 
