@@ -1,3 +1,28 @@
+/**
+ * OpenALRenderableSource.cpp
+ *
+ * Copyright (C) Daniel Horn
+ * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike
+ * contributors
+ *
+ * https://github.com/vegastrike/Vega-Strike-Engine-Source
+ *
+ * This file is part of Vega Strike.
+ *
+ * Vega Strike is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Vega Strike is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 //
 // C++ Implementation: Audio::OpenALRenderableListener
 //
@@ -31,59 +56,59 @@ namespace Audio {
     {
         alGenSources(1,&alSource);
     }
-    
+
     OpenALRenderableSource::~OpenALRenderableSource()
     {
         alDeleteSources(1,&alSource);
     }
-    
-    void OpenALRenderableSource::startPlayingImpl(Timestamp start) 
+
+    void OpenALRenderableSource::startPlayingImpl(Timestamp start)
     {
         if (!isPlayingImpl()) {
             // Make sure we have an attached sound
             attachALBuffers();
-            
+
             // Tell the AL to start playing (from the specified position)
             clearAlError();
             ALuint als = getALSource();
             alSourcePlay(als);
             checkAlError();
-            
+
             if (start != 0)
                 seekImpl(start);
         }
     }
-    
-    void OpenALRenderableSource::stopPlayingImpl() 
+
+    void OpenALRenderableSource::stopPlayingImpl()
     {
         alSourceStop(alSource);
     }
-    
-    bool OpenALRenderableSource::isPlayingImpl() const 
+
+    bool OpenALRenderableSource::isPlayingImpl() const
     {
         ALint state = 0;
         alGetSourcei(getALSource(), AL_SOURCE_STATE, &state);
         return (state == AL_PLAYING);
     }
-    
-    Timestamp OpenALRenderableSource::getPlayingTimeImpl() const 
+
+    Timestamp OpenALRenderableSource::getPlayingTimeImpl() const
     {
         ALfloat offs = -1.f;
         alGetSourcef(getALSource(), AL_SEC_OFFSET, &offs);
-        
+
         if (offs < 0.f)
             throw NotImplementedException("getPlayingTimeImpl");
-        
+
         return Timestamp(offs);
     }
-    
-    void OpenALRenderableSource::updateImpl(int flags, const Listener& sceneListener) 
+
+    void OpenALRenderableSource::updateImpl(int flags, const Listener& sceneListener)
     {
         Source *source = getSource();
         ALSourceHandle als = getALSource();
-        
+
         clearAlError();
-        
+
         if (flags & UPDATE_ATTRIBUTES) {
             // Distance attenuation
             if (source->isAttenuated()) {
@@ -114,42 +139,42 @@ namespace Audio {
                 alSource3f(als, AL_VELOCITY, source->getVelocity());
                 alSource3f(als, AL_DIRECTION, source->getDirection());
             } else {
-                alSource3f(als, AL_POSITION, 
+                alSource3f(als, AL_POSITION,
                     source->getPosition() - sceneListener.getPosition() );
-                alSource3f(als, AL_VELOCITY, 
+                alSource3f(als, AL_VELOCITY,
                     sceneListener.toLocalDirection(
                         source->getVelocity() - sceneListener.getVelocity()
                     ) );
-                alSource3f(als, AL_DIRECTION, 
+                alSource3f(als, AL_DIRECTION,
                     sceneListener.toLocalDirection(
                         source->getDirection()
                     ) );
             }
         }
-        
+
         checkAlError();
     }
-    
+
     void OpenALRenderableSource::attachALBuffers()
     {
         if (!alBuffersAttached) {
             SharedPtr<Sound> sound = getSource()->getSound();
-            
+
             if (!sound->isLoaded())
                 sound->load();
-            
+
             assert(!sound->isStreaming() && "OpenALRenderableSource can only handle streaming sounds");
-            
+
             // Attachment to a simple sound, just assign the AL buffer to this AL source
             ALBufferHandle alBuffer = dynamic_cast<OpenALSimpleSound*>(sound.get())->getAlBuffer();
             ALSourceHandle alSource = getALSource();
             alSourcei(alSource, AL_BUFFER, alBuffer);
             alBuffersAttached = true;
-            
+
             checkAlError();
         }
     }
-    
+
     void OpenALRenderableSource::seekImpl(Timestamp time)
     {
         // Tell the AL to jump to the specified position
@@ -158,7 +183,7 @@ namespace Audio {
         clearAlError();
         ALuint als = getALSource();
         alSourcef(als, AL_SEC_OFFSET, time);
-        
+
         ALenum error = alGetError();
         if (error == ALC_INVALID_ENUM) {
             // This version of the AL does not support seeking

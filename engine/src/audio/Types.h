@@ -1,3 +1,28 @@
+/**
+ * Types.h
+ *
+ * Copyright (C) Daniel Horn
+ * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike
+ * contributors
+ *
+ * https://github.com/vegastrike/Vega-Strike-Engine-Source
+ *
+ * This file is part of Vega Strike.
+ *
+ * Vega Strike is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Vega Strike is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 //
 // C++ Interface: Audio::Codec
 //
@@ -20,10 +45,10 @@ namespace Audio {
 
     /** Generic fp scalar type */
     typedef float Scalar;
-    
+
     /** Long fp scalar type */
     typedef double LScalar;
-    
+
     /** Tiemstamp type */
     typedef LScalar Timestamp;
 
@@ -32,13 +57,13 @@ namespace Audio {
 
     /** FP 3D vector */
     typedef TVector3<Scalar> Vector3;
-    
+
     /** Long FP 3D vector */
     typedef TVector3<LScalar> LVector3;
 
     /** FP 3x3 matrix */
     typedef TMatrix3<Scalar> Matrix3;
-    
+
     /** Long FP 3x3 matrix */
     typedef TMatrix3<LScalar> LMatrix3;
 
@@ -46,17 +71,17 @@ namespace Audio {
     template<typename T> struct PerFrequency {
         T lf;
         T hf;
-        
+
         PerFrequency(T _lf, T _hf) : lf(_lf), hf(_hf) {}
     };
-    
+
     /** Range data usually comes in min/max bundles */
     template<typename T> struct Range {
         T min;
         T max;
-        
+
         Range(T mn, T mx) : min(mn), max(mx) {}
-        
+
         T span() const { return max-min; }
         float phase(T x) const {
             if (min<max) {
@@ -76,7 +101,7 @@ namespace Audio {
             }
         }
     };
-    
+
     /** Generic user data container interface */
     class UserData {
     public:

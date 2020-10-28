@@ -1,3 +1,28 @@
+/**
+ * FFStream.h
+ *
+ * Copyright (C) Daniel Horn
+ * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike
+ * contributors
+ *
+ * https://github.com/vegastrike/Vega-Strike-Engine-Source
+ *
+ * This file is part of Vega Strike.
+ *
+ * Vega Strike is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Vega Strike is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 //
 // C++ Interface: Audio::Codec
 //
@@ -28,9 +53,9 @@ namespace Audio {
      */
     class FFStream : public Stream
     {
-    private: 
+    private:
         __impl::FFData *ffData;
-        
+
     public:
         /** Open the specified OGG file, or whine about it
          * @param path the file path
@@ -39,23 +64,23 @@ namespace Audio {
          * @param type the file type, used by resource management APIs
          */
         FFStream(const std::string& path, int streamIndex = 0, VSFileSystem::VSFileType type = VSFileSystem::UnknownFile);
-        
+
         virtual ~FFStream();
-        
+
     protected:
-        
+
         /** @see Stream::getLengthImpl */
         virtual double getLengthImpl() const;
-        
+
         /** @see Stream::getPositionImpl */
         virtual double getPositionImpl() const;
-        
+
         /** @see Stream::seekImpl */
         virtual void seekImpl(double position);
-        
+
         /** @see Stream::getBufferImpl */
         virtual void getBufferImpl(void *&buffer, unsigned int &bufferSize);
-        
+
         /** @see Stream::nextBufferImpl */
         virtual void nextBufferImpl();
     };

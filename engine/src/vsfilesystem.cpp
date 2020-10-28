@@ -1,8 +1,11 @@
 /**
  * vsfilesystem.cpp
  *
+ * Copyright (C) Daniel Horn
  * Copyright (C) 2020 pyramid3d, Nachum Barcohen, Roy Falk, Stephen G. Tuggy,
- * and other Vega Strike contributors.
+ * and other Vega Strike contributors
+ *
+ * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
  * This file is part of Vega Strike.
  *

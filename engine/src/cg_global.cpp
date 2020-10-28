@@ -1,9 +1,36 @@
+/**
+ * cg_global.cpp
+ *
+ * Copyright (C) Daniel Horn
+ * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike
+ * contributors
+ *
+ * https://github.com/vegastrike/Vega-Strike-Engine-Source
+ *
+ * This file is part of Vega Strike.
+ *
+ * Vega Strike is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Vega Strike is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
+
 #if defined (CG_SUPPORT)
 #define GLH_EXT_SINGLE_FILE 1
 #include "cg_global.h"
+#include "vs_globals.h"
 
 #include <glh/glh_extensions.h>
-#include <iostream>
+// #include <iostream>
 #include <string>
 #include <shared/data_path.h>
 
@@ -11,16 +38,16 @@ using std::string;
 
 void CG_Cloak::cgLoadMedia( string pathname, string filename )
 {
-    using std::cout;
-    using std::endl;
-    
+    // using std::cout;
+    // using std::endl;
+
     data_path media;
     media.path.push_back( "." );
     media.path.push_back( pathname );
     string    mediafile = media.get_file( filename );
     if (mediafile == "") {
-        cout<<"Unable to load "<<filename<<", exiting..."<<endl;
-        exit( 0 );
+        BOOST_LOG_TRIVIAL(fatal) << boost::format("Unable to load %1%, exiting...") % filename;
+        VSExit( 0 );
     }
     this->vertexProgram = cgCreateProgramFromFile( this->shaderContext,
                                                    CG_SOURCE, mediafile.data(),

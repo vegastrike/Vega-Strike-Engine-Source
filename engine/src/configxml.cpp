@@ -1,8 +1,12 @@
-/*
+/**
  * configxml.cpp
  *
  * Copyright (C) 2001-2002 Daniel Horn
- * Copyright (C) 2020 Stephen G. Tuggy
+ * Copyright (C) Alexander Rawass
+ * Copyright (C) 2020 Stephen G. Tuggy, pyramid3d, and other Vega Strike
+ * contributors
+ *
+ * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
  * This file is part of Vega Strike.
  *
@@ -42,8 +46,7 @@ VegaConfig::VegaConfig( const char *configfile )
     configNode *top = (configNode*) domf.LoadXML( configfile );
     if (top == NULL) {
         BOOST_LOG_TRIVIAL(fatal)<<"Panic exit - no configuration";
-        VSFileSystem::flushLogs();
-        exit( 0 );
+        VSExit( 0 );
     }
     variables = NULL;
     colors    = NULL;

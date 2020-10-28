@@ -1,3 +1,28 @@
+/**
+ * SimpleSource.h
+ *
+ * Copyright (C) Daniel Horn
+ * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike
+ * contributors
+ *
+ * https://github.com/vegastrike/Vega-Strike-Engine-Source
+ *
+ * This file is part of Vega Strike.
+ *
+ * Vega Strike is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Vega Strike is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 //
 // C++ Interface: Audio::SimpleSource
 //
@@ -28,30 +53,30 @@ namespace Audio {
     private:
         bool playing;
         SimpleScene *scene;
-        
+
     public:
         virtual ~SimpleSource();
-    
+
         /** Construct a simple source */
         SimpleSource(SharedPtr<Sound> sound, bool looping = false);
-        
+
         /** Notify attachment to a scene */
         void notifySceneAttached(SimpleScene *scene);
-        
+
         /** Get the scene to which it is attached */
         SimpleScene* getScene() const;
-        
+
         // The following section contains all the virtual functions that need be implemented
         // by a concrete Sound class. All are protected, so the stream interface is independent
         // of implementations.
     protected:
-        
+
         /** @copydoc Source::startPlayingImpl */
         virtual void startPlayingImpl(Timestamp start);
-        
+
         /** @copydoc Source::stopPlayingImpl */
         virtual void stopPlayingImpl();
-        
+
         /** @copydoc Source::isPlayingImpl*/
         virtual bool isPlayingImpl() const;
     };
