@@ -320,7 +320,7 @@ std::string MakeSharedPathReturnHome( const std::string &newpath )
 
 std::string MakeSharedPath( const std::string &s )
 {
-    VSFileSystem::vs_fprintf( stderr, "MakingSharedPath %s", s.c_str() );
+    BOOST_LOG_TRIVIAL(info) << boost::format("MakingSharedPath %1%") % s;
     return MakeSharedPathReturnHome( s )+s;
 }
 
@@ -505,21 +505,20 @@ void InitHomeDirectory()
 	homedir = userdir + "/" + HOMESUBDIR;
 	CreateDirectoryAbs( homedir );
 
-	#ifdef CLIENT
-	freopen((VSFileSystem::homedir+"/stderr_client.txt").c_str(), "w", stderr);
-	freopen((VSFileSystem::homedir+"/stdout_client.txt").c_str(), "w", stdout);
-	#endif
+	// #ifdef CLIENT
+	// freopen((VSFileSystem::homedir+"/stderr_client.txt").c_str(), "w", stderr);
+	// freopen((VSFileSystem::homedir+"/stdout_client.txt").c_str(), "w", stdout);
+	// #endif
 
-	#ifdef SERVER
-	freopen((VSFileSystem::homedir+"/stderr_server.txt").c_str(), "w", stderr);
-	freopen((VSFileSystem::homedir+"/stdout_server.txt").c_str(), "w", stdout);
-	#endif
+	// #ifdef SERVER
+	// freopen((VSFileSystem::homedir+"/stderr_server.txt").c_str(), "w", stderr);
+	// freopen((VSFileSystem::homedir+"/stdout_server.txt").c_str(), "w", stdout);
+	// #endif
 
-    cerr<<"USING HOMEDIR : "<<homedir<<" As the home directory "<<endl;
+    BOOST_LOG_TRIVIAL(info) << boost::format("USING HOMEDIR : %1% as the home directory ") % homedir;
 }
 #else
-// SGT 2020-07-16 This gets called from main before initLogging, at least on Windows,
-//                so it gets a pass on not using the Boost logging stuff
+
 void InitHomeDirectory()
 {
     //Setup home directory
@@ -528,19 +527,17 @@ void InitHomeDirectory()
     pwent = getpwuid( getuid() );
     chome_path = pwent->pw_dir;
     if ( !DirectoryExists( chome_path ) ) {
-        cerr<<"!!! ERROR : home directory not found"<<endl;
+        BOOST_LOG_TRIVIAL(fatal) << "!!! ERROR : home directory not found";
         VSExit( 1 );
     }
     string user_home_path( chome_path );
     homedir = user_home_path+"/"+HOMESUBDIR;
 
-    cerr<<"USING HOMEDIR : "<<homedir<<" As the home directory "<<endl;
+    BOOST_LOG_TRIVIAL(info) << boost::format("USING HOMEDIR : %1% As the home directory ") % homedir;
     CreateDirectoryAbs( homedir );
 }
 #endif
 
-// SGT 2020-07-16   This gets called from InitPaths(), in turn from main(), before initLogging().
-//                  So it gets a pass on not using the Boost logging stuff.
 void InitDataDirectory()
 {
     vector< string >data_paths;
@@ -580,27 +577,27 @@ void InitDataDirectory()
     for (vector< string >::iterator vsit = data_paths.begin(); vsit != data_paths.end(); vsit++)
         //Test if the dir exist and contains config_file
         if (FileExists( (*vsit), config_file ) >= 0) {
-            cerr<<"Found data in "<<(*vsit)<<endl;
+            BOOST_LOG_TRIVIAL(info) << boost::format("Found data in %1%") % (*vsit);
             if (NULL != getcwd( tmppath, VS_PATH_BUF_SIZE - 1 )) {
                 if ( (*vsit).substr( 0, 1 ) == "." )
                     datadir = string( tmppath )+"/"+(*vsit);
                 else
                     datadir = (*vsit);
             } else {
-                VSFileSystem::vs_fprintf( stderr, "Cannot get current path: path too long");
+                BOOST_LOG_TRIVIAL(error) << "Cannot get current path: path too long";
             }
 
             if (chdir( datadir.c_str() ) < 0) {
-                cerr<<"Error changing to datadir"<<endl;
+                BOOST_LOG_TRIVIAL(fatal) << "Error changing to datadir";
                 VSExit( 1 );
             }
             if (NULL != getcwd( tmppath, VS_PATH_BUF_SIZE - 1 )) {
                 datadir = string( tmppath );
             } else {
-                VSFileSystem::vs_fprintf( stderr, "Cannot get current path: path too long");
+                BOOST_LOG_TRIVIAL(error) << "Cannot get current path: path too long";
             }
 
-            cerr<<"Using "<<datadir<<" as data directory"<<endl;
+            BOOST_LOG_TRIVIAL(info) << boost::format("Using %1% as data directory") % datadir;
             break;
         }
     data_paths.clear();
@@ -623,19 +620,16 @@ void InitDataDirectory()
         fclose( version );
         if ( hsd.length() ) {
             HOMESUBDIR = hsd;
-            printf( "Using %s as the home directory\n", hsd.c_str() );
+            BOOST_LOG_TRIVIAL(info) << boost::format("Using %1% as the home directory") % hsd;
         }
     }
     //Get the mods path
     moddir = datadir+"/"+string( "mods" );
-    cout<<"Found MODDIR = "<<moddir<<endl;
+    BOOST_LOG_TRIVIAL(info) << boost::format("Found MODDIR = %1%") % moddir;
 }
 
 //Config file has been loaded from data dir but now we look at the specified moddir in order
 //to see if we should use a mod config file
-//
-// SGT 2020-07-16   This gets called before initLogging(),
-//                  so it gets a pass on not using the Boost logging stuff
 void LoadConfig( string subdir )
 {
     bool found = false;
@@ -646,8 +640,9 @@ void LoadConfig( string subdir )
         modname = subdir;
         if ( DirectoryExists( homedir+"/mods/"+subdir ) ) {
             if (FileExists( homedir+"/mods/"+subdir, config_file ) >= 0) {
-                cout<<"CONFIGFILE - Found a config file in home mod directory, using : "
-                    <<(homedir+"/mods/"+subdir+"/"+config_file)<<endl;
+                BOOST_LOG_TRIVIAL(info)
+                        << boost::format("CONFIGFILE - Found a config file in home mod directory, using : %1%")
+                        % (homedir+"/mods/"+subdir+"/"+config_file);
                 if (FileExists( homedir+"/mods/"+subdir, "weapon_list.xml" ) >= 0) {
                     weapon_list  = homedir+"/mods/"+subdir+"/weapon_list.xml";
                     foundweapons = true;
@@ -656,51 +651,57 @@ void LoadConfig( string subdir )
                 found = true;
             }
         }
-        if (!found)
-            cout<<"WARNING : coudn't find a mod named '"<<subdir<<"' in homedir/mods"<<endl;
+        if (!found) {
+            BOOST_LOG_TRIVIAL(warning) << boost::format("WARNING : coudn't find a mod named '%1%' in homedir/mods") % subdir;
+        }
         if ( DirectoryExists( moddir+"/"+subdir ) ) {
             if (FileExists( moddir+"/"+subdir, config_file ) >= 0) {
-                if (!found)
-                    cout<<"CONFIGFILE - Found a config file in mods directory, using : "
-                        <<(moddir+"/"+subdir+"/"+config_file)<<endl;
+                if (!found) {
+                    BOOST_LOG_TRIVIAL(info)
+                            << boost::format("CONFIGFILE - Found a config file in mods directory, using : %1%")
+                            % (moddir+"/"+subdir+"/"+config_file);
+                }
                 if ( (!foundweapons) && FileExists( moddir+"/"+subdir, "weapon_list.xml" ) >= 0 ) {
                     weapon_list  = moddir+"/"+subdir+"/weapon_list.xml";
                     foundweapons = true;
                 }
-                if (!found) config_file = moddir+"/"+subdir+"/"+config_file;
+                if (!found) {
+                    config_file = moddir+"/"+subdir+"/"+config_file;
+                }
                 found = true;
             }
         } else {
-            cout<<"ERROR : coudn't find a mod named '"<<subdir<<"' in datadir/mods"<<endl;
+            BOOST_LOG_TRIVIAL(error) << boost::format("ERROR : coudn't find a mod named '%1%' in datadir/mods") % subdir;
         }
         //}
     }
     if (!found) {
         //Next check if we have a config file in homedir if we haven't found one for mod
         if (FileExists( homedir, config_file ) >= 0) {
-            cerr<<"CONFIGFILE - Found a config file in home directory, using : "<<(homedir+"/"+config_file)<<endl;
+            BOOST_LOG_TRIVIAL(info) << boost::format("CONFIGFILE - Found a config file in home directory, using : %1%") % (homedir+"/"+config_file);
             config_file = homedir+"/"+config_file;
         } else {
-            cerr<<"CONFIGFILE - No config found in home : "<<(homedir+"/"+config_file)<<endl;
+            BOOST_LOG_TRIVIAL(info) << "CONFIGFILE - No config found in home : " << (homedir+"/"+config_file);
             if (FileExists( datadir, config_file ) >= 0) {
-                cerr<<"CONFIGFILE - No home config file found, using datadir config file : "<<(datadir+"/"+config_file)<<endl;
+                BOOST_LOG_TRIVIAL(info) << boost::format("CONFIGFILE - No home config file found, using datadir config file : %1%") % (datadir+"/"+config_file);
                 //We didn't find a config file in home_path so we load the data_path one
+                config_file = datadir+"/"+config_file;
             }
             else {
-                cerr<<"CONFIGFILE - No config found in data dir : "<<(datadir+"/"+config_file)<<endl;
-                cerr<<"CONFIG FILE NOT FOUND !!!"<<endl;
+                BOOST_LOG_TRIVIAL(fatal) << boost::format("CONFIGFILE - No config found in data dir : %1%") % (datadir+"/"+config_file);
+                BOOST_LOG_TRIVIAL(fatal) << "CONFIG FILE NOT FOUND !!!";
                 VSExit( 1 );
             }
         }
     } else if (subdir != "") {
-        printf( "Using Mod Directory %s\n", moddir.c_str() );
+        BOOST_LOG_TRIVIAL(info) << boost::format("Using Mod Directory %1%") % moddir;
         CreateDirectoryHome( "mods" );
         CreateDirectoryHome( "mods/"+subdir );
         homedir = homedir+"/mods/"+subdir;
     }
     //Delete the default config in order to reallocate it with the right one (if it is a mod)
     if (vs_config) {
-        fprintf( stderr, "reallocating vs_config \n" );
+        BOOST_LOG_TRIVIAL(info) << "reallocating vs_config ";
         delete vs_config;
     }
 
@@ -713,18 +714,16 @@ void LoadConfig( string subdir )
     //NOTE : THIS IS NOT A GOOD IDEA TO HAVE A DATADIR SPECIFIED IN THE CONFIG FILE
     if (game_options.datadir.size()>0 ) {
         //We found a path to data in config file
-        cout<<"DATADIR - Found a datadir in config, using : "<<game_options.datadir<<endl;
+        BOOST_LOG_TRIVIAL(info) << boost::format("DATADIR - Found a datadir in config, using : %1%") % game_options.datadir;
         datadir = game_options.datadir;
     } else {
-        cout<<"DATADIR - No datadir specified in config file, using ; "<<datadir<<endl;
+        BOOST_LOG_TRIVIAL(info) << boost::format("DATADIR - No datadir specified in config file, using : %1%") % datadir;
     }
 
     string universe_file = datadir + "/universe/milky_way.xml";
     Galaxy galaxy = Galaxy(universe_file);
 }
 
-// SGT 2020-07-16   This, too, gets called before initLogging(),
-//                  so it gets a pass on not using the Boost logging stuff.
 void InitMods()
 {
     string curpath;
@@ -740,7 +739,7 @@ void InitMods()
                 string dname( dirlist[ret]->d_name );
                 if (dname == game_options.hqtextures) {
                     curpath = selectcurrentdir+"/"+dname;
-                    cout<<"\n\nAdding HQ Textures Pack\n\n";
+                    BOOST_LOG_TRIVIAL(info) << "\n\nAdding HQ Textures Pack\n\n";
                     Rootdir.push_back( curpath );
                 }
             }
@@ -756,7 +755,7 @@ void InitMods()
             string dname( dirlist[ret]->d_name );
             if (dname == modname) {
                 curpath = moddir+"/"+dname;
-                cout<<"Adding mod path : "<<curpath<<endl;
+                BOOST_LOG_TRIVIAL(info) << boost::format("Adding mod path : %1%") % curpath;
                 Rootdir.push_back( curpath );
             }
         }
@@ -773,7 +772,7 @@ void InitMods()
             string dname( dirlist[ret]->d_name );
             if (dname == modname) {
                 curpath = curmodpath+dname;
-                cout<<"Adding mod path : "<<curpath<<endl;
+                BOOST_LOG_TRIVIAL(info) << boost::format("Adding mod path : %1%") % curpath;
                 Rootdir.push_back( curpath );
             }
         }
@@ -781,8 +780,6 @@ void InitMods()
     free( dirlist );
 }
 
-// SGT 2020-07-16   This gets called from main() before initLogging(),
-//                  so it gets a pass on not using the Boost logging stuff
 void InitPaths( string conf, string subdir )
 {
     config_file = conf;
@@ -793,8 +790,9 @@ void InitPaths( string conf, string subdir )
     current_type.push_back( UnknownFile );
 
     int i;
-    for (i = 0; i <= UnknownFile; i++)
+    for (i = 0; i <= UnknownFile; ++i) {
         UseVolumes.push_back( 0 );
+    }
     /************************** Data and home directory settings *************************/
 
     InitDataDirectory();                //Need to be first for win32
@@ -927,47 +925,47 @@ void InitPaths( string conf, string subdir )
     } else {
         if (FileExists( datadir, "/"+sharedunits+"."+volume_format ) >= 0) {
             UseVolumes[UnitFile] = 1;
-            cout<<"Using volume file "<<(datadir+"/"+sharedunits)<<".pk3"<<endl;
+            BOOST_LOG_TRIVIAL(info) << boost::format("Using volume file %1%.%2%") % (datadir+"/"+sharedunits) % volume_format;
         }
         if (FileExists( datadir, "/"+sharedmeshes+"."+volume_format ) >= 0) {
             UseVolumes[MeshFile] = 1;
-            cout<<"Using volume file "<<(datadir+"/"+sharedmeshes)<<".pk3"<<endl;
+            BOOST_LOG_TRIVIAL(info) << boost::format("Using volume file %1%.%2%") % (datadir+"/"+sharedmeshes) % volume_format;
         }
         if (FileExists( datadir, "/"+sharedtextures+"."+volume_format ) >= 0) {
             UseVolumes[TextureFile] = 1;
-            cout<<"Using volume file "<<(datadir+"/"+sharedtextures)<<".pk3"<<endl;
+            BOOST_LOG_TRIVIAL(info) << boost::format("Using volume file %1%.%2%") % (datadir+"/"+sharedtextures) % volume_format;
         }
         if (FileExists( datadir, "/"+sharedsounds+"."+volume_format ) >= 0) {
             UseVolumes[SoundFile] = 1;
-            cout<<"Using volume file "<<(datadir+"/"+sharedsounds)<<".pk3"<<endl;
+            BOOST_LOG_TRIVIAL(info) << boost::format("Using volume file %1%.%2%") % (datadir+"/"+sharedsounds) % volume_format;
         }
         if (FileExists( datadir, "/"+sharedcockpits+"."+volume_format ) >= 0) {
             UseVolumes[CockpitFile] = 1;
-            cout<<"Using volume file "<<(datadir+"/"+sharedcockpits)<<".pk3"<<endl;
+            BOOST_LOG_TRIVIAL(info) << boost::format("Using volume file %1%.%2%") % (datadir+"/"+sharedcockpits) % volume_format;
         }
         if (FileExists( datadir, "/"+sharedsprites+"."+volume_format ) >= 0) {
             UseVolumes[VSSpriteFile] = 1;
-            cout<<"Using volume file "<<(datadir+"/"+sharedsprites)<<".pk3"<<endl;
+            BOOST_LOG_TRIVIAL(info) << boost::format("Using volume file %1%.%2%") % (datadir+"/"+sharedsprites) % volume_format;
         }
         if (FileExists( datadir, "/animations."+volume_format ) >= 0) {
             UseVolumes[AnimFile] = 1;
-            cout<<"Using volume file "<<(datadir+"/animations")<<".pk3"<<endl;
+            BOOST_LOG_TRIVIAL(info) << boost::format("Using volume file %1%.%2%") % (datadir+"/animations") % volume_format;
         }
         if (FileExists( datadir, "/movies."+volume_format ) >= 0) {
             UseVolumes[VideoFile] = 1;
-            cout<<"Using volume file "<<(datadir+"/movies")<<".pk3"<<endl;
+            BOOST_LOG_TRIVIAL(info) << boost::format("Using volume file %1%.%2%") % (datadir+"/movies") % volume_format;
         }
         if (FileExists( datadir, "/communications."+volume_format ) >= 0) {
             UseVolumes[CommFile] = 1;
-            cout<<"Using volume file "<<(datadir+"/communications")<<".pk3"<<endl;
+            BOOST_LOG_TRIVIAL(info) << boost::format("Using volume file %1%.%2%") % (datadir+"/communications") % volume_format;
         }
         if (FileExists( datadir, "/mission."+volume_format ) >= 0) {
             UseVolumes[MissionFile] = 1;
-            cout<<"Using volume file "<<(datadir+"/mission")<<".pk3"<<endl;
+            BOOST_LOG_TRIVIAL(info) << boost::format("Using volume file %1%.%2%") % (datadir+"/mission") % volume_format;
         }
         if (FileExists( datadir, "/ai."+volume_format ) >= 0) {
             UseVolumes[AiFile] = 1;
-            cout<<"Using volume file "<<(datadir+"/ai")<<".pk3"<<endl;
+            BOOST_LOG_TRIVIAL(info) << boost::format("Using volume file %1%.%2%") % (datadir+"/ai") % volume_format;
         }
         UseVolumes[ZoneBuffer] = 0;
     }
