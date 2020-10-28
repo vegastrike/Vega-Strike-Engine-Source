@@ -3,6 +3,8 @@
  *
  * Copyright (C) 2020 Stephen G Tuggy
  *
+ * https://github.com/vegastrike/Vega-Strike-Engine-Source
+ *
  * This file is part of Vega Strike.
  *
  * Vega Strike is free software: you can redistribute it and/or modify

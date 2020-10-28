@@ -1,7 +1,11 @@
 /**
  * basecollider.h
  *
- * Copyright (C) 2020 Stephen G Tuggy and other Vega Strike contributors
+ * Copyright (C) Daniel Horn
+ * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike
+ * contributors
+ *
+ * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
  * This file is part of Vega Strike.
  *

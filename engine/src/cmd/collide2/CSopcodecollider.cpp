@@ -26,7 +26,7 @@
 
 /*
  * Copyright (C) 2020 pyramid3d
- * Copyright (C) 2020 Stephen G. Tuggy
+ * Copyright (C) 2020 Stephen G. Tuggy <sgt@stephengtuggy.com>
  */
 
 
