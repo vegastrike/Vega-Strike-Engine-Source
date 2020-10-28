@@ -13,6 +13,8 @@
 # Nachum Barcohen, Rune Morling, Stephen G. Tuggy, Benjamen Meyer, s0600204,
 # Evert Vorster, and other Vega Strike contributors.
 #
+# https://github.com/vegastrike/Vega-Strike-Engine-Source
+#
 # This file is part of Vega Strike.
 #
 # Vega Strike is free software: you can redistribute it and/or modify
@@ -525,10 +527,6 @@ ENDIF (NOT CMAKE_BUILD_TYPE)
 IF (NOT BUILD_OPT)
     SET(BUILD_OPT -O2 CACHE STRING "-O0, -O1, -O2, -O3, -Os, -Ofast" FORCE )
 ENDIF (NOT BUILD_OPT)
-
-# IF (CMAKE_COMPILER_IS_GNUCXX)
-#     ADD_DEFINITIONS(-std=gnu++03)
-# ENDIF ()
 
 
 # Provide boolean options for enabling various cpu optimizations.
@@ -1380,14 +1378,14 @@ ELSEIF (CMAKE_SYSTEM_NAME STREQUAL Linux)
                 ENDIF (USE_PYTHON_3)
             ENDIF (LINUX_VERSION_ID VERSION_EQUAL 32)
             SET(CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES}, libjpeg-turbo, libpng, freeglut, gtk3, libvorbis, openal-soft, SDL, libglvnd, expat, boost-log, boost-system, boost-filesystem, boost-thread, boost-regex, boost-chrono, boost-atomic")
-        ELSEIF (LINUX_ID STREQUAL centos AND LINUX_VERSION_ID STREQUAL "8")     # Not yet tested
+        ELSEIF (LINUX_ID STREQUAL centos AND LINUX_VERSION_ID STREQUAL "8")
             IF (USE_PYTHON_3)
                 SET(CPACK_RPM_PACKAGE_REQUIRES "boost-python3")
             ELSE (USE_PYTHON_3)
                 MESSAGE(SEND_WARNING "!! boost-python2 does not appear to be available on this platform.")
             ENDIF (USE_PYTHON_3)
             SET(CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES}, libjpeg-turbo, libpng, freeglut, gtk3, libvorbis, openal-soft, SDL, libglvnd, expat, boost-log, boost-system, boost-filesystem, boost-thread, boost-regex, boost-chrono, boost-atomic")
-        ELSEIF (LINUX_ID STREQUAL rhel AND LINUX_VERSION_ID STREQUAL "8")       # Not yet tested
+        ELSEIF (LINUX_ID STREQUAL rhel AND LINUX_VERSION_ID STREQUAL "8")
             IF (USE_PYTHON_3)
                 SET(CPACK_RPM_PACKAGE_REQUIRES "boost-python3")
             ELSE (USE_PYTHON_3)
