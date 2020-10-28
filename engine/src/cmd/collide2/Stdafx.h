@@ -3,8 +3,31 @@
  *	OPCODE - Optimized Collision Detection
  *	Copyright (C) 2001 Pierre Terdiman
  *	Homepage: http://www.codercorner.com/Opcode.htm
+ *
+ *  Copyright (C) Daniel Horn, chuck starchaser, and pheonixstorm
+ *  Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike contributors
+ *
+ *  https://github.com/vegastrike/Vega-Strike-Engine-Source
+ *
+ *  This file is part of Vega Strike.
+ *
+ *  Vega Strike is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
+ *
+ *  Vega Strike is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+#ifndef _STDAFX_H_
+#define _STDAFX_H_
 
 //chuck starchaser shutting up the warnings about violations of strict aliasing...
 #ifndef _WIN32 // pheonixstorm shutting up pragma warnings on win32
@@ -17,7 +40,11 @@
 //also
 //    assert( (dword&)float(0.0f) == (dword&)int(0) ) must pass or this library will blow on your face
 
+#include <memory>
 #include "opcodetypes.h"
 #include "opcodesysdef.h"
 #include "Opcode.h"
+#include "vs_collections.hpp"
+
+#endif	// _STDAFX_H_
 
