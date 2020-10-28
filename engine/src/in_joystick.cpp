@@ -113,15 +113,6 @@ void myGlutJoystickCallback( unsigned int buttonmask, int x, int y, int z )
     }
 }
 
-JoyStick::JoyStick()
-{
-    for (int j = 0; j < MAX_AXES; ++j) {
-        axis_axis[j]    = -1;
-        axis_inverse[j] = false;
-        joy_axis[j]     = axis_axis[j] = 0;
-    }
-    joy_buttons = 0;
-}
 int JoystickPollingRate()
 {
     return game_options.polling_rate;
@@ -143,7 +134,8 @@ void InitJoystick()
 #ifdef HAVE_SDL
     num_joysticks = SDL_NumJoysticks();
     printf( "%i joysticks were found.\n\n", num_joysticks );
-    printf( "The names of the joysticks are:\n" );
+    if (num_joysticks > 0)
+        printf( "The names of the joysticks are:\n" );
 #else
     //use glut
     if (glutDeviceGet( GLUT_HAS_JOYSTICK ) || game_options.force_use_of_joystick) {
