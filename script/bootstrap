@@ -5,11 +5,27 @@
 # @usage  : sudo script/bootstrap
 # @param  : none
 #====================================
+# Copyright (C) 2020 Stephen G. Tuggy <sgt@stephengtuggy.com>
+#
+# This file is part of Vega Strike.
+#
+# Vega Strike is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# Vega Strike is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
 
 set -e
 
 echo "------------------------------"
-echo "--- bootstrap | 2020-08-19 ---"
+echo "--- bootstrap | 2020-10-28 ---"
 echo "------------------------------"
 
 if [ -f /etc/os-release ]
@@ -44,7 +60,6 @@ then
                     libpng-tools \
                     libjpeg62-turbo-dev \
                     libexpat1-dev \
-                    libgtk2.0-dev \
                     libgtk-3-dev \
                     libopenal-dev \
                     libogg-dev \
@@ -74,7 +89,6 @@ then
                     libpng-tools \
                     libjpeg62-turbo-dev \
                     libexpat1-dev \
-                    libgtk2.0-dev \
                     libgtk-3-dev \
                     libopenal-dev \
                     libogg-dev \
@@ -104,7 +118,6 @@ then
                     libpng-tools \
                     libjpeg62-dev \
                     libexpat1-dev \
-                    libgtk2.0-dev \
                     libgtk-3-dev \
                     libopenal-dev \
                     libogg-dev \
@@ -135,7 +148,6 @@ then
                     libvorbis-dev \
                     libjpeg-dev \
                     libpng-dev \
-                    libgtk2.0-dev \
                     libgtk-3-dev \
                     libboost-python-dev \
                     libboost-log-dev \
@@ -158,7 +170,6 @@ then
                     libvorbis-dev \
                     libjpeg-dev \
                     libpng-dev \
-                    libgtk2.0-dev \
                     libgtk-3-dev \
                     libboost-python-dev \
                     libboost-log-dev \
@@ -192,8 +203,6 @@ then
                             libpng16-devel \
                             expat \
                             libexpat-devel \
-                            libgtk-2_0-0 \
-                            gtk2-devel \
                             libgtk-3-0 \
                             gtk3-devel \
                             python-devel \
@@ -201,7 +210,7 @@ then
                             git \
                             rpm-build \
                             clang
-elif [ $LINUX_ID == "fedora" ] && [ $LINUX_VERSION_ID -eq 32 ]
+elif [ $LINUX_ID == "fedora" ] && ([ $LINUX_VERSION_ID -ge 32 ] && [ $LINUX_VERSION_ID -lt 34 ])
 then
     dnf install -y \
                         git \
@@ -216,7 +225,6 @@ then
                         libjpeg-turbo-devel \
                         libpng-devel \
                         expat-devel \
-                        gtk2-devel \
                         gtk3-devel \
                         python3-devel \
                         rpm-build \
@@ -238,7 +246,6 @@ then
                         libjpeg-turbo-devel \
                         libpng-devel \
                         expat-devel \
-                        gtk2-devel \
                         gtk3-devel \
                         python2-devel \
                         python3-devel \
@@ -263,7 +270,6 @@ then
                         libjpeg-turbo-devel \
                         libpng-devel \
                         expat-devel \
-                        gtk2-devel \
                         gtk3-devel \
                         python3-devel \
                         rpm-build \
@@ -287,7 +293,6 @@ then
                         libjpeg-turbo-devel \
                         libpng-devel \
                         expat-devel \
-                        gtk2-devel \
                         gtk3-devel \
                         python3-devel \
                         rpm-build \
