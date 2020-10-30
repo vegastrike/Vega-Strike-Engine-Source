@@ -1,3 +1,29 @@
+/**
+ * event_xml.cpp
+ *
+ * Copyright (C) Daniel Horn
+ * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike
+ * contributors
+ *
+ * https://github.com/vegastrike/Vega-Strike-Engine-Source
+ *
+ * This file is part of Vega Strike.
+ *
+ * Vega Strike is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Vega Strike is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
+
 #include "cmd/unit_generic.h"
 #include "xml_support.h"
 #include "event_xml.h"
@@ -41,19 +67,18 @@ AIEvresult::AIEvresult( int type,
     if ( !validateHardCodedScript( this->script ) ) {
         static int aidebug = XMLSupport::parse_int( vs_config->getVariable( "AI", "debug_level", "0" ) );
         if (aidebug) {
-            for (int i = 0; i < 10; ++i) {
-                printf( "SERIOUS WARNING %s\n", this->script.c_str() );
-                fprintf( stderr, "SERIOUS WARNING: %s\n", this->script.c_str() );
+            for (int i = 0; i < 20; ++i) {
+                BOOST_LOG_TRIVIAL(warning) << boost::format("SERIOUS WARNING %1%") % this->script.c_str();
             }
         }
-        printf(
-            "SERIOUS WARNING in AI script: no fast method to perform %s when type %d is at least %f and at most %f with priority %f for %f time\n",
-            this->script.c_str(),
-            type,
-            min,
-            max,
-            priority,
-            timetofinish );
+        BOOST_LOG_TRIVIAL(warning) << boost::format(
+                "SERIOUS WARNING in AI script: no fast method to perform %1$s when type %2$d is at least %3$f and at most %4$f with priority %5$f for %6$f time")
+                % this->script.c_str()
+                % type
+                % min
+                % max
+                % priority
+                % timetofinish;
     }
 }
 
@@ -169,7 +194,7 @@ void LoadAI( const char *filename, ElemAttrMap &result, const string &faction )
     VSError err;
     err = f.OpenReadOnly( filename, AiFile );
     if (err > Ok) {
-        printf( "ai file %s not found\n", filename );
+        BOOST_LOG_TRIVIAL(warning) << boost::format("ai file %1% not found") % filename;
         string full_filename    = filename;
         full_filename = full_filename.substr( 0, strlen( filename )-4 );
         string::size_type where = full_filename.find_last_of( "." );
@@ -180,17 +205,17 @@ void LoadAI( const char *filename, ElemAttrMap &result, const string &faction )
             err  = f.OpenReadOnly( full_filename, AiFile );
         }
         if (err > Ok) {
-            printf( "ai file %s again not found\n", full_filename.c_str() );
+            BOOST_LOG_TRIVIAL(warning) << boost::format("ai file %1% again not found") % full_filename;
             full_filename  = "default";
             full_filename += type;
             err = f.OpenReadOnly( full_filename, AiFile );
         }
         if (err > Ok) {
-            printf( "ai file again %s again not found\n", full_filename.c_str() );
+            BOOST_LOG_TRIVIAL(warning) << boost::format("ai file again %1% again not found") % full_filename;
             err = f.OpenReadOnly( "default.agg.xml", AiFile );
             if (err > Ok) {
-                fprintf( stderr, "ai file again default.agg.xml again not found\n" );
-                return;                 //Who knows what will happen now? Crash?
+                BOOST_LOG_TRIVIAL(error) << "ai file again default.agg.xml again not found";
+                return;                 //Who knows what will happen now? Crash?    // TODO: VSExit()?
             }
         }
     }
@@ -200,8 +225,9 @@ void LoadAI( const char *filename, ElemAttrMap &result, const string &faction )
     XML_Parse( parser, ( f.ReadFull() ).c_str(), f.Size(), 1 );
     f.Close();
     XML_ParserFree( parser );
-    if (result.level != 0)
-        fprintf( stderr, "Error loading AI script %s for faction %s. Final count not zero.\n", filename, faction.c_str() );
+    if (result.level != 0) {
+        BOOST_LOG_TRIVIAL(error) << boost::format("Error loading AI script %1% for faction %2%. Final count not zero.") % filename % faction.c_str();
+    }
     result.level = 0;
 }
 }

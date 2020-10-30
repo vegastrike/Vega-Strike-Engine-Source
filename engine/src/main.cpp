@@ -173,13 +173,17 @@ void VSExit( int code)
 void cleanup( void )
 {
     STATIC_VARS_DESTROYED = true;
+    // stephengtuggy 2020-10-30: Output message both to the console and to the logs
     printf( "Thank you for playing!\n" );
-    if (_Universe != NULL )
+    BOOST_LOG_TRIVIAL(info) << "Thank you for playing!";
+    if (_Universe != NULL ) {
         _Universe->WriteSaveGame( true );
+    }
 #ifdef _WIN32
 #if defined (_MSC_VER) && defined (_DEBUG)
-    if (!cleanexit)
+    if (!cleanexit) {
         _RPT0( _CRT_ERROR, "WARNING: Vega Strike exit not clean\n" );
+    }
     return;
 #endif
 #else
@@ -616,9 +620,8 @@ void bootstrap_main_loop()
                 //In network mode, test if all player sections are present
                 if (pname == "") {
                     BOOST_LOG_TRIVIAL(fatal) << "Missing or incomplete section for player " << p;
-                    VSFileSystem::flushLogs();
                     cleanexit = true;
-                    winsys_exit( 1 );
+                    VSExit( 1 );
                 }
             }
             playername.push_back( pname );

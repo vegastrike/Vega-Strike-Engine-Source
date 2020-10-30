@@ -1,5 +1,31 @@
 // -*- mode: c++; c-basic-offset: 4; indent-tabs-mode: nil -*-
 
+/**
+ * cockpit.h
+ *
+ * Copyright (C) Daniel Horn
+ * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike
+ * contributors
+ *
+ * https://github.com/vegastrike/Vega-Strike-Engine-Source
+ *
+ * This file is part of Vega Strike.
+ *
+ * Vega Strike is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Vega Strike is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
+
 #ifndef _COCKPIT_H_
 #define _COCKPIT_H_
 #include "gfx/cockpit_generic.h"
@@ -68,10 +94,10 @@ struct soundArray
 class GameCockpit : public Cockpit
 {
     Camera    cam[NUM_CAM];
-    
+
     float     insidePanYaw, insidePanPitch;
     float     insidePanYawSpeed, insidePanPitchSpeed;
-    
+
     float     vdu_time[MAXVDUS];
     ///saved values to compare with current values (might need more for damage)
     std::list< Matrix >headtrans;
@@ -111,13 +137,13 @@ class GameCockpit : public Cockpit
     bool     steady_itts;
     //colors of blips/targetting boxes
     GFXColor friendly, enemy, neutral, targeted, targetting, planet;
-    
+
     // Last observed values for edge-triggered events
     struct LastState {
         double processing_time;
         int warplooplevel;
         int warpskiplevel;
-        
+
         bool jumpok:1, jumpnotok:1;
         bool specon:1, specoff:1;
         bool asapon:1, asapoff:1;
@@ -129,10 +155,10 @@ class GameCockpit : public Cockpit
         bool eject:1;
         bool flightcompon:1, flightcompoff:1;
         bool warpready:1, warpunready:1;
-        
+
         LastState();
     } last;
-    
+
     /// Used to display the arrow pointing to the currently selected target.
     float  projection_limit_x, projection_limit_y;
     float  inv_screen_aspect_ratio; //Precomputed division 1 / g_game.aspect.
@@ -236,7 +262,7 @@ public:
     {
         cam[currentcamera].UpdateGFX();
     }
-    
+
     virtual bool SetDrawNavSystem( bool );
     virtual bool CanDrawNavSystem();
     virtual bool DrawNavSystem();
@@ -257,7 +283,7 @@ public:
     // Ship is jumping
     void OnJumpBegin(Unit *unit);
     void OnJumpEnd(Unit *unit);
-    
+
 protected:
     /// Override to use a specific kind of sound implementation
     SoundContainer* soundImpl(const SoundContainer &specs);

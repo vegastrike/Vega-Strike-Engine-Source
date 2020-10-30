@@ -1,3 +1,29 @@
+/**
+ * flybywire.cpp
+ *
+ * Copyright (C) Daniel Horn
+ * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike
+ * contributors
+ *
+ * https://github.com/vegastrike/Vega-Strike-Engine-Source
+ *
+ * This file is part of Vega Strike.
+ *
+ * Vega Strike is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Vega Strike is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
+
 #include "flybywire.h"
 #include "vegastrike.h"
 #include <math.h>
@@ -76,8 +102,8 @@ void MatchLinearVelocity::Execute()
 MatchLinearVelocity::~MatchLinearVelocity()
 {
 #ifdef ORDERDEBUG
-    VSFileSystem::vs_fprintf( stderr, "mlv%x", this );
-    fflush( stderr );
+    BOOST_LOG_TRIVIAL(debug) << boost::format("mlv%1$x") % this;
+    VSFileSystem::flushLogs();
 #endif
 }
 
@@ -117,8 +143,8 @@ void MatchAngularVelocity::Execute()
 MatchAngularVelocity::~MatchAngularVelocity()
 {
 #ifdef ORDERDEBUG
-    VSFileSystem::vs_fprintf( stderr, "mav%x", this );
-    fflush( stderr );
+    BOOST_LOG_TRIVIAL(debug) << boost::format("mav%1$x") % this;
+    VSFileSystem::flushLogs();
 #endif
 }
 
@@ -138,8 +164,8 @@ void MatchVelocity::Execute()
 MatchVelocity::~MatchVelocity()
 {
 #ifdef ORDERDEBUG
-    VSFileSystem::vs_fprintf( stderr, "mv%x", this );
-    fflush( stderr );
+    BOOST_LOG_TRIVIAL(debug) << boost::format("mv%1$x") % this;
+    VSFileSystem::flushLogs();
 #endif
 }
 
@@ -353,8 +379,8 @@ void FlyByWire::Execute()
 FlyByWire::~FlyByWire()
 {
 #ifdef ORDERDEBUG
-    VSFileSystem::vs_fprintf( stderr, "fbw%x", this );
-    fflush( stderr );
+    BOOST_LOG_TRIVIAL(debug) << boost::format("fbw%1$x") % this;
+    VSFileSystem::flushLogs();
 #endif
 }
 

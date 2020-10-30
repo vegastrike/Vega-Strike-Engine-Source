@@ -1,3 +1,29 @@
+/**
+ * unit_xml.cpp
+ *
+ * Copyright (C) Daniel Horn
+ * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike
+ * contributors
+ *
+ * https://github.com/vegastrike/Vega-Strike-Engine-Source
+ *
+ * This file is part of Vega Strike.
+ *
+ * Vega Strike is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Vega Strike is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
+
 #include "unit_xml.h"
 #include "audiolib.h"
 #include "xml_support.h"
@@ -1720,7 +1746,7 @@ void Unit::beginElement( const string &name, const AttributeList &attributes )
                 xml->unitscale = parse_float( (*iter).value );
                 break;
             case COCKPIT:
-                VSFileSystem::vs_fprintf( stderr, "Cockpit attrib deprecated use tag" );
+                BOOST_LOG_TRIVIAL(warning) << "Cockpit attrib deprecated use tag";
                 break;
             }
         }
@@ -2006,8 +2032,9 @@ void Unit::LoadXML( VSFileSystem::VSFile &f, const char *modifications, string *
             mounts[a].sound = AUDCreateSound( mounts[a].type->sound, mounts[a].type->type != weapon_info::PROJECTILE ); //lloping also flase in unit_customize
         }
         if (a > 0)
-            if (mounts[a].sound == mounts[a-1].sound && mounts[a].sound != -1)
-                printf( "error" );
+            if (mounts[a].sound == mounts[a-1].sound && mounts[a].sound != -1) {
+                BOOST_LOG_TRIVIAL(error) << "error";
+            }
     }
     for (a = 0; a < xml->units.size(); a++)
         SubUnits.prepend( xml->units[a] );
@@ -2076,7 +2103,7 @@ csOPCODECollider* Unit::getCollideTree( const Vector & RESTRICT scale, std::vect
 	    }
 	}
 	return new csOPCODECollider( polies );
-    }	
+    }
     if (scale.i != 1 || scale.j != 1 || scale.k != 1) {
 	for (unsigned int i = 0;i < pol->size();++i){
 	    for (unsigned int j = 0; j < (*pol)[i].v.size(); ++j) {

@@ -1,9 +1,36 @@
+/**
+ * quadtree.cpp
+ *
+ * Copyright (C) Daniel Horn
+ * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike
+ * contributors
+ *
+ * https://github.com/vegastrike/Vega-Strike-Engine-Source
+ *
+ * This file is part of Vega Strike.
+ *
+ * Vega Strike is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Vega Strike is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
+
 #include "quadtree.h"
 #include "matrix.h"
 #include "aux_texture.h"
 #include "universe.h"
 #include "vegastrike.h"
 #include "vs_globals.h"
+#include "vsfilesystem.h"
 
 const GFXVertex InitialVertices[4] = {
     GFXVertex( Vector( 0, 0, 0 ), Vector( 0, 1, 0 ), 0, 0 ),
@@ -128,7 +155,6 @@ bool QuadTree::GetGroundPos( QVector &Location,
     }
     float tmp = root->GetHeight( RootCornerData, Loc.i, Loc.k, norm );
     if (tmp > -FLT_MAX) {
-        //VSFileSystem::Fprintf (stderr,"Orig<%f,%f,%f> Now <%f,%f,%f>",Loc.i,Loc.j,Loc.k,Loc.i,tmp,Loc.k);
         Location =
             Transform( transf, nonlinear_transform->Transform( QVector( TotalTerrainSizeX, tmp, TotalTerrainSizeZ ) ) ).Cast();
         norm     = TransformNormal( transf, nonlinear_transform->TransformNormal( Location, norm ) );
@@ -229,13 +255,13 @@ void QuadTree::LoadData()
     hm.Data       = new short[hm.XSize*hm.ZSize];
     hm.terrainmap = new unsigned char[hm.XSize*hm.ZSize];
     memset( hm.terrainmap, 0, sizeof (unsigned char)*hm.ZSize*hm.XSize );
-    printf( "Loading height grids...\n" );
+    BOOST_LOG_TRIVIAL(info) << "Loading height grids...";
 
     //Big coarse data, at 128 meter sample spacing.
     FILE *fp = VSFileSystem::vs_open( "demdata/gc16at128.raw", "rb" );
     VSFileSystem::vs_read( hm.Data, sizeof (unsigned short), hm.XSize*hm.ZSize, fp );
     VSFileSystem::vs_close( fp );
-    printf( "Building quadtree data...\n" );
+    BOOST_LOG_TRIVIAL(info) << "Building quadtree data...";
     root->AddHeightMap( RootCornerData, hm );
 
     //More detailed data at 64 meter spacing, covering the middle of the terrain.
@@ -245,7 +271,7 @@ void QuadTree::LoadData()
     fp = VSFileSystem::vs_open( "demdata/gc16at64.raw", "rb" );
     VSFileSystem::vs_read( hm.Data, sizeof (unsigned short), hm.XSize*hm.ZSize, fp );
     VSFileSystem::vs_close( fp );
-    printf( "Adding quadtree data...\n" );
+    BOOST_LOG_TRIVIAL(info) << "Adding quadtree data...";
     root->AddHeightMap( RootCornerData, hm );
 
     //Even more detailed data, at 32 meter spacing, covering a smaller area near the middle.
@@ -255,7 +281,7 @@ void QuadTree::LoadData()
     fp = VSFileSystem::vs_open( "demdata/gc16at32.raw", "rb" );
     VSFileSystem::vs_read( hm.Data, sizeof (unsigned short), hm.XSize*hm.ZSize, fp );
     VSFileSystem::vs_close( fp );
-    printf( "Adding quadtree data...\n" );
+    BOOST_LOG_TRIVIAL(info) << "Adding quadtree data...";
     root->AddHeightMap( RootCornerData, hm );
 
     delete[] hm.Data;

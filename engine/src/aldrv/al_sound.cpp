@@ -425,7 +425,7 @@ static int LoadSound( ALuint buffer, bool looping, bool music )
     sounds[i].looping = looping ? AL_TRUE : AL_FALSE;
     sounds[i].music   = music;
 #ifdef SOUND_DEBUG
-    printf( " with buffer %d and looping property %d\n", i, (int) looping );
+    BOOST_LOG_TRIVIAL(trace) << boost::format(" with buffer %1% and looping property %2%") % i % ((int) looping)''
 #endif
     //limited number of sources
     //alGenSources( 1, &sounds[i].source);
@@ -471,37 +471,35 @@ bool AUDLoadSoundFile( const char *s, struct AUDSoundProperties *info, bool use_
     } else {
         VSFile  f;
         VSError error = f.OpenReadOnly( s, SoundFile );
-        if (error > Ok)
+        if (error > Ok) {
             error = f.OpenReadOnly( s, UnknownFile );
+        }
         info->shared = (error == Shared);
-        if (info->shared)
+        if (info->shared) {
             info->hashname = VSFileSystem::GetSharedSoundHashName( s );
-        else
+        } else {
             info->hashname = VSFileSystem::GetHashName( s );
-        if (error > Ok)
+        }
+        if (error > Ok) {
             return false;
+        }
 #ifdef SOUND_DEBUG
-        printf( "Sound %s created with and alBuffer %d\n", s.c_str(), *wavbuf );
+        BOOST_LOG_TRIVIAL(trace) << boost::format("Sound %1$s created with and alBuffer %2$d") % s, % wavbuf;
 #endif
         dat.resize( f.Size() );
         f.Read( &dat[0], f.Size() );
         f.Close();
     }
     ConvertFormat( dat );
-    if (dat.size() == 0)      //conversion messed up
+    if (dat.size() == 0) {          //conversion messed up
         return false;
+    }
     //blutLoadWAVMemory((ALbyte *)&dat[0], &format, &wave, &size, &freq, &looping);
 
-#if 0
-    ALint format;
-    //MAC OS X
-    if (error <= Ok)
-        MacFixedLoadWAVFile( &dat[0], &format, &wave, &size, &freq );
-#else
     blutLoadWAVMemory( (ALbyte*) &dat[0], &info->format, &info->wave, &info->size, &info->freq, &info->looping );
-#endif
-    if (!info->wave)
+    if (!info->wave) {
         return false;          //failure.
+    }
 
     info->success = true;
     return true;
@@ -515,7 +513,9 @@ int AUDBufferSound( const struct AUDSoundProperties *info, bool music )
 #ifdef HAVE_AL
     ALuint wavbuf = 0;
     alGenBuffers( 1, &wavbuf );
-    if (!wavbuf) printf( "OpenAL Error in alGenBuffers: %d\n", alGetError() );
+    if (!wavbuf) {
+        BOOST_LOG_TRIVIAL(error) << boost::format("OpenAL Error in alGenBuffers: %1$d") % alGetError();
+    }
     alBufferData( wavbuf, info->format, info->wave, info->size, info->freq );
     return LoadSound( wavbuf, info->looping, music );
 #else
@@ -534,7 +534,7 @@ int AUDCreateSoundWAV( const std::string &s, const bool music, const bool LOOP )
 {
 #ifdef HAVE_AL
 #ifdef SOUND_DEBUG
-    printf( "AUDCreateSoundWAV:: " );
+    BOOST_LOG_TRIVIAL(trace) << "AUDCreateSoundWAV:: ";
 #endif
     if ( (game_options.Music && !music) || (game_options.Music && music) ) {
         ALuint     *wavbuf = NULL;
@@ -551,7 +551,7 @@ int AUDCreateSoundWAV( const std::string &s, const bool music, const bool LOOP )
         }
         if (wavbuf) {
 #ifdef SOUND_DEBUG
-            printf( "Sound %s restored with alBuffer %d\n", s.c_str(), *wavbuf );
+            BOOST_LOG_TRIVIAL(trace) << boost::format("Sound %1$s restored with alBuffer %2$d") % s % *wavbuf;
 #endif
         }
         if (wavbuf == NULL) {
@@ -681,9 +681,9 @@ void AUDDeleteSound( int sound, bool music )
         if ( AUDIsPlaying( sound ) ) {
             if (!music) {
 #ifdef SOUND_DEBUG
-                printf( "AUDDeleteSound: Sound Playing enqueue soundstodelete %d %d\n",
-                        sounds[sound].source,
-                        sounds[sound].buffer );
+                BOOST_LOG_TRIVIAL(trace) << boost::format("AUDDeleteSound: Sound Playing enqueue soundstodelete %1$d %2$d")
+                        % sounds[sound].source
+                        % sounds[sound].buffer;
 #endif
                 soundstodelete.push_back( sound );
                 return;
@@ -692,7 +692,7 @@ void AUDDeleteSound( int sound, bool music )
             }
         }
 #ifdef SOUND_DEBUG
-        printf( "AUDDeleteSound: Sound Not Playing push back to unused src %d %d\n", sounds[sound].source, sounds[sound].buffer );
+        BOOST_LOG_TRIVIAL(debug) << boost::format("AUDDeleteSound: Sound Not Playing push back to unused src %1$d %2$d") % sounds[sound].source % sounds[sound].buffer;
 #endif
         if (sounds[sound].source) {
             unusedsrcs.push_back( sounds[sound].source );
@@ -705,14 +705,15 @@ void AUDDeleteSound( int sound, bool music )
         dirtysounds.push_back( sound );
 #ifdef SOUND_DEBUG
     } else {
-        VSFileSystem::vs_fprintf( stderr, "double delete of sound %d", sound );
+        BOOST_LOG_TRIVIAL(error) << boost::format("double delete of sound %1$d") % sound;
         return;
     }
 #endif
         //FIXME??
         //alDeleteSources(1,&sounds[sound].source);
-        if (music)
+        if (music) {
             alDeleteBuffers( 1, &sounds[sound].buffer );
+        }
         sounds[sound].buffer = (ALuint) 0;
     }
 #endif
@@ -799,8 +800,9 @@ bool AUDIsPlaying( const int sound )
 {
 #ifdef HAVE_AL
     if ( sound >= 0 && sound < (int) sounds.size() ) {
-        if (!sounds[sound].source)
+        if (!sounds[sound].source) {
             return false;
+        }
         ALint state;
 #if defined (_WIN32) || defined (__APPLE__)
         alGetSourcei( sounds[sound].source, AL_SOURCE_STATE, &state );         //Obtiene el estado de la fuente para windows
@@ -819,7 +821,8 @@ void AUDStopPlaying( const int sound )
 #ifdef HAVE_AL
     if ( sound >= 0 && sound < (int) sounds.size() ) {
 #ifdef SOUND_DEBUG
-        printf( "AUDStopPlaying sound %d source(releasing): %d buffer:%d\n", sound, sounds[sound].source, sounds[sound].buffer );
+        BOOST_LOG_TRIVIAL(trace) << boost::format("AUDStopPlaying sound %1$d source(releasing): %2$d buffer: %3$d")
+                                    % sound % sounds[sound].source % sounds[sound].buffer;
 #endif
         if (sounds[sound].source != 0) {
             alSourceStop( sounds[sound].source );
@@ -835,8 +838,9 @@ static bool AUDReclaimSource( const int sound, bool high_priority = false )
 {
 #ifdef HAVE_AL
     if (sounds[sound].source == (ALuint) 0) {
-        if (!sounds[sound].buffer)
+        if (!sounds[sound].buffer) {
             return false;
+        }
         if ( unusedsrcs.empty() ) {
             if (high_priority) {
                 unsigned int i;
@@ -879,7 +883,7 @@ static bool AUDReclaimSource( const int sound, bool high_priority = false )
 void AUDStartPlaying( const int sound )
 {
 #ifdef SOUND_DEBUG
-    printf( "AUDStartPlaying(%d)", sound );
+    BOOST_LOG_TRIVIAL(trace) << boost::format("AUDStartPlaying(%1$d)") % sound;
 #endif
 
 #ifdef HAVE_AL
@@ -887,7 +891,8 @@ void AUDStartPlaying( const int sound )
         if ( sounds[sound].music || starSystemOK() )
             if ( AUDReclaimSource( sound, sounds[sound].pos == QVector( 0, 0, 0 ) ) ) {
 #ifdef SOUND_DEBUG
-                printf( "AUDStartPlaying sound %d source:%d buffer:%d\n", sound, sounds[sound].source, sounds[sound].buffer );
+                BOOST_LOG_TRIVIAL(trace) << boost::format("AUDStartPlaying sound %1$d source: %2$d buffer: %3$d")
+                                            % sound % sounds[sound].source % sounds[sound].buffer;
 #endif
                 AUDAdjustSound( sound, sounds[sound].pos, sounds[sound].vel );
                 AUDSoundGain( sound, sounds[sound].gain, sounds[sound].music );

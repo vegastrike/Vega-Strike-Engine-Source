@@ -1,5 +1,31 @@
 // -*- mode: c++; c-basic-offset: 4; indent-tabs-mode: nil -*-
 
+/**
+ * unit_generic.cpp
+ *
+ * Copyright (C) 2001-2002 Daniel Horn
+ * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike
+ * contributors
+ *
+ * https://github.com/vegastrike/Vega-Strike-Engine-Source
+ *
+ * This file is part of Vega Strike.
+ *
+ * Vega Strike is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * Vega Strike is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
+
 #include <set>
 #include "configxml.h"
 #include "audiolib.h"
@@ -595,15 +621,18 @@ static Hashtable< long, Unit, 2095 >deletedUn;
 int deathofvs = 1;
 void CheckUnit( Unit *un )
 {
-    if (deletedUn.Get( (long) un ) != NULL)
-        while (deathofvs)
-            printf( "%ld died", (long) un );
+    if (deletedUn.Get( (long) un ) != NULL) {
+        while (deathofvs) {
+            BOOST_LOG_TRIVIAL(info) << boost::format("%1% died") % ((long)un);
+        }
+    }
 }
 
 void UncheckUnit( Unit *un )
 {
-    if (deletedUn.Get( (long) un ) != NULL)
+    if (deletedUn.Get( (long) un ) != NULL) {
         deletedUn.Delete( (long) un );
+    }
 }
 
 string GetUnitDir( string filename )
@@ -738,7 +767,7 @@ Unit::~Unit()
         BOOST_LOG_TRIVIAL(fatal) << "DISASTER AREA!!!!";
         VSFileSystem::flushLogs();
     }
-    BOOST_LOG_TRIVIAL(trace) << boost::format("Deallocating unit %1$s addr=0x%2$08x refs=%3$d")
+    BOOST_LOG_TRIVIAL(trace) << boost::format("Deallocating unit %1$s addr=%2$x refs=%3$d")
                                 % name.get().c_str() % this % ucref;
 #ifdef DESTRUCTDEBUG
     VSFileSystem::vs_fprintf( stderr, "stage %d %x %d\n", 0, this, ucref );
@@ -3612,11 +3641,12 @@ bool DestroyPlayerSystem( float hull, float maxhull, float numhits )
     static float damage_chance     = XMLSupport::parse_float( vs_config->getVariable( "physics", "damage_player_chance", ".5" ) );
     static float guaranteed_chance = XMLSupport::parse_float( vs_config->getVariable( "physics", "definite_damage_chance", ".1" ) );
     float chance = 1-( damage_chance*(guaranteed_chance+(maxhull-hull)/maxhull) );
-    if (numhits > 1)
+    if (numhits > 1) {
         chance = pow( chance, numhits );
+    }
     bool  ret    = (rand01() > chance);
     if (ret) {
-        //printf("DAAAAAAMAGED!!!!\n");
+        //BOOST_LOG_TRIVIAL(warning) << "DAAAAAAMAGED!!!!";
     }
     return ret;
 }
@@ -3886,7 +3916,7 @@ public:
         WeaponGroupSet myset;
         unsigned int   i;
         typename WeaponGroupSet::const_iterator iter;
-        printf( "ToggleWeaponSet: %s\n", FORWARD ? "true" : "false" );
+        BOOST_LOG_TRIVIAL(info) << boost::format("ToggleWeaponSet: %1%") % (FORWARD ? "true" : "false");
         for (i = 0; i < un->mounts.size(); ++i)
             if ( checkmount( un, i, missile ) ) {
                 WeaponGroup mygroup;
@@ -3901,49 +3931,56 @@ public:
                     allWeaponsNoSpecial.insert( i );
             }
         const WeaponGroupSet mypairset( myset );
-        for (iter = mypairset.begin(); iter != mypairset.end(); ++iter)
+        for (iter = mypairset.begin(); iter != mypairset.end(); ++iter) {
             if ( (*iter).size() && notSpecial( un->mounts[( *( (*iter).begin() ) )] ) ) {
                 typename WeaponGroupSet::const_iterator iter2;
-                for (iter2 = mypairset.begin(); iter2 != mypairset.end(); ++iter2)
+                for (iter2 = mypairset.begin(); iter2 != mypairset.end(); ++iter2) {
                     if ( (*iter2).size() && notSpecial( un->mounts[( *( (*iter2).begin() ) )] ) ) {
                         WeaponGroup myGroup;
                         set_union( (*iter).begin(), (*iter).end(), (*iter2).begin(), (*iter2).end(),
                                   inserter( myGroup, myGroup.begin() ) );
                         myset.insert( myGroup );
                     }
+                }
             }
+        }
         static bool allow_special_with_weapons =
             XMLSupport::parse_bool( vs_config->getVariable( "physics", "special_and_normal_gun_combo", "true" ) );
-        if (allow_special_with_weapons)
+        if (allow_special_with_weapons) {
             myset.insert( allWeapons );
+        }
         myset.insert( allWeaponsNoSpecial );
         for (iter = myset.begin(); iter != myset.end(); ++iter) {
-            for (WeaponGroup::const_iterator iter2 = (*iter).begin(); iter2 != (*iter).end(); ++iter2)
-                printf( "%d:%s ", *iter2, un->mounts[*iter2].type->weapon_name.c_str() );
-            printf( "\n" );
+            for (WeaponGroup::const_iterator iter2 = (*iter).begin(); iter2 != (*iter).end(); ++iter2) {
+                BOOST_LOG_TRIVIAL(info) << boost::format("%1$p:%2$s ") % (*iter2) % (un->mounts[*iter2].type->weapon_name.c_str());
+            }
+            BOOST_LOG_TRIVIAL(info) << "\n";
         }
         WeaponGroup activeWeapons;
-        printf( "CURRENT: " );
+        BOOST_LOG_TRIVIAL(info) << "CURRENT: ";
         for (i = 0; i < un->mounts.size(); ++i)
             if ( un->mounts[i].status == Mount::ACTIVE && checkmount( un, i, missile ) ) {
                 activeWeapons.insert( i );
-                printf( "%d:%s ", i, un->mounts[i].type->weapon_name.c_str() );
+                BOOST_LOG_TRIVIAL(info) << boost::format("%1$d:%2$s ") % i % un->mounts[i].type->weapon_name.c_str();
             }
-        printf( "\n" );
+        BOOST_LOG_TRIVIAL(info) << "\n";
         iter = myset.upper_bound( activeWeapons );
-        if ( iter == myset.end() )
+        if ( iter == myset.end() ) {
             iter = myset.begin();
-        if ( iter == myset.end() )
+        }
+        if ( iter == myset.end() ) {
             return;
-        for (i = 0; i < un->mounts.size(); ++i)
+        }
+        for (i = 0; i < un->mounts.size(); ++i) {
             un->mounts[i].DeActive( missile );
-        printf( "ACTIVE: " );
+        }
+        BOOST_LOG_TRIVIAL(info) << "ACTIVE: ";
         for (WeaponGroup::const_iterator iter2 = (*iter).begin(); iter2 != (*iter).end(); ++iter2) {
-            printf( "%d:%s ", *iter2, un->mounts[*iter2].type->weapon_name.c_str() );
+            BOOST_LOG_TRIVIAL(info) << boost::format("%1$p:%2$s ") % (*iter2) % (un->mounts[*iter2].type->weapon_name.c_str());
             un->mounts[*iter2].Activate( missile );
         }
-        printf( "\n" );
-        printf( "ToggleWeapon end...\n" );
+        BOOST_LOG_TRIVIAL(info) << "\n";
+        BOOST_LOG_TRIVIAL(info) << "ToggleWeapon end...\n";
     }
 };
 
@@ -4800,7 +4837,7 @@ bool Unit::UpgradeMounts( const Unit *up,
 
                                         if (weapon == NULL || weapon->name == LOAD_FAILED) {
                                             // this should not happen
-                                            VSFileSystem::vs_dprintf(1, "UpgradeMount(): FAILED to obtain weapon: %s\n", weaponname.c_str());
+                                            BOOST_LOG_TRIVIAL(info) << boost::format("UpgradeMount(): FAILED to obtain weapon: %1%") % weaponname;
                                             cancompletefully = false;
                                             break;
                                         }
@@ -5138,12 +5175,6 @@ extern Unit * CreateGameTurret( std::string tur, int faction );
 extern char * GetUnitDir( const char* );
 double Unit::Upgrade( const std::string &file, int mountoffset, int subunitoffset, bool force, bool loop_through_mounts )
 {
-#if 0
-    if (shield.number == 2)
-        printf( "shields before %s %f %f", file.c_str(), shield.fb[2], shield.fb[3] );
-    else
-        printf( "shields before %s %d %d", file.c_str(), shield.fbrl.frontmax, shield.fbrl.backmax );
-#endif
     int upgradefac = FactionUtil::GetUpgradeFaction();
     const Unit *up = UnitConstCache::getCachedConst( StringIntKey( file, upgradefac ) );
     if (!up)
@@ -5175,12 +5206,6 @@ double Unit::Upgrade( const std::string &file, int mountoffset, int subunitoffse
                 break;
         }
     }
-#if 0
-    if (shield.number == 2)
-        printf( "shields before %s %f %f", file.c_str(), shield.fb[2], shield.fb[3] );
-    else
-        printf( "shields before %s %d %d", file.c_str(), shield.fbrl.frontmax, shield.fbrl.backmax );
-#endif
 
     return percentage;
 }
@@ -7216,7 +7241,7 @@ void Unit::Repair()
                         const Unit *up    = getUnitFromUpgradeName( carg->content, upfac );
                         static std::string loadfailed( "LOAD_FAILED" );
                         if (up->name == loadfailed) {
-                            printf( "Bug: Load failed cargo encountered: report to hellcatv@hotmail.com\n" );
+                            BOOST_LOG_TRIVIAL(info) << "Bug: Load failed cargo encountered: report on https://github.com/vegastrike/Vega-Strike-Engine-Source";
                         } else {
                             double percentage = 0;
                             //don't want to repair these things

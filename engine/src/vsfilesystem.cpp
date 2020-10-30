@@ -428,16 +428,6 @@ int vs_fprintf( FILE *fp, const char *format, ... )
     return 0;
 }
 
-void vs_dprintf( char level, const char *format, ... )
-{
-    if (!use_volumes && level <= g_game.vsdebug) {
-        va_list ap;
-        va_start( ap, format );
-        vfprintf( stderr, format, ap );
-        va_end(ap);
-    }
-}
-
 
 int vs_fseek( FILE *fp, long offset, int whence )
 {

@@ -1,3 +1,29 @@
+/**
+ * music.cpp
+ *
+ * Copyright (C) Daniel Horn
+ * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike
+ * contributors
+ *
+ * https://github.com/vegastrike/Vega-Strike-Engine-Source
+ *
+ * This file is part of Vega Strike.
+ *
+ * Vega Strike is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Vega Strike is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
+
 #include <map>
 #include <set>
 #include <algorithm>
@@ -276,7 +302,7 @@ readerThread(
 #else
         checkerr( pthread_mutex_lock( &me->musicinfo_mutex ) );
 #endif
-        if (me->killthread) { 
+        if (me->killthread) {
             break;
         }
         me->music_loading = true;
@@ -305,8 +331,8 @@ readerThread(
             if (foundcache) {
                 *me->music_load_info = wherecache->second;
                 me->freeWav = false;
-            } else if ( !AUDLoadSoundFile( songname, me->music_load_info, true ) ) { 	 
-	        VSFileSystem::vs_dprintf(1, "Failed to load music file \"%s\"", songname);
+            } else if ( !AUDLoadSoundFile( songname, me->music_load_info, true ) ) {
+                BOOST_LOG_TRIVIAL(info) << boost::format("Failed to load music file \"%1%\"") % songname;
             }
         }
         if (me->freeWav && docacheme) {
@@ -447,7 +473,7 @@ void Music::GotoSong( std::string mus, int layer )
             muzak_cross_index = (muzak_cross_index^1);
             muzak[muzak_cross_index]._GotoSong( mus );
         } else if ( (layer >= 0) && (layer < muzak_count) ) {
-            if (mus == muzak[layer].cur_song_file){ 
+            if (mus == muzak[layer].cur_song_file){
                 return;
             }
             muzak[layer]._GotoSong( mus );

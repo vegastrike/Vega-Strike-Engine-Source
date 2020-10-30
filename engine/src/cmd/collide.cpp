@@ -41,6 +41,8 @@
 #include <string>
 #include "vs_globals.h"
 #include "configxml.h"
+#include "vsfilesystem.h"
+
 static Hashtable< std::string, collideTrees, 127 >unitColliders;
 collideTrees::collideTrees( const std::string &hk, csOPCODECollider *cT,
                             csOPCODECollider *cS ) : hash_key( hk )
@@ -115,10 +117,11 @@ bool TableLocationChanged( const LineCollide &lc, const QVector &minx, const QVe
 
 void KillCollideTable( LineCollide *lc, StarSystem *ss )
 {
-    if (lc->type == LineCollide::UNIT)
+    if (lc->type == LineCollide::UNIT) {
         ss->collide_table->c.Remove( lc, lc->object.u );
-    else
-        printf( "such collide types as %d not allowed", lc->type );
+    } else {
+        BOOST_LOG_TRIVIAL(warning) << boost::format("such collide types as %1$d not allowed") % lc->type;
+    }
 }
 
 bool EradicateCollideTable( LineCollide *lc, StarSystem *ss )
@@ -126,17 +129,18 @@ bool EradicateCollideTable( LineCollide *lc, StarSystem *ss )
     if (lc->type == LineCollide::UNIT) {
         return ss->collide_table->c.Eradicate( lc->object.u );
     } else {
-        printf( "such collide types as %d not allowed", lc->type );
+        BOOST_LOG_TRIVIAL(warning) << boost::format("such collide types as %1$d not allowed") % lc->type;
         return false;
     }
 }
 
 void AddCollideQueue( LineCollide &tmp, StarSystem *ss )
 {
-    if (tmp.type == LineCollide::UNIT)
+    if (tmp.type == LineCollide::UNIT) {
         ss->collide_table->c.Put( &tmp, tmp.object.u );
-    else
-        printf( "such collide types as %d not allowed", tmp.type );
+    } else {
+        BOOST_LOG_TRIVIAL(warning) << boost::format("such collide types as %1$d not allowed") % lc->type;
+    }
 }
 
 bool lcwithin( const LineCollide &lc, const LineCollide &tmp )

@@ -15,6 +15,14 @@
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+ *
+ * Incorporated into Vega Strike
+ *
+ * Copyright (C) Daniel Horn
+ * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike
+ * contributors
+ *
+ * https://github.com/vegastrike/Vega-Strike-Engine-Source
  */
 #include <assert.h>
 #include <sstream>
@@ -241,13 +249,12 @@ static bool setup_sdl_video_mode()
             for (int bpd = 4; bpd > 1; --bpd) {
                 SDL_GL_SetAttribute( SDL_GL_DEPTH_SIZE, bpd*8 );
                 if ( ( screen = SDL_SetVideoMode( width, height, bpp, video_flags|SDL_ANYFORMAT ) )
-                    == NULL )
+                    == NULL ) {
                     BOOST_LOG_TRIVIAL(info) << boost::format("Couldn't initialize video bpp %1% depth %2%: %3%") % bpp % (bpd * 8) %
                                                 SDL_GetError();
-                    // VSFileSystem::vs_dprintf( 1, "Couldn't initialize video bpp %d depth %d: %s\n",
-                    //     bpp, bpd*8, SDL_GetError() );
-                else
+                } else {
                     break;
+                }
             }
             if (screen == NULL) {
                 SDL_GL_SetAttribute( SDL_GL_RED_SIZE, otherattributes );

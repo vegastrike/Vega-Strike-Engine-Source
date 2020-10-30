@@ -1,3 +1,29 @@
+/**
+ * flykeyboard.cpp
+ *
+ * Copyright (C) Daniel Horn
+ * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike
+ * contributors
+ *
+ * https://github.com/vegastrike/Vega-Strike-Engine-Source
+ *
+ * This file is part of Vega Strike.
+ *
+ * Vega Strike is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Vega Strike is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
+
 #include "in_joystick.h"
 #include "flykeyboard.h"
 #include "cmd/unit_generic.h"
@@ -6,6 +32,7 @@
 #include "config_xml.h"
 #include "xml_support.h"
 #include "vs_globals.h"
+#include "vsfilesystem.h"
 #include "gfx/cockpit.h"
 #include "lin_time.h"
 #include "universe.h"
@@ -466,11 +493,13 @@ void FlyByKeyboard::ChangeCommStatus( const KBData&, KBSTATE k )
     case UP:
         break;
     case PRESS:
-        printf( "Pressed NETCOMM key !!!\n" );
-        if (g().startcomm == true)
+        BOOST_LOG_TRIVIAL(info) << "Pressed NETCOMM key !!!";
+        if (g().startcomm == true) {
             g().startcomm = false;
-        else
+        }
+        else {
             g().startcomm = true;
+        }
         g().commchanged = true;
         break;
     case RELEASE:
@@ -487,7 +516,7 @@ void FlyByKeyboard::SwitchWebcam( const KBData&, KBSTATE k )
     case UP:
         break;
     case PRESS:
-        printf( "Pressed SWITCHWEBCAM key !!!\n" );
+        BOOST_LOG_TRIVIAL(info) << "Pressed SWITCHWEBCAM key !!!";
         g().switchwebcam = true;
         break;
     case RELEASE:
@@ -504,7 +533,7 @@ void FlyByKeyboard::SwitchSecured( const KBData&, KBSTATE k )
     case UP:
         break;
     case PRESS:
-        printf( "Pressed SWITCHSECURED key !!!\n" );
+        BOOST_LOG_TRIVIAL(info) << "Pressed SWITCHSECURED key !!!";
         g().switchsecured = true;
         break;
     case RELEASE:

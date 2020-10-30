@@ -184,13 +184,6 @@ long vs_getsize( FILE *fp );
 
 int vs_fprintf( FILE *fp, const char *format, ... );
 
-/* Debug level is a character, 1, 2, or 3.   1 is most important warnings only. 2 is warnings that are important but not hazardous to gameplay
- *  3 is for developer type messages, more akin to informational output but not relevant to anything an end user would care about.
- *  example usage.   vegastrike --debug=3       leaving --debug empty as an argument is the same as --debug=1
- *  all output is sent to stderr
- */
-void vs_dprintf( char level, const char *format, ... );
-
 template < class A >
 int vs_fscanf( FILE *fp, const char *format, A *a )
 {

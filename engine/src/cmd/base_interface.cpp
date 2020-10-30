@@ -1,3 +1,29 @@
+/**
+ * base_interface.cpp
+ *
+ * Copyright (C) Daniel Horn
+ * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike
+ * contributors
+ *
+ * https://github.com/vegastrike/Vega-Strike-Engine-Source
+ *
+ * This file is part of Vega Strike.
+ *
+ * Vega Strike is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Vega Strike is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
+
 #include <algorithm>
 #include <Python.h>
 #include "base.h"
@@ -31,9 +57,6 @@
 
 #include "ai/communication.h"
 #include "audio/SceneManager.h"
-
-using std::cerr;
-using std::endl;
 
 
 static unsigned int& getMouseButtonMask()
@@ -553,7 +576,8 @@ void BaseInterface::Room::BaseText::Draw( BaseInterface *base )
 void RunPython( const char *filnam )
 {
 #ifdef DEBUG_RUN_PYTHON
-    printf( "Run python:\n%s\n", filnam );
+    BOOST_LOG_TRIVIAL(trace) << "Run python:\n";
+    BOOST_LOG_TRIVIAL(trace) << boost::format("%1%\n") % filnam;
 #endif
     if (filnam[0]) {
         if (filnam[0] == '#' && filnam[1] != '\0') {
@@ -686,16 +710,18 @@ void BaseInterface::Room::Click( BaseInterface *base, float x, float y, int butt
         if (state == WS_MOUSE_UP) {
             char  input[201];
             char *str;
-            if (button == WS_RIGHT_BUTTON)
+            if (button == WS_RIGHT_BUTTON) {
                 str = "Please create a file named stdin.txt and type\nin the sprite file that you wish to use.";
-            else if (button == WS_MIDDLE_BUTTON)
+            } else if (button == WS_MIDDLE_BUTTON) {
                 str =
                     "Please create a file named stdin.txt and type\nin the type of room followed by arguments for the room followed by text in quotations:\n1 ROOM# \"TEXT\"\n2 \"TEXT\"\n3 vector<MODES>.size vector<MODES> \"TEXT\"";
-            else
+            } else {
                 return;
+            }
 #ifdef _WIN32
             int ret = MessageBox( NULL, str, "Input", MB_OKCANCEL );
 #else
+            // 2020-10-29 stephengtuggy: Leaving this here, since it is obviously intended for real-time user interaction when in BASE_MAKER mode
             printf( "\n%s\n", str );
             int ret = 1;
 #endif
@@ -742,6 +768,7 @@ void BaseInterface::Room::Click( BaseInterface *base, float x, float y, int butt
                         VSFileSystem::vs_close( fp );
                         MessageBox( NULL, "warning: invalid basemaker option", "Error", MB_OK );
 #endif
+                        // 2020-10-29 stephengtuggy: Leaving this here, since it is obviously intended for real-time user interaction when in BASE_MAKER mode
                         printf( "warning: invalid basemaker option: %d", rmtyp );
                         return;
                     }
@@ -940,7 +967,8 @@ void BaseInterface::GotoLink( int linknum )
         mousePointerStyle = MOUSE_POINTER_NORMAL;
     } else {
 #ifndef BASE_MAKER
-        VSFileSystem::vs_fprintf( stderr, "\nWARNING: base room #%d tried to go to an invalid index: #%d", curroom, linknum );
+        BOOST_LOG_TRIVIAL(fatal) << boost::format("\nWARNING: base room #%d tried to go to an invalid index: #%d") % curroom % linknum;
+        VSFileSystem::flushLogs();
         assert( 0 );
 #else
         while (rooms.size() <= linknum) {
@@ -1045,7 +1073,7 @@ double compute_light_dot( Unit *base, Unit *un )
     if (ss) {
         _Universe->pushActiveStarSystem( ss );
         un_iter ui = ss->getUnitList().createIterator();
-        for (; (st = *ui); ++ui)
+        for (; (st = *ui); ++ui) {
             if ( st->isPlanet() ) {
                 if ( ( (Planet*) st )->hasLights() ) {
 #ifdef VS_DEBUG
@@ -1054,18 +1082,21 @@ double compute_light_dot( Unit *base, Unit *un )
 
                     double  dot = v1.Dot( v2 );
                     if (dot > ret) {
-                        VSFileSystem::vs_fprintf( stderr, "dot %lf", dot );
+                        BOOST_LOG_TRIVIAL(debug) << boost::format("dot %1%") % dot;
                         ret = dot;
                     }
 #endif
                 } else {
                     un_iter ui   = ( (Planet*) st )->satellites.createIterator();
                     Unit   *ownz = NULL;
-                    for (; (ownz = *ui); ++ui)
-                        if (ownz == base)
+                    for (; (ownz = *ui); ++ui) {
+                        if (ownz == base) {
                             base_owner = st;
+                        }
+                    }
                 }
             }
+        }
         _Universe->popActiveStarSystem();
     } else {return 1; } if (base_owner == NULL || base->isUnit() == PLANETPTR)
         return ret;
@@ -1126,11 +1157,10 @@ BaseInterface::BaseInterface( const char *basefile, Unit *base, Unit *un ) :
             saveStringList( cpt, mission_key, vec );
     }
     if ( !rooms.size() ) {
-        VSFileSystem::vs_fprintf( stderr,
-                                  "ERROR: there are no rooms in basefile \"%s%s%s\" ...\n",
-                                  basefile,
-                                  compute_time_of_day( base, un ),
-                                  BASE_EXTENSION );
+        BOOST_LOG_TRIVIAL(error) << boost::format("ERROR: there are no rooms in basefile \"%1%%2%%3%\" ...\n")
+                                  % basefile
+                                  % compute_time_of_day( base, un )
+                                  % BASE_EXTENSION;
         rooms.push_back( new Room() );
         rooms.back()->deftext = "ERROR: No rooms specified...";
 #ifndef BASE_MAKER
@@ -1142,8 +1172,9 @@ BaseInterface::BaseInterface( const char *basefile, Unit *base, Unit *un ) :
     }
     GotoLink( 0 );
     {
-        for (unsigned int i = 0; i < 16; ++i)
+        for (unsigned int i = 0; i < 16; ++i) {
             ExecuteDirector();
+        }
     }
 }
 
@@ -1312,14 +1343,15 @@ void BaseInterface::Room::Talk::Click( BaseInterface *base, float x, float y, in
             if (soundfiles[sayindex].size() > 0) {
                 int sound = AUDCreateSoundWAV( soundfiles[sayindex], false );
                 if (sound == -1) {
-                    VSFileSystem::vs_fprintf( stderr, "\nCan't find the sound file %s\n", soundfiles[sayindex].c_str() );
+                    BOOST_LOG_TRIVIAL(error) << boost::format("\nCan't find the sound file %1%\n") % soundfiles[sayindex].c_str();
                 } else {
                     AUDStartPlaying( sound );
                     AUDDeleteSound( sound );                     //won't actually toast it until it stops
                 }
             }
         } else {
-            VSFileSystem::vs_fprintf( stderr, "\nThere are no things to say...\n" );
+            BOOST_LOG_TRIVIAL(fatal) << "\nThere are no things to say...\n";
+            VSFileSystem::flushLogs();
             assert( 0 );
         }
     }
@@ -1467,23 +1499,27 @@ void BaseInterface::Draw()
     Unit *un   = caller.GetUnit();
     Unit *base = baseun.GetUnit();
     if ( un && (!base) ) {
-        VSFileSystem::vs_fprintf( stderr, "Error: Base NULL" );
+        BOOST_LOG_TRIVIAL(error) << "Error: Base NULL";
         mission->msgcenter->add( "game", "all", "[Computer] Docking unit destroyed. Emergency launch initiated." );
-        for (size_t i = 0; i < un->pImage->dockedunits.size(); i++)
-            if (un->pImage->dockedunits[i]->uc.GetUnit() == base)
+        for (size_t i = 0; i < un->pImage->dockedunits.size(); i++) {
+            if (un->pImage->dockedunits[i]->uc.GetUnit() == base) {
                 un->FreeDockingPort( i );
+            }
+        }
         Terminate();
     }
 
     //Commit audio scene status to renderer
-    if (g_game.sound_enabled)
+    if (g_game.sound_enabled) {
         Audio::SceneManager::getSingleton()->commit();
+    }
 
     // Some operations cannot be performed in the middle of a Draw() loop
     // If any of them are scheduled for deferred execution, do so now
     midloop = false;
-    if (terminate_scheduled)
+    if (terminate_scheduled) {
         Terminate();
+    }
 }
 
 void BaseInterface::ProcessKeyboardBuffer()

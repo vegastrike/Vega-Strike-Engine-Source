@@ -1,3 +1,29 @@
+/**
+ * star.cpp
+ *
+ * Copyright (C) Daniel Horn
+ * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike
+ * contributors
+ *
+ * https://github.com/vegastrike/Vega-Strike-Engine-Source
+ *
+ * This file is part of Vega Strike.
+ *
+ * Vega Strike is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Vega Strike is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
+
 #include "star.h"
 #include "ani_texture.h"
 #include <assert.h>
@@ -118,9 +144,6 @@ bool computeStarColor( float &r, float &g, float &b, Vector luminmax, float dist
     g *= lum;
     b *= lum;
     static float starcolorcutoff = XMLSupport::parse_float( vs_config->getVariable( "graphics", "starcolorcutoff", ".1" ) );
-    if (lum > starcolorcutoff) {
-        //printf ("lum %f",lum);
-    }
     return lum > starcolorcutoff;
 }
 
@@ -279,9 +302,6 @@ static GFXColorVertex * AllocVerticesForSystem( std::string our_system_name, flo
             tmpvertex[j+LC].g = 0;
             tmpvertex[j+LC].b = 0;
             tmpvertex[j+LC].a = 0;
-        }
-        if (incj) {
-            //printf ("%f %f %f\n",tmpvertex[j+repetition-1].r,tmpvertex[j+repetition-1].g,tmpvertex[j+repetition-1].b);
         }
         j += incj;
     }
@@ -467,9 +487,9 @@ void Stars::Draw()
         static float star_spread_attenuation =
             XMLSupport::parse_float( vs_config->getVariable( "graphics", "star_spread_attenuation", ".2" ) );
         GFXPushGlobalEffects();
-        GFXLight fadeLight( true, GFXColor( cp.i, cp.j, cp.k ), 
-                            GFXColor( 0, 0, 0, 1 ), 
-                            GFXColor( 0, 0, 0, 1 ), 
+        GFXLight fadeLight( true, GFXColor( cp.i, cp.j, cp.k ),
+                            GFXColor( 0, 0, 0, 1 ),
+                            GFXColor( 0, 0, 0, 1 ),
                             GFXColor( 1, 1, 1, 1 ),
                             GFXColor( .01, 0, 1/(star_spread_attenuation*star_spread_attenuation*spread*spread) ) );
         GFXCreateLight( ligh, fadeLight, true );
