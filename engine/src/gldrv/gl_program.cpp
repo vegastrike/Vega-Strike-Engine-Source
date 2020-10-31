@@ -1,3 +1,29 @@
+/**
+ * gl_program.cpp
+ *
+ * Copyright (C) Daniel Horn
+ * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike
+ * contributors
+ *
+ * https://github.com/vegastrike/Vega-Strike-Engine-Source
+ *
+ * This file is part of Vega Strike.
+ *
+ * Vega Strike is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Vega Strike is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
+
 #include <map>
 #include <set>
 
@@ -32,8 +58,9 @@ static ProgramCache::key_type cacheKey( const std::string &vp, const std::string
     unsigned int defhash = 0;
     if (defines != NULL) {
         defhash = 0xBA0BAB00;
-        while (*defines)
+        while (*defines) {
             defhash ^= (defhash * 127) | *(defines++);
+        }
     }
     return std::pair< unsigned int , std::pair< std::string, std::string > > (defhash, std::pair< std::string, std::string > ( vp, fp ));
 }
@@ -46,10 +73,11 @@ static bool validateLog( GLuint obj, bool shader,
     GLsizei infologLength = 0;
     char    infoLog[LOGBUF+1]; // +1 for null terminator
 
-    if (shader)
+    if (shader) {
         glGetShaderInfoLog_p( obj, LOGBUF, &infologLength, infoLog );
-    else
+    } else {
         glGetProgramInfoLog_p( obj, LOGBUF, &infologLength, infoLog );
+    }
 
     if (infologLength > 0) {
         // make sure infoLog is null-termiated;
@@ -58,10 +86,12 @@ static bool validateLog( GLuint obj, bool shader,
 
         // search for signs of emulated execution
         if (!allowSoftwareEmulation) {
-            if (icontains(infoLog, "run in software"))
+            if (icontains(infoLog, "run in software")) {
                 return false;
-            if (icontains(infoLog, "run on software"))
+            }
+            if (icontains(infoLog, "run on software")) {
                 return false;
+            }
         }
     }
 
@@ -160,11 +190,13 @@ static VSFileSystem::VSError getProgramSource(const std::string &path, std::stri
 
     if (err <= Ok) {
         size_t sourcelen=0;
-        for (std::vector<std::string>::const_iterator it = lines.begin(); it != lines.end(); ++it)
+        for (std::vector<std::string>::const_iterator it = lines.begin(); it != lines.end(); ++it) {
             sourcelen += it->length();
+        }
         source.reserve(sourcelen);
-        for (std::vector<std::string>::const_iterator it = lines.begin(); it != lines.end(); ++it)
+        for (std::vector<std::string>::const_iterator it = lines.begin(); it != lines.end(); ++it) {
             source += *it;
+        }
     }
     return err;
 }
@@ -173,20 +205,22 @@ static std::string appendDefines( const std::string &prog, const char *extra_def
 {
     std::string::size_type nlpos = prog.find_first_of('\n');
 
-    if (nlpos == std::string::npos)
+    if (nlpos == std::string::npos) {
         nlpos = 0;
+    }
 
     std::string firstline = prog.substr(0, nlpos);
 
-    if (firstline.find("#version") != std::string::npos)
+    if (firstline.find("#version") != std::string::npos) {
         return firstline
                + "\n" + std::string(extra_defines)
                + "\n#line 1"
                + prog.substr(nlpos);
-    else
+    } else {
         return std::string(extra_defines)
                + "\n#line 0\n"
                + prog;
+    }
 }
 
 static int GFXCreateProgramNoCache( const char *vprogram, const char *fprogram, const char *extra_defines )
@@ -194,16 +228,18 @@ static int GFXCreateProgramNoCache( const char *vprogram, const char *fprogram, 
     if (vprogram[0] == '\0' && fprogram[0] == '\0') return 0;
 #ifndef __APPLE__
     if (glGetProgramInfoLog_p == NULL || glCreateShader_p == NULL || glShaderSource_p == NULL || glCompileShader_p == NULL
-        || glAttachShader_p == NULL || glLinkProgram_p == NULL || glGetShaderiv_p == NULL || glGetProgramiv_p == NULL)
+        || glAttachShader_p == NULL || glLinkProgram_p == NULL || glGetShaderiv_p == NULL || glGetProgramiv_p == NULL) {
         return 0;
+    }
 #else
 #ifdef OSX_LOWER_THAN_10_4
     return 0;
 #endif
 #endif
     GLenum errCode;
-    while ( ( errCode = glGetError() ) != GL_NO_ERROR )
-        printf( "Error code %s\n", gluErrorString( errCode ) );
+    while ( ( errCode = glGetError() ) != GL_NO_ERROR ) {
+        BOOST_LOG_TRIVIAL(error) << boost::format("Error code %1%") % gluErrorString( errCode );
+    }
     VSFileSystem::VSFile vf, ff;
     std::string vpfilename = std::string("programs/") + vprogram + ".vp";
     std::string fpfilename = std::string("programs/") + fprogram + ".fp";
@@ -212,10 +248,12 @@ static int GFXCreateProgramNoCache( const char *vprogram, const char *fprogram, 
     VSFileSystem::VSError vperr = getProgramSource(vpfilename, vertexprg);
     VSFileSystem::VSError fperr = getProgramSource(fpfilename, fragprg);
     if ( (vperr > Ok) || (fperr > Ok) ) {
-        if (vperr > Ok)
-            fprintf( stderr, "Vertex Program Error: Failed to open file %s\n", vpfilename.c_str() );
-        if (fperr > Ok)
-            fprintf( stderr, "Fragment Program Error: Failed to open file %s\n", fpfilename.c_str() );
+        if (vperr > Ok) {
+            BOOST_LOG_TRIVIAL(error) << boost::format("Vertex Program Error: Failed to open file %1%") % vpfilename;
+        }
+        if (fperr > Ok) {
+            BOOST_LOG_TRIVIAL(error) << boost::format("Fragment Program Error: Failed to open file %1%") % fpfilename;
+        }
         return 0;
     }
 
@@ -236,12 +274,12 @@ static int GFXCreateProgramNoCache( const char *vprogram, const char *fprogram, 
         glGetShaderiv_p( vproghandle, GL_COMPILE_STATUS, &successp );
         if (successp == 0) {
             printLog( vproghandle, true );
-            fprintf( stderr, "Vertex Program Error: Failed to compile %s\n", vprogram );
+            BOOST_LOG_TRIVIAL(error) << boost::format("Vertex Program Error: Failed to compile %1%") % vprogram;
             glDeleteShader_p( vproghandle );
             return 0;
         } else if (!validateLog( vproghandle, true )) {
             printLog( vproghandle, true );
-            fprintf( stderr, "Vertex Program Error: Failed log validation for %s. Inspect log above for details.\n", vprogram );
+            BOOST_LOG_TRIVIAL(error) << boost::format("Vertex Program Error: Failed log validation for %1%. Inspect log above for details.") % vprogram;
             glDeleteShader_p( vproghandle );
             return 0;
         }
@@ -256,13 +294,14 @@ static int GFXCreateProgramNoCache( const char *vprogram, const char *fprogram, 
         glGetShaderiv_p( fproghandle, GL_COMPILE_STATUS, &successp );
         if (successp == 0) {
             printLog( fproghandle, true );
-            fprintf( stderr, "Fragment Program Error: Failed to compile %s\n", fprogram );
+            BOOST_LOG_TRIVIAL(error) << boost::format("Fragment Program Error: Failed to compile %1%") % fprogram;
             glDeleteShader_p( vproghandle );
             glDeleteShader_p( fproghandle );
             return 0;
         } else if (!validateLog( fproghandle, true )) {
+            // FIXME: Should this be fproghandle instead of vproghandle? Same throughout this if block?
             printLog( vproghandle, true );
-            fprintf( stderr, "Vertex Program Error: Failed log validation for %s. Inspect log above for details.\n", vprogram );
+            BOOST_LOG_TRIVIAL(error) << boost::format("Vertex Program Error: Failed log validation for %1%. Inspect log above for details.") % vprogram;
             glDeleteShader_p( vproghandle );
             glDeleteShader_p( fproghandle );
             return 0;
@@ -279,11 +318,11 @@ static int GFXCreateProgramNoCache( const char *vprogram, const char *fprogram, 
     glGetProgramiv_p( sp, GL_LINK_STATUS, &successp );
     if (successp == 0) {
         printLog( sp, false );
-        fprintf( stderr, "Shader Program Error: Failed to link %s to %s\n", vprogram, fprogram );
+        BOOST_LOG_TRIVIAL(error) << boost::format("Shader Program Error: Failed to link %1% to %2%") % vprogram % fprogram;
         return 0;
     } else if (!validateLog( sp, false )) {
         printLog( sp, false );
-        fprintf( stderr, "Shader Program Error: Failed log validation for vp:%s fp:%s. Inspect log above for details.\n", vprogram, fprogram );
+        BOOST_LOG_TRIVIAL(error) << boost::format("Shader Program Error: Failed log validation for vp:%1% fp:%2%. Inspect log above for details.") % vprogram % fprogram;
         glDeleteShader_p( vproghandle );
         glDeleteShader_p( fproghandle );
         glDeleteProgram_p( sp );
@@ -294,12 +333,12 @@ static int GFXCreateProgramNoCache( const char *vprogram, const char *fprogram, 
     /* only for dev work
      *  glGetProgramiv_p(sp,GL_VALIDATE_STATUS,&successp);
      *  if (successp==0) {
-     *  fprintf(stderr,"Shader Program Error: Failed to validate %s linking to %s\n",vprogram,fprogram);
-     *  return 0;
+     *      BOOST_LOG_TRIVIAL(error) << boost::format("Shader Program Error: Failed to validate %1% linking to %2%") % vprogram % fprogram;
+     *      return 0;
      *  }
      */
     while ( ( errCode = glGetError() ) != GL_NO_ERROR ) {
-        printf( "Error code %s\n", gluErrorString( errCode ) );
+        BOOST_LOG_TRIVIAL(error) << boost::format("Error code %1%") % gluErrorString( errCode );
         sp = 0;         //no proper vertex prog support
     }
     return sp;
@@ -387,7 +426,7 @@ int getDefaultProgram()
 
 void GFXReloadDefaultShader()
 {
-    VSFileSystem::vs_fprintf(stderr, "Reloading all shaders\n");
+    BOOST_LOG_TRIVIAL(info) << "Reloading all shaders";
 
     // Increasing the timestamp makes all programs elsewhere recompile
     ++programVersion;

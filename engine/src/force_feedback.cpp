@@ -1,22 +1,27 @@
-/*
- * Vega Strike
+/**
+ * force_feedback.cpp
+ *
  * Copyright (C) 2001-2002 Daniel Horn
+ * Copyright (C) Alexander Rawass <alexannika@users.sourceforge.net>
+ * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike
+ * contributors
  *
- * http://vegastrike.sourceforge.net/
+ * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * as published by the Free Software Foundation; either version 2
- * of the License, or (at your option) any later version.
+ * This file is part of Vega Strike.
  *
- * This program is distributed in the hope that it will be useful,
+ * Vega Strike is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * Vega Strike is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+ * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 /*
@@ -43,18 +48,20 @@ ForceFeedback::ForceFeedback()
     init();
 #else
     have_ff = false;
-    printf( "Force feedback support disabled when compiled\n" );
+    BOOST_LOG_TRIVIAL(info) << "Force feedback support disabled when compiled";
 #endif
 }
 
 ForceFeedback::~ForceFeedback()
 {
-    if (!have_ff)
+    if (!have_ff) {
         return;
+    }
 #if HAVE_FORCE_FEEDBACK
     if (ff_fd != -1) {
-        for (int i = 0; i < N_EFFECTS; i++)
+        for (int i = 0; i < N_EFFECTS; i++) {
             stopEffect( i );
+        }
         close( ff_fd );
     }
 #endif
@@ -67,31 +74,33 @@ bool ForceFeedback::haveFF()
 
 void ForceFeedback::updateForce( float angle, float strength )
 {
-    printf( "update force %f degrees %f\n", angle, strength );
+    BOOST_LOG_TRIVIAL(info) << boost::format("update force %1% degrees %2%") % angle % strength;
 }
 
 void ForceFeedback::updateSpeedEffect( float strength )
 {
-    printf( "speed effect %f\n", strength );
+    BOOST_LOG_TRIVIAL(info) << boost::format("speed effect %1%") % strength;
 }
 
 void ForceFeedback::playHit( float angle, float strength )
 {
-    printf( "shield hit %f degrees %f\n", angle, strength );
+    BOOST_LOG_TRIVIAL(info) << boost::format("shield hit %1% degrees %2%") % angle % strength;
 }
 
 void ForceFeedback::playAfterburner( bool activate )
 {
-    if (!have_ff)
+    if (!have_ff) {
         return;
+    }
 #if HAVE_FORCE_FEEDBACK
     double nowtime = mission->getGametime();
 
     int    eff_nr  = eff_ab_jerk;
-    if (activate == true)
+    if (activate == true) {
         eff_last_time[eff_nr] = nowtime;
+    }
     if (activate == true && is_played[eff_nr] == false) {
-        printf( "starting ab\n" );
+        BOOST_LOG_TRIVIAL(info) << "starting ab";
         playEffect( eff_ab_wiggle_x );
         playEffect( eff_ab_wiggle_y );
         playEffect( eff_ab_jerk );
@@ -99,7 +108,7 @@ void ForceFeedback::playAfterburner( bool activate )
         is_played[eff_nr] = true;
     } else if (activate == false && is_played[eff_nr] == true) {
         if (nowtime > eff_last_time[eff_nr]+min_effect_time) {
-            printf( "stopped ab\n" );
+            BOOST_LOG_TRIVIAL(info) << "stopped ab";
             stopEffect( eff_ab_wiggle_x );
             stopEffect( eff_ab_wiggle_y );
             stopEffect( eff_ab_jerk );
@@ -113,15 +122,17 @@ void ForceFeedback::playAfterburner( bool activate )
 
 void ForceFeedback::playLaser()
 {
-    if (!have_ff)
+    if (!have_ff) {
         return;
+    }
 #if HAVE_FORCE_FEEDBACK
     int    eff_nr  = eff_laser_jerk;
 
     double nowtime = mission->getGametime();
-    if (nowtime < eff_last_time[eff_nr]+min_effect_time)
+    if (nowtime < eff_last_time[eff_nr]+min_effect_time) {
         //to make sure that effects aren't done too fast after another
         return;
+    }
     playEffect( eff_laser_jerk );
     playEffect( eff_laser_vibrate );
 
@@ -131,8 +142,9 @@ void ForceFeedback::playLaser()
 
 void ForceFeedback::playDurationEffect( unsigned int eff_nr, bool activate )
 {
-    if (!have_ff)
+    if (!have_ff) {
         return;
+    }
     return;
 
 #if HAVE_FORCE_FEEDBACK
@@ -148,15 +160,17 @@ void ForceFeedback::playDurationEffect( unsigned int eff_nr, bool activate )
 
 void ForceFeedback::playShortEffect( unsigned int eff_nr )
 {
-    if (!have_ff)
+    if (!have_ff) {
         return;
+    }
     return;
 
 #if HAVE_FORCE_FEEDBACK
     double nowtime = mission->getGametime();
-    if (nowtime < eff_last_time[eff_nr]+min_effect_time)
+    if (nowtime < eff_last_time[eff_nr]+min_effect_time) {
         //to make sure that effects aren't done too fast after another
         return;
+    }
     playEffect( eff_nr );
 
     eff_last_time[eff_nr] = nowtime;
@@ -179,7 +193,7 @@ void ForceFeedback::playEffect( unsigned int eff_nr )
     }
 #endif
 
-    printf( "played effect nr %d\n", eff_nr );
+    BOOST_LOG_TRIVIAL(info) << boost::format("played effect nr %1%") % eff_nr;
 }
 
 void ForceFeedback::stopEffect( unsigned int eff_nr )
@@ -196,13 +210,13 @@ void ForceFeedback::stopEffect( unsigned int eff_nr )
     }
 #endif
 
-    printf( "stopped effect nr %d\n", eff_nr );
+    BOOST_LOG_TRIVIAL(info) << boost::format("stopped effect nr %1%") % eff_nr;
 }
 
 void ForceFeedback::init()
 {
     if (!game_options.force_feedback) {
-        printf( "force feedback disabled in config file\n" );
+        BOOST_LOG_TRIVIAL(info) << "force feedback disabled in config file";
         return;
     }
     char devname[200];
@@ -214,7 +228,7 @@ void ForceFeedback::init()
         have_ff = false;
         return;
     }
-    printf( "Device %s opened\n", devname );
+    BOOST_LOG_TRIVIAL(info) << boost::format("Device %1% opened") % devname;
     /* Query device */
     if (ioctl( ff_fd, EVIOCGBIT( EV_FF, sizeof (unsigned long)*4 ), features ) == -1) {
         perror( "ff:Ioctl query" );
@@ -222,30 +236,47 @@ void ForceFeedback::init()
         close( ff_fd );
         return;
     }
-    printf( "Axes query: " );
-    if ( test_bit( ABS_X, features ) ) printf( "Axis X " );
-    if ( test_bit( ABS_Y, features ) ) printf( "Axis Y " );
-    if ( test_bit( ABS_WHEEL, features ) ) printf( "Wheel " );
-    printf( "\nEffects: " );
-    if ( test_bit( FF_CONSTANT, features ) ) printf( "Constant " );
-    if ( test_bit( FF_PERIODIC, features ) ) printf( "Periodic " );
-    if ( test_bit( FF_SPRING, features ) ) printf( "Spring " );
-    if ( test_bit( FF_FRICTION, features ) ) printf( "Friction " );
-    if ( test_bit( FF_RUMBLE, features ) ) printf( "Rumble " );
-    printf( "\nNumber of simultaneous effects: " );
+    BOOST_LOG_TRIVIAL(info) << "Axes query: ";
+    if ( test_bit( ABS_X, features ) ) {
+        BOOST_LOG_TRIVIAL(info) << "Axis X ";
+    }
+    if ( test_bit( ABS_Y, features ) ) {
+        BOOST_LOG_TRIVIAL(info) << "Axis Y ";
+    }
+    if ( test_bit( ABS_WHEEL, features ) ) {
+        BOOST_LOG_TRIVIAL(info) << "Wheel ";
+    }
+    BOOST_LOG_TRIVIAL(info) << "\nEffects: ";
+    if ( test_bit( FF_CONSTANT, features ) ) {
+        BOOST_LOG_TRIVIAL(info) << "Constant ";
+    }
+    if ( test_bit( FF_PERIODIC, features ) ) {
+        BOOST_LOG_TRIVIAL(info) << "Periodic ";
+    }
+    if ( test_bit( FF_SPRING, features ) ) {
+        BOOST_LOG_TRIVIAL(info) << "Spring ";
+    }
+    if ( test_bit( FF_FRICTION, features ) ) {
+        BOOST_LOG_TRIVIAL(info) << "Friction ";
+    }
+    if ( test_bit( FF_RUMBLE, features ) ) {
+        BOOST_LOG_TRIVIAL(info) << "Rumble ";
+    }
+    BOOST_LOG_TRIVIAL(info) << "\nNumber of simultaneous effects: ";
     if (ioctl( ff_fd, EVIOCGEFFECTS, &n_effects ) == -1) {
         perror( "Ioctl number of effects" );
         have_ff = false;
         close( ff_fd );
         return;
     }
-    printf( "nr_effects: %d\n", n_effects );
+    BOOST_LOG_TRIVIAL(info) << boost::format("nr_effects: %1%") % n_effects;
     if (n_effects < N_EFFECTS) {
-        printf( "not enough effects in device - ff disabled\n" );
+        BOOST_LOG_TRIVIAL(info) << "not enough effects in device - ff disabled";
         close( ff_fd );
         have_ff = false;
         return;
     }
+
 #if 0
     effects[1].type = FF_CONSTANT;
     effects[1].id   = -1;
@@ -443,7 +474,7 @@ void ForceFeedback::init()
     effects[eff_force].replay.length    = 0xfff;
     effects[eff_force].replay.delay     = 0;
     for (int i = 0; i < N_EFFECTS; i++) {
-        printf( "uploading effect %d\n", i );
+        BOOST_LOG_TRIVIAL(info) << boost::format("uploading effect %1%") % i;
         if (ioctl( ff_fd, EVIOCSFF, &effects[i] ) == -1) {
             perror( "error while uploading effect" );
             have_ff = false;

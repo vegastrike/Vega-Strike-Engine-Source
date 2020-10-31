@@ -367,14 +367,13 @@ char* CPK3::ExtractFile( const char *lpname, int *file_size )
 
     buffer = new char[flength];
     if (!buffer) {
-        printf( "Unable to allocate memory, probably to low memory !!!\n" );
+        BOOST_LOG_TRIVIAL(error) << "Unable to allocate memory, probably memory too low !!!";
         return NULL;
     } else {
         if ( true == ReadFile( index, buffer ) ) {
             //everything went well !!!
         } else {
-            printf( "\nThe file was found in the archive, but I was unable to " \
-                    "extract it. Maybe the archive is broken.\n" );
+            BOOST_LOG_TRIVIAL(error) << "\nThe file was found in the archive, but I was unable to extract it. Maybe the archive is broken.\n";
         }
     }
     *file_size = flength;
@@ -392,8 +391,8 @@ bool CPK3::Close()
 
 void CPK3::PrintFileContent()
 {
-    printf( "PK3 File: %s\n", pk3filename );
-    printf( "files count: %d\n\n", m_nEntries );
+    BOOST_LOG_TRIVIAL(info) << boost::format("PK3 File: %1%\n") % pk3filename;
+    BOOST_LOG_TRIVIAL(info) << boost::format("files count: %1%\n\n") % m_nEntries;
     for (int i = 0; i < m_nEntries; i++) {}
 }
 
