@@ -87,7 +87,7 @@ void MatchLinearVelocity::Execute()
     if ( !suborders.empty() ) {
         static int i = 0;
         if (i++ % 1000 == 0) {
-            std::cerr << "cannot execute suborders as Linear Velocity Matcher" << std::endl;                                // error printout just in case
+            BOOST_LOG_TRIVIAL(warning) << "cannot execute suborders as Linear Velocity Matcher";                                // error printout just in case
         }
     }
     MATCHLINVELSETUP();

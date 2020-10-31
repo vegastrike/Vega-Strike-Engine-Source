@@ -87,8 +87,8 @@ static Unit * getIthUnit( un_iter uiter, int i );
 varInst* Mission::call_unit( missionNode *node, int mode )
 {
 #ifdef ORDERDEBUG
-    VSFileSystem::vs_fprintf( stderr, "callun%x", this );
-    fflush( stderr );
+    BOOST_LOG_TRIVIAL(trace) << boost::format("callun%1$x") % this;
+    VSFileSystem::flushLogs();
 #endif
     varInst *viret = NULL;
     trace( node, mode );
@@ -207,16 +207,16 @@ varInst* Mission::call_unit( missionNode *node, int mode )
             for (int i = 0; i < 3; i++)
                 cf.rot[i] = 0.0;
 #ifdef ORDERDEBUG
-            VSFileSystem::vs_fprintf( stderr, "cunl%x", this );
-            fflush( stderr );
+            BOOST_LOG_TRIVIAL(trace) << boost::format("cunl%1$x") % this;
+            VSFileSystem::flushLogs();
 #endif
             Unit *tmp = call_unit_launch( &cf, clstyp, destinations );
             number_of_ships += nr_of_ships;
             if (!my_unit)
                 my_unit = tmp;
 #ifdef ORDERDEBUG
-            VSFileSystem::vs_fprintf( stderr, "ecun" );
-            fflush( stderr );
+            BOOST_LOG_TRIVIAL(trace) << "ecun";
+            VSFileSystem::flushLogs();
 #endif
         }
         deleteVarInst( name_vi );
@@ -915,19 +915,19 @@ varInst* Mission::call_unit( missionNode *node, int mode )
             assert( 0 );
         }
 #ifdef ORDERDEBUG
-        VSFileSystem::vs_fprintf( stderr, "callundel%x", ovi );
-        fflush( stderr );
+        BOOST_LOG_TRIVIAL(trace) << boost::format("callundel%1$x") % ovi;
+        VSFileSystem::flushLogs();
 #endif
         deleteVarInst( ovi );
 #ifdef ORDERDEBUG
-        VSFileSystem::vs_fprintf( stderr, "undel1" );
-        fflush( stderr );
+        BOOST_LOG_TRIVIAL(trace) << "undel1";
+        VSFileSystem::flushLogs();
 #endif
         return viret;
     }     //else (objects)
 #ifdef ORDERDEBUG
-    VSFileSystem::vs_fprintf( stderr, "endcallun%x", this );
-    fflush( stderr );
+    BOOST_LOG_TRIVIAL(trace) << boost::format("endcallun%1$x") % this;
+    VSFileSystem::flushLogs();
 #endif
     return NULL;     //never reach
 }

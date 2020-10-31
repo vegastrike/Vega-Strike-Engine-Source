@@ -1,3 +1,29 @@
+/**
+ * env_map_gent.cpp
+ *
+ * Copyright (C) Daniel Horn
+ * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike
+ * contributors
+ *
+ * https://github.com/vegastrike/Vega-Strike-Engine-Source
+ *
+ * This file is part of Vega Strike.
+ *
+ * Vega Strike is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Vega Strike is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
+
 #include "endianness.h"
 #include <float.h>
 #include <stdio.h>
@@ -317,9 +343,9 @@ static void Spherize( CubeCoord Tex[lmwid][lmwid], CubeCoord gluSph[lmwid][lmwid
                        Data[3].D )
            && LoadTex( makebgname( tmp, tmpsize, InputName, "_up",
                                    suffix ),
-                       Data[4].D ) 
-           && LoadTex( makebgname( tmp, tmpsize, InputName, "_down", 
-                                   suffix ), Data[5].D ) ) ) 
+                       Data[4].D )
+           && LoadTex( makebgname( tmp, tmpsize, InputName, "_down",
+                                   suffix ), Data[5].D ) ) )
     {
         if ( !LoadTex( makebgname( tmp, tmpsize, InputName, "_sphere", suffix ), Data[0].D ) )
             LoadTex( makebgname( tmp, tmpsize, InputName, "", suffix ), Data[0].D );
@@ -466,13 +492,8 @@ void EnvironmentMapGeneratorMain( const char *inpt, const char *outpt, float a, 
     OutputName = strdup( outpt );
     free( tmp );
     tmp = NULL;
-    VSFileSystem::vs_fprintf( stderr,
-                              "input name %s, output name %s\nAffine %f Mult %f Pow %f\n",
-                              InputName,
-                              OutputName,
-                              affine,
-                              multiplicitive,
-                              power );
+    BOOST_LOG_TRIVIAL(info) << boost::format("input name %1%, output name %2%") % InputName % OutputName;
+    BOOST_LOG_TRIVIAL(info) << boost::format("Affine %1% Mult %2% Pow %3%") % affine % multiplicitive % power;
     GenerateSphereMap();
     free( InputName );
     free( OutputName );

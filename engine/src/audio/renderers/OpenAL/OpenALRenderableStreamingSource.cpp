@@ -36,6 +36,7 @@
 #include "../../Listener.h"
 
 #include "vs_math.h"
+#include "vsfilesystem.h"
 
 namespace Audio {
 
@@ -258,8 +259,8 @@ namespace Audio {
         do {
             try {
                 buffer = streamingSound->readAndFlip();
-            } catch(const EndOfStreamException& e) {
-                fprintf(stderr, "EOS!\n");
+            } catch (const EndOfStreamException& e) {
+                BOOST_LOG_TRIVIAL(error) << "EOS!";
                 if (source->isLooping()) {
                     streamingSound->seek(0);
                     buffer = streamingSound->readAndFlip();
@@ -268,8 +269,9 @@ namespace Audio {
                     buffer = AL_NULL_BUFFER;
                 }
             }
-            if (buffer != AL_NULL_BUFFER)
+            if (buffer != AL_NULL_BUFFER) {
                 alSourceQueueBuffers(als, 1, &buffer);
+            }
         } while (buffer != AL_NULL_BUFFER);
     }
 

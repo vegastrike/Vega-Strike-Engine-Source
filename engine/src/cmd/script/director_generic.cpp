@@ -41,8 +41,6 @@
 #include "gnuhash.h"
 #include "universe.h"
 
-using std::cerr;
-using std::endl;
 PYTHON_INIT_INHERIT_GLOBALS( Director, PythonMissionBaseClass );
 
 float getSaveData( int whichcp, const string &key, unsigned int num )
@@ -370,7 +368,7 @@ void Mission::loadModule( string modulename )
 
     debug( 3, node, SCRIPT_PARSE, "loading module "+modulename );
 
-    BOOST_LOG_TRIVIAL(trace)<<"  loading module "<<modulename<<endl;
+    BOOST_LOG_TRIVIAL(trace) << "  loading module " << modulename;
 
     string filename = "modules/"+modulename+".module";
     missionNode *import_top = importf->LoadXML( filename.c_str() );
@@ -450,7 +448,7 @@ void Mission::UnPickle( string pickled )
 
 void Mission::DirectorStart( missionNode *node )
 {
-    BOOST_LOG_TRIVIAL(trace)<<"DIRECTOR START"<<endl;
+    BOOST_LOG_TRIVIAL(trace) << "DIRECTOR START";
 
     static int  st_debuglevel = atoi( vs_config->getVariable( "interpreter", "debuglevel", "0" ).c_str() );
     static bool st_start_game = XMLSupport::parse_bool( vs_config->getVariable( "interpreter", "startgame", "true" ) );
@@ -478,7 +476,7 @@ void Mission::DirectorStart( missionNode *node )
     if ( !doparse.empty() )
         if (XMLSupport::parse_bool( doparse ) == false)
             return;
-    BOOST_LOG_TRIVIAL(trace)<<"parsing declarations for director"<<endl;
+    BOOST_LOG_TRIVIAL(trace) << "parsing declarations for director";
 
     parsemode = PARSE_DECL;
 
@@ -497,7 +495,7 @@ void Mission::DirectorStart( missionNode *node )
         string mname = (*iter).first;
         missionNode *mnode = (*iter).second;
         if (mname != "director") {
-            BOOST_LOG_TRIVIAL(trace)<<"  parsing full module "<<mname<<endl;
+            BOOST_LOG_TRIVIAL(trace) << "  parsing full module " << mname;
             doModule( mnode, SCRIPT_PARSE );
         }
     }

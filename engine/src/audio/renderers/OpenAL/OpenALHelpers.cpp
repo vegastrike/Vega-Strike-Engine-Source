@@ -36,6 +36,7 @@
 
 #include <string>
 #include <stdio.h>
+#include "vsfilesystem.h"
 
 namespace Audio {
     namespace __impl {
@@ -66,7 +67,8 @@ namespace Audio {
 
                         std::string error("OpenAL error: ");
                         error += std::string(errdesc ? errdesc : "unknown") + s_errcode + " at " + filename + ":" + s_lineno;
-                        fprintf(stderr, "%s\n", error.c_str());
+                        BOOST_LOG_TRIVIAL(error) << boost::format("%1%") % error;
+                        VSFileSystem::flushLogs();
                         throw Exception(error);
                     }
                 }

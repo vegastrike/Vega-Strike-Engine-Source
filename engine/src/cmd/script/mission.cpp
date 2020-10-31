@@ -45,11 +45,11 @@
 
 /* *********************************************************** */
 using std::cout;
-using std::cerr;
+// using std::cerr;
 using std::endl;
 Mission::~Mission()
 {
-    VSFileSystem::vs_fprintf( stderr, "Mission Cleanup Not Yet Implemented" );
+    BOOST_LOG_TRIVIAL(info) << "Mission Cleanup Not Yet Implemented";
     //do not delete msgcenter...could be vital
 }
 double Mission::gametime = 0.0;

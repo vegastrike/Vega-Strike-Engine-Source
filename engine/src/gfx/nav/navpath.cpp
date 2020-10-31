@@ -47,7 +47,6 @@ using std::map;
 #include <string>
 using std::string;
 #include <iostream>
-using std::cout;
 using std::endl;
 using std::pair;
 
@@ -318,8 +317,8 @@ bool NavPath::evaluate()
         deque< unsigned > *front;
         unsigned visitMark;
         if ( originIndex >= visited.size() || destIndex >= visited.size() ) {
-            fprintf( stderr, "(previously) FATAL error with nav system, referencing value too big %d %d with visited size %d\n",
-                    (int) originIndex, (int) destIndex, (int) visited.size() );
+            BOOST_LOG_TRIVIAL(error) << boost::format("(previously) FATAL error with nav system, referencing value too big %1% %2% with visited size %3%")
+                                        % ((int) originIndex) % ((int) destIndex) % ((int) visited.size());
             return false;
         }
         oriFront.push_back( originIndex );
@@ -567,14 +566,16 @@ bool PathManager::removePath( NavPath *path )
 
 void PathManager::showAll()
 {
-    for (std::vector< NavPath* >::iterator i = paths.begin(); i < paths.end(); ++i)
+    for (std::vector< NavPath* >::iterator i = paths.begin(); i < paths.end(); ++i) {
         (*i)->setVisible( true );
+    }
 }
 
 void PathManager::showNone()
 {
-    for (std::vector< NavPath* >::iterator i = paths.begin(); i < paths.end(); ++i)
+    for (std::vector< NavPath* >::iterator i = paths.begin(); i < paths.end(); ++i) {
         (*i)->setVisible( false );
+    }
 }
 
 bool PathManager::updateSpecificPath( NavPath *path )
@@ -591,33 +592,38 @@ void PathManager::updatePaths( UpdateType type )
     DFS();
     if (type == ALL) {
         for (std::vector< NavPath* >::iterator j = paths.begin(); j < paths.end(); ++j) {
-            std::cerr<<"Updating path: "<<(*j)->getName()<<endl;
+            BOOST_LOG_TRIVIAL(info) << "Updating path: " << (*j)->getName();
             (*j)->update();
         }
     } else if (type == CURRENT) {
-        for (i = topoOrder.begin(); i != topoOrder.end(); ++i)
+        for (i = topoOrder.begin(); i != topoOrder.end(); ++i) {
             (*i)->updated = false;
-        for (i = topoOrder.begin(); i != topoOrder.end(); ++i)
+        }
+        for (i = topoOrder.begin(); i != topoOrder.end(); ++i) {
             if ( (*i)->updated == false && (*i)->isCurrentDependant() ) {
-                std::cerr<<"Updating path: "<<(*i)->getName()<<endl;
+                BOOST_LOG_TRIVIAL(info) << "Updating path: " << (*i)->getName();
                 updateSpecificPath( *i );
             }
+        }
     } else {
-        for (i = topoOrder.begin(); i != topoOrder.end(); ++i)
+        for (i = topoOrder.begin(); i != topoOrder.end(); ++i) {
             (*i)->updated = false;
-        for (i = topoOrder.begin(); i != topoOrder.end(); ++i)
+        }
+        for (i = topoOrder.begin(); i != topoOrder.end(); ++i) {
             if ( (*i)->updated == false && (*i)->isTargetDependant() ) {
-                std::cerr<<"Updating path: "<<(*i)->getName()<<endl;
+                BOOST_LOG_TRIVIAL(info) << "Updating path: " << (*i)->getName();
                 updateSpecificPath( *i );
             }
+        }
     }
 }
 
 void PathManager::updateDependants( NavPath *parent )
 {
     set< NavPath* > *dependants = parent->getDependants();
-    for (std::set< NavPath* >::iterator i = dependants->begin(); i != dependants->end(); ++i)
+    for (std::set< NavPath* >::iterator i = dependants->begin(); i != dependants->end(); ++i) {
         updateSpecificPath( *i );
+    }
 }
 
 void PathManager::DFS()

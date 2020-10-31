@@ -81,7 +81,6 @@
 #include <iostream>
 #define DEBUG_MESH_ANI
 
-using std::cerr;
 using std::endl;
 using std::list;
 
@@ -770,49 +769,57 @@ Unit::~Unit()
     BOOST_LOG_TRIVIAL(trace) << boost::format("Deallocating unit %1$s addr=%2$x refs=%3$d")
                                 % name.get().c_str() % this % ucref;
 #ifdef DESTRUCTDEBUG
-    VSFileSystem::vs_fprintf( stderr, "stage %d %x %d\n", 0, this, ucref );
-    fflush( stderr );
+    BOOST_LOG_TRIVIAL(trace) << boost::format("stage %1$d %2$x %3$d") % 0 % this % ucref;
+    VSFileSystem::flushLogs();
 #endif
 #ifdef DESTRUCTDEBUG
-    VSFileSystem::vs_fprintf( stderr, "%d %x\n", 2, pImage->pHudImage );
-    fflush( stderr );
+    BOOST_LOG_TRIVIAL(trace) << boost::format("%1$d %2$x") % 2 % pImage->pHudImage;
+    VSFileSystem::flushLogs();
 #endif
-    if (pImage->unitwriter)
+    if (pImage->unitwriter) {
         delete pImage->unitwriter;
+        // pImage->unitwriter = nullptr;
+    }
     delete pImage;
+    // pImage = nullptr;
 #ifdef DESTRUCTDEBUG
-    VSFileSystem::vs_fprintf( stderr, "%d %x", 3, pImage );
-    fflush( stderr );
+    BOOST_LOG_TRIVIAL(trace) << boost::format("%1$d %2$x") % 3 % pImage;
+    VSFileSystem::flushLogs();
 #endif
     delete sound;
     delete pilot;
 #ifdef DESTRUCTDEBUG
-    VSFileSystem::vs_fprintf( stderr, "%d", 5 );
-    fflush( stderr );
+    BOOST_LOG_TRIVIAL(trace) << boost::format("%1$d") % 5;
+    VSFileSystem::flushLogs();
 #endif
 #ifdef DESTRUCTDEBUG
-    VSFileSystem::vs_fprintf( stderr, "%d %x", 6, &mounts );
-    fflush( stderr );
+    BOOST_LOG_TRIVIAL(trace) << boost::format("%1$d %2$x") % 6 % &mounts;
+    VSFileSystem::flushLogs();
 #endif
 
 #ifdef DESTRUCTDEBUG
-    VSFileSystem::vs_fprintf( stderr, "%d %x ", 1, &mounts );
-    fflush( stderr );
+    BOOST_LOG_TRIVIAL(trace) << boost::format("%1$d %2$x") % 1 % &mounts;
+    VSFileSystem::flushLogs();
 #endif
 #ifndef NO_MOUNT_STAR
-    for (vector< Mount* >::iterator jj = mounts.begin(); jj != mounts.end(); ++jj)
+    for (vector< Mount* >::iterator jj = mounts.begin(); jj != mounts.end(); ++jj) {
         //Free all mounts elements
-        if ( (*jj) != NULL )
+        if ( (*jj) != nullptr ) {
             delete (*jj);
+            (*jj) = nullptr;
+        }
+    }
 #endif
     mounts.clear();
 #ifdef DESTRUCTDEBUG
-    VSFileSystem::vs_fprintf( stderr, "%d", 0 );
-    fflush( stderr );
+    BOOST_LOG_TRIVIAL(trace) << boost::format("%1$d") % 0;
+    VSFileSystem::flushLogs();
 #endif
-    for (unsigned int meshcount = 0; meshcount < meshdata.size(); ++meshcount)
-        if (meshdata[meshcount])
+    for (unsigned int meshcount = 0; meshcount < meshdata.size(); ++meshcount) {
+        if (meshdata[meshcount]) {
             delete meshdata[meshcount];
+        }
+    }
     meshdata.clear();
 }
 
@@ -1399,8 +1406,9 @@ void Unit::Fire( unsigned int weapon_type_bitmask, bool listen_to_owner )
         const bool locked_missile   = (mis && locked_on && lockable_weapon);
         const bool missile_and_want_to_fire_missiles = ( mis && (weapon_type_bitmask&ROLES::FIRE_MISSILES) );
         const bool gun_and_want_to_fire_guns = ( (!mis) && (weapon_type_bitmask&ROLES::FIRE_GUNS) );
-        if (verbose_debug && missile_and_want_to_fire_missiles && locked_missile)
-            VSFileSystem::vs_fprintf( stderr, "\n about to fire locked missile \n" );
+        if (verbose_debug && missile_and_want_to_fire_missiles && locked_missile) {
+            BOOST_LOG_TRIVIAL(trace) << "\n about to fire locked missile \n";
+        }
         bool want_to_fire =
             (fire_non_autotrackers || autotracking_gun || locked_missile)
             && ( (ROLES::EVERYTHING_ELSE&weapon_type_bitmask&i->type->role_bits) || i->type->role_bits == 0 )
@@ -2569,27 +2577,30 @@ void Unit::FireEngines( const Vector &Direction /*unit vector... might default t
 //applies a force for the whole gameturn upon the center of mass
 void Unit::ApplyForce( const Vector &Vforce )
 {
-    if ( FINITE( Vforce.i ) && FINITE( Vforce.j ) && FINITE( Vforce.k ) )
+    if ( FINITE( Vforce.i ) && FINITE( Vforce.j ) && FINITE( Vforce.k ) ) {
         NetForce += Vforce;
-    else
-        VSFileSystem::vs_fprintf( stderr, "fatal force" );
+    } else {
+        BOOST_LOG_TRIVIAL(error) << "fatal force";
+    }
 }
 
 //applies a force for the whole gameturn upon the center of mass
 void Unit::ApplyLocalForce( const Vector &Vforce )
 {
-    if ( FINITE( Vforce.i ) && FINITE( Vforce.j ) && FINITE( Vforce.k ) )
+    if ( FINITE( Vforce.i ) && FINITE( Vforce.j ) && FINITE( Vforce.k ) ) {
         NetLocalForce += Vforce;
-    else
-        VSFileSystem::vs_fprintf( stderr, "fatal local force" );
+    } else {
+        BOOST_LOG_TRIVIAL(error) << "fatal local force";
+    }
 }
 
 void Unit::Accelerate( const Vector &Vforce )
 {
-    if ( FINITE( Vforce.i ) && FINITE( Vforce.j ) && FINITE( Vforce.k ) )
+    if ( FINITE( Vforce.i ) && FINITE( Vforce.j ) && FINITE( Vforce.k ) ) {
         NetForce += Vforce*GetMass();
-    else
-        VSFileSystem::vs_fprintf( stderr, "fatal force" );
+    } else {
+        BOOST_LOG_TRIVIAL(error) << "fatal force";
+    }
 }
 
 void Unit::ApplyTorque( const Vector &Vforce, const QVector &Location )
@@ -2656,7 +2667,7 @@ Vector Unit::ClampTorque( const Vector &amt1 )
     fuel -= GetFuelUsage( false ) * simulation_atom_var * Res.Magnitude()*FMEC_exit_vel_inverse/Lithium6constant;
 #ifndef __APPLE__
     if ( ISNAN( fuel ) ) {
-        fprintf( stderr, "FUEL is NAN\n" );
+        BOOST_LOG_TRIVIAL(error) << "FUEL is NAN";
         fuel = 0;
     }
 #endif
@@ -2810,7 +2821,7 @@ Vector Unit::ClampThrust( const Vector &amt1, bool afterburn )
             *FMEC_exit_vel_inverse/Lithium6constant;
 #ifndef __APPLE__
         if ( ISNAN( fuel ) ) {
-            fprintf( stderr, "Fuel is NAN A\n" );
+            BOOST_LOG_TRIVIAL(error) << "Fuel is NAN A";
             fuel = 0;
         }
 #endif
@@ -2821,7 +2832,7 @@ Vector Unit::ClampThrust( const Vector &amt1, bool afterburn )
         fuel -= GetFuelUsage( false ) * simulation_atom_var * Res.Magnitude()*FMEC_exit_vel_inverse/Lithium6constant;
 #ifndef __APPLE__
         if ( ISNAN( fuel ) ) {
-            fprintf( stderr, "Fuel is NAN B\n" );
+            BOOST_LOG_TRIVIAL(error) << "Fuel is NAN B";
             fuel = 0;
         }
 #endif
@@ -3503,7 +3514,7 @@ void Unit::UnRef()
         //delete
         Unitdeletequeue.push_back( this );
 #ifdef DESTRUCTDEBUG
-        VSFileSystem::vs_fprintf( stderr, "%s 0x%x - %d\n", name.get().c_str(), this, Unitdeletequeue.size() );
+        BOOST_LOG_TRIVIAL(trace) << boost::format("%1$s %2$x - %3$d") % name.get().c_str() % this % Unitdeletequeue.size();
 #endif
     }
 }
@@ -3554,21 +3565,22 @@ void Unit::ProcessDeleteQueue()
 {
     while ( !Unitdeletequeue.empty() ) {
 #ifdef DESTRUCTDEBUG
-        VSFileSystem::vs_fprintf( stderr, "Eliminatin' 0x%x - %d", Unitdeletequeue.back(), Unitdeletequeue.size() );
-        fflush( stderr );
-        VSFileSystem::vs_fprintf( stderr, "Eliminatin' %s\n", Unitdeletequeue.back()->name.get().c_str() );
+        BOOST_LOG_TRIVIAL(trace) << boost::format("Eliminatin' %1$x - %2$d") % Unitdeletequeue.back() % Unitdeletequeue.size();
+        VSFileSystem::flushLogs();
+        BOOST_LOG_TRIVIAL(trace) << boost::format("Eliminatin' %1$s") % Unitdeletequeue.back()->name.get().c_str();
 #endif
 #ifdef DESTRUCTDEBUG
-        if ( Unitdeletequeue.back()->isSubUnit() )
-            VSFileSystem::vs_fprintf( stderr, "Subunit Deleting (related to double dipping)" );
+        if ( Unitdeletequeue.back()->isSubUnit() ) {
+            BOOST_LOG_TRIVIAL(debug) << "Subunit Deleting (related to double dipping)";
+        }
 #endif
         Unit *mydeleter = Unitdeletequeue.back();
         Unitdeletequeue.pop_back();
         delete mydeleter;                        ///might modify unitdeletequeue
 
 #ifdef DESTRUCTDEBUG
-        VSFileSystem::vs_fprintf( stderr, "Completed %d\n", Unitdeletequeue.size() );
-        fflush( stderr );
+        BOOST_LOG_TRIVIAL(trace) << boost::format("Completed %1$d") % Unitdeletequeue.size();
+        VSFileSystem::flushLogs();
 #endif
     }
 }
@@ -6573,14 +6585,16 @@ void Unit::EjectCargo( unsigned int index )
                     if (tmpcontent == "return_to_cockpit") {
                         static bool simulate_while_at_base =
                             XMLSupport::parse_bool( vs_config->getVariable( "physics", "simulate_while_docked", "false" ) );
-                        if ( (simulate_while_at_base) || (_Universe->numPlayers() > 1) )
+                        if ( (simulate_while_at_base) || (_Universe->numPlayers() > 1) ) {
                             this->TurretFAW();
+                        }
                         //make unit a sitting duck in the mean time
                         SwitchUnits( NULL, this );
-                        if (owner)
+                        if (owner) {
                             cargo->owner = owner;
-                        else
+                        } else {
                             cargo->owner = this;
+                        }
                         PrimeOrders();
                         cargo->SetOwner( this );
                         cargo->Position() = this->Position();
@@ -6590,20 +6604,25 @@ void Unit::EjectCargo( unsigned int index )
                         abletodock( 3 );
                         //actually calls the interface, meow. yay!
                         cargo->UpgradeInterface( this );
-                        if ( (simulate_while_at_base) || (_Universe->numPlayers() > 1) )
+                        if ( (simulate_while_at_base) || (_Universe->numPlayers() > 1) ) {
                             this->TurretFAW();
+                        }
                     } else {
                         SwitchUnits( NULL, cargo );
-                        if (owner)
+                        if (owner) {
                             cargo->owner = owner;
-                        else
+                        }
+                        else {
                             cargo->owner = this;
+                        }
                     }                                            //switching NULL gives "dead" ai to the unit I ejected from, by the way.
                 }
                 _Universe->activeStarSystem()->AddUnit( cargo );
-                if ( (unsigned int) index != ( (unsigned int) -1 ) && (unsigned int) index != ( (unsigned int) -2 ) )
-                    if ( index < pImage->cargo.size() )
+                if ( (unsigned int) index != ( (unsigned int) -1 ) && (unsigned int) index != ( (unsigned int) -2 ) ) {
+                    if ( index < pImage->cargo.size() ) {
                         RemoveCargo( index, 1, true );
+                    }
+                }
             }
         }
     }
@@ -6612,31 +6631,36 @@ void Unit::EjectCargo( unsigned int index )
 int Unit::RemoveCargo( unsigned int i, int quantity, bool eraseZero )
 {
     if ( !( i < pImage->cargo.size() ) ) {
-        fprintf( stderr, "(previously) FATAL problem...removing cargo that is past the end of array bounds." );
+        BOOST_LOG_TRIVIAL(error) << "(previously) FATAL problem...removing cargo that is past the end of array bounds.";
         return 0;
     }
     Cargo *carg = &(pImage->cargo[i]);
-    if (quantity > carg->quantity)
+    if (quantity > carg->quantity) {
         quantity = carg->quantity;
+    }
 
     static bool usemass = XMLSupport::parse_bool( vs_config->getVariable( "physics", "use_cargo_mass", "true" ) );
-    if (usemass)
+    if (usemass) {
         Mass -= quantity*carg->mass;
+    }
 
     carg->quantity -= quantity;
-    if (carg->quantity <= 0 && eraseZero)
+    if (carg->quantity <= 0 && eraseZero) {
         pImage->cargo.erase( pImage->cargo.begin()+i );
+    }
     return quantity;
 }
 
 void Unit::AddCargo( const Cargo &carg, bool sort )
 {
     static bool usemass = XMLSupport::parse_bool( vs_config->getVariable( "physics", "use_cargo_mass", "true" ) );
-    if (usemass)
+    if (usemass) {
         Mass += carg.quantity*carg.mass;
+    }
     pImage->cargo.push_back( carg );
-    if (sort)
+    if (sort) {
         SortCargo();
+    }
 }
 
 bool cargoIsUpgrade( const Cargo &c )
@@ -7181,7 +7205,8 @@ bool Unit::TransferUnitToSystem( StarSystem *Current )
         activeStarSystem = Current;
         return true;
     } else {
-        VSFileSystem::vs_fprintf( stderr, "Fatal Error: cannot remove starship from critical system" );
+        BOOST_LOG_TRIVIAL(fatal) << "Fatal Error: cannot remove starship from critical system";
+        VSFileSystem::flushLogs();
     }
     return false;
 }
@@ -7250,10 +7275,11 @@ void Unit::Repair()
                                                                                                    this->faction ), false,
                                                false );
                                 if (percentage == 0) {
-                                    VSFileSystem::vs_fprintf(
-                                        stderr, "Failed repair for unit %s, cargo item %d: %s (%s) - please report error\n",
-                                        name.get().c_str(), pImage->next_repair_cargo, carg->GetContent().c_str(),
-                                        carg->GetCategory().c_str() );
+                                    BOOST_LOG_TRIVIAL(error) << boost::format("Failed repair for unit %1%, cargo item %2%: %3% (%4%) - please report error")
+                                                                % name.get().c_str()
+                                                                % pImage->next_repair_cargo
+                                                                % carg->GetContent().c_str()
+                                                                % carg->GetCategory().c_str();
                                 }
                             }
                         }
@@ -8194,7 +8220,7 @@ void Unit::RegenShields()
                       *excessenergy) )/( min_reactor_efficiency+( pImage->LifeSupportFunctionality*(1-min_reactor_efficiency) ) ) );
         if (fuel < 0) fuel = 0;
         if ( !FINITE( fuel ) ) {
-            fprintf( stderr, "Fuel is nan C\n" );
+            BOOST_LOG_TRIVIAL(error) << "Fuel is nan C";
             fuel = 0;
         }
     }

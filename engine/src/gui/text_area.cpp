@@ -4,6 +4,8 @@
 *                           begin                : January 10, 2002
 *                           copyright            : (C) 2002 by David Ranger
 *                           email                : ussreliant@users.sourceforge.net
+*                           copyright            : (C) 2020 by Stephen G. Tuggy
+*                           email                : sgt@stephengtuggy.com
 ***************************************************************************/
 
 /***************************************************************************
