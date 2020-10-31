@@ -1479,7 +1479,7 @@ void GameCockpit::TriggerEvents( Unit *un ) {
                                                                                                                                 \
                     if (curvalue != last.lastvar) {                                                                             \
                         BOOST_LOG_TRIVIAL(debug) << boost::format("Triggering event edge " name " (cur=%1% last=%2% on=%3%)")   \
-                                                % int(curvalue) % int(last.lastvar) % int(triggervalue);                         \
+                                                % int(curvalue) % int(last.lastvar) % int(triggervalue);                        \
                         last.lastvar = curvalue;                                                                                \
                         if (curvalue == triggervalue)                                                                           \
                             sound->play();                                                                                      \
