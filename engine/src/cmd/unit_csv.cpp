@@ -1788,7 +1788,7 @@ string Unit::WriteUnitString()
                 return writeCSV( keys, values );
             }
         }
-        BOOST_LOG_TRIVIAL(error) << boost:format("Failed to locate base mesh for %1% %2% %3%") % csvRow.get().c_str() % name.get().c_str() % fullname.c_str();
+        BOOST_LOG_TRIVIAL(error) << boost::format("Failed to locate base mesh for %1% %2% %3%") % csvRow.get().c_str() % name.get().c_str() % fullname.c_str();
     } else {
         if (pImage->unitwriter) {
             ret = pImage->unitwriter->WriteString();

@@ -139,7 +139,7 @@ void AddCollideQueue( LineCollide &tmp, StarSystem *ss )
     if (tmp.type == LineCollide::UNIT) {
         ss->collide_table->c.Put( &tmp, tmp.object.u );
     } else {
-        BOOST_LOG_TRIVIAL(warning) << boost::format("such collide types as %1$d not allowed") % lc->type;
+        BOOST_LOG_TRIVIAL(warning) << boost::format("such collide types as %1$d not allowed") % tmp.type;
     }
 }
 
