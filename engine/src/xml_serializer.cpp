@@ -1,3 +1,29 @@
+/**
+ * xml_serializer.cpp
+ *
+ * Copyright (C) Daniel Horn
+ * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike
+ * contributors
+ *
+ * https://github.com/vegastrike/Vega-Strike-Engine-Source
+ *
+ * This file is part of Vega Strike.
+ *
+ * Vega Strike is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Vega Strike is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
+
 #include "xml_serializer.h"
 #include "cmd/unit_generic.h"
 #include "cmd/images.h"
@@ -119,14 +145,16 @@ void XMLnode::Write( VSFileSystem::VSFile &f, void *mythis, int level )
 {
     Tab( f, level );
     f.Fprintf( "<%s", val.c_str() );
-    for (unsigned int i = 0; i < elements.size(); i++)
+    for (unsigned int i = 0; i < elements.size(); i++) {
         elements[i].Write( f, mythis );
+    }
     if ( subnodes.empty() ) {
         f.Fprintf( "/>\n" );
     } else {
         f.Fprintf( ">\n" );
-        for (unsigned int i = 0; i < subnodes.size(); i++)
+        for (unsigned int i = 0; i < subnodes.size(); i++) {
             subnodes[i].Write( f, mythis, level+1 );
+        }
         Tab( f, level );
         f.Fprintf( "</%s>\n", val.c_str() );
     }
@@ -140,26 +168,29 @@ void XMLSerializer::Write( const char *modificationname )
     VSFile  f;
     VSError err = f.OpenCreateWrite( savedir+"/"+this->filename, UnitFile );
     if (err > Ok) {
-        fprintf( stderr, "!!! ERROR : Writing saved unit file : %s\n", f.GetFullPath().c_str() );
+        BOOST_LOG_TRIVIAL(error) << boost::format("!!! ERROR : Writing saved unit file : %1%") % f.GetFullPath().c_str();
         return;
     }
-    for (unsigned int i = 0; i < topnode.subnodes.size(); i++)
+    for (unsigned int i = 0; i < topnode.subnodes.size(); i++) {
         topnode.subnodes[i].Write( f, mythis, 0 );
+    }
     f.Close();
 }
 
 static string TabString( int level )
 {
     string ret = "";
-    for (int i = 0; i < level; i++)
+    for (int i = 0; i < level; i++) {
         ret += '\t';
+    }
     return ret;
 }
 string XMLSerializer::WriteString()
 {
     string ret = "";
-    for (unsigned int i = 0; i < topnode.subnodes.size(); i++)
+    for (unsigned int i = 0; i < topnode.subnodes.size(); i++) {
         ret += topnode.subnodes[i].WriteString( mythis, 0 );
+    }
     return ret;
 }
 string XMLnode::WriteString( void *mythis, int level )

@@ -35,6 +35,7 @@
 #include "lin_time.h"
 #include "galaxy_xml.h"
 #include "universe.h"
+#include "vsfilesystem.h"
 
 #if defined (__APPLE__) || defined (MACOSX)
     #include <OpenGL/gl.h>
@@ -134,7 +135,6 @@ bool computeStarColor( float &r, float &g, float &b, Vector luminmax, float dist
     float dissqr = distance*distance/(maxdistance*maxdistance);
     float lum    = 100*luminmax.i/(luminmax.k*dissqr);
     lum = log( (double) luminmax.i*10./(double) luminmax.j )*luminscale/dissqr;
-//VSFileSystem::vs_fprintf (stderr,"luminmax %f lumnow %f\n",luminmax.i/(luminmax.k*dissqr),lum);
     float clamp  = starcoloraverage+lum/starcolorincrement;
     if (clamp > 1)
         clamp = 1;
@@ -239,8 +239,8 @@ static GFXColorVertex * AllocVerticesForSystem( std::string our_system_name, flo
     if (mindistance < 0) mindistance = 0;
     maxdistance = sqrt( maxdistance );
     mindistance = sqrt( mindistance );
-    VSFileSystem::vs_fprintf( stderr, "Min (%f, %f, %f) Max(%f, %f, %f) MinLumin %f, MaxLumin %f",
-                              starmin.i, starmin.j, starmin.k, starmax.i, starmax.j, starmax.k, minlumin, maxlumin );
+    BOOST_LOG_TRIVIAL(info) << boost::format("Min (%1$f, %2$f, %3$f) Max(%4$f, %5$f, %6$f) MinLumin %7$f, MaxLumin %8$f")
+                               % starmin.i % starmin.j % starmin.k % starmax.i % starmax.j % starmax.k % minlumin % maxlumin;
     for (int y = 0; y < *num; ++y) {
         tmpvertex[j+repetition-1].x = -.5*xyzspread+rand()*( (float) xyzspread/RAND_MAX );
         tmpvertex[j+repetition-1].y = -.5*xyzspread+rand()*( (float) xyzspread/RAND_MAX );
@@ -287,8 +287,9 @@ static GFXColorVertex * AllocVerticesForSystem( std::string our_system_name, flo
                                     tmpvertex[j+repetition-1].g,
                                     tmpvertex[j+repetition-1].b,
                                     Vector( lumin, minlumin, maxlumin ),
-                                    distance, maxdistance ) )
+                                    distance, maxdistance ) ) {
                 incj = 0;
+            }
             ++si;
         }
         for (int LC = repetition-2; LC >= 0; --LC) {
@@ -305,7 +306,7 @@ static GFXColorVertex * AllocVerticesForSystem( std::string our_system_name, flo
         }
         j += incj;
     }
-    VSFileSystem::vs_fprintf( stderr, "Read In Star Count %d used: %d\n", starcount, j/2 );
+    BOOST_LOG_TRIVIAL(info) << boost::format("Read In Star Count %1$d used: %2$d\n") % starcount % (j/2);
     *num = j;
     return tmpvertex;
 }
@@ -318,8 +319,9 @@ PointStarVlist::PointStarVlist( int num, float spread, const std::string &sysnam
     //if(StarStreaks) {
     vlist = new GFXVertexList( GFXLINE, num, tmpvertex, num, true, 0 );
     //}else {
-    for (int i = 0, j = 1; i < num/2; ++i, j += 2)
+    for (int i = 0, j = 1; i < num/2; ++i, j += 2) {
         tmpvertex[i] = tmpvertex[j];
+    }
     nonstretchvlist = new GFXVertexList( GFXPOINT, num/2, tmpvertex, num/2, false, 0 );
     //}
     delete[] tmpvertex;

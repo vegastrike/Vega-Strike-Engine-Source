@@ -1400,8 +1400,8 @@ void generateStarSystem( SystemInfo &si )
 int main( int argc, char **argv )
 {
     if (argc < 9) {
-        VSFileSystem::vs_fprintf(
-            stderr,
+        // stephengtuggy 2020-11-12: Leaving this, since it is for standalone CONSOLE_APP mode
+        VSFileSystem::vs_fprintf(stderr,
             "Usage: starsysgen <seed> <sector>/<system> <sunradius>/<compactness> <numstars> [N][A]<numnaturalphenomena> <numstarbases> <faction> <namelist> [OtherSystemJumpNodes]...\n" );
         return 1;
     }

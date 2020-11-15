@@ -428,7 +428,7 @@ public: VSFile();
                 strcat( newformat, "%n" );
                 ret = sscanf( this->pk3_extracted_file+offset, newformat, a, &readbytes );
                 delete[] newformat;
-                std::cerr<<"FSCANF : sscanf read "<<readbytes<<" bytes - OFFSET="<<offset<<" VALUES : a="<<(*a)<<std::endl;
+                BOOST_LOG_TRIVIAL(info)<<"FSCANF : sscanf read "<<readbytes<<" bytes - OFFSET="<<offset<<" VALUES : a="<<(*a)<<std::endl;
                 this->offset += readbytes;
                 this->GoAfterEOL();
             } else if (q_volume_format == vfmtVSR) {}
@@ -453,7 +453,7 @@ public: VSFile();
                 strcat( newformat, "%n" );
                 ret = sscanf( this->pk3_extracted_file+offset, newformat, a, b, &readbytes );
                 delete[] newformat;
-                std::cerr<<"FSCANF : sscanf read "<<readbytes<<" bytes - OFFSET="<<offset<<" VALUES : a="<<(*a)<<", b="<<(*b)
+                BOOST_LOG_TRIVIAL(info)<<"FSCANF : sscanf read "<<readbytes<<" bytes - OFFSET="<<offset<<" VALUES : a="<<(*a)<<", b="<<(*b)
                          <<std::endl;
                 this->offset += readbytes;
                 this->GoAfterEOL();
@@ -479,7 +479,7 @@ public: VSFile();
                 strcat( newformat, "%n" );
                 ret = sscanf( this->pk3_extracted_file+offset, newformat, a, b, c, &readbytes );
                 delete[] newformat;
-                std::cerr<<"FSCANF : sscanf read "<<readbytes<<" bytes - OFFSET="<<offset<<" VALUES : a="<<(*a)<<", b="<<(*b)
+                BOOST_LOG_TRIVIAL(info)<<"FSCANF : sscanf read "<<readbytes<<" bytes - OFFSET="<<offset<<" VALUES : a="<<(*a)<<", b="<<(*b)
                          <<", c="<<(*c)<<std::endl;
                 this->offset += readbytes;
                 this->GoAfterEOL();

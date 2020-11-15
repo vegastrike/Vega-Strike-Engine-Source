@@ -92,10 +92,6 @@
 #include "gldrv/gl_globals.h"
 #endif
 
-using std::cout;
-using std::cerr;
-using std::endl;
-
 extern vs_options  game_options;
 
 #define KEYDOWN( name, key ) (name[key]&0x80)
@@ -890,7 +886,7 @@ void createObjects( std::vector< std::string > &fighter0name,
                     _Universe->SetActiveCockpit( _Universe->AccessCockpit( squadnum ) );
                 }
 
-                cout<<"CREATING A LOCAL SHIP : "<<fightername<<endl;
+                BOOST_LOG_TRIVIAL(info) << "CREATING A LOCAL SHIP : " << fightername;
                 fighters[a] = new GameUnit< Unit >( fightername, false, tmptarget[a], modifications, fg, s );
 
                 _Universe->activeStarSystem()->AddUnit( fighters[a] );

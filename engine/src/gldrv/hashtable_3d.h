@@ -1,3 +1,29 @@
+/**
+ * hashtable_3d.h
+ *
+ * Copyright (C) Daniel Horn
+ * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike
+ * contributors
+ *
+ * https://github.com/vegastrike/Vega-Strike-Engine-Source
+ *
+ * This file is part of Vega Strike.
+ *
+ * Vega Strike is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Vega Strike is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
+
 #ifndef _HASHTABLE_3D_H_
 #define _HASHTABLE_3D_H_
 #include "gfx/vec.h"
@@ -6,6 +32,8 @@
 #include <stdio.h>
 #include <assert.h>
 #include "linecollide.h"
+#include "vsfilesystem.h"
+
 //#define COLLIDETABLESIZE sizeof(CTSIZ)
 //#define COLLIDETABLEACCURACY sizeof (CTACCURACY)
 ///objects that go over 16 sectors are considered huge and better to check against everything.
@@ -47,11 +75,15 @@ public:
     void Clear()
     {
         hugeobjects.clear();
-        for (int i = 0; i <= COLLIDETABLESIZE-1; i++)
-            for (int j = 0; j <= COLLIDETABLESIZE-1; j++)
-                for (int k = 0; k <= COLLIDETABLESIZE-1; k++)
-                    if ( table[i][j][k].size() )
+        for (int i = 0; i <= COLLIDETABLESIZE-1; i++) {
+            for (int j = 0; j <= COLLIDETABLESIZE-1; j++) {
+                for (int k = 0; k <= COLLIDETABLESIZE-1; k++) {
+                    if ( table[i][j][k].size() ) {
                         table[i][j][k].clear();
+                    }
+                }
+            }
+        }
     }
 ///returns any objects residing in the sector occupied by Exact
     int Get( const QVector &Exact, std::vector< T > *retval[] )
@@ -82,8 +114,9 @@ public:
         if (target->Mini.j == maxy) maxy += COLLIDETABLEACCURACY/2;
         if (target->Mini.k == maxz) maxz += COLLIDETABLEACCURACY/2;
         retval[0] = &hugeobjects;
-        if (target->hhuge)
+        if (target->hhuge) {
             return sizer;      //we can't get _everything
+        }
         for (double i = target->Mini.i; i < maxx; i += COLLIDETABLEACCURACY) {
             x = hash_int( i );
             for (double j = target->Mini.j; j < maxy; j += COLLIDETABLEACCURACY) {
@@ -93,8 +126,9 @@ public:
                     if ( !table[x][y][z].empty() ) {
                         retval[sizer] = &table[x][y][z];
                         sizer++;
-                        if (sizer >= HUGEOBJECT+1)
+                        if (sizer >= HUGEOBJECT+1) {
                             return sizer;
+                        }
                     }
                 }
             }
@@ -161,10 +195,13 @@ public:
     bool Eradicate( T objectToKill )
     {
         bool ret = removeFromVector( hugeobjects, objectToKill );
-        for (unsigned int i = 0; i <= COLLIDETABLESIZE-1; i++)
-            for (unsigned int j = 0; j <= COLLIDETABLESIZE-1; j++)
-                for (unsigned int k = 0; k <= COLLIDETABLESIZE-1; k++)
+        for (unsigned int i = 0; i <= COLLIDETABLESIZE-1; i++) {
+            for (unsigned int j = 0; j <= COLLIDETABLESIZE-1; j++) {
+                for (unsigned int k = 0; k <= COLLIDETABLESIZE-1; k++) {
                     ret |= removeFromVector( table[i][j][k], objectToKill );
+                }
+            }
+        }
         return ret;
     }
 ///Removes objectToKill from collide table with span of Target
@@ -192,10 +229,12 @@ public:
                     }
                 }
             }
-        if (!ret && !target->hhuge)
-            fprintf( stderr, "Nonfatal Collide Error\n" );
-        if (!ret || target->hhuge)
+        if (!ret && !target->hhuge) {
+            BOOST_LOG_TRIVIAL(error) << "Nonfatal Collide Error";
+        }
+        if (!ret || target->hhuge) {
             ret |= removeFromVector( hugeobjects, objectToKill );
+        }
         return ret;
     }
 };

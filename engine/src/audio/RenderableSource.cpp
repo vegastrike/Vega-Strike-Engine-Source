@@ -28,6 +28,7 @@
 //
 
 #include "RenderableSource.h"
+#include "vsfilesystem.h"
 #include <stdio.h>
 
 namespace Audio {
@@ -85,7 +86,7 @@ namespace Audio {
         try {
             updateImpl(flags, sceneListener);
         } catch(const Exception& e) {
-            fprintf(stderr, "Ignoring exception in renderable update: %s", e.what());
+            BOOST_LOG_TRIVIAL(warning) << boost::format("Ignoring exception in renderable update: %1%") % e.what();
         }
     }
 

@@ -1,3 +1,29 @@
+/**
+ * gl_light_pick.cpp
+ *
+ * Copyright (C) Daniel Horn
+ * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike
+ * contributors
+ *
+ * https://github.com/vegastrike/Vega-Strike-Engine-Source
+ *
+ * This file is part of Vega Strike.
+ *
+ * Vega Strike is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Vega Strike is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
+
 #include "gl_light.h"
 #include "options.h"
 #include <queue>
@@ -74,10 +100,10 @@ void unpicklights()
 {
     for (std::vector< int >::iterator i = newpicked->begin(); i != newpicked->end(); i++) {
         if (*i>=(int)_llights->size()) {
-            VSFileSystem::vs_fprintf (stderr,"GFXLIGHT FAILURE %d is beyond array of size %d",(int)*i,(int)_llights->size());
+            BOOST_LOG_TRIVIAL(error) << boost::format("GFXLIGHT FAILURE %1% is beyond array of size %2%") % ((int)*i) % ((int)_llights->size());
         }
         if (GLLights[(*_llights)[*i].Target()].index != *i) {
-            VSFileSystem::vs_fprintf (stderr,"GFXLIGHT uh oh");
+            BOOST_LOG_TRIVIAL(error) << "GFXLIGHT uh oh";
             (*_llights)[*i].Target() = -1;
             continue;             //a lengthy operation... Since picked lights may have been smashed
         }
@@ -181,7 +207,7 @@ void GFXPickLights( const Vector &center, const float radius, vector< int > &lig
 
     if (lightsenabled && pickglobals)
         GFXGlobalLights(lights, center, radius);
-    
+
     veclinecol *tmppickt[2];
     lighttable.Get( center.Cast(), tmppickt );
 
@@ -224,21 +250,23 @@ void gfx_light::dopickenables()
     std::vector< int >::iterator traverse;
     std::vector< int >::iterator oldtrav;
     for ( traverse = newpicked->begin(); traverse != newpicked->end() && ( !oldpicked->empty() ); ++traverse ) {
-        for (oldtrav = oldpicked->begin(); oldtrav != oldpicked->end() && *oldtrav < *traverse ; )
+        for (oldtrav = oldpicked->begin(); oldtrav != oldpicked->end() && *oldtrav < *traverse ; ) {
             oldtrav++;
-        if ( ( (*traverse) == (*oldtrav) ) && ( (*_llights)[*oldtrav].target >= 0 ) )
+        }
+        if ( ( (*traverse) == (*oldtrav) ) && ( (*_llights)[*oldtrav].target >= 0 ) ) {
             //BOGUS ASSERT... just like this light wasn't on if it was somehow clobberedassert (GLLights[(*_llights)[oldpicked->front()].target].index == oldpicked->front());
             oldpicked->erase( oldtrav );              //already taken care of. main screen turn on ;-)
+        }
     }
     for ( oldtrav = oldpicked->begin(); oldtrav != oldpicked->end(); ++oldtrav ) {
-        if ( GLLights[(*_llights)[(*oldtrav)].target].index != (*oldtrav) ) 
+        if ( GLLights[(*_llights)[(*oldtrav)].target].index != (*oldtrav) )
             continue;             //don't clobber what's not yours
         GLLights[(*_llights)[(*oldtrav)].target].index    = -1;
         GLLights[(*_llights)[(*oldtrav)].target].options &= (OpenGLL::GL_ENABLED&OpenGLL::GLL_LOCAL);               //set it to be desirable to kill
     }
     for ( traverse = newpicked->begin(); traverse != newpicked->end(); ++traverse ) {
         if (*traverse>=(int)_llights->size()) {
-            VSFileSystem::vs_fprintf (stderr,"GFXLIGHT FAILURE %d is beyond array of size %d",(int)*traverse,(int)_llights->size());
+            BOOST_LOG_TRIVIAL(error) << boost::format("GFXLIGHT FAILURE %1% is beyond array of size %2%") % ((int)*traverse) % ((int)_llights->size());
             continue;
         }
         if ( (*_llights)[*traverse].target == -1 ) {
@@ -263,7 +291,7 @@ void gfx_light::dopickenables()
      *  }*/
     for (oldtrav = oldpicked->begin(); oldtrav != oldpicked->end(); oldtrav++) {
         if (*oldtrav>=(int)_llights->size()) {
-            VSFileSystem::vs_fprintf (stderr,"GFXLIGHT FAILURE %d is beyond array of size %d",(int)*oldtrav,(int)_llights->size());
+            BOOST_LOG_TRIVIAL(error) << boost::format("GFXLIGHT FAILURE %1% is beyond array of size %2%") % ((int)*oldtrav) % ((int)_llights->size());
             continue;
         }
 

@@ -919,7 +919,6 @@ void VDU::DrawMessages( GameCockpit *parentcp, Unit *target )
             //fullstr=fullstr+mymsg+"\n";
 
             rows_used += rows_needed+1;
-            //cout << "nav  " << mymsg << " rows " << rows_needed << endl;
         }
     }
     static std::string newline( "\n" );
