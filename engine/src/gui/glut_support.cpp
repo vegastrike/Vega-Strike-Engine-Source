@@ -47,10 +47,10 @@ void ShowColor( float x, float y, float wid, float hei, float red, float green, 
     if (x+wid > 1) wid = 1-x;
     if (y-hei < -1) hei = -1+y;
 #ifdef DEBUG
-    cout<<"Displaying color at "<<x<<","<<y<<"\n";
-    cout<<"with the dimensions of "<<wid<<","<<hei<<"\n";
-    cout<<"With the color "<<red<<","<<green<<","<<blue<<","<<alpha<<"\n";
-    cout<<"-----------------------------\n";
+    BOOST_LOG_TRIVIAL(debug) <<"Displaying color at "<<x<<","<<y<<"\n";
+    BOOST_LOG_TRIVIAL(debug) <<"with the dimensions of "<<wid<<","<<hei<<"\n";
+    BOOST_LOG_TRIVIAL(debug) <<"With the color "<<red<<","<<green<<","<<blue<<","<<alpha<<"\n";
+    BOOST_LOG_TRIVIAL(debug) <<"-----------------------------\n";
 #endif
     glDisable( GL_TEXTURE_2D );
     glBegin( GL_QUADS );

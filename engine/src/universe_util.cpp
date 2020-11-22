@@ -45,6 +45,7 @@
 #include "options.h"
 #include "universe.h"
 #include "savegame.h"
+#include "vsfilesystem.h"
 
 
 extern unsigned int AddAnimation( const QVector &pos,
@@ -226,7 +227,7 @@ bool isSplashScreenShowing()
 void sendCustom( int cp, string cmd, string args, string id )
 {
     if ( cp < 0 || cp >= static_cast<int>(_Universe->numPlayers()) ) {
-        fprintf( stderr, "sendCustom %s with invalid player %d\n", cmd.c_str(), cp );
+        BOOST_LOG_TRIVIAL(error) << boost::format("sendCustom %1% with invalid player %2%") % cmd % cp;
         return;
     }
         receivedCustom( cp, true, cmd, args, id );

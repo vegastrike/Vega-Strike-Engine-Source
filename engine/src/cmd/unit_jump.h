@@ -1,3 +1,29 @@
+/**
+ * unit_jump.h
+ *
+ * Copyright (C) Daniel Horn
+ * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike
+ * contributors
+ *
+ * https://github.com/vegastrike/Vega-Strike-Engine-Source
+ *
+ * This file is part of Vega Strike.
+ *
+ * Vega Strike is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Vega Strike is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
+
 #ifndef __UNIT_JUMP_CPP__
 #define __UNIT_JUMP_CPP__
 
@@ -63,7 +89,7 @@ bool GameUnit< UnitType >::TransferUnitToSystem( unsigned int kk, StarSystem* &s
                 }
             }
             if ( this == _Universe->AccessCockpit()->GetParent() ) {
-                VSFileSystem::vs_fprintf( stderr, "Unit is the active player character...changing scene graph\n" );
+                BOOST_LOG_TRIVIAL(info) << "Unit is the active player character...changing scene graph\n";
                 savedStarSystem->SwapOut();
                 AUDStopAllSounds();
                 savedStarSystem = pendingjump[kk]->dest;
@@ -116,7 +142,7 @@ bool GameUnit< UnitType >::TransferUnitToSystem( unsigned int kk, StarSystem* &s
                 AUDPlay( jumparrive, this->LocalPosition(), this->GetVelocity(), 1 );
         } else {
 #ifdef JUMP_DEBUG
-            VSFileSystem::vs_fprintf( stderr, "Unit FAILED remove from star system\n" );
+            BOOST_LOG_TRIVIAL(debug) << "Unit FAILED remove from star system\n";
 #endif
         }
         if (this->docked&UnitType::DOCKING_UNITS)
@@ -141,7 +167,7 @@ bool GameUnit< UnitType >::TransferUnitToSystem( unsigned int kk, StarSystem* &s
             }
         }
     } else {
-        VSFileSystem::vs_fprintf( stderr, "Already jumped\n" );
+        BOOST_LOG_TRIVIAL(warning) << "Already jumped\n";
     }
     return ret;
 }

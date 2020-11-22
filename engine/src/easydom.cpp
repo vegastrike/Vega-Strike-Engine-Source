@@ -33,9 +33,6 @@
 
 #include <assert.h>     /// needed for assert() calls.
 
-using std::cout;
-using std::cerr;
-using std::endl;
 easyDomNode::easyDomNode() {}
 
 void easyDomNode::set( easyDomNode *_parent, string _name, const XML_Char **atts )

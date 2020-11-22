@@ -1,23 +1,29 @@
-/*
- * Vega Strike
+/**
+ * mesh.cpp
+ *
  * Copyright (C) 2001-2002 Daniel Horn
+ * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike
+ * contributors
  *
- * http://vegastrike.sourceforge.net/
+ * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * as published by the Free Software Foundation; either version 2
- * of the License, or (at your option) any later version.
+ * This file is part of Vega Strike.
  *
- * This program is distributed in the hope that it will be useful,
+ * Vega Strike is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * Vega Strike is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+ * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
  */
+
+
 #include <memory.h>
 #include "animation.h"
 #include "aux_logo.h"
@@ -129,14 +135,13 @@ bool Mesh::LoadExistant( const string filehash, const Vector &scale, int faction
     }
     if (0 != oldmesh)
         return LoadExistant( oldmesh );
-    //VSFileSystem::Fprintf (stderr,"cannot cache %s",GetSharedMeshHashName(filehash,scale,faction).c_str());
     return false;
 }
 
 extern Hashtable< std::string, std::vector< Mesh* >, MESH_HASTHABLE_SIZE >bfxmHashTable;
 Mesh::Mesh( const Mesh &m )
 {
-    fprintf( stderr, "UNTESTED MESH COPY CONSTRUCTOR" );
+    BOOST_LOG_TRIVIAL(warning) << "UNTESTED MESH COPY CONSTRUCTOR";
     this->orig = NULL;
     this->hash_name = m.hash_name;
     InitUnit();
@@ -149,7 +154,9 @@ Mesh::Mesh( const Mesh &m )
                 oldmesh = (*vec)[i];
         }
         if (0 == oldmesh) {
-            if (vec->size() > 1) fprintf( stderr, "Copy constructor %s used in ambiguous Situation", hash_name.c_str() );
+            if (vec->size() > 1) {
+                BOOST_LOG_TRIVIAL(warning) << boost::format("Copy constructor %1$s used in ambiguous Situation") % hash_name.c_str();
+            }
             if ( vec->size() )
                 oldmesh = (*vec)[0];
         }
@@ -201,7 +208,7 @@ Mesh::Mesh( std::string filename, const Vector &scale, int faction, Flightgroup 
         }
     } else {
         delete cpy;
-        fprintf( stderr, "fallback, %s unable to be loaded as bfxm\n", filename.c_str() );
+        BOOST_LOG_TRIVIAL(error) << boost::format("fallback, %1$s unable to be loaded as bfxm\n") % filename.c_str();
     }
 }
 
@@ -223,7 +230,7 @@ Mesh::Mesh( const char *filename,
     VSError err    = Unspecified;
     err = f.OpenReadOnly( filename, MeshFile );
     if (err > Ok) {
-        VSFileSystem::vs_fprintf( stderr, "Cannot Open Mesh File %s\n", filename );
+        BOOST_LOG_TRIVIAL(error) << boost::format("Cannot Open Mesh File %1$s\n") % filename;
 //cleanexit=1;
 //winsys_exit(1);
         return;

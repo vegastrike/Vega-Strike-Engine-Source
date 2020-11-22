@@ -29,9 +29,6 @@
 #include "vsfilesystem.h"
 #include "cmd/script/mission.h"
 
-using std::cerr;
-using std::cout;
-using std::endl;
 using std::vector;
 
 class Faction;

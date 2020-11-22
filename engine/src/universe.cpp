@@ -1,23 +1,29 @@
-/*
- * Vega Strike
- * Copyright (C) 2001-2002 Daniel Horn & Alan Shieh
+/**
+ * universe.cpp
  *
- * http://vegastrike.sourceforge.net/
+ * Copyright (C) 2001-2002 Daniel Horn and Alan Shieh
+ * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike
+ * contributors
  *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * as published by the Free Software Foundation; either version 2
- * of the License, or (at your option) any later version.
+ * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
- * This program is distributed in the hope that it will be useful,
+ * This file is part of Vega Strike.
+ *
+ * Vega Strike is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Vega Strike is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+ * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
  */
+
+
 #include <stdio.h>
 #include <fcntl.h>
 #include "gfxlib.h"
@@ -50,6 +56,7 @@
 #include "cmd/csv.h"
 #include "cmd/role_bitmask.h"
 #include "universe_globals.h"
+#include "vsfilesystem.h"
 
 #include <algorithm>
 #include <string>
@@ -431,7 +438,7 @@ void Universe::StartDraw()
                         delete star_system.back();
                         star_system.pop_back();
                     } else {
-                        VSFileSystem::vs_fprintf( stderr, "error with active star system list\n" );
+                        BOOST_LOG_TRIVIAL(error) << "error with active star system list\n";
                     }
                 }
             }
@@ -519,8 +526,9 @@ unsigned int Universe::CurrentCockpit()
 void Universe::SetActiveCockpit( int i )
 {
 #ifdef VS_DEBUG
-    if ( i < 0 || i >= cockpit.size() )
-        VSFileSystem::vs_fprintf( stderr, "ouch invalid cockpit %d", i );
+    if ( i < 0 || i >= cockpit.size() ) {
+        BOOST_LOG_TRIVIAL(error) << boost::format("ouch invalid cockpit %1$d") % i;
+    }
 #endif
     _current_cockpit = i;
 }
@@ -645,7 +653,7 @@ StarSystem* Universe::GenerateStarSystem( const char *file, const char *jumpback
 
 void Universe::LoadStarSystem( StarSystem *s )
 {
-    std::cerr<<"Loading a starsystem"<<std::endl;
+    BOOST_LOG_TRIVIAL(info) << "Loading a starsystem";
     star_system.push_back( s );
     SortStarSystems( star_system, s );     //dont' want instadie
 }
@@ -682,10 +690,10 @@ void Universe::Generate2( StarSystem *ss )
     //notify the director that a new system is loaded (gotta have at least one active star system)
     StarSystem *old_script_system = _script_system;
     _script_system = ss;
-    VSFileSystem::vs_fprintf( stderr, "Loading Star System %s\n", ss->getFileName().c_str() );
+    BOOST_LOG_TRIVIAL(info) << boost::format("Loading Star System %1$s\n") % ss->getFileName().c_str();
     const vector< std::string > &adjacent = getAdjacentStarSystems( ss->getFileName() );
     for (unsigned int i = 0; i < adjacent.size(); i++) {
-        VSFileSystem::vs_fprintf( stderr, " Next To: %s\n", adjacent[i].c_str() );
+        BOOST_LOG_TRIVIAL(info) << boost::format(" Next To: %1$s\n") % adjacent[i].c_str();
     }
     static bool first = true;
     if (!first)

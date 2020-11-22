@@ -1,3 +1,29 @@
+/**
+ * planet.cpp
+ *
+ * Copyright (C) Daniel Horn
+ * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike
+ * contributors
+ *
+ * https://github.com/vegastrike/Vega-Strike-Engine-Source
+ *
+ * This file is part of Vega Strike.
+ *
+ * Vega Strike is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Vega Strike is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
+
 #include <math.h>
 #include "vegastrike.h"
 #include "unit.h"
@@ -159,14 +185,14 @@ Planet::Planet() :
 {
     Init();
     SetAI( new Order() );     //no behavior
-    
+
     shield.number=2;
     shield.recharge=0;
     shield.shield2fb.frontmax=0;
     shield.shield2fb.backmax=0;
     shield.shield2fb.front=0;
     shield.shield2fb.back=0;
-    
+
 }
 
 extern const vector< string >& ParseDestinations( const string &value );
@@ -351,10 +377,10 @@ void Planet::InitPlanet( QVector x,
                          unsigned int lights_num )
 {
     static const float bodyradius = GameConfig::GetVariable( "graphics", "star_body_radius", 0.33f );
-    
+
     if (lights_num)
         radius *= bodyradius;
-    
+
     curr_physical_state.position = prev_physical_state.position = cumulative_transformation.position = orbitcent+x;
     Init();
     //static int neutralfaction=FactionUtil::GetFaction("neutral");
@@ -721,7 +747,7 @@ Unit* Planet::beginElement( QVector x,
                                                              faction, fullname,
                                                              inside_out );
         } else {
-            VSFileSystem::vs_fprintf( stderr, "Planets are unable to orbit around units" );
+            BOOST_LOG_TRIVIAL(error) << "Planets are unable to orbit around units";
         }
     } else {
         if (isunit == true) {
@@ -794,7 +820,7 @@ Planet* Planet::GetTopPlanet( int level )
         if ( (*satiterator)->isUnit() == PLANETPTR ) {
             return ( (Planet*) (*satiterator) )->GetTopPlanet( level-1 );
         } else {
-            VSFileSystem::vs_fprintf( stderr, "Planets are unable to orbit around units" );
+            BOOST_LOG_TRIVIAL(error) << "Planets are unable to orbit around units";
             return nullptr;
         }
     } else {

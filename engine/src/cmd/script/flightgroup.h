@@ -75,7 +75,6 @@ public:
     Flightgroup() : pos( 0, 0, 0 )
     {
         //betterto have a flightgroup constructor
-        //fprintf (stderr,"constructing FG 0x%x\n",this);
         orderlist = NULL;
         nr_waves_left   = nr_ships_left = nr_ships = flightgroup_nr = 0;
         leader_decision = -1;

@@ -1,3 +1,29 @@
+/**
+ * coord_select.cpp
+ *
+ * Copyright (C) Daniel Horn
+ * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike
+ * contributors
+ *
+ * https://github.com/vegastrike/Vega-Strike-Engine-Source
+ *
+ * This file is part of Vega Strike.
+ *
+ * Vega Strike is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Vega Strike is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
+
 #include "cmd/unit_generic.h"
 #include "star_system.h"
 #include "loc_select.h"
@@ -46,8 +72,6 @@ void CoordinateSelect::UpdateMouse()
         //distance out into z...straight line...
 
         float distance = CamR.Dot( (LocalPosition-CamPos).Cast() );           //distance out into z...straight line...
-        //VSFileSystem::Fprintf (stderr, "distance:%f\n",distance);
-        //VSFileSystem::Fprintf (stderr, "mdistance:%f %f\n",mouseDistance,TMD);
         if (mouseDistance != 0)
             LocalPosition = mousePoint*(distance/mouseDistance)+CamPos.Cast();
         else
@@ -80,7 +104,6 @@ void CoordinateSelect::Draw()
     GFXLoadIdentity( MODEL );
 
     GFXPushBlendMode();
-    //VSFileSystem::Fprintf (stderr,"Location: %f %f %f", LocalPosition.i, LocalPosition.j, LocalPosition.k);
     GFXBlendMode( ONE, ONE );
     LocSelAni.SetPosition( LocalPosition );
     LocSelAni.Draw();

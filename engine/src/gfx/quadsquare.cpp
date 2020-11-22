@@ -1,4 +1,30 @@
 /**
+ * quadsquare.cpp
+ *
+ * Copyright (C) Daniel Horn
+ * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike
+ * contributors
+ *
+ * https://github.com/vegastrike/Vega-Strike-Engine-Source
+ *
+ * This file is part of Vega Strike.
+ *
+ * Vega Strike is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Vega Strike is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
+
+/**
  *
  * Data structures for quadtree terrain storage.
  * This code may be freely modified and redistributed.  I make no
@@ -50,8 +76,6 @@ unsigned int quadsquare::SetVertices( GFXVertex *vertexs, const quadcornerdata &
                                                                                (*textures)[Vertex[i].GetTex()].scales ),
                                                  nonlinear_trans->TransformT( v[i].k, (*textures)[Vertex[i].GetTex()].scalet ) );
         vertexs[Vertex[i].vertindex].SetVertex( nonlinear_trans->Transform( v[i].Cast() ).Cast() );
-        //if (vertexs[Vertex[i].vertindex].y>10000||vertexs[Vertex[i].vertindex].z>32768||vertexs[Vertex[i].vertindex].x>32768)
-        //not important...debug only to catch certain case	    VSFileSystem::Fprintf (stderr,"high %f", vertexs[Vertex[i].vertindex].y);
     }
     return half;
 }
@@ -226,9 +250,9 @@ float quadsquare::GetHeight( const quadcornerdata &cd, float x, float z, Vector 
     }
     //Bilinear interpolation.
     lx -= ix;
-    if (lx <= 0.f) 
+    if (lx <= 0.f)
 	lx = 0.f;
-    else 
+    else
 	lx = 1.f;
     lz -= iz;
     if (lz > 1) lz = 1;

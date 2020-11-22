@@ -1,3 +1,29 @@
+/**
+ * click_list.cpp
+ *
+ * Copyright (C) Daniel Horn
+ * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike
+ * contributors
+ *
+ * https://github.com/vegastrike/Vega-Strike-Engine-Source
+ *
+ * This file is part of Vega Strike.
+ *
+ * Vega Strike is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Vega Strike is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
+
 #include "gfxlib.h"
 #include "click_list.h"
 #include "unit_generic.h"
@@ -26,11 +52,11 @@ bool ClickList::queryShip( int mouseX, int mouseY, Unit *ship )
 
     mousePoint.Normalize();
     mouseline = mousePoint+CamPos.Cast();
-    /* int tmp = ship->querySphere(CamP,mousePoint,0);  //FIXME  bounding spheres seem to be broken
-    if (tmp) {
+    int tmp = ship->querySphere(CamP,mousePoint,0);  //FIXME  bounding spheres seem to be broken
+    /* if (tmp) {
         if ( ship->querySphereClickList( CamPos, mousePoint.Cast(), 0 ) ) {
             //camera position is not actually the center of the camera
-            //VSFileSystem::vs_fprintf (stderr, "bounding sphere hit\n");
+            // BOOST_LOG_TRIVIAL(info) << "bounding sphere hit\n";
             return true;
         }
     } POSSIBLE DELETE */

@@ -177,9 +177,6 @@ float QuadTree::GetHeight( Vector Location,
         //float t2=Location.k;
         Location.i = fmod( Location.i, TotalTerrainSizeX );
         Location.k = fmod( Location.k, TotalTerrainSizeZ );
-        //if (t1!=Location.i|| t2!=Location.k) {
-        //VSFileSystem::Fprintf (stderr,"wired");
-        ///}
         if (Location.i < 0)
             Location.i += TotalTerrainSizeX;
         if (Location.k < 0)
@@ -188,7 +185,6 @@ float QuadTree::GetHeight( Vector Location,
     float tmp = Location.j-root->GetHeight( RootCornerData, Location.i, Location.k, normal );
     normal = TransformNormal( transf, nonlinear_transform->TransformNormal( Location, normal ) );
     normal.Normalize();
-    //VSFileSystem::Fprintf (stderr,"<%f>",tmp);
     return tmp;
 }
 

@@ -83,8 +83,7 @@ bool Drawable::DrawableInit(const char *filename, int faction,
                     Mesh *m = Mesh::LoadMesh( path.c_str(), Vector(1,1,1), faction, flightgrp );
                     meshes->push_back( m );
     #ifdef DEBUG_MESH_ANI
-        // TODO: search and replace cerr with BOOST_LOG_TRIVIAL(error)
-                    cerr << "Animated Mesh: " << path << " loaded - with: " << m->getVertexList()->GetNumVertices() << " vertices." << endl;
+                    BOOST_LOG_TRIVIAL(debug) << "Animated Mesh: " << path << " loaded - with: " << m->getVertexList()->GetNumVertices() << " vertices.";
     #endif
             }
             else
@@ -109,7 +108,7 @@ bool Drawable::DrawableInit(const char *filename, int faction,
 		sprintf( count, "%u", unitCount );
 		uniqueUnitName = drawableGetName() + string(count);
 		Units[uniqueUnitName] = static_cast<Unit*>(this);
-		std::cerr << "Animation data loaded for unit: " << string(filename) << ", named " << uniqueUnitName << " - with: " << numFrames << " frames." << std::endl;
+		BOOST_LOG_TRIVIAL(info) << "Animation data loaded for unit: " << string(filename) << ", named " << uniqueUnitName << " - with: " << numFrames << " frames.";
 		return true;
 	} else {
 		delete meshes;
@@ -120,7 +119,7 @@ bool Drawable::DrawableInit(const char *filename, int faction,
 void Drawable::AnimationStep()
 {
 #ifdef DEBUG_MESH_ANI
-        std::cerr << "Starting animation step of Unit: " << uniqueUnitName << std::endl;
+        BOOST_LOG_TRIVIAL(debug) << "Starting animation step of Unit: " << uniqueUnitName;
 #endif
         if((!this->isContinuousLoop())&&(loopCount==0))
             return;
@@ -130,7 +129,7 @@ void Drawable::AnimationStep()
         Draw();
 
 #ifdef DEBUG_MESH_ANI
-        std::cerr << "Drawed mesh: " << uniqueUnitName << std::endl;
+        BOOST_LOG_TRIVIAL(debug) << "Drawed mesh: " << uniqueUnitName;
 #endif
 
         activeMesh = nextactiveMesh;
@@ -141,7 +140,7 @@ void Drawable::AnimationStep()
         if(loopCount > 0)
             loopCount--;
 #ifdef DEBUG_MESH_ANI
-        std::cerr << "Ending animation step of Unit: " << uniqueUnitName << std::endl;
+        BOOST_LOG_TRIVIAL(debug) << "Ending animation step of Unit: " << uniqueUnitName;
 #endif
 }
 

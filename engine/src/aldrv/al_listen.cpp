@@ -186,11 +186,11 @@ void AUDAddWatchedPlayed( const int sound, const Vector &pos )
     totalplaying++;
     if (sounds[sound].buffer != (ALuint) 0) {
         unsigned int h = hash_sound( sounds[sound].buffer );
-        if (sounds[sound].source == 0)
-            VSFileSystem::vs_fprintf( stderr, "adding null sound" );
+        if (sounds[sound].source == 0) {
+            BOOST_LOG_TRIVIAL(warning) << "adding null sound";
+        }
         playingbuffers[h].push_back( ApproxSound() );
         playingbuffers[h].back().soundname = sound;
-        //VSFileSystem::vs_fprintf (stderr,"pushingback %f",(pos-mylistener.pos).Magnitude());
     }
 #endif
 }

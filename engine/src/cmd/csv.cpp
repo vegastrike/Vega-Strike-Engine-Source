@@ -149,7 +149,7 @@ void CSVTable::Init( const string &data )
         vector< string >strs = readCSV( buffer );
         unsigned int    row  = table.size()/key.size();
         while ( strs.size() > key.size() ) {
-            fprintf( stderr, "error in csv, line %d: %s has no key", row+1, strs.back().c_str() );
+            BOOST_LOG_TRIVIAL(error) << boost::format("error in csv, line %1$d: %2$s has no key") % (row+1) % strs.back().c_str();
             strs.pop_back();
         }
         while ( strs.size() < key.size() )
@@ -207,7 +207,8 @@ CSVTable::Merge( const CSVTable &other )
             local = columns.insert(std::pair<string, int>(it->first, key.size()-1)).first;
         }
         if (it->second >= int(colmap.size())) {
-            std::cerr << "WTF column " << it->second << "?" << std::endl;
+            BOOST_LOG_TRIVIAL(error) << "WTF column " << it->second << "?";
+            VSFileSystem::flushLogs();
             abort();
         }
         BOOST_LOG_TRIVIAL(debug) << boost::format("  %1% (%2%) -> %3%") % it->first % it->second % local->second;
@@ -310,9 +311,10 @@ vector< CSVTable* > unitTables;
 
 string CSVRow::getRoot()
 {
-    if (parent)
+    if (parent) {
         return parent->rootdir;
-    fprintf( stderr, "Error getting root for unit\n" );
+    }
+    BOOST_LOG_TRIVIAL(error) << "Error getting root for unit\n";
     return "";
 }
 

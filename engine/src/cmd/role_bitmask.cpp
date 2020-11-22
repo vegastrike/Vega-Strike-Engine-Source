@@ -1,3 +1,29 @@
+/**
+ * role_bitmask.cpp
+ *
+ * Copyright (C) Daniel Horn
+ * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike
+ * contributors
+ *
+ * https://github.com/vegastrike/Vega-Strike-Engine-Source
+ *
+ * This file is part of Vega Strike.
+ *
+ * Vega Strike is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Vega Strike is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
+
 #include "role_bitmask.h"
 #include "xml_support.h"
 #include <gnuhash.h>
@@ -14,10 +40,12 @@ namespace ROLES
 {
 int discreteLog( int bitmask )
 {
-    for (unsigned char i = 0; i < sizeof (int)*8; i++)
-        if ( bitmask&(1<<i) )
+    for (unsigned char i = 0; i < sizeof (int)*8; i++) {
+        if ( bitmask&(1<<i) ) {
             return i;
-    VSFileSystem::vs_fprintf( stderr, "undefined discrete log." );
+        }
+    }
+    BOOST_LOG_TRIVIAL(warning) << "undefined discrete log.";
     return 0;
 }
 vector< vector< char > >buildroles();
@@ -72,24 +100,21 @@ vector< vector< string > >buildscripts()
 
         vector< string >vec = readCSV( temp );
         if ( siz && getAllRolePriorities()[0].size() != vec.size() ) {
-            fprintf(
-                stderr,
-                "FATAL error in hash map... column %u in ai/VegaEvents.csv does not line up with that item in ai/VegaPriorities.csv\n",
-                (unsigned int) vec.size() );
+            BOOST_LOG_TRIVIAL(fatal) << boost::format("FATAL error in hash map... column %1% in ai/VegaEvents.csv does not line up with that item in ai/VegaPriorities.csv\n")
+                % ((unsigned int) vec.size());
         }
         if ( vec.size() ) vec.erase( vec.begin() );
         for (unsigned int j = 0; j < vec.size(); j++)
             if (getRole( vec[j] ) != j) {
-                fprintf(
-                    stderr,
-                    "FATAL error in hash map... column %d in ai/VegaEvents.csv does not line up with that item in ai/VegaPriorities.csv\n",
-                    j );
+                BOOST_LOG_TRIVIAL(fatal) << boost::format("FATAL error in hash map... column %1% in ai/VegaEvents.csv does not line up with that item in ai/VegaPriorities.csv\n")
+                    % j;
             }
         unsigned int i = 0;
         for (i = 0; i < siz; i++) {
             scripts.push_back( vector< string > () );
-            for (unsigned int j = 0; j < vec.size(); j++)
+            for (unsigned int j = 0; j < vec.size(); j++) {
                 scripts[i].push_back( "default" );
+            }
         }
         for (i = 0; i < vec.size(); i++) {
             f.ReadLine( temp, len );
@@ -117,11 +142,11 @@ const std::string& getRoleEvents( unsigned char ourrole, unsigned char theirs )
     static vector< vector< string > >script = buildscripts();
     const static string def = "default";
     if ( ourrole >= script.size() ) {
-        VSFileSystem::vs_fprintf( stderr, "bad error with getRoleEvetnts (no event specified)" );
+        BOOST_LOG_TRIVIAL(error) << "bad error with getRoleEvents (no event specified)";
         return def;
     }
     if ( theirs >= script[ourrole].size() ) {
-        VSFileSystem::vs_fprintf( stderr, "bad error || with getRoleEvetnts (no event specified)" );
+        BOOST_LOG_TRIVIAL(error) << "bad error || with getRoleEvents (no event specified)";
         return def;
     }
     return script[ourrole][theirs];

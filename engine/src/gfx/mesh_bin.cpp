@@ -1,3 +1,29 @@
+/**
+ * mesh_bin.cpp
+ *
+ * Copyright (C) Daniel Horn
+ * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike
+ * contributors
+ *
+ * https://github.com/vegastrike/Vega-Strike-Engine-Source
+ *
+ * This file is part of Vega Strike.
+ *
+ * Vega Strike is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Vega Strike is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
+
 #include "mesh.h"
 //#include "aux_logo.h"
 //#include "aux_texture.h"
@@ -52,7 +78,7 @@ void Mesh::LoadBinary( const char *filename, int faction )
     VSFile  fp;
     VSError err = fp.OpenReadOnly( filename, MeshFile );
     if (err > Ok) {
-        VSFileSystem::vs_fprintf( stderr, "Failed to load file %s", filename );
+        BOOST_LOG_TRIVIAL(fatal) << boost::format("Failed to load file %1$s") % filename;
         VSExit( 1 );
     }
     TexNameLength = readi( fp );
@@ -489,7 +515,6 @@ void Mesh::LoadBinary( const char *filename, int faction )
     squadlogos =
         createLogo( numsquadlogo, center, PolyNormal, sizes, rotations, (float) 0.01, FactionUtil::getSquadLogo( faction ), Ref );
     delete[] Ref;
-    //VSFileSystem::Fprintf (stderr, "Ri:%f Rj: %f Rk %f",vertexlist[0].i,vertexlist[0].j,vertexlist[0].k);
     int vert_offset[2];
     vert_offset[0] = NumTris*3;
     vert_offset[1] = NumQuads*4;

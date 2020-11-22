@@ -1,3 +1,29 @@
+/**
+ * galaxy.cpp
+ *
+ * Copyright (C) Daniel Horn
+ * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike
+ * contributors
+ *
+ * https://github.com/vegastrike/Vega-Strike-Engine-Source
+ *
+ * This file is part of Vega Strike.
+ *
+ * Vega Strike is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Vega Strike is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
+
 #include "galaxy.h"
 
 #include <boost/property_tree/ptree.hpp>
@@ -31,9 +57,7 @@ Galaxy::Galaxy(string const &galaxy_file)
             string value = planet_iterator.second.get<string>("<xmlattr>.value", "");
             if(value == "") continue;
             variables[name] = value;
-            //std::cout << "Parsed variable " << name << "=" << value << std::endl;
         } else if(type == "planet") { // Parse planets
-            //std::cout << "Parsing planet " << name << std::endl;
             map<string, string> planet;
             pt::ptree inner_tree = planet_iterator.second;
             for (const auto& variable_iterator : inner_tree) {
@@ -41,7 +65,6 @@ Galaxy::Galaxy(string const &galaxy_file)
                 string value = variable_iterator.second.get<string>("<xmlattr>.value", "");
                 if(name == "" || value == "") continue;
                 planet[name] = value;
-                //std::cout << "Parsed variable " << name << "=" << value << std::endl;
             }
             planets[name] = planet;
         }
@@ -56,13 +79,11 @@ Galaxy::Galaxy(string const &galaxy_file)
         if(name == "") continue;
 
         // Parse sectors
-//        std::cout << "Parsing sector " << name << std::endl;
         map<string, map<string, string>> sector;
         pt::ptree inner_tree = sector_iterator.second;
         for (const auto& system_iterator : inner_tree) {
             string name = system_iterator.second.get<string>("<xmlattr>.name", "");
             if(name == "") continue;
-//            std::cout << "Parsing system " << name << std::endl;
 
             map<string, string> system;
             pt::ptree innermost_tree = system_iterator.second;
@@ -71,7 +92,6 @@ Galaxy::Galaxy(string const &galaxy_file)
                 string value = variable_iterator.second.get<string>("<xmlattr>.value", "");
                 if(name == "" || value == "") continue;
                 system[name] = value;
-//                std::cout << "Parsed variable " << name << "=" << value << std::endl;
             }
             sector[name] = system;
         }

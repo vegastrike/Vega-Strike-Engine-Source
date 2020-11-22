@@ -49,10 +49,7 @@
 using namespace VSFileSystem;
 using std::vector;
 using std::string;
-using std::cout;
-using std::endl;
 using std::allocator;
-using std::cerr;
 
 std::string CurrentSaveGameName = "";
 std::string GetHelperPlayerSaveGame( int num )

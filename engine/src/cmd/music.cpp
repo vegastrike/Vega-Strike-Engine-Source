@@ -79,7 +79,7 @@ static void print_check_err( int errorcode, const char *str )
         if (!err){
             err = unknown_error;
         }
-        fprintf( stderr, "ERROR IN PTHREAD FUNCTION %s: %s (%d)\n", str, err, errorcode );
+        BOOST_LOG_TRIVIAL(error) << boost::format("ERROR IN PTHREAD FUNCTION %1%: %2% (%3%)\n") % str % err % errorcode;
     }
 #endif
 }
@@ -396,7 +396,6 @@ void Music::Listen()
     if (game_options.Music) {
         if ( !music_load_list.empty() ) {
             if (music_loaded) {
-                //fprintf(stderr,"LOADED is true\n");
 #ifdef _WIN32
                 int trylock_ret = 0;
                 if (WaitForSingleObject( musicinfo_mutex, 0 ) == WAIT_TIMEOUT) {
@@ -404,7 +403,7 @@ void Music::Listen()
                 int trylock_ret = pthread_mutex_trylock( &musicinfo_mutex );
                 if (trylock_ret == EBUSY) {
 #endif
-                    fprintf( stderr, "Failed to lock music loading mutex despite loaded flag being set...\n" );
+                    BOOST_LOG_TRIVIAL(warning) << "Failed to lock music loading mutex despite loaded flag being set...\n";
                     return;
                 } else {
                     checkerr( trylock_ret );
@@ -513,7 +512,7 @@ void Music::_GotoSong( std::string mus )
             if (a_thread){
                 thread_initialized = true;
             } else {
-                fprintf( stderr, "Error creating music load thread: %d\n", GetLastError() );
+                BOOST_LOG_TRIVIAL(error) << boost::format("Error creating music load thread: %1$d\n") % GetLastError();
             }
 #else
             int thread_create_ret = pthread_create( &a_thread, NULL, Muzak::readerThread, this );
@@ -582,7 +581,7 @@ void Music::_SkipRandSong( int whichlist, int layer )
             GotoSong( whichlist, random ? randInt( playlist[whichlist].size() ) : playlist[whichlist].counter++
                         %playlist[whichlist].size(), true, layer );
         } else {
-            fprintf( stderr, "Error no songs in playlist %d\n", whichlist );
+            BOOST_LOG_TRIVIAL(error) << boost::format("Error no songs in playlist %1$d\n") % whichlist;
         }
     }
     _SkipRandList( layer );

@@ -1,3 +1,29 @@
+/**
+ * technique.cpp
+ *
+ * Copyright (C) Daniel Horn
+ * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike
+ * contributors
+ *
+ * https://github.com/vegastrike/Vega-Strike-Engine-Source
+ *
+ * This file is part of Vega Strike.
+ *
+ * Vega Strike is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Vega Strike is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
+
 //
 //C++ Implementation: Technique
 //
@@ -637,18 +663,15 @@ TechniquePtr Technique::getTechnique( const std::string &name )
         while ( !ptr->isCompiled() ) {
             try {
                 ptr->compile();
-                VSFileSystem::vs_fprintf( stdout,
-                                         "Compilation of technique %s successful\n",
-                                         ptr->getName().c_str() );
+                BOOST_LOG_TRIVIAL(info) << boost::format("Compilation of technique %1$s successful\n")
+                                         % ptr->getName().c_str();
             }
             catch (const ProgramCompileError& e) {
                 std::string fallback = ptr->getFallback();
-                VSFileSystem::vs_fprintf( stderr,
-                                         "Compilation of technique %s failed... trying %s\n"
-                                         "Cause: %s\n",
-                                         ptr->getName().c_str(),
-                                         fallback.c_str(),
-                                         e.what() );
+                BOOST_LOG_TRIVIAL(warning) << boost::format("Compilation of technique %1$s failed... trying %2$s\nCause: %3$s\n")
+                                         % ptr->getName().c_str()
+                                         % fallback.c_str()
+                                         % e.what();
                 if (!fallback.empty() && fallback != name)
                     ptr = getTechnique( fallback );
                 else

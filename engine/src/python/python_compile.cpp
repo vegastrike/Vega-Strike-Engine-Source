@@ -1,3 +1,29 @@
+/**
+ * python_compile.cpp
+ *
+ * Copyright (C) Daniel Horn
+ * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike
+ * contributors
+ *
+ * https://github.com/vegastrike/Vega-Strike-Engine-Source
+ *
+ * This file is part of Vega Strike.
+ *
+ * Vega Strike is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Vega Strike is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
+
 #include "cmd/unit_generic.h"
 #include "python_compile.h"
 #include <compile.h>
@@ -8,6 +34,8 @@
 #include "init.h"
 #include "universe_util.h"
 #include "in_kb_data.h"
+#include "vsfilesystem.h"
+
 Hashtable< string, PyObject, 1023 >compiled_python;
 
 char * LoadString( const char *filename )
@@ -55,7 +83,7 @@ PyObject * CompilePython( const std::string &name )
         return retval;
     char *str = LoadString( name.c_str() );
     if (str) {
-        fprintf( stdout, "Compiling python module %s\n", name.c_str() );
+        BOOST_LOG_TRIVIAL(info) << boost::format("Compiling python module %1$s\n") % name;
 
         std::string compiling_name = getCompilingName( name ).c_str();
         char *temp = strdup( compiling_name.c_str() );
@@ -82,11 +110,11 @@ void CompileRunPython( const std::string &filename )
             if ( ( m = PyImport_AddModule( main_str ) ) != NULL ) {
                 PyObject *localdict = PyDict_New();
                 if ( ( d = PyModule_GetDict( m ) ) != NULL ) {
-                    PyObject *exe = PyEval_EvalCode( 
+                    PyObject *exe = PyEval_EvalCode(
 #if (PY_VERSION_HEX >= 0x03020000)
-		        CompiledProgram, 
+		        CompiledProgram,
 #else
-		        (PyCodeObject*)CompiledProgram, 
+		        (PyCodeObject*)CompiledProgram,
 #endif
 			d, localdict );
                     Py_XDECREF( exe );

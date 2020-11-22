@@ -507,7 +507,7 @@ void bootstrap_draw( const std::string &message, Animation *newSplashScreen )
     if (ani) {
         if (GetElapsedTime() < 10) ani->UpdateAllFrame();
         {
-        ani->DrawNow( tmp ); //VSFileSystem::vs_fprintf( stderr, "(new?) splash screen ('animation'?) %d.  ", (long long)ani ); //temporary, by chuck
+            ani->DrawNow( tmp );
         }
     }
     bs_tp->Draw( game_options.default_boot_message.length() > 0 ?
