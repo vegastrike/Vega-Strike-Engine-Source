@@ -67,14 +67,14 @@ void easyDomNode::printNode( ostream &out, int recurse_level, int level )
     out<<"<"<<name;
     for (iter = attribute_map.begin(); iter != attribute_map.end(); iter++)
         out<<" "<<(*iter).first<<"=\""<<(*iter).second<<"\"";
-    out<<">"<<endl;
+    out<<">"<<std::endl;
 
     vector< easyDomNode* >::const_iterator siter;
     if (recurse_level > 0)
         for (siter = subnodes.begin(); siter != subnodes.end(); siter++)
             (*siter)->printNode( out, recurse_level-1, level+1 );
     if ( !(recurse_level == 0 && level == 0) )
-        out<<"</"<<name<<">"<<endl;
+        out<<"</"<<name<<">"<<std::endl;
 }
 
 const char *textAttr = "Text_Attr";
