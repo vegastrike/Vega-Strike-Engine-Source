@@ -1,3 +1,29 @@
+/**
+ * nebula.cpp
+ *
+ * Copyright (C) Daniel Horn
+ * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike
+ * contributors
+ *
+ * https://github.com/vegastrike/Vega-Strike-Engine-Source
+ *
+ * This file is part of Vega Strike.
+ *
+ * Vega Strike is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Vega Strike is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
+
 #include "nebula.h"
 #include "vegastrike.h"
 #include "vsfilesystem.h"
@@ -134,10 +160,12 @@ void Nebula::LoadXML( const char *filename )
     VSError     err = f.OpenReadOnly( filename, UnitFile );
     static bool usefog     = XMLSupport::parse_bool( vs_config->getVariable( "graphics", "fog", "true" ) );
     if (err > Ok || !usefog) {
-        if (err <= Ok)
+        if (err <= Ok) {
             f.Close();
-        else
-            VSFileSystem::vs_fprintf( stderr, "\nUnit file %s not found\n", filename );
+        }
+        else {
+            BOOST_LOG_TRIVIAL(error) << boost::format("\nUnit file %1% not found\n") % filename;
+        }
         fogmode = FOG_OFF;
         return;
     }

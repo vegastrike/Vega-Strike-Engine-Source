@@ -1,3 +1,29 @@
+/**
+ * cont_terrain.cpp
+ *
+ * Copyright (C) Daniel Horn
+ * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike
+ * contributors
+ *
+ * https://github.com/vegastrike/Vega-Strike-Engine-Source
+ *
+ * This file is part of Vega Strike.
+ *
+ * Vega Strike is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Vega Strike is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
+
 #include "cont_terrain.h"
 #include "universe.h"
 #include "star_system.h"
@@ -77,9 +103,9 @@ ContinuousTerrain::ContinuousTerrain( const char *filename, const Vector &Scales
         }
         for (i = 0; i < numcontterr; i++)
             if (data[i]) {
-                if ( sizeX != data[i]->getSizeX() || sizeZ != data[i]->getSizeZ() )
-                    VSFileSystem::vs_fprintf( stderr,
-                                              "Warning: Sizes of terrain do not match...expect gaps in continuous terrain\n" );
+                if ( sizeX != data[i]->getSizeX() || sizeZ != data[i]->getSizeZ() ){
+                    BOOST_LOG_TRIVIAL(warning) << "Warning: Sizes of terrain do not match...expect gaps in continuous terrain\n";
+                }
                 data[i]->SetTotalSize( sizeX*width, sizeZ*width );
             }
         for (i = 0; i < width; i++)
@@ -170,7 +196,7 @@ QVector ContinuousTerrain::GetGroundPosIdentTrans( QVector ShipPos, Vector &norm
             return tmploc;
         }
     }
-    VSFileSystem::vs_fprintf( stderr, "Can't find %f,%f,%f\n", ShipPos.i, ShipPos.j, ShipPos.k );
+    BOOST_LOG_TRIVIAL(error) << boost::format("Can't find %1$f,%2$f,%3$f\n") % ShipPos.i % ShipPos.j % ShipPos.k;
     ShipPos.i *= Scales.i;
     ShipPos.j *= Scales.j;
     ShipPos.k *= Scales.k;
@@ -281,8 +307,9 @@ void ContinuousTerrain::Collide( Unit *un, Matrix t )
             diff.k = fmod( (double) diff.k, (double) sizeZ*width );
             if (diff.k < 0)
                 diff.k += sizeZ*width;
-            if ( !(rand()%10) )
-                VSFileSystem::vs_fprintf( stderr, "unit in out sapce %f %f %f\n", diff.i, diff.j, diff.k );
+            if ( !(rand()%10) ) {
+                BOOST_LOG_TRIVIAL(warning) << boost::format("unit in out sapce %1$f %2$f %3$f\n") % diff.i % diff.j % diff.k;
+            }
             diff = Transform( t, diff );
             const csReversibleTransform bigtransform( transform );
             Matrix smallmat = ( un->GetTransformation() );

@@ -1,3 +1,29 @@
+/**
+ * mesh_xml.cpp
+ *
+ * Copyright (C) Daniel Horn
+ * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike
+ * contributors
+ *
+ * https://github.com/vegastrike/Vega-Strike-Engine-Source
+ *
+ * This file is part of Vega Strike.
+ *
+ * Vega Strike is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Vega Strike is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
+
 #include "mesh.h"
 #include "mesh_xml.h"
 #include "aux_texture.h"
@@ -407,7 +433,7 @@ void Mesh::beginElement( MeshXML *xml, const string &name, const AttributeList &
         }
         break;
     case MeshXML::UNKNOWN:
-        VSFileSystem::vs_fprintf( stderr, "Unknown element start tag '%s' detected\n", name.c_str() );
+        BOOST_LOG_TRIVIAL(error) << boost::format("Unknown element start tag '%1%' detected") % name;
         break;
     case MeshXML::MESH:
         assert( xml->load_stage == 0 );
@@ -538,7 +564,7 @@ void Mesh::beginElement( MeshXML *xml, const string &name, const AttributeList &
             switch ( MeshXML::attribute_map.lookup( (*iter).name ) )
             {
             case MeshXML::UNKNOWN:
-                VSFileSystem::vs_fprintf( stderr, "Unknown attribute '%s' encountered in Location tag\n", (*iter).name.c_str() );
+                BOOST_LOG_TRIVIAL(error) << boost::format("Unknown attribute '%1%' encountered in Location tag") % (*iter).name;
                 break;
             case MeshXML::X:
                 assert( !(xml->point_state&MeshXML::P_X) );
@@ -581,7 +607,7 @@ void Mesh::beginElement( MeshXML *xml, const string &name, const AttributeList &
             switch ( MeshXML::attribute_map.lookup( (*iter).name ) )
             {
             case MeshXML::UNKNOWN:
-                VSFileSystem::vs_fprintf( stderr, "Unknown attribute '%s' encountered in Normal tag\n", (*iter).name.c_str() );
+                BOOST_LOG_TRIVIAL(error) << boost::format("Unknown attribute '%1%' encountered in Normal tag") % (*iter).name;
                 break;
             case MeshXML::I:
                 assert( !(xml->point_state&MeshXML::P_I) );
@@ -629,11 +655,10 @@ void Mesh::beginElement( MeshXML *xml, const string &name, const AttributeList &
             switch ( MeshXML::attribute_map.lookup( (*iter).name ) )
             {
             case MeshXML::UNKNOWN:
-//VSFileSystem::vs_fprintf (stderr,"Unknown attribute '%s' encountered in Vertex tag\n",(*iter).name.c_str() );
                 break;
             case MeshXML::FLATSHADE:
                 if ( (*iter).value == "Flat" ) {
-                    VSFileSystem::vs_fprintf( stderr, "Cannot Flatshade Lines\n" );
+                    BOOST_LOG_TRIVIAL(error) << "Cannot Flatshade Lines";
                 } else if ( (*iter).value == "Smooth" ) {
                     //ignored -- already done
                 }
@@ -654,7 +679,6 @@ void Mesh::beginElement( MeshXML *xml, const string &name, const AttributeList &
             switch ( MeshXML::attribute_map.lookup( (*iter).name ) )
             {
             case MeshXML::UNKNOWN:
-//VSFileSystem::vs_fprintf (stderr,"Unknown attribute '%s' encountered in Vertex tag\n",(*iter).name.c_str() );
                 break;
             case MeshXML::FLATSHADE:
                 if ( (*iter).value == "Flat" )
@@ -679,11 +703,10 @@ void Mesh::beginElement( MeshXML *xml, const string &name, const AttributeList &
             switch ( MeshXML::attribute_map.lookup( (*iter).name ) )
             {
             case MeshXML::UNKNOWN:
-//VSFileSystem::vs_fprintf (stderr,"Unknown attribute '%s' encountered in Vertex tag\n",(*iter).name.c_str() );
                 break;
             case MeshXML::FLATSHADE:
                 if ( (*iter).value == "Flat" ) {
-                    VSFileSystem::vs_fprintf( stderr, "Cannot Flatshade Linestrips\n" );
+                    BOOST_LOG_TRIVIAL(error) << "Cannot Flatshade Linestrips";
                 } else if ( (*iter).value == "Smooth" ) {
                     //ignored -- already done
                 }
@@ -706,11 +729,10 @@ void Mesh::beginElement( MeshXML *xml, const string &name, const AttributeList &
             switch ( MeshXML::attribute_map.lookup( (*iter).name ) )
             {
             case MeshXML::UNKNOWN:
-//VSFileSystem::vs_fprintf (stderr,"Unknown attribute '%s' encountered in Vertex tag\n",(*iter).name.c_str() );
                 break;
             case MeshXML::FLATSHADE:
                 if ( (*iter).value == "Flat" ) {
-                    VSFileSystem::vs_fprintf( stderr, "Cannot Flatshade Tristrips\n" );
+                    BOOST_LOG_TRIVIAL(error) << "Cannot Flatshade Tristrips";
                 } else if ( (*iter).value == "Smooth" ) {
                     //ignored -- already done
                 }
@@ -733,11 +755,10 @@ void Mesh::beginElement( MeshXML *xml, const string &name, const AttributeList &
             switch ( MeshXML::attribute_map.lookup( (*iter).name ) )
             {
             case MeshXML::UNKNOWN:
-//VSFileSystem::vs_fprintf (stderr,"Unknown attribute '%s' encountered in Vertex tag\n",(*iter).name.c_str() );
                 break;
             case MeshXML::FLATSHADE:
                 if ( (*iter).value == "Flat" ) {
-                    VSFileSystem::vs_fprintf( stderr, "Cannot Flatshade Trifans\n" );
+                    BOOST_LOG_TRIVIAL(error) << "Cannot Flatshade Trifans";
                 } else if ( (*iter).value == "Smooth" ) {
                     //ignored -- already done
                 }
@@ -760,11 +781,10 @@ void Mesh::beginElement( MeshXML *xml, const string &name, const AttributeList &
             switch ( MeshXML::attribute_map.lookup( (*iter).name ) )
             {
             case MeshXML::UNKNOWN:
-//VSFileSystem::vs_fprintf (stderr,"Unknown attribute '%s' encountered in Vertex tag\n",(*iter).name.c_str() );
                 break;
             case MeshXML::FLATSHADE:
                 if ( (*iter).value == "Flat" ) {
-                    VSFileSystem::vs_fprintf( stderr, "Cannot Flatshade Quadstrips\n" );
+                    BOOST_LOG_TRIVIAL(error) << "Cannot Flatshade Quadstrips";
                 } else if ( (*iter).value == "Smooth" ) {
                     //ignored -- already done
                 }
@@ -786,13 +806,13 @@ void Mesh::beginElement( MeshXML *xml, const string &name, const AttributeList &
             switch ( MeshXML::attribute_map.lookup( (*iter).name ) )
             {
             case MeshXML::UNKNOWN:
-//VSFileSystem::vs_fprintf (stderr,"Unknown attribute '%s' encountered in Vertex tag\n",(*iter).name.c_str() );
                 break;
             case MeshXML::FLATSHADE:
-                if ( (*iter).value == "Flat" )
+                if ( (*iter).value == "Flat" ) {
                     xml->quadshade[xml->quadshade.size()-1] = 1;
-                else if ( (*iter).value == "Smooth" )
+                } else if ( (*iter).value == "Smooth" ) {
                     xml->quadshade[xml->quadshade.size()-1] = 0;
+                }
                 break;
             default:
                 assert( 0 );
@@ -834,7 +854,6 @@ void Mesh::beginElement( MeshXML *xml, const string &name, const AttributeList &
             switch ( MeshXML::attribute_map.lookup( (*iter).name ) )
             {
             case MeshXML::UNKNOWN:
-//VSFileSystem::vs_fprintf (stderr,"Unknown attribute '%s' encountered in Vertex tag\n",(*iter).name.c_str() );
                 break;
             case MeshXML::POINT:
                 assert( !(xml->vertex_state&MeshXML::V_POINT) );
@@ -912,7 +931,6 @@ void Mesh::beginElement( MeshXML *xml, const string &name, const AttributeList &
             switch ( MeshXML::attribute_map.lookup( (*iter).name ) )
             {
             case MeshXML::UNKNOWN:
-//VSFileSystem::vs_fprintf (stderr,"Unknown attribute '%s' encountered in Vertex tag\n",(*iter).name.c_str() );
                 break;
             case MeshXML::TYPE:
                 assert( !(xml->vertex_state&MeshXML::V_TYPE) );
@@ -969,7 +987,6 @@ void Mesh::beginElement( MeshXML *xml, const string &name, const AttributeList &
                 switch ( MeshXML::attribute_map.lookup( (*iter).name ) )
                 {
                 case MeshXML::UNKNOWN:
-//VSFileSystem::vs_fprintf (stderr,"Unknown attribute '%s' encountered in Vertex tag\n",(*iter).name.c_str() );
                     break;
                 case MeshXML::POINT:
                     assert( ttttttt < 2 );
@@ -989,8 +1006,9 @@ void Mesh::beginElement( MeshXML *xml, const string &name, const AttributeList &
                 }
             }
             assert( ttttttt == 3 );
-            if (!foundindex)
-                VSFileSystem::vs_fprintf( stderr, "mesh with uninitalized logo" );
+            if (!foundindex) {
+                BOOST_LOG_TRIVIAL(error) << "mesh with uninitalized logo";
+            }
             xml->logos[xml->logos.size()-1].refpnt.push_back( ind );
             xml->logos[xml->logos.size()-1].refweight.push_back( indweight );
             xml->vertex_state += MeshXML::V_REF;
@@ -1003,7 +1021,6 @@ void Mesh::beginElement( MeshXML *xml, const string &name, const AttributeList &
 
 void Mesh::endElement( MeshXML *xml, const string &name )
 {
-    //cerr << "End tag: " << name << endl;
     MeshXML::Names elem = (MeshXML::Names) MeshXML::element_map.lookup( name );
     assert( *xml->state_stack.rbegin() == elem );
     xml->state_stack.pop_back();
@@ -1011,7 +1028,7 @@ void Mesh::endElement( MeshXML *xml, const string &name )
     switch (elem)
     {
     case MeshXML::UNKNOWN:
-        VSFileSystem::vs_fprintf( stderr, "Unknown element end tag '%s' detected\n", name.c_str() );
+        BOOST_LOG_TRIVIAL(error) << boost::format("Unknown element end tag '%1%' detected") % name;
         break;
     case MeshXML::POINT:
         assert( ( xml->point_state&(MeshXML::P_X
@@ -1031,13 +1048,6 @@ void Mesh::endElement( MeshXML *xml, const string &name )
         break;
     case MeshXML::POINTS:
         xml->load_stage = 3;
-        /*
-         *  cerr << xml->vertices.size() << " vertices\n";
-         *  for(int a=0; a<xml->vertices.size(); a++) {
-         *  clog << "Point: (" << xml->vertices[a].x << ", " << xml->vertices[a].y << ", " << xml->vertices[a].z << ") (" << xml->vertices[a].i << ", " << xml->vertices[a].j << ", " << xml->vertices[a].k << ")\n";
-         *  }
-         *  clog << endl;
-         */
         break;
     case MeshXML::LINE:
         assert( xml->num_vertices == 0 );
@@ -1176,8 +1186,9 @@ void LaunchConverter( const char *input, const char *output, const char *args = 
         ss_path  = VSFileSystem::datadir+"\\mesher.exe";
         firstarg = string( "\"" )+ss_path+string( "\"" );
         int pid = spawnl( P_WAIT, ss_path.c_str(), firstarg.c_str(), intmp.c_str(), outtmp.c_str(), args, NULL );
-        if (pid == -1)
-            VSFileSystem::vs_fprintf( stderr, "Unable to spawn obj converter Error (%d)\n", pid );
+        if (pid == -1) {
+            BOOST_LOG_TRIVIAL(error) << boost::format("Unable to spawn obj converter Error (%1%)") % pid;
+        }
     }
 #endif
 }
@@ -1266,9 +1277,10 @@ Mesh* Mesh::LoadMesh( const char *filename,
     if ( m.empty() )
         return 0;
     if (m.size() > 1) {
-        fprintf( stderr, "Mesh %s has %u subcomponents. Only first used!\n", filename, (unsigned int) m.size() );
-        for (unsigned int i = 1; i < m.size(); ++i)
+        BOOST_LOG_TRIVIAL(warning) << boost::format("Mesh %1% has %2% subcomponents. Only first used!") % filename % ((unsigned int) m.size());
+        for (unsigned int i = 1; i < m.size(); ++i) {
             delete m[i];
+        }
     }
     return m[0];
 }
@@ -1305,7 +1317,7 @@ vector< Mesh* >Mesh::LoadMeshes( const char *filename,
     VSFile  f;
     VSError err = f.OpenReadOnly( filename, MeshFile );
     if (err > Ok) {
-        VSFileSystem::vs_fprintf( stderr, "Cannot Open Mesh File %s\n", filename );
+        BOOST_LOG_TRIVIAL(error) << boost::format("Cannot Open Mesh File %1%") % filename;
         return vector< Mesh* > ();
     }
     char bfxm[4];
@@ -1315,7 +1327,7 @@ vector< Mesh* >Mesh::LoadMeshes( const char *filename,
         if (!isbfxm) {
         	// NOTE : Commented out following block, probably not needed anymore
 /*            if ( !loadObj( f, filename ) ) {
-                VSFileSystem::vs_fprintf( stderr, "Cannot Open Mesh File %s\n", filename );
+                BOOST_LOG_TRIVIAL(error) << boost::format("Cannot Open Mesh File %1%") % filename;
 */
 //cleanexit=1;
 //winsys_exit(1);
@@ -1359,7 +1371,7 @@ void Mesh::LoadXML( const char *filename,
     VSFile  f;
     VSError err = f.OpenReadOnly( filename, MeshFile );
     if (err > Ok) {
-        VSFileSystem::vs_fprintf( stderr, "Cannot Open Mesh File %s\n", filename );
+        BOOST_LOG_TRIVIAL(error) << boost::format("Cannot Open Mesh File %1%") % filename;
 //cleanexit=1;
 //winsys_exit(1);
         return;

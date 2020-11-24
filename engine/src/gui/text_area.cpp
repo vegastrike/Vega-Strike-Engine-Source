@@ -4,6 +4,8 @@
 *                           begin                : January 10, 2002
 *                           copyright            : (C) 2002 by David Ranger
 *                           email                : ussreliant@users.sourceforge.net
+*                           copyright            : (C) 2020 by Stephen G. Tuggy
+*                           email                : sgt@stephengtuggy.com
 ***************************************************************************/
 
 /***************************************************************************
@@ -45,6 +47,8 @@ TextArea::TextArea()
 TextArea::TextArea( float x, float y, float wid, float hei, int scrollbar )
 {
         #ifdef DEBUG
+    // stephengtuggy 2020-10-30: Leaving these here, since this library is supposed to be
+    // self-sufficient, hence not depend on Vega Strike libraries
     cout<<"Displaying border at "<<x<<","<<y<<"\n";
     cout<<"with the dimensions of "<<wid<<","<<y<<"\n";
     cout<<"Scrollbar: "<<scrollbar<<endl;
@@ -96,6 +100,9 @@ TextArea::TextArea( float x, float y, float wid, float hei, int scrollbar )
     //The parent TextAreaItem. This is the only link where parent == NULL. It is not displayed and handled only internally
     ItemList     = new TextAreaItem( "", "", NULL );
     if (wid < 0 || hei < 0) {
+        // stephengtuggy 2020-10-30: Leaving this here, since comment at top of
+        // file says that this library is supposed to be self-sufficient, so it
+        // shouldn't rely on Vega Strike stuff presumably
         printf( "Cannot draw border with negative height or width\n" );
         return;
     }
@@ -153,7 +160,7 @@ void TextArea::Refresh( void )
 
     if (has_scrollbar != 0) DisplayScrollbar();
     RenderText();
-    if (cur_highlighted > 0) HighlightCount( cur_highlighted, 1 );   
+    if (cur_highlighted > 0) HighlightCount( cur_highlighted, 1 );
     if (cur_selected > 0) HighlightCount( cur_selected, 2 );
 }
 

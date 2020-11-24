@@ -1,3 +1,29 @@
+/**
+ * planetary_orbit.cpp
+ *
+ * Copyright (C) Daniel Horn
+ * Copyright (C) 2020 Roy Falk, Stephen G. Tuggy, and other Vega Strike
+ * contributors
+ *
+ * https://github.com/vegastrike/Vega-Strike-Engine-Source
+ *
+ * This file is part of Vega Strike.
+ *
+ * Vega Strike is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Vega Strike is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
+
 #include "planetary_orbit.h"
 
 #include "unit_generic.h"
@@ -37,7 +63,7 @@ PlanetaryOrbit::PlanetaryOrbit( Unit *p,
         subtype = (SLOCATION);
         AttachOrder( centre );
     }
-    
+
     this->SetParent( p );
 }
 
@@ -142,18 +168,6 @@ void PlanetaryOrbit::Execute()
 
     QVector destination = origin-focus+sum_orbiting_average+x_offset+y_offset;
     double  mag = ( destination-parent->LocalPosition() ).Magnitude();
-    if (mining && 0) {
-        printf( "(%.2f %.2f %.2f)\n(%.2f %.2f %.2f) del %.2f spd %.2f\n",
-                parent->LocalPosition().i,
-                parent->LocalPosition().j,
-                parent->LocalPosition().k,
-                destination.i,
-                destination.j,
-                destination.k,
-                mag,
-                mag*(1. / simulation_atom_var )
-              );
-    }
     parent->Velocity = parent->cumulative_velocity = ( ( ( destination-parent->LocalPosition() )*(1. / simulation_atom_var ) ).Cast() );
     static float Unreasonable_value =
         XMLSupport::parse_float( vs_config->getVariable( "physics", "planet_ejection_stophack", "2000" ) );

@@ -1,3 +1,29 @@
+/**
+ * base_util.cpp
+ *
+ * Copyright (C) Daniel Horn
+ * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike
+ * contributors
+ *
+ * https://github.com/vegastrike/Vega-Strike-Engine-Source
+ *
+ * This file is part of Vega Strike.
+ *
+ * Vega Strike is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Vega Strike is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
+
 #include <Python.h>
 
 #include <boost/version.hpp>
@@ -66,7 +92,7 @@ class VideoAudioStreamListener : public SourceListener
 {
     int sourceRoom;
     std::string index;
-    
+
 public:
     VideoAudioStreamListener(int sourceRoom, const std::string &index)
     {
@@ -74,35 +100,35 @@ public:
         events.attach =
         events.update = 0;
         events.play = 1;
-        
+
         this->sourceRoom = sourceRoom;
         this->index = index;
     }
-    
+
     virtual void onPreAttach(Source &source, bool detach) {};
     virtual void onPostAttach(Source &source, bool detach) {};
     virtual void onPrePlay(Source &source, bool stop) {};
     virtual void onPostPlay(Source &source, bool stop) {};
     virtual void onUpdate(Source &source, int updateFlags) {};
-    
-    virtual void onEndOfStream(Source &source) 
+
+    virtual void onEndOfStream(Source &source)
     {
         // Verify context before switching rooms
         if (BaseInterface::CurrentBase != NULL) {
             if (BaseUtil::GetCurRoom() == sourceRoom) {
                 // We're in the right context, switch to target room
                 BaseInterface::Room *room = CheckRoom( sourceRoom );
-                
-                if (!room) 
+
+                if (!room)
                     return;
-                
+
                 for (size_t i = 0; i < room->objs.size(); i++) {
                     if (room->objs[i]) {
                         if (room->objs[i]->index == index) {
                             //FIXME: Will crash if not a Movie object.
-                            BaseInterface::Room::BaseVSMovie *movie = 
+                            BaseInterface::Room::BaseVSMovie *movie =
                                 dynamic_cast< BaseInterface::Room::BaseVSMovie* > (room->objs[i]);
-                            
+
                             if (!movie->getCallback().empty()) {
                                 RunPython(movie->getCallback().c_str());
                                 break;
@@ -144,11 +170,11 @@ SharedPtr<Source> CreateVideoSoundStream( const std::string &afile, const std::s
         afile,
         VSFileSystem::VideoFile,
         true);
-    
+
     SharedPtr<Source> source = SceneManager::getSingleton()->createSource(
         sound,
         false);
-    
+
     source->setAttenuated(false);
     source->setRelative(true);
     source->setPosition(LVector3(0,0,1));
@@ -156,9 +182,9 @@ SharedPtr<Source> CreateVideoSoundStream( const std::string &afile, const std::s
     source->setVelocity(Vector3(0,0,0));
     source->setRadius(1.0);
     source->setGain(1.0);
-    
+
     SceneManager::getSingleton()->getScene(scene)->add(source);
-    
+
     return source;
 }
 
@@ -192,17 +218,17 @@ bool Video( int room, std::string index, std::string vfile, std::string afile, f
             baseSprite->spr.Reset();
         }
     }
-    
+
     return true;
 }
 bool VideoStream( int room, std::string index, std::string streamfile, float x, float y, float w, float h )
 {
     BaseInterface::Room *newroom = CheckRoom( room );
     if (!newroom) {
-        fprintf(stderr, "ERROR: Room not found!!\n");
+        BOOST_LOG_TRIVIAL(error) << "ERROR: Room not found!!\n";
         return false;
     }
-    
+
     BaseInterface::Room::BaseVSMovie *newobj = new BaseInterface::Room::BaseVSMovie( streamfile, index );
     newobj->SetPos( x, y );
     newobj->SetSize( w, h );
@@ -212,14 +238,14 @@ bool VideoStream( int room, std::string index, std::string streamfile, float x, 
 #endif
 
     if (newobj->spr.LoadSuccess()) {
-        fprintf(stdout, "INFO: Added video stream %s\n", streamfile.c_str());
+        BOOST_LOG_TRIVIAL(info) << boost::format("INFO: Added video stream %1$s\n") % streamfile.c_str();
         newroom->objs.push_back( newobj );
     } else {
-        fprintf(stdout, "INFO: Missing video stream %s\n", streamfile.c_str());
+        BOOST_LOG_TRIVIAL(info) << boost::format("INFO: Missing video stream %1$s\n") % streamfile.c_str();
         delete newobj;
         return false;
     }
-    
+
     return true;
 }
 void SetVideoCallback( int room, std::string index, std::string callback)
@@ -230,14 +256,14 @@ void SetVideoCallback( int room, std::string index, std::string callback)
         if (newroom->objs[i]) {
             if (newroom->objs[i]->index == index) {
                 //FIXME: Will crash if not a Sprite object.
-                BaseInterface::Room::BaseVSMovie *movie = 
+                BaseInterface::Room::BaseVSMovie *movie =
                     dynamic_cast< BaseInterface::Room::BaseVSMovie* > (newroom->objs[i]);
                 movie->setCallback(callback);
-                
+
                 if (movie->soundsource.get() != NULL) {
                     SharedPtr<SourceListener> transitionListener(
                         new VideoAudioStreamListener(room, index) );
-                    
+
                     movie->soundsource->setSourceListener(transitionListener);
                 }
             }
@@ -312,7 +338,7 @@ void StopVideo( int room, std::string index )
 void SetDJEnabled( bool enabled )
 {
     BaseInterface::CurrentBase->setDJEnabled(enabled);
-    if (!enabled) 
+    if (!enabled)
         Music::Stop();
 }
 void Ship( int room, std::string index, QVector pos, Vector Q, Vector R )
@@ -428,7 +454,7 @@ void SetLinkEventMask( int room, std::string index, std::string maskdef )
             break;
         case 'm':
         case 'M':
-            fprintf( stderr, "%s: WARNING: Ignoring request for movement event mask.\n", __FILE__ );
+            BOOST_LOG_TRIVIAL(warning) << boost::format("%1$s: WARNING: Ignoring request for movement event mask.\n") % __FILE__;
             break;
         }
     }
@@ -545,10 +571,12 @@ void CompPython( int room,
         //EnumMap crashes if the string is empty.
         curmode[j] = '\0';
         int modearg = modemap.lookup( curmode );
-        if (modearg < BaseComputer::DISPLAY_MODE_COUNT)
+        if (modearg < BaseComputer::DISPLAY_MODE_COUNT) {
             newcomp->modes.push_back( (BaseComputer::DisplayMode) (modearg) );
-        else
-            VSFileSystem::vs_fprintf( stderr, "WARNING: Unknown computer mode %s found in python script...\n", curmode );
+        }
+        else {
+            BOOST_LOG_TRIVIAL(warning) << boost::format("WARNING: Unknown computer mode %1$s found in python script...\n") % curmode;
+        }
     }
     delete[] curmode;
 }

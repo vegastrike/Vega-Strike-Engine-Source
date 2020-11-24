@@ -1,23 +1,29 @@
-/* 
- * Vega Strike
- * Copyright (C) 2001-2002 Daniel Horn & Alan Shieh
+/**
+ * gl_misc.cpp
  *
- * http://vegastrike.sourceforge.net/
+ * Copyright (C) 2001-2002 Daniel Horn and Alan Shieh
+ * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike
+ * contributors
  *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * as published by the Free Software Foundation; either version 2
- * of the License, or (at your option) any later version.
+ * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
- * This program is distributed in the hope that it will be useful,
+ * This file is part of Vega Strike.
+ *
+ * Vega Strike is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * Vega Strike is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+ * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
  */
+
+
 #include <string.h>
 #define GL_MISC_CPP
 #include "gl_globals.h"
@@ -132,14 +138,14 @@ void /*GFXDRVAPI*/ GFXDraw( POLYTYPE type, const float data[], int vnum,
         return;
 
     GFXDrawSetup(type, data, vnum, vsize, csize, tsize0, tsize1);
-    
+
     glDrawArrays(PolyLookup(type), 0, vnum);
-    
+
     GFXDrawCleanup(type, data, vnum, vsize, csize, tsize0, tsize1);
 #endif
 }
 
-void /*GFXDRVAPI*/ GFXDrawElements( POLYTYPE type, 
+void /*GFXDRVAPI*/ GFXDrawElements( POLYTYPE type,
     const float data[], int vnum, const unsigned char indices[], int nelem,
     int vsize, int csize, int tsize0, int tsize1 )
 {
@@ -149,16 +155,16 @@ void /*GFXDRVAPI*/ GFXDrawElements( POLYTYPE type,
 
     GFXDrawSetup(type, data, vnum, vsize, csize, tsize0, tsize1);
 
-    // Note: glDrawRangeElements doesn't seem to work well in MESA, 
+    // Note: glDrawRangeElements doesn't seem to work well in MESA,
     //       stay away from it
     GFXBindElementBuffer( 0 );
     glDrawElements(PolyLookup(type), nelem, GL_UNSIGNED_BYTE, indices);
-    
+
     GFXDrawCleanup(type, data, vnum, vsize, csize, tsize0, tsize1);
 #endif
 }
 
-void /*GFXDRVAPI*/ GFXDrawElements( POLYTYPE type, 
+void /*GFXDRVAPI*/ GFXDrawElements( POLYTYPE type,
     const float data[], int vnum, const unsigned short indices[], int nelem,
     int vsize, int csize, int tsize0, int tsize1 )
 {
@@ -167,17 +173,17 @@ void /*GFXDRVAPI*/ GFXDrawElements( POLYTYPE type,
         return;
 
     GFXDrawSetup(type, data, vnum, vsize, csize, tsize0, tsize1);
-    
-    // Note: glDrawRangeElements doesn't seem to work well in MESA, 
+
+    // Note: glDrawRangeElements doesn't seem to work well in MESA,
     //       stay away from it
     GFXBindElementBuffer( 0 );
     glDrawElements(PolyLookup(type), nelem, GL_UNSIGNED_SHORT, indices);
-    
+
     GFXDrawCleanup(type, data, vnum, vsize, csize, tsize0, tsize1);
 #endif
 }
 
-void /*GFXDRVAPI*/ GFXDrawElements( POLYTYPE type, 
+void /*GFXDRVAPI*/ GFXDrawElements( POLYTYPE type,
     const float data[], int vnum, const unsigned int indices[], int nelem,
     int vsize, int csize, int tsize0, int tsize1 )
 {
@@ -186,12 +192,12 @@ void /*GFXDRVAPI*/ GFXDrawElements( POLYTYPE type,
         return;
 
     GFXDrawSetup(type, data, vnum, vsize, csize, tsize0, tsize1);
-    
-    // Note: glDrawRangeElements doesn't seem to work well in MESA, 
+
+    // Note: glDrawRangeElements doesn't seem to work well in MESA,
     //       stay away from it
     GFXBindElementBuffer( 0 );
     glDrawElements(PolyLookup(type), nelem, GL_UNSIGNED_INT, indices);
-    
+
     GFXDrawCleanup(type, data, vnum, vsize, csize, tsize0, tsize1);
 #endif
 }
@@ -360,11 +366,7 @@ GFXBOOL GFXEndList()
 
 void GFXCallList( int list )
 {
-//VSFileSystem::Fprintf (stderr,"CallListStart");///causes crash with GF2 privaledge instruction on Win2k in certain instances
-//fflush (stderr);
     glCallList( list );
-//VSFileSystem::Fprintf (stderr,"CallListEnd");
-//fflush (stderr);
 }
 
 void GFXDeleteList( int list )
@@ -377,10 +379,11 @@ void GFXSubwindow( int x, int y, int xsize, int ysize )
 {
     glViewport( x, y, xsize, ysize );
     glScissor( x, y, xsize, ysize );
-    if (x == 0 && y == 0 && xsize == g_game.x_resolution && ysize == g_game.y_resolution)
+    if (x == 0 && y == 0 && xsize == g_game.x_resolution && ysize == g_game.y_resolution) {
         glDisable( GL_SCISSOR_TEST );
-    else
+    } else {
         glEnable( GL_SCISSOR_TEST );
+    }
 }
 
 void GFXSubwindow( float x, float y, float xsize, float ysize )

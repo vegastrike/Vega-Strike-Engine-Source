@@ -1,3 +1,29 @@
+/**
+ * csv.h
+ *
+ * Copyright (C) Daniel Horn
+ * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike
+ * contributors
+ *
+ * https://github.com/vegastrike/Vega-Strike-Engine-Source
+ *
+ * This file is part of Vega Strike.
+ *
+ * Vega Strike is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Vega Strike is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
+
 #include <string>
 #include <vector>
 #include <gnuhash.h>
@@ -7,14 +33,14 @@
 
 // delim should be read as separator and not to be confused with text delimiter see http://creativyst.com/Doc/Articles/CSV/CSV01.htm
 // separator values , and ; while delimiter is listed as quote or "
-std::vector< std::string >readCSV( const std::string &line, std::string delim = ",;" );  
+std::vector< std::string >readCSV( const std::string &line, std::string delim = ",;" );
 std::string writeCSV( const std::vector< std::string > &key, const std::vector< std::string > &table, std::string delim = ",;" );
 
 class CSVTable
 {
 private:
     void Init( const std::string &data );
-    
+
 public:
     std::string rootdir;
     vsUMap< std::string, int >columns;
@@ -51,7 +77,7 @@ public:
     {
         return parent->key.size();
     }
-    
+
     CSVRow( CSVTable *parent, const std::string &key );
     CSVRow( CSVTable *parent, unsigned int which );
     CSVRow()
@@ -77,7 +103,7 @@ public:
 /**
  * Load a space-separated list of CSV files and return a merged
  * representation of it.
- * 
+ *
  * @param csvfiles Space-separated list of CSV files
  * @param critical If true, any error reading any file will result
  *      in a fatal error and an exit() call.

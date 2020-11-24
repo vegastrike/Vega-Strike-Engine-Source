@@ -1,3 +1,29 @@
+/**
+ * gl_program.cpp
+ *
+ * Copyright (C) Daniel Horn
+ * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike
+ * contributors
+ *
+ * https://github.com/vegastrike/Vega-Strike-Engine-Source
+ *
+ * This file is part of Vega Strike.
+ *
+ * Vega Strike is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Vega Strike is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
+
 #include <map>
 #include <set>
 
@@ -5,6 +31,7 @@
 
 #include "gl_globals.h"
 #include "vs_globals.h"
+#include "vsfilesystem.h"
 #include "vegastrike.h"
 #include "config_xml.h"
 #include "gfxlib.h"
@@ -31,39 +58,43 @@ static ProgramCache::key_type cacheKey( const std::string &vp, const std::string
     unsigned int defhash = 0;
     if (defines != NULL) {
         defhash = 0xBA0BAB00;
-        while (*defines) 
+        while (*defines) {
             defhash ^= (defhash * 127) | *(defines++);
+        }
     }
     return std::pair< unsigned int , std::pair< std::string, std::string > > (defhash, std::pair< std::string, std::string > ( vp, fp ));
 }
 
-static bool validateLog( GLuint obj, bool shader, 
+static bool validateLog( GLuint obj, bool shader,
                          bool allowSoftwareEmulation = false )
 {
     // Retrieve compiler log
     const GLsizei LOGBUF = 1024;
     GLsizei infologLength = 0;
     char    infoLog[LOGBUF+1]; // +1 for null terminator
-    
-    if (shader)
+
+    if (shader) {
         glGetShaderInfoLog_p( obj, LOGBUF, &infologLength, infoLog );
-    else
+    } else {
         glGetProgramInfoLog_p( obj, LOGBUF, &infologLength, infoLog );
-    
+    }
+
     if (infologLength > 0) {
         // make sure infoLog is null-termiated;
         assert(infologLength <= LOGBUF);
         infoLog[infologLength] = 0;
-        
+
         // search for signs of emulated execution
         if (!allowSoftwareEmulation) {
-            if (icontains(infoLog, "run in software"))
+            if (icontains(infoLog, "run in software")) {
                 return false;
-            if (icontains(infoLog, "run on software"))
+            }
+            if (icontains(infoLog, "run on software")) {
                 return false;
+            }
         }
     }
-    
+
     // No validation failed...
     return true;
 }
@@ -73,34 +104,36 @@ void printLog( GLuint obj, bool shader )
     const GLsizei LOGBUF = 1024;
     GLsizei infologLength = 0;
     char    infoLog[LOGBUF+1]; // +1 for null terminator
-    
-    if (shader)
+
+    if (shader) {
         glGetShaderInfoLog_p( obj, 1024, &infologLength, infoLog );
-    else
+    } else {
         glGetProgramInfoLog_p( obj, 1024, &infologLength, infoLog );
-    
+    }
+
     // make sure infoLog is null-termiated;
     assert(infologLength <= LOGBUF);
     infoLog[infologLength] = 0;
-    
-    if (infologLength > 0)
-        fprintf( stderr, "%s\n", infoLog );
+
+    if (infologLength > 0) {
+        BOOST_LOG_TRIVIAL(error) << boost::format("%1%") % infoLog;
+    }
 }
 
 static VSFileSystem::VSError getProgramSource(const std::string &path, std::vector<std::string> &lines, std::set<std::string> &processed_includes, char *buf, size_t buflen)
 {
     std::string dirname = path.substr(0,path.find_last_of('/'));
-    
+
     VSFileSystem::VSFile f;
     VSFileSystem::VSError err = f.OpenReadOnly( path.c_str(), UnknownFile );
-    
+
     const char *include_directive = "#include \"";
     const size_t include_directive_len = 10;
     size_t lineno = 0;
-    
+
     if (err <= Ok) {
         processed_includes.insert(path);
-        
+
         while (Ok == f.ReadLine(buf, buflen)) {
             ++lineno;
             if (strncmp(buf, include_directive, include_directive_len) == 0) {
@@ -112,11 +145,11 @@ static VSFileSystem::VSError getProgramSource(const std::string &path, std::vect
                     if (processed_includes.count(includepath) == 0) {
                         // Set up line numbers for include file
                         lines.push_back("#line 0\n");
-                        
+
                         VSFileSystem::VSError ierr = getProgramSource(includepath, lines, processed_includes, buf, buflen);
                         if (ierr > Ok) {
                             f.Close();
-                            VSFileSystem::vs_fprintf(stderr, "ERROR: included from %s\n", path.c_str());
+                            BOOST_LOG_TRIVIAL(error) << boost::format("ERROR: included from %1%") % path.c_str();
                             return ierr;
                         } else {
                             // Append a blank line to avoid issues and restore line numbers
@@ -129,18 +162,18 @@ static VSFileSystem::VSError getProgramSource(const std::string &path, std::vect
                         lines.push_back("\n");
                     }
                 } else {
-                    VSFileSystem::vs_fprintf(stderr, "WARNING: broken include directive at file %s, line %d - skipping\n",
-                        path.c_str(), lineno);
+                    BOOST_LOG_TRIVIAL(warning) << boost::format("WARNING: broken include directive at file %1%, line %2% - skipping")
+                        % path.c_str() % lineno;
                 }
             } else {
                 // Append a line to the list
                 lines.push_back(buf);
             }
         }
-        
+
         f.Close();
     } else {
-        VSFileSystem::vs_fprintf(stderr, "ERROR: at %s\n", path.c_str());
+        BOOST_LOG_TRIVIAL(error) << boost::format("ERROR: at %1%") % path.c_str();
     }
     return err;
 }
@@ -150,18 +183,20 @@ static VSFileSystem::VSError getProgramSource(const std::string &path, std::stri
     std::set<std::string> processed_includes;
     std::vector<std::string> lines;
     char buf[16384];
-    
+
     source.clear();
-    
+
     VSFileSystem::VSError err = getProgramSource(path, lines, processed_includes, buf, sizeof(buf));
-    
+
     if (err <= Ok) {
         size_t sourcelen=0;
-        for (std::vector<std::string>::const_iterator it = lines.begin(); it != lines.end(); ++it)
+        for (std::vector<std::string>::const_iterator it = lines.begin(); it != lines.end(); ++it) {
             sourcelen += it->length();
+        }
         source.reserve(sourcelen);
-        for (std::vector<std::string>::const_iterator it = lines.begin(); it != lines.end(); ++it)
+        for (std::vector<std::string>::const_iterator it = lines.begin(); it != lines.end(); ++it) {
             source += *it;
+        }
     }
     return err;
 }
@@ -169,21 +204,23 @@ static VSFileSystem::VSError getProgramSource(const std::string &path, std::stri
 static std::string appendDefines( const std::string &prog, const char *extra_defines )
 {
     std::string::size_type nlpos = prog.find_first_of('\n');
-    
-    if (nlpos == std::string::npos)
+
+    if (nlpos == std::string::npos) {
         nlpos = 0;
-    
+    }
+
     std::string firstline = prog.substr(0, nlpos);
-    
-    if (firstline.find("#version") != std::string::npos)
-        return firstline 
-               + "\n" + std::string(extra_defines) 
+
+    if (firstline.find("#version") != std::string::npos) {
+        return firstline
+               + "\n" + std::string(extra_defines)
                + "\n#line 1"
                + prog.substr(nlpos);
-    else
-        return std::string(extra_defines) 
-               + "\n#line 0\n" 
+    } else {
+        return std::string(extra_defines)
+               + "\n#line 0\n"
                + prog;
+    }
 }
 
 static int GFXCreateProgramNoCache( const char *vprogram, const char *fprogram, const char *extra_defines )
@@ -191,36 +228,40 @@ static int GFXCreateProgramNoCache( const char *vprogram, const char *fprogram, 
     if (vprogram[0] == '\0' && fprogram[0] == '\0') return 0;
 #ifndef __APPLE__
     if (glGetProgramInfoLog_p == NULL || glCreateShader_p == NULL || glShaderSource_p == NULL || glCompileShader_p == NULL
-        || glAttachShader_p == NULL || glLinkProgram_p == NULL || glGetShaderiv_p == NULL || glGetProgramiv_p == NULL)
+        || glAttachShader_p == NULL || glLinkProgram_p == NULL || glGetShaderiv_p == NULL || glGetProgramiv_p == NULL) {
         return 0;
+    }
 #else
 #ifdef OSX_LOWER_THAN_10_4
     return 0;
 #endif
 #endif
     GLenum errCode;
-    while ( ( errCode = glGetError() ) != GL_NO_ERROR )
-        printf( "Error code %s\n", gluErrorString( errCode ) );
+    while ( ( errCode = glGetError() ) != GL_NO_ERROR ) {
+        BOOST_LOG_TRIVIAL(error) << boost::format("Error code %1%") % gluErrorString( errCode );
+    }
     VSFileSystem::VSFile vf, ff;
     std::string vpfilename = std::string("programs/") + vprogram + ".vp";
     std::string fpfilename = std::string("programs/") + fprogram + ".fp";
-    
+
     std::string vertexprg, fragprg;
     VSFileSystem::VSError vperr = getProgramSource(vpfilename, vertexprg);
     VSFileSystem::VSError fperr = getProgramSource(fpfilename, fragprg);
     if ( (vperr > Ok) || (fperr > Ok) ) {
-        if (vperr > Ok)
-            fprintf( stderr, "Vertex Program Error: Failed to open file %s\n", vpfilename.c_str() );
-        if (fperr > Ok)
-            fprintf( stderr, "Fragment Program Error: Failed to open file %s\n", fpfilename.c_str() );
+        if (vperr > Ok) {
+            BOOST_LOG_TRIVIAL(error) << boost::format("Vertex Program Error: Failed to open file %1%") % vpfilename;
+        }
+        if (fperr > Ok) {
+            BOOST_LOG_TRIVIAL(error) << boost::format("Fragment Program Error: Failed to open file %1%") % fpfilename;
+        }
         return 0;
     }
-    
+
     if (extra_defines != NULL) {
         vertexprg = appendDefines( vertexprg, extra_defines );
         fragprg   = appendDefines( fragprg, extra_defines );
     }
-    
+
     GLint vproghandle = 0;
     GLint fproghandle = 0;
     GLint sp = 0;
@@ -233,12 +274,12 @@ static int GFXCreateProgramNoCache( const char *vprogram, const char *fprogram, 
         glGetShaderiv_p( vproghandle, GL_COMPILE_STATUS, &successp );
         if (successp == 0) {
             printLog( vproghandle, true );
-            fprintf( stderr, "Vertex Program Error: Failed to compile %s\n", vprogram );
+            BOOST_LOG_TRIVIAL(error) << boost::format("Vertex Program Error: Failed to compile %1%") % vprogram;
             glDeleteShader_p( vproghandle );
             return 0;
         } else if (!validateLog( vproghandle, true )) {
             printLog( vproghandle, true );
-            fprintf( stderr, "Vertex Program Error: Failed log validation for %s. Inspect log above for details.\n", vprogram );
+            BOOST_LOG_TRIVIAL(error) << boost::format("Vertex Program Error: Failed log validation for %1%. Inspect log above for details.") % vprogram;
             glDeleteShader_p( vproghandle );
             return 0;
         }
@@ -253,50 +294,51 @@ static int GFXCreateProgramNoCache( const char *vprogram, const char *fprogram, 
         glGetShaderiv_p( fproghandle, GL_COMPILE_STATUS, &successp );
         if (successp == 0) {
             printLog( fproghandle, true );
-            fprintf( stderr, "Fragment Program Error: Failed to compile %s\n", fprogram );
+            BOOST_LOG_TRIVIAL(error) << boost::format("Fragment Program Error: Failed to compile %1%") % fprogram;
             glDeleteShader_p( vproghandle );
             glDeleteShader_p( fproghandle );
             return 0;
         } else if (!validateLog( fproghandle, true )) {
+            // FIXME: Should this be fproghandle instead of vproghandle? Same throughout this if block?
             printLog( vproghandle, true );
-            fprintf( stderr, "Vertex Program Error: Failed log validation for %s. Inspect log above for details.\n", vprogram );
+            BOOST_LOG_TRIVIAL(error) << boost::format("Vertex Program Error: Failed log validation for %1%. Inspect log above for details.") % vprogram;
             glDeleteShader_p( vproghandle );
             glDeleteShader_p( fproghandle );
             return 0;
         }
         printLog( fproghandle, true );
     }
-    
+
     sp = glCreateProgram_p();
     glAttachShader_p( sp, vproghandle );
     glAttachShader_p( sp, fproghandle );
     glLinkProgram_p( sp );
-    
+
     GLint successp = 0;
     glGetProgramiv_p( sp, GL_LINK_STATUS, &successp );
     if (successp == 0) {
         printLog( sp, false );
-        fprintf( stderr, "Shader Program Error: Failed to link %s to %s\n", vprogram, fprogram );
+        BOOST_LOG_TRIVIAL(error) << boost::format("Shader Program Error: Failed to link %1% to %2%") % vprogram % fprogram;
         return 0;
     } else if (!validateLog( sp, false )) {
         printLog( sp, false );
-        fprintf( stderr, "Shader Program Error: Failed log validation for vp:%s fp:%s. Inspect log above for details.\n", vprogram, fprogram );
+        BOOST_LOG_TRIVIAL(error) << boost::format("Shader Program Error: Failed log validation for vp:%1% fp:%2%. Inspect log above for details.") % vprogram % fprogram;
         glDeleteShader_p( vproghandle );
         glDeleteShader_p( fproghandle );
         glDeleteProgram_p( sp );
         return 0;
     }
     printLog( sp, false );
-    
+
     /* only for dev work
      *  glGetProgramiv_p(sp,GL_VALIDATE_STATUS,&successp);
      *  if (successp==0) {
-     *  fprintf(stderr,"Shader Program Error: Failed to validate %s linking to %s\n",vprogram,fprogram);
-     *  return 0;
+     *      BOOST_LOG_TRIVIAL(error) << boost::format("Shader Program Error: Failed to validate %1% linking to %2%") % vprogram % fprogram;
+     *      return 0;
      *  }
      */
     while ( ( errCode = glGetError() ) != GL_NO_ERROR ) {
-        printf( "Error code %s\n", gluErrorString( errCode ) );
+        BOOST_LOG_TRIVIAL(error) << boost::format("Error code %1%") % gluErrorString( errCode );
         sp = 0;         //no proper vertex prog support
     }
     return sp;
@@ -327,7 +369,7 @@ void GFXDestroyProgram( int program )
         if (glDeleteProgram_p)
             glDeleteProgram_p( program );
         */
-        // FIXME: Real problem here with program leakage, 
+        // FIXME: Real problem here with program leakage,
         //      but cannot destroy like this, brings all kind of issues
         //      since the caller may not hold the only reference.
         programCache.erase(it->second);
@@ -351,7 +393,7 @@ std::string lowfiProgramName = "maclite";
 std::string hifiProgramName  = "default";
 std::string lowfiProgramName = "lite";
 #endif
-// END STUPID 
+// END STUPID
 
 
 int getDefaultProgram()
@@ -384,11 +426,11 @@ int getDefaultProgram()
 
 void GFXReloadDefaultShader()
 {
-    VSFileSystem::vs_fprintf(stderr, "Reloading all shaders\n");
-    
+    BOOST_LOG_TRIVIAL(info) << "Reloading all shaders";
+
     // Increasing the timestamp makes all programs elsewhere recompile
     ++programVersion;
-    
+
     bool islow = (lowfiprog == defaultprog);
     if (glDeleteProgram_p && defaultprog) {
         glDeleteProgram_p( lowfiprog );

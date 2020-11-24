@@ -1,3 +1,29 @@
+/**
+ * VirtualIterator.h
+ *
+ * Copyright (C) Daniel Horn
+ * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike
+ * contributors
+ *
+ * https://github.com/vegastrike/Vega-Strike-Engine-Source
+ *
+ * This file is part of Vega Strike.
+ *
+ * Vega Strike is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Vega Strike is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
+
 #ifndef __AUDIO_VIRTUALITERATOR_H__INCLUDED__
 #define __AUDIO_VIRTUALITERATOR_H__INCLUDED__
 
@@ -6,7 +32,7 @@
 
 namespace Audio {
 
-    /** Used to derive virtual iterator types 
+    /** Used to derive virtual iterator types
     @remarks
         Since all operators are virtual, it is recommended not to use these iterators
         for iterating through large collections...
@@ -35,10 +61,10 @@ namespace Audio {
 
         /// End-of-sequence
         virtual bool eos() const = 0;
-        
+
         /// Start-of-sequence
         virtual bool sos() const = 0;
-        
+
         /* Aliases
          *
          * since virtual iterators must be handled through pointers, the standard
@@ -52,7 +78,7 @@ namespace Audio {
         iterator_type& prev() { return operator--(); }
     };
 
-    template <typename _It> class VirtualStandardIterator : 
+    template <typename _It> class VirtualStandardIterator :
         public VirtualIterator<
             typename std::iterator_traits<_It>::value_type,
             typename std::iterator_traits<_It>::reference,
@@ -62,50 +88,50 @@ namespace Audio {
         _It begin;
         _It end;
         _It cur;
-        
+
     public:
         // They should be inherited, but somehow gcc 4.1.0 doesn't understand that >:9
         typedef typename std::iterator_traits<_It>::value_type value_type;
         typedef typename std::iterator_traits<_It>::reference reference_type;
         typedef typename std::iterator_traits<_It>::pointer pointer_type;
         typedef VirtualIterator<value_type,reference_type,pointer_type> iterator_type;
-    
+
         VirtualStandardIterator(const _It &_begin, const _It &_end) : begin(_begin), end(_end), cur(_begin) {}
         VirtualStandardIterator(const VirtualStandardIterator<_It> &o) : begin(o.begin), end(o.end), cur(o.cur) {}
-        
+
         virtual reference_type operator*() { return *cur; };
         virtual pointer_type operator->() { return cur.operator->(); };
 
         virtual iterator_type& operator++() { ++cur; return *this; };
         virtual iterator_type& operator--() { --cur; return *this; };
 
-        virtual SharedPtr<iterator_type> clone() const 
+        virtual SharedPtr<iterator_type> clone() const
             { return SharedPtr<iterator_type>(new VirtualStandardIterator<_It>(*this)); };
-    
+
         virtual bool eos() const { return cur == end; }
         virtual bool sos() const { return cur == begin; };
     };
 
-    template <typename _It, typename _T, typename _Rt=_T&, typename _Pt=_T*> class VirtualMappingIterator : 
+    template <typename _It, typename _T, typename _Rt=_T&, typename _Pt=_T*> class VirtualMappingIterator :
         public VirtualIterator<_T,_Rt,_Pt>
     {
     protected:
         VirtualStandardIterator<_It> it;
-        
+
     public:
         // They should be inherited, but somehow gcc 4.1.0 doesn't understand that >:9
         typedef _T value_type;
         typedef _Rt reference_type;
         typedef _Pt pointer_type;
         typedef VirtualIterator<_T,_Rt,_Pt> iterator_type;
-    
+
         VirtualMappingIterator(const _It &_begin, const _It &_end) :
             it(_begin,_end) {}
-        VirtualMappingIterator(const iterator_type &o) : 
+        VirtualMappingIterator(const iterator_type &o) :
             it( o.it ) {}
-        VirtualMappingIterator(const VirtualStandardIterator<_It> &o) : 
+        VirtualMappingIterator(const VirtualStandardIterator<_It> &o) :
             it( o ) {}
-        
+
         virtual iterator_type& operator++() { ++it; return *this; };
         virtual iterator_type& operator--() { --it; return *this; };
 
@@ -113,7 +139,7 @@ namespace Audio {
         virtual bool sos() const { return it.sos(); };
     };
 
-    template <typename _It> class VirtualValuesIterator : 
+    template <typename _It> class VirtualValuesIterator :
         public VirtualMappingIterator<_It, typename _It::value_type::second_type>
     {
     public:
@@ -122,22 +148,22 @@ namespace Audio {
         typedef value_type& reference_type;
         typedef value_type* pointer_type;
         typedef VirtualIterator<value_type,reference_type,pointer_type> iterator_type;
-        
+
         VirtualValuesIterator(const _It &_begin, const _It &_end) :
             VirtualMappingIterator<_It, value_type>(_begin,_end) {}
-        VirtualValuesIterator(const VirtualValuesIterator<_It> &o) : 
+        VirtualValuesIterator(const VirtualValuesIterator<_It> &o) :
             VirtualMappingIterator<_It, value_type>( o.it ) {}
-        VirtualValuesIterator(const VirtualStandardIterator<_It> &o) : 
+        VirtualValuesIterator(const VirtualStandardIterator<_It> &o) :
             VirtualMappingIterator<_It, value_type>( o ) {}
-        
+
         virtual reference_type operator*() { return VirtualMappingIterator<_It, value_type>::it->second; };
         virtual pointer_type operator->() { return &(VirtualMappingIterator<_It, value_type>::it->second); };
-        
+
         virtual SharedPtr<iterator_type> clone() const
             {  return SharedPtr<iterator_type>(new VirtualValuesIterator(*this));  }
     };
 
-    template <typename _It> class VirtualKeysIterator : 
+    template <typename _It> class VirtualKeysIterator :
         public VirtualMappingIterator<_It, typename _It::value_type::first_type>
     {
     public:
@@ -146,21 +172,21 @@ namespace Audio {
         typedef value_type& reference_type;
         typedef value_type* pointer_type;
         typedef VirtualIterator<value_type,reference_type,pointer_type> iterator_type;
-    
+
         VirtualKeysIterator(const _It &_begin, const _It &_end) :
             VirtualMappingIterator<_It, value_type>(_begin,_end) {}
-        VirtualKeysIterator(const VirtualKeysIterator<_It> &o) : 
+        VirtualKeysIterator(const VirtualKeysIterator<_It> &o) :
             VirtualMappingIterator<_It, value_type>( o.it ) {}
-        VirtualKeysIterator(const VirtualStandardIterator<_It> &o) : 
+        VirtualKeysIterator(const VirtualStandardIterator<_It> &o) :
             VirtualMappingIterator<_It, value_type>( o ) {}
-        
+
         virtual reference_type operator*() { return VirtualMappingIterator<_It, value_type>::it->first; };
         virtual pointer_type operator->() { return VirtualMappingIterator<_It, value_type>::it->first; };
-        
+
         virtual SharedPtr<iterator_type> clone() const
             {  return SharedPtr<iterator_type>(new VirtualKeysIterator(*this));  }
     };
-    
+
     template <typename _It1, typename _It2=_It1> class ChainingIterator :
         public VirtualIterator<
             typename _It1::value_type,
@@ -170,14 +196,14 @@ namespace Audio {
     {
         _It1 it1;
         _It2 it2;
-        
+
     public:
         // They should be inherited, but somehow gcc 4.1.0 doesn't understand that >:9
         typedef typename _It1::value_type value_type;
         typedef typename _It1::reference_type reference_type;
         typedef typename _It1::pointer_type pointer_type;
         typedef VirtualIterator<value_type, reference_type, pointer_type> iterator_type;
-        
+
         ChainingIterator() {}
         ChainingIterator(const ChainingIterator<_It1,_It2> &o) : it1(o.it1), it2(o.it2) {}
         ChainingIterator(_It1 _it1, _It2 _it2) : it1(_it1), it2(_it2) {}
@@ -185,8 +211,8 @@ namespace Audio {
 
         virtual reference_type operator*()
             {   return (it1.eos() ? *it2 : *it1);   }
-        
-        virtual pointer_type operator->() 
+
+        virtual pointer_type operator->()
             {   return (it1.eos() ? it2.operator->() : it1.operator->());   }
 
         virtual iterator_type& operator++()
@@ -196,7 +222,7 @@ namespace Audio {
                 ++it1;
             return *this;
         }
-        
+
         virtual iterator_type& operator--()
         {
             if (it1.eos() && !it2.sos())
@@ -210,7 +236,7 @@ namespace Audio {
 
         virtual bool eos() const
             {   return (it1.eos() && it2.eos());   }
-        
+
         virtual bool sos() const
             {   return (it1.sos() && it2.sos());   }
     };

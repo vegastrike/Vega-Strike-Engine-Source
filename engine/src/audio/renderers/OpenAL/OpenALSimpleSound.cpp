@@ -1,3 +1,28 @@
+/**
+ * OpenALSimpleSound.cpp
+ *
+ * Copyright (C) Daniel Horn
+ * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike
+ * contributors
+ *
+ * https://github.com/vegastrike/Vega-Strike-Engine-Source
+ *
+ * This file is part of Vega Strike.
+ *
+ * Vega Strike is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Vega Strike is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 //
 // C++ Implementation: Audio::OpenALSimpleSound
 //
@@ -26,20 +51,20 @@ namespace Audio {
         bufferHandle(AL_NULL_BUFFER)
     {
     }
-    
+
     OpenALSimpleSound::~OpenALSimpleSound()
     {
     }
 
-    void OpenALSimpleSound::loadImpl(bool wait) 
+    void OpenALSimpleSound::loadImpl(bool wait)
     {
         // just in case
         unloadImpl();
-        
+
         try {
-        
+
             flags.loading = 1;
-            
+
             // load the stream
             try {
                 loadStream();
@@ -48,7 +73,7 @@ namespace Audio {
                 getStream()->seek(0);
             }
             SharedPtr<Stream> stream = getStream();
-    
+
             // setup formatted buffer
             // if the format does not match an OpenAL built-in format, we must convert it.
             Format targetFormat = stream->getFormat();
@@ -58,27 +83,27 @@ namespace Audio {
                 targetFormat.bitsPerSample = 16;
             else
                 targetFormat.bitsPerSample = 8;
-            
+
             // Set capacity to half a second or 16k samples, whatever's bigger
-            size_t bufferCapacity = 
+            size_t bufferCapacity =
                 std::max( 16384U, targetFormat.sampleFrequency/2 );
-            
+
             // Prepare a list of buffers, we'll stack them here and later append them
             std::list<SoundBuffer> buffers;
-            
+
             try {
                 while (true) {
                     // Prepare a new buffer
                     buffers.push_back(SoundBuffer());
                     SoundBuffer &buffer = buffers.back();
                     buffer.reserve(bufferCapacity, targetFormat);
-                    
+
                     // Fill it in
                     readBuffer(buffer);
-                    
+
                     // Make sure we're not wasting memory
                     buffer.optimize();
-                    
+
                     // Break if there's no more data
                     if (buffer.getUsedBytes() == 0) {
                         buffers.pop_back();
@@ -92,22 +117,22 @@ namespace Audio {
                 closeStream();
                 throw e;
             }
-            
+
             // Free the stream, asap
             stream.reset();
-            
+
             // Collapse the chunks into a single buffer
             SoundBuffer buffer;
-                
+
             if (buffers.size() > 1) {
                 // Create a compound buffer with all buffers concatenated
-                { 
+                {
                     unsigned int finalBytes = 0;
                     for (std::list<SoundBuffer>::const_iterator it = buffers.begin(); it != buffers.end(); ++it)
-                        finalBytes += it->getUsedBytes(); 
+                        finalBytes += it->getUsedBytes();
                     buffer.reserve(finalBytes);
                 }
-                
+
                 {
                     char* buf = (char*)buffer.getBuffer();
                     for (std::list<SoundBuffer>::const_iterator it = buffers.begin(); it != buffers.end(); ++it) {
@@ -121,37 +146,37 @@ namespace Audio {
             } else {
                 throw CorruptStreamException(true);
             }
-            
+
             // Free the buffers, asap
             // The AL will copy to their own buffers, freeing now kind of makes certain
             // the AL will have enough memory to do so
             // (kind of since if memory is allocated off the DSP card, it could still fail)
             buffers.clear();
-            
+
             // Send the data to the AL
             clearAlError();
-            
-            alGenBuffers(1,&bufferHandle); 
+
+            alGenBuffers(1,&bufferHandle);
             checkAlError();
-            
-            alBufferData(bufferHandle, 
-                asALFormat(targetFormat), 
-                buffer.getBuffer(), buffer.getUsedBytes(), 
+
+            alBufferData(bufferHandle,
+                asALFormat(targetFormat),
+                buffer.getBuffer(), buffer.getUsedBytes(),
                 targetFormat.sampleFrequency);
             checkAlError();
-            
+
             onLoaded(true);
         } catch(const Exception& e) {
             onLoaded(false);
             throw e;
         }
     }
-    
-    void OpenALSimpleSound::unloadImpl() 
+
+    void OpenALSimpleSound::unloadImpl()
     {
-        if (bufferHandle == AL_NULL_BUFFER) 
+        if (bufferHandle == AL_NULL_BUFFER)
             return;
-        
+
         alDeleteBuffers(1, &bufferHandle);
         bufferHandle = AL_NULL_BUFFER;
     }

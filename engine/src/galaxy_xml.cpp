@@ -1,22 +1,26 @@
-/*
- * Vega Strike
+/**
+ * galaxy_xml.cpp
+ *
  * Copyright (C) 2001-2002 Daniel Horn
+ * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike
+ * contributors
  *
- * http://vegastrike.sourceforge.net/
+ * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * as published by the Free Software Foundation; either version 2
- * of the License, or (at your option) any later version.
+ * This file is part of Vega Strike.
  *
- * This program is distributed in the hope that it will be useful,
+ * Vega Strike is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * Vega Strike is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+ * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 /*
@@ -466,13 +470,13 @@ void Galaxy::setupPlanetTypeMaps()
         SubHeirarchy::iterator i = planet_types->getHeirarchy().begin();
         for (; i != planet_types->getHeirarchy().end(); ++i) {
             string name = (*i).first;
-            
+
             string val;
-            
+
             {
                 static const string _unit("unit");
                 const string &unit = (*i).second[_unit];
-                
+
                 if (!unit.empty()) {
                     val = unit;
                 } else {
@@ -480,7 +484,7 @@ void Galaxy::setupPlanetTypeMaps()
                     const string &tex = (*i).second[_texture];
                     if (!tex.empty()) {
                         val = tex;
-                        
+
                         // Filter out irrelevant texture bits
                         // We only want the base name of the diffuse map
                         // Texture formats are: <path>/<diffse>.<extension>|<path>/<specular>.<extension>|...
@@ -493,7 +497,7 @@ void Galaxy::setupPlanetTypeMaps()
                         string::size_type dot = val.find_last_of('.');
                         if (dot != string::npos)
                             val = val.substr( 0, dot );
-                        
+
                         static const string numtag = "#num#";
                         static const string::size_type numtaglen = numtag.length();
                         string::size_type tagpos;
@@ -502,30 +506,31 @@ void Galaxy::setupPlanetTypeMaps()
                     }
                 }
             }
-            
+
             if ( texture2name.find( val ) != texture2name.end() ) {
-                printf( "name conflict %s has texture %s and %s has texture %s\n",
-                       name.c_str(),
-                       val.c_str(),
-                       texture2name[val].c_str(),
-                       val.c_str() );
+                BOOST_LOG_TRIVIAL(warning) << boost::format("name conflict %1% has texture %2% and %3% has texture %4%")
+                       % name.c_str()
+                       % val.c_str()
+                       % texture2name[val].c_str()
+                       % val.c_str();
             } else {
                 texture2name[val] = name;
             }
             val = (*i).second["initial"];
             if ( initial2name.find( val ) != initial2name.end() ) {
-                printf( "name conflict %s has initial %s and %s has initial %s\n",
-                       name.c_str(),
-                       val.c_str(),
-                       initial2name[val].c_str(),
-                       val.c_str() );
+                BOOST_LOG_TRIVIAL(warning) << boost::format("name conflict %1% has initial %2% and %3% has initial %4%")
+                       % name.c_str()
+                       % val.c_str()
+                       % initial2name[val].c_str()
+                       % val.c_str();
             } else {
                 initial2name[val] = name;
             }
         }
     }
-    if ( initial2name.empty() || texture2name.empty() )
-        fprintf( stderr, "Warning, galaxy contains no overarching planet info\n" );
+    if ( initial2name.empty() || texture2name.empty() ) {
+        BOOST_LOG_TRIVIAL(warning) << "Warning, galaxy contains no overarching planet info";
+    }
 }
 Galaxy::Galaxy( const SGalaxy &g ) : SGalaxy( g )
 {

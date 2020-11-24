@@ -1,8 +1,36 @@
+/**
+ * in_sdl.cpp
+ *
+ * Copyright (C) Daniel Horn
+ * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike
+ * contributors
+ *
+ * https://github.com/vegastrike/Vega-Strike-Engine-Source
+ *
+ * This file is part of Vega Strike.
+ *
+ * Vega Strike is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Vega Strike is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
+
 #include "in_joystick.h"
 #include "vs_globals.h"
 #include "config_xml.h"
 #include "in_kb_data.h"
+#include "vsfilesystem.h"
 #include <assert.h>     /// needed for assert() calls.
+
 void DefaultJoyHandler( const KBData&, KBSTATE newState ) // DELETE ME
 {
 }
@@ -105,9 +133,7 @@ void ProcessJoystick( int whichplayer )
 #endif
                 hsw = joystick[i]->digital_hat[h];
                 if (joystick[i]->debug_digital_hatswitch) {
-                    char buf[100];
-                    sprintf( buf, "hsw: %d", hsw );
-                    std::cout<<buf<<std::endl;
+                    BOOST_LOG_TRIVIAL(debug) << boost::format("hsw: %1$d") % hsw;
                 }
                 for (int dir_index = 0; dir_index < MAX_DIGITAL_VALUES; dir_index++) {
                     bool press = false;
@@ -115,8 +141,9 @@ void ProcessJoystick( int whichplayer )
 #ifndef NO_SDL_JOYSTICK
                     //CENTERED is an exact position.
                     if ( dir_index == VS_HAT_CENTERED && (hsw == SDL_HAT_CENTERED) ) {
-                        if (joystick[i]->debug_digital_hatswitch)
-                            std::cout<<"center"<<std::endl;
+                        if (joystick[i]->debug_digital_hatswitch) {
+                            BOOST_LOG_TRIVIAL(debug) << "center";
+                        }
                         press = true;
                     }
                     if ( dir_index == VS_HAT_LEFT && (hsw&SDL_HAT_LEFT) )

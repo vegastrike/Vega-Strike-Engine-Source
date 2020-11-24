@@ -1,6 +1,7 @@
 /**
  * C++ Implementation: Audio::SoundBuffer
  *
+ * Copyright (C) Daniel Horn
  * Copyright (C) 2020 pyramid3d, Nachum Barcohen, Stephen G. Tuggy,
  * and other Vega Strike contributors.
  *

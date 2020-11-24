@@ -1,6 +1,7 @@
 /**
  * galaxy_gen.cpp
  *
+ * Copyright (C) Daniel Horn
  * Copyright (C) 2020 pyramid3d, Evert Vorster, Roy Falk, Stephen G. Tuggy,
  * and other Vega Strike contributors.
  *
@@ -369,7 +370,7 @@ void readColorGrads( vector< string > &entity, const char *file )
     VSFile  f;
     VSError err = f.OpenReadOnly( file, UniverseFile );
     if (err > Ok) {
-        printf( "Failed to load %s", file );
+        BOOST_LOG_TRIVIAL(error) << boost::format("Failed to load %1%") % file;
         GradColor g;
         g.minrad   = 0;
         g.r = g.g = g.b = .9;
@@ -1082,8 +1083,9 @@ void beginStar()
     MakeJumps( 100+grand()*300, STAR, stars[staroffset].numjumps );
     MakeMoons( game_options.RockyRelativeToPrimary*radius, STAR );
     //Fixme: no jumps should be made around the star.
-    if ( !jumps.empty() )
-        VSFileSystem::vs_fprintf( stderr, "ERROR: jumps not empty() Size==%u!!!!!\n", jumps.size() );
+    if ( !jumps.empty() ) {
+        BOOST_LOG_TRIVIAL(error) << boost::format("ERROR: jumps not empty() Size==%1$u!!!!!") % jumps.size();
+    }
     staroffset++;
 }
 
@@ -1213,7 +1215,7 @@ void readplanetentity( vector< StarInfo > &starinfos, string planetlist, unsigne
 {
     if (numstars < 1) {
         numstars = 1;
-        vs_fprintf( stderr, "No stars exist in this system!\n" );
+        BOOST_LOG_TRIVIAL(warning) << "No stars exist in this system!";
     }
     string::size_type i, j;
     unsigned int u;
@@ -1353,17 +1355,18 @@ void generateStarSystem( SystemInfo &si )
 
     compactness     = si.compactness*game_options.CompactnessScale;
     jumpcompactness = si.compactness*game_options.JumpCompactnessScale;
-    if (si.seed)
+    if (si.seed) {
         seedrand( si.seed );
-    else
+    } else {
         seedrand( stringhash( si.sector+'/'+si.name ) );
-    VSFileSystem::vs_fprintf( stderr, "star %d, natural %d, bases %d", si.numstars, si.numun1, si.numun2 );
+    }
+    BOOST_LOG_TRIVIAL(info) << boost::format("star %1%, natural %2%, bases %3%") % si.numstars % si.numun1 % si.numun2;
     int nat = pushTowardsMean( game_options.MeanNaturalPhenomena, si.numun1 );
     numnaturalphenomena = nat > si.numun1 ? si.numun1 : nat;
     numstarbases    = pushTowardsMean( game_options.MeanStarBases, si.numun2 );
     // numstarbases    = (int) (si.numun2*game_options.SmallUnitsMultiplier); This yields 0  in addition to making the preceding statement pointless.   Probably not intended
     numstarentities = si.numstars;
-    VSFileSystem::vs_fprintf( stderr, "star %d, natural %d, bases %d", numstarentities, numnaturalphenomena, numstarbases );
+    BOOST_LOG_TRIVIAL(info) << boost::format("star %1%, natural %2%, bases %3%") % numstarentities % numnaturalphenomena % numstarbases;
     starradius.push_back( si.sunradius );
     readColorGrads( gradtex, (si.stars).c_str() );
 
@@ -1397,8 +1400,8 @@ void generateStarSystem( SystemInfo &si )
 int main( int argc, char **argv )
 {
     if (argc < 9) {
-        VSFileSystem::vs_fprintf(
-            stderr,
+        // stephengtuggy 2020-11-12: Leaving this, since it is for standalone CONSOLE_APP mode
+        VSFileSystem::vs_fprintf(stderr,
             "Usage: starsysgen <seed> <sector>/<system> <sunradius>/<compactness> <numstars> [N][A]<numnaturalphenomena> <numstarbases> <faction> <namelist> [OtherSystemJumpNodes]...\n" );
         return 1;
     }

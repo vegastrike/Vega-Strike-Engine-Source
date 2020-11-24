@@ -1,6 +1,33 @@
+/**
+ * faction_util.cpp
+ *
+ * Copyright (C) Daniel Horn
+ * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike
+ * contributors
+ *
+ * https://github.com/vegastrike/Vega-Strike-Engine-Source
+ *
+ * This file is part of Vega Strike.
+ *
+ * Vega Strike is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Vega Strike is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
+
 #include <assert.h>
 
 #include "vs_globals.h"
+#include "vsfilesystem.h"
 #include "cmd/unit_generic.h"
 #include "faction_generic.h"
 #include "gfx/aux_texture.h"
@@ -10,7 +37,7 @@
 #include "gfx/animation.h"
 #include "cmd/music.h"
 
-// DO NOT PUT INCLUDES AFTER using namespace 
+// DO NOT PUT INCLUDES AFTER using namespace
 
 using namespace FactionUtil;
 
@@ -90,11 +117,7 @@ std::vector< Animation* >* FactionUtil::GetRandCommAnimation( int faction, Unit 
             if (tmp->base == Faction::comm_face_t::CYES && base)
                 return GetAnimation( faction, ind, sex );                  //bases may be dockable but we have set dockable_only to no
         }
-        fprintf( stderr,
-                 "Error picking comm animation for %d faction with bas:%d dock:%d\n",
-                 faction,
-                 (int) base,
-                 (int) dockable );
+        BOOST_LOG_TRIVIAL(error) << boost::format("Error picking comm animation for %1$d faction with base:%2$d dock:%3$d\n") % faction % ((int) base) % ((int) dockable);
         return GetAnimation( faction, rand()%siz, sex );
     } else {
         sex = 0;

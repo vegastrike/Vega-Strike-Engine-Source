@@ -1,21 +1,29 @@
-/*
- * Vega Strike
+/**
+ * main.cpp
+ *
  * Copyright (C) 2001-2002 Daniel Horn
+ * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike
+ * contributors
  *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * as published by the Free Software Foundation; either version 2
- * of the License, or (at your option) any later version.
+ * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
- * This program is distributed in the hope that it will be useful,
+ * This file is part of Vega Strike.
+ *
+ * Vega Strike is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * Vega Strike is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+ * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
  */
+
+
 #include <Python.h>
 #include "audio/test.h"
 #if defined (HAVE_SDL)
@@ -154,7 +162,7 @@ std::string ParseCommandLine(int argc, char ** CmdLine);
  */
 int readCommandLineOptions(int argc, char ** argv);
 
-// FIXME: Code should throw exception instead of calling exit
+// FIXME: Code should throw exception instead of calling winsys_exit            // Should it really? - stephengtuggy 2020-10-25
 void VSExit( int code)
 {
     Music::CleanupMuzak();
@@ -165,13 +173,17 @@ void VSExit( int code)
 void cleanup( void )
 {
     STATIC_VARS_DESTROYED = true;
+    // stephengtuggy 2020-10-30: Output message both to the console and to the logs
     printf( "Thank you for playing!\n" );
-    if (_Universe != NULL )
+    BOOST_LOG_TRIVIAL(info) << "Thank you for playing!";
+    if (_Universe != NULL ) {
         _Universe->WriteSaveGame( true );
+    }
 #ifdef _WIN32
 #if defined (_MSC_VER) && defined (_DEBUG)
-    if (!cleanexit)
+    if (!cleanexit) {
         _RPT0( _CRT_ERROR, "WARNING: Vega Strike exit not clean\n" );
+    }
     return;
 #endif
 #else
@@ -307,7 +319,7 @@ int main( int argc, char *argv[] )
     boost::filesystem::path program_path(program_path_str);
     boost::filesystem::path program_directory_path = program_path.parent_path();
     if ( ! program_directory_path.empty())                  // Changing to an empty path does bad things
-    {    
+    {
         boost::filesystem::current_path(program_directory_path);
     }
 
@@ -323,9 +335,9 @@ int main( int argc, char *argv[] )
         char pwd[8192] = "";
         if (NULL != getcwd( pwd, 8191 )) {
             pwd[8191] = '\0';
-            printf( " In path %s\n", pwd );
+            BOOST_LOG_TRIVIAL(info) << boost::format(" In path %1%") % pwd;
         } else {
-            printf( " In path <<path too long>>\n" );
+            BOOST_LOG_TRIVIAL(info) << " In path <<path too long>>";
         }
     }
 #ifdef _WIN32
@@ -335,7 +347,7 @@ int main( int argc, char *argv[] )
 
     GetVersionEx( &osvi );
     isVista = (osvi.dwMajorVersion == 6);
-    printf( "Windows version %d %d\n", osvi.dwMajorVersion, osvi.dwMinorVersion );
+    BOOST_LOG_TRIVIAL(info) << boost::format("Windows version %1% %2%") % osvi.dwMajorVersion % osvi.dwMinorVersion;
 #endif
     /* Print copyright notice */
     printf( "Vega Strike "  " \n"
@@ -351,7 +363,7 @@ int main( int argc, char *argv[] )
     //loads the configuration file .vegastrike/vegastrike.config from home dir if such exists
     {
         string subdir = ParseCommandLine( argc, argv );
-        cerr<<"GOT SUBDIR ARG = "<<subdir<<endl;
+        BOOST_LOG_TRIVIAL(info) << boost::format("GOT SUBDIR ARG = %1%") % subdir;
         if (CONFIGFILE == 0) {
             CONFIGFILE = new char[42];
             sprintf( CONFIGFILE, "vegastrike.config" );
@@ -372,7 +384,7 @@ int main( int argc, char *argv[] )
     if (mission_name[0] == '\0') {
         strncpy( mission_name, game_options.default_mission.c_str(), 1023 );
         mission_name[1023] = '\0';
-        BOOST_LOG_TRIVIAL(info) << "MISSION_NAME is empty using : " << mission_name;
+        BOOST_LOG_TRIVIAL(info) << boost::format("MISSION_NAME is empty using : %1%") % mission_name;
     }
 
 
@@ -393,8 +405,7 @@ int main( int argc, char *argv[] )
 #ifndef NO_SDL_JOYSTICK
     if ( SDL_InitSubSystem( SDL_INIT_JOYSTICK ) ) {
         BOOST_LOG_TRIVIAL(fatal) << boost::format("Couldn't initialize SDL: %1%") % SDL_GetError();
-        VSFileSystem::flushLogs();
-        winsys_exit( 1 );
+        VSExit( 1 );
     }
 #endif
 #endif
@@ -496,7 +507,7 @@ void bootstrap_draw( const std::string &message, Animation *newSplashScreen )
     if (ani) {
         if (GetElapsedTime() < 10) ani->UpdateAllFrame();
         {
-        ani->DrawNow( tmp ); //VSFileSystem::vs_fprintf( stderr, "(new?) splash screen ('animation'?) %d.  ", (long long)ani ); //temporary, by chuck
+            ani->DrawNow( tmp );
         }
     }
     bs_tp->Draw( game_options.default_boot_message.length() > 0 ?
@@ -609,9 +620,8 @@ void bootstrap_main_loop()
                 //In network mode, test if all player sections are present
                 if (pname == "") {
                     BOOST_LOG_TRIVIAL(fatal) << "Missing or incomplete section for player " << p;
-                    VSFileSystem::flushLogs();
                     cleanexit = true;
-                    winsys_exit( 1 );
+                    VSExit( 1 );
                 }
             }
             playername.push_back( pname );

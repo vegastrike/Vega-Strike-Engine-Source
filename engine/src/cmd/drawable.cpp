@@ -1,3 +1,28 @@
+/**
+ * drawable.cpp
+ *
+ * Copyright (C) 2020 Roy Falk, Stephen G. Tuggy and other Vega Strike
+ * contributors
+ *
+ * https://github.com/vegastrike/Vega-Strike-Engine-Source
+ *
+ * This file is part of Vega Strike.
+ *
+ * Vega Strike is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Vega Strike is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
+
 #include "drawable.h"
 #include "vsfilesystem.h"
 #include "gfx/mesh.h"
@@ -29,7 +54,7 @@ bool Drawable::DrawableInit(const char *filename, int faction,
 
     if(animationExt)
         anifilename += string("_") + string(animationExt);
-    
+
     std::vector< Mesh* > *meshes = new vector<Mesh *>();
     int i = 1;
     char count[30] = "1";
@@ -58,8 +83,7 @@ bool Drawable::DrawableInit(const char *filename, int faction,
                     Mesh *m = Mesh::LoadMesh( path.c_str(), Vector(1,1,1), faction, flightgrp );
                     meshes->push_back( m );
     #ifdef DEBUG_MESH_ANI
-        // TODO: search and replace cerr with BOOST_LOG_TRIVIAL(error)
-                    cerr << "Animated Mesh: " << path << " loaded - with: " << m->getVertexList()->GetNumVertices() << " vertices." << endl;
+                    BOOST_LOG_TRIVIAL(debug) << "Animated Mesh: " << path << " loaded - with: " << m->getVertexList()->GetNumVertices() << " vertices.";
     #endif
             }
             else
@@ -84,7 +108,7 @@ bool Drawable::DrawableInit(const char *filename, int faction,
 		sprintf( count, "%u", unitCount );
 		uniqueUnitName = drawableGetName() + string(count);
 		Units[uniqueUnitName] = static_cast<Unit*>(this);
-		std::cerr << "Animation data loaded for unit: " << string(filename) << ", named " << uniqueUnitName << " - with: " << numFrames << " frames." << std::endl;
+		BOOST_LOG_TRIVIAL(info) << "Animation data loaded for unit: " << string(filename) << ", named " << uniqueUnitName << " - with: " << numFrames << " frames.";
 		return true;
 	} else {
 		delete meshes;
@@ -95,7 +119,7 @@ bool Drawable::DrawableInit(const char *filename, int faction,
 void Drawable::AnimationStep()
 {
 #ifdef DEBUG_MESH_ANI
-        std::cerr << "Starting animation step of Unit: " << uniqueUnitName << std::endl;
+        BOOST_LOG_TRIVIAL(debug) << "Starting animation step of Unit: " << uniqueUnitName;
 #endif
         if((!this->isContinuousLoop())&&(loopCount==0))
             return;
@@ -105,7 +129,7 @@ void Drawable::AnimationStep()
         Draw();
 
 #ifdef DEBUG_MESH_ANI
-        std::cerr << "Drawed mesh: " << uniqueUnitName << std::endl;
+        BOOST_LOG_TRIVIAL(debug) << "Drawed mesh: " << uniqueUnitName;
 #endif
 
         activeMesh = nextactiveMesh;
@@ -116,7 +140,7 @@ void Drawable::AnimationStep()
         if(loopCount > 0)
             loopCount--;
 #ifdef DEBUG_MESH_ANI
-        std::cerr << "Ending animation step of Unit: " << uniqueUnitName << std::endl;
+        BOOST_LOG_TRIVIAL(debug) << "Ending animation step of Unit: " << uniqueUnitName;
 #endif
 }
 

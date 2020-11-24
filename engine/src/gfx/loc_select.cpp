@@ -1,3 +1,29 @@
+/**
+ * loc_select.cpp
+ *
+ * Copyright (C) Daniel Horn
+ * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike
+ * contributors
+ *
+ * https://github.com/vegastrike/Vega-Strike-Engine-Source
+ *
+ * This file is part of Vega Strike.
+ *
+ * Vega Strike is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Vega Strike is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
+
 #include "cmd/unit_generic.h"
 #include "loc_select.h"
 #include "gfxlib.h"
@@ -145,9 +171,6 @@ void LocationSelect::Draw()
         Vector tP( t.getP() );         //the p vector of the plane being selected on
         Vector tQ( t.getQ() );         //the q vector of the plane being selected on
         ///unused    Vector tR (t[8],t[9],t[10]);//the q vector of the plane being selected on
-        //VSFileSystem::Fprintf (stderr,"<%f,%f,%f>",t[0],t[1],t[2]);
-        //VSFileSystem::Fprintf (stderr,"<%f,%f,%f>",t[4],t[5],t[6]);
-        //VSFileSystem::Fprintf (stderr,"<%f,%f,%f>",t[8],t[9],t[10]);
 #ifdef DELTA_MOVEMENT
         float zvalueXY = tLocation.k+LocalPosition.i*tP.k+LocalPosition.j*tQ.k;         //z val of the parallelogram
 #else

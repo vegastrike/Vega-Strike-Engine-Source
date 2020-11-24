@@ -1,3 +1,28 @@
+/**
+ * Codec.h
+ *
+ * Copyright (C) Daniel Horn
+ * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike
+ * contributors
+ *
+ * https://github.com/vegastrike/Vega-Strike-Engine-Source
+ *
+ * This file is part of Vega Strike.
+ *
+ * Vega Strike is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Vega Strike is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 //
 // C++ Interface: Audio::Codec
 //
@@ -13,7 +38,7 @@
 namespace Audio {
 
     // Forward Stream so that Codec headers don't depend on them.
-    // Implementations will surely depend on them, though... 
+    // Implementations will surely depend on them, though...
     // ...but this way Codec users may be oblivious to them.
     class Stream;
 
@@ -28,29 +53,29 @@ namespace Audio {
     {
     private:
         std::string name;
-    
+
     protected:
         /** Internal constructor */
         Codec(const std::string& name);
-    
+
     public:
         /** Back-appendable collection of std::string, optimally for static readonly data */
         typedef std::vector<std::string> Extensions;
-        
+
     public:
         virtual ~Codec();
-        
+
         /** Return the descriptive name of the codec. */
         const std::string& getName() const;
-        
-        /** Return a list of supported extensions. 
-         * @remarks 
+
+        /** Return a list of supported extensions.
+         * @remarks
          *      If it returns something, it is expected that files handled by this codec
          *      be named by appending one of the returned extensions as a suffix.
          *      @par Though supported extensions are a big help to the codec registry
          *      when asked to suggest codecs for a file, a null value can be returned
          *      asking the registry to always try this codec. This is useful if the codec
-         *      can handle many (perhaps unknown) file types, or if there is no associated 
+         *      can handle many (perhaps unknown) file types, or if there is no associated
          *      extension to the type handled.
          *      @par The base implementation does just that - returns null.
          *      @par It is expected that files named with returned extensions will pass the
@@ -59,7 +84,7 @@ namespace Audio {
          *      includes an extension within the returned set.
          */
         virtual const Extensions* getExtensions() const;
-        
+
         /**
          * Returns whether this codec instanc can handle the specified file.
          * @param path the file to be tested
@@ -81,7 +106,7 @@ namespace Audio {
          *      success (true).
          */
         virtual bool canHandle(const std::string& path, bool canOpen, VSFileSystem::VSFileType type = VSFileSystem::UnknownFile) = 0;
-        
+
         /**
          * Returns an instance of the Stream class attached to this codec and the specified
          * file.

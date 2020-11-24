@@ -1,3 +1,29 @@
+/**
+ * star_system.cpp
+ *
+ * Copyright (C) Daniel Horn
+ * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike
+ * contributors
+ *
+ * https://github.com/vegastrike/Vega-Strike-Engine-Source
+ *
+ * This file is part of Vega Strike.
+ *
+ * Vega Strike is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Vega Strike is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
+
 #include <assert.h>
 #include "star_system.h"
 
@@ -127,10 +153,11 @@ StarSystem::~StarSystem()
     _Universe->popActiveStarSystem();
     vector< StarSystem* >activ;
     while ( _Universe->getNumActiveStarSystem() ) {
-        if (_Universe->activeStarSystem() != this)
+        if (_Universe->activeStarSystem() != this) {
             activ.push_back( _Universe->activeStarSystem() );
-        else
-            fprintf( stderr, "Avoided fatal error in deleting star system %s\n", getFileName().c_str() );
+        } else {
+            BOOST_LOG_TRIVIAL(error) << boost::format("Avoided fatal error in deleting star system %1%") % getFileName().c_str();
+        }
         _Universe->popActiveStarSystem();
     }
     while ( activ.size() ) {
@@ -374,30 +401,6 @@ void StarSystem::Draw( bool DrawCockpit )
     drawer.action.drawParents();     //draw units targeted by camera
     //FIXME  maybe we could do bolts & units instead of unit only--and avoid bolt drawing step
 
-#if 0
-    for (unsigned int sim_counter = 0; sim_counter <= SIM_QUEUE_SIZE; ++sim_counter) {
-        double tmp    = queryTime();
-        Unit  *unit;
-        UnitCollection::UnitIterator iter = physics_buffer[sim_counter].createIterator();
-        float  backup = simulation_atom_var;
-        unsigned int cur_sim_frame = _Universe->activeStarSystem()->getCurrentSimFrame();
-        while ( ( unit = iter.current() ) != nullptr ) {
-            interpolation_blend_factor = calc_blend_factor( saved_interpolation_blend_factor,
-                                                            unit->sim_atom_multiplier,
-                                                            unit->cur_sim_queue_slot,
-                                                            cur_sim_frame );
-            //if (par&&par->Target()==unit) {
-            //printf ("i:%f s:%f m:%d c:%d l:%d\n",interpolation_blend_factor,saved_interpolation_blend_factor,unit->sim_atom_multiplier,sim_counter,current_sim_location);
-            //}
-            simulation_atom_var = backup*unit->sim_atom_multiplier;
-            ( (GameUnit< Unit >*)unit )->Draw();
-            iter.advance();
-        }
-        interpolation_blend_factor = saved_interpolation_blend_factor;
-        simulation_atom_var = backup;
-        tmp = queryTime()-tmp;
-    }
-#endif
     drawtime = queryTime()-drawtime;
     WarpTrailDraw();
 
@@ -441,7 +444,7 @@ void StarSystem::Draw( bool DrawCockpit )
         _Universe->AccessCockpit()->Draw();
 
     Drawable::UpdateFrames();
-    
+
     // And now we're done with the occluder set
     Occlusion::end();
 }
@@ -483,7 +486,7 @@ void NebulaUpdate( StarSystem *ss )
 void StarSystem::createBackground( Star_XML *xml )
 {
 #ifdef NV_CUBE_MAP
-    printf( "using NV_CUBE_MAP\n" );
+    BOOST_LOG_TRIVIAL(info) << "using NV_CUBE_MAP";
     light_map[0] = new Texture( (xml->backgroundname+"_light.cube").c_str(), 1, TRILINEAR, CUBEMAP, CUBEMAP_POSITIVE_X,
                               GFXFALSE, game_options.max_cubemap_size );
     if ( light_map[0]->LoadSuccess() && light_map[0]->isCube() ) {
@@ -1063,7 +1066,7 @@ void ExecuteDirector()
                     unsigned int w = active_missions.size();
                     active_missions[i]->terminateMission();
                     if ( w == active_missions.size() ) {
-                        printf( "MISSION NOT ERASED\n" );
+                        BOOST_LOG_TRIVIAL(warning) << "MISSION NOT ERASED";
                         break;
                     }
                 }
@@ -1256,7 +1259,7 @@ void StarSystem::ProcessPendingJumps()
             continue;
         } else {
 #ifdef JUMP_DEBUG
-            VSFileSystem::vs_fprintf( stderr, "Volitalizing pending jump animation.\n" );
+            BOOST_LOG_TRIVIAL(trace) << "Volitalizing pending jump animation.";
 #endif
             _Universe->activeStarSystem()->VolitalizeJumpAnimation( pendingjump[kk]->animation );
         }
@@ -1266,7 +1269,7 @@ void StarSystem::ProcessPendingJumps()
         if ( un == nullptr || !_Universe->StillExists( pendingjump[kk]->dest )
              || !_Universe->StillExists( pendingjump[kk]->orig ) ) {
 #ifdef JUMP_DEBUG
-            VSFileSystem::vs_fprintf( stderr, "Adez Mon! Unit destroyed during jump!\n" );
+            BOOST_LOG_TRIVIAL(debug) << "Adez Mon! Unit destroyed during jump!";
 #endif
             delete pendingjump[kk];
             pendingjump.erase( pendingjump.begin()+kk );
@@ -1353,7 +1356,7 @@ bool StarSystem::JumpTo( Unit *un, Unit *jumppoint, const std::string &system, b
     if (un->jump.drive >= 0)
       un->jump.drive = -1;
 #ifdef JUMP_DEBUG
-    VSFileSystem::vs_fprintf( stderr, "jumping to %s.  ", system.c_str() );
+    BOOST_LOG_TRIVIAL(trace) << boost::format("jumping to %1%.  ") % system;
 #endif
     StarSystem *ss = star_system_table.Get( system );
     std::string ssys( system+".system" );
@@ -1366,7 +1369,7 @@ bool StarSystem::JumpTo( Unit *un, Unit *jumppoint, const std::string &system, b
       }
     if ( ss && !isJumping( pendingjump, un ) ) {
 #ifdef JUMP_DEBUG
-        VSFileSystem::vs_fprintf( stderr, "Pushing back to pending queue!\n" );
+        BOOST_LOG_TRIVIAL(debug) << "Pushing back to pending queue!";
 #endif
         bool dosightandsound = ( ( this == _Universe->getActiveStarSystem( 0 ) ) || _Universe->isPlayerStarship( un ) );
         int  ani = -1;
@@ -1378,12 +1381,13 @@ bool StarSystem::JumpTo( Unit *un, Unit *jumppoint, const std::string &system, b
                                                                                            system ) : QVector( 0, 0, 0 ) ) );
       } else {
 #ifdef JUMP_DEBUG
-        VSFileSystem::vs_fprintf( stderr, "Failed to retrieve!\n" );
+        BOOST_LOG_TRIVIAL(debug) << "Failed to retrieve!";
 #endif
         return false;
       }
-    if (jumppoint)
+    if (jumppoint) {
       ActivateAnimation( jumppoint );
+    }
 
     return true;
 }

@@ -1,3 +1,29 @@
+/**
+ * gl_clip.cpp
+ *
+ * Copyright (C) Daniel Horn
+ * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike
+ * contributors
+ *
+ * https://github.com/vegastrike/Vega-Strike-Engine-Source
+ *
+ * This file is part of Vega Strike.
+ *
+ * Vega Strike is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Vega Strike is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
+
 #include "gfxlib.h"
 #include "gfx/matrix.h"
 #include "gl_matrix.h"
@@ -116,7 +142,7 @@ void DrawFrustum( double f[6][4] )
         Vector b = q+n;
         Vector c = n-t;
         Vector d = n-q;
-        
+
         verts.insert(GFXColorVertex(a, cols[i]));
         verts.insert(GFXColorVertex(b, cols[i]));
         verts.insert(GFXColorVertex(c, cols[i]));
@@ -143,9 +169,9 @@ float /*GFXDRVAPI*/ GFXSphereInFrustum( double f[6][4], const QVector &Cnt, floa
         //does not evaluate for yon
         d = f[p][0]*Cnt.i+f[p][1]*Cnt.j+f[p][2]*Cnt.k+f[p][3];
         if (d < 0) {
-            //VSFileSystem::Fprintf (stderr,"cin %f",d);
-            if (d <= -radius)
+            if (d <= -radius) {
                 return 0;
+            }
         }
     }
     return d;
@@ -169,7 +195,6 @@ void GFXGetFrustumVars( bool retr, float *l, float *r, float *b, float *t, float
         *n = nnear;
         *f = ffar;
     }
-    //VSFileSystem::Fprintf (stderr,"<FUN%f,%f,%f,%f,%f,%f>>",near,far,left,right,bot,top);
 }
 
 void /*GFXDRVAPI*/ GFXGetFrustum( double f[6][4] )

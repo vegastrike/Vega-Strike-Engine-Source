@@ -1,3 +1,29 @@
+/**
+ * ani_texture.cpp
+ *
+ * Copyright (C) Daniel Horn
+ * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike
+ * contributors
+ *
+ * https://github.com/vegastrike/Vega-Strike-Engine-Source
+ *
+ * This file is part of Vega Strike.
+ *
+ * Vega Strike is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Vega Strike is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
+
 #include "cmd/unit_generic.h"
 #include "ani_texture.h"
 #include "audiolib.h"
@@ -30,25 +56,30 @@ static inline unsigned int intmax( unsigned int a, unsigned int b )
 static enum ADDRESSMODE parseAddressMode( const string &addrmodestr, ADDRESSMODE defaultAddressMode )
 {
     enum ADDRESSMODE addrmode = defaultAddressMode;
-    if (addrmodestr == "wrap")
+    if (addrmodestr == "wrap") {
         addrmode = WRAP;
+    }
 
-    else if (addrmodestr == "mirror")
+    else if (addrmodestr == "mirror") {
         addrmode = MIRROR;
+    }
 
-    else if (addrmodestr == "clamp")
+    else if (addrmodestr == "clamp") {
         addrmode = CLAMP;
+    }
 
-    else if (addrmodestr == "border")
+    else if (addrmodestr == "border") {
         addrmode = BORDER;
+    }
     return addrmode;
 }
 
 static void ActivateWhite( int stage )
 {
     static Texture *white = new Texture( "white.bmp", 0, MIPMAP, TEXTURE2D, TEXTURE_2D, 1 );
-    if ( white->LoadSuccess() )
+    if ( white->LoadSuccess() ) {
         white->MakeActive( stage );
+    }
 }
 
 void AnimatedTexture::MakeActive( int stage, int pass )
@@ -57,11 +88,11 @@ void AnimatedTexture::MakeActive( int stage, int pass )
     if (timeperframe && !vidSource) {
         unsigned int numframes = numFrames();
         unsigned int active    = ( (unsigned int) (curtime/timeperframe) );
-        if ( GetLoop() )
+        if ( GetLoop() ) {
             active %= numframes;
-
-        else
+        } else {
             active = intmin( active, numframes-1 );
+        }
         unsigned int nextactive = ( GetLoopInterp() ? ( (active+1)%numframes ) : intmin( active+1, numframes-1 ) );
         float fraction = (curtime/timeperframe)-(unsigned int) (curtime/timeperframe);
         if (fraction < 0) fraction += 1.0f;
@@ -493,10 +524,11 @@ AnimatedTexture* AnimatedTexture::CreateVideoTexture( const std::string &fname,
     AnimatedTexture     *rv = new AnimatedTexture( stage, ismipmapped, detailtex );
     VSFileSystem::VSFile f;
     VSError err = f.OpenReadOnly( fname, VSFileSystem::VideoFile );
-    if (err <= Ok)
+    if (err <= Ok) {
         rv->LoadVideoSource( f );
-    else
-        fprintf( stderr, "CreateVideoTexture could not find %s\n", fname.c_str() );
+    } else {
+        BOOST_LOG_TRIVIAL(warning) << boost::format("CreateVideoTexture could not find %1%\n") % fname.c_str();
+    }
 
     // Videos usually don't want to be looped, so set non-looping as default
     rv->SetLoop(false);

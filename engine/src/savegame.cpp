@@ -1,3 +1,29 @@
+/**
+ * savegame.cpp
+ *
+ * Copyright (C) Daniel Horn
+ * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike
+ * contributors
+ *
+ * https://github.com/vegastrike/Vega-Strike-Engine-Source
+ *
+ * This file is part of Vega Strike.
+ *
+ * Vega Strike is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Vega Strike is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
+
 #include <Python.h>
 #include "cmd/unit_generic.h"
 #include "hashtable.h"
@@ -23,10 +49,7 @@
 using namespace VSFileSystem;
 using std::vector;
 using std::string;
-using std::cout;
-using std::endl;
 using std::allocator;
-using std::cerr;
 
 std::string CurrentSaveGameName = "";
 std::string GetHelperPlayerSaveGame( int num )
@@ -60,14 +83,12 @@ std::string GetHelperPlayerSaveGame( int num )
                 f.Close();
               } else {
                 BOOST_LOG_TRIVIAL(fatal) << boost::format("!!! ERROR : Creating default save.4.x.txt file : %1%") % f.GetFullPath();
-                flushLogs();
-                exit( 1 );
+                VSExit( 1 );
               }
             err = f.OpenReadOnly( "save.4.x.txt", UnknownFile );
             if (err > Ok) {
                 BOOST_LOG_TRIVIAL(fatal) << "!!! ERROR : Opening the default save we just created";
-                flushLogs();
-                exit( 1 );
+                VSExit( 1 );
               }
           }
         if (err <= Ok) {
@@ -573,10 +594,11 @@ void SaveGame::ReadMissionStringData( char* &buf, bool select_data, const std::s
             BOOST_LOG_TRIVIAL(info) << boost::format(" SaveGame::ReadMissionStringData: vecstring->reserve(md_i_size = %1%) will fail, bailing out (i = %2%)") % md_i_size % i;
         }
         for (int j = 0; j < md_i_size; j++) {
-            if (skip)
+            if (skip) {
                 AnyStringSkipInString( buf2 );
-            else
+            } else {
                 vecstring->push_back( AnyStringScanInString( buf2 ) );
+            }
         }
     }
     buf = buf2;
@@ -585,12 +607,14 @@ void SaveGame::ReadMissionStringData( char* &buf, bool select_data, const std::s
 
 void SaveGame::PurgeZeroStarships() // DELETE unused function?
 {
-    for (MissionStringDat::MSD::iterator i = missionstringdata->m.begin(), ie = missionstringdata->m.end(); i != ie; ++i)
-        if ( fg_util::IsFGKey( i->first ) )
+    for (MissionStringDat::MSD::iterator i = missionstringdata->m.begin(), ie = missionstringdata->m.end(); i != ie; ++i) {
+        if ( fg_util::IsFGKey( i->first ) ) {
             if ( fg_util::CheckFG( i->second ) )
             {
-                //printf( "correcting flightgroup %s to have right landed ships\n", i->first.c_str() );
+                // BOOST_LOG_TRIVIAL(info) << boost::format("correcting flightgroup %1% to have right landed ships") % i->first.c_str();
             }
+        }
+    }
 }
 
 static inline void PushBackUInt( unsigned int i, vector< char > &ret )
@@ -605,8 +629,9 @@ static inline void PushBackUInt( unsigned int i, vector< char > &ret )
             i /= 10;
         }
         ret.resize( q+p );
-        while (p)
+        while (p) {
             ret[q++] = tmp[--p];
+        }
     }
 }
 

@@ -1,3 +1,29 @@
+/**
+ * star.cpp
+ *
+ * Copyright (C) Daniel Horn
+ * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike
+ * contributors
+ *
+ * https://github.com/vegastrike/Vega-Strike-Engine-Source
+ *
+ * This file is part of Vega Strike.
+ *
+ * Vega Strike is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Vega Strike is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
+
 #include "star.h"
 #include "ani_texture.h"
 #include <assert.h>
@@ -9,6 +35,7 @@
 #include "lin_time.h"
 #include "galaxy_xml.h"
 #include "universe.h"
+#include "vsfilesystem.h"
 
 #if defined (__APPLE__) || defined (MACOSX)
     #include <OpenGL/gl.h>
@@ -108,7 +135,6 @@ bool computeStarColor( float &r, float &g, float &b, Vector luminmax, float dist
     float dissqr = distance*distance/(maxdistance*maxdistance);
     float lum    = 100*luminmax.i/(luminmax.k*dissqr);
     lum = log( (double) luminmax.i*10./(double) luminmax.j )*luminscale/dissqr;
-//VSFileSystem::vs_fprintf (stderr,"luminmax %f lumnow %f\n",luminmax.i/(luminmax.k*dissqr),lum);
     float clamp  = starcoloraverage+lum/starcolorincrement;
     if (clamp > 1)
         clamp = 1;
@@ -118,9 +144,6 @@ bool computeStarColor( float &r, float &g, float &b, Vector luminmax, float dist
     g *= lum;
     b *= lum;
     static float starcolorcutoff = XMLSupport::parse_float( vs_config->getVariable( "graphics", "starcolorcutoff", ".1" ) );
-    if (lum > starcolorcutoff) {
-        //printf ("lum %f",lum);
-    }
     return lum > starcolorcutoff;
 }
 
@@ -216,8 +239,8 @@ static GFXColorVertex * AllocVerticesForSystem( std::string our_system_name, flo
     if (mindistance < 0) mindistance = 0;
     maxdistance = sqrt( maxdistance );
     mindistance = sqrt( mindistance );
-    VSFileSystem::vs_fprintf( stderr, "Min (%f, %f, %f) Max(%f, %f, %f) MinLumin %f, MaxLumin %f",
-                              starmin.i, starmin.j, starmin.k, starmax.i, starmax.j, starmax.k, minlumin, maxlumin );
+    BOOST_LOG_TRIVIAL(info) << boost::format("Min (%1$f, %2$f, %3$f) Max(%4$f, %5$f, %6$f) MinLumin %7$f, MaxLumin %8$f")
+                               % starmin.i % starmin.j % starmin.k % starmax.i % starmax.j % starmax.k % minlumin % maxlumin;
     for (int y = 0; y < *num; ++y) {
         tmpvertex[j+repetition-1].x = -.5*xyzspread+rand()*( (float) xyzspread/RAND_MAX );
         tmpvertex[j+repetition-1].y = -.5*xyzspread+rand()*( (float) xyzspread/RAND_MAX );
@@ -264,8 +287,9 @@ static GFXColorVertex * AllocVerticesForSystem( std::string our_system_name, flo
                                     tmpvertex[j+repetition-1].g,
                                     tmpvertex[j+repetition-1].b,
                                     Vector( lumin, minlumin, maxlumin ),
-                                    distance, maxdistance ) )
+                                    distance, maxdistance ) ) {
                 incj = 0;
+            }
             ++si;
         }
         for (int LC = repetition-2; LC >= 0; --LC) {
@@ -280,12 +304,9 @@ static GFXColorVertex * AllocVerticesForSystem( std::string our_system_name, flo
             tmpvertex[j+LC].b = 0;
             tmpvertex[j+LC].a = 0;
         }
-        if (incj) {
-            //printf ("%f %f %f\n",tmpvertex[j+repetition-1].r,tmpvertex[j+repetition-1].g,tmpvertex[j+repetition-1].b);
-        }
         j += incj;
     }
-    VSFileSystem::vs_fprintf( stderr, "Read In Star Count %d used: %d\n", starcount, j/2 );
+    BOOST_LOG_TRIVIAL(info) << boost::format("Read In Star Count %1$d used: %2$d\n") % starcount % (j/2);
     *num = j;
     return tmpvertex;
 }
@@ -298,8 +319,9 @@ PointStarVlist::PointStarVlist( int num, float spread, const std::string &sysnam
     //if(StarStreaks) {
     vlist = new GFXVertexList( GFXLINE, num, tmpvertex, num, true, 0 );
     //}else {
-    for (int i = 0, j = 1; i < num/2; ++i, j += 2)
+    for (int i = 0, j = 1; i < num/2; ++i, j += 2) {
         tmpvertex[i] = tmpvertex[j];
+    }
     nonstretchvlist = new GFXVertexList( GFXPOINT, num/2, tmpvertex, num/2, false, 0 );
     //}
     delete[] tmpvertex;
@@ -467,9 +489,9 @@ void Stars::Draw()
         static float star_spread_attenuation =
             XMLSupport::parse_float( vs_config->getVariable( "graphics", "star_spread_attenuation", ".2" ) );
         GFXPushGlobalEffects();
-        GFXLight fadeLight( true, GFXColor( cp.i, cp.j, cp.k ), 
-                            GFXColor( 0, 0, 0, 1 ), 
-                            GFXColor( 0, 0, 0, 1 ), 
+        GFXLight fadeLight( true, GFXColor( cp.i, cp.j, cp.k ),
+                            GFXColor( 0, 0, 0, 1 ),
+                            GFXColor( 0, 0, 0, 1 ),
                             GFXColor( 1, 1, 1, 1 ),
                             GFXColor( .01, 0, 1/(star_spread_attenuation*star_spread_attenuation*spread*spread) ) );
         GFXCreateLight( ligh, fadeLight, true );

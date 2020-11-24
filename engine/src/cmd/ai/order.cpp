@@ -1,23 +1,29 @@
-/*
- * Vega Strike
+/**
+ * order.cpp
+ *
  * Copyright (C) 2001-2002 Daniel Horn
+ * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike
+ * contributors
  *
- * http://vegastrike.sourceforge.net/
+ * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * as published by the Free Software Foundation; either version 2
- * of the License, or (at your option) any later version.
+ * This file is part of Vega Strike.
  *
- * This program is distributed in the hope that it will be useful,
+ * Vega Strike is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * Vega Strike is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+ * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
  */
+
+
 #include "vegastrike.h"
 #include "cmd/unit_generic.h"
 #include "order.h"
@@ -53,47 +59,54 @@ void Order::Execute()
 
 Order* Order::queryType( unsigned int type )
 {
-    for (unsigned int i = 0; i < suborders.size(); i++)
-        if ( (suborders[i]->type&type) == type )
+    for (unsigned int i = 0; i < suborders.size(); i++) {
+        if ( (suborders[i]->type&type) == type ) {
             return suborders[i];
-    return NULL;
+        }
+    }
+    return nullptr;
 }
+
 Order* Order::queryAny( unsigned int type )
 {
-    for (unsigned int i = 0; i < suborders.size(); i++)
-        if ( (suborders[i]->type&type) != 0 )
+    for (unsigned int i = 0; i < suborders.size(); i++) {
+        if ( (suborders[i]->type&type) != 0 ) {
             return suborders[i];
-    return NULL;
+        }
+    }
+    return nullptr;
 }
 
 void Order::eraseType( unsigned int type )
 {
-    for (unsigned int i = 0; i < suborders.size(); i++)
+    for (unsigned int i = 0; i < suborders.size(); i++) {
         if ( (suborders[i]->type&type) == type ) {
             suborders[i]->Destroy();
             vector< Order* >::iterator j = suborders.begin()+i;
             suborders.erase( j );
             i--;
         }
+    }
 }
 
 Order* Order::EnqueueOrder( Order *ord )
 {
-    if (ord == NULL) {
-        printf( "NOT ENQEUEING NULL ORDER\n" );
-        printf( "this order: %s\n", getOrderDescription().c_str() );
-        return NULL;
+    if (ord == nullptr) {
+        BOOST_LOG_TRIVIAL(warning) << "NOT ENQEUEING NULL ORDER";
+        BOOST_LOG_TRIVIAL(warning) << boost::format("this order: %1%") % getOrderDescription().c_str();
+        return nullptr;
     }
     ord->SetParent( parent );
     suborders.push_back( ord );
     return this;
 }
+
 Order* Order::EnqueueOrderFirst( Order *ord )
 {
-    if (ord == NULL) {
-        printf( "NOT ENQEUEING NULL ORDER\n" );
-        printf( "this order: %s\n", getOrderDescription().c_str() );
-        return NULL;
+    if (ord == nullptr) {
+        BOOST_LOG_TRIVIAL(warning) << "NOT ENQEUEING NULL ORDER";
+        BOOST_LOG_TRIVIAL(warning) << boost::format("this order: %1%") % getOrderDescription().c_str();
+        return nullptr;
     }
     ord->SetParent( parent );
 
@@ -101,6 +114,7 @@ Order* Order::EnqueueOrderFirst( Order *ord )
     suborders.insert( first_elem, ord );
     return this;
 }
+
 Order* Order::ReplaceOrder( Order *ord )
 {
     for (vector< Order* >::iterator ordd = suborders.begin(); ordd != suborders.end();) {
@@ -145,43 +159,48 @@ bool Order::AttachOrder( QVector targetv )
 
 Order* Order::findOrder( Order *ord )
 {
-    if (ord == NULL) {
-        printf( "FINDING EMPTY ORDER\n" );
-        printf( "this order: %s\n", getOrderDescription().c_str() );
-        return NULL;
+    if (ord == nullptr) {
+        BOOST_LOG_TRIVIAL(warning) << "FINDING EMPTY ORDER";
+        BOOST_LOG_TRIVIAL(warning) << boost::format("this order: %1%") % getOrderDescription().c_str();
+        return nullptr;
     }
     for (unsigned int i = 0; i < suborders.size(); i++)
         if (suborders[i] == ord)
             return suborders[i];
-    return NULL;
+    return nullptr;
 }
+
 Order::~Order()
 {
     VSDESTRUCT1
 }
+
 void Order::Destructor()
 {
     delete this;
 }
+
 void Order::Destroy()
 {
     unsigned int i;
-    for (i = 0; i < suborders.size(); i++) {
-        if (suborders[i] == NULL) {
-            printf( "ORDER: a null order\n" );
-            printf( "this order: %s\n", getOrderDescription().c_str() );
+    for (i = 0; i < suborders.size(); ++i) {
+        if (suborders[i] == nullptr) {
+            BOOST_LOG_TRIVIAL(warning) << "ORDER: a null order";
+            BOOST_LOG_TRIVIAL(warning) << boost::format("this order: %1%") % getOrderDescription().c_str();
         } else {
             suborders[i]->Destroy();
         }
     }
     {
-        for (list< CommunicationMessage* >::iterator i = messagequeue.begin(); i != messagequeue.end(); i++)
+        for (list< CommunicationMessage* >::iterator i = messagequeue.begin(); i != messagequeue.end(); ++i) {
             delete (*i);
+        }
     }
     messagequeue.clear();
     suborders.clear();
     this->Destructor();
 }
+
 void Order::ClearMessages()
 {
     unsigned int i;
@@ -193,12 +212,13 @@ void Order::ClearMessages()
     }
     messagequeue.clear();
 }
+
 void Order::eraseOrder( Order *ord )
 {
     bool found = false;
-    if (ord == NULL) {
-        printf( "NOT ERASING A NULL ORDER\n" );
-        printf( "this order: %s\n", getOrderDescription().c_str() );
+    if (ord == nullptr) {
+        BOOST_LOG_TRIVIAL(warning) << "NOT ERASING A NULL ORDER";
+        BOOST_LOG_TRIVIAL(warning) << boost::format("this order: %1%") % getOrderDescription().c_str();
         return;
     }
     for (unsigned int i = 0; i < suborders.size() && found == false; i++)
@@ -209,30 +229,34 @@ void Order::eraseOrder( Order *ord )
             found = true;
         }
     if (!found) {
-        printf( "TOLD TO ERASE AN ORDER - NOT FOUND\n" );
-        printf( "this order: %s\n", getOrderDescription().c_str() );
+        BOOST_LOG_TRIVIAL(warning) << "TOLD TO ERASE AN ORDER - NOT FOUND";
+        BOOST_LOG_TRIVIAL(warning) << boost::format("this order: %1%") % getOrderDescription().c_str();
     }
 }
 
 Order* Order::findOrderList()
 {
     olist_t *orderlist   = getOrderList();
-    if (orderlist)
+    if (orderlist) {
         return this;
+    }
     Order   *found_order = NULL;
-    for (unsigned int i = 0; i < suborders.size() && found_order == NULL; i++)
+    for (unsigned int i = 0; i < suborders.size() && found_order == NULL; ++i) {
         found_order = suborders[i]->findOrderList();
+    }
     return found_order;
 }
 
 string Order::createFullOrderDescription( int level )
 {
     string tabs;
-    for (int i = 0; i < level; i++)
+    for (int i = 0; i < level; ++i) {
         tabs = tabs+"   ";
+    }
     string desc = tabs+"+"+getOrderDescription()+"\n";
-    for (unsigned int j = 0; j < suborders.size(); j++)
+    for (unsigned int j = 0; j < suborders.size(); ++j) {
         desc = desc+suborders[j]->createFullOrderDescription( level+1 );
+    }
     return desc;
 }
 

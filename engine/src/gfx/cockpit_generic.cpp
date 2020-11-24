@@ -1,3 +1,29 @@
+/**
+ * cockpit_generic.cpp
+ *
+ * Copyright (C) Daniel Horn
+ * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike
+ * contributors
+ *
+ * https://github.com/vegastrike/Vega-Strike-Engine-Source
+ *
+ * This file is part of Vega Strike.
+ *
+ * Vega Strike is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Vega Strike is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
+
 #include "in.h"
 #include "vsfilesystem.h"
 #include "vs_globals.h"
@@ -424,9 +450,9 @@ void Cockpit::updateAttackers()
         //too_many_attackers=false;
     }
     if (isDone) {
-        if (_Universe->AccessCockpit( 0 ) == this)
+        if (_Universe->AccessCockpit( 0 ) == this) {
             too_many_attackers = false;
-        //printf ("There are %d folks attacking player\n",partial_number_of_attackers);
+        }
         number_of_attackers = partial_number_of_attackers;         //reupdate the count
         partial_number_of_attackers = 0;
         too_many_attackers  = max_attackers > 0 && (too_many_attackers || number_of_attackers > max_attackers);
@@ -858,11 +884,11 @@ void Cockpit::SetInsidePanPitchSpeed( float )
 void Cockpit::PackUnitInfo(vector< std::string > &info) const
 {
     info.clear();
-    
+
     // First entry, current ship
     if (GetNumUnits() > 0)
         info.push_back(GetUnitFileName());
-    
+
     // Following entries, ship/location pairs
     for (size_t i=1,n=GetNumUnits(); i<n; ++i) {
         info.push_back(GetUnitFileName(i));
@@ -884,22 +910,22 @@ void Cockpit::UnpackUnitInfo(vector< std::string > &info)
     // Following entries, ship/location pairs
     for (size_t i=1, n=info.size(); i < n; i += 2) {
         filenames.push_back( info[i] );
-        
+
         string location = ((i+1) < n) ? info[i+1] : "";
         string::size_type atpos = location.find_first_of('@');
-        
+
         systemnames.push_back(location.substr(0, atpos));
         basenames.push_back((atpos != string::npos) ? location.substr(atpos+1) : "");
     }
-    
+
     unitfilename.swap(filenames);
     unitsystemname.swap(systemnames);
-    unitbasename.swap(basenames);    
+    unitbasename.swap(basenames);
 }
 
 static const std::string emptystring;
 
-const std::string& Cockpit::GetUnitFileName(unsigned int which) const 
+const std::string& Cockpit::GetUnitFileName(unsigned int which) const
 {
     if ( which >= unitfilename.size() )
         return emptystring;
@@ -907,7 +933,7 @@ const std::string& Cockpit::GetUnitFileName(unsigned int which) const
         return unitfilename[which];
 }
 
-const std::string& Cockpit::GetUnitSystemName(unsigned int which) const 
+const std::string& Cockpit::GetUnitSystemName(unsigned int which) const
 {
     if ( which >= unitsystemname.size() )
         return emptystring;
@@ -915,7 +941,7 @@ const std::string& Cockpit::GetUnitSystemName(unsigned int which) const
         return unitsystemname[which];
 }
 
-const std::string& Cockpit::GetUnitBaseName(unsigned int which) const 
+const std::string& Cockpit::GetUnitBaseName(unsigned int which) const
 {
     if ( which >= unitbasename.size() )
         return emptystring;
@@ -943,10 +969,10 @@ string Cockpit::MakeBaseName(const Unit *base)
         if (base->getFgSubnumber() > 0)
             name += ':' + XMLSupport::tostring(base->getFgSubnumber());
     }
-    
+
     // remove all whitespace, it breaks savegames
     std::replace(name.begin(), name.end(), ' ', '_');
-    
+
     return name;
 }
 

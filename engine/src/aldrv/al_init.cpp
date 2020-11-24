@@ -1,3 +1,29 @@
+/**
+ * al_init.cpp
+ *
+ * Copyright (C) Daniel Horn
+ * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike
+ * contributors
+ *
+ * https://github.com/vegastrike/Vega-Strike-Engine-Source
+ *
+ * This file is part of Vega Strike.
+ *
+ * Vega Strike is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Vega Strike is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
+
 #ifdef HAVE_AL
 #ifdef __APPLE__
 #include <al.h>
@@ -48,18 +74,16 @@ static void fixup_function_pointers( void )
      *             GP("alBombOnError_LOKI");
      *
      *     if(talBombOnError == NULL) {
-     *             VSFileSystem::vs_fprintf(stderr,
-     *                     "Could not GetProcAddress alBombOnError_LOKI\n");
-     *             exit(1);
+     *             BOOST_LOG_TRIVIAL(fatal) << "Could not GetProcAddress alBombOnError_LOKI";
+     *             VSExit(1);
      *     }
      *
      *     talBufferi = (void (*)(ALuint, ALenum, ALint ))
      *             GP("alBufferi_LOKI");
      *
      *     if(talBufferi == NULL) {
-     *             VSFileSystem::vs_fprintf(stderr,
-     *                     "Could not GetProcAddress alBufferi_LOKI\n");
-     *             exit(1);
+     *             BOOST_LOG_TRIVIAL(fatal) << "Could not GetProcAddress alBufferi_LOKI";
+     *             VSExit(1);
      *     }
      *
      *     alCaptureInit    = (ALboolean (*)( ALenum, ALuint, ALsizei )) GP("alCaptureInit_EXT");
@@ -73,8 +97,8 @@ static void fixup_function_pointers( void )
      *
      *     talGenStreamingBuffers = (void (*)(ALsizei n, ALuint *bids )) GP("alGenStreamingBuffers_LOKI");
      *     if( talGenStreamingBuffers == NULL ) {
-     *             VSFileSystem::vs_fprintf( stderr, "Could not GP alGenStreamingBuffers_LOKI\n");
-     *             exit(1);
+     *             BOOST_LOG_TRIVIAL(fatal) << "Could not GP alGenStreamingBuffers_LOKI";
+     *             VSExit(1);
      *     }
      *
      *
@@ -135,7 +159,7 @@ static ALCcontext *context_id = NULL;
 #endif
 bool AUDInit()
 {
-    g_game.sound_enabled = 
+    g_game.sound_enabled =
 #ifdef HAVE_AL
     usedoppler    = game_options.Doppler;
     usepositional = game_options.Positional;
@@ -149,7 +173,7 @@ bool AUDInit()
     scalevel = game_options.DopplerScale;
     g_game.audio_frequency_mode = game_options.frequency;
     maxallowedsingle     = game_options.MaxSingleSounds;
-    g_game.max_sound_sources = 
+    g_game.max_sound_sources =
     maxallowedtotal      = game_options.MaxTotalSounds;
     if (!game_options.Sound && !game_options.Music)
         return false;
@@ -186,12 +210,12 @@ bool AUDInit()
         alGenSources( 1, &cursrc );
         alGetEr = alGetError();
     }
-    
+
     alDistanceModel(AL_INVERSE_DISTANCE_CLAMPED);
-    
+
     g_game.sound_enabled = game_options.Sound;
 
-    
+
     return true;
 #endif
     return false;

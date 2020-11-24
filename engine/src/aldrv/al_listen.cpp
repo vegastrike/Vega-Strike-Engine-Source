@@ -1,3 +1,29 @@
+/**
+ * al_listen.cpp
+ *
+ * Copyright (C) Daniel Horn
+ * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike
+ * contributors
+ *
+ * https://github.com/vegastrike/Vega-Strike-Engine-Source
+ *
+ * This file is part of Vega Strike.
+ *
+ * Vega Strike is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Vega Strike is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
+
 #ifdef HAVE_AL
 #ifdef __APPLE__
 #include <al.h>
@@ -160,11 +186,11 @@ void AUDAddWatchedPlayed( const int sound, const Vector &pos )
     totalplaying++;
     if (sounds[sound].buffer != (ALuint) 0) {
         unsigned int h = hash_sound( sounds[sound].buffer );
-        if (sounds[sound].source == 0)
-            VSFileSystem::vs_fprintf( stderr, "adding null sound" );
+        if (sounds[sound].source == 0) {
+            BOOST_LOG_TRIVIAL(warning) << "adding null sound";
+        }
         playingbuffers[h].push_back( ApproxSound() );
         playingbuffers[h].back().soundname = sound;
-        //VSFileSystem::vs_fprintf (stderr,"pushingback %f",(pos-mylistener.pos).Magnitude());
     }
 #endif
 }
@@ -214,12 +240,13 @@ void AUDListener( const QVector &pos, const Vector &vel )
     mylistener.pos = pos.Cast();
     mylistener.vel = vel;
     if (g_game.sound_enabled) {
-        if (usepositional)
+        if (usepositional) {
             alListener3f( AL_POSITION, scalepos*pos.i, scalepos*pos.j, scalepos*pos.k );
-        if (usedoppler)
+        }
+        if (usedoppler) {
             alListener3f( AL_VELOCITY, scalevel*vel.i, scalevel*vel.j, scalevel*vel.k );
+        }
     }
-    //printf ("(%f,%f,%f) <%f %f %f>\n",pos.i,pos.j,pos.k,vel.i,vel.j,vel.k);
 #endif
 }
 
@@ -237,9 +264,9 @@ void AUDListenerOrientation( const Vector &p, const Vector &q, const Vector &r )
     mylistener.q = q;
     mylistener.r = r;
     ALfloat orient[] = {r.i, r.j, r.k, q.i, q.j, q.k};
-    //printf ("R%f,%f,%f>Q<%f %f %f>",r.i,r.j,r.k,q.i,q.j,q.k);
-    if (g_game.sound_enabled)
+    if (g_game.sound_enabled) {
         alListenerfv( AL_ORIENTATION, orient );
+    }
 #endif
 }
 
@@ -249,8 +276,9 @@ void AUDSoundGain( int sound, float gain, bool music )
     if ( sound >= 0 && sound < (int) sounds.size() ) {
         sounds[sound].music = music;
         float val = gain*(music ? 1.0f : mylistener.gain);
-        if (sounds[sound].source)
+        if (sounds[sound].source) {
             alSourcef( sounds[sound].source, AL_GAIN, val <= 1./16384 ? 0 : val );
+        }
         sounds[sound].gain = gain;
         //alSourcefv(sounds[sound].source,AL_VELOCITY,v);
     }
@@ -261,13 +289,18 @@ void AUDListenerGain( const float ggain )
 {
 #ifdef HAVE_AL
     float gain = ggain;
-    if (gain <= 0) gain = 1./16384;
+    if (gain <= 0) {
+        gain = 1./16384;
+    }
     mylistener.gain = gain;
-    for (unsigned int i = 0, ie = sounds.size(); i < ie; ++i)
-        if (!sounds[i].music)
+    for (unsigned int i = 0, ie = sounds.size(); i < ie; ++i) {
+        if (!sounds[i].music) {
             AUDSoundGain( i, sounds[i].gain, false );
-    if (g_game.sound_enabled)
+        }
+    }
+    if (g_game.sound_enabled) {
         alListenerf( AL_GAIN, 1.0 );
+    }
 #endif
 }
 

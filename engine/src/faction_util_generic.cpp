@@ -1,3 +1,29 @@
+/**
+ * faction_util_generic.cpp
+ *
+ * Copyright (C) Daniel Horn
+ * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike
+ * contributors
+ *
+ * https://github.com/vegastrike/Vega-Strike-Engine-Source
+ *
+ * This file is part of Vega Strike.
+ *
+ * Vega Strike is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Vega Strike is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
+
 #include <assert.h>
 #include "faction_generic.h"
 #include "vsfilesystem.h"
@@ -131,6 +157,7 @@ void FactionUtil::SerializeFaction( FILE *fp )
         VSFileSystem::vs_fprintf( fp, "\n" );
     }
 }
+
 string FactionUtil::SerializeFaction()
 {
     char   temp[8192];
@@ -145,13 +172,16 @@ string FactionUtil::SerializeFaction()
     }
     return ret;
 }
+
 int FactionUtil::numnums( const char *str )
 {
     int count = 0;
-    for (int i = 0; str[i]; i++)
+    for (int i = 0; str[i]; i++) {
         count += (str[i] >= '0' && str[i] <= '9') ? 1 : 0;
+    }
     return count;
 }
+
 void FactionUtil::LoadSerializedFaction( FILE *fp )
 {
     for (unsigned int i = 0; i < factions.size(); i++) {
@@ -163,35 +193,44 @@ void FactionUtil::LoadSerializedFaction( FILE *fp )
             continue;
         }
         for (unsigned int j = 0; j < factions[i]->faction.size(); j++) {
-            if ( 1 != sscanf( tmp2, "%f ", &factions[i]->faction[j].relationship ) )
-                printf( "err" );
+            if ( 1 != sscanf( tmp2, "%f ", &factions[i]->faction[j].relationship ) ) {
+                BOOST_LOG_TRIVIAL(error) << "err";
+            }
             int  k = 0;
             bool founddig = false;
             while (tmp2[k]) {
-                if ( isdigit( tmp2[k] ) )
+                if ( isdigit( tmp2[k] ) ) {
                     founddig = true;
-                if ( founddig && (!isdigit( tmp2[k] ) && tmp2[k] != '.') )
+                }
+                if ( founddig && (!isdigit( tmp2[k] ) && tmp2[k] != '.') ) {
                     break;
+                }
                 k++;
             }
             tmp2 += k;
-            if (*tmp2 == '\r' || *tmp2 == '\n')
+            if (*tmp2 == '\r' || *tmp2 == '\n') {
                 break;
+            }
         }
         delete[] tmp;
     }
 }
+
 bool whitespaceNewline( char *inp )
 {
     for (; *inp; inp++) {
-        if (inp[0] == '\n' || inp[0] == '\r')
+        if (inp[0] == '\n' || inp[0] == '\r') {
             return true;
-        if (inp[0] != ' ' && inp[0] != '\t')
+        }
+        if (inp[0] != ' ' && inp[0] != '\t') {
             break;
+        }
     }
     return false;
 }
+
 string savedFactions;
+
 void FactionUtil::LoadSerializedFaction( char* &buf )
 {
     if (buf == NULL) {

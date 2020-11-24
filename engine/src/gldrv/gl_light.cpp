@@ -1,23 +1,29 @@
-/*
- * Vega Strike
- * Copyright (C) 2001-2002 Daniel Horn & Alan Shieh
+/**
+ * gl_light.cpp
  *
- * http://vegastrike.sourceforge.net/
+ * Copyright (C) 2001-2002 Daniel Horn and Alan Shieh
+ * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike
+ * contributors
  *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * as published by the Free Software Foundation; either version 2
- * of the License, or (at your option) any later version.
+ * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
- * This program is distributed in the hope that it will be useful,
+ * This file is part of Vega Strike.
+ *
+ * Vega Strike is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * Vega Strike is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+ * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
  */
+
+
 #include <stack>
 using std::stack;
 #include <assert.h>
@@ -53,14 +59,14 @@ void /*GFXDRVAPI*/ GFXPushGlobalEffects()
         tmp = GlobalEffectsFreelist.top();
         GlobalEffectsFreelist.pop();
     }
-    
+
     unpicklights();     //costly but necessary to get rid of pesky local enables that shoudln't be tagged to get reenabled
     for (int i = 0; i < GFX_MAX_LIGHTS; i++) {
         tmp[i] = ( 0 != (GLLights[i].options&OpenGLL::GL_ENABLED) );
-        if (GLLights[i].options&OpenGLL::GL_ENABLED)
+        if (GLLights[i].options&OpenGLL::GL_ENABLED) {
             glDisable( GL_LIGHT0+i );
+        }
     }
-    //VSFileSystem::Fprintf (stderr,"PUSH %d",GlobalEffects.size());
     GlobalEffects.push( tmp );
     GlobalEffectsAmbient.push( _ambient_light[_currentContext] );
     GFXLightContextAmbient( GFXColor( 0, 0, 0, 1 ) );
@@ -68,19 +74,22 @@ void /*GFXDRVAPI*/ GFXPushGlobalEffects()
 
 GFXBOOL /*GFXDRVAPI*/ GFXPopGlobalEffects()
 {
-    if ( GlobalEffects.empty() )
+    if ( GlobalEffects.empty() ) {
         return false;
-    //VSFileSystem::Fprintf (stderr,"GES %d",GlobalEffects.size());
-    for (int i = 0; i < GFX_MAX_LIGHTS; i++)
-        if (GlobalEffects.top()[i])
+    }
+    for (int i = 0; i < GFX_MAX_LIGHTS; i++) {
+        if (GlobalEffects.top()[i]) {
             glEnable( GL_LIGHT0+i );
-    
-    if (GlobalEffectsFreelist.size() >= 10)
+        }
+    }
+
+    if (GlobalEffectsFreelist.size() >= 10) {
         delete[] GlobalEffects.top();
-    else
+    } else {
         GlobalEffectsFreelist.push(GlobalEffects.top());
+    }
     GlobalEffects.pop();
-    
+
     GFXLightContextAmbient( GlobalEffectsAmbient.top() );
     GlobalEffectsAmbient.pop();
     return true;

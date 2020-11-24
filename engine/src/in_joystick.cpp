@@ -1,22 +1,27 @@
-/*
- * Vega Strike
+/**
+ * in_joystick.cpp
+ *
  * Copyright (C) 2001-2002 Daniel Horn
+ * Copyright (C) Alexander Rawass <alexannika@users.sourceforge.net>
+ * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike
+ * contributors
  *
- * http://vegastrike.sourceforge.net/
+ * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * as published by the Free Software Foundation; either version 2
- * of the License, or (at your option) any later version.
+ * This file is part of Vega Strike.
  *
- * This program is distributed in the hope that it will be useful,
+ * Vega Strike is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * Vega Strike is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+ * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 /*
@@ -26,6 +31,7 @@
 #include <lin_time.h>
 #include "vegastrike.h"
 #include "vs_globals.h"
+#include "vsfilesystem.h"
 
 #include "in_handler.h"
 #include "in_joystick.h"
@@ -142,12 +148,12 @@ void InitJoystick()
 #ifndef NO_SDL_JOYSTICK
 #ifdef HAVE_SDL
     num_joysticks = SDL_NumJoysticks();
-    printf( "%i joysticks were found.\n\n", num_joysticks );
-    printf( "The names of the joysticks are:\n" );
+    BOOST_LOG_TRIVIAL(info) << boost::format("%1% joysticks were found.\n\n") % num_joysticks;
+    BOOST_LOG_TRIVIAL(info) << "The names of the joysticks are:\n";
 #else
     //use glut
     if (glutDeviceGet( GLUT_HAS_JOYSTICK ) || game_options.force_use_of_joystick) {
-        printf( "setting joystick functionality:: joystick online" );
+        BOOST_LOG_TRIVIAL(info) << "setting joystick functionality:: joystick online";
         glutJoystickFunc( myGlutJoystickCallback, JoystickPollingRate() );
         num_joysticks = 1;
     }
@@ -156,13 +162,13 @@ void InitJoystick()
     for (i = 0; i < MAX_JOYSTICKS; i++) {
 #ifndef NO_SDL_JOYSTICK
 #ifdef HAVE_SDL
-        if (i < num_joysticks)
-            printf( "    %s\n", SDL_JoystickName( i ) );
+        if (i < num_joysticks) {
+            BOOST_LOG_TRIVIAL(info) << boost::format("    %1%\n") % SDL_JoystickName( i );
+        }
 #else
-        if (i < num_joysticks)
-            //SDL_EventState (SDL_JOYBUTTONDOWN,SDL_ENABLE);
-            //SDL_EventState (SDL_JOYBUTTONUP,SDL_ENABLE);
-            printf( "Glut detects %d joystick", i+1 );
+        if (i < num_joysticks) {
+            BOOST_LOG_TRIVIAL(info) << boost::format("Glut detects %1% joystick") % (i+1);
+        }
 #endif
 #endif
         joystick[i] = new JoyStick( i );         //SDL_Init is done in main.cpp
@@ -171,8 +177,9 @@ void InitJoystick()
 
 void DeInitJoystick()
 {
-    for (int i = 0; i < MAX_JOYSTICKS; i++)
+    for (int i = 0; i < MAX_JOYSTICKS; i++) {
         delete joystick[i];
+    }
 }
 JoyStick::JoyStick( int which ) : mouse( which == MOUSE_JOYSTICK )
 {
@@ -207,8 +214,8 @@ JoyStick::JoyStick( int which ) : mouse( which == MOUSE_JOYSTICK )
         return;
     }
     joy = SDL_JoystickOpen( which );     //joystick nr should be configurable
-    if (joy == NULL) {
-        printf( "warning: no joystick nr %d\n", which );
+    if (joy == nullptr) {
+        BOOST_LOG_TRIVIAL(warning) << boost::format("warning: no joystick nr %1%\n") % which;
         joy_available = false;
         return;
     }
@@ -228,7 +235,7 @@ JoyStick::JoyStick( int which ) : mouse( which == MOUSE_JOYSTICK )
     nr_of_hats    = 0;
 #endif //we have GLUT
 #endif
-    printf( "axes: %d buttons: %d hats: %d\n", nr_of_axes, nr_of_buttons, nr_of_hats );
+    BOOST_LOG_TRIVIAL(info) << boost::format("axes: %1% buttons: %2% hats: %3%\n") % nr_of_axes % nr_of_buttons % nr_of_hats;
 }
 void JoyStick::InitMouse( int which )
 {
@@ -269,8 +276,9 @@ void JoyStick::GetMouse( float &x, float &y, float &z, int &buttons )
     int   _mx, _my;
     GetMouseXY( _mx, _my );
     GetMouseDelta( _dx, _dy );
-    if ( 0 && (_dx || _dy) )
-        printf( "x:%d y:%d\n", _dx, _dy );
+    if ( 0 && (_dx || _dy) ) {
+        BOOST_LOG_TRIVIAL(info) << boost::format("x:%1% y:%2%\n") % _dx % _dy;
+    }
     if (!game_options.warp_mouse) {
         fdx = (float) (_dx = _mx-g_game.x_resolution/2);
         def_mouse_sens = 25;

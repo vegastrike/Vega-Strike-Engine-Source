@@ -1,3 +1,28 @@
+/**
+ * OggStream.cpp
+ *
+ * Copyright (C) Daniel Horn
+ * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike
+ * contributors
+ *
+ * https://github.com/vegastrike/Vega-Strike-Engine-Source
+ *
+ * This file is part of Vega Strike.
+ *
+ * Vega Strike is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Vega Strike is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 //
 // C++ Implementation: Audio::OggStream
 //
@@ -28,10 +53,10 @@ namespace Audio {
         if ( file.OpenReadOnly(path, type) <= VSFileSystem::Ok )
             throw FileOpenException("Error opening file \"" + path + "\"");
         oggData = new __impl::OggData(file, getFormatInternal(), 0);
-        
+
         // Cache duration in case ov_time_total gets expensive
         duration = ov_time_total( &oggData->vorbisFile, oggData->streamIndex );
-        
+
         // Allocate read buffer
         readBufferSize = OGG_BUFFER_SIZE;
         readBufferAvail = 0;
@@ -48,19 +73,19 @@ namespace Audio {
     {
         return duration;
     }
-    
+
     double OggStream::getPositionImpl() const
     {
         return ov_time_tell( &oggData->vorbisFile );
     }
-    
+
     void OggStream::seekImpl(double position)
     {
         if (position >= duration)
             throw EndOfStreamException();
-        
+
         readBufferAvail = 0;
-        
+
         switch (ov_time_seek(&oggData->vorbisFile, position)) {
         case 0: break;
         case OV_ENOSEEK: throw Exception("Stream not seekable");
@@ -71,21 +96,21 @@ namespace Audio {
         default:         throw Exception("Unidentified error code");
         }
     }
-    
+
     void OggStream::getBufferImpl(void *&buffer, unsigned int &bufferSize)
     {
         if (readBufferAvail == 0)
             throw NoBufferException();
-        
+
         buffer = readBuffer;
         bufferSize = readBufferAvail;
     }
-    
+
     void OggStream::nextBufferImpl()
     {
         int curStream = oggData->streamIndex;
         long ovr;
-        switch( ovr = ov_read(&oggData->vorbisFile, 
+        switch( ovr = ov_read(&oggData->vorbisFile,
                               (char*)readBuffer, readBufferSize,
                               0, 2, 1, &curStream) )
         {

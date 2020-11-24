@@ -1,23 +1,29 @@
-/*
- * Vega Strike
- * Copyright (C) 2001-2002 Daniel Horn & Alan Shieh
+/**
+ * gl_matrix_hack.cpp
  *
- * http://vegastrike.sourceforge.net/
+ * Copyright (C) 2001-2002 Daniel Horn and Alan Shieh
+ * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike
+ * contributors
  *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * as published by the Free Software Foundation; either version 2
- * of the License, or (at your option) any later version.
+ * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
- * This program is distributed in the hope that it will be useful,
+ * This file is part of Vega Strike.
+ *
+ * Vega Strike is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * Vega Strike is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+ * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
  */
+
+
 #include "gfxlib.h"
 #include "gfx/vec.h"
 #include <stdio.h>
@@ -37,6 +43,7 @@
 #include "gl_matrix.h"
 
 #include "vs_globals.h"
+#include "vsfilesystem.h"
 
 //#include <GL/glu.h>
 
@@ -176,7 +183,6 @@ void evaluateViews()
     rotview[9]  = view[9];
     rotview[10] = view[10];
     //transview[11]=view[11];
-    //VSFileSystem::Fprintf (stderr,"trans %f,%f,%f",transview[3],transview[7],transview[11]);
 #undef M
 }
 
@@ -202,7 +208,7 @@ float GFXGetZPerspective( const float z )
     float left, right, bottom, top, nearval, farval;
     GFXGetFrustumVars( true, &left, &right, &bottom, &top, &nearval, &farval );
 
-    printf( "nearval: %f, left: %f, right: %f, z: %f\n", nearval, left, right, z );
+    BOOST_LOG_TRIVIAL(info) << boost::format("nearval: %1%, left: %2%, right: %3%, z: %4%") % nearval % left % right % z;
 
     float xs = 2*nearval/(right-left);
     float a  = (right+left)/(right-left);
@@ -443,7 +449,6 @@ void GFXGetFrustumVars( bool retr, float *l, float *r, float *b, float *t, float
         *n = nnear;
         *f = ffar;
     }
-    //VSFileSystem::Fprintf (stderr,"<FUN%f,%f,%f,%f,%f,%f>>",near,far,left,right,bot,top);
 }
 
 void GFXFrustum( float *m, float *i, float left, float right, float bottom, float top, float nearval, float farval )

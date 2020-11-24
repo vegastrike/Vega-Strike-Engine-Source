@@ -1,3 +1,29 @@
+/**
+ * vsbox.cpp
+ *
+ * Copyright (C) Daniel Horn
+ * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike
+ * contributors
+ *
+ * https://github.com/vegastrike/Vega-Strike-Engine-Source
+ *
+ * This file is part of Vega Strike.
+ *
+ * Vega Strike is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Vega Strike is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
+
 #include "vsbox.h"
 #include "xml_support.h"
 
@@ -21,7 +47,6 @@ Box::Box( const Vector &corner1, const Vector &corner2 ) : corner_min( corner1 )
     blendDst = ONE;
     Box   *oldmesh;
     string hash_key = string( "@@Box" )+"#"+tostring( corner1 )+"#"+tostring( corner2 );
-    //cerr << "hashkey: " << hash_key << endl;
     if ( 0 != ( oldmesh = (Box*) meshHashTable.Get( hash_key ) ) ) {
         *this = *oldmesh;
         oldmesh->refcount++;
@@ -30,7 +55,7 @@ Box::Box( const Vector &corner1, const Vector &corner2 ) : corner_min( corner1 )
     }
     int a = 0;
     GFXVertex *vertices = new GFXVertex[18];
-    
+
 #define VERTEX( ax, ay, az ) \
     do {vertices[a].x = ax;  \
         vertices[a].y = ay;  \
