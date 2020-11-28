@@ -756,6 +756,10 @@ const char helpmessage[] =
     " --net \t Networking Enabled (Experimental)\n"
     " --debug[=#] \t Enable debugging output, 1 major warnings, 2 medium, 3 developer notes\n"
     " --test-audio \t Run audio tests\n"
+    " --version \t Print the version and exit\n"
+    "\n";
+const char versionmessage[] =
+    "Vega Strike Engine Version 0.8.0.0\n"
     "\n";
 std::string ParseCommandLine( int argc, char **lpCmdLine )
 {
@@ -845,6 +849,9 @@ std::string ParseCommandLine( int argc, char **lpCmdLine )
                     //don't ignore the network section of the config file
                     ignore_network = false;
                 } else if (strcmp( lpCmdLine[i], "--help" ) == 0) {
+                    cout<<helpmessage;
+                    exit( 0 );
+                } else if (strcmp( lpCmdLine[i], "--version" ) == 0) {
                     cout<<helpmessage;
                     exit( 0 );
                 } else if (strncmp( lpCmdLine[i], "--debug", 7 ) == 0) {
