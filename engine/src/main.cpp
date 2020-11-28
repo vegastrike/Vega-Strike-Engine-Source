@@ -852,7 +852,7 @@ std::string ParseCommandLine( int argc, char **lpCmdLine )
                     cout<<helpmessage;
                     exit( 0 );
                 } else if (strcmp( lpCmdLine[i], "--version" ) == 0) {
-                    cout<<helpmessage;
+                    cout<<versionmessage;
                     exit( 0 );
                 } else if (strncmp( lpCmdLine[i], "--debug", 7 ) == 0) {
                     if (lpCmdLine[i][7] == 0) {
