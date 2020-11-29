@@ -10,8 +10,6 @@ public:
     // Constructors
         Nebula( const char *unitfile, bool SubU, int faction, Flightgroup *fg = NULL, int fg_snumber = 0 );
 
-        friend class UnitFactory;
-
 protected:
     // Method
     static void beginElement( void *Userdata, const XML_Char *name, const XML_Char **atts );

@@ -57,7 +57,6 @@ class UnitCollection;
 template < class UnitType >
 class GameUnit : public UnitType
 {
-    friend class UnitFactory;
 protected:
 
 public:

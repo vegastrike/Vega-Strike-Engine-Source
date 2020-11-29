@@ -40,7 +40,6 @@ protected:
     bool  had_target;
     signed char retarget;
 public:
-/// constructor only to be called by UnitFactory
     Missile( const char *filename,
                  int faction,
                  const string &modifications,
@@ -53,8 +52,6 @@ public:
 
     Missile( std::vector< Mesh* >m, bool b, int i) :
         GameUnit(m, b, i) {}
-
-    friend class UnitFactory;
 
 public:
     virtual void Kill( bool erase = true );

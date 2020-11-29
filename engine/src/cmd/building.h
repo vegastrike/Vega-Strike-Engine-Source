@@ -39,8 +39,6 @@ public:
               const std::string &unitModifications = std::string( "" ),
               Flightgroup *fg = NULL );
 
-    friend class UnitFactory;
-
 public:
 
     virtual enum clsptr isUnit() const

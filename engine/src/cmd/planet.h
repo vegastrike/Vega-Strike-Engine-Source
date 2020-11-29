@@ -45,10 +45,8 @@ public:
     UnitCollection satellites = UnitCollection();
 
 public:
-/// default constructor - only to be called by UnitFactory
     Planet();
 
-/// constructor - only to be called by UnitFactory
     Planet( QVector x,
                 QVector y,
                 float vely,
@@ -90,7 +88,6 @@ public:
 
     virtual ~Planet();
 
-    friend class UnitFactory;
     friend class PlanetaryOrbit;
   
   

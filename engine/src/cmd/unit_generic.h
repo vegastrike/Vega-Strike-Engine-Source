@@ -292,7 +292,6 @@ public:
     void Init();
     void Init( const char *filename, bool SubUnit, int faction, std::string customizedUnit = std::string(
                    "" ), Flightgroup *flightgroup = NULL, int fg_subnumber = 0, std::string *netxml = NULL );
-    friend class UnitFactory;
 //table can be NULL, but setting it appropriately may increase performance
     void LoadRow( class CSVRow&row, std::string unitMod, std::string*netxml = NULL );
 

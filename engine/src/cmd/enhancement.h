@@ -19,7 +19,6 @@ public:
         this->filename = filename;
     }
 
-    friend class UnitFactory;
 protected:
     std::string filename;
     virtual enum clsptr isUnit() const
