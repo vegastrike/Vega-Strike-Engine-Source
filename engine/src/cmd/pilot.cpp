@@ -1,3 +1,29 @@
+/**
+ * pilot.cpp
+ *
+ * Copyright (C) Daniel Horn
+ * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike
+ * contributors
+ *
+ * https://github.com/vegastrike/Vega-Strike-Engine-Source
+ *
+ * This file is part of Vega Strike.
+ *
+ * Vega Strike is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Vega Strike is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
+
 #include "faction_generic.h"
 #include "unit_generic.h"
 #include "pilot.h"
@@ -6,6 +32,7 @@
 #include "cmd/unit_util.h"
 #include "configxml.h"
 #include "universe.h"
+#include "vsfilesystem.h"
 #include <vector>
 
 Pilot::Pilot( int faction )
@@ -76,8 +103,13 @@ void Pilot::DoHit( Unit *parent, void *aggressor, int faction )
 }
 float Pilot::getAnger( const Unit *parent, const Unit *target ) const
 {
+    float rel = 0.0f;
+    if (target == nullptr)
+    {
+        BOOST_LOG_TRIVIAL(warning) << "Pilot::getAnger(): target is null";
+        return 0.0f;
+    }
     relationmap::const_iterator iter = effective_relationship.find( target );
-    float rel = 0;
     if ( iter != effective_relationship.end() )
         rel = iter->second;
     if ( _Universe->isPlayerStarship( target ) ) {
@@ -129,6 +161,11 @@ float Pilot::getAnger( const Unit *parent, const Unit *target ) const
 
 float Pilot::GetEffectiveRelationship( const Unit *parent, const Unit *target )  const
 {
+    if (target == nullptr)
+    {
+        BOOST_LOG_TRIVIAL(warning) << "Pilot::GetEffectiveRelationship(): target is null";
+        return 0.0f;
+    }
     return getAnger( parent, target )+UnitUtil::getFactionRelation( parent, target );
 }
 
