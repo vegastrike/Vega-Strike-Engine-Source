@@ -120,15 +120,7 @@ using namespace Orders;
 
 extern void DestroyMount( Mount* );
 
-void Mount::SetMountPosition( const Vector &v )
-{
-    pos = v;
-}
 
-void Mount::SetMountOrientation( const Quaternion &t )
-{
-    orient = t;
-}
 
 
 Unit::graphic_options::graphic_options()
@@ -3822,20 +3814,7 @@ void Unit::SelectAllWeapon( bool Missile )
                 mounts[i].Activate( Missile );
 }
 
-void Mount::Activate( bool Missile )
-{
-    if ( type->isMissile() == Missile )
-        if (status == INACTIVE)
-            status = ACTIVE;
-}
 
-///Sets this gun to inactive, unless unchosen or destroyed
-void Mount::DeActive( bool Missile )
-{
-    if ( type->isMissile() == Missile )
-        if (status == ACTIVE)
-            status = INACTIVE;
-}
 
 // TODO: candidate for deletion
 void Unit::UnFire()
