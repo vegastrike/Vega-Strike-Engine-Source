@@ -73,7 +73,7 @@ void Unit::RemoveFromSystem()
             activeStarSystem->collide_map[locind]->erase( this->location[locind] );
             set_null( this->location[locind] );
         }
-    for (int j = 0; j < GetNumMounts(); ++j)
+    for (int j = 0; j < getNumMounts(); ++j)
         if (mounts[j].type->type == weapon_info::BEAM)
             if (mounts[j].ref.gun)
                 mounts[j].ref.gun->RemoveFromSystem( true );

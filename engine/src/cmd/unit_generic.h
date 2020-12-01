@@ -33,6 +33,7 @@
 #ifndef _UNIT_H_
 #define _UNIT_H_
 
+#include "armed.h"
 #include "damageable.h"
 #include "drawable.h"
 #include "movable.h"
@@ -71,11 +72,11 @@ void UncheckUnit( class Unit*un );
 #include "collide_map.h"
 #include "SharedPool.h"
 
-
 extern char * GetUnitDir( const char *filename );
 extern float capship_size;
 
 Unit* getMasterPartList();
+bool CloseEnoughToAutotrack( Unit *me, Unit *targ, float &cone );
 
 //A stupid struct that is only for grouping 2 different types of variables together in one return value
 class CargoColor
@@ -138,7 +139,8 @@ struct PlanetaryOrbitData;
  * the aistate indicates how the unit will behave in the upcoming phys frame
  */
 
-class Unit : public Drawable, public Damageable, public Movable
+// TODO: move Armed to subclasses
+class Unit : public Armed, public Drawable, public Damageable, public Movable
 {
 protected:
 //How many lists are referencing us
@@ -253,13 +255,8 @@ public:
     un_iter getSubUnits();
     un_kiter viewSubUnits() const;
 #define NO_MOUNT_STAR
-    std::vector< Mount >mounts;
-    float gunspeed;
-    float gunrange;
-    float missilerange;
     bool  inertialmode;
-    char  turretstatus;
-    bool  autopilotactive;
+    bool autopilotactive;
 
     bool isSubUnit() const
     {
@@ -279,10 +276,7 @@ public:
                          bool force_change_on_nothing,
                          bool gen_downgrade_list );
     void ImportPartList( const std::string &category, float price, float pricedev, float quantity, float quantdev );
-    int GetNumMounts() const
-    {
-        return mounts.size();
-    }
+
     void ClearMounts();
 //Loads a user interface for the user to upgrade his ship
 //Uses base stuff -> only in Unit
@@ -795,8 +789,7 @@ public:
 //current energy
     float  energy;
 protected:
-//Activates all guns of that size
-    void ActivateGuns( const weapon_info*, bool Missile );
+
 
 //The radar limits (range, cone range, etc)
 //the current order
@@ -812,29 +805,10 @@ protected:
 
 
 public:
-//resets average gun speed (in event of weapon change
-    void setAverageGunSpeed();
-    int LockMissile() const;             //-1 is no lock necessary 1 is locked
-    void LockTarget( bool myboo );
-    bool TargetLocked( const Unit *checktarget = NULL ) const;
-    bool TargetTracked( const Unit *checktarget = NULL );
-    float TrackingGuns( bool &missileLock );
-//Changes currently selected weapon
-    void ToggleWeapon( bool Missile, bool forward = true );
-//Selects all weapons
-    void SelectAllWeapon( bool Missile );
-//Gets the average gun speed of the unit::caution SLOW
-    void getAverageGunSpeed( float &speed, float &grange, float &mrange ) const;
 
-//Finds the position from the local position if guns are aimed at it with speed
-    QVector PositionITTS( const QVector &firingposit, Vector firingvelocity, float gunspeed, bool smooth_itts ) const;
 //returns percentage of course deviation for contraband searches.  .5 causes error and 1 causes them to get mad
 
-//Fires all active guns that are or arent Missiles
-//if bitmask is (1<<31) then fire off autotracking of that type;
-    void Fire( unsigned int bitmask, bool beams_target_owner = false );
-//Stops all active guns from firing
-    void UnFire();
+
 
 
 /*

@@ -47,8 +47,14 @@ void Ikarus::ExecuteStrategy( Unit *target )
 void Ikarus::WillFire( Unit *target )
 {
     bool  missilelockp = false;
-    if ( ShouldFire( target, missilelockp ) )     //this is a function from fire.cpp  you probably want to write a better one
+    if ( ShouldFire( target, missilelockp ) ) {
+        // this is a function from fire.cpp  you probably want to write a better one
+        // Roy Falk - This function was actually in unit_generic and moved to armed
+        // The false is coerced into unsigned int for the bitmask.
+        // I suspect that while this compiled, the boolean was not meant to do apply to the first parameter but to the second one -
+        // either beams_target_owner or listen_to_owner
         parent->Fire( false );
+    }
     if (missilelockp) {
         parent->Fire( true );         //if missiles locked fire
         parent->ToggleWeapon( true );

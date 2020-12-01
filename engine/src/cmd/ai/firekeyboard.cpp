@@ -1666,7 +1666,7 @@ void FireKeyboard::Execute()
             if (!allow_special_with_weapons) {
                 bool special = false;
                 bool normal  = false;
-                int  nm = parent->GetNumMounts();
+                int  nm = parent->getNumMounts();
                 int  i;
                 for (i = 0; i < nm; ++i)
                     if (parent->mounts[i].status == Mount::ACTIVE) {

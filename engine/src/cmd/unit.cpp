@@ -273,7 +273,7 @@ void GameUnit::DrawNow( const Matrix &mato, float lod )
     if (cmas == 0)
         cmas = 1;
         Vector Scale( 1, 1, 1 );         //Now, HaloSystem handles that
-    int    nummounts = this->GetNumMounts();
+    int    nummounts = this->getNumMounts();
     Matrix wmat = this->WarpMatrix( mat );
     for (i = 0; (int) i < nummounts; i++) {
         Mount *mahnt = &this->mounts[i];
@@ -510,7 +510,7 @@ void GameUnit::Draw( const Transformation &parent, const Matrix &parentMatrix )
      *  delete tmpiter;
      **/
     if (cam_setup_phase) return;
-    int nummounts = this->GetNumMounts();
+    int nummounts = this->getNumMounts();
     for (i = 0; (int) i < nummounts; i++) {
         Mount *mahnt = &this->mounts[i];
         if (game_options.draw_weapons && On_Screen)

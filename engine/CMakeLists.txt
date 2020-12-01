@@ -200,6 +200,7 @@ SET(LIBCMD_SOURCES
     src/cmd/container.cpp
     src/cmd/csv.cpp
     src/cmd/mount.cpp
+    src/cmd/armed.cpp
     src/cmd/role_bitmask.cpp
     src/cmd/unit_collide.cpp
     src/cmd/unit_const_cache.cpp

@@ -27,10 +27,12 @@
 #define MOUNT_H
 
 #include "collide_map.h"
+#include "gfx/quaternion.h"
 
 class Beam;
 class weapon_info;
-
+class Unit;
+class Mesh;
 
 class Mount
 {

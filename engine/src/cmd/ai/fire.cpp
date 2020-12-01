@@ -776,7 +776,7 @@ void FireAt::Execute()
         istargetjumpableplanet = isJumpablePlanet( targ );
         if (targ->CloakVisible() > .8 && targ->hull >= 0) {
             had_target = true;
-            if (parent->GetNumMounts() > 0)
+            if (parent->getNumMounts() > 0)
                 if (!istargetjumpableplanet)
                     shouldfire |= ShouldFire( targ, missilelock );
         } else {
@@ -791,7 +791,7 @@ void FireAt::Execute()
         lastchangedtarg = -100000;
     }
     PossiblySwitchTarget( istargetjumpableplanet );
-    if ( (!istargetjumpableplanet) && parent->GetNumMounts() > 0 )
+    if ( (!istargetjumpableplanet) && parent->getNumMounts() > 0 )
         FireWeapons( shouldfire, missilelock );
 }
 

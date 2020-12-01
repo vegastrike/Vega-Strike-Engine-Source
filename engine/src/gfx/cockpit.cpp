@@ -659,7 +659,7 @@ void GameCockpit::DrawTargetBox(const Radar::Sensor& sensor)
             DrawITTSMark(scatter, p, q, iLoc, trackcolor);
         }
         else {	// per-mount ITTS
-            int nummounts = player->GetNumMounts();
+            int nummounts = player->getNumMounts();
             if (draw_line_to_itts) {
                 for (int i = 0; i < nummounts; i++) {
                     if ( (player->mounts[i].status == Mount::ACTIVE)

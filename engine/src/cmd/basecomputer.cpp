@@ -3453,7 +3453,7 @@ bool UpgradeOperationMountDialog::processWindowCommand( const EventCommandId &co
 //Select the mount to use for selling.
 void BaseComputer::BuyUpgradeOperation::selectMount( void )
 {
-    if (m_newPart->GetNumMounts() <= 0) {
+    if (m_newPart->getNumMounts() <= 0) {
         //Part doesn't need a mount point.
         gotSelectedMount( 0 );
         return;
@@ -3471,7 +3471,7 @@ void BaseComputer::BuyUpgradeOperation::selectMount( void )
     //Fill the dialog picker with the mount points.
     SimplePicker *picker = static_cast< SimplePicker* > ( dialog->window()->findControlById( "Picker" ) );
     assert( picker != NULL );
-    for (int i = 0; i < playerUnit->GetNumMounts(); i++) {
+    for (int i = 0; i < playerUnit->getNumMounts(); i++) {
         //Mount is selectable if we can upgrade with the new part using that mount.
         double     percent;             //Temp.  Not used.
         const bool selectable = playerUnit->canUpgrade( m_newPart,
@@ -3646,7 +3646,7 @@ static bool matchCargoToWeapon( const std::string &cargoName, const std::string 
 //Select the mount to use for selling.
 void BaseComputer::SellUpgradeOperation::selectMount( void )
 {
-    if (m_newPart->GetNumMounts() <= 0) {
+    if (m_newPart->getNumMounts() <= 0) {
         //Part doesn't need a mount point.
         gotSelectedMount( 0 );
         return;
@@ -3666,7 +3666,7 @@ void BaseComputer::SellUpgradeOperation::selectMount( void )
     assert( picker != NULL );
     int mount = -1;                     //The mount if there was only one.
     int selectableCount  = 0;
-    for (int i = 0; i < playerUnit->GetNumMounts(); i++) {
+    for (int i = 0; i < playerUnit->getNumMounts(); i++) {
         //Whether or not the entry is selectable -- the same as the thing we are selling.
         bool   selectable = false;
 
@@ -3682,7 +3682,7 @@ void BaseComputer::SellUpgradeOperation::selectMount( void )
                 (playerUnit->mounts[i].ammo == -1) ? string( "" ) : string( ( " ammo: "+tostring( playerUnit->mounts[i].ammo ) ) );
             mountName += ammoexp;
             if (partUnit) {
-                if ( partUnit->GetNumMounts() ) {
+                if ( partUnit->getNumMounts() ) {
                     if (partUnit->mounts[0].type == playerUnit->mounts[i].type) {
                         selectable = true;
                         selectableCount++;
@@ -5528,7 +5528,7 @@ void showUnitStats( Unit *playerUnit, string &text, int subunitlevel, int mode, 
     }
     //let's go through all mountpoints
     {
-        for (int i = 0; i < playerUnit->GetNumMounts(); i++) {
+        for (int i = 0; i < playerUnit->getNumMounts(); i++) {
             if (!mode) {
                 PRETTY_ADD( " #c0:1:.3#[#-c", i+1, 0 );
                 text += "#c0:1:.3#]#-c #c0:1:1#"+lookupMountSize( playerUnit->mounts[i].size )+"#-c";
@@ -5542,7 +5542,7 @@ void showUnitStats( Unit *playerUnit, string &text, int subunitlevel, int mode, 
         text += "#n#"+prefix+"MOUNTED:";          //need brace for namespace issues on VC++
     {
         if (anyweapons) {
-            for (int i = 0; i < playerUnit->GetNumMounts(); i++) {
+            for (int i = 0; i < playerUnit->getNumMounts(); i++) {
                 const weapon_info *wi = playerUnit->mounts[i].type;
                 if ( (!wi) || (wi->weapon_name == "") ) {
                     continue;

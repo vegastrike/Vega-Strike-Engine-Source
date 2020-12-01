@@ -29,7 +29,7 @@ void TurretAI::Execute()
         parent->getAverageGunSpeed( speed, range, mrange );
         float tspeed, trange, tmrange;
         Unit *gun;
-        if (parent->GetNumMounts() == 0) {
+        if (parent->getNumMounts() == 0) {
             speed  = 1;
             range  = 1;
             mrange = 1;                             //not much
@@ -52,7 +52,7 @@ void TurretAI::Execute()
         static float missile_prob =
             XMLSupport::parse_float( vs_config->getVariable( "AI", "Firing", "TurretMissileProbability", ".05" ) );
         FaceTargetITTS::Execute();
-        if (parent->GetNumMounts() > 0) {
+        if (parent->getNumMounts() > 0) {
             Vector  R( parent->GetTransformation().getR() );
             QVector Pos( targ->Position()-parent->Position() );
             double  mag = Pos.Magnitude();
@@ -79,7 +79,7 @@ void TurretAI::Execute()
         }
         if (targ->hull < 0)
             parent->Target( NULL );
-    } else if (hadFired && parent->GetNumMounts() > 0) {
+    } else if (hadFired && parent->getNumMounts() > 0) {
         // When we get a kill, we must stop firing
         parent->UnFire();
         hadFired = false;

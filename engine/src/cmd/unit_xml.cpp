@@ -2024,7 +2024,7 @@ void Unit::LoadXML( VSFileSystem::VSFile &f, const char *modifications, string *
         static bool half_sounds = XMLSupport::parse_bool( vs_config->getVariable( "audio", "every_other_mount", "false" ) );
         if (a%2 == parity) {
             int b = a;
-            if ( a%4 == 2 && (int) a < (GetNumMounts()-1) )
+            if ( a%4 == 2 && (int) a < (getNumMounts()-1) )
                 if (mounts[a].type->type != weapon_info::PROJECTILE && mounts[a+1].type->type != weapon_info::PROJECTILE)
                     b = a+1;
             mounts[b].sound = AUDCreateSound( mounts[b].type->sound, mounts[b].type->type != weapon_info::PROJECTILE );

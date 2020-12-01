@@ -121,7 +121,7 @@ WRAPPED0( std::string, getUnitRole, "INERT" )
 
 WRAPPED1( bool, UnDock, UnitWrapper, unitToDockWith, false )
 WRAPPED0( int, DockedOrDocking, 0 )
-WRAPPED0( int, GetNumMounts, 0 )
+WRAPPED0( int, getNumMounts, 0 )
 EXPORT_UTIL0( UnitWrapper, owner )
 voidEXPORT_UTIL2( performDockingOperations, UnitWrapper, unitToDockWith, int, acootuallydock )
 

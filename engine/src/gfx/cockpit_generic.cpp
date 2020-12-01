@@ -77,7 +77,7 @@ void Cockpit::endElement( void *userData, const XML_Char *name )
 float Unit::computeLockingPercent()
 {
     float most = -1024;
-    for (int i = 0; i < GetNumMounts(); i++)
+    for (int i = 0; i < getNumMounts(); i++)
         if ( mounts[i].type->type == weapon_info::PROJECTILE
             || ( mounts[i].type->size
                 &(weapon_info::SPECIALMISSILE|weapon_info::LIGHTMISSILE|weapon_info::MEDIUMMISSILE|weapon_info::HEAVYMISSILE

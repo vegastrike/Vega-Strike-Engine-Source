@@ -78,7 +78,7 @@ bool Track::HasWeapons() const
 {
     assert(target);
 
-    return (target->GetNumMounts() > 0);
+    return (target->getNumMounts() > 0);
 }
 
 bool Track::HasTurrets() const

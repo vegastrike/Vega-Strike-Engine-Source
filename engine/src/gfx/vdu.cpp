@@ -1586,7 +1586,7 @@ void VDU::DrawWeapon( Unit *parent )
     DrawTargetSpr( drawweapsprite ? parent->getHudImage() : NULL, percent, x, y, w, h );
     GFXDisable( TEXTURE0 );
     GFXDisable( LIGHTING );
-    int nummounts = parent->GetNumMounts();
+    int nummounts = parent->getNumMounts();
     int numave    = 1;
     GFXColor average( 0, 0, 0, 0 );
     for (int i = 0; i < nummounts; i++) {

@@ -312,8 +312,8 @@ static void AddMounts( Unit *thus, Unit::XML &xml, const std::string &mounts )
         static bool half_sounds = XMLSupport::parse_bool( vs_config->getVariable( "audio", "every_other_mount", "false" ) );
         if ( (a&1) == parity ) {
             int b = a;
-            if ( (a&3) == 2 && (int) a < (thus->GetNumMounts()-1) ) {
-                if (thus->mounts[a].type->type != weapon_info::PROJECTILE
+            if ( (a&3) == 2 && (int) a < (thus->getNumMounts()-1) ) {
+                if (thus->mounts[a].type->type != weapon_info::PROJECTILE 
                     && thus->mounts[a+1].type->type != weapon_info::PROJECTILE)
                 {
                     b = a+1;

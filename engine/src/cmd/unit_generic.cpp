@@ -1351,104 +1351,7 @@ bool preEmptiveClientFire( const weapon_info *wi )
     return client_side_fire && wi->type != weapon_info::BEAM && wi->type != weapon_info::PROJECTILE;
 }
 
-void Unit::Fire( unsigned int weapon_type_bitmask, bool listen_to_owner )
-{
-    static bool can_fire_in_spec  = XMLSupport::parse_bool( vs_config->getVariable( "physics", "can_fire_in_spec", "false" ) );
-    static bool can_fire_in_cloak = XMLSupport::parse_bool( vs_config->getVariable( "physics", "can_fire_in_cloak", "false" ) );
-    static bool verbose_debug     = XMLSupport::parse_bool( vs_config->getVariable( "data", "verbose_debug", "false" ) );
-    if ( (cloaking >= 0 && can_fire_in_cloak == false) || (graphicOptions.InWarp && can_fire_in_spec == false) ) {
-        UnFire();
-        return;
-    }
-    unsigned int mountssize = mounts.size();
-    _Universe->whichPlayerStarship( this );
-    vector< int >gunFireRequests;
-    vector< int >missileFireRequests;
-    vector< int >serverUnfireRequests;
-    for (unsigned int counter = 0; counter < mountssize; ++counter) {
-        unsigned int index = counter;
-        Mount *i = &mounts[index];
-        if (i->status != Mount::ACTIVE)
-            continue;
-        if (i->bank == true) {
-            unsigned int best = index;
-            unsigned int j;
-            for (j = index+1; j < mountssize; ++j) {
-                if ( i->NextMountCloser( &mounts[j], this ) ) {
-                    best = j;
 
-                    i->UnFire();
-                    i = &mounts[j];
-                } else {
-                    mounts[j].UnFire();
-                }
-                if (mounts[j].bank == false) {
-                    ++j;
-                    break;
-                }
-            }
-            counter = j-1;                       //will increment to the next one
-            index   = best;
-        }
-        const bool mis = i->type->isMissile();
-        const bool locked_on = i->time_to_lock <= 0;
-        const bool lockable_weapon  = i->type->LockTime > 0;
-        const bool autotracking_gun = (!mis) && 0 != (i->size&weapon_info::AUTOTRACKING) && locked_on;
-        const bool fire_non_autotrackers = ( 0 == (weapon_type_bitmask&ROLES::FIRE_ONLY_AUTOTRACKERS) );
-        const bool locked_missile   = (mis && locked_on && lockable_weapon);
-        const bool missile_and_want_to_fire_missiles = ( mis && (weapon_type_bitmask&ROLES::FIRE_MISSILES) );
-        const bool gun_and_want_to_fire_guns = ( (!mis) && (weapon_type_bitmask&ROLES::FIRE_GUNS) );
-        if (verbose_debug && missile_and_want_to_fire_missiles && locked_missile) {
-            BOOST_LOG_TRIVIAL(trace) << "\n about to fire locked missile \n";
-        }
-        bool want_to_fire =
-            (fire_non_autotrackers || autotracking_gun || locked_missile)
-            && ( (ROLES::EVERYTHING_ELSE&weapon_type_bitmask&i->type->role_bits) || i->type->role_bits == 0 )
-            && ( (locked_on && missile_and_want_to_fire_missiles) || gun_and_want_to_fire_guns );
-        if ( (*i).type->type == weapon_info::BEAM ) {
-            if ( (*i).type->EnergyRate * simulation_atom_var > energy ) {
-                //NOT ONLY IN non-networking mode : anyway, the server will tell everyone including us to stop if not already done
-                (*i).UnFire();
-                continue;
-            }
-        } else
-        //Only in non-networking mode
-        if (i->type->EnergyRate > energy) {
-            if (!want_to_fire) {
-                i->UnFire();
-            }
-
-                continue;
-        }
-        if (want_to_fire) {
-            //If in non-networking mode and mount fire has been accepted or if on server side
-
-
-                //If we are on server or if the weapon has been accepted for fire we fire
-                if ( i->Fire( this, owner == NULL ? this : owner, mis, listen_to_owner ) ) {
-                    //We could only refresh energy on server side or in non-networking mode, on client side it is done with
-                    //info the server sends with ack for fire
-                    //FOR NOW WE TRUST THE CLIENT SINCE THE SERVER CAN REFUSE A FIRE
-                    //if( Network==NULL || SERVER)
-                    if (i->type->type == weapon_info::BEAM) {
-                        if (i->ref.gun)
-                            if ( ( !i->ref.gun->Dissolved() ) || i->ref.gun->Ready() )
-                                energy -= i->type->EnergyRate*simulation_atom_var;
-                    } else if ( i->type->isMissile() ) {    // FIXME  other than beams, only missiles are processed here?
-                        energy -= i->type->EnergyRate;
-                    }
-                    //IF WE REFRESH ENERGY FROM SERVER : Think to send the energy update to the firing client with ACK TO fireRequest
-                    //fire only 1 missile at a time
-                    if (mis) weapon_type_bitmask &= (~ROLES::FIRE_MISSILES);
-                }
-
-        }
-        if ( want_to_fire == false
-            && (i->processed == Mount::FIRED || i->processed == Mount::REQUESTED || i->processed == Mount::PROCESSED) ) {
-            i->UnFire();
-        }
-    }
-}
 
 const string Unit::getFgID()
 {
@@ -1485,81 +1388,11 @@ const std::vector< std::string >& Unit::GetDestinations() const
     return pImage->destination;
 }
 
-float Unit::TrackingGuns( bool &missilelock )
-{
-    float trackingcone = 0;
-    missilelock = false;
-    for (int i = 0; i < GetNumMounts(); ++i) {
-        if ( mounts[i].status == Mount::ACTIVE && (mounts[i].size&weapon_info::AUTOTRACKING) )
-            trackingcone = computer.radar.trackingcone;
-        if (mounts[i].status == Mount::ACTIVE && mounts[i].type->LockTime > 0 && mounts[i].time_to_lock <= 0)
-            missilelock = true;
-    }
-    return trackingcone;
-}
 
-void Unit::setAverageGunSpeed()
-{
-    float mrange = -1;
-    float grange = -1;
-    float speed  = -1;
-    bool  beam   = true;
-    if ( GetNumMounts() ) {
-        grange = 0;
-        speed  = 0;
-        mrange = 0;
-        int nummt = 0;
-        //this breaks the name, but... it _is_ more useful.
-        for (int i = 0; i < GetNumMounts(); ++i)
-            if (mounts[i].status == Mount::ACTIVE || mounts[i].status == Mount::INACTIVE) {
-                if ( mounts[i].type->isMissile() ) {
-                        if (mounts[i].type->Range > mrange)
-                            mrange = mounts[i].type->Range;
-                }
-                else {
-                    if (mounts[i].type->Range > grange)
-                        grange = mounts[i].type->Range;
-                    if (mounts[i].status == Mount::ACTIVE) {
-                        speed += mounts[i].type->Speed;
-                        ++nummt;
-                        beam  &= (mounts[i].type->type == weapon_info::BEAM);
-                    }
-                }
-            }
-        if (nummt) {
-            if (beam)
-                speed = FLT_MAX;
-            else
-                speed = speed/nummt;
-        }
-    }
-    this->missilerange = mrange;
-    this->gunrange     = grange;
-    this->gunspeed     = speed;
-}
 
-QVector Unit::PositionITTS( const QVector &absposit, Vector velocity, float speed, bool steady_itts ) const
-{
-    if (speed == FLT_MAX)
-        return this->Position();
-    float difficultyscale = 1;
-    if (g_game.difficulty < .99)
-        GetVelocityDifficultyMult( difficultyscale );
-    velocity = (cumulative_velocity.Scale( difficultyscale )-velocity);
-    QVector posit( this->Position()-absposit );
-    QVector curguess( posit );
-    for (unsigned int i = 0; i < 3; ++i) {
-        float time = 0;
-        if (speed > 0.001)
-            time = curguess.Magnitude()/speed;
-        if (steady_itts)
-            //** jay
-            curguess = posit+GetVelocity().Cast().Scale( time );
-        else
-            curguess = posit+velocity.Scale( time ).Cast();
-    }
-    return curguess+absposit;
-}
+
+
+
 
 static float tmpsqr( float x )
 {
@@ -1637,7 +1470,7 @@ float Unit::cosAngleFromMountTo( Unit *targ, float &dist ) const
     dist = FLT_MAX;
     float  tmpcos;
     Matrix mat;
-    for (int i = 0; i < GetNumMounts(); ++i) {
+    for (int i = 0; i < getNumMounts(); ++i) {
         float tmpdist = .001;
         Transformation finaltrans( mounts[i].GetMountOrientation(), mounts[i].GetMountLocation().Cast() );
         finaltrans.Compose( cumulative_transformation, cumulative_transformation_matrix );
@@ -1892,12 +1725,7 @@ string Unit::getFullAIDescription()
         return "no order";
 }
 
-void Unit::getAverageGunSpeed( float &speed, float &range, float &mmrange ) const
-{
-    speed   = gunspeed;
-    range   = gunrange;
-    mmrange = missilerange;
-}
+
 
 float Unit::getRelation( const Unit *targ ) const
 {
@@ -3233,8 +3061,8 @@ void Unit::DamageRandSys( float dam, const Vector &vec, float randnum, float deg
         //DAMAGE MOUNT
         if (randnum >= .65 && randnum < .9) {
             pImage->ecm *= float_to_int( dam );
-        } else if ( GetNumMounts() ) {
-            unsigned int whichmount = rand()%GetNumMounts();
+        } else if ( getNumMounts() ) {
+            unsigned int whichmount = rand()%getNumMounts();
             if (randnum >= .9)
                 DestroyMount( &mounts[whichmount] );
             else if (mounts[whichmount].ammo > 0 && randnum >= .75)
@@ -3699,36 +3527,9 @@ void WarpPursuit( Unit *un, StarSystem *sourcess, std::string destination )
 }
 
 //WARNING : WHEN TURRETS WE MAY NOT WANT TO ASK THE SERVER FOR INFOS ! ONLY FOR LOCAL PLAYERS (_Universe-isStarship())
-void Unit::LockTarget( bool myboo )
-{
-    computer.radar.locked = myboo;
-    if ( myboo && computer.radar.canlock == false && false == UnitUtil::isSignificant( Target() ) )
-        computer.radar.locked = false;
-}
 
-bool Unit::TargetLocked( const Unit *checktarget ) const
-{
-    if (!computer.radar.locked)
-        return false;
-    return (checktarget == NULL) || (computer.target == checktarget);
-}
 
-bool Unit::TargetTracked( const Unit *checktarget )
-{
-    static bool must_lock_to_autotrack = XMLSupport::parse_bool(
-        vs_config->getVariable( "physics", "must_lock_to_autotrack", "true" ) );
-    bool we_do_track = computer.radar.trackingactive
-        && ( !_Universe->isPlayerStarship(this) || TargetLocked() || !must_lock_to_autotrack);
-    if (!we_do_track)
-        return false;
-    if (checktarget == NULL)
-        return true;
-    if (computer.target != checktarget)
-        return false;
-    float mycone = computer.radar.trackingcone;
-    we_do_track = CloseEnoughToAutotrack( this, computer.target.GetUnit(), mycone );
-    return we_do_track;
-}
+
 
 
 void Unit::Target( Unit *targ )
@@ -3744,7 +3545,7 @@ void Unit::Target( Unit *targ )
     if (targ) {
         if (targ->activeStarSystem == _Universe->activeStarSystem() || targ->activeStarSystem == NULL) {
             if ( targ != Unit::Target() ) {
-                for (int i = 0; i < GetNumMounts(); ++i)
+                for (int i = 0; i < getNumMounts(); ++i)
                     mounts[i].time_to_lock = mounts[i].type->LockTime;
 
                 computer.target.SetUnit( targ );
@@ -3806,182 +3607,18 @@ void Unit::Cloak( bool loak )
     }
 }
 
-void Unit::SelectAllWeapon( bool Missile )
-{
-    for (int i = 0; i < GetNumMounts(); ++i)
-        if (mounts[i].status < Mount::DESTROYED)
-            if (mounts[i].type->size != weapon_info::SPECIAL)
-                mounts[i].Activate( Missile );
-}
 
 
 
-// TODO: candidate for deletion
-void Unit::UnFire()
-{
-    if (this->GetNumMounts() == 0) {
-        Unit *tur = NULL;
-        for (un_iter i = this->getSubUnits(); (tur = *i) != NULL; ++i)
-            tur->UnFire();
-    } else {
-        _Universe->whichPlayerStarship( this );
-        vector< int >unFireRequests;
-        for (int i = 0; i < GetNumMounts(); ++i) {
-            if (mounts[i].status != Mount::ACTIVE)
-                continue;
-            mounts[i].UnFire();                  //turns off beams;
-        }
-        if ( !unFireRequests.empty() ) {
-        }
-    }
-}
 
-///cycles through the loop twice turning on all matching to ms weapons of size or after size
-void Unit::ActivateGuns( const weapon_info *sz, bool ms )
-{
-    for (int j = 0; j < 2; ++j)
-        for (int i = 0; i < GetNumMounts(); ++i)
-            if (mounts[i].type == sz) {
-                if ( (mounts[i].status < Mount::DESTROYED) && (mounts[i].ammo != 0) && (mounts[i].type->isMissile() == ms) )
-                    mounts[i].Activate( ms );
-                else
-                    sz = mounts[(i+1)%GetNumMounts()].type;
-            }
-}
 
-typedef std::set< int >WeaponGroup;
 
-template < bool FORWARD >
-class WeaponComparator
-{
-public:
-    bool operator()( const WeaponGroup &a, const WeaponGroup &b ) const
-    {
-        if ( a.size() == b.size() ) {
-            for (WeaponGroup::const_iterator iterA = a.begin(), iterB = b.begin();
-                 iterA != a.end() && iterB != b.end();
-                 ++iterA, ++iterB) {
-                if ( (*iterA) < (*iterB) )
-                    return FORWARD;
-                else if ( (*iterB) < (*iterA) )
-                    return !FORWARD;
-            }
-            return false;
-        } else if ( a.size() < b.size() ) {
-            return FORWARD;
-        } else {
-            return !FORWARD;
-        }
-    }
 
-    typedef std::set< WeaponGroup, WeaponComparator< FORWARD > >WeaponGroupSet;
 
-    static bool checkmount( Unit *un, int i, bool missile )
-    {
-        return un->mounts[i].status < Mount::DESTROYED && ( un->mounts[i].type->isMissile() == missile )
-               && un->mounts[i].ammo != 0;
-    }
 
-    static bool isSpecial( const Mount &mount )
-    {
-        return mount.type->size == weapon_info::SPECIAL || mount.type->size == weapon_info::SPECIALMISSILE;
-    }
 
-    static bool notSpecial( const Mount &mount )
-    {
-        return !isSpecial( mount );
-    }
 
-    static void ToggleWeaponSet( Unit *un, bool missile )
-    {
-        if (un->mounts.size() == 0) {
-            Unit *tur = NULL;
-            for (un_iter i = un->getSubUnits(); (tur = *i) != NULL; ++i)
-                ToggleWeaponSet( tur, missile );
-            return;
-        }
-        WeaponGroup    lightMissiles;
-        WeaponGroup    heavyMissiles;
-        WeaponGroup    allWeapons;
-        WeaponGroup    allWeaponsNoSpecial;
-        WeaponGroupSet myset;
-        unsigned int   i;
-        typename WeaponGroupSet::const_iterator iter;
-        BOOST_LOG_TRIVIAL(info) << boost::format("ToggleWeaponSet: %1%") % (FORWARD ? "true" : "false");
-        for (i = 0; i < un->mounts.size(); ++i)
-            if ( checkmount( un, i, missile ) ) {
-                WeaponGroup mygroup;
-                for (unsigned int j = 0; j < un->mounts.size(); ++j)
-                    if (un->mounts[j].type == un->mounts[i].type)
-                        if ( checkmount( un, j, missile ) )
-                            mygroup.insert( j );
-                //WIll ignore if already there.
-                myset.insert( mygroup );
-                allWeapons.insert( i );
-                if ( notSpecial( un->mounts[i] ) )
-                    allWeaponsNoSpecial.insert( i );
-            }
-        const WeaponGroupSet mypairset( myset );
-        for (iter = mypairset.begin(); iter != mypairset.end(); ++iter) {
-            if ( (*iter).size() && notSpecial( un->mounts[( *( (*iter).begin() ) )] ) ) {
-                typename WeaponGroupSet::const_iterator iter2;
-                for (iter2 = mypairset.begin(); iter2 != mypairset.end(); ++iter2) {
-                    if ( (*iter2).size() && notSpecial( un->mounts[( *( (*iter2).begin() ) )] ) ) {
-                        WeaponGroup myGroup;
-                        set_union( (*iter).begin(), (*iter).end(), (*iter2).begin(), (*iter2).end(),
-                                  inserter( myGroup, myGroup.begin() ) );
-                        myset.insert( myGroup );
-                    }
-                }
-            }
-        }
-        static bool allow_special_with_weapons =
-            XMLSupport::parse_bool( vs_config->getVariable( "physics", "special_and_normal_gun_combo", "true" ) );
-        if (allow_special_with_weapons) {
-            myset.insert( allWeapons );
-        }
-        myset.insert( allWeaponsNoSpecial );
-        for (iter = myset.begin(); iter != myset.end(); ++iter) {
-            for (WeaponGroup::const_iterator iter2 = (*iter).begin(); iter2 != (*iter).end(); ++iter2) {
-                BOOST_LOG_TRIVIAL(info) << boost::format("%1$p:%2$s ") % (*iter2) % (un->mounts[*iter2].type->weapon_name.c_str());
-            }
-            BOOST_LOG_TRIVIAL(info) << "\n";
-        }
-        WeaponGroup activeWeapons;
-        BOOST_LOG_TRIVIAL(info) << "CURRENT: ";
-        for (i = 0; i < un->mounts.size(); ++i)
-            if ( un->mounts[i].status == Mount::ACTIVE && checkmount( un, i, missile ) ) {
-                activeWeapons.insert( i );
-                BOOST_LOG_TRIVIAL(info) << boost::format("%1$d:%2$s ") % i % un->mounts[i].type->weapon_name.c_str();
-            }
-        BOOST_LOG_TRIVIAL(info) << "\n";
-        iter = myset.upper_bound( activeWeapons );
-        if ( iter == myset.end() ) {
-            iter = myset.begin();
-        }
-        if ( iter == myset.end() ) {
-            return;
-        }
-        for (i = 0; i < un->mounts.size(); ++i) {
-            un->mounts[i].DeActive( missile );
-        }
-        BOOST_LOG_TRIVIAL(info) << "ACTIVE: ";
-        for (WeaponGroup::const_iterator iter2 = (*iter).begin(); iter2 != (*iter).end(); ++iter2) {
-            BOOST_LOG_TRIVIAL(info) << boost::format("%1$p:%2$s ") % (*iter2) % (un->mounts[*iter2].type->weapon_name.c_str());
-            un->mounts[*iter2].Activate( missile );
-        }
-        BOOST_LOG_TRIVIAL(info) << "\n";
-        BOOST_LOG_TRIVIAL(info) << "ToggleWeapon end...\n";
-    }
-};
 
-void Unit::ToggleWeapon( bool missile, bool forward )
-{
-    if (forward)
-        WeaponComparator< true >::ToggleWeaponSet( this, missile );
-    else
-        WeaponComparator< false >::ToggleWeaponSet( this, missile );
-}
 
 void Unit::SetRecursiveOwner( Unit *target )
 {
@@ -3991,20 +3628,7 @@ void Unit::SetRecursiveOwner( Unit *target )
         su->SetRecursiveOwner( target );
 }
 
-int Unit::LockMissile() const
-{
-    bool missilelock = false;
-    bool dumblock    = false;
-    for (int i = 0; i < GetNumMounts(); ++i) {
-        if ( mounts[i].status == Mount::ACTIVE && mounts[i].type->LockTime > 0 && mounts[i].time_to_lock <= 0
-            &&  mounts[i].type->isMissile() )
-            missilelock = true;
-        else if (mounts[i].status == Mount::ACTIVE && mounts[i].type->LockTime == 0 &&  mounts[i].type->isMissile()
-                 && mounts[i].time_to_lock <= 0)
-            dumblock = true;
-    }
-    return missilelock ? 1 : (dumblock ? -1 : 0);
-}
+
 
 /*
  **********************************************************************************
@@ -4029,7 +3653,7 @@ void Unit::Destroy()
     if (!killed) {
         if (hull >= 0)
             hull = -1;
-        for (int beamcount = 0; beamcount < GetNumMounts(); ++beamcount)
+        for (int beamcount = 0; beamcount < getNumMounts(); ++beamcount)
             DestroyMount( &mounts[beamcount] );
 
 
@@ -4751,7 +4375,7 @@ bool Unit::UpgradeMounts( const Unit *up,
     int  j;
     int  i;
     bool cancompletefully = true;
-    for (i = 0, j = mountoffset; i < up->GetNumMounts() && i < GetNumMounts() /*i should be GetNumMounts(), s'ok*/; ++i, ++j)
+    for (i = 0, j = mountoffset; i < up->getNumMounts() && i < getNumMounts() /*i should be getNumMounts(), s'ok*/; ++i, ++j)
         //only mess with this if the upgrador has active mounts
         if (up->mounts[i].status == Mount::ACTIVE || up->mounts[i].status == Mount::INACTIVE) {
             //make sure since we're offsetting the starting we don't overrun the mounts
@@ -4763,7 +4387,7 @@ bool Unit::UpgradeMounts( const Unit *up,
                        |weapon_info::LIGHTMISSILE
                        |weapon_info::HEAVYMISSILE|weapon_info::CAPSHIPLIGHTMISSILE) ) );
 
-            int jmod = j%GetNumMounts();
+            int jmod = j%getNumMounts();
             if (!downgrade) {
                 //if we wish to add guns instead of remove
                 if (up->mounts[i].type->weapon_name.find( "_UPGRADE" ) == string::npos) {
@@ -4779,7 +4403,7 @@ bool Unit::UpgradeMounts( const Unit *up,
                                 ++numave;                                 //ok now we can compute percentage of used parts
                                 Mount upmount( up->mounts[i] );
                                 if (templ) {
-                                    if (templ->GetNumMounts() > jmod) {
+                                    if (templ->getNumMounts() > jmod) {
                                         if (templ->mounts[jmod].volume != -1)
                                             if (upmount.ammo*upmount.type->volume > templ->mounts[jmod].volume)
                                                 upmount.ammo = (int) ( (templ->mounts[jmod].volume+1)/upmount.type->volume );
@@ -4800,7 +4424,7 @@ bool Unit::UpgradeMounts( const Unit *up,
                                     tmpammo += up->mounts[i].ammo;
                                     if (ismissiletype) {
                                         if (templ) {
-                                            if (templ->GetNumMounts() > jmod) {
+                                            if (templ->getNumMounts() > jmod) {
                                                 if (templ->mounts[jmod].volume != -1) {
                                                     if (templ->mounts[jmod].volume < mounts[jmod].type->volume*tmpammo) {
                                                         tmpammo =
@@ -4860,7 +4484,7 @@ bool Unit::UpgradeMounts( const Unit *up,
                     unsigned int siz = 0;
                     siz = ~siz;
                     if (templ)
-                        if (templ->GetNumMounts() > jmod)
+                        if (templ->getNumMounts() > jmod)
                             siz = templ->mounts[jmod].size;
                     if ( ( (siz&up->mounts[i].size)|mounts[jmod].size ) != mounts[jmod].size ) {
                         if (touchme)
@@ -4877,9 +4501,9 @@ bool Unit::UpgradeMounts( const Unit *up,
                 if (up->mounts[i].type->weapon_name != "MOUNT_UPGRADE") {
                     bool found = false;                     //we haven't found a matching gun to remove
                     ///go through all guns
-                    for (unsigned int k = 0; k < (unsigned int) GetNumMounts(); ++k) {
+                    for (unsigned int k = 0; k < (unsigned int) getNumMounts(); ++k) {
                         //we want to start with bias
-                        int jkmod = (jmod+k)%GetNumMounts();
+                        int jkmod = (jmod+k)%getNumMounts();
                         if (Mount::UNCHOSEN == mounts[jkmod].status)
                             //can't sell weapon that's already been sold/removed
                             continue;
@@ -4925,9 +4549,9 @@ bool Unit::UpgradeMounts( const Unit *up,
                         XMLSupport::parse_bool( vs_config->getVariable( "physics", "can_downgrade_mount_upgrades", "false" ) );
                     if (downmount) {
                         ///go through all guns
-                        for (unsigned int k = 0; k < (unsigned int) GetNumMounts(); ++k) {
+                        for (unsigned int k = 0; k < (unsigned int) getNumMounts(); ++k) {
                             //we want to start with bias
-                            int jkmod = (jmod+k)%GetNumMounts();
+                            int jkmod = (jmod+k)%getNumMounts();
                             if ( (up->mounts[i].size&mounts[jkmod].size) == (up->mounts[i].size) ) {
                                 if (touchme)
                                     mounts[jkmod].size &= (~up->mounts[i].size);
@@ -4942,7 +4566,7 @@ bool Unit::UpgradeMounts( const Unit *up,
                 }
             }
         }
-    if ( i < up->GetNumMounts() )
+    if ( i < up->getNumMounts() )
         cancompletefully = false;          //if we didn't reach the last mount that we wished to upgrade, we did not fully complete
 
     return cancompletefully;
@@ -5193,7 +4817,7 @@ double Unit::Upgrade( const std::string &file, int mountoffset, int subunitoffse
                                        ( (templ->name == "LOAD_FAILED") ? NULL : templ ),
                                        false, false ) )
                 percentage = 0;
-            if (!loop_through_mounts || ( i+1 >= this->GetNumMounts() ) || percentage > 0)
+            if (!loop_through_mounts || ( i+1 >= this->getNumMounts() ) || percentage > 0)
                 break;
         }
     }
@@ -6103,12 +5727,12 @@ bool Unit::RepairUpgradeCargo( Cargo *item, Unit *baseUnit, float *credits )
     double itemPrice = baseUnit ? baseUnit->PriceCargo( item->content ) : item->price;
     if ( isWeapon( item->category ) ) {
         const Unit *upgrade = getUnitFromUpgradeName( item->content, this->faction );
-        if ( upgrade->GetNumMounts() ) {
+        if ( upgrade->getNumMounts() ) {
             double price = itemPrice; //RepairPrice probably won't work for mounts.
             if ( !credits || price <= (*credits) ) {
                 if (credits) (*credits) -= price;
                 const Mount *mnt = &upgrade->mounts[0];
-                unsigned int nummounts = this->GetNumMounts();
+                unsigned int nummounts = this->getNumMounts();
                 bool complete    = false;
                 for (unsigned int i = 0; i < nummounts; ++i)
                     if (mnt->type->weapon_name == this->mounts[i].type->weapon_name) {
@@ -6219,7 +5843,7 @@ vector< CargoColor >& Unit::FilterDowngradeList( vector< CargoColor > &mylist, b
                 }
             }
             if ( NewPart->name != string( "LOAD_FAILED" ) ) {
-                int    maxmountcheck = NewPart->GetNumMounts() ? GetNumMounts() : 1;
+                int    maxmountcheck = NewPart->getNumMounts() ? getNumMounts() : 1;
                 char  *unitdir = GetUnitDir( name.get().c_str() );
                 string templnam = string( unitdir )+".template";
                 string limiternam    = string( unitdir )+".blank";
@@ -7005,7 +6629,7 @@ std::string Unit::mountSerializer( const XMLType &input, void *mythis )
 {
     Unit *un = (Unit*) mythis;
     int   i  = input.w.hardint;
-    if (un->GetNumMounts() > i) {
+    if (un->getNumMounts() > i) {
         string result( lookupMountSize( un->mounts[i].size ) );
         if (un->mounts[i].status == Mount::INACTIVE || un->mounts[i].status == Mount::ACTIVE)
             result += string( "\" weapon=\"" )+(un->mounts[i].type->weapon_name);
@@ -7249,7 +6873,7 @@ void Unit::Repair()
                         } else {
                             double percentage = 0;
                             //don't want to repair these things
-                            if (up->SubUnits.empty() && up->GetNumMounts() == 0) {
+                            if (up->SubUnits.empty() && up->getNumMounts() == 0) {
                                 this->Upgrade( up, 0, 0, 0, true, percentage, makeTemplateUpgrade( this->name,
                                                                                                    this->faction ), false,
                                                false );
@@ -7552,7 +7176,7 @@ void Unit::UpdatePhysics3(const Transformation &trans,
 
   bool locking = false;
   bool touched = false;
-  for (int i = 0; (int) i < GetNumMounts(); ++i) {
+  for (int i = 0; (int) i < getNumMounts(); ++i) {
       // TODO: simplify this if
       if ( ( (false
               && mounts[i].status
@@ -7894,7 +7518,7 @@ float Unit::DealDamageToHull( const Vector &pnt, float damage)
                       const Unit *downgrade =
                           loadUnitByCache( GetCargo( which ).content, FactionUtil::GetFactionIndex( "upgrades" ) );
                       if (downgrade) {
-                          if ( 0 == downgrade->GetNumMounts() && downgrade->SubUnits.empty() ) {
+                          if ( 0 == downgrade->getNumMounts() && downgrade->SubUnits.empty() ) {
                               double percentage = 0;
                               this->Downgrade( downgrade, 0, 0, percentage, NULL );
                             }

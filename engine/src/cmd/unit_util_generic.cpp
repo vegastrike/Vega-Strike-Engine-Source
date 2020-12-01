@@ -824,9 +824,9 @@ float PercentOperational( Unit *un, std::string name, std::string category, bool
     if (!upgrade) return 1.0f;
     if ( isWeapon( category ) ) {
         static std::string loadfailed( "LOAD_FAILED" );
-        if ( upgrade->GetNumMounts() ) {
+        if ( upgrade->getNumMounts() ) {
             const Mount *mnt = &upgrade->mounts[0];
-            unsigned int nummounts = un->GetNumMounts();
+            unsigned int nummounts = un->getNumMounts();
             for (unsigned int i = 0; i < nummounts; ++i)
                 if (mnt->type->weapon_name == un->mounts[i].type->weapon_name) {
                     if (un->mounts[i].status == Mount::DESTROYED)
