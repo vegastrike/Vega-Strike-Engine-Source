@@ -61,7 +61,7 @@ Unit * getAtmospheric( Unit *targ )
         for (un_iter i = _Universe->activeStarSystem()->getUnitList().createIterator();
              (un = *i) != NULL;
              ++i) {
-            if (un->isUnit() == PLANETPTR) {
+            if (un->isUnit() == _UnitType::planet) {
                 if ( ( targ->Position()-un->Position() ).Magnitude() < targ->rSize()*.5 ) {
                     if ( !( ( (Planet*) un )->isAtmospheric() ) ) {
                         return un;
@@ -78,7 +78,8 @@ bool RequestClearence( Unit *parent, Unit *targ, unsigned char sex )
     if ( !targ->DockingPortLocations().size() ) {
         return false;
     }
-    if (targ->isUnit() == PLANETPTR) {
+
+    if (targ->isUnit() == _UnitType::planet) {
         if ( ( (Planet*) targ )->isAtmospheric() && NoDockWithClear() ) {
             targ = getAtmospheric( targ );
             if (!targ) {
@@ -637,7 +638,7 @@ bool FireAt::ShouldFire( Unit *targ, bool &missilelock )
                                                                            "MaximumFiringAngle.maxagg",
                                                                            "18" ) )/180. );                                                                      //Roughly 18 degrees
     float temp   = parent->TrackingGuns( missilelock );
-    bool  isjumppoint = targ->isUnit() == PLANETPTR && ( (Planet*) targ )->GetDestinations().empty() == false;
+    bool  isjumppoint = targ->isUnit() == _UnitType::planet && ( (Planet*) targ )->GetDestinations().empty() == false;
     float fangle = (fireangle_minagg+fireangle_maxagg*agg)/(1.0f+agg);
     bool retval  =
         ( (dist < firewhen)
@@ -713,7 +714,7 @@ void FireAt::FireWeapons( bool shouldfire, bool lockmissile )
 
 bool FireAt::isJumpablePlanet( Unit *targ )
 {
-    bool istargetjumpableplanet = targ->isUnit() == PLANETPTR;
+    bool istargetjumpableplanet = targ->isUnit() == _UnitType::planet;
     if (istargetjumpableplanet) {
         istargetjumpableplanet = ( !( (Planet*) targ )->GetDestinations().empty() ) && (parent->GetJumpStatus().drive >= 0);
     }
@@ -743,7 +744,7 @@ void FireAt::Execute()
     Order::Execute();
     done = tmp;
     Unit *targ;
-    if (parent->isUnit() == UNITPTR) {
+    if (parent->isUnit() == _UnitType::unit) {
         static float cont_update_time   = XMLSupport::parse_float( vs_config->getVariable( "AI", "ContrabandUpdateTime", "1" ) );
         //Will rand() be in the expected range here? -- stephengtuggy 2020-07-25
         if (rand() < RAND_MAX*SIMULATION_ATOM/cont_update_time)

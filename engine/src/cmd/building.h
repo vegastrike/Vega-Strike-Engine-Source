@@ -8,7 +8,7 @@ class Terrain;
 class ContinuousTerrain;
 class Flightgroup;
 
-class Building : public GameUnit< BuildingGeneric >
+class Building : public GameUnit
 {
     // Fields
 protected:
@@ -41,9 +41,9 @@ public:
 
 public:
 
-    virtual enum clsptr isUnit() const
+    enum _UnitType isUnit() const
     {
-        return BUILDINGPTR;
+        return _UnitType::building;
     }
 
     virtual void UpdatePhysics2( const Transformation &trans,

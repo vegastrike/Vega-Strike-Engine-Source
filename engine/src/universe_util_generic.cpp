@@ -164,13 +164,13 @@ Unit * launchJumppoint( string name_string,
                         string squadlogo,
                         string destinations )
 {
-    int clstype = UNITPTR;
+    int clstype = _UnitType::unit;
     if (unittype_string == "planet")
-        clstype = PLANETPTR;
+        clstype = _UnitType::planet;
     else if (unittype_string == "asteroid")
-        clstype = ASTEROIDPTR;
+        clstype = _UnitType::asteroid;
     else if (unittype_string == "nebula")
-        clstype = NEBULAPTR;
+        clstype = _UnitType::nebula;
     CreateFlightgroup cf;
     cf.fg = Flightgroup::newFlightgroup( name_string,
                                          type_string,
@@ -670,7 +670,7 @@ QVector SafeStarSystemEntrancePoint( StarSystem *sts, QVector pos, float radial_
         {
             //fixme, make me faster, use collide map
             for (un_iter i = sts->getUnitList().createIterator(); (un = *i) != NULL; ++i) {
-                if (UnitUtil::isAsteroid( un ) || un->isUnit() == NEBULAPTR)
+                if (UnitUtil::isAsteroid( un ) || un->isUnit() == _UnitType::nebula)
                     continue;
                 double dist = ( pos-un->LocalPosition() ).Magnitude()-un->rSize()-/*def_un_size-*/ radial_size;
                 if (dist < 0) {
@@ -736,7 +736,7 @@ string LookupUnitStat( const string &unitname, const string &faction, const stri
 static std::vector< Unit* >cachedUnits;
 void precacheUnit( string type_string, string faction_string )
 {
-    cachedUnits.push_back( new GameUnit< Unit >( type_string.c_str(), true, FactionUtil::GetFactionIndex( faction_string ) ) );
+    cachedUnits.push_back( new GameUnit( type_string.c_str(), true, FactionUtil::GetFactionIndex( faction_string ) ) );
 }
 Unit * getPlayer()
 {

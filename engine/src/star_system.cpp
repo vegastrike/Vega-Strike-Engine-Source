@@ -291,7 +291,7 @@ unit->cur_sim_queue_slot,
 cur_sim_frame );
         simulation_atom_var = backup*unit->sim_atom_multiplier;
         //BOOST_LOG_TRIVIAL(trace) << boost::format("UnitDrawer::draw(): simulation_atom_var as multiplied = %1%") % simulation_atom_var;
-        (/*(GameUnit< Unit >*)*/ unit)->Draw();
+        (/*(GameUnit*)*/ unit)->Draw();
         interpolation_blend_factor = saved_interpolation_blend_factor;
         simulation_atom_var = backup;
         //BOOST_LOG_TRIVIAL(trace) << boost::format("UnitDrawer::draw(): simulation_atom_var as restored   = %1%") % simulation_atom_var;
@@ -357,7 +357,8 @@ void StarSystem::Draw( bool DrawCockpit )
                 // stephengtuggy 2020-07-25 - Should we just use the standard SIMULATION_ATOM here?
                 simulation_atom_var = backup*unit->sim_atom_multiplier;
                 //BOOST_LOG_TRIVIAL(trace) << boost::format("StarSystem::Draw(): simulation_atom_var as multiplied = %1%") % simulation_atom_var;
-                ( (GameUnit< Unit >*)unit )->GameUnit< Unit >::Draw();
+                //( (GameUnit*)unit )->GameUnit::Draw();
+                unit->Draw();
             }
         }
         interpolation_blend_factor = saved_interpolation_blend_factor;
@@ -656,7 +657,7 @@ void StarSystem::AddUnit( Unit *unit )
 {
     if ( stats.system_faction == FactionUtil::GetNeutralFaction() )
         stats.CheckVitals( this );
-    if ( unit->isPlanet() || unit->isJumppoint() || unit->isUnit() == ASTEROIDPTR) {
+    if ( unit->isPlanet() || unit->isJumppoint() || unit->isUnit() == _UnitType::asteroid) {
         if (!gravitationalUnits().contains(unit))
             gravitationalUnits().prepend( unit );
     }
@@ -1434,8 +1435,8 @@ void StarSystem::UpdateMissiles()
             for ( un_iter ui = getUnitList().createIterator();
                   NULL != ( un = (*ui) );
                   ++ui ) {
-                enum clsptr type = un->isUnit();
-                if (collideroids || type != ASTEROIDPTR )           // could check for more, unless someone wants planet-killer missiles, but what it would change?
+                enum _UnitType type = un->isUnit();
+                if (collideroids || type != _UnitType::asteroid )           // could check for more, unless someone wants planet-killer missiles, but what it would change?
                     discharged_missiles.back()->ApplyDamage( un );
             }
         }

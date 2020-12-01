@@ -3,7 +3,6 @@
 
 #include "unit.h"
 #include "unit_util.h"
-#include "unit_generics.h"
 
 class MissileEffect {
 private:
@@ -27,7 +26,7 @@ private:
 
 
 
-class Missile : public GameUnit< MissileGeneric >
+class Missile : public GameUnit
 {
 protected:
     float time;
@@ -58,7 +57,10 @@ public:
     void Discharge();
     float ExplosionRadius();
 
-//    virtual enum clsptr isUnit() const;
+    enum _UnitType isUnit() const
+    {
+        return _UnitType::asteroid;
+    }
 
     virtual void UpdatePhysics2( const Transformation &trans,
                                  const Transformation &old_physical_state,

@@ -49,7 +49,7 @@ void BaseInterface::Load( const char *filename, const char *time_of_day_hint, co
     if (!inFile) {
         Unit *baseun = this->baseun.GetUnit();
         if (baseun) {
-            if (baseun->isUnit() == PLANETPTR) {
+            if (baseun->isUnit() == _UnitType::planet) {
                 daynight_filename = string( "bases/planet_" )+time_of_day_hint+string( BASE_EXTENSION );
                 inFile  = VSFileSystem::vs_open( daynight_filename.c_str(), "r" );
                 newfile = daynight_filename;
@@ -76,7 +76,7 @@ void BaseInterface::Load( const char *filename, const char *time_of_day_hint, co
         bool   planet = false;
         Unit  *baseun = this->baseun.GetUnit();
         if (baseun)
-            planet = (baseun->isUnit() == PLANETPTR);
+            planet = (baseun->isUnit() == _UnitType::planet);
         string basestring( "bases/unit" );
         if (planet)
             basestring = "bases/planet";

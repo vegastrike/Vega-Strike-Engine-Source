@@ -11,13 +11,17 @@
 
 
 
-class Asteroid : public GameUnit< AsteroidGeneric >
+class Asteroid : public GameUnit
 {
 private:
     unsigned int asteroid_physics_offset;
 
 public:
     Asteroid( const char *filename, int faction, Flightgroup *fg = NULL, int fg_snumber = 0, float difficulty = .01 );
+    enum _UnitType isUnit() const
+    {
+        return _UnitType::asteroid;
+    }
 
 private:
 /// default constructor forbidden

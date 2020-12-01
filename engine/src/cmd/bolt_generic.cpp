@@ -147,15 +147,15 @@ bool Bolt::Collide( Unit *target )
     if ( ( affectedSubUnit = target->rayCollide( prev_position, cur_position, normal, distance ) ) ) {
         //ignore return
         if (target == owner) return false;
-        enum clsptr type = target->isUnit();
-        if (type == NEBULAPTR || type == ASTEROIDPTR) {
+        enum _UnitType type = target->isUnit();
+        if (type == _UnitType::nebula || type == _UnitType::asteroid) {
             static bool collideroids =
                 XMLSupport::parse_bool( vs_config->getVariable( "physics", "AsteroidWeaponCollision", "false" ) );
-            if ( type != ASTEROIDPTR || (!collideroids) )
+            if ( type != _UnitType::asteroid || (!collideroids) )
                 return false;
         }
         static bool collidejump = XMLSupport::parse_bool( vs_config->getVariable( "physics", "JumpWeaponCollision", "false" ) );
-        if ( type == PLANETPTR && (!collidejump) && !target->GetDestinations().empty() )
+        if ( type == _UnitType::planet && (!collidejump) && !target->GetDestinations().empty() )
             return false;
         QVector     tmp = (cur_position-prev_position).Normalize();
         tmp = tmp.Scale( distance );

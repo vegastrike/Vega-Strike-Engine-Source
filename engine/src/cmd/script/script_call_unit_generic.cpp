@@ -180,11 +180,11 @@ varInst* Mission::call_unit( missionNode *node, int mode )
         }
         Unit *my_unit = NULL;
         if (mode == SCRIPT_RUN) {
-            clsptr clstyp = UNITPTR;
+            _UnitType clstyp = _UnitType::unit;
             if (method_id == CMT_UNIT_launchJumppoint || method_id == CMT_UNIT_launchPlanet)
-                clstyp = PLANETPTR;
+                clstyp = _UnitType::planet;
             else if (method_id == CMT_UNIT_launchNebula)
-                clstyp = NEBULAPTR;
+                clstyp = _UnitType::nebula;
             string name_string    = *( (string*) name_vi->object );
             string faction_string = *( (string*) faction_vi->object );
             string type_string    = *( (string*) type_vi->object );
@@ -950,7 +950,7 @@ Unit* Mission::call_unit_launch( CreateFlightgroup *fg, int type, const string &
         hint = par->location;
     for (u = 0; u < fg->nr_ships; u++) {
         Unit *my_unit;
-        if (type == PLANETPTR) {
+        if (type == _UnitType::planet) {
             float radius     = 1;
             char *tex        = strdup( fg->fg->type.c_str() );
             char *nam        = strdup( fg->fg->type.c_str() );
@@ -979,14 +979,14 @@ Unit* Mission::call_unit_launch( CreateFlightgroup *fg, int type, const string &
             free( tex );
             free( nam );
             free( citylights );
-        } else if (type == NEBULAPTR) {
+        } else if (type == _UnitType::nebula) {
             my_unit = new Nebula(
                 fg->fg->type.c_str(), false, faction_nr, fg->fg, u+fg->fg->nr_ships-fg->nr_ships );
-        } else if (type == ASTEROIDPTR) {
+        } else if (type == _UnitType::asteroid) {
             my_unit = new Asteroid(
                 fg->fg->type.c_str(), faction_nr, fg->fg, u+fg->fg->nr_ships-fg->nr_ships, .01 );
         } else {
-            my_unit = new GameUnit< Unit >( fg->fg->type.c_str(), false, faction_nr, string(
+            my_unit = new GameUnit( fg->fg->type.c_str(), false, faction_nr, string(
                                                   "" ), fg->fg, u+fg->fg->nr_ships-fg->nr_ships, NULL );
         }
         units[u] = my_unit;
@@ -1000,7 +1000,7 @@ Unit* Mission::call_unit_launch( CreateFlightgroup *fg, int type, const string &
         pox.j = fg->fg->pos.j+u*fg_radius*3;
         pox.k = fg->fg->pos.k+u*fg_radius*3;
         my_unit->SetPosAndCumPos( pox );
-        if (type == ASTEROIDPTR || type == NEBULAPTR) {
+        if (type == _UnitType::asteroid || type == _UnitType::nebula) {
             my_unit->PrimeOrders();
         } else {
             my_unit->LoadAIScript( fg->fg->ainame );

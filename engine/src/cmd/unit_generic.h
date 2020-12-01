@@ -109,15 +109,15 @@ class AsteroidGeneric;
  * Needed by star system to determine whether current unit
  * is orbitable
  */
-enum clsptr
+enum _UnitType
 {
-    UNITPTR,
-    PLANETPTR,
-    BUILDINGPTR,
-    NEBULAPTR,
-    ASTEROIDPTR,
-    ENHANCEMENTPTR,
-    MISSILEPTR
+    unit,
+    planet,
+    building,
+    nebula,
+    asteroid,
+    enhancement,
+    missile
 };
 
 class Mount
@@ -1236,10 +1236,11 @@ public:
     }
 
 //Is this class a unit
-    virtual enum clsptr isUnit() const
+    virtual enum _UnitType isUnit() const
     {
-        return UNITPTR;
+        return _UnitType::unit;
     }
+
     void Ref();
 //Low level list function to reference the unit as being the target of a UnitContainer or Colleciton
 //Releases the unit from this reference of UnitContainer or Collection
@@ -1251,11 +1252,11 @@ public:
 //sets the full name/fgid for planets
     bool isStarShip() const
     {
-        return isUnit() == UNITPTR;
+        return isUnit() == _UnitType::unit;
     }
     bool isPlanet() const
     {
-        return isUnit() == PLANETPTR;
+        return isUnit() == _UnitType::planet;
     }
     bool isJumppoint() const
     {

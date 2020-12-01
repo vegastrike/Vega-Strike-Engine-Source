@@ -234,7 +234,7 @@ bool Unit::InRange( const Unit *target, double &mm, bool cone, bool cap, bool lo
     if ( ( ( mm-rSize()-target->rSize() ) > computer.radar.maxrange ) || target->rSize() < computer.radar.mintargetsize ) {
         Flightgroup *fg = target->getFlightgroup();
         if ( ( target->rSize() < capship_size || (!cap) ) && (fg == NULL ? true : fg->name != "Base") )
-            return target->isUnit() == PLANETPTR;
+            return target->isUnit() == _UnitType::planet;
     }
     return true;
 }
@@ -350,9 +350,9 @@ bool CrashForceDock( Unit *thus, Unit *dockingUn, bool force )
                              const Vector &smallnormal,
                              float dist )
 {
-    clsptr smltyp = smalle->isUnit();
-    if (smltyp == ENHANCEMENTPTR || smltyp == MISSILEPTR) {
-        if (isUnit() != ENHANCEMENTPTR && isUnit() != MISSILEPTR) {
+    _UnitType smltyp = smalle->isUnit();
+    if (smltyp == _UnitType::enhancement || smltyp == _UnitType::missile) {
+        if (isUnit() != _UnitType::enhancement && isUnit() != _UnitType::missile) {
             smalle->reactToCollision( this, smalllocation, smallnormal, biglocation, bignormal, dist );
             return;
         }
@@ -471,7 +471,7 @@ bool CrashForceDock( Unit *thus, Unit *dockingUn, bool force )
             XMLSupport::parse_float( vs_config->getVariable( "physics", "maxCollisionTorqueMultiplier", ".67" ) ); //value, in seconds of desired maximum recovery time
         static float maxForceMultiplier  =
             XMLSupport::parse_float( vs_config->getVariable( "physics", "maxCollisionForceMultiplier", "5" ) ); //value, in seconds of desired maximum recovery time
-        if ( (smalle->isUnit() != MISSILEPTR) && isnotplayerorhasbeenmintime ) {
+        if ( (smalle->isUnit() != _UnitType::missile) && isnotplayerorhasbeenmintime ) {
             //for torque... smalllocation -- approximation hack of MR^2 for rotational inertia (moment of inertia currently just M)
             Vector torque    = smforce/(smalle->radial_size*smalle->radial_size);
             Vector force     = smforce-torque;
@@ -492,7 +492,7 @@ bool CrashForceDock( Unit *thus, Unit *dockingUn, bool force )
             smalle->ApplyTorque( torque, smalllocation );
             smalle->ApplyForce( force-torque );
         }
-        if ( (this->isUnit() != MISSILEPTR) && isnotplayerorhasbeenmintime ) {
+        if ( (this->isUnit() != _UnitType::missile) && isnotplayerorhasbeenmintime ) {
             //for torque ... biglocation -- approximation hack of MR^2 for rotational inertia
             Vector torque    = thisforce/(radial_size*radial_size);
             Vector force     = thisforce-torque;
@@ -543,7 +543,7 @@ bool CrashForceDock( Unit *thus, Unit *dockingUn, bool force )
             }
         }
         if ( !_Universe->isPlayerStarship( this ) && !_Universe->isPlayerStarship( smalle ) ) {
-            if (this->isUnit() != MISSILEPTR && smalle->isUnit() != MISSILEPTR) {
+            if (this->isUnit() != _UnitType::missile && smalle->isUnit() != _UnitType::missile) {
                 static bool collisionDamageToAI =
                     XMLSupport::parse_bool( vs_config->getVariable( "physics", "collisionDamageToAI", "false" ) );
                 if (!collisionDamageToAI)
@@ -1322,7 +1322,7 @@ void Unit::calculate_extent( bool update_collide_queue )
     if ( !isSubUnit() && update_collide_queue && (maxhull > 0) ) {
         //only do it in Unit::CollideAll UpdateCollideQueue();
     }
-    if (isUnit() == PLANETPTR)
+    if (isUnit() == _UnitType::planet)
         radial_size = tmpmax( tmpmax( corner_max.i, corner_max.j ), corner_max.k );
 }
 
@@ -2237,7 +2237,7 @@ bool Unit::AutoPilotToErrorMessage( const Unit *target,
         failuremessage = err;
         return false;
     }
-    if (target->isUnit() == PLANETPTR) {
+    if (target->isUnit() == _UnitType::planet) {
         const Unit   *targ = *(target->viewSubUnits());
         if (targ && 0 == targ->graphicOptions.FaceCamera)
             return AutoPilotToErrorMessage( targ, ignore_energy_requirements, failuremessage, recursive_level );
@@ -2283,10 +2283,10 @@ bool Unit::AutoPilotToErrorMessage( const Unit *target,
     float   totpercent = 1;
     if (totallength > 1) {
         float apt =
-            (target->isUnit() == PLANETPTR) ? ( autopilot_term_distance+target->rSize()
+            (target->isUnit() == _UnitType::planet) ? ( autopilot_term_distance+target->rSize()
                                                *UniverseUtil::getPlanetRadiusPercent() ) : autopilot_term_distance;
         float aptne     =
-            (target->isUnit() == PLANETPTR) ? ( atd_no_enemies+target->rSize()
+            (target->isUnit() == _UnitType::planet) ? ( atd_no_enemies+target->rSize()
                                                *UniverseUtil::getPlanetRadiusPercent() ) : atd_no_enemies;
         float percent   = (getAutoRSize( this, this )+rSize()+target->rSize()+apt)/totallength;
         float percentne = (getAutoRSize( this, this )+rSize()+target->rSize()+aptne)/totallength;
@@ -2313,8 +2313,8 @@ bool Unit::AutoPilotToErrorMessage( const Unit *target,
             for (un_iter i = ss->getUnitList().createIterator(); (un = *i) != NULL; ++i) {
                 static bool canflythruplanets =
                     XMLSupport::parse_bool( vs_config->getVariable( "physics", "can_auto_through_planets", "true" ) );
-                if ( ( !(un->isUnit() == PLANETPTR
-                         && canflythruplanets) ) && un->isUnit() != NEBULAPTR && ( !UnitUtil::isSun( un ) ) ) {
+                if ( ( !(un->isUnit() == _UnitType::planet
+                         && canflythruplanets) ) && un->isUnit() != _UnitType::nebula && ( !UnitUtil::isSun( un ) ) ) {
                     if (un != this && un != target) {
                         float tdis  = ( start-un->Position() ).Magnitude()-rSize()-un->rSize();
                         float nedis = ( end-un->Position() ).Magnitude()-rSize()-un->rSize();
@@ -3118,8 +3118,8 @@ void Unit::ApplyDamage( const Vector &pnt,
             //cp != NULL
             player     = cp->GetParent();
         }
-        if (computerai && player && computerai->getAIState() && player->getAIState() && computerai->isUnit() == UNITPTR
-            && player->isUnit() == UNITPTR) {
+        if (computerai && player && computerai->getAIState() && player->getAIState() && computerai->isUnit() == _UnitType::unit
+            && player->isUnit() == _UnitType::unit) {
             unsigned char gender;
             vector< Animation* > *anim = computerai->pilot->getCommFaces( gender );
             if (cp) {
@@ -3481,7 +3481,7 @@ void Unit::Kill( bool erasefromsave, bool quitting )
     for (un_iter iter = getSubUnits(); (un = *iter); ++iter)
         un->Kill();
 
-    //if (isUnit() != MISSILEPTR) {
+    //if (isUnit() != _UnitType::missile) {
     //    BOOST_LOG_TRIVIAL(info) << boost::format("UNIT HAS DIED: %1% %2% (file %3%)") % name.get() % fullname % filename.get();
     //}
 
@@ -3622,7 +3622,7 @@ const Unit * makeTemplateUpgrade( string name, int faction )
     if (!lim) {
         lim =
             UnitConstCache::setCachedConst( StringIntKey( limiternam,
-                                                          faction ), new GameUnit< Unit >( limiternam.c_str(), true, faction ) );
+                                                          faction ), new GameUnit( limiternam.c_str(), true, faction ) );
     }
     if (lim->name == LOAD_FAILED)
         lim = NULL;
@@ -3634,7 +3634,7 @@ const Unit * loadUnitByCache( std::string name, int faction )
     const Unit *temprate = UnitConstCache::getCachedConst( StringIntKey( name, faction ) );
     if (!temprate)
         temprate =
-            UnitConstCache::setCachedConst( StringIntKey( name, faction ), new GameUnit< Unit >( name.c_str(), true, faction ) );
+            UnitConstCache::setCachedConst( StringIntKey( name, faction ), new GameUnit( name.c_str(), true, faction ) );
     return temprate;
 }
 
@@ -5037,7 +5037,7 @@ bool Unit::UpgradeSubUnitsWithFactory( const Unit *up, int subunitoffset, bool t
                     Unit *un;                            //make garbage unit
                     //NOT 100% SURE A GENERIC UNIT CAN FIT (WAS GAME UNIT CREATION)
                     //give a default do-nothing unit
-                    ui.preinsert( un = new GameUnit< Unit >( "upgrading_dummy_unit", true, faction ) );
+                    ui.preinsert( un = new GameUnit( "upgrading_dummy_unit", true, faction ) );
                     un->SetFaction( faction );
                     un->curr_physical_state = addToMeCur;
                     un->prev_physical_state = addToMePrev;
@@ -5191,7 +5191,7 @@ double Unit::Upgrade( const std::string &file, int mountoffset, int subunitoffse
     const Unit *up = UnitConstCache::getCachedConst( StringIntKey( file, upgradefac ) );
     if (!up)
         up = UnitConstCache::setCachedConst( StringIntKey( file, upgradefac ),
-                                            new GameUnit< Unit >( file.c_str(), true, upgradefac ) );
+                                            new GameUnit( file.c_str(), true, upgradefac ) );
     unsigned int cargonum;
     Cargo *cargo = GetCargo(file, cargonum);
     if (cargo)
@@ -5203,7 +5203,7 @@ double Unit::Upgrade( const std::string &file, int mountoffset, int subunitoffse
         templ =
             UnitConstCache::setCachedConst( StringIntKey( templnam,
                                                           this->faction ),
-                                           new GameUnit< Unit >( templnam.c_str(), true, this->faction ) );
+                                           new GameUnit( templnam.c_str(), true, this->faction ) );
     }
     free( unitdir );
     double percentage = 0;
@@ -6227,7 +6227,7 @@ vector< CargoColor >& Unit::FilterDowngradeList( vector< CargoColor > &mylist, b
                 NewPart = UnitConstCache::setCachedConst( StringIntKey(
                                                              mylist[i].cargo.GetContent(),
                                                              upgrfac ),
-                                                         new GameUnit< Unit >( mylist[i].cargo.GetContent().c_str(), false,
+                                                         new GameUnit( mylist[i].cargo.GetContent().c_str(), false,
                                                                                   upgrfac ) );
             }
             if ( NewPart->name == string( "LOAD_FAILED" ) ) {
@@ -6235,7 +6235,7 @@ vector< CargoColor >& Unit::FilterDowngradeList( vector< CargoColor > &mylist, b
                     UnitConstCache::getCachedConst( StringIntKey( mylist[i].cargo.GetContent().c_str(), faction ) );
                 if (!NewPart) {
                     NewPart = UnitConstCache::setCachedConst( StringIntKey( mylist[i].cargo.content, faction ),
-                                                             new GameUnit< Unit >( mylist[i].cargo.GetContent().c_str(),
+                                                             new GameUnit( mylist[i].cargo.GetContent().c_str(),
                                                                                       false, faction ) );
                 }
             }
@@ -6250,7 +6250,7 @@ vector< CargoColor >& Unit::FilterDowngradeList( vector< CargoColor > &mylist, b
                         templ =
                             UnitConstCache::setCachedConst( StringIntKey( templnam,
                                                                           faction ),
-                                                           new GameUnit< Unit >( templnam.c_str(), true, this->faction ) );
+                                                           new GameUnit( templnam.c_str(), true, this->faction ) );
                     }
                     if ( templ->name == std::string( "LOAD_FAILED" ) )
                         templ = NULL;
@@ -6259,7 +6259,7 @@ vector< CargoColor >& Unit::FilterDowngradeList( vector< CargoColor > &mylist, b
                     if (downgradelimit == NULL) {
                         downgradelimit = UnitConstCache::setCachedConst( StringIntKey( limiternam,
                                                                                        faction ),
-                                                                        new GameUnit< Unit >( limiternam.c_str(), true,
+                                                                        new GameUnit( limiternam.c_str(), true,
                                                                                                  this->faction ) );
                     }
                     if ( downgradelimit->name == std::string( "LOAD_FAILED" ) )
@@ -6415,7 +6415,7 @@ void Unit::EjectCargo( unsigned int index )
                         ++(fg->nr_ships);
                         ++(fg->nr_ships_left);
                     }
-                    cargo = new GameUnit< Unit >( ans.c_str(), false, faction, "", fg, fgsnumber, NULL );
+                    cargo = new GameUnit( ans.c_str(), false, faction, "", fg, fgsnumber, NULL );
                     cargo->PrimeOrders();
                     cargo->SetAI( new Orders::AggressiveAI( "default.agg.xml" ) );
                     cargo->SetTurretAI();
@@ -6442,10 +6442,10 @@ void Unit::EjectCargo( unsigned int index )
                             ++(fg->nr_ships);
                             ++(fg->nr_ships_left);
                         }
-                        cargo = new GameUnit< Unit >( "eject", false, faction, "", fg, fgsnumber, NULL);
+                        cargo = new GameUnit( "eject", false, faction, "", fg, fgsnumber, NULL);
                     } else {
                         int fac = FactionUtil::GetUpgradeFaction();
-                        cargo = new GameUnit< Unit >( "eject", false, fac, "", NULL, 0, NULL );
+                        cargo = new GameUnit( "eject", false, fac, "", NULL, 0, NULL );
                     }
                     if (owner)
                         cargo->owner = owner;
@@ -6469,7 +6469,7 @@ void Unit::EjectCargo( unsigned int index )
                             ++(fg->nr_ships);
                             ++(fg->nr_ships_left);
                         }
-                        cargo = new GameUnit< Unit >( "return_to_cockpit", false, faction, "", fg, fgsnumber, NULL);
+                        cargo = new GameUnit( "return_to_cockpit", false, faction, "", fg, fgsnumber, NULL);
                         if (owner)
                             cargo->owner = owner;
                         else
@@ -6479,7 +6479,7 @@ void Unit::EjectCargo( unsigned int index )
                         static float ejectcargotime =
                             XMLSupport::parse_float( vs_config->getVariable( "physics", "eject_live_time", "0" ) );
                         if (cargotime == 0.0) {
-                            cargo = new GameUnit< Unit >( "eject", false, fac, "", NULL, 0, NULL);
+                            cargo = new GameUnit( "eject", false, fac, "", NULL, 0, NULL);
                         } else {
                             cargo = new Missile( "eject",
                                                                fac, "",
@@ -7538,7 +7538,7 @@ void Unit::UpdatePhysics3(const Transformation &trans,
   Unit *target = Unit::Target();
   bool  increase_locking   = false;
   if (target && cloaking < 0 /*-1 or -32768*/) {
-      if (target->isUnit() != PLANETPTR) {
+      if (target->isUnit() != _UnitType::planet) {
           Vector TargetPos( InvTransform( cumulative_transformation_matrix, ( target->Position() ) ).Cast() );
           dist_sqr_to_target = TargetPos.MagnitudeSquared();
           TargetPos.Normalize();
@@ -7793,7 +7793,7 @@ float Unit::CalculateNearestWarpUnit( float minmultiplier, Unit **nearest_unit, 
             if (planet == this)
                 continue;
             float shiphack = 1;
-            if (planet->isUnit() != PLANETPTR) {
+            if (planet->isUnit() != _UnitType::planet) {
                 shiphack = def_inv_interdiction;
                 if ( planet->specInterdiction != 0 && planet->graphicOptions.specInterdictionOnline != 0
                     && (planet->specInterdiction > 0 || count_negative_warp_units) ) {
@@ -7949,7 +7949,7 @@ float Unit::DealDamageToHull( const Vector &pnt, float damage)
           static float autoejectpercent =
               XMLSupport::parse_float( vs_config->getVariable( "physics", "autoeject_percent", ".5" ) );
 
-          if (rand() < (RAND_MAX*autoejectpercent) && isUnit() == UNITPTR) {
+          if (rand() < (RAND_MAX*autoejectpercent) && isUnit() == _UnitType::unit) {
               static bool player_autoeject =
                   XMLSupport::parse_bool( vs_config->getVariable( "physics", "player_autoeject", "true" ) );
               if ( faction != neutralfac && faction != upgradesfac

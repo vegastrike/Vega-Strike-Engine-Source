@@ -56,8 +56,8 @@ extern void DealPossibleJumpDamage( Unit *un );
 extern void ActivateAnimation( Unit* );
 void WarpPursuit( Unit *un, StarSystem *sourcess, std::string destination );
 
-template < class UnitType >
-bool GameUnit< UnitType >::TransferUnitToSystem( unsigned int kk, StarSystem* &savedStarSystem, bool dosightandsound )
+
+bool GameUnit::TransferUnitToSystem( unsigned int kk, StarSystem* &savedStarSystem, bool dosightandsound )
 {
     bool ret = false;
     if (pendingjump[kk]->orig == this->activeStarSystem || this->activeStarSystem == NULL) {
@@ -116,7 +116,7 @@ bool GameUnit< UnitType >::TransferUnitToSystem( unsigned int kk, StarSystem* &s
 
                 this->SetCurPosition( pos );
                 ActivateAnimation( jumpnode );
-                if (jumpnode->isUnit() == UNITPTR) {
+                if (jumpnode->isUnit() == _UnitType::unit) {
                     QVector Offset( pos.i < 0 ? 1 : -1,
                                     pos.j < 0 ? 1 : -1,
                                     pos.k < 0 ? 1 : -1 );
@@ -132,7 +132,7 @@ bool GameUnit< UnitType >::TransferUnitToSystem( unsigned int kk, StarSystem* &s
             for (unsigned int jjj = 0; jjj < 2; ++jjj)
                 for (un_iter i = _Universe->activeStarSystem()->getUnitList().createIterator();
                      (tester = *i) != NULL; ++i)
-                    if (tester->isUnit() == UNITPTR && tester != this)
+                    if (tester->isUnit() == _UnitType::unit && tester != this)
                         if ( ( this->LocalPosition()-tester->LocalPosition() ).Magnitude() < this->rSize()+tester->rSize() )
                             this->SetCurPosition( this->LocalPosition()+this->cumulative_transformation_matrix.getR()
                                            *( 4*( this->rSize()+tester->rSize() ) ) );
@@ -145,16 +145,16 @@ bool GameUnit< UnitType >::TransferUnitToSystem( unsigned int kk, StarSystem* &s
             BOOST_LOG_TRIVIAL(debug) << "Unit FAILED remove from star system\n";
 #endif
         }
-        if (this->docked&UnitType::DOCKING_UNITS)
+        if (this->docked&DOCKING_UNITS)
             for (unsigned int i = 0; i < this->pImage->dockedunits.size(); i++) {
                 Unit *unut;
                 if ( NULL != ( unut = this->pImage->dockedunits[i]->uc.GetUnit() ) )
                     unut->TransferUnitToSystem( kk, savedStarSystem, dosightandsound );
             }
-        if ( this->docked&(UnitType::DOCKED|UnitType::DOCKED_INSIDE) ) {
+        if ( this->docked&(DOCKED|DOCKED_INSIDE) ) {
             Unit *un = this->pImage->DockedTo.GetUnit();
             if (!un) {
-                this->docked &= ( ~(UnitType::DOCKED|UnitType::DOCKED_INSIDE) );
+                this->docked &= ( ~(DOCKED|DOCKED_INSIDE) );
             } else {
                 Unit *targ = NULL;
                 for (un_iter i = pendingjump[kk]->dest->getUnitList().createIterator();

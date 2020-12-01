@@ -429,7 +429,7 @@ int main( int argc, char *argv[] )
         InitShipCommands();
     }
     _Universe = new Universe( argc, argv, game_options.galaxy.c_str() );
-    TheTopLevelUnit = new GameUnit<Unit>(0);
+    TheTopLevelUnit = new GameUnit(0);
     _Universe->Loop( bootstrap_first_loop );
 
     //Unregister commands - and cleanup memory

@@ -779,7 +779,7 @@ void Unit::beginElement( const string &name, const AttributeList &attributes )
                 }
             }
             int   upgrfac  = FactionUtil::GetUpgradeFaction();
-            Unit *upgradee = new GameUnit< Unit >( filename.c_str(), true, upgrfac );
+            Unit *upgradee = new GameUnit( filename.c_str(), true, upgrfac );
             Unit::Upgrade( upgradee, moffset, soffset, GetModeFromName( filename.c_str() ), true, percent, NULL );
             upgradee->Kill();
             break;
@@ -1079,7 +1079,7 @@ void Unit::beginElement( const string &name, const AttributeList &attributes )
             }
         }
         indx = xml->units.size();
-        xml->units.push_back( new GameUnit< Unit >( filename.c_str(), true, faction, xml->unitModifications, NULL ) ); //I set here the fg arg to NULL
+        xml->units.push_back( new GameUnit( filename.c_str(), true, faction, xml->unitModifications, NULL ) ); //I set here the fg arg to NULL
         if (xml->units.back()->name == "LOAD_FAILED") {
             xml->units.back()->limits.yaw = 0;
             xml->units.back()->limits.pitch = 0;

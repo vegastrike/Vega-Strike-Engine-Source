@@ -84,7 +84,7 @@ static const string& getFgDirectiveCR( const Unit *my_unit );
 bool isAsteroid( const Unit *my_unit )
 {
     if (!my_unit) return false;
-    return my_unit->isUnit() == ASTEROIDPTR || nameIsAsteroid( my_unit->name );
+    return my_unit->isUnit() == _UnitType::asteroid || nameIsAsteroid( my_unit->name );
 }
 
 bool isCapitalShip( const Unit *my_unit )
@@ -116,7 +116,7 @@ int getPhysicsPriority( Unit *un )
         vs_config->getVariable( "physics", "priorities", "dockable", "1" ) );
 
     float            rad      = un->rSize();
-    clsptr           untype   = un->isUnit();
+    _UnitType           untype   = un->isUnit();
     float            cpdist   = FLT_MAX;
     float            tooclose = 0;
     unsigned int     np = _Universe->numPlayers();
@@ -173,7 +173,7 @@ int getPhysicsPriority( Unit *un )
             || (0 && _Universe->AccessCockpit( i )->GetSaveParent() == un) )
             return PLAYER_PRIORITY;
     }
-    if (untype == MISSILEPTR)
+    if (untype == _UnitType::missile)
         return MISSILE_PRIORITY;
     if ( hasDockingUnits( un ) )
         return DOCKABLE_PRIORITY;
@@ -330,7 +330,7 @@ void orbit( Unit *my_unit, Unit *orbitee, float speed, QVector R, QVector S, QVe
         my_unit->PrimeOrders( new PlanetaryOrbit( my_unit, speed/( 3.1415926536*( S.Magnitude()+R.Magnitude() ) ), 0, R, S,
                                                   center, orbitee ) );
         if (orbitee)
-            if (orbitee->isUnit() == PLANETPTR)
+            if (orbitee->isUnit() == _UnitType::planet)
                 ( (Planet*) orbitee )->AddSatellite( my_unit );
         if ( my_unit->faction != FactionUtil::GetFactionIndex( "neutral" ) ) {
             Order *tmp = new Orders::FireAt( 15.0 );
@@ -691,7 +691,7 @@ bool isDockableUnit( const Unit *my_unit )
                    && isSignificant( my_unit )
                    && !my_unit->isJumppoint()
                )
-               || (my_unit->isUnit() == UNITPTR)
+               || (my_unit->isUnit() == _UnitType::unit)
                || (getFlightgroupName( my_unit ) == "Base")
            )
            && (my_unit->DockingPortLocations().size() > 0);
@@ -701,7 +701,7 @@ bool isCloseEnoughToDock( const Unit *my_unit, const Unit *un )
 {
     static bool superdock = XMLSupport::parse_bool( vs_config->getVariable( "physics", "dock_within_base_shield", "false" ) );
     float dis =
-        (un->isUnit() == PLANETPTR || superdock) ? UnitUtil::getSignificantDistance( my_unit, un ) : UnitUtil::getDistance(
+        (un->isUnit() == _UnitType::planet || superdock) ? UnitUtil::getSignificantDistance( my_unit, un ) : UnitUtil::getDistance(
             my_unit,
             un );
     if ( dis < un->rSize() )
@@ -740,9 +740,9 @@ bool isSignificant( const Unit *my_unit )
 {
     if (!my_unit) return false;
     bool   res = false;
-    clsptr typ = my_unit->isUnit();
+    _UnitType typ = my_unit->isUnit();
     const string &s = getFlightgroupNameCR( my_unit );
-    res = (typ == PLANETPTR || typ == ASTEROIDPTR || typ == NEBULAPTR || s == "Base");
+    res = (typ == _UnitType::planet || typ == _UnitType::asteroid || typ == _UnitType::nebula || s == "Base");
     return res && !isSun( my_unit );
 }
 

@@ -72,24 +72,24 @@ public:
 	int size() const {
 	    return (col->size());
 	}
-        UnitIterator& operator=( const UnitIterator& );
-        inline const UnitIterator operator++( int )
-        {
-            UnitCollection::UnitIterator tmp( *this );
-            advance();
-            return tmp;
-        }
-        inline const UnitIterator& operator++()
-        {
-            advance();
-            return *this;
-        }
-        inline Unit* operator*()
-        {
-            if ( col && it != col->u.end() )
-                return *it;
-            return NULL;
-        }
+    UnitIterator& operator=( const UnitIterator& );
+    inline const UnitIterator operator++( int )
+    {
+        UnitCollection::UnitIterator tmp( *this );
+        advance();
+        return tmp;
+    }
+    inline const UnitIterator& operator++()
+    {
+        advance();
+        return *this;
+    }
+    inline Unit* operator*()
+    {
+        if ( col && it != col->u.end() )
+            return *it;
+        return NULL;
+    }
 
     protected:
         friend class UnitCollection;

@@ -1550,7 +1550,7 @@ void BaseComputer::recalcTitle()
     Unit  *baseUnit  = m_base.GetUnit();
     string baseName;
     if (baseUnit) {
-        if (baseUnit->isUnit() == PLANETPTR) {
+        if (baseUnit->isUnit() == _UnitType::planet) {
             string temp = ( (Planet*) baseUnit )->getHumanReadablePlanetType()+" Planet";
             // think "<planet type> <name of planet>"
             baseName = temp + " " + baseUnit->name;
@@ -3946,7 +3946,7 @@ string buildShipDescription( Cargo &item, std::string &texturedescription )
     current_unit_load_mode = NO_MESH;
 
     BOOST_LOG_TRIVIAL(debug) << "buildShipDescription: creating newPart";
-    Unit  *newPart   = new GameUnit< Unit >( item.GetContent().c_str(), false, 0, newModifications, flightGroup, fgsNumber );
+    Unit  *newPart   = new GameUnit( item.GetContent().c_str(), false, 0, newModifications, flightGroup, fgsNumber );
     current_unit_load_mode = DEFAULT;
     string sHudImage;
     string sImage;
@@ -3987,7 +3987,7 @@ string buildUpgradeDescription( Cargo &item )
     Flightgroup *flightGroup = new Flightgroup();     //sigh
     int    fgsNumber = 0;
     current_unit_load_mode = NO_MESH;
-    Unit  *newPart   = new GameUnit< Unit >( item.GetContent().c_str(), false,
+    Unit  *newPart   = new GameUnit( item.GetContent().c_str(), false,
                                                 FactionUtil::GetUpgradeFaction(), blnk, flightGroup, fgsNumber );
     current_unit_load_mode = DEFAULT;
     string str = "";
@@ -4220,7 +4220,7 @@ string buildCargoDescription( const Cargo &item, BaseComputer &computer, float p
         int cp = _Universe->whichPlayerStarship( computer.m_player.GetUnit() );
         vector<string> highest, lowest;
 
-        const string &baseName = (computer.m_base.GetUnit()->isUnit() == PLANETPTR) ?
+        const string &baseName = (computer.m_base.GetUnit()->isUnit() == _UnitType::planet) ?
               computer.m_base.GetUnit()->name.get()
             : computer.m_base.GetUnit()->getFullname();
 
@@ -4371,7 +4371,7 @@ bool buyShip( Unit *baseUnit,
                                                                                                                         0 ),
                                     Vector( 0, 0, 0 ) );
             Unit *newPart =
-                new GameUnit< Unit >( content.c_str(),
+                new GameUnit( content.c_str(),
                                          false,
                                          baseUnit->faction,
                                          newModifications,
@@ -4641,7 +4641,7 @@ static const char *WeaponTypeStrings[] = {
 
 void showUnitStats( Unit *playerUnit, string &text, int subunitlevel, int mode, Cargo &item )
 {
-    static Unit *blankUnit   = new GameUnit< Unit >( "upgrading_dummy_unit", 1, FactionUtil::GetFactionIndex( "upgrades" ) );
+    static Unit *blankUnit   = new GameUnit( "upgrading_dummy_unit", 1, FactionUtil::GetFactionIndex( "upgrades" ) );
     static float warpenratio = XMLSupport::parse_float( vs_config->getVariable( "physics", "warp_energy_multiplier", "0.12" ) );
     static float warpbleed   = XMLSupport::parse_float( vs_config->getVariable( "physics", "warpbleed", "20" ) );
     static float shield_maintenance_cost =

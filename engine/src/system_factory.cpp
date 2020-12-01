@@ -197,7 +197,7 @@ void SystemFactory::processRing(Star_XML *xml, Object& object, Planet* owner)
     // Get the planet the ring will encircle
     Unit *unit = static_cast<Unit*>(owner);
     if (owner == nullptr) return;
-    if (unit->isUnit() != PLANETPTR) return;
+    if (unit->isUnit() != _UnitType::planet) return;
 
     QVector R(1, 0, 0 );
     QVector S( 0, 1, 0 );
@@ -413,7 +413,7 @@ void SystemFactory::processSpaceElevator(Object& object, Planet* owner)
 
     Unit *unit = static_cast<Unit*>(owner);
 
-    if (owner == nullptr || unit->isUnit() != PLANETPTR) return;
+    if (owner == nullptr || unit->isUnit() != _UnitType::planet) return;
 
 
     char direction = getCharAttribute(object, "direction", 'b');
@@ -566,7 +566,7 @@ void SystemFactory::processEnhancement(string element, Star_XML *xml, Object& ob
 
     if(boost::iequals(element, "unit")) {
         Flightgroup *fg = getStaticBaseFlightgroup(faction);
-        unit = new GameUnit< Unit >( filename.c_str(), false, faction, "", fg, fg->nr_ships-1 );
+        unit = new GameUnit( filename.c_str(), false, faction, "", fg, fg->nr_ships-1 );
         unit->setFullname(fullname);
 
         if(unit->faction != neutralfaction) {
@@ -590,17 +590,11 @@ void SystemFactory::processEnhancement(string element, Star_XML *xml, Object& ob
               boost::iequals(element, "vehicle")) {
 
         if (xml->ct == nullptr && xml->parentterrain != nullptr) // Terrain
-            unit = static_cast<Unit*>(
-                        new Building(xml->parentterrain,
-                                                    boost::iequals(element, "vehicle"),
-                                                    filename.c_str(), false, faction,
-                                                    string("")));
+            unit = new Building(xml->parentterrain, boost::iequals(element, "vehicle"),
+                                filename.c_str(), false, faction, string(""));
         else if(xml->ct != nullptr) // Continuous terrain
-            unit = static_cast<Unit*>(
-                        new Building(xml->ct,
-                                                    boost::iequals(element, "vehicle"),
-                                                    filename.c_str(), false, faction,
-                                                    string("")));
+            unit = new Building(xml->ct, boost::iequals(element, "vehicle"),
+                                filename.c_str(), false, faction, string(""));
 
         unit->EnqueueAI(new Orders::AggressiveAI( "default.agg.xml"));
         unit->SetTurretAI(); // This was only applied to ct in original code

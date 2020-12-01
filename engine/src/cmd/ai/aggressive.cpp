@@ -1364,7 +1364,7 @@ bool CloseEnoughToNavOrDest( Unit *parent, Unit *navUnit, QVector nav )
 {
     static float how_far_to_stop_moving =
         XMLSupport::parse_float( vs_config->getVariable( "AI", "how_far_to_stop_navigating", "100" ) );
-    if (navUnit && navUnit->isUnit() != PLANETPTR) {
+    if (navUnit && navUnit->isUnit() != _UnitType::planet) {
         float dist = UnitUtil::getDistance( navUnit, parent );
         if (dist < SIMULATION_ATOM /*simulation_atom_var?*/ * parent->Velocity.Magnitude() * parent->predicted_priority * how_far_to_stop_moving)
             return true;
@@ -1459,7 +1459,7 @@ void AggressiveAI::ExecuteNoEnemies()
             if (!otherdest) {
                 navDestination = dest;
                 dir = unitdir*( dest->rSize()+parent->rSize() );
-                if (dest->isUnit() == PLANETPTR) {
+                if (dest->isUnit() == _UnitType::planet) {
                     float planetpct = UniverseUtil::getPlanetRadiusPercent();
                     dir *= (planetpct+1.0f);
                     dir += randVector()*parent->rSize()*2*randspacingfactor;

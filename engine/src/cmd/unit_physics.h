@@ -44,8 +44,8 @@
 
 extern unsigned int apply_float_to_unsigned_int( float tmp ); //short fix
 
-template < class UnitType >
-void GameUnit< UnitType >::UpdatePhysics2( const Transformation &trans,
+
+void GameUnit::UpdatePhysics2( const Transformation &trans,
                                            const Transformation &old_physical_state,
                                            const Vector &accel,
                                            float difficulty,
@@ -54,7 +54,7 @@ void GameUnit< UnitType >::UpdatePhysics2( const Transformation &trans,
                                            bool lastframe,
                                            UnitCollection *uc )
 {
-    UnitType::UpdatePhysics2( trans, old_physical_state, accel, difficulty, transmat, cum_vel, lastframe, uc );
+    Unit::UpdatePhysics2( trans, old_physical_state, accel, difficulty, transmat, cum_vel, lastframe, uc );
 
     this->AddVelocity( difficulty );
 
@@ -95,8 +95,8 @@ void GameUnit< UnitType >::UpdatePhysics2( const Transformation &trans,
 
 /****************************** ONLY SOUND/GFX STUFF LEFT IN THOSE FUNCTIONS *********************************/
 
-template < class UnitType >
-void GameUnit< UnitType >::Thrust( const Vector &amt1, bool afterburn )
+
+void GameUnit::Thrust( const Vector &amt1, bool afterburn )
 {
     if (this->afterburntype == 0)
         afterburn = afterburn && this->energy > this->afterburnenergy*simulation_atom_var; //SIMULATION_ATOM; ?
@@ -145,8 +145,8 @@ void GameUnit< UnitType >::Thrust( const Vector &amt1, bool afterburn )
     }
 }
 
-template < class UnitType >
-Vector GameUnit< UnitType >::ResolveForces( const Transformation &trans, const Matrix &transmat )
+
+Vector GameUnit::ResolveForces( const Transformation &trans, const Matrix &transmat )
 {
 #ifndef PERFRAMESOUND
     AUDAdjustSound( this->sound->engine, this->cumulative_transformation.position, this->cumulative_velocity );

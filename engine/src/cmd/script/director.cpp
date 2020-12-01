@@ -148,7 +148,7 @@ void Mission::DirectorShipDestroyed( Unit *unit )
             cf.waves    = fg->nr_waves_left;
             cf.nr_ships = fg->nr_ships;
 
-            call_unit_launch( &cf, UNITPTR, string( "" ) );
+            call_unit_launch( &cf, _UnitType::unit, string( "" ) );
         } else {
             mission->msgcenter->add( "game", "all", "Flightgroup "+fg->name+" destroyed" );
         }

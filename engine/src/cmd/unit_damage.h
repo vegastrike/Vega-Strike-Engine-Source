@@ -35,8 +35,7 @@
 extern unsigned int apply_float_to_unsigned_int( float tmp );  //Short fix
 extern vector< Mesh* >MakeMesh( unsigned int mysize );
 
-template < class UnitType >
-void GameUnit< UnitType >::Split( int level )
+void GameUnit::Split( int level )
 {
     if (game_options.split_dead_subunits)
         for (un_iter su = this->getSubUnits(); *su; ++su)
@@ -121,7 +120,7 @@ void GameUnit< UnitType >::Split( int level )
         tempmeshes.reserve( meshsizes[i] );
         for (unsigned int j = 0; j < meshsizes[i] && k < old.size(); ++j, ++k)
             tempmeshes.push_back( old[k] );
-        this->SubUnits.prepend( splitsub = new GameUnit< Unit >( tempmeshes, true, this->faction ) );
+        this->SubUnits.prepend( splitsub = new GameUnit( tempmeshes, true, this->faction ) );
         splitsub->hull = 1000;
         splitsub->name = "debris";
         splitsub->Mass = game_options.debris_mass*splitsub->Mass/level;
@@ -147,10 +146,9 @@ extern float rand01();
 
 
 
-template < class UnitType >
-float GameUnit< UnitType >::DealDamageToShield( const Vector &pnt, float &damage )
+float GameUnit::DealDamageToShield( const Vector &pnt, float &damage )
 {
-    float percent = UnitType::DealDamageToShield( pnt, damage );
+    float percent = Damageable::DealDamageToShield( pnt, damage );
     if ( !_Universe->isPlayerStarship( this ) ) {
         if (percent) {
             if ( AUDIsPlaying( this->sound->shield ) )
@@ -180,8 +178,8 @@ extern Animation * getRandomCachedAni();
 extern string getRandomCachedAniString();
 extern void disableSubUnits( Unit *un );
 
-template < class UnitType >
-bool GameUnit< UnitType >::Explode( bool drawit, float timeit )
+
+bool GameUnit::Explode( bool drawit, float timeit )
 {
     if (this->pImage->pExplosion == NULL && this->pImage->timeexplode == 0) {
         //no explosion in unit data file && explosions haven't started yet
@@ -205,7 +203,7 @@ bool GameUnit< UnitType >::Explode( bool drawit, float timeit )
         Vector p, q, r;
         this->GetOrientation( p, q, r );
         this->pImage->pExplosion->SetOrientation( p, q, r );
-        if (this->isUnit() != MISSILEPTR) {
+        if (this->isUnit() != _UnitType::missile) {
             _Universe->activeStarSystem()->AddMissileToQueue( new MissileEffect( this->Position(), this->MaxShieldVal(),
                                                                                  0, this->ExplosionRadius()*game_options.explosion_damage_center,
                                                                                  this->ExplosionRadius()*game_options.explosion_damage_center
@@ -221,7 +219,7 @@ bool GameUnit< UnitType >::Explode( bool drawit, float timeit )
         AUDPlay( this->sound->explode, exploc, this->Velocity, 1 );
         if (!sub) {
             un = _Universe->AccessCockpit()->GetParent();
-            if (this->isUnit() == UNITPTR) {
+            if (this->isUnit() == _UnitType::unit) {
                 if ( rand() < RAND_MAX*game_options.percent_shockwave && ( !this->isSubUnit() ) ) {
                     static string     shockani( game_options.shockwave_animation);
                     static Animation *__shock__ani = new Animation( shockani.c_str(), true, .1, MIPMAP, false );
@@ -252,7 +250,7 @@ bool GameUnit< UnitType >::Explode( bool drawit, float timeit )
                         static float lasttime = 0;
                         float newtime = getNewTime();
                         if ( newtime-lasttime > game_options.time_between_music
-                            || (_Universe->isPlayerStarship( this ) && this->isUnit() != MISSILEPTR && this->faction
+                            || (_Universe->isPlayerStarship( this ) && this->isUnit() != _UnitType::missile && this->faction
                                 != upgradesfaction) ) {
                             //No victory for missiles or spawned explosions
                             if (rel > game_options.victory_relationship) {
@@ -269,7 +267,7 @@ bool GameUnit< UnitType >::Explode( bool drawit, float timeit )
         }
     }
     bool timealldone =
-        ( this->pImage->timeexplode > game_options.debris_time || this->isUnit() == MISSILEPTR
+        ( this->pImage->timeexplode > game_options.debris_time || this->isUnit() == _UnitType::missile
          || _Universe->AccessCockpit()->GetParent() == this || this->SubUnits.empty() );
     if (this->pImage->pExplosion) {
         this->pImage->timeexplode += timeit;

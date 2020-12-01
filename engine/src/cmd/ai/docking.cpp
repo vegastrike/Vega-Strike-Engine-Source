@@ -162,7 +162,7 @@ bool DockingOps::DockToTarget( Unit *utdw )
     QVector loc      = Movement( utdw );
     float   rad      = utdw->DockingPortLocations()[port].GetRadius() + parent->rSize();
     float   diss     = (parent->Position()-loc).MagnitudeSquared()-.1;
-    bool    isplanet = utdw->isUnit() == PLANETPTR;
+    bool    isplanet = utdw->isUnit() == _UnitType::planet;
     static float MinimumCapacityToRefuelOnLand =
         XMLSupport::parse_float( vs_config->getVariable( "physics", "MinimumWarpCapToRefuelDockeesAutomatically", "0" ) );
     if ( diss <= ( isplanet ? rad*rad : parent->rSize()*parent->rSize() ) ) {
@@ -194,7 +194,7 @@ bool DockingOps::DockToTarget( Unit *utdw )
 bool DockingOps::PerformDockingOperations( Unit *utdw )
 {
     timer -= SIMULATION_ATOM;
-    bool isplanet = utdw->isUnit() == PLANETPTR;
+    bool isplanet = utdw->isUnit() == _UnitType::planet;
     if (timer < 0) {
         static float tmp = XMLSupport::parse_float( vs_config->getVariable( "physics", "un_docking_time", "180" ) );
         timer = tmp;

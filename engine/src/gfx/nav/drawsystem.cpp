@@ -250,7 +250,7 @@ void NavigationSystem::DrawSystem()
 
         float insert_size = 0.0;
         int   insert_type = navambiguous;
-        if ( (*blah)->isUnit() == UNITPTR ) {
+        if ( (*blah)->isUnit() == _UnitType::unit ) {
             //unit
             /*if(UnitUtil::isPlayerStarship(*blah) > -1)	//	is a PLAYER SHIP
              *  {
@@ -308,7 +308,7 @@ void NavigationSystem::DrawSystem()
                 }
             }
             //}
-        } else if ( (*blah)->isUnit() == PLANETPTR ) {
+        } else if ( (*blah)->isUnit() == _UnitType::planet ) {
             //is it a PLANET?
             if ( UnitUtil::isSun( *blah ) ) {
                 //is this a SUN?
@@ -323,15 +323,15 @@ void NavigationSystem::DrawSystem()
                 insert_type = navplanet;
                 insert_size = navplanetsize;
             }
-        } else if ( (*blah)->isUnit() == MISSILEPTR ) {
+        } else if ( (*blah)->isUnit() == _UnitType::missile ) {
             //a missile
             insert_type = navmissile;
             insert_size = navmissilesize;
-        } else if ( (*blah)->isUnit() == ASTEROIDPTR ) {
+        } else if ( (*blah)->isUnit() == _UnitType::asteroid ) {
             //an asteroid
             insert_type = navasteroid;
             insert_size = navasteroidsize;
-        } else if ( (*blah)->isUnit() == NEBULAPTR ) {
+        } else if ( (*blah)->isUnit() == _UnitType::nebula ) {
             //a nebula
             insert_type = navnebula;
             insert_size = navnebulasize;

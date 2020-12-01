@@ -32,7 +32,6 @@
 #include "configxml.h"
 #include "unit_armorshield.h"
 #include "gfx/vec.h"
-#include "unit_damage.h"
 
 #include <algorithm>
 
