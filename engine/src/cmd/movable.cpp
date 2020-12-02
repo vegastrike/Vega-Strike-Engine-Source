@@ -89,6 +89,23 @@ Movable::Movable() : cumulative_transformation_matrix( identity_matrix ) {
 
 
 
+//C
+static const float  warpMultiplierMax = GameConfig::GetVariable( "physics", "warpMultiplierMax", 300000000 );
+
+//Pi^2 * C
+static const float warpMaxEfVel = GameConfig::GetVariable( "physics", "warpMaxEfVel", 2960881320.0f);
+
+
+Movable::graphic_options::graphic_options()
+{
+    FaceCamera  = Animating = missilelock = InWarp = unused1 = WarpRamping = NoDamageParticles = 0;
+    specInterdictionOnline = 1;
+    NumAnimationPoints = 0;
+    RampCounter = 0;
+    MinWarpMultiplier = MaxWarpMultiplier = 1;
+}
+
+
 void Movable::SetPosition( const QVector &pos )
 {
     prev_physical_state.position = curr_physical_state.position = pos;

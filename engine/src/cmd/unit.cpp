@@ -210,7 +210,6 @@ void GameUnit::UpdateHudMatrix( int whichcam )
                                                      this->GetWarpVelocity(), this->GetAngularVelocity(), this->GetAcceleration() );
 }
 
-extern bool flickerDamage( Unit *un, float hullpercent );
 extern int cloakVal( int cloakint, int cloakminint, int cloakrateint, bool cloakglass ); //short fix?
 
 
@@ -412,7 +411,7 @@ void GameUnit::Draw( const Transformation &parent, const Matrix &parentMatrix )
                     if ( (this->invisible & INVISGLOW) != 0 )
                         continue;
                     if (damagelevel < .9)
-                        if ( flickerDamage( this, damagelevel ) )
+                        if ( flickerDamage() )
                             continue;
                 }
                 QVector TransformedPosition = Transform( *ctm, this->meshdata[i]->Position().Cast() );

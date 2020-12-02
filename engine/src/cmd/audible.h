@@ -37,6 +37,7 @@ class Audible
 {
 private:
     std::map<SoundType, int> sounds;
+    std::map<SoundType, std::string> defaultSoundNames;
 
 public:
     Audible();

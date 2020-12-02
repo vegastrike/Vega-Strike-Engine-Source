@@ -92,6 +92,9 @@ public:
   static float totalShieldVal( const Shield &shield );
   static float currentTotalShieldVal( const Shield &shield );
   static float totalShieldEnergyCapacitance( const Shield &shield );
+
+protected:
+  bool flickerDamage();
 };
 
 

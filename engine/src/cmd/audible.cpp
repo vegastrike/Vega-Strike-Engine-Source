@@ -31,24 +31,22 @@
 #include "audiolib.h"
 #include "options.h"
 
+
 static const SoundType typesArray[] = {SoundType::engine, SoundType::shield, SoundType::armor,
                                        SoundType::hull, SoundType::explosion, SoundType::cloaking,
                                        SoundType::jump};
-
-static std::map<SoundType, std::string> defaultSoundNames = {
-    {SoundType::engine, vs_config->getVariable( "unitaudio", "afterburner", "sfx10.wav" )},
-    {SoundType::shield, vs_config->getVariable( "unitaudio", "shield", "sfx09.wav" )},
-    {SoundType::armor, vs_config->getVariable( "unitaudio", "armor", "sfx08.wav" )},
-    {SoundType::hull, vs_config->getVariable( "unitaudio", "armor", "sfx08.wav" )},
-    {SoundType::explosion, vs_config->getVariable( "unitaudio", "explode", "explosion.wav" )},
-    {SoundType::cloaking, vs_config->getVariable( "unitaudio", "cloak", "sfx43.wav" )},
-    {SoundType::jump, vs_config->getVariable( "unitaudio", "explode", "sfx43.wav" )},
-};
 
 Audible::Audible() {
     for(const SoundType &soundType : typesArray) {
         sounds[soundType] = -1;
     }
+
+    defaultSoundNames[SoundType::engine] = vs_config->getVariable( "unitaudio", "afterburner", "sfx10.wav" );
+    defaultSoundNames[SoundType::shield] = vs_config->getVariable( "unitaudio", "shield", "sfx09.wav" );
+    defaultSoundNames[SoundType::armor] = vs_config->getVariable( "unitaudio", "armor", "sfx08.wav" );
+    defaultSoundNames[SoundType::hull] = vs_config->getVariable( "unitaudio", "armor", "sfx08.wav" );
+    defaultSoundNames[SoundType::explosion] = vs_config->getVariable( "unitaudio", "explode", "explosion.wav" );
+    defaultSoundNames[SoundType::cloaking] = vs_config->getVariable( "unitaudio", "cloak", "sfx43.wav");
 }
 
 void Audible::addDefaultSounds() {
