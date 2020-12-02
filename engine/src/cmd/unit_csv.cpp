@@ -615,60 +615,7 @@ string WriteHudDamageFunc( Unit *un )
     return ret;
 }
 
-void AddSounds( Unit *thus, string sounds )
-{
-    if (sounds.length() != 0) {
-        string tmp = nextElement( sounds );
-        if ( tmp.length() )
-            thus->sound->shield = AUDCreateSoundWAV( tmp, false );
-        tmp = nextElement( sounds );
-        if ( tmp.length() )
-            thus->sound->armor = AUDCreateSoundWAV( tmp, false );
-        tmp = nextElement( sounds );
-        if ( tmp.length() )
-            thus->sound->hull = AUDCreateSoundWAV( tmp, false );
-        tmp = nextElement( sounds );
-        if ( tmp.length() )
-            thus->sound->jump = AUDCreateSoundWAV( tmp, false );
-        tmp = nextElement( sounds );
-        if ( tmp.length() )
-            thus->sound->explode = AUDCreateSoundWAV( tmp, false );
-        tmp = nextElement( sounds );
-        if ( tmp.length() )
-            thus->sound->cloak = AUDCreateSoundWAV( tmp, false );
-        tmp = nextElement( sounds );
-        if ( tmp.length() )
-            thus->sound->engine = AUDCreateSoundWAV( tmp, true );
-    }
-    if (thus->sound->cloak == -1) {
-        static std::string ssound = vs_config->getVariable( "unitaudio", "cloak", "sfx43.wav" );
-        thus->sound->cloak = AUDCreateSound( ssound, false );
-    }
-    if (thus->sound->engine == -1) {
-        static std::string ssound = vs_config->getVariable( "unitaudio", "afterburner", "sfx10.wav" );
-        thus->sound->engine = AUDCreateSound( ssound, false );
-    }
-    if (thus->sound->shield == -1) {
-        static std::string ssound = vs_config->getVariable( "unitaudio", "shield", "sfx09.wav" );
-        thus->sound->shield = AUDCreateSound( ssound, false );
-    }
-    if (thus->sound->armor == -1) {
-        static std::string ssound = vs_config->getVariable( "unitaudio", "armor", "sfx08.wav" );
-        thus->sound->armor = AUDCreateSound( ssound, false );
-    }
-    if (thus->sound->hull == -1) {
-        static std::string ssound = vs_config->getVariable( "unitaudio", "armor", "sfx08.wav" );
-        thus->sound->hull = AUDCreateSound( ssound, false );
-    }
-    if (thus->sound->explode == -1) {
-        static std::string ssound = vs_config->getVariable( "unitaudio", "explode", "explosion.wav" );
-        thus->sound->explode = AUDCreateSound( ssound, false );
-    }
-    if (thus->sound->jump == -1) {
-        static std::string ssound = vs_config->getVariable( "unitaudio", "explode", "sfx43.wav" );
-        thus->sound->jump = AUDCreateSound( ssound, false );
-    }
-}
+
 
 void LoadCockpit( Unit *thus, const string &cockpit )
 {
@@ -1061,7 +1008,11 @@ void Unit::LoadRow( CSVRow &row, string modification, string *netxml )
     this->pImage->equipment_volume  = ::stof( OPTIM_GET( row, table, Equipment_Space ) );
     ImportCargo( this, OPTIM_GET( row, table, Cargo_Import ) );     //if this changes change planet_generic.cpp
     AddCarg( this, OPTIM_GET( row, table, Cargo ) );
-    AddSounds( this, OPTIM_GET( row, table, Sounds ) );
+
+    // Replaced by below: AddSounds( this, OPTIM_GET( row, table, Sounds ) );
+    this->addSounds(&nextElement, OPTIM_GET( row, table, Sounds ));
+
+
     LoadCockpit( this, OPTIM_GET( row, table, Cockpit ) );
     pImage->CockpitCenter.i = ::stof( OPTIM_GET( row, table, CockpitX ) )*xml.unitscale;
     pImage->CockpitCenter.j = ::stof( OPTIM_GET( row, table, CockpitY ) )*xml.unitscale;

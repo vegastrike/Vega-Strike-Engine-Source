@@ -137,7 +137,8 @@ void GameUnit::Thrust( const Vector &amt1, bool afterburn )
                     float  dotprod = vel.Dot( pvel );
                     if (dotprod < .86) {
                         lastbuzz = ttime;
-                        AUDPlay( this->sound->engine, this->Position(), this->GetVelocity(), 1 );
+                        //AUDPlay( this->sound->engine, this->Position(), this->GetVelocity(), 1 );
+                        playEngineSound();
                     } else {}
                 }
             }
@@ -149,7 +150,8 @@ void GameUnit::Thrust( const Vector &amt1, bool afterburn )
 Vector GameUnit::ResolveForces( const Transformation &trans, const Matrix &transmat )
 {
 #ifndef PERFRAMESOUND
-    AUDAdjustSound( this->sound->engine, this->cumulative_transformation.position, this->cumulative_velocity );
+    //AUDAdjustSound( this->sound->engine, this->cumulative_transformation.position, this->cumulative_velocity );
+    adjustSound(SoundType::engine);
 #endif
     return Unit::ResolveForces( trans, transmat );
 }

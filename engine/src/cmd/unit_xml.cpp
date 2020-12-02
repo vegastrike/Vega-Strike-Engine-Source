@@ -1190,6 +1190,7 @@ void Unit::beginElement( const string &name, const AttributeList &attributes )
             break;
         }
     case SOUND:
+        // TODO: refactor this
         ADDTAG;
         assert( xml->unitlevel == 1 );
         xml->unitlevel++;
@@ -1198,86 +1199,62 @@ void Unit::beginElement( const string &name, const AttributeList &attributes )
             {
             case CLOAKWAV:
                 ADDDEFAULT;
-                sound->cloak = AUDCreateSoundWAV( (*iter).value, false );
+                //sound->cloak = AUDCreateSoundWAV( (*iter).value, false );
+                addSound((*iter).value, SoundType::cloaking);
                 break;
             case JUMPWAV:
                 ADDDEFAULT;
-                sound->jump = AUDCreateSoundWAV( (*iter).value, false );
+                addSound((*iter).value, SoundType::jump);
                 break;
             case CLOAKMP3:
                 ADDDEFAULT;
-                sound->cloak = AUDCreateSoundMP3( (*iter).value, false );
+                addSound((*iter).value, SoundType::cloaking);
                 break;
             case ENGINEWAV:
                 ADDDEFAULT;
-                sound->engine = AUDCreateSoundWAV( (*iter).value, true );
+                addSound((*iter).value, SoundType::engine);
                 break;
             case ENGINEMP3:
                 ADDDEFAULT;
-                sound->engine = AUDCreateSoundMP3( (*iter).value, true );
+                addSound((*iter).value, SoundType::engine);
                 break;
             case SHIELDMP3:
                 ADDDEFAULT;
-                sound->shield = AUDCreateSoundMP3( (*iter).value, false );
+                addSound((*iter).value, SoundType::shield);
                 break;
             case SHIELDWAV:
                 ADDDEFAULT;
-                sound->shield = AUDCreateSoundWAV( (*iter).value, false );
+                addSound((*iter).value, SoundType::shield);
                 break;
             case EXPLODEMP3:
                 ADDDEFAULT;
-                sound->explode = AUDCreateSoundMP3( (*iter).value, false );
+                addSound((*iter).value, SoundType::explosion);
                 break;
             case EXPLODEWAV:
                 ADDDEFAULT;
-                sound->explode = AUDCreateSoundWAV( (*iter).value, false );
+                addSound((*iter).value, SoundType::explosion);
                 break;
             case ARMORMP3:
                 ADDDEFAULT;
-                sound->armor = AUDCreateSoundMP3( (*iter).value, false );
+                addSound((*iter).value, SoundType::armor);
                 break;
             case ARMORWAV:
                 ADDDEFAULT;
-                sound->armor = AUDCreateSoundWAV( (*iter).value, false );
+                addSound((*iter).value, SoundType::armor);
                 break;
             case HULLWAV:
                 ADDDEFAULT;
-                sound->hull = AUDCreateSoundWAV( (*iter).value, false );
+                addSound((*iter).value, SoundType::hull);
                 break;
             case HULLMP3:
                 ADDDEFAULT;
-                sound->hull = AUDCreateSoundMP3( (*iter).value, false );
+                addSound((*iter).value, SoundType::hull);
                 break;
             }
         }
-        if (sound->cloak == -1) {
-            static std::string ssound = vs_config->getVariable( "unitaudio", "cloak", "sfx43.wav" );
-            sound->cloak = AUDCreateSound( ssound, false );
-        }
-        if (sound->engine == -1) {
-            static std::string ssound = vs_config->getVariable( "unitaudio", "afterburner", "sfx10.wav" );
-            sound->engine = AUDCreateSound( ssound, false );
-        }
-        if (sound->shield == -1) {
-            static std::string ssound = vs_config->getVariable( "unitaudio", "shield", "sfx09.wav" );
-            sound->shield = AUDCreateSound( ssound, false );
-        }
-        if (sound->armor == -1) {
-            static std::string ssound = vs_config->getVariable( "unitaudio", "armor", "sfx08.wav" );
-            sound->armor = AUDCreateSound( ssound, false );
-        }
-        if (sound->hull == -1) {
-            static std::string ssound = vs_config->getVariable( "unitaudio", "armor", "sfx08.wav" );
-            sound->hull = AUDCreateSound( ssound, false );
-        }
-        if (sound->explode == -1) {
-            static std::string ssound = vs_config->getVariable( "unitaudio", "explode", "explosion.wav" );
-            sound->explode = AUDCreateSound( ssound, false );
-        }
-        if (sound->jump == -1) {
-            static std::string ssound = vs_config->getVariable( "unitaudio", "explode", "sfx43.wav" );
-            sound->jump = AUDCreateSound( ssound, false );
-        }
+
+        addDefaultSounds();
+
         break;
     case CLOAK:
         //serialization covered elsewhere

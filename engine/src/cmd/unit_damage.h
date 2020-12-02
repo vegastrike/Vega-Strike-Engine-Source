@@ -151,23 +151,29 @@ float GameUnit::DealDamageToShield( const Vector &pnt, float &damage )
     float percent = Damageable::DealDamageToShield( pnt, damage );
     if ( !_Universe->isPlayerStarship( this ) ) {
         if (percent) {
-            if ( AUDIsPlaying( this->sound->shield ) )
-                AUDStopPlaying( this->sound->shield );
-            if (game_options.ai_sound)
-                AUDPlay( this->sound->shield, this->ToWorldCoordinates(
-                    pnt ).Cast()+this->cumulative_transformation.position, this->Velocity, 1 );
+//            if ( AUDIsPlaying( this->sound->shield ) )
+//                AUDStopPlaying( this->sound->shield );
+//            if (game_options.ai_sound)
+//                AUDPlay( this->sound->shield, this->ToWorldCoordinates(
+//                    pnt ).Cast()+this->cumulative_transformation.position, this->Velocity, 1 );
+
+            // I think this is equal to the above
+            playShieldDamageSound(pnt);
         }
     } else {
-        static int playerhullsound =
-            AUDCreateSoundWAV( game_options.player_shield_hit);
-        int sound = playerhullsound != -1 ? playerhullsound : this->sound->hull;
         if (percent) {
-            if ( AUDIsPlaying( sound ) )
-                AUDStopPlaying( sound );
-            AUDPlay( sound, this->ToWorldCoordinates(
-                pnt ).Cast()+this->cumulative_transformation.position, this->Velocity, 1 );
+            playHullDamageSound(pnt);
         }
     }
+//        static int playerhullsound =
+//            AUDCreateSoundWAV( game_options.player_shield_hit);
+//        int sound = playerhullsound != -1 ? playerhullsound : this->sound->hull;
+//        if (percent) {
+//            if ( AUDIsPlaying( sound ) )
+//                AUDStopPlaying( sound );
+//            AUDPlay( sound, this->ToWorldCoordinates(
+//                pnt ).Cast()+this->cumulative_transformation.position, this->Velocity, 1 );
+
     return percent;
 }
 
@@ -216,7 +222,9 @@ bool GameUnit::Explode( bool drawit, float timeit )
             if (( un = _Universe->AccessCockpit( 0 )->GetParent() )) {
                 exploc = un->Position()*game_options.explosion_closeness+exploc*(1-game_options.explosion_closeness);
             }
-        AUDPlay( this->sound->explode, exploc, this->Velocity, 1 );
+        //AUDPlay( this->sound->explode, exploc, this->Velocity, 1 );
+        playExplosionDamageSound();
+
         if (!sub) {
             un = _Universe->AccessCockpit()->GetParent();
             if (this->isUnit() == _UnitType::unit) {

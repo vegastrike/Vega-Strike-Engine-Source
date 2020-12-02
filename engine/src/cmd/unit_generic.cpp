@@ -688,7 +688,6 @@ Unit::Unit( int /*dummy*/ ) : Drawable(), Damageable(), Movable()
 {
     ZeroAll();
     pImage  = (new UnitImages< void >);
-    sound   = new UnitSounds;
     aistate = NULL;
     pImage->cockpit_damage = NULL;
     pilot   = new Pilot( FactionUtil::GetNeutralFaction() );
@@ -699,7 +698,6 @@ Unit::Unit() : Drawable(), Damageable(), Movable() //: cumulative_transformation
 {
     ZeroAll();
     pImage  = (new UnitImages< void >);
-    sound   = new UnitSounds;
     aistate = NULL;
     pImage->cockpit_damage = NULL;
     pilot   = new Pilot( FactionUtil::GetNeutralFaction() );
@@ -710,7 +708,6 @@ Unit::Unit( std::vector< Mesh* > &meshes, bool SubU, int fact ) : Drawable(), Da
 {
     ZeroAll();
     pImage  = (new UnitImages< void >);
-    sound   = new UnitSounds;
     pilot   = new Pilot( fact );
     aistate = NULL;
     pImage->cockpit_damage = NULL;
@@ -737,7 +734,6 @@ Unit::Unit( const char *filename,
 {
     ZeroAll();
     pImage  = (new UnitImages< void >);
-    sound   = new UnitSounds;
     pilot   = new Pilot( faction );
     aistate = NULL;
     pImage->cockpit_damage = NULL;
@@ -778,7 +774,6 @@ Unit::~Unit()
     BOOST_LOG_TRIVIAL(trace) << boost::format("%1$d %2$x") % 3 % pImage;
     VSFileSystem::flushLogs();
 #endif
-    delete sound;
     delete pilot;
 #ifdef DESTRUCTDEBUG
     BOOST_LOG_TRIVIAL(trace) << boost::format("%1$d") % 5;
@@ -817,7 +812,6 @@ Unit::~Unit()
 
 void Unit::ZeroAll()
 {
-    sound = NULL;
     ucref = 0;
     SavedAccel.i = 0;
     SavedAccel.j = 0;
@@ -961,13 +955,6 @@ void Unit::Init()
     pImage->cloakrate         = 100;
     pImage->cloakenergy       = 0;
     pImage->forcejump         = false;
-    sound->engine             = -1;
-    sound->armor              = -1;
-    sound->shield             = -1;
-    sound->hull               = -1;
-    sound->explode            = -1;
-    sound->cloak              = -1;
-    sound->jump               = -1;
     pImage->fireControlFunctionality    = 1.0f;
     pImage->fireControlFunctionalityMax = 1.0f;
     pImage->SPECDriveFunctionality = 1.0f;
@@ -3230,30 +3217,7 @@ void Unit::Kill( bool erasefromsave, bool quitting )
     if (this->colTrees)
         this->colTrees->Dec();           //might delete
     this->colTrees = NULL;
-    if (this->sound->engine != -1) {
-        AUDStopPlaying( this->sound->engine );
-        AUDDeleteSound( this->sound->engine );
-    }
-    if (this->sound->explode != -1) {
-        AUDStopPlaying( this->sound->explode );
-        AUDDeleteSound( this->sound->explode );
-    }
-    if (this->sound->shield != -1) {
-        AUDStopPlaying( this->sound->shield );
-        AUDDeleteSound( this->sound->shield );
-    }
-    if (this->sound->armor != -1) {
-        AUDStopPlaying( this->sound->armor );
-        AUDDeleteSound( this->sound->armor );
-    }
-    if (this->sound->hull != -1) {
-        AUDStopPlaying( this->sound->hull );
-        AUDDeleteSound( this->sound->hull );
-    }
-    if (this->sound->cloak != -1) {
-        AUDStopPlaying( this->sound->cloak );
-        AUDDeleteSound( this->sound->cloak );
-    }
+    killSounds();
     ClearMounts();
 
     if ( docked&(DOCKING_UNITS) ) {
@@ -7097,11 +7061,12 @@ void Unit::UpdatePhysics3(const Transformation &trans,
                   energy -= (simulation_atom_var*pImage->cloakenergy);
           }
           if (cloaking > cloakmin) {
-              AUDAdjustSound( sound->cloak, cumulative_transformation.position, cumulative_velocity );
+              adjustSound(SoundType::cloaking, cumulative_transformation.position, cumulative_velocity);
+
               //short fix
               if ( (cloaking == (2147483647)
                     && pImage->cloakrate > 0) || (cloaking == cloakmin+1 && pImage->cloakrate < 0) )
-                  AUDStartPlaying( sound->cloak );
+                  playSound(SoundType::cloaking);
               //short fix
               cloaking -= (int) (pImage->cloakrate*simulation_atom_var);
               if (cloaking <= cloakmin && pImage->cloakrate > 0)
@@ -7531,9 +7496,9 @@ float Unit::DealDamageToHull( const Vector &pnt, float damage)
 
   // Play Damage Sound
   if(did_hull_damage) {
-      HullDamageSound ( pnt );
+      playHullDamageSound ( pnt );
   } else {
-      ArmorDamageSound( pnt );
+      playArmorDamageSound( pnt );
   }
 
   // Ship was destroyed
