@@ -34,6 +34,7 @@
 #define _UNIT_H_
 
 #include "armed.h"
+#include "audible.h"
 #include "damageable.h"
 #include "drawable.h"
 #include "movable.h"
@@ -123,7 +124,6 @@ enum _UnitType
 
 
 class VDU;
-struct UnitSounds;
 //template
 template < typename BOGUS >
 struct UnitImages;
@@ -140,14 +140,14 @@ struct PlanetaryOrbitData;
  */
 
 // TODO: move Armed to subclasses
-class Unit : public Armed, public Drawable, public Damageable, public Movable
+class Unit : public Armed, public Audible, public Drawable, public Damageable, public Movable
 {
 protected:
 //How many lists are referencing us
     int ucref;
     StringPool::Reference csvRow;
 public:
-    UnitSounds *sound;
+
 
 //The name (type) of this unit shouldn't be public
     StringPool::Reference name;
@@ -783,8 +783,6 @@ public:
  */
 public:
     void RegenShields() override;
-    void ArmorDamageSound( const Vector &pnt ) override;
-    void HullDamageSound( const Vector &pnt ) override;
 
 //current energy
     float  energy;

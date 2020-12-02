@@ -7830,39 +7830,4 @@ void Unit::RegenShields()
     energy = energy < 0 ? 0 : energy;
 }
 
-void Unit::ArmorDamageSound( const Vector &pnt )
-{
-    if ( !_Universe->isPlayerStarship( this ) ) {
-        if ( AUDIsPlaying( this->sound->armor ) )
-            AUDStopPlaying( this->sound->armor );
-        if (game_options.ai_sound)
-            AUDPlay( this->sound->armor, this->ToWorldCoordinates(
-                         pnt ).Cast()+this->cumulative_transformation.position, this->Velocity, 1 );
-    } else {
-        static int playerarmorsound =
-            AUDCreateSoundWAV( game_options.player_armor_hit );
-        int sound = playerarmorsound != -1 ? playerarmorsound : this->sound->armor;
-        if ( AUDIsPlaying( sound ) )
-            AUDStopPlaying( sound );
-        AUDPlay( sound, this->ToWorldCoordinates(
-            pnt ).Cast()+this->cumulative_transformation.position, this->Velocity, 1 );
-    }
-}
 
-void Unit::HullDamageSound( const Vector &pnt )
-{
-    if ( !_Universe->isPlayerStarship( this ) ) {
-        if ( AUDIsPlaying( this->sound->hull ) )
-            AUDStopPlaying( this->sound->hull );
-        if (game_options.ai_sound)
-            AUDPlay( this->sound->hull, this->ToWorldCoordinates(
-                         pnt ).Cast()+this->cumulative_transformation.position, this->Velocity, 1 );
-    } else {
-        static int playerhullsound = AUDCreateSoundWAV( game_options.player_hull_hit );
-        int sound = playerhullsound != -1 ? playerhullsound : this->sound->hull;
-        if ( AUDIsPlaying( sound ) )
-            AUDStopPlaying( sound );
-        AUDPlay( sound, this->ToWorldCoordinates(
-            pnt ).Cast()+this->cumulative_transformation.position, this->Velocity, 1 );
-    }
-}
