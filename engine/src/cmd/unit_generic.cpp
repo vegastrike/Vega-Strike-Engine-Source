@@ -116,7 +116,6 @@ static float mymin( float a, float b )
 }
 
 using namespace XMLSupport;
-using namespace Orders;
 
 extern void DestroyMount( Mount* );
 
@@ -1057,12 +1056,7 @@ const StarSystem* Unit::getStarSystem() const
     return _Universe->activeStarSystem();
 }
 
-bool preEmptiveClientFire( const weapon_info *wi )
-{
-    static bool
-        client_side_fire = XMLSupport::parse_bool( vs_config->getVariable( "network", "client_side_fire", "true" ) );
-    return client_side_fire && wi->type != weapon_info::BEAM && wi->type != weapon_info::PROJECTILE;
-}
+
 
 
 
@@ -1285,166 +1279,6 @@ void Unit::SetGlowVisible( bool vis )
 }
 
 
-
-/*
- **********************************************************************************
- **** UNIT AI STUFF
- **********************************************************************************
- */
-void Unit::LoadAIScript( const std::string &s )
-{
-    if (s.find( ".py" ) != string::npos) {
-        Order *ai = PythonClass< FireAt >::Factory( s );
-        PrimeOrders( ai );
-        return;
-    } else {
-        if (s.length() > 0) {
-            if (*s.begin() == '_') {
-                mission->addModule( s.substr( 1 ) );
-                PrimeOrders( new AImissionScript( s.substr( 1 ) ) );
-            } else {
-                if (s == "ikarus") {
-                    PrimeOrders( new Orders::Ikarus() );
-                } else {
-                    string ai_agg = s+".agg.xml";
-                    PrimeOrders( new Orders::AggressiveAI( ai_agg.c_str() ) );
-                }
-            }
-        } else {
-            PrimeOrders();
-        }
-    }
-}
-
-void Unit::eraseOrderType( unsigned int type )
-{
-    if (aistate)
-        aistate->eraseType( type );
-}
-
-bool Unit::LoadLastPythonAIScript()
-{
-    Order *pyai = PythonClass< Orders::FireAt >::LastPythonClass();
-    if (pyai) {
-        PrimeOrders( pyai );
-    } else if (!aistate) {
-        PrimeOrders();
-        return false;
-    }
-    return true;
-}
-
-bool Unit::EnqueueLastPythonAIScript()
-{
-    Order *pyai = PythonClass< Orders::FireAt >::LastPythonClass();
-    if (pyai)
-        EnqueueAI( pyai );
-    else if (!aistate)
-        return false;
-    return true;
-}
-
-void Unit::PrimeOrders( Order *newAI )
-{
-    if (newAI) {
-        if (aistate)
-            aistate->Destroy();
-        aistate = newAI;
-        newAI->SetParent( this );
-    } else {
-        PrimeOrders();
-    }
-}
-
-void Unit::PrimeOrders()
-{
-    if (aistate) {
-        aistate->Destroy();
-        aistate = NULL;
-    }
-    aistate = new Order;                 //get 'er ready for enqueueing
-    aistate->SetParent( this );
-}
-
-void Unit::PrimeOrdersLaunched()
-{
-    if (aistate) {
-        aistate->Destroy();
-        aistate = NULL;
-    }
-    Vector vec( 0, 0, 10000 );
-    aistate = new ExecuteFor( new Orders::MatchVelocity( this->ClampVelocity( vec, true ), Vector( 0,
-                                                                                                   0,
-                                                                                                   0 ), true, true,
-                                                         false ), 4.0f );
-    aistate->SetParent( this );
-}
-
-void Unit::SetAI( Order *newAI )
-{
-    newAI->SetParent( this );
-    if (aistate)
-        aistate->ReplaceOrder( newAI );
-    else
-        aistate = newAI;
-}
-
-void Unit::EnqueueAI( Order *newAI )
-{
-    newAI->SetParent( this );
-    if (aistate)
-        aistate->EnqueueOrder( newAI );
-    else
-        aistate = newAI;
-}
-
-void Unit::EnqueueAIFirst( Order *newAI )
-{
-    newAI->SetParent( this );
-    if (aistate)
-        aistate->EnqueueOrderFirst( newAI );
-    else
-        aistate = newAI;
-}
-
-void Unit::ExecuteAI()
-{
-    if (flightgroup) {
-        Unit *leader = flightgroup->leader.GetUnit();
-        //no heirarchy in flight group
-        if (leader ? (flightgroup->leader_decision > -1) && ( leader->getFgSubnumber() >= getFgSubnumber() ) : true) {
-            if (!leader)
-                flightgroup->leader_decision = flightgroup->nr_ships;
-            flightgroup->leader.SetUnit( this );
-        }
-        flightgroup->leader_decision--;
-    }
-    if (aistate) aistate->Execute();
-    if ( !SubUnits.empty() ) {
-        un_iter iter = getSubUnits();
-        Unit   *un;
-        while ( (un = *iter) ) {
-            un->ExecuteAI();                     //like dubya
-            ++iter;
-        }
-    }
-}
-
-string Unit::getFullAIDescription()
-{
-    if ( getAIState() )
-        return getFgID()+":"+getAIState()->createFullOrderDescription( 0 ).c_str();
-    else
-        return "no order";
-}
-
-
-
-float Unit::getRelation( const Unit *targ ) const
-{
-    return pilot->GetEffectiveRelationship( this, targ );
-}
-
 void Unit::setTargetFg( string primary, string secondary, string tertiary )
 {
     target_fgid[0] = primary;
@@ -1488,46 +1322,9 @@ void Unit::ReTargetFg( int which_target )
 #endif
 }
 
-void Unit::SetTurretAI()
-{
-    turretstatus = 2;
-    static bool talkinturrets = XMLSupport::parse_bool( vs_config->getVariable( "AI", "independent_turrets", "false" ) );
-    if (talkinturrets) {
-        Unit *un;
-        for (un_iter iter = getSubUnits(); (un = *iter); ++iter) {
-            if ( !CheckAccessory( un ) ) {
-                un->EnqueueAIFirst( new Orders::FireAt( 15.0f ) );
-                un->EnqueueAIFirst( new Orders::FaceTarget( false, 3 ) );
-            }
-            un->SetTurretAI();
-        }
-    } else {
-        Unit *un;
-        for (un_iter iter = getSubUnits(); (un = *iter); ++iter) {
-            if ( !CheckAccessory( un ) ) {
-                if (un->aistate)
-                    un->aistate->Destroy();
-                un->aistate = ( new Orders::TurretAI() );
-                un->aistate->SetParent( un );
-            }
-            un->SetTurretAI();
-        }
-    }
-}
 
-void Unit::DisableTurretAI()
-{
-    turretstatus = 1;
-    Unit *un;
-    for (un_iter iter = getSubUnits(); (un = *iter); ++iter) {
-        if (un->aistate)
-            un->aistate->Destroy();
-        un->aistate = new Order;         //get 'er ready for enqueueing
-        un->aistate->SetParent( un );
-        un->UnFire();
-        un->DisableTurretAI();
-    }
-}
+
+
 
 /*
  **********************************************************************************
@@ -3363,34 +3160,6 @@ void Unit::SetCollisionParent( Unit *name )
 #endif
 }
 
-double Unit::getMinDis( const QVector &pnt ) const
-{
-    float  minsofar = 1e+10;
-    float  tmpvar;
-    unsigned int    i;
-    Vector TargetPoint( cumulative_transformation_matrix.getP() );
-
-#ifdef VARIABLE_LENGTH_PQR
-    //the scale factor of the current UNIT
-    float SizeScaleFactor = sqrtf( TargetPoint.Dot( TargetPoint ) );
-#endif
-    for (i = 0; i < nummesh(); ++i) {
-        TargetPoint = (Transform( cumulative_transformation_matrix, meshdata[i]->Position() ).Cast()-pnt).Cast();
-        tmpvar = sqrtf( TargetPoint.Dot( TargetPoint ) )-meshdata[i]->rSize()
-#ifdef VARIABLE_LENGTH_PQR
-                 *SizeScaleFactor
-#endif
-        ;
-        if (tmpvar < minsofar)
-            minsofar = tmpvar;
-    }
-    for (un_kiter ui = viewSubUnits(); !ui.isDone(); ++ui) {
-        tmpvar = (*ui)->getMinDis( pnt );
-        if (tmpvar < minsofar)
-            minsofar = tmpvar;
-    }
-    return minsofar;
-}
 
 //This function should not be used on server side
 extern vector< Vector >perplines;

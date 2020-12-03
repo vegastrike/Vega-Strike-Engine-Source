@@ -219,6 +219,8 @@ SET(LIBCMD_SOURCES
     src/cmd/movable.cpp
     src/cmd/computer.cpp
 
+    src/cmd/intelligent.cpp
+
     src/cmd/planetary_orbit.cpp
 )
 

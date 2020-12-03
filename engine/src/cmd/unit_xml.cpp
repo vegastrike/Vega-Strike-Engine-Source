@@ -2063,33 +2063,5 @@ void Unit::LoadXML( VSFileSystem::VSFile &f, const char *modifications, string *
     delete xml;
 }
 
-csOPCODECollider* Unit::getCollideTree( const Vector & RESTRICT scale, std::vector< mesh_polygon > * RESTRICT pol )
-{
-    if (!pol){
-	vector< mesh_polygon > polies;
-        for (unsigned int j = 0; j < nummesh(); j++){
-            meshdata[j]->GetPolys( polies );
-	}
-	if (scale.i != 1 || scale.j != 1 || scale.k != 1) {
-	    for (unsigned int i = 0;i < polies.size();++i){
-        	for (unsigned int j = 0; j < polies[i].v.size(); ++j) {
-            	    polies[i].v[j].i *= scale.i;
-            	    polies[i].v[j].j *= scale.j;
-            	    polies[i].v[j].k *= scale.k;
-        	}
-	    }
-	}
-	return new csOPCODECollider( polies );
-    }
-    if (scale.i != 1 || scale.j != 1 || scale.k != 1) {
-	for (unsigned int i = 0;i < pol->size();++i){
-	    for (unsigned int j = 0; j < (*pol)[i].v.size(); ++j) {
-    		(*pol)[i].v[j].i *= scale.i;
-        	(*pol)[i].v[j].j *= scale.j;
-        	(*pol)[i].v[j].k *= scale.k;
-    	    }
-	}
-    }
-    return new csOPCODECollider( *pol );
-}
+
 

@@ -39,6 +39,7 @@
 #include "drawable.h"
 #include "movable.h"
 #include "computer.h"
+#include "intelligent.h"
 
 #include "mount.h"
 
@@ -140,7 +141,7 @@ struct PlanetaryOrbitData;
  */
 
 // TODO: move Armed to subclasses
-class Unit : public Armed, public Audible, public Drawable, public Damageable, public Movable
+class Unit : public Armed, public Audible, public Drawable, public Damageable, public Intelligent, public Movable
 {
 protected:
 //How many lists are referencing us
@@ -815,10 +816,10 @@ public:
  **************************************************************************************
  */
 
-protected:
+public:
 //not used yet
     StringPool::Reference target_fgid[3];
-public:
+
     bool InRange( const Unit *target, bool cone = true, bool cap = true ) const
     {
         double mm;
@@ -895,51 +896,6 @@ public:
     float getUpgradeVolume( void ) const;
     float getHiddenCargoVolume( void ) const;
 
-/*
- **************************************************************************************
- **** AI STUFF                                                                      ***
- **************************************************************************************
- */
-
-public:
-    class csOPCODECollider * getCollideTree( const Vector &scale = Vector( 1,
-                                                                           1,
-                                                                           1 ), std::vector< struct mesh_polygon >* = NULL );
-//Because accessing in daughter classes member function from Unit * instances
-    Order *aistate;
-    Order * getAIState() const
-    {
-        return aistate;
-    }
-//Sets up a null queue for orders
-//Uses AI so only in NetUnit and Unit classes
-    void PrimeOrders();
-    void PrimeOrdersLaunched();
-    void PrimeOrders( Order *newAI );
-//Sets the AI to be a specific order
-    void SetAI( Order *newAI );
-//Enqueues an order to the unit's order queue
-    void EnqueueAI( Order *newAI );
-//EnqueuesAI first
-    void EnqueueAIFirst( Order *newAI );
-//num subunits
-    void LoadAIScript( const std::string &aiscript );
-    bool LoadLastPythonAIScript();
-    bool EnqueueLastPythonAIScript();
-//Uses Order class but just a poiner so ok
-//Uses AI so only in NetUnit and Unit classes
-//for clicklist
-    double getMinDis( const QVector &pnt ) const;
-//Uses AI stuff so only in NetUnit and Unit classes
-    void SetTurretAI();
-    void DisableTurretAI();
-//AI so only in NetUnit and Unit classes
-    std::string getFullAIDescription();
-//Erases all orders that bitwise OR with that type
-//Uses AI so only in NetUnit and Unit classes
-    void eraseOrderType( unsigned int type );
-//Executes 1 frame of physics-based AI
-    void ExecuteAI();
 
 /*
  **************************************************************************************
@@ -1053,12 +1009,12 @@ public:
  **************************************************************************************
  */
 
-protected:
+public:
 //the flightgroup this ship is in
     Flightgroup *flightgroup;
 //the flightgroup subnumber
     int flightgroup_subnumber;
-public:
+
     void SetFg( Flightgroup *fg, int fg_snumber );
 //The faction of this unit
     int faction;
@@ -1141,20 +1097,7 @@ public:
         return GetDestinations().size() != 0;
     }
 
-//Uses Universe stuff -> maybe only needed in Unit class
-    bool isEnemy( const Unit *other ) const
-    {
-        return getRelation( other ) < 0.0;
-    }
-    bool isFriend( const Unit *other ) const
-    {
-        return getRelation( other ) > 0.0;
-    }
-    bool isNeutral( const Unit *other ) const
-    {
-        return getRelation( other ) == 0.0;
-    }
-    float getRelation( const Unit *other ) const;
+
 
     void TurretFAW();
 };
