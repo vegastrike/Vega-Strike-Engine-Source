@@ -66,6 +66,8 @@
 #include "star_system.h"
 #include "universe.h"
 
+#include "energetic.h"
+
 #include <math.h>
 #include <list>
 
@@ -171,25 +173,9 @@ bool Unit::AutoPilotTo( Unit *un, bool automaticenergyrealloc )
     return AutoPilotToErrorMessage( un, automaticenergyrealloc, tmp );
 }
 
-void Unit::SetAfterBurn( float aft )
-{
-    afterburnenergy = aft;
-}
 
-void Unit::SetFuel( float f )
-{
-    fuel = f;
-}
 
-void Unit::SetEnergyRecharge( float enrech )
-{
-    recharge = enrech;
-}
 
-void Unit::SetMaxEnergy( float maxen )
-{
-    maxenergy = maxen;
-}
 
 
 
@@ -1792,36 +1778,13 @@ extern void ActivateAnimation( Unit *jp );
 void TurnJumpOKLightOn( Unit *un, Cockpit *cp )
 {
     if (cp) {
-        if (un->GetWarpEnergy() >= un->GetJumpStatus().energy)
+        if (un->getWarpEnergy() >= un->GetJumpStatus().energy)
             if (un->GetJumpStatus().drive > -2)
                 cp->jumpok = 1;
     }
 }
 
-void Unit::DecreaseWarpEnergy( bool insys, float time )
-{
-    static float bleedfactor = XMLSupport::parse_float( vs_config->getVariable( "physics", "warpbleed", "20" ) );
-    static bool  WCfuelhack  = XMLSupport::parse_bool( vs_config->getVariable( "physics", "fuel_equals_warp", "false" ) );
-    if (WCfuelhack)
-        this->warpenergy = this->fuel;
-    this->warpenergy -= (insys ? jump.insysenergy/bleedfactor : jump.energy)*time;
-    if (this->warpenergy < 0)
-        this->warpenergy = 0;
-    if (WCfuelhack)
-        this->fuel = this->warpenergy;
-}
 
-void Unit::IncreaseWarpEnergy( bool insys, float time )
-{
-    static bool WCfuelhack = XMLSupport::parse_bool( vs_config->getVariable( "physics", "fuel_equals_warp", "false" ) );
-    if (WCfuelhack)
-        this->warpenergy = this->fuel;
-    this->warpenergy += (insys ? jump.insysenergy : jump.energy)*time;
-    if (this->warpenergy > this->maxwarpenergy)
-        this->warpenergy = this->maxwarpenergy;
-    if (WCfuelhack)
-        this->fuel = this->warpenergy;
-}
 
 bool Unit::jumpReactToCollision( Unit *smalle )
 {
@@ -1965,14 +1928,7 @@ Vector Unit::MaxTorque( const Vector &torque )
                           copysign( limits.roll, torque.k ) )*torque);
 }
 
-float GetFuelUsage( bool afterburner )
-{
-    static float normalfuelusage = XMLSupport::parse_float( vs_config->getVariable( "physics", "FuelUsage", "1" ) );
-    static float abfuelusage     = XMLSupport::parse_float( vs_config->getVariable( "physics", "AfterburnerFuelUsage", "4" ) );
-    if (afterburner)
-        return abfuelusage;
-    return normalfuelusage;
-}
+
 
 Vector Unit::ClampTorque( const Vector &amt1 )
 {
@@ -1994,7 +1950,7 @@ Vector Unit::ClampTorque( const Vector &amt1 )
     static float FMEC_exit_vel_inverse =
         XMLSupport::parse_float( vs_config->getVariable( "physics", "FMEC_exit_vel", "0.0000002" ) );
     //HACK this forces the reaction to be Li-6+D fusion with efficiency governed by the getFuelUsage function
-    fuel -= GetFuelUsage( false ) * simulation_atom_var * Res.Magnitude()*FMEC_exit_vel_inverse/Lithium6constant;
+    fuel -= Energetic::getFuelUsage( false ) * simulation_atom_var * Res.Magnitude()*FMEC_exit_vel_inverse/Lithium6constant;
 #ifndef __APPLE__
     if ( ISNAN( fuel ) ) {
         BOOST_LOG_TRIVIAL(error) << "FUEL is NAN";
@@ -2139,7 +2095,7 @@ Vector Unit::ClampThrust( const Vector &amt1, bool afterburn )
     if (afterburntype == 2) {
         //Energy-consuming afterburner
         //HACK this forces the reaction to be Li-6+Li-6 fusion with efficiency governed by the getFuelUsage function
-        warpenergy -= afterburnenergy*GetFuelUsage( afterburn ) * simulation_atom_var * Res.Magnitude()*FMEC_exit_vel_inverse
+        warpenergy -= afterburnenergy * Energetic::getFuelUsage( afterburn ) * simulation_atom_var * Res.Magnitude()*FMEC_exit_vel_inverse
                       /Lithium6constant;
     }
     if (3 == afterburntype || afterburntype == 1) {
@@ -2147,7 +2103,7 @@ Vector Unit::ClampThrust( const Vector &amt1, bool afterburn )
         //HACK this forces the reaction to be Li-6+Li-6 fusion with efficiency governed by the getFuelUsage function
         fuel -=
             ( (afterburn
-               && finegrainedFuelEfficiency) ? afterburnenergy : GetFuelUsage( afterburn ) ) * simulation_atom_var * Res.Magnitude()
+               && finegrainedFuelEfficiency) ? afterburnenergy : Energetic::getFuelUsage( afterburn ) ) * simulation_atom_var * Res.Magnitude()
             *FMEC_exit_vel_inverse/Lithium6constant;
 #ifndef __APPLE__
         if ( ISNAN( fuel ) ) {
@@ -2159,7 +2115,7 @@ Vector Unit::ClampThrust( const Vector &amt1, bool afterburn )
     if (afterburntype == 0) {
         //fuel-burning afterburner - uses default efficiency - appears to check for available energy? FIXME
         //HACK this forces the reaction to be Li-6+Li-6 fusion with efficiency governed by the getFuelUsage function
-        fuel -= GetFuelUsage( false ) * simulation_atom_var * Res.Magnitude()*FMEC_exit_vel_inverse/Lithium6constant;
+        fuel -= getFuelUsage( false ) * simulation_atom_var * Res.Magnitude()*FMEC_exit_vel_inverse/Lithium6constant;
 #ifndef __APPLE__
         if ( ISNAN( fuel ) ) {
             BOOST_LOG_TRIVIAL(error) << "Fuel is NAN B";
@@ -2255,12 +2211,6 @@ static bool applyto( float &shield, const float max, const float amt )
 
 
 
-void Unit::RechargeEnergy()
-{
-    static bool reactor_uses_fuel = XMLSupport::parse_bool( vs_config->getVariable( "physics", "reactor_uses_fuel", "false" ) );
-    if ( (!reactor_uses_fuel) || (fuel > 0) )
-        energy += recharge * simulation_atom_var;
-}
 
 
 /*
@@ -2834,37 +2784,8 @@ float Unit::ExplosionRadius()
 
 
 
-float Unit::WarpCapData() const
-{
-    return maxwarpenergy;
-}
 
-float Unit::FuelData() const
-{
-    return fuel;
-}
 
-float Unit::WarpEnergyData() const
-{
-    if (maxwarpenergy > 0)
-        return ( (float) warpenergy )/( (float) maxwarpenergy );
-    if (jump.energy > 0)
-        return ( (float) warpenergy )/( (float) jump.energy );
-    return 0.0f;
-}
-
-float Unit::EnergyData() const
-{
-    static bool max_shield_lowers_capacitance =
-        XMLSupport::parse_bool( vs_config->getVariable( "physics", "max_shield_lowers_capacitance", "false" ) );
-    if (max_shield_lowers_capacitance) {
-        if ( maxenergy <= totalShieldEnergyCapacitance( shield ) )
-            return 0;
-        return ( (float) energy )/( maxenergy-totalShieldEnergyCapacitance( shield ) );
-    } else {
-        return ( (float) energy )/maxenergy;
-    }
-}
 
 
 
@@ -3335,22 +3256,7 @@ void Unit::PerformDockingOperations()
 }
 
 std::set< Unit* >arrested_list_do_not_dereference;
-bool Unit::RefillWarpEnergy()
-{
-    static bool WCfuelhack = XMLSupport::parse_bool( vs_config->getVariable( "physics", "fuel_equals_warp", "false" ) );
-    if (WCfuelhack)
-        this->warpenergy = this->fuel;
-    float tmp = this->maxwarpenergy;
-    if (tmp < this->jump.energy)
-        tmp = this->jump.energy;
-    if (tmp > this->warpenergy) {
-        this->warpenergy = tmp;
-        if (WCfuelhack)
-            this->fuel = this->warpenergy;
-        return true;
-    }
-    return false;
-}
+
 
 void UpdateMasterPartList( Unit* );
 int Unit::ForceDock( Unit *utdw, unsigned int whichdockport )
@@ -3378,21 +3284,21 @@ int Unit::ForceDock( Unit *utdw, unsigned int whichdockport )
 
     static float MinimumCapacityToRefuelOnLand =
         XMLSupport::parse_float( vs_config->getVariable( "physics", "MinimumWarpCapToRefuelDockeesAutomatically", "0" ) );
-    float capdata = utdw->WarpCapData();
-    if ( (capdata >= MinimumCapacityToRefuelOnLand) && ( this->RefillWarpEnergy() ) ) {
+    float capdata = utdw->warpCapData();
+    if ( (capdata >= MinimumCapacityToRefuelOnLand) && ( this->refillWarpEnergy() ) ) {
         if ( cockpit >= 0 && cockpit < _Universe->numPlayers() ) {
             static float docking_fee = XMLSupport::parse_float( vs_config->getVariable( "general", "fuel_docking_fee", "0" ) );
             _Universe->AccessCockpit( cockpit )->credits -= docking_fee;
         }
     }
     if ( (capdata < MinimumCapacityToRefuelOnLand) && (this->faction == utdw->faction) ) {
-        if (utdw->WarpEnergyData() > this->WarpEnergyData() && utdw->WarpEnergyData() > this->jump.energy) {
-            this->IncreaseWarpEnergy( false, this->jump.energy );
-            utdw->DecreaseWarpEnergy( false, this->jump.energy );
+        if (utdw->warpEnergyData() > this->warpEnergyData() && utdw->warpEnergyData() > this->jump.energy) {
+            this->increaseWarpEnergy( false, this->jump.energy );
+            utdw->decreaseWarpEnergy( false, this->jump.energy );
         }
-        if (utdw->WarpEnergyData() < this->WarpEnergyData() && this->WarpEnergyData() > utdw->jump.energy) {
-            utdw->IncreaseWarpEnergy( false, utdw->jump.energy );
-            this->DecreaseWarpEnergy( false, utdw->jump.energy );
+        if (utdw->warpEnergyData() < this->warpEnergyData() && this->warpEnergyData() > utdw->jump.energy) {
+            utdw->increaseWarpEnergy( false, utdw->jump.energy );
+            this->decreaseWarpEnergy( false, utdw->jump.energy );
         }
     }
     if ( cockpit >= 0 && cockpit < _Universe->numPlayers() ) {
@@ -7088,7 +6994,7 @@ void Unit::RegenShields()
     float precharge = energy;
     //Reactor energy
     if (!energy_before_shield)
-        RechargeEnergy();
+        rechargeEnergy();
     //Shield energy drain
     if (shield.number) {
         //GAHHH reactor in units of 100MJ, shields in units of VSD=5.4MJ to make 1MJ of shield use 1/shieldenergycap MJ
@@ -7226,7 +7132,7 @@ void Unit::RegenShields()
     }
     //Reactor energy
     if (energy_before_shield)
-        RechargeEnergy();
+        rechargeEnergy();
     //Final energy computations
     float menergy = maxenergy;
     if ( shield.number && (menergy-maxshield < low_power_mode) ) {

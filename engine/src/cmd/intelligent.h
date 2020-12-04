@@ -34,6 +34,7 @@
 class Unit;
 class Order;
 
+
 class Intelligent
 {
 public:

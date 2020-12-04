@@ -2083,7 +2083,7 @@ void FireKeyboard::Execute()
             cp->EjectDock();              //use specialized ejectdock in the future
     }
     static bool actually_arrest = XMLSupport::parse_bool( vs_config->getVariable( "AI", "arrest_energy_zero", "false" ) );
-    if (actually_arrest && parent->EnergyRechargeData() == 0)
+    if (actually_arrest && parent->energyRechargeData() == 0)
         Arrested( parent );
 }
 

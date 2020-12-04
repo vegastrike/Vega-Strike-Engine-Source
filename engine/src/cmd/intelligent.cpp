@@ -23,6 +23,11 @@
  * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+
+/* This class provides all AI related methods to intelligent unit type -
+ * ships, space installations, missiles, drones, etc. */
+
+
 #include "intelligent.h"
 
 #include "ai/order.h"

@@ -1280,7 +1280,7 @@ void StarSystem::ProcessPendingJumps()
         bool dosightandsound = ( (pendingjump[kk]->dest == savedStarSystem) || _Universe->isPlayerStarship( un ) );
         _Universe->setActiveStarSystem( pendingjump[kk]->orig );
         if ( un->TransferUnitToSystem( kk, savedStarSystem, dosightandsound ) )
-          un->DecreaseWarpEnergy( false, 1.0f );
+          un->decreaseWarpEnergy( false, 1.0f );
         if (dosightandsound)
           _Universe->activeStarSystem()->DoJumpingComeSightAndSound( un );
         _Universe->AccessCockpit()->OnJumpEnd(un);

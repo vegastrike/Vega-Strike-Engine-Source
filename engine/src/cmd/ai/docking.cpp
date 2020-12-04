@@ -170,9 +170,9 @@ bool DockingOps::DockToTarget( Unit *utdw )
         if (physicallyDock) {
             return parent->Dock( utdw );
         } else {
-            float maxWillingToRefill = utdw->WarpCapData();
+            float maxWillingToRefill = utdw->warpCapData();
             if (maxWillingToRefill >= MinimumCapacityToRefuelOnLand)
-                parent->RefillWarpEnergy();                  //BUCO! This needs its own units.csv column to see how much we refill!
+                parent->refillWarpEnergy();                  //BUCO! This needs its own units.csv column to see how much we refill!
             return true;
         }
     } else if (diss <= 1.2*rad*rad) {
@@ -182,9 +182,9 @@ bool DockingOps::DockToTarget( Unit *utdw )
             if (physicallyDock) {
                 return parent->Dock( utdw );
             } else {
-                float maxWillingToRefill = utdw->WarpCapData();
+                float maxWillingToRefill = utdw->warpCapData();
                 if (maxWillingToRefill >= MinimumCapacityToRefuelOnLand)
-                    parent->RefillWarpEnergy();                      //BUCO! This needs its own units.csv column to see how much we refill!
+                    parent->refillWarpEnergy();                      //BUCO! This needs its own units.csv column to see how much we refill!
                 return true;
             }
         }

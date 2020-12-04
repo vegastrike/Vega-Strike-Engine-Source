@@ -220,6 +220,7 @@ SET(LIBCMD_SOURCES
     src/cmd/computer.cpp
 
     src/cmd/intelligent.cpp
+    src/cmd/energetic.cpp
 
     src/cmd/planetary_orbit.cpp
 )

@@ -419,7 +419,7 @@ static void AddSubUnits( Unit *thus, Unit::XML &xml, const std::string &subunits
     for (int a = xml.units.size()-1; a >= 0; a--) {
         bool randomspawn = xml.units[a]->name.get().find( "randomspawn" ) != string::npos;
         if (randomspawn) {
-            int chancetospawn = float_to_int( xml.units[a]->WarpCapData() );
+            int chancetospawn = float_to_int( xml.units[a]->warpCapData() );
             if (chancetospawn > rand()%100)
                 thus->SubUnits.prepend( xml.units[a] );
 

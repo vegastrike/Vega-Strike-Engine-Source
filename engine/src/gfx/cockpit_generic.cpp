@@ -165,7 +165,7 @@ void Cockpit::SetParent( Unit *unit, const char *filename, const char *unitmodna
         if (StartArmor[5] == 0) StartArmor[5] = 1;
         if (StartArmor[6] == 0) StartArmor[6] = 1;
         if (StartArmor[7] == 0) StartArmor[7] = 1;
-        maxfuel = unit->FuelData();
+        maxfuel = unit->fuelData();
         maxhull = unit->GetHull();
     }
 }
@@ -536,7 +536,7 @@ bool Cockpit::Update()
         static float minEnergyShieldPercent =
             XMLSupport::parse_float( vs_config->getVariable( "physics", "shield_energy_downpower_percent", ".66666666666666" ) );
 
-        bool toolittleenergy = (par->EnergyData() <= minEnergyForShieldDownpower);
+        bool toolittleenergy = (par->energyData() <= minEnergyForShieldDownpower);
         if (toolittleenergy) {
             secondsWithZeroEnergy += SIMULATION_ATOM;
             if (secondsWithZeroEnergy > minEnergyShieldTime) {

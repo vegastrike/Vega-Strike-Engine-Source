@@ -1119,20 +1119,20 @@ float GameCockpit::LookupUnitStat( int stat, Unit *target )
             return .25*(armordat[0]+armordat[2]+armordat[4]+armordat[6]);
         }
     case UnitImages< void >::FUEL:
-        if (target->FuelData() > maxfuel)
-            maxfuel = target->FuelData();
-        if (maxfuel > 0) return target->FuelData()/maxfuel;
+        if (target->fuelData() > maxfuel)
+            maxfuel = target->fuelData();
+        if (maxfuel > 0) return target->fuelData()/maxfuel;
         return 0;
 
     case UnitImages< void >::ENERGY:
-        return target->EnergyData();
+        return target->energyData();
 
     case UnitImages< void >::WARPENERGY:
         {
             static bool warpifnojump =
                 XMLSupport::parse_bool( vs_config->getVariable( "graphics", "hud", "display_warp_energy_if_no_jump_drive",
                                                                 "true" ) );
-            return (warpifnojump || target->GetJumpStatus().drive != -2) ? target->WarpEnergyData() : 0;
+            return (warpifnojump || target->GetJumpStatus().drive != -2) ? target->warpEnergyData() : 0;
         }
     case UnitImages< void >::HULL:
         if ( maxhull < target->GetHull() )
@@ -1397,7 +1397,7 @@ float GameCockpit::LookupUnitStat( int stat, Unit *target )
     case UnitImages< void >::CANJUMP_MODAL:
         if (-2 == target->GetJumpStatus().drive)
             return (float) UnitImages< void >::NODRIVE;
-        else if (target->GetWarpEnergy() < target->GetJumpStatus().energy)
+        else if (target->getWarpEnergy() < target->GetJumpStatus().energy)
             return (float) UnitImages< void >::NOTENOUGHENERGY;
         else if (target->graphicOptions.InWarp)          //FIXME
             return (float) UnitImages< void >::OFF;

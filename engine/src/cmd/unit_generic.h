@@ -40,6 +40,7 @@
 #include "movable.h"
 #include "computer.h"
 #include "intelligent.h"
+#include "energetic.h"
 
 #include "mount.h"
 
@@ -141,7 +142,7 @@ struct PlanetaryOrbitData;
  */
 
 // TODO: move Armed to subclasses
-class Unit : public Armed, public Audible, public Drawable, public Damageable, public Intelligent, public Movable
+class Unit : public Armed, public Audible, public Drawable, public Damageable, public Energetic, public Intelligent, public Movable
 {
 protected:
 //How many lists are referencing us
@@ -451,17 +452,7 @@ public:
                                        bool DoSightAndSound );
     StarSystem * getStarSystem();
     const StarSystem * getStarSystem() const;
-    struct UnitJump
-    {
-        float warpDriveRating;
-        float energy;                            //short fix
-        float insysenergy;                       //short fix
-        signed char   drive;
-        unsigned char delay;
-        unsigned char damage;
-        //negative means fuel
-    }
-    jump;
+
     Pilot *pilot;
     bool   selected;
 
@@ -559,11 +550,7 @@ public:
 protected:
 //are shields tight to the hull.  zero means bubble
     float  shieldtight;
-//fuel of this unit
-    float  fuel;
-    float  afterburnenergy;              //short fix
-    int    afterburntype;                        //0--energy, 1--fuel
-//-1 means it is off. -2 means it doesn't exist. otherwise it's engaged to destination (positive number)
+
 
 
 public:
@@ -606,44 +593,16 @@ public:
     // 0 = not stated, 1 = done
     float ExplodingProgress() const;
 
-//returns the current ammt of armor left
-//short fix
-    float AfterburnData() const
-    {
-        return afterburnenergy;
-    }
-    void SetAfterBurn( float aft );
-    float FuelData() const;
-    float WarpCapData() const;
-    void SetFuel( float f );
-//Returns the current ammt of energy left
-    float EnergyRechargeData() const
-    {
-        return recharge;
-    }
-    void SetEnergyRecharge( float enrech );
-    void SetMaxEnergy( float maxen );
-    float MaxEnergyData() const
-    {
-        return maxenergy;
-    }
-    float ShieldRechargeData() const
-    {
-        return shield.recharge;
-    }
-    float EnergyData() const;
-    float WarpEnergyData() const;
-//short fix
-    float GetWarpEnergy() const
-    {
-        return warpenergy;
-    }
+
+
+
+
+
+
+
 
     float CalculateNearestWarpUnit( float minmultiplier, Unit **nearest_unit, bool count_negative_warp_units ) const override;
-    //float GetMaxWarpFieldStrength( float rampmult = 1.f ) const;
-    void DecreaseWarpEnergy( bool insys, float time );
-    void IncreaseWarpEnergy( bool insys, float time );
-    bool RefillWarpEnergy();
+
 
 //What's the size of this unit
     float rSize() const
@@ -785,22 +744,15 @@ public:
 public:
     void RegenShields() override;
 
-//current energy
-    float  energy;
+
 protected:
 
 
 //The radar limits (range, cone range, etc)
 //the current order
-//how much the energy recharges per second
-    float recharge;
 
-//maximum energy
-    float maxenergy;
-//maximum energy
-    float maxwarpenergy;                 //short fix
-//current energy
-    float warpenergy;                            //short fix
+
+
 
 
 public:
