@@ -122,9 +122,6 @@ using namespace XMLSupport;
 extern void DestroyMount( Mount* );
 
 
-
-
-
 void Unit::setFaceCamera()
 {
     graphicOptions.FaceCamera = 1;
@@ -172,15 +169,6 @@ bool Unit::AutoPilotTo( Unit *un, bool automaticenergyrealloc )
     std::string tmp;
     return AutoPilotToErrorMessage( un, automaticenergyrealloc, tmp );
 }
-
-
-
-
-
-
-
-
-
 
 
 bool Unit::InRange( const Unit *target, double &mm, bool cone, bool cap, bool lock ) const
@@ -248,10 +236,6 @@ void Unit::Ref()
 
 
 
-
-
-
-
 #define INVERSEFORCEDISTANCE 5400
 extern void abletodock( int dock );
 
@@ -270,7 +254,6 @@ bool CrashForceDock( Unit *thus, Unit *dockingUn, bool force )
     }
     return false;
 }
-
 
 
 void Unit::ActivateJumpDrive( int destination )
@@ -1080,10 +1063,6 @@ const std::vector< std::string >& Unit::GetDestinations() const
 {
     return pImage->destination;
 }
-
-
-
-
 
 
 

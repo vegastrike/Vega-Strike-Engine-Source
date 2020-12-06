@@ -177,21 +177,3 @@ float Energetic::warpEnergyData() const
         return ( (float) warpenergy )/( (float) jump.energy );
     return 0.0f;
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

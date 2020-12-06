@@ -37,6 +37,7 @@
 #include <algorithm>
 
 // TODO: make GameConfig support sub sections
+// See https://github.com/vegastrike/Vega-Strike-Engine-Source/issues/358
 static float  flickertime = 30.0f; // GameConfig::GetVariable( "graphics", "glowflicker", "time", 30.0f ) );
 static float  flickerofftime = 2.0f; // ( "graphics", "glowflicker", "off-time", "2" ) );
 static float  minflickercycle  = 2.0f; // ( "graphics", "glowflicker", "min-cycle", "2" ) );
