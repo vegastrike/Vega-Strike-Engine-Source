@@ -28,6 +28,7 @@
 
 #include "gfx/vec.h" // TODO: replace with class Vector;
 #include <map>
+#include <string>
 
 enum class SoundType {
     engine, shield, armor, hull, explosion, cloaking, jump
