@@ -59,7 +59,7 @@ public:
 
     enum _UnitType isUnit() const
     {
-        return _UnitType::asteroid;
+        return _UnitType::missile;
     }
 
     virtual void UpdatePhysics2( const Transformation &trans,
