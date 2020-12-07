@@ -382,7 +382,7 @@ void FactionUtil::LoadContrabandLists()
 {
     for (unsigned int i = 0; i < factions.size() && i < contrabandlists.size(); i++)
         if (contrabandlists[i].length() > 0)
-            factions[i]->contraband.reset(new GameUnit< Unit >( contrabandlists[i].c_str(), true, i ));
+            factions[i]->contraband.reset(new GameUnit( contrabandlists[i].c_str(), true, i ));
     contrabandlists.clear();
 }
 

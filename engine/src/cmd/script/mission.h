@@ -476,7 +476,7 @@ public:
     static double gametime;
     string mission_name;
     void terminateMission();
-    Unit  *call_unit_launch( class CreateFlightgroup*fg, int type /*clsptr type*/, const std::string&destinations );
+    Unit  *call_unit_launch( class CreateFlightgroup*fg, int type /*_UnitType type*/, const std::string&destinations );
 
     Mission( const char *configfile, bool loadscripts = true );
     Mission( const char *filename, const std::string &pythonscript, bool loadscripts = true );

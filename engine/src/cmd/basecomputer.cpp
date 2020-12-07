@@ -1550,7 +1550,7 @@ void BaseComputer::recalcTitle()
     Unit  *baseUnit  = m_base.GetUnit();
     string baseName;
     if (baseUnit) {
-        if (baseUnit->isUnit() == PLANETPTR) {
+        if (baseUnit->isUnit() == _UnitType::planet) {
             string temp = ( (Planet*) baseUnit )->getHumanReadablePlanetType()+" Planet";
             // think "<planet type> <name of planet>"
             baseName = temp + " " + baseUnit->name;
@@ -3453,7 +3453,7 @@ bool UpgradeOperationMountDialog::processWindowCommand( const EventCommandId &co
 //Select the mount to use for selling.
 void BaseComputer::BuyUpgradeOperation::selectMount( void )
 {
-    if (m_newPart->GetNumMounts() <= 0) {
+    if (m_newPart->getNumMounts() <= 0) {
         //Part doesn't need a mount point.
         gotSelectedMount( 0 );
         return;
@@ -3471,7 +3471,7 @@ void BaseComputer::BuyUpgradeOperation::selectMount( void )
     //Fill the dialog picker with the mount points.
     SimplePicker *picker = static_cast< SimplePicker* > ( dialog->window()->findControlById( "Picker" ) );
     assert( picker != NULL );
-    for (int i = 0; i < playerUnit->GetNumMounts(); i++) {
+    for (int i = 0; i < playerUnit->getNumMounts(); i++) {
         //Mount is selectable if we can upgrade with the new part using that mount.
         double     percent;             //Temp.  Not used.
         const bool selectable = playerUnit->canUpgrade( m_newPart,
@@ -3646,7 +3646,7 @@ static bool matchCargoToWeapon( const std::string &cargoName, const std::string 
 //Select the mount to use for selling.
 void BaseComputer::SellUpgradeOperation::selectMount( void )
 {
-    if (m_newPart->GetNumMounts() <= 0) {
+    if (m_newPart->getNumMounts() <= 0) {
         //Part doesn't need a mount point.
         gotSelectedMount( 0 );
         return;
@@ -3666,7 +3666,7 @@ void BaseComputer::SellUpgradeOperation::selectMount( void )
     assert( picker != NULL );
     int mount = -1;                     //The mount if there was only one.
     int selectableCount  = 0;
-    for (int i = 0; i < playerUnit->GetNumMounts(); i++) {
+    for (int i = 0; i < playerUnit->getNumMounts(); i++) {
         //Whether or not the entry is selectable -- the same as the thing we are selling.
         bool   selectable = false;
 
@@ -3682,7 +3682,7 @@ void BaseComputer::SellUpgradeOperation::selectMount( void )
                 (playerUnit->mounts[i].ammo == -1) ? string( "" ) : string( ( " ammo: "+tostring( playerUnit->mounts[i].ammo ) ) );
             mountName += ammoexp;
             if (partUnit) {
-                if ( partUnit->GetNumMounts() ) {
+                if ( partUnit->getNumMounts() ) {
                     if (partUnit->mounts[0].type == playerUnit->mounts[i].type) {
                         selectable = true;
                         selectableCount++;
@@ -3946,7 +3946,7 @@ string buildShipDescription( Cargo &item, std::string &texturedescription )
     current_unit_load_mode = NO_MESH;
 
     BOOST_LOG_TRIVIAL(debug) << "buildShipDescription: creating newPart";
-    Unit  *newPart   = new GameUnit< Unit >( item.GetContent().c_str(), false, 0, newModifications, flightGroup, fgsNumber );
+    Unit  *newPart   = new GameUnit( item.GetContent().c_str(), false, 0, newModifications, flightGroup, fgsNumber );
     current_unit_load_mode = DEFAULT;
     string sHudImage;
     string sImage;
@@ -3987,7 +3987,7 @@ string buildUpgradeDescription( Cargo &item )
     Flightgroup *flightGroup = new Flightgroup();     //sigh
     int    fgsNumber = 0;
     current_unit_load_mode = NO_MESH;
-    Unit  *newPart   = new GameUnit< Unit >( item.GetContent().c_str(), false,
+    Unit  *newPart   = new GameUnit( item.GetContent().c_str(), false,
                                                 FactionUtil::GetUpgradeFaction(), blnk, flightGroup, fgsNumber );
     current_unit_load_mode = DEFAULT;
     string str = "";
@@ -4220,7 +4220,7 @@ string buildCargoDescription( const Cargo &item, BaseComputer &computer, float p
         int cp = _Universe->whichPlayerStarship( computer.m_player.GetUnit() );
         vector<string> highest, lowest;
 
-        const string &baseName = (computer.m_base.GetUnit()->isUnit() == PLANETPTR) ?
+        const string &baseName = (computer.m_base.GetUnit()->isUnit() == _UnitType::planet) ?
               computer.m_base.GetUnit()->name.get()
             : computer.m_base.GetUnit()->getFullname();
 
@@ -4371,7 +4371,7 @@ bool buyShip( Unit *baseUnit,
                                                                                                                         0 ),
                                     Vector( 0, 0, 0 ) );
             Unit *newPart =
-                new GameUnit< Unit >( content.c_str(),
+                new GameUnit( content.c_str(),
                                          false,
                                          baseUnit->faction,
                                          newModifications,
@@ -4641,7 +4641,7 @@ static const char *WeaponTypeStrings[] = {
 
 void showUnitStats( Unit *playerUnit, string &text, int subunitlevel, int mode, Cargo &item )
 {
-    static Unit *blankUnit   = new GameUnit< Unit >( "upgrading_dummy_unit", 1, FactionUtil::GetFactionIndex( "upgrades" ) );
+    static Unit *blankUnit   = new GameUnit( "upgrading_dummy_unit", 1, FactionUtil::GetFactionIndex( "upgrades" ) );
     static float warpenratio = XMLSupport::parse_float( vs_config->getVariable( "physics", "warp_energy_multiplier", "0.12" ) );
     static float warpbleed   = XMLSupport::parse_float( vs_config->getVariable( "physics", "warpbleed", "20" ) );
     static float shield_maintenance_cost =
@@ -4786,14 +4786,14 @@ void showUnitStats( Unit *playerUnit, string &text, int subunitlevel, int mode, 
     //following lines somewhat borken in terms of semantics for quantity of fuel
     //and policy of upgrades to fuel
     if (!mode) {
-        PRETTY_ADDU( statcolor+"Fuel capacity: #-c", playerUnit->FuelData(), 2, "metric tons of Lithium-6" );
-    } else if ( blankUnit->FuelData() != playerUnit->FuelData() ) {
+        PRETTY_ADDU( statcolor+"Fuel capacity: #-c", playerUnit->fuelData(), 2, "metric tons of Lithium-6" );
+    } else if ( blankUnit->fuelData() != playerUnit->fuelData() ) {
         switch (replacement_mode)
         {
         case 0:                 //Replacement or new Module
             break;
         case 1:                 //Additive
-            PRETTY_ADDU( statcolor+"Adds #-c", playerUnit->FuelData(), 2, "metric tons of Lithium-6 " /*+statcolor+"to Fuel Capacity #-c"*/ );
+            PRETTY_ADDU( statcolor+"Adds #-c", playerUnit->fuelData(), 2, "metric tons of Lithium-6 " /*+statcolor+"to Fuel Capacity #-c"*/ );
             break;
         case 2:                 //multiplicative
             break;
@@ -5153,12 +5153,12 @@ void showUnitStats( Unit *playerUnit, string &text, int subunitlevel, int mode, 
         float maxshield = Damageable::totalShieldEnergyCapacitance( playerUnit->shield );
         if (shields_require_power)
             maxshield = 0;
-        PRETTY_ADDU( statcolor+"Recharge: #-c", playerUnit->EnergyRechargeData()*RSconverter, 0, "MJ/s" );
+        PRETTY_ADDU( statcolor+"Recharge: #-c", playerUnit->energyRechargeData()*RSconverter, 0, "MJ/s" );
         PRETTY_ADDU( statcolor+"Weapon capacitor bank storage: #-c",
-                     ( (playerUnit->MaxEnergyData()-maxshield)*RSconverter ), 0, "MJ" );
+                     ( (playerUnit->maxEnergyData()-maxshield)*RSconverter ), 0, "MJ" );
         //note: I found no function to get max warp energy, but since we're docked they are the same
         if (!subunitlevel) {
-            PRETTY_ADDU( statcolor+"Warp capacitor bank storage: #-c", playerUnit->WarpCapData()*RSconverter*Wconv, 0, "MJ" );
+            PRETTY_ADDU( statcolor+"Warp capacitor bank storage: #-c", playerUnit->warpCapData()*RSconverter*Wconv, 0, "MJ" );
 
             text += "#n##n##c0:1:.5#"+prefix+"[SPEC SUBSYSTEM]#n##-c";
 
@@ -5176,7 +5176,7 @@ void showUnitStats( Unit *playerUnit, string &text, int subunitlevel, int mode, 
                     PRETTY_ADDU( statcolor+"Delay: #-c", uj.delay, 0, "seconds" );
                 if (uj.damage > 0)
                     PRETTY_ADDU( statcolor+"Damage to outsystem jump drive: #-c", uj.damage*VSDM, 0, "MJ" );
-                if (playerUnit->WarpCapData() < uj.energy) {
+                if (playerUnit->warpCapData() < uj.energy) {
                     text += "#n##c1:.3:.3#"+prefix
                             +
                             "WARNING: Warp capacitor banks under capacity for jump: upgrade warp capacitance#-c";
@@ -5187,41 +5187,41 @@ void showUnitStats( Unit *playerUnit, string &text, int subunitlevel, int mode, 
         switch (replacement_mode)
         {
         case 0:                 //Replacement or new Module
-            if ( MODIFIES(replacement_mode, playerUnit, blankUnit, EnergyRechargeData()) )
+            if ( MODIFIES(replacement_mode, playerUnit, blankUnit, energyRechargeData()) )
                 PRETTY_ADDU( statcolor+"Installs reactor with recharge rate: #-c",
-                             playerUnit->EnergyRechargeData()*RSconverter, 0, "MJ/s" );
-            if ( MODIFIES(replacement_mode, playerUnit, blankUnit, MaxEnergyData()) )
+                             playerUnit->energyRechargeData()*RSconverter, 0, "MJ/s" );
+            if ( MODIFIES(replacement_mode, playerUnit, blankUnit, maxEnergyData()) )
                 PRETTY_ADDU( statcolor+"Installs main capacitor bank with storage capacity: #-c",
-                             (playerUnit->MaxEnergyData()*RSconverter), 0, "MJ" );
-            if ( MODIFIES(replacement_mode, playerUnit, blankUnit, GetWarpEnergy()) )
+                             (playerUnit->maxEnergyData()*RSconverter), 0, "MJ" );
+            if ( MODIFIES(replacement_mode, playerUnit, blankUnit, getWarpEnergy()) )
                 PRETTY_ADDU( statcolor+"Installs warp capacitor bank with storage capacity: #-c",
-                             playerUnit->GetWarpEnergy()*RSconverter*Wconv, 0, "MJ" );
+                             playerUnit->getWarpEnergy()*RSconverter*Wconv, 0, "MJ" );
             if (buj.drive != uj.drive) {
                 text += statcolor +
                         "#n#Allows travel via Jump Points.#n#Consult your personal info screen for ship specific energy requirements. #-c";
             }
             break;
         case 1:                 //Additive
-            if ( MODIFIES(replacement_mode, playerUnit, blankUnit, EnergyRechargeData()) )
+            if ( MODIFIES(replacement_mode, playerUnit, blankUnit, energyRechargeData()) )
                 PRETTY_ADDU( statcolor+"Increases recharge rate by #-c",
-                             playerUnit->EnergyRechargeData()*RSconverter, 0, "MJ/s" );
-            if ( MODIFIES(replacement_mode, playerUnit, blankUnit, MaxEnergyData()) )
+                             playerUnit->energyRechargeData()*RSconverter, 0, "MJ/s" );
+            if ( MODIFIES(replacement_mode, playerUnit, blankUnit, maxEnergyData()) )
                 PRETTY_ADDU( statcolor+"Adds #-c",
-                             (playerUnit->MaxEnergyData()*RSconverter), 0, "MJ of storage to main capacitor banks" );
-            if ( MODIFIES(replacement_mode, playerUnit, blankUnit, GetWarpEnergy()) )
+                             (playerUnit->maxEnergyData()*RSconverter), 0, "MJ of storage to main capacitor banks" );
+            if ( MODIFIES(replacement_mode, playerUnit, blankUnit, getWarpEnergy()) )
                 PRETTY_ADDU( statcolor+"Adds #-c",
-                             playerUnit->GetWarpEnergy()*RSconverter*Wconv, 0, "MJ of storage to warp capacitor bank" );
+                             playerUnit->getWarpEnergy()*RSconverter*Wconv, 0, "MJ of storage to warp capacitor bank" );
             break;
         case 2:                 //multiplicative
-            if ( MODIFIES(replacement_mode, playerUnit, blankUnit, EnergyRechargeData()) )
+            if ( MODIFIES(replacement_mode, playerUnit, blankUnit, energyRechargeData()) )
                 PRETTY_ADDU( statcolor+"Increases reactor recharge rate by #-c",
-                             100.0*(playerUnit->EnergyRechargeData()-1), 0, "%" );
-            if ( MODIFIES(replacement_mode, playerUnit, blankUnit, MaxEnergyData()) )
+                             100.0*(playerUnit->energyRechargeData()-1), 0, "%" );
+            if ( MODIFIES(replacement_mode, playerUnit, blankUnit, maxEnergyData()) )
                 PRETTY_ADDU( statcolor+"Increases main capacitor bank storage by #-c",
-                             100.0*(playerUnit->MaxEnergyData()-1), 0, "%" );
-            if ( MODIFIES(replacement_mode, playerUnit, blankUnit, GetWarpEnergy()) )
+                             100.0*(playerUnit->maxEnergyData()-1), 0, "%" );
+            if ( MODIFIES(replacement_mode, playerUnit, blankUnit, getWarpEnergy()) )
                 PRETTY_ADDU( statcolor+"Increases warp capacitor bank storage by #-c",
-                             (playerUnit->GetWarpEnergy()-1)*100, 0, "%" );
+                             (playerUnit->getWarpEnergy()-1)*100, 0, "%" );
             break;
         default:                 //Failure
             text += "Oh dear, this wasn't an upgrade. Please debug code.";
@@ -5528,7 +5528,7 @@ void showUnitStats( Unit *playerUnit, string &text, int subunitlevel, int mode, 
     }
     //let's go through all mountpoints
     {
-        for (int i = 0; i < playerUnit->GetNumMounts(); i++) {
+        for (int i = 0; i < playerUnit->getNumMounts(); i++) {
             if (!mode) {
                 PRETTY_ADD( " #c0:1:.3#[#-c", i+1, 0 );
                 text += "#c0:1:.3#]#-c #c0:1:1#"+lookupMountSize( playerUnit->mounts[i].size )+"#-c";
@@ -5542,7 +5542,7 @@ void showUnitStats( Unit *playerUnit, string &text, int subunitlevel, int mode, 
         text += "#n#"+prefix+"MOUNTED:";          //need brace for namespace issues on VC++
     {
         if (anyweapons) {
-            for (int i = 0; i < playerUnit->GetNumMounts(); i++) {
+            for (int i = 0; i < playerUnit->getNumMounts(); i++) {
                 const weapon_info *wi = playerUnit->mounts[i].type;
                 if ( (!wi) || (wi->weapon_name == "") ) {
                     continue;
@@ -5661,27 +5661,27 @@ void showUnitStats( Unit *playerUnit, string &text, int subunitlevel, int mode, 
         PRETTY_ADDU( statcolor+"Minimum time to reach full overthrust speed: #-c",
                      playerUnit->GetMass()*uc.max_ab_speed()/playerUnit->limits.afterburn, 2, "seconds" );
         //reactor
-        float avail    = (playerUnit->MaxEnergyData()*RSconverter-maxshield*VSDM);
+        float avail    = (playerUnit->maxEnergyData()*RSconverter-maxshield*VSDM);
         float overhead =
             (shields_require_power) ? (playerUnit->shield.recharge/shieldenergycap*shield_maintenance_cost
                                        *playerUnit->shield.number*VSDM) : 0;
-        float nrt = avail/(playerUnit->EnergyRechargeData()*RSconverter-overhead);
+        float nrt = avail/(playerUnit->energyRechargeData()*RSconverter-overhead);
         PRETTY_ADDU( statcolor+"Reactor nominal replenish time: #-c", nrt, 2, "seconds" );
         //shield related stuff
         //code taken from RegenShields in unit_generic.cpp, so we're sure what we say here is correct.
         static float low_power_mode = XMLSupport::parse_float( vs_config->getVariable( "physics", "low_power_mode_energy", "10" ) );
-        if (playerUnit->MaxEnergyData()-maxshield < low_power_mode) {
+        if (playerUnit->maxEnergyData()-maxshield < low_power_mode) {
             text += "#n##c1:.3:.3#"+prefix
                     +
                     "WARNING: Capacitor banks are overdrawn: downgrade shield, upgrade reactor or purchase reactor capacitance!#-c";
         }
-        if (uj.drive != -2 && playerUnit->WarpCapData() < uj.energy) {
+        if (uj.drive != -2 && playerUnit->warpCapData() < uj.energy) {
             text += "#n##c1:.3:.3#"+prefix
                     +
                     "WARNING: Warp capacitor banks under capacity for jump: upgrade warp capacitance#-c";
         }
         if (playerUnit->shield.number) {
-            if (playerUnit->shield.recharge*playerUnit->shield.number*VSDM/shieldenergycap > playerUnit->EnergyRechargeData()
+            if (playerUnit->shield.recharge*playerUnit->shield.number*VSDM/shieldenergycap > playerUnit->energyRechargeData()
                 *RSconverter) {
                 text += "#n##c1:1:.1#"+prefix+"WARNING: reactor recharge rate is less than combined shield recharge rate.#n#";
                 text += "Your shields won't be able to regenerate at their optimal speed!#-c";
@@ -5689,7 +5689,7 @@ void showUnitStats( Unit *playerUnit, string &text, int subunitlevel, int mode, 
             if (shields_require_power) {
                 text += "#n#"+prefix+statcolor+"Reactor recharge slowdown caused by shield maintenance: #-c";
                 float maint_draw_percent = playerUnit->shield.recharge*VSDM*100.0/shieldenergycap*shield_maintenance_cost
-                                           *playerUnit->shield.number/(playerUnit->EnergyRechargeData()*RSconverter);
+                                           *playerUnit->shield.number/(playerUnit->energyRechargeData()*RSconverter);
                 text += (boost::format("%1$.2f") % maint_draw_percent).str();
                 text += " %.";
                 if (maint_draw_percent > 60) {
@@ -5708,13 +5708,13 @@ void showUnitStats( Unit *playerUnit, string &text, int subunitlevel, int mode, 
         float maint_draw =
             (shields_require_power && playerUnit->shield.number) ? (playerUnit->shield.recharge*VSDM/shieldenergycap
                                                                     *shield_maintenance_cost*playerUnit->shield.number) : 0;
-        if ( totalWeaponEnergyUsage < (playerUnit->EnergyRechargeData()*RSconverter-maint_draw) ) {
+        if ( totalWeaponEnergyUsage < (playerUnit->energyRechargeData()*RSconverter-maint_draw) ) {
             //waouh, impressive...
             text += "#n##c0:1:.2#"+prefix+"Your reactor produces more energy than your weapons can use!#-c";
         } else {
             PRETTY_ADDU( statcolor+"Reactor energy depletion time if weapons in continuous use: #-c",
-                         (playerUnit->MaxEnergyData()
-                          *RSconverter)/( totalWeaponEnergyUsage-( (playerUnit->EnergyRechargeData()*RSconverter-maint_draw) ) ),
+                         (playerUnit->maxEnergyData()
+                          *RSconverter)/( totalWeaponEnergyUsage-( (playerUnit->energyRechargeData()*RSconverter-maint_draw) ) ),
                          2,
                          "seconds" );
         }

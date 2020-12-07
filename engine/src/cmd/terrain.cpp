@@ -52,7 +52,7 @@ void Terrain::ApplyForce( Unit *un, const Vector &normal, float dist )
 void Terrain::Collide( Unit *un, const Matrix &t )
 {
     Vector norm;
-    if (un->isUnit() == BUILDINGPTR)
+    if (un->isUnit() == _UnitType::building)
         return;
     float  dist = GetHeight( un->Position().Cast(), norm, t, TotalSizeX, TotalSizeZ )-un->rSize();
     if (dist < 0)

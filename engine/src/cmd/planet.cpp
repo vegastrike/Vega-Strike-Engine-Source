@@ -147,12 +147,12 @@ Mesh * MakeFogMesh( const AtmosphericFogMesh &f, float radius )
 //////////////////////////////////////////////
 // AtmosphereHalo
 //////////////////////////////////////////////
-class AtmosphereHalo : public GameUnit< Unit >
+class AtmosphereHalo : public GameUnit
 {
 public:
     float planetRadius;
     AtmosphereHalo( float radiusOfPlanet, vector< Mesh* > &meshes, int faction ) :
-        GameUnit< Unit > ( meshes, true, faction )
+        GameUnit ( meshes, true, faction )
     {
         planetRadius = radiusOfPlanet;
     }
@@ -173,7 +173,7 @@ public:
         mat.p += sqrt( planetRadius*planetRadius-HorizonHeight*HorizonHeight )*dirtocam;
         ScaleMatrix( mat, Vector( xyscale, xyscale, zscale ) );
         qua.position = mat.p;
-        GameUnit< Unit >::Draw( qua, mat );
+        GameUnit::Draw( qua, mat );
     }
 };
 
@@ -181,7 +181,7 @@ public:
 // Constructors and the like
 //////////////////////////////////////////////
 Planet::Planet() :
-    GameUnit< PlanetGeneric > ( 0 )
+    GameUnit ( 0 )
 {
     Init();
     SetAI( new Order() );     //no behavior
@@ -216,7 +216,7 @@ Planet::Planet( QVector x,
                         int faction,
                         string fgid,
                         bool inside_out ) :
-    GameUnit< PlanetGeneric > ( 0 )
+    GameUnit ( 0 )
 {
     atmosphere = nullptr;
     atmospheric  = false;
@@ -244,11 +244,11 @@ Planet::Planet( QVector x,
             stab = ".unstable";
         string wormholename   = wormhole_unit+stab;
         string wormholeneutralname = wormhole_unit+".neutral"+stab;
-        Unit  *jum = new GameUnit< Unit >( wormholename.c_str(), true, faction );
+        Unit  *jum = new GameUnit( wormholename.c_str(), true, faction );
         int    neutralfaction = FactionUtil::GetNeutralFaction();
         faction = neutralfaction;
 
-        Unit  *neujum  = new GameUnit< Unit >( wormholeneutralname.c_str(), true, neutralfaction );
+        Unit  *neujum  = new GameUnit( wormholeneutralname.c_str(), true, neutralfaction );
         Unit  *jump    = jum;
         bool   anytrue = false;
         while (jump != nullptr) {
@@ -422,7 +422,7 @@ void Planet::InitPlanet( QVector x,
     int    tmpfac   = faction;
     if (UniverseUtil::LookupUnitStat( tempname, FactionUtil::GetFactionName( faction ), "Cargo_Import" ).length() == 0)
         tmpfac = FactionUtil::GetPlanetFaction();
-    Unit  *un = new GameUnit< Unit >( tempname.c_str(), true, tmpfac );
+    Unit  *un = new GameUnit( tempname.c_str(), true, tmpfac );
 
     static bool smartplanets = XMLSupport::parse_bool( vs_config->getVariable( "physics", "planets_can_have_subunits", "false" ) );
     if ( un->name != string( "LOAD_FAILED" ) ) {
@@ -432,7 +432,7 @@ void Planet::InitPlanet( QVector x,
         VSSprite *tmp = pImage->pHudImage;
         pImage->pHudImage     = un->GetImageInformation().pHudImage;
         un->GetImageInformation().pHudImage = tmp;
-        maxwarpenergy = un->WarpCapData();
+        maxwarpenergy = un->warpCapData();
         if (smartplanets) {
             SubUnits.prepend( un );
             un->SetRecursiveOwner( this );
@@ -529,7 +529,7 @@ void Planet::AddFog( const std::vector< AtmosphericFogMesh > &v, bool opticalill
     if (opticalillusion)
         fawg = new AtmosphereHalo( this->rSize(), fogs, 0 );
     else
-        fawg = new GameUnit< Unit >( fogs, true, 0 );
+        fawg = new GameUnit( fogs, true, 0 );
     fawg->setFaceCamera();
     getSubUnits().preinsert( fawg );
     fawg->hull /= fawg->GetHullPercent();
@@ -614,7 +614,7 @@ Vector Planet::AddSpaceElevator( const std::string &name, const std::string &fac
             ElevatorLoc.p.Set( dir.i*mx.i, dir.j*mx.j, dir.k*mx.k );
         else
             ElevatorLoc.p.Set( -dir.i*mn.i, -dir.j*mn.j, -dir.k*mn.k );
-        Unit *un = new GameUnit< Unit >( name.c_str(), true, FactionUtil::GetFactionIndex( faction ), "", nullptr );
+        Unit *un = new GameUnit( name.c_str(), true, FactionUtil::GetFactionIndex( faction ), "", nullptr );
         if (pImage->dockingports.back().GetPosition().MagnitudeSquared() < 10)
             pImage->dockingports.clear();
         pImage->dockingports.push_back( DockingPorts( ElevatorLoc.p, un->rSize()*1.5, 0, DockingPorts::Type::INSIDE ) );
@@ -635,7 +635,7 @@ void Planet::Draw( const Transformation &quat, const Matrix &m )
     //Do lighting fx
     //if cam inside don't draw?
     //if(!inside) {
-    GameUnit< PlanetGeneric >::Draw( quat, m );
+    GameUnit::Draw( quat, m );
     //}
     QVector    t( _Universe->AccessCamera()->GetPosition()-Position() );
     static int counter = 0;
@@ -735,7 +735,7 @@ Unit* Planet::beginElement( QVector x,
     if (level > 2) {
         un_iter satiterator = satellites.createIterator();
         assert( *satiterator );
-        if ( (*satiterator)->isUnit() == PLANETPTR ) {
+        if ( (*satiterator)->isUnit() == _UnitType::planet ) {
             un = ( (Planet*) (*satiterator) )->beginElement( x, y, vely, rotvel, pos,
                                                              gravity, radius,
                                                              filename, technique, unitname,
@@ -753,7 +753,7 @@ Unit* Planet::beginElement( QVector x,
         if (isunit == true) {
             Unit *sat_unit  = nullptr;
             Flightgroup *fg = getStaticBaseFlightgroup( faction );
-            satellites.prepend( sat_unit = new GameUnit< Unit >( filename.c_str(), false, faction, "", fg, fg->nr_ships-1 ) );
+            satellites.prepend( sat_unit = new GameUnit( filename.c_str(), false, faction, "", fg, fg->nr_ships-1 ) );
             sat_unit->setFullname( fullname );
             un = sat_unit;
             un_iter satiterator( satellites.createIterator() );
@@ -817,7 +817,7 @@ Planet* Planet::GetTopPlanet( int level )
     if (level > 2) {
         un_iter satiterator = satellites.createIterator();
         assert( *satiterator );
-        if ( (*satiterator)->isUnit() == PLANETPTR ) {
+        if ( (*satiterator)->isUnit() == _UnitType::planet ) {
             return ( (Planet*) (*satiterator) )->GetTopPlanet( level-1 );
         } else {
             BOOST_LOG_TRIVIAL(error) << "Planets are unable to orbit around units";
@@ -839,7 +839,7 @@ void Planet::Kill( bool erasefromsave )
     /*	*/
     satellites.clear();
     insiders.clear();
-    GameUnit< PlanetGeneric >::Kill( erasefromsave );
+    GameUnit::Kill( erasefromsave );
 }
 
 

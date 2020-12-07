@@ -22,7 +22,7 @@ static void RecursiveSetSchedule(Unit *un)
 }
 
 Asteroid::Asteroid( const char *filename, int faction, Flightgroup *fg, int fg_snumber,
-                            float difficulty ) : GameUnit< AsteroidGeneric > ( filename, false, faction, string( "" ), fg, fg_snumber )
+                            float difficulty ) : GameUnit ( filename, false, faction, string( "" ), fg, fg_snumber )
 {
     asteroid_physics_offset=0;
     un_iter iter = getSubUnits();

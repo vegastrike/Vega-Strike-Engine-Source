@@ -16,7 +16,6 @@
 #include "star_system.h"
 #include "universe.h"
 #include "game_config.h"
-#include "unit_generics.h"
 
 
 ////////////////////////////////////////////////////////////////
@@ -36,7 +35,7 @@ void MissileEffect::ApplyDamage( Unit *smaller )
     QVector norm = pos-smaller->Position();
     float smaller_rsize = smaller->rSize();
     float distance = norm.Magnitude()-smaller_rsize;            // no better check than the bounding sphere for now
-    if ( distance < radius) {                                   // "smaller->isUnit() != MISSILEPTR &&" was removed - why disable antimissiles?
+    if ( distance < radius) {                                   // "smaller->isUnit() != _UnitType::missile &&" was removed - why disable antimissiles?
         if ( distance < 0)
             distance = 0.f;                                     //it's inside the bounding sphere, so we'll not reduce the effect
         if (radialmultiplier < .001) radialmultiplier = .001;
@@ -138,7 +137,7 @@ Missile::Missile( const char *filename,
              float radialeffect,
              float radmult,
              float detonation_radius ) :
-    GameUnit< MissileGeneric > ( filename, false, faction, modifications )
+    GameUnit( filename, false, faction, modifications )
   , time( time )
   , damage( damage )
   , phasedamage( phasedamage )
@@ -178,15 +177,12 @@ float Missile::ExplosionRadius()
 }
 
 
-//enum clsptr Missile::isUnit() const
-//{
-//    return MISSILEPTR;
-//}
+
 
 
 void Missile::Kill( bool erase ) {
     Discharge();
-    GameUnit< MissileGeneric >::Kill( erase );
+    GameUnit::Kill( erase );
 }
 
 
@@ -200,7 +196,7 @@ void Missile::UpdatePhysics2( const Transformation &trans,
                               UnitCollection *uc )
 {
     // First we move the missile by calling the super
-    GameUnit<MissileGeneric>::UpdatePhysics2( trans, old_physical_state, accel, difficulty, transmat, CumulativeVelocity, ResolveLast, uc );
+    GameUnit::UpdatePhysics2( trans, old_physical_state, accel, difficulty, transmat, CumulativeVelocity, ResolveLast, uc );
 
 
     // Get the target

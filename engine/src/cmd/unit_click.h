@@ -9,8 +9,8 @@ extern Vector mouseline;
 extern vector< Vector >perplines;
 Vector MouseCoordinate( int mouseX, int mouseY );
 
-template < class UnitType >
-bool GameUnit< UnitType >::querySphereClickList( int mouseX, int mouseY, float err, Camera *activeCam ) const
+
+bool GameUnit::querySphereClickList( int mouseX, int mouseY, float err, Camera *activeCam ) const
 {
     unsigned int    i;
     Matrix vw;

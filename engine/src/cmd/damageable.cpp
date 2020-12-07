@@ -27,14 +27,23 @@
 
 #include "gfx/vec.h"
 #include "vs_math.h"
-#include "xml_support.h"
+#include "game_config.h"
 #include "vs_globals.h"
 #include "configxml.h"
 #include "unit_armorshield.h"
 #include "gfx/vec.h"
-#include "unit_damage.h"
+#include "lin_time.h"
 
 #include <algorithm>
+
+// TODO: make GameConfig support sub sections
+// See https://github.com/vegastrike/Vega-Strike-Engine-Source/issues/358
+static float  flickertime = 30.0f; // GameConfig::GetVariable( "graphics", "glowflicker", "time", 30.0f ) );
+static float  flickerofftime = 2.0f; // ( "graphics", "glowflicker", "off-time", "2" ) );
+static float  minflickercycle  = 2.0f; // ( "graphics", "glowflicker", "min-cycle", "2" ) );
+static float  flickeronprob = 0.66f; // ( "graphics", "glowflicker", "num-times-per-second-on", ".66" ) );
+static float  hullfornoflicker = 0.04f; // ( "graphics", "glowflicker", "hull-for-total-dark", ".04" ) );
+
 
 Damageable::Damageable()
 {
@@ -430,3 +439,31 @@ float Damageable::currentTotalShieldVal( const Shield &shield )
     return maxshield;
 }
 
+bool Damageable::flickerDamage()
+{
+    float damagelevel = GetHullPercent();
+    static double counter = getNewTime();
+
+
+    float diff = getNewTime()-counter;
+    if (diff > flickertime) {
+        counter = getNewTime();
+        diff    = 0;
+    }
+    float tmpflicker = flickertime*damagelevel;
+    if (tmpflicker < minflickercycle)
+        tmpflicker = minflickercycle;
+    diff = fmod( diff, tmpflicker );
+    //we know counter is somewhere between 0 and damage level
+    //cast this to an int for fun!
+    unsigned int thus = ( (unsigned int) (size_t) this )>>2;
+    thus = thus%( (unsigned int) tmpflicker );
+    diff = fmod( diff+thus, tmpflicker );
+    if (flickerofftime > diff) {
+        if (damagelevel > hullfornoflicker)
+            return rand() > RAND_MAX * GetElapsedTime()*flickeronprob;
+        else
+            return true;
+    }
+    return false;
+}

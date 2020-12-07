@@ -3,7 +3,6 @@
 
 #include "unit.h"
 #include "unit_util.h"
-#include "unit_generics.h"
 
 class MissileEffect {
 private:
@@ -27,7 +26,7 @@ private:
 
 
 
-class Missile : public GameUnit< MissileGeneric >
+class Missile : public GameUnit
 {
 protected:
     float time;
@@ -40,7 +39,6 @@ protected:
     bool  had_target;
     signed char retarget;
 public:
-/// constructor only to be called by UnitFactory
     Missile( const char *filename,
                  int faction,
                  const string &modifications,
@@ -54,14 +52,15 @@ public:
     Missile( std::vector< Mesh* >m, bool b, int i) :
         GameUnit(m, b, i) {}
 
-    friend class UnitFactory;
-
 public:
     virtual void Kill( bool erase = true );
     void Discharge();
     float ExplosionRadius();
 
-//    virtual enum clsptr isUnit() const;
+    enum _UnitType isUnit() const
+    {
+        return _UnitType::missile;
+    }
 
     virtual void UpdatePhysics2( const Transformation &trans,
                                  const Transformation &old_physical_state,

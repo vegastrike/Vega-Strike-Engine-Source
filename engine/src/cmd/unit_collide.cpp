@@ -73,7 +73,7 @@ void Unit::RemoveFromSystem()
             activeStarSystem->collide_map[locind]->erase( this->location[locind] );
             set_null( this->location[locind] );
         }
-    for (int j = 0; j < GetNumMounts(); ++j)
+    for (int j = 0; j < getNumMounts(); ++j)
         if (mounts[j].type->type == weapon_info::BEAM)
             if (mounts[j].ref.gun)
                 mounts[j].ref.gun->RemoveFromSystem( true );
@@ -204,35 +204,35 @@ bool Unit::InsideCollideTree( Unit *smaller,
     }
     un_iter i;
     static float rsizelim = XMLSupport::parse_float( vs_config->getVariable( "physics", "smallest_subunit_to_collide", ".2" ) );
-    clsptr  bigtype = bigasteroid ? ASTEROIDPTR : bigger->isUnit();
-    clsptr  smalltype     = smallasteroid ? ASTEROIDPTR : smaller->isUnit();
+    _UnitType  bigtype = bigasteroid ? _UnitType::asteroid : bigger->isUnit();
+    _UnitType  smalltype     = smallasteroid ? _UnitType::asteroid : smaller->isUnit();
     if ( bigger->SubUnits.empty() == false
-        && (bigger->graphicOptions.RecurseIntoSubUnitsOnCollision == true || bigtype == ASTEROIDPTR) ) {
+        && (bigger->graphicOptions.RecurseIntoSubUnitsOnCollision == true || bigtype == _UnitType::asteroid) ) {
         i = bigger->getSubUnits();
         float rad = smaller->rSize();
         for (Unit *un; (un = *i); ++i) {
             float subrad = un->rSize();
-            if ( (bigtype != ASTEROIDPTR) && (subrad/bigger->rSize() < rsizelim) ) {
+            if ( (bigtype != _UnitType::asteroid) && (subrad/bigger->rSize() < rsizelim) ) {
                 break;
             }
             if ( ( un->Position()-smaller->Position() ).Magnitude() <= subrad+rad ) {
-                if ( ( un->InsideCollideTree( smaller, bigpos, bigNormal, smallpos, smallNormal, bigtype == ASTEROIDPTR,
-                                              smalltype == ASTEROIDPTR ) ) )
+                if ( ( un->InsideCollideTree( smaller, bigpos, bigNormal, smallpos, smallNormal, bigtype == _UnitType::asteroid,
+                                              smalltype == _UnitType::asteroid ) ) )
                     return true;
             }
         }
     }
     if ( smaller->SubUnits.empty() == false
-        && (smaller->graphicOptions.RecurseIntoSubUnitsOnCollision == true || smalltype == ASTEROIDPTR) ) {
+        && (smaller->graphicOptions.RecurseIntoSubUnitsOnCollision == true || smalltype == _UnitType::asteroid) ) {
         i = smaller->getSubUnits();
         float rad = bigger->rSize();
         for (Unit *un; (un = *i); ++i) {
             float subrad = un->rSize();
-            if ( (smalltype != ASTEROIDPTR) && (subrad/smaller->rSize() < rsizelim) )
+            if ( (smalltype != _UnitType::asteroid) && (subrad/smaller->rSize() < rsizelim) )
                 break;
             if ( ( un->Position()-bigger->Position() ).Magnitude() <= subrad+rad ) {
-                if ( ( bigger->InsideCollideTree( un, bigpos, bigNormal, smallpos, smallNormal, bigtype == ASTEROIDPTR,
-                                                  smalltype == ASTEROIDPTR ) ) )
+                if ( ( bigger->InsideCollideTree( un, bigpos, bigNormal, smallpos, smallNormal, bigtype == _UnitType::asteroid,
+                                                  smalltype == _UnitType::asteroid ) ) )
                     return true;
             }
         }
@@ -252,20 +252,20 @@ bool Unit::Collide( Unit *target )
     //now first OF ALL make sure they're within bubbles of each other...
     if ( ( Position()-target->Position() ).MagnitudeSquared() > mysqr( radial_size+target->radial_size ) )
         return false;
-    clsptr targetisUnit = target->isUnit();
-    clsptr thisisUnit   = this->isUnit();
+    _UnitType targetisUnit = target->isUnit();
+    _UnitType thisisUnit   = this->isUnit();
     static float NEBULA_SPACE_DRAG = XMLSupport::parse_float( vs_config->getVariable( "physics", "nebula_space_drag", "0.01" ) );
-    if (targetisUnit == NEBULAPTR)
+    if (targetisUnit == _UnitType::nebula)
         //why? why not?
         this->Velocity *= (1-NEBULA_SPACE_DRAG);
     if ( target == this
-        || ( (targetisUnit != NEBULAPTR
-              && thisisUnit != NEBULAPTR)
+        || ( (targetisUnit != _UnitType::nebula
+              && thisisUnit != _UnitType::nebula)
             && ( owner == target || target->owner == this
                 || (owner != NULL
                     && target->owner == owner) ) ))
         return false;
-    if (targetisUnit == ASTEROIDPTR && thisisUnit == ASTEROIDPTR)
+    if (targetisUnit == _UnitType::asteroid && thisisUnit == _UnitType::asteroid)
         return false;
     std::multimap< Unit*, Unit* > *last_collisions = &_Universe->activeStarSystem()->last_collisions;
     last_collisions->insert( std::pair< Unit*, Unit* > ( this, target ) );
@@ -489,7 +489,7 @@ float Unit::querySphereNoRecurse( const QVector &start, const QVector &end, floa
     for (i = 0; i < nummesh(); i++) {
         if ( ( meshdata[i]->Position().Magnitude() > this->rSize() ) || ( meshdata[i]->rSize() > 30+this->rSize() ) )
             continue;
-        if (isUnit() == PLANETPTR && i > 0)
+        if (isUnit() == _UnitType::planet && i > 0)
             break;
         double  a, b, c;
         QVector st  = start-Transform( cumulative_transformation_matrix, meshdata[i]->Position().Cast() );

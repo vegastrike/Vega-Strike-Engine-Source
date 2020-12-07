@@ -278,7 +278,7 @@ bool ContinuousTerrain::checkInvScale( double &pos, double campos, float size )
 void ContinuousTerrain::Collide( Unit *un, Matrix t )
 {
     Matrix transform;
-    if (un->isUnit() == BUILDINGPTR)
+    if (un->isUnit() == _UnitType::building)
         return;
     ScaleMatrix( t, Scales );
     CopyMatrix( transform, t );

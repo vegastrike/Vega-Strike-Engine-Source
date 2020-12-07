@@ -982,7 +982,7 @@ bool TargSig( Unit *me, Unit *target )
             me,
             target );
     if (can_target_asteroid == false)
-        if (target->isUnit() == ASTEROIDPTR || target->name.get().find( "Asteroid" ) == 0)
+        if (target->isUnit() == _UnitType::asteroid || target->name.get().find( "Asteroid" ) == 0)
             ret = false;
     return ret;
 }
@@ -995,14 +995,14 @@ bool TargUn( Unit *me, Unit *target )
     int up = FactionUtil::GetUpgradeFaction();
     return me->InRange( target, true,
                         false )
-           && (target->isUnit() == UNITPTR
-               || target->isUnit() == ENHANCEMENTPTR) && getTopLevelOwner() != target->owner
+           && (target->isUnit() == _UnitType::unit
+               || target->isUnit() == _UnitType::enhancement) && getTopLevelOwner() != target->owner
            && (can_target_cargo || target->faction != up) && isNotTurretOwner( me, target );
 }
 
 bool TargMissile( Unit *me, Unit *target )
 {
-    return me->InRange( target, true, false ) && (target->isUnit() == MISSILEPTR) && isNotTurretOwner( me, target );
+    return me->InRange( target, true, false ) && (target->isUnit() == _UnitType::missile) && isNotTurretOwner( me, target );
 }
 
 bool TargIncomingMissile( Unit *me, Unit *target )
@@ -1028,7 +1028,7 @@ bool TargThreat( Unit *me, Unit *target )
 {
     if ( !TargAll( me, target ) )
         return false;
-    if (target->isUnit() == MISSILEPTR)
+    if (target->isUnit() == _UnitType::missile)
         return false;
     if (target->Target() == me)
         return true;
@@ -1045,7 +1045,7 @@ bool TargNear( Unit *me, Unit *target )
                            target )
             || target->getRelation( me ) < 0)
            && TargAll( me,
-                       target ) && target->isUnit() != MISSILEPTR
+                       target ) && target->isUnit() != _UnitType::missile
            && ( can_target_sun || !UnitUtil::isSun( target ) ) && isNotTurretOwner( me,
    target );
 }
@@ -1073,16 +1073,16 @@ bool getNearestTargetUnit( Unit *me, int iType )
             || !( me->InRange( un, true, true ) ) )
             continue;
         if ( (iType == 0)
-            && ( (un->isUnit() != UNITPTR)
+            && ( (un->isUnit() != _UnitType::unit)
                 || !me->isEnemy( un ) ) )
             continue;
         if ( (iType == 1)
-            && ( (un->isUnit() != UNITPTR)
+            && ( (un->isUnit() != _UnitType::unit)
                 || ( !me->isEnemy( un )
                     && (un->Target() != me) ) ) )
             continue;
         if ( (iType == 2)
-            && ( (un->isUnit() != UNITPTR)
+            && ( (un->isUnit() != _UnitType::unit)
                 || me->isEnemy( un )
                 || (UnitUtil::getFlightgroupName( un ) == "Base") ) )
             continue;
@@ -1666,7 +1666,7 @@ void FireKeyboard::Execute()
             if (!allow_special_with_weapons) {
                 bool special = false;
                 bool normal  = false;
-                int  nm = parent->GetNumMounts();
+                int  nm = parent->getNumMounts();
                 int  i;
                 for (i = 0; i < nm; ++i)
                     if (parent->mounts[i].status == Mount::ACTIVE) {
@@ -2083,7 +2083,7 @@ void FireKeyboard::Execute()
             cp->EjectDock();              //use specialized ejectdock in the future
     }
     static bool actually_arrest = XMLSupport::parse_bool( vs_config->getVariable( "AI", "arrest_energy_zero", "false" ) );
-    if (actually_arrest && parent->EnergyRechargeData() == 0)
+    if (actually_arrest && parent->energyRechargeData() == 0)
         Arrested( parent );
 }
 

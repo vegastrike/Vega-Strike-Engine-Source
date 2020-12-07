@@ -92,23 +92,23 @@ Collision::Collision(Unit* unit, const QVector& location, const Vector& normal):
 // This function handles the initial reaction of the unit to hitting the other unit
 // Note: I'm changing the expected behavior here
 // Return value indicates whether to continue processing
-/*UNITPTR,
-PLANETPTR,
-BUILDINGPTR,
-NEBULAPTR,
-ASTEROIDPTR,
-ENHANCEMENTPTR,
-MISSILEPTR*/
+/*_UnitType::unit,
+_UnitType::planet,
+_UnitType::building,
+_UnitType::nebula,
+_UnitType::asteroid,
+_UnitType::enhancement,
+_UnitType::missile*/
 void Collision::shouldApplyForceAndDealDamage(Unit* other_unit)
 {
     // Collision with a nebula does nothing
-    if(other_unit->isUnit() == NEBULAPTR)
+    if(other_unit->isUnit() == _UnitType::nebula)
     {
         return;
     }
 
     // Collision with a enhancement improves your shield apparently
-    if(other_unit->isUnit() == ENHANCEMENTPTR)
+    if(other_unit->isUnit() == _UnitType::enhancement)
     {
         apply_force = true;
         return;
@@ -129,37 +129,37 @@ void Collision::shouldApplyForceAndDealDamage(Unit* other_unit)
     switch(unit_type)
     {
     // Missiles and asteroids always explode on impact with anything except Nebula and Enhancement.
-    case MISSILEPTR:
+    case _UnitType::missile:
         // Missile should explode when killed
         // If not, uncomment this
         //((Missile*)unit)->Discharge();
         unit->Kill();
         return;
 
-    case ASTEROIDPTR:
+    case _UnitType::asteroid:
         apply_force = true;
         deal_damage = true;
         return;
 
     // Planets and Nebulas can't be killed right now
-    case PLANETPTR:
-    case NEBULAPTR:
+    case _UnitType::planet:
+    case _UnitType::nebula:
         return;
 
     // Buildings should not calculate actual damage
-    case BUILDINGPTR:
+    case _UnitType::building:
         return;
 
     // Units (ships) should calculate actual damage
-    case UNITPTR:
+    case _UnitType::unit:
         apply_force = true;
         deal_damage = true;
         return;
 
     // Not sure what an enhancement is, but it looks like it's something that can increase the shields of the unit it collided with.
     // TODO: refactor this.
-    case ENHANCEMENTPTR:
-        if (other_unit->isUnit() == ASTEROIDPTR)
+    case _UnitType::enhancement:
+        if (other_unit->isUnit() == _UnitType::asteroid)
         {
             apply_force = true;
             return;
@@ -176,7 +176,8 @@ void Collision::shouldApplyForceAndDealDamage(Unit* other_unit)
         string fn( unit->filename );
         string fac( FactionUtil::GetFaction( unit->faction ) );
         unit->Kill();
-        _Universe->AccessCockpit()->savegame->AddUnitToSave( fn.c_str(), ENHANCEMENTPTR, fac.c_str(), reinterpret_cast<long>(unit));
+
+        _Universe->AccessCockpit()->savegame->AddUnitToSave( fn.c_str(), _UnitType::enhancement, fac.c_str(), reinterpret_cast<long>(unit));
         apply_force = true;
         return;
     }

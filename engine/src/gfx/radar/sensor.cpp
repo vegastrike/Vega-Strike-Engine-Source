@@ -156,7 +156,7 @@ public:
             {
                 collection->push_back(sensor->CreateTrack(target));
             }
-            if (target->isPlanet() == PLANETPTR && target->radial_size > 0)
+            if (target->isPlanet() == _UnitType::planet && target->radial_size > 0)
             {
                 const Unit *sub = NULL;
                 for (un_kiter i = target->viewSubUnits(); (sub = *i) != NULL; ++i)

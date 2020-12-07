@@ -87,11 +87,11 @@ string reformatName( string nam )
 string getUnitNameAndFgNoBase( Unit *target )
 {
     Flightgroup *fg = target->getFlightgroup();
-    if (target->isUnit() == PLANETPTR) {
+    if (target->isUnit() == _UnitType::planet) {
         string hr = ( (Planet*) target )->getHumanReadablePlanetType();
         if ( !hr.empty() )
             return hr+string( ":" )+reformatName( target->name );
-    } else if (target->isUnit() == UNITPTR) {
+    } else if (target->isUnit() == _UnitType::unit) {
         if (fg) {
             int    fgsnumber = target->getFgSubnumber();
             string fgnstring = XMLSupport::tostring( fgsnumber );
@@ -663,7 +663,7 @@ VSSprite * getNavImage()
 double DistanceTwoTargets( Unit *parent, Unit *target )
 {
     double tmp =
-        ( ( parent->Position()-target->Position() ).Magnitude()-( (target->isUnit() == PLANETPTR) ? target->rSize() : 0 ) );
+        ( ( parent->Position()-target->Position() ).Magnitude()-( (target->isUnit() == _UnitType::planet) ? target->rSize() : 0 ) );
     if (tmp < 0) return 0;
     return tmp;
 }
@@ -758,9 +758,9 @@ void VDU::DrawTarget( GameCockpit *cp, Unit *parent, Unit *target )
         au = ad;
         ad = tmp;
     }
-    if (target->isUnit() == PLANETPTR)
+    if (target->isUnit() == _UnitType::planet)
         au = ar = al = ad = target->GetHullPercent();
-    DrawHUDSprite( this, ( (target->isUnit() != PLANETPTR || target->getHudImage() != NULL) ? target->getHudImage()
+    DrawHUDSprite( this, ( (target->isUnit() != _UnitType::planet || target->getHudImage() != NULL) ? target->getHudImage()
                           : ( target->GetDestinations().size() != 0 ? getJumpImage()
                              : ( ( (Planet*) target )->hasLights() ? getSunImage()
                                 : ( target->getFullname().find(
@@ -811,7 +811,7 @@ void VDU::DrawTarget( GameCockpit *cp, Unit *parent, Unit *target )
         newst += '\n';
         double dist = DistanceTwoTargets( parent, target );
         double actual_range = dist;
-        if ( (target->isUnit() == PLANETPTR) && (target->CanDockWithMe( parent, 1 ) != -1) ) {
+        if ( (target->isUnit() == _UnitType::planet) && (target->CanDockWithMe( parent, 1 ) != -1) ) {
             dist -= target->rSize()*UniverseUtil::getPlanetRadiusPercent();
             if (dist < 0)
                 newst += string( "Docking: Ready" );
@@ -840,7 +840,7 @@ void VDU::DrawTarget( GameCockpit *cp, Unit *parent, Unit *target )
         }
         //this is a possibility to draw target shields but without gauging
         //the gauging method is implemented in cockpit.cpp
-/*  if (target->isUnit()!=PLANETPTR) {
+/*  if (target->isUnit()!=_UnitType::planet) {
  *   GFXEnable (TEXTURE0);
  *   //Dev:GFXColor4f (1,target->GetHullPercent(),target->GetHullPercent(),1);
  *   DrawHUDSprite(this,getTargetQuadShield(),0.9,x,y,w,h,fs,rs,ls,bs,target->GetHullPercent(),true,invert_target_sprite);
@@ -1586,7 +1586,7 @@ void VDU::DrawWeapon( Unit *parent )
     DrawTargetSpr( drawweapsprite ? parent->getHudImage() : NULL, percent, x, y, w, h );
     GFXDisable( TEXTURE0 );
     GFXDisable( LIGHTING );
-    int nummounts = parent->GetNumMounts();
+    int nummounts = parent->getNumMounts();
     int numave    = 1;
     GFXColor average( 0, 0, 0, 0 );
     for (int i = 0; i < nummounts; i++) {

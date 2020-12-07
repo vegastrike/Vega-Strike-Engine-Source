@@ -44,13 +44,13 @@ const Unit * getUnitFromUpgradeName( const string &upgradeName, int myUnitFactio
     if (!partUnit) {
         partUnit = UnitConstCache::setCachedConst( StringIntKey( name,
                                                                 FactionUtil::GetUpgradeFaction() ),
-                                                  new GameUnit< Unit >( name, true, FactionUtil::GetUpgradeFaction() ) );
+                                                  new GameUnit( name, true, FactionUtil::GetUpgradeFaction() ) );
     }
     if (partUnit->name == "LOAD_FAILED") {
         partUnit = UnitConstCache::getCachedConst( StringIntKey( name, myUnitFaction ) );
         if (!partUnit)
             partUnit = UnitConstCache::setCachedConst( StringIntKey( name, myUnitFaction ),
-                                                      new GameUnit< Unit >( name, true, myUnitFaction ) );
+                                                      new GameUnit( name, true, myUnitFaction ) );
     }
     return partUnit;
 }
@@ -75,7 +75,7 @@ int SelectDockPort( Unit *utdw, Unit *parent )
 //From unit_customize.cpp
 Unit * CreateGameTurret( std::string tur, int faction )
 {
-    return new GameUnit< Unit >( tur.c_str(), true, faction );
+    return new GameUnit( tur.c_str(), true, faction );
 }
 
 void SetShieldZero( Unit *un )
@@ -108,7 +108,7 @@ void SetShieldZero( Unit *un )
 //un scored a faction kill
 void ScoreKill( Cockpit *cp, Unit *un, Unit *killedUnit )
 {
-    if (un->isUnit() != UNITPTR || killedUnit->isUnit() != UNITPTR)
+    if (un->isUnit() != _UnitType::unit || killedUnit->isUnit() != _UnitType::unit)
         return;
     static float KILL_FACTOR = -XMLSupport::parse_float( vs_config->getVariable( "AI", "kill_factor", ".2" ) );
     int killedCp = _Universe->whichPlayerStarship( killedUnit );
@@ -190,12 +190,12 @@ float getAutoRSize( Unit *orig, Unit *un, bool ignore_friend = false )
         XMLSupport::parse_float( vs_config->getVariable( "physics", "hostile_auto_radius", "1000" ) )*gamespeed;
     int upgradefaction = FactionUtil::GetUpgradeFaction();
     int neutral = FactionUtil::GetNeutralFaction();
-    if (un->isUnit() == ASTEROIDPTR) {
+    if (un->isUnit() == _UnitType::asteroid) {
         static float minasteroiddistance =
             XMLSupport::parse_float( vs_config->getVariable( "physics", "min_asteroid_distance", "-100" ) );
         return minasteroiddistance;
     }
-    if ( un->isUnit() == PLANETPTR || ( un->getFlightgroup() == orig->getFlightgroup() && orig->getFlightgroup() ) )
+    if ( un->isUnit() == _UnitType::planet || ( un->getFlightgroup() == orig->getFlightgroup() && orig->getFlightgroup() ) )
         //same flihgtgroup
         return orig->rSize();
     if (un->faction == upgradefaction)

@@ -89,12 +89,12 @@ public:
   virtual void RegenShields() = 0;
   bool withinShield( const ShieldFacing &facing, float theta, float rho );
 
-
-  virtual void ArmorDamageSound( const Vector &pnt ) = 0;
-  virtual void HullDamageSound( const Vector &pnt ) = 0;
   static float totalShieldVal( const Shield &shield );
   static float currentTotalShieldVal( const Shield &shield );
   static float totalShieldEnergyCapacitance( const Shield &shield );
+
+protected:
+  bool flickerDamage();
 };
 
 

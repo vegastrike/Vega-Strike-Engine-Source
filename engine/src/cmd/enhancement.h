@@ -2,10 +2,9 @@
 #define _ENHANCER_H_
 #include "unit.h"
 #include "savegame.h"
-#include "unit_generics.h"
 #include "universe.h"
 
-class Enhancement : public GameUnit< EnhancementGeneric >
+class Enhancement : public GameUnit
 {
 public:
     Enhancement( const char *filename,
@@ -13,18 +12,17 @@ public:
                      const string &modifications,
                      Flightgroup *flightgrp = NULL,
                      int fg_subnumber = 0 ) :
-        GameUnit< EnhancementGeneric > ( filename, false, faction, modifications, flightgrp, fg_subnumber )
+        GameUnit( filename, false, faction, modifications, flightgrp, fg_subnumber )
     {
         string file( filename );
         this->filename = filename;
     }
 
-    friend class UnitFactory;
 protected:
     std::string filename;
-    virtual enum clsptr isUnit() const
+    enum _UnitType isUnit() const
     {
-        return ENHANCEMENTPTR;
+        return _UnitType::enhancement;
     }
 
 protected:

@@ -77,7 +77,7 @@ void Cockpit::endElement( void *userData, const XML_Char *name )
 float Unit::computeLockingPercent()
 {
     float most = -1024;
-    for (int i = 0; i < GetNumMounts(); i++)
+    for (int i = 0; i < getNumMounts(); i++)
         if ( mounts[i].type->type == weapon_info::PROJECTILE
             || ( mounts[i].type->size
                 &(weapon_info::SPECIALMISSILE|weapon_info::LIGHTMISSILE|weapon_info::MEDIUMMISSILE|weapon_info::HEAVYMISSILE
@@ -165,7 +165,7 @@ void Cockpit::SetParent( Unit *unit, const char *filename, const char *unitmodna
         if (StartArmor[5] == 0) StartArmor[5] = 1;
         if (StartArmor[6] == 0) StartArmor[6] = 1;
         if (StartArmor[7] == 0) StartArmor[7] = 1;
-        maxfuel = unit->FuelData();
+        maxfuel = unit->fuelData();
         maxhull = unit->GetHull();
     }
 }
@@ -536,7 +536,7 @@ bool Cockpit::Update()
         static float minEnergyShieldPercent =
             XMLSupport::parse_float( vs_config->getVariable( "physics", "shield_energy_downpower_percent", ".66666666666666" ) );
 
-        bool toolittleenergy = (par->EnergyData() <= minEnergyForShieldDownpower);
+        bool toolittleenergy = (par->energyData() <= minEnergyForShieldDownpower);
         if (toolittleenergy) {
             secondsWithZeroEnergy += SIMULATION_ATOM;
             if (secondsWithZeroEnergy > minEnergyShieldTime) {
@@ -554,7 +554,7 @@ bool Cockpit::Update()
             //this being here, it will require poking the turret from the undock script
             if (par) {
                 if (par->name == "return_to_cockpit") {
-                    //if (par->owner->isUnit()==UNITPTR ) this->SetParent(par->owner,GetUnitFileName().c_str(),this->unitmodname.c_str(),savegame->GetPlayerLocation());     // this warps back to the parent unit if we're eject-docking. in this position it also causes badness upon loading a game.
+                    //if (par->owner->isUnit()==_UnitType::unit ) this->SetParent(par->owner,GetUnitFileName().c_str(),this->unitmodname.c_str(),savegame->GetPlayerLocation());     // this warps back to the parent unit if we're eject-docking. in this position it also causes badness upon loading a game.
 
                     Unit *temp = findUnitInStarsystem( par->owner );
                     if (temp) {
@@ -614,21 +614,21 @@ bool Cockpit::Update()
             static float autopilot_term_distance =
                 XMLSupport::parse_float( vs_config->getVariable( "physics", "auto_pilot_termination_distance", "6000" ) );
             float doubled = dockingdistance( targ, par );
-            if ( ( (targ->isUnit() != PLANETPTR
+            if ( ( (targ->isUnit() != _UnitType::planet
                     && doubled < autopilot_term_distance)
                   || (UnitUtil::getSignificantDistance( targ,
                                                         par ) <= 0) )
                 && ( !( par->IsCleared( targ ) || targ->IsCleared( par ) || par->isDocked( targ )
                        || targ->isDocked( par ) ) ) && (par->getRelation( targ ) >= 0) && (targ->getRelation( par ) >= 0) ) {
-                if ( targ->isUnit() != PLANETPTR || targ->GetDestinations().empty() )
+                if ( targ->isUnit() != _UnitType::planet || targ->GetDestinations().empty() )
                     RequestClearence( par, targ, 0 );                      //sex is always 0... don't know how to	 get it.
             } else if ( ( par->IsCleared( targ )
                          || targ->IsCleared( par ) ) && ( !( par->isDocked( targ ) ) || targ->isDocked( par ) )
-                       && ( (targ->isUnit() == PLANETPTR && UnitUtil::getSignificantDistance( par, targ ) > 0)
-                           || ( ( targ->isUnit() != PLANETPTR
+                       && ( (targ->isUnit() == _UnitType::planet && UnitUtil::getSignificantDistance( par, targ ) > 0)
+                           || ( ( targ->isUnit() != _UnitType::planet
                                  && UnitUtil::getSignificantDistance( par, targ ) > ( targ->rSize()+par->rSize() ) )
                                && (doubled >= autopilot_term_distance) ) ) ) {
-                if ( targ->isUnit() != PLANETPTR || targ->GetDestinations().empty() ) {
+                if ( targ->isUnit() != _UnitType::planet || targ->GetDestinations().empty() ) {
                     par->EndRequestClearance( targ );
                     targ->EndRequestClearance( par );
                 }
@@ -670,7 +670,7 @@ bool Cockpit::Update()
                                 && un->owner == par)
                             || (par == NULL
                                 && un->owner) ) && (un->name != "eject") && (un->name != "Pilot")
-                        && (un->isUnit() != MISSILEPTR) ) {
+                        && (un->isUnit() != _UnitType::missile) ) {
                         found = true;
                         ++index;
                         Unit *k = GetParent();
@@ -818,7 +818,7 @@ bool Cockpit::Update()
                         fg->nr_ships++;
                         fg->nr_ships_left++;
                     }
-                    Unit *un = new GameUnit< Unit >(
+                    Unit *un = new GameUnit(
                         GetUnitFileName().c_str(), false, this->unitfaction, unitmodname, fg, fgsnumber );
                     un->SetCurPosition( UniverseUtil::SafeEntrancePoint( savegame->GetPlayerLocation() ) );
                     ss->AddUnit( un );

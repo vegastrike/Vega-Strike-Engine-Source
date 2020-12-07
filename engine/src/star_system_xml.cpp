@@ -320,7 +320,7 @@ void StarSystem::LoadXML( const string filename, const Vector &centroid, const f
 
     for(auto& unit : xml->moons)
     {
-        if (unit->isUnit() == PLANETPTR) {
+        if (unit->isUnit() == _UnitType::planet) {
             Unit *un = nullptr;
             // This code here is completely unclear to me and should be refactored
             // TODO: remove the whole PlanetIterator thing and all custom iterators

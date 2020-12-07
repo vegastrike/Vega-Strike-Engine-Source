@@ -9,7 +9,7 @@
 Briefing::Ship::Ship( const char *filename, int faction, const Vector &position )
 {
     VSCONSTRUCT2( 's' )
-    Unit*tmp = new GameUnit< Unit >( filename, true, faction );
+    Unit*tmp = new GameUnit( filename, true, faction );
     meshdata = tmp->StealMeshes();
     tmp->Kill();
     cloak    = 1;

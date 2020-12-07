@@ -96,7 +96,7 @@ static void UpgradeUnit( Unit *un, const std::string &upgrades )
         const Unit *upgradee = UnitConstCache::getCachedConst( StringIntKey( upgrade, FactionUtil::GetUpgradeFaction() ) );
         if (!upgradee) {
             upgradee = UnitConstCache::setCachedConst( StringIntKey( upgrade, FactionUtil::GetUpgradeFaction() ),
-                                                      new GameUnit< Unit >( upgrade.c_str(),
+                                                      new GameUnit( upgrade.c_str(),
                                                                               true,
                                                                               FactionUtil::GetUpgradeFaction() ) );
         }
@@ -312,8 +312,8 @@ static void AddMounts( Unit *thus, Unit::XML &xml, const std::string &mounts )
         static bool half_sounds = XMLSupport::parse_bool( vs_config->getVariable( "audio", "every_other_mount", "false" ) );
         if ( (a&1) == parity ) {
             int b = a;
-            if ( (a&3) == 2 && (int) a < (thus->GetNumMounts()-1) ) {
-                if (thus->mounts[a].type->type != weapon_info::PROJECTILE
+            if ( (a&3) == 2 && (int) a < (thus->getNumMounts()-1) ) {
+                if (thus->mounts[a].type->type != weapon_info::PROJECTILE 
                     && thus->mounts[a+1].type->type != weapon_info::PROJECTILE)
                 {
                     b = a+1;
@@ -395,7 +395,7 @@ static void AddSubUnits( Unit *thus, Unit::XML &xml, const std::string &subunits
         QVector Q   = (*i).Q;
         QVector R   = (*i).R;
         double  restricted = (*i).restricted;
-        xml.units.push_back( new GameUnit< Unit >( filename.c_str(), true, faction, modification, NULL ) );         //I set here the fg arg to NULL
+        xml.units.push_back( new GameUnit( filename.c_str(), true, faction, modification, NULL ) );         //I set here the fg arg to NULL
         if (xml.units.back()->name == "LOAD_FAILED") {
             xml.units.back()->limits.yaw = 0;
             xml.units.back()->limits.pitch = 0;
@@ -419,7 +419,7 @@ static void AddSubUnits( Unit *thus, Unit::XML &xml, const std::string &subunits
     for (int a = xml.units.size()-1; a >= 0; a--) {
         bool randomspawn = xml.units[a]->name.get().find( "randomspawn" ) != string::npos;
         if (randomspawn) {
-            int chancetospawn = float_to_int( xml.units[a]->WarpCapData() );
+            int chancetospawn = float_to_int( xml.units[a]->warpCapData() );
             if (chancetospawn > rand()%100)
                 thus->SubUnits.prepend( xml.units[a] );
 
@@ -615,60 +615,7 @@ string WriteHudDamageFunc( Unit *un )
     return ret;
 }
 
-void AddSounds( Unit *thus, string sounds )
-{
-    if (sounds.length() != 0) {
-        string tmp = nextElement( sounds );
-        if ( tmp.length() )
-            thus->sound->shield = AUDCreateSoundWAV( tmp, false );
-        tmp = nextElement( sounds );
-        if ( tmp.length() )
-            thus->sound->armor = AUDCreateSoundWAV( tmp, false );
-        tmp = nextElement( sounds );
-        if ( tmp.length() )
-            thus->sound->hull = AUDCreateSoundWAV( tmp, false );
-        tmp = nextElement( sounds );
-        if ( tmp.length() )
-            thus->sound->jump = AUDCreateSoundWAV( tmp, false );
-        tmp = nextElement( sounds );
-        if ( tmp.length() )
-            thus->sound->explode = AUDCreateSoundWAV( tmp, false );
-        tmp = nextElement( sounds );
-        if ( tmp.length() )
-            thus->sound->cloak = AUDCreateSoundWAV( tmp, false );
-        tmp = nextElement( sounds );
-        if ( tmp.length() )
-            thus->sound->engine = AUDCreateSoundWAV( tmp, true );
-    }
-    if (thus->sound->cloak == -1) {
-        static std::string ssound = vs_config->getVariable( "unitaudio", "cloak", "sfx43.wav" );
-        thus->sound->cloak = AUDCreateSound( ssound, false );
-    }
-    if (thus->sound->engine == -1) {
-        static std::string ssound = vs_config->getVariable( "unitaudio", "afterburner", "sfx10.wav" );
-        thus->sound->engine = AUDCreateSound( ssound, false );
-    }
-    if (thus->sound->shield == -1) {
-        static std::string ssound = vs_config->getVariable( "unitaudio", "shield", "sfx09.wav" );
-        thus->sound->shield = AUDCreateSound( ssound, false );
-    }
-    if (thus->sound->armor == -1) {
-        static std::string ssound = vs_config->getVariable( "unitaudio", "armor", "sfx08.wav" );
-        thus->sound->armor = AUDCreateSound( ssound, false );
-    }
-    if (thus->sound->hull == -1) {
-        static std::string ssound = vs_config->getVariable( "unitaudio", "armor", "sfx08.wav" );
-        thus->sound->hull = AUDCreateSound( ssound, false );
-    }
-    if (thus->sound->explode == -1) {
-        static std::string ssound = vs_config->getVariable( "unitaudio", "explode", "explosion.wav" );
-        thus->sound->explode = AUDCreateSound( ssound, false );
-    }
-    if (thus->sound->jump == -1) {
-        static std::string ssound = vs_config->getVariable( "unitaudio", "explode", "sfx43.wav" );
-        thus->sound->jump = AUDCreateSound( ssound, false );
-    }
-}
+
 
 void LoadCockpit( Unit *thus, const string &cockpit )
 {
@@ -1061,7 +1008,11 @@ void Unit::LoadRow( CSVRow &row, string modification, string *netxml )
     this->pImage->equipment_volume  = ::stof( OPTIM_GET( row, table, Equipment_Space ) );
     ImportCargo( this, OPTIM_GET( row, table, Cargo_Import ) );     //if this changes change planet_generic.cpp
     AddCarg( this, OPTIM_GET( row, table, Cargo ) );
-    AddSounds( this, OPTIM_GET( row, table, Sounds ) );
+
+    // Replaced by below: AddSounds( this, OPTIM_GET( row, table, Sounds ) );
+    this->addSounds(&nextElement, OPTIM_GET( row, table, Sounds ));
+
+
     LoadCockpit( this, OPTIM_GET( row, table, Cockpit ) );
     pImage->CockpitCenter.i = ::stof( OPTIM_GET( row, table, CockpitX ) )*xml.unitscale;
     pImage->CockpitCenter.j = ::stof( OPTIM_GET( row, table, CockpitY ) )*xml.unitscale;

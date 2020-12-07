@@ -1,16 +1,18 @@
 #ifndef _NEBULA_H_
 #define _NEBULA_H_
-#include "unit_generics.h"
 #include "unit.h"
 
-class Nebula : public  GameUnit< NebulaGeneric >
+class Nebula : public  GameUnit
 {
 public:
 
     // Constructors
-        Nebula( const char *unitfile, bool SubU, int faction, Flightgroup *fg = NULL, int fg_snumber = 0 );
+    Nebula( const char *unitfile, bool SubU, int faction, Flightgroup *fg = NULL, int fg_snumber = 0 );
 
-        friend class UnitFactory;
+    enum _UnitType isUnit() const
+    {
+        return _UnitType::nebula;
+    }
 
 protected:
     // Method

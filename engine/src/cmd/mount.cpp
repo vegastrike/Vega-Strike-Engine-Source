@@ -1,3 +1,28 @@
+/**
+ * mount.cpp
+ *
+ * Copyright (C) Daniel Horn
+ * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike
+ * contributors
+ *
+ * https://github.com/vegastrike/Vega-Strike-Engine-Source
+ *
+ * This file is part of Vega Strike.
+ *
+ * Vega Strike is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Vega Strike is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 #include "unit_generic.h"
 #include "missile.h"
 #include "beam.h"
@@ -292,7 +317,7 @@ bool Mount::PhysicsAlignedFire( Unit *caller,
                         fg->nr_ships      = 1;
                         fg->nr_ships_left = 1;
                     }
-                    temp = new GameUnit< Unit > (type->file.c_str(), false, caller->faction, "", fg, fgsnumber, nullptr );
+                    temp = new GameUnit (type->file.c_str(), false, caller->faction, "", fg, fgsnumber, nullptr );
                 } else {
                     Flightgroup *fg = caller->getFlightgroup();
                     int fgsnumber   = 0;
@@ -301,7 +326,7 @@ bool Mount::PhysicsAlignedFire( Unit *caller,
                         fg->nr_ships++;
                         fg->nr_ships_left++;
                     }
-                    temp = new GameUnit<Unit>(type->file.c_str(), false, caller->faction, "", fg, fgsnumber, nullptr);
+                    temp = new GameUnit(type->file.c_str(), false, caller->faction, "", fg, fgsnumber, nullptr);
                 }
             }
             Vector adder = Vector( mat.r[6], mat.r[7], mat.r[8] )*type->Speed;
@@ -476,3 +501,30 @@ void Mount::ReplaceSound()
 {
     sound = AUDCreateSound( sound, false );     //copy constructor basically
 }
+
+void Mount::Activate( bool Missile )
+{
+    if ( type->isMissile() == Missile )
+        if (status == INACTIVE)
+            status = ACTIVE;
+}
+
+///Sets this gun to inactive, unless unchosen or destroyed
+void Mount::DeActive( bool Missile )
+{
+    if ( type->isMissile() == Missile )
+        if (status == ACTIVE)
+            status = INACTIVE;
+}
+
+void Mount::SetMountPosition( const Vector &v )
+{
+    pos = v;
+}
+
+void Mount::SetMountOrientation( const Quaternion &t )
+{
+    orient = t;
+}
+
+

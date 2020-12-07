@@ -1098,7 +1098,7 @@ double compute_light_dot( Unit *base, Unit *un )
             }
         }
         _Universe->popActiveStarSystem();
-    } else {return 1; } if (base_owner == NULL || base->isUnit() == PLANETPTR)
+    } else {return 1; } if (base_owner == NULL || base->isUnit() == _UnitType::planet)
         return ret;
     else
         return compute_light_dot( base_owner, un );

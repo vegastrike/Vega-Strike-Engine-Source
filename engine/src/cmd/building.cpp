@@ -7,7 +7,7 @@ Building::Building( ContinuousTerrain *parent,
                             bool SubUnit,
                             int faction,
                             const string &modifications,
-                            Flightgroup *fg ) : GameUnit< BuildingGeneric > ( filename, SubUnit, faction, modifications, fg )
+                            Flightgroup *fg ) : GameUnit( filename, SubUnit, faction, modifications, fg )
 {
     this->vehicle = vehicle;
     continuous    = true;
@@ -20,7 +20,7 @@ Building::Building( Terrain *parent,
                             bool SubUnit,
                             int faction,
                             const string &modifications,
-                            Flightgroup *fg ) : GameUnit< BuildingGeneric > ( filename, SubUnit, faction, modifications, fg )
+                            Flightgroup *fg ) : GameUnit( filename, SubUnit, faction, modifications, fg )
 {
     this->vehicle = vehicle;
     continuous    = false;
@@ -36,7 +36,7 @@ void Building::UpdatePhysics2( const Transformation &trans,
                                    bool ResolveLast,
                                    UnitCollection *uc )
 {
-    GameUnit< BuildingGeneric >::UpdatePhysics2( trans,
+    GameUnit::UpdatePhysics2( trans,
                                           old_physical_state,
                                           accel,
                                           difficulty,

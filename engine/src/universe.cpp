@@ -202,7 +202,7 @@ Unit * DockToSavedBases( int playernum, QVector &safevec )
             }
         }
     if (closestUnit) {
-        if (UnitUtil::getSignificantDistance( plr, closestUnit ) > 0 && closestUnit->isUnit() != PLANETPTR)
+        if (UnitUtil::getSignificantDistance( plr, closestUnit ) > 0 && closestUnit->isUnit() != _UnitType::planet)
             dock_position = closestUnit->Position();
         dock_position = UniverseUtil::SafeEntrancePoint( dock_position, plr->rSize() );
         plr->SetPosAndCumPos( dock_position );

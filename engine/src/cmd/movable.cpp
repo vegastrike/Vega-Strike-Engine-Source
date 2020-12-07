@@ -88,6 +88,15 @@ Movable::Movable() : cumulative_transformation_matrix( identity_matrix ) {
 
 
 
+Movable::graphic_options::graphic_options()
+{
+    FaceCamera  = Animating = missilelock = InWarp = unused1 = WarpRamping = NoDamageParticles = 0;
+    specInterdictionOnline = 1;
+    NumAnimationPoints = 0;
+    RampCounter = 0;
+    MinWarpMultiplier = MaxWarpMultiplier = 1;
+}
+
 
 void Movable::SetPosition( const QVector &pos )
 {

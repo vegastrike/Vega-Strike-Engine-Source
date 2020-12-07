@@ -8,7 +8,6 @@
 #include <stdio.h>
 
 #include "unit.h"
-#include "unit_generics.h"
 #include "ai/order.h"
 #include "collection.h"
 #include <vector>
@@ -23,7 +22,7 @@ class ContinuousTerrain;
 class PlanetaryTransform;
 class Texture;
 
-class Planet : public GameUnit< class PlanetGeneric >
+class Planet : public GameUnit
 {
 private:
     Animation *shine = nullptr;
@@ -45,10 +44,8 @@ public:
     UnitCollection satellites = UnitCollection();
 
 public:
-/// default constructor - only to be called by UnitFactory
     Planet();
 
-/// constructor - only to be called by UnitFactory
     Planet( QVector x,
                 QVector y,
                 float vely,
@@ -90,9 +87,12 @@ public:
 
     virtual ~Planet();
 
-    friend class UnitFactory;
     friend class PlanetaryOrbit;
   
+    enum _UnitType isUnit() const
+    {
+        return _UnitType::planet;
+    }
   
     // Methods
     void AddAtmosphere( const std::string &texture, float radius, BLENDFUNC blendSrc, BLENDFUNC blendDst, bool inside_out );
@@ -206,7 +206,7 @@ public: PlanetIterator( Planet *p )
         {
             if (current() != NULL) {
                 Unit *cur = *pos;
-                if (cur->isUnit() == PLANETPTR)
+                if (cur->isUnit() == _UnitType::planet)
                     for (un_iter tmp( ( (Planet*) cur )->satellites.createIterator() ); !tmp.isDone(); ++tmp)
                         localCollection.append( (*tmp) );
                 ++pos;

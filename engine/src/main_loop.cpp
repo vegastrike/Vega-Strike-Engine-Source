@@ -866,7 +866,7 @@ void createObjects( std::vector< std::string > &fighter0name,
                                                                                        grav->rSize()/4 ),
                                                                   vsrandom.uniformExc( -grav->rSize()/4,
                                                                                        grav->rSize()/4 ) );
-                                        if (grav->isUnit() != PLANETPTR)
+                                        if (grav->isUnit() != _UnitType::planet)
                                             newpos = UniverseUtil::SafeEntrancePoint( newpos );
                                         cp->savegame->SetPlayerLocation( newpos );
                                         pox = newpos;
@@ -887,7 +887,7 @@ void createObjects( std::vector< std::string > &fighter0name,
                 }
 
                 BOOST_LOG_TRIVIAL(info) << "CREATING A LOCAL SHIP : " << fightername;
-                fighters[a] = new GameUnit< Unit >( fightername, false, tmptarget[a], modifications, fg, s );
+                fighters[a] = new GameUnit( fightername, false, tmptarget[a], modifications, fg, s );
 
                 _Universe->activeStarSystem()->AddUnit( fighters[a] );
                 if ( s == 0 && squadnum < (int) fighter0name.size() ) {
@@ -959,14 +959,14 @@ void AddUnitToSystem( const SavedUnits *su )
     Unit *un = NULL;
     switch (su->type)
     {
-    case ENHANCEMENTPTR:
+    case _UnitType::enhancement:
         un =
             new Enhancement( su->filename.get().c_str(), FactionUtil::GetFactionIndex( su->faction ), string( "" ) );
         un->SetPosition( QVector( 0, 0, 0 ) );
         break;
-    case UNITPTR:
+    case _UnitType::unit:
     default:
-        un = new GameUnit< Unit >( su->filename.get().c_str(), false, FactionUtil::GetFactionIndex( su->faction ) );
+        un = new GameUnit( su->filename.get().c_str(), false, FactionUtil::GetFactionIndex( su->faction ) );
         un->EnqueueAI( new Orders::AggressiveAI( "default.agg.xml" ) );
         un->SetTurretAI();
         if ( _Universe->AccessCockpit()->GetParent() )

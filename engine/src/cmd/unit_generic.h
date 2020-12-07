@@ -33,12 +33,16 @@
 #ifndef _UNIT_H_
 #define _UNIT_H_
 
+#include "armed.h"
+#include "audible.h"
 #include "damageable.h"
 #include "drawable.h"
 #include "movable.h"
 #include "computer.h"
+#include "intelligent.h"
+#include "energetic.h"
 
-
+#include "mount.h"
 
 #ifdef VS_DEBUG
 #define CONTAINER_DEBUG
@@ -71,11 +75,11 @@ void UncheckUnit( class Unit*un );
 #include "collide_map.h"
 #include "SharedPool.h"
 
-
 extern char * GetUnitDir( const char *filename );
 extern float capship_size;
 
 Unit* getMasterPartList();
+bool CloseEnoughToAutotrack( Unit *me, Unit *targ, float &cone );
 
 //A stupid struct that is only for grouping 2 different types of variables together in one return value
 class CargoColor
@@ -109,114 +113,19 @@ class AsteroidGeneric;
  * Needed by star system to determine whether current unit
  * is orbitable
  */
-enum clsptr
+enum _UnitType
 {
-    UNITPTR,
-    PLANETPTR,
-    BUILDINGPTR,
-    NEBULAPTR,
-    ASTEROIDPTR,
-    ENHANCEMENTPTR,
-    MISSILEPTR
+    unit,
+    planet,
+    building,
+    nebula,
+    asteroid,
+    enhancement,
+    missile
 };
 
-class Mount
-{
-protected:
-//Where is it
-    Vector     pos;
-    Quaternion orient;
-    double last_sound_refire_time;
-    void ReplaceSound();
-public:
-//for guns!
-    float     xyscale;
-    float     zscale;
-    float ComputeAnimatedFrame( Mesh *gun );
-//pass inunit so it can update gunspeed
-    void ReplaceMounts( Unit *unit, const Mount *other );
-    double Percentage( const Mount *newammo ) const;
-//Gotta look at that, if we can make Beam a string in AcctUnit and a Beam elsewhere
-    union REF
-    {
-        //only beams are actually coming out of the gun at all times...bolts, balls, etc aren't
-        Beam *gun;
-        //Other weapons must track refire times
-        float refire;
-    }
-    ref;
-//the size that this mount can hold. May be any bitwise combination of weapon_info::MOUNT_SIZE
-    unsigned int size;                                           //short fix
-//-1 is infinite
-    int ammo;                                            //short
-    int volume;                                          //-1 is infinite //short fix
-//The data behind this weapon. May be accordingly damaged as time goes on
-    enum MOUNTSTATUS {REQUESTED, ACCEPTED, PROCESSED, UNFIRED, FIRED}
-    processed;
-//Status of the selection of this weapon. Does it fire when we hit space
-    enum STATUS {ACTIVE, INACTIVE, DESTROYED, UNCHOSEN}
-    status;
-    bool  bank;
-//bank implies whether the weapon is linked with the next mount (i.e. only one firing at a time)
-    const weapon_info *type;
-    float functionality;
-    float maxfunctionality;
-    int   sound;
-//The sound this mount makes when fired
-    float time_to_lock;
-    Mount();
-//short fix
-    Mount( const std::string &name,
-           int ammo,
-           int volume,
-           float xyscale,
-           float zscale,
-           float functionality,
-           float maxfunctionality,
-           bool banked );
-
-    void Activate( bool Missile );
-    void DeActive( bool Missile );
-//Sets this gun's position on the mesh
-    void SetMountPosition( const Vector& );
-    void SetMountOrientation( const Quaternion& );
-//Gets the mount's position and transform
-    const Vector& GetMountLocation() const
-    {
-        return pos;
-    }
-    const Quaternion& GetMountOrientation() const
-    {
-        return orient;
-    }
-//Turns off a firing beam (upon key release for example)
-    void UnFire();
-/**
- *  Fires a beam when the firing unit is at the Cumulative location/transformation
- * owner (won't crash into)  as owner and target as missile target. bool Missile indicates if it is a missile
- * should it fire
- */
-//Uses Sound Forcefeedback and other stuff
-    void PhysicsAlignedUnfire();
-    bool PhysicsAlignedFire( Unit*caller,
-                             const Transformation &Cumulative,
-                             const Matrix &mat,
-                             const Vector &Velocity,
-                             void *owner,
-                             Unit*target,
-                             signed char autotrack,
-                             float trackingcone,
-                             CollideMap::iterator hint[] );
-    bool NextMountCloser( Mount *nextmount, Unit* );
-    bool Fire( Unit *firer, void *owner, bool Missile = false, bool collide_only_with_target = false );
-    bool IsEmpty() const
-    {
-        return !(status == ACTIVE || status == INACTIVE);
-    }
-};
 
 class VDU;
-struct UnitSounds;
 //template
 template < typename BOGUS >
 struct UnitImages;
@@ -232,14 +141,15 @@ struct PlanetaryOrbitData;
  * the aistate indicates how the unit will behave in the upcoming phys frame
  */
 
-class Unit : public Drawable, public Damageable, public Movable
+// TODO: move Armed to subclasses
+class Unit : public Armed, public Audible, public Drawable, public Damageable, public Energetic, public Intelligent, public Movable
 {
 protected:
 //How many lists are referencing us
     int ucref;
     StringPool::Reference csvRow;
 public:
-    UnitSounds *sound;
+
 
 //The name (type) of this unit shouldn't be public
     StringPool::Reference name;
@@ -292,7 +202,6 @@ public:
     void Init();
     void Init( const char *filename, bool SubUnit, int faction, std::string customizedUnit = std::string(
                    "" ), Flightgroup *flightgroup = NULL, int fg_subnumber = 0, std::string *netxml = NULL );
-    friend class UnitFactory;
 //table can be NULL, but setting it appropriately may increase performance
     void LoadRow( class CSVRow&row, std::string unitMod, std::string*netxml = NULL );
 
@@ -348,13 +257,8 @@ public:
     un_iter getSubUnits();
     un_kiter viewSubUnits() const;
 #define NO_MOUNT_STAR
-    std::vector< Mount >mounts;
-    float gunspeed;
-    float gunrange;
-    float missilerange;
     bool  inertialmode;
-    char  turretstatus;
-    bool  autopilotactive;
+    bool autopilotactive;
 
     bool isSubUnit() const
     {
@@ -374,10 +278,7 @@ public:
                          bool force_change_on_nothing,
                          bool gen_downgrade_list );
     void ImportPartList( const std::string &category, float price, float pricedev, float quantity, float quantdev );
-    int GetNumMounts() const
-    {
-        return mounts.size();
-    }
+
     void ClearMounts();
 //Loads a user interface for the user to upgrade his ship
 //Uses base stuff -> only in Unit
@@ -551,17 +452,7 @@ public:
                                        bool DoSightAndSound );
     StarSystem * getStarSystem();
     const StarSystem * getStarSystem() const;
-    struct UnitJump
-    {
-        float warpDriveRating;
-        float energy;                            //short fix
-        float insysenergy;                       //short fix
-        signed char   drive;
-        unsigned char delay;
-        unsigned char damage;
-        //negative means fuel
-    }
-    jump;
+
     Pilot *pilot;
     bool   selected;
 
@@ -659,11 +550,7 @@ public:
 protected:
 //are shields tight to the hull.  zero means bubble
     float  shieldtight;
-//fuel of this unit
-    float  fuel;
-    float  afterburnenergy;              //short fix
-    int    afterburntype;                        //0--energy, 1--fuel
-//-1 means it is off. -2 means it doesn't exist. otherwise it's engaged to destination (positive number)
+
 
 
 public:
@@ -706,44 +593,16 @@ public:
     // 0 = not stated, 1 = done
     float ExplodingProgress() const;
 
-//returns the current ammt of armor left
-//short fix
-    float AfterburnData() const
-    {
-        return afterburnenergy;
-    }
-    void SetAfterBurn( float aft );
-    float FuelData() const;
-    float WarpCapData() const;
-    void SetFuel( float f );
-//Returns the current ammt of energy left
-    float EnergyRechargeData() const
-    {
-        return recharge;
-    }
-    void SetEnergyRecharge( float enrech );
-    void SetMaxEnergy( float maxen );
-    float MaxEnergyData() const
-    {
-        return maxenergy;
-    }
-    float ShieldRechargeData() const
-    {
-        return shield.recharge;
-    }
-    float EnergyData() const;
-    float WarpEnergyData() const;
-//short fix
-    float GetWarpEnergy() const
-    {
-        return warpenergy;
-    }
+
+
+
+
+
+
+
 
     float CalculateNearestWarpUnit( float minmultiplier, Unit **nearest_unit, bool count_negative_warp_units ) const override;
-    //float GetMaxWarpFieldStrength( float rampmult = 1.f ) const;
-    void DecreaseWarpEnergy( bool insys, float time );
-    void IncreaseWarpEnergy( bool insys, float time );
-    bool RefillWarpEnergy();
+
 
 //What's the size of this unit
     float rSize() const
@@ -884,52 +743,23 @@ public:
  */
 public:
     void RegenShields() override;
-    void ArmorDamageSound( const Vector &pnt ) override;
-    void HullDamageSound( const Vector &pnt ) override;
 
-//current energy
-    float  energy;
+
 protected:
-//Activates all guns of that size
-    void ActivateGuns( const weapon_info*, bool Missile );
+
 
 //The radar limits (range, cone range, etc)
 //the current order
-//how much the energy recharges per second
-    float recharge;
 
-//maximum energy
-    float maxenergy;
-//maximum energy
-    float maxwarpenergy;                 //short fix
-//current energy
-    float warpenergy;                            //short fix
+
+
 
 
 public:
-//resets average gun speed (in event of weapon change
-    void setAverageGunSpeed();
-    int LockMissile() const;             //-1 is no lock necessary 1 is locked
-    void LockTarget( bool myboo );
-    bool TargetLocked( const Unit *checktarget = NULL ) const;
-    bool TargetTracked( const Unit *checktarget = NULL );
-    float TrackingGuns( bool &missileLock );
-//Changes currently selected weapon
-    void ToggleWeapon( bool Missile, bool forward = true );
-//Selects all weapons
-    void SelectAllWeapon( bool Missile );
-//Gets the average gun speed of the unit::caution SLOW
-    void getAverageGunSpeed( float &speed, float &grange, float &mrange ) const;
 
-//Finds the position from the local position if guns are aimed at it with speed
-    QVector PositionITTS( const QVector &firingposit, Vector firingvelocity, float gunspeed, bool smooth_itts ) const;
 //returns percentage of course deviation for contraband searches.  .5 causes error and 1 causes them to get mad
 
-//Fires all active guns that are or arent Missiles
-//if bitmask is (1<<31) then fire off autotracking of that type;
-    void Fire( unsigned int bitmask, bool beams_target_owner = false );
-//Stops all active guns from firing
-    void UnFire();
+
 
 
 /*
@@ -938,10 +768,10 @@ public:
  **************************************************************************************
  */
 
-protected:
+public:
 //not used yet
     StringPool::Reference target_fgid[3];
-public:
+
     bool InRange( const Unit *target, bool cone = true, bool cap = true ) const
     {
         double mm;
@@ -1018,51 +848,6 @@ public:
     float getUpgradeVolume( void ) const;
     float getHiddenCargoVolume( void ) const;
 
-/*
- **************************************************************************************
- **** AI STUFF                                                                      ***
- **************************************************************************************
- */
-
-public:
-    class csOPCODECollider * getCollideTree( const Vector &scale = Vector( 1,
-                                                                           1,
-                                                                           1 ), std::vector< struct mesh_polygon >* = NULL );
-//Because accessing in daughter classes member function from Unit * instances
-    Order *aistate;
-    Order * getAIState() const
-    {
-        return aistate;
-    }
-//Sets up a null queue for orders
-//Uses AI so only in NetUnit and Unit classes
-    void PrimeOrders();
-    void PrimeOrdersLaunched();
-    void PrimeOrders( Order *newAI );
-//Sets the AI to be a specific order
-    void SetAI( Order *newAI );
-//Enqueues an order to the unit's order queue
-    void EnqueueAI( Order *newAI );
-//EnqueuesAI first
-    void EnqueueAIFirst( Order *newAI );
-//num subunits
-    void LoadAIScript( const std::string &aiscript );
-    bool LoadLastPythonAIScript();
-    bool EnqueueLastPythonAIScript();
-//Uses Order class but just a poiner so ok
-//Uses AI so only in NetUnit and Unit classes
-//for clicklist
-    double getMinDis( const QVector &pnt ) const;
-//Uses AI stuff so only in NetUnit and Unit classes
-    void SetTurretAI();
-    void DisableTurretAI();
-//AI so only in NetUnit and Unit classes
-    std::string getFullAIDescription();
-//Erases all orders that bitwise OR with that type
-//Uses AI so only in NetUnit and Unit classes
-    void eraseOrderType( unsigned int type );
-//Executes 1 frame of physics-based AI
-    void ExecuteAI();
 
 /*
  **************************************************************************************
@@ -1176,12 +961,12 @@ public:
  **************************************************************************************
  */
 
-protected:
+public:
 //the flightgroup this ship is in
     Flightgroup *flightgroup;
 //the flightgroup subnumber
     int flightgroup_subnumber;
-public:
+
     void SetFg( Flightgroup *fg, int fg_snumber );
 //The faction of this unit
     int faction;
@@ -1237,10 +1022,11 @@ public:
     }
 
 //Is this class a unit
-    virtual enum clsptr isUnit() const
+    virtual enum _UnitType isUnit() const
     {
-        return UNITPTR;
+        return _UnitType::unit;
     }
+
     void Ref();
 //Low level list function to reference the unit as being the target of a UnitContainer or Colleciton
 //Releases the unit from this reference of UnitContainer or Collection
@@ -1252,31 +1038,18 @@ public:
 //sets the full name/fgid for planets
     bool isStarShip() const
     {
-        return isUnit() == UNITPTR;
+        return isUnit() == _UnitType::unit;
     }
     bool isPlanet() const
     {
-        return isUnit() == PLANETPTR;
+        return isUnit() == _UnitType::planet;
     }
     bool isJumppoint() const
     {
         return GetDestinations().size() != 0;
     }
 
-//Uses Universe stuff -> maybe only needed in Unit class
-    bool isEnemy( const Unit *other ) const
-    {
-        return getRelation( other ) < 0.0;
-    }
-    bool isFriend( const Unit *other ) const
-    {
-        return getRelation( other ) > 0.0;
-    }
-    bool isNeutral( const Unit *other ) const
-    {
-        return getRelation( other ) == 0.0;
-    }
-    float getRelation( const Unit *other ) const;
+
 
     void TurretFAW();
 };
