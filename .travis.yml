@@ -180,8 +180,8 @@ deploy:
    on:
       tags: true
       repo: vegastrike/Vega-Strike-Engine-Source
-      # We're compiling the same thing twice, no need to deploy it twice.
-      condition: "$CC != gcc"
+      # # We're compiling the same thing twice, no need to deploy it twice.
+      # condition: "$CC != gcc"
 notifications:
   webhooks:
     if: repo = vegastrike/Vega-Strike-Engine-Source
