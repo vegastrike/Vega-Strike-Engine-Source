@@ -99,16 +99,16 @@ jobs:
             - FLAGS='-DUSE_PYTHON_3=ON'
         - os: linux
           compiler: clang
-          name: "Fedora 32 - Py3"
+          name: "Fedora 33 - Py3"
           env:
-            - FROM='fedora:32'
+            - FROM='fedora:33'
             - COMPILER='clang'
             - FLAGS='-DUSE_PYTHON_3=ON'
         - os: linux
           compiler: clang
-          name: "Fedora 31 - Py3"
+          name: "Fedora 32 - Py3"
           env:
-            - FROM='fedora:31'
+            - FROM='fedora:32'
             - COMPILER='clang'
             - FLAGS='-DUSE_PYTHON_3=ON'
         - os: linux
@@ -158,28 +158,30 @@ script:
 # CI/CD hookups
 # See https://docs.travis-ci.com/user/deployment/releases/
 # for what to do for `before_deploy` and `deploy` sections
-#before_deploy:
-#  - pull the submodule here
-#  - ./script/package
-#  - export TRAVIS_TAG="composite tag name here"
-#  - git tag ${TRAVIS_TAG}
-#deploy:
-#    # GitHub Releases
-#    provider: releases
-#    api_key:
-#        secure: "Encrypted GitHub Auth Key" <-- put this in the secrets
-#    file:
-#       # Upload files in the `packages` directory
-#       - packages/*
-#    # Ensure the build doesn't get cleaned up so the files are avialable
-#    # for the release build
-#    skip_clean: true
-#    # release is a draft so it can be edited, updated, etc.
-#    draft: true
-#    # GitHub Releases requires a tag; this guarnatees a tag is set
-#    on:
-#        tags: true
-
+before_deploy:
+# - pull the submodule here
+ - ./script/package
+# - export TRAVIS_TAG="composite tag name here"
+# - git tag ${TRAVIS_TAG}
+deploy:
+   edge: true
+   provider: releases
+   token: $GITHUB_TOKEN
+   file_glob: true
+   file:
+      # Upload files in the `packages` directory
+      - ./packages/*
+   # # Ensure the build doesn't get cleaned up so the files are avialable
+   # # for the release build
+   # skip_clean: true
+   # # release is a draft so it can be edited, updated, etc.
+   # draft: true
+   # GitHub Releases requires a tag; this guarnatees a tag is set
+   on:
+      tags: true
+      repo: vegastrike/Vega-Strike-Engine-Source
+      # # We're compiling the same thing twice, no need to deploy it twice.
+      # condition: "$CC != gcc"
 notifications:
   webhooks:
     if: repo = vegastrike/Vega-Strike-Engine-Source
