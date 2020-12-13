@@ -167,7 +167,7 @@ deploy:
    file_glob: true
    file:
       # Upload files in this directory
-      - ./*
+      - ./packages/*
    # GitHub Releases requires a tag; this guarnatees a tag is set
    on:
       tags: true
