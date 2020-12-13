@@ -158,24 +158,16 @@ script:
 # CI/CD hookups
 # See https://docs.travis-ci.com/user/deployment/releases/
 # for what to do for `before_deploy` and `deploy` sections
-before_deploy:
-# - pull the submodule here
- - ./script/package
-# - export TRAVIS_TAG="composite tag name here"
-# - git tag ${TRAVIS_TAG}
+# before_deploy:
+#  - ./script/package
 deploy:
    edge: true
    provider: releases
    token: $GITHUB_TOKEN
    file_glob: true
    file:
-      # Upload files in the `packages` directory
-      - ./packages/*
-   # # Ensure the build doesn't get cleaned up so the files are avialable
-   # # for the release build
-   # skip_clean: true
-   # # release is a draft so it can be edited, updated, etc.
-   # draft: true
+      # Upload files in this directory
+      - ./*
    # GitHub Releases requires a tag; this guarnatees a tag is set
    on:
       tags: true
