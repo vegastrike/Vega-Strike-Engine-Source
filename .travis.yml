@@ -15,105 +15,84 @@ jobs:
     include:
         - os: linux
           compiler: gcc
-          name: "Ubuntu 20.04 LTS - GCC"
+          name: "Ubuntu 20.04 LTS - Py3 GCC"
           env:
             - FROM='ubuntu:focal'
             - COMPILER='gcc'
-            - FLAGS='-DUSE_PYTHON_3=OFF'
+            - FLAGS='-DUSE_PYTHON_3=ON'
         - os: linux
           compiler: clang
-          name: "Ubuntu 20.04 LTS - Clang"
-          env:
-            - FROM='ubuntu:focal'
-            - COMPILER='clang'
-            - FLAGS='-DUSE_PYTHON_3=OFF'
-        - os: linux
-          compiler: clang
-          name: "Ubuntu 20.04 LTS - Py3"
+          name: "Ubuntu 20.04 LTS - Py3 Clang"
           env:
             - FROM='ubuntu:focal'
             - COMPILER='clang'
             - FLAGS='-DUSE_PYTHON_3=ON'
         - os: linux
           compiler: gcc
-          name: "Ubuntu 18.04 LTS - GCC"
+          name: "Ubuntu 18.04 LTS - Py3 GCC"
           env:
             - FROM='ubuntu:bionic'
             - COMPILER='gcc'
-            - FLAGS='-DUSE_PYTHON_3=OFF'
+            - FLAGS='-DUSE_PYTHON_3=ON'
         - os: linux
           compiler: clang
-          name: "Ubuntu 18.04 LTS - Clang"
-          env:
-            - FROM='ubuntu:bionic'
-            - COMPILER='clang'
-            - FLAGS='-DUSE_PYTHON_3=OFF'
-        - os: linux
-          compiler: clang
-          name: "Ubuntu 18.04 LTS - Py3"
+          name: "Ubuntu 18.04 LTS - Py3 Clang"
           env:
             - FROM='ubuntu:bionic'
             - COMPILER='clang'
             - FLAGS='-DUSE_PYTHON_3=ON'
         - os: linux
           compiler: gcc
-          name: "Ubuntu 16.04 LTS - GCC"
-          env:
-            - FROM='ubuntu:xenial'
-            - COMPILER='gcc'
-            - FLAGS='-DUSE_PYTHON_3=OFF'
-        - os: linux
-          compiler: clang
-          name: "Ubuntu 16.04 LTS - Clang"
-          env:
-            - FROM='ubuntu:xenial'
-            - COMPILER='clang'
-            - FLAGS='-DUSE_PYTHON_3=OFF'
-        - os: linux
-          compiler: gcc
-          name: "Ubuntu 16.04 LTS - Py3"
+          name: "Ubuntu 16.04 LTS - Py3 GCC"
           env:
             - FROM='ubuntu:xenial'
             - COMPILER='gcc'
             - FLAGS='-DUSE_PYTHON_3=ON'
         - os: linux
           compiler: clang
-          name: "Debian 10 - Py3"
+          name: "Ubuntu 16.04 LTS - Py3 Clang"
+          env:
+            - FROM='ubuntu:xenial'
+            - COMPILER='clang'
+            - FLAGS='-DUSE_PYTHON_3=ON'
+        - os: linux
+          compiler: clang
+          name: "Debian 10 - Py3 Clang"
           env:
             - FROM='debian:buster'
             - COMPILER='clang'
             - FLAGS='-DUSE_PYTHON_3=ON'
         - os: linux
           compiler: gcc
-          name: "Debian 9 - GCC"
+          name: "Debian 9 - Py3 GCC"
           env:
             - FROM='debian:stretch'
             - COMPILER='gcc'
-            - FLAGS='-DUSE_PYTHON_3=OFF'
+            - FLAGS='-DUSE_PYTHON_3=ON'
         - os: linux
           compiler: clang
-          name: "openSUSE Leap 15.2 - Py3"
+          name: "openSUSE Leap 15.2 - Py3 Clang"
           env:
             - FROM='opensuse/leap'
             - COMPILER='clang'
             - FLAGS='-DUSE_PYTHON_3=ON'
         - os: linux
           compiler: clang
-          name: "Fedora 33 - Py3"
+          name: "Fedora 33 - Py3 Clang"
           env:
             - FROM='fedora:33'
             - COMPILER='clang'
             - FLAGS='-DUSE_PYTHON_3=ON'
         - os: linux
           compiler: clang
-          name: "Fedora 32 - Py3"
+          name: "Fedora 32 - Py3 Clang"
           env:
             - FROM='fedora:32'
             - COMPILER='clang'
             - FLAGS='-DUSE_PYTHON_3=ON'
         - os: linux
           compiler: clang
-          name: "CentOS 8 - Py3"
+          name: "CentOS 8 - Py3 Clang"
           env:
             - FROM='centos:8'
             - COMPILER='clang'
@@ -121,7 +100,7 @@ jobs:
         - os: osx
           osx_image: xcode11.3
           env:
-            - FLAGS='-DUSE_PYTHON_3=OFF -DBoost_NO_BOOST_CMAKE=ON'
+            - FLAGS='-DUSE_PYTHON_3=ON -DBoost_NO_BOOST_CMAKE=ON'
         - os: osx
           osx_image: xcode11.3
           env:
@@ -131,11 +110,11 @@ jobs:
         - os: linux
           # dist: xenial
           compiler: clang
-          name: "Ubuntu 16.04 LTS - Clang"
+          name: "Ubuntu 16.04 LTS - Py3 Clang"
           env:
             - FROM='ubuntu:xenial'
             - COMPILER='clang'
-            - FLAGS='-DUSE_PYTHON_3=OFF'
+            - FLAGS='-DUSE_PYTHON_3=ON'
     fast_finish: true
 
 addons:

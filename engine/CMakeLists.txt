@@ -752,13 +752,14 @@ CHECK_TYPE_SIZE("void*" SIZEOF_VOID_P BUILTIN_TYPES_ONLY)
 # Let cmake find our in-tree modules
 SET(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${Vega_Strike_SOURCE_DIR})
 
-# Python 3 has a SASL compatibility issue which causes an error
-# on some installations that prefer Python 3
-# -- Python 2.7 is default for now
-OPTION(USE_PYTHON_3 "Use Python 3 instead of Python 2.7 (default is 2.7)" OFF)
+# Python 3 is now our default -- stephengtuggy 2020-12-18
+## Python 3 has a SASL compatibility issue which causes an error
+## on some installations that prefer Python 3
+## -- Python 2.7 is default for now
+OPTION(USE_PYTHON_3 "Use Python 3 or Python 2.7 (default is 3)" ON)
 IF (USE_PYTHON_3)
     # We want at least Python 3.4, but we prefer newer versions
-    SET(Python_ADDITIONAL_VERSIONS 3.8 3.7 3.6 3.5 3.4)
+    SET(Python_ADDITIONAL_VERSIONS 3.9 3.8 3.7 3.6 3.5 3.4)
 ELSE (USE_PYTHON_3)
     SET(Python_ADDITIONAL_VERSIONS 2.7)
 ENDIF (USE_PYTHON_3)
@@ -810,13 +811,13 @@ IF (USE_SYSTEM_BOOST)
         ELSEIF (USE_PYTHON_3)
             SET(BOOST_PYTHON_COMPONENT "python3")
 
-            # Xenial lacks libboost_python3.{so|a} but has libboost_python-py{major}{minor}.{so|a}
-            # (This is common to all Debian and Debian-based systems up to Boost 1.67,
-            #   it's just not needed for any other Debian-based system (at the moment).)
+            # Debian and Debian-based systems up to Boost 1.67 lack libboost_python3.{so|a}
+            # but have libboost_python-py{major}{minor}.{so|a}. E.g., Ubuntu xenial and 
+            # Debian stretch.
             IF (CMAKE_SYSTEM_NAME STREQUAL Linux)
-                IF (LINUX_CODENAME STREQUAL xenial)
+                IF (LINUX_CODENAME STREQUAL xenial OR LINUX_CODENAME STREQUAL stretch)
                     SET(BOOST_PYTHON_COMPONENT "python-py3${PYTHON_VERSION_MINOR}")
-                ENDIF (LINUX_CODENAME STREQUAL xenial)
+                ENDIF (LINUX_CODENAME STREQUAL xenial OR LINUX_CODENAME STREQUAL stretch)
             ENDIF (CMAKE_SYSTEM_NAME STREQUAL Linux)
 
         ELSE (Boost_1_67_Or_Later_Result)
