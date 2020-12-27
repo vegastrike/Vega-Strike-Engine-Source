@@ -334,6 +334,7 @@ SET(LIBGFXCLIENT_SOURCES
     src/gfx/star.cpp
     src/gfx/stream_texture.cpp
     src/gfx/technique.cpp
+    src/gfx/pass.cpp
     src/gfx/tex_transform.cpp
     src/gfx/vdu.cpp
     src/gfx/vid_file.cpp

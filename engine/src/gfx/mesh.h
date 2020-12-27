@@ -244,7 +244,7 @@ private:
     void ProcessShaderDrawQueue( size_t whichpass, int whichdrawqueue, bool zsort, const QVector &sortctr );
 
 ///Activate a texture unit - internal usage
-    void activateTextureUnit( const Technique::Pass::TextureUnit &tu, bool deflt = false );
+    void activateTextureUnit( const Pass::TextureUnit &tu, bool deflt = false );
 
 public: Mesh();
     Mesh( const Mesh &m );
