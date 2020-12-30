@@ -15,105 +15,84 @@ jobs:
     include:
         - os: linux
           compiler: gcc
-          name: "Ubuntu 20.04 LTS - GCC"
+          name: "Ubuntu 20.04 LTS - Py3 GCC"
           env:
             - FROM='ubuntu:focal'
             - COMPILER='gcc'
-            - FLAGS='-DUSE_PYTHON_3=OFF'
+            - FLAGS='-DUSE_PYTHON_3=ON'
         - os: linux
           compiler: clang
-          name: "Ubuntu 20.04 LTS - Clang"
-          env:
-            - FROM='ubuntu:focal'
-            - COMPILER='clang'
-            - FLAGS='-DUSE_PYTHON_3=OFF'
-        - os: linux
-          compiler: clang
-          name: "Ubuntu 20.04 LTS - Py3"
+          name: "Ubuntu 20.04 LTS - Py3 Clang"
           env:
             - FROM='ubuntu:focal'
             - COMPILER='clang'
             - FLAGS='-DUSE_PYTHON_3=ON'
         - os: linux
           compiler: gcc
-          name: "Ubuntu 18.04 LTS - GCC"
+          name: "Ubuntu 18.04 LTS - Py3 GCC"
           env:
             - FROM='ubuntu:bionic'
             - COMPILER='gcc'
-            - FLAGS='-DUSE_PYTHON_3=OFF'
+            - FLAGS='-DUSE_PYTHON_3=ON'
         - os: linux
           compiler: clang
-          name: "Ubuntu 18.04 LTS - Clang"
-          env:
-            - FROM='ubuntu:bionic'
-            - COMPILER='clang'
-            - FLAGS='-DUSE_PYTHON_3=OFF'
-        - os: linux
-          compiler: clang
-          name: "Ubuntu 18.04 LTS - Py3"
+          name: "Ubuntu 18.04 LTS - Py3 Clang"
           env:
             - FROM='ubuntu:bionic'
             - COMPILER='clang'
             - FLAGS='-DUSE_PYTHON_3=ON'
         - os: linux
           compiler: gcc
-          name: "Ubuntu 16.04 LTS - GCC"
-          env:
-            - FROM='ubuntu:xenial'
-            - COMPILER='gcc'
-            - FLAGS='-DUSE_PYTHON_3=OFF'
-        - os: linux
-          compiler: clang
-          name: "Ubuntu 16.04 LTS - Clang"
-          env:
-            - FROM='ubuntu:xenial'
-            - COMPILER='clang'
-            - FLAGS='-DUSE_PYTHON_3=OFF'
-        - os: linux
-          compiler: gcc
-          name: "Ubuntu 16.04 LTS - Py3"
+          name: "Ubuntu 16.04 LTS - Py3 GCC"
           env:
             - FROM='ubuntu:xenial'
             - COMPILER='gcc'
             - FLAGS='-DUSE_PYTHON_3=ON'
         - os: linux
           compiler: clang
-          name: "Debian 10 - Py3"
+          name: "Ubuntu 16.04 LTS - Py3 Clang"
+          env:
+            - FROM='ubuntu:xenial'
+            - COMPILER='clang'
+            - FLAGS='-DUSE_PYTHON_3=ON'
+        - os: linux
+          compiler: clang
+          name: "Debian 10 - Py3 Clang"
           env:
             - FROM='debian:buster'
             - COMPILER='clang'
             - FLAGS='-DUSE_PYTHON_3=ON'
         - os: linux
           compiler: gcc
-          name: "Debian 9 - GCC"
+          name: "Debian 9 - Py3 GCC"
           env:
             - FROM='debian:stretch'
             - COMPILER='gcc'
-            - FLAGS='-DUSE_PYTHON_3=OFF'
+            - FLAGS='-DUSE_PYTHON_3=ON'
         - os: linux
           compiler: clang
-          name: "openSUSE Leap 15.2 - Py3"
+          name: "openSUSE Leap 15.2 - Py3 Clang"
           env:
             - FROM='opensuse/leap'
             - COMPILER='clang'
             - FLAGS='-DUSE_PYTHON_3=ON'
         - os: linux
           compiler: clang
-          name: "Fedora 32 - Py3"
+          name: "Fedora 33 - Py3 Clang"
+          env:
+            - FROM='fedora:33'
+            - COMPILER='clang'
+            - FLAGS='-DUSE_PYTHON_3=ON'
+        - os: linux
+          compiler: clang
+          name: "Fedora 32 - Py3 Clang"
           env:
             - FROM='fedora:32'
             - COMPILER='clang'
             - FLAGS='-DUSE_PYTHON_3=ON'
         - os: linux
           compiler: clang
-          name: "Fedora 31 - Py3"
-          env:
-            - FROM='fedora:31'
-            - COMPILER='clang'
-            - FLAGS='-DUSE_PYTHON_3=ON'
-        - os: linux
-          compiler: clang
-          name: "CentOS 8 - Py3"
+          name: "CentOS 8 - Py3 Clang"
           env:
             - FROM='centos:8'
             - COMPILER='clang'
@@ -121,7 +100,7 @@ jobs:
         - os: osx
           osx_image: xcode11.3
           env:
-            - FLAGS='-DUSE_PYTHON_3=OFF -DBoost_NO_BOOST_CMAKE=ON'
+            - FLAGS='-DUSE_PYTHON_3=ON -DBoost_NO_BOOST_CMAKE=ON'
         - os: osx
           osx_image: xcode11.3
           env:
@@ -131,11 +110,11 @@ jobs:
         - os: linux
           # dist: xenial
           compiler: clang
-          name: "Ubuntu 16.04 LTS - Clang"
+          name: "Ubuntu 16.04 LTS - Py3 Clang"
           env:
             - FROM='ubuntu:xenial'
             - COMPILER='clang'
-            - FLAGS='-DUSE_PYTHON_3=OFF'
+            - FLAGS='-DUSE_PYTHON_3=ON'
     fast_finish: true
 
 addons:
@@ -158,28 +137,22 @@ script:
 # CI/CD hookups
 # See https://docs.travis-ci.com/user/deployment/releases/
 # for what to do for `before_deploy` and `deploy` sections
-#before_deploy:
-#  - pull the submodule here
+# before_deploy:
 #  - ./script/package
-#  - export TRAVIS_TAG="composite tag name here"
-#  - git tag ${TRAVIS_TAG}
-#deploy:
-#    # GitHub Releases
-#    provider: releases
-#    api_key:
-#        secure: "Encrypted GitHub Auth Key" <-- put this in the secrets
-#    file:
-#       # Upload files in the `packages` directory
-#       - packages/*
-#    # Ensure the build doesn't get cleaned up so the files are avialable
-#    # for the release build
-#    skip_clean: true
-#    # release is a draft so it can be edited, updated, etc.
-#    draft: true
-#    # GitHub Releases requires a tag; this guarnatees a tag is set
-#    on:
-#        tags: true
-
+deploy:
+   edge: true
+   provider: releases
+   token: $GITHUB_TOKEN
+   file_glob: true
+   file:
+      # Upload files in this directory
+      - ./packages/*
+   # GitHub Releases requires a tag; this guarnatees a tag is set
+   on:
+      tags: true
+      repo: vegastrike/Vega-Strike-Engine-Source
+      # # We're compiling the same thing twice, no need to deploy it twice.
+      # condition: "$CC != gcc"
 notifications:
   webhooks:
     if: repo = vegastrike/Vega-Strike-Engine-Source

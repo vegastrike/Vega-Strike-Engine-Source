@@ -753,13 +753,14 @@ CHECK_TYPE_SIZE("void*" SIZEOF_VOID_P BUILTIN_TYPES_ONLY)
 # Let cmake find our in-tree modules
 SET(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${Vega_Strike_SOURCE_DIR})
 
-# Python 3 has a SASL compatibility issue which causes an error
-# on some installations that prefer Python 3
-# -- Python 2.7 is default for now
-OPTION(USE_PYTHON_3 "Use Python 3 instead of Python 2.7 (default is 2.7)" OFF)
+# Python 3 is now our default -- stephengtuggy 2020-12-18
+## Python 3 has a SASL compatibility issue which causes an error
+## on some installations that prefer Python 3
+## -- Python 2.7 is default for now
+OPTION(USE_PYTHON_3 "Use Python 3 or Python 2.7 (default is 3)" ON)
 IF (USE_PYTHON_3)
     # We want at least Python 3.4, but we prefer newer versions
-    SET(Python_ADDITIONAL_VERSIONS 3.8 3.7 3.6 3.5 3.4)
+    SET(Python_ADDITIONAL_VERSIONS 3.9 3.8 3.7 3.6 3.5 3.4)
 ELSE (USE_PYTHON_3)
     SET(Python_ADDITIONAL_VERSIONS 2.7)
 ENDIF (USE_PYTHON_3)
@@ -811,13 +812,13 @@ IF (USE_SYSTEM_BOOST)
         ELSEIF (USE_PYTHON_3)
             SET(BOOST_PYTHON_COMPONENT "python3")
 
-            # Xenial lacks libboost_python3.{so|a} but has libboost_python-py{major}{minor}.{so|a}
-            # (This is common to all Debian and Debian-based systems up to Boost 1.67,
-            #   it's just not needed for any other Debian-based system (at the moment).)
+            # Debian and Debian-based systems up to Boost 1.67 lack libboost_python3.{so|a}
+            # but have libboost_python-py{major}{minor}.{so|a}. E.g., Ubuntu xenial and 
+            # Debian stretch.
             IF (CMAKE_SYSTEM_NAME STREQUAL Linux)
-                IF (LINUX_CODENAME STREQUAL xenial)
+                IF (LINUX_CODENAME STREQUAL xenial OR LINUX_CODENAME STREQUAL stretch)
                     SET(BOOST_PYTHON_COMPONENT "python-py3${PYTHON_VERSION_MINOR}")
-                ENDIF (LINUX_CODENAME STREQUAL xenial)
+                ENDIF (LINUX_CODENAME STREQUAL xenial OR LINUX_CODENAME STREQUAL stretch)
             ENDIF (CMAKE_SYSTEM_NAME STREQUAL Linux)
 
         ELSE (Boost_1_67_Or_Later_Result)
@@ -1287,7 +1288,7 @@ ELSEIF (CMAKE_SYSTEM_NAME STREQUAL Linux)
                 ELSE (USE_PYTHON_3)
                     SET(CPACK_DEBIAN_PACKAGE_DEPENDS "libpython2.7")
                 ENDIF (USE_PYTHON_3)
-                SET(CPACK_DEBIAN_PACKAGE_DEPENDS "${CPACK_DEBIAN_PACKAGE_DEPENDS}, libjpeg62-turbo, libpng16-16, freeglut3, libgtk-3-0, libvorbis0a, libopenal1, libsdl-gfx1.2-5, xdg-utils, libgl1, libopengl0, libboost-python1.67.0, libboost-log1.67.0")
+                SET(CPACK_DEBIAN_PACKAGE_DEPENDS "${CPACK_DEBIAN_PACKAGE_DEPENDS}, libjpeg62-turbo, libpng16-16, freeglut3, libgtk-3-0, libvorbis0a, libopenal1, libsdl-gfx1.2-5, xdg-utils, libgl1, libopengl0, libglu1-mesa, libboost-python1.67.0, libboost-log1.67.0")
             ELSEIF (DEBIAN_RELEASE_VERSION STREQUAL "stretch")
                 IF (USE_PYTHON_3)
                     SET(CPACK_DEBIAN_PACKAGE_DEPENDS "libpython3.5")
@@ -1330,7 +1331,7 @@ ELSEIF (CMAKE_SYSTEM_NAME STREQUAL Linux)
                 ELSE (USE_PYTHON_3)
                     SET(CPACK_DEBIAN_PACKAGE_DEPENDS "libpython2.7")
                 ENDIF (USE_PYTHON_3)
-                SET(CPACK_DEBIAN_PACKAGE_DEPENDS "${CPACK_DEBIAN_PACKAGE_DEPENDS}, libjpeg62-turbo, libpng16-16, freeglut3, libgtk-3-0, libvorbis0a, libopenal1, libsdl-gfx1.2-5, xdg-utils, libgl1, libopengl0, libboost-python1.67.0, libboost-log1.67.0")
+                SET(CPACK_DEBIAN_PACKAGE_DEPENDS "${CPACK_DEBIAN_PACKAGE_DEPENDS}, libjpeg62-turbo, libpng16-16, freeglut3, libgtk-3-0, libvorbis0a, libopenal1, libsdl-gfx1.2-5, xdg-utils, libgl1, libopengl0, libglu1-mesa, libboost-python1.67.0, libboost-log1.67.0")
             ELSEIF (LSB_LINUX_DISTRIBUTION_CODENAME STREQUAL "stretch")
                 IF (USE_PYTHON_3)
                     SET(CPACK_DEBIAN_PACKAGE_DEPENDS "libpython3.5")
@@ -1376,8 +1377,8 @@ ELSEIF (CMAKE_SYSTEM_NAME STREQUAL Linux)
                 SET(CPACK_RPM_PACKAGE_REQUIRES "libboost_python-py2_7-1_66_0, libpython2_7-1_0")
             ENDIF (USE_PYTHON_3)
             SET(CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES}, libjpeg-turbo, libpng16-16, libglut3, libgtk-3-0, libvorbis0, libopenal0, libSDL-1_2-0, libglvnd, expat, libboost_log1_66_0, libboost_system1_66_0, libboost_filesystem1_66_0, libboost_thread1_66_0, libboost_regex1_66_0, libboost_chrono1_66_0, libboost_atomic1_66_0")
-        ELSEIF (LINUX_ID STREQUAL fedora AND (LINUX_VERSION_ID VERSION_EQUAL 30 OR LINUX_VERSION_ID VERSION_EQUAL 31 OR LINUX_VERSION_ID VERSION_EQUAL 32))
-            IF (LINUX_VERSION_ID VERSION_EQUAL 32)
+        ELSEIF (LINUX_ID STREQUAL fedora AND (LINUX_VERSION_ID VERSION_EQUAL 30 OR LINUX_VERSION_ID VERSION_GREATER 30) AND (LINUX_VERSION_ID VERSION_LESS 33 OR LINUX_VERSION_ID VERSION_EQUAL 33))
+            IF (LINUX_VERSION_ID VERSION_EQUAL 32 OR LINUX_VERSION_ID VERSION_EQUAL 33)
                 IF (USE_PYTHON_3)
                     SET(CPACK_RPM_PACKAGE_REQUIRES "python38, boost-python3")       # python39
                 ELSE (USE_PYTHON_3)
@@ -1390,13 +1391,13 @@ ELSEIF (CMAKE_SYSTEM_NAME STREQUAL Linux)
                 ELSE (USE_PYTHON_3)
                     SET(CPACK_RPM_PACKAGE_REQUIRES "python27, boost-python2")
                 ENDIF (USE_PYTHON_3)
-            ELSE (LINUX_VERSION_ID VERSION_EQUAL 32)
+            ELSE (LINUX_VERSION_ID VERSION_EQUAL 32 OR LINUX_VERSION_ID VERSION_EQUAL 33)
                 IF (USE_PYTHON_3)
                     SET(CPACK_RPM_PACKAGE_REQUIRES "python37, boost-python3")
                 ELSE (USE_PYTHON_3)
                     SET(CPACK_RPM_PACKAGE_REQUIRES "python27, boost-python2")
                 ENDIF (USE_PYTHON_3)
-            ENDIF (LINUX_VERSION_ID VERSION_EQUAL 32)
+            ENDIF (LINUX_VERSION_ID VERSION_EQUAL 32 OR LINUX_VERSION_ID VERSION_EQUAL 33)
             SET(CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES}, libjpeg-turbo, libpng, freeglut, gtk3, libvorbis, openal-soft, SDL, libglvnd, expat, boost-log, boost-system, boost-filesystem, boost-thread, boost-regex, boost-chrono, boost-atomic")
         ELSEIF (LINUX_ID STREQUAL centos AND LINUX_VERSION_ID STREQUAL "8")
             IF (USE_PYTHON_3)
