@@ -653,7 +653,7 @@ void GameUnit::applyTechniqueOverrides(const map<string, string> &overrides)
             if (technique.get() != NULL) {
                 bool doOverride = false;
                 for (int passno = 0; !doOverride && passno < technique->getNumPasses(); ++passno) {
-                    const Technique::Pass &pass = technique->getPass(passno);
+                    const Pass &pass = technique->getPass(passno);
                     for (size_t paramno = 0; !doOverride && paramno < pass.getNumShaderParams(); ++paramno) {
                         if (overrides.count(pass.getShaderParam(paramno).name) > 0)
                             doOverride = true;
@@ -666,9 +666,9 @@ void GameUnit::applyTechniqueOverrides(const map<string, string> &overrides)
                     // parameter values don't really need recompilation)
                     TechniquePtr newtechnique = TechniquePtr(new Technique(*technique));
                     for (int passno = 0; passno < technique->getNumPasses(); ++passno) {
-                        Technique::Pass &pass = technique->getPass(passno);
+                        Pass &pass = technique->getPass(passno);
                         for (size_t paramno = 0; paramno < pass.getNumShaderParams(); ++paramno) {
-                            Technique::Pass::ShaderParam &param = pass.getShaderParam(paramno);
+                            Pass::ShaderParam &param = pass.getShaderParam(paramno);
                             map<string, string>::const_iterator override = overrides.find(param.name);
                             if (override != overrides.end())
                                 parseFloat4(override->second, param.value);
