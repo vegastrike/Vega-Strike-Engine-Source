@@ -1,9 +1,4 @@
-# For most projects, this workflow file will not need changing; you simply need
-# to commit it to your repository.
-#
-# You may wish to alter this file to override the set of languages analyzed,
-# or to provide custom queries or build logic.
-name: "GH Actions CI"
+name: 'GH Actions CI'
 
 on:
   push:
@@ -26,6 +21,45 @@ jobs:
           - FROM:     'ubuntu:focal'
             COMPILER: 'gcc'
             FLAGS:    '-DUSE_PYTHON_3=OFF'
+          - FROM:     'ubuntu:focal'
+            COMPILER: 'clang'
+            FLAGS:    '-DUSE_PYTHON_3=OFF'
+          - FROM:     'ubuntu:focal'
+            COMPILER: 'clang'
+            FLAGS:    '-DUSE_PYTHON_3=ON'
+          - FROM:     'ubuntu:bionic'
+            COMPILER: 'gcc'
+            FLAGS:    '-DUSE_PYTHON_3=OFF'
+          - FROM:     'ubuntu:bionic'
+            COMPILER: 'clang'
+            FLAGS:    '-DUSE_PYTHON_3=OFF'
+          - FROM:     'ubuntu:bionic'
+            COMPILER: 'clang'
+            FLAGS:    '-DUSE_PYTHON_3=ON'
+          - FROM:     'ubuntu:xenial'
+            COMPILER: 'gcc'
+            FLAGS:    '-DUSE_PYTHON_3=OFF'
+          - FROM:     'ubuntu:xenial'
+            COMPILER: 'gcc'
+            FLAGS:    '-DUSE_PYTHON_3=ON'
+          - FROM:     'debian:buster'
+            COMPILER: 'clang'
+            FLAGS:    '-DUSE_PYTHON_3=ON'
+          - FROM:     'debian:stretch'
+            COMPILER: 'gcc'
+            FLAGS:    '-DUSE_PYTHON_3=OFF'
+          - FROM:     'opensuse/leap'
+            COMPILER: 'clang'
+            FLAGS:    '-DUSE_PYTHON_3=ON'
+          - FROM:     'fedora:33'
+            COMPILER: 'clang'
+            FLAGS:    '-DUSE_PYTHON_3=ON'
+          - FROM:     'fedora:32'
+            COMPILER: 'clang'
+            FLAGS:    '-DUSE_PYTHON_3=ON'
+          - FROM:     'centos:8'
+            COMPILER: 'clang'
+            FLAGS:    '-DUSE_PYTHON_3=ON'
 
     steps:
     - name: Checkout repository
