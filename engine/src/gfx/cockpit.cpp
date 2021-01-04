@@ -1,5 +1,31 @@
 // -*- mode: c++; c-basic-offset: 4; indent-tabs-mode: nil -*-
 
+/**
+ * cockpit.cpp
+ *
+ * Copyright (C) Daniel Horn
+ * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike
+ * contributors
+ *
+ * https://github.com/vegastrike/Vega-Strike-Engine-Source
+ *
+ * This file is part of Vega Strike.
+ *
+ * Vega Strike is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Vega Strike is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
+
 /// Draws cockpit parts
 /// Draws gauges, info strings, radar, ...
 
@@ -56,7 +82,7 @@
 #include "options.h"
 #include "soundcontainer_aldrv.h"
 #include "configxml.h"
-#include "planet_generic.h"
+#include "planet.h"
 
 
 
@@ -297,7 +323,6 @@ inline void DrawOneTargetBox( const QVector &Loc,
             GFXDraw( GFXLINE, verts );
         } else {
             float  max   = diamondsize;
-            //VSFileSystem::Fprintf (stderr,"lock percent %f\n",lock_percent);
             float  coord = endreticle+(startreticle-endreticle)*lock_percent;              //rSize/(1-lock_percent);//this is a number between 1 and 100
             double rtot  = 1./sqrtf( 2 );
 
@@ -1407,13 +1432,14 @@ float GameCockpit::LookupUnitStat( int stat, Unit *target )
 void GameCockpit::DrawTargetGauges( Unit *target )
 {
     int i;
-    //printf ("(debug)UNIT NAME:%s\n",UnitUtil::getName(target).c_str());
-    //printf ("(debug)TARGETSHIELDF:%1.2f\n",target->FShieldData());
-    for (i = UnitImages< void >::TARGETSHIELDF; i < UnitImages< void >::KPS; i++)
-        if (gauges[i])
+    for (i = UnitImages< void >::TARGETSHIELDF; i < UnitImages< void >::KPS; i++) {
+        if (gauges[i]) {
             gauges[i]->Draw( LookupTargetStat( i, target ) );
-    if (!text)
+        }
+    }
+    if (!text) {
         return;
+    }
 }
 
 GameCockpit::LastState::LastState()
@@ -1439,28 +1465,27 @@ void GameCockpit::TriggerEvents( Unit *un ) {
     else
         last.processing_time = curtime;
 
-    // VSFileSystem::vs_dprintf(3, "Processing events\n");
     BOOST_LOG_TRIVIAL(trace) << "Processing events";
     for (EVENTID event = EVENTID_FIRST; event < NUM_EVENTS; event = (EVENTID)(event+1)) {
         GameSoundContainer *sound = static_cast<GameSoundContainer*>(GetSoundForEvent(event));
         if (sound != NULL) {
 
-            #define MODAL_TRIGGER(name, _triggervalue, _curvalue, lastvar) \
-                do { \
-                    bool triggervalue = _triggervalue; \
-                    bool curvalue = _curvalue; \
-                    VSFileSystem::vs_dprintf(3, "Processing event " name " (cur=%d last=%d)\n", \
-                        int(curvalue), int(last.lastvar) ); \
-                    \
-                    if (curvalue != last.lastvar) { \
-                        VSFileSystem::vs_dprintf(2, "Triggering event edge " name " (cur=%d last=%d on=%d)\n", \
-                            int(curvalue), int(last.lastvar), int(triggervalue) ); \
-                        last.lastvar = curvalue; \
-                        if (curvalue == triggervalue) \
-                            sound->play(); \
-                        else \
-                            sound->stop(); \
-                    } \
+            #define MODAL_TRIGGER(name, _triggervalue, _curvalue, lastvar)                                                      \
+                do {                                                                                                            \
+                    bool triggervalue = _triggervalue;                                                                          \
+                    bool curvalue = _curvalue;                                                                                  \
+                    BOOST_LOG_TRIVIAL(trace) << boost::format("Processing event " name " (cur=%1% last=%2%)")                   \
+                                                % int(curvalue) % int(last.lastvar);                                            \
+                                                                                                                                \
+                    if (curvalue != last.lastvar) {                                                                             \
+                        BOOST_LOG_TRIVIAL(debug) << boost::format("Triggering event edge " name " (cur=%1% last=%2% on=%3%)")   \
+                                                % int(curvalue) % int(last.lastvar) % int(triggervalue);                        \
+                        last.lastvar = curvalue;                                                                                \
+                        if (curvalue == triggervalue)                                                                           \
+                            sound->play();                                                                                      \
+                        else                                                                                                    \
+                            sound->stop();                                                                                      \
+                    }                                                                                                           \
                 } while(0)
 
             #define MODAL_IMAGE_TRIGGER(image, itrigger, btrigger, lastvar) \
@@ -2508,8 +2533,8 @@ void GameCockpit::Draw()
                         GFXTRUE,
                         GFXTRUE,
                         GFXTRUE,
-                        zfloor+zrange*(j-1)/COCKPITZ_PARTITIONS, 
-                        zfloor+zrange*j/COCKPITZ_PARTITIONS );                                                                                       //cockpit-specific frustrum (with clipping, with frustrum update) 
+                        zfloor+zrange*(j-1)/COCKPITZ_PARTITIONS,
+                        zfloor+zrange*j/COCKPITZ_PARTITIONS );                                                                                       //cockpit-specific frustrum (with clipping, with frustrum update)
                     for (i = 0; i < mesh.size(); ++i)
                         mesh[i]->Draw( FLT_MAX, headtrans.back() );
 
@@ -2747,7 +2772,6 @@ void GameCockpit::Draw()
         static bool drawarrow_on_chasecam =
             XMLSupport::parse_bool( vs_config->getVariable( "graphics", "hud", "draw_arrow_on_chasecam", "true" ) );
         {
-            //printf("view: %i\n",view);
             Unit *parent = NULL;
             if ( drawarrow && ( parent = this->parent.GetUnit() ) ) {
                 Radar::Sensor sensor(parent);

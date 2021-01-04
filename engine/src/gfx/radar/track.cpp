@@ -3,7 +3,7 @@
 #include <algorithm>
 #include "gfxlib.h"
 #include "cmd/unit_generic.h"
-#include "cmd/planet_generic.h"
+#include "cmd/planet.h"
 #include "cmd/unit_util.h"
 #include "track.h"
 

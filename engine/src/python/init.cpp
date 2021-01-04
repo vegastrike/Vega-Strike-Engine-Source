@@ -1,3 +1,29 @@
+/**
+ * init.cpp
+ *
+ * Copyright (C) Daniel Horn
+ * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike
+ * contributors
+ *
+ * https://github.com/vegastrike/Vega-Strike-Engine-Source
+ *
+ * This file is part of Vega Strike.
+ *
+ * Vega Strike is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Vega Strike is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
+
 #ifdef HAVE_PYTHON
 #include <boost/version.hpp>
 #if defined (_MSC_VER) && _MSC_VER <= 1200
@@ -84,7 +110,7 @@ void Python::initpaths()
      *                       ",\""+VSFileSystem::datadir+DELIMSTR+basesdir + string("\"")+
      *                       "]\n");
      */
-    VSFileSystem::vs_fprintf( stderr, "running %s", changepath.c_str() );
+    BOOST_LOG_TRIVIAL(info) << boost::format("running %1%") % changepath;
     char *temppython = strdup( changepath.c_str() );
     PyRun_SimpleString( temppython );
     Python::reseterrors();
@@ -160,9 +186,9 @@ void Python::init()
     InitBriefing2();
     InitVS2();
 #endif
-    VSFileSystem::vs_fprintf( stderr, "testing VS random" );
+    BOOST_LOG_TRIVIAL(info) << "testing VS random";
     std::string changepath( "import sys\nprint(sys.path)\n" );
-    VSFileSystem::vs_fprintf( stderr, "running %s", changepath.c_str() );
+    BOOST_LOG_TRIVIAL(info) << boost::format("running %1%") % changepath;
     char *temppython = strdup( changepath.c_str() );
     PyRun_SimpleString( temppython );
     Python::reseterrors();
@@ -226,8 +252,7 @@ void Python::test()
 //vs_config->setVariable("data","test","NULL");
 //VSFileSystem::vs_fprintf(stdout, "%s", vs_config->getVariable("data","test", string()).c_str());
 //VSFileSystem::vs_fprintf(stdout, "output %s\n", PythonIOString::buffer.str());
-    fflush( stderr );
-    fflush( stdout );
+    VSFileSystem::flushLogs();
 }
 
 #endif

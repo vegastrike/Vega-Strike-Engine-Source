@@ -1,23 +1,28 @@
-/*
- * Vega Strike
+/**
+ * aux_texture.cpp
+ *
  * Copyright (C) 2001-2002 Daniel Horn
+ * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike
+ * contributors
  *
- * http://vegastrike.sourceforge.net/
+ * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * as published by the Free Software Foundation; either version 2
- * of the License, or (at your option) any later version.
+ * This file is part of Vega Strike.
  *
- * This program is distributed in the hope that it will be useful,
+ * Vega Strike is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * Vega Strike is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+ * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
  */
+
 
 #include <stdio.h>
 #include <assert.h>
@@ -91,7 +96,6 @@ GFXBOOL Texture::checkold( const string &s, bool shared, string &hashname )
     if (oldtex != NULL) {
         //*this = *oldtex;//will be obsoleted--unpredictable results with string()
         setReference( oldtex );
-        //cerr<<"Found cached texture : "<<s<<" with hashname="<<hashname<<endl;
         return GFXTRUE;
     } else {
         return GFXFALSE;
@@ -308,7 +312,6 @@ void Texture::Load( const char *FileName,
             return;
         }
     }
-    //VSFileSystem::vs_fprintf (stderr,"1.Loading bmp file %s ",FileName);
     char *t   = strdup( FileName );
     int   tmp = strlen( FileName );
     if (tmp > 3) {
@@ -346,7 +349,6 @@ void Texture::Load( const char *FileName,
     }
     if (err > Ok) { //FIXME err not guaranteed to have been initialized!
         FileNotFound( texfn );
-//VSFileSystem::vs_fprintf (stderr, "\n%s, not found\n",FileName);
         if (err2 <= Ok)
             f2.Close();
         return;
@@ -383,7 +385,6 @@ void Texture::Load( const char *FileName,
     f.Close();
     if ( f2.Valid() )
         f2.Close();
-    //VSFileSystem::vs_fprintf (stderr," Load Success\n");
 }
 
 Texture::Texture( const char *FileNameRGB,
@@ -452,7 +453,6 @@ void Texture::Load( const char *FileNameRGB,
             return;
         }
     }
-    //VSFileSystem::vs_fprintf (stderr,"2.Loading bmp file %s alp %s ",FileNameRGB,FileNameA);
     //this->texfilename = texfilename;
     //strcpy (filename,texfilename.c_str());
     VSFile  f;
@@ -512,7 +512,6 @@ void Texture::Load( const char *FileNameRGB,
     f.Close();
     if (err1 <= Ok)
         f1.Close();
-    //VSFileSystem::vs_fprintf (stderr,"Load Success\n");
 }
 
 Texture::~Texture()
@@ -667,7 +666,7 @@ void Texture::MakeActive( int stag, int pass )
         ActivateWhite( stag );
     } else {
         // Lazy-init default address mode
-        // So that texture_target is properly initiated 
+        // So that texture_target is properly initiated
         // by the time we do
         if (address_mode == DEFAULT_ADDRESS_MODE) {
             switch (texture_target)
@@ -684,7 +683,7 @@ void Texture::MakeActive( int stag, int pass )
                 break;
             }
         }
-    
+
         GFXActiveTexture( stag );
         GFXSelectTexture( name, stag );
         GFXTextureAddressMode( address_mode, texture_target );         //In case it changed - it's possible

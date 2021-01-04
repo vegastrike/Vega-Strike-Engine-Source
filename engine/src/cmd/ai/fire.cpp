@@ -1,9 +1,36 @@
+/**
+ * fire.cpp
+ *
+ * Copyright (C) Daniel Horn
+ * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike
+ * contributors
+ *
+ * https://github.com/vegastrike/Vega-Strike-Engine-Source
+ *
+ * This file is part of Vega Strike.
+ *
+ * Vega Strike is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Vega Strike is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
+
 #include "fire.h"
 #include "flybywire.h"
 #include "navigation.h"
-#include "cmd/planet_generic.h"
+#include "cmd/planet.h"
 #include "config_xml.h"
 #include "vs_globals.h"
+#include "vsfilesystem.h"
 #include "cmd/unit_util.h"
 #include "cmd/script/flightgroup.h"
 #include "cmd/role_bitmask.h"
@@ -33,45 +60,54 @@ Unit * getAtmospheric( Unit *targ )
         Unit *un;
         for (un_iter i = _Universe->activeStarSystem()->getUnitList().createIterator();
              (un = *i) != NULL;
-             ++i)
+             ++i) {
             if (un->isUnit() == PLANETPTR) {
-                if ( ( targ->Position()-un->Position() ).Magnitude() < targ->rSize()*.5 )
-                    if ( !( ( (Planet*) un )->isAtmospheric() ) )
+                if ( ( targ->Position()-un->Position() ).Magnitude() < targ->rSize()*.5 ) {
+                    if ( !( ( (Planet*) un )->isAtmospheric() ) ) {
                         return un;
+                    }
+                }
             }
+        }
     }
     return NULL;
 }
 
 bool RequestClearence( Unit *parent, Unit *targ, unsigned char sex )
 {
-    if ( !targ->DockingPortLocations().size() )
+    if ( !targ->DockingPortLocations().size() ) {
         return false;
+    }
     if (targ->isUnit() == PLANETPTR) {
         if ( ( (Planet*) targ )->isAtmospheric() && NoDockWithClear() ) {
             targ = getAtmospheric( targ );
-            if (!targ)
+            if (!targ) {
                 return false;
+            }
             parent->Target( targ );
         }
     }
     CommunicationMessage c( parent, targ, NULL, sex );
     c.SetCurrentState( c.fsm->GetRequestLandNode(), NULL, sex );
     Order *o = targ->getAIState();
-    if (o)
+    if (o) {
         o->Communicate( c );
+    }
     return true;
 }
 
 using Orders::FireAt;
 bool FireAt::PursueTarget( Unit *un, bool leader )
 {
-    if (leader)
+    if (leader) {
         return true;
-    if ( un == parent->Target() )
+    }
+    if ( un == parent->Target() ) {
         return rand() < .9*RAND_MAX;
-    if (parent->getRelation( un ) < 0)
+    }
+    if (parent->getRelation( un ) < 0) {
         return rand() < .2*RAND_MAX;
+    }
     return false;
 }
 
@@ -578,8 +614,9 @@ bool FireAt::ShouldFire( Unit *targ, bool &missilelock )
         return false;
 
         static int test = 0;
-        if (test++%1000 == 1)
-            VSFileSystem::vs_fprintf( stderr, "lost target" );
+        if (test++%1000 == 1) {
+            BOOST_LOG_TRIVIAL(warning) << "lost target";
+        }
     }
     float gunspeed, gunrange, missilerange;
     parent->getAverageGunSpeed( gunspeed, gunrange, missilerange );
@@ -631,8 +668,8 @@ bool FireAt::ShouldFire( Unit *targ, bool &missilelock )
 FireAt::~FireAt()
 {
 #ifdef ORDERDEBUG
-    VSFileSystem::vs_fprintf( stderr, "fire%x\n", this );
-    fflush( stderr );
+    BOOST_LOG_TRIVIAL(trace) << boost::format("fire%1$x") % this;
+    VSFileSystem::flushLogs();
 #endif
 }
 

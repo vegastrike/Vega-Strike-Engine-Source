@@ -1,3 +1,29 @@
+/**
+ * cockpit_generic.h
+ *
+ * Copyright (C) Daniel Horn
+ * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike
+ * contributors
+ *
+ * https://github.com/vegastrike/Vega-Strike-Engine-Source
+ *
+ * This file is part of Vega Strike.
+ *
+ * Vega Strike is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Vega Strike is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
+
 #ifndef _COCKPIT_GENERIC_H_
 #define _COCKPIT_GENERIC_H_
 #include "xml_support.h"
@@ -37,80 +63,80 @@ class Cockpit
 public:
     ///cockpit events.
     enum EVENTID {
-        EVENTID_FIRST, 
-        
+        EVENTID_FIRST,
+
         /// Warp is possible at this time
         WARP_READY = EVENTID_FIRST,
-        
+
         /// Warp ceased to be possible at this time
         WARP_UNREADY,
-        
+
         /// Warp started
         WARP_ENGAGED,
-        
+
         /// Warp stopped
         WARP_DISENGAGED,
-        
+
         /// Asap autopilot engaged
         ASAP_ENGAGED,
-        
+
         /// Asap autopilot disengaged
         ASAP_DISENGAGED,
-        
+
         /// Asap docking available
         ASAP_DOCKING_AVAILABLE,
-        
+
         /// Asap docking engaged
         ASAP_DOCKING_ENGAGED,
-        
+
         /// Asap docking disengaged
         ASAP_DOCKING_DISENGAGED,
-        
+
         /// Docking ready
         DOCK_AVAILABLE,
-        
+
         /// Docking no longer ready
         DOCK_UNAVAILABLE,
-        
+
         /// Docking triggered yet not ready
         DOCK_FAILED,
-        
+
         /// Jump ready
         JUMP_AVAILABLE,
-        
+
         /// Jump no longer ready
         JUMP_UNAVAILABLE,
-        
+
         /// Jump triggered yet not ready
         JUMP_FAILED,
-        
+
         /// Weapons lock warning active
         LOCK_WARNING,
-        
+
         /// Missile lock warning acgive
         MISSILELOCK_WARNING,
-        
+
         /// Eject light
         EJECT_WARNING,
-        
+
         /// Governor enabled
         FLIGHT_COMPUTER_ENABLED,
-        
+
         /// Governor disabled
         FLIGHT_COMPUTER_DISABLED,
-        
+
         /// Warp loop, warp speed 0 (+1 = warp 1, +2 = warp 2, etc...)
         WARP_LOOP0,
         WARP_LOOP9 = WARP_LOOP0 + 9,
         /// Last warp level
         WRAP_LOOPLAST = WARP_LOOP9,
-        
+
         /// Warp threshold, warp speed 0 (+1 = warp 1, +2 = warp 2, etc...)
         WARP_SKIP0,
         WARP_SKIP9 = WARP_SKIP0 + 9,
         /// Last warp level
         WRAP_SKIPLAST = WARP_SKIP9,
-        
+
         /// Just after all valid values
         NUM_EVENTS
     };
@@ -119,7 +145,7 @@ public:
 protected:
     ///style of current view (chase cam, inside)
     enum VIEWSTYLE view;
-    
+
     int   currentcamera;
     float radar_time;
     float gauge_time[UnitImages < void > ::NUMGAUGES];
@@ -129,7 +155,7 @@ protected:
 
     ///saved values to compare with current values (might need more for damage)
     float maxfuel, maxhull;
-    
+
     ///this is the parent that Cockpit will read data from
     UnitContainer parent;
     UnitContainer parentturret;
@@ -140,14 +166,14 @@ protected:
 
     ///Video Display Units (may need more than 2 in future)
     std::string unitmodname;
-    
+
     ///Color of cockpit default text
     ///The font that the entire cockpit will use. Currently without color
     //Gauge *gauges[UnitImages::NUMGAUGES];
     //0 means no autopilot...positive autopilto in progress
     float autopilot_time;
     UnitContainer autopilot_target; //usually null
-    
+
     /**
      * two values that represent the adjustment to perspective needed to center teh crosshairs in the perceived view.
      */
@@ -174,7 +200,7 @@ protected:
 
     ///draws the target box around all units
     virtual void DrawTargetBoxes(const Radar::Sensor&) {}
-    
+
     ///draws a target cross around all units targeted by your turrets // ** jay
     virtual void DrawTurretTargetBoxes() {}
 
@@ -196,7 +222,7 @@ private:
     std::vector< std::string > unitsystemname;
     std::vector< std::string > unitbasename;
     std::vector< SoundContainer* > sounds;
-    
+
 public:
     double secondsWithZeroEnergy;
     int    number_of_attackers;
@@ -216,7 +242,7 @@ public:
         return autopilot_time > 0;
     }
     bool unitInAutoRegion( Unit *un );
-    
+
     ///Sets the current viewstyle
     void SetView( const enum VIEWSTYLE tmp )
     {
@@ -234,21 +260,21 @@ public:
 
     ///Restores the view from the IDentity Matrix needed to draw sprites
     virtual void RestoreViewPort() {}
-    
+
     std::string& GetUnitFileName(unsigned int which = 0)
     {
         while ( which >= unitfilename.size() )
             unitfilename.push_back("");
         return unitfilename[which];
     }
-    
+
     std::string& GetUnitSystemName(unsigned int which = 0)
     {
         while ( which >= unitsystemname.size() )
             unitsystemname.push_back("");
         return unitsystemname[which];
     }
-    
+
     std::string& GetUnitBaseName(unsigned int which = 0)
     {
         while ( which >= unitbasename.size() )
@@ -259,33 +285,33 @@ public:
     const std::string& GetUnitFileName(unsigned int which = 0) const;
     const std::string& GetUnitSystemName(unsigned int which = 0) const;
     const std::string& GetUnitBaseName(unsigned int which = 0) const;
-    
+
     void RemoveUnit(unsigned int which = 0);
-    
+
     static std::string MakeBaseName(const Unit *base);
 
     std::string GetUnitModifications()
     {
         return unitmodname;
     }
-    
+
     size_t GetNumUnits() const
     {
         return unitfilename.size();
     }
-    
+
     void PackUnitInfo(vector< std::string > &info) const;
 
     void UnpackUnitInfo(vector< std::string > &info);
 
     std::string communication_choices;
     float credits; //how much money player has
-    
+
     ///How far away chasecam and pan cam is
     float zoomfactor;
     Cockpit( const char *file, Unit *parent, const std::string &pilotname );
     virtual ~Cockpit();
-    
+
     ///Looks up a particular Gauge stat on target unit
     virtual float LookupTargetStat( int stat, Unit *target )
     {
@@ -336,14 +362,14 @@ public:
     static void TurretControl( const KBData&, KBSTATE ) {}
     virtual void SetCommAnimation( Animation *ani, Unit *un ) {}
     virtual void SetStaticAnimation() {}
-    
+
 
     /**
      * Retrieves the sound associated to the given event.
      * Returns NULL if no sound has been associated
      */
     SoundContainer* GetSoundForEvent(EVENTID eventId) const;
-    
+
     /**
      * Sets the sound associated to the given event to match the given specs
      * (the actual container will be a different, implementation-specific one)

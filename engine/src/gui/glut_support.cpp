@@ -4,6 +4,8 @@
 *                           begin                : December 28, 2001
 *                           copyright            : (C) 2001 by David Ranger
 *                           email                : ussreliant@users.sourceforge.net
+*                           copyright            : (C) 2020 by Stephen G. Tuggy
+*                           email                : sgt@stephengtuggy.com
 ***************************************************************************/
 
 /***************************************************************************
@@ -38,17 +40,17 @@ void ShowColor( float x, float y, float wid, float hei, float red, float green, 
 {
     float cols[4] = {red, green, blue, alpha};
     if (wid < 0 || hei < 0) {
-        printf( "Cannot draw color with negative height or width\n" );
+        BOOST_LOG_TRIVIAL(error) << "Cannot draw color with negative height or width";
         return;
     }
     //Make sure we don't exceed the program
     if (x+wid > 1) wid = 1-x;
     if (y-hei < -1) hei = -1+y;
 #ifdef DEBUG
-    cout<<"Displaying color at "<<x<<","<<y<<"\n";
-    cout<<"with the dimensions of "<<wid<<","<<hei<<"\n";
-    cout<<"With the color "<<red<<","<<green<<","<<blue<<","<<alpha<<"\n";
-    cout<<"-----------------------------\n";
+    BOOST_LOG_TRIVIAL(debug) <<"Displaying color at "<<x<<","<<y<<"\n";
+    BOOST_LOG_TRIVIAL(debug) <<"with the dimensions of "<<wid<<","<<hei<<"\n";
+    BOOST_LOG_TRIVIAL(debug) <<"With the color "<<red<<","<<green<<","<<blue<<","<<alpha<<"\n";
+    BOOST_LOG_TRIVIAL(debug) <<"-----------------------------\n";
 #endif
     glDisable( GL_TEXTURE_2D );
     glBegin( GL_QUADS );
@@ -184,20 +186,20 @@ void EndGUIFrame( MousePointerStyle pointerStyle )
     static VSSprite MouseOverVSSprite( "mouseover.spr", BILINEAR, GFXTRUE );
     static VSSprite MouseVSSprite( "mouse.spr", BILINEAR, GFXTRUE );
     static Texture  dummy( "white.bmp", 0, NEAREST, TEXTURE2D, TEXTURE_2D, GFXTRUE );
-    
+
     if (pointerStyle != MOUSE_POINTER_NONE) {
         dummy.MakeActive();
         GFXDisable( CULLFACE );
-        
+
         VSSprite *whichSprite = &MouseVSSprite;
         switch(pointerStyle) {
         case MOUSE_POINTER_NORMAL:  whichSprite = &MouseVSSprite; break;
         case MOUSE_POINTER_HOVER:   whichSprite = &MouseOverVSSprite; break;
         case MOUSE_POINTER_NONE: return;
         }
-        
+
         DrawGlutMouse( mmx, mmy, whichSprite );
-        
+
         //GFXEndScene();bad things...only call this once
         GFXHudMode( false );
         GFXEnable( CULLFACE );

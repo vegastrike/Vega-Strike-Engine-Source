@@ -1,3 +1,29 @@
+/**
+ * mesh_bxm.cpp
+ *
+ * Copyright (C) Daniel Horn
+ * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike
+ * contributors
+ *
+ * https://github.com/vegastrike/Vega-Strike-Engine-Source
+ *
+ * This file is part of Vega Strike.
+ *
+ * Vega Strike is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Vega Strike is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
+
 #include "mesh_io.h"
 #include "mesh_bxm.h"
 #include "mesh.h"
@@ -279,16 +305,19 @@ vector< Mesh* >Mesh::LoadMeshes( VSFileSystem::VSFile &Inputfile,
     }
     *inmemfile;
 #ifdef STANDALONE
+    // stephengtuggy 2020-10-30: Leaving this here, since this is for when running in STANDALONE mode
     printf( "Loading Mesh File: %s\n", Inputfile.GetFilename().c_str() );
     fseek( Inputfile, 4+sizeof (uint32bit), SEEK_SET );
     fread( &intbuf, sizeof (uint32bit), 1, Inputfile );              //Length of Inputfile
     uint32bit Inputlength = VSSwapHostIntToLittle( intbuf );
     if (Inputlength < sizeof(uint32bit)*13 || Inputlength > (1<<30)) {
+        // stephengtuggy 2020-10-30: Leaving this here, since this is for when running in STANDALONE mode
         fprintf( stderr, "Corrupt file %s, aborting\n", Inputfile.GetFilename().c_str() );
         exit( -1 );
     }
     inmemfile = (chunk32*) malloc( Inputlength+1 );
     if (!inmemfile) {
+        // stephengtuggy 2020-10-30: Leaving this here, since this is for when running in STANDALONE mode
         fprintf( stderr, "Buffer allocation failed, Aborting" );
         exit( -1 );
     }
@@ -298,12 +327,14 @@ vector< Mesh* >Mesh::LoadMeshes( VSFileSystem::VSFile &Inputfile,
 #else
     uint32bit Inputlength = Inputfile.Size();
     if (Inputlength < sizeof(uint32bit)*13 || Inputlength > (1<<30)) {
-        fprintf( stderr, "Corrupt file %s, aborting\n", Inputfile.GetFilename().c_str() );
+        BOOST_LOG_TRIVIAL(fatal) << boost::format("Corrupt file %1%, aborting") % Inputfile.GetFilename();
+        VSFileSystem::flushLogs();
         abort();
     }
     inmemfile = (chunk32*) malloc( Inputlength );
     if (!inmemfile) {
-        fprintf( stderr, "Buffer allocation failed, Aborting\n" );
+        BOOST_LOG_TRIVIAL(fatal) << "Buffer allocation failed, Aborting";
+        VSFileSystem::flushLogs();
         exit( -2 );
     }
     Inputfile.Read( inmemfile, Inputlength );

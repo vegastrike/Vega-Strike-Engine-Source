@@ -1,6 +1,6 @@
 //====================================
 // @file   : mesh_gfx.cpp
-// @version: 2020-02-14
+// @version: 2020-10-28
 // @created: 2002-12-14
 // @author : surfdargent
 // @author : hellcatv
@@ -8,8 +8,34 @@
 // @author : klaussfreire
 // @author : dan_w
 // @author : pyramid
+// @author : stephengtuggy
 // @brief  : draws meshes
 //====================================
+
+/**
+ * mesh_gfx.cpp
+ *
+ * Copyright (C) 2002-2020 surfdargent, hellcatv, ace123, klaussfreire, dan_w,
+ * pyramid3d, Stephen G. Tuggy, and other Vega Strike contributors
+ *
+ * https://github.com/vegastrike/Vega-Strike-Engine-Source
+ *
+ * This file is part of Vega Strike.
+ *
+ * Vega Strike is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Vega Strike is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 
 #include <algorithm>
 #include "mesh.h"
@@ -18,7 +44,7 @@
 #include "lin_time.h"
 #include "configxml.h"
 #include "vs_globals.h"
-#include "cmd/nebula_generic.h"
+#include "cmd/nebula.h"
 #include "gfx/camera.h"
 #include "gfx/animation.h"
 #include "gfx/technique.h"
@@ -1224,7 +1250,6 @@ void Mesh::ProcessShaderDrawQueue( size_t whichpass, int whichdrawqueue, bool zs
             technique->compile();
         }
         catch (const Exception& e) {
-            // VSFileSystem::vs_dprintf(1, "Technique recompilation failed: %s\n", e.what());
             BOOST_LOG_TRIVIAL(info) << boost::format("Technique recompilation failed: %1%") % e.what();
         }
     }
@@ -1570,11 +1595,11 @@ void Mesh::ProcessFixedDrawQueue( size_t techpass, int whichdrawqueue, bool zsor
     }
     std::vector< MeshDrawContext > &cur_draw_queue = draw_queue[whichdrawqueue];
     if ( cur_draw_queue.empty() ) {
-        static bool thiserrdone = false;         //Avoid filling up stderr.txt with this thing (it would be output at least once per frame)
+        static bool thiserrdone = false;         //Avoid filling up logs with this thing (it would be output at least once per frame)
         if (!thiserrdone) {
-            VSFileSystem::vs_fprintf( stderr, "cloaking queues issue! Report to hellcatv@hotmail.com\nn%d\n%s",
-                                     whichdrawqueue,
-                                     hash_name.c_str() );
+            BOOST_LOG_TRIVIAL(error) << boost::format("cloaking queues issue! Please report at https://github.com/vegastrike/Vega-Strike-Engine-Source\nn%1$d\n%2$s")
+                                     % whichdrawqueue
+                                     % hash_name.c_str();
         }
         thiserrdone = true;
         return;
@@ -1640,8 +1665,9 @@ void Mesh::ProcessFixedDrawQueue( size_t techpass, int whichdrawqueue, bool zsor
         if ( !(nomultienv_passno >= 0 && nomultienv_passno <= 2) ) {
             static int errcount = 0;
             errcount++;
-            if (errcount < 100)
-                fprintf( stderr, "Nomultienvpassno failure %s!\n", hash_name.c_str() );
+            if (errcount < 100) {
+                BOOST_LOG_TRIVIAL(error) << boost::format("Nomultienvpassno failure %1$s!\n") % hash_name.c_str();
+            }
             return;
         }
         if ( (whichpass == GLOW_PASS) && skipglowpass ) {

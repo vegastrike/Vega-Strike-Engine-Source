@@ -1,3 +1,29 @@
+/**
+ * main_loop.cpp
+ *
+ * Copyright (C) 2001-2002 Daniel Horn
+ * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike
+ * contributors
+ *
+ * https://github.com/vegastrike/Vega-Strike-Engine-Source
+ *
+ * This file is part of Vega Strike.
+ *
+ * Vega Strike is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Vega Strike is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
+
 #include <stdlib.h>
 #ifndef _WIN32
 #include <fenv.h>
@@ -65,10 +91,6 @@
 #ifndef NO_GFX
 #include "gldrv/gl_globals.h"
 #endif
-
-using std::cout;
-using std::cerr;
-using std::endl;
 
 extern vs_options  game_options;
 
@@ -236,11 +258,14 @@ void QuitNow()
     if (!cleanexit)
     {
         cleanexit = true;
-        if ( game_options.write_savegame_on_exit)
+        if ( game_options.write_savegame_on_exit) {
             _Universe->WriteSaveGame( true );              //gotta do important stuff first
-        for (unsigned int i = 0; i < active_missions.size(); i++)
-            if (active_missions[i])
+        }
+        for (unsigned int i = 0; i < active_missions.size(); i++) {
+            if (active_missions[i]) {
                 active_missions[i]->DirectorEnd();
+            }
+        }
         if (forcefeedback)
         {
             delete forcefeedback;
@@ -253,7 +278,7 @@ void QuitNow()
 void SkipMusicTrack( const KBData&, KBSTATE newState )
 {
     if (newState == PRESS) {
-        printf( "skipping\n" );
+        BOOST_LOG_TRIVIAL(info) << "skipping";
         muzak->Skip();
     }
 }
@@ -479,7 +504,7 @@ void ScrollUp( const KBData&, KBSTATE newState )
     scrolltime += GetElapsedTime();
     if ( newState == PRESS || (newState == DOWN && scrolltime >= .5) ) {
         scrolltime = 0;
-        printf( "Enabling exceptions %d\n", allexcept );
+        BOOST_LOG_TRIVIAL(info) << boost::format("Enabling exceptions %1%") % allexcept;
         _Universe->AccessCockpit()->ScrollAllVDU( -1 );
     }
 }
@@ -488,7 +513,7 @@ void ScrollDown( const KBData&, KBSTATE newState )
     scrolltime += GetElapsedTime();
     if ( newState == PRESS || (newState == DOWN && scrolltime >= .5) ) {
         scrolltime = 0;
-        printf( "Disabling exceptions\n" );
+        BOOST_LOG_TRIVIAL(info) << "Disabling exceptions";
         _Universe->AccessCockpit()->ScrollAllVDU( 1 );
     }
 }
@@ -794,9 +819,9 @@ void createObjects( std::vector< std::string > &fighter0name,
         for (int s = 0; s < fg->nr_ships; s++) {
             if (a >= mission->number_of_ships) {
                 a -= 22;
-                printf( "Error: in createObjects: more ships in flightgroups than in total for mission!\n"
-                       "Variables a=%d, fg-number-of-ships=%d, total nr=%d, fact=%s, fgname=%s\n",
-                       a, fg->nr_ships, mission->number_of_ships, fg->faction.c_str(), fg->name.c_str() );
+                BOOST_LOG_TRIVIAL(error) << "Error: in createObjects: more ships in flightgroups than in total for mission!";
+                BOOST_LOG_TRIVIAL(error) << boost::format("Variables a=%1%, fg-number-of-ships=%2%, total nr=%3%, fact=%4%, fgname=%5%")
+                                            % a % fg->nr_ships % mission->number_of_ships % fg->faction.c_str() % fg->name.c_str();
                 break;
             }
             numf++;
@@ -850,7 +875,7 @@ void createObjects( std::vector< std::string > &fighter0name,
                             dat->clear();
                         }
                         fighter0mods.push_back( modifications = game_options.getCallsign( squadnum ) );
-                        fprintf( stderr, "FOUND MODIFICATION = %s FOR PLAYER #%d\n", modifications.c_str(), squadnum );
+                        BOOST_LOG_TRIVIAL(info) << boost::format("FOUND MODIFICATION = %1% FOR PLAYER #%2%") % modifications.c_str() % squadnum;
                     } else {
                         fighter0mods.push_back( "" );
                     }
@@ -861,7 +886,7 @@ void createObjects( std::vector< std::string > &fighter0name,
                     _Universe->SetActiveCockpit( _Universe->AccessCockpit( squadnum ) );
                 }
 
-                cout<<"CREATING A LOCAL SHIP : "<<fightername<<endl;
+                BOOST_LOG_TRIVIAL(info) << "CREATING A LOCAL SHIP : " << fightername;
                 fighters[a] = new GameUnit< Unit >( fightername, false, tmptarget[a], modifications, fg, s );
 
                 _Universe->activeStarSystem()->AddUnit( fighters[a] );
@@ -878,7 +903,7 @@ void createObjects( std::vector< std::string > &fighter0name,
                 bool isvehicle = false;
                 if (fg_terrain == -2) {
                     fighters[a] =
-                        new GameBuilding( myterrain, isvehicle, fightername, false, tmptarget[a], string( "" ), fg );
+                        new Building( myterrain, isvehicle, fightername, false, tmptarget[a], string( "" ), fg );
                 } else {
                     if ( fg_terrain >= (int) _Universe->activeStarSystem()->numTerrain() ) {
                         ContinuousTerrain *t;
@@ -886,17 +911,17 @@ void createObjects( std::vector< std::string > &fighter0name,
                             fg_terrain-_Universe->activeStarSystem()->numTerrain()
                             < _Universe->activeStarSystem()->numContTerrain() );
                         t = _Universe->activeStarSystem()->getContTerrain( fg_terrain-_Universe->activeStarSystem()->numTerrain() );
-                        fighters[a] = new GameBuilding( t, isvehicle, fightername, false, tmptarget[a], string(
+                        fighters[a] = new Building( t, isvehicle, fightername, false, tmptarget[a], string(
                                                                        "" ), fg );
                     } else {
                         Terrain *t = _Universe->activeStarSystem()->getTerrain( fg_terrain );
-                        fighters[a] = new GameBuilding( t, isvehicle, fightername, false, tmptarget[a], string(
+                        fighters[a] = new Building( t, isvehicle, fightername, false, tmptarget[a], string(
                                                                        "" ), fg );
                     }
                 }
                 _Universe->activeStarSystem()->AddUnit( fighters[a] );
             }
-            printf( "pox %lf %lf %lf\n", pox.i, pox.j, pox.k );
+            BOOST_LOG_TRIVIAL(info) << boost::format("pox %1% %2% %3%") % pox.i % pox.j % pox.k;
             fighters[a]->SetPosAndCumPos( pox );
             fg_radius = fighters[a]->rSize();
             if ( benchmark > 0.0 || ( s != 0 || squadnum >= (int) fighter0name.size() ) ) {
@@ -936,7 +961,7 @@ void AddUnitToSystem( const SavedUnits *su )
     {
     case ENHANCEMENTPTR:
         un =
-            new GameEnhancement( su->filename.get().c_str(), FactionUtil::GetFactionIndex( su->faction ), string( "" ) );
+            new Enhancement( su->filename.get().c_str(), FactionUtil::GetFactionIndex( su->faction ), string( "" ) );
         un->SetPosition( QVector( 0, 0, 0 ) );
         break;
     case UNITPTR:

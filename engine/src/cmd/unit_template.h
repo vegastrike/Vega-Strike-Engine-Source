@@ -4,19 +4,14 @@
 //currnetly causes multiple definitions for a STUPID reason... die, gcc die
 #include "unit_generic.h"
 #include "unit.h"
-#include "asteroid_generic.h"
-#include "enhancement_generic.h"
-#include "planet_generic.h"
-#include "building_generic.h"
-#include "missile.h"
-#include "nebula_generic.h"
+#include "unit_generics.h"
 
-template class GameUnit< Enhancement >;
-template class GameUnit< Nebula >;
-template class GameUnit< Asteroid >;
+template class GameUnit< EnhancementGeneric >;
+template class GameUnit< NebulaGeneric >;
 template class GameUnit< Unit >;
-template class GameUnit< Building >;
-template class GameUnit< DummyUnit >;
-template class GameUnit< Planet >;
+template class GameUnit< BuildingGeneric >;
+template class GameUnit< MissileGeneric >;
+template class GameUnit< AsteroidGeneric >;
+template class GameUnit< PlanetGeneric >;
 #endif
 

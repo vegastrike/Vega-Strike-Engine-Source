@@ -3,25 +3,29 @@
 #ifndef __UNIT_GENERIC_H__
 #define __UNIT_GENERIC_H__
 
-/*
- * Vega Strike
+/**
+ * unit_generic.cpp
+ *
  * Copyright (C) 2001-2002 Daniel Horn
+ * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike
+ * contributors
  *
- * http://vegastrike.sourceforge.net/
+ * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * as published by the Free Software Foundation; either version 2
- * of the License, or (at your option) any later version.
+ * This file is part of Vega Strike.
  *
- * This program is distributed in the hope that it will be useful,
+ * Vega Strike is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * Vega Strike is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+ * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 /***** Unit is the Unit class without GFX/Sound with AI *****/
@@ -97,6 +101,8 @@ class StarSystem;
 struct colTrees;
 class Pilot;
 class Limits;
+class MissileGeneric;
+class AsteroidGeneric;
 
 /**
  * Currently the only inheriting function is planet
@@ -247,12 +253,15 @@ public:
 
 protected:
 //forbidden
-    Unit( const Unit& );
+    Unit( const Unit& ) = delete;
 
 //forbidden
-    Unit& operator=( const Unit& );
+    Unit& operator=( const Unit& ) = delete;
 
-public: Unit();
+    virtual ~Unit();
+
+public:
+    Unit();
 
 /** Default constructor. This is just to figure out where default
  *  constructors are used. The useless argument will be removed
@@ -286,7 +295,6 @@ public:
     friend class UnitFactory;
 //table can be NULL, but setting it appropriately may increase performance
     void LoadRow( class CSVRow&row, std::string unitMod, std::string*netxml = NULL );
-    virtual ~Unit();
 
     // TODO: implement enum class as type safe bitmask...
     // http://blog.bitwigglers.org/using-enum-classes-as-type-safe-bitmasks/
@@ -518,8 +526,8 @@ public:
         return NULL;
     }
 //Not needed just in Unit class
-    
-    // Uses GFX, so generic version is a no-op. 
+
+    // Uses GFX, so generic version is a no-op.
     // GameUnit variants (clientside) would apply the overrides to their GFX techniques
     virtual void applyTechniqueOverrides(const std::map<std::string, std::string> &overrides);
 

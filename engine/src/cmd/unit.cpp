@@ -63,7 +63,6 @@
 
 
 
-
 using std::vector;
 using std::string;
 using std::map;
@@ -733,25 +732,21 @@ void GameUnit< UnitType >::SwapInHalos()
 //explicit instantiations, added by chuck_starchaser:
 
 
- #include "cmd/asteroid_generic.h"
-template class GameUnit< Asteroid >;
 
- #include "cmd/building_generic.h"
-template class GameUnit< Building >;
 
- #include "cmd/planet_generic.h"
-template class GameUnit< Planet >;
-
- #include "cmd/unit_generic.h"
+#include "cmd/unit_generic.h"
 template class GameUnit< Unit >;
 
- #include "cmd/dummy_unit.h"
-template class GameUnit< DummyUnit >;
 
- #include "cmd/nebula.h"
-template class GameUnit< Nebula >;
+#include "cmd/unit_generics.h"
+template class GameUnit< AsteroidGeneric >;
+template class GameUnit< BuildingGeneric >;
+template class GameUnit< EnhancementGeneric >;
+template class GameUnit< MissileGeneric >;
+template class GameUnit< NebulaGeneric >;
+template class GameUnit< PlanetGeneric >;
 
- #include "cmd/enhancement.h"
-template class GameUnit< Enhancement >;
+
+
 
 /////////////////////////////////////////////////////

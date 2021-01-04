@@ -1,22 +1,27 @@
-/*
- * Vega Strike
+/**
+ * config_xml.cpp
+ *
  * Copyright (C) 2001-2002 Daniel Horn
+ * Copyright (C) Alexander Rawass
+ * Copyright (C) 2020 Stephen G. Tuggy, pyramid3d, and other Vega Strike
+ * contributors
  *
- * http://vegastrike.sourceforge.net/
+ * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * as published by the Free Software Foundation; either version 2
- * of the License, or (at your option) any later version.
+ * This file is part of Vega Strike.
  *
- * This program is distributed in the hope that it will be useful,
+ * Vega Strike is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * Vega Strike is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+ * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 /*
@@ -40,9 +45,7 @@
 #include "in_kb_data.h"
 #include "python/python_compile.h"
 #include "gfx/screenshot.h"
-using std::cout;
-using std::endl;
-using std::cerr;
+#include "vsfilesystem.h"
 
 /* *********************************************************** */
 
@@ -257,7 +260,7 @@ void GameVegaConfig::doBindings( configNode *node )
         else if ( ( (cnode)->Name() == "axis" ) )
             doAxis( cnode );
         else
-            cout<<"Unknown tag: "<<(cnode)->Name()<<endl;
+            BOOST_LOG_TRIVIAL(warning) << "Unknown tag: " << (cnode)->Name();
     }
 }
 
@@ -271,7 +274,7 @@ void GameVegaConfig::doAxis( configNode *node )
     string invertstr = node->attr_value( "inverse" );
     string mouse_str = node->attr_value( "mouse" );
     if ( name.empty() || ( mouse_str.empty() && myjoystick.empty() ) || axis.empty() ) {
-        cout<<"no correct axis desription given "<<endl;
+        BOOST_LOG_TRIVIAL(warning) << "no correct axis description given ";
         return;
     }
     int joy_nr  = atoi( myjoystick.c_str() );
@@ -304,7 +307,7 @@ void GameVegaConfig::doAxis( configNode *node )
         string nr_str     = node->attr_value( "nr" );
         string margin_str = node->attr_value( "margin" );
         if ( nr_str.empty() || margin_str.empty() ) {
-            cout<<"you have to assign a number and a margin to the hatswitch"<<endl;
+            BOOST_LOG_TRIVIAL(warning) << "you have to assign a number and a margin to the hatswitch";
             return;
         }
         int   nr     = atoi( nr_str.c_str() );
@@ -323,7 +326,7 @@ void GameVegaConfig::doAxis( configNode *node )
             checkHatswitch( nr, cnode );
         }
     } else {
-        cout<<"unknown axis "<<name<<endl;
+        BOOST_LOG_TRIVIAL(warning) << "unknown axis " << name;
         return;
     }
 }
@@ -333,17 +336,17 @@ void GameVegaConfig::doAxis( configNode *node )
 void GameVegaConfig::checkHatswitch( int nr, configNode *node )
 {
     if (node->Name() != "hatswitch") {
-        cout<<"not a hatswitch node "<<endl;
+        BOOST_LOG_TRIVIAL(warning) << "not a hatswitch node ";
         return;
     }
     string strval = node->attr_value( "value" );
     float  val    = atof( strval.c_str() );
     if (val > 1.0 || val < -1.0) {
-        cout<<"only hatswitch values from -1.0 to 1.0 allowed"<<endl;
+        BOOST_LOG_TRIVIAL(error) << "only hatswitch values from -1.0 to 1.0 allowed";
         return;
     }
     hatswitch[nr][hs_value_index] = val;
-    cout<<"setting hatswitch nr "<<nr<<" "<<hs_value_index<<" = "<<val<<endl;
+    BOOST_LOG_TRIVIAL(info) <<"setting hatswitch nr "<<nr<<" "<<hs_value_index<<" = "<<val;
     hs_value_index++;
 }
 
@@ -352,7 +355,7 @@ void GameVegaConfig::checkHatswitch( int nr, configNode *node )
 void GameVegaConfig::checkBind( configNode *node )
 {
     if (node->Name() != "bind") {
-        cout<<"not a bind node "<<endl;
+        BOOST_LOG_TRIVIAL(warning) << "not a bind node ";
         return;
     }
     std::string tmp        = node->attr_value( "modifier" );
@@ -364,7 +367,7 @@ void GameVegaConfig::checkBind( configNode *node )
         player_bound = "0";
     KBHandler handler      = commandMap[cmdstr];
     if (handler == NULL) {
-        cout<<"No such command: "<<cmdstr<<endl;
+        BOOST_LOG_TRIVIAL(error) << "No such command: " << cmdstr;
         return;
     }
     string player_str = node->attr_value( "player" );
@@ -393,7 +396,7 @@ void GameVegaConfig::checkBind( configNode *node )
         } else {
             int glut_key = key_map[keystr];
             if (glut_key == 0) {
-                cout<<"No such special key: "<<keystr<<endl;
+                BOOST_LOG_TRIVIAL(error) << "No such special key: " << keystr;
                 return;
             }
             BindKey( glut_key, modifier, XMLSupport::parse_int( player_bound ), handler, KBData( additional_data ) );
@@ -404,7 +407,7 @@ void GameVegaConfig::checkBind( configNode *node )
         if ( joy_str.empty() && mouse_str.empty() ) {
             //it has to be the analogue hatswitch
             if ( hat_str.empty() ) {
-                cout<<"you got to give a analogue hatswitch number"<<endl;
+                BOOST_LOG_TRIVIAL(error) << "you got to give an analogue hatswitch number";
                 return;
             }
             int hatswitch_nr = atoi( hat_str.c_str() );
@@ -428,7 +431,7 @@ void GameVegaConfig::checkBind( configNode *node )
             else {
                 static bool first = true;
                 if (first) {
-                    cout<<"\nrefusing to bind command to joystick (joy-nr too high)"<<endl;
+                    BOOST_LOG_TRIVIAL(warning) << "\nrefusing to bind command to joystick (joy-nr too high)";
                     first = false;
                 }
             }
@@ -436,7 +439,7 @@ void GameVegaConfig::checkBind( configNode *node )
     } else if ( !( dighswitch.empty() || direction.empty() || ( mouse_str.empty() && joy_str.empty() ) ) ) {
         //digital hatswitch or ...
         if ( dighswitch.empty() || direction.empty() || ( mouse_str.empty() && joy_str.empty() ) ) {
-            cout<<"you have to specify joystick,digital-hatswitch,direction"<<endl;
+            BOOST_LOG_TRIVIAL(error) << "you have to specify joystick,digital-hatswitch,direction";
             return;
         }
         int hsw_nr = atoi( dighswitch.c_str() );
@@ -447,7 +450,7 @@ void GameVegaConfig::checkBind( configNode *node )
         else
             joy_nr = MOUSE_JOYSTICK;
         if ( !(joystick[joy_nr]->isAvailable() && hsw_nr < joystick[joy_nr]->nr_of_hats) ) {
-            cout<<"refusing to bind digital hatswitch: no such hatswitch"<<endl;
+            BOOST_LOG_TRIVIAL(error) << "refusing to bind digital hatswitch: no such hatswitch";
             return;
         }
         int dir_index;
@@ -470,11 +473,11 @@ void GameVegaConfig::checkBind( configNode *node )
         } else if (direction == "leftdown") {
             dir_index = VS_HAT_LEFTDOWN;
         } else {
-            cout<<"no valid direction string"<<endl;
+            BOOST_LOG_TRIVIAL(error) << "no valid direction string";
             return;
         }
         BindDigitalHatswitchKey( joy_nr, hsw_nr, dir_index, handler, KBData( additional_data ) );
-        cout<<"Bound joy "<<joy_nr<<" hatswitch "<<hsw_nr<<" dir_index "<<dir_index<<" to command "<<cmdstr<<endl;
+        BOOST_LOG_TRIVIAL(info) <<"Bound joy "<<joy_nr<<" hatswitch "<<hsw_nr<<" dir_index "<<dir_index<<" to command "<<cmdstr;
     }
 #if 1
     else {
@@ -725,7 +728,7 @@ CommandMap initGlobalCommandMap()
 
     commandMap["ConsoleKeys::BringConsole"]        = ConsoleKeys::BringConsole;
     commandMap["NewShader"]                        = doReloadShader;
-    
+
     return commandMap;
 }
 

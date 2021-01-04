@@ -1,3 +1,29 @@
+/**
+ * unit_collide.h
+ *
+ * Copyright (C) Daniel Horn
+ * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike
+ * contributors
+ *
+ * https://github.com/vegastrike/Vega-Strike-Engine-Source
+ *
+ * This file is part of Vega Strike.
+ *
+ * Vega Strike is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Vega Strike is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
+
 #ifndef _CMD_COLLIDE_H_
 #define _CMD_COLLIDE_H_
 
@@ -10,6 +36,7 @@
 #include "linecollide.h"
 #include "collection.h"
 #include "cmd/unit_generic.h"
+#include "vsfilesystem.h"
 #include <set>
 #define COLLIDETABLESIZE sizeof (CTSIZ)
 #define COLLIDETABLEACCURACY sizeof (CTACCURACY)
@@ -81,7 +108,7 @@ public: UnitHash3d( StarSystem *ss )
             }
         }
     }
-    
+
 ///Hashes a single value to a value on the collide table truncated to all 3d constraints.  Consider using a swizzle
     static int hash_int( const double aye )
     {
@@ -231,10 +258,12 @@ public: UnitHash3d( StarSystem *ss )
                     }
                 }
             }
-        if (!ret && !target->hhuge)
-            fprintf( stderr, "Nonfatal Collide Error\n" );
-        if (!ret || target->hhuge)
+        if (!ret && !target->hhuge) {
+            BOOST_LOG_TRIVIAL(error) << "Nonfatal Collide Error\n";
+        }
+        if (!ret || target->hhuge) {
             ret |= removeFromVector( hugeobjects, objectToKill );
+        }
         return ret;
     }
 };
@@ -265,7 +294,7 @@ const unsigned int collideTreesMaxTrees = 16;
 struct collideTrees
 {
     std::string hash_key;
-    
+
     csOPCODECollider *rapidColliders[collideTreesMaxTrees];
 
     bool usingColTree() const
@@ -274,7 +303,7 @@ struct collideTrees
     }
 
     csOPCODECollider * colTree( Unit *un, const Vector &othervelocity );     //gets the appropriately scaled unit collide tree
-    
+
     // Not sure at the moment where we decide to collide to the shield ...since all we ever compare to is colTree in Collide()
     // Yet, this is used somewhere.
     csOPCODECollider *colShield;

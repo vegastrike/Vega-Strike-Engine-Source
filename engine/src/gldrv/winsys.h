@@ -1,20 +1,28 @@
-/* 
- * Tux Racer 
+/*
+ * Tux Racer
  * Copyright (C) 1999-2001 Jasmin F. Patry
- * 
+ *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
  * as published by the Free Software Foundation; either version 2
  * of the License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+ *
+ * Incorporated into Vega Strike
+ *
+ * Copyright (C) Daniel Horn
+ * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike
+ * contributors
+ *
+ * https://github.com/vegastrike/Vega-Strike-Engine-Source
  */
 #ifndef WINSYS_H
 #define WINSYS_H 1
@@ -45,7 +53,7 @@ extern "C"
 
 /* Keysyms */
 
-#if defined( SDL_WINDOWING ) && defined (HAVE_SDL) 
+#if defined( SDL_WINDOWING ) && defined (HAVE_SDL)
 /*---------------------------------------------------------------------------*/
 /*---------------------------------------------------------------------------*/
 /* SDL version */
@@ -73,7 +81,7 @@ typedef enum {
     WSK_KP_PLUS = SDLK_KP_PLUS,
     WSK_KP_ENTER = SDLK_KP_ENTER,
     WSK_KP_EQUALS = SDLK_KP_EQUALS,
-	
+
 	WSK_RETURN = 13,
 	WSK_TAB = '\t',
 	WSK_ESCAPE = 27,
@@ -83,7 +91,7 @@ typedef enum {
 #else
     8,
 #endif
-	WSK_DELETE = 
+	WSK_DELETE =
 #ifdef __APPLE__
     8,
 #else
@@ -146,7 +154,7 @@ typedef enum {
 	WSK_MOD_RMETA=KMOD_RMETA ,
 	WSK_MOD_NUM=KMOD_NUM   ,
 	WSK_MOD_CAPS=KMOD_CAPS  ,
-	WSK_MOD_MODE=KMOD_MODE  
+	WSK_MOD_MODE=KMOD_MODE
 } winsys_modifiers;
 
 // mouse wheel events are only available with SDL 1.2.5 or later
@@ -176,7 +184,7 @@ typedef enum {
 /*---------------------------------------------------------------------------*/
 /*---------------------------------------------------------------------------*/
 
-/* GLUT doesn't define as many keysyms as SDL; we map those to 
+/* GLUT doesn't define as many keysyms as SDL; we map those to
    WSK_NOT_AVAIL (0) */
 
 typedef enum {
@@ -210,7 +218,7 @@ typedef enum {
 #else
     8,
 #endif
-	WSK_DELETE = 
+	WSK_DELETE =
 #ifdef __APPLE__
     8,
 #else

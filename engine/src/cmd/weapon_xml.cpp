@@ -285,7 +285,7 @@ void beginElement( void *userData, const char *name, const char **atts )
             switch ( attribute_map.lookup( (*iter).name ) )
             {
             case UNKNOWN:
-                VSFileSystem::vs_fprintf( stderr, "Unknown Weapon Element %s", (*iter).name.c_str() );
+                BOOST_LOG_TRIVIAL(warning) << boost::format("Unknown Weapon Element %1$s") % (*iter).name.c_str();
                 break;
             case NAME:
                 curname = (*iter).value;
@@ -313,7 +313,7 @@ void beginElement( void *userData, const char *name, const char **atts )
             switch ( attribute_map.lookup( (*iter).name ) )
             {
             case UNKNOWN:
-                VSFileSystem::vs_fprintf( stderr, "Unknown Weapon Element %s", (*iter).name.c_str() );
+                BOOST_LOG_TRIVIAL(warning) << boost::format("Unknown Weapon Element %1$s") % (*iter).name.c_str();
                 break;
             case XFILE:
                 tmpweapon.file     = (*iter).value;
@@ -366,7 +366,7 @@ void beginElement( void *userData, const char *name, const char **atts )
             switch ( attribute_map.lookup( (*iter).name ) )
             {
             case UNKNOWN:
-                VSFileSystem::vs_fprintf( stderr, "Unknown Weapon Element %s", (*iter).name.c_str() );
+                BOOST_LOG_TRIVIAL(warning) << boost::format("Unknown Weapon Element %1$s") % (*iter).name.c_str();
                 break;
             case CONSUMPTION:
                 tmpweapon.EnergyRate = XMLSupport::parse_floatf( (*iter).value );
@@ -395,7 +395,7 @@ void beginElement( void *userData, const char *name, const char **atts )
                 switch ( attribute_map.lookup( (*iter).name ) )
                 {
                 case UNKNOWN:
-                    VSFileSystem::vs_fprintf( stderr, "Unknown Weapon Element %s", (*iter).name.c_str() );
+                    BOOST_LOG_TRIVIAL(warning) << boost::format("Unknown Weapon Element %1$s") % (*iter).name.c_str();
                     break;
                 case DAMAGE:
                     tmpweapon.Damage = game_options.weapon_damage_efficiency*XMLSupport::parse_floatf( (*iter).value );
@@ -427,7 +427,7 @@ void beginElement( void *userData, const char *name, const char **atts )
             switch ( attribute_map.lookup( (*iter).name ) )
             {
             case UNKNOWN:
-                VSFileSystem::vs_fprintf( stderr, "Unknown Weapon Element %s", (*iter).name.c_str() );
+                BOOST_LOG_TRIVIAL(warning) << boost::format("Unknown Weapon Element %1$s") % (*iter).name.c_str();
                 break;
             case VOLUME:
                 tmpweapon.volume = XMLSupport::parse_float( (*iter).value );

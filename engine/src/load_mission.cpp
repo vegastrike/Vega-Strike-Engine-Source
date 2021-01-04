@@ -1,9 +1,35 @@
+/**
+ * load_mission.cpp
+ *
+ * Copyright (C) Daniel Horn
+ * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike
+ * contributors
+ *
+ * https://github.com/vegastrike/Vega-Strike-Engine-Source
+ *
+ * This file is part of Vega Strike.
+ *
+ * Vega Strike is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Vega Strike is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
+
 #include "configxml.h"
 #include "cmd/script/mission.h"
 #include "cmd/script/pythonmission.h"
 #include "vs_globals.h"
 #include "star_system_generic.h"
-#include "vs_globals.h"
+#include "vsfilesystem.h"
 #include "cmd/unit_generic.h"
 #include "gfx/cockpit_generic.h"
 #include "cmd/ai/aggressive.h"
@@ -21,10 +47,12 @@
 std::string PickledDataSansMissionName( std::string pickled )
 {
     string::size_type newline = pickled.find( "\n" );
-    if (newline != string::npos)
+    if (newline != string::npos) {
         return pickled.substr( newline+1, pickled.length()-(newline+1) );
-    else
+    }
+    else {
         return pickled;
+    }
 }
 std::string PickledDataOnlyMissionName( std::string pickled )
 {
@@ -66,15 +94,17 @@ int num_delayed_missions()
 {
     unsigned int cp = _Universe->CurrentCockpit();
     int number = 0;
-    for (unsigned int i = 0; i < delayed_missions.size(); ++i)
-        if (delayed_missions[i].player == cp)
+    for (unsigned int i = 0; i < delayed_missions.size(); ++i) {
+        if (delayed_missions[i].player == cp) {
             ++number;
+        }
+    }
     return number;
 }
 
 void processDelayedMissions()
 {
-    while ( !delayed_missions.empty() )
+    while ( !delayed_missions.empty() ) {
         if ( delayed_missions.back().player < (unsigned int) _Universe->numPlayers() ) {
             int i = _Universe->CurrentCockpit();
             _Universe->SetActiveCockpit( delayed_missions.back().player );
@@ -87,6 +117,7 @@ void processDelayedMissions()
             _Universe->popActiveStarSystem();
             _Universe->SetActiveCockpit( i );
         }
+    }
 }
 void delayLoadMission( std::string str )
 {
@@ -106,10 +137,11 @@ void SaveGame::ReloadPickledData()
                 int len = ReadIntSpace( lpd );
                 std::string pickled = lpd.substr( 0, len );
                 lpd = lpd.substr( len, lpd.length()-len );
-                if ( i < active_missions.size() )
+                if ( i < active_missions.size() ) {
                     active_missions[i]->UnPickle( PickledDataSansMissionName( pickled ) );
-                else
+                } else {
                     UnpickleMission( lpd );
+                }
             }
         }
     }
@@ -191,10 +223,11 @@ std::string UnpickleAllMissions( FILE *fp )
         temp[picklelength] = 0;
         VSFileSystem::vs_read( temp, picklelength, 1, fp );
         retval += temp;
-        if ( i < active_missions.size() )
+        if ( i < active_missions.size() ) {
             active_missions[i]->SetUnpickleData( PickledDataSansMissionName( temp ) );
-        else
+        } else {
             UnpickleMission( temp );
+        }
         free( temp );
     }
     return retval;
@@ -214,10 +247,11 @@ std::string UnpickleAllMissions( char* &buf )
         buf    += picklelength;
         //VSFileSystem::vs_read (temp,picklelength,1,fp);
         retval += temp;
-        if ( i < active_missions.size() )
+        if ( i < active_missions.size() ) {
             active_missions[i]->SetUnpickleData( PickledDataSansMissionName( temp ) );
-        else
+        } else {
             UnpickleMission( temp );
+        }
         free( temp );
     }
     return retval;
@@ -236,13 +270,15 @@ void LoadMission( const char *nission_name, const std::string &script, bool load
         mission_name = string();
         friendly_mission_name++;
     }
-    if ( mission_name.empty() )
+    if ( mission_name.empty() ) {
         mission_name = game_options.empty_mission;
-    printf( "%s", script.c_str() );
+    }
+    BOOST_LOG_TRIVIAL(info) << boost::format("%1%") % script;
     VSFile  f;
     VSError err = f.OpenReadOnly( mission_name, MissionFile );
-    if (err > Ok)
+    if (err > Ok) {
         return;
+    }
     f.Close();
     if (Mission::getNthPlayerMission( _Universe->CurrentCockpit(), 0 ) != NULL) {
         pushSaveString( _Universe->CurrentCockpit(), "active_scripts", script );
@@ -256,9 +292,10 @@ void LoadMission( const char *nission_name, const std::string &script, bool load
     vector< Flightgroup* >::const_iterator siter;
     vector< Flightgroup* >fg = active_missions.back()->flightgroups;
 
-    if (active_missions.size() > 0)
+    if (active_missions.size() > 0) {
         //Give the mission a name.
         active_missions.back()->mission_name = friendly_mission_name;
+    }
     active_missions.back()->player_num = _Universe->CurrentCockpit();
 
     active_missions.back()->DirectorInitgame();

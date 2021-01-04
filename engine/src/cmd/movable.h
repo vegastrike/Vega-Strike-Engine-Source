@@ -1,3 +1,28 @@
+/**
+ * movable.h
+ *
+ * Copyright (C) 2020 Roy Falk, Stephen G. Tuggy and other Vega Strike
+ * contributors
+ *
+ * https://github.com/vegastrike/Vega-Strike-Engine-Source
+ *
+ * This file is part of Vega Strike.
+ *
+ * Vega Strike is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Vega Strike is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
+
 #ifndef MOVABLE_H
 #define MOVABLE_H
 
@@ -89,6 +114,28 @@ protected:
     float  Momentofinertia;
     Vector SavedAccel;
     Vector SavedAngAccel;
+    static bool configLoaded;
+    static float VELOCITY_MAX;
+    //for the heck of it.
+    static float humanwarprampuptime;
+    //for the heck of it.
+    static float compwarprampuptime;
+    static float warprampdowntime;
+    static float WARPMEMORYEFFECT;
+    static float maxplayerrotationrate;
+    static float maxnonplayerrotationrate;
+    static float warpstretchcutoff;
+    static float warpstretchoutcutoff;
+    static float sec;
+    static float endsec;
+    static float warpMultiplierMin;
+    static float warpMultiplierMax;
+    static float warpMaxEfVel;
+    static float cutsqr;
+    static float outcutsqr;
+    static std::string insys_jump_ani;
+    static float air_res_coef;
+    static float lateral_air_res_coef;
 
 
 // Methods
@@ -96,6 +143,14 @@ protected:
 public:
     Movable();
 
+protected:
+    // forbidden
+    Movable( const Movable& ) = delete;
+    // forbidden
+    Movable& operator= ( const Movable& ) = delete;
+    virtual ~Movable() = default;
+
+public:
     void AddVelocity( float difficulty );
 //Resolves forces of given unit on a physics frame
     virtual Vector ResolveForces( const Transformation&, const Matrix& );

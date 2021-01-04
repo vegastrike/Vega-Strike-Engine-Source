@@ -1,23 +1,29 @@
-/*
- * Vega Strike
+/**
+ * mission.cpp
+ *
  * Copyright (C) 2001-2002 Daniel Horn
+ * Copyright (C) Alexander Rawass <alexannika@users.sourceforge.net>
+ * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike
+ * contributors
  *
- * http://vegastrike.sourceforge.net/
+ * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * as published by the Free Software Foundation; either version 2
- * of the License, or (at your option) any later version.
+ * This file is part of Vega Strike.
  *
- * This program is distributed in the hope that it will be useful,
+ * Vega Strike is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Vega Strike is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+ * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
  */
+
 
 /*
  *  xml Mission written by Alexander Rawass <alexannika@users.sourceforge.net>
@@ -42,14 +48,12 @@
 #include "python/python_class.h"
 #include "savegame.h"
 #include "universe.h"
+#include "vsfilesystem.h"
 
 /* *********************************************************** */
-using std::cout;
-using std::cerr;
-using std::endl;
 Mission::~Mission()
 {
-    VSFileSystem::vs_fprintf( stderr, "Mission Cleanup Not Yet Implemented" );
+    BOOST_LOG_TRIVIAL(info) << "Mission Cleanup Not Yet Implemented";
     //do not delete msgcenter...could be vital
 }
 double Mission::gametime = 0.0;
@@ -132,7 +136,7 @@ void Mission::initMission( bool loadscripts )
 bool Mission::checkMission( easyDomNode *node, bool loadscripts )
 {
     if (node->Name() != "mission") {
-        cout<<"this is no Vegastrike mission file"<<endl;
+        BOOST_LOG_TRIVIAL(warning) << "this is no Vegastrike mission file";
         return false;
     }
     vector< easyDomNode* >::const_iterator siter;
@@ -168,7 +172,7 @@ bool Mission::checkMission( easyDomNode *node, bool loadscripts )
             }
             this->nextpythonmission = dumbstr;
         } else {
-            cout<<"warning: Unknown tag: "<<(*siter)->Name()<<endl;
+            BOOST_LOG_TRIVIAL(warning) << "warning: Unknown tag: " << (*siter)->Name();
         }
     }
     return true;
@@ -322,7 +326,7 @@ void Mission::doSettings( easyDomNode *node )
 void Mission::doVariables( easyDomNode *node )
 {
     if (variables != NULL) {
-        cout<<"only one variable section allowed"<<endl;
+        BOOST_LOG_TRIVIAL(warning) << "only one variable section allowed";
         return;
     }
     variables = node;
@@ -337,7 +341,7 @@ void Mission::doVariables( easyDomNode *node )
 void Mission::checkVar( easyDomNode *node )
 {
     if (node->Name() != "var") {
-        cout<<"not a variable"<<endl;
+        BOOST_LOG_TRIVIAL(warning) << "not a variable";
         return;
     }
     string name  = node->attr_value( "name" );
@@ -363,7 +367,7 @@ void Mission::AddFlightgroup( Flightgroup *fg )
 void Mission::checkFlightgroup( easyDomNode *node )
 {
     if (node->Name() != "flightgroup") {
-        cout<<"not a flightgroup"<<endl;
+        BOOST_LOG_TRIVIAL(warning) << "not a flightgroup";
         return;
     }
     //nothing yet
@@ -378,7 +382,7 @@ void Mission::checkFlightgroup( easyDomNode *node )
     string terrain_nr    = node->attr_value( "terrain_nr" );
     string unittype      = node->attr_value( "unit_type" );
     if ( name.empty() || faction.empty() || type.empty() || ainame.empty() || waves.empty() || nr_ships.empty() ) {
-        cout<<"no valid flightgroup decsription"<<endl;
+        BOOST_LOG_TRIVIAL(warning) << "no valid flightgroup decsription";
         return;
     }
     if ( unittype.empty() )
@@ -403,8 +407,9 @@ void Mission::checkFlightgroup( easyDomNode *node )
         else if ( (*siter)->Name() == "order" )
             doOrder( *siter, cf.fg );
     }
-    if (!have_pos)
-        cout<<"don;t have a position in flightgroup "<<name<<endl;
+    if (!have_pos) {
+        BOOST_LOG_TRIVIAL(warning) << "don't have a position in flightgroup " << name;
+    }
     if ( terrain_nr.empty() ) {
         cf.terrain_nr = -1;
     } else {
@@ -443,7 +448,7 @@ bool Mission::doPosition( easyDomNode *node, double pos[3], CreateFlightgroup *c
     string y = node->attr_value( "y" );
     string z = node->attr_value( "z" );
     if ( x.empty() || y.empty() || z.empty() ) {
-        cout<<"no valid position"<<endl;
+        BOOST_LOG_TRIVIAL(warning) << "no valid position";
         return false;
     }
     pos[0] = strtod( x.c_str(), NULL );
@@ -484,7 +489,7 @@ void Mission::doOrder( easyDomNode *node, Flightgroup *fg )
     string order  = node->attr_value( "order" );
     string target = node->attr_value( "target" );
     if ( order.empty() || target.empty() ) {
-        cout<<"you have to give an order and a target"<<endl;
+        BOOST_LOG_TRIVIAL(warning) << "you have to give an order and a target";
         return;
     }
     //the tmptarget is evaluated later
@@ -499,8 +504,9 @@ string Mission::getVariable( string name, string defaultval )
     vector< easyDomNode* >::const_iterator siter;
     for (siter = variables->subnodes.begin(); siter != variables->subnodes.end(); siter++) {
         string scan_name = (*siter)->attr_value( "name" );
-        if (scan_name == name)
+        if (scan_name == name) {
             return (*siter)->attr_value( "value" );
+        }
     }
     return defaultval;
 }

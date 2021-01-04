@@ -1,19 +1,44 @@
+/**
+ * star_system_xml.cpp
+ *
+ * Copyright (C) Daniel Horn
+ * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike
+ * contributors
+ *
+ * https://github.com/vegastrike/Vega-Strike-Engine-Source
+ *
+ * This file is part of Vega Strike.
+ *
+ * Vega Strike is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Vega Strike is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
+
 #include <expat.h>
 #include "xml_support.h"
 #include "star_system_generic.h"
-#include "cmd/planet_generic.h"
+#include "cmd/planet.h"
 #include "vs_globals.h"
 #include "vsfilesystem.h"
 #include "configxml.h"
 #include "vegastrike.h"
 #include <assert.h>                              /// needed for assert() calls.
 #include "gfx/mesh.h"
-#include "cmd/building_generic.h"
+#include "cmd/building.h"
 #include "cmd/ai/aggressive.h"
 #include "cmd/ai/fire.h"
-#include "cmd/nebula_generic.h"
-#include "cmd/asteroid_generic.h"
-#include "cmd/enhancement_generic.h"
+#include "cmd/nebula.h"
+#include "cmd/enhancement.h"
 #include "cmd/script/flightgroup.h"
 #include "universe_util.h"
 #include "cmd/atmosphere.h"
@@ -33,8 +58,6 @@
 using std::string;
 using std::vector;
 using std::map;
-using std::cout;
-using std::endl;
 
 using namespace XMLSupport;
 using namespace VSFileSystem;

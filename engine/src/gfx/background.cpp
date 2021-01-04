@@ -344,7 +344,7 @@ void Background::Draw()
                 if (tex == NULL)
                     tex = _Universe->getLightMap();
                 const int    numpasses = 1;
-                static const float edge_fixup =
+                static float edge_fixup =
                     XMLSupport::parse_float( vs_config->getVariable( "graphics", "background_edge_fixup", "0" ) );
                 const float  ms      = 0.f, Ms = 1.f-edge_fixup/tex->boundSizeX;
                 const float  mt      = 0.f, Mt = 1.f-edge_fixup/tex->boundSizeY;

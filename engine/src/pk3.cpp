@@ -41,12 +41,18 @@
  * - Added endianness support (was not working on big endian machine)
  */
 
+/*
+ * Modified by Stephen G. Tuggy 2020-10-28
+ * - Use Boost logging instead of cerr output directly
+ * - Use VSExit() rather than exit() directly
+ */
+
 #include "pk3.h"
 #include <cstdlib>
 #include <iostream>
 #include "posh.h"
-using std::cerr;
-using std::endl;
+#include "vs_globals.h"
+#include "vsfilesystem.h"
 using std::hex;
 
 #pragma pack(2)
@@ -205,8 +211,8 @@ bool CPK3::CheckPK3( FILE *f )
     dh.correctByteOrder();
     //Check
     if (dh.sig != TZipDirHeader::SIGNATURE) {
-        cerr<<"PK3 -- BAD DIR HEADER SIGNATURE, NOT A PK3 FILE !"<<endl;
-        exit( 1 );
+        BOOST_LOG_TRIVIAL(fatal) << "PK3 -- BAD DIR HEADER SIGNATURE, NOT A PK3 FILE !";
+        VSExit( 1 );
         return false;
     }
     //Go to the beginning of the directory.
@@ -215,8 +221,8 @@ bool CPK3::CheckPK3( FILE *f )
     //Allocate the data buffer, and read the whole thing.
     m_pDirData = new char[dh.dirSize+dh.nDirEntries*sizeof (*m_papDir)];
     if (!m_pDirData) {
-        cerr<<"PK3 -- ERROR ALLOCATING DATA BUFFER !"<<endl;
-        exit( 1 );
+        BOOST_LOG_TRIVIAL(fatal) << "PK3 -- ERROR ALLOCATING DATA BUFFER !";
+        VSExit( 1 );
         return false;
     }
     memset( m_pDirData, 0, dh.dirSize+dh.nDirEntries*sizeof (*m_papDir) );
@@ -235,8 +241,8 @@ bool CPK3::CheckPK3( FILE *f )
         m_papDir[i] = &fh;
         //Check the directory entry integrity.
         if (fh.sig != TZipDirFileHeader::SIGNATURE) {
-            cerr<<"PK3 -- ERROR BAD DIRECTORY SIGNATURE !"<<endl;
-            exit( 1 );
+            BOOST_LOG_TRIVIAL(fatal) << "PK3 -- ERROR BAD DIRECTORY SIGNATURE !";
+            VSExit( 1 );
             ret = false;
         } else {
             pfh += sizeof (fh);
@@ -313,7 +319,7 @@ int CPK3::FileExists( const char *lpname )
         GetFilename( i, str );
         int result = vsstrcmp( lpname, str );
         if (result == 0) {
-            cerr<<"FOUND IN PK3 FILE : "<<lpname<<" with index="<<i<<endl;
+            BOOST_LOG_TRIVIAL(info) << boost::format("FOUND IN PK3 FILE : %1% with index=%2%") % lpname % i;
             idx = i;
         }
     }
@@ -328,13 +334,13 @@ char* CPK3::ExtractFile( int index, int *file_size )
 
     buffer = new char[flength];
     if (!buffer) {
-        cerr<<"Unable to allocate memory, probably to low memory !!!"<<endl;
+        BOOST_LOG_TRIVIAL(error) << "Unable to allocate memory, probably memory too low !!!";
         return NULL;
     } else {
         if ( true == ReadFile( index, buffer ) ) {
             //everything went well !!!
         } else {
-            cerr<<"\nThe file was found in the archive, but I was unable to extract it. Maybe the archive is broken."<<endl;
+            BOOST_LOG_TRIVIAL(error) << "\nThe file was found in the archive, but I was unable to extract it. Maybe the archive is broken.\n";
         }
     }
     *file_size = flength;
@@ -361,14 +367,13 @@ char* CPK3::ExtractFile( const char *lpname, int *file_size )
 
     buffer = new char[flength];
     if (!buffer) {
-        printf( "Unable to allocate memory, probably to low memory !!!\n" );
+        BOOST_LOG_TRIVIAL(error) << "Unable to allocate memory, probably memory too low !!!";
         return NULL;
     } else {
         if ( true == ReadFile( index, buffer ) ) {
             //everything went well !!!
         } else {
-            printf( "\nThe file was found in the archive, but I was unable to " \
-                    "extract it. Maybe the archive is broken.\n" );
+            BOOST_LOG_TRIVIAL(error) << "\nThe file was found in the archive, but I was unable to extract it. Maybe the archive is broken.\n";
         }
     }
     *file_size = flength;
@@ -386,8 +391,8 @@ bool CPK3::Close()
 
 void CPK3::PrintFileContent()
 {
-    printf( "PK3 File: %s\n", pk3filename );
-    printf( "files count: %d\n\n", m_nEntries );
+    BOOST_LOG_TRIVIAL(info) << boost::format("PK3 File: %1%\n") % pk3filename;
+    BOOST_LOG_TRIVIAL(info) << boost::format("files count: %1%\n\n") % m_nEntries;
     for (int i = 0; i < m_nEntries; i++) {}
 }
 
@@ -413,16 +418,17 @@ int CPK3::GetFileLen( int i ) const
 
 bool CPK3::ReadFile( int i, void *pBuf )
 {
-    if (pBuf == NULL || i < 0 || i >= m_nEntries) {
-        cerr<<"PK3ERROR : ";
-        if (pBuf == NULL)
-            cerr<<" pBuf is NULL !!!"<<endl;
-        else if (i < 0)
-            cerr<<" Bad index < 0 !!!"<<endl;
-        else if (i >= m_nEntries)
-            cerr<<" Index TOO BIG !!!"<<endl;
+    if (pBuf == nullptr) {
+        BOOST_LOG_TRIVIAL(error) << "PK3ERROR :  pBuf is NULL !!!";
+        return false;
+    } else if (i < 0) {
+        BOOST_LOG_TRIVIAL(error) << "PK3ERROR :  Bad index < 0 !!!";
+        return false;
+    } else if (i >= m_nEntries) {
+        BOOST_LOG_TRIVIAL(error) << "PK3ERROR :  Index TOO BIG !!!";
         return false;
     }
+
     //Quick'n dirty read, the whole file at once.
     //Ungood if the ZIP has huge files inside
 
@@ -434,7 +440,7 @@ bool CPK3::ReadFile( int i, void *pBuf )
     bogus_sizet = fread( &h, sizeof (h), 1, this->f );
     h.correctByteOrder();
     if (h.sig != TZipLocalHeader::SIGNATURE) {
-        cerr<<"PK3 - BAD LOCAL HEADER SIGNATURE !!!"<<endl;
+        BOOST_LOG_TRIVIAL(error) << "PK3ERROR - BAD LOCAL HEADER SIGNATURE !!!";
         return false;
     }
     //Skip extra fields
@@ -444,13 +450,13 @@ bool CPK3::ReadFile( int i, void *pBuf )
         bogus_sizet = fread( pBuf, h.cSize, 1, this->f );
         return true;
     } else if (h.compression != TZipLocalHeader::COMP_DEFLAT) {
-        cerr<<"BAD Compression level, found="<<h.compression<<" - expected="<<TZipLocalHeader::COMP_DEFLAT<<endl;
+        BOOST_LOG_TRIVIAL(error) << boost::format("BAD Compression level, found=%1% - expected=%2%") % h.compression % TZipLocalHeader::COMP_DEFLAT;
         return false;
     }
     //Alloc compressed data buffer and read the whole stream
     char *pcData = new char[h.cSize];
     if (!pcData) {
-        cerr<<"PK3ERROR : Could not allocate memory buffer for decompression"<<endl;
+        BOOST_LOG_TRIVIAL(error) << "PK3ERROR : Could not allocate memory buffer for decompression";
         return false;
     }
     memset( pcData, 0, h.cSize );
@@ -476,25 +482,25 @@ bool CPK3::ReadFile( int i, void *pBuf )
         if (err == Z_STREAM_END)
             err = Z_OK;
         else if (err == Z_NEED_DICT)
-            cerr<<"PK3ERROR : Needed a dictionary"<<endl;
+            BOOST_LOG_TRIVIAL(error) << "PK3ERROR : Needed a dictionary";
         else if (err == Z_DATA_ERROR)
-            cerr<<"PK3ERROR : Bad data buffer"<<endl;
+            BOOST_LOG_TRIVIAL(error) << "PK3ERROR : Bad data buffer";
         else if (err == Z_STREAM_ERROR)
-            cerr<<"PK3ERROR : Bad parameter, stream error"<<endl;
+            BOOST_LOG_TRIVIAL(error) << "PK3ERROR : Bad parameter, stream error";
         err2 = inflateEnd( &stream );
         if (err2 == Z_STREAM_ERROR)
-            cerr<<"PK3ERROR : Bad parameter, stream error"<<endl;
+            BOOST_LOG_TRIVIAL(error) << "PK3ERROR : Bad parameter, stream error";
         err2 = inflateEnd( &stream );
         if (err2 == Z_STREAM_ERROR)
-            cerr<<"PK3ERROR : Bad parameter, stream error"<<endl;
+            BOOST_LOG_TRIVIAL(error) << "PK3ERROR : Bad parameter, stream error";
     } else {
         if (err == Z_STREAM_ERROR)
-            cerr<<"PK3ERROR : Bad parameter, stream error"<<endl;
+            BOOST_LOG_TRIVIAL(error) << "PK3ERROR : Bad parameter, stream error";
         else if (err == Z_MEM_ERROR)
-            cerr<<"PK3ERROR : Memory error"<<endl;
+            BOOST_LOG_TRIVIAL(error) << "PK3ERROR : Memory error";
     }
     if (err != Z_OK) {
-        cerr<<"PK3ERROR : Bad decompression return code"<<endl;
+        BOOST_LOG_TRIVIAL(error) << "PK3ERROR : Bad decompression return code";
         ret = false;
     }
     delete[] pcData;

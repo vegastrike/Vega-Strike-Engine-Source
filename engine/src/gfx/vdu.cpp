@@ -1,3 +1,29 @@
+/**
+ * vdu.cpp
+ *
+ * Copyright (C) Daniel Horn
+ * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike
+ * contributors
+ *
+ * https://github.com/vegastrike/Vega-Strike-Engine-Source
+ *
+ * This file is part of Vega Strike.
+ *
+ * Vega Strike is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Vega Strike is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
+
 /// Draws VDU parts
 /// Draws shield, armor, comm strings and animation, messages, manifest,
 /// target info, and objectives
@@ -160,9 +186,6 @@ VDU::VDU( const char *file, TextPlane *textp, unsigned short modes, short rwws, 
     maxhull    = mh;
     got_target_info = true;
     SwitchMode( NULL );
-
-    //printf("\nVDU rows=%d,col=%d\n",rows,cols);
-    //cout << "vdu" << endl;
 }
 
 GFXColor getDamageColor( float armor, bool gradient = false )
@@ -225,7 +248,7 @@ static void DrawHUDSprite( VDU *thus,
         s->SetSize( w, invertsprite ? -h : h );
         Texture *spritetex = s->getTexture();
         if (drawsprite && spritetex) {
-            static const float middle_point =
+            static float middle_point =
                 XMLSupport::parse_float( vs_config->getVariable( "graphics", "hud", "armor_hull_size", ".55" ) );
             static bool top_view = XMLSupport::parse_bool( vs_config->getVariable( "graphics", "hud", "top_view", "false" ) );
             float  middle_point_small = 1-middle_point;
@@ -896,7 +919,6 @@ void VDU::DrawMessages( GameCockpit *parentcp, Unit *target )
             //fullstr=fullstr+mymsg+"\n";
 
             rows_used += rows_needed+1;
-            //cout << "nav  " << mymsg << " rows " << rows_needed << endl;
         }
     }
     static std::string newline( "\n" );
@@ -976,9 +998,6 @@ void VDU::DrawNav( GameCockpit *cp, Unit *you, Unit *targ, const Vector &nav )
     if (targ)
         nam = reformatName( targ->name );
     int    faction = FactionUtil::GetFactionIndex( UniverseUtil::GetGalaxyFaction( _Universe->activeStarSystem()->getFileName() ) );
-    //std::string systemname = _Universe->activeStarSystem()->getFileName(); // as Sector/System
-    //string sectorname = getStarSystemSector(systemname);
-    //printf ("(debug) Sector: %s\n", sectorname.c_str());
     std::string navdata =
         std::string( "#ff0000Sector:\n     #ffff00"+getStarSystemSector(
                          _Universe->activeStarSystem()->getFileName() )

@@ -34,7 +34,7 @@ void Unit::RemoveFromSystem()
     for (unsigned int locind = 0; locind < NUM_COLLIDE_MAPS; ++locind)
         if ( !is_null( this->location[locind] ) ) {
             if (activeStarSystem == NULL) {
-                printf( "NONFATAL NULL activeStarSystem detected...please fix\n" );
+                BOOST_LOG_TRIVIAL(error) << "NONFATAL NULL activeStarSystem detected...please fix";
                 activeStarSystem = _Universe->activeStarSystem();
             }
             static bool collidemap_sanity_check =
@@ -48,25 +48,24 @@ void Unit::RemoveFromSystem()
                     for (i = activeStarSystem->collide_map[locind]->begin();
                          i != activeStarSystem->collide_map[locind]->end(); ++i) {
                         if (i == this->location[locind]) {
-                            printf( "hussah %d\n", *i == *this->location[locind] );
+                            BOOST_LOG_TRIVIAL(info) << boost::format("hussah %1$b") % (*i == *this->location[locind]);
                             found = true;
                         }
                         if (**i < **j) {
-                            printf( "(%f %f %f) and (%f %f %f) %f < %f %d!!!",
-                                   (**i).GetPosition().i,
-                                   (**i).GetPosition().j,
-                                   (**i).GetPosition().k,
-                                   (**j).GetPosition().i,
-                                   (**j).GetPosition().j,
-                                   (**j).GetPosition().k,
-                                   (**i).GetPosition().MagnitudeSquared(),
-                                   (**j).GetPosition().MagnitudeSquared(),
-                                   (**i).GetPosition().MagnitudeSquared()
-                                   < (**j).GetPosition().MagnitudeSquared() );
+                            BOOST_LOG_TRIVIAL(warning) << boost::format("(%1$f %2$f %3$f) and (%4$f %5$f %6$f) %7$f < %8$f %9$b!!!")
+                                   % (**i).GetPosition().i
+                                   % (**i).GetPosition().j
+                                   % (**i).GetPosition().k
+                                   % (**j).GetPosition().i
+                                   % (**j).GetPosition().j
+                                   % (**j).GetPosition().k
+                                   % (**i).GetPosition().MagnitudeSquared()
+                                   % (**j).GetPosition().MagnitudeSquared()
+                                   % ((**i).GetPosition().MagnitudeSquared() < (**j).GetPosition().MagnitudeSquared());
                         }
                         j = i;
                     }
-                    printf( "fin %d %d ", *(int*) &i, found );
+                    BOOST_LOG_TRIVIAL(info) << boost::format("fin %1$p %2$b ") % (*(int*) &i) % found;
                     activeStarSystem->collide_map[locind]->checkSet();
                     assert( 0 );
                 }

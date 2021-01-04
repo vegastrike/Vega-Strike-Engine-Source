@@ -13,6 +13,8 @@
 # Nachum Barcohen, Rune Morling, Stephen G. Tuggy, Benjamen Meyer, s0600204,
 # Evert Vorster, and other Vega Strike contributors.
 #
+# https://github.com/vegastrike/Vega-Strike-Engine-Source
+#
 # This file is part of Vega Strike.
 #
 # Vega Strike is free software: you can redistribute it and/or modify
@@ -190,18 +192,14 @@ ADD_LIBRARY(OPcollide
 
 SET(LIBCMD_SOURCES
     src/cmd/alphacurve.cpp
-    src/cmd/asteroid_generic.cpp
     src/cmd/beam_generic.cpp
     src/cmd/bolt_generic.cpp
-    src/cmd/building_generic.cpp
     src/cmd/collection.cpp
     src/cmd/collide_map.cpp
     src/cmd/collide.cpp
     src/cmd/container.cpp
     src/cmd/csv.cpp
     src/cmd/mount.cpp
-    src/cmd/nebula_generic.cpp
-    src/cmd/planet_generic.cpp
     src/cmd/role_bitmask.cpp
     src/cmd/unit_collide.cpp
     src/cmd/unit_const_cache.cpp
@@ -218,7 +216,6 @@ SET(LIBCMD_SOURCES
     src/cmd/drawable.cpp
     src/cmd/movable.cpp
     src/cmd/computer.cpp
-    src/cmd/dummy_unit.cpp
 
     src/cmd/planetary_orbit.cpp
 )
@@ -530,10 +527,6 @@ ENDIF (NOT CMAKE_BUILD_TYPE)
 IF (NOT BUILD_OPT)
     SET(BUILD_OPT -O2 CACHE STRING "-O0, -O1, -O2, -O3, -Os, -Ofast" FORCE )
 ENDIF (NOT BUILD_OPT)
-
-IF (CMAKE_COMPILER_IS_GNUCXX)
-    ADD_DEFINITIONS(-std=gnu++03)
-ENDIF ()
 
 
 # Provide boolean options for enabling various cpu optimizations.
@@ -1154,8 +1147,9 @@ INSTALL(TARGETS vegastrike DESTINATION bin)
 
 SET(CPACK_PACKAGE_NAME "Vega-Strike")
 SET(CPACK_PACKAGE_DESCRIPTION_SUMMARY "3D OpenGL spaceflight simulator")
+SET(CPACK_PACKAGE_DESCRIPTION "Vega Strike 3D OpenGL spaceflight simulator (game engine)")
 SET(CPACK_PACKAGE_VENDOR "Vega Strike")
-SET(CPACK_PACKAGE_DESCRIPTION_FILE "${CMAKE_CURRENT_SOURCE_DIR}/../README.md")
+#SET(CPACK_PACKAGE_DESCRIPTION_FILE "${CMAKE_CURRENT_SOURCE_DIR}/../README.md")
 SET(CPACK_RESOURCE_FILE_LICENSE "${CMAKE_CURRENT_SOURCE_DIR}/../LICENSE")
 SET(CPACK_PACKAGE_VERSION_MAJOR "0")
 SET(CPACK_PACKAGE_VERSION_MINOR "7")
@@ -1274,7 +1268,7 @@ ELSEIF (CMAKE_SYSTEM_NAME STREQUAL Linux)
                 ELSE (USE_PYTHON_3)
                     SET(CPACK_DEBIAN_PACKAGE_DEPENDS "libpython2.7")
                 ENDIF (USE_PYTHON_3)
-                SET(CPACK_DEBIAN_PACKAGE_DEPENDS "${CPACK_DEBIAN_PACKAGE_DEPENDS}, libjpeg62-turbo, libpng16-16, freeglut3, libgtk-3-0, libvorbis0a, libopenal1, libsdl-gfx1.2-5, xdg-utils, libgl1, libopengl0, libboost-python1.67.0, libboost-log1.67.0")
+                SET(CPACK_DEBIAN_PACKAGE_DEPENDS "${CPACK_DEBIAN_PACKAGE_DEPENDS}, libjpeg62-turbo, libpng16-16, freeglut3, libgtk-3-0, libvorbis0a, libopenal1, libsdl-gfx1.2-5, xdg-utils, libgl1, libopengl0, libglu1-mesa, libboost-python1.67.0, libboost-log1.67.0")
             ELSEIF (DEBIAN_RELEASE_VERSION STREQUAL "stretch")
                 IF (USE_PYTHON_3)
                     SET(CPACK_DEBIAN_PACKAGE_DEPENDS "libpython3.5")
@@ -1303,7 +1297,7 @@ ELSEIF (CMAKE_SYSTEM_NAME STREQUAL Linux)
                 ELSE (USE_PYTHON_3)
                     SET(CPACK_DEBIAN_PACKAGE_DEPENDS "libpython2.7")
                 ENDIF (USE_PYTHON_3)
-                SET(CPACK_DEBIAN_PACKAGE_DEPENDS "${CPACK_DEBIAN_PACKAGE_DEPENDS}, libjpeg62, libpng16-16, freeglut3, libgtk-3-0, libvorbis0a, libopenal1, libsdl-gfx1.2-5, xdg-utils, libgl1, libopengl0, libboost-python1.65.1, libboost-log1.65.1")
+                SET(CPACK_DEBIAN_PACKAGE_DEPENDS "${CPACK_DEBIAN_PACKAGE_DEPENDS}, libjpeg62, libpng16-16, freeglut3, libgtk-3-0, libvorbis0a, libopenal1, libsdl-gfx1.2-5, xdg-utils, libgl1, libglu1-mesa, libopengl0, libboost-python1.65.1, libboost-log1.65.1")
             ELSEIF (LSB_LINUX_DISTRIBUTION_CODENAME STREQUAL "focal")
                 IF (USE_PYTHON_3)
                     SET(CPACK_DEBIAN_PACKAGE_DEPENDS "libpython3.8")
@@ -1317,7 +1311,7 @@ ELSEIF (CMAKE_SYSTEM_NAME STREQUAL Linux)
                 ELSE (USE_PYTHON_3)
                     SET(CPACK_DEBIAN_PACKAGE_DEPENDS "libpython2.7")
                 ENDIF (USE_PYTHON_3)
-                SET(CPACK_DEBIAN_PACKAGE_DEPENDS "${CPACK_DEBIAN_PACKAGE_DEPENDS}, libjpeg62-turbo, libpng16-16, freeglut3, libgtk-3-0, libvorbis0a, libopenal1, libsdl-gfx1.2-5, xdg-utils, libgl1, libopengl0, libboost-python1.67.0, libboost-log1.67.0")
+                SET(CPACK_DEBIAN_PACKAGE_DEPENDS "${CPACK_DEBIAN_PACKAGE_DEPENDS}, libjpeg62-turbo, libpng16-16, freeglut3, libgtk-3-0, libvorbis0a, libopenal1, libsdl-gfx1.2-5, xdg-utils, libgl1, libopengl0, libglu1-mesa, libboost-python1.67.0, libboost-log1.67.0")
             ELSEIF (LSB_LINUX_DISTRIBUTION_CODENAME STREQUAL "stretch")
                 IF (USE_PYTHON_3)
                     SET(CPACK_DEBIAN_PACKAGE_DEPENDS "libpython3.5")
@@ -1363,8 +1357,8 @@ ELSEIF (CMAKE_SYSTEM_NAME STREQUAL Linux)
                 SET(CPACK_RPM_PACKAGE_REQUIRES "libboost_python-py2_7-1_66_0, libpython2_7-1_0")
             ENDIF (USE_PYTHON_3)
             SET(CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES}, libjpeg-turbo, libpng16-16, libglut3, libgtk-3-0, libvorbis0, libopenal0, libSDL-1_2-0, libglvnd, expat, libboost_log1_66_0, libboost_system1_66_0, libboost_filesystem1_66_0, libboost_thread1_66_0, libboost_regex1_66_0, libboost_chrono1_66_0, libboost_atomic1_66_0")
-        ELSEIF (LINUX_ID STREQUAL fedora AND (LINUX_VERSION_ID VERSION_EQUAL 30 OR LINUX_VERSION_ID VERSION_EQUAL 31 OR LINUX_VERSION_ID VERSION_EQUAL 32))
-            IF (LINUX_VERSION_ID VERSION_EQUAL 32)
+        ELSEIF (LINUX_ID STREQUAL fedora AND (LINUX_VERSION_ID VERSION_EQUAL 30 OR LINUX_VERSION_ID VERSION_GREATER 30) AND (LINUX_VERSION_ID VERSION_LESS 33 OR LINUX_VERSION_ID VERSION_EQUAL 33))
+            IF (LINUX_VERSION_ID VERSION_EQUAL 32 OR LINUX_VERSION_ID VERSION_EQUAL 33)
                 IF (USE_PYTHON_3)
                     SET(CPACK_RPM_PACKAGE_REQUIRES "python38, boost-python3")       # python39
                 ELSE (USE_PYTHON_3)
@@ -1377,22 +1371,22 @@ ELSEIF (CMAKE_SYSTEM_NAME STREQUAL Linux)
                 ELSE (USE_PYTHON_3)
                     SET(CPACK_RPM_PACKAGE_REQUIRES "python27, boost-python2")
                 ENDIF (USE_PYTHON_3)
-            ELSE (LINUX_VERSION_ID VERSION_EQUAL 32)
+            ELSE (LINUX_VERSION_ID VERSION_EQUAL 32 OR LINUX_VERSION_ID VERSION_EQUAL 33)
                 IF (USE_PYTHON_3)
                     SET(CPACK_RPM_PACKAGE_REQUIRES "python37, boost-python3")
                 ELSE (USE_PYTHON_3)
                     SET(CPACK_RPM_PACKAGE_REQUIRES "python27, boost-python2")
                 ENDIF (USE_PYTHON_3)
-            ENDIF (LINUX_VERSION_ID VERSION_EQUAL 32)
+            ENDIF (LINUX_VERSION_ID VERSION_EQUAL 32 OR LINUX_VERSION_ID VERSION_EQUAL 33)
             SET(CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES}, libjpeg-turbo, libpng, freeglut, gtk3, libvorbis, openal-soft, SDL, libglvnd, expat, boost-log, boost-system, boost-filesystem, boost-thread, boost-regex, boost-chrono, boost-atomic")
-        ELSEIF (LINUX_ID STREQUAL centos AND LINUX_VERSION_ID STREQUAL "8")     # Not yet tested
+        ELSEIF (LINUX_ID STREQUAL centos AND LINUX_VERSION_ID STREQUAL "8")
             IF (USE_PYTHON_3)
                 SET(CPACK_RPM_PACKAGE_REQUIRES "boost-python3")
             ELSE (USE_PYTHON_3)
                 MESSAGE(SEND_WARNING "!! boost-python2 does not appear to be available on this platform.")
             ENDIF (USE_PYTHON_3)
             SET(CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES}, libjpeg-turbo, libpng, freeglut, gtk3, libvorbis, openal-soft, SDL, libglvnd, expat, boost-log, boost-system, boost-filesystem, boost-thread, boost-regex, boost-chrono, boost-atomic")
-        ELSEIF (LINUX_ID STREQUAL rhel AND LINUX_VERSION_ID STREQUAL "8")       # Not yet tested
+        ELSEIF (LINUX_ID STREQUAL rhel AND LINUX_VERSION_ID STREQUAL "8")
             IF (USE_PYTHON_3)
                 SET(CPACK_RPM_PACKAGE_REQUIRES "boost-python3")
             ELSE (USE_PYTHON_3)

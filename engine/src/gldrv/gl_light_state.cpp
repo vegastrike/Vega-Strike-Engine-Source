@@ -1,3 +1,29 @@
+/**
+ * gl_light_state.cpp
+ *
+ * Copyright (C) Daniel Horn
+ * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike
+ * contributors
+ *
+ * https://github.com/vegastrike/Vega-Strike-Engine-Source
+ *
+ * This file is part of Vega Strike.
+ *
+ * Vega Strike is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Vega Strike is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
+
 #include <assert.h>
 #include <cstring>
 //#include <vegastrike.h>
@@ -17,7 +43,7 @@ void GFXSetLightOffset( const QVector &offset ) {
     _light_offset = offset;
 }
 
-QVector GFXGetLightOffset() { 
+QVector GFXGetLightOffset() {
     return _light_offset;
 }
 
@@ -25,22 +51,22 @@ void GFXUploadLightState( int max_light_location, int active_light_array, int ap
     // FIXME: (klauss) Very bad thing: static variables initialized with heap-allocated arrays...
     static GLint *lightData = new GLint[GFX_MAX_LIGHTS];
     static float *lightSizes = new float[GFX_MAX_LIGHTS*4];
-    
+
     Matrix modelview;
-    
+
     // if we're using shaders, we'll need the modelview matrix
     // to properly compute light-model apparent light sizes
     GFXGetMatrixModel(modelview);
-    
+
     size_t maxval = 0;
     size_t i = 0;
-    
+
     for (vector<int>::const_iterator lightit = begin; lightit != end; ++i, ++lightit) {
         const gfx_light &light = (*_llights)[*lightit];
         if (light.enabled()) {
             lightData[i] = 1;
             maxval = i;
-            
+
             // Only bother with apparent light size if there is a shader
             if (shader) {
                 // We'll compute apparent light size by transforming the origin
@@ -55,9 +81,9 @@ void GFXUploadLightState( int max_light_location, int active_light_array, int ap
                 // matrix. For one, rotation is meaningless for this calculation.
                 // For two, scaling would be nullified when scaling both distance
                 // and light size, so it would only waste time.
-                
+
                 QVector lightPos = light.getPosition() - modelview.p + _light_offset;
-                
+
                 double lightDistance = lightPos.Magnitude();
                 double lightSize = light.getSize() * 0.5;
                 double lightCosAngle;
@@ -108,7 +134,7 @@ void GFXUploadLightState( int max_light_location, int active_light_array, int ap
             lightSizes[i*4+3] = 0.f;
         }
     }
-    
+
     for (; i < (size_t)GFX_MAX_LIGHTS; ++i) {
         lightData[i] = 0;
         lightSizes[i*4+0] = 0.f;
@@ -116,7 +142,7 @@ void GFXUploadLightState( int max_light_location, int active_light_array, int ap
         lightSizes[i*4+2] = 0.f;
         lightSizes[i*4+3] = 0.f;
     }
-    
+
     if (!shader) {
         //only bother with actual GL state in the event of lack of shaders
         for (size_t i = 0; i < (size_t) GFX_MAX_LIGHTS; ++i) {
@@ -156,8 +182,8 @@ Hashtable3d< LineCollideStar, 20, CTACC, lighthuge >lighttable;
 GFXLight gfx_light::operator=( const GFXLight &tmp )
 {   // Let's see if I can write a better copy operator
 //    memcpy( this, &tmp, sizeof (GFXLight) );
-            this->target  = -1;
-            this->options = 0;
+            this->target  = tmp.target;
+            this->options = tmp.options;
             memcpy( this->vect, tmp.vect, sizeof (float)*3 );
             memcpy( this->diffuse, tmp.diffuse, sizeof (float)*4 );
             memcpy( this->specular, tmp.specular, sizeof (float)*4 );
@@ -168,11 +194,12 @@ GFXLight gfx_light::operator=( const GFXLight &tmp )
             this->cutoff = tmp.cutoff;
             this->size   = tmp.size;
             this->occlusion = tmp.occlusion;
-            apply_attenuate( attenuated() );
-            if (GFX_LIGHT_ENABLED) //This is always true...No reason to define a light and not turn it on...
-                this->enable();
-            else
-                this->disable();
+            apply_attenuate( tmp.attenuated() );
+            // if (tmp.enabled()) {
+            //     this->enable();
+            // } else {
+            //     this->disable();
+            // }
             return tmp;
 }
 
@@ -237,8 +264,9 @@ bool gfx_light::Create( const GFXLight &temp, bool global )
 void gfx_light::Kill()
 {
     Disable();     //first disables it...which _will_ remove it from the light table.
-    if (target >= 0)
+    if (target >= 0) {
         TrashFromGLLights();          //then if not already done, trash from GLlights;
+    }
     target  = -2;
     options = 0;
 }
@@ -277,7 +305,7 @@ inline void gfx_light::ContextSwitchClobberLight( const GLenum gltarg, const int
         v[3]=value[3]*attenuation; \
         glLightfv( gltarg, attr, v ); \
     } while(0)
-    
+
     SendGLPosition( gltarg );
     glLightfvAttenuated( gltarg, GL_DIFFUSE, diffuse, occlusion );
     glLightfvAttenuated( gltarg, GL_SPECULAR, specular, occlusion );
@@ -345,9 +373,7 @@ void gfx_light::ClobberGLLight( const int target )
     }
 #endif
     this->target = target;
-    //VSFileSystem::Fprintf (stderr,"Target %d had light %d",target, GLLights[target].index);
     GLLights[target].index    = lightNum();
-    //VSFileSystem::Fprintf (stderr," Clobbered with %d\n",lightNum());
     GLLights[target].options |= OpenGLL::GLL_ON*enabled()+OpenGLL::GLL_LOCAL * LocalLight();
 }
 
@@ -360,10 +386,12 @@ void gfx_light::ResetProperties( const enum LIGHT_TARGET light_targ, const GFXCo
         t.SetProperties( light_targ, color );
         changed = RemoveFromTable( false, t );
         *this = t;
-        if (changed)
+        if (changed) {
             AddToTable();
-        if (target >= 0)
+        }
+        if (target >= 0) {
             TrashFromGLLights();
+        }
         return;
     }
     switch (light_targ)
@@ -528,9 +556,9 @@ LineCollide gfx_light::CalculateBounds( bool &error )
     ffastmathreallysucksd = sqrt( tot_intensity/intensity_cutoff-ambient[0] );
 
     ffastmathreallysucksq = sqrt( attenuate[2]+attenuate[1] );
-    //VSFileSystem::Fprintf (stderr,"q%lf d%lf",ffastmathreallysucksq,ffastmathreallysucksd);
-    if (ffastmathreallysucksq == 0 || ffastmathreallysucksd <= 0)
+    if (ffastmathreallysucksq == 0 || ffastmathreallysucksd <= 0) {
         error = true;
+    }
     ffastmathreallysucksd /= ffastmathreallysucksq;
 
     QVector     st( vect[0]-ffastmathreallysucksd, vect[1]-ffastmathreallysucksd, vect[2]-ffastmathreallysucksd );

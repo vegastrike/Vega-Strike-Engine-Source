@@ -15,6 +15,14 @@
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+ *
+ * Incorporated into Vega Strike
+ *
+ * Copyright (C) Daniel Horn
+ * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike
+ * contributors
+ *
+ * https://github.com/vegastrike/Vega-Strike-Engine-Source
  */
 #include <assert.h>
 #include <sstream>
@@ -230,8 +238,9 @@ static bool setup_sdl_video_mode()
         SDL_GL_SetAttribute( SDL_GL_DOUBLEBUFFER, 1 );
     }
 #if SDL_VERSION_ATLEAST( 1, 2, 10 )
-    if (game_options.gl_accelerated_visual)
+    if (game_options.gl_accelerated_visual) {
         SDL_GL_SetAttribute( SDL_GL_ACCELERATED_VISUAL, 1 );
+    }
 #endif
     width  = g_game.x_resolution;
     height = g_game.y_resolution;
@@ -241,13 +250,12 @@ static bool setup_sdl_video_mode()
             for (int bpd = 4; bpd > 1; --bpd) {
                 SDL_GL_SetAttribute( SDL_GL_DEPTH_SIZE, bpd*8 );
                 if ( ( screen = SDL_SetVideoMode( width, height, bpp, video_flags|SDL_ANYFORMAT ) )
-                    == NULL )
-                    BOOST_LOG_TRIVIAL(info) << boost::format("Couldn't initialize video bpp %1% depth %2%: %3%") % bpp % (bpd * 8) %
+                    == NULL ) {
+                    BOOST_LOG_TRIVIAL(error) << boost::format("Couldn't initialize video bpp %1% depth %2%: %3%") % bpp % (bpd * 8) %
                                                 SDL_GetError();
-                    // VSFileSystem::vs_dprintf( 1, "Couldn't initialize video bpp %d depth %d: %s\n",
-                    //     bpp, bpd*8, SDL_GetError() );
-                else
+                } else {
                     break;
+                }
             }
             if (screen == NULL) {
                 SDL_GL_SetAttribute( SDL_GL_RED_SIZE, otherattributes );
@@ -265,14 +273,13 @@ static bool setup_sdl_video_mode()
     std::string version = (const char*)glGetString(GL_RENDERER);
     if (version == "GDI Generic") {
         if (game_options.gl_accelerated_visual) {
-            VSFileSystem::vs_fprintf( stderr, "GDI Generic software driver reported, trying to reset.\n" );
+            BOOST_LOG_TRIVIAL(error) << "GDI Generic software driver reported, trying to reset.";
             SDL_Quit();
-	    game_options.gl_accelerated_visual = false;
+            game_options.gl_accelerated_visual = false;
             return false;
         } else {
-            VSFileSystem::vs_fprintf( stderr,
-                "GDI Generic software driver reported, reset failed.\n "
-                "Please make sure a graphics card driver is installed and functioning properly.\n" );
+            BOOST_LOG_TRIVIAL(error) << "GDI Generic software driver reported, reset failed.\n";
+            BOOST_LOG_TRIVIAL(error) << "Please make sure a graphics card driver is installed and functioning properly.\n";
         }
     }
 
@@ -315,8 +322,9 @@ void winsys_init( int *argc, char **argv, char const *window_title, char const *
     SDL_Surface *icon = NULL;
 #if 1
     if (icon_title) icon = SDL_LoadBMP( icon_title );
-    if (icon)
+    if (icon) {
         SDL_SetColorKey( icon, SDL_SRCCOLORKEY, ( (Uint32*) (icon->pixels) )[0] );
+    }
 #endif
     /*
      * Init video
@@ -369,11 +377,12 @@ void winsys_shutdown()
  */
 void winsys_enable_key_repeat( bool enabled )
 {
-    if (enabled)
+    if (enabled) {
         SDL_EnableKeyRepeat( SDL_DEFAULT_REPEAT_DELAY,
                              SDL_DEFAULT_REPEAT_INTERVAL );
-    else
+    } else {
         SDL_EnableKeyRepeat( 0, 0 );
+    }
 }
 
 /*---------------------------------------------------------------------------*/
@@ -401,7 +410,7 @@ void winsys_show_cursor( bool visible )
  *  \date    Modified: 2000-10-19
  *  \date    Modified: 2005-8-16 - Rogue
  *  \date    Modified: 2005-12-24 - ace123
- *  \date    Modified: 2019-10-14 - stephengtuggy
+ *  \date    Modified: 2020-11-14 - stephengtuggy
  */
 extern int shiftdown( int );
 extern int shiftup( int );
@@ -438,17 +447,20 @@ void winsys_process_events()
                     bool is_unicode = maybe_unicode && event.key.keysym.unicode;
 
                     //Fix up ctrl unicode codes
-                    if (is_unicode && event.key.keysym.unicode <= 0x1a && (event.key.keysym.sym&0xFF) > 0x1a && event.key.keysym.mod & (KMOD_LCTRL|KMOD_RCTRL))
+                    if (is_unicode && event.key.keysym.unicode <= 0x1a && (event.key.keysym.sym&0xFF) > 0x1a && event.key.keysym.mod & (KMOD_LCTRL|KMOD_RCTRL)) {
                         event.key.keysym.unicode += 0x60; // 0x01 (^A) --> 0x61 (A)
+                    }
 
                     //Translate untranslated release events
                     if (state && maybe_unicode
-                        && keysym_to_unicode[event.key.keysym.sym&0xFF])
+                        && keysym_to_unicode[event.key.keysym.sym&0xFF]) {
                         event.key.keysym.unicode = keysym_to_unicode[event.key.keysym.sym&0xFF];
+                    }
 
                     //Remember translation for translating release events
-                    if (is_unicode)
+                    if (is_unicode) {
                         keysym_to_unicode[event.key.keysym.sym&0xFF] = event.key.keysym.unicode;
+                    }
 
                     //Ugly hack: prevent shiftup/shiftdown screwups on intl keyboard
                     //Note: Thank god we'll have OIS for 0.5.x
@@ -482,19 +494,21 @@ void winsys_process_events()
 
             case SDL_MOUSEBUTTONDOWN:
             case SDL_MOUSEBUTTONUP:
-                if (mouse_func)
+                if (mouse_func) {
                     (*mouse_func)(event.button.button,
                                   event.button.state,
                                   event.button.x,
                                   event.button.y);
+                }
                 break;
 
             case SDL_MOUSEMOTION:
                 if (event.motion.state) {
                     /* buttons are down */
-                    if (motion_func)
+                    if (motion_func) {
                         (*motion_func)(event.motion.x,
                                        event.motion.y);
+                    }
                 } else
                 /* no buttons are down */
                 if (passive_motion_func) {
@@ -508,9 +522,10 @@ void winsys_process_events()
                 g_game.x_resolution = event.resize.w;
                 g_game.y_resolution = event.resize.h;
                 setup_sdl_video_mode();
-                if (reshape_func)
+                if (reshape_func) {
                     (*reshape_func)(event.resize.w,
                                     event.resize.h);
+                }
 #endif
                 break;
             }
@@ -536,13 +551,14 @@ void winsys_process_events()
  *  function should only be called once.
  *  \author  jfpatry
  *  \date    Created:  2000-10-20
- *  \date    Modified: 2019-10-14 - stephengtuggy
+ *  \date    Modified: 2020-11-14 - stephengtuggy
  */
 void winsys_atexit( winsys_atexit_func_t func )
 {
     static bool called = false;
     if (called != false) {
-        BOOST_LOG_TRIVIAL(info) << "winsys_atexit called twice";
+        BOOST_LOG_TRIVIAL(error) << "winsys_atexit called twice";
+        VSFileSystem::flushLogs();
     }
     called = true;
 }
@@ -557,8 +573,9 @@ void winsys_atexit( winsys_atexit_func_t func )
 void winsys_exit( int code )
 {
     winsys_shutdown();
-    if (atexit_func)
+    if (atexit_func) {
         (*atexit_func)();
+    }
     // exit( code );
 }
 
@@ -646,16 +663,18 @@ static void glut_keyboard_cb( unsigned char ch, int x, int y )
         if (gm) {
             BOOST_LOG_TRIVIAL(trace) << boost::format("Down Modifier %d for char %d %c") % gm % (int)ch % ch;
         }
-        if (gm&GLUT_ACTIVE_CTRL)
+        if (gm&GLUT_ACTIVE_CTRL) {
             ch = AdjustKeyCtrl( ch );
+        }
         (*keyboard_func)(ch, gm, false, x, y);
     }
 }
 
 static void glut_special_cb( int key, int x, int y )
 {
-    if (keyboard_func)
+    if (keyboard_func) {
         (*keyboard_func)(key+128, glutGetModifiers(), false, x, y);
+    }
 }
 
 static void glut_keyboard_up_cb( unsigned char ch, int x, int y )
@@ -665,16 +684,18 @@ static void glut_keyboard_up_cb( unsigned char ch, int x, int y )
         if (gm) {
             BOOST_LOG_TRIVIAL(trace) << boost::format("Up Modifier %d for char %d %c") % gm % (int)ch % ch;
         }
-        if (gm&GLUT_ACTIVE_CTRL)
+        if (gm&GLUT_ACTIVE_CTRL) {
             ch = AdjustKeyCtrl( ch );
+        }
         (*keyboard_func)(ch, gm, true, x, y);
     }
 }
 
 static void glut_special_up_cb( int key, int x, int y )
 {
-    if (keyboard_func)
+    if (keyboard_func) {
         (*keyboard_func)(key+128, glutGetModifiers(), true, x, y);
+    }
 }
 
 /*---------------------------------------------------------------------------*/
@@ -814,8 +835,9 @@ void winsys_shutdown()
     static bool shutdown = false;
     if (!shutdown) {
         shutdown = true;
-        if (gl_options.fullscreen)
+        if (gl_options.fullscreen) {
             glutLeaveGameMode();
+        }
     }
 }
 
@@ -843,10 +865,11 @@ void winsys_show_cursor( bool visible )
 {
     static bool vis = true;
     if (visible != vis) {
-        if (visible)
+        if (visible) {
             glutSetCursor( GLUT_CURSOR_LEFT_ARROW );
-        else
+        } else {
             glutSetCursor( GLUT_CURSOR_NONE );
+        }
         vis = visible;
     }
 }
@@ -876,12 +899,15 @@ void winsys_process_events()
  *  function should only be called once.
  *  \author  jfpatry
  *  \date    Created:  2000-10-20
- *  \date Modified: 2000-10-20 */
+ *  \date    Modified: 2020-11-14 - stephengtuggy */
 void winsys_atexit( winsys_atexit_func_t func )
 {
     static bool called = false;
-    if (called)
-        VSFileSystem::vs_fprintf( stderr, "winsys_atexit called twice\n" );
+    if (called) {
+        cerr << "winsys_atexit called twice\n";
+        BOOST_LOG_TRIVIAL(error) << "winsys_atexit called twice\n";
+        VSFileSystem::flushLogs();
+    }
     called = true;
 
     //atexit(func);

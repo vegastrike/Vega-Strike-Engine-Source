@@ -1,9 +1,36 @@
+/**
+ * aggressive.cpp
+ *
+ * Copyright (C) Daniel Horn
+ * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike
+ * contributors
+ *
+ * https://github.com/vegastrike/Vega-Strike-Engine-Source
+ *
+ * This file is part of Vega Strike.
+ *
+ * Vega Strike is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Vega Strike is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
+
 #include <list>
 #include <vector>
 #include "aggressive.h"
 #include "event_xml.h"
 #include "script.h"
 #include "vs_globals.h"
+#include "vsfilesystem.h"
 #include "config_xml.h"
 #include "xml_support.h"
 #include "cmd/unit_generic.h"
@@ -1145,8 +1172,9 @@ void AggressiveAI::ReCommandWing( Flightgroup *fg )
                     if ( parent->Threat() && (parent->FShieldData() < .2 || parent->RShieldData() < .2) ) {
                         fg->directive = string( "h" );
                         LeadMe( parent, "h", "I need help here!", false );
-                        if (verbose_debug)
-                            VSFileSystem::vs_fprintf( stderr, "he needs help %s", parent->name.get().c_str() );
+                        if (verbose_debug) {
+                            BOOST_LOG_TRIVIAL(trace) << boost::format("he needs help %1%") % parent->name.get().c_str();
+                        }
                     } else if ( lead->getFgSubnumber() >= parent->getFgSubnumber() ) {
                         fg->directive = string( "b" );
                         LeadMe( parent, "b", "I'm taking over this wing. Break and attack", false );
@@ -1363,12 +1391,14 @@ public: FlyTo( const QVector &target,
 
     virtual void Execute()
     {
-        if (parent == uoif)
-            printf( "kewl" );
+        if (parent == uoif) {
+            BOOST_LOG_TRIVIAL(info) << "kewl";
+        }
         MoveTo::Execute();
         Unit *un = destUnit.GetUnit();
-        if ( CloseEnoughToNavOrDest( parent, un, targetlocation ) )
+        if ( CloseEnoughToNavOrDest( parent, un, targetlocation ) ) {
             done = true;
+        }
         un = NULL;
         static float mintime = XMLSupport::parse_float( vs_config->getVariable( "AI", "min_time_to_auto", "25" ) );
         if (getNewTime()-creationtime > mintime) {
@@ -1377,8 +1407,9 @@ public: FlyTo( const QVector &target,
                 WarpToP( parent, un, true );
             } else {
                 Unit *playa = _Universe->AccessCockpit()->GetParent();
-                if (playa == NULL || playa->Target() != parent || 1)
+                if (playa == NULL || playa->Target() != parent || 1) {
                     WarpToP( parent, targetlocation, 0, true );
+                }
             }
         }
     }
@@ -1452,12 +1483,14 @@ void AggressiveAI::ExecuteNoEnemies()
             std::string fgname    = UnitUtil::getFlightgroupName( parent );
             std::string pfullname = parent->getFullname();
             std::string dfullname = dest->getFullname();
-            printf( "%s:%s %s going to %s:%s", parent->name.get().c_str(), pfullname.c_str(), fgname.c_str(),
-                   dest->name.get().c_str(), dfullname.c_str() );
+            BOOST_LOG_TRIVIAL(debug) << boost::format("%1%:%2% %3% going to %4%:%5%")
+                    % parent->name.get().c_str() % pfullname.c_str() % fgname.c_str() % dest->name.get().c_str() % dfullname.c_str();
             if (otherdest) {
                 std::string ofullname = otherdest->getFullname();
-                printf( " between %s:%s\n", otherdest->name.get().c_str(), ofullname.c_str() );
-            } else {printf( "\n" ); }
+                BOOST_LOG_TRIVIAL(debug) << boost::format(" between %1%:%2%\n") % otherdest->name.get().c_str() % ofullname.c_str();
+            } else {
+                BOOST_LOG_TRIVIAL(debug) << "\n";
+            }
 #endif
             GoTo( this, parent, nav, creationtime, otherdest != NULL, otherdest == NULL ? dest : NULL );
         }
@@ -1523,15 +1556,19 @@ volatile Unit *uoi;
 
 void AggressiveAI::Execute()
 {
-    if (parent == uoi)
-        printf( "kewl" );
+    if (parent == uoi) {
+        BOOST_LOG_TRIVIAL(info) << "kewl";
+    }
     jump_time_check++;     //just so we get a nicely often wrapping var;
     jump_time_check %= 5;
     Flightgroup  *fg  = parent->getFlightgroup();
     double firetime   = queryTime();
     static int    pir = FactionUtil::GetFactionIndex( "pirates" );
-    if (parent->faction == pir)
-        if (rand() == 0) printf( "ahoy, a pirates!" );
+    if (parent->faction == pir) {
+        if (rand() == 0) {
+            BOOST_LOG_TRIVIAL(info) << "ahoy, a pirates!";
+        }
+    }
     FireAt::Execute();
     aggfire += queryTime()-firetime;
     static bool resistance_to_side_movement =
@@ -1543,10 +1580,12 @@ void AggressiveAI::Execute()
         Vector countervelocity  = -parent->Velocity;
         Vector counterforce     = -parent->NetForce;
         float  forceforwardness = parent->NetForce.Dot( r );
-        if (forceforwardness > 0)
+        if (forceforwardness > 0) {
             counterforce = forceforwardness*r-parent->NetForce;
-        if (forwardness > 0)
+        }
+        if (forwardness > 0) {
             countervelocity = forwardness*r-parent->Velocity;
+        }
         static float resistance_percent =
             XMLSupport::parse_float( vs_config->getVariable( "AI", "resistance_to_side_movement_percent", ".01" ) );
         static float force_resistance_percent =
@@ -1570,7 +1609,7 @@ void AggressiveAI::Execute()
                     if (AIjumpCheat) {
                         static int i = 0;
                         if (!i) {
-                            VSFileSystem::vs_fprintf( stderr, "FIXME: warning ship not equipped to jump" );
+                            BOOST_LOG_TRIVIAL(warning) << "FIXME: warning ship not equipped to jump";
                             i = 1;
                         }
                         parent->jump.drive = -1;
@@ -1610,8 +1649,9 @@ void AggressiveAI::Execute()
         } else {
             if (target) {
                 static bool can_warp_to = XMLSupport::parse_bool( vs_config->getVariable( "AI", "warp_to_enemies", "true" ) );
-                if ( can_warp_to || _Universe->AccessCockpit()->autoInProgress() )
+                if ( can_warp_to || _Universe->AccessCockpit()->autoInProgress() ) {
                     WarpToP( parent, target, false );
+                }
                 logiccurtime     -= simulation_atom_var;
                 interruptcurtime -= simulation_atom_var;
                 if (logiccurtime <= 0) {
@@ -1631,8 +1671,8 @@ void AggressiveAI::Execute()
         }
     }
 #ifdef AGGDEBUG
-    VSFileSystem::vs_fprintf( stderr, "endagg" );
-    fflush( stderr );
+    BOOST_LOG_TRIVIAL(debug) << "endagg";
+    VSFileSystem::flushLogs();
 #endif
     if (getTimeCompression() > 3) {
         float mag = parent->GetVelocity().Magnitude();

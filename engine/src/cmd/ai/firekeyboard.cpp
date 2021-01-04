@@ -1,3 +1,29 @@
+/**
+ * firekeyboard.cpp
+ *
+ * Copyright (C) Daniel Horn
+ * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike
+ * contributors
+ *
+ * https://github.com/vegastrike/Vega-Strike-Engine-Source
+ *
+ * This file is part of Vega Strike.
+ *
+ * Vega Strike is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Vega Strike is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
+
 /// Keyboard parsing
 /// Parses keyboard commands
 
@@ -1128,8 +1154,9 @@ bool ChooseTargets( Unit *me, bool (*typeofunit)( Unit*, Unit* ), bool reverse )
             ++veciter;
         }
         ++cur;
-        if (cur >= 2)
+        if (cur >= 2) {
             break;
+        }
         veciter = vec.begin();
     }
     return true;
@@ -1138,12 +1165,14 @@ bool ChooseTargets( Unit *me, bool (*typeofunit)( Unit*, Unit* ), bool reverse )
 void ChooseSubTargets( Unit *me )
 {
     Unit   *parent = UnitUtil::owner( me->Target() );
-    if (!parent)
+    if (!parent) {
         return;
+    }
     un_iter uniter = parent->getSubUnits();
     if ( parent == me->Target() ) {
-        if ( !(*uniter) )
+        if ( !(*uniter) ) {
             return;
+        }
         me->Target( *uniter );
         return;
     }
@@ -1154,17 +1183,18 @@ void ChooseSubTargets( Unit *me )
             tUnit = *uniter;
             break;
         }
-    if (tUnit)
+    if (tUnit) {
         me->Target( tUnit );
-    else
+    } else {
         me->Target( parent );
+    }
 }
 
 FireKeyboard::~FireKeyboard()
 {
 #ifdef ORDERDEBUG
-    VSFileSystem::vs_fprintf( stderr, "fkb%x", this );
-    fflush( stderr );
+    BOOST_LOG_TRIVIAL(trace) << boost::format("fkb%1$x") % this;
+    VSFileSystem::flushLogs();
 #endif
 }
 
@@ -1172,12 +1202,14 @@ bool FireKeyboard::ShouldFire( Unit *targ )
 {
     float dist = FLT_MAX;
     float mrange;
-    if (gunspeed == .0001)
+    if (gunspeed == .0001) {
         parent->getAverageGunSpeed( gunspeed, gunrange, mrange );
+    }
     float angle = parent->cosAngleTo( targ, dist, gunspeed, gunrange );
     targ->Threaten( parent, angle/(dist < .8 ? .8 : dist) );
-    if ( targ == parent->Target() )
+    if ( targ == parent->Target() ) {
         distance = dist;
+    }
     return dist < .8 && angle > 1;
 }
 
@@ -1187,10 +1219,13 @@ static bool UnDockNow( Unit *me, Unit *targ )
     Unit *un;
     for (un_iter i = _Universe->activeStarSystem()->getUnitList().createIterator();
          (un = *i) != NULL;
-         ++i)
-        if ( un->isDocked( me ) )
-            if ( me->UnDock( un ) )
+         ++i) {
+        if ( un->isDocked( me ) ) {
+            if ( me->UnDock( un ) ) {
                 ret = true;
+            }
+        }
+    }
     return ret;
 }
 

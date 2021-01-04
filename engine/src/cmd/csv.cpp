@@ -1,5 +1,31 @@
+/**
+ * csv.cpp
+ *
+ * Copyright (C) Daniel Horn
+ * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike
+ * contributors
+ *
+ * https://github.com/vegastrike/Vega-Strike-Engine-Source
+ *
+ * This file is part of Vega Strike.
+ *
+ * Vega Strike is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Vega Strike is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
+
 #include "csv.h"
-#include "vsfilesystem.h"
+#include "vs_globals.h"
 
 using std::string;
 
@@ -123,7 +149,7 @@ void CSVTable::Init( const string &data )
         vector< string >strs = readCSV( buffer );
         unsigned int    row  = table.size()/key.size();
         while ( strs.size() > key.size() ) {
-            fprintf( stderr, "error in csv, line %d: %s has no key", row+1, strs.back().c_str() );
+            BOOST_LOG_TRIVIAL(error) << boost::format("error in csv, line %1$d: %2$s has no key") % (row+1) % strs.back().c_str();
             strs.pop_back();
         }
         while ( strs.size() < key.size() )
@@ -181,7 +207,8 @@ CSVTable::Merge( const CSVTable &other )
             local = columns.insert(std::pair<string, int>(it->first, key.size()-1)).first;
         }
         if (it->second >= int(colmap.size())) {
-            std::cerr << "WTF column " << it->second << "?" << std::endl;
+            BOOST_LOG_TRIVIAL(error) << "WTF column " << it->second << "?";
+            VSFileSystem::flushLogs();
             abort();
         }
         BOOST_LOG_TRIVIAL(debug) << boost::format("  %1% (%2%) -> %3%") % it->first % it->second % local->second;
@@ -284,9 +311,10 @@ vector< CSVTable* > unitTables;
 
 string CSVRow::getRoot()
 {
-    if (parent)
+    if (parent) {
         return parent->rootdir;
-    fprintf( stderr, "Error getting root for unit\n" );
+    }
+    BOOST_LOG_TRIVIAL(error) << "Error getting root for unit\n";
     return "";
 }
 
@@ -324,8 +352,7 @@ CSVTable* loadCSVTableList(const string& csvfiles, VSFileSystem::VSFileType file
                 thisFile.Close();
             } else if (critical) {
                 BOOST_LOG_TRIVIAL(fatal) << boost::format("Could not load CSV database at '%1%'") % tmp;
-                VSFileSystem::flushLogs();
-                exit(2);
+                VSExit(2);
             }
         }
         if (where2 == string::npos)

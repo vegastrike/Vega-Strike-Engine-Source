@@ -1,7 +1,7 @@
 // -*- mode: c++; c-basic-offset: 4; indent-tabs-mode: nil -*-
 
 #include "cmd/unit_generic.h"
-#include "cmd/planet_generic.h"
+#include "cmd/planet.h"
 #include "cmd/unit_util.h"
 #include "cmd/unit_find.h"
 #include "sensor.h"

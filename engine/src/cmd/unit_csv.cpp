@@ -1,5 +1,31 @@
 // -*- mode: c++; c-basic-offset: 4; indent-tabs-mode: nil -*-
 
+/**
+ * unit_csv.cpp
+ *
+ * Copyright (C) Daniel Horn
+ * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike
+ * contributors
+ *
+ * https://github.com/vegastrike/Vega-Strike-Engine-Source
+ *
+ * This file is part of Vega Strike.
+ *
+ * Vega Strike is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Vega Strike is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
+
 #include "unit_generic.h"
 #include "csv.h"
 #include "savegame.h"
@@ -19,6 +45,7 @@
 #include "vs_math.h"
 #include "unit.h"
 #include "universe.h"
+#include "vsfilesystem.h"
 
 CSVRow LookupUnitRow( const string &unitname, const string &faction ) {
     string hashname = unitname+"__"+faction;
@@ -154,7 +181,7 @@ static int nextElementInt( const string &inp, string::size_type &start, string::
     std::pair< string::size_type, string::size_type >rng = nextElementRange( inp, start, end );
     if (rng.second == string::npos && rng.first >= inp.length())
         return def;
-    else if (rng.first == rng.second) 
+    else if (rng.first == rng.second)
         return def;
     else
         return atoi( inp.c_str()+rng.first );
@@ -165,7 +192,7 @@ static double nextElementFloat( const string &inp, string::size_type &start, str
     std::pair< string::size_type, string::size_type >rng = nextElementRange( inp, start, end );
     if (rng.second == string::npos && rng.first >= inp.length())
         return def;
-    else if (rng.first == rng.second) 
+    else if (rng.first == rng.second)
         return def;
     else
         return atof( inp.c_str()+rng.first );
@@ -176,7 +203,7 @@ static double nextElementBool( const string &inp, string::size_type &start, stri
     std::pair< string::size_type, string::size_type >rng = nextElementRange( inp, start, end );
     if (rng.second == string::npos && rng.first >= inp.length())
         return def;
-    else if (rng.first == rng.second) 
+    else if (rng.first == rng.second)
         return def;
     else if (rng.second == string::npos)
         return XMLSupport::parse_bool( inp.substr( rng.first ) );
@@ -286,7 +313,7 @@ static void AddMounts( Unit *thus, Unit::XML &xml, const std::string &mounts )
         if ( (a&1) == parity ) {
             int b = a;
             if ( (a&3) == 2 && (int) a < (thus->GetNumMounts()-1) ) {
-                if (thus->mounts[a].type->type != weapon_info::PROJECTILE 
+                if (thus->mounts[a].type->type != weapon_info::PROJECTILE
                     && thus->mounts[a+1].type->type != weapon_info::PROJECTILE)
                 {
                     b = a+1;
@@ -297,8 +324,9 @@ static void AddMounts( Unit *thus, Unit::XML &xml, const std::string &mounts )
             thus->mounts[a].sound = AUDCreateSound( thus->mounts[a].type->sound, false );
         }
         if (a > 0)
-            if (thus->mounts[a].sound == thus->mounts[a-1].sound && thus->mounts[a].sound != -1)
-                printf( "Sound error\n" );
+            if (thus->mounts[a].sound == thus->mounts[a-1].sound && thus->mounts[a].sound != -1) {
+                BOOST_LOG_TRIVIAL(error) << "Sound error";
+            }
     }
 }
 
@@ -351,7 +379,7 @@ static vector< SubUnitStruct >GetSubUnits( const std::string &subunits )
 
             ret.push_back( SubUnitStruct( filename, pos, Q, R, restricted ) );
         } else {
-            ofs = string::npos; 
+            ofs = string::npos;
         }
     }
     return ret;
@@ -541,12 +569,12 @@ static void AddCarg( Unit *thus, const string &cargos )
             carg.maxfunctionality = nextElementFloat( cargos, elemstart, elemend, 1.f );
             carg.description      = nextElementString( cargos, elemstart, elemend );
             carg.mission          = nextElementBool( cargos, elemstart, elemend, false );
-            carg.installed        = nextElementBool( cargos, elemstart, elemend, 
+            carg.installed        = nextElementBool( cargos, elemstart, elemend,
                 carg.category.get().find("upgrades/") == 0 );
 
             thus->AddCargo( carg, false );
         } else {
-            ofs = string::npos; 
+            ofs = string::npos;
         }
     }
 }
@@ -861,7 +889,7 @@ void Unit::LoadRow( CSVRow &row, string modification, string *netxml )
         static bool optimizer_keys_init = false;
         if (!optimizer_keys_init) {
             optimizer_keys_init = true;
-            printf( "Initializing optimizer\n" );
+            BOOST_LOG_TRIVIAL(info) << "Initializing optimizer";
             INIT_OPTIMIZER( keys, Name );
             INIT_OPTIMIZER( keys, Hud_image );
             INIT_OPTIMIZER( keys, FaceCamera );
@@ -1473,10 +1501,11 @@ void Unit::WriteUnit( const char *modifications )
         bool bad = false;
         if (!modifications) bad = true;
         if (!bad)
-            if ( !strlen( modifications ) )
+            if ( !strlen( modifications ) ) {
                 bad = true;
+            }
         if (bad) {
-            fprintf( stderr, "Cannot Write out unit file %s %s that has no filename\n", name.get().c_str(), csvRow.get().c_str() );
+            BOOST_LOG_TRIVIAL(error) << boost::format("Cannot Write out unit file %1% %2% that has no filename") % name.get().c_str() % csvRow.get().c_str();
             return;
         }
         std::string savedir = modifications;
@@ -1484,7 +1513,7 @@ void Unit::WriteUnit( const char *modifications )
         VSFile  f;
         VSError err = f.OpenCreateWrite( savedir+"/"+name+".csv", UnitFile );
         if (err > Ok) {
-            fprintf( stderr, "!!! ERROR : Writing saved unit file : %s\n", f.GetFullPath().c_str() );
+            BOOST_LOG_TRIVIAL(error) << boost::format("!!! ERROR : Writing saved unit file : %1%") % f.GetFullPath().c_str();
             return;
         }
         std::string towrite = WriteUnitString();
@@ -1759,12 +1788,14 @@ string Unit::WriteUnitString()
                 return writeCSV( keys, values );
             }
         }
-        fprintf( stderr, "Failed to locate base mesh for %s %s %s\n", csvRow.get().c_str(), name.get().c_str(), fullname.c_str() );
+        BOOST_LOG_TRIVIAL(error) << boost::format("Failed to locate base mesh for %1% %2% %3%") % csvRow.get().c_str() % name.get().c_str() % fullname.c_str();
     } else {
-        if (pImage->unitwriter)
+        if (pImage->unitwriter) {
             ret = pImage->unitwriter->WriteString();
-        for (un_iter ui = getSubUnits(); (*ui) != NULL; ++ui)
+        }
+        for (un_iter ui = getSubUnits(); (*ui) != NULL; ++ui) {
             ret = ret+( (*ui)->WriteUnitString() );
+        }
     }
     return ret;
 }
@@ -1809,7 +1840,7 @@ Unit* Unit::makeMasterPartList()
     unsigned int i;
     static std::string mpl = vs_config->getVariable( "data", "master_part_list", "master_part_list" );
     CSVTable *table = loadCSVTableList(mpl, VSFileSystem::UnknownFile, false);
-    
+
     Unit *ret = new Unit();
     ret->name = "master_part_list";
     if (table) {

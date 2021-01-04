@@ -1,3 +1,28 @@
+/**
+ * Stream.h
+ *
+ * Copyright (C) Daniel Horn
+ * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike
+ * contributors
+ *
+ * https://github.com/vegastrike/Vega-Strike-Engine-Source
+ *
+ * This file is part of Vega Strike.
+ *
+ * Vega Strike is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Vega Strike is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 //
 // C++ Interface: Audio::Codec
 //
@@ -14,7 +39,7 @@ namespace Audio {
      * Stream abstract class
      *
      * @remarks This is the interface to all kinds of streams.
-     *      @par This abstract class has but a few 
+     *      @par This abstract class has but a few
      * @see Codec to create Stream instances.
      *
      */
@@ -23,9 +48,9 @@ namespace Audio {
     private:
         std::string filePath;
         Format streamFormat;
-        
+
         void* curBufferPos;
-    
+
     protected:
         /**
          * No Buffer exception
@@ -41,31 +66,31 @@ namespace Audio {
             NoBufferException(const NoBufferException &other) : Exception(other) {}
             explicit NoBufferException(const std::string &message) : Exception(message) {}
         };
-        
+
     protected:
         /** Internal constructor used by derived classes */
         Stream(const std::string& path);
-        
+
         /** Internal write access to stream format, for derived classes */
         Format& getFormatInternal() { return streamFormat; }
-    
+
     public:
         virtual ~Stream();
-        
+
         /** Return the path of the associated file. */
         const std::string& getPath() const { return filePath; };
-        
+
         /** Return the format of the stream. */
         const Format& getFormat() const { return streamFormat; }
-        
-        /** 
+
+        /**
          * Return the length of the stream.
          * @remarks This may not be an inocuous function. Some codecs can't return the length of
-         *      a file without parsing it entirely, and as such it cannot be const. 
+         *      a file without parsing it entirely, and as such it cannot be const.
          *      So use sparingly.
          */
         double getLength();
-        
+
         /**
          * Fill the specified buffer with data from the stream, and advance.
          * @remarks If not enough data is available, but some is, instead of throwing an EndOfStream
@@ -76,32 +101,32 @@ namespace Audio {
          *      of data to be extracted from the stream, if available.
          */
         unsigned int read(void *buffer, unsigned int bufferSize);
-        
+
         /** Get the stream's current position, in seconds */
         double getPosition() const;
-        
-        /** 
+
+        /**
          * Set the stream's position, in seconds
          * @remarks The final position in the stream after this operation is not guaranteed
          *      to be as requested, but an approximation given codec limitations. The only exception
          *      being seek(0), which is guaranteed to seek to the beginning of the stream.
          */
         void seek(double position);
-        
+
         // The following section contains all the virtual functions that need be implemented
         // by a concrete Stream class. All are protected, so the stream interface is independent
         // of implementations.
     protected:
-        
+
         /** @see getLength */
         virtual double getLengthImpl() const = 0;
-        
+
         /** @see getPosition */
         virtual double getPositionImpl() const = 0;
-        
+
         /** @see seek */
         virtual void seekImpl(double position) = 0;
-        
+
         /**
          * Get the stream's current reading buffer.
          * @remarks This buffer is to remain valid until any stream advancement is made
@@ -113,7 +138,7 @@ namespace Audio {
          *      a NoBuffer exception.
          */
         virtual void getBufferImpl(void *&buffer, unsigned int &bufferSize) = 0;
-        
+
         /**
          * Advance the stream by reading a new buffer.
          * @remarks The data read by this member is accessible through getBufferImpl().

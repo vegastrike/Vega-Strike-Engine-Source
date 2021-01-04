@@ -1,22 +1,27 @@
-/*
- * Vega Strike
+/**
+ * easydom.h
+ *
  * Copyright (C) 2001-2002 Daniel Horn
+ * Copyright (C) Alexander Rawass
+ * Copyright (C) 2020 Stephen G. Tuggy, pyramid3d, and other Vega Strike
+ * contributors
  *
- * http://vegastrike.sourceforge.net/
+ * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * as published by the Free Software Foundation; either version 2
- * of the License, or (at your option) any later version.
+ * This file is part of Vega Strike.
  *
- * This program is distributed in the hope that it will be useful,
+ * Vega Strike is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * Vega Strike is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+ * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 /*
@@ -32,6 +37,7 @@
 #include <gnuhash.h>
 #include <stdlib.h>
 #include "vsfilesystem.h"
+#include "vs_globals.h"
 //using namespace VSFileSystem;
 using VSFileSystem::VSFile;
 using VSFileSystem::VSError;
@@ -94,9 +100,6 @@ public:
     void Tag( tagMap *tagmap )
     {
         tag = (*tagmap)[Name()];
-        if (tag == 0) {
-            //cout << "cannot translate tag " << Name() << endl;
-        }
         vector< easyDomNode* >::const_iterator siter;
         for (siter = subnodes.begin(); siter != subnodes.end(); siter++) {
             tagDomNode *tnode = (tagDomNode*) (*siter);
@@ -160,10 +163,9 @@ public: easyDomFactory() {}
             prefix += filename;
             err     = f.OpenReadOnly( prefix.c_str(), UnknownFile );
         }
-        if (err > Ok)
-            //cout << "warning: could not open file: " << filename << endl;
-            //assert(0);
+        if (err > Ok) {
             return NULL;
+        }
         xml = new easyDomFactoryXML;
 
         XML_Parser parser = XML_ParserCreate( NULL );
@@ -212,10 +214,9 @@ public: easyDomFactory() {}
         const int chunk_size = 262144;
 
         string    module_str = parseCalike( filename );
-        if ( module_str.empty() )
-            //cout << "warning: could not open file: " << filename << endl;
-            //assert(0);
+        if ( module_str.empty() ) {
             return NULL;
+        }
         xml = new easyDomFactoryXML;
 
         XML_Parser parser = XML_ParserCreate( NULL );
@@ -232,21 +233,19 @@ public: easyDomFactory() {}
 
             int  max_index = index+incr;
             int  newlen    = incr;
-            //printf("max_index=%d,string_size=%d\n",max_index,string_size);
             if (max_index >= string_size) {
                 newlen = module_str.size()-index;
-                //printf("getting string from %d length %d\n",index,newlen);
                 const char *strbuf = module_str.c_str();
                 memcpy( buf, strbuf+index, sizeof (char)*newlen );
             } else {
-                //printf("getting string from %d length %d\n",index,incr);
                 const char *strbuf = module_str.c_str();
                 memcpy( buf, strbuf+index, sizeof (char)*incr );
                 newlen = incr;
             }
             index += newlen;
-            if (index >= string_size)
+            if (index >= string_size) {
                 is_final = true;
+            }
             XML_Parse( parser, buf, newlen, is_final );
         } while (!is_final);
         XML_ParserFree( parser );
@@ -305,9 +304,8 @@ public: easyDomFactory() {}
         doTextBuffer();
         domNodeType *stacktop = nodestack.top();
         if (stacktop->Name() != name) {
-            BOOST_LOG_TRIVIAL(fatal)<<"error: expected "<<stacktop->Name()<<" , got "<<name;
-            VSFileSystem::flushLogs();
-            exit( 1 );
+            BOOST_LOG_TRIVIAL(fatal) << boost::format("error: expected %1% , got %2%") % stacktop->Name() % name;
+            VSExit( 1 );
         } else {
             nodestack.pop();
         }

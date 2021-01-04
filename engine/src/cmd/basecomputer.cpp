@@ -1,24 +1,30 @@
 // -*- mode: c++; c-basic-offset: 4; indent-tabs-mode: nil -*-
-/*
- * Vega Strike
+
+/**
+ * basecomputer.cpp
+ *
  * Copyright (C) 2003 Mike Byron
+ * Copyright (C) 2019-2020 Stephen G. Tuggy, pyramid3d, and other Vega Strike
+ * contributors
  *
- * http://vegastrike.sourceforge.net/
+ * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * as published by the Free Software Foundation; either version 2
- * of the License, or (at your option) any later version.
+ * This file is part of Vega Strike.
  *
- * This program is distributed in the hope that it will be useful,
+ * Vega Strike is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * Vega Strike is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+ * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
  */
+
 
 #include "vegastrike.h"
 #if defined (_WIN32) && !defined (__CYGWIN__) && !defined (__MINGW32__)
@@ -33,7 +39,7 @@ using VSFileSystem::SaveFile;
 #include <algorithm>                //For std::sort.
 #include <set>
 #include "load_mission.h"
-#include "cmd/planet_generic.h"
+#include "cmd/planet.h"
 #include "cmd/unit_util.h"
 #include "cmd/music.h"
 #include "cmd/unit_const_cache.h"
@@ -396,7 +402,7 @@ extern float RepairPrice( float operational, float price );
 
 static float basicRepairPrice( void )
 {
-    static const float price = XMLSupport::parse_float( vs_config->getVariable( "physics", "repair_price", "5000" ) );
+    static float price = XMLSupport::parse_float( vs_config->getVariable( "physics", "repair_price", "5000" ) );
     return price*g_game.difficulty;
 }
 
@@ -2807,7 +2813,7 @@ void BaseComputer::loadNewsControls( void )
     picker->clear();
 
     //Load the picker.
-    static const bool newsFromCargolist =
+    static bool newsFromCargolist =
         XMLSupport::parse_bool( vs_config->getVariable( "cargo", "news_from_cargolist", "false" ) );
     if (newsFromCargolist ) {
         gameMessage last;
@@ -3141,7 +3147,7 @@ void BaseComputer::loadSellUpgradeControls( void )
     loadMasterList( partListUnit, weapfiltervec, std::vector< std::string > (), false, tlist );
     ClearDowngradeMap();
     playerUnit->FilterDowngradeList( tlist.masterList );
-    static const bool clearDowngrades =
+    static bool clearDowngrades =
         XMLSupport::parse_bool( vs_config->getVariable( "physics", "only_show_best_downgrade", "true" ) );
     if (clearDowngrades) {
         std::set< std::string >downgradeMap = GetListOfDowngrades();
@@ -3863,11 +3869,11 @@ Cargo CreateCargoForOwnerStarship( const Cockpit *cockpit, const Unit *base, int
     bool needsJumpTransport = (locationSystemName != destinationSystemName);
     bool needsInsysTransport = (locationBaseName != destinationBaseName);
 
-    static const float shipping_price_base =
+    static float shipping_price_base =
         XMLSupport::parse_float( vs_config->getVariable( "physics", "shipping_price_base", "0" ) );
-    static const float shipping_price_insys =
+    static float shipping_price_insys =
         XMLSupport::parse_float( vs_config->getVariable( "physics", "shipping_price_insys", "1000" ) );
-    static const float shipping_price_perjump =
+    static float shipping_price_perjump =
         XMLSupport::parse_float( vs_config->getVariable( "physics", "shipping_price_perjump", "25000" ) );
 
     cargo.price = shipping_price_base;
@@ -4281,7 +4287,7 @@ bool sellShip( Unit *baseUnit, Unit *playerUnit, std::string shipname, BaseCompu
 
                 float xtra = 0;
                 if ( cockpit->GetUnitSystemName(i) == _Universe->activeStarSystem()->getFileName() ) {
-                    static const float shipping_price =
+                    static float shipping_price =
                         XMLSupport::parse_float( vs_config->getVariable( "physics", "sellback_shipping_price", "6000" ) );
                     xtra += shipping_price;
                 }
@@ -4483,9 +4489,6 @@ static std::string factionColorTextString( int faction )
     //The following gets the spark (faction) color.
     const float *spark = FactionUtil::GetSparkColor( faction );
 
-    //This line puts the faction colors on the std out.
-    //printf("%2d. r=%g g=%g b=%g\n", faction, spark[0], spark[1], spark[2]);
-
     //Brighten up the raw colors by multiplying each channel by 2/3, then adding back 1/3.
     //The darker colors are too hard to read.
     std::string result = colorsToCommandString( spark[0]/1.5+1.0/3, spark[1]/1.5+1.0/3, spark[2]/1.5+1.0/3 );
@@ -4626,7 +4629,6 @@ void prettyPrintFloat( char *buffer, float f, int digitsBefore, int digitsAfter,
     }
     if (bufferPos < bufferLen)
         buffer[bufferPos] = 0;
-    //printf("******************* %f is, I think %s\n",dbgval,buffer);
 }
 
 static const char *WeaponTypeStrings[] = {

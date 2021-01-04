@@ -1,5 +1,32 @@
+/**
+ * communication.cpp
+ *
+ * Copyright (C) 2001-2002 Daniel Horn
+ * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike
+ * contributors
+ *
+ * https://github.com/vegastrike/Vega-Strike-Engine-Source
+ *
+ * This file is part of Vega Strike.
+ *
+ * Vega Strike is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Vega Strike is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
+
 #include "communication.h"
 #include "vs_globals.h"
+#include "vsfilesystem.h"
 #include "config_xml.h"
 #include <assert.h>
 #include "audiolib.h"
@@ -144,7 +171,7 @@ std::string FSM::Node::GetMessage( unsigned int &multiple ) const
 // FIXME: this variability makes it hard to use proper include files
 extern int createSound( std::string file, bool val );
 
-int FSM::Node::GetSound( unsigned char sex, unsigned int multiple, float &gain ) 
+int FSM::Node::GetSound( unsigned char sex, unsigned int multiple, float &gain )
 {
     unsigned int index = multiple+( (unsigned int) sex )*messages.size();
     if ( index < sounds.size() ) {
@@ -186,7 +213,7 @@ bool FSM::StopAllSounds( unsigned char sex )
 void FSM::Node::AddSound( std::string soundfile, unsigned char sex, float gain )
 {
     static std::string emptystr;
-    
+
     for (int multiple = 0;; ++multiple) {
         unsigned int index = ( (unsigned int) sex )*messages.size()+multiple;
         while ( index >= sounds.size() ) {
@@ -194,15 +221,15 @@ void FSM::Node::AddSound( std::string soundfile, unsigned char sex, float gain )
             soundfiles.push_back(emptystr);
             gains.push_back( 1.0f );
         }
-        
+
         if (soundfiles[index].empty()) {
             soundfiles[index] = soundfile;
             gains[index] = gain;
-        
+
             // Preload sound if configured to do so
             if (game_options.comm_preload)
                 GetSound(sex, multiple, gain);
-            
+
             break;
         }
     }
@@ -291,7 +318,7 @@ std::string FSM::GetEdgesString( unsigned int curstate )
 {
     std::string retval = "\n";
     if (nodes.size() <= curstate) {
-        fprintf( stderr, "Error with faction relationship due to %d not being in range of faction\n", curstate );
+        BOOST_LOG_TRIVIAL(error) << boost::format("Error with faction relationship due to %1$d not being in range of faction") % curstate;
         return "\n1. Transmit Error\n2. Transmit Error\n3. Transmit Error\n";
     }
     for (unsigned int i = 0; i < nodes[curstate].edges.size(); i++)
@@ -306,7 +333,7 @@ std::string FSM::GetEdgesString( unsigned int curstate )
 float FSM::getDeltaRelation( int prevstate, unsigned int current_state ) const
 {
     if (nodes.size() <= current_state) {
-        fprintf( stderr, "Error with faction relationship due to %d not being in range of faction\n", current_state );
+        BOOST_LOG_TRIVIAL(error) << boost::format("Error with faction relationship due to %1$d not being in range of faction") % current_state;
         return 0;
     }
     return nodes[current_state].messagedelta;

@@ -1,8 +1,12 @@
-/*
+/**
  * configxml.cpp
  *
  * Copyright (C) 2001-2002 Daniel Horn
- * Copyright (C) 2020 Stephen G. Tuggy
+ * Copyright (C) Alexander Rawass
+ * Copyright (C) 2020 Stephen G. Tuggy, pyramid3d, and other Vega Strike
+ * contributors
+ *
+ * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
  * This file is part of Vega Strike.
  *
@@ -29,10 +33,7 @@
 #include <assert.h>
 #include "configxml.h"
 #include "easydom.h"
-
-using std::cout;
-using std::cerr;
-using std::endl;
+#include "vsfilesystem.h"
 
 /* *********************************************************** */
 
@@ -42,8 +43,7 @@ VegaConfig::VegaConfig( const char *configfile )
     configNode *top = (configNode*) domf.LoadXML( configfile );
     if (top == NULL) {
         BOOST_LOG_TRIVIAL(fatal)<<"Panic exit - no configuration";
-        VSFileSystem::flushLogs();
-        exit( 0 );
+        VSExit( 0 );
     }
     variables = NULL;
     colors    = NULL;
@@ -65,7 +65,7 @@ VegaConfig::~VegaConfig()
 bool VegaConfig::checkConfig( configNode *node )
 {
     if (node->Name() != "vegaconfig") {
-        cout<<"this is no Vegastrike config file"<<endl;
+        BOOST_LOG_TRIVIAL(warning) << "this is no Vegastrike config file";
         return false;
     }
     vector< easyDomNode* >::const_iterator siter;
@@ -78,7 +78,7 @@ bool VegaConfig::checkConfig( configNode *node )
         else if (cnode->Name() == "bindings")
             bindings = cnode;              //delay the bindings until keyboard/joystick is initialized
         else
-            cout<<"Unknown tag: "<<cnode->Name()<<endl;
+            BOOST_LOG_TRIVIAL(warning) <<"Unknown tag: "<<cnode->Name();
     }
     return true;
 }
@@ -88,7 +88,7 @@ bool VegaConfig::checkConfig( configNode *node )
 void VegaConfig::doVariables( configNode *node )
 {
     if (variables != NULL) {
-        cout<<"only one variable section allowed"<<endl;
+        BOOST_LOG_TRIVIAL(error) << "only one variable section allowed";
         return;
     }
     variables = node;
@@ -105,20 +105,24 @@ void VegaConfig::doVariables( configNode *node )
 void VegaConfig::doSection( string prefix, configNode *node, enum section_t section_type )
 {
     string section = node->attr_value( "name" );
-    if ( section.empty() )
-        cout<<"no name given for section"<<endl;
+    if ( section.empty() ) {
+        BOOST_LOG_TRIVIAL(warning) << "no name given for section";
+    }
     vector< easyDomNode* >::const_iterator siter;
     for (siter = node->subnodes.begin(); siter != node->subnodes.end(); siter++) {
         configNode *cnode = (configNode*) (*siter);
         if (section_type == SECTION_COLOR) {
             checkColor( prefix, cnode );
         } else if (section_type == SECTION_VAR) {
-            if (cnode->Name() == "var")
+            if (cnode->Name() == "var") {
                 doVar( prefix, cnode );
-            else if (cnode->Name() == "section")
+            }
+            else if (cnode->Name() == "section") {
                 doSection( prefix+cnode->attr_value( "name" )+"/", cnode, section_type );
-            else
-                cout<<"neither a variable nor a section"<<endl;
+            }
+            else {
+                BOOST_LOG_TRIVIAL(warning) << "neither a variable nor a section";
+            }
         }
     }
 }
@@ -128,8 +132,8 @@ void VegaConfig::doSection( string prefix, configNode *node, enum section_t sect
 void VegaConfig::checkSection( configNode *node, enum section_t section_type )
 {
     if (node->Name() != "section") {
-        cout<<"not a section"<<endl;
-        node->printNode( cout, 0, 1 );
+        BOOST_LOG_TRIVIAL(warning) << "not a section";
+        node->printNode( std::cout, 0, 1 );
 
         return;
     }
@@ -144,8 +148,9 @@ void VegaConfig::doVar( string prefix, configNode *node )
     string value    = node->attr_value( "value" );
     string hashname = prefix+name;
     map_variables[hashname] = value;
-    if ( name.empty() )
-        cout<<"no name given for variable "<<name<<" "<<value<<" "<<endl;
+    if ( name.empty() ) {
+        BOOST_LOG_TRIVIAL(warning) << "no name given for variable " << name << " " << value << " ";
+    }
 }
 
 /* *********************************************************** */
@@ -153,7 +158,7 @@ void VegaConfig::doVar( string prefix, configNode *node )
 void VegaConfig::checkVar( configNode *node )
 {
     if (node->Name() != "var") {
-        cout<<"not a variable"<<endl;
+        BOOST_LOG_TRIVIAL(warning) << "not a variable";
         return;
     }
     doVar( "", node );
@@ -164,11 +169,11 @@ void VegaConfig::checkVar( configNode *node )
 bool VegaConfig::checkColor( string prefix, configNode *node )
 {
     if (node->Name() != "color") {
-        cout<<"no color definition"<<endl;
+        BOOST_LOG_TRIVIAL(warning) << "no color definition";
         return false;
     }
     if ( node->attr_value( "name" ).empty() ) {
-        cout<<"no color name given"<<endl;
+        BOOST_LOG_TRIVIAL(warning) << "no color name given";
         return false;
     }
     string  name     = node->attr_value( "name" );
@@ -184,7 +189,7 @@ bool VegaConfig::checkColor( string prefix, configNode *node )
         string b = node->attr_value( "b" );
         string a = node->attr_value( "a" );
         if ( r.empty() || g.empty() || b.empty() || a.empty() ) {
-            cout<<"neither name nor r,g,b given for color "<<node->Name()<<endl;
+            BOOST_LOG_TRIVIAL(warning) << "neither name nor r,g,b given for color " << node->Name();
             delete color;
             return false;
         }
@@ -208,7 +213,7 @@ bool VegaConfig::checkColor( string prefix, configNode *node )
         string ref_section = node->attr_value( "section" );
         string ref_name    = node->attr_value( "ref" );
         if ( ref_section.empty() ) {
-            cout<<"you have to give a referenced section when referencing colors"<<endl;
+            BOOST_LOG_TRIVIAL(warning) << "you have to give a referenced section when referencing colors";
             ref_section = "default";
         }
         GFXColor refcol;
@@ -236,7 +241,7 @@ bool VegaConfig::checkColor( string prefix, configNode *node )
 void VegaConfig::doColors( configNode *node )
 {
     if (colors != NULL) {
-        cout<<"only one variable section allowed"<<endl;
+        BOOST_LOG_TRIVIAL(warning) << "only one variable section allowed";
         return;
     }
     colors = node;
@@ -292,9 +297,9 @@ string VegaConfig::getVariable( configNode *section, string name, string default
             foundshouldwarn = true;
         }
     }
-    if (shouldwarn)
-        cout<<"WARNING: no var named "<<name<<" in section "<<section->attr_value( "name" )<<" using default: "<<defaultval
-            <<endl;
+    if (shouldwarn) {
+        BOOST_LOG_TRIVIAL(warning) <<"WARNING: no var named "<<name<<" in section "<<section->attr_value( "name" )<<" using default: "<<defaultval;
+    }
     return defaultval;
 }
 
@@ -318,7 +323,7 @@ GFXColor VegaConfig::getColor( configNode *node, string name, GFXColor default_c
         if ( (cnode)->attr_value( "name" ) == name )
             return GFXColor( (cnode)->color->r, (cnode)->color->g, (cnode)->color->b, (cnode)->color->a );
         }
-    cout<<"WARNING: color "<<name<<" not defined, using default"<<endl;
+    BOOST_LOG_TRIVIAL(warning) << "WARNING: color "<<name<<" not defined, using default";
     return default_color;
     }
 
@@ -340,7 +345,7 @@ configNode* VegaConfig::findSection( string section, configNode *startnode )
         if (scan_name == section)
             return cnode;
     }
-    cout<<"WARNING: no section/variable/color named "<<section<<endl;
+    BOOST_LOG_TRIVIAL(warning) << "WARNING: no section/variable/color named " << section;
 
     return NULL;
 }
