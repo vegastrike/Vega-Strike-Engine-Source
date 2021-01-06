@@ -1,0 +1,83 @@
+name: 'GH Actions CI'
+
+on:
+  push:
+    branches: ['*master', '*0.[0-9].x']
+  pull_request:
+    # The branches below must be a subset of the branches above
+    branches: ['*master', '*0.[0-9].x']
+  # schedule:
+  #   - cron: '0 11 * * 3'
+
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: true
+      matrix:
+        include:
+          - FROM:     'ubuntu:focal'
+            COMPILER: 'gcc'
+            FLAGS:    '-DUSE_PYTHON_3=OFF'
+          - FROM:     'ubuntu:focal'
+            COMPILER: 'clang'
+            FLAGS:    '-DUSE_PYTHON_3=OFF'
+          - FROM:     'ubuntu:focal'
+            COMPILER: 'clang'
+            FLAGS:    '-DUSE_PYTHON_3=ON'
+          - FROM:     'ubuntu:bionic'
+            COMPILER: 'gcc'
+            FLAGS:    '-DUSE_PYTHON_3=OFF'
+          - FROM:     'ubuntu:bionic'
+            COMPILER: 'clang'
+            FLAGS:    '-DUSE_PYTHON_3=OFF'
+          - FROM:     'ubuntu:bionic'
+            COMPILER: 'clang'
+            FLAGS:    '-DUSE_PYTHON_3=ON'
+          - FROM:     'ubuntu:xenial'
+            COMPILER: 'gcc'
+            FLAGS:    '-DUSE_PYTHON_3=OFF'
+          - FROM:     'ubuntu:xenial'
+            COMPILER: 'gcc'
+            FLAGS:    '-DUSE_PYTHON_3=ON'
+          - FROM:     'debian:buster'
+            COMPILER: 'clang'
+            FLAGS:    '-DUSE_PYTHON_3=ON'
+          - FROM:     'debian:stretch'
+            COMPILER: 'gcc'
+            FLAGS:    '-DUSE_PYTHON_3=OFF'
+          - FROM:     'opensuse/leap'
+            COMPILER: 'clang'
+            FLAGS:    '-DUSE_PYTHON_3=ON'
+          - FROM:     'fedora:33'
+            COMPILER: 'clang'
+            FLAGS:    '-DUSE_PYTHON_3=ON'
+          - FROM:     'fedora:32'
+            COMPILER: 'clang'
+            FLAGS:    '-DUSE_PYTHON_3=ON'
+          - FROM:     'centos:8'
+            COMPILER: 'clang'
+            FLAGS:    '-DUSE_PYTHON_3=ON'
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+      with:
+        # We must fetch at least the immediate parents so that if this is
+        # a pull request then we can checkout the head.
+        fetch-depth: 2
+
+    # If this run was triggered by a pull request event, then checkout
+    # the head of the pull request instead of the merge commit.
+    - run: git checkout HEAD^2
+      if: ${{ github.event_name == 'pull_request' }}
+
+    - name: Run CI
+      env:
+        FROM:       ${{ matrix.FROM }}
+        COMPILER:   ${{ matrix.COMPILER }}
+        FLAGS:      ${{ matrix.FLAGS }}
+        MY_OS_NAME: linux
+      run: script/cibuild $FLAGS
