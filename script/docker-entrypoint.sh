@@ -6,7 +6,7 @@ echo "docker-entrypoint.sh: Flags passed in: $@"
 
 # find /usr -iname '*libboost_python*'
 
-if [ -z "$TRAVIS_TAG" ]
+if [ -z "$IS_RELEASE" ]
 then
     if [ "$CC" == "clang" ]
     then
