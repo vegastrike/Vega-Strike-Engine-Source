@@ -2,7 +2,7 @@
 <p style="font-weight:600; font-size:36px">Vega Strike Space Simulation Engine</p>
 </header>
 
-[![Build Status](https://travis-ci.org/vegastrike/Vega-Strike-Engine-Source.svg?branch=master)](https://travis-ci.org/vegastrike/Vega-Strike-Engine-Source)
+[![Build Status](https://github.com/vegastrike/Vega-Strike-Engine-Source/workflows/ci/badge.svg)]
 [![Gitter](https://badges.gitter.im/vegastrike/community.svg)](https://gitter.im/vegastrike/community?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
 [![Vega Strike](https://img.shields.io/badge/-Website-informational)](https://www.vega-strike.org)
 
