@@ -2,10 +2,10 @@ name: 'GH Actions CI'
 
 on:
   push:
-    branches: ['*master', '*0.[0-9].x']
+    branches: ['*master', '*0.[0-9]?.x']
   pull_request:
     # The branches below must be a subset of the branches above
-    branches: ['*master', '*0.[0-9].x']
+    branches: ['*master', '*0.[0-9]?.x']
   # schedule:
   #   - cron: '0 11 * * 3'
 
