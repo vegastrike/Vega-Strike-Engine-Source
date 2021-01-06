@@ -1,4 +1,4 @@
-name: 'GH Actions CI'
+name: CI
 
 on:
   push:
