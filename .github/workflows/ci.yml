@@ -6,6 +6,7 @@ on:
   pull_request:
     # The branches below must be a subset of the branches above
     branches: ['*master', '*0.[0-9].x']
+  release:
   # schedule:
   #   - cron: '0 11 * * 3'
 
@@ -80,4 +81,5 @@ jobs:
         COMPILER:   ${{ matrix.COMPILER }}
         FLAGS:      ${{ matrix.FLAGS }}
         MY_OS_NAME: linux
+        IS_RELEASE: ${{ github.event_name == 'release' }}
       run: script/cibuild $FLAGS
