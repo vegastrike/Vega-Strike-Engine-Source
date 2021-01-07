@@ -9,7 +9,7 @@
 
 set -e
 
-if [ "$TRAVIS_OS_NAME" == "linux" ]
+if [ "$MY_OS_NAME" == "linux" ]
 then
     SRC_DOCKER_IMG_NAME="vegastrike/vega-strike-build-env:$(echo $FROM | sed 's/:/_/' | sed 's/\//_/')"
     DST_DOCKER_IMG_NAME="building-vega-strike:$(echo $FROM | sed 's/:/_/' | sed 's/\//_/')"
@@ -24,12 +24,12 @@ then
         export CC=clang
         export CXX=clang++
     fi
-    docker run --env CC=$CC --env CXX=$CXX --env FLAGS=$FLAGS --env TRAVIS_TAG=$TRAVIS_TAG --name $DOCKER_CONTAINER_NAME $DST_DOCKER_IMG_NAME $FLAGS
+    docker run --env CC=$CC --env CXX=$CXX --env FLAGS=$FLAGS --name $DOCKER_CONTAINER_NAME $DST_DOCKER_IMG_NAME $FLAGS
     docker cp $DOCKER_CONTAINER_NAME:/usr/src/Vega-Strike-Engine-Source/bin .
-    if ! [ -z "$TRAVIS_TAG" ]
-    then
-        docker cp $DOCKER_CONTAINER_NAME:/usr/src/Vega-Strike-Engine-Source/packages .
-    fi
+    # if ! [ -z "$TRAVIS_TAG" ]
+    # then
+    #     docker cp $DOCKER_CONTAINER_NAME:/usr/src/Vega-Strike-Engine-Source/packages .
+    # fi
     docker rm $DOCKER_CONTAINER_NAME
 else
     script/docker-entrypoint.sh $@
