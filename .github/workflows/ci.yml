@@ -7,6 +7,7 @@ on:
     # The branches below must be a subset of the branches above
     branches: ['*master', '*0.[0-9].x']
   release:
+    types: [published, created, edited, prereleased]
   # schedule:
   #   - cron: '0 11 * * 3'
 
@@ -69,19 +70,20 @@ jobs:
         # We must fetch at least the immediate parents so that if this is
         # a pull request then we can checkout the head.
         fetch-depth: 2
+        submodules: false
 
     # If this run was triggered by a pull request event, then checkout
     # the head of the pull request instead of the merge commit.
     - run: git checkout HEAD^2
       if: ${{ github.event_name == 'pull_request' }}
 
-    - name: Extract tag name
+    - name: Extract tag name etc
       shell: bash
       run: |
-        echo "::set-env name=TAG_NAME::$(echo ${GITHUB_REF#refs/tags/} | sed 's/\//_/g')"
-        echo "::set-env name=IS_RELEASE::1"
+        echo "TAG_NAME=$(echo ${GITHUB_REF#refs/tags/} | sed 's/\//_/g')" >> $GITHUB_ENV
+        echo "IS_RELEASE=1" >> $GITHUB_ENV
       if: ${{ github.event_name == 'release' }}
-    - name: Test
+    - name: Test tag name etc
       run: |
         echo "${TAG_NAME}"
         echo "$IS_RELEASE"
