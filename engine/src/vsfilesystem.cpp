@@ -710,7 +710,10 @@ void LoadConfig( string subdir )
         BOOST_LOG_TRIVIAL(info) << boost::format("DATADIR - No datadir specified in config file, using : %1%") % datadir;
     }
 
-    string universe_file = datadir + "/universe/milky_way.xml";
+    string universe_file = datadir + "/" \
+        + vs_config->getVariable( "data", "universe_path", "universe" ) + "/" \
+        + vs_config->getVariable( "general", "galaxy", "milky_way.xml" );
+    BOOST_LOG_TRIVIAL(debug) << "Force galaxy to " << universe_file;
     Galaxy galaxy = Galaxy(universe_file);
 }
 
