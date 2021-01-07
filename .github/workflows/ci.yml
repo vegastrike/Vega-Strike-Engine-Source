@@ -1,4 +1,4 @@
-name: 'GH Actions CI'
+name: CI
 
 on:
   push:
@@ -6,6 +6,7 @@ on:
   pull_request:
     # The branches below must be a subset of the branches above
     branches: ['*master', '*0.[0-9].x']
+  release:
   # schedule:
   #   - cron: '0 11 * * 3'
 
@@ -74,6 +75,17 @@ jobs:
     - run: git checkout HEAD^2
       if: ${{ github.event_name == 'pull_request' }}
 
+    - name: Extract tag name
+      shell: bash
+      run: |
+        echo "::set-env name=TAG_NAME::$(echo ${GITHUB_REF#refs/tags/} | sed 's/\//_/g')"
+        echo "::set-env name=IS_RELEASE::1"
+      if: ${{ github.event_name == 'release' }}
+    - name: Test
+      run: |
+        echo "${TAG_NAME}"
+        echo "$IS_RELEASE"
+      if: ${{ github.event_name == 'release' }}
     - name: Run CI
       env:
         FROM:       ${{ matrix.FROM }}
