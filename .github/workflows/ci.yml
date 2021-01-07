@@ -3,10 +3,12 @@ name: CI
 on:
   push:
     branches: ['*master', '*0.[0-9].x']
+    tags: ['*']
   pull_request:
     # The branches below must be a subset of the branches above
     branches: ['*master', '*0.[0-9].x']
   release:
+    types: [published, created, edited, prereleased]
   # schedule:
   #   - cron: '0 11 * * 3'
 
@@ -69,6 +71,7 @@ jobs:
         # We must fetch at least the immediate parents so that if this is
         # a pull request then we can checkout the head.
         fetch-depth: 2
+        submodules: false
 
     # If this run was triggered by a pull request event, then checkout
     # the head of the pull request instead of the merge commit.
