@@ -1,6 +1,12 @@
-name: 'GH Actions - CI'
+name: 'GH Actions - Release'
 
-on: [ pull_request ]
+on:
+  release:
+    types:
+      - published
+      - created
+      - edited
+      - prereleased
 
 jobs:
   build:
@@ -63,15 +69,28 @@ jobs:
         fetch-depth: 2
         submodules: false
 
-    # Ensure PRs are built against the PR Head
-    # As opposed to the merge commit
-    - name: Move to PR HEAD
-      run: git checkout HEAD^2
+    # where in a pull request we want to move to the head of the PR and not be at the
+    # merge commit; here we want to be at the HEAD of the ref
+
+    - name: Extract tag name etc
+      shell: bash
+      run: |
+        echo "TAG_NAME=$(echo ${GITHUB_REF#refs/tags/} | sed 's/\//_/g')" >> $GITHUB_ENV
+    - name: Test tag name etc
+      run: |
+        echo "${TAG_NAME}"
     - name: Run CI
       env:
         FROM:       ${{ matrix.FROM }}
         COMPILER:   ${{ matrix.COMPILER }}
         FLAGS:      ${{ matrix.FLAGS }}
         MY_OS_NAME: linux
-        IS_RELEASE: 0
+        IS_RELEASE: 1
       run: script/cibuild $FLAGS
+    - name: Upload the artifacts
+      uses: skx/github-action-publish-binaries@master
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        args: 'packages/*'
+      if: ${{ github.event_name == 'release' }}
