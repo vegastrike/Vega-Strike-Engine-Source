@@ -95,3 +95,10 @@ jobs:
         FLAGS:      ${{ matrix.FLAGS }}
         MY_OS_NAME: linux
       run: script/cibuild $FLAGS
+    - name: Upload the artifacts
+      uses: skx/github-action-publish-binaries@master
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        args: 'packages/*'
+      if: ${{ github.event_name == 'release' }}
