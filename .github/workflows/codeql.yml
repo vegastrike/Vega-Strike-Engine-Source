@@ -60,7 +60,8 @@ jobs:
     #    and modify them (or add more) to build your code if your project
     #    uses a compiled language
 
-    - run: |
+    - name: Bootstrap and Build the Code
+      run: |
         sudo script/bootstrap
         script/build.sh
 
