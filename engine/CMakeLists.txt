@@ -9,7 +9,7 @@
 # to change build target (in Release, RelWithDebInfo, Debug, Profiler)
 # > cmake -DCMAKE_BUILD_TYPE=Debug <path to source tree>
 #====================================
-# Copyright (C) 2008-2020 safemode, Anth0rx, pyramid, Roy Falk,
+# Copyright (C) 2008-2021 safemode, Anth0rx, pyramid, Roy Falk,
 # Nachum Barcohen, Rune Morling, Stephen G. Tuggy, Benjamen Meyer, s0600204,
 # Evert Vorster, and other Vega Strike contributors.
 #
@@ -1310,7 +1310,7 @@ ELSEIF (CMAKE_SYSTEM_NAME STREQUAL Linux)
                 ELSE (USE_PYTHON_3)
                     SET(CPACK_DEBIAN_PACKAGE_DEPENDS "libpython2.7")
                 ENDIF (USE_PYTHON_3)
-                SET(CPACK_DEBIAN_PACKAGE_DEPENDS "${CPACK_DEBIAN_PACKAGE_DEPENDS}, libjpeg62, libpng16-16, freeglut3, libgtk-3-0, libvorbis0a, libopenal1, libsdl-gfx1.2-5, xdg-utils, libgl1-mesa-glx, libboost-python1.58.0, libboost-log1.58.0")
+                SET(CPACK_DEBIAN_PACKAGE_DEPENDS "${CPACK_DEBIAN_PACKAGE_DEPENDS}, libjpeg62, libpng16-16, freeglut3, libgtk-3-0, libvorbis0a, libopenal1, libsdl-gfx1.2-5, xdg-utils, libgl1-mesa-glx, libboost-python1.58.0, libboost-log1.58.0, libboost-date-time1.58.0")
             ELSEIF (LSB_LINUX_DISTRIBUTION_CODENAME STREQUAL "bionic")
                 IF (USE_PYTHON_3)
                     SET(CPACK_DEBIAN_PACKAGE_DEPENDS "libpython3.7")
