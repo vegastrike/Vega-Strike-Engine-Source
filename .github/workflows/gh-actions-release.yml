@@ -16,17 +16,11 @@ jobs:
       matrix:
         include:
           - FROM:     'ubuntu:focal'
-            COMPILER: 'gcc'
-            FLAGS:    '-DUSE_PYTHON_3=OFF'
-          - FROM:     'ubuntu:focal'
             COMPILER: 'clang'
             FLAGS:    '-DUSE_PYTHON_3=OFF'
           - FROM:     'ubuntu:focal'
             COMPILER: 'clang'
             FLAGS:    '-DUSE_PYTHON_3=ON'
-          - FROM:     'ubuntu:bionic'
-            COMPILER: 'gcc'
-            FLAGS:    '-DUSE_PYTHON_3=OFF'
           - FROM:     'ubuntu:bionic'
             COMPILER: 'clang'
             FLAGS:    '-DUSE_PYTHON_3=OFF'
