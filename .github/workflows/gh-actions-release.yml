@@ -3,10 +3,8 @@ name: 'GH Actions - Release'
 on:
   release:
     types:
-      - published
       - created
       - edited
-      - prereleased
 
 jobs:
   build:
@@ -14,7 +12,7 @@ jobs:
     runs-on: ubuntu-latest
 
     strategy:
-      fail-fast: true
+      fail-fast: false
       matrix:
         include:
           - FROM:     'ubuntu:focal'
