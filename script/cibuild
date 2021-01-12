@@ -24,9 +24,9 @@ then
         export CC=clang
         export CXX=clang++
     fi
-    docker run --env CC=$CC --env CXX=$CXX --env FLAGS=$FLAGS --name $DOCKER_CONTAINER_NAME $DST_DOCKER_IMG_NAME $FLAGS
+    docker run --env CC=$CC --env CXX=$CXX --env IS_RELEASE=$IS_RELEASE --env TAG_NAME=$TAG_NAME --env FLAGS=$FLAGS --name $DOCKER_CONTAINER_NAME $DST_DOCKER_IMG_NAME $FLAGS
     docker cp $DOCKER_CONTAINER_NAME:/usr/src/Vega-Strike-Engine-Source/bin .
-    if [ $IS_RELEASE ]
+    if [ $IS_RELEASE -eq 1 ]
     then
         docker cp $DOCKER_CONTAINER_NAME:/usr/src/Vega-Strike-Engine-Source/packages .
     fi
