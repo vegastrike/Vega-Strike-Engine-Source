@@ -1,0 +1,29 @@
+name: Fortify on Demand Scan
+
+# Controls when the action will run. 
+on:
+  push:
+    # branches: ['master', '[0-9]?.[0-9]?.x']
+  pull_request:
+    # branches: ['master', '[0-9]?.[0-9]?.x']
+
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+jobs:
+  scan:
+    # The type of runner that the job will run on
+    runs-on: ubuntu-latest
+
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - uses: actions/checkout@v2
+
+      - name: Fortify on Demand Scan
+        # You may pin to the exact commit or the version.
+        # uses: fortify/gha-setup-fod-uploader@636f3c3a14aec1747eec5242a02c6349e4f3cce6
+        uses: fortify/gha-setup-fod-uploader@v1.0.1
+        with:
+          # FoDUploader version to use
+          version: latest
