@@ -1,13 +1,6 @@
-name: 'GH Actions CI'
+name: 'GH Actions - PR'
 
-on:
-  push:
-    branches: ['*master', '*0.[0-9]?.x']
-  pull_request:
-    # The branches below must be a subset of the branches above
-    branches: ['*master', '*0.[0-9]?.x']
-  # schedule:
-  #   - cron: '0 11 * * 3'
+on: [ pull_request ]
 
 jobs:
   build:
@@ -59,16 +52,17 @@ jobs:
         # We must fetch at least the immediate parents so that if this is
         # a pull request then we can checkout the head.
         fetch-depth: 2
+        submodules: false
 
-    # If this run was triggered by a pull request event, then checkout
-    # the head of the pull request instead of the merge commit.
-    - run: git checkout HEAD^2
-      if: ${{ github.event_name == 'pull_request' }}
-
+    # Ensure PRs are built against the PR Head
+    # As opposed to the merge commit
+    - name: Move to PR HEAD
+      run: git checkout HEAD^2
     - name: Run CI
       env:
         FROM:       ${{ matrix.FROM }}
         COMPILER:   ${{ matrix.COMPILER }}
         FLAGS:      ${{ matrix.FLAGS }}
         MY_OS_NAME: linux
+        IS_RELEASE: 0
       run: script/cibuild $FLAGS
