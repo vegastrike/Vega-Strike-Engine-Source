@@ -2,7 +2,7 @@
 <p style="font-weight:600; font-size:36px">Vega Strike Space Simulation Engine</p>
 </header>
 
-<!-- ![CI](https://github.com/vegastrike/Vega-Strike-Engine-Source/workflows/gh-actions-pr/badge.svg) -->
+![CI - GitHub Actions - PR](https://github.com/vegastrike/Vega-Strike-Engine-Source/workflows/gh-actions-pr/badge.svg)
 [![Gitter](https://badges.gitter.im/vegastrike/community.svg)](https://gitter.im/vegastrike/community?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
 [![Vega Strike](https://img.shields.io/badge/-Website-informational)](https://www.vega-strike.org)
 
