@@ -16,13 +16,7 @@ jobs:
       matrix:
         include:
           - FROM:     'ubuntu:focal'
-            COMPILER: 'gcc'
-            FLAGS:    '-DUSE_PYTHON_3=ON'
-          - FROM:     'ubuntu:focal'
             COMPILER: 'clang'
-            FLAGS:    '-DUSE_PYTHON_3=ON'
-          - FROM:     'ubuntu:bionic'
-            COMPILER: 'gcc'
             FLAGS:    '-DUSE_PYTHON_3=ON'
           - FROM:     'ubuntu:bionic'
             COMPILER: 'clang'
@@ -82,4 +76,3 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         args: 'packages/*'
-      if: ${{ github.event_name == 'release' }}
