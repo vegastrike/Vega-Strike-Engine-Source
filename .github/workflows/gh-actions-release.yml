@@ -3,10 +3,8 @@ name: 'GH Actions - Release'
 on:
   release:
     types:
-      - published
       - created
       - edited
-      - prereleased
 
 jobs:
   build:
@@ -14,21 +12,15 @@ jobs:
     runs-on: ubuntu-latest
 
     strategy:
-      fail-fast: true
+      fail-fast: false
       matrix:
         include:
-          - FROM:     'ubuntu:focal'
-            COMPILER: 'gcc'
-            FLAGS:    '-DUSE_PYTHON_3=OFF'
           - FROM:     'ubuntu:focal'
             COMPILER: 'clang'
             FLAGS:    '-DUSE_PYTHON_3=OFF'
           - FROM:     'ubuntu:focal'
             COMPILER: 'clang'
             FLAGS:    '-DUSE_PYTHON_3=ON'
-          - FROM:     'ubuntu:bionic'
-            COMPILER: 'gcc'
-            FLAGS:    '-DUSE_PYTHON_3=OFF'
           - FROM:     'ubuntu:bionic'
             COMPILER: 'clang'
             FLAGS:    '-DUSE_PYTHON_3=OFF'
