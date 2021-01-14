@@ -84,5 +84,4 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        args: 'packages/*'
-      if: ${{ github.event_name == 'release' }}
+        args: 'packages/Vega-Strike_v*.*'
