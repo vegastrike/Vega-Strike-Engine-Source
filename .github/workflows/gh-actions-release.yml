@@ -79,9 +79,15 @@ jobs:
         MY_OS_NAME: linux
         IS_RELEASE: 1
       run: script/cibuild $FLAGS
-    - name: Upload the artifacts
+    - name: Upload DEB artifacts
       uses: skx/github-action-publish-binaries@master
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        args: 'packages/Vega-Strike_v*.*'
+        args: 'packages/Vega-Strike_v*.deb'
+    - name: Upload RPM artifacts
+      uses: skx/github-action-publish-binaries@master
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        args: 'packages/Vega-Strike_v*.rpm'
