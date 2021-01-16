@@ -18,30 +18,44 @@ jobs:
           - FROM:     'ubuntu:focal'
             COMPILER: 'clang'
             FLAGS:    '-DUSE_PYTHON_3=ON'
+            ARTIFACT_EXT: 'deb'
+          # Source tarballs only
+          - FROM:     'ubuntu:focal'
+            COMPILER: 'clang'
+            FLAGS:    '-DUSE_PYTHON_3=ON'
+            ARTIFACT_EXT: 't?z*'
           - FROM:     'ubuntu:bionic'
             COMPILER: 'clang'
             FLAGS:    '-DUSE_PYTHON_3=ON'
+            ARTIFACT_EXT: 'deb'
           - FROM:     'ubuntu:xenial'
             COMPILER: 'gcc'
             FLAGS:    '-DUSE_PYTHON_3=ON'
+            ARTIFACT_EXT: 'deb'
           - FROM:     'debian:buster'
             COMPILER: 'clang'
             FLAGS:    '-DUSE_PYTHON_3=ON'
+            ARTIFACT_EXT: 'deb'
           - FROM:     'debian:stretch'
             COMPILER: 'gcc'
             FLAGS:    '-DUSE_PYTHON_3=ON'
+            ARTIFACT_EXT: 'deb'
           - FROM:     'opensuse/leap'
             COMPILER: 'clang'
             FLAGS:    '-DUSE_PYTHON_3=ON'
+            ARTIFACT_EXT: 'rpm'
           - FROM:     'fedora:33'
             COMPILER: 'clang'
             FLAGS:    '-DUSE_PYTHON_3=ON'
+            ARTIFACT_EXT: 'rpm'
           - FROM:     'fedora:32'
             COMPILER: 'clang'
             FLAGS:    '-DUSE_PYTHON_3=ON'
+            ARTIFACT_EXT: 'rpm'
           - FROM:     'centos:8'
             COMPILER: 'clang'
             FLAGS:    '-DUSE_PYTHON_3=ON'
+            ARTIFACT_EXT: 'rpm'
 
     steps:
     - name: Checkout repository
@@ -74,5 +88,6 @@ jobs:
       uses: skx/github-action-publish-binaries@master
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        ARTIFACT_EXT: ${{ matrix.ARTIFACT_EXT }}
       with:
-        args: 'packages/*'
+        args: 'packages/*.${ARTIFACT_EXT}'
