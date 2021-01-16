@@ -23,7 +23,7 @@ jobs:
           - FROM:     'ubuntu:focal'
             COMPILER: 'clang'
             FLAGS:    '-DUSE_PYTHON_3=OFF'
-            ARTIFACT_EXT: 't?z*'
+            ARTIFACT_EXT: 't[xb]z*'
           - FROM:     'ubuntu:focal'
             COMPILER: 'clang'
             FLAGS:    '-DUSE_PYTHON_3=ON'
