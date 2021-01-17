@@ -2,7 +2,7 @@
 <p style="font-weight:600; font-size:36px">Vega Strike Space Simulation Engine</p>
 </header>
 
-![CI](https://github.com/vegastrike/Vega-Strike-Engine-Source/workflows/CI/badge.svg)
+<!-- ![CI - GitHub Actions - PR](https://github.com/vegastrike/Vega-Strike-Engine-Source/workflows/gh-actions-pr/badge.svg) -->
 [![Gitter](https://badges.gitter.im/vegastrike/community.svg)](https://gitter.im/vegastrike/community?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
 [![Vega Strike](https://img.shields.io/badge/-Website-informational)](https://www.vega-strike.org)
 
@@ -128,93 +128,97 @@ Compiling Vegastrike
 Compiling On Linux
 ------------------
 
-1. Install the dependencies. Something like this:
+1. Install the development dependencies:
 
-```bash
-sudo apt-get -y install cmake g++ python-dev libboost-python-dev libboost-log-dev \
-                libboost-regex-dev libgl1-mesa-glx freeglut3-dev libopenal-dev \
-                libsdl-gfx1.2-dev libvorbis-dev libjpeg-dev libpng-dev libgtk-3-dev
-```
+   a. Run `sudo script/bootstrap`
 
-On Debian 10 "buster":
+   b. *OR* install the dependencies manually. Something like this:
 
-```bash
-sudo apt-get -y install git cmake python-dev build-essential automake autoconf libpng16-16 \
-                libpng-dev libpng-tools libjpeg62-turbo-dev libexpat1-dev libgtk-3-dev \
-                libopenal-dev libogg-dev libvorbis-dev libgl1-mesa-dev libsdl1.2-dev \
-                libpostproc-dev freeglut3-dev libboost-python1.67-dev libboost-log1.67-dev \
-                libboost-regex1.67-dev
-```
+   ```bash
+   sudo apt-get -y install cmake g++ python-dev libboost-python-dev libboost-log-dev \
+                   libboost-regex-dev libgl1-mesa-glx freeglut3-dev libopenal-dev \
+                   libsdl-gfx1.2-dev libvorbis-dev libjpeg-dev libpng-dev libgtk-3-dev
+   ```
 
-On Ubuntu 20.04 LTS "focal":
+   On Debian 10 "buster":
 
-```bash
-sudo apt-get -y install git cmake python-dev build-essential automake autoconf libpng16-16 \
-                libpng-dev libpng-tools libjpeg62-dev libexpat1-dev libgtk-3-dev libopenal-dev \
-                libogg-dev libvorbis-dev libgl1-mesa-dev libsdl1.2-dev libopengl0 \
-                libpostproc-dev freeglut3-dev libboost-python1.67-dev libboost-log1.67-dev \
-                libboost-regex1.67-dev
-```
+   ```bash
+   sudo apt-get -y install git cmake python-dev build-essential automake autoconf libpng16-16 \
+                   libpng-dev libpng-tools libjpeg62-turbo-dev libexpat1-dev libgtk-3-dev \
+                   libopenal-dev libogg-dev libvorbis-dev libgl1-mesa-dev libsdl1.2-dev \
+                   libpostproc-dev freeglut3-dev libboost-python1.67-dev libboost-log1.67-dev \
+                   libboost-regex1.67-dev
+   ```
 
-On openSUSE Leap 15.2:
+   On Ubuntu 20.04 LTS "focal":
 
-```bash
-sudo zypper install libboost_log1_66_0-devel \
-                    libboost_python-py2_7-1_66_0-devel \
-                    libboost_python-py3-1_66_0-devel \
-                    libboost_system1_66_0-devel \
-                    libboost_filesystem1_66_0-devel \
-                    libboost_thread1_66_0-devel \
-                    libboost_regex1_66_0-devel \
-                    libboost_chrono1_66_0-devel \
-                    libboost_atomic1_66_0-devel \
-                    cmake \
-                    gcc-c++ \
-                    freeglut-devel \
-                    libopenal0 \
-                    openal-soft-devel \
-                    libSDL-1_2-0 \
-                    libSDL-devel \
-                    libvorbis-devel \
-                    libjpeg-turbo \
-                    libjpeg62-devel \
-                    libpng16-devel \
-                    expat \
-                    libexpat-devel \
-                    libgtk-2_0-0 \
-                    gtk2-devel \
-                    libgtk-3-0 \
-                    gtk3-devel \
-                    python-devel \
-                    python3-devel \
-                    git \
-                    rpm-build
-```
+   ```bash
+   sudo apt-get -y install git cmake python-dev build-essential automake autoconf libpng16-16 \
+                   libpng-dev libpng-tools libjpeg62-dev libexpat1-dev libgtk-3-dev libopenal-dev \
+                   libogg-dev libvorbis-dev libgl1-mesa-dev libsdl1.2-dev libopengl0 \
+                   libpostproc-dev freeglut3-dev libboost-python1.67-dev libboost-log1.67-dev \
+                   libboost-regex1.67-dev
+   ```
 
-On Fedora 30/31/32:
+   On openSUSE Leap 15.2:
 
-```bash
-sudo dnf install    git \
-                    cmake \
-                    boost-devel \
-                    boost-python3-devel \
-                    freeglut-devel \
-                    gcc-c++ \
-                    openal-soft-devel \
-                    SDL-devel \
-                    libvorbis-devel \
-                    libjpeg-turbo-devel \
-                    libpng-devel \
-                    expat-devel \
-                    gtk3-devel \
-                    python2-devel \
-                    python3-devel \
-                    rpm-build \
-                    make
-```
+   ```bash
+   sudo zypper install libboost_log1_66_0-devel \
+                       libboost_python-py2_7-1_66_0-devel \
+                       libboost_python-py3-1_66_0-devel \
+                       libboost_system1_66_0-devel \
+                       libboost_filesystem1_66_0-devel \
+                       libboost_thread1_66_0-devel \
+                       libboost_regex1_66_0-devel \
+                       libboost_chrono1_66_0-devel \
+                       libboost_atomic1_66_0-devel \
+                       cmake \
+                       gcc-c++ \
+                       freeglut-devel \
+                       libopenal0 \
+                       openal-soft-devel \
+                       libSDL-1_2-0 \
+                       libSDL-devel \
+                       libvorbis-devel \
+                       libjpeg-turbo \
+                       libjpeg62-devel \
+                       libpng16-devel \
+                       expat \
+                       libexpat-devel \
+                       libgtk-2_0-0 \
+                       gtk2-devel \
+                       libgtk-3-0 \
+                       gtk3-devel \
+                       python-devel \
+                       python3-devel \
+                       git \
+                       rpm-build
+   ```
 
-On Fedora 30 or 31, also install `boost-python2-devel`. (Apparently not available
-on Fedora 32.)
+   On Fedora 30/31/32/33:
+
+   ```bash
+   sudo dnf install    git \
+                       cmake \
+                       boost-devel \
+                       boost-python3-devel \
+                       freeglut-devel \
+                       gcc-c++ \
+                       openal-soft-devel \
+                       SDL-devel \
+                       libvorbis-devel \
+                       libjpeg-turbo-devel \
+                       libpng-devel \
+                       expat-devel \
+                       gtk3-devel \
+                       python2-devel \
+                       python3-devel \
+                       rpm-build \
+                       make
+   ```
+
+   On Fedora 30 or 31, also install `boost-python2-devel`. (Apparently not available
+   on Fedora 32 or 33.)
 
 2. Build Vega Strike:
 
