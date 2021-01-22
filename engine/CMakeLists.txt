@@ -1157,6 +1157,15 @@ SET(CPACK_PACKAGE_VERSION_PATCH "0")
 SET(CPACK_PACKAGE_INSTALL_DIRECTORY "VegaStrike-${CPACK_PACKAGE_VERSION_MAJOR}.${CPACK_PACKAGE_VERSION_MINOR}")
 SET(CPACK_PACKAGE_EXECUTABLES "vegastrike" "mesh_tool" "vegasettings")
 SET(CPACK_CONTACT "maintainers@vega-strike.org")
+
+IF (DEFINED ENV{TAG_NAME})
+    SET(VEGA_STRIKE_PACKAGE_VERSION_STR "$ENV{TAG_NAME}")
+ELSE (DEFINED ENV{TAG_NAME})
+    SET(VEGA_STRIKE_PACKAGE_VERSION_STR "${CPACK_PACKAGE_VERSION_MAJOR}.${CPACK_PACKAGE_VERSION_MINOR}.${CPACK_PACKAGE_VERSION_PATCH}")
+ENDIF (DEFINED ENV{TAG_NAME})
+SET(CPACK_SOURCE_PACKAGE_FILE_NAME "${CPACK_PACKAGE_NAME}_${VEGA_STRIKE_PACKAGE_VERSION_STR}-Source")
+SET(CPACK_SOURCE_GENERATOR "TBZ2" "TXZ")
+
 # See https://gitlab.kitware.com/cmake/community/-/wikis/doc/cpack/PackageGenerators for generator lists
 IF (WIN32 AND NOT UNIX)
     MESSAGE("-- Configuring Packaging for Windows")
@@ -1181,17 +1190,10 @@ ELSEIF (XCODE)
     #  See https://cmake.org/cmake/help/v3.3/module/CPackDMG.html
     # Bundle -> Compressed Disk Image
     # PackageMaker - see https://cmake.org/cmake/help/v3.3/module/CPackPackageMaker.html
-    SET(CPACK_GENERATOR "DragNDrop" "BUNDLE" "TBZ2" "TGZ" "TXZ")
+    SET(CPACK_GENERATOR "DragNDrop" "BUNDLE" "TXZ")
 ELSEIF (CMAKE_SYSTEM_NAME STREQUAL Linux)
     MESSAGE("-- Configuring Packaging for Linux")
     SET(CPACK_GENERATOR "TBZ2" "TGZ" "TXZ")
-    # Linux
-
-    IF (DEFINED ENV{TAG_NAME})
-        SET(VEGA_STRIKE_PACKAGE_VERSION_STR "$ENV{TAG_NAME}")
-    ELSE (DEFINED ENV{TAG_NAME})
-        SET(VEGA_STRIKE_PACKAGE_VERSION_STR "${CPACK_PACKAGE_VERSION_MAJOR}.${CPACK_PACKAGE_VERSION_MINOR}.${CPACK_PACKAGE_VERSION_PATCH}")
-    ENDIF (DEFINED ENV{TAG_NAME})
 
     IF (USE_PYTHON_3)
         SET(VEGA_STRIKE_PYTHON_VERSION_STR "py3")
@@ -1407,7 +1409,7 @@ ELSEIF (CMAKE_SYSTEM_NAME STREQUAL Linux)
 ELSE ()
     MESSAGE("-- Configuring Packaging for Unknown Platforms - \"${CMAKE_SYSTEM_NAME}\"")
     # Unknown Platform --> Just do the various compressed tarballs
-    SET(CPACK_GENERATOR "TBZ2" "TGZ" "TXZ")
+    SET(CPACK_GENERATOR "TXZ")
 ENDIF (WIN32 AND NOT UNIX)
 
 INCLUDE(CPack)
