@@ -90,4 +90,4 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         ARTIFACT_EXT: ${{ matrix.ARTIFACT_EXT }}
       with:
-        args: "packages/*.${ARTIFACT_EXT}"
+        args: "packages/*.${{ matrix.ARTIFACT_EXT }}"
