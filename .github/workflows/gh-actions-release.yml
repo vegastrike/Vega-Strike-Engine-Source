@@ -23,7 +23,7 @@ jobs:
           - FROM:     'ubuntu:focal'
             COMPILER: 'clang'
             FLAGS:    '-DUSE_PYTHON_3=ON'
-            ARTIFACT_EXT: 't[xb]z*'
+            ARTIFACT_EXT: 'tar.[xb]z*'
           - FROM:     'ubuntu:bionic'
             COMPILER: 'clang'
             FLAGS:    '-DUSE_PYTHON_3=ON'
@@ -90,4 +90,4 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         ARTIFACT_EXT: ${{ matrix.ARTIFACT_EXT }}
       with:
-        args: 'packages/*.${ARTIFACT_EXT}'
+        args: "packages/*.${{ matrix.ARTIFACT_EXT }}"
