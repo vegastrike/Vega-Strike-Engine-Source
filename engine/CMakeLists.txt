@@ -1155,7 +1155,7 @@ SET(CPACK_PACKAGE_VERSION_MAJOR "0")
 SET(CPACK_PACKAGE_VERSION_MINOR "7")
 SET(CPACK_PACKAGE_VERSION_PATCH "0")
 SET(CPACK_PACKAGE_INSTALL_DIRECTORY "VegaStrike-${CPACK_PACKAGE_VERSION_MAJOR}.${CPACK_PACKAGE_VERSION_MINOR}")
-SET(CPACK_PACKAGE_EXECUTABLES "vegastrike" "mesh_tool" "vegasettings")
+SET(CPACK_PACKAGE_EXECUTABLES "vegastrike" "vegastrike-meshtool" "vegasettings")
 SET(CPACK_CONTACT "maintainers@vega-strike.org")
 
 IF (DEFINED ENV{TAG_NAME})
@@ -1181,7 +1181,7 @@ IF (WIN32 AND NOT UNIX)
 
     # NSIS, Wix, and compressed archives (7z, Zip)
     SET(CPACK_GENERATOR "NSIS" "NSIS64" "WIX" "7Z" "ZIP")
-    SET(CPACK_PACKAGE_EXECUTABLES "vegastrike.exe" "mesh_tool.exe" "vegasettings.exe")
+    SET(CPACK_PACKAGE_EXECUTABLES "vegastrike.exe" "vegastrike-meshtool.exe" "vegasettings.exe")
 ELSEIF (XCODE)
     MESSAGE("-- Configuring Packaging for Mac OS X")
     # Mac OS X
