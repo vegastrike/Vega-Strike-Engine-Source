@@ -1,144 +1,179 @@
 .\" -*- nroff -*-
 .TH VEGASTRIKE 1 "Current" "Version 0.7.0" "Vega Strike 0.7.0"
 .SH NAME
-Vega Strike Upon The Coldest Sea \- Trade, Fight and Explore the Universe
+Vega Strike: Upon The Coldest Sea - Trade, Fight, and Explore the Universe
 .SH SYNOPSIS
-.BI "vegasettings"
-.PP
-.BI "vegastrike " "[-ddata_dir] [-px,y,z] [-jsector/starsystem]"
-.IR missionname
-.PP
-The recommended way to run Vega Strike is to first run
-.B 
+.SS
 vegasettings
-to configure your system, then invoke the 
-.B
+.PP
+Vega Strike Configuration
+.SS
+vegastrike [-ddata_dir] [-px,y,z] [-jsector/starsystem] [missionname]
+.PP
+Vega Strike Game Engine
+.PP
+It is recommended to run 
+.ft I
+vegasettings
+.ft P
+first to configure your system, then invoke
+.ft I
 vegastrike
-executable and begin a New Game.
+.ft P
+to start a New Game.
 .SH DESCRIPTION
-.B vegasettings
-.I program
-sets up the default save game and copies the vegastrike.config file to a user's ~/.vegastrike directory
+.SS
+vegasettings
 .PP
-.B vegastrike
-.I program
-Launches Vega Strike and allows user to select a campaign to run or load a save game. Save games must be saved at a base or planet.
+Program to create and edit the settings for Vega Strike.
+.SS
+vegastrike
 .PP
+Launch Vega Strike and allows the user to select a campaign to run or load a saved game.
+.PP
+Saved games must be saved at a base or planet.
 .SH REQUIREMENTS AND INSTALLATION
-run the 
-.B vegasettings
-program to set up your specific config options, then invoke 
-.B vegastrike
+.SS Installation
+For general installation instructions see https://www.vega-strike.org/install/.
+.SS Initial Configuration
+On the first use one must run
+.ft I
+vegasettings
+.ft P
+in order to configure the game. Once run it only needs to be run again if you want to change the configuration.
+.SS
+General Documentation
 .PP
-FIXME: Read the README.md file in
-.br
-.I "/usr/share/doc/vegastrike"
-or in color at
-.br
-.I FIXME: http://vegastrike.sourceforge.net/player_tutorial/
-to learn the keybindings and walk through a tutorial.
-.br
-FIXME: More information can be obtained from the Vega Strike website at
-.I http://vegastrike.sourceforge.net/
+There is general documentation installed at /usr/share/vegastrike/documentation. More thorough and community maintained
+documentation is also available at https://wiki.vega-strike.org/Manual:Tutorial.
+.SS
+Key Bindings
+.PP
+Some information about key bindings can be found at https://wiki.vega-strike.org/Manual:Keyboard_layout; however,
+the authoritative key bindings are stored in the configuration file under <bindings>.
+.SS
+More Information
+.PP
+More information can be obtained from the Vega Strike website at http://vega-strike.org/.
 .SH OPTIONS
-.TP
-.I -d/my/data/dir
-specifies 
-.I
-/my/data/dir
-as the path for finding the vega strike data.  The default is /usr/share/vegastrike/data
-.TP
-.I -p1024,2405,1245090101
-Forces the player's starting location to be at x= 1024, y= 2405, z=1245090101
-.TP
-.I -jgemini_sector/troy
-Forces the player to start in the troy system in gemini sector.
-.TP
-.I missionname
-Specifies a mission for vegastrike to run.  Default is /usr/share/vegastrike/data/mission/exploration/explore_universe.mission.
-
-.SH CONFIGURATION FILE
-.B Vega Strike
-expects a configuration file (
-.I $HOME/.vegastrike/vegastrike.config
-(~/.vegastrike/vegastrike.config)
-), which is modified by
-.B vegasettings
-.br
-A simple illustration of how to adjust vegastrike.config and the associated keybindings and options is in the readme.txt included in the documentation and also in the player tutorial listed above.
-.SH AUTHORS
-.B vegastrike
-is available thanks to the work of many developers.  For a listing
-of the authors, please see the file 
-.I FIXME: http://vegastrike.sourceforge.net/credits.html
-in the top-level directory of the source distribution.
-.SH COPYRIGHT
-.B vegastrike
-can be distributed under the terms of the X11 license.  A copy of the
-license is in the file
-.B LICENSE
-in the top-level directory of the source distribution.
-.SH BUGS
+.SS
+-d\<directory\>
 .PP
-FIXME: Issues with Vega Strike may be reported at
-.I https://github.com/vegastrike/Vega-Strike-Engine-Source/issues
+<directory> specifies the game data directory used.
+.PP
+Default: /usr/share/vegastrike/data
+.SS
+-p<x>,<y>,<z>
+.PP
+Forces the player's starting location to be at x=1024, y=2405, z=1245090101
+.SS
+-j<sector>/<system>
+.PP
+Forced the player to start in the specified system and sector.
+.PP
+For example, -jgemini_sector/troy would start the player in the Troy System of the Gemini Sector.
+.SS
+missionname
+.PP
+Specifies the mission within the game to run.
+.PP
+Default: /usr/share/vegastrike/data/mission/exploration/explore_universe.mission
+.SH
+CONFIGURATION FILE
+.PP
+The default configuration file is $HOME/.vegastrike/vegastrike.config.
+.PP
+The configuration file is modified by the
+.ft I
+vegasettings
+.ft P
+program for most important configuration items. Other options, such as the key bindings, may be found
+via the README included in the documentation, the Wiki Site, and other Vega Strike resources.
+.SH
+COPYRIGHT
+.PP
+\(co
+2001-2020 Danial Horn
+.br
+\(co
+2002-2020 Vega Strike Community Contributors
+.SH
+AUTHORS
+.PP
+Vega Strike is a community work thanks to the many developers that make up the Vega Strike Community Contributors.
+.PP
+Among the many contributors a special thanks goes to Daniel Horn for starting Vega Strike.
+.PP
+Please see https://github.com/vegastrike/Vega-Strike-Engine-Source/blob/master/AUTHORS for a listing.
+.SH
+LICENSE
+.PP
+Vega Strike is licensed under the GNU General Public License v3. See https://github.com/vegastrike/Vega-Strike-Engine-Source/blob/master/LICENSE for details.
+.SH
+BUGS
+.PP
+For a list of bugs see https://github.com/vegastrike/Vega-Strike-Engine-Source/issues.
+.SS
+Reporting Bugs
+.PP
 If you want to report a bug, please tell us which mission you ran, copy the last few lines of stdout and stderr, and describe the bug in detail, and what lead up to it.  It would be most helpful if you included a stack trace by compiling and running vegastrike from source.
 .PP
-For problems and suggestions with this manpage, please send a note to
-FIXME: Daniel Horn <hellcatv@hotmail.com>.
-.SH AVAILABILITY
-The most recent public version of 
-.B vegastrike
-can be obtained from https://github.com/vegastrike/Vega-Strike-Engine-Source/releases
+Bugs can be submitted directly to https://github.com/vegastrike/Vega-Strike-Engine-Source/issues, or via our Forums, or Vega Strike Users <users@lists.vega-strike.org>.
 .PP
-The latest snapshot of the code may be obtained via git.  For information
-on how to do this, please see the README.md at the Vega Strike github page:
-.I
-https://github.com/vegastrike/Vega-Strike-Engine-Source
+If you have a security sensitive bug please contact us at security@lists.vega-strike.org.
+.SH
+AVAILABILITY
 .PP
-FIXME: The Vega Strike github wiki contains a great deal of information about
-.B vegastrike.
+The most recent public version of Vega Strike can be obtained from https://github.com/vegastrike/Vega-Strike-Engine-Source/releases.
 .PP
-The
-.B vegastrike
-discussion forum lives at
-.I FIXME
-It is used for discussion of various 
-.B vegastrike end user aspects/help.
+The source can be found at https://github.com/vegastrike/Vega-Strike-Engine-Source.
+.SH
+COMMUNITY
 .PP
-To follow
-.B vegastrike
-development, you might want to star the
-.B vegastrike
-github page at
-.I https://github.com/vegastrike/Vega-Strike-Engine-Source
-.SH FILES
-.PD 0
-.TP
-.I /usr/bin/vegastrike
-The 
-.B vegastrike
-engine.
-.TP
-.I /usr/bin/vegasettings
-The Vega Strike Settings utility.
-.TP 
-.I /usr/share/vegastrike
-The 
-.B vegastrike
-data files
-.TP 
-.I /usr/share/man/man1
-Directory containg
-.B this file 
-.TP
-.I ~/.vegastrike/vegastrike.config
-User-specific configuration file
-.TP 
-.I ~/.vegastrike
-Directory containing user specific data managed by 
-.B vegastrike. 
-
-.SH "SEE ALSO"
-.BR FIXME: http://vegastrike.sourceforge.net/player_tutorial
-.BR /usr/share/doc/vegastrike
+Vega Strike has a many ways to access the community:
+.SS
+Gitter.im
+.PP
+https://gitter.im/vegastrike/community
+.SS
+Online Forum
+.PP
+https://forums.vega-strike.org/
+.SS
+Mailing Lists
+.PP
+https://lists.vega-strike.org/listinfo/
+.PP
+Security issues can be sent to security@lists.vega-strike.org.
+.SS
+Wikis
+.PP
+https://wiki.vega-strike.org/Vegastrike
+.PP
+https://github.com/vegastrike/Vega-Strike-Engine-Source/wiki
+.SH
+FILES
+.SS
+/usr/bin/vegastrike
+.PP
+The Vega Strike Game Engine
+.SS
+/usr/bin/vegasettings
+.PP
+The Vega Strike Configuration Editor
+.SS
+~/.vegastrike/
+.PP
+Configuration Directory
+.SS
+~/.vegastrike/vegastrike.config
+.PP
+The default user configuration file
+.SS
+/usr/share/vegastrike
+.PP
+The Vega Strike: Upon the Coldest Sea Game Data
+.SH
+See Also
+.PP
+https://wiki.vega-strike.org/Manual:Tutorial
