@@ -610,6 +610,31 @@ Submit comments or suggestions by opening an [issue](https://github.com/vegastri
 
 And if you can design some missions it would rock!
 
+Vega Strike Contacts
+====================
+
+Vega Strike is the product of many contributors from all around the world. If you need help, find a bug, want to request a feature, etc then please contact us all using one
+of the following methods:
+
+- [Gitter.im: Community](https://gitter.im/vegastrike/community)
+- [Gitter.im: Packaging](https://gitter.im/vegastrike/vegastrike-packaging)
+- [Gitter.im: Infrastructure](https://gitter.im/vegastrike/infrastructure-admins)
+- [Mailing Lists](https://lists.vega-strike.org)
+- [Vega Strike Forums](https://forums.vega-strike.org)
+
+Bugs can be sent to one of the following:
+  - Security related issues can be sent to [security@lists.vega-strike.org](mailto:security@lists.vega-strike.org).
+  - General issues can be sent to [devel@lists.vega-strike.org](mailto:devel@lists.vega-strike.org) or filed as an [issue](https://github.com/vegastrike/Vega-Strike-Engine-Source/issues).
+
+Vega Strike on Social Media
+===========================
+- [Facebook](https://www.facebook.com/VegaStrike-188522714499479/)
+- [Twitter](https://twitter.com/vega_strike)
+- [YouTube](https://www.youtube.com/channel/UC5p9ObADzS3sx9orZG7M91g/)
+- [MeWe](http://www.mewe.com/join/vegastrike)
+- [Diaspora: Pluspora](https://pluspora.com/tags/vegastrike)
+
+
 Vega Strike Code Repository
 ===========================
 
