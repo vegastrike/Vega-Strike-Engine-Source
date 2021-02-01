@@ -613,7 +613,7 @@ And if you can design some missions it would rock!
 Vega Strike Contacts
 ====================
 
-Vega Strike is the product of many contributors from all around the world. If you need help, find a bug, want to request a features, etc then please contact us all using one
+Vega Strike is the product of many contributors from all around the world. If you need help, find a bug, want to request a feature, etc then please contact us all using one
 of the following methods:
 
 - [Gitter.im: Community](https://gitter.im/vegastrike/community)
