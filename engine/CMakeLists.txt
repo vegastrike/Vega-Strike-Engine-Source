@@ -162,7 +162,7 @@ SET(LIBAI_SOURCES
     src/cmd/ai/flykeyboard_generic.cpp
 )
 
-ADD_LIBRARY(OPcollide
+ADD_LIBRARY(vegastrike-OPcollide
     src/cmd/collide2/Ice/IceAABB.cpp
     src/cmd/collide2/Ice/IceContainer.cpp
     src/cmd/collide2/Ice/IceHPoint.cpp
@@ -453,7 +453,7 @@ SET(LIBAUDIO_SOURCES
 )
 
 
-ADD_LIBRARY(engine_com
+ADD_LIBRARY(vegastrike-engine_com
     ${LIBAI_SOURCES}
     ${LIBCMD_SOURCES}
     ${LIBNET_SOURCES}
@@ -1088,7 +1088,7 @@ CONFIGURE_FILE(${Vega_Strike_SOURCE_DIR}/cmake-config.h.in ${Vega_Strike_BINARY_
 #SET(CMAKE_CXX_FLAGS "-include config.h;-pipe;"${CMAKE_CXX_FLAGS})
 
 #Setup shared lib and include listings for vegastrike.
-SET(TST_LIBS engine_com OPcollide ${TST_LIBS})
+SET(TST_LIBS vegastrike-engine_com vegastrike-OPcollide ${TST_LIBS})
 INCLUDE_DIRECTORIES(${TST_INCLUDES})
 
 TARGET_LINK_LIBRARIES(vegastrike ${TST_LIBS})
