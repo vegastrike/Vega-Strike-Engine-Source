@@ -378,7 +378,6 @@ SET(LIBROOTGENERIC_SOURCES
     src/universe_util_generic.cpp
     src/vs_globals.cpp
     src/vsfilesystem.cpp
-    src/VSFileXMLSerializer.cpp
     src/xml_serializer.cpp
     src/xml_support.cpp
     src/XMLDocument.cpp
@@ -434,7 +433,6 @@ SET(LIBAUDIO_SOURCES
     src/audio/Source.cpp
     src/audio/SourceTemplate.cpp
     src/audio/Stream.cpp
-    src/audio/TemplateManager.cpp
     src/audio/test.cpp
     src/audio/utils.cpp
     src/audio/codecs/Codec.cpp
@@ -762,6 +760,7 @@ IF (USE_PYTHON_3)
     # We want at least Python 3.4, but we prefer newer versions
     SET(Python_ADDITIONAL_VERSIONS 3.9 3.8 3.7 3.6 3.5 3.4)
 ELSE (USE_PYTHON_3)
+    MESSAGE("++ Adding python 2.7 variant")
     SET(Python_ADDITIONAL_VERSIONS 2.7)
 ENDIF (USE_PYTHON_3)
 # If we don't unset cache variables
@@ -784,6 +783,7 @@ ENDIF (PYTHONLIBS_FOUND OR PYTHON_LIBRARIES AND PYTHON_INCLUDE_DIRS)
 # Find Boost with boost_python library
 OPTION(USE_SYSTEM_BOOST "Use system boost" ON)
 IF (USE_SYSTEM_BOOST)
+    MESSAGE("++ Using System Boost")
     FIND_PACKAGE(Boost)
     IF (Boost_FOUND)
 
@@ -808,9 +808,9 @@ IF (USE_SYSTEM_BOOST)
         MESSAGE("-- Boost_1_67_Or_Later_Result: ${Boost_1_67_Or_Later_Result}")
         MESSAGE("-- USE_PYTHON_3: ${USE_PYTHON_3}")
         IF (Boost_1_67_Or_Later_Result)
-            SET(BOOST_PYTHON_COMPONENT "python${PYTHON_VERSION_MAJOR}${PYTHON_VERSION_MINOR}")
+            SET(BOOST_PYTHON_COMPONENT "python38")
         ELSEIF (USE_PYTHON_3)
-            SET(BOOST_PYTHON_COMPONENT "python3")
+            SET(BOOST_PYTHON_COMPONENT "python38")
 
             # Debian and Debian-based systems up to Boost 1.67 lack libboost_python3.{so|a}
             # but have libboost_python-py{major}{minor}.{so|a}. E.g., Ubuntu xenial and 
@@ -858,7 +858,7 @@ IF (NOT USE_SYSTEM_BOOST)
     SET(TST_INCLUDES ${TST_INCLUDES} ${Vega_Strike_SOURCE_DIR}/${Boost_DIR})
     IF (USE_PYTHON_3)
         MESSAGE("++ Using Internal Boost::python3")
-        SET(TST_LIBS ${TST_LIBS} boost_python3)
+        SET(TST_LIBS ${TST_LIBS} boost_python38)
     ELSE (USE_PYTHON_3)
         MESSAGE("++ Using Internal Boost::python (py2)")
         SET(TST_LIBS ${TST_LIBS} boost_python)
