@@ -44,13 +44,13 @@ class Hashtable : public vsUMap< KEY, VALUE* >
     typedef std::pair< KEY, VALUE* >HashElement;
     typedef vsUMap< KEY, VALUE* >   supertype;
 public:
-    static int hash( const int key )
+    static size_t hash( const int key )
     {
         unsigned int k = key;
         k %= SIZ;
         return k;
     }
-    static int hash( const char *key )
+    static size_t hash( const char *key )
     {
         unsigned int k = 0;
         for (const char *start = key; *start != '\0'; ++start) {
@@ -62,7 +62,7 @@ public:
         k %= SIZ;
         return k;
     }
-    static int hash( const std::string &key )
+    static size_t hash( const std::string &key )
     {
         unsigned int k = 0;
         for (typename std::string::const_iterator start = key.begin(); start != key.end(); ++start) {

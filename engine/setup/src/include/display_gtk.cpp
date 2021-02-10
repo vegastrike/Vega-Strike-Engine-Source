@@ -227,6 +227,7 @@ void ClickButton(GtkWidget *w, struct catagory *CUR) {
 
     new_value = gtk_combo_box_text_get_active_text(GTK_COMBO_BOX_TEXT(w));
 	new_text = (char *)malloc(strlen(CUR->name)+1);
+	if (NULL==new_text) { fprintf(stderr,"FAILED TO MALLOC A SMALL STRING!\n"); exit(-1); }
 	sprintf(new_text, "%s", GetNameFromInfo(new_value)->name);
 	NEW->setting = new_text;
 

@@ -104,7 +104,7 @@ char *ptr_copy(const char *string)
 #ifdef __STDC_LIB_EXT1__
     strcpy_s(alloc, buf_size, string);
 #else
-    strncpy(alloc, string, buf_size);
+    strncpy_s(alloc, buf_size, string, buf_size);
 #endif
     alloc[buf_size - 1] = '\0';
     return alloc;
@@ -208,7 +208,7 @@ void lower(char *line)
 
 void strappend(char *dest, char *source, int length) 
 {
-	int DoLength;
+	size_t DoLength;
 	DoLength = length - strlen(dest);
 	strncat(dest, source, DoLength);
 	return;
@@ -219,7 +219,7 @@ int randnum(int start, int end)
 	int random, dif, min, max;
 	if (RANDOMIZED == 0) 
         { 
-            srand(time(NULL)); RANDOMIZED = 1; 
+            srand((unsigned int)time(NULL)); RANDOMIZED = 1; 
         }
 	min = start;
 	max = end;
@@ -337,6 +337,7 @@ void btoa(char *dest, char *string)
 	int max, cur, pos, new_val;
 	char *ptr_char;
 	char *new_string= (char *)malloc(strlen(string)+1);
+	if (!new_string) { fprintf(stderr, "Failed to malloc a small string :-("); exit(-1); }
 	max = 7;
 	cur = 7;
 	pos = 0;

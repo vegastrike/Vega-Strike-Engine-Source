@@ -68,18 +68,18 @@ static void changeToProgramDirectory( char *argv0 )
     }
 #endif
     char *parentdir;
-    int   pathlen = strlen( program );
+    size_t   pathlen = strlen( program );
     parentdir = new char[pathlen+1];
     char *c;
-    strncpy( parentdir, program, pathlen+1 );
+    strncpy_s( parentdir, pathlen+1, program, pathlen+1 );
     c = (char*) parentdir;
     while (*c != '\0')      /* go to end */
         c++;
     while ( (*c != '/') && (*c != '\\') && c > parentdir )        /* back up to parent */
         c--;
     *c = '\0';             /* cut off last part (binary name) */
-    if (strlen( parentdir ) > 0)
-        bogus_int = chdir( parentdir );          /* chdir to the binary app's parent */
+    if (strlen(parentdir) > 0)
+        bogus_int = _chdir( parentdir );          /* chdir to the binary app's parent */
     delete[] parentdir;
 }
 
@@ -87,11 +87,31 @@ static void changeToProgramDirectory( char *argv0 )
 typedef char FileNameCharType[65536];
 int WINAPI WinMain( HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR lpCmdLine, int nShowCmd )
 {
-    char  *argv0 = new char[65535];
-    char **argv  = &argv0;
-    int    argc  = 0;
-    strcpy( argv0, origpath );
-    GetModuleFileName( NULL, argv0, 65534 );
+    char **argv;
+    int  argc;
+    //strcpy( argv0, origpath );
+    //GetModuleFileName( NULL, argv0, 65534 );
+    
+    LPWSTR* szArglist;
+    int i;
+    argv = (char**)malloc(3*sizeof(char*));
+    szArglist = CommandLineToArgvW(GetCommandLineW(), &argc);
+    if (NULL == szArglist)
+    {
+        wprintf(L"CommandLineToArgvW failed\n");
+        return 0;
+    }
+    else for (i = 0; i < argc && i < 4; i++) {
+        argv[i] = (char*)malloc(4096 * sizeof(char));
+        snprintf(argv[i],4096,"%ws", szArglist[i]);
+        //printf("%d: \"%s\"\n", i, argv[i]);
+    }
+    strncpy_s(origpath, 4096, argv[0], 4096);
+    //printf("argc = %d; origpath = %s\n", argc, origpath);
+
+    // Free memory allocated for CommandLineToArgvW arguments.
+
+    LocalFree(szArglist);
 #else
 int main( int argc, char *argv[] )
 {
@@ -101,7 +121,7 @@ int main( int argc, char *argv[] )
     CONFIG.program_name = NULL;
     CONFIG.temp_file = NULL;
     
-    bogus_str = getcwd( origpath, 65535 );
+    bogus_str = _getcwd( origpath, 65535 );
     origpath[65535] = 0;
     
     changeToProgramDirectory( argv[0] );
@@ -111,6 +131,7 @@ int main( int argc, char *argv[] )
         if (argc > 1) {
             if (strcmp( argv[1], "--target" ) == 0 && argc > 2) {
                 data_paths.push_back( argv[2] );
+                fprintf(stdout, "Set data directory to %s\n", argv[2]);
             } else {
                 fprintf( stderr, "Usage: vegasettings [--target DATADIR]\n" );
                 return 1;
@@ -128,7 +149,7 @@ int main( int argc, char *argv[] )
         data_paths.push_back( string( origpath )+"/data" );
         data_paths.push_back( string( origpath )+"/../data" );
         data_paths.push_back( string( origpath )+"/../Resources" );
-        bogus_str = getcwd( origpath, 65535 );
+        bogus_str = _getcwd( origpath, 65535 );
         origpath[65535] = 0;
         data_paths.push_back( "." );
         data_paths.push_back( ".." );
@@ -158,19 +179,20 @@ int main( int argc, char *argv[] )
         //Win32 data should be "."
         for (vector< string >::iterator vsit = data_paths.begin(); vsit != data_paths.end(); vsit++) {
             //Test if the dir exist and contains config_file
-            bogus_int = chdir( origpath );
-            bogus_int = chdir( (*vsit).c_str() );
-            FILE *setupcfg = fopen( "setup.config", "r" );
+            bogus_int = _chdir( origpath );
+            bogus_int = _chdir( (*vsit).c_str() );
+            FILE* setupcfg;
+            fopen_s(&setupcfg, "setup.config", "r");
             if (!setupcfg)
                 continue;
             fclose( setupcfg );
-            setupcfg  = fopen( "Version.txt", "r" );
+            fopen_s(&setupcfg, "Version.txt", "r" );
             if (!setupcfg)
                 continue;
-            bogus_str = getcwd( origpath, 65535 );
+            bogus_str = _getcwd( origpath, 65535 );
             origpath[65535] = 0;
             printf( "Found data in %s\n", origpath );
-            CONFIG.data_path = strdup(origpath);
+            CONFIG.data_path = _strdup(origpath);
             break;
         }
     }
@@ -205,7 +227,7 @@ int main( int argc, char *argv[] )
 #endif
     Start( &argc, &argv );
 #if defined (_WINDOWS) && defined (_WIN32)
-    delete[] argv0;
+    //delete[] argv0;
 #endif
     return 0;
 }

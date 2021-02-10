@@ -57,22 +57,23 @@ namespace Audio {
             codecPriority[codec] = priority;
             nameCodec[codec->getName()] = codec;
 
-            BOOST_LOG_TRIVIAL(trace) << "Registering codec " << codec->getName().c_str();
+            // static initializer ordering issue between boost logger and other code?
+            std::cerr << "Registering codec " << codec->getName().c_str();
 
             const Codec::Extensions *ext = codec->getExtensions();
             if (ext) {
                 for (Codec::Extensions::const_iterator it = ext->begin(); it != ext->end(); ++it) {
-                    BOOST_LOG_TRIVIAL(trace) << " " << it->c_str();
+                    std::cerr << " " << it->c_str();
                     extensionCodecs[*it].insert(codec);
                 }
             } else {
-                BOOST_LOG_TRIVIAL(trace) << " as universal";
+                std::cerr << " as universal";
                 universalCodecs.insert(codec);
             }
 
-            BOOST_LOG_TRIVIAL(trace) << "." << std::endl;
+            std::cerr << "." << std::endl;
         } else {
-            BOOST_LOG_TRIVIAL(trace) << "Codec " << codec->getName().c_str() << " already registered" << std::endl;
+            std::cerr << "Codec " << codec->getName().c_str() << " already registered" << std::endl;
         }
     }
 
