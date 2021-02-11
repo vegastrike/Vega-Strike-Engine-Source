@@ -149,7 +149,7 @@ int main( int argc, char *argv[] )
         data_paths.push_back( string( origpath )+"/data" );
         data_paths.push_back( string( origpath )+"/../data" );
         data_paths.push_back( string( origpath )+"/../Resources" );
-        bogus_str = _getcwd( origpath, 65535 );
+        bogus_str = getcwd( origpath, 65535 );
         origpath[65535] = 0;
         data_paths.push_back( "." );
         data_paths.push_back( ".." );
