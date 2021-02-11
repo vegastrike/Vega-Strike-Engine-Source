@@ -71,7 +71,7 @@ static void changeToProgramDirectory( char *argv0 )
     size_t   pathlen = strlen( program );
     parentdir = new char[pathlen+1];
     char *c;
-    strncpy_s( parentdir, pathlen+1, program, pathlen+1 );
+    strncpy(parentdir, program, pathlen + 1);
     c = (char*) parentdir;
     while (*c != '\0')      /* go to end */
         c++;
@@ -79,7 +79,7 @@ static void changeToProgramDirectory( char *argv0 )
         c--;
     *c = '\0';             /* cut off last part (binary name) */
     if (strlen(parentdir) > 0)
-        bogus_int = _chdir( parentdir );          /* chdir to the binary app's parent */
+        bogus_int = chdir( parentdir );          /* chdir to the binary app's parent */
     delete[] parentdir;
 }
 
@@ -106,7 +106,7 @@ int WINAPI WinMain( HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR lpCmdLine, int n
         snprintf(argv[i],4096,"%ws", szArglist[i]);
         //printf("%d: \"%s\"\n", i, argv[i]);
     }
-    strncpy_s(origpath, 4096, argv[0], 4096);
+    strncpy(origpath, argv[0], 4096);
     //printf("argc = %d; origpath = %s\n", argc, origpath);
 
     // Free memory allocated for CommandLineToArgvW arguments.
@@ -179,20 +179,28 @@ int main( int argc, char *argv[] )
         //Win32 data should be "."
         for (vector< string >::iterator vsit = data_paths.begin(); vsit != data_paths.end(); vsit++) {
             //Test if the dir exist and contains config_file
-            bogus_int = _chdir( origpath );
-            bogus_int = _chdir( (*vsit).c_str() );
+            bogus_int = chdir( origpath );
+            bogus_int = chdir( (*vsit).c_str() );
             FILE* setupcfg;
+#ifdef WIN32
             fopen_s(&setupcfg, "setup.config", "r");
+#else
+            setupcfg = fopen("setup.config", "r");
+#endif
             if (!setupcfg)
                 continue;
             fclose( setupcfg );
+#ifdef WIN32
             fopen_s(&setupcfg, "Version.txt", "r" );
+#else
+            setupcfg = fopen("Version.txt", "r");
+#endif
             if (!setupcfg)
                 continue;
-            bogus_str = _getcwd( origpath, 65535 );
+            bogus_str = getcwd( origpath, 65535 );
             origpath[65535] = 0;
             printf( "Found data in %s\n", origpath );
-            CONFIG.data_path = _strdup(origpath);
+            CONFIG.data_path = strdup(origpath);
             break;
         }
     }
