@@ -121,7 +121,7 @@ int main( int argc, char *argv[] )
     CONFIG.program_name = NULL;
     CONFIG.temp_file = NULL;
     
-    bogus_str = _getcwd( origpath, 65535 );
+    bogus_str = getcwd( origpath, 65535 );
     origpath[65535] = 0;
     
     changeToProgramDirectory( argv[0] );
