@@ -1,13 +1,13 @@
 #SET_PROPERTY(DIRECTORY PROPERTY INCLUDE_DIRECTORIES "")
 INCLUDE_DIRECTORIES("..")
 SET(TRISORT_SOURCES trisort.cpp)
-ADD_EXECUTABLE(trisort ${TRISORT_SOURCES})
+ADD_EXECUTABLE(vs-buildenv-trisort ${TRISORT_SOURCES})
 
 SET(ASTEROID_SOURCES asteroidgen.cpp)
-ADD_EXECUTABLE(asteroidgen ${ASTEROID_SOURCES})
+ADD_EXECUTABLE(vs-buildenv-asteroidgen ${ASTEROID_SOURCES})
 
 SET(REPLACE_SOURCES replace.cpp)
-ADD_EXECUTABLE(replace ${REPLACE_SOURCES})
+ADD_EXECUTABLE(vs-buildenv-replace ${REPLACE_SOURCES})
 
 #find Expat
 FIND_PACKAGE(EXPAT REQUIRED)
@@ -22,9 +22,9 @@ ENDIF (EXPAT_FOUND)
 IF (OGRE_FOUND)
     SET(MSH_INCLUDES ${MSH_INCLUDES} ${OGRE_INCLUDE_DIRS})
     SET(MSH_LIBS ${MSH_LIBS} ${OGRE_LIBRARIES})
-    MESSAGE("++ Compiling mesh_tool with OgreMesh support")
+    MESSAGE("++ Compiling vega-meshtool with OgreMesh support")
 ELSE (OGRE_FOUND)
-    MESSAGE("-- Compiling mesh_tool without OgreMesh support: Ogre not found")
+    MESSAGE("-- Compiling vega-meshtool without OgreMesh support: Ogre not found")
 ENDIF (OGRE_FOUND)
 
 SET(MESHER_SOURCES
@@ -48,15 +48,15 @@ SET(MESHER_SOURCES
 )
 
 INCLUDE_DIRECTORIES(${MSH_INCLUDES} mesher)
-ADD_EXECUTABLE(mesh_tool ${MESHER_SOURCES})
+ADD_EXECUTABLE(vega-meshtool ${MESHER_SOURCES})
 
 # OGRE already looked for by parent
 # USE_SYSTEM_BOOST already set by main script
 IF (OGRE_FOUND AND NOT USE_SYSTEM_BOOST)
     # Ogre usage in mesher requires boost::system
-    ADD_DEPENDENCIES(mesh_tool boost_system)
+    ADD_DEPENDENCIES(vega-meshtool boost_system)
     SET(MSH_LIBS ${MSH_LIBS} boost_system)
 ENDIF (OGRE_FOUND AND NOT USE_SYSTEM_BOOST)
 
-TARGET_LINK_LIBRARIES(mesh_tool ${MSH_LIBS})
-INSTALL(TARGETS mesh_tool DESTINATION bin)
+TARGET_LINK_LIBRARIES(vega-meshtool ${MSH_LIBS})
+INSTALL(TARGETS vega-meshtool DESTINATION bin)
