@@ -154,6 +154,9 @@ function copyFiles()
 
 function buildPackages()
 {
+	# before running make package regen the Cmake data so that
+	# it picks up the dependencies just generated
+	cmake "${SRC_DIR}"
 	make package
 	make package_source
 }
