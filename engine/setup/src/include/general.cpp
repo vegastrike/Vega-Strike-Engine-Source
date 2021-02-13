@@ -101,11 +101,7 @@ char *ptr_copy(const char *string)
         fflush(stderr);
         exit(-1);
     }
-#ifdef __STDC_LIB_EXT1__
-    strcpy_s(alloc, buf_size, string);
-#else
-    strncpy_s(alloc, buf_size, string, buf_size);
-#endif
+    strncpy(alloc, string, buf_size);
     alloc[buf_size - 1] = '\0';
     return alloc;
 #endif

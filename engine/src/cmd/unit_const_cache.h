@@ -7,8 +7,9 @@
 
 class Mesh;
 
-struct StringIntKey
+class StringIntKey
 {
+public:
     std::string key;
     int fac;
 public: StringIntKey( std::string k, int f )

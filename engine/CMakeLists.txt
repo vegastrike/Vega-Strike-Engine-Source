@@ -651,21 +651,27 @@ ELSE (ENABLE_PIE)
 ENDIF (ENABLE_PIE)
 
 IF (MSVC)
-    SET(COMPILER_SPECIFIC_FLAGS "/FI\"${Vega_Strike_BINARY_DIR}\"/config.h  -D__x86_64__ /Z7")
-    set(TOOLCHAIN_SPECIFIC_LINK_FLAGS "/DEBUG:FULL")
+    SET(COMPILER_SPECIFIC_FLAGS "/FI\"${Vega_Strike_BINARY_DIR}\"/config.h  -D__x86_64__ ")
+    SET(COMPILER_SPECIFIC_DEBUG_FLAGS "/Z7 ") # also used for release-with-debug -- can change later
+    SET(COMPILER_SPECIFIC_PROFILER_FLAGS "/Z7 /GL ") # not tested -- requires additional linker flag specialization for profiling run ( /FASTGENPROFILE) and profile use ( /USEPROFILE)
+    SET(COMPILER_SPECIFIC_RELEASE_FLAGS " ")
+    SET(TOOLCHAIN_SPECIFIC_LINK_FLAGS "/DEBUG:FULL ")
 ELSE (MSVC)
-    SET(COMPILER_SPECIFIC_FLAGS "-include config.h -pipe -Og -g3 -Wall -std=c++11 -fvisibility=hidden")
-    set(TOOLCHAIN_SPECIFIC_LINK_FLAGS "-Bsymbolic ")
+    SET(COMPILER_SPECIFIC_FLAGS "-include config.h -pipe -Og -g3 -Wall -std=c++11 -fvisibility=hidden ")
+    SET(COMPILER_SPECIFIC_DEBUG_FLAGS "-Og -g3 ")
+    SET(COMPILER_SPECIFIC_PROFILER_FLAGS "-Og -pg -g2 ")
+    SET(COMPILER_SPECIFIC_RELEASE_FLAGS " ")
+    SET(TOOLCHAIN_SPECIFIC_LINK_FLAGS "-Bsymbolic ")
 ENDIF (MSVC)
 
 
 
 # Debug target block.
-SET(CMAKE_CXX_FLAGS_DEBUG "${COMPILER_SPECIFIC_FLAGS} ${BUILD_OPT} ${CPU_OPTS} ${DEFINES} " CACHE STRING
+SET(CMAKE_CXX_FLAGS_DEBUG "${COMPILER_SPECIFIC_FLAGS} ${COMPILER_SPECIFIC_DEBUG_FLAGS} ${BUILD_OPT} ${CPU_OPTS} ${DEFINES} " CACHE STRING
     "Flags used by the C++ compiler during debug builds."
     FORCE
 )
-SET(CMAKE_C_FLAGS_DEBUG "${COMPILER_SPECIFIC_FLAGS} ${BUILD_OPT} ${CPU_OPTS} ${DEFINES} -Wno-unused-function -Wno-unused-variable" CACHE STRING
+SET(CMAKE_C_FLAGS_DEBUG "${COMPILER_SPECIFIC_FLAGS} ${COMPILER_SPECIFIC_DEBUG_FLAGS} ${BUILD_OPT} ${CPU_OPTS} ${DEFINES} -Wno-unused-function -Wno-unused-variable" CACHE STRING
     "Flags used by the C compiler during debug builds."
     FORCE
 )
@@ -685,14 +691,14 @@ ELSE ("${CMAKE_BUILD_TYPE}" STREQUAL "Debug")
     MARK_AS_ADVANCED( FORCE CMAKE_CXX_FLAGS_DEBUG )
 ENDIF ("${CMAKE_BUILD_TYPE}" STREQUAL "Debug")
 
-MESSAGE("** Compile [${MSVC}][${CMAKE_BUILD_TYPE}] options [${CMAKE_CXX_FLAGS}] [${CMAKE_CXX_FLAGS_DEBUG}] [${BUILD_OPT}] [${CPU_OPTS}] [${DEFINES}]")
+#MESSAGE("** Compile [${MSVC}][${CMAKE_BUILD_TYPE}] options [${CMAKE_CXX_FLAGS}] [${CMAKE_CXX_FLAGS_DEBUG}] [${BUILD_OPT}] [${CPU_OPTS}] [${DEFINES}]")
 
 # Release Target block
-SET(CMAKE_CXX_FLAGS_RELEASE  " ${COMPILER_SPECIFIC_FLAGS} ${BUILD_OPT} ${CPU_OPTS} ${DEFINES}" CACHE STRING
+SET(CMAKE_CXX_FLAGS_RELEASE  " ${COMPILER_SPECIFIC_FLAGS} ${COMPILER_SPECIFIC_RELEASE_FLAGS} ${BUILD_OPT} ${CPU_OPTS} ${DEFINES}" CACHE STRING
     "Flags used by the C++ compiler during release builds."
     FORCE
 )
-SET(CMAKE_C_FLAGS_RELEASE " ${COMPILER_SPECIFIC_FLAGS} ${BUILD_OPT} ${CPU_OPTS} ${DEFINES} -Wno-unused-function -Wno-unused-variable" CACHE STRING
+SET(CMAKE_C_FLAGS_RELEASE " ${COMPILER_SPECIFIC_FLAGS} ${COMPILER_SPECIFIC_RELEASE_FLAGS} ${BUILD_OPT} ${CPU_OPTS} ${DEFINES} -Wno-unused-function -Wno-unused-variable" CACHE STRING
     "Flags used by the C compiler during release builds."
     FORCE
 )
@@ -712,11 +718,11 @@ ENDIF ("${CMAKE_BUILD_TYPE}" STREQUAL "Release")
 
 
 # RelWithDebInfo Target block
-SET(CMAKE_CXX_FLAGS_RELWITHDEBINFO  " ${COMPILER_SPECIFIC_FLAGS} ${BUILD_OPT} ${CPU_OPTS} ${DEFINES} -g3" CACHE STRING
+SET(CMAKE_CXX_FLAGS_RELWITHDEBINFO  " ${COMPILER_SPECIFIC_FLAGS} ${COMPILER_SPECIFIC_DEBUG_FLAGS} ${BUILD_OPT} ${CPU_OPTS} ${DEFINES}" CACHE STRING
     "Flags used by the C++ compiler during release-with-debug-info builds."
     FORCE
 )
-SET(CMAKE_C_FLAGS_RELWITHDEBINFO "  ${COMPILER_SPECIFIC_FLAGS} ${BUILD_OPT} ${CPU_OPTS} ${DEFINES} -g3 -Wno-unused-function -Wno-unused-variable" CACHE STRING
+SET(CMAKE_C_FLAGS_RELWITHDEBINFO "  ${COMPILER_SPECIFIC_FLAGS} ${COMPILER_SPECIFIC_DEBUG_FLAGS} ${BUILD_OPT} ${CPU_OPTS} ${DEFINES} -Wno-unused-function -Wno-unused-variable" CACHE STRING
     "Flags used by the C compiler during release-with-debug-info builds."
     FORCE
 )
@@ -736,11 +742,11 @@ ENDIF ("${CMAKE_BUILD_TYPE}" STREQUAL "RelWithDebInfo")
 
 
 # Profiler Target block
-SET(CMAKE_CXX_FLAGS_PROFILER " ${COMPILER_SPECIFIC_FLAGS} ${BUILD_OPT} ${CPU_OPTS} ${DEFINES} -pg -g2 -Wno-unused-function -Wno-unused-variable" CACHE STRING
+SET(CMAKE_CXX_FLAGS_PROFILER " ${COMPILER_SPECIFIC_FLAGS} ${COMPILER_SPECIFIC_PROFILER_FLAGS} ${BUILD_OPT} ${CPU_OPTS} ${DEFINES} -Wno-unused-function -Wno-unused-variable" CACHE STRING
     "Flags used by the C++ compiler during profiler builds."
     FORCE
 )
-SET(CMAKE_C_FLAGS_PROFILER " ${COMPILER_SPECIFIC_FLAGS} ${BUILD_OPT} ${CPU_OPTS} ${DEFINES} -pg -g2 -Wno-unused-function -Wno-unused-variable" CACHE STRING
+SET(CMAKE_C_FLAGS_PROFILER " ${COMPILER_SPECIFIC_FLAGS} ${COMPILER_SPECIFIC_PROFILER_FLAGS} ${BUILD_OPT} ${CPU_OPTS} ${DEFINES} -Wno-unused-function -Wno-unused-variable" CACHE STRING
     "Flags used by the C compiler during profiler builds."
     FORCE
 )
@@ -843,7 +849,7 @@ IF (USE_SYSTEM_BOOST)
                     SET(BOOST_PYTHON_COMPONENT "python-py3${PYTHON_VERSION_MINOR}")
                 ENDIF (LINUX_CODENAME STREQUAL xenial OR LINUX_CODENAME STREQUAL stretch)
             ENDIF (CMAKE_SYSTEM_NAME STREQUAL Linux)
-        ELSE (Boost_1_67_Or_Later_Result)
+        ELSE (WIN32)
             SET(BOOST_PYTHON_COMPONENT "python")
         ENDIF (WIN32)
         UNSET(Boost_1_67_Or_Later_Result)

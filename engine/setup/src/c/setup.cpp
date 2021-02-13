@@ -162,19 +162,11 @@ int main( int argc, char *argv[] )
             bogus_int = chdir( origpath );
             bogus_int = chdir( (*vsit).c_str() );
             FILE* setupcfg;
-#ifdef WIN32
-            fopen_s(&setupcfg, "setup.config", "r");
-#else
             setupcfg = fopen("setup.config", "r");
-#endif
             if (!setupcfg)
                 continue;
             fclose( setupcfg );
-#ifdef WIN32
-            fopen_s(&setupcfg, "Version.txt", "r" );
-#else
             setupcfg = fopen("Version.txt", "r");
-#endif
             if (!setupcfg)
                 continue;
             bogus_str = getcwd( origpath, 65535 );
@@ -214,9 +206,6 @@ int main( int argc, char *argv[] )
     bogus_int = chdir( HOMESUBDIR.c_str() );
 #endif
     Start( &argc, &argv );
-#if defined (_WINDOWS) && defined (_WIN32)
-    //delete[] argv0;
-#endif
     return 0;
 }
 
