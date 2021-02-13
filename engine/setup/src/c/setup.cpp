@@ -89,29 +89,9 @@ int WINAPI WinMain( HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR lpCmdLine, int n
 {
     char **argv;
     int  argc;
-    //strcpy( argv0, origpath );
-    //GetModuleFileName( NULL, argv0, 65534 );
+    argv = __argv; // did not realize this was actually still defined by MSVC
+    argc = __argc; // same here
     
-    LPWSTR* szArglist;
-    int i;
-    argv = (char**)malloc(3*sizeof(char*));
-    szArglist = CommandLineToArgvW(GetCommandLineW(), &argc);
-    if (NULL == szArglist)
-    {
-        wprintf(L"CommandLineToArgvW failed\n");
-        return 0;
-    }
-    else for (i = 0; i < argc && i < 4; i++) {
-        argv[i] = (char*)malloc(4096 * sizeof(char));
-        snprintf(argv[i],4096,"%ws", szArglist[i]);
-        //printf("%d: \"%s\"\n", i, argv[i]);
-    }
-    strncpy(origpath, argv[0], 4096);
-    //printf("argc = %d; origpath = %s\n", argc, origpath);
-
-    // Free memory allocated for CommandLineToArgvW arguments.
-
-    LocalFree(szArglist);
 #else
 int main( int argc, char *argv[] )
 {
