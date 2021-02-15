@@ -9,7 +9,6 @@
 #include "gfxlib_struct.h"
 #include "gfx/aux_texture.h"
 #include "gfx/animation.h"
-#include "gfx/decalqueue.h"
 #include "unit.h"
 #include "audiolib.h"
 #include "config_xml.h"
@@ -24,7 +23,7 @@ bolt_draw::~bolt_draw()
 {
     unsigned int i;
     for (i = 0; i < cachedecals.size(); i++)
-        boltdecals->DelTexture( cachedecals[i] );
+        boltdecals.DelTexture( cachedecals[i] );
     cachedecals.clear();
     for (i = 0; i < animations.size(); i++)
         delete animations[i];
@@ -34,11 +33,9 @@ bolt_draw::~bolt_draw()
     for (i = 0; i < bolts.size(); i++)
         for (int j = bolts[i].size()-1; j >= 0; j--)
             bolts[i][j].Destroy( j );
-    delete boltdecals;
 }
 bolt_draw::bolt_draw()
 {
-    boltdecals = new DecalQueue;
     if (!boltmesh) {
         GFXVertex    vtx[12];
 #define V( ii, xx, yy, zz, ss,                                                                                                \
@@ -68,10 +65,10 @@ inline void BlendTrans( Matrix &drawmat, const QVector &cur_position, const QVec
 }
 int Bolt::AddTexture( bolt_draw *q, std::string file )
 {
-    int decal = q->boltdecals->AddTexture( file.c_str(), MIPMAP );
+    int decal = q->boltdecals.AddTexture( file.c_str(), MIPMAP );
     if ( decal >= (int) q->bolts.size() ) {
         q->bolts.push_back( vector< Bolt > () );
-        int blargh = q->boltdecals->AddTexture( file.c_str(), MIPMAP );
+        int blargh = q->boltdecals.AddTexture( file.c_str(), MIPMAP );
         if ( blargh >= (int) q->bolts.size() )
             q->bolts.push_back( vector< Bolt > () );
         q->cachedecals.push_back( blargh );
@@ -159,7 +156,7 @@ void Bolt::Draw()
         qmesh->BeginDrawState();
         int decal = 0;
         for (i = qq->bolts.begin(); i != qq->bolts.end(); decal++, i++) {
-            Texture *dec = qq->boltdecals->GetTexture( decal );
+            Texture *dec = qq->boltdecals.GetTexture( decal );
             if ( dec && i->begin() != i->end() ) {
                 float bolt_size = 2*i->begin()->type->Radius+i->begin()->type->Length;
                 bolt_size *= bolt_size;
@@ -205,7 +202,7 @@ void Bolt::Destroy( unsigned int index )
     bolt_draw *q = _Universe->activeStarSystem()->bolts;
     bool isBall  = true;
     if (type->type == weapon_info::BOLT) {
-        q->boltdecals->DelTexture( decal );
+        q->boltdecals.DelTexture( decal );
         isBall = false;
     } else {}
     BoltDestroyGeneric( this, index, decal, isBall );

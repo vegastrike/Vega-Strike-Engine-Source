@@ -1,6 +1,9 @@
+#include "vs_globals.h"
+#include "gfx/aux_texture.h"
+
 #include <vector>
 #include <string>
-#include "vs_globals.h"
+
 class DecalQueue
 {
     int nullity;

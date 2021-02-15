@@ -6,6 +6,8 @@
 #include "gfx/matrix.h"
 #include "gfx/quaternion.h"
 #include "collide_map.h"
+#include "gfx/decalqueue.h"
+
 class Animation;
 class Unit;
 class StarSystem;
@@ -45,7 +47,7 @@ private:
 };
 class bolt_draw {
 public:
-  class DecalQueue *boltdecals;
+  class DecalQueue boltdecals;
   static GFXVertexList * boltmesh;
   vector <std::string> animationname;
   vector <Animation *> animations;
