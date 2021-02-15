@@ -6,12 +6,11 @@
 #include "gfx/matrix.h"
 #include "gfx/quaternion.h"
 #include "collide_map.h"
-#include "gfx/decalqueue.h"
 
-class Animation;
 class Unit;
 class StarSystem;
-class bolt_draw ;
+class BoltDrawManager;
+
 class Bolt {
 private:
   const weapon_info* type;//beam or bolt;
@@ -24,8 +23,8 @@ private:
   int decal;//which image it uses
  public:
   CollideMap::iterator location;
-  static int AddTexture(bolt_draw *q, std::string filename);
-  static int AddAnimation(bolt_draw *q, std::string filename, QVector cur_position);
+  static int AddTexture(BoltDrawManager *q, std::string filename);
+  static int AddAnimation(BoltDrawManager *q, std::string filename, QVector cur_position);
   bool Collide (Unit * target);
   static bool CollideAnon (Collidable::CollideRef bolt_name, Unit* target);
   static Bolt * BoltFromIndex(StarSystem* ss,Collidable::CollideRef bolt_name);
@@ -45,17 +44,6 @@ private:
   static void UpdatePhysics(StarSystem *ss);//updates all physics in the starsystem
   void noop()const{}
 };
-class bolt_draw {
-public:
-  class DecalQueue boltdecals;
-  static GFXVertexList * boltmesh;
-  vector <std::string> animationname;
-  vector <Animation *> animations;
-  vector <vector <Bolt> > bolts;
-  vector <vector <Bolt> > balls;
-  vector <int> cachedecals;
-  bolt_draw();
-  ~bolt_draw();
-};
+
 
 #endif

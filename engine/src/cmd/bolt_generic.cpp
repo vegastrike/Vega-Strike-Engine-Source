@@ -12,6 +12,7 @@
 #include "config_xml.h"
 #include "star_system.h"
 #include "universe.h"
+#include "gfx/boltdrawmanager.h"
 
 using std::vector;
 using std::string;
@@ -24,7 +25,7 @@ Bolt::Bolt( const weapon_info *typ,
     , ShipSpeed( shipspeed )
 {
     VSCONSTRUCT2( 't' )
-    bolt_draw*q   = _Universe->activeStarSystem()->bolts;
+    BoltDrawManager*q   = _Universe->activeStarSystem()->bolts;
     prev_position = cur_position;
     this->owner   = owner;
     this->type    = typ;
@@ -205,7 +206,7 @@ Collidable::CollideRef Bolt::BoltIndex( int index, int decal, bool isBall )
 void BoltDestroyGeneric( Bolt *whichbolt, unsigned int index, int decal, bool isBall )
 {
     VSDESTRUCT2
-    bolt_draw *q = _Universe->activeStarSystem()->bolts;
+    BoltDrawManager *q = _Universe->activeStarSystem()->bolts;
     vector< vector< Bolt > > *target;
     if (!isBall)
         target = &q->bolts;

@@ -1,9 +1,12 @@
-#include <vector>
 
+
+#include <vector>
 #include <string>
 #include <algorithm>
 
 #include "bolt.h"
+
+#include "gfx/boltdrawmanager.h"
 #include "gfxlib.h"
 #include "gfx/mesh.h"
 #include "gfxlib_struct.h"
@@ -16,46 +19,11 @@
 #include "options.h"
 #include "universe.h"
 
+
 using std::vector;
 using std::string;
-GFXVertexList*bolt_draw::boltmesh = NULL;
-bolt_draw::~bolt_draw()
-{
-    unsigned int i;
-    for (i = 0; i < cachedecals.size(); i++)
-        boltdecals.DelTexture( cachedecals[i] );
-    cachedecals.clear();
-    for (i = 0; i < animations.size(); i++)
-        delete animations[i];
-    for (i = 0; i < balls.size(); i++)
-        for (int j = balls[i].size()-1; j >= 0; j--)
-            balls[i][j].Destroy( j );
-    for (i = 0; i < bolts.size(); i++)
-        for (int j = bolts[i].size()-1; j >= 0; j--)
-            bolts[i][j].Destroy( j );
-}
-bolt_draw::bolt_draw()
-{
-    if (!boltmesh) {
-        GFXVertex    vtx[12];
-#define V( ii, xx, yy, zz, ss,                                                                                                \
-           tt ) vtx[ii].x = xx; vtx[ii].y = yy; vtx[ii].z = zz+game_options.bolt_offset+.875; vtx[ii].i = 0; vtx[ii].j = 0; vtx[ii].k = 1; \
-    vtx[ii].s = ss; vtx[ii].t = tt;
-        V( 0, 0, 0, -.875, 0, .5 );
-        V( 1, 0, -1, 0, .875, 1 );
-        V( 2, 0, 0, .125, 1, .5 );
-        V( 3, 0, 1, 0, .875, 0 );
-        V( 4, 0, 0, -.875, 0, .5 );
-        V( 5, -1, 0, 0, .875, 1 );
-        V( 6, 0, 0, .125, 1, .5 );
-        V( 7, 1, 0, 0, .875, 0 );
-        V( 8, 1, 0, 0, .1875, 0 );
-        V( 9, 0, 1, 0, .375, .1875 );
-        V( 10, -1, 0, 0, .1875, .375 );
-        V( 11, 0, -1, 0, 0, .1875 );
-        boltmesh = new GFXVertexList( GFXQUAD, 12, vtx, 12, false );         //not mutable;
-    }
-}
+
+
 
 extern double interpolation_blend_factor;
 
@@ -63,7 +31,7 @@ inline void BlendTrans( Matrix &drawmat, const QVector &cur_position, const QVec
 {
     drawmat.p = prev_position.Scale( 1-interpolation_blend_factor )+cur_position.Scale( interpolation_blend_factor );
 }
-int Bolt::AddTexture( bolt_draw *q, std::string file )
+int Bolt::AddTexture( BoltDrawManager *q, std::string file )
 {
     int decal = q->boltdecals.AddTexture( file.c_str(), MIPMAP );
     if ( decal >= (int) q->bolts.size() ) {
@@ -75,7 +43,7 @@ int Bolt::AddTexture( bolt_draw *q, std::string file )
     }
     return decal;
 }
-int Bolt::AddAnimation( bolt_draw *q, std::string file, QVector cur_position )
+int Bolt::AddAnimation( BoltDrawManager *q, std::string file, QVector cur_position )
 {
     int decal = -1;
     for (unsigned int i = 0; i < q->animationname.size(); i++)
@@ -93,7 +61,7 @@ int Bolt::AddAnimation( bolt_draw *q, std::string file, QVector cur_position )
 
 void Bolt::Draw()
 {
-    bolt_draw *qq = _Universe->activeStarSystem()->bolts;
+    BoltDrawManager *qq = _Universe->activeStarSystem()->bolts;
     GFXDisable( LIGHTING );
     GFXDisable( CULLFACE );
 
@@ -199,7 +167,7 @@ extern void BoltDestroyGeneric( Bolt *whichbolt, unsigned int index, int decal, 
 void Bolt::Destroy( unsigned int index )
 {
     VSDESTRUCT2
-    bolt_draw *q = _Universe->activeStarSystem()->bolts;
+    BoltDrawManager *q = _Universe->activeStarSystem()->bolts;
     bool isBall  = true;
     if (type->type == weapon_info::BOLT) {
         q->boltdecals.DelTexture( decal );

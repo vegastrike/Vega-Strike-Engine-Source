@@ -82,6 +82,7 @@
 #include "gfx/occlusion.h"
 #include "gfx/vec.h"
 #include "gfx/cockpit_generic.h"
+#include "gfx/boltdrawmanager.h"
 
 #include <boost/python/errors.hpp>
 
@@ -105,7 +106,7 @@ StarSystem::StarSystem( const string filename, const Vector &centr, const float 
     ///adds to jumping table;
     _Universe->pushActiveStarSystem( this );
     GFXCreateLightContext( light_context );
-    bolts = new bolt_draw;
+    bolts = new BoltDrawManager;
     collide_table   = new CollideTable( this );
 
     LoadXML( filename, centr, timeofyear );
@@ -568,7 +569,7 @@ float ScaleJumpRadius( float radius )
     name  = nullptr;
     zone  = 0;
     _Universe->pushActiveStarSystem( this );
-    bolts = new bolt_draw;
+    bolts = new BoltDrawManager;
     collide_table   = new CollideTable( this );
     current_stage  = MISSION_SIMULATION;
     this->filename = filename;
