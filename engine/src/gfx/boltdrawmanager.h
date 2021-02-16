@@ -21,6 +21,11 @@ public:
 
     BoltDrawManager();
     ~BoltDrawManager();
+
+    static BoltDrawManager& getInstance() {
+        static BoltDrawManager instance;    // Guaranteed to be destroyed.
+        return instance;                    // Instantiated on first use.
+    }
 };
 
 #endif // BOLTDRAWMANAGER_H

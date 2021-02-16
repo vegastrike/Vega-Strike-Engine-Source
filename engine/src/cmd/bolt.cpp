@@ -61,7 +61,7 @@ int Bolt::AddAnimation( BoltDrawManager *q, std::string file, QVector cur_positi
 
 void Bolt::Draw()
 {
-    BoltDrawManager *qq = _Universe->activeStarSystem()->bolts;
+    BoltDrawManager& qq = BoltDrawManager::getInstance();
     GFXDisable( LIGHTING );
     GFXDisable( CULLFACE );
 
@@ -72,7 +72,7 @@ void Bolt::Draw()
     GFXAlphaTest( GREATER, .1 );
     vector< vector< Bolt > >::iterator i;
     vector< Bolt >::iterator j;
-    vector< Animation* >::iterator     k = qq->animations.begin();
+    vector< Animation* >::iterator     k = qq.animations.begin();
     float etime = GetElapsedTime();
     float pixel_angle = 2
                         *sin( g_game.fov*M_PI/180.0
@@ -82,7 +82,7 @@ void Bolt::Draw()
     Vector  p, q, r;
     _Universe->AccessCamera()->GetOrientation( p, q, r );
     QVector campos = _Universe->AccessCamera()->GetPosition();
-    for (i = qq->balls.begin(); i != qq->balls.end(); i++, k++) {
+    for (i = qq.balls.begin(); i != qq.balls.end(); i++, k++) {
         Animation *cur = *k;
         if ( i->begin() != i->end() ) {
             float bolt_size = 2*i->begin()->type->Radius*2;
@@ -106,8 +106,8 @@ void Bolt::Draw()
             }
         }
     }
-    GFXVertexList *qmesh = qq->boltmesh;
-    if (qmesh && qq->bolts.begin() != qq->bolts.end()) {
+    GFXVertexList *qmesh = qq.boltmesh;
+    if (qmesh && qq.bolts.begin() != qq.bolts.end()) {
         GFXAlphaTest( ALWAYS, 0 );
         GFXDisable( DEPTHWRITE );
         GFXDisable( TEXTURE1 );
@@ -123,8 +123,8 @@ void Bolt::Draw()
         qmesh->LoadDrawState();
         qmesh->BeginDrawState();
         int decal = 0;
-        for (i = qq->bolts.begin(); i != qq->bolts.end(); decal++, i++) {
-            Texture *dec = qq->boltdecals.GetTexture( decal );
+        for (i = qq.bolts.begin(); i != qq.bolts.end(); decal++, i++) {
+            Texture *dec = qq.boltdecals.GetTexture( decal );
             if ( dec && i->begin() != i->end() ) {
                 float bolt_size = 2*i->begin()->type->Radius+i->begin()->type->Length;
                 bolt_size *= bolt_size;
@@ -167,10 +167,10 @@ extern void BoltDestroyGeneric( Bolt *whichbolt, unsigned int index, int decal, 
 void Bolt::Destroy( unsigned int index )
 {
     VSDESTRUCT2
-    BoltDrawManager *q = _Universe->activeStarSystem()->bolts;
+    BoltDrawManager& q = BoltDrawManager::getInstance();
     bool isBall  = true;
     if (type->type == weapon_info::BOLT) {
-        q->boltdecals.DelTexture( decal );
+        q.boltdecals.DelTexture( decal );
         isBall = false;
     } else {}
     BoltDestroyGeneric( this, index, decal, isBall );
@@ -184,7 +184,7 @@ Bolt::Bolt( const weapon_info *typ,
     , ShipSpeed( shipspeed )
 {
     VSCONSTRUCT2( 't' )
-    BoltDrawManager*q   = _Universe->activeStarSystem()->bolts;
+    BoltDrawManager& q = BoltDrawManager::getInstance();
     prev_position = cur_position;
     this->owner   = owner;
     this->type    = typ;
@@ -193,9 +193,9 @@ Bolt::Bolt( const weapon_info *typ,
     Vector vel = shipspeed+orientationpos.getR()*typ->Speed;
     if (typ->type == weapon_info::BOLT) {
         ScaleMatrix( drawmat, Vector( typ->Radius, typ->Radius, typ->Length ) );
-        decal = Bolt::AddTexture( q, typ->file );
+        decal = Bolt::AddTexture( &q, typ->file );
         this->location =
-            _Universe->activeStarSystem()->collide_map[Unit::UNIT_BOLT]->insert( Collidable( Bolt::BoltIndex( q->bolts[decal].
+            _Universe->activeStarSystem()->collide_map[Unit::UNIT_BOLT]->insert( Collidable( Bolt::BoltIndex( q.bolts[decal].
                                                                                                              size(),
                                                                                                              decal,
                                                                                                              false ).bolt_index,
@@ -203,13 +203,13 @@ Bolt::Bolt( const weapon_info *typ,
                                                                                              *typ->Speed).Magnitude()*.5,
                                                                                             cur_position+vel*simulation_atom_var*.5 ),
                                                                                 hint );
-        q->bolts[decal].push_back( *this );
+        q.bolts[decal].push_back( *this );
     } else {
         ScaleMatrix( drawmat, Vector( typ->Radius, typ->Radius, typ->Radius ) );
-        decal = Bolt::AddAnimation( q, typ->file, cur_position );
+        decal = Bolt::AddAnimation( &q, typ->file, cur_position );
 
         this->location =
-            _Universe->activeStarSystem()->collide_map[Unit::UNIT_BOLT]->insert( Collidable( Bolt::BoltIndex( q->balls[decal].
+            _Universe->activeStarSystem()->collide_map[Unit::UNIT_BOLT]->insert( Collidable( Bolt::BoltIndex( q.balls[decal].
                                                                                                              size(),
                                                                                                              decal,
                                                                                                              true ).bolt_index,
@@ -217,7 +217,7 @@ Bolt::Bolt( const weapon_info *typ,
                                                                                              *typ->Speed).Magnitude()*.5,
                                                                                             cur_position+vel*simulation_atom_var*.5 ),
                                                                                 hint );
-        q->balls[decal].push_back( *this );
+        q.balls[decal].push_back( *this );
     }
 }
 
@@ -258,7 +258,7 @@ public: UpdateBolt( StarSystem *ss, CollideMap *collide_map )
     void operator()( Collidable &collidable )
     {
         if (collidable.radius < 0) {
-            Bolt *thus = Bolt::BoltFromIndex( starSystem, collidable.ref );
+            Bolt *thus = Bolt::BoltFromIndex( collidable.ref );
             if ( !collide_map->CheckCollisions( thus, collidable ) )
                 thus->Update( collidable.ref );
         }
@@ -292,7 +292,7 @@ public: UpdateBolts( StarSystem *ss, CollideMap *collide_map ) : sub( ss, collid
     }
 };
 
-void Bolt::UpdatePhysics( StarSystem *ss )
+void Bolt::UpdatePhysics(StarSystem *ss)
 {
     CollideMap *cm = ss->collide_map[Unit::UNIT_BOLT];
     vsalg::for_each( cm->sorted.begin(), cm->sorted.end(), UpdateBolt( ss, cm ) );
@@ -333,18 +333,19 @@ bool Bolt::Collide( Unit *target )
     return false;
 }
 
-Bolt* Bolt::BoltFromIndex( StarSystem *ss, Collidable::CollideRef b )
+Bolt* Bolt::BoltFromIndex( Collidable::CollideRef b )
 {
+    BoltDrawManager& bolt_draw_manager = BoltDrawManager::getInstance();
     size_t ind = nondecal_index( b );
     if (b.bolt_index&128)
-        return &ss->bolts->balls[b.bolt_index&0x7f][ind];
+        return &bolt_draw_manager.balls[b.bolt_index&0x7f][ind];
     else
-        return &ss->bolts->bolts[b.bolt_index&0x7f][ind];
+        return &bolt_draw_manager.bolts[b.bolt_index&0x7f][ind];
 }
 
 bool Bolt::CollideAnon( Collidable::CollideRef b, Unit *un )
 {
-    Bolt *tmp = BoltFromIndex( _Universe->activeStarSystem(), b );
+    Bolt *tmp = BoltFromIndex( b );
     if ( tmp->Collide( un ) ) {
         tmp->Destroy( nondecal_index( b ) );
         return true;
@@ -365,12 +366,12 @@ Collidable::CollideRef Bolt::BoltIndex( int index, int decal, bool isBall )
 void BoltDestroyGeneric( Bolt *whichbolt, unsigned int index, int decal, bool isBall )
 {
     VSDESTRUCT2
-    BoltDrawManager *q = _Universe->activeStarSystem()->bolts;
+    BoltDrawManager& q = BoltDrawManager::getInstance();
     vector< vector< Bolt > > *target;
     if (!isBall)
-        target = &q->bolts;
+        target = &q.bolts;
     else
-        target = &q->balls;
+        target = &q.balls;
     vector< Bolt > *vec = &(*target)[decal];
     if (&(*vec)[index] == whichbolt) {
         unsigned int tsize = vec->size();

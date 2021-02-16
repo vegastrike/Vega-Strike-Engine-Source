@@ -118,7 +118,6 @@ public:
     Statistics stats;
     std::multimap<Unit*, Unit*> last_collisions;
     CollideMap *collide_map[2]; // 0 Unit 1 Bolt
-    class BoltDrawManager *bolts = nullptr;
     class CollideTable *collide_table = nullptr;
 
 protected:

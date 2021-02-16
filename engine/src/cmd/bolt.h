@@ -27,7 +27,7 @@ private:
   static int AddAnimation(BoltDrawManager *q, std::string filename, QVector cur_position);
   bool Collide (Unit * target);
   static bool CollideAnon (Collidable::CollideRef bolt_name, Unit* target);
-  static Bolt * BoltFromIndex(StarSystem* ss,Collidable::CollideRef bolt_name);
+  static Bolt * BoltFromIndex(Collidable::CollideRef bolt_name);
   static Collidable::CollideRef BoltIndex(int index, int decal, bool isBall);
   bool operator == (const Bolt & b) const{
     

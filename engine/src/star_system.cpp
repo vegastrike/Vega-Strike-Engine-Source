@@ -82,7 +82,6 @@
 #include "gfx/occlusion.h"
 #include "gfx/vec.h"
 #include "gfx/cockpit_generic.h"
-#include "gfx/boltdrawmanager.h"
 
 #include <boost/python/errors.hpp>
 
@@ -106,7 +105,6 @@ StarSystem::StarSystem( const string filename, const Vector &centr, const float 
     ///adds to jumping table;
     _Universe->pushActiveStarSystem( this );
     GFXCreateLightContext( light_context );
-    bolts = new BoltDrawManager;
     collide_table   = new CollideTable( this );
 
     LoadXML( filename, centr, timeofyear );
@@ -184,9 +182,6 @@ StarSystem::~StarSystem()
 
     delete background;
     delete stars;
-    delete bolts;
-
-
 }
 
 Texture* StarSystem::getLightMap()
@@ -558,30 +553,6 @@ float ScaleJumpRadius( float radius )
     return radius;
 }
 
-/*StarSystem::StarSystem( const char *filename, const Vector &centr, const float timeofyear )
-{
-    no_collision_time = 0;               //(int)(1+2.000/SIMULATION_ATOM);
-    collide_map[Unit::UNIT_ONLY] = new CollideMap( Unit::UNIT_ONLY );
-    collide_map[Unit::UNIT_BOLT] = new CollideMap( Unit::UNIT_BOLT );
-
-    this->current_sim_location  = 0;
-    ///adds to jumping table;
-    name  = nullptr;
-    zone  = 0;
-    _Universe->pushActiveStarSystem( this );
-    bolts = new BoltDrawManager;
-    collide_table   = new CollideTable( this );
-    current_stage  = MISSION_SIMULATION;
-    this->filename = filename;
-    LoadXML( filename, centr, timeofyear );
-    if (!name)
-        name = strdup( filename );
-    sigIter = draw_list.createIterator();
-    AddStarsystemToUniverse( filename );
-
-    time = 0;
-    _Universe->popActiveStarSystem();
-}*/
 
 
 /********* FROM STAR SYSTEM XML *********/
