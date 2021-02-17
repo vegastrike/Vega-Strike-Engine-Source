@@ -38,14 +38,6 @@ typedef int            LONG;
 typedef unsigned short WORD;
 typedef unsigned char  BYTE;
 
-#if !defined (_WIN32) || defined (__CYGWIN__) || defined (__MINGW32__)
-  #define LOCALCONST_DECL( Type, cName, Value ) static const Type cName = Value;
-  #define LOCALCONST_DEF( Class, Type, cName, Value )
-#else
-  #define LOCALCONST_DECL( Type, cName, Value ) static Type cName;
-  #define LOCALCONST_DEF( Class, Type, cName, Value ) Type Class::cName = Value;
-#endif
-
 /**
  * Windows Bitmap format.
  * Caution about big endian systems (use endianness.h to read in things)
@@ -87,13 +79,24 @@ typedef struct
     BYTE rgbRed;
     BYTE rgbReserved;
 } RGBQUAD;
+
+#define LOCALCONST_DECL( Type, cName, Value ) static const Type cName = Value;
+#define LOCALCONST_DEF( Class, Type, cName, Value )
+
 #else
+
+#define LOCALCONST_DECL( Type, cName, Value ) static Type cName;
+#define LOCALCONST_DEF( Class, Type, cName, Value ) Type Class::cName = Value;
+
 #ifndef NOMINMAX
 #define NOMINMAX
 #endif //tells VCC not to generate min/max macros
 #include <windows.h>
 #include <wingdi.h>
+
 #endif
+
+
 
 /*
  * Standard DDS formats.
@@ -259,7 +262,6 @@ public: VSImage();
     //Defined for gcc which pads size of structs (not entirely necessary)
     //const static int SIZEOF_RGBQUAD;
     LOCALCONST_DECL( int, SIZEOF_RGBQUAD, sizeof (BYTE)*4 )
-
 
 //f2 is needed for bmp loading
     unsigned char*ReadImage( VSFileSystem::VSFile*f,

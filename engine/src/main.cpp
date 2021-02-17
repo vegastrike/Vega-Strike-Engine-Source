@@ -92,7 +92,6 @@
 #include <boost/log/sources/severity_logger.hpp>
 #include <boost/log/sources/record_ostream.hpp>
 #include <boost/filesystem.hpp>
-
 #include "options.h"
 
 using std::cout;

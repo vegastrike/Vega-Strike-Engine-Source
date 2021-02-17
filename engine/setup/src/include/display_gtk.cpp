@@ -41,7 +41,7 @@ void exit_0(GtkWidget *w, void *arg) {
 
 void InitGraphics(int *argc, char*** argv) {
 	gtk_init(argc, argv);
-        GET_TITLE; // sets title;
+        GET_TITLE; // sets title; uses sprintf, not snprintf -- //[MSVC-Warn]
         GET_STATIC_TEXT;
 	window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
 	gtk_window_set_default_size(GTK_WINDOW(window), 600, 400);
@@ -69,7 +69,7 @@ void myexit(int exitval){
 
 #ifdef _WIN32
 	readme_path += "\\documentation\\readme.txt";
-	int err=(int)ShellExecute(NULL,"open",readme_path.c_str(),"","",1);
+	int err=(int)ShellExecute(NULL,"open",readme_path.c_str(),"","",1); //[MSVC-Warn] err should not be an int, should be an HINSTANCE... but this is also immediately quitting and doesn't use err- fix it in another patch
 #else
 	readme_path += "/documentation/readme.txt";
 	execlp("xdg-open", "xdg-open", readme_path.c_str(), NULL); //Will this work in Linux?
@@ -227,7 +227,8 @@ void ClickButton(GtkWidget *w, struct catagory *CUR) {
 
     new_value = gtk_combo_box_text_get_active_text(GTK_COMBO_BOX_TEXT(w));
 	new_text = (char *)malloc(strlen(CUR->name)+1);
-	sprintf(new_text, "%s", GetNameFromInfo(new_value)->name);
+	if (NULL==new_text) { fprintf(stderr,"FAILED TO MALLOC A SMALL STRING!\n"); exit(-1); }
+	sprintf(new_text, "%s", GetNameFromInfo(new_value)->name); //[MSVC-Warn] sprintf instead of snprintf
 	NEW->setting = new_text;
 
 #ifdef USE_RADIO

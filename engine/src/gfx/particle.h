@@ -2,6 +2,7 @@
 #define __PARTICLE_H
 
 #include <vector>
+#include <string>
 #include <memory>
 #include "aligned.h"
 #include "vec.h"

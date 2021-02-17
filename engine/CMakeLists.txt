@@ -69,12 +69,20 @@ UNSET(FFMPEG_FOUND)
 UNSET(OGRE_FOUND)
 UNSET(Boost_DIR)
 
+IF (MSVC)
+INCLUDE_DIRECTORIES(
+    ${Vega_Strike_SOURCE_DIR}/src
+    ${Vega_Strike_SOURCE_DIR}/src/cmd
+    ${Vega_Strike_BINARY_DIR}
+)
+ELSE (MSVC)
 INCLUDE_DIRECTORIES(
     ${Vega_Strike_SOURCE_DIR}/src
     ${Vega_Strike_SOURCE_DIR}/src/cmd
     ${Vega_Strike_BINARY_DIR}
     /usr/include/harfbuzz/
 )
+ENDIF (MSVC)
 
 SET(LIBGUI_SOURCES
     src/gui/button.cpp
@@ -564,7 +572,7 @@ SET(DATADIR "" CACHE STRING "Default vegastrike data directory")
 
 # Hide our temporary variable and initialize it to empty
 SET(CPU_OPTS  )
-SET(DEFINES " -DNV_CUBE_MAP -DBOOST_PYTHON_NO_PY_SIGNATURES -DBOOST_ALL_DYN_LINK ")
+SET(DEFINES "-DNV_CUBE_MAP -DBOOST_PYTHON_NO_PY_SIGNATURES -DBOOST_ALL_DYN_LINK ")
 MARK_AS_ADVANCED( CPU_OPTS )
 MARK_AS_ADVANCED( DEFINES )
 SET(CPU_SMP "1" CACHE STRING "Number of CPU's in system")
@@ -636,25 +644,43 @@ IF (ENABLE_PIE)
   LINK_LIBRARIES("-pie")
 ELSE (ENABLE_PIE)
   MESSAGE("++ Disabling Position Independent Executables/Shared Libraries (Recommended on Ubuntu/Mint)")
-  ADD_COMPILE_OPTIONS("-no-pie")
-  LINK_LIBRARIES("-no-pie")
+  IF (NOT MSVC)
+    ADD_COMPILE_OPTIONS("-no-pie")
+    LINK_LIBRARIES("-no-pie")
+  ENDIF (NOT MSVC)
 ENDIF (ENABLE_PIE)
+
+IF (MSVC)
+    SET(COMPILER_SPECIFIC_FLAGS "/FI\"${Vega_Strike_BINARY_DIR}\"/config.h  -D__x86_64__ ")
+    SET(COMPILER_SPECIFIC_DEBUG_FLAGS "/Z7 ") # also used for release-with-debug -- can change later
+    SET(COMPILER_SPECIFIC_PROFILER_FLAGS "/Z7 /GL ") # not tested -- requires additional linker flag specialization for profiling run ( /FASTGENPROFILE) and profile use ( /USEPROFILE)
+    SET(COMPILER_SPECIFIC_RELEASE_FLAGS " ")
+    SET(TOOLCHAIN_SPECIFIC_LINK_FLAGS "/DEBUG:FULL ")
+ELSE (MSVC)
+    SET(COMPILER_SPECIFIC_FLAGS "-include config.h -pipe -Wall -std=c++11 -fvisibility=hidden ")
+    SET(COMPILER_SPECIFIC_DEBUG_FLAGS "-Og -g3 ")
+    SET(COMPILER_SPECIFIC_PROFILER_FLAGS "-Og -pg -g2 ")
+    SET(COMPILER_SPECIFIC_RELEASE_FLAGS " ")
+    SET(TOOLCHAIN_SPECIFIC_LINK_FLAGS "-Bsymbolic ")
+ENDIF (MSVC)
+
 
 
 # Debug target block.
-SET(CMAKE_CXX_FLAGS_DEBUG " ${BUILD_OPT} ${CPU_OPTS} ${DEFINES} -include config.h -pipe -Og -g3 -std=c++11 -Wall -fvisibility=hidden" CACHE STRING
+SET(CMAKE_CXX_FLAGS_DEBUG "${COMPILER_SPECIFIC_FLAGS} ${COMPILER_SPECIFIC_DEBUG_FLAGS} ${BUILD_OPT} ${CPU_OPTS} ${DEFINES} " CACHE STRING
     "Flags used by the C++ compiler during debug builds."
     FORCE
 )
-SET(CMAKE_C_FLAGS_DEBUG "  ${BUILD_OPT} ${CPU_OPTS} ${DEFINES} -include config.h -pipe -Og -g3 -Wall -Wno-unused-function -Wno-unused-variable -fvisibility=hidden" CACHE STRING
+SET(CMAKE_C_FLAGS_DEBUG "${COMPILER_SPECIFIC_FLAGS} ${COMPILER_SPECIFIC_DEBUG_FLAGS} ${BUILD_OPT} ${CPU_OPTS} ${DEFINES} -Wno-unused-function -Wno-unused-variable" CACHE STRING
     "Flags used by the C compiler during debug builds."
     FORCE
 )
 SET(CMAKE_EXE_LINKER_FLAGS_DEBUG
-    "-Bsymbolic " CACHE STRING
+    "${TOOLCHAIN_SPECIFIC_LINK_FLAGS}" CACHE STRING
     "Flags used for linking binaries during debug builds."
     FORCE
 )
+
 MARK_AS_ADVANCED(
     CMAKE_CXX_FLAGS_DEBUG
     CMAKE_C_FLAGS_DEBUG
@@ -665,17 +691,18 @@ ELSE ("${CMAKE_BUILD_TYPE}" STREQUAL "Debug")
     MARK_AS_ADVANCED( FORCE CMAKE_CXX_FLAGS_DEBUG )
 ENDIF ("${CMAKE_BUILD_TYPE}" STREQUAL "Debug")
 
+#MESSAGE("** Compile [${MSVC}][${CMAKE_BUILD_TYPE}] options [${CMAKE_CXX_FLAGS}] [${CMAKE_CXX_FLAGS_DEBUG}] [${BUILD_OPT}] [${CPU_OPTS}] [${DEFINES}]")
 
 # Release Target block
-SET(CMAKE_CXX_FLAGS_RELEASE  " ${BUILD_OPT} ${CPU_OPTS} ${DEFINES} -include config.h -pipe -std=c++11 -Wall -fvisibility=hidden" CACHE STRING
+SET(CMAKE_CXX_FLAGS_RELEASE  " ${COMPILER_SPECIFIC_FLAGS} ${COMPILER_SPECIFIC_RELEASE_FLAGS} ${BUILD_OPT} ${CPU_OPTS} ${DEFINES}" CACHE STRING
     "Flags used by the C++ compiler during release builds."
     FORCE
 )
-SET(CMAKE_C_FLAGS_RELEASE " ${BUILD_OPT} ${CPU_OPTS} ${DEFINES} -include config.h -pipe -Wall -Wno-unused-function -Wno-unused-variable -fvisibility=hidden" CACHE STRING
+SET(CMAKE_C_FLAGS_RELEASE " ${COMPILER_SPECIFIC_FLAGS} ${COMPILER_SPECIFIC_RELEASE_FLAGS} ${BUILD_OPT} ${CPU_OPTS} ${DEFINES} -Wno-unused-function -Wno-unused-variable" CACHE STRING
     "Flags used by the C compiler during release builds."
     FORCE
 )
-SET(CMAKE_EXE_LINKER_FLAGS_RELEASE "-Bsymbolic" CACHE STRING "Release linker flags"
+SET(CMAKE_EXE_LINKER_FLAGS_RELEASE "${TOOLCHAIN_SPECIFIC_LINK_FLAGS}" CACHE STRING "Release linker flags"
     FORCE
 )
 MARK_AS_ADVANCED(
@@ -691,15 +718,15 @@ ENDIF ("${CMAKE_BUILD_TYPE}" STREQUAL "Release")
 
 
 # RelWithDebInfo Target block
-SET(CMAKE_CXX_FLAGS_RELWITHDEBINFO  " ${BUILD_OPT} ${CPU_OPTS} ${DEFINES} -g3 -include config.h -pipe -std=c++11 -Wall -fvisibility=hidden" CACHE STRING
+SET(CMAKE_CXX_FLAGS_RELWITHDEBINFO  " ${COMPILER_SPECIFIC_FLAGS} ${COMPILER_SPECIFIC_DEBUG_FLAGS} ${BUILD_OPT} ${CPU_OPTS} ${DEFINES}" CACHE STRING
     "Flags used by the C++ compiler during release-with-debug-info builds."
     FORCE
 )
-SET(CMAKE_C_FLAGS_RELWITHDEBINFO " ${BUILD_OPT} ${CPU_OPTS} ${DEFINES} -g3 -include config.h -pipe -Wall -Wno-unused-function -Wno-unused-variable -fvisibility=hidden" CACHE STRING
+SET(CMAKE_C_FLAGS_RELWITHDEBINFO "  ${COMPILER_SPECIFIC_FLAGS} ${COMPILER_SPECIFIC_DEBUG_FLAGS} ${BUILD_OPT} ${CPU_OPTS} ${DEFINES} -Wno-unused-function -Wno-unused-variable" CACHE STRING
     "Flags used by the C compiler during release-with-debug-info builds."
     FORCE
 )
-SET(CMAKE_EXE_LINKER_FLAGS_RELWITHDEBINFO "-Bsymbolic" CACHE STRING "RelWithDebInfo linker flags"
+SET(CMAKE_EXE_LINKER_FLAGS_RELWITHDEBINFO "${TOOLCHAIN_SPECIFIC_LINK_FLAGS}" CACHE STRING "RelWithDebInfo linker flags"
     FORCE
 )
 MARK_AS_ADVANCED(
@@ -715,16 +742,16 @@ ENDIF ("${CMAKE_BUILD_TYPE}" STREQUAL "RelWithDebInfo")
 
 
 # Profiler Target block
-SET(CMAKE_CXX_FLAGS_PROFILER " ${BUILD_OPT} ${CPU_OPTS} ${DEFINES} -pg -g2 -include config.h -pipe -std=c++11 -Wall -Wno-unused-function -Wno-unused-variable" CACHE STRING
+SET(CMAKE_CXX_FLAGS_PROFILER " ${COMPILER_SPECIFIC_FLAGS} ${COMPILER_SPECIFIC_PROFILER_FLAGS} ${BUILD_OPT} ${CPU_OPTS} ${DEFINES} -Wno-unused-function -Wno-unused-variable" CACHE STRING
     "Flags used by the C++ compiler during profiler builds."
     FORCE
 )
-SET(CMAKE_C_FLAGS_PROFILER " ${BUILD_OPT} ${CPU_OPTS} ${DEFINES} -pg -g2 -include config.h -pipe -Wall -Wno-unused-function -Wno-unused-variable" CACHE STRING
+SET(CMAKE_C_FLAGS_PROFILER " ${COMPILER_SPECIFIC_FLAGS} ${COMPILER_SPECIFIC_PROFILER_FLAGS} ${BUILD_OPT} ${CPU_OPTS} ${DEFINES} -Wno-unused-function -Wno-unused-variable" CACHE STRING
     "Flags used by the C compiler during profiler builds."
     FORCE
 )
 SET(CMAKE_EXE_LINKER_FLAGS_PROFILER
-    "-Bsymbolic " CACHE STRING
+    "${TOOLCHAIN_SPECIFIC_LINK_FLAGS}" CACHE STRING
     "Flags used for linking binaries during profiler builds."
     FORCE
 )
@@ -807,7 +834,9 @@ IF (USE_SYSTEM_BOOST)
         LIST(GET PYTHONLIBS_VERSION_LIST 1 PYTHON_VERSION_MINOR)
         MESSAGE("-- Boost_1_67_Or_Later_Result: ${Boost_1_67_Or_Later_Result}")
         MESSAGE("-- USE_PYTHON_3: ${USE_PYTHON_3}")
-        IF (Boost_1_67_Or_Later_Result)
+        IF (WIN32)
+            set(BOOST_PYTHON_COMPONENT "python")
+        ELSEIF (Boost_1_67_Or_Later_Result)
             SET(BOOST_PYTHON_COMPONENT "python${PYTHON_VERSION_MAJOR}${PYTHON_VERSION_MINOR}")
         ELSEIF (USE_PYTHON_3)
             SET(BOOST_PYTHON_COMPONENT "python3")
@@ -820,10 +849,9 @@ IF (USE_SYSTEM_BOOST)
                     SET(BOOST_PYTHON_COMPONENT "python-py3${PYTHON_VERSION_MINOR}")
                 ENDIF (LINUX_CODENAME STREQUAL xenial OR LINUX_CODENAME STREQUAL stretch)
             ENDIF (CMAKE_SYSTEM_NAME STREQUAL Linux)
-
-        ELSE (Boost_1_67_Or_Later_Result)
+        ELSE (WIN32)
             SET(BOOST_PYTHON_COMPONENT "python")
-        ENDIF (Boost_1_67_Or_Later_Result)
+        ENDIF (WIN32)
         UNSET(Boost_1_67_Or_Later_Result)
 
         UNSET(Boost_${BOOST_PYTHON_COMPONENT}_FOUND)
@@ -949,6 +977,8 @@ ELSE (PNG_FOUND)
     MESSAGE("!! Can't find PNG lib")
 ENDIF (PNG_FOUND)
 
+
+
 ENDIF(NOT DISABLE_CLIENT) ##########
 
 #find Zlib
@@ -970,7 +1000,9 @@ ELSE (EXPAT_FOUND)
 ENDIF (EXPAT_FOUND)
 
 #find Math
-IF (NOT BEOS)
+include(CheckFunctionExists)
+CHECK_FUNCTION_EXISTS(pow POW_FUNCTION_EXISTS) # MSVC, etc. build libm into libc
+IF (NOT POW_FUNCTION_EXISTS)
     FIND_PACKAGE(MATH REQUIRED)
     IF (MATH_FOUND)
         SET(TST_INCLUDES ${TST_INCLUDES} ${MATH_INCLUDE_DIRS})
@@ -978,7 +1010,7 @@ IF (NOT BEOS)
     ELSE (MATH_FOUND)
         MESSAGE("!! Without math we have nothing")
     ENDIF (MATH_FOUND)
-ENDIF (NOT BEOS)
+ENDIF (NOT POW_FUNCTION_EXISTS)
 
 #Find FFMpeg
 OPTION(DISABLE_FFMPEG "Disable ffmpeg codecs" ON)
@@ -1022,11 +1054,15 @@ ENDIF (NOT DISABLE_OGRE)
 
 IF (NOT BEOS)
     FIND_LIBRARY(UTIL_LIB util)
+ELSEIF (WIN32)
+	# Don't need it?
 ELSE (NOT BEOS)
     FIND_LIBRARY(UTIL_LIB network)
 ENDIF (NOT BEOS)
 
-SET(TST_LIBS ${TST_LIBS} ${UTIL_LIB})
+IF (NOT WIN32)
+    SET(TST_LIBS ${TST_LIBS} ${UTIL_LIB})
+ENDIF (NOT WIN32)
 
 # Still need to add CEGUI and OGRE find packages
 
@@ -1092,7 +1128,11 @@ SET(TST_LIBS vegastrike-engine_com vegastrike-OPcollide ${TST_LIBS})
 INCLUDE_DIRECTORIES(${TST_INCLUDES})
 
 TARGET_LINK_LIBRARIES(vegastrike ${TST_LIBS})
-SET_TARGET_PROPERTIES(vegastrike PROPERTIES LINK_FLAGS "-L/usr/lib ${TST_LFLAGS}")
+IF (MSVC)
+    SET_TARGET_PROPERTIES(vegastrike PROPERTIES LINK_FLAGS "${TST_LFLAGS}")
+ELSE (MSVC)
+    SET_TARGET_PROPERTIES(vegastrike PROPERTIES LINK_FLAGS "-L/usr/lib ${TST_LFLAGS}")
+ENDIF (MSVC)
 
 # Vssetup Sub build file
 ADD_SUBDIRECTORY(setup)
@@ -1104,9 +1144,9 @@ ADD_SUBDIRECTORY(objconv)
 GET_DIRECTORY_PROPERTY(TEMP_DIRECTORY INCLUDE_DIRECTORIES)
 MESSAGE("-- Default build type is RelWithDebInfo, no cpu opts enabled. ")
 MESSAGE("++ Building with BUILD_OPT: ${BUILD_OPT}")
-#MESSAGE("++ Building with CMAKE_CXX_FLAGS: ${CMAKE_CXX_FLAGS}")
-#MESSAGE("Linking with : ${TST_LIBS}")
-#MESSAGE("including : ${TEMP_DIRECTORY}")
+MESSAGE("++ Building with CMAKE_CXX_FLAGS: ${CMAKE_CXX_FLAGS}")
+MESSAGE("Linking with : ${TST_LIBS}")
+MESSAGE("including : ${TEMP_DIRECTORY}")
 # end debug output
 
 MARK_AS_ADVANCED(FORCE
