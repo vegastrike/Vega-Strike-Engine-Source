@@ -14,7 +14,7 @@ public:
     class DecalQueue boltdecals;
     static GFXVertexList * boltmesh;
     vector <std::string> animationname;
-    vector <Animation *> animations;
+    vector <Animation *> animations; // Balls are animated
     vector <vector <Bolt> > bolts;
     vector <vector <Bolt> > balls;
     vector <int> cachedecals;

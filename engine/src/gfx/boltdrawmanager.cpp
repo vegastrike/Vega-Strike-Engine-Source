@@ -29,8 +29,6 @@ GFXVertexList *BoltDrawManager::boltmesh = NULL;
 BoltDrawManager::~BoltDrawManager()
 {
     unsigned int i;
-    for (i = 0; i < cachedecals.size(); i++)
-        boltdecals.DelTexture( cachedecals[i] );
     cachedecals.clear();
     for (i = 0; i < animations.size(); i++)
         delete animations[i];

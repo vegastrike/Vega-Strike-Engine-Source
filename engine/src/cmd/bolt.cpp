@@ -31,6 +31,8 @@ inline void BlendTrans( Matrix &drawmat, const QVector &cur_position, const QVec
 {
     drawmat.p = prev_position.Scale( 1-interpolation_blend_factor )+cur_position.Scale( interpolation_blend_factor );
 }
+
+// Bolts have texture
 int Bolt::AddTexture( BoltDrawManager *q, std::string file )
 {
     int decal = q->boltdecals.AddTexture( file.c_str(), MIPMAP );
@@ -43,6 +45,8 @@ int Bolt::AddTexture( BoltDrawManager *q, std::string file )
     }
     return decal;
 }
+
+// Balls have animation
 int Bolt::AddAnimation( BoltDrawManager *q, std::string file, QVector cur_position )
 {
     int decal = -1;
@@ -167,15 +171,14 @@ extern void BoltDestroyGeneric( Bolt *whichbolt, unsigned int index, int decal, 
 void Bolt::Destroy( unsigned int index )
 {
     VSDESTRUCT2
-    BoltDrawManager& q = BoltDrawManager::getInstance();
     bool isBall  = true;
     if (type->type == weapon_info::BOLT) {
-        q.boltdecals.DelTexture( decal );
         isBall = false;
     } else {}
     BoltDestroyGeneric( this, index, decal, isBall );
 }
 
+// A bolt is created when fired
 Bolt::Bolt( const weapon_info *typ,
             const Matrix &orientationpos,
             const Vector &shipspeed,
