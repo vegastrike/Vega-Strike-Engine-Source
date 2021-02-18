@@ -835,7 +835,7 @@ IF (USE_SYSTEM_BOOST)
         MESSAGE("-- Boost_1_67_Or_Later_Result: ${Boost_1_67_Or_Later_Result}")
         MESSAGE("-- USE_PYTHON_3: ${USE_PYTHON_3}")
         IF (WIN32)
-            set(BOOST_PYTHON_COMPONENT "python")
+            SET(BOOST_PYTHON_COMPONENT "python")
         ELSEIF (Boost_1_67_Or_Later_Result)
             SET(BOOST_PYTHON_COMPONENT "python${PYTHON_VERSION_MAJOR}${PYTHON_VERSION_MINOR}")
         ELSEIF (USE_PYTHON_3)
@@ -1000,7 +1000,7 @@ ELSE (EXPAT_FOUND)
 ENDIF (EXPAT_FOUND)
 
 #find Math
-include(CheckFunctionExists)
+INCLUDE(CheckFunctionExists)
 CHECK_FUNCTION_EXISTS(pow POW_FUNCTION_EXISTS) # MSVC, etc. build libm into libc
 IF (NOT POW_FUNCTION_EXISTS)
     FIND_PACKAGE(MATH REQUIRED)
