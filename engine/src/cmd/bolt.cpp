@@ -41,7 +41,6 @@ int Bolt::AddTexture( BoltDrawManager *q, std::string file )
         int blargh = q->boltdecals.AddTexture( file.c_str(), MIPMAP );
         if ( blargh >= (int) q->bolts.size() )
             q->bolts.push_back( vector< Bolt > () );
-        q->cachedecals.push_back( blargh );
     }
     return decal;
 }

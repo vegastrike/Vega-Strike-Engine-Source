@@ -29,7 +29,6 @@ GFXVertexList *BoltDrawManager::boltmesh = NULL;
 BoltDrawManager::~BoltDrawManager()
 {
     unsigned int i;
-    cachedecals.clear();
     for (i = 0; i < animations.size(); i++)
         delete animations[i];
     for (i = 0; i < balls.size(); i++)

@@ -17,7 +17,6 @@ public:
     vector <Animation *> animations; // Balls are animated
     vector <vector <Bolt> > bolts;
     vector <vector <Bolt> > balls;
-    vector <int> cachedecals;
 
     BoltDrawManager();
     ~BoltDrawManager();
