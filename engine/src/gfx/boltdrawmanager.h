@@ -15,7 +15,7 @@ public:
     static GFXVertexList * boltmesh;
     vector <std::string> animationname;
     vector <Animation *> animations; // Balls are animated
-    vector <vector <Bolt> > bolts;
+    vector <vector <Bolt> > bolts; // The inner vector is all of the same type.
     vector <vector <Bolt> > balls;
 
     BoltDrawManager();

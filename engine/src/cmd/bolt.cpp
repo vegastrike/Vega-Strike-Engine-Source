@@ -64,6 +64,7 @@ int Bolt::AddAnimation( BoltDrawManager *q, std::string file, QVector cur_positi
 
 void Bolt::Draw()
 {
+    // Various preps
     BoltDrawManager& qq = BoltDrawManager::getInstance();
     GFXDisable( LIGHTING );
     GFXDisable( CULLFACE );
@@ -73,9 +74,9 @@ void Bolt::Draw()
     GFXTextureCoordGenMode( 0, NO_GEN, NULL, NULL );
 
     GFXAlphaTest( GREATER, .1 );
-    vector< vector< Bolt > >::iterator i;
-    vector< Bolt >::iterator j;
     vector< Animation* >::iterator     k = qq.animations.begin();
+
+
     float etime = GetElapsedTime();
     float pixel_angle = 2
                         *sin( g_game.fov*M_PI/180.0
@@ -85,78 +86,96 @@ void Bolt::Draw()
     Vector  p, q, r;
     _Universe->AccessCamera()->GetOrientation( p, q, r );
     QVector campos = _Universe->AccessCamera()->GetPosition();
-    for (i = qq.balls.begin(); i != qq.balls.end(); i++, k++) {
+
+
+    // Iterate over ball types
+    for (auto&& ball_types : qq.balls) {
+        if(ball_types.size() == 0) continue;
+
         Animation *cur = *k;
-        if ( i->begin() != i->end() ) {
-            float bolt_size = 2*i->begin()->type->Radius*2;
-            bolt_size *= bolt_size;
-            //Matrix result;
-            //FIXME::MuST USE DRAWNO	TRANSFORMNOW cur->CalculateOrientation (result);
-            for (j = i->begin(); j != i->end(); j++) {
-                //don't update time more than once
-                Bolt *bolt     = &*j;
-                float distance = (bolt->cur_position-campos).MagnitudeSquared();
-                if (distance*pixel_angle < bolt_size) {
-                    const weapon_info *type = bolt->type;
-                    BlendTrans( bolt->drawmat, bolt->cur_position, bolt->prev_position );
-                    Matrix tmp;
-                    VectorAndPositionToMatrix( tmp, p, q, r, bolt->drawmat.p );
-                    cur->SetDimensions( bolt->type->Radius, bolt->type->Radius );
-                    GFXLoadMatrixModel( tmp );
-                    GFXColor4f( type->r, type->g, type->b, type->a );
-                    cur->DrawNoTransform( false, true );
-                }
+
+        float bolt_size = 2*ball_types[0].type->Radius*2;
+        bolt_size *= bolt_size;
+        //Matrix result;
+        //FIXME::MuST USE DRAWNO	TRANSFORMNOW cur->CalculateOrientation (result);
+
+        // Iterate over specific balls
+        for (auto&& bolt : ball_types) { // really ball
+            //don't update time more than once
+            float distance = (bolt.cur_position-campos).MagnitudeSquared();
+            if (distance*pixel_angle < bolt_size) {
+                const weapon_info *type = bolt.type;
+                BlendTrans( bolt.drawmat, bolt.cur_position, bolt.prev_position );
+                Matrix tmp;
+                VectorAndPositionToMatrix( tmp, p, q, r, bolt.drawmat.p );
+                cur->SetDimensions( bolt.type->Radius, bolt.type->Radius );
+                GFXLoadMatrixModel( tmp );
+                GFXColor4f( type->r, type->g, type->b, type->a );
+                cur->DrawNoTransform( false, true );
             }
         }
     }
+
     GFXVertexList *qmesh = qq.boltmesh;
-    if (qmesh && qq.bolts.begin() != qq.bolts.end()) {
+
+    // Iterate over bolt types
+    if (qmesh && qq.bolts.size() > 0) {
         GFXAlphaTest( ALWAYS, 0 );
         GFXDisable( DEPTHWRITE );
         GFXDisable( TEXTURE1 );
         GFXEnable( TEXTURE0 );
         GFXTextureCoordGenMode( 0, NO_GEN, NULL, NULL );
-        
+
         BLENDFUNC bsrc, bdst;
         if (game_options.BlendGuns == true)
             GFXBlendMode( bsrc=ONE, bdst=ONE );
         else
             GFXBlendMode( bsrc=ONE, bdst=ZERO );
-        
+
         qmesh->LoadDrawState();
         qmesh->BeginDrawState();
         int decal = 0;
-        for (i = qq.bolts.begin(); i != qq.bolts.end(); decal++, i++) {
-            Texture *dec = qq.boltdecals.GetTexture( decal );
-            if ( dec && i->begin() != i->end() ) {
-                float bolt_size = 2*i->begin()->type->Radius+i->begin()->type->Length;
-                bolt_size *= bolt_size;
-                for (size_t pass = 0, npasses = dec->numPasses(); pass < npasses; ++pass) {
-                    GFXTextureEnv( 0, GFXMODULATETEXTURE );
-                    if (dec->SetupPass(0, bsrc, bdst)) {
-                        dec->MakeActive();
-                        GFXToggleTexture( true, 0 );
-                        for (j = i->begin(); j != i->end(); j++) {
-                            Bolt &bolt     = *j;
-                            float distance = (bolt.cur_position-campos).MagnitudeSquared();
-                            if (distance*pixel_angle < bolt_size) {
-                                const weapon_info *wt = bolt.type;
 
-                                BlendTrans( bolt.drawmat, bolt.cur_position, bolt.prev_position );
-                                Matrix drawmat( bolt.drawmat );
-                                if (game_options.StretchBolts > 0)
-                                    ScaleMatrix( drawmat, Vector( 1, 1, bolt.type->Speed*etime*game_options.StretchBolts/bolt.type->Length ) );
-                                GFXLoadMatrixModel( drawmat );
-                                GFXColor4f( wt->r, wt->g, wt->b, wt->a );
-                                qmesh->Draw();
-                            }
+        // Iterate over specific balls
+        for (auto&& bolt_types : qq.bolts) {
+            if(bolt_types.size() == 0) continue;
+
+            Texture *dec = qq.boltdecals.GetTexture( decal );
+            if(!dec) {
+                BOOST_LOG_TRIVIAL(warning) <<"Failed to get texture from boltdecals";
+                decal++;
+                continue;
+            }
+
+            float bolt_size = 2*bolt_types[0].type->Radius+bolt_types[0].type->Length;
+            bolt_size *= bolt_size;
+            for (size_t pass = 0, npasses = dec->numPasses(); pass < npasses; ++pass) {
+                GFXTextureEnv( 0, GFXMODULATETEXTURE );
+                if (dec->SetupPass(0, bsrc, bdst)) {
+                    dec->MakeActive();
+                    GFXToggleTexture( true, 0 );
+                    for (auto&& bolt : bolt_types) {
+                        float distance = (bolt.cur_position-campos).MagnitudeSquared();
+                        if (distance*pixel_angle < bolt_size) {
+                            const weapon_info *wt = bolt.type;
+
+                            BlendTrans( bolt.drawmat, bolt.cur_position, bolt.prev_position );
+                            Matrix drawmat( bolt.drawmat );
+                            if (game_options.StretchBolts > 0)
+                                ScaleMatrix( drawmat, Vector( 1, 1, bolt.type->Speed*etime*game_options.StretchBolts/bolt.type->Length ) );
+                            GFXLoadMatrixModel( drawmat );
+                            GFXColor4f( wt->r, wt->g, wt->b, wt->a );
+                            qmesh->Draw();
                         }
                     }
                 }
             }
+            decal++;
         }
         qmesh->EndDrawState();
     }
+
+
     GFXEnable( LIGHTING );
     GFXEnable( CULLFACE );
     GFXBlendMode( ONE, ZERO );
@@ -193,32 +212,37 @@ Bolt::Bolt( const weapon_info *typ,
     curdist = 0;
     CopyMatrix( drawmat, orientationpos );
     Vector vel = shipspeed+orientationpos.getR()*typ->Speed;
+
+    StarSystem *current_star_system = _Universe->activeStarSystem();
+    CollideMap *bolt_collide_map = current_star_system->collide_map[Unit::UNIT_BOLT];
+
     if (typ->type == weapon_info::BOLT) {
         ScaleMatrix( drawmat, Vector( typ->Radius, typ->Radius, typ->Length ) );
         decal = Bolt::AddTexture( &q, typ->file );
+
+        int bolt_index = Bolt::BoltIndex( q.bolts[decal].size(),
+                                          decal,
+                                          false ).bolt_index;
+
         this->location =
-            _Universe->activeStarSystem()->collide_map[Unit::UNIT_BOLT]->insert( Collidable( Bolt::BoltIndex( q.bolts[decal].
-                                                                                                             size(),
-                                                                                                             decal,
-                                                                                                             false ).bolt_index,
-                                                                                            (shipspeed+orientationpos.getR()
-                                                                                             *typ->Speed).Magnitude()*.5,
-                                                                                            cur_position+vel*simulation_atom_var*.5 ),
-                                                                                hint );
+            bolt_collide_map->insert( Collidable( bolt_index,
+                                                  (shipspeed+orientationpos.getR()*typ->Speed).Magnitude()*.5,
+                                                  cur_position+vel*simulation_atom_var*.5 ),
+                                      hint );
+
         q.bolts[decal].push_back( *this );
     } else {
         ScaleMatrix( drawmat, Vector( typ->Radius, typ->Radius, typ->Radius ) );
         decal = Bolt::AddAnimation( &q, typ->file, cur_position );
 
-        this->location =
-            _Universe->activeStarSystem()->collide_map[Unit::UNIT_BOLT]->insert( Collidable( Bolt::BoltIndex( q.balls[decal].
-                                                                                                             size(),
-                                                                                                             decal,
-                                                                                                             true ).bolt_index,
-                                                                                            (shipspeed+orientationpos.getR()
-                                                                                             *typ->Speed).Magnitude()*.5,
-                                                                                            cur_position+vel*simulation_atom_var*.5 ),
-                                                                                hint );
+        int bolt_index = Bolt::BoltIndex( q.balls[decal].size(),
+                                          decal,
+                                          true ).bolt_index;
+        Collidable collidable = Collidable( bolt_index,
+                                                        (shipspeed+orientationpos.getR()
+                                                         *typ->Speed).Magnitude()*.5,
+                                                        cur_position+vel*simulation_atom_var*.5 );
+        this->location = bolt_collide_map->insert( collidable, hint );
         q.balls[decal].push_back( *this );
     }
 }
