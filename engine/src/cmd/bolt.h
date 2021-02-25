@@ -10,6 +10,7 @@
 class Unit;
 class StarSystem;
 class BoltDrawManager;
+class Animation;
 
 class Bolt {
 private:
@@ -38,7 +39,11 @@ private:
   }
   Bolt(const weapon_info *type, const Matrix &orientationpos, const Vector & ShipSpeed, void *owner, CollideMap::iterator hint);//makes a bolt
   void Destroy(unsigned int index);
-  static void Draw();
+  //static void Draw();
+  static void DrawAllBolts();
+  static void DrawAllBalls();
+  void DrawBolt(float& bolt_size, GFXVertexList *qmesh);
+  void DrawBall(float& bolt_size, Animation *cur);
   bool Update(Collidable::CollideRef index);
   bool Collide(Collidable::CollideRef index);
   static void UpdatePhysics(StarSystem *ss);//updates all physics in the starsystem

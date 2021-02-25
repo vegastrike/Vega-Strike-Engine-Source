@@ -62,34 +62,69 @@ int Bolt::AddAnimation( BoltDrawManager *q, std::string file, QVector cur_positi
     return decal;
 }
 
-void Bolt::Draw()
+
+
+void Bolt::DrawAllBolts()
 {
-    // Various preps
-    BoltDrawManager& qq = BoltDrawManager::getInstance();
-    GFXDisable( LIGHTING );
-    GFXDisable( CULLFACE );
+    BoltDrawManager& bolt_draw_manager = BoltDrawManager::GetInstance();
+    GFXVertexList *qmesh = bolt_draw_manager.boltmesh;
 
+    if (!qmesh || bolt_draw_manager.bolts.size() == 0) {
+        return;
+    }
 
-    GFXBlendMode( ONE, game_options.BlendGuns ? ONE : ZERO );
+    GFXAlphaTest( ALWAYS, 0 );
+    GFXDisable( DEPTHWRITE );
+    GFXDisable( TEXTURE1 );
+    GFXEnable( TEXTURE0 );
     GFXTextureCoordGenMode( 0, NO_GEN, NULL, NULL );
 
-    GFXAlphaTest( GREATER, .1 );
-    vector< Animation* >::iterator     k = qq.animations.begin();
+    BLENDFUNC bsrc, bdst;
+    if (game_options.BlendGuns == true)
+        GFXBlendMode( bsrc=ONE, bdst=ONE );
+    else
+        GFXBlendMode( bsrc=ONE, bdst=ZERO );
+
+    qmesh->LoadDrawState();
+    qmesh->BeginDrawState();
+    int decal = 0;
+
+    // Iterate over specific balls
+    for (auto&& bolt_types : bolt_draw_manager.bolts) {
+        if(bolt_types.size() == 0) continue;
+
+        Texture *dec = bolt_draw_manager.boltdecals.GetTexture( decal );
+        if(!dec) {
+            BOOST_LOG_TRIVIAL(warning) <<"Failed to get texture from boltdecals";
+            decal++;
+            continue;
+        }
+
+        float bolt_size = 2*bolt_types[0].type->Radius+bolt_types[0].type->Length;
+        bolt_size *= bolt_size;
+        for (size_t pass = 0, npasses = dec->numPasses(); pass < npasses; ++pass) {
+            GFXTextureEnv( 0, GFXMODULATETEXTURE );
+            if (dec->SetupPass(0, bsrc, bdst)) {
+                dec->MakeActive();
+                GFXToggleTexture( true, 0 );
+                for (auto&& bolt : bolt_types) {
+                    bolt.DrawBolt(bolt_size, qmesh);
+                }
+            }
+        }
+        decal++;
+    }
+    qmesh->EndDrawState();
+
+}
 
 
-    float etime = GetElapsedTime();
-    float pixel_angle = 2
-                        *sin( g_game.fov*M_PI/180.0
-                             /(g_game.y_resolution
-                               > g_game.x_resolution ? g_game.y_resolution : g_game.x_resolution) )*game_options.bolt_pixel_size;
-    pixel_angle *= pixel_angle;
-    Vector  p, q, r;
-    _Universe->AccessCamera()->GetOrientation( p, q, r );
-    QVector campos = _Universe->AccessCamera()->GetPosition();
+void Bolt::DrawAllBalls()
+{
+    BoltDrawManager& bolt_draw_manager = BoltDrawManager::GetInstance();
+    vector< Animation* >::iterator     k = bolt_draw_manager.animations.begin();
 
-
-    // Iterate over ball types
-    for (auto&& ball_types : qq.balls) {
+    for (auto&& ball_types : bolt_draw_manager.balls) {
         if(ball_types.size() == 0) continue;
 
         Animation *cur = *k;
@@ -101,89 +136,47 @@ void Bolt::Draw()
 
         // Iterate over specific balls
         for (auto&& bolt : ball_types) { // really ball
-            //don't update time more than once
-            float distance = (bolt.cur_position-campos).MagnitudeSquared();
-            if (distance*pixel_angle < bolt_size) {
-                const weapon_info *type = bolt.type;
-                BlendTrans( bolt.drawmat, bolt.cur_position, bolt.prev_position );
-                Matrix tmp;
-                VectorAndPositionToMatrix( tmp, p, q, r, bolt.drawmat.p );
-                cur->SetDimensions( bolt.type->Radius, bolt.type->Radius );
-                GFXLoadMatrixModel( tmp );
-                GFXColor4f( type->r, type->g, type->b, type->a );
-                cur->DrawNoTransform( false, true );
-            }
+            bolt.DrawBall(bolt_size, cur);
         }
     }
-
-    GFXVertexList *qmesh = qq.boltmesh;
-
-    // Iterate over bolt types
-    if (qmesh && qq.bolts.size() > 0) {
-        GFXAlphaTest( ALWAYS, 0 );
-        GFXDisable( DEPTHWRITE );
-        GFXDisable( TEXTURE1 );
-        GFXEnable( TEXTURE0 );
-        GFXTextureCoordGenMode( 0, NO_GEN, NULL, NULL );
-
-        BLENDFUNC bsrc, bdst;
-        if (game_options.BlendGuns == true)
-            GFXBlendMode( bsrc=ONE, bdst=ONE );
-        else
-            GFXBlendMode( bsrc=ONE, bdst=ZERO );
-
-        qmesh->LoadDrawState();
-        qmesh->BeginDrawState();
-        int decal = 0;
-
-        // Iterate over specific balls
-        for (auto&& bolt_types : qq.bolts) {
-            if(bolt_types.size() == 0) continue;
-
-            Texture *dec = qq.boltdecals.GetTexture( decal );
-            if(!dec) {
-                BOOST_LOG_TRIVIAL(warning) <<"Failed to get texture from boltdecals";
-                decal++;
-                continue;
-            }
-
-            float bolt_size = 2*bolt_types[0].type->Radius+bolt_types[0].type->Length;
-            bolt_size *= bolt_size;
-            for (size_t pass = 0, npasses = dec->numPasses(); pass < npasses; ++pass) {
-                GFXTextureEnv( 0, GFXMODULATETEXTURE );
-                if (dec->SetupPass(0, bsrc, bdst)) {
-                    dec->MakeActive();
-                    GFXToggleTexture( true, 0 );
-                    for (auto&& bolt : bolt_types) {
-                        float distance = (bolt.cur_position-campos).MagnitudeSquared();
-                        if (distance*pixel_angle < bolt_size) {
-                            const weapon_info *wt = bolt.type;
-
-                            BlendTrans( bolt.drawmat, bolt.cur_position, bolt.prev_position );
-                            Matrix drawmat( bolt.drawmat );
-                            if (game_options.StretchBolts > 0)
-                                ScaleMatrix( drawmat, Vector( 1, 1, bolt.type->Speed*etime*game_options.StretchBolts/bolt.type->Length ) );
-                            GFXLoadMatrixModel( drawmat );
-                            GFXColor4f( wt->r, wt->g, wt->b, wt->a );
-                            qmesh->Draw();
-                        }
-                    }
-                }
-            }
-            decal++;
-        }
-        qmesh->EndDrawState();
-    }
-
-
-    GFXEnable( LIGHTING );
-    GFXEnable( CULLFACE );
-    GFXBlendMode( ONE, ZERO );
-    GFXEnable( DEPTHTEST );
-    GFXEnable( DEPTHWRITE );
-    GFXEnable( TEXTURE0 );
-    GFXColor4f( 1, 1, 1, 1 );
 }
+
+
+void Bolt::DrawBolt(float& bolt_size, GFXVertexList *qmesh)
+{
+    float distance = (cur_position-BoltDrawManager::camera_position).MagnitudeSquared();
+    if (distance*BoltDrawManager::pixel_angle < bolt_size) {
+        const weapon_info *wt = type;
+
+        BlendTrans( drawmat, cur_position, prev_position );
+        Matrix drawmat( this->drawmat );
+        if (game_options.StretchBolts > 0)
+            ScaleMatrix( drawmat, Vector( 1, 1, type->Speed*BoltDrawManager::elapsed_time*game_options.StretchBolts/type->Length ) );
+        GFXLoadMatrixModel( drawmat );
+        GFXColor4f( wt->r, wt->g, wt->b, wt->a );
+        qmesh->Draw();
+    }
+}
+
+void Bolt::DrawBall(float& bolt_size, Animation *cur)
+{
+    // TODO: move up to DrawBalls
+    Vector  p, q, r;
+    _Universe->AccessCamera()->GetOrientation( p, q, r );
+
+    //don't update time more than once
+    float distance = (cur_position-BoltDrawManager::camera_position).MagnitudeSquared();
+    if (distance*BoltDrawManager::pixel_angle < bolt_size) {
+        BlendTrans( drawmat, cur_position, prev_position );
+        Matrix tmp;
+        VectorAndPositionToMatrix( tmp, p, q, r, drawmat.p );
+        cur->SetDimensions( type->Radius, type->Radius );
+        GFXLoadMatrixModel( tmp );
+        GFXColor4f( type->r, type->g, type->b, type->a );
+        cur->DrawNoTransform( false, true );
+    }
+}
+
 
 extern void BoltDestroyGeneric( Bolt *whichbolt, unsigned int index, int decal, bool isBall );
 void Bolt::Destroy( unsigned int index )
@@ -205,7 +198,7 @@ Bolt::Bolt( const weapon_info *typ,
     , ShipSpeed( shipspeed )
 {
     VSCONSTRUCT2( 't' )
-    BoltDrawManager& q = BoltDrawManager::getInstance();
+    BoltDrawManager& q = BoltDrawManager::GetInstance();
     prev_position = cur_position;
     this->owner   = owner;
     this->type    = typ;
@@ -361,7 +354,7 @@ bool Bolt::Collide( Unit *target )
 
 Bolt* Bolt::BoltFromIndex( Collidable::CollideRef b )
 {
-    BoltDrawManager& bolt_draw_manager = BoltDrawManager::getInstance();
+    BoltDrawManager& bolt_draw_manager = BoltDrawManager::GetInstance();
     size_t ind = nondecal_index( b );
     if (b.bolt_index&128)
         return &bolt_draw_manager.balls[b.bolt_index&0x7f][ind];
@@ -392,7 +385,7 @@ Collidable::CollideRef Bolt::BoltIndex( int index, int decal, bool isBall )
 void BoltDestroyGeneric( Bolt *whichbolt, unsigned int index, int decal, bool isBall )
 {
     VSDESTRUCT2
-    BoltDrawManager& q = BoltDrawManager::getInstance();
+    BoltDrawManager& q = BoltDrawManager::GetInstance();
     vector< vector< Bolt > > *target;
     if (!isBall)
         target = &q.bolts;

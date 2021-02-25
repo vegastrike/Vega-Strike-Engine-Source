@@ -68,6 +68,7 @@
 #include "cmd/unit_util.h"
 #include "cmd/missile.h"
 
+#include "gfx/boltdrawmanager.h"
 #include "gfx/sphere.h"
 #include "gfx/particle.h"
 #include "gfx/lerp.h"
@@ -429,7 +430,7 @@ void StarSystem::Draw( bool DrawCockpit )
     if ( ( neb = _Universe->AccessCamera()->GetNebula() ) )
         neb->SetFogState();
     Beam::ProcessDrawQueue();
-    Bolt::Draw();
+    BoltDrawManager::Draw();
 
     GFXFogMode( FOG_OFF );
     Animation::ProcessDrawQueue();

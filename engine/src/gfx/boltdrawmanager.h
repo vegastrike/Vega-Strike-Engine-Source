@@ -3,6 +3,7 @@
 
 #include "gfx/decalqueue.h"
 #include "bolt.h"
+#include "vec.h"
 
 #include <vector>
 
@@ -13,6 +14,10 @@ class BoltDrawManager
 public:
     class DecalQueue boltdecals;
     static GFXVertexList * boltmesh;
+    static QVector camera_position;
+    static float pixel_angle;
+    static float elapsed_time;
+
     vector <std::string> animationname;
     vector <Animation *> animations; // Balls are animated
     vector <vector <Bolt> > bolts; // The inner vector is all of the same type.
@@ -21,10 +26,9 @@ public:
     BoltDrawManager();
     ~BoltDrawManager();
 
-    static BoltDrawManager& getInstance() {
-        static BoltDrawManager instance;    // Guaranteed to be destroyed.
-        return instance;                    // Instantiated on first use.
-    }
+    static BoltDrawManager& GetInstance();
+
+    static void Draw();
 };
 
 #endif // BOLTDRAWMANAGER_H

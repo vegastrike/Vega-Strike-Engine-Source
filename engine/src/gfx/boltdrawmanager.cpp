@@ -1,6 +1,14 @@
 #include "boltdrawmanager.h"
 
+#include "gfx/animation.h"
+
+#include "lin_time.h"
 #include "options.h"
+#include "universe.h"
+
+QVector BoltDrawManager::camera_position = QVector();
+float BoltDrawManager::pixel_angle = 0.0;
+float BoltDrawManager::elapsed_time = 0.0;
 
 BoltDrawManager::BoltDrawManager()
 {
@@ -37,4 +45,44 @@ BoltDrawManager::~BoltDrawManager()
     for (i = 0; i < bolts.size(); i++)
         for (int j = bolts[i].size()-1; j >= 0; j--)
             bolts[i][j].Destroy( j );
+}
+
+
+BoltDrawManager& BoltDrawManager::GetInstance() {
+    static BoltDrawManager instance;    // Guaranteed to be destroyed.
+    return instance;                    // Instantiated on first use.
+}
+
+
+void BoltDrawManager::Draw()
+{
+    GFXDisable( LIGHTING );
+    GFXDisable( CULLFACE );
+    GFXBlendMode( ONE, game_options.BlendGuns ? ONE : ZERO );
+    GFXTextureCoordGenMode( 0, NO_GEN, NULL, NULL );
+    GFXAlphaTest( GREATER, .1 );
+
+    float pixel_angle = 2
+                        *sin( g_game.fov*M_PI/180.0
+                             /(g_game.y_resolution
+                               > g_game.x_resolution ? g_game.y_resolution : g_game.x_resolution) )*game_options.bolt_pixel_size;
+    pixel_angle *= pixel_angle;
+    camera_position = _Universe->AccessCamera()->GetPosition();
+    elapsed_time = GetElapsedTime();
+
+    // Iterate over ball types
+    Bolt::DrawAllBalls();
+
+
+    // Iterate over bolt types
+    Bolt::DrawAllBolts();
+
+    // Cleanup?
+    GFXEnable( LIGHTING );
+    GFXEnable( CULLFACE );
+    GFXBlendMode( ONE, ZERO );
+    GFXEnable( DEPTHTEST );
+    GFXEnable( DEPTHWRITE );
+    GFXEnable( TEXTURE0 );
+    GFXColor4f( 1, 1, 1, 1 );
 }
