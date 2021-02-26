@@ -63,7 +63,6 @@
 #include "ship_commands.h"
 #include "gamemenu.h"
 #include "audio/SceneManager.h"
-#include "audio/TemplateManager.h"
 #include "audio/renderers/OpenAL/BorrowedOpenALRenderer.h"
 
 #include <time.h>
@@ -215,9 +214,6 @@ void initSceneManager()
 {
     BOOST_LOG_TRIVIAL(info) << "Creating scene manager...";
     Audio::SceneManager *sm = Audio::SceneManager::getSingleton();
-
-    BOOST_LOG_TRIVIAL(info) << "Creating template manager...";
-    Audio::TemplateManager::getSingleton();
 
     if (Audio::SceneManager::getSingleton() == 0)
         throw Audio::Exception("Singleton null after SceneManager instantiation");

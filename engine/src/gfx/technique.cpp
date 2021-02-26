@@ -37,7 +37,6 @@
 #include "xml_support.h"
 #include "technique.h"
 #include "XMLDocument.h"
-#include "VSFileXMLSerializer.h"
 #include "vsfilesystem.h"
 #include "gfxlib.h"
 #include "aux_texture.h"
