@@ -49,4 +49,4 @@ cd $ROOT_DIR
 
 mkdir -pv $BIN_DIR
 
-cp -v $BUILD_DIR/{vegastrike,setup/vegasettings,objconv/vega-meshtool} $BIN_DIR
+cp -v $BUILD_DIR/{vegastrike-engine,setup/vegasettings,objconv/vega-meshtool} $BIN_DIR
