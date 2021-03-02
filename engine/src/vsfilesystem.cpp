@@ -729,6 +729,7 @@ void LoadConfig( string subdir )
             BOOST_LOG_TRIVIAL(info) << boost::format("DATADIR - No datadir specified in config file, using : %1%") % datadir;
         } else {
             BOOST_LOG_TRIVIAL(fatal) << boost::format("DATADIR - No datadir specified in config file");
+            VSExit( 1 );
         }
     }
 
@@ -740,6 +741,7 @@ void LoadConfig( string subdir )
         Galaxy galaxy = Galaxy(universe_file);
     } catch (std::exception &e) {
         BOOST_LOG_TRIVIAL(fatal) << boost::format("Error while loading configuration. Did you specifcy the asset directory? Error: %1%") % e.what();
+        VSExit(1);
     }
 }
 
