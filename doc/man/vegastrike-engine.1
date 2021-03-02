@@ -36,7 +36,8 @@ Program to create and edit the settings for Vega Strike.
 vegastrike-engine
 .PP
 Launch Vega Strike and allows the user to select a campaign to run or load a saved game.
-This uses the legacy behavior of defaulting to the local directory for the game assets.
+This requires that the either the data directory be specified on the command-line or
+that it is the current working directory of the executable.
 .PP
 Saved games must be saved at a base or planet.
 .SS
@@ -46,7 +47,8 @@ Same as
 .ft I
 vegastrike-engine
 .ft P
-except that it uses the legacy behavior of defaulting to the local directory for the game assets.
+except that it enables the legacy behavior of searching for the data directory using
+known installation points for the data assets.
 .SH REQUIREMENTS AND INSTALLATION
 .SS Installation
 For general installation instructions see https://www.vega-strike.org/install/.
