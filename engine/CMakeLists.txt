@@ -591,11 +591,11 @@ ENDIF (CMAKE_SYSTEM_NAME STREQUAL Linux)
 
 # On some Ubuntu versions and derivatives, a bug exists whereby enabling
 # PIE compilation (Position Independent Executables) results in the
-# `file` utility incorrectly recognising the compiled vegastrike binary
+# `file` utility incorrectly recognising the compiled vegastrike-engine binary
 # as a shared library instead of a position independent shared executable
 # object.
 #
-# The effect of the bug is that vegastrike can still be started from the
+# The effect of the bug is that vegastrike-engine can still be started from the
 # command line but that it will not be recognised as an executable by GUI
 # file managers such as Nautilus and Dolphin.
 #
@@ -723,7 +723,7 @@ ENDIF ("${CMAKE_BUILD_TYPE}" STREQUAL "Profiler")
 # Turn off compiling vegastrike bin
 OPTION(DISABLE_CLIENT "Disable building the vegastrike bin" OFF )
 IF (NOT DISABLE_CLIENT)
-    ADD_EXECUTABLE(vegastrike ${VEGASTRIKE_SOURCES})
+    ADD_EXECUTABLE(vegastrike-engine ${VEGASTRIKE_SOURCES})
 ENDIF (NOT DISABLE_CLIENT)
 
 INCLUDE(CheckIncludeFile)
@@ -846,7 +846,7 @@ IF (NOT USE_SYSTEM_BOOST)
     ADD_SUBDIRECTORY(${Boost_DIR} build)
     MESSAGE("++ boost dir: ${Boost_DIR}")
     #IF (NOT DISABLE_CLIENT)
-    #  ADD_DEPENDENCIES(vegastrike boost_python)
+    #  ADD_DEPENDENCIES(vegastrike-engine boost_python)
     #ENDIF (NOT DISABLE_CLIENT)
     #IF (NOT DISABLE_SERVER)
     #  ADD_DEPENDENCIES(vegaserver boost_python)
@@ -1066,12 +1066,12 @@ CONFIGURE_FILE(${Vega_Strike_SOURCE_DIR}/cmake-config.h.in ${Vega_Strike_BINARY_
 #end config.h generation
 #SET(CMAKE_CXX_FLAGS "-include config.h;-pipe;"${CMAKE_CXX_FLAGS})
 
-#Setup shared lib and include listings for vegastrike.
+#Setup shared lib and include listings for vegastrike-engine.
 SET(TST_LIBS vegastrike-engine_com vegastrike-OPcollide ${TST_LIBS})
 INCLUDE_DIRECTORIES(${TST_INCLUDES})
 
-TARGET_LINK_LIBRARIES(vegastrike ${TST_LIBS})
-SET_TARGET_PROPERTIES(vegastrike PROPERTIES LINK_FLAGS "-L/usr/lib ${TST_LFLAGS}")
+TARGET_LINK_LIBRARIES(vegastrike-engine ${TST_LIBS})
+SET_TARGET_PROPERTIES(vegastrike-engine PROPERTIES LINK_FLAGS "-L/usr/lib ${TST_LFLAGS}")
 
 # Vssetup Sub build file
 ADD_SUBDIRECTORY(setup)
@@ -1143,7 +1143,17 @@ MARK_AS_ADVANCED(FORCE
     vorbis_LIBRARY
     vorbisfile_LIBRARY
 )
-INSTALL(TARGETS vegastrike DESTINATION bin)
+INSTALL(TARGETS vegastrike-engine DESTINATION bin)
+
+# CMake doesn't support doing symlinks directly; however,
+# it's easy enough to mimic such behavior via CMake by installing
+# the executable a second time using a different name.
+IF (WIN32)
+INSTALL(PROGRAMS "${CMAKE_CURRENT_BINARY_DIR}/vegastrike-engine" RENAME vegastrike.exe DESTINATION bin)
+ELSE (WIN32)
+INSTALL(PROGRAMS "${CMAKE_CURRENT_BINARY_DIR}/vegastrike-engine" RENAME vegastrike DESTINATION bin)
+ENDIF (WIN32)
+
 
 ADD_SUBDIRECTORY("../doc" "./doc")
 
@@ -1157,7 +1167,7 @@ SET(CPACK_PACKAGE_VERSION_MAJOR "0")
 SET(CPACK_PACKAGE_VERSION_MINOR "7")
 SET(CPACK_PACKAGE_VERSION_PATCH "0")
 SET(CPACK_PACKAGE_INSTALL_DIRECTORY "VegaStrike-${CPACK_PACKAGE_VERSION_MAJOR}.${CPACK_PACKAGE_VERSION_MINOR}")
-SET(CPACK_PACKAGE_EXECUTABLES "vegastrike" "vega-meshtool" "vegasettings")
+SET(CPACK_PACKAGE_EXECUTABLES "vegastrike" "vegastrike-engine" "vega-meshtool" "vegasettings")
 SET(CPACK_CONTACT "maintainers@vega-strike.org")
 
 IF (DEFINED ENV{TAG_NAME})
@@ -1183,7 +1193,7 @@ IF (WIN32 AND NOT UNIX)
 
     # NSIS, Wix, and compressed archives (7z, Zip)
     SET(CPACK_GENERATOR "NSIS" "NSIS64" "WIX" "7Z" "ZIP")
-    SET(CPACK_PACKAGE_EXECUTABLES "vegastrike.exe" "vega-meshtool.exe" "vegasettings.exe")
+    SET(CPACK_PACKAGE_EXECUTABLES "vegastrike.exe" "vegastrike-engine.exe" "vega-meshtool.exe" "vegasettings.exe")
 ELSEIF (XCODE)
     MESSAGE("-- Configuring Packaging for Mac OS X")
     # Mac OS X

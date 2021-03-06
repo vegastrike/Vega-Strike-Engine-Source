@@ -8,6 +8,8 @@ vegasettings
 .PP
 Vega Strike Configuration
 .SS
+vegastrike-engine -ddata_dir [-px,y,z] [-jsector/starsystem] [missionname]
+.SS
 vegastrike [-ddata_dir] [-px,y,z] [-jsector/starsystem] [missionname]
 .PP
 Vega Strike Game Engine
@@ -18,6 +20,10 @@ vegasettings
 .ft P
 first to configure your system, then invoke
 .ft I
+vegastrike-engine
+.ft P
+or
+.ft I
 vegastrike
 .ft P
 to start a New Game.
@@ -27,11 +33,22 @@ vegasettings
 .PP
 Program to create and edit the settings for Vega Strike.
 .SS
-vegastrike
+vegastrike-engine
 .PP
 Launch Vega Strike and allows the user to select a campaign to run or load a saved game.
+This requires that the either the data directory be specified on the command-line or
+that it is the current working directory of the executable.
 .PP
 Saved games must be saved at a base or planet.
+.SS
+vegastrike
+.PP
+Same as
+.ft I
+vegastrike-engine
+.ft P
+except that it enables the legacy behavior of searching for the data directory using
+known installation points for the data assets.
 .SH REQUIREMENTS AND INSTALLATION
 .SS Installation
 For general installation instructions see https://www.vega-strike.org/install/.
@@ -154,9 +171,13 @@ https://github.com/vegastrike/Vega-Strike-Engine-Source/wiki
 .SH
 FILES
 .SS
-/usr/bin/vegastrike
+/usr/bin/vegastrike-engine
 .PP
 The Vega Strike Game Engine
+.SS
+/usr/bin/vegastrike
+.PP
+The Vega Strike Game Engine using the local directory as the default for the game assets.
 .SS
 /usr/bin/vegasettings
 .PP
