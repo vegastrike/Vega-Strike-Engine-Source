@@ -72,7 +72,7 @@ struct dirent
 #include <string>
 
 // from main.cpp
-extern bool legacy_mode;
+extern bool legacy_data_dir_mode;
 
 using VSFileSystem::VSVolumeType;
 using VSFileSystem::VSFSNone;
@@ -539,7 +539,7 @@ void InitDataDirectory()
         data_paths.push_back( datadir );
     }
 
-    if (true == legacy_mode) {
+    if (true == legacy_data_dir_mode) {
 #ifdef WIN32
         // TODO: push back the following:
         //      %{programdata}%/Vegastrike
@@ -725,7 +725,7 @@ void LoadConfig( string subdir )
         BOOST_LOG_TRIVIAL(info) << boost::format("DATADIR - Found a datadir in config, using : %1%") % game_options.datadir;
         datadir = game_options.datadir;
     } else {
-        if (true == legacy_mode) {
+        if (true == legacy_data_dir_mode) {
             BOOST_LOG_TRIVIAL(info) << boost::format("DATADIR - No datadir specified in config file, using : %1%") % datadir;
         } else {
             BOOST_LOG_TRIVIAL(fatal) << boost::format("DATADIR - No datadir specified in config file");
