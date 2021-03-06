@@ -118,11 +118,11 @@ boost::shared_ptr<VSFileSystem::console_log_sink> VSFileSystem::pConsoleLogSink 
 
 //false if command line option --net is given to start without network
 static bool ignore_network = true;
-// legacy_mode determines whether the application should require the data directory to be specified on the command-line or not
+// legacy_data_dir_mode determines whether the application should require the data directory to be specified on the command-line or not
 // true - no parameter required, application should start regardless of where it's called from
 // false - parameter required, application should only start if specified
 // NOTE: This is tied to the executable name. `vegastrike` -> true; `vegastrike-engine` -> false
-bool legacy_mode;
+bool legacy_data_dir_mode;
 
 void enableNetwork( bool usenetwork )
 {
@@ -328,10 +328,10 @@ int main( int argc, char *argv[] )
 
     // when the program name is `vegastrike-engine` then enforce that the data directory must be specified
     // if the program name is `vegastrike` then enable legacy mode where the current path is assumed.
-    legacy_mode = (program_name == "vegastrike") || (program_name == "vegastrike.exe");
-    std::cerr<<"Legacy Mode: "<<(legacy_mode ? "TRUE" : "FALSE")<<std::endl;
+    legacy_data_dir_mode = (program_name == "vegastrike") || (program_name == "vegastrike.exe");
+    std::cerr<<"Legacy Mode: "<<(legacy_data_dir_mode ? "TRUE" : "FALSE")<<std::endl;
 
-    if (true == legacy_mode) {
+    if (true == legacy_data_dir_mode) {
         VSFileSystem::datadir = boost::filesystem::current_path().native();
         std::cerr<<"Saving current directory (" << VSFileSystem::datadir << ") as DATA_DIR"<<std::endl;
     }
@@ -883,7 +883,7 @@ std::string ParseCommandLine( int argc, char **lpCmdLine )
             mission_name[1023] = '\0';
         }
     }
-    if (false == legacy_mode) {
+    if (false == legacy_data_dir_mode) {
         if (true == VSFileSystem::datadir.empty()) {
             cout<<"Data directory not specified."<<endl;
             exit(1);
