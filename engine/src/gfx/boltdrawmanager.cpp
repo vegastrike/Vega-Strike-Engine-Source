@@ -37,14 +37,21 @@ GFXVertexList *BoltDrawManager::boltmesh = NULL;
 BoltDrawManager::~BoltDrawManager()
 {
     unsigned int i;
-    for (i = 0; i < animations.size(); i++)
+    for (i = 0; i < animations.size(); i++) {
         delete animations[i];
-    for (i = 0; i < balls.size(); i++)
-        for (int j = balls[i].size()-1; j >= 0; j--)
+    }
+
+    for (i = 0; i < balls.size(); i++) {
+        for (int j = balls[i].size()-1; j >= 0; j--) {
             balls[i][j].Destroy( j );
-    for (i = 0; i < bolts.size(); i++)
-        for (int j = bolts[i].size()-1; j >= 0; j--)
+        }
+    }
+
+    for (i = 0; i < bolts.size(); i++) {
+        for (int j = bolts[i].size()-1; j >= 0; j--) {
             bolts[i][j].Destroy( j );
+        }
+    }
 }
 
 

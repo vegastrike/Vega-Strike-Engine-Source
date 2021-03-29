@@ -80,10 +80,11 @@ void Bolt::DrawAllBolts()
     GFXTextureCoordGenMode( 0, NO_GEN, NULL, NULL );
 
     BLENDFUNC bsrc, bdst;
-    if (game_options.BlendGuns == true)
+    if (game_options.BlendGuns == true) {
         GFXBlendMode( bsrc=ONE, bdst=ONE );
-    else
+    } else {
         GFXBlendMode( bsrc=ONE, bdst=ZERO );
+    }
 
     qmesh->LoadDrawState();
     qmesh->BeginDrawState();
@@ -125,7 +126,9 @@ void Bolt::DrawAllBalls()
     vector< Animation* >::iterator     k = bolt_draw_manager.animations.begin();
 
     for (auto&& ball_types : bolt_draw_manager.balls) {
-        if(ball_types.size() == 0) continue;
+        if(ball_types.size() == 0) {
+            continue;
+        }
 
         Animation *cur = *k;
 
@@ -217,11 +220,10 @@ Bolt::Bolt( const weapon_info *typ,
                                           decal,
                                           false ).bolt_index;
 
-        this->location =
-            bolt_collide_map->insert( Collidable( bolt_index,
-                                                  (shipspeed+orientationpos.getR()*typ->Speed).Magnitude()*.5,
-                                                  cur_position+vel*simulation_atom_var*.5 ),
-                                      hint );
+        this->location = bolt_collide_map->insert( Collidable( bolt_index,
+                                                               (shipspeed+orientationpos.getR()*typ->Speed).Magnitude()*.5,
+                                                               cur_position+vel*simulation_atom_var*.5 ),
+                                                   hint );
 
         q.bolts[decal].push_back( *this );
     } else {
@@ -330,8 +332,9 @@ bool Bolt::Collide( Unit *target )
         if (type == _UnitType::nebula || type == _UnitType::asteroid) {
             static bool collideroids =
                 XMLSupport::parse_bool( vs_config->getVariable( "physics", "AsteroidWeaponCollision", "false" ) );
-            if ( type != _UnitType::asteroid || (!collideroids) )
+            if ( type != _UnitType::asteroid || (!collideroids) ) {
                 return false;
+            }
         }
         static bool collidejump = XMLSupport::parse_bool( vs_config->getVariable( "physics", "JumpWeaponCollision", "false" ) );
         if ( type == _UnitType::planet && (!collidejump) && !target->GetDestinations().empty() )
@@ -356,10 +359,11 @@ Bolt* Bolt::BoltFromIndex( Collidable::CollideRef b )
 {
     BoltDrawManager& bolt_draw_manager = BoltDrawManager::GetInstance();
     size_t ind = nondecal_index( b );
-    if (b.bolt_index&128)
+    if (b.bolt_index&128) {
         return &bolt_draw_manager.balls[b.bolt_index&0x7f][ind];
-    else
+    } else {
         return &bolt_draw_manager.bolts[b.bolt_index&0x7f][ind];
+    }
 }
 
 bool Bolt::CollideAnon( Collidable::CollideRef b, Unit *un )
@@ -387,10 +391,12 @@ void BoltDestroyGeneric( Bolt *whichbolt, unsigned int index, int decal, bool is
     VSDESTRUCT2
     BoltDrawManager& q = BoltDrawManager::GetInstance();
     vector< vector< Bolt > > *target;
-    if (!isBall)
+    if (!isBall) {
         target = &q.bolts;
-    else
+    } else {
         target = &q.balls;
+    }
+
     vector< Bolt > *vec = &(*target)[decal];
     if (&(*vec)[index] == whichbolt) {
         unsigned int tsize = vec->size();
@@ -399,8 +405,10 @@ void BoltDestroyGeneric( Bolt *whichbolt, unsigned int index, int decal, bool is
 
         assert( index < tsize );
         cm->erase( (*vec)[index].location );
-        if ( index+1 != vec->size() )
+        if ( index+1 != vec->size() ) {
             (*vec)[index] = vec->back();                //just a memcopy, yo
+        }
+
         vec->pop_back();         //pop that back up
     } else {
         BOOST_LOG_TRIVIAL(fatal) << "Bolt Fault Nouveau! Not found in draw queue! No Chance to recover";
