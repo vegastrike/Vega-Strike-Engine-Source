@@ -134,12 +134,12 @@ class UpdateBackpointers
 public:
     void updateBackpointer( Collidable &collidable )
     {
-        StarSystem *ss = _Universe->activeStarSystem();
         assert( collidable.radius != 0.0f );
-        if (location_index != Unit::UNIT_ONLY && collidable.radius < 0)
-            Bolt::BoltFromIndex( ss, collidable.ref )->location = &collidable;
-        else
+        if (location_index != Unit::UNIT_ONLY && collidable.radius < 0) {
+            Bolt::BoltFromIndex( collidable.ref )->location = &collidable;
+        } else {
             collidable.ref.unit->location[location_index] = &collidable;
+        }
     }
     void operator()( Collidable &collidable )
     {

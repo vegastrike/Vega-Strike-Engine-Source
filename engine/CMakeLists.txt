@@ -215,7 +215,6 @@ ADD_LIBRARY(vegastrike-OPcollide
 SET(LIBCMD_SOURCES
     src/cmd/alphacurve.cpp
     src/cmd/beam_generic.cpp
-    src/cmd/bolt_generic.cpp
     src/cmd/collection.cpp
     src/cmd/collide_map.cpp
     src/cmd/collide.cpp
@@ -262,6 +261,7 @@ SET(LIBCMDSERVER_SOURCES
 )
 
 SET(LIBGFXGENERIC_SOURCES
+    src/gfx/boltdrawmanager.cpp
     src/gfx/cockpit_generic.cpp
     src/gfx/lerp.cpp
     src/gfx/matrix.cpp
