@@ -326,6 +326,23 @@ make package
 Gameplay
 ========
 
+Running Vega Strike
+-------------------
+
+Starting with 0.7.x there are some helper scripts for running Vega Strike and it's configuration utility:
+
+```bash
+vs
+```
+
+Runs Vega Strike itself.
+
+```bash
+vsettings
+```
+
+Launches the configuration utility.
+
 Interstellar Warp Transit (Jump Drive)
 --------------------------------------
 
