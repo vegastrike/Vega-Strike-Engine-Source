@@ -237,6 +237,9 @@ SET(LIBCMD_SOURCES
     src/cmd/energetic.cpp
 
     src/cmd/planetary_orbit.cpp
+
+    src/cmd/weapon_factory.cpp
+    src/cmd/weapon_info.cpp
 )
 
 SET(LIBCMDSERVER_SOURCES
