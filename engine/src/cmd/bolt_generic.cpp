@@ -30,9 +30,9 @@ Bolt::Bolt( const weapon_info *typ,
     this->type    = typ;
     curdist = 0;
     CopyMatrix( drawmat, orientationpos );
-    Vector vel = shipspeed+orientationpos.getR()*typ->Speed;
-    if (typ->type == weapon_info::BOLT) {
-        ScaleMatrix( drawmat, Vector( typ->Radius, typ->Radius, typ->Length ) );
+    Vector vel = shipspeed+orientationpos.getR()*typ->speed;
+    if (typ->type == WEAPON_TYPE::BOLT) {
+        ScaleMatrix( drawmat, Vector( typ->radius, typ->radius, typ->length ) );
         decal = Bolt::AddTexture( q, typ->file );
         this->location =
             _Universe->activeStarSystem()->collide_map[Unit::UNIT_BOLT]->insert( Collidable( Bolt::BoltIndex( q->bolts[decal].
@@ -40,12 +40,12 @@ Bolt::Bolt( const weapon_info *typ,
                                                                                                              decal,
                                                                                                              false ).bolt_index,
                                                                                             (shipspeed+orientationpos.getR()
-                                                                                             *typ->Speed).Magnitude()*.5,
+                                                                                             *typ->speed).Magnitude()*.5,
                                                                                             cur_position+vel*simulation_atom_var*.5 ),
                                                                                 hint );
         q->bolts[decal].push_back( *this );
     } else {
-        ScaleMatrix( drawmat, Vector( typ->Radius, typ->Radius, typ->Radius ) );
+        ScaleMatrix( drawmat, Vector( typ->radius, typ->radius, typ->radius ) );
         decal = Bolt::AddAnimation( q, typ->file, cur_position );
 
         this->location =
@@ -54,7 +54,7 @@ Bolt::Bolt( const weapon_info *typ,
                                                                                                              decal,
                                                                                                              true ).bolt_index,
                                                                                             (shipspeed+orientationpos.getR()
-                                                                                             *typ->Speed).Magnitude()*.5,
+                                                                                             *typ->speed).Magnitude()*.5,
                                                                                             cur_position+vel*simulation_atom_var*.5 ),
                                                                                 hint );
         q->balls[decal].push_back( *this );
@@ -69,14 +69,14 @@ size_t nondecal_index( Collidable::CollideRef b )
 bool Bolt::Update( Collidable::CollideRef index )
 {
     const weapon_info *type = this->type;
-    float speed = type->Speed;
+    float speed = type->speed;
     curdist += speed*simulation_atom_var;
     prev_position = cur_position;
     cur_position +=
         ( ( ShipSpeed+drawmat.getR()*speed
            /( (type->type
-               == weapon_info::BALL)*type->Radius+(type->type != weapon_info::BALL)*type->Length ) ).Cast()*simulation_atom_var );
-    if (curdist > type->Range) {
+               == WEAPON_TYPE::BALL)*type->radius+(type->type != WEAPON_TYPE::BALL)*type->length ) ).Cast()*simulation_atom_var );
+    if (curdist > type->range) {
         this->Destroy( nondecal_index( index ) );         //risky
         return false;
     }
@@ -159,15 +159,15 @@ bool Bolt::Collide( Unit *target )
             return false;
         QVector     tmp = (cur_position-prev_position).Normalize();
         tmp = tmp.Scale( distance );
-        distance = curdist/this->type->Range;
+        distance = curdist/this->type->range;
         GFXColor    coltmp( this->type->r, this->type->g, this->type->b, this->type->a );
         target->ApplyDamage( (prev_position+tmp).Cast(),
                             normal,
-                            this->type->Damage*( (1-distance)+distance*this->type->Longrange ),
+                            this->type->damage*( (1-distance)+distance*this->type->long_range ),
                             affectedSubUnit,
                             coltmp,
                             owner,
-                            this->type->PhaseDamage*( (1-distance)+distance*this->type->Longrange ) );
+                            this->type->phase_damage*( (1-distance)+distance*this->type->long_range ) );
         return true;
     }
     return false;

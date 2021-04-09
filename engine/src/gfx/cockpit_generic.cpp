@@ -78,12 +78,17 @@ float Unit::computeLockingPercent()
 {
     float most = -1024;
     for (int i = 0; i < getNumMounts(); i++)
-        if ( mounts[i].type->type == weapon_info::PROJECTILE
-            || ( mounts[i].type->size
-                &(weapon_info::SPECIALMISSILE|weapon_info::LIGHTMISSILE|weapon_info::MEDIUMMISSILE|weapon_info::HEAVYMISSILE
-                  |weapon_info::CAPSHIPLIGHTMISSILE|weapon_info::CAPSHIPHEAVYMISSILE|weapon_info::SPECIAL) ) ) {
-            if (mounts[i].status == Mount::ACTIVE && mounts[i].type->LockTime > 0) {
-                float rat = mounts[i].time_to_lock/mounts[i].type->LockTime;
+        if ( mounts[i].type->type == WEAPON_TYPE::PROJECTILE
+            || ( as_integer(mounts[i].type->size)
+                &(as_integer(MOUNT_SIZE::SPECIALMISSILE)|
+                  as_integer(MOUNT_SIZE::LIGHTMISSILE)|
+                  as_integer(MOUNT_SIZE::MEDIUMMISSILE)|
+                  as_integer(MOUNT_SIZE::HEAVYMISSILE)|
+                  as_integer(MOUNT_SIZE::CAPSHIPLIGHTMISSILE)|
+                  as_integer(MOUNT_SIZE::CAPSHIPHEAVYMISSILE)|
+                  as_integer(MOUNT_SIZE::SPECIAL)) ) ) {
+            if (mounts[i].status == Mount::ACTIVE && mounts[i].type->lock_time > 0) {
+                float rat = mounts[i].time_to_lock/mounts[i].type->lock_time;
                 if (rat < .99)
                     if (rat > most)
                         most = rat;

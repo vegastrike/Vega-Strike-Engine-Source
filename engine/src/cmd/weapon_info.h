@@ -5,101 +5,172 @@
 
 #include <string>
 
+enum class WEAPON_TYPE
+{
+    UNKNOWN,
+    BEAM,
+    BALL,
+    BOLT,
+    PROJECTILE
+};
+
+enum class MOUNT_SIZE
+{
+    NOWEAP              = 0x0,
+
+    LIGHT               = 0x1,
+    MEDIUM              = 0x2,
+    HEAVY               = 0x4,
+    CAPSHIPLIGHT        = 0x8,
+    CAPSHIPHEAVY        = 0x10,
+    SPECIAL             = 0x20,
+
+    LIGHTMISSILE        = 0x40,
+    MEDIUMMISSILE       = 0x80,
+    HEAVYMISSILE        = 0x100,
+    CAPSHIPLIGHTMISSILE = 0x200,
+    CAPSHIPHEAVYMISSILE = 0x400,
+    SPECIALMISSILE      = 0x800,
+
+    AUTOTRACKING        = 0x1000
+};
+
+template <typename Enumeration>
+auto as_integer(Enumeration const value)
+    -> typename std::underlying_type<Enumeration>::type
+{
+    return static_cast<typename std::underlying_type<Enumeration>::type>(value);
+}
+
+MOUNT_SIZE getMountSizeFromItsValue(int value);
+
+
+
 struct weapon_info
 {
+    // Fields
+    std::string name;
+    WEAPON_TYPE type;
+    MOUNT_SIZE size = MOUNT_SIZE::NOWEAP;
+
+    // Make const again
+    /*const*/ float   damage          = 1.8;
+    /*const*/ float   energy_rate     = 18;
+    /*const*/ float   length          = 5;
+    /*const*/ float   lock_time       = 0;
+    /*const*/ float   long_range      = .5;
+    /*const*/ Vector  offset          = Vector();
+    /*const*/ float   phase_damage     = 0;
+    /*const*/ float   pulse_speed     = 15;
+    /*const*/ float   radial_speed    = 1;
+    /*const*/ float   radius          = 0.5;
+    /*const*/ float   range           = 100;
+    /*const*/ float   refire_rate     = .2;
+    /*const*/ int     role_bits       = 0;
+    /*const*/ float   stability       = 60;
+    /*const*/ int     sound           = -1;
+    /*const*/ float   speed           = 10;
+    /*const*/ float   texture_stretch = 1;
+
+    /*const*/ float   volume          = 0;
+
+    /*const*/ float r = 127;
+    /*const*/ float g = 127;
+    /*const*/ float b = 127;
+    /*const*/ float a = 127;
+
+    mutable class Mesh *gun = nullptr;      //requires nonconst to add to orig drawing queue when drawing
+    mutable class Mesh *gun1 = nullptr;     //requires nonconst to add to orig drawing queue when drawing
+
+    // Constructors
+    weapon_info();
+    weapon_info(WEAPON_TYPE type,
+                std::string name,
+                MOUNT_SIZE mount_size,
+                float damage,
+                float energy_rate,
+                float length,
+                float lock_time,
+                float long_range,
+                Vector offset,
+                float phase_damage,
+                float pulse_speed,
+                float radial_speed,
+                float radius,
+                float refire_rate,
+                int role_bits,
+                float stability,
+                int sound,
+                float speed,
+                float texture_stretch,
+                float volume,
+                float appearance,
+
+                float r,
+                float g,
+                float b,
+                float a);
+
+    weapon_info(WEAPON_TYPE type);
+    weapon_info( const weapon_info &tmp );
+
+
+    // Methods
+
     friend void beginElement( void *userData, const char *name, const char **atts );
-    enum WEAPON_TYPE
-    {
-        UNKNOWN,
-        BEAM,
-        BALL,
-        BOLT,
-        PROJECTILE
-    }
-    type;
-    enum MOUNT_SIZE
-    {
-        NOWEAP=0x0, LIGHT=0x1, MEDIUM=0x2, HEAVY=0x4, CAPSHIPLIGHT=0x8, CAPSHIPHEAVY=0x10, SPECIAL=0x20,
-        LIGHTMISSILE  =0x40, MEDIUMMISSILE=0x80, HEAVYMISSILE=0x100, CAPSHIPLIGHTMISSILE=0x200, CAPSHIPHEAVYMISSILE=
-            0x400,
-        SPECIALMISSILE=0x800, AUTOTRACKING=0x1000
-    }
-    size;
-    Vector offset;
-    int    role_bits;
-    int    sound;
-    float  r, g, b, a;
-    float  Speed, PulseSpeed, RadialSpeed, Range, Radius, Length;
-    float  Damage, PhaseDamage, Stability, Longrange, LockTime;
-    float  EnergyRate, volume;
+
+
+
+
+
+
+
+
+
+
+
     float  Refire() const;
     bool   isMissile() const;
-    float  TextureStretch;
     std::string   file;
-    std::string   weapon_name;
-    mutable class Mesh *gun;      //requres nonconst to add to orig drawing queue when drawing
-    mutable class Mesh *gun1;      //requres nonconst to add to orig drawing queue when drawing
-    void init()
-    {
-        gun            = gun1 = NULL;
-        TextureStretch = 1;
-        role_bits      = 0;
-        offset         = Vector( 0, 0, 0 );
-        size           = NOWEAP;
-        r = g = b = a = 127;
-        Length         = 5;
-        Speed          = 10;
-        PulseSpeed     = 15;
-        RadialSpeed    = 1;
-        Range          = 100;
-        Radius         = .5;
-        Damage         = 1.8;
-        PhaseDamage    = 0;
-        Stability      = 60;
-        Longrange      = .5;
-        LockTime       = 0;
-        EnergyRate     = 18;
-        RefireRate     = .2;
-        sound          = -1;
-        volume         = 0;
-    }
-    void Type( enum WEAPON_TYPE typ )
+
+
+
+
+
+
+
+    void Type( WEAPON_TYPE typ )
     {
         type = typ;
         switch (typ)
         {
-        case BOLT:
-            file = std::string( "" );
+        case WEAPON_TYPE::BOLT:
+            file = "";
             break;
-        case BEAM:
-            file = std::string( "beamtexture.bmp" );
+        case WEAPON_TYPE::BEAM:
+            file = "beamtexture.bmp";
             break;
-        case BALL:
-            file = std::string( "ball.ani" );
+        case WEAPON_TYPE::BALL:
+            file = "ball.ani";
             break;
-        case PROJECTILE:
-            file = std::string( "missile.bfxm" );
+        case WEAPON_TYPE::PROJECTILE:
+            file = "missile.bfxm";
             break;
         default:
             break;
         }
     }
-    void MntSize( enum MOUNT_SIZE size )
+
+    /*void MntSize( enum MOUNT_SIZE size )
     {
         this->size = size;
-    }
-    weapon_info( enum WEAPON_TYPE typ )
-    {
-        init();
-        Type( typ );
-    }
-    weapon_info( const weapon_info &tmp )
-    {
-        *this = tmp;
-    }
+    }*/
+
+
+
     void netswap();
 private:
-    float RefireRate;
+
 };
 
 #endif // WEAPON_INFO_H

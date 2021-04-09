@@ -120,7 +120,7 @@ void Bolt::Draw()
     for (i = qq->balls.begin(); i != qq->balls.end(); i++, k++) {
         Animation *cur = *k;
         if ( i->begin() != i->end() ) {
-            float bolt_size = 2*i->begin()->type->Radius*2;
+            float bolt_size = 2*i->begin()->type->radius*2;
             bolt_size *= bolt_size;
             //Matrix result;
             //FIXME::MuST USE DRAWNO	TRANSFORMNOW cur->CalculateOrientation (result);
@@ -133,7 +133,7 @@ void Bolt::Draw()
                     BlendTrans( bolt->drawmat, bolt->cur_position, bolt->prev_position );
                     Matrix tmp;
                     VectorAndPositionToMatrix( tmp, p, q, r, bolt->drawmat.p );
-                    cur->SetDimensions( bolt->type->Radius, bolt->type->Radius );
+                    cur->SetDimensions( bolt->type->radius, bolt->type->radius );
                     GFXLoadMatrixModel( tmp );
                     GFXColor4f( type->r, type->g, type->b, type->a );
                     cur->DrawNoTransform( false, true );
@@ -161,7 +161,7 @@ void Bolt::Draw()
         for (i = qq->bolts.begin(); i != qq->bolts.end(); decal++, i++) {
             Texture *dec = qq->boltdecals->GetTexture( decal );
             if ( dec && i->begin() != i->end() ) {
-                float bolt_size = 2*i->begin()->type->Radius+i->begin()->type->Length;
+                float bolt_size = 2*i->begin()->type->radius+i->begin()->type->length;
                 bolt_size *= bolt_size;
                 for (size_t pass = 0, npasses = dec->numPasses(); pass < npasses; ++pass) {
                     GFXTextureEnv( 0, GFXMODULATETEXTURE );
@@ -177,7 +177,7 @@ void Bolt::Draw()
                                 BlendTrans( bolt.drawmat, bolt.cur_position, bolt.prev_position );
                                 Matrix drawmat( bolt.drawmat );
                                 if (game_options.StretchBolts > 0)
-                                    ScaleMatrix( drawmat, Vector( 1, 1, bolt.type->Speed*etime*game_options.StretchBolts/bolt.type->Length ) );
+                                    ScaleMatrix( drawmat, Vector( 1, 1, bolt.type->speed*etime*game_options.StretchBolts/bolt.type->length ) );
                                 GFXLoadMatrixModel( drawmat );
                                 GFXColor4f( wt->r, wt->g, wt->b, wt->a );
                                 qmesh->Draw();
@@ -204,7 +204,7 @@ void Bolt::Destroy( unsigned int index )
     VSDESTRUCT2
     bolt_draw *q = _Universe->activeStarSystem()->bolts;
     bool isBall  = true;
-    if (type->type == weapon_info::BOLT) {
+    if (type->type == WEAPON_TYPE::BOLT) {
         q->boltdecals->DelTexture( decal );
         isBall = false;
     } else {}

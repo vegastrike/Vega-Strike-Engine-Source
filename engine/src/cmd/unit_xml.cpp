@@ -586,7 +586,7 @@ void Unit::beginElement( const string &name, const AttributeList &attributes )
     AttributeList::const_iterator iter;
     GFXColor halocolor; //FIXME it's set, but not actually used
     int     ammo   = -1; //short fix
-    int     mntsiz = weapon_info::NOWEAP;
+    MOUNT_SIZE     mntsiz = MOUNT_SIZE::NOWEAP;
     string  light_type;
     Names   elem   = (Names) element_map.lookup( name );
     switch (elem)
@@ -970,7 +970,7 @@ void Unit::beginElement( const string &name, const AttributeList &attributes )
                 break;
             case MOUNTSIZE:
                 tempbool = true;
-                mntsiz   = parseMountSizes( (*iter).value.c_str() );
+                mntsiz   = getMountSizeFromItsValue(parseMountSizes( (*iter).value.c_str() ));
                 break;
             case X:
                 pos.i    = xml->unitscale*parse_float( (*iter).value );
@@ -1017,9 +1017,9 @@ void Unit::beginElement( const string &name, const AttributeList &attributes )
         xml->mountz[indx]->SetMountOrientation( Quaternion::from_vectors( P.Cast(), Q.Cast(), R.Cast() ) );
         xml->mountz[indx]->SetMountPosition( pos.Cast() );
         if (tempbool)
-            xml->mountz[indx]->size = mntsiz;
+            xml->mountz[indx]->size = as_integer(mntsiz);
         else
-            xml->mountz[indx]->size = xml->mountz[indx]->type->size;
+            xml->mountz[indx]->size = as_integer(xml->mountz[indx]->type->size);
         setAverageGunSpeed();
         break;
     case SUBUNIT:
@@ -2002,11 +2002,11 @@ void Unit::LoadXML( VSFileSystem::VSFile &f, const char *modifications, string *
         if (a%2 == parity) {
             int b = a;
             if ( a%4 == 2 && (int) a < (getNumMounts()-1) )
-                if (mounts[a].type->type != weapon_info::PROJECTILE && mounts[a+1].type->type != weapon_info::PROJECTILE)
+                if (mounts[a].type->type != WEAPON_TYPE::PROJECTILE && mounts[a+1].type->type != WEAPON_TYPE::PROJECTILE)
                     b = a+1;
-            mounts[b].sound = AUDCreateSound( mounts[b].type->sound, mounts[b].type->type != weapon_info::PROJECTILE );
-        } else if ( (!half_sounds) || mounts[a].type->type == weapon_info::PROJECTILE ) {
-            mounts[a].sound = AUDCreateSound( mounts[a].type->sound, mounts[a].type->type != weapon_info::PROJECTILE ); //lloping also flase in unit_customize
+            mounts[b].sound = AUDCreateSound( mounts[b].type->sound, mounts[b].type->type != WEAPON_TYPE::PROJECTILE );
+        } else if ( (!half_sounds) || mounts[a].type->type == WEAPON_TYPE::PROJECTILE ) {
+            mounts[a].sound = AUDCreateSound( mounts[a].type->sound, mounts[a].type->type != WEAPON_TYPE::PROJECTILE ); //lloping also flase in unit_customize
         }
         if (a > 0)
             if (mounts[a].sound == mounts[a-1].sound && mounts[a].sound != -1) {

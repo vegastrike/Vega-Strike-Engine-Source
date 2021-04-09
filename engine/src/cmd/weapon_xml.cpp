@@ -36,7 +36,7 @@
 
 
 
-extern enum weapon_info::MOUNT_SIZE lookupMountSize( const char *str );
+extern enum MOUNT_SIZE lookupMountSize( const char *str );
 
 
 #if (defined (__APPLE__) == POSH_BIG_ENDIAN) || !defined (INTEL_X86)
@@ -48,18 +48,18 @@ int counts = 0;
 
 void setWeaponInfoToBuffer( weapon_info wi, char *netbuf, int &bufsize )
 {
-    bufsize = sizeof (wi)+sizeof (wi.file)+sizeof (wi.weapon_name);
+    bufsize = sizeof (wi)+sizeof (wi.file)+sizeof (wi.name);
     netbuf  = new char[bufsize+1];
     netbuf[bufsize] = 0;
     int offset = 0;
 
     unsigned short file_len = wi.file.length();
-    unsigned short weap_len = wi.weapon_name.length();
+    unsigned short weap_len = wi.name.length();
     char *file = new char[file_len+1];
     char *weapon_name = new char[weap_len+1];
     memcpy( file, wi.file.c_str(), file_len );
     file[file_len] = 0;
-    memcpy( weapon_name, wi.weapon_name.c_str(), weap_len );
+    memcpy( weapon_name, wi.name.c_str(), weap_len );
     weapon_name[weap_len] = 0;
 
     //Copy the struct weapon_info in the buffer
@@ -81,35 +81,7 @@ void setWeaponInfoToBuffer( weapon_info wi, char *netbuf, int &bufsize )
     delete[] weapon_name;
 }
 
-void weapon_info::netswap()
-{
-    //Enum elements are the size of an int
-    //byte order swap doesn't work with ENUM - MAY NEED TO FIND A WORKAROUND SOMEDAY
-    //type = VSSwapHostIntToLittle( type);
-    //size = VSSwapHostIntToLittle( size);
-    offset.netswap();
-    role_bits = VSSwapHostIntToLittle( role_bits );
-    sound     = VSSwapHostIntToLittle( sound );
-    r              = VSSwapHostFloatToLittle( r );
-    g              = VSSwapHostFloatToLittle( g );
-    b              = VSSwapHostFloatToLittle( b );
-    a              = VSSwapHostFloatToLittle( a );
-    Speed          = VSSwapHostFloatToLittle( Speed );
-    PulseSpeed     = VSSwapHostFloatToLittle( PulseSpeed );
-    RadialSpeed    = VSSwapHostFloatToLittle( RadialSpeed );
-    Range          = VSSwapHostFloatToLittle( Range );
-    Radius         = VSSwapHostFloatToLittle( Radius );
-    Length         = VSSwapHostFloatToLittle( Length );
-    Damage         = VSSwapHostFloatToLittle( Damage );
-    PhaseDamage    = VSSwapHostFloatToLittle( PhaseDamage );
-    Stability      = VSSwapHostFloatToLittle( Stability );
-    Longrange      = VSSwapHostFloatToLittle( Longrange );
-    LockTime       = VSSwapHostFloatToLittle( LockTime );
-    EnergyRate     = VSSwapHostFloatToLittle( EnergyRate );
-    RefireRate     = VSSwapHostFloatToLittle( RefireRate );
-    volume         = VSSwapHostFloatToLittle( volume );
-    TextureStretch = VSSwapHostFloatToLittle( TextureStretch );
-}
+
 
 #include "xml_support.h"
 #include "physics.h"
@@ -165,6 +137,8 @@ enum Names
 
 };
 
+
+
 const EnumMap::Pair element_names[] = {
     EnumMap::Pair( "UNKNOWN",    UNKNOWN ),   //don't add anything until below missile so it maps to enum WEAPON_TYPE
     EnumMap::Pair( "Beam",       BEAM ),
@@ -217,7 +191,7 @@ const EnumMap element_map( element_names, 10 );
 const EnumMap attribute_map( attribute_names, 32 );
 Hashtable< string, weapon_info, 257 >lookuptable;
 string curname;
-weapon_info tmpweapon( weapon_info::BEAM );
+weapon_info tmpweapon( WEAPON_TYPE::BEAM );
 int    level = -1;
 
 void beginElementXML_Char( void *userData, const XML_Char *name, const XML_Char **atts )
@@ -242,7 +216,7 @@ void beginElement( void *userData, const char *name, const char **atts )
     static float  gun_speed     = game_options.gun_speed * (game_options.gun_speed_adjusted_game_speed ? game_options.game_speed : 1);
     static int    gamma = (int) ( 20*game_options.weapon_gamma );
     AttributeList attributes( atts );
-    enum weapon_info::WEAPON_TYPE weaptyp;
+    WEAPON_TYPE weaptyp;
     Names elem = (Names) element_map.lookup( string( name ) );
 #ifdef TESTBEAMSONLY
     if (elem == BOLT)
@@ -264,19 +238,19 @@ void beginElement( void *userData, const char *name, const char **atts )
         switch (elem)
         {
         case BOLT:
-            weaptyp = weapon_info::BOLT;
+            weaptyp = WEAPON_TYPE::BOLT;
             break;
         case BEAM:
-            weaptyp = weapon_info::BEAM;
+            weaptyp = WEAPON_TYPE::BEAM;
             break;
         case BALL:
-            weaptyp = weapon_info::BALL;
+            weaptyp = WEAPON_TYPE::BALL;
             break;
         case PROJECTILE:
-            weaptyp = weapon_info::PROJECTILE;
+            weaptyp = WEAPON_TYPE::PROJECTILE;
             break;
         default:
-            weaptyp = weapon_info::UNKNOWN;
+            weaptyp = WEAPON_TYPE::UNKNOWN;
             break;
         }
         tmpweapon.Type( weaptyp );
@@ -288,7 +262,7 @@ void beginElement( void *userData, const char *name, const char **atts )
                 break;
             case NAME:
                 curname = (*iter).value;
-                tmpweapon.weapon_name = curname;
+                tmpweapon.name = curname;
                 break;
             case ROLE:
                 tmpweapon.role_bits   = ROLES::readBitmask( iter->value );
@@ -298,7 +272,7 @@ void beginElement( void *userData, const char *name, const char **atts )
                 tmpweapon.role_bits   = ~tmpweapon.role_bits;
                 break;
             case WEAPSIZE:
-                tmpweapon.MntSize( lookupMountSize( (*iter).value.c_str() ) );
+                tmpweapon.size = lookupMountSize( (*iter).value.c_str() );
                 break;
             default:
                 break;
@@ -318,10 +292,10 @@ void beginElement( void *userData, const char *name, const char **atts )
                 tmpweapon.file     = (*iter).value;
                 break;
             case SOUNDMP3:
-                tmpweapon.sound    = AUDCreateSoundMP3( (*iter).value, tmpweapon.type != weapon_info::PROJECTILE );
+                tmpweapon.sound    = AUDCreateSoundMP3( (*iter).value, tmpweapon.type != WEAPON_TYPE::PROJECTILE );
                 break;
             case SOUNDWAV:
-                tmpweapon.sound    = AUDCreateSoundWAV( (*iter).value, tmpweapon.type == weapon_info::PROJECTILE );
+                tmpweapon.sound    = AUDCreateSoundWAV( (*iter).value, tmpweapon.type == WEAPON_TYPE::PROJECTILE );
                 break;
             case OFFSETX:
                 tmpweapon.offset.i = XMLSupport::parse_floatf( iter->value );
@@ -345,7 +319,7 @@ void beginElement( void *userData, const char *name, const char **atts )
                 tmpweapon.a = XMLSupport::parse_floatf( (*iter).value );
                 break;
             case TEXTURESTRETCH:
-                tmpweapon.TextureStretch =
+                tmpweapon.texture_stretch =
                     XMLSupport::parse_floatf( (*iter).value );
                 break;
             default:
@@ -368,19 +342,19 @@ void beginElement( void *userData, const char *name, const char **atts )
                 BOOST_LOG_TRIVIAL(warning) << boost::format("Unknown Weapon Element %1$s") % (*iter).name.c_str();
                 break;
             case CONSUMPTION:
-                tmpweapon.EnergyRate = XMLSupport::parse_floatf( (*iter).value );
+                tmpweapon.energy_rate = XMLSupport::parse_floatf( (*iter).value );
                 break;
             case RATE:
-                tmpweapon.EnergyRate = XMLSupport::parse_floatf( (*iter).value );
+                tmpweapon.energy_rate = XMLSupport::parse_floatf( (*iter).value );
                 break;
             case STABILITY:
-                tmpweapon.Stability  = XMLSupport::parse_floatf( (*iter).value );
+                tmpweapon.stability  = XMLSupport::parse_floatf( (*iter).value );
                 break;
             case REFIRE:
-                tmpweapon.RefireRate = XMLSupport::parse_floatf( (*iter).value );
+                tmpweapon.refire_rate = XMLSupport::parse_floatf( (*iter).value );
                 break;
             case LOCKTIME:
-                tmpweapon.LockTime   = XMLSupport::parse_floatf( (*iter).value );
+                tmpweapon.lock_time   = XMLSupport::parse_floatf( (*iter).value );
                 break;
             default:
                 break;
@@ -397,22 +371,22 @@ void beginElement( void *userData, const char *name, const char **atts )
                     BOOST_LOG_TRIVIAL(warning) << boost::format("Unknown Weapon Element %1$s") % (*iter).name.c_str();
                     break;
                 case DAMAGE:
-                    tmpweapon.Damage = game_options.weapon_damage_efficiency*XMLSupport::parse_floatf( (*iter).value );
+                    tmpweapon.damage = game_options.weapon_damage_efficiency*XMLSupport::parse_floatf( (*iter).value );
                     break;
                 case RADIUS:
-                    tmpweapon.Radius = XMLSupport::parse_floatf( (*iter).value );
+                    tmpweapon.radius = XMLSupport::parse_floatf( (*iter).value );
                     break;
                 case RADIALSPEED:
-                    tmpweapon.RadialSpeed = XMLSupport::parse_floatf( (*iter).value );
+                    tmpweapon.radial_speed = XMLSupport::parse_floatf( (*iter).value );
                     break;
                 case PHASEDAMAGE:
-                    tmpweapon.PhaseDamage = game_options.weapon_damage_efficiency*XMLSupport::parse_floatf( (*iter).value );
+                    tmpweapon.phase_damage = game_options.weapon_damage_efficiency*XMLSupport::parse_floatf( (*iter).value );
                     break;
                 case RATE:
-                    tmpweapon.Damage    = game_options.weapon_damage_efficiency*XMLSupport::parse_floatf( (*iter).value );
+                    tmpweapon.damage    = game_options.weapon_damage_efficiency*XMLSupport::parse_floatf( (*iter).value );
                     break;
                 case LONGRANGE:
-                    tmpweapon.Longrange = XMLSupport::parse_float( (*iter).value );
+                    tmpweapon.long_range = XMLSupport::parse_float( (*iter).value );
                     break;
                 default:
                     break;
@@ -432,40 +406,40 @@ void beginElement( void *userData, const char *name, const char **atts )
                 tmpweapon.volume = XMLSupport::parse_float( (*iter).value );
                 break;
             case SPEED:
-                tmpweapon.Speed  = XMLSupport::parse_float( (*iter).value );
-                if (tmpweapon.Speed < 1000) {
-                    tmpweapon.Speed = tmpweapon.Speed*(game_options.gun_speed_adjusted_game_speed ? (1.0+gun_speed/1.25) : gun_speed);
+                tmpweapon.speed  = XMLSupport::parse_float( (*iter).value );
+                if (tmpweapon.speed < 1000) {
+                    tmpweapon.speed = tmpweapon.speed*(game_options.gun_speed_adjusted_game_speed ? (1.0+gun_speed/1.25) : gun_speed);
                 } else {
-                    if (tmpweapon.Speed < 2000) {
-                        tmpweapon.Speed = tmpweapon.Speed*( game_options.gun_speed_adjusted_game_speed ? (1.0+gun_speed/2.5) : (gun_speed) );
+                    if (tmpweapon.speed < 2000) {
+                        tmpweapon.speed = tmpweapon.speed*( game_options.gun_speed_adjusted_game_speed ? (1.0+gun_speed/2.5) : (gun_speed) );
                     } else {
-                        if (tmpweapon.Speed < 4000)
-                            tmpweapon.Speed = tmpweapon.Speed*( game_options.gun_speed_adjusted_game_speed ? (1.0+gun_speed/6.0) : (gun_speed) );
-                        else if (tmpweapon.Speed < 8000)
-                            tmpweapon.Speed = tmpweapon.Speed*( game_options.gun_speed_adjusted_game_speed ? (1.0+gun_speed/17.0) : (gun_speed) );
+                        if (tmpweapon.speed < 4000)
+                            tmpweapon.speed = tmpweapon.speed*( game_options.gun_speed_adjusted_game_speed ? (1.0+gun_speed/6.0) : (gun_speed) );
+                        else if (tmpweapon.speed < 8000)
+                            tmpweapon.speed = tmpweapon.speed*( game_options.gun_speed_adjusted_game_speed ? (1.0+gun_speed/17.0) : (gun_speed) );
                     }
                 }
                 break;
             case PULSESPEED:
-                if (tmpweapon.type == weapon_info::BEAM)
-                    tmpweapon.PulseSpeed = XMLSupport::parse_float( (*iter).value );
+                if (tmpweapon.type == WEAPON_TYPE::BEAM)
+                    tmpweapon.pulse_speed = XMLSupport::parse_float( (*iter).value );
                 break;
             case DETONATIONRADIUS:
-                if (tmpweapon.type != weapon_info::BEAM)
-                    tmpweapon.PulseSpeed = XMLSupport::parse_float( (*iter).value );
+                if (tmpweapon.type != WEAPON_TYPE::BEAM)
+                    tmpweapon.pulse_speed = XMLSupport::parse_float( (*iter).value );
                 break;
             case RADIALSPEED:
-                tmpweapon.RadialSpeed = XMLSupport::parse_float( (*iter).value );
+                tmpweapon.radial_speed = XMLSupport::parse_float( (*iter).value );
                 break;
             case RANGE:
-                tmpweapon.Range = ( game_options.gun_speed_adjusted_game_speed ? (1.0+gun_speed/16.0) : (gun_speed) )*XMLSupport::parse_float(
+                tmpweapon.range = ( game_options.gun_speed_adjusted_game_speed ? (1.0+gun_speed/16.0) : (gun_speed) )*XMLSupport::parse_float(
                     (*iter).value );
                 break;
             case RADIUS:
-                tmpweapon.Radius = XMLSupport::parse_float( (*iter).value );
+                tmpweapon.radius = XMLSupport::parse_float( (*iter).value );
                 break;
             case LENGTH:
-                tmpweapon.Length = XMLSupport::parse_float( (*iter).value );
+                tmpweapon.length = XMLSupport::parse_float( (*iter).value );
                 break;
             default:
                 break;
@@ -495,7 +469,7 @@ void endElement( void *userData, const XML_Char *name )
     case PROJECTILE:
         level--;
         lookuptable.Put( strtoupper( curname ), new weapon_info( tmpweapon ) );
-        tmpweapon.init();
+        tmpweapon = weapon_info();
         break;
     case ENERGY:
     case DAMAGE:
@@ -516,13 +490,13 @@ weapon_info * getTemplate( const string &kkey )
 {
     weapon_info *wi = lookuptable.Get( strtoupper( kkey ) );
     if (wi) {
-        if ( !WeaponMeshCache::getCachedMutable( wi->weapon_name ) ) {
+        if ( !WeaponMeshCache::getCachedMutable( wi->name ) ) {
             static FileLookupCache lookup_cache;
             string meshname = strtolower( kkey )+".bfxm";
             if (CachedFileLookup( lookup_cache, meshname, MeshFile ) <= Ok) {
-                WeaponMeshCache::setCachedMutable( wi->weapon_name, wi->gun =
+                WeaponMeshCache::setCachedMutable( wi->name, wi->gun =
                                                       Mesh::LoadMesh( meshname.c_str(), Vector( 1, 1, 1 ), 0, NULL ) );
-                WeaponMeshCache::setCachedMutable( wi->weapon_name+"_flare", wi->gun1 =
+                WeaponMeshCache::setCachedMutable( wi->name+"_flare", wi->gun1 =
                                                       Mesh::LoadMesh( meshname.c_str(), Vector( 1, 1, 1 ), 0, NULL ) );
             }
         }

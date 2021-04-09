@@ -78,7 +78,7 @@ public:
 
     static bool isSpecial( const Mount &mount )
     {
-        return mount.type->size == weapon_info::SPECIAL || mount.type->size == weapon_info::SPECIALMISSILE;
+        return mount.type->size == MOUNT_SIZE::SPECIAL || mount.type->size == MOUNT_SIZE::SPECIALMISSILE;
     }
 
     static bool notSpecial( const Mount &mount )
@@ -134,7 +134,7 @@ public:
         myset.insert( allWeaponsNoSpecial );
         for (iter = myset.begin(); iter != myset.end(); ++iter) {
             for (WeaponGroup::const_iterator iter2 = (*iter).begin(); iter2 != (*iter).end(); ++iter2)
-                printf( "%d:%s ", *iter2, un->mounts[*iter2].type->weapon_name.c_str() );
+                printf( "%d:%s ", *iter2, un->mounts[*iter2].type->name.c_str() );
             printf( "\n" );
         }
         WeaponGroup activeWeapons;
@@ -142,7 +142,7 @@ public:
         for (i = 0; i < un->mounts.size(); ++i)
             if ( un->mounts[i].status == Mount::ACTIVE && checkmount( un, i, missile ) ) {
                 activeWeapons.insert( i );
-                printf( "%d:%s ", i, un->mounts[i].type->weapon_name.c_str() );
+                printf( "%d:%s ", i, un->mounts[i].type->name.c_str() );
             }
         printf( "\n" );
         iter = myset.upper_bound( activeWeapons );
@@ -154,7 +154,7 @@ public:
             un->mounts[i].DeActive( missile );
         printf( "ACTIVE: " );
         for (WeaponGroup::const_iterator iter2 = (*iter).begin(); iter2 != (*iter).end(); ++iter2) {
-            printf( "%d:%s ", *iter2, un->mounts[*iter2].type->weapon_name.c_str() );
+            printf( "%d:%s ", *iter2, un->mounts[*iter2].type->name.c_str() );
             un->mounts[*iter2].Activate( missile );
         }
         printf( "\n" );
@@ -228,8 +228,8 @@ void Armed::Fire( unsigned int weapon_type_bitmask, bool listen_to_owner)
         }
         const bool mis = i->type->isMissile();
         const bool locked_on = i->time_to_lock <= 0;
-        const bool lockable_weapon  = i->type->LockTime > 0;
-        const bool autotracking_gun = (!mis) && 0 != (i->size&weapon_info::AUTOTRACKING) && locked_on;
+        const bool lockable_weapon  = i->type->lock_time > 0;
+        const bool autotracking_gun = (!mis) && 0 != (i->size& as_integer(MOUNT_SIZE::AUTOTRACKING)) && locked_on;
         const bool fire_non_autotrackers = ( 0 == (weapon_type_bitmask&ROLES::FIRE_ONLY_AUTOTRACKERS) );
         const bool locked_missile   = (mis && locked_on && lockable_weapon);
         const bool missile_and_want_to_fire_missiles = ( mis && (weapon_type_bitmask&ROLES::FIRE_MISSILES) );
@@ -240,15 +240,15 @@ void Armed::Fire( unsigned int weapon_type_bitmask, bool listen_to_owner)
             (fire_non_autotrackers || autotracking_gun || locked_missile)
             && ( (ROLES::EVERYTHING_ELSE&weapon_type_bitmask&i->type->role_bits) || i->type->role_bits == 0 )
             && ( (locked_on && missile_and_want_to_fire_missiles) || gun_and_want_to_fire_guns );
-        if ( (*i).type->type == weapon_info::BEAM ) {
-            if ( (*i).type->EnergyRate * simulation_atom_var > unit->energy ) {
+        if ( (*i).type->type == WEAPON_TYPE::BEAM ) {
+            if ( (*i).type->energy_rate * simulation_atom_var > unit->energy ) {
                 //NOT ONLY IN non-networking mode : anyway, the server will tell everyone including us to stop if not already done
                 (*i).UnFire();
                 continue;
             }
         } else
         //Only in non-networking mode
-        if (i->type->EnergyRate > unit->energy) {
+        if (i->type->energy_rate > unit->energy) {
             if (!want_to_fire) {
                 i->UnFire();
             }
@@ -265,12 +265,12 @@ void Armed::Fire( unsigned int weapon_type_bitmask, bool listen_to_owner)
                     //info the server sends with ack for fire
                     //FOR NOW WE TRUST THE CLIENT SINCE THE SERVER CAN REFUSE A FIRE
                     //if( Network==NULL || SERVER)
-                    if (i->type->type == weapon_info::BEAM) {
+                    if (i->type->type == WEAPON_TYPE::BEAM) {
                         if (i->ref.gun)
                             if ( ( !i->ref.gun->Dissolved() ) || i->ref.gun->Ready() )
-                                unit->energy -= i->type->EnergyRate*simulation_atom_var;
+                                unit->energy -= i->type->energy_rate*simulation_atom_var;
                     } else if ( i->type->isMissile() ) {    // FIXME  other than beams, only missiles are processed here?
-                        unit->energy -= i->type->EnergyRate;
+                        unit->energy -= i->type->energy_rate;
                     }
                     //IF WE REFRESH ENERGY FROM SERVER : Think to send the energy update to the firing client with ACK TO fireRequest
                     //fire only 1 missile at a time
@@ -305,10 +305,10 @@ int Armed::LockMissile() const
     bool missilelock = false;
     bool dumblock    = false;
     for (int i = 0; i < getNumMounts(); ++i) {
-        if ( mounts[i].status == Mount::ACTIVE && mounts[i].type->LockTime > 0 && mounts[i].time_to_lock <= 0
+        if ( mounts[i].status == Mount::ACTIVE && mounts[i].type->lock_time > 0 && mounts[i].time_to_lock <= 0
             &&  mounts[i].type->isMissile() )
             missilelock = true;
-        else if (mounts[i].status == Mount::ACTIVE && mounts[i].type->LockTime == 0 &&  mounts[i].type->isMissile()
+        else if (mounts[i].status == Mount::ACTIVE && mounts[i].type->lock_time == 0 &&  mounts[i].type->isMissile()
                  && mounts[i].time_to_lock <= 0)
             dumblock = true;
     }
@@ -354,7 +354,7 @@ void Armed::SelectAllWeapon( bool Missile )
 {
     for (int i = 0; i < getNumMounts(); ++i)
         if (mounts[i].status < Mount::DESTROYED)
-            if (mounts[i].type->size != weapon_info::SPECIAL)
+            if (mounts[i].type->size != MOUNT_SIZE::SPECIAL)
                 mounts[i].Activate( Missile );
 }
 
@@ -374,16 +374,16 @@ void Armed::setAverageGunSpeed()
         for (int i = 0; i < getNumMounts(); ++i)
             if (mounts[i].status == Mount::ACTIVE || mounts[i].status == Mount::INACTIVE) {
                 if ( mounts[i].type->isMissile() ) {
-                        if (mounts[i].type->Range > mrange)
-                            mrange = mounts[i].type->Range;
+                        if (mounts[i].type->range > mrange)
+                            mrange = mounts[i].type->range;
                 }
                 else {
-                    if (mounts[i].type->Range > grange)
-                        grange = mounts[i].type->Range;
+                    if (mounts[i].type->range > grange)
+                        grange = mounts[i].type->range;
                     if (mounts[i].status == Mount::ACTIVE) {
-                        speed += mounts[i].type->Speed;
+                        speed += mounts[i].type->speed;
                         ++nummt;
-                        beam  &= (mounts[i].type->type == weapon_info::BEAM);
+                        beam  &= (mounts[i].type->type == WEAPON_TYPE::BEAM);
                     }
                 }
             }
@@ -444,9 +444,9 @@ float Armed::TrackingGuns( bool &missilelock )
     float trackingcone = 0;
     missilelock = false;
     for (int i = 0; i < getNumMounts(); ++i) {
-        if ( mounts[i].status == Mount::ACTIVE && (mounts[i].size&weapon_info::AUTOTRACKING) )
+        if ( mounts[i].status == Mount::ACTIVE && (mounts[i].size& as_integer(MOUNT_SIZE::AUTOTRACKING)) )
             trackingcone = unit->computer.radar.trackingcone;
-        if (mounts[i].status == Mount::ACTIVE && mounts[i].type->LockTime > 0 && mounts[i].time_to_lock <= 0)
+        if (mounts[i].status == Mount::ACTIVE && mounts[i].type->lock_time > 0 && mounts[i].time_to_lock <= 0)
             missilelock = true;
     }
     return trackingcone;

@@ -298,12 +298,12 @@ static void AddMounts( Unit *thus, Unit::XML &xml, const std::string &mounts )
             Mount mnt( filename, ammo, volume, xml.unitscale*xyscale, xml.unitscale*zscale, func, maxfunc, banked );
             mnt.SetMountOrientation( Quaternion::from_vectors( P.Cast(), Q.Cast(), R.Cast() ) );
             mnt.SetMountPosition( xml.unitscale*pos.Cast() );
-            int   mntsiz = weapon_info::NOWEAP;
+            int   mntsiz = as_integer(MOUNT_SIZE::NOWEAP);
             if ( mountsize.length() ) {
                 mntsiz   = parseMountSizes( mountsize.c_str() );
                 mnt.size = mntsiz;
             } else {
-                mnt.size = mnt.type->size;
+                mnt.size = as_integer(mnt.type->size);
             }
             thus->mounts.push_back( mnt );
         } else {ofs = string::npos; }}
@@ -313,14 +313,14 @@ static void AddMounts( Unit *thus, Unit::XML &xml, const std::string &mounts )
         if ( (a&1) == parity ) {
             int b = a;
             if ( (a&3) == 2 && (int) a < (thus->getNumMounts()-1) ) {
-                if (thus->mounts[a].type->type != weapon_info::PROJECTILE 
-                    && thus->mounts[a+1].type->type != weapon_info::PROJECTILE)
+                if (thus->mounts[a].type->type != WEAPON_TYPE::PROJECTILE
+                    && thus->mounts[a+1].type->type != WEAPON_TYPE::PROJECTILE)
                 {
                     b = a+1;
                 }
             }
             thus->mounts[b].sound = AUDCreateSound( thus->mounts[b].type->sound, false );
-        } else if ( (!half_sounds) || thus->mounts[a].type->type == weapon_info::PROJECTILE ) {
+        } else if ( (!half_sounds) || thus->mounts[a].type->type == WEAPON_TYPE::PROJECTILE ) {
             thus->mounts[a].sound = AUDCreateSound( thus->mounts[a].type->sound, false );
         }
         if (a > 0)
@@ -1534,7 +1534,7 @@ string Unit::WriteUnitString()
                         Transformation tr( mounts[j].GetMountOrientation(),
                                           mounts[j].GetMountLocation().Cast() );
                         tr.to_matrix( m );
-                        string printedname = mounts[j].type->weapon_name;
+                        string printedname = mounts[j].type->name;
                         if (mounts[j].status == Mount::DESTROYED || mounts[j].status == Mount::UNCHOSEN)
                             printedname = "";
                         mountstr += "{"+printedname+";"+XMLSupport::tostring( mounts[j].ammo )+";"+XMLSupport::tostring(

@@ -1668,18 +1668,21 @@ void FireKeyboard::Execute()
                 bool normal  = false;
                 int  nm = parent->getNumMounts();
                 int  i;
-                for (i = 0; i < nm; ++i)
+                for (i = 0; i < nm; ++i) {
                     if (parent->mounts[i].status == Mount::ACTIVE) {
-                        special = special || (parent->mounts[i].type->size&weapon_info::SPECIAL) != 0;
-                        normal  = normal
-      || ( parent->mounts[i].type->size
-          &(weapon_info::LIGHT|weapon_info::MEDIUM|weapon_info::HEAVY|weapon_info::CAPSHIPLIGHT
-            |weapon_info::CAPSHIPHEAVY) ) != 0;
+                        special = special || (as_integer(parent->mounts[i].type->size) & as_integer(MOUNT_SIZE::SPECIAL)) != 0;
+                        normal  = normal  || ( as_integer(parent->mounts[i].type->size) & (
+                        as_integer(MOUNT_SIZE::LIGHT)|
+                        as_integer(MOUNT_SIZE::MEDIUM)|
+                        as_integer(MOUNT_SIZE::HEAVY)|
+                        as_integer(MOUNT_SIZE::CAPSHIPLIGHT)|
+                        as_integer(MOUNT_SIZE::CAPSHIPHEAVY) )) != 0;
                     }
+                }
                 for (i = 0; i < nm; ++i)
                     if (special && normal) {
                         if (parent->mounts[i].status == Mount::ACTIVE)
-                            if ( (parent->mounts[i].type->size&weapon_info::SPECIAL) != 0 )
+                            if ( (as_integer(parent->mounts[i].type->size) & as_integer(MOUNT_SIZE::SPECIAL)) != 0 )
     parent->mounts[i].status = Mount::INACTIVE;
                     }
             }

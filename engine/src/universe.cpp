@@ -58,6 +58,8 @@
 #include "universe_globals.h"
 #include "vsfilesystem.h"
 
+#include "weapon_factory.h"
+
 #include <algorithm>
 #include <string>
 #include <vector>
@@ -310,6 +312,9 @@ Universe::Universe( int argc, char **argv, const char *galaxy_str)
 
     ROLES::getAllRolePriorities();
     LoadWeapons( VSFileSystem::weapon_list.c_str() );
+
+    WeaponFactory wf = WeaponFactory(VSFileSystem::weapon_list);
+
     galaxy.reset(new GalaxyXML::Galaxy( galaxy_str ));
     static bool firsttime = false;
     if (!firsttime) {

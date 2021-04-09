@@ -1,11 +1,16 @@
 #ifndef WEAPON_FACTORY_H
 #define WEAPON_FACTORY_H
 
+#include <string>
+#include <boost/property_tree/ptree.hpp>
 
-class weapon_factory
+class WeaponFactory
 {
 public:
-    weapon_factory();
+    WeaponFactory(std::string filename);
+
+private:
+    void parse(boost::property_tree::ptree tree);
 };
 
 #endif // WEAPON_FACTORY_H

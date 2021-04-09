@@ -237,7 +237,7 @@ bool AdjustMatrix( Matrix &mat, const Vector &vel, Unit *target, float speed, bo
     return false;
 }
 
-enum weapon_info::MOUNT_SIZE lookupMountSize( const char *str )
+enum MOUNT_SIZE lookupMountSize( const char *str )
 {
     int  i;
     char tmp[384];
@@ -245,38 +245,38 @@ enum weapon_info::MOUNT_SIZE lookupMountSize( const char *str )
         tmp[i] = (char) toupper( str[i] );
     tmp[i] = '\0';
     if (strcmp( "LIGHT", tmp ) == 0)
-        return weapon_info::LIGHT;
+        return MOUNT_SIZE::LIGHT;
     if (strcmp( "MEDIUM", tmp ) == 0)
-        return weapon_info::MEDIUM;
+        return MOUNT_SIZE::MEDIUM;
     if (strcmp( "HEAVY", tmp ) == 0)
-        return weapon_info::HEAVY;
+        return MOUNT_SIZE::HEAVY;
     if (strcmp( "CAPSHIP-LIGHT", tmp ) == 0)
-        return weapon_info::CAPSHIPLIGHT;
+        return MOUNT_SIZE::CAPSHIPLIGHT;
     if (strcmp( "CAPSHIP-HEAVY", tmp ) == 0)
-        return weapon_info::CAPSHIPHEAVY;
+        return MOUNT_SIZE::CAPSHIPHEAVY;
     if (strcmp( "SPECIAL", tmp ) == 0)
-        return weapon_info::SPECIAL;
+        return MOUNT_SIZE::SPECIAL;
     if (strcmp( "LIGHT-MISSILE", tmp ) == 0)
-        return weapon_info::LIGHTMISSILE;
+        return MOUNT_SIZE::LIGHTMISSILE;
     if (strcmp( "MEDIUM-MISSILE", tmp ) == 0)
-        return weapon_info::MEDIUMMISSILE;
+        return MOUNT_SIZE::MEDIUMMISSILE;
     if (strcmp( "HEAVY-MISSILE", tmp ) == 0)
-        return weapon_info::HEAVYMISSILE;
+        return MOUNT_SIZE::HEAVYMISSILE;
     if (strcmp( "LIGHT-CAPSHIP-MISSILE", tmp ) == 0)
-        return weapon_info::CAPSHIPLIGHTMISSILE;
+        return MOUNT_SIZE::CAPSHIPLIGHTMISSILE;
     if (strcmp( "HEAVY-CAPSHIP-MISSILE", tmp ) == 0)
-        return weapon_info::CAPSHIPHEAVYMISSILE;
+        return MOUNT_SIZE::CAPSHIPHEAVYMISSILE;
     if (strcmp( "SPECIAL-MISSILE", tmp ) == 0)
-        return weapon_info::SPECIALMISSILE;
+        return MOUNT_SIZE::SPECIALMISSILE;
     if (strcmp( "AUTOTRACKING", tmp ) == 0)
-        return weapon_info::AUTOTRACKING;
-    return weapon_info::NOWEAP;
+        return MOUNT_SIZE::AUTOTRACKING;
+    return MOUNT_SIZE::NOWEAP;
 }
 
 int parseMountSizes( const char *str )
 {
     char tmp[13][50];
-    int  ans = weapon_info::NOWEAP;
+    int  ans = as_integer(MOUNT_SIZE::NOWEAP);
     int  num = sscanf( str,
                        "%s %s %s %s %s %s %s %s %s %s %s %s %s",
                        tmp[0],
@@ -293,7 +293,7 @@ int parseMountSizes( const char *str )
                        tmp[11],
                        tmp[12] );
     for (int i = 0; i < num && i < 13; i++)
-        ans |= lookupMountSize( tmp[i] );
+        ans |= as_integer(lookupMountSize( tmp[i] ));
     return ans;
 }
 

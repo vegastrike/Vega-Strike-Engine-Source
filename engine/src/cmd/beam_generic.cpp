@@ -88,16 +88,16 @@ void Beam::Init( const Transformation &trans, const weapon_info &cln, void *own,
     local_transformation = trans;     //location on ship
     //cumalative_transformation =trans;
     //trans.to_matrix (cumalative_transformation_matrix);
-    speed = cln.Speed;
-    texturespeed   = cln.PulseSpeed;
-    range          = cln.Range;
-    radialspeed    = cln.RadialSpeed;
-    thickness      = cln.Radius;
-    stability      = cln.Stability;
-    rangepenalty   = cln.Longrange;
-    damagerate     = cln.Damage;
-    phasedamage    = cln.PhaseDamage;
-    texturestretch = cln.TextureStretch;
+    speed = cln.speed;
+    texturespeed   = cln.pulse_speed;
+    range          = cln.range;
+    radialspeed    = cln.radial_speed;
+    thickness      = cln.radius;
+    stability      = cln.stability;
+    rangepenalty   = cln.long_range;
+    damagerate     = cln.damage;
+    phasedamage    = cln.phase_damage;
+    texturestretch = cln.texture_stretch;
     refiretime     = 0;
     refire         = cln.Refire();
     Col.r          = cln.r;
