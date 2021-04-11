@@ -35,22 +35,7 @@ bool weapon_info::isMissile() const
     return false;
 }
 
-MOUNT_SIZE getMountSizeFromItsValue(int value) {
-    MOUNT_SIZE mount_sizes[] = {MOUNT_SIZE::NOWEAP,
-                                MOUNT_SIZE::LIGHT, MOUNT_SIZE::MEDIUM, MOUNT_SIZE::HEAVY,
-                                MOUNT_SIZE::CAPSHIPLIGHT, MOUNT_SIZE::CAPSHIPHEAVY, MOUNT_SIZE::SPECIAL,
-                                MOUNT_SIZE::LIGHTMISSILE, MOUNT_SIZE::MEDIUMMISSILE, MOUNT_SIZE::HEAVYMISSILE,
-                                MOUNT_SIZE::CAPSHIPLIGHTMISSILE, MOUNT_SIZE::CAPSHIPHEAVYMISSILE, MOUNT_SIZE::SPECIALMISSILE,
-                                MOUNT_SIZE::AUTOTRACKING};
 
-    for (auto&& mount_size : mount_sizes) {
-        if(value == as_integer(mount_size)) {
-            return mount_size;
-        }
-    }
-
-    return MOUNT_SIZE::NOWEAP;
-}
 
 
 void weapon_info::netswap()

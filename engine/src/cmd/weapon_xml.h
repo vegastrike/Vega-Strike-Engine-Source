@@ -13,8 +13,7 @@ void beginElement( void *userData, const char *name, const char **atts );
 
 void setWeaponInfoToBuffer( weapon_info wi, char *netbuf, int &bufsize );             //WARNING : ALLOCATES A CHAR * BUFFER SO IT MUST BE DELETED AFTER THAT CALL
 
-enum MOUNT_SIZE lookupMountSize( const char *str );
-std::string lookupMountSize( int size );
+
 void LoadWeapons( const char *filename );
 weapon_info * getTemplate( const std::string &key );
 

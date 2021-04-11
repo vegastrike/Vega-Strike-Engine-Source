@@ -240,6 +240,7 @@ SET(LIBCMD_SOURCES
 
     src/cmd/weapon_factory.cpp
     src/cmd/weapon_info.cpp
+    src/cmd/mount_size.cpp
 )
 
 SET(LIBCMDSERVER_SOURCES

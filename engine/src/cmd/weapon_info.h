@@ -2,6 +2,7 @@
 #define WEAPON_INFO_H
 
 #include "gfx/vec.h"
+#include "mount_size.h"
 
 #include <string>
 
@@ -14,35 +15,10 @@ enum class WEAPON_TYPE
     PROJECTILE
 };
 
-enum class MOUNT_SIZE
-{
-    NOWEAP              = 0x0,
 
-    LIGHT               = 0x1,
-    MEDIUM              = 0x2,
-    HEAVY               = 0x4,
-    CAPSHIPLIGHT        = 0x8,
-    CAPSHIPHEAVY        = 0x10,
-    SPECIAL             = 0x20,
 
-    LIGHTMISSILE        = 0x40,
-    MEDIUMMISSILE       = 0x80,
-    HEAVYMISSILE        = 0x100,
-    CAPSHIPLIGHTMISSILE = 0x200,
-    CAPSHIPHEAVYMISSILE = 0x400,
-    SPECIALMISSILE      = 0x800,
 
-    AUTOTRACKING        = 0x1000
-};
 
-template <typename Enumeration>
-auto as_integer(Enumeration const value)
-    -> typename std::underlying_type<Enumeration>::type
-{
-    return static_cast<typename std::underlying_type<Enumeration>::type>(value);
-}
-
-MOUNT_SIZE getMountSizeFromItsValue(int value);
 
 
 

@@ -3493,7 +3493,7 @@ void BaseComputer::BuyUpgradeOperation::selectMount( void )
             mountName += ammoexp;
             mountColor = MOUNT_POINT_FULL();
         } else {
-            const std::string temp = lookupMountSize( playerUnit->mounts[i].size );
+            const std::string temp = getMountSizeString( playerUnit->mounts[i].size );
             mountName  = tostring( i+1 )+" (Empty) "+temp.c_str();
             mountColor = MOUNT_POINT_EMPTY();
         }
@@ -3696,7 +3696,7 @@ void BaseComputer::SellUpgradeOperation::selectMount( void )
             }
         } else {
             //Nothing at this mount point.
-            const std::string temp = lookupMountSize( playerUnit->mounts[i].size );
+            const std::string temp = getMountSizeString( playerUnit->mounts[i].size );
             mountName = tostring( i+1 )+" (Empty) "+temp.c_str();
         }
         //Now we add the cell.  Note that "selectable" is stored in the tag property.
@@ -5531,7 +5531,7 @@ void showUnitStats( Unit *playerUnit, string &text, int subunitlevel, int mode, 
         for (int i = 0; i < playerUnit->getNumMounts(); i++) {
             if (!mode) {
                 PRETTY_ADD( " #c0:1:.3#[#-c", i+1, 0 );
-                text += "#c0:1:.3#]#-c #c0:1:1#"+lookupMountSize( playerUnit->mounts[i].size )+"#-c";
+                text += "#c0:1:.3#]#-c #c0:1:1#"+getMountSizeString( playerUnit->mounts[i].size )+"#-c";
             }
             const weapon_info *wi = playerUnit->mounts[i].type;
             if (wi && wi->name != "")
@@ -5551,7 +5551,7 @@ void showUnitStats( Unit *playerUnit, string &text, int subunitlevel, int mode, 
                         PRETTY_ADD( "  #c0:1:.3#[#-c", i+1, 0 );
                         text += "#c0:1:.3#]#-c ";
                     }
-                    text += wi->name+": #c0:1:1#"+lookupMountSize( as_integer(wi->size) )+"#-c#c.9:.9:.5#"
+                    text += wi->name+": #c0:1:1#"+getMountSizeString( as_integer(wi->size) )+"#-c#c.9:.9:.5#"
                             +WeaponTypeStrings[as_integer(wi->type)]+" #-c";
                     if (wi->damage < 0) {text += "#n#"+prefix+statcolor+"   Damage:#-c special"; } else {
                         PRETTY_ADDU( statcolor+"   Damage: #-c",

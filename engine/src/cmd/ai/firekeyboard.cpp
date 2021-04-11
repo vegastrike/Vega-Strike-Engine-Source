@@ -42,6 +42,7 @@
 #include "cmd/planet.h"
 #include "cmd/script/flightgroup.h"
 #include "cmd/script/mission.h"
+#include "cmd/mount_size.h"
 #include "vs_globals.h"
 #include "gfx/car_assist.h"
 #include "cmd/unit_util.h"
@@ -1670,19 +1671,14 @@ void FireKeyboard::Execute()
                 int  i;
                 for (i = 0; i < nm; ++i) {
                     if (parent->mounts[i].status == Mount::ACTIVE) {
-                        special = special || (as_integer(parent->mounts[i].type->size) & as_integer(MOUNT_SIZE::SPECIAL)) != 0;
-                        normal  = normal  || ( as_integer(parent->mounts[i].type->size) & (
-                        as_integer(MOUNT_SIZE::LIGHT)|
-                        as_integer(MOUNT_SIZE::MEDIUM)|
-                        as_integer(MOUNT_SIZE::HEAVY)|
-                        as_integer(MOUNT_SIZE::CAPSHIPLIGHT)|
-                        as_integer(MOUNT_SIZE::CAPSHIPHEAVY) )) != 0;
+                        special = special || isSpecialGunMount(as_integer(parent->mounts[i].type->size));
+                        normal  = normal  || isNormalGunMount(as_integer(parent->mounts[i].type->size));
                     }
                 }
                 for (i = 0; i < nm; ++i)
                     if (special && normal) {
                         if (parent->mounts[i].status == Mount::ACTIVE)
-                            if ( (as_integer(parent->mounts[i].type->size) & as_integer(MOUNT_SIZE::SPECIAL)) != 0 )
+                            if ( isSpecialGunMount(as_integer(parent->mounts[i].type->size)))
     parent->mounts[i].status = Mount::INACTIVE;
                     }
             }

@@ -27,7 +27,9 @@
 
 #include "game_config.h"
 #include "mount.h"
+#include "mount_size.h"
 #include "weapon_xml.h"
+#include "weapon_info.h"
 #include "vs_globals.h"
 #include "movable.h"
 #include "universe.h"
@@ -229,7 +231,7 @@ void Armed::Fire( unsigned int weapon_type_bitmask, bool listen_to_owner)
         const bool mis = i->type->isMissile();
         const bool locked_on = i->time_to_lock <= 0;
         const bool lockable_weapon  = i->type->lock_time > 0;
-        const bool autotracking_gun = (!mis) && 0 != (i->size& as_integer(MOUNT_SIZE::AUTOTRACKING)) && locked_on;
+        const bool autotracking_gun = (!mis) && isAutoTrackingMount(i->size) && locked_on;
         const bool fire_non_autotrackers = ( 0 == (weapon_type_bitmask&ROLES::FIRE_ONLY_AUTOTRACKERS) );
         const bool locked_missile   = (mis && locked_on && lockable_weapon);
         const bool missile_and_want_to_fire_missiles = ( mis && (weapon_type_bitmask&ROLES::FIRE_MISSILES) );
@@ -354,7 +356,7 @@ void Armed::SelectAllWeapon( bool Missile )
 {
     for (int i = 0; i < getNumMounts(); ++i)
         if (mounts[i].status < Mount::DESTROYED)
-            if (mounts[i].type->size != MOUNT_SIZE::SPECIAL)
+            if (!isSpecialGunMount(as_integer(mounts[i].type->size)))
                 mounts[i].Activate( Missile );
 }
 
@@ -444,7 +446,7 @@ float Armed::TrackingGuns( bool &missilelock )
     float trackingcone = 0;
     missilelock = false;
     for (int i = 0; i < getNumMounts(); ++i) {
-        if ( mounts[i].status == Mount::ACTIVE && (mounts[i].size& as_integer(MOUNT_SIZE::AUTOTRACKING)) )
+        if ( mounts[i].status == Mount::ACTIVE && isAutoTrackingMount(mounts[i].size))
             trackingcone = unit->computer.radar.trackingcone;
         if (mounts[i].status == Mount::ACTIVE && mounts[i].type->lock_time > 0 && mounts[i].time_to_lock <= 0)
             missilelock = true;

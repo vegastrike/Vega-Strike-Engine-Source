@@ -62,6 +62,7 @@
 #include "options.h"
 
 #include "weapon_info.h"
+#include "mount_size.h"
 
 using std::vector;
 using std::string;
@@ -552,7 +553,7 @@ void GameUnit::Draw( const Transformation &parent, const Matrix &parentMatrix )
         if (this->mounts[i].type->type == WEAPON_TYPE::BEAM)
             if (this->mounts[i].ref.gun)
                 this->mounts[i].ref.gun->Draw( *ct, wmat,
-                                               ( (this->mounts[i].size & as_integer(MOUNT_SIZE::AUTOTRACKING))
+                                               ( isAutoTrackingMount(this->mounts[i].size)
                                                 && (this->mounts[i].time_to_lock <= 0)
                                                 && Unit::TargetTracked() ) ? Unit::Target() : NULL,
                                                this->computer.radar.trackingcone );

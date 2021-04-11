@@ -237,42 +237,8 @@ bool AdjustMatrix( Matrix &mat, const Vector &vel, Unit *target, float speed, bo
     return false;
 }
 
-enum MOUNT_SIZE lookupMountSize( const char *str )
-{
-    int  i;
-    char tmp[384];
-    for (i = 0; i < 383 && str[i] != '\0'; i++)
-        tmp[i] = (char) toupper( str[i] );
-    tmp[i] = '\0';
-    if (strcmp( "LIGHT", tmp ) == 0)
-        return MOUNT_SIZE::LIGHT;
-    if (strcmp( "MEDIUM", tmp ) == 0)
-        return MOUNT_SIZE::MEDIUM;
-    if (strcmp( "HEAVY", tmp ) == 0)
-        return MOUNT_SIZE::HEAVY;
-    if (strcmp( "CAPSHIP-LIGHT", tmp ) == 0)
-        return MOUNT_SIZE::CAPSHIPLIGHT;
-    if (strcmp( "CAPSHIP-HEAVY", tmp ) == 0)
-        return MOUNT_SIZE::CAPSHIPHEAVY;
-    if (strcmp( "SPECIAL", tmp ) == 0)
-        return MOUNT_SIZE::SPECIAL;
-    if (strcmp( "LIGHT-MISSILE", tmp ) == 0)
-        return MOUNT_SIZE::LIGHTMISSILE;
-    if (strcmp( "MEDIUM-MISSILE", tmp ) == 0)
-        return MOUNT_SIZE::MEDIUMMISSILE;
-    if (strcmp( "HEAVY-MISSILE", tmp ) == 0)
-        return MOUNT_SIZE::HEAVYMISSILE;
-    if (strcmp( "LIGHT-CAPSHIP-MISSILE", tmp ) == 0)
-        return MOUNT_SIZE::CAPSHIPLIGHTMISSILE;
-    if (strcmp( "HEAVY-CAPSHIP-MISSILE", tmp ) == 0)
-        return MOUNT_SIZE::CAPSHIPHEAVYMISSILE;
-    if (strcmp( "SPECIAL-MISSILE", tmp ) == 0)
-        return MOUNT_SIZE::SPECIALMISSILE;
-    if (strcmp( "AUTOTRACKING", tmp ) == 0)
-        return MOUNT_SIZE::AUTOTRACKING;
-    return MOUNT_SIZE::NOWEAP;
-}
 
+// TODO: delete
 int parseMountSizes( const char *str )
 {
     char tmp[13][50];
@@ -293,7 +259,11 @@ int parseMountSizes( const char *str )
                        tmp[11],
                        tmp[12] );
     for (int i = 0; i < num && i < 13; i++)
-        ans |= as_integer(lookupMountSize( tmp[i] ));
+        ans |= as_integer(getMountSize( tmp[i] ));
+
+    int check = getMountSizes(str);
+    assert(check == ans);
+
     return ans;
 }
 

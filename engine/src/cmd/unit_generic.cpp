@@ -66,7 +66,7 @@
 #include "star_system.h"
 #include "universe.h"
 #include "weapon_info.h"
-
+#include "mount_size.h"
 #include "energetic.h"
 
 #include <math.h>
@@ -341,38 +341,7 @@ char * GetUnitDir( const char *filename )
     return retval;
 }
 
-//From weapon_xml.cpp
-std::string lookupMountSize( int s )
-{
-    std::string result;
-    if (s & as_integer(MOUNT_SIZE::LIGHT))
-        result += "LIGHT ";
-    if (s & as_integer(MOUNT_SIZE::MEDIUM))
-        result += "MEDIUM ";
-    if (s & as_integer(MOUNT_SIZE::HEAVY))
-        result += "HEAVY ";
-    if (s & as_integer(MOUNT_SIZE::CAPSHIPLIGHT))
-        result += "CAPSHIP-LIGHT ";
-    if (s & as_integer(MOUNT_SIZE::CAPSHIPHEAVY))
-        result += "CAPSHIP-HEAVY ";
-    if (s & as_integer(MOUNT_SIZE::SPECIAL))
-        result += "SPECIAL ";
-    if (s & as_integer(MOUNT_SIZE::LIGHTMISSILE))
-        result += "LIGHT-MISSILE ";
-    if (s & as_integer(MOUNT_SIZE::MEDIUMMISSILE))
-        result += "MEDIUM-MISSILE ";
-    if (s & as_integer(MOUNT_SIZE::HEAVYMISSILE))
-        result += "HEAVY-MISSILE ";
-    if (s & as_integer(MOUNT_SIZE::CAPSHIPLIGHTMISSILE))
-        result += "LIGHT-CAPSHIP-MISSILE ";
-    if (s & as_integer(MOUNT_SIZE::CAPSHIPHEAVYMISSILE))
-        result += "HEAVY-CAPSHIP-MISSILE ";
-    if (s & as_integer(MOUNT_SIZE::SPECIALMISSILE))
-        result += "SPECIAL-MISSILE ";
-    if (s & as_integer(MOUNT_SIZE::AUTOTRACKING))
-        result += "AUTOTRACKING ";
-    return result;
-}
+
 
 /*
  **********************************************************************************
@@ -3725,15 +3694,7 @@ bool Unit::UpgradeMounts( const Unit *up,
         if (up->mounts[i].status == Mount::ACTIVE || up->mounts[i].status == Mount::INACTIVE) {
             //make sure since we're offsetting the starting we don't overrun the mounts
             bool isammo = ( string::npos != string( up->name ).find( "_ammo" ) );             //is this ammo for a weapon rather than an actual weapon
-            bool ismissiletype =
-                ( 0
-                 != ( as_integer(up->mounts[i].type->size) &
-                      (as_integer(MOUNT_SIZE::CAPSHIPHEAVYMISSILE)|
-                       as_integer(MOUNT_SIZE::SPECIALMISSILE)|
-                       as_integer(MOUNT_SIZE::MEDIUMMISSILE)|
-                       as_integer(MOUNT_SIZE::LIGHTMISSILE)|
-                       as_integer(MOUNT_SIZE::HEAVYMISSILE)|
-                       as_integer(MOUNT_SIZE::CAPSHIPLIGHTMISSILE))));
+            bool ismissiletype = isMissileMount(as_integer(up->mounts[i].type->size));
 
             int jmod = j%getNumMounts();
             if (!downgrade) {
@@ -5978,7 +5939,7 @@ std::string Unit::mountSerializer( const XMLType &input, void *mythis )
     Unit *un = (Unit*) mythis;
     int   i  = input.w.hardint;
     if (un->getNumMounts() > i) {
-        string result( lookupMountSize( un->mounts[i].size ) );
+        string result( getMountSizeString( un->mounts[i].size ) );
         if (un->mounts[i].status == Mount::INACTIVE || un->mounts[i].status == Mount::ACTIVE)
             result += string( "\" weapon=\"" )+(un->mounts[i].type->name);
         if (un->mounts[i].ammo != -1)
@@ -6586,7 +6547,7 @@ void Unit::UpdatePhysics3(const Transformation &trans,
       if (mounts[i].type->type == WEAPON_TYPE::BEAM) {
           if (mounts[i].ref.gun) {
               Unit *autotarg     =
-                  (   (mounts[i].size & as_integer(MOUNT_SIZE::AUTOTRACKING))
+                  (   isAutoTrackingMount(mounts[i].size)
                    && (mounts[i].time_to_lock <= 0)
                    && TargetTracked() ) ? target : NULL;
               float trackingcone = computer.radar.trackingcone;
@@ -6615,7 +6576,7 @@ void Unit::UpdatePhysics3(const Transformation &trans,
           t1.Compose( trans, transmat );
           t1.to_matrix( m1 );
           int autotrack = 0;
-          if (   ( 0 != (mounts[i].size & as_integer(MOUNT_SIZE::AUTOTRACKING)) )
+          if (   ( isAutoTrackingMount(mounts[i].size) )
               && TargetTracked() )
               autotrack = computer.itts ? 2 : 1;
           float trackingcone = computer.radar.trackingcone;

@@ -36,7 +36,6 @@
 
 
 
-extern enum MOUNT_SIZE lookupMountSize( const char *str );
 
 
 #if (defined (__APPLE__) == POSH_BIG_ENDIAN) || !defined (INTEL_X86)
@@ -272,7 +271,7 @@ void beginElement( void *userData, const char *name, const char **atts )
                 tmpweapon.role_bits   = ~tmpweapon.role_bits;
                 break;
             case WEAPSIZE:
-                tmpweapon.size = lookupMountSize( (*iter).value.c_str() );
+                tmpweapon.size = getMountSize( (*iter).value.c_str() );
                 break;
             default:
                 break;
