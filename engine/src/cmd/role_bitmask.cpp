@@ -228,6 +228,8 @@ const std::string& getRole( unsigned char c )
 {
     return InternalGetStrRole( c );
 }
+
+// TODO: remove and examine entire file
 unsigned int readBitmask( const std::string &ss )
 {
     string s   = ss;

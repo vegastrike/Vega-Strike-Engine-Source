@@ -252,7 +252,8 @@ void beginElement( void *userData, const char *name, const char **atts )
             weaptyp = WEAPON_TYPE::UNKNOWN;
             break;
         }
-        tmpweapon.Type( weaptyp );
+        tmpweapon.type = weaptyp;
+        tmpweapon.file = getFilenameFromWeaponType(tmpweapon.type);
         for (iter = attributes.begin(); iter != attributes.end(); iter++) {
             switch ( attribute_map.lookup( (*iter).name ) )
             {
@@ -263,13 +264,14 @@ void beginElement( void *userData, const char *name, const char **atts )
                 curname = (*iter).value;
                 tmpweapon.name = curname;
                 break;
-            case ROLE:
+                // TODO: remove completely
+            /*case ROLE:
                 tmpweapon.role_bits   = ROLES::readBitmask( iter->value );
                 break;
             case ANTIROLE:
                 tmpweapon.role_bits   = ROLES::readBitmask( iter->value );
                 tmpweapon.role_bits   = ~tmpweapon.role_bits;
-                break;
+                break;*/
             case WEAPSIZE:
                 tmpweapon.size = getMountSize( (*iter).value.c_str() );
                 break;

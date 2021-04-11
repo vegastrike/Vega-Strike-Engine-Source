@@ -57,7 +57,7 @@ void weapon_info::netswap()
     radius          = VSSwapHostFloatToLittle( radius );
     range           = VSSwapHostFloatToLittle( range );
     refire_rate     = VSSwapHostFloatToLittle( refire_rate );
-    role_bits       = VSSwapHostIntToLittle( role_bits );
+    //role_bits       = VSSwapHostIntToLittle( role_bits );
     stability       = VSSwapHostFloatToLittle( stability );
     sound           = VSSwapHostIntToLittle( sound );
     speed           = VSSwapHostFloatToLittle( speed );

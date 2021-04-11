@@ -1,19 +1,13 @@
 #ifndef WEAPON_INFO_H
 #define WEAPON_INFO_H
 
+#include "weapon_type.h"
 #include "gfx/vec.h"
 #include "mount_size.h"
 
 #include <string>
 
-enum class WEAPON_TYPE
-{
-    UNKNOWN,
-    BEAM,
-    BALL,
-    BOLT,
-    PROJECTILE
-};
+
 
 
 
@@ -42,7 +36,6 @@ struct weapon_info
     /*const*/ float   radius          = 0.5;
     /*const*/ float   range           = 100;
     /*const*/ float   refire_rate     = .2;
-    /*const*/ int     role_bits       = 0;
     /*const*/ float   stability       = 60;
     /*const*/ int     sound           = -1;
     /*const*/ float   speed           = 10;
@@ -115,7 +108,7 @@ struct weapon_info
 
 
 
-    void Type( WEAPON_TYPE typ )
+    /*void Type( WEAPON_TYPE typ )
     {
         type = typ;
         switch (typ)
@@ -135,7 +128,7 @@ struct weapon_info
         default:
             break;
         }
-    }
+    }*/
 
     /*void MntSize( enum MOUNT_SIZE size )
     {

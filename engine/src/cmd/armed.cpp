@@ -238,10 +238,9 @@ void Armed::Fire( unsigned int weapon_type_bitmask, bool listen_to_owner)
         const bool gun_and_want_to_fire_guns = ( (!mis) && (weapon_type_bitmask&ROLES::FIRE_GUNS) );
         if (verbose_debug && missile_and_want_to_fire_missiles && locked_missile)
             VSFileSystem::vs_fprintf( stderr, "\n about to fire locked missile \n" );
-        bool want_to_fire =
-            (fire_non_autotrackers || autotracking_gun || locked_missile)
-            && ( (ROLES::EVERYTHING_ELSE&weapon_type_bitmask&i->type->role_bits) || i->type->role_bits == 0 )
-            && ( (locked_on && missile_and_want_to_fire_missiles) || gun_and_want_to_fire_guns );
+        bool want_to_fire = (fire_non_autotrackers || autotracking_gun || locked_missile) &&
+            //&& ( (ROLES::EVERYTHING_ELSE&weapon_type_bitmask&i->type->role_bits) || i->type->role_bits == 0 )
+                            ( (locked_on && missile_and_want_to_fire_missiles) || gun_and_want_to_fire_guns );
         if ( (*i).type->type == WEAPON_TYPE::BEAM ) {
             if ( (*i).type->energy_rate * simulation_atom_var > unit->energy ) {
                 //NOT ONLY IN non-networking mode : anyway, the server will tell everyone including us to stop if not already done
