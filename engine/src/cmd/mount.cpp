@@ -44,6 +44,7 @@
 #include "unit.h"
 #include "star_system.h"
 #include "universe.h"
+#include "weapon_info.h"
 
 
 extern char SERVER;
@@ -115,7 +116,7 @@ Mount::Mount( const string &filename, int am, int vol, float xyscale, float zsca
     ref.gun      = NULL;
     status       = (UNCHOSEN);
     processed    = Mount::PROCESSED;
-    weapon_info *temp = getTemplate( filename );
+    weapon_info *temp = getWeapon( filename );
     if (temp == NULL) {
         status = UNCHOSEN;
         time_to_lock = 0;

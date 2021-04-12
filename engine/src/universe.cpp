@@ -311,8 +311,7 @@ Universe::Universe( int argc, char **argv, const char *galaxy_str)
     bootstrap_first_loop();
 
     ROLES::getAllRolePriorities();
-    LoadWeapons( VSFileSystem::weapon_list.c_str() );
-
+    //LoadWeapons( VSFileSystem::weapon_list.c_str() );
     WeaponFactory wf = WeaponFactory(VSFileSystem::weapon_list);
 
     galaxy.reset(new GalaxyXML::Galaxy( galaxy_str ));
@@ -346,7 +345,9 @@ StarSystem* Universe::Init( string systemfile, const Vector &centr, const string
     static bool js = true;
     if (js) {
         js = false;
-        LoadWeapons( VSFileSystem::weapon_list.c_str() );
+        // LoadWeapons( VSFileSystem::weapon_list.c_str() );
+        WeaponFactory wf = WeaponFactory(VSFileSystem::weapon_list);
+
         CacheJumpStar( false );
     }
 

@@ -46,6 +46,8 @@
 #include "unit.h"
 #include "universe.h"
 #include "vsfilesystem.h"
+#include "mount_size.h"
+#include "weapon_info.h"
 
 CSVRow LookupUnitRow( const string &unitname, const string &faction ) {
     string hashname = unitname+"__"+faction;

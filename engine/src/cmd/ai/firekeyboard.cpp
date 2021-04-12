@@ -55,6 +55,8 @@
 #include "cmd/script/pythonmission.h"
 #include "universe_util.h"
 #include "universe.h"
+#include "mount_size.h"
+#include "weapon_info.h"
 
 extern bool toggle_pause();
 

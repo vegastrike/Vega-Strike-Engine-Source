@@ -136,10 +136,11 @@ struct weapon_info
     }*/
 
 
-
     void netswap();
 private:
 
 };
+
+weapon_info * getWeapon( const std::string &key );
 
 #endif // WEAPON_INFO_H

@@ -2,6 +2,17 @@
 
 #include "vs_globals.h"
 #include "options.h"
+#include "unit_const_cache.h"
+
+// TODO: this should not be here
+#include "vsfilesystem.h"
+#include "gfx/mesh.h"
+
+#include <boost/algorithm/string.hpp>
+
+namespace alg = boost::algorithm;
+
+Hashtable< std::string, weapon_info, 257 >lookuptable;
 
 weapon_info::weapon_info() {}
 
@@ -35,7 +46,26 @@ bool weapon_info::isMissile() const
     return false;
 }
 
+// TODO: this should not be here
+using namespace VSFileSystem;
 
+weapon_info * getWeapon( const std::string &key )
+{
+    weapon_info *wi = lookuptable.Get( boost::to_upper_copy( key ) );
+    if (wi) {
+        if ( !WeaponMeshCache::getCachedMutable( wi->name ) ) {
+            static FileLookupCache lookup_cache;
+            string meshname = boost::to_lower_copy( key )+".bfxm";
+            if (CachedFileLookup( lookup_cache, meshname, MeshFile ) <= Ok) {
+                WeaponMeshCache::setCachedMutable( wi->name, wi->gun =
+                                                      Mesh::LoadMesh( meshname.c_str(), Vector( 1, 1, 1 ), 0, NULL ) );
+                WeaponMeshCache::setCachedMutable( wi->name+"_flare", wi->gun1 =
+                                                      Mesh::LoadMesh( meshname.c_str(), Vector( 1, 1, 1 ), 0, NULL ) );
+            }
+        }
+    }
+    return wi;
+}
 
 
 void weapon_info::netswap()

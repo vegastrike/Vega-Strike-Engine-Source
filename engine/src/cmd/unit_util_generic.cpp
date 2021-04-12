@@ -39,6 +39,7 @@
 #include "planetary_orbit.h"
 #include "universe.h"
 #include "vsfilesystem.h"
+#include "weapon_info.h"
 
 #include "cmd/script/pythonmission.h"
 #ifndef NO_GFX

@@ -8,6 +8,8 @@ using std::vector;
 #include "audiolib.h"
 #include "configxml.h"
 #include "images.h"
+#include "mount_size.h"
+#include "weapon_info.h"
 
 struct BeamDrawContext
 {

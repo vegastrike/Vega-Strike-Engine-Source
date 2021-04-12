@@ -48,6 +48,8 @@
 #include "vsfilesystem.h"
 #include "cmd/ai/communication.h"
 #include "universe.h"
+#include "mount_size.h"
+#include "weapon_info.h"
 
 template < typename T >
 inline T mymin( T a, T b )

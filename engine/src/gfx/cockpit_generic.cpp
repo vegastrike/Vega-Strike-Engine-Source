@@ -55,6 +55,8 @@
 #include "save_util.h"
 #include "star_system.h"
 #include "universe.h"
+#include "mount_size.h"
+#include "weapon_info.h"
 
 #include <algorithm>
 

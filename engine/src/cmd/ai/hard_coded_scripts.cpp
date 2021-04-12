@@ -2,6 +2,7 @@
 #include "python/python_class.h"
 #include "script.h"
 #include "cmd/unit_generic.h"
+#include "cmd/mount_size.h"
 #include "hard_coded_scripts.h"
 #include "flybywire.h"
 #include "navigation.h"

@@ -4,6 +4,7 @@
 #include "options.h"
 #include "role_bitmask.h"
 #include "audiolib.h"
+#include "hashtable.h"
 
 #include <iostream>
 
@@ -20,6 +21,17 @@ using boost::property_tree::ptree;
 using std::string;
 using std::endl;
 
+extern Hashtable< string, weapon_info, 257 >lookuptable;
+
+// TODO: reenable this?
+/*constexpr int color_step(49);
+int counts = time( nullptr );
+
+bool gamma_needed(int gamma, int count, int depth)
+{
+    return !(( count/(100*depth*gamma) ) % ( (6*(color_step*100+depth)/gamma-1)/3 )
+                -100);
+}*/
 
 WeaponFactory::WeaponFactory(std::string filename)
 {
@@ -63,23 +75,76 @@ void WeaponFactory::parse(ptree tree)
 
         // Energy
         wi.energy_rate = inner.get( "Energy.<xmlattr>.rate", wi.energy_rate );
-        wi.stability = inner.get( "Energy.<xmlattr>.rate", wi.stability );
-        wi.refire_rate = inner.get( "Energy.<xmlattr>.rate", wi.refire_rate );
+        wi.stability = inner.get( "Energy.<xmlattr>.stability", wi.stability );
+        wi.refire_rate = inner.get( "Energy.<xmlattr>.refire", wi.refire_rate );
+        wi.lock_time = inner.get( "Energy.<xmlattr>.locktime", wi.lock_time );
         std::cout << "Energy rate " << wi.energy_rate << endl;
         std::cout << "Energy stability " << wi.stability << endl;
         std::cout << "Energy refire " << wi.refire_rate << endl;
+        std::cout << "Energy lock time " << wi.lock_time << endl;
 
         // Damage
-        std::cout << "Damage size " << inner.get( "Damage.<xmlattr>.rate", "Unknown_damage" ) << endl;
-        std::cout << "Damage phasedamage " << inner.get( "Damage.<xmlattr>.phasedamage", "Unknown_phasedamage" ) << endl;
-        std::cout << "Damage long range " << inner.get( "Damage.<xmlattr>.longrange", "Unknown_longrange" ) << endl;
+        // TODO: weapon_list.xml laser has damage. Everything else has rate. Correct.
+        wi.damage = inner.get( "Damage.<xmlattr>.rate", wi.damage );
+        wi.phase_damage = inner.get( "Damage.<xmlattr>.phasedamage", wi.phase_damage );
+        wi.radius = inner.get( "Damage.<xmlattr>.radius", wi.radius );
+        wi.radial_speed = inner.get( "Damage.<xmlattr>.radialspeed", wi.radial_speed );
+        wi.long_range = inner.get( "Damage.<xmlattr>.longrange", wi.long_range );
+        std::cout << "Damage damage " << wi.damage << endl;
+        std::cout << "Damage phase_damage " << wi.phase_damage << endl;
+        std::cout << "Damage radius " << wi.radius << endl;
+        std::cout << "Damage radial_speed " << wi.radial_speed << endl;
+        std::cout << "Damage long_range " << wi.long_range << endl;
+
+        // Distance
+        wi.volume = inner.get( "Distance.<xmlattr>.volume", wi.volume );
+        wi.speed = inner.get( "Distance.<xmlattr>.speed", wi.speed );
+        wi.pulse_speed = inner.get( "Distance.<xmlattr>.pulsespeed", wi.pulse_speed );
+        wi.range = inner.get( "Distance.<xmlattr>.range", wi.range );
+        wi.length = inner.get( "Distance.<xmlattr>.length", wi.length );
+
+        // TODO: this is a bug. It gets parsed into the same radius and radial_speed variables.
+        wi.radius = inner.get( "Distance.<xmlattr>.radius", wi.radius );
+        wi.radial_speed = inner.get( "Distance.<xmlattr>.radialspeed", wi.radial_speed );
+
+        // TODO: detonation range not implemented. Incorrectly assigns to pulse_speed...
+        //wi.bug = inner.get( "Energy.<xmlattr>.detonationrange", wi.bug );
+
+        // TODO: is this really necessary???
+        /*if(game_options.gun_speed_adjusted_game_speed) {
+            if (wi.speed < 1000) {
+                wi.speed *= 1.0+gun_speed/1.25;
+            } else if (wi.speed < 2000) {
+                wi.speed *= 1.0+gun_speed/2.5;
+            } else if (wi.speed < 4000) {
+                wi.speed *= 1.0+gun_speed/6.0;
+            } else if (wi.speed < 8000) {
+                wi.speed *= 1.0+gun_speed/17.0;
+            }
+        }*/
+
+        std::cout << "Distance volume " << wi.volume << endl;
+        std::cout << "Distance speed " << wi.speed << endl;
+        std::cout << "Distance pulse_speed " << wi.pulse_speed << endl;
+        std::cout << "Distance range " << wi.range << endl;
+        std::cout << "Distance length " << wi.length << endl;
+
 
         // Appearance
         wi.file = inner.get( "Appearance.<xmlattr>.file", wi.file );
+        wi.a = inner.get( "Appearance.<xmlattr>.a", wi.a );
         wi.r = inner.get( "Appearance.<xmlattr>.r", wi.r );
         wi.g = inner.get( "Appearance.<xmlattr>.g", wi.g );
         wi.b = inner.get( "Appearance.<xmlattr>.b", wi.b );
         wi.a = inner.get( "Appearance.<xmlattr>.a", wi.a );
+
+        // TODO: reenable? No idea why or what this is...
+        /*if ( (gamma > 0) && gamma_needed( gamma, counts, 32 ) ) {
+            //approximate the color func
+            wi.b = (wi.b+color_step*5)/255.;
+            wi.g = (wi.g+color_step/5)/255.;
+            wi.r = (wi.r+color_step*2)/255.;
+        }*/
 
         std::cout << "Appearance file " << wi.file << endl;
         std::cout << "Appearance r " << wi.r << endl;
@@ -101,5 +166,7 @@ void WeaponFactory::parse(ptree tree)
         }
 
         std::cout << "Appearance sound " << wi.sound << endl;
+
+        lookuptable.Put( boost::to_upper_copy( wi.name ), new weapon_info(wi) );
     }
 }

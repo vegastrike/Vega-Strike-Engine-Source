@@ -62,6 +62,9 @@ using VSFileSystem::SaveFile;
 #include "vs_math.h"
 #include "damageable.h"
 #include "universe.h"
+#include "mount_size.h"
+#include "weapon_info.h"
+
 //#define VS_PI 3.1415926535897931
 
 

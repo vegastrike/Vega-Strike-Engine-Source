@@ -83,7 +83,8 @@
 #include "soundcontainer_aldrv.h"
 #include "configxml.h"
 #include "planet.h"
-
+#include "mount_size.h"
+#include "weapon_info.h"
 
 
 using std::min;

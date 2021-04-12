@@ -33,6 +33,7 @@
 #include "images.h"
 #include "gfx/camera.h"
 #include "universe.h"
+#include "weapon_info.h"
 
 using namespace XMLSupport;
 extern double interpolation_blend_factor;
