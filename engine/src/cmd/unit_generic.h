@@ -63,7 +63,6 @@ void UncheckUnit( class Unit*un );
 #include "gfx/matrix.h"
 #include "gfx/quaternion.h"
 #include "gfxlib_struct.h"
-#include "weapon_xml.h"
 #include "xml_support.h"
 #include "container.h"
 #include "collection.h"

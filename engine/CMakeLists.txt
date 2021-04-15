@@ -225,7 +225,6 @@ SET(LIBCMD_SOURCES
     src/cmd/fg_util.cpp
     src/cmd/unit_util_generic.cpp
     src/cmd/unit_xml.cpp
-    src/cmd/weapon_xml.cpp
 
     src/cmd/collision.cpp
     src/cmd/damageable.cpp

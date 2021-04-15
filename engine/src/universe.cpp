@@ -33,7 +33,6 @@
 #include "gfx/aux_texture.h"
 #include "profile.h"
 #include "gfx/cockpit.h"
-#include "cmd/weapon_xml.h"
 #include "galaxy_xml.h"
 #include <algorithm>
 #include "config_xml.h"

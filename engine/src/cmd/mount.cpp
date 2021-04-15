@@ -27,7 +27,6 @@
 #include "missile.h"
 #include "beam.h"
 #include "bolt.h"
-#include "weapon_xml.h"
 #include "audiolib.h"
 #include "missile.h"
 #include "ai/order.h"

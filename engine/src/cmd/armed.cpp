@@ -28,7 +28,6 @@
 #include "game_config.h"
 #include "mount.h"
 #include "mount_size.h"
-#include "weapon_xml.h"
 #include "weapon_info.h"
 #include "vs_globals.h"
 #include "movable.h"
