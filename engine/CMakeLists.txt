@@ -509,6 +509,7 @@ SET(VEGASTRIKE_SOURCES
     src/cmd/unit_functions.cpp
     src/cmd/unit_util.cpp
     src/cmd/faction_xml.cpp
+    src/cmd/faction_factory.cpp
     src/cmd/pilot.cpp
     src/cmd/images.cpp
     src/cmd/unit.cpp

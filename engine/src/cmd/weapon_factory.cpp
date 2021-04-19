@@ -63,25 +63,18 @@ void WeaponFactory::parse(ptree tree)
         // Weapon Type
         wi.type = getWeaponTypeFromString(iterator.first);
         wi.file = getFilenameFromWeaponType(wi.type);
-        std::cout << "Type " << iterator.first << endl << "File " << wi.file << endl;
 
         // Name
         wi.name = inner.get( "<xmlattr>.name", "Unknown" );
-        std::cout << "Name " << wi.name << endl;
-
 
         // Mount Size
-        std::cout << "Mount size " << inner.get( "<xmlattr>.mountsize", "Unknown_mount" ) << endl;
+        wi.size = getMountSize(inner.get( "<xmlattr>.mountsize", "Unknown_mount"));
 
         // Energy
         wi.energy_rate = inner.get( "Energy.<xmlattr>.rate", wi.energy_rate );
         wi.stability = inner.get( "Energy.<xmlattr>.stability", wi.stability );
         wi.refire_rate = inner.get( "Energy.<xmlattr>.refire", wi.refire_rate );
         wi.lock_time = inner.get( "Energy.<xmlattr>.locktime", wi.lock_time );
-        std::cout << "Energy rate " << wi.energy_rate << endl;
-        std::cout << "Energy stability " << wi.stability << endl;
-        std::cout << "Energy refire " << wi.refire_rate << endl;
-        std::cout << "Energy lock time " << wi.lock_time << endl;
 
         // Damage
         // TODO: weapon_list.xml laser has damage. Everything else has rate. Correct.
@@ -90,11 +83,6 @@ void WeaponFactory::parse(ptree tree)
         wi.radius = inner.get( "Damage.<xmlattr>.radius", wi.radius );
         wi.radial_speed = inner.get( "Damage.<xmlattr>.radialspeed", wi.radial_speed );
         wi.long_range = inner.get( "Damage.<xmlattr>.longrange", wi.long_range );
-        std::cout << "Damage damage " << wi.damage << endl;
-        std::cout << "Damage phase_damage " << wi.phase_damage << endl;
-        std::cout << "Damage radius " << wi.radius << endl;
-        std::cout << "Damage radial_speed " << wi.radial_speed << endl;
-        std::cout << "Damage long_range " << wi.long_range << endl;
 
         // Distance
         wi.volume = inner.get( "Distance.<xmlattr>.volume", wi.volume );
@@ -123,13 +111,6 @@ void WeaponFactory::parse(ptree tree)
             }
         }*/
 
-        std::cout << "Distance volume " << wi.volume << endl;
-        std::cout << "Distance speed " << wi.speed << endl;
-        std::cout << "Distance pulse_speed " << wi.pulse_speed << endl;
-        std::cout << "Distance range " << wi.range << endl;
-        std::cout << "Distance length " << wi.length << endl;
-
-
         // Appearance
         wi.file = inner.get( "Appearance.<xmlattr>.file", wi.file );
         wi.a = inner.get( "Appearance.<xmlattr>.a", wi.a );
@@ -146,12 +127,6 @@ void WeaponFactory::parse(ptree tree)
             wi.r = (wi.r+color_step*2)/255.;
         }*/
 
-        std::cout << "Appearance file " << wi.file << endl;
-        std::cout << "Appearance r " << wi.r << endl;
-        std::cout << "Appearance g " << wi.g << endl;
-        std::cout << "Appearance b " << wi.b << endl;
-        std::cout << "Appearance a " << wi.a << endl;
-
         // Sound
         std::string sound_wave = inner.get( "Appearance.<xmlattr>.soundwav", "" );
         if(!sound_wave.empty()) {
@@ -165,8 +140,7 @@ void WeaponFactory::parse(ptree tree)
             wi.sound = AUDCreateSoundMP3( sound_wave, wi.type != WEAPON_TYPE::PROJECTILE );
         }
 
-        std::cout << "Appearance sound " << wi.sound << endl;
-
+        // Add new weapon_info to weapons table
         lookuptable.Put( boost::to_upper_copy( wi.name ), new weapon_info(wi) );
     }
 }

@@ -757,18 +757,7 @@ void Unit::Init()
 using namespace VSFileSystem;
 extern std::string GetReadPlayerSaveGame( int );
 CSVRow GetUnitRow( string filename, bool subu, int faction, bool readLast, bool &read );
-#if 0
-static std::string csvUnit( std::string un )
-{
-    string::size_type i   = un.find_last_of( "." );
-    string::size_type del = un.find_last_of( "/\\:" );
-    if (i == std::string::npos)
-        return un+".csv";
-    if (del == std::string::npos || del < i)
-        return un.substr( 0, i )+".csv";
-    return un+".csv";
-}
-#endif
+
 void Unit::Init( const char *filename,
                  bool SubU,
                  int faction,

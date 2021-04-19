@@ -9,6 +9,7 @@
 #include "unit.h"
 #include "cmd/music.h"
 #include "faction_generic.h"
+#include "faction_factory.h"
 
 using namespace XMLSupport;
 
@@ -288,7 +289,7 @@ void Faction::LoadXML( const char *filename, char *xmlbuffer, int buflength )
     using std::endl;
     using std::pair;    
     unitlevel = 0;
-    VSFile    f;
+    /*VSFile    f;
     VSError   err;
     if (buflength == 0 || xmlbuffer == NULL) {
         BOOST_LOG_TRIVIAL(trace) << "FactionXML:LoadXML "<<filename<<endl;
@@ -305,7 +306,8 @@ void Faction::LoadXML( const char *filename, char *xmlbuffer, int buflength )
         XML_Parse( parser, xmlbuffer, buflength, 1 );
     else
         XML_Parse( parser, ( f.ReadFull() ).c_str(), f.Size(), 1 );
-    XML_ParserFree( parser );
+    XML_ParserFree( parser );*/
+    FactionFactory factory(filename);
     ParseAllAllies();
 
     // Results are cached to avoid looking for too many files
