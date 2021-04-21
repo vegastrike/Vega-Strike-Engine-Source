@@ -34,7 +34,7 @@
 CMAKE_MINIMUM_REQUIRED(VERSION 3.5)
 SET(CMAKE_CXX_STANDARD 11)
 SET(VEGASTRIKE_VERSION_MAJOR "0")
-SET(VEGASTRIKE_VERSION_MINOR "8")
+SET(VEGASTRIKE_VERSION_MINOR "9")
 SET(VEGASTRIKE_VERSION_PATCH "0")
 # This needs to be auto-filled to the git hash of the build
 # some custom CMake code will be needed to run something like the following command:
