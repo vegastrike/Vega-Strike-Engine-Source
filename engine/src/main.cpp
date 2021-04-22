@@ -773,7 +773,7 @@ const char helpmessage[] =
     "\n";
 const char versionmessage[] =
     // (BenjamenMeyer) this will be `major.minor.patch+githash` once all is said and done
-    "Vega Strike Engine Version 0.8.0+0\n"
+    "Vega Strike Engine Version 0.9.0+0\n"
     "\n";
 std::string ParseCommandLine( int argc, char **lpCmdLine )
 {
