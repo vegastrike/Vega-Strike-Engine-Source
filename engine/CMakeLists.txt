@@ -599,7 +599,7 @@ IF (CPU_SMP GREATER 1)
 ENDIF (CPU_SMP GREATER 1)
 
 IF (DATADIR)
-    SET(DEFINES "${DEFINES} -DDATA_DIR=\"${DATADIR}\"")
+    SET(DEFINES "${DEFINES} -DDATA_DIR='\"${DATADIR}\"'")
 ENDIF (DATADIR)
 
 # Gather info about Linux distro and release (if applicable) for later use down below.
