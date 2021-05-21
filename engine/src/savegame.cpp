@@ -25,6 +25,7 @@
 
 
 #include <Python.h>
+#include <set>
 #include "cmd/unit_generic.h"
 #include "hashtable.h"
 #include <float.h>
@@ -50,6 +51,22 @@ using namespace VSFileSystem;
 using std::vector;
 using std::string;
 using std::allocator;
+
+bool ValidateString(const string &str);
+
+// data set used to validate which characters can convert to Py3 Unicode
+// easily using the existing mechanisms when it's passed as a byte array
+std::set<char> validCharData = {
+    '\r','\t',' ','\n',
+    '(',')','[',']','{','}',
+    '-','+','=','<','>','/','\\',
+    ';','.',':','_',',','!',
+    '\'','`','"',
+    '@','#','$','%','^','|','?',
+    'A', 'B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z',
+    'a', 'b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z',
+    '0','1','2','3','4','5','6','7','8','9'
+};
 
 std::string CurrentSaveGameName = "";
 std::string GetHelperPlayerSaveGame( int num )
@@ -423,7 +440,16 @@ const std::vector< string >& SaveGame::readMissionStringData( const std::string 
 
 std::vector< string >& SaveGame::getMissionStringData( const std::string &magic_number )
 {
-    return missionstringdata->m[magic_number];
+    // auto-creates a new value if the magic_number does not exist in the dataset
+    std::vector< string> &result = missionstringdata->m[magic_number];
+    for (auto a_string = result.cbegin(); a_string != result.cend(); ++a_string)
+    {
+        if (!ValidateString(*a_string))
+        {
+            BOOST_LOG_TRIVIAL(error) << boost::format("WARNING : Detected invalid UTF-8 string: \"%1%\"") % *a_string;
+        }
+    }
+    return result;
 }
 
 unsigned int SaveGame::getMissionStringDataLength( const std::string &magic_number ) const
@@ -499,11 +525,16 @@ void SaveGame::ReadMissionData( char* &buf, bool select_data, const std::set< st
         buf2 += hopto( buf2, ' ', '\n', 0 );
         vector< float > *vecfloat = 0;
         bool skip = true;
-        if ( !select_data || select_data_filter.count( mag_num ) ) {
+        // in some games assets may have data that can't be loaded due to not
+        // properly decoding into Unicode in Python.
+        if ( md_i_size >= 0 && (!select_data || select_data_filter.count( mag_num ) )) {
             vecfloat = &missiondata->m[mag_num];
             vecfloat->clear();
             vecfloat->reserve(md_i_size);
             skip = false;
+        } else {
+            // catch the error and let the user know
+            BOOST_LOG_TRIVIAL(info) << boost::format(" SaveGame::ReadMissionData: vecstring->reserve(md_i_size = %1%) will fail, bailing out (i = %2%)") % md_i_size % i;
         }
         for (int j = 0; j < md_i_size; j++) {
             if (!skip) {
@@ -517,8 +548,20 @@ void SaveGame::ReadMissionData( char* &buf, bool select_data, const std::set< st
     buf = buf2;
 }
 
-string AnyStringScanInString( char* &buf )
+string AnyStringScanInString( char* &buf, bool &success )
 {
+    // string data uses the following format:
+    // <number> <string>
+    // <number> is the number of bytes to read for <string>
+    // there is no null-terminator between strings; the next
+    // data chunk may start immediately after the <number>
+    // bytes are read in
+
+    // assume a successful read - this will fail if and only if
+    // there are invalid values detected in the string later
+    success = true;
+
+    // extract the string size data
     unsigned int size = 0;
     bool found = false;
     while ( (*buf) && ( (*buf) != ' ' || (!found) ) ) {
@@ -529,33 +572,48 @@ string AnyStringScanInString( char* &buf )
         }
         buf++;
     }
-    if (*buf)
+
+    // move past any spaces before reading thea ctual string data
+    if (*buf) {
         buf++;
+    }
+
+    // extract the actual string value
     string ret;
     ret.resize( size );
     unsigned int i = 0;
-    while (i < size && *buf)
-        ret[i++] = *(buf++);
+    char c;
+    bool validString = true;
+    string invalidChars;
+    while (i < size && *buf) {
+        c = (*buf++);
+        ret[i++] = c;
+        if (validCharData.find(c) == validCharData.end()) {
+            validString = false;
+            invalidChars += c;
+        }
+    }
+
+    // validate unicode conversion here
+    if (!validString) {
+        BOOST_LOG_TRIVIAL(error) << boost::format("WARNING : Detected invalid UTF-8 string: \"%1%\" found in \"%2%\"") % invalidChars % ret;
+        success = false;
+    }
+
     return ret;
 }
 
-void AnyStringSkipInString( char* &buf )
+bool ValidateString(const string &str)
 {
-    unsigned int size = 0;
-    bool found = false;
-    while ( (*buf) && ( (*buf) != ' ' || (!found) ) ) {
-        if ( (*buf) >= '0' && (*buf) <= '9' ) {
-            size *= 10;
-            size += (*buf)-'0';
-            found = true;
+    BOOST_LOG_TRIVIAL(debug) << boost::format("DEBUG : Validating \"%1%\" as valid UTF-8") % str;
+    for (auto s = str.cbegin(); s != str.cend(); ++s)
+    {
+        if (validCharData.find(*s) == validCharData.end())
+        {
+            return false;
         }
-        buf++;
     }
-    if (*buf)
-        buf++;
-    unsigned int i = 0;
-    while (i < size && *buf)
-        ++i, ++buf;
+    return true;
 }
 
 string AnyStringWriteString( string input )
@@ -573,7 +631,8 @@ void SaveGame::ReadMissionStringData( char* &buf, bool select_data, const std::s
     buf2 += hopto( buf2, ' ', '\n', 0 );
     for (int i = 0; i < mdsize; i++) {
         int    md_i_size;
-        string mag_num( AnyStringScanInString( buf2 ) );
+        bool   successfulReadString;
+        string mag_num( AnyStringScanInString( buf2, successfulReadString ) );
         md_i_size = strtol( buf2, (char**) NULL, 10 );
 
         //Put ptr to point after the number we just read
@@ -594,10 +653,12 @@ void SaveGame::ReadMissionStringData( char* &buf, bool select_data, const std::s
             BOOST_LOG_TRIVIAL(info) << boost::format(" SaveGame::ReadMissionStringData: vecstring->reserve(md_i_size = %1%) will fail, bailing out (i = %2%)") % md_i_size % i;
         }
         for (int j = 0; j < md_i_size; j++) {
-            if (skip) {
-                AnyStringSkipInString( buf2 );
-            } else {
-                vecstring->push_back( AnyStringScanInString( buf2 ) );
+            string value = AnyStringScanInString( buf2, successfulReadString );
+            if (!successfulReadString) {
+                BOOST_LOG_TRIVIAL(info) << boost::format(" SaveGame::ReadMissionStringData: string data will crash python: %1%") % value;
+            }
+            if (!skip) {
+                vecstring->push_back( value );
             }
         }
     }
@@ -673,7 +734,8 @@ void SaveGame::WriteMissionStringData( std::vector< char > &ret )
 
 void SaveGame::ReadStardate( char* &buf )
 {
-    string stardate( AnyStringScanInString( buf ) );
+    bool successfulReadString;
+    string stardate( AnyStringScanInString( buf, successfulReadString ) );
     BOOST_LOG_TRIVIAL(info) << "Read stardate: " << stardate;
     _Universe->current_stardate.InitTrek( stardate );
 }
@@ -707,10 +769,12 @@ void SaveGame::ReadSavedPackets( char* &buf,
             if (commitfactions) ReadNewsData( buf, skip_news );
         } else if ( a == 0 && 0 == strcmp( unitname, "stardate" ) && 0 == strcmp( factname, "data" ) ) {
             //On server side we expect the latest saved stardate in dynaverse.dat too
-            if (commitfactions)
+            if (commitfactions) {
                 ReadStardate( buf );
-            else
-                AnyStringScanInString( buf );
+            } else {
+                bool successfulReadString;
+                AnyStringScanInString( buf, successfulReadString );
+            }
         } else {
             char output[31] = {0};
             strncpy( output, buf, 30 );
@@ -728,10 +792,12 @@ void SaveGame::LoadSavedMissions()
         "import VS\nVS.loading_active_missions=True\nprint(\"Loading active missions \"+str(VS.loading_active_missions))\n" );
     //kill any leftovers so they don't get loaded twice.
     Mission *ignoreMission = Mission::getNthPlayerMission( _Universe->CurrentCockpit(), 0 );
-    for (i = active_missions.size()-1; i > 0; --i)      //don't terminate zeroth mission
+    for (i = active_missions.size()-1; i > 0; --i) {      //don't terminate zeroth mission
         if (active_missions[i]->player_num == _Universe->CurrentCockpit()
-            && active_missions[i] != ignoreMission)
+            && active_missions[i] != ignoreMission) {
             active_missions[i]->terminateMission();
+        }
+    }
     for (i = 0; i < scripts.size() && i < missions.size(); ++i) {
         try {
             if ( !missions[i].empty() )             //Built-in/networking missions
@@ -902,7 +968,7 @@ void SaveGame::SetOutputFileName( const string &filename )
         outputsavegame = string( "Autosave" ); //empty name?
 }
 
-void SaveGame::ParseSaveGame( const string &filename_p,
+bool SaveGame::ParseSaveGame( const string &filename_p,
                               string &FSS,
                               const string &originalstarsystem,
                               QVector &PP,
@@ -918,6 +984,7 @@ void SaveGame::ParseSaveGame( const string &filename_p,
                               bool select_data,
                               const std::set< std::string > &select_data_filter )
 {
+    bool loadResult = true;
     const string &str     = save_contents;     //alias
     string filename;
     //Now leave filename empty, use the default name regardless...
@@ -931,9 +998,10 @@ void SaveGame::ParseSaveGame( const string &filename_p,
         string plsave = GetReadPlayerSaveGame( player_num );
         if ( plsave.length() ) {
             err = f.OpenReadOnly( plsave, SaveFile );
-            if (err > Ok)                             //failed in SaveFile
+            if (err > Ok) {                             //failed in SaveFile
                 //Try as an UnknownFile to get a datadir saved game, like New_Game.
                 err = f.OpenReadOnly( plsave, UnknownFile );
+            }
         } else if (filename.length() > 0) {
             //IF NONE SIMPLY LOAD THE MISSION DEFAULT ONE
             err = f.OpenReadOnly( filename, SaveFile );
@@ -951,63 +1019,73 @@ void SaveGame::ParseSaveGame( const string &filename_p,
         }
     }
     if ( err <= Ok || (!read && str != "") ) {
-        if (!read)
+        if (!read) {
             savestring = str;
-        if (savestring.length() > 0) {
-            char *buf = new char[savestring.length()+1];
-            buf[savestring.length()] = '\0';
-            memcpy( buf, savestring.c_str(), savestring.length() );
-            int   headlen     = hopto( buf, '\n', '\n', 0 );
-            char *deletebuf   = buf;
-            char *tmp2 = (char*) malloc( headlen+2 );
-            char *freetmp2    = tmp2;
-            char *factionname = (char*) malloc( headlen+2 );
-            if ( headlen > 0 && (buf[headlen-1] == '\n' || buf[headlen-1] == ' ' || buf[headlen-1] == '\r') )
-                buf[headlen-1] = '\0';
-            factionname[headlen+1] = '\0';
-            QVector tmppos;
-            int     res = sscanf( buf, "%s %lf %lf %lf %s", tmp2, &tmppos.i, &tmppos.j, &tmppos.k, factionname );
-            if (res == 4 || res == 5) {
-                //Extract credits & starship
-                for (int j = 0; '\0' != tmp2[j]; j++)
-                    if (tmp2[j] == '^') {
-                        sscanf( tmp2+j+1, "%f", &credits );
-                        tmp2[j] = '\0';
-                        for (int k = j+1; tmp2[k] != '\0'; k++)
-                            if (tmp2[k] == '^') {
-                                tmp2[k] = '\0';
-                                savedstarship.clear();
-                                savedstarship = parsePipedString( tmp2+k+1 );
-                                break;
-                            }
-                        break;
-                    }
-                //In networking save we include the faction at the end of the first line
-                if (res == 5) {
-                    playerfaction = string( factionname );
-                    BOOST_LOG_TRIVIAL(info) << "Found faction in save file : " << playerfaction;
-                } else {
-                    //If no faction -> default to privateer
-                    playerfaction = string( "privateer" );
-                    BOOST_LOG_TRIVIAL(info) << "Faction not found assigning default one: privateer";
-                }
-                free( factionname );
-                if (ForceStarSystem.length() == 0)
-                    ForceStarSystem = string( tmp2 );
-                if (PlayerLocation.i == FLT_MAX || PlayerLocation.j == FLT_MAX || PlayerLocation.k == FLT_MAX) {
-                    shouldupdatepos = true;
-                    PlayerLocation  = tmppos; //LaunchUnitNear(tmppos);
-                }
-                buf += headlen;
-                ReadSavedPackets( buf, commitfaction, skip_news, select_data, select_data_filter );
-            }
-            free( freetmp2 );
-            freetmp2 = NULL;
-            tmp2     = NULL;
-            delete[] deletebuf;
         }
-        if (read)
-            f.Close();
+        if (!ValidateString(savestring)){
+            BOOST_LOG_TRIVIAL(fatal) << boost::format("!!! ERROR : Unable to load saved game : %1%") % f.GetFullPath();
+            loadResult = false;
+        } else {
+            if (savestring.length() > 0) {
+                char *buf = new char[savestring.length()+1];
+                buf[savestring.length()] = '\0';
+                memcpy( buf, savestring.c_str(), savestring.length() );
+                int   headlen     = hopto( buf, '\n', '\n', 0 );
+                char *deletebuf   = buf;
+                char *tmp2 = (char*) malloc( headlen+2 );
+                char *freetmp2    = tmp2;
+                char *factionname = (char*) malloc( headlen+2 );
+                if ( headlen > 0 && (buf[headlen-1] == '\n' || buf[headlen-1] == ' ' || buf[headlen-1] == '\r') ) {
+                    buf[headlen-1] = '\0';
+                }
+                factionname[headlen+1] = '\0';
+                QVector tmppos;
+                int     res = sscanf( buf, "%s %lf %lf %lf %s", tmp2, &tmppos.i, &tmppos.j, &tmppos.k, factionname );
+                if (res == 4 || res == 5) {
+                    //Extract credits & starship
+                    for (int j = 0; '\0' != tmp2[j]; j++) {
+                        if (tmp2[j] == '^') {
+                            sscanf( tmp2+j+1, "%f", &credits );
+                            tmp2[j] = '\0';
+                            for (int k = j+1; tmp2[k] != '\0'; k++)
+                                if (tmp2[k] == '^') {
+                                    tmp2[k] = '\0';
+                                    savedstarship.clear();
+                                    savedstarship = parsePipedString( tmp2+k+1 );
+                                    break;
+                                }
+                            break;
+                        }
+                    }
+                    //In networking save we include the faction at the end of the first line
+                    if (res == 5) {
+                        playerfaction = string( factionname );
+                        BOOST_LOG_TRIVIAL(info) << "Found faction in save file : " << playerfaction;
+                    } else {
+                        //If no faction -> default to privateer
+                        playerfaction = string( "privateer" );
+                        BOOST_LOG_TRIVIAL(info) << "Faction not found assigning default one: privateer";
+                    }
+                    free( factionname );
+                    if (ForceStarSystem.length() == 0) {
+                        ForceStarSystem = string( tmp2 );
+                    }
+                    if (PlayerLocation.i == FLT_MAX || PlayerLocation.j == FLT_MAX || PlayerLocation.k == FLT_MAX) {
+                        shouldupdatepos = true;
+                        PlayerLocation  = tmppos; //LaunchUnitNear(tmppos);
+                    }
+                    buf += headlen;
+                    ReadSavedPackets( buf, commitfaction, skip_news, select_data, select_data_filter );
+                }
+                free( freetmp2 );
+                freetmp2 = NULL;
+                tmp2     = NULL;
+                delete[] deletebuf;
+            }
+            if (read) {
+                f.Close();
+            }
+        }
     }
     if (PlayerLocation.i == FLT_MAX || PlayerLocation.j == FLT_MAX || PlayerLocation.k == FLT_MAX) {
         shouldupdatepos = false;
@@ -1024,6 +1102,8 @@ void SaveGame::ParseSaveGame( const string &filename_p,
         FSS = ForceStarSystem;
     }
     SetSavedCredits( credits );
+
+    return loadResult;
 }
 
 const string& GetCurrentSaveGame()

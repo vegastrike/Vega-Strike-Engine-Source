@@ -892,9 +892,15 @@ string getSaveInfo( const std::string &filename, bool formatForTextbox )
     vector< std::string >Ships;
     std::string sillytemp = UniverseUtil::setCurrentSaveGame( filename );
     savegame.SetStarSystem( "" );
-    savegame.ParseSaveGame( filename, system, "", pos, updatepos, creds, Ships,
+    // `fatal` log level is used here so that it actually gets printed out without any buffering
+    // otherwise it'd be debug or info level
+    BOOST_LOG_TRIVIAL(fatal) << boost::format(" Loading %1% from Generic Universe") % filename;
+    bool loaded = savegame.ParseSaveGame( filename, system, "", pos, updatepos, creds, Ships,
                             _Universe->CurrentCockpit(), "", true, false, game_options.quick_savegame_summaries, true, true,
                             campaign_score_vars );
+    if (!loaded) {
+        return "Failed to load " + filename + lf;
+    }
     UniverseUtil::setCurrentSaveGame( sillytemp );
     string text;
     text += filename;

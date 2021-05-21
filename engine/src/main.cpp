@@ -672,8 +672,12 @@ void bootstrap_main_loop()
         vector< SavedUnits >saved;
         vector< string > packedInfo;
 
+        bool loadedSavedGame = game_options.load_last_savegame;
         if (game_options.load_last_savegame) {
-            _Universe->AccessCockpit( k )->savegame->ParseSaveGame( savegamefile,
+            // `fatal` log level is used here so that it actually gets printed out without any buffering
+            // otherwise it'd be debug or info level
+            BOOST_LOG_TRIVIAL(fatal) << boost::format(" Loading %1% from Main") % savegamefile;
+            loadedSavedGame = _Universe->AccessCockpit( k )->savegame->ParseSaveGame( savegamefile,
                                                                     mysystem,
                                                                     mysystem,
                                                                     pos,
@@ -681,7 +685,9 @@ void bootstrap_main_loop()
                                                                     credits,
                                                                     packedInfo,
                                                                     k );
-        } else {
+        }
+
+        if (!loadedSavedGame) {
           _Universe->AccessCockpit( k )->savegame->SetOutputFileName( savegamefile );
         }
 

@@ -522,10 +522,12 @@ bool Cockpit::Update()
         QVector vec;
         DockToSavedBases( _Universe->CurrentCockpit(), vec );
     }
-    if (jumpok)
+    if (jumpok) {
         jumpok++;
-    if (jumpok > 5)
+    }
+    if (jumpok > 5) {
         jumpok = 0;
+    }
     UpdAutoPilot();
     Unit *par = GetParent();
     if (par != NULL) {
@@ -594,7 +596,9 @@ bool Cockpit::Update()
                     }
                 }
                 if (tmp == false) {
-                    if (tmpgot) index = 0;
+                    if (tmpgot) {
+                        index = 0;
+                    }
                     Unit *un = parentturret.GetUnit();
                     if ( un && ( !_Universe->isPlayerStarship( un ) ) ) {
                         SetParent( un, GetUnitFileName().c_str(), this->unitmodname.c_str(), savegame->GetPlayerLocation() );
@@ -620,8 +624,9 @@ bool Cockpit::Update()
                                                         par ) <= 0) )
                 && ( !( par->IsCleared( targ ) || targ->IsCleared( par ) || par->isDocked( targ )
                        || targ->isDocked( par ) ) ) && (par->getRelation( targ ) >= 0) && (targ->getRelation( par ) >= 0) ) {
-                if ( targ->isUnit() != _UnitType::planet || targ->GetDestinations().empty() )
+                if ( targ->isUnit() != _UnitType::planet || targ->GetDestinations().empty() ) {
                     RequestClearence( par, targ, 0 );                      //sex is always 0... don't know how to	 get it.
+                }
             } else if ( ( par->IsCleared( targ )
                          || targ->IsCleared( par ) ) && ( !( par->isDocked( targ ) ) || targ->isDocked( par ) )
                        && ( (targ->isUnit() == _UnitType::planet && UnitUtil::getSignificantDistance( par, targ ) > 0)
@@ -652,7 +657,7 @@ bool Cockpit::Update()
             Unit *un;
             bool  found = false;
             int   i     = 0;
-            for (un_iter ui = _Universe->activeStarSystem()->getUnitList().createIterator(); (un = *ui); ++ui)
+            for (un_iter ui = _Universe->activeStarSystem()->getUnitList().createIterator(); (un = *ui); ++ui) {
                 if (un->faction == this->unitfaction) {
 //this switches units UNLESS we're an ejected pilot. Instead, if we are an ejected
 //pilot, switch only if we're close enough.
@@ -675,20 +680,25 @@ bool Cockpit::Update()
                         ++index;
                         Unit *k = GetParent();
                         bool  proceed = true;
-                        if (k)
-                            if (k->name == "eject" || k->name == "Pilot" || k->name == "return_to_cockpit")
+                        if (k) {
+                            if (k->name == "eject" || k->name == "Pilot" || k->name == "return_to_cockpit") {
                                 proceed = false;
+                            }
+                        }
                         //we are an ejected pilot, so, if we can get close enough to the related unit, jump into it and remove the seat. This said, always allow
                         //switching from the "fake" ejection seat (ejectdock).
                         if ( !proceed && k && ( k->Position()-un->Position() ).Magnitude() < ( un->rSize()+5*k->rSize() ) ) {
-                            if ( !(k->name == "return_to_cockpit") )
+                            if ( !(k->name == "return_to_cockpit") ) {
                                 SwitchUnits( k, un );
+                            }
                             //this refers to cockpit
-                            if ( !(k->name == "return_to_cockpit") )
+                            if ( !(k->name == "return_to_cockpit") ) {
                                 this->SetParent( un, GetUnitFileName().c_str(),
                                                 this->unitmodname.c_str(), savegame->GetPlayerLocation() );
-                            if ( !(k->name == "return_to_cockpit") )
+                            }
+                            if ( !(k->name == "return_to_cockpit") ) {
                                 k->Kill();
+                            }
                             //un->SetAI(new FireKeyboard ())
                         }
                         if (proceed) {
@@ -712,8 +722,10 @@ bool Cockpit::Update()
                         break;
                     }
                 }
-            if (!found)
+            }
+            if (!found) {
                 index = 0;
+            }
         }
     }
     //this causes the physical ejecting. Check going_to_dock_screen in here, also.
@@ -723,8 +735,9 @@ bool Cockpit::Update()
 
         Unit *un = GetParent();
         if (un) {
-            if (going_to_dock_screen == false)
+            if (going_to_dock_screen == false) {
                 un->EjectCargo( (unsigned int) -1 );
+            }
             if (going_to_dock_screen == true) {
                 un->EjectCargo( (unsigned int) -2 );
                 going_to_dock_screen = false;
@@ -738,38 +751,49 @@ bool Cockpit::Update()
                     XMLSupport::parse_float( vs_config->getVariable( "graphics", "inital_zoom_factor", "2.25" ) );
                 zoomfactor = initialzoom;
 
-                    parentturret.SetUnit( NULL );
-                    respawnunit[_Universe->CurrentCockpit()] = 0;
-                    std::string  savegamefile = mission->getVariable( "savegame", "" );
-                    unsigned int k;
-                    for (k = 0; k < _Universe->numPlayers(); ++k)
-                        if (_Universe->AccessCockpit( k ) == this)
-                            break;
-                    if ( k == _Universe->numPlayers() ) k = 0;
-                    if (active_missions.size() > 1) {
-                        for (int i = active_missions.size()-1; i > 0; --i)                          //don't terminate zeroth mission
-                            if (active_missions[i]->player_num == k)
-                                active_missions[i]->terminateMission();
+                parentturret.SetUnit( NULL );
+                respawnunit[_Universe->CurrentCockpit()] = 0;
+                std::string  savegamefile = mission->getVariable( "savegame", "" );
+                unsigned int k;
+                for (k = 0; k < _Universe->numPlayers(); ++k) {
+                    if (_Universe->AccessCockpit( k ) == this) {
+                        break;
                     }
-                    unsigned int whichcp = k;
-                    string  newsystem;
-                    QVector pos;
-                    bool    setplayerXloc;
-                    savegame->SetStarSystem( "" );
-                    QVector tmpoldpos = savegame->GetPlayerLocation();
-                    savegame->SetPlayerLocation( QVector( FLT_MAX, FLT_MAX, FLT_MAX ) );
-                    vector< string > packedInfo;
-                    savegame->ParseSaveGame( savegamefile,
-                                             newsystem,
-                                             newsystem,
-                                             pos,
-                                             setplayerXloc,
-                                             this->credits,
-                                             packedInfo,
-                                             k );
+                }
+                if ( k == _Universe->numPlayers() ) {
+                    k = 0;
+                }
+                if (active_missions.size() > 1) {
+                    for (int i = active_missions.size()-1; i > 0; --i) {                          //don't terminate zeroth mission
+                        if (active_missions[i]->player_num == k) {
+                            active_missions[i]->terminateMission();
+                        }
+                    }
+                }
+                unsigned int whichcp = k;
+                string  newsystem;
+                QVector pos;
+                bool    setplayerXloc;
+                savegame->SetStarSystem( "" );
+                QVector tmpoldpos = savegame->GetPlayerLocation();
+                savegame->SetPlayerLocation( QVector( FLT_MAX, FLT_MAX, FLT_MAX ) );
+                vector< string > packedInfo;
+                // `fatal` log level is used here so that it actually gets printed out without any buffering
+                // otherwise it'd be debug or info level
+                BOOST_LOG_TRIVIAL(fatal) << boost::format(" Loading %1% from Cockpit") % savegamefile;
+                bool loaded = savegame->ParseSaveGame( savegamefile,
+                                         newsystem,
+                                         newsystem,
+                                         pos,
+                                         setplayerXloc,
+                                         this->credits,
+                                         packedInfo,
+                                         k );
+                if (loaded) {
                     UnpackUnitInfo(packedInfo);
-                    if (pos.i == FLT_MAX && pos.j == FLT_MAX && pos.k == FLT_MAX)
+                    if (pos.i == FLT_MAX && pos.j == FLT_MAX && pos.k == FLT_MAX) {
                         pos = tmpoldpos;
+                    }
                     savegame->SetPlayerLocation( pos );
                     CopySavedShips( savegame->GetCallsign(), whichcp, packedInfo, true );
                     bool actually_have_save = false;
@@ -780,8 +804,9 @@ bool Cockpit::Update()
                         newsystem = savegame->GetStarSystem()+".system";
                     } else {
                         newsystem = _Universe->activeStarSystem()->getFileName();
-                        if (newsystem.find( ".system" ) == string::npos)
+                        if (newsystem.find( ".system" ) == string::npos) {
                             newsystem += ".system";
+                        }
                     }
                     Background::BackgroundClone savedtextures = {
                         {NULL, NULL, NULL, NULL, NULL, NULL, NULL}
@@ -794,8 +819,9 @@ bool Cockpit::Update()
                         _Universe->clearAllSystems();
                     }
                     StarSystem *ss = _Universe->GenerateStarSystem( newsystem.c_str(), "", Vector( 0, 0, 0 ) );
-                    if (!persistent_on_load)
+                    if (!persistent_on_load) {
                         savedtextures.FreeClone();
+                    }
                     this->activeStarSystem = ss;
                     _Universe->pushActiveStarSystem( ss );
 
@@ -804,8 +830,9 @@ bool Cockpit::Update()
                         saved.push_back( _Universe->activeStarSystem() );
                         _Universe->popActiveStarSystem();
                     }
-                    if ( !saved.empty() )
+                    if ( !saved.empty() ) {
                         saved.back() = ss;
+                    }
                     unsigned int mysize = saved.size();
                     for (unsigned int i = 0; i < mysize; i++) {
                         _Universe->pushActiveStarSystem( saved.back() );
@@ -837,10 +864,11 @@ bool Cockpit::Update()
                     }
                     UniverseUtil::hideSplashScreen();
                     _Universe->popActiveStarSystem();
-                    if (!persistent_on_load)
+                    if (!persistent_on_load) {
                         _Universe->pushActiveStarSystem( ss );
+                    }
                     return true;
-
+                }
             }
         }
     }

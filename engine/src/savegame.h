@@ -141,7 +141,7 @@ public: ~SaveGame();
     void AddUnitToSave( const char *unitname, int type, const char *faction, long address );
     void RemoveUnitFromSave( long address ); //cast it to a long
     void SetOutputFileName( const std::string &filename );
-    void ParseSaveGame( const std::string &filename, std::string &ForceStarSystem, const std::string &originalstarsystem,
+    bool ParseSaveGame( const std::string &filename, std::string &ForceStarSystem, const std::string &originalstarsystem,
                        QVector &pos, bool &shouldupdatedfighter0pos, float &credits, std::vector< std::string > &originalunit,
                        int player_num,
                        const std::string &savestr = std::string(), bool read = true, bool commitFaction = true,
