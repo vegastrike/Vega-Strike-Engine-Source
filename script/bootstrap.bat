@@ -17,7 +17,7 @@
 @REM You should have received a copy of the GNU General Public License
 @REM along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
 
-mkdir -p C:\Projects
+mkdir C:\Projects
 pushd C:\Projects
 git clone https://github.com/Microsoft/vcpkg.git
 .\vcpkg\bootstrap-vcpkg.bat -disableMetrics
