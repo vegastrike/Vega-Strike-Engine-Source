@@ -327,7 +327,7 @@ int main( int argc, char *argv[] )
     std::cerr<<"Legacy Mode: "<<(legacy_data_dir_mode ? "TRUE" : "FALSE")<<std::endl;
 
     if (true == legacy_data_dir_mode) {
-        VSFileSystem::datadir = boost::filesystem::current_path().native();
+        VSFileSystem::datadir = boost::filesystem::current_path().string();
         std::cerr<<"Saving current directory (" << VSFileSystem::datadir << ") as DATA_DIR"<<std::endl;
     }
 
