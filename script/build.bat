@@ -17,7 +17,7 @@
 @REM You should have received a copy of the GNU General Public License
 @REM along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
 
-cmake -B build -S .\engine\ -DCMAKE_TOOLCHAIN_FILE=C:\Projects\vcpkg\scripts\buildsystems\vcpkg.cmake -DCMAKE_BUILD_TYPE=Release -DUSE_PYTHON_3=ON
+cmake -B build -S .\engine\ -DCMAKE_TOOLCHAIN_FILE=%VCPKG_ROOT%\scripts\buildsystems\vcpkg.cmake -DCMAKE_BUILD_TYPE=Release -DUSE_PYTHON_3=ON
 cmake --build .\build\ --config Release
 mkdir bin
 xcopy .\build\Release\*.* .\bin\
