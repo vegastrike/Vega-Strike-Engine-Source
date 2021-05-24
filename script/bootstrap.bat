@@ -17,11 +17,16 @@
 @REM You should have received a copy of the GNU General Public License
 @REM along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
 
-mkdir C:\Projects
-pushd C:\Projects
+@REM You can customize this directory location if desired, but it should be
+@REM something very short. Otherwise, you will run into problems.
+set VCKPG_PARENT_DIR=C:\Projects
+set CMAKE_VERSION="3.20.2"
+
+mkdir /p "%VCKPG_PARENT_DIR%"
+pushd "%VCKPG_PARENT_DIR%"
 git clone https://github.com/Microsoft/vcpkg.git
 .\vcpkg\bootstrap-vcpkg.bat -disableMetrics
-set PATH=%PATH%;C:\Projects\vcpkg\downloads\tools\cmake-3.20.2-windows\cmake-3.20.2-windows-i386\bin
+set PATH=%PATH%;%VCKPG_PARENT_DIR%\vcpkg\downloads\tools\cmake-%CMAKE_VERSION%-windows\cmake-%CMAKE_VERSION%-windows-i386\bin
 set VCPKG_DEFAULT_TRIPLET=x64-windows
-set PYTHONHOME=C:\Projects\vcpkg\packages\python3_x64-windows\tools\python3
+set PYTHONHOME=%VCKPG_PARENT_DIR%\vcpkg\packages\python3_x64-windows\tools\python3
 popd
