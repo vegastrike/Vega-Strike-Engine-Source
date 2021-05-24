@@ -19,3 +19,7 @@
 
 cmake -B build -S .\engine\ -DCMAKE_TOOLCHAIN_FILE=C:\Projects\vcpkg\scripts\buildsystems\vcpkg.cmake -DCMAKE_BUILD_TYPE=Release -DUSE_PYTHON_3=ON
 cmake --build .\build\ --config Release
+mkdir bin
+xcopy .\build\Release\*.* .\bin\
+xcopy .\build\objconv\Release\*.* .\bin\
+xcopy .\build\setup\Release\*.* .\bin\
