@@ -39,6 +39,7 @@ jobs:
         with:
           vcpkgDirectory: '${{ github.workspace }}/vcpkg'
           setupOnly: true
+          vcpkgGitCommitId: '5568f110b509a9fd90711978a7cb76bae75bb092'
           vcpkgTriplet: '64-windows'
         
       - name: run-cmake
