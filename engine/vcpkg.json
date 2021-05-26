@@ -1,6 +1,6 @@
 {
     "name": "vega-strike",
-    "version-string": "0.9.0",
+    "version-string": "0.8.0",
     "dependencies": [
       "boost",
       "expat",
