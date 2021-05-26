@@ -2,8 +2,8 @@
  * main.cpp
  *
  * Copyright (C) 2001-2002 Daniel Horn
- * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike
- * contributors
+ * Copyright (C) 2020-2021 pyramid3d, Stephen G. Tuggy, and
+ * other Vega Strike contributors
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -327,7 +327,7 @@ int main( int argc, char *argv[] )
     std::cerr<<"Legacy Mode: "<<(legacy_data_dir_mode ? "TRUE" : "FALSE")<<std::endl;
 
     if (true == legacy_data_dir_mode) {
-        VSFileSystem::datadir = boost::filesystem::current_path().native();
+        VSFileSystem::datadir = boost::filesystem::current_path().string();
         std::cerr<<"Saving current directory (" << VSFileSystem::datadir << ") as DATA_DIR"<<std::endl;
     }
 

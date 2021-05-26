@@ -561,6 +561,17 @@
 #  endif
 #endif
 
+/* ------------------------------------------------------------------
+** AArch64
+** ------------------------------------------------------------------
+*/
+#if defined __aarch64__ || defined __arm64__ || defined FORCE_DOXYGEN
+#  define POSH_CPU_AARCH64 /**<if defined, target CPU is AArch64 */
+#  if !defined FORCE_DOXYGEN
+#     define POSH_CPU_STRING "AArch64"
+#  endif
+#endif
+
 /** @} */
 
 #if !defined POSH_CPU_STRING
