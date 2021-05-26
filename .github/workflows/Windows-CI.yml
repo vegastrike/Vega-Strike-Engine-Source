@@ -20,25 +20,28 @@ jobs:
     # The type of runner that the job will run on
     runs-on: windows-latest
 
+    env:
+      PYTHONHOME: '${{ github.workspace }}/vcpkg/packages/python3_x64-windows/tools/python3'
+
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - name: checkout
         uses: actions/checkout@v2
+
+      - name: install-cmake
+        uses: lukka/get-cmake@v3.20.1
       
       - name: run-vcpkg
         # You may pin to the exact commit or the version.
         # uses: lukka/run-vcpkg@9c0ae56bad291f4b185cc433a9b56084b2962259
         uses: lukka/run-vcpkg@v7.3
         with:
+          vcpkgDirectory: '${{ github.workspace }}/vcpkg'
           vcpkgArguments:
           vcpkgTriplet:
             x64-windows
-      
-      - name: Set env variable(s)
-        run: |
-          set PYTHONHOME=C:\Projects\vcpkg\packages\python3_x64-windows\tools\python3
-          
+        
       - name: run-cmake
         # You may pin to the exact commit or the version.
         # uses: lukka/run-cmake@7ba4481660f0f04c86cfa5f1f24b90effc97bde1
