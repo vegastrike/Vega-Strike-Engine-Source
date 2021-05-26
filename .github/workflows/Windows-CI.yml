@@ -38,9 +38,8 @@ jobs:
         uses: lukka/run-vcpkg@v7.3
         with:
           vcpkgDirectory: '${{ github.workspace }}/vcpkg'
-          vcpkgArguments:
-          vcpkgTriplet:
-            x64-windows
+          setupOnly: true
+          vcpkgTriplet: '64-windows'
         
       - name: run-cmake
         # You may pin to the exact commit or the version.
