@@ -31,6 +31,7 @@ jobs:
         # uses: lukka/run-vcpkg@9c0ae56bad291f4b185cc433a9b56084b2962259
         uses: lukka/run-vcpkg@v7.3
         with:
+          vcpkgArguments:
           vcpkgTriplet:
             x64-windows
       
