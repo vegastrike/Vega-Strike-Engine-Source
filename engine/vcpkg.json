@@ -5,6 +5,7 @@
       "boost-python",
       "boost-log",
       "boost-date-time",
+      "boost-iostreams",
       "boost-system",
       "boost-filesystem",
       "boost-thread",
