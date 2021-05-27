@@ -12,7 +12,6 @@
       "boost-atomic",
       "expat",
       "freeglut",
-      "gtk",
       "libpng",
       "libjpeg-turbo",
       "libvorbis",
