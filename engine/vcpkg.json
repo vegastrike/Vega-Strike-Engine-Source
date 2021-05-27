@@ -11,6 +11,7 @@
       "boost-thread",
       "boost-chrono",
       "boost-atomic",
+      "boost-assign",
       "expat",
       "freeglut",
       "libpng",
