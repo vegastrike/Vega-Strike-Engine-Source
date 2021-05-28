@@ -65,3 +65,9 @@ jobs:
           buildWithCMake: true
           # Additional parameters for both CMake and the make program (e.g. ninja or make).  Separate CMake arguments to the native make program arguments with '--', such as: '--clean-first --config Debug -- -j0'. Used by both CMakeListsTxtBasic and CMakeListsTxtAdvanced modes
           buildWithCMakeArgs: "--config Release"
+      
+      - name: copy-build-artifacts
+        run: |
+          mkdir bin
+          xcopy .\build\Release\*.* .\bin\
+          xcopy .\build\objconv\Release\*.* .\bin\
