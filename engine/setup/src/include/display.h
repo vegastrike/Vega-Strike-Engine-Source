@@ -37,7 +37,7 @@ void ShowMain();
 
 #define GET_TITLE char title[1000]="Vega Strike Settings"; \
   if (strlen(CONFIG.program_name)+strlen(VERSION)<800) { \
-    sprintf(title, "Settings - %s - Version 0.8.0", \
+    sprintf(title, "Settings - %s - Version 0.9.0", \
     CONFIG.program_name); \
   }
 

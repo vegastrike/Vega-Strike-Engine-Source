@@ -57,7 +57,11 @@
 #include "universe_util.h"
 #include "universe.h"
 #include <utility>
+#ifdef _WIN32
+// What do we need from unistd? - let's find out :)
+#else
 #include <unistd.h>
+#endif
 #include <signal.h>
 #include <sys/types.h>
 

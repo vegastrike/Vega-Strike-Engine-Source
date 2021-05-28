@@ -3,13 +3,13 @@
 #include "hashtable.h"
 #include <string>
 #include <gnuhash.h>
+#include <functional>
 
 class Mesh;
-class ConstHasher;
 
 class StringIntKey
 {
-    friend class ConstHasher;
+public:
     std::string key;
     int fac;
 public: StringIntKey( std::string k, int f )
@@ -17,20 +17,24 @@ public: StringIntKey( std::string k, int f )
         key = k;
         fac = f;
     }
-    bool operator==( const StringIntKey &b ) const
-    {
-        return fac == b.fac && key == b.key;
-    }
-    bool operator<( const StringIntKey &b ) const
-    {
-        if (fac != b.fac)
-            return fac < b.fac;
-        return key < b.key;
-    }
-    operator size_t() const {
-        return Hashtable< std::string, int, (1<<30) >::hash( key )^fac;
-    }
 };
+
+extern bool operator==(const StringIntKey& a, const StringIntKey& b);
+
+extern bool operator<(const StringIntKey& a, const StringIntKey& b);
+
+namespace std
+{
+    template<> struct hash<StringIntKey>
+    {
+        std::size_t operator()(StringIntKey const& s) const noexcept
+        {
+            return (std::hash<std::string>{}(s.key)) ^ s.fac;
+        }
+    };
+}
+
+
 
 #if HAVE_TR1_UNORDERED_MAP || (!defined (_WIN32) && __GNUC__ != 2)
 class ConstHasher
@@ -87,7 +91,7 @@ public:
     }
 };
 
-typedef ClassCache< Unit, StringIntKey >UnitConstCache;
+typedef ClassCache< Unit, StringIntKey > UnitConstCache;
 typedef ClassCache< Mesh, std::string > WeaponMeshCache;
 
 #endif

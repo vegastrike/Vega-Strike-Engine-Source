@@ -2,8 +2,8 @@
  * main.cpp
  *
  * Copyright (C) 2001-2002 Daniel Horn
- * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike
- * contributors
+ * Copyright (C) 2020-2021 pyramid3d, Stephen G. Tuggy, and
+ * other Vega Strike contributors
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -63,7 +63,6 @@
 #include "ship_commands.h"
 #include "gamemenu.h"
 #include "audio/SceneManager.h"
-#include "audio/TemplateManager.h"
 #include "audio/renderers/OpenAL/BorrowedOpenALRenderer.h"
 
 #include <time.h>
@@ -92,7 +91,6 @@
 #include <boost/log/sources/severity_logger.hpp>
 #include <boost/log/sources/record_ostream.hpp>
 #include <boost/filesystem.hpp>
-
 #include "options.h"
 
 using std::cout;
@@ -118,6 +116,11 @@ boost::shared_ptr<VSFileSystem::console_log_sink> VSFileSystem::pConsoleLogSink 
 
 //false if command line option --net is given to start without network
 static bool ignore_network = true;
+// legacy_data_dir_mode determines whether the application should require the data directory to be specified on the command-line or not
+// true - no parameter required, application should start regardless of where it's called from
+// false - parameter required, application should only start if specified
+// NOTE: This is tied to the executable name. `vegastrike` -> true; `vegastrike-engine` -> false
+bool legacy_data_dir_mode;
 
 void enableNetwork( bool usenetwork )
 {
@@ -217,9 +220,6 @@ void initSceneManager()
     BOOST_LOG_TRIVIAL(info) << "Creating scene manager...";
     Audio::SceneManager *sm = Audio::SceneManager::getSingleton();
 
-    BOOST_LOG_TRIVIAL(info) << "Creating template manager...";
-    Audio::TemplateManager::getSingleton();
-
     if (Audio::SceneManager::getSingleton() == 0)
         throw Audio::Exception("Singleton null after SceneManager instantiation");
 
@@ -315,9 +315,22 @@ void initLoggingPart2(char debugLevel)
 int main( int argc, char *argv[] )
 {
     // Change to program directory if not already
-    std::string program_path_str(argv[0]);
-    boost::filesystem::path program_path(program_path_str);
+    // std::string program_as_called();
+    boost::filesystem::path program_path(argv[0]);
+
+    boost::filesystem::path program_name = program_path.filename();
     boost::filesystem::path program_directory_path = program_path.parent_path();
+
+    // when the program name is `vegastrike-engine` then enforce that the data directory must be specified
+    // if the program name is `vegastrike` then enable legacy mode where the current path is assumed.
+    legacy_data_dir_mode = (program_name == "vegastrike") || (program_name == "vegastrike.exe");
+    std::cerr<<"Legacy Mode: "<<(legacy_data_dir_mode ? "TRUE" : "FALSE")<<std::endl;
+
+    if (true == legacy_data_dir_mode) {
+        VSFileSystem::datadir = boost::filesystem::current_path().string();
+        std::cerr<<"Saving current directory (" << VSFileSystem::datadir << ") as DATA_DIR"<<std::endl;
+    }
+
     if ( ! program_directory_path.empty())                  // Changing to an empty path does bad things
     {
         boost::filesystem::current_path(program_directory_path);
@@ -326,7 +339,7 @@ int main( int argc, char *argv[] )
     initLoggingPart1();
 
 #ifdef WIN32
-	VSFileSystem::InitHomeDirectory();
+    VSFileSystem::InitHomeDirectory();
 #endif
 
     CONFIGFILE = 0;
@@ -511,8 +524,8 @@ void bootstrap_draw( const std::string &message, Animation *newSplashScreen )
         }
     }
     bs_tp->Draw( game_options.default_boot_message.length() > 0 ?
-		 game_options.default_boot_message : message.length() > 0 ?
-		 message : game_options.initial_boot_message );
+         game_options.default_boot_message : message.length() > 0 ?
+         message : game_options.initial_boot_message );
 
     GFXHudMode( GFXFALSE );
     GFXEndScene();
@@ -760,7 +773,7 @@ const char helpmessage[] =
     "\n";
 const char versionmessage[] =
     // (BenjamenMeyer) this will be `major.minor.patch+githash` once all is said and done
-    "Vega Strike Engine Version 0.8.0+0\n"
+    "Vega Strike Engine Version 0.9.0+0\n"
     "\n";
 std::string ParseCommandLine( int argc, char **lpCmdLine )
 {
@@ -873,6 +886,13 @@ std::string ParseCommandLine( int argc, char **lpCmdLine )
             mission_name[1023] = '\0';
         }
     }
+    if (false == legacy_data_dir_mode) {
+        if (true == VSFileSystem::datadir.empty()) {
+            cout<<"Data directory not specified."<<endl;
+            exit(1);
+        }
+    }
+
     return retstr;
 }
 #undef main

@@ -1,76 +1,51 @@
+#include "vs_globals.h"
+#include "gfx/aux_texture.h"
+
 #include <vector>
 #include <string>
-#include "vs_globals.h"
+
+/*
+ * A decal is a plastic, cloth, paper, or ceramic substrate that has printed on it a pattern or image that
+ * can be moved to another surface upon contact, usually with the aid of heat or water.
+ *
+ * The original code implemented its own ref counting. TODO:I replaced that with a singleton that holds all textures
+ * until the game exits. This should be a reasonable implementation for almost all scenarios.
+ */
+
+using std::vector;
+
 class DecalQueue
 {
-    int nullity;
-    std::vector< int >decalref;
-    std::vector< Texture* >decal;
-public: DecalQueue()
+    vector< Texture* >decals;
+
+public:
+    inline Texture * GetTexture( const unsigned int reference )
     {
-        nullity = -1;
+        return decals[reference];
     }
-    inline Texture * GetTexture( const unsigned int ref )
+
+    unsigned int AddTexture( std::string const &texname, enum FILTER mipmap )
     {
-        return decal[ref];
-    }
-    unsigned int AddTexture( const char *texname, enum FILTER mipmap )
-    {
-        Texture     *tmpDecal = Texture::Exists( std::string( texname ) );
-        if (nullity != -1 && tmpDecal == NULL && !g_game.use_textures)
-            tmpDecal = decal[nullity];
-        unsigned int i = 0;
-        unsigned int retval = 0;
-        int nullio     = -1;
-        if (tmpDecal) {
-            for (; i < decal.size(); i++) {
-                if (decal[i]) {
-                    if ( (*decal[i]) == (*tmpDecal) ) {
-                        retval = i;
-                        decalref[i]++;
-                        break;
-                    }
-                }
-                if (!decal[i] && decalref[i] == 0)
-                    nullio = i;
+        Texture *texture = Texture::Exists( texname );
+
+        // Texture already exists
+        if (texture) {
+            // Check if DecalQueue has the decal in the vector.
+            // If so, return the index.
+            vector<Texture*>::iterator it = std::find(decals.begin(), decals.end(), texture);
+            if(it != decals.end()) {
+                return std::distance(decals.begin(), it);
             }
+
+            // Decal not in queue. Add
+            decals.push_back(texture);
+            return decals.size()-1;
         }
-        if ( !tmpDecal || i == decal.size() ) {
-            //make sure we have our own to delete upon refcount =0
-            Texture *tex = new Texture( texname, 0, mipmap, TEXTURE2D, TEXTURE_2D, GFXTRUE );
-            if ( (nullity == -1) || tex->LoadSuccess() ) {
-                if (nullio != -1) {
-                    retval = nullio;
-                    decal[nullio] = tex;
-                    decalref[nullio] = 1;
-                } else {
-                    retval = decal.size();
-                    decal.push_back( tex );
-                    decalref.push_back( 1 );
-                }
-            }
-            if ( !tex->LoadSuccess() ) {
-                if (nullity == -1) {
-                    nullity = retval;
-                } else {
-                    delete tex;
-                    tex    = NULL;
-                    retval = nullity;
-                    decalref[nullity]++;
-                }
-            }
-        }
-        return retval;
-    }
-    bool DelTexture( unsigned int ref )
-    {
-        decalref[ref]--;
-        if (decalref[ref] <= 0) {
-            delete decal[ref];
-            decal[ref] = NULL;
-            return true;
-        }
-        return false;
+
+        // Need to create texture
+        texture = new Texture( texname.c_str(), 0, mipmap, TEXTURE2D, TEXTURE_2D, GFXTRUE );
+        decals.push_back(texture);
+        return decals.size()-1;
     }
 };
 

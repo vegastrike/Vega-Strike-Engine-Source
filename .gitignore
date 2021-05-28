@@ -8,3 +8,4 @@ packages/
 *.log
 *.bak
 *.kdev4
+.vs/

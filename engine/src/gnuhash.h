@@ -9,8 +9,10 @@ class Unit;
 
 namespace std
 {
+
+// defining things in std:: for basic types is ... frowned upon: http://eel.is/c++draft/namespace.std#1
 template < >
-class hash< void* >
+struct hash< void* >
 {
     hash< size_t >a;
 public:
@@ -20,7 +22,7 @@ public:
     }
 };
 template < >
-class hash< const void* >
+struct hash< const void* >
 {
     hash< size_t >a;
 public:
@@ -29,8 +31,9 @@ public:
         return a( (size_t) key );
     }
 };
+
 template < >
-class hash< const Unit* >
+struct hash< const Unit* >
 {
     hash< size_t >a;
 public:
@@ -40,16 +43,17 @@ public:
     }
 };
 template < >
-class hash< std::pair< Unit*, Unit* > >
+struct hash< std::pair< Unit*, Unit* > >
 {
     hash< size_t >a;
 public:
     size_t operator()( const std::pair< Unit*, Unit* > &key ) const
     {
-        return (size_t) (size_t) ( a( (int) ( ( (size_t) key.first )>>4 ) )
-                                  ^a( (int) ( ( (size_t) key.second )>>4 ) ) );
+        return (size_t) ((size_t) ( a( (int) ( ( (size_t) key.first )>>4 ) ))
+                                  ^((size_t) a( (int) ( ( (size_t) key.second )>>4 ) ) ));
     }
 };
+#ifdef __GNUC__
 //Minimum declaration needed by SharedPool.h
 template < class Key, class Traits = std::less< Key > >
 class hash_compare
@@ -58,6 +62,7 @@ public:
     static const size_t bucket_size = 4;
     static const size_t min_buckets = 8;
 };
+#endif
 }
 
 #endif //def _GNUHASH_H_

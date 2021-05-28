@@ -27,8 +27,9 @@
 #include "vsfilesystem.h"
 #ifdef _WIN32
 #define XMD_H
-#undef HAVE_BOOLEAN
-#define boolean boolean1
+#ifndef HAVE_BOOLEAN
+typedef unsigned char boolean;
+#endif
 #endif
 extern "C" {
 //#define XMD_H

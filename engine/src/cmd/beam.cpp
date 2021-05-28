@@ -53,7 +53,6 @@ Beam::~Beam()
 #endif
     //DO NOT DELETE - shared vlist
     //delete vlist;
-    beamdecals.DelTexture( decal );
 }
 
 extern void AdjustMatrixToTrackTarget( Matrix &mat, const Vector &vel, Unit *target, float speed, bool lead, float cone );

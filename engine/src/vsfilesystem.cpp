@@ -27,6 +27,7 @@
 #include <stdio.h>
 #include <assert.h>
 #include <stdarg.h>
+#include <exception>
 #if defined (_WIN32) && !defined (__CYGWIN__)
 #include <Shlobj.h>
 #include <direct.h>
@@ -70,7 +71,8 @@ struct dirent
 
 #include <string>
 
-
+// from main.cpp
+extern bool legacy_data_dir_mode;
 
 using VSFileSystem::VSVolumeType;
 using VSFileSystem::VSFSNone;
@@ -533,8 +535,24 @@ void InitDataDirectory()
     vector< string >data_paths;
 
     /* commandline-specified paths come first */
-    if (!datadir.empty())
+    if (!datadir.empty()) {
         data_paths.push_back( datadir );
+    }
+
+    if (true == legacy_data_dir_mode) {
+#ifdef WIN32
+        // TODO: push back the following:
+        //      %{programdata}%/Vegastrike
+        //      %{programfiles}%/Vegastrike
+        //      %{programfiles(x86)}%/Vegastrike
+        //      %{programfilesw6432}%/Vegastrike
+        //      %{commonprogramfiles}%/Vegastrike
+        //      %{appdata%}
+        // data_paths.push_back();
+#else
+        data_paths.push_back("/usr/share/vegastrike");
+#endif
+    }
 
     /* DATA_DIR should no longer be necessary--it will either use the path
      *  to the binary, or the current directory. */
@@ -707,11 +725,24 @@ void LoadConfig( string subdir )
         BOOST_LOG_TRIVIAL(info) << boost::format("DATADIR - Found a datadir in config, using : %1%") % game_options.datadir;
         datadir = game_options.datadir;
     } else {
-        BOOST_LOG_TRIVIAL(info) << boost::format("DATADIR - No datadir specified in config file, using : %1%") % datadir;
+        if (true == legacy_data_dir_mode) {
+            BOOST_LOG_TRIVIAL(info) << boost::format("DATADIR - No datadir specified in config file, using : %1%") % datadir;
+        } else {
+            BOOST_LOG_TRIVIAL(fatal) << boost::format("DATADIR - No datadir specified in config file");
+            VSExit( 1 );
+        }
     }
 
-    string universe_file = datadir + "/universe/milky_way.xml";
-    Galaxy galaxy = Galaxy(universe_file);
+    string universe_file = datadir + "/" \
+        + vs_config->getVariable( "data", "universe_path", "universe" ) + "/" \
+        + vs_config->getVariable( "general", "galaxy", "milky_way.xml" );
+    BOOST_LOG_TRIVIAL(debug) << "Force galaxy to " << universe_file;
+    try {
+        Galaxy galaxy = Galaxy(universe_file);
+    } catch (std::exception &e) {
+        BOOST_LOG_TRIVIAL(fatal) << boost::format("Error while loading configuration. Did you specifcy the asset directory? Error: %1%") % e.what();
+        VSExit(1);
+    }
 }
 
 void InitMods()
