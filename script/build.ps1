@@ -22,4 +22,5 @@ cmake --build .\build\ --config Release
 New-Item bin -ItemType Directory -Force
 xcopy .\build\Release\*.* .\bin\
 xcopy .\build\objconv\Release\*.* .\bin\
-xcopy .\build\setup\Release\*.* .\bin\
+# Not building vegasettings for the moment
+# xcopy .\build\setup\Release\*.* .\bin\
