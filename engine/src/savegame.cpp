@@ -44,6 +44,12 @@
 #include "universe.h"
 #include "options.h"
 
+#include <iostream>
+#include <fstream>
+#include <iterator>
+#include <vector>
+
+typedef unsigned char BYTE;
 
 
 using namespace VSFileSystem;
@@ -171,6 +177,99 @@ void SaveFileCopy( const char *src, const char *dst )
         } else {
             BOOST_LOG_TRIVIAL(warning) << boost::format("WARNING : couldn't find the savegame to copy : %1% as SaveFile") % src;
         }
+    }
+}
+
+class Utf8Checker {
+public:
+    bool validUtf8(const std::vector<BYTE> &data) {
+        for (long unsigned int i = 0; i < data.size(); ++ i) {
+            // 0xxxxxxx
+            int bit1 = (data[i] >> 7) & 1;
+            if (bit1 == 0) continue;
+            // 110xxxxx 10xxxxxx
+            int bit2 = (data[i] >> 6) & 1;
+            if (bit2 == 0) return false;
+            // 11
+            int bit3 = (data[i] >> 5) & 1;
+            if (bit3 == 0) {
+                // 110xxxxx 10xxxxxx
+                if ((++ i) < data.size()) {
+                    if (is10x(data[i])) {
+                        continue;
+                    }
+                    return false;
+                } else {
+                    return false;
+                }
+            }
+            int bit4 = (data[i] >> 4) & 1;
+            if (bit4 == 0) {
+                // 1110xxxx 10xxxxxx 10xxxxxx
+                if (i + 2 < data.size()) {
+                    if (is10x(data[i + 1]) && is10x(data[i + 2])) {
+                        i += 2;
+                        continue;
+                    }
+                    return false;
+                } else {
+                    return false;
+                }
+            }
+            int bit5 = (data[i] >> 3) & 1;
+            if (bit5 == 1) return false;
+            if (i + 3 < data.size()) {
+                if (is10x(data[i + 1]) && is10x(data[i + 2]) && is10x(data[i + 3])) {
+                    i += 3;
+                    continue;
+                }
+                return false;
+            } else {
+                return false;
+            }
+        }
+        return true;
+    }
+private:
+    inline bool is10x(int a) {
+        int bit1 = (a >> 7) & 1;
+        int bit2 = (a >> 6) & 1;
+        return (bit1 == 1) && (bit2 == 0);
+    }
+};
+
+std::vector<BYTE> readFile(std::string filename)
+{
+    std::ifstream file(filename, std::ios::binary);
+    file.unsetf(std::ios::skipws);
+    std::streampos fileSize;
+
+    file.seekg(0, std::ios::end);
+    fileSize = file.tellg();
+    file.seekg(0, std::ios::beg);
+
+    std::vector<BYTE> vec;
+    vec.reserve(fileSize);
+
+    std::copy(std::istream_iterator<BYTE>(file),
+          std::istream_iterator<BYTE>(),
+          std::back_inserter(vec));
+
+    file.close();
+
+    return vec;
+}
+
+bool checkSaveGame(std::string filename)
+{
+    string path = GetSaveDir() + filename;
+    std::vector<BYTE> savegame = readFile(path);
+    Utf8Checker* check = new Utf8Checker;
+    if (check->validUtf8(savegame)) {
+        return true;
+    } else {
+        BOOST_LOG_TRIVIAL(fatal) << boost::format("ERROR: save file %1% is not UTF-8") % path;
+        return false;
     }
 }
 

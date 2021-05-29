@@ -155,5 +155,6 @@ const std::string& GetCurrentSaveGame();
 std::string SetCurrentSaveGame( std::string newname );
 const std::string& GetSaveDir();
 void CopySavedShips( std::string filename, int player_num, const std::vector< std::string > &starships, bool load );
+bool checkSaveGame(std::string filename);
 #endif
 
