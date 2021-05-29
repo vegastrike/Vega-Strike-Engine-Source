@@ -4,10 +4,10 @@ name: Windows-CI
 
 # Controls when the action will run. 
 on:
-  ## Triggers the workflow on push or pull request events but only for the master branch
-  #push:
+  # Triggers the workflow on push or pull request events but only for the master branch
+  push:
   #  branches: [ master ]
-  #pull_request:
+  pull_request:
   #  branches: [ master ]
 
   # Allows you to run this workflow manually from the Actions tab
@@ -32,7 +32,7 @@ jobs:
       - name: install-cmake
         uses: lukka/get-cmake@v3.20.1
       
-      - name: run-vcpkg
+      - name: install-vcpkg
         # You may pin to the exact commit or the version.
         # uses: lukka/run-vcpkg@9c0ae56bad291f4b185cc433a9b56084b2962259
         uses: lukka/run-vcpkg@v7.3
@@ -65,3 +65,9 @@ jobs:
           buildWithCMake: true
           # Additional parameters for both CMake and the make program (e.g. ninja or make).  Separate CMake arguments to the native make program arguments with '--', such as: '--clean-first --config Debug -- -j0'. Used by both CMakeListsTxtBasic and CMakeListsTxtAdvanced modes
           buildWithCMakeArgs: "--config Release"
+      
+      - name: copy-build-artifacts
+        run: |
+          mkdir bin
+          xcopy /y .\build\Release\*.* .\bin\
+          xcopy /y .\build\objconv\Release\*.* .\bin\
