@@ -4,10 +4,10 @@ name: Windows-CI
 
 # Controls when the action will run. 
 on:
-  ## Triggers the workflow on push or pull request events but only for the master branch
-  #push:
+  # Triggers the workflow on push or pull request events but only for the master branch
+  push:
   #  branches: [ master ]
-  #pull_request:
+  pull_request:
   #  branches: [ master ]
 
   # Allows you to run this workflow manually from the Actions tab
