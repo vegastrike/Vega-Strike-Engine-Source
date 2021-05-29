@@ -69,5 +69,5 @@ jobs:
       - name: copy-build-artifacts
         run: |
           mkdir bin
-          xcopy .\build\Release\*.* .\bin\
-          xcopy .\build\objconv\Release\*.* .\bin\
+          xcopy /y .\build\Release\*.* .\bin\
+          xcopy /y .\build\objconv\Release\*.* .\bin\
