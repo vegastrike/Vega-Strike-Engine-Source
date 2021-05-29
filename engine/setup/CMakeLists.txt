@@ -31,4 +31,6 @@ IF ((NOT BEOS) AND (NOT WIN32))
         ${GTK3_INCLUDE_DIRS}
     )
 	TARGET_LINK_LIBRARIES(vegasettings ${GTK_LIBS})
+ELSE ((NOT BEOS) AND (NOT WIN32))
+	MESSAGE ("SKIPPING vegasettings - not supported on this platform at this time")
 ENDIF ((NOT BEOS) AND (NOT WIN32))
