@@ -102,7 +102,8 @@ public:
         WeaponGroupSet myset;
         unsigned int   i;
         typename WeaponGroupSet::const_iterator iter;
-        printf( "ToggleWeaponSet: %s\n", FORWARD ? "true" : "false" );
+
+        BOOST_LOG_TRIVIAL(info) << boost::format("ToggleWeaponSet: %s") % (FORWARD ? "true" : "false") ;
         for (i = 0; i < un->mounts.size(); ++i)
             if ( checkmount( un, i, missile ) ) {
                 WeaponGroup mygroup;
@@ -134,18 +135,18 @@ public:
             myset.insert( allWeapons );
         myset.insert( allWeaponsNoSpecial );
         for (iter = myset.begin(); iter != myset.end(); ++iter) {
-            for (WeaponGroup::const_iterator iter2 = (*iter).begin(); iter2 != (*iter).end(); ++iter2)
-                printf( "%d:%s ", *iter2, un->mounts[*iter2].type->name.c_str() );
-            printf( "\n" );
+            for (WeaponGroup::const_iterator iter2 = (*iter).begin(); iter2 != (*iter).end(); ++iter2) {
+                BOOST_LOG_TRIVIAL(info) << boost::format("%d:%s ") % *iter2 % un->mounts[*iter2].type->name.c_str();
+            }
         }
         WeaponGroup activeWeapons;
-        printf( "CURRENT: " );
-        for (i = 0; i < un->mounts.size(); ++i)
+        BOOST_LOG_TRIVIAL(info) <<  "CURRENT: ";
+        for (i = 0; i < un->mounts.size(); ++i) {
             if ( un->mounts[i].status == Mount::ACTIVE && checkmount( un, i, missile ) ) {
                 activeWeapons.insert( i );
-                printf( "%d:%s ", i, un->mounts[i].type->name.c_str() );
+                BOOST_LOG_TRIVIAL(info) << boost::format("%d:%s ") % i % un->mounts[i].type->name.c_str();
             }
-        printf( "\n" );
+        }
         iter = myset.upper_bound( activeWeapons );
         if ( iter == myset.end() )
             iter = myset.begin();
@@ -153,13 +154,13 @@ public:
             return;
         for (i = 0; i < un->mounts.size(); ++i)
             un->mounts[i].DeActive( missile );
-        printf( "ACTIVE: " );
+        BOOST_LOG_TRIVIAL(info) <<  "ACTIVE: ";
         for (WeaponGroup::const_iterator iter2 = (*iter).begin(); iter2 != (*iter).end(); ++iter2) {
-            printf( "%d:%s ", *iter2, un->mounts[*iter2].type->name.c_str() );
+            BOOST_LOG_TRIVIAL(info) <<  boost::format("%d:%s ") % *iter2 % un->mounts[*iter2].type->name.c_str();
             un->mounts[*iter2].Activate( missile );
         }
-        printf( "\n" );
-        printf( "ToggleWeapon end...\n" );
+
+        BOOST_LOG_TRIVIAL(info) << "ToggleWeapon end...\n";
     }
 };
 

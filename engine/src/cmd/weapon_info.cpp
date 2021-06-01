@@ -32,17 +32,20 @@ float weapon_info::Refire() const
     // TODO: what is this???
     if (g_game.difficulty > .98 || len < 9 || name[len-8] != 'C' || name[len-9] != '_' || name[len-7]
         != 'o' || name[len-6] != 'm' || name[len-5] != 'p' || name[len-4] != 'u' || name[len-3]
-        != 't' || name[len-2] != 'e' || name[len-1] != 'r')
+        != 't' || name[len-2] != 'e' || name[len-1] != 'r') {
         return refire_rate;
+    }
     return this->refire_rate*( game_options.refire_difficulty_scaling/(1.0f+(game_options.refire_difficulty_scaling-1.0f)*g_game.difficulty) );
 }
 
 bool weapon_info::isMissile() const
 {
-    if (game_options.projectile_means_missile  && this->type == WEAPON_TYPE::PROJECTILE)
+    if (game_options.projectile_means_missile  && this->type == WEAPON_TYPE::PROJECTILE) {
         return true;
-    if (game_options.projectile_means_missile == false && this->size >= MOUNT_SIZE::LIGHTMISSILE)
+    }
+    if (game_options.projectile_means_missile == false && this->size >= MOUNT_SIZE::LIGHTMISSILE) {
         return true;
+    }
     return false;
 }
 

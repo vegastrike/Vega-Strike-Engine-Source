@@ -9,13 +9,6 @@
 
 
 
-
-
-
-
-
-
-
 struct weapon_info
 {
     // Fields
@@ -89,51 +82,9 @@ struct weapon_info
     friend void beginElement( void *userData, const char *name, const char **atts );
 
 
-
-
-
-
-
-
-
-
-
     float  Refire() const;
     bool   isMissile() const;
     std::string   file;
-
-
-
-
-
-
-
-    /*void Type( WEAPON_TYPE typ )
-    {
-        type = typ;
-        switch (typ)
-        {
-        case WEAPON_TYPE::BOLT:
-            file = "";
-            break;
-        case WEAPON_TYPE::BEAM:
-            file = "beamtexture.bmp";
-            break;
-        case WEAPON_TYPE::BALL:
-            file = "ball.ani";
-            break;
-        case WEAPON_TYPE::PROJECTILE:
-            file = "missile.bfxm";
-            break;
-        default:
-            break;
-        }
-    }*/
-
-    /*void MntSize( enum MOUNT_SIZE size )
-    {
-        this->size = size;
-    }*/
 
 
     void netswap();

@@ -42,7 +42,6 @@
 #include "cmd/planet.h"
 #include "cmd/script/flightgroup.h"
 #include "cmd/script/mission.h"
-#include "cmd/mount_size.h"
 #include "vs_globals.h"
 #include "gfx/car_assist.h"
 #include "cmd/unit_util.h"

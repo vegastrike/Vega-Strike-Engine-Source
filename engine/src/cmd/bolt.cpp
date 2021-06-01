@@ -154,8 +154,9 @@ void Bolt::DrawBolt(float& bolt_size, GFXVertexList *qmesh)
 
         BlendTrans( drawmat, cur_position, prev_position );
         Matrix drawmat( this->drawmat );
-        if (game_options.StretchBolts > 0)
+        if (game_options.StretchBolts > 0) {
             ScaleMatrix( drawmat, Vector( 1, 1, type->speed*BoltDrawManager::elapsed_time*game_options.StretchBolts/type->length ) );
+        }
         GFXLoadMatrixModel( drawmat );
         GFXColor4f( wt->r, wt->g, wt->b, wt->a );
         qmesh->Draw();
