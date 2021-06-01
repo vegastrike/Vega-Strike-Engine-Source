@@ -30,10 +30,10 @@ void LoadMainConfig( void )
     int   got_config = 0;
     int   got_temp   = 0;
     int   got_column = 0;
-    if ( ( fp = fopen( CONFIG_FILE, "r" ) ) == NULL ) {
+    if ( ( fp = fopen( CONFIG_FILE, "r" ) ) == NULL ) { //[MSVC-Warn]
         string opath( origpath );
         opath += string( "/" )+CONFIG_FILE;
-        if ( ( fp = fopen( opath.c_str(), "r" ) ) == NULL ) {
+        if ( ( fp = fopen( opath.c_str(), "r" ) ) == NULL ) { //[MSVC-Warn]
             fprintf( stderr, "Unable to read from %s\n", CONFIG_FILE );
             exit( -1 );
         }
@@ -150,9 +150,9 @@ void LoadConfig( void )
 
     G_CURRENT = &GROUPS;
     C_CURRENT = &CATS;
-    if (useGameConfig() || ( fp = fopen( CONFIG.config_file, "r" ) ) == NULL) {
+    if (useGameConfig() || ( fp = fopen( CONFIG.config_file, "r" ) ) == NULL) { //[MSVC-Warn]
         origconfig = true;
-        if ( ( fp = fopen( mangle_config( CONFIG.config_file ).c_str(), "r" ) ) == NULL ) {
+        if ( ( fp = fopen( mangle_config( CONFIG.config_file ).c_str(), "r" ) ) == NULL ) { //[MSVC-Warn]
             fprintf( stderr, "Unable to read from %s\n", CONFIG_FILE );
             exit( -1 );
         }
@@ -232,21 +232,21 @@ void Modconfig( int setting, const char *name, const char *group ) {
     char *p, *parm, *n_parm, *start_write, *end_write;
     int   commenting = 0;               //0 if scanning, 1 if adding comments, 2 if removing comments
     int   skip;
-    if (useGameConfig() || ( rp = fopen( CONFIG.config_file, "r" ) ) == NULL) {
-        if ( ( rp = fopen( mangle_config( CONFIG.config_file ).c_str(), "r" ) ) == NULL ) {
+    if (useGameConfig() || ( rp = fopen( CONFIG.config_file, "r" ) ) == NULL) { //[MSVC-Warn]
+        if ( ( rp = fopen( mangle_config( CONFIG.config_file ).c_str(), "r" ) ) == NULL ) { //[MSVC-Warn]
             fprintf( stderr, "Unable to read from %s\n", CONFIG_FILE );
             exit( -1 );
         }
     }
-    if ( ( wp = fopen( CONFIG.temp_file, "w" ) ) == NULL ) {
-        if ( ( wp = fopen( mangle_config( CONFIG.temp_file ).c_str(), "w" ) ) == NULL ) {
+    if ( ( wp = fopen( CONFIG.temp_file, "w" ) ) == NULL ) { //[MSVC-Warn]
+        if ( ( wp = fopen( mangle_config( CONFIG.temp_file ).c_str(), "w" ) ) == NULL ) { //[MSVC-Warn]
             fprintf( stderr, "Unable to write to %s\n", CONFIG.temp_file );
             exit( -1 );
         }
     }
     while ( ( p = fgets( line, MAX_READ, rp ) ) != NULL ) {
         chomp( line );
-        strncpy( write, line, MAX_READ + 1);
+        strncpy( write, line, MAX_READ + 1); //[MSVC-Warn]
         skip = 0;
         start_write = line;
         parm = xml_pre_chomp_comment( start_write );         //Gets the start of the comment block
@@ -259,7 +259,7 @@ void Modconfig( int setting, const char *name, const char *group ) {
         end_write = xml_chomp_comment( parm );               //Gets the end of the comment block
                                                              //parm is everything inside <!-- -->, start_write and end_write
                                                              //is everything else (excluding <!-- -->
-        strncpy( mid, parm, MAX_READ + 1 );                      //Mid is used to keep the data inside the comments in memory
+        strncpy( mid, parm, MAX_READ + 1 );                      //Mid is used to keep the data inside the comments in memory //[MSVC-Warn]
         mid[strlen( parm )] = '\0';
         n_parm = next_parm( parm );
         //if (parm[0] == '#' && parm[1] == '#') { fprintf(wp, "%s\n", write); continue; }   We no longer use double # for comments
@@ -343,8 +343,8 @@ void Modconfig( int setting, const char *name, const char *group ) {
     fclose( wp );
     fclose( rp );
     //Now we commit the changes
-    if ( ( rp = fopen( CONFIG.temp_file, "r" ) ) == NULL ) {
-        if ( ( rp = fopen( mangle_config( CONFIG.temp_file ).c_str(), "r" ) ) == NULL ) {
+    if ( ( rp = fopen( CONFIG.temp_file, "r" ) ) == NULL ) { //[MSVC-Warn]
+        if ( ( rp = fopen( mangle_config( CONFIG.temp_file ).c_str(), "r" ) ) == NULL ) { //[MSVC-Warn]
             fprintf( stderr, "Unable to read from %s\n", CONFIG.temp_file );
 
             exit( -1 );
@@ -356,11 +356,11 @@ void Modconfig( int setting, const char *name, const char *group ) {
  *               tmp1 = mangle_config (CONFIG.config_file);
  *       }
  */
-    if ( ( wp = fopen( tmp1.c_str(), "w" ) ) == NULL ) {
+    if ( ( wp = fopen( tmp1.c_str(), "w" ) ) == NULL ) { //[MSVC-Warn]
         tmp1 = mangle_config( CONFIG.config_file );
-        if ( ( wp = fopen( tmp1.c_str(), "w" ) ) == NULL ) {
+        if ( ( wp = fopen( tmp1.c_str(), "w" ) ) == NULL ) { //[MSVC-Warn]
             tmp1 = CONFIG.config_file;
-            if ( ( wp = fopen( tmp1.c_str(), "w" ) ) == NULL ) {
+            if ( ( wp = fopen( tmp1.c_str(), "w" ) ) == NULL ) { //[MSVC-Warn]
                 fprintf( stderr, "Unable to write  to %s\n", CONFIG.config_file );
                 exit( 1 );
             }

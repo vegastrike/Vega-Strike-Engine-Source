@@ -54,7 +54,7 @@ int ShowSubMenu(char ** menuitem_list, char * def, char *retbuffer, const char *
   dialog_vars.default_item=def;
   dialog_vars.title=title;
   dialog_vars.backtitle="Vega Strike Configurator";
-  char *subtitle= new char[strlen(title)+2+strlen(name)];
+  char *subtitle= new char[strlen(title)+2+strlen(name)]; //TODO[String Safety] -- strlen assumes null terminated string
   sprintf(subtitle, "%s %s", title, name);
   dlg_put_backtitle();
   int retval=dialog_menu(subtitle,static_text,HEIGHT,WIDTH,LIST_HEIGHT,getLength(menuitem_list)/2,menuitem_list);
@@ -80,7 +80,7 @@ void SetOption(struct group *CURRENT, char *selectedstr) {
 
   if (OLD == NEW) { return; }
 
-  CURRENT->setting = strdup(NEW->name);
+  CURRENT->setting = strdup(NEW->name); //TODO[String Safety] -- future platform specific intrinsic options relevant here
 
   DisableSetting(OLD->name, OLD->group);
   EnableSetting(NEW->name, NEW->group);
@@ -161,10 +161,10 @@ void ShowMain() {
       if (CUR->name == NULL) { continue; }
       if (strcmp(CURRENT->name, CUR->group) != 0) { continue; }
       if (strcmp(CUR->name, CURRENT->setting) == 0) {
-        group_options_list[selected][i*2+1]=strdup(ON);
+        group_options_list[selected][i*2+1]=strdup(ON); //TODO[String Safety] -- future platform specific intrinsic options relevant here
         subselected=i;
       } else {
-        group_options_list[selected][i*2+1]=strdup(OFF);
+        group_options_list[selected][i*2+1]=strdup(OFF); //TODO[String Safety] -- future platform specific intrinsic options relevant here
       }
       i++;
     } while ((CUR = CUR->next) > 0);
@@ -177,7 +177,7 @@ void ShowMain() {
       continue;
     }
     SetOption(CURRENT,selectedstr);
-    menuitem_list[selected*2+1]=strdup(selectedstr);
+    menuitem_list[selected*2+1]=strdup(selectedstr); //TODO[String Safety] -- future platform specific intrinsic options relevant here
   }
   dlg_clear();
   dlg_killall_bg(&ret);

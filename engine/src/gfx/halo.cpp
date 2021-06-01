@@ -32,10 +32,8 @@ Halo::Halo( const char *texture, const GFXColor &col, const QVector &pos, float 
 Halo::~Halo()
 {
     halodrawqueue[decal]->DelQuad( quadnum );
-    if ( halodecal.DelTexture( decal ) ) {
-        delete halodrawqueue[decal];         //deletes the quad
-        halodrawqueue[decal] = NULL;
-    }
+    delete halodrawqueue[decal];         //deletes the quad
+    halodrawqueue[decal] = NULL;
 }
 
 void Halo::Draw( const Transformation &quat, const Matrix &m, float alpha )

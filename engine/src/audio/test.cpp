@@ -35,7 +35,6 @@
 #include "Listener.h"
 #include "Source.h"
 #include "SourceListener.h"
-#include "TemplateManager.h"
 #include "SourceTemplate.h"
 #include "renderers/OpenAL/OpenALRenderer.h"
 
@@ -55,9 +54,6 @@ namespace Audio {
         {
             cerr << "Creating scene manager..." << flush;
             new SceneManager();
-
-            cerr << "Creating template manager..." << flush;
-            new TemplateManager();
 
             if (SceneManager::getSingleton() == 0)
                 throw Exception("Singleton null after SceneManager instantiation");
@@ -189,67 +185,7 @@ namespace Audio {
             cerr << " ok" << endl;
         }
 
-        void testSimpleSceneWTemplates(const std::string &abtplName, const std::string &beamtplName)
-        {
-            clearScene();
 
-            int i;
-
-            SceneManager *sm = SceneManager::getSingleton();
-
-            // Create (and verify that) a test scene
-            SharedPtr<Scene> scene = sm->createScene("testScene");
-            sm->getScene("testScene");
-            sm->setSceneActive("testScene",true);
-
-            // Simple test scene:
-            //   1. A looping, afterburner source at the back.
-            //   2. A fire-and-forget beam sound to the left (4s)
-            //   3. A fire-and-forget beam sound to the right (8s)
-            //   4. Finish (16s)
-            cerr << "  Creating resources" << endl;
-            cerr << "    looking up templates..." << flush;
-            SharedPtr<SourceTemplate> abtpl = TemplateManager::getSingleton()->getSourceTemplate(abtplName);
-            SharedPtr<SourceTemplate> beamtpl = TemplateManager::getSingleton()->getSourceTemplate(beamtplName);
-            cerr << " ok" << endl;
-
-            cerr << "    setting up listener..." << flush;
-            scene->getListener().setOrientation( Vector3(0,0,1), Vector3(0,1,0) );
-            scene->getListener().setPosition( LVector3(0,0,0) );
-            cerr << " ok" << endl;
-
-            cerr << "    creating looping sources..." << flush;
-            SharedPtr<Source> absource = sm->createSource(abtpl);
-            absource->setPosition(Vector3(0,0,-1));
-            scene->add(absource);
-            cerr << " ok" << endl;
-
-            cerr << "  playing out scene..." << flush;
-
-            absource->startPlaying();
-            for (i=0; i<40; ++i) // 4s = 40 ticks
-                smTick();
-
-            sm->playSource(beamtpl, "testScene",
-                LVector3(-1,0,0),
-                Vector3(0,0,1), Vector3(0,0,0),
-                1);
-            for (i=0; i<40; ++i) // 4s = 40 ticks
-                smTick();
-
-            sm->playSource(beamtpl, "testScene",
-                LVector3(+1,0,0),
-                Vector3(0,0,1), Vector3(0,0,0),
-                1);
-            for (i=0; i<80; ++i) // 8s = 80 ticks
-                smTick();
-
-            absource->stopPlaying();
-            for (i=0; i<10; ++i) // 1s = 10 ticks
-                smTick();
-
-            cerr << " ok" << endl;
-        }
 
         void testSimpleSceneWDynTemplates()
         {
@@ -260,17 +196,11 @@ namespace Audio {
             SharedPtr<SourceTemplate> beamtpl(
                 new SourceTemplate("beam.wav", VSFileSystem::SoundFile, false) );
             beamtpl->setGain(0.5f);
-
-            TemplateManager::getSingleton()->addSourceTemplate("afterburner",abtpl,false);
-            TemplateManager::getSingleton()->addSourceTemplate("beam",beamtpl,false);
-
-            testSimpleSceneWTemplates(":afterburner", ":beam");
         }
 
         void testSimpleSceneWFileTemplates()
         {
             cerr << " Simple scene (persistent templates)" << endl;
-            testSimpleSceneWTemplates("test.sources:afterburner", "test.sources:beam");
         }
 
         class EngParticleListener : public UpdateSourceListener
@@ -383,16 +313,6 @@ namespace Audio {
             sm->getRenderer()->setMeterDistance(1.0);
 
 
-            cerr << "  Creating resources" << endl;
-            cerr << "    looking up templates..." << flush;
-            SharedPtr<SourceTemplate> abtpl = TemplateManager::getSingleton()->getSourceTemplate(
-                "test.sources:afterburner");
-            SharedPtr<SourceTemplate> engtpl = TemplateManager::getSingleton()->getSourceTemplate(
-                "test.sources:engine");
-            SharedPtr<SourceTemplate> engexpl = TemplateManager::getSingleton()->getSourceTemplate(
-                "test.sources:explosion");
-            cerr << " ok" << endl;
-
             cerr << "    setting up CP listener..." << flush;
             cpscene->getListener().setOrientation( Vector3(0,0,1), Vector3(0,1,0) );
             cpscene->getListener().setPosition( LVector3(0,0,0) );
@@ -404,10 +324,6 @@ namespace Audio {
             cerr << " ok" << endl;
 
             cerr << "    creating looping sources..." << flush;
-
-            SharedPtr<Source> absource = sm->createSource(abtpl);
-            absource->setPosition(Vector3(0,0,-1));
-            cpscene->add(absource);
 
             vector<SharedPtr<Source> > engsources;
             vector<LVector3> engpaths; // x=phase, y=speed, z=wobble
@@ -425,13 +341,6 @@ namespace Audio {
                     double radii = worldsize * ( 1.0 + 0.25 * double(rand() - RAND_MAX/2) / RAND_MAX );
 
                     engpaths.push_back(LVector3(phase, speed, radii));
-
-                    SharedPtr<Source> src = sm->createSource(engtpl);
-                    src->setUserDataLong(i);
-                    src->setSourceListener(englistener);
-                    engsources.push_back(src);
-
-                    spcscene->add(src);
                 }
             }
 
@@ -439,9 +348,6 @@ namespace Audio {
             cerr << " ok" << endl;
 
             cerr << "  playing out scene..." << flush;
-
-            absource->setGain(0.01);
-            absource->startPlaying();
 
             {
                 for (vector<SharedPtr<Source> >::iterator i = engsources.begin(); i != engsources.end(); ++i)
@@ -473,7 +379,6 @@ namespace Audio {
                 smQuickTick();
             }
 
-            absource->stopPlaying();
             { for (vector<SharedPtr<Source> >::iterator i = engsources.begin(); i != engsources.end(); ++i)
                 (*i)->stopPlaying(); }
 

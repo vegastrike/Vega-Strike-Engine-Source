@@ -7,10 +7,12 @@
 #include "gfx/quaternion.h"
 #include "collide_map.h"
 
-class Animation;
+
 class Unit;
 class StarSystem;
-class bolt_draw ;
+class BoltDrawManager;
+class Animation;
+
 class Bolt {
 private:
   const weapon_info* type;//beam or bolt;
@@ -23,11 +25,11 @@ private:
   int decal;//which image it uses
  public:
   CollideMap::iterator location;
-  static int AddTexture(bolt_draw *q, std::string filename);
-  static int AddAnimation(bolt_draw *q, std::string filename, QVector cur_position);
+  static int AddTexture(BoltDrawManager *q, std::string filename);
+  static int AddAnimation(BoltDrawManager *q, std::string filename, QVector cur_position);
   bool Collide (Unit * target);
   static bool CollideAnon (Collidable::CollideRef bolt_name, Unit* target);
-  static Bolt * BoltFromIndex(StarSystem* ss,Collidable::CollideRef bolt_name);
+  static Bolt * BoltFromIndex(Collidable::CollideRef bolt_name);
   static Collidable::CollideRef BoltIndex(int index, int decal, bool isBall);
   bool operator == (const Bolt & b) const{
     
@@ -38,23 +40,16 @@ private:
   }
   Bolt(const weapon_info *type, const Matrix &orientationpos, const Vector & ShipSpeed, void *owner, CollideMap::iterator hint);//makes a bolt
   void Destroy(unsigned int index);
-  static void Draw();
+  //static void Draw();
+  static void DrawAllBolts();
+  static void DrawAllBalls();
+  void DrawBolt(float& bolt_size, GFXVertexList *qmesh);
+  void DrawBall(float& bolt_size, Animation *cur);
   bool Update(Collidable::CollideRef index);
   bool Collide(Collidable::CollideRef index);
   static void UpdatePhysics(StarSystem *ss);//updates all physics in the starsystem
   void noop()const{}
 };
-class bolt_draw {
-public:
-  class DecalQueue *boltdecals;
-  static GFXVertexList * boltmesh;
-  vector <std::string> animationname;
-  vector <Animation *> animations;
-  vector <vector <Bolt> > bolts;
-  vector <vector <Bolt> > balls;
-  vector <int> cachedecals;
-  bolt_draw();
-  ~bolt_draw();
-};
+
 
 #endif

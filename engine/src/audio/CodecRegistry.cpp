@@ -57,6 +57,7 @@ namespace Audio {
             codecPriority[codec] = priority;
             nameCodec[codec->getName()] = codec;
 
+            // static initializer ordering issue between boost logger and other code?
             BOOST_LOG_TRIVIAL(trace) << "Registering codec " << codec->getName().c_str();
 
             const Codec::Extensions *ext = codec->getExtensions();
