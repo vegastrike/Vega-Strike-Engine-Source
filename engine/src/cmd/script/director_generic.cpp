@@ -327,6 +327,11 @@ static void saveStringListPy( int playernum, string mykey, vector< string > name
     saveStringList(playernum, mykey, names);
 }
 
+static bool isUtf8SaveGamePy( string savegame )
+{
+    return isUtf8SaveGame(savegame);
+}
+
 
 PYTHON_BEGIN_MODULE( Director )
 PYTHON_BEGIN_INHERIT_CLASS( Director, pythonMission, PythonMissionBaseClass, "Mission" )
@@ -348,6 +353,7 @@ PYTHON_DEFINE_GLOBAL( Director, &eraseSaveStringPy, "eraseSaveString" );
 PYTHON_DEFINE_GLOBAL( Director, &clearSaveStringPy, "clearSaveString" );
 PYTHON_DEFINE_GLOBAL( Director, &loadStringListPy, "loadStringList" );
 PYTHON_DEFINE_GLOBAL( Director, &saveStringListPy, "saveStringList" );
+PYTHON_DEFINE_GLOBAL( Director, &isUtf8SaveGamePy, "isUtf8SaveGame" );
 PYTHON_END_MODULE( Director )
 
 void InitDirector()

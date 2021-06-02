@@ -5979,7 +5979,7 @@ bool BaseComputer::actionConfirmedLoadGame()
     if (desc) {
         std::string tmp = desc->text();
         if (tmp.length() > 0) {
-            if (!checkSaveGame(tmp)) {
+            if (!isUtf8SaveGame(tmp)) {
                 showAlert( tmp + " is not UTF-8, convert it before loading" );
                 return true;
             }

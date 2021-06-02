@@ -182,6 +182,9 @@ void SaveFileCopy( const char *src, const char *dst )
 
 class Utf8Checker {
 public:
+    /*
+     * From https://helloacm.com/how-to-validate-utf-8-encoding-the-simple-utf-8-validation-algorithm/
+     */
     bool validUtf8(const std::vector<BYTE> &data) {
         for (long unsigned int i = 0; i < data.size(); ++ i) {
             // 0xxxxxxx
@@ -239,6 +242,9 @@ private:
 };
 
 std::vector<BYTE> readFile(std::string filename)
+/*
+ * From https://stackoverflow.com/a/21802936
+ */
 {
     std::ifstream file(filename, std::ios::binary);
     file.unsetf(std::ios::skipws);
@@ -260,9 +266,9 @@ std::vector<BYTE> readFile(std::string filename)
     return vec;
 }
 
-bool checkSaveGame(std::string filename)
+bool isUtf8SaveGame(std::string filename)
 {
-    string path = GetSaveDir() + filename;
+    std::string path = GetSaveDir() + filename;
     std::vector<BYTE> savegame = readFile(path);
     Utf8Checker* check = new Utf8Checker;
     if (check->validUtf8(savegame)) {
