@@ -41,6 +41,7 @@
 #include "computer.h"
 #include "intelligent.h"
 #include "energetic.h"
+#include "carrier.h"
 
 #include "mount.h"
 
@@ -81,15 +82,7 @@ extern float capship_size;
 Unit* getMasterPartList();
 bool CloseEnoughToAutotrack( Unit *me, Unit *targ, float &cone );
 
-//A stupid struct that is only for grouping 2 different types of variables together in one return value
-class CargoColor
-{
-public:
-    Cargo    cargo;
-    GFXColor color;
-    CargoColor() : cargo()
-        , color( 1, 1, 1, 1 ) {}
-};
+
 
 class PlanetaryOrbit;
 class UnitCollection;
@@ -142,7 +135,7 @@ struct PlanetaryOrbitData;
  */
 
 // TODO: move Armed to subclasses
-class Unit : public Armed, public Audible, public Drawable, public Damageable, public Energetic, public Intelligent, public Movable
+class Unit : public Armed, public Audible, public Drawable, public Damageable, public Energetic, public Intelligent, public Movable, public Carrier
 {
 protected:
 //How many lists are referencing us
@@ -489,7 +482,6 @@ public:
 
 protected:
     static std::string massSerializer( const struct XMLType &input, void *mythis );
-    static std::string cargoSerializer( const struct XMLType &input, void *mythis );
     static std::string mountSerializer( const struct XMLType &input, void *mythis );
     static std::string shieldSerializer( const struct XMLType &input, void *mythis );
     static std::string subunitSerializer( const struct XMLType &input, void *mythis );
@@ -814,39 +806,6 @@ public:
     void ReTargetFg( int which_target = 0 );
 //not used yet
 
-/*
- **************************************************************************************
- **** CARGO STUFF                                                                   ***
- **************************************************************************************
- */
-
-protected:
-    void SortCargo();
-public:
-    static Unit * makeMasterPartList();
-    bool CanAddCargo( const Cargo &carg ) const;
-    void AddCargo( const Cargo &carg, bool sort = true );
-    int RemoveCargo( unsigned int i, int quantity, bool eraseZero = true );
-    float PriceCargo( const std::string &s );
-    Cargo& GetCargo( unsigned int i );
-    const Cargo& GetCargo( unsigned int i ) const;
-    void GetSortedCargoCat( const std::string &category, size_t &catbegin, size_t &catend );
-//below function returns NULL if not found
-    Cargo * GetCargo( const std::string &s, unsigned int &i );
-    const Cargo * GetCargo( const std::string &s, unsigned int &i ) const;
-    unsigned int numCargo() const;
-    std::string GetManifest( unsigned int i, Unit *scanningUnit, const Vector &original_velocity ) const;
-    bool SellCargo( unsigned int i, int quantity, float &creds, Cargo &carg, Unit *buyer );
-    bool SellCargo( const std::string &s, int quantity, float &creds, Cargo &carg, Unit *buyer );
-    bool BuyCargo( const Cargo &carg, float &creds );
-    bool BuyCargo( unsigned int i, unsigned int quantity, Unit *buyer, float &creds );
-    bool BuyCargo( const std::string &cargo, unsigned int quantity, Unit *buyer, float &creds );
-    void EjectCargo( unsigned int index );
-    float getEmptyCargoVolume( void ) const;
-    float getCargoVolume( void ) const;
-    float getEmptyUpgradeVolume( void ) const;
-    float getUpgradeVolume( void ) const;
-    float getHiddenCargoVolume( void ) const;
 
 
 /*

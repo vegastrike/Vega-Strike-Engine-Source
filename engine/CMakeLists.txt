@@ -215,6 +215,8 @@ ADD_LIBRARY(vegastrike-OPcollide
 SET(LIBCMD_SOURCES
     src/cmd/alphacurve.cpp
     src/cmd/beam_generic.cpp
+    src/cmd/cargo.cpp
+    src/cmd/carrier.cpp
     src/cmd/collection.cpp
     src/cmd/collide_map.cpp
     src/cmd/collide.cpp
@@ -514,6 +516,7 @@ SET(VEGASTRIKE_SOURCES
     src/cmd/pilot.cpp
     src/cmd/images.cpp
     src/cmd/unit.cpp
+    src/cmd/turret.cpp
     src/gldrv/gl_program.cpp
     src/gldrv/gl_clip.cpp
     src/gldrv/gl_fog.cpp
