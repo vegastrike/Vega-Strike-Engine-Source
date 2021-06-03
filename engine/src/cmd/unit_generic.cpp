@@ -920,15 +920,6 @@ void Unit::Init( const char *filename,
             delete unitTables.back();
             unitTables.pop_back();
         }
-    } else {
-        if (netxml == NULL)
-            Unit::LoadXML( f, unitModifications.c_str() );
-        else
-            Unit::LoadXML( f, "", netxml );
-        if (err <= Ok)
-            f.Close();
-        if ( f2.Valid() )
-            f2.Close();
     }
     calculate_extent( false );
     pilot->SetComm( this );
