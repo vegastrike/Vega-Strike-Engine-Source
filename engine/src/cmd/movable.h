@@ -214,8 +214,7 @@ public:
     {
         return cumulative_velocity;
     }
-    virtual Vector GetWarpVelocity() const = 0;
-    virtual Vector GetWarpRefVelocity() const = 0;
+
     void SetVelocity( const Vector& );
     void SetAngularVelocity( const Vector& );
     float GetMoment() const
@@ -232,6 +231,8 @@ public:
     //Sets if forces should resolve on this unit or not
     void SetResolveForces( bool );
 
+
+
     float GetMaxWarpFieldStrength( float rampmult = 1.f ) const;
     void DecreaseWarpEnergy( bool insystem, float time = 1.0f );
     void IncreaseWarpEnergy( bool insystem, float time = 1.0f );
@@ -239,7 +240,6 @@ public:
     void Rotate( const Vector &axis );
 
     virtual QVector realPosition() = 0;
-    virtual float CalculateNearestWarpUnit( float minmultiplier, Unit **nearest_unit, bool count_negative_warp_units ) const = 0;
     virtual void UpdatePhysics3(const Transformation &trans,
                         const Matrix &transmat,
                         bool lastframe,

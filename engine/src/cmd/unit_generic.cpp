@@ -150,25 +150,7 @@ void Unit::SetNebula( Nebula *neb )
     }
 }
 
-bool Unit::InCorrectStarSystem( StarSystem *active )
-{
-    return active == activeStarSystem;
-}
 
-bool Unit::TransferUnitToSystem( unsigned int whichJumpQueue,
-                                 class StarSystem* &previouslyActiveStarSystem,
-                                 bool DoSightAndSound )
-{
-    return false;
-}
-
-
-
-bool Unit::AutoPilotTo( Unit *un, bool automaticenergyrealloc )
-{
-    std::string tmp;
-    return AutoPilotToErrorMessage( un, automaticenergyrealloc, tmp );
-}
 
 
 bool Unit::InRange( const Unit *target, double &mm, bool cone, bool cap, bool lock ) const
@@ -256,17 +238,7 @@ bool CrashForceDock( Unit *thus, Unit *dockingUn, bool force )
 }
 
 
-void Unit::ActivateJumpDrive( int destination )
-{
-    if ( ( ( docked&(DOCKED|DOCKED_INSIDE) ) == 0 ) && jump.drive != -2 )
-        jump.drive = destination;
-}
 
-void Unit::DeactivateJumpDrive()
-{
-    if (jump.drive >= 0)
-        jump.drive = -1;
-}
 
 float rand01()
 {
@@ -990,31 +962,7 @@ void Unit::calculate_extent( bool update_collide_queue )
         radial_size = tmpmax( tmpmax( corner_max.i, corner_max.j ), corner_max.k );
 }
 
-StarSystem* Unit::getStarSystem()
-{
-    if (activeStarSystem) {
-        return activeStarSystem;
-    } else {
-        Cockpit *cp = _Universe->isPlayerStarship( this );
-        if (cp)
-            if (cp->activeStarSystem)
-                return cp->activeStarSystem;
-    }
-    return _Universe->activeStarSystem();
-}
 
-const StarSystem* Unit::getStarSystem() const
-{
-    if (activeStarSystem) {
-        return activeStarSystem;
-    } else {
-        Cockpit *cp = _Universe->isPlayerStarship( this );
-        if (cp)
-            if (cp->activeStarSystem)
-                return cp->activeStarSystem;
-    }
-    return _Universe->activeStarSystem();
-}
 
 
 
@@ -1045,15 +993,9 @@ void Unit::SetFg( Flightgroup *fg, int fg_subnumber )
     flightgroup_subnumber = fg_subnumber;
 }
 
-void Unit::AddDestination( const std::string &dest )
-{
-    pImage->destination.push_back( dest );
-}
 
-const std::vector< std::string >& Unit::GetDestinations() const
-{
-    return pImage->destination;
-}
+
+
 
 
 
@@ -1457,292 +1399,20 @@ QVector Unit::realPosition( )
     return LocalPosition();
 }
 
-static QVector RealPosition( const Unit *un )
+// TODO: need to move and join a class
+QVector RealPosition( const Unit *un )
 {
     if ( un->isSubUnit() )
         return un->Position();
     return un->LocalPosition();
 }
 
-static QVector AutoSafeEntrancePoint( const QVector start, float rsize, const Unit *goal )
-{
-    QVector def  = UniverseUtil::SafeEntrancePoint( start, rsize );
-    float   bdis = ( def-RealPosition( goal ) ).MagnitudeSquared();
-    for (int i = -1; i <= 1; ++i)
-        for (int j = -1; j <= 1; ++j)
-            for (int k = -1; k <= 1; k += 2) {
-                QVector delta( i, j, k );
-                delta.Normalize();
-                QVector tmp  = RealPosition( goal )+delta*(goal->rSize()+rsize);
-                tmp = UniverseUtil::SafeEntrancePoint( tmp, rsize );
-                float   tmag = ( tmp-RealPosition( goal ) ).MagnitudeSquared();
-                if (tmag < bdis) {
-                    bdis = tmag;
-                    def  = tmp;
-                }
-            }
-    return def;
-}
+
 
 float globQueryShell( QVector pos, QVector dir, float rad );
-std::string GenerateAutoError( Unit *me, Unit *targ )
-{
-    if ( UnitUtil::isAsteroid( targ ) ) {
-        static std::string err =
-            XMLSupport::escaped_string( vs_config->getVariable( "graphics", "hud", "AsteroidsNearMessage",
-                                                                "#ff0000Asteroids Near#000000" ) );
-        return err;
-    }
-    if ( targ->isPlanet() ) {
-        static std::string err =
-            XMLSupport::escaped_string( vs_config->getVariable( "graphics", "hud", "PlanetNearMessage",
-                                                                "#ff0000Planetary Hazard Near#000000" ) );
-        return err;
-    }
-    if (targ->getRelation( me ) < 0) {
-        static std::string err =
-            XMLSupport::escaped_string( vs_config->getVariable( "graphics", "hud", "EnemyNearMessage",
-                                                                "#ff0000Enemy Near#000000" ) );
-        return err;
-    }
-    static std::string err =
-        XMLSupport::escaped_string( vs_config->getVariable( "graphics", "hud", "StarshipNearMessage",
-                                                            "#ff0000Starship Near#000000" ) );
-    return err;
-}
 
-bool Unit::AutoPilotToErrorMessage( const Unit *target,
-                                    bool ignore_energy_requirements,
-                                    std::string &failuremessage,
-                                    int recursive_level )
-{
-    static bool auto_valid =
-        XMLSupport::parse_bool( vs_config->getVariable( "physics", "insystem_jump_or_timeless_auto-pilot", "false" ) );
-    if (!auto_valid) {
-        static std::string err = "No Insystem Jump";
-        failuremessage = err;
-        return false;
-    }
-    if (target->isUnit() == _UnitType::planet) {
-        const Unit   *targ = *(target->viewSubUnits());
-        if (targ && 0 == targ->graphicOptions.FaceCamera)
-            return AutoPilotToErrorMessage( targ, ignore_energy_requirements, failuremessage, recursive_level );
-    }
-    if (warpenergy < jump.insysenergy)
-        if (!ignore_energy_requirements)
-            return false;
-    signed char  Guaranteed = ComputeAutoGuarantee( this );
-    if (Guaranteed == Mission::AUTO_OFF)
-        return false;
-    static float autopilot_term_distance =
-        XMLSupport::parse_float( vs_config->getVariable( "physics", "auto_pilot_termination_distance", "6000" ) );
-    static float atd_no_enemies =
-        XMLSupport::parse_float( vs_config->getVariable( "physics", "auto_pilot_termination_distance_no_enemies",
-                                                        vs_config->getVariable( "physics", "auto_pilot_termination_distance",
-                                                                                "6000" ) ) );
-    static float autopilot_no_enemies_multiplier =
-        XMLSupport::parse_float( vs_config->getVariable( "physics", "auto_pilot_no_enemies_distance_multiplier", "4" ) );
-    if ( isSubUnit() ) {
-        static std::string err = "Return To Cockpit for Auto";
-        failuremessage = err;
-        return false;                            //we can't auto here;
-    }
-    StarSystem *ss = activeStarSystem;
-    if (ss == NULL)
-        ss = _Universe->activeStarSystem();
-    Unit   *un = NULL;
-    QVector start( Position() );
-    QVector end( RealPosition( target ) );
-    float   totallength = (start-end).Magnitude();
-    bool    nanspace    = false;
-    if ( !FINITE( totallength ) ) {
-        nanspace    = true;
-        start       = QVector( 100000000.0, 100000000.0, 10000000000000.0 );
-        totallength = (start-end).Magnitude();
-        if ( !FINITE( totallength ) ) {
-            end = QVector( 200000000.0, 100000000.0, 10000000000000.0 );
-            totallength = (start-end).Magnitude();
-        }
-    }
-    QVector endne( end );
 
-    float   totpercent = 1;
-    if (totallength > 1) {
-        float apt =
-            (target->isUnit() == _UnitType::planet) ? ( autopilot_term_distance+target->rSize()
-                                               *UniverseUtil::getPlanetRadiusPercent() ) : autopilot_term_distance;
-        float aptne     =
-            (target->isUnit() == _UnitType::planet) ? ( atd_no_enemies+target->rSize()
-                                               *UniverseUtil::getPlanetRadiusPercent() ) : atd_no_enemies;
-        float percent   = (getAutoRSize( this, this )+rSize()+target->rSize()+apt)/totallength;
-        float percentne = (getAutoRSize( this, this )+rSize()+target->rSize()+aptne)/totallength;
-        if (percentne > 1)
-            endne = start;
 
-        else
-            endne = start*percentne+end*(1-percentne);
-        if (percent > 1) {
-            end = start;
-            totpercent = 0;
-        } else {
-            totpercent *= (1-percent);
-            end = start*percent+end*(1-percent);
-        }
-    }
-    bool ok     = true;
-
-    static bool teleport_autopilot = XMLSupport::parse_bool( vs_config->getVariable( "physics", "teleport_autopilot", "true" ) );
-    bool unsafe = false;
-    if ( (!teleport_autopilot) && (!nanspace) ) {
-        if (Guaranteed == Mission::AUTO_NORMAL && CloakVisible() > .5) {
-            bool ignore_friendlies = true;
-            for (un_iter i = ss->getUnitList().createIterator(); (un = *i) != NULL; ++i) {
-                static bool canflythruplanets =
-                    XMLSupport::parse_bool( vs_config->getVariable( "physics", "can_auto_through_planets", "true" ) );
-                if ( ( !(un->isUnit() == _UnitType::planet
-                         && canflythruplanets) ) && un->isUnit() != _UnitType::nebula && ( !UnitUtil::isSun( un ) ) ) {
-                    if (un != this && un != target) {
-                        float tdis  = ( start-un->Position() ).Magnitude()-rSize()-un->rSize();
-                        float nedis = ( end-un->Position() ).Magnitude()-rSize()-un->rSize();
-                        float trad  = getAutoRSize( this, un, ignore_friendlies )+getAutoRSize( this, this, ignore_friendlies );
-                        if (tdis <= trad) {
-                            failuremessage = GenerateAutoError( this, un );
-                            return false;
-                        }
-                        if ( (nedis < trad*autopilot_no_enemies_multiplier
-                              || tdis <= trad*autopilot_no_enemies_multiplier) && un->getRelation( this ) < 0 ) {
-                            unsafe = true;
-                            failuremessage = GenerateAutoError( this, un );
-                        }
-                        float intersection =
-                            globQueryShell( start-un->Position(), end-start, getAutoRSize( this,
-                                                                                           un,
-                                                                                           ignore_friendlies )+un->rSize() );
-                        if (intersection > 0) {
-                            unsafe = true;
-                            end            = start+(end-start)*intersection;
-                            totpercent    *= intersection;
-                            ok     = false;
-                            failuremessage = GenerateAutoError( this, un );
-                        }
-                    }
-                }
-            }
-        }
-    } else if (!nanspace) {
-        //just make sure we aren't in an asteroid field
-        Unit *un;
-        for (un_iter i = ss->getUnitList().createIterator(); (un = *i) != NULL; ++i)
-            if ( UnitUtil::isAsteroid( un ) ) {
-                static float minasteroiddistance =
-                    XMLSupport::parse_float( vs_config->getVariable( "physics", "min_asteroid_distance", "-100" ) );
-                if (UnitUtil::getDistance( this, un ) < minasteroiddistance) {
-                    failuremessage = GenerateAutoError( this, un );
-                    return false;                     //no auto in roid field
-                }
-            }
-    }
-    bool nowhere = false;
-    if (this != target) {
-        if ( (end-start).MagnitudeSquared() < rSize()*rSize() ) {
-            failuremessage =
-                XMLSupport::escaped_string( vs_config->getVariable( "graphics", "hud", "AlreadyNearMessage",
-                                                                    "#ff0000Already Near#000000" ) );
-            return false;
-        }
-        warpenergy -= totpercent*jump.insysenergy;
-        if (unsafe == false && totpercent == 0)
-            end = endne;
-        QVector sep( UniverseUtil::SafeEntrancePoint( end, rSize() ) );
-        if ( (sep-end).MagnitudeSquared() > 16*rSize()*rSize() )
-            //DOn't understand why rsize is so bigsep = AutoSafeEntrancePoint (end,(RealPosition(target)-end).Magnitude()-target->rSize(),target);
-            sep = AutoSafeEntrancePoint( end, rSize(), target );
-        if ( ( sep-RealPosition( target ) ).MagnitudeSquared()
-            > ( RealPosition( this )-RealPosition( target ) ).MagnitudeSquared() ) {
-            sep     = RealPosition( this );
-            nowhere = true;
-        }
-        static bool auto_turn_towards = XMLSupport::parse_bool( vs_config->getVariable( "physics", "auto_turn_towards", "true" ) );
-        if (auto_turn_towards) {
-            for (int i = 0; i < 3; ++i) {
-                Vector methem( RealPosition( target ).Cast()-sep.Cast() );
-                methem.Normalize();
-                Vector p, q, r;
-                GetOrientation( p, q, r );
-                p = methem.Cross( r );
-                float  theta = p.Magnitude();
-                if (theta*theta > .00001) {
-                    p *= (asin( theta )/theta);
-                    Rotate( p );
-                    GetOrientation( p, q, r );
-                }
-                if (r.Dot( methem ) < 0)
-                    Rotate( p*(PI/theta) );
-                Velocity = methem*Velocity.Magnitude();
-            }
-        }
-        static string insys_jump_ani = vs_config->getVariable( "graphics", "insys_jump_animation", "warp.ani" );
-        if (
-
-            insys_jump_ani.length() ) {
-            static bool docache = true;
-            if (docache) {
-                UniverseUtil::cacheAnimation( insys_jump_ani );
-                docache = false;
-            }
-            static float insys_jump_ani_size   =
-                XMLSupport::parse_float( vs_config->getVariable( "graphics", "insys_jump_animation_size", "4" ) );
-            static float insys_jump_ani_growth =
-                XMLSupport::parse_float( vs_config->getVariable( "graphics", "insys_jump_animation_growth", ".99" ) );
-            UniverseUtil::playAnimationGrow( insys_jump_ani, RealPosition( this ),
-                                             rSize()*insys_jump_ani_size, insys_jump_ani_growth );
-
-            Vector v( GetVelocity() );
-            v.Normalize();
-            Vector p, q, r;
-            GetOrientation( p, q, r );
-            static float sec = XMLSupport::parse_float( vs_config->getVariable( "graphics", "insys_jump_ani_second_ahead", "4" ) );
-            UniverseUtil::playAnimationGrow( insys_jump_ani, sep+GetVelocity()*sec+v*rSize(), rSize()*8, .97 );
-            UniverseUtil::playAnimationGrow( insys_jump_ani, sep+GetVelocity()*sec+2*v*rSize()+r*4*rSize(), rSize()*16, .97 );
-        }
-        static bool warptrail = XMLSupport::parse_bool( vs_config->getVariable( "graphics", "warp_trail", "true" ) );
-        if ( warptrail && (!nowhere) ) {
-            static float warptrailtime = XMLSupport::parse_float( vs_config->getVariable( "graphics", "warp_trail_time", "20" ) );
-            AddWarp( this, RealPosition( this ), warptrailtime );
-        }
-        if (!nowhere)
-            SetCurPosition( sep );
-        Cockpit *cp;
-        if ( ( cp = _Universe->isPlayerStarship( this ) ) != NULL ) {
-            std::string followermessage;
-            if (getFlightgroup() != NULL) {
-                Unit *other = NULL;
-                if (recursive_level > 0) {
-                    for (un_iter ui = ss->getUnitList().createIterator(); NULL != (other = *ui); ++ui) {
-                        Flightgroup *ff = other->getFlightgroup();
-                        bool leadah     = ( ff == getFlightgroup() );
-                        if (ff)
-                            if (ff->leader.GetUnit() == this)
-                                leadah = true;
-                        Order *otherord = other->getAIState();
-                        if (otherord) {
-                            if ( otherord->PursueTarget( this, leadah ) ) {
-                                other->AutoPilotToErrorMessage( this,
-                                                                ignore_energy_requirements,
-                                                                followermessage,
-                                                                recursive_level-1 );
-                                if (leadah)
-                                    if ( NULL == _Universe->isPlayerStarship( other ) )
-                                        other->SetPosition( AutoSafeEntrancePoint( LocalPosition(), other->rSize()*1.5, other ) );
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
-    return ok;
-}
 
 extern void ActivateAnimation( Unit *jp );
 void TurnJumpOKLightOn( Unit *un, Cockpit *cp )
@@ -5392,40 +5062,11 @@ using std::string;
 
 
 
-float Unit::CourseDeviation( const Vector &OriginalCourse, const Vector &FinalCourse ) const
-{
-    if (ViewComputerData().max_ab_speed() > .001)
-        return ( OriginalCourse-(FinalCourse) ).Magnitude()/ViewComputerData().max_ab_speed();
-    else
-        return (FinalCourse-OriginalCourse).Magnitude();
-}
 
-/*
- **************************************************************************************
- *** STAR SYSTEM JUMP STUFF                                                          **
- **************************************************************************************
- */
 
-bool Unit::TransferUnitToSystem( StarSystem *Current )
-{
-    if ( getStarSystem()->RemoveUnit( this ) ) {
-        this->RemoveFromSystem();
-        this->Target( NULL );
-        Current->AddUnit( this );
 
-        Cockpit *an_active_cockpit = _Universe->isPlayerStarship( this );
-        if (an_active_cockpit != NULL) {
-            an_active_cockpit->activeStarSystem = Current;
-            an_active_cockpit->visitSystem( Current->getFileName() );
-        }
-        activeStarSystem = Current;
-        return true;
-    } else {
-        BOOST_LOG_TRIVIAL(fatal) << "Fatal Error: cannot remove starship from critical system";
-        VSFileSystem::flushLogs();
-    }
-    return false;
-}
+
+
 
 /*
  **************************************************************************************
@@ -5637,54 +5278,7 @@ string toLowerCase( string in )
 unsigned int Drawable::unitCount = 0;
 
 
-// TODO: move to ship
-Vector Unit::GetWarpRefVelocity() const
-{
-    //Velocity
-    Vector VelocityRef( 0, 0, 0 );
-    {
-        const Unit *vr = computer.velocity_ref.GetConstUnit();
-        if (vr)
-            VelocityRef = vr->cumulative_velocity;
-    }
-    Vector v   = Velocity-VelocityRef;
-    float  len = v.Magnitude();
-    if (len > .01)      //only get velocity going in DIRECTIOn of cumulative transformation for warp calc...
-        v = v*( cumulative_transformation_matrix.getR().Dot( v*(1./len) ) );
 
-    return v;
-}
-
-// TODO: move to ship
-Vector Unit::GetWarpVelocity() const
-{
-    if (graphicOptions.WarpFieldStrength == 1.0) {
-        // Short circuit, most ships won't be at warp, so it simplifies math a lot
-        return cumulative_velocity;
-    } else {
-        Vector VelocityRef( 0, 0, 0 );
-        {
-            Unit *vr = const_cast< UnitContainer* > (&computer.velocity_ref)->GetUnit();
-            if (vr)
-                VelocityRef = vr->cumulative_velocity;
-        }
-
-        //return(cumulative_velocity*graphicOptions.WarpFieldStrength);
-        Vector vel   = cumulative_velocity-VelocityRef;
-        float  speed = vel.Magnitude();
-        //return vel*graphicOptions.WarpFieldStrength;
-        if (speed > 0) {
-            Vector veldir    = vel*(1./speed);
-            Vector facing    = cumulative_transformation_matrix.getR();
-            float  ang       = facing.Dot( veldir );
-            float  warpfield = graphicOptions.WarpFieldStrength;
-            if (ang < 0) warpfield = 1./warpfield;
-            return facing*(ang*speed*(warpfield-1.))+vel+VelocityRef;
-        } else {
-            return VelocityRef;
-        }
-    }
-}
 
 void Unit::UpdatePhysics3(const Transformation &trans,
                           const Matrix &transmat,
@@ -5973,84 +5567,7 @@ bool Unit::isPlayerShip()
     return _Universe->isPlayerStarship( this ) ? true : false;
 }
 
-float Unit::CalculateNearestWarpUnit( float minmultiplier, Unit **nearest_unit, bool count_negative_warp_units ) const
-{
-    static float  smallwarphack     = XMLSupport::parse_float( vs_config->getVariable( "physics", "minwarpeffectsize", "100" ) );
-    static float  bigwarphack       =
-        XMLSupport::parse_float( vs_config->getVariable( "physics", "maxwarpeffectsize", "10000000" ) );
-    //Boundary between multiplier regions 1&2. 2 is "high" mult
-    static double warpregion1       = XMLSupport::parse_float( vs_config->getVariable( "physics", "warpregion1", "5000000" ) );
-    //Boundary between multiplier regions 0&1 0 is mult=1
-    static double warpregion0       = XMLSupport::parse_float( vs_config->getVariable( "physics", "warpregion0", "5000" ) );
-    //Mult at 1-2 boundary
-    static double warpcruisemult    = XMLSupport::parse_float( vs_config->getVariable( "physics", "warpcruisemult", "5000" ) );
-    //degree of curve
-    static double curvedegree       = XMLSupport::parse_float( vs_config->getVariable( "physics", "warpcurvedegree", "1.5" ) );
-    //coefficient so as to agree with above
-    static double upcurvek = warpcruisemult/pow( (warpregion1-warpregion0), curvedegree );
-    //inverse fractional effect of ship vs real big object
-    static float  def_inv_interdiction = 1.
-                                         /XMLSupport::parse_float( vs_config->getVariable( "physics", "default_interdiction",
-                                                                                           ".125" ) );
-    Unit *planet;
-    Unit *testthis = NULL;
-    {
-        NearestUnitLocator locatespec;
-        findObjects( _Universe->activeStarSystem()->collide_map[Unit::UNIT_ONLY], location[Unit::UNIT_ONLY], &locatespec );
-        testthis = locatespec.retval.unit;
-    }
-    for (un_fiter iter = _Universe->activeStarSystem()->gravitationalUnits().fastIterator();
-         (planet = *iter) || testthis;
-         ++iter) {
-        if ( !planet || !planet->Killed() ) {
-            if (planet == NULL) {
-                planet   = testthis;
-                testthis = NULL;
-            }
-            if (planet == this)
-                continue;
-            float shiphack = 1;
-            if (planet->isUnit() != _UnitType::planet) {
-                shiphack = def_inv_interdiction;
-                if ( planet->specInterdiction != 0 && planet->graphicOptions.specInterdictionOnline != 0
-                    && (planet->specInterdiction > 0 || count_negative_warp_units) ) {
-                    shiphack = 1/fabs( planet->specInterdiction );
-                    if (specInterdiction != 0 && graphicOptions.specInterdictionOnline != 0)
-                        //only counters artificial interdiction ... or maybe it cheap ones shouldn't counter expensive ones!? or
-                        // expensive ones should counter planets...this is safe now, for gameplay
-                        shiphack *= fabs( specInterdiction );
-                }
-            }
-            float   multipliertemp = 1;
-            float   minsizeeffect  = (planet->rSize() > smallwarphack) ? planet->rSize() : smallwarphack;
-            float   effectiverad   = minsizeeffect*( 1.0f+UniverseUtil::getPlanetRadiusPercent() )+rSize();
-            if (effectiverad > bigwarphack)
-                effectiverad = bigwarphack;
-            QVector dir     = Position()-planet->Position();
-            double  udist   = dir.Magnitude();
-            float   sigdist = UnitUtil::getSignificantDistance( this, planet );
-            if ( planet->isPlanet() && udist < (1<<28) ) //If distance is viable as a float approximation and it's an actual celestial body
-                udist = sigdist;
-            do {
-                double dist = udist;
-                if (dist < 0) dist = 0;
-                dist *= shiphack;
-                if ( dist > (effectiverad+warpregion0) )
-                    multipliertemp = pow( (dist-effectiverad-warpregion0), curvedegree )*upcurvek;
-                else
-                    multipliertemp = 1;
-                if (multipliertemp < minmultiplier) {
-                    minmultiplier = multipliertemp;
-                    *nearest_unit = planet;
-                    //eventually use new multiplier to compute
-                } else {break; }
-            } while (0);
-            if (!testthis)
-                break; //don't want the ++
-        }
-    }
-    return minmultiplier;
-}
+
 
 float Unit::DealDamageToHull( const Vector &pnt, float damage)
 {

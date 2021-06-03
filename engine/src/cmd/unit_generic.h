@@ -42,6 +42,7 @@
 #include "intelligent.h"
 #include "energetic.h"
 #include "carrier.h"
+#include "jump_capable.h"
 
 #include "mount.h"
 
@@ -135,7 +136,8 @@ struct PlanetaryOrbitData;
  */
 
 // TODO: move Armed to subclasses
-class Unit : public Armed, public Audible, public Drawable, public Damageable, public Energetic, public Intelligent, public Movable, public Carrier
+class Unit : public Armed, public Audible, public Drawable, public Damageable, public Energetic,
+        public Intelligent, public Movable, public JumpCapable, public Carrier
 {
 protected:
 //How many lists are referencing us
@@ -374,12 +376,10 @@ public:
 //Shouldn't do anything here - but needed by Python
     class Cockpit * GetVelocityDifficultyMult( float& ) const;
 
-//the star system I'm in
-    StarSystem *activeStarSystem;
+
 //Takes out of the collide table for this system.
     void RemoveFromSystem();
     void RequestPhysics();               //Requeues the unit so that it is simulated ASAP
-    bool InCorrectStarSystem( StarSystem* );
     unsigned int nummesh() const {
         // Return number of meshes except shield
         return ( meshdata.size() - 1 );
@@ -432,35 +432,23 @@ public:
  */
 
 public:
-    const std::vector< std::string >& GetDestinations() const;
-    void AddDestination( const std::string& );
+
 
     Computer computer;
     void SwitchCombatFlightMode();
     bool CombatMode();
-//SHOULD TRY TO COME BACK HERE
-    virtual bool TransferUnitToSystem( StarSystem *NewSystem );
-    virtual bool TransferUnitToSystem( unsigned int whichJumpQueue,
-                                       class StarSystem*&previouslyActiveStarSystem,
-                                       bool DoSightAndSound );
-    StarSystem * getStarSystem();
-    const StarSystem * getStarSystem() const;
+
 
     Pilot *pilot;
     bool   selected;
 
-    const UnitJump& GetJumpStatus() const
-    {
-        return jump;
-    }
-    float CourseDeviation( const Vector &OriginalCourse, const Vector &FinalCourse ) const;
+
     Computer& GetComputerData() { return computer; }
     const Computer& ViewComputerData() const
     {
         return computer;
     }
-    void ActivateJumpDrive( int destination = 0 );
-    void DeactivateJumpDrive();
+
 
 /*
  **************************************************************************************
@@ -515,11 +503,9 @@ public:
                         Unit *superunit) override;
     bool isPlayerShip() override;
 
-    Vector GetWarpRefVelocity() const override;
-    Vector GetWarpVelocity() const override;
 
-    bool AutoPilotToErrorMessage( const Unit *un, bool automaticenergyrealloc, std::string &failuremessage, int recursive_level = 2 );
-    bool AutoPilotTo( Unit *un, bool automaticenergyrealloc );
+
+
 //The owner of this unit. This may not collide with owner or units owned by owner. Do not dereference (may be dead pointer)
     void *owner;                                 //void ensures that it won't be referenced by accident
 
@@ -593,7 +579,6 @@ public:
 
 
 
-    float CalculateNearestWarpUnit( float minmultiplier, Unit **nearest_unit, bool count_negative_warp_units ) const override;
 
 
 //What's the size of this unit

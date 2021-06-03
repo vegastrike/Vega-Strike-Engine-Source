@@ -225,6 +225,7 @@ SET(LIBCMD_SOURCES
     src/cmd/mount.cpp
     src/cmd/armed.cpp
     src/cmd/audible.cpp
+    src/cmd/jump_capable.cpp
     src/cmd/role_bitmask.cpp
     src/cmd/unit_collide.cpp
     src/cmd/unit_const_cache.cpp
