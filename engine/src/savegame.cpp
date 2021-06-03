@@ -56,6 +56,7 @@ using namespace VSFileSystem;
 using std::vector;
 using std::string;
 using std::allocator;
+using std::unique_ptr;
 
 std::string CurrentSaveGameName = "";
 std::string GetHelperPlayerSaveGame( int num )
@@ -270,7 +271,7 @@ bool isUtf8SaveGame(std::string filename)
 {
     std::string path = GetSaveDir() + filename;
     std::vector<BYTE> savegame = readFile(path);
-    Utf8Checker* check = new Utf8Checker;
+    std::unique_ptr<Utf8Checker> check(new Utf8Checker);
     if (check->validUtf8(savegame)) {
         return true;
     } else {
