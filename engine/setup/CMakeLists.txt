@@ -1,4 +1,4 @@
-IF (NOT BEOS)
+IF ((NOT BEOS) AND (NOT WIN32))
 	#SET_PROPERTY(DIRECTORY PROPERTY INCLUDE_DIRECTORIES "")
 	SET(VEGASETTINGS_SOURCES
 		src/c/setup.cpp
@@ -31,4 +31,6 @@ IF (NOT BEOS)
         ${GTK3_INCLUDE_DIRS}
     )
 	TARGET_LINK_LIBRARIES(vegasettings ${GTK_LIBS})
-ENDIF (NOT BEOS)
+ELSE ((NOT BEOS) AND (NOT WIN32))
+	MESSAGE ("SKIPPING vegasettings - not supported on this platform at this time")
+ENDIF ((NOT BEOS) AND (NOT WIN32))
