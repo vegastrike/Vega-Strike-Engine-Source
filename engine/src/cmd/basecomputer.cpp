@@ -92,7 +92,6 @@ using namespace XMLSupport;
 //end for directory thing
 extern const char *DamagedCategory;
 
-
 int BaseComputer:: dirty = 0;
 
 static GFXColor UnsaturatedColor( float r, float g, float b, float a = 1.0f )
@@ -5980,6 +5979,10 @@ bool BaseComputer::actionConfirmedLoadGame()
     if (desc) {
         std::string tmp = desc->text();
         if (tmp.length() > 0) {
+            if (!isUtf8SaveGame(tmp)) {
+                showAlert( tmp + " is not UTF-8, convert it before loading" );
+                return true;
+            }
             Cockpit *cockpit = player ? _Universe->isPlayerStarship( player ) : 0;
             if (player && cockpit) {
                 UniverseUtil::showSplashScreen( "" );
