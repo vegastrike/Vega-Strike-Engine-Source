@@ -1786,37 +1786,5 @@ void UpdateMasterPartList( Unit *ret )
     }
 }
 
-Unit* Unit::makeMasterPartList()
-{
-    unsigned int i;
-    static std::string mpl = vs_config->getVariable( "data", "master_part_list", "master_part_list" );
-    CSVTable *table = loadCSVTableList(mpl, VSFileSystem::UnknownFile, false);
 
-    Unit *ret = new Unit();
-    ret->name = "master_part_list";
-    if (table) {
-        vsUMap< std::string, int >::const_iterator it;
-        for (it = table->rows.begin(); it != table->rows.end(); ++it) {
-            CSVRow row( table, it->second );
-            Cargo  carg;
-            carg.content     = row["file"];
-            carg.category    = row["categoryname"];
-            carg.volume      = stof( row["volume"], 1 );
-            carg.mass        = stof( row["mass"], 1 );
-            carg.quantity    = 1;
-            carg.price       = stoi( row["price"], 1 );
-            carg.description = row["description"];
-            ret->GetImageInformation().cargo.push_back( carg );
-        }
-        delete table;
-    }
-    UpdateMasterPartList( ret );
-    if ( !ret->GetCargo( "Pilot", i ) )     //required items
-        ret->AddCargo( Cargo( "Pilot", "Contraband", 800, 1, .01, 1, 1.0, 1.0 ), true );
-    if ( !ret->GetCargo( "Hitchhiker", i ) )
-        ret->AddCargo( Cargo( "Hitchhiker", "Passengers", 42, 1, .01, 5.0, 1.0, 1.0 ), true );
-    if ( !ret->GetCargo( "Slaves", i ) )
-        ret->AddCargo( Cargo( "Slaves", "Contraband", 800, 1, .01, 1, 1, 1 ), true );
-    return ret;
-}
 

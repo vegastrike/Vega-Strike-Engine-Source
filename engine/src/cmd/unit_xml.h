@@ -39,7 +39,6 @@ void pushMesh( Unit::XML*xml,
                int startframe /*-1 is random frame*/,
                double texturestarttime );
 
-Mount * createMount( const std::string &name, int ammo, int volume, float xyscale = 0, float zscale = 0 ); //short fix
 VSSprite * createVSSprite( const char *file );
 bool isVSSpriteLoaded( const VSSprite* );
 void deleteVSSprite( VSSprite* );

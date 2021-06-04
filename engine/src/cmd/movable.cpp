@@ -211,6 +211,7 @@ void Movable::UpdatePhysics( const Transformation &trans,
 
 void Movable::AddVelocity( float difficulty )
 {
+    Unit *unit = static_cast<Unit*>(this);
     float  lastWarpField = graphicOptions.WarpFieldStrength;
 
     bool   playa = isPlayerShip();
@@ -256,7 +257,7 @@ void Movable::AddVelocity( float difficulty )
     //not any more? lastWarpField=1;
     Vector v;
     if (graphicOptions.WarpFieldStrength != 1.0)
-        v = GetWarpVelocity();
+        v = unit->GetWarpVelocity();
     else
         v = Velocity;
 
@@ -456,15 +457,17 @@ Vector Movable::ToWorldCoordinates( const Vector &v ) const
     return TransformNormal( cumulative_transformation_matrix, v );
 }
 
+// TODO: move this to JumpCapable
 float Movable::GetMaxWarpFieldStrength( float rampmult ) const
 {
-    Vector v = GetWarpRefVelocity();
+    const Unit *unit = static_cast<const Unit*>(this);
+    Vector v = unit->GetWarpRefVelocity();
 
 
     //inverse fractional effect of ship vs real big object
     float minmultiplier = warpMultiplierMax*graphicOptions.MaxWarpMultiplier;
     Unit *nearest_unit  = NULL;
-    minmultiplier = CalculateNearestWarpUnit( minmultiplier, &nearest_unit, true );
+    minmultiplier = unit->CalculateNearestWarpUnit( minmultiplier, &nearest_unit, true );
     float minWarp = warpMultiplierMin*graphicOptions.MinWarpMultiplier;
     float maxWarp = warpMultiplierMax*graphicOptions.MaxWarpMultiplier;
     if (minmultiplier < minWarp)
