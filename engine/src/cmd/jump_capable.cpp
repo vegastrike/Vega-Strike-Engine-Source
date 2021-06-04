@@ -15,8 +15,8 @@ static QVector AutoSafeEntrancePoint( const QVector start, float rsize, const Un
 {
     QVector def  = UniverseUtil::SafeEntrancePoint( start, rsize );
     float   bdis = ( def-RealPosition( goal ) ).MagnitudeSquared();
-    for (int i = -1; i <= 1; ++i)
-        for (int j = -1; j <= 1; ++j)
+    for (int i = -1; i <= 1; ++i) {
+        for (int j = -1; j <= 1; ++j) {
             for (int k = -1; k <= 1; k += 2) {
                 QVector delta( i, j, k );
                 delta.Normalize();
@@ -28,6 +28,8 @@ static QVector AutoSafeEntrancePoint( const QVector start, float rsize, const Un
                     def  = tmp;
                 }
             }
+        }
+    }
     return def;
 }
 
@@ -36,17 +38,24 @@ signed char ComputeAutoGuarantee( Unit *un )
 {
     Cockpit     *cp;
     unsigned int cpnum = 0;
-    if ( ( cp = _Universe->isPlayerStarship( un ) ) )
+    if ( ( cp = _Universe->isPlayerStarship( un ) ) ) {
         cpnum = cp-_Universe->AccessCockpit( 0 );
-    else
+    } else {
         return Mission::AUTO_ON;
+    }
     unsigned int i;
-    for (i = 0; i < active_missions.size(); ++i)
-        if (active_missions[i]->player_num == cpnum && active_missions[i]->player_autopilot != Mission::AUTO_NORMAL)
+    for (i = 0; i < active_missions.size(); ++i) {
+        if (active_missions[i]->player_num == cpnum && active_missions[i]->player_autopilot != Mission::AUTO_NORMAL) {
             return active_missions[i]->player_autopilot;
-    for (i = 0; i < active_missions.size(); i++)
-        if (active_missions[i]->global_autopilot != Mission::AUTO_NORMAL)
+        }
+    }
+
+    for (i = 0; i < active_missions.size(); i++) {
+        if (active_missions[i]->global_autopilot != Mission::AUTO_NORMAL) {
             return active_missions[i]->global_autopilot;
+        }
+    }
+
     return Mission::AUTO_NORMAL;
 }
 
@@ -82,8 +91,9 @@ std::string GenerateAutoError( Unit *me, Unit *targ )
 void JumpCapable::ActivateJumpDrive( int destination )
 {
     Unit *unit = static_cast<Unit*>(this);
-    if ( ( ( unit->docked & (unit->DOCKED|unit->DOCKED_INSIDE) ) == 0 ) && unit->jump.drive != -2 )
+    if ( ( ( unit->docked & (unit->DOCKED|unit->DOCKED_INSIDE) ) == 0 ) && unit->jump.drive != -2 ) {
         unit->jump.drive = destination;
+    }
 }
 
 
@@ -121,12 +131,15 @@ bool JumpCapable::AutoPilotToErrorMessage( const Unit *target,
         if (targ && 0 == targ->graphicOptions.FaceCamera)
             return AutoPilotToErrorMessage( targ, ignore_energy_requirements, failuremessage, recursive_level );
     }
-    if (unit->warpenergy < unit->jump.insysenergy)
-        if (!ignore_energy_requirements)
+    if (unit->warpenergy < unit->jump.insysenergy) {
+        if (!ignore_energy_requirements) {
             return false;
+        }
+    }
     signed char  Guaranteed = ComputeAutoGuarantee( unit );
-    if (Guaranteed == Mission::AUTO_OFF)
+    if (Guaranteed == Mission::AUTO_OFF) {
         return false;
+    }
     static float autopilot_term_distance =
         XMLSupport::parse_float( vs_config->getVariable( "physics", "auto_pilot_termination_distance", "6000" ) );
     static float atd_no_enemies =
@@ -169,11 +182,11 @@ bool JumpCapable::AutoPilotToErrorMessage( const Unit *target,
                                                *UniverseUtil::getPlanetRadiusPercent() ) : atd_no_enemies;
         float percent   = (getAutoRSize( unit, unit )+unit->rSize()+target->rSize()+apt)/totallength;
         float percentne = (getAutoRSize( unit, unit )+unit->rSize()+target->rSize()+aptne)/totallength;
-        if (percentne > 1)
+        if (percentne > 1) {
             endne = start;
-
-        else
+        } else {
             endne = start*percentne+end*(1-percentne);
+        }
         if (percent > 1) {
             end = start;
             totpercent = 0;
@@ -225,7 +238,7 @@ bool JumpCapable::AutoPilotToErrorMessage( const Unit *target,
     } else if (!nanspace) {
         //just make sure we aren't in an asteroid field
         Unit *un;
-        for (un_iter i = ss->getUnitList().createIterator(); (un = *i) != NULL; ++i)
+        for (un_iter i = ss->getUnitList().createIterator(); (un = *i) != NULL; ++i) {
             if ( UnitUtil::isAsteroid( un ) ) {
                 static float minasteroiddistance =
                     XMLSupport::parse_float( vs_config->getVariable( "physics", "min_asteroid_distance", "-100" ) );
@@ -234,6 +247,7 @@ bool JumpCapable::AutoPilotToErrorMessage( const Unit *target,
                     return false;                     //no auto in roid field
                 }
             }
+        }
     }
     bool nowhere = false;
     if (this != target) {
@@ -247,9 +261,10 @@ bool JumpCapable::AutoPilotToErrorMessage( const Unit *target,
         if (unsafe == false && totpercent == 0)
             end = endne;
         QVector sep( UniverseUtil::SafeEntrancePoint( end, unit->rSize() ) );
-        if ( (sep-end).MagnitudeSquared() > 16*unit->rSize()*unit->rSize() )
+        if ( (sep-end).MagnitudeSquared() > 16*unit->rSize()*unit->rSize() ) {
             //DOn't understand why rsize is so bigsep = AutoSafeEntrancePoint (end,(RealPosition(target)-end).Magnitude()-target->rSize(),target);
             sep = AutoSafeEntrancePoint( end, unit->rSize(), target );
+        }
         if ( ( sep-RealPosition( target ) ).MagnitudeSquared()
             > ( RealPosition( unit )-RealPosition( target ) ).MagnitudeSquared() ) {
             sep     = RealPosition( unit );
@@ -275,9 +290,7 @@ bool JumpCapable::AutoPilotToErrorMessage( const Unit *target,
             }
         }
         static string insys_jump_ani = vs_config->getVariable( "graphics", "insys_jump_animation", "warp.ani" );
-        if (
-
-            insys_jump_ani.length() ) {
+        if (insys_jump_ani.length() ) {
             static bool docache = true;
             if (docache) {
                 UniverseUtil::cacheAnimation( insys_jump_ani );
@@ -382,30 +395,35 @@ float JumpCapable::CalculateNearestWarpUnit( float minmultiplier, Unit **nearest
                 if ( planet->specInterdiction != 0 && planet->graphicOptions.specInterdictionOnline != 0
                     && (planet->specInterdiction > 0 || count_negative_warp_units) ) {
                     shiphack = 1/fabs( planet->specInterdiction );
-                    if (unit->specInterdiction != 0 && unit->graphicOptions.specInterdictionOnline != 0)
+                    if (unit->specInterdiction != 0 && unit->graphicOptions.specInterdictionOnline != 0) {
                         //only counters artificial interdiction ... or maybe it cheap ones shouldn't counter expensive ones!? or
                         // expensive ones should counter planets...this is safe now, for gameplay
                         shiphack *= fabs( unit->specInterdiction );
+                    }
                 }
             }
             float   multipliertemp = 1;
             float   minsizeeffect  = (planet->rSize() > smallwarphack) ? planet->rSize() : smallwarphack;
             float   effectiverad   = minsizeeffect*( 1.0f+UniverseUtil::getPlanetRadiusPercent() )+unit->rSize();
-            if (effectiverad > bigwarphack)
+            if (effectiverad > bigwarphack) {
                 effectiverad = bigwarphack;
+            }
             QVector dir     = unit->Position()-planet->Position();
             double  udist   = dir.Magnitude();
             float   sigdist = UnitUtil::getSignificantDistance( unit, planet );
-            if ( planet->isPlanet() && udist < (1<<28) ) //If distance is viable as a float approximation and it's an actual celestial body
+            if ( planet->isPlanet() && udist < (1<<28) ) {
+                //If distance is viable as a float approximation and it's an actual celestial body
                 udist = sigdist;
+            }
             do {
                 double dist = udist;
                 if (dist < 0) dist = 0;
                 dist *= shiphack;
-                if ( dist > (effectiverad+warpregion0) )
+                if ( dist > (effectiverad+warpregion0) ) {
                     multipliertemp = pow( (dist-effectiverad-warpregion0), curvedegree )*upcurvek;
-                else
+                } else {
                     multipliertemp = 1;
+                }
                 if (multipliertemp < minmultiplier) {
                     minmultiplier = multipliertemp;
                     *nearest_unit = planet;
@@ -423,18 +441,20 @@ float JumpCapable::CalculateNearestWarpUnit( float minmultiplier, Unit **nearest
 float JumpCapable::CourseDeviation( const Vector &OriginalCourse, const Vector &FinalCourse ) const
 {
     const Unit *unit = static_cast<const Unit*>(this);
-    if (unit->ViewComputerData().max_ab_speed() > .001)
+    if (unit->ViewComputerData().max_ab_speed() > .001) {
         return ( OriginalCourse-(FinalCourse) ).Magnitude()/unit->ViewComputerData().max_ab_speed();
-    else
+    } else {
         return (FinalCourse-OriginalCourse).Magnitude();
+    }
 }
 
 
 void JumpCapable::DeactivateJumpDrive()
 {
     Unit *unit = static_cast<Unit*>(this);
-    if (unit->jump.drive >= 0)
+    if (unit->jump.drive >= 0) {
         unit->jump.drive = -1;
+    }
 }
 
 
@@ -459,9 +479,11 @@ StarSystem* JumpCapable::getStarSystem()
         return activeStarSystem;
     } else {
         Cockpit *cp = _Universe->isPlayerStarship( unit );
-        if (cp)
-            if (cp->activeStarSystem)
+        if (cp) {
+            if (cp->activeStarSystem) {
                 return cp->activeStarSystem;
+            }
+        }
     }
     return _Universe->activeStarSystem();
 }
@@ -473,9 +495,11 @@ const StarSystem* JumpCapable::getStarSystem() const
         return activeStarSystem;
     } else {
         Cockpit *cp = _Universe->isPlayerStarship( unit );
-        if (cp)
-            if (cp->activeStarSystem)
+        if (cp) {
+            if (cp->activeStarSystem) {
                 return cp->activeStarSystem;
+            }
+        }
     }
     return _Universe->activeStarSystem();
 }
@@ -494,9 +518,10 @@ Vector JumpCapable::GetWarpRefVelocity() const
     }
     Vector v   = unit->Velocity-VelocityRef;
     float  len = v.Magnitude();
-    if (len > .01)      //only get velocity going in DIRECTIOn of cumulative transformation for warp calc...
+    if (len > .01) {
+        //only get velocity going in DIRECTIOn of cumulative transformation for warp calc...
         v = v*( unit->cumulative_transformation_matrix.getR().Dot( v*(1./len) ) );
-
+    }
     return v;
 }
 
@@ -512,8 +537,9 @@ Vector JumpCapable::GetWarpVelocity() const
         Vector VelocityRef( 0, 0, 0 );
         {
             Unit *vr = const_cast< UnitContainer* > (&unit->computer.velocity_ref)->GetUnit();
-            if (vr)
+            if (vr) {
                 VelocityRef = vr->cumulative_velocity;
+            }
         }
 
         //return(cumulative_velocity*graphicOptions.WarpFieldStrength);
