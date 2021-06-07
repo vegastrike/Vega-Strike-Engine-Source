@@ -104,7 +104,7 @@ inline_ bool planeBoxOverlap(const Point& normal, const float d, const Point& ma
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /**
  *	Triangle-Box overlap test using the separating axis theorem.
- *	This is the code from Tomas M�ller, a bit optimized:
+ *	This is the code from Tomas Möller, a bit optimized:
  *	- with some more lazy evaluation (faster path on PC)
  *	- with a tiny bit of assembly
  *	- with "SAT-lite" applied if needed
