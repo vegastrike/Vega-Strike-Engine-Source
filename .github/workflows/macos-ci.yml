@@ -1,14 +1,7 @@
 name: 'MacOS - CI'
 
 on:
-  # Activate on pull-requests...
-  #pull_request:
-
-  # ...pushes to certain branches...
-  push:
-    branches: [osx-gha]
-
-  # ...or manually
+  # Activate manually
   workflow_dispatch:
 
 jobs:
