@@ -21,6 +21,7 @@ jobs:
     runs-on: windows-latest
 
     env:
+      buildDir: '${{ github.workspace }}/build/'
       PYTHONHOME: '${{ github.workspace }}/v/packages/python3_x64-windows/tools/python3'
 
     # Steps represent a sequence of tasks that will be executed as part of the job
@@ -41,6 +42,8 @@ jobs:
           setupOnly: true
           vcpkgGitCommitId: '5568f110b509a9fd90711978a7cb76bae75bb092'
           vcpkgTriplet: 'x64-windows'
+          appendedCacheKey: ${{ hashFiles( '**/vcpkg.json' ) }}
+          additionalCachedPaths: ${{ env.buildDir }}/vcpkg_installed
         
       - name: run-cmake
         # You may pin to the exact commit or the version.
@@ -58,7 +61,7 @@ jobs:
           # Specify the CMake generator to use. Possible values: Ninja: Ninja, NinjaMulti: Ninja Multi-Config UnixMakefiles: Unix Makefiles, VS16Win64: Visual Studio 2019 x64, VS16Arm64: Visual Studio 2019 ARM64, VS16Arm: Visual Studio 2019 ARM, VS16Win32: Visual Studio 2019 Win32, VS15Win64: Visual Studio 2017 x64, VS15Arm64: Visual Studio 2017 ARM64, VS15Arm: Visual Studio 2017 ARM, VS15Win32: Visual Studio 2017 Win32. Used by CMakeListsTxtBasic mode.
           cmakeGenerator: VS16Win64
           # Set the build directory, i.e. where CMake generates the build system files. Defaults to `$(Build.ArtifactStagingDirectory)` for CMakeLists.txt, and to `$(Build.ArtifactStagingDirectory)/<configuration-name>` for CMakeSettings.json. Used by any mode.
-          buildDirectory: ${{ github.workspace }}/build
+          buildDirectory: ${{ env.buildDir }}
           # Provides a mean to provide all the CMake arguments. This is required when using CMakeLists.txt in Advanced mode. For CMakeSettings.json, the arguments are already inferred, but you can append your arguments providing them here.  Used by CMakeListsTxtAdvanced and CMakeSettingsJson modes.
           cmakeAppendedArgs: -DUSE_PYTHON_3=ON
           # Indicates whether to run 'cmake --build' after CMake project files have been generated successfully. Used by any mode.
