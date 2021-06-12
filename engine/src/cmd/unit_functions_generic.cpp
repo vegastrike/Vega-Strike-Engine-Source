@@ -161,23 +161,7 @@ void ScoreKill( Cockpit *cp, Unit *un, Unit *killedUnit )
 }
 
 //From unit_physics.cpp
-signed char ComputeAutoGuarantee( Unit *un )
-{
-    Cockpit     *cp;
-    unsigned int cpnum = 0;
-    if ( ( cp = _Universe->isPlayerStarship( un ) ) )
-        cpnum = cp-_Universe->AccessCockpit( 0 );
-    else
-        return Mission::AUTO_ON;
-    unsigned int i;
-    for (i = 0; i < active_missions.size(); ++i)
-        if (active_missions[i]->player_num == cpnum && active_missions[i]->player_autopilot != Mission::AUTO_NORMAL)
-            return active_missions[i]->player_autopilot;
-    for (i = 0; i < active_missions.size(); i++)
-        if (active_missions[i]->global_autopilot != Mission::AUTO_NORMAL)
-            return active_missions[i]->global_autopilot;
-    return Mission::AUTO_NORMAL;
-}
+
 
 float getAutoRSize( Unit *orig, Unit *un, bool ignore_friend = false )
 {

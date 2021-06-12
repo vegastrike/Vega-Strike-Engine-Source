@@ -20,7 +20,7 @@
 cmake -B build -S .\engine\ -DCMAKE_TOOLCHAIN_FILE="$env:VCPKG_ROOT\scripts\buildsystems\vcpkg.cmake" -DCMAKE_BUILD_TYPE=Release -DUSE_PYTHON_3=ON
 cmake --build .\build\ --config Release
 New-Item bin -ItemType Directory -Force
-xcopy .\build\Release\*.* .\bin\
-xcopy .\build\objconv\Release\*.* .\bin\
+xcopy /y .\build\Release\*.* .\bin\
+xcopy /y .\build\objconv\Release\*.* .\bin\
 # Not building vegasettings for the moment
-# xcopy .\build\setup\Release\*.* .\bin\
+# xcopy /y .\build\setup\Release\*.* .\bin\

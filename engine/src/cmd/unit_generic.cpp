@@ -67,6 +67,7 @@
 #include "universe.h"
 #include "weapon_info.h"
 #include "mount_size.h"
+#include "turret.h"
 #include "energetic.h"
 
 #include <math.h>
@@ -151,25 +152,7 @@ void Unit::SetNebula( Nebula *neb )
     }
 }
 
-bool Unit::InCorrectStarSystem( StarSystem *active )
-{
-    return active == activeStarSystem;
-}
 
-bool Unit::TransferUnitToSystem( unsigned int whichJumpQueue,
-                                 class StarSystem* &previouslyActiveStarSystem,
-                                 bool DoSightAndSound )
-{
-    return false;
-}
-
-
-
-bool Unit::AutoPilotTo( Unit *un, bool automaticenergyrealloc )
-{
-    std::string tmp;
-    return AutoPilotToErrorMessage( un, automaticenergyrealloc, tmp );
-}
 
 
 bool Unit::InRange( const Unit *target, double &mm, bool cone, bool cap, bool lock ) const
@@ -257,17 +240,7 @@ bool CrashForceDock( Unit *thus, Unit *dockingUn, bool force )
 }
 
 
-void Unit::ActivateJumpDrive( int destination )
-{
-    if ( ( ( docked&(DOCKED|DOCKED_INSIDE) ) == 0 ) && jump.drive != -2 )
-        jump.drive = destination;
-}
 
-void Unit::DeactivateJumpDrive()
-{
-    if (jump.drive >= 0)
-        jump.drive = -1;
-}
 
 float rand01()
 {
@@ -879,15 +852,6 @@ void Unit::Init( const char *filename,
             delete unitTables.back();
             unitTables.pop_back();
         }
-    } else {
-        if (netxml == NULL)
-            Unit::LoadXML( f, unitModifications.c_str() );
-        else
-            Unit::LoadXML( f, "", netxml );
-        if (err <= Ok)
-            f.Close();
-        if ( f2.Valid() )
-            f2.Close();
     }
     calculate_extent( false );
     pilot->SetComm( this );
@@ -958,31 +922,7 @@ void Unit::calculate_extent( bool update_collide_queue )
         radial_size = tmpmax( tmpmax( corner_max.i, corner_max.j ), corner_max.k );
 }
 
-StarSystem* Unit::getStarSystem()
-{
-    if (activeStarSystem) {
-        return activeStarSystem;
-    } else {
-        Cockpit *cp = _Universe->isPlayerStarship( this );
-        if (cp)
-            if (cp->activeStarSystem)
-                return cp->activeStarSystem;
-    }
-    return _Universe->activeStarSystem();
-}
 
-const StarSystem* Unit::getStarSystem() const
-{
-    if (activeStarSystem) {
-        return activeStarSystem;
-    } else {
-        Cockpit *cp = _Universe->isPlayerStarship( this );
-        if (cp)
-            if (cp->activeStarSystem)
-                return cp->activeStarSystem;
-    }
-    return _Universe->activeStarSystem();
-}
 
 
 
@@ -1013,15 +953,9 @@ void Unit::SetFg( Flightgroup *fg, int fg_subnumber )
     flightgroup_subnumber = fg_subnumber;
 }
 
-void Unit::AddDestination( const std::string &dest )
-{
-    pImage->destination.push_back( dest );
-}
 
-const std::vector< std::string >& Unit::GetDestinations() const
-{
-    return pImage->destination;
-}
+
+
 
 
 
@@ -1425,292 +1359,20 @@ QVector Unit::realPosition( )
     return LocalPosition();
 }
 
-static QVector RealPosition( const Unit *un )
+// TODO: need to move and join a class
+QVector RealPosition( const Unit *un )
 {
     if ( un->isSubUnit() )
         return un->Position();
     return un->LocalPosition();
 }
 
-static QVector AutoSafeEntrancePoint( const QVector start, float rsize, const Unit *goal )
-{
-    QVector def  = UniverseUtil::SafeEntrancePoint( start, rsize );
-    float   bdis = ( def-RealPosition( goal ) ).MagnitudeSquared();
-    for (int i = -1; i <= 1; ++i)
-        for (int j = -1; j <= 1; ++j)
-            for (int k = -1; k <= 1; k += 2) {
-                QVector delta( i, j, k );
-                delta.Normalize();
-                QVector tmp  = RealPosition( goal )+delta*(goal->rSize()+rsize);
-                tmp = UniverseUtil::SafeEntrancePoint( tmp, rsize );
-                float   tmag = ( tmp-RealPosition( goal ) ).MagnitudeSquared();
-                if (tmag < bdis) {
-                    bdis = tmag;
-                    def  = tmp;
-                }
-            }
-    return def;
-}
+
 
 float globQueryShell( QVector pos, QVector dir, float rad );
-std::string GenerateAutoError( Unit *me, Unit *targ )
-{
-    if ( UnitUtil::isAsteroid( targ ) ) {
-        static std::string err =
-            XMLSupport::escaped_string( vs_config->getVariable( "graphics", "hud", "AsteroidsNearMessage",
-                                                                "#ff0000Asteroids Near#000000" ) );
-        return err;
-    }
-    if ( targ->isPlanet() ) {
-        static std::string err =
-            XMLSupport::escaped_string( vs_config->getVariable( "graphics", "hud", "PlanetNearMessage",
-                                                                "#ff0000Planetary Hazard Near#000000" ) );
-        return err;
-    }
-    if (targ->getRelation( me ) < 0) {
-        static std::string err =
-            XMLSupport::escaped_string( vs_config->getVariable( "graphics", "hud", "EnemyNearMessage",
-                                                                "#ff0000Enemy Near#000000" ) );
-        return err;
-    }
-    static std::string err =
-        XMLSupport::escaped_string( vs_config->getVariable( "graphics", "hud", "StarshipNearMessage",
-                                                            "#ff0000Starship Near#000000" ) );
-    return err;
-}
 
-bool Unit::AutoPilotToErrorMessage( const Unit *target,
-                                    bool ignore_energy_requirements,
-                                    std::string &failuremessage,
-                                    int recursive_level )
-{
-    static bool auto_valid =
-        XMLSupport::parse_bool( vs_config->getVariable( "physics", "insystem_jump_or_timeless_auto-pilot", "false" ) );
-    if (!auto_valid) {
-        static std::string err = "No Insystem Jump";
-        failuremessage = err;
-        return false;
-    }
-    if (target->isUnit() == _UnitType::planet) {
-        const Unit   *targ = *(target->viewSubUnits());
-        if (targ && 0 == targ->graphicOptions.FaceCamera)
-            return AutoPilotToErrorMessage( targ, ignore_energy_requirements, failuremessage, recursive_level );
-    }
-    if (warpenergy < jump.insysenergy)
-        if (!ignore_energy_requirements)
-            return false;
-    signed char  Guaranteed = ComputeAutoGuarantee( this );
-    if (Guaranteed == Mission::AUTO_OFF)
-        return false;
-    static float autopilot_term_distance =
-        XMLSupport::parse_float( vs_config->getVariable( "physics", "auto_pilot_termination_distance", "6000" ) );
-    static float atd_no_enemies =
-        XMLSupport::parse_float( vs_config->getVariable( "physics", "auto_pilot_termination_distance_no_enemies",
-                                                        vs_config->getVariable( "physics", "auto_pilot_termination_distance",
-                                                                                "6000" ) ) );
-    static float autopilot_no_enemies_multiplier =
-        XMLSupport::parse_float( vs_config->getVariable( "physics", "auto_pilot_no_enemies_distance_multiplier", "4" ) );
-    if ( isSubUnit() ) {
-        static std::string err = "Return To Cockpit for Auto";
-        failuremessage = err;
-        return false;                            //we can't auto here;
-    }
-    StarSystem *ss = activeStarSystem;
-    if (ss == NULL)
-        ss = _Universe->activeStarSystem();
-    Unit   *un = NULL;
-    QVector start( Position() );
-    QVector end( RealPosition( target ) );
-    float   totallength = (start-end).Magnitude();
-    bool    nanspace    = false;
-    if ( !FINITE( totallength ) ) {
-        nanspace    = true;
-        start       = QVector( 100000000.0, 100000000.0, 10000000000000.0 );
-        totallength = (start-end).Magnitude();
-        if ( !FINITE( totallength ) ) {
-            end = QVector( 200000000.0, 100000000.0, 10000000000000.0 );
-            totallength = (start-end).Magnitude();
-        }
-    }
-    QVector endne( end );
 
-    float   totpercent = 1;
-    if (totallength > 1) {
-        float apt =
-            (target->isUnit() == _UnitType::planet) ? ( autopilot_term_distance+target->rSize()
-                                               *UniverseUtil::getPlanetRadiusPercent() ) : autopilot_term_distance;
-        float aptne     =
-            (target->isUnit() == _UnitType::planet) ? ( atd_no_enemies+target->rSize()
-                                               *UniverseUtil::getPlanetRadiusPercent() ) : atd_no_enemies;
-        float percent   = (getAutoRSize( this, this )+rSize()+target->rSize()+apt)/totallength;
-        float percentne = (getAutoRSize( this, this )+rSize()+target->rSize()+aptne)/totallength;
-        if (percentne > 1)
-            endne = start;
 
-        else
-            endne = start*percentne+end*(1-percentne);
-        if (percent > 1) {
-            end = start;
-            totpercent = 0;
-        } else {
-            totpercent *= (1-percent);
-            end = start*percent+end*(1-percent);
-        }
-    }
-    bool ok     = true;
-
-    static bool teleport_autopilot = XMLSupport::parse_bool( vs_config->getVariable( "physics", "teleport_autopilot", "true" ) );
-    bool unsafe = false;
-    if ( (!teleport_autopilot) && (!nanspace) ) {
-        if (Guaranteed == Mission::AUTO_NORMAL && CloakVisible() > .5) {
-            bool ignore_friendlies = true;
-            for (un_iter i = ss->getUnitList().createIterator(); (un = *i) != NULL; ++i) {
-                static bool canflythruplanets =
-                    XMLSupport::parse_bool( vs_config->getVariable( "physics", "can_auto_through_planets", "true" ) );
-                if ( ( !(un->isUnit() == _UnitType::planet
-                         && canflythruplanets) ) && un->isUnit() != _UnitType::nebula && ( !UnitUtil::isSun( un ) ) ) {
-                    if (un != this && un != target) {
-                        float tdis  = ( start-un->Position() ).Magnitude()-rSize()-un->rSize();
-                        float nedis = ( end-un->Position() ).Magnitude()-rSize()-un->rSize();
-                        float trad  = getAutoRSize( this, un, ignore_friendlies )+getAutoRSize( this, this, ignore_friendlies );
-                        if (tdis <= trad) {
-                            failuremessage = GenerateAutoError( this, un );
-                            return false;
-                        }
-                        if ( (nedis < trad*autopilot_no_enemies_multiplier
-                              || tdis <= trad*autopilot_no_enemies_multiplier) && un->getRelation( this ) < 0 ) {
-                            unsafe = true;
-                            failuremessage = GenerateAutoError( this, un );
-                        }
-                        float intersection =
-                            globQueryShell( start-un->Position(), end-start, getAutoRSize( this,
-                                                                                           un,
-                                                                                           ignore_friendlies )+un->rSize() );
-                        if (intersection > 0) {
-                            unsafe = true;
-                            end            = start+(end-start)*intersection;
-                            totpercent    *= intersection;
-                            ok     = false;
-                            failuremessage = GenerateAutoError( this, un );
-                        }
-                    }
-                }
-            }
-        }
-    } else if (!nanspace) {
-        //just make sure we aren't in an asteroid field
-        Unit *un;
-        for (un_iter i = ss->getUnitList().createIterator(); (un = *i) != NULL; ++i)
-            if ( UnitUtil::isAsteroid( un ) ) {
-                static float minasteroiddistance =
-                    XMLSupport::parse_float( vs_config->getVariable( "physics", "min_asteroid_distance", "-100" ) );
-                if (UnitUtil::getDistance( this, un ) < minasteroiddistance) {
-                    failuremessage = GenerateAutoError( this, un );
-                    return false;                     //no auto in roid field
-                }
-            }
-    }
-    bool nowhere = false;
-    if (this != target) {
-        if ( (end-start).MagnitudeSquared() < rSize()*rSize() ) {
-            failuremessage =
-                XMLSupport::escaped_string( vs_config->getVariable( "graphics", "hud", "AlreadyNearMessage",
-                                                                    "#ff0000Already Near#000000" ) );
-            return false;
-        }
-        warpenergy -= totpercent*jump.insysenergy;
-        if (unsafe == false && totpercent == 0)
-            end = endne;
-        QVector sep( UniverseUtil::SafeEntrancePoint( end, rSize() ) );
-        if ( (sep-end).MagnitudeSquared() > 16*rSize()*rSize() )
-            //DOn't understand why rsize is so bigsep = AutoSafeEntrancePoint (end,(RealPosition(target)-end).Magnitude()-target->rSize(),target);
-            sep = AutoSafeEntrancePoint( end, rSize(), target );
-        if ( ( sep-RealPosition( target ) ).MagnitudeSquared()
-            > ( RealPosition( this )-RealPosition( target ) ).MagnitudeSquared() ) {
-            sep     = RealPosition( this );
-            nowhere = true;
-        }
-        static bool auto_turn_towards = XMLSupport::parse_bool( vs_config->getVariable( "physics", "auto_turn_towards", "true" ) );
-        if (auto_turn_towards) {
-            for (int i = 0; i < 3; ++i) {
-                Vector methem( RealPosition( target ).Cast()-sep.Cast() );
-                methem.Normalize();
-                Vector p, q, r;
-                GetOrientation( p, q, r );
-                p = methem.Cross( r );
-                float  theta = p.Magnitude();
-                if (theta*theta > .00001) {
-                    p *= (asin( theta )/theta);
-                    Rotate( p );
-                    GetOrientation( p, q, r );
-                }
-                if (r.Dot( methem ) < 0)
-                    Rotate( p*(PI/theta) );
-                Velocity = methem*Velocity.Magnitude();
-            }
-        }
-        static string insys_jump_ani = vs_config->getVariable( "graphics", "insys_jump_animation", "warp.ani" );
-        if (
-
-            insys_jump_ani.length() ) {
-            static bool docache = true;
-            if (docache) {
-                UniverseUtil::cacheAnimation( insys_jump_ani );
-                docache = false;
-            }
-            static float insys_jump_ani_size   =
-                XMLSupport::parse_float( vs_config->getVariable( "graphics", "insys_jump_animation_size", "4" ) );
-            static float insys_jump_ani_growth =
-                XMLSupport::parse_float( vs_config->getVariable( "graphics", "insys_jump_animation_growth", ".99" ) );
-            UniverseUtil::playAnimationGrow( insys_jump_ani, RealPosition( this ),
-                                             rSize()*insys_jump_ani_size, insys_jump_ani_growth );
-
-            Vector v( GetVelocity() );
-            v.Normalize();
-            Vector p, q, r;
-            GetOrientation( p, q, r );
-            static float sec = XMLSupport::parse_float( vs_config->getVariable( "graphics", "insys_jump_ani_second_ahead", "4" ) );
-            UniverseUtil::playAnimationGrow( insys_jump_ani, sep+GetVelocity()*sec+v*rSize(), rSize()*8, .97 );
-            UniverseUtil::playAnimationGrow( insys_jump_ani, sep+GetVelocity()*sec+2*v*rSize()+r*4*rSize(), rSize()*16, .97 );
-        }
-        static bool warptrail = XMLSupport::parse_bool( vs_config->getVariable( "graphics", "warp_trail", "true" ) );
-        if ( warptrail && (!nowhere) ) {
-            static float warptrailtime = XMLSupport::parse_float( vs_config->getVariable( "graphics", "warp_trail_time", "20" ) );
-            AddWarp( this, RealPosition( this ), warptrailtime );
-        }
-        if (!nowhere)
-            SetCurPosition( sep );
-        Cockpit *cp;
-        if ( ( cp = _Universe->isPlayerStarship( this ) ) != NULL ) {
-            std::string followermessage;
-            if (getFlightgroup() != NULL) {
-                Unit *other = NULL;
-                if (recursive_level > 0) {
-                    for (un_iter ui = ss->getUnitList().createIterator(); NULL != (other = *ui); ++ui) {
-                        Flightgroup *ff = other->getFlightgroup();
-                        bool leadah     = ( ff == getFlightgroup() );
-                        if (ff)
-                            if (ff->leader.GetUnit() == this)
-                                leadah = true;
-                        Order *otherord = other->getAIState();
-                        if (otherord) {
-                            if ( otherord->PursueTarget( this, leadah ) ) {
-                                other->AutoPilotToErrorMessage( this,
-                                                                ignore_energy_requirements,
-                                                                followermessage,
-                                                                recursive_level-1 );
-                                if (leadah)
-                                    if ( NULL == _Universe->isPlayerStarship( other ) )
-                                        other->SetPosition( AutoSafeEntrancePoint( LocalPosition(), other->rSize()*1.5, other ) );
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
-    return ok;
-}
 
 extern void ActivateAnimation( Unit *jp );
 void TurnJumpOKLightOn( Unit *un, Cockpit *cp )
@@ -3160,7 +2822,6 @@ static Transformation HoldPositionWithRespectTo( Transformation holder,
 }
 
 extern void ExecuteDirector();
-extern void SwitchUnits( Unit*, Unit* );
 
 void Unit::PerformDockingOperations()
 {
@@ -3580,92 +3241,9 @@ bool Quit( const char *input_buffer )
 
 using std::string;
 
-void Tokenize( const string &str, vector< string > &tokens, const string &delimiters = " " )
-{
-    //Skip delimiters at beginning.
-    string::size_type lastPos = str.find_first_not_of( delimiters, 0 );
-    //Find first "non-delimiter".
-    string::size_type pos     = str.find_first_of( delimiters, lastPos );
-    while (string::npos != pos || string::npos != lastPos) {
-        //Found a token, add it to the vector.
-        tokens.push_back( str.substr( lastPos, pos-lastPos ) );
-        //Skip delimiters.  Note the "not_of"
-        lastPos = str.find_first_not_of( delimiters, pos );
-        //Find next "non-delimiter"
-        pos     = str.find_first_of( delimiters, lastPos );
-    }
-}
 
-std::string CheckBasicSizes( const std::string tokens )
-{
-    if (tokens.find( "small" ) != string::npos)
-        return "small";
-    if (tokens.find( "medium" ) != string::npos)
-        return "medium";
-    if (tokens.find( "large" ) != string::npos)
-        return "large";
-    if (tokens.find( "cargo" ) != string::npos)
-        return "cargo";
-    if (tokens.find( "LR" ) != string::npos || tokens.find( "massive" ) != string::npos)
-        return "massive";
-    return "";
-}
 
-class VCString : public std::string
-{
-public: VCString() {}
-    VCString( const string &s ) : string( s ) {}
-};
-std::map< VCString, VCString >parseTurretSizes()
-{
-    using namespace VSFileSystem;
-    std::map< VCString, VCString >t;
-    VSFile  f;
-    VSError err = f.OpenReadOnly( "units/subunits/size.txt", UnknownFile );
-    if (err <= Ok) {
-        int   siz = f.Size();
-        char *filedata = (char*) malloc( siz+1 );
-        filedata[siz] = 0;
-        while (f.ReadLine( filedata, siz ) == Ok) {
-            std::string x( filedata );
-            string::size_type len = x.find( "," );
-            if (len != std::string::npos) {
-                std::string y = x.substr( len+1 );
-                x = x.substr( 0, len );
-                len    = y.find( "," );
-                y      = y.substr( 0, len );
-                sscanf( y.c_str(), "%s", filedata );
-                y      = filedata;
-                VCString key( x );
-                VCString value( y );
-                t[key] = value;
-            }
-        }
-        free( filedata );
-        f.Close();
-    }
-    return t;
-}
 
-std::string getTurretSize( const std::string &size )
-{
-    static std::map< VCString, VCString >    turretmap = parseTurretSizes();
-    std::map< VCString, VCString >::iterator h = turretmap.find( size );
-    if ( h != turretmap.end() )
-        return (*h).second;
-    vector< string >tokens;
-    Tokenize( size, tokens, "_" );
-    for (unsigned int i = 0; i < tokens.size(); ++i) {
-        if (tokens[i].find( "turret" ) != string::npos) {
-            string temp = CheckBasicSizes( tokens[i] );
-            if ( !temp.empty() )
-                return temp;
-        } else {
-            return tokens[i];
-        }
-    }
-    return "capital";
-}
 
 bool Unit::UpgradeMounts( const Unit *up,
                           int mountoffset,
@@ -3870,10 +3448,7 @@ bool Unit::UpgradeMounts( const Unit *up,
     return cancompletefully;
 }
 
-Unit * CreateGenericTurret( std::string tur, int faction )
-{
-    return new Unit( tur.c_str(), true, faction, "", 0, 0 );
-}
+
 
 bool Unit::UpgradeSubUnits( const Unit *up, int subunitoffset, bool touchme, bool downgrade, int &numave, double &percentage )
 {
@@ -3899,7 +3474,7 @@ bool Unit::UpgradeSubUnitsWithFactory( const Unit *up, int subunitoffset, bool t
         return true;
     bool hasAnyTurrets = false;
     turSize = getTurretSize( giveAway->name );
-    //begin goign through other unit's turrets
+    //begin going through other unit's turrets
     for (upturrets = up->viewSubUnits(); ( (*upturrets) != NULL ) && ( (*ui) != NULL ); ++ui, ++upturrets) {
         hasAnyTurrets = true;
         const Unit *addtome;
@@ -5080,32 +4655,11 @@ bool Unit::RepairUpgradeCargo( Cargo *item, Unit *baseUnit, float *credits )
     return false;
 }
 
-/*
- **********************************************************************************
- **** UNIT_CARGO STUFF
- **********************************************************************************
- */
 
+// TODO: something with this comment.
 /***************** UNCOMMENT GETMASTERPARTLIST WHEN MODIFIED FACTION STUFF !!!!!! */
 
-float Unit::PriceCargo( const std::string &s )
-{
-    Cargo tmp;
-    tmp.content = s;
-    vector< Cargo >::iterator mycargo = std::find( pImage->cargo.begin(), pImage->cargo.end(), tmp );
-    if ( mycargo == pImage->cargo.end() ) {
-        Unit *mpl = getMasterPartList();
-        if (this != mpl) {
-            return mpl->PriceCargo( s );
-        } else {
-            static float spacejunk = parse_float( vs_config->getVariable( "cargo", "space_junk_price", "10" ) );
-            return spacejunk;
-        }
-    }
-    float price;
-    price = (*mycargo).price;
-    return price;
-}
+
 
 static const GFXColor disable( 1, 0, 0, 1 );
 extern int GetModeFromName( const char* );
@@ -5222,17 +4776,7 @@ bool Unit::IsBase() const
   return ((flightgroup != NULL) && (flightgroup->name == "Base"));
 }
 
-inline float uniformrand( float min, float max )
-{
-    return ( (float) ( rand() )/RAND_MAX )*(max-min)+min;
-}
 
-inline QVector randVector( float min, float max )
-{
-    return QVector( uniformrand( min, max ),
-                   uniformrand( min, max ),
-                   uniformrand( min, max ) );
-}
 
 void Unit::TurretFAW()
 {
@@ -5247,432 +4791,16 @@ void Unit::TurretFAW()
     }
 }
 
-extern int SelectDockPort( Unit*, Unit *parent );
-
-//index in here is unsigned, UINT_MAX and UINT_MAX-1 seem to be
-//special states.  This means the total amount of cargo any ship can have
-//is UINT_MAX -3   which is 65532 for 32bit machines.
-void Unit::EjectCargo( unsigned int index )
-{
-    Cargo *tmp = NULL;
-    Cargo  ejectedPilot;
-    Cargo  dockedPilot;
-    string name;
-    bool   isplayer = false;
-    //if (index==((unsigned int)-1)) { is ejecting normally
-    //if (index==((unsigned int)-2)) { is ejecting for eject-dock
-
-    Cockpit *cp = NULL;
-    if ( index == (UINT_MAX-1) ) {
-//        _Universe->CurrentCockpit();
-        //this calls the unit's existence, by the way.
-        name = "return_to_cockpit";
-        if ( NULL != ( cp = _Universe->isPlayerStarship( this ) ) ) {
-            isplayer = true;
-        }
-        //we will have to check for this on undock to return to the parent unit!
-        dockedPilot.content = "return_to_cockpit";
-        dockedPilot.mass    = .1;
-        dockedPilot.volume  = 1;
-        tmp = &dockedPilot;
-    }
-    if (index == UINT_MAX) {
-        int pilotnum = _Universe->CurrentCockpit();
-        name = "Pilot";
-        if ( NULL != ( cp = _Universe->isPlayerStarship( this ) ) ) {
-            string playernum = string( "player" )+( (pilotnum == 0) ? string( "" ) : XMLSupport::tostring( pilotnum ) );
-            isplayer = true;
-        }
-        ejectedPilot.content = "eject";
-        ejectedPilot.mass    = .1;
-        ejectedPilot.volume  = 1;
-        tmp = &ejectedPilot;
-    }
-    if ( index < numCargo() )
-        tmp = &GetCargo( index );
-    static float cargotime = XMLSupport::parse_float( vs_config->getVariable( "physics", "cargo_live_time", "600" ) );
-    if (tmp) {
-        string    tmpcontent = tmp->content;
-        if (tmp->mission)
-            tmpcontent = "Mission_Cargo";
-        const int ulen = strlen( "upgrades" );
-        //prevents a number of bad things, incl. impossible speeds and people getting rich on broken stuff
-        if ( (!tmp->mission) && memcmp( tmp->GetCategory().c_str(), "upgrades", ulen ) == 0 )
-            tmpcontent = "Space_Salvage";
-        //this happens if it's a ship
-        if (tmp->quantity > 0) {
-            const int sslen = strlen( "starships" );
-            Unit     *cargo = NULL;
-            if (tmp->GetCategory().length() >= (unsigned int) sslen) {
-                if ( (!tmp->mission) && memcmp( tmp->GetCategory().c_str(), "starships", sslen ) == 0 ) {
-                    string ans = tmpcontent;
-                    string::size_type blank = ans.find( ".blank" );
-                    if (blank != string::npos)
-                        ans = ans.substr( 0, blank );
-                    Flightgroup *fg = this->getFlightgroup();
-                    int fgsnumber   = 0;
-                    if (fg != NULL) {
-                        fgsnumber = fg->nr_ships;
-                        ++(fg->nr_ships);
-                        ++(fg->nr_ships_left);
-                    }
-                    cargo = new GameUnit( ans.c_str(), false, faction, "", fg, fgsnumber, NULL );
-                    cargo->PrimeOrders();
-                    cargo->SetAI( new Orders::AggressiveAI( "default.agg.xml" ) );
-                    cargo->SetTurretAI();
-                    //he's alive!!!!!
-                }
-            }
-            float arot = 0;
-            static float grot =
-                XMLSupport::parse_float( vs_config->getVariable( "graphics", "generic_cargo_rotation_speed",
-                                                                 "1" ) )*3.1415926536/180;
-            if (!cargo) {
-                static float crot =
-                    XMLSupport::parse_float( vs_config->getVariable( "graphics", "cargo_rotation_speed",
-                                                                     "60" ) )*3.1415926536/180;
-                static float erot =
-                    XMLSupport::parse_float( vs_config->getVariable( "graphics", "eject_rotation_speed",
-                                                                     "0" ) )*3.1415926536/180;
-                if (tmpcontent == "eject") {
-                    if (isplayer) {
-                        Flightgroup *fg = this->getFlightgroup();
-                        int fgsnumber   = 0;
-                        if (fg != NULL) {
-                            fgsnumber = fg->nr_ships;
-                            ++(fg->nr_ships);
-                            ++(fg->nr_ships_left);
-                        }
-                        cargo = new GameUnit( "eject", false, faction, "", fg, fgsnumber, NULL);
-                    } else {
-                        int fac = FactionUtil::GetUpgradeFaction();
-                        cargo = new GameUnit( "eject", false, fac, "", NULL, 0, NULL );
-                    }
-                    if (owner)
-                        cargo->owner = owner;
-                    else
-                        cargo->owner = this;
-                    arot = erot;
-                    static bool eject_attacks = XMLSupport::parse_bool( vs_config->getVariable( "AI", "eject_attacks", "false" ) );
-                    if (eject_attacks) {
-                        cargo->PrimeOrders();
-                        //generally fraidycat AI
-                        cargo->SetAI( new Orders::AggressiveAI( "default.agg.xml" ) );
-                    }
-
-                    //Meat. Docking should happen here
-                } else if (tmpcontent == "return_to_cockpit") {
-                    if (isplayer) {
-                        Flightgroup *fg = this->getFlightgroup();
-                        int fgsnumber   = 0;
-                        if (fg != NULL) {
-                            fgsnumber = fg->nr_ships;
-                            ++(fg->nr_ships);
-                            ++(fg->nr_ships_left);
-                        }
-                        cargo = new GameUnit( "return_to_cockpit", false, faction, "", fg, fgsnumber, NULL);
-                        if (owner)
-                            cargo->owner = owner;
-                        else
-                            cargo->owner = this;
-                    } else {
-                        int fac = FactionUtil::GetUpgradeFaction();
-                        static float ejectcargotime =
-                            XMLSupport::parse_float( vs_config->getVariable( "physics", "eject_live_time", "0" ) );
-                        if (cargotime == 0.0) {
-                            cargo = new GameUnit( "eject", false, fac, "", NULL, 0, NULL);
-                        } else {
-                            cargo = new Missile( "eject",
-                                                               fac, "",
-                                                               0,
-                                                               0,
-                                                               ejectcargotime,
-                                                               1,
-                                                               1,
-                                                               1);
-                        }
-                    }
-                    arot = erot;
-                    cargo->PrimeOrders();
-                    cargo->aistate = NULL;
-                } else {
-                    string tmpnam = tmpcontent+".cargo";
-                    static std::string nam( "Name" );
-                    float  rot    = crot;
-                    if (UniverseUtil::LookupUnitStat( tmpnam, "upgrades", nam ).length() == 0) {
-                        tmpnam = "generic_cargo";
-                        rot    = grot;
-                    }
-                    int upgrfac = FactionUtil::GetUpgradeFaction();
-                    cargo = new Missile( tmpnam.c_str(),
-                                                        upgrfac,
-                                                        "",
-                                                        0,
-                                                        0,
-                                                        cargotime,
-                                                        1,
-                                                        1,
-                                                        1);
-                    arot = rot;
-                }
-            }
-            if (cargo->name == "LOAD_FAILED") {
-                cargo->Kill();
-                cargo = new Missile( "generic_cargo",
-                                                   FactionUtil::GetUpgradeFaction(), "",
-                                                   0,
-                                                   0,
-                                                   cargotime,
-                                                   1,
-                                                   1,
-                                                   1);
-                arot = grot;
-            }
-            Vector rotation( vsrandom.uniformInc( -arot, arot ), vsrandom.uniformInc( -arot, arot ), vsrandom.uniformInc( -arot,
-                                                                                                                          arot ) );
-            static bool all_rotate_same =
-                XMLSupport::parse_bool( vs_config->getVariable( "graphics", "cargo_rotates_at_same_speed", "true" ) );
-            if (all_rotate_same && arot != 0) {
-                float tmp = rotation.Magnitude();
-                if (tmp > .001) {
-                    rotation.Scale( 1/tmp );
-                    rotation *= arot;
-                }
-            }
-            if ( 0 && cargo->rSize() >= rSize() ) {
-                cargo->Kill();
-            } else {
-                Vector tmpvel = -Velocity;
-                if (tmpvel.MagnitudeSquared() < .00001) {
-                    tmpvel = randVector( -rSize(), rSize() ).Cast();
-                    if (tmpvel.MagnitudeSquared() < .00001)
-                        tmpvel = Vector( 1, 1, 1 );
-                }
-                tmpvel.Normalize();
-                if ( (SelectDockPort( this, this ) > -1) ) {
-                    static float eject_cargo_offset =
-                        XMLSupport::parse_float( vs_config->getVariable( "physics", "eject_distance", "20" ) );
-                    QVector loc( Transform( this->GetTransformation(), this->DockingPortLocations()[0].GetPosition().Cast() ) );
-                    //index is always > -1 because it's unsigned.  Lets use the correct terms, -1 in Uint is UINT_MAX
-                    loc += tmpvel*1.5*rSize()+randVector( -.5*rSize()+(index == UINT_MAX ? eject_cargo_offset/2 : 0),
-                                                         .5*rSize()+(index == UINT_MAX ? eject_cargo_offset : 0) );
-                    cargo->SetPosAndCumPos( loc );
-                    Vector p, q, r;
-                    this->GetOrientation( p, q, r );
-                    cargo->SetOrientation( p, q, r );
-                    if (owner)
-                        cargo->owner = owner;
-                    else
-                        cargo->owner = this;
-                } else {
-                    cargo->SetPosAndCumPos( Position()+tmpvel*1.5*rSize()+randVector( -.5*rSize(), .5*rSize() ) );
-                    cargo->SetAngularVelocity( rotation );
-                }
-                static float velmul = XMLSupport::parse_float( vs_config->getVariable( "physics", "eject_cargo_speed", "1" ) );
-                cargo->SetOwner( this );
-                cargo->SetVelocity( Velocity*velmul+randVector( -.25, .25 ).Cast() );
-                cargo->Mass = tmp->mass;
-                if (name.length() > 0)
-                    cargo->name = name;
-                else if (tmp)
-                    cargo->name = tmpcontent;
-                if (cp && _Universe->numPlayers() == 1) {
-                    cargo->SetOwner( NULL );
-                    PrimeOrders();
-                    cargo->SetTurretAI();
-                    cargo->faction = faction;
-                    //changes control to that cockpit
-                    cp->SetParent( cargo, "", "", Position() );
-                    if (tmpcontent == "return_to_cockpit") {
-                        static bool simulate_while_at_base =
-                            XMLSupport::parse_bool( vs_config->getVariable( "physics", "simulate_while_docked", "false" ) );
-                        if ( (simulate_while_at_base) || (_Universe->numPlayers() > 1) ) {
-                            this->TurretFAW();
-                        }
-                        //make unit a sitting duck in the mean time
-                        SwitchUnits( NULL, this );
-                        if (owner) {
-                            cargo->owner = owner;
-                        } else {
-                            cargo->owner = this;
-                        }
-                        PrimeOrders();
-                        cargo->SetOwner( this );
-                        cargo->Position() = this->Position();
-                        cargo->SetPosAndCumPos( this->Position() );
-                        //claims to be docked, stops speed and taking damage etc. but doesn't seem to call the base script
-                        cargo->ForceDock( this, 0 );
-                        abletodock( 3 );
-                        //actually calls the interface, meow. yay!
-                        cargo->UpgradeInterface( this );
-                        if ( (simulate_while_at_base) || (_Universe->numPlayers() > 1) ) {
-                            this->TurretFAW();
-                        }
-                    } else {
-                        SwitchUnits( NULL, cargo );
-                        if (owner) {
-                            cargo->owner = owner;
-                        }
-                        else {
-                            cargo->owner = this;
-                        }
-                    }                                            //switching NULL gives "dead" ai to the unit I ejected from, by the way.
-                }
-                _Universe->activeStarSystem()->AddUnit( cargo );
-                if ( (unsigned int) index != ( (unsigned int) -1 ) && (unsigned int) index != ( (unsigned int) -2 ) ) {
-                    if ( index < pImage->cargo.size() ) {
-                        RemoveCargo( index, 1, true );
-                    }
-                }
-            }
-        }
-    }
-}
-
-int Unit::RemoveCargo( unsigned int i, int quantity, bool eraseZero )
-{
-    if ( !( i < pImage->cargo.size() ) ) {
-        BOOST_LOG_TRIVIAL(error) << "(previously) FATAL problem...removing cargo that is past the end of array bounds.";
-        return 0;
-    }
-    Cargo *carg = &(pImage->cargo[i]);
-    if (quantity > carg->quantity) {
-        quantity = carg->quantity;
-    }
-
-    static bool usemass = XMLSupport::parse_bool( vs_config->getVariable( "physics", "use_cargo_mass", "true" ) );
-    if (usemass) {
-        Mass -= quantity*carg->mass;
-    }
-
-    carg->quantity -= quantity;
-    if (carg->quantity <= 0 && eraseZero) {
-        pImage->cargo.erase( pImage->cargo.begin()+i );
-    }
-    return quantity;
-}
-
-void Unit::AddCargo( const Cargo &carg, bool sort )
-{
-    static bool usemass = XMLSupport::parse_bool( vs_config->getVariable( "physics", "use_cargo_mass", "true" ) );
-    if (usemass) {
-        Mass += carg.quantity*carg.mass;
-    }
-    pImage->cargo.push_back( carg );
-    if (sort) {
-        SortCargo();
-    }
-}
-
-bool cargoIsUpgrade( const Cargo &c )
-{
-    return c.GetCategory().find( "upgrades" ) == 0;
-}
-
-float Unit::getHiddenCargoVolume() const
-{
-    return pImage->HiddenCargoVolume;
-}
-
-bool Unit::CanAddCargo( const Cargo &carg ) const
-{
-    //Always can, in this case (this accounts for some odd precision issues)
-    if ( (carg.quantity == 0) || (carg.volume == 0) )
-        return true;
-    //Test volume availability
-    bool  upgradep     = cargoIsUpgrade( carg );
-    float total_volume = carg.quantity*carg.volume+( upgradep ? getUpgradeVolume() : getCargoVolume() );
-    if ( total_volume <= ( upgradep ? getEmptyUpgradeVolume() : getEmptyCargoVolume() ) )
-        return true;
-    //Hm... not in main unit... perhaps a subunit can take it
-    for (un_kiter i = viewSubUnits(); !i.isDone(); ++i)
-        if ( (*i)->CanAddCargo( carg ) )
-            return true;
-    //Bad luck
-    return false;
-}
-
-//The cargo volume of this ship when empty.  Max cargo volume.
-float Unit::getEmptyCargoVolume( void ) const
-{
-    return pImage->CargoVolume;
-}
-
-float Unit::getEmptyUpgradeVolume( void ) const
-{
-    return pImage->UpgradeVolume;
-}
-
-float Unit::getCargoVolume( void ) const
-{
-    float result = 0.0;
-    for (unsigned int i = 0; i < pImage->cargo.size(); ++i)
-        if ( !cargoIsUpgrade( pImage->cargo[i] ) )
-            result += pImage->cargo[i].quantity*pImage->cargo[i].volume;
-    return result;
-}
-
-float Unit::getUpgradeVolume( void ) const
-{
-    float result = 0.0;
-    for (unsigned int i = 0; i < pImage->cargo.size(); ++i)
-        if ( cargoIsUpgrade( pImage->cargo[i] ) )
-            result += pImage->cargo[i].quantity*pImage->cargo[i].volume;
-    return result;
-}
-
 UnitImages< void >& Unit::GetImageInformation()
 {
     return *pImage;
 }
 
-Cargo& Unit::GetCargo( unsigned int i )
-{
-    return pImage->cargo[i];
-}
 
-const Cargo& Unit::GetCargo( unsigned int i ) const
-{
-    return pImage->cargo[i];
-}
 
-class CatCompare
-{
-public:
-    bool operator()( const Cargo &a, const Cargo &b )
-    {
-        std::string::const_iterator aiter = a.GetCategory().begin();
-        std::string::const_iterator aend  = a.GetCategory().end();
-        std::string::const_iterator biter = b.GetCategory().begin();
-        std::string::const_iterator bend  = b.GetCategory().end();
-        for (; aiter != aend && biter != bend; ++aiter, ++biter) {
-            char achar = *aiter;
-            char bchar = *biter;
-            if (achar < bchar)
-                return true;
-            if (achar > bchar)
-                return false;
-        }
-        return false;
-    }
-};
 
-void Unit::GetSortedCargoCat( const std::string &cat, size_t &begin, size_t &end )
-{
-    vector< Cargo >::iterator Begin  = pImage->cargo.begin();
-    vector< Cargo >::iterator End    = pImage->cargo.end();
-    vector< Cargo >::iterator lbound = pImage->cargo.end();
-    vector< Cargo >::iterator ubound = pImage->cargo.end();
 
-    Cargo beginningtype;
-    beginningtype.category = cat;
-    CatCompare Comp;
-    lbound = std::lower_bound( Begin, End, beginningtype, Comp );
-    beginningtype.content  = "zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz";
-    ubound = std::upper_bound( Begin, End, beginningtype, Comp );
-    begin  = lbound-Begin;
-    end    = ubound-Begin;
-}
+
 
 Unit& GetUnitMasterPartList()
 {
@@ -5684,142 +4812,7 @@ bool myless( const Cargo &a, const Cargo &b )
     return a < b;
 }
 
-Cargo* Unit::GetCargo( const std::string &s, unsigned int &i )
-{
-    const Unit *thus = this;
-    if ( thus->GetCargo( s, i ) )
-        return &GetCargo( i );
-    return NULL;
-}
 
-const Cargo* Unit::GetCargo( const std::string &s, unsigned int &i ) const
-{
-    static Hashtable< string, unsigned int, 2047 >index_cache_table;
-    Unit *mpl = getMasterPartList();
-    if (this == mpl) {
-        unsigned int *ind = index_cache_table.Get( s );
-        if (ind) {
-            if ( *ind < pImage->cargo.size() ) {
-                Cargo *guess = &pImage->cargo[*ind];
-                if (guess->content == s) {
-                    i = *ind;
-                    return guess;
-                }
-            }
-        }
-        Cargo searchfor;
-        searchfor.content = s;
-        vector< Cargo >::iterator tmp = std::find( pImage->cargo.begin(), pImage->cargo.end(), searchfor );
-        if ( tmp == pImage->cargo.end() )
-            return NULL;
-        if ( (*tmp).content == searchfor.content ) {
-            i = ( tmp-pImage->cargo.begin() );
-            if (this == mpl) {
-                unsigned int *tmp = new unsigned int;
-                *tmp = i;
-                if ( index_cache_table.Get( s ) )
-                    index_cache_table.Delete( s );
-                //memory leak--should not be reached though, ever
-                index_cache_table.Put( s, tmp );
-            }
-            return &(*tmp);
-        }
-        return NULL;
-    }
-    Cargo searchfor;
-    searchfor.content = s;
-    vector< Cargo >::iterator tmp = ( std::find( pImage->cargo.begin(), pImage->cargo.end(), searchfor ) );
-    if ( tmp == pImage->cargo.end() )
-        return NULL;
-    i = ( tmp-pImage->cargo.begin() );
-    return &(*tmp);
-}
-
-unsigned int Unit::numCargo() const
-{
-    return pImage->cargo.size();
-}
-
-std::string Unit::GetManifest( unsigned int i, Unit *scanningUnit, const Vector &oldspd ) const
-{
-    ///FIXME somehow mangle string
-    string mangled = pImage->cargo[i].content;
-    static float scramblingmanifest =
-        XMLSupport::parse_float( vs_config->getVariable( "general", "PercentageSpeedChangeToFaultSearch", ".5" ) );
-    {
-        //Keep inside subblock, otherwice MSVC will throw an error while redefining 'i'
-        bool last = true;
-        for (string::iterator i = mangled.begin(); i != mangled.end(); ++i) {
-            if (last)
-                (*i) = toupper( *i );
-            last = (*i == ' ' || *i == '_');
-        }
-    }
-    if (CourseDeviation( oldspd, GetVelocity() ) > scramblingmanifest)
-        for (string::iterator i = mangled.begin(); i != mangled.end(); ++i)
-            (*i) += (rand()%3-1);
-    return mangled;
-}
-
-bool Unit::SellCargo( unsigned int i, int quantity, float &creds, Cargo &carg, Unit *buyer )
-{
-    if (i < 0 || i >= pImage->cargo.size() || !buyer->CanAddCargo( pImage->cargo[i] ) || Mass < pImage->cargo[i].mass)
-        return false;
-    carg = pImage->cargo[i];
-    if (quantity > pImage->cargo[i].quantity)
-        quantity = pImage->cargo[i].quantity;
-    carg.price = buyer->PriceCargo( pImage->cargo[i].content );
-    creds += quantity*carg.price;
-
-    carg.quantity = quantity;
-    buyer->AddCargo( carg );
-
-    RemoveCargo( i, quantity );
-    return true;
-}
-
-bool Unit::SellCargo( const std::string &s, int quantity, float &creds, Cargo &carg, Unit *buyer )
-{
-    Cargo tmp;
-    tmp.content = s;
-    vector< Cargo >::iterator mycargo = std::find( pImage->cargo.begin(), pImage->cargo.end(), tmp );
-    if ( mycargo == pImage->cargo.end() )
-        return false;
-    return SellCargo( mycargo-pImage->cargo.begin(), quantity, creds, carg, buyer );
-}
-
-bool Unit::BuyCargo( const Cargo &carg, float &creds )
-{
-    if (!CanAddCargo( carg ) || creds < carg.quantity*carg.price)
-        return false;
-    AddCargo( carg );
-    creds -= carg.quantity*carg.price;
-
-    return true;
-}
-
-bool Unit::BuyCargo( unsigned int i, unsigned int quantity, Unit *seller, float &creds )
-{
-    Cargo soldcargo = seller->pImage->cargo[i];
-    if (quantity > (unsigned int) soldcargo.quantity)
-        quantity = soldcargo.quantity;
-    if (quantity == 0)
-        return false;
-    soldcargo.quantity = quantity;
-    if ( BuyCargo( soldcargo, creds ) ) {
-        seller->RemoveCargo( i, quantity, false );
-        return true;
-    }
-    return false;
-}
-
-bool Unit::BuyCargo( const std::string &cargo, unsigned int quantity, Unit *seller, float &creds )
-{
-    unsigned int i;
-    if ( seller->GetCargo( cargo, i ) )
-        return BuyCargo( i, quantity, seller, creds );
-    return false;
-}
 
 Cargo * GetMasterPartList( const char *input_buffer )
 {
@@ -6015,102 +5008,20 @@ const std::string& Unit::getCombatRole() const
     return ROLES::getRole( retA );
 }
 
-void Unit::SortCargo()
-{
-    Unit *un = this;
-    std::sort( un->pImage->cargo.begin(), un->pImage->cargo.end() );
-    for (unsigned int i = 0; i+1 < un->pImage->cargo.size(); ++i)
-        if (un->pImage->cargo[i].content == un->pImage->cargo[i+1].content) {
-            float tmpmass   = un->pImage->cargo[i].quantity*un->pImage->cargo[i].mass
-                              +un->pImage->cargo[i+1].quantity*un->pImage->cargo[i+1].mass;
-            float tmpvolume = un->pImage->cargo[i].quantity*un->pImage->cargo[i].volume
-                              +un->pImage->cargo[i+1].quantity*un->pImage->cargo[i+1].volume;
-            un->pImage->cargo[i].quantity += un->pImage->cargo[i+1].quantity;
-            if (un->pImage->cargo[i].quantity) {
-                tmpmass   /= un->pImage->cargo[i].quantity;
-                tmpvolume /= un->pImage->cargo[i].quantity;
-            }
-            un->pImage->cargo[i].volume  = tmpvolume;
-            un->pImage->cargo[i].mission = (un->pImage->cargo[i].mission || un->pImage->cargo[i+1].mission);
-            un->pImage->cargo[i].mass    = tmpmass;
-            //group up similar ones
-            un->pImage->cargo.erase( un->pImage->cargo.begin()+(i+1) );
-            i--;
-        }
-}
+
 
 using XMLSupport::tostring;
 using std::string;
 
-std::string CargoToString( const Cargo &cargo )
-{
-    string missioncargo;
-    if (cargo.mission)
-        missioncargo = string( "\" missioncargo=\"" )+XMLSupport::tostring( cargo.mission );
-    return string( "\t\t\t<Cargo mass=\"" )+XMLSupport::tostring( (float) cargo.mass )+string( "\" price=\"" )
-           +XMLSupport::tostring( (float) cargo.price )+string( "\" volume=\"" )+XMLSupport::tostring( (float) cargo.volume )
-           +string(
-               "\" quantity=\"" )+XMLSupport::tostring( (int) cargo.quantity )+string( "\" file=\"" )+cargo.GetContent()
-           +missioncargo
-           +string( "\"/>\n" );
-}
 
-std::string Unit::cargoSerializer( const XMLType &input, void *mythis )
-{
-    Unit *un = (Unit*) mythis;
-    if (un->pImage->cargo.size() == 0)
-        return string( "0" );
-    un->SortCargo();
-    string retval( "" );
-    if ( !( un->pImage->cargo.empty() ) ) {
-        retval = un->pImage->cargo[0].GetCategory()+string( "\">\n" )+CargoToString( un->pImage->cargo[0] );
-        for (unsigned int kk = 1; kk < un->pImage->cargo.size(); ++kk) {
-            if (un->pImage->cargo[kk].category != un->pImage->cargo[kk-1].category)
-                retval += string( "\t\t</Category>\n\t\t<Category file=\"" )+un->pImage->cargo[kk].GetCategory()+string(
-                    "\">\n" );
-            retval += CargoToString( un->pImage->cargo[kk] );
-        }
-        retval += string( "\t\t</Category>\n\t\t<Category file=\"nothing" );
-    } else {
-        retval = string( "nothing" );
-    }
-    return retval;
-}
 
-float Unit::CourseDeviation( const Vector &OriginalCourse, const Vector &FinalCourse ) const
-{
-    if (ViewComputerData().max_ab_speed() > .001)
-        return ( OriginalCourse-(FinalCourse) ).Magnitude()/ViewComputerData().max_ab_speed();
-    else
-        return (FinalCourse-OriginalCourse).Magnitude();
-}
 
-/*
- **************************************************************************************
- *** STAR SYSTEM JUMP STUFF                                                          **
- **************************************************************************************
- */
 
-bool Unit::TransferUnitToSystem( StarSystem *Current )
-{
-    if ( getStarSystem()->RemoveUnit( this ) ) {
-        this->RemoveFromSystem();
-        this->Target( NULL );
-        Current->AddUnit( this );
 
-        Cockpit *an_active_cockpit = _Universe->isPlayerStarship( this );
-        if (an_active_cockpit != NULL) {
-            an_active_cockpit->activeStarSystem = Current;
-            an_active_cockpit->visitSystem( Current->getFileName() );
-        }
-        activeStarSystem = Current;
-        return true;
-    } else {
-        BOOST_LOG_TRIVIAL(fatal) << "Fatal Error: cannot remove starship from critical system";
-        VSFileSystem::flushLogs();
-    }
-    return false;
-}
+
+
+
+
 
 /*
  **************************************************************************************
@@ -6322,54 +5233,7 @@ string toLowerCase( string in )
 unsigned int Drawable::unitCount = 0;
 
 
-// TODO: move to ship
-Vector Unit::GetWarpRefVelocity() const
-{
-    //Velocity
-    Vector VelocityRef( 0, 0, 0 );
-    {
-        const Unit *vr = computer.velocity_ref.GetConstUnit();
-        if (vr)
-            VelocityRef = vr->cumulative_velocity;
-    }
-    Vector v   = Velocity-VelocityRef;
-    float  len = v.Magnitude();
-    if (len > .01)      //only get velocity going in DIRECTIOn of cumulative transformation for warp calc...
-        v = v*( cumulative_transformation_matrix.getR().Dot( v*(1./len) ) );
 
-    return v;
-}
-
-// TODO: move to ship
-Vector Unit::GetWarpVelocity() const
-{
-    if (graphicOptions.WarpFieldStrength == 1.0) {
-        // Short circuit, most ships won't be at warp, so it simplifies math a lot
-        return cumulative_velocity;
-    } else {
-        Vector VelocityRef( 0, 0, 0 );
-        {
-            Unit *vr = const_cast< UnitContainer* > (&computer.velocity_ref)->GetUnit();
-            if (vr)
-                VelocityRef = vr->cumulative_velocity;
-        }
-
-        //return(cumulative_velocity*graphicOptions.WarpFieldStrength);
-        Vector vel   = cumulative_velocity-VelocityRef;
-        float  speed = vel.Magnitude();
-        //return vel*graphicOptions.WarpFieldStrength;
-        if (speed > 0) {
-            Vector veldir    = vel*(1./speed);
-            Vector facing    = cumulative_transformation_matrix.getR();
-            float  ang       = facing.Dot( veldir );
-            float  warpfield = graphicOptions.WarpFieldStrength;
-            if (ang < 0) warpfield = 1./warpfield;
-            return facing*(ang*speed*(warpfield-1.))+vel+VelocityRef;
-        } else {
-            return VelocityRef;
-        }
-    }
-}
 
 void Unit::UpdatePhysics3(const Transformation &trans,
                           const Matrix &transmat,
@@ -6658,84 +5522,7 @@ bool Unit::isPlayerShip()
     return _Universe->isPlayerStarship( this ) ? true : false;
 }
 
-float Unit::CalculateNearestWarpUnit( float minmultiplier, Unit **nearest_unit, bool count_negative_warp_units ) const
-{
-    static float  smallwarphack     = XMLSupport::parse_float( vs_config->getVariable( "physics", "minwarpeffectsize", "100" ) );
-    static float  bigwarphack       =
-        XMLSupport::parse_float( vs_config->getVariable( "physics", "maxwarpeffectsize", "10000000" ) );
-    //Boundary between multiplier regions 1&2. 2 is "high" mult
-    static double warpregion1       = XMLSupport::parse_float( vs_config->getVariable( "physics", "warpregion1", "5000000" ) );
-    //Boundary between multiplier regions 0&1 0 is mult=1
-    static double warpregion0       = XMLSupport::parse_float( vs_config->getVariable( "physics", "warpregion0", "5000" ) );
-    //Mult at 1-2 boundary
-    static double warpcruisemult    = XMLSupport::parse_float( vs_config->getVariable( "physics", "warpcruisemult", "5000" ) );
-    //degree of curve
-    static double curvedegree       = XMLSupport::parse_float( vs_config->getVariable( "physics", "warpcurvedegree", "1.5" ) );
-    //coefficient so as to agree with above
-    static double upcurvek = warpcruisemult/pow( (warpregion1-warpregion0), curvedegree );
-    //inverse fractional effect of ship vs real big object
-    static float  def_inv_interdiction = 1.
-                                         /XMLSupport::parse_float( vs_config->getVariable( "physics", "default_interdiction",
-                                                                                           ".125" ) );
-    Unit *planet;
-    Unit *testthis = NULL;
-    {
-        NearestUnitLocator locatespec;
-        findObjects( _Universe->activeStarSystem()->collide_map[Unit::UNIT_ONLY], location[Unit::UNIT_ONLY], &locatespec );
-        testthis = locatespec.retval.unit;
-    }
-    for (un_fiter iter = _Universe->activeStarSystem()->gravitationalUnits().fastIterator();
-         (planet = *iter) || testthis;
-         ++iter) {
-        if ( !planet || !planet->Killed() ) {
-            if (planet == NULL) {
-                planet   = testthis;
-                testthis = NULL;
-            }
-            if (planet == this)
-                continue;
-            float shiphack = 1;
-            if (planet->isUnit() != _UnitType::planet) {
-                shiphack = def_inv_interdiction;
-                if ( planet->specInterdiction != 0 && planet->graphicOptions.specInterdictionOnline != 0
-                    && (planet->specInterdiction > 0 || count_negative_warp_units) ) {
-                    shiphack = 1/fabs( planet->specInterdiction );
-                    if (specInterdiction != 0 && graphicOptions.specInterdictionOnline != 0)
-                        //only counters artificial interdiction ... or maybe it cheap ones shouldn't counter expensive ones!? or
-                        // expensive ones should counter planets...this is safe now, for gameplay
-                        shiphack *= fabs( specInterdiction );
-                }
-            }
-            float   multipliertemp = 1;
-            float   minsizeeffect  = (planet->rSize() > smallwarphack) ? planet->rSize() : smallwarphack;
-            float   effectiverad   = minsizeeffect*( 1.0f+UniverseUtil::getPlanetRadiusPercent() )+rSize();
-            if (effectiverad > bigwarphack)
-                effectiverad = bigwarphack;
-            QVector dir     = Position()-planet->Position();
-            double  udist   = dir.Magnitude();
-            float   sigdist = UnitUtil::getSignificantDistance( this, planet );
-            if ( planet->isPlanet() && udist < (1<<28) ) //If distance is viable as a float approximation and it's an actual celestial body
-                udist = sigdist;
-            do {
-                double dist = udist;
-                if (dist < 0) dist = 0;
-                dist *= shiphack;
-                if ( dist > (effectiverad+warpregion0) )
-                    multipliertemp = pow( (dist-effectiverad-warpregion0), curvedegree )*upcurvek;
-                else
-                    multipliertemp = 1;
-                if (multipliertemp < minmultiplier) {
-                    minmultiplier = multipliertemp;
-                    *nearest_unit = planet;
-                    //eventually use new multiplier to compute
-                } else {break; }
-            } while (0);
-            if (!testthis)
-                break; //don't want the ++
-        }
-    }
-    return minmultiplier;
-}
+
 
 float Unit::DealDamageToHull( const Vector &pnt, float damage)
 {

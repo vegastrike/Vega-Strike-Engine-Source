@@ -323,7 +323,7 @@ int main( int argc, char *argv[] )
 
     // when the program name is `vegastrike-engine` then enforce that the data directory must be specified
     // if the program name is `vegastrike` then enable legacy mode where the current path is assumed.
-    legacy_data_dir_mode = (program_name == "vegastrike") || (program_name == "vegastrike.exe");
+    legacy_data_dir_mode = true; //(program_name == "vegastrike") || (program_name == "vegastrike.exe");
     std::cerr<<"Legacy Mode: "<<(legacy_data_dir_mode ? "TRUE" : "FALSE")<<std::endl;
 
     if (true == legacy_data_dir_mode) {

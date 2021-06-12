@@ -90,9 +90,11 @@ char *split_words(char *string, int max_words) {
 char *ptr_copy(const char *string)
 {
 #if _XOPEN_SOURCE >= 500 || _POSIX_C_SOURCE >= 200809L
-    return strdup(string); //TODO[String Safety] -- future platform specific intrinsic options relevant here
+    return strdup(string);
+#elif defined (_WINDOWS)
+    return _strdup(string);
 #else
-    size_t buf_size = strlen(string) + 1; //TODO[String Safety] -- strlen assumes null terminated string 
+    size_t buf_size = strlen(string) + 1;
     char *alloc;
     alloc = (char *)malloc(buf_size);
     if (alloc == nullptr)
@@ -101,8 +103,8 @@ char *ptr_copy(const char *string)
         fflush(stderr);
         exit(-1);
     }
-    strncpy(alloc, string, buf_size); //TODO[String Safety] -- future platform specific intrinsic options relevant here //[MSVC-Warn]
-    alloc[buf_size - 1] = '\0'; // redundant due to buffer>strlen and zero pad semantics of strncpy
+    strncpy(alloc, string, buf_size);
+    alloc[buf_size - 1] = '\0';
     return alloc;
 #endif
 }
