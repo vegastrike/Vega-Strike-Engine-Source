@@ -1,4 +1,4 @@
-name: 'MacOS - CI'
+name: 'MacOS-CI'
 
 on:
   # Activate manually
@@ -7,11 +7,13 @@ on:
 jobs:
   build:
     name: Build
-    runs-on: macos-latest
+    runs-on: ${{ matrix.os }}
 
     strategy:
       fail-fast: false
       matrix:
+        os:
+          - macos-10.15
         compiler:
           - clang
           - gcc
@@ -22,17 +24,23 @@ jobs:
 
     steps:
 
-    # Dependencies provided in the macos-latest image:
+    # The following dependencies are already present within macos-* images:
+    # - clang (llvm 12)
+    # - cmake
+    # - expat
+    # - gcc (9, 10, 11)
+    # - git
     # - jpeg
     # - libpng
     # - libvorbis
-    - name: Install general dependencies using homebrew
+    # - python (3.8, 3.9)
+    - name: Install dependencies using homebrew
       run: brew install boost-python3 gtk+3 gtkglext sdl
 
     # The following Apple-provided libraries are deprecated:
     # * OpenGL as of MacOS 10.14
     # * GLUT as of MacOS 10.9
-    - name: Install homebrewed OpenGL and GLUT
+    - name: Optionally install homebrewed OpenGL and GLUT
       if: ${{ matrix.override == 'opengl' }}
       run: |
         brew install mesa mesa-glu freeglut
@@ -41,7 +49,7 @@ jobs:
         ln -s /usr/local/lib/libGL.dylib /usr/local/lib/libOpenGL.dylib
 
     # The Apple-provided OpenAL is deprecated as of MacOS 10.15
-    - name: Install homebrewed OpenAL
+    - name: Optionally install homebrewed OpenAL
       if: ${{ matrix.override == 'openal' }}
       run: brew install openal-soft
 
