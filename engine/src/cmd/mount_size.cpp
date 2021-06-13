@@ -48,9 +48,9 @@ MOUNT_SIZE getMountSizeFromItsValue(int value) {
 
 MOUNT_SIZE getMountSize(const std::string& mount_string) {
     // TODO: just use map here?! but then need to do something about case sensitivity
-    for (const auto& [key, value]: mount_map) {
-        if(boost::iequals(mount_string, key)) {
-            return value;
+    for (const auto& key_value: mount_map) {
+        if(boost::iequals(mount_string, key_value.first)) {
+            return key_value.second;
         }
     }
 
@@ -72,9 +72,9 @@ int getMountSizes(const std::string& mounts_string) {
 std::string getMountSizeString(const int mount){
     std::string mount_string;
 
-    for (const auto& [key, value]: mount_map) {
-        if(as_integer(value) & mount) {
-            mount_string += key + " ";
+    for (const auto& key_value: mount_map) {
+        if(as_integer(key_value.second) & mount) {
+            mount_string += key_value.first + " ";
         }
     }
 
