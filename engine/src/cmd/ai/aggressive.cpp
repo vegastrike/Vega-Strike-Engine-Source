@@ -316,7 +316,7 @@ bool AggressiveAI::ProcessLogicItem( const AIEvents::AIEvresult &item )
                 value = ( pdmag-parent->rSize()-targ->rSize() );
                 float  myvel = PosDifference.Dot( parent->GetVelocity()-targ->GetVelocity() )/value;        ///pdmag;
                 if (myvel > 0)
-                    value -= myvel*myvel/( 2*( parent->limits.retro/parent->GetMass() ) );
+                    value -= myvel*myvel/( 2*( parent->limits.retro/parent->Mass ) );
             } else {
                 value = 10000;
             }
@@ -1520,7 +1520,7 @@ void AggressiveAI::ExecuteNoEnemies()
         } else if (lurk_on_arrival > 0) {
             lurk_on_arrival -= simulation_atom_var;
             //slowdown
-            parent->Thrust( -parent->GetMass()*parent->UpCoordinateLevel( parent->GetVelocity() )/simulation_atom_var, false );
+            parent->Thrust( -parent->Mass*parent->UpCoordinateLevel( parent->GetVelocity() )/simulation_atom_var, false );
             parent->graphicOptions.InWarp = 0;
             if (lurk_on_arrival <= 0) {
                 nav = QVector( 0, 0, 0 );

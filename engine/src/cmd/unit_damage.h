@@ -130,7 +130,7 @@ void GameUnit::Split( int level )
             float  locm = loc.Magnitude();
             if (locm < .0001)
                 locm = 1;
-            splitsub->ApplyForce( splitsub->meshdata[0]->rSize()*game_options.explosionforce*10*splitsub->GetMass()*loc/locm );
+            splitsub->ApplyForce( splitsub->meshdata[0]->rSize()*game_options.explosionforce*10*splitsub->Mass*loc/locm );
             loc.Set( rand(), rand(), rand()+.1 );
             loc.Normalize();
             splitsub->ApplyLocalTorque( loc*splitsub->GetMoment()*game_options.explosiontorque*( 1+rand()%(int) ( 1+this->rSize() ) ) );

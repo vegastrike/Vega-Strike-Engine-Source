@@ -1490,7 +1490,7 @@ void Unit::ApplyLocalForce( const Vector &Vforce )
 void Unit::Accelerate( const Vector &Vforce )
 {
     if ( FINITE( Vforce.i ) && FINITE( Vforce.j ) && FINITE( Vforce.k ) ) {
-        NetForce += Vforce*GetMass();
+        NetForce += Vforce*Mass;
     } else {
         BOOST_LOG_TRIVIAL(error) << "fatal force";
     }

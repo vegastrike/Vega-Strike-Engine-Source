@@ -118,7 +118,7 @@ Vector Movable::GetNetAcceleration() const
     GetOrientation( p, q, r );
     Vector res( NetLocalForce.i*p+NetLocalForce.j*q+NetLocalForce.k*r );
     res += NetForce;
-    return res/GetMass();
+    return res/Mass;
 }
 
 Vector Movable::GetNetAngularAcceleration() const
@@ -140,7 +140,7 @@ float Movable::GetMaxAccelerationInDirectionOf( const Vector &ref, bool afterbur
     float  tr     = (lref.k == 0) ? 0 : fabs( ( (lref.k > 0) ? Limits().forward : Limits().retro )/lref.k );
     float  trqmin = (tr < tq) ? tr : tq;
     float  tm     = tp < trqmin ? tp : trqmin;
-    return lref.Magnitude()*tm/GetMass();
+    return lref.Magnitude()*tm/Mass;
 }
 
 void Movable::SetVelocity( const Vector &v )
@@ -332,7 +332,7 @@ Vector Movable::ResolveForces( const Transformation &trans, const Matrix &transm
     }
     if (NetForce.i || NetForce.j || NetForce.k)
         temp2 += InvTransformNormal( transmat, NetForce );
-    temp2 = temp2/GetMass();
+    temp2 = temp2/Mass;
     temp  = temp2*simulation_atom_var;
     if ( !( FINITE( temp2.i ) && FINITE( temp2.j ) && FINITE( temp2.k ) ) ) {
         BOOST_LOG_TRIVIAL(info) << "NetForce transform skrewed";
@@ -369,7 +369,7 @@ Vector Movable::ResolveForces( const Transformation &trans, const Matrix &transm
     if (air_res_coef || lateral_air_res_coef) {
         float  velmag = Velocity.Magnitude();
         Vector AirResistance = Velocity
-                               *( air_res_coef*velmag/GetMass() )*(corner_max.i-corner_min.i)*(corner_max.j-corner_min.j);
+                               *( air_res_coef*velmag/Mass )*(corner_max.i-corner_min.i)*(corner_max.j-corner_min.j);
         if (AirResistance.Magnitude() > velmag) {
             Velocity.Set( 0, 0, 0 );
         } else {
@@ -380,7 +380,7 @@ Vector Movable::ResolveForces( const Transformation &trans, const Matrix &transm
                 Vector lateralVel = p*Velocity.Dot( p )+q*Velocity.Dot( q );
                 AirResistance = lateralVel
                                 *( lateral_air_res_coef*velmag
-                                  /GetMass() )*(corner_max.i-corner_min.i)*(corner_max.j-corner_min.j);
+                                  /Mass )*(corner_max.i-corner_min.i)*(corner_max.j-corner_min.j);
                 if ( AirResistance.Magnitude() > lateralVel.Magnitude() )
                     Velocity = r*Velocity.Dot( r );
                 else

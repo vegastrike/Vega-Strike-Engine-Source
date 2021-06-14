@@ -4749,12 +4749,12 @@ void showUnitStats( Unit *playerUnit, string &text, int subunitlevel, int mode, 
         text += "#n##c0:1:.5#"+prefix+"[GENERAL INFORMATION]#n##-c";
 
         text += "#n#"+prefix+statcolor+"Class: #-c"+nametemp+statcolor+"    Model: #-c"+model;
-        PRETTY_ADDU( statcolor+"Mass: #-c", playerUnit->GetMass(), 0, "metric tons" );
+        PRETTY_ADDU( statcolor+"Mass: #-c", playerUnit->Mass, 0, "metric tons" );
         //Irrelevant to player as is proportional to mass in our physics system.
         //PRETTY_ADDU("Moment of inertia: ",playerUnit->GetMoment(),2,"tons.m�");
     }
-    if ( mode && replacement_mode == 2 && playerUnit->GetMass() != blankUnit->GetMass() )
-        PRETTY_ADDU( statcolor+"Effective Mass reduced by: #-c", 100.0*( 1.0-playerUnit->GetMass() ), 0, "%" );
+    if ( mode && replacement_mode == 2 && playerUnit->Mass != blankUnit->Mass )
+        PRETTY_ADDU( statcolor+"Effective Mass reduced by: #-c", 100.0*( 1.0-playerUnit->Mass ), 0, "%" );
     if (!subunitlevel) {
         float vol[2];
         float bvol[2];
@@ -4879,23 +4879,23 @@ void showUnitStats( Unit *playerUnit, string &text, int subunitlevel, int mode, 
         }
     }
     if (!subunitlevel) {
-        if ( !mode && (playerUnit->GetMass() != 0) ) {
+        if ( !mode && (playerUnit->Mass != 0) ) {
             PRETTY_ADDU( statcolor+"Fore acceleration: #-c",
-                         playerUnit->limits.forward/( 9.8*playerUnit->GetMass() ), 2, "gravities" );
+                         playerUnit->limits.forward/( 9.8*playerUnit->Mass ), 2, "gravities" );
             PRETTY_ADDU( statcolor+"Aft acceleration: #-c",
-                         playerUnit->limits.retro/( 9.8*playerUnit->GetMass() ), 2, "gravities" );
+                         playerUnit->limits.retro/( 9.8*playerUnit->Mass ), 2, "gravities" );
             if (playerUnit->limits.lateral == playerUnit->limits.vertical) {
                 PRETTY_ADDU( statcolor+"Orthogonal acceleration: #-c",
-                             playerUnit->limits.vertical/( 9.8*playerUnit->GetMass() ), 2, "gravities" );
+                             playerUnit->limits.vertical/( 9.8*playerUnit->Mass ), 2, "gravities" );
                 text += expstatcolor+"#n#  (vertical and lateral axes)#-c";
             } else {
-                PRETTY_ADDN( statcolor+" Lateral acceleration #-c", playerUnit->limits.lateral/( 9.8*playerUnit->GetMass() ), 2 );
+                PRETTY_ADDN( statcolor+" Lateral acceleration #-c", playerUnit->limits.lateral/( 9.8*playerUnit->Mass ), 2 );
                 PRETTY_ADDN( statcolor+" Vertical acceleration #-c",
-                             playerUnit->limits.vertical/( 9.8*playerUnit->GetMass() ), 2 );
+                             playerUnit->limits.vertical/( 9.8*playerUnit->Mass ), 2 );
                 text += " gravities";
             }
             PRETTY_ADDU( statcolor+"Forward acceleration with overthrust: #-c", playerUnit->limits.afterburn
-                         /( 9.8*playerUnit->GetMass() ), 2, "gravities" );
+                         /( 9.8*playerUnit->Mass ), 2, "gravities" );
             text.append( "#n##n##c0:1:.5#"+prefix+"[GOVERNOR SETTINGS]#n##-c" );
         } else {
             switch (replacement_mode)
@@ -5661,7 +5661,7 @@ void showUnitStats( Unit *playerUnit, string &text, int subunitlevel, int mode, 
         if (shields_require_power)
             maxshield = 0;
         PRETTY_ADDU( statcolor+"Minimum time to reach full overthrust speed: #-c",
-                     playerUnit->GetMass()*uc.max_ab_speed()/playerUnit->limits.afterburn, 2, "seconds" );
+                     playerUnit->Mass*uc.max_ab_speed()/playerUnit->limits.afterburn, 2, "seconds" );
         //reactor
         float avail    = (playerUnit->maxEnergyData()*RSconverter-maxshield*VSDM);
         float overhead =

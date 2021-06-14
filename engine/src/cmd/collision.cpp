@@ -81,7 +81,7 @@ Collision::Collision(Unit* unit, const QVector& location, const Vector& normal):
     cockpit = _Universe->isPlayerStarship( unit ); // smcp/thcp
     unit_type = unit->isUnit();
     is_player_ship = _Universe->isPlayerStarship(unit);
-    mass = std::max(unit->GetMass(), minimum_mass);
+    mass = std::max(unit->Mass, minimum_mass);
     position = unit->Position();
     velocity = unit->GetVelocity();
 }

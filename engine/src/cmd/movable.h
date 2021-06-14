@@ -42,6 +42,7 @@ class Movable
 public:
     // Fields
     //mass of this unit (may change with cargo)
+    // TODO: subclass with return Mass+fuel;
     float  Mass;
     Limits limits;
     //The velocity this unit has in World Space
