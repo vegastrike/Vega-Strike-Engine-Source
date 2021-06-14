@@ -69,6 +69,8 @@
 #include "mount_size.h"
 #include "turret.h"
 #include "energetic.h"
+#include "game_config.h"
+
 
 #include <math.h>
 #include <list>
@@ -109,15 +111,7 @@ Unit* getMasterPartList()
     return _masterPartList;
 }
 
-//cannot seem to get min and max working properly across win and lin any other way...
-static float mymax( float a, float b )
-{
-    return a < b ? b : a;
-}
-static float mymin( float a, float b )
-{
-    return a < b ? a : b;
-}
+
 
 using namespace XMLSupport;
 
@@ -262,12 +256,7 @@ unsigned int apply_float_to_unsigned_int( float tmp )
     return ans;
 }
 
-std::string accelStarHandler( const XMLType &input, void *mythis )
-{
-    static float game_speed = XMLSupport::parse_float( vs_config->getVariable( "physics", "game_speed", "1" ) );
-    static float game_accel = XMLSupport::parse_float( vs_config->getVariable( "physics", "game_accel", "1" ) );
-    return XMLSupport::tostring( *input.w.f/(game_speed*game_accel) );
-}
+
 
 std::string speedStarHandler( const XMLType &input, void *mythis )
 {
@@ -1456,14 +1445,11 @@ Cockpit* Unit::GetVelocityDifficultyMult( float &difficulty ) const
 }
 
 
-void Unit::FireEngines( const Vector &Direction /*unit vector... might default to "r"*/, float FuelSpeed, float FMass )
+void Unit::FireEngines( const Vector &Direction /*unit vector... might default to "r"*/,
+                        float FuelSpeed,
+                        float FMass )
 {
-    static float fuelpct = XMLSupport::parse_float( vs_config->getVariable( "physics", "FuelUsage", "1" ) );
-    fuel -= fuelpct*FMass;
-    if (fuel < 0) {
-        FMass += fuel;
-        fuel   = 0;                                      //ha ha!
-    }
+    FMass = ExpendFuel(FMass);
     NetForce += Direction*( FuelSpeed*FMass/GetElapsedTime() );
 }
 
@@ -1532,11 +1518,12 @@ Vector Unit::MaxTorque( const Vector &torque )
 
 Vector Unit::ClampTorque( const Vector &amt1 )
 {
+    static float staticfuelclamp = GameConfig::GetVariable( "physics", "NoFuelThrust", 0.4 );
+
     Vector Res = amt1;
-    static bool  WCfuelhack = XMLSupport::parse_bool( vs_config->getVariable( "physics", "fuel_equals_warp", "false" ) );
-    if (WCfuelhack)
-        fuel = warpenergy;
-    static float staticfuelclamp = XMLSupport::parse_float( vs_config->getVariable( "physics", "NoFuelThrust", ".4" ) );
+
+    WCWarpIsFuelHack(true);
+
     float fuelclamp = (fuel <= 0) ? staticfuelclamp : 1;
     if (fabs( amt1.i ) > fuelclamp*limits.pitch)
         Res.i = copysign( fuelclamp*limits.pitch, amt1.i );
@@ -1544,22 +1531,10 @@ Vector Unit::ClampTorque( const Vector &amt1 )
         Res.j = copysign( fuelclamp*limits.yaw, amt1.j );
     if (fabs( amt1.k ) > fuelclamp*limits.roll)
         Res.k = copysign( fuelclamp*limits.roll, amt1.k );
-    static float Lithium6constant =
-        XMLSupport::parse_float( vs_config->getVariable( "physics", "LithiumRelativeEfficiency_Lithium", "1" ) );
     //1/5,000,000 m/s
-    static float FMEC_exit_vel_inverse =
-        XMLSupport::parse_float( vs_config->getVariable( "physics", "FMEC_exit_vel", "0.0000002" ) );
-    //HACK this forces the reaction to be Li-6+D fusion with efficiency governed by the getFuelUsage function
-    fuel -= Energetic::getFuelUsage( false ) * simulation_atom_var * Res.Magnitude()*FMEC_exit_vel_inverse/Lithium6constant;
-#ifndef __APPLE__
-    if ( ISNAN( fuel ) ) {
-        BOOST_LOG_TRIVIAL(error) << "FUEL is NAN";
-        fuel = 0;
-    }
-#endif
-    if (fuel < 0) fuel = 0;
-    if (warpenergy < 0) warpenergy = 0;
-    if (WCfuelhack) warpenergy = fuel;
+
+    ExpendMomentaryFuelUsage(Res.Magnitude());
+    WCWarpIsFuelHack(false);
     return Res;
 }
 
@@ -1644,7 +1619,7 @@ Vector Unit::MaxThrust( const Vector &amt1 )
 }
 
 //CMD_FLYBYWIRE depends on new version of Clampthrust... don't change without resolving it
-
+// TODO: refactor soon. Especially access to the fuel variable
 Vector Unit::ClampThrust( const Vector &amt1, bool afterburn )
 {
     static bool  WCfuelhack = XMLSupport::parse_bool( vs_config->getVariable( "physics", "fuel_equals_warp", "false" ) );
@@ -1821,7 +1796,7 @@ static bool applyto( float &shield, const float max, const float amt )
 
 void Unit::LightShields( const Vector &pnt, const Vector &normal, float amt, const GFXColor &color )
 {
-    meshdata.back()->AddDamageFX( pnt, shieldtight ? shieldtight*normal : Vector( 0, 0, 0 ), mymin( 1.0f, mymax( 0.0f,
+    meshdata.back()->AddDamageFX( pnt, shieldtight ? shieldtight*normal : Vector( 0, 0, 0 ), std::min( 1.0f, std::max( 0.0f,
                                                                                                                  amt ) ), color );
 }
 
@@ -2241,12 +2216,12 @@ void Unit::DamageRandSys( float dam, const Vector &vec, float randnum, float deg
         //DAMAGE JUMP
         if (randnum >= .9) {
             static char max_shield_leak =
-                (char) mymax( 0.0,
-                             mymin( 100.0, XMLSupport::parse_float( vs_config->getVariable( "physics", "max_shield_leak", "90" ) ) ) );
+                (char) std::max( 0.0,
+                             std::min( 100.0, XMLSupport::parse_float( vs_config->getVariable( "physics", "max_shield_leak", "90" ) ) ) );
             static char min_shield_leak =
-                (char) mymax( 0.0,
-                             mymin( 100.0, XMLSupport::parse_float( vs_config->getVariable( "physics", "max_shield_leak", "0" ) ) ) );
-            char newleak = float_to_int( mymax( min_shield_leak, mymax( max_shield_leak, (char) ( (randnum-.9)*10.0*100.0 ) ) ) );
+                (char) std::max( 0.0,
+                             std::min( 100.0, XMLSupport::parse_float( vs_config->getVariable( "physics", "max_shield_leak", "0" ) ) ) );
+            char newleak = float_to_int( std::max( min_shield_leak, std::max( max_shield_leak, (char) ( (randnum-.9)*10.0*100.0 ) ) ) );
             if (shield.leak < newleak)
                 shield.leak = newleak;
         } else if (randnum >= .7) {
@@ -3842,6 +3817,10 @@ static bool cell_has_recursive_data( const string &name, unsigned int fac, const
                                      this->my ); }             \
     while (0)
 
+
+// TODO: get rid of this
+extern float accelStarHandler( float &input );
+
 bool Unit::UpAndDownGrade( const Unit *up,
                            const Unit *templ,
                            int mountoffset,
@@ -3913,11 +3892,11 @@ bool Unit::UpAndDownGrade( const Unit *up,
             tlimits_yaw       = XMLSupport::parse_float( angleStarHandler( XMLType( &tlimits_yaw ), NULL ) );
             tlimits_pitch     = XMLSupport::parse_float( angleStarHandler( XMLType( &tlimits_pitch ), NULL ) );
             tlimits_roll      = XMLSupport::parse_float( angleStarHandler( XMLType( &tlimits_roll ), NULL ) );
-            tlimits_forward   = XMLSupport::parse_float( accelStarHandler( XMLType( &tlimits_forward ), NULL ) );
-            tlimits_retro     = XMLSupport::parse_float( accelStarHandler( XMLType( &tlimits_retro ), NULL ) );
-            tlimits_lateral   = XMLSupport::parse_float( accelStarHandler( XMLType( &tlimits_lateral ), NULL ) );
-            tlimits_vertical  = XMLSupport::parse_float( accelStarHandler( XMLType( &tlimits_vertical ), NULL ) );
-            tlimits_afterburn = XMLSupport::parse_float( accelStarHandler( XMLType( &tlimits_afterburn ), NULL ) );
+            tlimits_forward   = accelStarHandler( tlimits_forward);
+            tlimits_retro     = accelStarHandler( tlimits_retro);
+            tlimits_lateral   = accelStarHandler( tlimits_lateral);
+            tlimits_vertical  = accelStarHandler( tlimits_vertical);
+            tlimits_afterburn = accelStarHandler( tlimits_afterburn);
         } else {
             Adder     = &GetsB;
             Percenter = &computePercent;
@@ -5233,48 +5212,26 @@ string toLowerCase( string in )
 unsigned int Drawable::unitCount = 0;
 
 
+void Unit::ActTurn() {
+    // Dock
+    if (docked&DOCKING_UNITS)
+        PerformDockingOperations();
 
+    // Repair Ship
+    Repair();
+
+}
 
 void Unit::UpdatePhysics3(const Transformation &trans,
                           const Matrix &transmat,
                           bool lastframe,
                           UnitCollection *uc,
                           Unit *superunit) {
-  if (docked&DOCKING_UNITS)
-      PerformDockingOperations();
-  Repair();
+  ActTurn();
+
   if (fuel < 0)
       fuel = 0;
-  if (cloaking >= cloakmin) {
-      static bool warp_energy_for_cloak =
-          XMLSupport::parse_bool( vs_config->getVariable( "physics", "warp_energy_for_cloak", "true" ) );
-      if ( pImage->cloakenergy*simulation_atom_var > (warp_energy_for_cloak ? warpenergy : energy) ) {
-          Cloak( false );                      //Decloak
-      } else {
-          SetShieldZero( this );
-          if (pImage->cloakrate > 0 || cloaking == cloakmin) {
-              if (warp_energy_for_cloak)
-                  warpenergy -= (simulation_atom_var*pImage->cloakenergy);
-              else
-                  energy -= (simulation_atom_var*pImage->cloakenergy);
-          }
-          if (cloaking > cloakmin) {
-              adjustSound(SoundType::cloaking, cumulative_transformation.position, cumulative_velocity);
-
-              //short fix
-              if ( (cloaking == (2147483647)
-                    && pImage->cloakrate > 0) || (cloaking == cloakmin+1 && pImage->cloakrate < 0) )
-                  playSound(SoundType::cloaking);
-              //short fix
-              cloaking -= (int) (pImage->cloakrate*simulation_atom_var);
-              if (cloaking <= cloakmin && pImage->cloakrate > 0)
-                  cloaking = cloakmin;
-              if (cloaking < 0 && pImage->cloakrate < 0) {
-                  cloaking = -2147483647-1;
-              }
-          }
-      }
-  }
+  UpdateCloak();
   RegenShields();
   if (lastframe) {
       if ( !( docked&(DOCKED|DOCKED_INSIDE) ) )
@@ -5515,6 +5472,55 @@ void Unit::UpdatePhysics3(const Transformation &trans,
               this->getStarSystem()->collide_map[Unit::UNIT_BOLT]->changeKey( this->location[locind], Collidable( this ) );
       }
   }
+}
+
+void Unit::UpdateCloak() {
+    // Use warp power for cloaking (SPEC capacitor)
+    static bool warp_energy_for_cloak =
+            GameConfig::GetVariable("physics", "warp_energy_for_cloak", true);
+
+    // Cloaking is not effective
+    if (cloaking < cloakmin) {
+        return;
+    }
+
+    // Insufficient energy to cloak ship
+    if ( pImage->cloakenergy*simulation_atom_var > (warp_energy_for_cloak ? warpenergy : energy) ) {
+        Cloak( false );
+        return;
+    }
+
+    // Cloaked ships don't have shields on
+    SetShieldZero( this );
+
+    // We're cloaked
+    if (cloaking > cloakmin) {
+        adjustSound(SoundType::cloaking, cumulative_transformation.position, cumulative_velocity);
+
+        //short fix
+        // TODO: figure out what they have fixed
+        if ( (cloaking == (2147483647)
+              && pImage->cloakrate > 0) || (cloaking == cloakmin+1 && pImage->cloakrate < 0) )
+            playSound(SoundType::cloaking);
+
+        //short fix
+        // TODO: figure out what they have fixed
+        cloaking -= (int) (pImage->cloakrate*simulation_atom_var);
+        if (cloaking <= cloakmin && pImage->cloakrate > 0)
+            cloaking = cloakmin;
+        if (cloaking < 0 && pImage->cloakrate < 0) {
+            cloaking = -2147483647-1;
+        }
+    }
+
+    // Calculate energy drain
+    if (pImage->cloakrate > 0 || cloaking == cloakmin) {
+        if (warp_energy_for_cloak) {
+            warpenergy -= (simulation_atom_var*pImage->cloakenergy);
+        } else {
+            energy -= (simulation_atom_var*pImage->cloakenergy);
+        }
+    }
 }
 
 bool Unit::isPlayerShip()

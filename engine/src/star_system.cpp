@@ -892,119 +892,105 @@ void StarSystem::RequestPhysics( Unit *un, unsigned int queue )
 //scheduling also require a constant base priority, since otherwise priority changes
 //will wreak havoc with subunit interpolation. Luckily again, we only need
 //randomization on priority changes, so we're fine.
-void StarSystem::UpdateUnitPhysics( bool firstframe )
+void StarSystem::UpdateUnitsPhysics( bool firstframe )
 {
-    static bool phytoggle  = true;
     static int  batchcount = SIM_QUEUE_SIZE-1;
-    double aitime = 0;
-    double phytime = 0;
     double collidetime     = 0;
     double bolttime = 0;
     targetpick   = 0;
     aggfire      = 0;
     numprocessed = 0;
     stats.CheckVitals( this );
-    if (phytoggle) {
-        for (++batchcount; batchcount > 0; --batchcount) {
-            try {
-                UnitCollection col = physics_buffer[current_sim_location];
-                un_iter iter = physics_buffer[current_sim_location].createIterator();
-                Unit *unit = nullptr;
-                for (; (unit = *iter); ++iter) {
-                    int priority  = UnitUtil::getPhysicsPriority( unit );
-                    //Doing spreading here and only on priority changes, so as to make AI easier
-                    int predprior = unit->predicted_priority;
-                    //If the priority has really changed (not an initial scattering, because prediction doesn't match)
-                    if (priority != predprior) {
-                        if (predprior == 0)
-                            //Validate snapshot of current interpolated state (this is a reschedule)
-                            unit->curr_physical_state = unit->cumulative_transformation;
-                        //Save priority value as prediction for next scheduling, but don't overwrite yet.
-                        predprior = priority;
-                        //Scatter, so as to achieve uniform distribution
-#if defined(RANDOMIZE_SIM_ATOMS)
-                        BOOST_LOG_TRIVIAL(trace) << "void StarSystem::UpdateUnitPhysics( bool firstframe ): Randomizing unit priority";
-                        priority  = 1+( ( (unsigned int) vsrandom.genrand_int32() )%priority );
-#endif
-                    }
-                    float backup = simulation_atom_var;
-                    //BOOST_LOG_TRIVIAL(trace) << boost::format("void StarSystem::UpdateUnitPhysics( bool firstframe ): Msg A: simulation_atom_var as backed up:  %1%") % simulation_atom_var;
-                    try {
-                        theunitcounter   = theunitcounter+1;
-                        simulation_atom_var *= priority;
-                        //BOOST_LOG_TRIVIAL(trace) << boost::format("void StarSystem::UpdateUnitPhysics( bool firstframe ): Msg B: simulation_atom_var as multiplied: %1%") % simulation_atom_var;
-                        unit->sim_atom_multiplier = priority;
-                        double aa = queryTime();
-                        unit->ExecuteAI();
-                        double bb = queryTime();
-                        unit->ResetThreatLevel();
-                        //FIXME "firstframe"-- assume no more than 2 physics updates per frame.
-                        unit->UpdatePhysics( identity_transformation, identity_matrix, Vector( 0,
-                                                                                               0,
-                                                                                               0 ), priority
-                                             == 1 ? firstframe : true, &this->gravitationalUnits(), unit );
-                        double cc = queryTime();
-                        aitime  += bb-aa;
-                        phytime += cc-bb;
-                        simulation_atom_var = backup;
-                    } catch (...) {
-                        simulation_atom_var = backup;
-                        throw;
-                    }
-                    //BOOST_LOG_TRIVIAL(trace) << boost::format("void StarSystem::UpdateUnitPhysics( bool firstframe ): Msg C: simulation_atom_var as restored:   %1%") % simulation_atom_var;
-                    unit->predicted_priority = predprior;
-                }
-            } catch (const boost::python::error_already_set&) {
-                if ( PyErr_Occurred() ) {
-                    BOOST_LOG_TRIVIAL(fatal) << "void StarSystem::UpdateUnitPhysics( bool firstframe ): Msg D: Python error occurred";
-                    PyErr_Print();
-                    PyErr_Clear();
-                    VSFileSystem::flushLogs();
-                } throw;
+
+    for (++batchcount; batchcount > 0; --batchcount) {
+        try {
+            UnitCollection col = physics_buffer[current_sim_location];
+            un_iter iter = physics_buffer[current_sim_location].createIterator();
+            Unit *unit = nullptr;
+            for (; (unit = *iter); ++iter) {
+                UpdateUnitPhysics(firstframe, unit);
             }
-            double c0  = queryTime();
-            Bolt::UpdatePhysics( this );
-            double cc  = queryTime();
-            last_collisions.clear();
-            collide_map[Unit::UNIT_BOLT]->flatten();
-            if (Unit::NUM_COLLIDE_MAPS > 1)
-                collide_map[Unit::UNIT_ONLY]->flatten( *collide_map[Unit::UNIT_BOLT] );
-            Unit *unit;
-            for (un_iter iter = physics_buffer[current_sim_location].createIterator(); (unit = *iter);) {
-                int   priority = unit->sim_atom_multiplier;
-                float backup   = simulation_atom_var;
-                //BOOST_LOG_TRIVIAL(trace) << boost::format("void StarSystem::UpdateUnitPhysics( bool firstframe ): Msg E: simulation_atom_var as backed up:  %1%") % simulation_atom_var;
-                simulation_atom_var *= priority;
-                //BOOST_LOG_TRIVIAL(trace) << boost::format("void StarSystem::UpdateUnitPhysics( bool firstframe ): Msg F: simulation_atom_var as multiplied: %1%") % simulation_atom_var;
-                unsigned int newloc = (current_sim_location+priority)%SIM_QUEUE_SIZE;
-                unit->CollideAll();
-                simulation_atom_var = backup;
-                //BOOST_LOG_TRIVIAL(trace) << boost::format("void StarSystem::UpdateUnitPhysics( bool firstframe ): Msg G: simulation_atom_var as restored:   %1%") % simulation_atom_var;
-                if (newloc == current_sim_location)
-                    ++iter;
-                else
-                    iter.moveBefore( physics_buffer[newloc] );
-            }
-            double dd = queryTime();
-            collidetime += dd-cc;
-            bolttime    += cc-c0;
-            current_sim_location = (current_sim_location+1)%SIM_QUEUE_SIZE;
-            ++physicsframecounter;
-            totalprocessed += theunitcounter;
-            theunitcounter  = 0;
+        } catch (const boost::python::error_already_set&) {
+            if ( PyErr_Occurred() ) {
+                BOOST_LOG_TRIVIAL(fatal) << "void StarSystem::UpdateUnitPhysics( bool firstframe ): Msg D: Python error occurred";
+                PyErr_Print();
+                PyErr_Clear();
+                VSFileSystem::flushLogs();
+            } throw;
         }
-    } else {
-        Unit *unit = nullptr;
-        for (un_iter iter = getUnitList().createIterator(); (unit = *iter); ++iter) {
-            unit->ExecuteAI();
-            last_collisions.clear();
-            unit->UpdatePhysics( identity_transformation, identity_matrix, Vector( 0,
-                                                                                   0,
-                                                                                   0 ), firstframe,
-                                 &this->gravitationalUnits(), unit );
+        double c0  = queryTime();
+        Bolt::UpdatePhysics( this );
+        double cc  = queryTime();
+        last_collisions.clear();
+        collide_map[Unit::UNIT_BOLT]->flatten();
+        if (Unit::NUM_COLLIDE_MAPS > 1)
+            collide_map[Unit::UNIT_ONLY]->flatten( *collide_map[Unit::UNIT_BOLT] );
+        Unit *unit;
+        for (un_iter iter = physics_buffer[current_sim_location].createIterator(); (unit = *iter);) {
+            int   priority = unit->sim_atom_multiplier;
+            float backup   = simulation_atom_var;
+            //BOOST_LOG_TRIVIAL(trace) << boost::format("void StarSystem::UpdateUnitPhysics( bool firstframe ): Msg E: simulation_atom_var as backed up:  %1%") % simulation_atom_var;
+            simulation_atom_var *= priority;
+            //BOOST_LOG_TRIVIAL(trace) << boost::format("void StarSystem::UpdateUnitPhysics( bool firstframe ): Msg F: simulation_atom_var as multiplied: %1%") % simulation_atom_var;
+            unsigned int newloc = (current_sim_location+priority)%SIM_QUEUE_SIZE;
             unit->CollideAll();
+            simulation_atom_var = backup;
+            //BOOST_LOG_TRIVIAL(trace) << boost::format("void StarSystem::UpdateUnitPhysics( bool firstframe ): Msg G: simulation_atom_var as restored:   %1%") % simulation_atom_var;
+            if (newloc == current_sim_location)
+                ++iter;
+            else
+                iter.moveBefore( physics_buffer[newloc] );
         }
+        double dd = queryTime();
+        collidetime += dd-cc;
+        bolttime    += cc-c0;
+        current_sim_location = (current_sim_location+1)%SIM_QUEUE_SIZE;
+        ++physicsframecounter;
+        totalprocessed += theunitcounter;
+        theunitcounter  = 0;
     }
+}
+
+
+void StarSystem::UpdateUnitPhysics( bool firstframe, Unit *unit )
+{
+    int priority  = UnitUtil::getPhysicsPriority( unit );
+    //Doing spreading here and only on priority changes, so as to make AI easier
+    int predprior = unit->predicted_priority;
+    //If the priority has really changed (not an initial scattering, because prediction doesn't match)
+    if (priority != predprior) {
+        if (predprior == 0)
+            //Validate snapshot of current interpolated state (this is a reschedule)
+            unit->curr_physical_state = unit->cumulative_transformation;
+        //Save priority value as prediction for next scheduling, but don't overwrite yet.
+        predprior = priority;
+        //Scatter, so as to achieve uniform distribution
+#if defined(RANDOMIZE_SIM_ATOMS)
+        BOOST_LOG_TRIVIAL(trace) << "void StarSystem::UpdateUnitPhysics( bool firstframe ): Randomizing unit priority";
+        priority  = 1+( ( (unsigned int) vsrandom.genrand_int32() )%priority );
+#endif
+    }
+    float backup = simulation_atom_var;
+    //BOOST_LOG_TRIVIAL(trace) << boost::format("void StarSystem::UpdateUnitPhysics( bool firstframe ): Msg A: simulation_atom_var as backed up:  %1%") % simulation_atom_var;
+    try {
+        theunitcounter   = theunitcounter+1;
+        simulation_atom_var *= priority;
+        //BOOST_LOG_TRIVIAL(trace) << boost::format("void StarSystem::UpdateUnitPhysics( bool firstframe ): Msg B: simulation_atom_var as multiplied: %1%") % simulation_atom_var;
+        unit->sim_atom_multiplier = priority;
+        unit->ExecuteAI();
+        unit->ResetThreatLevel();
+        //FIXME "firstframe"-- assume no more than 2 physics updates per frame.
+        unit->UpdatePhysics( identity_transformation, identity_matrix, Vector( 0,
+                                                                               0,
+                                                                               0 ), priority
+                             == 1 ? firstframe : true, &this->gravitationalUnits(), unit );
+        simulation_atom_var = backup;
+    } catch (...) {
+        simulation_atom_var = backup;
+        throw;
+    }
+    //BOOST_LOG_TRIVIAL(trace) << boost::format("void StarSystem::UpdateUnitPhysics( bool firstframe ): Msg C: simulation_atom_var as restored:   %1%") % simulation_atom_var;
+    unit->predicted_priority = predprior;
 }
 
 extern void TerrainCollide();
@@ -1031,6 +1017,7 @@ void ExecuteDirector()
     _Universe->SetActiveCockpit( curcockpit );
     mission = active_missions[0];
     processDelayedMissions();
+
     {
         for (unsigned int i = 1; i < active_missions.size();) {
             if (active_missions[i]) {
@@ -1075,7 +1062,7 @@ void StarSystem::Update( float priority )
             for (un_iter iter = draw_list.createIterator(); (unit = *iter); ++iter)
                 unit->SetNebula( nullptr );
             UpdateMissiles();                    //do explosions
-            UpdateUnitPhysics( firstframe );
+            UpdateUnitsPhysics( firstframe );
 
             firstframe = false;
         }
@@ -1126,7 +1113,7 @@ void StarSystem::Update( float priority, bool executeDirector )
                     active_missions[i]->BriefingUpdate();
                 current_stage = PROCESS_UNIT;
             } else if (current_stage == PROCESS_UNIT) {
-                UpdateUnitPhysics( firstframe );
+                UpdateUnitsPhysics( firstframe );
                 UpdateMissiles(); //do explosions
                 collide_table->Update();
                 if ( this == _Universe->getActiveStarSystem( 0 ) )

@@ -36,6 +36,14 @@
 #include <string>
 
 
+float accelStarHandler( float &input )
+{
+    static float game_speed = GameConfig::GetVariable( "physics", "game_speed", 1.0f );
+    static float game_accel = GameConfig::GetVariable( "physics", "game_accel", 1.0f );
+    return input/(game_speed*game_accel);
+}
+
+
 
 bool Movable::configLoaded = false;
 float Movable::VELOCITY_MAX = 0.0f;

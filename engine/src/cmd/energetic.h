@@ -40,6 +40,9 @@ public:
     float fuelData() const;
 
     static float getFuelUsage( bool afterburner );
+    void WCWarpIsFuelHack(bool transfer_warp_to_fuel);
+    float ExpendMomentaryFuelUsage( float magnitude );
+    float ExpendFuel(float quantity);
     float getWarpEnergy() const;
 
     void increaseWarpEnergy( bool insys, float time );

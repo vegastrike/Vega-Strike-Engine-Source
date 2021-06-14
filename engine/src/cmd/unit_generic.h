@@ -494,6 +494,12 @@ protected:
 public:
     QVector realPosition( ) override;
 
+    // Act out a unit's turn
+    void ActTurn();
+
+    // TODO: move to cloakable
+    void UpdateCloak();
+
     // TODO: move up to ship
     void UpdatePhysics3(const Transformation &trans,
                         const Matrix &transmat,
