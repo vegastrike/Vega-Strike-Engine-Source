@@ -159,10 +159,7 @@ void Movable::SetResolveForces( bool ys )
     resolveforces = ys;
 }
 
-float Movable::GetElasticity()
-{
-    return .5;
-}
+
 
 void Movable::UpdatePhysics( const Transformation &trans,
                           const Matrix &transmat,

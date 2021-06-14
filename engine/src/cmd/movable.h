@@ -225,8 +225,6 @@ public:
     {
         return Mass; // TODO: subclass with return Mass+fuel;
     }
-    //returns the ammt of elasticity of collisions with this unit
-    float GetElasticity();
 
     //Sets if forces should resolve on this unit or not
     void SetResolveForces( bool );
