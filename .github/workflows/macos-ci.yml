@@ -1,0 +1,76 @@
+name: 'MacOS-CI'
+
+on:
+  # Activate manually
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: Build
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      fail-fast: false
+      matrix:
+        os:
+          - macos-10.15
+        compiler:
+          - clang
+          - gcc
+        override:
+          - -
+          - opengl
+          - openal
+
+    steps:
+
+    # The following dependencies are already present within macos-* images:
+    # - clang (llvm 12)
+    # - cmake
+    # - expat
+    # - gcc (9, 10, 11)
+    # - git
+    # - jpeg
+    # - libpng
+    # - libvorbis
+    # - python (3.8, 3.9)
+    - name: Install dependencies using homebrew
+      run: brew install boost-python3 gtk+3 gtkglext sdl
+
+    # The following Apple-provided libraries are deprecated:
+    # * OpenGL as of MacOS 10.14
+    # * GLUT as of MacOS 10.9
+    - name: Optionally install homebrewed OpenGL and GLUT
+      if: ${{ matrix.override == 'opengl' }}
+      run: |
+        brew install mesa mesa-glu freeglut
+        ln -s /usr/local/include/GL /usr/local/include/OpenGL
+        ln -s /usr/local/include/GL /usr/local/include/GLUT
+        ln -s /usr/local/lib/libGL.dylib /usr/local/lib/libOpenGL.dylib
+
+    # The Apple-provided OpenAL is deprecated as of MacOS 10.15
+    - name: Optionally install homebrewed OpenAL
+      if: ${{ matrix.override == 'openal' }}
+      run: brew install openal-soft
+
+    - name: Checkout repository
+      uses: actions/checkout@v2
+      with:
+        # We must fetch at least the immediate parents so that if this is
+        # a pull request then we can checkout the head.
+        fetch-depth: 2
+        submodules: false
+
+    # Ensure PRs are built against the PR Head
+    # As opposed to the merge commit
+    - name: Conditionally relocate to PR HEAD
+      if: github.event.pull_request
+      run: git checkout HEAD^2
+
+    - name: Build it
+      env:
+        MY_OS_NAME: macos
+        COMPILER:   ${{ matrix.compiler }}
+        FLAGS:      -DCMAKE_FIND_FRAMEWORK=LAST
+        OPENALDIR:  "/usr/local/opt/openal-soft"
+      run: script/cibuild $FLAGS

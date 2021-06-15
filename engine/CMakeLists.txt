@@ -916,6 +916,23 @@ ELSE (OPENGL_FOUND AND OPENGL_GLU_FOUND)
     MESSAGE("!! Why you no have GL?")
 ENDIF (OPENGL_FOUND AND OPENGL_GLU_FOUND)
 
+# Workaround two oversights in FindGLUT (when trying to use freeglut on MacOS):
+#
+# 1. Use of OPENGL_LIBRARY_DIR
+#    This was added to FindOpenGL in June 2002, then removed 3 months later. In that time it had
+#    made its way into use within FindGLUT, where (oddly) it was used as a possible
+#    location of GLUT's headers but not its libraries. From here, it was never removed.
+#
+# 2. Missing path component
+#    FindGLUT looks for glut.h in various locations when (on MacOS) it should be looking for
+#    GLUT/glut.h. We use the latter in our headers when building on MacOS, so the include path
+#    FindGLUT returns isn't actually of any use, but if FindGLUT can't find glut.h the build
+#    ends up using Apple's deprecated Framework (which defeats the purpose of using freeglut).
+#
+# If we're not on MacOS and using freeglut this line is not required, but as OPENGL_LIBRARY_DIR
+# is not used by anything else the following does no harm either.
+SET(OPENGL_LIBRARY_DIR "${OPENGL_INCLUDE_DIR}/GLUT")
+
 #Find GLUT
 FIND_PACKAGE(GLUT REQUIRED)
 IF (GLUT_FOUND)
