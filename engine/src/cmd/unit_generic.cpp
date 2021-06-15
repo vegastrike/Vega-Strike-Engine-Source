@@ -312,6 +312,7 @@ Unit::Unit( int /*dummy*/ ) : Drawable(), Damageable(), Movable()
     pImage  = (new UnitImages< void >);
     pImage->cockpit_damage = NULL;
     pilot   = new Pilot( FactionUtil::GetNeutralFaction() );
+    // TODO: delete
     Init();
 }
 
@@ -320,6 +321,7 @@ Unit::Unit() : Drawable(), Damageable(), Movable() //: cumulative_transformation
     pImage  = (new UnitImages< void >);
     pImage->cockpit_damage = NULL;
     pilot   = new Pilot( FactionUtil::GetNeutralFaction() );
+    // TODO:
     Init();
 }
 
@@ -328,6 +330,7 @@ Unit::Unit( std::vector< Mesh* > &meshes, bool SubU, int fact ) : Drawable(), Da
     pImage  = (new UnitImages< void >);
     pilot   = new Pilot( fact );
     pImage->cockpit_damage = NULL;
+    // TODO:
     Init();
     hull     = 1000;
     maxhull  = 100000;
@@ -453,14 +456,10 @@ void Unit::Init()
     pImage->next_repair_cargo = ~0;
     pImage->ecm               = 0;
     pImage->cloakglass        = false;
-    pImage->CargoVolume       = 0;
-    pImage->UpgradeVolume     = 0;
     this->HeatSink            = 0;
 
     pImage->unitwriter        = NULL;
     cloakmin = pImage->cloakglass ? 1 : 0;
-    pImage->equipment_volume  = 0;
-    pImage->HiddenCargoVolume = 0;
     pImage->cloakrate         = 100;
     pImage->cloakenergy       = 0;
     pImage->forcejump         = false;
@@ -2023,20 +2022,20 @@ void Unit::DamageRandSys( float dam, const Vector &vec, float randnum, float deg
         } else if (randnum >= ab_damage_prob) {
             this->afterburnenergy += ( (1-dam)*recharge );
         } else if (randnum >= cargovolume_damage_prob) {
-            pImage->CargoVolume *= dam;
+            CargoVolume *= dam;
         } else if (randnum >= upgradevolume_damage_prob) {
-            pImage->UpgradeVolume *= dam;
+            UpgradeVolume *= dam;
         } else if (randnum >= cargo_damage_prob) {
             //Do something NASTY to the cargo
-            if (pImage->cargo.size() > 0) {
+            if (cargo.size() > 0) {
                 unsigned int i = 0;
                 unsigned int cargorand_o = rand();
                 unsigned int cargorand;
                 do
-                    cargorand = (cargorand_o+i)%pImage->cargo.size();
-                while ( (pImage->cargo[cargorand].quantity == 0
-                         || pImage->cargo[cargorand].mission) && (++i) < pImage->cargo.size() );
-                pImage->cargo[cargorand].quantity *= float_to_int( dam );
+                    cargorand = (cargorand_o+i)%cargo.size();
+                while ( (cargo[cargorand].quantity == 0
+                         || cargo[cargorand].mission) && (++i) < cargo.size() );
+                cargo[cargorand].quantity *= float_to_int( dam );
             }
         }
         damages |= Damages::CARGOFUEL_DAMAGED;
@@ -3904,16 +3903,16 @@ bool Unit::UpAndDownGrade( const Unit *up,
             STDUPGRADE( pImage->repair_droid, up->pImage->repair_droid, templ->pImage->repair_droid, 0 );
         if ( !csv_cell_null_check || force_change_on_nothing
             || cell_has_recursive_data( upgrade_name, up->faction, "Hold_Volume" ) )
-            STDUPGRADE( pImage->CargoVolume, up->pImage->CargoVolume, templ->pImage->CargoVolume, 0 );
+            STDUPGRADE( CargoVolume, up->CargoVolume, templ->CargoVolume, 0 );
         if ( !csv_cell_null_check || force_change_on_nothing
             || cell_has_recursive_data( upgrade_name, up->faction, "Upgrade_Storage_Volume" ) )
-            STDUPGRADE( pImage->UpgradeVolume, up->pImage->UpgradeVolume, templ->pImage->UpgradeVolume, 0 );
+            STDUPGRADE( UpgradeVolume, up->UpgradeVolume, templ->UpgradeVolume, 0 );
         if ( !csv_cell_null_check || force_change_on_nothing
             || cell_has_recursive_data( upgrade_name, up->faction, "Equipment_Space" ) )
-            STDUPGRADE( pImage->equipment_volume, up->pImage->equipment_volume, templ->pImage->equipment_volume, 0 );
+            STDUPGRADE( equipment_volume, up->equipment_volume, templ->equipment_volume, 0 );
         if ( !csv_cell_null_check || force_change_on_nothing
             || cell_has_recursive_data( upgrade_name, up->faction, "Hidden_Hold_Volume" ) )
-            STDUPGRADE( pImage->HiddenCargoVolume, up->pImage->HiddenCargoVolume, templ->pImage->HiddenCargoVolume, 0 );
+            STDUPGRADE( HiddenCargoVolume, up->HiddenCargoVolume, templ->HiddenCargoVolume, 0 );
         if ( !csv_cell_null_check || force_change_on_nothing
             || cell_has_recursive_data( upgrade_name, up->faction, "ECM_Rating" ) )
             STDUPGRADE( pImage->ecm, up->pImage->ecm, templ->pImage->ecm, 0 ); //ecm is unsigned --chuck_starchaser
@@ -4227,9 +4226,9 @@ bool Unit::UpAndDownGrade( const Unit *up,
     } else {
         //we are upgrading!
         if (touchme) {
-            for (unsigned int i = 0; i < up->pImage->cargo.size(); ++i)
-                if ( CanAddCargo( up->pImage->cargo[i] ) )
-                    AddCargo( up->pImage->cargo[i], false );
+            for (unsigned int i = 0; i < up->cargo.size(); ++i)
+                if ( CanAddCargo( up->cargo[i] ) )
+                    AddCargo( up->cargo[i], false );
         }
         if ( (cloaking == -1 && up->cloaking != -1) || force_change_on_nothing ) {
             if (touchme) {
@@ -4297,7 +4296,7 @@ bool Unit::UpAndDownGrade( const Unit *up,
 bool Unit::ReduceToTemplate()
 {
     vector< Cargo >savedCargo;
-    savedCargo.swap( pImage->cargo );
+    savedCargo.swap( cargo );
     vector< Mount >savedWeap;
     savedWeap.swap( mounts );
     const Unit    *temprate = makeFinalBlankUpgrade( name, faction );
@@ -4308,7 +4307,7 @@ bool Unit::ReduceToTemplate()
         if (pct > 0)
             success = true;
     }
-    savedCargo.swap( pImage->cargo );
+    savedCargo.swap( cargo );
     savedWeap.swap( mounts );
     return success;
 }
@@ -4354,7 +4353,7 @@ int Unit::RepairCost()
 int Unit::RepairUpgrade()
 {
     vector< Cargo >savedCargo;
-    savedCargo.swap( pImage->cargo );
+    savedCargo.swap( cargo );
     vector< Mount >savedWeap;
     savedWeap.swap( mounts );
     int upfac = FactionUtil::GetUpgradeFaction();
@@ -4366,7 +4365,7 @@ int Unit::RepairUpgrade()
         if (pct > 0)
             success = 1;
     }
-    savedCargo.swap( pImage->cargo );
+    savedCargo.swap( cargo );
     savedWeap.swap( mounts );
     UnitImages< void > *im = &GetImageInformation();
     for (int i = 0; i < (1+MAXVDUS+UnitImages< void >::NUMGAUGES)*2; ++i)
@@ -4745,10 +4744,10 @@ std::string Unit::massSerializer( const XMLType &input, void *mythis )
     Unit *un   = (Unit*) mythis;
     float mass = un->Mass;
     static bool usemass = XMLSupport::parse_bool( vs_config->getVariable( "physics", "use_cargo_mass", "true" ) );
-    for (unsigned int i = 0; i < un->pImage->cargo.size(); ++i)
-        if (un->pImage->cargo[i].quantity > 0)
+    for (unsigned int i = 0; i < un->cargo.size(); ++i)
+        if (un->cargo[i].quantity > 0)
             if (usemass)
-                mass -= un->pImage->cargo[i].mass*un->pImage->cargo[i].quantity;
+                mass -= un->cargo[i].mass*un->cargo[i].quantity;
     return XMLSupport::tostring( (float) mass );
 }
 

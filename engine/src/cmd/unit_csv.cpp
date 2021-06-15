@@ -524,7 +524,7 @@ static void ImportCargo( Unit *thus, const string &imports )
         int nelem = 0;
         while ( ( ofs = imports.find( '{', ofs ) ) != string::npos )
             nelem++, ofs++;
-        thus->pImage->cargo.reserve( nelem+thus->pImage->cargo.size() );
+        thus->cargo.reserve( nelem+thus->cargo.size() );
         ofs = 0;
     }
     while ( ( where = imports.find( '{', ofs ) ) != string::npos ) {
@@ -552,7 +552,7 @@ static void AddCarg( Unit *thus, const string &cargos )
         int nelem = 0;
         while ( ( ofs = cargos.find( '{', ofs ) ) != string::npos )
             nelem++, ofs++;
-        thus->pImage->cargo.reserve( nelem+thus->pImage->cargo.size() );
+        thus->cargo.reserve( nelem+thus->cargo.size() );
         ofs = 0;
     }
     while ( ( where = cargos.find( '{', ofs ) ) != string::npos ) {
@@ -1004,10 +1004,10 @@ void Unit::LoadRow( CSVRow &row, string modification, string *netxml )
     corner_max = Vector( -FLT_MAX, -FLT_MAX, -FLT_MAX );
     calculate_extent( false );
     AddMounts( this, xml, OPTIM_GET( row, table, Mounts ) );
-    this->pImage->CargoVolume = ::stof( OPTIM_GET( row, table, Hold_Volume ) );
-    this->pImage->HiddenCargoVolume = ::stof( OPTIM_GET( row, table, Hidden_Hold_Volume ) );
-    this->pImage->UpgradeVolume     = ::stof( OPTIM_GET( row, table, Upgrade_Storage_Volume ) );
-    this->pImage->equipment_volume  = ::stof( OPTIM_GET( row, table, Equipment_Space ) );
+    this->CargoVolume = ::stof( OPTIM_GET( row, table, Hold_Volume ) );
+    this->HiddenCargoVolume = ::stof( OPTIM_GET( row, table, Hidden_Hold_Volume ) );
+    this->UpgradeVolume     = ::stof( OPTIM_GET( row, table, Upgrade_Storage_Volume ) );
+    this->equipment_volume  = ::stof( OPTIM_GET( row, table, Equipment_Space ) );
     ImportCargo( this, OPTIM_GET( row, table, Cargo_Import ) );     //if this changes change planet_generic.cpp
     AddCarg( this, OPTIM_GET( row, table, Cargo ) );
 
@@ -1522,10 +1522,10 @@ string Unit::WriteUnitString()
                     if (jj != 0)
                         unit[row.getKey( jj )] = row[jj];
                 //mutable things
-                unit["Equipment_Space"] = XMLSupport::tostring( pImage->equipment_volume );
-                unit["Hold_Volume"] = XMLSupport::tostring( pImage->CargoVolume );
-                unit["Hidden_Hold_Volume"]     = XMLSupport::tostring( pImage->HiddenCargoVolume );
-                unit["Upgrade_Storage_Volume"] = XMLSupport::tostring( pImage->UpgradeVolume );
+                unit["Equipment_Space"] = XMLSupport::tostring( equipment_volume );
+                unit["Hold_Volume"] = XMLSupport::tostring( CargoVolume );
+                unit["Hidden_Hold_Volume"]     = XMLSupport::tostring( HiddenCargoVolume );
+                unit["Upgrade_Storage_Volume"] = XMLSupport::tostring( UpgradeVolume );
                 string mountstr;
                 double unitScale = stof( unit["Unit_Scale"], 1 );
                 {
@@ -1772,10 +1772,10 @@ void UpdateMasterPartList( Unit *ret )
             carg.mass        = (j < addedcargomass->size() ? XMLSupport::parse_float( (*addedcargomass)[j] ) : .01);
             carg.description = ( j < addedcargodesc->size() ? (*addedcargodesc)[j] : std::string( "No Description Added" ) );
             carg.quantity    = 1;
-            ret->GetImageInformation().cargo.push_back( carg );
+            ret->cargo.push_back( carg );
         }
     }
-    std::sort( ret->GetImageInformation().cargo.begin(), ret->GetImageInformation().cargo.end() );
+    std::sort( ret->cargo.begin(), ret->cargo.end() );
     {
         Cargo last_cargo;
         for (int i = ret->numCargo()-1; i >= 0; --i) {

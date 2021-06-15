@@ -426,9 +426,9 @@ void Planet::InitPlanet( QVector x,
 
     static bool smartplanets = XMLSupport::parse_bool( vs_config->getVariable( "physics", "planets_can_have_subunits", "false" ) );
     if ( un->name != string( "LOAD_FAILED" ) ) {
-        pImage->cargo = un->GetImageInformation().cargo;
-        pImage->CargoVolume   = un->GetImageInformation().CargoVolume;
-        pImage->UpgradeVolume = un->GetImageInformation().UpgradeVolume;
+        cargo = un->cargo;
+        CargoVolume   = un->CargoVolume;
+        UpgradeVolume = un->UpgradeVolume;
         VSSprite *tmp = pImage->pHudImage;
         pImage->pHudImage     = un->GetImageInformation().pHudImage;
         un->GetImageInformation().pHudImage = tmp;

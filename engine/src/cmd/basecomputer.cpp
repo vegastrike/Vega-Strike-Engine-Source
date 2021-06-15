@@ -2717,10 +2717,10 @@ bool BaseComputer::sellSelectedCargo( int requestedQuantity )
         Cargo     sold;
         const int quantity = (requestedQuantity <= 0 ? item->quantity : requestedQuantity);
         if (item->mission) {
-            vector< Cargo >::iterator mycargo = std::find( playerUnit->pImage->cargo.begin(),
-                                                           playerUnit->pImage->cargo.end(), *item );
-            if ( mycargo != playerUnit->pImage->cargo.end() )
-                playerUnit->RemoveCargo( mycargo-playerUnit->pImage->cargo.begin(), quantity, true );
+            vector< Cargo >::iterator mycargo = std::find( playerUnit->cargo.begin(),
+                                                           playerUnit->cargo.end(), *item );
+            if ( mycargo != playerUnit->cargo.end() )
+                playerUnit->RemoveCargo( mycargo-playerUnit->cargo.begin(), quantity, true );
         } else {
             playerUnit->SellCargo( item->content, quantity, _Universe->AccessCockpit()->credits, sold, baseUnit );
         }

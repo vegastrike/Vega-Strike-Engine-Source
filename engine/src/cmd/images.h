@@ -174,11 +174,7 @@ struct UnitImages
     bool  cloakglass;
     ///if the unit is a wormhole
     bool  forcejump;
-    float UpgradeVolume;
-    float CargoVolume;     ///mass just makes you turn worse
-    float equipment_volume;     //this one should be more general--might want to apply it to radioactive goods, passengers, ships (hangar), etc
-    float HiddenCargoVolume;
-    std::vector< Cargo > cargo;
+
     std::vector< string >destination;
     std::vector< DockingPorts >dockingports;
     ///warning unreliable pointer, never dereference!

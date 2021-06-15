@@ -145,6 +145,13 @@ protected:
     StringPool::Reference csvRow;
 public:
 
+    /// Volume
+    // This isn't mass. Denser materials translate to more mass
+    // TODO: move this to ship class
+    float UpgradeVolume = 0;
+    float CargoVolume = 0;     ///mass just makes you turn worse
+    float equipment_volume = 0;     //this one should be more general--might want to apply it to radioactive goods, passengers, ships (hangar), etc
+    float HiddenCargoVolume = 0;
 
 //The name (type) of this unit shouldn't be public
     StringPool::Reference name;
