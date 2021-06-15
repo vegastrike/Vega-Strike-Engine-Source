@@ -258,11 +258,7 @@ unsigned int apply_float_to_unsigned_int( float tmp )
 
 
 
-std::string speedStarHandler( const XMLType &input, void *mythis )
-{
-    static float game_speed = XMLSupport::parse_float( vs_config->getVariable( "physics", "game_speed", "1" ) );
-    return XMLSupport::tostring( (*input.w.f)/game_speed );
-}
+
 
 static list< Unit* >Unitdeletequeue;
 static Hashtable< long, Unit, 2095 >deletedUn;
@@ -305,6 +301,7 @@ char * GetUnitDir( const char *filename )
 
 
 
+
 /*
  **********************************************************************************
  **** UNIT STUFF
@@ -312,9 +309,7 @@ char * GetUnitDir( const char *filename )
  */
 Unit::Unit( int /*dummy*/ ) : Drawable(), Damageable(), Movable()
 {
-    ZeroAll();
     pImage  = (new UnitImages< void >);
-    aistate = NULL;
     pImage->cockpit_damage = NULL;
     pilot   = new Pilot( FactionUtil::GetNeutralFaction() );
     Init();
@@ -322,9 +317,7 @@ Unit::Unit( int /*dummy*/ ) : Drawable(), Damageable(), Movable()
 
 Unit::Unit() : Drawable(), Damageable(), Movable() //: cumulative_transformation_matrix( identity_matrix )
 {
-    ZeroAll();
     pImage  = (new UnitImages< void >);
-    aistate = NULL;
     pImage->cockpit_damage = NULL;
     pilot   = new Pilot( FactionUtil::GetNeutralFaction() );
     Init();
@@ -332,10 +325,8 @@ Unit::Unit() : Drawable(), Damageable(), Movable() //: cumulative_transformation
 
 Unit::Unit( std::vector< Mesh* > &meshes, bool SubU, int fact ) : Drawable(), Damageable(), Movable() //: cumulative_transformation_matrix( identity_matrix )
 {
-    ZeroAll();
     pImage  = (new UnitImages< void >);
     pilot   = new Pilot( fact );
-    aistate = NULL;
     pImage->cockpit_damage = NULL;
     Init();
     hull     = 1000;
@@ -358,10 +349,8 @@ Unit::Unit( const char *filename,
             int fg_subnumber,
             string *netxml ) : Drawable(), Damageable(), Movable() //: cumulative_transformation_matrix( identity_matrix )
 {
-    ZeroAll();
     pImage  = (new UnitImages< void >);
     pilot   = new Pilot( faction );
-    aistate = NULL;
     pImage->cockpit_damage = NULL;
     Init( filename, SubU, faction, unitModifications, flightgrp, fg_subnumber, netxml );
     pilot->SetComm( this );
@@ -436,91 +425,7 @@ Unit::~Unit()
     meshdata.clear();
 }
 
-void Unit::ZeroAll()
-{
-    ucref = 0;
-    SavedAccel.i = 0;
-    SavedAccel.j = 0;
-    SavedAccel.k = 0;
-    SavedAngAccel.i = 0;
-    SavedAngAccel.j = 0;
-    SavedAngAccel.k = 0;
-    //old_state has a constructor
-        damages      = Damages::NO_DAMAGE;
-    //SubUnits has a constructor
-    attack_preference = unit_role = 0;
-    nebula            = NULL;
-    activeStarSystem  = NULL;
-    //computer has a constructor
-    //jump needs fixing
-    selected          = false;
-    //scanner needs fixing
-    xml = NULL;
-    owner             = NULL;
-    //prev_physical_state has a constructor
-    //curr_physical_state has a constructor
-    //cumulative_transformation_matrix has a constructor
-    //cumulative_transformation has a constructor
-    cumulative_velocity.i = 0;
-    cumulative_velocity.j = 0;
-    cumulative_velocity.k = 0;
-    NetForce.i = 0;
-    NetForce.j = 0;
-    NetForce.k = 0;
-    NetLocalForce.i  = 0;
-    NetLocalForce.j  = 0;
-    NetLocalForce.k  = 0;
-    NetTorque.i      = 0;
-    NetTorque.j      = 0;
-    NetTorque.k      = 0;
-    NetLocalTorque.i = 0;
-    NetLocalTorque.j = 0;
-    NetLocalTorque.k = 0;
-    AngularVelocity.i     = 0;
-    AngularVelocity.j     = 0;
-    AngularVelocity.k     = 0;
-    Velocity.i            = 0;
-    Velocity.j            = 0;
-    Velocity.k            = 0;
-    pImage                = NULL;
-    Mass                  = 0;
-    shieldtight           = 0;           //this can be used to differentiate whether this is a capship or a fighter?
-    fuel                  = 0;
-    afterburnenergy       = 0;
-    afterburntype         = 0;
-    Momentofinertia       = 0;
-    //limits has a constructor
-    cloaking              = 0;
-    cloakmin              = 0;
-    radial_size           = 0;
-    killed                = false;
-    invisible             = 0;
-    corner_min.i          = 0;
-    corner_min.j          = 0;
-    corner_min.k          = 0;
-    corner_max.i          = 0;
-    corner_max.j          = 0;
-    corner_max.k          = 0;
-    resolveforces         = false;
-    //armor has a constructor
-    //shield has a constructor
-    hull                  = 0;
-    maxhull               = 0;
-    recharge              = 0;
-    maxenergy             = 0;
-    energy                = 0;
-    maxwarpenergy         = 0;
-    warpenergy            = 0;
-    //target_fgid has a constructor
-    aistate               = NULL;
-    //CollideInfo has a constructor
-    colTrees              = NULL;
-    docked                = NOT_DOCKED;
-    faction               = 0;
-    flightgroup           = NULL;
-    flightgroup_subnumber = 0;
-    setTractorability( tractorImmune );
-}
+
 
 void Unit::Init()
 {
@@ -3820,6 +3725,7 @@ static bool cell_has_recursive_data( const string &name, unsigned int fac, const
 
 // TODO: get rid of this
 extern float accelStarHandler( float &input );
+float speedStarHandler( float &input);
 
 bool Unit::UpAndDownGrade( const Unit *up,
                            const Unit *templ,
@@ -3881,17 +3787,17 @@ bool Unit::UpAndDownGrade( const Unit *up,
         } else if (additive == 2) {
             Adder = &MultUp;
             Percenter  = &computeMultPercent;
-            tmax_speed = XMLSupport::parse_float( speedStarHandler( XMLType( &tmax_speed ), NULL ) );
-            tmax_ab_speed     = XMLSupport::parse_float( speedStarHandler( XMLType( &tmax_ab_speed ), NULL ) );
-            tmax_yaw_right    = XMLSupport::parse_float( angleStarHandler( XMLType( &tmax_yaw_right ), NULL ) );
-            tmax_yaw_left     = XMLSupport::parse_float( angleStarHandler( XMLType( &tmax_yaw_left ), NULL ) );
-            tmax_pitch_up     = XMLSupport::parse_float( angleStarHandler( XMLType( &tmax_pitch_up ), NULL ) );
-            tmax_pitch_down   = XMLSupport::parse_float( angleStarHandler( XMLType( &tmax_pitch_down ), NULL ) );
-            tmax_roll_right   = XMLSupport::parse_float( angleStarHandler( XMLType( &tmax_roll_right ), NULL ) );
-            tmax_roll_left    = XMLSupport::parse_float( angleStarHandler( XMLType( &tmax_roll_left ), NULL ) );
-            tlimits_yaw       = XMLSupport::parse_float( angleStarHandler( XMLType( &tlimits_yaw ), NULL ) );
-            tlimits_pitch     = XMLSupport::parse_float( angleStarHandler( XMLType( &tlimits_pitch ), NULL ) );
-            tlimits_roll      = XMLSupport::parse_float( angleStarHandler( XMLType( &tlimits_roll ), NULL ) );
+            tmax_speed = speedStarHandler( tmax_speed );
+            tmax_ab_speed     = speedStarHandler( tmax_ab_speed );
+            tmax_yaw_right    = speedStarHandler( tmax_yaw_right );
+            tmax_yaw_left     = speedStarHandler( tmax_yaw_left );
+            tmax_pitch_up     = speedStarHandler( tmax_pitch_up );
+            tmax_pitch_down   = speedStarHandler( tmax_pitch_down );
+            tmax_roll_right   = speedStarHandler( tmax_roll_right );
+            tmax_roll_left    = speedStarHandler( tmax_roll_left );
+            tlimits_yaw       = speedStarHandler( tlimits_yaw );
+            tlimits_pitch     = speedStarHandler( tlimits_pitch );
+            tlimits_roll      = speedStarHandler( tlimits_roll );
             tlimits_forward   = accelStarHandler( tlimits_forward);
             tlimits_retro     = accelStarHandler( tlimits_retro);
             tlimits_lateral   = accelStarHandler( tlimits_lateral);

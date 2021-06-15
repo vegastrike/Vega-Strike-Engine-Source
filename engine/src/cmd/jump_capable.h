@@ -11,7 +11,7 @@
 class JumpCapable
 {
 public:
-    StarSystem *activeStarSystem;
+    StarSystem *activeStarSystem = nullptr;
 
 public:
     void ActivateJumpDrive( int destination = 0 );

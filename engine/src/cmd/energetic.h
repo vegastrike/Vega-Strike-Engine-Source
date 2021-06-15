@@ -80,22 +80,22 @@ public:
     jump;
 
     //current energy
-    float  energy;
+    float  energy = 0;
 
     //how much the energy recharges per second
-    float recharge;
+    float recharge = 0;
 
     //maximum energy
-    float maxenergy;
+    float maxenergy = 0;
     //maximum energy
-    float maxwarpenergy;                 //short fix
+    float maxwarpenergy = 0; //short fix
     //current energy
-    float warpenergy;                            //short fix
+    float warpenergy = 0;    //short fix
 protected:
     //fuel of this unit
-    float  fuel;
-    float  afterburnenergy;              //short fix
-    int    afterburntype;                        //0--energy, 1--fuel
+    float  fuel = 0;
+    float  afterburnenergy = 0;              //short fix
+    int    afterburntype = 0;   //0--energy, 1--fuel
     //-1 means it is off. -2 means it doesn't exist. otherwise it's engaged to destination (positive number)
 };
 

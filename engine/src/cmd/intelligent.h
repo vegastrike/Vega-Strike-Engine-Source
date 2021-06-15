@@ -45,7 +45,7 @@ public:
                                                                            1,
                                                                            1 ), std::vector< struct mesh_polygon >* = NULL );
 //Because accessing in daughter classes member function from Unit * instances
-    Order *aistate;
+    Order *aistate = nullptr;
     Order * getAIState() const
     {
         return aistate;

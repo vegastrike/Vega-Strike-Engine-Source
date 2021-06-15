@@ -59,6 +59,9 @@ public:
     Vector AngularVelocity;
     Vector Velocity;
 
+    // TODO: move enum to dockable class
+    enum DOCKENUM {NOT_DOCKED=0x0, DOCKED_INSIDE=0x1, DOCKED=0x2, DOCKING_UNITS=0x4};
+
     //The previous state in last physics frame to interpolate within
     Transformation prev_physical_state;
     //The state of the current physics frame to interpolate within
@@ -78,7 +81,7 @@ public:
     unsigned int   last_processed_sqs;
 
     // TODO: this should go up to ship
-    unsigned char docked;
+    unsigned char docked = NOT_DOCKED;
 
     //The cumulative (incl subunits parents' transformation)
     Matrix cumulative_transformation_matrix;
@@ -87,7 +90,7 @@ public:
 
     Vector corner_min, corner_max;
     //How big is this unit
-    float radial_size;
+    float radial_size = 0;
 
     class graphic_options
     {
@@ -112,7 +115,7 @@ public:
     graphicOptions;
 protected:
     //Moment of intertia of this unit
-    float  Momentofinertia;
+    float  Momentofinertia = 0;
     Vector SavedAccel;
     Vector SavedAngAccel;
     static bool configLoaded;

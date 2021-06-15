@@ -43,6 +43,12 @@ float accelStarHandler( float &input )
     return input/(game_speed*game_accel);
 }
 
+float speedStarHandler( float &input)
+{
+    static float game_speed = GameConfig::GetVariable( "physics", "game_speed", 1.0f );
+    return input/game_speed;
+}
+
 
 
 bool Movable::configLoaded = false;

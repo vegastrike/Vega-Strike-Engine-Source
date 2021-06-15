@@ -35,8 +35,8 @@ class Damageable
 public:
     // TODO: Consider making into protected later
     // Fields
-    float maxhull;
-    float hull;
+    float maxhull = 0;
+    float hull = 0;
     Armor armor;
     Shield shield;
 

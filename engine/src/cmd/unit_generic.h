@@ -140,7 +140,7 @@ class Unit : public Armed, public Audible, public Drawable, public Damageable, p
 {
 protected:
 //How many lists are referencing us
-    int ucref;
+    int ucref = 0;
     StringPool::Reference csvRow;
 public:
 
@@ -186,10 +186,6 @@ public:
     Unit( const char *filename, bool SubUnit, int faction, std::string customizedUnit = std::string(
               "" ), Flightgroup *flightgroup = NULL, int fg_subnumber = 0, std::string *netxml = NULL );
 
-private:
-/** Fix all those uninitialized variables by calling this from every
- *  constructor.  */
-    void ZeroAll();
 
 public:
 //Initialize many of the defaults inherant to the constructor
@@ -213,7 +209,7 @@ public:
       LIMITS_DAMAGED = 0x40,
       ARMOR_DAMAGED = 0x80
     };
-    unsigned int damages;
+    unsigned int damages = Damages::NO_DAMAGE;
 
 /*
  **************************************************************************************
@@ -348,9 +344,9 @@ public:
     const std::string& getAttackPreference() const;
     void setAttackPreference( const std::string &s );
 protected:
-    unsigned char attack_preference;
-    unsigned char unit_role;
-    Nebula *nebula;
+    unsigned char attack_preference = 0;
+    unsigned char unit_role = 0;
+    Nebula *nebula = nullptr;
 //The orbit needs to have access to the velocity directly to disobey physics laws to precalculate orbits
     friend class PlanetaryOrbit;
     friend class ContinuousTerrain;
@@ -439,7 +435,7 @@ public:
 
 
     Pilot *pilot;
-    bool   selected;
+    bool   selected = false;
 
 
     Computer& GetComputerData() { return computer; }
@@ -459,7 +455,7 @@ public:
 //Unit XML Load information
     struct XML;
 //Loading information
-    XML *xml;
+    XML *xml = nullptr;
 
     static void beginElement( void *userData, const XML_Char *name, const XML_Char **atts );
     static void endElement( void *userData, const XML_Char *name );
@@ -512,7 +508,7 @@ public:
 
 
 //The owner of this unit. This may not collide with owner or units owned by owner. Do not dereference (may be dead pointer)
-    void *owner;                                 //void ensures that it won't be referenced by accident
+    void *owner = nullptr;   //void ensures that it won't be referenced by accident
 
 
 
@@ -525,30 +521,30 @@ public:
 
 
 //The image that will appear on those screens of units targetting this unit
-    UnitImages< void > *pImage;
+    UnitImages< void > *pImage = nullptr;
 //positive for the multiplier applied to nearby spec starships (1 = planetary/inert effects) 0 is default (no effect), -X means 0 but able to be enabled
     float  specInterdiction;
 
     float  HeatSink;
 protected:
 //are shields tight to the hull.  zero means bubble
-    float  shieldtight;
+    float  shieldtight = 0;
 
 
 
 public:
 
 //-1 is not available... ranges between 0 32767 for "how invisible" unit currently is (32768... -32768) being visible)
-    int   cloaking;                              //short fix
+    int   cloaking = 0;                              //short fix
 //the minimum cloaking value...
-    int   cloakmin;                              //short fix
+    int   cloakmin = 0;                              //short fix
 
 protected:
 //Is dead already?
-    bool  killed;
+    bool  killed = false;
 //Should not be drawn
     enum INVIS {DEFAULTVIS=0x0, INVISGLOW=0x1, INVISUNIT=0x2, INVISCAMERA=0x4};
-    unsigned char invisible;             //1 means turn off glow, 2 means turn off ship
+    unsigned char invisible = 0;             //1 means turn off glow, 2 means turn off ship
 //corners of object
 
 public:
@@ -809,7 +805,7 @@ public:
     enum COLLIDELOCATIONTYPES {UNIT_ONLY=0, UNIT_BOLT=1, NUM_COLLIDE_MAPS=2};
 //location[0] is for units only, location[1] is for units + bolts
     CollideMap::iterator location[2];
-    struct collideTrees *colTrees;
+    struct collideTrees *colTrees = nullptr;
 //Sets the parent to be this unit. Unit never dereferenced for this operation
     void SetCollisionParent( Unit *name );
 //won't collide with ownery
@@ -883,7 +879,7 @@ public:
  */
 
 public:
-    enum DOCKENUM {NOT_DOCKED=0x0, DOCKED_INSIDE=0x1, DOCKED=0x2, DOCKING_UNITS=0x4};
+
 //returns -1 if unit cannot dock, otherwise returns which dock it can dock at
     int CanDockWithMe( Unit *dockingunit, bool forcedock = false );
     int ForceDock( Unit *utdw, unsigned int whichdockport );
@@ -912,13 +908,13 @@ public:
 
 public:
 //the flightgroup this ship is in
-    Flightgroup *flightgroup;
+    Flightgroup *flightgroup = nullptr;
 //the flightgroup subnumber
-    int flightgroup_subnumber;
+    int flightgroup_subnumber = 0;
 
     void SetFg( Flightgroup *fg, int fg_snumber );
 //The faction of this unit
-    int faction;
+    int faction = 0;
     void SetFaction( int faction );
 //get the flightgroup description
     Flightgroup * getFlightgroup() const
@@ -950,7 +946,7 @@ public:
     void setTractorability( enum tractorHow how );
     enum tractorHow getTractorability() const;
 private:
-    unsigned char   tractorability_flags;
+    unsigned char   tractorability_flags = tractorImmune;
 
 protected:
 //if the unit is a planet, this contains the long-name 'mars-station'
