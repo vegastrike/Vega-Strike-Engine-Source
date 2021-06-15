@@ -42,7 +42,7 @@ public:
     float gunspeed;
     float gunrange;
     float missilerange;
-    char  turretstatus;
+    char  turretstatus = 0;
 
 protected:
     //Activates all guns of that size

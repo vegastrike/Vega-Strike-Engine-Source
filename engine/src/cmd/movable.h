@@ -29,6 +29,7 @@
 #include "gfx/vec.h"
 #include "vs_limits.h"
 #include "gfx/quaternion.h"
+#include "star_system.h"
 
 struct Transformation;
 class Matrix;
@@ -72,13 +73,13 @@ public:
     bool resolveforces;
 
     //The number of frames ahead this was put in the simulation queue
-    unsigned int   sim_atom_multiplier;
+    unsigned int   sim_atom_multiplier = 1;
     //The number of frames ahead this is predicted to be scheduled in the next scheduling round
-    unsigned int   predicted_priority;
+    unsigned int   predicted_priority = 1;
     //When will physical simulation occur
-    unsigned int   cur_sim_queue_slot;
+    unsigned int   cur_sim_queue_slot = rand()%SIM_QUEUE_SIZE;
     //Used with subunit scheduling, to avoid the complex ickiness of having to synchronize scattered slots
-    unsigned int   last_processed_sqs;
+    unsigned int   last_processed_sqs = 0;
 
     // TODO: this should go up to ship
     unsigned char docked = NOT_DOCKED;
@@ -106,10 +107,11 @@ public:
         unsigned NoDamageParticles : 1;
         unsigned specInterdictionOnline : 1;
         unsigned char NumAnimationPoints;
-        float    WarpFieldStrength;
+        float    WarpFieldStrength = 1;
         float    RampCounter;
         float    MinWarpMultiplier;
         float    MaxWarpMultiplier;
+
         graphic_options();
     }
     graphicOptions;

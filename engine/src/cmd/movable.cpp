@@ -109,6 +109,12 @@ Movable::graphic_options::graphic_options()
     NumAnimationPoints = 0;
     RampCounter = 0;
     MinWarpMultiplier = MaxWarpMultiplier = 1;
+
+    // Added implementation to make var false
+    // I don't like it, because it's true by default and false by default
+    // TODO: figure out which it actually is
+    RecurseIntoSubUnitsOnCollision = false;
+    SubUnit    = 0; // Also this
 }
 
 

@@ -75,6 +75,7 @@ void UncheckUnit( class Unit*un );
 #include "vsfilesystem.h"
 #include "collide_map.h"
 #include "SharedPool.h"
+#include "role_bitmask.h"
 
 extern char * GetUnitDir( const char *filename );
 extern float capship_size;
@@ -189,6 +190,9 @@ public:
 
 public:
 //Initialize many of the defaults inherant to the constructor
+
+    // This is called from python and so left in place for now
+    // TODO: get rid of this
     void Init();
     void Init( const char *filename, bool SubUnit, int faction, std::string customizedUnit = std::string(
                    "" ), Flightgroup *flightgroup = NULL, int fg_subnumber = 0, std::string *netxml = NULL );
@@ -247,8 +251,8 @@ public:
     un_iter getSubUnits();
     un_kiter viewSubUnits() const;
 #define NO_MOUNT_STAR
-    bool  inertialmode;
-    bool autopilotactive;
+    bool  inertialmode = false;
+    bool autopilotactive = false;
 
     bool isSubUnit() const
     {
@@ -344,8 +348,10 @@ public:
     const std::string& getAttackPreference() const;
     void setAttackPreference( const std::string &s );
 protected:
-    unsigned char attack_preference = 0;
-    unsigned char unit_role = 0;
+    // These two are probably zero.
+    // TODO: check and if so, replace with 0.
+    unsigned char attack_preference = ROLES::getRole( "INERT" );
+    unsigned char unit_role = ROLES::getRole( "INERT" );
     Nebula *nebula = nullptr;
 //The orbit needs to have access to the velocity directly to disobey physics laws to precalculate orbits
     friend class PlanetaryOrbit;
@@ -513,17 +519,17 @@ public:
 
 
 //Whether or not to schedule subunits for deferred physics processing - if not, they're processed at the same time the parent unit is being processed
-    bool do_subunit_scheduling;
+    bool do_subunit_scheduling = false;
 //Does this unit require special scheduling?
     enum schedulepriorityenum {scheduleDefault, scheduleAField, scheduleRoid}
-    schedule_priority;
+    schedule_priority = scheduleDefault;
 //number of meshes (each with separate texture) this unit has
 
 
 //The image that will appear on those screens of units targetting this unit
     UnitImages< void > *pImage = nullptr;
 //positive for the multiplier applied to nearby spec starships (1 = planetary/inert effects) 0 is default (no effect), -X means 0 but able to be enabled
-    float  specInterdiction;
+    float  specInterdiction = 0;
 
     float  HeatSink;
 protected:

@@ -429,23 +429,9 @@ Unit::~Unit()
 
 void Unit::Init()
 {
-    this->schedule_priority = Unit::scheduleDefault;
     for (unsigned int locind = 0; locind < NUM_COLLIDE_MAPS; ++locind)
         set_null( location[locind] );
-    specInterdiction      = 0;
-    sim_atom_multiplier   = 1;
-    predicted_priority    = 1;
-    cur_sim_queue_slot    = rand()%SIM_QUEUE_SIZE;
-    last_processed_sqs    = 0;
-    do_subunit_scheduling = false;
-    damages = Damages::NO_DAMAGE;
 
-    graphicOptions.RecurseIntoSubUnitsOnCollision = false;
-    graphicOptions.WarpFieldStrength = 1;
-    inertialmode    = false;
-    turretstatus    = 0;
-    autopilotactive = false;
-    this->unit_role = this->attack_preference = ROLES::getRole( "INERT" );
     this->computer.combat_mode = true;
 #ifdef CONTAINER_DEBUG
     UncheckUnit( this );
@@ -453,18 +439,10 @@ void Unit::Init()
     static float capsize = XMLSupport::parse_float( vs_config->getVariable( "physics", "capship_size", "500" ) );
 
     capship_size     = capsize;
-    activeStarSystem = NULL;
-    xml    = NULL;
-    docked = NOT_DOCKED;
-    graphicOptions.SubUnit    = 0;
-    jump.energy               = 100;
+
     static float insys_jump_cost = XMLSupport::parse_float( vs_config->getVariable( "physics", "insystem_jump_cost", ".1" ) );
     jump.insysenergy          = insys_jump_cost*jump.energy;
-    jump.delay                = 5;
-    jump.damage               = 0;
-    jump.warpDriveRating      = 0;
-    graphicOptions.FaceCamera = false;
-    jump.drive                = -2;              //disabled
+
     afterburnenergy           = 0;
     nebula = NULL;
     limits.structurelimits    = Vector( 0, 0, 1 );
@@ -635,6 +613,7 @@ void Unit::Init( const char *filename,
 {
     static bool UNITTAB = XMLSupport::parse_bool( vs_config->getVariable( "physics", "UnitTable", "false" ) );
     CSVRow unitRow;
+    // TODO: something with the following line
     this->Unit::Init();
     graphicOptions.SubUnit   = SubU ? 1 : 0;
     graphicOptions.Animating = 1;
