@@ -451,26 +451,26 @@ void Unit::Init()
     limits.structurelimits    = Vector( 0, 0, 1 );
     limits.limitmin           = -1;
     cloaking = -1;
-    pImage->repair_droid      = 0;
-    pImage->next_repair_time  = -FLT_MAX;
-    pImage->next_repair_cargo = ~0;
-    pImage->ecm               = 0;
-    pImage->cloakglass        = false;
+    repair_droid      = 0;
+    next_repair_time  = -FLT_MAX;
+    next_repair_cargo = ~0;
+    ecm               = 0;
+    cloakglass        = false;
     this->HeatSink            = 0;
 
     pImage->unitwriter        = NULL;
-    cloakmin = pImage->cloakglass ? 1 : 0;
-    pImage->cloakrate         = 100;
-    pImage->cloakenergy       = 0;
-    pImage->forcejump         = false;
-    pImage->fireControlFunctionality    = 1.0f;
-    pImage->fireControlFunctionalityMax = 1.0f;
-    pImage->SPECDriveFunctionality = 1.0f;
-    pImage->SPECDriveFunctionalityMax   = 1.0f;
-    pImage->CommFunctionality = 1.0f;
-    pImage->CommFunctionalityMax = 1.0f;
-    pImage->LifeSupportFunctionality    = 1.0f;
-    pImage->LifeSupportFunctionalityMax = 1.0f;
+    cloakmin = cloakglass ? 1 : 0;
+    cloakrate         = 100;
+    cloakenergy       = 0;
+    forcejump         = false;
+    fireControlFunctionality    = 1.0f;
+    fireControlFunctionalityMax = 1.0f;
+    SPECDriveFunctionality = 1.0f;
+    SPECDriveFunctionalityMax   = 1.0f;
+    CommFunctionality = 1.0f;
+    CommFunctionalityMax = 1.0f;
+    LifeSupportFunctionality    = 1.0f;
+    LifeSupportFunctionalityMax = 1.0f;
 
     pImage->pHudImage = NULL;
 
@@ -1268,7 +1268,7 @@ bool Unit::jumpReactToCollision( Unit *smalle )
     //only allow big with small
     if ( !GetDestinations().empty() ) {
         Cockpit *cp = _Universe->isPlayerStarship( smalle );
-        if (!SPEC_interference || pImage->forcejump)
+        if (!SPEC_interference || forcejump)
             TurnJumpOKLightOn( smalle, cp );
         else
             return false;
@@ -1279,7 +1279,7 @@ bool Unit::jumpReactToCollision( Unit *smalle )
                                        //or we're being cheap
                                        || (ai_jump_cheat && cp == NULL)
                                       ) ) )
-            || pImage->forcejump ) {
+            || forcejump ) {
             //or the jump is being forced?
             //NOW done in star_system_generic.cpp before TransferUnitToSystem smalle->warpenergy-=smalle->GetJumpStatus().energy;
             int dest = smalle->GetJumpStatus().drive;
@@ -1294,13 +1294,13 @@ bool Unit::jumpReactToCollision( Unit *smalle )
     }
     if ( !smalle->GetDestinations().empty() ) {
         Cockpit *cp = _Universe->isPlayerStarship( this );
-        if (!SPEC_interference || smalle->pImage->forcejump)
+        if (!SPEC_interference || smalle->forcejump)
             TurnJumpOKLightOn( this, cp );
         else
             return false;
         if ( ( !SPEC_interference && (GetJumpStatus().drive >= 0
                                       && ( warpenergy >= GetJumpStatus().energy || (ai_jump_cheat && cp == NULL) )
-                                     ) ) || smalle->pImage->forcejump ) {
+                                     ) ) || smalle->forcejump ) {
             warpenergy -= GetJumpStatus().energy;
             DeactivateJumpDrive();
             Unit *jumppoint = smalle;
@@ -1978,7 +1978,7 @@ void Unit::DamageRandSys( float dam, const Vector &vec, float randnum, float deg
     if (degrees >= 20 && degrees < 35) {
         //DAMAGE MOUNT
         if (randnum >= .65 && randnum < .9) {
-            pImage->ecm *= float_to_int( dam );
+            ecm *= float_to_int( dam );
         } else if ( getNumMounts() ) {
             unsigned int whichmount = rand()%getNumMounts();
             if (randnum >= .9)
@@ -2048,7 +2048,7 @@ void Unit::DamageRandSys( float dam, const Vector &vec, float randnum, float deg
             this->cloaking = -1;
             damages |= Damages::CLOAK_DAMAGED;
           } else if (randnum >= .78) {
-            pImage->cloakenergy += ( (1-dam)*recharge );
+            cloakenergy += ( (1-dam)*recharge );
             damages |= Damages::CLOAK_DAMAGED;
           } else if (randnum >= .7) {
             cloakmin += ( rand()%(32000-cloakmin) );
@@ -2120,8 +2120,8 @@ void Unit::DamageRandSys( float dam, const Vector &vec, float randnum, float deg
             if (dam < mindam)
                 dam = mindam;
             this->maxenergy *= dam;
-        } else if (pImage->repair_droid > 0) {
-            pImage->repair_droid--;
+        } else if (repair_droid > 0) {
+            repair_droid--;
         }
         damages |= Damages::JUMP_DAMAGED;
         return;
@@ -2458,16 +2458,16 @@ void Unit::Cloak( bool loak )
     if (loak) {
         static bool warp_energy_for_cloak =
             XMLSupport::parse_bool( vs_config->getVariable( "physics", "warp_energy_for_cloak", "true" ) );
-        if ( pImage->cloakenergy < (warp_energy_for_cloak ? warpenergy : energy) ) {
-            pImage->cloakrate = (pImage->cloakrate >= 0) ? pImage->cloakrate : -pImage->cloakrate;
+        if ( cloakenergy < (warp_energy_for_cloak ? warpenergy : energy) ) {
+            cloakrate = (cloakrate >= 0) ? cloakrate : -cloakrate;
             //short fix
-            if (cloaking < -1 && pImage->cloakrate != 0) {
+            if (cloaking < -1 && cloakrate != 0) {
                 //short fix
                 cloaking = 2147483647;
             } else {}
         }
     } else {
-        pImage->cloakrate = (pImage->cloakrate >= 0) ? -pImage->cloakrate : pImage->cloakrate;
+        cloakrate = (cloakrate >= 0) ? -cloakrate : cloakrate;
         if (cloaking == cloakmin)
             ++cloaking;
     }
@@ -3900,7 +3900,7 @@ bool Unit::UpAndDownGrade( const Unit *up,
             STDUPGRADE( HeatSink, up->HeatSink, templ->HeatSink, 0 );
         if ( !csv_cell_null_check || force_change_on_nothing
             || cell_has_recursive_data( upgrade_name, up->faction, "Repair_Droid" ) )
-            STDUPGRADE( pImage->repair_droid, up->pImage->repair_droid, templ->pImage->repair_droid, 0 );
+            STDUPGRADE( repair_droid, up->repair_droid, templ->repair_droid, 0 );
         if ( !csv_cell_null_check || force_change_on_nothing
             || cell_has_recursive_data( upgrade_name, up->faction, "Hold_Volume" ) )
             STDUPGRADE( CargoVolume, up->CargoVolume, templ->CargoVolume, 0 );
@@ -3915,7 +3915,7 @@ bool Unit::UpAndDownGrade( const Unit *up,
             STDUPGRADE( HiddenCargoVolume, up->HiddenCargoVolume, templ->HiddenCargoVolume, 0 );
         if ( !csv_cell_null_check || force_change_on_nothing
             || cell_has_recursive_data( upgrade_name, up->faction, "ECM_Rating" ) )
-            STDUPGRADE( pImage->ecm, up->pImage->ecm, templ->pImage->ecm, 0 ); //ecm is unsigned --chuck_starchaser
+            STDUPGRADE( ecm, up->ecm, templ->ecm, 0 ); //ecm is unsigned --chuck_starchaser
         if ( !csv_cell_null_check || force_change_on_nothing
             || cell_has_recursive_data( upgrade_name, up->faction, "Primary_Capacitor" ) )
             STDUPGRADE( maxenergy, up->maxenergy, templ->maxenergy, 0 );
@@ -3977,26 +3977,26 @@ bool Unit::UpAndDownGrade( const Unit *up,
     static bool UpgradeCockpitDamage =
         XMLSupport::parse_bool( vs_config->getVariable( "physics", "upgrade_cockpit_damage", "false" ) );
     if (UpgradeCockpitDamage) {
-        STDUPGRADE( pImage->fireControlFunctionality, up->pImage->fireControlFunctionality,
-                   templ->pImage->fireControlFunctionality,
+        STDUPGRADE( fireControlFunctionality, up->fireControlFunctionality,
+                   templ->fireControlFunctionality,
                    (unittable ? 0 : 1) );
-        STDUPGRADE( pImage->fireControlFunctionalityMax, up->pImage->fireControlFunctionalityMax,
-                   templ->pImage->fireControlFunctionalityMax,
+        STDUPGRADE( fireControlFunctionalityMax, up->fireControlFunctionalityMax,
+                   templ->fireControlFunctionalityMax,
                    (unittable ? 0 : 1) );
-        STDUPGRADE( pImage->SPECDriveFunctionality, up->pImage->SPECDriveFunctionality, templ->pImage->SPECDriveFunctionality,
+        STDUPGRADE( SPECDriveFunctionality, up->SPECDriveFunctionality, templ->SPECDriveFunctionality,
                    (unittable ? 0 : 1) );
-        STDUPGRADE( pImage->SPECDriveFunctionalityMax, up->pImage->SPECDriveFunctionalityMax,
-                   templ->pImage->SPECDriveFunctionalityMax,
+        STDUPGRADE( SPECDriveFunctionalityMax, up->SPECDriveFunctionalityMax,
+                   templ->SPECDriveFunctionalityMax,
                    (unittable ? 0 : 1) );
-        STDUPGRADE( pImage->CommFunctionality, up->pImage->CommFunctionality, templ->pImage->CommFunctionality,
+        STDUPGRADE( CommFunctionality, up->CommFunctionality, templ->CommFunctionality,
                    (unittable ? 0 : 1) );
-        STDUPGRADE( pImage->CommFunctionalityMax, up->pImage->CommFunctionalityMax, templ->pImage->CommFunctionalityMax,
+        STDUPGRADE( CommFunctionalityMax, up->CommFunctionalityMax, templ->CommFunctionalityMax,
                    (unittable ? 0 : 1) );
-        STDUPGRADE( pImage->LifeSupportFunctionality, up->pImage->LifeSupportFunctionality,
-                   templ->pImage->LifeSupportFunctionality,
+        STDUPGRADE( LifeSupportFunctionality, up->LifeSupportFunctionality,
+                   templ->LifeSupportFunctionality,
                    (unittable ? 0 : 1) );
-        STDUPGRADE( pImage->LifeSupportFunctionalityMax, up->pImage->LifeSupportFunctionalityMax,
-                   templ->pImage->LifeSupportFunctionalityMax,
+        STDUPGRADE( LifeSupportFunctionalityMax, up->LifeSupportFunctionalityMax,
+                   templ->LifeSupportFunctionalityMax,
                    (unittable ? 0 : 1) );
         unsigned int upgrmax = (UnitImages< void >::NUMGAUGES+1+MAXVDUS)*2;
         for (unsigned int upgr = 0; upgr < upgrmax; upgr++)
@@ -4234,9 +4234,9 @@ bool Unit::UpAndDownGrade( const Unit *up,
             if (touchme) {
                 cloaking = up->cloaking;
                 cloakmin = up->cloakmin;
-                pImage->cloakrate   = up->pImage->cloakrate;
-                pImage->cloakglass  = up->pImage->cloakglass;
-                pImage->cloakenergy = up->pImage->cloakenergy;
+                cloakrate   = up->cloakrate;
+                cloakglass  = up->cloakglass;
+                cloakenergy = up->cloakenergy;
             }
             ++numave;
         } else if (cloaking != -1 && up->cloaking != -1) {
@@ -4328,21 +4328,21 @@ int Unit::RepairCost()
     for (i = 0; i < (1+MAXVDUS+UnitImages< void >::NUMGAUGES)*2; ++i)
         if (pImage->cockpit_damage[i] < 1)
             ++cost;
-    if (pImage->fireControlFunctionality < 1)
+    if (fireControlFunctionality < 1)
         ++cost;
-    if (pImage->fireControlFunctionalityMax < 1)
+    if (fireControlFunctionalityMax < 1)
         ++cost;
-    if (pImage->SPECDriveFunctionality < 1)
+    if (SPECDriveFunctionality < 1)
         ++cost;
-    if (pImage->SPECDriveFunctionalityMax < 1)
+    if (SPECDriveFunctionalityMax < 1)
         ++cost;
-    if (pImage->CommFunctionality < 1)
+    if (CommFunctionality < 1)
         ++cost;
-    if (pImage->CommFunctionalityMax < 1)
+    if (CommFunctionalityMax < 1)
         ++cost;
-    if (pImage->LifeSupportFunctionality < 1)
+    if (LifeSupportFunctionality < 1)
         ++cost;
-    if (pImage->LifeSupportFunctionalityMax < 1)
+    if (LifeSupportFunctionalityMax < 1)
         ++cost;
     for (i = 0; i < numCargo(); ++i)
         if (GetCargo( i ).GetCategory().find( DamagedCategory ) == 0)
@@ -4374,43 +4374,43 @@ int Unit::RepairUpgrade()
             success += 1;
             pct = 1;
         }
-    if (im->fireControlFunctionality < 1) {
-        im->fireControlFunctionality = 1;
+    if (fireControlFunctionality < 1) {
+        fireControlFunctionality = 1;
         pct = 1;
         success += 1;
     }
-    if (im->fireControlFunctionalityMax < 1) {
-        im->fireControlFunctionalityMax = 1;
+    if (fireControlFunctionalityMax < 1) {
+        fireControlFunctionalityMax = 1;
         pct = 1;
         success += 1;
     }
-    if (im->SPECDriveFunctionality < 1) {
-        im->SPECDriveFunctionality = 1;
+    if (SPECDriveFunctionality < 1) {
+        SPECDriveFunctionality = 1;
         pct = 1;
         success += 1;
     }
-    if (im->SPECDriveFunctionalityMax < 1) {
-        im->SPECDriveFunctionalityMax = 1;
+    if (SPECDriveFunctionalityMax < 1) {
+        SPECDriveFunctionalityMax = 1;
         pct = 1;
         success += 1;
     }
-    if (im->CommFunctionality < 1) {
-        im->CommFunctionality = 1;
+    if (CommFunctionality < 1) {
+        CommFunctionality = 1;
         pct = 1;
         success += 1;
     }
-    if (im->CommFunctionalityMax < 1) {
-        im->CommFunctionalityMax = 1;
+    if (CommFunctionalityMax < 1) {
+        CommFunctionalityMax = 1;
         pct = 1;
         success += 1;
     }
-    if (im->LifeSupportFunctionality < 1) {
-        im->LifeSupportFunctionality = 1;
+    if (LifeSupportFunctionality < 1) {
+        LifeSupportFunctionality = 1;
         pct = 1;
         success += 1;
     }
-    if (im->LifeSupportFunctionalityMax < 1) {
-        im->LifeSupportFunctionalityMax = 1;
+    if (LifeSupportFunctionalityMax < 1) {
+        LifeSupportFunctionalityMax = 1;
         pct = 1;
         success += 1;
     }
@@ -4919,13 +4919,13 @@ void Unit::Repair()
     static float repairtime = XMLSupport::parse_float( vs_config->getVariable( "physics", "RepairDroidTime", "180" ) );
     static float checktime  = XMLSupport::parse_float( vs_config->getVariable( "physics", "RepairDroidCheckTime", "5" ) );
     if ( (repairtime <= 0) || (checktime <= 0) ) return;
-    if (pImage->repair_droid > 0) {
-        if ( pImage->next_repair_time == -FLT_MAX || pImage->next_repair_time <= UniverseUtil::GetGameTime() ) {
+    if (repair_droid > 0) {
+        if ( next_repair_time == -FLT_MAX || next_repair_time <= UniverseUtil::GetGameTime() ) {
             unsigned int numcargo = numCargo();
             if (numcargo > 0) {
-                if ( pImage->next_repair_cargo >= numCargo() )
-                    pImage->next_repair_cargo = 0;
-                Cargo *carg = &GetCargo( pImage->next_repair_cargo );
+                if ( next_repair_cargo >= numCargo() )
+                    next_repair_cargo = 0;
+                Cargo *carg = &GetCargo( next_repair_cargo );
                 float  percentoperational = 1;
                 if ( carg->GetCategory().find( "upgrades/" ) == 0
                     && carg->GetCategory().find( DamagedCategory ) != 0
@@ -4933,8 +4933,8 @@ void Unit::Repair()
                     && carg->GetContent().find( "mult_" ) != 0
                     && ( ( percentoperational =
                               UnitUtil::PercentOperational( this, carg->content, carg->category, true ) ) < 1.f ) ) {
-                    if (pImage->next_repair_time == -FLT_MAX) {
-                        pImage->next_repair_time = UniverseUtil::GetGameTime()+repairtime*(1-percentoperational)/pImage->repair_droid;
+                    if (next_repair_time == -FLT_MAX) {
+                        next_repair_time = UniverseUtil::GetGameTime()+repairtime*(1-percentoperational)/repair_droid;
                     } else {
                         //ACtually fix the cargo here
                         static int  upfac = FactionUtil::GetUpgradeFaction();
@@ -4952,25 +4952,25 @@ void Unit::Repair()
                                 if (percentage == 0) {
                                     BOOST_LOG_TRIVIAL(error) << boost::format("Failed repair for unit %1%, cargo item %2%: %3% (%4%) - please report error")
                                                                 % name.get().c_str()
-                                                                % pImage->next_repair_cargo
+                                                                % next_repair_cargo
                                                                 % carg->GetContent().c_str()
                                                                 % carg->GetCategory().c_str();
                                 }
                             }
                         }
-                        pImage->next_repair_time = -FLT_MAX;
-                        ++(pImage->next_repair_cargo);
+                        next_repair_time = -FLT_MAX;
+                        ++(next_repair_cargo);
                     }
                 } else {
-                    ++(pImage->next_repair_cargo);
+                    ++(next_repair_cargo);
                 }
             }
         }
-        float ammt_repair = simulation_atom_var/repairtime*pImage->repair_droid;
-        REPAIRINTEGRATED( pImage->LifeSupportFunctionality, pImage->LifeSupportFunctionalityMax );
-        REPAIRINTEGRATED( pImage->fireControlFunctionality, pImage->fireControlFunctionalityMax );
-        REPAIRINTEGRATED( pImage->SPECDriveFunctionality, pImage->SPECDriveFunctionalityMax );
-        REPAIRINTEGRATED( pImage->CommFunctionality, pImage->CommFunctionalityMax );
+        float ammt_repair = simulation_atom_var/repairtime*repair_droid;
+        REPAIRINTEGRATED( LifeSupportFunctionality, LifeSupportFunctionalityMax );
+        REPAIRINTEGRATED( fireControlFunctionality, fireControlFunctionalityMax );
+        REPAIRINTEGRATED( SPECDriveFunctionality, SPECDriveFunctionalityMax );
+        REPAIRINTEGRATED( CommFunctionality, CommFunctionalityMax );
         unsigned int numg  = (1+UnitImages< void >::NUMGAUGES+MAXVDUS);
         unsigned int which = vsrandom.genrand_int31()%numg;
         static float hud_repair_quantity = XMLSupport::parse_float( vs_config->getVariable( "physics", "hud_repair_unit", ".25" ) );
@@ -5369,7 +5369,7 @@ void Unit::UpdateCloak() {
     }
 
     // Insufficient energy to cloak ship
-    if ( pImage->cloakenergy*simulation_atom_var > (warp_energy_for_cloak ? warpenergy : energy) ) {
+    if ( cloakenergy*simulation_atom_var > (warp_energy_for_cloak ? warpenergy : energy) ) {
         Cloak( false );
         return;
     }
@@ -5384,25 +5384,25 @@ void Unit::UpdateCloak() {
         //short fix
         // TODO: figure out what they have fixed
         if ( (cloaking == (2147483647)
-              && pImage->cloakrate > 0) || (cloaking == cloakmin+1 && pImage->cloakrate < 0) )
+              && cloakrate > 0) || (cloaking == cloakmin+1 && cloakrate < 0) )
             playSound(SoundType::cloaking);
 
         //short fix
         // TODO: figure out what they have fixed
-        cloaking -= (int) (pImage->cloakrate*simulation_atom_var);
-        if (cloaking <= cloakmin && pImage->cloakrate > 0)
+        cloaking -= (int) (cloakrate*simulation_atom_var);
+        if (cloaking <= cloakmin && cloakrate > 0)
             cloaking = cloakmin;
-        if (cloaking < 0 && pImage->cloakrate < 0) {
+        if (cloaking < 0 && cloakrate < 0) {
             cloaking = -2147483647-1;
         }
     }
 
     // Calculate energy drain
-    if (pImage->cloakrate > 0 || cloaking == cloakmin) {
+    if (cloakrate > 0 || cloaking == cloakmin) {
         if (warp_energy_for_cloak) {
-            warpenergy -= (simulation_atom_var*pImage->cloakenergy);
+            warpenergy -= (simulation_atom_var*cloakenergy);
         } else {
-            energy -= (simulation_atom_var*pImage->cloakenergy);
+            energy -= (simulation_atom_var*cloakenergy);
         }
     }
 }
@@ -5641,7 +5641,7 @@ void Unit::RegenShields()
     //ECM energy drain
     if (computer.ecmactive) {
         static float ecmadj = XMLSupport::parse_float( vs_config->getVariable( "physics", "ecm_energy_cost", ".05" ) );
-        float sim_atom_ecm  = ecmadj*pImage->ecm*simulation_atom_var;
+        float sim_atom_ecm  = ecmadj*ecm*simulation_atom_var;
         if (energy > sim_atom_ecm)
             energy -= sim_atom_ecm;
         else
@@ -5796,7 +5796,7 @@ void Unit::RegenShields()
         fuel -= FMEC_factor
                 *( ( recharge*simulation_atom_var
                     -(reactor_idle_efficiency
-                      *excessenergy) )/( min_reactor_efficiency+( pImage->LifeSupportFunctionality*(1-min_reactor_efficiency) ) ) );
+                      *excessenergy) )/( min_reactor_efficiency+( LifeSupportFunctionality*(1-min_reactor_efficiency) ) ) );
         if (fuel < 0) fuel = 0;
         if ( !FINITE( fuel ) ) {
             BOOST_LOG_TRIVIAL(error) << "Fuel is nan C";

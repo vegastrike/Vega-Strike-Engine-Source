@@ -5499,7 +5499,7 @@ void showUnitStats( Unit *playerUnit, string &text, int subunitlevel, int mode, 
     if (playerUnit->cloaking != -1) {
         if (!mode) {
             PRETTY_ADDU( statcolor+"Cloaking device available, energy usage: #-c",
-                         playerUnit->pImage->cloakenergy*RSconverter*Wconv,
+                         playerUnit->cloakenergy*RSconverter*Wconv,
                          0,
                          "MJ/s" );
         } else {
@@ -5507,7 +5507,7 @@ void showUnitStats( Unit *playerUnit, string &text, int subunitlevel, int mode, 
             {
             case 0:                     //Replacement or new Module
                 PRETTY_ADDU( statcolor+"Installs a cloaking device.#n#  Activated energy usage: #-c",
-                             playerUnit->pImage->cloakenergy*RSconverter*Wconv,
+                             playerUnit->cloakenergy*RSconverter*Wconv,
                              0,
                              "MJ/s" );
                 break;

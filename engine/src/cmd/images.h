@@ -159,21 +159,10 @@ struct UnitImages
     Animation    *pExplosion;
     float timeexplode;
     float        *cockpit_damage;     //0 is radar, 1 to MAXVDU is vdus and >MAXVDU is gauges
-    ///how likely to fool missiles
-    /// -2 = inactive L2, -1 = inactive L1, 0 = not available, 1 = active L1, 2 = active L2, etc...
-    int  ecm;    
-    ///holds the info for the repair bot type. 0 is no bot;
-    unsigned char repair_droid;
-    float next_repair_time;
-    unsigned int  next_repair_cargo;    //(~0 : select randomly)
-    ///How much energy cloaking takes per frame
-    float cloakenergy;
-    ///how fast this starship decloaks/close...if negative, decloaking
-    int   cloakrate;   //short fix
-    ///If this unit cloaks like glass or like fading
-    bool  cloakglass;
-    ///if the unit is a wormhole
-    bool  forcejump;
+
+
+
+
 
     std::vector< string >destination;
     std::vector< DockingPorts >dockingports;
@@ -183,14 +172,8 @@ struct UnitImages
     UnitContainer DockedTo;
     float unitscale;     //for output
     class XMLSerializer *unitwriter;
-    float fireControlFunctionality;
-    float fireControlFunctionalityMax;
-    float SPECDriveFunctionality;
-    float SPECDriveFunctionalityMax;
-    float CommFunctionality;
-    float CommFunctionalityMax;
-    float LifeSupportFunctionality;
-    float LifeSupportFunctionalityMax;
+
+
     enum GAUGES
     {
         //Image-based gauges

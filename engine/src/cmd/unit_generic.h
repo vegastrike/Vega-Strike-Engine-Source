@@ -145,6 +145,28 @@ protected:
     StringPool::Reference csvRow;
 public:
 
+    /// Radar and related systems
+    // TODO: take a deeper look at this much later...
+    //how likely to fool missiles
+    // -2 = inactive L2, -1 = inactive L1, 0 = not available, 1 = active L1, 2 = active L2, etc...
+    int  ecm;
+
+    /// Repair
+    // TODO: Maybe move to damageable
+    // holds the info for the repair bot type. 0 is no bot;
+    unsigned char repair_droid;
+    float next_repair_time;
+    unsigned int  next_repair_cargo;    //(~0 : select randomly)
+
+    float fireControlFunctionality;
+    float fireControlFunctionalityMax;
+    float SPECDriveFunctionality;
+    float SPECDriveFunctionalityMax;
+    float CommFunctionality;
+    float CommFunctionalityMax;
+    float LifeSupportFunctionality;
+    float LifeSupportFunctionalityMax;
+
     /// Volume
     // This isn't mass. Denser materials translate to more mass
     // TODO: move this to ship class
@@ -546,12 +568,21 @@ protected:
 
 
 public:
-
+    // TODO: move cloak to Cloakable?
+    ///How much energy cloaking takes per frame
+    float cloakenergy;
+    ///how fast this starship decloaks/close...if negative, decloaking
+    int   cloakrate;   //short fix
+    ///If this unit cloaks like glass or like fading
+    bool  cloakglass;
 //-1 is not available... ranges between 0 32767 for "how invisible" unit currently is (32768... -32768) being visible)
     int   cloaking = 0;                              //short fix
 //the minimum cloaking value...
     int   cloakmin = 0;                              //short fix
 
+    // TODO: move to jump_capable?
+    ///if the unit is a wormhole
+    bool  forcejump;
 protected:
 //Is dead already?
     bool  killed = false;

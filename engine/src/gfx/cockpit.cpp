@@ -1352,7 +1352,7 @@ float GameCockpit::LookupUnitStat( int stat, Unit *target )
         else
             return (float) UnitImages< void >::OFF;
     case UnitImages< void >::ECM_MODAL:
-        if (target->GetImageInformation().ecm > 0)
+        if (target->ecm > 0)
             return (target->GetComputerData().ecmactive ? (float) UnitImages< void >::ACTIVE : (float) UnitImages< void >::READY);
         else
             return (float) UnitImages< void >::NOTAPPLICABLE;
