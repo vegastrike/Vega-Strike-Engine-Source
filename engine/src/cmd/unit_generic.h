@@ -77,8 +77,10 @@ void UncheckUnit( class Unit*un );
 #include "SharedPool.h"
 #include "role_bitmask.h"
 
+#include "game_config.h"
+
+
 extern char * GetUnitDir( const char *filename );
-extern float capship_size;
 
 Unit* getMasterPartList();
 bool CloseEnoughToAutotrack( Unit *me, Unit *targ, float &cone );
@@ -560,35 +562,40 @@ public:
 //positive for the multiplier applied to nearby spec starships (1 = planetary/inert effects) 0 is default (no effect), -X means 0 but able to be enabled
     float  specInterdiction = 0;
 
-    float  HeatSink;
+    float  HeatSink = 0;
 protected:
-//are shields tight to the hull.  zero means bubble
-    float  shieldtight = 0;
+    //BUCO! Must add shield tightness back into units.csv for great justice.
+    //are shields tight to the hull.  zero means bubble
+    float  shieldtight = GameConfig::GetVariable( "physics",
+                                                  "default_shield_tightness",
+                                                  0 );
 
 
 
 public:
     // TODO: move cloak to Cloakable?
     ///How much energy cloaking takes per frame
-    float cloakenergy;
+    float cloakenergy = 0;
     ///how fast this starship decloaks/close...if negative, decloaking
-    int   cloakrate;   //short fix
+    int   cloakrate = 100;   //short fix
     ///If this unit cloaks like glass or like fading
-    bool  cloakglass;
-//-1 is not available... ranges between 0 32767 for "how invisible" unit currently is (32768... -32768) being visible)
-    int   cloaking = 0;                              //short fix
+    bool  cloakglass = false;
+
+    //-1 is not available... ranges between 0 32767 for "how invisible" unit currently is (32768... -32768) being visible)
+    // Despite the above comment, Init() would set it to -1
+    int   cloaking = -1;                              //short fix
 //the minimum cloaking value...
-    int   cloakmin = 0;                              //short fix
+    int   cloakmin = cloakglass ? 1 : 0;              //short fix
 
     // TODO: move to jump_capable?
     ///if the unit is a wormhole
-    bool  forcejump;
+    bool  forcejump = false;
 protected:
 //Is dead already?
     bool  killed = false;
 //Should not be drawn
     enum INVIS {DEFAULTVIS=0x0, INVISGLOW=0x1, INVISUNIT=0x2, INVISCAMERA=0x4};
-    unsigned char invisible = 0;             //1 means turn off glow, 2 means turn off ship
+    unsigned char invisible = DEFAULTVIS;             //1 means turn off glow, 2 means turn off ship
 //corners of object
 
 public:
@@ -848,7 +855,9 @@ public:
 //The information about the minimum and maximum ranges of this unit. Collide Tables point to this bit of information.
     enum COLLIDELOCATIONTYPES {UNIT_ONLY=0, UNIT_BOLT=1, NUM_COLLIDE_MAPS=2};
 //location[0] is for units only, location[1] is for units + bolts
-    CollideMap::iterator location[2];
+    // This used to be initialized by set_null (see collide_map)
+    // Right now, there's an ifdef that assigns NULL but it could be something else.
+    CollideMap::iterator location[2] = {nullptr, nullptr};
     struct collideTrees *colTrees = nullptr;
 //Sets the parent to be this unit. Unit never dereferenced for this operation
     void SetCollisionParent( Unit *name );

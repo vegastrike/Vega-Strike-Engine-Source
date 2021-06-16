@@ -151,6 +151,8 @@ void Unit::SetNebula( Nebula *neb )
 
 bool Unit::InRange( const Unit *target, double &mm, bool cone, bool cap, bool lock ) const
 {
+    static float capship_size = GameConfig::GetVariable( "physics", "capship_size", 500 );
+
     if (this == target || target->CloakVisible() < .8)
         return false;
     if (cone && computer.radar.maxcone > -.98) {
@@ -241,7 +243,6 @@ float rand01()
     return (float) rand()/(float) RAND_MAX;
 }
 
-float capship_size = 500;
 
 /* UGLYNESS short fix */
 unsigned int apply_float_to_unsigned_int( float tmp )
@@ -432,111 +433,11 @@ Unit::~Unit()
 
 void Unit::Init()
 {
-    for (unsigned int locind = 0; locind < NUM_COLLIDE_MAPS; ++locind)
-        set_null( location[locind] );
-
     this->computer.combat_mode = true;
 #ifdef CONTAINER_DEBUG
     UncheckUnit( this );
 #endif
-    static float capsize = XMLSupport::parse_float( vs_config->getVariable( "physics", "capship_size", "500" ) );
 
-    capship_size     = capsize;
-
-    static float insys_jump_cost = XMLSupport::parse_float( vs_config->getVariable( "physics", "insystem_jump_cost", ".1" ) );
-    jump.insysenergy          = insys_jump_cost*jump.energy;
-
-    afterburnenergy           = 0;
-    nebula = NULL;
-    limits.structurelimits    = Vector( 0, 0, 1 );
-    limits.limitmin           = -1;
-    cloaking = -1;
-    repair_droid      = 0;
-    next_repair_time  = -FLT_MAX;
-    next_repair_cargo = ~0;
-    ecm               = 0;
-    cloakglass        = false;
-    this->HeatSink            = 0;
-
-    pImage->unitwriter        = NULL;
-    cloakmin = cloakglass ? 1 : 0;
-    cloakrate         = 100;
-    cloakenergy       = 0;
-    forcejump         = false;
-    fireControlFunctionality    = 1.0f;
-    fireControlFunctionalityMax = 1.0f;
-    SPECDriveFunctionality = 1.0f;
-    SPECDriveFunctionalityMax   = 1.0f;
-    CommFunctionality = 1.0f;
-    CommFunctionalityMax = 1.0f;
-    LifeSupportFunctionality    = 1.0f;
-    LifeSupportFunctionalityMax = 1.0f;
-
-    pImage->pHudImage = NULL;
-
-    //Freedom for the masses!!!!  //you'll have to justify why setting to this is better.
-    owner         = NULL;
-    faction       = 0;
-    resolveforces = true;
-    colTrees      = NULL;
-    invisible     = DEFAULTVIS;
-    corner_min.Set( FLT_MAX, FLT_MAX, FLT_MAX );
-    corner_max.Set( -FLT_MAX, -FLT_MAX, -FLT_MAX );
-
-    //BUCO! Must add shield tightness back into units.csv for great justice.
-    static float default_shield_tightness =
-        XMLSupport::parse_float( vs_config->getVariable( "physics", "default_shield_tightness", "0" ) );
-    //was 0 // sphere mesh by default, but let's decide on it
-    shieldtight     =
-        default_shield_tightness;
-    energy = maxenergy = 1;
-    warpenergy      =
-        0;
-    maxwarpenergy   =
-        0;
-    recharge = 1;
-    shield.recharge =
-        shield.leak = 0;
-    this->shield.efficiency = 1;
-    shield.shield2fb.front  = shield.shield2fb.back = shield.shield2fb.frontmax = shield.shield2fb.backmax =
-                                                                                      armor.frontrighttop    =
-                                                                                          armor.backrighttop =
-                                                                                              armor.frontlefttop    =
-                                                                                                  armor.backlefttop =
-                                                                                                      armor.frontrightbottom =
-                                                                                                          armor
-                                                                                                          .
-                                                                                                          backrightbottom
-                                                                                                              =
-                                                                                                                  armor.
-                                                                                                                  frontleftbottom
-                                                                                                                      =
-                                                                                                                          armor
-                                                                                                                          .
-                                                                                                                          backleftbottom
-                                                                                                                              =
-                                                                                                                                  0;
-    hull    = 1;                                         //10;
-    maxhull = 1;                                         //10;
-    shield.number =
-        0;
-
-    pImage->pExplosion  = NULL;
-    pImage->timeexplode = 0;
-    killed  = false;
-    ucref   = 0;
-    aistate = NULL;
-    Identity( cumulative_transformation_matrix );
-    cumulative_transformation = identity_transformation;
-    curr_physical_state = prev_physical_state = identity_transformation;
-    Mass = .01;
-    fuel = 000;
-
-    static Vector myang( XMLSupport::parse_float( vs_config->getVariable( "general", "pitch", "0" ) ), XMLSupport::parse_float(
-                            vs_config->getVariable( "general", "yaw", "0" ) ), XMLSupport::parse_float( vs_config->getVariable(
-                                                                                                           "general",
-                                                                                                           "roll",
-                                                                                                           "0" ) ) );
     static float rr = XMLSupport::parse_float( vs_config->getVariable( "graphics", "hud", "radarRange", "20000" ) );
     static float minTrackingNum = XMLSupport::parse_float( vs_config->getVariable( "physics",
                                                                                    "autotracking",
@@ -545,50 +446,7 @@ void Unit::Init()
     //DO NOT CHANGE see unit_customize.cpp
     static float lc = XMLSupport::parse_float( vs_config->getVariable( "physics", "lock_cone", ".8" ) );
 
-    Momentofinertia      = .01;
-    AngularVelocity      = myang;
-    cumulative_velocity  = Velocity = Vector( 0, 0, 0 );
 
-    NetTorque            = NetLocalTorque = Vector( 0, 0, 0 );
-    NetForce             = Vector( 0, 0, 0 );
-    NetLocalForce        = Vector( 0, 0, 0 );
-
-    selected             = false;
-
-    limits.yaw           = 2.55;
-    limits.pitch         = 2.55;
-    limits.roll          = 2.55;
-
-    limits.lateral       = 2;
-    limits.vertical      = 8;
-    limits.forward       = 2;
-    limits.afterburn     = 5;
-    limits.retro         = 2;
-    VelocityReference( NULL );
-    computer.threat.SetUnit( NULL );
-    computer.threatlevel = 0;
-    computer.slide_start = computer.slide_end = 0;
-    computer.set_speed   = 0;
-    computer.max_combat_speed    = 1;
-    computer.max_combat_ab_speed = 1;
-    computer.max_yaw_right       = computer.max_yaw_left = 1;
-
-    computer.max_pitch_down      = computer.max_pitch_up = 1;
-    computer.max_roll_right      = computer.max_roll_left = 1;
-    computer.NavPoint            = Vector( 0, 0, 0 );
-    computer.itts                = false;
-    computer.radar.maxrange      = rr;
-    computer.radar.locked        = false;
-    computer.radar.maxcone       = -1;
-    computer.radar.trackingcone  = minTrackingNum;
-    computer.radar.trackingactive= true;
-    computer.radar.lockcone      = lc;
-    computer.radar.mintargetsize = 0;
-    computer.radar.capability    = Computer::RADARLIM::Capability::IFF_NONE;
-    computer.ecmactive           = true;
-
-    flightgroup                  = NULL;
-    flightgroup_subnumber        = 0;
     //No cockpit reference here
     if (!pImage->cockpit_damage) {
         unsigned int numg = (1+MAXVDUS+UnitImages< void >::NUMGAUGES)*2;

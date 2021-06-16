@@ -8,7 +8,7 @@ class Unit;
 class UnitContainer
 {
 protected:
-    Unit *unit;
+    Unit *unit = nullptr;
 public: UnitContainer();
     UnitContainer( Unit* );
     UnitContainer( const UnitContainer &un )

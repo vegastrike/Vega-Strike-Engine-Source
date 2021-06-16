@@ -31,6 +31,8 @@
 #include "gfx/quaternion.h"
 #include "star_system.h"
 
+#include <float.h>
+
 struct Transformation;
 class Matrix;
 class Unit;
@@ -89,7 +91,8 @@ public:
     //The cumulative (incl subunits parents' transformation)
     Transformation cumulative_transformation;
 
-    Vector corner_min, corner_max;
+    Vector corner_min = Vector(FLT_MAX, FLT_MAX, FLT_MAX);
+    Vector corner_max = Vector(-FLT_MAX, -FLT_MAX, -FLT_MAX);
     //How big is this unit
     float radial_size = 0;
 
@@ -117,7 +120,7 @@ public:
     graphicOptions;
 protected:
     //Moment of intertia of this unit
-    float  Momentofinertia = 0;
+    float  Momentofinertia = 0.01; // Was 0 but Init says 0.01
     Vector SavedAccel;
     Vector SavedAngAccel;
     static bool configLoaded;

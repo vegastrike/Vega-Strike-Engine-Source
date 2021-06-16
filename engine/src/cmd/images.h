@@ -154,10 +154,10 @@ struct UnitImages
     StringPool::Reference cockpitImage;
     StringPool::Reference explosion_type;
     Vector CockpitCenter;
-    VSSprite     *pHudImage;
+    VSSprite     *pHudImage = nullptr;
     ///The explosion starts at null, when activated time explode is incremented and ends at null
-    Animation    *pExplosion;
-    float timeexplode;
+    Animation    *pExplosion = nullptr;
+    float timeexplode = 0;
     float        *cockpit_damage;     //0 is radar, 1 to MAXVDU is vdus and >MAXVDU is gauges
 
 
@@ -171,7 +171,7 @@ struct UnitImages
     std::vector< DockedUnits* >dockedunits;
     UnitContainer DockedTo;
     float unitscale;     //for output
-    class XMLSerializer *unitwriter;
+    class XMLSerializer *unitwriter = nullptr;
 
 
     enum GAUGES

@@ -32,9 +32,17 @@
 /* This class provides all energy generation methods to unit types -
  * ships, space installations, missiles, drones, etc. */
 
+static const float insys_jump_cost = GameConfig::GetVariable( "physics", "insystem_jump_cost", 0.1 );
+
 Energetic::Energetic()
 {
+    // TODO: this inconsistency is taken from the old code.
+    // We really should pick between 1 and 0 and be done with it.
+    energy = 1;
+    maxenergy = 1;
+    recharge = 1;
 
+    jump.insysenergy = insys_jump_cost * jump.energy;
 }
 
 void Energetic::decreaseWarpEnergy( bool insys, float time )

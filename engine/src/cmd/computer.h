@@ -54,16 +54,16 @@ public:
         //the max range the radar can handle
         float maxrange;
         //the dot with (0,0,1) indicating the farthest to the side the radar can handle.
-        float maxcone;
+        float maxcone = -1;
         float lockcone;
         float trackingcone;
         //The minimum radius of the target
-        float mintargetsize;
+        float mintargetsize = 0;
         // What kind of type and capability the radar supports
-        int   capability;
-        bool  locked;
+        int   capability = Computer::RADARLIM::Capability::IFF_NONE;
+        bool  locked = false;
         bool  canlock;
-        bool  trackingactive;
+        bool  trackingactive = true;
         RADARLIM() : maxrange( 0 )
           , maxcone( 0 )
           , lockcone( 0 )
@@ -79,9 +79,9 @@ public:
         bool UseThreatAssessment() const;
     }
     radar;
-    bool ecmactive;
+    bool ecmactive = true;
     //The nav point the unit may be heading for
-    Vector NavPoint;
+    Vector NavPoint = Vector(0,0,0);
     //The target that the unit has in computer
     UnitContainer target;
     //Any target that may be attacking and has set this threat
@@ -90,25 +90,25 @@ public:
     UnitContainer velocity_ref;
     bool  force_velocity_ref;
     //The threat level that was calculated from attacking unit's threat
-    float threatlevel;
+    float threatlevel = 0;
     //The speed the flybywire system attempts to maintain
-    float set_speed;
+    float set_speed = 0;
     //Computers limitation of speed
-    float max_combat_speed;
-    float max_combat_ab_speed;
+    float max_combat_speed = 1;
+    float max_combat_ab_speed = 1;
     //Computer's restrictions of YPR to limit space combat maneuvers
-    float max_yaw_left;
-    float max_yaw_right;
-    float max_pitch_down;
-    float max_pitch_up;
-    float max_roll_left;
-    float max_roll_right;
+    float max_yaw_left = 1;
+    float max_yaw_right = 1;
+    float max_pitch_down = 1;
+    float max_pitch_up = 1;
+    float max_roll_left = 1;
+    float max_roll_right = 1;
     //Whether or not an 'lead' indicator appears in front of target
-    unsigned char slide_start;
-    unsigned char slide_end;
-    bool itts;
+    unsigned char slide_start = 0;
+    unsigned char slide_end = 0;
+    bool itts = false;
     //tells whether the speed is clamped draconian-like or not
-    bool combat_mode;
+    bool combat_mode = true;
     Computer() : NavPoint( 0, 0, 0 )
       , threatlevel( 0 )
       , set_speed( 0 )

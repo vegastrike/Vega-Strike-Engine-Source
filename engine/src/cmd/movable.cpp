@@ -49,6 +49,9 @@ float speedStarHandler( float &input)
     return input/game_speed;
 }
 
+static Vector default_angular_velocity( GameConfig::GetVariable( "general", "pitch", 0.0f ),
+                                        GameConfig::GetVariable( "general", "yaw", 0.0f ),
+                                        GameConfig::GetVariable( "general", "roll", 0.0f));
 
 
 bool Movable::configLoaded = false;
@@ -98,6 +101,12 @@ Movable::Movable() : cumulative_transformation_matrix( identity_matrix ) {
         insys_jump_ani = vs_config->getVariable( "graphics", "insys_jump_animation", "warp.ani" );
         configLoaded = true;
     }
+
+    Identity( cumulative_transformation_matrix );
+    cumulative_transformation = identity_transformation;
+    curr_physical_state = prev_physical_state = identity_transformation;
+
+    AngularVelocity = default_angular_velocity;
 }
 
 

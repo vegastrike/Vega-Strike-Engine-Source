@@ -71,7 +71,7 @@ public:
     {
         float warpDriveRating = 0;
         float energy = 100;                            //short fix
-        float insysenergy;                       //short fix
+        float insysenergy;  //short fix
         signed char   drive = -2; // disabled
         unsigned char delay = 5;
         unsigned char damage = 0;
