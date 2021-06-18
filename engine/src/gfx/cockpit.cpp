@@ -83,7 +83,8 @@
 #include "soundcontainer_aldrv.h"
 #include "configxml.h"
 #include "planet.h"
-
+#include "mount_size.h"
+#include "weapon_info.h"
 
 
 using std::min;
@@ -663,21 +664,21 @@ void GameCockpit::DrawTargetBox(const Radar::Sensor& sensor)
             if (draw_line_to_itts) {
                 for (int i = 0; i < nummounts; i++) {
                     if ( (player->mounts[i].status == Mount::ACTIVE)
-                        && (ITTS_for_beams || (player->mounts[i].type->type != weapon_info::BEAM))
-                        && (ITTS_for_locks || (player->mounts[i].type->LockTime == 0)) )
+                        && (ITTS_for_beams || (player->mounts[i].type->type != WEAPON_TYPE::BEAM))
+                        && (ITTS_for_locks || (player->mounts[i].type->lock_time == 0)) )
                     {
-                        iLoc = target->PositionITTS( PlayerPosition, PlayerVelocity, player->mounts[i].type->Speed, steady_itts ) - offs;
+                        iLoc = target->PositionITTS( PlayerPosition, PlayerVelocity, player->mounts[i].type->speed, steady_itts ) - offs;
                         DrawITTSLine( Loc, iLoc, GFXColor(trackcolor.r, trackcolor.g, trackcolor.b, line_to_itts_alpha) );
                     }
                 }
             }
             for (int i = 0; i < nummounts; i++) {
                 if ( (player->mounts[i].status == Mount::ACTIVE)
-                    && (ITTS_for_beams || (player->mounts[i].type->type != weapon_info::BEAM))
-                    && (ITTS_for_locks || (player->mounts[i].type->LockTime == 0)) )
+                    && (ITTS_for_beams || (player->mounts[i].type->type != WEAPON_TYPE::BEAM))
+                    && (ITTS_for_locks || (player->mounts[i].type->lock_time == 0)) )
                 {
                     mntcolor = MountColor( &player->mounts[i] );
-                    iLoc = target->PositionITTS( PlayerPosition, PlayerVelocity, player->mounts[i].type->Speed, steady_itts ) - offs;
+                    iLoc = target->PositionITTS( PlayerPosition, PlayerVelocity, player->mounts[i].type->speed, steady_itts ) - offs;
                     DrawITTSMark(scatter, p, q, iLoc, mntcolor);
                 }
             }

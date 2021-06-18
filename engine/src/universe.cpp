@@ -33,7 +33,6 @@
 #include "gfx/aux_texture.h"
 #include "profile.h"
 #include "gfx/cockpit.h"
-#include "cmd/weapon_xml.h"
 #include "galaxy_xml.h"
 #include <algorithm>
 #include "config_xml.h"
@@ -57,6 +56,8 @@
 #include "cmd/role_bitmask.h"
 #include "universe_globals.h"
 #include "vsfilesystem.h"
+
+#include "weapon_factory.h"
 
 #include <algorithm>
 #include <string>
@@ -309,7 +310,9 @@ Universe::Universe( int argc, char **argv, const char *galaxy_str)
     bootstrap_first_loop();
 
     ROLES::getAllRolePriorities();
-    LoadWeapons( VSFileSystem::weapon_list.c_str() );
+    //LoadWeapons( VSFileSystem::weapon_list.c_str() );
+    WeaponFactory wf = WeaponFactory(VSFileSystem::weapon_list);
+
     galaxy.reset(new GalaxyXML::Galaxy( galaxy_str ));
     static bool firsttime = false;
     if (!firsttime) {
@@ -341,7 +344,9 @@ StarSystem* Universe::Init( string systemfile, const Vector &centr, const string
     static bool js = true;
     if (js) {
         js = false;
-        LoadWeapons( VSFileSystem::weapon_list.c_str() );
+        // LoadWeapons( VSFileSystem::weapon_list.c_str() );
+        WeaponFactory wf = WeaponFactory(VSFileSystem::weapon_list);
+
         CacheJumpStar( false );
     }
 

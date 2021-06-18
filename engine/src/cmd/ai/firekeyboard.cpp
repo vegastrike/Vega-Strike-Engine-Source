@@ -54,6 +54,8 @@
 #include "cmd/script/pythonmission.h"
 #include "universe_util.h"
 #include "universe.h"
+#include "mount_size.h"
+#include "weapon_info.h"
 
 extern bool toggle_pause();
 
@@ -1668,18 +1670,16 @@ void FireKeyboard::Execute()
                 bool normal  = false;
                 int  nm = parent->getNumMounts();
                 int  i;
-                for (i = 0; i < nm; ++i)
+                for (i = 0; i < nm; ++i) {
                     if (parent->mounts[i].status == Mount::ACTIVE) {
-                        special = special || (parent->mounts[i].type->size&weapon_info::SPECIAL) != 0;
-                        normal  = normal
-      || ( parent->mounts[i].type->size
-          &(weapon_info::LIGHT|weapon_info::MEDIUM|weapon_info::HEAVY|weapon_info::CAPSHIPLIGHT
-            |weapon_info::CAPSHIPHEAVY) ) != 0;
+                        special = special || isSpecialGunMount(as_integer(parent->mounts[i].type->size));
+                        normal  = normal  || isNormalGunMount(as_integer(parent->mounts[i].type->size));
                     }
+                }
                 for (i = 0; i < nm; ++i)
                     if (special && normal) {
                         if (parent->mounts[i].status == Mount::ACTIVE)
-                            if ( (parent->mounts[i].type->size&weapon_info::SPECIAL) != 0 )
+                            if ( isSpecialGunMount(as_integer(parent->mounts[i].type->size)))
     parent->mounts[i].status = Mount::INACTIVE;
                     }
             }

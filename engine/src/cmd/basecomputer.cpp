@@ -62,6 +62,9 @@ using VSFileSystem::SaveFile;
 #include "vs_math.h"
 #include "damageable.h"
 #include "universe.h"
+#include "mount_size.h"
+#include "weapon_info.h"
+
 //#define VS_PI 3.1415926535897931
 
 
@@ -3486,13 +3489,13 @@ void BaseComputer::BuyUpgradeOperation::selectMount( void )
         string   mountName;
         string   ammoexp;
         if (playerUnit->mounts[i].status == Mount::ACTIVE || playerUnit->mounts[i].status == Mount::INACTIVE) {
-            mountName  = tostring( i+1 )+" "+playerUnit->mounts[i].type->weapon_name;
+            mountName  = tostring( i+1 )+" "+playerUnit->mounts[i].type->name;
             ammoexp    =
                 (playerUnit->mounts[i].ammo == -1) ? string( "" ) : string( ( " ammo: "+tostring( playerUnit->mounts[i].ammo ) ) );
             mountName += ammoexp;
             mountColor = MOUNT_POINT_FULL();
         } else {
-            const std::string temp = lookupMountSize( playerUnit->mounts[i].size );
+            const std::string temp = getMountSizeString( playerUnit->mounts[i].size );
             mountName  = tostring( i+1 )+" (Empty) "+temp.c_str();
             mountColor = MOUNT_POINT_EMPTY();
         }
@@ -3673,7 +3676,7 @@ void BaseComputer::SellUpgradeOperation::selectMount( void )
         string mountName;
         if (playerUnit->mounts[i].status == Mount::ACTIVE || playerUnit->mounts[i].status == Mount::INACTIVE) {
             //Something is mounted here.
-            const std::string unitName = playerUnit->mounts[i].type->weapon_name;
+            const std::string unitName = playerUnit->mounts[i].type->name;
             const Unit *partUnit = UnitConstCache::getCachedConst( StringIntKey( m_part.content, FactionUtil::GetUpgradeFaction() ) );
             string ammoexp;
             mountName  = tostring( i+1 )+" "+unitName.c_str();
@@ -3695,7 +3698,7 @@ void BaseComputer::SellUpgradeOperation::selectMount( void )
             }
         } else {
             //Nothing at this mount point.
-            const std::string temp = lookupMountSize( playerUnit->mounts[i].size );
+            const std::string temp = getMountSizeString( playerUnit->mounts[i].size );
             mountName = tostring( i+1 )+" (Empty) "+temp.c_str();
         }
         //Now we add the cell.  Note that "selectable" is stored in the tag property.
@@ -5530,10 +5533,10 @@ void showUnitStats( Unit *playerUnit, string &text, int subunitlevel, int mode, 
         for (int i = 0; i < playerUnit->getNumMounts(); i++) {
             if (!mode) {
                 PRETTY_ADD( " #c0:1:.3#[#-c", i+1, 0 );
-                text += "#c0:1:.3#]#-c #c0:1:1#"+lookupMountSize( playerUnit->mounts[i].size )+"#-c";
+                text += "#c0:1:.3#]#-c #c0:1:1#"+getMountSizeString( playerUnit->mounts[i].size )+"#-c";
             }
             const weapon_info *wi = playerUnit->mounts[i].type;
-            if (wi && wi->weapon_name != "")
+            if (wi && wi->name != "")
                 anyweapons = true;
         }
     }
@@ -5543,103 +5546,103 @@ void showUnitStats( Unit *playerUnit, string &text, int subunitlevel, int mode, 
         if (anyweapons) {
             for (int i = 0; i < playerUnit->getNumMounts(); i++) {
                 const weapon_info *wi = playerUnit->mounts[i].type;
-                if ( (!wi) || (wi->weapon_name == "") ) {
+                if ( (!wi) || (wi->name == "") ) {
                     continue;
                 } else {
                     if (!mode) {
                         PRETTY_ADD( "  #c0:1:.3#[#-c", i+1, 0 );
                         text += "#c0:1:.3#]#-c ";
                     }
-                    text += wi->weapon_name+": #c0:1:1#"+lookupMountSize( wi->size )+"#-c#c.9:.9:.5#"
-                            +WeaponTypeStrings[wi->type]+" #-c";
-                    if (wi->Damage < 0) {text += "#n#"+prefix+statcolor+"   Damage:#-c special"; } else {
+                    text += wi->name+": #c0:1:1#"+getMountSizeString( as_integer(wi->size) )+"#-c#c.9:.9:.5#"
+                            +WeaponTypeStrings[as_integer(wi->type)]+" #-c";
+                    if (wi->damage < 0) {text += "#n#"+prefix+statcolor+"   Damage:#-c special"; } else {
                         PRETTY_ADDU( statcolor+"   Damage: #-c",
-                                     wi->Damage*VSDM,
+                                     wi->damage*VSDM,
                                      0,
-                                     wi->type == weapon_info::BEAM ? "MJ/s" : "MJ" );
-                        if (wi->PhaseDamage > 0)
+                                     wi->type == WEAPON_TYPE::BEAM ? "MJ/s" : "MJ" );
+                        if (wi->phase_damage > 0)
                             PRETTY_ADDU( statcolor+"   Phase damage: #-c",
-                                         wi->PhaseDamage*VSDM,
+                                         wi->phase_damage*VSDM,
                                          0,
-                                         wi->type == weapon_info::BEAM ? "MJ/s" : "MJ" );
+                                         wi->type == WEAPON_TYPE::BEAM ? "MJ/s" : "MJ" );
                    }
                     PRETTY_ADDU( statcolor+"   Energy usage: #-c",
-                                 wi->EnergyRate*RSconverter,
+                                 wi->energy_rate*RSconverter,
                                  0,
-                                 wi->type == weapon_info::BEAM ? "MJ/s" : "MJ/shot" );
+                                 wi->type == WEAPON_TYPE::BEAM ? "MJ/s" : "MJ/shot" );
                     PRETTY_ADDU( statcolor+"   Refire delay: #-c", wi->Refire(), 2, "seconds" );
                     //display info specific to some weapons type
 
-                    PRETTY_ADDU( statcolor+"   Range: #-c", wi->Range, 0, "meters" );
-                    if ( ( 100000*(1.0-wi->Longrange)/(wi->Range) ) > 0.00001 ) {
+                    PRETTY_ADDU( statcolor+"   Range: #-c", wi->range, 0, "meters" );
+                    if ( ( 100000*(1.0-wi->long_range)/(wi->range) ) > 0.00001 ) {
                         PRETTY_ADD( statcolor+"   Range attenuation factor: #-c",
-                                        100000*(1.0-wi->Longrange)/(wi->Range),
+                                        100000*(1.0-wi->long_range)/(wi->range),
                                         2 );
                         text += "% per km";
                     }
 
                     switch (wi->type)
                     {
-                    case weapon_info::BALL:                     //may need ammo
-                    case weapon_info::BOLT:
-                        if (wi->Damage > 0)
-                            totalWeaponDamage += ( wi->Damage/wi->Refire() );                              //damage per second
-                        if (wi->PhaseDamage > 0)
-                            totalWeaponDamage += ( wi->PhaseDamage/wi->Refire() );                              //damage per second
+                    case WEAPON_TYPE::BALL:                     //may need ammo
+                    case WEAPON_TYPE::BOLT:
+                        if (wi->damage > 0)
+                            totalWeaponDamage += ( wi->damage/wi->Refire() );                              //damage per second
+                        if (wi->phase_damage > 0)
+                            totalWeaponDamage += ( wi->phase_damage/wi->Refire() );                              //damage per second
 
-                        PRETTY_ADDU( statcolor+"   Exit velocity: #-c", wi->Speed, 0, "meters/second" );
+                        PRETTY_ADDU( statcolor+"   Exit velocity: #-c", wi->speed, 0, "meters/second" );
                         if ( playerUnit->mounts[i].ammo != -1) {
-                            if ( (wi->size & weapon_info::SPECIALMISSILE) == 0)
+                            if ( (as_integer(wi->size) & as_integer(MOUNT_SIZE::SPECIALMISSILE)) == 0)
                                 PRETTY_ADD( statcolor+"   Rounds remaining: #-c", playerUnit->mounts[i].ammo, 0 );
                             else
                                 PRETTY_ADD( statcolor+"   Rockets remaining: #-c", playerUnit->mounts[i].ammo, 0 );
                         }
-                        totalWeaponEnergyUsage += ( wi->EnergyRate/wi->Refire() );
+                        totalWeaponEnergyUsage += ( wi->energy_rate/wi->Refire() );
                         break;
-                    case weapon_info::PROJECTILE:                     //need ammo
-                        if (wi->LockTime > 0) {
-                            PRETTY_ADDU( statcolor+"   'Fire and Forget' lock time: #-c", wi->LockTime, 0, "seconds" );
+                    case WEAPON_TYPE::PROJECTILE:                     //need ammo
+                        if (wi->lock_time > 0) {
+                            PRETTY_ADDU( statcolor+"   'Fire and Forget' lock time: #-c", wi->lock_time, 0, "seconds" );
                         } else {
                             text += "#n#";
                             text += prefix;
                             text += statcolor+"   Missile Lock Type: #-c#c1:.3:.3#None.#-c Inertial Guidance Only";
                         }
                         PRETTY_ADD( statcolor+"   Missiles remaining: #-c", playerUnit->mounts[i].ammo, 0 );
-                        totalWeaponEnergyUsage += ( wi->EnergyRate/wi->Refire() );
+                        totalWeaponEnergyUsage += ( wi->energy_rate/wi->Refire() );
                         break;
-                    case weapon_info::BEAM:
-                        if (wi->Damage > 0)
-                            totalWeaponDamage += wi->Damage;
-                        if (wi->PhaseDamage > 0)
-                            totalWeaponDamage += wi->PhaseDamage;
-                        PRETTY_ADDU( statcolor+"   Beam stability: #-c", wi->Stability, 2, "seconds" );
+                    case WEAPON_TYPE::BEAM:
+                        if (wi->damage > 0)
+                            totalWeaponDamage += wi->damage;
+                        if (wi->phase_damage > 0)
+                            totalWeaponDamage += wi->phase_damage;
+                        PRETTY_ADDU( statcolor+"   Beam stability: #-c", wi->stability, 2, "seconds" );
                         if ( playerUnit->mounts[i].ammo != -1)
                             PRETTY_ADD( statcolor+"   Shots remaining: #-c", playerUnit->mounts[i].ammo, 0 );
-                        totalWeaponEnergyUsage += wi->EnergyRate;
+                        totalWeaponEnergyUsage += wi->energy_rate;
                         break;
                     default:
                         break;
                     }
                     if ( (mode!=0) &&
-                         (wi->type != weapon_info::PROJECTILE) &&
+                         (wi->type != WEAPON_TYPE::PROJECTILE) &&
                          (wi->Refire()>0) &&
-                         ( (wi->Damage != 0) || (wi->PhaseDamage != 0) || (wi->EnergyRate != 0) ))
+                         ( (wi->damage != 0) || (wi->phase_damage != 0) || (wi->energy_rate != 0) ))
                     {
                         text += "#n##n#"+prefix+statcolor+"   Average for continuous firing:#-c";
-                        float shot_cycle_mul = wi->type==weapon_info::BEAM ?
-                                                    wi->Stability / ( wi->Refire() + wi->Stability ) :
+                        float shot_cycle_mul = wi->type==WEAPON_TYPE::BEAM ?
+                                                    wi->stability / ( wi->Refire() + wi->stability ) :
                                                     1 / wi->Refire();
-                        if (wi->Damage != 0)
+                        if (wi->damage != 0)
                             PRETTY_ADDU( statcolor+"   Damage: #-c",
-                                     wi->Damage*VSDM*shot_cycle_mul,
+                                     wi->damage*VSDM*shot_cycle_mul,
                                      2, "MJ/s" );
-                        if (wi->PhaseDamage != 0)
+                        if (wi->phase_damage != 0)
                             PRETTY_ADDU( statcolor+"   Phase damage: #-c",
-                                         wi->PhaseDamage*VSDM*shot_cycle_mul,
+                                         wi->phase_damage*VSDM*shot_cycle_mul,
                                          2, "MJ/s" );
-                        if (wi->EnergyRate != 0)
+                        if (wi->energy_rate != 0)
                             PRETTY_ADDU( statcolor+"   Energy usage: #-c",
-                                         wi->EnergyRate*RSconverter*shot_cycle_mul,
+                                         wi->energy_rate*RSconverter*shot_cycle_mul,
                                          2, "MJ/s" );
                    }
                             text += "#n#";

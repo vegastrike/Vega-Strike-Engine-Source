@@ -12,6 +12,7 @@
 #include "unit.h"
 #include "cmd/ai/order.h"
 #include "universe.h"
+#include "mount_size.h"
 
 //Various functions that were used in .cpp files that are now included because of
 //the temple GameUnit class
@@ -221,46 +222,12 @@ bool AdjustMatrix( Matrix &mat, const Vector &vel, Unit *target, float speed, bo
     return false;
 }
 
-enum weapon_info::MOUNT_SIZE lookupMountSize( const char *str )
-{
-    int  i;
-    char tmp[384];
-    for (i = 0; i < 383 && str[i] != '\0'; i++)
-        tmp[i] = (char) toupper( str[i] );
-    tmp[i] = '\0';
-    if (strcmp( "LIGHT", tmp ) == 0)
-        return weapon_info::LIGHT;
-    if (strcmp( "MEDIUM", tmp ) == 0)
-        return weapon_info::MEDIUM;
-    if (strcmp( "HEAVY", tmp ) == 0)
-        return weapon_info::HEAVY;
-    if (strcmp( "CAPSHIP-LIGHT", tmp ) == 0)
-        return weapon_info::CAPSHIPLIGHT;
-    if (strcmp( "CAPSHIP-HEAVY", tmp ) == 0)
-        return weapon_info::CAPSHIPHEAVY;
-    if (strcmp( "SPECIAL", tmp ) == 0)
-        return weapon_info::SPECIAL;
-    if (strcmp( "LIGHT-MISSILE", tmp ) == 0)
-        return weapon_info::LIGHTMISSILE;
-    if (strcmp( "MEDIUM-MISSILE", tmp ) == 0)
-        return weapon_info::MEDIUMMISSILE;
-    if (strcmp( "HEAVY-MISSILE", tmp ) == 0)
-        return weapon_info::HEAVYMISSILE;
-    if (strcmp( "LIGHT-CAPSHIP-MISSILE", tmp ) == 0)
-        return weapon_info::CAPSHIPLIGHTMISSILE;
-    if (strcmp( "HEAVY-CAPSHIP-MISSILE", tmp ) == 0)
-        return weapon_info::CAPSHIPHEAVYMISSILE;
-    if (strcmp( "SPECIAL-MISSILE", tmp ) == 0)
-        return weapon_info::SPECIALMISSILE;
-    if (strcmp( "AUTOTRACKING", tmp ) == 0)
-        return weapon_info::AUTOTRACKING;
-    return weapon_info::NOWEAP;
-}
 
+// TODO: delete
 int parseMountSizes( const char *str )
 {
     char tmp[13][50];
-    int  ans = weapon_info::NOWEAP;
+    int  ans = as_integer(MOUNT_SIZE::NOWEAP);
     int  num = sscanf( str,
                        "%s %s %s %s %s %s %s %s %s %s %s %s %s",
                        tmp[0],
@@ -277,7 +244,11 @@ int parseMountSizes( const char *str )
                        tmp[11],
                        tmp[12] );
     for (int i = 0; i < num && i < 13; i++)
-        ans |= lookupMountSize( tmp[i] );
+        ans |= as_integer(getMountSize( tmp[i] ));
+
+    int check = getMountSizes(str);
+    assert(check == ans);
+
     return ans;
 }
 

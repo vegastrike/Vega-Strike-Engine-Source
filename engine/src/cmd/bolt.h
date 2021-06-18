@@ -2,10 +2,11 @@
 #define _CMD_BOLT_H_
 #include "gfxlib.h"
 #include "gfxlib_struct.h"
-#include "weapon_xml.h"
+#include "weapon_info.h"
 #include "gfx/matrix.h"
 #include "gfx/quaternion.h"
 #include "collide_map.h"
+
 
 class Unit;
 class StarSystem;

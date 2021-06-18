@@ -101,7 +101,7 @@ void Bolt::DrawAllBolts()
             continue;
         }
 
-        float bolt_size = 2*bolt_types[0].type->Radius+bolt_types[0].type->Length;
+        float bolt_size = 2*bolt_types[0].type->radius+bolt_types[0].type->length;
         bolt_size *= bolt_size;
         for (size_t pass = 0, npasses = dec->numPasses(); pass < npasses; ++pass) {
             GFXTextureEnv( 0, GFXMODULATETEXTURE );
@@ -115,6 +115,7 @@ void Bolt::DrawAllBolts()
         }
         decal++;
     }
+
     qmesh->EndDrawState();
 
 }
@@ -132,7 +133,7 @@ void Bolt::DrawAllBalls()
 
         Animation *cur = *k;
 
-        float bolt_size = 2*ball_types[0].type->Radius*2;
+        float bolt_size = 2*ball_types[0].type->radius*2;
         bolt_size *= bolt_size;
         //Matrix result;
         //FIXME::MuST USE DRAWNO	TRANSFORMNOW cur->CalculateOrientation (result);
@@ -153,8 +154,9 @@ void Bolt::DrawBolt(float& bolt_size, GFXVertexList *qmesh)
 
         BlendTrans( drawmat, cur_position, prev_position );
         Matrix drawmat( this->drawmat );
-        if (game_options.StretchBolts > 0)
-            ScaleMatrix( drawmat, Vector( 1, 1, type->Speed*BoltDrawManager::elapsed_time*game_options.StretchBolts/type->Length ) );
+        if (game_options.StretchBolts > 0) {
+            ScaleMatrix( drawmat, Vector( 1, 1, type->speed*BoltDrawManager::elapsed_time*game_options.StretchBolts/type->length ) );
+        }
         GFXLoadMatrixModel( drawmat );
         GFXColor4f( wt->r, wt->g, wt->b, wt->a );
         qmesh->Draw();
@@ -173,7 +175,7 @@ void Bolt::DrawBall(float& bolt_size, Animation *cur)
         BlendTrans( drawmat, cur_position, prev_position );
         Matrix tmp;
         VectorAndPositionToMatrix( tmp, p, q, r, drawmat.p );
-        cur->SetDimensions( type->Radius, type->Radius );
+        cur->SetDimensions( type->radius, type->radius );
         GFXLoadMatrixModel( tmp );
         GFXColor4f( type->r, type->g, type->b, type->a );
         cur->DrawNoTransform( false, true );
@@ -186,7 +188,7 @@ void Bolt::Destroy( unsigned int index )
 {
     VSDESTRUCT2
     bool isBall  = true;
-    if (type->type == weapon_info::BOLT) {
+    if (type->type == WEAPON_TYPE::BOLT) {
         isBall = false;
     } else {}
     BoltDestroyGeneric( this, index, decal, isBall );
@@ -207,13 +209,13 @@ Bolt::Bolt( const weapon_info *typ,
     this->type    = typ;
     curdist = 0;
     CopyMatrix( drawmat, orientationpos );
-    Vector vel = shipspeed+orientationpos.getR()*typ->Speed;
+    Vector vel = shipspeed+orientationpos.getR()*typ->speed;
 
     StarSystem *current_star_system = _Universe->activeStarSystem();
     CollideMap *bolt_collide_map = current_star_system->collide_map[Unit::UNIT_BOLT];
 
-    if (typ->type == weapon_info::BOLT) {
-        ScaleMatrix( drawmat, Vector( typ->Radius, typ->Radius, typ->Length ) );
+    if (typ->type == WEAPON_TYPE::BOLT) {
+        ScaleMatrix( drawmat, Vector( typ->radius, typ->radius, typ->length ) );
         decal = Bolt::AddTexture( &q, typ->file );
 
         int bolt_index = Bolt::BoltIndex( q.bolts[decal].size(),
@@ -221,13 +223,13 @@ Bolt::Bolt( const weapon_info *typ,
                                           false ).bolt_index;
 
         this->location = bolt_collide_map->insert( Collidable( bolt_index,
-                                                               (shipspeed+orientationpos.getR()*typ->Speed).Magnitude()*.5,
+                                                               (shipspeed+orientationpos.getR()*typ->speed).Magnitude()*.5,
                                                                cur_position+vel*simulation_atom_var*.5 ),
                                                    hint );
 
         q.bolts[decal].push_back( *this );
     } else {
-        ScaleMatrix( drawmat, Vector( typ->Radius, typ->Radius, typ->Radius ) );
+        ScaleMatrix( drawmat, Vector( typ->radius, typ->radius, typ->radius ) );
         decal = Bolt::AddAnimation( &q, typ->file, cur_position );
 
         int bolt_index = Bolt::BoltIndex( q.balls[decal].size(),
@@ -235,7 +237,7 @@ Bolt::Bolt( const weapon_info *typ,
                                           true ).bolt_index;
         Collidable collidable = Collidable( bolt_index,
                                                         (shipspeed+orientationpos.getR()
-                                                         *typ->Speed).Magnitude()*.5,
+                                                         *typ->speed).Magnitude()*.5,
                                                         cur_position+vel*simulation_atom_var*.5 );
         this->location = bolt_collide_map->insert( collidable, hint );
         q.balls[decal].push_back( *this );
@@ -250,14 +252,14 @@ size_t nondecal_index( Collidable::CollideRef b )
 bool Bolt::Update( Collidable::CollideRef index )
 {
     const weapon_info *type = this->type;
-    float speed = type->Speed;
+    float speed = type->speed;
     curdist += speed*simulation_atom_var;
     prev_position = cur_position;
     cur_position +=
         ( ( ShipSpeed+drawmat.getR()*speed
            /( (type->type
-               == weapon_info::BALL)*type->Radius+(type->type != weapon_info::BALL)*type->Length ) ).Cast()*simulation_atom_var );
-    if (curdist > type->Range) {
+               == WEAPON_TYPE::BALL)*type->radius+(type->type != WEAPON_TYPE::BALL)*type->length ) ).Cast()*simulation_atom_var );
+    if (curdist > type->range) {
         this->Destroy( nondecal_index( index ) );         //risky
         return false;
     }
@@ -341,15 +343,15 @@ bool Bolt::Collide( Unit *target )
             return false;
         QVector     tmp = (cur_position-prev_position).Normalize();
         tmp = tmp.Scale( distance );
-        distance = curdist/this->type->Range;
+        distance = curdist/this->type->range;
         GFXColor    coltmp( this->type->r, this->type->g, this->type->b, this->type->a );
         target->ApplyDamage( (prev_position+tmp).Cast(),
                             normal,
-                            this->type->Damage*( (1-distance)+distance*this->type->Longrange ),
+                            this->type->damage*( (1-distance)+distance*this->type->long_range ),
                             affectedSubUnit,
                             coltmp,
                             owner,
-                            this->type->PhaseDamage*( (1-distance)+distance*this->type->Longrange ) );
+                            this->type->phase_damage*( (1-distance)+distance*this->type->long_range ) );
         return true;
     }
     return false;

@@ -1,6 +1,5 @@
 #ifndef _CMD_BEAM_H_
 #define _CMD_BEAM_H_
-#include "weapon_xml.h"
 #include "gfx/mesh.h"
 #include "unit_collide.h"
 #include "gfx/matrix.h"

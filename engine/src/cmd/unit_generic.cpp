@@ -65,6 +65,8 @@
 #include "unit.h"
 #include "star_system.h"
 #include "universe.h"
+#include "weapon_info.h"
+#include "mount_size.h"
 #include "turret.h"
 #include "energetic.h"
 
@@ -312,38 +314,7 @@ char * GetUnitDir( const char *filename )
     return retval;
 }
 
-//From weapon_xml.cpp
-std::string lookupMountSize( int s )
-{
-    std::string result;
-    if (s&weapon_info::LIGHT)
-        result += "LIGHT ";
-    if (s&weapon_info::MEDIUM)
-        result += "MEDIUM ";
-    if (s&weapon_info::HEAVY)
-        result += "HEAVY ";
-    if (s&weapon_info::CAPSHIPLIGHT)
-        result += "CAPSHIP-LIGHT ";
-    if (s&weapon_info::CAPSHIPHEAVY)
-        result += "CAPSHIP-HEAVY ";
-    if (s&weapon_info::SPECIAL)
-        result += "SPECIAL ";
-    if (s&weapon_info::LIGHTMISSILE)
-        result += "LIGHT-MISSILE ";
-    if (s&weapon_info::MEDIUMMISSILE)
-        result += "MEDIUM-MISSILE ";
-    if (s&weapon_info::HEAVYMISSILE)
-        result += "HEAVY-MISSILE ";
-    if (s&weapon_info::CAPSHIPLIGHTMISSILE)
-        result += "LIGHT-CAPSHIP-MISSILE ";
-    if (s&weapon_info::CAPSHIPHEAVYMISSILE)
-        result += "HEAVY-CAPSHIP-MISSILE ";
-    if (s&weapon_info::SPECIALMISSILE)
-        result += "SPECIAL-MISSILE ";
-    if (s&weapon_info::AUTOTRACKING)
-        result += "AUTOTRACKING ";
-    return result;
-}
+
 
 /*
  **********************************************************************************
@@ -759,18 +730,7 @@ void Unit::Init()
 using namespace VSFileSystem;
 extern std::string GetReadPlayerSaveGame( int );
 CSVRow GetUnitRow( string filename, bool subu, int faction, bool readLast, bool &read );
-#if 0
-static std::string csvUnit( std::string un )
-{
-    string::size_type i   = un.find_last_of( "." );
-    string::size_type del = un.find_last_of( "/\\:" );
-    if (i == std::string::npos)
-        return un+".csv";
-    if (del == std::string::npos || del < i)
-        return un.substr( 0, i )+".csv";
-    return un+".csv";
-}
-#endif
+
 void Unit::Init( const char *filename,
                  bool SubU,
                  int faction,
@@ -1082,7 +1042,7 @@ float Unit::cosAngleFromMountTo( Unit *targ, float &dist ) const
         finaltrans.to_matrix( mat );
         Vector  Normal( mat.getR() );
 
-        QVector totarget( targ->PositionITTS( finaltrans.position, cumulative_velocity, mounts[i].type->Speed, false ) );
+        QVector totarget( targ->PositionITTS( finaltrans.position, cumulative_velocity, mounts[i].type->speed, false ) );
 
         tmpcos  = Normal.Dot( totarget.Cast() );
         tmpdist = totarget.Magnitude();
@@ -1094,7 +1054,7 @@ float Unit::cosAngleFromMountTo( Unit *targ, float &dist ) const
             tmpcos /= tmpdist;
         }
         //UNLIKELY DIV/0
-        tmpdist /= mounts[i].type->Range;
+        tmpdist /= mounts[i].type->range;
         if (tmpdist < 1 || tmpdist < dist) {
             if (tmpcos-tmpdist/2 > retval-dist/2) {
                 dist   = tmpdist;
@@ -1639,7 +1599,7 @@ void Unit::ClearMounts()
     for (unsigned int j = 0; j < mounts.size(); ++j) {
         DestroyMount( &mounts[j] );
         AUDDeleteSound( mounts[j].sound );
-        if (mounts[j].ref.gun && mounts[j].type->type == weapon_info::BEAM) {
+        if (mounts[j].ref.gun && mounts[j].type->type == WEAPON_TYPE::BEAM) {
             //hope we're not killin' em twice...they don't go in gunqueue
             delete mounts[j].ref.gun;
             mounts[j].ref.gun = NULL;
@@ -2594,7 +2554,7 @@ void Unit::Target( Unit *targ )
         if (targ->activeStarSystem == _Universe->activeStarSystem() || targ->activeStarSystem == NULL) {
             if ( targ != Unit::Target() ) {
                 for (int i = 0; i < getNumMounts(); ++i)
-                    mounts[i].time_to_lock = mounts[i].type->LockTime;
+                    mounts[i].time_to_lock = mounts[i].type->lock_time;
 
                 computer.target.SetUnit( targ );
                 LockTarget( false );
@@ -3301,21 +3261,16 @@ bool Unit::UpgradeMounts( const Unit *up,
         if (up->mounts[i].status == Mount::ACTIVE || up->mounts[i].status == Mount::INACTIVE) {
             //make sure since we're offsetting the starting we don't overrun the mounts
             bool isammo = ( string::npos != string( up->name ).find( "_ammo" ) );             //is this ammo for a weapon rather than an actual weapon
-            bool ismissiletype =
-                ( 0
-                 != ( up->mounts[i].type->size
-                     &(weapon_info::CAPSHIPHEAVYMISSILE|weapon_info::SPECIALMISSILE|weapon_info::MEDIUMMISSILE
-                       |weapon_info::LIGHTMISSILE
-                       |weapon_info::HEAVYMISSILE|weapon_info::CAPSHIPLIGHTMISSILE) ) );
+            bool ismissiletype = isMissileMount(as_integer(up->mounts[i].type->size));
 
             int jmod = j%getNumMounts();
             if (!downgrade) {
                 //if we wish to add guns instead of remove
-                if (up->mounts[i].type->weapon_name.find( "_UPGRADE" ) == string::npos) {
+                if (up->mounts[i].type->name.find( "_UPGRADE" ) == string::npos) {
                     //check for capability increase rather than actual weapon upgrade
                     //only look at this mount if it can fit in the rack
-                    if ( (unsigned int) (up->mounts[i].type->size) == (up->mounts[i].type->size&mounts[jmod].size) ) {
-                        if (up->mounts[i].type->weapon_name != mounts[jmod].type->weapon_name || mounts[jmod].status
+                    if ( (unsigned int) (as_integer(up->mounts[i].type->size)) == ( as_integer(up->mounts[i].type->size) & mounts[jmod].size) ) {
+                        if (up->mounts[i].type->name != mounts[jmod].type->name || mounts[jmod].status
                             == Mount::DESTROYED || mounts[jmod].status == Mount::UNCHOSEN) {
                             //If missile, can upgrade directly, if other type of ammo, needs actual gun to be present.
                             if (isammo && !ismissiletype) {
@@ -3338,7 +3293,7 @@ bool Unit::UpgradeMounts( const Unit *up,
                                     mounts[jmod].ReplaceMounts( this, &upmount );
                             }
                         } else {
-                            if (isammo && up->mounts[i].type->weapon_name == mounts[jmod].type->weapon_name) {
+                            if (isammo && up->mounts[i].type->name == mounts[jmod].type->name) {
                                 //if is ammo and is same weapon type
                                 int tmpammo = mounts[jmod].ammo;
                                 if (mounts[jmod].ammo != -1 && up->mounts[i].ammo != -1) {
@@ -3419,7 +3374,7 @@ bool Unit::UpgradeMounts( const Unit *up,
                 }
             }             //DOWNGRADE
             else {
-                if (up->mounts[i].type->weapon_name != "MOUNT_UPGRADE") {
+                if (up->mounts[i].type->name != "MOUNT_UPGRADE") {
                     bool found = false;                     //we haven't found a matching gun to remove
                     ///go through all guns
                     for (unsigned int k = 0; k < (unsigned int) getNumMounts(); ++k) {
@@ -3429,8 +3384,8 @@ bool Unit::UpgradeMounts( const Unit *up,
                             //can't sell weapon that's already been sold/removed
                             continue;
                         ///search for right mount to remove starting from j. this is the right name
-                        if (strcasecmp( mounts[jkmod].type->weapon_name.c_str(),
-                                       up->mounts[i].type->weapon_name.c_str() ) == 0) {
+                        if (strcasecmp( mounts[jkmod].type->name.c_str(),
+                                       up->mounts[i].type->name.c_str() ) == 0) {
                             //we got one, but check if we're trying to sell non-existent ammo
                             if (isammo && mounts[jkmod].ammo <= 0)
                                 //whether it's gun ammo or a missile, you can't remove ammo from an infinite source, and you can't remove ammo if there isn't any
@@ -4653,7 +4608,7 @@ bool Unit::RepairUpgradeCargo( Cargo *item, Unit *baseUnit, float *credits )
                 unsigned int nummounts = this->getNumMounts();
                 bool complete    = false;
                 for (unsigned int i = 0; i < nummounts; ++i)
-                    if (mnt->type->weapon_name == this->mounts[i].type->weapon_name) {
+                    if (mnt->type->name == this->mounts[i].type->name) {
                         if (this->mounts[i].status == Mount::DESTROYED) {
                             this->mounts[i].status = Mount::INACTIVE;
                             complete = true;
@@ -4966,9 +4921,9 @@ std::string Unit::mountSerializer( const XMLType &input, void *mythis )
     Unit *un = (Unit*) mythis;
     int   i  = input.w.hardint;
     if (un->getNumMounts() > i) {
-        string result( lookupMountSize( un->mounts[i].size ) );
+        string result( getMountSizeString( un->mounts[i].size ) );
         if (un->mounts[i].status == Mount::INACTIVE || un->mounts[i].status == Mount::ACTIVE)
-            result += string( "\" weapon=\"" )+(un->mounts[i].type->weapon_name);
+            result += string( "\" weapon=\"" )+(un->mounts[i].type->name);
         if (un->mounts[i].ammo != -1)
             result += string( "\" ammo=\"" )+XMLSupport::tostring( un->mounts[i].ammo );
         if (un->mounts[i].volume != -1)
@@ -5391,7 +5346,7 @@ void Unit::UpdatePhysics3(const Transformation &trans,
               == Mount::INACTIVE) || mounts[i].status == Mount::ACTIVE ) && cloaking < 0 && mounts[i].ammo != 0 ) {
           if (player_cockpit)
               touched = true;
-          if ( increase_locking && (dist_sqr_to_target < mounts[i].type->Range*mounts[i].type->Range) ) {
+          if ( increase_locking && (dist_sqr_to_target < mounts[i].type->range*mounts[i].type->range) ) {
               mounts[i].time_to_lock -= simulation_atom_var;
               static bool ai_lock_cheat = XMLSupport::parse_bool( vs_config->getVariable( "physics", "ai_lock_cheat", "true" ) );
               if (!player_cockpit) {
@@ -5406,10 +5361,10 @@ void Unit::UpdatePhysics3(const Transformation &trans,
                   //enables spiffy wc2 torpedo music, default to normal though
                   static bool TorpLockTrumpsMusic =
                       XMLSupport::parse_bool( vs_config->getVariable( "unitaudio", "locking_torp_trumps_music", "false" ) );
-                  if (mounts[i].type->LockTime > 0) {
+                  if (mounts[i].type->lock_time > 0) {
                       static string LockedSoundName = vs_config->getVariable( "unitaudio", "locked", "locked.wav" );
                       static int    LockedSound     = AUDCreateSoundWAV( LockedSoundName, false );
-                      if (mounts[i].type->size == weapon_info::SPECIALMISSILE)
+                      if (mounts[i].type->size == MOUNT_SIZE::SPECIALMISSILE)
                           LockingPlay = LockingSoundTorp;
 
                       else
@@ -5437,15 +5392,15 @@ void Unit::UpdatePhysics3(const Transformation &trans,
                   }
               }
           } else if (mounts[i].ammo != 0) {
-              mounts[i].time_to_lock = mounts[i].type->LockTime;
+              mounts[i].time_to_lock = mounts[i].type->lock_time;
           }
       } else if (mounts[i].ammo != 0) {
-          mounts[i].time_to_lock = mounts[i].type->LockTime;
+          mounts[i].time_to_lock = mounts[i].type->lock_time;
       }
-      if (mounts[i].type->type == weapon_info::BEAM) {
+      if (mounts[i].type->type == WEAPON_TYPE::BEAM) {
           if (mounts[i].ref.gun) {
               Unit *autotarg     =
-                  (   (mounts[i].size&weapon_info::AUTOTRACKING)
+                  (   isAutoTrackingMount(mounts[i].size)
                    && (mounts[i].time_to_lock <= 0)
                    && TargetTracked() ) ? target : NULL;
               float trackingcone = computer.radar.trackingcone;
@@ -5474,7 +5429,7 @@ void Unit::UpdatePhysics3(const Transformation &trans,
           t1.Compose( trans, transmat );
           t1.to_matrix( m1 );
           int autotrack = 0;
-          if (   ( 0 != (mounts[i].size&weapon_info::AUTOTRACKING) )
+          if (   ( isAutoTrackingMount(mounts[i].size) )
               && TargetTracked() )
               autotrack = computer.itts ? 2 : 1;
           float trackingcone = computer.radar.trackingcone;
@@ -5494,7 +5449,7 @@ void Unit::UpdatePhysics3(const Transformation &trans,
                                               trackingcone,
                                               hint ) ) {
               const weapon_info *typ = mounts[i].type;
-              energy += typ->EnergyRate*(typ->type == weapon_info::BEAM ? simulation_atom_var : 1);
+              energy += typ->energy_rate * (typ->type == WEAPON_TYPE::BEAM ? simulation_atom_var : 1);
           }
       } else if ( mounts[i].processed == Mount::UNFIRED || mounts[i].ref.refire > 2*mounts[i].type->Refire() ) {
           mounts[i].processed = Mount::UNFIRED;

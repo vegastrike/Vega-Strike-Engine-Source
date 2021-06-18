@@ -2,6 +2,7 @@
 #include "python/python_class.h"
 #include "script.h"
 #include "cmd/unit_generic.h"
+#include "cmd/mount_size.h"
 #include "hard_coded_scripts.h"
 #include "flybywire.h"
 #include "navigation.h"
@@ -889,7 +890,7 @@ void Takeoff( Order *aisc, Unit *un )
     ord = ( new Orders::FaceTargetITTS( 0, 3 ) );
     AddOrd( aisc, un, ord );
     un->SelectAllWeapon( false );
-    un->Fire( (weapon_info::LIGHT | weapon_info::MEDIUM), false );
+    un->Fire( as_integer(MOUNT_SIZE::LIGHT) | as_integer(MOUNT_SIZE::MEDIUM), false );
     TurnTowards( aisc, un );
 }
 
@@ -899,7 +900,7 @@ void TakeoffEveryZig( Order *aisc, Unit *un )
 
     Order *ord;
     un->UnFire();
-    un->Fire( weapon_info::CAPSHIPHEAVY, false );
+    un->Fire( as_integer(MOUNT_SIZE::CAPSHIPHEAVY), false );
     un->UnFire();
     ord = new Orders::MatchVelocity( un->ClampVelocity( vec, true ), Vector( 0, 0, 0 ), true, true, false );
     AddOrd( aisc, un, ord );
@@ -917,7 +918,7 @@ void TakeoffEveryZig( Order *aisc, Unit *un )
     AddOrd( aisc, un, ord );
     ord = new Orders::MatchAngularVelocity( Vector( 0, 0, 0 ), 1, false );
     AddOrd( aisc, un, ord );
-    un->Fire( weapon_info::CAPSHIPHEAVY, false );     //doesn't have time to happen anyway
+    un->Fire( as_integer(MOUNT_SIZE::CAPSHIPHEAVY), false );     //doesn't have time to happen anyway
     un->SelectAllWeapon( false );
 }
 

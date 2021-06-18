@@ -48,6 +48,8 @@
 #include "vsfilesystem.h"
 #include "cmd/ai/communication.h"
 #include "universe.h"
+#include "mount_size.h"
+#include "weapon_info.h"
 
 template < typename T >
 inline T mymin( T a, T b )
@@ -1131,22 +1133,22 @@ void VDU::DrawManifest( Unit *parent, Unit *target )
     tp->bgcol = tpbg;
 }
 
-static void DrawGun( Vector pos, float w, float h, weapon_info::MOUNT_SIZE sz )
+static void DrawGun( Vector pos, float w, float h, MOUNT_SIZE sz )
 {
     w = fabs( w );
     h      = fabs( h );
     float oox = 1./g_game.x_resolution;
     float ooy = 1./g_game.y_resolution;
     pos.j -= h/3.8;
-    if (sz == weapon_info::NOWEAP) {
+    if (sz == MOUNT_SIZE::NOWEAP) {
         GFXPointSize( 4 );
         const float verts[3] = {
             pos.x, pos.y, pos.z
         };
         GFXDraw( GFXPOINT, verts, 1 );
         GFXPointSize( 1 );
-    } else if (sz < weapon_info::SPECIAL) {
-        if (sz == weapon_info::LIGHT) {
+    } else if (sz < MOUNT_SIZE::SPECIAL) {
+        if (sz == MOUNT_SIZE::LIGHT) {
             const float verts[10 * 3] = {
                 pos.i+oox, pos.j,           0,
                 pos.i+oox, pos.j-h/15,      0,
@@ -1160,7 +1162,7 @@ static void DrawGun( Vector pos, float w, float h, weapon_info::MOUNT_SIZE sz )
                 pos.i,     pos.j+h/4+ooy*5, 0,
             };
             GFXDraw( GFXLINE, verts, 10 );
-        } else if (sz == weapon_info::MEDIUM) {
+        } else if (sz == MOUNT_SIZE::MEDIUM) {
             const float verts[12 * 3] = {
                 pos.i+oox, pos.j,           0,
                 pos.i+oox, pos.j-h/15,      0,
@@ -1176,7 +1178,7 @@ static void DrawGun( Vector pos, float w, float h, weapon_info::MOUNT_SIZE sz )
                 pos.i-oox, pos.j+h/5+ooy*2, 0,
             };
             GFXDraw( GFXLINE, verts, 12 );
-        } else if (sz == weapon_info::HEAVY) {
+        } else if (sz == MOUNT_SIZE::HEAVY) {
             const float verts[14 * 3] = {
                 pos.i+oox,   pos.j,           0,
                 pos.i+oox,   pos.j-h/15,      0,
@@ -1213,14 +1215,14 @@ static void DrawGun( Vector pos, float w, float h, weapon_info::MOUNT_SIZE sz )
             };
             GFXDraw( GFXLINE, verts, 14 );
         }
-    } else if (sz == weapon_info::SPECIAL || sz == weapon_info::SPECIALMISSILE) {
+    } else if (sz == MOUNT_SIZE::SPECIAL || sz == MOUNT_SIZE::SPECIALMISSILE) {
         GFXPointSize( 4 );
         const float verts[3] = {
             pos.x, pos.y, pos.z
         };
         GFXDraw( GFXPOINT, verts, 1 );
         GFXPointSize( 1 );         //classified...  FIXME
-    } else if (sz < weapon_info::HEAVYMISSILE) {
+    } else if (sz < MOUNT_SIZE::HEAVYMISSILE) {
         const float verts[4 * 3] = {
             pos.i,       pos.j-h/8,       0,
             pos.i,       pos.j+h/8,       0,
@@ -1228,7 +1230,7 @@ static void DrawGun( Vector pos, float w, float h, weapon_info::MOUNT_SIZE sz )
             pos.i-2*oox, pos.j-h/8+2*ooy, 0,
         };
         GFXDraw( GFXLINE, verts, 4 );
-    } else if (sz <= weapon_info::CAPSHIPHEAVYMISSILE) {
+    } else if (sz <= MOUNT_SIZE::CAPSHIPHEAVYMISSILE) {
         const float verts[8 * 3] = {
             pos.i,       pos.j-h/6,       0,
             pos.i,       pos.j+h/6,       0,
@@ -1533,7 +1535,7 @@ GFXColor MountColor( Mount *mnt )
             {
                 float tref = mnt->type->Refire();
                 float cref = 0;
-                if ( (mnt->type->type == weapon_info::BEAM) && mnt->ref.gun )
+                if ( (mnt->type->type == WEAPON_TYPE::BEAM) && mnt->ref.gun )
                     cref = mnt->ref.gun->refireTime();
                 else
                     cref = mnt->ref.refire;
@@ -1614,7 +1616,7 @@ void VDU::DrawWeapon( Unit *parent )
                 if (parent->mounts[i].status == Mount::UNCHOSEN)
                     baseweaponreport += list_empty_mounts_as;
                 else
-                    baseweaponreport += parent->mounts[i].type->weapon_name;
+                    baseweaponreport += parent->mounts[i].type->name;
                 if (numave != 1)    //  show banks, if any, here; "#" seems to be a reserved char, see colToString
                     baseweaponreport += string( " x" )+tostring( numave );
                 if (parent->mounts[i].ammo >= 0)

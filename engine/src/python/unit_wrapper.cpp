@@ -40,6 +40,7 @@ typedef boost::python::dict       BoostPythonDictionary;
 #include "cmd/ai/fire.h"
 #include "unit_wrapper_class.h"
 #include "unit_from_to_python.h"
+#include "weapon_info.h"
 #if _MSC_VER <= 1200
 #else
 #include "define_odd_unit_functions.h"
@@ -199,19 +200,19 @@ void InitVS2()
 static std::string ParseSizeFlags( int size )
 {
     static const std::pair< int, std::string >masks[] = {
-        std::pair< int, std::string > ( weapon_info::LIGHT,               " LIGHT" ),
-        std::pair< int, std::string > ( weapon_info::MEDIUM,              " MEDIUM" ),
-        std::pair< int, std::string > ( weapon_info::HEAVY,               " HEAVY" ),
-        std::pair< int, std::string > ( weapon_info::CAPSHIPLIGHT,        " CAPSHIPLIGHT" ),
-        std::pair< int, std::string > ( weapon_info::CAPSHIPHEAVY,        " CAPSHIPHEAVY" ),
-        std::pair< int, std::string > ( weapon_info::SPECIAL,             " SPECIAL" ),
-        std::pair< int, std::string > ( weapon_info::LIGHTMISSILE,        " LIGHTMISSILE" ),
-        std::pair< int, std::string > ( weapon_info::MEDIUMMISSILE,       " MEDIUMMISSILE" ),
-        std::pair< int, std::string > ( weapon_info::HEAVYMISSILE,        " HEAVYMISSILE" ),
-        std::pair< int, std::string > ( weapon_info::CAPSHIPLIGHTMISSILE, " CAPSHIPLIGHTMISSILE" ),
-        std::pair< int, std::string > ( weapon_info::CAPSHIPHEAVYMISSILE, " CAPSHIPHEAVYMISSILE" ),
-        std::pair< int, std::string > ( weapon_info::SPECIALMISSILE,      " SPECIALMISSILE" ),
-        std::pair< int, std::string > ( weapon_info::AUTOTRACKING,        " AUTOTRACKING" )
+        std::pair< int, std::string > ( as_integer(MOUNT_SIZE::LIGHT),               " LIGHT" ),
+        std::pair< int, std::string > ( as_integer(MOUNT_SIZE::MEDIUM),              " MEDIUM" ),
+        std::pair< int, std::string > ( as_integer(MOUNT_SIZE::HEAVY),               " HEAVY" ),
+        std::pair< int, std::string > ( as_integer(MOUNT_SIZE::CAPSHIPLIGHT),        " CAPSHIPLIGHT" ),
+        std::pair< int, std::string > ( as_integer(MOUNT_SIZE::CAPSHIPHEAVY),        " CAPSHIPHEAVY" ),
+        std::pair< int, std::string > ( as_integer(MOUNT_SIZE::SPECIAL),             " SPECIAL" ),
+        std::pair< int, std::string > ( as_integer(MOUNT_SIZE::LIGHTMISSILE),        " LIGHTMISSILE" ),
+        std::pair< int, std::string > ( as_integer(MOUNT_SIZE::MEDIUMMISSILE),       " MEDIUMMISSILE" ),
+        std::pair< int, std::string > ( as_integer(MOUNT_SIZE::HEAVYMISSILE),        " HEAVYMISSILE" ),
+        std::pair< int, std::string > ( as_integer(MOUNT_SIZE::CAPSHIPLIGHTMISSILE), " CAPSHIPLIGHTMISSILE" ),
+        std::pair< int, std::string > ( as_integer(MOUNT_SIZE::CAPSHIPHEAVYMISSILE), " CAPSHIPHEAVYMISSILE" ),
+        std::pair< int, std::string > ( as_integer(MOUNT_SIZE::SPECIALMISSILE),      " SPECIALMISSILE" ),
+        std::pair< int, std::string > ( as_integer(MOUNT_SIZE::AUTOTRACKING),        " AUTOTRACKING" )
     };
     std::string rv;
     for (unsigned int i = 0; i < sizeof (masks)/sizeof (*masks); ++i)
@@ -243,15 +244,15 @@ static std::string ParseMountStatus( Mount::STATUS status )
     }
 }
 
-static std::string ParseWeaponType( weapon_info::WEAPON_TYPE type )
+static std::string ParseWeaponType( WEAPON_TYPE type )
 {
     switch (type)
     {
-        PARSE_CASE( weapon_info, BEAM );
-        PARSE_CASE( weapon_info, BALL );
-        PARSE_CASE( weapon_info, BOLT );
-        PARSE_CASE( weapon_info, PROJECTILE );
-        PARSE_CASE_DEFAULT;
+    case WEAPON_TYPE::BEAM: return "BEAM";
+    case WEAPON_TYPE::BALL: return "BALL";
+    case WEAPON_TYPE::BOLT: return "BOLT";
+    case WEAPON_TYPE::PROJECTILE: return "PROJECTILE";
+    default: return "UNDEFINED";
     }
 }
 
@@ -260,17 +261,17 @@ static BoostPythonDictionary GatherWeaponInfo( const weapon_info *wi )
     BoostPythonDictionary rv;
     if (wi) {
         rv["type"]        = ParseWeaponType( wi->type );
-        rv["speed"]       = wi->Speed;
-        rv["range"]       = wi->Range;
-        rv["damage"]      = wi->Damage;
-        rv["phaseDamage"] = wi->PhaseDamage;
-        rv["stability"]   = wi->Stability;
-        rv["longRange"]   = wi->Longrange;
-        rv["lockTime"]    = wi->LockTime;
-        rv["energyRate"]  = wi->EnergyRate;
+        rv["speed"]       = wi->speed;
+        rv["range"]       = wi->range;
+        rv["damage"]      = wi->damage;
+        rv["phaseDamage"] = wi->phase_damage;
+        rv["stability"]   = wi->stability;
+        rv["longRange"]   = wi->long_range;
+        rv["lockTime"]    = wi->lock_time;
+        rv["energyRate"]  = wi->energy_rate;
         rv["refire"]      = wi->Refire();
         rv["volume"]      = wi->volume;
-        rv["name"]        = wi->weapon_name;
+        rv["name"]        = wi->name;
     }
     return rv;
 }

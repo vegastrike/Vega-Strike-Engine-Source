@@ -235,7 +235,6 @@ SET(LIBCMD_SOURCES
     src/cmd/fg_util.cpp
     src/cmd/unit_util_generic.cpp
     src/cmd/unit_xml.cpp
-    src/cmd/weapon_xml.cpp
 
     src/cmd/collision.cpp
     src/cmd/damageable.cpp
@@ -247,6 +246,11 @@ SET(LIBCMD_SOURCES
     src/cmd/energetic.cpp
 
     src/cmd/planetary_orbit.cpp
+
+    src/cmd/weapon_factory.cpp
+    src/cmd/weapon_info.cpp
+    src/cmd/mount_size.cpp
+    src/cmd/weapon_type.cpp
 )
 
 SET(LIBCMDSERVER_SOURCES
@@ -514,6 +518,7 @@ SET(VEGASTRIKE_SOURCES
     src/cmd/unit_functions.cpp
     src/cmd/unit_util.cpp
     src/cmd/faction_xml.cpp
+    src/cmd/faction_factory.cpp
     src/cmd/pilot.cpp
     src/cmd/images.cpp
     src/cmd/unit.cpp

@@ -47,6 +47,8 @@
 #include "cmd/collide2/CSopcodecollider.h"
 #include "vs_math.h"
 #include "unit.h"
+#include "mount_size.h"
+#include "weapon_info.h"
 
 
 using namespace XMLSupport;
@@ -184,4 +186,3 @@ void pushMesh( std::vector< Mesh* > &meshes,
         }
     }
 }
-                                                                                                                           //short fi

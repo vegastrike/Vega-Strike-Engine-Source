@@ -74,7 +74,7 @@ void Unit::RemoveFromSystem()
             set_null( this->location[locind] );
         }
     for (int j = 0; j < getNumMounts(); ++j)
-        if (mounts[j].type->type == weapon_info::BEAM)
+        if (mounts[j].type->type == WEAPON_TYPE::BEAM)
             if (mounts[j].ref.gun)
                 mounts[j].ref.gun->RemoveFromSystem( true );
     activeStarSystem = NULL;

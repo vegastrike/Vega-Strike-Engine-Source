@@ -39,6 +39,7 @@
 #include "planetary_orbit.h"
 #include "universe.h"
 #include "vsfilesystem.h"
+#include "weapon_info.h"
 
 #include "cmd/script/pythonmission.h"
 #ifndef NO_GFX
@@ -568,14 +569,14 @@ float upgrade( Unit *my_unit, string file, int mountoffset, int subunitoffset, b
     return percentage;
 }
 
-int removeWeapon( Unit *my_unit, string weapon_name, int mountoffset, bool loop )
+int removeWeapon( Unit *my_unit, string name, int mountoffset, bool loop )
 {
     if (!my_unit) return -1;
     int maxmount = my_unit->mounts.size();
     int max = maxmount+mountoffset;
     for (int loopi = mountoffset; loopi < max; ++loopi) {
         int i = loopi%maxmount;
-        if ( my_unit->mounts[i].type->weapon_name == weapon_name
+        if ( my_unit->mounts[i].type->name == name
             && (my_unit->mounts[i].status == Mount::ACTIVE || my_unit->mounts[i].status == Mount::INACTIVE) ) {
             my_unit->mounts[i].status = Mount::UNCHOSEN;
             return i;
@@ -834,7 +835,7 @@ float PercentOperational( Unit *un, std::string name, std::string category, bool
             const Mount *mnt = &upgrade->mounts[0];
             unsigned int nummounts = un->getNumMounts();
             for (unsigned int i = 0; i < nummounts; ++i)
-                if (mnt->type->weapon_name == un->mounts[i].type->weapon_name) {
+                if (mnt->type->name == un->mounts[i].type->name) {
                     if (un->mounts[i].status == Mount::DESTROYED)
                         return 0.0;
                     if (un->mounts[i].functionality < 1.0f)
