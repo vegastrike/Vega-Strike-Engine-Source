@@ -207,8 +207,8 @@ static AIEvents::ElemAttrMap * getProperScript( Unit *me, Unit *targ, bool inter
         }
         return getProperLogicOrInterruptScript( "default", fac, nam, interrupt, personalityseed );
     }
-    return getProperLogicOrInterruptScript( ROLES::getRoleEvents( me->attackPreference(),
-                                                                 targ->unitRole() ), me->faction, me->name, interrupt,
+    return getProperLogicOrInterruptScript( ROLES::getRoleEvents( me->attack_preference,
+                                                                 targ->unit_role ), me->faction, me->name, interrupt,
                                             personalityseed );
 }
 

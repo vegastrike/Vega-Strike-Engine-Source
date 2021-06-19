@@ -135,22 +135,15 @@ class Box;
 class VSSprite;
 class Animation;
 
+// TODO: why is this a template??
 template < typename BOGUS >
 //added by chuck starchaser, to try to break dependency to VSSprite in vegaserver
 struct UnitImages
 {
-    UnitImages(){ VSCONSTRUCT1('i'); pHudImage=NULL; pExplosion=NULL;}
-/*    {
-*       VSCONSTRUCT1( 'i' )
-*  //        pHudImage = NULL;
-*       pExplosion = NULL;
-*   }*/
+    UnitImages();
+
     virtual ~UnitImages();
-/*    {
-*       delete pExplosion;
-*  //        delete pHudImage;
-*       VSDESTRUCT1
-*   }*/
+
     StringPool::Reference cockpitImage;
     StringPool::Reference explosion_type;
     Vector CockpitCenter;
@@ -158,6 +151,8 @@ struct UnitImages
     ///The explosion starts at null, when activated time explode is incremented and ends at null
     Animation    *pExplosion = nullptr;
     float timeexplode = 0;
+
+    // TODO: use smart pointer
     float        *cockpit_damage;     //0 is radar, 1 to MAXVDU is vdus and >MAXVDU is gauges
 
 

@@ -52,33 +52,28 @@ public:
             };
         };
         //the max range the radar can handle
-        float maxrange;
+        float maxrange = 0;
         //the dot with (0,0,1) indicating the farthest to the side the radar can handle.
         float maxcone = -1;
-        float lockcone;
-        float trackingcone;
+        float lockcone = 0;
+        float trackingcone = 0;
         //The minimum radius of the target
         float mintargetsize = 0;
         // What kind of type and capability the radar supports
-        int   capability = Computer::RADARLIM::Capability::IFF_NONE;
+        int   capability = Capability::IFF_NONE;
         bool  locked = false;
-        bool  canlock;
+        bool  canlock = false;
         bool  trackingactive = true;
-        RADARLIM() : maxrange( 0 )
-          , maxcone( 0 )
-          , lockcone( 0 )
-          , trackingcone( 0 )
-          , mintargetsize( 0 )
-          , capability(Capability::IFF_NONE | Capability::IFF_SPHERE)
-          , locked( false )
-          , canlock( false )
-        {}
+
         Brand::Value GetBrand() const;
         bool UseFriendFoe() const;
         bool UseObjectRecognition() const;
         bool UseThreatAssessment() const;
-    }
-    radar;
+
+        RADARLIM();
+    };
+
+    RADARLIM radar;
     bool ecmactive = true;
     //The nav point the unit may be heading for
     Vector NavPoint = Vector(0,0,0);
@@ -87,8 +82,8 @@ public:
     //Any target that may be attacking and has set this threat
     UnitContainer threat;
     //Unit that it should match velocity with (not speed) if null, matches velocity with universe frame (star)
-    UnitContainer velocity_ref;
-    bool  force_velocity_ref;
+    UnitContainer velocity_ref = nullptr;
+    bool  force_velocity_ref = false;
     //The threat level that was calculated from attacking unit's threat
     float threatlevel = 0;
     //The speed the flybywire system attempts to maintain

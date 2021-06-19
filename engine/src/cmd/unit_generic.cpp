@@ -123,15 +123,6 @@ void Unit::setFaceCamera()
     graphicOptions.FaceCamera = 1;
 }
 
-void Unit::attackPreference( unsigned char c )
-{
-    attack_preference = c;
-}
-
-void Unit::unitRole( unsigned char c )
-{
-    unit_role = c;
-}
 
 void Unit::SetNebula( Nebula *neb )
 {
@@ -430,22 +421,17 @@ Unit::~Unit()
 }
 
 
-
+// Delete this
 void Unit::Init()
 {
+    // What's left cannot be removed without breaking something.
+    // TODO: need to figure out how to remove it safely.
+
     this->computer.combat_mode = true;
+    // TODO: check if this is necessary and if it can be moved
 #ifdef CONTAINER_DEBUG
     UncheckUnit( this );
 #endif
-
-    static float rr = XMLSupport::parse_float( vs_config->getVariable( "graphics", "hud", "radarRange", "20000" ) );
-    static float minTrackingNum = XMLSupport::parse_float( vs_config->getVariable( "physics",
-                                                                                   "autotracking",
-                                                                                   ".93" ) );     //DO NOT CHANGE see unit_customize.cpp
-
-    //DO NOT CHANGE see unit_customize.cpp
-    static float lc = XMLSupport::parse_float( vs_config->getVariable( "physics", "lock_cone", ".8" ) );
-
 
     //No cockpit reference here
     if (!pImage->cockpit_damage) {
@@ -4688,37 +4674,37 @@ std::string Unit::subunitSerializer( const XMLType &input, void *mythis )
 
 void Unit::setUnitRole( const std::string &s )
 {
-    unitRole( ROLES::getRole( s ) );
+    unit_role = ROLES::getRole( s );
 }
 
 void Unit::setAttackPreference( const std::string &s )
 {
-    attackPreference( ROLES::getRole( s ) );
+    attack_preference = ROLES::getRole( s );
 }
 
 const std::string& Unit::getUnitRole() const
 {
-    return ROLES::getRole( unitRole() );
+    return ROLES::getRole( unit_role );
 }
 
 const std::string& Unit::getAttackPreference() const
 {
-    return ROLES::getRole( attackPreference() );
+    return ROLES::getRole( attack_preference );
 }
 
 //legacy function for python
 void Unit::setCombatRole( const std::string &s )
 {
-    unitRole( ROLES::getRole( s ) );
-    attackPreference( ROLES::getRole( s ) );
+    unit_role = ROLES::getRole( s );
+    attack_preference = ROLES::getRole( s );
 }
 
 //legacy function for python
 const std::string& Unit::getCombatRole() const
 {
     static unsigned char inert = ROLES::getRole( "INERT" );
-    unsigned char retA = unitRole();
-    unsigned char retB = attackPreference();
+    unsigned char retA = unit_role;
+    unsigned char retB = attack_preference;
 
     //often missions used this to render items either uninteresting or not attacking...so want to prioritize that behavior
     if (retA == inert || retB == inert) {

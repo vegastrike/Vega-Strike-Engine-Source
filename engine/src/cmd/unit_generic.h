@@ -359,17 +359,13 @@ protected:
  */
 
 public:
+    // TODO: move from GFX/Planet stuff
+    // These two are probably zero.
+    // TODO: check and if so, replace with 0.
+    unsigned char attack_preference = ROLES::getRole( "INERT" );
+    unsigned char unit_role = ROLES::getRole( "INERT" );
 
-    unsigned attackPreference() const
-    {
-        return attack_preference;
-    }
-    void attackPreference( unsigned char );
-    unsigned unitRole() const
-    {
-        return unit_role;
-    }
-    void unitRole( unsigned char );
+
 //following 2 are legacy functions for python export only
     void setCombatRole( const std::string &s );
     const std::string& getCombatRole() const;
@@ -379,10 +375,7 @@ public:
     const std::string& getAttackPreference() const;
     void setAttackPreference( const std::string &s );
 protected:
-    // These two are probably zero.
-    // TODO: check and if so, replace with 0.
-    unsigned char attack_preference = ROLES::getRole( "INERT" );
-    unsigned char unit_role = ROLES::getRole( "INERT" );
+
     Nebula *nebula = nullptr;
 //The orbit needs to have access to the velocity directly to disobey physics laws to precalculate orbits
     friend class PlanetaryOrbit;
