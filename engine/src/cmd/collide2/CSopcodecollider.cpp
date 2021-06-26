@@ -128,7 +128,7 @@ csOPCODECollider::~csOPCODECollider ()
 }
 
 
-void csOPCODECollider::MeshCallback (udword triangle_index,
+void csOPCODECollider::MeshCallback (ice_udword triangle_index,
                                     VertexPointers& triangle,
                                     void* user_data)
 {

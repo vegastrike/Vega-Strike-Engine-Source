@@ -40,8 +40,8 @@
 	{
 		inline_	BuildSettings() : mLimit(1), mRules(SPLIT_FORCE_DWORD)	{}
 
-		udword	mLimit;		//!< Limit number of primitives / node. If limit is 1, build a complete tree (2*N-1 nodes)
-		udword	mRules;		//!< Building/Splitting rules (a combination of SplittingRules flags)
+		ice_udword	mLimit;		//!< Limit number of primitives / node. If limit is 1, build a complete tree (2*N-1 nodes)
+		ice_udword	mRules;		//!< Building/Splitting rules (a combination of SplittingRules flags)
 	};
 
 	class OPCODE_API AABBTreeBuilder
@@ -65,7 +65,7 @@
 		 *	\return		true if success
 		 */
 		///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-		virtual						bool			ComputeGlobalBox(const udword* primitives, udword nb_prims, AABB& global_box)	const	= 0;
+		virtual						bool			ComputeGlobalBox(const ice_udword* primitives, ice_udword nb_prims, AABB& global_box)	const	= 0;
 
 		///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 		/**
@@ -75,7 +75,7 @@
 		 *	\return		splitting value
 		 */
 		///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-		virtual						float			GetSplittingValue(udword index, udword axis)	const	= 0;
+		virtual						float			GetSplittingValue(ice_udword index, ice_udword axis)	const	= 0;
 
 		///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 		/**
@@ -87,7 +87,7 @@
 		 *	\return		splitting value
 		 */
 		///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-		virtual						float			GetSplittingValue(const udword* /*primitives*/, udword /*nb_prims*/, const AABB& global_box, udword axis)	const
+		virtual						float			GetSplittingValue(const ice_udword* /*primitives*/, ice_udword /*nb_prims*/, const AABB& global_box, ice_udword axis)	const
 													{
 														// Default split value = middle of the axis (using only the box)
 														return global_box.GetCenter(axis);
@@ -102,7 +102,7 @@
 		 *	\return		TRUE if the node should be subdivised
 		 */
 		///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-		virtual						BOOL			ValidateSubdivision(const udword* /*primitives*/, udword nb_prims, const AABB& /*global_box*/)
+		virtual						BOOL			ValidateSubdivision(const ice_udword* /*primitives*/, ice_udword nb_prims, const AABB& /*global_box*/)
 													{
 														// Check the user-defined limit
 														if(nb_prims<=mSettings.mLimit)	return FALSE;
@@ -111,19 +111,19 @@
 													}
 
 									BuildSettings	mSettings;			//!< Splitting rules & split limit [Opcode 1.3]
-									udword			mNbPrimitives;		//!< Total number of primitives.
+									ice_udword			mNbPrimitives;		//!< Total number of primitives.
 									void*			mNodeBase;			//!< Address of node pool [Opcode 1.3]
 		// Stats
-		inline_						void			SetCount(udword nb)				{ mCount=nb;				}
-		inline_						void			IncreaseCount(udword nb)		{ mCount+=nb;				}
-		inline_						udword			GetCount()				const	{ return mCount;			}
-		inline_						void			SetNbInvalidSplits(udword nb)	{ mNbInvalidSplits=nb;		}
+		inline_						void			SetCount(ice_udword nb)				{ mCount=nb;				}
+		inline_						void			IncreaseCount(ice_udword nb)		{ mCount+=nb;				}
+		inline_						ice_udword			GetCount()				const	{ return mCount;			}
+		inline_						void			SetNbInvalidSplits(ice_udword nb)	{ mNbInvalidSplits=nb;		}
 		inline_						void			IncreaseNbInvalidSplits()		{ mNbInvalidSplits++;		}
-		inline_						udword			GetNbInvalidSplits()	const	{ return mNbInvalidSplits;	}
+		inline_						ice_udword			GetNbInvalidSplits()	const	{ return mNbInvalidSplits;	}
 
 		private:
-									udword			mCount;				//!< Stats: number of nodes created
-									udword			mNbInvalidSplits;	//!< Stats: number of invalid splits
+									ice_udword			mCount;				//!< Stats: number of nodes created
+									ice_udword			mNbInvalidSplits;	//!< Stats: number of invalid splits
 	};
 
 	class OPCODE_API AABBTreeOfVerticesBuilder : public AABBTreeBuilder
@@ -134,9 +134,9 @@
 		//! Destructor
 		virtual										~AABBTreeOfVerticesBuilder()						{}
 
-		override(AABBTreeBuilder)	bool			ComputeGlobalBox(const udword* primitives, udword nb_prims, AABB& global_box)	const;
-		override(AABBTreeBuilder)	float			GetSplittingValue(udword index, udword axis)									const;
-		override(AABBTreeBuilder)	float			GetSplittingValue(const udword* primitives, udword nb_prims, const AABB& global_box, udword axis)	const;
+		override(AABBTreeBuilder)	bool			ComputeGlobalBox(const ice_udword* primitives, ice_udword nb_prims, AABB& global_box)	const;
+		override(AABBTreeBuilder)	float			GetSplittingValue(ice_udword index, ice_udword axis)									const;
+		override(AABBTreeBuilder)	float			GetSplittingValue(const ice_udword* primitives, ice_udword nb_prims, const AABB& global_box, ice_udword axis)	const;
 
 		const						Point*			mVertexArray;		//!< Shortcut to an app-controlled array of vertices.
 	};
@@ -149,8 +149,8 @@
 		//! Destructor
 		virtual										~AABBTreeOfAABBsBuilder()					{}
 
-		override(AABBTreeBuilder)	bool			ComputeGlobalBox(const udword* primitives, udword nb_prims, AABB& global_box)	const;
-		override(AABBTreeBuilder)	float			GetSplittingValue(udword index, udword axis)									const;
+		override(AABBTreeBuilder)	bool			ComputeGlobalBox(const ice_udword* primitives, ice_udword nb_prims, AABB& global_box)	const;
+		override(AABBTreeBuilder)	float			GetSplittingValue(ice_udword index, ice_udword axis)									const;
 
 		const						AABB*			mAABBArray;			//!< Shortcut to an app-controlled array of AABBs.
 	};
@@ -163,9 +163,9 @@
 		//! Destructor
 		virtual										~AABBTreeOfTrianglesBuilder()													{}
 
-		override(AABBTreeBuilder)	bool			ComputeGlobalBox(const udword* primitives, udword nb_prims, AABB& global_box)	const;
-		override(AABBTreeBuilder)	float			GetSplittingValue(udword index, udword axis)									const;
-		override(AABBTreeBuilder)	float			GetSplittingValue(const udword* primitives, udword nb_prims, const AABB& global_box, udword axis)	const;
+		override(AABBTreeBuilder)	bool			ComputeGlobalBox(const ice_udword* primitives, ice_udword nb_prims, AABB& global_box)	const;
+		override(AABBTreeBuilder)	float			GetSplittingValue(ice_udword index, ice_udword axis)									const;
+		override(AABBTreeBuilder)	float			GetSplittingValue(const ice_udword* primitives, ice_udword nb_prims, const AABB& global_box, ice_udword axis)	const;
 
 		const				MeshInterface*			mIMesh;			//!< Shortcut to an app-controlled mesh interface
 	};

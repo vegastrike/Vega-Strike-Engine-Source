@@ -46,9 +46,9 @@
 						}
 		inline_			~Axes()		{}
 
-				udword	mAxis0;
-				udword	mAxis1;
-				udword	mAxis2;
+				ice_udword	mAxis0;
+				ice_udword	mAxis1;
+				ice_udword	mAxis2;
 	};
 
 #endif // __ICEAXES_H__

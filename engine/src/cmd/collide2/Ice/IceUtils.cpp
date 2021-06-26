@@ -22,14 +22,14 @@ using namespace Opcode;
  *	\return		the best alignment (e.g. 1 for odd addresses, etc)
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-udword Alignment(udword address)
+ice_udword Alignment(ice_udword address)
 {
 	// Returns 0 for null addresses
 	if(!address) return 0;
 
 	// Test all bits
-	udword Align = 1;
-	for(udword i=1;i<32;i++)
+	ice_udword Align = 1;
+	for(ice_udword i=1;i<32;i++)
 	{
 		// Returns as soon as the alignment is broken
 		if(address&Align)	return Align;

@@ -28,7 +28,7 @@
 		//! Destructor
 		inline_				~CollisionFace()		{}
 
-				udword		mFaceID;				//!< Index of touched face
+				ice_udword		mFaceID;				//!< Index of touched face
 				float		mDistance;				//!< Distance from collider to hitpoint
 				float		mU, mV;					//!< Impact barycentric coordinates
 	};
@@ -41,7 +41,7 @@
 		//! Destructor
 										~CollisionFaces()						{}
 
-		inline_	udword					GetNbFaces()					const	{ return GetNbEntries()>>2;						}
+		inline_	ice_udword					GetNbFaces()					const	{ return GetNbEntries()>>2;						}
 		inline_	const CollisionFace*	GetFaces()						const	{ return (const CollisionFace*)GetEntries();	}
 
 		inline_	void					Reset()									{ Container::Reset();							}
@@ -81,7 +81,7 @@
 		 *	\warning	SCALE NOT SUPPORTED. The matrices must contain rotation & translation parts only.
 		 */
 		///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-							bool			Collide(const Ray& world_ray, const Model& model, const Matrix4x4* world=null, udword* cache=null);
+							bool			Collide(const Ray& world_ray, const Model& model, const Matrix4x4* world=null, ice_udword* cache=null);
 		//
 							bool			Collide(const Ray& world_ray, const AABBTree* tree, Container& box_indices);
 		// Settings
@@ -144,7 +144,7 @@
 		 *	\return		the number of Ray-BV tests performed during last query
 		 */
 		///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-		inline_				udword			GetNbRayBVTests()				const	{ return mNbRayBVTests;		}
+		inline_				ice_udword			GetNbRayBVTests()				const	{ return mNbRayBVTests;		}
 
 		///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 		/**
@@ -154,7 +154,7 @@
 		 *	\return		the number of Ray-Triangle tests performed during last query
 		 */
 		///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-		inline_				udword			GetNbRayPrimTests()				const	{ return mNbRayPrimTests;	}
+		inline_				ice_udword			GetNbRayPrimTests()				const	{ return mNbRayPrimTests;	}
 
 		// In-out test
 		///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -165,7 +165,7 @@
 		 *	\return		the number of valid intersections during last query
 		 */
 		///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-		inline_				udword			GetNbIntersections()			const	{ return mNbIntersections;	}
+		inline_				ice_udword			GetNbIntersections()			const	{ return mNbIntersections;	}
 
 		///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 		/**
@@ -190,10 +190,10 @@
 							CollisionFaces*	mStabbedFaces;		//!< List of stabbed faces
 #endif
 		// Stats
-							udword			mNbRayBVTests;		//!< Number of Ray-BV tests
-							udword			mNbRayPrimTests;	//!< Number of Ray-Primitive tests
+							ice_udword			mNbRayBVTests;		//!< Number of Ray-BV tests
+							ice_udword			mNbRayPrimTests;	//!< Number of Ray-Primitive tests
 		// In-out test
-							udword			mNbIntersections;	//!< Number of valid intersections
+							ice_udword			mNbIntersections;	//!< Number of valid intersections
 		// Dequantization coeffs
 							Point			mCenterCoeff;
 							Point			mExtentsCoeff;
@@ -219,7 +219,7 @@
 		inline_				bool			SegmentAABBOverlap(const Point& center, const Point& extents);
 		inline_				bool			RayTriOverlap(const Point& vert0, const Point& vert1, const Point& vert2);
 			// Init methods
-							bool			InitQuery(const Ray& world_ray, const Matrix4x4* world=null, udword* face_id=null);
+							bool			InitQuery(const Ray& world_ray, const Matrix4x4* world=null, ice_udword* face_id=null);
 	};
 
 #endif // __OPC_RAYCOLLIDER_H__

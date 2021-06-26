@@ -22,7 +22,7 @@
 
 using namespace Opcode;
 
-inline_ void Sort(udword& id0, udword& id1)
+inline_ void Sort(ice_udword& id0, ice_udword& id1)
 {
 	if(id0>id1)	Swap(id0, id1);
 }
@@ -31,10 +31,10 @@ inline_ void Sort(udword& id0, udword& id1)
 	{
 		public:
 		inline_					SAP_Element()														{}
-		inline_					SAP_Element(udword id, SAP_Element* next) : mID(id), mNext(next)	{}
+		inline_					SAP_Element(ice_udword id, SAP_Element* next) : mID(id), mNext(next)	{}
 		inline_					~SAP_Element()														{}
 
-				udword			mID;
+				ice_udword			mID;
 				SAP_Element*	mNext;
 	};
 
@@ -51,11 +51,11 @@ inline_ void Sort(udword& id0, udword& id1)
 				float			Value;		// Min or Max value
 				SAP_EndPoint*	Previous;	// Previous EndPoint whose Value is smaller than ours (or null)
 				SAP_EndPoint*	Next;		// Next EndPoint whose Value is greater than ours (or null)
-				udword			Data;		// Parent box ID *2 | MinMax flag
+				ice_udword			Data;		// Parent box ID *2 | MinMax flag
 
-		inline_	void			SetData(udword box_id, bool is_max)			{ Data = (box_id<<1)|(is_max?1:0);	}
+		inline_	void			SetData(ice_udword box_id, bool is_max)			{ Data = (box_id<<1)|(is_max?1:0);	}
 		inline_	bool			IsMax()								const	{ return Data & 1;				}
-		inline_	udword			GetBoxID()							const	{ return Data>>1;				}
+		inline_	ice_udword			GetBoxID()							const	{ return Data>>1;				}
 
 		inline_	void InsertAfter(SAP_EndPoint* element)
 		{
@@ -142,7 +142,7 @@ void SAP_PairData::Release()
  *	\return		true if success
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-bool SAP_PairData::Init(udword nb_objects)
+bool SAP_PairData::Init(ice_udword nb_objects)
 {
 	// Make sure everything has been released
 	Release();
@@ -163,7 +163,7 @@ bool SAP_PairData::Init(udword nb_objects)
  *	\param		delta	[in] offset in bytes
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-inline_ void Remap(SAP_Element*& element, udword delta)
+inline_ void Remap(SAP_Element*& element, ice_udword delta)
 {
 	if(element)	element = (SAP_Element*)(uintptr_t(element) + delta);
 }
@@ -177,7 +177,7 @@ inline_ void Remap(SAP_Element*& element, udword delta)
  *	\return		the new element
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-SAP_Element* SAP_PairData::GetFreeElem(udword id, SAP_Element* next, udword* remap)
+SAP_Element* SAP_PairData::GetFreeElem(ice_udword id, SAP_Element* next, ice_udword* remap)
 {
 	if(remap)	*remap = 0;
 
@@ -201,9 +201,9 @@ SAP_Element* SAP_PairData::GetFreeElem(udword id, SAP_Element* next, udword* rem
 
 			// Remap everything
 			{
-				udword Delta = uintptr_t(NewElems) - uintptr_t(mElementPool);
+				ice_udword Delta = uintptr_t(NewElems) - uintptr_t(mElementPool);
 
-				udword i;
+				ice_udword i;
 				for(i=0;i<mNbUsedElements;i++)	Remap(NewElems[i].mNext, Delta);
 				for(i=0;i<mNbObjects;i++)		Remap(mArray[i], Delta);
 
@@ -239,7 +239,7 @@ inline_ void SAP_PairData::FreeElem(SAP_Element* elem)
 }
 
 // Add a pair to the set.
-void SAP_PairData::AddPair(udword id1, udword id2)
+void SAP_PairData::AddPair(ice_udword id1, ice_udword id2)
 {
 	// Order the ids
 	Sort(id1, id2);
@@ -273,7 +273,7 @@ void SAP_PairData::AddPair(udword id1, udword id2)
 		if(Current->mID==id2)	return;	// The pair already exists
 		
 //		Current->mNext = GetFreeElem(id2, Current->mNext);
-		udword Delta;
+		ice_udword Delta;
 		SAP_Element* E = GetFreeElem(id2, Current->mNext, &Delta);
 		if(Delta)	Remap(Current, Delta);
 		Current->mNext = E;
@@ -281,7 +281,7 @@ void SAP_PairData::AddPair(udword id1, udword id2)
 }
 
 // Delete a pair from the set.
-void SAP_PairData::RemovePair(udword id1, udword id2)
+void SAP_PairData::RemovePair(ice_udword id1, ice_udword id2)
 {
 	// Order the ids.
 	Sort(id1, id2);
@@ -325,7 +325,7 @@ void SAP_PairData::RemovePair(udword id1, udword id2)
 void SAP_PairData::DumpPairs(Pairs& pairs) const
 {
 	// ### Ugly and slow
-	for(udword i=0;i<mNbObjects;i++)
+	for(ice_udword i=0;i<mNbObjects;i++)
 	{
 		SAP_Element* Current = mArray[i];
 		while(Current)
@@ -343,7 +343,7 @@ void SAP_PairData::DumpPairs(PairCallback callback, void* user_data) const
 	if(!callback)	return;
 
 	// ### Ugly and slow
-	for(udword i=0;i<mNbObjects;i++)
+	for(ice_udword i=0;i<mNbObjects;i++)
 	{
 		SAP_Element* Current = mArray[i];
 		while(Current)
@@ -411,36 +411,36 @@ void SweepAndPrune::GetPairs(PairCallback callback, void* user_data) const
 	mPairs.DumpPairs(callback, user_data);
 }
 
-bool SweepAndPrune::Init(udword nb_objects, const AABB** boxes)
+bool SweepAndPrune::Init(ice_udword nb_objects, const AABB** boxes)
 {
 	// 1) Create sorted lists
 	mNbObjects = nb_objects;
 
 	mBoxes = new SAP_Box[nb_objects];
-//	for(udword i=0;i<nb_objects;i++)	mBoxes[i].Box = *boxes[i];
+//	for(ice_udword i=0;i<nb_objects;i++)	mBoxes[i].Box = *boxes[i];
 
 	float* Data = new float[nb_objects*2];
 
-	for(udword Axis=0;Axis<3;Axis++)
+	for(ice_udword Axis=0;Axis<3;Axis++)
 	{
 		mList[Axis] = new SAP_EndPoint[nb_objects*2];
 
-		udword i;
+		ice_udword i;
 		for(i=0;i<nb_objects;i++)
 		{
 			Data[i*2+0] = boxes[i]->GetMin(Axis);
 			Data[i*2+1] = boxes[i]->GetMax(Axis);
 		}
 		RadixSort RS;
-		const udword* Sorted = RS.Sort(Data, nb_objects*2).GetRanks();
+		const ice_udword* Sorted = RS.Sort(Data, nb_objects*2).GetRanks();
 
 		SAP_EndPoint* PreviousEndPoint = null;
 
 		for(i=0;i<nb_objects*2;i++)
 		{
-			udword SortedIndex	= *Sorted++;
+			ice_udword SortedIndex	= *Sorted++;
 			float SortedCoord	= Data[SortedIndex];
-			udword BoxIndex		= SortedIndex>>1;
+			ice_udword BoxIndex		= SortedIndex>>1;
 
 			OPASSERT(BoxIndex<nb_objects);
 
@@ -471,12 +471,12 @@ bool SweepAndPrune::Init(udword nb_objects, const AABB** boxes)
 	{
 		Pairs P;
 		CompleteBoxPruning(nb_objects, boxes, P, Axes(AXES_XZY));
-		for(udword i=0;i<P.GetNbPairs();i++)
+		for(ice_udword i=0;i<P.GetNbPairs();i++)
 		{
 			const Pair* PP = P.GetPair(i);
 
-			udword id0 = PP->id0;
-			udword id1 = PP->id1;
+			ice_udword id0 = PP->id0;
+			ice_udword id1 = PP->id1;
 
 			if(id0!=id1 && boxes[id0]->Intersect(*boxes[id1]))
 			{
@@ -491,13 +491,13 @@ bool SweepAndPrune::Init(udword nb_objects, const AABB** boxes)
 
 bool SweepAndPrune::CheckListsIntegrity()
 {
-	for(udword Axis=0;Axis<3;Axis++)
+	for(ice_udword Axis=0;Axis<3;Axis++)
 	{
 		// Find list head
 		SAP_EndPoint* Current = mList[Axis];
 		while(Current->Previous)	Current = Current->Previous;
 
-		udword Nb = 0;
+		ice_udword Nb = 0;
 
 		SAP_EndPoint* Previous = null;
 		while(Current)
@@ -533,11 +533,11 @@ inline_ bool Intersect(const AABB& a, const SAP_Box& b)
 
 
 
-bool SweepAndPrune::UpdateObject(udword i, const AABB& box)
+bool SweepAndPrune::UpdateObject(ice_udword i, const AABB& box)
 {
-	for(udword Axis=0;Axis<3;Axis++)
+	for(ice_udword Axis=0;Axis<3;Axis++)
 	{
-//		udword Base = (udword)&mList[Axis][0];
+//		ice_udword Base = (ice_udword)&mList[Axis][0];
 
 		// Update min
 		{
@@ -564,9 +564,9 @@ bool SweepAndPrune::UpdateObject(udword i, const AABB& box)
 					if(NewPos->IsMax())
 					{
 						// Our min passed a max => start overlap
-						//udword SortedIndex = (udword(CurrentMin) - Base)/sizeof(NS_EndPoint);
-						const udword id0 = CurrentMin->GetBoxID();
-						const udword id1 = NewPos->GetBoxID();
+						//ice_udword SortedIndex = (ice_udword(CurrentMin) - Base)/sizeof(NS_EndPoint);
+						const ice_udword id0 = CurrentMin->GetBoxID();
+						const ice_udword id1 = NewPos->GetBoxID();
 
 						if(id0!=id1 && Intersect(box, mBoxes[id1]))	mPairs.AddPair(id0, id1);
 					}
@@ -590,8 +590,8 @@ bool SweepAndPrune::UpdateObject(udword i, const AABB& box)
 					if(NewPos->IsMax())
 					{
 						// Our min passed a max => stop overlap
-						const udword id0 = CurrentMin->GetBoxID();
-						const udword id1 = NewPos->GetBoxID();
+						const ice_udword id0 = CurrentMin->GetBoxID();
+						const ice_udword id1 = NewPos->GetBoxID();
 
 						if(id0!=id1)	mPairs.RemovePair(id0, id1);
 					}
@@ -626,8 +626,8 @@ bool SweepAndPrune::UpdateObject(udword i, const AABB& box)
 					if(!NewPos->IsMax())
 					{
 						// Our max passed a min => start overlap
-						const udword id0 = CurrentMax->GetBoxID();
-						const udword id1 = NewPos->GetBoxID();
+						const ice_udword id0 = CurrentMax->GetBoxID();
+						const ice_udword id1 = NewPos->GetBoxID();
 
 						if(id0!=id1 && Intersect(box, mBoxes[id1]))	mPairs.AddPair(id0, id1);
 					}
@@ -651,8 +651,8 @@ bool SweepAndPrune::UpdateObject(udword i, const AABB& box)
 					if(!NewPos->IsMax())
 					{
 						// Our max passed a min => stop overlap
-						const udword id0 = CurrentMax->GetBoxID();
-						const udword id1 = NewPos->GetBoxID();
+						const ice_udword id0 = CurrentMax->GetBoxID();
+						const ice_udword id1 = NewPos->GetBoxID();
 
 						if(id0!=id1)	mPairs.RemovePair(id0, id1);
 					}

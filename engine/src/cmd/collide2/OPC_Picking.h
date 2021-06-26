@@ -29,7 +29,7 @@
 		CULLMODE_CCW	= 2
 	};
 
-	typedef CullMode (*CullModeCallback)(udword triangle_index, void* user_data);
+	typedef CullMode (*CullModeCallback)(ice_udword triangle_index, void* user_data);
 
 	OPCODE_API	bool SetupAllHits		(RayCollider& collider, CollisionFaces& contacts);
 	OPCODE_API	bool SetupClosestHit	(RayCollider& collider, CollisionFace& closest_contact);

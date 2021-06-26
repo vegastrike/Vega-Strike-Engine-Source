@@ -25,7 +25,7 @@ using namespace Opcode;
 */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-static sdword VPlaneSideEps(const Point& v, const Plane& plane, float epsilon)
+static ice_sdword VPlaneSideEps(const Point& v, const Plane& plane, float epsilon)
 {
 	// Compute distance from current vertex to the plane
 	float Dist = plane.Distance(v);
@@ -138,10 +138,10 @@ PartVal Triangle::TestAgainstPlane(const Plane& plane, float epsilon) const
 	bool Pos = false, Neg = false;
 
 	// Loop through all vertices
-	for(udword i=0;i<3;i++)
+	for(ice_udword i=0;i<3;i++)
 	{
 		// Compute side:
-		sdword Side = VPlaneSideEps(mVerts[i], plane, epsilon);
+		ice_sdword Side = VPlaneSideEps(mVerts[i], plane, epsilon);
 
 				if (Side < 0)	Neg = true;
 		else	if (Side > 0)	Pos = true;
@@ -249,7 +249,7 @@ float Triangle::MaxEdgeLength()	const
  *	\param		nearvtx		[out] index of nearest vertex
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-void Triangle::ComputePoint(float u, float v, Point& pt, udword* nearvtx)	const
+void Triangle::ComputePoint(float u, float v, Point& pt, ice_udword* nearvtx)	const
 {
 	// Compute point coordinates
 	pt = (1.0f - u - v)*mVerts[0] + u*mVerts[1] + v*mVerts[2];
@@ -276,7 +276,7 @@ void Triangle::Inflate(float fat_coeff, bool constant_border)
 	// Don't normalize?
 	// Normalize => add a constant border, regardless of triangle size
 	// Don't => add more to big triangles
-	for(udword i=0;i<3;i++)
+	for(ice_udword i=0;i<3;i++)
 	{
 		Point v = mVerts[i] - TriangleCenter;
 

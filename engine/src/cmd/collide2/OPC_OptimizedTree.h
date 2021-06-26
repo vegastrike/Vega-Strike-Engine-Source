@@ -31,9 +31,9 @@
 		/* Data access */									\
 		inline_	const base_class* GetPos() const { return (base_class*)mData;		}	\
 		inline_	const base_class* GetNeg() const { return ((base_class*)mData)+1;	}	\
-		inline_	udword GetPrimitive() const { return (udword)(mData>>1);		}		\
+		inline_	ice_udword GetPrimitive() const { return (ice_udword)(mData>>1);		}		\
 		/* Stats */										\
-		inline_	udword GetNodeSize() const { return SIZEOFOBJECT;			}	\
+		inline_	ice_udword GetNodeSize() const { return SIZEOFOBJECT;			}	\
 													\
 		volume mAABB;										\
 		uintptr_t mData;
@@ -50,10 +50,10 @@
 		/* Data access */									\
 		inline_	const base_class* GetPos() const { return (base_class*)mPosData;	}	\
 		inline_	const base_class* GetNeg() const { return (base_class*)mNegData;	}	\
-		inline_	udword GetPosPrimitive() const { return (udword)(mPosData>>1);	}			\
-		inline_	udword GetNegPrimitive() const { return (udword)(mNegData>>1);	}			\
+		inline_	ice_udword GetPosPrimitive() const { return (ice_udword)(mPosData>>1);	}			\
+		inline_	ice_udword GetNegPrimitive() const { return (ice_udword)(mNegData>>1);	}			\
 		/* Stats */										\
-		inline_	udword GetNodeSize() const { return SIZEOFOBJECT;			}	\
+		inline_	ice_udword GetNodeSize() const { return SIZEOFOBJECT;			}	\
 													\
 		volume mAABB;								  		\
 		uintptr_t mPosData;									\
@@ -65,10 +65,10 @@
 
 		inline_			float				GetVolume()		const	{ return mAABB.mExtents.x * mAABB.mExtents.y * mAABB.mExtents.z;	}
 		inline_			float				GetSize()		const	{ return mAABB.mExtents.SquareMagnitude();	}
-		inline_			udword				GetRadius()		const
+		inline_			ice_udword				GetRadius()		const
 											{
-												udword* Bits = (udword*)&mAABB.mExtents.x;
-												udword Max = Bits[0];
+												ice_udword* Bits = (ice_udword*)&mAABB.mExtents.x;
+												ice_udword Max = Bits[0];
 												if(Bits[1]>Max)	Max = Bits[1];
 												if(Bits[2]>Max)	Max = Bits[2];
 												return Max;
@@ -87,10 +87,10 @@
 	{
 		IMPLEMENT_IMPLICIT_NODE(AABBQuantizedNode, QuantizedAABB)
 
-		inline_			uword				GetSize()		const
+		inline_			ice_uword				GetSize()		const
 											{
-												const uword* Bits = mAABB.mExtents;
-												uword Max = Bits[0];
+												const ice_uword* Bits = mAABB.mExtents;
+												ice_uword Max = Bits[0];
 												if(Bits[1]>Max)	Max = Bits[1];
 												if(Bits[2]>Max)	Max = Bits[2];
 												return Max;
@@ -124,7 +124,7 @@
 		/* Data access */																							\
 		inline_						const node*		GetNodes()		const	{ return mNodes;					}	\
 		/* Stats */																									\
-		override(AABBOptimizedTree)	udword			GetUsedBytes()	const	{ return mNbNodes*sizeof(node);		}	\
+		override(AABBOptimizedTree)	ice_udword			GetUsedBytes()	const	{ return mNbNodes*sizeof(node);		}	\
 		private:																									\
 									node*			mNodes;
 
@@ -168,11 +168,11 @@
 		virtual			bool				Walk(GenericWalkingCallback callback, void* user_data) const	= 0;
 
 		// Data access
-		virtual			udword				GetUsedBytes()		const										= 0;
-		inline_			udword				GetNbNodes()		const						{ return mNbNodes;	}
+		virtual			ice_udword				GetUsedBytes()		const										= 0;
+		inline_			ice_udword				GetNbNodes()		const						{ return mNbNodes;	}
 
 		protected:
-						udword				mNbNodes;
+						ice_udword				mNbNodes;
 	};
 
 	class OPCODE_API AABBCollisionTree : public AABBOptimizedTree

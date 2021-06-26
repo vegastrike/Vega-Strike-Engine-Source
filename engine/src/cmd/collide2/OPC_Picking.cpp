@@ -115,7 +115,7 @@ float min_dist, float max_dist, const Point& view_point, CullModeCallback callba
 			if(hit.mDistance<=Data->MinLimit)	return;
 
 			// This is the index of currently stabbed triangle.
-			udword StabbedFaceIndex = hit.mFaceID;
+			ice_udword StabbedFaceIndex = hit.mFaceID;
 
 			// We may keep it or not, depending on backface culling
 			bool KeepIt = true;

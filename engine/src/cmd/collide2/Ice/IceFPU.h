@@ -14,17 +14,24 @@
 
 	#define	SIGN_BITMASK			0x80000000
 
+    union ice_union
+    {
+        ice_sdword a;
+        ice_udword b;
+        float      c;
+    };
+
 	//! Integer representation of a floating-point value.
-	#define IR(x)					((udword&)(x))
+	#define IR(x)					((static_cast<ice_union*>((void *)&(x)))->b)
 
 	//! Signed integer representation of a floating-point value.
-	#define SIR(x)					((sdword&)(x))
+	#define SIR(x)					((static_cast<ice_union*>((void *)&(x)))->a)
 
 	//! Absolute integer representation of a floating-point value
 	#define AIR(x)					(IR(x)&0x7fffffff)
 
 	//! Floating-point representation of an integer value.
-	#define FR(x)					((float&)(x))
+	#define FR(x)					((static_cast<ice_union*>((void *)&(x)))->c)
 	
 	//! Is the float valid ?
 	inline_ bool IsNAN(float value)				{ return (IR(value)&0x7f800000) == 0x7f800000;	}

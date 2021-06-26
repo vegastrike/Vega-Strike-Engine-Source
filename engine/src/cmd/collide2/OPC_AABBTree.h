@@ -37,7 +37,7 @@
 		inline_	bool				IsLeaf()		const	{ return !GetPos();						}					\
 																														\
 		/* Stats */																										\
-		inline_	udword				GetNodeSize()	const	{ return SIZEOFOBJECT;					}					\
+		inline_	ice_udword				GetNodeSize()	const	{ return SIZEOFOBJECT;					}					\
 		protected:																										\
 		/* Tree-independent data */																						\
 		/* Following data always belong to the BV-tree, regardless of what the tree actually contains.*/				\
@@ -63,7 +63,7 @@
 		inline_	bool				IsLeaf()		const	{ return !GetPos();						}					\
 																														\
 		/* Stats */																										\
-		inline_	udword				GetNodeSize()	const	{ return SIZEOFOBJECT;					}					\
+		inline_	ice_udword				GetNodeSize()	const	{ return SIZEOFOBJECT;					}					\
 		protected:																										\
 		/* Tree-independent data */																						\
 		/* Following data always belong to the BV-tree, regardless of what the tree actually contains.*/				\
@@ -73,22 +73,22 @@
 				uintptr_t			mNeg;		/* "Negative" child */
 #endif
 
-	typedef		void				(*CullingCallback)		(udword nb_primitives, udword* node_primitives, BOOL need_clipping, void* user_data);
+	typedef		void				(*CullingCallback)		(ice_udword nb_primitives, ice_udword* node_primitives, BOOL need_clipping, void* user_data);
 
 	class OPCODE_API AABBTreeNode
 	{
 									IMPLEMENT_TREE(AABBTreeNode, AABB)
 		public:
 		// Data access
-		inline_	const udword*		GetPrimitives()		const	{ return mNodePrimitives;	}
-		inline_	udword				GetNbPrimitives()	const	{ return mNbPrimitives;		}
+		inline_	const ice_udword*		GetPrimitives()		const	{ return mNodePrimitives;	}
+		inline_	ice_udword				GetNbPrimitives()	const	{ return mNbPrimitives;		}
 
 		protected:
 		// Tree-dependent data
-				udword*				mNodePrimitives;	//!< Node-related primitives (shortcut to a position in mIndices below)
-				udword				mNbPrimitives;		//!< Number of primitives for this node
+				ice_udword*				mNodePrimitives;	//!< Node-related primitives (shortcut to a position in mIndices below)
+				ice_udword				mNbPrimitives;		//!< Number of primitives for this node
 		// Internal methods
-				udword				Split(udword axis, AABBTreeBuilder* builder);
+				ice_udword				Split(ice_udword axis, AABBTreeBuilder* builder);
 				bool				Subdivide(AABBTreeBuilder* builder);
 				void				_BuildHierarchy(AABBTreeBuilder* builder);
 				void				_Refit(AABBTreeBuilder* builder);
@@ -103,7 +103,7 @@
 	 *	\return		true to recurse through children, else false to bypass them
 	 */
 	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	typedef		bool				(*WalkingCallback)	(const AABBTreeNode* current, udword depth, void* user_data);
+	typedef		bool				(*WalkingCallback)	(const AABBTreeNode* current, ice_udword depth, void* user_data);
 
 	class OPCODE_API AABBTree : public AABBTreeNode
 	{
@@ -116,23 +116,23 @@
 				void				Release();
 
 		// Data access
-		inline_	const udword*		GetIndices()		const	{ return mIndices;		}	//!< Catch the indices
-		inline_	udword				GetNbNodes()		const	{ return mTotalNbNodes;	}	//!< Catch the number of nodes
+		inline_	const ice_udword*		GetIndices()		const	{ return mIndices;		}	//!< Catch the indices
+		inline_	ice_udword				GetNbNodes()		const	{ return mTotalNbNodes;	}	//!< Catch the number of nodes
 
 		// Infos
 				bool				IsComplete()		const;
 		// Stats
-				udword				ComputeDepth()		const;
-				udword				GetUsedBytes()		const;
-				udword				Walk(WalkingCallback callback, void* user_data) const;
+				ice_udword				ComputeDepth()		const;
+				ice_udword				GetUsedBytes()		const;
+				ice_udword				Walk(WalkingCallback callback, void* user_data) const;
 
 				bool				Refit(AABBTreeBuilder* builder);
 				bool				Refit2(AABBTreeBuilder* builder);
 		private:
-				udword*				mIndices;			//!< Indices in the app list. Indices are reorganized during build (permutation).
+				ice_udword*				mIndices;			//!< Indices in the app list. Indices are reorganized during build (permutation).
 				AABBTreeNode*		mPool;				//!< Linear pool of nodes for complete trees. Null otherwise. [Opcode 1.3]
 		// Stats
-				udword				mTotalNbNodes;		//!< Number of nodes in the tree.
+				ice_udword				mTotalNbNodes;		//!< Number of nodes in the tree.
 	};
 
 #endif // __OPC_AABBTREE_H__

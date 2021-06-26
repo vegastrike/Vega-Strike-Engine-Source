@@ -271,7 +271,7 @@ float IndexedTriangle::ComputeOcclusionPotential(const Point* verts, const Point
  *	\return		true if success, else false if the input vertex reference doesn't belong to the triangle
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-bool IndexedTriangle::ReplaceVertex(udword oldref, udword newref)
+bool IndexedTriangle::ReplaceVertex(ice_udword oldref, ice_udword newref)
 {
 			if(mVRef[0]==oldref)	{ mVRef[0] = newref; return true; }
 	else	if(mVRef[1]==oldref)	{ mVRef[1] = newref; return true; }
@@ -300,7 +300,7 @@ bool IndexedTriangle::IsDegenerate()	const
  *	\return		true if the triangle contains the vertex reference
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-bool IndexedTriangle::HasVertex(udword ref)	const
+bool IndexedTriangle::HasVertex(ice_udword ref)	const
 {
 	if(mVRef[0]==ref)	return true;
 	if(mVRef[1]==ref)	return true;
@@ -316,7 +316,7 @@ bool IndexedTriangle::HasVertex(udword ref)	const
  *	\return		true if the triangle contains the vertex reference
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-bool IndexedTriangle::HasVertex(udword ref, udword* index)	const
+bool IndexedTriangle::HasVertex(ice_udword ref, ice_udword* index)	const
 {
 	if(mVRef[0]==ref)	{ *index = 0;	return true; }
 	if(mVRef[1]==ref)	{ *index = 1;	return true; }
@@ -332,7 +332,7 @@ bool IndexedTriangle::HasVertex(udword ref, udword* index)	const
  *	\return		the edge number between 0 and 2, or 0xff if input refs are wrong.
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-ubyte IndexedTriangle::FindEdge(udword vref0, udword vref1)	const
+ice_ubyte IndexedTriangle::FindEdge(ice_udword vref0, ice_udword vref1)	const
 {
 			if(mVRef[0]==vref0 && mVRef[1]==vref1)	return 0;
 	else	if(mVRef[0]==vref1 && mVRef[1]==vref0)	return 0;
@@ -351,7 +351,7 @@ ubyte IndexedTriangle::FindEdge(udword vref0, udword vref1)	const
  *	\return		the last reference, or INVALID_ID if input refs are wrong.
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-udword IndexedTriangle::OppositeVertex(udword vref0, udword vref1)	const
+ice_udword IndexedTriangle::OppositeVertex(ice_udword vref0, ice_udword vref1)	const
 {
 			if(mVRef[0]==vref0 && mVRef[1]==vref1)	return mVRef[2];
 	else	if(mVRef[0]==vref1 && mVRef[1]==vref0)	return mVRef[2];
@@ -375,7 +375,7 @@ udword IndexedTriangle::OppositeVertex(udword vref0, udword vref1)	const
  *	\param		vref2	[out] the returned third vertex reference
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-void IndexedTriangle::GetVRefs(ubyte edgenb, udword& vref0, udword& vref1, udword& vref2) const
+void IndexedTriangle::GetVRefs(ice_ubyte edgenb, ice_udword& vref0, ice_udword& vref1, ice_udword& vref2) const
 {
 	if(edgenb==0)
 	{
@@ -448,7 +448,7 @@ float IndexedTriangle::MaxEdgeLength(const Point* verts)	const
  *	\param		nearvtx		[out] index of nearest vertex
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-void IndexedTriangle::ComputePoint(const Point* verts, float u, float v, Point& pt, udword* nearvtx)	const
+void IndexedTriangle::ComputePoint(const Point* verts, float u, float v, Point& pt, ice_udword* nearvtx)	const
 {
 	// Checkings
 	if(!verts)	return;

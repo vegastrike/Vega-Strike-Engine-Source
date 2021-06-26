@@ -43,9 +43,9 @@
 		inline_	void		GetMax(Point& max)		const		{ max = mCenter + mExtents;					}
 
 		//! Get component of the box's min point along a given axis
-		inline_	float		GetMin(udword axis)		const		{ return mCenter[axis] - mExtents[axis];	}
+		inline_	float		GetMin(ice_udword axis)		const		{ return mCenter[axis] - mExtents[axis];	}
 		//! Get component of the box's max point along a given axis
-		inline_	float		GetMax(udword axis)		const		{ return mCenter[axis] + mExtents[axis];	}
+		inline_	float		GetMax(ice_udword axis)		const		{ return mCenter[axis] + mExtents[axis];	}
 
 		///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 		/**
@@ -86,8 +86,8 @@
 		//! Destructor
 		inline_				~QuantizedAABB()		{}
 
-				sword		mCenter[3];				//!< Quantized center
-				uword		mExtents[3];			//!< Quantized extents
+				ice_sword		mCenter[3];				//!< Quantized center
+				ice_uword		mExtents[3];			//!< Quantized extents
 	};
 
 	//! Quickly rotates & translates a vector

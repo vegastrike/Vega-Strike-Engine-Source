@@ -4,6 +4,7 @@
  *	\file		IceTypes.h
  *	\author		Pierre Terdiman
  *	\date		April, 4, 2000
+ *  Updated     2021-06-26 by Stephen G. Tuggy
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -45,38 +46,38 @@
 	#define null				0														//!< our own NULL pointer
 
 	// Custom types used in ICE
-	typedef signed char			sbyte;		//!< sizeof(sbyte)	must be 1
-	typedef unsigned char		ubyte;		//!< sizeof(ubyte)	must be 1
-	typedef signed short		sword;		//!< sizeof(sword)	must be 2
-	typedef unsigned short		uword;		//!< sizeof(uword)	must be 2
-	typedef signed int			sdword;		//!< sizeof(sdword)	must be 4
-	typedef unsigned int		udword;		//!< sizeof(udword)	must be 4
-	typedef int64		sqword;		//!< sizeof(sqword)	must be 8
-	typedef uint64	uqword;		//!< sizeof(uqword)	must be 8
-	typedef float				float32;	//!< sizeof(float32)	must be 4
-	typedef double				float64;	//!< sizeof(float64)	must be 4
+    typedef int8_t              ice_sbyte;      //!< sizeof(ice_sbyte)      must be 1
+    typedef uint8_t             ice_ubyte;      //!< sizeof(ice_ubyte)      must be 1
+    typedef int16_t             ice_sword;      //!< sizeof(ice_sword)      must be 2
+    typedef uint16_t            ice_uword;      //!< sizeof(ice_uword)      must be 2
+    typedef int32_t             ice_sdword;     //!< sizeof(ice_sdword)     must be 4
+    typedef uint32_t            ice_udword;     //!< sizeof(ice_udword)     must be 4
+    typedef int64_t             ice_sqword;     //!< sizeof(ice_sqword)	    must be 8
+    typedef uint64_t            ice_uqword;     //!< sizeof(ice_uqword)     must be 8
+    typedef float               ice_float32;    //!< sizeof(ice_float32)    must be 4
+    typedef double              ice_float64;    //!< sizeof(ice_float64)    must be 4
 
-	// ICE_COMPILE_TIME_ASSERT(sizeof(bool)==1);	// ...otherwise things might fail with VC++ 4.2 !
-	ICE_COMPILE_TIME_ASSERT(sizeof(ubyte)==1);
-	ICE_COMPILE_TIME_ASSERT(sizeof(sbyte)==1);
-	ICE_COMPILE_TIME_ASSERT(sizeof(sword)==2);
-	ICE_COMPILE_TIME_ASSERT(sizeof(uword)==2);
-	ICE_COMPILE_TIME_ASSERT(sizeof(udword)==4);
-	ICE_COMPILE_TIME_ASSERT(sizeof(sdword)==4);
-	ICE_COMPILE_TIME_ASSERT(sizeof(uqword)==8);
-	ICE_COMPILE_TIME_ASSERT(sizeof(sqword)==8);
+    // ICE_COMPILE_TIME_ASSERT(sizeof(bool)==1);	// ...otherwise things might fail with VC++ 4.2 !
+    ICE_COMPILE_TIME_ASSERT(sizeof(ice_ubyte)==1);
+    ICE_COMPILE_TIME_ASSERT(sizeof(ice_sbyte)==1);
+    ICE_COMPILE_TIME_ASSERT(sizeof(ice_sword)==2);
+    ICE_COMPILE_TIME_ASSERT(sizeof(ice_uword)==2);
+    ICE_COMPILE_TIME_ASSERT(sizeof(ice_udword)==4);
+    ICE_COMPILE_TIME_ASSERT(sizeof(ice_sdword)==4);
+    ICE_COMPILE_TIME_ASSERT(sizeof(ice_uqword)==8);
+    ICE_COMPILE_TIME_ASSERT(sizeof(ice_sqword)==8);
 
 	//! TO BE DOCUMENTED
 	#define DECLARE_ICE_HANDLE(name)	struct name##__ { int unused; }; typedef struct name##__ *name
 
-	typedef udword				DynID;		//!< Dynamic identifier
+	typedef ice_udword          DynID;		//!< Dynamic identifier
 #ifdef USE_HANDLE_MANAGER
-	typedef udword				KID;		//!< Kernel ID
+	typedef ice_udword          KID;		//!< Kernel ID
 //	DECLARE_ICE_HANDLE(KID);
 #else
-	typedef uword				KID;		//!< Kernel ID
+	typedef ice_uword           KID;		//!< Kernel ID
 #endif
-	typedef udword				RTYPE;		//!< Relationship-type (!) between owners and references
+	typedef ice_udword          RTYPE;		//!< Relationship-type (!) between owners and references
 	#define	INVALID_ID			0xffffffff	//!< Invalid dword ID (counterpart of null pointers)
 #ifdef USE_HANDLE_MANAGER
 	#define	INVALID_KID			0xffffffff	//!< Invalid Kernel ID
@@ -90,31 +91,31 @@
 	typedef int	BOOL;						//!< Another boolean type.
 	#endif
 
-	//! Union of a float and a sdword
+	//! Union of a float and a ice_sdword
 	typedef union {
-		float	f;							//!< The float
-		sdword	d;							//!< The integer
+		float       f;                         //!< The float
+		ice_sdword  d;                         //!< The integer
 	}scell;
 
-	//! Union of a float and a udword
+	//! Union of a float and a ice_udword
 	typedef union {
-		float	f;							//!< The float
-		udword	d;							//!< The integer
+		float       f;                         //!< The float
+		ice_udword  d;                         //!< The integer
 	}ucell;
 
 	// Type ranges
-	#define	MAX_SBYTE				0x7f						//!< max possible sbyte value
-	#define	MIN_SBYTE				0x80						//!< min possible sbyte value
-	#define	MAX_UBYTE				0xff						//!< max possible ubyte value
-	#define	MIN_UBYTE				0x00						//!< min possible ubyte value
-	#define	MAX_SWORD				0x7fff						//!< max possible sword value
-	#define	MIN_SWORD				0x8000						//!< min possible sword value
-	#define	MAX_UWORD				0xffff						//!< max possible uword value
-	#define	MIN_UWORD				0x0000						//!< min possible uword value
-	#define	MAX_SDWORD				0x7fffffff					//!< max possible sdword value
-	#define	MIN_SDWORD				0x80000000					//!< min possible sdword value
-	#define	MAX_UDWORD				0xffffffff					//!< max possible udword value
-	#define	MIN_UDWORD				0x00000000					//!< min possible udword value
+	#define	MAX_SBYTE				0x7f						//!< max possible ice_sbyte value
+	#define	MIN_SBYTE				0x80						//!< min possible ice_sbyte value
+	#define	MAX_UBYTE				0xff						//!< max possible ice_ubyte value
+	#define	MIN_UBYTE				0x00						//!< min possible ice_ubyte value
+	#define	MAX_SWORD				0x7fff						//!< max possible ice_sword value
+	#define	MIN_SWORD				0x8000						//!< min possible ice_sword value
+	#define	MAX_UWORD				0xffff						//!< max possible ice_uword value
+	#define	MIN_UWORD				0x0000						//!< min possible ice_uword value
+	#define	MAX_SDWORD				0x7fffffff					//!< max possible ice_sdword value
+	#define	MIN_SDWORD				0x80000000					//!< min possible ice_sdword value
+	#define	MAX_UDWORD				0xffffffff					//!< max possible ice_udword value
+	#define	MIN_UDWORD				0x00000000					//!< min possible ice_udword value
 	#define	MAX_FLOAT				FLT_MAX						//!< max possible float value
 	#define	MIN_FLOAT				(-FLT_MAX)					//!< min possible loat value
 	#define IEEE_1_0				0x3f800000					//!< integer representation of 1.0
@@ -125,7 +126,7 @@
 
 	#define ONE_OVER_RAND_MAX		(1.0f / float(RAND_MAX))	//!< Inverse of the max possible value returned by rand()
 
-	typedef bool				(*ENUMERATION)(udword value, udword param, udword context);	//!< ICE standard enumeration call
+	typedef bool				(*ENUMERATION)(ice_udword value, ice_udword param, ice_udword context); //!< ICE standard enumeration call
 	typedef	void**				VTABLE;							//!< A V-Table.
 
 	#undef		MIN

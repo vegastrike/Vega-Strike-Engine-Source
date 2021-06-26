@@ -50,7 +50,7 @@
 		 *	\warning	SCALE NOT SUPPORTED. The matrices must contain rotation & translation parts only.
 		 */
 		///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-							bool			Collide(PlanesCache& cache, const Plane* planes, udword nb_planes, const Model& model, const Matrix4x4* worldm=null);
+							bool			Collide(PlanesCache& cache, const Plane* planes, ice_udword nb_planes, const Model& model, const Matrix4x4* worldm=null);
 
 		// Mutant box-with-planes collision queries
 		inline_				bool			Collide(PlanesCache& cache, const OBB& box, const Model& model, const Matrix4x4* worldb=null, const Matrix4x4* worldm=null)
@@ -86,24 +86,24 @@
 
 		protected:
 		// Planes in model space
-							udword			mNbPlanes;
+							ice_udword			mNbPlanes;
 							Plane*			mPlanes;
 		// Leaf description
 							VertexPointers	mVP;
 		// Internal methods
-							void			_Collide(const AABBCollisionNode* node, udword clip_mask);
-							void			_Collide(const AABBNoLeafNode* node, udword clip_mask);
-							void			_Collide(const AABBQuantizedNode* node, udword clip_mask);
-							void			_Collide(const AABBQuantizedNoLeafNode* node, udword clip_mask);
-							void			_CollideNoPrimitiveTest(const AABBCollisionNode* node, udword clip_mask);
-							void			_CollideNoPrimitiveTest(const AABBNoLeafNode* node, udword clip_mask);
-							void			_CollideNoPrimitiveTest(const AABBQuantizedNode* node, udword clip_mask);
-							void			_CollideNoPrimitiveTest(const AABBQuantizedNoLeafNode* node, udword clip_mask);
+							void			_Collide(const AABBCollisionNode* node, ice_udword clip_mask);
+							void			_Collide(const AABBNoLeafNode* node, ice_udword clip_mask);
+							void			_Collide(const AABBQuantizedNode* node, ice_udword clip_mask);
+							void			_Collide(const AABBQuantizedNoLeafNode* node, ice_udword clip_mask);
+							void			_CollideNoPrimitiveTest(const AABBCollisionNode* node, ice_udword clip_mask);
+							void			_CollideNoPrimitiveTest(const AABBNoLeafNode* node, ice_udword clip_mask);
+							void			_CollideNoPrimitiveTest(const AABBQuantizedNode* node, ice_udword clip_mask);
+							void			_CollideNoPrimitiveTest(const AABBQuantizedNoLeafNode* node, ice_udword clip_mask);
 			// Overlap tests
-		inline_				bool			PlanesAABBOverlap(const Point& center, const Point& extents, udword& out_clip_mask, udword in_clip_mask);
-		inline_				bool			PlanesTriOverlap(udword in_clip_mask);
+		inline_				bool			PlanesAABBOverlap(const Point& center, const Point& extents, ice_udword& out_clip_mask, ice_udword in_clip_mask);
+		inline_				bool			PlanesTriOverlap(ice_udword in_clip_mask);
 			// Init methods
-							bool			InitQuery(PlanesCache& cache, const Plane* planes, udword nb_planes, const Matrix4x4* worldm=null);
+							bool			InitQuery(PlanesCache& cache, const Plane* planes, ice_udword nb_planes, const Matrix4x4* worldm=null);
 	};
 
 	class OPCODE_API HybridPlanesCollider : public PlanesCollider
@@ -113,7 +113,7 @@
 											HybridPlanesCollider();
 		virtual								~HybridPlanesCollider();
 
-							bool			Collide(PlanesCache& cache, const Plane* planes, udword nb_planes, const HybridModel& model, const Matrix4x4* worldm=null);
+							bool			Collide(PlanesCache& cache, const Plane* planes, ice_udword nb_planes, const HybridModel& model, const Matrix4x4* worldm=null);
 		protected:
 							Container		mTouchedBoxes;
 	};

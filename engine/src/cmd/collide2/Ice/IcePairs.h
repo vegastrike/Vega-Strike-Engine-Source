@@ -16,10 +16,10 @@
 	struct ICECORE_API Pair
 	{
 		inline_	Pair()	{}
-		inline_	Pair(udword i0, udword i1) : id0(i0), id1(i1)	{}
+		inline_	Pair(ice_udword i0, ice_udword i1) : id0(i0), id1(i1)	{}
 
-		udword	id0;	//!< First index of the pair
-		udword	id1;	//!< Second index of the pair
+		ice_udword	id0;	//!< First index of the pair
+		ice_udword	id1;	//!< Second index of the pair
 	};
 
 	class ICECORE_API Pairs : private Container
@@ -29,9 +29,9 @@
 								Pairs()							{}
 								~Pairs()						{}
 
-		inline_	udword			GetNbPairs()		const		{ return GetNbEntries()>>1;					}
+		inline_	ice_udword			GetNbPairs()		const		{ return GetNbEntries()>>1;					}
 		inline_	const Pair*		GetPairs()			const		{ return (const Pair*)GetEntries();			}
-		inline_	const Pair*		GetPair(udword i)	const		{ return (const Pair*)&GetEntries()[i+i];	}
+		inline_	const Pair*		GetPair(ice_udword i)	const		{ return (const Pair*)&GetEntries()[i+i];	}
 
 		inline_	BOOL			HasPairs()			const		{ return IsNotEmpty();						}
 
@@ -39,7 +39,7 @@
 		inline_	void			DeleteLastPair()				{ DeleteLastEntry();	DeleteLastEntry();	}
 
 		inline_	void			AddPair(const Pair& p)			{ Add(p.id0).Add(p.id1);					}
-		inline_	void			AddPair(udword id0, udword id1)	{ Add(id0).Add(id1);						}
+		inline_	void			AddPair(ice_udword id0, ice_udword id1)	{ Add(id0).Add(id1);						}
 	};
 
 #endif // __ICEPAIRS_H__

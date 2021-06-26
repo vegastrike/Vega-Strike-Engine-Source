@@ -11,7 +11,7 @@
 inline_ bool planeBoxOverlap(const Point& normal, const float d, const Point& maxbox)
 {
 	Point vmin, vmax;
-	for(udword q=0;q<=2;q++)
+	for(ice_udword q=0;q<=2;q++)
 	{
 		if(normal[q]>0.0f)	{ vmin[q]=-maxbox[q]; vmax[q]=maxbox[q]; }
 		else				{ vmin[q]=maxbox[q]; vmax[q]=-maxbox[q]; }
@@ -104,7 +104,7 @@ inline_ bool planeBoxOverlap(const Point& normal, const float d, const Point& ma
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /**
  *	Triangle-Box overlap test using the separating axis theorem.
- *	This is the code from Tomas Möller, a bit optimized:
+ *	This is the code from Tomas Mï¿½ller, a bit optimized:
  *	- with some more lazy evaluation (faster path on PC)
  *	- with a tiny bit of assembly
  *	- with "SAT-lite" applied if needed

@@ -20,13 +20,13 @@
 			AABB&			Add(const AABB& aabb);																					\
 			float			MakeCube(AABB& cube)																			const;	\
 			void			MakeSphere(Sphere& sphere)																		const;	\
-			const sbyte*	ComputeOutline(const Point& local_eye, sdword& num)												const;	\
-			float			ComputeBoxArea(const Point& eye, const Matrix4x4& mat, float width, float height, sdword& num)	const;	\
+			const ice_sbyte*	ComputeOutline(const Point& local_eye, ice_sdword& num)												const;	\
+			float			ComputeBoxArea(const Point& eye, const Matrix4x4& mat, float width, float height, ice_sdword& num)	const;	\
 			bool			IsInside(const AABB& box)																		const;	\
 			bool			ComputePlanes(Plane* planes)																	const;	\
 			bool			ComputePoints(Point* pts)																		const;	\
 			const Point*	GetVertexNormals()																				const;	\
-			const udword*	GetEdges()																						const;	\
+			const ice_udword*	GetEdges()																						const;	\
 			const Point*	GetEdgeNormals()																				const;	\
 	inline_	BOOL			ContainsPoint(const Point& p)																	const	\
 							{																										\
@@ -128,9 +128,9 @@
 		inline_			void		GetMax(Point& max)						const		{ max = mMax;								}
 
 		//! Get component of the box's min point along a given axis
-		inline_			float		GetMin(udword axis)						const		{ return mMin[axis];						}
+		inline_			float		GetMin(ice_udword axis)						const		{ return mMin[axis];						}
 		//! Get component of the box's max point along a given axis
-		inline_			float		GetMax(udword axis)						const		{ return mMax[axis];						}
+		inline_			float		GetMax(ice_udword axis)						const		{ return mMax[axis];						}
 
 		//! Get box center
 		inline_			void		GetCenter(Point& center)				const		{ center = (mMax + mMin)*0.5f;				}
@@ -138,9 +138,9 @@
 		inline_			void		GetExtents(Point& extents)				const		{ extents = (mMax - mMin)*0.5f;				}
 
 		//! Get component of the box's center along a given axis
-		inline_			float		GetCenter(udword axis)					const		{ return (mMax[axis] + mMin[axis])*0.5f;	}
+		inline_			float		GetCenter(ice_udword axis)					const		{ return (mMax[axis] + mMin[axis])*0.5f;	}
 		//! Get component of the box's extents along a given axis
-		inline_			float		GetExtents(udword axis)					const		{ return (mMax[axis] - mMin[axis])*0.5f;	}
+		inline_			float		GetExtents(ice_udword axis)					const		{ return (mMax[axis] - mMin[axis])*0.5f;	}
 
 		//! Get box diagonal
 		inline_			void		GetDiagonal(Point& diagonal)			const		{ diagonal = mMax - mMin;					}
@@ -178,7 +178,7 @@
 		 *	\return		true on intersection
 		 */
 		///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-		inline_			BOOL		Intersect(const AABB& a, udword axis)	const
+		inline_			BOOL		Intersect(const AABB& a, ice_udword axis)	const
 									{
 										if(mMax[axis] < a.mMin[axis] || a.mMax[axis] < mMin[axis])	return FALSE;
 										return TRUE;
@@ -345,9 +345,9 @@
 		inline_			void		GetMax(Point& max)						const		{ max = mCenter + mExtents;					}
 
 		//! Get component of the box's min point along a given axis
-		inline_			float		GetMin(udword axis)						const		{ return mCenter[axis] - mExtents[axis];	}
+		inline_			float		GetMin(ice_udword axis)						const		{ return mCenter[axis] - mExtents[axis];	}
 		//! Get component of the box's max point along a given axis
-		inline_			float		GetMax(udword axis)						const		{ return mCenter[axis] + mExtents[axis];	}
+		inline_			float		GetMax(ice_udword axis)						const		{ return mCenter[axis] + mExtents[axis];	}
 
 		//! Get box center
 		inline_			void		GetCenter(Point& center)				const		{ center = mCenter;							}
@@ -355,9 +355,9 @@
 		inline_			void		GetExtents(Point& extents)				const		{ extents = mExtents;						}
 
 		//! Get component of the box's center along a given axis
-		inline_			float		GetCenter(udword axis)					const		{ return mCenter[axis];						}
+		inline_			float		GetCenter(ice_udword axis)					const		{ return mCenter[axis];						}
 		//! Get component of the box's extents along a given axis
-		inline_			float		GetExtents(udword axis)					const		{ return mExtents[axis];					}
+		inline_			float		GetExtents(ice_udword axis)					const		{ return mExtents[axis];					}
 
 		//! Get box diagonal
 		inline_			void		GetDiagonal(Point& diagonal)			const		{ diagonal = mExtents * 2.0f;				}
@@ -406,7 +406,7 @@
 		 *	\return		true on intersection
 		 */
 		///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-		inline_			BOOL		Intersect(const AABB& a, udword axis)	const
+		inline_			BOOL		Intersect(const AABB& a, ice_udword axis)	const
 									{
 										float t = mCenter[axis] - a.mCenter[axis];
 										float e = a.mExtents[axis] + mExtents[axis];
@@ -487,7 +487,7 @@
 		if(p.z < min.z)	min.z = p.z;
 	}
 
-	inline_ void ComputeAABB(AABB& aabb, const Point* list, udword nb_pts)
+	inline_ void ComputeAABB(AABB& aabb, const Point* list, ice_udword nb_pts)
 	{
 		if(list)
 		{

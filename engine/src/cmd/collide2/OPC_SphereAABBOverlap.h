@@ -16,7 +16,7 @@ inline_ bool SphereCollider::SphereAABBOverlap(const Point& center, const Point&
 	//find the square of the distance
 	//from the sphere to the box
 #ifdef OLDIES
-	for(udword i=0;i<3;i++)
+	for(ice_udword i=0;i<3;i++)
 	{
 		float tmp = mCenter[i] - center[i];
 		float s = tmp + extents[i];
@@ -100,7 +100,7 @@ inline_ bool SphereCollider::SphereAABBOverlap(const Point& center, const Point&
 
 	//find the square of the distance
 	//from the sphere to the box
-	for(udword i=0;i<3;i++)
+	for(ice_udword i=0;i<3;i++)
 	{
 float Min = center[i] - extents[i];
 

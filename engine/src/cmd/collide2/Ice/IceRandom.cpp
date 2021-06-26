@@ -14,12 +14,12 @@
 
 using namespace Opcode;
 
-void 	SRand(udword seed)
+void 	SRand(ice_udword seed)
 {
 	srand(seed);
 }
 
-udword  Rand()
+ice_udword  Rand()
 {
 	return rand();
 }
@@ -27,10 +27,10 @@ udword  Rand()
 
 static BasicRandom gRandomGenerator(42);
 
-udword GetRandomIndex(udword max_index)
+ice_udword GetRandomIndex(ice_udword max_index)
 {
 	// We don't use rand() since it's limited to RAND_MAX
-	udword Index = gRandomGenerator.Randomize();
+	ice_udword Index = gRandomGenerator.Randomize();
 	return Index % max_index;
 }
 

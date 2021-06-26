@@ -46,7 +46,7 @@
 		 *	\return		the number of touched primitives
 		 */
 		///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-		inline_				udword			GetNbTouchedPrimitives()	const	{ return mTouchedPrimitives ? mTouchedPrimitives->GetNbEntries() : 0;	}
+		inline_				ice_udword			GetNbTouchedPrimitives()	const	{ return mTouchedPrimitives ? mTouchedPrimitives->GetNbEntries() : 0;	}
 
 		///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 		/**
@@ -56,7 +56,7 @@
 		 *	\return		the list of touched primitives (primitive indices)
 		 */
 		///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-		inline_		const	udword*			GetTouchedPrimitives()		const	{ return mTouchedPrimitives ? mTouchedPrimitives->GetEntries() : null;	}
+		inline_		const	ice_udword*			GetTouchedPrimitives()		const	{ return mTouchedPrimitives ? mTouchedPrimitives->GetEntries() : null;	}
 
 		// Stats
 
@@ -67,7 +67,7 @@
 		 *	\return		the number of Volume-BV tests performed during last query
 		 */
 		///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-		inline_				udword			GetNbVolumeBVTests()		const	{ return mNbVolumeBVTests;												}
+		inline_				ice_udword			GetNbVolumeBVTests()		const	{ return mNbVolumeBVTests;												}
 
 		///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 		/**
@@ -76,7 +76,7 @@
 		 *	\return		the number of Volume-Triangle tests performed during last query
 		 */
 		///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-		inline_				udword			GetNbVolumePrimTests()		const	{ return mNbVolumePrimTests;											}
+		inline_				ice_udword			GetNbVolumePrimTests()		const	{ return mNbVolumePrimTests;											}
 
 		// Settings
 
@@ -96,8 +96,8 @@
 							Point			mCenterCoeff;
 							Point			mExtentsCoeff;
 		// Stats
-							udword			mNbVolumeBVTests;	//!< Number of Volume-BV tests
-							udword			mNbVolumePrimTests;	//!< Number of Volume-Primitive tests
+							ice_udword			mNbVolumeBVTests;	//!< Number of Volume-BV tests
+							ice_udword			mNbVolumePrimTests;	//!< Number of Volume-Primitive tests
 		// Internal methods
 							void			_Dump(const AABBCollisionNode* node);
 							void			_Dump(const AABBNoLeafNode* node);

@@ -82,7 +82,7 @@ class csOPCODECollider
 		void GeometryInitialize (const std::vector <mesh_polygon> &polygons);
 
 		/* callback used to return vertex points when requested from opcode*/
-		static void MeshCallback (udword triangle_index,
+		static void MeshCallback (ice_udword triangle_index,
 							Opcode::VertexPointers& triangle, void* user_data);
 
         /* returns face of mesh where ray collided */

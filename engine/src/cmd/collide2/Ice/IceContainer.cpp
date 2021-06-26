@@ -29,8 +29,8 @@ using namespace Opcode;
 
 // Static members
 #ifdef CONTAINER_STATS
-udword Container::mNbContainers = 0;
-udword Container::mUsedRam = 0;
+ice_udword Container::mNbContainers = 0;
+ice_udword Container::mUsedRam = 0;
 #endif
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -51,7 +51,7 @@ Container::Container() : mMaxNbEntries(0), mCurNbEntries(0), mEntries(null), mGr
  *	Constructor. Also allocates a given number of entries.
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-Container::Container(udword size, float growth_factor) : mMaxNbEntries(0), mCurNbEntries(0), mEntries(null), mGrowthFactor(growth_factor)
+Container::Container(ice_udword size, float growth_factor) : mMaxNbEntries(0), mCurNbEntries(0), mEntries(null), mGrowthFactor(growth_factor)
 {
 #ifdef CONTAINER_STATS
 	mNbContainers++;
@@ -98,7 +98,7 @@ Container::~Container()
 Container& Container::Empty()
 {
 #ifdef CONTAINER_STATS
-	mUsedRam-=mMaxNbEntries*sizeof(udword);
+	mUsedRam-=mMaxNbEntries*sizeof(ice_udword);
 #endif
 	DELETEARRAY(mEntries);
 	mCurNbEntries = mMaxNbEntries = 0;
@@ -112,28 +112,28 @@ Container& Container::Empty()
  *	\return		true if success.
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-bool Container::Resize(udword needed)
+bool Container::Resize(ice_udword needed)
 {
 #ifdef CONTAINER_STATS
 	// Subtract previous amount of bytes
-	mUsedRam-=mMaxNbEntries*sizeof(udword);
+	mUsedRam-=mMaxNbEntries*sizeof(ice_udword);
 #endif
 
 	// Get more entries
-	mMaxNbEntries = mMaxNbEntries ? udword(float(mMaxNbEntries)*mGrowthFactor) : 2;	// Default nb Entries = 2
+	mMaxNbEntries = mMaxNbEntries ? ice_udword(float(mMaxNbEntries)*mGrowthFactor) : 2;	// Default nb Entries = 2
 	if(mMaxNbEntries<mCurNbEntries + needed)	mMaxNbEntries = mCurNbEntries + needed;
 
 	// Get some bytes for new entries
-	udword*	NewEntries = new udword[mMaxNbEntries];
+	ice_udword*	NewEntries = new ice_udword[mMaxNbEntries];
 	CHECKALLOC(NewEntries);
 
 #ifdef CONTAINER_STATS
 	// Add current amount of bytes
-	mUsedRam+=mMaxNbEntries*sizeof(udword);
+	mUsedRam+=mMaxNbEntries*sizeof(ice_udword);
 #endif
 
 	// Copy old data if needed
-	if(mCurNbEntries)	CopyMemory(NewEntries, mEntries, mCurNbEntries*sizeof(udword));
+	if(mCurNbEntries)	CopyMemory(NewEntries, mEntries, mCurNbEntries*sizeof(ice_udword));
 
 	// Delete old data
 	DELETEARRAY(mEntries);
@@ -151,7 +151,7 @@ bool Container::Resize(udword needed)
  *	\return		true if success
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-bool Container::SetSize(udword nb)
+bool Container::SetSize(ice_udword nb)
 {
 	// Make sure it's empty
 	Empty();
@@ -163,12 +163,12 @@ bool Container::SetSize(udword nb)
 	mMaxNbEntries = nb;
 
 	// Get some bytes for new entries
-	mEntries = new udword[mMaxNbEntries];
+	mEntries = new ice_udword[mMaxNbEntries];
 	CHECKALLOC(mEntries);
 
 #ifdef CONTAINER_STATS
 	// Add current amount of bytes
-	mUsedRam+=mMaxNbEntries*sizeof(udword);
+	mUsedRam+=mMaxNbEntries*sizeof(ice_udword);
 #endif
 	return true;
 }
@@ -183,7 +183,7 @@ bool Container::Refit()
 {
 #ifdef CONTAINER_STATS
 	// Subtract previous amount of bytes
-	mUsedRam-=mMaxNbEntries*sizeof(udword);
+	mUsedRam-=mMaxNbEntries*sizeof(ice_udword);
 #endif
 
 	// Get just enough entries
@@ -191,16 +191,16 @@ bool Container::Refit()
 	if(!mMaxNbEntries)	return false;
 
 	// Get just enough bytes
-	udword*	NewEntries = new udword[mMaxNbEntries];
+	ice_udword*	NewEntries = new ice_udword[mMaxNbEntries];
 	CHECKALLOC(NewEntries);
 
 #ifdef CONTAINER_STATS
 	// Add current amount of bytes
-	mUsedRam+=mMaxNbEntries*sizeof(udword);
+	mUsedRam+=mMaxNbEntries*sizeof(ice_udword);
 #endif
 
 	// Copy old data
-	CopyMemory(NewEntries, mEntries, mCurNbEntries*sizeof(udword));
+	CopyMemory(NewEntries, mEntries, mCurNbEntries*sizeof(ice_udword));
 
 	// Delete old data
 	DELETEARRAY(mEntries);
@@ -216,16 +216,16 @@ bool Container::Refit()
  *	Checks whether the container already contains a given value.
  *	\param		entry			[in] the value to look for in the container
  *	\param		location		[out] a possible pointer to store the entry location
- *	\see		Add(udword entry)
+ *	\see		Add(ice_udword entry)
  *	\see		Add(float entry)
  *	\see		Empty()
  *	\return		true if the value has been found in the container, else false.
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-bool Container::Contains(udword entry, udword* location) const
+bool Container::Contains(ice_udword entry, ice_udword* location) const
 {
 	// Look for the entry
-	for(udword i=0;i<mCurNbEntries;i++)
+	for(ice_udword i=0;i<mCurNbEntries;i++)
 	{
 		if(mEntries[i]==entry)
 		{
@@ -244,10 +244,10 @@ bool Container::Contains(udword entry, udword* location) const
  *	\warning	This method is arbitrary slow (O(n)) and should be used carefully. Insertion order is not preserved.
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-bool Container::Delete(udword entry)
+bool Container::Delete(ice_udword entry)
 {
 	// Look for the entry
-	for(udword i=0;i<mCurNbEntries;i++)
+	for(ice_udword i=0;i<mCurNbEntries;i++)
 	{
 		if(mEntries[i]==entry)
 		{
@@ -267,17 +267,17 @@ bool Container::Delete(udword entry)
  *	\warning	This method is arbitrary slow (O(n)) and should be used carefully.
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-bool Container::DeleteKeepingOrder(udword entry)
+bool Container::DeleteKeepingOrder(ice_udword entry)
 {
 	// Look for the entry
-	for(udword i=0;i<mCurNbEntries;i++)
+	for(ice_udword i=0;i<mCurNbEntries;i++)
 	{
 		if(mEntries[i]==entry)
 		{
 			// Entry has been found at index i.
 			// Shift entries to preserve order. You really should use a linked list instead.
 			mCurNbEntries--;
-			for(udword j=i;j<mCurNbEntries;j++)
+			for(ice_udword j=i;j<mCurNbEntries;j++)
 			{
 				mEntries[j] = mEntries[j+1];
 			}
@@ -295,9 +295,9 @@ bool Container::DeleteKeepingOrder(udword entry)
  *	\return		Self-Reference
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-Container& Container::FindNext(udword& entry, FindMode find_mode)
+Container& Container::FindNext(ice_udword& entry, FindMode find_mode)
 {
-	udword Location;
+	ice_udword Location;
 	if(Contains(entry, &Location))
 	{
 		Location++;
@@ -315,9 +315,9 @@ Container& Container::FindNext(udword& entry, FindMode find_mode)
  *	\return		Self-Reference
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-Container& Container::FindPrev(udword& entry, FindMode find_mode)
+Container& Container::FindPrev(ice_udword& entry, FindMode find_mode)
 {
-	udword Location;
+	ice_udword Location;
 	if(Contains(entry, &Location))
 	{
 		Location--;
@@ -333,15 +333,15 @@ Container& Container::FindPrev(udword& entry, FindMode find_mode)
  *	\return		the ram used in bytes.
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-udword Container::GetUsedRam() const
+ice_udword Container::GetUsedRam() const
 {
-	return sizeof(Container) + mMaxNbEntries * sizeof(udword);
+	return sizeof(Container) + mMaxNbEntries * sizeof(ice_udword);
 }
 
 void Container::operator=(const Container& object)
 {
 	SetSize(object.GetNbEntries());
-	CopyMemory(mEntries, object.GetEntries(), mMaxNbEntries*sizeof(udword));
+	CopyMemory(mEntries, object.GetEntries(), mMaxNbEntries*sizeof(ice_udword));
 	mCurNbEntries = mMaxNbEntries;
 }
 

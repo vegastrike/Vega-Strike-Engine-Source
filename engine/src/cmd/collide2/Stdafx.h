@@ -6,6 +6,7 @@
  *
  *  Copyright (C) Daniel Horn, chuck starchaser, and pheonixstorm
  *  Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike contributors
+ *  Copyright (C) 2021 Stephen G. Tuggy
  *
  *  https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -29,10 +30,11 @@
 #ifndef _STDAFX_H_
 #define _STDAFX_H_
 
-//chuck starchaser shutting up the warnings about violations of strict aliasing...
-#ifndef _WIN32 // pheonixstorm shutting up pragma warnings on win32
-#pragma GCC diagnostic ignored "-Wstrict-aliasing"
-#endif
+// Stephen G. Tuggy getting rid of this hack entirely
+// chuck starchaser shutting up the warnings about violations of strict aliasing...
+// #ifndef _WIN32 // pheonixstorm shutting up pragma warnings on win32
+// #pragma GCC diagnostic ignored "-Wstrict-aliasing"
+// #endif
 //believe me I tried to fix the code, using a union of float, int and unsigned, but the amount of
 //changes needed in the code was immense.
 //So, bottom line:

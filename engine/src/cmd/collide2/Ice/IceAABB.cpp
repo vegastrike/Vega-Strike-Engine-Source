@@ -205,9 +205,9 @@ const Point* AABB::GetVertexNormals()	const
  *	\return		24 indices (12 edges) indexing the list returned by ComputePoints()
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-const udword* AABB::GetEdges() const
+const ice_udword* AABB::GetEdges() const
 {
-	static udword Indices[] = {
+	static ice_udword Indices[] = {
 	0, 1,	1, 2,	2, 3,	3, 0,
 	7, 6,	6, 5,	5, 4,	4, 7,
 	1, 5,	6, 2,
@@ -285,7 +285,7 @@ const Point* AABB::GetEdgeNormals() const
 //
 // I also replaced original ints with sbytes.
 
-static const sbyte gIndexList[64][8] =
+static const ice_sbyte gIndexList[64][8] =
 {
     {-1,-1,-1,-1,-1,-1,-1,   0}, // 0 inside
     { 0, 4, 7, 3, 0,-1,-1,   4}, // 1 left
@@ -353,7 +353,7 @@ static const sbyte gIndexList[64][8] =
     {-1,-1,-1,-1,-1,-1,-1,   0}  //63 invalid
 };
 
-const sbyte* AABB::ComputeOutline(const Point& local_eye, sdword& num)	const
+const ice_sbyte* AABB::ComputeOutline(const Point& local_eye, ice_sdword& num)	const
 {
 	// Get box corners
 	Point min;	GetMin(min);
@@ -368,7 +368,7 @@ const sbyte* AABB::ComputeOutline(const Point& local_eye, sdword& num)	const
 			+ ((local_eye.z > max.z) ? 32 : 0);	// 32 = back
 
 	// Look up number of vertices in outline
-	num = (sdword)gIndexList[pos][7];
+	num = (ice_sdword)gIndexList[pos][7];
 	// Zero indicates invalid case
 	if(!num) return null;
 
@@ -381,16 +381,16 @@ const sbyte* AABB::ComputeOutline(const Point& local_eye, sdword& num)	const
 //const AABB&			box,		//3d bbox
 //const Matrix4x4&	mat,		//free transformation for bbox
 //float width, float height, int& num)
-float AABB::ComputeBoxArea(const Point& eye, const Matrix4x4& mat, float width, float height, sdword& num)	const
+float AABB::ComputeBoxArea(const Point& eye, const Matrix4x4& mat, float width, float height, ice_sdword& num)	const
 {
-	const sbyte* Outline = ComputeOutline(eye, num);
+	const ice_sbyte* Outline = ComputeOutline(eye, num);
 	if(!Outline)	return -1.0f;
 
 	// Compute box vertices
 	Point vertexBox[8], dst[8];
 	ComputePoints(vertexBox);
 
-	sdword i;
+	ice_sdword i;
 	// Transform all outline corners into 2D screen space
 	for(i=0;i<num;i++)
 	{
