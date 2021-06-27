@@ -16,22 +16,22 @@
 
     union ice_union
     {
-        ice_sdword a;
-        ice_udword b;
-        float      c;
+        ice_sdword sdword_member;
+        ice_udword udword_member;
+        float      float_member;
     };
 
 	//! Integer representation of a floating-point value.
-	#define IR(x)					((static_cast<ice_union*>((void *)&(x)))->b)
+	#define IR(x)					((static_cast<ice_union*>((void *)&(x)))->udword_member)
 
 	//! Signed integer representation of a floating-point value.
-	#define SIR(x)					((static_cast<ice_union*>((void *)&(x)))->a)
+	#define SIR(x)					((static_cast<ice_union*>((void *)&(x)))->sdword_member)
 
 	//! Absolute integer representation of a floating-point value
 	#define AIR(x)					(IR(x)&0x7fffffff)
 
 	//! Floating-point representation of an integer value.
-	#define FR(x)					((static_cast<ice_union*>((void *)&(x)))->c)
+	#define FR(x)					((static_cast<ice_union*>((void *)&(x)))->float_member)
 	
 	//! Is the float valid ?
 	inline_ bool IsNAN(float value)				{ return (IR(value)&0x7f800000) == 0x7f800000;	}
