@@ -498,7 +498,7 @@ bool Beam::Collide( Unit *target, Unit *firer, Unit *superunit )
                     target->ApplyForce( direction
                                        *( appldam
                                          /sqrt( /*(target->sim_atom_multiplier
-                                                 > 0) ? target->sim_atom_multiplier : */ 1.0 )*mymin( 1, target->Mass ) ) );
+                                                 > 0) ? target->sim_atom_multiplier : */ 1.0 )*mymin( 1, target->getMass() ) ) );
                 }
             }
             float ors_m = o_ors_m, trs_m = o_trs_m, ofs = o_o;

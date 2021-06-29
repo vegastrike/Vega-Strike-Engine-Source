@@ -959,9 +959,10 @@ void StarSystem::UpdateUnitPhysics( bool firstframe, Unit *unit )
     int predprior = unit->predicted_priority;
     //If the priority has really changed (not an initial scattering, because prediction doesn't match)
     if (priority != predprior) {
-        if (predprior == 0)
+        if (predprior == 0) {
             //Validate snapshot of current interpolated state (this is a reschedule)
             unit->curr_physical_state = unit->cumulative_transformation;
+        }
         //Save priority value as prediction for next scheduling, but don't overwrite yet.
         predprior = priority;
         //Scatter, so as to achieve uniform distribution

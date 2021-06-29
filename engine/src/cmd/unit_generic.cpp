@@ -2122,7 +2122,7 @@ Unit * makeBlankUpgrade( string templnam, int faction )
         int q = bl->GetCargo( i ).quantity;
         bl->RemoveCargo( i, q );
     }
-    bl->Mass = 0;
+    bl->setMass(0);
     return bl;
 }
 

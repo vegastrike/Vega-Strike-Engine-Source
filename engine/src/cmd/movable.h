@@ -42,11 +42,20 @@ struct Quaternion;
 
 class Movable
 {
-public:
-    // Fields
+
+protected:
     //mass of this unit (may change with cargo)
     // TODO: subclass with return Mass+fuel;
     float  Mass;
+
+public:
+
+    float getMass() { return Mass;}
+    float getMass() const { return Mass;}
+    void setMass(float mass) { Mass = mass;}
+
+    // Fields
+
     Limits limits;
     //The velocity this unit has in World Space
     Vector cumulative_velocity;
@@ -75,26 +84,26 @@ public:
     bool resolveforces;
 
     //The number of frames ahead this was put in the simulation queue
-    unsigned int   sim_atom_multiplier = 1;
+    unsigned int   sim_atom_multiplier;
     //The number of frames ahead this is predicted to be scheduled in the next scheduling round
-    unsigned int   predicted_priority = 1;
+    unsigned int   predicted_priority;
     //When will physical simulation occur
-    unsigned int   cur_sim_queue_slot = rand()%SIM_QUEUE_SIZE;
+    unsigned int   cur_sim_queue_slot;
     //Used with subunit scheduling, to avoid the complex ickiness of having to synchronize scattered slots
-    unsigned int   last_processed_sqs = 0;
+    unsigned int   last_processed_sqs;
 
     // TODO: this should go up to ship
-    unsigned char docked = NOT_DOCKED;
+    unsigned char docked;
 
     //The cumulative (incl subunits parents' transformation)
     Matrix cumulative_transformation_matrix;
     //The cumulative (incl subunits parents' transformation)
     Transformation cumulative_transformation;
 
-    Vector corner_min = Vector(FLT_MAX, FLT_MAX, FLT_MAX);
-    Vector corner_max = Vector(-FLT_MAX, -FLT_MAX, -FLT_MAX);
+    Vector corner_min;
+    Vector corner_max;
     //How big is this unit
-    float radial_size = 0;
+    float radial_size;
 
     class graphic_options
     {
@@ -120,7 +129,7 @@ public:
     graphicOptions;
 protected:
     //Moment of intertia of this unit
-    float  Momentofinertia = 0.01; // Was 0 but Init says 0.01
+    float  Momentofinertia; // Was 0 but Init says 0.01
     Vector SavedAccel;
     Vector SavedAngAccel;
     static bool configLoaded;

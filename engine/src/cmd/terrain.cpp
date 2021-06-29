@@ -43,7 +43,7 @@ void Terrain::SetTransformation( const Matrix &Mat )
 
 void Terrain::ApplyForce( Unit *un, const Vector &normal, float dist )
 {
-    un->ApplyForce( normal*.4*un->Mass
+    un->ApplyForce( normal*.4*un->getMass()
                    *fabs( normal.Dot( (un->GetVelocity()/simulation_atom_var) )+fabs( dist )/(simulation_atom_var) ) );
     un->ApplyDamage( un->Position().Cast()-normal*un->rSize(), -normal, .5*fabs( normal.Dot(
                                                                                     un->GetVelocity() ) )*mass*simulation_atom_var,

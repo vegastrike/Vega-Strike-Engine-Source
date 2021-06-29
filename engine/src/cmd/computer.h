@@ -52,18 +52,18 @@ public:
             };
         };
         //the max range the radar can handle
-        float maxrange = 0;
+        float maxrange;
         //the dot with (0,0,1) indicating the farthest to the side the radar can handle.
-        float maxcone = -1;
-        float lockcone = 0;
-        float trackingcone = 0;
+        float maxcone;
+        float lockcone;
+        float trackingcone;
         //The minimum radius of the target
-        float mintargetsize = 0;
+        float mintargetsize;
         // What kind of type and capability the radar supports
-        int   capability = Capability::IFF_NONE;
-        bool  locked = false;
-        bool  canlock = false;
-        bool  trackingactive = true;
+        int   capability;
+        bool  locked;
+        bool  canlock;
+        bool  trackingactive;
 
         Brand::Value GetBrand() const;
         bool UseFriendFoe() const;
@@ -74,55 +74,41 @@ public:
     };
 
     RADARLIM radar;
-    bool ecmactive = true;
+    bool ecmactive;
     //The nav point the unit may be heading for
-    Vector NavPoint = Vector(0,0,0);
+    Vector NavPoint;
     //The target that the unit has in computer
     UnitContainer target;
     //Any target that may be attacking and has set this threat
     UnitContainer threat;
     //Unit that it should match velocity with (not speed) if null, matches velocity with universe frame (star)
-    UnitContainer velocity_ref = nullptr;
-    bool  force_velocity_ref = false;
+    UnitContainer velocity_ref;
+    bool  force_velocity_ref;
     //The threat level that was calculated from attacking unit's threat
-    float threatlevel = 0;
+    float threatlevel;
     //The speed the flybywire system attempts to maintain
-    float set_speed = 0;
+    float set_speed ;
     //Computers limitation of speed
-    float max_combat_speed = 1;
-    float max_combat_ab_speed = 1;
+    float max_combat_speed;
+    float max_combat_ab_speed;
     //Computer's restrictions of YPR to limit space combat maneuvers
-    float max_yaw_left = 1;
-    float max_yaw_right = 1;
-    float max_pitch_down = 1;
-    float max_pitch_up = 1;
-    float max_roll_left = 1;
-    float max_roll_right = 1;
+    float max_yaw_left;
+    float max_yaw_right;
+    float max_pitch_down;
+    float max_pitch_up;
+    float max_roll_left;
+    float max_roll_right;
     //Whether or not an 'lead' indicator appears in front of target
-    unsigned char slide_start = 0;
-    unsigned char slide_end = 0;
-    bool itts = false;
+    unsigned char slide_start;
+    unsigned char slide_end;
+    bool itts;
     //tells whether the speed is clamped draconian-like or not
-    bool combat_mode = true;
-    Computer() : NavPoint( 0, 0, 0 )
-      , threatlevel( 0 )
-      , set_speed( 0 )
-      , max_combat_speed( 0 )
-      , max_combat_ab_speed( 0 )
-      , max_yaw_left( 0 )
-      , max_yaw_right( 0 )
-      , max_pitch_down( 0 )
-      , max_pitch_up( 0 )
-      , max_roll_left( 0 )
-      , max_roll_right( 0 )
-      , slide_start( 0 )
-      , slide_end( 0 )
-      , itts( false )
-      , combat_mode( false ) {}
+    bool combat_mode;
 
     float max_speed() const;
     float max_ab_speed() const;
 
+    Computer();
 };
 
 #endif // COMPUTER_H

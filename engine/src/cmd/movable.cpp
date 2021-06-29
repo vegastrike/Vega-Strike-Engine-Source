@@ -77,7 +77,18 @@ std::string Movable::insys_jump_ani = "";
 float Movable::air_res_coef = 0.0f;
 float Movable::lateral_air_res_coef = 0.0f;
 
-Movable::Movable() : cumulative_transformation_matrix( identity_matrix ) {
+Movable::Movable() : cumulative_transformation_matrix( identity_matrix ),
+    sim_atom_multiplier(1),
+    predicted_priority(1),
+    last_processed_sqs(0),
+    docked(NOT_DOCKED),
+    corner_min(Vector(FLT_MAX, FLT_MAX, FLT_MAX)),
+    corner_max(Vector(-FLT_MAX, -FLT_MAX, -FLT_MAX)),
+    radial_size(0),
+    Momentofinertia(0.01)
+{
+    cur_sim_queue_slot = rand()%SIM_QUEUE_SIZE;
+
     if (!configLoaded) {
         VELOCITY_MAX = GameConfig::GetVariable( "physics", "velocity_max", 10000);
         humanwarprampuptime = GameConfig::GetVariable( "physics", "warprampuptime", 5);

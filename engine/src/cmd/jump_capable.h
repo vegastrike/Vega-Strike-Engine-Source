@@ -11,9 +11,11 @@
 class JumpCapable
 {
 public:
-    StarSystem *activeStarSystem = nullptr;
+    StarSystem *activeStarSystem;
 
 public:
+    JumpCapable();
+
     void ActivateJumpDrive( int destination = 0 );
     void AddDestination( const std::string& );
     bool AutoPilotTo( Unit *un, bool automaticenergyrealloc );

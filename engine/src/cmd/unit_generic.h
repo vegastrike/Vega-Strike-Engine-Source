@@ -358,13 +358,19 @@ protected:
  **************************************************************************************
  */
 
-public:
+private:
     // TODO: move from GFX/Planet stuff
     // These two are probably zero.
     // TODO: check and if so, replace with 0.
+    // Making private and re-adding trivial getter
     unsigned char attack_preference = ROLES::getRole( "INERT" );
     unsigned char unit_role = ROLES::getRole( "INERT" );
 
+public:
+    unsigned char getAttackPreferenceChar() { return attack_preference; }
+    unsigned char getUnitRoleChar() { return unit_role; }
+    unsigned char getAttackPreferenceChar() const { return attack_preference; }
+    unsigned char getUnitRoleChar() const { return unit_role; }
 
 //following 2 are legacy functions for python export only
     void setCombatRole( const std::string &s );

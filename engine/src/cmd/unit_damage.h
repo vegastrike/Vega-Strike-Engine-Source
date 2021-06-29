@@ -123,14 +123,14 @@ void GameUnit::Split( int level )
         this->SubUnits.prepend( splitsub = new GameUnit( tempmeshes, true, this->faction ) );
         splitsub->hull = 1000;
         splitsub->name = "debris";
-        splitsub->Mass = game_options.debris_mass*splitsub->Mass/level;
+        splitsub->setMass(game_options.debris_mass*splitsub->getMass()/level);
         splitsub->pImage->timeexplode = .1;
         if (splitsub->meshdata[0]) {
             Vector loc  = splitsub->meshdata[0]->Position();
             float  locm = loc.Magnitude();
             if (locm < .0001)
                 locm = 1;
-            splitsub->ApplyForce( splitsub->meshdata[0]->rSize()*game_options.explosionforce*10*splitsub->Mass*loc/locm );
+            splitsub->ApplyForce( splitsub->meshdata[0]->rSize()*game_options.explosionforce*10*splitsub->getMass()*loc/locm );
             loc.Set( rand(), rand(), rand()+.1 );
             loc.Normalize();
             splitsub->ApplyLocalTorque( loc*splitsub->GetMoment()*game_options.explosiontorque*( 1+rand()%(int) ( 1+this->rSize() ) ) );

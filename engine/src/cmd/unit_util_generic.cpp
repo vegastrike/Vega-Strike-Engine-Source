@@ -93,7 +93,7 @@ bool isCapitalShip( const Unit *my_unit )
 {
     if (!my_unit) return false;
     static unsigned int capitaltypes = ROLES::getCapitalRoles();
-    return ( ( 1<<(unsigned int) my_unit->unit_role )&capitaltypes ) != 0;
+    return ( ( 1<<(unsigned int) my_unit->getUnitRoleChar() )&capitaltypes ) != 0;
 }
 
 bool hasDockingUnits( const Unit *my_unit )
