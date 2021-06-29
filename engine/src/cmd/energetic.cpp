@@ -34,14 +34,15 @@
 
 static const float insys_jump_cost = GameConfig::GetVariable( "physics", "insystem_jump_cost", 0.1 );
 
-Energetic::Energetic()
+Energetic::Energetic(): energy(0),
+    recharge(0),
+    maxenergy(0),
+    maxwarpenergy(0),
+    warpenergy(0),
+    fuel(0),
+    afterburnenergy(0),
+    afterburntype(0)
 {
-    // TODO: this inconsistency is taken from the old code.
-    // We really should pick between 1 and 0 and be done with it.
-    energy = 1;
-    maxenergy = 1;
-    recharge = 1;
-
     jump.insysenergy = insys_jump_cost * jump.energy;
 }
 
