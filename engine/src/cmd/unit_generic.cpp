@@ -4588,10 +4588,13 @@ std::string Unit::massSerializer( const XMLType &input, void *mythis )
     Unit *un   = (Unit*) mythis;
     float mass = un->Mass;
     static bool usemass = XMLSupport::parse_bool( vs_config->getVariable( "physics", "use_cargo_mass", "true" ) );
-    for (unsigned int i = 0; i < un->cargo.size(); ++i)
-        if (un->cargo[i].quantity > 0)
-            if (usemass)
+    for (unsigned int i = 0; i < un->cargo.size(); ++i) {
+        if (un->cargo[i].quantity > 0) {
+            if (usemass) {
                 mass -= un->cargo[i].mass*un->cargo[i].quantity;
+            }
+        }
+    }
     return XMLSupport::tostring( (float) mass );
 }
 
