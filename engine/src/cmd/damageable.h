@@ -35,8 +35,11 @@ class Damageable
 public:
     // TODO: Consider making into protected later
     // Fields
-    float maxhull;
-    float hull;
+    // Inconsistency between this (0) and Init (1) for hull and maxhull.
+    // Chose Init and value of 1. Also commented out was 10.
+    // Doesn't really matter, but documenting anyway.
+    float maxhull = 1;
+    float hull = 1;
     Armor armor;
     Shield shield;
 

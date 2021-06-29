@@ -93,7 +93,7 @@ bool isCapitalShip( const Unit *my_unit )
 {
     if (!my_unit) return false;
     static unsigned int capitaltypes = ROLES::getCapitalRoles();
-    return ( ( 1<<(unsigned int) my_unit->unitRole() )&capitaltypes ) != 0;
+    return ( ( 1<<(unsigned int) my_unit->getUnitRoleChar() )&capitaltypes ) != 0;
 }
 
 bool hasDockingUnits( const Unit *my_unit )
@@ -782,7 +782,7 @@ void setECM( Unit *my_unit, int NewECM )
     //short fix
     if (!my_unit)
         return;
-    my_unit->GetImageInformation().ecm = NewECM;
+    my_unit->ecm = NewECM;
 }
 
 int getECM( const Unit *my_unit )
@@ -790,7 +790,7 @@ int getECM( const Unit *my_unit )
     //short fix
     if (!my_unit)
         return 0;
-    return my_unit->computer.ecmactive ? my_unit->pImage->ecm : 0;
+    return my_unit->computer.ecmactive ? my_unit->ecm : 0;
 }
 
 static bool ishere( const Unit *par, const Unit *look )

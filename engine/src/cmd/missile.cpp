@@ -226,7 +226,7 @@ void Missile::UpdatePhysics2( const Transformation &trans,
             Unit   *su;
             for (; (su = *i) != nullptr; ++i)
             {
-                if (su->attackPreference() == pointdef)
+                if (su->getAttackPreferenceChar() == pointdef)
                 {
                     if (su->Target() == nullptr)
                     {

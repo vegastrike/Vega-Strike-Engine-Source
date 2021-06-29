@@ -187,7 +187,9 @@ public:
     }
     virtual void AddMissileToQueue( class MissileEffect* );
     virtual void UpdateMissiles();
-    void UpdateUnitPhysics( bool firstframe );
+    void UpdateUnitsPhysics( bool firstframe );
+    void UpdateUnitPhysics( bool firstframe, Unit *unit );
+
     ///Requeues the unit so that it is simulated ASAP.
     void RequestPhysics( Unit *un, unsigned int queue );
 

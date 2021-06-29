@@ -241,7 +241,7 @@ void GameUnit::DrawNow( const Matrix &mato, float lod )
     }
     int cloak = this->cloaking;
     if (this->cloaking > this->cloakmin)
-        cloak = cloakVal( cloak, this->cloakmin, this->pImage->cloakrate, this->pImage->cloakglass );
+        cloak = cloakVal( cloak, this->cloakmin, this->cloakrate, this->cloakglass );
     for (i = 0; i <= this->nummesh(); i++) {
         //NOTE LESS THAN OR EQUALS...to cover shield mesh
         if (this->meshdata[i] == NULL)
@@ -382,8 +382,8 @@ void GameUnit::Draw( const Transformation &parent, const Matrix &parentMatrix )
     if (!cam_setup_phase) {
         // Following stuff is only needed in actual drawing phase
         if (this->cloaking > this->cloakmin) {
-            cloak = (int) (this->cloaking-interpolation_blend_factor*this->pImage->cloakrate * simulation_atom_var );
-            cloak = cloakVal( cloak, this->cloakmin, this->pImage->cloakrate, this->pImage->cloakglass );
+            cloak = (int) (this->cloaking-interpolation_blend_factor*this->cloakrate * simulation_atom_var );
+            cloak = cloakVal( cloak, this->cloakmin, this->cloakrate, this->cloakglass );
         }
         if (this->hull < this->maxhull) {
             damagelevel = this->hull/this->maxhull;

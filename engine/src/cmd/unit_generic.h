@@ -75,9 +75,12 @@ void UncheckUnit( class Unit*un );
 #include "vsfilesystem.h"
 #include "collide_map.h"
 #include "SharedPool.h"
+#include "role_bitmask.h"
+
+#include "game_config.h"
+
 
 extern char * GetUnitDir( const char *filename );
-extern float capship_size;
 
 Unit* getMasterPartList();
 bool CloseEnoughToAutotrack( Unit *me, Unit *targ, float &cone );
@@ -140,10 +143,39 @@ class Unit : public Armed, public Audible, public Drawable, public Damageable, p
 {
 protected:
 //How many lists are referencing us
-    int ucref;
+    int ucref = 0;
     StringPool::Reference csvRow;
 public:
 
+    /// Radar and related systems
+    // TODO: take a deeper look at this much later...
+    //how likely to fool missiles
+    // -2 = inactive L2, -1 = inactive L1, 0 = not available, 1 = active L1, 2 = active L2, etc...
+    int  ecm;
+
+    /// Repair
+    // TODO: Maybe move to damageable
+    // holds the info for the repair bot type. 0 is no bot;
+    unsigned char repair_droid;
+    float next_repair_time;
+    unsigned int  next_repair_cargo;    //(~0 : select randomly)
+
+    float fireControlFunctionality;
+    float fireControlFunctionalityMax;
+    float SPECDriveFunctionality;
+    float SPECDriveFunctionalityMax;
+    float CommFunctionality;
+    float CommFunctionalityMax;
+    float LifeSupportFunctionality;
+    float LifeSupportFunctionalityMax;
+
+    /// Volume
+    // This isn't mass. Denser materials translate to more mass
+    // TODO: move this to ship class
+    float UpgradeVolume = 0;
+    float CargoVolume = 0;     ///mass just makes you turn worse
+    float equipment_volume = 0;     //this one should be more general--might want to apply it to radioactive goods, passengers, ships (hangar), etc
+    float HiddenCargoVolume = 0;
 
 //The name (type) of this unit shouldn't be public
     StringPool::Reference name;
@@ -186,13 +218,12 @@ public:
     Unit( const char *filename, bool SubUnit, int faction, std::string customizedUnit = std::string(
               "" ), Flightgroup *flightgroup = NULL, int fg_subnumber = 0, std::string *netxml = NULL );
 
-private:
-/** Fix all those uninitialized variables by calling this from every
- *  constructor.  */
-    void ZeroAll();
 
 public:
 //Initialize many of the defaults inherant to the constructor
+
+    // This is called from python and so left in place for now
+    // TODO: get rid of this
     void Init();
     void Init( const char *filename, bool SubUnit, int faction, std::string customizedUnit = std::string(
                    "" ), Flightgroup *flightgroup = NULL, int fg_subnumber = 0, std::string *netxml = NULL );
@@ -213,7 +244,7 @@ public:
       LIMITS_DAMAGED = 0x40,
       ARMOR_DAMAGED = 0x80
     };
-    unsigned int damages;
+    unsigned int damages = Damages::NO_DAMAGE;
 
 /*
  **************************************************************************************
@@ -251,8 +282,8 @@ public:
     un_iter getSubUnits();
     un_kiter viewSubUnits() const;
 #define NO_MOUNT_STAR
-    bool  inertialmode;
-    bool autopilotactive;
+    bool  inertialmode = false;
+    bool autopilotactive = false;
 
     bool isSubUnit() const
     {
@@ -327,18 +358,20 @@ protected:
  **************************************************************************************
  */
 
-public:
+private:
+    // TODO: move from GFX/Planet stuff
+    // These two are probably zero.
+    // TODO: check and if so, replace with 0.
+    // Making private and re-adding trivial getter
+    unsigned char attack_preference = ROLES::getRole( "INERT" );
+    unsigned char unit_role = ROLES::getRole( "INERT" );
 
-    unsigned attackPreference() const
-    {
-        return attack_preference;
-    }
-    void attackPreference( unsigned char );
-    unsigned unitRole() const
-    {
-        return unit_role;
-    }
-    void unitRole( unsigned char );
+public:
+    unsigned char getAttackPreferenceChar() { return attack_preference; }
+    unsigned char getUnitRoleChar() { return unit_role; }
+    unsigned char getAttackPreferenceChar() const { return attack_preference; }
+    unsigned char getUnitRoleChar() const { return unit_role; }
+
 //following 2 are legacy functions for python export only
     void setCombatRole( const std::string &s );
     const std::string& getCombatRole() const;
@@ -348,9 +381,8 @@ public:
     const std::string& getAttackPreference() const;
     void setAttackPreference( const std::string &s );
 protected:
-    unsigned char attack_preference;
-    unsigned char unit_role;
-    Nebula *nebula;
+
+    Nebula *nebula = nullptr;
 //The orbit needs to have access to the velocity directly to disobey physics laws to precalculate orbits
     friend class PlanetaryOrbit;
     friend class ContinuousTerrain;
@@ -439,7 +471,7 @@ public:
 
 
     Pilot *pilot;
-    bool   selected;
+    bool   selected = false;
 
 
     Computer& GetComputerData() { return computer; }
@@ -459,7 +491,7 @@ public:
 //Unit XML Load information
     struct XML;
 //Loading information
-    XML *xml;
+    XML *xml = nullptr;
 
     static void beginElement( void *userData, const XML_Char *name, const XML_Char **atts );
     static void endElement( void *userData, const XML_Char *name );
@@ -494,6 +526,12 @@ protected:
 public:
     QVector realPosition( ) override;
 
+    // Act out a unit's turn
+    void ActTurn();
+
+    // TODO: move to cloakable
+    void UpdateCloak();
+
     // TODO: move up to ship
     void UpdatePhysics3(const Transformation &trans,
                         const Matrix &transmat,
@@ -506,43 +544,57 @@ public:
 
 
 //The owner of this unit. This may not collide with owner or units owned by owner. Do not dereference (may be dead pointer)
-    void *owner;                                 //void ensures that it won't be referenced by accident
+    void *owner = nullptr;   //void ensures that it won't be referenced by accident
 
 
 
 //Whether or not to schedule subunits for deferred physics processing - if not, they're processed at the same time the parent unit is being processed
-    bool do_subunit_scheduling;
+    bool do_subunit_scheduling = false;
 //Does this unit require special scheduling?
     enum schedulepriorityenum {scheduleDefault, scheduleAField, scheduleRoid}
-    schedule_priority;
+    schedule_priority = scheduleDefault;
 //number of meshes (each with separate texture) this unit has
 
 
 //The image that will appear on those screens of units targetting this unit
-    UnitImages< void > *pImage;
+    UnitImages< void > *pImage = nullptr;
 //positive for the multiplier applied to nearby spec starships (1 = planetary/inert effects) 0 is default (no effect), -X means 0 but able to be enabled
-    float  specInterdiction;
+    float  specInterdiction = 0;
 
-    float  HeatSink;
+    float  HeatSink = 0;
 protected:
-//are shields tight to the hull.  zero means bubble
-    float  shieldtight;
+    //BUCO! Must add shield tightness back into units.csv for great justice.
+    //are shields tight to the hull.  zero means bubble
+    float  shieldtight = GameConfig::GetVariable( "physics",
+                                                  "default_shield_tightness",
+                                                  0 );
 
 
 
 public:
+    // TODO: move cloak to Cloakable?
+    ///How much energy cloaking takes per frame
+    float cloakenergy = 0;
+    ///how fast this starship decloaks/close...if negative, decloaking
+    int   cloakrate = 100;   //short fix
+    ///If this unit cloaks like glass or like fading
+    bool  cloakglass = false;
 
-//-1 is not available... ranges between 0 32767 for "how invisible" unit currently is (32768... -32768) being visible)
-    int   cloaking;                              //short fix
+    //-1 is not available... ranges between 0 32767 for "how invisible" unit currently is (32768... -32768) being visible)
+    // Despite the above comment, Init() would set it to -1
+    int   cloaking = -1;                              //short fix
 //the minimum cloaking value...
-    int   cloakmin;                              //short fix
+    int   cloakmin = cloakglass ? 1 : 0;              //short fix
 
+    // TODO: move to jump_capable?
+    ///if the unit is a wormhole
+    bool  forcejump = false;
 protected:
 //Is dead already?
-    bool  killed;
+    bool  killed = false;
 //Should not be drawn
     enum INVIS {DEFAULTVIS=0x0, INVISGLOW=0x1, INVISUNIT=0x2, INVISCAMERA=0x4};
-    unsigned char invisible;             //1 means turn off glow, 2 means turn off ship
+    unsigned char invisible = DEFAULTVIS;             //1 means turn off glow, 2 means turn off ship
 //corners of object
 
 public:
@@ -802,8 +854,10 @@ public:
 //The information about the minimum and maximum ranges of this unit. Collide Tables point to this bit of information.
     enum COLLIDELOCATIONTYPES {UNIT_ONLY=0, UNIT_BOLT=1, NUM_COLLIDE_MAPS=2};
 //location[0] is for units only, location[1] is for units + bolts
-    CollideMap::iterator location[2];
-    struct collideTrees *colTrees;
+    // This used to be initialized by set_null (see collide_map)
+    // Right now, there's an ifdef that assigns NULL but it could be something else.
+    CollideMap::iterator location[2] = {nullptr, nullptr};
+    struct collideTrees *colTrees = nullptr;
 //Sets the parent to be this unit. Unit never dereferenced for this operation
     void SetCollisionParent( Unit *name );
 //won't collide with ownery
@@ -877,7 +931,7 @@ public:
  */
 
 public:
-    enum DOCKENUM {NOT_DOCKED=0x0, DOCKED_INSIDE=0x1, DOCKED=0x2, DOCKING_UNITS=0x4};
+
 //returns -1 if unit cannot dock, otherwise returns which dock it can dock at
     int CanDockWithMe( Unit *dockingunit, bool forcedock = false );
     int ForceDock( Unit *utdw, unsigned int whichdockport );
@@ -906,13 +960,13 @@ public:
 
 public:
 //the flightgroup this ship is in
-    Flightgroup *flightgroup;
+    Flightgroup *flightgroup = nullptr;
 //the flightgroup subnumber
-    int flightgroup_subnumber;
+    int flightgroup_subnumber = 0;
 
     void SetFg( Flightgroup *fg, int fg_snumber );
 //The faction of this unit
-    int faction;
+    int faction = 0;
     void SetFaction( int faction );
 //get the flightgroup description
     Flightgroup * getFlightgroup() const
@@ -944,7 +998,7 @@ public:
     void setTractorability( enum tractorHow how );
     enum tractorHow getTractorability() const;
 private:
-    unsigned char   tractorability_flags;
+    unsigned char   tractorability_flags = tractorImmune;
 
 protected:
 //if the unit is a planet, this contains the long-name 'mars-station'

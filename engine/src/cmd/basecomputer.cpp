@@ -1629,7 +1629,7 @@ void BaseComputer::recalcTitle()
                 const float basemass = atof( UniverseUtil::LookupUnitStat( playerUnit->name, "", "Mass" ).c_str() );
                 float massEffect = 0.0;
                 if (basemass > 0)
-                    massEffect = 100 * playerUnit->Mass / basemass;
+                    massEffect = 100 * playerUnit->getMass() / basemass;
                 if (showStardate) {
                     playerTitle = (boost::format("Stardate: %1$s      Credits: %2$.2f      "
                                     "Space left: %3$.6g of %4$.6g cubic meters   Mass: %5$.0f%% (base)")
@@ -2717,10 +2717,10 @@ bool BaseComputer::sellSelectedCargo( int requestedQuantity )
         Cargo     sold;
         const int quantity = (requestedQuantity <= 0 ? item->quantity : requestedQuantity);
         if (item->mission) {
-            vector< Cargo >::iterator mycargo = std::find( playerUnit->pImage->cargo.begin(),
-                                                           playerUnit->pImage->cargo.end(), *item );
-            if ( mycargo != playerUnit->pImage->cargo.end() )
-                playerUnit->RemoveCargo( mycargo-playerUnit->pImage->cargo.begin(), quantity, true );
+            vector< Cargo >::iterator mycargo = std::find( playerUnit->cargo.begin(),
+                                                           playerUnit->cargo.end(), *item );
+            if ( mycargo != playerUnit->cargo.end() )
+                playerUnit->RemoveCargo( mycargo-playerUnit->cargo.begin(), quantity, true );
         } else {
             playerUnit->SellCargo( item->content, quantity, _Universe->AccessCockpit()->credits, sold, baseUnit );
         }
@@ -4749,12 +4749,12 @@ void showUnitStats( Unit *playerUnit, string &text, int subunitlevel, int mode, 
         text += "#n##c0:1:.5#"+prefix+"[GENERAL INFORMATION]#n##-c";
 
         text += "#n#"+prefix+statcolor+"Class: #-c"+nametemp+statcolor+"    Model: #-c"+model;
-        PRETTY_ADDU( statcolor+"Mass: #-c", playerUnit->GetMass(), 0, "metric tons" );
+        PRETTY_ADDU( statcolor+"Mass: #-c", playerUnit->getMass(), 0, "metric tons" );
         //Irrelevant to player as is proportional to mass in our physics system.
         //PRETTY_ADDU("Moment of inertia: ",playerUnit->GetMoment(),2,"tons.m�");
     }
-    if ( mode && replacement_mode == 2 && playerUnit->GetMass() != blankUnit->GetMass() )
-        PRETTY_ADDU( statcolor+"Effective Mass reduced by: #-c", 100.0*( 1.0-playerUnit->GetMass() ), 0, "%" );
+    if ( mode && replacement_mode == 2 && playerUnit->getMass() != blankUnit->getMass() )
+        PRETTY_ADDU( statcolor+"Effective Mass reduced by: #-c", 100.0*( 1.0-playerUnit->getMass() ), 0, "%" );
     if (!subunitlevel) {
         float vol[2];
         float bvol[2];
@@ -4879,23 +4879,23 @@ void showUnitStats( Unit *playerUnit, string &text, int subunitlevel, int mode, 
         }
     }
     if (!subunitlevel) {
-        if ( !mode && (playerUnit->GetMass() != 0) ) {
+        if ( !mode && (playerUnit->getMass() != 0) ) {
             PRETTY_ADDU( statcolor+"Fore acceleration: #-c",
-                         playerUnit->limits.forward/( 9.8*playerUnit->GetMass() ), 2, "gravities" );
+                         playerUnit->limits.forward/( 9.8*playerUnit->getMass() ), 2, "gravities" );
             PRETTY_ADDU( statcolor+"Aft acceleration: #-c",
-                         playerUnit->limits.retro/( 9.8*playerUnit->GetMass() ), 2, "gravities" );
+                         playerUnit->limits.retro/( 9.8*playerUnit->getMass() ), 2, "gravities" );
             if (playerUnit->limits.lateral == playerUnit->limits.vertical) {
                 PRETTY_ADDU( statcolor+"Orthogonal acceleration: #-c",
-                             playerUnit->limits.vertical/( 9.8*playerUnit->GetMass() ), 2, "gravities" );
+                             playerUnit->limits.vertical/( 9.8*playerUnit->getMass() ), 2, "gravities" );
                 text += expstatcolor+"#n#  (vertical and lateral axes)#-c";
             } else {
-                PRETTY_ADDN( statcolor+" Lateral acceleration #-c", playerUnit->limits.lateral/( 9.8*playerUnit->GetMass() ), 2 );
+                PRETTY_ADDN( statcolor+" Lateral acceleration #-c", playerUnit->limits.lateral/( 9.8*playerUnit->getMass() ), 2 );
                 PRETTY_ADDN( statcolor+" Vertical acceleration #-c",
-                             playerUnit->limits.vertical/( 9.8*playerUnit->GetMass() ), 2 );
+                             playerUnit->limits.vertical/( 9.8*playerUnit->getMass() ), 2 );
                 text += " gravities";
             }
             PRETTY_ADDU( statcolor+"Forward acceleration with overthrust: #-c", playerUnit->limits.afterburn
-                         /( 9.8*playerUnit->GetMass() ), 2, "gravities" );
+                         /( 9.8*playerUnit->getMass() ), 2, "gravities" );
             text.append( "#n##n##c0:1:.5#"+prefix+"[GOVERNOR SETTINGS]#n##-c" );
         } else {
             switch (replacement_mode)
@@ -5499,7 +5499,7 @@ void showUnitStats( Unit *playerUnit, string &text, int subunitlevel, int mode, 
     if (playerUnit->cloaking != -1) {
         if (!mode) {
             PRETTY_ADDU( statcolor+"Cloaking device available, energy usage: #-c",
-                         playerUnit->pImage->cloakenergy*RSconverter*Wconv,
+                         playerUnit->cloakenergy*RSconverter*Wconv,
                          0,
                          "MJ/s" );
         } else {
@@ -5507,7 +5507,7 @@ void showUnitStats( Unit *playerUnit, string &text, int subunitlevel, int mode, 
             {
             case 0:                     //Replacement or new Module
                 PRETTY_ADDU( statcolor+"Installs a cloaking device.#n#  Activated energy usage: #-c",
-                             playerUnit->pImage->cloakenergy*RSconverter*Wconv,
+                             playerUnit->cloakenergy*RSconverter*Wconv,
                              0,
                              "MJ/s" );
                 break;
@@ -5661,7 +5661,7 @@ void showUnitStats( Unit *playerUnit, string &text, int subunitlevel, int mode, 
         if (shields_require_power)
             maxshield = 0;
         PRETTY_ADDU( statcolor+"Minimum time to reach full overthrust speed: #-c",
-                     playerUnit->GetMass()*uc.max_ab_speed()/playerUnit->limits.afterburn, 2, "seconds" );
+                     playerUnit->getMass()*uc.max_ab_speed()/playerUnit->limits.afterburn, 2, "seconds" );
         //reactor
         float avail    = (playerUnit->maxEnergyData()*RSconverter-maxshield*VSDM);
         float overhead =

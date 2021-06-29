@@ -214,7 +214,7 @@ struct TurretBin
             uniter->tur->TargetTurret( NULL );
             if (finalChoice.t) {
                 if (finalChoice.range < uniter->gunrange
-                    && ROLES::getPriority( uniter->tur->attackPreference() )[finalChoice.t->unitRole()] < 31) {
+                    && ROLES::getPriority( uniter->tur->getAttackPreferenceChar() )[finalChoice.t->getUnitRoleChar()] < 31) {
                     if ( CanFaceTarget( uniter->tur, finalChoice.t, pos ) ) {
                         uniter->tur->Target( finalChoice.t );
                         uniter->tur->TargetTurret( finalChoice.t );
@@ -246,7 +246,7 @@ void AssignTBin( Unit *su, vector< TurretBin > &tbin )
 {
     unsigned int bnum = 0;
     for (; bnum < tbin.size(); bnum++)
-        if ( su->attackPreference() == tbin[bnum].turret[0].tur->attackPreference() )
+        if ( su->getAttackPreferenceChar() == tbin[bnum].turret[0].tur->getAttackPreferenceChar() )
             break;
     if ( bnum >= tbin.size() )
         tbin.push_back( TurretBin() );
@@ -274,7 +274,7 @@ float Priority( Unit *me, Unit *targ, float gunrange, float rangetotarget, float
         return -1;
     if (targ->hull < 0)
         return -1;
-    *rolepriority = ROLES::getPriority( me->attackPreference() )[targ->unitRole()];     //number btw 0 and 31 higher better
+    *rolepriority = ROLES::getPriority( me->getAttackPreferenceChar() )[targ->getUnitRoleChar()];     //number btw 0 and 31 higher better
     char invrolepriority = 31-*rolepriority;
     if (invrolepriority <= 0)
         return -1;
@@ -293,7 +293,7 @@ float Priority( Unit *me, Unit *targ, float gunrange, float rangetotarget, float
     {
         static float mass_inertial_priority_cutoff =
             XMLSupport::parse_float( vs_config->getVariable( "AI", "Targetting", "MassInertialPriorityCutoff", "5000" ) );
-        if (me->GetMass() > mass_inertial_priority_cutoff) {
+        if (me->getMass() > mass_inertial_priority_cutoff) {
             static float mass_inertial_priority_scale =
                 XMLSupport::parse_float( vs_config->getVariable( "AI", "Targetting", "MassInertialPriorityScale", ".0000001" ) );
             Vector normv( me->GetVelocity() );
@@ -301,7 +301,7 @@ float Priority( Unit *me, Unit *targ, float gunrange, float rangetotarget, float
             normv *= Speed ? 1.0f/Speed : 1.0f;
             Vector ourToThem = targ->Position()-me->Position();
             ourToThem.Normalize();
-            inertial_priority = mass_inertial_priority_scale*( .5+.5*( normv.Dot( ourToThem ) ) )*me->GetMass()*Speed;
+            inertial_priority = mass_inertial_priority_scale*( .5+.5*( normv.Dot( ourToThem ) ) )*me->getMass()*Speed;
         }
     }
     static float threat_weight = XMLSupport::parse_float( vs_config->getVariable( "AI", "Targetting", "ThreatWeight", ".5" ) );
@@ -437,7 +437,7 @@ public:
             for (vector< TurretBin >::iterator k = tbin->begin(); k != tbin->end(); ++k) {
                 if (rangetotarget > k->maxrange)
                     break;
-                const char tprior = ROLES::getPriority( k->turret[0].tur->attackPreference() )[un->unitRole()];
+                const char tprior = ROLES::getPriority( k->turret[0].tur->getAttackPreferenceChar() )[un->getUnitRoleChar()];
                 if (relationship < 0) {
                     if (tprior < 16) {
                         k->listOfTargets[0].push_back( TargetAndRange( un, rangetotarget, relationship ) );
@@ -519,8 +519,8 @@ void FireAt::ChooseTargets( int numtargs, bool force )
         static unsigned int pointdef = ROLES::getRole( "POINTDEF" );
         static bool assignpointdef   =
             XMLSupport::parse_bool( vs_config->getVariable( "AI", "Targetting", "AssignPointDef", "true" ) );
-        if ( (su->attackPreference() != pointdef) || assignpointdef ) {
-            if (su->attackPreference() != inert) {
+        if ( (su->getAttackPreferenceChar() != pointdef) || assignpointdef ) {
+            if (su->getAttackPreferenceChar() != inert) {
                 AssignTBin( su, tbin );
             } else {
                 Unit *ssu = NULL;
@@ -679,7 +679,7 @@ unsigned int FireBitmask( Unit *parent, bool shouldfire, bool firemissile )
     unsigned int firebitm = ROLES::EVERYTHING_ELSE;
     Unit *un = parent->Target();
     if (un) {
-        firebitm = ( 1<<un->unitRole() );
+        firebitm = ( 1<<un->getUnitRoleChar() );
 
         static bool AlwaysFireAutotrackers =
             XMLSupport::parse_bool( vs_config->getVariable( "AI", "AlwaysFireAutotrackers", "true" ) );

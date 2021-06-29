@@ -691,7 +691,7 @@ void Universe::Generate2( StarSystem *ss )
     LoadStarSystem( ss );
     pushActiveStarSystem( ss );
     for (unsigned int tume = 0; tume <= game_options.num_times_to_simulate_new_star_system*SIM_QUEUE_SIZE+1; ++tume)
-        ss->UpdateUnitPhysics( true );
+        ss->UpdateUnitsPhysics( true );
     //notify the director that a new system is loaded (gotta have at least one active star system)
     StarSystem *old_script_system = _script_system;
     _script_system = ss;

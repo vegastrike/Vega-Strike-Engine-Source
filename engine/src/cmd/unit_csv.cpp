@@ -524,7 +524,7 @@ static void ImportCargo( Unit *thus, const string &imports )
         int nelem = 0;
         while ( ( ofs = imports.find( '{', ofs ) ) != string::npos )
             nelem++, ofs++;
-        thus->pImage->cargo.reserve( nelem+thus->pImage->cargo.size() );
+        thus->cargo.reserve( nelem+thus->cargo.size() );
         ofs = 0;
     }
     while ( ( where = imports.find( '{', ofs ) ) != string::npos ) {
@@ -552,7 +552,7 @@ static void AddCarg( Unit *thus, const string &cargos )
         int nelem = 0;
         while ( ( ofs = cargos.find( '{', ofs ) ) != string::npos )
             nelem++, ofs++;
-        thus->pImage->cargo.reserve( nelem+thus->pImage->cargo.size() );
+        thus->cargo.reserve( nelem+thus->cargo.size() );
         ofs = 0;
     }
     while ( ( where = cargos.find( '{', ofs ) ) != string::npos ) {
@@ -1004,10 +1004,10 @@ void Unit::LoadRow( CSVRow &row, string modification, string *netxml )
     corner_max = Vector( -FLT_MAX, -FLT_MAX, -FLT_MAX );
     calculate_extent( false );
     AddMounts( this, xml, OPTIM_GET( row, table, Mounts ) );
-    this->pImage->CargoVolume = ::stof( OPTIM_GET( row, table, Hold_Volume ) );
-    this->pImage->HiddenCargoVolume = ::stof( OPTIM_GET( row, table, Hidden_Hold_Volume ) );
-    this->pImage->UpgradeVolume     = ::stof( OPTIM_GET( row, table, Upgrade_Storage_Volume ) );
-    this->pImage->equipment_volume  = ::stof( OPTIM_GET( row, table, Equipment_Space ) );
+    this->CargoVolume = ::stof( OPTIM_GET( row, table, Hold_Volume ) );
+    this->HiddenCargoVolume = ::stof( OPTIM_GET( row, table, Hidden_Hold_Volume ) );
+    this->UpgradeVolume     = ::stof( OPTIM_GET( row, table, Upgrade_Storage_Volume ) );
+    this->equipment_volume  = ::stof( OPTIM_GET( row, table, Equipment_Space ) );
     ImportCargo( this, OPTIM_GET( row, table, Cargo_Import ) );     //if this changes change planet_generic.cpp
     AddCarg( this, OPTIM_GET( row, table, Cargo ) );
 
@@ -1197,7 +1197,7 @@ void Unit::LoadRow( CSVRow &row, string modification, string *netxml )
     recharge   = ::stof( OPTIM_GET( row, table, Reactor_Recharge ) );
     jump.drive = XMLSupport::parse_bool( OPTIM_GET( row, table, Jump_Drive_Present ) ) ? -1 : -2;
     jump.delay = ::stoi( OPTIM_GET( row, table, Jump_Drive_Delay ) );
-    pImage->forcejump = XMLSupport::parse_bool( OPTIM_GET( row, table, Wormhole ) );
+    forcejump = XMLSupport::parse_bool( OPTIM_GET( row, table, Wormhole ) );
     graphicOptions.RecurseIntoSubUnitsOnCollision = stob( OPTIM_GET( row,
                                                                      table,
                                                                      Collide_Subunits ),
@@ -1311,34 +1311,34 @@ void Unit::LoadRow( CSVRow &row, string modification, string *netxml )
     computer.radar.lockcone     = cos( stof( OPTIM_GET( row, table, Lock_Cone ), 180 )*VS_PI/180 );
     cloakmin = (int) (::stof( OPTIM_GET( row, table, Cloak_Min ) )*2147483136);
     if (cloakmin < 0) cloakmin = 0;
-    pImage->cloakglass = XMLSupport::parse_bool( OPTIM_GET( row, table, Cloak_Glass ) );
-    if ( (cloakmin&0x1) && !pImage->cloakglass )
+    cloakglass = XMLSupport::parse_bool( OPTIM_GET( row, table, Cloak_Glass ) );
+    if ( (cloakmin&0x1) && !cloakglass )
         cloakmin -= 1;
-    if ( (cloakmin&0x1) == 0 && pImage->cloakglass )
+    if ( (cloakmin&0x1) == 0 && cloakglass )
         cloakmin += 1;
     if ( !XMLSupport::parse_bool( OPTIM_GET( row, table, Can_Cloak ) ) )
         cloaking = -1;
     else
         cloaking = (int) (-2147483647)-1;
-    pImage->cloakrate    = (int) ( 2147483136.*::stof( OPTIM_GET( row, table, Cloak_Rate ) ) );     //short fix
-    pImage->cloakenergy  = ::stof( OPTIM_GET( row, table, Cloak_Energy ) );
-    pImage->repair_droid = ::stoi( OPTIM_GET( row, table, Repair_Droid ) );
-    pImage->ecm    = ::stoi( OPTIM_GET( row, table, ECM_Rating ) );
+    cloakrate    = (int) ( 2147483136.*::stof( OPTIM_GET( row, table, Cloak_Rate ) ) );     //short fix
+    cloakenergy  = ::stof( OPTIM_GET( row, table, Cloak_Energy ) );
+    repair_droid = ::stoi( OPTIM_GET( row, table, Repair_Droid ) );
+    ecm    = ::stoi( OPTIM_GET( row, table, ECM_Rating ) );
 
     this->HeatSink = ::stof( OPTIM_GET( row, table, Heat_Sink_Rating ) );
-    if (pImage->ecm < 0) pImage->ecm *= -1;
+    if (ecm < 0) ecm *= -1;
     if (pImage->cockpit_damage) {
         HudDamage( pImage->cockpit_damage, OPTIM_GET( row, table, Hud_Functionality ) );
         HudDamage( pImage->cockpit_damage+1+MAXVDUS+UnitImages< void >::NUMGAUGES, OPTIM_GET( row, table, Max_Hud_Functionality ) );
     }
-    pImage->LifeSupportFunctionality    = ::stof( OPTIM_GET_DEF( row, table, Lifesupport_Functionality, "1" ) );
-    pImage->LifeSupportFunctionalityMax = ::stof( OPTIM_GET_DEF( row, table, Max_Lifesupport_Functionality, "1" ) );
-    pImage->CommFunctionality = ::stof( OPTIM_GET_DEF( row, table, Comm_Functionality, "1" ) );
-    pImage->CommFunctionalityMax = ::stof( OPTIM_GET_DEF( row, table, Max_Comm_Functionality, "1" ) );
-    pImage->fireControlFunctionality    = ::stof( OPTIM_GET_DEF( row, table, FireControl_Functionality, "1" ) );
-    pImage->fireControlFunctionalityMax = ::stof( OPTIM_GET_DEF( row, table, Max_FireControl_Functionality, "1" ) );
-    pImage->SPECDriveFunctionality = ::stof( OPTIM_GET_DEF( row, table, SPECDrive_Functionality, "1" ) );
-    pImage->SPECDriveFunctionalityMax   = ::stof( OPTIM_GET_DEF( row, table, Max_SPECDrive_Functionality, "1" ) );
+    LifeSupportFunctionality    = ::stof( OPTIM_GET_DEF( row, table, Lifesupport_Functionality, "1" ) );
+    LifeSupportFunctionalityMax = ::stof( OPTIM_GET_DEF( row, table, Max_Lifesupport_Functionality, "1" ) );
+    CommFunctionality = ::stof( OPTIM_GET_DEF( row, table, Comm_Functionality, "1" ) );
+    CommFunctionalityMax = ::stof( OPTIM_GET_DEF( row, table, Max_Comm_Functionality, "1" ) );
+    fireControlFunctionality    = ::stof( OPTIM_GET_DEF( row, table, FireControl_Functionality, "1" ) );
+    fireControlFunctionalityMax = ::stof( OPTIM_GET_DEF( row, table, Max_FireControl_Functionality, "1" ) );
+    SPECDriveFunctionality = ::stof( OPTIM_GET_DEF( row, table, SPECDrive_Functionality, "1" ) );
+    SPECDriveFunctionalityMax   = ::stof( OPTIM_GET_DEF( row, table, Max_SPECDrive_Functionality, "1" ) );
     computer.slide_start = ::stoi( OPTIM_GET( row, table, Slide_Start ) );
     computer.slide_end   = ::stoi( OPTIM_GET( row, table, Slide_End ) );
     UpgradeUnit( this, OPTIM_GET( row, table, Upgrades ) );
@@ -1522,10 +1522,10 @@ string Unit::WriteUnitString()
                     if (jj != 0)
                         unit[row.getKey( jj )] = row[jj];
                 //mutable things
-                unit["Equipment_Space"] = XMLSupport::tostring( pImage->equipment_volume );
-                unit["Hold_Volume"] = XMLSupport::tostring( pImage->CargoVolume );
-                unit["Hidden_Hold_Volume"]     = XMLSupport::tostring( pImage->HiddenCargoVolume );
-                unit["Upgrade_Storage_Volume"] = XMLSupport::tostring( pImage->UpgradeVolume );
+                unit["Equipment_Space"] = XMLSupport::tostring( equipment_volume );
+                unit["Hold_Volume"] = XMLSupport::tostring( CargoVolume );
+                unit["Hidden_Hold_Volume"]     = XMLSupport::tostring( HiddenCargoVolume );
+                unit["Upgrade_Storage_Volume"] = XMLSupport::tostring( UpgradeVolume );
                 string mountstr;
                 double unitScale = stof( unit["Unit_Scale"], 1 );
                 {
@@ -1674,7 +1674,7 @@ string Unit::WriteUnitString()
                 unit["Reactor_Recharge"] = tos( recharge );
                 unit["Jump_Drive_Present"] = tos( jump.drive >= -1 );
                 unit["Jump_Drive_Delay"] = tos( jump.delay );
-                unit["Wormhole"] = tos( pImage->forcejump != 0 );
+                unit["Wormhole"] = tos( forcejump != 0 );
                 unit["Outsystem_Jump_Cost"] = tos( jump.energy );
                 unit["Warp_Usage_Cost"] = tos( jump.insysenergy );
                 unit["Afterburner_Usage_Cost"]        = tos( afterburnenergy );
@@ -1706,24 +1706,24 @@ string Unit::WriteUnitString()
                 unit["Lock_Cone"]                     = tos( acos( computer.radar.lockcone )*180./VS_PI );
                 unit["Cloak_Min"]                     = tos( cloakmin/2147483136. );
                 unit["Can_Cloak"]                     = tos( cloaking != -1 );
-                unit["Cloak_Rate"]                    = tos( fabs( pImage->cloakrate/2147483136. ) );
-                unit["Cloak_Energy"]                  = tos( pImage->cloakenergy );
-                unit["Cloak_Glass"]                   = tos( pImage->cloakglass );
-                unit["Repair_Droid"]                  = tos( pImage->repair_droid );
-                unit["ECM_Rating"]                    = tos( pImage->ecm > 0 ? pImage->ecm : -pImage->ecm );
+                unit["Cloak_Rate"]                    = tos( fabs( cloakrate/2147483136. ) );
+                unit["Cloak_Energy"]                  = tos( cloakenergy );
+                unit["Cloak_Glass"]                   = tos( cloakglass );
+                unit["Repair_Droid"]                  = tos( repair_droid );
+                unit["ECM_Rating"]                    = tos( ecm > 0 ? ecm : -ecm );
                 unit["Hud_Functionality"]             = WriteHudDamage( this );
                 unit["Max_Hud_Functionality"]         = WriteHudDamageFunc( this );
                 unit["Heat_Sink_Rating"]              = tos( this->HeatSink );
-                unit["Lifesupport_Functionality"]     = tos( pImage->LifeSupportFunctionality );
-                unit["Max_Lifesupport_Functionality"] = tos( pImage->LifeSupportFunctionalityMax );
-                unit["Comm_Functionality"]            = tos( pImage->CommFunctionality );
-                unit["Max_Comm_Functionality"]        = tos( pImage->CommFunctionalityMax );
-                unit["Comm_Functionality"]            = tos( pImage->CommFunctionality );
-                unit["Max_Comm_Functionality"]        = tos( pImage->CommFunctionalityMax );
-                unit["FireControl_Functionality"]     = tos( pImage->fireControlFunctionality );
-                unit["Max_FireControl_Functionality"] = tos( pImage->fireControlFunctionalityMax );
-                unit["SPECDrive_Functionality"]       = tos( pImage->SPECDriveFunctionality );
-                unit["Max_SPECDrive_Functionality"]   = tos( pImage->SPECDriveFunctionalityMax );
+                unit["Lifesupport_Functionality"]     = tos( LifeSupportFunctionality );
+                unit["Max_Lifesupport_Functionality"] = tos( LifeSupportFunctionalityMax );
+                unit["Comm_Functionality"]            = tos( CommFunctionality );
+                unit["Max_Comm_Functionality"]        = tos( CommFunctionalityMax );
+                unit["Comm_Functionality"]            = tos( CommFunctionality );
+                unit["Max_Comm_Functionality"]        = tos( CommFunctionalityMax );
+                unit["FireControl_Functionality"]     = tos( fireControlFunctionality );
+                unit["Max_FireControl_Functionality"] = tos( fireControlFunctionalityMax );
+                unit["SPECDrive_Functionality"]       = tos( SPECDriveFunctionality );
+                unit["Max_SPECDrive_Functionality"]   = tos( SPECDriveFunctionalityMax );
                 unit["Slide_Start"]                   = tos( computer.slide_start );
                 unit["Slide_End"]                     = tos( computer.slide_end );
                 unit["Cargo_Import"]                  = unit["Upgrades"] = "";                 //make sure those are empty
@@ -1772,10 +1772,10 @@ void UpdateMasterPartList( Unit *ret )
             carg.mass        = (j < addedcargomass->size() ? XMLSupport::parse_float( (*addedcargomass)[j] ) : .01);
             carg.description = ( j < addedcargodesc->size() ? (*addedcargodesc)[j] : std::string( "No Description Added" ) );
             carg.quantity    = 1;
-            ret->GetImageInformation().cargo.push_back( carg );
+            ret->cargo.push_back( carg );
         }
     }
-    std::sort( ret->GetImageInformation().cargo.begin(), ret->GetImageInformation().cargo.end() );
+    std::sort( ret->cargo.begin(), ret->cargo.end() );
     {
         Cargo last_cargo;
         for (int i = ret->numCargo()-1; i >= 0; --i) {

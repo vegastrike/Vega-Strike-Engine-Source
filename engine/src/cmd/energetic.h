@@ -40,6 +40,9 @@ public:
     float fuelData() const;
 
     static float getFuelUsage( bool afterburner );
+    void WCWarpIsFuelHack(bool transfer_warp_to_fuel);
+    float ExpendMomentaryFuelUsage( float magnitude );
+    float ExpendFuel(float quantity);
     float getWarpEnergy() const;
 
     void increaseWarpEnergy( bool insys, float time );
@@ -67,9 +70,9 @@ public:
     struct UnitJump
     {
         float warpDriveRating;
-        float energy;                            //short fix
-        float insysenergy;                       //short fix
-        signed char   drive;
+        float energy;       //short fix
+        float insysenergy;  //short fix
+        signed char   drive; // disabled
         unsigned char delay;
         unsigned char damage;
         //negative means fuel
@@ -85,14 +88,14 @@ public:
     //maximum energy
     float maxenergy;
     //maximum energy
-    float maxwarpenergy;                 //short fix
+    float maxwarpenergy; //short fix
     //current energy
-    float warpenergy;                            //short fix
+    float warpenergy;    //short fix
 protected:
     //fuel of this unit
     float  fuel;
     float  afterburnenergy;              //short fix
-    int    afterburntype;                        //0--energy, 1--fuel
+    int    afterburntype;   //0--energy, 1--fuel
     //-1 means it is off. -2 means it doesn't exist. otherwise it's engaged to destination (positive number)
 };
 

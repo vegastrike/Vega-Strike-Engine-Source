@@ -18,7 +18,7 @@ namespace pt = boost::property_tree;
 using std::string;
 using pt::ptree;
 
-
+// TODO: test this functionality, especially the subsection...
 
 class GameConfig
 {
@@ -32,10 +32,24 @@ private:
             return variables[key];
         return DEFAULT_ERROR_VALUE;
     }
+
+    static inline string _GetVariable(string const &section,
+                                      string const &sub_section,
+                                      string const &name)
+    {
+        string const key = section + "." + sub_section + "." + name;
+        if (variables.count(key))
+            return variables[key];
+        return DEFAULT_ERROR_VALUE;
+    }
 public:
     static void LoadGameConfig(const string &filename);
     template <class T>
     static inline T GetVariable(string const &section, string const &name, T default_value) = delete;
+
+    template <class T>
+    static inline T GetVariable(string const &section, string const &sub_section,
+                                string const &name, T default_value) = delete;
 };
 
 
@@ -69,6 +83,44 @@ template <>
 inline int GameConfig::GetVariable(string const &section, string const &name, int default_value)
 {
     string result = _GetVariable(section, name);
+    if(result == DEFAULT_ERROR_VALUE) return default_value;
+    return std::stoi(result);
+}
+
+// With Subsection
+template <>
+inline bool GameConfig::GetVariable(string const &section, string const &sub_section,
+                                    string const &name,bool default_value)
+{
+    string result = _GetVariable(section, sub_section, name);
+    if(result == DEFAULT_ERROR_VALUE) return default_value;
+    boost::algorithm::to_lower(result);
+    return result == "true";
+}
+
+template <>
+inline float GameConfig::GetVariable(string const &section, string const &sub_section,
+                                     string const &name,float default_value)
+{
+    string result = _GetVariable(section, sub_section, name);
+    if(result == DEFAULT_ERROR_VALUE) return default_value;
+    return std::stof(result);
+}
+
+template <>
+inline double GameConfig::GetVariable(string const &section, string const &sub_section,
+                                      string const &name,double default_value)
+{
+    string result = _GetVariable(section, sub_section, name);
+    if(result == DEFAULT_ERROR_VALUE) return default_value;
+    return std::stod(result);
+}
+
+template <>
+inline int GameConfig::GetVariable(string const &section, string const &sub_section,
+                                   string const &name,int default_value)
+{
+    string result = _GetVariable(section, sub_section, name);
     if(result == DEFAULT_ERROR_VALUE) return default_value;
     return std::stoi(result);
 }
