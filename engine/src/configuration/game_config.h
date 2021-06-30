@@ -50,10 +50,24 @@ public:
     template <class T>
     static inline T GetVariable(string const &section, string const &sub_section,
                                 string const &name, T default_value) = delete;
+
 };
 
+// Discussion - other options are a singleton or placing it in another global variable, like universe.
+
+// Config Structs Declaration
+struct WeaponsConfig {
+    bool can_fire_in_spec;
+    bool can_fire_in_cloak;
+
+    WeaponsConfig();
+};
+
+// Global Structs Declaration
+extern WeaponsConfig weapons_config;
 
 
+// Template Specialization
 template <>
 inline bool GameConfig::GetVariable(string const &section, string const &name, bool default_value)
 {
@@ -124,5 +138,7 @@ inline int GameConfig::GetVariable(string const &section, string const &sub_sect
     if(result == DEFAULT_ERROR_VALUE) return default_value;
     return std::stoi(result);
 }
+
+
 
 #endif // GAME_CONFIG_H

@@ -84,6 +84,10 @@ INCLUDE_DIRECTORIES(
 )
 ENDIF (MSVC)
 
+SET(LIBCONFIG
+    src/configuration/game_config.cpp
+)
+
 SET(LIBGUI_SOURCES
     src/gui/button.cpp
     src/gui/control.cpp
@@ -368,7 +372,6 @@ SET(LIBGFXSERVER_SOURCES
 )
 
 SET(LIBROOTGENERIC_SOURCES
-    src/game_config.cpp
     src/configxml.cpp
     src/easydom.cpp
     src/endianness.cpp
@@ -467,6 +470,7 @@ SET(LIBAUDIO_SOURCES
 
 
 ADD_LIBRARY(vegastrike-engine_com
+    ${LIBCONFIG}
     ${LIBAI_SOURCES}
     ${LIBCMD_SOURCES}
     ${LIBNET_SOURCES}

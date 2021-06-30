@@ -28,7 +28,7 @@
 #include "unit_generic.h"
 #include "universe.h"
 #include "universe_util.h"
-#include "game_config.h"
+#include "configuration/game_config.h"
 #include "missile.h"
 #include "enhancement.h"
 #include <typeinfo>

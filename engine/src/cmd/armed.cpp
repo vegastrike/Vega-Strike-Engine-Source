@@ -25,7 +25,7 @@
 
 #include "armed.h"
 
-#include "game_config.h"
+#include "configuration/game_config.h"
 #include "mount.h"
 #include "mount_size.h"
 #include "weapon_info.h"
@@ -190,11 +190,11 @@ void Armed::ActivateGuns( const weapon_info *sz, bool ms )
 void Armed::Fire( unsigned int weapon_type_bitmask, bool listen_to_owner)
 {
     Unit *unit = static_cast<Unit*>(this);
-    static bool can_fire_in_spec  = GameConfig::GetVariable( "physics", "can_fire_in_spec", false);
-    static bool can_fire_in_cloak = GameConfig::GetVariable( "physics", "can_fire_in_cloak", false);
+    /*static bool can_fire_in_spec  = GameConfig::GetVariable( "physics", "can_fire_in_spec", false);
+    static bool can_fire_in_cloak = GameConfig::GetVariable( "physics", "can_fire_in_cloak", false);*/
     static bool verbose_debug     = GameConfig::GetVariable("data", "verbose_debug", false);
 
-    if ( (unit->cloaking >= 0 && can_fire_in_cloak == false) || (unit->graphicOptions.InWarp && can_fire_in_spec == false) ) {
+    if ( (unit->cloaking >= 0 && weapons_config.can_fire_in_cloak == false) || (unit->graphicOptions.InWarp && weapons_config.can_fire_in_spec == false) ) {
         UnFire();
         return;
     }

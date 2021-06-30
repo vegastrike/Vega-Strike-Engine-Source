@@ -25,7 +25,7 @@
 
 #include "energetic.h"
 
-#include "game_config.h"
+#include "configuration/game_config.h"
 #include "damageable.h"
 #include "vegastrike.h"
 
