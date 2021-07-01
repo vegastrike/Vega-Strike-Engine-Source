@@ -58,8 +58,10 @@ class Collision
 
     Collision(Unit* unit, const QVector &location, const Vector& normal);
     void shouldApplyForceAndDealDamage(Unit* other_unit);
-    void applyForce(double elasticity, float& m2, Vector& v2);
-    void dealDamage(Collision other_collision, float factor=0.01);
+    // needs force and location-relative-to-center-of-mass to apply torque; all other arguments needed only for interpenetration kludge
+    void applyForce(QVector &force, QVector &location_local, QVector &new_velocity, QVector& new_angular_velocity, const Vector& normal);
+    // pass change in kinetic energy of entire system - collision can decide what to do with the energy values
+    void dealDamage(Collision other_collision, double deltaKE_linear, double deltaKE_angular);
     bool crashLand(Unit *base);
 public:
     static void collide( Unit* unit1,
