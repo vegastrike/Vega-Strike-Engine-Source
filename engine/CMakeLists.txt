@@ -85,6 +85,7 @@ INCLUDE_DIRECTORIES(
 ENDIF (MSVC)
 
 SET(LIBCONFIG
+    src/configuration/configuration.cpp
     src/configuration/game_config.cpp
 )
 

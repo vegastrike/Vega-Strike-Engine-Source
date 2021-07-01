@@ -1,13 +1,5 @@
 #include "configuration/game_config.h"
 
-// Global Variable Definitions
-WeaponsConfig weapons_config;
-
-WeaponsConfig::WeaponsConfig() {
-    can_fire_in_spec  = GameConfig::GetVariable( "physics", "can_fire_in_spec", false);
-    can_fire_in_cloak = GameConfig::GetVariable( "physics", "can_fire_in_cloak", false);
-}
-
 
 std::map<string, string> GameConfig::variables;
 

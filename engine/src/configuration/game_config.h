@@ -53,19 +53,6 @@ public:
 
 };
 
-// Discussion - other options are a singleton or placing it in another global variable, like universe.
-
-// Config Structs Declaration
-struct WeaponsConfig {
-    bool can_fire_in_spec;
-    bool can_fire_in_cloak;
-
-    WeaponsConfig();
-};
-
-// Global Structs Declaration
-extern WeaponsConfig weapons_config;
-
 
 // Template Specialization
 template <>

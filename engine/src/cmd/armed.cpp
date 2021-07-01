@@ -25,7 +25,7 @@
 
 #include "armed.h"
 
-#include "configuration/game_config.h"
+#include "configuration/configuration.h"
 #include "mount.h"
 #include "mount_size.h"
 #include "weapon_info.h"
@@ -190,11 +190,9 @@ void Armed::ActivateGuns( const weapon_info *sz, bool ms )
 void Armed::Fire( unsigned int weapon_type_bitmask, bool listen_to_owner)
 {
     Unit *unit = static_cast<Unit*>(this);
-    /*static bool can_fire_in_spec  = GameConfig::GetVariable( "physics", "can_fire_in_spec", false);
-    static bool can_fire_in_cloak = GameConfig::GetVariable( "physics", "can_fire_in_cloak", false);*/
-    static bool verbose_debug     = GameConfig::GetVariable("data", "verbose_debug", false);
 
-    if ( (unit->cloaking >= 0 && weapons_config.can_fire_in_cloak == false) || (unit->graphicOptions.InWarp && weapons_config.can_fire_in_spec == false) ) {
+    if ( (unit->cloaking >= 0 && configuration.weapons.can_fire_in_cloak == false) ||
+         (unit->graphicOptions.InWarp && configuration.weapons.can_fire_in_spec == false) ) {
         UnFire();
         return;
     }
@@ -236,7 +234,7 @@ void Armed::Fire( unsigned int weapon_type_bitmask, bool listen_to_owner)
         const bool locked_missile   = (mis && locked_on && lockable_weapon);
         const bool missile_and_want_to_fire_missiles = ( mis && (weapon_type_bitmask&ROLES::FIRE_MISSILES) );
         const bool gun_and_want_to_fire_guns = ( (!mis) && (weapon_type_bitmask&ROLES::FIRE_GUNS) );
-        if (verbose_debug && missile_and_want_to_fire_missiles && locked_missile)
+        if (configuration.logging.verbose_debug && missile_and_want_to_fire_missiles && locked_missile)
             VSFileSystem::vs_fprintf( stderr, "\n about to fire locked missile \n" );
         bool want_to_fire = (fire_non_autotrackers || autotracking_gun || locked_missile) &&
             //&& ( (ROLES::EVERYTHING_ELSE&weapon_type_bitmask&i->type->role_bits) || i->type->role_bits == 0 )

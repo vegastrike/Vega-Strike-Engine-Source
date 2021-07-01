@@ -28,7 +28,7 @@
 #include "unit_generic.h"
 #include "universe.h"
 #include "universe_util.h"
-#include "configuration/game_config.h"
+#include "configuration/configuration.h"
 #include "missile.h"
 #include "enhancement.h"
 #include <typeinfo>
@@ -36,42 +36,15 @@
 
 // TODO: convert all float to double and all Vector to QVector.
 
-static float kilojoules_per_damage = GameConfig::GetVariable( "physics", "kilojoules_per_unit_damage", 5400 );
-static float collision_scale_factor =
-        GameConfig::GetVariable( "physics", "collision_damage_scale", 1.0f );
-static float inelastic_scale = GameConfig::GetVariable( "physics", "inelastic_scale", 0.8f);
-static float min_time =
-        GameConfig::GetVariable( "physics", "minimum_time_between_recorded_player_collisions", 0.1f);
-static const float minimum_mass = 1e-6f;
+// TODO: all of these comments were moved around from the old code.
+// They are unclear to me. Someone (probably JS) needs to do something with it.
 
 //Collision force caps primarily for AI-AI collisions. Once the AIs get a real collision avoidance system, we can
 // turn damage for AI-AI collisions back on, and then we can remove these caps.
 //value, in seconds of desired maximum recovery time
-static float max_torque_multiplier =
-        GameConfig::GetVariable( "physics", "maxCollisionTorqueMultiplier", 0.67f);
 //value, in seconds of desired maximum recovery time
-static float max_force_multiplier  =
-        GameConfig::GetVariable( "physics", "maxCollisionForceMultiplier", 5);
 
-static int upgrade_faction =
-        GameConfig::GetVariable( "physics", "cargo_deals_collide_damage",
-                                                        false) ? -1 : FactionUtil::GetUpgradeFaction();
 
-static float collision_hack_distance =
-        GameConfig::GetVariable( "physics", "collision_avoidance_hack_distance", 10000);
-static float front_collision_hack_distance =
-        GameConfig::GetVariable( "physics", "front_collision_avoidance_hack_distance", 200000);
-
-static float front_collision_hack_angle = cos( 3.1415926536f * GameConfig::GetVariable( "physics", "front_collision_avoidance_hack_angle", 40)/180.0f );
-
-static bool collision_damage_to_ai = GameConfig::GetVariable( "physics", "collisionDamageToAI", false);
-
-static bool crash_dock_unit = GameConfig::GetVariable( "physics", "unit_collision_docks", false);
-
-static bool crash_dock_hangar = GameConfig::GetVariable( "physics", "only_hangar_collision_docks", false);
-
-// Disabled bouncing missile option. Missiles always explode when colliding with something.
-//static bool does_missile_bounce = GameConfig::GetVariable( "physics", "missile_bounce", false);
 
 
 
@@ -81,7 +54,7 @@ Collision::Collision(Unit* unit, const QVector& location, const Vector& normal):
     cockpit = _Universe->isPlayerStarship( unit ); // smcp/thcp
     unit_type = unit->isUnit();
     is_player_ship = _Universe->isPlayerStarship(unit);
-    mass = std::max(unit->getMass(), minimum_mass);
+    mass = std::max(unit->getMass(), configuration.physics.minimum_mass);
     position = unit->Position();
     velocity = unit->GetVelocity();
 }
