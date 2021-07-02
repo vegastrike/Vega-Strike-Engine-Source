@@ -22,18 +22,36 @@ Configuration::CollisionHacks::CollisionHacks():
                                              false)) {}
 
 
+Configuration::Computer::Computer():
+    default_lock_cone(GameConfig::GetVariable( "physics", "lock_cone", 0.8 )),
+    default_max_range(GameConfig::GetVariable( "graphics", "hud", "radarRange", 20000 )),
+    default_tracking_cone(GameConfig::GetVariable( "physics", "autotracking", 0.93 )) {}
+
+Configuration::Fuel::Fuel():
+    afterburner_fuel_usage(GameConfig::GetVariable( "physics", "AfterburnerFuelUsage", 4.0f )),
+    fmec_exit_velocity_inverse(GameConfig::GetVariable( "physics", "FMEC_exit_vel", 0.0000002 )),
+    fuel_efficiency(GameConfig::GetVariable( "physics", "LithiumRelativeEfficiency_Lithium", 1.0 )),
+    fuel_equals_warp(GameConfig::GetVariable( "physics", "fuel_equals_warp", false )),
+    normal_fuel_usage(GameConfig::GetVariable( "physics", "FuelUsage", 1.0f )),
+    reactor_uses_fuel(GameConfig::GetVariable( "physics", "reactor_uses_fuel", false )) {}
 
 Configuration::Logging::Logging():
     verbose_debug(GameConfig::GetVariable("data", "verbose_debug", false)) {}
 
 Configuration::Physics::Physics():
+
+    bleed_factor(GameConfig::GetVariable( "physics", "warpbleed", 2.0f )),
     collision_scale_factor(GameConfig::GetVariable( "physics", "collision_damage_scale", 1.0f )),
     inelastic_scale(GameConfig::GetVariable( "physics", "inelastic_scale", 0.8f)),
     kilojoules_per_damage( GameConfig::GetVariable( "physics", "kilojoules_per_unit_damage", 5400 ) ),
     max_force_multiplier( GameConfig::GetVariable( "physics", "maxCollisionForceMultiplier", 5) ),
+    max_shield_lowers_capacitance(GameConfig::GetVariable( "physics", "max_shield_lowers_capacitance", false )),
     max_torque_multiplier( GameConfig::GetVariable( "physics", "maxCollisionTorqueMultiplier", 0.67f) ),
     minimum_mass( 1e-6f ),
     minimum_time( GameConfig::GetVariable( "physics", "minimum_time_between_recorded_player_collisions", 0.1f )) {}
+
+Configuration::Warp::Warp():
+    insystem_jump_cost(GameConfig::GetVariable( "physics", "insystem_jump_cost", 0.1 )) {}
 
 Configuration::Weapons::Weapons():
     can_fire_in_cloak( GameConfig::GetVariable( "physics", "can_fire_in_cloak", false)),
