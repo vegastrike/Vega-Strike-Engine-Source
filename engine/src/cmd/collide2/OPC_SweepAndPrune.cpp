@@ -207,7 +207,7 @@ SAP_Element* SAP_PairData::GetFreeElem(uint32_t id, SAP_Element* next, uint32_t*
 
 			// Remap everything
 			{
-				uint32_t Delta = uintptr_t(NewElems) - uintptr_t(mElementPool);
+				ptrdiff_t Delta = uintptr_t(NewElems) - uintptr_t(mElementPool);    // Hmm. Pointer arithmetic. That might not be such a good idea
 
 				uint32_t i;
 				for(i=0;i<mNbUsedElements;i++)	Remap(NewElems[i].mNext, Delta);
