@@ -16,6 +16,12 @@
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/**
+ * Updated by Stephen G. Tuggy 2021-07-03
+ */
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Include Guard
 #ifndef __OPC_AABBTREE_H__
 #define __OPC_AABBTREE_H__
@@ -37,7 +43,7 @@
 		inline_	bool				IsLeaf()		const	{ return !GetPos();						}					\
 																														\
 		/* Stats */																										\
-		inline_	ice_udword				GetNodeSize()	const	{ return SIZEOFOBJECT;					}					\
+		inline_	size_t				GetNodeSize()	const	{ return SIZEOFOBJECT;					}					\
 		protected:																										\
 		/* Tree-independent data */																						\
 		/* Following data always belong to the BV-tree, regardless of what the tree actually contains.*/				\
@@ -63,7 +69,7 @@
 		inline_	bool				IsLeaf()		const	{ return !GetPos();						}					\
 																														\
 		/* Stats */																										\
-		inline_	ice_udword				GetNodeSize()	const	{ return SIZEOFOBJECT;					}					\
+		inline_	size_t				GetNodeSize()	const	{ return SIZEOFOBJECT;					}					\
 		protected:																										\
 		/* Tree-independent data */																						\
 		/* Following data always belong to the BV-tree, regardless of what the tree actually contains.*/				\
@@ -73,22 +79,22 @@
 				uintptr_t			mNeg;		/* "Negative" child */
 #endif
 
-	typedef		void				(*CullingCallback)		(ice_udword nb_primitives, ice_udword* node_primitives, BOOL need_clipping, void* user_data);
+	typedef		void				(*CullingCallback)		(uint32_t nb_primitives, uint32_t* node_primitives, BOOL need_clipping, void* user_data);
 
 	class OPCODE_API AABBTreeNode
 	{
 									IMPLEMENT_TREE(AABBTreeNode, AABB)
 		public:
 		// Data access
-		inline_	const ice_udword*		GetPrimitives()		const	{ return mNodePrimitives;	}
-		inline_	ice_udword				GetNbPrimitives()	const	{ return mNbPrimitives;		}
+		inline_	const uint32_t*		GetPrimitives()		const	{ return mNodePrimitives;	}
+		inline_	uint32_t				GetNbPrimitives()	const	{ return mNbPrimitives;		}
 
 		protected:
 		// Tree-dependent data
-				ice_udword*				mNodePrimitives;	//!< Node-related primitives (shortcut to a position in mIndices below)
-				ice_udword				mNbPrimitives;		//!< Number of primitives for this node
+				uint32_t*				mNodePrimitives;	//!< Node-related primitives (shortcut to a position in mIndices below)
+				uint32_t				mNbPrimitives;		//!< Number of primitives for this node
 		// Internal methods
-				ice_udword				Split(ice_udword axis, AABBTreeBuilder* builder);
+				uint32_t				Split(uint32_t axis, AABBTreeBuilder* builder);
 				bool				Subdivide(AABBTreeBuilder* builder);
 				void				_BuildHierarchy(AABBTreeBuilder* builder);
 				void				_Refit(AABBTreeBuilder* builder);
@@ -103,7 +109,7 @@
 	 *	\return		true to recurse through children, else false to bypass them
 	 */
 	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	typedef		bool				(*WalkingCallback)	(const AABBTreeNode* current, ice_udword depth, void* user_data);
+	typedef		bool				(*WalkingCallback)	(const AABBTreeNode* current, uint32_t depth, void* user_data);
 
 	class OPCODE_API AABBTree : public AABBTreeNode
 	{
@@ -116,23 +122,23 @@
 				void				Release();
 
 		// Data access
-		inline_	const ice_udword*		GetIndices()		const	{ return mIndices;		}	//!< Catch the indices
-		inline_	ice_udword				GetNbNodes()		const	{ return mTotalNbNodes;	}	//!< Catch the number of nodes
+		inline_	const uint32_t*		GetIndices()		const	{ return mIndices;		}	//!< Catch the indices
+		inline_	uint32_t			GetNbNodes()		const	{ return mTotalNbNodes;	}	//!< Catch the number of nodes
 
 		// Infos
 				bool				IsComplete()		const;
 		// Stats
-				ice_udword				ComputeDepth()		const;
-				ice_udword				GetUsedBytes()		const;
-				ice_udword				Walk(WalkingCallback callback, void* user_data) const;
+				uint32_t			ComputeDepth()		const;
+				size_t				GetUsedBytes()		const;
+				uint32_t			Walk(WalkingCallback callback, void* user_data) const;
 
 				bool				Refit(AABBTreeBuilder* builder);
 				bool				Refit2(AABBTreeBuilder* builder);
 		private:
-				ice_udword*				mIndices;			//!< Indices in the app list. Indices are reorganized during build (permutation).
+				uint32_t*				mIndices;			//!< Indices in the app list. Indices are reorganized during build (permutation).
 				AABBTreeNode*		mPool;				//!< Linear pool of nodes for complete trees. Null otherwise. [Opcode 1.3]
 		// Stats
-				ice_udword				mTotalNbNodes;		//!< Number of nodes in the tree.
+				uint32_t				mTotalNbNodes;		//!< Number of nodes in the tree.
 	};
 
 #endif // __OPC_AABBTREE_H__

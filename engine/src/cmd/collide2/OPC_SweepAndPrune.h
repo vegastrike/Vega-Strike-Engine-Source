@@ -16,6 +16,12 @@
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/**
+ * Updated by Stephen G. Tuggy 2021-07-03
+ */
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Include Guard
 #ifndef __OPC_SWEEPANDPRUNE_H__
 #define __OPC_SWEEPANDPRUNE_H__
@@ -29,7 +35,7 @@
 	 *	\return		TRUE to continue enumeration
 	 */
 	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	typedef BOOL	(*PairCallback)	(ice_udword id0, ice_udword id1, void* user_data);
+	typedef BOOL	(*PairCallback)	(uint32_t id0, uint32_t id1, void* user_data);
 
 	class SAP_Element;
 	class SAP_EndPoint;
@@ -41,23 +47,23 @@
 								SAP_PairData();
 								~SAP_PairData();
 
-				bool			Init(ice_udword nb_objects);
+				bool			Init(uint32_t nb_objects);
 
-				void			AddPair(ice_udword id1, ice_udword id2);
-				void			RemovePair(ice_udword id1, ice_udword id2);
+				void			AddPair(uint32_t id1, uint32_t id2);
+				void			RemovePair(uint32_t id1, uint32_t id2);
 
 				void			DumpPairs(Pairs& pairs)								const;
 				void			DumpPairs(PairCallback callback, void* user_data)	const;
 		private:
-				ice_udword			mNbElements;		//!< Total number of elements in the pool
-				ice_udword			mNbUsedElements;	//!< Number of used elements
+				uint32_t			mNbElements;		//!< Total number of elements in the pool
+				uint32_t			mNbUsedElements;	//!< Number of used elements
 				SAP_Element*	mElementPool;		//!< Array of mNbElements elements
 				SAP_Element*	mFirstFree;			//!< First free element in the pool
 
-				ice_udword			mNbObjects;			//!< Max number of objects we can handle
+				uint32_t			mNbObjects;			//!< Max number of objects we can handle
 				SAP_Element**	mArray;				//!< Pointers to pool
 		// Internal methods
-				SAP_Element*	GetFreeElem(ice_udword id, SAP_Element* next, ice_udword* remap=null);
+				SAP_Element*	GetFreeElem(uint32_t id, SAP_Element* next, uint32_t* remap=null);
 		inline_	void			FreeElem(SAP_Element* elem);
 				void			Release();
 	};
@@ -68,15 +74,15 @@
 								SweepAndPrune();
 								~SweepAndPrune();
 
-				bool			Init(ice_udword nb_objects, const AABB** boxes);
-				bool			UpdateObject(ice_udword i, const AABB& box);
+				bool			Init(uint32_t nb_objects, const AABB** boxes);
+				bool			UpdateObject(uint32_t i, const AABB& box);
 
 				void			GetPairs(Pairs& pairs)								const;
 				void			GetPairs(PairCallback callback, void* user_data)	const;
 		private:
 				SAP_PairData	mPairs;
 
-				ice_udword			mNbObjects;
+				uint32_t			mNbObjects;
 				SAP_Box*		mBoxes;
 				SAP_EndPoint*	mList[3];
 		// Internal methods

@@ -27,6 +27,12 @@
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/**
+ * Updated by Stephen G. Tuggy 2021-07-03
+ */
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Precompiled Header
 #include "Stdafx.h"
 
@@ -201,7 +207,7 @@ bool LSSCollider::InitQuery(LSSCache& cache, const LSS& lss, const Matrix4x4* wo
 			mTouchedPrimitives->Reset();
 
 			// Perform overlap test between the unique triangle and the LSS (and set contact status if needed)
-			LSS_PRIM(ice_udword(0), OPC_CONTACT)
+			LSS_PRIM(uint32_t(0), OPC_CONTACT)
 
 			// Return immediately regardless of status
 			return TRUE;
@@ -219,7 +225,7 @@ bool LSSCollider::InitQuery(LSSCache& cache, const LSS& lss, const Matrix4x4* wo
 			if(mTouchedPrimitives->GetNbEntries())
 			{
 				// Get index of previously touched face = the first entry in the array
-				ice_udword PreviouslyTouchedFace = mTouchedPrimitives->GetEntry(0);
+				uint32_t PreviouslyTouchedFace = mTouchedPrimitives->GetEntry(0);
 
 				// Then reset the array:
 				// - if the overlap test below is successful, the index we'll get added back anyway
@@ -615,10 +621,10 @@ bool HybridLSSCollider::Collide(LSSCache& cache, const LSS& lss, const HybridMod
 	if(mCurrentModel && mCurrentModel->HasSingleNode())
 	{
 		// Here we're supposed to perform a normal query, except our tree has a single node, i.e. just a few triangles
-		ice_udword Nb = mIMesh->GetNbTriangles();
+		uint32_t Nb = mIMesh->GetNbTriangles();
 
 		// Loop through all triangles
-		for(ice_udword i=0;i<Nb;i++)
+		for(uint32_t i=0;i<Nb;i++)
 		{
 			LSS_PRIM(i, OPC_CONTACT)
 		}
@@ -684,11 +690,11 @@ bool HybridLSSCollider::Collide(LSSCache& cache, const LSS& lss, const HybridMod
 		mTouchedPrimitives = &cache.TouchedPrimitives;
 
 		// Read touched leaf boxes
-		ice_udword Nb = mTouchedBoxes.GetNbEntries();
-		const ice_udword* Touched = mTouchedBoxes.GetEntries();
+		uint32_t Nb = mTouchedBoxes.GetNbEntries();
+		const uint32_t* Touched = mTouchedBoxes.GetEntries();
 
 		const LeafTriangles* LT = model.GetLeafTriangles();
-		const ice_udword* Indices = model.GetIndices();
+		const uint32_t* Indices = model.GetIndices();
 
 		// Loop through touched leaves
 		while(Nb--)
@@ -696,26 +702,26 @@ bool HybridLSSCollider::Collide(LSSCache& cache, const LSS& lss, const HybridMod
 			const LeafTriangles& CurrentLeaf = LT[*Touched++];
 
 			// Each leaf box has a set of triangles
-			ice_udword NbTris = CurrentLeaf.GetNbTriangles();
+			uint32_t NbTris = CurrentLeaf.GetNbTriangles();
 			if(Indices)
 			{
-				const ice_udword* T = &Indices[CurrentLeaf.GetTriangleIndex()];
+				const uint32_t* T = &Indices[CurrentLeaf.GetTriangleIndex()];
 
 				// Loop through triangles and test each of them
 				while(NbTris--)
 				{
-					ice_udword TriangleIndex = *T++;
+					uint32_t TriangleIndex = *T++;
 					LSS_PRIM(TriangleIndex, OPC_CONTACT)
 				}
 			}
 			else
 			{
-				ice_udword BaseIndex = CurrentLeaf.GetTriangleIndex();
+				uint32_t BaseIndex = CurrentLeaf.GetTriangleIndex();
 
 				// Loop through triangles and test each of them
 				while(NbTris--)
 				{
-					ice_udword TriangleIndex = BaseIndex++;
+					uint32_t TriangleIndex = BaseIndex++;
 					LSS_PRIM(TriangleIndex, OPC_CONTACT)
 				}
 			}

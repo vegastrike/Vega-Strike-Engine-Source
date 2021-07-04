@@ -16,6 +16,12 @@
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/**
+ * Updated by Stephen G. Tuggy 2021-07-03
+ */
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Include Guard
 #ifndef __OPC_OPTIMIZEDTREE_H__
 #define __OPC_OPTIMIZEDTREE_H__
@@ -31,9 +37,9 @@
 		/* Data access */									\
 		inline_	const base_class* GetPos() const { return (base_class*)mData;		}	\
 		inline_	const base_class* GetNeg() const { return ((base_class*)mData)+1;	}	\
-		inline_	ice_udword GetPrimitive() const { return (ice_udword)(mData>>1);		}		\
+		inline_	uint32_t GetPrimitive() const { return (uint32_t)(mData>>1);		}		\
 		/* Stats */										\
-		inline_	ice_udword GetNodeSize() const { return SIZEOFOBJECT;			}	\
+		inline_	size_t GetNodeSize() const { return SIZEOFOBJECT;			}	\
 													\
 		volume mAABB;										\
 		uintptr_t mData;
@@ -50,10 +56,10 @@
 		/* Data access */									\
 		inline_	const base_class* GetPos() const { return (base_class*)mPosData;	}	\
 		inline_	const base_class* GetNeg() const { return (base_class*)mNegData;	}	\
-		inline_	ice_udword GetPosPrimitive() const { return (ice_udword)(mPosData>>1);	}			\
-		inline_	ice_udword GetNegPrimitive() const { return (ice_udword)(mNegData>>1);	}			\
+		inline_	uint32_t GetPosPrimitive() const { return (uint32_t)(mPosData>>1);	}			\
+		inline_	uint32_t GetNegPrimitive() const { return (uint32_t)(mNegData>>1);	}			\
 		/* Stats */										\
-		inline_	ice_udword GetNodeSize() const { return SIZEOFOBJECT;			}	\
+		inline_	size_t GetNodeSize() const { return SIZEOFOBJECT;			}	\
 													\
 		volume mAABB;								  		\
 		uintptr_t mPosData;									\
@@ -65,10 +71,10 @@
 
 		inline_			float				GetVolume()		const	{ return mAABB.mExtents.x * mAABB.mExtents.y * mAABB.mExtents.z;	}
 		inline_			float				GetSize()		const	{ return mAABB.mExtents.SquareMagnitude();	}
-		inline_			ice_udword				GetRadius()		const
+		inline_			uint32_t				GetRadius()		const
 											{
-												ice_udword* Bits = (ice_udword*)&mAABB.mExtents.x;
-												ice_udword Max = Bits[0];
+												uint32_t* Bits = (uint32_t*)&mAABB.mExtents.x;
+												uint32_t Max = Bits[0];
 												if(Bits[1]>Max)	Max = Bits[1];
 												if(Bits[2]>Max)	Max = Bits[2];
 												return Max;
@@ -87,10 +93,10 @@
 	{
 		IMPLEMENT_IMPLICIT_NODE(AABBQuantizedNode, QuantizedAABB)
 
-		inline_			ice_uword				GetSize()		const
+		inline_			size_t				GetSize()		const
 											{
-												const ice_uword* Bits = mAABB.mExtents;
-												ice_uword Max = Bits[0];
+												const uint16_t* Bits = mAABB.mExtents;
+												uint16_t Max = Bits[0];
 												if(Bits[1]>Max)	Max = Bits[1];
 												if(Bits[2]>Max)	Max = Bits[2];
 												return Max;
@@ -124,7 +130,7 @@
 		/* Data access */																							\
 		inline_						const node*		GetNodes()		const	{ return mNodes;					}	\
 		/* Stats */																									\
-		override(AABBOptimizedTree)	ice_udword			GetUsedBytes()	const	{ return mNbNodes*sizeof(node);		}	\
+		override(AABBOptimizedTree)	size_t			GetUsedBytes()	const	{ return mNbNodes*sizeof(node);		}	\
 		private:																									\
 									node*			mNodes;
 
@@ -168,11 +174,11 @@
 		virtual			bool				Walk(GenericWalkingCallback callback, void* user_data) const	= 0;
 
 		// Data access
-		virtual			ice_udword				GetUsedBytes()		const										= 0;
-		inline_			ice_udword				GetNbNodes()		const						{ return mNbNodes;	}
+		virtual			size_t				GetUsedBytes()		const										= 0;
+		inline_			uint32_t			GetNbNodes()		const						{ return mNbNodes;	}
 
 		protected:
-						ice_udword				mNbNodes;
+						uint32_t				mNbNodes;
 	};
 
 	class OPCODE_API AABBCollisionTree : public AABBOptimizedTree

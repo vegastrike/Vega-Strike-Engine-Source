@@ -27,6 +27,12 @@
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/**
+ * Updated by Stephen G. Tuggy 2021-07-03
+ */
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Precompiled Header
 #include "Stdafx.h"
 
@@ -101,7 +107,7 @@ const char* PlanesCollider::ValidateSettings()
  *	\warning	SCALE NOT SUPPORTED. The matrices must contain rotation & translation parts only.
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-bool PlanesCollider::Collide(PlanesCache& cache, const Plane* planes, ice_udword nb_planes, const Model& model, const Matrix4x4* worldm)
+bool PlanesCollider::Collide(PlanesCache& cache, const Plane* planes, uint32_t nb_planes, const Model& model, const Matrix4x4* worldm)
 {
 	// Checkings
 	if(!Setup(&model))	return false;
@@ -109,7 +115,7 @@ bool PlanesCollider::Collide(PlanesCache& cache, const Plane* planes, ice_udword
 	// Init collision query
 	if(InitQuery(cache, planes, nb_planes, worldm))	return true;
 
-	ice_udword PlaneMask = (1<<nb_planes)-1;
+	uint32_t PlaneMask = (1<<nb_planes)-1;
 
 	if(!model.HasLeafNodes())
 	{
@@ -175,7 +181,7 @@ bool PlanesCollider::Collide(PlanesCache& cache, const Plane* planes, ice_udword
  *	\warning	SCALE NOT SUPPORTED. The matrix must contain rotation & translation parts only.
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-bool PlanesCollider::InitQuery(PlanesCache& cache, const Plane* planes, ice_udword nb_planes, const Matrix4x4* worldm)
+bool PlanesCollider::InitQuery(PlanesCache& cache, const Plane* planes, uint32_t nb_planes, const Matrix4x4* worldm)
 {
 	// 1) Call the base method
 	VolumeCollider::InitQuery();
@@ -193,8 +199,8 @@ bool PlanesCollider::InitQuery(PlanesCache& cache, const Plane* planes, ice_udwo
 		Matrix4x4 InvWorldM;
 		InvertPRMatrix(InvWorldM, *worldm);
 
-//		for(ice_udword i=0;i<nb_planes;i++)	mPlanes[i] = planes[i] * InvWorldM;
-		for(ice_udword i=0;i<nb_planes;i++)	TransformPlane(mPlanes[i], planes[i], InvWorldM);
+//		for(uint32_t i=0;i<nb_planes;i++)	mPlanes[i] = planes[i] * InvWorldM;
+		for(uint32_t i=0;i<nb_planes;i++)	TransformPlane(mPlanes[i], planes[i], InvWorldM);
 	}
 	else CopyMemory(mPlanes, planes, nb_planes*sizeof(Plane));
 
@@ -210,8 +216,8 @@ bool PlanesCollider::InitQuery(PlanesCache& cache, const Plane* planes, ice_udwo
 			mTouchedPrimitives->Reset();
 
 			// Perform overlap test between the unique triangle and the planes (and set contact status if needed)
-			ice_udword clip_mask = (1<<mNbPlanes)-1;
-			PLANES_PRIM(ice_udword(0), OPC_CONTACT)
+			uint32_t clip_mask = (1<<mNbPlanes)-1;
+			PLANES_PRIM(uint32_t(0), OPC_CONTACT)
 
 			// Return immediately regardless of status
 			return TRUE;
@@ -229,7 +235,7 @@ bool PlanesCollider::InitQuery(PlanesCache& cache, const Plane* planes, ice_udwo
 			if(mTouchedPrimitives->GetNbEntries())
 			{
 				// Get index of previously touched face = the first entry in the array
-				ice_udword PreviouslyTouchedFace = mTouchedPrimitives->GetEntry(0);
+				uint32_t PreviouslyTouchedFace = mTouchedPrimitives->GetEntry(0);
 
 				// Then reset the array:
 				// - if the overlap test below is successful, the index we'll get added back anyway
@@ -237,7 +243,7 @@ bool PlanesCollider::InitQuery(PlanesCache& cache, const Plane* planes, ice_udwo
 				mTouchedPrimitives->Reset();
 
 				// Perform overlap test between the cached triangle and the planes (and set contact status if needed)
-				ice_udword clip_mask = (1<<mNbPlanes)-1;
+				uint32_t clip_mask = (1<<mNbPlanes)-1;
 				PLANES_PRIM(PreviouslyTouchedFace, OPC_TEMPORAL_CONTACT)
 
 				// Return immediately if possible
@@ -274,10 +280,10 @@ bool PlanesCollider::InitQuery(PlanesCache& cache, const Plane* planes, ice_udwo
  *	\param		node	[in] current collision node
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-void PlanesCollider::_Collide(const AABBCollisionNode* node, ice_udword clip_mask)
+void PlanesCollider::_Collide(const AABBCollisionNode* node, uint32_t clip_mask)
 {
 	// Test the box against the planes. If the box is completely culled, so are its children, hence we exit.
-	ice_udword OutClipMask;
+	uint32_t OutClipMask;
 	if(!PlanesAABBOverlap(node->mAABB.mCenter, node->mAABB.mExtents, OutClipMask, clip_mask))	return;
 
 	TEST_CLIP_MASK
@@ -303,10 +309,10 @@ void PlanesCollider::_Collide(const AABBCollisionNode* node, ice_udword clip_mas
  *	\param		node	[in] current collision node
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-void PlanesCollider::_CollideNoPrimitiveTest(const AABBCollisionNode* node, ice_udword clip_mask)
+void PlanesCollider::_CollideNoPrimitiveTest(const AABBCollisionNode* node, uint32_t clip_mask)
 {
 	// Test the box against the planes. If the box is completely culled, so are its children, hence we exit.
-	ice_udword OutClipMask;
+	uint32_t OutClipMask;
 	if(!PlanesAABBOverlap(node->mAABB.mCenter, node->mAABB.mExtents, OutClipMask, clip_mask))	return;
 
 	TEST_CLIP_MASK
@@ -332,7 +338,7 @@ void PlanesCollider::_CollideNoPrimitiveTest(const AABBCollisionNode* node, ice_
  *	\param		node	[in] current collision node
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-void PlanesCollider::_Collide(const AABBQuantizedNode* node, ice_udword clip_mask)
+void PlanesCollider::_Collide(const AABBQuantizedNode* node, uint32_t clip_mask)
 {
 	// Dequantize box
 	const QuantizedAABB& Box = node->mAABB;
@@ -340,7 +346,7 @@ void PlanesCollider::_Collide(const AABBQuantizedNode* node, ice_udword clip_mas
 	const Point Extents(float(Box.mExtents[0]) * mExtentsCoeff.x, float(Box.mExtents[1]) * mExtentsCoeff.y, float(Box.mExtents[2]) * mExtentsCoeff.z);
 
 	// Test the box against the planes. If the box is completely culled, so are its children, hence we exit.
-	ice_udword OutClipMask;
+	uint32_t OutClipMask;
 	if(!PlanesAABBOverlap(Center, Extents, OutClipMask, clip_mask))	return;
 
 	TEST_CLIP_MASK
@@ -366,7 +372,7 @@ void PlanesCollider::_Collide(const AABBQuantizedNode* node, ice_udword clip_mas
  *	\param		node	[in] current collision node
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-void PlanesCollider::_CollideNoPrimitiveTest(const AABBQuantizedNode* node, ice_udword clip_mask)
+void PlanesCollider::_CollideNoPrimitiveTest(const AABBQuantizedNode* node, uint32_t clip_mask)
 {
 	// Dequantize box
 	const QuantizedAABB& Box = node->mAABB;
@@ -374,7 +380,7 @@ void PlanesCollider::_CollideNoPrimitiveTest(const AABBQuantizedNode* node, ice_
 	const Point Extents(float(Box.mExtents[0]) * mExtentsCoeff.x, float(Box.mExtents[1]) * mExtentsCoeff.y, float(Box.mExtents[2]) * mExtentsCoeff.z);
 
 	// Test the box against the planes. If the box is completely culled, so are its children, hence we exit.
-	ice_udword OutClipMask;
+	uint32_t OutClipMask;
 	if(!PlanesAABBOverlap(Center, Extents, OutClipMask, clip_mask))	return;
 
 	TEST_CLIP_MASK
@@ -400,10 +406,10 @@ void PlanesCollider::_CollideNoPrimitiveTest(const AABBQuantizedNode* node, ice_
  *	\param		node	[in] current collision node
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-void PlanesCollider::_Collide(const AABBNoLeafNode* node, ice_udword clip_mask)
+void PlanesCollider::_Collide(const AABBNoLeafNode* node, uint32_t clip_mask)
 {
 	// Test the box against the planes. If the box is completely culled, so are its children, hence we exit.
-	ice_udword OutClipMask;
+	uint32_t OutClipMask;
 	if(!PlanesAABBOverlap(node->mAABB.mCenter, node->mAABB.mExtents, OutClipMask, clip_mask))	return;
 
 	TEST_CLIP_MASK
@@ -424,10 +430,10 @@ void PlanesCollider::_Collide(const AABBNoLeafNode* node, ice_udword clip_mask)
  *	\param		node	[in] current collision node
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-void PlanesCollider::_CollideNoPrimitiveTest(const AABBNoLeafNode* node, ice_udword clip_mask)
+void PlanesCollider::_CollideNoPrimitiveTest(const AABBNoLeafNode* node, uint32_t clip_mask)
 {
 	// Test the box against the planes. If the box is completely culled, so are its children, hence we exit.
-	ice_udword OutClipMask;
+	uint32_t OutClipMask;
 	if(!PlanesAABBOverlap(node->mAABB.mCenter, node->mAABB.mExtents, OutClipMask, clip_mask))	return;
 
 	TEST_CLIP_MASK
@@ -448,7 +454,7 @@ void PlanesCollider::_CollideNoPrimitiveTest(const AABBNoLeafNode* node, ice_udw
  *	\param		node	[in] current collision node
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-void PlanesCollider::_Collide(const AABBQuantizedNoLeafNode* node, ice_udword clip_mask)
+void PlanesCollider::_Collide(const AABBQuantizedNoLeafNode* node, uint32_t clip_mask)
 {
 	// Dequantize box
 	const QuantizedAABB& Box = node->mAABB;
@@ -456,7 +462,7 @@ void PlanesCollider::_Collide(const AABBQuantizedNoLeafNode* node, ice_udword cl
 	const Point Extents(float(Box.mExtents[0]) * mExtentsCoeff.x, float(Box.mExtents[1]) * mExtentsCoeff.y, float(Box.mExtents[2]) * mExtentsCoeff.z);
 
 	// Test the box against the planes. If the box is completely culled, so are its children, hence we exit.
-	ice_udword OutClipMask;
+	uint32_t OutClipMask;
 	if(!PlanesAABBOverlap(Center, Extents, OutClipMask, clip_mask))	return;
 
 	TEST_CLIP_MASK
@@ -477,7 +483,7 @@ void PlanesCollider::_Collide(const AABBQuantizedNoLeafNode* node, ice_udword cl
  *	\param		node	[in] current collision node
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-void PlanesCollider::_CollideNoPrimitiveTest(const AABBQuantizedNoLeafNode* node, ice_udword clip_mask)
+void PlanesCollider::_CollideNoPrimitiveTest(const AABBQuantizedNoLeafNode* node, uint32_t clip_mask)
 {
 	// Dequantize box
 	const QuantizedAABB& Box = node->mAABB;
@@ -485,7 +491,7 @@ void PlanesCollider::_CollideNoPrimitiveTest(const AABBQuantizedNoLeafNode* node
 	const Point Extents(float(Box.mExtents[0]) * mExtentsCoeff.x, float(Box.mExtents[1]) * mExtentsCoeff.y, float(Box.mExtents[2]) * mExtentsCoeff.z);
 
 	// Test the box against the planes. If the box is completely culled, so are its children, hence we exit.
-	ice_udword OutClipMask;
+	uint32_t OutClipMask;
 	if(!PlanesAABBOverlap(Center, Extents, OutClipMask, clip_mask))	return;
 
 	TEST_CLIP_MASK
@@ -524,7 +530,7 @@ HybridPlanesCollider::~HybridPlanesCollider()
 {
 }
 
-bool HybridPlanesCollider::Collide(PlanesCache& cache, const Plane* planes, ice_udword nb_planes, const HybridModel& model, const Matrix4x4* worldm)
+bool HybridPlanesCollider::Collide(PlanesCache& cache, const Plane* planes, uint32_t nb_planes, const HybridModel& model, const Matrix4x4* worldm)
 {
 	// We don't want primitive tests here!
 	mFlags |= OPC_NO_PRIMITIVE_TESTS;
@@ -539,11 +545,11 @@ bool HybridPlanesCollider::Collide(PlanesCache& cache, const Plane* planes, ice_
 	if(mCurrentModel && mCurrentModel->HasSingleNode())
 	{
 		// Here we're supposed to perform a normal query, except our tree has a single node, i.e. just a few triangles
-		ice_udword Nb = mIMesh->GetNbTriangles();
+		uint32_t Nb = mIMesh->GetNbTriangles();
 
 		// Loop through all triangles
-		ice_udword clip_mask = (1<<mNbPlanes)-1;
-		for(ice_udword i=0;i<Nb;i++)
+		uint32_t clip_mask = (1<<mNbPlanes)-1;
+		for(uint32_t i=0;i<Nb;i++)
 		{
 			PLANES_PRIM(i, OPC_CONTACT)
 		}
@@ -554,7 +560,7 @@ bool HybridPlanesCollider::Collide(PlanesCache& cache, const Plane* planes, ice_
 	mTouchedBoxes.Reset();
 	mTouchedPrimitives = &mTouchedBoxes;
 
-	ice_udword PlaneMask = (1<<nb_planes)-1;
+	uint32_t PlaneMask = (1<<nb_planes)-1;
 
 	// Now, do the actual query against leaf boxes
 	if(!model.HasLeafNodes())
@@ -611,39 +617,39 @@ bool HybridPlanesCollider::Collide(PlanesCache& cache, const Plane* planes, ice_
 		mTouchedPrimitives = &cache.TouchedPrimitives;
 
 		// Read touched leaf boxes
-		ice_udword Nb = mTouchedBoxes.GetNbEntries();
-		const ice_udword* Touched = mTouchedBoxes.GetEntries();
+		uint32_t Nb = mTouchedBoxes.GetNbEntries();
+		const uint32_t* Touched = mTouchedBoxes.GetEntries();
 
 		const LeafTriangles* LT = model.GetLeafTriangles();
-		const ice_udword* Indices = model.GetIndices();
+		const uint32_t* Indices = model.GetIndices();
 
 		// Loop through touched leaves
-		ice_udword clip_mask = (1<<mNbPlanes)-1;
+		uint32_t clip_mask = (1<<mNbPlanes)-1;
 		while(Nb--)
 		{
 			const LeafTriangles& CurrentLeaf = LT[*Touched++];
 
 			// Each leaf box has a set of triangles
-			ice_udword NbTris = CurrentLeaf.GetNbTriangles();
+			uint32_t NbTris = CurrentLeaf.GetNbTriangles();
 			if(Indices)
 			{
-				const ice_udword* T = &Indices[CurrentLeaf.GetTriangleIndex()];
+				const uint32_t* T = &Indices[CurrentLeaf.GetTriangleIndex()];
 
 				// Loop through triangles and test each of them
 				while(NbTris--)
 				{
-					ice_udword TriangleIndex = *T++;
+					uint32_t TriangleIndex = *T++;
 					PLANES_PRIM(TriangleIndex, OPC_CONTACT)
 				}
 			}
 			else
 			{
-				ice_udword BaseIndex = CurrentLeaf.GetTriangleIndex();
+				uint32_t BaseIndex = CurrentLeaf.GetTriangleIndex();
 
 				// Loop through triangles and test each of them
 				while(NbTris--)
 				{
-					ice_udword TriangleIndex = BaseIndex++;
+					uint32_t TriangleIndex = BaseIndex++;
 					PLANES_PRIM(TriangleIndex, OPC_CONTACT)
 				}
 			}

@@ -16,6 +16,12 @@
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/**
+ * Updated by Stephen G. Tuggy 2021-07-03
+ */
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Include Guard
 #ifndef __OPC_PLANESCOLLIDER_H__
 #define __OPC_PLANESCOLLIDER_H__
@@ -50,7 +56,7 @@
 		 *	\warning	SCALE NOT SUPPORTED. The matrices must contain rotation & translation parts only.
 		 */
 		///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-							bool			Collide(PlanesCache& cache, const Plane* planes, ice_udword nb_planes, const Model& model, const Matrix4x4* worldm=null);
+							bool			Collide(PlanesCache& cache, const Plane* planes, uint32_t nb_planes, const Model& model, const Matrix4x4* worldm=null);
 
 		// Mutant box-with-planes collision queries
 		inline_				bool			Collide(PlanesCache& cache, const OBB& box, const Model& model, const Matrix4x4* worldb=null, const Matrix4x4* worldm=null)
@@ -86,24 +92,24 @@
 
 		protected:
 		// Planes in model space
-							ice_udword			mNbPlanes;
+							uint32_t			mNbPlanes;
 							Plane*			mPlanes;
 		// Leaf description
 							VertexPointers	mVP;
 		// Internal methods
-							void			_Collide(const AABBCollisionNode* node, ice_udword clip_mask);
-							void			_Collide(const AABBNoLeafNode* node, ice_udword clip_mask);
-							void			_Collide(const AABBQuantizedNode* node, ice_udword clip_mask);
-							void			_Collide(const AABBQuantizedNoLeafNode* node, ice_udword clip_mask);
-							void			_CollideNoPrimitiveTest(const AABBCollisionNode* node, ice_udword clip_mask);
-							void			_CollideNoPrimitiveTest(const AABBNoLeafNode* node, ice_udword clip_mask);
-							void			_CollideNoPrimitiveTest(const AABBQuantizedNode* node, ice_udword clip_mask);
-							void			_CollideNoPrimitiveTest(const AABBQuantizedNoLeafNode* node, ice_udword clip_mask);
+							void			_Collide(const AABBCollisionNode* node, uint32_t clip_mask);
+							void			_Collide(const AABBNoLeafNode* node, uint32_t clip_mask);
+							void			_Collide(const AABBQuantizedNode* node, uint32_t clip_mask);
+							void			_Collide(const AABBQuantizedNoLeafNode* node, uint32_t clip_mask);
+							void			_CollideNoPrimitiveTest(const AABBCollisionNode* node, uint32_t clip_mask);
+							void			_CollideNoPrimitiveTest(const AABBNoLeafNode* node, uint32_t clip_mask);
+							void			_CollideNoPrimitiveTest(const AABBQuantizedNode* node, uint32_t clip_mask);
+							void			_CollideNoPrimitiveTest(const AABBQuantizedNoLeafNode* node, uint32_t clip_mask);
 			// Overlap tests
-		inline_				bool			PlanesAABBOverlap(const Point& center, const Point& extents, ice_udword& out_clip_mask, ice_udword in_clip_mask);
-		inline_				bool			PlanesTriOverlap(ice_udword in_clip_mask);
+		inline_				bool			PlanesAABBOverlap(const Point& center, const Point& extents, uint32_t& out_clip_mask, uint32_t in_clip_mask);
+		inline_				bool			PlanesTriOverlap(uint32_t in_clip_mask);
 			// Init methods
-							bool			InitQuery(PlanesCache& cache, const Plane* planes, ice_udword nb_planes, const Matrix4x4* worldm=null);
+							bool			InitQuery(PlanesCache& cache, const Plane* planes, uint32_t nb_planes, const Matrix4x4* worldm=null);
 	};
 
 	class OPCODE_API HybridPlanesCollider : public PlanesCollider
@@ -113,7 +119,7 @@
 											HybridPlanesCollider();
 		virtual								~HybridPlanesCollider();
 
-							bool			Collide(PlanesCache& cache, const Plane* planes, ice_udword nb_planes, const HybridModel& model, const Matrix4x4* worldm=null);
+							bool			Collide(PlanesCache& cache, const Plane* planes, uint32_t nb_planes, const HybridModel& model, const Matrix4x4* worldm=null);
 		protected:
 							Container		mTouchedBoxes;
 	};

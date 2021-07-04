@@ -8,6 +8,12 @@
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /**
+ * Updated by Stephen G. Tuggy 2021-07-03
+ */
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/**
  *	Contains a mesh interface.
  *	\file		OPC_MeshInterface.cpp
  *	\author		Pierre Terdiman
@@ -55,7 +61,7 @@
  *	Ex:
  *
  *	\code
- *		static void ColCallback(ice_udword triangle_index, VertexPointers& triangle, ice_udword user_data)
+ *		static void ColCallback(uint32_t triangle_index, VertexPointers& triangle, uint32_t user_data)
  *		{
  *			// Get back Mesh0 or Mesh1 (you also can use 2 different callbacks)
  *			Mesh* MyMesh = (Mesh*)user_data;
@@ -68,8 +74,8 @@
  *		}
  *
  *		// Setup callbacks
- *		MeshInterface0->SetCallback(ColCallback, ice_udword(Mesh0));
- *		MeshInterface1->SetCallback(ColCallback, ice_udword(Mesh1));
+ *		MeshInterface0->SetCallback(ColCallback, uint32_t(Mesh0));
+ *		MeshInterface1->SetCallback(ColCallback, uint32_t(Mesh1));
  *	\endcode
  *
  *	Of course, you should make this callback as fast as possible. And you're also not supposed
@@ -176,19 +182,19 @@ bool MeshInterface::IsValid() const
  *	\return		number of degenerate faces
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-ice_udword MeshInterface::CheckTopology()	const
+uint32_t MeshInterface::CheckTopology()	const
 {
 	// Check topology. If the model contains degenerate faces, collision report can be wrong in some cases.
 	// e.g. it happens with the standard MAX teapot. So clean your meshes first... If you don't have a mesh cleaner
 	// you can try this: www.codercorner.com/Consolidation.zip
 
-	ice_udword NbDegenerate = 0;
+	uint32_t NbDegenerate = 0;
 
 	VertexPointers VP;
 
 	// Using callbacks, we don't have access to vertex indices. Nevertheless we still can check for
 	// redundant vertex pointers, which cover all possibilities (callbacks/pointers/strides).
-	for(ice_udword i=0;i<mNbTris;i++)
+	for(uint32_t i=0;i<mNbTris;i++)
 	{
 		GetTriangle(VP, i);
 
@@ -244,7 +250,7 @@ bool MeshInterface::SetPointers(const IndexedTriangle* tris, const Point* verts)
  *	\return		true if success
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-bool MeshInterface::SetStrides(ice_udword tri_stride, ice_udword vertex_stride)
+bool MeshInterface::SetStrides(uint32_t tri_stride, uint32_t vertex_stride)
 {
 	if(tri_stride<sizeof(IndexedTriangle))	return SetIceError("MeshInterface::SetStrides: invalid triangle stride", null);
 	if(vertex_stride<sizeof(Point))			return SetIceError("MeshInterface::SetStrides: invalid vertex stride", null);
@@ -264,7 +270,7 @@ bool MeshInterface::SetStrides(ice_udword tri_stride, ice_udword vertex_stride)
  *	\return		true if success
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-bool MeshInterface::RemapClient(ice_udword nb_indices, const ice_udword* permutation) const
+bool MeshInterface::RemapClient(uint32_t nb_indices, const uint32_t* permutation) const
 {
 	// Checkings
 	if(!nb_indices || !permutation)	return false;
@@ -278,20 +284,20 @@ bool MeshInterface::RemapClient(ice_udword nb_indices, const ice_udword* permuta
 	CHECKALLOC(Tmp);
 
 	#ifdef OPC_USE_STRIDE
-	ice_udword Stride = mTriStride;
+	uint32_t Stride = mTriStride;
 	#else
-	ice_udword Stride = sizeof(IndexedTriangle);
+	uint32_t Stride = sizeof(IndexedTriangle);
 	#endif
 
-	for(ice_udword i=0;i<mNbTris;i++)
+	for(uint32_t i=0;i<mNbTris;i++)
 	{
-		const IndexedTriangle* T = (const IndexedTriangle*)(((ice_ubyte*)mTris) + i * Stride);
+		const IndexedTriangle* T = (const IndexedTriangle*)(((uint8_t*)mTris) + i * Stride);
 		Tmp[i] = *T;
 	}
 
-	for(ice_udword i=0;i<mNbTris;i++)
+	for(uint32_t i=0;i<mNbTris;i++)
 	{
-		IndexedTriangle* T = (IndexedTriangle*)(((ice_ubyte*)mTris) + i * Stride);
+		IndexedTriangle* T = (IndexedTriangle*)(((uint8_t*)mTris) + i * Stride);
 		*T = Tmp[permutation[i]];
 	}
 

@@ -26,7 +26,7 @@
 
 /*
  * Copyright (C) 2020 pyramid3d
- * Copyright (C) 2020 Stephen G. Tuggy <sgt@stephengtuggy.com>
+ * Copyright (C) 2020-2021 Stephen G. Tuggy
  */
 
 
@@ -128,7 +128,7 @@ csOPCODECollider::~csOPCODECollider ()
 }
 
 
-void csOPCODECollider::MeshCallback (ice_udword triangle_index,
+void csOPCODECollider::MeshCallback (uint32_t triangle_index,
                                     VertexPointers& triangle,
                                     void* user_data)
 {

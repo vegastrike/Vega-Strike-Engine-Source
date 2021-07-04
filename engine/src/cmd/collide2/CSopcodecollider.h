@@ -26,7 +26,7 @@
 
 /*
  * Copyright (C) 2020 pyramid3d
- * Copyright (C) 2020 Stephen G. Tuggy <sgt@stephengtuggy.com>
+ * Copyright (C) 2020-2021 Stephen G. Tuggy
  */
 
 #ifndef __VS_OPCODECOL_H__
@@ -82,7 +82,7 @@ class csOPCODECollider
 		void GeometryInitialize (const std::vector <mesh_polygon> &polygons);
 
 		/* callback used to return vertex points when requested from opcode*/
-		static void MeshCallback (ice_udword triangle_index,
+		static void MeshCallback (uint32_t triangle_index,
 							Opcode::VertexPointers& triangle, void* user_data);
 
         /* returns face of mesh where ray collided */

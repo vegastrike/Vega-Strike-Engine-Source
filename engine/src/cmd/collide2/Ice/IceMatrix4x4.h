@@ -8,6 +8,12 @@
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/**
+ * Updated by Stephen G. Tuggy 2021-07-03
+ */
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Include Guard
 #ifndef __ICEMATRIX4X4_H__
 #define __ICEMATRIX4X4_H__
@@ -20,8 +26,8 @@
 
 	class ICEMATHS_API Matrix4x4
 	{
-//				void	LUBackwardSubstitution( ice_sdword *indx, float* b );
-//				void	LUDecomposition( ice_sdword* indx, float* d );
+//				void	LUBackwardSubstitution( int32_t *indx, float* b );
+//				void	LUDecomposition( int32_t* indx, float* d );
 
 		public:
 		//! Empty constructor.
@@ -70,25 +76,25 @@
 
 		// Row-column access
 		//! Returns a row.
-		inline_	void				GetRow(const ice_udword r, HPoint& p)	const	{ p.x=m[r][0];	p.y=m[r][1];	p.z=m[r][2];	p.w=m[r][3];		}
+		inline_	void				GetRow(const uint32_t r, HPoint& p)	const	{ p.x=m[r][0];	p.y=m[r][1];	p.z=m[r][2];	p.w=m[r][3];		}
 		//! Returns a row.
-		inline_	void				GetRow(const ice_udword r, Point& p)	const	{ p.x=m[r][0];	p.y=m[r][1];	p.z=m[r][2];						}
+		inline_	void				GetRow(const uint32_t r, Point& p)	const	{ p.x=m[r][0];	p.y=m[r][1];	p.z=m[r][2];						}
 		//! Returns a row.
-		inline_	const HPoint&		GetRow(const ice_udword r)				const	{ return *(const HPoint*)&m[r][0];									}
+		inline_	const HPoint&		GetRow(const uint32_t r)				const	{ return *(const HPoint*)&m[r][0];									}
 		//! Returns a row.
-		inline_	HPoint&				GetRow(const ice_udword r)						{ return *(HPoint*)&m[r][0];										}
+		inline_	HPoint&				GetRow(const uint32_t r)						{ return *(HPoint*)&m[r][0];										}
 		//! Sets a row.
-		inline_	void				SetRow(const ice_udword r, const HPoint& p)		{ m[r][0]=p.x;	m[r][1]=p.y;	m[r][2]=p.z;	m[r][3]=p.w;		}
+		inline_	void				SetRow(const uint32_t r, const HPoint& p)		{ m[r][0]=p.x;	m[r][1]=p.y;	m[r][2]=p.z;	m[r][3]=p.w;		}
 		//! Sets a row.
-		inline_	void				SetRow(const ice_udword r, const Point& p)		{ m[r][0]=p.x;	m[r][1]=p.y;	m[r][2]=p.z;	m[r][3]= (r!=3) ? 0.0f : 1.0f;		}
+		inline_	void				SetRow(const uint32_t r, const Point& p)		{ m[r][0]=p.x;	m[r][1]=p.y;	m[r][2]=p.z;	m[r][3]= (r!=3) ? 0.0f : 1.0f;		}
 		//! Returns a column.
-		inline_	void				GetCol(const ice_udword c, HPoint& p)	const	{ p.x=m[0][c];	p.y=m[1][c];	p.z=m[2][c];	p.w=m[3][c];		}
+		inline_	void				GetCol(const uint32_t c, HPoint& p)	const	{ p.x=m[0][c];	p.y=m[1][c];	p.z=m[2][c];	p.w=m[3][c];		}
 		//! Returns a column.
-		inline_	void				GetCol(const ice_udword c, Point& p)	const	{ p.x=m[0][c];	p.y=m[1][c];	p.z=m[2][c];						}
+		inline_	void				GetCol(const uint32_t c, Point& p)	const	{ p.x=m[0][c];	p.y=m[1][c];	p.z=m[2][c];						}
 		//! Sets a column.
-		inline_	void				SetCol(const ice_udword c, const HPoint& p)		{ m[0][c]=p.x;	m[1][c]=p.y;	m[2][c]=p.z;	m[3][c]=p.w;		}
+		inline_	void				SetCol(const uint32_t c, const HPoint& p)		{ m[0][c]=p.x;	m[1][c]=p.y;	m[2][c]=p.z;	m[3][c]=p.w;		}
 		//! Sets a column.
-		inline_	void				SetCol(const ice_udword c, const Point& p)		{ m[0][c]=p.x;	m[1][c]=p.y;	m[2][c]=p.z;	m[3][c]= (c!=3) ? 0.0f : 1.0f;	}
+		inline_	void				SetCol(const uint32_t c, const Point& p)		{ m[0][c]=p.x;	m[1][c]=p.y;	m[2][c]=p.z;	m[3][c]= (c!=3) ? 0.0f : 1.0f;	}
 
 		// Translation
 		//! Returns the translation part of the matrix.
@@ -123,11 +129,11 @@
 									}
 /*
 		//! Returns a row.
-		inline_	HPoint		GetRow(const ice_udword row)	const			{ return mRow[row];														}
+		inline_	HPoint		GetRow(const uint32_t row)	const			{ return mRow[row];														}
 		//! Sets a row.
-		inline_	Matrix4x4&	SetRow(const ice_udword row, const HPoint& p)	{ mRow[row] = p;	return *this;										}
+		inline_	Matrix4x4&	SetRow(const uint32_t row, const HPoint& p)	{ mRow[row] = p;	return *this;										}
 		//! Sets a row.
-						Matrix4x4&	SetRow(const ice_udword row, const Point& p)
+						Matrix4x4&	SetRow(const uint32_t row, const Point& p)
 						{
 							m[row][0] = p.x;
 							m[row][1] = p.y;
@@ -136,7 +142,7 @@
 							return	*this;
 						}
 		//! Returns a column.
-						HPoint		GetCol(const ice_udword col)		const
+						HPoint		GetCol(const uint32_t col)		const
 						{
 							HPoint	Res;
 							Res.x = m[0][col];
@@ -146,7 +152,7 @@
 							return	Res;
 						}
 		//! Sets a column.
-						Matrix4x4&	SetCol(const ice_udword col, const HPoint& p)
+						Matrix4x4&	SetCol(const uint32_t col, const HPoint& p)
 						{
 							m[0][col] = p.x;
 							m[1][col] = p.y;
@@ -155,7 +161,7 @@
 							return	*this;
 						}
 		//! Sets a column.
-						Matrix4x4&	SetCol(const ice_udword col, const Point& p)
+						Matrix4x4&	SetCol(const uint32_t col, const Point& p)
 						{
 							m[0][col] = p.x;
 							m[1][col] = p.y;
@@ -200,9 +206,9 @@
 		//! Checks matrix validity
 		inline_	BOOL				IsValid()		const
 									{
-										for(ice_udword j=0;j<4;j++)
+										for(uint32_t j=0;j<4;j++)
 										{
-											for(ice_udword i=0;i<4;i++)
+											for(uint32_t i=0;i<4;i++)
 											{
 												if(!IsValidFloat(m[j][i]))	return FALSE;
 											}
@@ -232,7 +238,7 @@
 									}
 
 		//! Computes a cofactor. Used for matrix inversion.
-				float				CoFactor(ice_udword row, ice_udword col)	const;
+				float				CoFactor(uint32_t row, uint32_t col)	const;
 		//! Computes the determinant of the matrix.
 				float				Determinant()	const;
 		//! Inverts the matrix. Determinant must be different from zero, else matrix can't be inverted.

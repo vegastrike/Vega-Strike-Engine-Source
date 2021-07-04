@@ -1,5 +1,8 @@
 /*
     Copyright (C) 1998-2004 by Jorrit Tyberghein
+    Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other
+    Vega Strike contributors
+    Copyright (C) 2021 Stephen G. Tuggy
   
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Library General Public
@@ -59,22 +62,22 @@
 #include <inttypes.h>
 #endif
 
-/**\name Specific sized types
- * These types should be used ONLY when you need a variable of an explicit
- * number of bits.  For all other cases, you should use normal char, short,
- * int, long, etc., types since they are treated as "natural" types and will
- * generally have better performance characteristics than the explicitly-sized
- * types. Use the explicitly-sized types sparingly.
- * @{ */
+// /**\name Specific sized types
+//  * These types should be used ONLY when you need a variable of an explicit
+//  * number of bits.  For all other cases, you should use normal char, short,
+//  * int, long, etc., types since they are treated as "natural" types and will
+//  * generally have better performance characteristics than the explicitly-sized
+//  * types. Use the explicitly-sized types sparingly.
+//  * @{ */
 
-typedef uint8_t opc_uint8;
-typedef int8_t opc_int8;
-typedef uint16_t opc_uint16;
-typedef int16_t opc_int16;
-typedef uint32_t opc_uint32;
-typedef int32_t opc_int32;
-typedef uint64_t opc_uint64;
-typedef int64_t opc_int64;
+// typedef uint8_t opc_uint8;
+// typedef int8_t opc_int8;
+// typedef uint16_t opc_uint16;
+// typedef int16_t opc_int16;
+// typedef uint32_t opc_uint32;
+// typedef int32_t opc_int32;
+// typedef uint64_t opc_uint64;
+// typedef int64_t opc_int64;
 
 #ifdef CS_HAVE_INT64_C
 

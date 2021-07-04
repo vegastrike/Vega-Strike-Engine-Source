@@ -16,6 +16,12 @@
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/**
+ * Updated by Stephen G. Tuggy 2021-07-03
+ */
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Include Guard
 #ifndef __OPC_TREECOLLIDER_H__
 #define __OPC_TREECOLLIDER_H__
@@ -61,7 +67,7 @@
 
 #ifdef __MESHMERIZER_H__	// Collision hulls only supported within ICE !
 		SVCache				SepVector;
-		ice_udword				CountDown;
+		uint32_t				CountDown;
 		bool				HullTest;
 #endif // __MESHMERIZER_H__
 	};
@@ -125,7 +131,7 @@
 		 *	\return		the number of BV-BV tests performed during last query
 		 */
 		///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-		inline_				ice_udword			GetNbBVBVTests()				const	{ return mNbBVBVTests;							}
+		inline_				uint32_t			GetNbBVBVTests()				const	{ return mNbBVBVTests;							}
 
 		///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 		/**
@@ -135,7 +141,7 @@
 		 *	\return		the number of Triangle-Triangle tests performed during last query
 		 */
 		///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-		inline_				ice_udword			GetNbPrimPrimTests()			const	{ return mNbPrimPrimTests;						}
+		inline_				uint32_t			GetNbPrimPrimTests()			const	{ return mNbPrimPrimTests;						}
 
 		///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 		/**
@@ -145,7 +151,7 @@
 		 *	\return		the number of BV-Triangle tests performed during last query
 		 */
 		///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-		inline_				ice_udword			GetNbBVPrimTests()				const	{ return mNbBVPrimTests;						}
+		inline_				uint32_t			GetNbBVPrimTests()				const	{ return mNbBVPrimTests;						}
 
 		// Data access
 
@@ -157,7 +163,7 @@
 		 *	\return		the number of contacts / colliding pairs.
 		 */
 		///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-		inline_				ice_udword			GetNbPairs()					const	{ return mPairs.GetNbEntries()>>1;				}
+		inline_				uint32_t			GetNbPairs()					const	{ return mPairs.GetNbEntries()>>1;				}
 
 		///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 		/**
@@ -184,9 +190,9 @@
 					const	MeshInterface*	mIMesh0;			//!< User-defined mesh interface for object0
 					const	MeshInterface*	mIMesh1;			//!< User-defined mesh interface for object1
 		// Stats
-							ice_udword			mNbBVBVTests;		//!< Number of BV-BV tests
-							ice_udword			mNbPrimPrimTests;	//!< Number of Primitive-Primitive tests
-							ice_udword			mNbBVPrimTests;		//!< Number of BV-Primitive tests
+							uint32_t			mNbBVBVTests;		//!< Number of BV-BV tests
+							uint32_t			mNbPrimPrimTests;	//!< Number of Primitive-Primitive tests
+							uint32_t			mNbBVPrimTests;		//!< Number of BV-Primitive tests
 		// Precomputed data
 							Matrix3x3		mAR;				//!< Absolute rotation matrix
 							Matrix3x3		mR0to1;				//!< Rotation from object0 to object1
@@ -200,7 +206,7 @@
 							Point			mExtentsCoeff1;
 		// Leaf description
 							Point			mLeafVerts[3];		//!< Triangle vertices
-							ice_udword			mLeafIndex;			//!< Triangle index
+							uint32_t			mLeafIndex;			//!< Triangle index
 		// Settings
 							bool			mFullBoxBoxTest;	//!< Perform full BV-BV tests (true) or SAT-lite tests (false)
 							bool			mFullPrimBoxTest;	//!< Perform full Primitive-BV tests (true) or SAT-lite tests (false)
@@ -219,9 +225,9 @@
 							void			_CollideBoxTri(const AABBQuantizedNoLeafNode* b);
 							void			_Collide(const AABBQuantizedNoLeafNode* a, const AABBQuantizedNoLeafNode* b);
 			// Overlap tests
-							void			PrimTest(ice_udword id0, ice_udword id1);
-			inline_			void			PrimTestTriIndex(ice_udword id1);
-			inline_			void			PrimTestIndexTri(ice_udword id0);
+							void			PrimTest(uint32_t id0, uint32_t id1);
+			inline_			void			PrimTestTriIndex(uint32_t id1);
+			inline_			void			PrimTestIndexTri(uint32_t id0);
 
 			inline_			bool			BoxBoxOverlap(const Point& ea, const Point& ca, const Point& eb, const Point& cb);
 			inline_			bool			TriBoxOverlap(const Point& center, const Point& extents);

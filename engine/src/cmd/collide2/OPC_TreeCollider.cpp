@@ -28,6 +28,12 @@
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/**
+ * Updated by Stephen G. Tuggy 2021-07-03
+ */
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Precompiled Header
 #include "Stdafx.h"
 
@@ -114,7 +120,7 @@ bool AABBTreeCollider::Collide(BVTCache& cache, const Matrix4x4* world0, const M
 		{
 			struct Local
 			{
-				static Point* SVCallback(const Point& sv, ice_udword& previndex, ice_udword user_data)
+				static Point* SVCallback(const Point& sv, uint32_t& previndex, uint32_t user_data)
 				{
 					CollisionHull* Hull = (CollisionHull*)user_data;
 					previndex = Hull->ComputeSupportingVertex(sv, previndex);
@@ -137,8 +143,8 @@ bool AABBTreeCollider::Collide(BVTCache& cache, const Matrix4x4* world0, const M
 				}
 				GJK.SetCallbackObj0(Local::SVCallback);
 				GJK.SetCallbackObj1(Local::SVCallback);
-				GJK.SetUserData0(ice_udword(cache.Model0->GetHull()));
-				GJK.SetUserData1(ice_udword(cache.Model1->GetHull()));
+				GJK.SetUserData0(uint32_t(cache.Model0->GetHull()));
+				GJK.SetUserData1(uint32_t(cache.Model1->GetHull()));
 				Collide = GJK.Collide(*world0, *world1, &cache.SepVector);
 			}
 			else
@@ -146,8 +152,8 @@ bool AABBTreeCollider::Collide(BVTCache& cache, const Matrix4x4* world0, const M
 				static SVEngine SVE;
 				SVE.SetCallbackObj0(Local::SVCallback);
 				SVE.SetCallbackObj1(Local::SVCallback);
-				SVE.SetUserData0(ice_udword(cache.Model0->GetHull()));
-				SVE.SetUserData1(ice_udword(cache.Model1->GetHull()));
+				SVE.SetUserData0(uint32_t(cache.Model0->GetHull()));
+				SVE.SetUserData1(uint32_t(cache.Model1->GetHull()));
 				Collide = SVE.Collide(*world0, *world1, &cache.SepVector);
 			}
 
@@ -257,9 +263,9 @@ void AABBTreeCollider::InitQuery(const Matrix4x4* world0, const Matrix4x4* world
 	mR1to0 = World1to0;		World1to0.GetTrans(mT1to0);
 
 	// Precompute absolute 1-to-0 rotation matrix
-	for(ice_udword i=0;i<3;i++)
+	for(uint32_t i=0;i<3;i++)
 	{
-		for(ice_udword j=0;j<3;j++)
+		for(uint32_t j=0;j<3;j++)
 		{
 			// Epsilon value prevents floating-point inaccuracies (strategy borrowed from RAPID)
 			mAR.m[i][j] = 1e-6f + fabsf(mR1to0.m[i][j]);
@@ -526,7 +532,7 @@ void AABBTreeCollider::_Collide(const AABBCollisionNode* b0, const AABBCollision
  *	\param		id1		[in] index from second leaf-triangle
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-void AABBTreeCollider::PrimTest(ice_udword id0, ice_udword id1)
+void AABBTreeCollider::PrimTest(uint32_t id0, uint32_t id1)
 {
 	// Request vertices from the app
 	VertexPointers VP0;
@@ -556,7 +562,7 @@ void AABBTreeCollider::PrimTest(ice_udword id0, ice_udword id1)
  *	\param		id1		[in] leaf-triangle index from tree B
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-inline_ void AABBTreeCollider::PrimTestTriIndex(ice_udword id1)
+inline_ void AABBTreeCollider::PrimTestTriIndex(uint32_t id1)
 {
 	// Request vertices from the app
 	VertexPointers VP;
@@ -578,7 +584,7 @@ inline_ void AABBTreeCollider::PrimTestTriIndex(ice_udword id1)
  *	\param		id0		[in] leaf-triangle index from tree A
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-inline_ void AABBTreeCollider::PrimTestIndexTri(ice_udword id0)
+inline_ void AABBTreeCollider::PrimTestIndexTri(uint32_t id0)
 {
 	// Request vertices from the app
 	VertexPointers VP;

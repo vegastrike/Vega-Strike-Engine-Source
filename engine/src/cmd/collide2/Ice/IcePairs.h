@@ -8,6 +8,12 @@
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/**
+ * Updated by Stephen G. Tuggy 2021-07-03
+ */
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Include Guard
 #ifndef __ICEPAIRS_H__
 #define __ICEPAIRS_H__
@@ -16,10 +22,10 @@
 	struct ICECORE_API Pair
 	{
 		inline_	Pair()	{}
-		inline_	Pair(ice_udword i0, ice_udword i1) : id0(i0), id1(i1)	{}
+		inline_	Pair(uint32_t i0, uint32_t i1) : id0(i0), id1(i1)	{}
 
-		ice_udword	id0;	//!< First index of the pair
-		ice_udword	id1;	//!< Second index of the pair
+		uint32_t	id0;	//!< First index of the pair
+		uint32_t	id1;	//!< Second index of the pair
 	};
 
 	class ICECORE_API Pairs : private Container
@@ -29,9 +35,9 @@
 								Pairs()							{}
 								~Pairs()						{}
 
-		inline_	ice_udword			GetNbPairs()		const		{ return GetNbEntries()>>1;					}
+		inline_	uint32_t			GetNbPairs()		const		{ return GetNbEntries()>>1;					}
 		inline_	const Pair*		GetPairs()			const		{ return (const Pair*)GetEntries();			}
-		inline_	const Pair*		GetPair(ice_udword i)	const		{ return (const Pair*)&GetEntries()[i+i];	}
+		inline_	const Pair*		GetPair(uint32_t i)	const		{ return (const Pair*)&GetEntries()[i+i];	}
 
 		inline_	BOOL			HasPairs()			const		{ return IsNotEmpty();						}
 
@@ -39,7 +45,7 @@
 		inline_	void			DeleteLastPair()				{ DeleteLastEntry();	DeleteLastEntry();	}
 
 		inline_	void			AddPair(const Pair& p)			{ Add(p.id0).Add(p.id1);					}
-		inline_	void			AddPair(ice_udword id0, ice_udword id1)	{ Add(id0).Add(id1);						}
+		inline_	void			AddPair(uint32_t id0, uint32_t id1)	{ Add(id0).Add(id1);						}
 	};
 
 #endif // __ICEPAIRS_H__
