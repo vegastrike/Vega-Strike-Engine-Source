@@ -550,6 +550,7 @@ SET(VEGASTRIKE_SOURCES
     src/python/briefing_wrapper.cpp
 )
 
+
 IF (COMMAND cmake_policy)
     CMAKE_POLICY(SET CMP0003 NEW)
 ENDIF (COMMAND cmake_policy)
@@ -1535,3 +1536,34 @@ ELSE ()
 ENDIF (WIN32 AND NOT UNIX)
 
 INCLUDE(CPack)
+
+INCLUDE(FetchContent)
+FetchContent_Declare(
+  googletest
+  URL https://github.com/google/googletest/archive/609281088cfefc76f9d0ce82e1ff6c30cc3591e5.zip
+)
+# For Windows: Prevent overriding the parent project's compiler/linker settings
+SET(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
+FetchContent_MakeAvailable(googletest)
+
+enable_testing()
+
+file(COPY "src/configuration/tests/vegastrike.config" DESTINATION ${CMAKE_BINARY_DIR})
+
+add_executable(
+    unit_tests
+    src/configuration/tests/configuration_tests.cpp
+)
+
+ADD_LIBRARY(vegastrike-testing
+    ${LIBCONFIG}
+)
+
+target_link_libraries(
+  unit_tests
+  gtest_main
+  vegastrike-testing
+)
+
+include(GoogleTest)
+gtest_discover_tests(unit_tests)
