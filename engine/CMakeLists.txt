@@ -1548,7 +1548,7 @@ FetchContent_MakeAvailable(googletest)
 
 enable_testing()
 
-file(COPY "src/configuration/tests/vegastrike.config" DESTINATION ${CMAKE_BINARY_DIR})
+file(COPY "src/configuration/tests/vegastrike.config" DESTINATION "${CMAKE_BINARY_DIR}/test_assets")
 
 add_executable(
     unit_tests

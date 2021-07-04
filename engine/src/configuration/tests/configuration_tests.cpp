@@ -15,7 +15,7 @@ TEST(LoadConfig, Sanity) {
     //EXPECT_TRUE(default_string == "World");
 
     // Read the configuration from the config file
-    const std::string filename = "vegastrike.config";
+    const std::string filename = "test_assets/vegastrike.config";
     GameConfig::LoadGameConfig(filename);
 
     // Test again

@@ -30,7 +30,7 @@ struct Configuration
         const float default_tracking_cone;
 
         Computer();
-    } computer;
+    };
 
     struct Fuel {
         const float afterburner_fuel_usage;
@@ -41,12 +41,12 @@ struct Configuration
         const bool reactor_uses_fuel;
 
         Fuel();
-    } fuel;
+    };
 
     struct Logging {
         const bool verbose_debug;
         Logging();
-    } logging;
+    };
 
     struct Physics {
         const float bleed_factor;
@@ -64,22 +64,30 @@ struct Configuration
         //static bool does_missile_bounce = GameConfig::GetVariable( "physics", "missile_bounce", false);
 
         Physics();
-    } physics;
+    };
 
     // Covers both SPEC and jumps
     struct Warp {
         const float insystem_jump_cost;
 
         Warp();
-    } warp;
+    };
 
     struct Weapons {
         const bool can_fire_in_cloak;
         const bool can_fire_in_spec;
         Weapons();
-    } weapons;
+    };
 
     Configuration();
+
+    CollisionHacks collision_hacks;
+    Computer computer;
+    Fuel fuel;
+    Logging logging;
+    Physics physics;
+    Warp warp;
+    Weapons weapons;
 };
 
 extern Configuration configuration;
