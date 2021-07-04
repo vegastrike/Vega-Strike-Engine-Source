@@ -376,7 +376,9 @@ const int8_t* AABB::ComputeOutline(const Point& local_eye, int32_t& num)	const
 	// Look up number of vertices in outline
 	num = (int32_t)gIndexList[pos][7];
 	// Zero indicates invalid case
-	if(!num) return null;
+	if (!num) {
+        return nullptr;
+    }
 
 	return &gIndexList[pos][0];
 }

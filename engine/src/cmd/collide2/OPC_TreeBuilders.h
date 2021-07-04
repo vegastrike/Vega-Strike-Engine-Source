@@ -56,7 +56,7 @@
 		//! Constructor
 													AABBTreeBuilder() :
 														mNbPrimitives(0),
-														mNodeBase(null),
+														mNodeBase(nullptr),
 														mCount(0),
 														mNbInvalidSplits(0)		{}
 		//! Destructor
@@ -136,7 +136,7 @@
 	{
 		public:
 		//! Constructor
-													AABBTreeOfVerticesBuilder() : mVertexArray(null)	{}
+													AABBTreeOfVerticesBuilder() : mVertexArray(nullptr)	{}
 		//! Destructor
 		virtual										~AABBTreeOfVerticesBuilder()						{}
 
@@ -151,7 +151,7 @@
 	{
 		public:
 		//! Constructor
-													AABBTreeOfAABBsBuilder() : mAABBArray(null)	{}
+													AABBTreeOfAABBsBuilder() : mAABBArray(nullptr)	{}
 		//! Destructor
 		virtual										~AABBTreeOfAABBsBuilder()					{}
 
@@ -165,7 +165,7 @@
 	{
 		public:
 		//! Constructor
-													AABBTreeOfTrianglesBuilder() : mIMesh(null)										{}
+													AABBTreeOfTrianglesBuilder() : mIMesh(nullptr)										{}
 		//! Destructor
 		virtual										~AABBTreeOfTrianglesBuilder()													{}
 

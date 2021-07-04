@@ -30,7 +30,7 @@
 	//!	\see		StoreDwords
 	//!	\see		CopyMemory
 	//!	\see		MoveMemory
-	inline_ void ZeroMemory(void* addr, uint32_t size)					{ memset(addr, 0, size);		}
+	inline_ void ZeroMemory(void* addr, size_t size)					{ memset(addr, 0, size);		}
 
 	//!	Fills a buffer with a given byte.
 	//!	\param		addr	[in] buffer address
@@ -40,7 +40,7 @@
 	//!	\see		ZeroMemory
 	//!	\see		CopyMemory
 	//!	\see		MoveMemory
-	inline_ void FillMemory(void* dest, uint32_t size, uint8_t val)			{ memset(dest, val, size);		}
+	inline_ void FillMemory(void* dest, size_t size, uint8_t val)			{ memset(dest, val, size);		}
 
 	//!	Fills a buffer with a given dword.
 	//!	\param		addr	[in] buffer address
@@ -81,7 +81,7 @@
 	//!	\see		FillMemory
 	//!	\see		StoreDwords
 	//!	\see		MoveMemory
-	inline_ void CopyMemory(void* dest, const void* src, uint32_t size)	{ memcpy(dest, src, size);		}
+	inline_ void CopyMemory(void* dest, const void* src, size_t size)	{ memcpy(dest, src, size);		}
 
 	//!	Moves a buffer.
 	//!	\param		addr	[in] destination buffer address
@@ -91,14 +91,14 @@
 	//!	\see		FillMemory
 	//!	\see		StoreDwords
 	//!	\see		CopyMemory
-	inline_ void MoveMemory(void* dest, const void* src, uint32_t size)	{ memmove(dest, src, size);		}
+	inline_ void MoveMemory(void* dest, const void* src, size_t size)	{ memmove(dest, src, size);		}
 
 	#define SIZEOFOBJECT		sizeof(*this)									//!< Gives the size of current object. Avoid some mistakes (e.g. "sizeof(this)").
 	//#define CLEAROBJECT		{ memset(this, 0, SIZEOFOBJECT);	}			//!< Clears current object. Laziness is my business. HANDLE WITH CARE.
-	#define DELETESINGLE(x)		{ delete x; x = null; }		//!< Deletes an instance of a class.
-	#define DELETEARRAY(x)		{ delete []x; x = null; }		//!< Deletes an array.
-	#define SAFE_RELEASE(x)		if (x) { (x)->Release();		(x) = null; }	//!< Safe D3D-style release
-	#define SAFE_DESTRUCT(x)	if (x) { (x)->SelfDestruct();	(x) = null; }	//!< Safe ICE-style release
+	#define DELETESINGLE(x)		{ delete x; x = nullptr; }		//!< Deletes an instance of a class.
+	#define DELETEARRAY(x)		{ delete []x; x = nullptr; }		//!< Deletes an array.
+	#define SAFE_RELEASE(x)		if (x) { (x)->Release();		(x) = nullptr; }	//!< Safe D3D-style release
+	#define SAFE_DESTRUCT(x)	if (x) { (x)->SelfDestruct();	(x) = nullptr; }	//!< Safe ICE-style release
 
 #ifdef __ICEERROR_H__
 	#define CHECKALLOC(x)		if(!x) return SetIceError("Out of memory.", EC_OUT_OF_MEMORY);	//!< Standard alloc checking. HANDLE WITH CARE.

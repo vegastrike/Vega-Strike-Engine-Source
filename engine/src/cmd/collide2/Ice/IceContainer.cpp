@@ -44,7 +44,7 @@ uint32_t Container::mUsedRam = 0;
  *	Constructor. No entries allocated there.
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-Container::Container() : mMaxNbEntries(0), mCurNbEntries(0), mEntries(null), mGrowthFactor(2.0f)
+Container::Container() : mMaxNbEntries(0), mCurNbEntries(0), mEntries(nullptr), mGrowthFactor(2.0f)
 {
 #ifdef CONTAINER_STATS
 	mNbContainers++;
@@ -57,7 +57,7 @@ Container::Container() : mMaxNbEntries(0), mCurNbEntries(0), mEntries(null), mGr
  *	Constructor. Also allocates a given number of entries.
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-Container::Container(uint32_t size, float growth_factor) : mMaxNbEntries(0), mCurNbEntries(0), mEntries(null), mGrowthFactor(growth_factor)
+Container::Container(uint32_t size, float growth_factor) : mMaxNbEntries(0), mCurNbEntries(0), mEntries(nullptr), mGrowthFactor(growth_factor)
 {
 #ifdef CONTAINER_STATS
 	mNbContainers++;
@@ -71,7 +71,7 @@ Container::Container(uint32_t size, float growth_factor) : mMaxNbEntries(0), mCu
  *	Copy constructor.
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-Container::Container(const Container& object) : mMaxNbEntries(0), mCurNbEntries(0), mEntries(null), mGrowthFactor(2.0f)
+Container::Container(const Container& object) : mMaxNbEntries(0), mCurNbEntries(0), mEntries(nullptr), mGrowthFactor(2.0f)
 {
 #ifdef CONTAINER_STATS
 	mNbContainers++;

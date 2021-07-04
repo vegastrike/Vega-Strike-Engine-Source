@@ -28,7 +28,7 @@
 
 	struct OPCODE_API VolumeCache
 	{
-							VolumeCache() : Model(null)		{}
+							VolumeCache() : Model(nullptr)	{}
 							~VolumeCache()					{}
 
 		Container			TouchedPrimitives;	//!< Indices of touched primitives
@@ -62,7 +62,7 @@
 		 *	\return		the list of touched primitives (primitive indices)
 		 */
 		///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-		inline_		const	uint32_t*			GetTouchedPrimitives()		const	{ return mTouchedPrimitives ? mTouchedPrimitives->GetEntries() : null;	}
+		inline_		const	uint32_t*			GetTouchedPrimitives()		const	{ return mTouchedPrimitives ? mTouchedPrimitives->GetEntries() : nullptr; }
 
 		// Stats
 
@@ -89,7 +89,7 @@
 		///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 		/**
 		 *	Validates current settings. You should call this method after all the settings / callbacks have been defined for a collider.
-		 *	\return		null if everything is ok, else a string describing the problem
+		 *	\return		nullptr if everything is ok, else a string describing the problem
 		 */
 		///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 		override(Collider)	const char*		ValidateSettings();

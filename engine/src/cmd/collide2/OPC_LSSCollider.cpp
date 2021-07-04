@@ -88,8 +88,8 @@ LSSCollider::~LSSCollider()
  *	\param		cache			[in/out] an lss cache
  *	\param		lss				[in] collision lss in local space
  *	\param		model			[in] Opcode model to collide with
- *	\param		worldl			[in] lss world matrix, or null
- *	\param		worldm			[in] model's world matrix, or null
+ *	\param		worldl			[in] lss world matrix, or nullptr
+ *	\param		worldm			[in] model's world matrix, or nullptr
  *	\return		true if success
  *	\warning	SCALE NOT SUPPORTED. The matrices must contain rotation & translation parts only.
  */
@@ -161,8 +161,8 @@ bool LSSCollider::Collide(LSSCache& cache, const LSS& lss, const Model& model, c
  *
  *	\param		cache		[in/out] an lss cache
  *	\param		lss			[in] lss in local space
- *	\param		worldl		[in] lss world matrix, or null
- *	\param		worldm		[in] model's world matrix, or null
+ *	\param		worldl		[in] lss world matrix, or nullptr
+ *	\param		worldm		[in] model's world matrix, or nullptr
  *	\return		TRUE if we can return immediately
  *	\warning	SCALE NOT SUPPORTED. The matrices must contain rotation & translation parts only.
  */

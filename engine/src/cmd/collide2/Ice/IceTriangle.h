@@ -67,7 +67,7 @@
 				void			ComputeMoment(Moment& m);
 				float			MinEdgeLength() const;
 				float			MaxEdgeLength() const;
-				void			ComputePoint(float u, float v, Point& pt, uint32_t* nearvtx=null)	const;
+				void			ComputePoint(float u, float v, Point& pt, uint32_t* nearvtx=nullptr)	const;
 				void			Inflate(float fat_coeff, bool constant_border);
 	};
 

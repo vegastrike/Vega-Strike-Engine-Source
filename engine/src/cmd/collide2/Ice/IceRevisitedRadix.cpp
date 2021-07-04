@@ -164,7 +164,7 @@ using namespace Opcode;
 	/* for words and O(n) for bytes. Running time for floats depends on actual values... */	\
 																							\
 	/* Get first byte */																	\
-	uint8_t UniqueVal = *(((uint8_t*)input)+pass);												\
+	uint8_t UniqueVal = *(((uint8_t*)input)+pass);											\
 																							\
 	/* Check that byte's counter */															\
 	if(CurCount[UniqueVal]==nb)	PerformPass=false;
@@ -174,7 +174,7 @@ using namespace Opcode;
  *	Constructor.
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-RadixSort::RadixSort() : mCurrentSize(0), mRanks(null), mRanks2(null), mTotalCalls(0), mNbHits(0)
+RadixSort::RadixSort() : mCurrentSize(0), mRanks(nullptr), mRanks2(nullptr), mTotalCalls(0), mNbHits(0)
 {
 #ifndef RADIX_LOCAL_RAM
 	// Allocate input-independent ram

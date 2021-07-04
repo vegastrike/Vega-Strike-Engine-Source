@@ -81,13 +81,13 @@
 		 *
 		 *	\param		world_ray		[in] stabbing ray in world space
 		 *	\param		model			[in] Opcode model to collide with
-		 *	\param		world			[in] model's world matrix, or null
-		 *	\param		cache			[in] a possibly cached face index, or null
+		 *	\param		world			[in] model's world matrix, or nullptr
+		 *	\param		cache			[in] a possibly cached face index, or nullptr
 		 *	\return		true if success
 		 *	\warning	SCALE NOT SUPPORTED. The matrices must contain rotation & translation parts only.
 		 */
 		///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-							bool			Collide(const Ray& world_ray, const Model& model, const Matrix4x4* world=null, uint32_t* cache=null);
+							bool			Collide(const Ray& world_ray, const Model& model, const Matrix4x4* world=nullptr, uint32_t* cache=nullptr);
 		//
 							bool			Collide(const Ray& world_ray, const AABBTree* tree, Container& box_indices);
 		// Settings
@@ -176,7 +176,7 @@
 		///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 		/**
 		 *	Validates current settings. You should call this method after all the settings and callbacks have been defined for a collider.
-		 *	\return		null if everything is ok, else a string describing the problem
+		 *	\return		nullptr if everything is ok, else a string describing the problem
 		 */
 		///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 		override(Collider)	const char*		ValidateSettings();
@@ -225,7 +225,7 @@
 		inline_				bool			SegmentAABBOverlap(const Point& center, const Point& extents);
 		inline_				bool			RayTriOverlap(const Point& vert0, const Point& vert1, const Point& vert2);
 			// Init methods
-							bool			InitQuery(const Ray& world_ray, const Matrix4x4* world=null, uint32_t* face_id=null);
+							bool			InitQuery(const Ray& world_ray, const Matrix4x4* world=nullptr, uint32_t* face_id=nullptr);
 	};
 
 #endif // __OPC_RAYCOLLIDER_H__

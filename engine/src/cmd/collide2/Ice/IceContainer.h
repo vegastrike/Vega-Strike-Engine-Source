@@ -159,7 +159,7 @@
 				bool			Refit();
 
 		// Checks whether the container already contains a given value.
-				bool			Contains(uint32_t entry, uint32_t* location=null) const;
+				bool			Contains(uint32_t entry, uint32_t* location=nullptr) const;
 		// Deletes an entry - doesn't preserve insertion order.
 				bool			Delete(uint32_t entry);
 		// Deletes an entry - does preserve insertion order.

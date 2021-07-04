@@ -61,7 +61,7 @@
 				void			GetVRefs(uint8_t edgenb, uint32_t& vref0, uint32_t& vref1, uint32_t& vref2)	const;
 				float			MinEdgeLength(const Point* verts)									const;
 				float			MaxEdgeLength(const Point* verts)									const;
-				void			ComputePoint(const Point* verts, float u, float v, Point& pt, uint32_t* nearvtx=null)	const;
+				void			ComputePoint(const Point* verts, float u, float v, Point& pt, uint32_t* nearvtx=nullptr)	const;
 				float			Angle(const IndexedTriangle& tri, const Point* verts)				const;
 		inline_	Plane			PlaneEquation(const Point* verts)									const	{ return Plane(verts[mVRef[0]], verts[mVRef[1]], verts[mVRef[2]]);	}
 				bool			Equal(const IndexedTriangle& tri)									const;

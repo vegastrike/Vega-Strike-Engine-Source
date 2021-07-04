@@ -55,8 +55,8 @@ inline_ void Sort(uint32_t& id0, uint32_t& id1)
 	{
 		public:
 				float			Value;		// Min or Max value
-				SAP_EndPoint*	Previous;	// Previous EndPoint whose Value is smaller than ours (or null)
-				SAP_EndPoint*	Next;		// Next EndPoint whose Value is greater than ours (or null)
+				SAP_EndPoint*	Previous;	// Previous EndPoint whose Value is smaller than ours (or nullptr)
+				SAP_EndPoint*	Next;		// Next EndPoint whose Value is greater than ours (or nullptr)
 				uint32_t			Data;		// Parent box ID *2 | MinMax flag
 
 		inline_	void			SetData(uint32_t box_id, bool is_max)			{ Data = (box_id<<1)|(is_max?1:0);	}
@@ -115,10 +115,10 @@ inline_ void Sort(uint32_t& id0, uint32_t& id1)
 SAP_PairData::SAP_PairData() :
 	mNbElements		(0),
 	mNbUsedElements	(0),
-	mElementPool	(null),
-	mFirstFree		(null),
+	mElementPool	(nullptr),
+	mFirstFree		(nullptr),
 	mNbObjects		(0),
-	mArray			(null)
+	mArray			(nullptr)
 {
 }
 
@@ -192,7 +192,7 @@ SAP_Element* SAP_PairData::GetFreeElem(uint32_t id, SAP_Element* next, uint32_t*
 	{
 		// Recycle
 		FreeElem = mFirstFree;
-		mFirstFree = mFirstFree->mNext;	// First free = next free (or null)
+		mFirstFree = mFirstFree->mNext;	// First free = next free (or nullptr)
 	}
 	else
 	{
@@ -259,7 +259,7 @@ void SAP_PairData::AddPair(uint32_t id1, uint32_t id2)
 	if(!Current)
 	{
 		// Empty slot => create new element
-		mArray[id1] = GetFreeElem(id2, null);
+		mArray[id1] = GetFreeElem(id2, nullptr);
 	}
 	else if(Current->mID>id2)
 	{
@@ -440,7 +440,7 @@ bool SweepAndPrune::Init(uint32_t nb_objects, const AABB** boxes)
 		RadixSort RS;
 		const uint32_t* Sorted = RS.Sort(Data, nb_objects*2).GetRanks();
 
-		SAP_EndPoint* PreviousEndPoint = null;
+		SAP_EndPoint* PreviousEndPoint = nullptr;
 
 		for(i=0;i<nb_objects*2;i++)
 		{
@@ -456,7 +456,7 @@ bool SweepAndPrune::Init(uint32_t nb_objects, const AABB** boxes)
 //			CurrentEndPoint->ID			= BoxIndex;				// ### could be implicit ?
 			CurrentEndPoint->SetData(BoxIndex, SortedIndex&1);	// ### could be implicit ?
 			CurrentEndPoint->Previous	= PreviousEndPoint;
-			CurrentEndPoint->Next		= null;
+			CurrentEndPoint->Next		= nullptr;
 			if(PreviousEndPoint)	PreviousEndPoint->Next = CurrentEndPoint;
 
 			if(CurrentEndPoint->IsMax())	mBoxes[BoxIndex].Max[Axis] = CurrentEndPoint;
@@ -505,7 +505,7 @@ bool SweepAndPrune::CheckListsIntegrity()
 
 		uint32_t Nb = 0;
 
-		SAP_EndPoint* Previous = null;
+		SAP_EndPoint* Previous = nullptr;
 		while(Current)
 		{
 			Nb++;

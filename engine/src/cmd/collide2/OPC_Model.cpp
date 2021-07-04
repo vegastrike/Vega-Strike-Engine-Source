@@ -109,7 +109,7 @@ using namespace Opcode;
 Model::Model()
 {
 #ifdef __MESHMERIZER_H__	// Collision hulls only supported within ICE !
-	mHull	= null;
+	mHull	= nullptr;
 #endif // __MESHMERIZER_H__
 }
 
@@ -149,7 +149,7 @@ bool Model::Build(const OPCODECREATE& create)
 	if(!create.mIMesh || !create.mIMesh->IsValid())	return false;
 
 	// For this model, we only support complete trees
-//	if(create.mSettings.mLimit!=1)	return SetIceError ("OPCODE WARNING: supports complete trees only! Use mLimit = 1.", null);
+//	if(create.mSettings.mLimit!=1)	return SetIceError ("OPCODE WARNING: supports complete trees only! Use mLimit = 1.", nullptr);
 	if(create.mSettings.mLimit!=1) return(false);
 	// Look for degenerate faces.
 	create.mIMesh->CheckTopology();

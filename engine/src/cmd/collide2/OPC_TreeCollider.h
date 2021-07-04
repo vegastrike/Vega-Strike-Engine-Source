@@ -43,8 +43,8 @@
 
 					void	ResetCache()
 							{
-								Model0			= null;
-								Model1			= null;
+								Model0			= nullptr;
+								Model1			= nullptr;
 								id0				= 0;
 								id1				= 1;
 #ifdef __MESHMERIZER_H__		// Collision hulls only supported within ICE !
@@ -88,19 +88,19 @@
 		 *	- GetPairs()
 		 *
 		 *	\param		cache			[in] collision cache for model pointers and a colliding pair of primitives
-		 *	\param		world0			[in] world matrix for first object, or null
-		 *	\param		world1			[in] world matrix for second object, or null
+		 *	\param		world0			[in] world matrix for first object, or nullptr
+		 *	\param		world1			[in] world matrix for second object, or nullptr
 		 *	\return		true if success
 		 *	\warning	SCALE NOT SUPPORTED. The matrices must contain rotation & translation parts only.
 		 */
 		///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-							bool			Collide(BVTCache& cache, const Matrix4x4* world0=null, const Matrix4x4* world1=null);
+							bool			Collide(BVTCache& cache, const Matrix4x4* world0=nullptr, const Matrix4x4* world1=nullptr);
 
 		// Collision queries
-							bool			Collide(const AABBCollisionTree* tree0, const AABBCollisionTree* tree1,				const Matrix4x4* world0=null, const Matrix4x4* world1=null, Pair* cache=null);
-							bool			Collide(const AABBNoLeafTree* tree0, const AABBNoLeafTree* tree1,					const Matrix4x4* world0=null, const Matrix4x4* world1=null, Pair* cache=null);
-							bool			Collide(const AABBQuantizedTree* tree0, const AABBQuantizedTree* tree1,				const Matrix4x4* world0=null, const Matrix4x4* world1=null, Pair* cache=null);
-							bool			Collide(const AABBQuantizedNoLeafTree* tree0, const AABBQuantizedNoLeafTree* tree1,	const Matrix4x4* world0=null, const Matrix4x4* world1=null, Pair* cache=null);
+							bool			Collide(const AABBCollisionTree* tree0, const AABBCollisionTree* tree1,				const Matrix4x4* world0=nullptr, const Matrix4x4* world1=nullptr, Pair* cache=nullptr);
+							bool			Collide(const AABBNoLeafTree* tree0, const AABBNoLeafTree* tree1,					const Matrix4x4* world0=nullptr, const Matrix4x4* world1=nullptr, Pair* cache=nullptr);
+							bool			Collide(const AABBQuantizedTree* tree0, const AABBQuantizedTree* tree1,				const Matrix4x4* world0=nullptr, const Matrix4x4* world1=nullptr, Pair* cache=nullptr);
+							bool			Collide(const AABBQuantizedNoLeafTree* tree0, const AABBQuantizedNoLeafTree* tree1,	const Matrix4x4* world0=nullptr, const Matrix4x4* world1=nullptr, Pair* cache=nullptr);
 		// Settings
 
 		///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -178,7 +178,7 @@
 		///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 		/**
 		 *	Validates current settings. You should call this method after all the settings and callbacks have been defined for a collider.
-		 *	\return		null if everything is ok, else a string describing the problem
+		 *	\return		nullptr if everything is ok, else a string describing the problem
 		 */
 		///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 		override(Collider)	const char*		ValidateSettings();
@@ -233,7 +233,7 @@
 			inline_			bool			TriBoxOverlap(const Point& center, const Point& extents);
 			inline_			bool			TriTriOverlap(const Point& V0, const Point& V1, const Point& V2, const Point& U0, const Point& U1, const Point& U2);
 			// Init methods
-							void			InitQuery(const Matrix4x4* world0=null, const Matrix4x4* world1=null);
+							void			InitQuery(const Matrix4x4* world0=nullptr, const Matrix4x4* world1=nullptr);
 							bool			CheckTemporalCoherence(Pair* cache);
 
 		inline_				bool			Setup(const MeshInterface* mi0, const MeshInterface* mi1)

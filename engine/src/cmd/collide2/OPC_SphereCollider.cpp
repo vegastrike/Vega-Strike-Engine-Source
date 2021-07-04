@@ -92,8 +92,8 @@ SphereCollider::~SphereCollider()
  *	\param		cache		[in/out] a sphere cache
  *	\param		sphere		[in] collision sphere in local space
  *	\param		model		[in] Opcode model to collide with
- *	\param		worlds		[in] sphere's world matrix, or null
- *	\param		worldm		[in] model's world matrix, or null
+ *	\param		worlds		[in] sphere's world matrix, or nullptr
+ *	\param		worldm		[in] model's world matrix, or nullptr
  *	\return		true if success
  *	\warning	SCALE NOT SUPPORTED. The matrices must contain rotation & translation parts only.
  */
@@ -164,8 +164,8 @@ bool SphereCollider::Collide(SphereCache& cache, const Sphere& sphere, const Mod
  *
  *	\param		cache		[in/out] a sphere cache
  *	\param		sphere		[in] sphere in local space
- *	\param		worlds		[in] sphere's world matrix, or null
- *	\param		worldm		[in] model's world matrix, or null
+ *	\param		worlds		[in] sphere's world matrix, or nullptr
+ *	\param		worldm		[in] model's world matrix, or nullptr
  *	\return		TRUE if we can return immediately
  *	\warning	SCALE NOT SUPPORTED. The matrices must contain rotation & translation parts only.
  */

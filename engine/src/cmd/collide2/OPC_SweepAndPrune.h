@@ -63,7 +63,7 @@
 				uint32_t			mNbObjects;			//!< Max number of objects we can handle
 				SAP_Element**	mArray;				//!< Pointers to pool
 		// Internal methods
-				SAP_Element*	GetFreeElem(uint32_t id, SAP_Element* next, uint32_t* remap=null);
+				SAP_Element*	GetFreeElem(uint32_t id, SAP_Element* next, uint32_t* remap=nullptr);
 		inline_	void			FreeElem(SAP_Element* elem);
 				void			Release();
 	};
