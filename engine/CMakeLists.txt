@@ -73,16 +73,27 @@ IF (MSVC)
 INCLUDE_DIRECTORIES(
     ${Vega_Strike_SOURCE_DIR}/src
     ${Vega_Strike_SOURCE_DIR}/src/cmd
+    ${Vega_Strike_SOURCE_DIR}/src/damage
     ${Vega_Strike_BINARY_DIR}
 )
 ELSE (MSVC)
 INCLUDE_DIRECTORIES(
     ${Vega_Strike_SOURCE_DIR}/src
     ${Vega_Strike_SOURCE_DIR}/src/cmd
+    ${Vega_Strike_SOURCE_DIR}/src/damage
     ${Vega_Strike_BINARY_DIR}
     /usr/include/harfbuzz/
 )
 ENDIF (MSVC)
+
+
+SET(LIDAMAGE
+    src/damage/damageable_facet.cpp
+    src/damage/damageable_layer.cpp
+    src/damage/damageable_object.cpp
+    src/damage/facets_factory.cpp
+    src/damage/health.cpp
+    )
 
 SET(LIBGUI_SOURCES
     src/gui/button.cpp
@@ -467,6 +478,7 @@ SET(LIBAUDIO_SOURCES
 
 
 ADD_LIBRARY(vegastrike-engine_com
+    ${LIDAMAGE}
     ${LIBAI_SOURCES}
     ${LIBCMD_SOURCES}
     ${LIBNET_SOURCES}
