@@ -5,7 +5,7 @@
 # @usage  : sudo script/bootstrap
 # @param  : none
 #====================================
-# Copyright (C) 2020 Stephen G. Tuggy <sgt@stephengtuggy.com>
+# Copyright (C) 2020-2021 Stephen G. Tuggy <sgt@stephengtuggy.com>
 #
 # This file is part of Vega Strike.
 #
@@ -25,7 +25,7 @@
 set -e
 
 echo "------------------------------"
-echo "--- bootstrap | 2020-10-28 ---"
+echo "--- bootstrap | 2021-05-30 ---"
 echo "------------------------------"
 
 if [ -f /etc/os-release ]
@@ -162,7 +162,6 @@ then
                     git \
                     cmake \
                     build-essential \
-                    python-dev \
                     libgl1-mesa-glx \
                     freeglut3-dev \
                     libopenal-dev \
@@ -182,7 +181,6 @@ elif [ $LINUX_ID == "opensuse-leap" ]
 then
     zypper --non-interactive install -y \
                             libboost_log1_66_0-devel \
-                            libboost_python-py2_7-1_66_0-devel \
                             libboost_python-py3-1_66_0-devel \
                             libboost_system1_66_0-devel \
                             libboost_filesystem1_66_0-devel \
@@ -205,7 +203,6 @@ then
                             libexpat-devel \
                             libgtk-3-0 \
                             gtk3-devel \
-                            python-devel \
                             python3-devel \
                             git \
                             rpm-build \
@@ -236,7 +233,6 @@ then
                         git \
                         cmake \
                         boost-devel \
-                        boost-python2-devel \
                         boost-python3-devel \
                         freeglut-devel \
                         gcc-c++ \
@@ -247,7 +243,6 @@ then
                         libpng-devel \
                         expat-devel \
                         gtk3-devel \
-                        python2-devel \
                         python3-devel \
                         rpm-build \
                         make \
