@@ -23,50 +23,19 @@
         float      float_member;
     };
 
-	//! Integer representation of a floating-point value.
-    inline uint32_t IR(uint32_t x)
-    {
-        return x;
-    }
-    inline uint32_t IR(int32_t x)
-    {
-        return static_cast<ice_union*>(static_cast<void*>(&(x)))->uint32_member;
-    }
-    inline uint32_t IR(float x)
-    {
-        return static_cast<ice_union*>(static_cast<void*>(&(x)))->uint32_member;
-    }
+    // 2021-07-07 SGT: It seems that the below macros cannot be converted to inline functions, 
+    //                 because they need to be assignable in some contexts.
+    //! Integer representation of a floating-point value.
+    #define IR(x)                   (static_cast<ice_union*>(static_cast<void*>(&(x)))->uint32_member)
 
 	//! Signed integer representation of a floating-point value.
-    inline int32_t SIR(uint32_t x)
-    {
-        return static_cast<ice_union*>(static_cast<void*>(&(x)))->sint32_member;
-    }
-    inline int32_t SIR(int32_t x)
-    {
-        return x;
-    }
-    inline int32_t SIR(float x)
-    {
-        return static_cast<ice_union*>(static_cast<void*>(&(x)))->sint32_member;
-    }
+    #define SIR(x)                  (static_cast<ice_union*>(static_cast<void*>(&(x)))->sint32_member)
 
 	//! Absolute integer representation of a floating-point value
 	#define AIR(x)					(IR(x)&0x7fffffff)
 
 	//! Floating-point representation of an integer value.
-    inline float FR(uint32_t x)
-    {
-        return static_cast<ice_union*>(static_cast<void*>(&(x)))->float_member;
-    }
-    inline float FR(int32_t x)
-    {
-        return static_cast<ice_union*>(static_cast<void*>(&(x)))->float_member;
-    }
-    inline float FR(float x)
-    {
-        return x;
-    }
+    #define FR(x)                   (static_cast<ice_union*>(static_cast<void*>(&(x)))->float_member)
 	
 	//! Is the float valid ?
 	inline_ bool IsNAN(float value)				{ return (IR(value)&0x7f800000) == 0x7f800000;	}
