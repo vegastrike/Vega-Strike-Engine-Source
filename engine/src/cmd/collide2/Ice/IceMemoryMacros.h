@@ -4,12 +4,8 @@
  *	\file		IceMemoryMacros.h
  *	\author		Pierre Terdiman
  *	\date		April, 4, 2000
- */
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-/**
- * Updated by Stephen G. Tuggy 2021-07-03
+ *
+ *  Updated by Stephen G. Tuggy 2021-07-07
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -95,10 +91,34 @@
 
 	#define SIZEOFOBJECT		sizeof(*this)									//!< Gives the size of current object. Avoid some mistakes (e.g. "sizeof(this)").
 	//#define CLEAROBJECT		{ memset(this, 0, SIZEOFOBJECT);	}			//!< Clears current object. Laziness is my business. HANDLE WITH CARE.
-	#define DELETESINGLE(x)		{ delete x; x = nullptr; }		//!< Deletes an instance of a class.
-	#define DELETEARRAY(x)		{ delete []x; x = nullptr; }		//!< Deletes an array.
-	#define SAFE_RELEASE(x)		if (x) { (x)->Release();		(x) = nullptr; }	//!< Safe D3D-style release
-	#define SAFE_DESTRUCT(x)	if (x) { (x)->SelfDestruct();	(x) = nullptr; }	//!< Safe ICE-style release
+    
+    template<typename T>
+    inline void DELETESINGLE(T x) {                                             //!< Deletes an instance of a class.
+        delete x;
+        x = nullptr;
+    }
+    
+    template<typename T>
+    inline void DELETEARRAY(T x) {                                              //!< Deletes an array.
+        delete []x;
+        x = nullptr;
+    }
+
+    template<typename T>
+    inline void SAFE_RELEASE(T x) {                                             //!< Safe D3D-style release
+        if (x) {
+            (x)->Release();
+            (x) = nullptr;
+        }
+    }
+
+    template<typename T>
+    inline void SAFE_DESTRUCT(T x) {                                            //!< Safe ICE-style release
+        if (x) {
+            (x)->SelfDestruct();
+            (x) = nullptr;
+        }
+    }
 
 #ifdef __ICEERROR_H__
 	#define CHECKALLOC(x)		if(!x) return SetIceError("Out of memory.", EC_OUT_OF_MEMORY);	//!< Standard alloc checking. HANDLE WITH CARE.
