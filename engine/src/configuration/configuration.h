@@ -1,7 +1,7 @@
 #ifndef CONFIGURATION_H
 #define CONFIGURATION_H
 
-namespace vegastrike::configuration {
+namespace vegastrike_configuration {
 // Config Structs Declaration
 
 // These are settings that are relevant to collision.cpp and are marked as hacks
@@ -93,19 +93,19 @@ struct Weapons {
 
 }
 
-// not using namespace vegastrike::configuration, because Computer would be ambiguous
+// not using namespace vegastrike_configuration, because Computer would be ambiguous
 
 struct Configuration
 {
     Configuration();
 
-    vegastrike::configuration::CollisionHacks collision_hacks;
-    vegastrike::configuration::Computer computer;
-    vegastrike::configuration::Fuel fuel;
-    vegastrike::configuration::Logging logging;
-    vegastrike::configuration::Physics physics;
-    vegastrike::configuration::Warp warp;
-    vegastrike::configuration::Weapons weapons;
+    vegastrike_configuration::CollisionHacks collision_hacks;
+    vegastrike_configuration::Computer computer;
+    vegastrike_configuration::Fuel fuel;
+    vegastrike_configuration::Logging logging;
+    vegastrike_configuration::Physics physics;
+    vegastrike_configuration::Warp warp;
+    vegastrike_configuration::Weapons weapons;
 };
 
 

@@ -11,7 +11,7 @@ Configuration::Configuration()
     //logging.verbose_debug = GameConfig::GetVariable("data", "verbose_debug", false);
 }
 
-vegastrike::configuration::CollisionHacks::CollisionHacks():
+vegastrike_configuration::CollisionHacks::CollisionHacks():
     collision_hack_distance(GameConfig::GetVariable( "physics", "collision_avoidance_hack_distance", 10000)),
     collision_damage_to_ai(GameConfig::GetVariable( "physics", "collisionDamageToAI", false)),
     crash_dock_hangar(GameConfig::GetVariable( "physics", "only_hangar_collision_docks", false)),
@@ -22,12 +22,12 @@ vegastrike::configuration::CollisionHacks::CollisionHacks():
                                              false)) {}
 
 
-vegastrike::configuration::Computer::Computer():
+vegastrike_configuration::Computer::Computer():
     default_lock_cone(GameConfig::GetVariable( "physics", "lock_cone", 0.8 )),
     default_max_range(GameConfig::GetVariable( "graphics", "hud", "radarRange", 20000 )),
     default_tracking_cone(GameConfig::GetVariable( "physics", "autotracking", 0.93 )) {}
 
-vegastrike::configuration::Fuel::Fuel():
+vegastrike_configuration::Fuel::Fuel():
     afterburner_fuel_usage(GameConfig::GetVariable( "physics", "AfterburnerFuelUsage", 4.0f )),
     fmec_exit_velocity_inverse(GameConfig::GetVariable( "physics", "FMEC_exit_vel", 0.0000002 )),
     fuel_efficiency(GameConfig::GetVariable( "physics", "LithiumRelativeEfficiency_Lithium", 1.0 )),
@@ -35,10 +35,10 @@ vegastrike::configuration::Fuel::Fuel():
     normal_fuel_usage(GameConfig::GetVariable( "physics", "FuelUsage", 1.0f )),
     reactor_uses_fuel(GameConfig::GetVariable( "physics", "reactor_uses_fuel", false )) {}
 
-vegastrike::configuration::Logging::Logging():
+vegastrike_configuration::Logging::Logging():
     verbose_debug(GameConfig::GetVariable("data", "verbose_debug", false)) {}
 
-vegastrike::configuration::Physics::Physics():
+vegastrike_configuration::Physics::Physics():
 
     bleed_factor(GameConfig::GetVariable( "physics", "warpbleed", 2.0f )),
     collision_scale_factor(GameConfig::GetVariable( "physics", "collision_damage_scale", 1.0f )),
@@ -50,9 +50,9 @@ vegastrike::configuration::Physics::Physics():
     minimum_mass( 1e-6f ),
     minimum_time( GameConfig::GetVariable( "physics", "minimum_time_between_recorded_player_collisions", 0.1f )) {}
 
-vegastrike::configuration::Warp::Warp():
+vegastrike_configuration::Warp::Warp():
     insystem_jump_cost(GameConfig::GetVariable( "physics", "insystem_jump_cost", 0.1 )) {}
 
-vegastrike::configuration::Weapons::Weapons():
+vegastrike_configuration::Weapons::Weapons():
     can_fire_in_cloak( GameConfig::GetVariable( "physics", "can_fire_in_cloak", false)),
     can_fire_in_spec(GameConfig::GetVariable( "physics", "can_fire_in_spec", false)) {}
