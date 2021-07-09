@@ -1,4 +1,5 @@
-#include "game_config.h"
+#include "configuration/game_config.h"
+
 
 std::map<string, string> GameConfig::variables;
 
@@ -28,4 +29,3 @@ void GameConfig::LoadGameConfig(const string &filename)
         }
     }
 }
-

@@ -15,7 +15,7 @@
 #include "vsfilesystem.h"
 #include "star_system.h"
 #include "universe.h"
-#include "game_config.h"
+#include "configuration/game_config.h"
 
 
 ////////////////////////////////////////////////////////////////

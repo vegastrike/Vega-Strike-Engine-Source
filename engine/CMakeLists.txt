@@ -84,6 +84,11 @@ ELSE (MSVC)
 )
 ENDIF (MSVC)
 
+SET(LIBCONFIG
+    src/configuration/configuration.cpp
+    src/configuration/game_config.cpp
+)
+
 SET(LIBGUI_SOURCES
     src/gui/button.cpp
     src/gui/control.cpp
@@ -368,7 +373,6 @@ SET(LIBGFXSERVER_SOURCES
 )
 
 SET(LIBROOTGENERIC_SOURCES
-    src/game_config.cpp
     src/configxml.cpp
     src/easydom.cpp
     src/endianness.cpp
@@ -467,6 +471,7 @@ SET(LIBAUDIO_SOURCES
 
 
 ADD_LIBRARY(vegastrike-engine_com
+    ${LIBCONFIG}
     ${LIBAI_SOURCES}
     ${LIBCMD_SOURCES}
     ${LIBNET_SOURCES}
@@ -544,6 +549,7 @@ SET(VEGASTRIKE_SOURCES
     src/main.cpp
     src/python/briefing_wrapper.cpp
 )
+
 
 IF (COMMAND cmake_policy)
     CMAKE_POLICY(SET CMP0003 NEW)
@@ -1450,3 +1456,4 @@ ELSE ()
 ENDIF (WIN32 AND NOT UNIX)
 
 INCLUDE(CPack)
+

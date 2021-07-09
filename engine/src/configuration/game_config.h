@@ -50,10 +50,11 @@ public:
     template <class T>
     static inline T GetVariable(string const &section, string const &sub_section,
                                 string const &name, T default_value) = delete;
+
 };
 
 
-
+// Template Specialization
 template <>
 inline bool GameConfig::GetVariable(string const &section, string const &name, bool default_value)
 {
@@ -124,5 +125,7 @@ inline int GameConfig::GetVariable(string const &section, string const &sub_sect
     if(result == DEFAULT_ERROR_VALUE) return default_value;
     return std::stoi(result);
 }
+
+
 
 #endif // GAME_CONFIG_H
