@@ -48,8 +48,9 @@ collideTrees::collideTrees( const std::string &hk, csOPCODECollider *cT,
                             csOPCODECollider *cS ) : hash_key( hk )
     , colShield( cS )
 {
-    for (unsigned int i = 0; i < collideTreesMaxTrees; ++i)
-        rapidColliders[i] = NULL;
+    for (unsigned int i = 0; i < collideTreesMaxTrees; ++i) {
+        rapidColliders[i] = nullptr;
+    }
     rapidColliders[0] = cT;
 
     refcount = 1;
@@ -90,12 +91,17 @@ void collideTrees::Dec()
     refcount--;
     if (refcount == 0) {
         unitColliders.Delete( hash_key );
-        for (unsigned int i = 0; i < collideTreesMaxTrees; ++i)
-            if (rapidColliders[i])
+        for (unsigned int i = 0; i < collideTreesMaxTrees; ++i) {
+            if (rapidColliders[i]) {
                 delete rapidColliders[i];
-        if (colShield)
+                rapidColliders[i] = nullptr;
+            }
+        }
+        if (colShield) {
             delete colShield;
-        delete this;
+            colShield = nullptr;
+        }
+        delete this;    // SGT 2021-07-09 ?!?
         return;
     }
 }
