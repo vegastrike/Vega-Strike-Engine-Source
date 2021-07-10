@@ -64,21 +64,16 @@ public:
         bool  locked;
         bool  canlock;
         bool  trackingactive;
-        RADARLIM() : maxrange( 0 )
-          , maxcone( 0 )
-          , lockcone( 0 )
-          , trackingcone( 0 )
-          , mintargetsize( 0 )
-          , capability(Capability::IFF_NONE | Capability::IFF_SPHERE)
-          , locked( false )
-          , canlock( false )
-        {}
+
         Brand::Value GetBrand() const;
         bool UseFriendFoe() const;
         bool UseObjectRecognition() const;
         bool UseThreatAssessment() const;
-    }
-    radar;
+
+        RADARLIM();
+    };
+
+    RADARLIM radar;
     bool ecmactive;
     //The nav point the unit may be heading for
     Vector NavPoint;
@@ -92,7 +87,7 @@ public:
     //The threat level that was calculated from attacking unit's threat
     float threatlevel;
     //The speed the flybywire system attempts to maintain
-    float set_speed;
+    float set_speed ;
     //Computers limitation of speed
     float max_combat_speed;
     float max_combat_ab_speed;
@@ -109,25 +104,11 @@ public:
     bool itts;
     //tells whether the speed is clamped draconian-like or not
     bool combat_mode;
-    Computer() : NavPoint( 0, 0, 0 )
-      , threatlevel( 0 )
-      , set_speed( 0 )
-      , max_combat_speed( 0 )
-      , max_combat_ab_speed( 0 )
-      , max_yaw_left( 0 )
-      , max_yaw_right( 0 )
-      , max_pitch_down( 0 )
-      , max_pitch_up( 0 )
-      , max_roll_left( 0 )
-      , max_roll_right( 0 )
-      , slide_start( 0 )
-      , slide_end( 0 )
-      , itts( false )
-      , combat_mode( false ) {}
 
     float max_speed() const;
     float max_ab_speed() const;
 
+    Computer();
 };
 
 #endif // COMPUTER_H

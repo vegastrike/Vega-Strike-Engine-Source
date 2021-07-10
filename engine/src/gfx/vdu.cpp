@@ -1349,7 +1349,7 @@ void VDU::DrawDamage( Unit *parent )
     do { \
         static string name = vs_config->getVariable( "graphics", "hud", which_key, which_name_default ); \
         if (!name.empty()) { \
-            REPORTITEM( parent->pImage->which##Functionality, parent->pImage->which##FunctionalityMax, \
+            REPORTITEM( parent->which##Functionality, parent->which##FunctionalityMax, \
                 print_percent_working, \
                 name \
             ); \

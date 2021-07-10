@@ -32,9 +32,23 @@
 /* This class provides all energy generation methods to unit types -
  * ships, space installations, missiles, drones, etc. */
 
-Energetic::Energetic()
-{
+static const float insys_jump_cost = GameConfig::GetVariable( "physics", "insystem_jump_cost", 0.1 );
 
+Energetic::Energetic(): energy(0),
+    recharge(0),
+    maxenergy(0),
+    maxwarpenergy(0),
+    warpenergy(0),
+    fuel(0),
+    afterburnenergy(0),
+    afterburntype(0)
+{
+    jump.warpDriveRating = 0;
+    jump.energy = 100;
+    jump.insysenergy = insys_jump_cost * jump.energy;
+    jump.drive = -2;
+    jump.delay = 5;
+    jump.damage = 0;
 }
 
 void Energetic::decreaseWarpEnergy( bool insys, float time )
@@ -84,6 +98,57 @@ float Energetic::getFuelUsage( bool afterburner )
     if (afterburner)
         return abfuelusage;
     return normalfuelusage;
+}
+
+/**
+ * @brief Energetic::WCWarpIsFuelHack - in Wing Commander, warp and fuel are the same variable.
+ * Therefore, we need to transfer from one to the other to maintain equality
+ * @param transfer_warp_to_fuel - true means fuel = warpenergy
+ */
+// TODO: this is still an ugly hack
+void Energetic::WCWarpIsFuelHack(bool transfer_warp_to_fuel) {
+    static bool  WCfuelhack = GameConfig::GetVariable( "physics", "fuel_equals_warp", false );
+    if (!WCfuelhack) {
+        return;
+    }
+
+    if (transfer_warp_to_fuel) {
+        fuel = warpenergy;
+    } else {
+        warpenergy = fuel;
+    }
+}
+
+float Energetic::ExpendMomentaryFuelUsage( float magnitude )
+{
+    static float Lithium6constant =
+        GameConfig::GetVariable( "physics", "LithiumRelativeEfficiency_Lithium", 1.0 );
+    static float FMEC_exit_vel_inverse =
+        GameConfig::GetVariable( "physics", "FMEC_exit_vel", 0.0000002 );
+
+    //HACK this forces the reaction to be Li-6+D fusion with efficiency governed by the getFuelUsage function
+    float quantity = Energetic::getFuelUsage( false ) * simulation_atom_var * magnitude *
+            FMEC_exit_vel_inverse / Lithium6constant;
+
+    return ExpendFuel(quantity);
+}
+
+/**
+ * @brief expendFuel - reduce fuel by burning it
+ * @param quantity - requested quantity to use
+ * @return - actual quantity used
+ */
+float Energetic::ExpendFuel(float quantity) {
+    static float fuel_percentage = GameConfig::GetVariable( "physics", "FuelUsage", 1.0 );
+
+    fuel -= fuel_percentage * quantity;
+
+    if (fuel < 0) {
+        quantity += fuel;
+        fuel   = 0;
+    }
+
+    return quantity;
 }
 
 float Energetic::getWarpEnergy() const

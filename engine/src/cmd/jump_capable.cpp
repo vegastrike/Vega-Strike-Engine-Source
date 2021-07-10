@@ -88,6 +88,8 @@ std::string GenerateAutoError( Unit *me, Unit *targ )
 
 ///////////////////////////////////////////////
 
+JumpCapable::JumpCapable() : activeStarSystem(nullptr) {};
+
 void JumpCapable::ActivateJumpDrive( int destination )
 {
     Unit *unit = static_cast<Unit*>(this);

@@ -9,6 +9,8 @@
 class Carrier
 {
 public:
+    std::vector< Cargo > cargo;
+
     Carrier();
     void SortCargo();
     static std::string cargoSerializer( const struct XMLType &input, void *mythis );

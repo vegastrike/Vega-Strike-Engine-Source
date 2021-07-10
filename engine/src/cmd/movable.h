@@ -29,6 +29,9 @@
 #include "gfx/vec.h"
 #include "vs_limits.h"
 #include "gfx/quaternion.h"
+#include "star_system.h"
+
+#include <float.h>
 
 struct Transformation;
 class Matrix;
@@ -39,10 +42,20 @@ struct Quaternion;
 
 class Movable
 {
-public:
-    // Fields
+
+protected:
     //mass of this unit (may change with cargo)
+    // TODO: subclass with return Mass+fuel;
     float  Mass;
+
+public:
+
+    float getMass() { return Mass;}
+    float getMass() const { return Mass;}
+    void setMass(float mass) { Mass = mass;}
+
+    // Fields
+
     Limits limits;
     //The velocity this unit has in World Space
     Vector cumulative_velocity;
@@ -57,6 +70,9 @@ public:
     //the current velocities in LOCAL space (not world space)
     Vector AngularVelocity;
     Vector Velocity;
+
+    // TODO: move enum to dockable class
+    enum DOCKENUM {NOT_DOCKED=0x0, DOCKED_INSIDE=0x1, DOCKED=0x2, DOCKING_UNITS=0x4};
 
     //The previous state in last physics frame to interpolate within
     Transformation prev_physical_state;
@@ -84,7 +100,8 @@ public:
     //The cumulative (incl subunits parents' transformation)
     Transformation cumulative_transformation;
 
-    Vector corner_min, corner_max;
+    Vector corner_min;
+    Vector corner_max;
     //How big is this unit
     float radial_size;
 
@@ -102,16 +119,17 @@ public:
         unsigned NoDamageParticles : 1;
         unsigned specInterdictionOnline : 1;
         unsigned char NumAnimationPoints;
-        float    WarpFieldStrength;
+        float    WarpFieldStrength = 1;
         float    RampCounter;
         float    MinWarpMultiplier;
         float    MaxWarpMultiplier;
+
         graphic_options();
     }
     graphicOptions;
 protected:
     //Moment of intertia of this unit
-    float  Momentofinertia;
+    float  Momentofinertia; // Was 0 but Init says 0.01
     Vector SavedAccel;
     Vector SavedAngAccel;
     static bool configLoaded;
@@ -225,8 +243,6 @@ public:
     {
         return Mass; // TODO: subclass with return Mass+fuel;
     }
-    //returns the ammt of elasticity of collisions with this unit
-    float GetElasticity();
 
     //Sets if forces should resolve on this unit or not
     void SetResolveForces( bool );

@@ -1,12 +1,11 @@
 #include <stdlib.h>
 #include "container.h"
 #include "unit_generic.h"
-UnitContainer::UnitContainer()
+UnitContainer::UnitContainer() : unit( nullptr )
 {
-    unit = NULL;
     VSCONSTRUCT1( 'U' )
 }
-UnitContainer::UnitContainer( Unit *un ) : unit( NULL )
+UnitContainer::UnitContainer( Unit *un ) : unit( nullptr )
 {
     SetUnit( un );
     VSCONSTRUCT1( 'U' );

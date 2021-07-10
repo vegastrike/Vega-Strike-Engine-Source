@@ -36,6 +36,23 @@
 #include <string>
 
 
+float accelStarHandler( float &input )
+{
+    static float game_speed = GameConfig::GetVariable( "physics", "game_speed", 1.0f );
+    static float game_accel = GameConfig::GetVariable( "physics", "game_accel", 1.0f );
+    return input/(game_speed*game_accel);
+}
+
+float speedStarHandler( float &input)
+{
+    static float game_speed = GameConfig::GetVariable( "physics", "game_speed", 1.0f );
+    return input/game_speed;
+}
+
+static Vector default_angular_velocity( GameConfig::GetVariable( "general", "pitch", 0.0f ),
+                                        GameConfig::GetVariable( "general", "yaw", 0.0f ),
+                                        GameConfig::GetVariable( "general", "roll", 0.0f));
+
 
 bool Movable::configLoaded = false;
 float Movable::VELOCITY_MAX = 0.0f;
@@ -60,7 +77,18 @@ std::string Movable::insys_jump_ani = "";
 float Movable::air_res_coef = 0.0f;
 float Movable::lateral_air_res_coef = 0.0f;
 
-Movable::Movable() : cumulative_transformation_matrix( identity_matrix ) {
+Movable::Movable() : cumulative_transformation_matrix( identity_matrix ),
+    sim_atom_multiplier(1),
+    predicted_priority(1),
+    last_processed_sqs(0),
+    docked(NOT_DOCKED),
+    corner_min(Vector(FLT_MAX, FLT_MAX, FLT_MAX)),
+    corner_max(Vector(-FLT_MAX, -FLT_MAX, -FLT_MAX)),
+    radial_size(0),
+    Momentofinertia(0.01)
+{
+    cur_sim_queue_slot = rand()%SIM_QUEUE_SIZE;
+
     if (!configLoaded) {
         VELOCITY_MAX = GameConfig::GetVariable( "physics", "velocity_max", 10000);
         humanwarprampuptime = GameConfig::GetVariable( "physics", "warprampuptime", 5);
@@ -84,6 +112,12 @@ Movable::Movable() : cumulative_transformation_matrix( identity_matrix ) {
         insys_jump_ani = vs_config->getVariable( "graphics", "insys_jump_animation", "warp.ani" );
         configLoaded = true;
     }
+
+    Identity( cumulative_transformation_matrix );
+    cumulative_transformation = identity_transformation;
+    curr_physical_state = prev_physical_state = identity_transformation;
+
+    AngularVelocity = default_angular_velocity;
 }
 
 
@@ -95,6 +129,12 @@ Movable::graphic_options::graphic_options()
     NumAnimationPoints = 0;
     RampCounter = 0;
     MinWarpMultiplier = MaxWarpMultiplier = 1;
+
+    // Added implementation to make var false
+    // I don't like it, because it's true by default and false by default
+    // TODO: figure out which it actually is
+    RecurseIntoSubUnitsOnCollision = false;
+    SubUnit    = 0; // Also this
 }
 
 
@@ -118,7 +158,7 @@ Vector Movable::GetNetAcceleration() const
     GetOrientation( p, q, r );
     Vector res( NetLocalForce.i*p+NetLocalForce.j*q+NetLocalForce.k*r );
     res += NetForce;
-    return res/GetMass();
+    return res/Mass;
 }
 
 Vector Movable::GetNetAngularAcceleration() const
@@ -140,7 +180,7 @@ float Movable::GetMaxAccelerationInDirectionOf( const Vector &ref, bool afterbur
     float  tr     = (lref.k == 0) ? 0 : fabs( ( (lref.k > 0) ? Limits().forward : Limits().retro )/lref.k );
     float  trqmin = (tr < tq) ? tr : tq;
     float  tm     = tp < trqmin ? tp : trqmin;
-    return lref.Magnitude()*tm/GetMass();
+    return lref.Magnitude()*tm/Mass;
 }
 
 void Movable::SetVelocity( const Vector &v )
@@ -159,10 +199,7 @@ void Movable::SetResolveForces( bool ys )
     resolveforces = ys;
 }
 
-float Movable::GetElasticity()
-{
-    return .5;
-}
+
 
 void Movable::UpdatePhysics( const Transformation &trans,
                           const Matrix &transmat,
@@ -335,7 +372,7 @@ Vector Movable::ResolveForces( const Transformation &trans, const Matrix &transm
     }
     if (NetForce.i || NetForce.j || NetForce.k)
         temp2 += InvTransformNormal( transmat, NetForce );
-    temp2 = temp2/GetMass();
+    temp2 = temp2/Mass;
     temp  = temp2*simulation_atom_var;
     if ( !( FINITE( temp2.i ) && FINITE( temp2.j ) && FINITE( temp2.k ) ) ) {
         BOOST_LOG_TRIVIAL(info) << "NetForce transform skrewed";
@@ -372,7 +409,7 @@ Vector Movable::ResolveForces( const Transformation &trans, const Matrix &transm
     if (air_res_coef || lateral_air_res_coef) {
         float  velmag = Velocity.Magnitude();
         Vector AirResistance = Velocity
-                               *( air_res_coef*velmag/GetMass() )*(corner_max.i-corner_min.i)*(corner_max.j-corner_min.j);
+                               *( air_res_coef*velmag/Mass )*(corner_max.i-corner_min.i)*(corner_max.j-corner_min.j);
         if (AirResistance.Magnitude() > velmag) {
             Velocity.Set( 0, 0, 0 );
         } else {
@@ -383,7 +420,7 @@ Vector Movable::ResolveForces( const Transformation &trans, const Matrix &transm
                 Vector lateralVel = p*Velocity.Dot( p )+q*Velocity.Dot( q );
                 AirResistance = lateralVel
                                 *( lateral_air_res_coef*velmag
-                                  /GetMass() )*(corner_max.i-corner_min.i)*(corner_max.j-corner_min.j);
+                                  /Mass )*(corner_max.i-corner_min.i)*(corner_max.j-corner_min.j);
                 if ( AirResistance.Magnitude() > lateralVel.Magnitude() )
                     Velocity = r*Velocity.Dot( r );
                 else

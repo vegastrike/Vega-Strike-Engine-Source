@@ -366,7 +366,7 @@ void ContinuousTerrain::Collide( Unit *un, Matrix t )
             }
             if (autocol) {
                 static float mass = 1000;
-                un->ApplyForce( bigNormal*.4*un->GetMass()*fabs( bigNormal.Dot( (un->GetVelocity()/simulation_atom_var) ) ) );
+                un->ApplyForce( bigNormal*.4*un->Mass*fabs( bigNormal.Dot( (un->GetVelocity()/simulation_atom_var) ) ) );
                 un->ApplyDamage( un->Position().Cast()-bigNormal*un->rSize(), -bigNormal, .5
                                  *fabs( bigNormal.Dot( un->GetVelocity() ) )*mass*simulation_atom_var, un, GFXColor( 1,
                                                                                                                      1,
