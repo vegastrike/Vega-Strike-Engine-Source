@@ -1,6 +1,6 @@
 
 #include "computer.h"
-#include "game_config.h"
+#include "configuration/configuration.h"
 
 
 
@@ -46,16 +46,10 @@ Computer::RADARLIM::RADARLIM() :
     locked(false),
     canlock(false),
     trackingactive(true) {
-    static float default_max_range = GameConfig::GetVariable( "graphics", "hud", "radarRange", 20000 );
-    static float default_tracking_cone = GameConfig::GetVariable( "physics", "autotracking", 0.93 );     //DO NOT CHANGE see unit_customize.cpp
 
-    // Note: below is probably a stale comment
-    // DO NOT CHANGE see unit_customize.cpp
-    static float default_lock_cone = GameConfig::GetVariable( "physics", "lock_cone", 0.8 );
-
-    maxrange      = default_max_range;
-    trackingcone  = default_tracking_cone;
-    lockcone      = default_lock_cone;
+    maxrange      = configuration.computer.default_max_range;
+    trackingcone  = configuration.computer.default_tracking_cone;
+    lockcone      = configuration.computer.default_lock_cone;
 }
 
 Computer::RADARLIM::Brand::Value Computer::RADARLIM::GetBrand() const

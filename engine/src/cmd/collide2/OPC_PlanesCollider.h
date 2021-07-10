@@ -16,6 +16,12 @@
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/**
+ * Updated by Stephen G. Tuggy 2021-07-03
+ */
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Include Guard
 #ifndef __OPC_PLANESCOLLIDER_H__
 #define __OPC_PLANESCOLLIDER_H__
@@ -45,15 +51,15 @@
 		 *	\param		planes			[in] list of planes in world space
 		 *	\param		nb_planes		[in] number of planes
 		 *	\param		model			[in] Opcode model to collide with
-		 *	\param		worldm			[in] model's world matrix, or null
+		 *	\param		worldm			[in] model's world matrix, or nullptr
 		 *	\return		true if success
 		 *	\warning	SCALE NOT SUPPORTED. The matrices must contain rotation & translation parts only.
 		 */
 		///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-							bool			Collide(PlanesCache& cache, const Plane* planes, udword nb_planes, const Model& model, const Matrix4x4* worldm=null);
+							bool			Collide(PlanesCache& cache, const Plane* planes, uint32_t nb_planes, const Model& model, const Matrix4x4* worldm=nullptr);
 
 		// Mutant box-with-planes collision queries
-		inline_				bool			Collide(PlanesCache& cache, const OBB& box, const Model& model, const Matrix4x4* worldb=null, const Matrix4x4* worldm=null)
+		inline_				bool			Collide(PlanesCache& cache, const OBB& box, const Model& model, const Matrix4x4* worldb=nullptr, const Matrix4x4* worldm=nullptr)
 											{
 												Plane PL[6];
 
@@ -79,31 +85,31 @@
 		///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 		/**
 		 *	Validates current settings. You should call this method after all the settings and callbacks have been defined for a collider.
-		 *	\return		null if everything is ok, else a string describing the problem
+		 *	\return		nullptr if everything is ok, else a string describing the problem
 		 */
 		///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 		override(Collider)	const char*		ValidateSettings();
 
 		protected:
 		// Planes in model space
-							udword			mNbPlanes;
+							uint32_t			mNbPlanes;
 							Plane*			mPlanes;
 		// Leaf description
 							VertexPointers	mVP;
 		// Internal methods
-							void			_Collide(const AABBCollisionNode* node, udword clip_mask);
-							void			_Collide(const AABBNoLeafNode* node, udword clip_mask);
-							void			_Collide(const AABBQuantizedNode* node, udword clip_mask);
-							void			_Collide(const AABBQuantizedNoLeafNode* node, udword clip_mask);
-							void			_CollideNoPrimitiveTest(const AABBCollisionNode* node, udword clip_mask);
-							void			_CollideNoPrimitiveTest(const AABBNoLeafNode* node, udword clip_mask);
-							void			_CollideNoPrimitiveTest(const AABBQuantizedNode* node, udword clip_mask);
-							void			_CollideNoPrimitiveTest(const AABBQuantizedNoLeafNode* node, udword clip_mask);
+							void			_Collide(const AABBCollisionNode* node, uint32_t clip_mask);
+							void			_Collide(const AABBNoLeafNode* node, uint32_t clip_mask);
+							void			_Collide(const AABBQuantizedNode* node, uint32_t clip_mask);
+							void			_Collide(const AABBQuantizedNoLeafNode* node, uint32_t clip_mask);
+							void			_CollideNoPrimitiveTest(const AABBCollisionNode* node, uint32_t clip_mask);
+							void			_CollideNoPrimitiveTest(const AABBNoLeafNode* node, uint32_t clip_mask);
+							void			_CollideNoPrimitiveTest(const AABBQuantizedNode* node, uint32_t clip_mask);
+							void			_CollideNoPrimitiveTest(const AABBQuantizedNoLeafNode* node, uint32_t clip_mask);
 			// Overlap tests
-		inline_				bool			PlanesAABBOverlap(const Point& center, const Point& extents, udword& out_clip_mask, udword in_clip_mask);
-		inline_				bool			PlanesTriOverlap(udword in_clip_mask);
+		inline_				bool			PlanesAABBOverlap(const Point& center, const Point& extents, uint32_t& out_clip_mask, uint32_t in_clip_mask);
+		inline_				bool			PlanesTriOverlap(uint32_t in_clip_mask);
 			// Init methods
-							bool			InitQuery(PlanesCache& cache, const Plane* planes, udword nb_planes, const Matrix4x4* worldm=null);
+							bool			InitQuery(PlanesCache& cache, const Plane* planes, uint32_t nb_planes, const Matrix4x4* worldm=nullptr);
 	};
 
 	class OPCODE_API HybridPlanesCollider : public PlanesCollider
@@ -113,7 +119,7 @@
 											HybridPlanesCollider();
 		virtual								~HybridPlanesCollider();
 
-							bool			Collide(PlanesCache& cache, const Plane* planes, udword nb_planes, const HybridModel& model, const Matrix4x4* worldm=null);
+							bool			Collide(PlanesCache& cache, const Plane* planes, uint32_t nb_planes, const HybridModel& model, const Matrix4x4* worldm=nullptr);
 		protected:
 							Container		mTouchedBoxes;
 	};

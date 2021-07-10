@@ -27,7 +27,7 @@
 
 #include "gfx/vec.h"
 #include "vs_math.h"
-#include "game_config.h"
+#include "configuration/game_config.h"
 #include "vs_globals.h"
 #include "configxml.h"
 #include "unit_armorshield.h"

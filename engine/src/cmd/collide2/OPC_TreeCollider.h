@@ -16,6 +16,12 @@
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/**
+ * Updated by Stephen G. Tuggy 2021-07-03
+ */
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Include Guard
 #ifndef __OPC_TREECOLLIDER_H__
 #define __OPC_TREECOLLIDER_H__
@@ -37,8 +43,8 @@
 
 					void	ResetCache()
 							{
-								Model0			= null;
-								Model1			= null;
+								Model0			= nullptr;
+								Model1			= nullptr;
 								id0				= 0;
 								id1				= 1;
 #ifdef __MESHMERIZER_H__		// Collision hulls only supported within ICE !
@@ -61,7 +67,7 @@
 
 #ifdef __MESHMERIZER_H__	// Collision hulls only supported within ICE !
 		SVCache				SepVector;
-		udword				CountDown;
+		uint32_t				CountDown;
 		bool				HullTest;
 #endif // __MESHMERIZER_H__
 	};
@@ -82,19 +88,19 @@
 		 *	- GetPairs()
 		 *
 		 *	\param		cache			[in] collision cache for model pointers and a colliding pair of primitives
-		 *	\param		world0			[in] world matrix for first object, or null
-		 *	\param		world1			[in] world matrix for second object, or null
+		 *	\param		world0			[in] world matrix for first object, or nullptr
+		 *	\param		world1			[in] world matrix for second object, or nullptr
 		 *	\return		true if success
 		 *	\warning	SCALE NOT SUPPORTED. The matrices must contain rotation & translation parts only.
 		 */
 		///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-							bool			Collide(BVTCache& cache, const Matrix4x4* world0=null, const Matrix4x4* world1=null);
+							bool			Collide(BVTCache& cache, const Matrix4x4* world0=nullptr, const Matrix4x4* world1=nullptr);
 
 		// Collision queries
-							bool			Collide(const AABBCollisionTree* tree0, const AABBCollisionTree* tree1,				const Matrix4x4* world0=null, const Matrix4x4* world1=null, Pair* cache=null);
-							bool			Collide(const AABBNoLeafTree* tree0, const AABBNoLeafTree* tree1,					const Matrix4x4* world0=null, const Matrix4x4* world1=null, Pair* cache=null);
-							bool			Collide(const AABBQuantizedTree* tree0, const AABBQuantizedTree* tree1,				const Matrix4x4* world0=null, const Matrix4x4* world1=null, Pair* cache=null);
-							bool			Collide(const AABBQuantizedNoLeafTree* tree0, const AABBQuantizedNoLeafTree* tree1,	const Matrix4x4* world0=null, const Matrix4x4* world1=null, Pair* cache=null);
+							bool			Collide(const AABBCollisionTree* tree0, const AABBCollisionTree* tree1,				const Matrix4x4* world0=nullptr, const Matrix4x4* world1=nullptr, Pair* cache=nullptr);
+							bool			Collide(const AABBNoLeafTree* tree0, const AABBNoLeafTree* tree1,					const Matrix4x4* world0=nullptr, const Matrix4x4* world1=nullptr, Pair* cache=nullptr);
+							bool			Collide(const AABBQuantizedTree* tree0, const AABBQuantizedTree* tree1,				const Matrix4x4* world0=nullptr, const Matrix4x4* world1=nullptr, Pair* cache=nullptr);
+							bool			Collide(const AABBQuantizedNoLeafTree* tree0, const AABBQuantizedNoLeafTree* tree1,	const Matrix4x4* world0=nullptr, const Matrix4x4* world1=nullptr, Pair* cache=nullptr);
 		// Settings
 
 		///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -125,7 +131,7 @@
 		 *	\return		the number of BV-BV tests performed during last query
 		 */
 		///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-		inline_				udword			GetNbBVBVTests()				const	{ return mNbBVBVTests;							}
+		inline_				uint32_t			GetNbBVBVTests()				const	{ return mNbBVBVTests;							}
 
 		///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 		/**
@@ -135,7 +141,7 @@
 		 *	\return		the number of Triangle-Triangle tests performed during last query
 		 */
 		///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-		inline_				udword			GetNbPrimPrimTests()			const	{ return mNbPrimPrimTests;						}
+		inline_				uint32_t			GetNbPrimPrimTests()			const	{ return mNbPrimPrimTests;						}
 
 		///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 		/**
@@ -145,7 +151,7 @@
 		 *	\return		the number of BV-Triangle tests performed during last query
 		 */
 		///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-		inline_				udword			GetNbBVPrimTests()				const	{ return mNbBVPrimTests;						}
+		inline_				uint32_t			GetNbBVPrimTests()				const	{ return mNbBVPrimTests;						}
 
 		// Data access
 
@@ -157,7 +163,7 @@
 		 *	\return		the number of contacts / colliding pairs.
 		 */
 		///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-		inline_				udword			GetNbPairs()					const	{ return mPairs.GetNbEntries()>>1;				}
+		inline_				uint32_t			GetNbPairs()					const	{ return mPairs.GetNbEntries()>>1;				}
 
 		///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 		/**
@@ -172,7 +178,7 @@
 		///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 		/**
 		 *	Validates current settings. You should call this method after all the settings and callbacks have been defined for a collider.
-		 *	\return		null if everything is ok, else a string describing the problem
+		 *	\return		nullptr if everything is ok, else a string describing the problem
 		 */
 		///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 		override(Collider)	const char*		ValidateSettings();
@@ -184,9 +190,9 @@
 					const	MeshInterface*	mIMesh0;			//!< User-defined mesh interface for object0
 					const	MeshInterface*	mIMesh1;			//!< User-defined mesh interface for object1
 		// Stats
-							udword			mNbBVBVTests;		//!< Number of BV-BV tests
-							udword			mNbPrimPrimTests;	//!< Number of Primitive-Primitive tests
-							udword			mNbBVPrimTests;		//!< Number of BV-Primitive tests
+							uint32_t			mNbBVBVTests;		//!< Number of BV-BV tests
+							uint32_t			mNbPrimPrimTests;	//!< Number of Primitive-Primitive tests
+							uint32_t			mNbBVPrimTests;		//!< Number of BV-Primitive tests
 		// Precomputed data
 							Matrix3x3		mAR;				//!< Absolute rotation matrix
 							Matrix3x3		mR0to1;				//!< Rotation from object0 to object1
@@ -200,7 +206,7 @@
 							Point			mExtentsCoeff1;
 		// Leaf description
 							Point			mLeafVerts[3];		//!< Triangle vertices
-							udword			mLeafIndex;			//!< Triangle index
+							uint32_t			mLeafIndex;			//!< Triangle index
 		// Settings
 							bool			mFullBoxBoxTest;	//!< Perform full BV-BV tests (true) or SAT-lite tests (false)
 							bool			mFullPrimBoxTest;	//!< Perform full Primitive-BV tests (true) or SAT-lite tests (false)
@@ -219,15 +225,15 @@
 							void			_CollideBoxTri(const AABBQuantizedNoLeafNode* b);
 							void			_Collide(const AABBQuantizedNoLeafNode* a, const AABBQuantizedNoLeafNode* b);
 			// Overlap tests
-							void			PrimTest(udword id0, udword id1);
-			inline_			void			PrimTestTriIndex(udword id1);
-			inline_			void			PrimTestIndexTri(udword id0);
+							void			PrimTest(uint32_t id0, uint32_t id1);
+			inline_			void			PrimTestTriIndex(uint32_t id1);
+			inline_			void			PrimTestIndexTri(uint32_t id0);
 
 			inline_			bool			BoxBoxOverlap(const Point& ea, const Point& ca, const Point& eb, const Point& cb);
 			inline_			bool			TriBoxOverlap(const Point& center, const Point& extents);
 			inline_			bool			TriTriOverlap(const Point& V0, const Point& V1, const Point& V2, const Point& U0, const Point& U1, const Point& U2);
 			// Init methods
-							void			InitQuery(const Matrix4x4* world0=null, const Matrix4x4* world1=null);
+							void			InitQuery(const Matrix4x4* world0=nullptr, const Matrix4x4* world1=nullptr);
 							bool			CheckTemporalCoherence(Pair* cache);
 
 		inline_				bool			Setup(const MeshInterface* mi0, const MeshInterface* mi1)

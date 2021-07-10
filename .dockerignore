@@ -1,4 +1,6 @@
 .git/
+.vs/
+.vscode/
 bin/
 build/
 data/

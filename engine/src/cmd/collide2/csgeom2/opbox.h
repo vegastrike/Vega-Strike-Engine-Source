@@ -1,6 +1,7 @@
 /*
     Copyright (C) 1998,1999,2000 by Jorrit Tyberghein
     Largely rewritten by Ivan Avramovic <ivan@avramovic.com>
+    Copyright (C) 2021 by Stephen G Tuggy
   
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Library General Public
@@ -104,10 +105,10 @@ protected:
 
   struct bEdge
   {
-    uint8 v1, v2; // Indices of vertex in bounding box (BOX_CORNER_...)
-    uint8 fl, fr; // Indices of left/right faces sharing edge (BOX_SIDE_...)
+    uint8_t v1, v2; // Indices of vertex in bounding box (BOX_CORNER_...)
+    uint8_t fl, fr; // Indices of left/right faces sharing edge (BOX_SIDE_...)
   };
-  typedef uint8 bFace[4];	// Indices of four clock-wise edges (0..23)
+  typedef uint8_t bFace[4];	// Indices of four clock-wise edges (0..23)
   // Index by edge number. Edge e and e+1 with e even are opposite edges.
   // (BOX_EDGE_...)
   static bEdge edges[24];
@@ -163,7 +164,7 @@ public:
    * Given a face index (BOX_SIDE_???) return the four edges oriented
    * clockwise around this face (BOX_EDGE_???).
    */
-  uint8* GetFaceEdges (int face) const
+  uint8_t* GetFaceEdges (int face) const
   {
     return faces[face];
   }

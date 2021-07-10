@@ -1,5 +1,8 @@
 /*
     Copyright (C) 1998-2004 by Jorrit Tyberghein
+    Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other
+    Vega Strike contributors
+    Copyright (C) 2021 Stephen G. Tuggy
   
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Library General Public
@@ -59,54 +62,22 @@
 #include <inttypes.h>
 #endif
 
-/**\name Specific sized types
- * These types should be used ONLY when you need a variable of an explicit
- * number of bits.  For all other cases, you should use normal char, short,
- * int, long, etc., types since they are treated as "natural" types and will
- * generally have better performance characteristics than the explicitly-sized
- * types. Use the explicitly-sized types sparingly.
- * @{ */
+// /**\name Specific sized types
+//  * These types should be used ONLY when you need a variable of an explicit
+//  * number of bits.  For all other cases, you should use normal char, short,
+//  * int, long, etc., types since they are treated as "natural" types and will
+//  * generally have better performance characteristics than the explicitly-sized
+//  * types. Use the explicitly-sized types sparingly.
+//  * @{ */
 
-#if !defined(HAVE_STDINT_H) && !defined(HAVE_INTTYPES_H)
-/// unsigned 8-bit integer (0..255)
-typedef unsigned char uint8;
-/// signed 8-bit integer (-128..127)
-typedef char int8;
-/// unsigned 16-bit integer (0..65 535)
-typedef unsigned short uint16;
-/// signed 16-bit integer (-32 768..32 767)
-typedef short int16;
-/// unsigned 32-bit integer (0..4 294 967 295)
-typedef unsigned int uint32;
-/// signed 32-bit integer (-2 147 483 648..2 147 483 647)
-typedef int int32;
-#if defined(CS_COMPILER_GCC)
-#ifndef __STRICT_ANSI__
-/// unsigned 64-bit integer
-typedef unsigned long long uint64;
-/// signed 64-bit integer
-typedef long long int64;
-#endif
-#elif defined(CS_COMPILER_MSVC) || defined(CS_COMPILER_BCC)
-/// unsigned 64 bit integer
-typedef unsigned __int64 uint64;
-/// signed 64 bit integer
-typedef __int64 int64;
-#else
-#error Do not know how to declare 64-bit integers
-#endif // CS_COMPILER_GCC
-
-#else // CS_HAVE_STDINT_H || CS_HAVE_INTTYPES_H
-
-typedef uint8_t uint8;
-typedef int8_t int8;
-typedef uint16_t uint16;
-typedef int16_t int16;
-typedef uint32_t uint32;
-typedef int32_t int32;
-typedef uint64_t uint64;
-typedef int64_t int64;
-#endif
+// typedef uint8_t opc_uint8;
+// typedef int8_t opc_int8;
+// typedef uint16_t opc_uint16;
+// typedef int16_t opc_int16;
+// typedef uint32_t opc_uint32;
+// typedef int32_t opc_int32;
+// typedef uint64_t opc_uint64;
+// typedef int64_t opc_int64;
 
 #ifdef CS_HAVE_INT64_C
 
@@ -150,34 +121,10 @@ typedef int64_t int64;
 // <stddef.h> provided the types by checking if _INTPTR_T_DEFINED has been
 // #defined; newer versions of MSVC will provide them; older ones will not.  If
 // all else fails, then we fake up these types on our own.
+//
+// 2021-06-26 SGT: I believe these are standard types now in C++11 and later.
 #include <stddef.h>
-#if !defined(CS_HAVE_INTPTR_T) && !defined(_INTPTR_T_DEFINED)
-
-#if CS_PROCESSOR_SIZE == 64
-typedef int64 intptr_t;
-typedef uint64 uintptr_t;
-typedef int64 ptrdiff_t;
-#else
-/// Integer at least as wide as a pointer
-typedef int intptr_t;
-/// Unsigned integer at least as wide as a pointer
-typedef unsigned int uintptr_t;
-/// Difference of 2 pointers
-typedef int ptrdiff_t;
-#endif
-
-#define _INTPTR_T_DEFINED
-#define _UINTPTR_T_DEFINED
-#define _PTRDIFF_T_DEFINED
-#endif
-
-#if !defined(CS_HAVE_INTMAX_T)
-/// Greatest-width integer
-typedef int64 intmax_t;
-/// Greatest-width unsigned integer
-typedef uint64 uintmax_t;
-#endif
-
+typedef intptr_t opc_ptrdiff_t;
 
 // Provide wchar_t and wint_t. If the configure script determined that these
 // types exist in the standard headers, then just employ those types.  For
@@ -209,33 +156,6 @@ typedef uint64 uintmax_t;
 #endif
 
 
-#if defined(CS_COMPILER_GCC)
-#ifndef __STRICT_ANSI__
-/**
- * Type to pass to cs_snprintf() as an argument to the "%lld" format specifier.
- */
-typedef long long longlong;
-/**
- * Type to pass to cs_snprintf() as an argument to the "%llu" format specifier.
- */
-typedef unsigned long long ulonglong;
-#else
-// @@@ Correct?
-typedef int64 longlong;
-typedef uint64 ulonglong;
-#endif
-#elif defined(CS_COMPILER_MSVC) || defined(CS_COMPILER_BCC)
-typedef int64 longlong;
-typedef uint64 ulonglong;
-#else
-#ifdef HAVE_STDINT_H
-typedef int_least64_t longlong;
-typedef uint_least64_t ulonglong;
-#else 
-#error Do not know how to declare (u)longlong types
-#endif 
-#endif 
-
 /**
  * A time value measured in milliseconds (1/1000 of a second).  Ticks do not
  * represent wall clock time or any other Epoch-based time.  Instead, ticks are
@@ -245,7 +165,7 @@ typedef uint_least64_t ulonglong;
 typedef unsigned int csTicks;
 
 /// Shortcut for default unsigned int.
-typedef unsigned int uint;
+typedef unsigned int opc_uint;
 /** @} */
 
 /** @} */

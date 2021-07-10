@@ -8,34 +8,40 @@
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/**
+ * Updated by Stephen G. Tuggy 2021-07-03
+ */
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Include Guard
 #ifndef __ICERANDOM_H__
 #define __ICERANDOM_H__
 
-	ICECORE_API	void	SRand(udword seed);
-	 udword	Rand();
+	ICECORE_API	void	SRand(uint32_t seed);
+	 uint32_t	Rand();
 
 	//! Returns a unit random floating-point value
 	inline_ float UnitRandomFloat()	{ return float(Rand()) * ONE_OVER_RAND_MAX;	}
 
 	//! Returns a random index so that 0<= index < max_index
-	ICECORE_API	udword GetRandomIndex(udword max_index);
+	ICECORE_API	uint32_t GetRandomIndex(uint32_t max_index);
 
 	class ICECORE_API BasicRandom
 	{
 		public:
 
 		//! Constructor
-		inline_				BasicRandom(udword seed=0)	: mRnd(seed)	{}
+		inline_				BasicRandom(uint32_t seed=0)	: mRnd(seed)	{}
 		//! Destructor
 		inline_				~BasicRandom()								{}
 
-		inline_	void		SetSeed(udword seed)		{ mRnd = seed;											}
-		inline_	udword		GetCurrentValue()	const	{ return mRnd;											}
-		inline_	udword		Randomize()					{ mRnd = mRnd * 2147001325 + 715136305; return mRnd;	}
+		inline_	void		SetSeed(uint32_t seed)		{ mRnd = seed;											}
+		inline_	uint32_t		GetCurrentValue()	const	{ return mRnd;											}
+		inline_	uint32_t		Randomize()					{ mRnd = mRnd * 2147001325 + 715136305; return mRnd;	}
 
 		private:
-				udword		mRnd;
+				uint32_t		mRnd;
 	};
 
 #endif // __ICERANDOM_H__

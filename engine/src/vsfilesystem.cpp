@@ -67,7 +67,7 @@ struct dirent
 #include "boost/iostreams/device/null.hpp"
 #include "boost/filesystem.hpp"
 
-#include "game_config.h"
+#include "configuration/game_config.h"
 
 #include <string>
 
