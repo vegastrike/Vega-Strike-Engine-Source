@@ -17,6 +17,12 @@
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /**
+ * Updated by Stephen G. Tuggy 2021-07-03
+ */
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/**
  *	The main collision wrapper, for all trees. Supported trees are:
  *	- Normal trees (2*N-1 nodes, full size)
  *	- No-leaf trees (N-1 nodes, full size)
@@ -68,7 +74,7 @@
  *		BOOL Status = TC.GetContactStatus();
  *
  *		// Number of colliding pairs and list of pairs
- *		udword NbPairs = TC.GetNbPairs();
+ *		uint32_t NbPairs = TC.GetNbPairs();
  *		const Pair* p = TC.GetPairs()
  *	\endcode
  *
@@ -103,7 +109,7 @@ using namespace Opcode;
 Model::Model()
 {
 #ifdef __MESHMERIZER_H__	// Collision hulls only supported within ICE !
-	mHull	= null;
+	mHull	= nullptr;
 #endif // __MESHMERIZER_H__
 }
 
@@ -143,7 +149,7 @@ bool Model::Build(const OPCODECREATE& create)
 	if(!create.mIMesh || !create.mIMesh->IsValid())	return false;
 
 	// For this model, we only support complete trees
-//	if(create.mSettings.mLimit!=1)	return SetIceError ("OPCODE WARNING: supports complete trees only! Use mLimit = 1.", null);
+//	if(create.mSettings.mLimit!=1)	return SetIceError ("OPCODE WARNING: supports complete trees only! Use mLimit = 1.", nullptr);
 	if(create.mSettings.mLimit!=1) return(false);
 	// Look for degenerate faces.
 	create.mIMesh->CheckTopology();
@@ -155,7 +161,7 @@ bool Model::Build(const OPCODECREATE& create)
 	SetMeshInterface(create.mIMesh);
 
 	// Special case for 1-triangle meshes [Opcode 1.3]
-	udword NbTris = create.mIMesh->GetNbTriangles();
+	uint32_t NbTris = create.mIMesh->GetNbTriangles();
 	if(NbTris==1)
 	{
 		// We don't need to actually create a tree here, since we'll only have a single triangle to deal with anyway.
@@ -215,9 +221,11 @@ bool Model::Build(const OPCODECREATE& create)
  *	\return		amount of bytes used
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-udword Model::GetUsedBytes() const
+size_t Model::GetUsedBytes() const
 {
-	if(!mTree)	return 0;
+	if (!mTree) {
+        return 0;
+    }
 	return mTree->GetUsedBytes();
 }
 

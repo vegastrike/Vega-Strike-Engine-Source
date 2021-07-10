@@ -8,6 +8,12 @@
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/**
+ * Updated by Stephen G. Tuggy 2021-07-03
+ */
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Include Guard
 #ifndef __ICETYPES_H__
 #define __ICETYPES_H__
@@ -42,41 +48,41 @@
 	#define	SQRT3				1.73205080757f											//!< sqrt(3)
 	#define	INVSQRT3			0.577350269189f											//!< 1 / sqrt(3)
 
-	#define null				0														//!< our own NULL pointer
+	// #define null				0														//!< our own NULL pointer
 
-	// Custom types used in ICE
-	typedef signed char			sbyte;		//!< sizeof(sbyte)	must be 1
-	typedef unsigned char		ubyte;		//!< sizeof(ubyte)	must be 1
-	typedef signed short		sword;		//!< sizeof(sword)	must be 2
-	typedef unsigned short		uword;		//!< sizeof(uword)	must be 2
-	typedef signed int			sdword;		//!< sizeof(sdword)	must be 4
-	typedef unsigned int		udword;		//!< sizeof(udword)	must be 4
-	typedef int64		sqword;		//!< sizeof(sqword)	must be 8
-	typedef uint64	uqword;		//!< sizeof(uqword)	must be 8
-	typedef float				float32;	//!< sizeof(float32)	must be 4
-	typedef double				float64;	//!< sizeof(float64)	must be 4
+	// // Custom types used in ICE
+    // typedef int8_t              int8_t;      //!< sizeof(int8_t)      must be 1
+    // typedef uint8_t             uint8_t;      //!< sizeof(uint8_t)      must be 1
+    // typedef int16_t             int16_t;     //!< sizeof(int16_t)     must be 2
+    // typedef uint16_t            uint16_t;     //!< sizeof(uint16_t)     must be 2
+    // typedef int32_t             int32_t;     //!< sizeof(int32_t)     must be 4
+    // typedef uint32_t            uint32_t;     //!< sizeof(uint32_t)     must be 4
+    // typedef int64_t             int64_t;     //!< sizeof(int64_t)	    must be 8
+    // typedef uint64_t            uint64_t;     //!< sizeof(uint64_t)     must be 8
+    // typedef float               float;    //!< sizeof(float)    must be 4
+    // typedef double              ice_float64;    //!< sizeof(ice_float64)    must be 8
 
-	// ICE_COMPILE_TIME_ASSERT(sizeof(bool)==1);	// ...otherwise things might fail with VC++ 4.2 !
-	ICE_COMPILE_TIME_ASSERT(sizeof(ubyte)==1);
-	ICE_COMPILE_TIME_ASSERT(sizeof(sbyte)==1);
-	ICE_COMPILE_TIME_ASSERT(sizeof(sword)==2);
-	ICE_COMPILE_TIME_ASSERT(sizeof(uword)==2);
-	ICE_COMPILE_TIME_ASSERT(sizeof(udword)==4);
-	ICE_COMPILE_TIME_ASSERT(sizeof(sdword)==4);
-	ICE_COMPILE_TIME_ASSERT(sizeof(uqword)==8);
-	ICE_COMPILE_TIME_ASSERT(sizeof(sqword)==8);
+    // ICE_COMPILE_TIME_ASSERT(sizeof(bool)==1);	// ...otherwise things might fail with VC++ 4.2 !
+    ICE_COMPILE_TIME_ASSERT(sizeof(uint8_t)==1);
+    ICE_COMPILE_TIME_ASSERT(sizeof(int8_t)==1);
+    ICE_COMPILE_TIME_ASSERT(sizeof(int16_t)==2);
+    ICE_COMPILE_TIME_ASSERT(sizeof(uint16_t)==2);
+    ICE_COMPILE_TIME_ASSERT(sizeof(uint32_t)==4);
+    ICE_COMPILE_TIME_ASSERT(sizeof(int32_t)==4);
+    ICE_COMPILE_TIME_ASSERT(sizeof(uint64_t)==8);
+    ICE_COMPILE_TIME_ASSERT(sizeof(int64_t)==8);
 
 	//! TO BE DOCUMENTED
 	#define DECLARE_ICE_HANDLE(name)	struct name##__ { int unused; }; typedef struct name##__ *name
 
-	typedef udword				DynID;		//!< Dynamic identifier
+	typedef uint32_t            DynID;		//!< Dynamic identifier
 #ifdef USE_HANDLE_MANAGER
-	typedef udword				KID;		//!< Kernel ID
+	typedef uint32_t            KID;		//!< Kernel ID
 //	DECLARE_ICE_HANDLE(KID);
 #else
-	typedef uword				KID;		//!< Kernel ID
+	typedef uint16_t            KID;		//!< Kernel ID
 #endif
-	typedef udword				RTYPE;		//!< Relationship-type (!) between owners and references
+	typedef uint32_t            RTYPE;		//!< Relationship-type (!) between owners and references
 	#define	INVALID_ID			0xffffffff	//!< Invalid dword ID (counterpart of null pointers)
 #ifdef USE_HANDLE_MANAGER
 	#define	INVALID_KID			0xffffffff	//!< Invalid Kernel ID
@@ -90,31 +96,31 @@
 	typedef int	BOOL;						//!< Another boolean type.
 	#endif
 
-	//! Union of a float and a sdword
+	//! Union of a float and a int32_t
 	typedef union {
-		float	f;							//!< The float
-		sdword	d;							//!< The integer
+		float       f;                         //!< The float
+		int32_t     d;                         //!< The integer
 	}scell;
 
-	//! Union of a float and a udword
+	//! Union of a float and a uint32_t
 	typedef union {
-		float	f;							//!< The float
-		udword	d;							//!< The integer
+		float       f;                         //!< The float
+		uint32_t    d;                         //!< The integer
 	}ucell;
 
 	// Type ranges
-	#define	MAX_SBYTE				0x7f						//!< max possible sbyte value
-	#define	MIN_SBYTE				0x80						//!< min possible sbyte value
-	#define	MAX_UBYTE				0xff						//!< max possible ubyte value
-	#define	MIN_UBYTE				0x00						//!< min possible ubyte value
-	#define	MAX_SWORD				0x7fff						//!< max possible sword value
-	#define	MIN_SWORD				0x8000						//!< min possible sword value
-	#define	MAX_UWORD				0xffff						//!< max possible uword value
-	#define	MIN_UWORD				0x0000						//!< min possible uword value
-	#define	MAX_SDWORD				0x7fffffff					//!< max possible sdword value
-	#define	MIN_SDWORD				0x80000000					//!< min possible sdword value
-	#define	MAX_UDWORD				0xffffffff					//!< max possible udword value
-	#define	MIN_UDWORD				0x00000000					//!< min possible udword value
+	// #define	MAX_SBYTE				INT8_MAX				    //!< max possible int8_t value
+	// #define	MIN_SBYTE				INT8_MIN    				//!< min possible int8_t value
+	// #define	MAX_UBYTE				UINT8_MAX   				//!< max possible uint8_t value
+	#define	MIN_UBYTE				uint8_t(0x00)				//!< min possible uint8_t value
+	// #define	MAX_SWORD				INT16_MAX       			//!< max possible int16_t value
+	// #define	MIN_SWORD				INT16_MIN       			//!< min possible int16_t value
+	// #define	MAX_UWORD				UINT16_MAX					//!< max possible uint16_t value
+	#define	MIN_UWORD				uint16_t(0x0000)			//!< min possible uint16_t value
+	// #define	MAX_SDWORD				INT32_MAX					//!< max possible int32_t value
+	// #define	MIN_SDWORD				INT32_MIN					//!< min possible int32_t value
+	// #define	MAX_UDWORD				UINT32_MAX					//!< max possible uint32_t value
+	#define	MIN_UDWORD				uint32_t(0x00000000)	    //!< min possible uint32_t value
 	#define	MAX_FLOAT				FLT_MAX						//!< max possible float value
 	#define	MIN_FLOAT				(-FLT_MAX)					//!< min possible loat value
 	#define IEEE_1_0				0x3f800000					//!< integer representation of 1.0
@@ -125,7 +131,7 @@
 
 	#define ONE_OVER_RAND_MAX		(1.0f / float(RAND_MAX))	//!< Inverse of the max possible value returned by rand()
 
-	typedef bool				(*ENUMERATION)(udword value, udword param, udword context);	//!< ICE standard enumeration call
+	typedef bool				(*ENUMERATION)(uint32_t value, uint32_t param, uint32_t context); //!< ICE standard enumeration call
 	typedef	void**				VTABLE;							//!< A V-Table.
 
 	#undef		MIN

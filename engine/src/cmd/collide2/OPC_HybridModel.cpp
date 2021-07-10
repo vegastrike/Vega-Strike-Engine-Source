@@ -81,6 +81,12 @@
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/**
+ * Updated by Stephen G. Tuggy 2021-07-03
+ */
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Precompiled Header
 #include "Stdafx.h"
 
@@ -95,9 +101,9 @@ namespace Opcode
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 HybridModel::HybridModel() :
 	mNbLeaves		(0),
-	mTriangles		(null),
+	mTriangles		(nullptr),
 	mNbPrimitives	(0),
-	mIndices		(null)
+	mIndices		(nullptr)
 {
 }
 
@@ -130,19 +136,19 @@ void HybridModel::Release()
 		Internal()
 		{
 			mNbLeaves	= 0;
-			mLeaves		= null;
-			mTriangles	= null;
-			mBase		= null;
+			mLeaves		= nullptr;
+			mTriangles	= nullptr;
+			mBase		= nullptr;
 		}
 		~Internal()
 		{
 			DELETEARRAY(mLeaves);
 		}
 
-		udword			mNbLeaves;
+		uint32_t			mNbLeaves;
 		AABB*			mLeaves;
 		LeafTriangles*	mTriangles;
-		const udword*	mBase;
+		const uint32_t*	mBase;
 	};
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -167,7 +173,7 @@ bool HybridModel::Build(const OPCODECREATE& create)
 	SetMeshInterface(create.mIMesh);
 
 	bool Status = false;
-	AABBTree* LeafTree = null;
+	AABBTree* LeafTree = nullptr;
 	Internal Data;
 
 	// 2) Build a generic AABB Tree.
@@ -189,7 +195,7 @@ bool HybridModel::Build(const OPCODECREATE& create)
 	struct Local
 	{
 		// A callback to count leaf nodes
-		static bool CountLeaves(const AABBTreeNode* current, udword /*depth*/, void* user_data)
+		static bool CountLeaves(const AABBTreeNode* current, uint32_t /*depth*/, void* user_data)
 		{
 			if(current->IsLeaf())
 			{
@@ -200,7 +206,7 @@ bool HybridModel::Build(const OPCODECREATE& create)
 		}
 
 		// A callback to setup leaf nodes in our internal structures
-		static bool SetupLeafData(const AABBTreeNode* current, udword /*depth*/, void* user_data)
+		static bool SetupLeafData(const AABBTreeNode* current, uint32_t /*depth*/, void* user_data)
 		{
 			if(current->IsLeaf())
 			{
@@ -210,7 +216,7 @@ bool HybridModel::Build(const OPCODECREATE& create)
 				Data->mLeaves[Data->mNbLeaves] = *current->GetAABB();
 
 				// Setup leaf data
-				udword Index = (uintptr_t(current->GetPrimitives()) - uintptr_t(Data->mBase))/sizeof(udword);
+				uint32_t Index = (uintptr_t(current->GetPrimitives()) - uintptr_t(Data->mBase))/sizeof(uint32_t);
 				Data->mTriangles[Data->mNbLeaves].SetData(current->GetNbPrimitives(), Index);
 
 				Data->mNbLeaves++;
@@ -260,8 +266,8 @@ bool HybridModel::Build(const OPCODECREATE& create)
 		{
 			// Keep track of source indices (from vanilla tree)
 			mNbPrimitives = mSource->GetNbPrimitives();
-			mIndices = new udword[mNbPrimitives];
-			CopyMemory(mIndices, mSource->GetIndices(), mNbPrimitives*sizeof(udword));
+			mIndices = new uint32_t[mNbPrimitives];
+			CopyMemory(mIndices, mSource->GetIndices(), mNbPrimitives*sizeof(uint32_t));
 		}
 	}
 
@@ -301,12 +307,18 @@ FreeAndExit:	// Allow me this one...
  *	\return		amount of bytes used
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-udword HybridModel::GetUsedBytes() const
+size_t HybridModel::GetUsedBytes() const
 {
-	udword UsedBytes = 0;
-	if(mTree)		UsedBytes += mTree->GetUsedBytes();
-	if(mIndices)	UsedBytes += mNbPrimitives * sizeof(udword);	// mIndices
-	if(mTriangles)	UsedBytes += mNbLeaves * sizeof(LeafTriangles);	// mTriangles
+	size_t UsedBytes = 0;
+	if (mTree) {
+        UsedBytes += mTree->GetUsedBytes();
+    }
+	if (mIndices) {
+        UsedBytes += mNbPrimitives * sizeof(uint32_t);	// mIndices
+    }
+	if (mTriangles)	{
+        UsedBytes += mNbLeaves * sizeof(LeafTriangles);	// mTriangles
+    }
 	return UsedBytes;
 }
 
@@ -349,13 +361,13 @@ bool HybridModel::Refit()
 	if(HasLeafNodes())	return false;
 
 	const LeafTriangles* LT = GetLeafTriangles();
-	const udword* Indices = GetIndices();
+	const uint32_t* Indices = GetIndices();
 
 	// Bottom-up update
 	VertexPointers VP;
 	Point Min,Max;
 	Point Min_,Max_;
-	udword Index = mTree->GetNbNodes();
+	uint32_t Index = mTree->GetNbNodes();
 	AABBNoLeafNode* Nodes = (AABBNoLeafNode*)((AABBNoLeafTree*)mTree)->GetNodes();
 	while(Index--)
 	{
@@ -371,10 +383,10 @@ bool HybridModel::Refit()
 			Point TmpMin, TmpMax;
 
 			// Each leaf box has a set of triangles
-			udword NbTris = CurrentLeaf.GetNbTriangles();
+			uint32_t NbTris = CurrentLeaf.GetNbTriangles();
 			if(Indices)
 			{
-				const udword* T = &Indices[CurrentLeaf.GetTriangleIndex()];
+				const uint32_t* T = &Indices[CurrentLeaf.GetTriangleIndex()];
 
 				// Loop through triangles and test each of them
 				while(NbTris--)
@@ -387,7 +399,7 @@ bool HybridModel::Refit()
 			}
 			else
 			{
-				udword BaseIndex = CurrentLeaf.GetTriangleIndex();
+				uint32_t BaseIndex = CurrentLeaf.GetTriangleIndex();
 
 				// Loop through triangles and test each of them
 				while(NbTris--)
@@ -416,10 +428,10 @@ bool HybridModel::Refit()
 			Point TmpMin, TmpMax;
 
 			// Each leaf box has a set of triangles
-			udword NbTris = CurrentLeaf.GetNbTriangles();
+			uint32_t NbTris = CurrentLeaf.GetNbTriangles();
 			if(Indices)
 			{
-				const udword* T = &Indices[CurrentLeaf.GetTriangleIndex()];
+				const uint32_t* T = &Indices[CurrentLeaf.GetTriangleIndex()];
 
 				// Loop through triangles and test each of them
 				while(NbTris--)
@@ -432,7 +444,7 @@ bool HybridModel::Refit()
 			}
 			else
 			{
-				udword BaseIndex = CurrentLeaf.GetTriangleIndex();
+				uint32_t BaseIndex = CurrentLeaf.GetTriangleIndex();
 
 				// Loop through triangles and test each of them
 				while(NbTris--)

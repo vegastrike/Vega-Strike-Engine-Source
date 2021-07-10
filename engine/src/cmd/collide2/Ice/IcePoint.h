@@ -27,6 +27,12 @@
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/**
+ * Updated by Stephen G. Tuggy 2021-07-03
+ */
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Include Guard
 #ifndef __ICEPOINT_H__
 #define __ICEPOINT_H__
@@ -277,11 +283,11 @@
 								}
 
 		//! Slighty moves the point
-				void			Tweak(udword coord_mask, udword tweak_mask)
+				void			Tweak(uint32_t coord_mask, uint32_t tweak_mask)
 								{
-									if(coord_mask&1)	{ udword Dummy = IR(x);	Dummy^=tweak_mask;	x = FR(Dummy); }
-									if(coord_mask&2)	{ udword Dummy = IR(y);	Dummy^=tweak_mask;	y = FR(Dummy); }
-									if(coord_mask&4)	{ udword Dummy = IR(z);	Dummy^=tweak_mask;	z = FR(Dummy); }
+									if(coord_mask&1)	{ uint32_t Dummy = IR(x);	Dummy^=tweak_mask;	x = FR(Dummy); }
+									if(coord_mask&2)	{ uint32_t Dummy = IR(y);	Dummy^=tweak_mask;	y = FR(Dummy); }
+									if(coord_mask&4)	{ uint32_t Dummy = IR(z);	Dummy^=tweak_mask;	z = FR(Dummy); }
 								}
 
 		#define TWEAKMASK		0x3fffff
@@ -289,7 +295,7 @@
 		//! Slighty moves the point out
 		inline_	void			TweakBigger()
 								{
-									udword	Dummy = (IR(x)&TWEAKNOTMASK);	if(x >= 0.0f)	Dummy+=TWEAKMASK+1;	x = FR(Dummy);
+									uint32_t	Dummy = (IR(x)&TWEAKNOTMASK);	if(x >= 0.0f)	Dummy+=TWEAKMASK+1;	x = FR(Dummy);
 											Dummy = (IR(y)&TWEAKNOTMASK);	if(y >= 0.0f)	Dummy+=TWEAKMASK+1;	y = FR(Dummy);
 											Dummy = (IR(z)&TWEAKNOTMASK);	if(z >= 0.0f)	Dummy+=TWEAKMASK+1;	z = FR(Dummy);
 								}
@@ -297,7 +303,7 @@
 		//! Slighty moves the point in
 		inline_	void			TweakSmaller()
 								{
-									udword	Dummy = (IR(x)&TWEAKNOTMASK);	if(x < 0.0f)	Dummy+=TWEAKMASK+1;	x = FR(Dummy);
+									uint32_t	Dummy = (IR(x)&TWEAKNOTMASK);	if(x < 0.0f)	Dummy+=TWEAKMASK+1;	x = FR(Dummy);
 											Dummy = (IR(y)&TWEAKNOTMASK);	if(y < 0.0f)	Dummy+=TWEAKMASK+1;	y = FR(Dummy);
 											Dummy = (IR(z)&TWEAKNOTMASK);	if(z < 0.0f)	Dummy+=TWEAKMASK+1;	z = FR(Dummy);
 								}
@@ -369,7 +375,7 @@
 								}
 
 		//! Vector code ( bitmask = sign(z) | sign(y) | sign(x) )
-		inline_	udword			VectorCode()						const
+		inline_	uint32_t			VectorCode()						const
 								{
 									return (IR(x)>>31) | ((IR(y)&SIGN_BITMASK)>>30) | ((IR(z)&SIGN_BITMASK)>>29);
 								}
@@ -426,10 +432,10 @@
 				Point&			Unfold(Plane& p, Point& a, Point& b);
 
 		//! Hash function from Ville Miettinen
-		inline_	udword			GetHashValue()						const
+		inline_	uint32_t			GetHashValue()						const
 								{
-									const udword* h = (const udword*)(this);
-									udword f = (h[0]+h[1]*11-(h[2]*17)) & 0x7fffffff;	// avoid problems with +-0
+									const uint32_t* h = (const uint32_t*)(this);
+									uint32_t f = (h[0]+h[1]*11-(h[2]*17)) & 0x7fffffff;	// avoid problems with +-0
 									return (f>>22)^(f>>12)^(f);
 								}
 
