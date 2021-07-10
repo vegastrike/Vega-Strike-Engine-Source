@@ -64,7 +64,7 @@
 #include "gamemenu.h"
 #include "audio/SceneManager.h"
 #include "audio/renderers/OpenAL/BorrowedOpenALRenderer.h"
-
+#include "configuration/configuration.h"
 #include <time.h>
 #if !defined(_WIN32) && !defined (__HAIKU__)
 #include <sys/signal.h>
@@ -384,7 +384,8 @@ int main( int argc, char *argv[] )
         //Specify the config file and the possible mod subdir to play
         VSFileSystem::InitPaths( CONFIGFILE, subdir );
     }
-
+    Configuration postConfigLoad;
+    memcpy(&configuration, &postConfigLoad, sizeof(configuration)); // should define an = operator as this, but, eh - just for testing.
     // If no debug argument is supplied, set to what the config file has.
     if (g_game.vsdebug == '0')
         g_game.vsdebug = game_options.vsdebug;

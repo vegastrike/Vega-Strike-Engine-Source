@@ -1,6 +1,8 @@
 #include "configuration.h"
 #include "game_config.h"
-
+#ifndef _USE_MATH_DEFINES
+#define _USE_MATH_DEFINES
+#endif
 #include <math.h>
 
 // Global Variable Definition

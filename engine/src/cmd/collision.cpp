@@ -36,18 +36,6 @@
 
 // TODO: convert all float to double and all Vector to QVector.
 
-// TODO: all of these comments were moved around from the old code.
-// They are unclear to me. Someone (probably JS) needs to do something with it.
-
-//Collision force caps primarily for AI-AI collisions. Once the AIs get a real collision avoidance system, we can
-// turn damage for AI-AI collisions back on, and then we can remove these caps.
-//value, in seconds of desired maximum recovery time
-//value, in seconds of desired maximum recovery time
-
-
-
-
-
 Collision::Collision(Unit* unit, const QVector& location, const Vector& normal):
     unit(unit), location(location), normal(normal)
 {
@@ -59,11 +47,8 @@ Collision::Collision(Unit* unit, const QVector& location, const Vector& normal):
     velocity = unit->GetVelocity();
 }
 
-
-
-
 // This function handles the initial reaction of the unit to hitting the other unit
-// Note: I'm changing the expected behavior here
+// Note: I'm (@royfalk) changing the expected behavior here
 // Return value indicates whether to continue processing
 /*_UnitType::unit,
 _UnitType::planet,
@@ -164,7 +149,7 @@ void Collision::dealDamage(Collision other_collision, double deltaKE_linear, dou
         return;
     }
 
-    float damage = 0.5 * ( deltaKE_linear + deltaKE_angular) /* deltaKE is in KiloJoules, due to mass being in units of 1000 Kg, not Kg - so convert accordingly */ / kilojoules_per_damage; // assign half the change in energy to this unit, convert from KJ to VSD
+    float damage = 0.5 * ( deltaKE_linear + deltaKE_angular) /* deltaKE is in KiloJoules, due to mass being in units of 1000 Kg, not Kg - so convert accordingly */ / configuration.physics.kilojoules_per_damage; // assign half the change in energy to this unit, convert from KJ to VSD
     
     unit->ApplyDamage(other_collision.location.Cast(),
                       other_collision.normal,
@@ -204,6 +189,12 @@ void Collision::applyForce(QVector &force, QVector &location_local)
     Disabling clamping for the time being - will revisit this later; will be somewhat cleaner once moment of inertia implementation is upgraded.
     May also want to do clamping in a configurable fashion AI vs. player, etc.
 
+    //Collision force caps primarily for AI-AI collisions. Once the AIs get a real collision avoidance system, we can
+    // turn damage for AI-AI collisions back on, and then we can remove these caps.
+    //value, in seconds of desired maximum recovery time
+
+
+
     //scale max applicable force by unit's ability to restore orientation and velocity, then convert from frames to seconds
     float  max_force = max_force_multiplier * (unit->limits.forward + unit->limits.retro + unit->limits.lateral + unit->limits.vertical) / (unit->sim_atom_multiplier * SIMULATION_ATOM);
     float  max_torque = max_torque_multiplier * (unit->limits.yaw + unit->limits.pitch + unit->limits.roll) / (unit->sim_atom_multiplier * SIMULATION_ATOM);
@@ -237,7 +228,7 @@ void Collision::validateCollision(const QVector& relative_velocity,
     const QVector& w1_new,
     const QVector& w2_new) {
     //following two values should be identical. Due to FP math, should be nearly identical. Checks for both absolute and relative error, the former to shield slightly larger errors on very small values - can set tighter/looser bounds later
-    double RestorativeVelAlongNormal = -1 * (1 - inelastic_scale) * relative_velocity.Dot(normal1);
+    double RestorativeVelAlongNormal = -1 * (1 - configuration.physics.inelastic_scale) * relative_velocity.Dot(normal1);
     double ResultantVelAlongNormal = ((v2_new + w2_new.Cross(location2_local)) - (v1_new + w1_new.Cross(location1_local))).Dot(normal1);
     double normalizedError = abs(1.0 - ResultantVelAlongNormal / RestorativeVelAlongNormal);
     double absoluteError = abs(ResultantVelAlongNormal - RestorativeVelAlongNormal);
@@ -295,16 +286,16 @@ void Collision::collide( Unit* unit1,
     // CAVEAT - next two variables (I1, I2) should be 3x3 matrices; using current data set (scalar) and assuming hollow shell (0.667 MR^2); avoiding divide by zero in case of data set omissions -- should probably just put some asserts here?
     // 2/3 constant from shell approximation -- this will disappear when moment of inertia is actually turned into a 3x3 matrix OR getter is adjusted to fix dataside issues 
     // should assert: mass >0; radial_size !=0; moment !=0; -- may require data set cleaning if asserted
-    double I1 = std::max(unit1->GetMoment(), minimum_mass) * unit1->radial_size * unit1->radial_size * 0.667; // deriving scalar moment of inertia for unit 1
-    double I2 = std::max(unit2->GetMoment(), minimum_mass) * unit2->radial_size * unit2->radial_size * 0.667; // deriving scalar moment of inertia for unit 2
-    double I1_inverse = 1 / I1; // Matrix inverse for matrix version of momentof inertia I1 is computable, but probably still better to have precomputed and fetched -- not an issue when I is still scalar
-    double I2_inverse = 1 / I2;
-    double mass1 = std::max(unit1->GetMass(), minimum_mass); // avoid subsequent divides by 0 - again, should probably just check all the invariants and yell at the dataset with an assert here OR change the getter for mass and moment and [add getter for] radial_size that do the data cleaning/logging/yelling
-    double mass2 = std::max(unit2->GetMass(), minimum_mass); // avoid subsequent divides by 0
-    double mass1_inverse = 1 / mass1;
-    double mass2_inverse = 1 / mass2;
+    double I1 = std::max(unit1->GetMoment(), configuration.physics.minimum_mass) * unit1->radial_size * unit1->radial_size * 0.667; // deriving scalar moment of inertia for unit 1
+    double I2 = std::max(unit2->GetMoment(), configuration.physics.minimum_mass) * unit2->radial_size * unit2->radial_size * 0.667; // deriving scalar moment of inertia for unit 2
+    double I1_inverse = 1.0 / I1; // Matrix inverse for matrix version of momentof inertia I1 is computable, but probably still better to have precomputed and fetched -- not an issue when I is still scalar
+    double I2_inverse = 1.0 / I2;
+    double mass1 = std::max(unit1->GetMass(), configuration.physics.minimum_mass); // avoid subsequent divides by 0 - again, should probably just check all the invariants and yell at the dataset with an assert here OR change the getter for mass and moment and [add getter for] radial_size that do the data cleaning/logging/yelling
+    double mass2 = std::max(unit2->GetMass(), configuration.physics.minimum_mass); // avoid subsequent divides by 0
+    double mass1_inverse = 1.0 / mass1;
+    double mass2_inverse = 1.0 / mass2;
     // impulse magnitude, as per equation 5 in wiki -- note that  e = 1 - inelastic_scale, so 1+e = 1 + 1 -inelastic_scale = 2 - inelastic_scale
-    double impulse_magnitude = -1 * ((2 - inelastic_scale) * relative_velocity).Dot(normal1) /
+    double impulse_magnitude = -1 * ((2 - configuration.physics.inelastic_scale) * relative_velocity).Dot(normal1) /
         (mass1_inverse + mass2_inverse +
             ((I1_inverse * (location1_local.Cross(normal1))).Cross(location1_local) + (I2_inverse * (location2_local.Cross(normal1))).Cross(location2_local)).Dot(normal1)
             );
