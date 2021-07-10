@@ -93,30 +93,34 @@
 	//#define CLEAROBJECT		{ memset(this, 0, SIZEOFOBJECT);	}			//!< Clears current object. Laziness is my business. HANDLE WITH CARE.
     
     template<typename T>
-    inline void DELETESINGLE(T x) {                                             //!< Deletes an instance of a class.
-        delete x;
-        x = nullptr;
+    inline void DELETESINGLE(T* &x) {                                             //!< Deletes an instance of a class.
+        if (x) {
+            delete x;
+            x = nullptr;
+        }
     }
     
     template<typename T>
-    inline void DELETEARRAY(T x) {                                              //!< Deletes an array.
-        delete []x;
-        x = nullptr;
-    }
-
-    template<typename T>
-    inline void SAFE_RELEASE(T x) {                                             //!< Safe D3D-style release
+    inline void DELETEARRAY(T* &x) {                                              //!< Deletes an array.
         if (x) {
-            (x)->Release();
-            (x) = nullptr;
+            delete []x;
+            x = nullptr;
         }
     }
 
     template<typename T>
-    inline void SAFE_DESTRUCT(T x) {                                            //!< Safe ICE-style release
+    inline void SAFE_RELEASE(T* &x) {                                             //!< Safe D3D-style release
         if (x) {
-            (x)->SelfDestruct();
-            (x) = nullptr;
+            x->Release();
+            x = nullptr;
+        }
+    }
+
+    template<typename T>
+    inline void SAFE_DESTRUCT(T* &x) {                                            //!< Safe ICE-style release
+        if (x) {
+            x->SelfDestruct();
+            x = nullptr;
         }
     }
 
