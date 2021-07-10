@@ -36,7 +36,7 @@
 
 // TODO: convert all float to double and all Vector to QVector.
 
-static float kilojoules_per_damage = GameConfig::GetVariable( "physics", "kilojoules_per_unit_damage", 5400 );
+static float kilojoules_per_damage = GameConfig::GetVariable( "physics", "kilojoules_per_unit_damage", 5400.0f );
 static float collision_scale_factor =
         GameConfig::GetVariable( "physics", "collision_damage_scale", 1.0f );
 static float inelastic_scale = GameConfig::GetVariable( "physics", "inelastic_scale", 0.2f); // THIS DOES NOT SEEM TO BE LOADING THE VARIABLE FROM THE CONFIG FILE?!?
@@ -51,16 +51,16 @@ static float max_torque_multiplier =
         GameConfig::GetVariable( "physics", "maxCollisionTorqueMultiplier", 0.67f);
 //value, in seconds of desired maximum recovery time
 static float max_force_multiplier  =
-        GameConfig::GetVariable( "physics", "maxCollisionForceMultiplier", 5);
+        GameConfig::GetVariable( "physics", "maxCollisionForceMultiplier", 5.0f);
 
 static int upgrade_faction =
         GameConfig::GetVariable( "physics", "cargo_deals_collide_damage",
                                                         false) ? -1 : FactionUtil::GetUpgradeFaction();
 
 static float collision_hack_distance =
-        GameConfig::GetVariable( "physics", "collision_avoidance_hack_distance", 10000);
+        GameConfig::GetVariable( "physics", "collision_avoidance_hack_distance", 10000.0f);
 static float front_collision_hack_distance =
-        GameConfig::GetVariable( "physics", "front_collision_avoidance_hack_distance", 200000);
+        GameConfig::GetVariable( "physics", "front_collision_avoidance_hack_distance", 200000.0f);
 
 static float front_collision_hack_angle = cos( 3.1415926536f * GameConfig::GetVariable( "physics", "front_collision_avoidance_hack_angle", 40)/180.0f );
 
@@ -183,34 +183,7 @@ void Collision::shouldApplyForceAndDealDamage(Unit* other_unit)
     }
 }
 
-// This stops the unit from going through the other unit
-/*void Collision::applyForce(double elasticity, float& m2, Vector& v2)
-{
-    //for torque... location -- approximation hack of MR^2 for rotational inertia (moment of inertia currently just M)
-    Vector torque = force/(unit->radial_size*unit->radial_size);
-    Vector force  = this->force-torque; // Note the variable shadowing
-
-    float  max_force  = max_force_multiplier*(unit->limits.forward + unit->limits.retro + unit->limits.lateral + unit->limits.vertical);
-    float  max_torque = max_torque_multiplier*(unit->limits.yaw + unit->limits.pitch+unit->limits.roll);
-
-    //Convert from frames to seconds, so that the specified value is meaningful
-    max_force  = max_force / (unit->sim_atom_multiplier * simulation_atom_var);
-    max_torque = max_torque / (unit->sim_atom_multiplier * simulation_atom_var);
-    float torque_magnitude = torque.Magnitude();
-    float force_magnitude = force.Magnitude();
-    if (torque_magnitude > max_torque) {
-        torque *= (max_torque/torque_magnitude);
-    }
-    if (force_magnitude > max_force) {
-        force *= (max_force/force_magnitude);
-    }
-    unit->ApplyTorque( torque, location );
-    unit->ApplyForce( force-torque );
-}*/
-
-
-
-
+// Apply damage, in VS Damage units (a unit of energy), based on change in energy from collision outcome
 void Collision::dealDamage(Collision other_collision, double deltaKE_linear, double deltaKE_angular)
 {
     if(!deal_damage)
@@ -226,18 +199,50 @@ void Collision::dealDamage(Collision other_collision, double deltaKE_linear, dou
                       != nullptr ? other_collision.unit->owner : this );
 }
 
-void Collision::applyForce(QVector &force, QVector &location_local, QVector &new_velocity, QVector& new_angular_velocity, const Vector& normal)
+/*
+* Attempt to work around interpenetration issues[KLUDGE]
+* Specifically, impulse model for rigid body collisions assumes that, being rigid bodies, the two geometries have zero interpenetration, 
+* but VS physics granularity + object relative velocity means that non-trivial interpenetration is common
+*/
+void Collision::adjustInterpenetration(QVector& new_velocity, QVector& new_angular_velocity, const Vector& normal)
 {
+
+    if (!apply_force)
+    {
+        return;
+    }
     
+    double magnitude = new_velocity.Magnitude();
+    QVector velocity_norm = new_velocity.Normalize(); // want to perform positional displacement in direction of new velocity vector
+    double movementKludgeMagnitude = 2 * (new_angular_velocity.Dot(velocity_norm) * unit->radial_size / PI + magnitude);
+    QVector movementKludgeAmount = movementKludgeMagnitude*velocity_norm + abs(movementKludgeMagnitude)*normal;
+    unit->SetPosition(unit->Position() + (movementKludgeAmount)*SIMULATION_ATOM); // move by one physics frame at F() resultant linear velocity + component of angular velocity along linear velocity vector + normal before applying force -- this is NOT REMOTELY correct, but will often be sufficient
+}
+
+// apply force and torque, enforce clamping
+void Collision::applyForce(QVector &force, QVector &location_local)
+{
     if(!apply_force)
     {
         return;
     }
-    //Attempt to work around interpenetration issues [KLUDGE]
-    double magnitude = new_velocity.Magnitude();
-    QVector velocity_norm = new_velocity.Normalize();
-    QVector movementKludgeAmount = 2 * (new_angular_velocity.Dot(velocity_norm)*unit->radial_size / PI + magnitude) *velocity_norm;
-    unit->SetPosition(unit->Position() + (movementKludgeAmount) * SIMULATION_ATOM); // move by one physics frame at F() resultant linear velocity + component of angular velocity along linear velocity vector before applying force -- this is NOT REMOTELY correct, but will often be sufficient
+
+    /*
+    Disabling clamping for the time being - will revisit this later; will be somewhat cleaner once moment of inertia implementation is upgraded.
+    May also want to do clamping in a configurable fashion AI vs. player, etc.
+
+    //scale max applicable force by unit's ability to restore orientation and velocity, then convert from frames to seconds
+    float  max_force = max_force_multiplier * (unit->limits.forward + unit->limits.retro + unit->limits.lateral + unit->limits.vertical) / (unit->sim_atom_multiplier * SIMULATION_ATOM);
+    float  max_torque = max_torque_multiplier * (unit->limits.yaw + unit->limits.pitch + unit->limits.roll) / (unit->sim_atom_multiplier * SIMULATION_ATOM);
+    float force_magnitude = force.Magnitude();
+    if (force_magnitude > max_force) {
+        force *= (max_force / force_magnitude);
+    }
+    if (torque_magnitude > max_torque) {
+        torque *= (max_torque / torque_magnitude);
+    }
+    
+    */
 
     // Apply force at location, should just be one call to ApplyLocalTorque.... but there's a catch - our current moment of inertia units(as in SI units, not unit class) are a bit b0rked, so we need to do a workaround :-(
     Vector torqueForce = force * (1 / (0.667 * unit->radial_size * unit->radial_size)); // use shell approximation
@@ -247,7 +252,29 @@ void Collision::applyForce(QVector &force, QVector &location_local, QVector &new
 }
 
 
+/*
+* Correctness check to validate collision math - should be eventually moved to testing, rather than on critical path
+*/
+void Collision::validateCollision(const QVector& relative_velocity,
+    const Vector& normal1,
+    const QVector& location1_local,
+    const QVector& location2_local,
+    const QVector& v1_new,
+    const QVector& v2_new,
+    const QVector& w1_new,
+    const QVector& w2_new) {
+    //following two values should be identical. Due to FP math, should be nearly identical. Checks for both absolute and relative error, the former to shield slightly larger errors on very small values - can set tighter/looser bounds later
+    double RestorativeVelAlongNormal = -1 * (1 - inelastic_scale) * relative_velocity.Dot(normal1);
+    double ResultantVelAlongNormal = ((v2_new + w2_new.Cross(location2_local)) - (v1_new + w1_new.Cross(location1_local))).Dot(normal1);
+    double normalizedError = abs(1.0 - ResultantVelAlongNormal / RestorativeVelAlongNormal);
+    double absoluteError = abs(ResultantVelAlongNormal - RestorativeVelAlongNormal);
+    if (absoluteError > 0.001 && normalizedError > 0.01) { // absolute error > 1 milimeter/second along collision normal AND normalized error > 1%
+        BOOST_LOG_TRIVIAL(warning) << "Computed error between equation sides for collision is beyond acceptable error bounds:" << absoluteError << ":" << normalizedError << ":" << ResultantVelAlongNormal << ":" << RestorativeVelAlongNormal;
+    }
+}
+
 // Discussion - the original code ran this once for both units. This required a comparison of the units to find out which is smaller.
+// The history on this is as follows - one of the normals is picked to compute the force along; while this is arbitrary in the ideal case, given interpentration, we use the heuristic that the larger object's normal is likely to better characterize the collision angles
 void Collision::collide( Unit* unit1,
                                    const QVector &location1,
                                    const Vector &normal1,
@@ -315,14 +342,16 @@ void Collision::collide( Unit* unit1,
     QVector w1_new = unit1->GetAngularVelocity() - impulse_magnitude * I1_inverse * (location1_local.Cross(normal1));
     QVector w2_new = unit2->GetAngularVelocity() + impulse_magnitude * I2_inverse * (location2_local.Cross(normal1)); // again, repeated use of normal1 and lack of use of normal2 is intentional; difference in sign is intentional and important
 
-    /* Should be able to run the following, since they should be equal, but it's asserting occasionally O_o  -- but only sometimes
-    * // assertion check for conservation of momentum (equation 4)
-    * double RestorativeVelAlongNormal = -1 * (1 - inelastic_scale) * relative_velocity.Dot(normal1);
-    * double ResultantVelAlongNormal = ((v2_new + w2_new.Cross(location2_local)) - (v1_new + w1_new.Cross(location1_local))).Dot(normal1);
-    * BOOST_ASSERT_MSG((ResultantVelAlongNormal > 0.95 * RestorativeVelAlongNormal) && (ResultantVelAlongNormal < 1.05 * RestorativeVelAlongNormal), "Computed error between equation sides for collision is beyond acceptable error bounds");
+    /* 
+    * Can factor the following out into testing code later
+    * BEGIN TESTING CODE
     */
-
-    // Kinetic energy including rotational, from https://en.wikipedia.org/wiki/Moment_of_inertia#Kinetic_energy_2 -- kinetic energy should probably be refactored to be a [new method] getKineticEnergy on units OR a helper function
+    validateCollision(relative_velocity, normal1, location1_local, location2_local, v1_new, v2_new, w1_new, w2_new);
+    /*
+    * END TESTING CODE
+    */
+    
+    // Kinetic energy including rotational, from https://en.wikipedia.org/wiki/Moment_of_inertia#Kinetic_energy_2 
     double kinetic_energy_system_initial_linear = 0.5 * mass1 * unit1->GetVelocity().MagnitudeSquared() + 0.5 * mass2 * unit2->GetVelocity().MagnitudeSquared();
     double kinetic_energy_system_initial_angular = 0.5 * unit1->GetAngularVelocity().Dot(I1 * unit1->GetAngularVelocity()) + 0.5 * unit2->GetAngularVelocity().Dot(I2 * unit2->GetAngularVelocity());
     
@@ -332,17 +361,15 @@ void Collision::collide( Unit* unit1,
     double delta_kinetic_energy_linear = kinetic_energy_system_initial_linear - kinetic_energy_system_linear;
     double delta_kinetic_energy_angular = kinetic_energy_system_initial_angular - kinetic_energy_system_angular;
     
-
     //we have an impulse [ Force * Time ] and our physics interfaces operate on forces and torques [Force * Meters]
     QVector force_on_1 = -1 * impulse * (1.0f / (unit1->sim_atom_multiplier * SIMULATION_ATOM)); // divide impulse by time over which it will be applied to derive force -- allow different units to have different physics fidelity
     QVector force_on_2 = impulse * (1.0f / (unit2->sim_atom_multiplier * SIMULATION_ATOM)); // divide impulse by time over which it will be applied to derive force 
 
-
-    collision1.applyForce(force_on_1, location1_local, v1_new, w1_new, normal1);
-    collision2.applyForce(force_on_2, location2_local, v2_new, w2_new, normal1);
+    collision1.adjustInterpenetration(v1_new, w1_new, normal1); // Call this BEFORE applying force
+    collision1.applyForce(force_on_1, location1_local); // handles both force-on-center-of-mass and torque
+    collision2.adjustInterpenetration(v2_new, w2_new, normal1); // uses normal1, not normal2
+    collision2.applyForce(force_on_2, location2_local);
 
     collision1.dealDamage(collision2, delta_kinetic_energy_linear, delta_kinetic_energy_angular);
     collision2.dealDamage(collision1, delta_kinetic_energy_linear, delta_kinetic_energy_angular);
-
-    // TODO: add torque
 }
