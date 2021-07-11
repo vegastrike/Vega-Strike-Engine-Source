@@ -49,9 +49,6 @@ float speedStarHandler( float &input)
     return input/game_speed;
 }
 
-static Vector default_angular_velocity( GameConfig::GetVariable( "general", "pitch", 0.0f ),
-                                        GameConfig::GetVariable( "general", "yaw", 0.0f ),
-                                        GameConfig::GetVariable( "general", "roll", 0.0f));
 
 
 bool Movable::configLoaded = false;
@@ -88,6 +85,9 @@ Movable::Movable() : cumulative_transformation_matrix( identity_matrix ),
     Momentofinertia(0.01)
 {
     cur_sim_queue_slot = rand()%SIM_QUEUE_SIZE;
+    static Vector default_angular_velocity(GameConfig::GetVariable("general", "pitch", 0.0f),
+        GameConfig::GetVariable("general", "yaw", 0.0f),
+        GameConfig::GetVariable("general", "roll", 0.0f));
 
     if (!configLoaded) {
         VELOCITY_MAX = GameConfig::GetVariable( "physics", "velocity_max", 10000);
@@ -116,7 +116,7 @@ Movable::Movable() : cumulative_transformation_matrix( identity_matrix ),
     Identity( cumulative_transformation_matrix );
     cumulative_transformation = identity_transformation;
     curr_physical_state = prev_physical_state = identity_transformation;
-
+    resolveforces = true;
     AngularVelocity = default_angular_velocity;
 }
 
