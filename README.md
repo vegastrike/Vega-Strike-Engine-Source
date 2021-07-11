@@ -103,7 +103,7 @@ Executable Name Changes
 
 Note that the executable names have changed since the 0.5.x releases. Now, you configure game settings using `vegasettings`, and run the game itself using `vegastrike-engine`. With the latter, the data directory (`-d...`)  is now a required parameter. This is to allow using the Vega Strike Game Engine with multiple games (asset sets), including Upon the Coldest Sea (vsUtCS), PWCU, and others.
 
-Also note that when you install vsUtCS, it comes with a script called `vssetup` that automatically runs `vegasettings` with the correct data directory, and another script called `vs` that automatically runs `vegastrike-engine` with the correct data directory. These scripts are the recommended way to run the game Vega Strike: Upon the Coldest Sea. You should see shortcuts to them on your desktop, Start Menu, or similar.
+Also note that when you install vsUtCS, it comes with a script called `vsettings` that automatically runs `vegasettings` with the correct data directory, and another script called `vs` that automatically runs `vegastrike-engine` with the correct data directory. These scripts are the recommended way to run the game Vega Strike: Upon the Coldest Sea. You should see shortcuts to them on your desktop, Start Menu, or similar.
 
 If you encounter any issues while playing, please create an issue with the Vega Strike development team by [posting a new issue](https://github.com/vegastrike/Vega-Strike-Engine-Source/issues).
 
