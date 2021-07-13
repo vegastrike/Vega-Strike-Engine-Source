@@ -4,6 +4,10 @@ on:
   # Activate manually
   workflow_dispatch:
 
+  push:
+    branches:
+    - macosx
+
 jobs:
   build:
     name: Build
