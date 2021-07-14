@@ -86,12 +86,11 @@ INCLUDE_DIRECTORIES(
 )
 ENDIF (MSVC)
 
-
-SET(LIDAMAGE
+SET(LIBDAMAGE
     src/damage/damageable_facet.cpp
+    src/damage/damageable_factory.cpp
     src/damage/damageable_layer.cpp
     src/damage/damageable_object.cpp
-    src/damage/facets_factory.cpp
     src/damage/health.cpp
     )
 
@@ -478,7 +477,7 @@ SET(LIBAUDIO_SOURCES
 
 
 ADD_LIBRARY(vegastrike-engine_com
-    ${LIDAMAGE}
+    ${LIBDAMAGE}
     ${LIBAI_SOURCES}
     ${LIBCMD_SOURCES}
     ${LIBNET_SOURCES}
@@ -1542,3 +1541,34 @@ ELSE ()
 ENDIF (WIN32 AND NOT UNIX)
 
 INCLUDE(CPack)
+
+INCLUDE(FetchContent)
+FetchContent_Declare(
+    googletest
+    URL https://github.com/google/googletest/archive/609281088cfefc76f9d0ce82e1ff6c30cc3591e5.zip
+    )
+# For Windows: Prevent overriding the parent project's compiler/linker settings
+SET(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
+FetchContent_MakeAvailable(googletest)
+
+enable_testing()
+
+add_executable(
+    unit_tests
+    src/damage/tests/health_tests.cpp
+    src/damage/tests/facet_tests.cpp
+    src/damage/tests/layer_tests.cpp
+    )
+
+ADD_LIBRARY(vegastrike-testing
+    ${LIBDAMAGE}
+    )
+
+target_link_libraries(
+    unit_tests
+    gtest_main
+    vegastrike-testing
+    )
+
+include(GoogleTest)
+gtest_discover_tests(unit_tests)

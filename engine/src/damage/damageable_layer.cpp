@@ -2,7 +2,7 @@
 
 
 
-void DamageableLayer::DealDamage( const Vector &attack_vector, Damage &damage ) {
+void DamageableLayer::DealDamage( const CoreVector &attack_vector, Damage &damage ) {
     DamageableFacet impacted_facet = GetFacet(attack_vector);
     impacted_facet.DealDamage(damage);
 }
@@ -23,7 +23,7 @@ void DamageableLayer::Enable() {
 }
 
 
-const DamageableFacet& DamageableLayer::GetFacet(const Vector& attack_vector) {
+const DamageableFacet& DamageableLayer::GetFacet(const CoreVector& attack_vector) {
     for(const DamageableFacet& facet : facets) {
         if(facet.InFacet(attack_vector)) {
             return facet;

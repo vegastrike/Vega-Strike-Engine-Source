@@ -1,8 +1,12 @@
-#ifndef FACETSFACTORY_H
-#define FACETSFACTORY_H
+#ifndef DAMAGEABLEFACTORY_H
+#define DAMAGEABLEFACTORY_H
 
 #include <vector>
+
+#include "damageable_object.h"
+#include "damageable_layer.h"
 #include "damageable_facet.h"
+#include "health.h"
 
 /**
  * @brief The FacetConfiguration enum represents how many facets a layer has and it what configuration.
@@ -20,9 +24,19 @@ enum class FacetConfiguration {
     six     // A cube. Front, rear, left, right, top and bottom.
 };
 
-const std::vector<DamageableFacet> FacetsCreator(const FacetConfiguration& configuration,
-                                           const DamageableFacet& template_facet);
 
+class DamageableFactory
+{
+public:
+    static DamageableObject CreateStandardObject(float shield,
+                                                 float shield_regeneration,
+                                                 FacetConfiguration shield_configuration,
+                                                 float armor,
+                                                 float hull);
 
+    static DamageableLayer CreateLayer(const FacetConfiguration configuration,
+                                Health health_template,
+                                bool core_layer);
+};
 
-#endif // FACETSFACTORY_H
+#endif // DAMAGEABLEFACTORY_H

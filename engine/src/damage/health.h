@@ -19,7 +19,7 @@
 struct Health
 {
 public:
-    const float max_health;
+    float max_health;
     float health;
     float regeneration;
     bool regenerative;
@@ -38,9 +38,10 @@ public:
         destroying  // The DamageableObject is destroyed, potentially leaving debris behind
     } effect;
 
-    Health(float max_health = 1, float health = 1, float regeneration = 0, bool regenerative = false) :
-        max_health(max_health), health(health), regeneration(regeneration), regenerative(regenerative) {
+    Health(float max_health = 1, float health = 1, float regeneration = 0) :
+        max_health(max_health), health(health), regeneration(regeneration), regenerative(regeneration > 0) {
         destroyed = false;
+        enabled = regenerative; // Only relevant for regenerative objects (e.g. shields).
     };
 
     float percent() {
@@ -48,6 +49,9 @@ public:
     }
 
     void DealDamage( Damage &damage );
+    void DealDamageComponent( float &health, float &damage, float vulnerability );
+    void Disable();
+    void Enable();
     void Regenerate();
 };
 
