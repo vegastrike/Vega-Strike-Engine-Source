@@ -45,7 +45,7 @@ public:
     };
 
     float percent() {
-        return health/max_health;
+        return max_health != 0 ? health/max_health : health;
     }
 
     void DealDamage( Damage &damage );

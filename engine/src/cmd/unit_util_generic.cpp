@@ -417,7 +417,7 @@ void setName( Unit *my_unit, string name )
 void SetHull( Unit *my_unit, float newhull )
 {
     if (!my_unit) return;
-    my_unit->hull = newhull;
+    my_unit->health.health = newhull;
 }
 
 float getCredits( const Unit *my_unit )
@@ -845,7 +845,7 @@ float PercentOperational( Unit *un, std::string name, std::string category, bool
     } else if (name.find( "add_" ) != 0 && name.find( "mult_" ) != 0) {
         float armor[8];
         upgrade->ArmorData( armor );
-        if (upgrade->hull > 1 || armor[0] || armor[1] || armor[2] || armor[3] || armor[4] || armor[5] || armor[6]
+        if (upgrade->health.health > 1 || armor[0] || armor[1] || armor[2] || armor[3] || armor[4] || armor[5] || armor[6]
             || armor[7])
             if (countHullAndArmorAsFull)
                 return 1.0f;

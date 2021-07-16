@@ -1022,7 +1022,7 @@ void Unit::LoadRow( CSVRow &row, string modification, string *netxml )
     Mass = stof( OPTIM_GET( row, table, Mass ), 1.0 );
     Momentofinertia = stof( OPTIM_GET( row, table, Moment_Of_Inertia ), 1.0 );
     fuel = ::stof( OPTIM_GET( row, table, Fuel_Capacity ) );
-    hull = maxhull = ::stof( OPTIM_GET( row, table, Hull ) );
+    health.health = health.max_health = ::stof( OPTIM_GET( row, table, Hull ) );
     specInterdiction = ::stof( OPTIM_GET( row, table, Spec_Interdiction ) );
     armor.frontlefttop     = ::stof( OPTIM_GET( row, table, Armor_Front_Top_Left ) );
     armor.frontrighttop    = ::stof( OPTIM_GET( row, table, Armor_Front_Top_Right ) );
@@ -1620,7 +1620,7 @@ string Unit::WriteUnitString()
                 unit["Mass"] = tos( Mass );
                 unit["Moment_Of_Inertia"] = tos( Momentofinertia );
                 unit["Fuel_Capacity"] = tos( fuel );
-                unit["Hull"] = tos( hull );
+                unit["Hull"] = tos( health.health );
                 unit["Spec_Interdiction"] = tos( specInterdiction );
                 unit["Armor_Front_Top_Left"]     = tos( armor.frontlefttop );
                 unit["Armor_Front_Top_Right"]    = tos( armor.frontrighttop );

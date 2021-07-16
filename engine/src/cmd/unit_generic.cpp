@@ -324,8 +324,8 @@ Unit::Unit( std::vector< Mesh* > &meshes, bool SubU, int fact ) : Drawable(), Da
     pImage->cockpit_damage = NULL;
     // TODO:
     Init();
-    hull     = 1000;
-    maxhull  = 100000;
+    health.health = 1000;
+    health.max_health  = 100000;
     this->faction = fact;
     graphicOptions.SubUnit = SubU;
     meshdata = meshes;
@@ -631,7 +631,7 @@ void Unit::calculate_extent( bool update_collide_queue )
         float tmp2 = corner_max.Magnitude();
         radial_size = tmp1 > tmp2 ? tmp1 : tmp2;
     }
-    if ( !isSubUnit() && update_collide_queue && (maxhull > 0) ) {
+    if ( !isSubUnit() && update_collide_queue && (health.max_health > 0) ) {
         //only do it in Unit::CollideAll UpdateCollideQueue();
     }
     if (isUnit() == _UnitType::planet)
@@ -1061,7 +1061,7 @@ void Unit::UpdateSubunitPhysics( Unit *subunit,
                             superunit );
     //short fix
     subunit->cloaking = (unsigned int) cloaking;
-    if (hull < 0) {
+    if (health.destroyed) {
         subunit->Target( NULL );
         UnFire();                                        //don't want to go off shooting while your body's splitting everywhere
     }
@@ -1583,10 +1583,10 @@ float Unit::ApplyLocalDamage( const Vector &pnt,
     }
     //If shields failing or... => WE COMPUTE DAMAGE TO HULL
     if (shield.leak > 0 || !meshdata.back() || spercentage == 0 || absamt > 0 || phasedamage) {
-        float tmp = this->hull;
+        float tmp = this->health.health;
         ppercentage = DealDamageToHull( pnt, leakamt+amt );
         if (cpt)
-            cpt->Shake( amt+leakamt, tmp != this->hull ? 2 : 1 );
+            cpt->Shake( amt+leakamt, tmp != this->health.health ? 2 : 1 );
         if (ppercentage != -1) {
             //returns -1 on death--could delete
             for (unsigned int i = 0; i < nummesh(); ++i)
@@ -1648,7 +1648,7 @@ void Unit::ApplyDamage( const Vector &pnt,
     Cockpit     *cp = _Universe->isPlayerStarshipVoid( ownerDoNotDereference );
     float        hullpercent = GetHullPercent();
     //Only on client side
-    bool         mykilled    = hull < 0;
+    bool         mykilled    = health.destroyed;
     Vector       localpnt( InvTransform( cumulative_transformation_matrix, pnt ) );
     Vector       localnorm( ToLocalCoordinates( normal ) );
     //Only call when on servre side or non-networking
@@ -1672,7 +1672,7 @@ void Unit::ApplyDamage( const Vector &pnt,
         //if only the damage contained which faction it belonged to
         pilot->DoHit( this, ownerDoNotDereference, FactionUtil::GetNeutralFaction() );
     }
-    if (hull < 0) {
+    if (health.destroyed) {
         ClearMounts();
         if (!mykilled) {
             if (cp) {
@@ -2361,14 +2361,18 @@ float Unit::ExplodingProgress() const
 void Unit::Destroy()
 {
     if (!killed) {
-        if (hull >= 0)
-            hull = -1;
-        for (int beamcount = 0; beamcount < getNumMounts(); ++beamcount)
+        if (health.destroyed) {
+            health.health = -1;
+            health.destroyed = true;
+        }
+        for (int beamcount = 0; beamcount < getNumMounts(); ++beamcount) {
             DestroyMount( &mounts[beamcount] );
+        }
 
 
-        if ( !Explode( false, simulation_atom_var ) )
+        if ( !Explode( false, simulation_atom_var ) ) {
             Kill();
+        }
     }
 }
 
@@ -3726,10 +3730,14 @@ bool Unit::UpAndDownGrade( const Unit *up,
         || cell_has_recursive_data( upgrade_name, up->faction, "Shield_Recharge" ) )
         STDUPGRADE( shield.recharge, up->shield.recharge, templ->shield.recharge, 0 );
     bool upgradedrecharge = (tmp != shield.recharge);
-    if ( !csv_cell_null_check || force_change_on_nothing || cell_has_recursive_data( upgrade_name, up->faction, "Hull" ) )
-        STDUPGRADE( hull, up->hull, templ->hull, 0 );
-    if ( (maxhull < hull) && (hull != 0) )
-        maxhull = hull;
+    if ( !csv_cell_null_check || force_change_on_nothing || cell_has_recursive_data( upgrade_name, up->faction, "Hull" ) ) {
+        STDUPGRADE( health.health, up->health.health, templ->health.health, 0 );
+    }
+
+    if ( (health.max_health < health.health) && (!health.destroyed) ) {
+        health.max_health = health.health;
+    }
+
     if ( !csv_cell_null_check || force_change_on_nothing
         || cell_has_recursive_data( upgrade_name, up->faction, "Reactor_Recharge" ) )
         STDUPGRADE( recharge, up->recharge, templ->recharge, 0 );
@@ -5185,11 +5193,14 @@ void Unit::UpdatePhysics3(const Transformation &trans,
                                                                 curr_physical_state.position ), true, true );
       }
   }
-  if (maxhull < 0) {
+
+  // TODO: this should never happen
+  if (health.max_health <= 0) {
       this->Explode( true, 0 );
   }
+
   //Really kill the unit only in non-networking or on server side
-  if (hull < 0) {
+  if (health.destroyed) {
       dead &= (pImage->pExplosion == NULL);
       if (dead)
           Kill();
@@ -5263,23 +5274,23 @@ bool Unit::isPlayerShip()
 
 float Unit::DealDamageToHull( const Vector &pnt, float damage)
 {
-  float _hull = hull; // Store the old value for did_hull_damage
+  float _hull = health.health; // Store the old value for did_hull_damage
 
   // Not sure why damage can be negative
   damage = std::abs(damage);
 
   // unit is already destroyed
-  if (hull < 0)
+  if (health.destroyed)
       return -1;
 
-  bool did_hull_damage = hull < _hull;
+  bool did_hull_damage = health.health < _hull;
 
   float percent = Damageable::DealDamageToHull( pnt, damage);
 
   bool isplayer = isPlayerShip();
 
   // Damage things in the ship
-  if(did_hull_damage && hull >0) {
+  if(did_hull_damage && !health.destroyed) {
       // Removed this for now XMLSupport::parse_bool( vs_config->getVariable( "physics", "system_damage_on_armor", "false" ) );
       // Destroy systems
 
@@ -5288,10 +5299,10 @@ float Unit::DealDamageToHull( const Vector &pnt, float damage)
       if ( (!isplayer) || _Universe->AccessCockpit()->godliness <= 0 ) { // || system_damage_on_armor ) {
           static float system_failure =
               XMLSupport::parse_float( vs_config->getVariable( "physics", "indiscriminate_system_destruction", ".25" ) );
-          if ( (!isplayer) && DestroySystem( hull, maxhull, 1 ) )
-            DamageRandSys( system_failure*rand01()+(1-system_failure)*( 1-(hull > 0 ? damage/hull : 1.0f) ), pnt );
-          else if ( isplayer && DestroyPlayerSystem( hull, maxhull, 1 ) )
-            DamageRandSys( system_failure*rand01()+(1-system_failure)*( 1-(hull > 0 ? damage/hull : 1.0f) ), pnt );
+          if ( (!isplayer) && DestroySystem( health.health, health.max_health, 1 ) )
+            DamageRandSys( system_failure*rand01()+(1-system_failure)*( 1-(health.health > 0 ? damage/health.health : 1.0f) ), pnt );
+          else if ( isplayer && DestroyPlayerSystem( health.health, health.max_health, 1 ) )
+            DamageRandSys( system_failure*rand01()+(1-system_failure)*( 1-(health.health > 0 ? damage/health.health : 1.0f) ), pnt );
 
           if (did_hull_damage) {
               if (damage > 0) {
@@ -5302,7 +5313,7 @@ float Unit::DealDamageToHull( const Vector &pnt, float damage)
             }
         } else {
           _Universe->AccessCockpit()->godliness -= damage;
-          if ( DestroyPlayerSystem( hull, maxhull, 1 ) )
+          if ( DestroyPlayerSystem( health.health, health.max_health, 1 ) )
             //get system damage...but live!
             DamageRandSys( rand01()*.5+.2, pnt );
         }
@@ -5323,7 +5334,7 @@ float Unit::DealDamageToHull( const Vector &pnt, float damage)
       // Destroy cargo
       // TODO: move this to cargo
       if (numCargo() > 0) {
-          if ( DestroySystem( hull, maxhull, numCargo() ) ) {
+          if ( DestroySystem( health.health, health.max_health, numCargo() ) ) {
               int which = rand()%numCargo();
               static std::string Restricted_items = vs_config->getVariable( "physics", "indestructable_cargo_items", "" );
               //why not downgrade _add GetCargo(which).content.find("add_")!=0&&
@@ -5360,7 +5371,7 @@ float Unit::DealDamageToHull( const Vector &pnt, float damage)
   }
 
   // Ship was destroyed
-  if (hull < 0) {
+  if (health.health < 0) {
       // Effect on factions
       int neutralfac  = FactionUtil::GetNeutralFaction();
       int upgradesfac = FactionUtil::GetUpgradeFaction();
@@ -5371,7 +5382,7 @@ float Unit::DealDamageToHull( const Vector &pnt, float damage)
 
       static float hulldamtoeject    =
           XMLSupport::parse_float( vs_config->getVariable( "physics", "hull_damage_to_eject", "100" ) );
-      if (hull > -hulldamtoeject) {
+      if (health.health > -hulldamtoeject) {
           static float autoejectpercent =
               XMLSupport::parse_float( vs_config->getVariable( "physics", "autoeject_percent", ".5" ) );
 

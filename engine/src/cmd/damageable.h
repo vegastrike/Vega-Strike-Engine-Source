@@ -27,6 +27,7 @@
 #define DAMAGEABLE_H
 
 #include "unit_armorshield.h"
+#include "damageable_object.h"
 #include "gfx/vec.h"
 
 
@@ -38,11 +39,11 @@ public:
     // Inconsistency between this (0) and Init (1) for hull and maxhull.
     // Chose Init and value of 1. Also commented out was 10.
     // Doesn't really matter, but documenting anyway.
-    float maxhull = 1;
-    float hull = 1;
+
     Armor armor;
     Shield shield;
 
+    Health health;
 
     // Methods
 public:
@@ -56,7 +57,9 @@ protected:
   Damageable& operator=( const Damageable& ) = delete;
 
 public:
-  float GetHull() const { return hull;}
+  float GetHull() const {
+      return health.health;
+  }
 
   void ArmorData( float armor[8] ) const;
 
@@ -79,7 +82,7 @@ public:
 //  }
   float GetHullPercent() const
   {
-      return maxhull != 0 ? hull/maxhull : hull;
+      return static_cast<Health>(health).percent();
   }
 
   //reduces shields to X percentage and reduces shield recharge to Y percentage

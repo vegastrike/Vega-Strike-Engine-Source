@@ -339,11 +339,11 @@ float Damageable::DealDamageToHull( const Vector &pnt, float damage )
       }
     }
 
-  float denominator = (*affectedArmor+hull);
+  float denominator = (*affectedArmor+health.health);
   float overflowDamage = std::max(damage - *affectedArmor, 0.0f);
   *affectedArmor = std::max(*affectedArmor - damage, 0.0f);
 
-  hull -= overflowDamage;
+  health.health -= overflowDamage;
 
   // We calculate and return the percent (of something)
   float percent = damage/denominator; //(denominator > absdamage && denom != 0) ? absdamage/denom : (denom == 0 ? 0.0 : 1.0);

@@ -8,12 +8,12 @@
 /**
  * @brief The DamageableObject class repesents an overall game object - ship, space station, missile, etc.
  */
-class DamageableObject
+struct DamageableObject
 {
+    int number_of_layers;
     std::vector<DamageableLayer> layers;        // Typically shield/armor/hull
     std::vector<DamageableObject> components;   // Propoulsion, life support,
 
-public:
     DamageableObject(std::vector<DamageableLayer> layers,
                      std::vector<DamageableObject> components);
     DamageableObject();

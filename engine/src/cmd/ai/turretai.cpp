@@ -77,7 +77,7 @@ void TurretAI::Execute()
                 parent->UnFire();
             hadFired = shouldfire;
         }
-        if (targ->hull < 0)
+        if (targ->health.destroyed)
             parent->Target( NULL );
     } else if (hadFired && parent->getNumMounts() > 0) {
         // When we get a kill, we must stop firing

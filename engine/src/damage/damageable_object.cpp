@@ -3,6 +3,7 @@
 
 DamageableObject::DamageableObject(std::vector<DamageableLayer> layers,
                                    std::vector<DamageableObject> components) {
+    number_of_layers = layers.size();
     this->layers = layers;
     this->components = components;
 }

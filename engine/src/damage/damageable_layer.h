@@ -11,18 +11,15 @@
  * This can be shields, armor, hull or subsystem.
  * A layer can be regenerative (e.g. shields) or not (everything else).
  */
-class DamageableLayer
+struct DamageableLayer
 {
-public:
     bool core_layer;    // Damage to the core layer has a chance of also
                         // damaging internal components such as propulsion.
 
-private:
     unsigned int number_of_facets;    // How many facets. e.g. dual shield (front and rear).
     std::vector<DamageableFacet> facets;    // The facets container
 
     //static float damage_component_chance = 0.03;
-public:
     DamageableLayer(int number_of_facets, std::vector<DamageableFacet>& facets, bool core_layer):
         number_of_facets(number_of_facets),
         facets(facets),

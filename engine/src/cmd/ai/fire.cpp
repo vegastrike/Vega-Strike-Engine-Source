@@ -272,7 +272,7 @@ float Priority( Unit *me, Unit *targ, float gunrange, float rangetotarget, float
 {
     if (relationship >= 0)
         return -1;
-    if (targ->hull < 0)
+    if (targ->health.destroyed)
         return -1;
     *rolepriority = ROLES::getPriority( me->getAttackPreferenceChar() )[targ->getUnitRoleChar()];     //number btw 0 and 31 higher better
     char invrolepriority = 31-*rolepriority;
@@ -774,7 +774,7 @@ void FireAt::Execute()
     bool istargetjumpableplanet = false;
     if ( ( targ = parent->Target() ) ) {
         istargetjumpableplanet = isJumpablePlanet( targ );
-        if (targ->CloakVisible() > .8 && targ->hull >= 0) {
+        if (targ->CloakVisible() > .8 && !targ->health.destroyed) {
             had_target = true;
             if (parent->getNumMounts() > 0)
                 if (!istargetjumpableplanet)

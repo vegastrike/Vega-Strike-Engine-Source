@@ -2655,7 +2655,7 @@ void BaseComputer::refresh()
 
 void BaseComputer::draw()
 {
-    if ( ( !m_player.GetUnit() ) || m_player.GetUnit()->hull <= 0 ) {
+    if ( ( !m_player.GetUnit() ) || m_player.GetUnit()->health.health <= 0 ) {
         globalWindowManager().shutDown();
         TerminateCurrentBase();
     }

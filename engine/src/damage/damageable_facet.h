@@ -11,11 +11,11 @@
  * In such a way, we can model a DamageableLayer, such as a front and rear shields.
  * When hit, we can then identify which facet of the layer is actually hit and apply the damage to it.
  */
-class DamageableFacet
+struct DamageableFacet
 {
     CoreVector minimum_vector;
     CoreVector maximum_vector;
-public:
+
     Health health;
 
     DamageableFacet(const CoreVector& min_v, const CoreVector& max_v, const Health& health_template) :

@@ -302,7 +302,9 @@ public:
     bool isNull()
     {
         Unit *un = GetUnit();
-        if (un) if (un->hull <= 0) return true;
+        if (un) {
+            return (un->health.destroyed);
+        }
         return un == 0;
     }
     bool notNull()

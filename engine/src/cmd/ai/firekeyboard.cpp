@@ -1069,7 +1069,7 @@ bool getNearestTargetUnit( Unit *me, int iType )
     for (un_iter i = _Universe->activeStarSystem()->getUnitList().createIterator(); ( un = (*i) ); ++i) {
         if (un == me)
             continue;
-        if (un->hull < 0)
+        if (un->health.health < 0)
             continue;
         if ( !( me->InRange( un, true, false ) )
             || !( me->InRange( un, true, true ) ) )
