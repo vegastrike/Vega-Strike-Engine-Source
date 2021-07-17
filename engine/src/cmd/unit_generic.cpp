@@ -1532,61 +1532,71 @@ void Unit::LightShields( const Vector &pnt, const Vector &normal, float amt, con
 //Damage are computed on server side and shield/armor data are sent with the DAMAGE SNAPSHOT
 float Unit::ApplyLocalDamage( const Vector &pnt,
                               const Vector &normal,
-                              float amt,
+                              Damage damage,
                               Unit *affectedUnit,
-                              const GFXColor &color,
-                              float phasedamage )
+                              const GFXColor &color)
 {
     static float nebshields = XMLSupport::parse_float( vs_config->getVariable( "physics", "nebula_shield_recharge", ".5" ) );
-    Cockpit     *cpt;
-    if ( ( cpt = _Universe->isPlayerStarship( this ) ) != NULL ) {
+    //We also do the following lock on client side in order not to display shield hits
+    static bool nodockdamage = XMLSupport::parse_float( vs_config->getVariable( "physics", "no_damage_to_docked_ships", "true" ) );
+    static bool apply_difficulty_enemy_damage =
+        XMLSupport::parse_bool( vs_config->getVariable( "physics", "difficulty_based_enemy_damage", "true" ) );
+
+    Cockpit *cpt = _Universe->isPlayerStarship( this );
+    if ( cpt != nullptr ) {
         if (color.a != 2) {
-            static bool apply_difficulty_enemy_damage =
-                XMLSupport::parse_bool( vs_config->getVariable( "physics", "difficulty_based_enemy_damage", "true" ) );
+            // Adjust damage based on difficulty
             if (apply_difficulty_enemy_damage) {
-                phasedamage *= g_game.difficulty;
-                amt *= g_game.difficulty;
+                damage.phase_damage *= g_game.difficulty;
+                damage.normal_damage *= g_game.difficulty;
             }
         }
     }
-    float absamt = amt >= 0 ? amt : -amt;
+
+
     float ppercentage = 0;
-    //We also do the following lock on client side in order not to display shield hits
-    static bool nodockdamage = XMLSupport::parse_float( vs_config->getVariable( "physics", "no_damage_to_docked_ships", "true" ) );
-    if (nodockdamage)
-        if ( DockedOrDocking()&(DOCKED_INSIDE|DOCKED) )
+
+    if (nodockdamage) {
+        if ( DockedOrDocking()&(DOCKED_INSIDE|DOCKED) ) {
             return -1;
+        }
+    }
+
     if (affectedUnit != this) {
-        affectedUnit->ApplyLocalDamage( pnt, normal, amt, affectedUnit, color, phasedamage );
+        affectedUnit->ApplyLocalDamage( pnt, normal, damage, affectedUnit, color);
         return -1;
     }
-    if (aistate)
-        aistate->ChooseTarget();
-    float leakamt     = phasedamage+amt*.01*shield.leak;
-    amt *= 1-.01*shield.leak;
-    //Percentage returned by DealDamageToShield
-    float spercentage = 0;
-    //If not a nebula or if shields recharge in nebula => WE COMPUTE SHIELDS DAMAGE AND APPLY
-    if ( GetNebula() == NULL || (nebshields > 0) ) {
-        float origabsamt = absamt;
-        spercentage = DealDamageToShield( pnt, absamt );
 
-        amt = amt >= 0 ? absamt : -absamt;
+    if (aistate) {
+        aistate->ChooseTarget();
+    }
+
+    float leakamt = damage.phase_damage + damage.normal_damage *.01*shield.leak;
+    damage.normal_damage *= 1-.01*shield.leak;
+
+    //Percentage returned by DealDamageToShield
+    float shield_percentage = 0;
+
+    //If not a nebula or if shields recharge in nebula => WE COMPUTE SHIELDS DAMAGE AND APPLY
+    if ( GetNebula() == nullptr || (nebshields > 0) ) {
+        float origabsamt = damage.normal_damage;
+        shield_percentage = DealDamageToShield( pnt, damage.normal_damage );
+
         //shields are up
-        if ( meshdata.back() && spercentage > 0 && (origabsamt-absamt > shield.recharge || amt == 0) ) {
+        if ( meshdata.back() && shield_percentage > 0 && (origabsamt-damage.normal_damage > shield.recharge || damage.normal_damage == 0) ) {
             //calculate percentage
             if (cpt)
-                cpt->Shake( amt, 0 );
+                cpt->Shake( damage.normal_damage, 0 );
             if (GetNebula() == NULL)
-                LightShields( pnt, normal, spercentage, color );
+                LightShields( pnt, normal, shield_percentage, color );
         }
     }
     //If shields failing or... => WE COMPUTE DAMAGE TO HULL
-    if (shield.leak > 0 || !meshdata.back() || spercentage == 0 || absamt > 0 || phasedamage) {
+    if (shield.leak > 0 || !meshdata.back() || shield_percentage == 0 || damage.normal_damage > 0 || damage.phase_damage) {
         float tmp = this->health.health;
-        ppercentage = DealDamageToHull( pnt, leakamt+amt );
+        ppercentage = DealDamageToHull( pnt, leakamt+damage.normal_damage );
         if (cpt)
-            cpt->Shake( amt+leakamt, tmp != this->health.health ? 2 : 1 );
+            cpt->Shake( damage.normal_damage+leakamt, tmp != this->health.health ? 2 : 1 );
         if (ppercentage != -1) {
             //returns -1 on death--could delete
             for (unsigned int i = 0; i < nummesh(); ++i)
@@ -1639,11 +1649,10 @@ extern void ScoreKill( Cockpit *cp, Unit *killer, Unit *killedUnit );
 void AllUnitsCloseAndEngage( Unit*, int faction );
 void Unit::ApplyDamage( const Vector &pnt,
                         const Vector &normal,
-                        float amt,
+                        Damage damage,
                         Unit *affectedUnit,
                         const GFXColor &color,
-                        void *ownerDoNotDereference,
-                        float phasedamage )
+                        void *ownerDoNotDereference)
 {
     Cockpit     *cp = _Universe->isPlayerStarshipVoid( ownerDoNotDereference );
     float        hullpercent = GetHullPercent();
@@ -1655,7 +1664,7 @@ void Unit::ApplyDamage( const Vector &pnt,
     //If networking damages are applied as they are received
     static float hull_percent_for_comm = XMLSupport::parse_float( vs_config->getVariable( "AI", "HullPercentForComm", ".75" ) );
     bool         armor_damage = false;
-    armor_damage = (ApplyLocalDamage( localpnt, localnorm, amt, affectedUnit, color, phasedamage ) == 2);
+    armor_damage = (ApplyLocalDamage( localpnt, localnorm, damage, affectedUnit, color) == 2);
     if (cp) {
         static int MadnessForShieldDamage = XMLSupport::parse_bool( vs_config->getVariable( "AI", "ShieldDamageAnger", "1" ) );
         static int MadnessForHullDamage   = XMLSupport::parse_bool( vs_config->getVariable( "AI", "HullDamageAnger", "10" ) );

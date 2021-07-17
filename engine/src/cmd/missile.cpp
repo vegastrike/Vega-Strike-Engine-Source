@@ -117,8 +117,11 @@ void MissileEffect::DoApplyDamage(Unit *parent, Unit *un, float distance, float 
                 % distance
                 % radius
                 % (damage*damage_fraction*damage_left);
-        parent->ApplyDamage( pos.Cast(), norm, damage*damage_fraction*damage_left, un, GFXColor( 1,1,1,1 ),
-                             ownerDoNotDereference, phasedamage*damage_fraction*damage_left );
+        Damage damage;
+        damage.normal_damage = this->damage * damage_fraction * damage_left;
+        damage.phase_damage = phasedamage*damage_fraction*damage_left;
+        parent->ApplyDamage( pos.Cast(), norm, damage, un, GFXColor( 1,1,1,1 ),
+                             ownerDoNotDereference);
     }
 }
 

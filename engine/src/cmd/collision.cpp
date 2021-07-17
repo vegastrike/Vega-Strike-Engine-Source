@@ -225,7 +225,9 @@ void Collision::dealDamage(Collision other_collision, float factor)
     Vector& v2 = other_collision.velocity;
 
     float relative_velocity = (v1-v2).Magnitude();
-    float damage = relative_velocity * relative_velocity *
+
+    Damage damage;
+    damage.normal_damage = relative_velocity * relative_velocity *
             (m2)/(m1+m2) * factor;
 
     unit->ApplyDamage(other_collision.location.Cast(),

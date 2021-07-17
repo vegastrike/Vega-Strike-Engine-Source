@@ -45,6 +45,7 @@
 #include "jump_capable.h"
 
 #include "mount.h"
+#include "damage/damage.h"
 
 #ifdef VS_DEBUG
 #define CONTAINER_DEBUG
@@ -694,20 +695,18 @@ public:
 //Applies damage to the local area given by pnt
     float ApplyLocalDamage( const Vector &pnt,
                             const Vector &normal,
-                            float amt,
+                            Damage damage,
                             Unit *affectedSubUnit,
-                            const GFXColor&,
-                            float phasedamage = 0 );
+                            const GFXColor&);
 //Applies damage from network data
     void ApplyNetDamage( Vector &pnt, Vector &normal, float amt, float ppercentage, float spercentage, GFXColor &color );
 //Applies damage to the pre-transformed area of the ship
     void ApplyDamage( const Vector &pnt,
                       const Vector &normal,
-                      float amt,
+                      Damage damage,
                       Unit *affectedSubUnit,
                       const GFXColor&,
-                      void *ownerDoNotDereference,
-                      float phasedamage = 0 );
+                      void *ownerDoNotDereference);
 
     virtual float DealDamageToHull( const Vector &pnt, float Damage ) override;
 

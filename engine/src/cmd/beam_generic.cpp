@@ -34,6 +34,7 @@
 #include "gfx/camera.h"
 #include "universe.h"
 #include "weapon_info.h"
+#include "damage/damage.h"
 
 using namespace XMLSupport;
 extern double interpolation_blend_factor;
@@ -575,7 +576,10 @@ bool Beam::Collide( Unit *target, Unit *firer, Unit *superunit )
                 }
             }
         } else {
-            target->ApplyDamage( center.Cast()+direction*curlength, normal, appldam, colidee, coltmp, owner, phasdam );
+            Damage damage;
+            damage.normal_damage = appldam;
+            damage.phase_damage = phasdam;
+            target->ApplyDamage( center.Cast()+direction*curlength, normal, damage, colidee, coltmp, owner);
         }
         return true;
     }
