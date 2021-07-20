@@ -1024,14 +1024,26 @@ void Unit::LoadRow( CSVRow &row, string modification, string *netxml )
     fuel = ::stof( OPTIM_GET( row, table, Fuel_Capacity ) );
     health.health = health.max_health = ::stof( OPTIM_GET( row, table, Hull ) );
     specInterdiction = ::stof( OPTIM_GET( row, table, Spec_Interdiction ) );
-    armor.frontlefttop     = ::stof( OPTIM_GET( row, table, Armor_Front_Top_Left ) );
-    armor.frontrighttop    = ::stof( OPTIM_GET( row, table, Armor_Front_Top_Right ) );
-    armor.backlefttop      = ::stof( OPTIM_GET( row, table, Armor_Back_Top_Left ) );
-    armor.backrighttop     = ::stof( OPTIM_GET( row, table, Armor_Back_Top_Right ) );
-    armor.frontleftbottom  = ::stof( OPTIM_GET( row, table, Armor_Front_Bottom_Left ) );
-    armor.frontrightbottom = ::stof( OPTIM_GET( row, table, Armor_Front_Bottom_Right ) );
-    armor.backleftbottom   = ::stof( OPTIM_GET( row, table, Armor_Back_Bottom_Left ) );
-    armor.backrightbottom  = ::stof( OPTIM_GET( row, table, Armor_Back_Bottom_Right ) );
+
+    // TODO: Figure out if we're assining to the right facet
+    armor.facets[0].health.health = ::stof( OPTIM_GET( row, table, Armor_Front_Top_Left ) );
+    armor.facets[2].health.health = ::stof( OPTIM_GET( row, table, Armor_Front_Top_Right ) );
+    armor.facets[4].health.health = ::stof( OPTIM_GET( row, table, Armor_Back_Top_Left ) );
+    armor.facets[6].health.health = ::stof( OPTIM_GET( row, table, Armor_Back_Top_Right ) );
+    armor.facets[1].health.health = ::stof( OPTIM_GET( row, table, Armor_Front_Bottom_Left ) );
+    armor.facets[3].health.health = ::stof( OPTIM_GET( row, table, Armor_Front_Bottom_Right ) );
+    armor.facets[5].health.health = ::stof( OPTIM_GET( row, table, Armor_Back_Bottom_Left ) );
+    armor.facets[7].health.health = ::stof( OPTIM_GET( row, table, Armor_Back_Bottom_Right ) );
+
+    armor.facets[0].health.max_health = armor.facets[0].health.health;
+    armor.facets[1].health.max_health = armor.facets[1].health.health;
+    armor.facets[2].health.max_health = armor.facets[2].health.health;
+    armor.facets[3].health.max_health = armor.facets[3].health.health;
+    armor.facets[4].health.max_health = armor.facets[4].health.health;
+    armor.facets[5].health.max_health = armor.facets[5].health.health;
+    armor.facets[6].health.max_health = armor.facets[6].health.health;
+    armor.facets[7].health.max_health = armor.facets[7].health.health;
+
     int    shieldcount = 0;
     Shield two;
     Shield four;
@@ -1622,14 +1634,16 @@ string Unit::WriteUnitString()
                 unit["Fuel_Capacity"] = tos( fuel );
                 unit["Hull"] = tos( health.health );
                 unit["Spec_Interdiction"] = tos( specInterdiction );
-                unit["Armor_Front_Top_Left"]     = tos( armor.frontlefttop );
-                unit["Armor_Front_Top_Right"]    = tos( armor.frontrighttop );
-                unit["Armor_Back_Top_Left"]      = tos( armor.backlefttop );
-                unit["Armor_Back_Top_Right"]     = tos( armor.backrighttop );
-                unit["Armor_Front_Bottom_Left"]  = tos( armor.frontleftbottom );
-                unit["Armor_Front_Bottom_Right"] = tos( armor.frontrightbottom );
-                unit["Armor_Back_Bottom_Left"]   = tos( armor.backleftbottom );
-                unit["Armor_Back_Bottom_Right"]  = tos( armor.backrightbottom );
+
+                // TODO: figure out if this is correctly assigned
+                unit["Armor_Front_Top_Left"]     = tos( armor.facets[0].health.health );
+                unit["Armor_Front_Top_Right"]    = tos( armor.facets[2].health.health );
+                unit["Armor_Back_Top_Left"]      = tos( armor.facets[4].health.health );
+                unit["Armor_Back_Top_Right"]     = tos( armor.facets[6].health.health );
+                unit["Armor_Front_Bottom_Left"]  = tos( armor.facets[1].health.health );
+                unit["Armor_Front_Bottom_Right"] = tos( armor.facets[3].health.health );
+                unit["Armor_Back_Bottom_Left"]   = tos( armor.facets[5].health.health );
+                unit["Armor_Back_Bottom_Right"]  = tos( armor.facets[7].health.health );
                 {
                     unit["Shield_Front_Top_Right"]    = "";
                     unit["Shield_Front_Top_Left"]     = "";

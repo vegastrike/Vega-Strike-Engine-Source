@@ -21,7 +21,8 @@ enum class FacetConfiguration {
     one,    // A single facet covering all directions
     two,    // Front and rear
     four,   // Front, rear, left and right
-    six     // A cube. Front, rear, left, right, top and bottom.
+    six,    // A cube. Front, rear, left, right, top and bottom.
+    eight   // Front and rear, left and right, top and bottom
 };
 
 

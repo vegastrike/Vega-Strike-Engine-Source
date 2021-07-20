@@ -20,6 +20,8 @@ struct DamageableObject
 
     void DealDamage( const CoreVector &attack_vector, Damage &damage );
 
+    void Destroy();
+
     // Callbacks
     void (*explosion)(DamageableObject object);
     void* (*residual_debris)(DamageableObject object);

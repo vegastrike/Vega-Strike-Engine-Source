@@ -3725,14 +3725,12 @@ bool Unit::UpAndDownGrade( const Unit *up,
 
     if ( !csv_cell_null_check || force_change_on_nothing
         || cell_has_recursive_data( upgrade_name, up->faction, "Armor_Front_Top_Right" ) ) {
-        STDUPGRADE( armor.frontrighttop, up->armor.frontrighttop, templ->armor.frontrighttop, 0 );
-        STDUPGRADE( armor.backrighttop, up->armor.backrighttop, templ->armor.backrighttop, 0 );
-        STDUPGRADE( armor.frontlefttop, up->armor.frontlefttop, templ->armor.frontlefttop, 0 );
-        STDUPGRADE( armor.backlefttop, up->armor.backlefttop, templ->armor.backlefttop, 0 );
-        STDUPGRADE( armor.frontrightbottom, up->armor.frontrightbottom, templ->armor.frontrightbottom, 0 );
-        STDUPGRADE( armor.backrightbottom, up->armor.backrightbottom, templ->armor.backrightbottom, 0 );
-        STDUPGRADE( armor.frontleftbottom, up->armor.frontleftbottom, templ->armor.frontleftbottom, 0 );
-        STDUPGRADE( armor.backleftbottom, up->armor.backleftbottom, templ->armor.backleftbottom, 0 );
+        for(int i=0;i<8;i++) {
+            STDUPGRADE( armor.facets[i].health.health,
+                        up->armor.facets[i].health.health,
+                        templ->armor.facets[i].health.health, 0 );
+            armor.facets[i].health.max_health = armor.facets[i].health.health;
+        }
     }
     float tmp = shield.recharge;
     if ( !csv_cell_null_check || force_change_on_nothing

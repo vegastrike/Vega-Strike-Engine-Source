@@ -364,7 +364,7 @@ void GameUnit::Draw( const Transformation &parent, const Matrix &parentMatrix )
 #endif
 
     unsigned int i, n;
-    if ( (this->health.health < 0) && (!cam_setup_phase) )
+    if ( (this->health.health <= 0) && (!cam_setup_phase) )
         Explode( true, GetElapsedTime() );
 
     float damagelevel = 1.0f;

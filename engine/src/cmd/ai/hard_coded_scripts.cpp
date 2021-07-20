@@ -576,14 +576,10 @@ void LoopAroundSlow( Order *aisc, Unit *un )
 
 void SelfDestruct( Order *aisc, Unit *un )
 {
-    un->armor.frontrighttop    = -1;
-    un->armor.backrighttop     = -1;
-    un->armor.frontlefttop     = -1;
-    un->armor.backlefttop      = -1;
-    un->armor.frontrightbottom = -1;
-    un->armor.backrightbottom  = -1;
-    un->armor.frontleftbottom  = -1;
-    un->armor.backleftbottom   = -1;
+    // TODO: figure out why this line freezes the ship
+    //un->armor.Destroy();
+
+    // TODO: probably not the right way to implement this
     Damage damage;
     damage.normal_damage = un->health.health;
     un->health.DealDamage(damage);     //hull goes to zero but no kill, same for armor. strangely enough, all of them together work.

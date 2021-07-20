@@ -9,10 +9,16 @@ void Health::DealDamage( Damage &damage ) {
         return;
     }
 
-    DealDamageComponent(health, damage.normal_damage, vulnerabilities.normal_damage);
+    std::cout << "pre-deal normal_damage " << damage.normal_damage <<
+              " health " << health << std::endl;
+
+    DealDamageComponent(damage.normal_damage, vulnerabilities.normal_damage);
+    DealDamageComponent(damage.phase_damage, vulnerabilities.phase_damage);
 
     // TODO: implement other types of damage
 
+    std::cout << "post-deal normal_damage " << damage.normal_damage <<
+                 " health " << health << std::endl;
 
 }
 
@@ -24,7 +30,7 @@ void Health::DealDamage( Damage &damage ) {
  * @param damage - to inflict
  * @param vulnerability - adjust for
  */
-void Health::DealDamageComponent( float &health, float &damage, float vulnerability ) {
+void Health::DealDamageComponent( float &damage, float vulnerability ) {
     // Here we adjust for specialized weapons such as shield bypassing and shield leeching
     // which only damage the shield.
     // We also cap the actual damage at the current health

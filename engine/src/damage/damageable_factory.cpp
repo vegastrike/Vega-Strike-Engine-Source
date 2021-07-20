@@ -10,6 +10,7 @@ const CoreVector maximum_one_configuration(FLT_MAX, FLT_MAX, FLT_MAX);
 
 /// Two
 
+/// Eight
 
 
 DamageableObject DamageableFactory::CreateStandardObject(float shield,
@@ -37,6 +38,25 @@ DamageableLayer DamageableFactory::CreateLayer(FacetConfiguration configuration,
         DamageableFacet facet(minimum_one_configuration, maximum_one_configuration, health_template);
         std::vector<DamageableFacet> facets = { facet};
         DamageableLayer layer(1, facets, core_layer);
+        return layer;
+    } else if(configuration == FacetConfiguration::eight) {
+        DamageableFacet front_top_left_facet(CoreVector(0,0,0), CoreVector(FLT_MAX, FLT_MAX, FLT_MAX), health_template);
+        DamageableFacet front_bottom_left_facet(CoreVector(0,-FLT_MAX,0), CoreVector(FLT_MAX, 0, FLT_MAX), health_template);
+        DamageableFacet front_top_right_facet(CoreVector(-FLT_MAX,0,0), CoreVector(0, FLT_MAX, FLT_MAX), health_template);
+        DamageableFacet front_bottom_right_facet(CoreVector(-FLT_MAX,-FLT_MAX,0), CoreVector(0, 0, FLT_MAX), health_template);
+        DamageableFacet rear_top_left_facet(CoreVector(0,0,-FLT_MAX), CoreVector(FLT_MAX, FLT_MAX, 0), health_template);
+        DamageableFacet rear_bottom_left_facet(CoreVector(0,-FLT_MAX,-FLT_MAX), CoreVector(FLT_MAX, 0, 0), health_template);
+        DamageableFacet rear_top_right_facet(CoreVector(-FLT_MAX,0,-FLT_MAX), CoreVector(0, FLT_MAX, 0), health_template);
+        DamageableFacet rear_bottom_right_facet(CoreVector(-FLT_MAX,-FLT_MAX,-FLT_MAX), CoreVector(0, 0, 0), health_template);
+        std::vector<DamageableFacet> facets = { front_top_left_facet,
+                                              front_bottom_left_facet,
+                                              front_top_right_facet,
+                                              front_bottom_right_facet,
+                                              rear_top_left_facet,
+                                              rear_bottom_left_facet,
+                                              rear_top_right_facet,
+                                              rear_bottom_right_facet};
+        DamageableLayer layer(8, facets, core_layer);
         return layer;
     }
 

@@ -33,6 +33,7 @@
 #include "unit_armorshield.h"
 #include "gfx/vec.h"
 #include "lin_time.h"
+#include "damageable_factory.h"
 
 #include <algorithm>
 
@@ -47,7 +48,8 @@ static float  hullfornoflicker = 0.04f; // ( "graphics", "glowflicker", "hull-fo
 
 Damageable::Damageable()
 {
-
+    armor = DamageableFactory::CreateLayer(FacetConfiguration::eight,
+                                           Health(1,1,0), false);
 }
 
 bool Damageable::ShieldUp( const Vector &pnt ) const
@@ -265,14 +267,14 @@ float Damageable::RShieldData() const
 //short fix
 void Damageable::ArmorData( float armor[8] ) const
 {
-    armor[0] = this->armor.frontrighttop;
-    armor[1] = this->armor.backrighttop;
-    armor[2] = this->armor.frontlefttop;
-    armor[3] = this->armor.backlefttop;
-    armor[4] = this->armor.frontrightbottom;
-    armor[5] = this->armor.backrightbottom;
-    armor[6] = this->armor.frontleftbottom;
-    armor[7] = this->armor.backleftbottom;
+    armor[0] = this->armor.facets[0].health.health; //this->armor.frontrighttop;
+    armor[1] = this->armor.facets[1].health.health; //this->armor.backrighttop;
+    armor[2] = this->armor.facets[2].health.health; //this->armor.frontlefttop;
+    armor[3] = this->armor.facets[3].health.health; //this->armor.backlefttop;
+    armor[4] = this->armor.facets[4].health.health; //this->armor.frontrightbottom;
+    armor[5] = this->armor.facets[5].health.health; //this->armor.backrightbottom;
+    armor[6] = this->armor.facets[6].health.health; //this->armor.frontleftbottom;
+    armor[7] = this->armor.facets[7].health.health; //this->armor.backleftbottom;
 }
 
 // TODO: fix typo
@@ -310,7 +312,13 @@ void Damageable::leach( float damShield, float damShieldRecharge, float damEnRec
 
 float Damageable::DealDamageToHull( const Vector &pnt, float damage )
 {
-  float *affectedArmor = nullptr;
+    CoreVector core_vector(pnt.i, pnt.j, pnt.k);
+    Damage d;
+    d.normal_damage = damage;
+    std::cout << "pre-armor normal_damage " << d.normal_damage << std::endl;
+    armor.DealDamage(core_vector, d);
+
+  /*float *affectedArmor = nullptr;
 
   // Identify which armor to damage
   if (pnt.i > 0) {
@@ -343,9 +351,15 @@ float Damageable::DealDamageToHull( const Vector &pnt, float damage )
   float overflowDamage = std::max(damage - *affectedArmor, 0.0f);
   *affectedArmor = std::max(*affectedArmor - damage, 0.0f);
 
-  health.health -= overflowDamage;
+  health.health -= overflowDamage;*/
+
+    std::cout << "post armor normal_damage " << d.normal_damage << std::endl;
+    health.DealDamage(d);
 
   // We calculate and return the percent (of something)
+    int facet_index = armor.GetFacetIndex(core_vector);
+    DamageableFacet facet = armor.facets[facet_index];
+    float denominator = facet.health.health + health.health;
   float percent = damage/denominator; //(denominator > absdamage && denom != 0) ? absdamage/denom : (denom == 0 ? 0.0 : 1.0);
 
   return percent;

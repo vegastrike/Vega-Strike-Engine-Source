@@ -32,9 +32,10 @@ struct DamageableLayer
     }
 
     void DealDamage( const CoreVector &attack_vector, Damage &damage );
+    void Destroy();
     void Disable();
     void Enable();
-    const DamageableFacet& GetFacet(const CoreVector& attack_vector);
+    int GetFacetIndex(const CoreVector& attack_vector);
 };
 
 #endif // DAMAGEABLELAYER_H

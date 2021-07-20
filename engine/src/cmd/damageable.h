@@ -40,7 +40,7 @@ public:
     // Chose Init and value of 1. Also commented out was 10.
     // Doesn't really matter, but documenting anyway.
 
-    Armor armor;
+    DamageableLayer armor;
     Shield shield;
 
     Health health;

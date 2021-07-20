@@ -1,10 +1,18 @@
 #include "damageable_layer.h"
 
-
+#include "iostream"
 
 void DamageableLayer::DealDamage( const CoreVector &attack_vector, Damage &damage ) {
-    DamageableFacet impacted_facet = GetFacet(attack_vector);
-    impacted_facet.DealDamage(damage);
+    int impacted_facet_index = GetFacetIndex(attack_vector);
+    facets[impacted_facet_index].DealDamage(damage);
+}
+
+
+void DamageableLayer::Destroy() {
+    for(DamageableFacet& facet : facets) {
+        facet.health.health = 0;
+        facet.health.destroyed = true;
+    }
 }
 
 
@@ -23,12 +31,12 @@ void DamageableLayer::Enable() {
 }
 
 
-const DamageableFacet& DamageableLayer::GetFacet(const CoreVector& attack_vector) {
-    for(const DamageableFacet& facet : facets) {
-        if(facet.InFacet(attack_vector)) {
-            return facet;
+int DamageableLayer::GetFacetIndex(const CoreVector& attack_vector) {
+    for(int i=0;i<facets.size();i++) {
+        if(facets[i].InFacet(attack_vector)) {
+            return i;
         }
     }
 
-    return facets[0];
+    return 0;
 }

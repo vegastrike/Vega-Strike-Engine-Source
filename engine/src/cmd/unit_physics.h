@@ -87,7 +87,7 @@ void GameUnit::UpdatePhysics2( const Transformation &trans,
             }
         }
         //double blah1 = queryTime();
-        if (!tmp && this->health.health < 0)
+        if (!tmp && this->health.health <= 0)
             Explode( false, simulation_atom_var /*SIMULATION_ATOM?*/ );
         //double blah2 = queryTime();
     }

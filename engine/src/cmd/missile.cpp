@@ -218,7 +218,7 @@ void Missile::UpdatePhysics2( const Transformation &trans,
     if(target != nullptr)
     {
         // But the target is dead already
-        if (target->health.health < 0) {
+        if (target->health.health <= 0) {
             target = nullptr;
         } else {
             // What does this do?

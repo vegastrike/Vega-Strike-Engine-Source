@@ -5234,7 +5234,7 @@ void showUnitStats( Unit *playerUnit, string &text, int subunitlevel, int mode, 
         text += "#n##n##c0:1:.5#"+prefix+"[DURABILITY STATISTICS]#n##-c";
         text += "#n#"+prefix+statcolor+"Armor damage resistance:#-c";
     }
-    if (mode && MODIFIES(replacement_mode, playerUnit, blankUnit, armor.frontlefttop)) {
+    if (mode && MODIFIES(replacement_mode, playerUnit, blankUnit, armor.facets[0].health.health)) {
         switch (replacement_mode) {
         case 0:                 //Replacement or new Module
             text += "#n#"+prefix+statcolor+"Replaces existing armor, if any.#n#Armor damage resistance:#-c";
@@ -5250,53 +5250,53 @@ void showUnitStats( Unit *playerUnit, string &text, int subunitlevel, int mode, 
             break;
         }
     }
-    if (!mode || MODIFIES(replacement_mode, playerUnit, blankUnit, armor.frontrighttop)) {
+    if (!mode || MODIFIES(replacement_mode, playerUnit, blankUnit, armor.facets[2].health.health)) {
         PRETTY_ADDU(
             substatcolor+" - Fore-starboard-high: #-c",
             (mode && replacement_mode
-             == 2) ? 100.0*(playerUnit->armor.frontrighttop-1) : playerUnit->armor.frontrighttop*VSDM,
+             == 2) ? 100.0*(playerUnit->armor.facets[2].health.health-1) : playerUnit->armor.facets[2].health.health*VSDM,
             0,
             (2 == replacement_mode) ? "%" : "MJ" );
         PRETTY_ADDU(
             substatcolor+" - Aft-starboard-high: #-c",
             (mode && replacement_mode
-             == 2) ? 100.0*(playerUnit->armor.backrighttop-1) : playerUnit->armor.backrighttop*VSDM,
+             == 2) ? 100.0*(playerUnit->armor.facets[6].health.health-1) : playerUnit->armor.facets[6].health.health*VSDM,
             0,
             (2 == replacement_mode) ? "%" : "MJ" );
         PRETTY_ADDU(
             substatcolor+" - Fore-port-high: #-c",
             (mode && replacement_mode
-             == 2) ? 100.0*(playerUnit->armor.frontlefttop-1) : playerUnit->armor.frontlefttop*VSDM,
+             == 2) ? 100.0*(playerUnit->armor.facets[0].health.health-1) : playerUnit->armor.facets[0].health.health*VSDM,
             0,
             (2 == replacement_mode) ? "%" : "MJ" );
         PRETTY_ADDU(
             substatcolor+" - Aft-port-high: #-c",
             (mode && replacement_mode
-             == 2) ? 100.0*(playerUnit->armor.backlefttop-1) : playerUnit->armor.backlefttop*VSDM,
+             == 2) ? 100.0*(playerUnit->armor.facets[4].health.health-1) : playerUnit->armor.facets[4].health.health*VSDM,
             0,
             (2 == replacement_mode) ? "%" : "MJ" );
         PRETTY_ADDU(
             substatcolor+" - Fore-starboard-low: #-c",
             (mode && replacement_mode
-             == 2) ? 100.0*(playerUnit->armor.frontrightbottom-1) : playerUnit->armor.frontrightbottom*VSDM,
+             == 2) ? 100.0*(playerUnit->armor.facets[3].health.health-1) : playerUnit->armor.facets[3].health.health*VSDM,
             0,
             (2 == replacement_mode) ? "%" : "MJ" );
         PRETTY_ADDU(
             substatcolor+" - Aft-starboard-low: #-c",
             (mode && replacement_mode
-             == 2) ? 100.0*(playerUnit->armor.backrightbottom-1) : playerUnit->armor.backrightbottom*VSDM,
+             == 2) ? 100.0*(playerUnit->armor.facets[7].health.health-1) : playerUnit->armor.facets[7].health.health*VSDM,
             0,
             (2 == replacement_mode) ? "%" : "MJ" );
         PRETTY_ADDU(
             substatcolor+" - Fore-port-low: #-c",
             (mode && replacement_mode
-             == 2) ? 100.0*(playerUnit->armor.frontleftbottom-1) : playerUnit->armor.frontleftbottom*VSDM,
+             == 2) ? 100.0*(playerUnit->armor.facets[1].health.health-1) : playerUnit->armor.facets[1].health.health*VSDM,
             0,
             (2 == replacement_mode) ? "%" : "MJ" );
         PRETTY_ADDU(
             substatcolor+" - Aft-port-low: #-c",
             (mode && replacement_mode
-             == 2) ? 100.0*(playerUnit->armor.backleftbottom-1) : playerUnit->armor.backleftbottom*VSDM,
+             == 2) ? 100.0*(playerUnit->armor.facets[5].health.health-1) : playerUnit->armor.facets[5].health.health*VSDM,
             0,
             (2 == replacement_mode) ? "%" : "MJ" );
     }

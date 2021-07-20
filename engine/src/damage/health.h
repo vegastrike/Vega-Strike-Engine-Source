@@ -42,6 +42,8 @@ public:
         max_health(max_health), health(health), regeneration(regeneration), regenerative(regeneration > 0) {
         destroyed = false;
         enabled = regenerative; // Only relevant for regenerative objects (e.g. shields).
+        vulnerabilities.normal_damage = 1;
+        vulnerabilities.phase_damage = 1;
     };
 
     float percent() {
@@ -49,7 +51,7 @@ public:
     }
 
     void DealDamage( Damage &damage );
-    void DealDamageComponent( float &health, float &damage, float vulnerability );
+    void DealDamageComponent( float &damage, float vulnerability );
     void Disable();
     void Enable();
     void Regenerate();

@@ -4,17 +4,17 @@
 #include <algorithm>
 
 ///Armor values: how much damage armor can withhold before internal damage accrues
-struct Armor
+/*struct Armor
 {
-    float frontlefttop = 0;
-    float backlefttop = 0;
-    float frontrighttop = 0;
-    float backrighttop = 0;
-    float frontleftbottom = 0;
-    float backleftbottom = 0;
-    float frontrightbottom = 0;
-    float backrightbottom = 0;
-};
+    2 float frontlefttop = 0;
+    3 float backlefttop = 0;
+    0 float frontrighttop = 0;
+    1 float backrighttop = 0;
+    6 float frontleftbottom = 0;
+    7 float backleftbottom = 0;
+    4 float frontrightbottom = 0;
+    5 float backrightbottom = 0;
+};*/
 #define MAX_SHIELD_NUMBER 8
 struct ShieldFacing
 {

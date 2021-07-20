@@ -27,3 +27,10 @@ void DamageableObject::DealDamage( const CoreVector &attack_vector, Damage &dama
         }
     }
 }
+
+
+void DamageableObject::Destroy() {
+    for(DamageableLayer layer : layers) {
+        layer.Destroy();
+    }
+}
