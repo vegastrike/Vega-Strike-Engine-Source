@@ -63,7 +63,7 @@ Either install Vega Strike from the binary installer for your platform, if avail
 Vegastrike command line parameters allow for different start settings and are as follows
 
 ```man
-  vegastrike-engine [-ddata_dir] [-px,y,z] [-jsector/starsystem] missionname
+  vegastrike-engine -ddata_dir [-px,y,z] [-jsector/starsystem] missionname
 
 OPTIONS
   -d/my/data/dir
@@ -93,7 +93,7 @@ is an example of a valid mission call
 the -l flag (must be flushed with the system) will force a player to begin in a star system.
 
 ```bash
-bin/vegastrike-engine -lvega_sector/vega mission/bomber.mission
+bin/vegastrike-engine -d../Assets-Production -lvega_sector/vega mission/bomber.mission
 ```
 
 will force the bomber mission to run in the vega sector.
