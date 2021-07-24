@@ -314,13 +314,13 @@ and run `./script/build.sh -DUSE_SYSTEM_BOOST=NO`
 Compiling On Windows
 --------------------
 
-Vega Strike is now compiling on Windows! If you want to compile it, try it out, and perhaps offer feedback, that would certainly be welcome. (Installer still pending.)
+Vega Strike is now compiling on Windows! If you want to compile it, try it out, and perhaps offer feedback, that would certainly be welcome.
 
 To compile Vega Strike on Windows, start by installing Visual Studio 2019, if you haven't already. When selecting the Workloads and Components to install, include at least "C++ for Desktop"; "Python"; and a recent build of the Windows SDK. Probably Git and the GitHub for Windows extension also. Install the latest Visual Studio updates as well.
 
 Once Visual Studio finishes installing, and you have rebooted your computer, open a PowerShell window and run `script/bootstrap.ps1`. Once that finishes, run `script/build.ps1`.
 
-Assuming all the above steps succeed, you are now ready to run Vega Strike. Note that `vegasettings` is not currently building on Windows, so you will need to edit `vegastrike.config` manually as needed.
+Assuming all the above steps succeed, you are now ready to run Vega Strike. Note that `vegasettings` is not currently building on Windows, so you will need to edit `vegastrike.config` manually as needed. Also note: Windows installer is still pending.
 
 
 Compiling On MacOS
