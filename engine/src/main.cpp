@@ -64,7 +64,7 @@
 #include "gamemenu.h"
 #include "audio/SceneManager.h"
 #include "audio/renderers/OpenAL/BorrowedOpenALRenderer.h"
-
+#include "configuration/configuration.h"
 #include <time.h>
 #if !defined(_WIN32) && !defined (__HAIKU__)
 #include <sys/signal.h>
@@ -384,6 +384,9 @@ int main( int argc, char *argv[] )
         //Specify the config file and the possible mod subdir to play
         VSFileSystem::InitPaths( CONFIGFILE, subdir );
     }
+    
+    // now that the user config file has been loaded from disk, update the global configuration struct values
+    configuration.OverrideDefaultsWithUserConfiguration();
 
     // If no debug argument is supplied, set to what the config file has.
     if (g_game.vsdebug == '0')
