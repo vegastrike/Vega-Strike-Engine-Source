@@ -5,7 +5,7 @@
 # @usage  : sudo script/bootstrap
 # @param  : none
 #====================================
-# Copyright (C) 2020 Stephen G. Tuggy <sgt@stephengtuggy.com>
+# Copyright (C) 2020-2021 Stephen G. Tuggy <sgt@stephengtuggy.com>
 #
 # This file is part of Vega Strike.
 #
@@ -25,7 +25,7 @@
 set -e
 
 echo "------------------------------"
-echo "--- bootstrap | 2020-10-28 ---"
+echo "--- bootstrap | 2021-07-27 ---"
 echo "------------------------------"
 
 if [ -f /etc/os-release ]
@@ -210,6 +210,25 @@ then
                             git \
                             rpm-build \
                             clang
+elif [ $LINUX_ID == "fedora" ] && ([ $LINUX_VERSION_ID -ge 34 ] && [ $LINUX_VERSION_ID -lt 35 ])
+then
+    dnf install -y \
+                        git \
+                        cmake \
+                        boost-devel \
+                        freeglut-devel \
+                        gcc-c++ \
+                        openal-soft-devel \
+                        SDL-devel \
+                        libvorbis-devel \
+                        libjpeg-turbo-devel \
+                        libpng-devel \
+                        expat-devel \
+                        gtk3-devel \
+                        python3-devel \
+                        rpm-build \
+                        make \
+                        clang
 elif [ $LINUX_ID == "fedora" ] && ([ $LINUX_VERSION_ID -ge 32 ] && [ $LINUX_VERSION_ID -lt 34 ])
 then
     dnf install -y \
