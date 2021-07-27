@@ -41,9 +41,9 @@ jobs:
           - FROM:     'fedora:32'
             COMPILER: 'clang'
             FLAGS:    '-DUSE_PYTHON_3=ON'
-          - FROM:     'centos:8'
-            COMPILER: 'clang'
-            FLAGS:    '-DUSE_PYTHON_3=ON'
+          # - FROM:     'centos:8'
+          #   COMPILER: 'clang'
+          #   FLAGS:    '-DUSE_PYTHON_3=ON'
 
     steps:
     - name: Checkout repository

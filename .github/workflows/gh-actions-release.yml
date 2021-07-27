@@ -52,10 +52,10 @@ jobs:
             COMPILER: 'clang'
             FLAGS:    '-DUSE_PYTHON_3=ON'
             ARTIFACT_EXT: 'rpm'
-          - FROM:     'centos:8'
-            COMPILER: 'clang'
-            FLAGS:    '-DUSE_PYTHON_3=ON'
-            ARTIFACT_EXT: 'rpm'
+          # - FROM:     'centos:8'
+          #   COMPILER: 'clang'
+          #   FLAGS:    '-DUSE_PYTHON_3=ON'
+          #   ARTIFACT_EXT: 'rpm'
 
     steps:
     - name: Checkout repository
