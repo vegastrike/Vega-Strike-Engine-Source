@@ -9,3 +9,4 @@ packages/
 *.bak
 *.kdev4
 .vs/
+.vscode/
