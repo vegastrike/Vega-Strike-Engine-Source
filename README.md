@@ -58,12 +58,12 @@ How to Run
 Either install Vega Strike from the binary installer for your platform, if available, or follow the instructions for compiling from source. (`Compiling Vegastrike`, below.)
 
 - First change settings with `bin/vegasettings`
-- Then run `bin/vegastrike` or double-click on the executable file in the bin directory.
+- Then run `bin/vegastrike-engine` or double-click on the executable file in the bin directory.
 
 Vegastrike command line parameters allow for different start settings and are as follows
 
 ```man
-  vegastrike [-ddata_dir] [-px,y,z] [-jsector/starsystem] missionname
+  vegastrike-engine -ddata_dir [-px,y,z] [-jsector/starsystem] missionname
 
 OPTIONS
   -d/my/data/dir
@@ -85,7 +85,7 @@ OPTIONS
 Vegastrike takes a single command parameter indicating which mission it should load
 
 ```bash
-bin/vegastrike mission/explore_universe.mission
+bin/vegastrike-engine mission/explore_universe.mission
 ```
 
 is an example of a valid mission call
@@ -93,10 +93,17 @@ is an example of a valid mission call
 the -l flag (must be flushed with the system) will force a player to begin in a star system.
 
 ```bash
-bin/vegastrike -lvega_sector/vega mission/bomber.mission
+bin/vegastrike-engine -d../Assets-Production -lvega_sector/vega mission/bomber.mission
 ```
 
-will force the bomber mission to run in the vega sector
+will force the bomber mission to run in the vega sector.
+
+Executable Name Changes
+-----------------------
+
+Note that the executable names have changed since the 0.5.x releases. Now, you configure game settings using `vegasettings`, and run the game itself using `vegastrike-engine`. With the latter, the data directory (`-d...`)  is now a required parameter. This is to allow using the Vega Strike Game Engine with multiple games (asset sets), including Upon the Coldest Sea (vsUtCS), PWCU, and others.
+
+Also note that when you install vsUtCS, it comes with a script called `vsettings` that automatically runs `vegasettings` with the correct data directory, and another script called `vs` that automatically runs `vegastrike-engine` with the correct data directory. These scripts are the recommended way to run the game Vega Strike: Upon the Coldest Sea. You should see shortcuts to them on your desktop, Start Menu, or similar.
 
 If you encounter any issues while playing, please create an issue with the Vega Strike development team by [posting a new issue](https://github.com/vegastrike/Vega-Strike-Engine-Source/issues).
 
@@ -104,7 +111,7 @@ REQUIRED FILES
 --------------
 
 ```bash
-  /usr/local/bin/vegastrike
+  /usr/local/bin/vegastrike-engine
       The vegastrike engine.
   /usr/local/bin/vsinstall
       The Setup utility.
@@ -218,7 +225,7 @@ Compiling On Linux
    ```
 
    On Fedora 30 or 31, also install `boost-python2-devel`. (Apparently not available
-   on Fedora 32 or 33.)
+   on Fedora 32 or later.)
 
 2. Build Vega Strike:
 
@@ -241,7 +248,7 @@ Compiling On Linux
    mkdir build & cd build
    cmake ../engine
    make -j $(nproc) # (where $(nproc) returns the number of available CPU threads/cores on the system)
-   mkdir ../bin && cp vegastrike ../bin/ && cp setup/vegasettings ../bin/ && cd ..
+   mkdir ../bin && cp vegastrike-engine ../bin/ && cp setup/vegasettings ../bin/ && cd ..
    ```
 
    __TIPS__:
@@ -287,10 +294,10 @@ Compiling On Linux
    ./bin/vegasettings --target ../Assets-Production
    ```
 
-   Do the same with vegastrike using `-d` and no space. E.g.:
+   Do the same with vegastrike-engine using `-d` and no space. E.g.:
 
    ```bash
-   ./bin/vegastrike -d../Assets-Production
+   ./bin/vegastrike-engine -d../Assets-Production
    ```
 
 [Link to list of dependencies in wiki](http://vegastrike.sourceforge.net/wiki/HowTo:Compile_from_CVS)
@@ -307,13 +314,19 @@ and run `./script/build.sh -DUSE_SYSTEM_BOOST=NO`
 Compiling On Windows
 --------------------
 
-Currently VegaStrike is not compiling on Windows. Any help will be appreciated to get it fix. For more information go [here](https://github.com/vegastrike/Vega-Strike-Engine-Source/issues/53)
+Vega Strike is now compiling on Windows! If you want to compile it, try it out, and perhaps offer feedback, that would certainly be welcome.
+
+To compile Vega Strike on Windows, start by installing Visual Studio 2019, if you haven't already. When selecting the Workloads and Components to install, include at least "C++ for Desktop"; "Python"; and a recent build of the Windows SDK. Probably Git and the GitHub for Windows extension also. Install the latest Visual Studio updates as well.
+
+Once Visual Studio finishes installing, and you have rebooted your computer, open a PowerShell window and run `script/bootstrap.ps1`. Once that finishes, run `script/build.ps1`.
+
+Assuming all the above steps succeed, you are now ready to run Vega Strike. Note that `vegasettings` is not currently building on Windows, so you will need to edit `vegastrike.config` manually as needed. Also note: Windows installer is still pending.
 
 
 Compiling On MacOS
 ------------------
 
-Currently VegaStrike is not compiling on MacOS. Any help will be appreciated to get it fix. For more information go [here](https://github.com/vegastrike/Vega-Strike-Engine-Source/issues/78)
+Currently VegaStrike is not compiling on MacOS. Any help will be appreciated to get it fixed. For more information go [here](https://github.com/vegastrike/Vega-Strike-Engine-Source/issues/78)
 
 3. Packaging Vega Strike:
 
@@ -343,7 +356,7 @@ To travel inside star system, the ships are equiped with a SPEC drive that allow
 Respawn
 -------
 
-If you sadly lose your life in combat you may respawn by pressing ':'
+If you sadly lose your life in combat you may respawn by pressing ';'
 
 A new starship will be created for you by Bob.
 
