@@ -5326,7 +5326,8 @@ void showUnitStats( Unit *playerUnit, string &text, int subunitlevel, int mode, 
             break;
         }
     }
-    if (!mode) {
+    // TODO: lib_damage
+    /*if (!mode) {
         if (playerUnit->shield.number) {
             PRETTY_ADD( statcolor+"Number of shield emitter facings: #-c", playerUnit->shield.number, 0 );
             text += "#n#"+prefix+statcolor+"Shield protection rating:#-c";
@@ -5494,7 +5495,7 @@ void showUnitStats( Unit *playerUnit, string &text, int subunitlevel, int mode, 
             text += "Oh dear, this wasn't an upgrade. Please debug code.";
             break;
         }
-    }
+    }*/
     //cloaking device? If we don't have one, no need to mention it ever exists, right?
     if (playerUnit->cloaking != -1) {
         if (!mode) {
@@ -5664,10 +5665,11 @@ void showUnitStats( Unit *playerUnit, string &text, int subunitlevel, int mode, 
                      playerUnit->getMass()*uc.max_ab_speed()/playerUnit->limits.afterburn, 2, "seconds" );
         //reactor
         float avail    = (playerUnit->maxEnergyData()*RSconverter-maxshield*VSDM);
-        float overhead =
+        /* TODO: lib_damage
+         * float overhead =
             (shields_require_power) ? (playerUnit->shield.recharge/shieldenergycap*shield_maintenance_cost
-                                       *playerUnit->shield.number*VSDM) : 0;
-        float nrt = avail/(playerUnit->energyRechargeData()*RSconverter-overhead);
+                                       *playerUnit->shield.number*VSDM) : 0;*/
+        float nrt = avail/(playerUnit->energyRechargeData()*RSconverter); // TODO -overhead);
         PRETTY_ADDU( statcolor+"Reactor nominal replenish time: #-c", nrt, 2, "seconds" );
         //shield related stuff
         //code taken from RegenShields in unit_generic.cpp, so we're sure what we say here is correct.
@@ -5682,7 +5684,8 @@ void showUnitStats( Unit *playerUnit, string &text, int subunitlevel, int mode, 
                     +
                     "WARNING: Warp capacitor banks under capacity for jump: upgrade warp capacitance#-c";
         }
-        if (playerUnit->shield.number) {
+        /* TODO: lib_damage
+         * if (playerUnit->shield.number) {
             if (playerUnit->shield.recharge*playerUnit->shield.number*VSDM/shieldenergycap > playerUnit->energyRechargeData()
                 *RSconverter) {
                 text += "#n##c1:1:.1#"+prefix+"WARNING: reactor recharge rate is less than combined shield recharge rate.#n#";
@@ -5704,19 +5707,20 @@ void showUnitStats( Unit *playerUnit, string &text, int subunitlevel, int mode, 
                             "SEVERE WARNING: Reactor power is overdrawn! Unsustainable power is being consumed by passive shield maintenance: downgrade shield or upgrade reactor immediately!#-c";
                 }
             }
-        }
+        }*/
         totalWeaponEnergyUsage = totalWeaponEnergyUsage*RSconverter;
         PRETTY_ADDU( statcolor+"Combined weapon energy usage: #-c", totalWeaponEnergyUsage, 0, "MJ/s" );
-        float maint_draw =
+        /* TODO: lib_damage
+         * float maint_draw =
             (shields_require_power && playerUnit->shield.number) ? (playerUnit->shield.recharge*VSDM/shieldenergycap
-                                                                    *shield_maintenance_cost*playerUnit->shield.number) : 0;
-        if ( totalWeaponEnergyUsage < (playerUnit->energyRechargeData()*RSconverter-maint_draw) ) {
+                                                                    *shield_maintenance_cost*playerUnit->shield.number) : 0;*/
+        if ( totalWeaponEnergyUsage < (playerUnit->energyRechargeData()*RSconverter)) { // TODO lib_damage -maint_draw) ) {
             //waouh, impressive...
             text += "#n##c0:1:.2#"+prefix+"Your reactor produces more energy than your weapons can use!#-c";
         } else {
             PRETTY_ADDU( statcolor+"Reactor energy depletion time if weapons in continuous use: #-c",
                          (playerUnit->maxEnergyData()
-                          *RSconverter)/( totalWeaponEnergyUsage-( (playerUnit->energyRechargeData()*RSconverter-maint_draw) ) ),
+                          *RSconverter)/( totalWeaponEnergyUsage-( (playerUnit->energyRechargeData()*RSconverter))), // TODO lib_damage -maint_draw) ) ),
                          2,
                          "seconds" );
         }

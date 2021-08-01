@@ -34,48 +34,37 @@ DamageableObject DamageableFactory::CreateStandardObject(float shield,
 DamageableLayer DamageableFactory::CreateLayer(FacetConfiguration configuration,
                                                Health health_template,
                                                bool core_layer) {
-    if(configuration == FacetConfiguration::one) {
-        DamageableFacet facet(minimum_one_configuration, maximum_one_configuration, health_template);
-        std::vector<DamageableFacet> facets = { facet};
-        DamageableLayer layer(1, facets, core_layer);
-        return layer;
-    } else if(configuration == FacetConfiguration::eight) {
-        DamageableFacet front_top_left_facet(CoreVector(0,0,0), CoreVector(FLT_MAX, FLT_MAX, FLT_MAX), health_template);
-        DamageableFacet front_bottom_left_facet(CoreVector(0,-FLT_MAX,0), CoreVector(FLT_MAX, 0, FLT_MAX), health_template);
-        DamageableFacet front_top_right_facet(CoreVector(-FLT_MAX,0,0), CoreVector(0, FLT_MAX, FLT_MAX), health_template);
-        DamageableFacet front_bottom_right_facet(CoreVector(-FLT_MAX,-FLT_MAX,0), CoreVector(0, 0, FLT_MAX), health_template);
-        DamageableFacet rear_top_left_facet(CoreVector(0,0,-FLT_MAX), CoreVector(FLT_MAX, FLT_MAX, 0), health_template);
-        DamageableFacet rear_bottom_left_facet(CoreVector(0,-FLT_MAX,-FLT_MAX), CoreVector(FLT_MAX, 0, 0), health_template);
-        DamageableFacet rear_top_right_facet(CoreVector(-FLT_MAX,0,-FLT_MAX), CoreVector(0, FLT_MAX, 0), health_template);
-        DamageableFacet rear_bottom_right_facet(CoreVector(-FLT_MAX,-FLT_MAX,-FLT_MAX), CoreVector(0, 0, 0), health_template);
-        std::vector<DamageableFacet> facets = { front_top_left_facet,
-                                              front_bottom_left_facet,
-                                              front_top_right_facet,
-                                              front_bottom_right_facet,
-                                              rear_top_left_facet,
-                                              rear_bottom_left_facet,
-                                              rear_top_right_facet,
-                                              rear_bottom_right_facet};
-        DamageableLayer layer(8, facets, core_layer);
-        return layer;
+    int size = FacetConfigurationSize(configuration);
+    const FacetName* facet_configuration_array = FacetConfigurationByName(configuration);
+
+    std::vector<DamageableFacet> facets;
+    for(int i=0;i<size;i++) {
+        facets.push_back(DamageableFacet(configuration,
+                                         facet_configuration_array[i],
+                                         health_template));
     }
 
-
+    DamageableLayer layer(size, facets, core_layer);
+    return layer;
 }
 
+DamageableLayer DamageableFactory::CreateLayer(FacetConfiguration configuration,
+                                               float health_array[],
+                                               float regeneration,
+                                               bool core_layer) {
+    int size = FacetConfigurationSize(configuration);
+    const FacetName* facet_configuration_array = FacetConfigurationByName(configuration);
 
-
-DamageableFacet CreateFacetFromTemplate(const DamageableFacet& template_facet,
-                                        const CoreVector& min_v,
-                                        const CoreVector& max_v) {
-    return DamageableFacet(min_v, max_v, template_facet);
-}
-
-const std::vector<DamageableFacet> CreateLayerFromTemplate(const FacetConfiguration& configuration,
-                                                           const DamageableFacet& template_facet,
-                                                           bool core_layer) {
-    if(configuration == FacetConfiguration::one) {
-        const std::vector<DamageableFacet> facets = { template_facet };
-        return facets;
+    std::vector<DamageableFacet> facets;
+    for(int i=0;i<size;i++) {
+        Health health(health_array[i], health_array[i], regeneration);
+        facets.push_back(DamageableFacet(configuration,
+                                         facet_configuration_array[i],
+                                         health));
     }
+
+    DamageableLayer layer(size, facets, core_layer);
+    return layer;
 }
+
+

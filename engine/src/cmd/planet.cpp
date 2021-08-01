@@ -186,12 +186,13 @@ Planet::Planet() :
     Init();
     SetAI( new Order() );     //no behavior
 
+    /* TODO: lib_damage
     shield.number=2;
     shield.recharge=0;
     shield.shield2fb.frontmax=0;
     shield.shield2fb.backmax=0;
     shield.shield2fb.front=0;
-    shield.shield2fb.back=0;
+    shield.shield2fb.back=0;*/
 
 }
 
@@ -331,12 +332,13 @@ Planet::Planet( QVector x,
                       inside_out,
                       nlights );
 
+    /* TODO: lib_damage
     shield.number=2;
     shield.recharge=0;
     shield.shield2fb.frontmax=0;
     shield.shield2fb.backmax=0;
     shield.shield2fb.front=0;
-    shield.shield2fb.back=0;
+    shield.shield2fb.back=0;*/
 }
 
 Planet::~Planet()

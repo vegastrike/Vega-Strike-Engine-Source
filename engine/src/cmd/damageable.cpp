@@ -50,93 +50,36 @@ Damageable::Damageable()
 {
     armor = DamageableFactory::CreateLayer(FacetConfiguration::eight,
                                            Health(1,1,0), false);
+    shield = DamageableFactory::CreateLayer(FacetConfiguration::eight,
+                                            Health(1,1,0), false);
 }
 
 bool Damageable::ShieldUp( const Vector &pnt ) const
 {
-    const int    shieldmin  = 5;
+    const int    shield_min  = 5;
 
     // TODO: think about this. I have no idea why a nebula needs shields
 //    static float nebshields = XMLSupport::parse_float( vs_config->getVariable( "physics", "nebula_shield_recharge", ".5" ) );
 //    if (nebula != NULL || nebshields > 0)
 //        return false;
-    switch (shield.number)
-    {
-    case 2:
-        return ( (pnt.k > 0) ? (shield.shield2fb.front) : (shield.shield2fb.back) ) > shieldmin;
-    case 8:
-        if (pnt.i > 0) {
-            if (pnt.j > 0) {
-                if (pnt.k > 0)
-                    return shield.shield8.frontlefttop > shieldmin;
-                else
-                    return shield.shield8.backlefttop > shieldmin;
-            } else {
-                if (pnt.k > 0)
-                    return shield.shield8.frontleftbottom > shieldmin;
-                else
-                    return shield.shield8.backleftbottom > shieldmin;
-            }
-        } else {
-            if (pnt.j > 0) {
-                if (pnt.k > 0)
-                    return shield.shield8.frontrighttop > shieldmin;
-                else
-                    return shield.shield8.backrighttop > shieldmin;
-            } else {
-                if (pnt.k > 0)
-                    return shield.shield8.frontrightbottom > shieldmin;
-                else
-                    return shield.shield8.backrightbottom > shieldmin;
-            }
-        }
-        break;
-    case 4:
-        if ( fabs( pnt.k ) > fabs( pnt.i ) ) {
-            if (pnt.k > 0)
-                return shield.shield4fbrl.front > shieldmin;
-            else
-                return shield.shield4fbrl.back > shieldmin;
-        } else {
-            if (pnt.i > 0)
-                return shield.shield4fbrl.left > shieldmin;
-            else
-                return shield.shield4fbrl.right > shieldmin;
-        }
-        return false;
 
-    default:
-        return false;
-    }
+    CoreVector attack_vector(pnt.i, pnt.j, pnt.k);
+    int facet_index = static_cast<DamageableLayer>(shield).GetFacetIndex(attack_vector);
+    return shield.facets[facet_index].health.health > shield_min;
 }
 
 float Damageable::DealDamageToShield( const Vector &pnt, float &damage )
 {
+    Damage d;
+    d.normal_damage = damage;
     float  percent = 0;
-    float *targ    = NULL;                       //short fix
-    float  theta   = atan2( pnt.i, pnt.k );
-    float  rho     = atan( pnt.j/sqrt( pnt.k*pnt.k+pnt.i*pnt.i ) );
-    //ONLY APPLY DAMAGES IN NON-NETWORKING OR ON SERVER SIDE
-    for (int i = 0; i < shield.number; ++i)
-        if ( withinShield( shield.range[i], theta, rho ) ) {
-            if (shield.shield.max[i]) {
-                //comparing with max
-                float tmp = damage/shield.shield.max[i];
-                if (tmp > percent) percent = tmp;
-            }
-            targ = &shield.shield.cur[i];
+    CoreVector attack_vector(pnt.i, pnt.j, pnt.k);
+    shield.DealDamage(attack_vector, d);
+    int facet_index = shield.GetFacetIndex(attack_vector);
 
-            if (damage > *targ) {
-                damage -= *targ;
-                *targ   = 0;
-              } else {
-                //short fix
-                *targ -= damage;
-                damage = 0;
-                break;
-              }
+    float denominator = shield.facets[facet_index].health.health + health.health;
+    percent = damage/denominator; //(denominator > absdamage && denom != 0) ? absdamage/denom : (denom == 0 ? 0.0 : 1.0);
 
-        }
     if ( !FINITE( percent ) )
         percent = 0;
     return percent;
@@ -144,137 +87,35 @@ float Damageable::DealDamageToShield( const Vector &pnt, float &damage )
 
 float Damageable::FShieldData() const
 {
-    switch (shield.number)
-    {
-    case 2:
-        {
-            if (shield.shield2fb.frontmax != 0)
-                return shield.shield2fb.front/shield.shield2fb.frontmax;
-            break;
-        }
-    case 4:
-        {
-            if (shield.shield4fbrl.frontmax != 0)
-                return (shield.shield4fbrl.front)/shield.shield4fbrl.frontmax;
-            break;
-        }
-    case 8:
-        {
-            if (shield.shield8.frontrighttopmax != 0 || shield.shield8.frontrightbottommax != 0
-                || shield.shield8.frontlefttopmax != 0 || shield.shield8.frontleftbottommax
-                != 0) {
-                return (shield.shield8.frontrighttop+shield.shield8.frontrightbottom+shield.shield8.frontlefttop
-                        +shield.shield8.frontleftbottom)
-                       /(shield.shield8.frontrighttopmax+shield.shield8.frontrightbottommax+shield.shield8.frontlefttopmax
-                         +shield.shield8.frontleftbottommax);
-            }
-            break;
-        }
-    }
-    return 0;
+    return static_cast<DamageableLayer>(shield).GetPercent(FacetName::front);
 }
 
 float Damageable::BShieldData() const
 {
-    switch (shield.number)
-    {
-    case 2:
-        {
-            if (shield.shield2fb.backmax != 0)
-                return shield.shield2fb.back/shield.shield2fb.backmax;
-            break;
-        }
-    case 4:
-        {
-            if (shield.shield4fbrl.backmax != 0)
-                return (shield.shield4fbrl.back)/shield.shield4fbrl.backmax;
-            break;
-        }
-    case 8:
-        {
-            if (shield.shield8.backrighttopmax != 0 || shield.shield8.backrightbottommax != 0
-                || shield.shield8.backlefttopmax != 0 || shield.shield8.backleftbottommax
-                != 0) {
-                return (shield.shield8.backrighttop+shield.shield8.backrightbottom+shield.shield8.backlefttop
-                        +shield.shield8.backleftbottom)
-                       /(shield.shield8.backrighttopmax+shield.shield8.backrightbottommax+shield.shield8.backlefttopmax
-                         +shield.shield8.backleftbottommax);
-            }
-            break;
-        }
-    }
-    return 0;
+    return static_cast<DamageableLayer>(shield).GetPercent(FacetName::rear);
 }
 
 float Damageable::LShieldData() const
 {
-    switch (shield.number)
-    {
-    case 2:
-        return 0;                                //no data, captain
-
-    case 4:
-        {
-            if (shield.shield4fbrl.leftmax != 0)
-                return (shield.shield4fbrl.left)/shield.shield4fbrl.leftmax;
-            break;
-        }
-    case 8:
-        {
-            if (shield.shield8.backlefttopmax != 0 || shield.shield8.backleftbottommax != 0
-                || shield.shield8.frontlefttopmax != 0 || shield.shield8.frontleftbottommax
-                != 0) {
-                return (shield.shield8.backlefttop+shield.shield8.backleftbottom+shield.shield8.frontlefttop
-                        +shield.shield8.frontleftbottom)
-                       /(shield.shield8.backlefttopmax+shield.shield8.backleftbottommax+shield.shield8.frontlefttopmax
-                         +shield.shield8.frontleftbottommax);
-            }
-            break;
-        }
-    }
-    return 0;
+    return static_cast<DamageableLayer>(shield).GetPercent(FacetName::left);
 }
 
 float Damageable::RShieldData() const
 {
-    switch (shield.number)
-    {
-    case 2:
-        return 0;                                //don't react to stuff we have no data on
-
-    case 4:
-        {
-            if (shield.shield4fbrl.rightmax != 0)
-                return (shield.shield4fbrl.right)/shield.shield4fbrl.rightmax;
-            break;
-        }
-    case 8:
-        {
-            if (shield.shield8.backrighttopmax != 0 || shield.shield8.backrightbottommax != 0
-                || shield.shield8.frontrighttopmax != 0 || shield.shield8.frontrightbottommax
-                != 0) {
-                return (shield.shield8.backrighttop+shield.shield8.backrightbottom+shield.shield8.frontrighttop
-                        +shield.shield8.frontrightbottom)
-                       /(shield.shield8.backrighttopmax+shield.shield8.backrightbottommax+shield.shield8.frontrighttopmax
-                         +shield.shield8.frontrightbottommax);
-            }
-            break;
-        }
-    }
-    return 0;
+    return static_cast<DamageableLayer>(shield).GetPercent(FacetName::right);
 }
 
 //short fix
 void Damageable::ArmorData( float armor[8] ) const
 {
-    armor[0] = this->armor.facets[0].health.health; //this->armor.frontrighttop;
-    armor[1] = this->armor.facets[1].health.health; //this->armor.backrighttop;
-    armor[2] = this->armor.facets[2].health.health; //this->armor.frontlefttop;
-    armor[3] = this->armor.facets[3].health.health; //this->armor.backlefttop;
-    armor[4] = this->armor.facets[4].health.health; //this->armor.frontrightbottom;
-    armor[5] = this->armor.facets[5].health.health; //this->armor.backrightbottom;
-    armor[6] = this->armor.facets[6].health.health; //this->armor.frontleftbottom;
-    armor[7] = this->armor.facets[7].health.health; //this->armor.backleftbottom;
+    armor[0] = this->armor.facets[0].health.health;
+    armor[1] = this->armor.facets[1].health.health;
+    armor[2] = this->armor.facets[2].health.health;
+    armor[3] = this->armor.facets[3].health.health;
+    armor[4] = this->armor.facets[4].health.health;
+    armor[5] = this->armor.facets[5].health.health;
+    armor[6] = this->armor.facets[6].health.health;
+    armor[7] = this->armor.facets[7].health.health;
 }
 
 // TODO: fix typo
@@ -282,7 +123,7 @@ void Damageable::leach( float damShield, float damShieldRecharge, float damEnRec
 {
   // TODO: restore this
   // recharge *= damEnRecharge;
-  shield.recharge *= damShieldRecharge;
+  /*shield.recharge *= damShieldRecharge;
   switch (shield.number)
     {
     case 2:
@@ -305,7 +146,7 @@ void Damageable::leach( float damShield, float damShieldRecharge, float damEnRec
       shield.shield8.frontleftbottommax  *= damShield;
       shield.shield8.backleftbottommax   *= damShield;
       break;
-    }
+    }*/
 }
 
 
@@ -315,91 +156,39 @@ float Damageable::DealDamageToHull( const Vector &pnt, float damage )
     CoreVector core_vector(pnt.i, pnt.j, pnt.k);
     Damage d;
     d.normal_damage = damage;
-    std::cout << "pre-armor normal_damage " << d.normal_damage << std::endl;
     armor.DealDamage(core_vector, d);
 
-  /*float *affectedArmor = nullptr;
-
-  // Identify which armor to damage
-  if (pnt.i > 0) {
-      if (pnt.j > 0) {
-          if (pnt.k > 0)
-            affectedArmor = &armor.frontlefttop;
-          else
-            affectedArmor = &armor.backlefttop;
-        } else {
-          if (pnt.k > 0)
-            affectedArmor = &armor.frontleftbottom;
-          else
-            affectedArmor = &armor.backleftbottom;
-        }
-    } else {
-      if (pnt.j > 0) {
-          if (pnt.k > 0)
-            affectedArmor = &armor.frontrighttop;
-          else
-            affectedArmor = &armor.backrighttop;
-      } else {
-          if (pnt.k > 0)
-            affectedArmor = &armor.frontrightbottom;
-          else
-            affectedArmor = &armor.backrightbottom;
-      }
-    }
-
-  float denominator = (*affectedArmor+health.health);
-  float overflowDamage = std::max(damage - *affectedArmor, 0.0f);
-  *affectedArmor = std::max(*affectedArmor - damage, 0.0f);
-
-  health.health -= overflowDamage;*/
-
-    std::cout << "post armor normal_damage " << d.normal_damage << std::endl;
     health.DealDamage(d);
 
-  // We calculate and return the percent (of something)
+    // We calculate and return the percent (of something)
     int facet_index = armor.GetFacetIndex(core_vector);
     DamageableFacet facet = armor.facets[facet_index];
     float denominator = facet.health.health + health.health;
-  float percent = damage/denominator; //(denominator > absdamage && denom != 0) ? absdamage/denom : (denom == 0 ? 0.0 : 1.0);
+    float percent = damage/denominator; //(denominator > absdamage && denom != 0) ? absdamage/denom : (denom == 0 ? 0.0 : 1.0);
 
-  return percent;
+    return percent;
 }
 
 
 
 float Damageable::MaxShieldVal() const
 {
-    float maxshield = 0;
-    switch (shield.number)
-    {
-    case 2:
-        maxshield = .5*(shield.shield2fb.frontmax+shield.shield2fb.backmax);
-        break;
-    case 4:
-        maxshield = .25
-                    *(shield.shield4fbrl.frontmax+shield.shield4fbrl.backmax+shield.shield4fbrl.leftmax
-                      +shield.shield4fbrl.rightmax);
-        break;
-    case 8:
-        maxshield = .125
-                    *(shield.shield8.frontrighttopmax+shield.shield8.backrighttopmax+shield.shield8.frontlefttopmax
-                      +shield.shield8.backlefttopmax+shield.shield8.frontrightbottommax+shield.shield8.backrightbottommax
-                      +shield.shield8.frontleftbottommax+shield.shield8.backleftbottommax);
-        break;
-    }
-    return maxshield;
+    return static_cast<DamageableLayer>(shield).AverageMaxLayerValue();
 }
 
 
 
 
-float Damageable::totalShieldEnergyCapacitance( const Shield &shield )
+float Damageable::totalShieldEnergyCapacitance( const DamageableLayer &shield )
 {
+    float total_max_shield_value = static_cast<DamageableLayer>(shield).TotalMaxLayerValue();
+    float total_current_shield_value = static_cast<DamageableLayer>(shield).TotalLayerValue();
+
     static float shieldenergycap =
         XMLSupport::parse_float( vs_config->getVariable( "physics", "shield_energy_capacitance", ".2" ) );
     static bool  use_max_shield_value =
         XMLSupport::parse_bool( vs_config->getVariable( "physics", "use_max_shield_energy_usage", "false" ) );
-    return shieldenergycap*(use_max_shield_value ? totalShieldVal( shield ) : currentTotalShieldVal( shield ));
+    return shieldenergycap*(use_max_shield_value ? total_max_shield_value : total_current_shield_value);
 }
 
 
@@ -412,46 +201,9 @@ bool Damageable::withinShield( const ShieldFacing &facing, float theta, float rh
                  && theta < facing.thetamax) || (theta360 >= facing.thetamin && theta360 < facing.thetamax) );
 }
 
-float Damageable::totalShieldVal( const Shield &shield )
-{
-    float maxshield = 0;
-    switch (shield.number)
-    {
-    case 2:
-        maxshield = shield.shield2fb.frontmax+shield.shield2fb.backmax;
-        break;
-    case 4:
-        maxshield = shield.shield4fbrl.frontmax+shield.shield4fbrl.backmax+shield.shield4fbrl.leftmax
-                    +shield.shield4fbrl.rightmax;
-        break;
-    case 8:
-        maxshield = shield.shield8.frontrighttopmax+shield.shield8.backrighttopmax+shield.shield8.frontlefttopmax
-                    +shield.shield8.backlefttopmax+shield.shield8.frontrightbottommax+shield.shield8.backrightbottommax
-                    +shield.shield8.frontleftbottommax+shield.shield8.backleftbottommax;
-        break;
-    }
-    return maxshield;
-}
 
-float Damageable::currentTotalShieldVal( const Shield &shield )
-{
-    float maxshield = 0;
-    switch (shield.number)
-    {
-    case 2:
-        maxshield = shield.shield2fb.front+shield.shield2fb.back;
-        break;
-    case 4:
-        maxshield = shield.shield4fbrl.front+shield.shield4fbrl.back+shield.shield4fbrl.left+shield.shield4fbrl.right;
-        break;
-    case 8:
-        maxshield = shield.shield8.frontrighttop+shield.shield8.backrighttop+shield.shield8.frontlefttop
-                    +shield.shield8.backlefttop+shield.shield8.frontrightbottom+shield.shield8.backrightbottom
-                    +shield.shield8.frontleftbottom+shield.shield8.backleftbottom;
-        break;
-    }
-    return maxshield;
-}
+
+
 
 bool Damageable::flickerDamage()
 {

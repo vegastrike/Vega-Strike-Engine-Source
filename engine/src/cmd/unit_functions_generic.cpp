@@ -81,29 +81,12 @@ Unit * CreateGameTurret( std::string tur, int faction )
 
 void SetShieldZero( Unit *un )
 {
-    switch (un->shield.number)
-    {
-    case 8:
-
-        un->shield.shield8.frontlefttop =
-            un->shield.shield8.frontrighttop   =
-                un->shield.shield8.backlefttop =
-                    un->shield.shield8.backrighttop =
-                        un->shield.shield8.frontleftbottom =
-                            un->shield.shield8.frontrightbottom   =
-                                un->shield.shield8.backleftbottom =
-                                    un->shield.shield8.backrightbottom = 0;
-        break;
-    case 4:
-        un->shield.shield4fbrl.front        =
-            un->shield.shield4fbrl.back     =
-                un->shield.shield4fbrl.left =
-                    un->shield.shield4fbrl.right = 0;
-        break;
-    case 2:
-        un->shield.shield2fb.front = un->shield.shield2fb.back = 0;
-        break;
-    }
+    // TODO: get rid of this function - it does two different things for cloaking and jumping.
+    // It appears this doesn't disable the shield but just zeroes it out.
+    // In the case of cloaked ships, this is the expected behavior.
+    // In the case of jump, this is not the expected behavior.
+    un->shield.Disable();
+    un->shield.Enable();
 }
 
 //un scored a faction kill

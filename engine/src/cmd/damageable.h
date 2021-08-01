@@ -41,7 +41,7 @@ public:
     // Doesn't really matter, but documenting anyway.
 
     DamageableLayer armor;
-    Shield shield;
+    DamageableLayer shield;
 
     Health health;
 
@@ -82,7 +82,7 @@ public:
 //  }
   float GetHullPercent() const
   {
-      return static_cast<Health>(health).percent();
+      return static_cast<Health>(health).Percent();
   }
 
   //reduces shields to X percentage and reduces shield recharge to Y percentage
@@ -97,7 +97,7 @@ public:
 
   static float totalShieldVal( const Shield &shield );
   static float currentTotalShieldVal( const Shield &shield );
-  static float totalShieldEnergyCapacitance( const Shield &shield );
+  static float totalShieldEnergyCapacitance( const DamageableLayer &shield );
 
 protected:
   bool flickerDamage();

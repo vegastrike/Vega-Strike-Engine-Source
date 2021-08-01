@@ -49,6 +49,8 @@
 #include "mount_size.h"
 #include "weapon_info.h"
 
+#include "damage/damageable_factory.h"
+
 CSVRow LookupUnitRow( const string &unitname, const string &faction ) {
     string hashname = unitname+"__"+faction;
     for (vector< CSVTable* >::reverse_iterator i = unitTables.rbegin(); i != unitTables.rend(); ++i) {
@@ -699,6 +701,9 @@ const std::string EMPTY_STRING( "" );
 
 #define OPTIM_GET( rot, table, variable ) OPTIM_GET_DEF( row, table, variable, EMPTY_STRING )
 
+
+
+
 void Unit::LoadRow( CSVRow &row, string modification, string *netxml )
 {
     CSVTable *table = row.getParent();
@@ -1025,179 +1030,100 @@ void Unit::LoadRow( CSVRow &row, string modification, string *netxml )
     health.health = health.max_health = ::stof( OPTIM_GET( row, table, Hull ) );
     specInterdiction = ::stof( OPTIM_GET( row, table, Spec_Interdiction ) );
 
-    // TODO: Figure out if we're assining to the right facet
-    armor.facets[0].health.health = ::stof( OPTIM_GET( row, table, Armor_Front_Top_Left ) );
-    armor.facets[2].health.health = ::stof( OPTIM_GET( row, table, Armor_Front_Top_Right ) );
-    armor.facets[4].health.health = ::stof( OPTIM_GET( row, table, Armor_Back_Top_Left ) );
-    armor.facets[6].health.health = ::stof( OPTIM_GET( row, table, Armor_Back_Top_Right ) );
-    armor.facets[1].health.health = ::stof( OPTIM_GET( row, table, Armor_Front_Bottom_Left ) );
-    armor.facets[3].health.health = ::stof( OPTIM_GET( row, table, Armor_Front_Bottom_Right ) );
-    armor.facets[5].health.health = ::stof( OPTIM_GET( row, table, Armor_Back_Bottom_Left ) );
-    armor.facets[7].health.health = ::stof( OPTIM_GET( row, table, Armor_Back_Bottom_Right ) );
+    // Init armor
+    float armor_values[8];
+    armor_values[0] = ::stof( OPTIM_GET( row, table, Armor_Front_Top_Left ));
+    armor_values[1] = ::stof( OPTIM_GET( row, table, Armor_Front_Top_Right ));
+    armor_values[2] = ::stof( OPTIM_GET( row, table, Armor_Front_Bottom_Left ));
+    armor_values[3] = ::stof( OPTIM_GET( row, table, Armor_Front_Bottom_Right ));
+    armor_values[4] = ::stof( OPTIM_GET( row, table, Armor_Back_Top_Left ));
+    armor_values[5] = ::stof( OPTIM_GET( row, table, Armor_Back_Top_Right ));
+    armor_values[6] = ::stof( OPTIM_GET( row, table, Armor_Back_Bottom_Left ));
+    armor_values[7] = ::stof( OPTIM_GET( row, table, Armor_Back_Bottom_Right ));
 
-    armor.facets[0].health.max_health = armor.facets[0].health.health;
-    armor.facets[1].health.max_health = armor.facets[1].health.health;
-    armor.facets[2].health.max_health = armor.facets[2].health.health;
-    armor.facets[3].health.max_health = armor.facets[3].health.health;
-    armor.facets[4].health.max_health = armor.facets[4].health.health;
-    armor.facets[5].health.max_health = armor.facets[5].health.health;
-    armor.facets[6].health.max_health = armor.facets[6].health.health;
-    armor.facets[7].health.max_health = armor.facets[7].health.health;
+    armor = DamageableFactory::CreateLayer(FacetConfiguration::eight,
+                                           armor_values,
+                                           0.0f,
+                                           false);
 
-    int    shieldcount = 0;
-    Shield two;
-    Shield four;
-    Shield eight;
-/*    It looks like the shields are initialized properly anyways
- *    memset( &two, 0, sizeof (Shield) );
- *    memset( &four, 0, sizeof (Shield) );
- *    memset( &eight, 0, sizeof (Shield) );
- */
-    shieldcount += AssignIf( OPTIM_GET( row, table, Shield_Front_Top_Right ),
-                             two.shield2fb.front, four.shield4fbrl.front, eight.shield8.frontrighttop );
-    shieldcount += AssignIf( OPTIM_GET( row, table, Shield_Front_Top_Left ),
-                             two.shield2fb.front, four.shield4fbrl.front, eight.shield8.frontlefttop );
-    shieldcount += AssignIf( OPTIM_GET( row, table, Shield_Back_Top_Left ),
-                             two.shield2fb.back, four.shield4fbrl.back, eight.shield8.backlefttop );
-    shieldcount += AssignIf( OPTIM_GET( row, table, Shield_Back_Top_Right ),
-                             two.shield2fb.back, four.shield4fbrl.back, eight.shield8.backrighttop );
-    shieldcount += AssignIf( OPTIM_GET( row, table, Shield_Front_Bottom_Left ),
-                             two.shield2fb.front, four.shield4fbrl.left, eight.shield8.frontleftbottom );
-    shieldcount += AssignIf( OPTIM_GET( row, table, Shield_Front_Bottom_Right ),
-                             two.shield2fb.front, four.shield4fbrl.right, eight.shield8.frontrightbottom );
-    shieldcount += AssignIf( OPTIM_GET( row, table, Shield_Back_Bottom_Left ),
-                             two.shield2fb.back, four.shield4fbrl.left, eight.shield8.backleftbottom );
-    shieldcount += AssignIf( OPTIM_GET( row, table, Shield_Back_Bottom_Right ),
-                             two.shield2fb.back, four.shield4fbrl.right, eight.shield8.backrightbottom );
-    two.shield2fb.frontmax = two.shield2fb.front;
-    two.shield2fb.backmax = two.shield2fb.back;
-    four.shield4fbrl.frontmax = four.shield4fbrl.front;
-    four.shield4fbrl.backmax = four.shield4fbrl.back;
-    four.shield4fbrl.rightmax = four.shield4fbrl.right;
-    four.shield4fbrl.leftmax = four.shield4fbrl.left;
-    eight.shield8.frontlefttopmax     = eight.shield8.frontlefttop;
-    eight.shield8.frontrighttopmax    = eight.shield8.frontrighttop;
-    eight.shield8.backrighttopmax     = eight.shield8.backrighttop;
-    eight.shield8.backlefttopmax      = eight.shield8.backlefttop;
-    eight.shield8.frontleftbottommax  = eight.shield8.frontleftbottom;
-    eight.shield8.frontrightbottommax = eight.shield8.frontrightbottom;
-    eight.shield8.backrightbottommax  = eight.shield8.backrightbottom;
-    eight.shield8.backleftbottommax   = eight.shield8.backleftbottom;
-    float r45  = VS_PI/4;
-    float r90  = VS_PI/2;
-    float r135 = 3*VS_PI/4;
-    float r180 = VS_PI;
-    float r225 = 5*VS_PI/4;
-    float r270 = 3*VS_PI/2;
-    float r315 = 7*VS_PI/4;
-    float r360 = 2*VS_PI;
-    int   iter;
-    if (shieldcount > MAX_SHIELD_NUMBER)
-        shieldcount = MAX_SHIELD_NUMBER;
- //   memset( shield.range, 0, sizeof (shield.range) );   The range is properly initialized anyways
-    if (shieldcount == 8) {
-        shield.number = 8;
-        shield.shield.cur[0]     = shield.shield.max[0] = eight.shield8.frontlefttopmax;
-        shield.range[0].thetamin = 0;
-        shield.range[0].thetamax = r90;
-        shield.range[0].rhomin   = 0;
-        shield.range[0].rhomax   = r90;
+    // Load shield
+    // Some basic shield variables
+    // TODO: lib_damage figure out how leak and efficiency work
+    char leak = (char) (::stof( OPTIM_GET( row, table, Shield_Leak ) )*100.0);
+    float recharge   = ::stof( OPTIM_GET( row, table, Shield_Recharge ) );
+    float efficiency = ::stof( OPTIM_GET( row, table, Shield_Efficiency ), 1.0 );
 
-        shield.shield.cur[1]     = shield.shield.max[1] = eight.shield8.backlefttopmax;
-        shield.range[1].thetamin = r90;
-        shield.range[1].thetamax = r180;
-        shield.range[1].rhomin   = 0;
-        shield.range[1].rhomax   = r90;
+    // Get shield count
+    int    shield_count = 0;
+    float shield_values[8];
 
-        shield.shield.cur[2]     = shield.shield.max[2] = eight.shield8.frontrighttopmax;
-        shield.range[2].thetamin = r270;
-        shield.range[2].thetamax = r360;
-        shield.range[2].rhomin   = 0;
-        shield.range[2].rhomax   = r90;
+    shield_values[0] = ::stof(OPTIM_GET( row, table, Shield_Front_Top_Left ));
+    shield_values[1] = ::stof(OPTIM_GET( row, table, Shield_Front_Top_Right ));
+    shield_values[2] = ::stof(OPTIM_GET( row, table, Shield_Back_Top_Left ));
+    shield_values[3] = ::stof(OPTIM_GET( row, table, Shield_Back_Top_Right ));
+    shield_values[4] = ::stof(OPTIM_GET( row, table, Shield_Front_Bottom_Left ));
+    shield_values[5] = ::stof(OPTIM_GET( row, table, Shield_Front_Bottom_Right ));
+    shield_values[6] = ::stof(OPTIM_GET( row, table, Shield_Back_Bottom_Left ));
+    shield_values[7] = ::stof(OPTIM_GET( row, table, Shield_Back_Bottom_Right ));
 
-        shield.shield.cur[3]     = shield.shield.max[3] = eight.shield8.backrighttopmax;
-        shield.range[3].thetamin = r180;
-        shield.range[3].thetamax = r270;
-        shield.range[3].rhomin   = 0;
-        shield.range[3].rhomax   = r90;
 
-        shield.shield.cur[4]     = shield.shield.max[4] = eight.shield8.frontleftbottommax;
-        shield.range[4].thetamin = 0;
-        shield.range[4].thetamax = r90;
-        shield.range[4].rhomin   = -r90;
-        shield.range[4].rhomax   = 0;
-
-        shield.shield.cur[5]     = shield.shield.max[5] = eight.shield8.backleftbottommax;
-        shield.range[5].thetamin = r90;
-        shield.range[5].thetamax = r180;
-        shield.range[5].rhomin   = -r90;
-        shield.range[5].rhomax   = 0;
-
-        shield.shield.cur[6]     = shield.shield.max[6] = eight.shield8.frontrightbottommax;
-        shield.range[6].thetamin = r270;
-        shield.range[6].thetamax = r360;
-        shield.range[6].rhomin   = -r90;
-        shield.range[6].rhomax   = 0;
-
-        shield.shield.cur[7]     = shield.shield.max[7] = eight.shield8.backrightbottommax;
-        shield.range[7].thetamin = r180;
-        shield.range[7].thetamax = r270;
-        shield.range[7].rhomin   = -r90;
-        shield.range[7].rhomax   = 0;
-    } else if (shieldcount == 4) {
-        shield.number = 4;
-
-        shield.shield.cur[0]     = shield.shield.max[0] = four.shield4fbrl.frontmax;
-        shield.range[0].thetamin = r315;
-        shield.range[0].thetamax = r360+r45;
-        shield.range[0].rhomin   = -r90;
-        shield.range[0].rhomax   = r90;
-
-        shield.shield.cur[1]     = shield.shield.max[1] = four.shield4fbrl.backmax;
-        shield.range[1].thetamin = r135;
-        shield.range[1].thetamax = r225;
-        shield.range[1].rhomin   = -r90;
-        shield.range[1].rhomax   = r90;
-
-        shield.shield.cur[2]     = shield.shield.max[2] = four.shield4fbrl.rightmax;
-        shield.range[2].thetamin = r225;
-        shield.range[2].thetamax = r315;
-        shield.range[2].rhomin   = -r90;
-        shield.range[2].rhomax   = r90;
-
-        shield.shield.cur[3]     = shield.shield.max[3] = four.shield4fbrl.leftmax;
-        shield.range[3].thetamin = r45;
-        shield.range[3].thetamax = r225;
-        shield.range[3].rhomin   = -r90;
-        shield.range[3].rhomax   = r90;
-    } else if (shieldcount == 2) {
-        shield.number = 2;
-
-        shield.shield.cur[0]     = shield.shield.max[0] = four.shield2fb.frontmax;
-        shield.range[0].thetamin = r270;
-        shield.range[0].thetamax = r360+r90;
-        shield.range[0].rhomin   = -r90;
-        shield.range[0].rhomax   = r90;
-
-        shield.shield.cur[1]     = shield.shield.max[1] = four.shield2fb.backmax;
-        shield.range[1].thetamin = r90;
-        shield.range[1].thetamax = r270;
-        shield.range[1].rhomin   = -r90;
-        shield.range[1].rhomax   = r90;
-    } else {
-        //No shields
-        shield.number = 0;
+    for(int i=0;i<8;i++) {
+        if(shield_values[i]) {
+            shield_count++;
+        }
     }
-    for (iter = 0; iter < shieldcount; ++iter) {
-        std::string shieldname = "Shield_"+XMLSupport::tostring( iter );
-        AssignIfDeg( row[shieldname+"_Min_Theta"], shield.range[iter].thetamin );
-        AssignIfDeg( row[shieldname+"_Max_Theta"], shield.range[iter].thetamax );
-        AssignIfDeg( row[shieldname+"_Min_Rho"], shield.range[iter].rhomin );
-        AssignIfDeg( row[shieldname+"_Max_Rho"], shield.range[iter].rhomax );
+
+    // This is ugly and unreliable. It assumes that the csv is correct.
+    switch(shield_count) {
+    case 1:
+        // No shields
+        shield = DamageableFactory::CreateLayer(FacetConfiguration::one,
+                                                shield_values,
+                                                0.0f,
+                                                false);
+        break;
+    case 2:
+        shield_values[0] += shield_values[1] + shield_values[4] + shield_values[5];
+        shield_values[1] = shield_values[2] + shield_values[3]
+                + shield_values[6] + shield_values[7];
+        shield = DamageableFactory::CreateLayer(FacetConfiguration::two,
+                                                shield_values,
+                                                recharge,
+                                                false);
+        break;
+    case 4:
+        float four_shield_values[4];
+        four_shield_values[0] = shield_values[4] + shield_values[6]; // Left
+        four_shield_values[1] = shield_values[5] + shield_values[7]; // Right
+        four_shield_values[2] = shield_values[0] + shield_values[1]; // Left
+        four_shield_values[3] = shield_values[2] + shield_values[3]; // Left
+
+        shield = DamageableFactory::CreateLayer(FacetConfiguration::four,
+                                                four_shield_values,
+                                                recharge,
+                                                false);
+        break;
+    case 6:
+        // Not supported yet
+    case 8:
+        // We are not in the right order
+        float eight_shield_values[8];
+        eight_shield_values[0] = shield_values[0];
+        eight_shield_values[1] = shield_values[1];
+        eight_shield_values[2] = shield_values[4];
+        eight_shield_values[3] = shield_values[5];
+        eight_shield_values[4] = shield_values[2];
+        eight_shield_values[5] = shield_values[3];
+        eight_shield_values[6] = shield_values[6];
+        eight_shield_values[7] = shield_values[7];
+        shield = DamageableFactory::CreateLayer(FacetConfiguration::eight,
+                                                eight_shield_values,
+                                                recharge,
+                                                false);
+        break;
     }
-    shield.leak = (char) (::stof( OPTIM_GET( row, table, Shield_Leak ) )*100.0);
-    shield.recharge   = ::stof( OPTIM_GET( row, table, Shield_Recharge ) );
-    shield.efficiency = ::stof( OPTIM_GET( row, table, Shield_Efficiency ), 1.0 );
+
+    // End shield section
 
     static bool WCfuelhack = XMLSupport::parse_bool( vs_config->getVariable( "physics", "fuel_equals_warp", "false" ) );
     maxwarpenergy     = warpenergy = ::stof( OPTIM_GET( row, table, Warp_Capacitor ) );
@@ -1635,7 +1561,7 @@ string Unit::WriteUnitString()
                 unit["Hull"] = tos( health.health );
                 unit["Spec_Interdiction"] = tos( specInterdiction );
 
-                // TODO: figure out if this is correctly assigned
+                // TODO: lib_damage figure out if this is correctly assigned
                 unit["Armor_Front_Top_Left"]     = tos( armor.facets[0].health.health );
                 unit["Armor_Front_Top_Right"]    = tos( armor.facets[2].health.health );
                 unit["Armor_Back_Top_Left"]      = tos( armor.facets[4].health.health );
@@ -1653,34 +1579,39 @@ string Unit::WriteUnitString()
                     unit["Shield_Front_Bottom_Left"]  = "";
                     unit["Shield_Back_Bottom_Right"]  = "";
                     unit["Shield_Back_Bottom_Left"]   = "";
-                    switch (shield.number)
+                    switch (shield.number_of_facets)
                     {
                     case 8:
-                        unit["Shield_Front_Top_Right"]    = tos( shield.shield8.frontrighttopmax );
-                        unit["Shield_Front_Top_Left"]     = tos( shield.shield8.frontlefttopmax );
-                        unit["Shield_Back_Top_Right"]     = tos( shield.shield8.backrighttopmax );
-                        unit["Shield_Back_Top_Left"]      = tos( shield.shield8.backlefttopmax );
-                        unit["Shield_Front_Bottom_Right"] = tos( shield.shield8.frontrightbottommax );
-                        unit["Shield_Front_Bottom_Left"]  = tos( shield.shield8.frontleftbottommax );
-                        unit["Shield_Back_Bottom_Right"]  = tos( shield.shield8.backrightbottommax );
-                        unit["Shield_Back_Bottom_Left"]   = tos( shield.shield8.backleftbottommax );
+                        unit["Shield_Front_Top_Left"]     = tos( shield.facets[0].health.max_health );
+                        unit["Shield_Front_Top_Right"]    = tos( shield.facets[1].health.max_health );
+                        unit["Shield_Front_Bottom_Left"]  = tos( shield.facets[2].health.max_health );
+                        unit["Shield_Front_Bottom_Right"] = tos( shield.facets[3].health.max_health );
+                        unit["Shield_Back_Top_Left"]      = tos( shield.facets[4].health.max_health );
+                        unit["Shield_Back_Top_Right"]     = tos( shield.facets[5].health.max_health );
+                        unit["Shield_Back_Bottom_Left"]   = tos( shield.facets[6].health.max_health );
+                        unit["Shield_Back_Bottom_Right"]  = tos( shield.facets[7].health.max_health );
+
                         break;
                     case 4:
-                        unit["Shield_Front_Top_Right"]    = tos( shield.shield4fbrl.frontmax );
-                        unit["Shield_Back_Top_Right"]     = tos( shield.shield4fbrl.backmax );
-                        unit["Shield_Front_Bottom_Right"] = tos( shield.shield4fbrl.rightmax );
-                        unit["Shield_Front_Bottom_Left"]  = tos( shield.shield4fbrl.leftmax );
+                        unit["Shield_Front_Bottom_Left"]  = tos( shield.facets[0].health.max_health );
+                        unit["Shield_Front_Bottom_Right"] = tos( shield.facets[1].health.max_health );
+                        unit["Shield_Front_Top_Right"]    = tos( shield.facets[2].health.max_health );
+                        unit["Shield_Back_Top_Right"]     = tos( shield.facets[3].health.max_health );
+
                         break;
                     case 2:
-                        unit["Shield_Front_Top_Right"]    = tos( shield.shield2fb.frontmax );
-                        unit["Shield_Back_Top_Right"]     = tos( shield.shield2fb.backmax );
+                        unit["Shield_Front_Top_Right"]    = tos( shield.facets[0].health.max_health );
+                        unit["Shield_Back_Top_Right"]     = tos( shield.facets[1].health.max_health );
                         break;
                         //NOTE: otherwise, no shields
                     }
                 }
-                unit["Shield_Leak"] = tos( shield.leak/100.0 );
-                unit["Shield_Recharge"] = tos( shield.recharge );
-                unit["Shield_Efficiency"] = tos( shield.efficiency );
+
+
+                //TODO: lib_damage shield leak and efficiency
+                unit["Shield_Leak"] = tos(0); //tos( shield.leak/100.0 );
+                unit["Shield_Recharge"] = tos(shield.facets[0].health.regeneration); //tos( shield.recharge );
+                unit["Shield_Efficiency"] = tos(0); //tos( shield.efficiency );
                 unit["Warp_Capacitor"] = tos( maxwarpenergy );
                 unit["Warp_Min_Multiplier"] = tos( graphicOptions.MinWarpMultiplier );
                 unit["Warp_Max_Multiplier"] = tos( graphicOptions.MaxWarpMultiplier );

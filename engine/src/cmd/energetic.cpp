@@ -67,14 +67,14 @@ void Energetic::decreaseWarpEnergy( bool insys, float time )
 float Energetic::energyData() const
 {
     const Damageable *damageable = reinterpret_cast<const Damageable*>(this);
-    const Shield shield = damageable->shield;
+    //const DamageableLayer shield = damageable->shield;
 
     static bool max_shield_lowers_capacitance =
         GameConfig::GetVariable( "physics", "max_shield_lowers_capacitance", false );
     if (max_shield_lowers_capacitance) {
-        if ( maxenergy <= damageable->totalShieldEnergyCapacitance( shield ) )
+        if ( maxenergy <= damageable->totalShieldEnergyCapacitance( damageable->shield ) )
             return 0;
-        return ( (float) energy )/( maxenergy-damageable->totalShieldEnergyCapacitance( shield ) );
+        return ( (float) energy )/( maxenergy-damageable->totalShieldEnergyCapacitance( damageable->shield ) );
     } else {
         return ( (float) energy )/maxenergy;
     }
@@ -222,8 +222,8 @@ void Energetic::setMaxEnergy( float maxen )
 float Energetic::shieldRechargeData() const
 {
     const Damageable *damageable = reinterpret_cast<const Damageable*>(this);
-    const Shield shield = damageable->shield;
-    return shield.recharge;
+    const DamageableLayer shield = damageable->shield;
+    return shield.facets[0].health.regeneration;
 }
 
 

@@ -19,13 +19,18 @@
 struct Health
 {
 public:
-    float max_health;
+    float factory_max_health; // The absolute maximum, for a new, undamaged part
+    float max_health; // The current max, for a potentially damaged part
+    float adjusted_health;  // Max health for shields when there's not enough power for them
     float health;
-    float regeneration;
+    float factory_regeneration;  // The absolute maximum, for a new, undamaged part
+    float regeneration; // The current capability of a potentially damaged part
     bool regenerative;
     bool destroyed;
     bool enabled;
     Damage vulnerabilities;
+
+    // TODO: implement "shield leaks"
 
     /**
      * @brief The Effect enum specifies what happens when the health of a specific object is zero.
@@ -38,22 +43,35 @@ public:
         destroying  // The DamageableObject is destroyed, potentially leaving debris behind
     } effect;
 
-    Health(float max_health = 1, float health = 1, float regeneration = 0) :
-        max_health(max_health), health(health), regeneration(regeneration), regenerative(regeneration > 0) {
+    Health(float health = 1, float regeneration = 0) :
+        Health(health, health, regeneration) {}
+
+
+    Health(float max_health, float health, float regeneration) :
+        factory_max_health(max_health),
+        max_health(max_health),
+        adjusted_health(max_health),
+        health(health),
+        factory_regeneration(regeneration),
+        regeneration(regeneration),
+        regenerative(regeneration > 0) {
         destroyed = false;
         enabled = regenerative; // Only relevant for regenerative objects (e.g. shields).
         vulnerabilities.normal_damage = 1;
         vulnerabilities.phase_damage = 1;
     };
 
-    float percent() {
+    float Percent() {
         return max_health != 0 ? health/max_health : health;
     }
 
+    void AdjustPower(const float& percent);
     void DealDamage( Damage &damage );
     void DealDamageComponent( float &damage, float vulnerability );
     void Disable();
     void Enable();
+    void ReduceLayerMaximum(const float& percent);
+    void ReduceRegeneration(const float& percent);
     void Regenerate();
 };
 

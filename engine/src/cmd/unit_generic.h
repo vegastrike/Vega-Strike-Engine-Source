@@ -487,7 +487,7 @@ public:
  **** XML STUFF                                                                     ***
  **************************************************************************************
  */
-
+// TODO: remove all of this. It's unused.
 public:
 //Unit XML Load information
     struct XML;
@@ -503,7 +503,6 @@ public:
 protected:
     static std::string massSerializer( const struct XMLType &input, void *mythis );
     static std::string mountSerializer( const struct XMLType &input, void *mythis );
-    static std::string shieldSerializer( const struct XMLType &input, void *mythis );
     static std::string subunitSerializer( const struct XMLType &input, void *mythis );
 
 public:

@@ -3,6 +3,26 @@
 #include <algorithm>
 #include <iostream>
 
+
+
+void Health::AdjustPower(const float& percent) {
+    if(!regenerative) {
+        // Not applicable for armor and hull
+        return;
+    }
+
+    if(percent > 1 || percent < 0) {
+        // valid values are between 0 and 1
+        return;
+    }
+
+    adjusted_health = max_health * percent;
+
+    if(adjusted_health < health) {
+        health = adjusted_health;
+    }
+}
+
 void Health::DealDamage( Damage &damage ) {
     // If this layer is destroyed, it can no longer sustain damage
     if(destroyed) {
@@ -59,6 +79,14 @@ void Health::Enable() {
     }
 }
 
+void Health::ReduceLayerMaximum(const float& percent) {
+    max_health = std::max(0.0f, max_health - factory_max_health * percent);
+    health = std::min(health, max_health);
+}
+
+void Health::ReduceRegeneration(const float& percent) {
+    regeneration = std::max(0.0f, regeneration - factory_regeneration * percent);
+}
 
 void Health::Regenerate() {
     if(!enabled || destroyed || !regenerative) {

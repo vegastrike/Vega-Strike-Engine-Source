@@ -1053,6 +1053,13 @@ float GameCockpit::LookupUnitStat( int stat, Unit *target )
     float armordat[8];     //short fix
     int   armori;
     Unit *tmpunit;
+
+    // TODO: lib_damage
+    // make sure the enums are in the right order as our
+    // facet_configuration
+    // Also, can't be defined within switch for some reason
+    int shield_index = stat-UnitImages < void > ::SHIELDF;
+
     if (shield8) {
         switch (stat)
         {
@@ -1064,10 +1071,17 @@ float GameCockpit::LookupUnitStat( int stat, Unit *target )
         case UnitImages< void >::SHIELD5:
         case UnitImages< void >::SHIELD6:
         case UnitImages< void >::SHIELD7:
-            if (target->shield.shield.max[stat-UnitImages < void > ::SHIELDF])
-                return target->shield.shield.cur[stat-UnitImages < void
-                                                 > ::SHIELDF]/target->shield.shield.max[stat-UnitImages < void > ::SHIELDF];
-            else return 0;
+            // TODO: lib_damage
+            // Not really sure what this is supposed to return.
+            // Probably a percent of the current/max shield values.
+            // Subtracing enum SHIELDF (first shield gauge) converts the
+            // stat parameter to the index of the shield.
+
+            if (target->shield.number_of_facets > shield_index) {
+                return target->shield.facets[shield_index].health.Percent();
+            } else {
+                return 0;
+            }
         default:
             break;
         }

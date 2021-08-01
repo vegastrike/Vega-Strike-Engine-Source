@@ -1658,8 +1658,9 @@ void FireKeyboard::Execute()
     }
 
     if (f().shieldpowerstate != 1) {
-        Shield *shield = &parent->shield;
-        PowerDownShield( shield, f().shieldpowerstate );
+        // TODO: lib_damage
+        // Shield *shield = &parent->shield;
+        // PowerDownShield( shield, f().shieldpowerstate );
     }
     if (f().firekey == PRESS || f().jfirekey == PRESS || j().firekey == DOWN || j().jfirekey == DOWN) {
         if ( !_Universe->AccessCockpit()->CanDrawNavSystem() ) {

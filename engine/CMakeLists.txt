@@ -91,6 +91,7 @@ SET(LIBDAMAGE
     src/damage/damageable_factory.cpp
     src/damage/damageable_layer.cpp
     src/damage/damageable_object.cpp
+    src/damage/facet_configuration.cpp
     src/damage/health.cpp
     )
 
