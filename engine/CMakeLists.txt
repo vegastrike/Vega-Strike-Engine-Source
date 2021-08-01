@@ -1409,7 +1409,7 @@ ELSEIF (CMAKE_SYSTEM_NAME STREQUAL Linux)
             ENDIF (USE_DEBIAN_VERSION)
         ENDIF (EXISTS "${CMAKE_BINARY_DIR}/dependency.list")
 
-        # Alternatively, just set a hard-coded set of dependencies...requires more logic for various platforms.
+        # # Alternatively, just set a hard-coded set of dependencies...requires more logic for various platforms.
         IF (USE_DEBIAN_VERSION)
             # Add the platform (Ubuntu, Debian, etc) to the filename, including the version (stretch, jessie, etc)
             SET(CPACK_PACKAGE_FILE_NAME "${CPACK_DEBIAN_PACKAGE_NAME}_${VEGA_STRIKE_PACKAGE_VERSION_STR}-${VEGA_STRIKE_PYTHON_VERSION_STR}-debian-${DEBIAN_RELEASE_VERSION}_x86_64")
