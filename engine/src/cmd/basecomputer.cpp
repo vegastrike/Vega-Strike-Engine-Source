@@ -5326,18 +5326,19 @@ void showUnitStats( Unit *playerUnit, string &text, int subunitlevel, int mode, 
             break;
         }
     }
-    // TODO: lib_damage
-    /*if (!mode) {
-        if (playerUnit->shield.number) {
-            PRETTY_ADD( statcolor+"Number of shield emitter facings: #-c", playerUnit->shield.number, 0 );
+
+    // Shields
+    const int num_shields = playerUnit->shield.number_of_facets;
+    const float first_shield_max_health = playerUnit->shield.facets[0].health.factory_max_health;
+    if (!mode) {
+        if (num_shields) {
+            PRETTY_ADD( statcolor+"Number of shield emitter facings: #-c", num_shields, 0 );
             text += "#n#"+prefix+statcolor+"Shield protection rating:#-c";
         } else {
             text += "#n#"+prefix+statcolor+"No shielding. #-c";
         }
-    } else if ( playerUnit->shield.number
-               && ( MODIFIES(replacement_mode, playerUnit, blankUnit, shield.shield2fb.frontmax)
-                   || MODIFIES(replacement_mode, playerUnit, blankUnit, shield.shield4fbrl.frontmax)
-                   || MODIFIES(replacement_mode, playerUnit, blankUnit, shield.shield8.frontrightbottommax) ) ) {
+    } else if ( num_shields
+               && MODIFIES(replacement_mode, playerUnit, blankUnit, shield.facets[0].health.factory_max_health)) {
         switch (replacement_mode) {
         case 0:                         //Replacement or new Module
             text += "#n#"+prefix+statcolor+"Installs shield with following protection ratings:#-c";
@@ -5353,141 +5354,51 @@ void showUnitStats( Unit *playerUnit, string &text, int subunitlevel, int mode, 
             break;
         }
     }
-    switch (playerUnit->shield.number)
-    {
-    case 0:
-        break;
-    case 2:
-        if (!mode || MODIFIES(replacement_mode, playerUnit, blankUnit, shield.shield2fb.frontmax)) {
-            PRETTY_ADDU(
-                substatcolor+" - fore: #-c",
-                (mode && replacement_mode == 2) ? ( 100.0
-                                                   *(playerUnit->shield.shield2fb.backmax
-                                                     -1) ) : playerUnit->shield.shield2fb.frontmax*VSDM,
-                0,
-                (2 == replacement_mode) ? "%" : "MJ" );
-            PRETTY_ADDU(
-                substatcolor+" - aft: #-c",
-                (mode && replacement_mode == 2) ? ( 100.0
-                                                   *(playerUnit->shield.shield2fb.backmax
-                                                     -1) ) : playerUnit->shield.shield2fb.backmax*VSDM,
-                0,
-                (2 == replacement_mode) ? "%" : "MJ" );
-        }
-        break;
-    case 4:
-        if (!mode || MODIFIES(replacement_mode, playerUnit, blankUnit, shield.shield4fbrl.frontmax)) {
-            PRETTY_ADDU(
-                substatcolor+" - fore: #-c",
-                (mode && replacement_mode == 2) ? ( 100.0
-                                                   *(playerUnit->shield.shield4fbrl.frontmax
-                                                     -1) ) : playerUnit->shield.shield4fbrl.frontmax*VSDM,
-                0,
-                (2 == replacement_mode) ? "%" : "MJ" );
-            PRETTY_ADDU(
-                substatcolor+" - aft: #-c",
-                (mode && replacement_mode == 2) ? ( 100.0
-                                                   *(playerUnit->shield.shield4fbrl.backmax
-                                                     -1) ) : playerUnit->shield.shield4fbrl.backmax*VSDM,
-                0,
-                (2 == replacement_mode) ? "%" : "MJ" );
-            PRETTY_ADDU(
-                substatcolor+" - port: #-c",
-                (mode && replacement_mode == 2) ? ( 100.0
-                                                   *(playerUnit->shield.shield4fbrl.leftmax
-                                                     -1) ) : playerUnit->shield.shield4fbrl.leftmax*VSDM,
-                0,
-                (2 == replacement_mode) ? "%" : "MJ" );
-            PRETTY_ADDU(
-                substatcolor+" - starboard: #-c",
-                (mode && replacement_mode == 2) ? ( 100.0
-                                                   *(playerUnit->shield.shield4fbrl.rightmax
-                                                     -1) ) : playerUnit->shield.shield4fbrl.rightmax*VSDM,
-                0,
-                (2 == replacement_mode) ? "%" : "MJ" );
-        }
-        break;
-    case 8:
-        if (!mode || MODIFIES(replacement_mode, playerUnit, blankUnit, shield.shield8.frontrightbottommax)) {
-            PRETTY_ADDU(
-                statcolor+" - Fore-starboard-high: #-c",
-                (mode && replacement_mode
-                 == 2) ? 100.0
-                *(playerUnit->shield.shield8.frontrighttopmax-1) : playerUnit->shield.shield8.frontrighttopmax*VSDM,
-                0,
-                (2 == replacement_mode) ? "%" : "MJ" );
-            PRETTY_ADDU(
-                substatcolor+" - Aft-starboard-high: #-c",
-                (mode && replacement_mode
-                 == 2) ? 100.0
-                *(playerUnit->shield.shield8.backrighttopmax-1) : playerUnit->shield.shield8.backrighttopmax*VSDM,
-                0,
-                (2 == replacement_mode) ? "%" : "MJ" );
-            PRETTY_ADDU(
-                substatcolor+" - Fore-port-high: #-c",
-                (mode && replacement_mode
-                 == 2) ? 100.0
-                *(playerUnit->shield.shield8.frontlefttopmax-1) : playerUnit->shield.shield8.frontlefttopmax*VSDM,
-                0,
-                (2 == replacement_mode) ? "%" : "MJ" );
-            PRETTY_ADDU(
-                substatcolor+" - Aft-port-high: #-c",
-                (mode && replacement_mode
-                 == 2) ? 100.0
-                *(playerUnit->shield.shield8.backlefttopmax-1) : playerUnit->shield.shield8.backlefttopmax*VSDM,
-                0,
-                (2 == replacement_mode) ? "%" : "MJ" );
-            PRETTY_ADDU(
-                substatcolor+" - Fore-starboard-low: #-c",
-                (mode && replacement_mode
-                 == 2) ? 100.0
-                *(playerUnit->shield.shield8.frontrighttopmax-1) : playerUnit->shield.shield8.frontrightbottommax*VSDM,
-                0,
-                (2 == replacement_mode) ? "%" : "MJ" );
-            PRETTY_ADDU(
-                substatcolor+" - Aft-starboard-low: #-c",
-                (mode && replacement_mode
-                 == 2) ? 100.0
-                *(playerUnit->shield.shield8.backrighttopmax-1) : playerUnit->shield.shield8.backrightbottommax*VSDM,
-                0,
-                (2 == replacement_mode) ? "%" : "MJ" );
-            PRETTY_ADDU(
-                substatcolor+" - Fore-port-low: #-c",
-                (mode && replacement_mode
-                 == 2) ? 100.0
-                *(playerUnit->shield.shield8.frontlefttopmax-1) : playerUnit->shield.shield8.frontleftbottommax*VSDM,
-                0,
-                (2 == replacement_mode) ? "%" : "MJ" );
-            PRETTY_ADDU(
-                substatcolor+" - Aft-port-low: #-c",
-                (mode && replacement_mode
-                 == 2) ? 100.0
-                *(playerUnit->shield.shield8.backlefttopmax-1) : playerUnit->shield.shield8.backleftbottommax*VSDM,
-                0,
-                (2 == replacement_mode) ? "%" : "MJ" );
-        }
-        break;
-    default:
-        text += "#c1:.3:.3#Shield model unrecognized#-c";
-        break;
+
+    std::string shield_two_strings[2] = {" - fore: #-c", " - aft: #-c"};
+    std::string shield_four_strings[4] = {" - port: #-c", " - starboard: #-c", " - fore: #-c", " - aft: #-c"};
+    // TODO: replace with fore aft port starboard top bottom
+    std::string shield_eight_strings[8] = {" - ltf: #-c", " - rtf: #-c", " - lbf: #-c", " - rbf: #-c",
+                                          " - ltr: #-c", " - rtr: #-c", " - lbr: #-c", " - rbr: #-c"};
+
+    std::string *shield_strings = nullptr;
+
+    switch (num_shields) {
+    case 2: shield_strings = shield_two_strings; break;
+    case 4: shield_strings = shield_two_strings; break;
+    case 8: shield_strings = shield_two_strings; break;
     }
+
+    if(shield_strings) {
+        if (!mode || MODIFIES(replacement_mode, playerUnit,
+                              blankUnit, shield.facets[0].health.factory_max_health)) {
+            for(int i=0;i<num_shields;i++) {
+                PRETTY_ADDU(substatcolor + shield_strings[i], (mode && replacement_mode == 2) ?
+                                ( 100.0 *(playerUnit->shield.facets[i].health.factory_max_health-1) ) :
+                                playerUnit->shield.facets[i].health.factory_max_health * VSDM, 0,
+                            (2 == replacement_mode) ? "%" : "MJ" );
+            }
+        }
+    }
+
+    const float regeneration = playerUnit->shield.facets[0].health.regeneration;
     if (!mode) {
-        PRETTY_ADDU( statcolor+"Shield protection recharge speed: #-c", playerUnit->shield.recharge*VSDM, 0, "MJ/s" );
-    } else if (MODIFIES(replacement_mode, playerUnit, blankUnit, shield.recharge)) {
+        PRETTY_ADDU( statcolor+"Shield protection recharge speed: #-c", regeneration * VSDM, 0, "MJ/s" );
+    } else if (MODIFIES(replacement_mode, playerUnit, blankUnit, shield.facets[0].health.regeneration)) {
         switch (replacement_mode)
         {
         case 0:                         //Replacement or new Module
-            PRETTY_ADDU( statcolor+"Shield protection recharge speed set to: #-c", playerUnit->shield.recharge*VSDM, 0, "MJ/s" );
+            PRETTY_ADDU( statcolor+"Shield protection recharge speed set to: #-c", regeneration*VSDM, 0, "MJ/s" );
             break;
         case 1:                         //Additive
             PRETTY_ADDU( statcolor+"Increases shield protection recharge speed by #-c",
-                         playerUnit->shield.recharge*VSDM,
+                         regeneration*VSDM,
                          0,
                          "MJ/s" );
             break;
         case 2:                         //multiplicative
             PRETTY_ADDU( statcolor+"Shield protection recharge speed increased by #-c",
-                         100.0*(playerUnit->shield.recharge-1),
+                         100.0*(regeneration-1),
                          0,
                          "%" );
             break;
@@ -5495,7 +5406,7 @@ void showUnitStats( Unit *playerUnit, string &text, int subunitlevel, int mode, 
             text += "Oh dear, this wasn't an upgrade. Please debug code.";
             break;
         }
-    }*/
+    }
     //cloaking device? If we don't have one, no need to mention it ever exists, right?
     if (playerUnit->cloaking != -1) {
         if (!mode) {
@@ -5665,10 +5576,12 @@ void showUnitStats( Unit *playerUnit, string &text, int subunitlevel, int mode, 
                      playerUnit->getMass()*uc.max_ab_speed()/playerUnit->limits.afterburn, 2, "seconds" );
         //reactor
         float avail    = (playerUnit->maxEnergyData()*RSconverter-maxshield*VSDM);
-        /* TODO: lib_damage
-         * float overhead =
-            (shields_require_power) ? (playerUnit->shield.recharge/shieldenergycap*shield_maintenance_cost
-                                       *playerUnit->shield.number*VSDM) : 0;*/
+
+        int num_shields = playerUnit->shield.number_of_facets;
+        float regeneration = playerUnit->shield.facets[0].health.regeneration;
+        float overhead = (shields_require_power) ?
+                    (regeneration / shieldenergycap * shield_maintenance_cost
+                                       * num_shields * VSDM) : 0;
         float nrt = avail/(playerUnit->energyRechargeData()*RSconverter); // TODO -overhead);
         PRETTY_ADDU( statcolor+"Reactor nominal replenish time: #-c", nrt, 2, "seconds" );
         //shield related stuff
@@ -5684,17 +5597,17 @@ void showUnitStats( Unit *playerUnit, string &text, int subunitlevel, int mode, 
                     +
                     "WARNING: Warp capacitor banks under capacity for jump: upgrade warp capacitance#-c";
         }
-        /* TODO: lib_damage
-         * if (playerUnit->shield.number) {
-            if (playerUnit->shield.recharge*playerUnit->shield.number*VSDM/shieldenergycap > playerUnit->energyRechargeData()
+
+        if (num_shields) {
+            if (regeneration*num_shields*VSDM/shieldenergycap > playerUnit->energyRechargeData()
                 *RSconverter) {
                 text += "#n##c1:1:.1#"+prefix+"WARNING: reactor recharge rate is less than combined shield recharge rate.#n#";
                 text += "Your shields won't be able to regenerate at their optimal speed!#-c";
             }
             if (shields_require_power) {
                 text += "#n#"+prefix+statcolor+"Reactor recharge slowdown caused by shield maintenance: #-c";
-                float maint_draw_percent = playerUnit->shield.recharge*VSDM*100.0/shieldenergycap*shield_maintenance_cost
-                                           *playerUnit->shield.number/(playerUnit->energyRechargeData()*RSconverter);
+                float maint_draw_percent = regeneration*VSDM*100.0/shieldenergycap*shield_maintenance_cost
+                                           *num_shields/(playerUnit->energyRechargeData()*RSconverter);
                 text += (boost::format("%1$.2f") % maint_draw_percent).str();
                 text += " %.";
                 if (maint_draw_percent > 60) {
@@ -5707,20 +5620,19 @@ void showUnitStats( Unit *playerUnit, string &text, int subunitlevel, int mode, 
                             "SEVERE WARNING: Reactor power is overdrawn! Unsustainable power is being consumed by passive shield maintenance: downgrade shield or upgrade reactor immediately!#-c";
                 }
             }
-        }*/
+        }
         totalWeaponEnergyUsage = totalWeaponEnergyUsage*RSconverter;
         PRETTY_ADDU( statcolor+"Combined weapon energy usage: #-c", totalWeaponEnergyUsage, 0, "MJ/s" );
-        /* TODO: lib_damage
-         * float maint_draw =
-            (shields_require_power && playerUnit->shield.number) ? (playerUnit->shield.recharge*VSDM/shieldenergycap
-                                                                    *shield_maintenance_cost*playerUnit->shield.number) : 0;*/
-        if ( totalWeaponEnergyUsage < (playerUnit->energyRechargeData()*RSconverter)) { // TODO lib_damage -maint_draw) ) {
+        float maint_draw =
+            (shields_require_power && num_shields) ? (regeneration*VSDM/shieldenergycap
+                                                                    *shield_maintenance_cost*num_shields) : 0;
+        if ( totalWeaponEnergyUsage < (playerUnit->energyRechargeData()*RSconverter -maint_draw) ) {
             //waouh, impressive...
             text += "#n##c0:1:.2#"+prefix+"Your reactor produces more energy than your weapons can use!#-c";
         } else {
             PRETTY_ADDU( statcolor+"Reactor energy depletion time if weapons in continuous use: #-c",
                          (playerUnit->maxEnergyData()
-                          *RSconverter)/( totalWeaponEnergyUsage-( (playerUnit->energyRechargeData()*RSconverter))), // TODO lib_damage -maint_draw) ) ),
+                          *RSconverter)/( totalWeaponEnergyUsage-( (playerUnit->energyRechargeData()*RSconverter -maint_draw) ) ),
                          2,
                          "seconds" );
         }
