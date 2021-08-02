@@ -440,7 +440,8 @@ elif [ $LINUX_ID == "rocky" ] && [ $LINUX_VERSION_ID == "8.4" ]
 then
     dnf -y install dnf-plugins-core
     dnf -y install epel-release
-    dnf config-manager --set-enabled PowerTools
+    dnf config-manager --enable epel
+    dnf config-manager --set-enabled powertools
     dnf -y update
     dnf -y install \
                         git \
