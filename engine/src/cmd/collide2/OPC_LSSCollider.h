@@ -16,6 +16,12 @@
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/**
+ * Updated by Stephen G. Tuggy 2021-07-03
+ */
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Include Guard
 #ifndef __OPC_LSSCOLLIDER_H__
 #define __OPC_LSSCOLLIDER_H__
@@ -53,13 +59,13 @@
 		 *	\param		cache			[in/out] an lss cache
 		 *	\param		lss				[in] collision lss in local space
 		 *	\param		model			[in] Opcode model to collide with
-		 *	\param		worldl			[in] lss world matrix, or null
-		 *	\param		worldm			[in] model's world matrix, or null
+		 *	\param		worldl			[in] lss world matrix, or nullptr
+		 *	\param		worldm			[in] model's world matrix, or nullptr
 		 *	\return		true if success
 		 *	\warning	SCALE NOT SUPPORTED. The matrices must contain rotation & translation parts only.
 		 */
 		///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-							bool			Collide(LSSCache& cache, const LSS& lss, const Model& model, const Matrix4x4* worldl=null, const Matrix4x4* worldm=null);
+							bool			Collide(LSSCache& cache, const LSS& lss, const Model& model, const Matrix4x4* worldl=nullptr, const Matrix4x4* worldm=nullptr);
 		// 
 							bool			Collide(LSSCache& cache, const LSS& lss, const AABBTree* tree);
 		protected:
@@ -81,7 +87,7 @@
 		inline_				bool			LSSAABBOverlap(const Point& center, const Point& extents);
 		inline_				bool			LSSTriOverlap(const Point& vert0, const Point& vert1, const Point& vert2);
 			// Init methods
-							bool			InitQuery(LSSCache& cache, const LSS& lss, const Matrix4x4* worldl=null, const Matrix4x4* worldm=null);
+							bool			InitQuery(LSSCache& cache, const LSS& lss, const Matrix4x4* worldl=nullptr, const Matrix4x4* worldm=nullptr);
 	};
 
 	class OPCODE_API HybridLSSCollider : public LSSCollider
@@ -91,7 +97,7 @@
 											HybridLSSCollider();
 		virtual								~HybridLSSCollider();
 
-							bool			Collide(LSSCache& cache, const LSS& lss, const HybridModel& model, const Matrix4x4* worldl=null, const Matrix4x4* worldm=null);
+							bool			Collide(LSSCache& cache, const LSS& lss, const HybridModel& model, const Matrix4x4* worldl=nullptr, const Matrix4x4* worldm=nullptr);
 		protected:
 							Container		mTouchedBoxes;
 	};

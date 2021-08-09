@@ -111,6 +111,12 @@
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/**
+ * Updated by Stephen G. Tuggy 2021-07-03
+ */
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Precompiled Header
 #include "Stdafx.h"
 
@@ -205,10 +211,10 @@ using namespace Opcode;
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 RayCollider::RayCollider() :
 #ifdef OPC_RAYHIT_CALLBACK
-	mHitCallback		(null),
+	mHitCallback		(nullptr),
 	mUserData			(0),
 #else
-	mStabbedFaces		(null),
+	mStabbedFaces		(nullptr),
 #endif
 	mNbRayBVTests		(0),
 	mNbRayPrimTests		(0),
@@ -233,7 +239,7 @@ RayCollider::~RayCollider()
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /**
  *	Validates current settings. You should call this method after all the settings and callbacks have been defined.
- *	\return		null if everything is ok, else a string describing the problem
+ *	\return		nullptr if everything is ok, else a string describing the problem
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 const char* RayCollider::ValidateSettings()
@@ -245,7 +251,7 @@ const char* RayCollider::ValidateSettings()
 	if(TemporalCoherenceEnabled() && mClosestHit)				return "Temporal coherence can't guarantee to report closest hit!";
 #endif
 	if(SkipPrimitiveTests())									return "SkipPrimitiveTests not possible for RayCollider ! (not implemented)";
-	return null;
+	return nullptr;
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -256,13 +262,13 @@ const char* RayCollider::ValidateSettings()
  *
  *	\param		world_ray		[in] stabbing ray in world space
  *	\param		model			[in] Opcode model to collide with
- *	\param		world			[in] model's world matrix, or null
- *	\param		cache			[in] a possibly cached face index, or null
+ *	\param		world			[in] model's world matrix, or nullptr
+ *	\param		cache			[in] a possibly cached face index, or nullptr
  *	\return		true if success
  *	\warning	SCALE NOT SUPPORTED. The matrices must contain rotation & translation parts only.
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-bool RayCollider::Collide(const Ray& world_ray, const Model& model, const Matrix4x4* world, udword* cache)
+bool RayCollider::Collide(const Ray& world_ray, const Model& model, const Matrix4x4* world, uint32_t* cache)
 {
 	// Checkings
 	if(!Setup(&model))	return false;
@@ -331,13 +337,13 @@ bool RayCollider::Collide(const Ray& world_ray, const Model& model, const Matrix
  *	- check temporal coherence
  *
  *	\param		world_ray	[in] stabbing ray in world space
- *	\param		world		[in] object's world matrix, or null
+ *	\param		world		[in] object's world matrix, or nullptr
  *	\param		face_id		[in] index of previously stabbed triangle
  *	\return		TRUE if we can return immediately
  *	\warning	SCALE NOT SUPPORTED. The matrix must contain rotation & translation parts only.
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-bool RayCollider::InitQuery(const Ray& world_ray, const Matrix4x4* world, udword* face_id)
+bool RayCollider::InitQuery(const Ray& world_ray, const Matrix4x4* world, uint32_t* face_id)
 {
 	// Reset stats & contact status
 	Collider::InitQuery();
@@ -372,7 +378,7 @@ bool RayCollider::InitQuery(const Ray& world_ray, const Matrix4x4* world, udword
 		if(!SkipPrimitiveTests())
 		{
 			// Perform overlap test between the unique triangle and the ray (and set contact status if needed)
-			SEGMENT_PRIM(udword(0), OPC_CONTACT)
+			SEGMENT_PRIM(uint32_t(0), OPC_CONTACT)
 
 			// Return immediately regardless of status
 			return TRUE;
@@ -384,43 +390,12 @@ bool RayCollider::InitQuery(const Ray& world_ray, const Matrix4x4* world, udword
 	// Test previously colliding primitives first
 	if(TemporalCoherenceEnabled() && FirstContactEnabled() && face_id && *face_id!=INVALID_ID)
 	{
-#ifdef OLD_CODE
-#ifndef OPC_RAYHIT_CALLBACK
-		if(!mClosestHit)
-#endif
-		{
-			// Request vertices from the app
-			VertexPointers VP;
-			mIMesh->GetTriangle(VP, *face_id);
-			// Perform ray-cached tri overlap test
-			if(RayTriOverlap(*VP.Vertex[0], *VP.Vertex[1], *VP.Vertex[2]))
-			{
-				// Intersection point is valid if:
-				// - distance is positive (else it can just be a face behind the orig point)
-				// - distance is smaller than a given max distance (useful for shadow feelers)
-//				if(mStabbedFace.mDistance>0.0f && mStabbedFace.mDistance<mMaxDist)
-				if(IR(mStabbedFace.mDistance)<IR(mMaxDist))	// The other test is already performed in RayTriOverlap
-				{
-					// Set contact status
-					mFlags |= OPC_TEMPORAL_CONTACT;
-
-					mStabbedFace.mFaceID = *face_id;
-
-#ifndef OPC_RAYHIT_CALLBACK
-					if(mStabbedFaces)	mStabbedFaces->AddFace(mStabbedFace);
-#endif
-					return TRUE;
-				}
-			}
-		}
-#else
 		// New code
 		// We handle both Segment/ray queries with the same segment code, and a possible infinite limit
 		SEGMENT_PRIM(*face_id, OPC_TEMPORAL_CONTACT)
 
 		// Return immediately if possible
 		if(GetContactStatus())	return TRUE;
-#endif
 	}
 
 	// Precompute data (moved after temporal coherence since only needed for ray-AABB)
@@ -438,9 +413,9 @@ bool RayCollider::InitQuery(const Ray& world_ray, const Matrix4x4* world, udword
 	else
 	{
 		// For Ray-AABB overlap
-//		udword x = SIR(mDir.x)-1;
-//		udword y = SIR(mDir.y)-1;
-//		udword z = SIR(mDir.z)-1;
+//		uint32_t x = SIR(mDir.x)-1;
+//		uint32_t y = SIR(mDir.y)-1;
+//		uint32_t z = SIR(mDir.z)-1;
 //		mData.x = FR(x);
 //		mData.y = FR(y);
 //		mData.z = FR(z);

@@ -4,6 +4,8 @@
  *	\file		IceMemoryMacros.h
  *	\author		Pierre Terdiman
  *	\date		April, 4, 2000
+ *
+ *  Updated by Stephen G. Tuggy 2021-07-07
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -24,7 +26,7 @@
 	//!	\see		StoreDwords
 	//!	\see		CopyMemory
 	//!	\see		MoveMemory
-	inline_ void ZeroMemory(void* addr, udword size)					{ memset(addr, 0, size);		}
+	inline_ void ZeroMemory(void* addr, size_t size)					{ memset(addr, 0, size);		}
 
 	//!	Fills a buffer with a given byte.
 	//!	\param		addr	[in] buffer address
@@ -34,7 +36,7 @@
 	//!	\see		ZeroMemory
 	//!	\see		CopyMemory
 	//!	\see		MoveMemory
-	inline_ void FillMemory(void* dest, udword size, ubyte val)			{ memset(dest, val, size);		}
+	inline_ void FillMemory(void* dest, size_t size, uint8_t val)			{ memset(dest, val, size);		}
 
 	//!	Fills a buffer with a given dword.
 	//!	\param		addr	[in] buffer address
@@ -45,14 +47,14 @@
 	//!	\see		CopyMemory
 	//!	\see		MoveMemory
 	//!	\warning	writes nb*4 bytes !
-	inline_ void StoreDwords(udword* dest, udword nb, udword value)
+	inline_ void StoreDwords(uint32_t* dest, uint32_t nb, uint32_t value)
 	{
 		// The asm code below **SHOULD** be equivalent to one of those C versions
 		// or the other if your compiled is good: (checked on VC++ 6.0)
 		//
 		//	1) while(nb--)	*dest++ = value;
 		//
-		//	2) for(udword i=0;i<nb;i++)	dest[i] = value;
+		//	2) for(uint32_t i=0;i<nb;i++)	dest[i] = value;
 		//
 		/*_asm push eax
 		_asm push ecx
@@ -75,7 +77,7 @@
 	//!	\see		FillMemory
 	//!	\see		StoreDwords
 	//!	\see		MoveMemory
-	inline_ void CopyMemory(void* dest, const void* src, udword size)	{ memcpy(dest, src, size);		}
+	inline_ void CopyMemory(void* dest, const void* src, size_t size)	{ memcpy(dest, src, size);		}
 
 	//!	Moves a buffer.
 	//!	\param		addr	[in] destination buffer address
@@ -85,14 +87,42 @@
 	//!	\see		FillMemory
 	//!	\see		StoreDwords
 	//!	\see		CopyMemory
-	inline_ void MoveMemory(void* dest, const void* src, udword size)	{ memmove(dest, src, size);		}
+	inline_ void MoveMemory(void* dest, const void* src, size_t size)	{ memmove(dest, src, size);		}
 
 	#define SIZEOFOBJECT		sizeof(*this)									//!< Gives the size of current object. Avoid some mistakes (e.g. "sizeof(this)").
 	//#define CLEAROBJECT		{ memset(this, 0, SIZEOFOBJECT);	}			//!< Clears current object. Laziness is my business. HANDLE WITH CARE.
-	#define DELETESINGLE(x)		{ delete x; x = null; }		//!< Deletes an instance of a class.
-	#define DELETEARRAY(x)		{ delete []x; x = null; }		//!< Deletes an array.
-	#define SAFE_RELEASE(x)		if (x) { (x)->Release();		(x) = null; }	//!< Safe D3D-style release
-	#define SAFE_DESTRUCT(x)	if (x) { (x)->SelfDestruct();	(x) = null; }	//!< Safe ICE-style release
+    
+    template<typename T>
+    inline void DELETESINGLE(T* &x) {                                             //!< Deletes an instance of a class.
+        if (x) {
+            delete x;
+            x = nullptr;
+        }
+    }
+    
+    template<typename T>
+    inline void DELETEARRAY(T* &x) {                                              //!< Deletes an array.
+        if (x) {
+            delete []x;
+            x = nullptr;
+        }
+    }
+
+    template<typename T>
+    inline void SAFE_RELEASE(T* &x) {                                             //!< Safe D3D-style release
+        if (x) {
+            x->Release();
+            x = nullptr;
+        }
+    }
+
+    template<typename T>
+    inline void SAFE_DESTRUCT(T* &x) {                                            //!< Safe ICE-style release
+        if (x) {
+            x->SelfDestruct();
+            x = nullptr;
+        }
+    }
 
 #ifdef __ICEERROR_H__
 	#define CHECKALLOC(x)		if(!x) return SetIceError("Out of memory.", EC_OUT_OF_MEMORY);	//!< Standard alloc checking. HANDLE WITH CARE.

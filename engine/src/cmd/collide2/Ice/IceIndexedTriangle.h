@@ -8,6 +8,12 @@
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/**
+ * Updated by Stephen G. Tuggy 2021-07-03
+ */
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Include Guard
 #ifndef __ICEINDEXEDTRIANGLE_H__
 #define __ICEINDEXEDTRIANGLE_H__
@@ -19,7 +25,7 @@
 		//! Constructor
 		inline_					IndexedTriangle()									{}
 		//! Constructor
-		inline_					IndexedTriangle(udword r0, udword r1, udword r2)	{ mVRef[0]=r0; mVRef[1]=r1; mVRef[2]=r2; }
+		inline_					IndexedTriangle(uint32_t r0, uint32_t r1, uint32_t r2)	{ mVRef[0]=r0; mVRef[1]=r1; mVRef[2]=r2; }
 		//! Copy constructor
 		inline_					IndexedTriangle(const IndexedTriangle& triangle)
 								{
@@ -30,7 +36,7 @@
 		//! Destructor
 		inline_					~IndexedTriangle()									{}
 		//! Vertex-references
-				udword			mVRef[3];
+				uint32_t			mVRef[3];
 
 		// Methods
 				void			Flip();
@@ -45,17 +51,17 @@
 				bool			IsVisible(const Point* verts, const Point& source)					const;
 				bool			BackfaceCulling(const Point* verts, const Point& source)			const;
 				float			ComputeOcclusionPotential(const Point* verts, const Point& view)	const;
-				bool			ReplaceVertex(udword oldref, udword newref);
+				bool			ReplaceVertex(uint32_t oldref, uint32_t newref);
 				bool			IsDegenerate()														const;
-				bool			HasVertex(udword ref)												const;
-				bool			HasVertex(udword ref, udword* index)								const;
-				ubyte			FindEdge(udword vref0, udword vref1)								const;
-				udword			OppositeVertex(udword vref0, udword vref1)							const;
-		inline_	udword			OppositeVertex(ubyte edgenb)										const	{ return mVRef[2-edgenb];	}
-				void			GetVRefs(ubyte edgenb, udword& vref0, udword& vref1, udword& vref2)	const;
+				bool			HasVertex(uint32_t ref)												const;
+				bool			HasVertex(uint32_t ref, uint32_t* index)							const;
+				uint8_t			FindEdge(uint32_t vref0, uint32_t vref1)							const;
+				uint32_t		OppositeVertex(uint32_t vref0, uint32_t vref1)						const;
+		inline_	uint32_t		OppositeVertex(uint8_t edgenb)										const	{ return mVRef[2-edgenb];	}
+				void			GetVRefs(uint8_t edgenb, uint32_t& vref0, uint32_t& vref1, uint32_t& vref2)	const;
 				float			MinEdgeLength(const Point* verts)									const;
 				float			MaxEdgeLength(const Point* verts)									const;
-				void			ComputePoint(const Point* verts, float u, float v, Point& pt, udword* nearvtx=null)	const;
+				void			ComputePoint(const Point* verts, float u, float v, Point& pt, uint32_t* nearvtx=nullptr)	const;
 				float			Angle(const IndexedTriangle& tri, const Point* verts)				const;
 		inline_	Plane			PlaneEquation(const Point* verts)									const	{ return Plane(verts[mVRef[0]], verts[mVRef[1]], verts[mVRef[2]]);	}
 				bool			Equal(const IndexedTriangle& tri)									const;

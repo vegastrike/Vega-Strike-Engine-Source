@@ -78,7 +78,7 @@ void UncheckUnit( class Unit*un );
 #include "SharedPool.h"
 #include "role_bitmask.h"
 
-#include "game_config.h"
+#include "configuration/game_config.h"
 
 
 extern char * GetUnitDir( const char *filename );

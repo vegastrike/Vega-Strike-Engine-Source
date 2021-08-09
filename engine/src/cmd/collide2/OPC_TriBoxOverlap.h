@@ -1,3 +1,8 @@
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/**
+ * Updated by Stephen G. Tuggy 2021-07-03
+ */
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 //! This macro quickly finds the min & max values among 3 variables
 #define FINDMINMAX(x0, x1, x2, min, max)	\
@@ -11,7 +16,7 @@
 inline_ bool planeBoxOverlap(const Point& normal, const float d, const Point& maxbox)
 {
 	Point vmin, vmax;
-	for(udword q=0;q<=2;q++)
+	for(uint32_t q=0;q<=2;q++)
 	{
 		if(normal[q]>0.0f)	{ vmin[q]=-maxbox[q]; vmax[q]=maxbox[q]; }
 		else				{ vmin[q]=maxbox[q]; vmax[q]=-maxbox[q]; }
@@ -73,7 +78,7 @@ inline_ bool planeBoxOverlap(const Point& normal, const float d, const Point& ma
 // compute triangle edges
 // - edges lazy evaluated to take advantage of early exits
 // - fabs precomputed (half less work, possible since extents are always >0)
-// - customized macros to take advantage of the null component
+// - customized macros to take advantage of the nullptr component
 // - axis vector discarded, possibly saves useless movs
 #define IMPLEMENT_CLASS3_TESTS						\
 	float rad;										\
@@ -104,7 +109,7 @@ inline_ bool planeBoxOverlap(const Point& normal, const float d, const Point& ma
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /**
  *	Triangle-Box overlap test using the separating axis theorem.
- *	This is the code from Tomas Möller, a bit optimized:
+ *	This is the code from Tomas MÃ¶ller, a bit optimized:
  *	- with some more lazy evaluation (faster path on PC)
  *	- with a tiny bit of assembly
  *	- with "SAT-lite" applied if needed

@@ -16,6 +16,12 @@
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/**
+ * Updated by Stephen G. Tuggy 2021-07-03
+ */
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Include Guard
 #ifndef __OPC_RAYCOLLIDER_H__
 #define __OPC_RAYCOLLIDER_H__
@@ -28,7 +34,7 @@
 		//! Destructor
 		inline_				~CollisionFace()		{}
 
-				udword		mFaceID;				//!< Index of touched face
+				uint32_t		mFaceID;				//!< Index of touched face
 				float		mDistance;				//!< Distance from collider to hitpoint
 				float		mU, mV;					//!< Impact barycentric coordinates
 	};
@@ -41,7 +47,7 @@
 		//! Destructor
 										~CollisionFaces()						{}
 
-		inline_	udword					GetNbFaces()					const	{ return GetNbEntries()>>2;						}
+		inline_	uint32_t					GetNbFaces()					const	{ return GetNbEntries()>>2;						}
 		inline_	const CollisionFace*	GetFaces()						const	{ return (const CollisionFace*)GetEntries();	}
 
 		inline_	void					Reset()									{ Container::Reset();							}
@@ -75,13 +81,13 @@
 		 *
 		 *	\param		world_ray		[in] stabbing ray in world space
 		 *	\param		model			[in] Opcode model to collide with
-		 *	\param		world			[in] model's world matrix, or null
-		 *	\param		cache			[in] a possibly cached face index, or null
+		 *	\param		world			[in] model's world matrix, or nullptr
+		 *	\param		cache			[in] a possibly cached face index, or nullptr
 		 *	\return		true if success
 		 *	\warning	SCALE NOT SUPPORTED. The matrices must contain rotation & translation parts only.
 		 */
 		///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-							bool			Collide(const Ray& world_ray, const Model& model, const Matrix4x4* world=null, udword* cache=null);
+							bool			Collide(const Ray& world_ray, const Model& model, const Matrix4x4* world=nullptr, uint32_t* cache=nullptr);
 		//
 							bool			Collide(const Ray& world_ray, const AABBTree* tree, Container& box_indices);
 		// Settings
@@ -144,7 +150,7 @@
 		 *	\return		the number of Ray-BV tests performed during last query
 		 */
 		///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-		inline_				udword			GetNbRayBVTests()				const	{ return mNbRayBVTests;		}
+		inline_				uint32_t			GetNbRayBVTests()				const	{ return mNbRayBVTests;		}
 
 		///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 		/**
@@ -154,7 +160,7 @@
 		 *	\return		the number of Ray-Triangle tests performed during last query
 		 */
 		///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-		inline_				udword			GetNbRayPrimTests()				const	{ return mNbRayPrimTests;	}
+		inline_				uint32_t			GetNbRayPrimTests()				const	{ return mNbRayPrimTests;	}
 
 		// In-out test
 		///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -165,12 +171,12 @@
 		 *	\return		the number of valid intersections during last query
 		 */
 		///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-		inline_				udword			GetNbIntersections()			const	{ return mNbIntersections;	}
+		inline_				uint32_t			GetNbIntersections()			const	{ return mNbIntersections;	}
 
 		///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 		/**
 		 *	Validates current settings. You should call this method after all the settings and callbacks have been defined for a collider.
-		 *	\return		null if everything is ok, else a string describing the problem
+		 *	\return		nullptr if everything is ok, else a string describing the problem
 		 */
 		///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 		override(Collider)	const char*		ValidateSettings();
@@ -190,10 +196,10 @@
 							CollisionFaces*	mStabbedFaces;		//!< List of stabbed faces
 #endif
 		// Stats
-							udword			mNbRayBVTests;		//!< Number of Ray-BV tests
-							udword			mNbRayPrimTests;	//!< Number of Ray-Primitive tests
+							uint32_t			mNbRayBVTests;		//!< Number of Ray-BV tests
+							uint32_t			mNbRayPrimTests;	//!< Number of Ray-Primitive tests
 		// In-out test
-							udword			mNbIntersections;	//!< Number of valid intersections
+							uint32_t			mNbIntersections;	//!< Number of valid intersections
 		// Dequantization coeffs
 							Point			mCenterCoeff;
 							Point			mExtentsCoeff;
@@ -219,7 +225,7 @@
 		inline_				bool			SegmentAABBOverlap(const Point& center, const Point& extents);
 		inline_				bool			RayTriOverlap(const Point& vert0, const Point& vert1, const Point& vert2);
 			// Init methods
-							bool			InitQuery(const Ray& world_ray, const Matrix4x4* world=null, udword* face_id=null);
+							bool			InitQuery(const Ray& world_ray, const Matrix4x4* world=nullptr, uint32_t* face_id=nullptr);
 	};
 
 #endif // __OPC_RAYCOLLIDER_H__

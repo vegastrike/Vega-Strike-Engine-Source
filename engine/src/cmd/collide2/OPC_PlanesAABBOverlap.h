@@ -11,7 +11,15 @@
  *	\return		TRUE if boxes overlap planes
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-inline_ bool PlanesCollider::PlanesAABBOverlap(const Point& center, const Point& extents, udword& out_clip_mask, udword in_clip_mask)
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/**
+ * Updated by Stephen G. Tuggy 2021-07-07
+ */
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+inline_ bool PlanesCollider::PlanesAABBOverlap(const Point& center, const Point& extents, uint32_t& out_clip_mask, uint32_t in_clip_mask)
 {
 	// Stats
 	mNbVolumeBVTests++;
@@ -20,14 +28,14 @@ inline_ bool PlanesCollider::PlanesAABBOverlap(const Point& center, const Point&
 
 	// Evaluate through all active frustum planes. We determine the relation 
 	// between the AABB and a plane by using the concept of "near" and "far"
-	// vertices originally described by Zhang (and later by Möller). Our
+	// vertices originally described by Zhang (and later by MÃ¶ller). Our
 	// variant here uses 3 fabs ops, 6 muls, 7 adds and two floating point
 	// comparisons per plane. The routine early-exits if the AABB is found
 	// to be outside any of the planes. The loop also constructs a new output
 	// clip mask. Most FPUs have a native single-cycle fabsf() operation.
 
-	udword Mask				= 1;			// current mask index (1,2,4,8,..)
-	udword TmpOutClipMask	= 0;			// initialize output clip mask into empty. 
+	uint32_t Mask				= 1;			// current mask index (1,2,4,8,..)
+	uint32_t TmpOutClipMask	= 0;			// initialize output clip mask into empty. 
 
 	while(Mask<=in_clip_mask)				// keep looping while we have active planes left...
 	{

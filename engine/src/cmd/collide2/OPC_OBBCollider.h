@@ -16,6 +16,12 @@
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/**
+ * Updated by Stephen G. Tuggy 2021-07-03
+ */
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Include Guard
 #ifndef __OPC_OBBCOLLIDER_H__
 #define __OPC_OBBCOLLIDER_H__
@@ -52,13 +58,13 @@
 		 *	\param		cache			[in/out] a box cache
 		 *	\param		box				[in] collision OBB in local space
 		 *	\param		model			[in] Opcode model to collide with
-		 *	\param		worldb			[in] OBB's world matrix, or null
-		 *	\param		worldm			[in] model's world matrix, or null
+		 *	\param		worldb			[in] OBB's world matrix, or nullptr
+		 *	\param		worldm			[in] model's world matrix, or nullptr
 		 *	\return		true if success
 		 *	\warning	SCALE NOT SUPPORTED. The matrices must contain rotation & translation parts only.
 		 */
 		///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-							bool			Collide(OBBCache& cache, const OBB& box, const Model& model, const Matrix4x4* worldb=null, const Matrix4x4* worldm=null);
+							bool			Collide(OBBCache& cache, const OBB& box, const Model& model, const Matrix4x4* worldb=nullptr, const Matrix4x4* worldm=nullptr);
 
 		// Settings
 
@@ -75,7 +81,7 @@
 		///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 		/**
 		 *	Validates current settings. You should call this method after all the settings and callbacks have been defined for a collider.
-		 *	\return		null if everything is ok, else a string describing the problem
+		 *	\return		nullptr if everything is ok, else a string describing the problem
 		 */
 		///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 		override(Collider)	const char*		ValidateSettings();
@@ -124,7 +130,7 @@
 		inline_				bool			BoxBoxOverlap(const Point& extents, const Point& center);
 		inline_				bool			TriBoxOverlap();
 			// Init methods
-							bool			InitQuery(OBBCache& cache, const OBB& box, const Matrix4x4* worldb=null, const Matrix4x4* worldm=null);
+							bool			InitQuery(OBBCache& cache, const OBB& box, const Matrix4x4* worldb=nullptr, const Matrix4x4* worldm=nullptr);
 	};
 
 	class OPCODE_API HybridOBBCollider : public OBBCollider
@@ -134,7 +140,7 @@
 											HybridOBBCollider();
 		virtual								~HybridOBBCollider();
 
-							bool			Collide(OBBCache& cache, const OBB& box, const HybridModel& model, const Matrix4x4* worldb=null, const Matrix4x4* worldm=null);
+							bool			Collide(OBBCache& cache, const OBB& box, const HybridModel& model, const Matrix4x4* worldb=nullptr, const Matrix4x4* worldm=nullptr);
 		protected:
 							Container		mTouchedBoxes;
 	};

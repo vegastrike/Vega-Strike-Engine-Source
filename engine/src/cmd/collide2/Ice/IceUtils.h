@@ -8,6 +8,12 @@
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/**
+ * Updated by Stephen G. Tuggy 2021-07-03
+ */
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Include Guard
 #ifndef __ICEUTILS_H__
 #define __ICEUTILS_H__
@@ -17,7 +23,7 @@
 
 	//! Reverse all the bits in a 32 bit word (from Steve Baker's Cute Code Collection)
 	//! (each line can be done in any order.
-	inline_ void	ReverseBits(udword& n)
+	inline_ void	ReverseBits(uint32_t& n)
 	{
 		n = ((n >>  1) & 0x55555555) | ((n <<  1) & 0xaaaaaaaa);
 		n = ((n >>  2) & 0x33333333) | ((n <<  2) & 0xcccccccc);
@@ -29,7 +35,7 @@
 	}
 
 	//! Count the number of '1' bits in a 32 bit word (from Steve Baker's Cute Code Collection)
-	inline_ udword	CountBits(udword n)
+	inline_ uint32_t	CountBits(uint32_t n)
 	{
 		// This relies of the fact that the count of n bits can NOT overflow 
 		// an n bit interger. EG: 1 bit count takes a 1 bit interger, 2 bit counts
@@ -46,7 +52,7 @@
 	}
 
 	//! Even faster?
-	inline_ udword	CountBits2(udword bits)
+	inline_ uint32_t	CountBits2(uint32_t bits)
 	{
 		bits = bits - ((bits >> 1) & 0x55555555);
 		bits = ((bits >> 2) & 0x33333333) + (bits & 0x33333333);
@@ -59,7 +65,7 @@
 	//! This is used to interleve to intergers to produce a `Morten Key'
 	//! used in Space Filling Curves (See DrDobbs Journal, July 1999)
 	//! Order is important.
-	inline_ void	SpreadBits(udword& n)
+	inline_ void	SpreadBits(uint32_t& n)
 	{
 		n = ( n & 0x0000ffff) | (( n & 0xffff0000) << 16);
 		n = ( n & 0x000000ff) | (( n & 0x0000ff00) <<  8);
@@ -73,7 +79,7 @@
 	// that recursively "folds" the upper bits into the lower bits. This process yields a bit vector with
 	// the same most significant 1 as x, but all 1's below it. Adding 1 to that value yields the next
 	// largest power of 2. For a 32-bit value: 
-	inline_ udword	nlpo2(udword x)
+	inline_ uint32_t	nlpo2(uint32_t x)
 	{
 		x |= (x >> 1);
 		x |= (x >> 2);
@@ -84,19 +90,19 @@
 	}
 
 	//! Test to see if a number is an exact power of two (from Steve Baker's Cute Code Collection)
-	inline_ bool	IsPowerOfTwo(udword n)				{ return ((n&(n-1))==0);					}
+	inline_ bool	IsPowerOfTwo(uint32_t n)				{ return ((n&(n-1))==0);					}
 
 	//! Zero the least significant '1' bit in a word. (from Steve Baker's Cute Code Collection)
-	inline_ void	ZeroLeastSetBit(udword& n)			{ n&=(n-1);									}
+	inline_ void	ZeroLeastSetBit(uint32_t& n)			{ n&=(n-1);									}
 
 	//! Set the least significant N bits in a word. (from Steve Baker's Cute Code Collection)
-	inline_ void	SetLeastNBits(udword& x, udword n)	{ x|=~(~0<<n);								}
+	inline_ void	SetLeastNBits(uint32_t& x, uint32_t n)	{ x|=~(~0<<n);								}
 
 	//! Classic XOR swap (from Steve Baker's Cute Code Collection)
 	//! x ^= y;		/* x' = (x^y) */
 	//! y ^= x;		/* y' = (y^(x^y)) = x */
 	//! x ^= y;		/* x' = (x^y)^x = y */
-	inline_ void	Swap(udword& x, udword& y)			{ x ^= y; y ^= x; x ^= y;					}
+	inline_ void	Swap(uint32_t& x, uint32_t& y)			{ x ^= y; y ^= x; x ^= y;					}
 
 	//! Little/Big endian (from Steve Baker's Cute Code Collection)
 	//!
@@ -115,17 +121,17 @@
 	inline_ char	LittleEndian()						{ int i = 1; return *((char*)&i);			}
 
 	//!< Alternative abs function
-	inline_ udword	abs_(sdword x)					{ sdword y= x >> 31;	return (x^y)-y;		}
+	inline_ uint32_t	abs_(int32_t x)					{ int32_t y= x >> 31;	return (x^y)-y;		}
 
 	//!< Alternative min function
-	inline_ sdword	min_(sdword a, sdword b)			{ sdword delta = b-a;	return a + (delta&(delta>>31));	}
+	inline_ int32_t	min_(int32_t a, int32_t b)			{ int32_t delta = b-a;	return a + (delta&(delta>>31));	}
 
 	// Determine if one of the bytes in a 4 byte word is zero
-	inline_	BOOL	HasNullByte(udword x)			{ return ((x + 0xfefefeff) & (~x) & 0x80808080);		}
+	inline_	BOOL	HasNullByte(uint32_t x)			{ return ((x + 0xfefefeff) & (~x) & 0x80808080);		}
 
 	// To find the smallest 1 bit in a word  EG: ~~~~~~10---0    =>    0----010---0
-	inline_	udword	LowestOneBit(udword w)			{ return ((w) & (~(w)+1));					}
-//	inline_	udword	LowestOneBit_(udword w)			{ return ((w) & (-(w)));					}
+	inline_	uint32_t	LowestOneBit(uint32_t w)			{ return ((w) & (~(w)+1));					}
+//	inline_	uint32_t	LowestOneBit_(uint32_t w)			{ return ((w) & (-(w)));					}
 
 	// Most Significant 1 Bit
 	// Given a binary integer value x, the most significant 1 bit (highest numbered element of a bit set)
@@ -133,7 +139,7 @@
 	// This process yields a bit vector with the same most significant 1 as x, but all 1's below it.
 	 // Bitwise AND of the original value with the complement of the "folded" value shifted down by one
 	// yields the most significant bit. For a 32-bit value: 
-	inline_ udword	msb32(udword x)
+	inline_ uint32_t	msb32(uint32_t x)
 	{
 		x |= (x >> 1);
 		x |= (x >> 2);
@@ -212,7 +218,7 @@
 	 *	\return		the best alignment (e.g. 1 for odd addresses, etc)
 	 */
 	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	FUNCTION ICECORE_API udword Alignment(udword address);
+	FUNCTION ICECORE_API uint32_t Alignment(uint32_t address);
 
 	#define IS_ALIGNED_2(x)		((x&1)==0)
 	#define IS_ALIGNED_4(x)		((x&3)==0)
@@ -233,7 +239,7 @@
 	// Since 0 <= u < nbu, u/nbu = 0 (integer)
 	// Hence: v = i/nbu
 	// Then we simply put it back in the original equation to compute u = i - v*nbu
-	inline_ void Compute2DCoords(udword& u, udword& v, udword i, udword nbu)
+	inline_ void Compute2DCoords(uint32_t& u, uint32_t& v, uint32_t i, uint32_t nbu)
 	{
 		v = i / nbu;
 		u = i - (v * nbu);
@@ -245,7 +251,7 @@
 	// v/nbv is null as well for the same reason.
 	// Hence w = i/(nbu*nbv)
 	// Then we're left with a 2D problem: i' = i - w*nbu*nbv = u + v*nbu
-	inline_ void Compute3DCoords(udword& u, udword& v, udword& w, udword i, udword nbu, udword nbu_nbv)
+	inline_ void Compute3DCoords(uint32_t& u, uint32_t& v, uint32_t& w, uint32_t i, uint32_t nbu, uint32_t nbu_nbv)
 	{
 		w = i / (nbu_nbv);
 		Compute2DCoords(u, v, i - (w * nbu_nbv), nbu);

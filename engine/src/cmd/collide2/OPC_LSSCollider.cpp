@@ -27,6 +27,12 @@
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/**
+ * Updated by Stephen G. Tuggy 2021-07-03
+ */
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Precompiled Header
 #include "Stdafx.h"
 
@@ -82,8 +88,8 @@ LSSCollider::~LSSCollider()
  *	\param		cache			[in/out] an lss cache
  *	\param		lss				[in] collision lss in local space
  *	\param		model			[in] Opcode model to collide with
- *	\param		worldl			[in] lss world matrix, or null
- *	\param		worldm			[in] model's world matrix, or null
+ *	\param		worldl			[in] lss world matrix, or nullptr
+ *	\param		worldm			[in] model's world matrix, or nullptr
  *	\return		true if success
  *	\warning	SCALE NOT SUPPORTED. The matrices must contain rotation & translation parts only.
  */
@@ -155,8 +161,8 @@ bool LSSCollider::Collide(LSSCache& cache, const LSS& lss, const Model& model, c
  *
  *	\param		cache		[in/out] an lss cache
  *	\param		lss			[in] lss in local space
- *	\param		worldl		[in] lss world matrix, or null
- *	\param		worldm		[in] model's world matrix, or null
+ *	\param		worldl		[in] lss world matrix, or nullptr
+ *	\param		worldm		[in] model's world matrix, or nullptr
  *	\return		TRUE if we can return immediately
  *	\warning	SCALE NOT SUPPORTED. The matrices must contain rotation & translation parts only.
  */
@@ -201,7 +207,7 @@ bool LSSCollider::InitQuery(LSSCache& cache, const LSS& lss, const Matrix4x4* wo
 			mTouchedPrimitives->Reset();
 
 			// Perform overlap test between the unique triangle and the LSS (and set contact status if needed)
-			LSS_PRIM(udword(0), OPC_CONTACT)
+			LSS_PRIM(uint32_t(0), OPC_CONTACT)
 
 			// Return immediately regardless of status
 			return TRUE;
@@ -219,7 +225,7 @@ bool LSSCollider::InitQuery(LSSCache& cache, const LSS& lss, const Matrix4x4* wo
 			if(mTouchedPrimitives->GetNbEntries())
 			{
 				// Get index of previously touched face = the first entry in the array
-				udword PreviouslyTouchedFace = mTouchedPrimitives->GetEntry(0);
+				uint32_t PreviouslyTouchedFace = mTouchedPrimitives->GetEntry(0);
 
 				// Then reset the array:
 				// - if the overlap test below is successful, the index we'll get added back anyway
@@ -615,10 +621,10 @@ bool HybridLSSCollider::Collide(LSSCache& cache, const LSS& lss, const HybridMod
 	if(mCurrentModel && mCurrentModel->HasSingleNode())
 	{
 		// Here we're supposed to perform a normal query, except our tree has a single node, i.e. just a few triangles
-		udword Nb = mIMesh->GetNbTriangles();
+		uint32_t Nb = mIMesh->GetNbTriangles();
 
 		// Loop through all triangles
-		for(udword i=0;i<Nb;i++)
+		for(uint32_t i=0;i<Nb;i++)
 		{
 			LSS_PRIM(i, OPC_CONTACT)
 		}
@@ -684,11 +690,11 @@ bool HybridLSSCollider::Collide(LSSCache& cache, const LSS& lss, const HybridMod
 		mTouchedPrimitives = &cache.TouchedPrimitives;
 
 		// Read touched leaf boxes
-		udword Nb = mTouchedBoxes.GetNbEntries();
-		const udword* Touched = mTouchedBoxes.GetEntries();
+		uint32_t Nb = mTouchedBoxes.GetNbEntries();
+		const uint32_t* Touched = mTouchedBoxes.GetEntries();
 
 		const LeafTriangles* LT = model.GetLeafTriangles();
-		const udword* Indices = model.GetIndices();
+		const uint32_t* Indices = model.GetIndices();
 
 		// Loop through touched leaves
 		while(Nb--)
@@ -696,26 +702,26 @@ bool HybridLSSCollider::Collide(LSSCache& cache, const LSS& lss, const HybridMod
 			const LeafTriangles& CurrentLeaf = LT[*Touched++];
 
 			// Each leaf box has a set of triangles
-			udword NbTris = CurrentLeaf.GetNbTriangles();
+			uint32_t NbTris = CurrentLeaf.GetNbTriangles();
 			if(Indices)
 			{
-				const udword* T = &Indices[CurrentLeaf.GetTriangleIndex()];
+				const uint32_t* T = &Indices[CurrentLeaf.GetTriangleIndex()];
 
 				// Loop through triangles and test each of them
 				while(NbTris--)
 				{
-					udword TriangleIndex = *T++;
+					uint32_t TriangleIndex = *T++;
 					LSS_PRIM(TriangleIndex, OPC_CONTACT)
 				}
 			}
 			else
 			{
-				udword BaseIndex = CurrentLeaf.GetTriangleIndex();
+				uint32_t BaseIndex = CurrentLeaf.GetTriangleIndex();
 
 				// Loop through triangles and test each of them
 				while(NbTris--)
 				{
-					udword TriangleIndex = BaseIndex++;
+					uint32_t TriangleIndex = BaseIndex++;
 					LSS_PRIM(TriangleIndex, OPC_CONTACT)
 				}
 			}

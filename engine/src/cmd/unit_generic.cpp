@@ -69,7 +69,7 @@
 #include "mount_size.h"
 #include "turret.h"
 #include "energetic.h"
-#include "game_config.h"
+#include "configuration/game_config.h"
 
 
 #include <math.h>

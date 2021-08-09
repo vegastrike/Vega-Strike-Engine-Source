@@ -53,7 +53,7 @@
 #include "vsfilesystem.h"
 #include "gfx/camera.h"
 #include "universe.h"
-#include "game_config.h"
+#include "configuration/game_config.h"
 #include "planetary_orbit.h"
 #include "universe_util.h"
 
