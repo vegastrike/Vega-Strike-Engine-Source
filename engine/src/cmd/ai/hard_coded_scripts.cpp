@@ -576,13 +576,7 @@ void LoopAroundSlow( Order *aisc, Unit *un )
 
 void SelfDestruct( Order *aisc, Unit *un )
 {
-    // TODO: figure out why this line freezes the ship
-    //un->armor.Destroy();
-
-    // TODO: probably not the right way to implement this
-    Damage damage;
-    damage.normal_damage = un->health.health;
-    un->health.DealDamage(damage);     //hull goes to zero but no kill, same for armor. strangely enough, all of them together work.
+    un->Destroy();
     un->Split( rand()%3+1 );
     un->Explode( true, 0 );     //displays explosion, unit continues
     un->RemoveFromSystem();      //has no effect

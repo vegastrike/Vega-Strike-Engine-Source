@@ -173,7 +173,7 @@ void Cockpit::SetParent( Unit *unit, const char *filename, const char *unitmodna
         if (StartArmor[6] == 0) StartArmor[6] = 1;
         if (StartArmor[7] == 0) StartArmor[7] = 1;
         maxfuel = unit->fuelData();
-        maxhull = unit->GetHull();
+        maxhull = unit->GetHullLayer().facets[0].health.health;
     }
 }
 void Cockpit::Delete()
@@ -510,7 +510,7 @@ bool Cockpit::Update()
 
                 // TODO: lib_damage
                 // check the input is in the expected 0 to 1 values
-                par->shield.AdjustPower(minEnergyShieldPercent);
+                par->GetShieldLayer().AdjustPower(minEnergyShieldPercent);
             }
         } else {
             secondsWithZeroEnergy = 0;

@@ -1069,7 +1069,7 @@ bool getNearestTargetUnit( Unit *me, int iType )
     for (un_iter i = _Universe->activeStarSystem()->getUnitList().createIterator(); ( un = (*i) ); ++i) {
         if (un == me)
             continue;
-        if (un->health.health <= 0)
+        if (un->Destroyed())
             continue;
         if ( !( me->InRange( un, true, false ) )
             || !( me->InRange( un, true, true ) ) )
@@ -1658,7 +1658,7 @@ void FireKeyboard::Execute()
     }
 
     if (f().shieldpowerstate != 1) {
-        parent->shield.AdjustPower(f().shieldpowerstate);
+        parent->layers[2].AdjustPower(f().shieldpowerstate);
     }
     if (f().firekey == PRESS || f().jfirekey == PRESS || j().firekey == DOWN || j().jfirekey == DOWN) {
         if ( !_Universe->AccessCockpit()->CanDrawNavSystem() ) {

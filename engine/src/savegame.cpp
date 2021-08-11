@@ -440,7 +440,7 @@ void WriteSaveGame( Cockpit *cp, bool auto_save )
     Unit *un = cp->GetSaveParent();
     if (!un)
         return;
-    if (un->GetHull() > 0) {
+    if (!un->Destroyed()) {
         vector< string > packedInfo;
         cp->PackUnitInfo(packedInfo);
 

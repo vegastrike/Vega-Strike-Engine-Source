@@ -65,14 +65,14 @@ void Energetic::decreaseWarpEnergy( bool insys, float time )
 
 float Energetic::energyData() const
 {
-    const Damageable *damageable = reinterpret_cast<const Damageable*>(this);
-    //const DamageableLayer shield = damageable->shield;
+    const Damageable *const_damageable = reinterpret_cast<const Damageable*>(this);
+    Damageable *damageable = const_cast<Damageable*>(const_damageable);
 
     if (configuration.physics.max_shield_lowers_capacitance) {
-        if ( maxenergy <= damageable->totalShieldEnergyCapacitance( damageable->shield ) ) {
+        if ( maxenergy <= damageable->totalShieldEnergyCapacitance( damageable->GetShieldLayer() ) ) {
             return 0;
         }
-        return ( (float) energy )/( maxenergy-damageable->totalShieldEnergyCapacitance( damageable->shield ) );
+        return ( (float) energy )/( maxenergy-damageable->totalShieldEnergyCapacitance( damageable->GetShieldLayer() ) );
     } else {
         return ( (float) energy )/maxenergy;
     }
@@ -208,12 +208,6 @@ void Energetic::setMaxEnergy( float maxen )
     maxenergy = maxen;
 }
 
-float Energetic::shieldRechargeData() const
-{
-    const Damageable *damageable = reinterpret_cast<const Damageable*>(this);
-    const DamageableLayer shield = damageable->shield;
-    return shield.facets[0].health.regeneration;
-}
 
 
 

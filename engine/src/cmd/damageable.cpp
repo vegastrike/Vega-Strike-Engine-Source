@@ -46,13 +46,7 @@ static float  flickeronprob = 0.66f; // ( "graphics", "glowflicker", "num-times-
 static float  hullfornoflicker = 0.04f; // ( "graphics", "glowflicker", "hull-for-total-dark", ".04" ) );
 
 
-Damageable::Damageable()
-{
-    armor = DamageableFactory::CreateLayer(FacetConfiguration::eight,
-                                           Health(1,1,0), false);
-    shield = DamageableFactory::CreateLayer(FacetConfiguration::eight,
-                                            Health(1,1,0), false);
-}
+
 
 bool Damageable::ShieldUp( const Vector &pnt ) const
 {
@@ -64,12 +58,17 @@ bool Damageable::ShieldUp( const Vector &pnt ) const
 //        return false;
 
     CoreVector attack_vector(pnt.i, pnt.j, pnt.k);
-    int facet_index = static_cast<DamageableLayer>(shield).GetFacetIndex(attack_vector);
+
+    DamageableLayer shield = const_cast<Damageable*>(this)->GetShieldLayer();
+    int facet_index = shield.GetFacetIndex(attack_vector);
     return shield.facets[facet_index].health.health > shield_min;
 }
 
 float Damageable::DealDamageToShield( const Vector &pnt, float &damage )
 {
+    // TODO: lib_damage enable
+    /*DamageableLayer shield = GetShield();
+    DamageableLayer hull = GetHull();
     Damage d;
     d.normal_damage = damage;
     float  percent = 0;
@@ -77,51 +76,58 @@ float Damageable::DealDamageToShield( const Vector &pnt, float &damage )
     shield.DealDamage(attack_vector, d);
     int facet_index = shield.GetFacetIndex(attack_vector);
 
-    float denominator = shield.facets[facet_index].health.health + health.health;
+    float denominator = shield.facets[facet_index].health.health + hull.facets[0].health.health;
     percent = damage/denominator; //(denominator > absdamage && denom != 0) ? absdamage/denom : (denom == 0 ? 0.0 : 1.0);
 
     if ( !FINITE( percent ) )
         percent = 0;
-    return percent;
+    return percent;*/
+    return 0;
 }
 
 float Damageable::FShieldData() const
 {
-    return static_cast<DamageableLayer>(shield).GetPercent(FacetName::front);
+    Damageable *damageable = const_cast<Damageable*>(this);
+    return static_cast<DamageableLayer>(damageable->GetShieldLayer()).GetPercent(FacetName::front);
 }
 
 float Damageable::BShieldData() const
 {
-    return static_cast<DamageableLayer>(shield).GetPercent(FacetName::rear);
+    Damageable *damageable = const_cast<Damageable*>(this);
+    return static_cast<DamageableLayer>(damageable->GetShieldLayer()).GetPercent(FacetName::rear);
 }
 
 float Damageable::LShieldData() const
 {
-    return static_cast<DamageableLayer>(shield).GetPercent(FacetName::left);
+    Damageable *damageable = const_cast<Damageable*>(this);
+    return static_cast<DamageableLayer>(damageable->GetShieldLayer()).GetPercent(FacetName::left);
 }
 
 float Damageable::RShieldData() const
 {
-    return static_cast<DamageableLayer>(shield).GetPercent(FacetName::right);
+    Damageable *damageable = const_cast<Damageable*>(this);
+    return static_cast<DamageableLayer>(damageable->GetShieldLayer()).GetPercent(FacetName::right);
 }
 
 //short fix
 void Damageable::ArmorData( float armor[8] ) const
 {
-    armor[0] = this->armor.facets[0].health.health;
-    armor[1] = this->armor.facets[1].health.health;
-    armor[2] = this->armor.facets[2].health.health;
-    armor[3] = this->armor.facets[3].health.health;
-    armor[4] = this->armor.facets[4].health.health;
-    armor[5] = this->armor.facets[5].health.health;
-    armor[6] = this->armor.facets[6].health.health;
-    armor[7] = this->armor.facets[7].health.health;
+    Damageable *damageable = const_cast<Damageable*>(this);
+    DamageableLayer armor_layer = damageable->GetArmorLayer();
+    armor[0] = armor_layer.facets[0].health.health;
+    armor[1] = armor_layer.facets[1].health.health;
+    armor[2] = armor_layer.facets[2].health.health;
+    armor[3] = armor_layer.facets[3].health.health;
+    armor[4] = armor_layer.facets[4].health.health;
+    armor[5] = armor_layer.facets[5].health.health;
+    armor[6] = armor_layer.facets[6].health.health;
+    armor[7] = armor_layer.facets[7].health.health;
 }
 
 // TODO: fix typo
 void Damageable::leach( float damShield, float damShieldRecharge, float damEnRecharge )
 {
-  // TODO: restore this
+  // TODO: restore this lib_damage
   // recharge *= damEnRecharge;
   /*shield.recharge *= damShieldRecharge;
   switch (shield.number)
@@ -153,27 +159,34 @@ void Damageable::leach( float damShield, float damShieldRecharge, float damEnRec
 
 float Damageable::DealDamageToHull( const Vector &pnt, float damage )
 {
+    // TODO: lib_damage enable
+    /*
+    DamageableLayer armor = GetArmor();
+    DamageableLayer hull = GetHull();
+
     CoreVector core_vector(pnt.i, pnt.j, pnt.k);
     Damage d;
     d.normal_damage = damage;
-    armor.DealDamage(core_vector, d);
 
-    health.DealDamage(d);
+    armor.DealDamage(core_vector, d);
+    hull.DealDamage(core_vector, d);
 
     // We calculate and return the percent (of something)
     int facet_index = armor.GetFacetIndex(core_vector);
     DamageableFacet facet = armor.facets[facet_index];
-    float denominator = facet.health.health + health.health;
+    float denominator = facet.health.health + hull.facets[0].health.health;
     float percent = damage/denominator; //(denominator > absdamage && denom != 0) ? absdamage/denom : (denom == 0 ? 0.0 : 1.0);
 
-    return percent;
+    return percent;*/
+    return 0.0;
 }
 
 
 
 float Damageable::MaxShieldVal() const
 {
-    return static_cast<DamageableLayer>(shield).AverageMaxLayerValue();
+    Damageable *damageable = const_cast<Damageable*>(this);
+    return static_cast<DamageableLayer>(damageable->GetShieldLayer()).AverageMaxLayerValue();
 }
 
 

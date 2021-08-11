@@ -56,7 +56,6 @@ public:
     void setEnergyRecharge( float enrech );
     void setFuel( float f );
     void setMaxEnergy( float maxen );
-    float shieldRechargeData() const;
 
 
     float warpCapData() const;

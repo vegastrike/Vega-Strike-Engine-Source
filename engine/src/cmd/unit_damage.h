@@ -121,7 +121,7 @@ void GameUnit::Split( int level )
         for (unsigned int j = 0; j < meshsizes[i] && k < old.size(); ++j, ++k)
             tempmeshes.push_back( old[k] );
         this->SubUnits.prepend( splitsub = new GameUnit( tempmeshes, true, this->faction ) );
-        splitsub->health.health = 1000;
+        splitsub->layers[0].facets[0].health.health = 1000;
         splitsub->name = "debris";
         splitsub->setMass(game_options.debris_mass*splitsub->getMass()/level);
         splitsub->pImage->timeexplode = .1;

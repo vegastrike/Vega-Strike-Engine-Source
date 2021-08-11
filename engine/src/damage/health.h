@@ -61,7 +61,7 @@ public:
         vulnerabilities.phase_damage = 1;
     };
 
-    float Percent() {
+    const float Percent() const {
         return max_health != 0 ? health/max_health : health;
     }
 

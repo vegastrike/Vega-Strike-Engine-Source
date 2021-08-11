@@ -153,8 +153,9 @@ Missile::Missile( const char *filename,
 
 {
     static bool missilesparkle = XMLSupport::parse_bool( vs_config->getVariable( "graphics", "missilesparkle", "false" ) );
-    if (missilesparkle)
-        health.max_health *= 4;
+    if (missilesparkle) {
+        layers[0].facets[0].health.max_health *= 4;
+    }
 }
 
 
@@ -218,7 +219,7 @@ void Missile::UpdatePhysics2( const Transformation &trans,
     if(target != nullptr)
     {
         // But the target is dead already
-        if (target->health.health <= 0) {
+        if (target->Destroyed()) {
             target = nullptr;
         } else {
             // What does this do?
@@ -355,7 +356,7 @@ bool Missile::useFuel(Unit* target, bool had_target)
     if (time < 0)
     {
         // TODO: This really should be kill()
-        DealDamageToHull( Vector( .1f, .1f, .1f ), health.health+1 );
+        DealDamageToHull( Vector( .1f, .1f, .1f ), layers[0].facets[0].health.health+1 );
         return true;
     }
 

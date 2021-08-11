@@ -161,7 +161,7 @@ bool Unit::InsideCollideTree( Unit *smaller,
 {
     if (smaller->colTrees == NULL || this->colTrees == NULL)
         return false;
-    if (health.destroyed) return false;
+    if (Destroyed()) return false;
     if (smaller->colTrees->usingColTree() == false || this->colTrees->usingColTree() == false)
         return false;
     csOPCODECollider::ResetCollisionPairs();

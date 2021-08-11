@@ -401,7 +401,7 @@ void Planet::InitPlanet( QVector x,
     static float densityOfJumpPoint =
         XMLSupport::parse_float( vs_config->getVariable( "physics", "density_of_jump_point", "100000" ) );
     //static  float massofplanet = XMLSupport::parse_float(vs_config->getVariable("physics","mass_of_planet","10000000"));
-    health.health = (4./3)*M_PI*radius*radius*radius*(notJumppoint ? densityOfRock : densityOfJumpPoint);
+    layers[0].facets[0].health.health = (4./3)*M_PI*radius*radius*radius*(notJumppoint ? densityOfRock : densityOfJumpPoint);
     this->Mass   = (4./3)*M_PI*radius*radius*radius*( notJumppoint ? densityOfRock : (densityOfJumpPoint/100000) );
     SetAI( new PlanetaryOrbit( this, vely, pos, x, y, orbitcent, parent ) );     //behavior
     terraintrans = nullptr;
@@ -534,7 +534,7 @@ void Planet::AddFog( const std::vector< AtmosphericFogMesh > &v, bool opticalill
         fawg = new GameUnit( fogs, true, 0 );
     fawg->setFaceCamera();
     getSubUnits().preinsert( fawg );
-    fawg->health.health /= fawg->GetHullPercent();
+    fawg->layers[0].facets[0].health.health /= fawg->GetHullPercent();
 #ifdef MESHONLY
     meshdata.push_back( shield );
 #endif

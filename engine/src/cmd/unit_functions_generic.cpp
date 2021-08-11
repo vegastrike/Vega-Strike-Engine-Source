@@ -85,8 +85,8 @@ void SetShieldZero( Unit *un )
     // It appears this doesn't disable the shield but just zeroes it out.
     // In the case of cloaked ships, this is the expected behavior.
     // In the case of jump, this is not the expected behavior.
-    un->shield.Disable();
-    un->shield.Enable();
+    un->layers[2].Disable();
+    un->layers[2].Enable();
 }
 
 //un scored a faction kill

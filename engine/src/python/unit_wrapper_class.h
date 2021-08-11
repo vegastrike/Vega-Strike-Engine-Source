@@ -302,7 +302,7 @@ public:
     {
         Unit *un = GetUnit();
         if (un) {
-            return (un->health.destroyed);
+            return (un->Destroyed());
         }
         return un == 0;
     }

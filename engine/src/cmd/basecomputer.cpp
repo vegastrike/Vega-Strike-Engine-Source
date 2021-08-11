@@ -2655,7 +2655,7 @@ void BaseComputer::refresh()
 
 void BaseComputer::draw()
 {
-    if ( ( !m_player.GetUnit() ) || m_player.GetUnit()->health.health <= 0 ) {
+    if ( ( !m_player.GetUnit() ) || m_player.GetUnit()->Destroyed() ) {
         globalWindowManager().shutDown();
         TerminateCurrentBase();
     }
@@ -5152,7 +5152,7 @@ void showUnitStats( Unit *playerUnit, string &text, int subunitlevel, int mode, 
     const Unit::UnitJump &uj  = playerUnit->GetJumpStatus();
     const Unit::UnitJump &buj = blankUnit->GetJumpStatus();
     if (!mode) {
-        float maxshield = Damageable::totalShieldEnergyCapacitance( playerUnit->shield );
+        float maxshield = Damageable::totalShieldEnergyCapacitance( playerUnit->GetShieldLayer() );
         if (shields_require_power)
             maxshield = 0;
         PRETTY_ADDU( statcolor+"Recharge: #-c", playerUnit->energyRechargeData()*RSconverter, 0, "MJ/s" );
@@ -5234,7 +5234,7 @@ void showUnitStats( Unit *playerUnit, string &text, int subunitlevel, int mode, 
         text += "#n##n##c0:1:.5#"+prefix+"[DURABILITY STATISTICS]#n##-c";
         text += "#n#"+prefix+statcolor+"Armor damage resistance:#-c";
     }
-    if (mode && MODIFIES(replacement_mode, playerUnit, blankUnit, armor.facets[0].health.health)) {
+    if (mode && MODIFIES(replacement_mode, playerUnit, blankUnit, layers[1].facets[0].health.health)) {
         switch (replacement_mode) {
         case 0:                 //Replacement or new Module
             text += "#n#"+prefix+statcolor+"Replaces existing armor, if any.#n#Armor damage resistance:#-c";
@@ -5250,53 +5250,53 @@ void showUnitStats( Unit *playerUnit, string &text, int subunitlevel, int mode, 
             break;
         }
     }
-    if (!mode || MODIFIES(replacement_mode, playerUnit, blankUnit, armor.facets[2].health.health)) {
+    if (!mode || MODIFIES(replacement_mode, playerUnit, blankUnit, layers[1].facets[2].health.health)) {
         PRETTY_ADDU(
             substatcolor+" - Fore-starboard-high: #-c",
             (mode && replacement_mode
-             == 2) ? 100.0*(playerUnit->armor.facets[2].health.health-1) : playerUnit->armor.facets[2].health.health*VSDM,
+             == 2) ? 100.0*(playerUnit->layers[1].facets[2].health.health-1) : playerUnit->layers[1].facets[2].health.health*VSDM,
             0,
             (2 == replacement_mode) ? "%" : "MJ" );
         PRETTY_ADDU(
             substatcolor+" - Aft-starboard-high: #-c",
             (mode && replacement_mode
-             == 2) ? 100.0*(playerUnit->armor.facets[6].health.health-1) : playerUnit->armor.facets[6].health.health*VSDM,
+             == 2) ? 100.0*(playerUnit->layers[1].facets[6].health.health-1) : playerUnit->layers[1].facets[6].health.health*VSDM,
             0,
             (2 == replacement_mode) ? "%" : "MJ" );
         PRETTY_ADDU(
             substatcolor+" - Fore-port-high: #-c",
             (mode && replacement_mode
-             == 2) ? 100.0*(playerUnit->armor.facets[0].health.health-1) : playerUnit->armor.facets[0].health.health*VSDM,
+             == 2) ? 100.0*(playerUnit->layers[1].facets[0].health.health-1) : playerUnit->layers[1].facets[0].health.health*VSDM,
             0,
             (2 == replacement_mode) ? "%" : "MJ" );
         PRETTY_ADDU(
             substatcolor+" - Aft-port-high: #-c",
             (mode && replacement_mode
-             == 2) ? 100.0*(playerUnit->armor.facets[4].health.health-1) : playerUnit->armor.facets[4].health.health*VSDM,
+             == 2) ? 100.0*(playerUnit->layers[1].facets[4].health.health-1) : playerUnit->layers[1].facets[4].health.health*VSDM,
             0,
             (2 == replacement_mode) ? "%" : "MJ" );
         PRETTY_ADDU(
             substatcolor+" - Fore-starboard-low: #-c",
             (mode && replacement_mode
-             == 2) ? 100.0*(playerUnit->armor.facets[3].health.health-1) : playerUnit->armor.facets[3].health.health*VSDM,
+             == 2) ? 100.0*(playerUnit->layers[1].facets[3].health.health-1) : playerUnit->layers[1].facets[3].health.health*VSDM,
             0,
             (2 == replacement_mode) ? "%" : "MJ" );
         PRETTY_ADDU(
             substatcolor+" - Aft-starboard-low: #-c",
             (mode && replacement_mode
-             == 2) ? 100.0*(playerUnit->armor.facets[7].health.health-1) : playerUnit->armor.facets[7].health.health*VSDM,
+             == 2) ? 100.0*(playerUnit->layers[1].facets[7].health.health-1) : playerUnit->layers[1].facets[7].health.health*VSDM,
             0,
             (2 == replacement_mode) ? "%" : "MJ" );
         PRETTY_ADDU(
             substatcolor+" - Fore-port-low: #-c",
             (mode && replacement_mode
-             == 2) ? 100.0*(playerUnit->armor.facets[1].health.health-1) : playerUnit->armor.facets[1].health.health*VSDM,
+             == 2) ? 100.0*(playerUnit->layers[1].facets[1].health.health-1) : playerUnit->layers[1].facets[1].health.health*VSDM,
             0,
             (2 == replacement_mode) ? "%" : "MJ" );
         PRETTY_ADDU(
             substatcolor+" - Aft-port-low: #-c",
             (mode && replacement_mode
-             == 2) ? 100.0*(playerUnit->armor.facets[5].health.health-1) : playerUnit->armor.facets[5].health.health*VSDM,
+             == 2) ? 100.0*(playerUnit->layers[1].facets[5].health.health-1) : playerUnit->layers[1].facets[5].health.health*VSDM,
             0,
             (2 == replacement_mode) ? "%" : "MJ" );
     }
@@ -5328,8 +5328,8 @@ void showUnitStats( Unit *playerUnit, string &text, int subunitlevel, int mode, 
     }
 
     // Shields
-    const int num_shields = playerUnit->shield.number_of_facets;
-    const float first_shield_max_health = playerUnit->shield.facets[0].health.factory_max_health;
+    const int num_shields = playerUnit->layers[2].number_of_facets;
+    const float first_shield_max_health = playerUnit->layers[2].facets[0].health.factory_max_health;
     if (!mode) {
         if (num_shields) {
             PRETTY_ADD( statcolor+"Number of shield emitter facings: #-c", num_shields, 0 );
@@ -5338,7 +5338,7 @@ void showUnitStats( Unit *playerUnit, string &text, int subunitlevel, int mode, 
             text += "#n#"+prefix+statcolor+"No shielding. #-c";
         }
     } else if ( num_shields
-               && MODIFIES(replacement_mode, playerUnit, blankUnit, shield.facets[0].health.factory_max_health)) {
+               && MODIFIES(replacement_mode, playerUnit, blankUnit, layers[2].facets[0].health.factory_max_health)) {
         switch (replacement_mode) {
         case 0:                         //Replacement or new Module
             text += "#n#"+prefix+statcolor+"Installs shield with following protection ratings:#-c";
@@ -5371,20 +5371,20 @@ void showUnitStats( Unit *playerUnit, string &text, int subunitlevel, int mode, 
 
     if(shield_strings) {
         if (!mode || MODIFIES(replacement_mode, playerUnit,
-                              blankUnit, shield.facets[0].health.factory_max_health)) {
+                              blankUnit, layers[2].facets[0].health.factory_max_health)) {
             for(int i=0;i<num_shields;i++) {
                 PRETTY_ADDU(substatcolor + shield_strings[i], (mode && replacement_mode == 2) ?
-                                ( 100.0 *(playerUnit->shield.facets[i].health.factory_max_health-1) ) :
-                                playerUnit->shield.facets[i].health.factory_max_health * VSDM, 0,
+                                ( 100.0 *(playerUnit->layers[2].facets[i].health.factory_max_health-1) ) :
+                                playerUnit->layers[2].facets[i].health.factory_max_health * VSDM, 0,
                             (2 == replacement_mode) ? "%" : "MJ" );
             }
         }
     }
 
-    const float regeneration = playerUnit->shield.facets[0].health.regeneration;
+    const float regeneration = playerUnit->layers[2].facets[0].health.regeneration;
     if (!mode) {
         PRETTY_ADDU( statcolor+"Shield protection recharge speed: #-c", regeneration * VSDM, 0, "MJ/s" );
-    } else if (MODIFIES(replacement_mode, playerUnit, blankUnit, shield.facets[0].health.regeneration)) {
+    } else if (MODIFIES(replacement_mode, playerUnit, blankUnit, layers[2].facets[0].health.regeneration)) {
         switch (replacement_mode)
         {
         case 0:                         //Replacement or new Module
@@ -5569,7 +5569,7 @@ void showUnitStats( Unit *playerUnit, string &text, int subunitlevel, int mode, 
         return;
     if (subunitlevel == 0 && mode == 0) {
         text += "#n##n##c0:1:.5#"+prefix+"[KEY FIGURES]#n##-c";
-        float maxshield = Damageable::totalShieldEnergyCapacitance( playerUnit->shield );
+        float maxshield = Damageable::totalShieldEnergyCapacitance( playerUnit->layers[2] );
         if (shields_require_power)
             maxshield = 0;
         PRETTY_ADDU( statcolor+"Minimum time to reach full overthrust speed: #-c",
@@ -5577,8 +5577,8 @@ void showUnitStats( Unit *playerUnit, string &text, int subunitlevel, int mode, 
         //reactor
         float avail    = (playerUnit->maxEnergyData()*RSconverter-maxshield*VSDM);
 
-        int num_shields = playerUnit->shield.number_of_facets;
-        float regeneration = playerUnit->shield.facets[0].health.regeneration;
+        int num_shields = playerUnit->layers[2].number_of_facets;
+        float regeneration = playerUnit->layers[2].facets[0].health.regeneration;
         float overhead = (shields_require_power) ?
                     (regeneration / shieldenergycap * shield_maintenance_cost
                                        * num_shields * VSDM) : 0;

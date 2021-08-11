@@ -1027,7 +1027,15 @@ void Unit::LoadRow( CSVRow &row, string modification, string *netxml )
     Mass = stof( OPTIM_GET( row, table, Mass ), 1.0 );
     Momentofinertia = stof( OPTIM_GET( row, table, Moment_Of_Inertia ), 1.0 );
     fuel = ::stof( OPTIM_GET( row, table, Fuel_Capacity ) );
-    health.health = health.max_health = ::stof( OPTIM_GET( row, table, Hull ) );
+
+    // Hull
+    float temp_hull = ::stof( OPTIM_GET( row, table, Hull ) );
+    float hull_values[1] = {temp_hull};
+    layers[0] = DamageableFactory::CreateLayer(FacetConfiguration::one,
+                                                          hull_values,
+                                                          0.0f,
+                                                          true);
+
     specInterdiction = ::stof( OPTIM_GET( row, table, Spec_Interdiction ) );
 
     // Init armor
@@ -1041,10 +1049,11 @@ void Unit::LoadRow( CSVRow &row, string modification, string *netxml )
     armor_values[6] = ::stof( OPTIM_GET( row, table, Armor_Back_Bottom_Left ));
     armor_values[7] = ::stof( OPTIM_GET( row, table, Armor_Back_Bottom_Right ));
 
-    armor = DamageableFactory::CreateLayer(FacetConfiguration::eight,
+    layers[1] = DamageableFactory::CreateLayer(FacetConfiguration::eight,
                                            armor_values,
                                            0.0f,
                                            false);
+
 
     // Load shield
     // Some basic shield variables
@@ -1077,7 +1086,7 @@ void Unit::LoadRow( CSVRow &row, string modification, string *netxml )
     switch(shield_count) {
     case 1:
         // No shields
-        shield = DamageableFactory::CreateLayer(FacetConfiguration::one,
+        layers[2] = DamageableFactory::CreateLayer(FacetConfiguration::one,
                                                 shield_values,
                                                 0.0f,
                                                 false);
@@ -1086,7 +1095,7 @@ void Unit::LoadRow( CSVRow &row, string modification, string *netxml )
         shield_values[0] += shield_values[1] + shield_values[4] + shield_values[5];
         shield_values[1] = shield_values[2] + shield_values[3]
                 + shield_values[6] + shield_values[7];
-        shield = DamageableFactory::CreateLayer(FacetConfiguration::two,
+        layers[2] = DamageableFactory::CreateLayer(FacetConfiguration::two,
                                                 shield_values,
                                                 recharge,
                                                 false);
@@ -1098,7 +1107,7 @@ void Unit::LoadRow( CSVRow &row, string modification, string *netxml )
         four_shield_values[2] = shield_values[0] + shield_values[1]; // Left
         four_shield_values[3] = shield_values[2] + shield_values[3]; // Left
 
-        shield = DamageableFactory::CreateLayer(FacetConfiguration::four,
+        layers[2] = DamageableFactory::CreateLayer(FacetConfiguration::four,
                                                 four_shield_values,
                                                 recharge,
                                                 false);
@@ -1116,7 +1125,7 @@ void Unit::LoadRow( CSVRow &row, string modification, string *netxml )
         eight_shield_values[5] = shield_values[3];
         eight_shield_values[6] = shield_values[6];
         eight_shield_values[7] = shield_values[7];
-        shield = DamageableFactory::CreateLayer(FacetConfiguration::eight,
+        layers[2] = DamageableFactory::CreateLayer(FacetConfiguration::eight,
                                                 eight_shield_values,
                                                 recharge,
                                                 false);
@@ -1558,18 +1567,18 @@ string Unit::WriteUnitString()
                 unit["Mass"] = tos( Mass );
                 unit["Moment_Of_Inertia"] = tos( Momentofinertia );
                 unit["Fuel_Capacity"] = tos( fuel );
-                unit["Hull"] = tos( health.health );
+                unit["Hull"] = tos( GetHullLayer().facets[0].health.health );
                 unit["Spec_Interdiction"] = tos( specInterdiction );
 
                 // TODO: lib_damage figure out if this is correctly assigned
-                unit["Armor_Front_Top_Left"]     = tos( armor.facets[0].health.health );
-                unit["Armor_Front_Top_Right"]    = tos( armor.facets[2].health.health );
-                unit["Armor_Back_Top_Left"]      = tos( armor.facets[4].health.health );
-                unit["Armor_Back_Top_Right"]     = tos( armor.facets[6].health.health );
-                unit["Armor_Front_Bottom_Left"]  = tos( armor.facets[1].health.health );
-                unit["Armor_Front_Bottom_Right"] = tos( armor.facets[3].health.health );
-                unit["Armor_Back_Bottom_Left"]   = tos( armor.facets[5].health.health );
-                unit["Armor_Back_Bottom_Right"]  = tos( armor.facets[7].health.health );
+                unit["Armor_Front_Top_Left"]     = tos( GetArmorLayer().facets[0].health.health );
+                unit["Armor_Front_Top_Right"]    = tos( GetArmorLayer().facets[2].health.health );
+                unit["Armor_Back_Top_Left"]      = tos( GetArmorLayer().facets[4].health.health );
+                unit["Armor_Back_Top_Right"]     = tos( GetArmorLayer().facets[6].health.health );
+                unit["Armor_Front_Bottom_Left"]  = tos( GetArmorLayer().facets[1].health.health );
+                unit["Armor_Front_Bottom_Right"] = tos( GetArmorLayer().facets[3].health.health );
+                unit["Armor_Back_Bottom_Left"]   = tos( GetArmorLayer().facets[5].health.health );
+                unit["Armor_Back_Bottom_Right"]  = tos( GetArmorLayer().facets[7].health.health );
                 {
                     unit["Shield_Front_Top_Right"]    = "";
                     unit["Shield_Front_Top_Left"]     = "";
@@ -1579,29 +1588,29 @@ string Unit::WriteUnitString()
                     unit["Shield_Front_Bottom_Left"]  = "";
                     unit["Shield_Back_Bottom_Right"]  = "";
                     unit["Shield_Back_Bottom_Left"]   = "";
-                    switch (shield.number_of_facets)
+                    switch (GetShieldLayer().number_of_facets)
                     {
                     case 8:
-                        unit["Shield_Front_Top_Left"]     = tos( shield.facets[0].health.max_health );
-                        unit["Shield_Front_Top_Right"]    = tos( shield.facets[1].health.max_health );
-                        unit["Shield_Front_Bottom_Left"]  = tos( shield.facets[2].health.max_health );
-                        unit["Shield_Front_Bottom_Right"] = tos( shield.facets[3].health.max_health );
-                        unit["Shield_Back_Top_Left"]      = tos( shield.facets[4].health.max_health );
-                        unit["Shield_Back_Top_Right"]     = tos( shield.facets[5].health.max_health );
-                        unit["Shield_Back_Bottom_Left"]   = tos( shield.facets[6].health.max_health );
-                        unit["Shield_Back_Bottom_Right"]  = tos( shield.facets[7].health.max_health );
+                        unit["Shield_Front_Top_Left"]     = tos( GetShieldLayer().facets[0].health.max_health );
+                        unit["Shield_Front_Top_Right"]    = tos( GetShieldLayer().facets[1].health.max_health );
+                        unit["Shield_Front_Bottom_Left"]  = tos( GetShieldLayer().facets[2].health.max_health );
+                        unit["Shield_Front_Bottom_Right"] = tos( GetShieldLayer().facets[3].health.max_health );
+                        unit["Shield_Back_Top_Left"]      = tos( GetShieldLayer().facets[4].health.max_health );
+                        unit["Shield_Back_Top_Right"]     = tos( GetShieldLayer().facets[5].health.max_health );
+                        unit["Shield_Back_Bottom_Left"]   = tos( GetShieldLayer().facets[6].health.max_health );
+                        unit["Shield_Back_Bottom_Right"]  = tos( GetShieldLayer().facets[7].health.max_health );
 
                         break;
                     case 4:
-                        unit["Shield_Front_Bottom_Left"]  = tos( shield.facets[0].health.max_health );
-                        unit["Shield_Front_Bottom_Right"] = tos( shield.facets[1].health.max_health );
-                        unit["Shield_Front_Top_Right"]    = tos( shield.facets[2].health.max_health );
-                        unit["Shield_Back_Top_Right"]     = tos( shield.facets[3].health.max_health );
+                        unit["Shield_Front_Bottom_Left"]  = tos( GetShieldLayer().facets[0].health.max_health );
+                        unit["Shield_Front_Bottom_Right"] = tos( GetShieldLayer().facets[1].health.max_health );
+                        unit["Shield_Front_Top_Right"]    = tos( GetShieldLayer().facets[2].health.max_health );
+                        unit["Shield_Back_Top_Right"]     = tos( GetShieldLayer().facets[3].health.max_health );
 
                         break;
                     case 2:
-                        unit["Shield_Front_Top_Right"]    = tos( shield.facets[0].health.max_health );
-                        unit["Shield_Back_Top_Right"]     = tos( shield.facets[1].health.max_health );
+                        unit["Shield_Front_Top_Right"]    = tos( GetShieldLayer().facets[0].health.max_health );
+                        unit["Shield_Back_Top_Right"]     = tos( GetShieldLayer().facets[1].health.max_health );
                         break;
                         //NOTE: otherwise, no shields
                     }
@@ -1610,7 +1619,7 @@ string Unit::WriteUnitString()
 
                 //TODO: lib_damage shield leak and efficiency
                 unit["Shield_Leak"] = tos(0); //tos( shield.leak/100.0 );
-                unit["Shield_Recharge"] = tos(shield.facets[0].health.regeneration); //tos( shield.recharge );
+                unit["Shield_Recharge"] = tos(GetShieldLayer().facets[0].health.regeneration); //tos( shield.recharge );
                 unit["Shield_Efficiency"] = tos(0); //tos( shield.efficiency );
                 unit["Warp_Capacitor"] = tos( maxwarpenergy );
                 unit["Warp_Min_Multiplier"] = tos( graphicOptions.MinWarpMultiplier );

@@ -30,24 +30,16 @@
 #include "damageable_object.h"
 #include "gfx/vec.h"
 
-
-class Damageable
+/**
+ * @brief The Damageable class TODO
+ */
+class Damageable : public DamageableObject
 {
 public:
-    // TODO: Consider making into protected later
-    // Fields
-    // Inconsistency between this (0) and Init (1) for hull and maxhull.
-    // Chose Init and value of 1. Also commented out was 10.
-    // Doesn't really matter, but documenting anyway.
-
-    DamageableLayer armor;
-    DamageableLayer shield;
-
-    Health health;
 
     // Methods
 public:
-  Damageable();
+    Damageable() {}
 
 protected:
   virtual ~Damageable() = default;
@@ -57,9 +49,40 @@ protected:
   Damageable& operator=( const Damageable& ) = delete;
 
 public:
-  float GetHull() const {
-      return health.health;
+  // We follow the existing convention of GetX for the actual health value
+  // because we are constrained by existing python interfaces, which cannot
+  // be easily changed.
+  const float GetHull() const {
+      return layers[0].facets[0].health.health;
   }
+
+  const float GetArmor(int facet = 0) const {
+      return layers[1].facets[facet].health.health;
+  }
+
+  const float GetShield(int facet = 0) const {
+      return layers[2].facets[facet].health.health;
+  }
+
+  DamageableLayer& GetHullLayer() {
+      return layers[0];
+  }
+
+  DamageableLayer& GetArmorLayer() {
+      return layers[1];
+  }
+
+  DamageableLayer& GetShieldLayer() {
+      return layers[2];
+  }
+
+  const float GetShieldRegeneration() const {
+      return layers[2].facets[0].health.regeneration;
+  }
+
+
+
+
 
   void ArmorData( float armor[8] ) const;
 
@@ -80,9 +103,10 @@ public:
 //  {
 //      return hull;
 //  }
-  float GetHullPercent() const
+
+  const float GetHullPercent() const
   {
-      return static_cast<Health>(health).Percent();
+      return layers[0].facets[0].health.Percent();
   }
 
   //reduces shields to X percentage and reduces shield recharge to Y percentage
