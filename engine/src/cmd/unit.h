@@ -99,8 +99,7 @@ public:
  	double sparkle_accum;
     std::unique_ptr< HaloSystem >phalos;
 ///Process all meshes to be deleted
-///Split this mesh with into 2^level submeshes at arbitrary planes
-    void Split( int level );
+
     void FixGauges();
 ///Sets the camera to be within this unit.
     void UpdateHudMatrix( int whichcam );

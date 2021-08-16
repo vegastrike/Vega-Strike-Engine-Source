@@ -1031,10 +1031,11 @@ void Unit::LoadRow( CSVRow &row, string modification, string *netxml )
     // Hull
     float temp_hull = ::stof( OPTIM_GET( row, table, Hull ) );
     float hull_values[1] = {temp_hull};
-    layers[0] = DamageableFactory::CreateLayer(FacetConfiguration::one,
-                                                          hull_values,
-                                                          0.0f,
-                                                          true);
+    layers[0] = DamageableFactory::CreateLayer(0,
+                                               FacetConfiguration::one,
+                                               hull_values,
+                                               0.0f,
+                                               true);
 
     specInterdiction = ::stof( OPTIM_GET( row, table, Spec_Interdiction ) );
 
@@ -1049,10 +1050,11 @@ void Unit::LoadRow( CSVRow &row, string modification, string *netxml )
     armor_values[6] = ::stof( OPTIM_GET( row, table, Armor_Back_Bottom_Left ));
     armor_values[7] = ::stof( OPTIM_GET( row, table, Armor_Back_Bottom_Right ));
 
-    layers[1] = DamageableFactory::CreateLayer(FacetConfiguration::eight,
-                                           armor_values,
-                                           0.0f,
-                                           false);
+    layers[1] = DamageableFactory::CreateLayer(1,
+                                               FacetConfiguration::eight,
+                                               armor_values,
+                                               0.0f,
+                                               false);
 
 
     // Load shield
@@ -1086,19 +1088,21 @@ void Unit::LoadRow( CSVRow &row, string modification, string *netxml )
     switch(shield_count) {
     case 1:
         // No shields
-        layers[2] = DamageableFactory::CreateLayer(FacetConfiguration::one,
-                                                shield_values,
-                                                0.0f,
-                                                false);
+        layers[2] = DamageableFactory::CreateLayer(2,
+                                                   FacetConfiguration::one,
+                                                   shield_values,
+                                                   0.0f,
+                                                   false);
         break;
     case 2:
         shield_values[0] += shield_values[1] + shield_values[4] + shield_values[5];
         shield_values[1] = shield_values[2] + shield_values[3]
                 + shield_values[6] + shield_values[7];
-        layers[2] = DamageableFactory::CreateLayer(FacetConfiguration::two,
-                                                shield_values,
-                                                recharge,
-                                                false);
+        layers[2] = DamageableFactory::CreateLayer(2,
+                                                   FacetConfiguration::two,
+                                                   shield_values,
+                                                   recharge,
+                                                   false);
         break;
     case 4:
         float four_shield_values[4];
@@ -1107,10 +1111,11 @@ void Unit::LoadRow( CSVRow &row, string modification, string *netxml )
         four_shield_values[2] = shield_values[0] + shield_values[1]; // Left
         four_shield_values[3] = shield_values[2] + shield_values[3]; // Left
 
-        layers[2] = DamageableFactory::CreateLayer(FacetConfiguration::four,
-                                                four_shield_values,
-                                                recharge,
-                                                false);
+        layers[2] = DamageableFactory::CreateLayer(2,
+                                                   FacetConfiguration::four,
+                                                   four_shield_values,
+                                                   recharge,
+                                                   false);
         break;
     case 6:
         // Not supported yet
@@ -1125,10 +1130,11 @@ void Unit::LoadRow( CSVRow &row, string modification, string *netxml )
         eight_shield_values[5] = shield_values[3];
         eight_shield_values[6] = shield_values[6];
         eight_shield_values[7] = shield_values[7];
-        layers[2] = DamageableFactory::CreateLayer(FacetConfiguration::eight,
-                                                eight_shield_values,
-                                                recharge,
-                                                false);
+        layers[2] = DamageableFactory::CreateLayer(2,
+                                                   FacetConfiguration::eight,
+                                                   eight_shield_values,
+                                                   recharge,
+                                                   false);
         break;
     }
 

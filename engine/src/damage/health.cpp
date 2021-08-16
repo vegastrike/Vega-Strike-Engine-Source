@@ -23,22 +23,22 @@ void Health::AdjustPower(const float& percent) {
     }
 }
 
-void Health::DealDamage( Damage &damage ) {
+void Health::DealDamage( Damage &damage, InflictedDamage& inflicted_damage ) {
     // If this layer is destroyed, it can no longer sustain damage
     if(destroyed) {
         return;
     }
 
-    std::cout << "pre-deal normal_damage " << damage.normal_damage <<
-              " health " << health << std::endl;
+    //std::cout << std::string:: "pre-deal normal_damage " << damage.normal_damage <<
+    //          " health " << health << std::endl;
 
-    DealDamageComponent(damage.normal_damage, vulnerabilities.normal_damage);
-    DealDamageComponent(damage.phase_damage, vulnerabilities.phase_damage);
+    DealDamageComponent(0, damage.normal_damage, vulnerabilities.normal_damage, inflicted_damage);
+    DealDamageComponent(1, damage.phase_damage, vulnerabilities.phase_damage, inflicted_damage);
 
     // TODO: implement other types of damage
-
-    std::cout << "post-deal normal_damage " << damage.normal_damage <<
-                 " health " << health << std::endl;
+    if(layer == 0 && destroyed) {
+        std::cout << " - health  - ship destroyed\n";
+    }
 
 }
 
@@ -50,17 +50,30 @@ void Health::DealDamage( Damage &damage ) {
  * @param damage - to inflict
  * @param vulnerability - adjust for
  */
-void Health::DealDamageComponent( float &damage, float vulnerability ) {
+// TODO: type is ugly hack
+void Health::DealDamageComponent( int type, float &damage, float vulnerability, InflictedDamage& inflicted_damage ) {
     // Here we adjust for specialized weapons such as shield bypassing and shield leeching
     // which only damage the shield.
     // We also cap the actual damage at the current health
-    float adjusted_damage = std::min(damage * vulnerability, health);
+    const float adjusted_damage = std::min(damage * vulnerability, health);
 
     // We check if there's any damage left to pass on to the next layer
     damage -= adjusted_damage;
 
     // Damage the current health
     health -= adjusted_damage;
+
+    // Record damage
+    switch (type) {
+    case 0:
+        inflicted_damage.normal_damage += adjusted_damage;
+        break;
+    case 1:
+        inflicted_damage.phase_damage += adjusted_damage;
+    }
+
+    inflicted_damage.total_damage += adjusted_damage;
+    inflicted_damage.inflicted_damage_by_layer[layer] += adjusted_damage;
 
     if(health == 0 && !regenerative) {
         destroyed = true;

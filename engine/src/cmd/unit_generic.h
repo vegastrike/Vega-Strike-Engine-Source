@@ -412,10 +412,7 @@ public:
 //Takes out of the collide table for this system.
     void RemoveFromSystem();
     void RequestPhysics();               //Requeues the unit so that it is simulated ASAP
-    unsigned int nummesh() const {
-        // Return number of meshes except shield
-        return ( meshdata.size() - 1 );
-    }
+
 //Uses planet stuff
 /* Updates the collide Queue with any possible change in sectors
  *  Split this mesh with into 2^level submeshes at arbitrary planes
@@ -562,7 +559,7 @@ public:
     float  specInterdiction = 0;
 
     float  HeatSink = 0;
-protected:
+public:
     //BUCO! Must add shield tightness back into units.csv for great justice.
     //are shields tight to the hull.  zero means bubble
     float  shieldtight = GameConfig::GetVariable( "physics",
@@ -699,18 +696,11 @@ public:
                             const GFXColor&);
 //Applies damage from network data
     void ApplyNetDamage( Vector &pnt, Vector &normal, float amt, float ppercentage, float spercentage, GFXColor &color );
-//Applies damage to the pre-transformed area of the ship
-    void ApplyDamage( const Vector &pnt,
-                      const Vector &normal,
-                      Damage damage,
-                      Unit *affectedSubUnit,
-                      const GFXColor&,
-                      void *ownerDoNotDereference);
+
+
 
     virtual float DealDamageToHull( const Vector &pnt, float Damage ) override;
 
-//Lights the shields, without applying damage or making the AI mad - useful for special effects
-    void LightShields( const Vector &pnt, const Vector &normal, float amt, const GFXColor &color );
 //Deals remaining damage to the hull at point and applies lighting effects
 //short fix
 //    virtual void ArmorDamageSound( const Vector &pnt ) {}

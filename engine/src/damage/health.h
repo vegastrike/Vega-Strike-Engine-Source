@@ -19,6 +19,7 @@
 struct Health
 {
 public:
+    int layer; // The layer we're in, for recording damage
     float factory_max_health; // The absolute maximum, for a new, undamaged part
     float max_health; // The current max, for a potentially damaged part
     float adjusted_health;  // Max health for shields when there's not enough power for them
@@ -43,19 +44,20 @@ public:
         destroying  // The DamageableObject is destroyed, potentially leaving debris behind
     } effect;
 
-    Health(float health = 1, float regeneration = 0) :
-        Health(health, health, regeneration) {}
+    Health(int layer, float health = 1, float regeneration = 0) :
+        Health(layer, health, health, regeneration) {}
 
 
-    Health(float max_health, float health, float regeneration) :
+    Health(int layer, float max_health, float health, float regeneration) :
         factory_max_health(max_health),
         max_health(max_health),
         adjusted_health(max_health),
         health(health),
         factory_regeneration(regeneration),
         regeneration(regeneration),
-        regenerative(regeneration > 0) {
+        regenerative(regeneration > 0 ) {
         destroyed = false;
+        if(layer == 0) regenerative = false;
         enabled = regenerative; // Only relevant for regenerative objects (e.g. shields).
         vulnerabilities.normal_damage = 1;
         vulnerabilities.phase_damage = 1;
@@ -66,8 +68,8 @@ public:
     }
 
     void AdjustPower(const float& percent);
-    void DealDamage( Damage &damage );
-    void DealDamageComponent( float &damage, float vulnerability );
+    void DealDamage( Damage &damage, InflictedDamage& inflicted_damage );
+    void DealDamageComponent( int type, float &damage, float vulnerability, InflictedDamage& inflicted_damage );
     void Disable();
     void Enable();
     void ReduceLayerMaximum(const float& percent);

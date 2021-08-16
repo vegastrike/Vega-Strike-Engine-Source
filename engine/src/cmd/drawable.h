@@ -34,6 +34,7 @@
 class Mesh;
 class Flightgroup;
 class Unit;
+class GFXColor;
 //class Transformation;
 
 using std::vector;
@@ -121,6 +122,17 @@ public:
     virtual void Draw( const Transformation &quat = identity_transformation, const Matrix &m = identity_matrix ) = 0;
     virtual void DrawNow( const Matrix &m = identity_matrix, float lod = 1000000000 ) = 0;
     virtual std::string drawableGetName() = 0;
+
+    //Split this mesh with into 2^level submeshes at arbitrary planes
+    void Split( int level );
+
+    unsigned int nummesh() const {
+        // Return number of meshes except shield
+        return ( meshdata.size() - 1 );
+    }
+
+    //Lights the shields, without applying damage or making the AI mad - useful for special effects
+    void LightShields( const Vector &pnt, const Vector &normal, float amt, const GFXColor &color );
 };
 
 

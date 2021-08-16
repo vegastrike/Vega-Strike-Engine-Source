@@ -1520,11 +1520,7 @@ static bool applyto( float &shield, const float max, const float amt )
  **********************************************************************************
  */
 
-void Unit::LightShields( const Vector &pnt, const Vector &normal, float amt, const GFXColor &color )
-{
-    meshdata.back()->AddDamageFX( pnt, shieldtight ? shieldtight*normal : Vector( 0, 0, 0 ), std::min( 1.0f, std::max( 0.0f,
-                                                                                                                 amt ) ), color );
-}
+
 
 //NEW TESTING MODIFICATIONS
 //We do it also on client side to display hits on shields/armor -> not to compute damage
@@ -1642,89 +1638,7 @@ Unit * findUnitInStarsystem(const void *unitDoNotDereference )
     return NULL;
 }
 
-extern void ScoreKill( Cockpit *cp, Unit *killer, Unit *killedUnit );
-//Changed order of things -> Vectors and ApplyLocalDamage are computed before Cockpit thing now
-void AllUnitsCloseAndEngage( Unit*, int faction );
-void Unit::ApplyDamage( const Vector &pnt,
-                        const Vector &normal,
-                        Damage damage,
-                        Unit *affectedUnit,
-                        const GFXColor &color,
-                        void *ownerDoNotDereference)
-{
-    Cockpit     *cp = _Universe->isPlayerStarshipVoid( ownerDoNotDereference );
-    float        hullpercent = GetHullPercent();
-    //Only on client side
-    bool         mykilled    = Destroyed();
-    Vector       localpnt( InvTransform( cumulative_transformation_matrix, pnt ) );
-    Vector       localnorm( ToLocalCoordinates( normal ) );
-    //Only call when on servre side or non-networking
-    //If networking damages are applied as they are received
-    static float hull_percent_for_comm = XMLSupport::parse_float( vs_config->getVariable( "AI", "HullPercentForComm", ".75" ) );
-    bool         armor_damage = false;
-    armor_damage = (ApplyLocalDamage( localpnt, localnorm, damage, affectedUnit, color) == 2);
-    if (cp) {
-        static int MadnessForShieldDamage = XMLSupport::parse_bool( vs_config->getVariable( "AI", "ShieldDamageAnger", "1" ) );
-        static int MadnessForHullDamage   = XMLSupport::parse_bool( vs_config->getVariable( "AI", "HullDamageAnger", "10" ) );
-        int howmany = armor_damage ? MadnessForHullDamage : MadnessForShieldDamage;
-        for (int i = 0; i < howmany; ++i) {
-            //now we can dereference it because we checked it against the parent
-            CommunicationMessage c( reinterpret_cast< Unit* > (ownerDoNotDereference), this, NULL, 0 );
-            c.SetCurrentState( c.fsm->GetHitNode(), NULL, 0 );
-            if ( this->getAIState() ) this->getAIState()->Communicate( c );
-        }
-        //the dark danger is real!
-        Threaten( reinterpret_cast< Unit* > (ownerDoNotDereference), 10 );
-    } else {
-        //if only the damage contained which faction it belonged to
-        pilot->DoHit( this, ownerDoNotDereference, FactionUtil::GetNeutralFaction() );
-    }
-    if (Destroyed()) {
-        ClearMounts();
-        if (!mykilled) {
-            if (cp) {
-                ScoreKill( cp, reinterpret_cast< Unit* > (ownerDoNotDereference), this );
-            } else {
-                Unit *tmp;
-                if ( ( tmp = findUnitInStarsystem( ownerDoNotDereference ) ) != NULL ) {
-                    if ( ( NULL != ( cp = _Universe->isPlayerStarshipVoid( tmp->owner ) ) )
-                        && (cp->GetParent() != NULL) )
-                        ScoreKill( cp, cp->GetParent(), this );
-                    else
-                        ScoreKill( NULL, tmp, this );
-                }
-            }
-        }
-    } else if ( hullpercent >= hull_percent_for_comm && ( (float) GetHullPercent() ) < hull_percent_for_comm
-               && ( cp || _Universe->isPlayerStarship( this ) ) ) {
-        Unit *computerai = NULL;
-        Unit *player     = NULL;
-        if (cp == NULL) {
-            computerai = findUnitInStarsystem( ownerDoNotDereference );
-            player     = this;
-        } else {
-            computerai = this;
-            //cp != NULL
-            player     = cp->GetParent();
-        }
-        if (computerai && player && computerai->getAIState() && player->getAIState() && computerai->isUnit() == _UnitType::unit
-            && player->isUnit() == _UnitType::unit) {
-            unsigned char gender;
-            vector< Animation* > *anim = computerai->pilot->getCommFaces( gender );
-            if (cp) {
-                static bool assistallyinneed =
-                    XMLSupport::parse_bool( vs_config->getVariable( "AI", "assist_friend_in_need", "true" ) );
-                if (assistallyinneed)
-                    AllUnitsCloseAndEngage( player, computerai->faction );
-            }
-            if (GetHullPercent() > 0 || !cp) {
-                CommunicationMessage c( computerai, player, anim, gender );
-                c.SetCurrentState( cp ? c.fsm->GetDamagedNode() : c.fsm->GetDealtDamageNode(), anim, gender );
-                player->getAIState()->Communicate( c );
-            }
-        }
-    }
-}
+
 
 //NUMGAUGES has been moved to pImages.h in UnitImages<void>
 void Unit::DamageRandSys( float dam, const Vector &vec, float randnum, float degrees )

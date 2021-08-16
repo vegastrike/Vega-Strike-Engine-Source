@@ -19,11 +19,13 @@ public:
                                                  float armor,
                                                  float hull);
 
-    static DamageableLayer CreateLayer(FacetConfiguration configuration,
+    static DamageableLayer CreateLayer(int layer_index,
+                                       FacetConfiguration configuration,
                                        Health health_template,
                                        bool core_layer);
 
-    static DamageableLayer CreateLayer(FacetConfiguration configuration,
+    static DamageableLayer CreateLayer(int layer_index,
+                                       FacetConfiguration configuration,
                                        float health_array[],
                                        float regeneration,
                                        bool core_layer);

@@ -6,6 +6,7 @@
 // Demonstrate some basic assertions.
 TEST(Shield, Sanity) {
     Damage damage;
+    InflictedDamage inflicted_damage(3);
     damage.normal_damage = 10;
     EXPECT_EQ(damage.normal_damage, 10);
 
@@ -19,7 +20,7 @@ TEST(Shield, Sanity) {
     EXPECT_FALSE(health.destroyed);
     EXPECT_TRUE(health.enabled);
 
-    health.DealDamage(damage);
+    health.DealDamage(damage, inflicted_damage);
     EXPECT_EQ(health.health, 90);
     EXPECT_EQ(damage.normal_damage, 0);
 
@@ -32,7 +33,7 @@ TEST(Shield, Sanity) {
     EXPECT_EQ(health.health, 100);
 
     damage.normal_damage = 110;
-    health.DealDamage(damage);
+    health.DealDamage(damage, inflicted_damage);
     EXPECT_EQ(health.health, 0);
     EXPECT_TRUE(health.regenerative);
     EXPECT_FALSE(health.destroyed);
@@ -43,6 +44,7 @@ TEST(Shield, Sanity) {
 
 TEST(Armor, Sanity) {
     Damage damage;
+    InflictedDamage inflicted_damage(3);
     damage.normal_damage = 10;
     EXPECT_EQ(damage.normal_damage, 10);
 
@@ -56,7 +58,7 @@ TEST(Armor, Sanity) {
     EXPECT_FALSE(health.destroyed);
     EXPECT_FALSE(health.enabled);
 
-    health.DealDamage(damage);
+    health.DealDamage(damage, inflicted_damage);
     EXPECT_EQ(health.health, 90);
     EXPECT_EQ(damage.normal_damage, 0);
 
@@ -71,7 +73,7 @@ TEST(Armor, Sanity) {
     EXPECT_FALSE(health.enabled);
 
     damage.normal_damage = 110;
-    health.DealDamage(damage);
+    health.DealDamage(damage, inflicted_damage);
     EXPECT_EQ(health.health, 0);
     EXPECT_FALSE(health.regenerative);
     EXPECT_TRUE(health.destroyed);

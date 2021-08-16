@@ -30,6 +30,9 @@
 #include "damageable_object.h"
 #include "gfx/vec.h"
 
+class Unit;
+class GFXColor;
+
 /**
  * @brief The Damageable class TODO
  */
@@ -80,7 +83,15 @@ public:
       return layers[2].facets[0].health.regeneration;
   }
 
+  const float GetHullPercent() const
+  {
+      return layers[0].facets[0].health.Percent();
+  }
 
+  const float GetShieldPercent() const
+  {
+      return layers[2].facets[0].health.Percent();
+  }
 
 
 
@@ -91,6 +102,17 @@ public:
 
   //applies damage from the given pnt to the shield, and returns % damage applied and applies lighitn
   virtual float DealDamageToShield( const Vector &pnt, float &Damage );
+  virtual float DealDamageToHull( const Vector &pnt, float Damage );
+
+  //Applies damage to the pre-transformed area of the ship
+  void ApplyDamage(const Vector &pnt,
+              const Vector &normal,
+              Damage damage,
+              Unit *affectedUnit,
+              const GFXColor &color,
+              void *ownerDoNotDereference);
+
+  void Destroy();
 
   float FShieldData() const;
   float RShieldData() const;
@@ -104,15 +126,12 @@ public:
 //      return hull;
 //  }
 
-  const float GetHullPercent() const
-  {
-      return layers[0].facets[0].health.Percent();
-  }
+
 
   //reduces shields to X percentage and reduces shield recharge to Y percentage
   void leach( float XshieldPercent, float YrechargePercent, float ZenergyPercent );
 
-  virtual float DealDamageToHull( const Vector &pnt, float Damage );
+
 
   float MaxShieldVal() const;
 //regenerates all 2,4, or 6 shields for 1 SIMULATION_ATOM
@@ -122,6 +141,7 @@ public:
   static float totalShieldVal( const Shield &shield );
   static float currentTotalShieldVal( const Shield &shield );
   static float totalShieldEnergyCapacitance( const DamageableLayer &shield );
+
 
 protected:
   bool flickerDamage();

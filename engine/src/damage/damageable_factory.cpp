@@ -18,22 +18,25 @@ DamageableObject DamageableFactory::CreateStandardObject(float shield,
                                                          FacetConfiguration shield_configuration,
                                                          float armor,
                                                          float hull) {
-    Health shield_health = Health(shield, shield, shield_regeneration);
-    Health armor_health = Health(armor, armor, 0);
     Health hull_health = Health(hull, hull, 0);
+    Health armor_health = Health(armor, armor, 0);
+    Health shield_health = Health(shield, shield, shield_regeneration);
 
-    DamageableLayer shield_layer = CreateLayer(shield_configuration, shield_health, false);
-    DamageableLayer armor_layer = CreateLayer(shield_configuration, armor_health, false);
-    DamageableLayer hull_layer = CreateLayer(FacetConfiguration::one, hull_health, true);
-    std::vector<DamageableLayer> layers = { shield_layer, armor_layer, hull_layer };
+    DamageableLayer hull_layer = CreateLayer(0, FacetConfiguration::one, hull_health, true);
+    DamageableLayer armor_layer = CreateLayer(1, shield_configuration, armor_health, false);
+    DamageableLayer shield_layer = CreateLayer(2, shield_configuration, shield_health, false);
+
+    std::vector<DamageableLayer> layers = { hull_layer, armor_layer, shield_layer };
 
     DamageableObject object(layers, std::vector<DamageableObject>());
     return object;
 }
 
-DamageableLayer DamageableFactory::CreateLayer(FacetConfiguration configuration,
+DamageableLayer DamageableFactory::CreateLayer(int layer_index,
+                                               FacetConfiguration configuration,
                                                Health health_template,
                                                bool core_layer) {
+    health_template.layer = layer_index;
     int size = FacetConfigurationSize(configuration);
     const FacetName* facet_configuration_array = FacetConfigurationByName(configuration);
 
@@ -44,11 +47,12 @@ DamageableLayer DamageableFactory::CreateLayer(FacetConfiguration configuration,
                                          health_template));
     }
 
-    DamageableLayer layer(size, facets, core_layer);
+    DamageableLayer layer(layer_index, size, facets, core_layer);
     return layer;
 }
 
-DamageableLayer DamageableFactory::CreateLayer(FacetConfiguration configuration,
+DamageableLayer DamageableFactory::CreateLayer(int layer_index,
+                                               FacetConfiguration configuration,
                                                float health_array[],
                                                float regeneration,
                                                bool core_layer) {
@@ -63,7 +67,7 @@ DamageableLayer DamageableFactory::CreateLayer(FacetConfiguration configuration,
                                          health));
     }
 
-    DamageableLayer layer(size, facets, core_layer);
+    DamageableLayer layer(layer_index, size, facets, core_layer);
     return layer;
 }
 

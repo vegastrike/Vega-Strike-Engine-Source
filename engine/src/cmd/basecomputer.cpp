@@ -5250,56 +5250,32 @@ void showUnitStats( Unit *playerUnit, string &text, int subunitlevel, int mode, 
             break;
         }
     }
+
+    // Add Armor stats
     if (!mode || MODIFIES(replacement_mode, playerUnit, blankUnit, layers[1].facets[2].health.health)) {
-        PRETTY_ADDU(
-            substatcolor+" - Fore-starboard-high: #-c",
-            (mode && replacement_mode
-             == 2) ? 100.0*(playerUnit->layers[1].facets[2].health.health-1) : playerUnit->layers[1].facets[2].health.health*VSDM,
-            0,
-            (2 == replacement_mode) ? "%" : "MJ" );
-        PRETTY_ADDU(
-            substatcolor+" - Aft-starboard-high: #-c",
-            (mode && replacement_mode
-             == 2) ? 100.0*(playerUnit->layers[1].facets[6].health.health-1) : playerUnit->layers[1].facets[6].health.health*VSDM,
-            0,
-            (2 == replacement_mode) ? "%" : "MJ" );
-        PRETTY_ADDU(
-            substatcolor+" - Fore-port-high: #-c",
-            (mode && replacement_mode
-             == 2) ? 100.0*(playerUnit->layers[1].facets[0].health.health-1) : playerUnit->layers[1].facets[0].health.health*VSDM,
-            0,
-            (2 == replacement_mode) ? "%" : "MJ" );
-        PRETTY_ADDU(
-            substatcolor+" - Aft-port-high: #-c",
-            (mode && replacement_mode
-             == 2) ? 100.0*(playerUnit->layers[1].facets[4].health.health-1) : playerUnit->layers[1].facets[4].health.health*VSDM,
-            0,
-            (2 == replacement_mode) ? "%" : "MJ" );
-        PRETTY_ADDU(
-            substatcolor+" - Fore-starboard-low: #-c",
-            (mode && replacement_mode
-             == 2) ? 100.0*(playerUnit->layers[1].facets[3].health.health-1) : playerUnit->layers[1].facets[3].health.health*VSDM,
-            0,
-            (2 == replacement_mode) ? "%" : "MJ" );
-        PRETTY_ADDU(
-            substatcolor+" - Aft-starboard-low: #-c",
-            (mode && replacement_mode
-             == 2) ? 100.0*(playerUnit->layers[1].facets[7].health.health-1) : playerUnit->layers[1].facets[7].health.health*VSDM,
-            0,
-            (2 == replacement_mode) ? "%" : "MJ" );
-        PRETTY_ADDU(
-            substatcolor+" - Fore-port-low: #-c",
-            (mode && replacement_mode
-             == 2) ? 100.0*(playerUnit->layers[1].facets[1].health.health-1) : playerUnit->layers[1].facets[1].health.health*VSDM,
-            0,
-            (2 == replacement_mode) ? "%" : "MJ" );
-        PRETTY_ADDU(
-            substatcolor+" - Aft-port-low: #-c",
-            (mode && replacement_mode
-             == 2) ? 100.0*(playerUnit->layers[1].facets[5].health.health-1) : playerUnit->layers[1].facets[5].health.health*VSDM,
-            0,
-            (2 == replacement_mode) ? "%" : "MJ" );
+        std::string armor_color_strings[8] = {
+            " - Fore-starboard-high: #-c",
+            " - Aft-starboard-high: #-c",
+            " - Fore-port-high: #-c",
+            " - Aft-port-high: #-c",
+            " - Fore-starboard-low: #-c",
+            " - Aft-starboard-low: #-c",
+            " - Fore-port-low: #-c",
+            " - Aft-port-low: #-c"
+        };
+
+        int armor_indices[8] = {2,6,0,4,3,7,1,5};
+
+        for(int i=0;i<8;i++) {
+            PRETTY_ADDU(
+                substatcolor+armor_color_strings[i],
+                (mode && replacement_mode
+                 == 2) ? 100.0*(playerUnit->layers[1].facets[armor_indices[i]].health.health-1) : playerUnit->layers[1].facets[2].health.health*VSDM,
+                0,
+                (2 == replacement_mode) ? "%" : "MJ" );
+        }
     }
+
     if (!mode) {
         PRETTY_ADDU( statcolor+"Sustainable Hull Damage: #-c",
                      playerUnit->GetHull()/( playerUnit->GetHullPercent() )*VSDM, 0, "MJ" );

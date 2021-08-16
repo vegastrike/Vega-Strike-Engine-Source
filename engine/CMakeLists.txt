@@ -1567,6 +1567,7 @@ add_executable(
     src/damage/tests/health_tests.cpp
     src/damage/tests/facet_tests.cpp
     src/damage/tests/layer_tests.cpp
+    src/damage/tests/object_tests.cpp
     )
 
 ADD_LIBRARY(vegastrike-testing

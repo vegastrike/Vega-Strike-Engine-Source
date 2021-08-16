@@ -18,7 +18,7 @@ struct DamageableObject
                      std::vector<DamageableObject> components);
     DamageableObject();
 
-    void DealDamage( const CoreVector &attack_vector, Damage &damage );
+    InflictedDamage DealDamage( const CoreVector &attack_vector, Damage &damage );
 
     void Destroy();
     bool Destroyed();

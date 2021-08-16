@@ -31,7 +31,7 @@ struct DamageableFacet
     health(health_template) {}
 
 
-    void DealDamage( Damage &damage );
+    void DealDamage( Damage &damage, InflictedDamage& inflicted_damage );
 };
 
 #endif // DAMAGEABLEFACET_H

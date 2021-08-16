@@ -11,7 +11,7 @@ TEST(Layer, Sanity) {
     CoreVector one = CoreVector(1.0f,1.0f,1.0f);
 
     Health health(10,10,0);
-    DamageableLayer layer = DamageableFactory::CreateLayer(FacetConfiguration::four, health, true);
+    DamageableLayer layer = DamageableFactory::CreateLayer(0, FacetConfiguration::four, health, true);
 
 //    EXPECT_TRUE(facet.InFacet(CoreVector()));
 //    EXPECT_TRUE(facet.InFacet(CoreVector(1,1,1)));

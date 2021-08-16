@@ -9,9 +9,9 @@ void DamageableLayer::AdjustPower(const float& percent) {
     }
 }
 
-void DamageableLayer::DealDamage( const CoreVector &attack_vector, Damage &damage ) {
+void DamageableLayer::DealDamage( const CoreVector &attack_vector, Damage &damage, InflictedDamage& inflicted_damage ) {
     int impacted_facet_index = GetFacetIndex(attack_vector);
-    facets[impacted_facet_index].DealDamage(damage);
+    facets[impacted_facet_index].DealDamage(damage, inflicted_damage);
 }
 
 

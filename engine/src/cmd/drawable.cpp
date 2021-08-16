@@ -28,6 +28,11 @@
 #include "gfx/mesh.h"
 #include "gfx/quaternion.h"
 #include "unit_generic.h"
+#include "unit.h"
+#include "options.h"
+#include "csv.h"
+#include "unit_csv.h"
+#include "universe_util.h"
 
 #include <boost/algorithm/string.hpp>
 
@@ -261,4 +266,123 @@ void Drawable::clear()
 bool Drawable::animationRuns() const
 {
     return !done;
+}
+
+
+void Drawable::Split( int level )
+{
+    Unit *unit = static_cast<Unit*>(this);
+
+    if (game_options.split_dead_subunits)
+        for (un_iter su = unit->getSubUnits(); *su; ++su)
+            (*su)->Split( level );
+    Vector PlaneNorm;
+    for (unsigned int i = 0; i < nummesh();) {
+        if (this->meshdata[i]) {
+            if (this->meshdata[i]->getBlendDst() == ONE) {
+                delete this->meshdata[i];
+                this->meshdata.erase( this->meshdata.begin()+i );
+            } else {i++; }} else {this->meshdata.erase( this->meshdata.begin()+i ); }}
+    int    nm = this->nummesh();
+    string fac = FactionUtil::GetFaction( unit->faction );
+
+    CSVRow unit_stats( LookupUnitRow( unit->name, fac ) );
+    unsigned int num_chunks = unit_stats.success() ? atoi( unit_stats["Num_Chunks"].c_str() ) : 0;
+    if (nm <= 0 && num_chunks == 0)
+        return;
+    vector< Mesh* >old = this->meshdata;
+    Mesh *shield = old.back();
+    old.pop_back();
+
+    vector< unsigned int >meshsizes;
+    if ( num_chunks && unit_stats.success() ) {
+        size_t i;
+        vector< Mesh* >nw;
+        unsigned int which_chunk = rand()%num_chunks;
+        string  chunkname   = UniverseUtil::LookupUnitStat( unit->name, fac, "Chunk_"+XMLSupport::tostring( which_chunk ) );
+        string  dir = UniverseUtil::LookupUnitStat( unit->name, fac, "Directory" );
+        VSFileSystem::current_path.push_back( unit_stats.getRoot() );
+        VSFileSystem::current_subdirectory.push_back( "/"+dir );
+        VSFileSystem::current_type.push_back( UnitFile );
+        float randomstartframe   = 0;
+        float randomstartseconds = 0;
+        string scalestr     = UniverseUtil::LookupUnitStat( unit->name, fac, "Unit_Scale" );
+        int   scale = atoi( scalestr.c_str() );
+        if (scale == 0) scale = 1;
+        AddMeshes( nw, randomstartframe, randomstartseconds, scale, chunkname, unit->faction,
+                   unit->getFlightgroup(), &meshsizes );
+        VSFileSystem::current_type.pop_back();
+        VSFileSystem::current_subdirectory.pop_back();
+        VSFileSystem::current_path.pop_back();
+        for (i = 0; i < old.size(); ++i)
+            delete old[i];
+        old.clear();
+        old = nw;
+    } else {
+        for (int split = 0; split < level; split++) {
+            vector< Mesh* >nw;
+            size_t oldsize = old.size();
+            for (size_t i = 0; i < oldsize; i++) {
+                PlaneNorm.Set( rand()-RAND_MAX/2, rand()-RAND_MAX/2, rand()-RAND_MAX/2+.5 );
+                PlaneNorm.Normalize();
+                nw.push_back( NULL );
+                nw.push_back( NULL );
+                old[i]->Fork( nw[nw.size()-2], nw.back(), PlaneNorm.i, PlaneNorm.j, PlaneNorm.k,
+                             -PlaneNorm.Dot( old[i]->Position() ) );                                                                              //splits somehow right down the middle.
+                delete old[i];
+                old[i] = NULL;
+                if (nw[nw.size()-2] == NULL) {
+                    nw[nw.size()-2] = nw.back();
+                    nw.pop_back();
+                }
+                if (nw.back() == NULL)
+                    nw.pop_back();
+            }
+            old = nw;
+        }
+        meshsizes.reserve( old.size() );
+        for (size_t i = 0; i < old.size(); ++i)
+            meshsizes.push_back( 1 );
+    }
+    old.push_back( NULL );     //push back shield
+    if (shield)
+        delete shield;
+    nm = old.size()-1;
+    unsigned int k = 0;
+    vector< Mesh* >tempmeshes;
+    for (vector<Mesh *>::size_type i=0;i<meshsizes.size();i++) {
+        Unit *splitsub;
+        tempmeshes.clear();
+        tempmeshes.reserve( meshsizes[i] );
+        for (unsigned int j = 0; j < meshsizes[i] && k < old.size(); ++j, ++k)
+            tempmeshes.push_back( old[k] );
+        unit->SubUnits.prepend( splitsub = new GameUnit( tempmeshes, true, unit->faction ) );
+        splitsub->layers[0].facets[0].health.health = 1000;
+        splitsub->name = "debris";
+        splitsub->setMass(game_options.debris_mass*splitsub->getMass()/level);
+        splitsub->pImage->timeexplode = .1;
+        if (splitsub->meshdata[0]) {
+            Vector loc  = splitsub->meshdata[0]->Position();
+            float  locm = loc.Magnitude();
+            if (locm < .0001)
+                locm = 1;
+            splitsub->ApplyForce( splitsub->meshdata[0]->rSize()*game_options.explosionforce*10*splitsub->getMass()*loc/locm );
+            loc.Set( rand(), rand(), rand()+.1 );
+            loc.Normalize();
+            splitsub->ApplyLocalTorque( loc*splitsub->GetMoment()*game_options.explosiontorque*( 1+rand()%(int) ( 1+unit->rSize() ) ) );
+        }
+    }
+    old.clear();
+    this->meshdata.clear();
+    this->meshdata.push_back( NULL );     //the shield
+    unit->Mass *= game_options.debris_mass;
+}
+
+
+void Drawable::LightShields( const Vector &pnt, const Vector &normal, float amt, const GFXColor &color )
+{
+    Unit *unit = static_cast<Unit*>(this);
+    // Not sure about shield percentage - more variance for more damage?
+    // TODO: figure out the above comment
+    meshdata.back()->AddDamageFX( pnt, unit->shieldtight ? unit->shieldtight*normal : Vector( 0, 0, 0 ), std::min( 1.0f, std::max( 0.0f,                                                                                                            amt ) ), color );
 }

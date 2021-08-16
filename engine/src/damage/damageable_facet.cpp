@@ -3,8 +3,8 @@
 
 
 
-void DamageableFacet::DealDamage( Damage &damage ) {
-    health.DealDamage(damage);
+void DamageableFacet::DealDamage( Damage &damage, InflictedDamage& inflicted_damage ) {
+    health.DealDamage(damage, inflicted_damage);
 }
 
 

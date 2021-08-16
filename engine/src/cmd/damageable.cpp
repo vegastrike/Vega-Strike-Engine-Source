@@ -34,6 +34,14 @@
 #include "gfx/vec.h"
 #include "lin_time.h"
 #include "damageable_factory.h"
+#include "damage.h"
+#include "unit_generic.h"
+#include "ai/communication.h"
+#include "universe.h"
+#include "ai/order.h"
+#include "pilot.h"
+#include "ai/comm_ai.h"
+#include "gfx/mesh.h"
 
 #include <algorithm>
 
@@ -84,6 +92,188 @@ float Damageable::DealDamageToShield( const Vector &pnt, float &damage )
     return percent;*/
     return 0;
 }
+
+// TODO: deal with this
+extern void ScoreKill( Cockpit *cp, Unit *killer, Unit *killedUnit );
+
+void Damageable::ApplyDamage( const Vector &pnt,
+                              const Vector &normal,
+                              Damage damage,
+                              Unit *affected_unit,
+                              const GFXColor &color,
+                              void *ownerDoNotDereference)
+{
+    const Damageable *const_damagable = static_cast<const Damageable*>(this);
+    Unit *unit = static_cast<Unit*>(this);
+
+
+    static float hull_percent_for_comm = GameConfig::GetVariable( "AI", "HullPercentForComm", 0.75 );
+    static int shield_damage_anger = GameConfig::GetVariable( "AI", "ShieldDamageAnger", 1 );
+    static int hull_damage_anger   = GameConfig::GetVariable( "AI", "HullDamageAnger", 10 );
+    static bool assist_ally_in_need =
+        GameConfig::GetVariable( "AI", "assist_friend_in_need", true );
+    static float nebula_shields = GameConfig::GetVariable( "physics", "nebula_shield_recharge", 0.5 );
+    //We also do the following lock on client side in order not to display shield hits
+    static bool no_dock_damage = GameConfig::GetVariable( "physics", "no_damage_to_docked_ships", true );
+    static bool apply_difficulty_enemy_damage =
+        GameConfig::GetVariable( "physics", "difficulty_based_enemy_damage", true );
+
+
+    // Stop processing if the affected unit isn't this unit
+    // How could this happen? Why even have two parameters (this and affected_unit)???
+    if (affected_unit != unit) {
+        return;
+    }
+
+    // Stop processing for destroyed units
+    if(Destroyed()) {
+        return;
+    }
+
+    // Stop processing for docked ships if no_dock_damage is set
+    if (no_dock_damage && (unit->DockedOrDocking()&(unit->DOCKED_INSIDE|unit->DOCKED))) {
+        return;
+    }
+
+
+    Cockpit     *cp = _Universe->isPlayerStarshipVoid( ownerDoNotDereference );
+    bool shooter_is_player = (cp != nullptr);
+    bool shot_at_is_player = _Universe->isPlayerStarship( unit );
+    Vector       localpnt( InvTransform( unit->cumulative_transformation_matrix, pnt ) );
+    Vector       localnorm( unit->ToLocalCoordinates( normal ) );
+    CoreVector attack_vector(localpnt.i,localpnt.j,localpnt.k);
+    float previous_hull_percent = GetHullPercent();
+
+    /*float        hullpercent = GetHullPercent();
+    bool         mykilled    = Destroyed();
+    bool         armor_damage = false;*/
+
+    InflictedDamage inflicted_damage = DealDamage(attack_vector, damage);
+
+    if(shooter_is_player) {
+        // Why is color relevant here?
+        if (color.a != 2 && apply_difficulty_enemy_damage) {
+            damage.phase_damage *= g_game.difficulty;
+            damage.normal_damage *= g_game.difficulty;
+        }
+
+        // Anger Management
+        float inflicted_armor_damage = inflicted_damage.inflicted_damage_by_layer[1];
+        int anger = inflicted_armor_damage ? hull_damage_anger : shield_damage_anger;
+
+        // If we damage the armor, we do this 10 times by default
+        for (int i = 0; i < anger; ++i) {
+            //now we can dereference it because we checked it against the parent
+            CommunicationMessage c( reinterpret_cast< Unit* > (ownerDoNotDereference), unit, nullptr, 0 );
+            c.SetCurrentState( c.fsm->GetHitNode(), nullptr, 0 );
+            if ( unit->getAIState() ) unit->getAIState()->Communicate( c );
+        }
+
+        //the dark danger is real!
+        unit->Threaten( reinterpret_cast< Unit* > (ownerDoNotDereference), 10 );
+    } else {
+        //if only the damage contained which faction it belonged to
+        unit->pilot->DoHit( unit, ownerDoNotDereference, FactionUtil::GetNeutralFaction() );
+
+        // Non-player ships choose a target when hit. Presumably the shooter.
+        if (unit->aistate) {
+            unit->aistate->ChooseTarget();
+        }
+    }
+
+    if (Destroyed()) {
+        std::cout << "ship is dead\n";
+
+        unit->ClearMounts();
+
+        if (shooter_is_player) {
+            ScoreKill( cp, reinterpret_cast< Unit* > (ownerDoNotDereference), unit );
+        } else {
+            Unit *tmp;
+            if ( ( tmp = findUnitInStarsystem( ownerDoNotDereference ) ) != nullptr ) {
+                if ( ( nullptr != ( cp = _Universe->isPlayerStarshipVoid( tmp->owner ) ) )
+                     && (cp->GetParent() != nullptr) )
+                    ScoreKill( cp, cp->GetParent(), unit );
+                else
+                    ScoreKill( NULL, tmp, unit );
+            }
+        }
+
+
+        return;
+    }
+
+    // Light shields if hit
+    if(inflicted_damage.inflicted_damage_by_layer[2] > 0) {
+        unit->LightShields( pnt, normal, GetShieldPercent(), color );
+    }
+
+    // Apply damage to meshes
+    // TODO: move to drawable as a function
+    if(inflicted_damage.inflicted_damage_by_layer[0] > 0 ||
+            inflicted_damage.inflicted_damage_by_layer[1] > 0) {
+
+        for (unsigned int i = 0; i < unit->nummesh(); ++i) {
+            // TODO: figure out how to adjust looks for armor damage
+            float hull_damage_percent = static_cast<float>(const_damagable->GetHullPercent());
+            unit->meshdata[i]->AddDamageFX( pnt, unit->shieldtight ? unit->shieldtight*normal : Vector( 0, 0, 0 ),
+                                            hull_damage_percent, color );
+        }
+    }
+
+    // Shake cockpit
+    if(shot_at_is_player) {
+        if(inflicted_damage.inflicted_damage_by_layer[0] >0 ) {
+            // Hull is hit - shake hardest
+            cp->Shake( inflicted_damage.total_damage, 2 );
+        } else if(inflicted_damage.inflicted_damage_by_layer[1] >0 ) {
+            // Armor is hit - shake harder
+            cp->Shake( inflicted_damage.total_damage, 1 );
+        } else {
+            // Shield is hit - shake
+            cp->Shake( inflicted_damage.total_damage, 0 );
+        }
+    }
+
+    // Only happens if we crossed the threshold in this attack
+    if ( previous_hull_percent >= hull_percent_for_comm &&
+         GetHullPercent() < hull_percent_for_comm &&
+         ( shooter_is_player || shot_at_is_player ) ) {
+        Unit *computer_ai = nullptr;
+        Unit *player     = nullptr;
+        if (shot_at_is_player) {
+            computer_ai = findUnitInStarsystem( ownerDoNotDereference );
+            player     = unit;
+        } else { //cp != NULL
+            computer_ai = unit;
+            player     = cp->GetParent();
+        }
+
+        Order *computer_ai_state = computer_ai->getAIState();
+        Order *player_ai_state = player->getAIState();
+        bool ai_is_unit = computer_ai->isUnit() == _UnitType::unit;
+        bool player_is_unit = player->isUnit() == _UnitType::unit;
+        if (computer_ai && player && computer_ai_state && player_ai_state &&
+            ai_is_unit && player_is_unit) {
+            unsigned char gender;
+            vector< Animation* > *anim = computer_ai->pilot->getCommFaces( gender );
+            if (shooter_is_player && assist_ally_in_need) {
+                AllUnitsCloseAndEngage( player, computer_ai->faction );
+            }
+            if (GetHullPercent() > 0 || !cp) {
+                CommunicationMessage c( computer_ai, player, anim, gender );
+                c.SetCurrentState( cp ? c.fsm->GetDamagedNode() : c.fsm->GetDealtDamageNode(), anim, gender );
+                player->getAIState()->Communicate( c );
+            }
+        }
+    }
+}
+
+
+void Damageable::Destroy() {
+
+}
+
 
 float Damageable::FShieldData() const
 {

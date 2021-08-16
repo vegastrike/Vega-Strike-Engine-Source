@@ -44,5 +44,7 @@ public:
     virtual int selectCommunicationMessageMood( CommunicationMessage &c, float mood );
 };
 
+void AllUnitsCloseAndEngage( Unit *un, int faction );
+
 #endif
 
