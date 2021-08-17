@@ -99,8 +99,8 @@ Movable::Movable() : cumulative_transformation_matrix( identity_matrix ),
         maxnonplayerrotationrate = GameConfig::GetVariable( "physics", "maxNPCrot", 360);
         warpstretchcutoff = GameConfig::GetVariable( "graphics", "warp_stretch_cutoff", 500000) * GameConfig::GetVariable( "physics", "game_speed", 1);
         warpstretchoutcutoff = GameConfig::GetVariable( "graphics", "warp_stretch_decel_cutoff", 500000) * GameConfig::GetVariable( "physics", "game_speed", 1);
-        sec = GameConfig::GetVariable( "graphics", "insys_jump_ani_second_ahead", 4) / (GameConfig::GetVariable( "physics", "game_speed", 1) * GameConfig::GetVariable( "physics", "game_accel", 1));
-        endsec = GameConfig::GetVariable( "graphics", "insys_jump_ani_second_ahead_end",0.03f) /( GameConfig::GetVariable( "physics", "game_speed",1.0f) *GameConfig::GetVariable( "physics", "game_accel", 1.0f) );
+        sec = GameConfig::GetVariable( "graphics", "insys_jump_ani_second_ahead", 4.0f) / (GameConfig::GetVariable( "physics", "game_speed", 1.0f) * GameConfig::GetVariable( "physics", "game_accel", 1.0f));
+        endsec = GameConfig::GetVariable( "graphics", "insys_jump_ani_second_ahead_end", 0.03f) /( GameConfig::GetVariable( "physics", "game_speed", 1.0f) *GameConfig::GetVariable( "physics", "game_accel", 1.0f) );
         //Pi^2
         warpMultiplierMin = GameConfig::GetVariable( "physics", "warpMultiplierMin", 9.86960440109f);
         //C
