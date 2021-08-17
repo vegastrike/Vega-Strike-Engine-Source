@@ -355,8 +355,8 @@ inline void InvertMatrix( Matrix &o, const Matrix &trans )
 
 inline void Rotate( Matrix &tmp, const Vector &axis, float angle )
 {
-    double c = cos( angle );
-    double s = sin( angle );
+    float c = cos( angle );
+    float s = sin( angle );
 //Row, COl
 #define M( a, b ) (tmp.r[b*3+a])
     M( 0, 0 ) = axis.i*axis.i*(1-c)+c;
