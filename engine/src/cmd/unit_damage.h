@@ -35,36 +35,7 @@
 
 
 
-float GameUnit::DealDamageToShield( const Vector &pnt, float &damage )
-{
-    float percent = Damageable::DealDamageToShield( pnt, damage );
-    if ( !_Universe->isPlayerStarship( this ) ) {
-        if (percent) {
-//            if ( AUDIsPlaying( this->sound->shield ) )
-//                AUDStopPlaying( this->sound->shield );
-//            if (game_options.ai_sound)
-//                AUDPlay( this->sound->shield, this->ToWorldCoordinates(
-//                    pnt ).Cast()+this->cumulative_transformation.position, this->Velocity, 1 );
 
-            // I think this is equal to the above
-            playShieldDamageSound(pnt);
-        }
-    } else {
-        if (percent) {
-            playHullDamageSound(pnt);
-        }
-    }
-//        static int playerhullsound =
-//            AUDCreateSoundWAV( game_options.player_shield_hit);
-//        int sound = playerhullsound != -1 ? playerhullsound : this->sound->hull;
-//        if (percent) {
-//            if ( AUDIsPlaying( sound ) )
-//                AUDStopPlaying( sound );
-//            AUDPlay( sound, this->ToWorldCoordinates(
-//                pnt ).Cast()+this->cumulative_transformation.position, this->Velocity, 1 );
-
-    return percent;
-}
 
 extern Animation * GetVolatileAni( unsigned int );
 extern unsigned int AddAnimation( const QVector&, const float, bool, const string&, float percentgrow );

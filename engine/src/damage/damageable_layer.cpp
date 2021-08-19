@@ -37,6 +37,19 @@ void DamageableLayer::Enable() {
     }
 }
 
+// TODO: test
+// Boost shields to 150%
+void DamageableLayer::Enhance() {
+    for(DamageableFacet& facet: facets) {
+        // Don't enhance armor and hull
+        if(!facet.health.regenerative) {
+            continue;
+        }
+
+        facet.health.health = facet.health.max_health * 1.5;
+    }
+}
+
 int DamageableLayer::GetFacetIndex(const CoreVector& attack_vector) {
     // Convenience Variables
     float i = attack_vector.i;

@@ -1600,7 +1600,6 @@ void Arrested( Unit *parent )
     }
 }
 
-extern void PowerDownShield( Shield *shield, float howmuch );
 
 static void ForceChangeTarget( Unit *parent )
 {

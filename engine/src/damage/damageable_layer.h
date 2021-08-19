@@ -41,6 +41,7 @@ struct DamageableLayer
     void Destroy();
     void Disable();
     void Enable();
+    void Enhance();
 
     int GetFacetIndex(const CoreVector& attack_vector);
     int GetFacetIndexByName(FacetName facet_name);

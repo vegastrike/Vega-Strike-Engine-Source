@@ -345,9 +345,9 @@ bool Bolt::Collide( Unit *target )
         tmp = tmp.Scale( distance );
         distance = curdist/this->type->range;
         GFXColor    coltmp( this->type->r, this->type->g, this->type->b, this->type->a );
-        Damage damage;
-        damage.normal_damage = this->type->damage*( (1-distance)+distance*this->type->long_range );
-        damage.phase_damage = this->type->phase_damage*( (1-distance)+distance*this->type->long_range );
+        Damage damage(this->type->damage*( (1-distance)+distance*this->type->long_range ),
+                      this->type->phase_damage*( (1-distance)+distance*this->type->long_range ));
+
         target->ApplyDamage( (prev_position+tmp).Cast(),
                             normal,
                             damage,

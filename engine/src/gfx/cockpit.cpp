@@ -2038,10 +2038,7 @@ void SuicideKey( const KBData&, KBSTATE k )
             Unit *un = NULL;
             if ( ( un = _Universe->AccessCockpit()->GetParent() ) ) {
                 float armor[8];                 //short fix
-                un->ArmorData( armor );
-                un->DealDamageToHull( Vector( 0, 0,
-                                              .1 ), un->GetHull()*256.+2+2
-                                     *(armor[1]+armor[2]+armor[3]+armor[4]+armor[5]+armor[6]+armor[7]+armor[0]) );
+                un->Destroy();
             }
         }
     }

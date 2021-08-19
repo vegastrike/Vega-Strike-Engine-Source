@@ -117,9 +117,8 @@ void MissileEffect::DoApplyDamage(Unit *parent, Unit *un, float distance, float 
                 % distance
                 % radius
                 % (damage*damage_fraction*damage_left);
-        Damage damage;
-        damage.normal_damage = this->damage * damage_fraction * damage_left;
-        damage.phase_damage = phasedamage*damage_fraction*damage_left;
+        Damage damage(this->damage * damage_fraction * damage_left,
+                      phasedamage*damage_fraction*damage_left);
         parent->ApplyDamage( pos.Cast(), norm, damage, un, GFXColor( 1,1,1,1 ),
                              ownerDoNotDereference);
     }
@@ -152,6 +151,7 @@ Missile::Missile( const char *filename,
   , had_target ( false )
 
 {
+    // TODO: why would a sparkling missile be four times as hard to kill???
     static bool missilesparkle = XMLSupport::parse_bool( vs_config->getVariable( "graphics", "missilesparkle", "false" ) );
     if (missilesparkle) {
         layers[0].facets[0].health.max_health *= 4;
@@ -356,7 +356,7 @@ bool Missile::useFuel(Unit* target, bool had_target)
     if (time < 0)
     {
         // TODO: This really should be kill()
-        DealDamageToHull( Vector( .1f, .1f, .1f ), layers[0].facets[0].health.health+1 );
+        Destroy();
         return true;
     }
 

@@ -576,9 +576,7 @@ bool Beam::Collide( Unit *target, Unit *firer, Unit *superunit )
                 }
             }
         } else {
-            Damage damage;
-            damage.normal_damage = appldam;
-            damage.phase_damage = phasdam;
+            Damage damage(appldam, phasdam);
             target->ApplyDamage( center.Cast()+direction*curlength, normal, damage, colidee, coltmp, owner);
         }
         return true;

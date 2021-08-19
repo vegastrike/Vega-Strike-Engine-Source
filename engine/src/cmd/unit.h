@@ -161,8 +161,6 @@ public:
 ///Resolves forces of given unit on a physics frame
     Vector ResolveForces( const Transformation&, const Matrix& );
 
-///applies damage from the given pnt to the shield, and returns % damage applied and applies lighitn
-    float DealDamageToShield( const Vector &pnt, float &Damage );
 /*
  **************************************************************************************
  **** CUSTOMIZE/UPGRADE STUFF

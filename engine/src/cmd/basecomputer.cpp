@@ -246,7 +246,6 @@ extern void TerminateCurrentBase( void );
 extern void CurrentBaseUnitSet( Unit *un );
 //For ships stats.
 extern string MakeUnitXMLPretty( std::string, Unit* );
-extern float totalShieldEnergyCapacitance( const Shield &shield );
 //For Options menu.
 extern void RespawnNow( Cockpit *cockpit );
 

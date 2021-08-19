@@ -62,7 +62,6 @@ void UncheckUnit( class Unit*un );
 #include <string>
 #include <set>
 #include <map>
-#include "cmd/unit_armorshield.h"
 #include "gfx/matrix.h"
 #include "gfx/quaternion.h"
 #include "gfxlib_struct.h"
@@ -699,7 +698,6 @@ public:
 
 
 
-    virtual float DealDamageToHull( const Vector &pnt, float Damage ) override;
 
 //Deals remaining damage to the hull at point and applies lighting effects
 //short fix

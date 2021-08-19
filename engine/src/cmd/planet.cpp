@@ -56,6 +56,7 @@
 #include "configuration/game_config.h"
 #include "planetary_orbit.h"
 #include "universe_util.h"
+#include "damageable_factory.h"
 
 using std::endl;
 
@@ -193,7 +194,8 @@ Planet::Planet() :
     shield.shield2fb.backmax=0;
     shield.shield2fb.front=0;
     shield.shield2fb.back=0;*/
-
+    Health health(2,0,0);
+    layers[2] = DamageableFactory::CreateLayer(2, FacetConfiguration::two, health, false);
 }
 
 extern const vector< string >& ParseDestinations( const string &value );
@@ -339,6 +341,8 @@ Planet::Planet( QVector x,
     shield.shield2fb.backmax=0;
     shield.shield2fb.front=0;
     shield.shield2fb.back=0;*/
+    Health health(2,0,0);
+    layers[2] = DamageableFactory::CreateLayer(2, FacetConfiguration::two, health, false);
 }
 
 Planet::~Planet()

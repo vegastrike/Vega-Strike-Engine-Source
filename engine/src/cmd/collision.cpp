@@ -114,17 +114,26 @@ void Collision::shouldApplyForceAndDealDamage(Unit* other_unit)
         deal_damage = true;
         return;
 
-    // Not sure what an enhancement is, but it looks like it's something that can increase the shields of the unit it collided with.
+    // An enhancement upgrades the shields of the unit it collided with.
     // TODO: refactor this.
     case _UnitType::enhancement:
-        // TODO: lib_damage re-enable this
-        /*if (other_unit->isUnit() == _UnitType::asteroid)
+        // We can't enhance rocks
+        if (other_unit->isUnit() == _UnitType::asteroid ||
+                other_unit->isUnit() == _UnitType::planet)
         {
             apply_force = true;
             return;
         }
 
-        double percent;
+        // I've changed the behavior of enhancements for now.
+        // Instead of upgrading the shields, the simply max them out
+        // at 150%.
+        // TODO: someone from the "product" team needs to define the
+        // exact behavior. Preferably after we sort the upgrade
+        // code.
+        other_unit->layers[2].Enhance();
+
+        /*double percent;
         char tempdata[sizeof(Shield)];
         memcpy( tempdata, &unit->shield, sizeof(Shield));
         unit->shield.number = 0;     //don't want them getting our boosted shields!
@@ -133,11 +142,11 @@ void Collision::shouldApplyForceAndDealDamage(Unit* other_unit)
         other_unit->Upgrade( unit, 0, 0, true, true, percent );
         memcpy( &unit->shield, tempdata, sizeof (Shield) );
         string fn( unit->filename );
-        string fac( FactionUtil::GetFaction( unit->faction ) );
+        string fac( FactionUtil::GetFaction( unit->faction ) );*/
         unit->Kill();
 
-        _Universe->AccessCockpit()->savegame->AddUnitToSave( fn.c_str(), _UnitType::enhancement, fac.c_str(), reinterpret_cast<long>(unit));
-        apply_force = true;*/
+        //_Universe->AccessCockpit()->savegame->AddUnitToSave( fn.c_str(), _UnitType::enhancement, fac.c_str(), reinterpret_cast<long>(unit));
+        apply_force = true;
         return;
     }
 }

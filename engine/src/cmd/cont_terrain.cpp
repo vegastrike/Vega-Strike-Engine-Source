@@ -368,8 +368,7 @@ void ContinuousTerrain::Collide( Unit *un, Matrix t )
                 static float mass = 1000;
                 un->ApplyForce( bigNormal*.4*un->Mass*fabs( bigNormal.Dot( (un->GetVelocity()/simulation_atom_var) ) ) );
 
-                Damage damage;
-                damage.normal_damage = .5*fabs( bigNormal.Dot( un->GetVelocity() ) )*mass*simulation_atom_var;
+                Damage damage(.5*fabs( bigNormal.Dot( un->GetVelocity() ) )*mass*simulation_atom_var);
 
                 un->ApplyDamage( un->Position().Cast()-bigNormal*un->rSize(),
                                  -bigNormal,
