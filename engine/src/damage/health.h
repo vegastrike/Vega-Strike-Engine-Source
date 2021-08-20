@@ -49,6 +49,7 @@ public:
 
 
     Health(int layer, float max_health, float health, float regeneration) :
+        layer(layer),
         factory_max_health(max_health),
         max_health(max_health),
         adjusted_health(max_health),

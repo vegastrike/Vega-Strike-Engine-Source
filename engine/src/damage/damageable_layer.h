@@ -3,9 +3,9 @@
 
 #include <vector>
 
-#include "damageable_facet.h"
 #include "facet_configuration.h"
 #include "core_vector.h"
+#include "health.h"
 
 /**
  * @brief The DamageableLayer class represents an object to be damaged.
@@ -20,10 +20,10 @@ struct DamageableLayer
                         // damaging internal components such as propulsion.
 
     unsigned int number_of_facets;    // How many facets. e.g. dual shield (front and rear).
-    std::vector<DamageableFacet> facets;    // The facets container
+    std::vector<Health> facets;    // The facets container
 
     //static float damage_component_chance = 0.03;
-    DamageableLayer(int layer_index, int number_of_facets, std::vector<DamageableFacet>& facets, bool core_layer):
+    DamageableLayer(int layer_index, int number_of_facets, std::vector<Health>& facets, bool core_layer):
         layer_index(layer_index),
         number_of_facets(number_of_facets),
         facets(facets),
@@ -33,7 +33,7 @@ struct DamageableLayer
         layer_index(0),
         core_layer(false),
         number_of_facets(1) {
-        facets.push_back(DamageableFacet(configuration, FacetName::single, Health(layer_index)));
+        facets.push_back(Health(layer_index));
     }
 
     void AdjustPower(const float& percent);

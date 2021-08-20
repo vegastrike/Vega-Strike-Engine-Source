@@ -29,9 +29,9 @@ TEST(DamageableObject, Sanity) {
     damage.normal_damage = 10;
 
     InflictedDamage inflicated_damage = object.DealDamage(core_vector, damage);
-    EXPECT_EQ(object.layers[0].facets[0].health.health, 50);
-    EXPECT_EQ(object.layers[1].facets[0].health.health, 100);
-    EXPECT_EQ(object.layers[2].facets[0].health.health, 140);
+    EXPECT_EQ(object.layers[0].facets[0].health, 50);
+    EXPECT_EQ(object.layers[1].facets[0].health, 100);
+    EXPECT_EQ(object.layers[2].facets[0].health, 140);
     EXPECT_EQ(damage.normal_damage, 0);
     EXPECT_EQ(inflicated_damage.total_damage, 10);
     EXPECT_EQ(inflicated_damage.normal_damage, 10);

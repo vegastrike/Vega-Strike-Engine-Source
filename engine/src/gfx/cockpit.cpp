@@ -1078,7 +1078,7 @@ float GameCockpit::LookupUnitStat( int stat, Unit *target )
             // stat parameter to the index of the shield.
 
             if (target->GetShieldLayer().number_of_facets > shield_index) {
-                return target->GetShieldLayer().facets[shield_index].health.Percent();
+                return target->GetShieldLayer().facets[shield_index].Percent();
             } else {
                 return 0;
             }

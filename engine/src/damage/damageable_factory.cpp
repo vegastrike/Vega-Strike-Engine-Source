@@ -18,9 +18,9 @@ DamageableObject DamageableFactory::CreateStandardObject(float shield,
                                                          FacetConfiguration shield_configuration,
                                                          float armor,
                                                          float hull) {
-    Health hull_health = Health(hull, hull, 0);
-    Health armor_health = Health(armor, armor, 0);
-    Health shield_health = Health(shield, shield, shield_regeneration);
+    Health hull_health(0, hull, hull, 0);
+    Health armor_health(1, armor, armor, 0);
+    Health shield_health(2, shield, shield, shield_regeneration);
 
     DamageableLayer hull_layer = CreateLayer(0, FacetConfiguration::one, hull_health, true);
     DamageableLayer armor_layer = CreateLayer(1, shield_configuration, armor_health, false);
@@ -38,13 +38,10 @@ DamageableLayer DamageableFactory::CreateLayer(int layer_index,
                                                bool core_layer) {
     health_template.layer = layer_index;
     int size = FacetConfigurationSize(configuration);
-    const FacetName* facet_configuration_array = FacetConfigurationByName(configuration);
 
-    std::vector<DamageableFacet> facets;
+    std::vector<Health> facets;
     for(int i=0;i<size;i++) {
-        facets.push_back(DamageableFacet(configuration,
-                                         facet_configuration_array[i],
-                                         health_template));
+        facets.push_back(health_template);
     }
 
     DamageableLayer layer(layer_index, size, facets, core_layer);
@@ -57,14 +54,11 @@ DamageableLayer DamageableFactory::CreateLayer(int layer_index,
                                                float regeneration,
                                                bool core_layer) {
     int size = FacetConfigurationSize(configuration);
-    const FacetName* facet_configuration_array = FacetConfigurationByName(configuration);
 
-    std::vector<DamageableFacet> facets;
+    std::vector<Health> facets;
     for(int i=0;i<size;i++) {
-        Health health(health_array[i], health_array[i], regeneration);
-        facets.push_back(DamageableFacet(configuration,
-                                         facet_configuration_array[i],
-                                         health));
+        Health health(layer_index, health_array[i], regeneration);
+        facets.push_back(health);
     }
 
     DamageableLayer layer(layer_index, size, facets, core_layer);

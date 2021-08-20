@@ -68,7 +68,7 @@ bool Damageable::ShieldUp( const Vector &pnt ) const
 
     DamageableLayer shield = const_cast<Damageable*>(this)->GetShieldLayer();
     int facet_index = shield.GetFacetIndex(attack_vector);
-    return shield.facets[facet_index].health.health > shield_min;
+    return shield.facets[facet_index].health > shield_min;
 }
 
 float Damageable::DealDamageToHull( const Vector &pnt, float damage )
@@ -107,7 +107,7 @@ float Damageable::DealDamageToShield( const Vector &pnt, float &damage )
 // TODO: deal with this
 extern void ScoreKill( Cockpit *cp, Unit *killer, Unit *killedUnit );
 
-InflictedDamage Damageable::ApplyDamage( const Vector &pnt,
+void Damageable::ApplyDamage( const Vector &pnt,
                               const Vector &normal,
                               Damage damage,
                               Unit *affected_unit,
@@ -135,17 +135,17 @@ InflictedDamage Damageable::ApplyDamage( const Vector &pnt,
     // Stop processing if the affected unit isn't this unit
     // How could this happen? Why even have two parameters (this and affected_unit)???
     if (affected_unit != unit) {
-        return inflicted_damage;
+        return;
     }
 
     // Stop processing for destroyed units
     if(Destroyed()) {
-        return inflicted_damage;
+        return;
     }
 
     // Stop processing for docked ships if no_dock_damage is set
     if (no_dock_damage && (unit->DockedOrDocking()&(unit->DOCKED_INSIDE|unit->DOCKED))) {
-        return inflicted_damage;
+        return;
     }
 
 
@@ -225,7 +225,7 @@ InflictedDamage Damageable::ApplyDamage( const Vector &pnt,
         // Neutral factions (planets, jump points) and upgrades (turrets) aren't people
         // and can't eject themselves or cargo
         if (unit->faction == neutralfac || unit->faction == upgradesfac) {
-            return inflicted_damage;
+            return;
         }
 
         // Eject cargo
@@ -260,7 +260,7 @@ InflictedDamage Damageable::ApplyDamage( const Vector &pnt,
             unit->EjectCargo( (unsigned int) -1 );
         }
 
-        return inflicted_damage;
+        return;
     }
 
     // Light shields if hit
@@ -356,9 +356,7 @@ InflictedDamage Damageable::ApplyDamage( const Vector &pnt,
     }*/
 
     DamageCargo(inflicted_damage);
-
-    return inflicted_damage;
-}
+  }
 
 // TODO: get rid of extern
 extern bool DestroySystem( float hull, float maxhull, float numhits );
@@ -380,8 +378,8 @@ void Damageable::DamageRandomSystem(InflictedDamage inflicted_damage, bool playe
         return;
     }
 
-    float& hull = layers[0].facets[0].health.health;
-    float& max_hull = layers[0].facets[0].health.factory_max_health;
+    float& hull = layers[0].facets[0].health;
+    float& max_hull = layers[0].facets[0].factory_max_health;
 
     bool damage_system;
     if(player) {
@@ -433,8 +431,8 @@ void Damageable::DamageCargo(InflictedDamage inflicted_damage) {
         return;
     }
 
-    float& hull = layers[0].facets[0].health.health;
-    float& max_hull = layers[0].facets[0].health.factory_max_health;
+    float& hull = layers[0].facets[0].health;
+    float& max_hull = layers[0].facets[0].factory_max_health;
 
     // Is the hit unit, lucky or not
     if ( DestroySystem( hull, max_hull, unit->numCargo() ) ) {
@@ -514,14 +512,14 @@ void Damageable::ArmorData( float armor[8] ) const
 {
     Damageable *damageable = const_cast<Damageable*>(this);
     DamageableLayer armor_layer = damageable->GetArmorLayer();
-    armor[0] = armor_layer.facets[0].health.health;
-    armor[1] = armor_layer.facets[1].health.health;
-    armor[2] = armor_layer.facets[2].health.health;
-    armor[3] = armor_layer.facets[3].health.health;
-    armor[4] = armor_layer.facets[4].health.health;
-    armor[5] = armor_layer.facets[5].health.health;
-    armor[6] = armor_layer.facets[6].health.health;
-    armor[7] = armor_layer.facets[7].health.health;
+    armor[0] = armor_layer.facets[0].health;
+    armor[1] = armor_layer.facets[1].health;
+    armor[2] = armor_layer.facets[2].health;
+    armor[3] = armor_layer.facets[3].health;
+    armor[4] = armor_layer.facets[4].health;
+    armor[5] = armor_layer.facets[5].health;
+    armor[6] = armor_layer.facets[6].health;
+    armor[7] = armor_layer.facets[7].health;
 }
 
 // TODO: fix typo

@@ -3501,10 +3501,10 @@ bool Unit::UpAndDownGrade( const Unit *up,
     if ( !csv_cell_null_check || force_change_on_nothing
         || cell_has_recursive_data( upgrade_name, up->faction, "Armor_Front_Top_Right" ) ) {
         for(int i=0;i<8;i++) {
-            STDUPGRADE( layers[1].facets[i].health.health,
-                        up->layers[1].facets[i].health.health,
-                        templ->layers[1].facets[i].health.health, 0 );
-            layers[1].facets[i].health.max_health = layers[1].facets[i].health.health;
+            STDUPGRADE( layers[1].facets[i].health,
+                        up->layers[1].facets[i].health,
+                        templ->layers[1].facets[i].health, 0 );
+            layers[1].facets[i].max_health = layers[1].facets[i].health;
         }
     }
 
@@ -3516,11 +3516,11 @@ bool Unit::UpAndDownGrade( const Unit *up,
         STDUPGRADE( shield.recharge, up->shield.recharge, templ->shield.recharge, 0 );
     bool upgradedrecharge = (tmp != shield.recharge);
     if ( !csv_cell_null_check || force_change_on_nothing || cell_has_recursive_data( upgrade_name, up->faction, "Hull" ) ) {
-        STDUPGRADE( health.health, up->health.health, templ->health.health, 0 );
+        STDUPGRADE( health, up->health, templ->health, 0 );
     }*/
 
-    if ( (layers[0].facets[0].health.max_health < layers[0].facets[0].health.health) && (!Destroyed()) ) {
-        layers[0].facets[0].health.max_health = layers[0].facets[0].health.health;
+    if ( (layers[0].facets[0].max_health < layers[0].facets[0].health) && (!Destroyed()) ) {
+        layers[0].facets[0].max_health = layers[0].facets[0].health;
     }
 
     if ( !csv_cell_null_check || force_change_on_nothing

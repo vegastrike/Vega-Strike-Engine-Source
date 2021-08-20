@@ -70,5 +70,5 @@ bool DamageableObject::Destroyed() {
         return true;
     }
 
-    return layers[0].facets[0].health.destroyed;
+    return layers[0].facets[0].destroyed;
 }

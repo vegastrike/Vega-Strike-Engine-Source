@@ -4,8 +4,8 @@
 #include <random>
 
 void DamageableLayer::AdjustPower(const float& percent) {
-    for(DamageableFacet& facet : facets) {
-        facet.health.AdjustPower(percent);
+    for(Health& facet : facets) {
+        facet.AdjustPower(percent);
     }
 }
 
@@ -16,37 +16,37 @@ void DamageableLayer::DealDamage( const CoreVector &attack_vector, Damage &damag
 
 
 void DamageableLayer::Destroy() {
-    for(DamageableFacet& facet : facets) {
-        facet.health.health = 0;
-        facet.health.destroyed = true;
+    for(Health& facet : facets) {
+        facet.health = 0;
+        facet.destroyed = true;
     }
 }
 
 
 void DamageableLayer::Disable() {
-    for(DamageableFacet& facet : facets) {
-        facet.health.health = 0;
-        facet.health.enabled = false;
+    for(Health& facet : facets) {
+        facet.health = 0;
+        facet.enabled = false;
     }
 }
 
 
 void DamageableLayer::Enable() {
-    for(DamageableFacet& facet : facets) {
-        facet.health.enabled = true;
+    for(Health& facet : facets) {
+        facet.enabled = true;
     }
 }
 
 // TODO: test
 // Boost shields to 150%
 void DamageableLayer::Enhance() {
-    for(DamageableFacet& facet: facets) {
+    for(Health& facet: facets) {
         // Don't enhance armor and hull
-        if(!facet.health.regenerative) {
+        if(!facet.regenerative) {
             continue;
         }
 
-        facet.health.health = facet.health.max_health * 1.5;
+        facet.health = facet.max_health * 1.5;
     }
 }
 
@@ -103,14 +103,14 @@ int DamageableLayer::GetFacetIndexByName(FacetName facet_name) {
 void DamageableLayer::InitFacetByName(FacetName facet_name, float facet_health) {
     int facet_index = GetFacetIndexByName(facet_name);
 
-    facets[facet_index].health.health = facet_health;
-    facets[facet_index].health.max_health = facet_health;
+    facets[facet_index].health = facet_health;
+    facets[facet_index].max_health = facet_health;
 }
 
 void DamageableLayer::InitFacetByName(FacetName facet_name, Health facet_health) {
     int facet_index = GetFacetIndexByName(facet_name);
 
-    facets[facet_index].health = facet_health;
+    facets[facet_index] = facet_health;
 }
 
 
@@ -131,42 +131,42 @@ void DamageableLayer::ReduceLayerCapability(const float& percent,
 
     if(affect_regeneration) {
         // Reduce regeneration
-        facets[facet_index].health.ReduceRegeneration(percent);
+        facets[facet_index].ReduceRegeneration(percent);
     } else {
         // Reduce max health
-        facets[facet_index].health.ReduceLayerMaximum(percent);
+        facets[facet_index].ReduceLayerMaximum(percent);
     }
 }
 
 
 float DamageableLayer::TotalLayerValue() {
     float total_value = 0.0f;
-    for(const DamageableFacet& facet: facets) {
-        total_value += facet.health.health;
+    for(const Health& facet: facets) {
+        total_value += facet.health;
     }
     return total_value;
 }
 
 float DamageableLayer::TotalMaxLayerValue() {
     float total_value = 0.0f;
-    for(const DamageableFacet& facet: facets) {
-        total_value += facet.health.max_health;
+    for(const Health& facet: facets) {
+        total_value += facet.max_health;
     }
     return total_value;
 }
 
 float DamageableLayer::AverageLayerValue() {
     float total_value = 0.0f;
-    for(const DamageableFacet& facet: facets) {
-        total_value += facet.health.health;
+    for(const Health& facet: facets) {
+        total_value += facet.health;
     }
     return total_value / facets.size();
 }
 
 float DamageableLayer::AverageMaxLayerValue() {
     float total_value = 0.0f;
-    for(const DamageableFacet& facet: facets) {
-        total_value += facet.health.max_health;
+    for(const Health& facet: facets) {
+        total_value += facet.max_health;
     }
     return total_value / facets.size();
 }
@@ -175,47 +175,47 @@ float DamageableLayer::AverageMaxLayerValue() {
 float DamageableLayer::GetPercent(FacetName facet_name) {
     if(configuration == FacetConfiguration::eight) {
         if(facet_name == FacetName::front) {
-            return facets[0].health.health/facets[0].health.max_health +
-                    facets[1].health.health/facets[1].health.max_health +
-                    facets[4].health.health/facets[4].health.max_health +
-                    facets[5].health.health/facets[5].health.max_health;
+            return facets[0].health/facets[0].max_health +
+                    facets[1].health/facets[1].max_health +
+                    facets[4].health/facets[4].max_health +
+                    facets[5].health/facets[5].max_health;
         }
 
         if(facet_name == FacetName::rear) {
-            return facets[2].health.health/facets[2].health.max_health +
-                    facets[3].health.health/facets[3].health.max_health +
-                    facets[6].health.health/facets[6].health.max_health +
-                    facets[7].health.health/facets[7].health.max_health;
+            return facets[2].health/facets[2].max_health +
+                    facets[3].health/facets[3].max_health +
+                    facets[6].health/facets[6].max_health +
+                    facets[7].health/facets[7].max_health;
         }
 
         if(facet_name == FacetName::left) {
-            return facets[0].health.health/facets[0].health.max_health +
-                    facets[2].health.health/facets[2].health.max_health +
-                    facets[4].health.health/facets[4].health.max_health +
-                    facets[6].health.health/facets[6].health.max_health;
+            return facets[0].health/facets[0].max_health +
+                    facets[2].health/facets[2].max_health +
+                    facets[4].health/facets[4].max_health +
+                    facets[6].health/facets[6].max_health;
         }
 
         if(facet_name == FacetName::right) {
-            return facets[1].health.health/facets[1].health.max_health +
-                    facets[3].health.health/facets[3].health.max_health +
-                    facets[5].health.health/facets[5].health.max_health +
-                    facets[7].health.health/facets[7].health.max_health;
+            return facets[1].health/facets[1].max_health +
+                    facets[3].health/facets[3].max_health +
+                    facets[5].health/facets[5].max_health +
+                    facets[7].health/facets[7].max_health;
         }
     } else {
         if(facet_name == FacetName::front) {
-            return facets[0].health.health/facets[0].health.max_health;
+            return facets[0].health/facets[0].max_health;
         }
 
         if(facet_name == FacetName::rear) {
-            return facets[1].health.health/facets[1].health.max_health;
+            return facets[1].health/facets[1].max_health;
         }
 
         if(facet_name == FacetName::left) {
-            return facets[2].health.health/facets[2].health.max_health;
+            return facets[2].health/facets[2].max_health;
         }
 
         if(facet_name == FacetName::right) {
-            return facets[3].health.health/facets[3].health.max_health;
+            return facets[3].health/facets[3].max_health;
         }
     }
 
@@ -223,13 +223,13 @@ float DamageableLayer::GetPercent(FacetName facet_name) {
 }
 
 void DamageableLayer::Regenerate() {
-    for(DamageableFacet& facet : facets) {
-        facet.health.Regenerate();
+    for(Health& facet : facets) {
+        facet.Regenerate();
     }
 }
 
 void DamageableLayer::UpdateRegeneration(const float& new_regeneration_value) {
-    for(DamageableFacet& facet : facets) {
-        facet.health.regeneration = new_regeneration_value;
+    for(Health& facet : facets) {
+        facet.regeneration = new_regeneration_value;
     }
 }

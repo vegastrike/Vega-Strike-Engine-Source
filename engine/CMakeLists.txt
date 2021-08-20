@@ -92,7 +92,6 @@ SET(LIBCONFIG
 )
 
 SET(LIBDAMAGE
-    src/damage/damageable_facet.cpp
     src/damage/damageable_factory.cpp
     src/damage/damageable_layer.cpp
     src/damage/damageable_object.cpp
@@ -1565,7 +1564,6 @@ enable_testing()
 add_executable(
     unit_tests
     src/damage/tests/health_tests.cpp
-    src/damage/tests/facet_tests.cpp
     src/damage/tests/layer_tests.cpp
     src/damage/tests/object_tests.cpp
     )

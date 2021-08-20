@@ -14,7 +14,7 @@ TEST(Shield, Sanity) {
     health.vulnerabilities.normal_damage = 1;
 
     EXPECT_EQ(health.health, 100);
-    EXPECT_EQ(health.max_health, 100);
+    EXPECT_EQ(health.factory_max_health, 100);
     EXPECT_EQ(health.regeneration, 25);
     EXPECT_TRUE(health.regenerative);
     EXPECT_FALSE(health.destroyed);
@@ -74,7 +74,7 @@ TEST(Armor, Sanity) {
 
     damage.normal_damage = 110;
     health.DealDamage(damage, inflicted_damage);
-    EXPECT_EQ(health.health, 0);
+    EXPECT_EQ(health.   health, 0);
     EXPECT_FALSE(health.regenerative);
     EXPECT_TRUE(health.destroyed);
     EXPECT_FALSE(health.enabled);

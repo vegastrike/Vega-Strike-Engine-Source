@@ -495,7 +495,7 @@ varInst* Mission::call_unit( missionNode *node, int mode )
         } else if (method_id == CMT_UNIT_getHullData) {
             float res = 0.0;
             if (mode == SCRIPT_RUN)
-                res = my_unit->GetHullLayer().facets[0].health.health;
+                res = my_unit->GetHullLayer().facets[0].health;
             viret = newVarInst( VI_TEMP );
             viret->type = VAR_FLOAT;
             viret->float_val = res;

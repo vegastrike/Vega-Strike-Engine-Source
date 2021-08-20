@@ -5233,7 +5233,7 @@ void showUnitStats( Unit *playerUnit, string &text, int subunitlevel, int mode, 
         text += "#n##n##c0:1:.5#"+prefix+"[DURABILITY STATISTICS]#n##-c";
         text += "#n#"+prefix+statcolor+"Armor damage resistance:#-c";
     }
-    if (mode && MODIFIES(replacement_mode, playerUnit, blankUnit, layers[1].facets[0].health.health)) {
+    if (mode && MODIFIES(replacement_mode, playerUnit, blankUnit, layers[1].facets[0].health)) {
         switch (replacement_mode) {
         case 0:                 //Replacement or new Module
             text += "#n#"+prefix+statcolor+"Replaces existing armor, if any.#n#Armor damage resistance:#-c";
@@ -5251,7 +5251,7 @@ void showUnitStats( Unit *playerUnit, string &text, int subunitlevel, int mode, 
     }
 
     // Add Armor stats
-    if (!mode || MODIFIES(replacement_mode, playerUnit, blankUnit, layers[1].facets[2].health.health)) {
+    if (!mode || MODIFIES(replacement_mode, playerUnit, blankUnit, layers[1].facets[2].health)) {
         std::string armor_color_strings[8] = {
             " - Fore-starboard-high: #-c",
             " - Aft-starboard-high: #-c",
@@ -5269,7 +5269,7 @@ void showUnitStats( Unit *playerUnit, string &text, int subunitlevel, int mode, 
             PRETTY_ADDU(
                 substatcolor+armor_color_strings[i],
                 (mode && replacement_mode
-                 == 2) ? 100.0*(playerUnit->layers[1].facets[armor_indices[i]].health.health-1) : playerUnit->layers[1].facets[2].health.health*VSDM,
+                 == 2) ? 100.0*(playerUnit->layers[1].facets[armor_indices[i]].health-1) : playerUnit->layers[1].facets[2].health*VSDM,
                 0,
                 (2 == replacement_mode) ? "%" : "MJ" );
         }
@@ -5304,7 +5304,7 @@ void showUnitStats( Unit *playerUnit, string &text, int subunitlevel, int mode, 
 
     // Shields
     const int num_shields = playerUnit->layers[2].number_of_facets;
-    const float first_shield_max_health = playerUnit->layers[2].facets[0].health.factory_max_health;
+    const float first_shield_max_health = playerUnit->layers[2].facets[0].factory_max_health;
     if (!mode) {
         if (num_shields) {
             PRETTY_ADD( statcolor+"Number of shield emitter facings: #-c", num_shields, 0 );
@@ -5313,7 +5313,7 @@ void showUnitStats( Unit *playerUnit, string &text, int subunitlevel, int mode, 
             text += "#n#"+prefix+statcolor+"No shielding. #-c";
         }
     } else if ( num_shields
-               && MODIFIES(replacement_mode, playerUnit, blankUnit, layers[2].facets[0].health.factory_max_health)) {
+               && MODIFIES(replacement_mode, playerUnit, blankUnit, layers[2].facets[0].factory_max_health)) {
         switch (replacement_mode) {
         case 0:                         //Replacement or new Module
             text += "#n#"+prefix+statcolor+"Installs shield with following protection ratings:#-c";
@@ -5346,20 +5346,20 @@ void showUnitStats( Unit *playerUnit, string &text, int subunitlevel, int mode, 
 
     if(shield_strings) {
         if (!mode || MODIFIES(replacement_mode, playerUnit,
-                              blankUnit, layers[2].facets[0].health.factory_max_health)) {
+                              blankUnit, layers[2].facets[0].factory_max_health)) {
             for(int i=0;i<num_shields;i++) {
                 PRETTY_ADDU(substatcolor + shield_strings[i], (mode && replacement_mode == 2) ?
-                                ( 100.0 *(playerUnit->layers[2].facets[i].health.factory_max_health-1) ) :
-                                playerUnit->layers[2].facets[i].health.factory_max_health * VSDM, 0,
+                                ( 100.0 *(playerUnit->layers[2].facets[i].factory_max_health-1) ) :
+                                playerUnit->layers[2].facets[i].factory_max_health * VSDM, 0,
                             (2 == replacement_mode) ? "%" : "MJ" );
             }
         }
     }
 
-    const float regeneration = playerUnit->layers[2].facets[0].health.regeneration;
+    const float regeneration = playerUnit->layers[2].facets[0].regeneration;
     if (!mode) {
         PRETTY_ADDU( statcolor+"Shield protection recharge speed: #-c", regeneration * VSDM, 0, "MJ/s" );
-    } else if (MODIFIES(replacement_mode, playerUnit, blankUnit, layers[2].facets[0].health.regeneration)) {
+    } else if (MODIFIES(replacement_mode, playerUnit, blankUnit, layers[2].facets[0].regeneration)) {
         switch (replacement_mode)
         {
         case 0:                         //Replacement or new Module
@@ -5553,7 +5553,7 @@ void showUnitStats( Unit *playerUnit, string &text, int subunitlevel, int mode, 
         float avail    = (playerUnit->maxEnergyData()*RSconverter-maxshield*VSDM);
 
         int num_shields = playerUnit->layers[2].number_of_facets;
-        float regeneration = playerUnit->layers[2].facets[0].health.regeneration;
+        float regeneration = playerUnit->layers[2].facets[0].regeneration;
         float overhead = (shields_require_power) ?
                     (regeneration / shieldenergycap * shield_maintenance_cost
                                        * num_shields * VSDM) : 0;

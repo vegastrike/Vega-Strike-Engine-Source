@@ -5,7 +5,6 @@
 
 #include "damageable_object.h"
 #include "damageable_layer.h"
-#include "damageable_facet.h"
 #include "health.h"
 
 

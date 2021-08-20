@@ -55,15 +55,15 @@ public:
     // because we are constrained by existing python interfaces, which cannot
     // be easily changed.
     const float GetHull() const {
-        return layers[0].facets[0].health.health;
+        return layers[0].facets[0].health;
     }
 
     const float GetArmor(int facet = 0) const {
-        return layers[1].facets[facet].health.health;
+        return layers[1].facets[facet].health;
     }
 
     const float GetShield(int facet = 0) const {
-        return layers[2].facets[facet].health.health;
+        return layers[2].facets[facet].health;
     }
 
     DamageableLayer& GetHullLayer() {
@@ -79,17 +79,17 @@ public:
     }
 
     const float GetShieldRegeneration() const {
-        return layers[2].facets[0].health.regeneration;
+        return layers[2].facets[0].regeneration;
     }
 
     const float GetHullPercent() const
     {
-        return layers[0].facets[0].health.Percent();
+        return layers[0].facets[0].Percent();
     }
 
     const float GetShieldPercent() const
     {
-        return layers[2].facets[0].health.Percent();
+        return layers[2].facets[0].Percent();
     }
 
 
@@ -107,7 +107,7 @@ public:
     float DealDamageToHull( const Vector &pnt, float Damage );
 
     //Applies damage to the pre-transformed area of the ship
-    InflictedDamage ApplyDamage(const Vector &pnt,
+    void ApplyDamage(const Vector &pnt,
                      const Vector &normal,
                      Damage damage,
                      Unit *affectedUnit,

@@ -72,6 +72,7 @@ void Health::DealDamageComponent( int type, float &damage, float vulnerability, 
         inflicted_damage.phase_damage += adjusted_damage;
     }
 
+    std::cout << "crash on type " << type << " adjusted " << adjusted_damage << "\n";
     inflicted_damage.total_damage += adjusted_damage;
     inflicted_damage.inflicted_damage_by_layer[layer] += adjusted_damage;
 
