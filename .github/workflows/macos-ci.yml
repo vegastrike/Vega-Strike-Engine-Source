@@ -21,10 +21,10 @@ jobs:
         compiler:
           - clang
           - gcc
-        override:
-          - -
-          - opengl
-          - openal
+#         override:
+#           - -
+#           - opengl
+#           - openal
 
     steps:
 
@@ -45,7 +45,7 @@ jobs:
     # * OpenGL as of MacOS 10.14
     # * GLUT as of MacOS 10.9
     - name: Optionally install homebrewed OpenGL and GLUT
-      if: ${{ matrix.override == 'opengl' }}
+#       if: ${{ matrix.override == 'opengl' }}
       run: |
         brew install mesa mesa-glu freeglut
         ln -s /usr/local/include/GL /usr/local/include/OpenGL
@@ -54,7 +54,7 @@ jobs:
 
     # The Apple-provided OpenAL is deprecated as of MacOS 10.15
     - name: Optionally install homebrewed OpenAL
-      if: ${{ matrix.override == 'openal' }}
+#       if: ${{ matrix.override == 'openal' }}
       run: brew install openal-soft
 
     - name: Checkout repository
