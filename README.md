@@ -58,7 +58,7 @@ How to Run
 Either install Vega Strike from the binary installer for your platform, if available, or follow the instructions for compiling from source. (`Compiling Vegastrike`, below.)
 
 - First change settings with `bin/vegasettings`
-- Then run `bin/vegastrike-engine` or double-click on the executable file in the bin directory.
+- Then run `bin/vegastrike-engine`
 
 Vegastrike command line parameters allow for different start settings and are as follows
 
@@ -111,8 +111,10 @@ REQUIRED FILES
 --------------
 
 ```bash
-  /usr/local/bin/vegastrike-engine
-      The vegastrike engine.
+  /usr/bin/vegastrike-engine
+      The vegastrike engine, requires `-d` to specify the data set.
+  /usr/bin/vegastrike
+      The vegastrike engine with legacy data set search support
   /usr/local/bin/vsinstall
       The Setup utility.
   /usr/local/bin/vslauncher
