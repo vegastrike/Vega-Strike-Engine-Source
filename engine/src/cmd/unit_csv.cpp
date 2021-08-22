@@ -1061,7 +1061,7 @@ void Unit::LoadRow( CSVRow &row, string modification, string *netxml )
     // Some basic shield variables
     // TODO: lib_damage figure out how leak and efficiency work
     char leak = (char) (::stof( OPTIM_GET( row, table, Shield_Leak ) )*100.0);
-    float recharge   = ::stof( OPTIM_GET( row, table, Shield_Recharge ) );
+    float regeneration   = ::stof( OPTIM_GET( row, table, Shield_Recharge ) );
     float efficiency = ::stof( OPTIM_GET( row, table, Shield_Efficiency ), 1.0 );
 
     // Get shield count
@@ -1101,7 +1101,7 @@ void Unit::LoadRow( CSVRow &row, string modification, string *netxml )
         layers[2] = DamageableFactory::CreateLayer(2,
                                                    FacetConfiguration::two,
                                                    shield_values,
-                                                   recharge,
+                                                   regeneration,
                                                    false);
         break;
     case 4:
@@ -1114,7 +1114,7 @@ void Unit::LoadRow( CSVRow &row, string modification, string *netxml )
         layers[2] = DamageableFactory::CreateLayer(2,
                                                    FacetConfiguration::four,
                                                    four_shield_values,
-                                                   recharge,
+                                                   regeneration,
                                                    false);
         break;
     case 6:
@@ -1133,7 +1133,7 @@ void Unit::LoadRow( CSVRow &row, string modification, string *netxml )
         layers[2] = DamageableFactory::CreateLayer(2,
                                                    FacetConfiguration::eight,
                                                    eight_shield_values,
-                                                   recharge,
+                                                   regeneration,
                                                    false);
         break;
     }

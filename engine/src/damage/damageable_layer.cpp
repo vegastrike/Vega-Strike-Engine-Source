@@ -222,9 +222,9 @@ float DamageableLayer::GetPercent(FacetName facet_name) {
     return 0;
 }
 
-void DamageableLayer::Regenerate() {
+void DamageableLayer::Regenerate(float alternative_regeneration) {
     for(Health& facet : facets) {
-        facet.Regenerate();
+        facet.Regenerate(alternative_regeneration);
     }
 }
 

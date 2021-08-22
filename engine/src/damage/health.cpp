@@ -102,10 +102,16 @@ void Health::ReduceRegeneration(const float& percent) {
     regeneration = std::max(0.0f, regeneration - factory_regeneration * percent);
 }
 
-void Health::Regenerate() {
+void Health::Regenerate(float alternative_regeneration) {
     if(!enabled || destroyed || !regenerative) {
         return;
     }
 
-    health = std::min(max_health, health + regeneration);
+    if(alternative_regeneration == -1) {
+        health = std::min(max_health, health + regeneration);
+    } else {
+        health = std::min(max_health, health + alternative_regeneration);
+    }
+
+
 }

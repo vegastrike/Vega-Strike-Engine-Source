@@ -149,8 +149,8 @@ void Damageable::ApplyDamage( const Vector &pnt,
     }
 
 
-    Cockpit     *cp = _Universe->isPlayerStarshipVoid( ownerDoNotDereference );
-    bool shooter_is_player = (cp != nullptr);
+    Cockpit     *shooter_cockpit = _Universe->isPlayerStarshipVoid( ownerDoNotDereference );
+    bool shooter_is_player = (shooter_cockpit != nullptr);
     bool shot_at_is_player = _Universe->isPlayerStarship( unit );
     Vector       localpnt( InvTransform( unit->cumulative_transformation_matrix, pnt ) );
     Vector       localnorm( unit->ToLocalCoordinates( normal ) );
@@ -200,13 +200,13 @@ void Damageable::ApplyDamage( const Vector &pnt,
         unit->ClearMounts();
 
         if (shooter_is_player) {
-            ScoreKill( cp, reinterpret_cast< Unit* > (ownerDoNotDereference), unit );
+            ScoreKill( shooter_cockpit, reinterpret_cast< Unit* > (ownerDoNotDereference), unit );
         } else {
             Unit *tmp;
             if ( ( tmp = findUnitInStarsystem( ownerDoNotDereference ) ) != nullptr ) {
-                if ( ( nullptr != ( cp = _Universe->isPlayerStarshipVoid( tmp->owner ) ) )
-                     && (cp->GetParent() != nullptr) )
-                    ScoreKill( cp, cp->GetParent(), unit );
+                if ( ( nullptr != ( shooter_cockpit = _Universe->isPlayerStarshipVoid( tmp->owner ) ) )
+                     && (shooter_cockpit->GetParent() != nullptr) )
+                    ScoreKill( shooter_cockpit, shooter_cockpit->GetParent(), unit );
                 else
                     ScoreKill( NULL, tmp, unit );
             }
@@ -282,20 +282,23 @@ void Damageable::ApplyDamage( const Vector &pnt,
     }
 
     // Shake cockpit
-    if(shot_at_is_player) {
+    Cockpit *shot_at_cockpit = _Universe->isPlayerStarship( unit );
+
+    // The second condition should always be met, but if not, at least we won't crash
+    if(shot_at_is_player && shot_at_cockpit) {
         if(inflicted_damage.inflicted_damage_by_layer[0] >0 ) {
             // Hull is hit - shake hardest
-            cp->Shake( inflicted_damage.total_damage, 2 );
+            shot_at_cockpit->Shake( inflicted_damage.total_damage, 2 );
 
             unit->playHullDamageSound(pnt);
         } else if(inflicted_damage.inflicted_damage_by_layer[1] >0 ) {
             // Armor is hit - shake harder
-            cp->Shake( inflicted_damage.total_damage, 1 );
+            shot_at_cockpit->Shake( inflicted_damage.total_damage, 1 );
 
             unit->playArmorDamageSound(pnt);
         } else {
             // Shield is hit - shake
-            cp->Shake( inflicted_damage.total_damage, 0 );
+            shot_at_cockpit->Shake( inflicted_damage.total_damage, 0 );
 
             unit->playShieldDamageSound(pnt);
         }
@@ -312,7 +315,7 @@ void Damageable::ApplyDamage( const Vector &pnt,
             player     = unit;
         } else { //cp != NULL
             computer_ai = unit;
-            player     = cp->GetParent();
+            player     = shooter_cockpit->GetParent();
         }
 
         Order *computer_ai_state = computer_ai->getAIState();
@@ -326,9 +329,9 @@ void Damageable::ApplyDamage( const Vector &pnt,
             if (shooter_is_player && assist_ally_in_need) {
                 AllUnitsCloseAndEngage( player, computer_ai->faction );
             }
-            if (GetHullPercent() > 0 || !cp) {
+            if (GetHullPercent() > 0 || !shooter_cockpit) {
                 CommunicationMessage c( computer_ai, player, anim, gender );
-                c.SetCurrentState( cp ? c.fsm->GetDamagedNode() : c.fsm->GetDealtDamageNode(), anim, gender );
+                c.SetCurrentState( shooter_cockpit ? c.fsm->GetDamagedNode() : c.fsm->GetDealtDamageNode(), anim, gender );
                 player->getAIState()->Communicate( c );
             }
         }

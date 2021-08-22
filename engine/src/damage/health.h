@@ -75,7 +75,7 @@ public:
     void Enable();
     void ReduceLayerMaximum(const float& percent);
     void ReduceRegeneration(const float& percent);
-    void Regenerate();
+    void Regenerate(float alternative_regeneration = -1);
 };
 
 #endif // HEALTH_H

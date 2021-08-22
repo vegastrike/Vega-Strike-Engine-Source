@@ -57,7 +57,7 @@ struct DamageableLayer
     float AverageMaxLayerValue();
 
     float GetPercent(FacetName facet_name);
-    void Regenerate();
+    void Regenerate(float alternative_regeneration = -1);
     void UpdateRegeneration(const float& new_regeneration_value);
 };
 
