@@ -71,10 +71,13 @@ jobs:
       if: github.event.pull_request
       run: git checkout HEAD^2
 
+    - name: Print number of CPU cores available
+      run: getconf _NPROCESSORS_ONLN
+    
     - name: Build it
       env:
         MY_OS_NAME: macos
         COMPILER:   ${{ matrix.compiler }}
-        FLAGS:      "-DCMAKE_FIND_FRAMEWORK=LAST -DLLVM_PARALLEL_COMPILE_JOBS=2"
+        FLAGS:      -DCMAKE_FIND_FRAMEWORK=LAST
         OPENALDIR:  "/usr/local/opt/openal-soft"
       run: script/cibuild $FLAGS
