@@ -75,6 +75,6 @@ jobs:
       env:
         MY_OS_NAME: macos
         COMPILER:   ${{ matrix.compiler }}
-        FLAGS:      -DCMAKE_FIND_FRAMEWORK=LAST
+        FLAGS:      "-DCMAKE_FIND_FRAMEWORK=LAST -DLLVM_PARALLEL_COMPILE_JOBS=2"
         OPENALDIR:  "/usr/local/opt/openal-soft"
       run: script/cibuild $FLAGS
