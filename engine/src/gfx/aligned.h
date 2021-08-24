@@ -86,7 +86,7 @@ public:
     typename std::allocator<T>::pointer _align (typename std::allocator<void>::const_pointer p)
     {
         if (p == 0) {
-            return const_cast<typename std::allocator<T>::pointer>(p);
+            return static_cast<typename std::allocator<T>::pointer>(const_cast<typename std::allocator<void>::pointer>(p));
         }
         
         uint8_t *vrv;
@@ -99,8 +99,11 @@ public:
         
         // Store offset
         *((size_t*)vrv - 1) = vrv - (uint8_t*)p;
-        
-        return __alpn(vrv, ALIGN);
+
+        void *vrv2 = static_cast<void *>(vrv);
+        typename std::allocator<T>::pointer vrv3 = static_cast<typename std::allocator<T>::pointer>(vrv2);
+
+        return __alpn(vrv3, ALIGN);
     }
 
     typename std::allocator<T>::pointer _dealign (typename std::allocator<T>::pointer p)
