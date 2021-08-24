@@ -77,7 +77,7 @@ public:
         return __alpn(vrv, ALIGN);
     }
 
-    void _dealign (typename std::allocator<T>::pointer p)
+    typename std::allocator<T>::pointer _dealign (typename std::allocator<T>::pointer p)
     {
         if (p == 0)
             return p;
