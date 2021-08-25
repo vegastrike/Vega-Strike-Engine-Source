@@ -1144,7 +1144,7 @@ TARGET_LINK_LIBRARIES(vegastrike-engine ${TST_LIBS})
 IF (MSVC)
     SET_TARGET_PROPERTIES(vegastrike-engine PROPERTIES LINK_FLAGS "${TST_LFLAGS}")
 ELSE (MSVC)
-    SET_TARGET_PROPERTIES(vegastrike-engine PROPERTIES LINK_FLAGS "-L/usr/lib ${TST_LFLAGS}")
+    SET_TARGET_PROPERTIES(vegastrike-engine PROPERTIES LINK_FLAGS "-L/usr/lib:/usr/local/lib ${TST_LFLAGS}")
 ENDIF (MSVC)
 
 # Vssetup Sub build file
