@@ -2879,11 +2879,11 @@ static int datesort( const void *v1, const void *v2 )
     return s1.st_mtime-s2.st_mtime;
 }
 
-#if (defined (__FREEBSD__)) || (defined (_WIN32) && !defined (__CYGWIN__ ) ) || (defined (__GLIBC_MINOR__) && __GLIBC_MINOR__ >= 10) || defined(__HAIKU__)
+// #if (defined (__FREEBSD__)) || (defined (_WIN32) && !defined (__CYGWIN__ ) ) || (defined (__GLIBC_MINOR__) && __GLIBC_MINOR__ >= 10) || defined(__HAIKU__)
 typedef int (*scancompare)( const struct dirent **v1, const struct dirent **v2 );
-#else
-typedef int (*scancompare)( const void *v1, const void *v2 );
-#endif
+// #else
+// typedef int (*scancompare)( const void *v1, const void *v2 );
+// #endif
 
 //Load the controls for the News display.
 void BaseComputer::loadLoadSaveControls( void )
