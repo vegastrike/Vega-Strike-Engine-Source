@@ -29,17 +29,10 @@ void Health::DealDamage( Damage &damage, InflictedDamage& inflicted_damage ) {
         return;
     }
 
-    //std::cout << std::string:: "pre-deal normal_damage " << damage.normal_damage <<
-    //          " health " << health << std::endl;
-
     DealDamageComponent(0, damage.normal_damage, vulnerabilities.normal_damage, inflicted_damage);
     DealDamageComponent(1, damage.phase_damage, vulnerabilities.phase_damage, inflicted_damage);
 
     // TODO: implement other types of damage
-    if(layer == 0 && destroyed) {
-        std::cout << " - health  - ship destroyed\n";
-    }
-
 }
 
 
@@ -72,7 +65,6 @@ void Health::DealDamageComponent( int type, float &damage, float vulnerability, 
         inflicted_damage.phase_damage += adjusted_damage;
     }
 
-    std::cout << "crash on type " << type << " adjusted " << adjusted_damage << "\n";
     inflicted_damage.total_damage += adjusted_damage;
     inflicted_damage.inflicted_damage_by_layer[layer] += adjusted_damage;
 

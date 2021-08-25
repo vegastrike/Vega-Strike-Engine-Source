@@ -172,54 +172,54 @@ float DamageableLayer::AverageMaxLayerValue() {
 }
 
 
+
+
 float DamageableLayer::GetPercent(FacetName facet_name) {
-    if(configuration == FacetConfiguration::eight) {
-        if(facet_name == FacetName::front) {
-            return facets[0].health/facets[0].max_health +
-                    facets[1].health/facets[1].max_health +
-                    facets[4].health/facets[4].max_health +
-                    facets[5].health/facets[5].max_health;
+    // Two or Four shield configurations
+    if(configuration != FacetConfiguration::eight) {
+        int index = GetFacetIndexByName(facet_name);
+        if(facets[index].factory_max_health == 0) {
+            return 0;
         }
 
-        if(facet_name == FacetName::rear) {
-            return facets[2].health/facets[2].max_health +
-                    facets[3].health/facets[3].max_health +
-                    facets[6].health/facets[6].max_health +
-                    facets[7].health/facets[7].max_health;
-        }
-
-        if(facet_name == FacetName::left) {
-            return facets[0].health/facets[0].max_health +
-                    facets[2].health/facets[2].max_health +
-                    facets[4].health/facets[4].max_health +
-                    facets[6].health/facets[6].max_health;
-        }
-
-        if(facet_name == FacetName::right) {
-            return facets[1].health/facets[1].max_health +
-                    facets[3].health/facets[3].max_health +
-                    facets[5].health/facets[5].max_health +
-                    facets[7].health/facets[7].max_health;
-        }
-    } else {
-        if(facet_name == FacetName::front) {
-            return facets[0].health/facets[0].max_health;
-        }
-
-        if(facet_name == FacetName::rear) {
-            return facets[1].health/facets[1].max_health;
-        }
-
-        if(facet_name == FacetName::left) {
-            return facets[2].health/facets[2].max_health;
-        }
-
-        if(facet_name == FacetName::right) {
-            return facets[3].health/facets[3].max_health;
-        }
+        return facets[index].health / facets[index].factory_max_health;
     }
 
-    return 0;
+    // Indices of facets for shield configuration eight
+    static const int indices_array[4][4] = {{0,2,4,6},    // left
+                                            {1,3,5,7},    // right
+                                            {0,1,4,5},    // front
+                                            {2,3,6,7}};   // rear
+
+    int indices_index; // An index to the top array dimension
+    if(facet_name == FacetName::left) {
+        indices_index = 0;
+    } else if(facet_name == FacetName::right) {
+        indices_index = 1;
+    } else if(facet_name == FacetName::front) {
+        indices_index = 2;
+    } else if(facet_name == FacetName::rear) {
+        indices_index = 3;
+    } else  {
+        // We received a malformed facet name
+        return 0;
+    }
+
+    float aggregate_health = 0;
+    float aggregate_max_health = 0;
+
+    for(int i=0;i<4;i++) {
+        int facet_index = indices_array[indices_index][i];
+        Health& facet = facets[facet_index];
+        aggregate_health += facet.health;
+        aggregate_max_health += facet.factory_max_health;
+    }
+
+    if(aggregate_max_health == 0) {
+        return 0;
+    }
+
+    return aggregate_health / aggregate_max_health;
 }
 
 void DamageableLayer::Regenerate(float alternative_regeneration) {

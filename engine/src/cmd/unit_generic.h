@@ -430,8 +430,6 @@ public:
  *  Uses GFX so only in Unit class
  *  But should always return true on server side = assuming explosion time=0 here */
     virtual bool Explode( bool draw, float timeit );
-//explodes then deletes
-    void Destroy();
 
 //Uses GFX so only in Unit class
     virtual void Draw( const Transformation &quat = identity_transformation, const Matrix &m = identity_matrix ) override {}
@@ -586,8 +584,7 @@ public:
     ///if the unit is a wormhole
     bool  forcejump = false;
 protected:
-//Is dead already?
-    bool  killed = false;
+
 //Should not be drawn
     enum INVIS {DEFAULTVIS=0x0, INVISGLOW=0x1, INVISUNIT=0x2, INVISCAMERA=0x4};
     unsigned char invisible = DEFAULTVIS;             //1 means turn off glow, 2 means turn off ship

@@ -37,11 +37,14 @@ class GFXColor;
  */
 class Damageable : public DamageableObject
 {
-public:
+public:    
+    bool dying;
+    //Is dead already?
+    bool  killed = false;
 
     // Methods
 public:
-    Damageable() {}
+    Damageable(): dying(false) {}
 
 protected:
     virtual ~Damageable() = default;
@@ -115,7 +118,7 @@ public:
                      void *ownerDoNotDereference);
     void DamageRandomSystem(InflictedDamage inflicted_damage, bool player, Vector attack_vector);
     void DamageCargo(InflictedDamage inflicted_damage);
-    void Destroy();
+    void Destroy(); //explodes then deletes
 
     float FShieldData() const;
     float RShieldData() const;

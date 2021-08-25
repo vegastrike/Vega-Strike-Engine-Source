@@ -44,7 +44,7 @@ extern Animation * getRandomCachedAni();
 extern string getRandomCachedAniString();
 extern void disableSubUnits( Unit *un );
 
-
+// TODO: move this from here
 bool GameUnit::Explode( bool drawit, float timeit )
 {
     if (this->pImage->pExplosion == NULL && this->pImage->timeexplode == 0) {

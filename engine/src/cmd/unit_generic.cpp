@@ -2143,22 +2143,6 @@ float Unit::ExplodingProgress() const
   return std::min(pImage->timeexplode / debrisTime, 1.0f);
 }
 
-void Unit::Destroy()
-{
-    if (!killed) {
-        if (!Destroyed()) {
-            Destroy();
-        }
-        for (int beamcount = 0; beamcount < getNumMounts(); ++beamcount) {
-            DestroyMount( &mounts[beamcount] );
-        }
-
-
-        if ( !Explode( false, simulation_atom_var ) ) {
-            Kill();
-        }
-    }
-}
 
 void Unit::SetCollisionParent( Unit *name )
 {
@@ -4956,22 +4940,30 @@ void Unit::UpdatePhysics3(const Transformation &trans,
       }
   }
 
-  // TODO: lib_damage
-  // I merged two conditions for explode and kill here
+
+  // Destroyed means we just killed the unit and it is exploding
   if (Destroyed()) {
       this->Explode( true, 0 );
 
+      // Kill means it is done exploding and we can delete it
       dead &= (pImage->pExplosion == NULL);
-      if (dead)
+      if(dead) {
           Kill();
-  } else
-  if ( !isSubUnit() ) {
-      for (unsigned int locind = 0; locind < Unit::NUM_COLLIDE_MAPS; ++locind) {
-          if ( is_null( this->location[locind] ) )
-              this->getStarSystem()->collide_map[locind]->insert( Collidable( this ) );
-          else if (locind == Unit::UNIT_BOLT)
-              //that update will propagate with the flatten
-              this->getStarSystem()->collide_map[Unit::UNIT_BOLT]->changeKey( this->location[locind], Collidable( this ) );
+      }
+      return;
+  }
+
+  // We stop processing for sub-units
+  if ( isSubUnit() ) {
+      return;
+  }
+
+  for (unsigned int locind = 0; locind < Unit::NUM_COLLIDE_MAPS; ++locind) {
+      if ( is_null( this->location[locind] ) ) {
+          this->getStarSystem()->collide_map[locind]->insert( Collidable( this ) );
+      } else if (locind == Unit::UNIT_BOLT) {
+          //that update will propagate with the flatten
+          this->getStarSystem()->collide_map[Unit::UNIT_BOLT]->changeKey( this->location[locind], Collidable( this ) );
       }
   }
 }

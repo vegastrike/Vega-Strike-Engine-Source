@@ -35,7 +35,6 @@ InflictedDamage DamageableObject::DealDamage( const CoreVector &attack_vector, D
 
     // Higher index layers are outer layers. We therefore need to reverse the order.
     for (DamageableLayer& layer : boost::adaptors::reverse(layers)) {
-        std::cout << "Damaging layer " << layer.layer_index << "\n";
         layer.DealDamage(attack_vector, damage, inflicted_damage);
 
         // TODO: handle damage to components here?

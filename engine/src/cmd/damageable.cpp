@@ -195,8 +195,6 @@ void Damageable::ApplyDamage( const Vector &pnt,
     }
 
     if (Destroyed()) {
-        std::cout << "ship is dead\n";
-
         unit->ClearMounts();
 
         if (shooter_is_player) {
@@ -479,10 +477,25 @@ void Damageable::DamageCargo(InflictedDamage inflicted_damage) {
     }
 }
 
+// TODO: get rid of extern
+extern void DestroyMount( Mount* );
 
-// TODO: what else is needed here that we have a separate function?
+// TODO: a lot of this should be handled by RAII
 void Damageable::Destroy() {
+    Unit *unit = static_cast<Unit*>(this);
+
     DamageableObject::Destroy();
+
+    if(!unit->killed) {
+        for (int beamcount = 0; beamcount < unit->getNumMounts(); ++beamcount) {
+            DestroyMount( &unit->mounts[beamcount] );
+        }
+
+
+        if ( !unit->Explode( false, simulation_atom_var ) ) {
+            unit->Kill();
+        }
+    }
 }
 
 

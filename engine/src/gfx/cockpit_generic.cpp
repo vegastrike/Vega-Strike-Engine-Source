@@ -173,7 +173,7 @@ void Cockpit::SetParent( Unit *unit, const char *filename, const char *unitmodna
         if (StartArmor[6] == 0) StartArmor[6] = 1;
         if (StartArmor[7] == 0) StartArmor[7] = 1;
         maxfuel = unit->fuelData();
-        maxhull = unit->GetHullLayer().facets[0].health;
+        maxhull = unit->GetHull();
     }
 }
 void Cockpit::Delete()
