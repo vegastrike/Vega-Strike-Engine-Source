@@ -23,7 +23,7 @@ jobs:
           - gcc
         homebrew-gl:
           - true
-          - false
+          # - false
         homebrew-al:
           - true
           - false
