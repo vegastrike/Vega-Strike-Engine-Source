@@ -53,7 +53,7 @@ jobs:
         ln -s /usr/local/include/GL /usr/local/include/OpenGL
         ln -s /usr/local/include/GL /usr/local/include/GLUT
         ln -s /usr/local/lib/libGL.dylib /usr/local/lib/libOpenGL.dylib
-        find /usr/local/lib/ -iname '*glut.dylib'
+        find /usr/local/lib/ -iname '*gl*.dylib'
 
     # The Apple-provided OpenAL is deprecated as of MacOS 10.15
     - name: Optionally install homebrewed OpenAL
