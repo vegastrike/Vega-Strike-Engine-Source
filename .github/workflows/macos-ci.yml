@@ -41,7 +41,7 @@ jobs:
     # - libvorbis
     # - python (3.8, 3.9)
     - name: Install dependencies using homebrew
-      run: brew install boost-python3 gtk+3 gtkglext sdl
+      run: brew install boost-python3 gtk+3 gtkglext sdl glew
 
     # The following Apple-provided libraries are deprecated:
     # * OpenGL as of MacOS 10.14
