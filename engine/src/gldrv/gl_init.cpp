@@ -58,11 +58,11 @@
 #ifndef NOMINMAX
 #define NOMINMAX
 #endif //tells VCC not to generate min/max macros
-#if defined (__APPLE__) || defined (MACOSX)
-#include <GL/glew.h>
-#else
+// #if defined (__APPLE__) || defined (MACOSX)
+// #include <GL/glew.h>
+// #else
 #define GL_TEXTURE_CUBE_MAP_SEAMLESS_ARB 0x884F
-#endif
+// #endif
 #include <windows.h>
 #endif
 #define GL_GLEXT_PROTOTYPES 1
@@ -82,7 +82,7 @@
 //typedef void (APIENTRY * PFNGLLOCKARRAYSEXTPROC) (GLint first, GLsizei count);
 //typedef void (APIENTRY * PFNGLUNLOCKARRAYSEXTPROC) (void);
 
-#if !defined (__APPLE__) && !defined (MACOSX) && !defined (WIN32)  && !defined (__HAIKU__)
+#if !defined (WIN32)  && !defined (__HAIKU__)
     # define GLX_GLXEXT_PROTOTYPES 1
     # define GLX_GLXEXT_LEGACY 1
     # include <GL/glx.h>
