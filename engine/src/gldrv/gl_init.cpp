@@ -82,7 +82,7 @@
 //typedef void (APIENTRY * PFNGLLOCKARRAYSEXTPROC) (GLint first, GLsizei count);
 //typedef void (APIENTRY * PFNGLUNLOCKARRAYSEXTPROC) (void);
 
-#if !defined (WIN32)  && !defined (__HAIKU__)
+#if !defined (__APPLE__) && !defined (MACOSX) && !defined (WIN32)  && !defined (__HAIKU__)
     # define GLX_GLXEXT_PROTOTYPES 1
     # define GLX_GLXEXT_LEGACY 1
     # include <GL/glx.h>
@@ -98,7 +98,7 @@
 #include "cg_global.h"
 #endif
 
-#if !defined (__APPLE__)
+// #if !defined (__APPLE__)
 
 PFNGLBINDBUFFERARBPROC    glBindBufferARB_p    = 0;
 PFNGLGENBUFFERSARBPROC    glGenBuffersARB_p    = 0;
@@ -154,7 +154,7 @@ PFNGLUNIFORM4IVPROC    glUniform4iv_p    = 0;
 PFNGLDELETESHADERPROC  glDeleteShader_p  = 0;
 PFNGLDELETEPROGRAMPROC glDeleteProgram_p = 0;
 
-#endif /* __APPLE_PANTHER_GCC33_CLI__ */
+// #endif /* __APPLE_PANTHER_GCC33_CLI__ */
 
 typedef void ( *(*get_gl_proc_fptr_t)(const GLubyte*) )();
 #ifdef _WIN32
