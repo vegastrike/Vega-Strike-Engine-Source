@@ -6,6 +6,7 @@
  */
 struct Damage {
     // TODO: generalize this later
+    // TODO: add shield leach
     float normal_damage;        // Go through shield, armor and finally hull and subsystems
     float phase_damage;         // Bypass shields
     float propulsion_damage;    // Disables the ship's drive

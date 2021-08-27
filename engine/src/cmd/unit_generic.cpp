@@ -907,7 +907,6 @@ void Unit::ReTargetFg( int which_target )
 
 extern signed char ComputeAutoGuarantee( Unit *un );
 extern float getAutoRSize( Unit *orig, Unit *un, bool ignore_friend = false );
-extern void SetShieldZero( Unit* );
 double howFarToJump()
 {
     static float tmp = XMLSupport::parse_float( vs_config->getVariable( "physics", "distance_to_warp", "1000000000000.0" ) );
@@ -3629,99 +3628,31 @@ bool Unit::UpAndDownGrade( const Unit *up,
     bool upgradedshield = false;
 
     // TODO: lib_damage re-enable this
-    /*if ( !csv_cell_null_check || force_change_on_nothing
+    if ( !csv_cell_null_check || force_change_on_nothing
         || cell_has_recursive_data( upgrade_name, up->faction, "Shield_Front_Top_Right" ) ) {
-        if (shield.number == up->shield.number) {
-            float a, b, c, d;
-            float aa, bb, cc, dd;
-            switch (shield.number)
-            {
-            case 2:
-                a = shield.shield2fb.frontmax;
-                b = shield.shield2fb.backmax;
-                STDUPGRADE( shield.shield2fb.frontmax, up->shield.shield2fb.frontmax, templ->shield.shield2fb.frontmax, 0 );
-                STDUPGRADE( shield.shield2fb.backmax, up->shield.shield2fb.backmax, templ->shield.shield2fb.backmax, 0 );
-                if (shield.shield2fb.frontmax != a) shield.shield2fb.front = shield.shield2fb.frontmax;
-                if (shield.shield2fb.backmax != b) shield.shield2fb.back = shield.shield2fb.backmax;
-                break;
-            case 4:
-                a = shield.shield4fbrl.frontmax;
-                b = shield.shield4fbrl.backmax;
-                c = shield.shield4fbrl.leftmax;
-                d = shield.shield4fbrl.rightmax;
-                STDUPGRADE( shield.shield4fbrl.frontmax, up->shield.shield4fbrl.frontmax, templ->shield.shield4fbrl.frontmax, 0 );
-                STDUPGRADE( shield.shield4fbrl.backmax, up->shield.shield4fbrl.backmax, templ->shield.shield4fbrl.backmax, 0 );
-                STDUPGRADE( shield.shield4fbrl.leftmax, up->shield.shield4fbrl.leftmax, templ->shield.shield4fbrl.leftmax, 0 );
-                STDUPGRADE( shield.shield4fbrl.rightmax, up->shield.shield4fbrl.rightmax, templ->shield.shield4fbrl.rightmax, 0 );
-                if (a != shield.shield4fbrl.frontmax) shield.shield4fbrl.front = shield.shield4fbrl.frontmax;
-                if (b != shield.shield4fbrl.backmax) shield.shield4fbrl.back = shield.shield4fbrl.backmax;
-                if (c != shield.shield4fbrl.leftmax) shield.shield4fbrl.left = shield.shield4fbrl.leftmax;
-                if (d != shield.shield4fbrl.rightmax) shield.shield4fbrl.right = shield.shield4fbrl.rightmax;
-                break;
-            case 8:
-                a  = shield.shield8.frontrighttopmax;
-                b  = shield.shield8.backrighttopmax;
-                c  = shield.shield8.frontlefttopmax;
-                d  = shield.shield8.backlefttopmax;
-                aa = shield.shield8.frontrightbottommax;
-                bb = shield.shield8.backrightbottommax;
-                cc = shield.shield8.frontleftbottommax;
-                dd = shield.shield8.backleftbottommax;
-                STDUPGRADE( shield.shield8.frontrighttopmax,
-                            up->shield.shield8.frontrighttopmax,
-                            templ->shield.shield8.frontrighttopmax,
-                            0 );
-                STDUPGRADE( shield.shield8.backrighttopmax,
-                            up->shield.shield8.backrighttopmax,
-                            templ->shield.shield8.backrighttopmax,
-                            0 );
-                STDUPGRADE( shield.shield8.frontlefttopmax,
-                            up->shield.shield8.frontlefttopmax,
-                            templ->shield.shield8.frontlefttopmax,
-                            0 );
-                STDUPGRADE( shield.shield8.backlefttopmax,
-                            up->shield.shield8.backlefttopmax,
-                            templ->shield.shield8.backlefttopmax,
-                            0 );
-                STDUPGRADE( shield.shield8.frontrightbottommax,
-                            up->shield.shield8.frontrightbottommax,
-                            templ->shield.shield8.frontrightbottommax,
-                            0 );
-                STDUPGRADE( shield.shield8.backrightbottommax,
-                            up->shield.shield8.backrightbottommax,
-                            templ->shield.shield8.backrightbottommax,
-                            0 );
-                STDUPGRADE( shield.shield8.frontleftbottommax,
-                            up->shield.shield8.frontleftbottommax,
-                            templ->shield.shield8.frontleftbottommax,
-                            0 );
-                STDUPGRADE( shield.shield8.backleftbottommax,
-                            up->shield.shield8.backleftbottommax,
-                            templ->shield.shield8.backleftbottommax,
-                            0 );
-                if (a != shield.shield8.frontrighttopmax) shield.shield8.frontrighttop = shield.shield8.frontrighttopmax;
-                if (b != shield.shield8.backrighttopmax) shield.shield8.backrighttop = shield.shield8.backrighttopmax;
-                if (c != shield.shield8.frontlefttopmax) shield.shield8.frontlefttop = shield.shield8.frontlefttopmax;
-                if (d != shield.shield8.backlefttopmax) shield.shield8.backlefttop = shield.shield8.backlefttopmax;
-                if (aa != shield.shield8.frontrightbottommax)
-                    shield.shield8.frontrightbottom =
-                        shield.shield8.frontrightbottommax;
-                if (bb != shield.shield8.backrightbottommax)
-                    shield.shield8.backrightbottom =
-                        shield.shield8.backrightbottommax;
-                if (cc != shield.shield8.frontleftbottommax)
-                    shield.shield8.frontleftbottom =
-                        shield.shield8.frontleftbottommax;
-                if (dd != shield.shield8.backleftbottommax) shield.shield8.backleftbottom = shield.shield8.backleftbottommax;
-                break;
+        if (layers[2].number_of_facets == up->layers[2].number_of_facets) {
+            for(int i=0;i<layers[2].number_of_facets;i++) {
+                float previous_max = layers[2].facets[i].factory_max_health;
+                STDUPGRADE( layers[2].facets[i].factory_max_health,
+                        up->layers[2].facets[i].factory_max_health,
+                        templ->layers[2].facets[i].factory_max_health, 0 );
+
+                if (layers[2].facets[i].factory_max_health != previous_max) {
+                    layers[2].facets[i].max_health = layers[2].facets[i].factory_max_health;
+                    layers[2].facets[i].adjusted_health = layers[2].facets[i].factory_max_health;
+                    layers[2].facets[i].health = layers[2].facets[i].factory_max_health;
+                }
             }
+
             if (touchme && retval == UPGRADEOK)
                 upgradedshield = true;
         } else if (up->FShieldData() > 0 || up->RShieldData() > 0 || up->LShieldData() > 0 || up->BShieldData() > 0) {
             cancompletefully = false;
         }
     }
-    if (upgradedshield || upgradedrecharge) {
+
+    // TODO: enable lib_damage
+    /*if (upgradedshield || upgradedrecharge) {
         if (up->shield.efficiency) {
             shield.efficiency = up->shield.efficiency;
             if (templ)
@@ -4973,7 +4904,7 @@ void Unit::UpdateCloak() {
     static bool warp_energy_for_cloak =
             GameConfig::GetVariable("physics", "warp_energy_for_cloak", true);
 
-    // Cloaking is not effective
+    // We are not cloaked - exiting function
     if (cloaking < cloakmin) {
         return;
     }
@@ -4985,7 +4916,7 @@ void Unit::UpdateCloak() {
     }
 
     // Cloaked ships don't have shields on
-    SetShieldZero( this );
+    layers[2].Disable();
 
     // We're cloaked
     if (cloaking > cloakmin) {
@@ -5073,17 +5004,20 @@ void Unit::RegenShields()
     if ( shield_number > 0) {
         //GAHHH reactor in units of 100MJ, shields in units of VSD=5.4MJ to make 1MJ of shield use 1/shieldenergycap MJ
         if (shields_in_spec || !graphicOptions.InWarp) {
-            energy -= shield_recharge * VSD / 100
+            /*energy -= shield_recharge * VSD / 100
                     // TODO: implement efficiency: ( 100 * (shield.efficiency ? shield.efficiency : 1) )
                     /shieldenergycap * shield_number * shield_maintenance_cost
                       * simulation_atom_var * ( (apply_difficulty_shields) ? g_game.difficulty : 1 );
             if (energy < 0) {
                 velocity_discharge = true;
                 energy = 0;
-            }
+            }*/
+            layers[2].AdjustPower(1.0f);
+        } else {
+            layers[2].GradualDisable(0.01f);
         }
 
-        rec = (velocity_discharge) ?
+        /*rec = (velocity_discharge) ?
                     0 :
                     ( (shield_recharge * VSD / 100 *
                        simulation_atom_var * shield_number/shieldenergycap)
@@ -5103,7 +5037,7 @@ void Unit::RegenShields()
             static float nebshields =
                 XMLSupport::parse_float( vs_config->getVariable( "physics", "nebula_shield_recharge", ".5" ) );
             rec *= nebshields;
-        }
+        }*/
     }
 
     //ECM energy drain

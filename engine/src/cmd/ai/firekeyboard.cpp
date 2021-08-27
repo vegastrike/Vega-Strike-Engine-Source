@@ -1656,8 +1656,9 @@ void FireKeyboard::Execute()
         refresh_target = true;
     }
 
-    if (f().shieldpowerstate != 1) {
-        parent->layers[2].AdjustPower(f().shieldpowerstate);
+    float f_result = f().shieldpowerstate;
+    if (f_result != 1) {
+        parent->layers[2].AdjustPower(f_result);
     }
     if (f().firekey == PRESS || f().jfirekey == PRESS || j().firekey == DOWN || j().jfirekey == DOWN) {
         if ( !_Universe->AccessCockpit()->CanDrawNavSystem() ) {

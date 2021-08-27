@@ -79,15 +79,6 @@ Unit * CreateGameTurret( std::string tur, int faction )
     return new GameUnit( tur.c_str(), true, faction );
 }
 
-void SetShieldZero( Unit *un )
-{
-    // TODO: get rid of this function - it does two different things for cloaking and jumping.
-    // It appears this doesn't disable the shield but just zeroes it out.
-    // In the case of cloaked ships, this is the expected behavior.
-    // In the case of jump, this is not the expected behavior.
-    un->layers[2].Disable();
-    un->layers[2].Enable();
-}
 
 //un scored a faction kill
 void ScoreKill( Cockpit *cp, Unit *un, Unit *killedUnit )

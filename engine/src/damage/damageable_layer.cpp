@@ -4,8 +4,10 @@
 #include <random>
 
 void DamageableLayer::AdjustPower(const float& percent) {
+    float adjusted_percent = std::max(std::min(percent, 1.0f), 0.0f);
+
     for(Health& facet : facets) {
-        facet.AdjustPower(percent);
+        facet.AdjustPower(adjusted_percent);
     }
 }
 
@@ -28,6 +30,12 @@ void DamageableLayer::Disable() {
         facet.health = 0;
         facet.enabled = false;
     }
+}
+
+// Used for nicer graphics when entering SPEC
+void DamageableLayer::GradualDisable(float percent) {
+    const float current_percent = facets[0].adjusted_health / facets[0].max_health;
+    AdjustPower(current_percent - percent);
 }
 
 
@@ -166,7 +174,7 @@ float DamageableLayer::AverageLayerValue() {
 float DamageableLayer::AverageMaxLayerValue() {
     float total_value = 0.0f;
     for(const Health& facet: facets) {
-        total_value += facet.max_health;
+        total_value += facet.factory_max_health;
     }
     return total_value / facets.size();
 }

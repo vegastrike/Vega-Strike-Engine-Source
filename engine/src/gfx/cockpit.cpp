@@ -1077,7 +1077,7 @@ float GameCockpit::LookupUnitStat( int stat, Unit *target )
             // Subtracing enum SHIELDF (first shield gauge) converts the
             // stat parameter to the index of the shield.
 
-            if (target->GetShieldLayer().number_of_facets > shield_index) {
+            if (target->GetShieldLayer().facets[shield_index].factory_max_health > 0) {
                 return target->GetShieldLayer().facets[shield_index].Percent();
             } else {
                 return 0;

@@ -1190,7 +1190,6 @@ bool PendingJumpsEmpty()
     return pendingjump.empty();
 }
 
-extern void SetShieldZero( Unit* );
 
 void StarSystem::ProcessPendingJumps()
 {
@@ -1210,8 +1209,11 @@ void StarSystem::ProcessPendingJumps()
                     } else if (!player) {
                         un->SetVelocity( Vector( 0, 0, 0 ) );
                     }
-                    if (game_options.jump_disables_shields)
-                        SetShieldZero( un );
+                    if (game_options.jump_disables_shields) {
+                        // Disable and then enable so they'll start recharging
+                        un->layers[2].Disable();
+                        un->layers[2].Enable();
+                    }
                 }
             }
             double time = GetElapsedTime();

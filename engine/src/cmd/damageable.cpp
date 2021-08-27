@@ -311,26 +311,28 @@ void Damageable::ApplyDamage( const Vector &pnt,
         if (shot_at_is_player) {
             computer_ai = findUnitInStarsystem( ownerDoNotDereference );
             player     = unit;
-        } else { //cp != NULL
+        } else {
             computer_ai = unit;
             player     = shooter_cockpit->GetParent();
         }
 
-        Order *computer_ai_state = computer_ai->getAIState();
-        Order *player_ai_state = player->getAIState();
-        bool ai_is_unit = computer_ai->isUnit() == _UnitType::unit;
-        bool player_is_unit = player->isUnit() == _UnitType::unit;
-        if (computer_ai && player && computer_ai_state && player_ai_state &&
-            ai_is_unit && player_is_unit) {
-            unsigned char gender;
-            vector< Animation* > *anim = computer_ai->pilot->getCommFaces( gender );
-            if (shooter_is_player && assist_ally_in_need) {
-                AllUnitsCloseAndEngage( player, computer_ai->faction );
-            }
-            if (GetHullPercent() > 0 || !shooter_cockpit) {
-                CommunicationMessage c( computer_ai, player, anim, gender );
-                c.SetCurrentState( shooter_cockpit ? c.fsm->GetDamagedNode() : c.fsm->GetDealtDamageNode(), anim, gender );
-                player->getAIState()->Communicate( c );
+        if(computer_ai && player) {
+            Order *computer_ai_state = computer_ai->getAIState();
+            Order *player_ai_state = player->getAIState();
+            bool ai_is_unit = computer_ai->isUnit() == _UnitType::unit;
+            bool player_is_unit = player->isUnit() == _UnitType::unit;
+            if (computer_ai && player && computer_ai_state && player_ai_state &&
+                ai_is_unit && player_is_unit) {
+                unsigned char gender;
+                vector< Animation* > *anim = computer_ai->pilot->getCommFaces( gender );
+                if (shooter_is_player && assist_ally_in_need) {
+                    AllUnitsCloseAndEngage( player, computer_ai->faction );
+                }
+                if (GetHullPercent() > 0 || !shooter_cockpit) {
+                    CommunicationMessage c( computer_ai, player, anim, gender );
+                    c.SetCurrentState( shooter_cockpit ? c.fsm->GetDamagedNode() : c.fsm->GetDealtDamageNode(), anim, gender );
+                    player->getAIState()->Communicate( c );
+                }
             }
         }
     }
@@ -542,31 +544,6 @@ void Damageable::ArmorData( float armor[8] ) const
 void Damageable::leach( float damShield, float damShieldRecharge, float damEnRecharge )
 {
   // TODO: restore this lib_damage
-  // recharge *= damEnRecharge;
-  /*shield.recharge *= damShieldRecharge;
-  switch (shield.number)
-    {
-    case 2:
-      shield.shield2fb.frontmax   *= damShield;
-      shield.shield2fb.backmax    *= damShield;
-      break;
-    case 4:
-      shield.shield4fbrl.frontmax *= damShield;
-      shield.shield4fbrl.backmax  *= damShield;
-      shield.shield4fbrl.leftmax  *= damShield;
-      shield.shield4fbrl.rightmax *= damShield;
-      break;
-    case 8:
-      shield.shield8.frontrighttopmax    *= damShield;
-      shield.shield8.backrighttopmax     *= damShield;
-      shield.shield8.frontlefttopmax     *= damShield;
-      shield.shield8.backlefttopmax      *= damShield;
-      shield.shield8.frontrightbottommax *= damShield;
-      shield.shield8.backrightbottommax  *= damShield;
-      shield.shield8.frontleftbottommax  *= damShield;
-      shield.shield8.backleftbottommax   *= damShield;
-      break;
-    }*/
 }
 
 

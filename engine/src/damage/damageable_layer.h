@@ -40,6 +40,7 @@ struct DamageableLayer
     void DealDamage( const CoreVector &attack_vector, Damage &damage, InflictedDamage& inflicted_damage );
     void Destroy();
     void Disable();
+    void GradualDisable(float percent);
     void Enable();
     void Enhance();
 
