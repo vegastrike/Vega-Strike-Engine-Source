@@ -126,7 +126,7 @@ public:
     void ApplyDamage(const Vector &pnt,
                      const Vector &normal,
                      Damage damage,
-                     Unit *affectedUnit,
+                     Unit *affected_unit,
                      const GFXColor &color,
                      void *ownerDoNotDereference);
     void DamageRandomSystem(InflictedDamage inflicted_damage, bool player, Vector attack_vector);

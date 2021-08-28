@@ -524,14 +524,9 @@ void Damageable::ArmorData( float armor[8] ) const
 {
     Damageable *damageable = const_cast<Damageable*>(this);
     DamageableLayer armor_layer = damageable->GetArmorLayer();
-    armor[0] = armor_layer.facets[0].health;
-    armor[1] = armor_layer.facets[1].health;
-    armor[2] = armor_layer.facets[2].health;
-    armor[3] = armor_layer.facets[3].health;
-    armor[4] = armor_layer.facets[4].health;
-    armor[5] = armor_layer.facets[5].health;
-    armor[6] = armor_layer.facets[6].health;
-    armor[7] = armor_layer.facets[7].health;
+    for(int i=0;i<8;i++) {
+        armor[i] = armor_layer.facets[i].health;
+    }
 }
 
 // TODO: fix typo

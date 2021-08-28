@@ -18,6 +18,7 @@ int FacetConfigurationSize(FacetConfiguration configuration) {
     if(configuration ==  FacetConfiguration::four) { return 4; }
     if(configuration ==  FacetConfiguration::six) { return 6; }
     if(configuration ==  FacetConfiguration::eight) { return 8; }
+    return 1; // Literally cannot happen
 }
 
 const FacetName* FacetConfigurationByName(FacetConfiguration configuration) {
@@ -26,4 +27,5 @@ const FacetName* FacetConfigurationByName(FacetConfiguration configuration) {
     if(configuration ==  FacetConfiguration::four) { return four_configuration; }
     if(configuration ==  FacetConfiguration::six) { return six_configuration; }
     if(configuration ==  FacetConfiguration::eight) { return eight_configuration; }
+    return one_configuration; // Literally cannot happen
 }
