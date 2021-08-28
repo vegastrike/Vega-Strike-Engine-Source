@@ -131,7 +131,7 @@ void Collision::shouldApplyForceAndDealDamage(Unit* other_unit)
         // TODO: someone from the "product" team needs to define the
         // exact behavior. Preferably after we sort the upgrade
         // code.
-        other_unit->layers[2].Enhance();
+        other_unit->shield->Enhance();
 
         /*double percent;
         char tempdata[sizeof(Shield)];
@@ -159,8 +159,12 @@ void Collision::dealDamage(Collision other_collision, double deltaKE_linear, dou
         return;
     }
 
-    Damage damage;
-    damage.normal_damage = 0.5 * ( deltaKE_linear + deltaKE_angular) /* deltaKE is in KiloJoules, due to mass being in units of 1000 Kg, not Kg - so convert accordingly */ / configuration.physics.kilojoules_per_damage; // assign half the change in energy to this unit, convert from KJ to VSD
+    // deltaKE is in KiloJoules, due to mass being in units of 1000 Kg, not Kg -
+    // so convert accordingly
+    // assign half the change in energy to this unit, convert from KJ to VSD
+    Damage damage(0.5 * ( deltaKE_linear + deltaKE_angular)  /
+                  configuration.physics.kilojoules_per_damage);
+
     
     unit->ApplyDamage(other_collision.location.Cast(),
                       other_collision.normal,

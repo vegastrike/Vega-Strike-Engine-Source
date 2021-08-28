@@ -76,9 +76,9 @@ float Damageable::DealDamageToHull( const Vector &pnt, float damage )
     Damage dmg(0, damage); // Bypass shield with phase damage
     CoreVector attack_vector(pnt.i, pnt.j, pnt.k);
     InflictedDamage inflicted_damage(3);
-    layers[1].DealDamage(attack_vector, dmg, inflicted_damage);
-    layers[0].DealDamage(attack_vector, dmg, inflicted_damage);
-    int facet_index = layers[1].GetFacetIndex(attack_vector);
+    armor->DealDamage(attack_vector, dmg, inflicted_damage);
+    hull->DealDamage(attack_vector, dmg, inflicted_damage);
+    int facet_index = armor->GetFacetIndex(attack_vector);
 
     float denominator = GetArmor(facet_index) + GetHull();
     if(denominator == 0) {
@@ -93,8 +93,8 @@ float Damageable::DealDamageToShield( const Vector &pnt, float &damage )
     Damage dmg(damage);
     CoreVector attack_vector(pnt.i, pnt.j, pnt.k);
     InflictedDamage inflicted_damage(3);
-    layers[2].DealDamage(attack_vector, dmg, inflicted_damage);
-    int facet_index = layers[2].GetFacetIndex(attack_vector);
+    shield->DealDamage(attack_vector, dmg, inflicted_damage);
+    int facet_index = shield->GetFacetIndex(attack_vector);
 
     float denominator = GetShield(facet_index) + GetHull();
     if(denominator == 0) {
@@ -381,14 +381,11 @@ void Damageable::DamageRandomSystem(InflictedDamage inflicted_damage, bool playe
         return;
     }
 
-    float& hull = layers[0].facets[0].health;
-    float& max_hull = layers[0].facets[0].factory_max_health;
-
     bool damage_system;
     if(player) {
-        damage_system = DestroyPlayerSystem(hull, max_hull, 1);
+        damage_system = DestroyPlayerSystem(*current_hull, *max_hull, 1);
     } else {
-        damage_system = DestroySystem(hull, max_hull, 1);
+        damage_system = DestroySystem(*current_hull, *max_hull, 1);
     }
 
     if(!damage_system) {
@@ -396,7 +393,7 @@ void Damageable::DamageRandomSystem(InflictedDamage inflicted_damage, bool playe
     }
 
     unit->DamageRandSys( system_failure * rand01() +
-                   (1-system_failure) * ( 1-(hull > 0 ? hull_damage/hull : 1.0f) ),
+                   (1-system_failure) * ( 1-((*current_hull) > 0 ? hull_damage/(*current_hull) : 1.0f) ),
                    attack_vector, 1.0f, 1.0f );
 }
 
@@ -434,11 +431,8 @@ void Damageable::DamageCargo(InflictedDamage inflicted_damage) {
         return;
     }
 
-    float& hull = layers[0].facets[0].health;
-    float& max_hull = layers[0].facets[0].factory_max_health;
-
     // Is the hit unit, lucky or not
-    if ( DestroySystem( hull, max_hull, unit->numCargo() ) ) {
+    if ( DestroySystem( *current_hull, *max_hull, unit->numCargo() ) ) {
         return;
     }
 

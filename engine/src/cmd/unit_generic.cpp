@@ -1717,7 +1717,7 @@ void Unit::DamageRandSys( float dam, const Vector &vec, float randnum, float deg
           }
 
         // TODO: lib_damage reenable
-        layers[2].ReduceLayerCapability(dam, 0.1);
+        shield->ReduceLayerCapability(dam, 0.1);
 
         damages |= Damages::SHIELD_DAMAGED;
         return;
@@ -3484,10 +3484,10 @@ bool Unit::UpAndDownGrade( const Unit *up,
     if ( !csv_cell_null_check || force_change_on_nothing
         || cell_has_recursive_data( upgrade_name, up->faction, "Armor_Front_Top_Right" ) ) {
         for(int i=0;i<8;i++) {
-            STDUPGRADE( layers[1].facets[i].health,
-                        up->layers[1].facets[i].health,
-                        templ->layers[1].facets[i].health, 0 );
-            layers[1].facets[i].max_health = layers[1].facets[i].health;
+            STDUPGRADE( armor->facets[i].health,
+                        up->armor->facets[i].health,
+                        templ->armor->facets[i].health, 0 );
+            armor->facets[i].max_health = armor->facets[i].health;
         }
     }
 
@@ -3502,8 +3502,8 @@ bool Unit::UpAndDownGrade( const Unit *up,
         STDUPGRADE( health, up->health, templ->health, 0 );
     }*/
 
-    if ( (layers[0].facets[0].max_health < layers[0].facets[0].health) && (!Destroyed()) ) {
-        layers[0].facets[0].max_health = layers[0].facets[0].health;
+    if ( (hull->facets[0].max_health < hull->facets[0].health) && (!Destroyed()) ) {
+        hull->facets[0].max_health = hull->facets[0].health;
     }
 
     if ( !csv_cell_null_check || force_change_on_nothing
@@ -3630,17 +3630,17 @@ bool Unit::UpAndDownGrade( const Unit *up,
     // TODO: lib_damage re-enable this
     if ( !csv_cell_null_check || force_change_on_nothing
         || cell_has_recursive_data( upgrade_name, up->faction, "Shield_Front_Top_Right" ) ) {
-        if (layers[2].number_of_facets == up->layers[2].number_of_facets) {
-            for(int i=0;i<layers[2].number_of_facets;i++) {
-                float previous_max = layers[2].facets[i].factory_max_health;
-                STDUPGRADE( layers[2].facets[i].factory_max_health,
-                        up->layers[2].facets[i].factory_max_health,
-                        templ->layers[2].facets[i].factory_max_health, 0 );
+        if (shield->number_of_facets == up->shield->number_of_facets) {
+            for(int i=0;i<shield->number_of_facets;i++) {
+                float previous_max = shield->facets[i].factory_max_health;
+                STDUPGRADE( shield->facets[i].factory_max_health,
+                        up->shield->facets[i].factory_max_health,
+                        templ->shield->facets[i].factory_max_health, 0 );
 
-                if (layers[2].facets[i].factory_max_health != previous_max) {
-                    layers[2].facets[i].max_health = layers[2].facets[i].factory_max_health;
-                    layers[2].facets[i].adjusted_health = layers[2].facets[i].factory_max_health;
-                    layers[2].facets[i].health = layers[2].facets[i].factory_max_health;
+                if (shield->facets[i].factory_max_health != previous_max) {
+                    shield->facets[i].max_health = shield->facets[i].factory_max_health;
+                    shield->facets[i].adjusted_health = shield->facets[i].factory_max_health;
+                    shield->facets[i].health = shield->facets[i].factory_max_health;
                 }
             }
 
@@ -4916,7 +4916,7 @@ void Unit::UpdateCloak() {
     }
 
     // Cloaked ships don't have shields on
-    layers[2].Disable();
+    shield->Disable();
 
     // We're cloaked
     if (cloaking > cloakmin) {
@@ -4995,7 +4995,7 @@ void Unit::RegenShields()
     if (!energy_before_shield)
         rechargeEnergy();
     //Shield energy drain
-    layers[2].Regenerate();
+    shield->Regenerate();
 
     // TODO: Go over this and refactor
     int shield_number = GetShieldLayer().number_of_facets;
@@ -5012,9 +5012,9 @@ void Unit::RegenShields()
                 velocity_discharge = true;
                 energy = 0;
             }*/
-            layers[2].AdjustPower(1.0f);
+            shield->AdjustPower(1.0f);
         } else {
-            layers[2].GradualDisable(0.01f);
+            shield->GradualDisable(0.01f);
         }
 
         /*rec = (velocity_discharge) ?
@@ -5051,7 +5051,7 @@ void Unit::RegenShields()
     }
 
     //Shield regeneration
-    layers[2].Regenerate(rec);
+    shield->Regenerate(rec);
 
     // shield costs energy
     if(GetShieldLayer().facets[0].enabled) {

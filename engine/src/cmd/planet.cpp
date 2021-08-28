@@ -196,6 +196,7 @@ Planet::Planet() :
     shield.shield2fb.back=0;*/
     Health health(2,0,0);
     layers[2] = DamageableFactory::CreateLayer(2, FacetConfiguration::two, health, false);
+    shield = &layers[2];
 }
 
 extern const vector< string >& ParseDestinations( const string &value );
@@ -343,6 +344,7 @@ Planet::Planet( QVector x,
     shield.shield2fb.back=0;*/
     Health health(2,0,0);
     layers[2] = DamageableFactory::CreateLayer(2, FacetConfiguration::two, health, false);
+    shield = &layers[2];
 }
 
 Planet::~Planet()
@@ -405,7 +407,7 @@ void Planet::InitPlanet( QVector x,
     static float densityOfJumpPoint =
         XMLSupport::parse_float( vs_config->getVariable( "physics", "density_of_jump_point", "100000" ) );
     //static  float massofplanet = XMLSupport::parse_float(vs_config->getVariable("physics","mass_of_planet","10000000"));
-    layers[0].facets[0].health = (4./3)*M_PI*radius*radius*radius*(notJumppoint ? densityOfRock : densityOfJumpPoint);
+    hull->facets[0].health = (4./3)*M_PI*radius*radius*radius*(notJumppoint ? densityOfRock : densityOfJumpPoint);
     this->Mass   = (4./3)*M_PI*radius*radius*radius*( notJumppoint ? densityOfRock : (densityOfJumpPoint/100000) );
     SetAI( new PlanetaryOrbit( this, vely, pos, x, y, orbitcent, parent ) );     //behavior
     terraintrans = nullptr;
@@ -538,7 +540,7 @@ void Planet::AddFog( const std::vector< AtmosphericFogMesh > &v, bool opticalill
         fawg = new GameUnit( fogs, true, 0 );
     fawg->setFaceCamera();
     getSubUnits().preinsert( fawg );
-    fawg->layers[0].facets[0].health /= fawg->GetHullPercent();
+    fawg->hull->facets[0].health /= fawg->GetHullPercent();
 #ifdef MESHONLY
     meshdata.push_back( shield );
 #endif

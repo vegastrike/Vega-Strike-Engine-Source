@@ -1140,6 +1140,14 @@ void Unit::LoadRow( CSVRow &row, string modification, string *netxml )
 
     // End shield section
 
+    // Assign shorthand pointers;
+    hull = &layers[2];
+    armor = &layers[2];
+    shield = &layers[2];
+
+    current_hull = &hull->facets[0].health;
+    max_hull = &hull->facets[0].factory_max_health;
+
     static bool WCfuelhack = XMLSupport::parse_bool( vs_config->getVariable( "physics", "fuel_equals_warp", "false" ) );
     maxwarpenergy     = warpenergy = ::stof( OPTIM_GET( row, table, Warp_Capacitor ) );
 

@@ -357,7 +357,7 @@ void Drawable::Split( int level )
         for (unsigned int j = 0; j < meshsizes[i] && k < old.size(); ++j, ++k)
             tempmeshes.push_back( old[k] );
         unit->SubUnits.prepend( splitsub = new GameUnit( tempmeshes, true, unit->faction ) );
-        splitsub->layers[0].facets[0].health = 1000;
+        splitsub->hull->facets[0].health = 1000;
         splitsub->name = "debris";
         splitsub->setMass(game_options.debris_mass*splitsub->getMass()/level);
         splitsub->pImage->timeexplode = .1;

@@ -37,14 +37,27 @@ class GFXColor;
  */
 class Damageable : public DamageableObject
 {
-public:    
+public:
+    DamageableLayer *hull;
+    DamageableLayer *armor;
+    DamageableLayer *shield;
+
+    float *current_hull;
+    float *max_hull;
+
+
     bool dying;
     //Is dead already?
     bool  killed = false;
 
     // Methods
 public:
-    Damageable(): dying(false) {}
+    Damageable(): hull(nullptr),
+        armor(nullptr),
+        shield(nullptr),
+        dying(false),
+        current_hull(nullptr),
+        max_hull(nullptr) {}
 
 protected:
     virtual ~Damageable() = default;
@@ -58,15 +71,15 @@ public:
     // because we are constrained by existing python interfaces, which cannot
     // be easily changed.
     const float GetHull() const {
-        return layers[0].facets[0].health;
+        return hull->facets[0].health;
     }
 
     const float GetArmor(int facet = 0) const {
-        return layers[1].facets[facet].health;
+        return armor->facets[facet].health;
     }
 
     const float GetShield(int facet = 0) const {
-        return layers[2].facets[facet].health;
+        return shield->facets[facet].health;
     }
 
     DamageableLayer& GetHullLayer() {
@@ -82,17 +95,17 @@ public:
     }
 
     const float GetShieldRegeneration() const {
-        return layers[2].facets[0].regeneration;
+        return shield->facets[0].regeneration;
     }
 
     const float GetHullPercent() const
     {
-        return layers[0].facets[0].Percent();
+        return hull->facets[0].Percent();
     }
 
     const float GetShieldPercent() const
     {
-        return layers[2].facets[0].Percent();
+        return shield->facets[0].Percent();
     }
 
 

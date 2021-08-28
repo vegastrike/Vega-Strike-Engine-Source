@@ -154,7 +154,7 @@ Missile::Missile( const char *filename,
     // TODO: why would a sparkling missile be four times as hard to kill???
     static bool missilesparkle = XMLSupport::parse_bool( vs_config->getVariable( "graphics", "missilesparkle", "false" ) );
     if (missilesparkle) {
-        layers[0].facets[0].max_health *= 4;
+        hull->facets[0].max_health *= 4;
     }
 }
 

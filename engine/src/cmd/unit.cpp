@@ -220,8 +220,8 @@ void GameUnit::DrawNow( const Matrix &mato, float lod )
     if (rootunit == NULL) rootunit = (const void*) this;
     float damagelevel = 1.0;
     unsigned char chardamage    = 0;
-    if (this->GetHull() < this->layers[0].facets[0].max_health) {
-        damagelevel = this->layers[0].facets[0].health/this->layers[0].facets[0].max_health;
+    if (this->GetHull() < this->hull->facets[0].max_health) {
+        damagelevel = this->hull->facets[0].health/this->hull->facets[0].max_health;
         chardamage  = ( 255-(unsigned char) (damagelevel*255) );
     }
 #ifdef VARIABLE_LENGTH_PQR
@@ -386,8 +386,8 @@ void GameUnit::Draw( const Transformation &parent, const Matrix &parentMatrix )
             cloak = (int) (this->cloaking-interpolation_blend_factor*this->cloakrate * simulation_atom_var );
             cloak = cloakVal( cloak, this->cloakmin, this->cloakrate, this->cloakglass );
         }
-        if (this->GetHull() < this->layers[0].facets[0].max_health) {
-            damagelevel = this->layers[0].facets[0].health/this->layers[0].facets[0].max_health;
+        if (this->GetHull() < this->hull->facets[0].max_health) {
+            damagelevel = this->hull->facets[0].health/this->hull->facets[0].max_health;
             chardamage  = ( 255-(unsigned char) (damagelevel*255) );
         }
         avgscale = sqrt((ctm->getP().MagnitudeSquared() + ctm->getR().MagnitudeSquared()) * 0.5);
