@@ -630,25 +630,7 @@ void LoadCockpit( Unit *thus, const string &cockpit )
     thus->pImage->CockpitCenter.k = nextElementFloat( cockpit, elemstart, elemend );
 }
 
-static int AssignIf( const string &inp, float &val, float &val1, float &val2 )
-{
-    if ( inp.length() ) {
-        val  = ::stof( inp );
-        val1 = ::stof( inp );
-        val2 = ::stof( inp );
-        return 1;
-    }
-    return 0;
-}
 
-static int AssignIfDeg( const string &inp, float &val )
-{
-    if ( inp.length() ) {
-        val = ::stof( inp )*VS_PI/180;
-        return 1;
-    }
-    return 0;
-}
 
 float getFuelConversion()
 {
@@ -1060,9 +1042,9 @@ void Unit::LoadRow( CSVRow &row, string modification, string *netxml )
     // Load shield
     // Some basic shield variables
     // TODO: lib_damage figure out how leak and efficiency work
-    char leak = (char) (::stof( OPTIM_GET( row, table, Shield_Leak ) )*100.0);
+    //char leak = (char) (::stof( OPTIM_GET( row, table, Shield_Leak ) )*100.0);
     float regeneration   = ::stof( OPTIM_GET( row, table, Shield_Recharge ) );
-    float efficiency = ::stof( OPTIM_GET( row, table, Shield_Efficiency ), 1.0 );
+    //float efficiency = ::stof( OPTIM_GET( row, table, Shield_Efficiency ), 1.0 );
 
     // Get shield count
     int    shield_count = 0;

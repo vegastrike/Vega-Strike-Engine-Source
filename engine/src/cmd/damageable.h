@@ -48,16 +48,17 @@ public:
 
     bool dying;
     //Is dead already?
-    bool  killed = false;
+    bool  killed;
 
     // Methods
 public:
     Damageable(): hull(nullptr),
         armor(nullptr),
         shield(nullptr),
-        dying(false),
         current_hull(nullptr),
-        max_hull(nullptr) {}
+        max_hull(nullptr),
+        dying(false),
+        killed(false) {}
 
 protected:
     virtual ~Damageable() = default;

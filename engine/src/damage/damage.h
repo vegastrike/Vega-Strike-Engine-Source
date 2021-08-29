@@ -1,6 +1,8 @@
 #ifndef DAMAGE_H
 #define DAMAGE_H
 
+#include <vector>
+
 /**
  * @brief The Damage struct provides a cleaner way for a weapon to deliver multiple effects. e.g. both damage and a torque, or damage to specific sub-systems.
  */
@@ -35,7 +37,7 @@ struct InflictedDamage {
     // This array stores the damage inflicted to each layer
     // By default, it is  hard-coded to three layers:
     // shield, armor and hull. But this makes this implementation inflexible.
-    float inflicted_damage_by_layer[3];
+    std::vector<float> inflicted_damage_by_layer;
 
     InflictedDamage(int number_of_layers = 3) {
         total_damage = 0.0;
@@ -43,9 +45,9 @@ struct InflictedDamage {
         phase_damage = 0.0;
         propulsion_damage = 0.0;
 
-        inflicted_damage_by_layer[number_of_layers];
+
         for(int i=0;i<number_of_layers;i++) {
-            inflicted_damage_by_layer[i] = 0;
+            inflicted_damage_by_layer.push_back(0.0f);
         }
     }
 

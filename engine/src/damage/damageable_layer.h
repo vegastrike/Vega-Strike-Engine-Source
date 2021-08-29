@@ -16,11 +16,12 @@ struct DamageableLayer
 {
     int layer_index;
     FacetConfiguration configuration;
-    bool core_layer;    // Damage to the core layer has a chance of also
-                        // damaging internal components such as propulsion.
 
     unsigned int number_of_facets;    // How many facets. e.g. dual shield (front and rear).
     std::vector<Health> facets;    // The facets container
+
+    bool core_layer;    // Damage to the core layer has a chance of also
+                        // damaging internal components such as propulsion.
 
     //static float damage_component_chance = 0.03;
     DamageableLayer(int layer_index, int number_of_facets, std::vector<Health>& facets, bool core_layer):
@@ -31,8 +32,8 @@ struct DamageableLayer
 
     DamageableLayer():
         layer_index(0),
-        core_layer(false),
-        number_of_facets(1) {
+        number_of_facets(1),
+        core_layer(false) {
         facets.push_back(Health(layer_index));
     }
 

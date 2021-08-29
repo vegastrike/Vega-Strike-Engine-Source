@@ -1498,20 +1498,6 @@ float WARPENERGYMULTIPLIER( Unit *un )
     return player ? playerwarpenergymultiplier : warpenergymultiplier;
 }
 
-//short fix
-static bool applyto( float &shield, const float max, const float amt )
-{
-    shield += amt;                               //short fix
-    if (shield > max)
-        shield = max;
-    return (shield >= max) ? 1 : 0;
-}
-
-
-
-
-
-
 
 /*
  **********************************************************************************
@@ -1726,13 +1712,13 @@ void Unit::DamageRandSys( float dam, const Vector &vec, float randnum, float deg
         //DAMAGE Reactor
         //DAMAGE JUMP
         if (randnum >= .9) {
-            static char max_shield_leak =
+            /*static char max_shield_leak =
                 (char) std::max( 0.0,
                              std::min( 100.0, XMLSupport::parse_float( vs_config->getVariable( "physics", "max_shield_leak", "90" ) ) ) );
             static char min_shield_leak =
                 (char) std::max( 0.0,
-                             std::min( 100.0, XMLSupport::parse_float( vs_config->getVariable( "physics", "max_shield_leak", "0" ) ) ) );
-            char newleak = float_to_int( std::max( min_shield_leak, std::max( max_shield_leak, (char) ( (randnum-.9)*10.0*100.0 ) ) ) );
+                             std::min( 100.0, XMLSupport::parse_float( vs_config->getVariable( "physics", "max_shield_leak", "0" ) ) ) );*/
+            //char newleak = float_to_int( std::max( min_shield_leak, std::max( max_shield_leak, (char) ( (randnum-.9)*10.0*100.0 ) ) ) );
             // TODO: lib_damage if (shield.leak < newleak)
                 //shield.leak = newleak;
         } else if (randnum >= .7) {
@@ -3625,13 +3611,15 @@ bool Unit::UpAndDownGrade( const Unit *up,
         for (unsigned int upgr = 0; upgr < upgrmax; ++upgr)
             GCCBugCheckFloat( pImage->cockpit_damage, upgr );
     }
-    bool upgradedshield = false;
+
+    // part of the below lib_damage disabled code
+    //bool upgradedshield = false;
 
     // TODO: lib_damage re-enable this
     if ( !csv_cell_null_check || force_change_on_nothing
         || cell_has_recursive_data( upgrade_name, up->faction, "Shield_Front_Top_Right" ) ) {
         if (shield->number_of_facets == up->shield->number_of_facets) {
-            for(int i=0;i<shield->number_of_facets;i++) {
+            for(unsigned int i=0;i<shield->number_of_facets;i++) {
                 float previous_max = shield->facets[i].factory_max_health;
                 STDUPGRADE( shield->facets[i].factory_max_health,
                         up->shield->facets[i].factory_max_health,
@@ -3644,8 +3632,8 @@ bool Unit::UpAndDownGrade( const Unit *up,
                 }
             }
 
-            if (touchme && retval == UPGRADEOK)
-                upgradedshield = true;
+            /*if (touchme && retval == UPGRADEOK)
+                upgradedshield = true;*/
         } else if (up->FShieldData() > 0 || up->RShieldData() > 0 || up->LShieldData() > 0 || up->BShieldData() > 0) {
             cancompletefully = false;
         }
@@ -4957,23 +4945,24 @@ bool Unit::isPlayerShip()
 
 void Unit::RegenShields()
 {
+    // TODO: lib_damage reenable disabled settings
     static bool  shields_in_spec = XMLSupport::parse_bool( vs_config->getVariable( "physics", "shields_in_spec", "false" ) );
-    static float shieldenergycap =
-        XMLSupport::parse_float( vs_config->getVariable( "physics", "shield_energy_capacitance", ".2" ) );
+    //static float shieldenergycap =
+    //    XMLSupport::parse_float( vs_config->getVariable( "physics", "shield_energy_capacitance", ".2" ) );
     static bool  energy_before_shield     =
         XMLSupport::parse_bool( vs_config->getVariable( "physics", "engine_energy_priority", "true" ) );
-    static bool  apply_difficulty_shields =
-        XMLSupport::parse_bool( vs_config->getVariable( "physics", "difficulty_based_shield_recharge", "true" ) );
-    static float shield_maintenance_cost  =
-        XMLSupport::parse_float( vs_config->getVariable( "physics", "shield_maintenance_charge", ".25" ) );
+    //static bool  apply_difficulty_shields =
+    //    XMLSupport::parse_bool( vs_config->getVariable( "physics", "difficulty_based_shield_recharge", "true" ) );
+    //static float shield_maintenance_cost  =
+    //    XMLSupport::parse_float( vs_config->getVariable( "physics", "shield_maintenance_charge", ".25" ) );
     static bool  shields_require_power    =
         XMLSupport::parse_bool( vs_config->getVariable( "physics", "shields_require_passive_recharge_maintenance", "true" ) );
     static float discharge_per_second     =
         XMLSupport::parse_float( vs_config->getVariable( "physics", "speeding_discharge", ".25" ) );
     //approx
-    const float  dischargerate  = (1-(1-discharge_per_second)*simulation_atom_var);
-    static float min_shield_discharge =
-        XMLSupport::parse_float( vs_config->getVariable( "physics", "min_shield_speeding_discharge", ".1" ) );
+    //const float  dischargerate  = (1-(1-discharge_per_second)*simulation_atom_var);
+    //static float min_shield_discharge =
+    //    XMLSupport::parse_float( vs_config->getVariable( "physics", "min_shield_speeding_discharge", ".1" ) );
     static float low_power_mode =
         XMLSupport::parse_float( vs_config->getVariable( "physics", "low_power_mode_energy", "10" ) );
     static float max_shield_lowers_recharge    =
@@ -4988,7 +4977,7 @@ void Unit::RegenShields()
     //Fuel Mass in metric tons expended per generation of 100MJ
     static float FMEC_factor     = XMLSupport::parse_float( vs_config->getVariable( "physics", "FMEC_factor", "0.000000008" ) );
     float maxshield = totalShieldEnergyCapacitance( GetShieldLayer() );
-    bool  velocity_discharge     = false;
+    //bool  velocity_discharge     = false;
     float rec = 0;
     float precharge = energy;
     //Reactor energy
@@ -4999,7 +4988,7 @@ void Unit::RegenShields()
 
     // TODO: Go over this and refactor
     int shield_number = GetShieldLayer().number_of_facets;
-    float shield_recharge = GetShieldLayer().facets[0].regeneration;
+    //float shield_recharge = GetShieldLayer().facets[0].regeneration;
 
     if ( shield_number > 0) {
         //GAHHH reactor in units of 100MJ, shields in units of VSD=5.4MJ to make 1MJ of shield use 1/shieldenergycap MJ
