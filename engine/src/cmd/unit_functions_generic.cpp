@@ -13,6 +13,8 @@
 #include "cmd/ai/order.h"
 #include "universe.h"
 #include "mount_size.h"
+#include "damageable.h"
+
 
 //Various functions that were used in .cpp files that are now included because of
 //the temple GameUnit class

@@ -31,6 +31,8 @@
 #include "configuration/configuration.h"
 #include "missile.h"
 #include "enhancement.h"
+#include "damageable.h"
+
 #include <typeinfo>
 #include <boost/log/trivial.hpp>
 

@@ -27,6 +27,7 @@
 #include <assert.h>
 #include "star_system.h"
 
+#include "damageable.h"
 #include "lin_time.h"
 #include "audiolib.h"
 #include "config_xml.h"

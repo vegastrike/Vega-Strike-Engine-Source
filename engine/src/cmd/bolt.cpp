@@ -18,6 +18,8 @@
 #include "gfx/camera.h"
 #include "options.h"
 #include "universe.h"
+#include "damageable.h"
+
 
 
 using std::vector;

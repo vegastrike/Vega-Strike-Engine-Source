@@ -10,6 +10,7 @@ using std::vector;
 #include "images.h"
 #include "mount_size.h"
 #include "weapon_info.h"
+#include "damageable.h"
 
 struct BeamDrawContext
 {

@@ -10,6 +10,8 @@
 #include <vector>
 #include "collection.h"
 #include "building.h"
+#include "damageable.h"
+
 static std::vector< Terrain* >allterrains;
 
 Terrain::Terrain( const char *filename,

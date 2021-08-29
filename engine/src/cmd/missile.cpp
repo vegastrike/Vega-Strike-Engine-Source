@@ -1,4 +1,5 @@
 #include "missile.h"
+#include "damageable.h"
 
 #include "universe_util.h"
 #include "unit_generic.h"
