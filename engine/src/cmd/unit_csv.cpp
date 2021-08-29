@@ -1123,8 +1123,8 @@ void Unit::LoadRow( CSVRow &row, string modification, string *netxml )
     // End shield section
 
     // Assign shorthand pointers;
-    hull = &layers[2];
-    armor = &layers[2];
+    hull = &layers[0];
+    armor = &layers[1];
     shield = &layers[2];
 
     current_hull = &hull->facets[0].health;

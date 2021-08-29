@@ -196,6 +196,8 @@ Planet::Planet() :
     shield.shield2fb.back=0;*/
     Health health(2,0,0);
     layers[2] = DamageableFactory::CreateLayer(2, FacetConfiguration::two, health, false);
+    hull = &layers[0];
+    armor = &layers[1];
     shield = &layers[2];
 }
 
@@ -344,6 +346,8 @@ Planet::Planet( QVector x,
     shield.shield2fb.back=0;*/
     Health health(2,0,0);
     layers[2] = DamageableFactory::CreateLayer(2, FacetConfiguration::two, health, false);
+    hull = &layers[0];
+    armor = &layers[1];
     shield = &layers[2];
 }
 

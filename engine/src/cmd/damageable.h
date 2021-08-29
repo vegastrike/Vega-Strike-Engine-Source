@@ -52,11 +52,11 @@ public:
 
     // Methods
 public:
-    Damageable(): hull(nullptr),
-        armor(nullptr),
-        shield(nullptr),
-        current_hull(nullptr),
-        max_hull(nullptr),
+    Damageable(): hull(&layers[0]),
+        armor(&layers[1]),
+        shield(&layers[2]),
+        current_hull(&hull->facets[0].health),
+        max_hull(&hull->facets[0].factory_max_health),
         dying(false),
         killed(false) {}
 

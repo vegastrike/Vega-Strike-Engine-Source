@@ -760,8 +760,10 @@ void VDU::DrawTarget( GameCockpit *cp, Unit *parent, Unit *target )
         au = ad;
         ad = tmp;
     }
-    if (target->isUnit() == _UnitType::planet)
+    if (target->isUnit() == _UnitType::planet) {
         au = ar = al = ad = target->GetHullPercent();
+    }
+
     DrawHUDSprite( this, ( (target->isUnit() != _UnitType::planet || target->getHudImage() != NULL) ? target->getHudImage()
                           : ( target->GetDestinations().size() != 0 ? getJumpImage()
                              : ( ( (Planet*) target )->hasLights() ? getSunImage()

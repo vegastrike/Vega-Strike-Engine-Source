@@ -183,6 +183,13 @@ float DamageableLayer::AverageMaxLayerValue() {
 
 
 float DamageableLayer::GetPercent(FacetName facet_name) {
+    // One configuration
+    if(facets[0].factory_max_health == 0) {
+        return 0;
+    } else {
+        return facets[0].health / facets[0].factory_max_health;
+    }
+
     // Two or Four shield configurations
     if(configuration != FacetConfiguration::eight) {
         int index = GetFacetIndexByName(facet_name);
