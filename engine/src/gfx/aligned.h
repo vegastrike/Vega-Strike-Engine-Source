@@ -1,3 +1,28 @@
+/**
+ * aligned.h
+ *
+ * Copyright (C) Daniel Horn and klaussfreire
+ * Copyright (C) 2020-2021 pyramid3d, Stephen G. Tuggy, and other
+ * Vega Strike contributors
+ *
+ * https://github.com/vegastrike/Vega-Strike-Engine-Source
+ *
+ * This file is part of Vega Strike.
+ *
+ * Vega Strike is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Vega Strike is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 #ifndef __ALIGNED_H
 #define __ALIGNED_H
 
@@ -60,42 +85,60 @@ public:
     
     typename std::allocator<T>::pointer _align (typename std::allocator<void>::const_pointer p)
     {
-        if (p == 0)
-            return p;
+        if (p == 0) {
+            return static_cast<typename std::allocator<T>::pointer>(const_cast<typename std::allocator<void>::pointer>(p));
+        }
         
-        char *vrv;
+        uint8_t *vrv;
         
         // Make room for the offset
-        vrv = (char*)((size_t*) p + 1);
+        vrv = (uint8_t*)((size_t*) p + 1);
         
         // Align
-        vrv += (ALIGN - (vrv - (char*)NULL) % ALIGN) % ALIGN;
+        vrv += (ALIGN - (vrv - (uint8_t*)NULL) % ALIGN) % ALIGN;
         
         // Store offset
-        *((size_t*)vrv - 1) = vrv - (char*)p;
-        
-        return __alpn(vrv, ALIGN);
+        *((size_t*)vrv - 1) = vrv - (uint8_t*)p;
+
+        void *vrv2 = static_cast<void *>(vrv);
+        typename std::allocator<T>::pointer vrv3 = static_cast<typename std::allocator<T>::pointer>(vrv2);
+
+        return __alpn(vrv3, ALIGN);
     }
 
-    void _dealign (typename std::allocator<T>::pointer p)
+    typename std::allocator<T>::pointer _dealign (typename std::allocator<T>::pointer p)
     {
-        if (p == 0)
+        if (p == 0) {
             return p;
+        }
         
+        // Convert our input to pointer-to-void as an intermediate step
+        void *p2 = static_cast<void *>(p);
+
         // De-align
-        char *vrv = (char*)p - *((size_t*)p - 1);
+        uint8_t *vrv = (uint8_t*)p2 - *((size_t*)p2 - 1);
+
+        // Now convert back to pointer-to-void on the way out
+        void *vrv2 = static_cast<void *>(vrv);
+
+        // And back to the specific pointer type desired
+        typename std::allocator<T>::pointer vrv3 = static_cast<typename std::allocator<T>::pointer>(vrv2);
         
-        return (typename std::allocator<T>::pointer)vrv;
+        // And return
+        return vrv3;
     }
     
-    typename std::allocator<T>::pointer allocate (typename std::allocator<T>::size_type n, typename std::allocator<void>::const_pointer hint=0)
+    typename std::allocator<T>::pointer allocate (typename std::allocator<T>::size_type n, typename std::allocator<void>::const_pointer hint = 0)
     {
-        return __alpn(_align(std::allocator<T>::allocate(n+_OVERHEAD, _dealign(hint))), ALIGN);
+        typename std::allocator<void>::pointer hint2 = const_cast<typename std::allocator<void>::pointer>(hint);
+        typename std::allocator<T>::pointer    hint3 = static_cast<typename std::allocator<T>::pointer>(hint2);
+        
+        return __alpn(_align(std::allocator<T>::allocate(n + _OVERHEAD, _dealign(hint3))), ALIGN);
     }
     
     void deallocate (typename std::allocator<T>::pointer p, typename std::allocator<T>::size_type n)
     {
-        std::allocator<T>::deallocate(_dealign(p), n+_OVERHEAD);
+        std::allocator<T>::deallocate(_dealign(p), n + _OVERHEAD);
     }
 };
 

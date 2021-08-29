@@ -1,7 +1,10 @@
 name: 'MacOS-CI'
 
 on:
-  # Activate manually
+  push:
+  pull_request:
+
+  # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
 
 jobs:
@@ -17,10 +20,12 @@ jobs:
         compiler:
           - clang
           - gcc
-        override:
-          - -
-          - opengl
-          - openal
+        homebrew-gl:
+          - true
+          # - false
+        homebrew-al:
+          - true
+          - false
 
     steps:
 
@@ -41,16 +46,17 @@ jobs:
     # * OpenGL as of MacOS 10.14
     # * GLUT as of MacOS 10.9
     - name: Optionally install homebrewed OpenGL and GLUT
-      if: ${{ matrix.override == 'opengl' }}
+      if: ${{ matrix.homebrew-gl }}
       run: |
         brew install mesa mesa-glu freeglut
         ln -s /usr/local/include/GL /usr/local/include/OpenGL
         ln -s /usr/local/include/GL /usr/local/include/GLUT
-        ln -s /usr/local/lib/libGL.dylib /usr/local/lib/libOpenGL.dylib
+      # ln -s /usr/local/lib/libGL.dylib /usr/local/lib/libOpenGL.dylib
+      # find /usr/local/lib/ -iname '*gl*.dylib'
 
     # The Apple-provided OpenAL is deprecated as of MacOS 10.15
     - name: Optionally install homebrewed OpenAL
-      if: ${{ matrix.override == 'openal' }}
+      if: ${{ matrix.homebrew-al }}
       run: brew install openal-soft
 
     - name: Checkout repository
