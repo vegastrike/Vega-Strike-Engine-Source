@@ -28,9 +28,10 @@
 
 #include "damageable_object.h"
 #include "gfx/vec.h"
+#include "mount_size.h"
 
 class Unit;
-class GFXColor;
+struct GFXColor;
 
 /**
  * @brief The Damageable class TODO
@@ -46,7 +47,6 @@ public:
     float *max_hull;
 
 
-    bool dying;
     //Is dead already?
     bool  killed;
 
@@ -55,9 +55,8 @@ public:
     Damageable(): hull(&layers[0]),
         armor(&layers[1]),
         shield(&layers[2]),
-        current_hull(&hull->facets[0].health),
-        max_hull(&hull->facets[0].factory_max_health),
-        dying(false),
+        current_hull(&hull->facets[as_integer(FacetName::single)].health),
+        max_hull(&hull->facets[as_integer(FacetName::single)].factory_max_health),
         killed(false) {}
 
 protected:
@@ -71,10 +70,12 @@ public:
     // We follow the existing convention of GetX for the actual health value
     // because we are constrained by existing python interfaces, which cannot
     // be easily changed.
+    // TODO: convert all calls to *current_hull
     const float GetHull() const {
-        return hull->facets[0].health;
+        return *current_hull;
     }
 
+    // TODO: check for valid index
     const float GetArmor(int facet = 0) const {
         return armor->facets[facet].health;
     }
@@ -96,17 +97,17 @@ public:
     }
 
     const float GetShieldRegeneration() const {
-        return shield->facets[0].regeneration;
+        return shield->facets[as_integer(FacetName::left_top_front)].regeneration;
     }
 
     const float GetHullPercent() const
     {
-        return hull->facets[0].Percent();
+        return hull->GetPercent(FacetName::single);
     }
 
     const float GetShieldPercent() const
     {
-        return shield->facets[0].Percent();
+        return shield->GetPercent(FacetName::left_top_front);
     }
 
 

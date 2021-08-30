@@ -3,6 +3,18 @@
 
 #include <float.h>
 
+// TODO: this is a duplication of the code in mount_size.
+// We cannot use it as it is in a different library.
+// I'm unhappy with this duplication.
+// Marked static so it cannot leak out of this file.
+template <typename Enumeration>
+static auto as_integer(Enumeration const value)
+    -> typename std::underlying_type<Enumeration>::type
+{
+    return static_cast<typename std::underlying_type<Enumeration>::type>(value);
+}
+
+
 /// Facet Configurations
 /// One
 const CoreVector minimum_one_configuration(-FLT_MAX, -FLT_MAX, -FLT_MAX);
@@ -37,7 +49,7 @@ DamageableLayer DamageableFactory::CreateLayer(int layer_index,
                                                Health health_template,
                                                bool core_layer) {
     health_template.layer = layer_index;
-    int size = FacetConfigurationSize(configuration);
+    int size = as_integer(configuration);
 
     std::vector<Health> facets;
     for(int i=0;i<size;i++) {
@@ -53,7 +65,7 @@ DamageableLayer DamageableFactory::CreateLayer(int layer_index,
                                                float health_array[],
                                                float regeneration,
                                                bool core_layer) {
-    int size = FacetConfigurationSize(configuration);
+    int size = as_integer(configuration);
 
     std::vector<Health> facets;
     for(int i=0;i<size;i++) {

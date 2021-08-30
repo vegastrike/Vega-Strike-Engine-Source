@@ -3,6 +3,7 @@
 
 #include "core_vector.h"
 #include <float.h>
+#include <string>
 
 /**
  * @brief The FacetConfiguration enum represents how many facets a layer has and it what configuration.
@@ -26,24 +27,27 @@ enum class FacetConfiguration {
 
 
 enum class FacetName {
-    single,             // 0
+    single             = 0,
 
-    left,               // 0
-    right,              // 1
-    top,                // 2
-    bottom,             // 3
-    front,              // 4
-    rear,               // 5
+    left               = 0,
+    right              = 1,
+    top                = 2,
+    bottom             = 3,
+    front              = 4,
+    rear               = 5,
 
-    left_top_front,     // 0
-    right_top_front,    // 1
-    left_bottom_front,  // 2
-    right_bottom_front, // 3
-    left_top_rear,      // 4
-    right_top_rear,     // 5
-    left_bottom_rear,   // 6
-    right_bottom_rear   // 7
+    left_top_front     = 0,
+    right_top_front    = 1,
+    left_bottom_front  = 2,
+    right_bottom_front = 3,
+    left_top_rear      = 4,
+    right_top_rear     = 5,
+    left_bottom_rear   = 6,
+    right_bottom_rear  = 7
 };
+
+// Same code as mount_size.h!
+// auto as_integer(Enumeration const value)
 
 const FacetName one_configuration[1] = { FacetName::single};
 
@@ -72,8 +76,6 @@ const FacetName eight_configuration[8] = { FacetName::left_top_front,
                                            FacetName::right_bottom_rear };
 
 int Find(FacetName facet_name, const FacetName facet_array[], int size);
-
-int FacetConfigurationSize(FacetConfiguration configuration);
 
 const FacetName* FacetConfigurationByName(FacetConfiguration configuration);
 

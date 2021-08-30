@@ -64,6 +64,7 @@ using VSFileSystem::SaveFile;
 #include "universe.h"
 #include "mount_size.h"
 #include "weapon_info.h"
+#include "facet_configuration.h"
 
 //#define VS_PI 3.1415926535897931
 
@@ -5233,7 +5234,9 @@ void showUnitStats( Unit *playerUnit, string &text, int subunitlevel, int mode, 
         text += "#n##n##c0:1:.5#"+prefix+"[DURABILITY STATISTICS]#n##-c";
         text += "#n#"+prefix+statcolor+"Armor damage resistance:#-c";
     }
-    if (mode && MODIFIES(replacement_mode, playerUnit, blankUnit, armor->facets[0].health)) {
+
+    if (mode && MODIFIES(replacement_mode, playerUnit, blankUnit,
+                         armor->facets[as_integer(FacetName::left_top_front)].health)) {
         switch (replacement_mode) {
         case 0:                 //Replacement or new Module
             text += "#n#"+prefix+statcolor+"Replaces existing armor, if any.#n#Armor damage resistance:#-c";
@@ -5304,7 +5307,7 @@ void showUnitStats( Unit *playerUnit, string &text, int subunitlevel, int mode, 
 
     // Shields
     const int num_shields = playerUnit->shield->number_of_facets;
-    const float first_shield_max_health = playerUnit->shield->facets[0].factory_max_health;
+    const float first_shield_max_health = playerUnit->shield->facets[as_integer(FacetName::left_top_front)].factory_max_health;
     if (!mode) {
         if (num_shields) {
             PRETTY_ADD( statcolor+"Number of shield emitter facings: #-c", num_shields, 0 );
@@ -5313,7 +5316,8 @@ void showUnitStats( Unit *playerUnit, string &text, int subunitlevel, int mode, 
             text += "#n#"+prefix+statcolor+"No shielding. #-c";
         }
     } else if ( num_shields
-               && MODIFIES(replacement_mode, playerUnit, blankUnit, shield->facets[0].factory_max_health)) {
+               && MODIFIES(replacement_mode, playerUnit, blankUnit,
+                           shield->facets[as_integer(FacetName::left_top_front)].factory_max_health)) {
         switch (replacement_mode) {
         case 0:                         //Replacement or new Module
             text += "#n#"+prefix+statcolor+"Installs shield with following protection ratings:#-c";
@@ -5346,7 +5350,8 @@ void showUnitStats( Unit *playerUnit, string &text, int subunitlevel, int mode, 
 
     if(shield_strings) {
         if (!mode || MODIFIES(replacement_mode, playerUnit,
-                              blankUnit, shield->facets[0].factory_max_health)) {
+                              blankUnit,
+                              shield->facets[as_integer(FacetName::left_top_front)].factory_max_health)) {
             for(int i=0;i<num_shields;i++) {
                 PRETTY_ADDU(substatcolor + shield_strings[i], (mode && replacement_mode == 2) ?
                                 ( 100.0 *(playerUnit->shield->facets[i].factory_max_health-1) ) :
@@ -5356,10 +5361,10 @@ void showUnitStats( Unit *playerUnit, string &text, int subunitlevel, int mode, 
         }
     }
 
-    const float regeneration = playerUnit->shield->facets[0].regeneration;
+    const float regeneration = playerUnit->shield->facets[as_integer(FacetName::left_top_front)].regeneration;
     if (!mode) {
         PRETTY_ADDU( statcolor+"Shield protection recharge speed: #-c", regeneration * VSDM, 0, "MJ/s" );
-    } else if (MODIFIES(replacement_mode, playerUnit, blankUnit, shield->facets[0].regeneration)) {
+    } else if (MODIFIES(replacement_mode, playerUnit, blankUnit, shield->facets[as_integer(FacetName::left_top_front)].regeneration)) {
         switch (replacement_mode)
         {
         case 0:                         //Replacement or new Module
@@ -5553,7 +5558,7 @@ void showUnitStats( Unit *playerUnit, string &text, int subunitlevel, int mode, 
         float avail    = (playerUnit->maxEnergyData()*RSconverter-maxshield*VSDM);
 
         int num_shields = playerUnit->shield->number_of_facets;
-        float regeneration = playerUnit->shield->facets[0].regeneration;
+        float regeneration = playerUnit->shield->facets[as_integer(FacetName::left_top_front)].regeneration;
         float overhead = (shields_require_power) ?
                     (regeneration / shieldenergycap * shield_maintenance_cost
                                        * num_shields * VSDM) : 0;

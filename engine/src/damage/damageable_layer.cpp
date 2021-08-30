@@ -183,22 +183,41 @@ float DamageableLayer::AverageMaxLayerValue() {
 
 
 float DamageableLayer::GetPercent(FacetName facet_name) {
-    // One configuration
-    if(facets[0].factory_max_health == 0) {
-        return 0;
-    } else {
-        return facets[0].health / facets[0].factory_max_health;
-    }
+    int index = 0; // Must define variables outside switch
 
-    // Two or Four shield configurations
-    if(configuration != FacetConfiguration::eight) {
-        int index = GetFacetIndexByName(facet_name);
-        if(facets[index].factory_max_health == 0) {
+    switch(configuration) {
+    case FacetConfiguration::one:
+        // One configuration
+        if(facets[0].factory_max_health == 0) {
             return 0;
+        } else {
+            return facets[0].health / facets[0].factory_max_health;
+        }
+
+        // Two or Four shield configurations
+        // Note the fallthrough
+        case FacetConfiguration::two:
+        case FacetConfiguration::four:
+        index = GetFacetIndexByName(facet_name);
+
+        // Invalid facet
+        if(index == -1) {
+            return 0.0f;
+        }
+
+        if(facets[index].factory_max_health == 0) {
+            return 0.0f;
         }
 
         return facets[index].health / facets[index].factory_max_health;
+
+
+        default:
+            break; // Noop
     }
+
+    // We handle the eight configuration outside the switch
+    // as it is longer and more complex
 
     // Indices of facets for shield configuration eight
     static const int indices_array[4][4] = {{0,2,4,6},    // left

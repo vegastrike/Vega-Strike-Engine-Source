@@ -34,7 +34,7 @@
 class Mesh;
 class Flightgroup;
 class Unit;
-class GFXColor;
+struct GFXColor;
 //class Transformation;
 
 using std::vector;

@@ -308,7 +308,9 @@ void Drawable::Split( int level )
         float randomstartseconds = 0;
         string scalestr     = UniverseUtil::LookupUnitStat( unit->name, fac, "Unit_Scale" );
         int   scale = atoi( scalestr.c_str() );
-        if (scale == 0) scale = 1;
+        if (scale == 0) {
+            scale = 1;
+        }
         AddMeshes( nw, randomstartframe, randomstartseconds, scale, chunkname, unit->faction,
                    unit->getFlightgroup(), &meshsizes );
         VSFileSystem::current_type.pop_back();
@@ -357,7 +359,7 @@ void Drawable::Split( int level )
         for (unsigned int j = 0; j < meshsizes[i] && k < old.size(); ++j, ++k)
             tempmeshes.push_back( old[k] );
         unit->SubUnits.prepend( splitsub = new GameUnit( tempmeshes, true, unit->faction ) );
-        splitsub->hull->facets[0].health = 1000;
+        *splitsub->current_hull = 1000.0f;
         splitsub->name = "debris";
         splitsub->setMass(game_options.debris_mass*splitsub->getMass()/level);
         splitsub->pImage->timeexplode = .1;

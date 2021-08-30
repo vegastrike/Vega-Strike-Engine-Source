@@ -1,6 +1,7 @@
 #include "missile.h"
 #include "damageable.h"
 
+#include "mount_size.h"
 #include "universe_util.h"
 #include "unit_generic.h"
 #include "vegastrike.h"
@@ -155,7 +156,7 @@ Missile::Missile( const char *filename,
     // TODO: why would a sparkling missile be four times as hard to kill???
     static bool missilesparkle = XMLSupport::parse_bool( vs_config->getVariable( "graphics", "missilesparkle", "false" ) );
     if (missilesparkle) {
-        hull->facets[0].max_health *= 4;
+        *current_hull *= 4;
     }
 }
 
