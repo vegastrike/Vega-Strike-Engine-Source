@@ -327,7 +327,23 @@ Assuming all the above steps succeed, you are now ready to run Vega Strike. Note
 Compiling On MacOS
 ------------------
 
-Currently VegaStrike is not compiling on MacOS. Any help will be appreciated to get it fixed. For more information go [here](https://github.com/vegastrike/Vega-Strike-Engine-Source/issues/78)
+VegaStrike is now compiling on MacOS. However, it's currently experiencing segfaults. Any help will be appreciated to get it fixed. For more information go [here](https://github.com/vegastrike/Vega-Strike-Engine-Source/issues/533)
+
+To install the required build dependencies:
+
+If you have Homebrew, follow the steps in the GitHub action:
+
+```
+.github/workflows/macos-ci.yml
+```
+
+If you have MacPorts, install the following:
+
+```
+sudo port install cmake expat jpeg libpng libvorbis boost gtk3 gtkglext libsdl mesa libGLU freeglut
+```
+
+Also set the environment variables to match those in the GitHub action.
 
 3. Packaging Vega Strike:
 
