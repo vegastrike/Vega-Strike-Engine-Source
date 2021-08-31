@@ -5,7 +5,7 @@
 # @usage  : sudo script/bootstrap
 # @param  : none
 #====================================
-# Copyright (C) 2020-2021 Stephen G. Tuggy <sgt@stephengtuggy.com>
+# Copyright (C) 2020-2021 Stephen G. Tuggy
 #
 # This file is part of Vega Strike.
 #
@@ -25,7 +25,7 @@
 set -e
 
 echo "------------------------------"
-echo "--- bootstrap | 2021-08-04 ---"
+echo "--- bootstrap | 2021-08-30 ---"
 echo "------------------------------"
 
 if [ -f /etc/os-release ]
