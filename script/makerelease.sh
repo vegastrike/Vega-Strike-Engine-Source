@@ -1,4 +1,4 @@
-#! /bin/bash
+#! /usr/bin/env bash
 #
 # THIS SCRIPT MUST BE RUN AS ROOT
 # This script *should* build, from the seperate vegastrike modules, a full RPM (and SRPM) based
@@ -14,10 +14,10 @@
 # directories (such as objconv, launcher and the extra boost dir -- depending on your srpm options).  And make
 # sure the data dir is also ready, by removing all non-linux files from all modules -- some of this is accounted
 # for in this script, some is not (see Removing Windows/Mac junk).  This will minimise srpm and rpm file size.
-# 
+#
 # Now, before you launch this script, make sure that the .spec files are up to date with version, release and builder,
 # and that the included documentation (man, info etc) are up to date for this version.
-# 
+#
 # Finally, make sure that you know the SRCPATH for your system.  This path should contain the directories:
 # BUILD  RPMS  SOURCES  SPECS  SRPMS
 # In RedHat for example, it is /usr/src/redhat
@@ -29,8 +29,8 @@ SRCPATHDEFAULT="/usr/src"
 RPMBUILDERDEFAULT="/usr/bin/rpm"
 
 # Now, simply run this script! :-)
-# 
-# 
+#
+#
 
 echo "Welcome to the Vegastrike Auto-Release System.  If you have prepared the directories
 as instructed in the top part of this file, then simply follow the on-screen prompts

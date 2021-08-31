@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 #====================================
 # @file   : bootstrap
 # @brief  : installs dependencies for building Vega Strike
