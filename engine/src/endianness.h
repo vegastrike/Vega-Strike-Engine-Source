@@ -5,7 +5,7 @@ double DONTUSE__NXSwapBigDoubleToLittleEndian( double x );
 
 #if defined (__HAIKU__) //For unknow reasons, Haiku don't fit into any case below
     #include <endian.h>
-#elif defined (__APPLE__) || defined (MACOSX) || defined (BSD) || defined (__FreeBSD__)
+#elif defined (BSD) || defined (__FreeBSD__)
     #include <machine/endian.h>
 #else
 
@@ -20,17 +20,24 @@ double DONTUSE__NXSwapBigDoubleToLittleEndian( double x );
     # define __BYTE_ORDER 0
     #endif
 #endif
-#if defined (__APPLE__) || defined (MACOSX)
-    #include <machine/endian.h>
-    #if __BYTE_ORDER == __BIG_ENDIAN
-    # include <machine/byte_order.h>
-    # define le32_to_cpu( x ) ( NXSwapHostLongToLittle( x ) )
-    # define le16_to_cpu( x ) ( NXSwapHostShortToLittle( x ) )
-    # define le64_to_cpu( x ) ( DONTUSE__NXSwapBigDoubleToLittleEndian( x ) )
+
+#if defined (__APPLE__)
+    #if defined (__BIG_ENDIAN__)
+        #if defined (__x86_64__)
+            #include <libkern/OSByteOrder.h>
+            #define le16_to_cpu( x ) ( (unsigned long)      OSSwapLittleToHostInt16( (uint16_t) x ) )
+            #define le32_to_cpu( x ) ( (unsigned short)     OSSwapLittleToHostInt32( (uint32_t) x ) )
+            #define le64_to_cpu( x ) ( (unsigned long long) OSSwapLittleToHostInt64( (uint64_t) x ) )
+        #else
+            #include <architecture/byte_order.h>
+            #define le16_to_cpu( x ) NXSwapLittleShortToHost( x )
+            #define le32_to_cpu( x ) NXSwapLittleLongToHost( x )
+            #define le64_to_cpu( x ) NXSwapLittleLongLongToHost( x )
+        #endif
     #else
-    # define le32_to_cpu( x ) (x)
-    # define le16_to_cpu( x ) (x)
-    # define le64_to_cpu( x ) (x)
+        #define le32_to_cpu( x ) (x)
+        #define le16_to_cpu( x ) (x)
+        #define le64_to_cpu( x ) (x)
     #endif
 #else
     #if defined (IRIX) || (defined (__SVR4) && defined (__sun ) )

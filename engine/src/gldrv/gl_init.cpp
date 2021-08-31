@@ -2,8 +2,8 @@
  * gl_init.cpp
  *
  * Copyright (C) 2001-2002 Daniel Horn
- * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike
- * contributors
+ * Copyright (C) 2020-2021 pyramid3d, Stephen G. Tuggy, and other
+ * Vega Strike contributors
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -58,7 +58,11 @@
 #ifndef NOMINMAX
 #define NOMINMAX
 #endif //tells VCC not to generate min/max macros
-#define GL_TEXTURE_CUBE_MAP_SEAMLESS_ARB 0x884F // FIXME May need to actually include the GLEW package for this to work.
+// #if defined (__APPLE__) || defined (MACOSX)
+// #include <GL/glew.h>
+// #else
+#define GL_TEXTURE_CUBE_MAP_SEAMLESS_ARB 0x884F
+// #endif
 #include <windows.h>
 #endif
 #define GL_GLEXT_PROTOTYPES 1
@@ -93,8 +97,6 @@
 #if defined (CG_SUPPORT)
 #include "cg_global.h"
 #endif
-
-#if !defined (__APPLE__)
 
 PFNGLBINDBUFFERARBPROC    glBindBufferARB_p    = 0;
 PFNGLGENBUFFERSARBPROC    glGenBuffersARB_p    = 0;
@@ -149,8 +151,6 @@ PFNGLUNIFORM4IVPROC    glUniform4iv_p    = 0;
 
 PFNGLDELETESHADERPROC  glDeleteShader_p  = 0;
 PFNGLDELETEPROGRAMPROC glDeleteProgram_p = 0;
-
-#endif /* __APPLE_PANTHER_GCC33_CLI__ */
 
 typedef void ( *(*get_gl_proc_fptr_t)(const GLubyte*) )();
 #ifdef _WIN32
