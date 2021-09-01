@@ -31,25 +31,45 @@
 # along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
 
 
-CMAKE_MINIMUM_REQUIRED(VERSION 3.5)
-SET(CMAKE_CXX_STANDARD 11)
+CMAKE_MINIMUM_REQUIRED(VERSION 3.11 FATAL_ERROR)
+
 SET(VEGASTRIKE_VERSION_MAJOR "0")
 SET(VEGASTRIKE_VERSION_MINOR "9")
 SET(VEGASTRIKE_VERSION_PATCH "0")
-# This needs to be auto-filled to the git hash of the build
-# some custom CMake code will be needed to run something like the following command:
-# $ git rev-parse --short HEAD
-SET(VEGASTRIKE_VERSION_TWEAK "0")
+# Auto-populate with the git hash of the build
+EXECUTE_PROCESS(
+    COMMAND git rev-parse --short HEAD
+    OUTPUT_VARIABLE VEGASTRIKE_VERSION_TWEAK
+    OUTPUT_STRIP_TRAILING_WHITESPACE
+)
 
 # VERSION Policy
 IF (POLICY CMP0048)
     CMAKE_POLICY (SET CMP0048 NEW)
 ENDIF (POLICY CMP0048)
 
-PROJECT(Vega_Strike VERSION "${VEGASTRIKE_VERSION_MAJOR}.${VEGASTRIKE_VERSION_MINOR}.${VEGASTRIKE_VERSION_PATCH}.${VEGASTRIKE_VERSION_TWEAK}")
+IF (POLICY CMP0074)
+    CMAKE_POLICY (SET CMP0074 NEW)
+ENDIF (POLICY CMP0074)
 
-#ADD_DEFINITIONS(-DVEGASTRIKE_VERSION_MAJOR=VEGASTRIKE_VERSION_MAJOR -DVEGASTRIKE_VERSION_MINOR=VEGASTRIKE_VERSION_MINOR -DVEGASTRIKE_VERSION_PATCH=VEGASTRIKE_VERSION_PATCH -DVEGASTRIKE_VERSION_TWEAK=VEGASTRIKE_VERSION_TWEAK)
+# Very important. Without this, CMake can't find pow() -- at least not on my Windows machine.
+IF (POLICY CMP0066)
+    CMAKE_POLICY (SET CMP0066 OLD)
+ENDIF (POLICY CMP0066)
 
+PROJECT(Vega_Strike
+    VERSION
+        "${VEGASTRIKE_VERSION_MAJOR}.${VEGASTRIKE_VERSION_MINOR}.${VEGASTRIKE_VERSION_PATCH}"   #.${VEGASTRIKE_VERSION_TWEAK}   # CMake only allows numeric version components, unfortunately.
+    LANGUAGES
+        CXX C
+)
+
+MESSAGE("== Vega Strike Version: ${VEGASTRIKE_VERSION_MAJOR}.${VEGASTRIKE_VERSION_MINOR}.${VEGASTRIKE_VERSION_PATCH}-${VEGASTRIKE_VERSION_TWEAK}")
+
+SET(CMAKE_CXX_STANDARD 11)
+SET(CMAKE_CXX_STANDARD_REQUIRED TRUE)
+SET(CMAKE_C_STANDARD 11)
+SET(CMAKE_C_STANDARD_REQUIRED TRUE)
 
 UNSET(PYTHONLIBS_FOUND)
 UNSET(Boost_FOUND)
@@ -69,6 +89,9 @@ UNSET(FFMPEG_FOUND)
 UNSET(OGRE_FOUND)
 UNSET(Boost_DIR)
 
+SET(CMAKE_INSTALL_UCRT_LIBRARIES TRUE)
+INCLUDE(InstallRequiredSystemLibraries)
+
 IF (MSVC)
     INCLUDE_DIRECTORIES(
         ${Vega_Strike_SOURCE_DIR}/src
@@ -84,6 +107,597 @@ ELSE (MSVC)
 )
 ENDIF (MSVC)
 
+# The source files used to be listed here...
+
+IF (COMMAND cmake_policy)
+    CMAKE_POLICY(SET CMP0003 NEW)
+ENDIF (COMMAND cmake_policy)
+
+IF (POLICY CMP0072)
+    CMAKE_POLICY (SET CMP0072 NEW)
+ENDIF (POLICY CMP0072)
+
+
+# Set the default build type
+IF (NOT CMAKE_BUILD_TYPE)
+    SET(CMAKE_BUILD_TYPE "RelWithDebInfo" CACHE STRING "Release, RelWithDebInfo, Debug, Profiler" FORCE )
+ENDIF (NOT CMAKE_BUILD_TYPE)
+
+IF (NOT BUILD_OPT)
+    SET(BUILD_OPT -O2 CACHE STRING "-O0, -O1, -O2, -O3, -Os, -Ofast" FORCE )
+ENDIF (NOT BUILD_OPT)
+
+# Option to turn off compiling vegastrike bin
+OPTION(DISABLE_CLIENT "Disable building the vegastrike bin" OFF )
+
+# Provide boolean options for enabling various cpu optimizations.
+OPTION(CPUAMD_k8  "Enable AMD K8 optimizations (Athlon through athlon64)" OFF )
+OPTION(CPUAMD_k9  "Enable AMD K9 (sse3) optimizations (Athlon64 AM3) " OFF )
+OPTION(CPUAMD_k10  "Enable AMD K10 optimizations (Athlon2)" OFF )
+OPTION(CPUAMD_vishera  "Enable AMD Vishera optimizations" OFF )
+OPTION(CPUINTEL_p4 "Enable Intel P4 optimizations (1st gen P4's)" OFF )
+OPTION(CPUINTEL_prescott  "Enable Intel P4 (sse3) optimizations" OFF )
+OPTION(CPUINTEL_nocona "Enable Intel P4 (64bit) optimizations" OFF )
+OPTION(CPUINTEL_core2 "Enable Intel Core2 optimizations" OFF )
+OPTION(CPUINTEL_native "Enable host-specific optimizations for this machine" OFF )
+
+SET(DATADIR "" CACHE STRING "Default vegastrike data directory")
+
+# Hide our temporary variable and initialize it to empty
+SET(CPU_OPTS  )
+SET(DEFINES "-DNV_CUBE_MAP -DBOOST_PYTHON_NO_PY_SIGNATURES -DBOOST_ALL_DYN_LINK ")
+MARK_AS_ADVANCED( CPU_OPTS )
+MARK_AS_ADVANCED( DEFINES )
+SET(CPU_SMP "1" CACHE STRING "Number of CPU's in system")
+
+# Depending on the boolean chosen above, set CPU_OPTS to the correct cpu opts
+IF (CPUAMD_k8)
+    SET(CPU_OPTS "-mtune=athlon64 -mfpmath=sse -msse2 -mmmx -m3dnow -ftree-vectorize -ffast-math -fassociative-math -funsafe-math-optimizations -fprefetch-loop-arrays ")
+ELSEIF (CPUAMD_K9)
+    SET(CPU_OPTS "-mtune=k8-sse3 -mfpmath=sse -msse3 -mmmx -m3dnow -ftree-vectorize -ffast-math -fassociative-math -funsafe-math-optimizations -funroll-loops ")
+ELSEIF (CPUINTEL_p4)
+    SET(CPU_OPTS "-mtune=pentium4 -mfpmath=sse -msse2 -mmmx -ftree-vectorize -ffast-math -fassociative-math -funsafe-math-optimizations -funroll-loops ")
+ELSEIF (CPUINTEL_prescott)
+    SET(CPU_OPTS "-mtune=prescott -mfpmath=sse -msse3 -mmmx -ftree-vectorize -ffast-math -fassociative-math -funsafe-math-optimizations -funroll-loops " )
+ELSEIF (CPUINTEL_nocona)
+    SET(CPU_OPTS "-mtune=nocona -mfpmath=sse -msse3 -mmmx -ftree-vectorize -ffast-math -fassociative-math -funsafe-math-optimizations -funroll-loops ")
+ELSEIF (CPUINTEL_core2)
+    SET(CPU_OPTS "-mtune=core2 -mfpmath=sse -msse3 -mmmx -ftree-vectorize -ffast-math -fassociative-math -funsafe-math-optimizations -funroll-loops ")
+ELSEIF (CPUINTEL_native)
+    SET(CPU_OPTS "-mtune=native -march=native -mfpmath=sse -msse3 -mmmx -ftree-vectorize -ffast-math -fassociative-math -funsafe-math-optimizations -funroll-loops ")
+ELSEIF (CPUAMD_vishera)
+    SET(CPU_OPTS "-march=bdver2 -mfpmath=both -mmmx -msse4a -msse4.2 -maes -mpclmul -mfsgsbase -mrdrnd -mf16c -mfma -mfma4 -m3dnow -mxop -mlwp -mtbm -mavx2 -mvzeroupper -msahf -mcx16 -funsafe-loop-optimizations ")
+ENDIF (CPUAMD_k8)
+
+IF (CPU_SMP GREATER 1)
+    SET(CPU_OPTS " ${CPU_OPTS} -ftree-parallelize-loops=${CPU_SMP} ")
+ENDIF (CPU_SMP GREATER 1)
+
+IF (DATADIR)
+    SET(DEFINES "${DEFINES} -DDATA_DIR='\"${DATADIR}\"'")
+ENDIF (DATADIR)
+
+# Gather info about Linux distro and release (if applicable) for later use down below.
+IF (CMAKE_SYSTEM_NAME STREQUAL Linux)
+    EXECUTE_PROCESS(
+        COMMAND sh -c "cat /etc/os-release | grep ^ID= | sed 's/^ID=//' | tr -d '\"\n'"
+        OUTPUT_VARIABLE LINUX_ID)
+    EXECUTE_PROCESS(
+        COMMAND sh -c "cat /etc/os-release | grep ^VERSION_CODENAME= | sed 's/^VERSION_CODENAME=//' | tr -d '\"\n'"
+        OUTPUT_VARIABLE LINUX_CODENAME)
+    EXECUTE_PROCESS(
+        COMMAND sh -c "cat /etc/os-release | grep ^VERSION_ID= | sed 's/^VERSION_ID=//' | tr -d '\"\n'"
+        OUTPUT_VARIABLE LINUX_VERSION_ID)
+ENDIF (CMAKE_SYSTEM_NAME STREQUAL Linux)
+
+# On some Ubuntu versions and derivatives, a bug exists whereby enabling
+# PIE compilation (Position Independent Executables) results in the
+# `file` utility incorrectly recognising the compiled vegastrike-engine binary
+# as a shared library instead of a position independent shared executable
+# object.
+#
+# The effect of the bug is that vegastrike-engine can still be started from the
+# command line but that it will not be recognised as an executable by GUI
+# file managers such as Nautilus and Dolphin.
+#
+# To avoid this scenario, turn off this flag by default and let packagers
+# on other distributions turn this on if their OS is able to correctly deal
+# with Position Independent Executables.
+
+# For more info, see:
+# - https://bugs.launchpad.net/ubuntu/+source/file/+bug/1747711
+# - https://github.com/vegastrike/Vega-Strike-Engine-Source/issues/94
+#
+#UNSET(CMAKE_POSITION_INDEPENDENT_CODE)
+OPTION(ENABLE_PIE "Enable Position Independent Executables/Shared Libraries (NOT RECOMMENDED on Ubuntu/Mint)" OFF)
+IF (ENABLE_PIE)
+  MESSAGE("!! Enabling Position Independent Executables/Shared Libraries (NOT RECOMMENDED on Ubuntu/Mint) !!")
+  #SET(CMAKE_POSITION_INDEPENDENT_CODE ON)
+  ADD_COMPILE_OPTIONS("-fpie")
+  LINK_LIBRARIES("-pie")
+ELSE (ENABLE_PIE)
+  MESSAGE("++ Disabling Position Independent Executables/Shared Libraries (Recommended on Ubuntu/Mint)")
+  IF (NOT MSVC)
+    ADD_COMPILE_OPTIONS("-fno-pie")
+    LINK_LIBRARIES("-no-pie")
+  ENDIF (NOT MSVC)
+ENDIF (ENABLE_PIE)
+
+IF (MSVC)
+    SET(COMPILER_SPECIFIC_FLAGS "/FI\"${Vega_Strike_BINARY_DIR}\"/config.h  -D__x86_64__ ")
+    SET(COMPILER_SPECIFIC_DEBUG_FLAGS "/Z7 ") # also used for release-with-debug -- can change later
+    SET(COMPILER_SPECIFIC_PROFILER_FLAGS "/Z7 /GL ") # not tested -- requires additional linker flag specialization for profiling run ( /FASTGENPROFILE) and profile use ( /USEPROFILE)
+    SET(COMPILER_SPECIFIC_RELEASE_FLAGS " ")
+    SET(TOOLCHAIN_SPECIFIC_LINK_FLAGS "/DEBUG:FULL ")
+ELSE (MSVC)
+    SET(COMPILER_SPECIFIC_FLAGS "-include config.h -pipe -Wall -std=c++11 -fvisibility=hidden ")
+    SET(COMPILER_SPECIFIC_DEBUG_FLAGS "-Og -g3 ")
+    SET(COMPILER_SPECIFIC_PROFILER_FLAGS "-Og -pg -g2 ")
+    SET(COMPILER_SPECIFIC_RELEASE_FLAGS " ")
+    SET(TOOLCHAIN_SPECIFIC_LINK_FLAGS "-Bsymbolic ")
+ENDIF (MSVC)
+
+
+
+# Debug target block.
+SET(CMAKE_CXX_FLAGS_DEBUG "${COMPILER_SPECIFIC_FLAGS} ${COMPILER_SPECIFIC_DEBUG_FLAGS} ${BUILD_OPT} ${CPU_OPTS} ${DEFINES} " CACHE STRING
+    "Flags used by the C++ compiler during debug builds."
+    FORCE
+)
+SET(CMAKE_C_FLAGS_DEBUG "${COMPILER_SPECIFIC_FLAGS} ${COMPILER_SPECIFIC_DEBUG_FLAGS} ${BUILD_OPT} ${CPU_OPTS} ${DEFINES} -Wno-unused-function -Wno-unused-variable" CACHE STRING
+    "Flags used by the C compiler during debug builds."
+    FORCE
+)
+SET(CMAKE_EXE_LINKER_FLAGS_DEBUG
+    "${TOOLCHAIN_SPECIFIC_LINK_FLAGS}" CACHE STRING
+    "Flags used for linking binaries during debug builds."
+    FORCE
+)
+
+MARK_AS_ADVANCED(
+    CMAKE_CXX_FLAGS_DEBUG
+    CMAKE_C_FLAGS_DEBUG
+)
+IF ("${CMAKE_BUILD_TYPE}" STREQUAL "Debug")
+    MARK_AS_ADVANCED( CLEAR CMAKE_CXX_FLAGS_DEBUG )
+ELSE ("${CMAKE_BUILD_TYPE}" STREQUAL "Debug")
+    MARK_AS_ADVANCED( FORCE CMAKE_CXX_FLAGS_DEBUG )
+ENDIF ("${CMAKE_BUILD_TYPE}" STREQUAL "Debug")
+
+#MESSAGE("** Compile [${MSVC}][${CMAKE_BUILD_TYPE}] options [${CMAKE_CXX_FLAGS}] [${CMAKE_CXX_FLAGS_DEBUG}] [${BUILD_OPT}] [${CPU_OPTS}] [${DEFINES}]")
+
+# Release Target block
+SET(CMAKE_CXX_FLAGS_RELEASE  " ${COMPILER_SPECIFIC_FLAGS} ${COMPILER_SPECIFIC_RELEASE_FLAGS} ${BUILD_OPT} ${CPU_OPTS} ${DEFINES}" CACHE STRING
+    "Flags used by the C++ compiler during release builds."
+    FORCE
+)
+SET(CMAKE_C_FLAGS_RELEASE " ${COMPILER_SPECIFIC_FLAGS} ${COMPILER_SPECIFIC_RELEASE_FLAGS} ${BUILD_OPT} ${CPU_OPTS} ${DEFINES} -Wno-unused-function -Wno-unused-variable" CACHE STRING
+    "Flags used by the C compiler during release builds."
+    FORCE
+)
+SET(CMAKE_EXE_LINKER_FLAGS_RELEASE "${TOOLCHAIN_SPECIFIC_LINK_FLAGS}" CACHE STRING "Release linker flags"
+    FORCE
+)
+MARK_AS_ADVANCED(
+    CMAKE_C_FLAGS_RELEASE
+    CMAKE_CXX_FLAGS_RELEASE
+    CMAKE_EXE_LINKER_FLAGS_RELEASE
+)
+IF ("${CMAKE_BUILD_TYPE}" STREQUAL "Release")
+    MARK_AS_ADVANCED( CLEAR CMAKE_CXX_FLAGS_RELEASE )
+ELSE ("${CMAKE_BUILD_TYPE}" STREQUAL "Release")
+    MARK_AS_ADVANCED( FORCE CMAKE_CXX_FLAGS_RELEASE )
+ENDIF ("${CMAKE_BUILD_TYPE}" STREQUAL "Release")
+
+
+# RelWithDebInfo Target block
+SET(CMAKE_CXX_FLAGS_RELWITHDEBINFO  " ${COMPILER_SPECIFIC_FLAGS} ${COMPILER_SPECIFIC_DEBUG_FLAGS} ${BUILD_OPT} ${CPU_OPTS} ${DEFINES}" CACHE STRING
+    "Flags used by the C++ compiler during release-with-debug-info builds."
+    FORCE
+)
+SET(CMAKE_C_FLAGS_RELWITHDEBINFO "  ${COMPILER_SPECIFIC_FLAGS} ${COMPILER_SPECIFIC_DEBUG_FLAGS} ${BUILD_OPT} ${CPU_OPTS} ${DEFINES} -Wno-unused-function -Wno-unused-variable" CACHE STRING
+    "Flags used by the C compiler during release-with-debug-info builds."
+    FORCE
+)
+SET(CMAKE_EXE_LINKER_FLAGS_RELWITHDEBINFO "${TOOLCHAIN_SPECIFIC_LINK_FLAGS}" CACHE STRING "RelWithDebInfo linker flags"
+    FORCE
+)
+MARK_AS_ADVANCED(
+    CMAKE_C_FLAGS_RELWITHDEBINFO
+    CMAKE_CXX_FLAGS_RELWITHDEBINFO
+    CMAKE_EXE_LINKER_FLAGS_RELWITHDEBINFO
+)
+IF ("${CMAKE_BUILD_TYPE}" STREQUAL "RelWithDebInfo")
+    MARK_AS_ADVANCED( CLEAR CMAKE_CXX_FLAGS_RELWITHDEBINFO )
+ELSE ("${CMAKE_BUILD_TYPE}" STREQUAL "RelWithDebInfo")
+    MARK_AS_ADVANCED( FORCE CMAKE_CXX_FLAGS_RELWITHDEBINFO )
+ENDIF ("${CMAKE_BUILD_TYPE}" STREQUAL "RelWithDebInfo")
+
+
+# Profiler Target block
+SET(CMAKE_CXX_FLAGS_PROFILER " ${COMPILER_SPECIFIC_FLAGS} ${COMPILER_SPECIFIC_PROFILER_FLAGS} ${BUILD_OPT} ${CPU_OPTS} ${DEFINES} -Wno-unused-function -Wno-unused-variable" CACHE STRING
+    "Flags used by the C++ compiler during profiler builds."
+    FORCE
+)
+SET(CMAKE_C_FLAGS_PROFILER " ${COMPILER_SPECIFIC_FLAGS} ${COMPILER_SPECIFIC_PROFILER_FLAGS} ${BUILD_OPT} ${CPU_OPTS} ${DEFINES} -Wno-unused-function -Wno-unused-variable" CACHE STRING
+    "Flags used by the C compiler during profiler builds."
+    FORCE
+)
+SET(CMAKE_EXE_LINKER_FLAGS_PROFILER
+    "${TOOLCHAIN_SPECIFIC_LINK_FLAGS}" CACHE STRING
+    "Flags used for linking binaries during profiler builds."
+    FORCE
+)
+MARK_AS_ADVANCED(
+    CMAKE_CXX_FLAGS_PROFILER
+    CMAKE_C_FLAGS_PROFILER
+    CMAKE_EXE_LINKER_FLAGS_PROFILER
+    CMAKE_SHARED_LINKER_FLAGS_PROFILER
+)
+IF ("${CMAKE_BUILD_TYPE}" STREQUAL "Profiler")
+    MARK_AS_ADVANCED( CLEAR CMAKE_CXX_FLAGS_PROFILER )
+ELSE ("${CMAKE_BUILD_TYPE}" STREQUAL "Profiler")
+    MARK_AS_ADVANCED( FORCE CMAKE_CXX_FLAGS_PROFILER )
+ENDIF ("${CMAKE_BUILD_TYPE}" STREQUAL "Profiler")
+
+INCLUDE(CheckIncludeFile)
+INCLUDE(CheckIncludeFileCXX)
+INCLUDE(CheckTypeSize)
+CHECK_TYPE_SIZE("void*" SIZEOF_VOID_P BUILTIN_TYPES_ONLY)
+# Let cmake find our in-tree modules
+SET(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${Vega_Strike_SOURCE_DIR})
+
+# No more Python 2 -- stephengtuggy 2021-05-30
+## Python 3 has a SASL compatibility issue which causes an error
+## on some installations that prefer Python 3
+# We want at least Python 3.4, but we prefer newer versions
+SET(Python_ADDITIONAL_VERSIONS 3.9 3.8 3.7 3.6 3.5 3.4)
+UNSET(PYTHON_INCLUDE_DIR CACHE)
+UNSET(PYTHON_LIBRARY CACHE)
+# The python version we want is set via Python_ADDITIONAL_VERSIONS
+MESSAGE("++ Python release(s) searched for : ${Python_ADDITIONAL_VERSIONS}")
+FIND_PACKAGE(PythonLibs REQUIRED)
+MESSAGE("++ Python library : ${PYTHON_LIBRARY} (${PYTHONLIBS_VERSION_STRING})")
+MESSAGE("++ Python include dir : ${PYTHON_INCLUDE_DIR}")
+IF (PYTHONLIBS_FOUND OR PYTHON_LIBRARIES AND PYTHON_INCLUDE_DIRS)
+    SET(TST_INCLUDES ${PYTHON_INCLUDE_DIRS})
+    SET(TST_LIBS ${PYTHON_LIBRARIES})
+    SET(HAVE_PYTHON 1)
+ELSE (PYTHONLIBS_FOUND OR PYTHON_LIBRARIES AND PYTHON_INCLUDE_DIRS)
+    MESSAGE(FATAL_ERROR "Can't find python")
+ENDIF (PYTHONLIBS_FOUND OR PYTHON_LIBRARIES AND PYTHON_INCLUDE_DIRS)
+
+# Find Boost with boost_python library
+OPTION(USE_SYSTEM_BOOST "Use system boost" ON)
+IF (USE_SYSTEM_BOOST)
+    MESSAGE("++ Using System Boost")
+    FIND_PACKAGE(Boost)
+    IF (Boost_FOUND)
+
+        # VERSION_EQUAL / VERSION_GREATER requires a version in the form X.Y.Z
+        # Until CMake v3.15, Boost_VERSION is in the form as written in boost/version.hpp (e.g. 106700)
+        # Thus, build the version from parts, which should work across all supported CMake versions
+        SET(Boost_DERIVED_VERSION "${Boost_MAJOR_VERSION}.${Boost_MINOR_VERSION}.${Boost_SUBMINOR_VERSION}")
+        MESSAGE("++ Found System Boost version : ${Boost_DERIVED_VERSION}")
+
+        # With boost version 1.67 and above, python components are specified with a version suffix
+        # (`python27`, `python38`) instead of their invocation name (`python`, `python3`)
+        IF (Boost_DERIVED_VERSION VERSION_EQUAL 1.67.0)
+            SET(Boost_1_67_Or_Later_Result TRUE)
+        ELSEIF (Boost_DERIVED_VERSION VERSION_GREATER 1.67.0)
+            SET(Boost_1_67_Or_Later_Result TRUE)
+        ELSE (Boost_DERIVED_VERSION VERSION_EQUAL 1.67.0)
+            SET(Boost_1_67_Or_Later_Result FALSE)
+        ENDIF (Boost_DERIVED_VERSION VERSION_EQUAL 1.67.0)
+        STRING(REPLACE "." ";" PYTHONLIBS_VERSION_LIST ${PYTHONLIBS_VERSION_STRING})
+        LIST(GET PYTHONLIBS_VERSION_LIST 0 PYTHON_VERSION_MAJOR)
+        LIST(GET PYTHONLIBS_VERSION_LIST 1 PYTHON_VERSION_MINOR)
+        MESSAGE("-- Boost_1_67_Or_Later_Result: ${Boost_1_67_Or_Later_Result}")
+        IF (Boost_1_67_Or_Later_Result)
+            SET(BOOST_PYTHON_COMPONENT "python${PYTHON_VERSION_MAJOR}${PYTHON_VERSION_MINOR}")
+        ELSE (Boost_1_67_Or_Later_Result)
+            SET(BOOST_PYTHON_COMPONENT "python3")
+        ENDIF (Boost_1_67_Or_Later_Result)
+        UNSET(Boost_1_67_Or_Later_Result)
+
+        UNSET(Boost_${BOOST_PYTHON_COMPONENT}_FOUND)
+        MESSAGE("++ Looking for System Boost::python")
+        FIND_PACKAGE(Boost COMPONENTS ${BOOST_PYTHON_COMPONENT} log log_setup date_time system filesystem thread chrono atomic REQUIRED)
+        IF (Boost_python3_FOUND)
+            MESSAGE("++ Found System Boost::python3 : ${Boost_PYTHON3_LIBRARY}")
+        ELSEIF (Boost_${BOOST_PYTHON_COMPONENT}_FOUND)
+            MESSAGE("++ Found System Boost::python")
+        ENDIF (Boost_python3_FOUND)
+
+        SET(BOOST_PYTHON_NO_PY_SIGNATURES 1)
+        SET(TST_INCLUDES ${TST_INCLUDES} ${Boost_INCLUDE_DIRS})
+        SET(TST_LIBS ${TST_LIBS} ${Boost_LIBRARIES})
+        INCLUDE_DIRECTORIES(${TST_INCLUDES})
+    ELSE (Boost_FOUND)
+        SET(USE_SYSTEM_BOOST OFF)
+    ENDIF (Boost_FOUND)
+ENDIF (USE_SYSTEM_BOOST)
+
+IF (NOT USE_SYSTEM_BOOST)
+    MESSAGE("++ Using Internal Boost")
+    # This is just to cleanup advanced variable viewing, since they're not used anyway
+    UNSET(Boost_INCLUDE_DIRS)
+    UNSET(Boost_LIBRARIES)
+    UNSET(Boost_INCLUDE_DIR)
+    UNSET(Boost_LIBRARY_DIRS)
+    SET(Boost_DIR ../ext/)
+    SET(BOOST_PYTHON_NO_PY_SIGNATURES 1)
+    SET(TST_INCLUDES ${TST_INCLUDES} ${Vega_Strike_SOURCE_DIR}/${Boost_DIR})
+    MESSAGE("++ Using Internal Boost::python3")
+    SET(TST_LIBS ${TST_LIBS} boost_python3)
+    INCLUDE_DIRECTORIES(${TST_INCLUDES})
+    ADD_SUBDIRECTORY(${Boost_DIR} build)
+    MESSAGE("++ boost dir: ${Boost_DIR}")
+    #IF (NOT DISABLE_CLIENT)
+    #  ADD_DEPENDENCIES(vegastrike-engine boost_python)
+    #ENDIF (NOT DISABLE_CLIENT)
+    #IF (NOT DISABLE_SERVER)
+    #  ADD_DEPENDENCIES(vegaserver boost_python)
+    #ENDIF (NOT DISABLE_SERVER)
+ENDIF (NOT USE_SYSTEM_BOOST)
+
+IF (NOT DISABLE_CLIENT) ##########
+
+#Find GL
+FIND_PACKAGE(OpenGL REQUIRED)
+IF (OPENGL_FOUND AND OPENGL_GLU_FOUND)
+    SET(TST_INCLUDES ${TST_INCLUDES} ${OPENL_INCLUDE_DIR})
+    SET(TST_LIBS ${TST_LIBS} ${OPENGL_LIBRARIES})
+    MESSAGE("++ OpenGL found : ${OPENGL_LIBRARIES}")
+ELSE (OPENGL_FOUND AND OPENGL_GLU_FOUND)
+    MESSAGE("!! Why you no have GL?")
+ENDIF (OPENGL_FOUND AND OPENGL_GLU_FOUND)
+
+# Workaround two oversights in FindGLUT (when trying to use freeglut on MacOS):
+#
+# 1. Use of OPENGL_LIBRARY_DIR
+#    This was added to FindOpenGL in June 2002, then removed 3 months later. In that time it had
+#    made its way into use within FindGLUT, where (oddly) it was used as a possible
+#    location of GLUT's headers but not its libraries. From here, it was never removed.
+#
+# 2. Missing path component
+#    FindGLUT looks for glut.h in various locations when (on MacOS) it should be looking for
+#    GLUT/glut.h. We use the latter in our headers when building on MacOS, so the include path
+#    FindGLUT returns isn't actually of any use, but if FindGLUT can't find glut.h the build
+#    ends up using Apple's deprecated Framework (which defeats the purpose of using freeglut).
+#
+# If we're not on MacOS and using freeglut this line is not required, but as OPENGL_LIBRARY_DIR
+# is not used by anything else the following does no harm either.
+SET(OPENGL_LIBRARY_DIR "${OPENGL_INCLUDE_DIR}/GLUT")
+
+#Find GLUT
+FIND_PACKAGE(GLUT REQUIRED)
+IF (GLUT_FOUND)
+    SET(TST_INCLUDES ${TST_INCLUDES} ${GLUT_INCLUDE_DIR})
+    SET(TST_LIBS ${TST_LIBS} ${GLUT_LIBRARIES})
+    MESSAGE("++ GLUT found : ${GLUT_LIBRARIES}")
+ELSE (GLUT_FOUND)
+    MESSAGE("!! I can't build this, missing GLUT")
+ENDIF (GLUT_FOUND)
+
+UNSET(OPENGL_LIBRARY_DIR)
+
+#Find OpenAL
+FIND_PACKAGE(OpenAL REQUIRED)
+IF (OPENAL_FOUND)
+    MESSAGE("++ Found OpenAL")
+    SET(TST_INCLUDES ${TST_INCLUDES} ${OPENAL_INCLUDE_DIR})
+    SET(TST_LIBS ${TST_LIBS} ${OPENAL_LIBRARY})
+    SET(HAVE_AL 1)
+ELSE (OPENAL_FOUND)
+    MESSAGE("!! We aint got no sound")
+ENDIF (OPENAL_FOUND)
+
+IF (NOT BEOS)
+    #Find SDL
+    FIND_PACKAGE(SDL)
+    IF (SDL_FOUND)
+        SET(TST_INCLUDES ${TST_INCLUDES} ${SDL_INCLUDE_DIR})
+        SET(TST_LIBS ${TST_LIBS} ${SDL_LIBRARY})
+        MESSAGE("++ SDL Found")
+        SET(HAVE_SDL 1)
+        SET(SDL_WINDOWING 1)
+    ELSE (SDL_FOUND)
+        MESSAGE("!! How will we render to OpenGL without SDL?")
+    ENDIF (SDL_FOUND)
+ENDIF (NOT BEOS)
+
+#find Vorbis
+FIND_PACKAGE(Vorbis REQUIRED)
+IF (Vorbis_FOUND)
+    SET(TST_INCLUDES ${TST_INCLUDES} ${Vorbis_INCLUDE_DIRS})
+    SET(TST_LIBS ${TST_LIBS} ${Vorbis_LIBRARIES})
+    SET(HAVE_OGG 1)
+ELSE (Vorbis_FOUND)
+    MESSAGE("!! Can't find Vorbis libs")
+ENDIF (Vorbis_FOUND)
+
+#Find JPEG
+FIND_PACKAGE(JPEG REQUIRED)
+IF (JPEG_FOUND)
+    SET(TST_INCLUDES ${TST_INCLUDES} ${JPEG_INCLUDE_DIR})
+    SET(TST_LIBS ${TST_LIBS} ${JPEG_LIBRARIES})
+ELSE (JPEG_FOUND)
+    MESSAGE("!! How are we gonna open jpegs?")
+ENDIF (JPEG_FOUND)
+
+#Find PNG
+FIND_PACKAGE(PNG REQUIRED)
+IF (PNG_FOUND)
+    SET(TEST_INCLUDES ${TST_INCLUDES} ${PNG_INCLUDE_DIRS})
+    SET(TST_LIBS ${TST_LIBS} ${PNG_LIBRARIES})
+ELSE (PNG_FOUND)
+    MESSAGE("!! Can't find PNG lib")
+ENDIF (PNG_FOUND)
+
+
+
+ENDIF(NOT DISABLE_CLIENT) ##########
+
+#find Zlib
+FIND_PACKAGE(ZLIB REQUIRED)
+IF (ZLIB_FOUND)
+    SET(TST_INCLUDES ${TST_INCLUDES} ${ZLIB_INCLUDE_DIR})
+    SET(TST_LIBS ${TST_LIBS} ${ZLIB_LIBRARIES})
+ELSE (ZLIB_FOUND)
+    MESSAGE("!! For the love of god, no zlib here")
+ENDIF (ZLIB_FOUND)
+
+#find Expat
+FIND_PACKAGE(EXPAT REQUIRED)
+IF (EXPAT_FOUND)
+    SET(TST_INCLUDES ${TST_INCLUDES} ${EXPAT_INCLUDE_DIRS})
+    SET(TST_LIBS ${TST_LIBS} ${EXPAT_LIBRARIES})
+ELSE (EXPAT_FOUND)
+    MESSAGE("!! We can't find expat for XML crap")
+ENDIF (EXPAT_FOUND)
+
+#find Math
+include(CheckFunctionExists)
+
+if(NOT POW_FUNCTION_EXISTS AND NOT NEED_LINKING_AGAINST_LIBM)
+  CHECK_FUNCTION_EXISTS(pow POW_FUNCTION_EXISTS)
+  if(NOT POW_FUNCTION_EXISTS)
+      unset(POW_FUNCTION_EXISTS CACHE)
+      list(APPEND CMAKE_REQUIRED_LIBRARIES m)
+      CHECK_FUNCTION_EXISTS(pow POW_FUNCTION_EXISTS)
+      if(POW_FUNCTION_EXISTS)
+          set(NEED_LINKING_AGAINST_LIBM True CACHE BOOL "" FORCE)
+      else()
+          message(FATAL_ERROR "Failed making the pow() function available")
+      endif()
+  endif()
+endif()
+
+# INCLUDE(CheckFunctionExists)
+# CHECK_FUNCTION_EXISTS(pow POW_FUNCTION_EXISTS) # MSVC, etc. build libm into libc
+# IF (NOT POW_FUNCTION_EXISTS)
+#     FIND_PACKAGE(MATH REQUIRED)
+#     IF (MATH_FOUND)
+#         SET(TST_INCLUDES ${TST_INCLUDES} ${MATH_INCLUDE_DIRS})
+#         SET(TST_LIBS ${TST_LIBS} ${MATH_LIBRARIES})
+#     ELSE (MATH_FOUND)
+#         MESSAGE("!! Without math we have nothing")
+#     ENDIF (MATH_FOUND)
+# ENDIF (NOT POW_FUNCTION_EXISTS)
+
+#Find FFMpeg
+OPTION(DISABLE_FFMPEG "Disable ffmpeg codecs" ON)
+IF (NOT DISABLE_FFMPEG)
+    FIND_PACKAGE(FFMPEG)
+    IF (FFMPEG_FOUND)
+        SET(TST_INCLUDES ${TST_INCLUDES} ${FFMPEG_INCLUDE_DIRS})
+        SET(TST_LIBS ${TST_LIBS} ${FFMPEG_LIBRARIES})
+        ADD_DEFINITIONS(${FFMPEG_DEFINITIONS})
+        SET(HAVE_FFMPEG 1 )
+        MESSAGE("++ FFmpeg found.")
+        IF (swscale1_FOUND)
+            MESSAGE("++ FFmpeg's libswscale found.")
+        ELSE (swscale1_FOUND)
+            MESSAGE("-- FFMpeg's libswscale not found... depending on your ffmpeg version, VS might not build.")
+        ENDIF (swscale1_FOUND)
+    ELSE (FFMPEG_FOUND)
+        MESSAGE("-- FFMPEG Not Found")
+    ENDIF (FFMPEG_FOUND)
+ELSE (NOT DISABLE_FFMPEG)
+    MESSAGE("-- FFMPEG disabled")
+ENDIF (NOT DISABLE_FFMPEG)
+
+#Find Ogre
+# current OGRE 1.12 is not compatible
+OPTION(DISABLE_OGRE "Disable Ogre-mesh support in mesh tool" ON)
+IF (NOT DISABLE_OGRE)
+    FIND_PACKAGE(OGRE)
+    IF (OGRE_FOUND)
+        SET(TST_INCLUDES ${TST_INCLUDES} ${OGRE_INCLUDE_DIR})
+        SET(TST_LIBS ${TST_LIBS} ${OGRE_LIBRARY})
+        ADD_DEFINITIONS(${OGRE_DEFINITIONS})
+        SET(HAVE_OGRE 1)
+        MESSAGE("++ Found Ogre: ${OGRE_VERSION}")
+    ELSE (OGRE_FOUND)
+        MESSAGE("-- Ogre Not Found: compiling without")
+    ENDIF (OGRE_FOUND)
+ELSE (NOT DISABLE_OGRE)
+    MESSAGE("-- Ogre disabled")
+ENDIF (NOT DISABLE_OGRE)
+
+IF (NOT BEOS)
+    FIND_LIBRARY(UTIL_LIB util)
+ELSEIF (WIN32)
+	# Don't need it?
+ELSE (NOT BEOS)
+    FIND_LIBRARY(UTIL_LIB network)
+ENDIF (NOT BEOS)
+
+IF (NOT WIN32)
+    SET(TST_LIBS ${TST_LIBS} ${UTIL_LIB})
+ENDIF (NOT WIN32)
+
+# Still need to add CEGUI and OGRE find packages
+
+# Multiplayer networking option
+OPTION(USE_NET_THREAD_POSIX "Enable Posix net threads" OFF)
+IF (NOT USE_NET_THREAD_POSIX)
+    SET(USE_NET_THREAD_NONE 1)
+ENDIF (NOT USE_NET_THREAD_POSIX)
+
+
+#config.h generation
+INCLUDE(CheckFunctionExists)
+INCLUDE(CheckSymbolExists)
+CHECK_INCLUDE_FILE(wchar.h HAVE_WCHAR_H)
+CHECK_INCLUDE_FILE(float.h HAVE_FLOAT_H)
+CHECK_INCLUDE_FILE(wctype.h HAVE_WCTYPE_H)
+CHECK_INCLUDE_FILE(inttypes.h HAVE_INTTYPES_H)
+CHECK_INCLUDE_FILE(zlib.h HAVE_ZLIB_H)
+CHECK_INCLUDE_FILE(math.h HAVE_MATH_H)
+CHECK_INCLUDE_FILE_CXX(tr1/unordered_map HAVE_TR1_UNORDERED_MAP)
+
+CHECK_FUNCTION_EXISTS(gettimeofday HAVE_GETTIMEOFDAY)
+IF (HAVE_MATH_H)
+    CHECK_FUNCTION_EXISTS(isnan HAVE_ISNAN)
+    IF (NOT HAVE_ISNAN)
+        CHECK_FUNCTION_EXISTS(_isnan HAVE__ISNAN)
+    ENDIF (NOT HAVE_ISNAN)
+    CHECK_FUNCTION_EXISTS(finite HAVE_FINITE)
+    IF (NOT HAVE_FINITE)
+        CHECK_FUNCTION_EXISTS(_finite HAVE__finite)
+    ENDIF (NOT HAVE_FINITE)
+ENDIF (HAVE_MATH_H)
+
+CHECK_INCLUDE_FILE(sys/stat.h HAVE_STAT_H)
+IF (HAVE_STAT_H)
+    CHECK_FUNCTION_EXISTS(lstat HAVE_LSTAT)
+ENDIF (HAVE_STAT_H)
+
+CHECK_SYMBOL_EXISTS(GLX_ARB_get_proc_address GL/glx.h HAVE_GLXGETPROCADDRESSARB)
+
+IF (UNIX)
+    IF (CMAKE_SYSTEM_NAME STREQUAL "Linux")
+        SET(HOSTOS "LINUX")
+        SET(_GNU_SOURCE 1)
+    ELSE (CMAKE_SYSTEM_NAME STREQUAL "Linux")
+        SET(HOSTOS "BSD")
+    ENDIF (CMAKE_SYSTEM_NAME STREQUAL "Linux")
+ELSEIF (WIN32)
+    SET(HOSTOS "WIN32")
+ELSEIF (BEOS)
+    SET(HOSTOS "HAIKU")
+ELSE (UNIX)
+    SET(HOSTOS "APPLE")
+ENDIF (UNIX)
+
+CONFIGURE_FILE(${Vega_Strike_SOURCE_DIR}/cmake-config.h.in ${Vega_Strike_BINARY_DIR}/config.h)
+
+#end config.h generation
+#SET(CMAKE_CXX_FLAGS "-include config.h;-pipe;"${CMAKE_CXX_FLAGS})
+
+# Now the source files are listed starting here!
 SET(LIBCONFIG
     src/configuration/configuration.cpp
     src/configuration/game_config.cpp
@@ -216,6 +830,11 @@ ADD_LIBRARY(vegastrike-OPcollide
     src/cmd/collide2/OPC_VolumeCollider.cpp
     src/cmd/collide2/CSopcodecollider.cpp
 )
+
+TARGET_COMPILE_FEATURES(vegastrike-OPcollide PUBLIC cxx_std_11)
+if (NEED_LINKING_AGAINST_LIBM)
+    target_link_libraries(vegastrike-OPcollide m)
+endif()
 
 SET(LIBCMD_SOURCES
     src/cmd/alphacurve.cpp
@@ -481,6 +1100,11 @@ ADD_LIBRARY(vegastrike-engine_com
     ${LIBGFXGENERIC_SOURCES}
 )
 
+TARGET_COMPILE_FEATURES(vegastrike-engine_com PUBLIC cxx_std_11)
+if (NEED_LINKING_AGAINST_LIBM)
+    target_link_libraries(vegastrike-engine_com m)
+endif()
+
 SET(VEGASTRIKE_SOURCES
     ${LIBGUI_SOURCES}
     ${LIBNETCLIENT_SOURCES}
@@ -551,585 +1175,18 @@ SET(VEGASTRIKE_SOURCES
 )
 
 
-IF (COMMAND cmake_policy)
-    CMAKE_POLICY(SET CMP0003 NEW)
-ENDIF (COMMAND cmake_policy)
-
-IF (POLICY CMP0072)
-    CMAKE_POLICY (SET CMP0072 NEW)
-ENDIF (POLICY CMP0072)
-
-
-# Set the default build type
-IF (NOT CMAKE_BUILD_TYPE)
-    SET(CMAKE_BUILD_TYPE "RelWithDebInfo" CACHE STRING "Release, RelWithDebInfo, Debug, Profiler" FORCE )
-ENDIF (NOT CMAKE_BUILD_TYPE)
-
-IF (NOT BUILD_OPT)
-    SET(BUILD_OPT -O2 CACHE STRING "-O0, -O1, -O2, -O3, -Os, -Ofast" FORCE )
-ENDIF (NOT BUILD_OPT)
-
-
-# Provide boolean options for enabling various cpu optimizations.
-OPTION(CPUAMD_k8  "Enable AMD K8 optimizations (Athlon through athlon64)" OFF )
-OPTION(CPUAMD_k9  "Enable AMD K9 (sse3) optimizations (Athlon64 AM3) " OFF )
-OPTION(CPUAMD_k10  "Enable AMD K10 optimizations (Athlon2)" OFF )
-OPTION(CPUAMD_vishera  "Enable AMD Vishera optimizations" OFF )
-OPTION(CPUINTEL_p4 "Enable Intel P4 optimizations (1st gen P4's)" OFF )
-OPTION(CPUINTEL_prescott  "Enable Intel P4 (sse3) optimizations" OFF )
-OPTION(CPUINTEL_nocona "Enable Intel P4 (64bit) optimizations" OFF )
-OPTION(CPUINTEL_core2 "Enable Intel Core2 optimizations" OFF )
-OPTION(CPUINTEL_native "Enable host-specific optimizations for this machine" OFF )
-
-SET(DATADIR "" CACHE STRING "Default vegastrike data directory")
-
-# Hide our temporary variable and initialize it to empty
-SET(CPU_OPTS  )
-SET(DEFINES "-DNV_CUBE_MAP -DBOOST_PYTHON_NO_PY_SIGNATURES -DBOOST_ALL_DYN_LINK ")
-MARK_AS_ADVANCED( CPU_OPTS )
-MARK_AS_ADVANCED( DEFINES )
-SET(CPU_SMP "1" CACHE STRING "Number of CPU's in system")
-
-# Depending on the boolean chosen above, set CPU_OPTS to the correct cpu opts
-IF (CPUAMD_k8)
-    SET(CPU_OPTS "-mtune=athlon64 -mfpmath=sse -msse2 -mmmx -m3dnow -ftree-vectorize -ffast-math -fassociative-math -funsafe-math-optimizations -fprefetch-loop-arrays ")
-ELSEIF (CPUAMD_K9)
-    SET(CPU_OPTS "-mtune=k8-sse3 -mfpmath=sse -msse3 -mmmx -m3dnow -ftree-vectorize -ffast-math -fassociative-math -funsafe-math-optimizations -funroll-loops ")
-ELSEIF (CPUINTEL_p4)
-    SET(CPU_OPTS "-mtune=pentium4 -mfpmath=sse -msse2 -mmmx -ftree-vectorize -ffast-math -fassociative-math -funsafe-math-optimizations -funroll-loops ")
-ELSEIF (CPUINTEL_prescott)
-    SET(CPU_OPTS "-mtune=prescott -mfpmath=sse -msse3 -mmmx -ftree-vectorize -ffast-math -fassociative-math -funsafe-math-optimizations -funroll-loops " )
-ELSEIF (CPUINTEL_nocona)
-    SET(CPU_OPTS "-mtune=nocona -mfpmath=sse -msse3 -mmmx -ftree-vectorize -ffast-math -fassociative-math -funsafe-math-optimizations -funroll-loops ")
-ELSEIF (CPUINTEL_core2)
-    SET(CPU_OPTS "-mtune=core2 -mfpmath=sse -msse3 -mmmx -ftree-vectorize -ffast-math -fassociative-math -funsafe-math-optimizations -funroll-loops ")
-ELSEIF (CPUINTEL_native)
-    SET(CPU_OPTS "-mtune=native -march=native -mfpmath=sse -msse3 -mmmx -ftree-vectorize -ffast-math -fassociative-math -funsafe-math-optimizations -funroll-loops ")
-ELSEIF (CPUAMD_vishera)
-    SET(CPU_OPTS "-march=bdver2 -mfpmath=both -mmmx -msse4a -msse4.2 -maes -mpclmul -mfsgsbase -mrdrnd -mf16c -mfma -mfma4 -m3dnow -mxop -mlwp -mtbm -mavx2 -mvzeroupper -msahf -mcx16 -funsafe-loop-optimizations ")
-ENDIF (CPUAMD_k8)
-
-IF (CPU_SMP GREATER 1)
-    SET(CPU_OPTS " ${CPU_OPTS} -ftree-parallelize-loops=${CPU_SMP} ")
-ENDIF (CPU_SMP GREATER 1)
-
-IF (DATADIR)
-    SET(DEFINES "${DEFINES} -DDATA_DIR='\"${DATADIR}\"'")
-ENDIF (DATADIR)
-
-# Gather info about Linux distro and release (if applicable) for later use down below.
-IF (CMAKE_SYSTEM_NAME STREQUAL Linux)
-    EXECUTE_PROCESS(
-        COMMAND sh -c "cat /etc/os-release | grep ^ID= | sed 's/^ID=//' | tr -d '\"\n'"
-        OUTPUT_VARIABLE LINUX_ID)
-    EXECUTE_PROCESS(
-        COMMAND sh -c "cat /etc/os-release | grep ^VERSION_CODENAME= | sed 's/^VERSION_CODENAME=//' | tr -d '\"\n'"
-        OUTPUT_VARIABLE LINUX_CODENAME)
-    EXECUTE_PROCESS(
-        COMMAND sh -c "cat /etc/os-release | grep ^VERSION_ID= | sed 's/^VERSION_ID=//' | tr -d '\"\n'"
-        OUTPUT_VARIABLE LINUX_VERSION_ID)
-ENDIF (CMAKE_SYSTEM_NAME STREQUAL Linux)
-
-# On some Ubuntu versions and derivatives, a bug exists whereby enabling
-# PIE compilation (Position Independent Executables) results in the
-# `file` utility incorrectly recognising the compiled vegastrike-engine binary
-# as a shared library instead of a position independent shared executable
-# object.
-#
-# The effect of the bug is that vegastrike-engine can still be started from the
-# command line but that it will not be recognised as an executable by GUI
-# file managers such as Nautilus and Dolphin.
-#
-# To avoid this scenario, turn off this flag by default and let packagers
-# on other distributions turn this on if their OS is able to correctly deal
-# with Position Independent Executables.
-
-# For more info, see:
-# - https://bugs.launchpad.net/ubuntu/+source/file/+bug/1747711
-# - https://github.com/vegastrike/Vega-Strike-Engine-Source/issues/94
-#
-#UNSET(CMAKE_POSITION_INDEPENDENT_CODE)
-OPTION(ENABLE_PIE "Enable Position Independent Executables/Shared Libraries (NOT RECOMMENDED on Ubuntu/Mint)" OFF)
-IF (ENABLE_PIE)
-  MESSAGE("!! Enabling Position Independent Executables/Shared Libraries (NOT RECOMMENDED on Ubuntu/Mint) !!")
-  #SET(CMAKE_POSITION_INDEPENDENT_CODE ON)
-  ADD_COMPILE_OPTIONS("-fpie")
-  LINK_LIBRARIES("-pie")
-ELSE (ENABLE_PIE)
-  MESSAGE("++ Disabling Position Independent Executables/Shared Libraries (Recommended on Ubuntu/Mint)")
-  IF (NOT MSVC)
-    ADD_COMPILE_OPTIONS("-fno-pie")
-    LINK_LIBRARIES("-no-pie")
-  ENDIF (NOT MSVC)
-ENDIF (ENABLE_PIE)
-
-IF (MSVC)
-    SET(COMPILER_SPECIFIC_FLAGS "/FI\"${Vega_Strike_BINARY_DIR}\"/config.h  -D__x86_64__ ")
-    SET(COMPILER_SPECIFIC_DEBUG_FLAGS "/Z7 ") # also used for release-with-debug -- can change later
-    SET(COMPILER_SPECIFIC_PROFILER_FLAGS "/Z7 /GL ") # not tested -- requires additional linker flag specialization for profiling run ( /FASTGENPROFILE) and profile use ( /USEPROFILE)
-    SET(COMPILER_SPECIFIC_RELEASE_FLAGS " ")
-    SET(TOOLCHAIN_SPECIFIC_LINK_FLAGS "/DEBUG:FULL ")
-ELSE (MSVC)
-    SET(COMPILER_SPECIFIC_FLAGS "-include config.h -pipe -Wall -std=c++11 -fvisibility=hidden ")
-    SET(COMPILER_SPECIFIC_DEBUG_FLAGS "-Og -g3 ")
-    SET(COMPILER_SPECIFIC_PROFILER_FLAGS "-Og -pg -g2 ")
-    SET(COMPILER_SPECIFIC_RELEASE_FLAGS " ")
-    SET(TOOLCHAIN_SPECIFIC_LINK_FLAGS "-Bsymbolic ")
-ENDIF (MSVC)
-
-
-
-# Debug target block.
-SET(CMAKE_CXX_FLAGS_DEBUG "${COMPILER_SPECIFIC_FLAGS} ${COMPILER_SPECIFIC_DEBUG_FLAGS} ${BUILD_OPT} ${CPU_OPTS} ${DEFINES} " CACHE STRING
-    "Flags used by the C++ compiler during debug builds."
-    FORCE
-)
-SET(CMAKE_C_FLAGS_DEBUG "${COMPILER_SPECIFIC_FLAGS} ${COMPILER_SPECIFIC_DEBUG_FLAGS} ${BUILD_OPT} ${CPU_OPTS} ${DEFINES} -Wno-unused-function -Wno-unused-variable" CACHE STRING
-    "Flags used by the C compiler during debug builds."
-    FORCE
-)
-SET(CMAKE_EXE_LINKER_FLAGS_DEBUG
-    "${TOOLCHAIN_SPECIFIC_LINK_FLAGS}" CACHE STRING
-    "Flags used for linking binaries during debug builds."
-    FORCE
-)
-
-MARK_AS_ADVANCED(
-    CMAKE_CXX_FLAGS_DEBUG
-    CMAKE_C_FLAGS_DEBUG
-)
-IF ("${CMAKE_BUILD_TYPE}" STREQUAL "Debug")
-    MARK_AS_ADVANCED( CLEAR CMAKE_CXX_FLAGS_DEBUG )
-ELSE ("${CMAKE_BUILD_TYPE}" STREQUAL "Debug")
-    MARK_AS_ADVANCED( FORCE CMAKE_CXX_FLAGS_DEBUG )
-ENDIF ("${CMAKE_BUILD_TYPE}" STREQUAL "Debug")
-
-#MESSAGE("** Compile [${MSVC}][${CMAKE_BUILD_TYPE}] options [${CMAKE_CXX_FLAGS}] [${CMAKE_CXX_FLAGS_DEBUG}] [${BUILD_OPT}] [${CPU_OPTS}] [${DEFINES}]")
-
-# Release Target block
-SET(CMAKE_CXX_FLAGS_RELEASE  " ${COMPILER_SPECIFIC_FLAGS} ${COMPILER_SPECIFIC_RELEASE_FLAGS} ${BUILD_OPT} ${CPU_OPTS} ${DEFINES}" CACHE STRING
-    "Flags used by the C++ compiler during release builds."
-    FORCE
-)
-SET(CMAKE_C_FLAGS_RELEASE " ${COMPILER_SPECIFIC_FLAGS} ${COMPILER_SPECIFIC_RELEASE_FLAGS} ${BUILD_OPT} ${CPU_OPTS} ${DEFINES} -Wno-unused-function -Wno-unused-variable" CACHE STRING
-    "Flags used by the C compiler during release builds."
-    FORCE
-)
-SET(CMAKE_EXE_LINKER_FLAGS_RELEASE "${TOOLCHAIN_SPECIFIC_LINK_FLAGS}" CACHE STRING "Release linker flags"
-    FORCE
-)
-MARK_AS_ADVANCED(
-    CMAKE_C_FLAGS_RELEASE
-    CMAKE_CXX_FLAGS_RELEASE
-    CMAKE_EXE_LINKER_FLAGS_RELEASE
-)
-IF ("${CMAKE_BUILD_TYPE}" STREQUAL "Release")
-    MARK_AS_ADVANCED( CLEAR CMAKE_CXX_FLAGS_RELEASE )
-ELSE ("${CMAKE_BUILD_TYPE}" STREQUAL "Release")
-    MARK_AS_ADVANCED( FORCE CMAKE_CXX_FLAGS_RELEASE )
-ENDIF ("${CMAKE_BUILD_TYPE}" STREQUAL "Release")
-
-
-# RelWithDebInfo Target block
-SET(CMAKE_CXX_FLAGS_RELWITHDEBINFO  " ${COMPILER_SPECIFIC_FLAGS} ${COMPILER_SPECIFIC_DEBUG_FLAGS} ${BUILD_OPT} ${CPU_OPTS} ${DEFINES}" CACHE STRING
-    "Flags used by the C++ compiler during release-with-debug-info builds."
-    FORCE
-)
-SET(CMAKE_C_FLAGS_RELWITHDEBINFO "  ${COMPILER_SPECIFIC_FLAGS} ${COMPILER_SPECIFIC_DEBUG_FLAGS} ${BUILD_OPT} ${CPU_OPTS} ${DEFINES} -Wno-unused-function -Wno-unused-variable" CACHE STRING
-    "Flags used by the C compiler during release-with-debug-info builds."
-    FORCE
-)
-SET(CMAKE_EXE_LINKER_FLAGS_RELWITHDEBINFO "${TOOLCHAIN_SPECIFIC_LINK_FLAGS}" CACHE STRING "RelWithDebInfo linker flags"
-    FORCE
-)
-MARK_AS_ADVANCED(
-    CMAKE_C_FLAGS_RELWITHDEBINFO
-    CMAKE_CXX_FLAGS_RELWITHDEBINFO
-    CMAKE_EXE_LINKER_FLAGS_RELWITHDEBINFO
-)
-IF ("${CMAKE_BUILD_TYPE}" STREQUAL "RelWithDebInfo")
-    MARK_AS_ADVANCED( CLEAR CMAKE_CXX_FLAGS_RELWITHDEBINFO )
-ELSE ("${CMAKE_BUILD_TYPE}" STREQUAL "RelWithDebInfo")
-    MARK_AS_ADVANCED( FORCE CMAKE_CXX_FLAGS_RELWITHDEBINFO )
-ENDIF ("${CMAKE_BUILD_TYPE}" STREQUAL "RelWithDebInfo")
-
-
-# Profiler Target block
-SET(CMAKE_CXX_FLAGS_PROFILER " ${COMPILER_SPECIFIC_FLAGS} ${COMPILER_SPECIFIC_PROFILER_FLAGS} ${BUILD_OPT} ${CPU_OPTS} ${DEFINES} -Wno-unused-function -Wno-unused-variable" CACHE STRING
-    "Flags used by the C++ compiler during profiler builds."
-    FORCE
-)
-SET(CMAKE_C_FLAGS_PROFILER " ${COMPILER_SPECIFIC_FLAGS} ${COMPILER_SPECIFIC_PROFILER_FLAGS} ${BUILD_OPT} ${CPU_OPTS} ${DEFINES} -Wno-unused-function -Wno-unused-variable" CACHE STRING
-    "Flags used by the C compiler during profiler builds."
-    FORCE
-)
-SET(CMAKE_EXE_LINKER_FLAGS_PROFILER
-    "${TOOLCHAIN_SPECIFIC_LINK_FLAGS}" CACHE STRING
-    "Flags used for linking binaries during profiler builds."
-    FORCE
-)
-MARK_AS_ADVANCED(
-    CMAKE_CXX_FLAGS_PROFILER
-    CMAKE_C_FLAGS_PROFILER
-    CMAKE_EXE_LINKER_FLAGS_PROFILER
-    CMAKE_SHARED_LINKER_FLAGS_PROFILER
-)
-IF ("${CMAKE_BUILD_TYPE}" STREQUAL "Profiler")
-    MARK_AS_ADVANCED( CLEAR CMAKE_CXX_FLAGS_PROFILER )
-ELSE ("${CMAKE_BUILD_TYPE}" STREQUAL "Profiler")
-    MARK_AS_ADVANCED( FORCE CMAKE_CXX_FLAGS_PROFILER )
-ENDIF ("${CMAKE_BUILD_TYPE}" STREQUAL "Profiler")
-
-# Turn off compiling vegastrike bin
-OPTION(DISABLE_CLIENT "Disable building the vegastrike bin" OFF )
-IF (NOT DISABLE_CLIENT)
-    ADD_EXECUTABLE(vegastrike-engine ${VEGASTRIKE_SOURCES})
-ENDIF (NOT DISABLE_CLIENT)
-
-INCLUDE(CheckIncludeFile)
-INCLUDE(CheckIncludeFileCXX)
-INCLUDE(CheckTypeSize)
-CHECK_TYPE_SIZE("void*" SIZEOF_VOID_P BUILTIN_TYPES_ONLY)
-# Let cmake find our in-tree modules
-SET(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${Vega_Strike_SOURCE_DIR})
-
-# No more Python 2 -- stephengtuggy 2021-05-30
-## Python 3 has a SASL compatibility issue which causes an error
-## on some installations that prefer Python 3
-# We want at least Python 3.4, but we prefer newer versions
-SET(Python_ADDITIONAL_VERSIONS 3.9 3.8 3.7 3.6 3.5 3.4)
-UNSET(PYTHON_INCLUDE_DIR CACHE)
-UNSET(PYTHON_LIBRARY CACHE)
-# The python version we want is set via Python_ADDITIONAL_VERSIONS
-MESSAGE("++ Python release(s) searched for : ${Python_ADDITIONAL_VERSIONS}")
-FIND_PACKAGE(PythonLibs REQUIRED)
-MESSAGE("++ Python library : ${PYTHON_LIBRARY} (${PYTHONLIBS_VERSION_STRING})")
-MESSAGE("++ Python include dir : ${PYTHON_INCLUDE_DIR}")
-IF (PYTHONLIBS_FOUND OR PYTHON_LIBRARIES AND PYTHON_INCLUDE_DIRS)
-    SET(TST_INCLUDES ${PYTHON_INCLUDE_DIRS})
-    SET(TST_LIBS ${PYTHON_LIBRARIES})
-    SET(HAVE_PYTHON 1)
-ELSE (PYTHONLIBS_FOUND OR PYTHON_LIBRARIES AND PYTHON_INCLUDE_DIRS)
-    MESSAGE(FATAL_ERROR "Can't find python")
-ENDIF (PYTHONLIBS_FOUND OR PYTHON_LIBRARIES AND PYTHON_INCLUDE_DIRS)
-
-# Find Boost with boost_python library
-OPTION(USE_SYSTEM_BOOST "Use system boost" ON)
-IF (USE_SYSTEM_BOOST)
-    MESSAGE("++ Using System Boost")
-    FIND_PACKAGE(Boost)
-    IF (Boost_FOUND)
-
-        # VERSION_EQUAL / VERSION_GREATER requires a version in the form X.Y.Z
-        # Until CMake v3.15, Boost_VERSION is in the form as written in boost/version.hpp (e.g. 106700)
-        # Thus, build the version from parts, which should work across all supported CMake versions
-        SET(Boost_DERIVED_VERSION "${Boost_MAJOR_VERSION}.${Boost_MINOR_VERSION}.${Boost_SUBMINOR_VERSION}")
-        MESSAGE("++ Found System Boost version : ${Boost_DERIVED_VERSION}")
-
-        # With boost version 1.67 and above, python components are specified with a version suffix
-        # (`python27`, `python38`) instead of their invocation name (`python`, `python3`)
-        IF (Boost_DERIVED_VERSION VERSION_EQUAL 1.67.0)
-            SET(Boost_1_67_Or_Later_Result TRUE)
-        ELSEIF (Boost_DERIVED_VERSION VERSION_GREATER 1.67.0)
-            SET(Boost_1_67_Or_Later_Result TRUE)
-        ELSE (Boost_DERIVED_VERSION VERSION_EQUAL 1.67.0)
-            SET(Boost_1_67_Or_Later_Result FALSE)
-        ENDIF (Boost_DERIVED_VERSION VERSION_EQUAL 1.67.0)
-        STRING(REPLACE "." ";" PYTHONLIBS_VERSION_LIST ${PYTHONLIBS_VERSION_STRING})
-        LIST(GET PYTHONLIBS_VERSION_LIST 0 PYTHON_VERSION_MAJOR)
-        LIST(GET PYTHONLIBS_VERSION_LIST 1 PYTHON_VERSION_MINOR)
-        MESSAGE("-- Boost_1_67_Or_Later_Result: ${Boost_1_67_Or_Later_Result}")
-        IF (Boost_1_67_Or_Later_Result)
-            SET(BOOST_PYTHON_COMPONENT "python${PYTHON_VERSION_MAJOR}${PYTHON_VERSION_MINOR}")
-        ELSE (Boost_1_67_Or_Later_Result)
-            SET(BOOST_PYTHON_COMPONENT "python3")
-        ENDIF (Boost_1_67_Or_Later_Result)
-        UNSET(Boost_1_67_Or_Later_Result)
-
-        UNSET(Boost_${BOOST_PYTHON_COMPONENT}_FOUND)
-        MESSAGE("++ Looking for System Boost::python")
-        FIND_PACKAGE(Boost COMPONENTS ${BOOST_PYTHON_COMPONENT} log log_setup date_time system filesystem thread chrono atomic REQUIRED)
-        IF (Boost_python3_FOUND)
-            MESSAGE("++ Found System Boost::python3 : ${Boost_PYTHON3_LIBRARY}")
-        ELSEIF (Boost_${BOOST_PYTHON_COMPONENT}_FOUND)
-            MESSAGE("++ Found System Boost::python")
-        ENDIF (Boost_python3_FOUND)
-
-        SET(BOOST_PYTHON_NO_PY_SIGNATURES 1)
-        SET(TST_INCLUDES ${TST_INCLUDES} ${Boost_INCLUDE_DIRS})
-        SET(TST_LIBS ${TST_LIBS} ${Boost_LIBRARIES})
-        INCLUDE_DIRECTORIES(${TST_INCLUDES})
-    ELSE (Boost_FOUND)
-        SET(USE_SYSTEM_BOOST OFF)
-    ENDIF (Boost_FOUND)
-ENDIF (USE_SYSTEM_BOOST)
-
-IF (NOT USE_SYSTEM_BOOST)
-    MESSAGE("++ Using Internal Boost")
-    # This is just to cleanup advanced variable viewing, since they're not used anyway
-    UNSET(Boost_INCLUDE_DIRS)
-    UNSET(Boost_LIBRARIES)
-    UNSET(Boost_INCLUDE_DIR)
-    UNSET(Boost_LIBRARY_DIRS)
-    SET(Boost_DIR ../ext/)
-    SET(BOOST_PYTHON_NO_PY_SIGNATURES 1)
-    SET(TST_INCLUDES ${TST_INCLUDES} ${Vega_Strike_SOURCE_DIR}/${Boost_DIR})
-    MESSAGE("++ Using Internal Boost::python3")
-    SET(TST_LIBS ${TST_LIBS} boost_python3)
-    INCLUDE_DIRECTORIES(${TST_INCLUDES})
-    ADD_SUBDIRECTORY(${Boost_DIR} build)
-    MESSAGE("++ boost dir: ${Boost_DIR}")
-    #IF (NOT DISABLE_CLIENT)
-    #  ADD_DEPENDENCIES(vegastrike-engine boost_python)
-    #ENDIF (NOT DISABLE_CLIENT)
-    #IF (NOT DISABLE_SERVER)
-    #  ADD_DEPENDENCIES(vegaserver boost_python)
-    #ENDIF (NOT DISABLE_SERVER)
-ENDIF (NOT USE_SYSTEM_BOOST)
-
-IF (NOT DISABLE_CLIENT) ##########
-
-#Find GL
-FIND_PACKAGE(OpenGL REQUIRED)
-IF (OPENGL_FOUND AND OPENGL_GLU_FOUND)
-    SET(TST_INCLUDES ${TST_INCLUDES} ${OPENL_INCLUDE_DIR})
-    SET(TST_LIBS ${TST_LIBS} ${OPENGL_LIBRARIES})
-    MESSAGE("++ OpenGL found : ${OPENGL_LIBRARIES}")
-ELSE (OPENGL_FOUND AND OPENGL_GLU_FOUND)
-    MESSAGE("!! Why you no have GL?")
-ENDIF (OPENGL_FOUND AND OPENGL_GLU_FOUND)
-
-# Workaround two oversights in FindGLUT (when trying to use freeglut on MacOS):
-#
-# 1. Use of OPENGL_LIBRARY_DIR
-#    This was added to FindOpenGL in June 2002, then removed 3 months later. In that time it had
-#    made its way into use within FindGLUT, where (oddly) it was used as a possible
-#    location of GLUT's headers but not its libraries. From here, it was never removed.
-#
-# 2. Missing path component
-#    FindGLUT looks for glut.h in various locations when (on MacOS) it should be looking for
-#    GLUT/glut.h. We use the latter in our headers when building on MacOS, so the include path
-#    FindGLUT returns isn't actually of any use, but if FindGLUT can't find glut.h the build
-#    ends up using Apple's deprecated Framework (which defeats the purpose of using freeglut).
-#
-# If we're not on MacOS and using freeglut this line is not required, but as OPENGL_LIBRARY_DIR
-# is not used by anything else the following does no harm either.
-SET(OPENGL_LIBRARY_DIR "${OPENGL_INCLUDE_DIR}/GLUT")
-
-#Find GLUT
-FIND_PACKAGE(GLUT REQUIRED)
-IF (GLUT_FOUND)
-    SET(TST_INCLUDES ${TST_INCLUDES} ${GLUT_INCLUDE_DIR})
-    SET(TST_LIBS ${TST_LIBS} ${GLUT_LIBRARIES})
-    MESSAGE("++ GLUT found : ${GLUT_LIBRARIES}")
-ELSE (GLUT_FOUND)
-    MESSAGE("!! I can't build this, missing GLUT")
-ENDIF (GLUT_FOUND)
-
-UNSET(OPENGL_LIBRARY_DIR)
-
-#Find OpenAL
-FIND_PACKAGE(OpenAL REQUIRED)
-IF (OPENAL_FOUND)
-    MESSAGE("++ Found OpenAL")
-    SET(TST_INCLUDES ${TST_INCLUDES} ${OPENAL_INCLUDE_DIR})
-    SET(TST_LIBS ${TST_LIBS} ${OPENAL_LIBRARY})
-    SET(HAVE_AL 1)
-ELSE (OPENAL_FOUND)
-    MESSAGE("!! We aint got no sound")
-ENDIF (OPENAL_FOUND)
-
-IF (NOT BEOS)
-    #Find SDL
-    FIND_PACKAGE(SDL)
-    IF (SDL_FOUND)
-        SET(TST_INCLUDES ${TST_INCLUDES} ${SDL_INCLUDE_DIR})
-        SET(TST_LIBS ${TST_LIBS} ${SDL_LIBRARY})
-        MESSAGE("++ SDL Found")
-        SET(HAVE_SDL 1)
-        SET(SDL_WINDOWING 1)
-    ELSE (SDL_FOUND)
-        MESSAGE("!! How will we render to OpenGL without SDL?")
-    ENDIF (SDL_FOUND)
-ENDIF (NOT BEOS)
-
-#find Vorbis
-FIND_PACKAGE(Vorbis REQUIRED)
-IF (Vorbis_FOUND)
-    SET(TST_INCLUDES ${TST_INCLUDES} ${Vorbis_INCLUDE_DIRS})
-    SET(TST_LIBS ${TST_LIBS} ${Vorbis_LIBRARIES})
-    SET(HAVE_OGG 1)
-ELSE (Vorbis_FOUND)
-    MESSAGE("!! Can't find Vorbis libs")
-ENDIF (Vorbis_FOUND)
-
-#Find JPEG
-FIND_PACKAGE(JPEG REQUIRED)
-IF (JPEG_FOUND)
-    SET(TST_INCLUDES ${TST_INCLUDES} ${JPEG_INCLUDE_DIR})
-    SET(TST_LIBS ${TST_LIBS} ${JPEG_LIBRARIES})
-ELSE (JPEG_FOUND)
-    MESSAGE("!! How are we gonna open jpegs?")
-ENDIF (JPEG_FOUND)
-
-#Find PNG
-FIND_PACKAGE(PNG REQUIRED)
-IF (PNG_FOUND)
-    SET(TEST_INCLUDES ${TST_INCLUDES} ${PNG_INCLUDE_DIRS})
-    SET(TST_LIBS ${TST_LIBS} ${PNG_LIBRARIES})
-ELSE (PNG_FOUND)
-    MESSAGE("!! Can't find PNG lib")
-ENDIF (PNG_FOUND)
-
-
-
-ENDIF(NOT DISABLE_CLIENT) ##########
-
-#find Zlib
-FIND_PACKAGE(ZLIB REQUIRED)
-IF (ZLIB_FOUND)
-    SET(TST_INCLUDES ${TST_INCLUDES} ${ZLIB_INCLUDE_DIR})
-    SET(TST_LIBS ${TST_LIBS} ${ZLIB_LIBRARIES})
-ELSE (ZLIB_FOUND)
-    MESSAGE("!! For the love of god, no zlib here")
-ENDIF (ZLIB_FOUND)
-
-#find Expat
-FIND_PACKAGE(EXPAT REQUIRED)
-IF (EXPAT_FOUND)
-    SET(TST_INCLUDES ${TST_INCLUDES} ${EXPAT_INCLUDE_DIRS})
-    SET(TST_LIBS ${TST_LIBS} ${EXPAT_LIBRARIES})
-ELSE (EXPAT_FOUND)
-    MESSAGE("!! We can't find expat for XML crap")
-ENDIF (EXPAT_FOUND)
-
-#find Math
-INCLUDE(CheckFunctionExists)
-CHECK_FUNCTION_EXISTS(pow POW_FUNCTION_EXISTS) # MSVC, etc. build libm into libc
-IF (NOT POW_FUNCTION_EXISTS)
-    FIND_PACKAGE(MATH REQUIRED)
-    IF (MATH_FOUND)
-        SET(TST_INCLUDES ${TST_INCLUDES} ${MATH_INCLUDE_DIRS})
-        SET(TST_LIBS ${TST_LIBS} ${MATH_LIBRARIES})
-    ELSE (MATH_FOUND)
-        MESSAGE("!! Without math we have nothing")
-    ENDIF (MATH_FOUND)
-ENDIF (NOT POW_FUNCTION_EXISTS)
-
-#Find FFMpeg
-OPTION(DISABLE_FFMPEG "Disable ffmpeg codecs" ON)
-IF (NOT DISABLE_FFMPEG)
-    FIND_PACKAGE(FFMPEG)
-    IF (FFMPEG_FOUND)
-        SET(TST_INCLUDES ${TST_INCLUDES} ${FFMPEG_INCLUDE_DIRS})
-        SET(TST_LIBS ${TST_LIBS} ${FFMPEG_LIBRARIES})
-        ADD_DEFINITIONS(${FFMPEG_DEFINITIONS})
-        SET(HAVE_FFMPEG 1 )
-        MESSAGE("++ FFmpeg found.")
-        IF (swscale1_FOUND)
-            MESSAGE("++ FFmpeg's libswscale found.")
-        ELSE (swscale1_FOUND)
-            MESSAGE("-- FFMpeg's libswscale not found... depending on your ffmpeg version, VS might not build.")
-        ENDIF (swscale1_FOUND)
-    ELSE (FFMPEG_FOUND)
-        MESSAGE("-- FFMPEG Not Found")
-    ENDIF (FFMPEG_FOUND)
-ELSE (NOT DISABLE_FFMPEG)
-    MESSAGE("-- FFMPEG disabled")
-ENDIF (NOT DISABLE_FFMPEG)
-
-#Find Ogre
-# current OGRE 1.12 is not compatible
-OPTION(DISABLE_OGRE "Disable Ogre-mesh support in mesh tool" ON)
-IF (NOT DISABLE_OGRE)
-    FIND_PACKAGE(OGRE)
-    IF (OGRE_FOUND)
-        SET(TST_INCLUDES ${TST_INCLUDES} ${OGRE_INCLUDE_DIR})
-        SET(TST_LIBS ${TST_LIBS} ${OGRE_LIBRARY})
-        ADD_DEFINITIONS(${OGRE_DEFINITIONS})
-        SET(HAVE_OGRE 1)
-        MESSAGE("++ Found Ogre: ${OGRE_VERSION}")
-    ELSE (OGRE_FOUND)
-        MESSAGE("-- Ogre Not Found: compiling without")
-    ENDIF (OGRE_FOUND)
-ELSE (NOT DISABLE_OGRE)
-    MESSAGE("-- Ogre disabled")
-ENDIF (NOT DISABLE_OGRE)
-
-IF (NOT BEOS)
-    FIND_LIBRARY(UTIL_LIB util)
-ELSEIF (WIN32)
-	# Don't need it?
-ELSE (NOT BEOS)
-    FIND_LIBRARY(UTIL_LIB network)
-ENDIF (NOT BEOS)
-
-IF (NOT WIN32)
-    SET(TST_LIBS ${TST_LIBS} ${UTIL_LIB})
-ENDIF (NOT WIN32)
-
-# Still need to add CEGUI and OGRE find packages
-
-# Multiplayer networking option
-OPTION(USE_NET_THREAD_POSIX "Enable Posix net threads" OFF)
-IF (NOT USE_NET_THREAD_POSIX)
-    SET(USE_NET_THREAD_NONE 1)
-ENDIF (NOT USE_NET_THREAD_POSIX)
-
-
-#config.h generation
-INCLUDE(CheckFunctionExists)
-INCLUDE(CheckSymbolExists)
-CHECK_INCLUDE_FILE(wchar.h HAVE_WCHAR_H)
-CHECK_INCLUDE_FILE(float.h HAVE_FLOAT_H)
-CHECK_INCLUDE_FILE(wctype.h HAVE_WCTYPE_H)
-CHECK_INCLUDE_FILE(inttypes.h HAVE_INTTYPES_H)
-CHECK_INCLUDE_FILE(zlib.h HAVE_ZLIB_H)
-CHECK_INCLUDE_FILE(math.h HAVE_MATH_H)
-CHECK_INCLUDE_FILE_CXX(tr1/unordered_map HAVE_TR1_UNORDERED_MAP)
-
-CHECK_FUNCTION_EXISTS(gettimeofday HAVE_GETTIMEOFDAY)
-IF (HAVE_MATH_H)
-    CHECK_FUNCTION_EXISTS(isnan HAVE_ISNAN)
-    IF (NOT HAVE_ISNAN)
-        CHECK_FUNCTION_EXISTS(_isnan HAVE__ISNAN)
-    ENDIF (NOT HAVE_ISNAN)
-    CHECK_FUNCTION_EXISTS(finite HAVE_FINITE)
-    IF (NOT HAVE_FINITE)
-        CHECK_FUNCTION_EXISTS(_finite HAVE__finite)
-    ENDIF (NOT HAVE_FINITE)
-ENDIF (HAVE_MATH_H)
-
-CHECK_INCLUDE_FILE(sys/stat.h HAVE_STAT_H)
-IF (HAVE_STAT_H)
-    CHECK_FUNCTION_EXISTS(lstat HAVE_LSTAT)
-ENDIF (HAVE_STAT_H)
-
-CHECK_SYMBOL_EXISTS(GLX_ARB_get_proc_address GL/glx.h HAVE_GLXGETPROCADDRESSARB)
-
-IF (UNIX)
-    IF (CMAKE_SYSTEM_NAME STREQUAL "Linux")
-        SET(HOSTOS "LINUX")
-        SET(_GNU_SOURCE 1)
-    ELSE (CMAKE_SYSTEM_NAME STREQUAL "Linux")
-        SET(HOSTOS "BSD")
-    ENDIF (CMAKE_SYSTEM_NAME STREQUAL "Linux")
-ELSEIF (WIN32)
-    SET(HOSTOS "WIN32")
-ELSEIF (BEOS)
-    SET(HOSTOS "HAIKU")
-ELSE (UNIX)
-    SET(HOSTOS "APPLE")
-ENDIF (UNIX)
-
-CONFIGURE_FILE(${Vega_Strike_SOURCE_DIR}/cmake-config.h.in ${Vega_Strike_BINARY_DIR}/config.h)
-
-#end config.h generation
-#SET(CMAKE_CXX_FLAGS "-include config.h;-pipe;"${CMAKE_CXX_FLAGS})
-
 #Setup shared lib and include listings for vegastrike-engine.
 SET(TST_LIBS vegastrike-engine_com vegastrike-OPcollide ${TST_LIBS})
 INCLUDE_DIRECTORIES(${TST_INCLUDES})
+
+IF (NOT DISABLE_CLIENT)
+    ADD_EXECUTABLE(vegastrike-engine ${VEGASTRIKE_SOURCES})
+
+    TARGET_COMPILE_FEATURES(vegastrike-engine PUBLIC cxx_std_11)
+    if (NEED_LINKING_AGAINST_LIBM)
+        target_link_libraries(vegastrike-engine m)
+    endif()
+ENDIF (NOT DISABLE_CLIENT)
 
 TARGET_LINK_LIBRARIES(vegastrike-engine ${TST_LIBS})
 IF (MSVC)
@@ -1222,6 +1279,9 @@ ENDIF (WIN32)
 
 ADD_SUBDIRECTORY("../doc" "./doc")
 
+# As per https://braintrekking.wordpress.com/2013/04/27/dll-hell-how-to-include-microsoft-redistributable-runtime-libraries-in-your-cmakecpack-project/
+INSTALL(FILES ${CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS} DESTINATION bin COMPONENT Libraries)
+
 SET(CPACK_PACKAGE_NAME "Vega-Strike")
 SET(CPACK_PACKAGE_DESCRIPTION_SUMMARY "3D OpenGL spaceflight simulator")
 SET(CPACK_PACKAGE_VENDOR "Vega Strike")
@@ -1237,7 +1297,7 @@ SET(CPACK_CONTACT "maintainers@vega-strike.org")
 IF (DEFINED ENV{TAG_NAME})
     SET(VEGA_STRIKE_PACKAGE_VERSION_STR "$ENV{TAG_NAME}")
 ELSE (DEFINED ENV{TAG_NAME})
-    SET(VEGA_STRIKE_PACKAGE_VERSION_STR "${CPACK_PACKAGE_VERSION_MAJOR}.${CPACK_PACKAGE_VERSION_MINOR}.${CPACK_PACKAGE_VERSION_PATCH}")
+    SET(VEGA_STRIKE_PACKAGE_VERSION_STR "${CPACK_PACKAGE_VERSION_MAJOR}.${CPACK_PACKAGE_VERSION_MINOR}.${CPACK_PACKAGE_VERSION_PATCH}-${VEGASTRIKE_VERSION_TWEAK}")
 ENDIF (DEFINED ENV{TAG_NAME})
 SET(CPACK_SOURCE_PACKAGE_FILE_NAME "${CPACK_PACKAGE_NAME}_${VEGA_STRIKE_PACKAGE_VERSION_STR}-Source")
 SET(CPACK_SOURCE_GENERATOR "TBZ2" "TXZ")
