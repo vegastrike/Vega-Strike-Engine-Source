@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 #====================================
 # @file   : clean
 # @brief  : cleans VegaStrike build

@@ -1,8 +1,7 @@
-#!/bin/bash
+#!/usr/bin/env bash
 #====================================
 # @file   : cibuild
-# @brief  : Builds Vega Strike for
-#           purposes of CI/CD (Travis)
+# @brief  : Builds Vega Strike for purposes of CI/CD (GitHub Actions)
 # @usage  : ./script/cibuild
 # @param  : none
 #====================================

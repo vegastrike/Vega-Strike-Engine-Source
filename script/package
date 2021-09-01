@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 #============ DESCRIPTION ===========
 # This file generates the packages
 # for the build platform.
