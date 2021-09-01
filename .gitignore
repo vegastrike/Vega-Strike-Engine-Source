@@ -10,3 +10,4 @@ packages/
 *.kdev4
 .vs/
 .vscode/
+.editorconfig
