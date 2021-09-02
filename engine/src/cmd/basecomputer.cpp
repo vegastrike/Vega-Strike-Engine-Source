@@ -5306,7 +5306,7 @@ void showUnitStats( Unit *playerUnit, string &text, int subunitlevel, int mode, 
 
     // Shields
     const int num_shields = playerUnit->shield->number_of_facets;
-    const float first_shield_max_health = playerUnit->shield->facets[as_integer(FacetName::left_top_front)].factory_max_health;
+    const float first_shield_max_health = playerUnit->shield->facets[as_integer(FacetName::left_top_front)].max_health;
     if (!mode) {
         if (num_shields) {
             PRETTY_ADD( statcolor+"Number of shield emitter facings: #-c", num_shields, 0 );
@@ -5316,7 +5316,7 @@ void showUnitStats( Unit *playerUnit, string &text, int subunitlevel, int mode, 
         }
     } else if ( num_shields
                && MODIFIES(replacement_mode, playerUnit, blankUnit,
-                           shield->facets[as_integer(FacetName::left_top_front)].factory_max_health)) {
+                           shield->facets[as_integer(FacetName::left_top_front)].max_health)) {
         switch (replacement_mode) {
         case 0:                         //Replacement or new Module
             text += "#n#"+prefix+statcolor+"Installs shield with following protection ratings:#-c";
@@ -5350,11 +5350,11 @@ void showUnitStats( Unit *playerUnit, string &text, int subunitlevel, int mode, 
     if(shield_strings) {
         if (!mode || MODIFIES(replacement_mode, playerUnit,
                               blankUnit,
-                              shield->facets[as_integer(FacetName::left_top_front)].factory_max_health)) {
+                              shield->facets[as_integer(FacetName::left_top_front)].max_health)) {
             for(int i=0;i<num_shields;i++) {
                 PRETTY_ADDU(substatcolor + shield_strings[i], (mode && replacement_mode == 2) ?
-                                ( 100.0 *(playerUnit->shield->facets[i].factory_max_health-1) ) :
-                                playerUnit->shield->facets[i].factory_max_health * VSDM, 0,
+                                ( 100.0 *(playerUnit->shield->facets[i].max_health-1) ) :
+                                playerUnit->shield->facets[i].max_health * VSDM, 0,
                             (2 == replacement_mode) ? "%" : "MJ" );
             }
         }

@@ -32,7 +32,6 @@
 #include "configxml.h"
 #include "gfx/vec.h"
 #include "lin_time.h"
-#include "damageable_factory.h"
 #include "damage.h"
 #include "unit_generic.h"
 #include "ai/communication.h"
@@ -495,28 +494,56 @@ void Damageable::Destroy() {
 }
 
 
+// We only support 2 and 4 facet shields ATM
+// This doesn't have proper checks
+float ShieldData(const Damageable *unit, int facet_index) {
+    return (unit->shield->facets[facet_index].health)/
+            (unit->shield->facets[facet_index].max_health);
+}
+
+
 float Damageable::FShieldData() const
 {
-    Damageable *damageable = const_cast<Damageable*>(this);
-    return static_cast<DamageableLayer>(damageable->GetShieldLayer()).GetPercent(FacetName::front);
+    switch(shield->number_of_facets) {
+    case 2:
+        return ShieldData(this, 0);
+    case 4:
+        return ShieldData(this, 2);
+    default: return 0.0f; // We only support 2 and 4 facet shields ATM
+    }
 }
 
 float Damageable::BShieldData() const
 {
-    Damageable *damageable = const_cast<Damageable*>(this);
-    return static_cast<DamageableLayer>(damageable->GetShieldLayer()).GetPercent(FacetName::rear);
+    switch(shield->number_of_facets) {
+    case 2:
+        return ShieldData(this, 1);
+    case 4:
+        return ShieldData(this, 3);
+    default: return 0.0f; // We only support 2 and 4 facet shields ATM
+    }
 }
 
 float Damageable::LShieldData() const
 {
-    Damageable *damageable = const_cast<Damageable*>(this);
-    return static_cast<DamageableLayer>(damageable->GetShieldLayer()).GetPercent(FacetName::left);
+    switch(shield->number_of_facets) {
+    case 2:
+        return 0.0f;
+    case 4:
+        return ShieldData(this, 0);
+    default: return 0.0f; // We only support 2 and 4 facet shields ATM
+    }
 }
 
 float Damageable::RShieldData() const
 {
-    Damageable *damageable = const_cast<Damageable*>(this);
-    return static_cast<DamageableLayer>(damageable->GetShieldLayer()).GetPercent(FacetName::right);
+    switch(shield->number_of_facets) {
+    case 2:
+        return 0.0f;
+    case 4:
+        return ShieldData(this, 1);
+    default: return 0.0f; // We only support 2 and 4 facet shields ATM
+    }
 }
 
 //short fix
@@ -573,7 +600,6 @@ bool Damageable::flickerDamage()
     float damagelevel = GetHullPercent();
     static double counter = getNewTime();
 
-
     float diff = getNewTime()-counter;
     if (diff > flickertime) {
         counter = getNewTime();
@@ -589,10 +615,20 @@ bool Damageable::flickerDamage()
     thus = thus%( (unsigned int) tmpflicker );
     diff = fmod( diff+thus, tmpflicker );
     if (flickerofftime > diff) {
-        if (damagelevel > hullfornoflicker)
+        if (damagelevel > hullfornoflicker) {
             return rand() > RAND_MAX * GetElapsedTime()*flickeronprob;
-        else
+        } else {
             return true;
+        }
     }
     return false;
+}
+
+void Damageable::UpdatePointers() {
+    hull = &layers[0];
+    armor = &layers[1];
+    shield = &layers[2];
+
+    current_hull = &hull->facets[0].health;
+    max_hull = &hull->facets[0].max_health;
 }

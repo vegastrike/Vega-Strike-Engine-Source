@@ -49,7 +49,6 @@
 #include "mount_size.h"
 #include "weapon_info.h"
 
-#include "damage/damageable_factory.h"
 
 CSVRow LookupUnitRow( const string &unitname, const string &faction ) {
     string hashname = unitname+"__"+faction;
@@ -1013,11 +1012,11 @@ void Unit::LoadRow( CSVRow &row, string modification, string *netxml )
     // Hull
     float temp_hull = ::stof( OPTIM_GET( row, table, Hull ) );
     float hull_values[1] = {temp_hull};
-    layers[0] = DamageableFactory::CreateLayer(0,
-                                               FacetConfiguration::one,
-                                               hull_values,
-                                               0.0f,
-                                               true);
+    layers[0] = DamageableLayer(0,
+                                FacetConfiguration::one,
+                                hull_values,
+                                0.0f,
+                                true);
 
     specInterdiction = ::stof( OPTIM_GET( row, table, Spec_Interdiction ) );
 
@@ -1032,11 +1031,11 @@ void Unit::LoadRow( CSVRow &row, string modification, string *netxml )
     armor_values[6] = ::stof( OPTIM_GET( row, table, Armor_Back_Bottom_Left ));
     armor_values[7] = ::stof( OPTIM_GET( row, table, Armor_Back_Bottom_Right ));
 
-    layers[1] = DamageableFactory::CreateLayer(1,
-                                               FacetConfiguration::eight,
-                                               armor_values,
-                                               0.0f,
-                                               false);
+    layers[1] = DamageableLayer(1,
+                                FacetConfiguration::eight,
+                                armor_values,
+                                0.0f,
+                                false);
 
 
     // Load shield
@@ -1048,87 +1047,80 @@ void Unit::LoadRow( CSVRow &row, string modification, string *netxml )
 
     // Get shield count
     int    shield_count = 0;
-    float shield_values[8];
+    float shield_values[4];
 
-    shield_values[0] = ::stof(OPTIM_GET( row, table, Shield_Front_Top_Left ));
-    shield_values[1] = ::stof(OPTIM_GET( row, table, Shield_Front_Top_Right ));
-    shield_values[2] = ::stof(OPTIM_GET( row, table, Shield_Back_Top_Left ));
-    shield_values[3] = ::stof(OPTIM_GET( row, table, Shield_Back_Top_Right ));
-    shield_values[4] = ::stof(OPTIM_GET( row, table, Shield_Front_Bottom_Left ));
-    shield_values[5] = ::stof(OPTIM_GET( row, table, Shield_Front_Bottom_Right ));
-    shield_values[6] = ::stof(OPTIM_GET( row, table, Shield_Back_Bottom_Left ));
-    shield_values[7] = ::stof(OPTIM_GET( row, table, Shield_Back_Bottom_Right ));
+    // TODO: this mapping should really go away
+    shield_values[0] = ::stof(OPTIM_GET( row, table, Shield_Front_Top_Right ));
+    shield_values[1] = ::stof(OPTIM_GET( row, table, Shield_Back_Top_Left ));
+    shield_values[2] = ::stof(OPTIM_GET( row, table, Shield_Front_Bottom_Right ));
+    shield_values[3] = ::stof(OPTIM_GET( row, table, Shield_Front_Bottom_Left ));
 
 
-    for(int i=0;i<8;i++) {
+    for(int i=0;i<4;i++) {
         if(shield_values[i]) {
             shield_count++;
         }
     }
 
-    // This is ugly and unreliable. It assumes that the csv is correct.
+    /*
+     We are making the following assumptions:
+     1. The CSV is correct
+     2. Dual shields are 0 front and 1 rear
+     3. Quad shields are front (0), rear(1), right(2) and left(3)
+     4. There is no support for 8 facet shields in the game.
+        This has more to do with the cockpit code than anything else
+     5. We map the above index to our own
+     */
+
+    float dummy_shield_value[1] = {0};
+
     switch(shield_count) {
     case 1:
         // No shields
-        layers[2] = DamageableFactory::CreateLayer(2,
-                                                   FacetConfiguration::one,
-                                                   shield_values,
-                                                   0.0f,
-                                                   false);
+        shield_values[0] = 0.0f;
+        layers[2] = DamageableLayer(2,
+                                    FacetConfiguration::one,
+                                    dummy_shield_value,
+                                    0.0f,
+                                    false);
         break;
     case 2:
-        shield_values[0] += shield_values[1] + shield_values[4] + shield_values[5];
-        shield_values[1] = shield_values[2] + shield_values[3]
-                + shield_values[6] + shield_values[7];
-        layers[2] = DamageableFactory::CreateLayer(2,
-                                                   FacetConfiguration::two,
-                                                   shield_values,
-                                                   regeneration,
-                                                   false);
+        layers[2] = DamageableLayer(2,
+                                    FacetConfiguration::two,
+                                    shield_values,
+                                    regeneration,
+                                    false);
         break;
     case 4:
         float four_shield_values[4];
-        four_shield_values[0] = shield_values[4] + shield_values[6]; // Left
-        four_shield_values[1] = shield_values[5] + shield_values[7]; // Right
-        four_shield_values[2] = shield_values[0] + shield_values[1]; // Left
-        four_shield_values[3] = shield_values[2] + shield_values[3]; // Left
+        four_shield_values[0] = shield_values[3]; // Left
+        four_shield_values[1] = shield_values[2]; // Right
+        four_shield_values[2] = shield_values[0]; // Front
+        four_shield_values[3] = shield_values[1]; // Rear
 
-        layers[2] = DamageableFactory::CreateLayer(2,
-                                                   FacetConfiguration::four,
-                                                   four_shield_values,
-                                                   regeneration,
-                                                   false);
+        layers[2] = DamageableLayer(2,
+                                    FacetConfiguration::four,
+                                    four_shield_values,
+                                    regeneration,
+                                    false);
         break;
     case 6:
         // Not supported yet
     case 8:
-        // We are not in the right order
-        float eight_shield_values[8];
-        eight_shield_values[0] = shield_values[0];
-        eight_shield_values[1] = shield_values[1];
-        eight_shield_values[2] = shield_values[4];
-        eight_shield_values[3] = shield_values[5];
-        eight_shield_values[4] = shield_values[2];
-        eight_shield_values[5] = shield_values[3];
-        eight_shield_values[6] = shield_values[6];
-        eight_shield_values[7] = shield_values[7];
-        layers[2] = DamageableFactory::CreateLayer(2,
-                                                   FacetConfiguration::eight,
-                                                   eight_shield_values,
-                                                   regeneration,
-                                                   false);
+        // Not supported yet
+        // No shields
+        layers[2] = DamageableLayer(2,
+                                    FacetConfiguration::one,
+                                    dummy_shield_value,
+                                    0.0f,
+                                    false);
         break;
     }
 
     // End shield section
 
     // Assign shorthand pointers;
-    hull = &layers[0];
-    armor = &layers[1];
-    shield = &layers[2];
-
-    current_hull = &hull->facets[0].health;
-    max_hull = &hull->facets[0].factory_max_health;
+    UpdatePointers();
 
     static bool WCfuelhack = XMLSupport::parse_bool( vs_config->getVariable( "physics", "fuel_equals_warp", "false" ) );
     maxwarpenergy     = warpenergy = ::stof( OPTIM_GET( row, table, Warp_Capacitor ) );

@@ -1,5 +1,4 @@
 #include "damageable_object.h"
-#include "damageable_factory.h"
 #include "core_vector.h"
 #include <boost/range/adaptor/reversed.hpp>
 #include <iostream>
@@ -9,9 +8,9 @@ DamageableObject::DamageableObject() {
     Health armor_health = Health(0, 0, 0);
     Health shield_health = Health(0, 0, 0);
 
-    DamageableLayer hull_layer = DamageableFactory::CreateLayer(0, FacetConfiguration::one, hull_health, true);
-    DamageableLayer armor_layer = DamageableFactory::CreateLayer(1, FacetConfiguration::one, armor_health, false);
-    DamageableLayer shield_layer = DamageableFactory::CreateLayer(2, FacetConfiguration::one, shield_health, false);
+    DamageableLayer hull_layer = DamageableLayer(0, FacetConfiguration::one, hull_health, true);
+    DamageableLayer armor_layer = DamageableLayer(1, FacetConfiguration::one, armor_health, false);
+    DamageableLayer shield_layer = DamageableLayer(2, FacetConfiguration::one, shield_health, false);
 
     layers = { hull_layer, armor_layer, shield_layer };
 }

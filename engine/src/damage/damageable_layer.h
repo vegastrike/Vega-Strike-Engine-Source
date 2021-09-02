@@ -23,32 +23,35 @@ struct DamageableLayer
     bool core_layer;    // Damage to the core layer has a chance of also
                         // damaging internal components such as propulsion.
 
-    //static float damage_component_chance = 0.03;
-    DamageableLayer(int layer_index, int number_of_facets, std::vector<Health>& facets, bool core_layer):
-        layer_index(layer_index),
-        number_of_facets(number_of_facets),
-        facets(facets),
-        core_layer(core_layer) {}
+    friend class Damageable;
 
-    DamageableLayer():
-        layer_index(0),
-        number_of_facets(1),
-        core_layer(false) {
-        facets.push_back(Health(layer_index));
-    }
+    //static float damage_component_chance = 0.03;
+    DamageableLayer(int layer_index,
+                      FacetConfiguration configuration,
+                      Health health_template,
+                      bool core_layer);
+
+    DamageableLayer(int layer_index,
+                    FacetConfiguration configuration,
+                    float health_array[],
+                    float regeneration,
+                    bool core_layer);
+
+    DamageableLayer(int layer_index,
+                    int number_of_facets,
+                    std::vector<Health>& facets,
+                    bool core_layer);
+    DamageableLayer();
 
     void AdjustPower(const float& percent);
     void DealDamage( const CoreVector &attack_vector, Damage &damage, InflictedDamage& inflicted_damage );
     void Destroy();
     void Disable();
-    void GradualDisable(float percent);
+    void GradualDisable();
     void Enable();
     void Enhance();
 
     int GetFacetIndex(const CoreVector& attack_vector);
-    int GetFacetIndexByName(FacetName facet_name);
-    void InitFacetByName(FacetName facet_name, float facet_health);
-    void InitFacetByName(FacetName facet_name, Health facet_health);
 
     void ReduceLayerCapability(const float& percent,
                                const float& chance_to_reduce_regeneration);
@@ -59,7 +62,7 @@ struct DamageableLayer
     float AverageMaxLayerValue();
 
     float GetPercent(FacetName facet_name);
-    void Regenerate(float alternative_regeneration = -1);
+    void Regenerate();
     void UpdateRegeneration(const float& new_regeneration_value);
 };
 

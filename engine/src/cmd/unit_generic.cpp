@@ -3620,15 +3620,15 @@ bool Unit::UpAndDownGrade( const Unit *up,
         || cell_has_recursive_data( upgrade_name, up->faction, "Shield_Front_Top_Right" ) ) {
         if (shield->number_of_facets == up->shield->number_of_facets) {
             for(unsigned int i=0;i<shield->number_of_facets;i++) {
-                float previous_max = shield->facets[i].factory_max_health;
-                STDUPGRADE( shield->facets[i].factory_max_health,
-                        up->shield->facets[i].factory_max_health,
-                        templ->shield->facets[i].factory_max_health, 0 );
+                float previous_max = shield->facets[i].max_health;
+                STDUPGRADE( shield->facets[i].max_health,
+                        up->shield->facets[i].max_health,
+                        templ->shield->facets[i].max_health, 0 );
 
-                if (shield->facets[i].factory_max_health != previous_max) {
-                    shield->facets[i].max_health = shield->facets[i].factory_max_health;
-                    shield->facets[i].adjusted_health = shield->facets[i].factory_max_health;
-                    shield->facets[i].health = shield->facets[i].factory_max_health;
+                if (shield->facets[i].max_health != previous_max) {
+                    shield->facets[i].max_health = shield->facets[i].max_health;
+                    shield->facets[i].adjusted_health = shield->facets[i].max_health;
+                    shield->facets[i].health = shield->facets[i].max_health;
                 }
             }
 
@@ -4945,6 +4945,12 @@ bool Unit::isPlayerShip()
 
 void Unit::RegenShields()
 {
+    // No point in all this code if there are no shields.
+    int shield_number = GetShieldLayer().number_of_facets;
+    if(shield_number < 2) {
+        return;
+    }
+
     // TODO: lib_damage reenable disabled settings
     static bool  shields_in_spec = XMLSupport::parse_bool( vs_config->getVariable( "physics", "shields_in_spec", "false" ) );
     //static float shieldenergycap =
@@ -4987,13 +4993,10 @@ void Unit::RegenShields()
     shield->Regenerate();
 
     // TODO: Go over this and refactor
-    int shield_number = GetShieldLayer().number_of_facets;
-    //float shield_recharge = GetShieldLayer().facets[0].regeneration;
 
-    if ( shield_number > 0) {
-        //GAHHH reactor in units of 100MJ, shields in units of VSD=5.4MJ to make 1MJ of shield use 1/shieldenergycap MJ
-        if (shields_in_spec || !graphicOptions.InWarp) {
-            /*energy -= shield_recharge * VSD / 100
+    //GAHHH reactor in units of 100MJ, shields in units of VSD=5.4MJ to make 1MJ of shield use 1/shieldenergycap MJ
+    if (shields_in_spec || !graphicOptions.InWarp) {
+        /*energy -= shield_recharge * VSD / 100
                     // TODO: implement efficiency: ( 100 * (shield.efficiency ? shield.efficiency : 1) )
                     /shieldenergycap * shield_number * shield_maintenance_cost
                       * simulation_atom_var * ( (apply_difficulty_shields) ? g_game.difficulty : 1 );
@@ -5001,33 +5004,33 @@ void Unit::RegenShields()
                 velocity_discharge = true;
                 energy = 0;
             }*/
-            shield->AdjustPower(1.0f);
-        } else {
-            shield->GradualDisable(0.01f);
-        }
-
-        /*rec = (velocity_discharge) ?
-                    0 :
-                    ( (shield_recharge * VSD / 100 *
-                       simulation_atom_var * shield_number/shieldenergycap)
-                                        > energy ) ? (energy*shieldenergycap*100/VSD
-                                                      /shield_number) : shield_recharge*simulation_atom_var;
-        if (apply_difficulty_shields) {
-            if ( !_Universe->isPlayerStarship( this ) )
-                rec *= g_game.difficulty;
-            else
-                rec *= g_game.difficulty;
-        }
-        if (graphicOptions.InWarp && !shields_in_spec) {
-            rec = 0;
-            velocity_discharge = true;
-        }
-        if (GetNebula() != NULL) {
-            static float nebshields =
-                XMLSupport::parse_float( vs_config->getVariable( "physics", "nebula_shield_recharge", ".5" ) );
-            rec *= nebshields;
-        }*/
+        shield->AdjustPower(1.0f);
+    } else {
+        shield->GradualDisable();
     }
+
+    /*rec = (velocity_discharge) ?
+                0 :
+                ( (shield_recharge * VSD / 100 *
+                   simulation_atom_var * shield_number/shieldenergycap)
+                  > energy ) ? (energy*shieldenergycap*100/VSD
+                                /shield_number) : shield_recharge*simulation_atom_var;
+    if (apply_difficulty_shields) {
+        if ( !_Universe->isPlayerStarship( this ) )
+            rec *= g_game.difficulty;
+        else
+            rec *= g_game.difficulty;
+    }
+    if (graphicOptions.InWarp && !shields_in_spec) {
+        rec = 0;
+        velocity_discharge = true;
+    }
+    if (GetNebula() != NULL) {
+        static float nebshields =
+                XMLSupport::parse_float( vs_config->getVariable( "physics", "nebula_shield_recharge", ".5" ) );
+        rec *= nebshields;
+    }*/
+
 
     //ECM energy drain
     if (computer.ecmactive) {
@@ -5040,7 +5043,7 @@ void Unit::RegenShields()
     }
 
     //Shield regeneration
-    shield->Regenerate(rec);
+    shield->Regenerate();
 
     // shield costs energy
     if(GetShieldLayer().facets[0].enabled) {

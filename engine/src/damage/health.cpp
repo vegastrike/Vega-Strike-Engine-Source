@@ -2,7 +2,7 @@
 
 #include <algorithm>
 #include <iostream>
-
+#include <string>
 
 
 void Health::AdjustPower(const float& percent) {
@@ -17,11 +17,12 @@ void Health::AdjustPower(const float& percent) {
     }
 
     adjusted_health = max_health * percent;
-
     if(adjusted_health < health) {
         health = adjusted_health;
     }
 }
+
+
 
 void Health::DealDamage( Damage &damage, InflictedDamage& inflicted_damage ) {
     // If this layer is destroyed, it can no longer sustain damage
@@ -76,7 +77,13 @@ void Health::DealDamageComponent( int type, float &damage, float vulnerability, 
 void Health::Disable() {
     if(regenerative && enabled) {
         enabled = false;
+        health = 0.0f;
     }
+}
+
+void Health::Destroy() {
+    health = 0;
+    destroyed = true;
 }
 
 void Health::Enable() {
@@ -85,25 +92,46 @@ void Health::Enable() {
     }
 }
 
+
+void Health::Enhance(float percent) {
+    // Don't enhance armor and hull
+    if(!regenerative) {
+        return;
+    }
+
+    health = max_health * percent;
+}
+
 void Health::ReduceLayerMaximum(const float& percent) {
-    max_health = std::max(0.0f, max_health - factory_max_health * percent);
+    adjusted_health = std::max(0.0f, max_health * (1 - percent));
     health = std::min(health, max_health);
+}
+
+
+void Health::ReduceLayerMaximumByOne() {
+    adjusted_health = std::max(0.0f, adjusted_health - 1);
+    health = std::min(health, adjusted_health);
+}
+
+void Health::ReduceLayerMaximumByOnePercent() {
+    float percent = adjusted_health/max_health - 0.01f;
+    max_health = std::max(0.0f, max_health * percent);
 }
 
 void Health::ReduceRegeneration(const float& percent) {
     regeneration = std::max(0.0f, regeneration - factory_regeneration * percent);
 }
 
-void Health::Regenerate(float alternative_regeneration) {
+void Health::Regenerate() {
     if(!enabled || destroyed || !regenerative) {
         return;
     }
 
-    if(alternative_regeneration == -1) {
-        health = std::min(max_health, health + regeneration);
-    } else {
-        health = std::min(max_health, health + alternative_regeneration);
-    }
+    health = std::min(adjusted_health, health + regeneration);
+}
 
-
+void Health::SetHealth(float health) {
+    health = std::min(max_health, health);
+    health = std::max(0.0f, health);
+    this->health = health;
 }

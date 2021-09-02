@@ -56,7 +56,7 @@ public:
         armor(&layers[1]),
         shield(&layers[2]),
         current_hull(&hull->facets[as_integer(FacetName::single)].health),
-        max_hull(&hull->facets[as_integer(FacetName::single)].factory_max_health),
+        max_hull(&hull->facets[as_integer(FacetName::single)].max_health),
         killed(false) {}
 
 protected:
@@ -160,7 +160,7 @@ public:
 
     static float totalShieldEnergyCapacitance( const DamageableLayer &shield );
 
-
+    void UpdatePointers();
 protected:
     bool flickerDamage();
 };

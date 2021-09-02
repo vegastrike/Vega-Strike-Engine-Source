@@ -18,23 +18,24 @@
  * That is x,y,z. This is also how both core vector and Vector class are ordered.
  */
 enum class FacetConfiguration {
-    one,    // A single facet covering all directions
-    two,    // Front and rear
-    four,   // Front, rear, left and right
-    six,    // A cube. Front, rear, left, right, top and bottom.
-    eight   // Front and rear, left and right, top and bottom
+    one     = 1,    // A single facet covering all directions
+    two     = 2,    // Front and rear
+    four    = 4,   // Front, rear, left and right
+    //six     = 6,    // A cube. Front, rear, left, right, top and bottom.
+    eight   = 8  // Front and rear, left and right, top and bottom
 };
 
 
 enum class FacetName {
-    single             = 0,
+    single              = 0,
 
-    left               = 0,
-    right              = 1,
-    top                = 2,
-    bottom             = 3,
-    front              = 4,
-    rear               = 5,
+    two_front           = 0,
+    two_rear            = 1,
+
+    four_left           = 0,
+    four_right          = 1,
+    four_front          = 2,
+    four_rear           = 3,
 
     left_top_front     = 0,
     right_top_front    = 1,
@@ -49,34 +50,5 @@ enum class FacetName {
 // Same code as mount_size.h!
 // auto as_integer(Enumeration const value)
 
-const FacetName one_configuration[1] = { FacetName::single};
-
-const FacetName two_configuration[2] = { FacetName::front,
-                                         FacetName::rear};
-
-const FacetName four_configuration[4] = { FacetName::left,
-                                          FacetName::right,
-                                          FacetName::front,
-                                          FacetName::rear};
-
-const FacetName six_configuration[6] = { FacetName::left,
-                                         FacetName::right,
-                                         FacetName::top,
-                                         FacetName::bottom,
-                                         FacetName::front,
-                                         FacetName::rear};
-
-const FacetName eight_configuration[8] = { FacetName::left_top_front,
-                                           FacetName::right_top_front,
-                                           FacetName::left_bottom_front,
-                                           FacetName::right_bottom_front,
-                                           FacetName::left_top_rear,
-                                           FacetName::right_top_rear,
-                                           FacetName::left_bottom_rear,
-                                           FacetName::right_bottom_rear };
-
-int Find(FacetName facet_name, const FacetName facet_array[], int size);
-
-const FacetName* FacetConfigurationByName(FacetConfiguration configuration);
 
 #endif // FACET_CONFIGURATION_H
