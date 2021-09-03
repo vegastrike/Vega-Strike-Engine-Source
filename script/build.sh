@@ -61,8 +61,8 @@ cmake $@ $SRC_DIR
 # mut we can do it manually
 #make clean
 
-# compile now using all cpus and show compilation commands
-cmake --build $BUILD_DIR -j $(getconf _NPROCESSORS_ONLN) -v
+# compile now using all cpus # and show compilation commands
+cmake --build $BUILD_DIR -j $(getconf _NPROCESSORS_ONLN) # -v
 
 cd $ROOT_DIR
 
