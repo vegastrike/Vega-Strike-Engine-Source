@@ -76,14 +76,15 @@ jobs:
           xcopy /y .\build\objconv\Release\*.* .\bin\
 
       - name: Test
-        working-directory: ${{runner.workspace}}/build
-        run: |
-          mkdir test-results
-          GTEST_OUTPUT=xml:test-results/ GTEST_COLOR=1 ctest -V
+        working-directory: ${{github.workspace}}/build
+        env:
+          GTEST_OUTPUT: xml
+          GTEST_COLOR: 1
+        run: ctest -V -C Release
 
       - name: Upload test results
         uses: actions/upload-artifact@v2
         if: failure()
         with:
             name: test_results_xml
-            path: ${{runner.workspace}}/build/test-results/**/*.xml
+            path: ${{github.workspace}}/build/test-results/**/*.xml
