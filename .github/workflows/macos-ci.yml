@@ -90,7 +90,7 @@ jobs:
       env:
         GTEST_OUTPUT: xml
         GTEST_COLOR: 1
-      run: ctest -V
+      run: ctest -VV --debug
 
     - name: Upload test results
       uses: actions/upload-artifact@v2
