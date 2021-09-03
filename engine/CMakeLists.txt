@@ -1568,26 +1568,35 @@ ENDIF (WIN32 AND NOT UNIX)
 
 INCLUDE(CPack)
 
+MESSAGE("-- Configuring Unit Tests")
+
 INCLUDE(FetchContent)
 FetchContent_Declare(
-  googletest
-  GIT_REPOSITORY https://github.com/google/googletest.git
-  GIT_TAG        release-1.10.0
+    googletest
+    GIT_REPOSITORY https://github.com/google/googletest.git
+    GIT_TAG        release-1.10.0
 )
 
-# For Windows: Prevent overriding the parent project's compiler/linker settings
-SET(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
-
 FetchContent_GetProperties(googletest)
-if(NOT googletest_POPULATED)
-  FetchContent_Populate(googletest)
-  ...
+string(TOLOWER "googletest" lcName)
+if(NOT ${lcName}_POPULATED)
+    # Fetch the content using previously declared details
+    FetchContent_Populate(googletest)
+
+    # Set custom variables, policies, etc.
+
+    # For Windows: Prevent overriding the parent project's compiler/linker settings
+    SET(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
+
+    # Bring the populated content into the build
+    add_subdirectory(${${lcName}_SOURCE_DIR} ${${lcName}_BINARY_DIR})
 endif()
 
-enable_testing()
+
+set(TEST_NAME ${PROJECT_NAME}_tests)
 
 add_executable(
-    unit_tests
+    ${TEST_NAME}
     src/configuration/tests/configuration_tests.cpp
     # src/damage/tests/health_tests.cpp
     # src/damage/tests/layer_tests.cpp
@@ -1600,10 +1609,11 @@ ADD_LIBRARY(vegastrike-testing
     )
 
 target_link_libraries(
-    unit_tests
+    ${TEST_NAME}
     gtest_main
     vegastrike-testing
     )
 
+enable_testing()
 include(GoogleTest)
-gtest_discover_tests(unit_tests)
+gtest_discover_tests(${TEST_NAME})
