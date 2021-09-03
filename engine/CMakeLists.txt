@@ -1568,3 +1568,42 @@ ENDIF (WIN32 AND NOT UNIX)
 
 INCLUDE(CPack)
 
+INCLUDE(FetchContent)
+FetchContent_Declare(
+  googletest
+  GIT_REPOSITORY https://github.com/google/googletest.git
+  GIT_TAG        release-1.10.0
+)
+
+# For Windows: Prevent overriding the parent project's compiler/linker settings
+SET(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
+
+FetchContent_GetProperties(googletest)
+if(NOT googletest_POPULATED)
+  FetchContent_Populate(googletest)
+  ...
+endif()
+
+enable_testing()
+
+add_executable(
+    unit_tests
+    src/configuration/tests/configuration_tests.cpp
+    # src/damage/tests/health_tests.cpp
+    # src/damage/tests/layer_tests.cpp
+    # src/damage/tests/object_tests.cpp
+    )
+
+ADD_LIBRARY(vegastrike-testing
+    ${LIBCONFIG}
+    # ${LIBDAMAGE}
+    )
+
+target_link_libraries(
+    unit_tests
+    gtest_main
+    vegastrike-testing
+    )
+
+include(GoogleTest)
+gtest_discover_tests(unit_tests)
