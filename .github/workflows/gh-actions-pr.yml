@@ -62,7 +62,7 @@ jobs:
     - name: Move to PR HEAD
       run: git checkout HEAD^2
 
-    - name: Build
+    - name: Build and Test
       env:
         FROM:       ${{ matrix.FROM }}
         COMPILER:   ${{ matrix.COMPILER }}
@@ -71,16 +71,16 @@ jobs:
         IS_RELEASE: 0
       run: script/cibuild $FLAGS
 
-    - name: Test
-      working-directory: ${{github.workspace}}/build
-      env:
-        GTEST_OUTPUT: xml
-        GTEST_COLOR: 1
-      run: ctest -VV --debug
+    # - name: Test
+    #   working-directory: ${{github.workspace}}/build
+    #   env:
+    #     GTEST_OUTPUT: xml
+    #     GTEST_COLOR: 1
+    #   run: ctest -VV --debug
 
-    - name: Upload test results
-      uses: actions/upload-artifact@v2
-      if: failure()
-      with:
-        name: test_results_xml
-        path: ${{github.workspace}}/build/test-results/**/*.xml
+    # - name: Upload test results
+    #   uses: actions/upload-artifact@v2
+    #   if: failure()
+    #   with:
+    #     name: test_results_xml
+    #     path: ${{github.workspace}}/build/test-results/**/*.xml

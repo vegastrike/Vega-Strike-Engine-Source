@@ -34,6 +34,7 @@ then
 elif [ "$MY_OS_NAME" == "macos" ]
 then
     script/build.sh -DCMAKE_BUILD_TYPE=RelWithDebInfo $@
+    ctest -VV --debug
     # Not building successfully yet, so shouldn't try to package it
 else
     script/docker-entrypoint.sh $@

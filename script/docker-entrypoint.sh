@@ -17,4 +17,5 @@ else
     else
         script/build.sh -DCMAKE_BUILD_TYPE=Debug $@
     fi
+    ctest -VV --debug
 fi
