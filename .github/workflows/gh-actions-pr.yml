@@ -57,7 +57,8 @@ jobs:
     # As opposed to the merge commit
     - name: Move to PR HEAD
       run: git checkout HEAD^2
-    - name: Run CI
+
+    - name: Build
       env:
         FROM:       ${{ matrix.FROM }}
         COMPILER:   ${{ matrix.COMPILER }}
@@ -65,3 +66,14 @@ jobs:
         MY_OS_NAME: linux
         IS_RELEASE: 0
       run: script/cibuild $FLAGS
+
+    - name: Test
+      working-directory: ${{runner.workspace}}/build
+      run: GTEST_OUTPUT=xml:test-results/ GTEST_COLOR=1 ctest -V
+
+    - name: Upload test results
+      uses: actions/upload-artifact@v2
+      if: failure()
+      with:
+        name: test_results_xml
+        path: ${{runner.workspace}}/build/test-results/**/*.xml

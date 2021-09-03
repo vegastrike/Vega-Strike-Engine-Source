@@ -80,3 +80,14 @@ jobs:
         FLAGS:      -DCMAKE_FIND_FRAMEWORK=LAST
         OPENALDIR:  "/usr/local/opt/openal-soft"
       run: script/cibuild $FLAGS
+
+    - name: Test
+      working-directory: ${{runner.workspace}}/build
+      run: GTEST_OUTPUT=xml:test-results/ GTEST_COLOR=1 ctest -V
+
+    - name: Upload test results
+      uses: actions/upload-artifact@v2
+      if: failure()
+      with:
+        name: test_results_xml
+        path: ${{runner.workspace}}/build/test-results/**/*.xml
