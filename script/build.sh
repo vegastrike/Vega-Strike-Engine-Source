@@ -62,7 +62,7 @@ cmake $@ $SRC_DIR
 #make clean
 
 # compile now using all cpus and show compilation commands
-cmake --build $BUILD_DIR -j $(getconf _NPROCESSORS_ONLN) --verbose
+cmake --build $BUILD_DIR -j $(getconf _NPROCESSORS_ONLN) -V
 
 cd $ROOT_DIR
 

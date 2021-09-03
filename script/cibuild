@@ -30,11 +30,13 @@ then
     then
         docker cp $DOCKER_CONTAINER_NAME:/usr/src/Vega-Strike-Engine-Source/packages .
     fi
+    docker cp $DOCKER_CONTAINER_NAME:/usr/src/Vega-Strike-Engine-Source/build/test-results .
     docker rm $DOCKER_CONTAINER_NAME
 elif [ "$MY_OS_NAME" == "macos" ]
 then
     script/build.sh -DCMAKE_BUILD_TYPE=RelWithDebInfo $@
-    ctest -VV --debug
+    # On macOS, the following is done by the calling CI workflow
+    # ctest -V
     # Not building successfully yet, so shouldn't try to package it
 else
     script/docker-entrypoint.sh $@

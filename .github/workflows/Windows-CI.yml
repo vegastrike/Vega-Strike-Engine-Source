@@ -80,7 +80,7 @@ jobs:
         env:
           GTEST_OUTPUT: xml
           GTEST_COLOR: 1
-        run: ctest -VV --debug -C Release
+        run: ctest -V -C Release
 
       - name: Upload test results
         uses: actions/upload-artifact@v2
