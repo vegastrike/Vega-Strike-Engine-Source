@@ -19,6 +19,6 @@ else
     fi
 
     pushd build
-    ctest -V
+    GTEST_OUTPUT=xml:test-results ctest -V
     popd
 fi
