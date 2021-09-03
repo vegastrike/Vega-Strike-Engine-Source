@@ -1592,6 +1592,7 @@ if(NOT ${lcName}_POPULATED)
     add_subdirectory(${${lcName}_SOURCE_DIR} ${${lcName}_BINARY_DIR})
 endif()
 
+enable_testing()
 
 set(TEST_NAME ${PROJECT_NAME}_tests)
 
@@ -1614,6 +1615,7 @@ target_link_libraries(
     vegastrike-testing
     )
 
-enable_testing()
+file(COPY "src/configuration/tests/vegastrike.config" DESTINATION ${CMAKE_BINARY_DIR}/test_assets)
+
 include(GoogleTest)
 gtest_discover_tests(${TEST_NAME})
