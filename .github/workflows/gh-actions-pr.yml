@@ -71,16 +71,17 @@ jobs:
         IS_RELEASE: 0
       run: script/cibuild $FLAGS
 
+    # This is run from inside the Docker container, by script/docker-entrypoint.sh
     # - name: Test
     #   working-directory: ${{github.workspace}}/build
     #   env:
     #     GTEST_OUTPUT: xml
     #     GTEST_COLOR: 1
-    #   run: ctest -VV --debug
+    #   run: ctest -V
 
-    # - name: Upload test results
-    #   uses: actions/upload-artifact@v2
-    #   if: failure()
-    #   with:
-    #     name: test_results_xml
-    #     path: ${{github.workspace}}/build/test-results/**/*.xml
+    - name: Upload test results
+      uses: actions/upload-artifact@v2
+      if: failure()
+      with:
+        name: test_results_xml
+        path: ${{github.workspace}}/test-results/**/*.xml
