@@ -292,10 +292,7 @@ void Collision::collide( Unit* unit1,
     // See commit a66bdcfa1e00bf039183603913567d48e52c7a8e method Unit->jumpReactToCollision for an example
     // I assume this is for "always open" jump gates that you pass through
 
-    collision1.apply_force = false;
-    collision1.deal_damage = false;
-    collision2.apply_force = false;
-    collision2.deal_damage = false;
+    // apply_force and deal_damage are both initialized to false when the Collision object is constructed. (See collision.h.)
 
     collision1.shouldApplyForceAndDealDamage(unit2);
     collision2.shouldApplyForceAndDealDamage(unit1);
