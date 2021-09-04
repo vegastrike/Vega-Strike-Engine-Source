@@ -1,7 +1,7 @@
 /**
  * collision.cpp
  *
- * Copyright (C) 2020 Roy Falk, Stephen G. Tuggy and other Vega Strike
+ * Copyright (C) 2020-2021 Roy Falk, Stephen G. Tuggy and other Vega Strike
  * contributors
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
@@ -292,15 +292,24 @@ void Collision::collide( Unit* unit1,
     // See commit a66bdcfa1e00bf039183603913567d48e52c7a8e method Unit->jumpReactToCollision for an example
     // I assume this is for "always open" jump gates that you pass through
 
+    collision1.apply_force = false;
+    collision1.deal_damage = false;
+    collision2.apply_force = false;
+    collision2.deal_damage = false;
+
     collision1.shouldApplyForceAndDealDamage(unit2);
     collision2.shouldApplyForceAndDealDamage(unit1);
 
     float elasticity = 0.8f;
-    collision1.applyForce(elasticity, collision2.mass, collision2.velocity);
-    collision2.applyForce(elasticity, collision1.mass, collision1.velocity);
+    if (collision1.apply_force && collision2.apply_force) {
+        collision1.applyForce(elasticity, collision2.mass, collision2.velocity);
+        collision2.applyForce(elasticity, collision1.mass, collision1.velocity);
+    }
 
-    collision1.dealDamage(collision2);
-    collision2.dealDamage(collision1);
+    if (collision1.deal_damage && collision2.deal_damage) {
+        collision1.dealDamage(collision2);
+        collision2.dealDamage(collision1);
+    }
 
-    // TODO: add torque
+    // Is this still a TODO? -- add torque
 }
