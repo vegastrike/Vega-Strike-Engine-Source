@@ -112,7 +112,7 @@ void Collision::shouldApplyForceAndDealDamage(Unit* other_unit)
             return;
         case _UnitType::planet:
             // Handle the "Nav 8" case
-            if (other_unit->getFilename().find("invisible")) {
+            if (other_unit->getFilename().find("invisible") != std::string::npos) {
                 BOOST_LOG_TRIVIAL(debug) << "Found a Nav_8-type object";
                 return;
             } else {
