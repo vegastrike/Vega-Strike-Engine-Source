@@ -101,17 +101,25 @@ _UnitType::enhancement,
 _UnitType::missile*/
 void Collision::shouldApplyForceAndDealDamage(Unit* other_unit)
 {
-    // Collision with a nebula does nothing
-    if(other_unit->isUnit() == _UnitType::nebula)
+    switch (other_unit->isUnit())
     {
-        return;
-    }
-
-    // Collision with a enhancement improves your shield apparently
-    if(other_unit->isUnit() == _UnitType::enhancement)
-    {
-        apply_force = true;
-        return;
+        case _UnitType::nebula:
+            // Collision with a nebula does nothing
+            return;
+        case _UnitType::enhancement:
+            // Collision with a enhancement improves your shield apparently
+            apply_force = true;
+            return;
+        case _UnitType::planet:
+            // Handle the "Nav 8" case
+            if (other_unit->getFilename().find("invisible")) {
+                BOOST_LOG_TRIVIAL(debug) << "Found a Nav_8-type object";
+                return;
+            } else {
+                break;
+            }
+        default:
+            break;
     }
 
     // Collision with a jump point does nothing
@@ -298,15 +306,15 @@ void Collision::collide( Unit* unit1,
     collision2.shouldApplyForceAndDealDamage(unit1);
 
     float elasticity = 0.8f;
-    if (collision1.apply_force && collision2.apply_force) {
+    // if (collision1.apply_force && collision2.apply_force) {
         collision1.applyForce(elasticity, collision2.mass, collision2.velocity);
         collision2.applyForce(elasticity, collision1.mass, collision1.velocity);
-    }
+    // }
 
-    if (collision1.deal_damage && collision2.deal_damage) {
+    // if (collision1.deal_damage && collision2.deal_damage) {
         collision1.dealDamage(collision2);
         collision2.dealDamage(collision1);
-    }
+    // }
 
     // Is this still a TODO? -- add torque
 }
