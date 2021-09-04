@@ -228,6 +228,28 @@ Compiling On Linux
 
    On Fedora 30 or 31, also install `boost-python2-devel`. (Apparently not available
    on Fedora 32 or later.)
+   
+   On Funtoo(-current):
+   
+     Most dependencies are already met with a standard desktop Funtoo install. In particular, you want to make sure your "flavor" is set to desktop, 
+     and that you have a proper "mix-in" depending on the desktop manager you use. Check your current profile:
+     ```bash
+     sudo epro show
+     ```
+     and if you don't have the desktop flavor enabled, enable it with
+     ```bash
+     sudo epro flavor desktop
+     ```
+     Also enable the proper mix-in for your desktop manager; for instance xfce:
+     ```bash
+     sudo epro mix-in +xfce (or gnome, kde etc)
+     ```
+     All of the steps above are outlined in the Funtoo installation guide at https://www.funtoo.org/Install/Profiles and you should have done it 
+     already in the process of installing desktop Funtoo. The only dependency that you have to install manually is OpenAL:
+     ```bash
+     sudo emerge media-libs/openal
+     ```
+   After that you are ready to compile.
 
 2. Build Vega Strike:
 
