@@ -112,8 +112,9 @@ void Collision::shouldApplyForceAndDealDamage(Unit* other_unit)
             return;
         case _UnitType::planet:
             // Handle the "Nav 8" case
-            if (other_unit->getFilename().find("invisible") != std::string::npos) {
-                BOOST_LOG_TRIVIAL(debug) << "Found a Nav_8-type object";
+            // BOOST_LOG_TRIVIAL(debug) << "shouldApplyForceAndDealDamage(): other_unit is a planet, with full name " << other_unit->getFullname();
+            if (other_unit->getFullname().find("invisible") != std::string::npos) {
+                // BOOST_LOG_TRIVIAL(debug) << "Found a Nav_8-type object";
                 return;
             } else {
                 break;
@@ -152,6 +153,7 @@ void Collision::shouldApplyForceAndDealDamage(Unit* other_unit)
     // Planets and Nebulas can't be killed right now
     case _UnitType::planet:
     case _UnitType::nebula:
+        // BOOST_LOG_TRIVIAL(debug) << "shouldApplyForceAndDealDamage(): this unit is a planet or nebula, with full name " << unit->getFullname();
         return;
 
     // Buildings should not calculate actual damage
