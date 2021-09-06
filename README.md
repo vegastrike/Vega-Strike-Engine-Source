@@ -6,21 +6,18 @@
 [![Gitter](https://badges.gitter.im/vegastrike/community.svg)](https://gitter.im/vegastrike/community?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
 [![Vega Strike](https://img.shields.io/badge/-Website-informational)](https://www.vega-strike.org)
 
-```
+```text
 #====================================
 # @file   : README.md
 # @brief  : quick repo guide
 #====================================
 ```
 
-Vega Strike Space Simulation Engine
-===================================
+# Vega Strike Space Simulation Engine
 
 Vega Strike is a Space Flight Simulator that allows a player to explore, trade, and fight in the vast open space. You start in an old beat up cargo ship, with endless possibilities in front of you and just enough cash to scrape together a life. Yet danger lurks in the space beyond.
 
-
-Features
-========
+# Features
 
 - All of the art assets are original.
 - Never before seen ships modelled by the Vegastrike team!
@@ -51,9 +48,7 @@ Features
 - Switch Ships with the '\[' key
 - Joystick support for a full featured joystick
 
-
-How to Run
-==========
+# How to Run
 
 Either install Vega Strike from the binary installer for your platform, if available, or follow the instructions for compiling from source. (`Compiling Vegastrike`, below.)
 
@@ -98,8 +93,7 @@ bin/vegastrike -lvega_sector/vega mission/bomber.mission -d../Assets-Production
 
 will force the bomber mission to run in the vega sector.
 
-Executable Name Changes
------------------------
+## Executable Name Changes
 
 Note that the executable names have changed since the 0.5.x releases. Now, you configure game settings using `vegasettings`, and run the game itself using `vegastrike-engine`. With the latter, the data directory (`-d...`)  is now a required parameter. This is to allow using the Vega Strike Game Engine with multiple games (asset sets), including Upon the Coldest Sea (vsUtCS), PWCU, and others.
 
@@ -107,8 +101,7 @@ Also note that when you install vsUtCS, it comes with a script called `vsettings
 
 If you encounter any issues while playing, please create an issue with the Vega Strike development team by [posting a new issue](https://github.com/vegastrike/Vega-Strike-Engine-Source/issues).
 
-REQUIRED FILES
---------------
+## REQUIRED FILES
 
 ```bash
   /usr/bin/vegastrike-engine
@@ -131,11 +124,9 @@ REQUIRED FILES
       User-specific configuration file
 ```
 
-Compiling Vegastrike
-====================
+# Compiling Vegastrike
 
-Compiling On Linux
-------------------
+## Compiling On Linux
 
 1. Install the development dependencies:
 
@@ -228,27 +219,35 @@ Compiling On Linux
 
    On Fedora 30 or 31, also install `boost-python2-devel`. (Apparently not available
    on Fedora 32 or later.)
-   
+
    On Funtoo(-current):
-   
-     Most dependencies are already met with a standard desktop Funtoo install. In particular, you want to make sure your "flavor" is set to desktop, 
+
+     Most dependencies are already met with a standard desktop Funtoo install. In particular, you want to make sure your "flavor" is set to desktop,
      and that you have a proper "mix-in" depending on the desktop manager you use. Check your current profile:
+
      ```bash
      sudo epro show
      ```
+
      and if you don't have the desktop flavor enabled, enable it with
+
      ```bash
      sudo epro flavor desktop
      ```
+
      Also enable the proper mix-in for your desktop manager; for instance xfce:
+
      ```bash
      sudo epro mix-in +xfce (or gnome, kde etc)
      ```
-     All of the steps above are outlined in the Funtoo installation guide at https://www.funtoo.org/Install/Profiles and you should have done it 
+
+     All of the steps above are outlined in the Funtoo installation guide at <https://www.funtoo.org/Install/Profiles> and you should have done it
      already in the process of installing desktop Funtoo. The only dependency that you have to install manually is OpenAL:
+
      ```bash
      sudo emerge media-libs/openal
      ```
+
    After that you are ready to compile.
 
 2. Build Vega Strike:
@@ -262,7 +261,7 @@ Compiling On Linux
    ccmake ../engine
    # (configure/edit options to taste in ccmake, press 'c' to save the selected options
    # and press 'g' to update the build configuration files used by the make build tool)
-   make -j $(nproc) # (where $(nproc) returns the number of available CPU threads/cores on the system)
+   cmake --build ./build -j $(getconf _NPROCESSORS_ONLN) # (where the getconf clause returns the number of available CPU threads/cores on the system)
    mkdir ../bin && cp vegastrike-engine ../bin/ && cp setup/vegasettings ../bin/ && cd ..
    ```
 
@@ -271,16 +270,16 @@ Compiling On Linux
    ```bash
    mkdir build & cd build
    cmake ../engine
-   make -j $(nproc) # (where $(nproc) returns the number of available CPU threads/cores on the system)
+   cmake --build ./build -j $(getconf _NPROCESSORS_ONLN) # (where the getconf clause returns the number of available CPU threads/cores on the system)
    mkdir ../bin && cp vegastrike-engine ../bin/ && cp setup/vegasettings ../bin/ && cd ..
    ```
 
    __TIPS__:
 
-   To enable verbose output for debugging purposes (will show compilation commands), pass the `VERBOSE=1` argument:
+   To enable verbose output for debugging purposes (will show compilation commands), pass the `--version` argument, where supported:
 
    ```bash
-   make VERBOSE=1
+   cmake --build ./build --verbose
    ```
 
    To enable/disable compile-time options with cmake, use `cmake -D<option>=<value>`. Example:
@@ -307,8 +306,8 @@ Compiling On Linux
 
    For more info, see:
 
-   - https://bugs.launchpad.net/ubuntu/+source/file/+bug/1747711
-   - https://github.com/vegastrike/Vega-Strike-Engine-Source/issues/94
+   - <https://bugs.launchpad.net/ubuntu/+source/file/+bug/1747711>
+   - <https://github.com/vegastrike/Vega-Strike-Engine-Source/issues/94>
 
 3. Download a copy of the assets/game data from [here](https://github.com/vegastrike/Assets-Production). You can either `git clone` this repository, or download it as a ZIP file and unzip it.
 
@@ -334,9 +333,7 @@ If you get compilation issues with the system `libboost`, download it manually f
 [here](https://dl.bintray.com/boostorg/release/1.72.0/source/boost_1_72_0.tar.gz) to `./ext/boost/`
 and run `./script/build.sh -DUSE_SYSTEM_BOOST=NO`
 
-
-Compiling On Windows
---------------------
+## Compiling On Windows
 
 Vega Strike is now compiling on Windows! If you want to compile it, try it out, and perhaps offer feedback, that would certainly be welcome.
 
@@ -346,8 +343,7 @@ Once the Visual Studio Installer finishes, and you have rebooted your computer, 
 
 Assuming all the above steps succeed, you are now ready to run Vega Strike. Note that `vegasettings` is not currently building on Windows, so you will need to edit `vegastrike.config` manually as needed. Also note: Windows installer is still pending.
 
-Compiling On MacOS
-------------------
+## Compiling On MacOS
 
 VegaStrike is now compiling on MacOS. However, it's currently experiencing segfaults. Any help will be appreciated to get it fixed. For more information go [here](https://github.com/vegastrike/Vega-Strike-Engine-Source/issues/533)
 
@@ -355,13 +351,13 @@ To install the required build dependencies:
 
 If you have Homebrew, follow the steps in the GitHub action:
 
-```
+```bash
 .github/workflows/macos-ci.yml
 ```
 
 If you have MacPorts, install the following:
 
-```
+```bash
 sudo port install cmake expat jpeg libpng libvorbis boost gtk3 gtkglext libsdl mesa libGLU freeglut
 ```
 
@@ -369,17 +365,15 @@ Also set the environment variables to match those in the GitHub action.
 
 3. Packaging Vega Strike:
 
-	After building Vega Strike, then packages can be built using:
+After building Vega Strike, then packages can be built using:
 
 ```bash
 make package
 ```
 
-Gameplay
-========
+# Gameplay
 
-Interstellar Warp Transit (Jump Drive)
---------------------------------------
+## Interstellar Warp Transit (Jump Drive)
 
 Most starships come equipped with a warp drive.  Unfortunately they can only be used at large singularities in the space-time continuum.  Your computer signals these points by placing glowing blue balls in those areas.  Their relative size indicates how small a starship must be to fit through the jump point.
 
@@ -387,27 +381,21 @@ To engage a jump drive, position your ship inside and press 'j'.
 
 Regulations state that starships should be stopped before jumping-- disasters have resulted from starships travelling at any great speed into a jump point.
 
-Intrastellar SPEC Drive
------------------------
+## Intrastellar SPEC Drive
 
 To travel inside star system, the ships are equiped with a SPEC drive that allow faster-than-light travel. This allows efficient travel between planets and stations inside the same star system. To toggle it press 'Shift-A'. To activate auto-pilot, that will handle this automatically, press 'A'.
 
-Respawn
--------
+## Respawn
 
 If you sadly lose your life in combat you may respawn by pressing ';'
 
 A new starship will be created for you by Bob.
 
-
-Transfer Ship Command
----------------------
+## Transfer Ship Command
 
 If you wish to transfer command to another starship, simply press '\[' to switch over.  This is useful if you have died and do not wish to call on Bob for help.
 
-
-Controls
---------
+## Controls
 
 - `Arrow keys` - Flight Sim style turning
 - `\` - Full throttle
@@ -447,12 +435,9 @@ Controls
 - `F11` - Lower game volume
 - `F12` - Raise game volume
 
+# Modding Vega Strike
 
-Modding Vega Strike
-===================
-
-How to make Vegastrike Missions
--------------------------------
+## How to make Vegastrike Missions
 
 An example mission (this is stored in the test1.mission file)
 
@@ -518,9 +503,7 @@ continue with any other flightgroups... you can have as many as you want from as
 </mission>
 ```
 
-
-Editing AI
-==========
+## Editing AI
 
 The AI is completely scriptable, and I have not spent all that long perfecting it.  There are included instructions about editing the AI scripts yourself.
 
@@ -610,9 +593,7 @@ If you want to know more about writing actual maneuvers (like turnaway.xml which
 
 you need to have a heavy background in vector math.
 
-
-Hacking Vega Strike
--------------------
+## Hacking Vega Strike
 
 In this guide, any coding is located in square brackets ([]).
 Number values may not be accurate.
@@ -621,17 +602,22 @@ Number values may not be accurate.
 
 Step 1
 Locate you saved files. (Windows XP: Program files/VegaStrike/Vegastike-0.5.0/.vegastrike-0.5.0/save||||Mac: (disk)>Users>(user)>.vegastrike-0.5.0>saves>(savefile))
+
 Step 2
 Open the files using a word document editing program (preferably Notepad++)
+
 Step 3
 On the first line, you should see something roughly resembling this: [Crucible/Cephid_17^200000.000000^Llama.begin 119990000070.992740 -8999928.351833 -109989999927.749450]
 On this line, find the numbers surrounded by carets “^”. This is your cash. Change it to what you want, preferably in the high millions. Or possibly even trillions. Go nuts.
+
 Step 4
 In order for the game not to go mad about this, you need to add this ending:[.000000]
 Basically, if you have, say a quadrillion cash (1000000000000000) you still need to add .000000 on the end, making it stupidly long. Yes, we know, its annoying.
+
 Step 5
 Now you need to check if you are using commas or “‘” in your cash. Don’t.
 Then save the file. .txt files work, however when you see them on the loading screen they end in .txt.
+
 Step 6
 You’re now richer than a very rich man on International very rich day! Yay!
 
@@ -639,31 +625,32 @@ You’re now richer than a very rich man on International very rich day! Yay!
 
 Step 1
 Get your saved file from Guide 1.
+
 Step 2
 Now, find the cash (numbers in carets “^”). There is a name after this. At the start of the game, it is always “Llama.begin”
+
 Step 3
 Now you can change this name into any ship you like. However, it must be in the same format.
+
 Step 4
 Here are some good ships:
 Goddard.milspec
 Clydesdale.stock
 Hyena.stock (Light, weak fighter. Good for getting used to combat with other fighters.)
 Mule.stock (trader)
+
 Step 5
 There is a ship list either in the game files or on the internet, check that out for some good models. (remember: add .stock or .milspec on the end!!!! (milspec is only on some specialised ships)) Finally, save the file as before.
 
 This guide was created by Munno 2010-10-08
 
-
-Vega Strike Information
-=======================
+# Vega Strike Information
 
 Submit comments or suggestions by opening an [issue](https://github.com/vegastrike/Vega-Strike-Engine-Source/issues)
 
 And if you can design some missions it would rock!
 
-Vega Strike Contacts
-====================
+# Vega Strike Contacts
 
 Vega Strike is the product of many contributors from all around the world. If you need help, find a bug, want to request a feature, etc then please contact us all using one
 of the following methods:
@@ -675,41 +662,37 @@ of the following methods:
 - [Vega Strike Forums](https://forums.vega-strike.org)
 
 Bugs can be sent to one of the following:
-  - Security related issues can be sent to [security@lists.vega-strike.org](mailto:security@lists.vega-strike.org).
-  - General issues can be sent to [devel@lists.vega-strike.org](mailto:devel@lists.vega-strike.org) or filed as an [issue](https://github.com/vegastrike/Vega-Strike-Engine-Source/issues).
 
-Vega Strike on Social Media
-===========================
+- Security related issues can be sent to [security@lists.vega-strike.org](mailto:security@lists.vega-strike.org).
+- General issues can be sent to [devel@lists.vega-strike.org](mailto:devel@lists.vega-strike.org) or filed as an [issue](https://github.com/vegastrike/Vega-Strike-Engine-Source/issues).
+
+# Vega Strike on Social Media
+
 - [Facebook](https://www.facebook.com/VegaStrike-188522714499479/)
 - [Twitter](https://twitter.com/vega_strike)
 - [YouTube](https://www.youtube.com/channel/UC5p9ObADzS3sx9orZG7M91g/)
 - [MeWe](http://www.mewe.com/join/vegastrike)
 - [Diaspora: Pluspora](https://pluspora.com/tags/vegastrike)
 
-
-Vega Strike Code Repository
-===========================
+# Vega Strike Code Repository
 
 [https://github.com/vegastrike/Vega-Strike-Engine-Source](https://github.com/vegastrike/Vega-Strike-Engine-Source)
 
-Contributors
-------------
+## Contributors
 
 This project exists thanks to all the people who contribute. [[Contribute](CONTRIBUTING.md)].
-<a href="https://github.com/vegastrike/Vega-Strike-Engine-Source/graphs/contributors"><img src="https://opencollective.com/vega-strike/contributors.svg?width=890" /></a>
+[![Our Contributors](https://opencollective.com/vega-strike/contributors.svg?width=890)](https://github.com/vegastrike/Vega-Strike-Engine-Source/graphs/contributors)
 
-Backers
--------
+## Backers
 
 Thank you to all our backers! 🙏 [[Become a backer](https://opencollective.com/vega-strike#backer)]
 
-<a href="https://opencollective.com/vega-strike#backers" target="_blank"><img src="https://opencollective.com/vega-strike/backers.svg?width=890"></a>
+[![Our Backers](https://opencollective.com/vega-strike/backers.svg?width=890)](https://opencollective.com/vega-strike#backers)
 
-Sponsors
---------
+## Sponsors
 
 Support this project by becoming a sponsor. Your logo will show up here with a link to your website. [[Become a sponsor](https://opencollective.com/vega-strike#sponsor)]
 
-<a href="https://opencollective.com/vega-strike/sponsor/0/website" target="_blank"><img src="https://opencollective.com/vega-strike/sponsor/0/avatar.svg"></a>
+[![Become a Sponsor](https://opencollective.com/vega-strike/sponsor/0/avatar.svg)](https://opencollective.com/vega-strike/sponsor/0/website)
 
 ```EOF```
