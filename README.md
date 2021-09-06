@@ -375,7 +375,7 @@ make package
 
 ## Interstellar Warp Transit (Jump Drive)
 
-Most starships come equipped with a warp drive.  Unfortunately they can only be used at large singularities in the space-time continuum.  Your computer signals these points by placing glowing blue balls in those areas.  Their relative size indicates how small a starship must be to fit through the jump point.
+Most starships come equipped with a warp drive. Unfortunately they can only be used at large singularities in the space-time continuum. Your computer signals these points by placing green donut-shaped wireframes in those areas.
 
 To engage a jump drive, position your ship inside and press 'j'.
 
@@ -405,7 +405,7 @@ If you wish to transfer command to another starship, simply press '\[' to switch
 - `Enter`- Fire missile
 - `Space` - Fire Guns
 - `Tab` - Afterburners
-- `J` - Engage interstellar warp drive (use at clear blue balls)
+- `J` - Engage interstellar warp drive (use at green donut-shaped wireframes)
 - `*, Insert` - Spin Right
 - `/, Delete` - Spin Left
 - `~` (hold down) - Engage shelton slide
