@@ -3,8 +3,8 @@
  *
  * Copyright (C) 2001-2002 Daniel Horn
  * Copyright (C) Alexander Rawass
- * Copyright (C) 2020 Stephen G. Tuggy, pyramid3d, and other Vega Strike
- * contributors
+ * Copyright (C) 2020 Stephen G. Tuggy, pyramid3d, and other Vega Strike contributors
+ * Copyright (C) 2021 Stephen G. Tuggy
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -12,7 +12,7 @@
  *
  * Vega Strike is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 2 of the License, or
+ * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
  * Vega Strike is distributed in the hope that it will be useful,
@@ -35,11 +35,11 @@
 
 easyDomNode::easyDomNode() {}
 
-void easyDomNode::set( easyDomNode *_parent, string _name, const XML_Char **atts )
+void easyDomNode::set( easyDomNode *_parent, std::string _name, const XML_Char **atts )
 {
     parent = _parent;
-    if (atts != NULL) {
-        for (; *atts != NULL; atts += 2) {
+    if (atts != nullptr) {
+        for (; *atts != nullptr; atts += 2) {
 #if 0
             att_name.push_back( (*iter).name );
             att_value.push_back( (*iter).value );
@@ -55,21 +55,21 @@ void easyDomNode::addChild( easyDomNode *child )
     subnodes.push_back( child );
 }
 
-string easyDomNode::attr_value( string search_name )
+std::string easyDomNode::attr_value( std::string search_name )
 {
     return attribute_map[search_name];
 }
 
-void easyDomNode::printNode( ostream &out, int recurse_level, int level )
+void easyDomNode::printNode( std::ostream &out, int recurse_level, int level )
 {
-    vsUMap< string, string >::const_iterator iter;
+    vsUMap< std::string, std::string >::const_iterator iter;
 
     out<<"<"<<name;
     for (iter = attribute_map.begin(); iter != attribute_map.end(); iter++)
         out<<" "<<(*iter).first<<"=\""<<(*iter).second<<"\"";
     out<<">"<<std::endl;
 
-    vector< easyDomNode* >::const_iterator siter;
+    std::vector< easyDomNode* >::const_iterator siter;
     if (recurse_level > 0)
         for (siter = subnodes.begin(); siter != subnodes.end(); siter++)
             (*siter)->printNode( out, recurse_level-1, level+1 );

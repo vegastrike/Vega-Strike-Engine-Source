@@ -3,8 +3,8 @@
  *
  * Copyright (C) 2001-2002 Daniel Horn
  * Copyright (C) Alexander Rawass
- * Copyright (C) 2020 Stephen G. Tuggy, pyramid3d, and other Vega Strike
- * contributors
+ * Copyright (C) 2020 Stephen G. Tuggy, pyramid3d, and other Vega Strike contributors
+ * Copyright (C) 2021 Stephen G. Tuggy
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -12,7 +12,7 @@
  *
  * Vega Strike is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 2 of the License, or
+ * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
  * Vega Strike is distributed in the hope that it will be useful,
@@ -69,6 +69,7 @@
 #include "flightgroup.h"
 #include "gldrv/winsys.h"
 #include "gfx/cockpit_generic.h"
+#include "vs_logging.h"
 
 /* *********************************************************** */
 //ADD_FROM_PYTHON_FUNCTION(pythonMission)
@@ -89,10 +90,10 @@ void Mission::DirectorLoop()
     }
     catch (...) {
         if ( PyErr_Occurred() ) {
-            BOOST_LOG_TRIVIAL(fatal) << "void Mission::DirectorLoop(): Python error occurred";
+            VS_LOG(fatal, "void Mission::DirectorLoop(): Python error occurred");
             PyErr_Print();
             PyErr_Clear();
-            VSFileSystem::flushLogs();
+            VegaStrikeLogging::VegaStrikeLogger::FlushLogs();
         } throw;
     }
 }
@@ -213,7 +214,7 @@ void Mission::DirectorBenchmark()
     if (benchmark > 0.0 && benchmark < gametime) {
         BOOST_LOG_TRIVIAL(trace) << "Game was running for "<<gametime<<" secs,   av. framerate "<<( (double) total_nr_frames )/gametime
                  <<std::endl;
-        VSFileSystem::flushLogs();
+        VegaStrikeLogging::VegaStrikeLogger::FlushLogs();
         winsys_exit( 0 );
     }
 }

@@ -1,14 +1,15 @@
-/*
+/**
  * gl_quad_list.cpp
  *
  * Copyright (C) 2001-2002 Daniel Horn & Alan Shieh
  * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike contributors
+ * Copyright (C) 2021 Stephen G. Tuggy
  *
  * This file is part of Vega Strike.
  *
  * Vega Strike is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 2 of the License, or
+ * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
  * Vega Strike is distributed in the hope that it will be useful,
@@ -19,13 +20,16 @@
  * You should have received a copy of the GNU General Public License
  * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
  */
+
+
 #include "gl_globals.h"
 
 #include "gfxlib.h"
 #include "vegastrike.h"
 #include "vs_globals.h"
 #include <stdio.h>
-#include "vsfilesystem.h"
+// #include "vsfilesystem.h"   // Is this still needed? -- stephengtuggy 2021-09-06
+#include "vs_logging.h"
 
 GFXQuadList::GFXQuadList( GFXBOOL color ) : numVertices( 0 )
     , numQuads( 0 )
@@ -76,7 +80,7 @@ int GFXQuadList::AddQuad( const GFXVertex *vertices, const GFXColorVertex *color
                 data.colors = (GFXColorVertex*) realloc( data.colors, numVertices*sizeof (GFXColorVertex) );
             int* tmp = (int*) realloc( quadassignments, numVertices*sizeof (int)/4 );
             if (tmp == nullptr) {
-                BOOST_LOG_TRIVIAL(fatal) << "Error reallocating quadassignments!";
+                VS_LOG_AND_FLUSH(fatal, "Error reallocating quadassignments!");
                 return -1;
             } else {
                 quadassignments = tmp;
@@ -104,7 +108,7 @@ int GFXQuadList::AddQuad( const GFXVertex *vertices, const GFXColorVertex *color
             Dirty--;
             return i;
         }
-    BOOST_LOG_TRIVIAL(fatal) << "Fatal Error adding quads";
+    VS_LOG_AND_FLUSH(fatal, "Fatal Error adding quads");
     //should NOT get here!
     return -1;
 }

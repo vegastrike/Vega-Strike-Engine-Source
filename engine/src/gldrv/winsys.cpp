@@ -1,4 +1,4 @@
-/*
+/**
  * Tux Racer
  * Copyright (C) 1999-2001 Jasmin F. Patry
  *
@@ -19,11 +19,26 @@
  * Incorporated into Vega Strike
  *
  * Copyright (C) Daniel Horn
- * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike
- * contributors
+ * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike contributors
+ * Copyright (C) 2021 Stephen G. Tuggy
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
+ *
+ * Vega Strike is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Vega Strike is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
  */
+
+
 #include <assert.h>
 #include <sstream>
 
@@ -33,8 +48,9 @@
 #include "xml_support.h"
 #include "config_xml.h"
 #include "vs_globals.h"
-#include "vsfilesystem.h"
+// #include "vsfilesystem.h"
 #include "options.h"
+#include "vs_logging.h"
 
 
 
@@ -265,7 +281,7 @@ static bool setup_sdl_video_mode()
             }
         }
         if (screen == NULL) {
-            BOOST_LOG_TRIVIAL(fatal) << "FAILED to initialize video";
+            VS_LOG_AND_FLUSH(fatal, "FAILED to initialize video");
             VSExit( 1 );
         }
     }
@@ -312,8 +328,7 @@ void winsys_init( int *argc, char **argv, char const *window_title, char const *
      * Initialize SDL
      */
     if (SDL_Init( sdl_flags ) < 0) {
-        BOOST_LOG_TRIVIAL(fatal) << boost::format("Couldn't initialize SDL: %1%") % SDL_GetError();
-        VSFileSystem::flushLogs();
+        VS_LOG_AND_FLUSH(fatal, (boost::format("Couldn't initialize SDL: %1%") % SDL_GetError()));
         exit( 1 );              // stephengtuggy 2020-07-27 - I would use VSExit here, but that calls winsys_exit, which I'm not sure will work if winsys_init hasn't finished yet.
     }
     SDL_EnableUNICODE( 1 );     //supposedly fixes int'l keyboards.
@@ -558,7 +573,7 @@ void winsys_atexit( winsys_atexit_func_t func )
     static bool called = false;
     if (called != false) {
         BOOST_LOG_TRIVIAL(error) << "winsys_atexit called twice";
-        VSFileSystem::flushLogs();
+        VegaStrikeLogging::VegaStrikeLogger::FlushLogs();
     }
     called = true;
 }
@@ -816,8 +831,7 @@ void winsys_init( int *argc, char **argv, char const *window_title, char const *
 
         glutWindow = glutCreateWindow( window_title );
         if (glutWindow == 0) {
-            BOOST_LOG_TRIVIAL(fatal) << "Couldn't create a window.";
-            VSFileSystem::flushLogs();
+            VS_LOG_AND_FLUSH(fatal, "Couldn't create a window.");
             exit( 1 );                  // stephengtuggy 2020-07-27 - I would use VSExit here, but that calls winsys_exit, which I'm not sure will work if winsys_init hasn't finished yet.
         }
     }
@@ -904,9 +918,9 @@ void winsys_atexit( winsys_atexit_func_t func )
 {
     static bool called = false;
     if (called) {
-        cerr << "winsys_atexit called twice\n";
+        std::cerr << "winsys_atexit called twice\n";
         BOOST_LOG_TRIVIAL(error) << "winsys_atexit called twice\n";
-        VSFileSystem::flushLogs();
+        VegaStrikeLogging::VegaStrikeLogger::FlushLogs();
     }
     called = true;
 

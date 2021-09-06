@@ -4,6 +4,7 @@
  * Copyright (C) Daniel Horn
  * Copyright (C) 2020 pyramid3d, Nachum Barcohen, Roy Falk, Stephen G. Tuggy,
  * and other Vega Strike contributors
+ * Copyright (C) 2021 Stephen G. Tuggy
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -24,9 +25,11 @@
  */
 
 
-#include <stdio.h>
+#include "vsfilesystem.h"
+
+#include <cstdio>
 #include <assert.h>
-#include <stdarg.h>
+#include <cstdarg>
 #include <exception>
 #if defined (_WIN32) && !defined (__CYGWIN__)
 #include <Shlobj.h>
@@ -50,7 +53,6 @@ struct dirent
 #endif
 #include <sys/stat.h>
 #include "configxml.h"
-#include "vsfilesystem.h"
 #include "vs_globals.h"
 #include "vegastrike.h"
 #include "common/common.h"
@@ -63,9 +65,9 @@ struct dirent
 
 #include "galaxy.h"
 
-#include "boost/iostreams/stream.hpp"
-#include "boost/iostreams/device/null.hpp"
-#include "boost/filesystem.hpp"
+// #include "boost/iostreams/stream.hpp"
+// #include "boost/iostreams/device/null.hpp"
+#include <boost/filesystem.hpp>
 
 #include "configuration/game_config.h"
 
@@ -91,14 +93,14 @@ char *CONFIGFILE;
 const size_t VS_PATH_BUF_SIZE = 65536;
 char  pwd[VS_PATH_BUF_SIZE];
 VSVolumeType isin_bigvolumes = VSFSNone;
-string curmodpath = "";
+std::string curmodpath = "";
 
 
 
 
 extern string GetUnitDir( string filename );
 
-string selectcurrentdir;
+std::string selectcurrentdir;
 
 int selectdirs( const struct dirent * entry )
 {
@@ -145,9 +147,9 @@ namespace VSFileSystem
 std::string vegastrike_cwd;
 
 
-VSError CachedFileLookup( FileLookupCache &cache, const string &file, VSFileType type )
+VSError CachedFileLookup( FileLookupCache &cache, const std::string &file, VSFileType type )
 {
-    string hashName = GetHashName( file );
+    std::string hashName = GetHashName( file );
     FileLookupCache::iterator it = cache.find( hashName );
     if ( it != cache.end() )
         return it->second;
@@ -229,33 +231,33 @@ int GetReadBytes( char *fmt, va_list ap )
  */
 
 bool   use_volumes;
-string volume_format;
+std::string volume_format;
 enum VSVolumeFormat q_volume_format;
 
-vector< vector< string > >SubDirectories;                       //Subdirectories where we should look for VSFileTypes files
-vector< string >    Directories;                                        //Directories where we should look for VSFileTypes files
-vector< string >    Rootdir;                                                    //Root directories where we should look for VSFileTypes files
-string sharedtextures;
-string sharedunits;
-string sharedsounds;
-string sharedmeshes;
-string sharedsectors;
-string sharedcockpits;
-string shareduniverse;
-string aidir;
-string sharedanims;
-string sharedvideos;
-string sharedsprites;
-string savedunitpath;
-string modname;
-string moddir;
-string datadir;
-string homedir;
+std::vector<std::vector<std::string>> SubDirectories;                       //Subdirectories where we should look for VSFileTypes files
+std::vector<std::string>    Directories;                                        //Directories where we should look for VSFileTypes files
+std::vector<std::string>    Rootdir;                                                    //Root directories where we should look for VSFileTypes files
+std::string sharedtextures;
+std::string sharedunits;
+std::string sharedsounds;
+std::string sharedmeshes;
+std::string sharedsectors;
+std::string sharedcockpits;
+std::string shareduniverse;
+std::string aidir;
+std::string sharedanims;
+std::string sharedvideos;
+std::string sharedsprites;
+std::string savedunitpath;
+std::string modname;
+std::string moddir;
+std::string datadir;
+std::string homedir;
 
-string config_file;
-string weapon_list;
-string universe_name;
-string HOMESUBDIR( ".vegastrike" );
+std::string config_file;
+std::string weapon_list;
+std::string universe_name;
+std::string HOMESUBDIR( ".vegastrike" );
 vector< string >current_path;
 vector< string >current_directory;
 vector< string >current_subdirectory;
@@ -268,10 +270,10 @@ vector< std::vector< std::string > >savedcurdir;        //current dir starting f
 
 vector< int >UseVolumes;
 
-string failed;
+std::string failed;
 
 //Map of the currently opened PK3 volume/resource files
-vsUMap< string, CPK3* >pk3_opened_files;
+vsUMap< std::string, CPK3* >pk3_opened_files;
 
 /*
  ***********************************************************************************************
@@ -464,18 +466,6 @@ long vs_getsize( FILE *fp )
  ***********************************************************************************************
  */
 
-void flushLogs()
-{
-    if (pConsoleLogSink) {
-        pConsoleLogSink->flush();
-    }
-    if (pFileLogSink) {
-        pFileLogSink->flush();
-    }
-    fflush(stdout);
-    fflush(stderr);
-}
-
 #ifdef WIN32
 void InitHomeDirectory()
 {
@@ -515,7 +505,7 @@ void InitHomeDirectory()
     pwent = getpwuid( getuid() );
     chome_path = pwent->pw_dir;
     if ( !DirectoryExists( chome_path ) ) {
-        BOOST_LOG_TRIVIAL(fatal) << "!!! ERROR : home directory not found";
+        VS_LOG_AND_FLUSH(fatal, "!!! ERROR : home directory not found");
         VSExit( 1 );
     }
     string user_home_path( chome_path );
@@ -528,7 +518,7 @@ void InitHomeDirectory()
 
 void InitDataDirectory()
 {
-    vector< string >data_paths;
+    std::vector< std::string >data_paths;
 
     /* commandline-specified paths come first */
     if (!datadir.empty()) {
@@ -592,7 +582,7 @@ void InitDataDirectory()
             }
 
             if (chdir( datadir.c_str() ) < 0) {
-                BOOST_LOG_TRIVIAL(fatal) << "Error changing to datadir";
+                VS_LOG_AND_FLUSH(fatal, "Error changing to datadir");
                 VSExit( 1 );
             }
             if (NULL != getcwd( tmppath, VS_PATH_BUF_SIZE - 1 )) {
@@ -692,8 +682,8 @@ void LoadConfig( string subdir )
                 config_file = datadir+"/"+config_file;
             }
             else {
-                BOOST_LOG_TRIVIAL(fatal) << boost::format("CONFIGFILE - No config found in data dir : %1%") % (datadir+"/"+config_file);
-                BOOST_LOG_TRIVIAL(fatal) << "CONFIG FILE NOT FOUND !!!";
+                VS_LOG_AND_FLUSH(fatal, (boost::format("CONFIGFILE - No config found in data dir : %1%") % (datadir+"/"+config_file)));
+                VS_LOG_AND_FLUSH(fatal, "CONFIG FILE NOT FOUND !!!");
                 VSExit( 1 );
             }
         }
@@ -724,7 +714,7 @@ void LoadConfig( string subdir )
         if (true == legacy_data_dir_mode) {
             BOOST_LOG_TRIVIAL(info) << boost::format("DATADIR - No datadir specified in config file, using : %1%") % datadir;
         } else {
-            BOOST_LOG_TRIVIAL(fatal) << boost::format("DATADIR - No datadir specified in config file");
+            VS_LOG_AND_FLUSH(fatal, "DATADIR - No datadir specified in config file");
             VSExit( 1 );
         }
     }
@@ -736,7 +726,7 @@ void LoadConfig( string subdir )
     try {
         Galaxy galaxy = Galaxy(universe_file);
     } catch (std::exception &e) {
-        BOOST_LOG_TRIVIAL(fatal) << boost::format("Error while loading configuration. Did you specifcy the asset directory? Error: %1%") % e.what();
+        VS_LOG_AND_FLUSH(fatal, (boost::format("Error while loading configuration. Did you specifcy the asset directory? Error: %1%") % e.what()));
         VSExit(1);
     }
 }
@@ -998,7 +988,7 @@ void CreateDirectoryAbs( const char *filename )
 #endif
                    );
         if (err < 0 && errno != EEXIST) {
-            BOOST_LOG_TRIVIAL(fatal) << "Errno=" << errno << " - FAILED TO CREATE : " << filename;
+            VS_LOG_AND_FLUSH(fatal, (boost::format("Errno=%1% - FAILED TO CREATE : %2%") % errno % filename));
             GetError( "CreateDirectory" );
             VSExit( 1 );
         }
@@ -1421,7 +1411,7 @@ void VSFile::checkExtracted()
                 //File is not opened so we open it and add it in the pk3 file map
                 CPK3 *pk3newfile = new CPK3;
                 if ( !pk3newfile->Open( full_vol_path.c_str() ) ) {
-                    BOOST_LOG_TRIVIAL(fatal) << "!!! ERROR : opening volume : " << full_vol_path;
+                    VS_LOG_AND_FLUSH(fatal, (boost::format("!!! ERROR : opening volume : %1%") % full_vol_path));
                     VSExit( 1 );
                 }
                 std::pair< std::string, CPK3* >pk3_pair( full_vol_path, pk3newfile );
@@ -1694,7 +1684,7 @@ VSError VSFile::ReadLine( void *ptr, size_t length )
     return Ok;
 }
 
-string VSFile::ReadFull()
+std::string VSFile::ReadFull()
 {
     if (this->Size() < 0) {
         BOOST_LOG_TRIVIAL(error)<<"Attempt to call ReadFull on a bad file "<<this->filename<<" "<<this->Size()<<" "<<this->GetFullPath().c_str();
@@ -1962,7 +1952,7 @@ static void pathAppend( string &dest, string &suffix )
     dest += suffix;
 }
 
-string VSFile::GetFullPath()
+std::string VSFile::GetFullPath()
 {
     string tmp = this->rootname;
     pathAppend( tmp, this->directoryname );
@@ -1971,7 +1961,7 @@ string VSFile::GetFullPath()
     return tmp;
 }
 
-string VSFile::GetAbsPath()
+std::string VSFile::GetAbsPath()
 {
     string tmp = this->directoryname;
     pathAppend( tmp, this->subdirectoryname );

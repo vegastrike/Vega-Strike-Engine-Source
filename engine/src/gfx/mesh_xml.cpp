@@ -2,8 +2,8 @@
  * mesh_xml.cpp
  *
  * Copyright (C) Daniel Horn
- * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike
- * contributors
+ * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike contributors
+ * Copyright (C) 2021 Stephen G. Tuggy
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -53,6 +53,7 @@
 #include "cmd/script/mission.h"
 #include "cmd/script/flightgroup.h"
 #include "hashtable.h"
+#include "vs_logging.h"
 
 #ifdef max
 #undef max
@@ -1168,11 +1169,11 @@ void LaunchConverter( const char *input, const char *output, const char *args = 
         soundserver_path = VSFileSystem::datadir+"/mesher";
         firstarg = string( "\"" )+soundserver_path+string( "\"" );
         pid = execlp( soundserver_path.c_str(), soundserver_path.c_str(), input, output, args, NULL );
-        BOOST_LOG_TRIVIAL(fatal) << "Unable to spawn converter";
+        VS_LOG_AND_FLUSH(fatal, "Unable to spawn converter");
         VSExit( -1 );
     } else {
         if (pid == -1) {
-            BOOST_LOG_TRIVIAL(fatal) << "Unable to spawn converter";
+            VS_LOG_AND_FLUSH(fatal, "Unable to spawn converter");
             VSExit( -1 );
         }
         int mystat = 0;
@@ -1409,7 +1410,7 @@ void Mesh::LoadXML( VSFileSystem::VSFile &f,
     XML_ParserFree( parser );
     //Now, copy everything into the mesh data structures
     if (xml->load_stage != 5) {
-        BOOST_LOG_TRIVIAL(fatal) << "Warning: mesh load possibly failed";
+        VS_LOG_AND_FLUSH(fatal, "Warning: mesh load possibly failed");
         VSExit( -1 );
     }
     PostProcessLoading( xml, textureOverride );

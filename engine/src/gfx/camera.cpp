@@ -2,8 +2,8 @@
  * camera.cpp
  *
  * Copyright (C) 2001-2002 Daniel Horn and Alan Shieh
- * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike
- * contributors
+ * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike contributors
+ * Copyright (C) 2021 Stephen G. Tuggy
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -11,7 +11,7 @@
  *
  * Vega Strike is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 2 of the License, or
+ * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
  * Vega Strike is distributed in the hope that it will be useful,
@@ -36,6 +36,8 @@
 
 #include <assert.h>     //needed for assert() calls
 //#include "planetary_transform.h"  commented out by chuck_starchaser; --never used
+
+#include "vs_logging.h"
 
 //const float PI=3.1415926536;
 
@@ -210,8 +212,8 @@ void Camera::SetPosition( const QVector &origin, const Vector &vel, const Vector
         Coord    = origin;
         changed  = GFXTRUE;
     } else {
-        BOOST_LOG_TRIVIAL(fatal) << "fatal error in camera";
-        VSFileSystem::flushLogs();
+        VS_LOG_AND_FLUSH(fatal, "fatal error in camera");
+        VSExit(-3); // What value should this return? -- stephengtuggy 2021-09-06
     }
 }
 

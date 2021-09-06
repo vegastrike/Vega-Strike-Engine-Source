@@ -3,8 +3,8 @@
  *
  * Copyright (C) 2001-2002 Daniel Horn
  * Copyright (C) Alexander Rawass
- * Copyright (C) 2020 Stephen G. Tuggy, pyramid3d, and other Vega Strike
- * contributors
+ * Copyright (C) 2020 Stephen G. Tuggy, pyramid3d, and other Vega Strike contributors
+ * Copyright (C) 2021 Stephen G. Tuggy
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -12,7 +12,7 @@
  *
  * Vega Strike is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 2 of the License, or
+ * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
  * Vega Strike is distributed in the hope that it will be useful,
@@ -39,58 +39,59 @@
 #include "vsfilesystem.h"
 #include "vs_globals.h"
 //using namespace VSFileSystem;
-using VSFileSystem::VSFile;
-using VSFileSystem::VSError;
-using VSFileSystem::Ok;
-using VSFileSystem::FileNotFound;
-using VSFileSystem::MissionFile;
-using VSFileSystem::UnitFile;
-using VSFileSystem::UnknownFile;
-using VSFileSystem::AiFile;
+// using VSFileSystem::VSFile;
+// using VSFileSystem::VSError;
+// using VSFileSystem::Ok;
+// using VSFileSystem::FileNotFound;
+// using VSFileSystem::MissionFile;
+// using VSFileSystem::UnitFile;
+// using VSFileSystem::UnknownFile;
+// using VSFileSystem::AiFile;
 #include "xml_support.h"
+#include "vs_logging.h"
 
-using std::string;
-using std::vector;
-using std::stack;
-using std::ostream;
+// using std::string;
+// using std::vector;
+// using std::stack;
+// using std::ostream;
 
-using XMLSupport::AttributeList;
+// using XMLSupport::AttributeList;
 
-extern string parseCalike( char const *filename );
+extern std::string parseCalike( char const *filename );
 
 class easyDomNode
 {
 public: easyDomNode();
 
-    void set( easyDomNode *parent, string name, const XML_Char **atts );
-    void printNode( ostream &out, int recurse_level, int level );
+    void set( easyDomNode *parent, std::string name, const XML_Char **atts );
+    void printNode( std::ostream &out, int recurse_level, int level );
 
     void addChild( easyDomNode *child );
 
-    string Name()
+    std::string Name()
     {
         return name;
     }
 
-    void set_attribute( string name, string value )
+    void set_attribute( std::string name, std::string value )
     {
         attribute_map[name] = value;
     }
 
-    string attr_value( string attr_name );
-    vector< easyDomNode* >subnodes;
+    std::string attr_value( std::string attr_name );
+    std::vector< easyDomNode* >subnodes;
 
 private:
     easyDomNode   *parent;
-    AttributeList *attributes;
-    vsUMap< string, string >attribute_map;
+    XMLSupport::AttributeList *attributes;
+    vsUMap< std::string, std::string >attribute_map;
 //vector<string> att_name;
 //vector<string> att_value;
 
-    string name;
+    std::string name;
 };
 
-typedef vsUMap< string, int >tagMap;
+typedef vsUMap< std::string, int >tagMap;
 
 class tagDomNode : public easyDomNode
 {
@@ -100,7 +101,7 @@ public:
     void Tag( tagMap *tagmap )
     {
         tag = (*tagmap)[Name()];
-        vector< easyDomNode* >::const_iterator siter;
+        std::vector< easyDomNode* >::const_iterator siter;
         for (siter = subnodes.begin(); siter != subnodes.end(); siter++) {
             tagDomNode *tnode = (tagDomNode*) (*siter);
             tnode->Tag( tagmap );
@@ -134,41 +135,41 @@ public: easyDomFactory() {}
 
     domNodeType * LoadXML( const char *filename )
     {
-        topnode = NULL;
+        topnode = nullptr;
         //Not really nice but should do its job
         unsigned int length = strlen( filename );
-        VSFile  f;
-        VSError err = FileNotFound;
+        VSFileSystem::VSFile  f;
+        VSFileSystem::VSError err = VSFileSystem::VSError::FileNotFound;
         if ( length > 8 && !memcmp( (filename+length-7), "mission", 7 ) )
-            err = f.OpenReadOnly( filename, MissionFile );
-        if (err > Ok) {
-            err = f.OpenReadOnly( filename, UnknownFile );
-            if (err > Ok) {
-                string rootthis = string( "/" )+filename;
-                err = f.OpenReadOnly( rootthis, UnknownFile );
+            err = f.OpenReadOnly( filename, VSFileSystem::MissionFile );
+        if (err > VSFileSystem::VSError::Ok) {
+            err = f.OpenReadOnly( filename, VSFileSystem::UnknownFile );
+            if (err > VSFileSystem::VSError::Ok) {
+                std::string rootthis = std::string( "/" )+filename;
+                err = f.OpenReadOnly( rootthis, VSFileSystem::UnknownFile );
             }
         }
-        if (err > Ok) {
+        if (err > VSFileSystem::VSError::Ok) {
             string prefix = ("../mission/");
             prefix += filename;
-            err     = f.OpenReadOnly( prefix.c_str(), UnknownFile );
+            err     = f.OpenReadOnly( prefix.c_str(), VSFileSystem::UnknownFile );
         }
-        if (err > Ok) {
+        if (err > VSFileSystem::VSError::Ok) {
             string prefix = ("mission/");
             prefix += filename;
-            err     = f.OpenReadOnly( prefix.c_str(), UnknownFile );
+            err     = f.OpenReadOnly( prefix.c_str(), VSFileSystem::UnknownFile );
         }
-        if (err > Ok) {
+        if (err > VSFileSystem::VSError::Ok) {
             string prefix = ("../");
             prefix += filename;
-            err     = f.OpenReadOnly( prefix.c_str(), UnknownFile );
+            err     = f.OpenReadOnly( prefix.c_str(), VSFileSystem::UnknownFile );
         }
-        if (err > Ok) {
-            return NULL;
+        if (err > VSFileSystem::VSError::Ok) {
+            return nullptr;
         }
         xml = new easyDomFactoryXML;
 
-        XML_Parser parser = XML_ParserCreate( NULL );
+        XML_Parser parser = XML_ParserCreate( nullptr );
         XML_SetUserData( parser, this );
         XML_SetElementHandler( parser, &easyDomFactory::beginElement, &easyDomFactory::endElement );
         XML_SetCharacterDataHandler( parser, &easyDomFactory::charHandler );
@@ -201,10 +202,11 @@ public: easyDomFactory() {}
     static void charHandler( void *userData, const XML_Char *s, int len )
     {
         easyDomFactoryXML *xml = ( (easyDomFactory< domNodeType >*)userData )->xml;
-        if (!xml->buffer)
+        if (!xml->buffer) {
             xml->buffer = (char*) malloc( sizeof (char)*(len+1) );
-        else
+        } else {
             xml->buffer = (char*) realloc( xml->buffer, sizeof (char)*(len+1+xml->currentindex) );
+        }
         strncpy( xml->buffer+xml->currentindex, s, len );
         xml->currentindex += len;
     }
@@ -213,13 +215,13 @@ public: easyDomFactory() {}
     {
         const int chunk_size = 262144;
 
-        string    module_str = parseCalike( filename );
+        std::string    module_str = parseCalike( filename );
         if ( module_str.empty() ) {
-            return NULL;
+            return nullptr;
         }
         xml = new easyDomFactoryXML;
 
-        XML_Parser parser = XML_ParserCreate( NULL );
+        XML_Parser parser = XML_ParserCreate( nullptr );
         XML_SetUserData( parser, this );
         XML_SetElementHandler( parser, &easyDomFactory::beginElement, &easyDomFactory::endElement );
         XML_SetCharacterDataHandler( parser, &easyDomFactory::charHandler );
@@ -262,11 +264,12 @@ public: easyDomFactory() {}
         ( (easyDomFactory*) userData )->endElement( name );
     }
 
-//void beginElement(const string &name, const AttributeList &attributes){
+//void beginElement(const std::string &name, const XMLSupport::AttributeList &attributes){
     void doTextBuffer()
     {
-        if ( !nodestack.size() )
+        if ( !nodestack.size() ) {
             return;
+        }
         domNodeType *stacktop = nodestack.top();
         if (xml->buffer) {
             xml->buffer[xml->currentindex] = '\0';
@@ -277,25 +280,26 @@ public: easyDomFactory() {}
         xml->currentindex = 0;
     }
 
-    void beginElement( const string &name, const XML_Char **atts )
+    void beginElement( const std::string &name, const XML_Char **atts )
     {
-        //AttributeList::const_iterator iter;
+        //XMLSupport::AttributeList::const_iterator iter;
 
         doTextBuffer();
         domNodeType *parent;
         bool hasParent = false;
         if ( nodestack.empty() ) {
-            parent = NULL;
+            parent = nullptr;
         } else {
             hasParent = true;
             parent    = nodestack.top();
         }
         domNodeType *thisnode = new domNodeType();
         thisnode->set( parent, name, atts );
-        if (!hasParent)
+        if (!hasParent) {
             topnode = thisnode;
-        else
+        } else {
             parent->addChild( thisnode );
+        }
         nodestack.push( thisnode );
     }
 
@@ -304,14 +308,14 @@ public: easyDomFactory() {}
         doTextBuffer();
         domNodeType *stacktop = nodestack.top();
         if (stacktop->Name() != name) {
-            BOOST_LOG_TRIVIAL(fatal) << boost::format("error: expected %1% , got %2%") % stacktop->Name() % name;
+            VS_LOG_AND_FLUSH(fatal, (boost::format("error: expected %1% , got %2%") % stacktop->Name() % name));
             VSExit( 1 );
         } else {
             nodestack.pop();
         }
     }
 
-    stack< domNodeType* >nodestack;
+    std::stack< domNodeType* >nodestack;
 
     domNodeType *topnode;
 };

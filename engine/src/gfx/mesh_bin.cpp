@@ -2,8 +2,8 @@
  * mesh_bin.cpp
  *
  * Copyright (C) Daniel Horn
- * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike
- * contributors
+ * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike contributors
+ * Copyright (C) 2021 Stephen G. Tuggy
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -32,8 +32,9 @@
 #include "vs_globals.h"
 #include "file_main.h"
 #include "vsfilesystem.h"
+#include "vs_logging.h"
 
-using namespace VSFileSystem;
+using namespace VSFileSystem;   // FIXME -- Shouldn't include the entire namespace
 
 extern Texture * createTexture( char const *ccc,
                                 char const *cc,
@@ -78,7 +79,7 @@ void Mesh::LoadBinary( const char *filename, int faction )
     VSFile  fp;
     VSError err = fp.OpenReadOnly( filename, MeshFile );
     if (err > Ok) {
-        BOOST_LOG_TRIVIAL(fatal) << boost::format("Failed to load file %1$s") % filename;
+        VS_LOG_AND_FLUSH(fatal, (boost::format("Failed to load file %1$s") % filename));
         VSExit( 1 );
     }
     TexNameLength = readi( fp );

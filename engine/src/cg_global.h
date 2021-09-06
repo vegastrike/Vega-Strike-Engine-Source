@@ -2,8 +2,8 @@
  * cg_global.h
  *
  * Copyright (C) Daniel Horn
- * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike
- * contributors
+ * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike contributors
+ * Copyright (C) 2021 Stephen G. Tuggy
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -47,6 +47,8 @@
 
 #endif
 
+#include <string>
+
 #include <Cg/cg.h>
 #include <Cg/cgGL.h>
 
@@ -84,7 +86,7 @@ public:
     CGparameter VecEye;
     CGparameter VecTime;
     CG_Cloak() {}
-    void cgLoadMedia( string pathname, string filename );
+    void cgLoadMedia( std::string pathname, std::string filename );
 };
 
 extern CG_Cloak *cloak_cg;
