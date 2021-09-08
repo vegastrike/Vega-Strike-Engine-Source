@@ -41,17 +41,23 @@
 #define XMD_H
 #endif
 
-#if !defined(HAVE_BOOLEAN)
-#define HAVE_BOOLEAN
-typedef int boolean;
-#define TRUE (static_cast<boolean>(true))
-#define FALSE (static_cast<boolean>(false))
-#endif
+typedef int jpeg_bool;
 
 extern "C" {
-//#define XMD_H
-#include <jconfig.h>
-#include <jpeglib.h>
+//# define XMD_H
+#   define DONT_USE_EXTERN_C
+#   if !defined(HAVE_BOOLEAN)
+#       define HAVE_BOOLEAN
+#       define boolean      jpeg_bool
+#       define TRUE         ((jpeg_bool)true)
+#       define FALSE        ((jpeg_bool)false)
+#       include <jconfig.h>
+#       include <jpeglib.h>
+#       undef boolean
+#   else
+#       include <jconfig.h>
+#       include <jpeglib.h>
+#   endif
 }
 
 /*--------------
@@ -75,7 +81,7 @@ void init_destination( j_compress_ptr cinfo );
 
 /*----------------------------------------------------------------------------
  *  /  Empty the output buffer --- called whenever buffer fills up. */
-boolean empty_output_buffer( j_compress_ptr cinfo );
+jpeg_bool empty_output_buffer( j_compress_ptr cinfo );
 
 
 /*----------------------------------------------------------------------------

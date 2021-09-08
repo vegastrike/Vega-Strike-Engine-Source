@@ -44,7 +44,7 @@ void init_destination( j_compress_ptr cinfo )
 
 /*----------------------------------------------------------------------------
  *  /  Empty the output buffer --- called whenever buffer fills up. */
-boolean empty_output_buffer( j_compress_ptr cinfo )
+jpeg_bool empty_output_buffer( j_compress_ptr cinfo )
 {
     mem_dest_ptr dest = (mem_dest_ptr) cinfo->dest;
     dest->pub.next_output_byte = dest->buffer;
@@ -167,7 +167,7 @@ static void init_source( j_decompress_ptr cinfo )
     /* nothing to do */
 }
 
-static boolean fill_input_buffer( j_decompress_ptr cinfo )
+static jpeg_bool fill_input_buffer( j_decompress_ptr cinfo )
 {
     /* can't fill */
     return FALSE;
