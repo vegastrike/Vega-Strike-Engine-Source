@@ -49,8 +49,8 @@ namespace VegaStrikeLogging {
 // namespace sinks = boost::log::sinks;
 // namespace keywords = boost::log::keywords;
 
-// boost::shared_ptr<VegaStrikeLogging::FileLogSink>    VegaStrikeLogging::pFileLogSink{};
-// boost::shared_ptr<VegaStrikeLogging::ConsoleLogSink> VegaStrikeLogging::pConsoleLogSink{};
+boost::shared_ptr<VegaStrikeLogging::FileLogSink>    VegaStrikeLogger::file_log_sink_{};
+boost::shared_ptr<VegaStrikeLogging::ConsoleLogSink> VegaStrikeLogger::console_log_sink_{};
 
 // void exitProgram(int code)
 // {
@@ -75,8 +75,8 @@ void VegaStrikeLogger::InitLoggingPart2(const uint8_t debug_level, const ::boost
 {
     auto logging_core = ::boost::log::core::get();
 
-    ::boost::filesystem::path& logging_dir = ::boost::filesystem::absolute("logs", vega_strike_home_dir);               /*< $HOME/.vegastrike/logs, typically >*/
-    std::string& logging_dir_name = logging_dir.string();
+    const ::boost::filesystem::path& logging_dir = ::boost::filesystem::absolute("logs", vega_strike_home_dir);         /*< $HOME/.vegastrike/logs, typically >*/
+    const std::string& logging_dir_name = logging_dir.string();
 
     switch (debug_level) {
     case 1:

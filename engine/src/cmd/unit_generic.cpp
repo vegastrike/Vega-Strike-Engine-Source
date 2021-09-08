@@ -524,7 +524,7 @@ void Unit::Init( const char *filename,
         bool istemplate = ( string::npos != ( string( filename ).find( ".template" ) ) );
         static bool usingtemplates = XMLSupport::parse_bool( vs_config->getVariable( "data", "usingtemplates", "true" ) );
         if (!istemplate || (istemplate && usingtemplates)) {
-            VS_LOG(trace, (boost::format("Unit file %1% not found") % filename << std::endl));
+            VS_LOG(trace, (boost::format("Unit file %1% not found") % filename));
         }
         meshdata.clear();
         meshdata.push_back( NULL );

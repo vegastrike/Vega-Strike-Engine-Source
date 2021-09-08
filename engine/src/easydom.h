@@ -24,6 +24,7 @@
  * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+
 /*
  *  easyDom - easy DOM for expat - written by Alexander Rawass <alexannika@users.sourceforge.net>
  */
@@ -150,17 +151,17 @@ public: easyDomFactory() {}
             }
         }
         if (err > VSFileSystem::VSError::Ok) {
-            string prefix = ("../mission/");
+            std::string prefix = ("../mission/");
             prefix += filename;
             err     = f.OpenReadOnly( prefix.c_str(), VSFileSystem::UnknownFile );
         }
         if (err > VSFileSystem::VSError::Ok) {
-            string prefix = ("mission/");
+            std::string prefix = ("mission/");
             prefix += filename;
             err     = f.OpenReadOnly( prefix.c_str(), VSFileSystem::UnknownFile );
         }
         if (err > VSFileSystem::VSError::Ok) {
-            string prefix = ("../");
+            std::string prefix = ("../");
             prefix += filename;
             err     = f.OpenReadOnly( prefix.c_str(), VSFileSystem::UnknownFile );
         }
@@ -303,7 +304,7 @@ public: easyDomFactory() {}
         nodestack.push( thisnode );
     }
 
-    void endElement( const string &name )
+    void endElement( const std::string &name )
     {
         doTextBuffer();
         domNodeType *stacktop = nodestack.top();
