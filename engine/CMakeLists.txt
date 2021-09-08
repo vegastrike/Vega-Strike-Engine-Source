@@ -43,10 +43,18 @@ EXECUTE_PROCESS(
     OUTPUT_STRIP_TRAILING_WHITESPACE
 )
 
+IF (COMMAND cmake_policy)
+    CMAKE_POLICY(SET CMP0003 NEW)
+ENDIF (COMMAND cmake_policy)
+
 # VERSION Policy
 IF (POLICY CMP0048)
     CMAKE_POLICY (SET CMP0048 NEW)
 ENDIF (POLICY CMP0048)
+
+IF (POLICY CMP0072)
+    CMAKE_POLICY (SET CMP0072 NEW)
+ENDIF (POLICY CMP0072)
 
 IF (POLICY CMP0074)
     CMAKE_POLICY (SET CMP0074 NEW)
@@ -108,14 +116,6 @@ ELSE (MSVC)
 ENDIF (MSVC)
 
 # The source files used to be listed here...
-
-IF (COMMAND cmake_policy)
-    CMAKE_POLICY(SET CMP0003 NEW)
-ENDIF (COMMAND cmake_policy)
-
-IF (POLICY CMP0072)
-    CMAKE_POLICY (SET CMP0072 NEW)
-ENDIF (POLICY CMP0072)
 
 
 # Set the default build type
@@ -1568,3 +1568,54 @@ ENDIF (WIN32 AND NOT UNIX)
 
 INCLUDE(CPack)
 
+MESSAGE("-- Configuring Unit Tests")
+
+INCLUDE(FetchContent)
+FetchContent_Declare(
+    googletest
+    GIT_REPOSITORY https://github.com/google/googletest.git
+    GIT_TAG        release-1.11.0
+)
+
+FetchContent_GetProperties(googletest)
+string(TOLOWER "googletest" lcName)
+if(NOT ${lcName}_POPULATED)
+    # Fetch the content using previously declared details
+    FetchContent_Populate(googletest)
+
+    # Set custom variables, policies, etc.
+
+    # For Windows: Prevent overriding the parent project's compiler/linker settings
+    SET(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
+
+    # Bring the populated content into the build
+    add_subdirectory(${${lcName}_SOURCE_DIR} ${${lcName}_BINARY_DIR})
+endif()
+
+enable_testing()
+
+set(TEST_NAME ${PROJECT_NAME}_tests)
+
+add_executable(
+    ${TEST_NAME}
+    src/configuration/tests/configuration_tests.cpp
+    # src/damage/tests/health_tests.cpp
+    # src/damage/tests/layer_tests.cpp
+    # src/damage/tests/object_tests.cpp
+    )
+
+ADD_LIBRARY(vegastrike-testing
+    ${LIBCONFIG}
+    # ${LIBDAMAGE}
+    )
+
+target_link_libraries(
+    ${TEST_NAME}
+    gtest_main
+    vegastrike-testing
+    )
+
+file(COPY "src/configuration/tests/vegastrike.config" DESTINATION ${CMAKE_BINARY_DIR}/test_assets)
+
+include(GoogleTest)
+gtest_discover_tests(${TEST_NAME})
