@@ -34,7 +34,7 @@ Usage:
 
 import sys
 from pathlib import Path
-from shutil import move
+from shutil import copystat, move
 from tempfile import NamedTemporaryFile
 
 LICENSE_TEXT = """{filename}
@@ -107,6 +107,8 @@ def add_gpl_license(filepath: Path):
                 output_file.write(first_line)
                 output_file.write(input_file.read())
 
+    # Copy original file attributes and permissions to temp file
+    copystat(filepath, output_file.name)
     # Move temp file into place
     move(output_file.name, filepath)
 
