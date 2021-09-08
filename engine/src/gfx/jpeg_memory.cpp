@@ -50,7 +50,7 @@ boolean empty_output_buffer( j_compress_ptr cinfo )
     dest->pub.next_output_byte = dest->buffer;
     dest->pub.free_in_buffer   = dest->bufsize;
 
-    return TRUE;
+    return true;
 }
 
 /*----------------------------------------------------------------------------
@@ -106,8 +106,8 @@ int jpeg_compress( char *dst, char *src, int width, int height, int dstsize, int
     /* Setup compression and do it */
     jpeg_memory_dest( &cinfo, jpgbuff, dstsize );
     jpeg_set_defaults( &cinfo );
-    jpeg_set_quality( &cinfo, quality, TRUE );
-    jpeg_start_compress( &cinfo, TRUE );
+    jpeg_set_quality( &cinfo, quality, true );
+    jpeg_start_compress( &cinfo, true );
     /* compress each scanline one-at-a-time */
     while (cinfo.next_scanline < cinfo.image_height) {
         row_pointer = (JSAMPROW) ( dataRGB+(cinfo.next_scanline*3*width) );
@@ -147,8 +147,8 @@ int jpeg_compress_to_file( char *src, char *file, int width, int height, int qua
     /* Setup compression and do it */
     jpeg_stdio_dest( &cinfo, outfile );
     jpeg_set_defaults( &cinfo );
-    jpeg_set_quality( &cinfo, quality, TRUE );
-    jpeg_start_compress( &cinfo, TRUE );
+    jpeg_set_quality( &cinfo, quality, true );
+    jpeg_start_compress( &cinfo, true );
     /* compress each scanline one-at-a-time */
     while (cinfo.next_scanline < cinfo.image_height) {
         row_pointer = (JSAMPROW) &src[cinfo.next_scanline*3*width];
@@ -170,7 +170,7 @@ static void init_source( j_decompress_ptr cinfo )
 static boolean fill_input_buffer( j_decompress_ptr cinfo )
 {
     /* can't fill */
-    return FALSE;
+    return false;
 }
 
 static void skip_input_data( j_decompress_ptr cinfo, long num_bytes )
@@ -221,7 +221,7 @@ void jpeg_decompress( unsigned char *dst, unsigned char *src, int size, int *w, 
     cinfo.err = jpeg_std_error( &jerr );
     jpeg_create_decompress( &cinfo );
     jpeg_memory_src( &cinfo, src, size );
-    jpeg_read_header( &cinfo, TRUE );
+    jpeg_read_header( &cinfo, true );
     jpeg_start_decompress( &cinfo );
 
     *w        = cinfo.output_width;
@@ -251,7 +251,7 @@ void jpeg_decompress_from_file( unsigned char *dst, char *file, int size, int *w
     cinfo.err = jpeg_std_error( &jerr );
     jpeg_create_decompress( &cinfo );
     jpeg_stdio_src( &cinfo, infile );
-    jpeg_read_header( &cinfo, TRUE );
+    jpeg_read_header( &cinfo, true );
     jpeg_start_decompress( &cinfo );
 
     *w        = cinfo.output_width;
