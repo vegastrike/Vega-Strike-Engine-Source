@@ -45,7 +45,7 @@
 #define HAVE_BOOLEAN
 #define TRUE true
 #define FALSE false
-#define boolean bool
+typedef bool boolean;
 #endif
 
 extern "C" {
