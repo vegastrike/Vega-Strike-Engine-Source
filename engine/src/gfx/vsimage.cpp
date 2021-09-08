@@ -47,17 +47,6 @@
 #  define png_jmpbuf( png_ptr ) ( (png_ptr)->jmpbuf )
 #endif
 
-#if defined (_WIN32) && !defined (__CYGWIN__)
-
-#ifndef HAVE_BOOLEAN
-#define HAVE_BOOLEAN
-#define FALSE 0
-#define TRUE 1
-typedef unsigned char boolean;
-#endif
-
-#endif
-
 #ifndef DDS_CUBEMAP
 #define DDS_CUBEMAP 0x00000200L
 #define DDS_CUBEMAP_POSITIVEX 0x00000400L

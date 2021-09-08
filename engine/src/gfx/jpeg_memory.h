@@ -24,38 +24,21 @@
  */
 
 
-#include <stdio.h>
 #define JPEG_SUPPORT
 #ifdef JPEG_SUPPORT   /* Always true? */
 #ifndef __JPEG_MEMORY_H
 #define __JPEG_MEMORY_H
+
+#include <stdio.h>
 #include <string.h>
-/* BAD BAD!!
- * #if defined( _WIN32) && !defined( __CYGWIN__)
- * #ifndef HAVE_BOOLEAN
- * #define HAVE_BOOLEAN
- * #define FALSE 0
- * #define TRUE 1
- *  typedef unsigned char boolean;
- * #endif
- * #ifndef XMD_H
- * #define XMD_H
- *  typedef int INT32;
- * #endif
- * #endif
- */
 #if defined (_WIN32) && !defined (__CYGWIN__)
 #ifndef NOMINMAX
 #define NOMINMAX
 #endif //tells VCC not to generate min/max macros
 #include <windows.h>
 #endif
-// #include "vsfilesystem.h"
 #ifdef _WIN32
 #define XMD_H
-#ifndef HAVE_BOOLEAN
-typedef unsigned char boolean;
-#endif
 #endif
 extern "C" {
 //#define XMD_H
