@@ -43,7 +43,7 @@
 
 #if !defined(HAVE_BOOLEAN)
 #define HAVE_BOOLEAN
-typedef unsigned int boolean;
+typedef int boolean;
 #define TRUE (static_cast<boolean>(true))
 #define FALSE (static_cast<boolean>(false))
 #endif
