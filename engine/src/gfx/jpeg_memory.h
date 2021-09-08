@@ -40,11 +40,20 @@
 #ifdef _WIN32
 #define XMD_H
 #endif
+
+#if !defined(HAVE_BOOLEAN)
+#define HAVE_BOOLEAN
+#define TRUE true
+#define FALSE false
+#define boolean bool
+#endif
+
 extern "C" {
 //#define XMD_H
 #include <jconfig.h>
 #include <jpeglib.h>
 }
+
 /*--------------
  *  A hack to hijack JPEG's innards to write into a memory buffer
  *  ----------------
