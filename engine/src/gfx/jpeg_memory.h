@@ -43,9 +43,9 @@
 
 #if !defined(HAVE_BOOLEAN)
 #define HAVE_BOOLEAN
-#define TRUE true
-#define FALSE false
-#define boolean bool
+typedef unsigned int boolean;
+#define TRUE (static_cast<boolean>(true))
+#define FALSE (static_cast<boolean>(false))
 #endif
 
 extern "C" {
