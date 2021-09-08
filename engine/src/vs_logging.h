@@ -1,4 +1,4 @@
-/**
+/*
  * vs_logging.h
  *
  * Copyright (C) 2021 Stephen G. Tuggy

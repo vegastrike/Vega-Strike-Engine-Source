@@ -1,8 +1,7 @@
-/**
+/*
  * collide.cpp
  *
- * Copyright (C) 2020 Roy Falk, Stephen G. Tuggy and other Vega Strike
- * contributors
+ * Copyright (C) 2020-2021 Roy Falk, Stephen G. Tuggy and other Vega Strike contributors
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -41,7 +40,8 @@
 #include <string>
 #include "vs_globals.h"
 #include "configxml.h"
-#include "vsfilesystem.h"
+// #include "vsfilesystem.h"
+#include "vs_logging.h"
 
 static Hashtable< std::string, collideTrees, 127 >unitColliders;
 collideTrees::collideTrees( const std::string &hk, csOPCODECollider *cT,
@@ -126,7 +126,7 @@ void KillCollideTable( LineCollide *lc, StarSystem *ss )
     if (lc->type == LineCollide::UNIT) {
         ss->collide_table->c.Remove( lc, lc->object.u );
     } else {
-        BOOST_LOG_TRIVIAL(warning) << boost::format("such collide types as %1$d not allowed") % lc->type;
+        VS_LOG(warning, (boost::format("such collide types as %1$d not allowed") % lc->type));
     }
 }
 
@@ -135,7 +135,7 @@ bool EradicateCollideTable( LineCollide *lc, StarSystem *ss )
     if (lc->type == LineCollide::UNIT) {
         return ss->collide_table->c.Eradicate( lc->object.u );
     } else {
-        BOOST_LOG_TRIVIAL(warning) << boost::format("such collide types as %1$d not allowed") % lc->type;
+        VS_LOG(warning, (boost::format("such collide types as %1$d not allowed") % lc->type));
         return false;
     }
 }
@@ -145,7 +145,7 @@ void AddCollideQueue( LineCollide &tmp, StarSystem *ss )
     if (tmp.type == LineCollide::UNIT) {
         ss->collide_table->c.Put( &tmp, tmp.object.u );
     } else {
-        BOOST_LOG_TRIVIAL(warning) << boost::format("such collide types as %1$d not allowed") % tmp.type;
+        VS_LOG(warning, (boost::format("such collide types as %1$d not allowed") % tmp.type));
     }
 }
 

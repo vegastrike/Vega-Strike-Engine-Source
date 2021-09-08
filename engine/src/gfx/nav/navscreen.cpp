@@ -1,9 +1,10 @@
-/**
+/*
  * @file : navscreen.cpp
  * @brief: draws nav map
  *
  * Copyright (C) 2003-2020 hellcatv, ace123, surfdargent, klaussfreire, jacks,
  * pyramid3d, Stephen G. Tuggy, and other Vega Strike contributors
+ * Copyright (C) 2021 Stephen G. Tuggy
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -25,7 +26,8 @@
 
 
 #include <set>
-#include "vsfilesystem.h"
+// #include "vsfilesystem.h"
+#include "vs_logging.h"
 #include "vs_globals.h"
 #include "vegastrike.h"
 #include "gfx/gauge.h"
@@ -301,7 +303,7 @@ void NavigationSystem::Setup()
         for (int i = 0; i < NAVTOTALMESHCOUNT; i++) {
             mesh[i] = NULL;
         }
-        BOOST_LOG_TRIVIAL(error) << "ERROR: Map mesh file not found!!! Using default: blank mesh.";
+        VS_LOG(error, "ERROR: Map mesh file not found!!! Using default: blank mesh.");
         //end DUMMY VARS
     }
     ScreenToCoord( screenskipby4[0] );

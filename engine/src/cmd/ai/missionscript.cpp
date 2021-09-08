@@ -1,9 +1,9 @@
-/**
+/*
  * missionscript.cpp
  *
  * Copyright (C) 2001-2002 Daniel Horn
- * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike
- * contributors
+ * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike contributors
+ * Copyright (C) 2021 Stephen G. Tuggy
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -11,7 +11,7 @@
  *
  * Vega Strike is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 2 of the License, or
+ * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
  * Vega Strike is distributed in the hope that it will be useful,
@@ -34,7 +34,8 @@
 #include <stdio.h>
 #include <vector>
 #include <stack>
-#include "vsfilesystem.h"
+// #include "vsfilesystem.h"
+#include "vs_logging.h"
 #include "tactics.h"
 #include "cmd/unit_generic.h"
 
@@ -54,15 +55,14 @@ AImissionScript::AImissionScript( string modname )
 
 AImissionScript::~AImissionScript()
 {
-    BOOST_LOG_TRIVIAL(info) << "destructor\n";
-    BOOST_LOG_TRIVIAL(info) << parent->getFullAIDescription().c_str();
+    VS_LOG(info, "destructor\n");
+    VS_LOG(info, parent->getFullAIDescription().c_str());
 
     mission->runScript( modulename, "quitai", classid );
 
     mission->destroyClassInstance( modulename, classid );
 #ifdef ORDERDEBUG
-    BOOST_LOG_TRIVIAL(debug) << boost::format("aims%1$x") % this;
-    VSFileSystem::flushLogs();
+    VS_LOG_AND_FLUSH(debug, (boost::format("aims%1$x") % this));
 #endif
 }
 

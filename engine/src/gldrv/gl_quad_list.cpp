@@ -1,4 +1,4 @@
-/**
+/*
  * gl_quad_list.cpp
  *
  * Copyright (C) 2001-2002 Daniel Horn & Alan Shieh
@@ -115,7 +115,7 @@ int GFXQuadList::AddQuad( const GFXVertex *vertices, const GFXColorVertex *color
 void GFXQuadList::DelQuad( int which )
 {
     if (quadassignments[which] >= numQuads) {
-        BOOST_LOG_TRIVIAL(error) << "error del";
+        VS_LOG(error, "error del");
         return;
     }
     if (which < 0 || which >= numVertices/4 || quadassignments[which] == -1)
@@ -132,7 +132,7 @@ void GFXQuadList::DelQuad( int which )
             numQuads--;
             return;
         }
-    BOOST_LOG_TRIVIAL(info) << " error deleting engine flame";
+    VS_LOG(info, " error deleting engine flame");
 }
 void GFXQuadList::ModQuad( int which, const GFXVertex *vertices, float alpha )
 {

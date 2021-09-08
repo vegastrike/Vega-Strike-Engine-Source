@@ -1,4 +1,4 @@
-/**
+/*
  * vs_math.h
  *
  * Copyright (C) 2001-2002 Daniel Horn

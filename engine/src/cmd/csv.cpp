@@ -1,9 +1,9 @@
-/**
+/*
  * csv.cpp
  *
  * Copyright (C) Daniel Horn
- * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike
- * contributors
+ * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike contributors
+ * Copyright (C) 2021 Stephen G. Tuggy
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -26,12 +26,14 @@
 
 #include "csv.h"
 #include "vs_globals.h"
+#include "vsfilesystem.h"
+#include "vs_logging.h"
 
 using std::string;
 
-vector< string > readCSV( const string &s, string delim )
+std::vector<string> readCSV( const string &s, string delim )
 {
-    vector< string >l;
+    std::vector<string> l;
     string as;
     unsigned int    epos = 0;
     unsigned int    sl   = s.length();
@@ -97,7 +99,7 @@ static string addQuote( string s, string delim = ",;" )
     return s;
 }
 
-string writeCSV( const vector< string > &key, const vector< string > &table, string delim )
+string writeCSV( const std::vector< string > &key, const std::vector< string > &table, string delim )
 {
     unsigned int i;
     unsigned int wid = key.size();
@@ -132,35 +134,36 @@ void CSVTable::Init( const string &data )
     string buffer( cdata, csep-cdata );
     cdata = csep+1;
     key   = readCSV( buffer, delim );
-    for (unsigned int i = 0; i < key.size(); i++)
+    for (unsigned int i = 0; i < key.size(); i++) {
         columns[key[i]] = i;
+    }
     while (cdata && *cdata) {
         csep = strchr( cdata, '\n' );
-        if (csep == NULL)
+        if (csep == NULL) {
             buffer.assign( cdata );
-
-        else
+        } else {
             buffer.assign( cdata, csep-cdata );
-        if (csep == NULL)
+        }
+        if (csep == NULL) {
             cdata = NULL;
-
-        else
+        } else {
             cdata = csep+1;
-        vector< string >strs = readCSV( buffer );
+        }
+        std::vector<string> strs = readCSV( buffer );
         unsigned int    row  = table.size()/key.size();
         while ( strs.size() > key.size() ) {
-            BOOST_LOG_TRIVIAL(error) << boost::format("error in csv, line %1$d: %2$s has no key") % (row+1) % strs.back().c_str();
+            VS_LOG(error, (boost::format("error in csv, line %1$d: %2$s has no key") % (row+1) % strs.back().c_str()));
             strs.pop_back();
         }
         while ( strs.size() < key.size() )
             strs.push_back( "" );
         assert( strs.size() == key.size() );
         table.insert( table.end(), strs.begin(), strs.end() );
-        if ( strs.size() )
+        if ( strs.size() ) {
             rows[strs[0]] = row;
-
-        else
+        } else {
             table.pop_back();
+        }
     }
 }
 
@@ -179,14 +182,16 @@ CSVTable::CSVTable( VSFileSystem::VSFile &f, const string &root )
 static string strip_white( const string &s )
 {
     string::size_type start = s.find_first_not_of(" \t\r\n");
-    if (start == string::npos)
+    if (start == string::npos) {
         return "";
+    }
 
     string::size_type end = s.find_last_not_of(" \t\r\n");
-    if (end == string::npos)
+    if (end == string::npos) {
         return s.substr(start);
-    else
+    } else {
         return s.substr(start, end+1-start);
+    }
 }
 
 void
@@ -202,16 +207,15 @@ CSVTable::Merge( const CSVTable &other )
     for (vsUMap<std::string, int>::const_iterator it = other.columns.begin(); it != other.columns.end(); ++it) {
         vsUMap<std::string, int>::const_iterator local = columns.find(it->first);
         if (local == columns.end()) {
-            BOOST_LOG_TRIVIAL(debug) << boost::format("New column %1%") % it->first;
+            VS_LOG(debug, (boost::format("New column %1%") % it->first));
             key.push_back(it->first);
             local = columns.insert(std::pair<string, int>(it->first, key.size()-1)).first;
         }
         if (it->second >= int(colmap.size())) {
-            BOOST_LOG_TRIVIAL(error) << "WTF column " << it->second << "?";
-            VSFileSystem::flushLogs();
+            VS_LOG_AND_FLUSH(fatal, (boost::format("WTF column %1%?") % it->second));
             abort();
         }
-        BOOST_LOG_TRIVIAL(debug) << boost::format("  %1% (%2%) -> %3%") % it->first % it->second % local->second;
+        VS_LOG(debug, (boost::format("  %1% (%2%) -> %3%") % it->first % it->second % local->second));
         colmap[it->second] = local->second;
     }
 
@@ -222,20 +226,22 @@ CSVTable::Merge( const CSVTable &other )
         std::vector<std::string>::const_iterator orig_it = orig_table.begin();
         const std::string empty;
 
-        BOOST_LOG_TRIVIAL(info) << boost::format("Reshaping %1% columns into %2%") % orig_cols % columns.size();
+        VS_LOG(info, (boost::format("Reshaping %1% columns into %2%") % orig_cols % columns.size()));
         table.reserve(rows.size() * key.size());
         while (orig_it != orig_table.end()) {
             size_t i,n;
-            for (i = 0; orig_it != orig_table.end() && i < orig_cols; ++i)
+            for (i = 0; orig_it != orig_table.end() && i < orig_cols; ++i) {
                 table.push_back(*orig_it++);
-            for (n = key.size(); i < n; ++i)
+            }
+            for (n = key.size(); i < n; ++i) {
                 table.push_back(empty);
+            }
         }
     }
-    BOOST_LOG_TRIVIAL(debug) << boost::format("Reshaped table holds %1% cells") % table.size();
+    VS_LOG(debug, (boost::format("Reshaped table holds %1% cells") % table.size()));
 
     // Merge rows
-    BOOST_LOG_TRIVIAL(info) << "Merging rows...";
+    VS_LOG(info, "Merging rows...");
     size_t merged_rows = 0, new_rows = 0;
     for (vsUMap<std::string, int>::const_iterator it = other.rows.begin(); it != other.rows.end(); ++it) {
         vsUMap<std::string, int>::const_iterator local = rows.find(it->first);
@@ -252,8 +258,8 @@ CSVTable::Merge( const CSVTable &other )
             if (!strip_white(*(other_it + i)).empty())
                 *(table_it + colmap[i]) = *(other_it + i);
     }
-    BOOST_LOG_TRIVIAL(info) << boost::format("Rows Merged: %1%, Rows Added: %2%") % merged_rows % new_rows;
-    BOOST_LOG_TRIVIAL(debug) << boost::format("Merged table holds %1% cells") % table.size();
+    VS_LOG(info, (boost::format("Rows Merged: %1%, Rows Added: %2%") % merged_rows % new_rows));
+    VS_LOG(debug, (boost::format("Merged table holds %1% cells") % table.size()));
 }
 
 CSVRow::CSVRow( CSVTable *parent, const string &key )
@@ -272,11 +278,11 @@ const string& CSVRow::operator[]( const string &col ) const
 {
     static string empty_string;
     vsUMap< string, int >::iterator i = parent->columns.find( col );
-    if ( i == parent->columns.end() )
+    if ( i == parent->columns.end() ) {
         return empty_string;
-
-    else
+    } else {
         return parent->table[iter+(*i).second];
+    }
 }
 
 const string& CSVRow::operator[]( unsigned int col ) const
@@ -292,8 +298,9 @@ const string& CSVRow::getKey( unsigned int which ) const
 bool CSVTable::RowExists( const string &name, unsigned int &where )
 {
     vsUMap< string, int >::iterator i = rows.find( name );
-    if ( i == rows.end() )
+    if ( i == rows.end() ) {
         return false;
+    }
     where = (*i).second;
     return true;
 }
@@ -301,24 +308,25 @@ bool CSVTable::RowExists( const string &name, unsigned int &where )
 bool CSVTable::ColumnExists( const string &name, unsigned int &where )
 {
     vsUMap< string, int >::iterator i = columns.find( name );
-    if ( i == columns.end() )
+    if ( i == columns.end() ) {
         return false;
+    }
     where = (*i).second;
     return true;
 }
 
-vector< CSVTable* > unitTables;
+std::vector< CSVTable* > unitTables;
 
 string CSVRow::getRoot()
 {
     if (parent) {
         return parent->rootdir;
     }
-    BOOST_LOG_TRIVIAL(error) << "Error getting root for unit\n";
+    VS_LOG(error, "Error getting root for unit\n");
     return "";
 }
 
-void CSVTable::SetupOptimizer( const vector< string > &keys, unsigned int type )
+void CSVTable::SetupOptimizer( const std::vector< string > &keys, unsigned int type )
 {
     optimizer_setup = true;
     optimizer_type  = type;
@@ -339,24 +347,25 @@ CSVTable* loadCSVTableList(const string& csvfiles, VSFileSystem::VSFileType file
         string tmp = csvfiles.substr( pwhere, where-pwhere );
 
         if (!tmp.empty()) {
-            BOOST_LOG_TRIVIAL(trace) << boost::format("Opening CSV database from '%1%'") % tmp;
+            VS_LOG(trace, (boost::format("Opening CSV database from '%1%'") % tmp));
 
             VSFileSystem::VSFile thisFile;
             VSFileSystem::VSError err = thisFile.OpenReadOnly( tmp, fileType );
             if (err <= VSFileSystem::Ok) {
-                BOOST_LOG_TRIVIAL(info) << boost::format("Loading CSV database from '%1%'") % tmp;
+                VS_LOG(info, (boost::format("Loading CSV database from '%1%'") % tmp));
                 if (table == NULL)
                     table = new CSVTable( thisFile, thisFile.GetRoot() );
                 else
                     table->Merge(CSVTable( thisFile, thisFile.GetRoot() ));
                 thisFile.Close();
             } else if (critical) {
-                BOOST_LOG_TRIVIAL(fatal) << boost::format("Could not load CSV database at '%1%'") % tmp;
+                VS_LOG_AND_FLUSH(fatal, (boost::format("Could not load CSV database at '%1%'") % tmp));
                 VSExit(2);
             }
         }
-        if (where2 == string::npos)
+        if (where2 == string::npos) {
             break;
+        }
         pwhere = where+1;
     }
     return table;

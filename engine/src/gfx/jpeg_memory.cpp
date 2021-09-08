@@ -1,9 +1,9 @@
-/**
+/*
  * jpeg_memory.cpp
  *
  * Copyright (C) Daniel Horn
- * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike
- * contributors
+ * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike contributors
+ * Copyright (C) 2021 Stephen G. Tuggy
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -26,6 +26,8 @@
 
 #include "jpeg_memory.h"
 #include <iostream>
+#include "vs_logging.h"
+#include "vsfilesystem.h"
 
 #ifdef JPEG_SUPPORT
 
@@ -127,7 +129,7 @@ int jpeg_compress_to_file( char *src, char *file, int width, int height, int qua
     struct jpeg_error_mgr jerr;
     JSAMPROW row_pointer;
     if ( ( outfile = fopen( file, "wb" ) ) == NULL ) {
-        BOOST_LOG_TRIVIAL(error) << "can't open " << file;
+        VS_LOG(error, (boost::format("can't open %1%") % file));
         return -1;
     }
     /* zero out the compresion info structures and
@@ -243,7 +245,7 @@ void jpeg_decompress_from_file( unsigned char *dst, char *file, int size, int *w
     unsigned char *dstcur;
     FILE *infile;
     if ( ( infile = fopen( file, "rb" ) ) == NULL ) {
-        BOOST_LOG_TRIVIAL(error) << "can't open " << file;
+        VS_LOG(error, (boost::format("can't open %1%") % file));
         return;
     }
     cinfo.err = jpeg_std_error( &jerr );

@@ -1,29 +1,36 @@
 /*
- * Vega Strike
- * Copyright (C) 2001-2002 Daniel Horn & Alan Shieh
+ * gl_vertex_list.cpp
  *
- * http://vegastrike.sourceforge.net/
+ * Copyright (C) 2001-2002 Daniel Horn and Alan Shieh
+ * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike contributors
+ * Copyright (C) 2021 Stephen G. Tuggy
  *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * as published by the Free Software Foundation; either version 2
- * of the License, or (at your option) any later version.
+ * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
- * This program is distributed in the hope that it will be useful,
+ * This file is part of Vega Strike.
+ *
+ * Vega Strike is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Vega Strike is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+ * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
  */
+
+
 //#include "gl_globals.h"
 
 #include "gfxlib_struct.h"
 #include "vegastrike.h"
 #include "vs_globals.h"
-#include "vsfilesystem.h"
+// #include "vsfilesystem.h"
+#include "vs_logging.h"
 #include <assert.h>
 #ifndef NO_GFX //Server cannot depend on GL, but still needs a mesh library.
 #include "gl_globals.h"
@@ -93,7 +100,7 @@ void GFXOptimizeList( GFXVertex *old, int numV, GFXVertex **nw, int *nnewV, unsi
         memcpy( *nw, old, sizeof(GFXVertex)*size_t(i) );
     *nnewV = _nnewV;
 
-    BOOST_LOG_TRIVIAL(trace) << boost::format("Optimized vertex list - vertices: %1% -> %2%") % numV % *nnewV;
+    VS_LOG(trace, (boost::format("Optimized vertex list - vertices: %1% -> %2%") % numV % *nnewV));
 }
 
 void GFXVertexList::Init( enum POLYTYPE *poly,
@@ -166,17 +173,17 @@ void GFXVertexList::Init( enum POLYTYPE *poly,
         switch (stride)
         {
         case INDEX_BYTE:
-            BOOST_LOG_TRIVIAL(trace) << "Optimized vertex list - using 8-bit indices";
+            VS_LOG(trace, "Optimized vertex list - using 8-bit indices");
             for (unsigned int i = 0; i < numindices; i++)
                 index.b[i] = indices[i];
             break;
         case INDEX_SHORT:
-            BOOST_LOG_TRIVIAL(trace) << "Optimized vertex list - using 16-bit indices";
+            VS_LOG(trace, "Optimized vertex list - using 16-bit indices");
             for (unsigned int i = 0; i < numindices; i++)
                 index.s[i] = indices[i];
             break;
         case INDEX_INT:
-            BOOST_LOG_TRIVIAL(debug) << "Optimized vertex list - using 32-bit indices";
+            VS_LOG(debug, "Optimized vertex list - using 32-bit indices");
             for (unsigned int i = 0; i < numindices; i++)
                 index.i[i] = indices[i];
             break;

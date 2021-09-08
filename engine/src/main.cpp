@@ -1,4 +1,4 @@
-/**
+/*
  * main.cpp
  *
  * Copyright (C) 2001-2002 Daniel Horn
@@ -158,7 +158,7 @@ void cleanup( void )
     STATIC_VARS_DESTROYED = true;
     // stephengtuggy 2020-10-30: Output message both to the console and to the logs
     printf( "Thank you for playing!\n" );
-    BOOST_LOG_TRIVIAL(info) << "Thank you for playing!";
+    VS_LOG(info, "Thank you for playing!");
     ::VegaStrikeLogging::VegaStrikeLogger::FlushLogs();
     if (_Universe != NULL ) {
         _Universe->WriteSaveGame( true );
@@ -198,7 +198,7 @@ void nothinghappens( unsigned int, unsigned int, bool, int, int ) {}
 
 void initSceneManager()
 {
-    BOOST_LOG_TRIVIAL(info) << "Creating scene manager...";
+    VS_LOG(info, "Creating scene manager...");
     Audio::SceneManager *sm = Audio::SceneManager::getSingleton();
 
     if (Audio::SceneManager::getSingleton() == 0)
@@ -209,7 +209,7 @@ void initSceneManager()
 
 void initALRenderer()
 {
-    BOOST_LOG_TRIVIAL(info) << "  Initializing renderer...";
+    VS_LOG(info, "  Initializing renderer...");
     Audio::SceneManager *sm = Audio::SceneManager::getSingleton();
 
     if (g_game.sound_enabled) {
@@ -236,7 +236,7 @@ void initScenes()
 
 void closeRenderer()
 {
-    BOOST_LOG_TRIVIAL(info) << "Shutting down renderer...";
+    VS_LOG(info, "Shutting down renderer...");
     Audio::SceneManager::getSingleton()->setRenderer( SharedPtr<Audio::Renderer>() );
 }
 
@@ -283,9 +283,9 @@ int main( int argc, char *argv[] )
         char pwd[8192] = "";
         if (NULL != getcwd( pwd, 8191 )) {
             pwd[8191] = '\0';
-            BOOST_LOG_TRIVIAL(info) << boost::format(" In path %1%") % pwd;
+            VS_LOG(info, (boost::format(" In path %1%") % pwd));
         } else {
-            BOOST_LOG_TRIVIAL(info) << " In path <<path too long>>";
+            VS_LOG(info, " In path <<path too long>>");
         }
     }
 #ifdef _WIN32
@@ -295,7 +295,7 @@ int main( int argc, char *argv[] )
 
     GetVersionEx( &osvi );
     isVista = (osvi.dwMajorVersion == 6);
-    BOOST_LOG_TRIVIAL(info) << boost::format("Windows version %1% %2%") % osvi.dwMajorVersion % osvi.dwMinorVersion;
+    VS_LOG(info, (boost::format("Windows version %1% %2%") % osvi.dwMajorVersion % osvi.dwMinorVersion));
 #endif
     /* Print copyright notice */
     printf( "Vega Strike "  " \n"
@@ -312,7 +312,7 @@ int main( int argc, char *argv[] )
     //loads the configuration file .vegastrike/vegastrike.config from home dir if such exists
     {
         std::string subdir = ParseCommandLine( argc, argv );
-        BOOST_LOG_TRIVIAL(info) << boost::format("GOT SUBDIR ARG = %1%") % subdir;
+        VS_LOG(info, (boost::format("GOT SUBDIR ARG = %1%") % subdir));
         if (CONFIGFILE == 0) {
             CONFIGFILE = new char[42];
             sprintf( CONFIGFILE, "vegastrike.config" );
@@ -338,7 +338,7 @@ int main( int argc, char *argv[] )
     if (mission_name[0] == '\0') {
         strncpy( mission_name, game_options.default_mission.c_str(), 1023 );
         mission_name[1023] = '\0';
-        BOOST_LOG_TRIVIAL(info) << boost::format("MISSION_NAME is empty using : %1%") % mission_name;
+        VS_LOG(info, (boost::format("MISSION_NAME is empty using : %1%") % mission_name));
     }
 
 

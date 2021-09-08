@@ -1,9 +1,9 @@
-/**
+/*
  * aggressive.cpp
  *
  * Copyright (C) Daniel Horn
- * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike
- * contributors
+ * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike contributors
+ * Copyright (C) 2021 Stephen G. Tuggy
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -31,6 +31,7 @@
 #include "script.h"
 #include "vs_globals.h"
 #include "vsfilesystem.h"
+#include "vs_logging.h"
 #include "config_xml.h"
 #include "xml_support.h"
 #include "cmd/unit_generic.h"
@@ -113,8 +114,8 @@ static vsUMap< string, string >getAITypes()
 {
     vsUMap< string, string >ret;
     VSFileSystem::VSFile    f;
-    VSError err = f.OpenReadOnly( "VegaPersonalities.csv", AiFile );
-    if (err <= Ok) {
+    VSFileSystem::VSError err = f.OpenReadOnly( "VegaPersonalities.csv", VSFileSystem::AiFile );
+    if (err <= VSFileSystem::Ok) {
         CSVTable table( f, f.GetRoot() );
         vsUMap< std::string, int >::iterator browser = table.rows.begin();
         for (; browser != table.rows.end(); ++browser) {
@@ -1173,7 +1174,7 @@ void AggressiveAI::ReCommandWing( Flightgroup *fg )
                         fg->directive = string( "h" );
                         LeadMe( parent, "h", "I need help here!", false );
                         if (verbose_debug) {
-                            BOOST_LOG_TRIVIAL(trace) << boost::format("he needs help %1%") % parent->name.get().c_str();
+                            VS_LOG(trace, (boost::format("he needs help %1%") % parent->name.get().c_str()));
                         }
                     } else if ( lead->getFgSubnumber() >= parent->getFgSubnumber() ) {
                         fg->directive = string( "b" );
@@ -1392,7 +1393,7 @@ public: FlyTo( const QVector &target,
     virtual void Execute()
     {
         if (parent == uoif) {
-            BOOST_LOG_TRIVIAL(info) << "kewl";
+            VS_LOG(info, "kewl");
         }
         MoveTo::Execute();
         Unit *un = destUnit.GetUnit();
@@ -1483,13 +1484,13 @@ void AggressiveAI::ExecuteNoEnemies()
             std::string fgname    = UnitUtil::getFlightgroupName( parent );
             std::string pfullname = parent->getFullname();
             std::string dfullname = dest->getFullname();
-            BOOST_LOG_TRIVIAL(debug) << boost::format("%1%:%2% %3% going to %4%:%5%")
-                    % parent->name.get().c_str() % pfullname.c_str() % fgname.c_str() % dest->name.get().c_str() % dfullname.c_str();
+            VS_LOG(debug, (boost::format("%1%:%2% %3% going to %4%:%5%")
+                    % parent->name.get().c_str() % pfullname.c_str() % fgname.c_str() % dest->name.get().c_str() % dfullname.c_str()));
             if (otherdest) {
                 std::string ofullname = otherdest->getFullname();
-                BOOST_LOG_TRIVIAL(debug) << boost::format(" between %1%:%2%\n") % otherdest->name.get().c_str() % ofullname.c_str();
+                VS_LOG(debug, (boost::format(" between %1%:%2%\n") % otherdest->name.get().c_str() % ofullname.c_str()));
             } else {
-                BOOST_LOG_TRIVIAL(debug) << "\n";
+                VS_LOG(debug, "\n");
             }
 #endif
             GoTo( this, parent, nav, creationtime, otherdest != NULL, otherdest == NULL ? dest : NULL );
@@ -1557,7 +1558,7 @@ volatile Unit *uoi;
 void AggressiveAI::Execute()
 {
     if (parent == uoi) {
-        BOOST_LOG_TRIVIAL(info) << "kewl";
+        VS_LOG(info, "kewl");
     }
     jump_time_check++;     //just so we get a nicely often wrapping var;
     jump_time_check %= 5;
@@ -1566,7 +1567,7 @@ void AggressiveAI::Execute()
     static int    pir = FactionUtil::GetFactionIndex( "pirates" );
     if (parent->faction == pir) {
         if (rand() == 0) {
-            BOOST_LOG_TRIVIAL(info) << "ahoy, a pirates!";
+            VS_LOG(info, "ahoy, a pirates!");
         }
     }
     FireAt::Execute();
@@ -1609,7 +1610,7 @@ void AggressiveAI::Execute()
                     if (AIjumpCheat) {
                         static int i = 0;
                         if (!i) {
-                            BOOST_LOG_TRIVIAL(warning) << "FIXME: warning ship not equipped to jump";
+                            VS_LOG(warning, "FIXME: warning ship not equipped to jump");
                             i = 1;
                         }
                         parent->jump.drive = -1;
@@ -1644,8 +1645,9 @@ void AggressiveAI::Execute()
                     ProcessLogic( *logic, false );
                 } else {}
             }
-            if (!isjumpable)
+            if (!isjumpable) {
                 ExecuteNoEnemies();
+            }
         } else {
             if (target) {
                 static bool can_warp_to = XMLSupport::parse_bool( vs_config->getVariable( "AI", "warp_to_enemies", "true" ) );
@@ -1671,22 +1673,24 @@ void AggressiveAI::Execute()
         }
     }
 #ifdef AGGDEBUG
-    BOOST_LOG_TRIVIAL(debug) << "endagg";
-    VSFileSystem::flushLogs();
+    VS_LOG_AND_FLUSH(debug, "endagg");
 #endif
     if (getTimeCompression() > 3) {
         float mag = parent->GetVelocity().Magnitude();
-        if (mag > .01)
+        if (mag > .01) {
             mag = 1/mag;
+        }
         parent->SetVelocity( parent->GetVelocity()*( mag*parent->GetComputerData().max_speed()/getTimeCompression() ) );
         parent->NetLocalForce = parent->NetForce = Vector( 0, 0, 0 );
     }
     target     = parent->Target();
 
     isjumpable = target ? ( !target->GetDestinations().empty() ) : false;
-    if (!isjumpable)
-        if (parent->GetJumpStatus().drive >= 0)
+    if (!isjumpable) {
+        if (parent->GetJumpStatus().drive >= 0) {
             parent->ActivateJumpDrive( -1 );
+        }
+    }
 }
 
 AggressiveAI *DONOTUSEAG = NULL;

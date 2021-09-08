@@ -1,9 +1,9 @@
-/**
+/*
  * gamemenu.cpp
  *
  * Copyright (C) Daniel Horn
- * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike
- * contributors
+ * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike contributors
+ * Copyright (C) 2021 Stephen G. Tuggy
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -44,8 +44,7 @@
 #include "cmd/music.h"
 #include "options.h"
 #include "configxml.h"
-
-
+#include "vs_logging.h"
 
 
 extern void TerminateCurrentBase( void );
@@ -473,7 +472,7 @@ bool GameMenu::processMainMenuButton( const EventCommandId &command, Control *co
 
 bool GameMenu::processExitGameButton( const EventCommandId &command, Control *control )
 {
-    VSFileSystem::flushLogs();
+    VegaStrikeLogging::VegaStrikeLogger::FlushLogs();
     winsys_exit( 0 );
     return true;
 }

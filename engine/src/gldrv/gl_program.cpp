@@ -1,9 +1,9 @@
-/**
+/*
  * gl_program.cpp
  *
  * Copyright (C) Daniel Horn
- * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike
- * contributors
+ * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike contributors
+ * Copyright (C) 2021 Stephen G. Tuggy
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -32,6 +32,7 @@
 #include "gl_globals.h"
 #include "vs_globals.h"
 #include "vsfilesystem.h"
+#include "vs_logging.h"
 #include "vegastrike.h"
 #include "config_xml.h"
 #include "gfxlib.h"
@@ -40,6 +41,8 @@
 
 
 using boost::algorithm::icontains;
+using VSFileSystem::UnknownFile;
+using VSFileSystem::Ok;
 
 
 #if _MSC_VER >= 1300
@@ -116,7 +119,7 @@ void printLog( GLuint obj, bool shader )
     infoLog[infologLength] = 0;
 
     if (infologLength > 0) {
-        BOOST_LOG_TRIVIAL(error) << boost::format("%1%") % infoLog;
+        VS_LOG(error, (boost::format("%1%") % infoLog));
     }
 }
 
@@ -149,7 +152,7 @@ static VSFileSystem::VSError getProgramSource(const std::string &path, std::vect
                         VSFileSystem::VSError ierr = getProgramSource(includepath, lines, processed_includes, buf, buflen);
                         if (ierr > Ok) {
                             f.Close();
-                            BOOST_LOG_TRIVIAL(error) << boost::format("ERROR: included from %1%") % path.c_str();
+                            VS_LOG(error, (boost::format("ERROR: included from %1%") % path.c_str()));
                             return ierr;
                         } else {
                             // Append a blank line to avoid issues and restore line numbers
@@ -162,8 +165,9 @@ static VSFileSystem::VSError getProgramSource(const std::string &path, std::vect
                         lines.push_back("\n");
                     }
                 } else {
-                    BOOST_LOG_TRIVIAL(warning) << boost::format("WARNING: broken include directive at file %1%, line %2% - skipping")
-                        % path.c_str() % lineno;
+                    VS_LOG(warning, (boost::format("WARNING: broken include directive at file %1%, line %2% - skipping")
+                            % path.c_str()
+                            % lineno));
                 }
             } else {
                 // Append a line to the list
@@ -173,7 +177,7 @@ static VSFileSystem::VSError getProgramSource(const std::string &path, std::vect
 
         f.Close();
     } else {
-        BOOST_LOG_TRIVIAL(error) << boost::format("ERROR: at %1%") % path.c_str();
+        VS_LOG(error, (boost::format("ERROR: at %1%") % path.c_str()));
     }
     return err;
 }
@@ -238,7 +242,7 @@ static int GFXCreateProgramNoCache( const char *vprogram, const char *fprogram, 
 #endif
     GLenum errCode;
     while ( ( errCode = glGetError() ) != GL_NO_ERROR ) {
-        BOOST_LOG_TRIVIAL(error) << boost::format("Error code %1%") % gluErrorString( errCode );
+        VS_LOG(error, (boost::format("Error code %1%") % gluErrorString( errCode )));
     }
     VSFileSystem::VSFile vf, ff;
     std::string vpfilename = std::string("programs/") + vprogram + ".vp";
@@ -249,10 +253,10 @@ static int GFXCreateProgramNoCache( const char *vprogram, const char *fprogram, 
     VSFileSystem::VSError fperr = getProgramSource(fpfilename, fragprg);
     if ( (vperr > Ok) || (fperr > Ok) ) {
         if (vperr > Ok) {
-            BOOST_LOG_TRIVIAL(error) << boost::format("Vertex Program Error: Failed to open file %1%") % vpfilename;
+            VS_LOG(error, (boost::format("Vertex Program Error: Failed to open file %1%") % vpfilename));
         }
         if (fperr > Ok) {
-            BOOST_LOG_TRIVIAL(error) << boost::format("Fragment Program Error: Failed to open file %1%") % fpfilename;
+            VS_LOG(error, (boost::format("Fragment Program Error: Failed to open file %1%") % fpfilename));
         }
         return 0;
     }
@@ -274,12 +278,12 @@ static int GFXCreateProgramNoCache( const char *vprogram, const char *fprogram, 
         glGetShaderiv_p( vproghandle, GL_COMPILE_STATUS, &successp );
         if (successp == 0) {
             printLog( vproghandle, true );
-            BOOST_LOG_TRIVIAL(error) << boost::format("Vertex Program Error: Failed to compile %1%") % vprogram;
+            VS_LOG(error, (boost::format("Vertex Program Error: Failed to compile %1%") % vprogram));
             glDeleteShader_p( vproghandle );
             return 0;
         } else if (!validateLog( vproghandle, true )) {
             printLog( vproghandle, true );
-            BOOST_LOG_TRIVIAL(error) << boost::format("Vertex Program Error: Failed log validation for %1%. Inspect log above for details.") % vprogram;
+            VS_LOG(error, (boost::format("Vertex Program Error: Failed log validation for %1%. Inspect log above for details.") % vprogram));
             glDeleteShader_p( vproghandle );
             return 0;
         }
@@ -294,14 +298,14 @@ static int GFXCreateProgramNoCache( const char *vprogram, const char *fprogram, 
         glGetShaderiv_p( fproghandle, GL_COMPILE_STATUS, &successp );
         if (successp == 0) {
             printLog( fproghandle, true );
-            BOOST_LOG_TRIVIAL(error) << boost::format("Fragment Program Error: Failed to compile %1%") % fprogram;
+            VS_LOG(error, (boost::format("Fragment Program Error: Failed to compile %1%") % fprogram));
             glDeleteShader_p( vproghandle );
             glDeleteShader_p( fproghandle );
             return 0;
         } else if (!validateLog( fproghandle, true )) {
             // FIXME: Should this be fproghandle instead of vproghandle? Same throughout this if block?
             printLog( vproghandle, true );
-            BOOST_LOG_TRIVIAL(error) << boost::format("Vertex Program Error: Failed log validation for %1%. Inspect log above for details.") % vprogram;
+            VS_LOG(error, (boost::format("Vertex Program Error: Failed log validation for %1%. Inspect log above for details.") % vprogram));
             glDeleteShader_p( vproghandle );
             glDeleteShader_p( fproghandle );
             return 0;
@@ -318,11 +322,11 @@ static int GFXCreateProgramNoCache( const char *vprogram, const char *fprogram, 
     glGetProgramiv_p( sp, GL_LINK_STATUS, &successp );
     if (successp == 0) {
         printLog( sp, false );
-        BOOST_LOG_TRIVIAL(error) << boost::format("Shader Program Error: Failed to link %1% to %2%") % vprogram % fprogram;
+        VS_LOG(error, (boost::format("Shader Program Error: Failed to link %1% to %2%") % vprogram % fprogram));
         return 0;
     } else if (!validateLog( sp, false )) {
         printLog( sp, false );
-        BOOST_LOG_TRIVIAL(error) << boost::format("Shader Program Error: Failed log validation for vp:%1% fp:%2%. Inspect log above for details.") % vprogram % fprogram;
+        VS_LOG(error, (boost::format("Shader Program Error: Failed log validation for vp:%1% fp:%2%. Inspect log above for details.") % vprogram % fprogram));
         glDeleteShader_p( vproghandle );
         glDeleteShader_p( fproghandle );
         glDeleteProgram_p( sp );
@@ -333,12 +337,12 @@ static int GFXCreateProgramNoCache( const char *vprogram, const char *fprogram, 
     /* only for dev work
      *  glGetProgramiv_p(sp,GL_VALIDATE_STATUS,&successp);
      *  if (successp==0) {
-     *      BOOST_LOG_TRIVIAL(error) << boost::format("Shader Program Error: Failed to validate %1% linking to %2%") % vprogram % fprogram;
+     *      VS_LOG(error, (boost::format("Shader Program Error: Failed to validate %1% linking to %2%") % vprogram % fprogram));
      *      return 0;
      *  }
      */
     while ( ( errCode = glGetError() ) != GL_NO_ERROR ) {
-        BOOST_LOG_TRIVIAL(error) << boost::format("Error code %1%") % gluErrorString( errCode );
+        VS_LOG(error, (boost::format("Error code %1%") % gluErrorString( errCode )));
         sp = 0;         //no proper vertex prog support
     }
     return sp;
@@ -426,7 +430,7 @@ int getDefaultProgram()
 
 void GFXReloadDefaultShader()
 {
-    BOOST_LOG_TRIVIAL(info) << "Reloading all shaders";
+    VS_LOG(info, "Reloading all shaders");
 
     // Increasing the timestamp makes all programs elsewhere recompile
     ++programVersion;

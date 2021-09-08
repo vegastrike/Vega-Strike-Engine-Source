@@ -1,9 +1,9 @@
-/**
+/*
  * collide_map.cpp
  *
  * Copyright (C) Daniel Horn
- * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike
- * contributors
+ * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike contributors
+ * Copyright (C) 2021 Stephen G. Tuggy
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -31,7 +31,8 @@
 #include "bolt.h"
 #include "star_system.h"
 #include "universe.h"
-#include "vsfilesystem.h"
+// #include "vsfilesystem.h"
+#include "vs_logging.h"
 
 volatile bool apart_return = true;
 void CollideArray::erase( iterator target )
@@ -232,7 +233,7 @@ void CollideArray::flatten( CollideArray &hint )
 
         for_each( sorted.begin(), sorted.end(), CopyExample( hint.sorted.begin(), hint.sorted.end() ) );
     } else {
-        BOOST_LOG_TRIVIAL(info) << "Trying to use flatten hint on a array with both bolts and units";
+        VS_LOG(info, "Trying to use flatten hint on a array with both bolts and units");
         flatten();
     }
 }

@@ -1,23 +1,29 @@
 /*
- * Vega Strike
+ * script_call_unit_generic.cpp
+ *
  * Copyright (C) 2001-2002 Daniel Horn
+ * Copyright (C) Alexander Rawass
+ * Copyright (C) 2020 Stephen G. Tuggy, pyramid3d, and other Vega Strike contributors
+ * Copyright (C) 2021 Stephen G. Tuggy
  *
- * http://vegastrike.sourceforge.net/
+ * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * as published by the Free Software Foundation; either version 2
- * of the License, or (at your option) any later version.
+ * This file is part of Vega Strike.
  *
- * This program is distributed in the hope that it will be useful,
+ * Vega Strike is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Vega Strike is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+ * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
  */
+
 
 /*
  *  xml Mission Scripting written by Alexander Rawass <alexannika@users.sourceforge.net>
@@ -64,6 +70,7 @@
 #include "asteroid.h"
 #include "star_system.h"
 #include "universe.h"
+#include "vs_logging.h"
 
 
 extern const vector< string >& ParseDestinations( const string &value );
@@ -87,8 +94,7 @@ static Unit * getIthUnit( un_iter uiter, int i );
 varInst* Mission::call_unit( missionNode *node, int mode )
 {
 #ifdef ORDERDEBUG
-    BOOST_LOG_TRIVIAL(trace) << boost::format("callun%1$x") % this;
-    VSFileSystem::flushLogs();
+    VS_LOG_AND_FLUSH(trace, (boost::format("callun%1$x") % this));
 #endif
     varInst *viret = NULL;
     trace( node, mode );
@@ -207,16 +213,14 @@ varInst* Mission::call_unit( missionNode *node, int mode )
             for (int i = 0; i < 3; i++)
                 cf.rot[i] = 0.0;
 #ifdef ORDERDEBUG
-            BOOST_LOG_TRIVIAL(trace) << boost::format("cunl%1$x") % this;
-            VSFileSystem::flushLogs();
+            VS_LOG_AND_FLUSH(trace, (boost::format("cunl%1$x") % this);
 #endif
             Unit *tmp = call_unit_launch( &cf, clstyp, destinations );
             number_of_ships += nr_of_ships;
             if (!my_unit)
                 my_unit = tmp;
 #ifdef ORDERDEBUG
-            BOOST_LOG_TRIVIAL(trace) << "ecun";
-            VSFileSystem::flushLogs();
+            VS_LOG_AND_FLUSH(trace, "ecun");
 #endif
         }
         deleteVarInst( name_vi );
@@ -915,19 +919,16 @@ varInst* Mission::call_unit( missionNode *node, int mode )
             assert( 0 );
         }
 #ifdef ORDERDEBUG
-        BOOST_LOG_TRIVIAL(trace) << boost::format("callundel%1$x") % ovi;
-        VSFileSystem::flushLogs();
+        VS_LOG_AND_FLUSH(trace, (boost::format("callundel%1$x") % ovi));
 #endif
         deleteVarInst( ovi );
 #ifdef ORDERDEBUG
-        BOOST_LOG_TRIVIAL(trace) << "undel1";
-        VSFileSystem::flushLogs();
+        VS_LOG_AND_FLUSH(trace, "undel1");
 #endif
         return viret;
     }     //else (objects)
 #ifdef ORDERDEBUG
-    BOOST_LOG_TRIVIAL(trace) << boost::format("endcallun%1$x") % this;
-    VSFileSystem::flushLogs();
+    VS_LOG_AND_FLUSH(trace, (boost::format("endcallun%1$x") % this));
 #endif
     return NULL;     //never reach
 }

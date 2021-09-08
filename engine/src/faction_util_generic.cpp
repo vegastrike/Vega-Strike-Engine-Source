@@ -1,9 +1,9 @@
-/**
+/*
  * faction_util_generic.cpp
  *
  * Copyright (C) Daniel Horn
- * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike
- * contributors
+ * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike contributors
+ * Copyright (C) 2021 Stephen G. Tuggy
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -26,7 +26,8 @@
 
 #include <assert.h>
 #include "faction_generic.h"
-#include "vsfilesystem.h"
+// #include "vsfilesystem.h"
+#include "vs_logging.h"
 #include "config_xml.h"
 #include "vs_globals.h"
 #include "gfx/cockpit_generic.h"
@@ -194,7 +195,7 @@ void FactionUtil::LoadSerializedFaction( FILE *fp )
         }
         for (unsigned int j = 0; j < factions[i]->faction.size(); j++) {
             if ( 1 != sscanf( tmp2, "%f ", &factions[i]->faction[j].relationship ) ) {
-                BOOST_LOG_TRIVIAL(error) << "err";
+                VS_LOG(error, "err");
             }
             int  k = 0;
             bool founddig = false;

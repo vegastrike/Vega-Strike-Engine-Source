@@ -1,3 +1,29 @@
+/*
+ * script.cpp
+ *
+ * Copyright (C) Daniel Horn
+ * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike contributors
+ * Copyright (C) 2021 Stephen G. Tuggy
+ *
+ * https://github.com/vegastrike/Vega-Strike-Engine-Source
+ *
+ * This file is part of Vega Strike.
+ *
+ * Vega Strike is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Vega Strike is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
+
 #include "script.h"
 #include "navigation.h"
 #include "xml_support.h"
@@ -6,6 +32,7 @@
 #include <vector>
 #include <stack>
 #include "vsfilesystem.h"
+#include "vs_logging.h"
 #include "tactics.h"
 #include "cmd/unit_generic.h"
 #include "hard_coded_scripts.h"
@@ -106,14 +133,14 @@ float& AIScript::topf()
 {
     if ( !xml->floats.size() ) {
         xml->floats.push( xml->defaultf );
-        BOOST_LOG_TRIVIAL(error) << boost::format("ERROR: Float stack is empty... Will return %1%") % xml->defaultf;
+        VS_LOG(error, (boost::format("ERROR: Float stack is empty... Will return %1%") % xml->defaultf));
     }
     return xml->floats.top();
 }
 void AIScript::popf()
 {
     if (xml->floats.size() <= 0) {
-        BOOST_LOG_TRIVIAL(error) << "ERROR: Float stack is empty... Will not delete";
+        VS_LOG(error, "ERROR: Float stack is empty... Will not delete");
         return;
     }
     xml->floats.pop();
@@ -122,18 +149,18 @@ QVector& AIScript::topv()
 {
     if ( !xml->vectors.size() ) {
         xml->vectors.push( xml->defaultvec );
-        BOOST_LOG_TRIVIAL(error) << boost::format(
+        VS_LOG(error, (boost::format(
                                   "ERROR: Vector stack is empty... Will return <%1%, %2%, %3%>")
                                   % xml->defaultvec.i
                                   % xml->defaultvec.j
-                                  % xml->defaultvec.k;
+                                  % xml->defaultvec.k));
     }
     return xml->vectors.top();
 }
 void AIScript::popv()
 {
     if (xml->vectors.size() <= 0) {
-        BOOST_LOG_TRIVIAL(error) << "ERROR: Vector stack is empty... Will not delete";
+        VS_LOG(error, "ERROR: Vector stack is empty... Will not delete");
         return;
     }
     xml->vectors.pop();
@@ -272,11 +299,11 @@ void AIScript::beginElement( const string &name, const AttributeList &attributes
     xml->itts = false;
     Unit *tmp;
 #ifdef AIDBG
-    BOOST_LOG_TRIVIAL(debug) << "0";
+    VS_LOG(debug, "0");
 #endif
     Names elem = (Names) element_map.lookup( name );
 #ifdef AIDBG
-    BOOST_LOG_TRIVIAL(debug) << boost::format("1%1$x ") % &elem;
+    VS_LOG(debug, (boost::format("1%1$x ") % &elem));
 #endif
     AttributeList::const_iterator iter;
     switch (elem)
@@ -310,7 +337,7 @@ void AIScript::beginElement( const string &name, const AttributeList &attributes
                 break;
             case DUPLIC:
 #ifdef AIDBG
-                BOOST_LOG_TRIVIAL(debug) << boost::format("1%1$x ") % &elem;
+                VS_LOG(debug, (boost::format("1%1$x ") % &elem));
 #endif
                 xml->vectors.pop();                 //get rid of dummy vector pushed on above
                 xml->vectors.push( xml->vectors.top() );
@@ -376,7 +403,7 @@ void AIScript::beginElement( const string &name, const AttributeList &attributes
         break;
     case FACETARGET:
 #ifdef AIDBG
-        BOOST_LOG_TRIVIAL(debug) << "ft";
+        VS_LOG(debug, "ft");
 #endif
         xml->unitlevel++;
         xml->acc  = 3;
@@ -398,7 +425,7 @@ void AIScript::beginElement( const string &name, const AttributeList &attributes
             }
         }
 #ifdef AIDBG
-        BOOST_LOG_TRIVIAL(debug) << "eft";
+        VS_LOG(debug, "eft");
 #endif
 
         break;
@@ -480,7 +507,7 @@ void AIScript::beginElement( const string &name, const AttributeList &attributes
     case MATCHANG:
     case MATCHVEL:
 #ifdef AIDBG
-        BOOST_LOG_TRIVIAL(debug) << "mlv";
+        VS_LOG(debug, "mlv");
 #endif
 
         xml->unitlevel++;
@@ -502,7 +529,7 @@ void AIScript::beginElement( const string &name, const AttributeList &attributes
             }
         }
 #ifdef AIDBG
-        BOOST_LOG_TRIVIAL(debug) << "emlv ";
+        VS_LOG(debug, "emlv ");
 #endif
 
         break;
@@ -668,7 +695,7 @@ void AIScript::endElement( const string &name )
         topv() = -topv();
         break;
     case MOVETO:
-        BOOST_LOG_TRIVIAL(debug) << boost::format("Moveto <%1%,%2%,%3%>") % topv().i % topv().j % topv().k;
+        VS_LOG(debug, (boost::format("Moveto <%1%,%2%,%3%>") % topv().i % topv().j % topv().k));
         xml->unitlevel--;
         xml->orders.push_back( new Orders::MoveTo( topv(), xml->afterburn, xml->acc ) );
         popv();
@@ -774,9 +801,11 @@ void AIScript::LoadXML()
                 RollLeft( this, parent );
         }
         if (aidebug > 1) {
-            BOOST_LOG_TRIVIAL(debug) << boost::format("%1% using hcs %2% for %3% threat %4%")
-                                      % mission->getGametime() % filename % parent->name
-                                      % parent->GetComputerData().threatlevel;
+            VS_LOG(debug, (boost::format("%1% using hcs %2% for %3% threat %4%")
+                                      % mission->getGametime()
+                                      % filename
+                                      % parent->name
+                                      % parent->GetComputerData().threatlevel));
         }
         if ( _Universe->isPlayerStarship( parent->Target() ) ) {
             float value;
@@ -806,32 +835,32 @@ void AIScript::LoadXML()
         return;
     } else {
         if (aidebug > 1)
-            BOOST_LOG_TRIVIAL(debug) << boost::format("using soft coded script %1%") % filename;
+            VS_LOG(debug, (boost::format("using soft coded script %1%") % filename));
         if (aidebug > 0)
             UniverseUtil::IOmessage( 0, parent->name, "all", string( "FAILED(or missile) script " )+string(
                                         filename )+" threat "+XMLSupport::tostring( parent->GetComputerData().threatlevel ) );
     }
 #ifdef AIDBG
-    BOOST_LOG_TRIVIAL(debug) << "chd";
+    VS_LOG(debug, "chd");
 #endif
 
 #ifdef AIDBG
-    BOOST_LOG_TRIVIAL(debug) << "echd";
+    VS_LOG(debug, "echd");
 #endif
     VSFile    f;
     VSError   err = f.OpenReadOnly( filename, AiFile );
 #ifdef AIDBG
-    BOOST_LOG_TRIVIAL(debug) << "backup ";
+    VS_LOG(debug, "backup ");
 #endif
     if (err > Ok) {
-        BOOST_LOG_TRIVIAL(error) << boost::format("cannot find AI script %1%") % filename;
+        VS_LOG(error, (boost::format("cannot find AI script %1%") % filename));
         if (hard_coded_scripts.find(filename)!=hard_coded_scripts.end()) {
             assert(0);
         }
         return;
     }
 #ifdef BIDBG
-    BOOST_LOG_TRIVIAL(debug) << "nxml";
+    VS_LOG(debug, "nxml");
 #endif
     xml = new AIScriptXML;
     xml->unitlevel  = 0;
@@ -841,48 +870,45 @@ void AIScript::LoadXML()
     xml->defaultvec = QVector( 0, 0, 0 );
     xml->defaultf   = 0;
 #ifdef BIDBG
-    BOOST_LOG_TRIVIAL(debug) << "parscrea";
+    VS_LOG(debug, "parscrea");
 #endif
     XML_Parser parser = XML_ParserCreate( NULL );
 #ifdef BIDBG
-    BOOST_LOG_TRIVIAL(debug) << boost::format("usdat %1$x") % parser;
+    VS_LOG(debug, (boost::format("usdat %1$x") % parser));
 #endif
     XML_SetUserData( parser, this );
 #ifdef BIDBG
-    BOOST_LOG_TRIVIAL(debug) << "elha";
+    VS_LOG(debug, "elha");
 #endif
     XML_SetElementHandler( parser, &AIScript::beginElement, &AIScript::endElement );
 #ifdef BIDBG
-    BOOST_LOG_TRIVIAL(debug) << "do";
+    VS_LOG(debug, "do");
 #endif
     XML_Parse( parser, ( f.ReadFull() ).c_str(), f.Size(), 1 );
 #ifdef BIDBG
-    BOOST_LOG_TRIVIAL(debug) << boost::format("%1$xxml_free") % parser;
-    VSFileSystem::flushLogs();
+    VS_LOG_AND_FLUSH(debug, (boost::format("%1$xxml_free") % parser));
 #endif
     XML_ParserFree( parser );
 #ifdef BIDBG
-    BOOST_LOG_TRIVIAL(debug) << "xml_freed";
+    VS_LOG(debug, "xml_freed");
 #endif
     f.Close();
     for (unsigned int i = 0; i < xml->orders.size(); i++) {
 #ifdef BIDBG
-        BOOST_LOG_TRIVIAL(debug) << "parset";
+        VS_LOG(debug, "parset");
 #endif
         xml->orders[i]->SetParent( parent );
         EnqueueOrder( xml->orders[i] );
 #ifdef BIDBG
-        BOOST_LOG_TRIVIAL(debug) << "cachunkx";
+        VS_LOG(debug, "cachunkx");
 #endif
     }
 #ifdef BIDBG
-    BOOST_LOG_TRIVIAL(debug) << boost::format("xml%1$x") % xml;
-    VSFileSystem::flushLogs();
+    VS_LOG_AND_FLUSH(debug, (boost::format("xml%1$x") % xml));
 #endif
     delete xml;
 #ifdef BIDBG
-    BOOST_LOG_TRIVIAL(debug) << "\\xml\n";
-    VSFileSystem::flushLogs();
+    VS_LOG_AND_FLUSH(debug, "\\xml\n");
 #endif
 }
 
@@ -895,14 +921,14 @@ AIScript::AIScript( const char *scriptname ) : Order( Order::MOVEMENT|Order::FAC
 AIScript::~AIScript()
 {
 #ifdef ORDERDEBUG
-    BOOST_LOG_TRIVIAL(debug) << boost::format("sc%1$x") % this;
-    VSFileSystem::flushLogs();
+    VS_LOG_AND_FLUSH(debug, (boost::format("sc%1$x") % this));
 #endif
-    if (filename)
+    if (filename) {
         delete[] filename;
+        filename = nullptr;
+    }
 #ifdef ORDERDEBUG
-    BOOST_LOG_TRIVIAL(debug) << "sc";
-    VSFileSystem::flushLogs();
+    VS_LOG_AND_FLUSH(debug, "sc");
 #endif
 }
 
@@ -911,14 +937,12 @@ void AIScript::Execute()
     if (filename) {
         LoadXML();
 #ifdef ORDERDEBUG
-        BOOST_LOG_TRIVIAL(debug) << boost::format("fn%1$x") % this;
-        VSFileSystem::flushLogs();
+        VS_LOG_AND_FLUSH(debug, (boost::format("fn%1$x") % this));
 #endif
         delete[] filename;
-        filename = NULL;
+        filename = nullptr;
 #ifdef ORDERDEBUG
-        BOOST_LOG_TRIVIAL(debug) << "fn";
-        VSFileSystem::flushLogs();
+        VS_LOG_AND_FLUSH(debug, "fn");
 #endif
     }
     Order::Execute();

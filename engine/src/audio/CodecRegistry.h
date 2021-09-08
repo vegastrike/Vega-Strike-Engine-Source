@@ -1,4 +1,4 @@
-/**
+/*
  * CodecRegistry.h
  *
  * Copyright (C) Daniel Horn

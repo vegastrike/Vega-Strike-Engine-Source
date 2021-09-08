@@ -1,4 +1,4 @@
-/**
+/*
  * vsfilesystem.h
  *
  * Copyright (C) Daniel Horn
@@ -156,7 +156,7 @@ extern std::vector<std::vector<std::string>> SubDirectories;                    
 extern std::vector< std::string  >    Directories;
 extern std::vector< std::string  >    Rootdir;                                                     //Root directories where we should look for VSFileTypes files
 
-extern vector< int >UseVolumes;                                                                 //Tells us for which VSFileType we will use volumes
+extern std::vector< int > UseVolumes;                                                                 //Tells us for which VSFileType we will use volumes
 //0 tells FileType doesn't use volumes
 //1 tells it uses a volume based on the FileType
 //2 tells it uses a big data volume
@@ -421,7 +421,8 @@ public: VSFile();
                 strcat( newformat, "%n" );
                 ret = sscanf( this->pk3_extracted_file+offset, newformat, a, &readbytes );
                 delete[] newformat;
-                BOOST_LOG_TRIVIAL(info)<<"FSCANF : sscanf read "<<readbytes<<" bytes - OFFSET="<<offset<<" VALUES : a="<<(*a)<<std::endl;
+                newformat = nullptr;
+                VS_LOG(info, (boost::format("FSCANF : sscanf read %1% bytes - OFFSET=%2% VALUES : a=%3%") % readbytes % offset % (*a)));
                 this->offset += readbytes;
                 this->GoAfterEOL();
             } else if (q_volume_format == vfmtVSR) {}
@@ -446,8 +447,8 @@ public: VSFile();
                 strcat( newformat, "%n" );
                 ret = sscanf( this->pk3_extracted_file+offset, newformat, a, b, &readbytes );
                 delete[] newformat;
-                BOOST_LOG_TRIVIAL(info)<<"FSCANF : sscanf read "<<readbytes<<" bytes - OFFSET="<<offset<<" VALUES : a="<<(*a)<<", b="<<(*b)
-                         <<std::endl;
+                newformat = nullptr;
+                VS_LOG(info, (boost::format("FSCANF : sscanf read %1% bytes - OFFSET=%2% VALUES : a=%3%, b=%4%") % readbytes % offset % (*a) % (*b)));
                 this->offset += readbytes;
                 this->GoAfterEOL();
             } else if (q_volume_format == vfmtVSR) {}
@@ -472,8 +473,8 @@ public: VSFile();
                 strcat( newformat, "%n" );
                 ret = sscanf( this->pk3_extracted_file+offset, newformat, a, b, c, &readbytes );
                 delete[] newformat;
-                BOOST_LOG_TRIVIAL(info)<<"FSCANF : sscanf read "<<readbytes<<" bytes - OFFSET="<<offset<<" VALUES : a="<<(*a)<<", b="<<(*b)
-                         <<", c="<<(*c)<<std::endl;
+                newformat = nullptr;
+                VS_LOG(info, (boost::format("FSCANF : sscanf read %1% bytes - OFFSET=%2% VALUES : a=%3%, b=%4%, c=%5%") % readbytes % offset % (*a) % (*b) % (*c)));
                 this->offset += readbytes;
                 this->GoAfterEOL();
             } else if (q_volume_format == vfmtVSR) {}
@@ -498,6 +499,7 @@ public: VSFile();
                 strcat( newformat, "%n" );
                 ret = sscanf( this->pk3_extracted_file+offset, newformat, a, b, c, d, &readbytes );
                 delete[] newformat;
+                newformat = nullptr;
                 this->offset += readbytes;
                 this->GoAfterEOL();
             } else if (q_volume_format == vfmtVSR) {}
@@ -522,6 +524,7 @@ public: VSFile();
                 strcat( newformat, "%n" );
                 ret = sscanf( this->pk3_extracted_file+offset, newformat, a, b, c, d, e, &readbytes );
                 delete[] newformat;
+                newformat = nullptr;
                 this->offset += readbytes;
                 this->GoAfterEOL();
             } else if (q_volume_format == vfmtVSR) {}
@@ -546,6 +549,7 @@ public: VSFile();
                 strcat( newformat, "%n" );
                 ret = sscanf( this->pk3_extracted_file+offset, newformat, a, b, c, d, e, f, &readbytes );
                 delete[] newformat;
+                newformat = nullptr;
                 this->offset += readbytes;
                 this->GoAfterEOL();
             } else if (q_volume_format == vfmtVSR) {}

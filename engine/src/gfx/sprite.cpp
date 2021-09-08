@@ -1,9 +1,9 @@
-/**
+/*
  * sprite.cpp
  *
  * Copyright (C) 2001-2002 Daniel Horn
- * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike
- * contributors
+ * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike contributors
+ * Copyright (C) 2021 Stephen G. Tuggy
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -11,7 +11,7 @@
  *
  * Vega Strike is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 2 of the License, or
+ * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
  * Vega Strike is distributed in the hope that it will be useful,
@@ -27,6 +27,7 @@
 #include <stdlib.h>
 #include <iostream>
 #include "vsfilesystem.h"
+#include "vs_logging.h"
 #include "cmd/unit_generic.h"
 #include "aux_texture.h"
 #include "ani_texture.h"
@@ -183,7 +184,7 @@ void VSSprite::ReadTexture( VSFileSystem::VSFile *f )
     if ( !f->Valid() ) {
         widtho2 = heighto2 = 0;
         xcenter = ycenter = 0;
-        BOOST_LOG_TRIVIAL(error) << "VSSprite::ReadTexture error : VSFile not valid";
+        VS_LOG(error, "VSSprite::ReadTexture error : VSFile not valid");
         return;
     }
     surface = new Texture( f );

@@ -1,4 +1,4 @@
-/**
+/*
  * Tux Racer
  * Copyright (C) 1999-2001 Jasmin F. Patry
  *
@@ -49,8 +49,8 @@
 #include "config_xml.h"
 #include "vs_globals.h"
 // #include "vsfilesystem.h"
-#include "options.h"
 #include "vs_logging.h"
+#include "options.h"
 
 
 
@@ -208,7 +208,7 @@ void winsys_warp_pointer( int x, int y )
  *  Sets up the SDL OpenGL rendering context
  *  \author  jfpatry
  *  \date    Created:  2000-10-20
- *  \date    Modified: 2020-07-27 - stephengtuggy
+ *  \date    Modified: 2021-09-07 - stephengtuggy
  */
 static bool setup_sdl_video_mode()
 {
@@ -261,14 +261,17 @@ static bool setup_sdl_video_mode()
     width  = g_game.x_resolution;
     height = g_game.y_resolution;
     if ( ( screen = SDL_SetVideoMode( width, height, bpp, video_flags ) ) == NULL ) {
-        BOOST_LOG_TRIVIAL(info) << boost::format("Couldn't initialize video: %1%") % SDL_GetError();
+        VS_LOG(info, (boost::format("Couldn't initialize video: %1%") % SDL_GetError()));
         for (int counter = 0; screen == NULL && counter < 2; ++counter) {
             for (int bpd = 4; bpd > 1; --bpd) {
                 SDL_GL_SetAttribute( SDL_GL_DEPTH_SIZE, bpd*8 );
                 if ( ( screen = SDL_SetVideoMode( width, height, bpp, video_flags|SDL_ANYFORMAT ) )
-                    == NULL ) {
-                    BOOST_LOG_TRIVIAL(error) << boost::format("Couldn't initialize video bpp %1% depth %2%: %3%") % bpp % (bpd * 8) %
-                                                SDL_GetError();
+                        == NULL ) {
+                    VS_LOG_AND_FLUSH(error,
+                            (boost::format("Couldn't initialize video bpp %1% depth %2%: %3%")
+                                    % bpp
+                                    % (bpd * 8)
+                                    % SDL_GetError()));
                 } else {
                     break;
                 }
@@ -289,18 +292,23 @@ static bool setup_sdl_video_mode()
     std::string version = (const char*)glGetString(GL_RENDERER);
     if (version == "GDI Generic") {
         if (game_options.gl_accelerated_visual) {
-            BOOST_LOG_TRIVIAL(error) << "GDI Generic software driver reported, trying to reset.";
+            VS_LOG(error, "GDI Generic software driver reported, trying to reset.");
             SDL_Quit();
             game_options.gl_accelerated_visual = false;
             return false;
         } else {
-            BOOST_LOG_TRIVIAL(error) << "GDI Generic software driver reported, reset failed.\n";
-            BOOST_LOG_TRIVIAL(error) << "Please make sure a graphics card driver is installed and functioning properly.\n";
+            VS_LOG(error, "GDI Generic software driver reported, reset failed.\n");
+            VS_LOG(error, "Please make sure a graphics card driver is installed and functioning properly.\n");
         }
     }
 
-    BOOST_LOG_TRIVIAL(trace) << boost::format("Setting Screen to w %1% h %2% and pitch of %3% and %4% bpp %5% bytes per pix mode") %
-                                 screen->w % screen->h % screen->pitch % screen->format->BitsPerPixel % screen->format->BytesPerPixel;
+    VS_LOG(trace,
+            (boost::format("Setting Screen to w %1% h %2% and pitch of %3% and %4% bpp %5% bytes per pix mode")
+                    % screen->w
+                    % screen->h
+                    % screen->pitch
+                    % screen->format->BitsPerPixel
+                    % screen->format->BytesPerPixel));
 
     return true;
 }
@@ -423,9 +431,9 @@ void winsys_show_cursor( bool visible )
  *  \author  jfpatry
  *  \date    Created:  2000-10-19
  *  \date    Modified: 2000-10-19
- *  \date    Modified: 2005-8-16 - Rogue
+ *  \date    Modified: 2005-08-16 - Rogue
  *  \date    Modified: 2005-12-24 - ace123
- *  \date    Modified: 2020-11-14 - stephengtuggy
+ *  \date    Modified: 2021-09-07 - stephengtuggy
  */
 extern int shiftdown( int );
 extern int shiftup( int );
@@ -481,10 +489,14 @@ void winsys_process_events()
                     //Note: Thank god we'll have OIS for 0.5.x
                     bool shifton = event.key.keysym.mod&(KMOD_LSHIFT|KMOD_RSHIFT|KMOD_CAPS);
 
-                    BOOST_LOG_TRIVIAL(debug) << boost::format("Kbd: %s mod:%x sym:%x unicode:%x sh:%c u:%c mu:%c") %
-                                                 ((event.type == SDL_KEYUP) ? "KEYUP" : "KEYDOWN") % event.key.keysym.mod %
-                                                 event.key.keysym.sym % event.key.keysym.unicode % ((shifton) ? 't' : 'f') %
-                                                 ((is_unicode) ? 't' : 'f') % ((maybe_unicode) ? 't' : 'f');
+                    VS_LOG(debug, (boost::format("Kbd: %1$s mod:%2$x sym:%3$x unicode:%4$x sh:%5$c u:%6$c mu:%7$c")
+                            % ((event.type == SDL_KEYUP) ? "KEYUP" : "KEYDOWN")
+                            % event.key.keysym.mod
+                            % event.key.keysym.sym
+                            % event.key.keysym.unicode
+                            % ((shifton) ? 't' : 'f')
+                            % ((is_unicode) ? 't' : 'f')
+                            % ((maybe_unicode) ? 't' : 'f')));
 
                     if (shifton && is_unicode
                         && shiftup( shiftdown( event.key.keysym.unicode ) ) != event.key.keysym.unicode) {
@@ -566,14 +578,13 @@ void winsys_process_events()
  *  function should only be called once.
  *  \author  jfpatry
  *  \date    Created:  2000-10-20
- *  \date    Modified: 2020-11-14 - stephengtuggy
+ *  \date    Modified: 2021-09-06 - stephengtuggy
  */
 void winsys_atexit( winsys_atexit_func_t func )
 {
     static bool called = false;
     if (called != false) {
-        BOOST_LOG_TRIVIAL(error) << "winsys_atexit called twice";
-        VegaStrikeLogging::VegaStrikeLogger::FlushLogs();
+        VS_LOG_AND_FLUSH(error, "winsys_atexit called twice");
     }
     called = true;
 }
@@ -676,7 +687,7 @@ static void glut_keyboard_cb( unsigned char ch, int x, int y )
     if (keyboard_func) {
         int gm = glutGetModifiers();
         if (gm) {
-            BOOST_LOG_TRIVIAL(trace) << boost::format("Down Modifier %d for char %d %c") % gm % (int)ch % ch;
+            VS_LOG(trace, (boost::format("Down Modifier %d for char %d %c") % gm % (int)ch % ch));
         }
         if (gm&GLUT_ACTIVE_CTRL) {
             ch = AdjustKeyCtrl( ch );
@@ -697,7 +708,7 @@ static void glut_keyboard_up_cb( unsigned char ch, int x, int y )
     if (keyboard_func) {
         int gm = glutGetModifiers();
         if (gm) {
-            BOOST_LOG_TRIVIAL(trace) << boost::format("Up Modifier %d for char %d %c") % gm % (int)ch % ch;
+            VS_LOG(trace, (boost::format("Up Modifier %d for char %d %c") % gm % (int)ch % ch));
         }
         if (gm&GLUT_ACTIVE_CTRL) {
             ch = AdjustKeyCtrl( ch );
@@ -791,7 +802,7 @@ void winsys_warp_pointer( int x, int y )
  *  sets up fullscreen mode if selected)
  *  \author  jfpatry
  *  \date    Created:  2000-10-19
- *  \date    Modified: 2020-07-27 - stephengtuggy
+ *  \date    Modified: 2021-09-07 - stephengtuggy
  */
 void winsys_init( int *argc, char **argv, char const *window_title, char const *icon_title )
 {
@@ -815,16 +826,20 @@ void winsys_init( int *argc, char **argv, char const *window_title, char const *
     char str[1024];
     sprintf( str, "%dx%d:%d@60", g_game.x_resolution, g_game.y_resolution, gl_options.color_depth );
     glutGameModeString( str );
-    BOOST_LOG_TRIVIAL(trace) << boost::format("Game Mode Params %1%x%2% at depth %3% @ %4% Hz") % glutGameModeGet(GLUT_GAME_MODE_WIDTH) %
-                                 glutGameModeGet(GLUT_GAME_MODE_HEIGHT) % glutGameModeGet(GLUT_GAME_MODE_PIXEL_DEPTH) %
-                                 glutGameModeGet(GLUT_GAME_MODE_REFRESH_RATE);
+    VS_LOG(trace, (boost::format("Game Mode Params %1%x%2% at depth %3% @ %4% Hz")
+                                % glutGameModeGet(GLUT_GAME_MODE_WIDTH)
+                                % glutGameModeGet(GLUT_GAME_MODE_HEIGHT)
+                                % glutGameModeGet(GLUT_GAME_MODE_PIXEL_DEPTH)
+                                % glutGameModeGet(GLUT_GAME_MODE_REFRESH_RATE)));
     /* Create a window */
     if ( gl_options.fullscreen && (glutGameModeGet( GLUT_GAME_MODE_POSSIBLE ) != -1) ) {
         glutInitWindowPosition( 0, 0 );
         glutEnterGameMode();
-        BOOST_LOG_TRIVIAL(trace) << boost::format("Game Mode Params %1%x%2% at depth %3% @ %4% Hz") %
-                                     glutGameModeGet(GLUT_GAME_MODE_WIDTH) % glutGameModeGet(GLUT_GAME_MODE_HEIGHT) %
-                                     glutGameModeGet(GLUT_GAME_MODE_PIXEL_DEPTH) % glutGameModeGet(GLUT_GAME_MODE_REFRESH_RATE);
+        VS_LOG(trace, (boost::format("Game Mode Params %1%x%2% at depth %3% @ %4% Hz")
+                                    % glutGameModeGet(GLUT_GAME_MODE_WIDTH)
+                                    % glutGameModeGet(GLUT_GAME_MODE_HEIGHT)
+                                    % glutGameModeGet(GLUT_GAME_MODE_PIXEL_DEPTH)
+                                    % glutGameModeGet(GLUT_GAME_MODE_REFRESH_RATE)));
     } else {
         /* Set the initial window size */
         glutInitWindowSize( g_game.x_resolution, g_game.y_resolution );
@@ -913,14 +928,13 @@ void winsys_process_events()
  *  function should only be called once.
  *  \author  jfpatry
  *  \date    Created:  2000-10-20
- *  \date    Modified: 2020-11-14 - stephengtuggy */
+ *  \date    Modified: 2021-09-06 - stephengtuggy */
 void winsys_atexit( winsys_atexit_func_t func )
 {
     static bool called = false;
     if (called) {
         std::cerr << "winsys_atexit called twice\n";
-        BOOST_LOG_TRIVIAL(error) << "winsys_atexit called twice\n";
-        VegaStrikeLogging::VegaStrikeLogger::FlushLogs();
+        VS_LOG_AND_FLUSH(error, "winsys_atexit called twice\n");
     }
     called = true;
 

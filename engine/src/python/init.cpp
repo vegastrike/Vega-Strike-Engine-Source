@@ -1,9 +1,9 @@
-/**
+/*
  * init.cpp
  *
  * Copyright (C) Daniel Horn
- * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike
- * contributors
+ * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike contributors
+ * Copyright (C) 2021 Stephen G. Tuggy
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -45,6 +45,7 @@
 #include "configxml.h"
 #include "vs_globals.h"
 #include "vsfilesystem.h"
+#include "vs_logging.h"
 #include "init.h"
 #include "python_compile.h"
 #include "python_class.h"
@@ -55,7 +56,6 @@
 class Unit;
 //FROM_PYTHON_SMART_POINTER(Unit)
 
-#include "vsfilesystem.h"
 
 #ifdef _WIN32
 //Python 2.5 doesn't seem to like forward-slashes.
@@ -110,7 +110,7 @@ void Python::initpaths()
      *                       ",\""+VSFileSystem::datadir+DELIMSTR+basesdir + string("\"")+
      *                       "]\n");
      */
-    BOOST_LOG_TRIVIAL(info) << boost::format("running %1%") % changepath;
+    VS_LOG(info, (boost::format("running %1%") % changepath));
     char *temppython = strdup( changepath.c_str() );
     PyRun_SimpleString( temppython );
     Python::reseterrors();
@@ -120,10 +120,10 @@ void Python::initpaths()
 void Python::reseterrors()
 {
     if ( PyErr_Occurred() ) {
-        BOOST_LOG_TRIVIAL(error) << "void Python::reseterrors(): Python error occurred";
+        VS_LOG_AND_FLUSH(error, "void Python::reseterrors(): Python error occurred");
         PyErr_Print();
         PyErr_Clear();
-        VSFileSystem::flushLogs();
+        VegaStrikeLogging::VegaStrikeLogger::FlushLogs();
     }
 }
 
@@ -186,9 +186,9 @@ void Python::init()
     InitBriefing2();
     InitVS2();
 #endif
-    BOOST_LOG_TRIVIAL(info) << "testing VS random";
+    VS_LOG(info, "testing VS random");
     std::string changepath( "import sys\nprint(sys.path)\n" );
-    BOOST_LOG_TRIVIAL(info) << boost::format("running %1%") % changepath;
+    VS_LOG(info, (boost::format("running %1%") % changepath));
     char *temppython = strdup( changepath.c_str() );
     PyRun_SimpleString( temppython );
     Python::reseterrors();
@@ -232,27 +232,12 @@ void Python::test()
      *  This would be the preferred mode of operation for AI scripts
      */
 
-#if 0 //defined(WIN32)
-    FILE *fp = VSFileSystem::OpenFile( "config.py", "r" );
-
-    freopen( "stderr", "w", stderr );
-    freopen( "stdout", "w", stdout );
-    changehome( true );
-    FILE *fp1 = VSFileSystem::OpenFile( "config.py", "r" );
-    returnfromhome();
-    if (fp1 == NULL)
-        fp1 = fp;
-    if (fp1 != NULL) {
-        PyRun_SimpleFile( fp, "config.py" );
-        VSFileSystem::Close( fp1 );
-    }
-#endif
 //char buffer[128];
 //PythonIOString::buffer << endl << '\0';
 //vs_config->setVariable("data","test","NULL");
 //VSFileSystem::vs_fprintf(stdout, "%s", vs_config->getVariable("data","test", string()).c_str());
 //VSFileSystem::vs_fprintf(stdout, "output %s\n", PythonIOString::buffer.str());
-    VSFileSystem::flushLogs();
+    VegaStrikeLogging::VegaStrikeLogger::FlushLogs();
 }
 
 #endif

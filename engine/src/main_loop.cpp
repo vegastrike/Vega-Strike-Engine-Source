@@ -1,9 +1,10 @@
-/**
+/*
  * main_loop.cpp
  *
  * Copyright (C) 2001-2002 Daniel Horn
  * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike
  * contributors
+ * Copyright (C) 2021 Stephen G. Tuggy
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -69,7 +70,8 @@
 #include "cmd/music.h"
 #include "audiolib.h"
 #include "cmd/nebula.h"
-#include "vsfilesystem.h"
+// #include "vsfilesystem.h"   // Is this still needed? -- stephengtuggy 2021-09-06
+#include "vs_logging.h"
 #include "cmd/script/mission.h"
 #include "xml_support.h"
 #include "config_xml.h"
@@ -278,7 +280,7 @@ void QuitNow()
 void SkipMusicTrack( const KBData&, KBSTATE newState )
 {
     if (newState == PRESS) {
-        BOOST_LOG_TRIVIAL(info) << "skipping";
+        VS_LOG(info, "skipping");
         muzak->Skip();
     }
 }
@@ -504,7 +506,7 @@ void ScrollUp( const KBData&, KBSTATE newState )
     scrolltime += GetElapsedTime();
     if ( newState == PRESS || (newState == DOWN && scrolltime >= .5) ) {
         scrolltime = 0;
-        BOOST_LOG_TRIVIAL(info) << boost::format("Enabling exceptions %1%") % allexcept;
+        VS_LOG(info, (boost::format("Enabling exceptions %1%") % allexcept));
         _Universe->AccessCockpit()->ScrollAllVDU( -1 );
     }
 }
@@ -513,7 +515,7 @@ void ScrollDown( const KBData&, KBSTATE newState )
     scrolltime += GetElapsedTime();
     if ( newState == PRESS || (newState == DOWN && scrolltime >= .5) ) {
         scrolltime = 0;
-        BOOST_LOG_TRIVIAL(info) << "Disabling exceptions";
+        VS_LOG(info, "Disabling exceptions");
         _Universe->AccessCockpit()->ScrollAllVDU( 1 );
     }
 }
@@ -819,9 +821,10 @@ void createObjects( std::vector< std::string > &fighter0name,
         for (int s = 0; s < fg->nr_ships; s++) {
             if (a >= mission->number_of_ships) {
                 a -= 22;
-                BOOST_LOG_TRIVIAL(error) << "Error: in createObjects: more ships in flightgroups than in total for mission!";
-                BOOST_LOG_TRIVIAL(error) << boost::format("Variables a=%1%, fg-number-of-ships=%2%, total nr=%3%, fact=%4%, fgname=%5%")
-                                            % a % fg->nr_ships % mission->number_of_ships % fg->faction.c_str() % fg->name.c_str();
+                VS_LOG(error, "Error: in createObjects: more ships in flightgroups than in total for mission!");
+                VS_LOG(error,
+                       (boost::format("Variables a=%1%, fg-number-of-ships=%2%, total nr=%3%, fact=%4%, fgname=%5%")
+                                            % a % fg->nr_ships % mission->number_of_ships % fg->faction.c_str() % fg->name.c_str()));
                 break;
             }
             numf++;
@@ -875,7 +878,7 @@ void createObjects( std::vector< std::string > &fighter0name,
                             dat->clear();
                         }
                         fighter0mods.push_back( modifications = game_options.getCallsign( squadnum ) );
-                        BOOST_LOG_TRIVIAL(info) << boost::format("FOUND MODIFICATION = %1% FOR PLAYER #%2%") % modifications.c_str() % squadnum;
+                        VS_LOG(info, (boost::format("FOUND MODIFICATION = %1% FOR PLAYER #%2%") % modifications.c_str() % squadnum));
                     } else {
                         fighter0mods.push_back( "" );
                     }
@@ -886,7 +889,7 @@ void createObjects( std::vector< std::string > &fighter0name,
                     _Universe->SetActiveCockpit( _Universe->AccessCockpit( squadnum ) );
                 }
 
-                BOOST_LOG_TRIVIAL(info) << "CREATING A LOCAL SHIP : " << fightername;
+                VS_LOG(info, (boost::format("CREATING A LOCAL SHIP : %1%") % fightername));
                 fighters[a] = new GameUnit( fightername, false, tmptarget[a], modifications, fg, s );
 
                 _Universe->activeStarSystem()->AddUnit( fighters[a] );
@@ -921,7 +924,7 @@ void createObjects( std::vector< std::string > &fighter0name,
                 }
                 _Universe->activeStarSystem()->AddUnit( fighters[a] );
             }
-            BOOST_LOG_TRIVIAL(info) << boost::format("pox %1% %2% %3%") % pox.i % pox.j % pox.k;
+            VS_LOG(info, (boost::format("pox %1% %2% %3%") % pox.i % pox.j % pox.k));
             fighters[a]->SetPosAndCumPos( pox );
             fg_radius = fighters[a]->rSize();
             if ( benchmark > 0.0 || ( s != 0 || squadnum >= (int) fighter0name.size() ) ) {
@@ -934,8 +937,9 @@ void createObjects( std::vector< std::string > &fighter0name,
     }     //end of for flightgroups
 
     delete[] tmptarget;
-    for (int m_i = 0; m_i < muzak_count; m_i++)
+    for (int m_i = 0; m_i < muzak_count; m_i++) {
         muzak[m_i].SetParent( fighters[0] );
+    }
     FactionUtil::LoadFactionPlaylists();
     AUDListenerSize( fighters[0]->rSize()*4 );
     for (unsigned int cnum = 0; cnum < fighter0indices.size(); cnum++) {
@@ -1022,7 +1026,7 @@ void main_loop()
         myterrain->AdjustTerrain( _Universe->activeStarSystem() );
 
 #ifndef NO_GFX
-    BOOST_LOG_TRIVIAL(trace) << boost::format("Drawn %1% vertices in %2% batches") % gl_vertices_this_frame % gl_batches_this_frame;
+    VS_LOG(trace, (boost::format("Drawn %1% vertices in %2% batches") % gl_vertices_this_frame % gl_batches_this_frame));
     gl_vertices_this_frame = 0;
     gl_batches_this_frame = 0;
 #endif

@@ -1,9 +1,9 @@
-/**
+/*
  * beam_generic.cpp
  *
  * Copyright (C) Daniel Horn
- * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike
- * contributors
+ * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike contributors
+ * Copyright (C) 2021 Stephen G. Tuggy
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -34,8 +34,9 @@
 #include "gfx/camera.h"
 #include "universe.h"
 #include "weapon_info.h"
+#include "vs_logging.h"
 
-using namespace XMLSupport;
+using namespace XMLSupport; // FIXME -- Shouldn't include an entire namespace, per Google Style Guide -- stephengtuggy 2021-09-07
 extern double interpolation_blend_factor;
 extern bool AdjustMatrix( Matrix &mat, const Vector &velocity, Unit *target, float speed, bool lead, float cone );
 
@@ -387,7 +388,7 @@ extern Cargo * GetMasterPartList( const char* );
 bool Beam::Collide( Unit *target, Unit *firer, Unit *superunit )
 {
     if (target == NULL) {
-        BOOST_LOG_TRIVIAL(error) << "Recovering from nonfatal beam error when beam inactive\n";
+        VS_LOG(error, "Recovering from nonfatal beam error when beam inactive\n");
         return false;
     }
     float distance;

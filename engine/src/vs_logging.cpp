@@ -1,4 +1,4 @@
-/**
+/*
  * vs_logging.cpp
  *
  * Copyright (C) 2021 Stephen G. Tuggy
@@ -55,7 +55,7 @@ namespace VegaStrikeLogging {
 // void exitProgram(int code)
 // {
 //     Music::CleanupMuzak();
-//     VegaStrikeLogging::flushLogs();
+//     VegaStrikeLogging::VegaStrikeLogger::FlushLogs();
 //     winsys_exit(code);
 // }
 

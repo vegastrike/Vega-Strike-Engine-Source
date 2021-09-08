@@ -1,9 +1,9 @@
-/**
+/*
  * click_list.cpp
  *
  * Copyright (C) Daniel Horn
- * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike
- * contributors
+ * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike contributors
+ * Copyright (C) 2021 Stephen G. Tuggy
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -31,6 +31,8 @@
 #include "vs_globals.h"
 #include "gfx/camera.h"
 #include "universe.h"
+// #include "vs_logging.h"
+
 extern Vector mouseline;
 extern vector< Vector >perplines;
 
@@ -56,7 +58,7 @@ bool ClickList::queryShip( int mouseX, int mouseY, Unit *ship )
     /* if (tmp) {
         if ( ship->querySphereClickList( CamPos, mousePoint.Cast(), 0 ) ) {
             //camera position is not actually the center of the camera
-            // BOOST_LOG_TRIVIAL(info) << "bounding sphere hit\n";
+            // VS_LOG(info, "bounding sphere hit\n");
             return true;
         }
     } POSSIBLE DELETE */

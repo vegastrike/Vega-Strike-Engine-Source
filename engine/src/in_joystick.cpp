@@ -1,10 +1,10 @@
-/**
+/*
  * in_joystick.cpp
  *
  * Copyright (C) 2001-2002 Daniel Horn
  * Copyright (C) Alexander Rawass <alexannika@users.sourceforge.net>
- * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike
- * contributors
+ * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike contributors
+ * Copyright (C) 2021 Stephen G. Tuggy
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -12,7 +12,7 @@
  *
  * Vega Strike is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 2 of the License, or
+ * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
  * Vega Strike is distributed in the hope that it will be useful,
@@ -31,7 +31,8 @@
 #include <lin_time.h>
 #include "vegastrike.h"
 #include "vs_globals.h"
-#include "vsfilesystem.h"
+// #include "vsfilesystem.h"
+#include "vs_logging.h"
 
 #include "in_handler.h"
 #include "in_joystick.h"
@@ -148,12 +149,12 @@ void InitJoystick()
 #ifndef NO_SDL_JOYSTICK
 #ifdef HAVE_SDL
     num_joysticks = SDL_NumJoysticks();
-    BOOST_LOG_TRIVIAL(info) << boost::format("%1% joysticks were found.\n\n") % num_joysticks;
-    BOOST_LOG_TRIVIAL(info) << "The names of the joysticks are:\n";
+    VS_LOG(info, (boost::format("%1% joysticks were found.\n\n") % num_joysticks));
+    VS_LOG(info, "The names of the joysticks are:\n");
 #else
     //use glut
     if (glutDeviceGet( GLUT_HAS_JOYSTICK ) || game_options.force_use_of_joystick) {
-        BOOST_LOG_TRIVIAL(info) << "setting joystick functionality:: joystick online";
+        VS_LOG(info, "setting joystick functionality:: joystick online");
         glutJoystickFunc( myGlutJoystickCallback, JoystickPollingRate() );
         num_joysticks = 1;
     }
@@ -163,11 +164,11 @@ void InitJoystick()
 #ifndef NO_SDL_JOYSTICK
 #ifdef HAVE_SDL
         if (i < num_joysticks) {
-            BOOST_LOG_TRIVIAL(info) << boost::format("    %1%\n") % SDL_JoystickName( i );
+            VS_LOG(info, (boost::format("    %1%\n") % SDL_JoystickName( i )));
         }
 #else
         if (i < num_joysticks) {
-            BOOST_LOG_TRIVIAL(info) << boost::format("Glut detects %1% joystick") % (i+1);
+            VS_LOG(info, (boost::format("Glut detects %1% joystick") % (i+1)));
         }
 #endif
 #endif
@@ -215,7 +216,7 @@ JoyStick::JoyStick( int which ) : mouse( which == MOUSE_JOYSTICK )
     }
     joy = SDL_JoystickOpen( which );     //joystick nr should be configurable
     if (joy == nullptr) {
-        BOOST_LOG_TRIVIAL(warning) << boost::format("warning: no joystick nr %1%\n") % which;
+        VS_LOG(warning, (boost::format("warning: no joystick nr %1%\n") % which));
         joy_available = false;
         return;
     }
@@ -235,7 +236,7 @@ JoyStick::JoyStick( int which ) : mouse( which == MOUSE_JOYSTICK )
     nr_of_hats    = 0;
 #endif //we have GLUT
 #endif
-    BOOST_LOG_TRIVIAL(info) << boost::format("axes: %1% buttons: %2% hats: %3%\n") % nr_of_axes % nr_of_buttons % nr_of_hats;
+    VS_LOG(info, (boost::format("axes: %1% buttons: %2% hats: %3%\n") % nr_of_axes % nr_of_buttons % nr_of_hats));
 }
 void JoyStick::InitMouse( int which )
 {
@@ -277,7 +278,7 @@ void JoyStick::GetMouse( float &x, float &y, float &z, int &buttons )
     GetMouseXY( _mx, _my );
     GetMouseDelta( _dx, _dy );
     if ( 0 && (_dx || _dy) ) {
-        BOOST_LOG_TRIVIAL(info) << boost::format("x:%1% y:%2%\n") % _dx % _dy;
+        VS_LOG(info, (boost::format("x:%1% y:%2%\n") % _dx % _dy));
     }
     if (!game_options.warp_mouse) {
         fdx = (float) (_dx = _mx-g_game.x_resolution/2);
@@ -351,7 +352,7 @@ void JoyStick::GetJoyStick( float &x, float &y, float &z, int &buttons )
 #ifndef NO_SDL_JOYSTICK
 #if defined (HAVE_SDL)
     int numaxes = SDL_JoystickNumAxes( joy ) < MAX_AXES ? SDL_JoystickNumAxes( joy ) : MAX_AXES;
-    vector< Sint16 >axi( numaxes );
+    std::vector< Sint16 >axi( numaxes );
     for (a = 0; a < numaxes; a++)
         axi[a] = SDL_JoystickGetAxis( joy, a );
     joy_buttons   = 0;

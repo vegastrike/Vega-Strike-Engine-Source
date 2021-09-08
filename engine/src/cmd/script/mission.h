@@ -1,4 +1,4 @@
-/**
+/*
  * mission.h
  *
  * Copyright (C) 2001-2002 Daniel Horn
@@ -44,7 +44,8 @@
 
 #ifndef VS_MIS_SEL
 #include "vegastrike.h"
-#include "vsfilesystem.h"
+// #include "vsfilesystem.h"
+#include "vs_logging.h"
 #include "vs_globals.h"
 #include "msgcenter.h"
 #include "cmd/container.h"
@@ -59,8 +60,6 @@ class MessageCenter;
 // using std::string;
 
 // using XMLSupport::AttributeList;
-
-#include "vs_logging.h"
 
 #define qu( x ) ("\""+x+"\"")
 

@@ -1,9 +1,10 @@
-/**
+/*
  * CodecRegistry.cpp
  *
  * Copyright (C) Daniel Horn
  * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike
  * contributors
+ * Copyright (C) 2021 Stephen G. Tuggy
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -58,22 +59,22 @@ namespace Audio {
             nameCodec[codec->getName()] = codec;
 
             // static initializer ordering issue between boost logger and other code?
-            BOOST_LOG_TRIVIAL(trace) << "Registering codec " << codec->getName().c_str();
+            VS_LOG(trace, (boost::format("Registering codec %1%") % codec->getName().c_str()));
 
             const Codec::Extensions *ext = codec->getExtensions();
             if (ext) {
                 for (Codec::Extensions::const_iterator it = ext->begin(); it != ext->end(); ++it) {
-                    BOOST_LOG_TRIVIAL(trace) << " " << it->c_str();
+                    VS_LOG(trace, (boost::format(" %1%") % it->c_str()));
                     extensionCodecs[*it].insert(codec);
                 }
             } else {
-                BOOST_LOG_TRIVIAL(trace) << " as universal";
+                VS_LOG(trace, " as universal");
                 universalCodecs.insert(codec);
             }
 
-            BOOST_LOG_TRIVIAL(trace) << "." << std::endl;
+            VS_LOG(trace, ".");
         } else {
-            BOOST_LOG_TRIVIAL(trace) << "Codec " << codec->getName().c_str() << " already registered" << std::endl;
+            VS_LOG(trace, (boost::format("Codec %1% already registered") % codec->getName().c_str()));
         }
     }
 

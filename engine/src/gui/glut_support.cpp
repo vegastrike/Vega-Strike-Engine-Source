@@ -4,7 +4,7 @@
 *                           begin                : December 28, 2001
 *                           copyright            : (C) 2001 by David Ranger
 *                           email                : ussreliant@users.sourceforge.net
-*                           copyright            : (C) 2020 by Stephen G. Tuggy
+*                           copyright            : (C) 2020-2021 by Stephen G. Tuggy
 *                           email                : sgt@stephengtuggy.com
 ***************************************************************************/
 
@@ -12,7 +12,7 @@
 *                                                                         *
 *   This program is free software; you can redistribute it and/or modify  *
 *   it under the terms of the GNU General Public License as published by  *
-*   the Free Software Foundation; either version 2 of the License, or     *
+*   the Free Software Foundation; either version 3 of the License, or     *
 *   any later version.                                                    *
 *                                                                         *
 ***************************************************************************/
@@ -26,6 +26,7 @@
 #include "config_xml.h"
 #include "gfx/vsimage.h"
 #include "vsfilesystem.h"
+#include "vs_logging.h"
 #include "gldrv/gl_globals.h"
 using namespace VSFileSystem;
 
@@ -40,17 +41,17 @@ void ShowColor( float x, float y, float wid, float hei, float red, float green, 
 {
     float cols[4] = {red, green, blue, alpha};
     if (wid < 0 || hei < 0) {
-        BOOST_LOG_TRIVIAL(error) << "Cannot draw color with negative height or width";
+        VS_LOG(error, "Cannot draw color with negative height or width");
         return;
     }
     //Make sure we don't exceed the program
     if (x+wid > 1) wid = 1-x;
     if (y-hei < -1) hei = -1+y;
 #ifdef DEBUG
-    BOOST_LOG_TRIVIAL(debug) <<"Displaying color at "<<x<<","<<y<<"\n";
-    BOOST_LOG_TRIVIAL(debug) <<"with the dimensions of "<<wid<<","<<hei<<"\n";
-    BOOST_LOG_TRIVIAL(debug) <<"With the color "<<red<<","<<green<<","<<blue<<","<<alpha<<"\n";
-    BOOST_LOG_TRIVIAL(debug) <<"-----------------------------\n";
+    VS_LOG(debug, (boost::format("Displaying color at %1%,%2%") % x % y));
+    VS_LOG(debug, (boost::format("with the dimensions of %1%,%2%") % wid % hei));
+    VS_LOG(debug, (boost::format("With the color %1%,%2%,%3%,%4%") % red % green % blue % alpha));
+    VS_LOG(debug, "-----------------------------");
 #endif
     glDisable( GL_TEXTURE_2D );
     glBegin( GL_QUADS );

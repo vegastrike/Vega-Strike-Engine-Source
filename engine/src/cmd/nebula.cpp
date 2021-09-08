@@ -1,9 +1,9 @@
-/**
+/*
  * nebula.cpp
  *
  * Copyright (C) Daniel Horn
- * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike
- * contributors
+ * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike contributors
+ * Copyright (C) 2021 Stephen G. Tuggy
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -27,6 +27,7 @@
 #include "nebula.h"
 #include "vegastrike.h"
 #include "vsfilesystem.h"
+#include "vs_logging.h"
 #include <assert.h>
 #include "config_xml.h"
 #include "vs_globals.h"
@@ -42,6 +43,7 @@ using XMLSupport::EnumMap;
 using XMLSupport::Attribute;
 using XMLSupport::AttributeList;
 
+// FIXME -- Shouldn't include entire namespaces, according to Google Style Guide -- stephengtuggy 2021-09-07
 using namespace XMLSupport;
 using namespace NebulaXML;
 using namespace VSFileSystem;
@@ -161,9 +163,8 @@ void Nebula::LoadXML( const char *filename )
     if (err > Ok || !usefog) {
         if (err <= Ok) {
             f.Close();
-        }
-        else {
-            BOOST_LOG_TRIVIAL(error) << boost::format("\nUnit file %1% not found\n") % filename;
+        } else {
+            VS_LOG(error, (boost::format("\nUnit file %1% not found\n") % filename));
         }
         fogmode = FOG_OFF;
         return;

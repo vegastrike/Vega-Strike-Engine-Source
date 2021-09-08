@@ -1,4 +1,4 @@
-/**
+/*
  * eventmanager.cpp
  *
  * Copyright (C) Daniel Horn

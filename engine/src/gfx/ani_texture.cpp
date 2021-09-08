@@ -1,9 +1,9 @@
-/**
+/*
  * ani_texture.cpp
  *
  * Copyright (C) Daniel Horn
- * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike
- * contributors
+ * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike contributors
+ * Copyright (C) 2021 Stephen G. Tuggy
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -34,6 +34,7 @@
 #include "lin_time.h"
 #include "vegastrike.h"
 #include "vsfilesystem.h"
+#include "vs_logging.h"
 #include "vs_globals.h"
 #include "vs_random.h"
 #include "../gldrv/gl_globals.h"
@@ -181,7 +182,7 @@ void AnimatedTexture::MakeActive( int stage, int pass )
                     int ocompression = gl_options.compression;
                     gl_options.compression = 0;
 
-                    BOOST_LOG_TRIVIAL(info) << "Transferring video frame";
+                    VS_LOG(info, "Transferring video frame");
                     Transfer( 65535, GFXFALSE );
 
                     gl_options.compression = ocompression;
@@ -197,7 +198,7 @@ void AnimatedTexture::MakeActive( int stage, int pass )
                 }
             }
             catch (const ::VidFile::Exception& e) {
-                BOOST_LOG_TRIVIAL(info) << boost::format("\nVidFile exception: %1%") % e.what();
+                VS_LOG(info, (boost::format("\nVidFile exception: %1%") % e.what()));
             }
             Texture::MakeActive( stage, pass );
         }
@@ -527,7 +528,7 @@ AnimatedTexture* AnimatedTexture::CreateVideoTexture( const std::string &fname,
     if (err <= Ok) {
         rv->LoadVideoSource( f );
     } else {
-        BOOST_LOG_TRIVIAL(warning) << boost::format("CreateVideoTexture could not find %1%\n") % fname.c_str();
+        VS_LOG(warning, (boost::format("CreateVideoTexture could not find %1%\n") % fname.c_str()));
     }
 
     // Videos usually don't want to be looped, so set non-looping as default

@@ -1,4 +1,4 @@
-/**
+/*
  * vs_globals.h
  *
  * Copyright (C) Daniel Horn

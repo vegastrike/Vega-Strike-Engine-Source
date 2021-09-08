@@ -1,9 +1,9 @@
-/**
+/*
  * env_map_gent.cpp
  *
  * Copyright (C) Daniel Horn
- * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike
- * contributors
+ * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike contributors
+ * Copyright (C) 2021 Stephen G. Tuggy
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -32,6 +32,7 @@
 #include <assert.h>
 #include <string.h>
 #include "vsfilesystem.h"
+#include "vs_logging.h"
 #include "vsimage.h"
 #include "aux_texture.h"
 #include "gldrv/sdds.h"
@@ -55,7 +56,7 @@ static float affine         = 0;
 static float multiplicitive = 1;
 static float power = 1;
 
-using namespace VSFileSystem;
+using namespace VSFileSystem;   // FIXME -- Shouldn't include an entire namespace, according to Google Style Guide -- stephengtuggy 2021-09-07
 
 /*
 struct Vector {
@@ -492,8 +493,8 @@ void EnvironmentMapGeneratorMain( const char *inpt, const char *outpt, float a, 
     OutputName = strdup( outpt );
     free( tmp );
     tmp = NULL;
-    BOOST_LOG_TRIVIAL(info) << boost::format("input name %1%, output name %2%") % InputName % OutputName;
-    BOOST_LOG_TRIVIAL(info) << boost::format("Affine %1% Mult %2% Pow %3%") % affine % multiplicitive % power;
+    VS_LOG(info, (boost::format("input name %1%, output name %2%") % InputName % OutputName));
+    VS_LOG(info, (boost::format("Affine %1% Mult %2% Pow %3%") % affine % multiplicitive % power));
     GenerateSphereMap();
     free( InputName );
     free( OutputName );

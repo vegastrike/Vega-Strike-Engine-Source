@@ -1,9 +1,9 @@
-/**
+/*
  * python_compile.cpp
  *
  * Copyright (C) Daniel Horn
- * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike
- * contributors
+ * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike contributors
+ * Copyright (C) 2021 Stephen G. Tuggy
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -34,7 +34,8 @@
 #include "init.h"
 #include "universe_util.h"
 #include "in_kb_data.h"
-#include "vsfilesystem.h"
+// #include "vsfilesystem.h"
+#include "vs_logging.h"
 
 Hashtable< string, PyObject, 1023 >compiled_python;
 
@@ -83,7 +84,7 @@ PyObject * CompilePython( const std::string &name )
         return retval;
     char *str = LoadString( name.c_str() );
     if (str) {
-        BOOST_LOG_TRIVIAL(info) << boost::format("Compiling python module %1$s\n") % name;
+        VS_LOG(info, (boost::format("Compiling python module %1$s\n") % name));
 
         std::string compiling_name = getCompilingName( name ).c_str();
         char *temp = strdup( compiling_name.c_str() );

@@ -2,8 +2,8 @@
  * OpenALHelpers.cpp
  *
  * Copyright (C) Daniel Horn
- * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike
- * contributors
+ * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike contributors
+ * Copyright (C) 2021 Stephen G. Tuggy
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -36,7 +36,8 @@
 
 #include <string>
 #include <stdio.h>
-#include "vsfilesystem.h"
+// #include "vsfilesystem.h"
+#include "vs_logging.h"
 
 namespace Audio {
     namespace __impl {
@@ -67,8 +68,7 @@ namespace Audio {
 
                         std::string error("OpenAL error: ");
                         error += std::string(errdesc ? errdesc : "unknown") + s_errcode + " at " + filename + ":" + s_lineno;
-                        BOOST_LOG_TRIVIAL(error) << boost::format("%1%") % error;
-                        VSFileSystem::flushLogs();
+                        VS_LOG_AND_FLUSH(error, (boost::format("%1%") % error));
                         throw Exception(error);
                     }
                 }

@@ -1,9 +1,9 @@
-/**
+/*
  * base_util.cpp
  *
  * Copyright (C) Daniel Horn
- * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike
- * contributors
+ * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike contributors
+ * Copyright (C) 2021 Stephen G. Tuggy
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -63,6 +63,7 @@ typedef boost::python::dictionary BoostPythonDictionary;
 #include "audio/Scene.h"
 
 #include "configxml.h"
+#include "vs_logging.h"
 
 extern float getFontHeight();
 
@@ -225,7 +226,7 @@ bool VideoStream( int room, std::string index, std::string streamfile, float x, 
 {
     BaseInterface::Room *newroom = CheckRoom( room );
     if (!newroom) {
-        BOOST_LOG_TRIVIAL(error) << "ERROR: Room not found!!\n";
+        VS_LOG(error, "ERROR: Room not found!!\n");
         return false;
     }
 
@@ -238,10 +239,10 @@ bool VideoStream( int room, std::string index, std::string streamfile, float x, 
 #endif
 
     if (newobj->spr.LoadSuccess()) {
-        BOOST_LOG_TRIVIAL(info) << boost::format("INFO: Added video stream %1$s\n") % streamfile.c_str();
+        VS_LOG(info, (boost::format("INFO: Added video stream %1$s\n") % streamfile.c_str()));
         newroom->objs.push_back( newobj );
     } else {
-        BOOST_LOG_TRIVIAL(info) << boost::format("INFO: Missing video stream %1$s\n") % streamfile.c_str();
+        VS_LOG(info, (boost::format("INFO: Missing video stream %1$s\n") % streamfile.c_str()));
         delete newobj;
         return false;
     }
@@ -454,7 +455,7 @@ void SetLinkEventMask( int room, std::string index, std::string maskdef )
             break;
         case 'm':
         case 'M':
-            BOOST_LOG_TRIVIAL(warning) << boost::format("%1$s: WARNING: Ignoring request for movement event mask.\n") % __FILE__;
+            VS_LOG(warning, (boost::format("%1$s: WARNING: Ignoring request for movement event mask.\n") % __FILE__));
             break;
         }
     }
@@ -575,7 +576,7 @@ void CompPython( int room,
             newcomp->modes.push_back( (BaseComputer::DisplayMode) (modearg) );
         }
         else {
-            BOOST_LOG_TRIVIAL(warning) << boost::format("WARNING: Unknown computer mode %1$s found in python script...\n") % curmode;
+            VS_LOG(warning, (boost::format("WARNING: Unknown computer mode %1$s found in python script...\n") % curmode));
         }
     }
     delete[] curmode;

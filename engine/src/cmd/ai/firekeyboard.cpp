@@ -1,9 +1,9 @@
-/**
+/*
  * firekeyboard.cpp
  *
  * Copyright (C) Daniel Horn
- * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike
- * contributors
+ * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike contributors
+ * Copyright (C) 2021 Stephen G. Tuggy
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -56,6 +56,7 @@
 #include "universe.h"
 #include "mount_size.h"
 #include "weapon_info.h"
+#include "vs_logging.h"
 
 extern bool toggle_pause();
 
@@ -761,7 +762,7 @@ void FireKeyboard::NearestJumpKey( const KBData&, KBSTATE k )
 void FireKeyboard::TogglePause( const KBData&, KBSTATE k )
 {
     if (k == PRESS) {
-        BOOST_LOG_TRIVIAL(info) << "FireKeyboard::TogglePause(): Pause key detected";
+        VS_LOG(info, "FireKeyboard::TogglePause(): Pause key detected");
         g().togglepausekey = k;
     }
 }
@@ -1195,8 +1196,7 @@ void ChooseSubTargets( Unit *me )
 FireKeyboard::~FireKeyboard()
 {
 #ifdef ORDERDEBUG
-    BOOST_LOG_TRIVIAL(trace) << boost::format("fkb%1$x") % this;
-    VSFileSystem::flushLogs();
+    VS_LOG_AND_FLUSH(trace, (boost::format("fkb%1$x") % this));
 #endif
 }
 
@@ -1903,15 +1903,15 @@ void FireKeyboard::Execute()
     }
     if (f().togglepausekey == PRESS) {
         f().togglepausekey = DOWN;
-        BOOST_LOG_TRIVIAL(info) << "Pause key pressed";
+        VS_LOG(info, "Pause key pressed");
         if (toggle_pause())
     	{
-    	    BOOST_LOG_TRIVIAL(info) << "Calling _Universe->AccessCockpit()->OnPauseBegin();";
+    	    VS_LOG(info, "Calling _Universe->AccessCockpit()->OnPauseBegin();");
             _Universe->AccessCockpit()->OnPauseBegin();
     	}
     	else
     	{
-    	    BOOST_LOG_TRIVIAL(info) << "Calling _Universe->AccessCockpit()->OnPauseEnd();";
+    	    VS_LOG(info, "Calling _Universe->AccessCockpit()->OnPauseEnd();");
             _Universe->AccessCockpit()->OnPauseEnd();
     	}
     }

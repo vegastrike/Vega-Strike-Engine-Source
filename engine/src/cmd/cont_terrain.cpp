@@ -1,9 +1,9 @@
-/**
+/*
  * cont_terrain.cpp
  *
  * Copyright (C) Daniel Horn
- * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike
- * contributors
+ * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike contributors
+ * Copyright (C) 2021 Stephen G. Tuggy
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -39,6 +39,10 @@
 #include "unit_collide.h"
 #include "vs_globals.h"
 #include "config_xml.h"
+#include "vsfilesystem.h"
+#include "vs_logging.h"
+
+
 ContinuousTerrain::ContinuousTerrain( const char *filename, const Vector &Scales, const float mass )
 {
     float tmass;
@@ -104,7 +108,7 @@ ContinuousTerrain::ContinuousTerrain( const char *filename, const Vector &Scales
         for (i = 0; i < numcontterr; i++)
             if (data[i]) {
                 if ( sizeX != data[i]->getSizeX() || sizeZ != data[i]->getSizeZ() ){
-                    BOOST_LOG_TRIVIAL(warning) << "Warning: Sizes of terrain do not match...expect gaps in continuous terrain\n";
+                    VS_LOG(warning, "Warning: Sizes of terrain do not match...expect gaps in continuous terrain\n");
                 }
                 data[i]->SetTotalSize( sizeX*width, sizeZ*width );
             }
@@ -196,7 +200,7 @@ QVector ContinuousTerrain::GetGroundPosIdentTrans( QVector ShipPos, Vector &norm
             return tmploc;
         }
     }
-    BOOST_LOG_TRIVIAL(error) << boost::format("Can't find %1$f,%2$f,%3$f\n") % ShipPos.i % ShipPos.j % ShipPos.k;
+    VS_LOG(error, (boost::format("Can't find %1$f,%2$f,%3$f\n") % ShipPos.i % ShipPos.j % ShipPos.k));
     ShipPos.i *= Scales.i;
     ShipPos.j *= Scales.j;
     ShipPos.k *= Scales.k;
@@ -308,7 +312,7 @@ void ContinuousTerrain::Collide( Unit *un, Matrix t )
             if (diff.k < 0)
                 diff.k += sizeZ*width;
             if ( !(rand()%10) ) {
-                BOOST_LOG_TRIVIAL(warning) << boost::format("unit in out sapce %1$f %2$f %3$f\n") % diff.i % diff.j % diff.k;
+                VS_LOG(warning, (boost::format("unit in out sapce %1$f %2$f %3$f\n") % diff.i % diff.j % diff.k));
             }
             diff = Transform( t, diff );
             const csReversibleTransform bigtransform( transform );

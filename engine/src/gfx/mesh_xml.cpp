@@ -1,4 +1,4 @@
-/**
+/*
  * mesh_xml.cpp
  *
  * Copyright (C) Daniel Horn
@@ -434,7 +434,7 @@ void Mesh::beginElement( MeshXML *xml, const string &name, const AttributeList &
         }
         break;
     case MeshXML::UNKNOWN:
-        BOOST_LOG_TRIVIAL(error) << boost::format("Unknown element start tag '%1%' detected") % name;
+        VS_LOG(error, (boost::format("Unknown element start tag '%1%' detected") % name));
         break;
     case MeshXML::MESH:
         assert( xml->load_stage == 0 );
@@ -565,7 +565,7 @@ void Mesh::beginElement( MeshXML *xml, const string &name, const AttributeList &
             switch ( MeshXML::attribute_map.lookup( (*iter).name ) )
             {
             case MeshXML::UNKNOWN:
-                BOOST_LOG_TRIVIAL(error) << boost::format("Unknown attribute '%1%' encountered in Location tag") % (*iter).name;
+                VS_LOG(error, (boost::format("Unknown attribute '%1%' encountered in Location tag") % (*iter).name));
                 break;
             case MeshXML::X:
                 assert( !(xml->point_state&MeshXML::P_X) );
@@ -608,7 +608,7 @@ void Mesh::beginElement( MeshXML *xml, const string &name, const AttributeList &
             switch ( MeshXML::attribute_map.lookup( (*iter).name ) )
             {
             case MeshXML::UNKNOWN:
-                BOOST_LOG_TRIVIAL(error) << boost::format("Unknown attribute '%1%' encountered in Normal tag") % (*iter).name;
+                VS_LOG(error, (boost::format("Unknown attribute '%1%' encountered in Normal tag") % (*iter).name));
                 break;
             case MeshXML::I:
                 assert( !(xml->point_state&MeshXML::P_I) );
@@ -659,7 +659,7 @@ void Mesh::beginElement( MeshXML *xml, const string &name, const AttributeList &
                 break;
             case MeshXML::FLATSHADE:
                 if ( (*iter).value == "Flat" ) {
-                    BOOST_LOG_TRIVIAL(error) << "Cannot Flatshade Lines";
+                    VS_LOG(error, "Cannot Flatshade Lines");
                 } else if ( (*iter).value == "Smooth" ) {
                     //ignored -- already done
                 }
@@ -707,7 +707,7 @@ void Mesh::beginElement( MeshXML *xml, const string &name, const AttributeList &
                 break;
             case MeshXML::FLATSHADE:
                 if ( (*iter).value == "Flat" ) {
-                    BOOST_LOG_TRIVIAL(error) << "Cannot Flatshade Linestrips";
+                    VS_LOG(error, "Cannot Flatshade Linestrips");
                 } else if ( (*iter).value == "Smooth" ) {
                     //ignored -- already done
                 }
@@ -733,7 +733,7 @@ void Mesh::beginElement( MeshXML *xml, const string &name, const AttributeList &
                 break;
             case MeshXML::FLATSHADE:
                 if ( (*iter).value == "Flat" ) {
-                    BOOST_LOG_TRIVIAL(error) << "Cannot Flatshade Tristrips";
+                    VS_LOG(error, "Cannot Flatshade Tristrips");
                 } else if ( (*iter).value == "Smooth" ) {
                     //ignored -- already done
                 }
@@ -759,7 +759,7 @@ void Mesh::beginElement( MeshXML *xml, const string &name, const AttributeList &
                 break;
             case MeshXML::FLATSHADE:
                 if ( (*iter).value == "Flat" ) {
-                    BOOST_LOG_TRIVIAL(error) << "Cannot Flatshade Trifans";
+                    VS_LOG(error, "Cannot Flatshade Trifans");
                 } else if ( (*iter).value == "Smooth" ) {
                     //ignored -- already done
                 }
@@ -785,7 +785,7 @@ void Mesh::beginElement( MeshXML *xml, const string &name, const AttributeList &
                 break;
             case MeshXML::FLATSHADE:
                 if ( (*iter).value == "Flat" ) {
-                    BOOST_LOG_TRIVIAL(error) << "Cannot Flatshade Quadstrips";
+                    VS_LOG(error, "Cannot Flatshade Quadstrips");
                 } else if ( (*iter).value == "Smooth" ) {
                     //ignored -- already done
                 }
@@ -1008,7 +1008,7 @@ void Mesh::beginElement( MeshXML *xml, const string &name, const AttributeList &
             }
             assert( ttttttt == 3 );
             if (!foundindex) {
-                BOOST_LOG_TRIVIAL(error) << "mesh with uninitalized logo";
+                VS_LOG(error, "mesh with uninitalized logo");
             }
             xml->logos[xml->logos.size()-1].refpnt.push_back( ind );
             xml->logos[xml->logos.size()-1].refweight.push_back( indweight );
@@ -1029,7 +1029,7 @@ void Mesh::endElement( MeshXML *xml, const string &name )
     switch (elem)
     {
     case MeshXML::UNKNOWN:
-        BOOST_LOG_TRIVIAL(error) << boost::format("Unknown element end tag '%1%' detected") % name;
+        VS_LOG(error, (boost::format("Unknown element end tag '%1%' detected") % name));
         break;
     case MeshXML::POINT:
         assert( ( xml->point_state&(MeshXML::P_X
@@ -1188,7 +1188,7 @@ void LaunchConverter( const char *input, const char *output, const char *args = 
         firstarg = string( "\"" )+ss_path+string( "\"" );
         int pid = spawnl( P_WAIT, ss_path.c_str(), firstarg.c_str(), intmp.c_str(), outtmp.c_str(), args, NULL );
         if (pid == -1) {
-            BOOST_LOG_TRIVIAL(error) << boost::format("Unable to spawn obj converter Error (%1%)") % pid;
+            VS_LOG(error, (boost::format("Unable to spawn obj converter Error (%1%)") % pid));
         }
     }
 #endif
@@ -1278,7 +1278,7 @@ Mesh* Mesh::LoadMesh( const char *filename,
     if ( m.empty() )
         return 0;
     if (m.size() > 1) {
-        BOOST_LOG_TRIVIAL(warning) << boost::format("Mesh %1% has %2% subcomponents. Only first used!") % filename % ((unsigned int) m.size());
+        VS_LOG(warning, (boost::format("Mesh %1% has %2% subcomponents. Only first used!") % filename % m.size()));
         for (unsigned int i = 1; i < m.size(); ++i) {
             delete m[i];
         }
@@ -1318,7 +1318,7 @@ vector< Mesh* >Mesh::LoadMeshes( const char *filename,
     VSFile  f;
     VSError err = f.OpenReadOnly( filename, MeshFile );
     if (err > Ok) {
-        BOOST_LOG_TRIVIAL(error) << boost::format("Cannot Open Mesh File %1%") % filename;
+        VS_LOG(error, (boost::format("Cannot Open Mesh File %1%") % filename));
         return vector< Mesh* > ();
     }
     char bfxm[4];
@@ -1328,7 +1328,7 @@ vector< Mesh* >Mesh::LoadMeshes( const char *filename,
         if (!isbfxm) {
         	// NOTE : Commented out following block, probably not needed anymore
 /*            if ( !loadObj( f, filename ) ) {
-                BOOST_LOG_TRIVIAL(error) << boost::format("Cannot Open Mesh File %1%") % filename;
+                VS_LOG(error, (boost::format("Cannot Open Mesh File %1%") % filename));
 */
 //cleanexit=1;
 //winsys_exit(1);
@@ -1372,7 +1372,7 @@ void Mesh::LoadXML( const char *filename,
     VSFile  f;
     VSError err = f.OpenReadOnly( filename, MeshFile );
     if (err > Ok) {
-        BOOST_LOG_TRIVIAL(error) << boost::format("Cannot Open Mesh File %1%") % filename;
+        VS_LOG(error, (boost::format("Cannot Open Mesh File %1%") % filename));
 //cleanexit=1;
 //winsys_exit(1);
         return;

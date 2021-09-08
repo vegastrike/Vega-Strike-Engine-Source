@@ -1,9 +1,8 @@
-/**
+/*
  * music.cpp
  *
  * Copyright (C) Daniel Horn
- * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike
- * contributors
+ * Copyright (C) 2020-2021 pyramid3d, Stephen G. Tuggy, and other Vega Strike contributors
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -53,6 +52,7 @@
 #include "collection.h"
 #include "unit_generic.h"
 #include "vsfilesystem.h"
+#include "vs_logging.h"
 #include "music.h"
 #include "base.h"
 
@@ -79,7 +79,7 @@ static void print_check_err( int errorcode, const char *str )
         if (!err){
             err = unknown_error;
         }
-        BOOST_LOG_TRIVIAL(error) << boost::format("ERROR IN PTHREAD FUNCTION %1%: %2% (%3%)\n") % str % err % errorcode;
+        VS_LOG(error, (boost::format("ERROR IN PTHREAD FUNCTION %1%: %2% (%3%)\n") % str % err % errorcode));
     }
 #endif
 }
@@ -332,7 +332,7 @@ readerThread(
                 *me->music_load_info = wherecache->second;
                 me->freeWav = false;
             } else if ( !AUDLoadSoundFile( songname, me->music_load_info, true ) ) {
-                BOOST_LOG_TRIVIAL(info) << boost::format("Failed to load music file \"%1%\"") % songname;
+                VS_LOG(info, (boost::format("Failed to load music file \"%1%\"") % songname));
             }
         }
         if (me->freeWav && docacheme) {
@@ -403,7 +403,7 @@ void Music::Listen()
                 int trylock_ret = pthread_mutex_trylock( &musicinfo_mutex );
                 if (trylock_ret == EBUSY) {
 #endif
-                    BOOST_LOG_TRIVIAL(warning) << "Failed to lock music loading mutex despite loaded flag being set...\n";
+                    VS_LOG(warning, "Failed to lock music loading mutex despite loaded flag being set...\n");
                     return;
                 } else {
                     checkerr( trylock_ret );
@@ -512,7 +512,7 @@ void Music::_GotoSong( std::string mus )
             if (a_thread){
                 thread_initialized = true;
             } else {
-                BOOST_LOG_TRIVIAL(error) << boost::format("Error creating music load thread: %1$d\n") % GetLastError();
+                VS_LOG(error, (boost::format("Error creating music load thread: %1$d\n") % GetLastError()));
             }
 #else
             int thread_create_ret = pthread_create( &a_thread, NULL, Muzak::readerThread, this );
@@ -581,7 +581,7 @@ void Music::_SkipRandSong( int whichlist, int layer )
             GotoSong( whichlist, random ? randInt( playlist[whichlist].size() ) : playlist[whichlist].counter++
                         %playlist[whichlist].size(), true, layer );
         } else {
-            BOOST_LOG_TRIVIAL(error) << boost::format("Error no songs in playlist %1$d\n") % whichlist;
+            VS_LOG(error, (boost::format("Error no songs in playlist %1$d\n") % whichlist));
         }
     }
     _SkipRandList( layer );

@@ -1,4 +1,4 @@
-/**
+/*
  * cg_global.cpp
  *
  * Copyright (C) Daniel Horn

@@ -4,12 +4,13 @@
  * Copyright (C) 2003 Mike Byron
  * Copyright (C) 2020 pyramid3d, Roy Falk, Stephen G. Tuggy, and other
  * Vega Strike contributors.
+ * Copyright (C) 2021 Stephen G. Tuggy
  *
  * This file is part of Vega Strike.
  *
  * Vega Strike is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 2 of the License, or
+ * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
  * Vega Strike is distributed in the hope that it will be useful,
@@ -49,6 +50,8 @@ using std::string;
 #include <iostream>
 using std::endl;
 using std::pair;
+
+#include "vs_logging.h"
 
 //*******************************************************************//
 ////
@@ -317,8 +320,10 @@ bool NavPath::evaluate()
         deque< unsigned > *front;
         unsigned visitMark;
         if ( originIndex >= visited.size() || destIndex >= visited.size() ) {
-            BOOST_LOG_TRIVIAL(error) << boost::format("(previously) FATAL error with nav system, referencing value too big %1% %2% with visited size %3%")
-                                        % ((int) originIndex) % ((int) destIndex) % ((int) visited.size());
+            VS_LOG_AND_FLUSH(error, (boost::format("(previously) FATAL error with nav system, referencing value too big %1% %2% with visited size %3%")
+                                        % ((int) originIndex)
+                                        % ((int) destIndex)
+                                        % ((int) visited.size())));
             return false;
         }
         oriFront.push_back( originIndex );
@@ -592,7 +597,7 @@ void PathManager::updatePaths( UpdateType type )
     DFS();
     if (type == ALL) {
         for (std::vector< NavPath* >::iterator j = paths.begin(); j < paths.end(); ++j) {
-            BOOST_LOG_TRIVIAL(info) << "Updating path: " << (*j)->getName();
+            VS_LOG(info, (boost::format("Updating path: %1%") % (*j)->getName()));
             (*j)->update();
         }
     } else if (type == CURRENT) {
@@ -601,7 +606,7 @@ void PathManager::updatePaths( UpdateType type )
         }
         for (i = topoOrder.begin(); i != topoOrder.end(); ++i) {
             if ( (*i)->updated == false && (*i)->isCurrentDependant() ) {
-                BOOST_LOG_TRIVIAL(info) << "Updating path: " << (*i)->getName();
+                VS_LOG(info, (boost::format("Updating path: %1%") % (*i)->getName()));
                 updateSpecificPath( *i );
             }
         }
@@ -611,7 +616,7 @@ void PathManager::updatePaths( UpdateType type )
         }
         for (i = topoOrder.begin(); i != topoOrder.end(); ++i) {
             if ( (*i)->updated == false && (*i)->isTargetDependant() ) {
-                BOOST_LOG_TRIVIAL(info) << "Updating path: " << (*i)->getName();
+                VS_LOG(info, (boost::format("Updating path: %1%") % (*i)->getName()));
                 updateSpecificPath( *i );
             }
         }

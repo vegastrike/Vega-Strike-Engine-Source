@@ -1,9 +1,9 @@
-/**
+/*
  * order.cpp
  *
  * Copyright (C) 2001-2002 Daniel Horn
- * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike
- * contributors
+ * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike contributors
+ * Copyright (C) 2021 Stephen G. Tuggy
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -11,7 +11,7 @@
  *
  * Vega Strike is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 2 of the License, or
+ * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
  * Vega Strike is distributed in the hope that it will be useful,
@@ -31,6 +31,9 @@
 #include "communication.h"
 #include "config_xml.h"
 #include "vs_globals.h"
+#include "vs_logging.h"
+
+
 using std::vector;
 using std::list;
 //#define ORDERDEBUG  // FIXME ?
@@ -92,8 +95,8 @@ void Order::eraseType( unsigned int type )
 Order* Order::EnqueueOrder( Order *ord )
 {
     if (ord == nullptr) {
-        BOOST_LOG_TRIVIAL(warning) << "NOT ENQEUEING NULL ORDER";
-        BOOST_LOG_TRIVIAL(warning) << boost::format("this order: %1%") % getOrderDescription().c_str();
+        VS_LOG(warning, "NOT ENQEUEING NULL ORDER");
+        VS_LOG(warning, (boost::format("this order: %1%") % getOrderDescription().c_str()));
         return nullptr;
     }
     ord->SetParent( parent );
@@ -104,8 +107,8 @@ Order* Order::EnqueueOrder( Order *ord )
 Order* Order::EnqueueOrderFirst( Order *ord )
 {
     if (ord == nullptr) {
-        BOOST_LOG_TRIVIAL(warning) << "NOT ENQEUEING NULL ORDER";
-        BOOST_LOG_TRIVIAL(warning) << boost::format("this order: %1%") % getOrderDescription().c_str();
+        VS_LOG(warning, "NOT ENQEUEING NULL ORDER");
+        VS_LOG(warning, (boost::format("this order: %1%") % getOrderDescription().c_str()));
         return nullptr;
     }
     ord->SetParent( parent );
@@ -160,8 +163,8 @@ bool Order::AttachOrder( QVector targetv )
 Order* Order::findOrder( Order *ord )
 {
     if (ord == nullptr) {
-        BOOST_LOG_TRIVIAL(warning) << "FINDING EMPTY ORDER";
-        BOOST_LOG_TRIVIAL(warning) << boost::format("this order: %1%") % getOrderDescription().c_str();
+        VS_LOG(warning, "FINDING EMPTY ORDER");
+        VS_LOG(warning, (boost::format("this order: %1%") % getOrderDescription().c_str()));
         return nullptr;
     }
     for (unsigned int i = 0; i < suborders.size(); i++)
@@ -185,8 +188,8 @@ void Order::Destroy()
     unsigned int i;
     for (i = 0; i < suborders.size(); ++i) {
         if (suborders[i] == nullptr) {
-            BOOST_LOG_TRIVIAL(warning) << "ORDER: a null order";
-            BOOST_LOG_TRIVIAL(warning) << boost::format("this order: %1%") % getOrderDescription().c_str();
+            VS_LOG(warning, "ORDER: a null order");
+            VS_LOG(warning, (boost::format("this order: %1%") % getOrderDescription().c_str()));
         } else {
             suborders[i]->Destroy();
         }
@@ -217,8 +220,8 @@ void Order::eraseOrder( Order *ord )
 {
     bool found = false;
     if (ord == nullptr) {
-        BOOST_LOG_TRIVIAL(warning) << "NOT ERASING A NULL ORDER";
-        BOOST_LOG_TRIVIAL(warning) << boost::format("this order: %1%") % getOrderDescription().c_str();
+        VS_LOG(warning, "NOT ERASING A NULL ORDER");
+        VS_LOG(warning, (boost::format("this order: %1%") % getOrderDescription().c_str()));
         return;
     }
     for (unsigned int i = 0; i < suborders.size() && found == false; i++)
@@ -229,8 +232,8 @@ void Order::eraseOrder( Order *ord )
             found = true;
         }
     if (!found) {
-        BOOST_LOG_TRIVIAL(warning) << "TOLD TO ERASE AN ORDER - NOT FOUND";
-        BOOST_LOG_TRIVIAL(warning) << boost::format("this order: %1%") % getOrderDescription().c_str();
+        VS_LOG(warning, "TOLD TO ERASE AN ORDER - NOT FOUND");
+        VS_LOG(warning, (boost::format("this order: %1%") % getOrderDescription().c_str()));
     }
 }
 

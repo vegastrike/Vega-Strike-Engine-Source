@@ -1,9 +1,9 @@
-/**
+/*
  * OpenALRenderableStreamingSource.cpp
  *
  * Copyright (C) Daniel Horn
- * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike
- * contributors
+ * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike contributors
+ * Copyright (C) 2021 Stephen G. Tuggy
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -36,7 +36,8 @@
 #include "../../Listener.h"
 
 #include "vs_math.h"
-#include "vsfilesystem.h"
+// #include "vsfilesystem.h"
+#include "vs_logging.h"
 
 namespace Audio {
 
@@ -260,7 +261,7 @@ namespace Audio {
             try {
                 buffer = streamingSound->readAndFlip();
             } catch (const EndOfStreamException& e) {
-                BOOST_LOG_TRIVIAL(error) << "EOS!";
+                VS_LOG(error, "EOS!");
                 if (source->isLooping()) {
                     streamingSound->seek(0);
                     buffer = streamingSound->readAndFlip();

@@ -1,9 +1,9 @@
-/**
+/*
  * navigation.cpp
  *
  * Copyright (C) Daniel Horn
- * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike
- * contributors
+ * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike contributors
+ * Copyright (C) 2021 Stephen G. Tuggy
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -35,7 +35,8 @@
 #include "cmd/script/flightgroup.h"
 #include "config_xml.h"
 #include "vs_globals.h"
-#include "vsfilesystem.h"
+// #include "vsfilesystem.h"
+#include "vs_logging.h"
 #include "warpto.h"
 #include "flybywire.h"
 #include "cmd/unit_util.h"
@@ -243,8 +244,7 @@ bool MoveToParent::Execute( Unit *parent, const QVector &targetlocation )
 MoveTo::~MoveTo()
 {
 #ifdef ORDERDEBUG
-    BOOST_LOG_TRIVIAL(trace) << boost::format("mt%1$x") % this;
-    VSFileSystem::flushLogs();
+    VS_LOG_AND_FLUSH(trace, (boost::format("mt%1$x") % this));
 #endif
 }
 
@@ -397,8 +397,7 @@ void ChangeHeading::Execute()
 ChangeHeading::~ChangeHeading()
 {
 #ifdef ORDERDEBUG
-    BOOST_LOG_TRIVIAL(trace) << boost::format("ch%1$x") % this;
-    VSFileSystem::flushLogs();
+    VS_LOG_AND_FLUSH(trace, (boost::format("ch%1$x") % this));
 #endif
 }
 FaceTargetITTS::FaceTargetITTS( bool fini, int accuracy ) : ChangeHeading( QVector( 0, 0, 1 ), accuracy )
@@ -418,8 +417,7 @@ FaceTargetITTS::FaceTargetITTS( bool fini, int accuracy ) : ChangeHeading( QVect
 FaceTargetITTS::~FaceTargetITTS()
 {
 #ifdef ORDERDEBUG
-    BOOST_LOG_TRIVIAL(trace) << boost::format("fti%1$x") % this;
-    VSFileSystem::flushLogs();
+    VS_LOG_AND_FLUSH(trace, (boost::format("fti%1$x") % this));
 #endif
 }
 
@@ -469,8 +467,7 @@ void FaceTarget::Execute()
 FaceTarget::~FaceTarget()
 {
 #ifdef ORDERDEBUG
-    BOOST_LOG_TRIVIAL(trace) << boost::format("ft%1$x") % this;
-    VSFileSystem::flushLogs();
+    VS_LOG_AND_FLUSH(trace, (boost::format("ft%1$x") % this));
 #endif
 }
 AutoLongHaul::AutoLongHaul( bool fini, int accuracy ) : ChangeHeading( QVector( 0, 0, 1 ), accuracy )
@@ -710,15 +707,15 @@ void AutoLongHaul::Execute()
 AutoLongHaul::~AutoLongHaul()
 {
 #ifdef ORDERDEBUG
-    BOOST_LOG_TRIVIAL(trace) << boost::format("alh%1$x") % this;    // Was "ft"
-    VSFileSystem::flushLogs();
+    VS_LOG_AND_FLUSH(trace, (boost::format("alh%1$x") % this));    // Was "ft"
 #endif
 }
 
 void FaceDirection::SetParent( Unit *un )
 {
-    if ( un->getFlightgroup() )
+    if ( un->getFlightgroup() ) {
         AttachSelfOrder( un->getFlightgroup()->leader.GetUnit() );
+    }
     ChangeHeading::SetParent( un );
 }
 FaceDirection::FaceDirection( float dist, bool fini, int accuracy ) : ChangeHeading( QVector( 0, 0, 1 ), accuracy )
@@ -751,8 +748,7 @@ void FaceDirection::Execute()
 FaceDirection::~FaceDirection()
 {
 #ifdef ORDERDEBUG
-    BOOST_LOG_TRIVIAL(trace) << boost::format("fd%1$x") % this;     // Was "ft"
-    VSFileSystem::flushLogs();
+    VS_LOG_AND_FLUSH(trace, (boost::format("fd%1$x") % this));     // Was "ft"
 #endif
 }
 

@@ -1,9 +1,9 @@
-/**
+/*
  * al_init.cpp
  *
  * Copyright (C) Daniel Horn
- * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike
- * contributors
+ * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike contributors
+ * Copyright (C) 2021 Stephen G. Tuggy
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -45,6 +45,7 @@
 #include "vs_globals.h"
 #include "al_globals.h"
 #include "options.h"
+#include "vs_logging.h"
 
 
 
@@ -74,7 +75,7 @@ static void fixup_function_pointers( void )
      *             GP("alBombOnError_LOKI");
      *
      *     if(talBombOnError == NULL) {
-     *             BOOST_LOG_TRIVIAL(fatal) << "Could not GetProcAddress alBombOnError_LOKI";
+     *             VS_LOG_AND_FLUSH(fatal, "Could not GetProcAddress alBombOnError_LOKI");
      *             VSExit(1);
      *     }
      *
@@ -82,7 +83,7 @@ static void fixup_function_pointers( void )
      *             GP("alBufferi_LOKI");
      *
      *     if(talBufferi == NULL) {
-     *             BOOST_LOG_TRIVIAL(fatal) << "Could not GetProcAddress alBufferi_LOKI";
+     *             VS_LOG_AND_FLUSH(fatal, "Could not GetProcAddress alBufferi_LOKI");
      *             VSExit(1);
      *     }
      *
@@ -97,7 +98,7 @@ static void fixup_function_pointers( void )
      *
      *     talGenStreamingBuffers = (void (*)(ALsizei n, ALuint *bids )) GP("alGenStreamingBuffers_LOKI");
      *     if( talGenStreamingBuffers == NULL ) {
-     *             BOOST_LOG_TRIVIAL(fatal) << "Could not GP alGenStreamingBuffers_LOKI";
+     *             VS_LOG_AND_FLUSH(fatal, "Could not GP alGenStreamingBuffers_LOKI");
      *             VSExit(1);
      *     }
      *
@@ -159,8 +160,8 @@ static ALCcontext *context_id = NULL;
 #endif
 bool AUDInit()
 {
-    g_game.sound_enabled =
 #ifdef HAVE_AL
+    g_game.sound_enabled =
     usedoppler    = game_options.Doppler;
     usepositional = game_options.Positional;
     double linuxadjust=1;

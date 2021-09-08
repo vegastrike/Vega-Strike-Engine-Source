@@ -1,23 +1,29 @@
 /*
- * Vega Strike
+ * gl_texture.cpp
+ *
  * Copyright (C) 2001-2002 Daniel Horn
+ * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike contributors
+ * Copyright (C) 2021 Stephen G. Tuggy
  *
- * http://vegastrike.sourceforge.net/
+ * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * as published by the Free Software Foundation; either version 2
- * of the License, or (at your option) any later version.
+ * This file is part of Vega Strike.
  *
- * This program is distributed in the hope that it will be useful,
+ * Vega Strike is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Vega Strike is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+ * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
  */
+
+
 #define GL_EXT_texture_env_combine 1
 #include "gldrv/sdds.h"
 #include "gl_globals.h"
@@ -27,6 +33,7 @@
 #include "gfxlib.h"
 
 #include "options.h"
+#include "vs_logging.h"
 
 
 
@@ -325,10 +332,10 @@ GFXBOOL /*GFXDRVAPI*/ GFXCreateTexture( int width,
 {
     int dummy = 0;
     if ((mipmap & (MIPMAP | TRILINEAR)) && !isPowerOfTwo(width, dummy)) {
-        BOOST_LOG_TRIVIAL(info) << boost::format("Width %1% not a power of two") % width;
+        VS_LOG(info, (boost::format("Width %1% not a power of two") % width));
     }
     if ((mipmap & (MIPMAP | TRILINEAR)) && !isPowerOfTwo(height, dummy)) {
-        BOOST_LOG_TRIVIAL(info) << boost::format("Height %1% not a power of two") % height;
+        VS_LOG(info, (boost::format("Height %1% not a power of two") % height));
     }
     GFXActiveTexture( texturestage );
     *handle = 0;
@@ -394,7 +401,7 @@ GFXBOOL /*GFXDRVAPI*/ GFXCreateTexture( int width,
     textures[*handle].iheight = height;
     textures[*handle].palette = NULL;
     if (palette && textureformat == PALETTE8) {
-        BOOST_LOG_TRIVIAL(trace) << " palette ";
+        VS_LOG(trace, " palette ");
         textures[*handle].palette = (GLubyte*) malloc( sizeof (GLubyte)*1024 );
         ConvertPalette( textures[*handle].palette, (unsigned char*) palette );
     }
@@ -756,12 +763,20 @@ GFXBOOL /*GFXDRVAPI*/ GFXTransferTexture( unsigned char *buffer,
     //By default, if we have no limit set, aux_texture sends us a high number
     //for the max dimension, so that we know to grep the GL max number.
     //Otherwise maxdimension is set by some user argument based on quality settings.
-    if (maxdimension == 65536)
+    if (maxdimension == 65536) {
         maxdimension = gl_options.max_texture_dimension;
-    BOOST_LOG_TRIVIAL(trace)
-       << boost::format("Transferring %1%x%2% texture, page %3% (eff: %4%x%5% - limited at %6% - %7% mips), onto name %8% (%9%)") %
-              textures[handle].iwidth % textures[handle].iheight % pageIndex % textures[handle].width % textures[handle].height %
-              maxdimension % mips % textures[handle].name % GetImageTargetName(imagetarget);
+    }
+    VS_LOG(trace,
+            (boost::format("Transferring %1%x%2% texture, page %3% (eff: %4%x%5% - limited at %6% - %7% mips), onto name %8% (%9%)")
+                    % textures[handle].iwidth
+                    % textures[handle].iheight
+                    % pageIndex
+                    % textures[handle].width
+                    % textures[handle].height
+                    % maxdimension
+                    % mips
+                    % textures[handle].name
+                    % GetImageTargetName(imagetarget)));
     if (maxdimension == 44) {
         detail_texture = 0;
         maxdimension   = 256;
@@ -821,9 +836,13 @@ GFXBOOL /*GFXDRVAPI*/ GFXTransferTexture( unsigned char *buffer,
                                    maxdimension,
                                    1 );
                 buffer = tempbuf;
-                BOOST_LOG_TRIVIAL(debug) << boost::format("Downsampled %1%x%2% texture (target: %3%x%4% - limited at %5%)") %
-                                               textures[handle].iwidth % textures[handle].iheight % textures[handle].width %
-                                               textures[handle].height % maxdimension;
+                VS_LOG(debug,
+                        (boost::format("Downsampled %1%x%2% texture (target: %3%x%4% - limited at %5%)")
+                                % textures[handle].iwidth
+                                % textures[handle].iheight
+                                % textures[handle].width
+                                % textures[handle].height
+                                % maxdimension));
             }
             offset2 = 2;
         } else {
