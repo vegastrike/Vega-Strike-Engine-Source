@@ -330,7 +330,9 @@ int main( int argc, char *argv[] )
     }
 
     const boost::filesystem::path& home_path = boost::filesystem::canonical(VSFileSystem::homedir);
-    VegaStrikeLogging::VegaStrikeLogger::InitLoggingPart2(g_game.vsdebug, home_path);
+    const boost::filesystem::path home_subdir(VSFileSystem::HOMESUBDIR);
+    const boost::filesystem::path& home_subdir_path = boost::filesystem::absolute(home_subdir, home_path);
+    VegaStrikeLogging::VegaStrikeLogger::InitLoggingPart2(g_game.vsdebug, home_subdir_path);
 
     // can use the vegastrike config variable to read in the default mission
     if ( game_options.force_client_connect )
