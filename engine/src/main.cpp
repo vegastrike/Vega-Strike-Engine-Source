@@ -253,8 +253,11 @@ int main( int argc, char *argv[] )
     const boost::filesystem::path  program_path(argv[0]);
     const boost::filesystem::path& canonical_program_path = boost::filesystem::canonical(program_path);
 
-    const boost::filesystem::path& program_name = canonical_program_path.filename();
-    const boost::filesystem::path& program_directory_path = canonical_program_path.parent_path();
+    const boost::filesystem::path& program_name = program_path.filename();  //canonical_program_path.filename();
+    const boost::filesystem::path& program_directory_path = program_path.parent_path(); //.parent_path();
+
+    // This will be set later
+    boost::filesystem::path home_subdir_path{};
 
     // when the program name is `vegastrike-engine` then enforce that the data directory must be specified
     // if the program name is `vegastrike` then enable legacy mode where the current path is assumed.
@@ -319,6 +322,7 @@ int main( int argc, char *argv[] )
         }
         //Specify the config file and the possible mod subdir to play
         VSFileSystem::InitPaths( CONFIGFILE, subdir );
+        // home_subdir_path = boost::filesystem::canonical(boost::filesystem::path(subdir));
     }
 
     // now that the user config file has been loaded from disk, update the global configuration struct values
@@ -329,9 +333,16 @@ int main( int argc, char *argv[] )
         g_game.vsdebug = game_options.vsdebug;
     }
 
-    const boost::filesystem::path& home_path = boost::filesystem::canonical(VSFileSystem::homedir);
-    const boost::filesystem::path home_subdir(VSFileSystem::HOMESUBDIR);
-    const boost::filesystem::path& home_subdir_path = boost::filesystem::absolute(home_subdir, home_path);
+    // Ugly hack until we can find a way to redo all the directory initialization stuff properly.
+    // Use the subdirectory "logs" under the Vega Strike home directory. Make sure we don't duplicate the ".vegastrike/" or ".pu/", etc. part.
+    const boost::filesystem::path& home_path = boost::filesystem::absolute(VSFileSystem::homedir);
+    if (home_path.string().find(VSFileSystem::HOMESUBDIR) == std::string::npos) {
+        const boost::filesystem::path home_subdir(VSFileSystem::HOMESUBDIR);
+        home_subdir_path = boost::filesystem::absolute(home_subdir, home_path);
+    } else {
+        home_subdir_path = home_path;
+    }
+
     VegaStrikeLogging::VegaStrikeLogger::InitLoggingPart2(g_game.vsdebug, home_subdir_path);
 
     // can use the vegastrike config variable to read in the default mission

@@ -76,6 +76,7 @@ void VegaStrikeLogger::InitLoggingPart2(const uint8_t debug_level, const ::boost
 
     const ::boost::filesystem::path& logging_dir = ::boost::filesystem::absolute("logs", vega_strike_home_dir);         /*< $HOME/.vegastrike/logs, typically >*/
     const std::string& logging_dir_name = logging_dir.string();
+    VS_LOG(info, (boost::format("log directory : '%1%'") % logging_dir_name));
 
     switch (debug_level) {
     case 1:
