@@ -24,8 +24,6 @@
  */
 
 
-//#include "gl_globals.h"
-
 #include "gfxlib_struct.h"
 #include "vegastrike.h"
 #include "vs_globals.h"
@@ -168,7 +166,7 @@ void GFXVertexList::Init( enum POLYTYPE *poly,
         if (numVertices > 65535)
             stride = INDEX_INT;
 
-        index.b = (unsigned char*) malloc( stride*numindices );
+        index.b = (unsigned char*) malloc( static_cast<size_t>(stride) * static_cast<size_t>(numindices) );
         switch (stride)
         {
         case INDEX_BYTE:
