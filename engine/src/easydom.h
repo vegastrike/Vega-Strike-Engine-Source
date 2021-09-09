@@ -39,24 +39,9 @@
 #include <stdlib.h>
 #include "vsfilesystem.h"
 #include "vs_globals.h"
-//using namespace VSFileSystem;
-// using VSFileSystem::VSFile;
-// using VSFileSystem::VSError;
-// using VSFileSystem::Ok;
-// using VSFileSystem::FileNotFound;
-// using VSFileSystem::MissionFile;
-// using VSFileSystem::UnitFile;
-// using VSFileSystem::UnknownFile;
-// using VSFileSystem::AiFile;
 #include "xml_support.h"
 #include "vs_logging.h"
 
-// using std::string;
-// using std::vector;
-// using std::stack;
-// using std::ostream;
-
-// using XMLSupport::AttributeList;
 
 extern std::string parseCalike( char const *filename );
 

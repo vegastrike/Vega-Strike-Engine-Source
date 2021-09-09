@@ -31,21 +31,10 @@
 #include <string>
 #include <vector>
 #include <iostream>
-// using std::string;
-// using std::vector;
 #include <stdarg.h>
 #include "gfx/vec.h"
 #include "pk3.h"
 #include <gnuhash.h>
-
-// #include <boost/smart_ptr/shared_ptr.hpp>
-// #include <boost/format.hpp>
-// #include <boost/log/core.hpp>
-// #include <boost/log/trivial.hpp>
-// #include <boost/log/sinks/sync_frontend.hpp>
-// #include <boost/log/sinks/text_file_backend.hpp>
-// #include <boost/log/sinks/text_ostream_backend.hpp>
-
 #include "vs_logging.h"
 
 class VegaConfig;

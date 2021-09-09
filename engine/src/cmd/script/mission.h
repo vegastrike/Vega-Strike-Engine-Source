@@ -56,9 +56,7 @@ class MessageCenter;
 #include "star_system.h"
 
 #include <assert.h>
-// using std::string;
 
-// using XMLSupport::AttributeList;
 
 #define qu( x ) ("\""+x+"\"")
 

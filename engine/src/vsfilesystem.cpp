@@ -65,8 +65,6 @@ struct dirent
 
 #include "galaxy.h"
 
-// #include "boost/iostreams/stream.hpp"
-// #include "boost/iostreams/device/null.hpp"
 #include <boost/filesystem.hpp>
 
 #include "configuration/game_config.h"

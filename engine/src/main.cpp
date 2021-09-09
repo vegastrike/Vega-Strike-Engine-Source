@@ -81,9 +81,6 @@
 #include "vs_logging.h"
 #include "options.h"
 
-// using std::cout;
-// using std::cerr;
-// using std::endl;
 
 vs_options game_options;
 
@@ -251,7 +248,7 @@ int main( int argc, char *argv[] )
     // Change to program directory if not already
     // std::string program_as_called();
     const boost::filesystem::path  program_path(argv[0]);
-    const boost::filesystem::path& canonical_program_path = boost::filesystem::canonical(program_path);
+    // const boost::filesystem::path& canonical_program_path = boost::filesystem::canonical(program_path);
 
     const boost::filesystem::path& program_name = program_path.filename();  //canonical_program_path.filename();
     const boost::filesystem::path& program_directory_path = program_path.parent_path(); //.parent_path();

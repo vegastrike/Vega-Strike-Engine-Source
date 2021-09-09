@@ -39,8 +39,6 @@ namespace VegaStrikeLogging {
 
 typedef ::boost::log::sinks::synchronous_sink<::boost::log::sinks::text_ostream_backend> ConsoleLogSink;
 typedef ::boost::log::sinks::synchronous_sink<::boost::log::sinks::text_file_backend>    FileLogSink;
-// extern boost::shared_ptr<ConsoleLogSink> pConsoleLogSink;
-// extern boost::shared_ptr<FileLogSink> pFileLogSink;
 
 #define VS_LOG(log_level, log_message)                      \
     do {                                                    \

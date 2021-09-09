@@ -43,11 +43,6 @@
 
 namespace VegaStrikeLogging {
 
-// namespace ::boost::log = boost::log;
-// namespace src = boost::log::sources;
-// namespace sinks = boost::log::sinks;
-// namespace keywords = boost::log::keywords;
-
 boost::shared_ptr<VegaStrikeLogging::FileLogSink>    VegaStrikeLogger::file_log_sink_{};
 boost::shared_ptr<VegaStrikeLogging::ConsoleLogSink> VegaStrikeLogger::console_log_sink_{};
 
