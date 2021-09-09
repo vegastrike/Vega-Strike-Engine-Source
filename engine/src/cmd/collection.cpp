@@ -40,7 +40,6 @@
 #include "testcollection/unit.h"
 #endif
 
-// #include "vsfilesystem.h"
 #include "vs_logging.h"
 
 using std::list;

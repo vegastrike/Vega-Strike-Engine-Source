@@ -31,7 +31,6 @@
 #include "bolt.h"
 #include "star_system.h"
 #include "universe.h"
-// #include "vsfilesystem.h"
 #include "vs_logging.h"
 
 volatile bool apart_return = true;

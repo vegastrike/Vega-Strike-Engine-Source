@@ -44,7 +44,6 @@
 #include "vs_globals.h"
 #include "configxml.h"
 #include "collide.h"
-// #include "vsfilesystem.h"
 #include "vs_logging.h"
 
 #include "collision.h"

@@ -27,7 +27,6 @@
 #include <assert.h>
 
 #include "vs_globals.h"
-// #include "vsfilesystem.h"
 #include "vs_logging.h"
 #include "cmd/unit_generic.h"
 #include "faction_generic.h"

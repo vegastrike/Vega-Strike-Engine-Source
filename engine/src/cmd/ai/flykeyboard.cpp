@@ -32,7 +32,6 @@
 #include "config_xml.h"
 #include "xml_support.h"
 #include "vs_globals.h"
-// #include "vsfilesystem.h"
 #include "vs_logging.h"
 #include "gfx/cockpit.h"
 #include "lin_time.h"

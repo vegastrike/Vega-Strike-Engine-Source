@@ -28,7 +28,6 @@
 #include "options.h"
 #include <queue>
 #include <list>
-// #include "vsfilesystem.h"
 #include "vs_logging.h"
 #include "gfx/occlusion.h"
 

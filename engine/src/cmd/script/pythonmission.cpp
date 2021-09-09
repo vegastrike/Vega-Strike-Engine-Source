@@ -32,7 +32,6 @@
 #include <string>
 #include "python/init.h"
 
-// #include "vsfilesystem.h"
 #include "vs_logging.h"
 #include "cmd/container.h"
 PythonMissionBaseClass::PythonMissionBaseClass() {}

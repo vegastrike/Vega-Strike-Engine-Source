@@ -35,7 +35,6 @@
 #include "lin_time.h"
 #include "galaxy_xml.h"
 #include "universe.h"
-// #include "vsfilesystem.h"
 #include "vs_logging.h"
 
 #if defined (__APPLE__) || defined (MACOSX)

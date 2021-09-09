@@ -26,7 +26,6 @@
 
 
 #include <set>
-// #include "vsfilesystem.h"
 #include "vs_logging.h"
 #include "vs_globals.h"
 #include "vegastrike.h"

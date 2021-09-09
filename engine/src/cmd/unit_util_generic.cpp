@@ -39,7 +39,6 @@
 #include "lin_time.h"
 #include "planetary_orbit.h"
 #include "universe.h"
-// #include "vsfilesystem.h"
 #include "vs_logging.h"
 #include "weapon_info.h"
 

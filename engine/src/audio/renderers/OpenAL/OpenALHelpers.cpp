@@ -36,7 +36,6 @@
 
 #include <string>
 #include <stdio.h>
-// #include "vsfilesystem.h"
 #include "vs_logging.h"
 
 namespace Audio {

@@ -40,7 +40,6 @@
 #include <string>
 #include "vs_globals.h"
 #include "configxml.h"
-// #include "vsfilesystem.h"
 #include "vs_logging.h"
 
 static Hashtable< std::string, collideTrees, 127 >unitColliders;

@@ -28,7 +28,6 @@
 #define _COMMUNICATION_H_
 #include "cmd/unit_generic.h"
 #include "gfxlib_struct.h"
-// #include "vsfilesystem.h"
 #include "vs_logging.h"
 
 class FSM

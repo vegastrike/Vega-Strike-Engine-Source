@@ -34,7 +34,6 @@
 #include "init.h"
 #include "universe_util.h"
 #include "in_kb_data.h"
-// #include "vsfilesystem.h"
 #include "vs_logging.h"
 
 Hashtable< string, PyObject, 1023 >compiled_python;

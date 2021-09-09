@@ -30,7 +30,6 @@
 #include "config_xml.h"
 #include "vs_globals.h"
 #include "vs_random.h"
-// #include "vsfilesystem.h"
 #include "vs_logging.h"
 
 #include "options.h"

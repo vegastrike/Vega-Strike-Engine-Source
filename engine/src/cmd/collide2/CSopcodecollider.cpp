@@ -33,7 +33,6 @@
 #include "CSopcodecollider.h"
 #include "opcodeqsqrt.h"
 #include "opcodeqint.h"
-// #include "vsfilesystem.h"
 #include "vs_logging.h"
 // #include "opcodegarray.h"
 #define _X 1000

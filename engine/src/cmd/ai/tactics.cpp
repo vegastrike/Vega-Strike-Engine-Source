@@ -26,7 +26,6 @@
 
 #include "tactics.h"
 #include "vegastrike.h"
-// #include "vsfilesystem.h"
 #include "vs_logging.h"
 #include "cmd/unit_generic.h"
 

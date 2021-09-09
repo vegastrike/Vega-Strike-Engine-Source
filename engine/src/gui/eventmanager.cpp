@@ -28,7 +28,6 @@
 #include "vegastrike.h"
 
 #include "eventmanager.h"
-// #include "vsfilesystem.h"
 #include "vs_logging.h"
 
 #include <algorithm>

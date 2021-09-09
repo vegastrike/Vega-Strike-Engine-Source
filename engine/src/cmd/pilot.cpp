@@ -32,7 +32,6 @@
 #include "cmd/unit_util.h"
 #include "configxml.h"
 #include "universe.h"
-// #include "vsfilesystem.h"
 #include "vs_logging.h"
 #include <vector>
 

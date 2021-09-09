@@ -36,7 +36,6 @@
 #include "linecollide.h"
 #include "collection.h"
 #include "cmd/unit_generic.h"
-// #include "vsfilesystem.h"
 #include "vs_logging.h"
 #include <set>
 #define COLLIDETABLESIZE sizeof (CTSIZ)

@@ -55,7 +55,6 @@
 #include "cmd/csv.h"
 #include "cmd/role_bitmask.h"
 #include "universe_globals.h"
-// #include "vsfilesystem.h"
 #include "vs_logging.h"
 
 #include "weapon_factory.h"

@@ -40,7 +40,6 @@
 #include <boost/log/sources/record_ostream.hpp>
 #include <boost/filesystem.hpp>
 
-// #include "vsfilesystem.h"
 
 namespace VegaStrikeLogging {
 

@@ -29,7 +29,6 @@
 
 #include "RenderableSource.h"
 #include <cstdio>
-// #include "vsfilesystem.h"
 #include "vs_logging.h"
 
 namespace Audio {

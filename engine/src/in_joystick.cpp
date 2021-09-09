@@ -31,7 +31,6 @@
 #include <lin_time.h>
 #include "vegastrike.h"
 #include "vs_globals.h"
-// #include "vsfilesystem.h"
 #include "vs_logging.h"
 
 #include "in_handler.h"

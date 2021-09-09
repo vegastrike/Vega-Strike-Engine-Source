@@ -28,7 +28,6 @@
 #include "vs_globals.h"
 #include "config_xml.h"
 #include "in_kb_data.h"
-// #include "vsfilesystem.h"
 #include "vs_logging.h"
 #include <assert.h>     /// needed for assert() calls.
 

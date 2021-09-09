@@ -45,7 +45,6 @@
 #include "in_kb_data.h"
 #include "python/python_compile.h"
 #include "gfx/screenshot.h"
-// #include "vsfilesystem.h"
 #include "vs_logging.h"
 
 /* *********************************************************** */

@@ -29,7 +29,6 @@
 #include "gfxlib_struct.h"
 #include "vegastrike.h"
 #include "vs_globals.h"
-// #include "vsfilesystem.h"
 #include "vs_logging.h"
 #include <assert.h>
 #ifndef NO_GFX //Server cannot depend on GL, but still needs a mesh library.

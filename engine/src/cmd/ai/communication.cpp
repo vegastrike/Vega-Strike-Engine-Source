@@ -26,7 +26,6 @@
 
 #include "communication.h"
 #include "vs_globals.h"
-// #include "vsfilesystem.h"
 #include "vs_logging.h"
 #include "config_xml.h"
 #include <assert.h>

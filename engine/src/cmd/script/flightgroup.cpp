@@ -28,7 +28,6 @@
 #include "mission.h"
 #include "flightgroup.h"
 #include "cmd/unit_generic.h"
-// #include "vsfilesystem.h"
 #include "vs_logging.h"
 
 Flightgroup* Flightgroup::newFlightgroup( const std::string &name,

@@ -27,7 +27,6 @@
 #include "vegastrike.h"
 #include "in_kb.h"
 #include "vs_random.h"
-// #include "vsfilesystem.h"
 #include "vs_logging.h"
 
 static double firsttime;

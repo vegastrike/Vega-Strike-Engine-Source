@@ -27,7 +27,6 @@
 #include "jpeg_memory.h"
 #include <iostream>
 #include "vs_logging.h"
-// #include "vsfilesystem.h"
 
 #ifdef JPEG_SUPPORT
 

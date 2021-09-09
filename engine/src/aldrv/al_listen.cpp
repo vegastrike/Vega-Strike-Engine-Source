@@ -36,7 +36,6 @@
 #include "audiolib.h"
 #include "al_globals.h"
 #include "vs_globals.h"
-// #include "vsfilesystem.h"
 #include "vs_logging.h"
 #include "config_xml.h"
 #include "options.h"

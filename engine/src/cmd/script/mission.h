@@ -44,7 +44,6 @@
 
 #ifndef VS_MIS_SEL
 #include "vegastrike.h"
-// #include "vsfilesystem.h"
 #include "vs_logging.h"
 #include "vs_globals.h"
 #include "msgcenter.h"

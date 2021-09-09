@@ -50,7 +50,6 @@
 #include "xml_support.h"
 
 #include "vegastrike.h"
-// #include "vsfilesystem.h"
 #include "lin_time.h"
 #include "cmd/unit_generic.h"
 

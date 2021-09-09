@@ -34,7 +34,6 @@
 #include <assert.h>
 #include "configxml.h"
 #include "easydom.h"
-// #include "vsfilesystem.h"
 #include "vs_logging.h"
 
 /* *********************************************************** */

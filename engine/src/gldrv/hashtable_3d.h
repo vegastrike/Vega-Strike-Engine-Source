@@ -32,7 +32,6 @@
 #include <stdio.h>
 #include <assert.h>
 #include "linecollide.h"
-// #include "vsfilesystem.h"
 #include "vs_logging.h"
 
 //#define COLLIDETABLESIZE sizeof(CTSIZ)

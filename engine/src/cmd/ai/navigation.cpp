@@ -35,7 +35,6 @@
 #include "cmd/script/flightgroup.h"
 #include "config_xml.h"
 #include "vs_globals.h"
-// #include "vsfilesystem.h"
 #include "vs_logging.h"
 #include "warpto.h"
 #include "flybywire.h"

@@ -48,7 +48,6 @@
 #include "xml_support.h"
 #include "config_xml.h"
 #include "vs_globals.h"
-// #include "vsfilesystem.h"
 #include "vs_logging.h"
 #include "options.h"
 

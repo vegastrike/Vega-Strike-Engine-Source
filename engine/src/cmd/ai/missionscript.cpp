@@ -35,7 +35,6 @@
 #include <stdio.h>
 #include <vector>
 #include <stack>
-// #include "vsfilesystem.h"
 #include "vs_logging.h"
 #include "tactics.h"
 #include "cmd/unit_generic.h"

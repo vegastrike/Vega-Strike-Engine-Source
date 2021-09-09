@@ -31,7 +31,6 @@
 #include "force_feedback.h"
 
 #include "vegastrike.h"
-// #include "vsfilesystem.h"
 #include "vs_logging.h"
 #include "vs_globals.h"
 

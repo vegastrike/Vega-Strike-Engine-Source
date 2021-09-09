@@ -33,7 +33,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-// #include "vsfilesystem.h"
 #include "vs_logging.h"
 #include "vs_globals.h"
 #include "config_xml.h"

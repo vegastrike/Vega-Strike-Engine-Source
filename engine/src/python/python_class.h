@@ -55,7 +55,6 @@
 #include "cmd/ai/fire.h"
 #include <memory>
 #include "init.h"
-// #include "vsfilesystem.h"
 #include "vs_logging.h"
 
 #define PYTHONCALLBACK(rtype, ptr, str) \

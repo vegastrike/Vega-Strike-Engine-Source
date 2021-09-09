@@ -45,7 +45,6 @@
 #include "options.h"
 #include "universe.h"
 #include "savegame.h"
-// #include "vsfilesystem.h"
 #include "vs_logging.h"
 
 

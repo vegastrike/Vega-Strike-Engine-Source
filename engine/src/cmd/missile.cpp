@@ -38,7 +38,6 @@
 #include "ai/order.h"
 #include "faction_generic.h"
 #include "unit_util.h"
-// #include "vsfilesystem.h"
 #include "vs_logging.h"
 #include "star_system.h"
 #include "universe.h"

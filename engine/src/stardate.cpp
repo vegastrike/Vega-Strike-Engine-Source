@@ -53,7 +53,6 @@
 #include <boost/shared_ptr.hpp>
 #include "stardate.h"
 #include "lin_time.h"
-// #include "vsfilesystem.h"
 #include "vs_logging.h"
 #include "cmd/script/mission.h"
 
