@@ -79,7 +79,7 @@ COMMENTS_BY_FILE_SUFFIX = {
     '.cpp': C_LIKE_COMMENT,
     '.h': C_LIKE_COMMENT,
     '.hpp': C_LIKE_COMMENT,
-    '.in': C_LIKE_COMMENT,
+    '.h.in': C_LIKE_COMMENT,
     '.py': SCRIPT_LIKE_COMMENT,
     '.cmake': SCRIPT_LIKE_COMMENT,
     '.txt': SCRIPT_LIKE_COMMENT,
@@ -132,10 +132,10 @@ def add_gpl_license(filepath: Path, license_path: Path) -> None:
     it already has a license notice already..."""
 
     print(filepath.name)
-    print(filepath.suffix)
 
     # Construct comment for filetype
-    comment_type = COMMENTS_BY_FILE_SUFFIX[filepath.suffix]
+    suffix = ''.join(filepath.suffixes)
+    comment_type = COMMENTS_BY_FILE_SUFFIX[suffix]
     license_block = LICENSE_TEXT.format(
             filename=filepath.name,
             copyright_notice=get_copyright_notice(license_path))
