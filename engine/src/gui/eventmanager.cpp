@@ -1,10 +1,10 @@
-/**
+/*
  * eventmanager.cpp
  *
  * Copyright (C) Daniel Horn
  * Copyright (C) 2003 Mike Byron
- * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike
- * contributors
+ * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike contributors
+ * Copyright (C) 2021 Stephen G. Tuggy
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -28,7 +28,7 @@
 #include "vegastrike.h"
 
 #include "eventmanager.h"
-#include "vsfilesystem.h"
+#include "vs_logging.h"
 
 #include <algorithm>
 
@@ -72,12 +72,7 @@ void EventManager::addToDeleteQueue( EventResponder *controlToDelete )
 {
     if ( controlToDelete == NULL || find( deleteQueue.begin(), deleteQueue.end(), controlToDelete ) != deleteQueue.end() ) {
         bool DUPLICATE_DELETE_OF_OBJECT = true;
-        BOOST_LOG_TRIVIAL(fatal) << boost::format("\nERROR: duplicate delete of object %1$x.\n\n") % controlToDelete;
-        VSFileSystem::flushLogs();
-#if defined (_MSC_VER) && defined (_DEBUG) && 0
-        if (DEBUG_ERROR_IN_MY_CODE)
-            _RPT0( _CRT_ERROR, tempstr );
-#endif
+        VS_LOG_AND_FLUSH(fatal, (boost::format("\nERROR: duplicate delete of object %1$x.\n\n") % controlToDelete));
         printf( "Attach a debugger now!" );
         while (DUPLICATE_DELETE_OF_OBJECT) {}
     } else {

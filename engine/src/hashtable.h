@@ -1,5 +1,5 @@
-/**
- * gl_light.cpp
+/*
+ * hashtable.h
  *
  * Copyright (C) 2001-2002 Daniel Horn and Alan Shieh
  * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike

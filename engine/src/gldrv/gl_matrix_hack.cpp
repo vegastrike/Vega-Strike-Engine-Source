@@ -1,9 +1,9 @@
-/**
+/*
  * gl_matrix_hack.cpp
  *
  * Copyright (C) 2001-2002 Daniel Horn and Alan Shieh
- * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike
- * contributors
+ * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike contributors
+ * Copyright (C) 2021 Stephen G. Tuggy
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -44,6 +44,7 @@
 
 #include "vs_globals.h"
 #include "vsfilesystem.h"
+#include "vs_logging.h"
 
 //#include <GL/glu.h>
 
@@ -208,7 +209,7 @@ float GFXGetZPerspective( const float z )
     float left, right, bottom, top, nearval, farval;
     GFXGetFrustumVars( true, &left, &right, &bottom, &top, &nearval, &farval );
 
-    BOOST_LOG_TRIVIAL(info) << boost::format("nearval: %1%, left: %2%, right: %3%, z: %4%") % nearval % left % right % z;
+    VS_LOG(info, (boost::format("nearval: %1%, left: %2%, right: %3%, z: %4%") % nearval % left % right % z));
 
     float xs = 2*nearval/(right-left);
     float a  = (right+left)/(right-left);

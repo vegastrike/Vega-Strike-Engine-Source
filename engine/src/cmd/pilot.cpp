@@ -1,9 +1,9 @@
-/**
+/*
  * pilot.cpp
  *
  * Copyright (C) Daniel Horn
- * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike
- * contributors
+ * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike contributors
+ * Copyright (C) 2021 Stephen G. Tuggy
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -32,7 +32,7 @@
 #include "cmd/unit_util.h"
 #include "configxml.h"
 #include "universe.h"
-#include "vsfilesystem.h"
+#include "vs_logging.h"
 #include <vector>
 
 Pilot::Pilot( int faction )
@@ -106,7 +106,7 @@ float Pilot::getAnger( const Unit *parent, const Unit *target ) const
     float rel = 0.0f;
     if (target == nullptr)
     {
-        BOOST_LOG_TRIVIAL(warning) << "Pilot::getAnger(): target is null";
+        VS_LOG(warning, "Pilot::getAnger(): target is null");
         return 0.0f;
     }
     relationmap::const_iterator iter = effective_relationship.find( target );
@@ -163,7 +163,7 @@ float Pilot::GetEffectiveRelationship( const Unit *parent, const Unit *target ) 
 {
     if (target == nullptr)
     {
-        BOOST_LOG_TRIVIAL(warning) << "Pilot::GetEffectiveRelationship(): target is null";
+        VS_LOG(warning, "Pilot::GetEffectiveRelationship(): target is null");
         return 0.0f;
     }
     return getAnger( parent, target )+UnitUtil::getFactionRelation( parent, target );

@@ -1,9 +1,9 @@
-/**
- * galaxy_xml.cpp
+/*
+ * galaxy_xml.h
  *
  * Copyright (C) 2001-2002 Daniel Horn
- * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike
- * contributors
+ * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike contributors
+ * Copyright (C) 2021 Stephen G. Tuggy
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -132,8 +132,8 @@ class SubHeirarchy : public vsUMap< std::string, class SGalaxy >
 {};
 }
 
-string getStarSystemFileName( const string &input );
-string getStarSystemName( const string &in );
-string getStarSystemSector( const string &in );
+std::string getStarSystemFileName( const std::string &input );
+std::string getStarSystemName( const std::string &in );
+std::string getStarSystemSector( const std::string &in );
 #endif
 

@@ -1,9 +1,9 @@
-/**
+/*
  * pythonmission.cpp
  *
  * Copyright (C) Daniel Horn
- * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike
- * contributors
+ * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike contributors
+ * Copyright (C) 2021 Stephen G. Tuggy
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -32,7 +32,7 @@
 #include <string>
 #include "python/init.h"
 
-#include "vsfilesystem.h"
+#include "vs_logging.h"
 #include "cmd/container.h"
 PythonMissionBaseClass::PythonMissionBaseClass() {}
 void PythonMissionBaseClass::Destructor()
@@ -46,7 +46,7 @@ PythonMissionBaseClass::~PythonMissionBaseClass()
         delete relevant_units[i];
     }
     relevant_units.clear();
-    BOOST_LOG_TRIVIAL(warning) << boost::format("BASE Destruct called. If called from C++ this is death %x") % this;
+    VS_LOG(warning, (boost::format("BASE Destruct called. If called from C++ this is death %x") % this));
 }
 
 void PythonMissionBaseClass::Execute() {}

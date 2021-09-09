@@ -1,27 +1,28 @@
-/**
-* particle.cpp
-*
-* Copyright (c) 2001-2002 Daniel Horn
-* Copyright (c) 2002-2019 pyramid3d and other Vega Strike Contributors
-* Copyright (c) 2019-2021 Stephen G. Tuggy, and other Vega Strike Contributors
-*
-* https://github.com/vegastrike/Vega-Strike-Engine-Source
-*
-* This file is part of Vega Strike.
-*
-* Vega Strike is free software: you can redistribute it and/or modify
-* it under the terms of the GNU General Public License as published by
-* the Free Software Foundation, either version 2 of the License, or
-* (at your option) any later version.
-*
-* Vega Strike is distributed in the hope that it will be useful,
-* but WITHOUT ANY WARRANTY; without even the implied warranty of
-* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-* GNU General Public License for more details.
-*
-* You should have received a copy of the GNU General Public License
-* along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
-*/
+/*
+ * particle.cpp
+ *
+ * Copyright (C) Daniel Horn
+ * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike contributors
+ * Copyright (C) 2021 Stephen G. Tuggy
+ *
+ * https://github.com/vegastrike/Vega-Strike-Engine-Source
+ *
+ * This file is part of Vega Strike.
+ *
+ * Vega Strike is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * Vega Strike is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 
 #include "particle.h"
 #include "gfxlib.h"
@@ -38,6 +39,7 @@
 #include <limits>
 
 #include "aligned.h"
+#include "vs_logging.h"
 
 ParticleTrail particleTrail( "sparkle", 500, SRCALPHA, ONE, 0.05f, false, true );
 ParticleTrail smokeTrail( "smoke", 500, SRCALPHA, INVSRCALPHA );
@@ -220,7 +222,7 @@ void ParticleTrail::DrawAndUpdate()
     if (!config.initialized) {
         config.init();
         ChangeMax( maxparticles );
-        BOOST_LOG_TRIVIAL(info) << boost::format("Configured particle system %1% with %2% particles") % config.prefix % maxparticles;
+        VS_LOG(info, (boost::format("Configured particle system %1% with %2% particles") % config.prefix % maxparticles));
     }
     if (!config.use || particleLoc.empty())
         return;
@@ -318,13 +320,13 @@ void ParticleTrail::DrawAndUpdate()
         }
 
         if (dosort) {
-            BOOST_LOG_TRIVIAL(trace) << boost::format("Drawing %1%/%2% sorted particles") % nparticles % maxparticles;
+            VS_LOG(trace, (boost::format("Drawing %1%/%2% sorted particles") % nparticles % maxparticles));
             GFXDrawElements( GFXQUAD,
                 &particleVert[0], nparticles * vertsPerParticle,
                 &indices[0], indices.size(),
                 3, 4, 2 );
         } else {
-            BOOST_LOG_TRIVIAL(trace) << boost::format("Drawing %1%/%2% unsorted particles") % nparticles % maxparticles;
+            VS_LOG(trace, (boost::format("Drawing %1%/%2% unsorted particles") % nparticles % maxparticles));
             GFXDraw( GFXQUAD, &particleVert[0], nparticles * 12, 3, 4, 2 );
         }
 
@@ -350,7 +352,7 @@ void ParticleTrail::DrawAndUpdate()
     float minalpha = (ptrans > 0.0f) ? sqrtf(alphaMask / ptrans) : 0.0f;
 
     //if (nparticles) {
-        //BOOST_LOG_TRIVIAL(trace) << boost::format("Drawn %1% particles, minalpha %2%") % nparticles % minalpha;
+        //VS_LOG(trace, (boost::format("Drawn %1% particles, minalpha %2%") % nparticles % minalpha));
     //}
 
     // Quickly remove dead particles at the end

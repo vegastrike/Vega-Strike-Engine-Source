@@ -1,4 +1,4 @@
-/**
+/*
  * main.cpp
  *
  * Copyright (C) 2001-2002 Daniel Horn
@@ -78,31 +78,11 @@
 #include "cg_global.h"
 #endif
 
-#include <boost/smart_ptr/shared_ptr.hpp>
-#include <boost/smart_ptr/make_shared_object.hpp>
-#include <boost/log/core.hpp>
-#include <boost/log/trivial.hpp>
-#include <boost/log/expressions.hpp>
-#include <boost/log/sinks/text_file_backend.hpp>
-#include <boost/log/sinks/text_ostream_backend.hpp>
-#include <boost/log/utility/setup/console.hpp>
-#include <boost/log/utility/setup/file.hpp>
-#include <boost/log/utility/setup/common_attributes.hpp>
-#include <boost/log/sources/severity_logger.hpp>
-#include <boost/log/sources/record_ostream.hpp>
-#include <boost/filesystem.hpp>
+#include "vs_logging.h"
 #include "options.h"
 
-using std::cout;
-using std::cerr;
-using std::endl;
 
 vs_options game_options;
-
-namespace logging = boost::log;
-namespace src = boost::log::sources;
-namespace sinks = boost::log::sinks;
-namespace keywords = boost::log::keywords;
 
 /*
  * Globals
@@ -110,9 +90,6 @@ namespace keywords = boost::log::keywords;
 Universe  *_Universe;
 TextPlane *bs_tp = NULL;
 char SERVER = 0;
-
-boost::shared_ptr<VSFileSystem::file_log_sink>    VSFileSystem::pFileLogSink    = boost::make_shared<VSFileSystem::file_log_sink>();
-boost::shared_ptr<VSFileSystem::console_log_sink> VSFileSystem::pConsoleLogSink = boost::make_shared<VSFileSystem::console_log_sink>();
 
 //false if command line option --net is given to start without network
 static bool ignore_network = true;
@@ -166,11 +143,11 @@ std::string ParseCommandLine(int argc, char ** CmdLine);
 int readCommandLineOptions(int argc, char ** argv);
 
 // FIXME: Code should throw exception instead of calling winsys_exit            // Should it really? - stephengtuggy 2020-10-25
-void VSExit( int code)
+void VSExit(int code)
 {
     Music::CleanupMuzak();
-    VSFileSystem::flushLogs();
-    winsys_exit( code );
+    ::VegaStrikeLogging::VegaStrikeLogger::FlushLogs();
+    winsys_exit(code);
 }
 
 void cleanup( void )
@@ -178,7 +155,8 @@ void cleanup( void )
     STATIC_VARS_DESTROYED = true;
     // stephengtuggy 2020-10-30: Output message both to the console and to the logs
     printf( "Thank you for playing!\n" );
-    BOOST_LOG_TRIVIAL(info) << "Thank you for playing!";
+    VS_LOG(info, "Thank you for playing!");
+    ::VegaStrikeLogging::VegaStrikeLogger::FlushLogs();
     if (_Universe != NULL ) {
         _Universe->WriteSaveGame( true );
     }
@@ -217,7 +195,7 @@ void nothinghappens( unsigned int, unsigned int, bool, int, int ) {}
 
 void initSceneManager()
 {
-    BOOST_LOG_TRIVIAL(info) << "Creating scene manager...";
+    VS_LOG(info, "Creating scene manager...");
     Audio::SceneManager *sm = Audio::SceneManager::getSingleton();
 
     if (Audio::SceneManager::getSingleton() == 0)
@@ -228,7 +206,7 @@ void initSceneManager()
 
 void initALRenderer()
 {
-    BOOST_LOG_TRIVIAL(info) << "  Initializing renderer...";
+    VS_LOG(info, "  Initializing renderer...");
     Audio::SceneManager *sm = Audio::SceneManager::getSingleton();
 
     if (g_game.sound_enabled) {
@@ -255,7 +233,7 @@ void initScenes()
 
 void closeRenderer()
 {
-    BOOST_LOG_TRIVIAL(info) << "Shutting down renderer...";
+    VS_LOG(info, "Shutting down renderer...");
     Audio::SceneManager::getSingleton()->setRenderer( SharedPtr<Audio::Renderer>() );
 }
 
@@ -265,70 +243,27 @@ bool isVista = false;
 
 Unit *TheTopLevelUnit;
 
-void initLoggingPart1()
-{
-    logging::add_common_attributes();
-
-    VSFileSystem::pConsoleLogSink = logging::add_console_log
-    (
-        std::cerr,
-        //keywords::filter              = (logging::trivial::severity >= logging::trivial::fatal),      /*< on the console, only show messages that are fatal to Vega Strike >*/
-        keywords::format                = "%Message%",                                                  /*< log record format specific to the console >*/
-        keywords::auto_flush            = true /*false*/                                                /*< whether to do the equivalent of fflush(stdout) after every msg >*/
-    );
-}
-
-void initLoggingPart2(char debugLevel)
-{
-    auto loggingCore = logging::core::get();
-
-    string loggingDir = VSFileSystem::homedir + "/" + "logs";                                           /*< $HOME/.vegastrike/logs, typically >*/
-
-    switch (debugLevel) {
-    case 1:
-        loggingCore->set_filter(logging::trivial::severity >= logging::trivial::info);
-        break;
-    case 2:
-        loggingCore->set_filter(logging::trivial::severity >= logging::trivial::debug);
-        break;
-    case 3:
-        loggingCore->set_filter(logging::trivial::severity >= logging::trivial::trace);
-        break;
-    default:
-        loggingCore->set_filter(logging::trivial::severity >= logging::trivial::warning);
-        break;
-    }
-
-    VSFileSystem::pFileLogSink = logging::add_file_log
-    (
-        keywords::file_name             = loggingDir + "/" + "vegastrike_%Y-%m-%d_%H_%M_%S.%f.log",     /*< file name pattern >*/
-        keywords::rotation_size         = 10 * 1024 * 1024,                                             /*< rotate files every 10 MiB... >*/
-        keywords::time_based_rotation   = sinks::file::rotation_at_time_point(0, 0, 0),                 /*< ...or at midnight >*/
-        keywords::format                = "[%TimeStamp%]: %Message%",                                   /*< log record format >*/
-        keywords::auto_flush            = true, /*false,*/                                              /*< whether to auto flush to the file after every line >*/
-        keywords::min_free_space        = 1 * 1024 * 1024 * 1024                                        /*< stop logging when there's only 1 GiB free space left >*/
-    );
-
-    VSFileSystem::pConsoleLogSink->set_filter(logging::trivial::severity >= logging::trivial::fatal);
-}
-
 int main( int argc, char *argv[] )
 {
     // Change to program directory if not already
     // std::string program_as_called();
-    boost::filesystem::path program_path(argv[0]);
+    const boost::filesystem::path  program_path(argv[0]);
+    // const boost::filesystem::path& canonical_program_path = boost::filesystem::canonical(program_path);
 
-    boost::filesystem::path program_name = program_path.filename();
-    boost::filesystem::path program_directory_path = program_path.parent_path();
+    const boost::filesystem::path& program_name = program_path.filename();  //canonical_program_path.filename();
+    const boost::filesystem::path& program_directory_path = program_path.parent_path(); //.parent_path();
+
+    // This will be set later
+    boost::filesystem::path home_subdir_path{};
 
     // when the program name is `vegastrike-engine` then enforce that the data directory must be specified
     // if the program name is `vegastrike` then enable legacy mode where the current path is assumed.
     legacy_data_dir_mode = (program_name == "vegastrike") || (program_name == "vegastrike.exe");
-    std::cerr<<"Legacy Mode: "<<(legacy_data_dir_mode ? "TRUE" : "FALSE")<<std::endl;
+    std::cerr << "Legacy Mode: " << (legacy_data_dir_mode ? "TRUE" : "FALSE") << std::endl;
 
     if (true == legacy_data_dir_mode) {
         VSFileSystem::datadir = boost::filesystem::current_path().string();
-        std::cerr<<"Saving current directory (" << VSFileSystem::datadir << ") as DATA_DIR"<<std::endl;
+        std::cerr << "Saving current directory (" << VSFileSystem::datadir << ") as DATA_DIR" << std::endl;
     }
 
     if ( ! program_directory_path.empty())                  // Changing to an empty path does bad things
@@ -336,7 +271,7 @@ int main( int argc, char *argv[] )
         boost::filesystem::current_path(program_directory_path);
     }
 
-    initLoggingPart1();
+    VegaStrikeLogging::VegaStrikeLogger::InitLoggingPart1();
 
 #ifdef WIN32
     VSFileSystem::InitHomeDirectory();
@@ -348,9 +283,9 @@ int main( int argc, char *argv[] )
         char pwd[8192] = "";
         if (NULL != getcwd( pwd, 8191 )) {
             pwd[8191] = '\0';
-            BOOST_LOG_TRIVIAL(info) << boost::format(" In path %1%") % pwd;
+            VS_LOG(info, (boost::format(" In path %1%") % pwd));
         } else {
-            BOOST_LOG_TRIVIAL(info) << " In path <<path too long>>";
+            VS_LOG(info, " In path <<path too long>>");
         }
     }
 #ifdef _WIN32
@@ -360,39 +295,52 @@ int main( int argc, char *argv[] )
 
     GetVersionEx( &osvi );
     isVista = (osvi.dwMajorVersion == 6);
-    BOOST_LOG_TRIVIAL(info) << boost::format("Windows version %1% %2%") % osvi.dwMajorVersion % osvi.dwMinorVersion;
+    VS_LOG(info, (boost::format("Windows version %1% %2%") % osvi.dwMajorVersion % osvi.dwMinorVersion));
 #endif
     /* Print copyright notice */
     printf( "Vega Strike "  " \n"
             "See http://www.gnu.org/copyleft/gpl.html for license details.\n\n" );
     /* Seed the random number generator */
-    if (benchmark < 0.0)
+    if (benchmark < 0.0) {
         srand( time( NULL ) );
-    else
+    } else {
         //in benchmark mode, always use the same seed
         srand( 171070 );
+    }
     //this sets up the vegastrike config variable
     setup_game_data();
     //loads the configuration file .vegastrike/vegastrike.config from home dir if such exists
     {
-        string subdir = ParseCommandLine( argc, argv );
-        BOOST_LOG_TRIVIAL(info) << boost::format("GOT SUBDIR ARG = %1%") % subdir;
+        std::string subdir = ParseCommandLine( argc, argv );
+        VS_LOG(info, (boost::format("GOT SUBDIR ARG = %1%") % subdir));
         if (CONFIGFILE == 0) {
             CONFIGFILE = new char[42];
             sprintf( CONFIGFILE, "vegastrike.config" );
         }
         //Specify the config file and the possible mod subdir to play
         VSFileSystem::InitPaths( CONFIGFILE, subdir );
+        // home_subdir_path = boost::filesystem::canonical(boost::filesystem::path(subdir));
     }
-    
+
     // now that the user config file has been loaded from disk, update the global configuration struct values
     configuration.OverrideDefaultsWithUserConfiguration();
 
     // If no debug argument is supplied, set to what the config file has.
-    if (g_game.vsdebug == '0')
+    if (g_game.vsdebug == '0') {
         g_game.vsdebug = game_options.vsdebug;
+    }
 
-    initLoggingPart2(g_game.vsdebug);
+    // Ugly hack until we can find a way to redo all the directory initialization stuff properly.
+    // Use the subdirectory "logs" under the Vega Strike home directory. Make sure we don't duplicate the ".vegastrike/" or ".pu/", etc. part.
+    const boost::filesystem::path& home_path = boost::filesystem::absolute(VSFileSystem::homedir);
+    if (home_path.string().find(VSFileSystem::HOMESUBDIR) == std::string::npos) {
+        const boost::filesystem::path home_subdir(VSFileSystem::HOMESUBDIR);
+        home_subdir_path = boost::filesystem::absolute(home_subdir, home_path);
+    } else {
+        home_subdir_path = home_path;
+    }
+
+    VegaStrikeLogging::VegaStrikeLogger::InitLoggingPart2(g_game.vsdebug, home_subdir_path);
 
     // can use the vegastrike config variable to read in the default mission
     if ( game_options.force_client_connect )
@@ -400,7 +348,7 @@ int main( int argc, char *argv[] )
     if (mission_name[0] == '\0') {
         strncpy( mission_name, game_options.default_mission.c_str(), 1023 );
         mission_name[1023] = '\0';
-        BOOST_LOG_TRIVIAL(info) << boost::format("MISSION_NAME is empty using : %1%") % mission_name;
+        VS_LOG(info, (boost::format("MISSION_NAME is empty using : %1%") % mission_name));
     }
 
 
@@ -420,7 +368,7 @@ int main( int argc, char *argv[] )
 #if defined(HAVE_SDL)
 #ifndef NO_SDL_JOYSTICK
     if ( SDL_InitSubSystem( SDL_INIT_JOYSTICK ) ) {
-        BOOST_LOG_TRIVIAL(fatal) << boost::format("Couldn't initialize SDL: %1%") % SDL_GetError();
+        VS_LOG_AND_FLUSH(fatal, (boost::format("Couldn't initialize SDL: %1%") % SDL_GetError()));
         VSExit( 1 );
     }
 #endif
@@ -457,7 +405,8 @@ int main( int argc, char *argv[] )
 
     delete _Universe;
     CleanupUnitTables();
-    VSFileSystem::flushLogs();  // Just to be sure -- stephengtuggy 2020-07-27
+    // Just to be sure -- stephengtuggy 2020-07-27
+    VegaStrikeLogging::VegaStrikeLogger::FlushLogs();
     return 0;
 }
 
@@ -635,7 +584,7 @@ void bootstrap_main_loop()
             if (!ignore_network) {
                 //In network mode, test if all player sections are present
                 if (pname == "") {
-                    BOOST_LOG_TRIVIAL(fatal) << "Missing or incomplete section for player " << p;
+                    VS_LOG_AND_FLUSH(fatal, (boost::format("Missing or incomplete section for player %1%") % p));
                     cleanexit = true;
                     VSExit( 1 );
                 }
@@ -787,24 +736,24 @@ std::string ParseCommandLine( int argc, char **lpCmdLine )
     QVector     PlayerLocation;
     for (int i = 1; i < argc; i++) {
         if (lpCmdLine[i][0] == '-') {
-            cerr<<"ARG #"<<i<<" = "<<lpCmdLine[i]<<endl;
+            std::cerr << "ARG #" << i << " = " << lpCmdLine[i] << std::endl;
             switch (lpCmdLine[i][1])
             {
             case 'd':
             case 'D':
                 //Specifying data directory
                 if (lpCmdLine[i][2] == 0) {
-                    cout<<"Option -D requires an argument"<<endl;
+                    std::cout << "Option -D requires an argument" << std::endl;
                     exit( 1 );
                 }
                 datatmp = &lpCmdLine[i][2];
                 if ( VSFileSystem::DirectoryExists( datatmp ) ) {
                     VSFileSystem::datadir = datatmp;
                 } else {
-                    cout<<"Specified data directory not found... exiting"<<endl;
+                    std::cout << "Specified data directory not found... exiting" << std::endl;
                     exit( 1 );
                 }
-                cout<<"Using data dir specified on command line : "<<datatmp<<endl;
+                std::cout << "Using data dir specified on command line : " << datatmp << std::endl;
                 break;
             case 'r':
             case 'R':
@@ -866,16 +815,16 @@ std::string ParseCommandLine( int argc, char **lpCmdLine )
                     //don't ignore the network section of the config file
                     ignore_network = false;
                 } else if (strcmp( lpCmdLine[i], "--help" ) == 0) {
-                    cout<<helpmessage;
+                    std::cout << helpmessage;
                     exit( 0 );
                 } else if (strcmp( lpCmdLine[i], "--version" ) == 0) {
-                    cout<<versionmessage;
+                    std::cout << versionmessage;
                     exit( 0 );
                 } else if (strncmp( lpCmdLine[i], "--debug", 7 ) == 0) {
                     if (lpCmdLine[i][7] == 0) {
                         g_game.vsdebug = 1;
                     } else if (lpCmdLine[i][8] == 0) {
-                        cout<<helpmessage;
+                        std::cout << helpmessage;
                         exit( 0 );
                     }
                     g_game.vsdebug = lpCmdLine[i][8] - '0';
@@ -891,7 +840,7 @@ std::string ParseCommandLine( int argc, char **lpCmdLine )
     }
     if (false == legacy_data_dir_mode) {
         if (true == VSFileSystem::datadir.empty()) {
-            cout<<"Data directory not specified."<<endl;
+            std::cout << "Data directory not specified." << std::endl;
             exit(1);
         }
     }

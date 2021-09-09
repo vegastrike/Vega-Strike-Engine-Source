@@ -1,9 +1,9 @@
-/**
+/*
  * unit_wrapper_class.h
  *
  * Copyright (C) Daniel Horn
- * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike
- * contributors
+ * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike contributors
+ * Copyright (C) 2021 Stephen G. Tuggy
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -24,13 +24,13 @@
  */
 
 
-#include "vsfilesystem.h"
+#include "vs_logging.h"
 using std::string;
 //WARNING: Macro City ahead.  Please skip this section if you don't like macros.
-static const char *error = "\nERROR: NULL Unit used in Python script; returning default value...";
+static const char *kNullUnitErrorMsg = "\nERROR: NULL Unit used in Python script; returning default value...";
 #define CHECKME \
     }           \
-    Unit *me = GetUnit(); if (!me) {BOOST_LOG_TRIVIAL(error) << error; return
+    Unit *me = GetUnit(); if (!me) {VS_LOG_AND_FLUSH(error, kNullUnitErrorMsg); return
 #define WRAPPED0( type, name, def ) \
     type name() {                   \
         {CHECKME def; }             \

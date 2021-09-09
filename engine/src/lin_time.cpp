@@ -1,28 +1,34 @@
 /*
- * Vega Strike
- * Copyright (C) 2001-2002 Daniel Horn
+ * lin_time.cpp
  *
- * http://vegastrike.sourceforge.net/
+ * Copyright (C) Daniel Horn
+ * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike contributors
+ * Copyright (C) 2021 Stephen G. Tuggy
  *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * as published by the Free Software Foundation; either version 2
- * of the License, or (at your option) any later version.
+ * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
- * This program is distributed in the hope that it will be useful,
+ * This file is part of Vega Strike.
+ *
+ * Vega Strike is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * Vega Strike is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+ * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
  */
+
 
 #include "vegastrike.h"
 #include "in_kb.h"
 #include "vs_random.h"
-#include "vsfilesystem.h"
+#include "vs_logging.h"
+
 static double firsttime;
 VSRandom vsrandom( time( NULL ) );
 
@@ -115,16 +121,16 @@ void setTimeCompression( float tc )
 bool toggle_pause()
 {
     static bool paused = false;
-    BOOST_LOG_TRIVIAL(debug) << "toggle_pause() called in lin_time.cpp";
+    VS_LOG(debug, "toggle_pause() called in lin_time.cpp");
     if (paused)
     {
-        BOOST_LOG_TRIVIAL(debug) << "toggle_pause() in lin_time.cpp: Resuming (unpausing)";
+        VS_LOG(debug, "toggle_pause() in lin_time.cpp: Resuming (unpausing)");
         setTimeCompression(1);
         paused = false;
     }
     else
     {
-        BOOST_LOG_TRIVIAL(debug) << "toggle_pause() in lin_time.cpp: Pausing";
+        VS_LOG(debug, "toggle_pause() in lin_time.cpp: Pausing");
 
         // If you make this value too small, then when the user presses the
         // Pause key again to resume, the game will take too long to respond.
@@ -272,7 +278,7 @@ void UpdateTime()
     lasttime    = newtime;
     newtime     = (double)ts.tv_sec + ((double)ts.tv_nsec) * 1.e-9;
     elapsedtime = newtime-lasttime;
-    // BOOST_LOG_TRIVIAL(trace) << boost::format("lin_time.cpp: UpdateTime(): lasttime is %1%; newtime is %2%; elapsedtime before time compression is %3%") % lasttime % newtime % elapsedtime;
+    // VS_LOG(trace, (boost::format("lin_time.cpp: UpdateTime(): lasttime is %1%; newtime is %2%; elapsedtime before time compression is %3%") % lasttime % newtime % elapsedtime));
     if (first) {
         firsttime = newtime;
     }
@@ -294,7 +300,7 @@ void UpdateTime()
 # error "We have no way to determine the time on this system."
 #endif
     elapsedtime *= timecompression;
-    // BOOST_LOG_TRIVIAL(trace) << boost::format("lin_time.cpp: UpdateTime():                                  elapsedtime after  time compression is %1%") % elapsedtime;
+    // VS_LOG(trace, (boost::format("lin_time.cpp: UpdateTime():                                  elapsedtime after  time compression is %1%") % elapsedtime));
     first=false;
 }
 

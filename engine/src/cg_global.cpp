@@ -1,9 +1,10 @@
-/**
+/*
  * cg_global.cpp
  *
  * Copyright (C) Daniel Horn
  * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike
  * contributors
+ * Copyright (C) 2021 Stephen G. Tuggy
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -34,16 +35,18 @@
 #include <string>
 #include <shared/data_path.h>
 
-using std::string;
+#include "vs_logging.h"
 
-void CG_Cloak::cgLoadMedia( string pathname, string filename )
+// using std::string;
+
+void CG_Cloak::cgLoadMedia( std::string pathname, std::string filename )
 {
     data_path media;
     media.path.push_back( "." );
     media.path.push_back( pathname );
-    string    mediafile = media.get_file( filename );
+    std::string mediafile = media.get_file( filename );
     if (mediafile == "") {
-        BOOST_LOG_TRIVIAL(fatal) << boost::format("Unable to load %1%, exiting...") % filename;
+        VS_LOG_AND_FLUSH(fatal, (boost::format("Unable to load %1%, exiting...") % filename));
         VSExit( 0 );
     }
     this->vertexProgram = cgCreateProgramFromFile( this->shaderContext,

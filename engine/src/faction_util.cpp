@@ -1,9 +1,9 @@
-/**
+/*
  * faction_util.cpp
  *
  * Copyright (C) Daniel Horn
- * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike
- * contributors
+ * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike contributors
+ * Copyright (C) 2021 Stephen G. Tuggy
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -27,7 +27,7 @@
 #include <assert.h>
 
 #include "vs_globals.h"
-#include "vsfilesystem.h"
+#include "vs_logging.h"
 #include "cmd/unit_generic.h"
 #include "faction_generic.h"
 #include "gfx/aux_texture.h"
@@ -111,13 +111,15 @@ std::vector< Animation* >* FactionUtil::GetRandCommAnimation( int faction, Unit 
                 || (tmp->dockable == Faction::comm_face_t::CNO && !dockable) ) {
                 if ( tmp->base == Faction::comm_face_t::CEITHER
                     || (tmp->base == Faction::comm_face_t::CYES && base)
-                    || (tmp->base == Faction::comm_face_t::CNO && !base) )
+                    || (tmp->base == Faction::comm_face_t::CNO && !base) ) {
                     return GetAnimation( faction, ind, sex );
+                }
             }
-            if (tmp->base == Faction::comm_face_t::CYES && base)
+            if (tmp->base == Faction::comm_face_t::CYES && base) {
                 return GetAnimation( faction, ind, sex );                  //bases may be dockable but we have set dockable_only to no
+            }
         }
-        BOOST_LOG_TRIVIAL(error) << boost::format("Error picking comm animation for %1$d faction with base:%2$d dock:%3$d\n") % faction % ((int) base) % ((int) dockable);
+        VS_LOG(error, (boost::format("Error picking comm animation for %1$d faction with base:%2$d dock:%3$d\n") % faction % ((int) base) % ((int) dockable)));
         return GetAnimation( faction, rand()%siz, sex );
     } else {
         sex = 0;

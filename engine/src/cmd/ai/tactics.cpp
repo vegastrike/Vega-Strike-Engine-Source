@@ -1,9 +1,9 @@
-/**
+/*
  * tactics.cpp
  *
  * Copyright (C) Daniel Horn
- * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike
- * contributors
+ * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike contributors
+ * Copyright (C) 2021 Stephen G. Tuggy
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -26,7 +26,7 @@
 
 #include "tactics.h"
 #include "vegastrike.h"
-#include "vsfilesystem.h"
+#include "vs_logging.h"
 #include "cmd/unit_generic.h"
 
 void CloakFor::Execute()
@@ -47,8 +47,7 @@ void CloakFor::Execute()
 CloakFor::~CloakFor()
 {
 #ifdef ORDERDEBUG
-    BOOST_LOG_TRIVIAL(trace) << boost::format("clk%1$x") % this;
-    VSFileSystem::flushLogs();
+    VS_LOG_AND_FLUSH(trace, (boost::format("clk%1$x") % this));
 #endif
     if (parent && time <= maxtime) {
         parent->Cloak( !enable );

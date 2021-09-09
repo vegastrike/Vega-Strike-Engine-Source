@@ -1,9 +1,9 @@
-/**
+/*
  * universe.cpp
  *
  * Copyright (C) 2001-2002 Daniel Horn and Alan Shieh
- * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike
- * contributors
+ * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike contributors
+ * Copyright (C) 2021 Stephen G. Tuggy
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -55,7 +55,7 @@
 #include "cmd/csv.h"
 #include "cmd/role_bitmask.h"
 #include "universe_globals.h"
-#include "vsfilesystem.h"
+#include "vs_logging.h"
 
 #include "weapon_factory.h"
 
@@ -443,7 +443,7 @@ void Universe::StartDraw()
                         delete star_system.back();
                         star_system.pop_back();
                     } else {
-                        BOOST_LOG_TRIVIAL(error) << "error with active star system list\n";
+                        VS_LOG(error, "error with active star system list\n");
                     }
                 }
             }
@@ -532,7 +532,7 @@ void Universe::SetActiveCockpit( int i )
 {
 #ifdef VS_DEBUG
     if ( i < 0 || i >= cockpit.size() ) {
-        BOOST_LOG_TRIVIAL(error) << boost::format("ouch invalid cockpit %1$d") % i;
+        VS_LOG(error, (boost::format("ouch invalid cockpit %1$d") % i));
     }
 #endif
     _current_cockpit = i;
@@ -658,7 +658,7 @@ StarSystem* Universe::GenerateStarSystem( const char *file, const char *jumpback
 
 void Universe::LoadStarSystem( StarSystem *s )
 {
-    BOOST_LOG_TRIVIAL(info) << "Loading a starsystem";
+    VS_LOG(info, "Loading a starsystem");
     star_system.push_back( s );
     SortStarSystems( star_system, s );     //dont' want instadie
 }
@@ -695,10 +695,10 @@ void Universe::Generate2( StarSystem *ss )
     //notify the director that a new system is loaded (gotta have at least one active star system)
     StarSystem *old_script_system = _script_system;
     _script_system = ss;
-    BOOST_LOG_TRIVIAL(info) << boost::format("Loading Star System %1$s\n") % ss->getFileName().c_str();
+    VS_LOG(info, (boost::format("Loading Star System %1$s\n") % ss->getFileName().c_str()));
     const vector< std::string > &adjacent = getAdjacentStarSystems( ss->getFileName() );
     for (unsigned int i = 0; i < adjacent.size(); i++) {
-        BOOST_LOG_TRIVIAL(info) << boost::format(" Next To: %1$s\n") % adjacent[i].c_str();
+        VS_LOG(info, (boost::format(" Next To: %1$s\n") % adjacent[i].c_str()));
     }
     static bool first = true;
     if (!first)

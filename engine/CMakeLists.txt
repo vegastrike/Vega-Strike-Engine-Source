@@ -698,6 +698,10 @@ CONFIGURE_FILE(${Vega_Strike_SOURCE_DIR}/cmake-config.h.in ${Vega_Strike_BINARY_
 #SET(CMAKE_CXX_FLAGS "-include config.h;-pipe;"${CMAKE_CXX_FLAGS})
 
 # Now the source files are listed starting here!
+SET(LIBVS_LOGGING
+    src/vs_logging.cpp
+)
+
 SET(LIBCONFIG
     src/configuration/configuration.cpp
     src/configuration/game_config.cpp
@@ -1090,6 +1094,7 @@ SET(LIBAUDIO_SOURCES
 
 
 ADD_LIBRARY(vegastrike-engine_com
+    ${LIBVS_LOGGING}
     ${LIBCONFIG}
     ${LIBAI_SOURCES}
     ${LIBCMD_SOURCES}

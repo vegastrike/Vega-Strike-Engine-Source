@@ -1,9 +1,9 @@
-/**
+/*
  * base_interface.cpp
  *
  * Copyright (C) Daniel Horn
- * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike
- * contributors
+ * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike contributors
+ * Copyright (C) 2021 Stephen G. Tuggy
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -29,6 +29,7 @@
 #include "base.h"
 #include "gldrv/winsys.h"
 #include "vsfilesystem.h"
+#include "vs_logging.h"
 #include "lin_time.h"
 #include "audiolib.h"
 #include "gfx/camera.h"
@@ -576,8 +577,8 @@ void BaseInterface::Room::BaseText::Draw( BaseInterface *base )
 void RunPython( const char *filnam )
 {
 #ifdef DEBUG_RUN_PYTHON
-    BOOST_LOG_TRIVIAL(trace) << "Run python:\n";
-    BOOST_LOG_TRIVIAL(trace) << boost::format("%1%\n") % filnam;
+    VS_LOG(trace, "Run python:\n");
+    VS_LOG(trace, (boost::format("%1%\n") % filnam));
 #endif
     if (filnam[0]) {
         if (filnam[0] == '#' && filnam[1] != '\0') {
@@ -595,7 +596,7 @@ void BaseInterface::Room::BasePython::Draw( BaseInterface *base )
     timeleft += GetElapsedTime()/getTimeCompression();
     if (timeleft >= maxtime) {
         timeleft = 0;
-        BOOST_LOG_TRIVIAL(debug) << "Running python script...";
+        VS_LOG(debug, "Running python script...");
         RunPython( this->pythonfile.c_str() );
         return;         //do not do ANYTHING with 'this' after the previous statement...
     }
@@ -967,8 +968,7 @@ void BaseInterface::GotoLink( int linknum )
         mousePointerStyle = MOUSE_POINTER_NORMAL;
     } else {
 #ifndef BASE_MAKER
-        BOOST_LOG_TRIVIAL(fatal) << boost::format("\nWARNING: base room #%d tried to go to an invalid index: #%d") % curroom % linknum;
-        VSFileSystem::flushLogs();
+        VS_LOG_AND_FLUSH(fatal, (boost::format("\nWARNING: base room #%d tried to go to an invalid index: #%d") % curroom % linknum));
         assert( 0 );
 #else
         while (rooms.size() <= linknum) {
@@ -1082,7 +1082,7 @@ double compute_light_dot( Unit *base, Unit *un )
 
                     double  dot = v1.Dot( v2 );
                     if (dot > ret) {
-                        BOOST_LOG_TRIVIAL(debug) << boost::format("dot %1%") % dot;
+                        VS_LOG(debug, (boost::format("dot %1%") % dot));
                         ret = dot;
                     }
 #endif
@@ -1157,10 +1157,10 @@ BaseInterface::BaseInterface( const char *basefile, Unit *base, Unit *un ) :
             saveStringList( cpt, mission_key, vec );
     }
     if ( !rooms.size() ) {
-        BOOST_LOG_TRIVIAL(error) << boost::format("ERROR: there are no rooms in basefile \"%1%%2%%3%\" ...\n")
+        VS_LOG(error, (boost::format("ERROR: there are no rooms in basefile \"%1%%2%%3%\" ...\n")
                                   % basefile
                                   % compute_time_of_day( base, un )
-                                  % BASE_EXTENSION;
+                                  % BASE_EXTENSION));
         rooms.push_back( new Room() );
         rooms.back()->deftext = "ERROR: No rooms specified...";
 #ifndef BASE_MAKER
@@ -1343,15 +1343,14 @@ void BaseInterface::Room::Talk::Click( BaseInterface *base, float x, float y, in
             if (soundfiles[sayindex].size() > 0) {
                 int sound = AUDCreateSoundWAV( soundfiles[sayindex], false );
                 if (sound == -1) {
-                    BOOST_LOG_TRIVIAL(error) << boost::format("\nCan't find the sound file %1%\n") % soundfiles[sayindex].c_str();
+                    VS_LOG(error, (boost::format("\nCan't find the sound file %1%\n") % soundfiles[sayindex].c_str()));
                 } else {
                     AUDStartPlaying( sound );
                     AUDDeleteSound( sound );                     //won't actually toast it until it stops
                 }
             }
         } else {
-            BOOST_LOG_TRIVIAL(fatal) << "\nThere are no things to say...\n";
-            VSFileSystem::flushLogs();
+            VS_LOG_AND_FLUSH(fatal, "\nThere are no things to say...\n");
             assert( 0 );
         }
     }
@@ -1499,7 +1498,7 @@ void BaseInterface::Draw()
     Unit *un   = caller.GetUnit();
     Unit *base = baseun.GetUnit();
     if ( un && (!base) ) {
-        BOOST_LOG_TRIVIAL(error) << "Error: Base NULL";
+        VS_LOG(error, "Error: Base NULL");
         mission->msgcenter->add( "game", "all", "[Computer] Docking unit destroyed. Emergency launch initiated." );
         for (size_t i = 0; i < un->pImage->dockedunits.size(); i++) {
             if (un->pImage->dockedunits[i]->uc.GetUnit() == base) {

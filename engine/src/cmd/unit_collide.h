@@ -1,9 +1,9 @@
-/**
+/*
  * unit_collide.h
  *
  * Copyright (C) Daniel Horn
- * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike
- * contributors
+ * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike contributors
+ * Copyright (C) 2021 Stephen G. Tuggy
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -36,7 +36,7 @@
 #include "linecollide.h"
 #include "collection.h"
 #include "cmd/unit_generic.h"
-#include "vsfilesystem.h"
+#include "vs_logging.h"
 #include <set>
 #define COLLIDETABLESIZE sizeof (CTSIZ)
 #define COLLIDETABLEACCURACY sizeof (CTACCURACY)
@@ -259,7 +259,7 @@ public: UnitHash3d( StarSystem *ss )
                 }
             }
         if (!ret && !target->hhuge) {
-            BOOST_LOG_TRIVIAL(error) << "Nonfatal Collide Error\n";
+            VS_LOG(error, "Nonfatal Collide Error\n");
         }
         if (!ret || target->hhuge) {
             ret |= removeFromVector( hugeobjects, objectToKill );

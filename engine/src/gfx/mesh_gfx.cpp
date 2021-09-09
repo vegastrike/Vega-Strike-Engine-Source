@@ -1,6 +1,6 @@
 //====================================
 // @file   : mesh_gfx.cpp
-// @version: 2020-10-28
+// @version: 2021-09-07
 // @created: 2002-12-14
 // @author : surfdargent
 // @author : hellcatv
@@ -12,11 +12,12 @@
 // @brief  : draws meshes
 //====================================
 
-/**
+/*
  * mesh_gfx.cpp
  *
  * Copyright (C) 2002-2020 surfdargent, hellcatv, ace123, klaussfreire, dan_w,
  * pyramid3d, Stephen G. Tuggy, and other Vega Strike contributors
+ * Copyright (C) 2021 Stephen G. Tuggy
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -75,6 +76,8 @@ extern vector< Logo* > undrawn_logos;
 #undef min
 #undef max
 #endif
+
+#include "vs_logging.h"
 
 class Exception : public std::exception
 {
@@ -407,7 +410,7 @@ Mesh::~Mesh()
             for (OrigMeshVector::iterator it = undrawn_meshes[j].begin(); it != undrawn_meshes[j].end(); ++it)
                 if (it->orig == this) {
                     undrawn_meshes[j].erase( it-- );
-                    BOOST_LOG_TRIVIAL(debug) << "stale mesh found in draw queue--removed!";
+                    VS_LOG(debug, "stale mesh found in draw queue--removed!");
                 }
         if (vlist) {
             delete vlist;
@@ -447,7 +450,7 @@ Mesh::~Mesh()
         }
     } else {
         orig->refcount--;
-        BOOST_LOG_TRIVIAL(debug) << boost::format("orig refcount: %1%") % refcount;
+        VS_LOG(debug, (boost::format("orig refcount: %1%") % refcount));
         if (orig->refcount == 0) {
             delete[] orig;
             orig = nullptr;
@@ -1254,7 +1257,7 @@ void Mesh::ProcessShaderDrawQueue( size_t whichpass, int whichdrawqueue, bool zs
             technique->compile();
         }
         catch (const Exception& e) {
-            BOOST_LOG_TRIVIAL(info) << boost::format("Technique recompilation failed: %1%") % e.what();
+            VS_LOG(info, (boost::format("Technique recompilation failed: %1%") % e.what()));
         }
     }
 
@@ -1601,9 +1604,9 @@ void Mesh::ProcessFixedDrawQueue( size_t techpass, int whichdrawqueue, bool zsor
     if ( cur_draw_queue.empty() ) {
         static bool thiserrdone = false;         //Avoid filling up logs with this thing (it would be output at least once per frame)
         if (!thiserrdone) {
-            BOOST_LOG_TRIVIAL(error) << boost::format("cloaking queues issue! Please report at https://github.com/vegastrike/Vega-Strike-Engine-Source\nn%1$d\n%2$s")
+            VS_LOG(error, (boost::format("cloaking queues issue! Please report at https://github.com/vegastrike/Vega-Strike-Engine-Source\nn%1$d\n%2$s")
                                      % whichdrawqueue
-                                     % hash_name.c_str();
+                                     % hash_name.c_str()));
         }
         thiserrdone = true;
         return;
@@ -1670,7 +1673,7 @@ void Mesh::ProcessFixedDrawQueue( size_t techpass, int whichdrawqueue, bool zsor
             static int errcount = 0;
             errcount++;
             if (errcount < 100) {
-                BOOST_LOG_TRIVIAL(error) << boost::format("Nomultienvpassno failure %1$s!\n") % hash_name.c_str();
+                VS_LOG(error, (boost::format("Nomultienvpassno failure %1$s!\n") % hash_name.c_str()));
             }
             return;
         }

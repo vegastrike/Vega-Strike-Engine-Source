@@ -1,27 +1,28 @@
-/**
-* pass.cpp
-*
-* Copyright (c) 2001-2002 Daniel Horn
-* Copyright (c) 2002-2019 pyramid3d and other Vega Strike Contributors
-* Copyright (c) 2019-2021 Stephen G. Tuggy, and other Vega Strike Contributors
-*
-* https://github.com/vegastrike/Vega-Strike-Engine-Source
-*
-* This file is part of Vega Strike.
-*
-* Vega Strike is free software: you can redistribute it and/or modify
-* it under the terms of the GNU General Public License as published by
-* the Free Software Foundation, either version 2 of the License, or
-* (at your option) any later version.
-*
-* Vega Strike is distributed in the hope that it will be useful,
-* but WITHOUT ANY WARRANTY; without even the implied warranty of
-* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-* GNU General Public License for more details.
-*
-* You should have received a copy of the GNU General Public License
-* along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
-*/
+/*
+ * pass.cpp
+ *
+ * Copyright (C) Daniel Horn
+ * Copyright (C) 2020 pyramid3d and other Vega Strike contributors
+ * Copyright (C) 2021 Stephen G. Tuggy
+ *
+ * https://github.com/vegastrike/Vega-Strike-Engine-Source
+ *
+ * This file is part of Vega Strike.
+ *
+ * Vega Strike is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * Vega Strike is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 
 #include "pass.h"
 
@@ -32,8 +33,9 @@
 
 
 #include <boost/range/adaptors.hpp>
-#include <boost/log/trivial.hpp>
-#include <boost/format.hpp>
+
+#include "vs_logging.h"
+
 
 using boost::property_tree::ptree;
 
@@ -135,7 +137,7 @@ void Pass::parseTextureUnit(ptree tree) {
 
     addTextureUnit( source, target, defaultSource, name, kind );
 
-    BOOST_LOG_TRIVIAL(debug) << boost::format("Added texture unit #%1% \"%2%\"") % getNumTextureUnits() % name;
+    VS_LOG(debug, (boost::format("Added texture unit #%1% \"%2%\"") % getNumTextureUnits() % name));
 }
 
 void Pass::parseParam(ptree tree)
@@ -157,11 +159,15 @@ void Pass::parseParam(ptree tree)
 
     addShaderParam(name, floats, optional );
 
-    BOOST_LOG_TRIVIAL(debug)
-            << boost::format("Added constant #%1% \"%2%\" with value "
-                             "(%3$.2f,%4$.2f,%5$.2f,%6$.2f) as %7%") %
-               getNumShaderParams() % name % floats[0] % floats[1] % floats[2] %
-            floats[3] % (optional ? "optional" : "required");
+    VS_LOG(debug, (boost::format("Added constant #%1% \"%2%\" with value "
+                             "(%3$.2f,%4$.2f,%5$.2f,%6$.2f) as %7%")
+                             % getNumShaderParams()
+                             % name
+                             % floats[0]
+                             % floats[1]
+                             % floats[2]
+                             % floats[3]
+                             % (optional ? "optional" : "required")));
 
 }
 
@@ -173,11 +179,11 @@ void Pass::parseAutoParam(ptree tree)
 
     addShaderParam(name, getShaderParam(semantic), optional );
 
-    BOOST_LOG_TRIVIAL(debug)
-            << boost::format("Added param #%1% \"%2%\" with semantic %3% as %4%") %
-               getNumShaderParams() %
-               name % semantic %
-               (optional ? "optional" : "required");
+    VS_LOG(debug, (boost::format("Added param #%1% \"%2%\" with semantic %3% as %4%")
+                    % getNumShaderParams()
+                    % name
+                    % semantic
+                    % (optional ? "optional" : "required")));
 }
 
 void Pass::setType(string typeString)

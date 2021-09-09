@@ -1,9 +1,10 @@
-/**
+/*
  * al_sound.cpp
  *
  * Copyright (C) Daniel Horn
  * Copyright (C) 2020 pyramid3d, Nachum Barcohen, Roy Falk, Stephen G. Tuggy,
  * and other Vega Strike contributors
+ * Copyright (C) 2021 Stephen G. Tuggy
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -27,6 +28,7 @@
 #include "audiolib.h"
 #include "hashtable.h"
 #include "vsfilesystem.h"
+#include "vs_logging.h"
 #include <string>
 #include "al_globals.h"
 #include <stdio.h>
@@ -414,7 +416,7 @@ static int LoadSound( ALuint buffer, bool looping, bool music )
         dirtysounds.pop_back();
         //assert (sounds[i].buffer==(ALuint)0);
         //if (sounds[i].buffer != (ALuint)0) {
-        //    BOOST_LOG_TRIVIAL(trace) << boost::format("using claimed buffer %1%") % sounds[i].buffer;
+        //    VS_LOG(trace, (boost::format("using claimed buffer %1%") % sounds[i].buffer));
         //}
         sounds[i].buffer = buffer;
     } else {
@@ -425,7 +427,7 @@ static int LoadSound( ALuint buffer, bool looping, bool music )
     sounds[i].looping = looping ? AL_TRUE : AL_FALSE;
     sounds[i].music   = music;
 #ifdef SOUND_DEBUG
-    BOOST_LOG_TRIVIAL(trace) << boost::format(" with buffer %1% and looping property %2%") % i % ((int) looping)''
+    VS_LOG(trace, (boost::format(" with buffer %1% and looping property %2%") % i % ((int) looping)));
 #endif
     //limited number of sources
     //alGenSources( 1, &sounds[i].source);
@@ -440,7 +442,7 @@ using namespace VSFileSystem;
 
 bool AUDLoadSoundFile( const char *s, struct AUDSoundProperties *info, bool use_fileptr )
 {
-    BOOST_LOG_TRIVIAL(trace) << boost::format("Loading sound file %1%") % s;
+    VS_LOG(trace, (boost::format("Loading sound file %1%") % s));
 
     info->success = false;
 
@@ -484,7 +486,7 @@ bool AUDLoadSoundFile( const char *s, struct AUDSoundProperties *info, bool use_
             return false;
         }
 #ifdef SOUND_DEBUG
-        BOOST_LOG_TRIVIAL(trace) << boost::format("Sound %1$s created with and alBuffer %2$d") % s, % wavbuf;
+        VS_LOG(trace, (boost::format("Sound %1$s created with and alBuffer %2$d") % s, % wavbuf));
 #endif
         dat.resize( f.Size() );
         f.Read( &dat[0], f.Size() );
@@ -514,7 +516,7 @@ int AUDBufferSound( const struct AUDSoundProperties *info, bool music )
     ALuint wavbuf = 0;
     alGenBuffers( 1, &wavbuf );
     if (!wavbuf) {
-        BOOST_LOG_TRIVIAL(error) << boost::format("OpenAL Error in alGenBuffers: %1$d") % alGetError();
+        VS_LOG(error, (boost::format("OpenAL Error in alGenBuffers: %1$d") % alGetError()));
     }
     alBufferData( wavbuf, info->format, info->wave, info->size, info->freq );
     return LoadSound( wavbuf, info->looping, music );
@@ -534,7 +536,7 @@ int AUDCreateSoundWAV( const std::string &s, const bool music, const bool LOOP )
 {
 #ifdef HAVE_AL
 #ifdef SOUND_DEBUG
-    BOOST_LOG_TRIVIAL(trace) << "AUDCreateSoundWAV:: ";
+    VS_LOG(trace, "AUDCreateSoundWAV:: ");
 #endif
     if ( (game_options.Music && !music) || (game_options.Music && music) ) {
         ALuint     *wavbuf = NULL;
@@ -551,7 +553,7 @@ int AUDCreateSoundWAV( const std::string &s, const bool music, const bool LOOP )
         }
         if (wavbuf) {
 #ifdef SOUND_DEBUG
-            BOOST_LOG_TRIVIAL(trace) << boost::format("Sound %1$s restored with alBuffer %2$d") % s % *wavbuf;
+            VS_LOG(trace, (boost::format("Sound %1$s restored with alBuffer %2$d") % s % *wavbuf));
 #endif
         }
         if (wavbuf == NULL) {
@@ -681,9 +683,9 @@ void AUDDeleteSound( int sound, bool music )
         if ( AUDIsPlaying( sound ) ) {
             if (!music) {
 #ifdef SOUND_DEBUG
-                BOOST_LOG_TRIVIAL(trace) << boost::format("AUDDeleteSound: Sound Playing enqueue soundstodelete %1$d %2$d")
+                VS_LOG(trace, (boost::format("AUDDeleteSound: Sound Playing enqueue soundstodelete %1$d %2$d")
                         % sounds[sound].source
-                        % sounds[sound].buffer;
+                        % sounds[sound].buffer));
 #endif
                 soundstodelete.push_back( sound );
                 return;
@@ -692,7 +694,7 @@ void AUDDeleteSound( int sound, bool music )
             }
         }
 #ifdef SOUND_DEBUG
-        BOOST_LOG_TRIVIAL(debug) << boost::format("AUDDeleteSound: Sound Not Playing push back to unused src %1$d %2$d") % sounds[sound].source % sounds[sound].buffer;
+        VS_LOG(debug, (boost::format("AUDDeleteSound: Sound Not Playing push back to unused src %1$d %2$d") % sounds[sound].source % sounds[sound].buffer));
 #endif
         if (sounds[sound].source) {
             unusedsrcs.push_back( sounds[sound].source );
@@ -705,7 +707,7 @@ void AUDDeleteSound( int sound, bool music )
         dirtysounds.push_back( sound );
 #ifdef SOUND_DEBUG
     } else {
-        BOOST_LOG_TRIVIAL(error) << boost::format("double delete of sound %1$d") % sound;
+        VS_LOG(error, (boost::format("double delete of sound %1$d") % sound));
         return;
     }
 #endif
@@ -821,8 +823,8 @@ void AUDStopPlaying( const int sound )
 #ifdef HAVE_AL
     if ( sound >= 0 && sound < (int) sounds.size() ) {
 #ifdef SOUND_DEBUG
-        BOOST_LOG_TRIVIAL(trace) << boost::format("AUDStopPlaying sound %1$d source(releasing): %2$d buffer: %3$d")
-                                    % sound % sounds[sound].source % sounds[sound].buffer;
+        VS_LOG(trace, (boost::format("AUDStopPlaying sound %1$d source(releasing): %2$d buffer: %3$d")
+                                    % sound % sounds[sound].source % sounds[sound].buffer));
 #endif
         if (sounds[sound].source != 0) {
             alSourceStop( sounds[sound].source );
@@ -883,7 +885,7 @@ static bool AUDReclaimSource( const int sound, bool high_priority = false )
 void AUDStartPlaying( const int sound )
 {
 #ifdef SOUND_DEBUG
-    BOOST_LOG_TRIVIAL(trace) << boost::format("AUDStartPlaying(%1$d)") % sound;
+    VS_LOG(trace, (boost::format("AUDStartPlaying(%1$d)") % sound));
 #endif
 
 #ifdef HAVE_AL
@@ -891,8 +893,8 @@ void AUDStartPlaying( const int sound )
         if ( sounds[sound].music || starSystemOK() )
             if ( AUDReclaimSource( sound, sounds[sound].pos == QVector( 0, 0, 0 ) ) ) {
 #ifdef SOUND_DEBUG
-                BOOST_LOG_TRIVIAL(trace) << boost::format("AUDStartPlaying sound %1$d source: %2$d buffer: %3$d")
-                                            % sound % sounds[sound].source % sounds[sound].buffer;
+                VS_LOG(trace, (boost::format("AUDStartPlaying sound %1$d source: %2$d buffer: %3$d")
+                                            % sound % sounds[sound].source % sounds[sound].buffer));
 #endif
                 AUDAdjustSound( sound, sounds[sound].pos, sounds[sound].vel );
                 AUDSoundGain( sound, sounds[sound].gain, sounds[sound].music );
@@ -919,10 +921,10 @@ void AUDPlay( const int sound, const QVector &pos, const Vector &vel, const floa
             AUDAdjustSound( sound, pos, vel );
             AUDSoundGain( sound, gain, sounds[sound].music );
             if (tmp != 2) {
-                BOOST_LOG_TRIVIAL(trace) << boost::format("AUDPlay sound %1% %2%") % sounds[sound].source % sounds[sound].buffer;
+                VS_LOG(trace, (boost::format("AUDPlay sound %1% %2%") % sounds[sound].source % sounds[sound].buffer));
                 AUDAddWatchedPlayed( sound, pos.Cast() );
             } else {
-                BOOST_LOG_TRIVIAL(trace) << boost::format("AUDPlay stole sound %1% %2%") % sounds[sound].source % sounds[sound].buffer;
+                VS_LOG(trace, (boost::format("AUDPlay stole sound %1% %2%") % sounds[sound].source % sounds[sound].buffer));
                 alSourceStop( sounds[sound].source );
             }
             alSourcePlay( sounds[sound].source );

@@ -38,11 +38,12 @@ bool NavigationSystem::ParseFile( string filename )
 
     //ifstream dataset_file;
     //dataset_file.open("navdata.xml");
-    VSFile  f;
-    VSError err = f.OpenReadOnly( "nav/navdata.xml", CockpitFile );
+    VSFileSystem::VSFile  f;
+    VSFileSystem::VSError err = f.OpenReadOnly( "nav/navdata.xml", VSFileSystem::CockpitFile );
     //if (dataset_file.fail())
-    if (err > Ok)
+    if (err > VSFileSystem::Ok) {
         return 0;
+    }
     while ( !f.Eof() ) {
         if (next == '<') {
             //trap <*>

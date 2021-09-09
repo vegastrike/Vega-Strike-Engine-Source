@@ -1,9 +1,9 @@
-/**
+/*
  * mesh.cpp
  *
  * Copyright (C) 2001-2002 Daniel Horn
- * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike
- * contributors
+ * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike contributors
+ * Copyright (C) 2021 Stephen G. Tuggy
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -39,6 +39,7 @@
 #include <string>
 #include <fstream>
 #include "vsfilesystem.h"
+#include "vs_logging.h"
 #include "lin_time.h"
 #include "gfxlib.h"
 #include "vs_globals.h"
@@ -141,7 +142,7 @@ bool Mesh::LoadExistant( const string filehash, const Vector &scale, int faction
 extern Hashtable< std::string, std::vector< Mesh* >, MESH_HASTHABLE_SIZE >bfxmHashTable;
 Mesh::Mesh( const Mesh &m )
 {
-    BOOST_LOG_TRIVIAL(warning) << "UNTESTED MESH COPY CONSTRUCTOR";
+    VS_LOG(warning, "UNTESTED MESH COPY CONSTRUCTOR");
     this->orig = NULL;
     this->hash_name = m.hash_name;
     InitUnit();
@@ -155,7 +156,7 @@ Mesh::Mesh( const Mesh &m )
         }
         if (0 == oldmesh) {
             if (vec->size() > 1) {
-                BOOST_LOG_TRIVIAL(warning) << boost::format("Copy constructor %1$s used in ambiguous Situation") % hash_name.c_str();
+                VS_LOG(warning, (boost::format("Copy constructor %1$s used in ambiguous Situation") % hash_name.c_str()));
             }
             if ( vec->size() )
                 oldmesh = (*vec)[0];
@@ -208,7 +209,7 @@ Mesh::Mesh( std::string filename, const Vector &scale, int faction, Flightgroup 
         }
     } else {
         delete cpy;
-        BOOST_LOG_TRIVIAL(error) << boost::format("fallback, %1$s unable to be loaded as bfxm\n") % filename.c_str();
+        VS_LOG(error, (boost::format("fallback, %1$s unable to be loaded as bfxm\n") % filename.c_str()));
     }
 }
 
@@ -230,7 +231,7 @@ Mesh::Mesh( const char *filename,
     VSError err    = Unspecified;
     err = f.OpenReadOnly( filename, MeshFile );
     if (err > Ok) {
-        BOOST_LOG_TRIVIAL(error) << boost::format("Cannot Open Mesh File %1$s\n") % filename;
+        VS_LOG(error, (boost::format("Cannot Open Mesh File %1$s\n") % filename));
 //cleanexit=1;
 //winsys_exit(1);
         return;

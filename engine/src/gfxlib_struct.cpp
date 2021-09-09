@@ -1,27 +1,26 @@
-/**
-* gfxlib_struct.cpp
-*
-* Copyright (c) 2001-2002 Daniel Horn
-* Copyright (c) 2002-2019 pyramid3d and other Vega Strike Contributors
-* Copyright (c) 2019-2021 Stephen G. Tuggy, and other Vega Strike Contributors
-*
-* https://github.com/vegastrike/Vega-Strike-Engine-Source
-*
-* This file is part of Vega Strike.
-*
-* Vega Strike is free software: you can redistribute it and/or modify
-* it under the terms of the GNU General Public License as published by
-* the Free Software Foundation, either version 2 of the License, or
-* (at your option) any later version.
-*
-* Vega Strike is distributed in the hope that it will be useful,
-* but WITHOUT ANY WARRANTY; without even the implied warranty of
-* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-* GNU General Public License for more details.
-*
-* You should have received a copy of the GNU General Public License
-* along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
-*/
+/*
+ * gfxlib_struct.cpp
+ *
+ * Copyright (C) Daniel Horn
+ * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike contributors.
+ * Copyright (C) 2021 Stephen G. Tuggy
+ *
+ * This file is part of Vega Strike.
+ *
+ * Vega Strike is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * Vega Strike is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 
 #include "gfxlib_struct.h"
 #include "gfxlib.h"
@@ -31,7 +30,7 @@
 #include "config_xml.h"
 #include "vs_globals.h"
 #include "vs_random.h"
-#include "vsfilesystem.h"
+#include "vs_logging.h"
 
 #include "options.h"
 
@@ -79,9 +78,9 @@ static void clear_gl_error()
 }
 static void print_gl_error(const char *fmt)
 {
-    GLenum gl_error;
-    if ((gl_error = glGetError())) {
-        BOOST_LOG_TRIVIAL(info) << boost::format(fmt) % gl_error;
+    GLenum gl_error = glGetError();
+    if (!!gl_error) {
+        VS_LOG(error, (boost::format(fmt) % gl_error));
     }
 }
 

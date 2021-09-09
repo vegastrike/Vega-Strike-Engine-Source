@@ -1,66 +1,65 @@
-/**
-* jpeg_memory.h
-*
-* Copyright (c) 2001-2002 Daniel Horn
-* Copyright (c) 2002-2019 pyramid3d and other Vega Strike Contributors
-* Copyright (c) 2019-2021 Stephen G. Tuggy, and other Vega Strike Contributors
-*
-* https://github.com/vegastrike/Vega-Strike-Engine-Source
-*
-* This file is part of Vega Strike.
-*
-* Vega Strike is free software: you can redistribute it and/or modify
-* it under the terms of the GNU General Public License as published by
-* the Free Software Foundation, either version 2 of the License, or
-* (at your option) any later version.
-*
-* Vega Strike is distributed in the hope that it will be useful,
-* but WITHOUT ANY WARRANTY; without even the implied warranty of
-* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-* GNU General Public License for more details.
-*
-* You should have received a copy of the GNU General Public License
-* along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
-*/
+/*
+ * jpeg_memory.h
+ *
+ * Copyright (C) Daniel Horn
+ * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike contributors
+ * Copyright (C) 2021 Stephen G. Tuggy
+ *
+ * https://github.com/vegastrike/Vega-Strike-Engine-Source
+ *
+ * This file is part of Vega Strike.
+ *
+ * Vega Strike is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * Vega Strike is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
+ */
 
-#include <stdio.h>
+
 #define JPEG_SUPPORT
 #ifdef JPEG_SUPPORT   /* Always true? */
 #ifndef __JPEG_MEMORY_H
 #define __JPEG_MEMORY_H
+
+#include <stdio.h>
 #include <string.h>
-/* BAD BAD!!
- * #if defined( _WIN32) && !defined( __CYGWIN__)
- * #ifndef HAVE_BOOLEAN
- * #define HAVE_BOOLEAN
- * #define FALSE 0
- * #define TRUE 1
- *  typedef unsigned char boolean;
- * #endif
- * #ifndef XMD_H
- * #define XMD_H
- *  typedef int INT32;
- * #endif
- * #endif
- */
 #if defined (_WIN32) && !defined (__CYGWIN__)
 #ifndef NOMINMAX
 #define NOMINMAX
 #endif //tells VCC not to generate min/max macros
 #include <windows.h>
 #endif
-#include "vsfilesystem.h"
 #ifdef _WIN32
 #define XMD_H
-#ifndef HAVE_BOOLEAN
-typedef unsigned char boolean;
 #endif
-#endif
+
+typedef int jpeg_bool;
+
 extern "C" {
-//#define XMD_H
-#include <jconfig.h>
-#include <jpeglib.h>
+//# define XMD_H
+#   define DONT_USE_EXTERN_C
+#   if !defined(HAVE_BOOLEAN)
+#       define HAVE_BOOLEAN
+#       define boolean      jpeg_bool
+#       define TRUE         ((jpeg_bool)true)
+#       define FALSE        ((jpeg_bool)false)
+#       include <jconfig.h>
+#       include <jpeglib.h>
+#       undef boolean
+#   else
+#       include <jconfig.h>
+#       include <jpeglib.h>
+#   endif
 }
+
 /*--------------
  *  A hack to hijack JPEG's innards to write into a memory buffer
  *  ----------------
@@ -82,7 +81,7 @@ void init_destination( j_compress_ptr cinfo );
 
 /*----------------------------------------------------------------------------
  *  /  Empty the output buffer --- called whenever buffer fills up. */
-boolean empty_output_buffer( j_compress_ptr cinfo );
+jpeg_bool empty_output_buffer( j_compress_ptr cinfo );
 
 
 /*----------------------------------------------------------------------------

@@ -1,9 +1,10 @@
-/**
+/*
  * universe_util_generic.cpp
  *
  * Copyright (C) Daniel Horn
  * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike
  * contributors
+ * Copyright (C) 2021 Stephen G. Tuggy
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -43,6 +44,7 @@
 #include "configxml.h"
 #include "vs_globals.h"
 #include "vsfilesystem.h"
+#include "vs_logging.h"
 #include "cmd/unit_util.h"
 #include "cmd/csv.h"
 #include "linecollide.h"
@@ -204,7 +206,7 @@ Cargo getRandCargo( int quantity, string category )
             unsigned int i = Begin+( rand()%(End-Begin) );
             ret = &mpl->GetCargo( i );
         } else {
-            BOOST_LOG_TRIVIAL(info) << boost::format("Cargo category %1% not found") % category;
+            VS_LOG(info, (boost::format("Cargo category %1% not found") % category));
         }
     } else if ( mpl->numCargo() ) {
         for (unsigned int i = 0; i < 500; ++i) {
@@ -767,8 +769,8 @@ void receivedCustom( int cp, bool trusted, string cmd, string args, string id )
     securepythonstr( id );
     string pythonCode = game_options.custompython+"("+(trusted ? "True" : "False")
                         +", r\'"+cmd+"\', r\'"+args+"\', r\'"+id+"\')\n";
-    BOOST_LOG_TRIVIAL(info) << "Executing python command: ";
-    BOOST_LOG_TRIVIAL(info) << "    " << pythonCode;
+    VS_LOG(info, "Executing python command: ");
+    VS_LOG(info, (boost::format("    %1%") % pythonCode));
     const char *cpycode = pythonCode.c_str();
     ::Python::reseterrors();
     PyRun_SimpleString( const_cast< char* > (cpycode) );

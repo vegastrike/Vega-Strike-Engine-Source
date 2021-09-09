@@ -1,10 +1,10 @@
-/**
+/*
  * criteria_xml.cpp
  *
  * Copyright (C) Daniel Horn
  * Copyright (C) 2003 Mike Byron
- * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike
- * contributors
+ * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike contributors
+ * Copyright (C) 2021 Stephen G. Tuggy
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -39,9 +39,10 @@
 #include "criteria.h"
 #include "xml_support.h"
 #include "vsfilesystem.h"
+#include "vs_logging.h"
 
 using XMLSupport::AttributeList;
-using namespace VSFileSystem;
+using namespace VSFileSystem;   // FIXME -- Shouldn't include entire namespace
 using std::set;
 using std::string;
 
@@ -65,7 +66,7 @@ std::set< std::string >CriteriaContains::getPlanetTypesFromXML( const char *file
     VSError err;
     err = f.OpenReadOnly( string( string( filename )+string( ".system" ) ).c_str(), SystemFile );
     if (err > Ok) {
-        BOOST_LOG_TRIVIAL(error) << boost::format("CriteriaContains: file not found %1%") % filename;
+        VS_LOG(error, (boost::format("CriteriaContains: file not found %1%") % filename));
         return textures;
     }
     XML_Parser parser = XML_ParserCreate( NULL );

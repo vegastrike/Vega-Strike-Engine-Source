@@ -1,9 +1,9 @@
-/**
+/*
  * star.cpp
  *
  * Copyright (C) Daniel Horn
- * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike
- * contributors
+ * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike contributors
+ * Copyright (C) 2021 Stephen G. Tuggy
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -35,7 +35,7 @@
 #include "lin_time.h"
 #include "galaxy_xml.h"
 #include "universe.h"
-#include "vsfilesystem.h"
+#include "vs_logging.h"
 
 #if defined (__APPLE__) || defined (MACOSX)
     #include <OpenGL/gl.h>
@@ -239,8 +239,8 @@ static GFXColorVertex * AllocVerticesForSystem( std::string our_system_name, flo
     if (mindistance < 0) mindistance = 0;
     maxdistance = sqrt( maxdistance );
     mindistance = sqrt( mindistance );
-    BOOST_LOG_TRIVIAL(info) << boost::format("Min (%1$f, %2$f, %3$f) Max(%4$f, %5$f, %6$f) MinLumin %7$f, MaxLumin %8$f")
-                               % starmin.i % starmin.j % starmin.k % starmax.i % starmax.j % starmax.k % minlumin % maxlumin;
+    VS_LOG(info, (boost::format("Min (%1$f, %2$f, %3$f) Max(%4$f, %5$f, %6$f) MinLumin %7$f, MaxLumin %8$f")
+                               % starmin.i % starmin.j % starmin.k % starmax.i % starmax.j % starmax.k % minlumin % maxlumin));
     for (int y = 0; y < *num; ++y) {
         tmpvertex[j+repetition-1].x = -.5*xyzspread+rand()*( (float) xyzspread/RAND_MAX );
         tmpvertex[j+repetition-1].y = -.5*xyzspread+rand()*( (float) xyzspread/RAND_MAX );
@@ -306,7 +306,7 @@ static GFXColorVertex * AllocVerticesForSystem( std::string our_system_name, flo
         }
         j += incj;
     }
-    BOOST_LOG_TRIVIAL(info) << boost::format("Read In Star Count %1$d used: %2$d\n") % starcount % (j/2);
+    VS_LOG(info, (boost::format("Read In Star Count %1$d used: %2$d\n") % starcount % (j/2)));
     *num = j;
     return tmpvertex;
 }

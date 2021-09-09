@@ -1,9 +1,9 @@
-/**
+/*
  * al_listen.cpp
  *
  * Copyright (C) Daniel Horn
- * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike
- * contributors
+ * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike contributors
+ * Copyright (C) 2021 Stephen G. Tuggy
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -36,7 +36,7 @@
 #include "audiolib.h"
 #include "al_globals.h"
 #include "vs_globals.h"
-#include "vsfilesystem.h"
+#include "vs_logging.h"
 #include "config_xml.h"
 #include "options.h"
 
@@ -167,7 +167,7 @@ char AUDQueryAudability( const int sound, const Vector &pos, const Vector &vel, 
         if (tmpsrc == 0) {
             playingbuffers[hashed].erase( playingbuffers[hashed].begin()+target );
         } else {
-            BOOST_LOG_TRIVIAL(trace) << boost::format("stole %1%\n") % tmpsrc;
+            VS_LOG(trace, (boost::format("stole %1%\n") % tmpsrc));
             return 2;
         }
     }
@@ -187,7 +187,7 @@ void AUDAddWatchedPlayed( const int sound, const Vector &pos )
     if (sounds[sound].buffer != (ALuint) 0) {
         unsigned int h = hash_sound( sounds[sound].buffer );
         if (sounds[sound].source == 0) {
-            BOOST_LOG_TRIVIAL(warning) << "adding null sound";
+            VS_LOG(warning, "adding null sound");
         }
         playingbuffers[h].push_back( ApproxSound() );
         playingbuffers[h].back().soundname = sound;

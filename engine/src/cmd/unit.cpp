@@ -1,25 +1,30 @@
 /*
- * Vega Strike
+ * unit.cpp
+ *
  * Copyright (C) 2001-2002 Daniel Horn
+ * Copyright (C) 2020-2021 Stephen G. Tuggy and other Vega Strike contributors
  *
- * http://vegastrike.sourceforge.net/
+ * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * as published by the Free Software Foundation; either version 2
- * of the License, or (at your option any later version.
+ * This file is part of Vega Strike.
  *
- * This program is distributed in the hope that it will be useful,
+ * Vega Strike is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * Vega Strike is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+ * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
  */
+
+
 #include "unit.h"
-#include "vsfilesystem.h"
+#include "vs_logging.h"
 #include "vs_globals.h"
 #include "file_main.h"
 #include "gfx/halo.h"
@@ -473,12 +478,12 @@ void GameUnit::Draw( const Transformation &parent, const Matrix &parentMatrix )
             for (un_iter iter = this->getSubUnits(); (un = *iter); ++iter) {
                 float sim_atom_backup = simulation_atom_var;
                 /*if (sim_atom_backup != SIMULATION_ATOM) {
-                    BOOST_LOG_TRIVIAL(debug) << boost::format("void GameUnit::Draw( const Transformation &parent, const Matrix &parentMatrix ): sim_atom as backed up != SIMULATION_ATOM: %1%") % sim_atom_backup;
+                    VS_LOG(debug, (boost::format("void GameUnit::Draw( const Transformation &parent, const Matrix &parentMatrix ): sim_atom as backed up != SIMULATION_ATOM: %1%") % sim_atom_backup));
                 }*/
                 if (this->sim_atom_multiplier && un->sim_atom_multiplier) {
-                    //BOOST_LOG_TRIVIAL(trace) << boost::format("void GameUnit::Draw( const Transformation &parent, const Matrix &parentMatrix ): simulation_atom_var as backed up  = %1%") % simulation_atom_var;
+                    //VS_LOG(trace, (boost::format("void GameUnit::Draw( const Transformation &parent, const Matrix &parentMatrix ): simulation_atom_var as backed up  = %1%") % simulation_atom_var));
                     simulation_atom_var = simulation_atom_var * un->sim_atom_multiplier / this->sim_atom_multiplier;
-                    //BOOST_LOG_TRIVIAL(trace) << boost::format("void GameUnit::Draw( const Transformation &parent, const Matrix &parentMatrix ): simulation_atom_var as multiplied = %1%") % simulation_atom_var;
+                    //VS_LOG(trace, (boost::format("void GameUnit::Draw( const Transformation &parent, const Matrix &parentMatrix ): simulation_atom_var as multiplied = %1%") % simulation_atom_var));
                 }
                 interpolation_blend_factor = calc_blend_factor( saved_interpolation_blend_factor,
                                                                 un->sim_atom_multiplier,
@@ -621,7 +626,7 @@ void GameUnit::Draw()
 static float parseFloat( const std::string &s )
 {
     if ( s.empty() ) {
-        BOOST_LOG_TRIVIAL(info) << boost::format("WARNING: invalid float: %1%") % s;
+        VS_LOG(info, (boost::format("WARNING: invalid float: %1%") % s));
         return 0.f;
     } else {
         return XMLSupport::parse_floatf( s );
@@ -637,7 +642,7 @@ static void parseFloat4( const std::string &s, float value[4] )
         ini = ( (end == string::npos) ? end : (end+1) );
     }
     //if (i >= 4 && ini != string::npos) {
-    //    BOOST_LOG_TRIVIAL(info) << boost::format("WARNING: invalid float4: %1%") % s;
+    //    VS_LOG(info, (boost::format("WARNING: invalid float4: %1%") % s));
     //}
     while (i < 4) {
         value[i++] = 0;

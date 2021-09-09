@@ -164,7 +164,7 @@ using XMLSupport::parse_int;
 using XMLSupport::parse_float;
 using namespace TerrainXML;
 
-void QuadTree::beginElement( const string &name, const AttributeList &attributes )
+void QuadTree::beginElement( const std::string &name, const AttributeList &attributes )
 {
     Names elem = (Names) element_map.lookup( name );
     AttributeList::const_iterator iter;
@@ -351,7 +351,7 @@ void QuadTree::beginElement( const string &name, const AttributeList &attributes
     }
 }
 
-void QuadTree::endElement( const string &name ) {}
+void QuadTree::endElement( const std::string &name ) {}
 
 void QuadTree::SetXSizes( int mX, unsigned int maxX )
 {

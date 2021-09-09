@@ -1,9 +1,10 @@
-/**
+/*
  * galaxy_gen.cpp
  *
  * Copyright (C) Daniel Horn
  * Copyright (C) 2020 pyramid3d, Evert Vorster, Roy Falk, Stephen G. Tuggy,
  * and other Vega Strike contributors.
+ * Copyright (C) 2021 Stephen G. Tuggy
  *
  * This file is part of Vega Strike.
  *
@@ -40,6 +41,7 @@
 #include "vs_random.h"
 #include "options.h"
 #include "universe.h"
+#include "vs_logging.h"
 
 
 #ifndef _WIN32
@@ -370,7 +372,7 @@ void readColorGrads( vector< string > &entity, const char *file )
     VSFile  f;
     VSError err = f.OpenReadOnly( file, UniverseFile );
     if (err > Ok) {
-        BOOST_LOG_TRIVIAL(error) << boost::format("Failed to load %1%") % file;
+        VS_LOG(error, (boost::format("Failed to load %1%") % file));
         GradColor g;
         g.minrad   = 0;
         g.r = g.g = g.b = .9;
@@ -1084,7 +1086,7 @@ void beginStar()
     MakeMoons( game_options.RockyRelativeToPrimary*radius, STAR );
     //Fixme: no jumps should be made around the star.
     if ( !jumps.empty() ) {
-        BOOST_LOG_TRIVIAL(error) << boost::format("ERROR: jumps not empty() Size==%1$u!!!!!") % jumps.size();
+        VS_LOG(error, (boost::format("ERROR: jumps not empty() Size==%1$u!!!!!") % jumps.size()));
     }
     staroffset++;
 }
@@ -1215,7 +1217,7 @@ void readplanetentity( vector< StarInfo > &starinfos, string planetlist, unsigne
 {
     if (numstars < 1) {
         numstars = 1;
-        BOOST_LOG_TRIVIAL(warning) << "No stars exist in this system!";
+        VS_LOG(warning, "No stars exist in this system!");
     }
     string::size_type i, j;
     unsigned int u;
@@ -1360,13 +1362,13 @@ void generateStarSystem( SystemInfo &si )
     } else {
         seedrand( stringhash( si.sector+'/'+si.name ) );
     }
-    BOOST_LOG_TRIVIAL(info) << boost::format("star %1%, natural %2%, bases %3%") % si.numstars % si.numun1 % si.numun2;
+    VS_LOG(info, (boost::format("star %1%, natural %2%, bases %3%") % si.numstars % si.numun1 % si.numun2));
     int nat = pushTowardsMean( game_options.MeanNaturalPhenomena, si.numun1 );
     numnaturalphenomena = nat > si.numun1 ? si.numun1 : nat;
     numstarbases    = pushTowardsMean( game_options.MeanStarBases, si.numun2 );
     // numstarbases    = (int) (si.numun2*game_options.SmallUnitsMultiplier); This yields 0  in addition to making the preceding statement pointless.   Probably not intended
     numstarentities = si.numstars;
-    BOOST_LOG_TRIVIAL(info) << boost::format("star %1%, natural %2%, bases %3%") % numstarentities % numnaturalphenomena % numstarbases;
+    VS_LOG(info, (boost::format("star %1%, natural %2%, bases %3%") % numstarentities % numnaturalphenomena % numstarbases));
     starradius.push_back( si.sunradius );
     readColorGrads( gradtex, (si.stars).c_str() );
 

@@ -2,8 +2,8 @@
  * mesh_bxm.cpp
  *
  * Copyright (C) Daniel Horn
- * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike
- * contributors
+ * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike contributors
+ * Copyright (C) 2021 Stephen G. Tuggy
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -39,6 +39,7 @@
 #include <assert.h>
 
 #include "vegastrike.h"
+#include "vs_logging.h"
 
 string inverseblend[16] = {
     "ZERO",       "ZERO",          "ONE",         "SRCCOLOR",       "INVSRCCOLOR",     "SRCALPHA",   "INVSRCALPHA",
@@ -327,14 +328,12 @@ vector< Mesh* >Mesh::LoadMeshes( VSFileSystem::VSFile &Inputfile,
 #else
     uint32bit Inputlength = Inputfile.Size();
     if (Inputlength < sizeof(uint32bit)*13 || Inputlength > (1<<30)) {
-        BOOST_LOG_TRIVIAL(fatal) << boost::format("Corrupt file %1%, aborting") % Inputfile.GetFilename();
-        VSFileSystem::flushLogs();
+        VS_LOG_AND_FLUSH(fatal, (boost::format("Corrupt file %1%, aborting") % Inputfile.GetFilename()));
         abort();
     }
     inmemfile = (chunk32*) malloc( Inputlength );
     if (!inmemfile) {
-        BOOST_LOG_TRIVIAL(fatal) << "Buffer allocation failed, Aborting";
-        VSFileSystem::flushLogs();
+        VS_LOG_AND_FLUSH(fatal, "Buffer allocation failed, Aborting");
         exit( -2 );
     }
     Inputfile.Read( inmemfile, Inputlength );

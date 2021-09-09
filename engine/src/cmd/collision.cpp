@@ -1,7 +1,7 @@
-/**
+/*
  * collision.cpp
  *
- * Copyright (C) 2020 Roy Falk, Stephen G. Tuggy and other Vega Strike
+ * Copyright (C) 2020-2021 Roy Falk, Stephen G. Tuggy and other Vega Strike
  * contributors
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
@@ -32,7 +32,8 @@
 #include "missile.h"
 #include "enhancement.h"
 #include <typeinfo>
-#include <boost/log/trivial.hpp>
+// #include <boost/log/trivial.hpp>
+#include "vs_logging.h"
 
 // TODO: convert all float to double and all Vector to QVector.
 
@@ -150,7 +151,7 @@ void Collision::dealDamage(Collision other_collision, double deltaKE_linear, dou
     }
 
     float damage = 0.5 * ( deltaKE_linear + deltaKE_angular) /* deltaKE is in KiloJoules, due to mass being in units of 1000 Kg, not Kg - so convert accordingly */ / configuration.physics.kilojoules_per_damage; // assign half the change in energy to this unit, convert from KJ to VSD
-    
+
     unit->ApplyDamage(other_collision.location.Cast(),
                       other_collision.normal,
                       damage, unit, GFXColor( 1,1,1,2 ), other_collision.unit->owner
@@ -159,7 +160,7 @@ void Collision::dealDamage(Collision other_collision, double deltaKE_linear, dou
 
 /*
 * Attempt to work around interpenetration issues[KLUDGE]
-* Specifically, impulse model for rigid body collisions assumes that, being rigid bodies, the two geometries have zero interpenetration, 
+* Specifically, impulse model for rigid body collisions assumes that, being rigid bodies, the two geometries have zero interpenetration,
 * but VS physics granularity + object relative velocity means that non-trivial interpenetration is common
 */
 void Collision::adjustInterpenetration(QVector& new_velocity, QVector& new_angular_velocity, const Vector& normal)
@@ -169,7 +170,7 @@ void Collision::adjustInterpenetration(QVector& new_velocity, QVector& new_angul
     {
         return;
     }
-    
+
     double magnitude = new_velocity.Magnitude();
     QVector velocity_norm = new_velocity.Normalize(); // want to perform positional displacement in direction of new velocity vector
     double movementKludgeMagnitude = 2 * (new_angular_velocity.Dot(velocity_norm) * unit->radial_size / PI + magnitude);
@@ -205,7 +206,7 @@ void Collision::applyForce(QVector &force, QVector &location_local)
     if (torque_magnitude > max_torque) {
         torque *= (max_torque / torque_magnitude);
     }
-    
+
     */
 
     // Apply force at location, should just be one call to ApplyLocalTorque.... but there's a catch - our current moment of inertia units(as in SI units, not unit class) are a bit b0rked, so we need to do a workaround :-(
@@ -232,8 +233,10 @@ void Collision::validateCollision(const QVector& relative_velocity,
     double ResultantVelAlongNormal = ((v2_new + w2_new.Cross(location2_local)) - (v1_new + w1_new.Cross(location1_local))).Dot(normal1);
     double normalizedError = abs(1.0 - ResultantVelAlongNormal / RestorativeVelAlongNormal);
     double absoluteError = abs(ResultantVelAlongNormal - RestorativeVelAlongNormal);
-    if (absoluteError > 0.001 && normalizedError > 0.01) { // absolute error > 1 milimeter/second along collision normal AND normalized error > 1%
-        BOOST_LOG_TRIVIAL(warning) << "Computed error between equation sides for collision is beyond acceptable error bounds:" << absoluteError << ":" << normalizedError << ":" << ResultantVelAlongNormal << ":" << RestorativeVelAlongNormal;
+    // absolute error > 1 milimeter/second along collision normal AND normalized error > 1%
+    if (absoluteError > 0.001 && normalizedError > 0.01) {
+        VS_LOG(warning, (boost::format("Computed error between equation sides for collision is beyond acceptable error bounds:%1%:%2%:%3%:%4%")
+                        % absoluteError % normalizedError % ResultantVelAlongNormal % RestorativeVelAlongNormal));
     }
 }
 
@@ -247,7 +250,7 @@ void Collision::collide( Unit* unit1,
                                    const Vector &normal2,
                                    float distance)
 {
-    
+
     Collision collision1 = Collision(unit1, location1, normal1);
     Collision collision2 = Collision(unit2, location2, normal2);
 
@@ -284,7 +287,7 @@ void Collision::collide( Unit* unit1,
     QVector velocity_of_contact_point2 = unit2->GetVelocity() + unit2->GetAngularVelocity().Cross(location2_local); // compute velocity of point of contact for unit 2
     QVector relative_velocity = velocity_of_contact_point2 - velocity_of_contact_point1;
     // CAVEAT - next two variables (I1, I2) should be 3x3 matrices; using current data set (scalar) and assuming hollow shell (0.667 MR^2); avoiding divide by zero in case of data set omissions -- should probably just put some asserts here?
-    // 2/3 constant from shell approximation -- this will disappear when moment of inertia is actually turned into a 3x3 matrix OR getter is adjusted to fix dataside issues 
+    // 2/3 constant from shell approximation -- this will disappear when moment of inertia is actually turned into a 3x3 matrix OR getter is adjusted to fix dataside issues
     // should assert: mass >0; radial_size !=0; moment !=0; -- may require data set cleaning if asserted
     double I1 = std::max(unit1->GetMoment(), configuration.physics.minimum_mass) * unit1->radial_size * unit1->radial_size * 0.667; // deriving scalar moment of inertia for unit 1
     double I2 = std::max(unit2->GetMoment(), configuration.physics.minimum_mass) * unit2->radial_size * unit2->radial_size * 0.667; // deriving scalar moment of inertia for unit 2
@@ -306,7 +309,7 @@ void Collision::collide( Unit* unit1,
     QVector w1_new = unit1->GetAngularVelocity() - impulse_magnitude * I1_inverse * (location1_local.Cross(normal1));
     QVector w2_new = unit2->GetAngularVelocity() + impulse_magnitude * I2_inverse * (location2_local.Cross(normal1)); // again, repeated use of normal1 and lack of use of normal2 is intentional; difference in sign is intentional and important
 
-    /* 
+    /*
     * Can factor the following out into testing code later
     * BEGIN TESTING CODE
     */
@@ -314,20 +317,20 @@ void Collision::collide( Unit* unit1,
     /*
     * END TESTING CODE
     */
-    
-    // Kinetic energy including rotational, from https://en.wikipedia.org/wiki/Moment_of_inertia#Kinetic_energy_2 
+
+    // Kinetic energy including rotational, from https://en.wikipedia.org/wiki/Moment_of_inertia#Kinetic_energy_2
     double kinetic_energy_system_initial_linear = 0.5 * mass1 * unit1->GetVelocity().MagnitudeSquared() + 0.5 * mass2 * unit2->GetVelocity().MagnitudeSquared();
     double kinetic_energy_system_initial_angular = 0.5 * unit1->GetAngularVelocity().Dot(I1 * unit1->GetAngularVelocity()) + 0.5 * unit2->GetAngularVelocity().Dot(I2 * unit2->GetAngularVelocity());
-    
+
     // compute changes in kinetic energy for linear and rotational
     double kinetic_energy_system_linear = 0.5 * mass1 * v1_new.MagnitudeSquared() + 0.5 * mass2 * v2_new.MagnitudeSquared();
     double kinetic_energy_system_angular = (0.5 * w1_new.Dot(I1 * w1_new)) + ( 0.5 * w2_new.Dot(I2 * w2_new));
     double delta_kinetic_energy_linear = kinetic_energy_system_initial_linear - kinetic_energy_system_linear;
     double delta_kinetic_energy_angular = kinetic_energy_system_initial_angular - kinetic_energy_system_angular;
-    
+
     //we have an impulse [ Force * Time ] and our physics interfaces operate on forces and torques [Force * Meters]
     QVector force_on_1 = -1 * impulse * (1.0f / (unit1->sim_atom_multiplier * SIMULATION_ATOM)); // divide impulse by time over which it will be applied to derive force -- allow different units to have different physics fidelity
-    QVector force_on_2 = impulse * (1.0f / (unit2->sim_atom_multiplier * SIMULATION_ATOM)); // divide impulse by time over which it will be applied to derive force 
+    QVector force_on_2 = impulse * (1.0f / (unit2->sim_atom_multiplier * SIMULATION_ATOM)); // divide impulse by time over which it will be applied to derive force
 
     collision1.adjustInterpenetration(v1_new, w1_new, normal1); // Call this BEFORE applying force
     collision1.applyForce(force_on_1, location1_local); // handles both force-on-center-of-mass and torque

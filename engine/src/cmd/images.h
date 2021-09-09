@@ -184,11 +184,11 @@ struct UnitImages
 
 
 
-    std::vector< string >destination;
-    std::vector< DockingPorts >dockingports;
+    std::vector< std::string > destination;
+    std::vector< DockingPorts > dockingports;
     ///warning unreliable pointer, never dereference!
     std::vector< Unit* > clearedunits;
-    std::vector< DockedUnits* >dockedunits;
+    std::vector< DockedUnits* > dockedunits;
     UnitContainer DockedTo;
     float unitscale;     //for output
     class XMLSerializer *unitwriter = nullptr;

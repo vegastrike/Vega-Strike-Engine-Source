@@ -1,9 +1,9 @@
-/**
+/*
  * role_bitmask.cpp
  *
  * Copyright (C) Daniel Horn
- * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike
- * contributors
+ * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike contributors
+ * Copyright (C) 2021 Stephen G. Tuggy
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -31,13 +31,15 @@
 #include "vs_globals.h"
 #include "config_xml.h"
 #include "vsfilesystem.h"
+#include "vs_logging.h"
 #include "csv.h"
 using std::string;
 using std::pair;
-using namespace VSFileSystem;
+using namespace VSFileSystem;   // FIXME -- Shouldn't import an entire namespace like this, at least according to Google Style Guide
 
 namespace ROLES
 {
+
 int discreteLog( int bitmask )
 {
     for (unsigned char i = 0; i < sizeof (int)*8; i++) {
@@ -45,20 +47,22 @@ int discreteLog( int bitmask )
             return i;
         }
     }
-    BOOST_LOG_TRIVIAL(warning) << "undefined discrete log.";
+    VS_LOG(warning, "undefined discrete log.");
     return 0;
 }
-vector< vector< char > >buildroles();
 
-vector< vector< char > >& getAllRolePriorities()
+std::vector<std::vector<char>> buildroles();
+
+std::vector<std::vector<char>>& getAllRolePriorities()
 {
-    static vector< vector< char > >allrolepriority = buildroles();
+    static std::vector< std::vector< char > > allrolepriority = buildroles();
     return allrolepriority;
 }
-vector< char >& getPriority( unsigned char rolerow )
+
+std::vector< char >& getPriority( unsigned char rolerow )
 {
     if ( rolerow > getAllRolePriorities().size() ) {
-        BOOST_LOG_TRIVIAL(fatal) << "FATAL ERROR ROLE OUT OF RANGE";
+        VS_LOG_AND_FLUSH(fatal, "FATAL ERROR ROLE OUT OF RANGE");
         VSExit( 1 );
     }
     return getAllRolePriorities()[rolerow];
@@ -70,8 +74,9 @@ static vsUMap< int, string > irolemap;
 unsigned char InternalGetRole( const std::string &s )
 {
     vsUMap< string, int >::const_iterator i = rolemap.find( strtoupper( s ) );
-    if ( i != rolemap.end() )
+    if ( i != rolemap.end() ) {
         return (*i).second;
+    }
     return 0;
 }
 const std::string& InternalGetStrRole( unsigned char c )
@@ -79,14 +84,15 @@ const std::string& InternalGetStrRole( unsigned char c )
     static const std::string empty;
 
     vsUMap< int, string >::const_iterator i = irolemap.find( c );
-    if ( i != irolemap.end() )
+    if ( i != irolemap.end() ) {
         return (*i).second;
+    }
     return rolemap.size() ? rolemap.begin()->first : empty;
 }
 
-vector< vector< string > >buildscripts()
+std::vector< std::vector< std::string > > buildscripts()
 {
-    vector< vector< string > >scripts;
+    std::vector< std::vector< std::string > > scripts;
     getAllRolePriorities();
 
     VSFile  f;
@@ -98,32 +104,35 @@ vector< vector< string > >buildscripts()
         f.ReadLine( temp, len );
         size_t siz  = getAllRolePriorities().size();
 
-        vector< string >vec = readCSV( temp );
+        std::vector< std::string > vec = readCSV( temp );
         if ( siz && getAllRolePriorities()[0].size() != vec.size() ) {
-            BOOST_LOG_TRIVIAL(fatal) << boost::format("FATAL error in hash map... column %1% in ai/VegaEvents.csv does not line up with that item in ai/VegaPriorities.csv\n")
-                % ((unsigned int) vec.size());
+            VS_LOG_AND_FLUSH(fatal, (boost::format("FATAL error in hash map... column %1% in ai/VegaEvents.csv does not line up with that item in ai/VegaPriorities.csv\n")
+                % ((unsigned int) vec.size())));
+            VSExit(-5);
         }
         if ( vec.size() ) vec.erase( vec.begin() );
-        for (unsigned int j = 0; j < vec.size(); j++)
+        for (unsigned int j = 0; j < vec.size(); j++) {
             if (getRole( vec[j] ) != j) {
-                BOOST_LOG_TRIVIAL(fatal) << boost::format("FATAL error in hash map... column %1% in ai/VegaEvents.csv does not line up with that item in ai/VegaPriorities.csv\n")
-                    % j;
+                VS_LOG_AND_FLUSH(fatal, (boost::format("FATAL error in hash map... column %1% in ai/VegaEvents.csv does not line up with that item in ai/VegaPriorities.csv\n")
+                    % j));
+                VSExit(-5);
             }
+        }
         unsigned int i = 0;
         for (i = 0; i < siz; i++) {
-            scripts.push_back( vector< string > () );
+            scripts.push_back( std::vector< std::string > () );
             for (unsigned int j = 0; j < vec.size(); j++) {
                 scripts[i].push_back( "default" );
             }
         }
         for (i = 0; i < vec.size(); i++) {
             f.ReadLine( temp, len );
-            vector< string >strs = readCSV( temp );
+            std::vector< std::string >strs = readCSV( temp );
             if ( strs.size() ) {
                 string front = strs.front();
                 unsigned int scriptind = getRole( front );
                 while (scripts.size() <= scriptind)
-                    scripts.push_back( vector< string > () );
+                    scripts.push_back( std::vector< std::string > () );
                 for (unsigned int j = 1; j < strs.size() && j <= vec.size(); j++) {
                     unsigned int index = getRole( vec[j-1] );
                     while (scripts[scriptind].size() <= index)
@@ -137,23 +146,25 @@ vector< vector< string > >buildscripts()
     }
     return scripts;
 }
+
 const std::string& getRoleEvents( unsigned char ourrole, unsigned char theirs )
 {
-    static vector< vector< string > >script = buildscripts();
-    const static string def = "default";
+    static std::vector< std::vector< std::string > > script = buildscripts();
+    const static std::string def = "default";
     if ( ourrole >= script.size() ) {
-        BOOST_LOG_TRIVIAL(error) << "bad error with getRoleEvents (no event specified)";
+        VS_LOG(error, "bad error with getRoleEvents (no event specified)");
         return def;
     }
     if ( theirs >= script[ourrole].size() ) {
-        BOOST_LOG_TRIVIAL(error) << "bad error || with getRoleEvents (no event specified)";
+        VS_LOG(error, "bad error || with getRoleEvents (no event specified)");
         return def;
     }
     return script[ourrole][theirs];
 }
-vector< vector< char > >buildroles()
+
+std::vector< std::vector< char > > buildroles()
 {
-    vector< vector< char > >rolePriorities;
+    std::vector< std::vector< char > > rolePriorities;
     VSFile  f;
     VSError err = f.OpenReadOnly( "VegaPriorities.csv", AiFile );
     if (err <= Ok) {
@@ -161,23 +172,25 @@ vector< vector< char > >buildroles()
         char *temp = (char*) malloc( len+1 );
         memset( temp, 0, len+1 );
         f.ReadLine( temp, len );
-        vector< string >vec = readCSV( temp );
+        std::vector< std::string > vec = readCSV( temp );
         unsigned int    i;
         for (i = 1; i < vec.size(); i++) {
             rolemap.insert( pair< string, int > ( strtoupper( vec[i] ), i-1 ) );
             irolemap.insert( pair< int, string > ( i-1, strtoupper( vec[i] ) ) );
         }
-        vector< vector< char > >tmprolepriorities;
-        vector< string >tmpnamelist;
+        std::vector< std::vector< char > > tmprolepriorities;
+        std::vector< std::string >tmpnamelist;
         while (f.ReadLine( temp, len ) == Ok) {
-            vector< string >priority = readCSV( temp );
+            std::vector< std::string >priority = readCSV( temp );
             if (priority.size() > 0) {
                 tmpnamelist.push_back( strtoupper( priority[0] ) );
-                tmprolepriorities.push_back( vector< char > () );
-                for (unsigned int j = 1; j < priority.size(); j++)
+                tmprolepriorities.push_back( std::vector< char > () );
+                for (unsigned int j = 1; j < priority.size(); j++) {
                     tmprolepriorities.back().push_back( XMLSupport::parse_int( priority[j] ) );
-                while ( tmprolepriorities.back().size() < vec.size() )
+                }
+                while ( tmprolepriorities.back().size() < vec.size() ) {
                     tmprolepriorities.back().push_back( 31 );
+                }
             }
         }
         for (int k = 0; k < 2; ++k)
@@ -185,18 +198,22 @@ vector< vector< char > >buildroles()
                 vsUMap< string, int >::iterator iter = rolemap.find( tmpnamelist[i] );
                 int j = -1;
                 if ( iter != rolemap.end() ) {
-                    if (k == 0)
+                    if (k == 0) {
                         j = iter->second;
+                    }
                 } else if (k == 1) {
-                    for (j = 0; j < (int) rolePriorities.size(); ++j)
-                        if (rolePriorities[j].size() == 0)
+                    for (j = 0; j < (int) rolePriorities.size(); ++j) {
+                        if (rolePriorities[j].size() == 0) {
                             break;
+                        }
+                    }
                     rolemap[tmpnamelist[i]] = j;
                     irolemap[j] = tmpnamelist[i];
                 }
                 if (j != -1) {
-                    while (rolePriorities.size() <= (unsigned int) j)
-                        rolePriorities.push_back( vector< char > () );
+                    while (rolePriorities.size() <= (unsigned int) j) {
+                        rolePriorities.push_back( std::vector< char > () );
+                    }
                     rolePriorities[j].swap( tmprolepriorities[i] );
                 }
             }
@@ -207,23 +224,27 @@ vector< vector< char > >buildroles()
                 rolePriorities.push_back( rolePriorities[0] );
                 a++;
             }
-            if (a > b)
-                for (size_t i = 0; i < rolePriorities.size(); ++i)
+            if (a > b) {
+                for (size_t i = 0; i < rolePriorities.size(); ++i) {
                     rolePriorities[i].resize( a );
+                }
+            }
             //this is just to square out the table and make it safe to access with *any * input string
         }
         free( temp );
         f.Close();
     } else {
-        rolePriorities.push_back( vector< char > () );
+        rolePriorities.push_back( std::vector< char > () );
         rolePriorities[0].push_back( 0 );
     }
     return rolePriorities;
 }
+
 unsigned char getRole( const std::string &s )
 {
     return InternalGetRole( s );
 }
+
 const std::string& getRole( unsigned char c )
 {
     return InternalGetStrRole( c );
@@ -243,6 +264,7 @@ unsigned int readBitmask( const std::string &ss )
     } while (loc != string::npos);
     return ans;
 }
+
 unsigned int getCapitalRoles()
 {
     static string     defaultcapshipvalues = vs_config->getVariable( "data",
@@ -254,15 +276,17 @@ unsigned int getCapitalRoles()
     while ( ( where = inp.find( " " ) ) != string::npos ) {
         string tmp = inp.substr( 0, where );
         unsigned char logrole = getRole( tmp );
-        if ( tmp == getRole( logrole ) )
+        if ( tmp == getRole( logrole ) ) {
             retval |= (1<<logrole);
+        }
         inp = inp.substr( where+1 );
     }
     if ( inp.length() ) {
         unsigned char logrole = getRole( inp );
         string tmp = getRole( logrole );
-        if (tmp == inp)
+        if (tmp == inp) {
             retval |= (1<<logrole);
+        }
     }
     return retval;
 }

@@ -1,27 +1,26 @@
-/**
-* bolt.cpp
-*
-* Copyright (c) 2001-2002 Daniel Horn
-* Copyright (c) 2002-2019 pyramid3d and other Vega Strike Contributors
-* Copyright (c) 2019-2021 Stephen G. Tuggy, and other Vega Strike Contributors
-*
-* https://github.com/vegastrike/Vega-Strike-Engine-Source
-*
-* This file is part of Vega Strike.
-*
-* Vega Strike is free software: you can redistribute it and/or modify
-* it under the terms of the GNU General Public License as published by
-* the Free Software Foundation, either version 2 of the License, or
-* (at your option) any later version.
-*
-* Vega Strike is distributed in the hope that it will be useful,
-* but WITHOUT ANY WARRANTY; without even the implied warranty of
-* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-* GNU General Public License for more details.
-*
-* You should have received a copy of the GNU General Public License
-* along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
-*/
+/*
+ * bolt.cpp
+ *
+ * Copyright (C) Daniel Horn
+ * Copyright (C) 2021 Stephen G. Tuggy
+ *
+ * https://github.com/vegastrike/Vega-Strike-Engine-Source
+ *
+ * This file is part of Vega Strike.
+ *
+ * Vega Strike is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * Vega Strike is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
+ */
 
 
 
@@ -43,6 +42,7 @@
 #include "gfx/camera.h"
 #include "options.h"
 #include "universe.h"
+#include "vs_logging.h"
 
 
 using std::vector;
@@ -121,7 +121,7 @@ void Bolt::DrawAllBolts()
 
         Texture *dec = bolt_draw_manager.boltdecals.GetTexture( decal );
         if(!dec) {
-            BOOST_LOG_TRIVIAL(warning) <<"Failed to get texture from boltdecals";
+            VS_LOG(warning, "Failed to get texture from boltdecals");
             decal++;
             continue;
         }
@@ -438,8 +438,7 @@ void BoltDestroyGeneric( Bolt *whichbolt, unsigned int index, int decal, bool is
 
         vec->pop_back();         //pop that back up
     } else {
-        BOOST_LOG_TRIVIAL(fatal) << "Bolt Fault Nouveau! Not found in draw queue! No Chance to recover";
-        VSFileSystem::flushLogs();
+        VS_LOG_AND_FLUSH(fatal, "Bolt Fault Nouveau! Not found in draw queue! No Chance to recover");
         assert( 0 );
     }
 }

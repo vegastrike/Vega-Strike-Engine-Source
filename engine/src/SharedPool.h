@@ -27,7 +27,6 @@
 #define __STRINGPOOL_H__INCLUDED__
 #include <string>
 #include "gnuhash.h"
-//#include "vsfilesystem.h"
 
 
 #ifndef INITIAL_STRINGPOOL_SIZE

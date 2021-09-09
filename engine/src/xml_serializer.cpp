@@ -1,9 +1,9 @@
-/**
+/*
  * xml_serializer.cpp
  *
  * Copyright (C) Daniel Horn
- * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike
- * contributors
+ * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike contributors
+ * Copyright (C) 2021 Stephen G. Tuggy
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -28,6 +28,7 @@
 #include "cmd/unit_generic.h"
 #include "cmd/images.h"
 #include "vsfilesystem.h"
+#include "vs_logging.h"
 #include "configxml.h"
 #include "vs_globals.h"
 #include "vegastrike.h"
@@ -168,7 +169,7 @@ void XMLSerializer::Write( const char *modificationname )
     VSFile  f;
     VSError err = f.OpenCreateWrite( savedir+"/"+this->filename, UnitFile );
     if (err > Ok) {
-        BOOST_LOG_TRIVIAL(error) << boost::format("!!! ERROR : Writing saved unit file : %1%") % f.GetFullPath().c_str();
+        VS_LOG(error, (boost::format("!!! ERROR : Writing saved unit file : %1%") % f.GetFullPath().c_str()));
         return;
     }
     for (unsigned int i = 0; i < topnode.subnodes.size(); i++) {

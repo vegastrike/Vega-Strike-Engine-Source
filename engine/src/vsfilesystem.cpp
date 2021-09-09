@@ -1,9 +1,10 @@
-/**
+/*
  * vsfilesystem.cpp
  *
  * Copyright (C) Daniel Horn
  * Copyright (C) 2020 pyramid3d, Nachum Barcohen, Roy Falk, Stephen G. Tuggy,
  * and other Vega Strike contributors
+ * Copyright (C) 2021 Stephen G. Tuggy
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -24,9 +25,11 @@
  */
 
 
-#include <stdio.h>
+#include "vsfilesystem.h"
+
+#include <cstdio>
 #include <assert.h>
-#include <stdarg.h>
+#include <cstdarg>
 #include <exception>
 #if defined (_WIN32) && !defined (__CYGWIN__)
 #include <Shlobj.h>
@@ -50,7 +53,6 @@ struct dirent
 #endif
 #include <sys/stat.h>
 #include "configxml.h"
-#include "vsfilesystem.h"
 #include "vs_globals.h"
 #include "vegastrike.h"
 #include "common/common.h"
@@ -63,9 +65,7 @@ struct dirent
 
 #include "galaxy.h"
 
-#include "boost/iostreams/stream.hpp"
-#include "boost/iostreams/device/null.hpp"
-#include "boost/filesystem.hpp"
+#include <boost/filesystem.hpp>
 
 #include "configuration/game_config.h"
 
@@ -91,14 +91,14 @@ char *CONFIGFILE;
 const size_t VS_PATH_BUF_SIZE = 65536;
 char  pwd[VS_PATH_BUF_SIZE];
 VSVolumeType isin_bigvolumes = VSFSNone;
-string curmodpath = "";
+std::string curmodpath = "";
 
 
 
 
 extern string GetUnitDir( string filename );
 
-string selectcurrentdir;
+std::string selectcurrentdir;
 
 int selectdirs( const struct dirent * entry )
 {
@@ -145,9 +145,9 @@ namespace VSFileSystem
 std::string vegastrike_cwd;
 
 
-VSError CachedFileLookup( FileLookupCache &cache, const string &file, VSFileType type )
+VSError CachedFileLookup( FileLookupCache &cache, const std::string &file, VSFileType type )
 {
-    string hashName = GetHashName( file );
+    std::string hashName = GetHashName( file );
     FileLookupCache::iterator it = cache.find( hashName );
     if ( it != cache.end() )
         return it->second;
@@ -229,33 +229,33 @@ int GetReadBytes( char *fmt, va_list ap )
  */
 
 bool   use_volumes;
-string volume_format;
+std::string volume_format;
 enum VSVolumeFormat q_volume_format;
 
-vector< vector< string > >SubDirectories;                       //Subdirectories where we should look for VSFileTypes files
-vector< string >    Directories;                                        //Directories where we should look for VSFileTypes files
-vector< string >    Rootdir;                                                    //Root directories where we should look for VSFileTypes files
-string sharedtextures;
-string sharedunits;
-string sharedsounds;
-string sharedmeshes;
-string sharedsectors;
-string sharedcockpits;
-string shareduniverse;
-string aidir;
-string sharedanims;
-string sharedvideos;
-string sharedsprites;
-string savedunitpath;
-string modname;
-string moddir;
-string datadir;
-string homedir;
+std::vector<std::vector<std::string>> SubDirectories;                       //Subdirectories where we should look for VSFileTypes files
+std::vector<std::string>    Directories;                                        //Directories where we should look for VSFileTypes files
+std::vector<std::string>    Rootdir;                                                    //Root directories where we should look for VSFileTypes files
+std::string sharedtextures;
+std::string sharedunits;
+std::string sharedsounds;
+std::string sharedmeshes;
+std::string sharedsectors;
+std::string sharedcockpits;
+std::string shareduniverse;
+std::string aidir;
+std::string sharedanims;
+std::string sharedvideos;
+std::string sharedsprites;
+std::string savedunitpath;
+std::string modname;
+std::string moddir;
+std::string datadir;
+std::string homedir;
 
-string config_file;
-string weapon_list;
-string universe_name;
-string HOMESUBDIR( ".vegastrike" );
+std::string config_file;
+std::string weapon_list;
+std::string universe_name;
+std::string HOMESUBDIR( ".vegastrike" );
 vector< string >current_path;
 vector< string >current_directory;
 vector< string >current_subdirectory;
@@ -268,10 +268,10 @@ vector< std::vector< std::string > >savedcurdir;        //current dir starting f
 
 vector< int >UseVolumes;
 
-string failed;
+std::string failed;
 
 //Map of the currently opened PK3 volume/resource files
-vsUMap< string, CPK3* >pk3_opened_files;
+vsUMap< std::string, CPK3* >pk3_opened_files;
 
 /*
  ***********************************************************************************************
@@ -318,7 +318,7 @@ std::string MakeSharedPathReturnHome( const std::string &newpath )
 
 std::string MakeSharedPath( const std::string &s )
 {
-    BOOST_LOG_TRIVIAL(info) << boost::format("MakingSharedPath %1%") % s;
+    VS_LOG(info, (boost::format("MakingSharedPath %1%") % s));
     return MakeSharedPathReturnHome( s )+s;
 }
 
@@ -464,18 +464,6 @@ long vs_getsize( FILE *fp )
  ***********************************************************************************************
  */
 
-void flushLogs()
-{
-    if (pConsoleLogSink) {
-        pConsoleLogSink->flush();
-    }
-    if (pFileLogSink) {
-        pFileLogSink->flush();
-    }
-    fflush(stdout);
-    fflush(stderr);
-}
-
 #ifdef WIN32
 void InitHomeDirectory()
 {
@@ -503,7 +491,7 @@ void InitHomeDirectory()
 	// freopen((VSFileSystem::homedir+"/stdout_server.txt").c_str(), "w", stdout);
 	// #endif
 
-    BOOST_LOG_TRIVIAL(info) << boost::format("USING HOMEDIR : %1% as the home directory ") % homedir;
+    VS_LOG(info, (boost::format("USING HOMEDIR : %1% as the home directory ") % homedir));
 }
 #else
 
@@ -515,20 +503,20 @@ void InitHomeDirectory()
     pwent = getpwuid( getuid() );
     chome_path = pwent->pw_dir;
     if ( !DirectoryExists( chome_path ) ) {
-        BOOST_LOG_TRIVIAL(fatal) << "!!! ERROR : home directory not found";
+        VS_LOG_AND_FLUSH(fatal, "!!! ERROR : home directory not found");
         VSExit( 1 );
     }
     string user_home_path( chome_path );
     homedir = user_home_path+"/"+HOMESUBDIR;
 
-    BOOST_LOG_TRIVIAL(info) << boost::format("USING HOMEDIR : %1% As the home directory ") % homedir;
+    VS_LOG(info, (boost::format("USING HOMEDIR : %1% As the home directory ") % homedir));
     CreateDirectoryAbs( homedir );
 }
 #endif
 
 void InitDataDirectory()
 {
-    vector< string >data_paths;
+    std::vector< std::string >data_paths;
 
     /* commandline-specified paths come first */
     if (!datadir.empty()) {
@@ -581,27 +569,27 @@ void InitDataDirectory()
     for (vector< string >::iterator vsit = data_paths.begin(); vsit != data_paths.end(); vsit++)
         //Test if the dir exist and contains config_file
         if (FileExists( (*vsit), config_file ) >= 0) {
-            BOOST_LOG_TRIVIAL(info) << boost::format("Found data in %1%") % (*vsit);
+            VS_LOG(info, (boost::format("Found data in %1%") % (*vsit)));
             if (NULL != getcwd( tmppath, VS_PATH_BUF_SIZE - 1 )) {
                 if ( (*vsit).substr( 0, 1 ) == "." )
                     datadir = string( tmppath )+"/"+(*vsit);
                 else
                     datadir = (*vsit);
             } else {
-                BOOST_LOG_TRIVIAL(error) << "Cannot get current path: path too long";
+                VS_LOG(error, "Cannot get current path: path too long");
             }
 
             if (chdir( datadir.c_str() ) < 0) {
-                BOOST_LOG_TRIVIAL(fatal) << "Error changing to datadir";
+                VS_LOG_AND_FLUSH(fatal, "Error changing to datadir");
                 VSExit( 1 );
             }
             if (NULL != getcwd( tmppath, VS_PATH_BUF_SIZE - 1 )) {
                 datadir = string( tmppath );
             } else {
-                BOOST_LOG_TRIVIAL(error) << "Cannot get current path: path too long";
+                VS_LOG(error, "Cannot get current path: path too long");
             }
 
-            BOOST_LOG_TRIVIAL(info) << boost::format("Using %1% as data directory") % datadir;
+            VS_LOG(info, (boost::format("Using %1% as data directory") % datadir));
             break;
         }
     data_paths.clear();
@@ -624,12 +612,12 @@ void InitDataDirectory()
         fclose( version );
         if ( hsd.length() ) {
             HOMESUBDIR = hsd;
-            BOOST_LOG_TRIVIAL(info) << boost::format("Using %1% as the home directory") % hsd;
+            VS_LOG(info, (boost::format("Using %1% as the home directory") % hsd));
         }
     }
     //Get the mods path
     moddir = datadir+"/"+string( "mods" );
-    BOOST_LOG_TRIVIAL(info) << boost::format("Found MODDIR = %1%") % moddir;
+    VS_LOG(info, (boost::format("Found MODDIR = %1%") % moddir));
 }
 
 //Config file has been loaded from data dir but now we look at the specified moddir in order
@@ -644,9 +632,9 @@ void LoadConfig( string subdir )
         modname = subdir;
         if ( DirectoryExists( homedir+"/mods/"+subdir ) ) {
             if (FileExists( homedir+"/mods/"+subdir, config_file ) >= 0) {
-                BOOST_LOG_TRIVIAL(info)
-                        << boost::format("CONFIGFILE - Found a config file in home mod directory, using : %1%")
-                        % (homedir+"/mods/"+subdir+"/"+config_file);
+                VS_LOG(info,
+                        (boost::format("CONFIGFILE - Found a config file in home mod directory, using : %1%")
+                        % (homedir+"/mods/"+subdir+"/"+config_file)));
                 if (FileExists( homedir+"/mods/"+subdir, "weapon_list.xml" ) >= 0) {
                     weapon_list  = homedir+"/mods/"+subdir+"/weapon_list.xml";
                     foundweapons = true;
@@ -656,14 +644,14 @@ void LoadConfig( string subdir )
             }
         }
         if (!found) {
-            BOOST_LOG_TRIVIAL(warning) << boost::format("WARNING : coudn't find a mod named '%1%' in homedir/mods") % subdir;
+            VS_LOG(warning, (boost::format("WARNING : coudn't find a mod named '%1%' in homedir/mods") % subdir));
         }
         if ( DirectoryExists( moddir+"/"+subdir ) ) {
             if (FileExists( moddir+"/"+subdir, config_file ) >= 0) {
                 if (!found) {
-                    BOOST_LOG_TRIVIAL(info)
-                            << boost::format("CONFIGFILE - Found a config file in mods directory, using : %1%")
-                            % (moddir+"/"+subdir+"/"+config_file);
+                    VS_LOG(info,
+                            (boost::format("CONFIGFILE - Found a config file in mods directory, using : %1%")
+                            % (moddir+"/"+subdir+"/"+config_file)));
                 }
                 if ( (!foundweapons) && FileExists( moddir+"/"+subdir, "weapon_list.xml" ) >= 0 ) {
                     weapon_list  = moddir+"/"+subdir+"/weapon_list.xml";
@@ -675,37 +663,37 @@ void LoadConfig( string subdir )
                 found = true;
             }
         } else {
-            BOOST_LOG_TRIVIAL(error) << boost::format("ERROR : coudn't find a mod named '%1%' in datadir/mods") % subdir;
+            VS_LOG(error, (boost::format("ERROR : coudn't find a mod named '%1%' in datadir/mods") % subdir));
         }
         //}
     }
     if (!found) {
         //Next check if we have a config file in homedir if we haven't found one for mod
         if (FileExists( homedir, config_file ) >= 0) {
-            BOOST_LOG_TRIVIAL(info) << boost::format("CONFIGFILE - Found a config file in home directory, using : %1%") % (homedir+"/"+config_file);
+            VS_LOG(info, (boost::format("CONFIGFILE - Found a config file in home directory, using : %1%") % (homedir+"/"+config_file)));
             config_file = homedir+"/"+config_file;
         } else {
-            BOOST_LOG_TRIVIAL(info) << "CONFIGFILE - No config found in home : " << (homedir+"/"+config_file);
+            VS_LOG(info, (boost::format("CONFIGFILE - No config found in home : %1%") % (homedir+"/"+config_file)));
             if (FileExists( datadir, config_file ) >= 0) {
-                BOOST_LOG_TRIVIAL(info) << boost::format("CONFIGFILE - No home config file found, using datadir config file : %1%") % (datadir+"/"+config_file);
+                VS_LOG(info, (boost::format("CONFIGFILE - No home config file found, using datadir config file : %1%") % (datadir+"/"+config_file)));
                 //We didn't find a config file in home_path so we load the data_path one
                 config_file = datadir+"/"+config_file;
             }
             else {
-                BOOST_LOG_TRIVIAL(fatal) << boost::format("CONFIGFILE - No config found in data dir : %1%") % (datadir+"/"+config_file);
-                BOOST_LOG_TRIVIAL(fatal) << "CONFIG FILE NOT FOUND !!!";
+                VS_LOG_AND_FLUSH(fatal, (boost::format("CONFIGFILE - No config found in data dir : %1%") % (datadir+"/"+config_file)));
+                VS_LOG_AND_FLUSH(fatal, "CONFIG FILE NOT FOUND !!!");
                 VSExit( 1 );
             }
         }
     } else if (subdir != "") {
-        BOOST_LOG_TRIVIAL(info) << boost::format("Using Mod Directory %1%") % moddir;
+        VS_LOG(info, (boost::format("Using Mod Directory %1%") % moddir));
         CreateDirectoryHome( "mods" );
         CreateDirectoryHome( "mods/"+subdir );
         homedir = homedir+"/mods/"+subdir;
     }
     //Delete the default config in order to reallocate it with the right one (if it is a mod)
     if (vs_config) {
-        BOOST_LOG_TRIVIAL(info) << "reallocating vs_config ";
+        VS_LOG(info, "reallocating vs_config ");
         delete vs_config;
     }
 
@@ -718,13 +706,13 @@ void LoadConfig( string subdir )
     //NOTE : THIS IS NOT A GOOD IDEA TO HAVE A DATADIR SPECIFIED IN THE CONFIG FILE
     if (game_options.datadir.size()>0 ) {
         //We found a path to data in config file
-        BOOST_LOG_TRIVIAL(info) << boost::format("DATADIR - Found a datadir in config, using : %1%") % game_options.datadir;
+        VS_LOG(info, (boost::format("DATADIR - Found a datadir in config, using : %1%") % game_options.datadir));
         datadir = game_options.datadir;
     } else {
         if (true == legacy_data_dir_mode) {
-            BOOST_LOG_TRIVIAL(info) << boost::format("DATADIR - No datadir specified in config file, using : %1%") % datadir;
+            VS_LOG(info, (boost::format("DATADIR - No datadir specified in config file, using : %1%") % datadir));
         } else {
-            BOOST_LOG_TRIVIAL(fatal) << boost::format("DATADIR - No datadir specified in config file");
+            VS_LOG_AND_FLUSH(fatal, "DATADIR - No datadir specified in config file");
             VSExit( 1 );
         }
     }
@@ -732,11 +720,11 @@ void LoadConfig( string subdir )
     string universe_file = datadir + "/" \
         + vs_config->getVariable( "data", "universe_path", "universe" ) + "/" \
         + vs_config->getVariable( "general", "galaxy", "milky_way.xml" );
-    BOOST_LOG_TRIVIAL(debug) << "Force galaxy to " << universe_file;
+    VS_LOG(debug, (boost::format("Force galaxy to %1%") % universe_file));
     try {
         Galaxy galaxy = Galaxy(universe_file);
     } catch (std::exception &e) {
-        BOOST_LOG_TRIVIAL(fatal) << boost::format("Error while loading configuration. Did you specifcy the asset directory? Error: %1%") % e.what();
+        VS_LOG_AND_FLUSH(fatal, (boost::format("Error while loading configuration. Did you specifcy the asset directory? Error: %1%") % e.what()));
         VSExit(1);
     }
 }
@@ -756,7 +744,7 @@ void InitMods()
                 string dname( dirlist[ret]->d_name );
                 if (dname == game_options.hqtextures) {
                     curpath = selectcurrentdir+"/"+dname;
-                    BOOST_LOG_TRIVIAL(info) << "\n\nAdding HQ Textures Pack\n\n";
+                    VS_LOG(info, "\n\nAdding HQ Textures Pack\n\n");
                     Rootdir.push_back( curpath );
                 }
             }
@@ -772,7 +760,7 @@ void InitMods()
             string dname( dirlist[ret]->d_name );
             if (dname == modname) {
                 curpath = moddir+"/"+dname;
-                BOOST_LOG_TRIVIAL(info) << boost::format("Adding mod path : %1%") % curpath;
+                VS_LOG(info, (boost::format("Adding mod path : %1%") % curpath));
                 Rootdir.push_back( curpath );
             }
         }
@@ -789,7 +777,7 @@ void InitMods()
             string dname( dirlist[ret]->d_name );
             if (dname == modname) {
                 curpath = curmodpath+dname;
-                BOOST_LOG_TRIVIAL(info) << boost::format("Adding mod path : %1%") % curpath;
+                VS_LOG(info, (boost::format("Adding mod path : %1%") % curpath));
                 Rootdir.push_back( curpath );
             }
         }
@@ -903,7 +891,7 @@ void InitPaths( string conf, string subdir )
     simulation_atom_var = SIMULATION_ATOM;
     AUDIO_ATOM          = game_options.audio_atom;
     audio_atom_var      = AUDIO_ATOM;
-    BOOST_LOG_TRIVIAL(info) << "SIMULATION_ATOM: " << SIMULATION_ATOM;
+    VS_LOG(info, (boost::format("SIMULATION_ATOM: %1%") % SIMULATION_ATOM));
 
     /************************* Home directory subdirectories creation ************************/
     CreateDirectoryHome( savedunitpath );
@@ -942,47 +930,47 @@ void InitPaths( string conf, string subdir )
     } else {
         if (FileExists( datadir, "/"+sharedunits+"."+volume_format ) >= 0) {
             UseVolumes[UnitFile] = 1;
-            BOOST_LOG_TRIVIAL(info) << boost::format("Using volume file %1%.%2%") % (datadir+"/"+sharedunits) % volume_format;
+            VS_LOG(info, (boost::format("Using volume file %1%.%2%") % (datadir+"/"+sharedunits) % volume_format));
         }
         if (FileExists( datadir, "/"+sharedmeshes+"."+volume_format ) >= 0) {
             UseVolumes[MeshFile] = 1;
-            BOOST_LOG_TRIVIAL(info) << boost::format("Using volume file %1%.%2%") % (datadir+"/"+sharedmeshes) % volume_format;
+            VS_LOG(info, (boost::format("Using volume file %1%.%2%") % (datadir+"/"+sharedmeshes) % volume_format));
         }
         if (FileExists( datadir, "/"+sharedtextures+"."+volume_format ) >= 0) {
             UseVolumes[TextureFile] = 1;
-            BOOST_LOG_TRIVIAL(info) << boost::format("Using volume file %1%.%2%") % (datadir+"/"+sharedtextures) % volume_format;
+            VS_LOG(info, (boost::format("Using volume file %1%.%2%") % (datadir+"/"+sharedtextures) % volume_format));
         }
         if (FileExists( datadir, "/"+sharedsounds+"."+volume_format ) >= 0) {
             UseVolumes[SoundFile] = 1;
-            BOOST_LOG_TRIVIAL(info) << boost::format("Using volume file %1%.%2%") % (datadir+"/"+sharedsounds) % volume_format;
+            VS_LOG(info, (boost::format("Using volume file %1%.%2%") % (datadir+"/"+sharedsounds) % volume_format));
         }
         if (FileExists( datadir, "/"+sharedcockpits+"."+volume_format ) >= 0) {
             UseVolumes[CockpitFile] = 1;
-            BOOST_LOG_TRIVIAL(info) << boost::format("Using volume file %1%.%2%") % (datadir+"/"+sharedcockpits) % volume_format;
+            VS_LOG(info, (boost::format("Using volume file %1%.%2%") % (datadir+"/"+sharedcockpits) % volume_format));
         }
         if (FileExists( datadir, "/"+sharedsprites+"."+volume_format ) >= 0) {
             UseVolumes[VSSpriteFile] = 1;
-            BOOST_LOG_TRIVIAL(info) << boost::format("Using volume file %1%.%2%") % (datadir+"/"+sharedsprites) % volume_format;
+            VS_LOG(info, (boost::format("Using volume file %1%.%2%") % (datadir+"/"+sharedsprites) % volume_format));
         }
         if (FileExists( datadir, "/animations."+volume_format ) >= 0) {
             UseVolumes[AnimFile] = 1;
-            BOOST_LOG_TRIVIAL(info) << boost::format("Using volume file %1%.%2%") % (datadir+"/animations") % volume_format;
+            VS_LOG(info, (boost::format("Using volume file %1%.%2%") % (datadir+"/animations") % volume_format));
         }
         if (FileExists( datadir, "/movies."+volume_format ) >= 0) {
             UseVolumes[VideoFile] = 1;
-            BOOST_LOG_TRIVIAL(info) << boost::format("Using volume file %1%.%2%") % (datadir+"/movies") % volume_format;
+            VS_LOG(info, (boost::format("Using volume file %1%.%2%") % (datadir+"/movies") % volume_format));
         }
         if (FileExists( datadir, "/communications."+volume_format ) >= 0) {
             UseVolumes[CommFile] = 1;
-            BOOST_LOG_TRIVIAL(info) << boost::format("Using volume file %1%.%2%") % (datadir+"/communications") % volume_format;
+            VS_LOG(info, (boost::format("Using volume file %1%.%2%") % (datadir+"/communications") % volume_format));
         }
         if (FileExists( datadir, "/mission."+volume_format ) >= 0) {
             UseVolumes[MissionFile] = 1;
-            BOOST_LOG_TRIVIAL(info) << boost::format("Using volume file %1%.%2%") % (datadir+"/mission") % volume_format;
+            VS_LOG(info, (boost::format("Using volume file %1%.%2%") % (datadir+"/mission") % volume_format));
         }
         if (FileExists( datadir, "/ai."+volume_format ) >= 0) {
             UseVolumes[AiFile] = 1;
-            BOOST_LOG_TRIVIAL(info) << boost::format("Using volume file %1%.%2%") % (datadir+"/ai") % volume_format;
+            VS_LOG(info, (boost::format("Using volume file %1%.%2%") % (datadir+"/ai") % volume_format));
         }
         UseVolumes[ZoneBuffer] = 0;
     }
@@ -998,7 +986,7 @@ void CreateDirectoryAbs( const char *filename )
 #endif
                    );
         if (err < 0 && errno != EEXIST) {
-            BOOST_LOG_TRIVIAL(fatal) << "Errno=" << errno << " - FAILED TO CREATE : " << filename;
+            VS_LOG_AND_FLUSH(fatal, (boost::format("Errno=%1% - FAILED TO CREATE : %2%") % errno % filename));
             GetError( "CreateDirectory" );
             VSExit( 1 );
         }
@@ -1062,7 +1050,7 @@ int FileExists( const string &root, const char *filename, VSFileType type, bool 
         struct stat s;
         if (stat( fullpath.c_str(), &s ) >= 0) {
             if (s.st_mode&S_IFDIR) {
-                BOOST_LOG_TRIVIAL(error) << " File is a directory ! ";
+                VS_LOG(error, " File is a directory ! ");
                 found = -1;
             } else {
                 isin_bigvolumes = VSFSNone;
@@ -1185,16 +1173,16 @@ VSError GetError( const char *str )
         prefix += " : ";
     }
     if (errno == ENOENT) {
-        BOOST_LOG_TRIVIAL(error) << prefix + "File not found";
+        VS_LOG(error, (prefix + "File not found"));
         return FileNotFound;
     } else if (errno == EPERM) {
-        BOOST_LOG_TRIVIAL(error) << prefix + "Permission denied";
+        VS_LOG(error, (prefix + "Permission denied"));
         return LocalPermissionDenied;
     } else if (errno == EACCES) {
-        BOOST_LOG_TRIVIAL(error) << prefix + "Access denied";
+        VS_LOG(error, (prefix + "Access denied"));
         return LocalPermissionDenied;
     } else {
-        BOOST_LOG_TRIVIAL(error) << prefix + "Unspecified error (maybe to document in VSFile ?)";
+        VS_LOG(error, (prefix + "Unspecified error (maybe to document in VSFile ?)"));
         return Unspecified;
     }
 }
@@ -1421,7 +1409,7 @@ void VSFile::checkExtracted()
                 //File is not opened so we open it and add it in the pk3 file map
                 CPK3 *pk3newfile = new CPK3;
                 if ( !pk3newfile->Open( full_vol_path.c_str() ) ) {
-                    BOOST_LOG_TRIVIAL(fatal) << "!!! ERROR : opening volume : " << full_vol_path;
+                    VS_LOG_AND_FLUSH(fatal, (boost::format("!!! ERROR : opening volume : %1%") % full_vol_path));
                     VSExit( 1 );
                 }
                 std::pair< std::string, CPK3* >pk3_pair( full_vol_path, pk3newfile );
@@ -1438,8 +1426,11 @@ void VSFile::checkExtracted()
                 pk3_extracted_file = (char*) pk3_file->ExtractFile(
                     (this->subdirectoryname+"/"+this->filename).c_str(), &pk3size );
             this->size = pk3size;
-            BOOST_LOG_TRIVIAL(info)<<"EXTRACTING "
-                <<(this->subdirectoryname+"/"+this->filename)<<" WITH INDEX="<<this->file_index<<" SIZE="<<pk3size<<endl;
+            VS_LOG(info,
+                    (boost::format("EXTRACTING %1% WITH INDEX=%2% SIZE=%3%")
+                    % (this->subdirectoryname + "/" + this->filename)
+                    % this->file_index
+                    % pk3size));
         }
     }
 }
@@ -1468,8 +1459,9 @@ VSError VSFile::OpenReadOnly( const char *file, VSFileType type )
     failed = "";
 
     VSError err = Ok;
-    if ( VSFS_DEBUG() )
-        BOOST_LOG_TRIVIAL(debug)<<"Loading a "<<type<<" : "<<file;
+    if ( VSFS_DEBUG() ) {
+        VS_LOG(debug, (boost::format("Loading a %1% : %2%") % type % file));
+    }
     if (type < ZoneBuffer || type == UnknownFile) {
         //It is a "classic file"
         if (!UseVolumes[type]) {
@@ -1503,12 +1495,13 @@ VSError VSFile::OpenReadOnly( const char *file, VSFileType type )
                     err = FileNotFound;
                 } else {
                     if ( ( this->fp = fopen( filestr.c_str(), "rb" ) ) == NULL ) {
-                        BOOST_LOG_TRIVIAL(fatal)<<"!!! SERIOUS ERROR : failed to open Unknown file "<<filestr<<" - this should not happen";
+                        VS_LOG_AND_FLUSH(fatal, (boost::format("!!! SERIOUS ERROR : failed to open Unknown file %1% - this should not happen") % filestr));
                         VSExit( 1 );
                     }
                     this->valid = true;
-                    if (VSFS_DEBUG() > 1)
-                        BOOST_LOG_TRIVIAL(debug)<<filestr<<" SUCCESS !!!"<<endl;
+                    if (VSFS_DEBUG() > 1) {
+                        VS_LOG(debug, (boost::format("%1% SUCCESS !!!") % filestr));
+                    }
                 }
             } else {
                 err = VSFileSystem::LookForFile( *this, type, file_mode );
@@ -1519,7 +1512,7 @@ VSError VSFile::OpenReadOnly( const char *file, VSFileType type )
                 filestr  = this->GetFullPath();
                 this->fp = fopen( filestr.c_str(), "rb" );
                 if (!this->fp) {
-                    BOOST_LOG_TRIVIAL(error)<<"!!! SERIOUS ERROR : failed to open "<<filestr<<" - this should not happen";
+                    VS_LOG(error, (boost::format("!!! SERIOUS ERROR : failed to open %1% - this should not happen") % filestr));
                     this->valid = false;
                     return FileNotFound;                     //fault!
                 }
@@ -1539,7 +1532,7 @@ VSError VSFile::OpenReadOnly( const char *file, VSFileType type )
                     filestr  = this->GetFullPath();
                     this->fp = fopen( filestr.c_str(), "rb" );
                     if (!this->fp) {
-                        BOOST_LOG_TRIVIAL(error)<<"!!! SERIOUS ERROR : failed to open "<<filestr<<" - this should not happen";
+                        VS_LOG(error, (boost::format("!!! SERIOUS ERROR : failed to open %1% - this should not happen") % filestr));
                         this->valid = false;
                         return FileNotFound;                         //fault
                     }
@@ -1694,10 +1687,11 @@ VSError VSFile::ReadLine( void *ptr, size_t length )
     return Ok;
 }
 
-string VSFile::ReadFull()
+std::string VSFile::ReadFull()
 {
     if (this->Size() < 0) {
-        BOOST_LOG_TRIVIAL(error)<<"Attempt to call ReadFull on a bad file "<<this->filename<<" "<<this->Size()<<" "<<this->GetFullPath().c_str();
+        VS_LOG(error,
+                (boost::format("Attempt to call ReadFull on a bad file %1% %2% %3%") % this->filename % this->Size() % this->GetFullPath().c_str()));
         return string();
     }
     if (!UseVolumes[alt_type] || this->volume_type == VSFSNone) {
@@ -1709,12 +1703,14 @@ string VSFile::ReadFull()
         content[this->Size()] = 0;
         int   readsize = fread( content, 1, this->Size(), this->fp );
         if (this->Size() != readsize) {
-            BOOST_LOG_TRIVIAL(error)<<"Only read "<<readsize<<" out of "<<this->Size()<<" bytes of "<<this->filename;
+            VS_LOG(error,
+                    (boost::format("Only read %1% out of %2% bytes of %3%") % readsize % this->Size() % this->filename));
             GetError( "ReadFull" );
-            if (readsize <= 0)
+            if (readsize <= 0) {
                 content[0] = '\0';
-            else
+            } else {
                 content[readsize] = '\0';
+            }
         }
         string res( content );
         delete[] content;
@@ -1735,7 +1731,7 @@ size_t VSFile::Write( const void *ptr, size_t length )
         size_t nbwritten = fwrite( ptr, 1, length, this->fp );
         return nbwritten;
     } else {
-        BOOST_LOG_TRIVIAL(fatal)<<"!!! ERROR : Writing is not supported within resource/volume files";
+        VS_LOG_AND_FLUSH(fatal, "!!! ERROR : Writing is not supported within resource/volume files");
         VSExit( 1 );
     }
     return Ok;
@@ -1752,7 +1748,7 @@ VSError VSFile::WriteLine( const void *ptr )
     if (!UseVolumes[alt_type] || this->volume_type == VSFSNone) {
         fputs( (const char*) ptr, this->fp );
     } else {
-        BOOST_LOG_TRIVIAL(fatal)<<"!!! ERROR : Writing is not supported within resource/volume files";
+        VS_LOG_AND_FLUSH(fatal, "!!! ERROR : Writing is not supported within resource/volume files");
         VSExit( 1 );
     }
     return Ok;
@@ -1771,7 +1767,7 @@ int VSFile::Fprintf( const char *format, ... )
         va_end(ap);
         return retVal;
     } else {
-        BOOST_LOG_TRIVIAL(fatal)<<"!!! ERROR : Writing is not supported within resource/volume files";
+        VS_LOG_AND_FLUSH(fatal, "!!! ERROR : Writing is not supported within resource/volume files");
         VSExit( 1 );
     }
     return 0;
@@ -1878,7 +1874,7 @@ void VSFile::Clear()
             VSExit( 1 );
         }
     } else {
-        BOOST_LOG_TRIVIAL(fatal)<<"!!! ERROR : Writing is not supported within resource/volume files";
+        VS_LOG_AND_FLUSH(fatal, "!!! ERROR : Writing is not supported within resource/volume files");
         VSExit( 1 );
     }
 }
@@ -1962,7 +1958,7 @@ static void pathAppend( string &dest, string &suffix )
     dest += suffix;
 }
 
-string VSFile::GetFullPath()
+std::string VSFile::GetFullPath()
 {
     string tmp = this->rootname;
     pathAppend( tmp, this->directoryname );
@@ -1971,7 +1967,7 @@ string VSFile::GetFullPath()
     return tmp;
 }
 
-string VSFile::GetAbsPath()
+std::string VSFile::GetAbsPath()
 {
     string tmp = this->directoryname;
     pathAppend( tmp, this->subdirectoryname );

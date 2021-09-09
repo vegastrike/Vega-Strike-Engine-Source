@@ -1,10 +1,10 @@
-/**
+/*
  * mission.cpp
  *
  * Copyright (C) 2001-2002 Daniel Horn
  * Copyright (C) Alexander Rawass <alexannika@users.sourceforge.net>
- * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike
- * contributors
+ * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike contributors
+ * Copyright (C) 2021 Stephen G. Tuggy
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -48,12 +48,13 @@
 #include "python/python_class.h"
 #include "savegame.h"
 #include "universe.h"
-#include "vsfilesystem.h"
+// #include "vsfilesystem.h"   // Is this needed? -- stephengtuggy 2021-09-06
+#include "vs_logging.h"
 
 /* *********************************************************** */
 Mission::~Mission()
 {
-    BOOST_LOG_TRIVIAL(info) << "Mission Cleanup Not Yet Implemented";
+    VS_LOG(info, "Mission Cleanup Not Yet Implemented");
     //do not delete msgcenter...could be vital
 }
 double Mission::gametime = 0.0;
@@ -88,7 +89,7 @@ void Mission::ConstructMission( const char *configfile, const std::string &scrip
     top = domf.LoadXML(configfile);
     static bool dontpanic = false;
     if (top == NULL && !dontpanic) {
-        BOOST_LOG_TRIVIAL(fatal)<<"Panic exit - mission file "<<configfile<<" not found";
+        VS_LOG_AND_FLUSH(fatal, (boost::format("Panic exit - mission file %1% not found") % configfile));
         VSExit( 0 );
     } else {
         dontpanic = true;
@@ -136,7 +137,7 @@ void Mission::initMission( bool loadscripts )
 bool Mission::checkMission( easyDomNode *node, bool loadscripts )
 {
     if (node->Name() != "mission") {
-        BOOST_LOG_TRIVIAL(warning) << "this is no Vegastrike mission file";
+        VS_LOG(warning, "this is no Vegastrike mission file");
         return false;
     }
     vector< easyDomNode* >::const_iterator siter;
@@ -172,7 +173,7 @@ bool Mission::checkMission( easyDomNode *node, bool loadscripts )
             }
             this->nextpythonmission = dumbstr;
         } else {
-            BOOST_LOG_TRIVIAL(warning) << "warning: Unknown tag: " << (*siter)->Name();
+            VS_LOG(warning, (boost::format("warning: Unknown tag: %1%") % ((*siter)->Name())));
         }
     }
     return true;
@@ -235,7 +236,7 @@ void Mission::terminateMission()
 
     f = std::find( Mission_delqueue.begin(), Mission_delqueue.end(), this );
     if (f != Mission_delqueue.end()) {
-        BOOST_LOG_TRIVIAL(info) << boost::format("Not deleting mission twice: %1%") % this->mission_name;
+        VS_LOG(info, (boost::format("Not deleting mission twice: %1%") % this->mission_name));
     }
 
     f = std::find( active_missions->begin(), active_missions->end(), this );
@@ -246,7 +247,7 @@ void Mission::terminateMission()
         for (vector< Mission* >::iterator i = active_missions->begin(); i != active_missions->end(); ++i) {
             if ((*i)->player_num == player_num) {
                 ++misnum;
-                BOOST_LOG_TRIVIAL(info) << boost::format("   Mission #%1%: %2%") % misnum % (*i)->mission_name;
+                VS_LOG(info, (boost::format("   Mission #%1%: %2%") % misnum % (*i)->mission_name));
             }
         }
     }
@@ -260,7 +261,7 @@ void Mission::terminateMission()
     if (this != (*active_missions)[0])        //Shouldn't this always be true?
         Mission_delqueue.push_back( this );          //only delete if we arent' the base mission
     //NETFIXME: This routine does not work properly yet.
-    BOOST_LOG_TRIVIAL(info) << boost::format("Terminating mission %1% #%2%") % this->mission_name % queuenum;
+    VS_LOG(info, (boost::format("Terminating mission %1% #%2%") % this->mission_name % queuenum));
     if (queuenum >= 0) {
         // queuenum - 1 since mission #0 is the base mission (main_menu) and is persisted
         // in savegame.cpp:LoadSavedMissions, and it has no correspondin active_scripts/active_missions entry,
@@ -269,16 +270,16 @@ void Mission::terminateMission()
 
         vector< std::string > *scripts = &_Universe->AccessCockpit( player_num )->savegame->getMissionStringData(
             "active_scripts" );
-        BOOST_LOG_TRIVIAL(info) << boost::format("Terminating mission #%1% - got %2% scripts") % queuenum % scripts->size();
+        VS_LOG(info, (boost::format("Terminating mission #%1% - got %2% scripts") % queuenum % scripts->size()));
         if ( num < scripts->size() )
             scripts->erase( scripts->begin()+num );
         vector< std::string > *missions = &_Universe->AccessCockpit( player_num )->savegame->getMissionStringData(
             "active_missions" );
-        BOOST_LOG_TRIVIAL(info) << boost::format("Terminating mission #%1% - got %2% missions") % queuenum % missions->size();
+        VS_LOG(info, (boost::format("Terminating mission #%1% - got %2% missions") % queuenum % missions->size()));
         if ( num < missions->size() )
             missions->erase( missions->begin()+num );
-        BOOST_LOG_TRIVIAL(info) << boost::format("Terminating mission #%1% - %2% scripts remain") % queuenum % scripts->size();
-        BOOST_LOG_TRIVIAL(info) << boost::format("Terminating mission #%1% - %2% missions remain") % queuenum % missions->size();
+        VS_LOG(info, (boost::format("Terminating mission #%1% - %2% scripts remain") % queuenum % scripts->size()));
+        VS_LOG(info, (boost::format("Terminating mission #%1% - %2% missions remain") % queuenum % missions->size()));
     }
     if (runtime.pymissions)
         runtime.pymissions->Destroy();
@@ -326,7 +327,7 @@ void Mission::doSettings( easyDomNode *node )
 void Mission::doVariables( easyDomNode *node )
 {
     if (variables != NULL) {
-        BOOST_LOG_TRIVIAL(warning) << "only one variable section allowed";
+        VS_LOG(warning, "only one variable section allowed");
         return;
     }
     variables = node;
@@ -341,7 +342,7 @@ void Mission::doVariables( easyDomNode *node )
 void Mission::checkVar( easyDomNode *node )
 {
     if (node->Name() != "var") {
-        BOOST_LOG_TRIVIAL(warning) << "not a variable";
+        VS_LOG(warning, "not a variable");
         return;
     }
     string name  = node->attr_value( "name" );
@@ -367,7 +368,7 @@ void Mission::AddFlightgroup( Flightgroup *fg )
 void Mission::checkFlightgroup( easyDomNode *node )
 {
     if (node->Name() != "flightgroup") {
-        BOOST_LOG_TRIVIAL(warning) << "not a flightgroup";
+        VS_LOG(warning, "not a flightgroup");
         return;
     }
     //nothing yet
@@ -382,11 +383,12 @@ void Mission::checkFlightgroup( easyDomNode *node )
     string terrain_nr    = node->attr_value( "terrain_nr" );
     string unittype      = node->attr_value( "unit_type" );
     if ( name.empty() || faction.empty() || type.empty() || ainame.empty() || waves.empty() || nr_ships.empty() ) {
-        BOOST_LOG_TRIVIAL(warning) << "no valid flightgroup decsription";
+        VS_LOG(warning, "no valid flightgroup decsription");
         return;
     }
-    if ( unittype.empty() )
+    if ( unittype.empty() ) {
         unittype = string( "unit" );
+    }
     int    waves_i    = atoi( waves.c_str() );
     int    nr_ships_i = atoi( nr_ships.c_str() );
 
@@ -400,37 +402,43 @@ void Mission::checkFlightgroup( easyDomNode *node )
     cf.fg  = Flightgroup::newFlightgroup( name, type, faction, ainame, nr_ships_i, waves_i, texture, texture_alpha, this );
     vector< easyDomNode* >::const_iterator siter;
     for (siter = node->subnodes.begin(); siter != node->subnodes.end(); siter++) {
-        if ( (*siter)->Name() == "pos" )
+        if ( (*siter)->Name() == "pos" ) {
             have_pos = doPosition( *siter, pos, &cf );
+        }
 //        else if ( (*siter)->Name() == "rot" )
 //            doRotation( *siter, rot, &cf );  This function isn't implemented yet
-        else if ( (*siter)->Name() == "order" )
+        else if ( (*siter)->Name() == "order" ) {
             doOrder( *siter, cf.fg );
+        }
     }
     if (!have_pos) {
-        BOOST_LOG_TRIVIAL(warning) << "don't have a position in flightgroup " << name;
+        VS_LOG(warning, (boost::format("don't have a position in flightgroup %1%") % name));
     }
     if ( terrain_nr.empty() ) {
         cf.terrain_nr = -1;
     } else {
-        if (terrain_nr == "mission")
+        if (terrain_nr == "mission") {
             cf.terrain_nr = -2;
-        else
+        } else {
             cf.terrain_nr = atoi( terrain_nr.c_str() );
+        }
     }
     cf.unittype = CreateFlightgroup::UNIT;
-    if (unittype == "vehicle")
+    if (unittype == "vehicle") {
         cf.unittype = CreateFlightgroup::VEHICLE;
-    if (unittype == "building")
+    }
+    if (unittype == "building") {
         cf.unittype = CreateFlightgroup::BUILDING;
+    }
     cf.nr_ships  = nr_ships_i;
     cf.domnode   = (node);       //don't hijack node
 
     cf.fg->pos.i = pos[0];
     cf.fg->pos.j = pos[1];
     cf.fg->pos.k = pos[2];
-    for (int i = 0; i < 3; i++)
+    for (int i = 0; i < 3; i++) {
         cf.rot[i] = rot[i];
+    }
     cf.nr_ships  = nr_ships_i;
     if (ainame[0] == '_') {
 #ifndef VS_MIS_SEL
@@ -448,7 +456,7 @@ bool Mission::doPosition( easyDomNode *node, double pos[3], CreateFlightgroup *c
     string y = node->attr_value( "y" );
     string z = node->attr_value( "z" );
     if ( x.empty() || y.empty() || z.empty() ) {
-        BOOST_LOG_TRIVIAL(warning) << "no valid position";
+        VS_LOG(warning, "no valid position");
         return false;
     }
     pos[0] = strtod( x.c_str(), NULL );
@@ -489,7 +497,7 @@ void Mission::doOrder( easyDomNode *node, Flightgroup *fg )
     string order  = node->attr_value( "order" );
     string target = node->attr_value( "target" );
     if ( order.empty() || target.empty() ) {
-        BOOST_LOG_TRIVIAL(warning) << "you have to give an order and a target";
+        VS_LOG(warning, "you have to give an order and a target");
         return;
     }
     //the tmptarget is evaluated later

@@ -92,7 +92,7 @@ void GameUnit::Split( int level )
         string  dir = UniverseUtil::LookupUnitStat( this->name, fac, "Directory" );
         VSFileSystem::current_path.push_back( unit_stats.getRoot() );
         VSFileSystem::current_subdirectory.push_back( "/"+dir );
-        VSFileSystem::current_type.push_back( UnitFile );
+        VSFileSystem::current_type.push_back( VSFileSystem::UnitFile );
         float randomstartframe   = 0;
         float randomstartseconds = 0;
         string scalestr     = UniverseUtil::LookupUnitStat( this->name, fac, "Unit_Scale" );

@@ -1,9 +1,9 @@
-/**
+/*
  * in_sdl.cpp
  *
  * Copyright (C) Daniel Horn
- * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike
- * contributors
+ * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike contributors
+ * Copyright (C) 2021 Stephen G. Tuggy
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -28,7 +28,7 @@
 #include "vs_globals.h"
 #include "config_xml.h"
 #include "in_kb_data.h"
-#include "vsfilesystem.h"
+#include "vs_logging.h"
 #include <assert.h>     /// needed for assert() calls.
 
 void DefaultJoyHandler( const KBData&, KBSTATE newState ) // DELETE ME
@@ -133,7 +133,7 @@ void ProcessJoystick( int whichplayer )
 #endif
                 hsw = joystick[i]->digital_hat[h];
                 if (joystick[i]->debug_digital_hatswitch) {
-                    BOOST_LOG_TRIVIAL(debug) << boost::format("hsw: %1$d") % hsw;
+                    VS_LOG(debug, (boost::format("hsw: %1$d") % hsw));
                 }
                 for (int dir_index = 0; dir_index < MAX_DIGITAL_VALUES; dir_index++) {
                     bool press = false;
@@ -142,7 +142,7 @@ void ProcessJoystick( int whichplayer )
                     //CENTERED is an exact position.
                     if ( dir_index == VS_HAT_CENTERED && (hsw == SDL_HAT_CENTERED) ) {
                         if (joystick[i]->debug_digital_hatswitch) {
-                            BOOST_LOG_TRIVIAL(debug) << "center";
+                            VS_LOG(debug, "center");
                         }
                         press = true;
                     }

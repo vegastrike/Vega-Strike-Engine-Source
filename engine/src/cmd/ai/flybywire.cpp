@@ -1,9 +1,9 @@
-/**
+/*
  * flybywire.cpp
  *
  * Copyright (C) Daniel Horn
- * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike
- * contributors
+ * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike contributors
+ * Copyright (C) 2021 Stephen G. Tuggy
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -34,6 +34,7 @@
 #include "vs_globals.h"
 #include "config_xml.h"
 #include "universe.h"
+#include "vs_logging.h"
 
 #define VELTHRESHOLD .1
 #define ANGVELTHRESHOLD .01
@@ -87,14 +88,16 @@ void MatchLinearVelocity::Execute()
     if ( !suborders.empty() ) {
         static int i = 0;
         if (i++ % 1000 == 0) {
-            BOOST_LOG_TRIVIAL(warning) << "cannot execute suborders as Linear Velocity Matcher";                                // error printout just in case
+            // error printout just in case
+            VS_LOG(warning, "cannot execute suborders as Linear Velocity Matcher");
         }
     }
     MATCHLINVELSETUP();
     if (willfinish) {
         if ( (done = fabs( desired.i+FrameOfRef.i-velocity.i ) < VELTHRESHOLD && fabs( desired.j+FrameOfRef.j-velocity.j )
-                     < VELTHRESHOLD && fabs( desired.k+FrameOfRef.k-velocity.k ) < VELTHRESHOLD) )
+                     < VELTHRESHOLD && fabs( desired.k+FrameOfRef.k-velocity.k ) < VELTHRESHOLD) ) {
             return;
+        }
     }
     MATCHLINVELEXECUTE();
 }
@@ -102,8 +105,7 @@ void MatchLinearVelocity::Execute()
 MatchLinearVelocity::~MatchLinearVelocity()
 {
 #ifdef ORDERDEBUG
-    BOOST_LOG_TRIVIAL(debug) << boost::format("mlv%1$x") % this;
-    VSFileSystem::flushLogs();
+    VS_LOG_AND_FLUSH(debug, (boost::format("mlv%1$x") % this));
 #endif
 }
 
@@ -113,9 +115,11 @@ void Orders::MatchRoll::Execute()
     Order::Execute();
     done = temp;
     Vector angvel( parent->UpCoordinateLevel( parent->GetAngularVelocity() ) );
-    if (willfinish)
-        if (fabs( desired_roll-angvel.k ) < ANGVELTHRESHOLD)
+    if (willfinish) {
+        if (fabs( desired_roll-angvel.k ) < ANGVELTHRESHOLD) {
             return;
+        }
+    }
     //prevent matchangvel from resetting this (kinda a hack)
     parent->ApplyLocalTorque( parent->GetMoment()*Vector( 0, 0, desired_roll-angvel.k )/simulation_atom_var );
     parent->ApplyLocalTorque( parent->GetMoment()*Vector( 0, 0, desired_roll-angvel.k )/simulation_atom_var );
@@ -129,12 +133,14 @@ void MatchAngularVelocity::Execute()
     Vector desired( desired_ang_velocity );
 
     Vector angvel( parent->UpCoordinateLevel( parent->GetAngularVelocity() ) );
-    if (!LocalAng)
+    if (!LocalAng) {
         desired = parent->ToLocalCoordinates( desired );
+    }
     if (willfinish) {
         if ( (done = fabs( desired.i-angvel.i ) < ANGVELTHRESHOLD && fabs( desired.j-angvel.j ) < ANGVELTHRESHOLD
-                     && fabs( desired.k-angvel.k ) < ANGVELTHRESHOLD) )
+                     && fabs( desired.k-angvel.k ) < ANGVELTHRESHOLD) ) {
             return;
+        }
     }
     parent->ApplyLocalTorque( parent->GetMoment()*( desired-parent->UpCoordinateLevel(
                                                        parent->GetAngularVelocity() ) )/simulation_atom_var );
@@ -143,8 +149,7 @@ void MatchAngularVelocity::Execute()
 MatchAngularVelocity::~MatchAngularVelocity()
 {
 #ifdef ORDERDEBUG
-    BOOST_LOG_TRIVIAL(debug) << boost::format("mav%1$x") % this;
-    VSFileSystem::flushLogs();
+    VS_LOG_AND_FLUSH(debug, (boost::format("mav%1$x") % this));
 #endif
 }
 
@@ -164,8 +169,7 @@ void MatchVelocity::Execute()
 MatchVelocity::~MatchVelocity()
 {
 #ifdef ORDERDEBUG
-    BOOST_LOG_TRIVIAL(debug) << boost::format("mv%1$x") % this;
-    VSFileSystem::flushLogs();
+    VS_LOG_AND_FLUSH(debug, (boost::format("mv%1$x") % this));
 #endif
 }
 
@@ -379,8 +383,7 @@ void FlyByWire::Execute()
 FlyByWire::~FlyByWire()
 {
 #ifdef ORDERDEBUG
-    BOOST_LOG_TRIVIAL(debug) << boost::format("fbw%1$x") % this;
-    VSFileSystem::flushLogs();
+    VS_LOG_AND_FLUSH(debug, (boost::format("fbw%1$x") % this));
 #endif
 }
 

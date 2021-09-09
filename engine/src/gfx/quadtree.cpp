@@ -1,9 +1,9 @@
-/**
+/*
  * quadtree.cpp
  *
  * Copyright (C) Daniel Horn
- * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike
- * contributors
+ * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike contributors
+ * Copyright (C) 2021 Stephen G. Tuggy
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -31,6 +31,7 @@
 #include "vegastrike.h"
 #include "vs_globals.h"
 #include "vsfilesystem.h"
+#include "vs_logging.h"
 
 const GFXVertex InitialVertices[4] = {
     GFXVertex( Vector( 0, 0, 0 ), Vector( 0, 1, 0 ), 0, 0 ),
@@ -251,13 +252,13 @@ void QuadTree::LoadData()
     hm.Data       = new short[hm.XSize*hm.ZSize];
     hm.terrainmap = new unsigned char[hm.XSize*hm.ZSize];
     memset( hm.terrainmap, 0, sizeof (unsigned char)*hm.ZSize*hm.XSize );
-    BOOST_LOG_TRIVIAL(info) << "Loading height grids...";
+    VS_LOG(info, "Loading height grids...");
 
     //Big coarse data, at 128 meter sample spacing.
     FILE *fp = VSFileSystem::vs_open( "demdata/gc16at128.raw", "rb" );
     VSFileSystem::vs_read( hm.Data, sizeof (unsigned short), hm.XSize*hm.ZSize, fp );
     VSFileSystem::vs_close( fp );
-    BOOST_LOG_TRIVIAL(info) << "Building quadtree data...";
+    VS_LOG(info, "Building quadtree data...");
     root->AddHeightMap( RootCornerData, hm );
 
     //More detailed data at 64 meter spacing, covering the middle of the terrain.
@@ -267,7 +268,7 @@ void QuadTree::LoadData()
     fp = VSFileSystem::vs_open( "demdata/gc16at64.raw", "rb" );
     VSFileSystem::vs_read( hm.Data, sizeof (unsigned short), hm.XSize*hm.ZSize, fp );
     VSFileSystem::vs_close( fp );
-    BOOST_LOG_TRIVIAL(info) << "Adding quadtree data...";
+    VS_LOG(info, "Adding quadtree data...");
     root->AddHeightMap( RootCornerData, hm );
 
     //Even more detailed data, at 32 meter spacing, covering a smaller area near the middle.
@@ -277,7 +278,7 @@ void QuadTree::LoadData()
     fp = VSFileSystem::vs_open( "demdata/gc16at32.raw", "rb" );
     VSFileSystem::vs_read( hm.Data, sizeof (unsigned short), hm.XSize*hm.ZSize, fp );
     VSFileSystem::vs_close( fp );
-    BOOST_LOG_TRIVIAL(info) << "Adding quadtree data...";
+    VS_LOG(info, "Adding quadtree data...");
     root->AddHeightMap( RootCornerData, hm );
 
     delete[] hm.Data;

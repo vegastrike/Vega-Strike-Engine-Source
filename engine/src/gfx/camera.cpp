@@ -2,8 +2,8 @@
  * camera.cpp
  *
  * Copyright (C) 2001-2002 Daniel Horn and Alan Shieh
- * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike
- * contributors
+ * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike contributors
+ * Copyright (C) 2021 Stephen G. Tuggy
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -36,6 +36,8 @@
 
 #include <assert.h>     //needed for assert() calls
 //#include "planetary_transform.h"  commented out by chuck_starchaser; --never used
+
+#include "vs_logging.h"
 
 //const float PI=3.1415926536;
 
@@ -210,8 +212,8 @@ void Camera::SetPosition( const QVector &origin, const Vector &vel, const Vector
         Coord    = origin;
         changed  = GFXTRUE;
     } else {
-        BOOST_LOG_TRIVIAL(fatal) << "fatal error in camera";
-        VSFileSystem::flushLogs();
+        VS_LOG_AND_FLUSH(fatal, "fatal error in camera");
+        VSExit(-3); // What value should this return? -- stephengtuggy 2021-09-06
     }
 }
 

@@ -1,23 +1,28 @@
 /*
- * Vega Strike
+ * aux_texture.h
+ *
  * Copyright (C) 2001-2002 Daniel Horn
+ * Copyright (C) 2021 Stephen G. Tuggy
  *
- * http://vegastrike.sourceforge.net/
+ * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * as published by the Free Software Foundation; either version 2
- * of the License, or (at your option) any later version.
+ * This file is part of Vega Strike.
  *
- * This program is distributed in the hope that it will be useful,
+ * Vega Strike is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * Vega Strike is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+ * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
  */
+
+
 #ifndef _TEXTURE_H_
 #define _TEXTURE_H_
 #include "vsimage.h"
@@ -83,8 +88,8 @@ public:
 
     ///Loads the old texture
     void setold();
-    bool checkbad( const string &s );
-    void setbad( const string &s );
+    bool checkbad( const std::string &s );
+    void setbad( const std::string &s );
 
     ///Inits the class with default values
     void InitTexture();
@@ -187,39 +192,39 @@ public:
 
     ///Destructor for texture
     virtual ~Texture();
-    
+
     virtual unsigned int numFrames() const
     {
         return 1;
     }                                               //Number of frames in an animated texture (or, rather, keyframes)
-    
+
     virtual double curTime() const
     {
         return 0;
     }                                       //Current time of an animated texture
-    
+
     virtual void setTime( double tim ) {}
-    
+
     virtual float framesPerSecond() const
     {
         return 0;
     }                                               //Frames per second, if applicable.
-    
+
     virtual unsigned int numLayers() const
     {
         return 1;
     }                                               //Number of layers in the texture. If more than 1, makeActive() sets up multitexturing units, and other use of multitexture units, other than [stage..stage+numLayers), should be avoided. If not enough multitexturing units are available, special fall-back mechanisms should be implmemented by MakeActive() so that it still renders as correctly as possible. In that case, canMultiPass(), numPasses() and MakeActive(stage,pass) could be used to process in multipass mode (one stage at a time, or a stage group at a time, depending on fallback implementation), if possible.
-    
+
     virtual unsigned int numPasses() const
     {
         return 1;
     }                                               //Number of passes when on multipass rendering.
-    
+
     virtual bool canMultiPass() const
     {
         return true;
     }                                             //True, if full functionality can be achieved after multipass rendering. If false, fallback rendering must be possible by multipass (or singlepass) rendering. True, also, if texturing units are sufficient for singlepass rendering.
-    
+
     virtual bool constFrameRate() const
     {
         return true;
@@ -229,17 +234,17 @@ public:
     {
         return stage;
     }
-    
+
     int getFilter() const
     {
         return ismipmapped;
     }
-    
+
     int getTarget() const
     {
         return texture_target;
     }
-    
+
     int getImageTarget() const
     {
         return image_target;
@@ -265,19 +270,19 @@ public:
     {
         MakeActive( this->stage, 0 );
     }                                                      //Assumes stage=this->stage, pass=0
-    
+
     virtual void MakeActive( int stage )
     {
         MakeActive( stage, 0 );
     }                                                         //Assumes pass=0
-    
+
     virtual void MakeActive( int stage, int pass );
-    
+
     virtual bool SetupPass( int pass, const enum BLENDFUNC src, const enum BLENDFUNC dst )
     {
         return SetupPass( pass, stage, src, dst );
     }                                                                                                                            //If one is going to perform multipass rendering of this texture, the Texture() must handle blending - SetupPass() sets up blending. If it returns false, then blending is not compatible with the requested blend mode emulation. One may assume that if numPasses()==1, no SetupPass() is needed. pass==-1 means restore setup. You should call it after multipass rendering.
-    
+
     virtual bool SetupPass( int pass, int stage, const enum BLENDFUNC src, const enum BLENDFUNC dst )
     {
         return true;

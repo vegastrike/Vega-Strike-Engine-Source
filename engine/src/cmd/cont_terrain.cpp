@@ -1,9 +1,9 @@
-/**
+/*
  * cont_terrain.cpp
  *
  * Copyright (C) Daniel Horn
- * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike
- * contributors
+ * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike contributors
+ * Copyright (C) 2021 Stephen G. Tuggy
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -39,6 +39,10 @@
 #include "unit_collide.h"
 #include "vs_globals.h"
 #include "config_xml.h"
+#include "vsfilesystem.h"
+#include "vs_logging.h"
+
+
 ContinuousTerrain::ContinuousTerrain( const char *filename, const Vector &Scales, const float mass )
 {
     float tmass;
@@ -104,7 +108,7 @@ ContinuousTerrain::ContinuousTerrain( const char *filename, const Vector &Scales
         for (i = 0; i < numcontterr; i++)
             if (data[i]) {
                 if ( sizeX != data[i]->getSizeX() || sizeZ != data[i]->getSizeZ() ){
-                    BOOST_LOG_TRIVIAL(warning) << "Warning: Sizes of terrain do not match...expect gaps in continuous terrain\n";
+                    VS_LOG(warning, "Warning: Sizes of terrain do not match...expect gaps in continuous terrain\n");
                 }
                 data[i]->SetTotalSize( sizeX*width, sizeZ*width );
             }
@@ -176,6 +180,7 @@ void ContinuousTerrain::Collide( Unit *un )
     if (datacol)
         Collide( un, transformation );
 }
+
 QVector ContinuousTerrain::GetGroundPosIdentTrans( QVector ShipPos, Vector &norm )
 {
     Matrix ident;
@@ -196,12 +201,13 @@ QVector ContinuousTerrain::GetGroundPosIdentTrans( QVector ShipPos, Vector &norm
             return tmploc;
         }
     }
-    BOOST_LOG_TRIVIAL(error) << boost::format("Can't find %1$f,%2$f,%3$f\n") % ShipPos.i % ShipPos.j % ShipPos.k;
+    VS_LOG(error, (boost::format("Can't find %1$f,%2$f,%3$f\n") % ShipPos.i % ShipPos.j % ShipPos.k));
     ShipPos.i *= Scales.i;
     ShipPos.j *= Scales.j;
     ShipPos.k *= Scales.k;
     return ShipPos;
 }
+
 QVector ContinuousTerrain::GetGroundPos( QVector ShipPos, Vector &norm )
 {
     for (int i = 0; i < numcontterr; i++)
@@ -209,24 +215,28 @@ QVector ContinuousTerrain::GetGroundPos( QVector ShipPos, Vector &norm )
             return ShipPos;
     return ShipPos;
 }
+
 void ContinuousTerrain::DisableDraw()
 {
     for (int i = 0; i < numcontterr; i++)
         if (data[i])
             data[i]->DisableDraw();
 }
+
 void ContinuousTerrain::DisableUpdate()
 {
     for (int i = 0; i < numcontterr; i++)
         if (data[i])
             data[i]->DisableUpdate();
 }
+
 void ContinuousTerrain::EnableDraw()
 {
     for (int i = 0; i < numcontterr; i++)
         if (data[i])
             data[i]->EnableDraw();
 }
+
 void ContinuousTerrain::EnableUpdate()
 {
     for (int i = 0; i < numcontterr; i++)
@@ -250,6 +260,7 @@ void ContinuousTerrain::Draw()
         }
     }
 }
+
 void ContinuousTerrain::SetTransformation( const Matrix &transformation )
 {
     CopyMatrix( this->transformation, transformation );
@@ -275,11 +286,13 @@ bool ContinuousTerrain::checkInvScale( double &pos, double campos, float size )
         pos = tmp+campos;
     return retval;
 }
+
 void ContinuousTerrain::Collide( Unit *un, Matrix t )
 {
     Matrix transform;
-    if (un->isUnit() == _UnitType::building)
+    if (un->isUnit() == _UnitType::building) {
         return;
+    }
     ScaleMatrix( t, Scales );
     CopyMatrix( transform, t );
     for (int i = 0; i < numcontterr; i++) {
@@ -300,15 +313,19 @@ void ContinuousTerrain::Collide( Unit *un, Matrix t )
         } else {
             bool    autocol = false;
             QVector diff    = InvScaleTransform( t, un->Position() );
-            if (diff.j < 0) autocol = true;
+            if (diff.j < 0) {
+                autocol = true;
+            }
             diff.i = fmod( (double) diff.i, (double) sizeX*width );
-            if (diff.i < 0)
-                diff.i += sizeX*width;
+            if (diff.i < 0) {
+                diff.i += static_cast<double>(sizeX) * static_cast<double>(width);
+            }
             diff.k = fmod( (double) diff.k, (double) sizeZ*width );
-            if (diff.k < 0)
-                diff.k += sizeZ*width;
+            if (diff.k < 0) {
+                diff.k += static_cast<double>(sizeZ) * static_cast<double>(width);
+            }
             if ( !(rand()%10) ) {
-                BOOST_LOG_TRIVIAL(warning) << boost::format("unit in out sapce %1$f %2$f %3$f\n") % diff.i % diff.j % diff.k;
+                VS_LOG(warning, (boost::format("unit in out sapce %1$f %2$f %3$f\n") % diff.i % diff.j % diff.k));
             }
             diff = Transform( t, diff );
             const csReversibleTransform bigtransform( transform );
@@ -391,6 +408,7 @@ void ContinuousTerrain::AdjustTerrain( Matrix &transform, const Matrix &transfor
                                  *( data[i] ? (data[i])->getSizeZ() : (md[i].mesh->corner_max().i-md[i].mesh->corner_min().i) ) ) ) ) );
     transform.p = tmp;
 }
+
 void ContinuousTerrain::AdjustTerrain( StarSystem *ss )
 {
     Matrix  transform;

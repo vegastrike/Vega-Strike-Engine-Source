@@ -1,9 +1,9 @@
-/**
+/*
  * hashtable_3d.h
  *
  * Copyright (C) Daniel Horn
- * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike
- * contributors
+ * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike contributors
+ * Copyright (C) 2021 Stephen G. Tuggy
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -32,7 +32,7 @@
 #include <stdio.h>
 #include <assert.h>
 #include "linecollide.h"
-#include "vsfilesystem.h"
+#include "vs_logging.h"
 
 //#define COLLIDETABLESIZE sizeof(CTSIZ)
 //#define COLLIDETABLEACCURACY sizeof (CTACCURACY)
@@ -230,7 +230,7 @@ public:
                 }
             }
         if (!ret && !target->hhuge) {
-            BOOST_LOG_TRIVIAL(error) << "Nonfatal Collide Error";
+            VS_LOG(error, "Nonfatal Collide Error");
         }
         if (!ret || target->hhuge) {
             ret |= removeFromVector( hugeobjects, objectToKill );

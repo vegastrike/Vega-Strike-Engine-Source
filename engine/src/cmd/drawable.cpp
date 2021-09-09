@@ -1,8 +1,8 @@
-/**
+/*
  * drawable.cpp
  *
- * Copyright (C) 2020 Roy Falk, Stephen G. Tuggy and other Vega Strike
- * contributors
+ * Copyright (C) 2020-2021 Roy Falk, Stephen G. Tuggy and other
+ * Vega Strike contributors
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -25,6 +25,7 @@
 
 #include "drawable.h"
 #include "vsfilesystem.h"
+#include "vs_logging.h"
 #include "gfx/mesh.h"
 #include "gfx/quaternion.h"
 #include "unit_generic.h"
@@ -83,7 +84,7 @@ bool Drawable::DrawableInit(const char *filename, int faction,
                     Mesh *m = Mesh::LoadMesh( path.c_str(), Vector(1,1,1), faction, flightgrp );
                     meshes->push_back( m );
     #ifdef DEBUG_MESH_ANI
-                    BOOST_LOG_TRIVIAL(debug) << "Animated Mesh: " << path << " loaded - with: " << m->getVertexList()->GetNumVertices() << " vertices.";
+                    VS_LOG(debug, (boost::format("Animated Mesh: %1% loaded - with: %2% vertices.") % path % m->getVertexList()->GetNumVertices()));
     #endif
             }
             else
@@ -108,7 +109,7 @@ bool Drawable::DrawableInit(const char *filename, int faction,
 		sprintf( count, "%u", unitCount );
 		uniqueUnitName = drawableGetName() + string(count);
 		Units[uniqueUnitName] = static_cast<Unit*>(this);
-		BOOST_LOG_TRIVIAL(info) << "Animation data loaded for unit: " << string(filename) << ", named " << uniqueUnitName << " - with: " << numFrames << " frames.";
+		VS_LOG(info, (boost::format("Animation data loaded for unit: %1%, named %2% - with: %3% frames.") % string(filename) % uniqueUnitName % numFrames));
 		return true;
 	} else {
 		delete meshes;
@@ -119,28 +120,31 @@ bool Drawable::DrawableInit(const char *filename, int faction,
 void Drawable::AnimationStep()
 {
 #ifdef DEBUG_MESH_ANI
-        BOOST_LOG_TRIVIAL(debug) << "Starting animation step of Unit: " << uniqueUnitName;
+        VS_LOG(debug, (boost::format("Starting animation step of Unit: %1%") % uniqueUnitName));
 #endif
-        if((!this->isContinuousLoop())&&(loopCount==0))
+        if ((!this->isContinuousLoop())&&(loopCount==0)) {
             return;
+        }
         //copy reference to data
         meshdata.at(0) = vecAnimations.at(activeAnimation)->at(activeMesh);
 
         Draw();
 
 #ifdef DEBUG_MESH_ANI
-        BOOST_LOG_TRIVIAL(debug) << "Drawed mesh: " << uniqueUnitName;
+        VS_LOG(debug, (boost::format("Drawed mesh: %1%") % uniqueUnitName));
 #endif
 
         activeMesh = nextactiveMesh;
-        nextactiveMesh++;
-        if(nextactiveMesh >= vecAnimations.at(activeAnimation)->size())
+        ++nextactiveMesh;
+        if (nextactiveMesh >= vecAnimations.at(activeAnimation)->size()) {
             nextactiveMesh = 0;
+        }
 
-        if(loopCount > 0)
-            loopCount--;
+        if (loopCount > 0) {
+            --loopCount;
+        }
 #ifdef DEBUG_MESH_ANI
-        BOOST_LOG_TRIVIAL(debug) << "Ending animation step of Unit: " << uniqueUnitName;
+        VS_LOG(debug, (boost::format("Ending animation step of Unit: %1%") % uniqueUnitName));
 #endif
 }
 

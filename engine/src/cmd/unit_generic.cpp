@@ -1,11 +1,11 @@
 // -*- mode: c++; c-basic-offset: 4; indent-tabs-mode: nil -*-
 
-/**
+/*
  * unit_generic.cpp
  *
  * Copyright (C) 2001-2002 Daniel Horn
- * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike
- * contributors
+ * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike contributors
+ * Copyright (C) 2021 Stephen G. Tuggy
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -34,6 +34,7 @@
 #include "lin_time.h"
 #include "xml_serializer.h"
 #include "vsfilesystem.h"
+#include "vs_logging.h"
 #include "file_main.h"
 #include "universe_util.h"
 #include "unit_util.h"
@@ -83,7 +84,6 @@
 #include "unit_find.h"
 #include "pilot.h"
 
-#include "vsfilesystem.h"
 #include <iostream>
 #define DEBUG_MESH_ANI
 
@@ -259,7 +259,7 @@ void CheckUnit( Unit *un )
 {
     if (deletedUn.Get( (long) un ) != NULL) {
         while (deathofvs) {
-            BOOST_LOG_TRIVIAL(info) << boost::format("%1% died") % ((long)un);
+            VS_LOG(info, (boost::format("%1% died") % ((long)un)));
         }
     }
 }
@@ -357,22 +357,18 @@ Unit::~Unit()
     if ( (!killed) ) {
         // stephengtuggy 2020-07-27 - I think this message was mistakenly put in. This happens all the time when buying and selling cargo or ship upgrades.
         // stephengtuggy 2020-08-03 - Maybe not.
-        BOOST_LOG_TRIVIAL(error) << boost::format("Assumed exit on unit %1%(if not quitting, report error)")
-                                    % name;
+        VS_LOG(error, (boost::format("Assumed exit on unit %1%(if not quitting, report error)") % name));
     }
     if (ucref) {
-        BOOST_LOG_TRIVIAL(fatal) << "DISASTER AREA!!!!";
-        VSFileSystem::flushLogs();
+        VS_LOG_AND_FLUSH(fatal, "DISASTER AREA!!!!");
     }
-    BOOST_LOG_TRIVIAL(trace) << boost::format("Deallocating unit %1$s addr=%2$x refs=%3$d")
-                                % name.get().c_str() % this % ucref;
+    VS_LOG(trace, (boost::format("Deallocating unit %1$s addr=%2$x refs=%3$d")
+                                % name.get().c_str() % this % ucref));
 #ifdef DESTRUCTDEBUG
-    BOOST_LOG_TRIVIAL(trace) << boost::format("stage %1$d %2$x %3$d") % 0 % this % ucref;
-    VSFileSystem::flushLogs();
+    VS_LOG_AND_FLUSH(trace, (boost::format("stage %1$d %2$x %3$d") % 0 % this % ucref));
 #endif
 #ifdef DESTRUCTDEBUG
-    BOOST_LOG_TRIVIAL(trace) << boost::format("%1$d %2$x") % 2 % pImage->pHudImage;
-    VSFileSystem::flushLogs();
+    VS_LOG_AND_FLUSH(trace, (boost::format("%1$d %2$x") % 2 % pImage->pHudImage));
 #endif
     if (pImage->unitwriter) {
         delete pImage->unitwriter;
@@ -381,22 +377,18 @@ Unit::~Unit()
     delete pImage;
     // pImage = nullptr;
 #ifdef DESTRUCTDEBUG
-    BOOST_LOG_TRIVIAL(trace) << boost::format("%1$d %2$x") % 3 % pImage;
-    VSFileSystem::flushLogs();
+    VS_LOG_AND_FLUSH(trace, (boost::format("%1$d %2$x") % 3 % pImage));
 #endif
     delete pilot;
 #ifdef DESTRUCTDEBUG
-    BOOST_LOG_TRIVIAL(trace) << boost::format("%1$d") % 5;
-    VSFileSystem::flushLogs();
+    VS_LOG_AND_FLUSH(trace, (boost::format("%1$d") % 5));
 #endif
 #ifdef DESTRUCTDEBUG
-    BOOST_LOG_TRIVIAL(trace) << boost::format("%1$d %2$x") % 6 % &mounts;
-    VSFileSystem::flushLogs();
+    VS_LOG_AND_FLUSH(trace, (boost::format("%1$d %2$x") % 6 % &mounts);
 #endif
 
 #ifdef DESTRUCTDEBUG
-    BOOST_LOG_TRIVIAL(trace) << boost::format("%1$d %2$x") % 1 % &mounts;
-    VSFileSystem::flushLogs();
+    VS_LOG_AND_FLUSH(trace, (boost::format("%1$d %2$x") % 1 % &mounts));
 #endif
 #ifndef NO_MOUNT_STAR
     for (vector< Mount* >::iterator jj = mounts.begin(); jj != mounts.end(); ++jj) {
@@ -409,8 +401,7 @@ Unit::~Unit()
 #endif
     mounts.clear();
 #ifdef DESTRUCTDEBUG
-    BOOST_LOG_TRIVIAL(trace) << boost::format("%1$d") % 0;
-    VSFileSystem::flushLogs();
+    VS_LOG_AND_FLUSH(trace, (boost::format("%1$d") % 0));
 #endif
     for (unsigned int meshcount = 0; meshcount < meshdata.size(); ++meshcount) {
         if (meshdata[meshcount]) {
@@ -533,7 +524,7 @@ void Unit::Init( const char *filename,
         bool istemplate = ( string::npos != ( string( filename ).find( ".template" ) ) );
         static bool usingtemplates = XMLSupport::parse_bool( vs_config->getVariable( "data", "usingtemplates", "true" ) );
         if (!istemplate || (istemplate && usingtemplates)) {
-            BOOST_LOG_TRIVIAL(trace) << boost::format("Unit file %1% not found") % filename << std::endl;
+            VS_LOG(trace, (boost::format("Unit file %1% not found") % filename));
         }
         meshdata.clear();
         meshdata.push_back( NULL );
@@ -991,7 +982,7 @@ void Unit::UpdateSubunitPhysics( const Transformation &trans,
     if ( !SubUnits.empty() ) {
         Unit *su;
         float backup = simulation_atom_var;
-        //BOOST_LOG_TRIVIAL(trace) << boost::format("Unit::UpdateSubunitPhysics(): simulation_atom_var as backed up  = %1%") % simulation_atom_var;
+        //VS_LOG(trace, (boost::format("Unit::UpdateSubunitPhysics(): simulation_atom_var as backed up  = %1%") % simulation_atom_var));
         float basesimatom = (this->sim_atom_multiplier ? backup/(float) this->sim_atom_multiplier : backup);
         unsigned int cur_sim_frame = _Universe->activeStarSystem()->getCurrentSimFrame();
         bool didSomeScattering = false;
@@ -1027,7 +1018,7 @@ void Unit::UpdateSubunitPhysics( const Transformation &trans,
                         su->sim_atom_multiplier = this->sim_atom_multiplier;
                     }
                     simulation_atom_var = basesimatom*(float) su->sim_atom_multiplier;
-                    //BOOST_LOG_TRIVIAL(trace) << boost::format("Unit::UpdateSubunitPhysics(): simulation_atom_var as multiplied = %1%") % simulation_atom_var;
+                    //VS_LOG(trace, (boost::format("Unit::UpdateSubunitPhysics(): simulation_atom_var as multiplied = %1%") % simulation_atom_var));
                     Unit::UpdateSubunitPhysics( su,
                                                 cumulative_transformation,
                                                 cumulative_transformation_matrix,
@@ -1038,10 +1029,10 @@ void Unit::UpdateSubunitPhysics( const Transformation &trans,
                 }
             }
         if (didSomeScattering) {
-            BOOST_LOG_TRIVIAL(trace) << "Unit::UpdateSubunitPhysics(): Did some random scattering inside skipped-frames handler";
+            VS_LOG(trace, "Unit::UpdateSubunitPhysics(): Did some random scattering inside skipped-frames handler");
         }
         simulation_atom_var = backup;
-        //BOOST_LOG_TRIVIAL(trace) << boost::format("Unit::UpdateSubunitPhysics(): simulation_atom_var as restored   = %1%") % simulation_atom_var;
+        //VS_LOG(trace, (boost::format("Unit::UpdateSubunitPhysics(): simulation_atom_var as restored   = %1%") % simulation_atom_var));
     }
 }
 
@@ -1186,7 +1177,7 @@ void Unit::ApplyForce( const Vector &Vforce )
     if ( FINITE( Vforce.i ) && FINITE( Vforce.j ) && FINITE( Vforce.k ) ) {
         NetForce += Vforce;
     } else {
-        BOOST_LOG_TRIVIAL(error) << "fatal force";
+        VS_LOG(error, "fatal force");
     }
 }
 
@@ -1196,7 +1187,7 @@ void Unit::ApplyLocalForce( const Vector &Vforce )
     if ( FINITE( Vforce.i ) && FINITE( Vforce.j ) && FINITE( Vforce.k ) ) {
         NetLocalForce += Vforce;
     } else {
-        BOOST_LOG_TRIVIAL(error) << "fatal local force";
+        VS_LOG(error, "fatal local force");
     }
 }
 
@@ -1205,7 +1196,7 @@ void Unit::Accelerate( const Vector &Vforce )
     if ( FINITE( Vforce.i ) && FINITE( Vforce.j ) && FINITE( Vforce.k ) ) {
         NetForce += Vforce*Mass;
     } else {
-        BOOST_LOG_TRIVIAL(error) << "fatal force";
+        VS_LOG(error, "fatal force");
     }
 }
 
@@ -1409,7 +1400,7 @@ Vector Unit::ClampThrust( const Vector &amt1, bool afterburn )
             *FMEC_exit_vel_inverse/Lithium6constant;
 #ifndef __APPLE__
         if ( ISNAN( fuel ) ) {
-            BOOST_LOG_TRIVIAL(error) << "Fuel is NAN A";
+            VS_LOG(error, "Fuel is NAN A");
             fuel = 0;
         }
 #endif
@@ -1420,7 +1411,7 @@ Vector Unit::ClampThrust( const Vector &amt1, bool afterburn )
         fuel -= getFuelUsage( false ) * simulation_atom_var * Res.Magnitude()*FMEC_exit_vel_inverse/Lithium6constant;
 #ifndef __APPLE__
         if ( ISNAN( fuel ) ) {
-            BOOST_LOG_TRIVIAL(error) << "Fuel is NAN B";
+            VS_LOG(error, "Fuel is NAN B");
             fuel = 0;
         }
 #endif
@@ -2041,19 +2032,21 @@ void Unit::Kill( bool erasefromsave, bool quitting )
         un->Kill();
 
     //if (isUnit() != _UnitType::missile) {
-    //    BOOST_LOG_TRIVIAL(info) << boost::format("UNIT HAS DIED: %1% %2% (file %3%)") % name.get() % fullname % filename.get();
+    //    VS_LOG(info, (boost::format("UNIT HAS DIED: %1% %2% (file %3%)") % name.get() % fullname % filename.get()));
     //}
 
     if (ucref == 0) {
-        BOOST_LOG_TRIVIAL(trace) << boost::format("UNIT DELETION QUEUED: %1$s %2$s (file %3$s, addr 0x%4$08x)")
-                                    % name.get().c_str() % fullname.c_str() % filename.get().c_str() % this;
+        VS_LOG(trace, (boost::format("UNIT DELETION QUEUED: %1$s %2$s (file %3$s, addr 0x%4$08x)")
+                                    % name.get().c_str() % fullname.c_str() % filename.get().c_str() % this));
         Unitdeletequeue.push_back( this );
-        if (flightgroup)
-            if (flightgroup->leader.GetUnit() == this)
+        if (flightgroup) {
+            if (flightgroup->leader.GetUnit() == this) {
                 flightgroup->leader.SetUnit( NULL );
+            }
+        }
 
 //#ifdef DESTRUCTDEBUG
-//        BOOST_LOG_TRIVIAL(trace) << boost::format("%s 0x%x - %d") % name.get().c_str() % this % Unitdeletequeue.size();
+//        VS_LOG(trace, (boost::format("%s 0x%x - %d") % name.get().c_str() % this % Unitdeletequeue.size()));
 //#endif
     }
 }
@@ -2073,7 +2066,7 @@ void Unit::UnRef()
         //delete
         Unitdeletequeue.push_back( this );
 #ifdef DESTRUCTDEBUG
-        BOOST_LOG_TRIVIAL(trace) << boost::format("%1$s %2$x - %3$d") % name.get().c_str() % this % Unitdeletequeue.size();
+        VS_LOG(trace, (boost::format("%1$s %2$x - %3$d") % name.get().c_str() % this % Unitdeletequeue.size()));
 #endif
     }
 }
@@ -2095,13 +2088,12 @@ void Unit::ProcessDeleteQueue()
 {
     while ( !Unitdeletequeue.empty() ) {
 #ifdef DESTRUCTDEBUG
-        BOOST_LOG_TRIVIAL(trace) << boost::format("Eliminatin' %1$x - %2$d") % Unitdeletequeue.back() % Unitdeletequeue.size();
-        VSFileSystem::flushLogs();
-        BOOST_LOG_TRIVIAL(trace) << boost::format("Eliminatin' %1$s") % Unitdeletequeue.back()->name.get().c_str();
+        VS_LOG_AND_FLUSH(trace, (boost::format("Eliminatin' %1$x - %2$d") % Unitdeletequeue.back() % Unitdeletequeue.size()));
+        VS_LOG_AND_FLUSH(trace, (boost::format("Eliminatin' %1$s") % Unitdeletequeue.back()->name.get().c_str()));
 #endif
 #ifdef DESTRUCTDEBUG
         if ( Unitdeletequeue.back()->isSubUnit() ) {
-            BOOST_LOG_TRIVIAL(debug) << "Subunit Deleting (related to double dipping)";
+            VS_LOG(debug, "Subunit Deleting (related to double dipping)");
         }
 #endif
         Unit *mydeleter = Unitdeletequeue.back();
@@ -2109,8 +2101,7 @@ void Unit::ProcessDeleteQueue()
         delete mydeleter;                        ///might modify unitdeletequeue
 
 #ifdef DESTRUCTDEBUG
-        BOOST_LOG_TRIVIAL(trace) << boost::format("Completed %1$d") % Unitdeletequeue.size();
-        VSFileSystem::flushLogs();
+        VS_LOG_AND_FLUSH(trace, (boost::format("Completed %1$d") % Unitdeletequeue.size()));
 #endif
     }
 }
@@ -2132,14 +2123,17 @@ const Unit * makeFinalBlankUpgrade( string name, int faction )
 {
     char  *unitdir    = GetUnitDir( name.c_str() );
     string limiternam = name;
-    if (unitdir != name)
+    if (unitdir != name) {
         limiternam = string( unitdir )+string( ".blank" );
+    }
     free( unitdir );
     const Unit *lim = UnitConstCache::getCachedConst( StringIntKey( limiternam, faction ) );
-    if (!lim)
+    if (!lim) {
         lim = UnitConstCache::setCachedConst( StringIntKey( limiternam, faction ), makeBlankUpgrade( limiternam, faction ) );
-    if (lim->name == LOAD_FAILED)
+    }
+    if (lim->name == LOAD_FAILED) {
         lim = NULL;
+    }
     return lim;
 }
 
@@ -2188,7 +2182,7 @@ bool DestroyPlayerSystem( float hull, float maxhull, float numhits )
     }
     bool  ret    = (rand01() > chance);
     if (ret) {
-        //BOOST_LOG_TRIVIAL(warning) << "DAAAAAAMAGED!!!!";
+        //VS_LOG(warning, "DAAAAAAMAGED!!!!");
     }
     return ret;
 }
@@ -2722,7 +2716,7 @@ bool Unit::UnDock( Unit *utdw )
         else
             this->owner = NULL;
     }
-    BOOST_LOG_TRIVIAL(trace) << "Asking to undock";
+    VS_LOG(trace, "Asking to undock");
     for (i = 0; i < utdw->pImage->dockedunits.size(); ++i)
         if (utdw->pImage->dockedunits[i]->uc.GetUnit() == this) {
             utdw->FreeDockingPort( i );
@@ -3030,7 +3024,7 @@ bool Unit::UpgradeMounts( const Unit *up,
 
                                         if (weapon == NULL || weapon->name == LOAD_FAILED) {
                                             // this should not happen
-                                            BOOST_LOG_TRIVIAL(info) << boost::format("UpgradeMount(): FAILED to obtain weapon: %1%") % weaponname;
+                                            VS_LOG(info, (boost::format("UpgradeMount(): FAILED to obtain weapon: %1%") % weaponname));
                                             cancompletefully = false;
                                             break;
                                         }
@@ -4788,7 +4782,7 @@ void Unit::Repair()
                         const Unit *up    = getUnitFromUpgradeName( carg->content, upfac );
                         static std::string loadfailed( "LOAD_FAILED" );
                         if (up->name == loadfailed) {
-                            BOOST_LOG_TRIVIAL(info) << "Bug: Load failed cargo encountered: report on https://github.com/vegastrike/Vega-Strike-Engine-Source";
+                            VS_LOG(info, "Bug: Load failed cargo encountered: report on https://github.com/vegastrike/Vega-Strike-Engine-Source");
                         } else {
                             double percentage = 0;
                             //don't want to repair these things
@@ -4797,11 +4791,11 @@ void Unit::Repair()
                                                                                                    this->faction ), false,
                                                false );
                                 if (percentage == 0) {
-                                    BOOST_LOG_TRIVIAL(error) << boost::format("Failed repair for unit %1%, cargo item %2%: %3% (%4%) - please report error")
+                                    VS_LOG(error, (boost::format("Failed repair for unit %1%, cargo item %2%: %3% (%4%) - please report error")
                                                                 % name.get().c_str()
                                                                 % next_repair_cargo
                                                                 % carg->GetContent().c_str()
-                                                                % carg->GetCategory().c_str();
+                                                                % carg->GetCategory().c_str()));
                                 }
                             }
                         }
@@ -5646,7 +5640,7 @@ void Unit::RegenShields()
                       *excessenergy) )/( min_reactor_efficiency+( LifeSupportFunctionality*(1-min_reactor_efficiency) ) ) );
         if (fuel < 0) fuel = 0;
         if ( !FINITE( fuel ) ) {
-            BOOST_LOG_TRIVIAL(error) << "Fuel is nan C";
+            VS_LOG(error, "Fuel is nan C");
             fuel = 0;
         }
     }
