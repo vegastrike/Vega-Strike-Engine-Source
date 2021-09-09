@@ -1,6 +1,3 @@
-// TODO: enable, once google test works
-
-/*
 #include <gtest/gtest.h>
 #include "configuration/game_config.h"
 
@@ -29,4 +26,3 @@ TEST(LoadConfig, Sanity) {
     EXPECT_TRUE(test_int == 15) << "Expected 15 but got " << test_int;
     EXPECT_FLOAT_EQ(test_float, 4.2) << "Expected 4.2 but got " << test_float;
 }
-*/

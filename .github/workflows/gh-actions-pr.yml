@@ -7,6 +7,10 @@ jobs:
     name: Build
     runs-on: ubuntu-latest
 
+    defaults:
+      run:
+        shell: bash
+
     strategy:
       fail-fast: true
       matrix:
@@ -57,7 +61,8 @@ jobs:
     # As opposed to the merge commit
     - name: Move to PR HEAD
       run: git checkout HEAD^2
-    - name: Run CI
+
+    - name: Build and Test
       env:
         FROM:       ${{ matrix.FROM }}
         COMPILER:   ${{ matrix.COMPILER }}
@@ -65,3 +70,18 @@ jobs:
         MY_OS_NAME: linux
         IS_RELEASE: 0
       run: script/cibuild $FLAGS
+
+    # This is run from inside the Docker container, by script/docker-entrypoint.sh
+    # - name: Test
+    #   working-directory: ${{github.workspace}}/build
+    #   env:
+    #     GTEST_OUTPUT: xml
+    #     GTEST_COLOR: 1
+    #   run: ctest -V
+
+    - name: Upload test results
+      uses: actions/upload-artifact@v2
+      if: failure()
+      with:
+        name: test_results_xml
+        path: ${{github.workspace}}/test-results/**/*.xml

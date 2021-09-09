@@ -17,4 +17,8 @@ else
     else
         script/build.sh -DCMAKE_BUILD_TYPE=Debug $@
     fi
+
+    pushd build
+    GTEST_OUTPUT=xml:test-results ctest -V
+    popd
 fi
