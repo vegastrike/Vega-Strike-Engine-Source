@@ -909,7 +909,7 @@ string getSaveInfo( const std::string &filename, bool formatForTextbox )
             // This code, replacing the call to the potentially dangerous ctime, was adapted from https://stackoverflow.com/a/13552004/5067822
             std::stringstream time_string_stream{};
             time_string_stream << std::put_time(std::localtime(&attrib.st_mtime), "%F %T");
-            text += time_string_stream.str();
+            text += time_string_stream.str() + lf;
         }
     }
     text += "Credits: "+XMLSupport::tostring( (unsigned int) creds )+"."+XMLSupport::tostring(
