@@ -60,7 +60,15 @@
 #include "universe.h"
 
 #include <iostream>
-#include <chrono>
+// #include <chrono>
+#include <locale>
+
+#include <boost/date_time.hpp>
+#include <boost/date_time/date_facet.hpp>
+// #include <boost/date_time/time_facet.hpp>
+#include <boost/filesystem.hpp>
+#include <boost/chrono.hpp>
+#include <boost/chrono/io/time_point_put.hpp>
 
 extern Unit& GetUnitMasterPartList();
 extern int num_delayed_missions();
@@ -903,14 +911,47 @@ string getSaveInfo( const std::string &filename, bool formatForTextbox )
     text += filename;
     text  = "Savegame: "+text+lf+"_________________"+lf;
     {
-        struct stat attrib;
-        if ( 0 == stat( (getSaveDir()+filename).c_str(), &attrib ) ) {
-            text += "Saved on: ";
-            // This code, replacing the call to the potentially dangerous ctime, was adapted from https://stackoverflow.com/a/13552004/5067822
-            std::stringstream time_string_stream{};
-            time_string_stream << std::put_time(std::localtime(&attrib.st_mtime), "%c");
-            text += time_string_stream.str() + lf;
+        text += "Saved on: ";
+        const boost::filesystem::path file_name_path{filename};
+        const boost::filesystem::path save_dir_path{getSaveDir()};
+        const boost::filesystem::path& full_file_path = boost::filesystem::absolute(file_name_path, save_dir_path);
+        std::time_t last_saved_time{};
+        std::stringstream last_saved_string_stream{};
+        try
+        {
+            std::locale users_preferred_locale{std::locale::locale("")};
+            boost::gregorian::date_facet output_facet{};
+            last_saved_string_stream.imbue(users_preferred_locale);
+            last_saved_string_stream.imbue(std::locale(last_saved_string_stream.getloc(), &output_facet));
+            output_facet.format("%c");
+            last_saved_time = boost::filesystem::last_write_time(full_file_path);
+            auto last_saved_time_point{boost::chrono::system_clock::from_time_t(last_saved_time)};
+            // boost::chrono::time_point_put<char> my_time_point_put{};
+            last_saved_string_stream << last_saved_time_point;
         }
+        catch (boost::filesystem::filesystem_error& fse)
+        {
+            // last_saved_string_stream << "Filesystem Error determining savegame's last saved date/time: " << fse.what();
+            VS_LOG_AND_FLUSH(fatal, (boost::format("Filesystem Error determining savegame's last saved date/time: %1%") % fse.what()));
+        }
+        catch (std::exception& e)
+        {
+            // last_saved_string_stream << "General Error determining savegame's last saved date/time: " << e.what();
+            VS_LOG_AND_FLUSH(fatal, (boost::format("General Error determining savegame's last saved date/time: %1%") % e.what()));
+        }
+        catch (...)
+        {
+            VS_LOG_AND_FLUSH(fatal, "Really bad error determining savegame's last saved date/time! What just happened??");
+        }
+        text += last_saved_string_stream.str() + lf;
+        // struct stat attrib;
+        // if ( 0 == stat( (getSaveDir()+filename).c_str(), &attrib ) ) {
+        //     text += "Saved on: ";
+        //     // This code, replacing the call to the potentially dangerous ctime, was adapted from https://stackoverflow.com/a/13552004/5067822
+        //     std::stringstream time_string_stream{};
+        //     time_string_stream << std::put_time(std::localtime(&attrib.st_mtime), "%c");
+        //     text += time_string_stream.str() + lf;
+        // }
     }
     text += "Credits: "+XMLSupport::tostring( (unsigned int) creds )+"."+XMLSupport::tostring(
         ( (unsigned int) (creds*100) )%100 )+lf;
