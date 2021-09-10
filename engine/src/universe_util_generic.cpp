@@ -60,6 +60,7 @@
 #include "universe.h"
 
 #include <iostream>
+#include <sstream>
 // #include <chrono>
 #include <locale>
 
@@ -917,6 +918,7 @@ string getSaveInfo( const std::string &filename, bool formatForTextbox )
         const boost::filesystem::path& full_file_path = boost::filesystem::absolute(file_name_path, save_dir_path);
         std::time_t last_saved_time{};
         std::stringstream last_saved_string_stream{};
+        last_saved_string_stream.exceptions(std::ios_base::failbit);
         try
         {
             std::locale users_preferred_locale{std::locale::locale("")};
