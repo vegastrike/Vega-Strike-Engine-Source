@@ -40,7 +40,7 @@ extern float globQueryShell( QVector st, QVector dir, float radius );
 static QVector AutoSafeEntrancePoint( const QVector start, float rsize, const Unit *goal )
 {
     QVector def  = UniverseUtil::SafeEntrancePoint( start, rsize );
-    float   bdis = ( def-RealPosition( goal ) ).MagnitudeSquared();
+    double  bdis = ( def-RealPosition( goal ) ).MagnitudeSquared();
     for (int i = -1; i <= 1; ++i) {
         for (int j = -1; j <= 1; ++j) {
             for (int k = -1; k <= 1; k += 2) {
@@ -48,7 +48,7 @@ static QVector AutoSafeEntrancePoint( const QVector start, float rsize, const Un
                 delta.Normalize();
                 QVector tmp  = RealPosition( goal )+delta*(goal->rSize()+rsize);
                 tmp = UniverseUtil::SafeEntrancePoint( tmp, rsize );
-                float   tmag = ( tmp-RealPosition( goal ) ).MagnitudeSquared();
+                double tmag = ( tmp-RealPosition( goal ) ).MagnitudeSquared();
                 if (tmag < bdis) {
                     bdis = tmag;
                     def  = tmp;
@@ -63,20 +63,20 @@ static QVector AutoSafeEntrancePoint( const QVector start, float rsize, const Un
 signed char ComputeAutoGuarantee( Unit *un )
 {
     Cockpit     *cp;
-    unsigned int cpnum = 0;
+    size_t cpnum = 0;
     if ( ( cp = _Universe->isPlayerStarship( un ) ) ) {
         cpnum = cp-_Universe->AccessCockpit( 0 );
     } else {
         return Mission::AUTO_ON;
     }
-    unsigned int i;
+    size_t i = 0;
     for (i = 0; i < active_missions.size(); ++i) {
         if (active_missions[i]->player_num == cpnum && active_missions[i]->player_autopilot != Mission::AUTO_NORMAL) {
             return active_missions[i]->player_autopilot;
         }
     }
 
-    for (i = 0; i < active_missions.size(); i++) {
+    for (i = 0; i < active_missions.size(); ++i) {
         if (active_missions[i]->global_autopilot != Mission::AUTO_NORMAL) {
             return active_missions[i]->global_autopilot;
         }
@@ -279,7 +279,7 @@ bool JumpCapable::AutoPilotToErrorMessage( const Unit *target,
     }
     bool nowhere = false;
     if (this != target) {
-        if ( (end-start).MagnitudeSquared() < unit->rSize()*unit->rSize() ) {
+        if ( (end-start).MagnitudeSquared() < (static_cast<double>(unit->rSize()) * static_cast<double>(unit->rSize())) ) {
             failuremessage =
                 XMLSupport::escaped_string( vs_config->getVariable( "graphics", "hud", "AlreadyNearMessage",
                                                                     "#ff0000Already Near#000000" ) );
@@ -289,7 +289,7 @@ bool JumpCapable::AutoPilotToErrorMessage( const Unit *target,
         if (unsafe == false && totpercent == 0)
             end = endne;
         QVector sep( UniverseUtil::SafeEntrancePoint( end, unit->rSize() ) );
-        if ( (sep-end).MagnitudeSquared() > 16*unit->rSize()*unit->rSize() ) {
+        if ( (sep-end).MagnitudeSquared() > (16.0 * static_cast<double>(unit->rSize()) * static_cast<double>(unit->rSize())) ) {
             //DOn't understand why rsize is so bigsep = AutoSafeEntrancePoint (end,(RealPosition(target)-end).Magnitude()-target->rSize(),target);
             sep = AutoSafeEntrancePoint( end, unit->rSize(), target );
         }
