@@ -4,6 +4,7 @@
  * Copyright (C) Daniel Horn
  * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike
  * contributors
+ * Copyright (C) 2021 Stephen G. Tuggy
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -137,9 +138,12 @@ public: ~SaveGame();
     std::string WriteDynamicUniverse();
     void ReadSavedPackets( char* &buf, bool commitfaction, bool skip_news = false, bool select_data = false,
                           const std::set< std::string > &select_data_filter = std::set< std::string > () );
-///cast address to long (for 64 bits compatibility)
     void AddUnitToSave( const char *unitname, int type, const char *faction, long address );
-    void RemoveUnitFromSave( long address ); //cast it to a long
+    // New method overload added by stephengtuggy 2021-09-11
+    void AddUnitToSave(const std::string unitname, const int type, const std::string faction, void *address);
+    void RemoveUnitFromSave( long address );
+    // New method overload added by stephengtuggy 2021-09-11
+    void RemoveUnitFromSave(void *address);
     void SetOutputFileName( const std::string &filename );
     void ParseSaveGame( const std::string &filename, std::string &ForceStarSystem, const std::string &originalstarsystem,
                        QVector &pos, bool &shouldupdatedfighter0pos, float &credits, std::vector< std::string > &originalunit,

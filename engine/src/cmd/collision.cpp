@@ -119,7 +119,16 @@ void Collision::shouldApplyForceAndDealDamage(Unit* other_unit)
             } else {
                 break;
             }
+        case _UnitType::asteroid:
+            break;
+        case _UnitType::building:
+            break;
+        case _UnitType::missile:
+            break;
+        case _UnitType::unit:
+            break;
         default:
+            BOOST_LOG_TRIVIAL(warning) << boost::format("Collision::shouldApplyForceAndDealDamage(): unexpected other_unit type %1%") % other_unit->isUnit();
             break;
     }
 
@@ -137,59 +146,63 @@ void Collision::shouldApplyForceAndDealDamage(Unit* other_unit)
 
     switch(unit_type)
     {
-    // Missiles and asteroids always explode on impact with anything except Nebula and Enhancement.
-    case _UnitType::missile:
-        // Missile should explode when killed
-        // If not, uncomment this
-        //((Missile*)unit)->Discharge();
-        unit->Kill();
-        return;
+        // Missiles and asteroids always explode on impact with anything except Nebula and Enhancement.
+        case _UnitType::missile:
+            // Missile should explode when killed
+            // If not, uncomment this
+            //((Missile*)unit)->Discharge();
+            unit->Kill();
+            break;
 
-    case _UnitType::asteroid:
-        apply_force = true;
-        deal_damage = true;
-        return;
-
-    // Planets and Nebulas can't be killed right now
-    case _UnitType::planet:
-    case _UnitType::nebula:
-        // BOOST_LOG_TRIVIAL(debug) << "shouldApplyForceAndDealDamage(): this unit is a planet or nebula, with full name " << unit->getFullname();
-        return;
-
-    // Buildings should not calculate actual damage
-    case _UnitType::building:
-        return;
-
-    // Units (ships) should calculate actual damage
-    case _UnitType::unit:
-        apply_force = true;
-        deal_damage = true;
-        return;
-
-    // Not sure what an enhancement is, but it looks like it's something that can increase the shields of the unit it collided with.
-    // TODO: refactor this.
-    case _UnitType::enhancement:
-        if (other_unit->isUnit() == _UnitType::asteroid)
-        {
+        case _UnitType::asteroid:
             apply_force = true;
-            return;
-        }
+            deal_damage = true;
+            break;
 
-        double percent;
-        char tempdata[sizeof(Shield)];
-        memcpy( tempdata, &unit->shield, sizeof(Shield));
-        unit->shield.number = 0;     //don't want them getting our boosted shields!
-        unit->shield.shield2fb.front = unit->shield.shield2fb.back =
-                unit->shield.shield2fb.frontmax = unit->shield.shield2fb.backmax = 0;
-        other_unit->Upgrade( unit, 0, 0, true, true, percent );
-        memcpy( &unit->shield, tempdata, sizeof (Shield) );
-        string fn( unit->filename );
-        string fac( FactionUtil::GetFaction( unit->faction ) );
-        unit->Kill();
+        // Planets and Nebulas can't be killed right now
+        case _UnitType::planet:
+            break;
+        case _UnitType::nebula:
+            break;
 
-        _Universe->AccessCockpit()->savegame->AddUnitToSave( fn.c_str(), _UnitType::enhancement, fac.c_str(), reinterpret_cast<long>(unit));
-        apply_force = true;
-        return;
+        // Buildings should not calculate actual damage
+        case _UnitType::building:
+            break;
+
+        // Units (ships) should calculate actual damage
+        case _UnitType::unit:
+            apply_force = true;
+            deal_damage = true;
+            break;
+
+        // Not sure what an enhancement is, but it looks like it's something that can increase the shields of the unit it collided with.
+        // TODO: refactor this.
+        case _UnitType::enhancement:
+            if (other_unit->isUnit() == _UnitType::asteroid)
+            {
+                apply_force = true;
+                break;
+            }
+            else
+            {
+                double percent;
+                char tempdata[sizeof(Shield)];
+                memcpy( tempdata, &unit->shield, sizeof(Shield));
+                unit->shield.number = 0;     //don't want them getting our boosted shields!
+                unit->shield.shield2fb.front = unit->shield.shield2fb.back =
+                        unit->shield.shield2fb.frontmax = unit->shield.shield2fb.backmax = 0;
+                other_unit->Upgrade( unit, 0, 0, true, true, percent );
+                memcpy( &unit->shield, tempdata, sizeof (Shield) );
+                const std::string fn{unit->filename};
+                const std::string fac{FactionUtil::GetFaction( unit->faction ) };
+                unit->Kill();
+                _Universe->AccessCockpit()->savegame->AddUnitToSave(fn, _UnitType::enhancement, fac, static_cast<void *>(unit));
+                apply_force = true;
+                break;
+            }
+        default:
+            BOOST_LOG_TRIVIAL(warning) << boost::format("Collision::shouldApplyForceAndDealDamage(): unexpected unit_type %1%") % unit_type;
+            break;
     }
 }
 
