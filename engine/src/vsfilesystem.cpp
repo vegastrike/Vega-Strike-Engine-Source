@@ -472,7 +472,7 @@ void InitHomeDirectory()
 
     // Get user's home directory the MS way
     if (SUCCEEDED(SHGetFolderPathA(NULL,
-                                CSIDL_PROFILE,
+                                CSIDL_PERSONAL,
                                 NULL,
                                 0,
                                 szPath)))
