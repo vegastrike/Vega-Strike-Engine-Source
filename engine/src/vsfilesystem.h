@@ -37,6 +37,8 @@
 #include <gnuhash.h>
 #include "vs_logging.h"
 
+#include <boost/filesystem.hpp>
+
 class VegaConfig;
 class VSImage;
 
@@ -301,6 +303,9 @@ VSError GetError( const char *str = NULL );
 
 VSError LookForFile( VSFile &f, VSFileType type, VSFileMode mode = ReadOnly );
 VSError LookForFile( const std::string &filename, VSFileType type, VSFileMode mode = ReadOnly );
+
+// const boost::filesystem::path GetPathForFileType(VSFileType type);
+const boost::filesystem::path GetSavePath();
 
 /*
  ***********************************************************************************************

@@ -248,10 +248,10 @@ int main( int argc, char *argv[] )
     // Change to program directory if not already
     // std::string program_as_called();
     const boost::filesystem::path  program_path(argv[0]);
-    // const boost::filesystem::path& canonical_program_path = boost::filesystem::canonical(program_path);
+    // const boost::filesystem::path canonical_program_path = boost::filesystem::canonical(program_path);
 
-    const boost::filesystem::path& program_name = program_path.filename();  //canonical_program_path.filename();
-    const boost::filesystem::path& program_directory_path = program_path.parent_path(); //.parent_path();
+    const boost::filesystem::path program_name{program_path.filename()};  //canonical_program_path.filename();
+    const boost::filesystem::path program_directory_path{program_path.parent_path()};
 
     // This will be set later
     boost::filesystem::path home_subdir_path{};
@@ -273,9 +273,11 @@ int main( int argc, char *argv[] )
 
     VegaStrikeLogging::VegaStrikeLogger::InitLoggingPart1();
 
-#ifdef WIN32
-    VSFileSystem::InitHomeDirectory();
-#endif
+    // stephengtuggy 2021-09-10 Let's try initializing the directories in the same order
+    // on Windows as on other platforms, and see what happens
+// #ifdef WIN32
+//     VSFileSystem::InitHomeDirectory();
+// #endif
 
     CONFIGFILE = 0;
     mission_name[0] = '\0';
@@ -332,7 +334,7 @@ int main( int argc, char *argv[] )
 
     // Ugly hack until we can find a way to redo all the directory initialization stuff properly.
     // Use the subdirectory "logs" under the Vega Strike home directory. Make sure we don't duplicate the ".vegastrike/" or ".pu/", etc. part.
-    const boost::filesystem::path& home_path = boost::filesystem::absolute(VSFileSystem::homedir);
+    const boost::filesystem::path home_path{boost::filesystem::absolute(VSFileSystem::homedir)};
     if (home_path.string().find(VSFileSystem::HOMESUBDIR) == std::string::npos) {
         const boost::filesystem::path home_subdir(VSFileSystem::HOMESUBDIR);
         home_subdir_path = boost::filesystem::absolute(home_subdir, home_path);
@@ -353,8 +355,9 @@ int main( int argc, char *argv[] )
 
 
     int exitcode;
-    if ((exitcode = readCommandLineOptions(argc,argv)) >= 0)
+    if ((exitcode = readCommandLineOptions(argc,argv)) >= 0) {
         return exitcode;
+    }
 
     //might overwrite the default mission with the command line
     InitUnitTables();

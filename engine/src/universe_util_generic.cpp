@@ -909,17 +909,35 @@ string getSaveInfo( const std::string &filename, bool formatForTextbox )
     string text;
     text += filename;
     text  = "Savegame: "+text+lf+"_________________"+lf;
+    try
     {
         text += "Saved on: ";
         const boost::filesystem::path file_name_path{filename};
         const boost::filesystem::path save_dir_path{getSaveDir()};
-        const boost::filesystem::path full_file_path{boost::filesystem::canonical(file_name_path, save_dir_path)};
+        const boost::filesystem::path full_file_path{boost::filesystem::absolute(file_name_path, save_dir_path)};
         std::time_t last_saved_time{boost::filesystem::last_write_time(full_file_path)};
         boost::chrono::system_clock::time_point last_saved_time_point{boost::chrono::system_clock::from_time_t(last_saved_time)};
         std::ostringstream last_saved_string_stream{};
         last_saved_string_stream << boost::chrono::time_fmt(boost::chrono::timezone::local, "%c")
                                  << last_saved_time_point;
         text += last_saved_string_stream.str() + lf;
+    }
+    catch (boost::filesystem::filesystem_error& fse)
+    {
+        VS_LOG_AND_FLUSH(fatal, "boost::filesystem::filesystem_error encountered");
+        VS_LOG_AND_FLUSH(fatal, fse.what());
+        VSExit(-6);
+    }
+    catch (std::exception& e)
+    {
+        VS_LOG_AND_FLUSH(fatal, "std::exception encountered");
+        VS_LOG_AND_FLUSH(fatal, e.what());
+        VSExit(-6);
+    }
+    catch (...)
+    {
+        VS_LOG_AND_FLUSH(fatal, "unknown exception type encountered!");
+        VSExit(-6);
     }
     text += "Credits: "+XMLSupport::tostring( (unsigned int) creds )+"."+XMLSupport::tostring(
         ( (unsigned int) (creds*100) )%100 )+lf;

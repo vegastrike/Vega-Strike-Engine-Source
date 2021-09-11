@@ -467,29 +467,45 @@ long vs_getsize( FILE *fp )
 #ifdef WIN32
 void InitHomeDirectory()
 {
-	string userdir;
-	char szPath[MAX_PATH];
+    string userdir;
+    char szPath[MAX_PATH];
 
-	// Get My Documents path the MS way
-    if(SUCCEEDED(SHGetFolderPathA(NULL,
-                             CSIDL_PERSONAL,
-                             NULL,
-                             0,
-                             szPath)))
-		userdir = string(szPath);
+    // Get user's home directory the MS way
+    if (SUCCEEDED(SHGetFolderPathA(NULL,
+                                CSIDL_PROFILE,
+                                NULL,
+                                0,
+                                szPath)))
+    {
+        userdir = string(szPath);
+    }
+    else
+    {
+        VS_LOG_AND_FLUSH(fatal, "!!! ERROR determining user's home directory");
+        VSExit(1);
+    }
 
-	homedir = userdir + "/" + HOMESUBDIR;
-	CreateDirectoryAbs( homedir );
+    if (!DirectoryExists(userdir))
+    {
+        VS_LOG_AND_FLUSH(fatal, "!!! ERROR : home directory not found or not a directory");
+        VSExit(1);
+    }
 
-	// #ifdef CLIENT
-	// freopen((VSFileSystem::homedir+"/stderr_client.txt").c_str(), "w", stderr);
-	// freopen((VSFileSystem::homedir+"/stdout_client.txt").c_str(), "w", stdout);
-	// #endif
+    boost::filesystem::path home_path{userdir};
+    boost::filesystem::path home_sub_path{HOMESUBDIR};
+    boost::filesystem::path absolute_home_path{boost::filesystem::absolute(home_sub_path, home_path)};
+    homedir = absolute_home_path.string();
+    CreateDirectoryAbs( homedir );
 
-	// #ifdef SERVER
-	// freopen((VSFileSystem::homedir+"/stderr_server.txt").c_str(), "w", stderr);
-	// freopen((VSFileSystem::homedir+"/stdout_server.txt").c_str(), "w", stdout);
-	// #endif
+    // #ifdef CLIENT
+    // freopen((VSFileSystem::homedir+"/stderr_client.txt").c_str(), "w", stderr);
+    // freopen((VSFileSystem::homedir+"/stdout_client.txt").c_str(), "w", stdout);
+    // #endif
+
+    // #ifdef SERVER
+    // freopen((VSFileSystem::homedir+"/stderr_server.txt").c_str(), "w", stderr);
+    // freopen((VSFileSystem::homedir+"/stdout_server.txt").c_str(), "w", stdout);
+    // #endif
 
     VS_LOG(info, (boost::format("USING HOMEDIR : %1% as the home directory ") % homedir));
 }
@@ -724,7 +740,7 @@ void LoadConfig( string subdir )
     try {
         Galaxy galaxy = Galaxy(universe_file);
     } catch (std::exception &e) {
-        VS_LOG_AND_FLUSH(fatal, (boost::format("Error while loading configuration. Did you specifcy the asset directory? Error: %1%") % e.what()));
+        VS_LOG_AND_FLUSH(fatal, (boost::format("Error while loading configuration. Did you specify the asset directory? Error: %1%") % e.what()));
         VSExit(1);
     }
 }
@@ -800,10 +816,11 @@ void InitPaths( string conf, string subdir )
     }
     /************************** Data and home directory settings *************************/
 
-    InitDataDirectory();                //Need to be first for win32
-    #ifndef WIN32
-	InitHomeDirectory();
-	#endif
+    // Need to be first for win32. stephengtuggy 2021-09-10: O RLY? Let's try it the other way
+    InitDataDirectory();
+    // #ifndef WIN32
+    InitHomeDirectory();
+    // #endif
     LoadConfig( subdir );
     /*
       Paths relative to datadir or homedir (both should have the same structure)
@@ -1330,6 +1347,14 @@ VSError LookForFile( VSFile &f, VSFileType type, VSFileMode mode )
             return Ok;
     }
     return FileNotFound;
+}
+
+const boost::filesystem::path GetSavePath()
+{
+    const boost::filesystem::path home_path{homedir};
+    const boost::filesystem::path save_path{"save"};
+    const boost::filesystem::path ret_val{boost::filesystem::absolute(save_path, home_path)};
+    return ret_val;
 }
 
 /*
