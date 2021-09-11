@@ -68,6 +68,7 @@
 #include <sstream>
 #include <chrono>
 #include <locale>
+#include <cstdint>
 
 extern Unit& GetUnitMasterPartList();
 extern int num_delayed_missions();
@@ -906,31 +907,30 @@ string getSaveInfo( const std::string &filename, bool formatForTextbox )
                             _Universe->CurrentCockpit(), "", true, false, game_options.quick_savegame_summaries, true, true,
                             campaign_score_vars );
     UniverseUtil::setCurrentSaveGame( sillytemp );
-    string text;
-    text += filename;
-    text  = "Savegame: "+text+lf+"_________________"+lf;
+    std::ostringstream ss{};
+    ss << "Savegame: " << filename << lf;
+    ss << "_________________" << lf;
     try
     {
-        text += "Saved on: ";
+        ss << "Saved on: ";
         const boost::filesystem::path file_name_path{filename};
         const boost::filesystem::path save_dir_path{getSaveDir()};
         const boost::filesystem::path full_file_path{boost::filesystem::absolute(file_name_path, save_dir_path)};
         std::time_t last_saved_time{boost::filesystem::last_write_time(full_file_path)};
         boost::chrono::system_clock::time_point last_saved_time_point{boost::chrono::system_clock::from_time_t(last_saved_time)};
-        std::ostringstream last_saved_string_stream{};
-        last_saved_string_stream << boost::chrono::time_fmt(boost::chrono::timezone::local, "%c")
-                                 << last_saved_time_point;
-        text += last_saved_string_stream.str() + lf;
+        ss << boost::chrono::time_fmt(boost::chrono::timezone::local, "%c")
+                << last_saved_time_point
+                << lf;
     }
     catch (boost::filesystem::filesystem_error& fse)
     {
-        VS_LOG_AND_FLUSH(fatal, "boost::filesystem::filesystem_error encountered");
+        VS_LOG_AND_FLUSH(fatal, "boost::filesystem::filesystem_error encountered:");
         VS_LOG_AND_FLUSH(fatal, fse.what());
         VSExit(-6);
     }
     catch (std::exception& e)
     {
-        VS_LOG_AND_FLUSH(fatal, "std::exception encountered");
+        VS_LOG_AND_FLUSH(fatal, "std::exception encountered:");
         VS_LOG_AND_FLUSH(fatal, e.what());
         VSExit(-6);
     }
@@ -939,33 +939,41 @@ string getSaveInfo( const std::string &filename, bool formatForTextbox )
         VS_LOG_AND_FLUSH(fatal, "unknown exception type encountered!");
         VSExit(-6);
     }
-    text += "Credits: "+XMLSupport::tostring( (unsigned int) creds )+"."+XMLSupport::tostring(
-        ( (unsigned int) (creds*100) )%100 )+lf;
-    text += simplePrettySystem( system )+lf;
+    ss << "Credits: "
+            << static_cast<int_fast64_t>(creds)
+            << "."
+            << (static_cast<int_fast64_t>(creds * 100) % 100)
+            << lf;
+    ss << simplePrettySystem( system ) << lf;
     if ( Ships.size() ) {
-        text += "Starship: "+simplePrettyShip( Ships[0] )+lf;
+        ss << "Starship: " << simplePrettyShip( Ships[0] ) << lf;
         if (Ships.size() > 2) {
-            text += "Fleet:"+lf;
-            for (unsigned int i = 2; i < Ships.size(); i += 2)
-                text += " "+simplePrettyShip( Ships[i-1] )+lf+"  Located At:"+lf+"  "+simplePrettySystem( Ships[i] )+lf;
+            ss << "Fleet:" << lf;
+            for (size_t i = 2; i < Ships.size(); i += 2) {
+                ss << " " << simplePrettyShip( Ships[i-1] ) << lf;
+                ss << "  Located At:" << lf;
+                ss << "  " << simplePrettySystem( Ships[i] ) << lf;
+            }
         }
     }
     if (!game_options.quick_savegame_summaries) {
         bool hit = false;
         for (set< string >::const_iterator it = campaign_score_vars.begin(); it != campaign_score_vars.end(); ++it) {
             string var = *it;
-            unsigned int curscore = savegame.getMissionData( var ).size()+savegame.getMissionStringData( var ).size();
+            int_fast64_t curscore = savegame.getMissionData( var ).size() + savegame.getMissionStringData( var ).size();
             if (curscore > 0) {
                 hit   = true;
-                if (var.length() > 0)
+                if (var.length() > 0) {
                     var[0] = toupper( var[0] );
-                text += var.substr( 0, var.find( "_" ) )+" Campaign Score: "+XMLSupport::tostring( curscore )+lf;
+                }
+                ss << var.substr( 0, var.find( "_" ) ) + " Campaign Score: " << curscore << lf;
             }
         }
-        if (!hit)
-            text += "Campaign Score: 0"+lf;
+        if (!hit) {
+            ss << "Campaign Score: 0" << lf;
+        }
     }
-    return text;
+    return ss.str();
 }
 
 string getCurrentSaveGame()
