@@ -276,7 +276,7 @@ If you encounter any issues while playing, please create an issue with the Vega 
 
    __TIPS__:
 
-   To enable verbose output for debugging purposes (will show compilation commands), pass the `--version` argument, where supported:
+   To enable verbose output for debugging purposes (will show compilation commands), pass the `--verbose` argument, where supported:
 
    ```bash
    cmake --build ./build --verbose
