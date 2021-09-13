@@ -940,9 +940,9 @@ string getSaveInfo( const std::string &filename, bool formatForTextbox )
         VSExit(-6);
     }
     ss << "Credits: "
-            << static_cast<int_fast64_t>(creds)
+            << static_cast<int64_t>(creds)
             << "."
-            << (static_cast<int_fast64_t>(creds * 100) % 100)
+            << (static_cast<int64_t>(creds * 100) % 100)
             << lf;
     ss << simplePrettySystem( system ) << lf;
     if ( Ships.size() ) {
@@ -960,7 +960,7 @@ string getSaveInfo( const std::string &filename, bool formatForTextbox )
         bool hit = false;
         for (set< string >::const_iterator it = campaign_score_vars.begin(); it != campaign_score_vars.end(); ++it) {
             string var = *it;
-            int_fast64_t curscore = savegame.getMissionData( var ).size() + savegame.getMissionStringData( var ).size();
+            int64_t curscore = savegame.getMissionData( var ).size() + savegame.getMissionStringData( var ).size();
             if (curscore > 0) {
                 hit   = true;
                 if (var.length() > 0) {
