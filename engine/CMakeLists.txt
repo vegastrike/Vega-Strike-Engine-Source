@@ -1339,31 +1339,11 @@ ELSEIF (CMAKE_SYSTEM_NAME STREQUAL Linux)
 
     SET(VEGA_STRIKE_PYTHON_VERSION_STR "py3")
 
-    # lsb_release -i --> but then it'll find `Ubuntu` instead of Debian so will have to map more
-    # we can probably more reliably detect via checking for different packager commands
-    # `lsb_release` doesn't always work correctly, so it's easier to read the underlying file
-    # if it exists. It doesn't always exist. Debian doesn't use it, but Ubuntu does.
-    SET(LSB_EXISTS FALSE)
-    SET(LSB_LINUX_DISTRIBUTION "Unknown")
-    SET(LSB_LINUX_DISTRIBUTION_CODENAME "Unknown")
-
-    # Lookup the LSB Data - this is known for Ubuntu, but also used by other distros too.
-    # and may help with distro-sub-selection
-    FIND_PROGRAM(LSB_RELEASE_EXEC lsb_release)
-    IF (LSB_RELEASE_EXEC)
-        EXECUTE_PROCESS(COMMAND ${LSB_RELEASE_EXEC} --codename --short
-            OUTPUT_VARIABLE LSB_LINUX_DISTRIBUTION_CODENAME
-            OUTPUT_STRIP_TRAILING_WHITESPACE)
-        EXECUTE_PROCESS(COMMAND ${LSB_RELEASE_EXEC} --id --short
-            OUTPUT_VARIABLE LSB_LINUX_DISTRIBUTION
-            OUTPUT_STRIP_TRAILING_WHITESPACE)
-        SET(LSB_EXISTS TRUE)
-        MESSAGE("Found Linux Distribution Release Name: ${LSB_LINUX_DISTRIBUTION_CODENAME}")
-    ENDIF (LSB_RELEASE_EXEC)
+	# Detect available Linux Distros that can be built for
+	FIND_PACKAGE(LinuxDistro REQUIRED)
 
     # "DEB"
-    FIND_PROGRAM(HAS_APT NAMES apt-get apt)
-    IF(HAS_APT)
+    IF(VS_CAN_BUILD_DEB)
         MESSAGE("-- Configuring Debian Packaging")
         # See https://cmake.org/cmake/help/v3.3/module/CPackDeb.html
         SET(CPACK_DEBIAN_PACKAGE_NAME "Vega-Strike")
@@ -1503,11 +1483,10 @@ ELSEIF (CMAKE_SYSTEM_NAME STREQUAL Linux)
         SET(CPACK_DEBIAN_PACKAGE_SECTION "Amusements/Games")
         SET(CPACK_DEBIAN_PACKAGE_HOMEPAGE "https://www.vega-strike.org")
         SET(CPACK_GENERATOR "DEB")
-    ENDIF (HAS_APT)
+    ENDIF (VS_CAN_BUILD_DEB)
 
     #  "RPM"
-    FIND_PROGRAM(HAS_RPMBUILD rpmbuild)
-    IF (HAS_RPMBUILD)
+    IF (VS_CAN_BUILD_RPM)
         MESSAGE("-- Configuring RPM Packaging")
         # See https://cmake.org/cmake/help/v3.3/module/CPackRPM.html
         SET(CPACK_RPM_PACKAGE_LICENSE "GPLv3") # See ../LICENSE
@@ -1564,7 +1543,7 @@ ELSEIF (CMAKE_SYSTEM_NAME STREQUAL Linux)
             SET(CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES}, libjpeg, libpng, freeglut, gtk3, libvorbis, openal, SDL_mixer")
         ENDIF (LINUX_ID STREQUAL opensuse-leap)
         SET(CPACK_GENERATOR "RPM")
-    ENDIF (HAS_RPMBUILD)
+    ENDIF (VS_CAN_BUILD_RPM)
 ELSE ()
     MESSAGE("-- Configuring Packaging for Unknown Platforms - \"${CMAKE_SYSTEM_NAME}\"")
     # Unknown Platform --> Just do the various compressed tarballs
