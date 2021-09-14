@@ -49,6 +49,8 @@
 #include <iterator>
 #include <vector>
 
+#include <boost/filesystem.hpp>
+
 typedef unsigned char BYTE;
 
 
@@ -270,7 +272,10 @@ std::vector<BYTE> readFile(std::string filename)
 
 bool isUtf8SaveGame(std::string filename)
 {
-    std::string path = GetSaveDir() + filename;
+    boost::filesystem::path filename_path{filename};
+    boost::filesystem::path save_dir_path{GetSaveDir()};
+    boost::filesystem::path complete_path{boost::filesystem::absolute(filename_path, save_dir_path)};
+    std::string path{complete_path.string()};
     std::vector<BYTE> savegame = readFile(path);
     Utf8Checker check;
     if (check.validUtf8(savegame)) {
@@ -1153,7 +1158,14 @@ string SetCurrentSaveGame( string newname )
 
 const string& GetSaveDir()
 {
-    static string rv = VSFileSystem::homedir+"/save/";
-    return rv;
+    static string ret_val{VSFileSystem::GetSavePath().string()};
+    if (ret_val.back() != '/') {
+        ret_val += '/';
+    }
+    VS_LOG_AND_FLUSH(debug, (boost::format("GetSaveDir: %1%") % ret_val));
+    return ret_val;
+
+    // static string rv = VSFileSystem::homedir+"/save/";
+    // return rv;
 }
 
