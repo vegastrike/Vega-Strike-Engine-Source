@@ -105,14 +105,14 @@ IF (MSVC)
         ${Vega_Strike_SOURCE_DIR}/src
         ${Vega_Strike_SOURCE_DIR}/src/cmd
         ${Vega_Strike_BINARY_DIR}
-)
+    )
 ELSE (MSVC)
     INCLUDE_DIRECTORIES(
         ${Vega_Strike_SOURCE_DIR}/src
         ${Vega_Strike_SOURCE_DIR}/src/cmd
         ${Vega_Strike_BINARY_DIR}
         /usr/include/harfbuzz/
-)
+    )
 ENDIF (MSVC)
 
 # The source files used to be listed here...
@@ -177,19 +177,6 @@ IF (DATADIR)
     SET(DEFINES "${DEFINES} -DDATA_DIR='\"${DATADIR}\"'")
 ENDIF (DATADIR)
 
-# Gather info about Linux distro and release (if applicable) for later use down below.
-IF (CMAKE_SYSTEM_NAME STREQUAL Linux)
-    EXECUTE_PROCESS(
-        COMMAND sh -c "cat /etc/os-release | grep ^ID= | sed 's/^ID=//' | tr -d '\"\n'"
-        OUTPUT_VARIABLE LINUX_ID)
-    EXECUTE_PROCESS(
-        COMMAND sh -c "cat /etc/os-release | grep ^VERSION_CODENAME= | sed 's/^VERSION_CODENAME=//' | tr -d '\"\n'"
-        OUTPUT_VARIABLE LINUX_CODENAME)
-    EXECUTE_PROCESS(
-        COMMAND sh -c "cat /etc/os-release | grep ^VERSION_ID= | sed 's/^VERSION_ID=//' | tr -d '\"\n'"
-        OUTPUT_VARIABLE LINUX_VERSION_ID)
-ENDIF (CMAKE_SYSTEM_NAME STREQUAL Linux)
-
 # On some Ubuntu versions and derivatives, a bug exists whereby enabling
 # PIE compilation (Position Independent Executables) results in the
 # `file` utility incorrectly recognising the compiled vegastrike-engine binary
@@ -211,16 +198,16 @@ ENDIF (CMAKE_SYSTEM_NAME STREQUAL Linux)
 #UNSET(CMAKE_POSITION_INDEPENDENT_CODE)
 OPTION(ENABLE_PIE "Enable Position Independent Executables/Shared Libraries (NOT RECOMMENDED on Ubuntu/Mint)" OFF)
 IF (ENABLE_PIE)
-  MESSAGE("!! Enabling Position Independent Executables/Shared Libraries (NOT RECOMMENDED on Ubuntu/Mint) !!")
-  #SET(CMAKE_POSITION_INDEPENDENT_CODE ON)
-  ADD_COMPILE_OPTIONS("-fpie")
-  LINK_LIBRARIES("-pie")
+    MESSAGE("!! Enabling Position Independent Executables/Shared Libraries (NOT RECOMMENDED on Ubuntu/Mint) !!")
+    #SET(CMAKE_POSITION_INDEPENDENT_CODE ON)
+    ADD_COMPILE_OPTIONS("-fpie")
+    LINK_LIBRARIES("-pie")
 ELSE (ENABLE_PIE)
-  MESSAGE("++ Disabling Position Independent Executables/Shared Libraries (Recommended on Ubuntu/Mint)")
-  IF (NOT MSVC)
-    ADD_COMPILE_OPTIONS("-fno-pie")
-    LINK_LIBRARIES("-no-pie")
-  ENDIF (NOT MSVC)
+    MESSAGE("++ Disabling Position Independent Executables/Shared Libraries (Recommended on Ubuntu/Mint)")
+    IF (NOT MSVC)
+        ADD_COMPILE_OPTIONS("-fno-pie")
+        LINK_LIBRARIES("-no-pie")
+    ENDIF (NOT MSVC)
 ENDIF (ENABLE_PIE)
 
 IF (MSVC)
@@ -443,99 +430,97 @@ ENDIF (NOT USE_SYSTEM_BOOST)
 
 IF (NOT DISABLE_CLIENT) ##########
 
-#Find GL
-FIND_PACKAGE(OpenGL REQUIRED)
-IF (OPENGL_FOUND AND OPENGL_GLU_FOUND)
-    SET(TST_INCLUDES ${TST_INCLUDES} ${OPENL_INCLUDE_DIR})
-    SET(TST_LIBS ${TST_LIBS} ${OPENGL_LIBRARIES})
-    MESSAGE("++ OpenGL found : ${OPENGL_LIBRARIES}")
-ELSE (OPENGL_FOUND AND OPENGL_GLU_FOUND)
-    MESSAGE("!! Why you no have GL?")
-ENDIF (OPENGL_FOUND AND OPENGL_GLU_FOUND)
+    #Find GL
+    FIND_PACKAGE(OpenGL REQUIRED)
+    IF (OPENGL_FOUND AND OPENGL_GLU_FOUND)
+        SET(TST_INCLUDES ${TST_INCLUDES} ${OPENL_INCLUDE_DIR})
+        SET(TST_LIBS ${TST_LIBS} ${OPENGL_LIBRARIES})
+        MESSAGE("++ OpenGL found : ${OPENGL_LIBRARIES}")
+    ELSE (OPENGL_FOUND AND OPENGL_GLU_FOUND)
+        MESSAGE("!! Why you no have GL?")
+    ENDIF (OPENGL_FOUND AND OPENGL_GLU_FOUND)
 
-# Workaround two oversights in FindGLUT (when trying to use freeglut on MacOS):
-#
-# 1. Use of OPENGL_LIBRARY_DIR
-#    This was added to FindOpenGL in June 2002, then removed 3 months later. In that time it had
-#    made its way into use within FindGLUT, where (oddly) it was used as a possible
-#    location of GLUT's headers but not its libraries. From here, it was never removed.
-#
-# 2. Missing path component
-#    FindGLUT looks for glut.h in various locations when (on MacOS) it should be looking for
-#    GLUT/glut.h. We use the latter in our headers when building on MacOS, so the include path
-#    FindGLUT returns isn't actually of any use, but if FindGLUT can't find glut.h the build
-#    ends up using Apple's deprecated Framework (which defeats the purpose of using freeglut).
-#
-# If we're not on MacOS and using freeglut this line is not required, but as OPENGL_LIBRARY_DIR
-# is not used by anything else the following does no harm either.
-SET(OPENGL_LIBRARY_DIR "${OPENGL_INCLUDE_DIR}/GLUT")
+    # Workaround two oversights in FindGLUT (when trying to use freeglut on MacOS):
+    #
+    # 1. Use of OPENGL_LIBRARY_DIR
+    #    This was added to FindOpenGL in June 2002, then removed 3 months later. In that time it had
+    #    made its way into use within FindGLUT, where (oddly) it was used as a possible
+    #    location of GLUT's headers but not its libraries. From here, it was never removed.
+    #
+    # 2. Missing path component
+    #    FindGLUT looks for glut.h in various locations when (on MacOS) it should be looking for
+    #    GLUT/glut.h. We use the latter in our headers when building on MacOS, so the include path
+    #    FindGLUT returns isn't actually of any use, but if FindGLUT can't find glut.h the build
+    #    ends up using Apple's deprecated Framework (which defeats the purpose of using freeglut).
+    #
+    # If we're not on MacOS and using freeglut this line is not required, but as OPENGL_LIBRARY_DIR
+    # is not used by anything else the following does no harm either.
+    SET(OPENGL_LIBRARY_DIR "${OPENGL_INCLUDE_DIR}/GLUT")
 
-#Find GLUT
-FIND_PACKAGE(GLUT REQUIRED)
-IF (GLUT_FOUND)
-    SET(TST_INCLUDES ${TST_INCLUDES} ${GLUT_INCLUDE_DIR})
-    SET(TST_LIBS ${TST_LIBS} ${GLUT_LIBRARIES})
-    MESSAGE("++ GLUT found : ${GLUT_LIBRARIES}")
-ELSE (GLUT_FOUND)
-    MESSAGE("!! I can't build this, missing GLUT")
-ENDIF (GLUT_FOUND)
+    #Find GLUT
+    FIND_PACKAGE(GLUT REQUIRED)
+    IF (GLUT_FOUND)
+        SET(TST_INCLUDES ${TST_INCLUDES} ${GLUT_INCLUDE_DIR})
+        SET(TST_LIBS ${TST_LIBS} ${GLUT_LIBRARIES})
+        MESSAGE("++ GLUT found : ${GLUT_LIBRARIES}")
+    ELSE (GLUT_FOUND)
+        MESSAGE("!! I can't build this, missing GLUT")
+    ENDIF (GLUT_FOUND)
 
-UNSET(OPENGL_LIBRARY_DIR)
+    UNSET(OPENGL_LIBRARY_DIR)
 
-#Find OpenAL
-FIND_PACKAGE(OpenAL REQUIRED)
-IF (OPENAL_FOUND)
-    MESSAGE("++ Found OpenAL")
-    SET(TST_INCLUDES ${TST_INCLUDES} ${OPENAL_INCLUDE_DIR})
-    SET(TST_LIBS ${TST_LIBS} ${OPENAL_LIBRARY})
-    SET(HAVE_AL 1)
-ELSE (OPENAL_FOUND)
-    MESSAGE("!! We aint got no sound")
-ENDIF (OPENAL_FOUND)
+    #Find OpenAL
+    FIND_PACKAGE(OpenAL REQUIRED)
+    IF (OPENAL_FOUND)
+        MESSAGE("++ Found OpenAL")
+        SET(TST_INCLUDES ${TST_INCLUDES} ${OPENAL_INCLUDE_DIR})
+        SET(TST_LIBS ${TST_LIBS} ${OPENAL_LIBRARY})
+        SET(HAVE_AL 1)
+    ELSE (OPENAL_FOUND)
+        MESSAGE("!! We aint got no sound")
+    ENDIF (OPENAL_FOUND)
 
-IF (NOT BEOS)
-    #Find SDL
-    FIND_PACKAGE(SDL)
-    IF (SDL_FOUND)
-        SET(TST_INCLUDES ${TST_INCLUDES} ${SDL_INCLUDE_DIR})
-        SET(TST_LIBS ${TST_LIBS} ${SDL_LIBRARY})
-        MESSAGE("++ SDL Found")
-        SET(HAVE_SDL 1)
-        SET(SDL_WINDOWING 1)
-    ELSE (SDL_FOUND)
-        MESSAGE("!! How will we render to OpenGL without SDL?")
-    ENDIF (SDL_FOUND)
-ENDIF (NOT BEOS)
+    IF (NOT BEOS)
+        #Find SDL
+        FIND_PACKAGE(SDL)
+        IF (SDL_FOUND)
+            SET(TST_INCLUDES ${TST_INCLUDES} ${SDL_INCLUDE_DIR})
+            SET(TST_LIBS ${TST_LIBS} ${SDL_LIBRARY})
+            MESSAGE("++ SDL Found")
+            SET(HAVE_SDL 1)
+            SET(SDL_WINDOWING 1)
+        ELSE (SDL_FOUND)
+            MESSAGE("!! How will we render to OpenGL without SDL?")
+        ENDIF (SDL_FOUND)
+    ENDIF (NOT BEOS)
 
-#find Vorbis
-FIND_PACKAGE(Vorbis REQUIRED)
-IF (Vorbis_FOUND)
-    SET(TST_INCLUDES ${TST_INCLUDES} ${Vorbis_INCLUDE_DIRS})
-    SET(TST_LIBS ${TST_LIBS} ${Vorbis_LIBRARIES})
-    SET(HAVE_OGG 1)
-ELSE (Vorbis_FOUND)
-    MESSAGE("!! Can't find Vorbis libs")
-ENDIF (Vorbis_FOUND)
+    #find Vorbis
+    FIND_PACKAGE(Vorbis REQUIRED)
+    IF (Vorbis_FOUND)
+        SET(TST_INCLUDES ${TST_INCLUDES} ${Vorbis_INCLUDE_DIRS})
+        SET(TST_LIBS ${TST_LIBS} ${Vorbis_LIBRARIES})
+        SET(HAVE_OGG 1)
+    ELSE (Vorbis_FOUND)
+        MESSAGE("!! Can't find Vorbis libs")
+    ENDIF (Vorbis_FOUND)
 
-#Find JPEG
-FIND_PACKAGE(JPEG REQUIRED)
-IF (JPEG_FOUND)
-    SET(TST_INCLUDES ${TST_INCLUDES} ${JPEG_INCLUDE_DIR})
-    SET(TST_LIBS ${TST_LIBS} ${JPEG_LIBRARIES})
-ELSE (JPEG_FOUND)
-    MESSAGE("!! How are we gonna open jpegs?")
-ENDIF (JPEG_FOUND)
+    #Find JPEG
+    FIND_PACKAGE(JPEG REQUIRED)
+    IF (JPEG_FOUND)
+        SET(TST_INCLUDES ${TST_INCLUDES} ${JPEG_INCLUDE_DIR})
+        SET(TST_LIBS ${TST_LIBS} ${JPEG_LIBRARIES})
+    ELSE (JPEG_FOUND)
+        MESSAGE("!! How are we gonna open jpegs?")
+    ENDIF (JPEG_FOUND)
 
-#Find PNG
-FIND_PACKAGE(PNG REQUIRED)
-IF (PNG_FOUND)
-    SET(TEST_INCLUDES ${TST_INCLUDES} ${PNG_INCLUDE_DIRS})
-    SET(TST_LIBS ${TST_LIBS} ${PNG_LIBRARIES})
-ELSE (PNG_FOUND)
-    MESSAGE("!! Can't find PNG lib")
-ENDIF (PNG_FOUND)
-
-
+    #Find PNG
+    FIND_PACKAGE(PNG REQUIRED)
+    IF (PNG_FOUND)
+        SET(TEST_INCLUDES ${TST_INCLUDES} ${PNG_INCLUDE_DIRS})
+        SET(TST_LIBS ${TST_LIBS} ${PNG_LIBRARIES})
+    ELSE (PNG_FOUND)
+        MESSAGE("!! Can't find PNG lib")
+    ENDIF (PNG_FOUND)
 
 ENDIF(NOT DISABLE_CLIENT) ##########
 
@@ -558,21 +543,21 @@ ELSE (EXPAT_FOUND)
 ENDIF (EXPAT_FOUND)
 
 #find Math
-include(CheckFunctionExists)
+INCLUDE(CheckFunctionExists)
 
-if(NOT POW_FUNCTION_EXISTS AND NOT NEED_LINKING_AGAINST_LIBM)
-  CHECK_FUNCTION_EXISTS(pow POW_FUNCTION_EXISTS)
-  if(NOT POW_FUNCTION_EXISTS)
-      unset(POW_FUNCTION_EXISTS CACHE)
-      list(APPEND CMAKE_REQUIRED_LIBRARIES m)
-      CHECK_FUNCTION_EXISTS(pow POW_FUNCTION_EXISTS)
-      if(POW_FUNCTION_EXISTS)
-          set(NEED_LINKING_AGAINST_LIBM True CACHE BOOL "" FORCE)
-      else()
-          message(FATAL_ERROR "Failed making the pow() function available")
-      endif()
-  endif()
-endif()
+IF(NOT POW_FUNCTION_EXISTS AND NOT NEED_LINKING_AGAINST_LIBM)
+    CHECK_FUNCTION_EXISTS(pow POW_FUNCTION_EXISTS)
+    IF(NOT POW_FUNCTION_EXISTS)
+        UNSET(POW_FUNCTION_EXISTS CACHE)
+        LIST(APPEND CMAKE_REQUIRED_LIBRARIES m)
+        CHECK_FUNCTION_EXISTS(pow POW_FUNCTION_EXISTS)
+        IF(POW_FUNCTION_EXISTS)
+            SET(NEED_LINKING_AGAINST_LIBM True CACHE BOOL "" FORCE)
+        ELSE(POW_FUNCTION_EXISTS)
+            MESSAGE(FATAL_ERROR "Failed making the pow() function available")
+        ENDIF(POW_FUNCTION_EXISTS)
+    ENDIF(NOT POW_FUNCTION_EXISTS)
+ENDIF(NOT POW_FUNCTION_EXISTS AND NOT NEED_LINKING_AGAINST_LIBM)
 
 # INCLUDE(CheckFunctionExists)
 # CHECK_FUNCTION_EXISTS(pow POW_FUNCTION_EXISTS) # MSVC, etc. build libm into libc
@@ -629,7 +614,7 @@ ENDIF (NOT DISABLE_OGRE)
 IF (NOT BEOS)
     FIND_LIBRARY(UTIL_LIB util)
 ELSEIF (WIN32)
-	# Don't need it?
+    # Don't need it?
 ELSE (NOT BEOS)
     FIND_LIBRARY(UTIL_LIB network)
 ENDIF (NOT BEOS)
@@ -837,7 +822,7 @@ ADD_LIBRARY(vegastrike-OPcollide
 
 TARGET_COMPILE_FEATURES(vegastrike-OPcollide PUBLIC cxx_std_11)
 if (NEED_LINKING_AGAINST_LIBM)
-    target_link_libraries(vegastrike-OPcollide m)
+    TARGET_LINK_LIBRARIES(vegastrike-OPcollide m)
 endif()
 
 SET(LIBCMD_SOURCES
@@ -1107,7 +1092,7 @@ ADD_LIBRARY(vegastrike-engine_com
 
 TARGET_COMPILE_FEATURES(vegastrike-engine_com PUBLIC cxx_std_11)
 if (NEED_LINKING_AGAINST_LIBM)
-    target_link_libraries(vegastrike-engine_com m)
+    TARGET_LINK_LIBRARIES(vegastrike-engine_com m)
 endif()
 
 SET(VEGASTRIKE_SOURCES
@@ -1189,7 +1174,7 @@ IF (NOT DISABLE_CLIENT)
 
     TARGET_COMPILE_FEATURES(vegastrike-engine PUBLIC cxx_std_11)
     if (NEED_LINKING_AGAINST_LIBM)
-        target_link_libraries(vegastrike-engine m)
+        TARGET_LINK_LIBRARIES(vegastrike-engine m)
     endif()
 ENDIF (NOT DISABLE_CLIENT)
 
@@ -1339,31 +1324,11 @@ ELSEIF (CMAKE_SYSTEM_NAME STREQUAL Linux)
 
     SET(VEGA_STRIKE_PYTHON_VERSION_STR "py3")
 
-    # lsb_release -i --> but then it'll find `Ubuntu` instead of Debian so will have to map more
-    # we can probably more reliably detect via checking for different packager commands
-    # `lsb_release` doesn't always work correctly, so it's easier to read the underlying file
-    # if it exists. It doesn't always exist. Debian doesn't use it, but Ubuntu does.
-    SET(LSB_EXISTS FALSE)
-    SET(LSB_LINUX_DISTRIBUTION "Unknown")
-    SET(LSB_LINUX_DISTRIBUTION_CODENAME "Unknown")
-
-    # Lookup the LSB Data - this is known for Ubuntu, but also used by other distros too.
-    # and may help with distro-sub-selection
-    FIND_PROGRAM(LSB_RELEASE_EXEC lsb_release)
-    IF (LSB_RELEASE_EXEC)
-        EXECUTE_PROCESS(COMMAND ${LSB_RELEASE_EXEC} --codename --short
-            OUTPUT_VARIABLE LSB_LINUX_DISTRIBUTION_CODENAME
-            OUTPUT_STRIP_TRAILING_WHITESPACE)
-        EXECUTE_PROCESS(COMMAND ${LSB_RELEASE_EXEC} --id --short
-            OUTPUT_VARIABLE LSB_LINUX_DISTRIBUTION
-            OUTPUT_STRIP_TRAILING_WHITESPACE)
-        SET(LSB_EXISTS TRUE)
-        MESSAGE("Found Linux Distribution Release Name: ${LSB_LINUX_DISTRIBUTION_CODENAME}")
-    ENDIF (LSB_RELEASE_EXEC)
+    # Detect available Linux Distros that can be built for
+    FIND_PACKAGE(LinuxDistro REQUIRED)
 
     # "DEB"
-    FIND_PROGRAM(HAS_APT NAMES apt-get apt)
-    IF(HAS_APT)
+    IF(VS_CAN_BUILD_DEB)
         MESSAGE("-- Configuring Debian Packaging")
         # See https://cmake.org/cmake/help/v3.3/module/CPackDeb.html
         SET(CPACK_DEBIAN_PACKAGE_NAME "Vega-Strike")
@@ -1378,15 +1343,15 @@ ELSEIF (CMAKE_SYSTEM_NAME STREQUAL Linux)
             SET(DEBIAN_RELEASE_VERSION "Debian Derivative Release Version ${LSB_LINUX_DISTRIBUTION_CODENAME}")
         ENDIF (NOT LSB_EXISTS)
 
-		# dependency.list is generated by `script/packages`. It requires the binaries to already be built to work.
-		# if using `script/package` to build the packages, then it will automatically re-run `cmake` to update the data
-		# for the dependencies.
-		#
-		# If dependency.list is not available, then a hard-coded set of dependencies is provided below.
-		# Thanks to stephengtuggy for providing the static list for known distributions.
-		#
-		# Prefer the auto-generated list by default as it'll be more accurate
-		# Fall back to the static lists when it's not available.
+        # dependency.list is generated by `script/packages`. It requires the binaries to already be built to work.
+        # if using `script/package` to build the packages, then it will automatically re-run `cmake` to update the data
+        # for the dependencies.
+        #
+        # If dependency.list is not available, then a hard-coded set of dependencies is provided below.
+        # Thanks to stephengtuggy for providing the static list for known distributions.
+        #
+        # Prefer the auto-generated list by default as it'll be more accurate
+        # Fall back to the static lists when it's not available.
         MESSAGE("Looking for ${CMAKE_BINARY_DIR}/dependency.list")
         IF (EXISTS "${CMAKE_BINARY_DIR}/dependency.list")
             MESSAGE("Found Dependency file at ${CMAKE_BINARY_DIR}/dependency.list")
@@ -1503,11 +1468,10 @@ ELSEIF (CMAKE_SYSTEM_NAME STREQUAL Linux)
         SET(CPACK_DEBIAN_PACKAGE_SECTION "Amusements/Games")
         SET(CPACK_DEBIAN_PACKAGE_HOMEPAGE "https://www.vega-strike.org")
         SET(CPACK_GENERATOR "DEB")
-    ENDIF (HAS_APT)
+    ENDIF (VS_CAN_BUILD_DEB)
 
     #  "RPM"
-    FIND_PROGRAM(HAS_RPMBUILD rpmbuild)
-    IF (HAS_RPMBUILD)
+    IF (VS_CAN_BUILD_RPM)
         MESSAGE("-- Configuring RPM Packaging")
         # See https://cmake.org/cmake/help/v3.3/module/CPackRPM.html
         SET(CPACK_RPM_PACKAGE_LICENSE "GPLv3") # See ../LICENSE
@@ -1523,7 +1487,7 @@ ELSEIF (CMAKE_SYSTEM_NAME STREQUAL Linux)
 
         SET(CPACK_PACKAGE_FILE_NAME "${CPACK_RPM_PACKAGE_NAME}_${VEGA_STRIKE_PACKAGE_VERSION_STR}-${VEGA_STRIKE_PYTHON_VERSION_STR}-${LINUX_ID}-${VEGA_STRIKE_LINUX_VERSION_STR}_x86_64")
 
-		# TODO: Finish porting the script/package script over for RPM-based distros
+        # TODO: Finish porting the script/package script over for RPM-based distros
         # Detect whether SuSe or RH/CentOS/Fedora as deps may change
         IF (LINUX_ID STREQUAL opensuse-leap)
             IF (LINUX_VERSION_ID VERSION_EQUAL 15.2 OR LINUX_VERSION_ID VERSION_EQUAL 15.3)
@@ -1564,7 +1528,7 @@ ELSEIF (CMAKE_SYSTEM_NAME STREQUAL Linux)
             SET(CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES}, libjpeg, libpng, freeglut, gtk3, libvorbis, openal, SDL_mixer")
         ENDIF (LINUX_ID STREQUAL opensuse-leap)
         SET(CPACK_GENERATOR "RPM")
-    ENDIF (HAS_RPMBUILD)
+    ENDIF (VS_CAN_BUILD_RPM)
 ELSE ()
     MESSAGE("-- Configuring Packaging for Unknown Platforms - \"${CMAKE_SYSTEM_NAME}\"")
     # Unknown Platform --> Just do the various compressed tarballs
@@ -1583,8 +1547,8 @@ FetchContent_Declare(
 )
 
 FetchContent_GetProperties(googletest)
-string(TOLOWER "googletest" lcName)
-if(NOT ${lcName}_POPULATED)
+STRING(TOLOWER "googletest" lcName)
+IF(NOT ${lcName}_POPULATED)
     # Fetch the content using previously declared details
     FetchContent_Populate(googletest)
 
@@ -1594,33 +1558,36 @@ if(NOT ${lcName}_POPULATED)
     SET(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
 
     # Bring the populated content into the build
-    add_subdirectory(${${lcName}_SOURCE_DIR} ${${lcName}_BINARY_DIR})
-endif()
+    ADD_SUBDIRECTORY(${${lcName}_SOURCE_DIR} ${${lcName}_BINARY_DIR})
+ENDIF(NOT ${lcName}_POPULATED)
 
-enable_testing()
+ENABLE_TESTING()
 
-set(TEST_NAME ${PROJECT_NAME}_tests)
+SET(TEST_NAME ${PROJECT_NAME}_tests)
 
-add_executable(
+ADD_EXECUTABLE(
     ${TEST_NAME}
     src/configuration/tests/configuration_tests.cpp
     # src/damage/tests/health_tests.cpp
     # src/damage/tests/layer_tests.cpp
     # src/damage/tests/object_tests.cpp
-    )
+)
 
 ADD_LIBRARY(vegastrike-testing
     ${LIBCONFIG}
     # ${LIBDAMAGE}
-    )
+)
 
-target_link_libraries(
+TARGET_LINK_LIBRARIES(
     ${TEST_NAME}
     gtest_main
     vegastrike-testing
-    )
+)
 
-file(COPY "src/configuration/tests/vegastrike.config" DESTINATION ${CMAKE_BINARY_DIR}/test_assets)
+FILE(
+    COPY "src/configuration/tests/vegastrike.config"
+    DESTINATION ${CMAKE_BINARY_DIR}/test_assets
+)
 
-include(GoogleTest)
+INCLUDE(GoogleTest)
 gtest_discover_tests(${TEST_NAME})
