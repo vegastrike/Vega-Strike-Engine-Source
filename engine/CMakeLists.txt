@@ -52,6 +52,11 @@ IF (POLICY CMP0048)
     CMAKE_POLICY (SET CMP0048 NEW)
 ENDIF (POLICY CMP0048)
 
+# Very important. Without this, CMake can't find pow() -- at least not on my Windows machine.
+IF (POLICY CMP0066)
+    CMAKE_POLICY (SET CMP0066 OLD)
+ENDIF ()
+
 IF (POLICY CMP0072)
     CMAKE_POLICY (SET CMP0072 NEW)
 ENDIF (POLICY CMP0072)
@@ -62,9 +67,6 @@ ENDIF (POLICY CMP0074)
 
 IF (POLICY CMP0075)
     CMAKE_POLICY (SET CMP0075 NEW)
-# Very important. Without this, CMake can't find pow() -- at least not on my Windows machine.
-ELSEIF (POLICY CMP0066)
-    CMAKE_POLICY (SET CMP0066 OLD)
 ENDIF ()
 
 PROJECT(Vega_Strike
