@@ -123,6 +123,6 @@ public:
     virtual std::string drawableGetName() = 0;
 };
 
-
+Matrix* GetCumulativeTransformationMatrix(Unit *unit, const Matrix &parentMatrix, Matrix invview);
 
 #endif // DRAWABLE_H

@@ -350,19 +350,8 @@ void GameUnit::Draw( const Transformation &parent, const Matrix &parentMatrix )
     this->cumulative_transformation.Compose( parent, parentMatrix );
     this->cumulative_transformation.to_matrix( this->cumulative_transformation_matrix );
 
-    ctm = &this->cumulative_transformation_matrix;
+    ctm = GetCumulativeTransformationMatrix(this, parentMatrix, invview);
     ct  = &this->cumulative_transformation;
-    if (this->graphicOptions.FaceCamera == 1) {
-        Vector  p, q, r;
-        QVector pos( ctm->p );
-        float   wid, hei;
-        float   magr = parentMatrix.getR().Magnitude();
-        float   magp = parentMatrix.getP().Magnitude();
-        float   magq = parentMatrix.getQ().Magnitude();
-        CalculateOrientation( pos, p, q, r, wid, hei, 0, false, ctm );
-        VectorAndPositionToMatrix( invview, p*magp, q*magq, r*magr, ctm->p );
-        ctm = &invview;
-    }
 
 #ifdef PERFRAMESOUND
     AUDAdjustSound( sound.engine, cumulative_transformation.position, GetVelocity() );

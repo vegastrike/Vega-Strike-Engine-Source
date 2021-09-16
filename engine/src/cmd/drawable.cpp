@@ -29,6 +29,7 @@
 #include "gfx/mesh.h"
 #include "gfx/quaternion.h"
 #include "unit_generic.h"
+#include "gfx/point_to_cam.h"
 
 #include <boost/algorithm/string.hpp>
 
@@ -265,4 +266,22 @@ void Drawable::clear()
 bool Drawable::animationRuns() const
 {
     return !done;
+}
+
+Matrix* GetCumulativeTransformationMatrix(Unit *unit, const Matrix &parentMatrix, Matrix invview) {
+    Matrix *ctm = &unit->cumulative_transformation_matrix;
+
+    if (unit->graphicOptions.FaceCamera == 1) {
+        Vector  p, q, r;
+        QVector pos( ctm->p );
+        float   wid, hei;
+        float   magr = parentMatrix.getR().Magnitude();
+        float   magp = parentMatrix.getP().Magnitude();
+        float   magq = parentMatrix.getQ().Magnitude();
+        CalculateOrientation( pos, p, q, r, wid, hei, 0, false, ctm );
+        VectorAndPositionToMatrix( invview, p*magp, q*magq, r*magr, ctm->p );
+        ctm = &invview;
+    }
+
+    return ctm;
 }
