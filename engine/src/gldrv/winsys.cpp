@@ -2,6 +2,14 @@
  * Tux Racer
  * Copyright (C) 1999-2001 Jasmin F. Patry
  *
+ * Incorporated into Vega Strike
+ *
+ * Copyright (C) Daniel Horn
+ * Copyright (C) 2020-2021 pyramid3d, Stephen G. Tuggy, @monohydroxy,
+ * and other Vega Strike contributors
+ *
+ * https://github.com/vegastrike/Vega-Strike-Engine-Source
+ *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
  * as published by the Free Software Foundation; either version 2
@@ -15,14 +23,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
- *
- * Incorporated into Vega Strike
- *
- * Copyright (C) Daniel Horn
- * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike
- * contributors
- *
- * https://github.com/vegastrike/Vega-Strike-Engine-Source
  */
 #include <assert.h>
 #include <sstream>
@@ -192,7 +192,7 @@ void winsys_warp_pointer( int x, int y )
  *  Sets up the SDL OpenGL rendering context
  *  \author  jfpatry
  *  \date    Created:  2000-10-20
- *  \date    Modified: 2020-07-27 - stephengtuggy
+ *  \date    Modified: 2021-09-17 - @stephengtuggy and @monohydroxy
  */
 static bool setup_sdl_video_mode()
 {
@@ -270,16 +270,42 @@ static bool setup_sdl_video_mode()
         }
     }
 
-    std::string version = (const char*)glGetString(GL_RENDERER);
-    if (version == "GDI Generic") {
+    char * (*fn) (int) = (char * (*) (int)) SDL_GL_GetProcAddress("glGetString");
+    if (fn == nullptr) {
+        BOOST_LOG_TRIVIAL(fatal) << "Unable to locate glGetString function!";
+        SDL_Quit();
+        VSExit(-8);
+    }
+    char * r = fn(GL_RENDERER);
+    if (r == nullptr) {
+        BOOST_LOG_TRIVIAL(fatal) << "glGetString(GL_RENDERER) returned NULL!";
+        SDL_Quit();
+        VSExit(-9);
+    }
+    std::string version = r;
+    if (version == "") {
+        if (game_options.gl_accelerated_visual) {
+            BOOST_LOG_TRIVIAL(error) << "Graphics driver returned as the empty string, trying to reset.";
+            VSFileSystem::flushLogs();
+            SDL_Quit();
+            game_options.gl_accelerated_visual = false;
+            return false;
+        } else {
+            BOOST_LOG_TRIVIAL(error) << "Graphics driver returned as the empty string, reset failed.\n";
+            BOOST_LOG_TRIVIAL(error) << "Please make sure a graphics card driver is installed and functioning properly.\n";
+            VSFileSystem::flushLogs();
+        }
+    } else if (version == "GDI Generic") {
         if (game_options.gl_accelerated_visual) {
             BOOST_LOG_TRIVIAL(error) << "GDI Generic software driver reported, trying to reset.";
+            VSFileSystem::flushLogs();
             SDL_Quit();
             game_options.gl_accelerated_visual = false;
             return false;
         } else {
             BOOST_LOG_TRIVIAL(error) << "GDI Generic software driver reported, reset failed.\n";
             BOOST_LOG_TRIVIAL(error) << "Please make sure a graphics card driver is installed and functioning properly.\n";
+            VSFileSystem::flushLogs();
         }
     }
 
