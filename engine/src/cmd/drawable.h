@@ -123,6 +123,7 @@ public:
     virtual std::string drawableGetName() = 0;
 
     void Sparkle(bool on_screen, Matrix *ctm);
+    void DrawHalo(bool on_screen, float apparent_size, Matrix wmat, int cloak);
 };
 
 Matrix* GetCumulativeTransformationMatrix(Unit *unit, const Matrix &parentMatrix, Matrix invview);

@@ -32,6 +32,7 @@
 #include "gfx/point_to_cam.h"
 #include "gfx/halo_system.h"
 #include "options.h"
+#include "unit.h"
 
 #include <boost/algorithm/string.hpp>
 
@@ -357,4 +358,50 @@ void Drawable::Sparkle(bool on_screen, Matrix *ctm) {
 
         LaunchOneParticle( *ctm, velocity, seed, unit, damage_level, unit->faction );
     }
+}
+
+
+void Drawable::DrawHalo(bool on_screen, float apparent_size, Matrix wmat, int cloak) {
+    Unit *unit = static_cast<Unit*>(this);
+    GameUnit *game_unit = static_cast<GameUnit*>(this);
+
+    // Units not shown don't emit a halo
+    if(!on_screen) {
+        return;
+    }
+
+    // Units with no halo
+    if(game_unit->phalos->NumHalos() == 0) {
+        return;
+    }
+
+    // Docked units
+    if(unit->docked&(unit->DOCKED|unit->DOCKED_INSIDE)) {
+        return;
+    }
+
+    // Small units
+    if (  apparent_size <= 5.0f ) {
+        return;
+    }
+
+
+    Vector linaccel = unit->GetAcceleration();
+    Vector angaccel = unit->GetAngularAcceleration();
+    float  maxaccel = unit->GetMaxAccelerationInDirectionOf( wmat.getR(), true );
+    Vector velocity = unit->GetVelocity();
+
+    float  cmas = unit->computer.max_ab_speed()*unit->computer.max_ab_speed();
+    if (cmas == 0)
+        cmas = 1;
+
+    Vector Scale( 1, 1, 1 );         //Now, HaloSystem handles that
+    float damage_level = unit->hull/unit->maxhull;
+    //WARNING: cmas is not a valid maximum speed for the upcoming multi-direction thrusters,
+    //nor is maxaccel. Instead, each halo should have its own limits specified in units.csv
+    float nebd = (_Universe->AccessCamera()->GetNebula() == unit->nebula && unit->nebula != nullptr) ? -1 : 0;
+    float hulld = unit->GetHull() > 0 ? damage_level : 1.0;
+    game_unit->phalos->Draw( wmat, Scale, cloak, nebd, hulld, velocity,
+                  linaccel, angaccel, maxaccel, cmas, unit->faction );
+
 }

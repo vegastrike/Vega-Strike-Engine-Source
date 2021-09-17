@@ -552,23 +552,8 @@ void GameUnit::Draw( const Transformation &parent, const Matrix &parentMatrix )
                                                 && Unit::TargetTracked() ) ? Unit::Target() : NULL,
                                                this->computer.radar.trackingcone );
     }
-    if ( On_Screen && (phalos->NumHalos() > 0) && !( this->docked&(DOCKED|DOCKED_INSIDE) ) && (Apparent_Size > 5.0f) ) {
-        Vector linaccel = this->GetAcceleration();
-        Vector angaccel = this->GetAngularAcceleration();
-        float  maxaccel = this->GetMaxAccelerationInDirectionOf( wmat.getR(), true );
-        Vector velocity = this->GetVelocity();
 
-        float  cmas = this->computer.max_ab_speed()*this->computer.max_ab_speed();
-        if (cmas == 0)
-            cmas = 1;
-        Vector Scale( 1, 1, 1 );         //Now, HaloSystem handles that
-        //WARNING: cmas is not a valid maximum speed for the upcoming multi-direction thrusters,
-        //nor is maxaccel. Instead, each halo should have its own limits specified in units.csv
-        float nebd = (_Universe->AccessCamera()->GetNebula() == this->nebula && this->nebula != NULL) ? -1 : 0;
-        float hulld = this->GetHull() > 0 ? damagelevel : 1.0;
-        phalos->Draw( wmat, Scale, cloak, nebd, hulld, velocity, linaccel, angaccel, maxaccel, cmas, this->faction );
-    }
-
+    DrawHalo(On_Screen, Apparent_Size, wmat, cloak);
     Sparkle(On_Screen, ctm);
 }
 
