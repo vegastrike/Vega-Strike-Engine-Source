@@ -66,7 +66,7 @@ jobs:
           # Set the build directory, i.e. where CMake generates the build system files. Defaults to `$(Build.ArtifactStagingDirectory)` for CMakeLists.txt, and to `$(Build.ArtifactStagingDirectory)/<configuration-name>` for CMakeSettings.json. Used by any mode.
           buildDirectory: ${{ env.buildDir }}
           # Provides a mean to provide all the CMake arguments. This is required when using CMakeLists.txt in Advanced mode. For CMakeSettings.json, the arguments are already inferred, but you can append your arguments providing them here.  Used by CMakeListsTxtAdvanced and CMakeSettingsJson modes.
-          cmakeAppendedArgs: '-DUSE_PYTHON_3=ON -DCMAKE_SYSTEM_VERSION=10.0.19041.0'
+          cmakeAppendedArgs: '-DUSE_PYTHON_3=ON -DCMAKE_SYSTEM_VERSION="10.0.19041.0"'
           # Indicates whether to run 'cmake --build' after CMake project files have been generated successfully. Used by any mode.
           buildWithCMake: true
           # Additional parameters for both CMake and the make program (e.g. ninja or make).  Separate CMake arguments to the native make program arguments with '--', such as: '--clean-first --config Debug -- -j0'. Used by both CMakeListsTxtBasic and CMakeListsTxtAdvanced modes
