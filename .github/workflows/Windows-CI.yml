@@ -23,6 +23,8 @@ jobs:
     env:
       buildDir: '${{ github.workspace }}/build/'
       PYTHONHOME: '${{ github.workspace }}/v/packages/python3_x64-windows/tools/python3'
+      UCRTVersion: '10.0.19041.0\'
+      WindowsSDKLibVersion: '10.0.19041.0\'
       WindowsSDKVersion: '10.0.19041.0\'
 
     # Steps represent a sequence of tasks that will be executed as part of the job
