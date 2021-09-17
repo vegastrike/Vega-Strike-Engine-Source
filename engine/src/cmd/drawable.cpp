@@ -30,6 +30,8 @@
 #include "gfx/quaternion.h"
 #include "unit_generic.h"
 #include "gfx/point_to_cam.h"
+#include "gfx/halo_system.h"
+#include "options.h"
 
 #include <boost/algorithm/string.hpp>
 
@@ -284,4 +286,75 @@ Matrix* GetCumulativeTransformationMatrix(Unit *unit, const Matrix &parentMatrix
     }
 
     return ctm;
+}
+
+
+/**
+ * @brief Drawable::Sparkle caused damaged units to emit sparks
+ */
+void Drawable::Sparkle(bool on_screen, Matrix *ctm) {
+    Unit *unit = static_cast<Unit*>(this);
+    const Vector velocity = unit->GetVelocity();
+
+    // Docked units don't sparkle
+    // Move to a separate isDocked() function
+    if(unit->docked&(unit->DOCKED|unit->DOCKED_INSIDE)) {
+        return;
+    }
+
+    // Units not shown don't sparkle
+    if(!on_screen) {
+        return;
+    }
+
+    // Obviously, don't sparkle if the option isn't set
+    if(unit->graphicOptions.NoDamageParticles) {
+        return;
+    }
+
+    // Destroyed units (dying?) don't sparkle
+    if(unit->GetHull() <= 0) {
+        return;
+    }
+
+    // Units with no meshes, don't sparkle
+    if(unit->nummesh() <= 0) {
+        return;
+    }
+
+    // Undamaged units don't sparkle
+    float damage_level = unit->hull/unit->maxhull;
+    if(damage_level >= .99) {
+        return;
+    }
+
+    double sparkle_accum = GetElapsedTime() * game_options.sparklerate;
+    int spawn = (int) (sparkle_accum);
+    sparkle_accum -= spawn;
+
+
+    // Pretty sure the following is the equivalent of the commented code
+    // unsigned int switcher = (damagelevel > .8) ? 1
+    //: (damagelevel > .6) ? 2 : (damagelevel > .4) ? 3 : (damagelevel > .2) ? 4 : 5;
+    unsigned int switcher    = 5 * (1 - damage_level);
+
+    long seed = (long) this;
+
+    while (spawn-- > 0) {
+        switch (switcher)
+        {
+        case 5:
+            seed += 165;
+        case 4:
+            seed += 47;
+        case 3:
+            seed += 61;
+        case 2:
+            seed += 65537;
+        default:
+            seed += 257;
+        }
+
+        LaunchOneParticle( *ctm, velocity, seed, unit, damage_level, unit->faction );
+    }
 }

@@ -568,35 +568,8 @@ void GameUnit::Draw( const Transformation &parent, const Matrix &parentMatrix )
         float hulld = this->GetHull() > 0 ? damagelevel : 1.0;
         phalos->Draw( wmat, Scale, cloak, nebd, hulld, velocity, linaccel, angaccel, maxaccel, cmas, this->faction );
     }
-    if ( On_Screen && !graphicOptions.NoDamageParticles
-        && !( this->docked&(DOCKED|DOCKED_INSIDE) ) ) {
-        if (damagelevel < .99 && this->nummesh() > 0 && this->GetHull() > 0) {
-            unsigned int switcher    = (damagelevel > .8) ? 1
-                                       : (damagelevel > .6) ? 2 : (damagelevel > .4) ? 3 : (damagelevel > .2) ? 4 : 5;
-            sparkle_accum += GetElapsedTime()*game_options.sparklerate;
-            int spawn = (int) (sparkle_accum);
-            sparkle_accum -= spawn;
-            while (spawn-- > 0) {
-                switch (switcher)
-                {
-                case 5:
-                    LaunchOneParticle( *ctm, this->GetVelocity(), ( (long) this )+165, this, damagelevel, this->faction );
-                case 4:
-                    LaunchOneParticle( *ctm, this->GetVelocity(), ( (long) this )+47, this, damagelevel, this->faction );
-                case 3:
-                    LaunchOneParticle( *ctm, this->GetVelocity(), ( (long) this )+61, this, damagelevel, this->faction );
-                case 2:
-                    LaunchOneParticle( *ctm, this->GetVelocity(), ( (long) this )+65537, this, damagelevel, this->faction );
-                default:
-                    LaunchOneParticle( *ctm, this->GetVelocity(), ( (long) this )+257, this, damagelevel, this->faction );
-                }
-            }
-        } else {
-            sparkle_accum = 0;
-        }
-    } else {
-        sparkle_accum = 0;
-    }
+
+    Sparkle(On_Screen, ctm);
 }
 
 

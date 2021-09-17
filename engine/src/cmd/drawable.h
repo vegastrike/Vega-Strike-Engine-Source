@@ -121,6 +121,8 @@ public:
     virtual void Draw( const Transformation &quat = identity_transformation, const Matrix &m = identity_matrix ) = 0;
     virtual void DrawNow( const Matrix &m = identity_matrix, float lod = 1000000000 ) = 0;
     virtual std::string drawableGetName() = 0;
+
+    void Sparkle(bool on_screen, Matrix *ctm);
 };
 
 Matrix* GetCumulativeTransformationMatrix(Unit *unit, const Matrix &parentMatrix, Matrix invview);
