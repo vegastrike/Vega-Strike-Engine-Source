@@ -124,6 +124,7 @@ public:
 
     void Sparkle(bool on_screen, Matrix *ctm);
     void DrawHalo(bool on_screen, float apparent_size, Matrix wmat, int cloak);
+    void DrawSubunits(bool on_screen, Matrix wmat, int cloak, float average_scale, unsigned char char_damage);
 };
 
 Matrix* GetCumulativeTransformationMatrix(Unit *unit, const Matrix &parentMatrix, Matrix invview);

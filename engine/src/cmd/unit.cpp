@@ -504,55 +504,8 @@ void GameUnit::Draw( const Transformation &parent, const Matrix &parentMatrix )
      *  delete tmpiter;
      **/
     if (cam_setup_phase) return;
-    int nummounts = this->getNumMounts();
-    for (i = 0; (int) i < nummounts; i++) {
-        Mount *mahnt = &this->mounts[i];
-        if (game_options.draw_weapons && On_Screen)
-            if (mahnt->xyscale != 0 && mahnt->zscale != 0) {
-                Mesh *gun = mahnt->type->gun;
-                if (gun && mahnt->status != Mount::UNCHOSEN) {
-                    Transformation mountLocation( mahnt->GetMountOrientation(), mahnt->GetMountLocation().Cast() );
-                    mountLocation.Compose( *ct, wmat );
-                    Matrix mat;
-                    mountLocation.to_matrix( mat );
-                    if (GFXSphereInFrustum( mountLocation.position, gun->rSize()*avgscale ) > 0) {
-                        float d   = ( mountLocation.position-_Universe->AccessCamera()->GetPosition() ).Magnitude();
-                        float pixradius = gun->rSize()*perspectiveFactor(
-                            (d-gun->rSize() < g_game.znear) ? g_game.znear : d-gun->rSize() );
-                        float lod = pixradius * g_game.detaillevel;
-                        if (lod > 0.5 && pixradius > 2.5) {
-                            ScaleMatrix( mat, Vector( mahnt->xyscale, mahnt->xyscale, mahnt->zscale ) );
-                            gun->setCurrentFrame( this->mounts[i].ComputeAnimatedFrame( gun ) );
-                            gun->Draw( lod, mat, d, cloak,
-                                       (_Universe->AccessCamera()->GetNebula() == this->nebula && this->nebula != NULL) ? -1 : 0,
-                                       chardamage,
-                                       true );                                                                                                                                      //cloakign and nebula
-                        }
-                        if (mahnt->type->gun1) {
-                            pixradius = gun->rSize()*perspectiveFactor(
-                                (d-gun->rSize() < g_game.znear) ? g_game.znear : d-gun->rSize() );
-                            lod = pixradius * g_game.detaillevel;
-                            if (lod > 0.5 && pixradius > 2.5) {
-                                gun = mahnt->type->gun1;
-                                gun->setCurrentFrame( this->mounts[i].ComputeAnimatedFrame( gun ) );
-                                gun->Draw( lod, mat, d, cloak,
-                                           (_Universe->AccessCamera()->GetNebula() == this->nebula && this->nebula
-                                            != NULL) ? -1 : 0,
-                                           chardamage, true );                                                                                                                              //cloakign and nebula
-                            }
-                        }
-                    }
-                }
-            }
-        if (this->mounts[i].type->type == WEAPON_TYPE::BEAM)
-            if (this->mounts[i].ref.gun)
-                this->mounts[i].ref.gun->Draw( *ct, wmat,
-                                               ( isAutoTrackingMount(this->mounts[i].size)
-                                                && (this->mounts[i].time_to_lock <= 0)
-                                                && Unit::TargetTracked() ) ? Unit::Target() : NULL,
-                                               this->computer.radar.trackingcone );
-    }
 
+    DrawSubunits(On_Screen, wmat, cloak, avgscale, chardamage);
     DrawHalo(On_Screen, Apparent_Size, wmat, cloak);
     Sparkle(On_Screen, ctm);
 }

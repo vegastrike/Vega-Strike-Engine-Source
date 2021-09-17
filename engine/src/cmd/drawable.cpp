@@ -33,9 +33,20 @@
 #include "gfx/halo_system.h"
 #include "options.h"
 #include "unit.h"
+#include "weapon_info.h"
+#include "beam.h"
 
 #include <boost/algorithm/string.hpp>
 
+// Dupe to same function in unit.cpp
+// TODO: remove duplication
+inline static float perspectiveFactor( float d )
+{
+    if (d > 0)
+        return g_game.x_resolution*GFXGetZPerspective( d );
+    else
+        return 1.0f;
+}
 
 Drawable::Drawable() :
                    animatedMesh(true),
@@ -405,3 +416,85 @@ void Drawable::DrawHalo(bool on_screen, float apparent_size, Matrix wmat, int cl
                   linaccel, angaccel, maxaccel, cmas, unit->faction );
 
 }
+
+
+void Drawable::DrawSubunits(bool on_screen, Matrix wmat, int cloak, float average_scale, unsigned char char_damage) {
+    Unit *unit = static_cast<Unit*>(this);
+    Transformation *ct = &unit->cumulative_transformation;
+
+    // Units not shown don't draw subunits
+    if(!on_screen) {
+        return;
+    }
+
+    // Don't draw mounts if game is set not to...
+   if(!game_options.draw_weapons) {
+        return;
+   }
+
+   for (int i = 0; (int) i < unit->getNumMounts(); i++) {
+       Mount *mount = &unit->mounts[i];
+       Mesh *gun = mount->type->gun;
+
+       // Don't bother drawing small mounts ?!
+       if (mount->xyscale == 0 || mount->zscale == 0) {
+           continue;
+       }
+
+       // Don't draw unchosen GUN mounts, whatever that means
+       // Does not cover beams for some reason.
+       if (gun && mount->status == Mount::UNCHOSEN) {
+           continue;
+       }
+
+       Transformation mountLocation( mount->GetMountOrientation(), mount->GetMountLocation().Cast() );
+       mountLocation.Compose( *ct, wmat );
+       Matrix mat;
+       mountLocation.to_matrix( mat );
+       if (GFXSphereInFrustum( mountLocation.position, gun->rSize()*average_scale ) > 0) {
+           float d   = ( mountLocation.position-_Universe->AccessCamera()->GetPosition() ).Magnitude();
+           float pixradius = gun->rSize()*perspectiveFactor(
+                       (d-gun->rSize() < g_game.znear) ? g_game.znear : d-gun->rSize() );
+           float lod = pixradius * g_game.detaillevel;
+           if (lod > 0.5 && pixradius > 2.5) {
+               ScaleMatrix( mat, Vector( mount->xyscale, mount->xyscale, mount->zscale ) );
+               gun->setCurrentFrame( unit->mounts[i].ComputeAnimatedFrame( gun ) );
+               gun->Draw( lod, mat, d, cloak,
+                          (_Universe->AccessCamera()->GetNebula() == unit->nebula && unit->nebula != NULL) ? -1 : 0,
+                          char_damage,
+                          true );                                                                                                                                      //cloakign and nebula
+           }
+           if (mount->type->gun1) {
+               pixradius = gun->rSize()*perspectiveFactor(
+                           (d-gun->rSize() < g_game.znear) ? g_game.znear : d-gun->rSize() );
+               lod = pixradius * g_game.detaillevel;
+               if (lod > 0.5 && pixradius > 2.5) {
+                   gun = mount->type->gun1;
+                   gun->setCurrentFrame( unit->mounts[i].ComputeAnimatedFrame( gun ) );
+                   gun->Draw( lod, mat, d, cloak,
+                              (_Universe->AccessCamera()->GetNebula() == unit->nebula && unit->nebula
+                               != NULL) ? -1 : 0,
+                              char_damage, true );                                                                                                                              //cloakign and nebula
+               }
+           }
+       }
+
+
+       // If not a beam weapon, stop processing
+       if (unit->mounts[i].type->type != WEAPON_TYPE::BEAM) {
+           continue;
+       }
+
+       // If gun is null (?)
+       if (!unit->mounts[i].ref.gun) {
+           continue;
+       }
+
+       unit->mounts[i].ref.gun->Draw( *ct, wmat,
+                                      ( isAutoTrackingMount(unit->mounts[i].size)
+                                        && (unit->mounts[i].time_to_lock <= 0)
+                                        && unit->TargetTracked() ) ? unit->Target() : NULL,
+                                      unit->computer.radar.trackingcone );
+   }
+}
+
