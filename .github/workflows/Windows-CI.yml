@@ -26,6 +26,7 @@ jobs:
       UCRTVersion: '10.0.19041.0'
       WindowsSDKLibVersion: '10.0.19041.0\'
       WindowsSDKVersion: '10.0.19041.0\'
+      VCPKG_CMAKE_SYSTEM_VERSION: '10.0.19041.0'
 
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
