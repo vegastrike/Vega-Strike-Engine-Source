@@ -40,7 +40,7 @@ jobs:
       - name: install-vcpkg
         # You may pin to the exact commit or the version.
         # uses: lukka/run-vcpkg@9c0ae56bad291f4b185cc433a9b56084b2962259
-        uses: lukka/run-vcpkg@v7.3
+        uses: lukka/run-vcpkg@v7
         with:
           vcpkgDirectory: '${{ github.workspace }}/v'
           setupOnly: true
@@ -48,6 +48,9 @@ jobs:
           vcpkgTriplet: 'x64-windows'
           appendedCacheKey: ${{ hashFiles( '**/vcpkg.json' ) }}
           additionalCachedPaths: ${{ env.buildDir }}/vcpkg_installed
+
+      - name: Troubleshooting per Phoebe Hui
+        run: ./vcpkg install python3:x64-windows --debug
 
       - name: run-cmake
         # You may pin to the exact commit or the version.
