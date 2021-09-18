@@ -49,8 +49,8 @@ jobs:
           appendedCacheKey: ${{ hashFiles( '**/vcpkg.json' ) }}
           additionalCachedPaths: ${{ env.buildDir }}/vcpkg_installed
 
-      - name: Troubleshooting per Phoebe Hui
-        run: vcpkg install python3:x64-windows -DCMAKE_SYSTEM_VERSION='10.0.19041.0' -DCMAKE_VS_WINDOWS_TARGET_PLATFORM_VERSION='10.0.19041.0' -DVCPKG_CMAKE_SYSTEM_VERSION='10.0.19041.0' -DCMAKE_VS_WINDOWS_TARGET_PLATFORM_VERSION='10.0.19041.0' --debug
+    #   - name: Troubleshooting per Phoebe Hui
+    #     run: vcpkg install python3:x64-windows -DCMAKE_SYSTEM_VERSION='10.0.19041.0' -DCMAKE_VS_WINDOWS_TARGET_PLATFORM_VERSION='10.0.19041.0' -DVCPKG_CMAKE_SYSTEM_VERSION='10.0.19041.0' -DCMAKE_VS_WINDOWS_TARGET_PLATFORM_VERSION='10.0.19041.0' --debug
 
       - name: run-cmake
         # You may pin to the exact commit or the version.
