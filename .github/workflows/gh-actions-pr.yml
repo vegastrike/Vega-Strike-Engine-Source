@@ -40,7 +40,7 @@ jobs:
           - FROM:     'debian:buster'
             COMPILER: 'clang'
           - FROM:     'debian:stretch'
-            COMPILER: 'clang'
+            COMPILER: 'gcc'
           - FROM:     'opensuse/leap'
             COMPILER: 'clang'
           - FROM:     'fedora:34'

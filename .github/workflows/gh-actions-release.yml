@@ -44,7 +44,7 @@ jobs:
             COMPILER: 'clang'
             ARTIFACT_EXT: 'deb'
           - FROM:     'debian:stretch'
-            COMPILER: 'clang'
+            COMPILER: 'gcc'
             ARTIFACT_EXT: 'deb'
           - FROM:     'opensuse/leap'
             COMPILER: 'clang'
