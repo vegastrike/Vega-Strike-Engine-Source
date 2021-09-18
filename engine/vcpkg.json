@@ -2,7 +2,6 @@
     "$schema": "https://raw.githubusercontent.com/microsoft/vcpkg/master/scripts/vcpkg.schema.json",
     "name": "vega-strike",
     "version-string": "0.9.0",
-    "overrides": [],
     "dependencies": [
         "boost-python",
         "boost-log",

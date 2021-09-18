@@ -52,7 +52,7 @@ IF (POLICY CMP0048)
     CMAKE_POLICY (SET CMP0048 NEW)
 ENDIF (POLICY CMP0048)
 
-# Very important. Without this, CMake can't find pow() -- at least not on my Windows machine.
+# Used to be that without this, CMake couldn't find pow() -- at least not on my Windows machine.
 IF (POLICY CMP0066)
     CMAKE_POLICY (SET CMP0066 NEW)  #OLD
 ENDIF ()
@@ -72,8 +72,6 @@ ENDIF ()
 IF (POLICY CMP0091)
     CMAKE_POLICY (SET CMP0091 NEW)
 ENDIF ()
-
-SET (VCPKG_INSTALL_OPTIONS "-DCMAKE_SYSTEM_VERSION='10.0.19041.0' -DCMAKE_VS_WINDOWS_TARGET_PLATFORM_VERSION='10.0.19041.0' -DVCPKG_CMAKE_SYSTEM_VERSION='10.0.19041.0' -DCMAKE_VS_WINDOWS_TARGET_PLATFORM_VERSION='10.0.19041.0'")
 
 PROJECT(Vega_Strike
     VERSION
