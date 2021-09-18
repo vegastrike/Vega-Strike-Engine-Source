@@ -50,7 +50,7 @@ jobs:
           additionalCachedPaths: ${{ env.buildDir }}/vcpkg_installed
 
       - name: Troubleshooting per Phoebe Hui
-        run: ./vcpkg install python3:x64-windows --debug
+        run: vcpkg install python3:x64-windows --debug
 
       - name: run-cmake
         # You may pin to the exact commit or the version.
