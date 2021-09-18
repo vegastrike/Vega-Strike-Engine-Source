@@ -55,7 +55,7 @@ jobs:
       - name: run-cmake
         # You may pin to the exact commit or the version.
         # uses: lukka/run-cmake@7ba4481660f0f04c86cfa5f1f24b90effc97bde1
-        uses: lukka/run-cmake@v3.4
+        uses: lukka/run-cmake@v3
         with:
           # Path to CMakeLists.txt. Used for both CMakeListsTxtBasic and CMakeListsTxtAdvanced modes.
           cmakeListsTxtPath: ${{ github.workspace }}/engine/CMakeLists.txt
@@ -70,7 +70,7 @@ jobs:
           # Set the build directory, i.e. where CMake generates the build system files. Defaults to `$(Build.ArtifactStagingDirectory)` for CMakeLists.txt, and to `$(Build.ArtifactStagingDirectory)/<configuration-name>` for CMakeSettings.json. Used by any mode.
           buildDirectory: ${{ env.buildDir }}
           # Provides a mean to provide all the CMake arguments. This is required when using CMakeLists.txt in Advanced mode. For CMakeSettings.json, the arguments are already inferred, but you can append your arguments providing them here.  Used by CMakeListsTxtAdvanced and CMakeSettingsJson modes.
-          cmakeAppendedArgs: '-DCMAKE_SYSTEM_VERSION="10.0.19041.0" -DCMAKE_VS_WINDOWS_TARGET_PLATFORM_VERSION="10.0.19041.0" -DVCPKG_CMAKE_SYSTEM_VERSION="10.0.19041.0" -DCMAKE_VS_WINDOWS_TARGET_PLATFORM_VERSION="10.0.19041.0"'
+          cmakeAppendedArgs: ""
           # Indicates whether to run 'cmake --build' after CMake project files have been generated successfully. Used by any mode.
           buildWithCMake: true
           # Additional parameters for both CMake and the make program (e.g. ninja or make).  Separate CMake arguments to the native make program arguments with '--', such as: '--clean-first --config Debug -- -j0'. Used by both CMakeListsTxtBasic and CMakeListsTxtAdvanced modes
