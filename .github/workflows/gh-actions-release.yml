@@ -32,7 +32,7 @@ jobs:
             COMPILER: 'clang'
             ARTIFACT_EXT: 'deb'
           - FROM:     'ubuntu:xenial'
-            COMPILER: 'clang'
+            COMPILER: 'gcc'
             ARTIFACT_EXT: 'deb'
           - FROM:     'linuxmintd/mint20-amd64'
             COMPILER: 'clang'
