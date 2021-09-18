@@ -6,9 +6,7 @@ name: Windows-CI
 on:
   # Triggers the workflow on push or pull request events but only for the master branch
   push:
-  #  branches: [ master ]
   pull_request:
-  #  branches: [ master ]
 
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
@@ -23,7 +21,6 @@ jobs:
     env:
       buildDir: '${{ github.workspace }}/build/'
       PYTHONHOME: '${{ github.workspace }}/v/packages/python3_x64-windows/tools/python3'
-    #   WindowsSDKVersion: '10.0.19041.0'
 
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
@@ -31,20 +28,20 @@ jobs:
       - name: checkout
         uses: actions/checkout@v2
 
-    #   - name: install-cmake
-    #     uses: lukka/get-cmake@v3.21.1
+      - name: install-cmake
+        uses: lukka/get-cmake@v3.21.1
 
-    #   - name: install-vcpkg
-    #     # You may pin to the exact commit or the version.
-    #     # uses: lukka/run-vcpkg@9c0ae56bad291f4b185cc433a9b56084b2962259
-    #     uses: lukka/run-vcpkg@v7
-    #     with:
-    #       vcpkgDirectory: '${{ github.workspace }}/v'
-    #       setupOnly: true
-    #       vcpkgGitCommitId: '574c125d6f1dd8150dadf1e116cd182823591626'
-    #       vcpkgTriplet: 'x64-windows'
-    #       appendedCacheKey: ${{ hashFiles( '**/vcpkg.json' ) }}
-    #       additionalCachedPaths: ${{ env.buildDir }}/vcpkg_installed
+      - name: install-vcpkg
+        # You may pin to the exact commit or the version.
+        # uses: lukka/run-vcpkg@9c0ae56bad291f4b185cc433a9b56084b2962259
+        uses: lukka/run-vcpkg@v7
+        with:
+          vcpkgDirectory: '${{ github.workspace }}/v'
+          setupOnly: true
+          vcpkgGitCommitId: '574c125d6f1dd8150dadf1e116cd182823591626'
+          vcpkgTriplet: 'x64-windows'
+          appendedCacheKey: ${{ hashFiles( '**/vcpkg.json' ) }}
+          additionalCachedPaths: ${{ env.buildDir }}/vcpkg_installed
 
       - name: Troubleshooting per Phoebe Hui
         run: vcpkg install python3:x64-windows --debug
