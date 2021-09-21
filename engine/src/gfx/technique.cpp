@@ -151,28 +151,9 @@ Pass::BlendMode parseBlendMode(const std::string &s)
     return parseEnum(s, enumMap);
 }
 
-static float parseFloat( const std::string &s )
-{
-    if ( s.empty() ) throw InvalidParameters( "Invalid float attribute" );
-    else
-        return XMLSupport::parse_floatf( s );
-}
 
-void parseFloat4( const std::string &s, float value[4] )
-{
-    string::size_type ini = 0, end;
-    int i = 0;
-    while (i < 4 && ini != string::npos) {
-        value[i++] = parseFloat( s.substr( ini, end = s.find_first_of( ',', ini ) ) );
-        ini = ( (end == string::npos) ? end : (end+1) );
-    }
-    //if (i >= 4 && ini != string::npos) {
-        //VS_LOG(info, (boost::format("WARNING: invalid float4: %1%") % s));
-    //}
-    while (i < 4) {
-        value[i++] = 0;
-    }
-}
+
+
 
 //end namespace
 };
