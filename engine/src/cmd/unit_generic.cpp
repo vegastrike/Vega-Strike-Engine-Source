@@ -4884,10 +4884,77 @@ void Unit::RequestPhysics()
         getStarSystem()->RequestPhysics( this, cur_sim_queue_slot );
 }
 
+static float parseFloat( const std::string &s )
+{
+    if ( s.empty() ) {
+        return 0.0f;
+    }
+
+    return XMLSupport::parse_floatf( s );
+}
+
+static inline void parseFloat4( const std::string &s, float value[4] )
+{
+    string::size_type ini = 0, end;
+    int i = 0;
+    while (i < 4 && ini != string::npos) {
+        value[i++] = parseFloat( s.substr( ini, end = s.find_first_of( ',', ini ) ) );
+        ini = ( (end == string::npos) ? end : (end+1) );
+    }
+    //if (i >= 4 && ini != string::npos) {
+        //VS_LOG(info, (boost::format("WARNING: invalid float4: %1%") % s));
+    //}
+    while (i < 4) {
+        value[i++] = 0;
+    }
+}
 void Unit::applyTechniqueOverrides(const std::map<std::string, std::string> &overrides)
 {
-    // No-op
-	// FIXME ?
+    //for (vector<Mesh*>::iterator mesh = this->meshdata.begin(); mesh != this->meshdata.end(); ++mesh) {
+    for(Mesh* mesh: meshdata) {
+        if (mesh == nullptr) {
+            continue;
+        }
+
+        // First check to see if the technique holds any parameter being overridden
+        TechniquePtr technique = mesh->getTechnique();
+
+        if (technique.get() == nullptr) {
+            continue;
+        }
+
+        // Can't be any lower, or goto won't work
+        TechniquePtr newtechnique;
+
+        for (int passno = 0; passno < technique->getNumPasses(); ++passno) {
+            const Pass &pass = technique->getPass(passno);
+            for (size_t paramno = 0; paramno < pass.getNumShaderParams(); ++paramno) {
+                if (overrides.count(pass.getShaderParam(paramno).name) > 0) {
+                    goto do_not_override;
+                }
+            }
+        }
+
+        // Prepare a new technique with the overrides
+        // (make sure the technique has been compiled though -
+        // parameter values don't really need recompilation)
+        newtechnique = TechniquePtr(new Technique(*technique));
+        for (int passno = 0; passno < technique->getNumPasses(); ++passno) {
+            Pass &pass = technique->getPass(passno);
+            for (size_t paramno = 0; paramno < pass.getNumShaderParams(); ++paramno) {
+                Pass::ShaderParam &param = pass.getShaderParam(paramno);
+                map<string, string>::const_iterator override = overrides.find(param.name);
+                if (override != overrides.end()) {
+                    parseFloat4(override->second, param.value);
+                }
+            }
+        }
+
+        mesh->setTechnique(newtechnique);
+
+
+        do_not_override: ;
+    }
 }
 
 std::map< string, Unit * > Drawable::Units;

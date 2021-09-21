@@ -380,9 +380,12 @@ public:
     void setUnitRole( const std::string &s );
     const std::string& getAttackPreference() const;
     void setAttackPreference( const std::string &s );
-protected:
 
     Nebula *nebula = nullptr;
+
+protected:
+
+
 //The orbit needs to have access to the velocity directly to disobey physics laws to precalculate orbits
     friend class PlanetaryOrbit;
     friend class ContinuousTerrain;

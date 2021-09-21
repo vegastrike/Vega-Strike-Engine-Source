@@ -29,9 +29,24 @@
 #include "gfx/mesh.h"
 #include "gfx/quaternion.h"
 #include "unit_generic.h"
+#include "gfx/point_to_cam.h"
+#include "gfx/halo_system.h"
+#include "options.h"
+#include "unit.h"
+#include "weapon_info.h"
+#include "beam.h"
 
 #include <boost/algorithm/string.hpp>
 
+// Dupe to same function in unit.cpp
+// TODO: remove duplication
+inline static float perspectiveFactor( float d )
+{
+    if (d > 0)
+        return g_game.x_resolution*GFXGetZPerspective( d );
+    else
+        return 1.0f;
+}
 
 Drawable::Drawable() :
                    animatedMesh(true),
@@ -266,3 +281,220 @@ bool Drawable::animationRuns() const
 {
     return !done;
 }
+
+Matrix* GetCumulativeTransformationMatrix(Unit *unit, const Matrix &parentMatrix, Matrix invview) {
+    Matrix *ctm = &unit->cumulative_transformation_matrix;
+
+    if (unit->graphicOptions.FaceCamera == 1) {
+        Vector  p, q, r;
+        QVector pos( ctm->p );
+        float   wid, hei;
+        float   magr = parentMatrix.getR().Magnitude();
+        float   magp = parentMatrix.getP().Magnitude();
+        float   magq = parentMatrix.getQ().Magnitude();
+        CalculateOrientation( pos, p, q, r, wid, hei, 0, false, ctm );
+        VectorAndPositionToMatrix( invview, p*magp, q*magq, r*magr, ctm->p );
+        ctm = &invview;
+    }
+
+    return ctm;
+}
+
+
+/**
+ * @brief Drawable::Sparkle caused damaged units to emit sparks
+ */
+void Drawable::Sparkle(bool on_screen, Matrix *ctm) {
+    Unit *unit = static_cast<Unit*>(this);
+    const Vector velocity = unit->GetVelocity();
+
+    // Docked units don't sparkle
+    // Move to a separate isDocked() function
+    if(unit->docked&(unit->DOCKED|unit->DOCKED_INSIDE)) {
+        return;
+    }
+
+    // Units not shown don't sparkle
+    if(!on_screen) {
+        return;
+    }
+
+    // Obviously, don't sparkle if the option isn't set
+    if(unit->graphicOptions.NoDamageParticles) {
+        return;
+    }
+
+    // Destroyed units (dying?) don't sparkle
+    if(unit->GetHull() <= 0) {
+        return;
+    }
+
+    // Units with no meshes, don't sparkle
+    if(unit->nummesh() <= 0) {
+        return;
+    }
+
+    // Undamaged units don't sparkle
+    float damage_level = unit->hull/unit->maxhull;
+    if(damage_level >= .99) {
+        return;
+    }
+
+    double sparkle_accum = GetElapsedTime() * game_options.sparklerate;
+    int spawn = (int) (sparkle_accum);
+    sparkle_accum -= spawn;
+
+
+    // Pretty sure the following is the equivalent of the commented code
+    // unsigned int switcher = (damagelevel > .8) ? 1
+    //: (damagelevel > .6) ? 2 : (damagelevel > .4) ? 3 : (damagelevel > .2) ? 4 : 5;
+    unsigned int switcher    = 5 * (1 - damage_level);
+
+    long seed = (long) this;
+
+    while (spawn-- > 0) {
+        switch (switcher)
+        {
+        case 5:
+            seed += 165;
+        case 4:
+            seed += 47;
+        case 3:
+            seed += 61;
+        case 2:
+            seed += 65537;
+        default:
+            seed += 257;
+        }
+
+        LaunchOneParticle( *ctm, velocity, seed, unit, damage_level, unit->faction );
+    }
+}
+
+
+void Drawable::DrawHalo(bool on_screen, float apparent_size, Matrix wmat, int cloak) {
+    Unit *unit = static_cast<Unit*>(this);
+    GameUnit *game_unit = static_cast<GameUnit*>(this);
+
+    // Units not shown don't emit a halo
+    if(!on_screen) {
+        return;
+    }
+
+    // Units with no halo
+    if(game_unit->phalos->NumHalos() == 0) {
+        return;
+    }
+
+    // Docked units
+    if(unit->docked&(unit->DOCKED|unit->DOCKED_INSIDE)) {
+        return;
+    }
+
+    // Small units
+    if (  apparent_size <= 5.0f ) {
+        return;
+    }
+
+
+    Vector linaccel = unit->GetAcceleration();
+    Vector angaccel = unit->GetAngularAcceleration();
+    float  maxaccel = unit->GetMaxAccelerationInDirectionOf( wmat.getR(), true );
+    Vector velocity = unit->GetVelocity();
+
+    float  cmas = unit->computer.max_ab_speed()*unit->computer.max_ab_speed();
+    if (cmas == 0)
+        cmas = 1;
+
+    Vector Scale( 1, 1, 1 );         //Now, HaloSystem handles that
+    float damage_level = unit->hull/unit->maxhull;
+    //WARNING: cmas is not a valid maximum speed for the upcoming multi-direction thrusters,
+    //nor is maxaccel. Instead, each halo should have its own limits specified in units.csv
+    float nebd = (_Universe->AccessCamera()->GetNebula() == unit->nebula && unit->nebula != nullptr) ? -1 : 0;
+    float hulld = unit->GetHull() > 0 ? damage_level : 1.0;
+    game_unit->phalos->Draw( wmat, Scale, cloak, nebd, hulld, velocity,
+                  linaccel, angaccel, maxaccel, cmas, unit->faction );
+
+}
+
+
+void Drawable::DrawSubunits(bool on_screen, Matrix wmat, int cloak, float average_scale, unsigned char char_damage) {
+    Unit *unit = static_cast<Unit*>(this);
+    Transformation *ct = &unit->cumulative_transformation;
+
+    // Units not shown don't draw subunits
+    if(!on_screen) {
+        return;
+    }
+
+    // Don't draw mounts if game is set not to...
+   if(!game_options.draw_weapons) {
+        return;
+   }
+
+   for (int i = 0; (int) i < unit->getNumMounts(); i++) {
+       Mount *mount = &unit->mounts[i];
+       Mesh *gun = mount->type->gun;
+
+       // Don't bother drawing small mounts ?!
+       if (mount->xyscale == 0 || mount->zscale == 0) {
+           continue;
+       }
+
+       // Don't draw unchosen GUN mounts, whatever that means
+       // Does not cover beams for some reason.
+       if (gun && mount->status == Mount::UNCHOSEN) {
+           continue;
+       }
+
+       Transformation mountLocation( mount->GetMountOrientation(), mount->GetMountLocation().Cast() );
+       mountLocation.Compose( *ct, wmat );
+       Matrix mat;
+       mountLocation.to_matrix( mat );
+       if (GFXSphereInFrustum( mountLocation.position, gun->rSize()*average_scale ) > 0) {
+           float d   = ( mountLocation.position-_Universe->AccessCamera()->GetPosition() ).Magnitude();
+           float pixradius = gun->rSize()*perspectiveFactor(
+                       (d-gun->rSize() < g_game.znear) ? g_game.znear : d-gun->rSize() );
+           float lod = pixradius * g_game.detaillevel;
+           if (lod > 0.5 && pixradius > 2.5) {
+               ScaleMatrix( mat, Vector( mount->xyscale, mount->xyscale, mount->zscale ) );
+               gun->setCurrentFrame( unit->mounts[i].ComputeAnimatedFrame( gun ) );
+               gun->Draw( lod, mat, d, cloak,
+                          (_Universe->AccessCamera()->GetNebula() == unit->nebula && unit->nebula != NULL) ? -1 : 0,
+                          char_damage,
+                          true );                                                                                                                                      //cloakign and nebula
+           }
+           if (mount->type->gun1) {
+               pixradius = gun->rSize()*perspectiveFactor(
+                           (d-gun->rSize() < g_game.znear) ? g_game.znear : d-gun->rSize() );
+               lod = pixradius * g_game.detaillevel;
+               if (lod > 0.5 && pixradius > 2.5) {
+                   gun = mount->type->gun1;
+                   gun->setCurrentFrame( unit->mounts[i].ComputeAnimatedFrame( gun ) );
+                   gun->Draw( lod, mat, d, cloak,
+                              (_Universe->AccessCamera()->GetNebula() == unit->nebula && unit->nebula
+                               != NULL) ? -1 : 0,
+                              char_damage, true );                                                                                                                              //cloakign and nebula
+               }
+           }
+       }
+
+
+       // If not a beam weapon, stop processing
+       if (unit->mounts[i].type->type != WEAPON_TYPE::BEAM) {
+           continue;
+       }
+
+       // If gun is null (?)
+       if (!unit->mounts[i].ref.gun) {
+           continue;
+       }
+
+       unit->mounts[i].ref.gun->Draw( *ct, wmat,
+                                      ( isAutoTrackingMount(unit->mounts[i].size)
+                                        && (unit->mounts[i].time_to_lock <= 0)
+                                        && unit->TargetTracked() ) ? unit->Target() : NULL,
+                                      unit->computer.radar.trackingcone );
+   }
+}
+
