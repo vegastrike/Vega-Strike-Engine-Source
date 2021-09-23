@@ -183,8 +183,8 @@ ENDIF (NOT BUILD_OPT)
 OPTION(DISABLE_CLIENT "Disable building the vegastrike bin" OFF )
 
 # Should we prefer the Mesa OpenGL implementation, or GLVND?
-OPTION(VEGA_STRIKE_PREFER_MESA_OPENGL OFF )
-IF (VEGA_STRIKE_PREFER_MESA_OPENGL)
+OPTION(VEGA_STRIKE_PREFER_LEGACY_OPENGL "Prefer legacy OpenGL implementation (such as Mesa's)? Or prefer GLVND?" OFF )
+IF (VEGA_STRIKE_PREFER_LEGACY_OPENGL)
     SET (OpenGL_GL_PREFERENCE LEGACY)
     SET (VEGA_STRIKE_GLU_DEPENDENCY "libglu1-mesa")
 ELSE ()
