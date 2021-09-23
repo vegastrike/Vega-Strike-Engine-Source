@@ -269,7 +269,7 @@ bool Mount::PhysicsAlignedFire( Unit *caller,
             break;
         case WEAPON_TYPE::BEAM:
             if (ref.gun)
-                ref.gun->Init( Transformation( orient, pos.Cast() ), *type, owner, caller );
+                ref.gun->Reinitialize();
             break;
         case WEAPON_TYPE::BOLT:
         case WEAPON_TYPE::BALL:

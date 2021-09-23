@@ -38,6 +38,8 @@ using std::vector;
 class Beam
 {
 private:
+    const weapon_info* type;
+
     int sound;
     Transformation local_transformation;
     unsigned int   decal;
@@ -78,21 +80,32 @@ private:
     void RecalculateVertices( const Matrix &trans );
     void CollideHuge( const LineCollide&, Unit *targetToCollideWith, Unit *firer, Unit *superunit );
 public:
-    void ListenToOwner( bool listen )
-    {
-        listen_to_owner = listen;
-    }
     Beam( const Transformation &trans, const weapon_info &clne, void *own, Unit *firer, int sound );
     void Init( const Transformation &trans, const weapon_info &clne, void *own, Unit *firer );
     ~Beam();
-    void RemoveFromSystem( bool eradicate );
+
+    void Reinitialize();
+
+    bool Collide( class Unit*target, Unit*firer, Unit*superunit /*for cargo*/ );
+
+    void Destabilize();
+    bool Dissolved();
+    void Draw( const Transformation &, const Matrix &, class Unit*target, float trackingcone );
+
+    QVector GetPosition() const;
+
+    void ListenToOwner( bool listen );
+
+    static void ProcessDrawQueue();
+
+    bool Ready();
     float refireTime();
-    QVector GetPosition() const
-    {
-        return local_transformation.position;
-    }
+    void RemoveFromSystem( bool eradicate );
+
+
     void SetPosition( const QVector& );
     void SetOrientation( const Vector &p, const Vector &q, const Vector &r );
+
     void UpdatePhysics( const Transformation &,
                         const Matrix &,
                         class Unit*target,
@@ -101,21 +114,11 @@ public:
                         float HeatSink,
                         Unit*firer,
                         Unit*superunit );
-    void Draw( const Transformation &, const Matrix &, class Unit*target, float trackingcone );
-    void Destabilize()
-    {
-        impact = UNSTABLE;
-    }
-    bool Dissolved()
-    {
-        return curthick == 0;
-    }
-    bool Ready()
-    {
-        return curthick == 0 && refiretime > refire;
-    }
-    bool Collide( class Unit*target, Unit*firer, Unit*superunit /*for cargo*/ );
-    static void ProcessDrawQueue();
+
+
+
+
+
 };
 #endif
 

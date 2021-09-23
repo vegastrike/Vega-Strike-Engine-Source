@@ -827,7 +827,6 @@ endif()
 
 SET(LIBCMD_SOURCES
     src/cmd/alphacurve.cpp
-    src/cmd/beam_generic.cpp
     src/cmd/cargo.cpp
     src/cmd/carrier.cpp
     src/cmd/collection.cpp
