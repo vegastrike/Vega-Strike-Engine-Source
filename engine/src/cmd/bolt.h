@@ -40,7 +40,7 @@ class Animation;
 
 class Bolt {
 private:
-  const weapon_info* type;//beam or bolt;
+  const WeaponInfo* type;//beam or bolt;
   Matrix drawmat;
   QVector cur_position;
   Vector ShipSpeed;
@@ -63,7 +63,7 @@ private:
       &&cur_position==b.cur_position
       &&prev_position==b.prev_position;
   }
-  Bolt(const weapon_info *type, const Matrix &orientationpos, const Vector & ShipSpeed, void *owner, CollideMap::iterator hint);//makes a bolt
+  Bolt(const WeaponInfo *type, const Matrix &orientationpos, const Vector & ShipSpeed, void *owner, CollideMap::iterator hint);//makes a bolt
   void Destroy(unsigned int index);
   //static void Draw();
   static void DrawAllBolts();

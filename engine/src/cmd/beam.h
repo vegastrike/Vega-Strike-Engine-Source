@@ -38,7 +38,7 @@ using std::vector;
 class Beam
 {
 private:
-    const weapon_info* type;
+    const WeaponInfo* type;
 
     int sound;
     Transformation local_transformation;
@@ -80,8 +80,8 @@ private:
     void RecalculateVertices( const Matrix &trans );
     void CollideHuge( const LineCollide&, Unit *targetToCollideWith, Unit *firer, Unit *superunit );
 public:
-    Beam( const Transformation &trans, const weapon_info &clne, void *own, Unit *firer, int sound );
-    void Init( const Transformation &trans, const weapon_info &clne, void *own, Unit *firer );
+    Beam( const Transformation &trans, const WeaponInfo &clne, void *own, Unit *firer, int sound );
+    void Init( const Transformation &trans, const WeaponInfo &clne, void *own, Unit *firer );
     ~Beam();
 
     void Reinitialize();

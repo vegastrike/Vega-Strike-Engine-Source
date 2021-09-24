@@ -30,7 +30,7 @@
 #include "gfx/quaternion.h"
 
 class Beam;
-class weapon_info;
+class WeaponInfo;
 class Unit;
 class Mesh;
 
@@ -59,7 +59,7 @@ public:
         float refire;
     }
     ref;
-//the size that this mount can hold. May be any bitwise combination of weapon_info::MOUNT_SIZE
+//the size that this mount can hold. May be any bitwise combination of WeaponInfo::MOUNT_SIZE
     unsigned int size;                                           //short fix
 //-1 is infinite
     int ammo;                                            //short
@@ -72,7 +72,7 @@ public:
     status;
     bool  bank;
 //bank implies whether the weapon is linked with the next mount (i.e. only one firing at a time)
-    const weapon_info *type;
+    const WeaponInfo *type;
     float functionality;
     float maxfunctionality;
     int   sound;

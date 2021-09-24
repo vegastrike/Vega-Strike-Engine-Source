@@ -175,7 +175,7 @@ void Bolt::DrawBolt(float& bolt_size, GFXVertexList *qmesh)
 {
     float distance = (cur_position-BoltDrawManager::camera_position).MagnitudeSquared();
     if (distance*BoltDrawManager::pixel_angle < bolt_size) {
-        const weapon_info *wt = type;
+        const WeaponInfo *wt = type;
 
         BlendTrans( drawmat, cur_position, prev_position );
         Matrix drawmat( this->drawmat );
@@ -220,7 +220,7 @@ void Bolt::Destroy( unsigned int index )
 }
 
 // A bolt is created when fired
-Bolt::Bolt( const weapon_info *typ,
+Bolt::Bolt( const WeaponInfo *typ,
             const Matrix &orientationpos,
             const Vector &shipspeed,
             void *owner,
@@ -276,7 +276,7 @@ size_t nondecal_index( Collidable::CollideRef b )
 
 bool Bolt::Update( Collidable::CollideRef index )
 {
-    const weapon_info *type = this->type;
+    const WeaponInfo *type = this->type;
     float speed = type->speed;
     curdist += speed*simulation_atom_var;
     prev_position = cur_position;

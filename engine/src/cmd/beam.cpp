@@ -315,7 +315,7 @@ void Beam::CollideHuge( const LineCollide &lc, Unit *targetToCollideWith, Unit *
 /*
  * Constructors
  */
-Beam::Beam( const Transformation &trans, const weapon_info &clne, void *own, Unit *firer, int sound ) : vlist( NULL )
+Beam::Beam( const Transformation &trans, const WeaponInfo &clne, void *own, Unit *firer, int sound ) : vlist( NULL )
     , Col( clne.r, clne.g, clne.b, clne.a )
 {
     listen_to_owner = false;

@@ -34,7 +34,7 @@
 
 
 
-struct weapon_info
+struct WeaponInfo
 {
     // Fields
     std::string name;
@@ -70,8 +70,8 @@ struct weapon_info
     mutable class Mesh *gun1 = nullptr;     //requires nonconst to add to orig drawing queue when drawing
 
     // Constructors
-    weapon_info();
-    weapon_info(WEAPON_TYPE type,
+    WeaponInfo();
+    WeaponInfo(WEAPON_TYPE type,
                 std::string name,
                 MOUNT_SIZE mount_size,
                 float damage,
@@ -98,8 +98,8 @@ struct weapon_info
                 float b,
                 float a);
 
-    weapon_info(WEAPON_TYPE type);
-    weapon_info( const weapon_info &tmp );
+    WeaponInfo(WEAPON_TYPE type);
+    WeaponInfo( const WeaponInfo &tmp );
 
 
     // Methods
@@ -117,6 +117,6 @@ private:
 
 };
 
-weapon_info * getWeapon( const std::string &key );
+WeaponInfo * getWeapon( const std::string &key );
 
 #endif // WEAPON_INFO_H

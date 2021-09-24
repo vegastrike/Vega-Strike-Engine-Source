@@ -5535,7 +5535,7 @@ void showUnitStats( Unit *playerUnit, string &text, int subunitlevel, int mode, 
                 PRETTY_ADD( " #c0:1:.3#[#-c", i+1, 0 );
                 text += "#c0:1:.3#]#-c #c0:1:1#"+getMountSizeString( playerUnit->mounts[i].size )+"#-c";
             }
-            const weapon_info *wi = playerUnit->mounts[i].type;
+            const WeaponInfo *wi = playerUnit->mounts[i].type;
             if (wi && wi->name != "")
                 anyweapons = true;
         }
@@ -5545,7 +5545,7 @@ void showUnitStats( Unit *playerUnit, string &text, int subunitlevel, int mode, 
     {
         if (anyweapons) {
             for (int i = 0; i < playerUnit->getNumMounts(); i++) {
-                const weapon_info *wi = playerUnit->mounts[i].type;
+                const WeaponInfo *wi = playerUnit->mounts[i].type;
                 if ( (!wi) || (wi->name == "") ) {
                     continue;
                 } else {

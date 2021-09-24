@@ -5197,7 +5197,7 @@ void Unit::UpdatePhysics3(const Transformation &trans,
                                               (!isSubUnit() || owner == NULL) ? this : owner, target, autotrack,
                                               trackingcone,
                                               hint ) ) {
-              const weapon_info *typ = mounts[i].type;
+              const WeaponInfo *typ = mounts[i].type;
               energy += typ->energy_rate * (typ->type == WEAPON_TYPE::BEAM ? simulation_atom_var : 1);
           }
       } else if ( mounts[i].processed == Mount::UNFIRED || mounts[i].ref.refire > 2*mounts[i].type->Refire() ) {
