@@ -43,6 +43,12 @@ EXECUTE_PROCESS(
     OUTPUT_STRIP_TRAILING_WHITESPACE
 )
 
+# API Version for Game Assets
+# This is an incrementing number similar to the Google Android API Version
+# allowing us to differentiate our Assets API across multiple versions.
+# If a release is missing this value, then version `1` can be assumed.
+SET(VEGASTRIKE_ASSETS_API_VERSION "1")
+
 IF (COMMAND cmake_policy)
     CMAKE_POLICY(SET CMP0003 NEW)
 ENDIF (COMMAND cmake_policy)
@@ -72,6 +78,7 @@ PROJECT(Vega_Strike
         CXX C
 )
 
+# One version header generator to rule them all
 CONFIGURE_FILE(src/version.h.in ${CMAKE_SOURCE_DIR}/src/version.h)
 CONFIGURE_FILE(src/version.h.in ${CMAKE_SOURCE_DIR}/setup/src/include/version.h)
 
