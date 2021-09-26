@@ -72,6 +72,9 @@ PROJECT(Vega_Strike
         CXX C
 )
 
+CONFIGURE_FILE(src/version.h.in ${CMAKE_SOURCE_DIR}/src/version.h)
+CONFIGURE_FILE(src/version.h.in ${CMAKE_SOURCE_DIR}/setup/src/include/version.h)
+
 MESSAGE("== Vega Strike Version: ${VEGASTRIKE_VERSION_MAJOR}.${VEGASTRIKE_VERSION_MINOR}.${VEGASTRIKE_VERSION_PATCH}-${VEGASTRIKE_VERSION_TWEAK}")
 
 SET(CMAKE_CXX_STANDARD 11)
