@@ -31,14 +31,15 @@
 #define DISPLAY_H
 
 #include "central.h"
+#include "version.h"
 
 void InitGraphics(int*,char***);
 void ShowMain();
 
 #define GET_TITLE char title[1000]="Vega Strike Settings"; \
   if (strlen(CONFIG.program_name)+strlen(VERSION)<800) { \
-    sprintf(title, "Settings - %s - Version 0.8.0", \
-    CONFIG.program_name); \
+    sprintf(title, "Settings - %s - Version %s", \
+    CONFIG.program_name, VEGASTRIKE_VERSION_STR); \
   }
 
 #define GET_STATIC_TEXT char static_text[1000]="Vega Strike requires \
