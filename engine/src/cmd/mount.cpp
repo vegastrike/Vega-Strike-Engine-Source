@@ -49,7 +49,7 @@
 extern char SERVER;
 Mount::Mount()
 {
-    static weapon_info wi( WEAPON_TYPE::BEAM );
+    static WeaponInfo wi( WEAPON_TYPE::BEAM );
     functionality    = 1;
     maxfunctionality = 1;
     type = &wi;
@@ -97,7 +97,7 @@ Mount::Mount( const string &filename, int am, int vol, float xyscale, float zsca
     //short fix
     functionality    = func;
     maxfunctionality = maxfunc;
-    static weapon_info wi( WEAPON_TYPE::BEAM );
+    static WeaponInfo wi( WEAPON_TYPE::BEAM );
     size = as_integer(MOUNT_SIZE::NOWEAP);
     static float xyscalestat = XMLSupport::parse_float( vs_config->getVariable( "graphics", "weapon_xyscale", "1" ) );
 
@@ -115,7 +115,7 @@ Mount::Mount( const string &filename, int am, int vol, float xyscale, float zsca
     ref.gun      = NULL;
     status       = (UNCHOSEN);
     processed    = Mount::PROCESSED;
-    weapon_info *temp = getWeapon( filename );
+    WeaponInfo *temp = getWeapon( filename );
     if (temp == NULL) {
         status = UNCHOSEN;
         time_to_lock = 0;
@@ -269,7 +269,7 @@ bool Mount::PhysicsAlignedFire( Unit *caller,
             break;
         case WEAPON_TYPE::BEAM:
             if (ref.gun)
-                ref.gun->Init( Transformation( orient, pos.Cast() ), *type, owner, caller );
+                ref.gun->Reinitialize();
             break;
         case WEAPON_TYPE::BOLT:
         case WEAPON_TYPE::BALL:

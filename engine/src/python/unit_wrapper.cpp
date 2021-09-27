@@ -256,7 +256,7 @@ static std::string ParseWeaponType( WEAPON_TYPE type )
     }
 }
 
-static BoostPythonDictionary GatherWeaponInfo( const weapon_info *wi )
+static BoostPythonDictionary GatherWeaponInfo( const WeaponInfo *wi )
 {
     BoostPythonDictionary rv;
     if (wi) {

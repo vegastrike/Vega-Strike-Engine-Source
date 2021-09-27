@@ -31,7 +31,7 @@
 #include "mount.h"
 #include <vector>
 
-class weapon_info;
+class WeaponInfo;
 class Unit;
 
 class Armed
@@ -46,7 +46,7 @@ public:
 
 protected:
     //Activates all guns of that size
-    void ActivateGuns( const weapon_info*, bool Missile );
+    void ActivateGuns( const WeaponInfo*, bool Missile );
 
 public:
     Armed();

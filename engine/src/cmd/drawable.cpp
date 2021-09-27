@@ -422,19 +422,33 @@ void Drawable::DrawSubunits(bool on_screen, Matrix wmat, int cloak, float averag
     Unit *unit = static_cast<Unit*>(this);
     Transformation *ct = &unit->cumulative_transformation;
 
-    // Units not shown don't draw subunits
-    if(!on_screen) {
-        return;
-    }
-
-    // Don't draw mounts if game is set not to...
-   if(!game_options.draw_weapons) {
-        return;
-   }
-
    for (int i = 0; (int) i < unit->getNumMounts(); i++) {
        Mount *mount = &unit->mounts[i];
        Mesh *gun = mount->type->gun;
+
+       // Has to come before check for on screen, as a fired beam can still be seen
+       // even if the subunit firing it isn't on screen.
+       if (unit->mounts[i].type->type == WEAPON_TYPE::BEAM) {
+           // If gun is null (?)
+           if (unit->mounts[i].ref.gun) {
+               unit->mounts[i].ref.gun->Draw( *ct, wmat,
+                                              ( isAutoTrackingMount(unit->mounts[i].size)
+                                                && (unit->mounts[i].time_to_lock <= 0)
+                                                && unit->TargetTracked() ) ? unit->Target() : NULL,
+                                              unit->computer.radar.trackingcone );
+           }
+       }
+
+       // Units not shown don't draw subunits
+       if(!on_screen) {
+           continue;;
+       }
+
+       // Don't draw mounts if game is set not to...
+      if(!game_options.draw_weapons) {
+           continue;
+      }
+
 
        // Don't bother drawing small mounts ?!
        if (mount->xyscale == 0 || mount->zscale == 0) {
@@ -478,23 +492,6 @@ void Drawable::DrawSubunits(bool on_screen, Matrix wmat, int cloak, float averag
                }
            }
        }
-
-
-       // If not a beam weapon, stop processing
-       if (unit->mounts[i].type->type != WEAPON_TYPE::BEAM) {
-           continue;
-       }
-
-       // If gun is null (?)
-       if (!unit->mounts[i].ref.gun) {
-           continue;
-       }
-
-       unit->mounts[i].ref.gun->Draw( *ct, wmat,
-                                      ( isAutoTrackingMount(unit->mounts[i].size)
-                                        && (unit->mounts[i].time_to_lock <= 0)
-                                        && unit->TargetTracked() ) ? unit->Target() : NULL,
-                                      unit->computer.radar.trackingcone );
    }
 }
 

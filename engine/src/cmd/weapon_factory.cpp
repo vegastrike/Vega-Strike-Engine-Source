@@ -46,7 +46,7 @@ using boost::property_tree::ptree;
 using std::string;
 using std::endl;
 
-extern Hashtable< string, weapon_info, 257 >lookuptable;
+extern Hashtable< string, WeaponInfo, 257 >lookuptable;
 
 // TODO: reenable this?
 /*constexpr int color_step(49);
@@ -81,7 +81,7 @@ void WeaponFactory::parse(ptree tree)
 
     for (const auto& iterator : tree)
     {
-        weapon_info wi;
+        WeaponInfo wi;
 
         ptree inner = iterator.second;
 
@@ -165,7 +165,7 @@ void WeaponFactory::parse(ptree tree)
             wi.sound = AUDCreateSoundMP3( sound_wave, wi.type != WEAPON_TYPE::PROJECTILE );
         }
 
-        // Add new weapon_info to weapons table
-        lookuptable.Put( boost::to_upper_copy( wi.name ), new weapon_info(wi) );
+        // Add new WeaponInfo to weapons table
+        lookuptable.Put( boost::to_upper_copy( wi.name ), new WeaponInfo(wi) );
     }
 }

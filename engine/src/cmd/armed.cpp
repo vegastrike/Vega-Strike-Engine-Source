@@ -175,7 +175,7 @@ Armed::Armed()
 
 
 ///cycles through the loop twice turning on all matching to ms weapons of size or after size
-void Armed::ActivateGuns( const weapon_info *sz, bool ms )
+void Armed::ActivateGuns( const WeaponInfo *sz, bool ms )
 {
     for (int j = 0; j < 2; ++j)
         for (int i = 0; i < getNumMounts(); ++i)
