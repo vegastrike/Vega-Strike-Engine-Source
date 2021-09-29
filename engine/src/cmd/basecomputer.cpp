@@ -1,6 +1,6 @@
 // -*- mode: c++; c-basic-offset: 4; indent-tabs-mode: nil -*-
 
-/**
+/*
  * basecomputer.cpp
  *
  * Copyright (C) 2003 Mike Byron
@@ -65,6 +65,7 @@ using VSFileSystem::SaveFile;
 #include "mount_size.h"
 #include "weapon_info.h"
 #include "facet_configuration.h"
+#include "vs_logging.h"
 
 //#define VS_PI 3.1415926535897931
 
@@ -91,7 +92,7 @@ struct dirent
 #endif
 #include <sys/stat.h>
 
-using namespace XMLSupport;
+using namespace XMLSupport; // FIXME -- Shouldn't include an entire namespace, according to Google Style Guide -- stephengtuggy 2021-09-07
 
 //end for directory thing
 extern const char *DamagedCategory;
@@ -2929,7 +2930,7 @@ void BaseComputer::loadMissionsMasterList( TransactionList &tlist )
     Unit *unit = _Universe->AccessCockpit()->GetParent();
     int   playerNum = UnitUtil::isPlayerStarship( unit );
     if (playerNum < 0) {
-        BOOST_LOG_TRIVIAL(error) << "Docked ship not a player.";
+        VS_LOG(error, "Docked ship not a player.");
         return;
     }
     //Number of strings to look at.  And make sure they match!
@@ -3887,12 +3888,12 @@ Cargo CreateCargoForOwnerStarship( const Cockpit *cockpit, const Unit *base, int
             locationSystemName,
             destinationSystemName,
             jumps);
-        BOOST_LOG_TRIVIAL(trace) << boost::format("Player ship needs transport from %1% to %2% across %3% systems") % locationBaseName %
-                                       destinationSystemName % jumps.size();
+        VS_LOG(trace, (boost::format("Player ship needs transport from %1% to %2% across %3% systems")
+                        % locationBaseName % destinationSystemName % jumps.size()));
         cargo.price += shipping_price_perjump * (jumps.size() - 1);
     } else if (needsInsysTransport) {
-        BOOST_LOG_TRIVIAL(trace) << boost::format("Player ship needs insys transport from %1% to %2%") % locationBaseName %
-                                       destinationBaseName;
+        VS_LOG(trace, (boost::format("Player ship needs insys transport from %1% to %2%")
+                        % locationBaseName % destinationBaseName));
         cargo.price += shipping_price_insys;
     }
 
@@ -3936,7 +3937,7 @@ void SwapInNewShipName( Cockpit *cockpit, Unit *base, const std::string &newFile
 
 string buildShipDescription( Cargo &item, std::string &texturedescription )
 {
-    BOOST_LOG_TRIVIAL(debug) << "Entering buildShipDescription";
+    VS_LOG(debug, "Entering buildShipDescription");
     //load the Unit
     string newModifications;
     if (item.GetCategory().find( "My_Fleet" ) != string::npos)
@@ -3946,7 +3947,7 @@ string buildShipDescription( Cargo &item, std::string &texturedescription )
     int    fgsNumber = 0;
     current_unit_load_mode = NO_MESH;
 
-    BOOST_LOG_TRIVIAL(debug) << "buildShipDescription: creating newPart";
+    VS_LOG(debug, "buildShipDescription: creating newPart");
     Unit  *newPart   = new GameUnit( item.GetContent().c_str(), false, 0, newModifications, flightGroup, fgsNumber );
     current_unit_load_mode = DEFAULT;
     string sHudImage;
@@ -3967,16 +3968,16 @@ string buildShipDescription( Cargo &item, std::string &texturedescription )
     }
     std::string str;
     showUnitStats( newPart, str, 0, 0, item );
-    BOOST_LOG_TRIVIAL(debug) << "buildShipDescription: killing newPart";
+    VS_LOG(debug, "buildShipDescription: killing newPart");
     newPart->Kill();
-    // BOOST_LOG_TRIVIAL(debug) << "buildShipDescription: deleting newPart";
+    // VS_LOG(debug, "buildShipDescription: deleting newPart");
     // delete newPart;
     // newPart = nullptr;
     if ( texturedescription != "" && ( string::npos == str.find( '@' ) ) )
         str = "@"+texturedescription+"@"+str;
-    BOOST_LOG_TRIVIAL(debug) << boost::format("buildShipDescription: texturedescription == %1%") % texturedescription;
-    BOOST_LOG_TRIVIAL(debug) << boost::format("buildShipDescription: return value       == %1%") % str;
-    BOOST_LOG_TRIVIAL(debug) << "Leaving buildShipDescription";
+    VS_LOG(debug, (boost::format("buildShipDescription: texturedescription == %1%") % texturedescription));
+    VS_LOG(debug, (boost::format("buildShipDescription: return value       == %1%") % str));
+    VS_LOG(debug, "Leaving buildShipDescription");
     return str;
 }
 
@@ -4025,8 +4026,8 @@ void trackPrice(int whichplayer, const Cargo &item, float price, const string &s
     static size_t toprank = (size_t)
         XMLSupport::parse_int( vs_config->getVariable( "general", "trade_interface_tracks_prices_toprank", "10" ) );
 
-    BOOST_LOG_TRIVIAL(info) << boost::format("Ranking item %1%/%2% at %3%/%4%") % item.category.get() % item.content.get() % systemName %
-                                  baseName;
+    VS_LOG(info, (boost::format("Ranking item %1%/%2% at %3%/%4%")
+                    % item.category.get() % item.content.get() % systemName % baseName));
 
     // Recorded prices are always sorted, so we first do a quick check to avoid
     // triggering savegame serialization without reason
@@ -4151,38 +4152,38 @@ void trackPrice(int whichplayer, const Cargo &item, float price, const string &s
         string prefix = "   ";
         char conversionBuffer[128];
 
-        BOOST_LOG_TRIVIAL(info) << "Tracking data:";
-        BOOST_LOG_TRIVIAL(info) << boost::format("  highest locs: (%1%)") % recordedHighestLocs.size();
+        VS_LOG(info, "Tracking data:");
+        VS_LOG(info, (boost::format("  highest locs: (%1%)") % recordedHighestLocs.size()));
         {
             for (size_t i = 0; i < recordedHighestLocs.size(); ++i) {
-                BOOST_LOG_TRIVIAL(info) << boost::format("    %1% : %2%") % i % recordedHighestLocs[i];
+                VS_LOG(info, (boost::format("    %1% : %2%") % i % recordedHighestLocs[i]));
             }
         }
 
-        BOOST_LOG_TRIVIAL(info) << boost::format("  highest prices: (%1%)") % recordedHighestPrices.size();
+        VS_LOG(info, (boost::format("  highest prices: (%1%)") % recordedHighestPrices.size()));
         {
             for (size_t i = 0; i < recordedHighestPrices.size(); ++i) {
                                                                     // POSIX-printf style
-                BOOST_LOG_TRIVIAL(info) << boost::format("    %1$d : %2$.2f") % i % recordedHighestPrices[i];
+                VS_LOG(info, (boost::format("    %1$d : %2$.2f") % i % recordedHighestPrices[i]));
             }
         }
 
-        BOOST_LOG_TRIVIAL(info) << boost::format("  lowest locs: (%1%)") % recordedLowestLocs.size();
+        VS_LOG(info, (boost::format("  lowest locs: (%1%)") % recordedLowestLocs.size()));
         {
             for (size_t i = 0; i < recordedLowestLocs.size(); ++i) {
-                BOOST_LOG_TRIVIAL(info) << boost::format("    %1% : %2%") % i % recordedLowestLocs[i];
+                VS_LOG(info, (boost::format("    %1% : %2%") % i % recordedLowestLocs[i]));
             }
         }
 
-        BOOST_LOG_TRIVIAL(info) << boost::format("  lowest prices: (%1%)") % recordedLowestPrices.size();
+        VS_LOG(info, (boost::format("  lowest prices: (%1%)") % recordedLowestPrices.size()));
         {
             for (size_t i = 0; i < recordedLowestPrices.size(); ++i) {
                                                                     // POSIX-printf style
-                BOOST_LOG_TRIVIAL(info) << boost::format("    %1$d : %2$.2f") % i % recordedLowestPrices[i];
+                VS_LOG(info, (boost::format("    %1$d : %2$.2f") % i % recordedLowestPrices[i]));
             }
         }
 
-        VSFileSystem::flushLogs();
+        VegaStrikeLogging::VegaStrikeLogger::FlushLogs();
 
         highest.clear();
         highest.resize(recordedHighestPrices.size());
@@ -4192,7 +4193,7 @@ void trackPrice(int whichplayer, const Cargo &item, float price, const string &s
                 PRETTY_ADD("", recordedHighestPrices[i], 2);
                 text += " (at " + recordedHighestLocs[i] + ")";
 
-                BOOST_LOG_TRIVIAL(info) << boost::format("Highest item %1%") % text;
+                VS_LOG(info, (boost::format("Highest item %1%") % text));
             }
         }
 
@@ -4204,7 +4205,7 @@ void trackPrice(int whichplayer, const Cargo &item, float price, const string &s
                 PRETTY_ADD("", recordedLowestPrices[i], 2);
                 text += " (at " + recordedLowestLocs[i] + ")";
 
-                BOOST_LOG_TRIVIAL(info) << boost::format("Lowest item %1%") % text;
+                VS_LOG(info, (boost::format("Lowest item %1%") % text));
             }
         }
     }
@@ -5426,7 +5427,7 @@ void showUnitStats( Unit *playerUnit, string &text, int subunitlevel, int mode, 
                 PRETTY_ADD( " #c0:1:.3#[#-c", i+1, 0 );
                 text += "#c0:1:.3#]#-c #c0:1:1#"+getMountSizeString( playerUnit->mounts[i].size )+"#-c";
             }
-            const weapon_info *wi = playerUnit->mounts[i].type;
+            const WeaponInfo *wi = playerUnit->mounts[i].type;
             if (wi && wi->name != "")
                 anyweapons = true;
         }
@@ -5436,7 +5437,7 @@ void showUnitStats( Unit *playerUnit, string &text, int subunitlevel, int mode, 
     {
         if (anyweapons) {
             for (int i = 0; i < playerUnit->getNumMounts(); i++) {
-                const weapon_info *wi = playerUnit->mounts[i].type;
+                const WeaponInfo *wi = playerUnit->mounts[i].type;
                 if ( (!wi) || (wi->name == "") ) {
                     continue;
                 } else {
@@ -5808,7 +5809,7 @@ bool BaseComputer::actionConfirmedSaveGame()
         std::string tmp = desc->text();
         VSFileSystem::VSFile  fp;
         VSFileSystem::VSError err = fp.OpenCreateWrite( tmp, SaveFile );
-        if (err > Ok) {
+        if (err > VSFileSystem::Ok) {
             showAlert(
                 "Could not create the saved game because it contains invalid characters or you do not have permissions or free space." );
         } else {
@@ -5849,7 +5850,7 @@ bool BaseComputer::actionSaveGame( const EventCommandId &command, Control *contr
         if (cockpit) {
             VSFileSystem::VSFile  fp;
             VSFileSystem::VSError err = fp.OpenReadOnly( tmp, SaveFile );
-            if (err > Ok) {
+            if (err > VSFileSystem::Ok) {
                 actionConfirmedSaveGame();
             } else {
                 fp.Close();

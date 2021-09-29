@@ -3,6 +3,7 @@
  *
  * Copyright (C) 2001-2002 Daniel Horn & Alan Shieh
  * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike contributors
+ * Copyright (C) 2021 Stephen G. Tuggy
  *
  * This file is part of Vega Strike.
  *
@@ -19,13 +20,16 @@
  * You should have received a copy of the GNU General Public License
  * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
  */
+
+
 #include "gl_globals.h"
 
 #include "gfxlib.h"
 #include "vegastrike.h"
 #include "vs_globals.h"
 #include <stdio.h>
-#include "vsfilesystem.h"
+// #include "vsfilesystem.h"   // Is this still needed? -- stephengtuggy 2021-09-06
+#include "vs_logging.h"
 
 GFXQuadList::GFXQuadList( GFXBOOL color ) : numVertices( 0 )
     , numQuads( 0 )
@@ -76,7 +80,7 @@ int GFXQuadList::AddQuad( const GFXVertex *vertices, const GFXColorVertex *color
                 data.colors = (GFXColorVertex*) realloc( data.colors, numVertices*sizeof (GFXColorVertex) );
             int* tmp = (int*) realloc( quadassignments, numVertices*sizeof (int)/4 );
             if (tmp == nullptr) {
-                BOOST_LOG_TRIVIAL(fatal) << "Error reallocating quadassignments!";
+                VS_LOG_AND_FLUSH(fatal, "Error reallocating quadassignments!");
                 return -1;
             } else {
                 quadassignments = tmp;
@@ -104,14 +108,14 @@ int GFXQuadList::AddQuad( const GFXVertex *vertices, const GFXColorVertex *color
             Dirty--;
             return i;
         }
-    BOOST_LOG_TRIVIAL(fatal) << "Fatal Error adding quads";
+    VS_LOG_AND_FLUSH(fatal, "Fatal Error adding quads");
     //should NOT get here!
     return -1;
 }
 void GFXQuadList::DelQuad( int which )
 {
     if (quadassignments[which] >= numQuads) {
-        BOOST_LOG_TRIVIAL(error) << "error del";
+        VS_LOG(error, "error del");
         return;
     }
     if (which < 0 || which >= numVertices/4 || quadassignments[which] == -1)
@@ -128,7 +132,7 @@ void GFXQuadList::DelQuad( int which )
             numQuads--;
             return;
         }
-    BOOST_LOG_TRIVIAL(info) << " error deleting engine flame";
+    VS_LOG(info, " error deleting engine flame");
 }
 void GFXQuadList::ModQuad( int which, const GFXVertex *vertices, float alpha )
 {

@@ -1,3 +1,28 @@
+/**
+* beam.h
+*
+* Copyright (c) 2001-2002 Daniel Horn
+* Copyright (c) 2002-2019 pyramid3d and other Vega Strike Contributors
+* Copyright (c) 2019-2021 Stephen G. Tuggy, and other Vega Strike Contributors
+*
+* https://github.com/vegastrike/Vega-Strike-Engine-Source
+*
+* This file is part of Vega Strike.
+*
+* Vega Strike is free software: you can redistribute it and/or modify
+* it under the terms of the GNU General Public License as published by
+* the Free Software Foundation, either version 2 of the License, or
+* (at your option) any later version.
+*
+* Vega Strike is distributed in the hope that it will be useful,
+* but WITHOUT ANY WARRANTY; without even the implied warranty of
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+* GNU General Public License for more details.
+*
+* You should have received a copy of the GNU General Public License
+* along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
+*/
+
 #ifndef _CMD_BEAM_H_
 #define _CMD_BEAM_H_
 #include "gfx/mesh.h"
@@ -13,6 +38,8 @@ using std::vector;
 class Beam
 {
 private:
+    const WeaponInfo* type;
+
     int sound;
     Transformation local_transformation;
     unsigned int   decal;
@@ -53,21 +80,32 @@ private:
     void RecalculateVertices( const Matrix &trans );
     void CollideHuge( const LineCollide&, Unit *targetToCollideWith, Unit *firer, Unit *superunit );
 public:
-    void ListenToOwner( bool listen )
-    {
-        listen_to_owner = listen;
-    }
-    Beam( const Transformation &trans, const weapon_info &clne, void *own, Unit *firer, int sound );
-    void Init( const Transformation &trans, const weapon_info &clne, void *own, Unit *firer );
+    Beam( const Transformation &trans, const WeaponInfo &clne, void *own, Unit *firer, int sound );
+    void Init( const Transformation &trans, const WeaponInfo &clne, void *own, Unit *firer );
     ~Beam();
-    void RemoveFromSystem( bool eradicate );
+
+    void Reinitialize();
+
+    bool Collide( class Unit*target, Unit*firer, Unit*superunit /*for cargo*/ );
+
+    void Destabilize();
+    bool Dissolved();
+    void Draw( const Transformation &, const Matrix &, class Unit*target, float trackingcone );
+
+    QVector GetPosition() const;
+
+    void ListenToOwner( bool listen );
+
+    static void ProcessDrawQueue();
+
+    bool Ready();
     float refireTime();
-    QVector GetPosition() const
-    {
-        return local_transformation.position;
-    }
+    void RemoveFromSystem( bool eradicate );
+
+
     void SetPosition( const QVector& );
     void SetOrientation( const Vector &p, const Vector &q, const Vector &r );
+
     void UpdatePhysics( const Transformation &,
                         const Matrix &,
                         class Unit*target,
@@ -76,21 +114,11 @@ public:
                         float HeatSink,
                         Unit*firer,
                         Unit*superunit );
-    void Draw( const Transformation &, const Matrix &, class Unit*target, float trackingcone );
-    void Destabilize()
-    {
-        impact = UNSTABLE;
-    }
-    bool Dissolved()
-    {
-        return curthick == 0;
-    }
-    bool Ready()
-    {
-        return curthick == 0 && refiretime > refire;
-    }
-    bool Collide( class Unit*target, Unit*firer, Unit*superunit /*for cargo*/ );
-    static void ProcessDrawQueue();
+
+
+
+
+
 };
 #endif
 

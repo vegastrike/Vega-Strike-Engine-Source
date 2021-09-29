@@ -1,9 +1,9 @@
-/**
+/*
  * armed.cpp
  *
  * Copyright (C) Daniel Horn
- * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike
- * contributors
+ * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike contributors
+ * Copyright (C) 2021 Stephen G. Tuggy
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -35,6 +35,7 @@
 #include "role_bitmask.h"
 #include "beam.h"
 #include "unit_util.h"
+#include "vs_logging.h"
 
 #include <vector>
 
@@ -103,7 +104,7 @@ public:
         unsigned int   i;
         typename WeaponGroupSet::const_iterator iter;
 
-        BOOST_LOG_TRIVIAL(info) << boost::format("ToggleWeaponSet: %s") % (FORWARD ? "true" : "false") ;
+        VS_LOG(info, (boost::format("ToggleWeaponSet: %s") % (FORWARD ? "true" : "false") ));
         for (i = 0; i < un->mounts.size(); ++i)
             if ( checkmount( un, i, missile ) ) {
                 WeaponGroup mygroup;
@@ -136,15 +137,15 @@ public:
         myset.insert( allWeaponsNoSpecial );
         for (iter = myset.begin(); iter != myset.end(); ++iter) {
             for (WeaponGroup::const_iterator iter2 = (*iter).begin(); iter2 != (*iter).end(); ++iter2) {
-                BOOST_LOG_TRIVIAL(info) << boost::format("%d:%s ") % *iter2 % un->mounts[*iter2].type->name.c_str();
+                VS_LOG(info, (boost::format("%d:%s ") % *iter2 % un->mounts[*iter2].type->name.c_str()));
             }
         }
         WeaponGroup activeWeapons;
-        BOOST_LOG_TRIVIAL(info) <<  "CURRENT: ";
+        VS_LOG(info, "CURRENT: ");
         for (i = 0; i < un->mounts.size(); ++i) {
             if ( un->mounts[i].status == Mount::ACTIVE && checkmount( un, i, missile ) ) {
                 activeWeapons.insert( i );
-                BOOST_LOG_TRIVIAL(info) << boost::format("%d:%s ") % i % un->mounts[i].type->name.c_str();
+                VS_LOG(info, (boost::format("%d:%s ") % i % un->mounts[i].type->name.c_str()));
             }
         }
         iter = myset.upper_bound( activeWeapons );
@@ -154,13 +155,13 @@ public:
             return;
         for (i = 0; i < un->mounts.size(); ++i)
             un->mounts[i].DeActive( missile );
-        BOOST_LOG_TRIVIAL(info) <<  "ACTIVE: ";
+        VS_LOG(info, "ACTIVE: ");
         for (WeaponGroup::const_iterator iter2 = (*iter).begin(); iter2 != (*iter).end(); ++iter2) {
-            BOOST_LOG_TRIVIAL(info) <<  boost::format("%d:%s ") % *iter2 % un->mounts[*iter2].type->name.c_str();
+            VS_LOG(info, (boost::format("%d:%s ") % *iter2 % un->mounts[*iter2].type->name.c_str()));
             un->mounts[*iter2].Activate( missile );
         }
 
-        BOOST_LOG_TRIVIAL(info) << "ToggleWeapon end...\n";
+        VS_LOG(info, "ToggleWeapon end...\n");
     }
 };
 
@@ -174,7 +175,7 @@ Armed::Armed()
 
 
 ///cycles through the loop twice turning on all matching to ms weapons of size or after size
-void Armed::ActivateGuns( const weapon_info *sz, bool ms )
+void Armed::ActivateGuns( const WeaponInfo *sz, bool ms )
 {
     for (int j = 0; j < 2; ++j)
         for (int i = 0; i < getNumMounts(); ++i)

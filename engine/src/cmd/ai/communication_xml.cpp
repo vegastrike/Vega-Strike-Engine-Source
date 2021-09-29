@@ -1,9 +1,9 @@
-/**
+/*
  * communication_xml.cpp
  *
  * Copyright (C) Daniel Horn
- * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike
- * contributors
+ * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike contributors
+ * Copyright (C) 2021 Stephen G. Tuggy
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -31,6 +31,8 @@
 #include "communication.h"
 #include <assert.h>
 #include "vsfilesystem.h"
+#include "vs_logging.h"
+
 static int unitlevel;
 using namespace XMLSupport;
 using XMLSupport::EnumMap;
@@ -170,8 +172,7 @@ void FSM::LoadXML( const char *filename )
     VSFile  f;
     VSError err = f.OpenReadOnly( filename, CommFile );
     if (err > Ok) {
-        BOOST_LOG_TRIVIAL(fatal) << boost::format("Failed to open Communications file '%1%' -- aborting!\n") % filename;
-        VSFileSystem::flushLogs();
+        VS_LOG_AND_FLUSH(fatal, (boost::format("Failed to open Communications file '%1%' -- aborting!\n") % filename));
         assert( 0 );
         return;
     }

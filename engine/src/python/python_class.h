@@ -1,9 +1,10 @@
-/**
+/*
  * python_class.h
  *
  * Copyright (C) Daniel Horn
  * Copyright (C) 2020 pyramid3d, Nachum Barcohen, Stephen G. Tuggy,
  * and other Vega Strike contributors.
+ * Copyright (C) 2021 Stephen G. Tuggy
  *
  * This file is part of Vega Strike.
  *
@@ -54,7 +55,7 @@
 #include "cmd/ai/fire.h"
 #include <memory>
 #include "init.h"
-#include "vsfilesystem.h"
+#include "vs_logging.h"
 
 #define PYTHONCALLBACK(rtype, ptr, str) \
   boost::python::call_method<rtype>(ptr, str)
@@ -205,7 +206,7 @@ class PythonClass:public SuperClass
   }
   virtual ~PythonClass()
   {
-    BOOST_LOG_TRIVIAL(warning) << boost::format("Destruct called. If called from C++ this is death %1$x") % this;
+    VS_LOG(warning, (boost::format("Destruct called. If called from C++ this is death %1$x") % this));
   }
 };
 

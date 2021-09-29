@@ -1,9 +1,9 @@
-/**
+/*
  * planet.cpp
  *
  * Copyright (C) Daniel Horn
- * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike
- * contributors
+ * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike contributors
+ * Copyright (C) 2021 Stephen G. Tuggy
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -51,6 +51,7 @@
 #include "alphacurve.h"
 #include "gfx/vsimage.h"
 #include "vsfilesystem.h"
+#include "vs_logging.h"
 #include "gfx/camera.h"
 #include "universe.h"
 #include "configuration/game_config.h"
@@ -741,7 +742,7 @@ Unit* Planet::beginElement( QVector x,
                                                              faction, fullname,
                                                              inside_out );
         } else {
-            BOOST_LOG_TRIVIAL(error) << "Planets are unable to orbit around units";
+            VS_LOG(error, "Planets are unable to orbit around units");
         }
     } else {
         if (isunit == true) {
@@ -776,7 +777,7 @@ Unit* Planet::beginElement( QVector x,
                                                                QVector( 0, 0, 0 ), this, ourmat, ligh, faction, fullname, inside_out ) );
             un = p;
             p->SetOwner( this );
-            BOOST_LOG_TRIVIAL(trace) << "Created planet " << fullname << " of type " << p->fullname << " orbiting " << this->fullname << endl;
+            VS_LOG(trace, (boost::format("Created planet %1% of type %2% orbiting %3%") % fullname % p->fullname % this->fullname));
 
         }
     }
@@ -814,7 +815,7 @@ Planet* Planet::GetTopPlanet( int level )
         if ( (*satiterator)->isUnit() == _UnitType::planet ) {
             return ( (Planet*) (*satiterator) )->GetTopPlanet( level-1 );
         } else {
-            BOOST_LOG_TRIVIAL(error) << "Planets are unable to orbit around units";
+            VS_LOG(error, "Planets are unable to orbit around units");
             return nullptr;
         }
     } else {
@@ -877,23 +878,23 @@ bool operator==(const Planet& lhs, const Planet& rhs)
     bool equal = true;
     if(lhs.inside != rhs.inside) {
         equal = false;
-        BOOST_LOG_TRIVIAL(trace) << "inside: " << lhs.inside << " != " << rhs.inside << endl;
+        VS_LOG(trace, (boost::format("inside: %1% != %2%") % lhs.inside % rhs.inside));
     }
 
     if(lhs.atmospheric != rhs.atmospheric) {
         equal = false;
-        BOOST_LOG_TRIVIAL(trace) << "atmospheric: " << lhs.atmospheric << " != " << rhs.atmospheric << endl;
+        VS_LOG(trace, (boost::format("atmospheric: %1% != %2%") % lhs.atmospheric % rhs.atmospheric));
     }
 
     // TODO: turn floating point comparisons into a function
     if(std::fabs(lhs.radius - rhs.radius) > 0.001f) {
         equal = false;
-        BOOST_LOG_TRIVIAL(trace) << "radius: " << lhs.radius << " != " << rhs.radius << endl;
+        VS_LOG(trace, (boost::format("radius: %1% != %2%") % lhs.radius % rhs.radius));
     }
 
     if(std::fabs(lhs.gravity - rhs.gravity) > 0.001f) {
         equal = false;
-        BOOST_LOG_TRIVIAL(trace) << "gravity: " << lhs.gravity << " != " << rhs.gravity << endl;
+        VS_LOG(trace, (boost::format("gravity: %1% != %2%") % lhs.gravity % rhs.gravity));
     }
 
     return equal;

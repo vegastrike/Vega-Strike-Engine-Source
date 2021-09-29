@@ -1,3 +1,28 @@
+/**
+* weapon_info.h
+*
+* Copyright (c) 2001-2002 Daniel Horn
+* Copyright (c) 2002-2019 pyramid3d and other Vega Strike Contributors
+* Copyright (c) 2019-2021 Stephen G. Tuggy, and other Vega Strike Contributors
+*
+* https://github.com/vegastrike/Vega-Strike-Engine-Source
+*
+* This file is part of Vega Strike.
+*
+* Vega Strike is free software: you can redistribute it and/or modify
+* it under the terms of the GNU General Public License as published by
+* the Free Software Foundation, either version 2 of the License, or
+* (at your option) any later version.
+*
+* Vega Strike is distributed in the hope that it will be useful,
+* but WITHOUT ANY WARRANTY; without even the implied warranty of
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+* GNU General Public License for more details.
+*
+* You should have received a copy of the GNU General Public License
+* along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
+*/
+
 #ifndef WEAPON_INFO_H
 #define WEAPON_INFO_H
 
@@ -9,7 +34,7 @@
 
 
 
-struct weapon_info
+struct WeaponInfo
 {
     // Fields
     std::string name;
@@ -45,8 +70,8 @@ struct weapon_info
     mutable class Mesh *gun1 = nullptr;     //requires nonconst to add to orig drawing queue when drawing
 
     // Constructors
-    weapon_info();
-    weapon_info(WEAPON_TYPE type,
+    WeaponInfo();
+    WeaponInfo(WEAPON_TYPE type,
                 std::string name,
                 MOUNT_SIZE mount_size,
                 float damage,
@@ -73,8 +98,8 @@ struct weapon_info
                 float b,
                 float a);
 
-    weapon_info(WEAPON_TYPE type);
-    weapon_info( const weapon_info &tmp );
+    WeaponInfo(WEAPON_TYPE type);
+    WeaponInfo( const WeaponInfo &tmp );
 
 
     // Methods
@@ -92,6 +117,6 @@ private:
 
 };
 
-weapon_info * getWeapon( const std::string &key );
+WeaponInfo * getWeapon( const std::string &key );
 
 #endif // WEAPON_INFO_H

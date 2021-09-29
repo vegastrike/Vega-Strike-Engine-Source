@@ -1,3 +1,29 @@
+/*
+ * missile.cpp
+ *
+ * Copyright (C) Daniel Horn
+ * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike contributors
+ * Copyright (C) 2021 Stephen G. Tuggy
+ *
+ * https://github.com/vegastrike/Vega-Strike-Engine-Source
+ *
+ * This file is part of Vega Strike.
+ *
+ * Vega Strike is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * Vega Strike is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
+
 #include "missile.h"
 #include "damageable.h"
 
@@ -14,7 +40,7 @@
 #include "ai/order.h"
 #include "faction_generic.h"
 #include "unit_util.h"
-#include "vsfilesystem.h"
+#include "vs_logging.h"
 #include "star_system.h"
 #include "universe.h"
 #include "configuration/game_config.h"
@@ -95,7 +121,7 @@ void MissileEffect::DoApplyDamage(Unit *parent, Unit *un, float distance, float 
             }
         }
         if (total_area > 0) {
-            BOOST_LOG_TRIVIAL(info) << boost::format("Missile subunit damage of %1$.3f%%") % (total_area * (100.0 / 4.0*M_PI));
+            VS_LOG(info, (boost::format("Missile subunit damage of %1$.3f%%") % (total_area * (100.0 / 4.0*M_PI))));
         }
         if (total_area < 4.0*M_PI) total_area = 4.0*M_PI;
 
@@ -112,13 +138,13 @@ void MissileEffect::DoApplyDamage(Unit *parent, Unit *un, float distance, float 
         }
     }
     if (damage_left > 0) {
-        BOOST_LOG_TRIVIAL(info)
-                << boost::format("Missile damaging %1%/%2% (dist=%3$.3f r=%4$.3f dmg=%5$.3f)")
+        VS_LOG(info,
+                (boost::format("Missile damaging %1%/%2% (dist=%3$.3f r=%4$.3f dmg=%5$.3f)")
                 % parent->name.get()
                 % ((un == parent) ? "." : un->name.get())
                 % distance
                 % radius
-                % (damage*damage_fraction*damage_left);
+                % (damage*damage_fraction*damage_left)));
         Damage damage(this->damage * damage_fraction * damage_left,
                       phasedamage*damage_fraction*damage_left);
         parent->ApplyDamage( pos.Cast(), norm, damage, un, GFXColor( 1,1,1,1 ),
@@ -164,8 +190,8 @@ Missile::Missile( const char *filename,
 void Missile::Discharge() {
     if ( (damage != 0 || phasedamage != 0) && !discharged ) {
         Unit *target = Unit::Target();
-        BOOST_LOG_TRIVIAL(info) << boost::format("Missile discharged (target %1%)")
-                                % ((target != NULL) ? target->name.get() : "NULL");
+        VS_LOG(info, (boost::format("Missile discharged (target %1%)")
+                                % ((target != NULL) ? target->name.get() : "NULL")));
         _Universe->activeStarSystem()->AddMissileToQueue(
             new MissileEffect( Position(), damage, phasedamage,
             radial_effect, radial_multiplier, owner ) );

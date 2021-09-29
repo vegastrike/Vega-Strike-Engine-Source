@@ -1,10 +1,10 @@
-/**
+/*
  * force_feedback.cpp
  *
  * Copyright (C) 2001-2002 Daniel Horn
  * Copyright (C) Alexander Rawass <alexannika@users.sourceforge.net>
- * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike
- * contributors
+ * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike contributors
+ * Copyright (C) 2021 Stephen G. Tuggy
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -31,7 +31,7 @@
 #include "force_feedback.h"
 
 #include "vegastrike.h"
-#include "vsfilesystem.h"
+#include "vs_logging.h"
 #include "vs_globals.h"
 
 #include "config_xml.h"
@@ -48,7 +48,7 @@ ForceFeedback::ForceFeedback()
     init();
 #else
     have_ff = false;
-    BOOST_LOG_TRIVIAL(info) << "Force feedback support disabled when compiled";
+    VS_LOG(info, "Force feedback support disabled when compiled");
 #endif
 }
 
@@ -74,17 +74,17 @@ bool ForceFeedback::haveFF()
 
 void ForceFeedback::updateForce( float angle, float strength )
 {
-    BOOST_LOG_TRIVIAL(info) << boost::format("update force %1% degrees %2%") % angle % strength;
+    VS_LOG(info, (boost::format("update force %1% degrees %2%") % angle % strength));
 }
 
 void ForceFeedback::updateSpeedEffect( float strength )
 {
-    BOOST_LOG_TRIVIAL(info) << boost::format("speed effect %1%") % strength;
+    VS_LOG(info, (boost::format("speed effect %1%") % strength));
 }
 
 void ForceFeedback::playHit( float angle, float strength )
 {
-    BOOST_LOG_TRIVIAL(info) << boost::format("shield hit %1% degrees %2%") % angle % strength;
+    VS_LOG(info, (boost::format("shield hit %1% degrees %2%") % angle % strength));
 }
 
 void ForceFeedback::playAfterburner( bool activate )
@@ -100,7 +100,7 @@ void ForceFeedback::playAfterburner( bool activate )
         eff_last_time[eff_nr] = nowtime;
     }
     if (activate == true && is_played[eff_nr] == false) {
-        BOOST_LOG_TRIVIAL(info) << "starting ab";
+        VS_LOG(info, "starting ab");
         playEffect( eff_ab_wiggle_x );
         playEffect( eff_ab_wiggle_y );
         playEffect( eff_ab_jerk );
@@ -108,7 +108,7 @@ void ForceFeedback::playAfterburner( bool activate )
         is_played[eff_nr] = true;
     } else if (activate == false && is_played[eff_nr] == true) {
         if (nowtime > eff_last_time[eff_nr]+min_effect_time) {
-            BOOST_LOG_TRIVIAL(info) << "stopped ab";
+            VS_LOG(info, "stopped ab");
             stopEffect( eff_ab_wiggle_x );
             stopEffect( eff_ab_wiggle_y );
             stopEffect( eff_ab_jerk );
@@ -193,7 +193,7 @@ void ForceFeedback::playEffect( unsigned int eff_nr )
     }
 #endif
 
-    BOOST_LOG_TRIVIAL(info) << boost::format("played effect nr %1%") % eff_nr;
+    VS_LOG(info, (boost::format("played effect nr %1%") % eff_nr));
 }
 
 void ForceFeedback::stopEffect( unsigned int eff_nr )
@@ -210,13 +210,13 @@ void ForceFeedback::stopEffect( unsigned int eff_nr )
     }
 #endif
 
-    BOOST_LOG_TRIVIAL(info) << boost::format("stopped effect nr %1%") % eff_nr;
+    VS_LOG(info, (boost::format("stopped effect nr %1%") % eff_nr));
 }
 
 void ForceFeedback::init()
 {
     if (!game_options.force_feedback) {
-        BOOST_LOG_TRIVIAL(info) << "force feedback disabled in config file";
+        VS_LOG(info, "force feedback disabled in config file");
         return;
     }
     char devname[200];
@@ -228,7 +228,7 @@ void ForceFeedback::init()
         have_ff = false;
         return;
     }
-    BOOST_LOG_TRIVIAL(info) << boost::format("Device %1% opened") % devname;
+    VS_LOG(info, (boost::format("Device %1% opened") % devname));
     /* Query device */
     if (ioctl( ff_fd, EVIOCGBIT( EV_FF, sizeof (unsigned long)*4 ), features ) == -1) {
         perror( "ff:Ioctl query" );
@@ -236,42 +236,42 @@ void ForceFeedback::init()
         close( ff_fd );
         return;
     }
-    BOOST_LOG_TRIVIAL(info) << "Axes query: ";
+    VS_LOG(info, "Axes query: ");
     if ( test_bit( ABS_X, features ) ) {
-        BOOST_LOG_TRIVIAL(info) << "Axis X ";
+        VS_LOG(info, "Axis X ");
     }
     if ( test_bit( ABS_Y, features ) ) {
-        BOOST_LOG_TRIVIAL(info) << "Axis Y ";
+        VS_LOG(info, "Axis Y ");
     }
     if ( test_bit( ABS_WHEEL, features ) ) {
-        BOOST_LOG_TRIVIAL(info) << "Wheel ";
+        VS_LOG(info, "Wheel ");
     }
-    BOOST_LOG_TRIVIAL(info) << "\nEffects: ";
+    VS_LOG(info, "\nEffects: ");
     if ( test_bit( FF_CONSTANT, features ) ) {
-        BOOST_LOG_TRIVIAL(info) << "Constant ";
+        VS_LOG(info, "Constant ");
     }
     if ( test_bit( FF_PERIODIC, features ) ) {
-        BOOST_LOG_TRIVIAL(info) << "Periodic ";
+        VS_LOG(info, "Periodic ");
     }
     if ( test_bit( FF_SPRING, features ) ) {
-        BOOST_LOG_TRIVIAL(info) << "Spring ";
+        VS_LOG(info, "Spring ");
     }
     if ( test_bit( FF_FRICTION, features ) ) {
-        BOOST_LOG_TRIVIAL(info) << "Friction ";
+        VS_LOG(info, "Friction ");
     }
     if ( test_bit( FF_RUMBLE, features ) ) {
-        BOOST_LOG_TRIVIAL(info) << "Rumble ";
+        VS_LOG(info, "Rumble ");
     }
-    BOOST_LOG_TRIVIAL(info) << "\nNumber of simultaneous effects: ";
+    VS_LOG(info, "\nNumber of simultaneous effects: ");
     if (ioctl( ff_fd, EVIOCGEFFECTS, &n_effects ) == -1) {
         perror( "Ioctl number of effects" );
         have_ff = false;
         close( ff_fd );
         return;
     }
-    BOOST_LOG_TRIVIAL(info) << boost::format("nr_effects: %1%") % n_effects;
+    VS_LOG(info, (boost::format("nr_effects: %1%") % n_effects));
     if (n_effects < N_EFFECTS) {
-        BOOST_LOG_TRIVIAL(info) << "not enough effects in device - ff disabled";
+        VS_LOG(info, "not enough effects in device - ff disabled");
         close( ff_fd );
         have_ff = false;
         return;
@@ -474,7 +474,7 @@ void ForceFeedback::init()
     effects[eff_force].replay.length    = 0xfff;
     effects[eff_force].replay.delay     = 0;
     for (int i = 0; i < N_EFFECTS; i++) {
-        BOOST_LOG_TRIVIAL(info) << boost::format("uploading effect %1%") % i;
+        VS_LOG(info, (boost::format("uploading effect %1%") % i));
         if (ioctl( ff_fd, EVIOCSFF, &effects[i] ) == -1) {
             perror( "error while uploading effect" );
             have_ff = false;

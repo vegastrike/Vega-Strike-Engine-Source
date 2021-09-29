@@ -1,3 +1,29 @@
+/*
+ * base_xml.cpp
+ *
+ * Copyright (C) Daniel Horn
+ * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike contributors
+ * Copyright (C) 2021 Stephen G. Tuggy
+ *
+ * https://github.com/vegastrike/Vega-Strike-Engine-Source
+ *
+ * This file is part of Vega Strike.
+ *
+ * Vega Strike is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * Vega Strike is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
+
 #include <boost/version.hpp>
 #if BOOST_VERSION != 102800
 #include <boost/python/object.hpp>
@@ -34,57 +60,22 @@ static FILE * getFullFile( std::string filename, std::string time_of_day_hint, s
 }
 void BaseInterface::Load( const char *filename, const char *time_of_day_hint, const char *faction )
 {
-#if 0
-    std::string full_filename     = string( "bases/" )+filename;
-    std::string daynight_filename = full_filename+"_"+string( time_of_day_hint );
-    full_filename     += BASE_EXTENSION;
-    daynight_filename += BASE_EXTENSION;
-    std::string newfile = daynight_filename;
-    BOOST_LOG_TRIVIAL(trace) << "BaseInterface::LoadXML "<<full_filename<<endl;
-    FILE *inFile = VSFileSystem::vs_open( daynight_filename.c_str(), "r" );
-    if (!inFile) {
-        newfile = full_filename;
-        inFile  = VSFileSystem::vs_open( full_filename.c_str(), "r" );
-    }
-    if (!inFile) {
-        Unit *baseun = this->baseun.GetUnit();
-        if (baseun) {
-            if (baseun->isUnit() == _UnitType::planet) {
-                daynight_filename = string( "bases/planet_" )+time_of_day_hint+string( BASE_EXTENSION );
-                inFile  = VSFileSystem::vs_open( daynight_filename.c_str(), "r" );
-                newfile = daynight_filename;
-                if (!inFile) {
-                    newfile = "bases/planet" BASE_EXTENSION;
-                    inFile  = VSFileSystem::vs_open( newfile.c_str(), "r" );
-                }
-            } else {
-                daynight_filename = string( "bases/unit_" )+time_of_day_hint+string( BASE_EXTENSION );
-                inFile  = VSFileSystem::vs_open( daynight_filename.c_str(), "r" );
-                newfile = daynight_filename;
-                if (!inFile) {
-                    newfile = "bases/unit" BASE_EXTENSION;
-                    inFile  = VSFileSystem::vs_open( newfile.c_str(), "r" );
-                }
-            }
-        }
-        if (!inFile)
-            return;
-    }
-#else
     FILE *inFile = getFullFile( string( "bases/" )+filename, time_of_day_hint, faction );
     if (!inFile) {
         bool   planet = false;
         Unit  *baseun = this->baseun.GetUnit();
-        if (baseun)
+        if (baseun) {
             planet = (baseun->isUnit() == _UnitType::planet);
+        }
         string basestring( "bases/unit" );
-        if (planet)
+        if (planet) {
             basestring = "bases/planet";
+        }
         inFile = getFullFile( basestring, time_of_day_hint, faction );
-        if (!inFile)
+        if (!inFile) {
             return;
+        }
     }
-#endif
     //now that we have a FILE * named inFile and a std::string named newfile we can finally begin the python
     string compilefile = string( filename )+time_of_day_hint+string( faction )+BASE_EXTENSION;
     Python::reseterrors();

@@ -20,7 +20,7 @@
 # You can customize this directory location if desired, but it should be
 # something very short. Otherwise, you will run into problems.
 Set-Variable -Name VCKPG_PARENT_DIR -Value "C:\Projects"
-Set-Variable -Name CMAKE_VERSION -Value "3.20.2"
+Set-Variable -Name CMAKE_VERSION -Value "3.21.1"
 
 New-Item "$VCKPG_PARENT_DIR" -ItemType Directory -Force
 Push-Location "$VCKPG_PARENT_DIR"

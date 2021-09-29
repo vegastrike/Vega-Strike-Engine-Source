@@ -1,3 +1,28 @@
+/**
+* unit_collide.cpp
+*
+* Copyright (c) 2001-2002 Daniel Horn
+* Copyright (c) 2002-2019 pyramid3d and other Vega Strike Contributors
+* Copyright (c) 2019-2021 Stephen G. Tuggy, and other Vega Strike Contributors
+*
+* https://github.com/vegastrike/Vega-Strike-Engine-Source
+*
+* This file is part of Vega Strike.
+*
+* Vega Strike is free software: you can redistribute it and/or modify
+* it under the terms of the GNU General Public License as published by
+* the Free Software Foundation, either version 2 of the License, or
+* (at your option) any later version.
+*
+* Vega Strike is distributed in the hope that it will be useful,
+* but WITHOUT ANY WARRANTY; without even the implied warranty of
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+* GNU General Public License for more details.
+*
+* You should have received a copy of the GNU General Public License
+* along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
+*/
+
 /// Unit mesh collision detection
 /// Provides various functions for collision detection
 
@@ -19,7 +44,7 @@
 #include "vs_globals.h"
 #include "configxml.h"
 #include "collide.h"
-#include "vsfilesystem.h"
+#include "vs_logging.h"
 
 #include "collision.h"
 #include "universe.h"
@@ -34,7 +59,7 @@ void Unit::RemoveFromSystem()
     for (unsigned int locind = 0; locind < NUM_COLLIDE_MAPS; ++locind)
         if ( !is_null( this->location[locind] ) ) {
             if (activeStarSystem == NULL) {
-                BOOST_LOG_TRIVIAL(error) << "NONFATAL NULL activeStarSystem detected...please fix";
+                VS_LOG(error, "NONFATAL NULL activeStarSystem detected...please fix");
                 activeStarSystem = _Universe->activeStarSystem();
             }
             static bool collidemap_sanity_check =
@@ -48,11 +73,11 @@ void Unit::RemoveFromSystem()
                     for (i = activeStarSystem->collide_map[locind]->begin();
                          i != activeStarSystem->collide_map[locind]->end(); ++i) {
                         if (i == this->location[locind]) {
-                            BOOST_LOG_TRIVIAL(info) << boost::format("hussah %1$b") % (*i == *this->location[locind]);
+                            VS_LOG(info, (boost::format("hussah %1$b") % (*i == *this->location[locind])));
                             found = true;
                         }
                         if (**i < **j) {
-                            BOOST_LOG_TRIVIAL(warning) << boost::format("(%1$f %2$f %3$f) and (%4$f %5$f %6$f) %7$f < %8$f %9$b!!!")
+                            VS_LOG(warning, (boost::format("(%1$f %2$f %3$f) and (%4$f %5$f %6$f) %7$f < %8$f %9$b!!!")
                                    % (**i).GetPosition().i
                                    % (**i).GetPosition().j
                                    % (**i).GetPosition().k
@@ -61,11 +86,11 @@ void Unit::RemoveFromSystem()
                                    % (**j).GetPosition().k
                                    % (**i).GetPosition().MagnitudeSquared()
                                    % (**j).GetPosition().MagnitudeSquared()
-                                   % ((**i).GetPosition().MagnitudeSquared() < (**j).GetPosition().MagnitudeSquared());
+                                   % ((**i).GetPosition().MagnitudeSquared() < (**j).GetPosition().MagnitudeSquared())));
                         }
                         j = i;
                     }
-                    BOOST_LOG_TRIVIAL(info) << boost::format("fin %1$p %2$b ") % (*(int*) &i) % found;
+                    VS_LOG(info, (boost::format("fin %1$p %2$b ") % (*(int*) &i) % found));
                     activeStarSystem->collide_map[locind]->checkSet();
                     assert( 0 );
                 }
@@ -393,14 +418,14 @@ Unit* Unit::rayCollide( const QVector &start, const QVector &end, Vector &norm, 
                 distance = (end-start).Magnitude() * distance;
 
                 // NOTE:   Here is where we need to retrieve the point on the ray that we collided with the mesh, and set it to end, create the normal and set distance
-                BOOST_LOG_TRIVIAL(trace) << boost::format("Beam collide with %1$p, distance %2%") % this % distance;
+                VS_LOG(trace, (boost::format("Beam collide with %1$p, distance %2%") % this % distance));
                 return(this);
             }
         } else {//no col trees = a sphere
             // compute real distance
             distance = (end-start).Magnitude() * distance;
 
-            BOOST_LOG_TRIVIAL(trace) << boost::format("Beam collide with %1$p, distance %2%") % this % distance;
+            VS_LOG(trace, (boost::format("Beam collide with %1$p, distance %2%") % this % distance));
             return(this);
         }
     } else {

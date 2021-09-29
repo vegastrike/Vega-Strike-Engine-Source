@@ -1,3 +1,28 @@
+/**
+* weapon_info.cpp
+*
+* Copyright (c) 2001-2002 Daniel Horn
+* Copyright (c) 2002-2019 pyramid3d and other Vega Strike Contributors
+* Copyright (c) 2019-2021 Stephen G. Tuggy, and other Vega Strike Contributors
+*
+* https://github.com/vegastrike/Vega-Strike-Engine-Source
+*
+* This file is part of Vega Strike.
+*
+* Vega Strike is free software: you can redistribute it and/or modify
+* it under the terms of the GNU General Public License as published by
+* the Free Software Foundation, either version 2 of the License, or
+* (at your option) any later version.
+*
+* Vega Strike is distributed in the hope that it will be useful,
+* but WITHOUT ANY WARRANTY; without even the implied warranty of
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+* GNU General Public License for more details.
+*
+* You should have received a copy of the GNU General Public License
+* along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
+*/
+
 #include "weapon_info.h"
 
 #include "vs_globals.h"
@@ -12,21 +37,21 @@
 
 namespace alg = boost::algorithm;
 
-Hashtable< std::string, weapon_info, 257 >lookuptable;
+Hashtable< std::string, WeaponInfo, 257 >lookuptable;
 
-weapon_info::weapon_info() {}
+WeaponInfo::WeaponInfo() {}
 
-weapon_info::weapon_info( WEAPON_TYPE type )
+WeaponInfo::WeaponInfo( WEAPON_TYPE type )
 {
     this->type = type;
 }
 
-weapon_info::weapon_info( const weapon_info &tmp )
+WeaponInfo::WeaponInfo( const WeaponInfo &tmp )
 {
     *this = tmp;
 }
 
-float weapon_info::Refire() const
+float WeaponInfo::Refire() const
 {
     unsigned int len = name.length();
     // TODO: what is this???
@@ -38,7 +63,7 @@ float weapon_info::Refire() const
     return this->refire_rate*( game_options.refire_difficulty_scaling/(1.0f+(game_options.refire_difficulty_scaling-1.0f)*g_game.difficulty) );
 }
 
-bool weapon_info::isMissile() const
+bool WeaponInfo::isMissile() const
 {
     if (game_options.projectile_means_missile  && this->type == WEAPON_TYPE::PROJECTILE) {
         return true;
@@ -52,9 +77,9 @@ bool weapon_info::isMissile() const
 // TODO: this should not be here
 using namespace VSFileSystem;
 
-weapon_info * getWeapon( const std::string &key )
+WeaponInfo * getWeapon( const std::string &key )
 {
-    weapon_info *wi = lookuptable.Get( boost::to_upper_copy( key ) );
+    WeaponInfo *wi = lookuptable.Get( boost::to_upper_copy( key ) );
     if (wi) {
         if ( !WeaponMeshCache::getCachedMutable( wi->name ) ) {
             static FileLookupCache lookup_cache;
@@ -71,7 +96,7 @@ weapon_info * getWeapon( const std::string &key )
 }
 
 
-void weapon_info::netswap()
+void WeaponInfo::netswap()
 {
     //Enum elements are the size of an int
     //byte order swap doesn't work with ENUM - MAY NEED TO FIND A WORKAROUND SOMEDAY

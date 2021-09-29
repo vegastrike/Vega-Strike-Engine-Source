@@ -1,9 +1,9 @@
-/**
+/*
  * load_mission.cpp
  *
  * Copyright (C) Daniel Horn
- * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike
- * contributors
+ * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike contributors
+ * Copyright (C) 2021 Stephen G. Tuggy
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -30,6 +30,7 @@
 #include "vs_globals.h"
 #include "star_system_generic.h"
 #include "vsfilesystem.h"
+#include "vs_logging.h"
 #include "cmd/unit_generic.h"
 #include "gfx/cockpit_generic.h"
 #include "cmd/ai/aggressive.h"
@@ -273,7 +274,7 @@ void LoadMission( const char *nission_name, const std::string &script, bool load
     if ( mission_name.empty() ) {
         mission_name = game_options.empty_mission;
     }
-    BOOST_LOG_TRIVIAL(info) << boost::format("%1%") % script;
+    VS_LOG(info, (boost::format("%1%") % script));
     VSFile  f;
     VSError err = f.OpenReadOnly( mission_name, MissionFile );
     if (err > Ok) {

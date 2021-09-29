@@ -1,9 +1,10 @@
-/**
+/*
  * universe_util_generic.cpp
  *
  * Copyright (C) Daniel Horn
  * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike
  * contributors
+ * Copyright (C) 2021 Stephen G. Tuggy
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -43,6 +44,7 @@
 #include "configxml.h"
 #include "vs_globals.h"
 #include "vsfilesystem.h"
+#include "vs_logging.h"
 #include "cmd/unit_util.h"
 #include "cmd/csv.h"
 #include "linecollide.h"
@@ -57,7 +59,16 @@
 #include "star_system.h"
 #include "universe.h"
 
+#include <boost/filesystem.hpp>
+#include <boost/chrono/time_point.hpp>
+#include <boost/chrono/io/time_point_io.hpp>
+#include <boost/chrono/chrono.hpp>
+
 #include <iostream>
+#include <sstream>
+#include <chrono>
+#include <locale>
+#include <cstdint>
 
 extern Unit& GetUnitMasterPartList();
 extern int num_delayed_missions();
@@ -204,7 +215,7 @@ Cargo getRandCargo( int quantity, string category )
             unsigned int i = Begin+( rand()%(End-Begin) );
             ret = &mpl->GetCargo( i );
         } else {
-            BOOST_LOG_TRIVIAL(info) << boost::format("Cargo category %1% not found") % category;
+            VS_LOG(info, (boost::format("Cargo category %1% not found") % category));
         }
     } else if ( mpl->numCargo() ) {
         for (unsigned int i = 0; i < 500; ++i) {
@@ -769,8 +780,8 @@ void receivedCustom( int cp, bool trusted, string cmd, string args, string id )
     securepythonstr( id );
     string pythonCode = game_options.custompython+"("+(trusted ? "True" : "False")
                         +", r\'"+cmd+"\', r\'"+args+"\', r\'"+id+"\')\n";
-    BOOST_LOG_TRIVIAL(info) << "Executing python command: ";
-    BOOST_LOG_TRIVIAL(info) << "    " << pythonCode;
+    VS_LOG(info, "Executing python command: ");
+    VS_LOG(info, (boost::format("    %1%") % pythonCode));
     const char *cpycode = pythonCode.c_str();
     ::Python::reseterrors();
     PyRun_SimpleString( const_cast< char* > (cpycode) );
@@ -898,43 +909,73 @@ string getSaveInfo( const std::string &filename, bool formatForTextbox )
                             _Universe->CurrentCockpit(), "", true, false, game_options.quick_savegame_summaries, true, true,
                             campaign_score_vars );
     UniverseUtil::setCurrentSaveGame( sillytemp );
-    string text;
-    text += filename;
-    text  = "Savegame: "+text+lf+"_________________"+lf;
+    std::ostringstream ss{};
+    ss << "Savegame: " << filename << lf;
+    ss << "_________________" << lf;
+    try
     {
-        struct stat attrib;
-        if ( 0 == stat( (getSaveDir()+filename).c_str(), &attrib ) ) {
-            text += "Saved on: ";
-            text += ctime( &attrib.st_mtime )+lf;
-        }
+        ss << "Saved on: ";
+        const boost::filesystem::path file_name_path{filename};
+        const boost::filesystem::path save_dir_path{getSaveDir()};
+        const boost::filesystem::path full_file_path{boost::filesystem::absolute(file_name_path, save_dir_path)};
+        std::time_t last_saved_time{boost::filesystem::last_write_time(full_file_path)};
+        boost::chrono::system_clock::time_point last_saved_time_point{boost::chrono::system_clock::from_time_t(last_saved_time)};
+        ss << boost::chrono::time_fmt(boost::chrono::timezone::local, "%c")
+                << last_saved_time_point
+                << lf;
     }
-    text += "Credits: "+XMLSupport::tostring( (unsigned int) creds )+"."+XMLSupport::tostring(
-        ( (unsigned int) (creds*100) )%100 )+lf;
-    text += simplePrettySystem( system )+lf;
+    catch (boost::filesystem::filesystem_error& fse)
+    {
+        VS_LOG_AND_FLUSH(fatal, "boost::filesystem::filesystem_error encountered:");
+        VS_LOG_AND_FLUSH(fatal, fse.what());
+        VSExit(-6);
+    }
+    catch (std::exception& e)
+    {
+        VS_LOG_AND_FLUSH(fatal, "std::exception encountered:");
+        VS_LOG_AND_FLUSH(fatal, e.what());
+        VSExit(-6);
+    }
+    catch (...)
+    {
+        VS_LOG_AND_FLUSH(fatal, "unknown exception type encountered!");
+        VSExit(-6);
+    }
+    ss << "Credits: "
+            << static_cast<int64_t>(creds)
+            << "."
+            << (static_cast<int64_t>(creds * 100) % 100)
+            << lf;
+    ss << simplePrettySystem( system ) << lf;
     if ( Ships.size() ) {
-        text += "Starship: "+simplePrettyShip( Ships[0] )+lf;
+        ss << "Starship: " << simplePrettyShip( Ships[0] ) << lf;
         if (Ships.size() > 2) {
-            text += "Fleet:"+lf;
-            for (unsigned int i = 2; i < Ships.size(); i += 2)
-                text += " "+simplePrettyShip( Ships[i-1] )+lf+"  Located At:"+lf+"  "+simplePrettySystem( Ships[i] )+lf;
+            ss << "Fleet:" << lf;
+            for (size_t i = 2; i < Ships.size(); i += 2) {
+                ss << " " << simplePrettyShip( Ships[i-1] ) << lf;
+                ss << "  Located At:" << lf;
+                ss << "  " << simplePrettySystem( Ships[i] ) << lf;
+            }
         }
     }
     if (!game_options.quick_savegame_summaries) {
         bool hit = false;
         for (set< string >::const_iterator it = campaign_score_vars.begin(); it != campaign_score_vars.end(); ++it) {
             string var = *it;
-            unsigned int curscore = savegame.getMissionData( var ).size()+savegame.getMissionStringData( var ).size();
+            int64_t curscore = savegame.getMissionData( var ).size() + savegame.getMissionStringData( var ).size();
             if (curscore > 0) {
                 hit   = true;
-                if (var.length() > 0)
+                if (var.length() > 0) {
                     var[0] = toupper( var[0] );
-                text += var.substr( 0, var.find( "_" ) )+" Campaign Score: "+XMLSupport::tostring( curscore )+lf;
+                }
+                ss << var.substr( 0, var.find( "_" ) ) + " Campaign Score: " << curscore << lf;
             }
         }
-        if (!hit)
-            text += "Campaign Score: 0"+lf;
+        if (!hit) {
+            ss << "Campaign Score: 0" << lf;
+        }
     }
-    return text;
+    return ss.str();
 }
 
 string getCurrentSaveGame()

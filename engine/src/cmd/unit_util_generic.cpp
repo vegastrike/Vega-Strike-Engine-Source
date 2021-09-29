@@ -1,8 +1,9 @@
-/**
+/*
  * unit_util_generic.cpp
  *
  * Copyright (C) 2020 pyramid3d, Roy Falk, Stephen G. Tuggy,
  * and other Vega Strike contributors.
+ * Copyright (C) 2021 Stephen G. Tuggy
  *
  * This file is part of Vega Strike.
  *
@@ -38,7 +39,7 @@
 #include "lin_time.h"
 #include "planetary_orbit.h"
 #include "universe.h"
-#include "vsfilesystem.h"
+#include "vs_logging.h"
 #include "weapon_info.h"
 
 #include "cmd/script/pythonmission.h"
@@ -371,7 +372,7 @@ float getFactionRelation( const Unit *my_unit, const Unit *their_unit )
 {
     if ((my_unit == nullptr) || (their_unit == nullptr))
     {
-        BOOST_LOG_TRIVIAL(warning) << "getFactionRelation: null unit encountered!";
+        VS_LOG(warning, "getFactionRelation: null unit encountered!");
         return 0.0f;
     }
     float relation = FactionUtil::GetIntRelation( my_unit->faction, their_unit->faction );

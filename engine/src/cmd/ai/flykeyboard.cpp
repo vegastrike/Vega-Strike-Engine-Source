@@ -1,9 +1,9 @@
-/**
+/*
  * flykeyboard.cpp
  *
  * Copyright (C) Daniel Horn
- * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike
- * contributors
+ * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike contributors
+ * Copyright (C) 2021 Stephen G. Tuggy
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -32,7 +32,7 @@
 #include "config_xml.h"
 #include "xml_support.h"
 #include "vs_globals.h"
-#include "vsfilesystem.h"
+#include "vs_logging.h"
 #include "gfx/cockpit.h"
 #include "lin_time.h"
 #include "universe.h"
@@ -493,7 +493,7 @@ void FlyByKeyboard::ChangeCommStatus( const KBData&, KBSTATE k )
     case UP:
         break;
     case PRESS:
-        BOOST_LOG_TRIVIAL(info) << "Pressed NETCOMM key !!!";
+        VS_LOG(info, "Pressed NETCOMM key !!!");
         if (g().startcomm == true) {
             g().startcomm = false;
         }
@@ -516,7 +516,7 @@ void FlyByKeyboard::SwitchWebcam( const KBData&, KBSTATE k )
     case UP:
         break;
     case PRESS:
-        BOOST_LOG_TRIVIAL(info) << "Pressed SWITCHWEBCAM key !!!";
+        VS_LOG(info, "Pressed SWITCHWEBCAM key !!!");
         g().switchwebcam = true;
         break;
     case RELEASE:
@@ -533,7 +533,7 @@ void FlyByKeyboard::SwitchSecured( const KBData&, KBSTATE k )
     case UP:
         break;
     case PRESS:
-        BOOST_LOG_TRIVIAL(info) << "Pressed SWITCHSECURED key !!!";
+        VS_LOG(info, "Pressed SWITCHSECURED key !!!");
         g().switchsecured = true;
         break;
     case RELEASE:

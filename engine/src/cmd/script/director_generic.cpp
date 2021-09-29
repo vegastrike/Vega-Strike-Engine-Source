@@ -1,8 +1,9 @@
-/**
+/*
  * director_generic.cpp
  *
  * Copyright (C) 2020 pyramid3d, Nachum Barcohen, Roy Falk, Stephen G. Tuggy,
  * and other Vega Strike contributors.
+ * Copyright (C) 2021 Stephen G. Tuggy
  *
  * This file is part of Vega Strike.
  *
@@ -40,6 +41,7 @@
 #include "savegame.h"
 #include "gnuhash.h"
 #include "universe.h"
+#include "vs_logging.h"
 
 PYTHON_INIT_INHERIT_GLOBALS( Director, PythonMissionBaseClass );
 
@@ -374,7 +376,7 @@ void Mission::loadModule( string modulename )
 
     debug( 3, node, SCRIPT_PARSE, "loading module "+modulename );
 
-    BOOST_LOG_TRIVIAL(trace) << "  loading module " << modulename;
+    VS_LOG(trace, (boost::format("  loading module %1%") % modulename));
 
     string filename = "modules/"+modulename+".module";
     missionNode *import_top = importf->LoadXML( filename.c_str() );
@@ -454,7 +456,7 @@ void Mission::UnPickle( string pickled )
 
 void Mission::DirectorStart( missionNode *node )
 {
-    BOOST_LOG_TRIVIAL(trace) << "DIRECTOR START";
+    VS_LOG(trace, "DIRECTOR START");
 
     static int  st_debuglevel = atoi( vs_config->getVariable( "interpreter", "debuglevel", "0" ).c_str() );
     static bool st_start_game = XMLSupport::parse_bool( vs_config->getVariable( "interpreter", "startgame", "true" ) );
@@ -482,7 +484,7 @@ void Mission::DirectorStart( missionNode *node )
     if ( !doparse.empty() )
         if (XMLSupport::parse_bool( doparse ) == false)
             return;
-    BOOST_LOG_TRIVIAL(trace) << "parsing declarations for director";
+    VS_LOG(trace, "parsing declarations for director");
 
     parsemode = PARSE_DECL;
 
@@ -501,7 +503,7 @@ void Mission::DirectorStart( missionNode *node )
         string mname = (*iter).first;
         missionNode *mnode = (*iter).second;
         if (mname != "director") {
-            BOOST_LOG_TRIVIAL(trace) << "  parsing full module " << mname;
+            VS_LOG(trace, (boost::format(" parsing full module %1%") % mname));
             doModule( mnode, SCRIPT_PARSE );
         }
     }

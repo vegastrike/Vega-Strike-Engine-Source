@@ -1,11 +1,11 @@
 // -*- mode: c++; c-basic-offset: 4; indent-tabs-mode: nil -*-
 
-/**
+/*
  * cockpit.cpp
  *
  * Copyright (C) Daniel Horn
- * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike
- * contributors
+ * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike contributors
+ * Copyright (C) 2021 Stephen G. Tuggy
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -38,6 +38,7 @@
 #endif
 
 #include "vsfilesystem.h"
+#include "vs_logging.h"
 #include "vs_globals.h"
 #include "vegastrike.h"
 #include "gauge.h"
@@ -1480,7 +1481,7 @@ void GameCockpit::TriggerEvents( Unit *un ) {
     else
         last.processing_time = curtime;
 
-    BOOST_LOG_TRIVIAL(trace) << "Processing events";
+    VS_LOG(trace, "Processing events");
     for (EVENTID event = EVENTID_FIRST; event < NUM_EVENTS; event = (EVENTID)(event+1)) {
         GameSoundContainer *sound = static_cast<GameSoundContainer*>(GetSoundForEvent(event));
         if (sound != NULL) {
@@ -1489,17 +1490,18 @@ void GameCockpit::TriggerEvents( Unit *un ) {
                 do {                                                                                                            \
                     bool triggervalue = _triggervalue;                                                                          \
                     bool curvalue = _curvalue;                                                                                  \
-                    BOOST_LOG_TRIVIAL(trace) << boost::format("Processing event " name " (cur=%1% last=%2%)")                   \
-                                                % int(curvalue) % int(last.lastvar);                                            \
+                    VS_LOG(trace, (boost::format("Processing event " name " (cur=%1% last=%2%)")                                \
+                                                % int(curvalue) % int(last.lastvar)));                                          \
                                                                                                                                 \
                     if (curvalue != last.lastvar) {                                                                             \
-                        BOOST_LOG_TRIVIAL(debug) << boost::format("Triggering event edge " name " (cur=%1% last=%2% on=%3%)")   \
-                                                % int(curvalue) % int(last.lastvar) % int(triggervalue);                        \
+                        VS_LOG(debug, (boost::format("Triggering event edge " name " (cur=%1% last=%2% on=%3%)")                \
+                                                % int(curvalue) % int(last.lastvar) % int(triggervalue)));                      \
                         last.lastvar = curvalue;                                                                                \
-                        if (curvalue == triggervalue)                                                                           \
+                        if (curvalue == triggervalue) {                                                                         \
                             sound->play();                                                                                      \
-                        else                                                                                                    \
+                        } else {                                                                                                \
                             sound->stop();                                                                                      \
+                        }                                                                                                       \
                     }                                                                                                           \
                 } while(0)
 
@@ -3002,14 +3004,16 @@ string GameCockpit::getsoundfile( string sound )
                 break;
             }
         }
-        if (VSFileSystem::LookForFile( anothertmpstr, SoundFile ) < Ok)
+        if (VSFileSystem::LookForFile( anothertmpstr, SoundFile ) < VSFileSystem::Ok) {
             ok = true;
+        }
     }
-    if (ok)
+    if (ok) {
         //return lastsound;
         return anothertmpstr;
-    else
+    } else {
         return "";
+    }
 }
 
 void SetStartupView( Cockpit* );

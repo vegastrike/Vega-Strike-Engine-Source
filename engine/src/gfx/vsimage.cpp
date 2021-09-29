@@ -1,9 +1,9 @@
-/**
+/*
  * vsimage.cpp
  *
  * Copyright (C) Daniel Horn
- * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike
- * contributors
+ * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike contributors
+ * Copyright (C) 2021 Stephen G. Tuggy
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -37,6 +37,7 @@
 #include "cmd/unit_generic.h"
 
 #include "vsfilesystem.h"
+#include "vs_logging.h"
 #include "vs_globals.h"
 #include <string.h>
 #include <png.h>
@@ -44,17 +45,6 @@
 
 #ifndef png_jmpbuf
 #  define png_jmpbuf( png_ptr ) ( (png_ptr)->jmpbuf )
-#endif
-
-#if defined (_WIN32) && !defined (__CYGWIN__)
-
-#ifndef HAVE_BOOLEAN
-#define HAVE_BOOLEAN
-#define FALSE 0
-#define TRUE 1
-typedef unsigned char boolean;
-#endif
-
 #endif
 
 #ifndef DDS_CUBEMAP
@@ -76,7 +66,9 @@ typedef unsigned char boolean;
 
 using VSFileSystem::VSError;
 using VSFileSystem::BadFormat;
+using VSFileSystem::Ok;
 using VSFileSystem::VSFileType;
+using VSFileSystem::VSFile;
 using boost::format;
 
 int PNG_HAS_PALETTE = 1;
@@ -153,7 +145,7 @@ unsigned char* VSImage::ReadImage( VSFile *f, textureTransform *t, bool strip, V
             ret = this->ReadBMP();
             break;
         default:
-            BOOST_LOG_TRIVIAL(info) << img_file->GetFilename();
+            VS_LOG(info, img_file->GetFilename());
             ret = NULL;
         }
         return ret;
@@ -225,22 +217,22 @@ VSError VSImage::CheckDDSSignature( VSFile *file )
 void VSImage::CheckFormat( VSFile *file )
 {
     if (this->CheckDDSSignature( file ) == Ok) {
-        BOOST_LOG_TRIVIAL(trace) << "\tFound a DDS file";
+        VS_LOG(trace, "\tFound a DDS file");
         this->img_type = DdsImage;
         return;
     }
     if (this->CheckPNGSignature( file ) == Ok) {
-        BOOST_LOG_TRIVIAL(trace) << "\tFound a PNG file";
+        VS_LOG(trace, "\tFound a PNG file");
         this->img_type = PngImage;
         return;
     }
     if (this->CheckBMPSignature( file ) == Ok) {
-        BOOST_LOG_TRIVIAL(trace) << "\tFound a BMP file";
+        VS_LOG(trace, "\tFound a BMP file");
         this->img_type = BmpImage;
         return;
     }
     if (this->CheckJPEGSignature( file ) == Ok) {
-        BOOST_LOG_TRIVIAL(trace) << "\tFound a JPEG file";
+        VS_LOG(trace, "\tFound a JPEG file");
         this->img_type = JpegImage;
         return;
     }
@@ -248,7 +240,7 @@ void VSImage::CheckFormat( VSFile *file )
 
 void PngReadFunc( png_struct *Png, png_bytep buf, png_size_t size )
 {
-    BOOST_LOG_TRIVIAL(trace) << format("Preparing to copy %1% bytes from PngFileBuffer") % size;
+    VS_LOG(trace, (boost::format("Preparing to copy %1% bytes from PngFileBuffer") % size));
     TPngFileBuffer *PngFileBuffer = (TPngFileBuffer*) png_get_io_ptr( Png );
     memcpy( buf, PngFileBuffer->Buffer+PngFileBuffer->Pos, size );
     PngFileBuffer->Pos += size;
@@ -275,12 +267,12 @@ unsigned char* VSImage::ReadPNG()
         png_infop info_ptr;
         int interlace_type;
 
-        BOOST_LOG_TRIVIAL(debug) << format("Loading PNG: %s") % this->img_file->GetFilename();
+        VS_LOG(debug, (boost::format("Loading PNG: %s") % this->img_file->GetFilename()));
 
         img_file->Begin();
         if ( !CheckPNGSignature( img_file ) ) {
-            BOOST_LOG_TRIVIAL(info) << "VSImage::ReadPNG() ERROR : NOT A PNG FILE";
-            BOOST_LOG_TRIVIAL(info) << img_file->GetFilename();
+            VS_LOG(error, "VSImage::ReadPNG() ERROR : NOT A PNG FILE");
+            VS_LOG_AND_FLUSH(error, img_file->GetFilename());
             throw (1);
         }
         //Go after sig since we already checked it
@@ -291,23 +283,23 @@ unsigned char* VSImage::ReadPNG()
         }
         png_ptr = png_create_read_struct( PNG_LIBPNG_VER_STRING, NULL, (png_error_ptr) png_cexcept_error, (png_error_ptr) NULL );
         if (png_ptr == NULL) {
-            BOOST_LOG_TRIVIAL(info) << "VSImage ERROR : PNG ptr == NULL !!!";
-            BOOST_LOG_TRIVIAL(info) << img_file->GetFilename();
+            VS_LOG(error, "VSImage ERROR : PNG ptr == NULL !!!");
+            VS_LOG_AND_FLUSH(error, img_file->GetFilename());
             throw (1);
         }
         info_ptr = png_create_info_struct( png_ptr );
         if (info_ptr == NULL) {
             png_destroy_read_struct( &png_ptr, (png_infopp) NULL, (png_infopp) NULL );
-            BOOST_LOG_TRIVIAL(info) << "VSImage ERROR : PNG info_ptr == NULL !!!";
-            BOOST_LOG_TRIVIAL(info) << img_file->GetFilename();
+            VS_LOG(error, "VSImage ERROR : PNG info_ptr == NULL !!!");
+            VS_LOG_AND_FLUSH(error, img_file->GetFilename());
             throw (1);
         }
         if ( setjmp( png_jmpbuf( png_ptr ) ) ) {
             /* Free all of the memory associated with the png_ptr and info_ptr */
             png_destroy_read_struct( &png_ptr, &info_ptr, (png_infopp) NULL );
             /* If we get here, we had a problem reading the file */
-            BOOST_LOG_TRIVIAL(info) << "VSImage ERROR : problem reading file/buffer -> setjmp !!!";
-            BOOST_LOG_TRIVIAL(info) << img_file->GetFilename();
+            VS_LOG(error, "VSImage ERROR : problem reading file/buffer -> setjmp !!!");
+            VS_LOG_AND_FLUSH(error, img_file->GetFilename());
             throw (1);
         }
         if ( !img_file->UseVolume() )
@@ -315,7 +307,7 @@ unsigned char* VSImage::ReadPNG()
         else
             png_set_read_fn( png_ptr, (png_voidp)&PngFileBuffer, (png_rw_ptr) PngReadFunc );
         png_set_sig_bytes( png_ptr, 8 );
-        BOOST_LOG_TRIVIAL(trace) << "Loading Done.  Decompressing";
+        VS_LOG(trace, "Loading Done.  Decompressing");
         png_read_info( png_ptr, info_ptr );         /* read all PNG info up to image data */
         this->sizeX     = 1;
         this->sizeY     = 1;
@@ -332,9 +324,13 @@ unsigned char* VSImage::ReadPNG()
                       &interlace_type,
                       NULL,
                       NULL );
-        BOOST_LOG_TRIVIAL(trace) << format("1. Loading a PNG file: width = %1% , height = %2% , depth = %3% , img "
-           "color = %4% , interlace = %5% ") %
-           sizeX % sizeY % img_depth % img_color_type % interlace_type;
+        VS_LOG(trace, (boost::format("1. Loading a PNG file: width = %1% , height = %2% , depth = %3% , img "
+            "color = %4% , interlace = %5% ")
+            % sizeX
+            % sizeY
+            % img_depth
+            % img_color_type
+            % interlace_type));
 # if __BYTE_ORDER != __BIG_ENDIAN
         if (this->img_depth == 16)
             png_set_swap( png_ptr );
@@ -360,34 +356,43 @@ unsigned char* VSImage::ReadPNG()
                       &interlace_type,
                       NULL,
                       NULL );
-        BOOST_LOG_TRIVIAL(trace) << format("2. Loading a PNG file : width = %1% , height = %2% , depth = %3% , "
-           "img_color = %4% , interlace = %5%") %
-           sizeX % sizeY % img_depth % img_color_type % interlace_type;
-        if (img_depth != 16)
+        VS_LOG(trace, (boost::format("2. Loading a PNG file : width = %1% , height = %2% , depth = %3% , "
+            "img_color = %4% , interlace = %5%")
+            % sizeX
+            % sizeY
+            % img_depth
+            % img_color_type
+            % interlace_type));
+        if (img_depth != 16) {
             img_depth = 8;
+        }
         row_pointers = (unsigned char**) malloc( sizeof (unsigned char*)*this->sizeY );
         int numchan = 1;
-        if (this->img_color_type&PNG_COLOR_MASK_COLOR)
+        if (this->img_color_type&PNG_COLOR_MASK_COLOR) {
             numchan = 3;
-        if (this->img_color_type&PNG_COLOR_MASK_PALETTE)
+        }
+        if (this->img_color_type&PNG_COLOR_MASK_PALETTE) {
             numchan = 1;
-        if (this->img_color_type&PNG_COLOR_MASK_ALPHA)
+        }
+        if (this->img_color_type&PNG_COLOR_MASK_ALPHA) {
             numchan++;
-        if (numchan == 1)
+        }
+        if (numchan == 1) {
             mode = _8BIT;
-        else if (numchan == 3)
+        } else if (numchan == 3) {
             mode = _24BIT;
-        else
+        } else {
             mode = _24BITRGBA;
+        }
         unsigned long stride = numchan * sizeof(unsigned char) * this->img_depth / 8;
-        BOOST_LOG_TRIVIAL(trace) << format("3. Allocating image buffer of size = %1% ") % (stride*this->sizeX*this->sizeY);
+        VS_LOG(trace, (boost::format("3. Allocating image buffer of size = %1% ") % (stride*this->sizeX*this->sizeY)));
         image = (unsigned char*) malloc( stride*this->sizeX*this->sizeY );
         for (unsigned int i = 0; i < this->sizeY; i++)
             row_pointers[i] = &image[i*stride*this->sizeX];
         png_read_image( png_ptr, row_pointers );
         unsigned char *result;
         if (tt) {
-            BOOST_LOG_TRIVIAL(trace) << "4. Doing a transformation ";
+            VS_LOG(trace, "4. Doing a transformation ");
             result = (*tt)(this->img_depth, this->img_color_type, this->sizeX, this->sizeY, row_pointers);
             free( image );
             image  = NULL;
@@ -400,17 +405,20 @@ unsigned char* VSImage::ReadPNG()
         png_destroy_read_struct( &png_ptr, &info_ptr, NULL );
         png_ptr  = NULL;
         info_ptr = NULL;
-        BOOST_LOG_TRIVIAL(trace) << "Decompressing Done.";
-        if (result)
+        VS_LOG(trace, "Decompressing Done.");
+        if (result) {
             this->AllocatePalette();
+        }
         return result;
     }
     catch (...) {
-        if (image)
+        if (image) {
             free( image );
+        }
         image = NULL;
-        if (row_pointers)
+        if (row_pointers) {
             free( row_pointers );
+        }
         row_pointers = NULL;
         return NULL;
     }
@@ -446,7 +454,7 @@ unsigned char* VSImage::ReadJPEG()
 
         my_error_mgr jerr;
 
-        BOOST_LOG_TRIVIAL(debug) << format("Loading JPEG: %1%") % this->img_file->GetFilename();
+        VS_LOG(debug, (boost::format("Loading JPEG: %1%") % this->img_file->GetFilename()));
 
         cinfo.err = jpeg_std_error( &jerr.pub );
         jerr.pub.error_exit = my_error_exit;
@@ -454,15 +462,16 @@ unsigned char* VSImage::ReadJPEG()
             //If we get here, the JPEG code has signaled an error.
             //We need to clean up the JPEG object, and return.
             jpeg_destroy_decompress( &cinfo );
-            BOOST_LOG_TRIVIAL(info) << "VSImage ERROR : error reading jpg file";
-            BOOST_LOG_TRIVIAL(info) << img_file->GetFilename();
+            VS_LOG(error, "VSImage ERROR : error reading jpg file");
+            VS_LOG_AND_FLUSH(error, img_file->GetFilename());
             throw (1);
         }
         jpeg_create_decompress( &cinfo );
-        if ( !img_file->UseVolume() )
+        if ( !img_file->UseVolume() ) {
             jpeg_stdio_src( (j_decompress_ptr)&cinfo, img_file->GetFP() );
-        else
+        } else {
             jpeg_memory_src( &cinfo, (unsigned char*) img_file->get_pk3_data(), img_file->Size() );
+        }
         (void) jpeg_read_header( &cinfo, TRUE );
         this->sizeX     = cinfo.image_width;
         this->sizeY     = cinfo.image_height;
@@ -472,12 +481,13 @@ unsigned char* VSImage::ReadJPEG()
         (void) jpeg_start_decompress( &cinfo );
 
         this->img_color_type = PNG_COLOR_TYPE_RGB;
-        if (cinfo.output_components == 1)
+        if (cinfo.output_components == 1) {
             this->img_color_type = PNG_COLOR_TYPE_GRAY;
-        else if (cinfo.output_components == 4)
+        } else if (cinfo.output_components == 4) {
             this->img_color_type = PNG_COLOR_TYPE_RGB_ALPHA;
-        else if (cinfo.output_components == 2)
+        } else if (cinfo.output_components == 2) {
             this->img_color_type = PNG_COLOR_TYPE_GRAY_ALPHA;
+        }
         switch (this->img_color_type)
         {
         case PNG_COLOR_TYPE_RGB:
@@ -493,8 +503,10 @@ unsigned char* VSImage::ReadJPEG()
             this->mode = _8BIT;
             break;
         }
-        BOOST_LOG_TRIVIAL(trace) << format("1. Loading a JPEG file : width= %1% , height = %2% , img_color = %3% ") % sizeX % sizeY %
-                                        img_color_type;
+        VS_LOG(trace, (boost::format("1. Loading a JPEG file : width= %1% , height = %2% , img_color = %3% ")
+                        % sizeX
+                        % sizeY
+                        % img_color_type));
         row_pointers    = (unsigned char**) malloc( sizeof (unsigned char*)*cinfo.image_height );
 
         this->img_depth = 8;
@@ -502,11 +514,13 @@ unsigned char* VSImage::ReadJPEG()
 
         unsigned long stride = numchan*sizeof (unsigned char)*this->img_depth/8;
         image = (unsigned char*) malloc( stride*cinfo.image_width*cinfo.image_height );
-        for (unsigned int i = 0; i < cinfo.image_height; i++)
+        for (unsigned int i = 0; i < cinfo.image_height; i++) {
             row_pointers[i] = &image[i*stride*cinfo.image_width];
+        }
         unsigned int count = 0;
-        while (count < this->sizeY)
+        while (count < this->sizeY) {
             count += jpeg_read_scanlines( &cinfo, &(row_pointers[count]), this->sizeY-count );
+        }
         (void) jpeg_finish_decompress( &cinfo );
         jpeg_destroy_decompress( &cinfo );
 
@@ -538,11 +552,11 @@ unsigned char* VSImage::ReadBMP()
     unsigned char *adata = NULL;
 
     try {
-        BOOST_LOG_TRIVIAL(debug) << format("Loading BMP: %1%") % this->img_file->GetFilename();
+        VS_LOG(debug, (boost::format("Loading BMP: %1%") % this->img_file->GetFilename()));
 
         if (CheckBMPSignature( img_file ) != Ok) {
-            BOOST_LOG_TRIVIAL(info) << "VSImage ERROR : BMP signature check failed : this should not happen !!!";
-            BOOST_LOG_TRIVIAL(info) << img_file->GetFilename();
+            VS_LOG(error, "VSImage ERROR : BMP signature check failed : this should not happen !!!");
+            VS_LOG_AND_FLUSH(error, img_file->GetFilename());
             throw (1);
         }
         //seek back to beginning
@@ -667,7 +681,7 @@ unsigned char* VSImage::ReadDDS()
     int width  = 0;
     int height = 0;
     try {
-        BOOST_LOG_TRIVIAL(debug) << format("Loading DDS: %1%") % this->img_file->GetFilename();
+        VS_LOG(debug, (boost::format("Loading DDS: %1%") % this->img_file->GetFilename()));
 
         //Skip what we already know.
         img_file->GoTo( 4 );
@@ -759,10 +773,12 @@ unsigned char* VSImage::ReadDDS()
             }
             break;
         default:
-            BOOST_LOG_TRIVIAL(info) << format("VSImage ERROR : DDS Compression Scheme, impossible.[%1% ;%2%;%3%;%4%]!") %
-                                          header.pixelFormat.fourcc[0] % header.pixelFormat.fourcc[1] % header.pixelFormat.fourcc[2] %
-                                          header.pixelFormat.fourcc[3];
-            BOOST_LOG_TRIVIAL(info) << img_file->GetFilename();
+            VS_LOG(error, (boost::format("VSImage ERROR : DDS Compression Scheme, impossible.[%1% ;%2%;%3%;%4%]!")
+                        % header.pixelFormat.fourcc[0]
+                        % header.pixelFormat.fourcc[1]
+                        % header.pixelFormat.fourcc[2]
+                        % header.pixelFormat.fourcc[3]));
+            VS_LOG_AND_FLUSH(error, img_file->GetFilename());
             throw (1);
         }
         inputSize = 0;
@@ -781,7 +797,7 @@ unsigned char* VSImage::ReadDDS()
                 height >>= 1;
         }
         if ( header.dcaps2&(DDS_CUBEMAP|DDS_CUBEMAP_ALLFACES) ) {
-            BOOST_LOG_TRIVIAL(trace) << format("Reading Cubemap %1%") % img_file->GetFilename();
+            VS_LOG(trace, (boost::format("Reading Cubemap %1%") % img_file->GetFilename()));
             inputSize = inputSize*6;
             this->img_sides =
                 SIDE_POS_X|SIDE_NEG_X
@@ -838,8 +854,8 @@ VSError VSImage::WriteImage( char *filename,
     VSFile  f;
     VSError err = f.OpenCreateWrite( filename, ft );
     if (err > Ok) {
-        BOOST_LOG_TRIVIAL(info) << format("VSImage ERROR : failed to open %1% for writing ") % filename;
-        BOOST_LOG_TRIVIAL(info) << img_file->GetFilename();
+        VS_LOG(error, (boost::format("VSImage ERROR : failed to open %1% for writing ") % filename));
+        VS_LOG_AND_FLUSH(error, img_file->GetFilename());
         return VSFileSystem::FileNotFound;
     }
     VSError ret = this->WriteImage( &f, data, type, width, height, alpha, bpp, flip );
@@ -876,8 +892,8 @@ VSError VSImage::WriteImage( VSFile *pf,
         ret = this->WriteBMP( data );
         break;
     default:
-        BOOST_LOG_TRIVIAL(info) << "VSImage ERROR : Unknown image format";
-        BOOST_LOG_TRIVIAL(info) << img_file->GetFilename();
+        VS_LOG(error, "VSImage ERROR : Unknown image format");
+        VS_LOG_AND_FLUSH(error, img_file->GetFilename());
         return VSFileSystem::BadFormat;
     }
     this->img_file  = NULL;

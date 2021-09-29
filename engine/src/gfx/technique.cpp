@@ -1,9 +1,9 @@
-/**
+/*
  * technique.cpp
  *
  * Copyright (C) Daniel Horn
- * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike
- * contributors
+ * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike contributors
+ * Copyright (C) 2021 Stephen G. Tuggy
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -37,7 +37,8 @@
 #include "xml_support.h"
 #include "technique.h"
 #include "XMLDocument.h"
-#include "vsfilesystem.h"
+// #include "vsfilesystem.h"   // Is this still needed? -- stephengtuggy 2021-09-07
+#include "vs_logging.h"
 #include "gfxlib.h"
 #include "aux_texture.h"
 #include "options.h"
@@ -150,28 +151,9 @@ Pass::BlendMode parseBlendMode(const std::string &s)
     return parseEnum(s, enumMap);
 }
 
-static float parseFloat( const std::string &s )
-{
-    if ( s.empty() ) throw InvalidParameters( "Invalid float attribute" );
-    else
-        return XMLSupport::parse_floatf( s );
-}
 
-void parseFloat4( const std::string &s, float value[4] )
-{
-    string::size_type ini = 0, end;
-    int i = 0;
-    while (i < 4 && ini != string::npos) {
-        value[i++] = parseFloat( s.substr( ini, end = s.find_first_of( ',', ini ) ) );
-        ini = ( (end == string::npos) ? end : (end+1) );
-    }
-    //if (i >= 4 && ini != string::npos) {
-        //BOOST_LOG_TRIVIAL(info) << boost::format("WARNING: invalid float4: %1%") % s;
-    //}
-    while (i < 4) {
-        value[i++] = 0;
-    }
-}
+
+
 
 //end namespace
 };
@@ -473,25 +455,27 @@ TechniquePtr Technique::getTechnique( const std::string &name )
         while ( !ptr->isCompiled() ) {
             try {
                 ptr->compile();
-                BOOST_LOG_TRIVIAL(info) << boost::format("Compilation of technique %1$s successful\n")
-                                         % ptr->getName().c_str();
+                VS_LOG(info, (boost::format("Compilation of technique %1$s successful\n")
+                                         % ptr->getName().c_str()));
             }
             catch (const ProgramCompileError& e) {
                 std::string fallback = ptr->getFallback();
-                BOOST_LOG_TRIVIAL(warning) << boost::format("Compilation of technique %1$s failed... trying %2$s\nCause: %3$s\n")
+                VS_LOG(warning, (boost::format("Compilation of technique %1$s failed... trying %2$s\nCause: %3$s\n")
                                          % ptr->getName().c_str()
                                          % fallback.c_str()
-                                         % e.what();
-                if (!fallback.empty() && fallback != name)
+                                         % e.what()));
+                if (!fallback.empty() && fallback != name) {
                     ptr = getTechnique( fallback );
-                else
+                } else {
                     break;
+                }
             }
         }
-        if ( ptr->isCompiled() )
+        if ( ptr->isCompiled() ) {
             techniqueCache[name] = ptr;
-        else
+        } else {
             throw InvalidParameters( "Could not compile any technique for \""+name+"\"" );
+        }
         return ptr;
     }
 }

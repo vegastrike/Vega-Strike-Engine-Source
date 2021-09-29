@@ -1,9 +1,10 @@
-/**
+/*
  * galaxy_xml.cpp
  *
  * Copyright (C) 2001-2002 Daniel Horn
  * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike
  * contributors
+ * Copyright (C) 2021 Stephen G. Tuggy
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -30,6 +31,7 @@
 #include <expat.h>
 #include "xml_support.h"
 #include "vsfilesystem.h"
+#include "vs_logging.h"
 #include "vs_globals.h"
 
 #include "galaxy_xml.h"
@@ -508,28 +510,30 @@ void Galaxy::setupPlanetTypeMaps()
             }
 
             if ( texture2name.find( val ) != texture2name.end() ) {
-                BOOST_LOG_TRIVIAL(warning) << boost::format("name conflict %1% has texture %2% and %3% has texture %4%")
+                VS_LOG(warning,
+                       (boost::format("name conflict %1% has texture %2% and %3% has texture %4%")
                        % name.c_str()
                        % val.c_str()
                        % texture2name[val].c_str()
-                       % val.c_str();
+                       % val.c_str()));
             } else {
                 texture2name[val] = name;
             }
             val = (*i).second["initial"];
             if ( initial2name.find( val ) != initial2name.end() ) {
-                BOOST_LOG_TRIVIAL(warning) << boost::format("name conflict %1% has initial %2% and %3% has initial %4%")
+                VS_LOG(warning,
+                       (boost::format("name conflict %1% has initial %2% and %3% has initial %4%")
                        % name.c_str()
                        % val.c_str()
                        % initial2name[val].c_str()
-                       % val.c_str();
+                       % val.c_str()));
             } else {
                 initial2name[val] = name;
             }
         }
     }
     if ( initial2name.empty() || texture2name.empty() ) {
-        BOOST_LOG_TRIVIAL(warning) << "Warning, galaxy contains no overarching planet info";
+        VS_LOG(warning, "Warning, galaxy contains no overarching planet info");
     }
 }
 Galaxy::Galaxy( const SGalaxy &g ) : SGalaxy( g )

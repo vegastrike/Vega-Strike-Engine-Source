@@ -1,11 +1,11 @@
 // -*- mode: c++; c-basic-offset: 4; indent-tabs-mode: nil -*-
 
-/**
+/*
  * unit_csv.cpp
  *
  * Copyright (C) Daniel Horn
- * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike
- * contributors
+ * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike contributors
+ * Copyright (C) 2021 Stephen G. Tuggy
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -46,6 +46,7 @@
 #include "unit.h"
 #include "universe.h"
 #include "vsfilesystem.h"
+#include "vs_logging.h"
 #include "mount_size.h"
 #include "weapon_info.h"
 
@@ -328,7 +329,7 @@ static void AddMounts( Unit *thus, Unit::XML &xml, const std::string &mounts )
         }
         if (a > 0)
             if (thus->mounts[a].sound == thus->mounts[a-1].sound && thus->mounts[a].sound != -1) {
-                BOOST_LOG_TRIVIAL(error) << "Sound error";
+                VS_LOG(error, "Sound error");
             }
     }
 }
@@ -824,7 +825,7 @@ void Unit::LoadRow( CSVRow &row, string modification, string *netxml )
         static bool optimizer_keys_init = false;
         if (!optimizer_keys_init) {
             optimizer_keys_init = true;
-            BOOST_LOG_TRIVIAL(info) << "Initializing optimizer";
+            VS_LOG(info, "Initializing optimizer");
             INIT_OPTIMIZER( keys, Name );
             INIT_OPTIMIZER( keys, Hud_image );
             INIT_OPTIMIZER( keys, FaceCamera );
@@ -1393,15 +1394,15 @@ void Unit::WriteUnit( const char *modifications )
                 bad = true;
             }
         if (bad) {
-            BOOST_LOG_TRIVIAL(error) << boost::format("Cannot Write out unit file %1% %2% that has no filename") % name.get().c_str() % csvRow.get().c_str();
+            VS_LOG(error, (boost::format("Cannot Write out unit file %1% %2% that has no filename") % name.get().c_str() % csvRow.get().c_str()));
             return;
         }
         std::string savedir = modifications;
         VSFileSystem::CreateDirectoryHome( VSFileSystem::savedunitpath+"/"+savedir );
-        VSFile  f;
-        VSError err = f.OpenCreateWrite( savedir+"/"+name+".csv", UnitFile );
-        if (err > Ok) {
-            BOOST_LOG_TRIVIAL(error) << boost::format("!!! ERROR : Writing saved unit file : %1%") % f.GetFullPath().c_str();
+        VSFileSystem::VSFile  f;
+        VSFileSystem::VSError err = f.OpenCreateWrite( savedir+"/"+name+".csv", VSFileSystem::UnitFile );
+        if (err > VSFileSystem::Ok) {
+            VS_LOG(error, (boost::format("!!! ERROR : Writing saved unit file : %1%") % f.GetFullPath().c_str()));
             return;
         }
         std::string towrite = WriteUnitString();
@@ -1683,7 +1684,7 @@ string Unit::WriteUnitString()
                 return writeCSV( keys, values );
             }
         }
-        BOOST_LOG_TRIVIAL(error) << boost::format("Failed to locate base mesh for %1% %2% %3%") % csvRow.get().c_str() % name.get().c_str() % fullname.c_str();
+        VS_LOG(error, (boost::format("Failed to locate base mesh for %1% %2% %3%") % csvRow.get().c_str() % name.get().c_str() % fullname.c_str()));
     } else {
         if (pImage->unitwriter) {
             ret = pImage->unitwriter->WriteString();

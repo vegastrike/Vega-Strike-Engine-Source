@@ -1,9 +1,9 @@
-/**
+/*
  * communication.cpp
  *
  * Copyright (C) 2001-2002 Daniel Horn
- * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike
- * contributors
+ * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike contributors
+ * Copyright (C) 2021 Stephen G. Tuggy
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -26,7 +26,7 @@
 
 #include "communication.h"
 #include "vs_globals.h"
-#include "vsfilesystem.h"
+#include "vs_logging.h"
 #include "config_xml.h"
 #include <assert.h>
 #include "audiolib.h"
@@ -318,7 +318,7 @@ std::string FSM::GetEdgesString( unsigned int curstate )
 {
     std::string retval = "\n";
     if (nodes.size() <= curstate) {
-        BOOST_LOG_TRIVIAL(error) << boost::format("Error with faction relationship due to %1$d not being in range of faction") % curstate;
+        VS_LOG(error, (boost::format("Error with faction relationship due to %1$d not being in range of faction") % curstate));
         return "\n1. Transmit Error\n2. Transmit Error\n3. Transmit Error\n";
     }
     for (unsigned int i = 0; i < nodes[curstate].edges.size(); i++)
@@ -333,7 +333,7 @@ std::string FSM::GetEdgesString( unsigned int curstate )
 float FSM::getDeltaRelation( int prevstate, unsigned int current_state ) const
 {
     if (nodes.size() <= current_state) {
-        BOOST_LOG_TRIVIAL(error) << boost::format("Error with faction relationship due to %1$d not being in range of faction") % current_state;
+        VS_LOG(error, (boost::format("Error with faction relationship due to %1$d not being in range of faction") % current_state));
         return 0;
     }
     return nodes[current_state].messagedelta;

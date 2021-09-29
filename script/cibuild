@@ -1,11 +1,32 @@
-#!/bin/bash
+#!/usr/bin/env bash
 #====================================
 # @file   : cibuild
-# @brief  : Builds Vega Strike for
-#           purposes of CI/CD (Travis)
+# @brief  : Builds Vega Strike for purposes of CI/CD (GitHub Actions)
 # @usage  : ./script/cibuild
 # @param  : none
 #====================================
+##
+# cibuild
+#
+# Copyright (c) 2020-2021 Stephen G. Tuggy and other Vega Strike Contributors
+#
+# https://github.com/vegastrike/Vega-Strike-Engine-Source
+#
+# This file is part of Vega Strike.
+#
+# Vega Strike is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# Vega Strike is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
+#
 
 set -e
 
@@ -25,16 +46,19 @@ then
     DST_DOCKER_IMG_NAME="building-vega-strike:$(echo $FROM | sed 's/:/_/' | sed 's/\//_/')"
     DOCKER_CONTAINER_NAME="building-vega-strike_$(echo $FROM | sed 's/:/_/' | sed 's/\//_/')"
     docker build --build-arg from=$SRC_DOCKER_IMG_NAME -t $DST_DOCKER_IMG_NAME .
-    docker run --env CC=$CC --env CXX=$CXX --env IS_RELEASE=$IS_RELEASE --env TAG_NAME=$TAG_NAME --env FLAGS=$FLAGS --name $DOCKER_CONTAINER_NAME $DST_DOCKER_IMG_NAME $FLAGS
+    docker run --env CC=$CC --env CXX=$CXX --env IS_RELEASE=$IS_RELEASE --env TAG_NAME=$TAG_NAME --env GITHUB_SHA=$GITHUB_SHA --env FLAGS=$FLAGS --name $DOCKER_CONTAINER_NAME $DST_DOCKER_IMG_NAME $FLAGS
     docker cp $DOCKER_CONTAINER_NAME:/usr/src/Vega-Strike-Engine-Source/bin .
     if [ $IS_RELEASE -eq 1 ]
     then
         docker cp $DOCKER_CONTAINER_NAME:/usr/src/Vega-Strike-Engine-Source/packages .
     fi
+    docker cp $DOCKER_CONTAINER_NAME:/usr/src/Vega-Strike-Engine-Source/build/test-results .
     docker rm $DOCKER_CONTAINER_NAME
 elif [ "$MY_OS_NAME" == "macos" ]
 then
     script/build.sh -DCMAKE_BUILD_TYPE=RelWithDebInfo $@
+    # On macOS, the following is done by the calling CI workflow
+    # ctest -V
     # Not building successfully yet, so shouldn't try to package it
 else
     script/docker-entrypoint.sh $@

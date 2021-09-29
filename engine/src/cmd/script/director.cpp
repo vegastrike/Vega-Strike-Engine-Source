@@ -1,10 +1,10 @@
-/**
+/*
  * director.cpp
  *
  * Copyright (C) 2001-2002 Daniel Horn
  * Copyright (C) Alexander Rawass
- * Copyright (C) 2020 Stephen G. Tuggy, pyramid3d, and other Vega Strike
- * contributors
+ * Copyright (C) 2020 Stephen G. Tuggy, pyramid3d, and other Vega Strike contributors
+ * Copyright (C) 2021 Stephen G. Tuggy
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -23,6 +23,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
  */
+
 
 /*
  *  xml Mission Scripting written by Alexander Rawass <alexannika@users.sourceforge.net>
@@ -49,7 +50,6 @@
 #include "xml_support.h"
 
 #include "vegastrike.h"
-#include "vsfilesystem.h"
 #include "lin_time.h"
 #include "cmd/unit_generic.h"
 
@@ -69,6 +69,7 @@
 #include "flightgroup.h"
 #include "gldrv/winsys.h"
 #include "gfx/cockpit_generic.h"
+#include "vs_logging.h"
 
 /* *********************************************************** */
 //ADD_FROM_PYTHON_FUNCTION(pythonMission)
@@ -76,10 +77,10 @@ void Mission::DirectorLoop()
 {
     double oldgametime = gametime;
     gametime += SIMULATION_ATOM;     //elapsed;
-    //BOOST_LOG_TRIVIAL(trace) << boost::format("void Mission::DirectorLoop(): oldgametime = %1$.6f; SIMULATION_ATOM = %2$.6f; gametime = %3$.6f") % oldgametime % SIMULATION_ATOM % gametime;
+    //VS_LOG(trace, (boost::format("void Mission::DirectorLoop(): oldgametime = %1$.6f; SIMULATION_ATOM = %2$.6f; gametime = %3$.6f") % oldgametime % SIMULATION_ATOM % gametime));
     if (getTimeCompression() >= .1)
         if (gametime <= oldgametime) {
-            BOOST_LOG_TRIVIAL(warning) << "void Mission::DirectorLoop(): gametime is before oldgametime!";
+            VS_LOG(warning, "void Mission::DirectorLoop(): gametime is before oldgametime!");
             gametime = SIMULATION_ATOM;
         }
     try {
@@ -89,10 +90,10 @@ void Mission::DirectorLoop()
     }
     catch (...) {
         if ( PyErr_Occurred() ) {
-            BOOST_LOG_TRIVIAL(fatal) << "void Mission::DirectorLoop(): Python error occurred";
+            VS_LOG_AND_FLUSH(fatal, "void Mission::DirectorLoop(): Python error occurred");
             PyErr_Print();
             PyErr_Clear();
-            VSFileSystem::flushLogs();
+            VegaStrikeLogging::VegaStrikeLogger::FlushLogs();
         } throw;
     }
 }
@@ -107,11 +108,11 @@ void Mission::DirectorShipDestroyed( Unit *unit )
 {
     Flightgroup *fg = unit->getFlightgroup();
     if (fg == nullptr) {
-        BOOST_LOG_TRIVIAL(info) << "ship destroyed-no flightgroup";
+        VS_LOG(info, "ship destroyed-no flightgroup");
         return;
     }
     if (fg->nr_ships_left <= 0 && fg->nr_waves_left > 0) {
-        BOOST_LOG_TRIVIAL(info) << "WARNING: nr_ships_left<=0";
+        VS_LOG(info, "WARNING: nr_ships_left<=0");
         return;
     }
     fg->nr_ships_left -= 1;
@@ -127,9 +128,9 @@ void Mission::DirectorShipDestroyed( Unit *unit )
     msgcenter->add( "game", "all", buf );
 
     if (fg->nr_ships_left == 0) {
-        BOOST_LOG_TRIVIAL(debug) << boost::format("no ships left in fg %1%") % fg->name;
+        VS_LOG(debug, (boost::format("no ships left in fg %1%") % fg->name));
         if (fg->nr_waves_left > 0) {
-            BOOST_LOG_TRIVIAL(info) << boost::format("Relaunching %1% wave") % fg->name;
+            VS_LOG(info, (boost::format("Relaunching %1% wave") % fg->name));
 
             //launch new wave
             fg->nr_waves_left -= 1;
@@ -211,9 +212,7 @@ void Mission::DirectorBenchmark()
 {
     total_nr_frames++;
     if (benchmark > 0.0 && benchmark < gametime) {
-        BOOST_LOG_TRIVIAL(trace) << "Game was running for "<<gametime<<" secs,   av. framerate "<<( (double) total_nr_frames )/gametime
-                 <<std::endl;
-        VSFileSystem::flushLogs();
+        VS_LOG_AND_FLUSH(trace, (boost::format("Game was running for %1% secs,   av. framerate %2%") % gametime % (( (double) total_nr_frames )/gametime)));
         winsys_exit( 0 );
     }
 }

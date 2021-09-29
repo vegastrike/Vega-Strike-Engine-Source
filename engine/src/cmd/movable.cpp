@@ -1,8 +1,7 @@
-/**
+/*
  * movable.cpp
  *
- * Copyright (C) 2020 Roy Falk, Stephen G. Tuggy and other Vega Strike
- * contributors
+ * Copyright (C) 2020-2021 Roy Falk, Stephen G. Tuggy and other Vega Strike contributors
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -31,6 +30,7 @@
 #include "star_system.h"
 #include "universe.h"
 #include "configuration/game_config.h"
+#include "vs_logging.h"
 
 #include <iostream>
 #include <string>
@@ -368,14 +368,14 @@ Vector Movable::ResolveForces( const Transformation &trans, const Matrix &transm
     //acceleration
     Vector temp2 = (NetLocalForce.i*p+NetLocalForce.j*q+NetLocalForce.k*r);
     if ( !( FINITE( NetForce.i ) && FINITE( NetForce.j ) && FINITE( NetForce.k ) ) ) {
-        BOOST_LOG_TRIVIAL(info) << "NetForce skrewed";
+        VS_LOG(info, "NetForce skrewed");
     }
     if (NetForce.i || NetForce.j || NetForce.k)
         temp2 += InvTransformNormal( transmat, NetForce );
     temp2 = temp2/Mass;
     temp  = temp2*simulation_atom_var;
     if ( !( FINITE( temp2.i ) && FINITE( temp2.j ) && FINITE( temp2.k ) ) ) {
-        BOOST_LOG_TRIVIAL(info) << "NetForce transform skrewed";
+        VS_LOG(info, "NetForce transform skrewed");
     }
     float oldmagsquared = Velocity.MagnitudeSquared();
         Velocity += temp;

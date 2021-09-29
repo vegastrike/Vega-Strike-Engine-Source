@@ -1,9 +1,9 @@
-/**
+/*
  * cockpit_generic.h
  *
  * Copyright (C) Daniel Horn
- * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike
- * contributors
+ * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike contributors
+ * Copyright (C) 2021 Stephen G. Tuggy
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -182,8 +182,8 @@ protected:
     virtual void LoadXML( VSFileSystem::VSFile &f ) {}
     static void beginElement( void *userData, const XML_Char *name, const XML_Char **atts );
     static void endElement( void *userData, const XML_Char *name );
-    virtual void beginElement( const string &name, const XMLSupport::AttributeList &attributes ) {}
-    virtual void endElement( const string &name ) {}
+    virtual void beginElement( const std::string &name, const XMLSupport::AttributeList &attributes ) {}
+    virtual void endElement( const std::string &name ) {}
 
     ///Destructs cockpit info for new loading
     virtual void Delete();
@@ -229,10 +229,10 @@ public:
     unsigned int retry_dock;
     double TimeOfLastCollision;
     char   jumpok;
-    virtual void setTargetLabel( const string &msg ) {}
-    virtual string getTargetLabel()
+    virtual void setTargetLabel( const std::string &msg ) {}
+    virtual std::string getTargetLabel()
     {
-        return string();
+        return std::string();
     }
     void updateAttackers();
     static bool tooManyAttackers(); //checks config file and declares if too many folks are attacking any of the players (to avoid expensive tests where unnecessary).

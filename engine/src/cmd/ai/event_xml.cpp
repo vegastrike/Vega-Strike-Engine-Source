@@ -1,9 +1,9 @@
-/**
+/*
  * event_xml.cpp
  *
  * Copyright (C) Daniel Horn
- * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike
- * contributors
+ * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike contributors
+ * Copyright (C) 2021 Stephen G. Tuggy
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -34,6 +34,7 @@
 #include <assert.h>
 #include "vegastrike.h"
 #include "vsfilesystem.h"
+#include "vs_logging.h"
 #include "vs_globals.h"
 #include "configxml.h"
 extern bool validateHardCodedScript( std::string s );
@@ -68,17 +69,17 @@ AIEvresult::AIEvresult( int type,
         static int aidebug = XMLSupport::parse_int( vs_config->getVariable( "AI", "debug_level", "0" ) );
         if (aidebug) {
             for (int i = 0; i < 20; ++i) {
-                BOOST_LOG_TRIVIAL(warning) << boost::format("SERIOUS WARNING %1%") % this->script.c_str();
+                VS_LOG(warning, (boost::format("SERIOUS WARNING %1%") % this->script.c_str()));
             }
         }
-        BOOST_LOG_TRIVIAL(warning) << boost::format(
+        VS_LOG(warning, (boost::format(
                 "SERIOUS WARNING in AI script: no fast method to perform %1$s when type %2$d is at least %3$f and at most %4$f with priority %5$f for %6$f time")
                 % this->script.c_str()
                 % type
                 % min
                 % max
                 % priority
-                % timetofinish;
+                % timetofinish));
     }
 }
 
@@ -194,7 +195,7 @@ void LoadAI( const char *filename, ElemAttrMap &result, const string &faction )
     VSError err;
     err = f.OpenReadOnly( filename, AiFile );
     if (err > Ok) {
-        BOOST_LOG_TRIVIAL(warning) << boost::format("ai file %1% not found") % filename;
+        VS_LOG(warning, (boost::format("ai file %1% not found") % filename));
         string full_filename    = filename;
         full_filename = full_filename.substr( 0, strlen( filename )-4 );
         string::size_type where = full_filename.find_last_of( "." );
@@ -205,16 +206,16 @@ void LoadAI( const char *filename, ElemAttrMap &result, const string &faction )
             err  = f.OpenReadOnly( full_filename, AiFile );
         }
         if (err > Ok) {
-            BOOST_LOG_TRIVIAL(warning) << boost::format("ai file %1% again not found") % full_filename;
+            VS_LOG(warning, (boost::format("ai file %1% again not found") % full_filename));
             full_filename  = "default";
             full_filename += type;
             err = f.OpenReadOnly( full_filename, AiFile );
         }
         if (err > Ok) {
-            BOOST_LOG_TRIVIAL(warning) << boost::format("ai file again %1% again not found") % full_filename;
+            VS_LOG(warning, (boost::format("ai file again %1% again not found") % full_filename));
             err = f.OpenReadOnly( "default.agg.xml", AiFile );
             if (err > Ok) {
-                BOOST_LOG_TRIVIAL(error) << "ai file again default.agg.xml again not found";
+                VS_LOG(error, "ai file again default.agg.xml again not found");
                 return;                 //Who knows what will happen now? Crash?    // TODO: VSExit()?
             }
         }
@@ -226,7 +227,7 @@ void LoadAI( const char *filename, ElemAttrMap &result, const string &faction )
     f.Close();
     XML_ParserFree( parser );
     if (result.level != 0) {
-        BOOST_LOG_TRIVIAL(error) << boost::format("Error loading AI script %1% for faction %2%. Final count not zero.") % filename % faction.c_str();
+        VS_LOG(error, (boost::format("Error loading AI script %1% for faction %2%. Final count not zero.") % filename % faction.c_str()));
     }
     result.level = 0;
 }

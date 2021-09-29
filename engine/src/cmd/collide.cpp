@@ -1,8 +1,7 @@
-/**
+/*
  * collide.cpp
  *
- * Copyright (C) 2020 Roy Falk, Stephen G. Tuggy and other Vega Strike
- * contributors
+ * Copyright (C) 2020-2021 Roy Falk, Stephen G. Tuggy and other Vega Strike contributors
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -41,7 +40,7 @@
 #include <string>
 #include "vs_globals.h"
 #include "configxml.h"
-#include "vsfilesystem.h"
+#include "vs_logging.h"
 
 static Hashtable< std::string, collideTrees, 127 >unitColliders;
 collideTrees::collideTrees( const std::string &hk, csOPCODECollider *cT,
@@ -126,7 +125,7 @@ void KillCollideTable( LineCollide *lc, StarSystem *ss )
     if (lc->type == LineCollide::UNIT) {
         ss->collide_table->c.Remove( lc, lc->object.u );
     } else {
-        BOOST_LOG_TRIVIAL(warning) << boost::format("such collide types as %1$d not allowed") % lc->type;
+        VS_LOG(warning, (boost::format("such collide types as %1$d not allowed") % lc->type));
     }
 }
 
@@ -135,7 +134,7 @@ bool EradicateCollideTable( LineCollide *lc, StarSystem *ss )
     if (lc->type == LineCollide::UNIT) {
         return ss->collide_table->c.Eradicate( lc->object.u );
     } else {
-        BOOST_LOG_TRIVIAL(warning) << boost::format("such collide types as %1$d not allowed") % lc->type;
+        VS_LOG(warning, (boost::format("such collide types as %1$d not allowed") % lc->type));
         return false;
     }
 }
@@ -145,7 +144,7 @@ void AddCollideQueue( LineCollide &tmp, StarSystem *ss )
     if (tmp.type == LineCollide::UNIT) {
         ss->collide_table->c.Put( &tmp, tmp.object.u );
     } else {
-        BOOST_LOG_TRIVIAL(warning) << boost::format("such collide types as %1$d not allowed") % tmp.type;
+        VS_LOG(warning, (boost::format("such collide types as %1$d not allowed") % tmp.type));
     }
 }
 
@@ -174,76 +173,7 @@ bool Bolt::Collide( Collidable::CollideRef index )
     return _Universe->activeStarSystem()->collide_map[Unit::UNIT_BOLT]->CheckCollisions( this, **location );
 }
 
-static bool beamCheckCollision( QVector pos, float len, const Collidable &un )
-{
-    return (un.GetPosition()-pos).MagnitudeSquared() <= len*len+2*len*un.radius+un.radius*un.radius;
-}
 
-void Beam::CollideHuge( const LineCollide &lc, Unit *targetToCollideWith, Unit *firer, Unit *superunit )
-{
-    QVector x0 = center;
-    QVector v  = direction*curlength;
-    if (is_null( superunit->location[Unit::UNIT_ONLY] ) && curlength) {
-        if (targetToCollideWith)
-            this->Collide( targetToCollideWith, firer, superunit );
-    } else if (curlength) {
-        CollideMap *cm = _Universe->activeStarSystem()->collide_map[Unit::UNIT_ONLY];
 
-        CollideMap::iterator superloc = superunit->location[Unit::UNIT_ONLY];
-        CollideMap::iterator tmore    = superloc;
-        if ( !cm->Iterable( superloc ) ) {
-            CollideArray::CollidableBackref *br = static_cast< CollideArray::CollidableBackref* > (superloc);
-            CollideMap::iterator tmploc = cm->begin()+br->toflattenhints_offset;
-            if ( tmploc == cm->end() )
-                tmploc--;
-            tmore = superloc = tmploc;             //don't decrease tless
-        } else {
-            ++tmore;
-        }
-        double r0 = x0.i;
-        double r1 = x0.i+v.i;
-        double minlook   = r0 < r1 ? r0 : r1;
-        double maxlook   = r0 < r1 ? r1 : r0;
-        bool   targcheck = false;
-        maxlook += ( maxlook-(*superunit->location[Unit::UNIT_ONLY])->getKey() )+2*curlength;           //double damage, yo
-        minlook += ( minlook-(*superunit->location[Unit::UNIT_ONLY])->getKey() )-2*curlength*curlength;
-        //(a+2*b)^2-(a+b)^2 = 3b^2+2ab = 2b^2+(a+b)^2-a^2
-        if ( superloc != cm->begin()
-            && minlook < (*superunit->location[Unit::UNIT_ONLY])->getKey() ) {
-            //less traversal
-            CollideMap::iterator tless = superloc;
-            --tless;
-            while ( (*tless)->getKey() >= minlook ) {
-                CollideMap::iterator curcheck = tless;
-                bool breakit = false;
-                if ( tless != cm->begin() )
-                    --tless;
-                else
-                    breakit = true;
-                if ( (*curcheck)->radius > 0 ) {
-                    if ( beamCheckCollision( center, curlength, (**curcheck) ) ) {
-                        Unit *tmp = (**curcheck).ref.unit;
-                        this->Collide( tmp, firer, superunit );
-                        targcheck = (targcheck || tmp == targetToCollideWith);
-                    }
-                }
-                if (breakit)
-                    break;
-            }
-        }
-        if ( maxlook > (*superunit->location[Unit::UNIT_ONLY])->getKey() ) {
-            //greater traversal
-            while (tmore != cm->end() && (*tmore)->getKey() <= maxlook) {
-                if ( (*tmore)->radius > 0 ) {
-                    Unit *un = (*tmore)->ref.unit;
-                    if ( beamCheckCollision( center, curlength, **tmore++ ) ) {
-                        this->Collide( un, firer, superunit );
-                        targcheck = (targcheck || un == targetToCollideWith);
-                    }
-                } else {++tmore; }}
-        }
-        if (targetToCollideWith && !targcheck)
-            this->Collide( targetToCollideWith, firer, superunit );
-    }
-}
+
 

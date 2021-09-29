@@ -1,9 +1,9 @@
-/**
+/*
  * savegame.cpp
  *
  * Copyright (C) Daniel Horn
- * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike
- * contributors
+ * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike contributors
+ * Copyright (C) 2021 Stephen G. Tuggy
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -29,6 +29,7 @@
 #include "hashtable.h"
 #include <float.h>
 #include "vsfilesystem.h"
+#include "vs_logging.h"
 #include <vector>
 #include <string>
 #include "configxml.h"
@@ -38,7 +39,6 @@
 #include <algorithm>
 #include "cmd/script/mission.h"
 #include "gfx/cockpit_generic.h"
-#include "vsfilesystem.h"
 #include "cmd/fg_util.h"
 #include "star_system.h"
 #include "universe.h"
@@ -49,10 +49,12 @@
 #include <iterator>
 #include <vector>
 
+#include <boost/filesystem.hpp>
+
 typedef unsigned char BYTE;
 
 
-using namespace VSFileSystem;
+using namespace VSFileSystem;   // FIXME: Shouldn't include the entire namespace, per Google Style Guide -- stephengtuggy 2021-09-07
 using std::vector;
 using std::string;
 using std::allocator;
@@ -67,13 +69,14 @@ std::string GetHelperPlayerSaveGame( int num )
             if (err <= Ok) {
                 f.Write( CurrentSaveGameName );
                 f.Close();
-              }
+            }
           }
-        if (num != 0)
-          return CurrentSaveGameName+XMLSupport::tostring( num );
+        if (num != 0) {
+            return CurrentSaveGameName+XMLSupport::tostring( num );
+        }
         return CurrentSaveGameName;
       }
-    BOOST_LOG_TRIVIAL(info) << "Hi helper play " << num;
+    VS_LOG(info, (boost::format("Hi helper play %1%") % num));
     static string *res = NULL;
     if (res == NULL) {
         res = new std::string;
@@ -87,16 +90,16 @@ std::string GetHelperPlayerSaveGame( int num )
                 f.Write( game_options.new_game_save_name.c_str(), game_options.new_game_save_name.length() );
                 f.Write( "\n", 1 );
                 f.Close();
-              } else {
-                BOOST_LOG_TRIVIAL(fatal) << boost::format("!!! ERROR : Creating default save.4.x.txt file : %1%") % f.GetFullPath();
+            } else {
+                VS_LOG_AND_FLUSH(fatal, (boost::format("!!! ERROR : Creating default save.4.x.txt file : %1%") % f.GetFullPath()));
                 VSExit( 1 );
-              }
+            }
             err = f.OpenReadOnly( "save.4.x.txt", UnknownFile );
             if (err > Ok) {
-                BOOST_LOG_TRIVIAL(fatal) << "!!! ERROR : Opening the default save we just created";
+                VS_LOG_AND_FLUSH(fatal, "!!! ERROR : Opening the default save we just created");
                 VSExit( 1 );
-              }
-          }
+            }
+        }
         if (err <= Ok) {
             long length = f.Size();
             if (length > 0) {
@@ -105,18 +108,19 @@ std::string GetHelperPlayerSaveGame( int num )
                 f.Read( temp, length );
                 bool  end  = true;
                 for (int i = length-1; i >= 0; i--) {
-                    if (temp[i] == '\r' || temp[i] == '\n')
-                      temp[i] = (end ? '\0' : '_');
-                    else if (temp[i] == '\0' || temp[i] == ' ' || temp[i] == '\t')
-                      temp[i] = (end ? '\0' : '_');
-                    else
-                      end = false;
-                  }
+                    if (temp[i] == '\r' || temp[i] == '\n') {
+                        temp[i] = (end ? '\0' : '_');
+                    } else if (temp[i] == '\0' || temp[i] == ' ' || temp[i] == '\t') {
+                        temp[i] = (end ? '\0' : '_');
+                    } else {
+                        end = false;
+                    }
+                }
                 *res = (temp);
                 free( temp );
-              }
+            }
             f.Close();
-          }
+        }
         if ( game_options.remember_savegame && !res->empty() ) {
             //Set filetype to Unknown so that it is searched in homedir/
             if (*res->begin() == '~') {
@@ -125,16 +129,16 @@ std::string GetHelperPlayerSaveGame( int num )
                     for (unsigned int i = 1; i < res->length(); i++) {
                         char cc = *(res->begin()+i);
                         f.Write( &cc, sizeof (char) );
-                      }
+                    }
                     char cc = 0;
                     f.Write( &cc, sizeof (char) );
                     f.Close();
-                  }
-              }
-          }
-      }
+                }
+            }
+        }
+    }
     if ( num == 0 || res->empty() ) {
-        BOOST_LOG_TRIVIAL(info) << "Here";
+        VS_LOG(info, "Here");
         return *res;
       }
     return (*res)+XMLSupport::tostring( num );
@@ -172,10 +176,10 @@ void SaveFileCopy( const char *src, const char *dst )
                 f.Write( savecontent );
                 f.Close();
             } else {
-                BOOST_LOG_TRIVIAL(warning) << boost::format("WARNING : couldn't open savegame to copy to : %1% as SaveFile") % dst;
+                VS_LOG(warning, (boost::format("WARNING : couldn't open savegame to copy to : %1% as SaveFile") % dst));
             }
         } else {
-            BOOST_LOG_TRIVIAL(warning) << boost::format("WARNING : couldn't find the savegame to copy : %1% as SaveFile") % src;
+            VS_LOG(warning, (boost::format("WARNING : couldn't find the savegame to copy : %1% as SaveFile") % src));
         }
     }
 }
@@ -268,13 +272,16 @@ std::vector<BYTE> readFile(std::string filename)
 
 bool isUtf8SaveGame(std::string filename)
 {
-    std::string path = GetSaveDir() + filename;
+    boost::filesystem::path filename_path{filename};
+    boost::filesystem::path save_dir_path{GetSaveDir()};
+    boost::filesystem::path complete_path{boost::filesystem::absolute(filename_path, save_dir_path)};
+    std::string path{complete_path.string()};
     std::vector<BYTE> savegame = readFile(path);
     Utf8Checker check;
     if (check.validUtf8(savegame)) {
         return true;
     } else {
-        BOOST_LOG_TRIVIAL(fatal) << boost::format("ERROR: save file %1% is not UTF-8") % path;
+        VS_LOG_AND_FLUSH(fatal, (boost::format("ERROR: save file %1% is not UTF-8") % path));
         return false;
     }
 }
@@ -328,8 +335,7 @@ void SaveGame::SetPlayerLocation( const QVector &v )
     if ( ( FINITE( v.i ) && FINITE( v.j ) && FINITE( v.k ) ) ) {
         PlayerLocation = v;
     } else {
-        BOOST_LOG_TRIVIAL(fatal) << "NaN ERROR saving unit";
-        flushLogs();
+        VS_LOG_AND_FLUSH(fatal, "NaN ERROR saving unit");
         assert( FINITE( v.i ) && FINITE( v.j ) && FINITE( v.k ) );
         PlayerLocation.Set( 1, 1, 1 );
     }
@@ -377,12 +383,12 @@ vector< string >parsePipedString( string s )
     vector< string >  ret;
     while ( ( loc = s.find( "|" ) ) != string::npos ) {
         ret.push_back( s.substr( 0, loc ) );
-        BOOST_LOG_TRIVIAL(info) << "Found ship named : " << s.substr( 0, loc );
+        VS_LOG(info, (boost::format("Found ship named : %1%") % s.substr(0, loc)));
         s = s.substr( loc+1 );
     }
     if ( s.length() ) {
         ret.push_back( s );
-        BOOST_LOG_TRIVIAL(info) << "Found ship named : " << s;
+        VS_LOG(info, (boost::format("Found ship named : %1%") % s));
     }
     return ret;
 }
@@ -390,10 +396,12 @@ vector< string >parsePipedString( string s )
 string createPipedString( vector< string >s )
 {
     string ret;
-    for (unsigned int i = 0; i < s.size()-1; i++)
+    for (unsigned int i = 0; i < s.size()-1; i++) {
         ret += s[i]+"|";
-    if ( s.size() )
+    }
+    if ( s.size() ) {
         ret += s.back();
+    }
     return ret;
 }
 
@@ -418,15 +426,17 @@ void CopySavedShips( std::string filename, int player_num, const std::vector< st
                 string srcdata = src.ReadFull();
                 dst.Write( srcdata );
             } else {
-                BOOST_LOG_TRIVIAL(error) << boost::format("Error: Cannot Copy Unit %1% from save file %2% to %3%")
+                VS_LOG(error,
+                       (boost::format("Error: Cannot Copy Unit %1% from save file %2% to %3%")
                         % starships[i]
                         % srcnam
-                        % dstnam;
+                        % dstnam));
             }
         } else {
-            BOOST_LOG_TRIVIAL(error) << boost::format("Error: Cannot Open Unit %1% from save file %2%.")
+            VS_LOG(error,
+                   (boost::format("Error: Cannot Open Unit %1% from save file %2%.")
                     % starships[i]
-                    % srcnam;
+                    % srcnam));
         }
     }
 }
@@ -434,13 +444,15 @@ void CopySavedShips( std::string filename, int player_num, const std::vector< st
 void WriteSaveGame( Cockpit *cp, bool auto_save )
 {
     int player_num = 0;
-    for (unsigned int kk = 0; kk < _Universe->numPlayers(); ++kk)
-        if (_Universe->AccessCockpit( kk ) == cp)
+    for (unsigned int kk = 0; kk < _Universe->numPlayers(); ++kk) {
+        if (_Universe->AccessCockpit( kk ) == cp) {
             player_num = kk;
+        }
+    }
     Unit *un = cp->GetSaveParent();
-    if (!un)
+    if (!un) {
         return;
-    if (!un->Destroyed()) {
+    } if (!un->Destroyed()) {
         vector< string > packedInfo;
         cp->PackUnitInfo(packedInfo);
 
@@ -696,7 +708,7 @@ void SaveGame::ReadMissionStringData( char* &buf, bool select_data, const std::s
             skip = false;
         } else {
             // debugging attempt -- show why the allocation would fail
-            BOOST_LOG_TRIVIAL(info) << boost::format(" SaveGame::ReadMissionStringData: vecstring->reserve(md_i_size = %1%) will fail, bailing out (i = %2%)") % md_i_size % i;
+            VS_LOG(info, (boost::format(" SaveGame::ReadMissionStringData: vecstring->reserve(md_i_size = %1%) will fail, bailing out (i = %2%)") % md_i_size % i));
         }
         for (int j = 0; j < md_i_size; j++) {
             if (skip) {
@@ -716,7 +728,7 @@ void SaveGame::PurgeZeroStarships() // DELETE unused function?
         if ( fg_util::IsFGKey( i->first ) ) {
             if ( fg_util::CheckFG( i->second ) )
             {
-                // BOOST_LOG_TRIVIAL(info) << boost::format("correcting flightgroup %1% to have right landed ships") % i->first.c_str();
+                // VS_LOG(info, (boost::format("correcting flightgroup %1% to have right landed ships") % i->first.c_str()));
             }
         }
     }
@@ -779,7 +791,7 @@ void SaveGame::WriteMissionStringData( std::vector< char > &ret )
 void SaveGame::ReadStardate( char* &buf )
 {
     string stardate( AnyStringScanInString( buf ) );
-    BOOST_LOG_TRIVIAL(info) << "Read stardate: " << stardate;
+    VS_LOG(info, (boost::format("Read stardate: %1%") % stardate));
     _Universe->current_stardate.InitTrek( stardate );
 }
 
@@ -819,7 +831,7 @@ void SaveGame::ReadSavedPackets( char* &buf,
         } else {
             char output[31] = {0};
             strncpy( output, buf, 30 );
-            BOOST_LOG_TRIVIAL(warning) << boost::format("buf unrecognized %1%...") % output;
+            VS_LOG(warning, (boost::format("buf unrecognized %1%...") % output));
         }
     }
 }
@@ -844,10 +856,10 @@ void SaveGame::LoadSavedMissions()
         }
         catch (...) {
             if ( PyErr_Occurred() ) {
-                BOOST_LOG_TRIVIAL(error) << "void SaveGame::LoadSavedMissions(): Python error occurred";
+                VS_LOG_AND_FLUSH(error, "void SaveGame::LoadSavedMissions(): Python error occurred");
                 PyErr_Print();
                 PyErr_Clear();
-                VSFileSystem::flushLogs();
+                VegaStrikeLogging::VegaStrikeLogger::FlushLogs();
             } else {throw; }}
     }
     PyRun_SimpleString( "import VS\nVS.loading_active_missions=False\n" );
@@ -961,7 +973,7 @@ string SaveGame::WriteSaveGame( const char *systemname,
                                 bool write )
 {
     savestring  = string( "" );
-    BOOST_LOG_TRIVIAL(info) << boost::format("Writing Save Game %1%") % outputsavegame;
+    VS_LOG(info, (boost::format("Writing Save Game %1%") % outputsavegame));
     savestring += WritePlayerData( FP, unitname, systemname, credits, fact );
     savestring += WriteDynamicUniverse();
     if (outputsavegame.length() != 0) {
@@ -981,7 +993,7 @@ string SaveGame::WriteSaveGame( const char *systemname,
                 }
             } else {
                 //error occured while opening file
-                BOOST_LOG_TRIVIAL(error) << "Error occurred while opening file: " << outputsavegame;
+                VS_LOG(error, (boost::format("Error occurred while opening file: %1%") % outputsavegame));
             }
         }
     }
@@ -1090,11 +1102,11 @@ void SaveGame::ParseSaveGame( const string &filename_p,
                 //In networking save we include the faction at the end of the first line
                 if (res == 5) {
                     playerfaction = string( factionname );
-                    BOOST_LOG_TRIVIAL(info) << "Found faction in save file : " << playerfaction;
+                    VS_LOG(info, (boost::format("Found faction in save file : %1%") % playerfaction));
                 } else {
                     //If no faction -> default to privateer
                     playerfaction = string( "privateer" );
-                    BOOST_LOG_TRIVIAL(info) << "Faction not found assigning default one: privateer";
+                    VS_LOG(info, "Faction not found assigning default one: privateer");
                 }
                 free( factionname );
                 if (ForceStarSystem.length() == 0)
@@ -1145,7 +1157,14 @@ string SetCurrentSaveGame( string newname )
 
 const string& GetSaveDir()
 {
-    static string rv = VSFileSystem::homedir+"/save/";
-    return rv;
+    static string ret_val{VSFileSystem::GetSavePath().string()};
+    if (ret_val.back() != '/') {
+        ret_val += '/';
+    }
+    VS_LOG_AND_FLUSH(debug, (boost::format("GetSaveDir: %1%") % ret_val));
+    return ret_val;
+
+    // static string rv = VSFileSystem::homedir+"/save/";
+    // return rv;
 }
 

@@ -1,9 +1,9 @@
-/**
+/*
  * unit_jump.h
  *
  * Copyright (C) Daniel Horn
- * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike
- * contributors
+ * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike contributors
+ * Copyright (C) 2021 Stephen G. Tuggy
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -31,6 +31,9 @@
 #include "audiolib.h"
 #include "star_system_generic.h"
 #include "cmd/images.h"
+#include "vs_logging.h"
+
+
 //From star_system_jump.cpp
 extern Hashtable< std::string, StarSystem, 127 >star_system_table;
 extern std::vector< unorigdest* >pendingjump;
@@ -89,7 +92,7 @@ bool GameUnit::TransferUnitToSystem( unsigned int kk, StarSystem* &savedStarSyst
                 }
             }
             if ( this == _Universe->AccessCockpit()->GetParent() ) {
-                BOOST_LOG_TRIVIAL(info) << "Unit is the active player character...changing scene graph\n";
+                VS_LOG(info, "Unit is the active player character...changing scene graph\n");
                 savedStarSystem->SwapOut();
                 AUDStopAllSounds();
                 savedStarSystem = pendingjump[kk]->dest;
@@ -142,7 +145,7 @@ bool GameUnit::TransferUnitToSystem( unsigned int kk, StarSystem* &savedStarSyst
                 AUDPlay( jumparrive, this->LocalPosition(), this->GetVelocity(), 1 );
         } else {
 #ifdef JUMP_DEBUG
-            BOOST_LOG_TRIVIAL(debug) << "Unit FAILED remove from star system\n";
+            VS_LOG(debug, "Unit FAILED remove from star system\n");
 #endif
         }
         if (this->docked&DOCKING_UNITS)
@@ -167,7 +170,7 @@ bool GameUnit::TransferUnitToSystem( unsigned int kk, StarSystem* &savedStarSyst
             }
         }
     } else {
-        BOOST_LOG_TRIVIAL(warning) << "Already jumped\n";
+        VS_LOG(warning, "Already jumped\n");
     }
     return ret;
 }

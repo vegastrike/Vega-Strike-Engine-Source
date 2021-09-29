@@ -1,3 +1,28 @@
+/**
+* weapon_factory.cpp
+*
+* Copyright (c) 2001-2002 Daniel Horn
+* Copyright (c) 2002-2019 pyramid3d and other Vega Strike Contributors
+* Copyright (c) 2019-2021 Stephen G. Tuggy, and other Vega Strike Contributors
+*
+* https://github.com/vegastrike/Vega-Strike-Engine-Source
+*
+* This file is part of Vega Strike.
+*
+* Vega Strike is free software: you can redistribute it and/or modify
+* it under the terms of the GNU General Public License as published by
+* the Free Software Foundation, either version 2 of the License, or
+* (at your option) any later version.
+*
+* Vega Strike is distributed in the hope that it will be useful,
+* but WITHOUT ANY WARRANTY; without even the implied warranty of
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+* GNU General Public License for more details.
+*
+* You should have received a copy of the GNU General Public License
+* along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
+*/
+
 #include "weapon_factory.h"
 
 #include "weapon_info.h"
@@ -21,7 +46,7 @@ using boost::property_tree::ptree;
 using std::string;
 using std::endl;
 
-extern Hashtable< string, weapon_info, 257 >lookuptable;
+extern Hashtable< string, WeaponInfo, 257 >lookuptable;
 
 // TODO: reenable this?
 /*constexpr int color_step(49);
@@ -56,7 +81,7 @@ void WeaponFactory::parse(ptree tree)
 
     for (const auto& iterator : tree)
     {
-        weapon_info wi;
+        WeaponInfo wi;
 
         ptree inner = iterator.second;
 
@@ -140,7 +165,7 @@ void WeaponFactory::parse(ptree tree)
             wi.sound = AUDCreateSoundMP3( sound_wave, wi.type != WEAPON_TYPE::PROJECTILE );
         }
 
-        // Add new weapon_info to weapons table
-        lookuptable.Put( boost::to_upper_copy( wi.name ), new weapon_info(wi) );
+        // Add new WeaponInfo to weapons table
+        lookuptable.Put( boost::to_upper_copy( wi.name ), new WeaponInfo(wi) );
     }
 }

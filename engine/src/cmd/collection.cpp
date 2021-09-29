@@ -2,8 +2,8 @@
  * collection.cpp
  *
  * Copyright (C) Daniel Horn
- * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike
- * contributors
+ * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike contributors
+ * Copyright (C) 2021 Stephen G. Tuggy
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -40,7 +40,7 @@
 #include "testcollection/unit.h"
 #endif
 
-#include "vsfilesystem.h"
+#include "vs_logging.h"
 
 using std::list;
 using std::vector;
@@ -49,11 +49,13 @@ using std::vector;
 UnitCollection::UnitIterator& UnitCollection::UnitIterator::operator=( const UnitCollection::UnitIterator &orig )
 {
     if (col != orig.col) {
-        if (col)
+        if (col) {
             col->unreg( this );
+        }
         col = orig.col;
-        if (col)
+        if (col) {
             col->reg( this );
+        }
     }
     it = orig.it;
     return *this;
@@ -63,18 +65,19 @@ UnitCollection::UnitIterator::UnitIterator( const UnitIterator &orig )
 {
     col = orig.col;
     it  = orig.it;
-    if (col)
+    if (col) {
         col->reg( this );
+    }
 }
 
 UnitCollection::UnitIterator::UnitIterator( UnitCollection *orig ) {
     col = orig;
     it = col->u.begin();
     col->reg(this);
-    while(it != col->u.end()){
-        if((*it) == NULL)
+    while (it != col->u.end()) {
+        if ((*it) == NULL) {
             ++it;
-        else {
+        } else {
             if((*it)->Killed())
                 col->erase(it);
             else
@@ -85,14 +88,16 @@ UnitCollection::UnitIterator::UnitIterator( UnitCollection *orig ) {
 
 UnitCollection::UnitIterator::~UnitIterator()
 {
-    if (col)
+    if (col) {
         col->unreg( this );
+    }
 }
 
 void UnitCollection::UnitIterator::remove()
 {
-    if ( col && it != col->u.end() )
+    if ( col && it != col->u.end() ) {
         col->erase( it );
+    }
 }
 
 void UnitCollection::UnitIterator::moveBefore( UnitCollection &otherlist )
@@ -105,8 +110,9 @@ void UnitCollection::UnitIterator::moveBefore( UnitCollection &otherlist )
 
 void UnitCollection::UnitIterator::preinsert( Unit *unit )
 {
-    if (col && unit)
+    if (col && unit) {
         col->insert( it, unit );
+    }
 }
 
 void UnitCollection::UnitIterator::postinsert( Unit *unit )
@@ -123,9 +129,9 @@ void UnitCollection::UnitIterator::advance()
     if ( !col || it == col->u.end() ) return;
     ++it;
     while ( it != col->u.end() ) {
-        if ( (*it) == NULL)
+        if ( (*it) == NULL) {
             ++it;
-        else {
+        } else {
             if((*it)->Killed())
                 col->erase(it);
             else
@@ -160,9 +166,11 @@ UnitCollection::ConstIterator::ConstIterator( const ConstIterator &orig )
 UnitCollection::ConstIterator::ConstIterator( const UnitCollection *orig )
 {
     col = orig;
-    for (it = orig->u.begin(); it != col->u.end(); ++it)
-        if ((*it) && !(*it)->Killed())
+    for (it = orig->u.begin(); it != col->u.end(); ++it) {
+        if ((*it) && !(*it)->Killed()) {
             break;
+        }
+    }
 }
 
 UnitCollection::ConstIterator::~ConstIterator()
@@ -171,19 +179,22 @@ UnitCollection::ConstIterator::~ConstIterator()
 Unit* UnitCollection::ConstIterator::next()
 {
     advance();
-    if ( col && it != col->u.end() )
+    if ( col && it != col->u.end() ) {
         return *it;
+    }
     return NULL;
 }
 
 inline void UnitCollection::ConstIterator::advance()
 {
-    if ( !col || it == col->u.end() ) return;
+    if ( !col || it == col->u.end() ) {
+        return;
+    }
     ++it;
     while ( it != col->u.end() ) {
-        if ( (*it) == NULL )
+        if ( (*it) == NULL ) {
             ++it;
-        else {
+        } else {
             if ((*it)->Killed())
                 ++it;
             else
@@ -226,9 +237,11 @@ UnitCollection::UnitCollection( const UnitCollection &uc )
 void UnitCollection::insert_unique( Unit *unit )
 {
     if (unit) {
-        for (list< Unit* >::iterator it = u.begin(); it != u.end(); ++it)
-            if (*it == unit)
+        for (list< Unit* >::iterator it = u.begin(); it != u.end(); ++it) {
+            if (*it == unit) {
                 return;
+            }
+        }
         unit->Ref();
         u.push_front( unit );
     }
@@ -286,7 +299,7 @@ void UnitCollection::insert( list< Unit* >::iterator &temp, Unit *unit )
 void UnitCollection::clear()
 {
     if ( !activeIters.empty() ) {
-        BOOST_LOG_TRIVIAL(warning) << "WARNING! Attempting to clear a collection with active iterators!\n";
+        VS_LOG(warning, "WARNING! Attempting to clear a collection with active iterators!\n");
         return;
     }
 
@@ -304,17 +317,21 @@ void UnitCollection::destr()
             (*it)->UnRef();
             (*it) = NULL;
         }
-    for (vector< un_iter* >::iterator t = activeIters.begin(); t != activeIters.end(); ++t)
+    for (vector< un_iter* >::iterator t = activeIters.begin(); t != activeIters.end(); ++t) {
         (*t)->col = NULL;
+    }
 }
 
 bool UnitCollection::contains( const Unit *unit ) const
 {
-    if (u.empty() || !unit)
+    if (u.empty() || !unit) {
         return false;
-    for (list< Unit* >::const_iterator it = u.begin(); it != u.end(); ++it)
-        if ( (*it) == unit && !(*it)->Killed() )
+    }
+    for (list< Unit* >::const_iterator it = u.begin(); it != u.end(); ++it) {
+        if ( (*it) == unit && !(*it)->Killed() ) {
             return true;
+        }
+    }
     return false;
 }
 
@@ -336,8 +353,8 @@ inline void UnitCollection::erase( list< Unit* >::iterator &it2 )
     //on the node we want to remove, if so, just push onto vector.
     //Purpose : This special case is to reduce the size of the list in the
     //situation where removedIters isn't being processed.
-    if (activeIters.size() > 1)
-        for (vector<UnitCollection::UnitIterator*>::size_type i = 0; i < activeIters.size(); ++i)
+    if (activeIters.size() > 1) {
+        for (vector<UnitCollection::UnitIterator*>::size_type i = 0; i < activeIters.size(); ++i) {
             if (activeIters[i]->it == it2) {
                 removedIters.push_back( it2 );
                 (*it2)->UnRef();
@@ -345,6 +362,8 @@ inline void UnitCollection::erase( list< Unit* >::iterator &it2 )
                 ++it2;
                 return;
             }
+        }
+    }
     //If we have 1 iterator, or none of the iterators are currently on the
     //requested node to be removed, then remove it right away.
     (*it2)->UnRef();
@@ -354,8 +373,9 @@ inline void UnitCollection::erase( list< Unit* >::iterator &it2 )
 
 bool UnitCollection::remove( const Unit *unit )
 {
-    if (u.empty() || !unit)
+    if (u.empty() || !unit) {
         return false;
+    }
     for (list< Unit* >::iterator it = u.begin(); it != u.end();++it) {
         if ( (*it) == unit ) {
             erase( it );

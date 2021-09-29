@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 #====================================
 # @file   : build.sh
 # @brief  : build VegaStrike
@@ -36,7 +36,7 @@
 set -e
 
 echo "-----------------------------"
-echo "--- build.sh | 2021-08-22 ---"
+echo "--- build.sh | 2021-09-03 ---"
 echo "-----------------------------"
 
 #----------------------------------
@@ -61,8 +61,8 @@ cmake $@ $SRC_DIR
 # mut we can do it manually
 #make clean
 
-# compile now using all cpus and show compilation commands
-make -j $(getconf _NPROCESSORS_ONLN) VERBOSE=1
+# compile now using all cpus # and show compilation commands
+cmake --build $BUILD_DIR -j $(getconf _NPROCESSORS_ONLN) # -v
 
 cd $ROOT_DIR
 

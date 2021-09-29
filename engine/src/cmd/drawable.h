@@ -123,6 +123,10 @@ public:
     virtual void DrawNow( const Matrix &m = identity_matrix, float lod = 1000000000 ) = 0;
     virtual std::string drawableGetName() = 0;
 
+    void Sparkle(bool on_screen, Matrix *ctm);
+    void DrawHalo(bool on_screen, float apparent_size, Matrix wmat, int cloak);
+    void DrawSubunits(bool on_screen, Matrix wmat, int cloak, float average_scale, unsigned char char_damage);
+
     //Split this mesh with into 2^level submeshes at arbitrary planes
     void Split( int level );
 
@@ -135,6 +139,6 @@ public:
     void LightShields( const Vector &pnt, const Vector &normal, float amt, const GFXColor &color );
 };
 
-
+Matrix* GetCumulativeTransformationMatrix(Unit *unit, const Matrix &parentMatrix, Matrix invview);
 
 #endif // DRAWABLE_H

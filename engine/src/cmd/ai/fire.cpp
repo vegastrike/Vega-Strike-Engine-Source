@@ -1,9 +1,9 @@
-/**
+/*
  * fire.cpp
  *
  * Copyright (C) Daniel Horn
- * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike
- * contributors
+ * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike contributors
+ * Copyright (C) 2021 Stephen G. Tuggy
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -30,7 +30,8 @@
 #include "cmd/planet.h"
 #include "config_xml.h"
 #include "vs_globals.h"
-#include "vsfilesystem.h"
+// #include "vsfilesystem.h"   // Is this needed here? -- stephengtuggy 2021-09-06
+#include "vs_logging.h"
 #include "cmd/unit_util.h"
 #include "cmd/script/flightgroup.h"
 #include "cmd/role_bitmask.h"
@@ -616,7 +617,7 @@ bool FireAt::ShouldFire( Unit *targ, bool &missilelock )
 
         static int test = 0;
         if (test++%1000 == 1) {
-            BOOST_LOG_TRIVIAL(warning) << "lost target";
+            VS_LOG(warning, "lost target");
         }
     }
     float gunspeed, gunrange, missilerange;
@@ -669,8 +670,7 @@ bool FireAt::ShouldFire( Unit *targ, bool &missilelock )
 FireAt::~FireAt()
 {
 #ifdef ORDERDEBUG
-    BOOST_LOG_TRIVIAL(trace) << boost::format("fire%1$x") % this;
-    VSFileSystem::flushLogs();
+    VS_LOG_AND_FLUSH(trace, (boost::format("fire%1$x") % this));
 #endif
 }
 

@@ -7,64 +7,50 @@ jobs:
     name: Build
     runs-on: ubuntu-latest
 
+    defaults:
+      run:
+        shell: bash
+
     strategy:
       fail-fast: true
       matrix:
         include:
           - FROM:     'ubuntu:hirsute'
             COMPILER: 'gcc'
-            FLAGS:    '-DUSE_PYTHON_3=ON'
           - FROM:     'ubuntu:hirsute'
             COMPILER: 'clang'
-            FLAGS:    '-DUSE_PYTHON_3=ON'
           - FROM:     'ubuntu:groovy'
             COMPILER: 'gcc'
-            FLAGS:    '-DUSE_PYTHON_3=ON'
           - FROM:     'ubuntu:groovy'
             COMPILER: 'clang'
-            FLAGS:    '-DUSE_PYTHON_3=ON'
           - FROM:     'ubuntu:focal'
             COMPILER: 'gcc'
-            FLAGS:    '-DUSE_PYTHON_3=ON'
           - FROM:     'ubuntu:focal'
             COMPILER: 'clang'
-            FLAGS:    '-DUSE_PYTHON_3=ON'
           - FROM:     'ubuntu:bionic'
             COMPILER: 'gcc'
-            FLAGS:    '-DUSE_PYTHON_3=ON'
           - FROM:     'ubuntu:bionic'
             COMPILER: 'clang'
-            FLAGS:    '-DUSE_PYTHON_3=ON'
           - FROM:     'ubuntu:xenial'
             COMPILER: 'gcc'
-            FLAGS:    '-DUSE_PYTHON_3=ON'
           - FROM:     'linuxmintd/mint20-amd64'
             COMPILER: 'clang'
-            FLAGS:    '-DUSE_PYTHON_3=ON'
           - FROM:     'debian:bullseye'
             COMPILER: 'clang'
-            FLAGS:    '-DUSE_PYTHON_3=ON'
           - FROM:     'debian:buster'
             COMPILER: 'clang'
-            FLAGS:    '-DUSE_PYTHON_3=ON'
           - FROM:     'debian:stretch'
             COMPILER: 'gcc'
-            FLAGS:    '-DUSE_PYTHON_3=ON'
           - FROM:     'opensuse/leap'
             COMPILER: 'clang'
-            FLAGS:    '-DUSE_PYTHON_3=ON'
           - FROM:     'fedora:34'
             COMPILER: 'clang'
-            FLAGS:    '-DUSE_PYTHON_3=ON'
           - FROM:     'fedora:33'
             COMPILER: 'clang'
-            FLAGS:    '-DUSE_PYTHON_3=ON'
           - FROM:     'fedora:32'
             COMPILER: 'clang'
-            FLAGS:    '-DUSE_PYTHON_3=ON'
           - FROM:     'rockylinux/rockylinux'
             COMPILER: 'clang'
-            FLAGS:    '-DUSE_PYTHON_3=ON'
 
     steps:
     - name: Checkout repository
@@ -79,11 +65,27 @@ jobs:
     # As opposed to the merge commit
     - name: Move to PR HEAD
       run: git checkout HEAD^2
-    - name: Run CI
+
+    - name: Build and Test
       env:
         FROM:       ${{ matrix.FROM }}
         COMPILER:   ${{ matrix.COMPILER }}
-        FLAGS:      ${{ matrix.FLAGS }}
+        FLAGS:      ''
         MY_OS_NAME: linux
         IS_RELEASE: 0
       run: script/cibuild $FLAGS
+
+    # This is run from inside the Docker container, by script/docker-entrypoint.sh
+    # - name: Test
+    #   working-directory: ${{github.workspace}}/build
+    #   env:
+    #     GTEST_OUTPUT: xml
+    #     GTEST_COLOR: 1
+    #   run: ctest -V
+
+    - name: Upload test results
+      uses: actions/upload-artifact@v2
+      if: failure()
+      with:
+        name: test_results_xml
+        path: ${{github.workspace}}/test-results/**/*.xml

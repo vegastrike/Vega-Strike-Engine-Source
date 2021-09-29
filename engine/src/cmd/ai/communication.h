@@ -1,9 +1,9 @@
-/**
+/*
  * communication.h
  *
  * Copyright (C) 2001-2002 Daniel Horn
- * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike
- * contributors
+ * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike contributors
+ * Copyright (C) 2021 Stephen G. Tuggy
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -28,7 +28,7 @@
 #define _COMMUNICATION_H_
 #include "cmd/unit_generic.h"
 #include "gfxlib_struct.h"
-#include "vsfilesystem.h"
+#include "vs_logging.h"
 
 class FSM
 {
@@ -119,7 +119,7 @@ public:
             if ( cs < (int) fsm->nodes.size() ) {
                 return &fsm->nodes[cs];
             }
-            BOOST_LOG_TRIVIAL(error) << "Critical error: fsm has less than 3 nodes";
+            VS_LOG(error, "Critical error: fsm has less than 3 nodes");
             return &fsm->nodes[0];
         }
     }

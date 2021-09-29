@@ -1,9 +1,9 @@
-/**
+/*
  * flightgroup.cpp
  *
  * Copyright (C) Daniel Horn
- * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike
- * contributors
+ * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike contributors
+ * Copyright (C) 2021 Stephen G. Tuggy
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -28,7 +28,7 @@
 #include "mission.h"
 #include "flightgroup.h"
 #include "cmd/unit_generic.h"
-#include "vsfilesystem.h"
+#include "vs_logging.h"
 
 Flightgroup* Flightgroup::newFlightgroup( const std::string &name,
                                           const std::string &type,
@@ -64,7 +64,7 @@ Flightgroup::~Flightgroup()
 
 Flightgroup&Flightgroup::operator=( Flightgroup &other )
 {
-    BOOST_LOG_TRIVIAL(warning) << "warning: may not work properly";
+    VS_LOG(warning, "warning: may not work properly");
     if (squadLogo) {
         squadLogo = other.squadLogo->Clone();
     }

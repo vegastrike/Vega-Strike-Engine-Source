@@ -33,7 +33,7 @@
 #include "CSopcodecollider.h"
 #include "opcodeqsqrt.h"
 #include "opcodeqint.h"
-#include "vsfilesystem.h"
+#include "vs_logging.h"
 // #include "opcodegarray.h"
 #define _X 1000
 
@@ -154,7 +154,7 @@ bool csOPCODECollider::rayCollide(const Ray &boltbeam, Vector&norm, float&distan
         if (retval) {
             distance=collFace.mDistance;
 #ifdef VS_DEBUG
-            BOOST_LOG_TRIVIAL(debug) << boost::format("Opcode actually reported a hit at %1$f meters!") % distance;
+            VS_LOG(debug, (boost::format("Opcode actually reported a hit at %1$f meters!") % distance));
 #endif
         } else {
             return true;//FIXME: buggy! this should return FALSE but the math is obviously broken with opcode, so opcode is rarely telling us about intersections

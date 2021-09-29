@@ -1,6 +1,31 @@
+/**
+* stardate.cpp
+*
+* Copyright (c) 2001-2002 Daniel Horn
+* Copyright (c) 2002-2019 pyramid3d and other Vega Strike Contributors
+* Copyright (c) 2019-2021 Stephen G. Tuggy, and other Vega Strike Contributors
+*
+* https://github.com/vegastrike/Vega-Strike-Engine-Source
+*
+* This file is part of Vega Strike.
+*
+* Vega Strike is free software: you can redistribute it and/or modify
+* it under the terms of the GNU General Public License as published by
+* the Free Software Foundation, either version 2 of the License, or
+* (at your option) any later version.
+*
+* Vega Strike is distributed in the hope that it will be useful,
+* but WITHOUT ANY WARRANTY; without even the implied warranty of
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+* GNU General Public License for more details.
+*
+* You should have received a copy of the GNU General Public License
+* along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
+*/
+
 //====================================
 // @file   : stardate.cpp
-// @version: 2020-02-26
+// @version: 2021-09-07
 // @created: 2002-12-14
 // @author : surfdargent
 // @author : griwodz
@@ -10,6 +35,7 @@
 // @author : pyramid
 // @author : breese
 // @author : klaussfreire
+// @author : stephengtuggy
 // @brief  : stardate and startime
 //====================================
 /// Provides functions for stardate and startime manipulation and conversion
@@ -20,13 +46,39 @@
 /// since the begin of initial universe time, which in Vega Strike UTCS universe is 3276800
 /// The formatting of the startime into faction specific output is done by the stardate.py script
 
+/*
+ * stardate.cpp
+ *
+ * Copyright (C) Daniel Horn, surfdargent, gridwodz, dan_w, pheonixstorm, pyramid, breese, and klaussfreire
+ * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike contributors
+ * Copyright (C) 2021 Stephen G. Tuggy
+ *
+ * https://github.com/vegastrike/Vega-Strike-Engine-Source
+ *
+ * This file is part of Vega Strike.
+ *
+ * Vega Strike is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * Vega Strike is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
+
 #include <assert.h>
 #include <iostream>
 #include <vector>
 #include <boost/shared_ptr.hpp>
 #include "stardate.h"
 #include "lin_time.h"
-#include "vsfilesystem.h"
+#include "vs_logging.h"
 #include "cmd/script/mission.h"
 
 using std::vector;
@@ -87,7 +139,7 @@ void StarDate::InitTrek( string date )
     initial_time = mission->getGametime();
     initial_star_time = new double[factions.size()];
     double init_time = this->ConvertTrekDate( date );
-    BOOST_LOG_TRIVIAL(trace) << boost::format("Initializing stardate from a Trek date for %1% factions") % factions.size();
+    VS_LOG(trace, (boost::format("Initializing stardate from a Trek date for %1% factions") % factions.size()));
     for (unsigned int i = 0; i < factions.size(); i++)
         initial_star_time[i] = init_time;
 }
@@ -149,7 +201,7 @@ double StarDate::ConvertTrekDate( string date ) {
     pos = date.find( "." );
     date.replace( pos, 1, "a" );
     if ((nb = sscanf(date.c_str(), "%da%4d:%3d", &days, &tmphrs, &seconds)) != 3) {
-       BOOST_LOG_TRIVIAL(trace) << "!!! ERROR reading date";
+       VS_LOG(trace, "!!! ERROR reading date");
     }
 
     //Extract number of hours
@@ -159,7 +211,7 @@ double StarDate::ConvertTrekDate( string date ) {
 
     res     = days*2880000+hours*28800+minutes*480+seconds;
     std::string formatted = ConvertFullTrekDate(res);
-    BOOST_LOG_TRIVIAL(trace) << boost::format("Converted date to %1%, which stardate is %2%") % long(res) % formatted;
+    VS_LOG(trace, (boost::format("Converted date to %1%, which stardate is %2%") % long(res) % formatted));
     return res;
 }
 

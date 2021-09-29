@@ -1,9 +1,9 @@
-/**
+/*
  * gl_light_pick.cpp
  *
  * Copyright (C) Daniel Horn
- * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike
- * contributors
+ * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike contributors
+ * Copyright (C) 2021 Stephen G. Tuggy
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -28,7 +28,7 @@
 #include "options.h"
 #include <queue>
 #include <list>
-#include "vsfilesystem.h"
+#include "vs_logging.h"
 #include "gfx/occlusion.h"
 
 #include <vector>
@@ -100,10 +100,10 @@ void unpicklights()
 {
     for (std::vector< int >::iterator i = newpicked->begin(); i != newpicked->end(); i++) {
         if (*i>=(int)_llights->size()) {
-            BOOST_LOG_TRIVIAL(error) << boost::format("GFXLIGHT FAILURE %1% is beyond array of size %2%") % ((int)*i) % ((int)_llights->size());
+            VS_LOG(error, (boost::format("GFXLIGHT FAILURE %1% is beyond array of size %2%") % ((int)*i) % ((int)_llights->size())));
         }
         if (GLLights[(*_llights)[*i].Target()].index != *i) {
-            BOOST_LOG_TRIVIAL(error) << "GFXLIGHT uh oh";
+            VS_LOG(error, "GFXLIGHT uh oh");
             (*_llights)[*i].Target() = -1;
             continue;             //a lengthy operation... Since picked lights may have been smashed
         }
@@ -266,7 +266,7 @@ void gfx_light::dopickenables()
     }
     for ( traverse = newpicked->begin(); traverse != newpicked->end(); ++traverse ) {
         if (*traverse>=(int)_llights->size()) {
-            BOOST_LOG_TRIVIAL(error) << boost::format("GFXLIGHT FAILURE %1% is beyond array of size %2%") % ((int)*traverse) % ((int)_llights->size());
+            VS_LOG(error, (boost::format("GFXLIGHT FAILURE %1% is beyond array of size %2%") % ((int)*traverse) % ((int)_llights->size())));
             continue;
         }
         if ( (*_llights)[*traverse].target == -1 ) {
@@ -291,7 +291,7 @@ void gfx_light::dopickenables()
      *  }*/
     for (oldtrav = oldpicked->begin(); oldtrav != oldpicked->end(); oldtrav++) {
         if (*oldtrav>=(int)_llights->size()) {
-            BOOST_LOG_TRIVIAL(error) << boost::format("GFXLIGHT FAILURE %1% is beyond array of size %2%") % ((int)*oldtrav) % ((int)_llights->size());
+            VS_LOG(error, (boost::format("GFXLIGHT FAILURE %1% is beyond array of size %2%") % ((int)*oldtrav) % ((int)_llights->size())));
             continue;
         }
 
