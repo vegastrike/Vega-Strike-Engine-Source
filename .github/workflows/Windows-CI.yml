@@ -2,13 +2,11 @@
 
 name: Windows-CI
 
-# Controls when the action will run. 
+# Controls when the action will run.
 on:
   # Triggers the workflow on push or pull request events but only for the master branch
   push:
-  #  branches: [ master ]
   pull_request:
-  #  branches: [ master ]
 
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
@@ -18,9 +16,10 @@ jobs:
   # This workflow contains a single job called "build"
   build:
     # The type of runner that the job will run on
-    runs-on: windows-latest
+    runs-on: windows-2019
 
     env:
+      buildDir: '${{ github.workspace }}/build/'
       PYTHONHOME: '${{ github.workspace }}/v/packages/python3_x64-windows/tools/python3'
 
     # Steps represent a sequence of tasks that will be executed as part of the job
@@ -30,22 +29,22 @@ jobs:
         uses: actions/checkout@v2
 
       - name: install-cmake
-        uses: lukka/get-cmake@v3.20.1
-      
+        uses: lukka/get-cmake@v3.21.1
+
       - name: install-vcpkg
         # You may pin to the exact commit or the version.
-        # uses: lukka/run-vcpkg@9c0ae56bad291f4b185cc433a9b56084b2962259
-        uses: lukka/run-vcpkg@v7.3
+        uses: lukka/run-vcpkg@v7
         with:
           vcpkgDirectory: '${{ github.workspace }}/v'
           setupOnly: true
-          vcpkgGitCommitId: '5568f110b509a9fd90711978a7cb76bae75bb092'
+          vcpkgGitCommitId: 'f819f66b4c2a639e18233bc30deb98531a386f78'
           vcpkgTriplet: 'x64-windows'
-        
+          appendedCacheKey: ${{ hashFiles( '**/vcpkg.json' ) }}
+          additionalCachedPaths: ${{ env.buildDir }}/vcpkg_installed
+
       - name: run-cmake
         # You may pin to the exact commit or the version.
-        # uses: lukka/run-cmake@7ba4481660f0f04c86cfa5f1f24b90effc97bde1
-        uses: lukka/run-cmake@v3.4
+        uses: lukka/run-cmake@v3
         with:
           # Path to CMakeLists.txt. Used for both CMakeListsTxtBasic and CMakeListsTxtAdvanced modes.
           cmakeListsTxtPath: ${{ github.workspace }}/engine/CMakeLists.txt
@@ -58,14 +57,14 @@ jobs:
           # Specify the CMake generator to use. Possible values: Ninja: Ninja, NinjaMulti: Ninja Multi-Config UnixMakefiles: Unix Makefiles, VS16Win64: Visual Studio 2019 x64, VS16Arm64: Visual Studio 2019 ARM64, VS16Arm: Visual Studio 2019 ARM, VS16Win32: Visual Studio 2019 Win32, VS15Win64: Visual Studio 2017 x64, VS15Arm64: Visual Studio 2017 ARM64, VS15Arm: Visual Studio 2017 ARM, VS15Win32: Visual Studio 2017 Win32. Used by CMakeListsTxtBasic mode.
           cmakeGenerator: VS16Win64
           # Set the build directory, i.e. where CMake generates the build system files. Defaults to `$(Build.ArtifactStagingDirectory)` for CMakeLists.txt, and to `$(Build.ArtifactStagingDirectory)/<configuration-name>` for CMakeSettings.json. Used by any mode.
-          buildDirectory: ${{ github.workspace }}/build
+          buildDirectory: ${{ env.buildDir }}
           # Provides a mean to provide all the CMake arguments. This is required when using CMakeLists.txt in Advanced mode. For CMakeSettings.json, the arguments are already inferred, but you can append your arguments providing them here.  Used by CMakeListsTxtAdvanced and CMakeSettingsJson modes.
           cmakeAppendedArgs: -DUSE_PYTHON_3=ON
           # Indicates whether to run 'cmake --build' after CMake project files have been generated successfully. Used by any mode.
           buildWithCMake: true
           # Additional parameters for both CMake and the make program (e.g. ninja or make).  Separate CMake arguments to the native make program arguments with '--', such as: '--clean-first --config Debug -- -j0'. Used by both CMakeListsTxtBasic and CMakeListsTxtAdvanced modes
           buildWithCMakeArgs: "--config Release"
-      
+
       - name: copy-build-artifacts
         run: |
           mkdir bin
