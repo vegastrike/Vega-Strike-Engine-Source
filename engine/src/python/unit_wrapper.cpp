@@ -38,6 +38,7 @@ typedef boost::python::dict       BoostPythonDictionary;
 #include "cmd/unit_util.h"
 #include "faction_generic.h"
 #include "cmd/ai/fire.h"
+#include "cmd/engineVersion.h"
 #include "unit_wrapper_class.h"
 #include "unit_from_to_python.h"
 #include "weapon_info.h"
@@ -68,6 +69,7 @@ void setOwner( int obj, UnitWrapper un )
 }
 }
 PYTHON_INIT_INHERIT_GLOBALS( VS, FireAt );
+PYTHON_INIT_INHERIT_GLOBALS( VS, VegaStrike::EngineVersionData );
 PYTHON_BEGIN_MODULE( VS )
 
 //#undef EXPORT_UTIL
@@ -182,6 +184,11 @@ PYTHON_DEFINE_METHOD( Class, &FireAt::FaceDirection, "FaceDirection" );
 PYTHON_DEFINE_METHOD( Class, &FireAt::XMLScript, "XMLScript" );
 PYTHON_DEFINE_METHOD( Class, &FireAt::LastPythonScript, "LastPythonScript" );
 PYTHON_END_CLASS( VS, FireAt )
+
+PYTHON_BEGIN_CLASS( VS, VegaStrike::EngineVersionData, "Version")
+PYTHON_DEFINE_METHOD( Class, &VegaStrike::EngineVersionData::GetVersion, "GetVersion" );
+PYTHON_DEFINE_METHOD( Class, &VegaStrike::EngineVersionData::GetAssetAPIVersion, "GetAssetAPIVersion" );
+PYTHON_END_CLASS( VS, VegaStrike::EngineVersionData)
 
 PYTHON_END_MODULE( VS )
 

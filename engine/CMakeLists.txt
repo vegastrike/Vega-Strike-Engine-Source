@@ -858,6 +858,7 @@ SET(LIBCMD_SOURCES
     src/cmd/fg_util.cpp
     src/cmd/unit_util_generic.cpp
     src/cmd/unit_xml.cpp
+    src/cmd/engineVersion.cpp
 
     src/cmd/collision.cpp
     src/cmd/damageable.cpp
