@@ -192,6 +192,17 @@ void Python::init()
     char *temppython = strdup( changepath.c_str() );
     PyRun_SimpleString( temppython );
     Python::reseterrors();
+    const std::string python_snippet_to_run{
+    "import VS\n"
+    "print("
+        "\"Engine Version: {0} \\nAsset API Version: {1}\".format("
+            "'.'.join([str(i) for i in VS.EngineVersion().GetVersion()]),"
+            "VS.EngineVersion().GetAssetAPIVersion()"
+        ")"
+    ")"
+    };
+    PyRun_SimpleString(python_snippet_to_run.c_str());
+    Python::reseterrors();
     free( temppython );
 #if (PY_VERSION_HEX < 0x03000000)
     InitDirector2();
