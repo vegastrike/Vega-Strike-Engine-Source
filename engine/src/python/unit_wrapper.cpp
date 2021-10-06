@@ -184,7 +184,7 @@ PYTHON_DEFINE_METHOD( Class, &FireAt::XMLScript, "XMLScript" );
 PYTHON_DEFINE_METHOD( Class, &FireAt::LastPythonScript, "LastPythonScript" );
 PYTHON_END_CLASS( VS, FireAt )
 
-PYTHON_BEGIN_CLASS( VS, VegaStrike::EngineVersionData, "Version")
+PYTHON_BEGIN_CLASS( VS, VegaStrike::EngineVersionData, "EngineVersion")
 PYTHON_DEFINE_METHOD( Class, &VegaStrike::EngineVersionData::GetVersion, "GetVersion" );
 PYTHON_DEFINE_METHOD( Class, &VegaStrike::EngineVersionData::GetAssetAPIVersion, "GetAssetAPIVersion" );
 PYTHON_END_CLASS( VS, VegaStrike::EngineVersionData)
