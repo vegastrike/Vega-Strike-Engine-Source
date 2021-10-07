@@ -2,7 +2,7 @@
 #define VS_ENGINE_VERSION_H__
 
 #include <string>
-#include <unistd.h>
+#include <stdint.h>
 
 #include "boost/tuple/tuple.hpp"
 
