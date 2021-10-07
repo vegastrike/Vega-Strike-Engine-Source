@@ -48,6 +48,12 @@ ELSE ()
     )
 ENDIF ()
 
+# API Version for Game Assets
+# This is an incrementing number similar to the Google Android API Version
+# allowing us to differentiate our Assets API across multiple versions.
+# If a release is missing this value, then version `1` can be assumed.
+SET(VEGASTRIKE_ASSETS_API_VERSION "1")
+
 IF (COMMAND cmake_policy)
     CMAKE_POLICY(SET CMP0003 NEW)
 ENDIF (COMMAND cmake_policy)
@@ -88,6 +94,10 @@ PROJECT(Vega_Strike
     LANGUAGES
         CXX C
 )
+
+# One version header generator to rule them all
+CONFIGURE_FILE(src/version.h.in ${CMAKE_SOURCE_DIR}/src/version.h)
+CONFIGURE_FILE(src/version.h.in ${CMAKE_SOURCE_DIR}/setup/src/include/version.h)
 
 MESSAGE("== Vega Strike Version: ${VEGASTRIKE_VERSION_MAJOR}.${VEGASTRIKE_VERSION_MINOR}.${VEGASTRIKE_VERSION_PATCH}-${VEGASTRIKE_VERSION_TWEAK}")
 
@@ -890,6 +900,7 @@ SET(LIBCMD_SOURCES
     src/cmd/fg_util.cpp
     src/cmd/unit_util_generic.cpp
     src/cmd/unit_xml.cpp
+    src/cmd/engineVersion.cpp
 
     src/cmd/collision.cpp
     src/cmd/damageable.cpp

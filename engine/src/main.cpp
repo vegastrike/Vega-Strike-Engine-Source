@@ -31,7 +31,7 @@
 #endif
 #include "cmd/role_bitmask.h"
 #if defined (WITH_MACOSX_BUNDLE)
-#import <sys/param.h>
+#include <sys/param.h>
 #endif
 #ifdef _WIN32
 #include <direct.h>
@@ -80,6 +80,7 @@
 
 #include "vs_logging.h"
 #include "options.h"
+#include "version.h"
 
 
 vs_options game_options;
@@ -728,7 +729,7 @@ const char helpmessage[] =
     "\n";
 const char versionmessage[] =
     // (BenjamenMeyer) this will be `major.minor.patch+githash` once all is said and done
-    "Vega Strike Engine Version 0.9.0+0\n"
+    "Vega Strike Engine Version " VEGASTRIKE_VERSION_STR "\n"
     "\n";
 std::string ParseCommandLine( int argc, char **lpCmdLine )
 {
