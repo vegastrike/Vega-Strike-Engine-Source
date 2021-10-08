@@ -75,6 +75,7 @@
 
 #include <math.h>
 #include <list>
+#include <boost/format.hpp>
 
 
 #ifdef _WIN32
@@ -3473,14 +3474,37 @@ bool Unit::UpAndDownGrade( const Unit *up,
 
     // TODO: lib_damage all of this should be implemented better elsewhere
     // Probably in DamageableFactory
-    /*float tmp = shield.recharge;
+    // Upgrade shield regeneration
+
+    // Because of the complex macros taking partial expressions and building code from them,
+    // this is the easiest way to refactor
+    float previous = shield->GetRegeneration();
+
     if ( !csv_cell_null_check || force_change_on_nothing
-        || cell_has_recursive_data( upgrade_name, up->faction, "Shield_Recharge" ) )
-        STDUPGRADE( shield.recharge, up->shield.recharge, templ->shield.recharge, 0 );
-    bool upgradedrecharge = (tmp != shield.recharge);
+         || cell_has_recursive_data( upgrade_name, up->faction, "Shield_Recharge" ) )
+        STDUPGRADE( shield_regeneration,
+                up->shield_regeneration,
+                templ->shield_regeneration, 0 );
+    bool upgradedrecharge = (previous != shield_regeneration);
+    if(upgradedrecharge) {
+
+        shield->UpdateRegeneration(shield_regeneration);
+    }
+
+    // Upgrade hull health
+    upgrade_hull = *current_hull;
+
+    if(up && up->current_hull) {
+        const_cast<Unit*>(up)->upgrade_hull = *up->current_hull;
+    }
+
+    if(templ && templ->current_hull) {
+        const_cast<Unit*>(templ)->upgrade_hull = *templ->current_hull;
+    }
+
     if ( !csv_cell_null_check || force_change_on_nothing || cell_has_recursive_data( upgrade_name, up->faction, "Hull" ) ) {
-        STDUPGRADE( health, up->health, templ->health, 0 );
-    }*/
+        STDUPGRADE( upgrade_hull, up->upgrade_hull, templ->upgrade_hull, 0 );
+    }
 
     if ( (hull->facets[0].max_health < hull->facets[0].health) && (!Destroyed()) ) {
         hull->facets[0].max_health = hull->facets[0].health;
@@ -3606,10 +3630,8 @@ bool Unit::UpAndDownGrade( const Unit *up,
             GCCBugCheckFloat( pImage->cockpit_damage, upgr );
     }
 
-    // part of the below lib_damage disabled code
-    //bool upgradedshield = false;
+    bool upgradedshield = false;
 
-    // TODO: lib_damage re-enable this
     if ( !csv_cell_null_check || force_change_on_nothing
         || cell_has_recursive_data( upgrade_name, up->faction, "Shield_Front_Top_Right" ) ) {
         if (shield->number_of_facets == up->shield->number_of_facets) {
@@ -3626,14 +3648,15 @@ bool Unit::UpAndDownGrade( const Unit *up,
                 }
             }
 
-            /*if (touchme && retval == UPGRADEOK)
-                upgradedshield = true;*/
+            if (touchme && retval == UPGRADEOK) {
+                upgradedshield = true;
+            }
         } else if (up->FShieldData() > 0 || up->RShieldData() > 0 || up->LShieldData() > 0 || up->BShieldData() > 0) {
             cancompletefully = false;
         }
     }
 
-    // TODO: enable lib_damage
+    // TODO: lib_damage. Disabled this until we restore efficiency and leak
     /*if (upgradedshield || upgradedrecharge) {
         if (up->shield.efficiency) {
             shield.efficiency = up->shield.efficiency;
@@ -3652,6 +3675,7 @@ bool Unit::UpAndDownGrade( const Unit *up,
         if (touchme && myleak <= 100 && myleak >= 0) shield.leak = (char) 100-myleak;
         cancompletefully = ccf;
     }*/
+
     //DO NOT CHANGE see unit_customize.cpp
     static float lc = XMLSupport::parse_float( vs_config->getVariable( "physics", "lock_cone", ".8" ) );
     //DO NOT CHANGE! see unit.cpp:258
@@ -5006,6 +5030,11 @@ bool Unit::isPlayerShip()
 
 void Unit::RegenShields()
 {
+    if(_Universe->isPlayerStarship( this )) {
+        // Need for a break point
+        int i = 0;
+    }
+
     // No point in all this code if there are no shields.
     int shield_number = GetShieldLayer().number_of_facets;
     if(shield_number < 2) {
@@ -5107,7 +5136,7 @@ void Unit::RegenShields()
     shield->Regenerate();
 
     // shield costs energy
-    if(GetShieldLayer().facets[0].enabled) {
+    if(shield->Enabled()) {
         energy -= rec;
 
         // TODO: lib_damage

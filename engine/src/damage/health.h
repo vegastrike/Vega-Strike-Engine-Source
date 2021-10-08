@@ -26,7 +26,7 @@ public:
                             // for them
                             // or shields are declining in SPEC
     float health;
-    float factory_regeneration;  // The absolute maximum, for a new, undamaged part
+    float max_regeneration;  // The absolute maximum, for a new, undamaged part
     float regeneration; // The current capability of a potentially damaged part
     bool regenerative;
     bool destroyed;
@@ -57,7 +57,7 @@ public:
         max_health(max_health),
         adjusted_health(max_health),
         health(health),
-        factory_regeneration(regeneration),
+        max_regeneration(regeneration),
         regeneration(regeneration),
         regenerative(regeneration > 0 ) {
         destroyed = false;

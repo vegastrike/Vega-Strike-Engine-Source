@@ -119,7 +119,7 @@ void Health::ReduceLayerMaximumByOnePercent() {
 }
 
 void Health::ReduceRegeneration(const float& percent) {
-    regeneration = std::max(0.0f, regeneration - factory_regeneration * percent);
+    regeneration = std::max(0.0f, regeneration - max_regeneration * percent);
 }
 
 void Health::Regenerate() {

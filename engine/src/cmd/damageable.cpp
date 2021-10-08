@@ -598,6 +598,10 @@ float Damageable::totalShieldEnergyCapacitance( const DamageableLayer &shield )
 bool Damageable::flickerDamage()
 {
     float damagelevel = GetHullPercent();
+    if(damagelevel == 0) {
+        return false;
+    }
+
     static double counter = getNewTime();
 
     float diff = getNewTime()-counter;

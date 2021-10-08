@@ -46,6 +46,11 @@ public:
     float *current_hull;
     float *max_hull;
 
+    // These are only used for upgrade due to macros
+    // TODO: refactor
+    float upgrade_hull;
+
+    float shield_regeneration;
 
     //Is dead already?
     bool  killed;
@@ -57,6 +62,8 @@ public:
         shield(&layers[2]),
         current_hull(&hull->facets[as_integer(FacetName::single)].health),
         max_hull(&hull->facets[as_integer(FacetName::single)].max_health),
+        upgrade_hull(0),
+        shield_regeneration(0),
         killed(false) {}
 
 protected:
@@ -100,12 +107,12 @@ public:
         return shield->facets[as_integer(FacetName::left_top_front)].regeneration;
     }
 
-    const float GetHullPercent() const
+    virtual const float GetHullPercent() const
     {
         return hull->GetPercent(FacetName::single);
     }
 
-    const float GetShieldPercent() const
+    virtual const float GetShieldPercent() const
     {
         return shield->GetPercent(FacetName::left_top_front);
     }

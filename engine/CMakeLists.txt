@@ -1646,14 +1646,14 @@ SET(TEST_NAME ${PROJECT_NAME}_tests)
 ADD_EXECUTABLE(
     ${TEST_NAME}
     src/configuration/tests/configuration_tests.cpp
-    # src/damage/tests/health_tests.cpp
-    # src/damage/tests/layer_tests.cpp
-    # src/damage/tests/object_tests.cpp
+    src/damage/tests/health_tests.cpp
+    src/damage/tests/layer_tests.cpp
+    src/damage/tests/object_tests.cpp
 )
 
 ADD_LIBRARY(vegastrike-testing
     ${LIBCONFIG}
-    # ${LIBDAMAGE}
+    ${LIBDAMAGE}
 )
 
 TARGET_LINK_LIBRARIES(

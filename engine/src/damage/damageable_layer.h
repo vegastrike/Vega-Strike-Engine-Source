@@ -14,6 +14,7 @@
  */
 struct DamageableLayer
 {
+
     int layer_index;
     FacetConfiguration configuration;
 
@@ -24,6 +25,7 @@ struct DamageableLayer
                         // damaging internal components such as propulsion.
 
     friend class Damageable;
+    friend class DamageableObject;
 
     //static float damage_component_chance = 0.03;
     DamageableLayer(int layer_index,
@@ -49,6 +51,7 @@ struct DamageableLayer
     void Disable();
     void GradualDisable();
     void Enable();
+    bool Enabled();
     void Enhance();
 
     int GetFacetIndex(const CoreVector& attack_vector);
@@ -61,8 +64,11 @@ struct DamageableLayer
     float AverageLayerValue();
     float AverageMaxLayerValue();
 
+    float GetMaxHealth();
     float GetPercent(FacetName facet_name);
+
     void Regenerate();
+    float GetRegeneration();
     void UpdateRegeneration(const float& new_regeneration_value);
 };
 

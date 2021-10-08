@@ -4,17 +4,26 @@
 #include "core_vector.h"
 
 // Demonstrate some basic assertions.
-/*TEST(Layer, Sanity) {
-    CoreVector zero(0.0,0.0,0.0);
-    CoreVector minus_one(-1,-1,-1);
-    CoreVector one = CoreVector(1.0f,1.0f,1.0f);
-
+TEST(Layer, Sanity) {
     Health health(10,10,0);
     DamageableLayer layer = DamageableLayer(0, FacetConfiguration::four, health, true);
 
-//    EXPECT_TRUE(facet.InFacet(CoreVector()));
-//    EXPECT_TRUE(facet.InFacet(CoreVector(1,1,1)));
-//    EXPECT_FALSE(facet.InFacet(CoreVector(1,1,2)));
-//    EXPECT_TRUE(facet.InFacet(CoreVector(-1,1,0)));
-//    EXPECT_FALSE(facet.InFacet(CoreVector(1,2,0)));
-}*/
+    EXPECT_EQ(layer.GetFacetIndex(CoreVector(0,0,0)), 0);
+
+    EXPECT_EQ(layer.GetFacetIndex(CoreVector(1,0,1)), 0);
+    EXPECT_EQ(layer.GetFacetIndex(CoreVector(1,0,2)), 2);
+    EXPECT_EQ(layer.GetFacetIndex(CoreVector(2,0,1)), 0);
+
+    EXPECT_EQ(layer.GetFacetIndex(CoreVector(-1,0,1)), 2);
+    EXPECT_EQ(layer.GetFacetIndex(CoreVector(-1,0,2)), 2);
+    EXPECT_EQ(layer.GetFacetIndex(CoreVector(-2,0,1)), 1);
+
+    EXPECT_EQ(layer.GetFacetIndex(CoreVector(1,0,-1)), 0);
+    EXPECT_EQ(layer.GetFacetIndex(CoreVector(1,0,-2)), 3);
+    EXPECT_EQ(layer.GetFacetIndex(CoreVector(2,0,-1)), 0);
+
+    EXPECT_EQ(layer.GetFacetIndex(CoreVector(-1,0,-1)), 3);
+    EXPECT_EQ(layer.GetFacetIndex(CoreVector(-1,0,-2)), 3);
+    EXPECT_EQ(layer.GetFacetIndex(CoreVector(-2,0,-1)), 1);
+
+}

@@ -4,7 +4,7 @@
 
 
 // Demonstrate some basic assertions.
-/*TEST(Shield, Sanity) {
+TEST(Shield, Sanity) {
     Damage damage;
     InflictedDamage inflicted_damage(3);
     damage.normal_damage = 10;
@@ -25,11 +25,11 @@
 
     health.Disable();
     health.Regenerate();
-    EXPECT_EQ(health.health, 90);
+    EXPECT_EQ(health.health, 0);
 
     health.Enable();
     health.Regenerate();
-    EXPECT_EQ(health.health, 100);
+    EXPECT_EQ(health.health, 25);
 
     damage.normal_damage = 110;
     health.DealDamage(damage, inflicted_damage);
@@ -37,7 +37,7 @@
     EXPECT_TRUE(health.regenerative);
     EXPECT_FALSE(health.destroyed);
     EXPECT_TRUE(health.enabled);
-    EXPECT_EQ(damage.normal_damage, 10);
+    EXPECT_EQ(damage.normal_damage, 85);
 }
 
 
@@ -78,4 +78,4 @@ TEST(Armor, Sanity) {
     EXPECT_TRUE(health.destroyed);
     EXPECT_FALSE(health.enabled);
     EXPECT_EQ(damage.normal_damage, 20);
-}*/
+}

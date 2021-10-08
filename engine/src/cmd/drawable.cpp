@@ -338,7 +338,7 @@ void Drawable::Sparkle(bool on_screen, Matrix *ctm) {
     }
 
     // Undamaged units don't sparkle
-    float damage_level = unit->hull->facets[0].health/unit->hull->facets[0].max_health;
+    float damage_level = (*unit->current_hull)/(*unit->max_hull);
     if(damage_level >= .99) {
         return;
     }
@@ -410,7 +410,7 @@ void Drawable::DrawHalo(bool on_screen, float apparent_size, Matrix wmat, int cl
         cmas = 1;
 
     Vector Scale( 1, 1, 1 );         //Now, HaloSystem handles that
-    float damage_level = unit->hull->facets[0].health/unit->hull->facets[0].max_health;
+    float damage_level = (*unit->current_hull)/(*unit->max_hull);
     //WARNING: cmas is not a valid maximum speed for the upcoming multi-direction thrusters,
     //nor is maxaccel. Instead, each halo should have its own limits specified in units.csv
     float nebd = (_Universe->AccessCamera()->GetNebula() == unit->nebula && unit->nebula != nullptr) ? -1 : 0;

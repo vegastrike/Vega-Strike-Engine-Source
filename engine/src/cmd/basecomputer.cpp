@@ -2333,6 +2333,7 @@ bool BaseComputer::isTransactionOK( const Cargo &originalItem, TransactionType t
         //cargo.mission == true means you can't do the transaction.
         havemoney = item.price*quantity <= cockpit->credits;
         havespace = ( playerUnit->CanAddCargo( item ) || upgradeNotAddedToCargo( item.category ) );
+
         //UpgradeAllowed must be first -- short circuit && operator
         if (UpgradeAllowed( item, playerUnit ) && havemoney && havespace && !item.mission) {
             return true;
@@ -5152,7 +5153,7 @@ void showUnitStats( Unit *playerUnit, string &text, int subunitlevel, int mode, 
     const Unit::UnitJump &uj  = playerUnit->GetJumpStatus();
     const Unit::UnitJump &buj = blankUnit->GetJumpStatus();
     if (!mode) {
-        float maxshield = Damageable::totalShieldEnergyCapacitance( playerUnit->GetShieldLayer() );
+        float maxshield = Damageable::totalShieldEnergyCapacitance( *playerUnit->shield );
         if (shields_require_power)
             maxshield = 0;
         PRETTY_ADDU( statcolor+"Recharge: #-c", playerUnit->energyRechargeData()*RSconverter, 0, "MJ/s" );
@@ -5307,7 +5308,6 @@ void showUnitStats( Unit *playerUnit, string &text, int subunitlevel, int mode, 
 
     // Shields
     const int num_shields = playerUnit->shield->number_of_facets;
-    const float first_shield_max_health = playerUnit->shield->facets[as_integer(FacetName::left_top_front)].max_health;
     if (!mode) {
         if (num_shields) {
             PRETTY_ADD( statcolor+"Number of shield emitter facings: #-c", num_shields, 0 );
@@ -5315,9 +5315,7 @@ void showUnitStats( Unit *playerUnit, string &text, int subunitlevel, int mode, 
         } else {
             text += "#n#"+prefix+statcolor+"No shielding. #-c";
         }
-    } else if ( num_shields
-               && MODIFIES(replacement_mode, playerUnit, blankUnit,
-                           shield->facets[as_integer(FacetName::left_top_front)].max_health)) {
+    } else if (replacement_mode !=0 || playerUnit->shield->GetMaxHealth() != blankUnit->shield->GetMaxHealth()) {
         switch (replacement_mode) {
         case 0:                         //Replacement or new Module
             text += "#n#"+prefix+statcolor+"Installs shield with following protection ratings:#-c";
@@ -5344,14 +5342,14 @@ void showUnitStats( Unit *playerUnit, string &text, int subunitlevel, int mode, 
 
     switch (num_shields) {
     case 2: shield_strings = shield_two_strings; break;
-    case 4: shield_strings = shield_two_strings; break;
-    case 8: shield_strings = shield_two_strings; break;
+    case 4: shield_strings = shield_four_strings; break;
+    case 8: shield_strings = shield_eight_strings; break;
     }
 
     if(shield_strings) {
         if (!mode || MODIFIES(replacement_mode, playerUnit,
                               blankUnit,
-                              shield->facets[as_integer(FacetName::left_top_front)].max_health)) {
+                              shield->GetMaxHealth())) {
             for(int i=0;i<num_shields;i++) {
                 PRETTY_ADDU(substatcolor + shield_strings[i], (mode && replacement_mode == 2) ?
                                 ( 100.0 *(playerUnit->shield->facets[i].max_health-1) ) :
@@ -5361,10 +5359,10 @@ void showUnitStats( Unit *playerUnit, string &text, int subunitlevel, int mode, 
         }
     }
 
-    const float regeneration = playerUnit->shield->facets[as_integer(FacetName::left_top_front)].regeneration;
+    const float regeneration = playerUnit->shield->GetRegeneration();
     if (!mode) {
         PRETTY_ADDU( statcolor+"Shield protection recharge speed: #-c", regeneration * VSDM, 0, "MJ/s" );
-    } else if (MODIFIES(replacement_mode, playerUnit, blankUnit, shield->facets[as_integer(FacetName::left_top_front)].regeneration)) {
+    } else if (replacement_mode !=0 || playerUnit->shield->GetRegeneration() != blankUnit->shield->GetRegeneration()) {
         switch (replacement_mode)
         {
         case 0:                         //Replacement or new Module
@@ -5558,7 +5556,7 @@ void showUnitStats( Unit *playerUnit, string &text, int subunitlevel, int mode, 
         float avail    = (playerUnit->maxEnergyData()*RSconverter-maxshield*VSDM);
 
         int num_shields = playerUnit->shield->number_of_facets;
-        float regeneration = playerUnit->shield->facets[as_integer(FacetName::left_top_front)].regeneration;
+        float regeneration = playerUnit->shield->GetRegeneration();
         float overhead = (shields_require_power) ?
                     (regeneration / shieldenergycap * shield_maintenance_cost
                                        * num_shields * VSDM) : 0;

@@ -20,7 +20,8 @@ DamageableLayer::DamageableLayer(int layer_index,
     }
 
     this->layer_index = layer_index;
-    this->number_of_facets = number_of_facets;
+    this->configuration = configuration;
+    this->number_of_facets = size;
     this->facets = facets;
     this->core_layer = core_layer;
 }
@@ -30,6 +31,7 @@ DamageableLayer::DamageableLayer(int layer_index,
                                  float health_array[],
                                  float regeneration,
                                  bool core_layer) {
+
     int size = as_integer(configuration);
 
     std::vector<Health> facets;
@@ -39,6 +41,7 @@ DamageableLayer::DamageableLayer(int layer_index,
     }
 
     this->layer_index = layer_index;
+    this->configuration = configuration;
     this->number_of_facets = size;
     this->facets = facets;
     this->core_layer = core_layer;
@@ -52,9 +55,8 @@ DamageableLayer::DamageableLayer(int layer_index, int number_of_facets, std::vec
 
 DamageableLayer::DamageableLayer():
     layer_index(0),
-    number_of_facets(1),
+    number_of_facets(0),
     core_layer(false) {
-    facets.push_back(Health(layer_index));
 }
 
 
@@ -67,6 +69,10 @@ void DamageableLayer::AdjustPower(const float& percent) {
 }
 
 void DamageableLayer::DealDamage( const CoreVector &attack_vector, Damage &damage, InflictedDamage& inflicted_damage ) {
+    if(number_of_facets == 0) {
+        return;
+    }
+
     int impacted_facet_index = GetFacetIndex(attack_vector);
     facets[impacted_facet_index].DealDamage(damage, inflicted_damage);
 }
@@ -99,6 +105,14 @@ void DamageableLayer::Enable() {
     }
 }
 
+bool DamageableLayer::Enabled() {
+    if(number_of_facets == 0) {
+        return false;
+    }
+
+    return facets[0].enabled;
+}
+
 // TODO: test
 // Boost shields to 150%
 void DamageableLayer::Enhance() {
@@ -109,6 +123,10 @@ void DamageableLayer::Enhance() {
 }
 
 int DamageableLayer::GetFacetIndex(const CoreVector& attack_vector) {
+    if(number_of_facets == 0) {
+        return -1;
+    }
+
     // Convenience Variables
     float i = attack_vector.i;
     float j = attack_vector.j;
@@ -123,6 +141,25 @@ int DamageableLayer::GetFacetIndex(const CoreVector& attack_vector) {
             return 1;
         }
     } else if(configuration == FacetConfiguration::four) {
+        float a = i + k;
+        float b = i - k;
+        if(a >= 0 && b >= 0) {
+            return 0;
+        }
+
+        if(a >= 0 && b < 0) {
+            return 2;
+        }
+
+        if(a < 0 && b >= 0) {
+            return 3;
+        }
+
+        if(a < 0 && b < 0) {
+            return 1;
+        }
+
+        return 0;
 
     } else if(configuration == FacetConfiguration::eight) {
         if(i >= 0 && j >= 0 && k >= 0) { return 0; }
@@ -149,6 +186,10 @@ int DamageableLayer::GetFacetIndex(const CoreVector& attack_vector) {
  * for one. */
 void DamageableLayer::ReduceLayerCapability(const float& percent,
                                             const float& chance_to_reduce_regeneration) {
+    if(number_of_facets == 0) {
+        return;
+    }
+
     static std::random_device randome_device;
     static std::mt19937 gen(randome_device());
 
@@ -230,7 +271,20 @@ float CalculatePercentage(float numerator, float denominator) {
     return percent;*/
 }
 
+float DamageableLayer::GetMaxHealth() {
+    if(number_of_facets == 0) {
+        return 0.0f;
+    }
+
+    return facets[0].max_health;
+}
+
+
 float DamageableLayer::GetPercent(FacetName facet_name) {
+    if(number_of_facets == 0) {
+        return 0.0f;
+    }
+
     float numerator, denominator;
     // One, Two or Four shield configurations
     // Note the fallthrough
@@ -289,8 +343,21 @@ void DamageableLayer::Regenerate() {
     }
 }
 
+
+float DamageableLayer::GetRegeneration() {
+    if(number_of_facets == 0) {
+        return 0.0f;
+    }
+
+    return facets[0].regeneration;
+}
+
+
 void DamageableLayer::UpdateRegeneration(const float& new_regeneration_value) {
     for(Health& facet : facets) {
         facet.regeneration = new_regeneration_value;
+        facet.max_regeneration = new_regeneration_value;
+        facet.regenerative = true;
+        facet.enabled = true;
     }
 }

@@ -3,7 +3,7 @@
 #include "damageable_object.h"
 
 // Demonstrate some basic assertions.
-/*TEST(DamageableObject, Sanity) {
+TEST(DamageableObject, Sanity) {
     CoreVector core_vector(1,1,1); // Left top front
 
     DamageableObject object;
@@ -38,4 +38,4 @@
     EXPECT_EQ(inflicated_damage.inflicted_damage_by_layer[0], 0);
     EXPECT_EQ(inflicated_damage.inflicted_damage_by_layer[1], 0);
     EXPECT_EQ(inflicated_damage.inflicted_damage_by_layer[2], 10);
-}*/
+}
