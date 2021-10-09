@@ -112,7 +112,7 @@ jobs:
       env:
         FROM:       ${{ matrix.FROM }}
         COMPILER:   ${{ matrix.COMPILER }}
-        FLAGS:      '${{ matrix.FLAGS }} -DVEGA_STRIKE_PREFER_LEGACY_OPENGL=${{ matrix.PREFER_LEGACY_OPENGL }}'
+        FLAGS:      '-DVEGA_STRIKE_PREFER_LEGACY_OPENGL=${{ matrix.PREFER_LEGACY_OPENGL }}'
         MY_OS_NAME: linux
         IS_RELEASE: 0
       run: script/cibuild $FLAGS
