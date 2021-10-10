@@ -426,6 +426,12 @@ void Drawable::DrawSubunits(bool on_screen, Matrix wmat, int cloak, float averag
        Mount *mount = &unit->mounts[i];
        Mesh *gun = mount->type->gun;
 
+       // Don't try to draw a nonexistent object -- stephengtuggy 2021-10-10
+       if (gun == nullptr)
+       {
+           continue;
+       }
+
        // Has to come before check for on screen, as a fired beam can still be seen
        // even if the subunit firing it isn't on screen.
        if (unit->mounts[i].type->type == WEAPON_TYPE::BEAM) {
@@ -441,7 +447,7 @@ void Drawable::DrawSubunits(bool on_screen, Matrix wmat, int cloak, float averag
 
        // Units not shown don't draw subunits
        if(!on_screen) {
-           continue;;
+           continue;
        }
 
        // Don't draw mounts if game is set not to...
@@ -457,7 +463,7 @@ void Drawable::DrawSubunits(bool on_screen, Matrix wmat, int cloak, float averag
 
        // Don't draw unchosen GUN mounts, whatever that means
        // Does not cover beams for some reason.
-       if (gun && mount->status == Mount::UNCHOSEN) {
+       if (mount->status == Mount::UNCHOSEN) {
            continue;
        }
 
