@@ -1,7 +1,7 @@
 /**
  * collision.cpp
  *
- * Copyright (C) 2020 Roy Falk, Stephen G. Tuggy and other Vega Strike
+ * Copyright (C) 2020-2021 Roy Falk, Stephen G. Tuggy and other Vega Strike
  * contributors
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
@@ -101,17 +101,35 @@ _UnitType::enhancement,
 _UnitType::missile*/
 void Collision::shouldApplyForceAndDealDamage(Unit* other_unit)
 {
-    // Collision with a nebula does nothing
-    if(other_unit->isUnit() == _UnitType::nebula)
+    switch (other_unit->isUnit())
     {
-        return;
-    }
-
-    // Collision with a enhancement improves your shield apparently
-    if(other_unit->isUnit() == _UnitType::enhancement)
-    {
-        apply_force = true;
-        return;
+        case _UnitType::nebula:
+            // Collision with a nebula does nothing
+            return;
+        case _UnitType::enhancement:
+            // Collision with a enhancement improves your shield apparently
+            apply_force = true;
+            return;
+        case _UnitType::planet:
+            // Handle the "Nav 8" case
+            // BOOST_LOG_TRIVIAL(debug) << "shouldApplyForceAndDealDamage(): other_unit is a planet, with full name " << other_unit->getFullname();
+            if (other_unit->getFullname().find("invisible") != std::string::npos) {
+                // BOOST_LOG_TRIVIAL(debug) << "Found a Nav_8-type object";
+                return;
+            } else {
+                break;
+            }
+        case _UnitType::asteroid:
+            break;
+        case _UnitType::building:
+            break;
+        case _UnitType::missile:
+            break;
+        case _UnitType::unit:
+            break;
+        default:
+            BOOST_LOG_TRIVIAL(warning) << boost::format("Collision::shouldApplyForceAndDealDamage(): unexpected other_unit type %1%") % other_unit->isUnit();
+            break;
     }
 
     // Collision with a jump point does nothing
@@ -128,58 +146,63 @@ void Collision::shouldApplyForceAndDealDamage(Unit* other_unit)
 
     switch(unit_type)
     {
-    // Missiles and asteroids always explode on impact with anything except Nebula and Enhancement.
-    case _UnitType::missile:
-        // Missile should explode when killed
-        // If not, uncomment this
-        //((Missile*)unit)->Discharge();
-        unit->Kill();
-        return;
+        // Missiles and asteroids always explode on impact with anything except Nebula and Enhancement.
+        case _UnitType::missile:
+            // Missile should explode when killed
+            // If not, uncomment this
+            //((Missile*)unit)->Discharge();
+            unit->Kill();
+            break;
 
-    case _UnitType::asteroid:
-        apply_force = true;
-        deal_damage = true;
-        return;
-
-    // Planets and Nebulas can't be killed right now
-    case _UnitType::planet:
-    case _UnitType::nebula:
-        return;
-
-    // Buildings should not calculate actual damage
-    case _UnitType::building:
-        return;
-
-    // Units (ships) should calculate actual damage
-    case _UnitType::unit:
-        apply_force = true;
-        deal_damage = true;
-        return;
-
-    // Not sure what an enhancement is, but it looks like it's something that can increase the shields of the unit it collided with.
-    // TODO: refactor this.
-    case _UnitType::enhancement:
-        if (other_unit->isUnit() == _UnitType::asteroid)
-        {
+        case _UnitType::asteroid:
             apply_force = true;
-            return;
-        }
+            deal_damage = true;
+            break;
 
-        double percent;
-        char tempdata[sizeof(Shield)];
-        memcpy( tempdata, &unit->shield, sizeof(Shield));
-        unit->shield.number = 0;     //don't want them getting our boosted shields!
-        unit->shield.shield2fb.front = unit->shield.shield2fb.back =
-                unit->shield.shield2fb.frontmax = unit->shield.shield2fb.backmax = 0;
-        other_unit->Upgrade( unit, 0, 0, true, true, percent );
-        memcpy( &unit->shield, tempdata, sizeof (Shield) );
-        string fn( unit->filename );
-        string fac( FactionUtil::GetFaction( unit->faction ) );
-        unit->Kill();
+        // Planets and Nebulas can't be killed right now
+        case _UnitType::planet:
+            break;
+        case _UnitType::nebula:
+            break;
 
-        _Universe->AccessCockpit()->savegame->AddUnitToSave( fn.c_str(), _UnitType::enhancement, fac.c_str(), reinterpret_cast<long>(unit));
-        apply_force = true;
-        return;
+        // Buildings should not calculate actual damage
+        case _UnitType::building:
+            break;
+
+        // Units (ships) should calculate actual damage
+        case _UnitType::unit:
+            apply_force = true;
+            deal_damage = true;
+            break;
+
+        // Not sure what an enhancement is, but it looks like it's something that can increase the shields of the unit it collided with.
+        // TODO: refactor this.
+        case _UnitType::enhancement:
+            if (other_unit->isUnit() == _UnitType::asteroid)
+            {
+                apply_force = true;
+                break;
+            }
+            else
+            {
+                double percent;
+                char tempdata[sizeof(Shield)];
+                memcpy( tempdata, &unit->shield, sizeof(Shield));
+                unit->shield.number = 0;     //don't want them getting our boosted shields!
+                unit->shield.shield2fb.front = unit->shield.shield2fb.back =
+                        unit->shield.shield2fb.frontmax = unit->shield.shield2fb.backmax = 0;
+                other_unit->Upgrade( unit, 0, 0, true, true, percent );
+                memcpy( &unit->shield, tempdata, sizeof (Shield) );
+                const std::string fn{unit->filename};
+                const std::string fac{FactionUtil::GetFaction( unit->faction ) };
+                unit->Kill();
+                _Universe->AccessCockpit()->savegame->AddUnitToSave(fn, _UnitType::enhancement, fac, static_cast<void *>(unit));
+                apply_force = true;
+                break;
+            }
+        default:
+            BOOST_LOG_TRIVIAL(warning) << boost::format("Collision::shouldApplyForceAndDealDamage(): unexpected unit_type %1%") % unit_type;
+            break;
     }
 }
 
@@ -292,15 +315,21 @@ void Collision::collide( Unit* unit1,
     // See commit a66bdcfa1e00bf039183603913567d48e52c7a8e method Unit->jumpReactToCollision for an example
     // I assume this is for "always open" jump gates that you pass through
 
+    // apply_force and deal_damage are both initialized to false when the Collision object is constructed. (See collision.h.)
+
     collision1.shouldApplyForceAndDealDamage(unit2);
     collision2.shouldApplyForceAndDealDamage(unit1);
 
     float elasticity = 0.8f;
-    collision1.applyForce(elasticity, collision2.mass, collision2.velocity);
-    collision2.applyForce(elasticity, collision1.mass, collision1.velocity);
+    // if (collision1.apply_force && collision2.apply_force) {
+        collision1.applyForce(elasticity, collision2.mass, collision2.velocity);
+        collision2.applyForce(elasticity, collision1.mass, collision1.velocity);
+    // }
 
-    collision1.dealDamage(collision2);
-    collision2.dealDamage(collision1);
+    // if (collision1.deal_damage && collision2.deal_damage) {
+        collision1.dealDamage(collision2);
+        collision2.dealDamage(collision1);
+    // }
 
-    // TODO: add torque
+    // Is this still a TODO? -- add torque
 }

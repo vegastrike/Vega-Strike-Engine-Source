@@ -4,6 +4,7 @@
  * Copyright (C) Daniel Horn
  * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike
  * contributors
+ * Copyright (C) 2021 Stephen G. Tuggy
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -340,7 +341,14 @@ QVector SaveGame::GetPlayerLocation()
     return PlayerLocation;
 }
 
-void SaveGame::RemoveUnitFromSave( long address ) // DELETE ? unused function?
+// DELETE ? unused function?
+// No, it's used all right. In AddUnitToSave() -- stephengtuggy 2021-09-11
+void SaveGame::RemoveUnitFromSave( long address )
+{
+}
+
+// stephengtuggy 2021-09-11: So I add another entire overload of this method, only to find out it does nothing. Argh.
+void SaveGame::RemoveUnitFromSave(void *address)
 {
 }
 
@@ -497,8 +505,18 @@ void SaveGame::ReadNewsData( char* &buf, bool just_skip )
 
 void SaveGame::AddUnitToSave( const char *filename, int type, const char *faction, long address )
 {
-    if ( game_options.Drone.compare( filename ) )
+    if ( game_options.Drone.compare( filename ) ) {
+        // So AddUnitToSave removes the unit from the save. Um... what? -- stephengtuggy 2021-09-11
         RemoveUnitFromSave( address );
+    }
+}
+
+void SaveGame::AddUnitToSave(const std::string filename, const int type, const std::string faction, void *address)
+{
+    if (game_options.Drone.compare(filename)) {
+        // Just copying what the above method does -- stephengtuggy 2021-09-11
+        RemoveUnitFromSave(address);
+    }
 }
 
 std::vector< float >& SaveGame::getMissionData( const std::string &magic_number )
