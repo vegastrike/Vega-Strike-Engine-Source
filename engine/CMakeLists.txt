@@ -70,18 +70,18 @@ UNSET(OGRE_FOUND)
 UNSET(Boost_DIR)
 
 IF (MSVC)
-INCLUDE_DIRECTORIES(
-    ${Vega_Strike_SOURCE_DIR}/src
-    ${Vega_Strike_SOURCE_DIR}/src/cmd
-    ${Vega_Strike_BINARY_DIR}
-)
+    INCLUDE_DIRECTORIES(
+        ${Vega_Strike_SOURCE_DIR}/src
+        ${Vega_Strike_SOURCE_DIR}/src/cmd
+        ${Vega_Strike_BINARY_DIR}
+    )
 ELSE (MSVC)
-INCLUDE_DIRECTORIES(
-    ${Vega_Strike_SOURCE_DIR}/src
-    ${Vega_Strike_SOURCE_DIR}/src/cmd
-    ${Vega_Strike_BINARY_DIR}
-    /usr/include/harfbuzz/
-)
+    INCLUDE_DIRECTORIES(
+        ${Vega_Strike_SOURCE_DIR}/src
+        ${Vega_Strike_SOURCE_DIR}/src/cmd
+        ${Vega_Strike_BINARY_DIR}
+        /usr/include/harfbuzz/
+    )
 ENDIF (MSVC)
 
 SET(LIBGUI_SOURCES
@@ -602,19 +602,6 @@ IF (DATADIR)
     SET(DEFINES "${DEFINES} -DDATA_DIR='\"${DATADIR}\"'")
 ENDIF (DATADIR)
 
-# Gather info about Linux distro and release (if applicable) for later use down below.
-IF (CMAKE_SYSTEM_NAME STREQUAL Linux)
-    EXECUTE_PROCESS(
-        COMMAND sh -c "cat /etc/os-release | grep ^ID= | sed 's/^ID=//' | tr -d '\"\n'"
-        OUTPUT_VARIABLE LINUX_ID)
-    EXECUTE_PROCESS(
-        COMMAND sh -c "cat /etc/os-release | grep ^VERSION_CODENAME= | sed 's/^VERSION_CODENAME=//' | tr -d '\"\n'"
-        OUTPUT_VARIABLE LINUX_CODENAME)
-    EXECUTE_PROCESS(
-        COMMAND sh -c "cat /etc/os-release | grep ^VERSION_ID= | sed 's/^VERSION_ID=//' | tr -d '\"\n'"
-        OUTPUT_VARIABLE LINUX_VERSION_ID)
-ENDIF (CMAKE_SYSTEM_NAME STREQUAL Linux)
-
 # On some Ubuntu versions and derivatives, a bug exists whereby enabling
 # PIE compilation (Position Independent Executables) results in the
 # `file` utility incorrectly recognising the compiled vegastrike-engine binary
@@ -636,16 +623,16 @@ ENDIF (CMAKE_SYSTEM_NAME STREQUAL Linux)
 #UNSET(CMAKE_POSITION_INDEPENDENT_CODE)
 OPTION(ENABLE_PIE "Enable Position Independent Executables/Shared Libraries (NOT RECOMMENDED on Ubuntu/Mint)" OFF)
 IF (ENABLE_PIE)
-  MESSAGE("!! Enabling Position Independent Executables/Shared Libraries (NOT RECOMMENDED on Ubuntu/Mint) !!")
-  #SET(CMAKE_POSITION_INDEPENDENT_CODE ON)
-  ADD_COMPILE_OPTIONS("-fpie")
-  LINK_LIBRARIES("-pie")
+    MESSAGE("!! Enabling Position Independent Executables/Shared Libraries (NOT RECOMMENDED on Ubuntu/Mint) !!")
+    #SET(CMAKE_POSITION_INDEPENDENT_CODE ON)
+    ADD_COMPILE_OPTIONS("-fpie")
+    LINK_LIBRARIES("-pie")
 ELSE (ENABLE_PIE)
-  MESSAGE("++ Disabling Position Independent Executables/Shared Libraries (Recommended on Ubuntu/Mint)")
-  IF (NOT MSVC)
-    ADD_COMPILE_OPTIONS("-fno-pie")
-    LINK_LIBRARIES("-no-pie")
-  ENDIF (NOT MSVC)
+    MESSAGE("++ Disabling Position Independent Executables/Shared Libraries (Recommended on Ubuntu/Mint)")
+    IF (NOT MSVC)
+        ADD_COMPILE_OPTIONS("-fno-pie")
+        LINK_LIBRARIES("-no-pie")
+    ENDIF (NOT MSVC)
 ENDIF (ENABLE_PIE)
 
 IF (MSVC)
@@ -902,80 +889,78 @@ ENDIF (NOT USE_SYSTEM_BOOST)
 
 IF (NOT DISABLE_CLIENT) ##########
 
-#Find GL
-FIND_PACKAGE(OpenGL REQUIRED)
-IF (OPENGL_FOUND AND OPENGL_GLU_FOUND)
-    SET(TST_INCLUDES ${TST_INCLUDES} ${OPENL_INCLUDE_DIR})
-    SET(TST_LIBS ${TST_LIBS} ${OPENGL_LIBRARIES})
-    MESSAGE("++ OpenGL found : ${OPENGL_LIBRARIES}")
-ELSE (OPENGL_FOUND AND OPENGL_GLU_FOUND)
-    MESSAGE("!! Why you no have GL?")
-ENDIF (OPENGL_FOUND AND OPENGL_GLU_FOUND)
+    #Find GL
+    FIND_PACKAGE(OpenGL REQUIRED)
+    IF (OPENGL_FOUND AND OPENGL_GLU_FOUND)
+        SET(TST_INCLUDES ${TST_INCLUDES} ${OPENL_INCLUDE_DIR})
+        SET(TST_LIBS ${TST_LIBS} ${OPENGL_LIBRARIES})
+        MESSAGE("++ OpenGL found : ${OPENGL_LIBRARIES}")
+    ELSE (OPENGL_FOUND AND OPENGL_GLU_FOUND)
+        MESSAGE("!! Why you no have GL?")
+    ENDIF (OPENGL_FOUND AND OPENGL_GLU_FOUND)
 
-#Find GLUT
-FIND_PACKAGE(GLUT REQUIRED)
-IF (GLUT_FOUND)
-    SET(TST_INCLUDES ${TST_INCLUDES} ${GLUT_INCLUDE_DIR})
-    SET(TST_LIBS ${TST_LIBS} ${GLUT_LIBRARIES})
-    MESSAGE("++ GLUT found : ${GLUT_LIBRARIES}")
-ELSE (GLUT_FOUND)
-    MESSAGE("!! I can't build this, missing GLUT")
-ENDIF (GLUT_FOUND)
+    #Find GLUT
+    FIND_PACKAGE(GLUT REQUIRED)
+    IF (GLUT_FOUND)
+        SET(TST_INCLUDES ${TST_INCLUDES} ${GLUT_INCLUDE_DIR})
+        SET(TST_LIBS ${TST_LIBS} ${GLUT_LIBRARIES})
+        MESSAGE("++ GLUT found : ${GLUT_LIBRARIES}")
+    ELSE (GLUT_FOUND)
+        MESSAGE("!! I can't build this, missing GLUT")
+    ENDIF (GLUT_FOUND)
 
-#Find OpenAL
-FIND_PACKAGE(OpenAL REQUIRED)
-IF (OPENAL_FOUND)
-    MESSAGE("++ Found OpenAL")
-    SET(TST_INCLUDES ${TST_INCLUDES} ${OPENAL_INCLUDE_DIR})
-    SET(TST_LIBS ${TST_LIBS} ${OPENAL_LIBRARY})
-    SET(HAVE_AL 1)
-ELSE (OPENAL_FOUND)
-    MESSAGE("!! We aint got no sound")
-ENDIF (OPENAL_FOUND)
+    #Find OpenAL
+    FIND_PACKAGE(OpenAL REQUIRED)
+    IF (OPENAL_FOUND)
+        MESSAGE("++ Found OpenAL")
+        SET(TST_INCLUDES ${TST_INCLUDES} ${OPENAL_INCLUDE_DIR})
+        SET(TST_LIBS ${TST_LIBS} ${OPENAL_LIBRARY})
+        SET(HAVE_AL 1)
+    ELSE (OPENAL_FOUND)
+        MESSAGE("!! We aint got no sound")
+    ENDIF (OPENAL_FOUND)
 
-IF (NOT BEOS)
-    #Find SDL
-    FIND_PACKAGE(SDL)
-    IF (SDL_FOUND)
-        SET(TST_INCLUDES ${TST_INCLUDES} ${SDL_INCLUDE_DIR})
-        SET(TST_LIBS ${TST_LIBS} ${SDL_LIBRARY})
-        MESSAGE("++ SDL Found")
-        SET(HAVE_SDL 1)
-        SET(SDL_WINDOWING 1)
-    ELSE (SDL_FOUND)
-        MESSAGE("!! How will we render to OpenGL without SDL?")
-    ENDIF (SDL_FOUND)
-ENDIF (NOT BEOS)
+    IF (NOT BEOS)
+        #Find SDL
+        FIND_PACKAGE(SDL)
+        IF (SDL_FOUND)
+            SET(TST_INCLUDES ${TST_INCLUDES} ${SDL_INCLUDE_DIR})
+            SET(TST_LIBS ${TST_LIBS} ${SDL_LIBRARY})
+            MESSAGE("++ SDL Found")
+            SET(HAVE_SDL 1)
+            SET(SDL_WINDOWING 1)
+        ELSE (SDL_FOUND)
+            MESSAGE("!! How will we render to OpenGL without SDL?")
+        ENDIF (SDL_FOUND)
+    ENDIF (NOT BEOS)
 
-#find Vorbis
-FIND_PACKAGE(Vorbis REQUIRED)
-IF (Vorbis_FOUND)
-    SET(TST_INCLUDES ${TST_INCLUDES} ${Vorbis_INCLUDE_DIRS})
-    SET(TST_LIBS ${TST_LIBS} ${Vorbis_LIBRARIES})
-    SET(HAVE_OGG 1)
-ELSE (Vorbis_FOUND)
-    MESSAGE("!! Can't find Vorbis libs")
-ENDIF (Vorbis_FOUND)
+    #find Vorbis
+    FIND_PACKAGE(Vorbis REQUIRED)
+    IF (Vorbis_FOUND)
+        SET(TST_INCLUDES ${TST_INCLUDES} ${Vorbis_INCLUDE_DIRS})
+        SET(TST_LIBS ${TST_LIBS} ${Vorbis_LIBRARIES})
+        SET(HAVE_OGG 1)
+    ELSE (Vorbis_FOUND)
+        MESSAGE("!! Can't find Vorbis libs")
+    ENDIF (Vorbis_FOUND)
 
-#Find JPEG
-FIND_PACKAGE(JPEG REQUIRED)
-IF (JPEG_FOUND)
-    SET(TST_INCLUDES ${TST_INCLUDES} ${JPEG_INCLUDE_DIR})
-    SET(TST_LIBS ${TST_LIBS} ${JPEG_LIBRARIES})
-ELSE (JPEG_FOUND)
-    MESSAGE("!! How are we gonna open jpegs?")
-ENDIF (JPEG_FOUND)
+    #Find JPEG
+    FIND_PACKAGE(JPEG REQUIRED)
+    IF (JPEG_FOUND)
+        SET(TST_INCLUDES ${TST_INCLUDES} ${JPEG_INCLUDE_DIR})
+        SET(TST_LIBS ${TST_LIBS} ${JPEG_LIBRARIES})
+    ELSE (JPEG_FOUND)
+        MESSAGE("!! How are we gonna open jpegs?")
+    ENDIF (JPEG_FOUND)
 
-#Find PNG
-FIND_PACKAGE(PNG REQUIRED)
-IF (PNG_FOUND)
-    SET(TEST_INCLUDES ${TST_INCLUDES} ${PNG_INCLUDE_DIRS})
-    SET(TST_LIBS ${TST_LIBS} ${PNG_LIBRARIES})
-ELSE (PNG_FOUND)
-    MESSAGE("!! Can't find PNG lib")
-ENDIF (PNG_FOUND)
-
-
+    #Find PNG
+    FIND_PACKAGE(PNG REQUIRED)
+    IF (PNG_FOUND)
+        SET(TEST_INCLUDES ${TST_INCLUDES} ${PNG_INCLUDE_DIRS})
+        SET(TST_LIBS ${TST_LIBS} ${PNG_LIBRARIES})
+    ELSE (PNG_FOUND)
+        MESSAGE("!! Can't find PNG lib")
+    ENDIF (PNG_FOUND)
 
 ENDIF(NOT DISABLE_CLIENT) ##########
 
@@ -1053,7 +1038,7 @@ ENDIF (NOT DISABLE_OGRE)
 IF (NOT BEOS)
     FIND_LIBRARY(UTIL_LIB util)
 ELSEIF (WIN32)
-	# Don't need it?
+    # Don't need it?
 ELSE (NOT BEOS)
     FIND_LIBRARY(UTIL_LIB network)
 ENDIF (NOT BEOS)
@@ -1272,8 +1257,8 @@ ELSEIF (CMAKE_SYSTEM_NAME STREQUAL Linux)
         SET(VEGA_STRIKE_PYTHON_VERSION_STR "py2")
     ENDIF (USE_PYTHON_3)
 
-	# Detect available Linux Distros that can be built for
-	FIND_PACKAGE(LinuxDistro REQUIRED)
+    # Detect available Linux Distros that can be built for
+    FIND_PACKAGE(LinuxDistro REQUIRED)
 
     # "DEB"
     IF(VS_CAN_BUILD_DEB)
@@ -1291,15 +1276,15 @@ ELSEIF (CMAKE_SYSTEM_NAME STREQUAL Linux)
             SET(DEBIAN_RELEASE_VERSION "Debian Derivative Release Version ${LSB_LINUX_DISTRIBUTION_CODENAME}")
         ENDIF (NOT LSB_EXISTS)
 
-		# dependency.list is generated by `script/packages`. It requires the binaries to already be built to work.
-		# if using `script/package` to build the packages, then it will automatically re-run `cmake` to update the data
-		# for the dependencies.
-		#
-		# If dependency.list is not available, then a hard-coded set of dependencies is provided below.
-		# Thanks to stephengtuggy for providing the static list for known distributions.
-		#
-		# Prefer the auto-generated list by default as it'll be more accurate
-		# Fall back to the static lists when it's not available.
+        # dependency.list is generated by `script/packages`. It requires the binaries to already be built to work.
+        # if using `script/package` to build the packages, then it will automatically re-run `cmake` to update the data
+        # for the dependencies.
+        #
+        # If dependency.list is not available, then a hard-coded set of dependencies is provided below.
+        # Thanks to stephengtuggy for providing the static list for known distributions.
+        #
+        # Prefer the auto-generated list by default as it'll be more accurate
+        # Fall back to the static lists when it's not available.
         MESSAGE("Looking for ${CMAKE_BINARY_DIR}/dependency.list")
         IF (EXISTS "${CMAKE_BINARY_DIR}/dependency.list")
             MESSAGE("Found Dependency file at ${CMAKE_BINARY_DIR}/dependency.list")
@@ -1511,7 +1496,7 @@ ELSEIF (CMAKE_SYSTEM_NAME STREQUAL Linux)
 
         SET(CPACK_PACKAGE_FILE_NAME "${CPACK_RPM_PACKAGE_NAME}_${VEGA_STRIKE_PACKAGE_VERSION_STR}-${VEGA_STRIKE_PYTHON_VERSION_STR}-${LINUX_ID}-${VEGA_STRIKE_LINUX_VERSION_STR}_x86_64")
 
-		# TODO: Finish porting the script/package script over for RPM-based distros
+        # TODO: Finish porting the script/package script over for RPM-based distros
         # Detect whether SuSe or RH/CentOS/Fedora as deps may change
         IF (LINUX_ID STREQUAL opensuse-leap)
             IF (LINUX_VERSION_ID VERSION_EQUAL 15.2 OR LINUX_VERSION_ID VERSION_EQUAL 15.3)
