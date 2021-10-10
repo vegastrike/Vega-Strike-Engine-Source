@@ -70,18 +70,18 @@ UNSET(OGRE_FOUND)
 UNSET(Boost_DIR)
 
 IF (MSVC)
-INCLUDE_DIRECTORIES(
-    ${Vega_Strike_SOURCE_DIR}/src
-    ${Vega_Strike_SOURCE_DIR}/src/cmd
-    ${Vega_Strike_BINARY_DIR}
-)
+    INCLUDE_DIRECTORIES(
+        ${Vega_Strike_SOURCE_DIR}/src
+        ${Vega_Strike_SOURCE_DIR}/src/cmd
+        ${Vega_Strike_BINARY_DIR}
+    )
 ELSE (MSVC)
-INCLUDE_DIRECTORIES(
-    ${Vega_Strike_SOURCE_DIR}/src
-    ${Vega_Strike_SOURCE_DIR}/src/cmd
-    ${Vega_Strike_BINARY_DIR}
-    /usr/include/harfbuzz/
-)
+    INCLUDE_DIRECTORIES(
+        ${Vega_Strike_SOURCE_DIR}/src
+        ${Vega_Strike_SOURCE_DIR}/src/cmd
+        ${Vega_Strike_BINARY_DIR}
+        /usr/include/harfbuzz/
+    )
 ENDIF (MSVC)
 
 SET(LIBGUI_SOURCES
@@ -602,19 +602,6 @@ IF (DATADIR)
     SET(DEFINES "${DEFINES} -DDATA_DIR='\"${DATADIR}\"'")
 ENDIF (DATADIR)
 
-# Gather info about Linux distro and release (if applicable) for later use down below.
-IF (CMAKE_SYSTEM_NAME STREQUAL Linux)
-    EXECUTE_PROCESS(
-        COMMAND sh -c "cat /etc/os-release | grep ^ID= | sed 's/^ID=//' | tr -d '\"\n'"
-        OUTPUT_VARIABLE LINUX_ID)
-    EXECUTE_PROCESS(
-        COMMAND sh -c "cat /etc/os-release | grep ^VERSION_CODENAME= | sed 's/^VERSION_CODENAME=//' | tr -d '\"\n'"
-        OUTPUT_VARIABLE LINUX_CODENAME)
-    EXECUTE_PROCESS(
-        COMMAND sh -c "cat /etc/os-release | grep ^VERSION_ID= | sed 's/^VERSION_ID=//' | tr -d '\"\n'"
-        OUTPUT_VARIABLE LINUX_VERSION_ID)
-ENDIF (CMAKE_SYSTEM_NAME STREQUAL Linux)
-
 # On some Ubuntu versions and derivatives, a bug exists whereby enabling
 # PIE compilation (Position Independent Executables) results in the
 # `file` utility incorrectly recognising the compiled vegastrike-engine binary
@@ -636,16 +623,16 @@ ENDIF (CMAKE_SYSTEM_NAME STREQUAL Linux)
 #UNSET(CMAKE_POSITION_INDEPENDENT_CODE)
 OPTION(ENABLE_PIE "Enable Position Independent Executables/Shared Libraries (NOT RECOMMENDED on Ubuntu/Mint)" OFF)
 IF (ENABLE_PIE)
-  MESSAGE("!! Enabling Position Independent Executables/Shared Libraries (NOT RECOMMENDED on Ubuntu/Mint) !!")
-  #SET(CMAKE_POSITION_INDEPENDENT_CODE ON)
-  ADD_COMPILE_OPTIONS("-fpie")
-  LINK_LIBRARIES("-pie")
+    MESSAGE("!! Enabling Position Independent Executables/Shared Libraries (NOT RECOMMENDED on Ubuntu/Mint) !!")
+    #SET(CMAKE_POSITION_INDEPENDENT_CODE ON)
+    ADD_COMPILE_OPTIONS("-fpie")
+    LINK_LIBRARIES("-pie")
 ELSE (ENABLE_PIE)
-  MESSAGE("++ Disabling Position Independent Executables/Shared Libraries (Recommended on Ubuntu/Mint)")
-  IF (NOT MSVC)
-    ADD_COMPILE_OPTIONS("-fno-pie")
-    LINK_LIBRARIES("-no-pie")
-  ENDIF (NOT MSVC)
+    MESSAGE("++ Disabling Position Independent Executables/Shared Libraries (Recommended on Ubuntu/Mint)")
+    IF (NOT MSVC)
+        ADD_COMPILE_OPTIONS("-fno-pie")
+        LINK_LIBRARIES("-no-pie")
+    ENDIF (NOT MSVC)
 ENDIF (ENABLE_PIE)
 
 IF (MSVC)
@@ -1053,7 +1040,7 @@ ENDIF (NOT DISABLE_OGRE)
 IF (NOT BEOS)
     FIND_LIBRARY(UTIL_LIB util)
 ELSEIF (WIN32)
-	# Don't need it?
+    # Don't need it?
 ELSE (NOT BEOS)
     FIND_LIBRARY(UTIL_LIB network)
 ENDIF (NOT BEOS)
@@ -1272,31 +1259,11 @@ ELSEIF (CMAKE_SYSTEM_NAME STREQUAL Linux)
         SET(VEGA_STRIKE_PYTHON_VERSION_STR "py2")
     ENDIF (USE_PYTHON_3)
 
-    # lsb_release -i --> but then it'll find `Ubuntu` instead of Debian so will have to map more
-    # we can probably more reliably detect via checking for different packager commands
-    # `lsb_release` doesn't always work correctly, so it's easier to read the underlying file
-    # if it exists. It doesn't always exist. Debian doesn't use it, but Ubuntu does.
-    SET(LSB_EXISTS FALSE)
-    SET(LSB_LINUX_DISTRIBUTION "Unknown")
-    SET(LSB_LINUX_DISTRIBUTION_CODENAME "Unknown")
-
-    # Lookup the LSB Data - this is known for Ubuntu, but also used by other distros too.
-    # and may help with distro-sub-selection
-    FIND_PROGRAM(LSB_RELEASE_EXEC lsb_release)
-    IF (LSB_RELEASE_EXEC)
-        EXECUTE_PROCESS(COMMAND ${LSB_RELEASE_EXEC} --codename --short
-            OUTPUT_VARIABLE LSB_LINUX_DISTRIBUTION_CODENAME
-            OUTPUT_STRIP_TRAILING_WHITESPACE)
-        EXECUTE_PROCESS(COMMAND ${LSB_RELEASE_EXEC} --id --short
-            OUTPUT_VARIABLE LSB_LINUX_DISTRIBUTION
-            OUTPUT_STRIP_TRAILING_WHITESPACE)
-        SET(LSB_EXISTS TRUE)
-        MESSAGE("Found Linux Distribution Release Name: ${LSB_LINUX_DISTRIBUTION_CODENAME}")
-    ENDIF (LSB_RELEASE_EXEC)
+    # Detect available Linux Distros that can be built for
+    FIND_PACKAGE(LinuxDistro REQUIRED)
 
     # "DEB"
-    FIND_PROGRAM(HAS_APT NAMES apt-get apt)
-    IF(HAS_APT)
+    IF(VS_CAN_BUILD_DEB)
         MESSAGE("-- Configuring Debian Packaging")
         # See https://cmake.org/cmake/help/v3.3/module/CPackDeb.html
         SET(CPACK_DEBIAN_PACKAGE_NAME "Vega-Strike")
@@ -1311,15 +1278,15 @@ ELSEIF (CMAKE_SYSTEM_NAME STREQUAL Linux)
             SET(DEBIAN_RELEASE_VERSION "Debian Derivative Release Version ${LSB_LINUX_DISTRIBUTION_CODENAME}")
         ENDIF (NOT LSB_EXISTS)
 
-		# dependency.list is generated by `script/packages`. It requires the binaries to already be built to work.
-		# if using `script/package` to build the packages, then it will automatically re-run `cmake` to update the data
-		# for the dependencies.
-		#
-		# If dependency.list is not available, then a hard-coded set of dependencies is provided below.
-		# Thanks to stephengtuggy for providing the static list for known distributions.
-		#
-		# Prefer the auto-generated list by default as it'll be more accurate
-		# Fall back to the static lists when it's not available.
+        # dependency.list is generated by `script/packages`. It requires the binaries to already be built to work.
+        # if using `script/package` to build the packages, then it will automatically re-run `cmake` to update the data
+        # for the dependencies.
+        #
+        # If dependency.list is not available, then a hard-coded set of dependencies is provided below.
+        # Thanks to stephengtuggy for providing the static list for known distributions.
+        #
+        # Prefer the auto-generated list by default as it'll be more accurate
+        # Fall back to the static lists when it's not available.
         MESSAGE("Looking for ${CMAKE_BINARY_DIR}/dependency.list")
         IF (EXISTS "${CMAKE_BINARY_DIR}/dependency.list")
             MESSAGE("Found Dependency file at ${CMAKE_BINARY_DIR}/dependency.list")
@@ -1512,11 +1479,10 @@ ELSEIF (CMAKE_SYSTEM_NAME STREQUAL Linux)
         SET(CPACK_DEBIAN_PACKAGE_SECTION "Amusements/Games")
         SET(CPACK_DEBIAN_PACKAGE_HOMEPAGE "https://www.vega-strike.org")
         SET(CPACK_GENERATOR "DEB")
-    ENDIF (HAS_APT)
+    ENDIF (VS_CAN_BUILD_DEB)
 
     #  "RPM"
-    FIND_PROGRAM(HAS_RPMBUILD rpmbuild)
-    IF (HAS_RPMBUILD)
+    IF (VS_CAN_BUILD_RPM)
         MESSAGE("-- Configuring RPM Packaging")
         # See https://cmake.org/cmake/help/v3.3/module/CPackRPM.html
         SET(CPACK_RPM_PACKAGE_LICENSE "GPLv3") # See ../LICENSE
@@ -1532,7 +1498,7 @@ ELSEIF (CMAKE_SYSTEM_NAME STREQUAL Linux)
 
         SET(CPACK_PACKAGE_FILE_NAME "${CPACK_RPM_PACKAGE_NAME}_${VEGA_STRIKE_PACKAGE_VERSION_STR}-${VEGA_STRIKE_PYTHON_VERSION_STR}-${LINUX_ID}-${VEGA_STRIKE_LINUX_VERSION_STR}_x86_64")
 
-		# TODO: Finish porting the script/package script over for RPM-based distros
+        # TODO: Finish porting the script/package script over for RPM-based distros
         # Detect whether SuSe or RH/CentOS/Fedora as deps may change
         IF (LINUX_ID STREQUAL opensuse-leap)
             IF (LINUX_VERSION_ID VERSION_EQUAL 15.2 OR LINUX_VERSION_ID VERSION_EQUAL 15.3)
@@ -1614,7 +1580,7 @@ ELSEIF (CMAKE_SYSTEM_NAME STREQUAL Linux)
             SET(CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES}, libjpeg, libpng, freeglut, gtk3, libvorbis, openal, SDL_mixer")
         ENDIF (LINUX_ID STREQUAL opensuse-leap)
         SET(CPACK_GENERATOR "RPM")
-    ENDIF (HAS_RPMBUILD)
+    ENDIF (VS_CAN_BUILD_RPM)
 ELSE ()
     MESSAGE("-- Configuring Packaging for Unknown Platforms - \"${CMAKE_SYSTEM_NAME}\"")
     # Unknown Platform --> Just do the various compressed tarballs
