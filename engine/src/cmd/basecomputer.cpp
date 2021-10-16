@@ -5153,7 +5153,7 @@ void showUnitStats( Unit *playerUnit, string &text, int subunitlevel, int mode, 
     const Unit::UnitJump &uj  = playerUnit->GetJumpStatus();
     const Unit::UnitJump &buj = blankUnit->GetJumpStatus();
     if (!mode) {
-        float maxshield = Damageable::totalShieldEnergyCapacitance( *playerUnit->shield );
+        float maxshield = playerUnit->totalShieldEnergyCapacitance();
         if (shields_require_power)
             maxshield = 0;
         PRETTY_ADDU( statcolor+"Recharge: #-c", playerUnit->energyRechargeData()*RSconverter, 0, "MJ/s" );
@@ -5547,7 +5547,7 @@ void showUnitStats( Unit *playerUnit, string &text, int subunitlevel, int mode, 
         return;
     if (subunitlevel == 0 && mode == 0) {
         text += "#n##n##c0:1:.5#"+prefix+"[KEY FIGURES]#n##-c";
-        float maxshield = Damageable::totalShieldEnergyCapacitance( *playerUnit->shield );
+        float maxshield = playerUnit->totalShieldEnergyCapacitance();
         if (shields_require_power)
             maxshield = 0;
         PRETTY_ADDU( statcolor+"Minimum time to reach full overthrust speed: #-c",

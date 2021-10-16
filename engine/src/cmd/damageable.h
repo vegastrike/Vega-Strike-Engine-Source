@@ -162,10 +162,7 @@ public:
 
 
     float MaxShieldVal() const;
-    //regenerates all 2,4, or 6 shields for 1 SIMULATION_ATOM
-    virtual void RegenShields() = 0;
-
-    static float totalShieldEnergyCapacitance( const DamageableLayer &shield );
+    void RegenerateShields(const float difficulty, const bool player_ship);
 
     void UpdatePointers();
 protected:

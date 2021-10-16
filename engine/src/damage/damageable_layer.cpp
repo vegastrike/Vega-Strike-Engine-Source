@@ -91,6 +91,16 @@ void DamageableLayer::Disable() {
     }
 }
 
+
+void DamageableLayer::Discharge(float discharge_rate, float minimum_discharge) {
+    for(Health& facet : facets) {
+        if(facet.health > minimum_discharge * facet.max_health) {
+            facet.health *= discharge_rate;
+        }
+    }
+}
+
+
 // Used for nicer graphics when entering SPEC
 void DamageableLayer::GradualDisable() {
     for(Health& facet : facets) {
@@ -337,9 +347,16 @@ float DamageableLayer::GetPercent(FacetName facet_name) {
     return percent;
 }
 
-void DamageableLayer::Regenerate() {
+void DamageableLayer::Regenerate(float recharge_rate) {
     for(Health& facet : facets) {
-        facet.Regenerate();
+        facet.Regenerate(recharge_rate);
+    }
+}
+
+
+void DamageableLayer::RegenerateOrDischarge(float recharge_rate, bool velocity_discharge, float discharge_rate) {
+    for(Health& facet : facets) {
+        facet.Regenerate(recharge_rate);
     }
 }
 

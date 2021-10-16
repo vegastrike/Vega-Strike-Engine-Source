@@ -84,6 +84,7 @@ public:
     void ReduceLayerMaximumByOnePercent();
     void ReduceRegeneration(const float& percent);
     void Regenerate();
+    void Regenerate(float recharge_rate);
     void SetHealth(float health);
 };
 

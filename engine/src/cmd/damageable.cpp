@@ -563,9 +563,50 @@ void Damageable::leach( float damShield, float damShieldRecharge, float damEnRec
 }
 
 
+void Damageable::RegenerateShields(const float difficulty, const bool player_ship)
+{
+    static bool  shields_in_spec = GameConfig::GetVariable( "physics", "shields_in_spec", false );
+    static float discharge_per_second     =
+        GameConfig::GetVariable( "physics", "speeding_discharge", 0.25f );
+    //approx
+    const float  discharge_rate  = (1-(1-discharge_per_second)*simulation_atom_var);
+    static float min_shield_discharge =
+        GameConfig::GetVariable( "physics", "min_shield_speeding_discharge", 0.1f );
+    static float nebshields =
+            GameConfig::GetVariable( "physics", "nebula_shield_recharge", 0.5f );
+
+    Unit *unit = static_cast<Unit*>(this);
+
+    const bool in_warp = unit->graphicOptions.InWarp;
+    const int shield_facets = unit->shield->number_of_facets;
+    const float total_max_shields = unit->shield->TotalMaxLayerValue();
+
+    // No point in all this code if there are no shields.
+    if(shield_facets < 2 || total_max_shields == 0) {
+        return;
+    }
 
 
+    float shield_recharge = unit->constrained_charge_to_shields * simulation_atom_var;
 
+    if (unit->GetNebula() != nullptr) {
+        shield_recharge *= nebshields;
+    }
+
+    // Adjust other (enemy) ships for difficulty
+    if(!player_ship) {
+        shield_recharge *= difficulty;
+    }
+
+
+    // Discharge shields due to energy or SPEC
+    if((in_warp && !shields_in_spec) || !unit->sufficient_energy_to_recharge_shields) {
+        shield->Discharge(discharge_rate, min_shield_discharge);
+    } else {
+        // Shield regeneration
+        shield->Regenerate(shield_recharge);
+    }
+}
 
 
 float Damageable::MaxShieldVal() const
@@ -573,26 +614,6 @@ float Damageable::MaxShieldVal() const
     Damageable *damageable = const_cast<Damageable*>(this);
     return static_cast<DamageableLayer>(damageable->GetShieldLayer()).AverageMaxLayerValue();
 }
-
-
-
-
-float Damageable::totalShieldEnergyCapacitance( const DamageableLayer &shield )
-{
-    float total_max_shield_value = static_cast<DamageableLayer>(shield).TotalMaxLayerValue();
-    float total_current_shield_value = static_cast<DamageableLayer>(shield).TotalLayerValue();
-
-    static float shieldenergycap =
-        XMLSupport::parse_float( vs_config->getVariable( "physics", "shield_energy_capacitance", ".2" ) );
-    static bool  use_max_shield_value =
-        XMLSupport::parse_bool( vs_config->getVariable( "physics", "use_max_shield_energy_usage", "false" ) );
-    return shieldenergycap*(use_max_shield_value ? total_max_shield_value : total_current_shield_value);
-}
-
-
-
-
-
 
 
 bool Damageable::flickerDamage()

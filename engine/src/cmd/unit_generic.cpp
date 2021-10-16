@@ -1477,18 +1477,7 @@ void Unit::RollTorque( float amt )
     ApplyLocalTorque( amt*Vector( 0, 0, 1 ) );
 }
 
-float WARPENERGYMULTIPLIER( Unit *un )
-{
-    static float warpenergymultiplier =
-        XMLSupport::parse_float( vs_config->getVariable( "physics", "warp_energy_multiplier", "0.12" ) );
-    static float playerwarpenergymultiplier =
-        XMLSupport::parse_float( vs_config->getVariable( "physics", "warp_energy_player_multiplier", ".12" ) );
-    bool player     = _Universe->isPlayerStarship( un ) != NULL;
-    Flightgroup *fg = un->getFlightgroup();
-    if (fg && !player)
-        player = _Universe->isPlayerStarship( fg->leader.GetUnit() ) != NULL;
-    return player ? playerwarpenergymultiplier : warpenergymultiplier;
-}
+
 
 
 /*
@@ -4721,7 +4710,31 @@ void Unit::UpdatePhysics3(const Transformation &trans,
   if (fuel < 0)
       fuel = 0;
   UpdateCloak();
-  RegenShields();
+
+  // Recharge energy and shields
+  static bool  apply_difficulty_shields = GameConfig::GetVariable( "physics", "difficulty_based_shield_recharge", true );
+  static bool  energy_before_shield     = GameConfig::GetVariable( "physics", "engine_energy_priority", true);
+
+  // Difficulty settings
+  float difficulty_shields = 1.0f;
+  if(apply_difficulty_shields) {
+      difficulty_shields = g_game.difficulty;
+  }
+
+  if (energy_before_shield) {
+      rechargeEnergy();
+  }
+
+  bool is_player_ship = _Universe->isPlayerStarship( this );
+  RegenerateShields(difficulty_shields, is_player_ship);
+  ExpendEnergy(is_player_ship);
+
+  if (!energy_before_shield) {
+      rechargeEnergy();
+  }
+
+
+
   if (lastframe) {
       if ( !( docked&(DOCKED|DOCKED_INSIDE) ) )
           //the AIscript should take care
@@ -5028,194 +5041,7 @@ bool Unit::isPlayerShip()
 
 
 
-void Unit::RegenShields()
-{
-    if(_Universe->isPlayerStarship( this )) {
-        // Need for a break point
-        int i = 0;
-    }
-
-    // No point in all this code if there are no shields.
-    int shield_number = GetShieldLayer().number_of_facets;
-    if(shield_number < 2) {
-        return;
-    }
-
-    // TODO: lib_damage reenable disabled settings
-    static bool  shields_in_spec = XMLSupport::parse_bool( vs_config->getVariable( "physics", "shields_in_spec", "false" ) );
-    //static float shieldenergycap =
-    //    XMLSupport::parse_float( vs_config->getVariable( "physics", "shield_energy_capacitance", ".2" ) );
-    static bool  energy_before_shield     =
-        XMLSupport::parse_bool( vs_config->getVariable( "physics", "engine_energy_priority", "true" ) );
-    //static bool  apply_difficulty_shields =
-    //    XMLSupport::parse_bool( vs_config->getVariable( "physics", "difficulty_based_shield_recharge", "true" ) );
-    //static float shield_maintenance_cost  =
-    //    XMLSupport::parse_float( vs_config->getVariable( "physics", "shield_maintenance_charge", ".25" ) );
-    static bool  shields_require_power    =
-        XMLSupport::parse_bool( vs_config->getVariable( "physics", "shields_require_passive_recharge_maintenance", "true" ) );
-    static float discharge_per_second     =
-        XMLSupport::parse_float( vs_config->getVariable( "physics", "speeding_discharge", ".25" ) );
-    //approx
-    //const float  dischargerate  = (1-(1-discharge_per_second)*simulation_atom_var);
-    //static float min_shield_discharge =
-    //    XMLSupport::parse_float( vs_config->getVariable( "physics", "min_shield_speeding_discharge", ".1" ) );
-    static float low_power_mode =
-        XMLSupport::parse_float( vs_config->getVariable( "physics", "low_power_mode_energy", "10" ) );
-    static float max_shield_lowers_recharge    =
-        XMLSupport::parse_float( vs_config->getVariable( "physics", "max_shield_recharge_drain", "0" ) );
-    static bool  max_shield_lowers_capacitance =
-        XMLSupport::parse_bool( vs_config->getVariable( "physics", "max_shield_lowers_capacitance", "false" ) );
-    static bool  reactor_uses_fuel       =
-        XMLSupport::parse_bool( vs_config->getVariable( "physics", "reactor_uses_fuel", "false" ) );
-    static float reactor_idle_efficiency =
-        XMLSupport::parse_float( vs_config->getVariable( "physics", "reactor_idle_efficiency", "0.98" ) );
-    static float VSD = XMLSupport::parse_float( vs_config->getVariable( "physics", "VSD_MJ_yield", "5.4" ) );
-    //Fuel Mass in metric tons expended per generation of 100MJ
-    static float FMEC_factor     = XMLSupport::parse_float( vs_config->getVariable( "physics", "FMEC_factor", "0.000000008" ) );
-    float maxshield = totalShieldEnergyCapacitance( GetShieldLayer() );
-    //bool  velocity_discharge     = false;
-    float rec = 0;
-    float precharge = energy;
-    //Reactor energy
-    if (!energy_before_shield)
-        rechargeEnergy();
-    //Shield energy drain
-    shield->Regenerate();
-
-    // TODO: Go over this and refactor
-
-    //GAHHH reactor in units of 100MJ, shields in units of VSD=5.4MJ to make 1MJ of shield use 1/shieldenergycap MJ
-    if (shields_in_spec || !graphicOptions.InWarp) {
-        /*energy -= shield_recharge * VSD / 100
-                    // TODO: implement efficiency: ( 100 * (shield.efficiency ? shield.efficiency : 1) )
-                    /shieldenergycap * shield_number * shield_maintenance_cost
-                      * simulation_atom_var * ( (apply_difficulty_shields) ? g_game.difficulty : 1 );
-            if (energy < 0) {
-                velocity_discharge = true;
-                energy = 0;
-            }*/
-        shield->AdjustPower(1.0f);
-    } else {
-        shield->GradualDisable();
-    }
-
-    /*rec = (velocity_discharge) ?
-                0 :
-                ( (shield_recharge * VSD / 100 *
-                   simulation_atom_var * shield_number/shieldenergycap)
-                  > energy ) ? (energy*shieldenergycap*100/VSD
-                                /shield_number) : shield_recharge*simulation_atom_var;
-    if (apply_difficulty_shields) {
-        if ( !_Universe->isPlayerStarship( this ) )
-            rec *= g_game.difficulty;
-        else
-            rec *= g_game.difficulty;
-    }
-    if (graphicOptions.InWarp && !shields_in_spec) {
-        rec = 0;
-        velocity_discharge = true;
-    }
-    if (GetNebula() != NULL) {
-        static float nebshields =
-                XMLSupport::parse_float( vs_config->getVariable( "physics", "nebula_shield_recharge", ".5" ) );
-        rec *= nebshields;
-    }*/
 
 
-    //ECM energy drain
-    if (computer.ecmactive) {
-        static float ecmadj = XMLSupport::parse_float( vs_config->getVariable( "physics", "ecm_energy_cost", ".05" ) );
-        float sim_atom_ecm  = ecmadj*ecm*simulation_atom_var;
-        if (energy > sim_atom_ecm)
-            energy -= sim_atom_ecm;
-        else
-            energy = 0;
-    }
-
-    //Shield regeneration
-    shield->Regenerate();
-
-    // shield costs energy
-    if(shield->Enabled()) {
-        energy -= rec;
-
-        // TODO: lib_damage
-        // refactor assuming I can figure out what they intended to do
-        float efficiency = 1; // TODO: reintroduce efficiency
-        if (shields_require_power)
-            maxshield = 0;
-        if (max_shield_lowers_recharge)
-            energy -= max_shield_lowers_recharge*simulation_atom_var*maxshield*VSD
-                      /( 100*efficiency );
-        if (!max_shield_lowers_capacitance)
-            maxshield = 0;
-    }
-
-    //Reactor energy
-    if (energy_before_shield)
-        rechargeEnergy();
-    //Final energy computations
-    float menergy = maxenergy;
-
-    if ( shield_number && (menergy-maxshield < low_power_mode) ) {
-        menergy = maxshield+low_power_mode;
-        if ( _Universe->isPlayerStarship( this ) ) {
-            if (rand() < .00005*RAND_MAX) {
-                UniverseUtil::IOmessage(
-                    0,
-                    "	game",
-                    "all",
-                    "**Warning** Power Supply Overdrawn: downgrade shield or purchase reactor capacitance!" );
-            }
-        }
-    }
-    if (graphicOptions.InWarp) {
-        //FIXME FIXME FIXME
-        static float bleedfactor = XMLSupport::parse_float( vs_config->getVariable( "physics", "warpbleed", "20" ) );
-        float bleed = jump.insysenergy/bleedfactor * simulation_atom_var;
-        if (warpenergy > bleed) {
-            warpenergy -= bleed;
-        } else {
-            graphicOptions.InWarp = 0;
-            graphicOptions.WarpRamping = 1;
-        }
-    }
-    float excessenergy = 0;
-    //NOTE: !shield.number => maxshield==0
-    if (menergy > maxshield) {
-        //allow warp caps to absorb xtra power
-        if (energy > menergy-maxshield) {
-            excessenergy = energy-(menergy-maxshield);
-            energy = menergy-maxshield;
-            if (excessenergy > 0) {
-                warpenergy = warpenergy+WARPENERGYMULTIPLIER( this )*excessenergy;
-                float mwe = maxwarpenergy;
-                if (mwe < jump.energy && mwe == 0)
-                    mwe = jump.energy;
-                if (warpenergy > mwe) {
-                    excessenergy = (warpenergy-mwe)/WARPENERGYMULTIPLIER( this );
-                    warpenergy   = mwe;
-                }
-            }
-        }
-    } else {
-        energy = 0;
-    }
-    excessenergy = (excessenergy > precharge) ? excessenergy-precharge : 0;
-    if (reactor_uses_fuel) {
-        static float min_reactor_efficiency =
-            XMLSupport::parse_float( vs_config->getVariable( "physics", "min_reactor_efficiency", ".00001" ) );
-        fuel -= FMEC_factor
-                *( ( recharge*simulation_atom_var
-                    -(reactor_idle_efficiency
-                      *excessenergy) )/( min_reactor_efficiency+( LifeSupportFunctionality*(1-min_reactor_efficiency) ) ) );
-        if (fuel < 0) fuel = 0;
-        if ( !FINITE( fuel ) ) {
-            VS_LOG(error, "Fuel is nan C");
-            fuel = 0;
-        }
-    }
-    energy = energy < 0 ? 0 : energy;
-}
 
 

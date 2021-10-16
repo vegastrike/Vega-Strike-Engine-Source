@@ -755,18 +755,6 @@ public:
  **** WEAPONS/SHIELD STUFF                                                          ***
  **************************************************************************************
  */
-public:
-    void RegenShields() override;
-
-
-protected:
-
-
-//The radar limits (range, cone range, etc)
-//the current order
-
-
-
 
 
 public:

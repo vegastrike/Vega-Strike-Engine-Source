@@ -122,12 +122,22 @@ void Health::ReduceRegeneration(const float& percent) {
     regeneration = std::max(0.0f, regeneration - max_regeneration * percent);
 }
 
+
 void Health::Regenerate() {
     if(!enabled || destroyed || !regenerative) {
         return;
     }
 
     health = std::min(adjusted_health, health + regeneration);
+}
+
+
+void Health::Regenerate(float recharge_rate) {
+    if(!enabled || destroyed || !regenerative) {
+        return;
+    }
+
+    health = std::min(adjusted_health, health + recharge_rate);
 }
 
 void Health::SetHealth(float health) {

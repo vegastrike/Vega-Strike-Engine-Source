@@ -13,6 +13,7 @@ DamageableObject::DamageableObject() {
     DamageableLayer shield_layer = DamageableLayer(2, FacetConfiguration::four, shield_health, false);
 
     layers = { hull_layer, armor_layer, shield_layer };
+    number_of_layers = 3;
 }
 
 

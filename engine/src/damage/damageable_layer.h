@@ -50,6 +50,7 @@ struct DamageableLayer
     void Destroy();
     void Disable();
     void GradualDisable();
+    void Discharge(float discharge_rate, float minimum_discharge);
     void Enable();
     bool Enabled();
     void Enhance();
@@ -67,7 +68,8 @@ struct DamageableLayer
     float GetMaxHealth();
     float GetPercent(FacetName facet_name);
 
-    void Regenerate();
+    void Regenerate(float recharge_rate);
+    void RegenerateOrDischarge(float recharge, bool velocity_discharge, float discharge_rate);
     float GetRegeneration();
     void UpdateRegeneration(const float& new_regeneration_value);
 };

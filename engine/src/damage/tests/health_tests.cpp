@@ -24,11 +24,11 @@ TEST(Shield, Sanity) {
     EXPECT_EQ(damage.normal_damage, 0);
 
     health.Disable();
-    health.Regenerate();
+    health.Regenerate(1.0f);
     EXPECT_EQ(health.health, 0);
 
     health.Enable();
-    health.Regenerate();
+    health.Regenerate(1.0f);
     EXPECT_EQ(health.health, 25);
 
     damage.normal_damage = 110;
@@ -62,12 +62,12 @@ TEST(Armor, Sanity) {
     EXPECT_EQ(damage.normal_damage, 0);
 
     health.Disable();
-    health.Regenerate();
+    health.Regenerate(1.0f);
     EXPECT_EQ(health.health, 90);
     EXPECT_FALSE(health.enabled);
 
     health.Enable();
-    health.Regenerate();
+    health.Regenerate(1.0f);
     EXPECT_EQ(health.health, 90);
     EXPECT_FALSE(health.enabled);
 
