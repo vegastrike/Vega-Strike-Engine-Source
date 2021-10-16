@@ -24,7 +24,7 @@ then
         export CC=clang
         export CXX=clang++
     fi
-    docker run --env CC=$CC --env CXX=$CXX --env IS_RELEASE=$IS_RELEASE --env TAG_NAME=$TAG_NAME --env FLAGS=$FLAGS --name $DOCKER_CONTAINER_NAME $DST_DOCKER_IMG_NAME $FLAGS
+    docker run --env CC=$CC --env CXX=$CXX --env IS_RELEASE=$IS_RELEASE --env TAG_NAME=$TAG_NAME --env FLAGS="$FLAGS" --name $DOCKER_CONTAINER_NAME $DST_DOCKER_IMG_NAME
     docker cp $DOCKER_CONTAINER_NAME:/usr/src/Vega-Strike-Engine-Source/bin .
     if [ $IS_RELEASE -eq 1 ]
     then
@@ -32,7 +32,7 @@ then
     fi
     docker rm $DOCKER_CONTAINER_NAME
 else
-    script/docker-entrypoint.sh $@
+    script/docker-entrypoint.sh
 fi
 
 echo "cibuild Done!"
