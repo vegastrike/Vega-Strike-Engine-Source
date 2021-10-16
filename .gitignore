@@ -11,3 +11,6 @@ packages/
 .vs/
 .vscode/
 .editorconfig
+
+engine/src/version.h
+engine/setup/src/include/version.h
