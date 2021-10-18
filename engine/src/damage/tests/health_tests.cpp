@@ -28,7 +28,7 @@ TEST(Shield, Sanity) {
     EXPECT_EQ(health.health, 0);
 
     health.Enable();
-    health.Regenerate(1.0f);
+    health.Regenerate(health.regeneration);
     EXPECT_EQ(health.health, 25);
 
     damage.normal_damage = 110;
