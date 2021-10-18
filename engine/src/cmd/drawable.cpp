@@ -617,5 +617,16 @@ void Drawable::LightShields( const Vector &pnt, const Vector &normal, float amt,
     Unit *unit = static_cast<Unit*>(this);
     // Not sure about shield percentage - more variance for more damage?
     // TODO: figure out the above comment
-    meshdata.back()->AddDamageFX( pnt, unit->shieldtight ? unit->shieldtight*normal : Vector( 0, 0, 0 ), std::min( 1.0f, std::max( 0.0f,                                                                                                            amt ) ), color );
+
+    Mesh *mesh = meshdata.back();
+
+    if(!mesh) {
+        return;
+    }
+
+    if(!unit) {
+        return;
+    }
+
+    mesh->AddDamageFX( pnt, unit->shieldtight ? unit->shieldtight*normal : Vector( 0, 0, 0 ), std::min( 1.0f, std::max( 0.0f,                                                                                                            amt ) ), color );
 }

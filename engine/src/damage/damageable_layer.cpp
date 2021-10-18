@@ -1,6 +1,7 @@
 #include "damageable_layer.h"
 
 #include <random>
+#include <cassert>
 
 // TODO: this is a use of the code in a different library.
 // I'm unhappy with this, so it needs to change.
@@ -367,6 +368,29 @@ float DamageableLayer::GetRegeneration() {
     }
 
     return facets[0].regeneration;
+}
+
+void DamageableLayer::UpdateFacets(const unsigned int new_size, const float new_facets[4]) {
+    assert(new_size == number_of_facets);
+
+    switch (number_of_facets) {
+    case 1:
+        facets[0].health = facets[0].max_health = new_facets[0];
+        break;
+
+    case 4:
+        facets[0].health = facets[0].max_health = new_facets[3];
+        facets[1].health = facets[1].max_health = new_facets[2];
+        facets[2].health = facets[2].max_health = new_facets[0];
+        facets[3].health = facets[3].max_health = new_facets[1];
+        break;
+    case 2:
+    case 8:
+        for(unsigned int i=0;i<number_of_facets;i++) {
+            facets[i].health = facets[i].max_health = new_facets[i];
+        }
+        break;
+    }
 }
 
 

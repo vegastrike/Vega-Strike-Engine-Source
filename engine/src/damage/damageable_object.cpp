@@ -9,7 +9,7 @@ DamageableObject::DamageableObject() {
     Health shield_health = Health(0, 0, 5);
 
     DamageableLayer hull_layer = DamageableLayer(0, FacetConfiguration::one, hull_health, true);
-    DamageableLayer armor_layer = DamageableLayer(1, FacetConfiguration::one, armor_health, false);
+    DamageableLayer armor_layer = DamageableLayer(1, FacetConfiguration::eight, armor_health, false);
     DamageableLayer shield_layer = DamageableLayer(2, FacetConfiguration::four, shield_health, false);
 
     layers = { hull_layer, armor_layer, shield_layer };

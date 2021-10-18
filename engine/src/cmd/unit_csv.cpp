@@ -1013,11 +1013,7 @@ void Unit::LoadRow( CSVRow &row, string modification, string *netxml )
     // Hull
     float temp_hull = ::stof( OPTIM_GET( row, table, Hull ) );
     float hull_values[1] = {temp_hull};
-    layers[0] = DamageableLayer(0,
-                                FacetConfiguration::one,
-                                hull_values,
-                                0.0f,
-                                true);
+    hull->UpdateFacets(1, hull_values);
 
     specInterdiction = ::stof( OPTIM_GET( row, table, Spec_Interdiction ) );
 
@@ -1032,11 +1028,7 @@ void Unit::LoadRow( CSVRow &row, string modification, string *netxml )
     armor_values[6] = ::stof( OPTIM_GET( row, table, Armor_Back_Bottom_Left ));
     armor_values[7] = ::stof( OPTIM_GET( row, table, Armor_Back_Bottom_Right ));
 
-    layers[1] = DamageableLayer(1,
-                                FacetConfiguration::eight,
-                                armor_values,
-                                0.0f,
-                                false);
+    armor->UpdateFacets(8, armor_values);
 
 
     // Load shield
@@ -1048,7 +1040,7 @@ void Unit::LoadRow( CSVRow &row, string modification, string *netxml )
     // This is necessary for upgrading shields, as it's done with an ugly macro in
     // unit_generic STDUPGRADE
     shield_regeneration = regeneration;
-
+    shield->UpdateRegeneration(regeneration);
     //float efficiency = ::stof( OPTIM_GET( row, table, Shield_Efficiency ), 1.0 );
 
     // Get shield count
@@ -1087,67 +1079,12 @@ void Unit::LoadRow( CSVRow &row, string modification, string *netxml )
      5. We map the above index to our own
      */
 
-    float dummy_shield_value[1] = {0};
-
-    switch(shield_count) {
-    case 0:
-        // No shields
-        //layers[2] = DamageableLayer();
-        assert(1);
-        break;
-
-    case 1:
-        // Actually, 1 should not occur during normal gameplay.
-        // No shields
-        assert(1);
-        shield_values[0] = 0.0f;
-        layers[2] = DamageableLayer(2,
-                                    FacetConfiguration::one,
-                                    dummy_shield_value,
-                                    0.0f,
-                                    false);
-        break;
-    case 2:
-        layers[2] = DamageableLayer(2,
-                                    FacetConfiguration::two,
-                                    shield_values,
-                                    regeneration,
-                                    false);
-        break;
-    case 4:
-        float four_shield_values[4];
-        four_shield_values[0] = shield_values[3]; // Left
-        four_shield_values[1] = shield_values[2]; // Right
-        four_shield_values[2] = shield_values[0]; // Front
-        four_shield_values[3] = shield_values[1]; // Rear
-
-        layers[2] = DamageableLayer(2,
-                                    FacetConfiguration::four,
-                                    four_shield_values,
-                                    regeneration,
-                                    false);
-        break;
-    case 6:
-        assert(1);
-        // Not supported yet
-    case 8:
-        assert(1);
-        // Not supported yet
-        // No shields
-        layers[2] = DamageableLayer(2,
-                                    FacetConfiguration::one,
-                                    dummy_shield_value,
-                                    0.0f,
-                                    false);
-        break;
-    default:
-        assert(1);
+    if(shield_count == 4 || shield_count == 2) {
+        shield->number_of_facets = shield_count;
+        shield->UpdateFacets(shield_count, shield_values);
     }
 
     // End shield section
-
-    // Assign shorthand pointers;
-    UpdatePointers();
 
 
     static bool WCfuelhack = XMLSupport::parse_bool( vs_config->getVariable( "physics", "fuel_equals_warp", "false" ) );
@@ -1596,7 +1533,7 @@ string Unit::WriteUnitString()
                 unit["Armor_Back_Bottom_Left"]   = tos( GetArmorLayer().facets[5].health );
                 unit["Armor_Back_Bottom_Right"]  = tos( GetArmorLayer().facets[7].health );
 
-                int number_of_shield_emitters = GetShieldLayer().number_of_facets;
+                int number_of_shield_emitters = shield->number_of_facets;
                 {
                     unit["Shield_Front_Top_Right"]    = "";
                     unit["Shield_Front_Top_Left"]     = "";
@@ -1621,15 +1558,15 @@ string Unit::WriteUnitString()
 
                         break;
                     case 4:
-                        unit["Shield_Front_Bottom_Left"]  = tos( GetShieldLayer().facets[2].max_health );
-                        unit["Shield_Front_Bottom_Right"] = tos( GetShieldLayer().facets[1].max_health );
-                        unit["Shield_Front_Top_Right"]    = tos( GetShieldLayer().facets[0].max_health );
-                        unit["Shield_Back_Top_Right"]     = tos( GetShieldLayer().facets[3].max_health );
+                        unit["Shield_Front_Top_Right"]  = tos( GetShieldLayer().facets[0].max_health );
+                        unit["Shield_Back_Top_Left"] = tos( GetShieldLayer().facets[1].max_health );
+                        unit["Shield_Front_Bottom_Right"] = tos( GetShieldLayer().facets[2].max_health );
+                        unit["Shield_Front_Bottom_Left"] = tos( GetShieldLayer().facets[3].max_health );
 
                         break;
                     case 2:
                         unit["Shield_Front_Top_Right"]    = tos( GetShieldLayer().facets[0].max_health );
-                        unit["Shield_Back_Top_Right"]     = tos( GetShieldLayer().facets[1].max_health );
+                        unit["Shield_Back_Top_Left"]     = tos( GetShieldLayer().facets[1].max_health );
                         break;
 
                     case 0:
@@ -1638,6 +1575,7 @@ string Unit::WriteUnitString()
 
                     default:
                         // This should not happen
+                        std::cout << number_of_shield_emitters << "\n";
                         assert(0);
                     }
                 }
@@ -1645,7 +1583,7 @@ string Unit::WriteUnitString()
 
                 //TODO: lib_damage shield leak and efficiency
                 unit["Shield_Leak"] = tos(0); //tos( shield.leak/100.0 );
-                unit["Shield_Efficiency"] = tos(0); //tos( shield.efficiency );
+                unit["Shield_Efficiency"] = tos(1); //tos( shield.efficiency );
                 unit["Shield_Recharge"] = tos(shield->GetRegeneration()); //tos( shield.recharge );
                 unit["Warp_Capacitor"] = tos( maxwarpenergy );
                 unit["Warp_Min_Multiplier"] = tos( graphicOptions.MinWarpMultiplier );

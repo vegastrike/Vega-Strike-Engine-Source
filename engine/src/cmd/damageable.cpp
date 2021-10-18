@@ -649,11 +649,4 @@ bool Damageable::flickerDamage()
     return false;
 }
 
-void Damageable::UpdatePointers() {
-    hull = &layers[0];
-    armor = &layers[1];
-    shield = &layers[2];
 
-    current_hull = &hull->facets[0].health;
-    max_hull = &hull->facets[0].max_health;
-}

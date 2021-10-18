@@ -164,7 +164,6 @@ public:
     float MaxShieldVal() const;
     void RegenerateShields(const float difficulty, const bool player_ship);
 
-    void UpdatePointers();
 protected:
     bool flickerDamage();
 };

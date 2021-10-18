@@ -186,10 +186,6 @@ Planet::Planet() :
 {
     Init();
     SetAI( new Order() );     //no behavior
-
-    Health health(2,0,0);
-    layers[2] = DamageableLayer(2, FacetConfiguration::two, health, false);
-    UpdatePointers();
 }
 
 extern const vector< string >& ParseDestinations( const string &value );
@@ -327,11 +323,6 @@ Planet::Planet( QVector x,
                       faction, fgid,
                       inside_out,
                       nlights );
-
-
-    Health health(2,0,0);
-    layers[2] = DamageableLayer(2, FacetConfiguration::two, health, false);
-    UpdatePointers();
 }
 
 Planet::~Planet()
