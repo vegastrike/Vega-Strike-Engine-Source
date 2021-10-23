@@ -202,6 +202,12 @@ ELSE ()
     SET (VEGA_STRIKE_GLU_DEPENDENCY "libglvnd0")
 ENDIF ()
 
+# Should we install gtest?
+OPTION(INSTALL_GTEST "Should we download and install GTest?" ON)
+
+# Should we run gtest?
+OPTION(RUN_GTEST "Should we build and run the unit tests using GTest?" ON)
+
 # Provide boolean options for enabling various cpu optimizations.
 OPTION(CPUAMD_k8  "Enable AMD K8 optimizations (Athlon through athlon64)" OFF )
 OPTION(CPUAMD_k9  "Enable AMD K9 (sse3) optimizations (Athlon64 AM3) " OFF )
@@ -1617,57 +1623,63 @@ ENDIF (WIN32 AND NOT UNIX)
 
 INCLUDE(CPack)
 
-MESSAGE("-- Configuring Unit Tests")
+IF (INSTALL_GTEST OR USE_GTEST)
+    MESSAGE("-- Configuring Unit Tests")
+ENDIF (INSTALL_GTEST OR USE_GTEST)
 
-INCLUDE(FetchContent)
-FetchContent_Declare(
-    googletest
-    GIT_REPOSITORY https://github.com/google/googletest.git
-    GIT_TAG        release-1.11.0
-)
+IF (INSTALL_GTEST)
+    INCLUDE(FetchContent)
+    FetchContent_Declare(
+        googletest
+        GIT_REPOSITORY https://github.com/google/googletest.git
+        GIT_TAG        release-1.11.0
+    )
 
-FetchContent_GetProperties(googletest)
-STRING(TOLOWER "googletest" lcName)
-IF(NOT ${lcName}_POPULATED)
-    # Fetch the content using previously declared details
-    FetchContent_Populate(googletest)
+    FetchContent_GetProperties(googletest)
+    STRING(TOLOWER "googletest" lcName)
+    IF(NOT ${lcName}_POPULATED)
+        # Fetch the content using previously declared details
+        FetchContent_Populate(googletest)
 
-    # Set custom variables, policies, etc.
+        # Set custom variables, policies, etc.
 
-    # For Windows: Prevent overriding the parent project's compiler/linker settings
-    SET(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
+        # For Windows: Prevent overriding the parent project's compiler/linker settings
+        SET(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
 
-    # Bring the populated content into the build
-    ADD_SUBDIRECTORY(${${lcName}_SOURCE_DIR} ${${lcName}_BINARY_DIR})
-ENDIF(NOT ${lcName}_POPULATED)
+        # Bring the populated content into the build
+        ADD_SUBDIRECTORY(${${lcName}_SOURCE_DIR} ${${lcName}_BINARY_DIR})
+    ENDIF(NOT ${lcName}_POPULATED)
+ENDIF (INSTALL_GTEST)
 
-ENABLE_TESTING()
+IF (USE_GTEST)
+    ENABLE_TESTING()
 
-SET(TEST_NAME ${PROJECT_NAME}_tests)
+    SET(TEST_NAME ${PROJECT_NAME}_tests)
 
-ADD_EXECUTABLE(
-    ${TEST_NAME}
-    src/configuration/tests/configuration_tests.cpp
-    # src/damage/tests/health_tests.cpp
-    # src/damage/tests/layer_tests.cpp
-    # src/damage/tests/object_tests.cpp
-)
+    ADD_EXECUTABLE(
+        ${TEST_NAME}
+        src/configuration/tests/configuration_tests.cpp
+        # src/damage/tests/health_tests.cpp
+        # src/damage/tests/layer_tests.cpp
+        # src/damage/tests/object_tests.cpp
+    )
 
-ADD_LIBRARY(vegastrike-testing
-    ${LIBCONFIG}
-    # ${LIBDAMAGE}
-)
+    ADD_LIBRARY(vegastrike-testing
+        ${LIBCONFIG}
+        # ${LIBDAMAGE}
+    )
 
-TARGET_LINK_LIBRARIES(
-    ${TEST_NAME}
-    gtest_main
-    vegastrike-testing
-)
+    TARGET_LINK_LIBRARIES(
+        ${TEST_NAME}
+        gtest_main
+        vegastrike-testing
+    )
 
-FILE(
-    COPY "src/configuration/tests/vegastrike.config"
-    DESTINATION ${CMAKE_BINARY_DIR}/test_assets
-)
+    FILE(
+        COPY "src/configuration/tests/vegastrike.config"
+        DESTINATION ${CMAKE_BINARY_DIR}/test_assets
+    )
 
-INCLUDE(GoogleTest)
-gtest_discover_tests(${TEST_NAME})
+    INCLUDE(GoogleTest)
+    gtest_discover_tests(${TEST_NAME})
+ENDIF (USE_GTEST)
