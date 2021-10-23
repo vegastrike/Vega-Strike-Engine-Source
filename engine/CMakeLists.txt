@@ -206,7 +206,7 @@ ENDIF ()
 OPTION(INSTALL_GTEST "Should we download and install GTest?" ON)
 
 # Should we run gtest?
-OPTION(RUN_GTEST "Should we build and run the unit tests using GTest?" ON)
+OPTION(USE_GTEST "Should we build and run the unit tests using GTest?" ON)
 
 # Provide boolean options for enabling various cpu optimizations.
 OPTION(CPUAMD_k8  "Enable AMD K8 optimizations (Athlon through athlon64)" OFF )
