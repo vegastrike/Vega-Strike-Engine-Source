@@ -375,19 +375,19 @@ void DamageableLayer::UpdateFacets(const unsigned int new_size, const float new_
 
     switch (number_of_facets) {
     case 1:
-        facets[0].health = facets[0].max_health = new_facets[0];
+        facets[0].Update(new_facets[0]);
         break;
 
     case 4:
-        facets[0].health = facets[0].max_health = new_facets[3];
-        facets[1].health = facets[1].max_health = new_facets[2];
-        facets[2].health = facets[2].max_health = new_facets[0];
-        facets[3].health = facets[3].max_health = new_facets[1];
+        facets[0].Update(new_facets[3]);
+        facets[1].Update(new_facets[2]);
+        facets[2].Update(new_facets[0]);
+        facets[3].Update(new_facets[1]);
         break;
-    case 2:
+    case 2: // Note the fallthrough
     case 8:
         for(unsigned int i=0;i<number_of_facets;i++) {
-            facets[i].health = facets[i].max_health = new_facets[i];
+            facets[i].Update(new_facets[i]);
         }
         break;
     }

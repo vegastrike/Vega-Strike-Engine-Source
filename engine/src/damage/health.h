@@ -86,6 +86,7 @@ public:
     void Regenerate();
     void Regenerate(float recharge_rate);
     void SetHealth(float health);
+    void Update(float health);
 };
 
 #endif // HEALTH_H

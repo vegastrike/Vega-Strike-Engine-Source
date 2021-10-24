@@ -145,3 +145,9 @@ void Health::SetHealth(float health) {
     health = std::max(0.0f, health);
     this->health = health;
 }
+
+void Health::Update(float health) {
+    this->health = health;
+    max_health = health;
+    adjusted_health = health;
+}

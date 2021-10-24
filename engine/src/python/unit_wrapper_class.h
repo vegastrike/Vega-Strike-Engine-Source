@@ -272,7 +272,7 @@ public:
     }
     void ApplyDamage( Vector pnt,
                       Vector normal,
-                      Damage damage,
+                      float amt,
                       UnitWrapper dealer,
                       float r,
                       float g,
@@ -282,6 +282,7 @@ public:
         {
             CHECKME;
         }
+        Damage damage(amt);
         unit->ApplyDamage( pnt, normal, damage, unit, GFXColor( r, g, b, a ), dealer.GetUnit());
     }
 /////////////////////////////MANUAL WRAP//////

@@ -303,13 +303,12 @@ void Energetic::ExpendEnergy(float usage) {
 // The original code was a continuation of the comment above and simply unclear.
 // I replaced it with a very simple model.
 void Energetic::ExpendFuel() {
-    static bool  reactor_uses_fuel = GameConfig::GetVariable( "physics", "reactor_uses_fuel", false );
     //Fuel Mass in metric tons expended per generation of 100MJ
     static float FMEC_factor = GameConfig::GetVariable( "physics", "FMEC_factor", 0.000000008 );
     static float reactor_idle_efficiency = GameConfig::GetVariable( "physics", "reactor_idle_efficiency", 0.98f );
     static float min_reactor_efficiency = GameConfig::GetVariable( "physics", "min_reactor_efficiency", 0.00001f );
 
-    if (!reactor_uses_fuel) {
+    if (!configuration.fuel.reactor_uses_fuel) {
         return;
     }
 
