@@ -49,10 +49,11 @@ public:
     void adjustSound(SoundType type, const QVector &position, const Vector &velocity);
     void playSound(SoundType type);
 
-protected:
     void playShieldDamageSound( const Vector &pnt );
     void playArmorDamageSound( const Vector &pnt );
     void playHullDamageSound( const Vector &pnt );
+protected:
+
     void playExplosionDamageSound();
     void playEngineSound();
 

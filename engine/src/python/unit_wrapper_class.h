@@ -274,7 +274,6 @@ public:
                       Vector normal,
                       float amt,
                       UnitWrapper dealer,
-                      float phasedamage,
                       float r,
                       float g,
                       float b,
@@ -283,7 +282,8 @@ public:
         {
             CHECKME;
         }
-        unit->ApplyDamage( pnt, normal, amt, unit, GFXColor( r, g, b, a ), dealer.GetUnit(), phasedamage );
+        Damage damage(amt);
+        unit->ApplyDamage( pnt, normal, damage, unit, GFXColor( r, g, b, a ), dealer.GetUnit());
     }
 /////////////////////////////MANUAL WRAP//////
 /*
@@ -302,7 +302,9 @@ public:
     bool isNull()
     {
         Unit *un = GetUnit();
-        if (un) if (un->hull <= 0) return true;
+        if (un) {
+            return (un->Destroyed());
+        }
         return un == 0;
     }
     bool notNull()

@@ -601,15 +601,7 @@ void LoopAroundSlow( Order *aisc, Unit *un )
 
 void SelfDestruct( Order *aisc, Unit *un )
 {
-    un->armor.frontrighttop    = -1;
-    un->armor.backrighttop     = -1;
-    un->armor.frontlefttop     = -1;
-    un->armor.backlefttop      = -1;
-    un->armor.frontrightbottom = -1;
-    un->armor.backrightbottom  = -1;
-    un->armor.frontleftbottom  = -1;
-    un->armor.backleftbottom   = -1;
-    un->hull = -1;     //hull goes to zero but no kill, same for armor. strangely enough, all of them together work.
+    un->Destroy();
     un->Split( rand()%3+1 );
     un->Explode( true, 0 );     //displays explosion, unit continues
     un->RemoveFromSystem();      //has no effect

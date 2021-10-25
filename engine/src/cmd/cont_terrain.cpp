@@ -35,6 +35,7 @@
 #include "collide2/CSopcodecollider.h"
 #include "collide2/csgeom2/optransfrm.h"
 #include "collide2/basecollider.h"
+#include "damageable.h"
 
 #include "unit_collide.h"
 #include "vs_globals.h"
@@ -384,11 +385,15 @@ void ContinuousTerrain::Collide( Unit *un, Matrix t )
             if (autocol) {
                 static float mass = 1000;
                 un->ApplyForce( bigNormal*.4*un->Mass*fabs( bigNormal.Dot( (un->GetVelocity()/simulation_atom_var) ) ) );
-                un->ApplyDamage( un->Position().Cast()-bigNormal*un->rSize(), -bigNormal, .5
-                                 *fabs( bigNormal.Dot( un->GetVelocity() ) )*mass*simulation_atom_var, un, GFXColor( 1,
-                                                                                                                     1,
-                                                                                                                     1,
-                                                                                                                     1 ), NULL );
+
+                Damage damage(.5*fabs( bigNormal.Dot( un->GetVelocity() ) )*mass*simulation_atom_var);
+
+                un->ApplyDamage( un->Position().Cast()-bigNormal*un->rSize(),
+                                 -bigNormal,
+                                 damage,
+                                 un,
+                                 GFXColor( 1, 1, 1, 1 ),
+                                 nullptr );
             }
         }
     }

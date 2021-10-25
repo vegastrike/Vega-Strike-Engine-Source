@@ -131,18 +131,20 @@ SET(CMAKE_INSTALL_UCRT_LIBRARIES TRUE)
 INCLUDE(InstallRequiredSystemLibraries)
 
 IF (MSVC)
-    INCLUDE_DIRECTORIES(
-        ${Vega_Strike_SOURCE_DIR}/src
-        ${Vega_Strike_SOURCE_DIR}/src/cmd
-        ${Vega_Strike_BINARY_DIR}
-    )
+INCLUDE_DIRECTORIES(
+    ${Vega_Strike_SOURCE_DIR}/src
+    ${Vega_Strike_SOURCE_DIR}/src/cmd
+    ${Vega_Strike_SOURCE_DIR}/src/damage
+    ${Vega_Strike_BINARY_DIR}
+)
 ELSE (MSVC)
-    INCLUDE_DIRECTORIES(
-        ${Vega_Strike_SOURCE_DIR}/src
-        ${Vega_Strike_SOURCE_DIR}/src/cmd
-        ${Vega_Strike_BINARY_DIR}
-        /usr/include/harfbuzz/
-    )
+INCLUDE_DIRECTORIES(
+    ${Vega_Strike_SOURCE_DIR}/src
+    ${Vega_Strike_SOURCE_DIR}/src/cmd
+    ${Vega_Strike_SOURCE_DIR}/src/damage
+    ${Vega_Strike_BINARY_DIR}
+    /usr/include/harfbuzz/
+)
 ENDIF (MSVC)
 
 # The source files used to be listed here...
@@ -745,6 +747,12 @@ SET(LIBCONFIG
     src/configuration/game_config.cpp
 )
 
+SET(LIBDAMAGE
+    src/damage/damageable_layer.cpp
+    src/damage/damageable_object.cpp
+    src/damage/health.cpp
+    )
+
 SET(LIBGUI_SOURCES
     src/gui/button.cpp
     src/gui/control.cpp
@@ -1134,6 +1142,7 @@ SET(LIBAUDIO_SOURCES
 ADD_LIBRARY(vegastrike-engine_com
     ${LIBVS_LOGGING}
     ${LIBCONFIG}
+    ${LIBDAMAGE}
     ${LIBAI_SOURCES}
     ${LIBCMD_SOURCES}
     ${LIBNET_SOURCES}
@@ -1648,14 +1657,14 @@ SET(TEST_NAME ${PROJECT_NAME}_tests)
 ADD_EXECUTABLE(
     ${TEST_NAME}
     src/configuration/tests/configuration_tests.cpp
-    # src/damage/tests/health_tests.cpp
-    # src/damage/tests/layer_tests.cpp
-    # src/damage/tests/object_tests.cpp
+    src/damage/tests/health_tests.cpp
+    src/damage/tests/layer_tests.cpp
+    src/damage/tests/object_tests.cpp
 )
 
 ADD_LIBRARY(vegastrike-testing
     ${LIBCONFIG}
-    # ${LIBDAMAGE}
+    ${LIBDAMAGE}
 )
 
 TARGET_LINK_LIBRARIES(

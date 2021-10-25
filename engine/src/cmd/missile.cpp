@@ -25,7 +25,9 @@
 
 
 #include "missile.h"
+#include "damageable.h"
 
+#include "mount_size.h"
 #include "universe_util.h"
 #include "unit_generic.h"
 #include "vegastrike.h"
@@ -143,8 +145,10 @@ void MissileEffect::DoApplyDamage(Unit *parent, Unit *un, float distance, float 
                 % distance
                 % radius
                 % (damage*damage_fraction*damage_left)));
-        parent->ApplyDamage( pos.Cast(), norm, damage*damage_fraction*damage_left, un, GFXColor( 1,1,1,1 ),
-                             ownerDoNotDereference, phasedamage*damage_fraction*damage_left );
+        Damage damage(this->damage * damage_fraction * damage_left,
+                      phasedamage*damage_fraction*damage_left);
+        parent->ApplyDamage( pos.Cast(), norm, damage, un, GFXColor( 1,1,1,1 ),
+                             ownerDoNotDereference);
     }
 }
 
@@ -175,9 +179,11 @@ Missile::Missile( const char *filename,
   , had_target ( false )
 
 {
+    // TODO: why would a sparkling missile be four times as hard to kill???
     static bool missilesparkle = XMLSupport::parse_bool( vs_config->getVariable( "graphics", "missilesparkle", "false" ) );
-    if (missilesparkle)
-        maxhull *= 4;
+    if (missilesparkle) {
+        *current_hull *= 4;
+    }
 }
 
 
@@ -241,7 +247,7 @@ void Missile::UpdatePhysics2( const Transformation &trans,
     if(target != nullptr)
     {
         // But the target is dead already
-        if (target->hull < 0) {
+        if (target->Destroyed()) {
             target = nullptr;
         } else {
             // What does this do?
@@ -378,7 +384,7 @@ bool Missile::useFuel(Unit* target, bool had_target)
     if (time < 0)
     {
         // TODO: This really should be kill()
-        DealDamageToHull( Vector( .1f, .1f, .1f ), hull+1 );
+        Destroy();
         return true;
     }
 

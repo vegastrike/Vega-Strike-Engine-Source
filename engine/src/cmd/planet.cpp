@@ -186,14 +186,6 @@ Planet::Planet() :
 {
     Init();
     SetAI( new Order() );     //no behavior
-
-    shield.number=2;
-    shield.recharge=0;
-    shield.shield2fb.frontmax=0;
-    shield.shield2fb.backmax=0;
-    shield.shield2fb.front=0;
-    shield.shield2fb.back=0;
-
 }
 
 extern const vector< string >& ParseDestinations( const string &value );
@@ -331,13 +323,6 @@ Planet::Planet( QVector x,
                       faction, fgid,
                       inside_out,
                       nlights );
-
-    shield.number=2;
-    shield.recharge=0;
-    shield.shield2fb.frontmax=0;
-    shield.shield2fb.backmax=0;
-    shield.shield2fb.front=0;
-    shield.shield2fb.back=0;
 }
 
 Planet::~Planet()
@@ -400,7 +385,7 @@ void Planet::InitPlanet( QVector x,
     static float densityOfJumpPoint =
         XMLSupport::parse_float( vs_config->getVariable( "physics", "density_of_jump_point", "100000" ) );
     //static  float massofplanet = XMLSupport::parse_float(vs_config->getVariable("physics","mass_of_planet","10000000"));
-    hull = (4./3)*M_PI*radius*radius*radius*(notJumppoint ? densityOfRock : densityOfJumpPoint);
+    *current_hull = (4./3)*M_PI*radius*radius*radius*(notJumppoint ? densityOfRock : densityOfJumpPoint);
     this->Mass   = (4./3)*M_PI*radius*radius*radius*( notJumppoint ? densityOfRock : (densityOfJumpPoint/100000) );
     SetAI( new PlanetaryOrbit( this, vely, pos, x, y, orbitcent, parent ) );     //behavior
     terraintrans = nullptr;
@@ -533,7 +518,7 @@ void Planet::AddFog( const std::vector< AtmosphericFogMesh > &v, bool opticalill
         fawg = new GameUnit( fogs, true, 0 );
     fawg->setFaceCamera();
     getSubUnits().preinsert( fawg );
-    fawg->hull /= fawg->GetHullPercent();
+    *fawg->current_hull /= fawg->GetHullPercent();
 #ifdef MESHONLY
     meshdata.push_back( shield );
 #endif

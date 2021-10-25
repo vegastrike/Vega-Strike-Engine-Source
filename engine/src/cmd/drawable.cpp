@@ -35,6 +35,9 @@
 #include "unit.h"
 #include "weapon_info.h"
 #include "beam.h"
+#include "csv.h"
+#include "unit_csv.h"
+#include "universe_util.h"
 
 #include <boost/algorithm/string.hpp>
 
@@ -335,7 +338,7 @@ void Drawable::Sparkle(bool on_screen, Matrix *ctm) {
     }
 
     // Undamaged units don't sparkle
-    float damage_level = unit->hull/unit->maxhull;
+    float damage_level = (*unit->current_hull)/(*unit->max_hull);
     if(damage_level >= .99) {
         return;
     }
@@ -407,7 +410,7 @@ void Drawable::DrawHalo(bool on_screen, float apparent_size, Matrix wmat, int cl
         cmas = 1;
 
     Vector Scale( 1, 1, 1 );         //Now, HaloSystem handles that
-    float damage_level = unit->hull/unit->maxhull;
+    float damage_level = (*unit->current_hull)/(*unit->max_hull);
     //WARNING: cmas is not a valid maximum speed for the upcoming multi-direction thrusters,
     //nor is maxaccel. Instead, each halo should have its own limits specified in units.csv
     float nebd = (_Universe->AccessCamera()->GetNebula() == unit->nebula && unit->nebula != nullptr) ? -1 : 0;
@@ -501,3 +504,135 @@ void Drawable::DrawSubunits(bool on_screen, Matrix wmat, int cloak, float averag
     }
 }
 
+
+
+void Drawable::Split( int level )
+{
+    Unit *unit = static_cast<Unit*>(this);
+
+    if (game_options.split_dead_subunits)
+        for (un_iter su = unit->getSubUnits(); *su; ++su)
+            (*su)->Split( level );
+    Vector PlaneNorm;
+    for (unsigned int i = 0; i < nummesh();) {
+        if (this->meshdata[i]) {
+            if (this->meshdata[i]->getBlendDst() == ONE) {
+                delete this->meshdata[i];
+                this->meshdata.erase( this->meshdata.begin()+i );
+            } else {i++; }} else {this->meshdata.erase( this->meshdata.begin()+i ); }}
+    int    nm = this->nummesh();
+    string fac = FactionUtil::GetFaction( unit->faction );
+
+    CSVRow unit_stats( LookupUnitRow( unit->name, fac ) );
+    unsigned int num_chunks = unit_stats.success() ? atoi( unit_stats["Num_Chunks"].c_str() ) : 0;
+    if (nm <= 0 && num_chunks == 0)
+        return;
+    vector< Mesh* >old = this->meshdata;
+    Mesh *shield = old.back();
+    old.pop_back();
+
+    vector< unsigned int >meshsizes;
+    if ( num_chunks && unit_stats.success() ) {
+        size_t i;
+        vector< Mesh* >nw;
+        unsigned int which_chunk = rand()%num_chunks;
+        string  chunkname   = UniverseUtil::LookupUnitStat( unit->name, fac, "Chunk_"+XMLSupport::tostring( which_chunk ) );
+        string  dir = UniverseUtil::LookupUnitStat( unit->name, fac, "Directory" );
+        VSFileSystem::current_path.push_back( unit_stats.getRoot() );
+        VSFileSystem::current_subdirectory.push_back( "/"+dir );
+        VSFileSystem::current_type.push_back( VSFileSystem::UnitFile );
+        float randomstartframe   = 0;
+        float randomstartseconds = 0;
+        string scalestr     = UniverseUtil::LookupUnitStat( unit->name, fac, "Unit_Scale" );
+        int   scale = atoi( scalestr.c_str() );
+        if (scale == 0) {
+            scale = 1;
+        }
+        AddMeshes( nw, randomstartframe, randomstartseconds, scale, chunkname, unit->faction,
+                   unit->getFlightgroup(), &meshsizes );
+        VSFileSystem::current_type.pop_back();
+        VSFileSystem::current_subdirectory.pop_back();
+        VSFileSystem::current_path.pop_back();
+        for (i = 0; i < old.size(); ++i)
+            delete old[i];
+        old.clear();
+        old = nw;
+    } else {
+        for (int split = 0; split < level; split++) {
+            vector< Mesh* >nw;
+            size_t oldsize = old.size();
+            for (size_t i = 0; i < oldsize; i++) {
+                PlaneNorm.Set( rand()-RAND_MAX/2, rand()-RAND_MAX/2, rand()-RAND_MAX/2+.5 );
+                PlaneNorm.Normalize();
+                nw.push_back( NULL );
+                nw.push_back( NULL );
+                old[i]->Fork( nw[nw.size()-2], nw.back(), PlaneNorm.i, PlaneNorm.j, PlaneNorm.k,
+                             -PlaneNorm.Dot( old[i]->Position() ) );                                                                              //splits somehow right down the middle.
+                delete old[i];
+                old[i] = NULL;
+                if (nw[nw.size()-2] == NULL) {
+                    nw[nw.size()-2] = nw.back();
+                    nw.pop_back();
+                }
+                if (nw.back() == NULL)
+                    nw.pop_back();
+            }
+            old = nw;
+        }
+        meshsizes.reserve( old.size() );
+        for (size_t i = 0; i < old.size(); ++i)
+            meshsizes.push_back( 1 );
+    }
+    old.push_back( NULL );     //push back shield
+    if (shield)
+        delete shield;
+    nm = old.size()-1;
+    unsigned int k = 0;
+    vector< Mesh* >tempmeshes;
+    for (vector<Mesh *>::size_type i=0;i<meshsizes.size();i++) {
+        Unit *splitsub;
+        tempmeshes.clear();
+        tempmeshes.reserve( meshsizes[i] );
+        for (unsigned int j = 0; j < meshsizes[i] && k < old.size(); ++j, ++k)
+            tempmeshes.push_back( old[k] );
+        unit->SubUnits.prepend( splitsub = new GameUnit( tempmeshes, true, unit->faction ) );
+        *splitsub->current_hull = 1000.0f;
+        splitsub->name = "debris";
+        splitsub->setMass(game_options.debris_mass*splitsub->getMass()/level);
+        splitsub->pImage->timeexplode = .1;
+        if (splitsub->meshdata[0]) {
+            Vector loc  = splitsub->meshdata[0]->Position();
+            float  locm = loc.Magnitude();
+            if (locm < .0001)
+                locm = 1;
+            splitsub->ApplyForce( splitsub->meshdata[0]->rSize()*game_options.explosionforce*10*splitsub->getMass()*loc/locm );
+            loc.Set( rand(), rand(), rand()+.1 );
+            loc.Normalize();
+            splitsub->ApplyLocalTorque( loc*splitsub->GetMoment()*game_options.explosiontorque*( 1+rand()%(int) ( 1+unit->rSize() ) ) );
+        }
+    }
+    old.clear();
+    this->meshdata.clear();
+    this->meshdata.push_back( NULL );     //the shield
+    unit->Mass *= game_options.debris_mass;
+}
+
+
+void Drawable::LightShields( const Vector &pnt, const Vector &normal, float amt, const GFXColor &color )
+{
+    Unit *unit = static_cast<Unit*>(this);
+    // Not sure about shield percentage - more variance for more damage?
+    // TODO: figure out the above comment
+
+    Mesh *mesh = meshdata.back();
+
+    if(!mesh) {
+        return;
+    }
+
+    if(!unit) {
+        return;
+    }
+
+    mesh->AddDamageFX( pnt, unit->shieldtight ? unit->shieldtight*normal : Vector( 0, 0, 0 ), std::min( 1.0f, std::max( 0.0f,                                                                                                            amt ) ), color );
+}

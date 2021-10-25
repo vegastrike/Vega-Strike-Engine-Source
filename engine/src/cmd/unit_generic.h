@@ -45,6 +45,7 @@
 #include "jump_capable.h"
 
 #include "mount.h"
+#include "damage/damage.h"
 
 #ifdef VS_DEBUG
 #define CONTAINER_DEBUG
@@ -61,7 +62,6 @@ void UncheckUnit( class Unit*un );
 #include <string>
 #include <set>
 #include <map>
-#include "cmd/unit_armorshield.h"
 #include "gfx/matrix.h"
 #include "gfx/quaternion.h"
 #include "gfxlib_struct.h"
@@ -414,10 +414,7 @@ public:
 //Takes out of the collide table for this system.
     void RemoveFromSystem();
     void RequestPhysics();               //Requeues the unit so that it is simulated ASAP
-    unsigned int nummesh() const {
-        // Return number of meshes except shield
-        return ( meshdata.size() - 1 );
-    }
+
 //Uses planet stuff
 /* Updates the collide Queue with any possible change in sectors
  *  Split this mesh with into 2^level submeshes at arbitrary planes
@@ -436,8 +433,6 @@ public:
  *  Uses GFX so only in Unit class
  *  But should always return true on server side = assuming explosion time=0 here */
     virtual bool Explode( bool draw, float timeit );
-//explodes then deletes
-    void Destroy();
 
 //Uses GFX so only in Unit class
     virtual void Draw( const Transformation &quat = identity_transformation, const Matrix &m = identity_matrix ) override {}
@@ -489,7 +484,7 @@ public:
  **** XML STUFF                                                                     ***
  **************************************************************************************
  */
-
+// TODO: remove all of this. It's unused.
 public:
 //Unit XML Load information
     struct XML;
@@ -505,7 +500,6 @@ public:
 protected:
     static std::string massSerializer( const struct XMLType &input, void *mythis );
     static std::string mountSerializer( const struct XMLType &input, void *mythis );
-    static std::string shieldSerializer( const struct XMLType &input, void *mythis );
     static std::string subunitSerializer( const struct XMLType &input, void *mythis );
 
 public:
@@ -565,7 +559,7 @@ public:
     float  specInterdiction = 0;
 
     float  HeatSink = 0;
-protected:
+public:
     //BUCO! Must add shield tightness back into units.csv for great justice.
     //are shields tight to the hull.  zero means bubble
     float  shieldtight = GameConfig::GetVariable( "physics",
@@ -593,8 +587,7 @@ public:
     ///if the unit is a wormhole
     bool  forcejump = false;
 protected:
-//Is dead already?
-    bool  killed = false;
+
 //Should not be drawn
     enum INVIS {DEFAULTVIS=0x0, INVISGLOW=0x1, INVISUNIT=0x2, INVISCAMERA=0x4};
     unsigned char invisible = DEFAULTVIS;             //1 means turn off glow, 2 means turn off ship
@@ -697,25 +690,15 @@ public:
 //Applies damage to the local area given by pnt
     float ApplyLocalDamage( const Vector &pnt,
                             const Vector &normal,
-                            float amt,
+                            Damage damage,
                             Unit *affectedSubUnit,
-                            const GFXColor&,
-                            float phasedamage = 0 );
+                            const GFXColor&);
 //Applies damage from network data
     void ApplyNetDamage( Vector &pnt, Vector &normal, float amt, float ppercentage, float spercentage, GFXColor &color );
-//Applies damage to the pre-transformed area of the ship
-    void ApplyDamage( const Vector &pnt,
-                      const Vector &normal,
-                      float amt,
-                      Unit *affectedSubUnit,
-                      const GFXColor&,
-                      void *ownerDoNotDereference,
-                      float phasedamage = 0 );
 
-    virtual float DealDamageToHull( const Vector &pnt, float Damage ) override;
 
-//Lights the shields, without applying damage or making the AI mad - useful for special effects
-    void LightShields( const Vector &pnt, const Vector &normal, float amt, const GFXColor &color );
+
+
 //Deals remaining damage to the hull at point and applies lighting effects
 //short fix
 //    virtual void ArmorDamageSound( const Vector &pnt ) {}
@@ -772,18 +755,6 @@ public:
  **** WEAPONS/SHIELD STUFF                                                          ***
  **************************************************************************************
  */
-public:
-    void RegenShields() override;
-
-
-protected:
-
-
-//The radar limits (range, cone range, etc)
-//the current order
-
-
-
 
 
 public:

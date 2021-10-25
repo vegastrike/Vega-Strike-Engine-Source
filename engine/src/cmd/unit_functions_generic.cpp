@@ -38,6 +38,8 @@
 #include "cmd/ai/order.h"
 #include "universe.h"
 #include "mount_size.h"
+#include "damageable.h"
+
 
 //Various functions that were used in .cpp files that are now included because of
 //the temple GameUnit class
@@ -104,32 +106,6 @@ Unit * CreateGameTurret( std::string tur, int faction )
     return new GameUnit( tur.c_str(), true, faction );
 }
 
-void SetShieldZero( Unit *un )
-{
-    switch (un->shield.number)
-    {
-    case 8:
-
-        un->shield.shield8.frontlefttop =
-            un->shield.shield8.frontrighttop   =
-                un->shield.shield8.backlefttop =
-                    un->shield.shield8.backrighttop =
-                        un->shield.shield8.frontleftbottom =
-                            un->shield.shield8.frontrightbottom   =
-                                un->shield.shield8.backleftbottom =
-                                    un->shield.shield8.backrightbottom = 0;
-        break;
-    case 4:
-        un->shield.shield4fbrl.front        =
-            un->shield.shield4fbrl.back     =
-                un->shield.shield4fbrl.left =
-                    un->shield.shield4fbrl.right = 0;
-        break;
-    case 2:
-        un->shield.shield2fb.front = un->shield.shield2fb.back = 0;
-        break;
-    }
-}
 
 //un scored a faction kill
 void ScoreKill( Cockpit *cp, Unit *un, Unit *killedUnit )
@@ -279,21 +255,25 @@ int parseMountSizes( const char *str )
 
 void DealPossibleJumpDamage( Unit *un )
 {
+
     float speed  = un->GetVelocity().Magnitude();
-    float damage = un->GetJumpStatus().damage+(rand()%100 < 1) ? (rand()%20) : 0;
-    static float muld = XMLSupport::parse_float( vs_config->getVariable( "physics", "jump_damage_multiplier", ".1" ) );
-    static float maxd = XMLSupport::parse_float( vs_config->getVariable( "physics", "max_jump_damage", "100" ) );
-    float dam    = speed*(damage*muld);
-    if (dam > maxd) dam = maxd;
-    if (dam > 1) {
+    float jump_damage = un->GetJumpStatus().damage+(rand()%100 < 1) ? (rand()%20) : 0;
+    static float jump_damage_multiplier = XMLSupport::parse_float( vs_config->getVariable( "physics", "jump_damage_multiplier", ".1" ) );
+    static float max_damage = XMLSupport::parse_float( vs_config->getVariable( "physics", "max_jump_damage", "100" ) );
+
+    jump_damage = std::min(speed*(jump_damage * jump_damage_multiplier), max_damage);
+
+    if (jump_damage > 1) {
+        Damage damage;
+        damage.normal_damage = jump_damage;
         un->ApplyDamage( ( un->Position()+un->GetVelocity().Cast() ),
                         un->GetVelocity(),
-                        dam,
+                        damage,
                         un,
                         GFXColor( ( (float) (rand()%100) )/100,
                                  ( (float) (rand()%100) )/100,
                                  ( (float) (rand()%100) )/100 ), NULL );
-        un->SetCurPosition( un->LocalPosition()+( ( (float) rand() )/RAND_MAX )*dam*un->GetVelocity().Cast() );
+        un->SetCurPosition( un->LocalPosition()+( ( (float) rand() )/RAND_MAX )*jump_damage*un->GetVelocity().Cast() );
     }
 }
 

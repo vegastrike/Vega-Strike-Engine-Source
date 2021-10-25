@@ -272,6 +272,16 @@ private:
         return lights;
     }
 
+    virtual const float GetHullPercent() const
+    {
+        return 1.0f;
+    }
+
+    virtual const float GetShieldPercent() const
+    {
+        return 0.0f;
+    }
+
 private:
 
 /// copy constructor forbidden

@@ -418,7 +418,9 @@ void setName( Unit *my_unit, string name )
 void SetHull( Unit *my_unit, float newhull )
 {
     if (!my_unit) return;
-    my_unit->hull = newhull;
+    // TODO: replace with a proper API in both lib_damage and damageable
+    // damageable SetHull linked to SetHealth which checks validity
+    my_unit->hull->facets[0].health = newhull;
 }
 
 float getCredits( const Unit *my_unit )
@@ -846,7 +848,7 @@ float PercentOperational( Unit *un, std::string name, std::string category, bool
     } else if (name.find( "add_" ) != 0 && name.find( "mult_" ) != 0) {
         float armor[8];
         upgrade->ArmorData( armor );
-        if (upgrade->hull > 1 || armor[0] || armor[1] || armor[2] || armor[3] || armor[4] || armor[5] || armor[6]
+        if (*upgrade->current_hull > 1 || armor[0] || armor[1] || armor[2] || armor[3] || armor[4] || armor[5] || armor[6]
             || armor[7])
             if (countHullAndArmorAsFull)
                 return 1.0f;

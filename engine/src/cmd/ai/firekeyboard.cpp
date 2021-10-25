@@ -1070,7 +1070,7 @@ bool getNearestTargetUnit( Unit *me, int iType )
     for (un_iter i = _Universe->activeStarSystem()->getUnitList().createIterator(); ( un = (*i) ); ++i) {
         if (un == me)
             continue;
-        if (un->hull < 0)
+        if (un->Destroyed())
             continue;
         if ( !( me->InRange( un, true, false ) )
             || !( me->InRange( un, true, true ) ) )
@@ -1600,7 +1600,6 @@ void Arrested( Unit *parent )
     }
 }
 
-extern void PowerDownShield( Shield *shield, float howmuch );
 
 static void ForceChangeTarget( Unit *parent )
 {
@@ -1657,9 +1656,9 @@ void FireKeyboard::Execute()
         refresh_target = true;
     }
 
-    if (f().shieldpowerstate != 1) {
-        Shield *shield = &parent->shield;
-        PowerDownShield( shield, f().shieldpowerstate );
+    float f_result = f().shieldpowerstate;
+    if (f_result != 1) {
+        parent->shield->AdjustPower(f_result);
     }
     if (f().firekey == PRESS || f().jfirekey == PRESS || j().firekey == DOWN || j().jfirekey == DOWN) {
         if ( !_Universe->AccessCockpit()->CanDrawNavSystem() ) {

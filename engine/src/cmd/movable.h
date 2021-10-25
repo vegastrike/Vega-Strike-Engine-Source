@@ -44,11 +44,13 @@ class Movable
 {
 
 protected:
+
+
+public:
     //mass of this unit (may change with cargo)
     // TODO: subclass with return Mass+fuel;
     float  Mass;
 
-public:
 
     float getMass() { return Mass;}
     float getMass() const { return Mass;}

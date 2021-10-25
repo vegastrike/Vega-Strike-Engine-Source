@@ -109,6 +109,12 @@ bool MeshFX::Update( float howmuchtime )
 
 void Mesh::AddDamageFX( const Vector &pnt, const Vector &norm, const float damage, const GFXColor &col )
 {
+    float r_size = rSize();
+
+    if(r_size == 0) {
+        return;
+    }
+
     Vector loc( pnt+norm );
     /*if (!(norm.i||norm.j||norm.k)) */ {
         loc  = pnt;
@@ -123,7 +129,7 @@ void Mesh::AddDamageFX( const Vector &pnt, const Vector &norm, const float damag
                     tmp, 
                     GFXColor( 0, 0, 0, 1 ),
                     tmp,
-                    GFXColor( 1, 0, startpotency/( rSize()*rSize() ) ) );
+                    GFXColor( 1, 0, startpotency/( r_size*r_size ) ) );
     newFX.setSize(rSize());
     if (LocalFX.size() >= MAXLOCALFX)
         LocalFX[( rand()%( LocalFX.size() ) )].MergeLights( newFX );

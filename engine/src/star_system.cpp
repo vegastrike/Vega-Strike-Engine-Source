@@ -27,6 +27,7 @@
 #include <assert.h>
 #include "star_system.h"
 
+#include "damageable.h"
 #include "lin_time.h"
 #include "audiolib.h"
 #include "config_xml.h"
@@ -1191,7 +1192,6 @@ bool PendingJumpsEmpty()
     return pendingjump.empty();
 }
 
-extern void SetShieldZero( Unit* );
 
 void StarSystem::ProcessPendingJumps()
 {
@@ -1211,8 +1211,11 @@ void StarSystem::ProcessPendingJumps()
                     } else if (!player) {
                         un->SetVelocity( Vector( 0, 0, 0 ) );
                     }
-                    if (game_options.jump_disables_shields)
-                        SetShieldZero( un );
+                    if (game_options.jump_disables_shields) {
+                        // Disable and then enable so they'll start recharging
+                        un->shield->Disable();
+                        un->shield->Enable();
+                    }
                 }
             }
             double time = GetElapsedTime();

@@ -34,6 +34,7 @@
 class Mesh;
 class Flightgroup;
 class Unit;
+struct GFXColor;
 //class Transformation;
 
 using std::vector;
@@ -125,6 +126,17 @@ public:
     void Sparkle(bool on_screen, Matrix *ctm);
     void DrawHalo(bool on_screen, float apparent_size, Matrix wmat, int cloak);
     void DrawSubunits(bool on_screen, Matrix wmat, int cloak, float average_scale, unsigned char char_damage);
+
+    //Split this mesh with into 2^level submeshes at arbitrary planes
+    void Split( int level );
+
+    unsigned int nummesh() const {
+        // Return number of meshes except shield
+        return ( meshdata.size() - 1 );
+    }
+
+    //Lights the shields, without applying damage or making the AI mad - useful for special effects
+    void LightShields( const Vector &pnt, const Vector &normal, float amt, const GFXColor &color );
 };
 
 Matrix* GetCumulativeTransformationMatrix(Unit *unit, const Matrix &parentMatrix, Matrix invview);
