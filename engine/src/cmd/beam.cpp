@@ -35,6 +35,7 @@ using std::vector;
 #include "images.h"
 #include "mount_size.h"
 #include "weapon_info.h"
+#include "damageable.h"
 #include "universe.h"
 
 #include <algorithm>
@@ -618,7 +619,8 @@ bool Beam::Collide( Unit *target, Unit *firer, Unit *superunit )
                 }
             }
         } else {
-            target->ApplyDamage( center.Cast()+direction*curlength, normal, appldam, colidee, coltmp, owner, phasdam );
+            Damage damage(appldam, phasdam);
+            target->ApplyDamage( center.Cast()+direction*curlength, normal, damage, colidee, coltmp, owner);
         }
         return true;
     }

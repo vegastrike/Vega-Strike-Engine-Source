@@ -42,7 +42,9 @@
 #include "gfx/camera.h"
 #include "options.h"
 #include "universe.h"
+#include "damageable.h"
 #include "vs_logging.h"
+
 
 
 using std::vector;
@@ -370,13 +372,15 @@ bool Bolt::Collide( Unit *target )
         tmp = tmp.Scale( distance );
         distance = curdist/this->type->range;
         GFXColor    coltmp( this->type->r, this->type->g, this->type->b, this->type->a );
+        Damage damage(this->type->damage*( (1-distance)+distance*this->type->long_range ),
+                      this->type->phase_damage*( (1-distance)+distance*this->type->long_range ));
+
         target->ApplyDamage( (prev_position+tmp).Cast(),
                             normal,
-                            this->type->damage*( (1-distance)+distance*this->type->long_range ),
+                            damage,
                             affectedSubUnit,
                             coltmp,
-                            owner,
-                            this->type->phase_damage*( (1-distance)+distance*this->type->long_range ) );
+                            owner);
         return true;
     }
     return false;

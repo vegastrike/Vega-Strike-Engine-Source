@@ -33,6 +33,7 @@ public:
     Energetic();
 
     void decreaseWarpEnergy( bool insys, float time );
+    void DecreaseWarpEnergyInWarp();
 
     float energyData() const;
     float energyRechargeData() const;
@@ -43,26 +44,36 @@ public:
     void WCWarpIsFuelHack(bool transfer_warp_to_fuel);
     float ExpendMomentaryFuelUsage( float magnitude );
     float ExpendFuel(float quantity);
+    void ExpendEnergy(const bool player_ship);
+    void ExpendEnergy(float usage);
+    void ExpendEnergyToRechargeShields();
+    void ExpendFuel();
     float getWarpEnergy() const;
 
     void increaseWarpEnergy( bool insys, float time );
 
     float maxEnergyData() const;
 
+    void MaintainECM();
+    void MaintainShields();
+
     void rechargeEnergy();
+    void RechargeWarpCapacitors(const bool player_ship);
     bool refillWarpEnergy();
 
     void setAfterburnerEnergy( float aft );
     void setEnergyRecharge( float enrech );
     void setFuel( float f );
     void setMaxEnergy( float maxen );
-    float shieldRechargeData() const;
 
+    float totalShieldEnergyCapacitance();
+
+    static float VSDPercent();
 
     float warpCapData() const;
     float warpEnergyData() const;
 
-
+    float WarpEnergyMultiplier(const bool player_ship);
 
 
 
@@ -91,7 +102,10 @@ public:
     float maxwarpenergy; //short fix
     //current energy
     float warpenergy;    //short fix
+    float constrained_charge_to_shields;
+    bool sufficient_energy_to_recharge_shields;
 protected:
+
     //fuel of this unit
     float  fuel;
     float  afterburnenergy;              //short fix

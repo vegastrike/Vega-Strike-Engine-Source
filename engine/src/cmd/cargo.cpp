@@ -62,6 +62,7 @@ Cargo::Cargo( std::string name, std::string cc, float pp, int qq, float mm, floa
     volume   = vv;
     mission  = false;
     installed = false;
+    functionality = maxfunctionality = 1.0f;
 }
 float Cargo::GetFunctionality()
 {

@@ -35,6 +35,8 @@
 #include <vector>
 #include "collection.h"
 #include "building.h"
+#include "damageable.h"
+
 static std::vector< Terrain* >allterrains;
 
 Terrain::Terrain( const char *filename,
@@ -70,8 +72,11 @@ void Terrain::ApplyForce( Unit *un, const Vector &normal, float dist )
 {
     un->ApplyForce( normal*.4*un->getMass()
                    *fabs( normal.Dot( (un->GetVelocity()/simulation_atom_var) )+fabs( dist )/(simulation_atom_var) ) );
-    un->ApplyDamage( un->Position().Cast()-normal*un->rSize(), -normal, .5*fabs( normal.Dot(
-                                                                                    un->GetVelocity() ) )*mass*simulation_atom_var,
+    Damage damage(.5*fabs( normal.Dot(un->GetVelocity() ) )*mass*simulation_atom_var);
+
+    un->ApplyDamage( un->Position().Cast()-normal*un->rSize(),
+                     -normal,
+                     damage,
                      un, GFXColor( 1, 1, 1, 1 ), NULL );
 }
 void Terrain::Collide( Unit *un, const Matrix &t )

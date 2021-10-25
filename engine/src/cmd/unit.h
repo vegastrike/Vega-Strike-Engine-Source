@@ -99,8 +99,7 @@ public:
  	double sparkle_accum;
     std::unique_ptr< HaloSystem >phalos;
 ///Process all meshes to be deleted
-///Split this mesh with into 2^level submeshes at arbitrary planes
-    void Split( int level );
+
     void FixGauges();
 ///Sets the camera to be within this unit.
     void UpdateHudMatrix( int whichcam );
@@ -160,8 +159,6 @@ public:
 ///Resolves forces of given unit on a physics frame
     Vector ResolveForces( const Transformation&, const Matrix& );
 
-///applies damage from the given pnt to the shield, and returns % damage applied and applies lighitn
-    float DealDamageToShield( const Vector &pnt, float &Damage );
 /*
  **************************************************************************************
  **** CUSTOMIZE/UPGRADE STUFF

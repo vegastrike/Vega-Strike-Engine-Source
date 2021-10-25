@@ -452,9 +452,8 @@ void WriteSaveGame( Cockpit *cp, bool auto_save )
     Unit *un = cp->GetSaveParent();
     if (!un) {
         return;
-    }
-    if (un->GetHull() > 0) {
-        std::vector< string > packedInfo;
+    } if (!un->Destroyed()) {
+        vector< string > packedInfo;
         cp->PackUnitInfo(packedInfo);
 
         cp->savegame->WriteSaveGame( cp->activeStarSystem->getFileName().c_str(),

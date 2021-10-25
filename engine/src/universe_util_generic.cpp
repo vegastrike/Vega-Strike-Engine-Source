@@ -447,10 +447,12 @@ Unit * getUnit( int index )
     un_iter iter = activeSys->getUnitList().createIterator();
     Unit   *un   = NULL;
     for (int i = -1; (un = *iter) && i < index; ++iter) {
-        if (un->GetHull() > 0)
+        if (!un->Destroyed()) {
             ++i;
-        if (i == index)
+        }
+        if (i == index) {
             break;
+        }
     }
     return un;
 }

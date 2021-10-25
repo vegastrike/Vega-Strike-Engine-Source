@@ -225,8 +225,8 @@ void GameUnit::DrawNow( const Matrix &mato, float lod )
     if (rootunit == NULL) rootunit = (const void*) this;
     float damagelevel = 1.0;
     unsigned char chardamage    = 0;
-    if (this->hull < this->maxhull) {
-        damagelevel = this->hull/this->maxhull;
+    if (*this->current_hull < *this->max_hull) {
+        damagelevel = (*this->current_hull)/(*this->max_hull);
         chardamage  = ( 255-(unsigned char) (damagelevel*255) );
     }
 #ifdef VARIABLE_LENGTH_PQR
@@ -358,8 +358,9 @@ void GameUnit::Draw( const Transformation &parent, const Matrix &parentMatrix )
 #endif
 
     unsigned int i, n;
-    if ( (this->hull < 0) && (!cam_setup_phase) )
+    if ( (this->Destroyed()) && (!cam_setup_phase) ) {
         Explode( true, GetElapsedTime() );
+    }
 
     float damagelevel = 1.0f;
     unsigned char chardamage = 0;
@@ -379,8 +380,8 @@ void GameUnit::Draw( const Transformation &parent, const Matrix &parentMatrix )
             cloak = (int) (this->cloaking-interpolation_blend_factor*this->cloakrate * simulation_atom_var );
             cloak = cloakVal( cloak, this->cloakmin, this->cloakrate, this->cloakglass );
         }
-        if (this->hull < this->maxhull) {
-            damagelevel = this->hull/this->maxhull;
+        if ((*this->current_hull) < (*this->max_hull)) {
+            damagelevel = (*this->current_hull)/(*this->max_hull);
             chardamage  = ( 255-(unsigned char) (damagelevel*255) );
         }
         avgscale = sqrt((ctm->getP().MagnitudeSquared() + ctm->getR().MagnitudeSquared()) * 0.5);
@@ -400,8 +401,10 @@ void GameUnit::Draw( const Transformation &parent, const Matrix &parentMatrix )
                 //NOTE LESS THAN OR EQUALS...to cover shield mesh
                 if (this->meshdata[i] == NULL)
                     continue;
-                if (  i == n && (this->meshdata[i]->numFX() == 0 || this->hull < 0) )
+                if (  i == n && (this->meshdata[i]->numFX() == 0 || this->Destroyed()) ) {
                     continue;
+                }
+
                 if (this->meshdata[i]->getBlendDst() == ONE) {
                     if ( (this->invisible & INVISGLOW) != 0 )
                         continue;

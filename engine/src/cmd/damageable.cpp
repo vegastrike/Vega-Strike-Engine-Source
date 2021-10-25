@@ -30,9 +30,16 @@
 #include "configuration/game_config.h"
 #include "vs_globals.h"
 #include "configxml.h"
-#include "unit_armorshield.h"
 #include "gfx/vec.h"
 #include "lin_time.h"
+#include "damage.h"
+#include "unit_generic.h"
+#include "ai/communication.h"
+#include "universe.h"
+#include "ai/order.h"
+#include "pilot.h"
+#include "ai/comm_ai.h"
+#include "gfx/mesh.h"
 
 #include <algorithm>
 
@@ -45,405 +52,578 @@ static float  flickeronprob = 0.66f; // ( "graphics", "glowflicker", "num-times-
 static float  hullfornoflicker = 0.04f; // ( "graphics", "glowflicker", "hull-for-total-dark", ".04" ) );
 
 
-Damageable::Damageable()
-{
 
-}
 
 bool Damageable::ShieldUp( const Vector &pnt ) const
 {
-    const int    shieldmin  = 5;
+    const int    shield_min  = 5;
 
     // TODO: think about this. I have no idea why a nebula needs shields
 //    static float nebshields = XMLSupport::parse_float( vs_config->getVariable( "physics", "nebula_shield_recharge", ".5" ) );
 //    if (nebula != NULL || nebshields > 0)
 //        return false;
-    switch (shield.number)
-    {
-    case 2:
-        return ( (pnt.k > 0) ? (shield.shield2fb.front) : (shield.shield2fb.back) ) > shieldmin;
-    case 8:
-        if (pnt.i > 0) {
-            if (pnt.j > 0) {
-                if (pnt.k > 0)
-                    return shield.shield8.frontlefttop > shieldmin;
-                else
-                    return shield.shield8.backlefttop > shieldmin;
-            } else {
-                if (pnt.k > 0)
-                    return shield.shield8.frontleftbottom > shieldmin;
-                else
-                    return shield.shield8.backleftbottom > shieldmin;
-            }
-        } else {
-            if (pnt.j > 0) {
-                if (pnt.k > 0)
-                    return shield.shield8.frontrighttop > shieldmin;
-                else
-                    return shield.shield8.backrighttop > shieldmin;
-            } else {
-                if (pnt.k > 0)
-                    return shield.shield8.frontrightbottom > shieldmin;
-                else
-                    return shield.shield8.backrightbottom > shieldmin;
-            }
-        }
-        break;
-    case 4:
-        if ( fabs( pnt.k ) > fabs( pnt.i ) ) {
-            if (pnt.k > 0)
-                return shield.shield4fbrl.front > shieldmin;
-            else
-                return shield.shield4fbrl.back > shieldmin;
-        } else {
-            if (pnt.i > 0)
-                return shield.shield4fbrl.left > shieldmin;
-            else
-                return shield.shield4fbrl.right > shieldmin;
-        }
-        return false;
 
-    default:
-        return false;
+    CoreVector attack_vector(pnt.i, pnt.j, pnt.k);
+
+    DamageableLayer shield = const_cast<Damageable*>(this)->GetShieldLayer();
+    int facet_index = shield.GetFacetIndex(attack_vector);
+    return shield.facets[facet_index].health > shield_min;
+}
+
+float Damageable::DealDamageToHull( const Vector &pnt, float damage )
+{
+    Damage dmg(0, damage); // Bypass shield with phase damage
+    CoreVector attack_vector(pnt.i, pnt.j, pnt.k);
+    InflictedDamage inflicted_damage(3);
+    armor->DealDamage(attack_vector, dmg, inflicted_damage);
+    hull->DealDamage(attack_vector, dmg, inflicted_damage);
+    int facet_index = armor->GetFacetIndex(attack_vector);
+
+    float denominator = GetArmor(facet_index) + GetHull();
+    if(denominator == 0) {
+        return 0;
     }
+
+    return damage/denominator;
 }
 
 float Damageable::DealDamageToShield( const Vector &pnt, float &damage )
 {
-    float  percent = 0;
-    float *targ    = NULL;                       //short fix
-    float  theta   = atan2( pnt.i, pnt.k );
-    float  rho     = atan( pnt.j/sqrt( pnt.k*pnt.k+pnt.i*pnt.i ) );
-    //ONLY APPLY DAMAGES IN NON-NETWORKING OR ON SERVER SIDE
-    for (int i = 0; i < shield.number; ++i)
-        if ( withinShield( shield.range[i], theta, rho ) ) {
-            if (shield.shield.max[i]) {
-                //comparing with max
-                float tmp = damage/shield.shield.max[i];
-                if (tmp > percent) percent = tmp;
-            }
-            targ = &shield.shield.cur[i];
+    Damage dmg(damage);
+    CoreVector attack_vector(pnt.i, pnt.j, pnt.k);
+    InflictedDamage inflicted_damage(3);
+    shield->DealDamage(attack_vector, dmg, inflicted_damage);
+    int facet_index = shield->GetFacetIndex(attack_vector);
 
-            if (damage > *targ) {
-                damage -= *targ;
-                *targ   = 0;
-              } else {
-                //short fix
-                *targ -= damage;
-                damage = 0;
-                break;
-              }
+    float denominator = GetShield(facet_index) + GetHull();
+    if(denominator == 0) {
+        return 0;
+    }
 
-        }
-    if ( !FINITE( percent ) )
-        percent = 0;
-    return percent;
+    return damage/denominator;
 }
+
+// TODO: deal with this
+extern void ScoreKill( Cockpit *cp, Unit *killer, Unit *killedUnit );
+
+void Damageable::ApplyDamage( const Vector &pnt,
+                              const Vector &normal,
+                              Damage damage,
+                              Unit *affected_unit,
+                              const GFXColor &color,
+                              void *ownerDoNotDereference)
+{
+    InflictedDamage inflicted_damage(3);
+
+    const Damageable *const_damagable = static_cast<const Damageable*>(this);
+    Unit *unit = static_cast<Unit*>(this);
+
+
+    static float hull_percent_for_comm = GameConfig::GetVariable( "AI", "HullPercentForComm", 0.75 );
+    static int shield_damage_anger = GameConfig::GetVariable( "AI", "ShieldDamageAnger", 1 );
+    static int hull_damage_anger   = GameConfig::GetVariable( "AI", "HullDamageAnger", 10 );
+    static bool assist_ally_in_need =
+        GameConfig::GetVariable( "AI", "assist_friend_in_need", true );
+    static float nebula_shields = GameConfig::GetVariable( "physics", "nebula_shield_recharge", 0.5 );
+    //We also do the following lock on client side in order not to display shield hits
+    static bool no_dock_damage = GameConfig::GetVariable( "physics", "no_damage_to_docked_ships", true );
+    static bool apply_difficulty_enemy_damage =
+        GameConfig::GetVariable( "physics", "difficulty_based_enemy_damage", true );
+
+
+    // Stop processing if the affected unit isn't this unit
+    // How could this happen? Why even have two parameters (this and affected_unit)???
+    if (affected_unit != unit) {
+        return;
+    }
+
+    // Stop processing for destroyed units
+    if(Destroyed()) {
+        return;
+    }
+
+    // Stop processing for docked ships if no_dock_damage is set
+    if (no_dock_damage && (unit->DockedOrDocking()&(unit->DOCKED_INSIDE|unit->DOCKED))) {
+        return;
+    }
+
+
+    Cockpit     *shooter_cockpit = _Universe->isPlayerStarshipVoid( ownerDoNotDereference );
+    bool shooter_is_player = (shooter_cockpit != nullptr);
+    bool shot_at_is_player = _Universe->isPlayerStarship( unit );
+    Vector       localpnt( InvTransform( unit->cumulative_transformation_matrix, pnt ) );
+    Vector       localnorm( unit->ToLocalCoordinates( normal ) );
+    CoreVector attack_vector(localpnt.i,localpnt.j,localpnt.k);
+    float previous_hull_percent = GetHullPercent();
+
+    /*float        hullpercent = GetHullPercent();
+    bool         mykilled    = Destroyed();
+    bool         armor_damage = false;*/
+
+    inflicted_damage = DealDamage(attack_vector, damage);
+
+    if(shooter_is_player) {
+        // Why is color relevant here?
+        if (color.a != 2 && apply_difficulty_enemy_damage) {
+            damage.phase_damage *= g_game.difficulty;
+            damage.normal_damage *= g_game.difficulty;
+        }
+
+        // Anger Management
+        float inflicted_armor_damage = inflicted_damage.inflicted_damage_by_layer[1];
+        int anger = inflicted_armor_damage ? hull_damage_anger : shield_damage_anger;
+
+        // If we damage the armor, we do this 10 times by default
+        for (int i = 0; i < anger; ++i) {
+            //now we can dereference it because we checked it against the parent
+            CommunicationMessage c( reinterpret_cast< Unit* > (ownerDoNotDereference), unit, nullptr, 0 );
+            c.SetCurrentState( c.fsm->GetHitNode(), nullptr, 0 );
+            if ( unit->getAIState() ) unit->getAIState()->Communicate( c );
+        }
+
+        //the dark danger is real!
+        unit->Threaten( reinterpret_cast< Unit* > (ownerDoNotDereference), 10 );
+    } else {
+        //if only the damage contained which faction it belonged to
+        unit->pilot->DoHit( unit, ownerDoNotDereference, FactionUtil::GetNeutralFaction() );
+
+        // Non-player ships choose a target when hit. Presumably the shooter.
+        if (unit->aistate) {
+            unit->aistate->ChooseTarget();
+        }
+    }
+
+    if (Destroyed()) {
+        unit->ClearMounts();
+
+        if (shooter_is_player) {
+            ScoreKill( shooter_cockpit, reinterpret_cast< Unit* > (ownerDoNotDereference), unit );
+        } else {
+            Unit *tmp;
+            if ( ( tmp = findUnitInStarsystem( ownerDoNotDereference ) ) != nullptr ) {
+                if ( ( nullptr != ( shooter_cockpit = _Universe->isPlayerStarshipVoid( tmp->owner ) ) )
+                     && (shooter_cockpit->GetParent() != nullptr) )
+                    ScoreKill( shooter_cockpit, shooter_cockpit->GetParent(), unit );
+                else
+                    ScoreKill( NULL, tmp, unit );
+            }
+        }
+
+        // Additional house cleaning
+        unit->PrimeOrders();
+        unit->maxenergy = unit->energy = 0;
+        unit->Split( rand()%3+1 );
+
+
+        // Effect on factions
+        int neutralfac  = FactionUtil::GetNeutralFaction();
+        int upgradesfac = FactionUtil::GetUpgradeFaction();
+
+        // Neutral factions (planets, jump points) and upgrades (turrets) aren't people
+        // and can't eject themselves or cargo
+        if (unit->faction == neutralfac || unit->faction == upgradesfac) {
+            return;
+        }
+
+        // Eject cargo
+        static float cargo_eject_percent =
+            GameConfig::GetVariable( "physics", "eject_cargo_percent", 1.0 );
+        static unsigned int max_dump_cargo =
+            GameConfig::GetVariable( "physics", "max_dumped_cargo", 15 );
+        unsigned int dumped_cargo = 0;
+
+
+        for (unsigned int i = 0; i < unit->numCargo(); ++i) {
+            if (rand() < (RAND_MAX * cargo_eject_percent) &&
+                    dumped_cargo++ < max_dump_cargo) {
+                  unit->EjectCargo( i );
+            }
+        }
+
+
+        // Eject Pilot
+        // Can't use this as we can't reach negative hull damage
+        //static float hull_dam_to_eject    =
+        //    GameConfig::GetVariable( "physics", "hull_damage_to_eject", 100.0 );
+        static float auto_eject_percent =
+                GameConfig::GetVariable( "physics", "autoeject_percent", 0.5 );
+        static bool player_autoeject =
+                GameConfig::GetVariable( "physics", "player_autoeject", true );
+
+        if(shot_at_is_player && player_autoeject) {
+            unit->EjectCargo( (unsigned int) -1 );
+        } else if(rand() < (RAND_MAX*auto_eject_percent) && unit->isUnit() == _UnitType::unit &&
+                  unit->faction != neutralfac && unit->faction != upgradesfac) {
+            unit->EjectCargo( (unsigned int) -1 );
+        }
+
+        return;
+    }
+
+    // Light shields if hit
+    if(inflicted_damage.inflicted_damage_by_layer[2] > 0) {
+        unit->LightShields( pnt, normal, GetShieldPercent(), color );
+    }
+
+    // Apply damage to meshes
+    // TODO: move to drawable as a function
+    if(inflicted_damage.inflicted_damage_by_layer[0] > 0 ||
+            inflicted_damage.inflicted_damage_by_layer[1] > 0) {
+
+        for (unsigned int i = 0; i < unit->nummesh(); ++i) {
+            // TODO: figure out how to adjust looks for armor damage
+            float hull_damage_percent = static_cast<float>(const_damagable->GetHullPercent());
+            unit->meshdata[i]->AddDamageFX( pnt, unit->shieldtight ? unit->shieldtight*normal : Vector( 0, 0, 0 ),
+                                            hull_damage_percent, color );
+        }
+    }
+
+    // Shake cockpit
+    Cockpit *shot_at_cockpit = _Universe->isPlayerStarship( unit );
+
+    // The second condition should always be met, but if not, at least we won't crash
+    if(shot_at_is_player && shot_at_cockpit) {
+        if(inflicted_damage.inflicted_damage_by_layer[0] >0 ) {
+            // Hull is hit - shake hardest
+            shot_at_cockpit->Shake( inflicted_damage.total_damage, 2 );
+
+            unit->playHullDamageSound(pnt);
+        } else if(inflicted_damage.inflicted_damage_by_layer[1] >0 ) {
+            // Armor is hit - shake harder
+            shot_at_cockpit->Shake( inflicted_damage.total_damage, 1 );
+
+            unit->playArmorDamageSound(pnt);
+        } else {
+            // Shield is hit - shake
+            shot_at_cockpit->Shake( inflicted_damage.total_damage, 0 );
+
+            unit->playShieldDamageSound(pnt);
+        }
+    }
+
+    // Only happens if we crossed the threshold in this attack
+    if ( previous_hull_percent >= hull_percent_for_comm &&
+         GetHullPercent() < hull_percent_for_comm &&
+         ( shooter_is_player || shot_at_is_player ) ) {
+        Unit *computer_ai = nullptr;
+        Unit *player     = nullptr;
+        if (shot_at_is_player) {
+            computer_ai = findUnitInStarsystem( ownerDoNotDereference );
+            player     = unit;
+        } else {
+            computer_ai = unit;
+            player     = shooter_cockpit->GetParent();
+        }
+
+        if(computer_ai && player) {
+            Order *computer_ai_state = computer_ai->getAIState();
+            Order *player_ai_state = player->getAIState();
+            bool ai_is_unit = computer_ai->isUnit() == _UnitType::unit;
+            bool player_is_unit = player->isUnit() == _UnitType::unit;
+            if (computer_ai && player && computer_ai_state && player_ai_state &&
+                ai_is_unit && player_is_unit) {
+                unsigned char gender;
+                vector< Animation* > *anim = computer_ai->pilot->getCommFaces( gender );
+                if (shooter_is_player && assist_ally_in_need) {
+                    AllUnitsCloseAndEngage( player, computer_ai->faction );
+                }
+                if (GetHullPercent() > 0 || !shooter_cockpit) {
+                    CommunicationMessage c( computer_ai, player, anim, gender );
+                    c.SetCurrentState( shooter_cockpit ? c.fsm->GetDamagedNode() : c.fsm->GetDealtDamageNode(), anim, gender );
+                    player->getAIState()->Communicate( c );
+                }
+            }
+        }
+    }
+
+    // Damage internal systems
+    static bool system_damage_on_armor = GameConfig::GetVariable( "physics", "system_damage_on_armor", false );
+    bool hull_damage = inflicted_damage.inflicted_damage_by_layer[0] > 0;
+    bool armor_damage = inflicted_damage.inflicted_damage_by_layer[0] > 0;
+
+    DamageRandomSystem(inflicted_damage, shot_at_is_player, pnt);
+
+    // TODO: lib_damage rewrite non-lethal
+    // Note: we really want a complete rewrite together with the modules sub-system
+    // Non-lethal/Disabling Weapon code here
+    /*static float disabling_constant =
+            XMLSupport::parse_float( vs_config->getVariable( "physics", "disabling_weapon_constant", "1" ) );
+    if (hull > 0)
+        pImage->LifeSupportFunctionality += disabling_constant*damage/hull;
+    if (pImage->LifeSupportFunctionality < 0) {
+        pImage->LifeSupportFunctionalityMax += pImage->LifeSupportFunctionality;
+        pImage->LifeSupportFunctionality     = 0;
+        if (pImage->LifeSupportFunctionalityMax < 0)
+            pImage->LifeSupportFunctionalityMax = 0;
+    }*/
+
+    DamageCargo(inflicted_damage);
+  }
+
+// TODO: get rid of extern
+extern bool DestroySystem( float hull, float maxhull, float numhits );
+extern bool DestroyPlayerSystem( float hull, float maxhull, float numhits );
+extern float rand01();
+extern const Unit * loadUnitByCache( std::string name, int faction );
+
+void Damageable::DamageRandomSystem(InflictedDamage inflicted_damage, bool player, Vector attack_vector) {
+    static bool system_damage_on_armor = GameConfig::GetVariable( "physics", "system_damage_on_armor", false );
+    static float system_failure = GameConfig::GetVariable( "physics", "indiscriminate_system_destruction", 0.25 );
+
+    Unit *unit = static_cast<Unit*>(this);
+
+    bool hull_damage = inflicted_damage.inflicted_damage_by_layer[0] > 0;
+    bool armor_damage = inflicted_damage.inflicted_damage_by_layer[0] > 0;
+
+    // It's actually easier to read this condition than the equivalent form
+    if(!(hull_damage || (system_damage_on_armor && armor_damage))) {
+        return;
+    }
+
+    bool damage_system;
+    if(player) {
+        damage_system = DestroyPlayerSystem(*current_hull, *max_hull, 1);
+    } else {
+        damage_system = DestroySystem(*current_hull, *max_hull, 1);
+    }
+
+    if(!damage_system) {
+        return;
+    }
+
+    unit->DamageRandSys( system_failure * rand01() +
+                   (1-system_failure) * ( 1-((*current_hull) > 0 ? hull_damage/(*current_hull) : 1.0f) ),
+                   attack_vector, 1.0f, 1.0f );
+}
+
+void Damageable::DamageCargo(InflictedDamage inflicted_damage) {
+    // TODO: lib_damage
+    // The following code needs to be renabled and placed somewhere
+    // Non-lethal/Disabling Weapon code here
+    // TODO: enable
+    /*static float disabling_constant =
+        XMLSupport::parse_float( vs_config->getVariable( "physics", "disabling_weapon_constant", "1" ) );
+    if (hull > 0)
+      pImage->LifeSupportFunctionality += disabling_constant*damage/hull;
+    if (pImage->LifeSupportFunctionality < 0) {
+        pImage->LifeSupportFunctionalityMax += pImage->LifeSupportFunctionality;
+        pImage->LifeSupportFunctionality     = 0;
+        if (pImage->LifeSupportFunctionalityMax < 0)
+          pImage->LifeSupportFunctionalityMax = 0;
+      }*/
+
+
+    static bool system_damage_on_armor = GameConfig::GetVariable( "physics", "system_damage_on_armor", false );
+
+    bool hull_damage = inflicted_damage.inflicted_damage_by_layer[0] > 0;
+    bool armor_damage = inflicted_damage.inflicted_damage_by_layer[0] > 0;
+
+    // TODO: Same condition as DamageRandomSystem - move up and merge
+    if(!(hull_damage || (system_damage_on_armor && armor_damage))) {
+        return;
+    }
+
+    Unit *unit = static_cast<Unit*>(this);
+
+    // If nothing to damage, exit
+    if (unit->numCargo() == 0) {
+        return;
+    }
+
+    // Is the hit unit, lucky or not
+    if ( DestroySystem( *current_hull, *max_hull, unit->numCargo() ) ) {
+        return;
+    }
+
+    static std::string restricted_items = vs_config->getVariable( "physics", "indestructable_cargo_items", "" );
+    int cargo_to_damage_index = rand() % unit->numCargo();
+    Cargo& cargo = unit->GetCargo( cargo_to_damage_index );
+    const std::string& cargo_category = cargo.GetCategory();
+
+    bool is_upgrade = cargo_category.find( "upgrades/" ) == 0;
+    bool already_damaged = cargo_category.find( "upgrades/Damaged/" ) == 0;
+    bool is_multiple = cargo_category.find( "mult_" ) == 0;
+    bool is_restricted = restricted_items.find(cargo.GetContent()) == string::npos;
+
+    // The following comment was kept in the hopes someone else knows what it means
+    //why not downgrade _add GetCargo(which).content.find("add_")!=0&&
+    if(!is_upgrade || already_damaged || is_multiple || is_restricted) {
+        return;
+    }
+
+
+    const int prefix_length = strlen( "upgrades/" );
+    cargo.category = "upgrades/Damaged/" + cargo_category.substr(prefix_length);
+
+    // TODO: find a better name for whatever this is. Right now it's not not downgrade
+    static bool not_actually_downgrade = GameConfig::GetVariable( "physics", "separate_system_flakiness_component", false );
+    if (not_actually_downgrade) {
+        return;
+    }
+
+    const Unit *downgrade = loadUnitByCache( cargo.content, FactionUtil::GetFactionIndex( "upgrades" ) );
+    if (!downgrade) {
+        return;
+    }
+
+    if ( 0 == downgrade->getNumMounts() && downgrade->SubUnits.empty() ) {
+        double percentage = 0;
+        unit->Downgrade( downgrade, 0, 0, percentage, nullptr );
+    }
+}
+
+// TODO: get rid of extern
+extern void DestroyMount( Mount* );
+
+// TODO: a lot of this should be handled by RAII
+void Damageable::Destroy() {
+    Unit *unit = static_cast<Unit*>(this);
+
+    DamageableObject::Destroy();
+
+    if(!unit->killed) {
+        for (int beamcount = 0; beamcount < unit->getNumMounts(); ++beamcount) {
+            DestroyMount( &unit->mounts[beamcount] );
+        }
+
+
+        if ( !unit->Explode( false, simulation_atom_var ) ) {
+            unit->Kill();
+        }
+    }
+}
+
+
+// We only support 2 and 4 facet shields ATM
+// This doesn't have proper checks
+float ShieldData(const Damageable *unit, int facet_index) {
+    return (unit->shield->facets[facet_index].health)/
+            (unit->shield->facets[facet_index].max_health);
+}
+
 
 float Damageable::FShieldData() const
 {
-    switch (shield.number)
-    {
+    switch(shield->number_of_facets) {
     case 2:
-        {
-            if (shield.shield2fb.frontmax != 0)
-                return shield.shield2fb.front/shield.shield2fb.frontmax;
-            break;
-        }
+        return ShieldData(this, 0);
     case 4:
-        {
-            if (shield.shield4fbrl.frontmax != 0)
-                return (shield.shield4fbrl.front)/shield.shield4fbrl.frontmax;
-            break;
-        }
-    case 8:
-        {
-            if (shield.shield8.frontrighttopmax != 0 || shield.shield8.frontrightbottommax != 0
-                || shield.shield8.frontlefttopmax != 0 || shield.shield8.frontleftbottommax
-                != 0) {
-                return (shield.shield8.frontrighttop+shield.shield8.frontrightbottom+shield.shield8.frontlefttop
-                        +shield.shield8.frontleftbottom)
-                       /(shield.shield8.frontrighttopmax+shield.shield8.frontrightbottommax+shield.shield8.frontlefttopmax
-                         +shield.shield8.frontleftbottommax);
-            }
-            break;
-        }
+        return ShieldData(this, 2);
+    default: return 0.0f; // We only support 2 and 4 facet shields ATM
     }
-    return 0;
 }
 
 float Damageable::BShieldData() const
 {
-    switch (shield.number)
-    {
+    switch(shield->number_of_facets) {
     case 2:
-        {
-            if (shield.shield2fb.backmax != 0)
-                return shield.shield2fb.back/shield.shield2fb.backmax;
-            break;
-        }
+        return ShieldData(this, 1);
     case 4:
-        {
-            if (shield.shield4fbrl.backmax != 0)
-                return (shield.shield4fbrl.back)/shield.shield4fbrl.backmax;
-            break;
-        }
-    case 8:
-        {
-            if (shield.shield8.backrighttopmax != 0 || shield.shield8.backrightbottommax != 0
-                || shield.shield8.backlefttopmax != 0 || shield.shield8.backleftbottommax
-                != 0) {
-                return (shield.shield8.backrighttop+shield.shield8.backrightbottom+shield.shield8.backlefttop
-                        +shield.shield8.backleftbottom)
-                       /(shield.shield8.backrighttopmax+shield.shield8.backrightbottommax+shield.shield8.backlefttopmax
-                         +shield.shield8.backleftbottommax);
-            }
-            break;
-        }
+        return ShieldData(this, 3);
+    default: return 0.0f; // We only support 2 and 4 facet shields ATM
     }
-    return 0;
 }
 
 float Damageable::LShieldData() const
 {
-    switch (shield.number)
-    {
+    switch(shield->number_of_facets) {
     case 2:
-        return 0;                                //no data, captain
-
+        return 0.0f;
     case 4:
-        {
-            if (shield.shield4fbrl.leftmax != 0)
-                return (shield.shield4fbrl.left)/shield.shield4fbrl.leftmax;
-            break;
-        }
-    case 8:
-        {
-            if (shield.shield8.backlefttopmax != 0 || shield.shield8.backleftbottommax != 0
-                || shield.shield8.frontlefttopmax != 0 || shield.shield8.frontleftbottommax
-                != 0) {
-                return (shield.shield8.backlefttop+shield.shield8.backleftbottom+shield.shield8.frontlefttop
-                        +shield.shield8.frontleftbottom)
-                       /(shield.shield8.backlefttopmax+shield.shield8.backleftbottommax+shield.shield8.frontlefttopmax
-                         +shield.shield8.frontleftbottommax);
-            }
-            break;
-        }
+        return ShieldData(this, 0);
+    default: return 0.0f; // We only support 2 and 4 facet shields ATM
     }
-    return 0;
 }
 
 float Damageable::RShieldData() const
 {
-    switch (shield.number)
-    {
+    switch(shield->number_of_facets) {
     case 2:
-        return 0;                                //don't react to stuff we have no data on
-
+        return 0.0f;
     case 4:
-        {
-            if (shield.shield4fbrl.rightmax != 0)
-                return (shield.shield4fbrl.right)/shield.shield4fbrl.rightmax;
-            break;
-        }
-    case 8:
-        {
-            if (shield.shield8.backrighttopmax != 0 || shield.shield8.backrightbottommax != 0
-                || shield.shield8.frontrighttopmax != 0 || shield.shield8.frontrightbottommax
-                != 0) {
-                return (shield.shield8.backrighttop+shield.shield8.backrightbottom+shield.shield8.frontrighttop
-                        +shield.shield8.frontrightbottom)
-                       /(shield.shield8.backrighttopmax+shield.shield8.backrightbottommax+shield.shield8.frontrighttopmax
-                         +shield.shield8.frontrightbottommax);
-            }
-            break;
-        }
+        return ShieldData(this, 1);
+    default: return 0.0f; // We only support 2 and 4 facet shields ATM
     }
-    return 0;
 }
 
 //short fix
 void Damageable::ArmorData( float armor[8] ) const
 {
-    armor[0] = this->armor.frontrighttop;
-    armor[1] = this->armor.backrighttop;
-    armor[2] = this->armor.frontlefttop;
-    armor[3] = this->armor.backlefttop;
-    armor[4] = this->armor.frontrightbottom;
-    armor[5] = this->armor.backrightbottom;
-    armor[6] = this->armor.frontleftbottom;
-    armor[7] = this->armor.backleftbottom;
+    Damageable *damageable = const_cast<Damageable*>(this);
+    DamageableLayer armor_layer = damageable->GetArmorLayer();
+    for(int i=0;i<8;i++) {
+        armor[i] = armor_layer.facets[i].health;
+    }
 }
 
 // TODO: fix typo
 void Damageable::leach( float damShield, float damShieldRecharge, float damEnRecharge )
 {
-  // TODO: restore this
-  // recharge *= damEnRecharge;
-  shield.recharge *= damShieldRecharge;
-  switch (shield.number)
-    {
-    case 2:
-      shield.shield2fb.frontmax   *= damShield;
-      shield.shield2fb.backmax    *= damShield;
-      break;
-    case 4:
-      shield.shield4fbrl.frontmax *= damShield;
-      shield.shield4fbrl.backmax  *= damShield;
-      shield.shield4fbrl.leftmax  *= damShield;
-      shield.shield4fbrl.rightmax *= damShield;
-      break;
-    case 8:
-      shield.shield8.frontrighttopmax    *= damShield;
-      shield.shield8.backrighttopmax     *= damShield;
-      shield.shield8.frontlefttopmax     *= damShield;
-      shield.shield8.backlefttopmax      *= damShield;
-      shield.shield8.frontrightbottommax *= damShield;
-      shield.shield8.backrightbottommax  *= damShield;
-      shield.shield8.frontleftbottommax  *= damShield;
-      shield.shield8.backleftbottommax   *= damShield;
-      break;
-    }
+  // TODO: restore this lib_damage
 }
 
 
-
-float Damageable::DealDamageToHull( const Vector &pnt, float damage )
+void Damageable::RegenerateShields(const float difficulty, const bool player_ship)
 {
-  float *affectedArmor = nullptr;
+    static bool  shields_in_spec = GameConfig::GetVariable( "physics", "shields_in_spec", false );
+    static float discharge_per_second     =
+        GameConfig::GetVariable( "physics", "speeding_discharge", 0.25f );
+    //approx
+    const float  discharge_rate  = (1-(1-discharge_per_second)*simulation_atom_var);
+    static float min_shield_discharge =
+        GameConfig::GetVariable( "physics", "min_shield_speeding_discharge", 0.1f );
+    static float nebshields =
+            GameConfig::GetVariable( "physics", "nebula_shield_recharge", 0.5f );
 
-  // Identify which armor to damage
-  if (pnt.i > 0) {
-      if (pnt.j > 0) {
-          if (pnt.k > 0)
-            affectedArmor = &armor.frontlefttop;
-          else
-            affectedArmor = &armor.backlefttop;
-        } else {
-          if (pnt.k > 0)
-            affectedArmor = &armor.frontleftbottom;
-          else
-            affectedArmor = &armor.backleftbottom;
-        }
-    } else {
-      if (pnt.j > 0) {
-          if (pnt.k > 0)
-            affectedArmor = &armor.frontrighttop;
-          else
-            affectedArmor = &armor.backrighttop;
-      } else {
-          if (pnt.k > 0)
-            affectedArmor = &armor.frontrightbottom;
-          else
-            affectedArmor = &armor.backrightbottom;
-      }
+    Unit *unit = static_cast<Unit*>(this);
+
+    const bool in_warp = unit->graphicOptions.InWarp;
+    const int shield_facets = unit->shield->number_of_facets;
+    const float total_max_shields = unit->shield->TotalMaxLayerValue();
+
+    // No point in all this code if there are no shields.
+    if(shield_facets < 2 || total_max_shields == 0) {
+        return;
     }
 
-  float denominator = (*affectedArmor+hull);
-  float overflowDamage = std::max(damage - *affectedArmor, 0.0f);
-  *affectedArmor = std::max(*affectedArmor - damage, 0.0f);
 
-  hull -= overflowDamage;
+    float shield_recharge = unit->constrained_charge_to_shields * simulation_atom_var;
 
-  // We calculate and return the percent (of something)
-  float percent = damage/denominator; //(denominator > absdamage && denom != 0) ? absdamage/denom : (denom == 0 ? 0.0 : 1.0);
+    if (unit->GetNebula() != nullptr) {
+        shield_recharge *= nebshields;
+    }
 
-  return percent;
+    // Adjust other (enemy) ships for difficulty
+    if(!player_ship) {
+        shield_recharge *= difficulty;
+    }
+
+
+    // Discharge shields due to energy or SPEC
+    if((in_warp && !shields_in_spec) || !unit->sufficient_energy_to_recharge_shields) {
+        shield->Discharge(discharge_rate, min_shield_discharge);
+    } else {
+        // Shield regeneration
+        shield->Regenerate(shield_recharge);
+    }
 }
-
 
 
 float Damageable::MaxShieldVal() const
 {
-    float maxshield = 0;
-    switch (shield.number)
-    {
-    case 2:
-        maxshield = .5*(shield.shield2fb.frontmax+shield.shield2fb.backmax);
-        break;
-    case 4:
-        maxshield = .25
-                    *(shield.shield4fbrl.frontmax+shield.shield4fbrl.backmax+shield.shield4fbrl.leftmax
-                      +shield.shield4fbrl.rightmax);
-        break;
-    case 8:
-        maxshield = .125
-                    *(shield.shield8.frontrighttopmax+shield.shield8.backrighttopmax+shield.shield8.frontlefttopmax
-                      +shield.shield8.backlefttopmax+shield.shield8.frontrightbottommax+shield.shield8.backrightbottommax
-                      +shield.shield8.frontleftbottommax+shield.shield8.backleftbottommax);
-        break;
-    }
-    return maxshield;
+    Damageable *damageable = const_cast<Damageable*>(this);
+    return static_cast<DamageableLayer>(damageable->GetShieldLayer()).AverageMaxLayerValue();
 }
 
-
-
-
-float Damageable::totalShieldEnergyCapacitance( const Shield &shield )
-{
-    static float shieldenergycap =
-        XMLSupport::parse_float( vs_config->getVariable( "physics", "shield_energy_capacitance", ".2" ) );
-    static bool  use_max_shield_value =
-        XMLSupport::parse_bool( vs_config->getVariable( "physics", "use_max_shield_energy_usage", "false" ) );
-    return shieldenergycap*(use_max_shield_value ? totalShieldVal( shield ) : currentTotalShieldVal( shield ));
-}
-
-
-
-bool Damageable::withinShield( const ShieldFacing &facing, float theta, float rho )
-{
-    float theta360 = theta+2*3.1415926536;
-    return rho >= facing.rhomin && rho < facing.rhomax
-           && ( (theta >= facing.thetamin
-                 && theta < facing.thetamax) || (theta360 >= facing.thetamin && theta360 < facing.thetamax) );
-}
-
-float Damageable::totalShieldVal( const Shield &shield )
-{
-    float maxshield = 0;
-    switch (shield.number)
-    {
-    case 2:
-        maxshield = shield.shield2fb.frontmax+shield.shield2fb.backmax;
-        break;
-    case 4:
-        maxshield = shield.shield4fbrl.frontmax+shield.shield4fbrl.backmax+shield.shield4fbrl.leftmax
-                    +shield.shield4fbrl.rightmax;
-        break;
-    case 8:
-        maxshield = shield.shield8.frontrighttopmax+shield.shield8.backrighttopmax+shield.shield8.frontlefttopmax
-                    +shield.shield8.backlefttopmax+shield.shield8.frontrightbottommax+shield.shield8.backrightbottommax
-                    +shield.shield8.frontleftbottommax+shield.shield8.backleftbottommax;
-        break;
-    }
-    return maxshield;
-}
-
-float Damageable::currentTotalShieldVal( const Shield &shield )
-{
-    float maxshield = 0;
-    switch (shield.number)
-    {
-    case 2:
-        maxshield = shield.shield2fb.front+shield.shield2fb.back;
-        break;
-    case 4:
-        maxshield = shield.shield4fbrl.front+shield.shield4fbrl.back+shield.shield4fbrl.left+shield.shield4fbrl.right;
-        break;
-    case 8:
-        maxshield = shield.shield8.frontrighttop+shield.shield8.backrighttop+shield.shield8.frontlefttop
-                    +shield.shield8.backlefttop+shield.shield8.frontrightbottom+shield.shield8.backrightbottom
-                    +shield.shield8.frontleftbottom+shield.shield8.backleftbottom;
-        break;
-    }
-    return maxshield;
-}
 
 bool Damageable::flickerDamage()
 {
     float damagelevel = GetHullPercent();
-    static double counter = getNewTime();
+    if(damagelevel == 0) {
+        return false;
+    }
 
+    static double counter = getNewTime();
 
     float diff = getNewTime()-counter;
     if (diff > flickertime) {
@@ -460,10 +640,13 @@ bool Damageable::flickerDamage()
     thus = thus%( (unsigned int) tmpflicker );
     diff = fmod( diff+thus, tmpflicker );
     if (flickerofftime > diff) {
-        if (damagelevel > hullfornoflicker)
+        if (damagelevel > hullfornoflicker) {
             return rand() > RAND_MAX * GetElapsedTime()*flickeronprob;
-        else
+        } else {
             return true;
+        }
     }
     return false;
 }
+
+
