@@ -42,7 +42,12 @@ void Resource<T>::DowngradeByPercent(const T &value) {
 }
 
 template <typename T>
-void Resource<T>::ResetMaxValue() {
+T Resource<T>::Percent() const {
+    return value_/max_value_;
+}
+
+template <typename T>
+    void Resource<T>::ResetMaxValue() {
     adjusted_max_value_ = max_value_;
 }
 

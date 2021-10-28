@@ -42,7 +42,7 @@ struct GFXMaterial;
 /* Orbits in the xy plane with the given radius. Depends on a reorientation of coordinate bases */
 
 class Atmosphere;
-class AtmosphericFogMesh;
+struct AtmosphericFogMesh;
 class ContinuousTerrain;
 class PlanetaryTransform;
 class Texture;

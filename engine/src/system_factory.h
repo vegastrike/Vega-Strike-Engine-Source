@@ -39,7 +39,7 @@ using std::map;
 using std::vector;
 
 
-class Star_XML;
+struct Star_XML;
 class Planet;
 
 

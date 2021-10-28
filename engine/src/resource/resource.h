@@ -27,6 +27,7 @@ public:
     void Downgrade(const T &value);
     void DowngradeByPercent(const T &value);
 
+    T Percent() const;
     void ResetMaxValue();
     void Set(const T& value, const T& min_value = 0);
     void SetMaxValue(const T &value);

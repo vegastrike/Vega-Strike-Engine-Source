@@ -31,6 +31,8 @@
 #include "vegastrike.h"
 #include "unit_generic.h"
 #include "universe.h"
+#include "resource/resource.h"
+
 #include <algorithm>
 
 
@@ -104,7 +106,7 @@ float Energetic::energyData() const
         }
         return ( energy )/( energy.MaxValue()-capacitance );
     } else {
-        return ( energy )/energy.MaxValue();
+        return energy.Percent();
     }
 }
 

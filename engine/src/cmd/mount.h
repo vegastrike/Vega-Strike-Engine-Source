@@ -30,7 +30,7 @@
 #include "gfx/quaternion.h"
 
 class Beam;
-class WeaponInfo;
+struct WeaponInfo;
 class Unit;
 class Mesh;
 

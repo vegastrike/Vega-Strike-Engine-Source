@@ -31,7 +31,7 @@
 #include "mount.h"
 #include <vector>
 
-class WeaponInfo;
+struct WeaponInfo;
 class Unit;
 
 class Armed

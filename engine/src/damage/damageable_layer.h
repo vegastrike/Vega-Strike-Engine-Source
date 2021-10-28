@@ -25,7 +25,7 @@ struct DamageableLayer
                         // damaging internal components such as propulsion.
 
     friend class Damageable;
-    friend class DamageableObject;
+    friend struct DamageableObject;
 
     //static float damage_component_chance = 0.03;
     DamageableLayer(int layer_index,

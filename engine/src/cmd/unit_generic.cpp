@@ -71,7 +71,7 @@
 #include "turret.h"
 #include "energetic.h"
 #include "configuration/game_config.h"
-
+#include "resource/resource.h"
 
 #include <math.h>
 #include <list>

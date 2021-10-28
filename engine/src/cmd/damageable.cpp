@@ -40,6 +40,7 @@
 #include "pilot.h"
 #include "ai/comm_ai.h"
 #include "gfx/mesh.h"
+#include "resource/resource.h"
 
 #include <algorithm>
 

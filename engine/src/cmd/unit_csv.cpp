@@ -49,7 +49,7 @@
 #include "vs_logging.h"
 #include "mount_size.h"
 #include "weapon_info.h"
-
+#include "resource/resource.h"
 
 CSVRow LookupUnitRow( const string &unitname, const string &faction ) {
     string hashname = unitname+"__"+faction;
