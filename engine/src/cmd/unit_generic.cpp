@@ -1714,7 +1714,7 @@ void Unit::DamageRandSys( float dam, const Vector &vec, float randnum, float deg
                 XMLSupport::parse_float( vs_config->getVariable( "physics", "min_maxenergy_shot_damage", "0.2" ) );
             if (dam < mindam)
                 dam = mindam;
-            this->maxenergy *= dam;
+            energy.DowngradeByPercent(dam);
         } else if (repair_droid > 0) {
             repair_droid--;
         }
@@ -3530,8 +3530,11 @@ bool Unit::UpAndDownGrade( const Unit *up,
             || cell_has_recursive_data( upgrade_name, up->faction, "ECM_Rating" ) )
             STDUPGRADE( ecm, up->ecm, templ->ecm, 0 ); //ecm is unsigned --chuck_starchaser
         if ( !csv_cell_null_check || force_change_on_nothing
-            || cell_has_recursive_data( upgrade_name, up->faction, "Primary_Capacitor" ) )
-            STDUPGRADE( maxenergy, up->maxenergy, templ->maxenergy, 0 );
+            || cell_has_recursive_data( upgrade_name, up->faction, "Primary_Capacitor" ) ) {
+            temporary_upgrade_float_variable = static_cast<float>(energy.MaxValue());
+            STDUPGRADE( temporary_upgrade_float_variable, up->energy.MaxValue(), templ->energy.MaxValue(), 0 );
+            energy.SetMaxValue(temporary_upgrade_float_variable);
+        }
     }
     //Maneuvering stuff
     if ( !csv_cell_null_check || force_change_on_nothing
@@ -3989,7 +3992,7 @@ int Unit::RepairUpgrade()
                         if (shield.recharge > maxrecharge->shield.recharge)
                             shield.recharge = maxrecharge->shield.recharge;
                 }*/
-                if (up->maxenergy == maxenergy && up->recharge > recharge) {
+                if (up->energy.MaxValue() == energy.MaxValue() && up->recharge > recharge) {
                     recharge = up->recharge;
                     if (recharge > maxrecharge->recharge)
                         recharge = maxrecharge->recharge;

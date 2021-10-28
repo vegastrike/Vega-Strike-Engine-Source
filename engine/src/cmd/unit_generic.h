@@ -1023,6 +1023,14 @@ public:
 
 
     void TurretFAW();
+
+    // Temporary holder for upgrade values
+    // Because the upgrade mechanism uses macros to construct code,
+    // we can't touch it without a complete rewrite.
+    // Example:
+    // MACRO_FUNCTION(field_a, object_a, object_b)
+    // object_a->field_a = object_b->field_b;
+    float temporary_upgrade_float_variable;
 };
 
 Unit * findUnitInStarsystem( const void *unitDoNotDereference );

@@ -211,7 +211,7 @@ void Damageable::ApplyDamage( const Vector &pnt,
 
         // Additional house cleaning
         unit->PrimeOrders();
-        unit->maxenergy = unit->energy = 0;
+        unit->energy.Zero();
         unit->Split( rand()%3+1 );
 
 
