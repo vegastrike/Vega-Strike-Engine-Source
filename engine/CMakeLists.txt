@@ -135,6 +135,7 @@ INCLUDE_DIRECTORIES(
     ${Vega_Strike_SOURCE_DIR}/src
     ${Vega_Strike_SOURCE_DIR}/src/cmd
     ${Vega_Strike_SOURCE_DIR}/src/damage
+    ${Vega_Strike_SOURCE_DIR}/src/resource
     ${Vega_Strike_BINARY_DIR}
 )
 ELSE (MSVC)
@@ -142,6 +143,7 @@ INCLUDE_DIRECTORIES(
     ${Vega_Strike_SOURCE_DIR}/src
     ${Vega_Strike_SOURCE_DIR}/src/cmd
     ${Vega_Strike_SOURCE_DIR}/src/damage
+    ${Vega_Strike_SOURCE_DIR}/src/resource
     ${Vega_Strike_BINARY_DIR}
     /usr/include/harfbuzz/
 )
