@@ -2,22 +2,6 @@
 
 #include <algorithm>
 
-// Template Instantiation
-template class Resource<float>;
-
-template bool operator==(const Resource<float>& lhs, const float& rhs);
-template bool operator>(const Resource<float>& lhs, const float& rhs);
-template bool operator<(const Resource<float>& lhs, const float& rhs);
-template bool operator<=(const Resource<float>& lhs, const float& rhs);
-template bool operator>=(const Resource<float>& lhs, const float& rhs);
-template bool operator==(const float& lhs, const Resource<float>& rhs);
-template bool operator>(const float& lhs, const Resource<float>& rhs);
-template bool operator<(const float& lhs, const Resource<float>& rhs);
-template bool operator<=(const float& lhs, const Resource<float>& rhs);
-template bool operator>=(const float& lhs, const Resource<float>& rhs);
-template float operator/(const Resource<float>& lhs, const float& rhs);
-template float operator/(const float& lhs, const Resource<float>& rhs);
-
 /*
  * Constructors
  */
@@ -190,3 +174,20 @@ template <typename T>
 T operator/(const T& lhs, const Resource<T>& rhs) {
     return lhs/rhs.Value();
 }
+
+// Template Instantiation
+// Must come after definition in clang!
+template class Resource<float>;
+
+template bool operator==(const Resource<float>& lhs, const float& rhs);
+template bool operator>(const Resource<float>& lhs, const float& rhs);
+template bool operator<(const Resource<float>& lhs, const float& rhs);
+template bool operator<=(const Resource<float>& lhs, const float& rhs);
+template bool operator>=(const Resource<float>& lhs, const float& rhs);
+template bool operator==(const float& lhs, const Resource<float>& rhs);
+template bool operator>(const float& lhs, const Resource<float>& rhs);
+template bool operator<(const float& lhs, const Resource<float>& rhs);
+template bool operator<=(const float& lhs, const Resource<float>& rhs);
+template bool operator>=(const float& lhs, const Resource<float>& rhs);
+template float operator/(const Resource<float>& lhs, const float& rhs);
+template float operator/(const float& lhs, const Resource<float>& rhs);

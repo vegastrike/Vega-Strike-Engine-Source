@@ -36,6 +36,7 @@
 #include "beam.h"
 #include "unit_util.h"
 #include "vs_logging.h"
+#include "resource/resource.h"
 
 #include <vector>
 
