@@ -135,6 +135,7 @@ INCLUDE_DIRECTORIES(
     ${Vega_Strike_SOURCE_DIR}/src
     ${Vega_Strike_SOURCE_DIR}/src/cmd
     ${Vega_Strike_SOURCE_DIR}/src/damage
+    ${Vega_Strike_SOURCE_DIR}/src/resource
     ${Vega_Strike_BINARY_DIR}
 )
 ELSE (MSVC)
@@ -142,6 +143,7 @@ INCLUDE_DIRECTORIES(
     ${Vega_Strike_SOURCE_DIR}/src
     ${Vega_Strike_SOURCE_DIR}/src/cmd
     ${Vega_Strike_SOURCE_DIR}/src/damage
+    ${Vega_Strike_SOURCE_DIR}/src/resource
     ${Vega_Strike_BINARY_DIR}
     /usr/include/harfbuzz/
 )
@@ -759,6 +761,10 @@ SET(LIBDAMAGE
     src/damage/health.cpp
     )
 
+SET(LIBRESOURCE
+    src/resource/resource.cpp
+    )
+
 SET(LIBGUI_SOURCES
     src/gui/button.cpp
     src/gui/control.cpp
@@ -1149,6 +1155,7 @@ ADD_LIBRARY(vegastrike-engine_com
     ${LIBVS_LOGGING}
     ${LIBCONFIG}
     ${LIBDAMAGE}
+    ${LIBRESOURCE}
     ${LIBAI_SOURCES}
     ${LIBCMD_SOURCES}
     ${LIBNET_SOURCES}
@@ -1676,6 +1683,7 @@ ADD_EXECUTABLE(
 ADD_LIBRARY(vegastrike-testing
     ${LIBCONFIG}
     ${LIBDAMAGE}
+    ${LIBRESOURCE}
 )
 
     TARGET_LINK_LIBRARIES(

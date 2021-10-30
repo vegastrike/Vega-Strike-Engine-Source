@@ -49,7 +49,7 @@
 #include "vs_logging.h"
 #include "mount_size.h"
 #include "weapon_info.h"
-
+#include "resource/resource.h"
 
 CSVRow LookupUnitRow( const string &unitname, const string &faction ) {
     string hashname = unitname+"__"+faction;
@@ -1093,7 +1093,7 @@ void Unit::LoadRow( CSVRow &row, string modification, string *netxml )
     graphicOptions.MinWarpMultiplier = ::stof( OPTIM_GET( row, table, Warp_Min_Multiplier ), 1.0 );
     graphicOptions.MaxWarpMultiplier = ::stof( OPTIM_GET( row, table, Warp_Max_Multiplier ), 1.0 );
 
-    maxenergy  = energy = ::stof( OPTIM_GET( row, table, Primary_Capacitor ) );
+    energy.Set(::stof( OPTIM_GET( row, table, Primary_Capacitor ) ), 0.0f);
     recharge   = ::stof( OPTIM_GET( row, table, Reactor_Recharge ) );
     jump.drive = XMLSupport::parse_bool( OPTIM_GET( row, table, Jump_Drive_Present ) ) ? -1 : -2;
     jump.delay = ::stoi( OPTIM_GET( row, table, Jump_Drive_Delay ) );
@@ -1588,7 +1588,7 @@ string Unit::WriteUnitString()
                 unit["Warp_Capacitor"] = tos( maxwarpenergy );
                 unit["Warp_Min_Multiplier"] = tos( graphicOptions.MinWarpMultiplier );
                 unit["Warp_Max_Multiplier"] = tos( graphicOptions.MaxWarpMultiplier );
-                unit["Primary_Capacitor"] = tos( maxenergy );
+                unit["Primary_Capacitor"] = tos( energy.MaxValue() );
                 unit["Reactor_Recharge"] = tos( recharge );
                 unit["Jump_Drive_Present"] = tos( jump.drive >= -1 );
                 unit["Jump_Drive_Delay"] = tos( jump.delay );

@@ -40,6 +40,7 @@
 #include "pilot.h"
 #include "ai/comm_ai.h"
 #include "gfx/mesh.h"
+#include "resource/resource.h"
 
 #include <algorithm>
 
@@ -211,7 +212,7 @@ void Damageable::ApplyDamage( const Vector &pnt,
 
         // Additional house cleaning
         unit->PrimeOrders();
-        unit->maxenergy = unit->energy = 0;
+        unit->energy.Zero();
         unit->Split( rand()%3+1 );
 
 

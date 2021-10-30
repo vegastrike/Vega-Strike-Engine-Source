@@ -44,7 +44,7 @@
 #include "star_system.h"
 #include "universe.h"
 #include "weapon_info.h"
-
+#include "resource/resource.h"
 
 extern char SERVER;
 Mount::Mount()

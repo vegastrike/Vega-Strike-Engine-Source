@@ -31,6 +31,8 @@
 #include "vegastrike.h"
 #include "unit_generic.h"
 #include "universe.h"
+#include "resource/resource.h"
+
 #include <algorithm>
 
 
@@ -40,9 +42,8 @@
  * ships, space installations, missiles, drones, etc. */
 
 
-Energetic::Energetic(): energy(0),
+Energetic::Energetic(): energy(0, 0),
     recharge(0),
-    maxenergy(0),
     maxwarpenergy(0),
     warpenergy(0),
     constrained_charge_to_shields(0.0f),
@@ -100,16 +101,15 @@ float Energetic::energyData() const
     float capacitance = const_cast<Energetic*>(this)->totalShieldEnergyCapacitance();
 
     if (configuration.physics.max_shield_lowers_capacitance) {
-        if ( maxenergy <= capacitance ) {
+        if ( energy.MaxValue() <= capacitance ) {
             return 0;
         }
-        return ( (float) energy )/( maxenergy-capacitance );
+        return ( energy )/( energy.MaxValue()-capacitance );
     } else {
-        return ( (float) energy )/maxenergy;
+        return energy.Percent();
     }
 }
 
-//Returns the current ammt of energy left
 float Energetic::energyRechargeData() const
 {
     return recharge;
@@ -191,13 +191,14 @@ void Energetic::increaseWarpEnergy( bool insys, float time )
 
 float Energetic::maxEnergyData() const
 {
-    return maxenergy;
+    return energy.MaxValue();
 }
 
 void Energetic::rechargeEnergy()
 {
-    if ( (!configuration.fuel.reactor_uses_fuel) || (fuel > 0) )
+    if ( (!configuration.fuel.reactor_uses_fuel) || (fuel > 0) ) {
         energy += recharge * simulation_atom_var;
+    }
 }
 
 bool Energetic::refillWarpEnergy()
@@ -231,15 +232,6 @@ void Energetic::setFuel( float f )
 {
     fuel = f;
 }
-
-
-
-void Energetic::setMaxEnergy( float maxen )
-{
-    maxenergy = maxen;
-}
-
-
 
 
 float Energetic::warpCapData() const
@@ -297,7 +289,8 @@ void Energetic::ExpendEnergy(const bool player_ship) {
 
 
 void Energetic::ExpendEnergy(float usage) {
-    energy = std::max(0.0f, energy - usage);
+    // Operator overloaded to prevent negative usage
+    energy -= usage;
 }
 
 // The original code was a continuation of the comment above and simply unclear.
@@ -390,7 +383,7 @@ void Energetic::ExpendEnergyToRechargeShields() {
     // Here we store the actual charge we'll use in RegenShields
     constrained_charge_to_shields = maximum_charge;
     sufficient_energy_to_recharge_shields = (constrained_charge_to_shields > 0);
-    float actual_charge = std::min(maximum_charge, energy);
+    float actual_charge = std::min(maximum_charge, energy.Value());
     float energy_required_to_charge = actual_charge * VSDPercent() *
             simulation_atom_var;
     ExpendEnergy(energy_required_to_charge);
@@ -400,7 +393,7 @@ void Energetic::ExpendEnergyToRechargeShields() {
 void Energetic::RechargeWarpCapacitors(const bool player_ship) {
     // Will try to keep the percentage of warp and normal capacitors equal
     const float transfer_capacity = 0.005f;
-    const float capacitor_percent = energy/maxenergy;
+    const float capacitor_percent = energy/energy.MaxValue();
     const float warp_capacitor_percent = warpenergy/maxwarpenergy;
     const float warp_multiplier = WarpEnergyMultiplier(player_ship);
 
@@ -411,10 +404,10 @@ void Energetic::RechargeWarpCapacitors(const bool player_ship) {
     }
 
 
-    const float previous_energy = energy;
-    ExpendEnergy(maxenergy * transfer_capacity);
+    const float previous_energy = energy.Value();
+    ExpendEnergy(energy.MaxValue() * transfer_capacity);
 
-    const float actual_energy = previous_energy - energy;
+    const float actual_energy = previous_energy - energy.Value();
     warpenergy = std::min(maxwarpenergy, warpenergy + actual_energy * warp_multiplier);
 }
 

@@ -26,6 +26,7 @@
 #ifndef ENERGETIC_H
 #define ENERGETIC_H
 
+#include "resource/resource.h"
 
 class Energetic
 {
@@ -64,7 +65,6 @@ public:
     void setAfterburnerEnergy( float aft );
     void setEnergyRecharge( float enrech );
     void setFuel( float f );
-    void setMaxEnergy( float maxen );
 
     float totalShieldEnergyCapacitance();
 
@@ -74,8 +74,6 @@ public:
     float warpEnergyData() const;
 
     float WarpEnergyMultiplier(const bool player_ship);
-
-
 
     // TODO: move to StarFaring class when available
     struct UnitJump
@@ -91,13 +89,11 @@ public:
     jump;
 
     //current energy
-    float  energy;
+    Resource<float> energy;
 
     //how much the energy recharges per second
     float recharge;
 
-    //maximum energy
-    float maxenergy;
     //maximum energy
     float maxwarpenergy; //short fix
     //current energy
