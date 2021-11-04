@@ -50,6 +50,7 @@
 #include "mount_size.h"
 #include "weapon_info.h"
 #include "resource/resource.h"
+#include "unit_csv_factory.h"
 
 CSVRow LookupUnitRow( const string &unitname, const string &faction ) {
     string hashname = unitname+"__"+faction;
@@ -946,6 +947,7 @@ void Unit::LoadRow( CSVRow &row, string modification, string *netxml )
         }
         table->SetupOptimizer( keys, LOADROW_OPTIMIZER );
     }
+
     //begin the geometry (and things that depend on stats)
     fullname = OPTIM_GET( row, table, Name );
     if ( ( tmpstr = OPTIM_GET( row, table, Hud_image ) ).length() != 0 ) {
@@ -1011,7 +1013,9 @@ void Unit::LoadRow( CSVRow &row, string modification, string *netxml )
     fuel = ::stof( OPTIM_GET( row, table, Fuel_Capacity ) );
 
     // Hull
-    float temp_hull = ::stof( OPTIM_GET( row, table, Hull ) );
+    std:: string unit_key = row[0];
+    std::map<std::string, std::string> unit_attributes = UnitCSVFactory::units[unit_key];
+    float temp_hull = ::stof(unit_attributes["Hull"]);
     float hull_values[1] = {temp_hull};
     hull->UpdateFacets(1, hull_values);
 

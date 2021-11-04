@@ -515,8 +515,9 @@ void Unit::Init( const char *filename,
             //end deprecated code
         }
     }
-    if (UNITTAB)
+    if (UNITTAB) {
         unitRow = GetUnitRow( filename, SubU, faction, true, foundFile );
+    }
     else
         foundFile = (err <= Ok);
     this->filename = filename;
