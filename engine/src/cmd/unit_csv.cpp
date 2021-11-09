@@ -687,7 +687,7 @@ const std::string EMPTY_STRING( "" );
 
 
 
-void Unit::LoadRow( CSVRow &row, string modification, string *netxml )
+void Unit::LoadRow( CSVRow &row, string modification)
 {
     CSVTable *table = row.getParent();
     Unit::XML xml;

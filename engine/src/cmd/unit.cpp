@@ -104,11 +104,10 @@ GameUnit::GameUnit( const char *filename,
                                                            int faction,
                                                            std::string unitModifications,
                                                            Flightgroup *flightgrp,
-                                                           int fg_subnumber,
-                                                           string *netxml ) : sparkle_accum( 0 )
+                                                           int fg_subnumber) : sparkle_accum( 0 )
     , phalos( new HaloSystem() )
 {
-    Unit::Init( filename, SubU, faction, unitModifications, flightgrp, fg_subnumber, netxml );
+    Unit::Init( filename, SubU, faction, unitModifications, flightgrp, fg_subnumber);
 }
 
 GameUnit::~GameUnit()
