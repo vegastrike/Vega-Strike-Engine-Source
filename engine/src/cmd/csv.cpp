@@ -178,9 +178,13 @@ CSVTable::CSVTable( VSFileSystem::VSFile &f, const string &root )
 {
     std::string data = f.ReadFull();
 
-    if(f.GetFilename() == "units.csv") {
-        UnitCSVFactory factory;
-        factory.ProcessCSV(data);
+    UnitCSVFactory factory;
+    if(f.GetFilename() == "units_description.csv" ||
+            f.GetFilename() == "master_part_list.csv") {
+    } else if(f.GetFilename() == "units.csv") {
+        factory.ProcessCSV(data, false);
+    } else {
+        factory.ProcessCSV(data, true);
     }
 
     this->rootdir = root;

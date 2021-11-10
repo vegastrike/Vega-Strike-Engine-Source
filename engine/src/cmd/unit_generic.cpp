@@ -458,7 +458,7 @@ void Unit::Init( const char *filename,
     VSFile  unitTab;
     VSError taberr    = Unspecified;
     bool    foundFile = false;
-
+    bool saved_game = false;
     if (unitModifications.length() != 0) {
         string nonautosave = GetReadPlayerSaveGame( _Universe->CurrentCockpit() );
         string filepath( "" );
@@ -478,6 +478,7 @@ void Unit::Init( const char *filename,
             if (taberr <= Ok) {
                 unitTables.push_back( new CSVTable( unitTab, unitTables.back()->rootdir ) );
                 unitTab.Close();
+                saved_game = true;
             }
             if (!UNITTAB)
                 err = f.OpenReadOnly( filepath, UnitSaveFile );
@@ -548,7 +549,7 @@ void Unit::Init( const char *filename,
                                                                           tmpbool ).getRoot() : unitRow.getRoot() );
         VSFileSystem::current_subdirectory.push_back( "/"+unitRow["Directory"] );
         VSFileSystem::current_type.push_back( UnitFile );
-        LoadRow( unitRow, unitModifications);
+        LoadRow( unitRow, unitModifications, saved_game);
         VSFileSystem::current_type.pop_back();
         VSFileSystem::current_subdirectory.pop_back();
         VSFileSystem::current_path.pop_back();

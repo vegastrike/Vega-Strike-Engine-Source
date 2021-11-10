@@ -685,9 +685,7 @@ const std::string EMPTY_STRING( "" );
 #define OPTIM_GET( rot, table, variable ) OPTIM_GET_DEF( row, table, variable, EMPTY_STRING )
 
 
-
-
-void Unit::LoadRow( CSVRow &row, string modification)
+void Unit::LoadRow( CSVRow &row, string modification, bool saved_game)
 {
     CSVTable *table = row.getParent();
     Unit::XML xml;
@@ -948,9 +946,13 @@ void Unit::LoadRow( CSVRow &row, string modification)
         table->SetupOptimizer( keys, LOADROW_OPTIMIZER );
     }
 
-    //begin the geometry (and things that depend on stats)
-    fullname = OPTIM_GET( row, table, Name );
-    if ( ( tmpstr = OPTIM_GET( row, table, Hud_image ) ).length() != 0 ) {
+    std:: string unit_key = (saved_game ? "player_ship" : row[0]);
+
+    fullname = UnitCSVFactory::GetVariable(unit_key, "Name", std::string());
+
+    tmpstr = UnitCSVFactory::GetVariable(unit_key, "Hud_image", std::string());
+
+    if ( !tmpstr.empty() ) {
         std::string fac = FactionUtil::GetFaction( faction );
         fac += "_";
         fac += tmpstr;
@@ -960,77 +962,99 @@ void Unit::LoadRow( CSVRow &row, string modification)
             pImage->pHudImage = createVSSprite( tmpstr.c_str() );
         }
     }
-    if ( ( tmpstr = OPTIM_GET( row, table, FaceCamera ) ).length() != 0 )
+
+    tmpstr = UnitCSVFactory::GetVariable(unit_key, "FaceCamera", std::string());
+
+    if ( !tmpstr.empty() ) {
         graphicOptions.FaceCamera = XMLSupport::parse_bool( tmpstr ) ? 1 : 0;
-    std::string llegacy_combat_role( OPTIM_GET( row, table, Combat_Role ) );
-    std::string lunit_role( OPTIM_GET( row, table, Unit_Role ) );
-    std::string lattack_preference( OPTIM_GET( row, table, Attack_Preference ) );
-    if (lunit_role.length() == 0)
+    }
+
+
+    std::string llegacy_combat_role( UnitCSVFactory::GetVariable(unit_key, "Combat_Role", std::string()) );
+    std::string lunit_role(UnitCSVFactory::GetVariable(unit_key, "Unit_Role", std::string()) );
+    std::string lattack_preference( UnitCSVFactory::GetVariable(unit_key, "Attack_Preference", std::string()) );
+
+    if (lunit_role.empty()) {
         this->setUnitRole( llegacy_combat_role );
-    else
+    } else {
         this->setUnitRole( lunit_role );
-    if (lattack_preference.length() == 0)
+    }
+
+    if (lattack_preference.empty()) {
         this->setAttackPreference( llegacy_combat_role );
-    else
+    } else {
         this->setAttackPreference( lattack_preference );
-    graphicOptions.NumAnimationPoints = stoi( OPTIM_GET( row, table, Num_Animation_Stages ), 0 );
-    graphicOptions.NoDamageParticles  = stoi( OPTIM_GET( row, table, NoDamageParticles ), 0 );
+    }
+
+    graphicOptions.NumAnimationPoints = UnitCSVFactory::GetVariable(unit_key, "Num_Animation_Stages", 0 );
+    graphicOptions.NoDamageParticles  = UnitCSVFactory::GetVariable(unit_key, "NoDamageParticles", 0 );
+
     if (graphicOptions.NumAnimationPoints > 0)
         graphicOptions.Animating = 0;
-    xml.unitscale     = stof( OPTIM_GET( row, table, Unit_Scale ), 1 );
+    xml.unitscale     = UnitCSVFactory::GetVariable(unit_key, "Unit_Scale", 1.0f );
     if (!xml.unitscale) xml.unitscale = 1;
     pImage->unitscale = xml.unitscale;
-    AddMeshes( xml.meshes, xml.randomstartframe, xml.randomstartseconds, xml.unitscale, OPTIM_GET( row,
-                                                                                                   table,
-                                                                                                   Mesh ), faction,
+
+    std::string mesh_string = UnitCSVFactory::GetVariable(unit_key, "Mesh", std::string());
+    AddMeshes( xml.meshes, xml.randomstartframe, xml.randomstartseconds, xml.unitscale,
+               mesh_string, faction,
               getFlightgroup() );
-    AddDocks( this, xml, OPTIM_GET( row, table, Dock ) );
-    AddSubUnits( this, xml, OPTIM_GET( row, table, Sub_Units ), faction, modification );
+
+    std::string dock_string = UnitCSVFactory::GetVariable(unit_key, "Dock", std::string());
+    AddDocks( this, xml, UnitCSVFactory::GetVariable(unit_key, "Dock",std::string()) );
+
+    std::string sub_string = UnitCSVFactory::GetVariable(unit_key, "Sub_Units", std::string());
+    AddSubUnits( this, xml, UnitCSVFactory::GetVariable(unit_key, "Sub_Units", std::string() ), faction, modification );
 
     meshdata   = xml.meshes;
     meshdata.push_back( NULL );
     corner_min = Vector( FLT_MAX, FLT_MAX, FLT_MAX );
     corner_max = Vector( -FLT_MAX, -FLT_MAX, -FLT_MAX );
     calculate_extent( false );
-    AddMounts( this, xml, OPTIM_GET( row, table, Mounts ) );
-    this->CargoVolume = ::stof( OPTIM_GET( row, table, Hold_Volume ) );
-    this->HiddenCargoVolume = ::stof( OPTIM_GET( row, table, Hidden_Hold_Volume ) );
-    this->UpgradeVolume     = ::stof( OPTIM_GET( row, table, Upgrade_Storage_Volume ) );
-    this->equipment_volume  = ::stof( OPTIM_GET( row, table, Equipment_Space ) );
-    ImportCargo( this, OPTIM_GET( row, table, Cargo_Import ) );     //if this changes change planet_generic.cpp
-    AddCarg( this, OPTIM_GET( row, table, Cargo ) );
+    AddMounts( this, xml, UnitCSVFactory::GetVariable(unit_key, "Mounts", std::string() ) );
+    this->CargoVolume = UnitCSVFactory::GetVariable(unit_key, "Hold_Volume" , 0.0f );
+    this->HiddenCargoVolume = UnitCSVFactory::GetVariable(unit_key, "Hidden_Hold_Volume", 0.0f );
+    this->UpgradeVolume     = UnitCSVFactory::GetVariable(unit_key, "Upgrade_Storage_Volume", 0.0f );
+    this->equipment_volume  = UnitCSVFactory::GetVariable(unit_key, "Equipment_Space", 0.0f );
+
+
+    std::string cargo_import_string = UnitCSVFactory::GetVariable(unit_key, "Cargo_Import", std::string() );
+    ImportCargo( this, cargo_import_string);     //if this changes change planet_generic.cpp
+
+    std::string cargo_string = UnitCSVFactory::GetVariable(unit_key, "Cargo", std::string() );
+    AddCarg( this, cargo_string);
+
+    std::cout << unit_key << " cargo " << cargo_string << " Cargo Imports " << cargo_import_string << "\n";
 
     // Replaced by below: AddSounds( this, OPTIM_GET( row, table, Sounds ) );
-    this->addSounds(&nextElement, OPTIM_GET( row, table, Sounds ));
+    this->addSounds(&nextElement, UnitCSVFactory::GetVariable(unit_key, "Sounds", std::string() ));
 
 
-    LoadCockpit( this, OPTIM_GET( row, table, Cockpit ) );
-    pImage->CockpitCenter.i = ::stof( OPTIM_GET( row, table, CockpitX ) )*xml.unitscale;
-    pImage->CockpitCenter.j = ::stof( OPTIM_GET( row, table, CockpitY ) )*xml.unitscale;
-    pImage->CockpitCenter.k = ::stof( OPTIM_GET( row, table, CockpitZ ) )*xml.unitscale;
-    Mass = stof( OPTIM_GET( row, table, Mass ), 1.0 );
-    Momentofinertia = stof( OPTIM_GET( row, table, Moment_Of_Inertia ), 1.0 );
-    fuel = ::stof( OPTIM_GET( row, table, Fuel_Capacity ) );
+    LoadCockpit( this, UnitCSVFactory::GetVariable(unit_key, "Cockpit", std::string() ));
+    pImage->CockpitCenter.i = UnitCSVFactory::GetVariable(unit_key, "CockpitX", 0.0f )*xml.unitscale;
+    pImage->CockpitCenter.j = UnitCSVFactory::GetVariable(unit_key, "CockpitY", 0.0f )*xml.unitscale;
+    pImage->CockpitCenter.k = UnitCSVFactory::GetVariable(unit_key, "CockpitZ", 0.0f )*xml.unitscale;
+    Mass = UnitCSVFactory::GetVariable(unit_key, "Mass", 1.0f );
+    Momentofinertia = UnitCSVFactory::GetVariable(unit_key, "Moment_Of_Inertia", 1.0f );
+    fuel = UnitCSVFactory::GetVariable(unit_key, "Fuel_Capacity", 0.0f );
 
     // Hull
-    std:: string unit_key = row[0];
-    std::map<std::string, std::string> unit_attributes = UnitCSVFactory::units[unit_key];
-    float temp_hull = ::stof(unit_attributes["Hull"]);
+    float temp_hull = UnitCSVFactory::GetVariable(unit_key, "Hull", 0.0f);
     float hull_values[1] = {temp_hull};
     hull->UpdateFacets(1, hull_values);
 
-    specInterdiction = ::stof( OPTIM_GET( row, table, Spec_Interdiction ) );
+    specInterdiction = UnitCSVFactory::GetVariable(unit_key, "Spec_Interdiction", 0.0f );
 
     // Init armor
+    std::string armor_keys[] = {"Armor_Front_Top_Left","Armor_Front_Top_Right",
+            "Armor_Front_Bottom_Left","Armor_Front_Bottom_Right",
+            "Armor_Back_Top_Left","Armor_Back_Top_Right",
+            "Armor_Back_Bottom_Left","Armor_Back_Bottom_Right"};
     float armor_values[8];
-    armor_values[0] = ::stof( OPTIM_GET( row, table, Armor_Front_Top_Left ));
-    armor_values[1] = ::stof( OPTIM_GET( row, table, Armor_Front_Top_Right ));
-    armor_values[2] = ::stof( OPTIM_GET( row, table, Armor_Front_Bottom_Left ));
-    armor_values[3] = ::stof( OPTIM_GET( row, table, Armor_Front_Bottom_Right ));
-    armor_values[4] = ::stof( OPTIM_GET( row, table, Armor_Back_Top_Left ));
-    armor_values[5] = ::stof( OPTIM_GET( row, table, Armor_Back_Top_Right ));
-    armor_values[6] = ::stof( OPTIM_GET( row, table, Armor_Back_Bottom_Left ));
-    armor_values[7] = ::stof( OPTIM_GET( row, table, Armor_Back_Bottom_Right ));
+    for(int i=0;i<8;i++) {
+        float tmp_armor_value = UnitCSVFactory::GetVariable(unit_key, armor_keys[i], 0.0f);
+        armor_values[i] = tmp_armor_value;
+    }
 
     armor->UpdateFacets(8, armor_values);
 

@@ -367,14 +367,10 @@ Technique::Technique( const string &name ):
      filename = sub_technique_filename;
     }
 
-    std::cout << "Processing technique " << filename << "\n";
-
     pt::ptree tree;
     pt::read_xml(filename, tree);
 
     for (const auto& iterator : tree) {
-        std::cout << "Processing tag " << iterator.first.data() << "\n";
-
         parseTechniqueXML(iterator.second);
         break;
     }
@@ -383,7 +379,6 @@ Technique::Technique( const string &name ):
 void Technique::parseTechniqueXML(pt::ptree tree)
 {
     fallback = tree.get( "<xmlattr>.fallback", "" );
-    std::cout << "Fallback is " << fallback << "\n";
     int nextSequence = 0;
 
     for (const auto& iterator : tree) {
@@ -392,8 +387,6 @@ void Technique::parseTechniqueXML(pt::ptree tree)
         std::string key = iterator.first.data();
 
         if(key == "pass") {
-            std::cout << "Parsing pass\n";
-
             Pass pass;
             pass.parsePass(iterator.second, name, nextSequence);
             passes.push_back(pass);
@@ -401,9 +394,6 @@ void Technique::parseTechniqueXML(pt::ptree tree)
         }
     }
 }
-
-
-
 
 
 Technique::Technique( const Technique &src ) :
@@ -441,12 +431,6 @@ static TechniqueMap techniqueCache;
 
 TechniquePtr Technique::getTechnique( const std::string &name )
 {
-//    Technique t1(name);
-//    Technique t2(name, false);
-//    if(t1 == t2) std::cout << "Good\n";
-//    else std::cout << "Errerrerr\n";
-
-
     TechniqueMap::const_iterator it = techniqueCache.find( name );
     if ( it != techniqueCache.end() ) {
         return it->second;

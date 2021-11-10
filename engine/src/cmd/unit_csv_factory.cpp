@@ -7,10 +7,10 @@
 // Required definition of static variable
 std::map<std::string, std::map<std::string, std::string>> UnitCSVFactory::units;
 
-UnitCSVFactory::UnitCSVFactory()
-{
+// This is probably unique enough to ensure no collision
+std::string UnitCSVFactory::DEFAULT_ERROR_VALUE = "UnitCSVFactory::_GetVariable DEFAULT_ERROR_VALUE";
 
-}
+
 
 void ExtractColumns(std::string &line) {
     std::string data(line);
@@ -64,9 +64,7 @@ std::vector<std::string> ProcessLine(std::string &line) {
     return cells;
 }
 
-
-
-void UnitCSVFactory::ProcessCSV(const std::string &d) {
+void UnitCSVFactory::ProcessCSV(const std::string &d, bool saved_game) {
     std::vector<std::string> columns;
     std::string data(d);
     std::string delimiter = "\n";
@@ -75,6 +73,11 @@ void UnitCSVFactory::ProcessCSV(const std::string &d) {
     bool first_line = true;
 
     line_num = 1;
+
+    // Add newline to end of file, so last line will be processed.
+    if(data.back() != '\n') {
+        data.append("\n");
+    }
 
     while ((pos = data.find(delimiter)) != std::string::npos) {
         token = data.substr(0, pos);
@@ -91,7 +94,9 @@ void UnitCSVFactory::ProcessCSV(const std::string &d) {
                 unit_attributes[columns[i]] = line[i];
             }
 
-            UnitCSVFactory::units[line[0]] = unit_attributes;
+            std::string key = (saved_game ? "player_ship" :  line[0]);
+
+            UnitCSVFactory::units[key] = unit_attributes;
         }
         data.erase(0, pos + delimiter.length());
     }

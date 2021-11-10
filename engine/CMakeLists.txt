@@ -751,6 +751,7 @@ SET(LIBVS_LOGGING
 )
 
 SET(LIBCONFIG
+    src/abstract_config.cpp
     src/configuration/configuration.cpp
     src/configuration/game_config.cpp
 )

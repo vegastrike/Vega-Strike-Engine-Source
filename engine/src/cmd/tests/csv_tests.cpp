@@ -13,9 +13,9 @@ TEST(CSV, Sanity) {
     buffer << ifs.rdbuf();
 
     UnitCSVFactory factory;
-    factory.ProcessCSV(buffer.str());
+    factory.ProcessCSV(buffer.str(), false);
 
-    for (auto const& x : UnitCSVFactory::units)
+    /*for (auto const& x : UnitCSVFactory::units)
     {
         std::string unit = x.first;
         std::map<std::string, std::string> unit_attributes = x.second;
@@ -29,5 +29,5 @@ TEST(CSV, Sanity) {
                       << y.first  << ':'
                       << y.second << std::endl;
         }
-    }
+    }*/
 }

@@ -228,7 +228,7 @@ public:
     void Init( const char *filename, bool SubUnit, int faction, std::string customizedUnit = std::string(
                    "" ), Flightgroup *flightgroup = NULL, int fg_subnumber = 0);
 //table can be NULL, but setting it appropriately may increase performance
-    void LoadRow( class CSVRow&row, std::string unitMod);
+    void LoadRow( class CSVRow&row, std::string unitMod, bool saved_game);
 
     // TODO: implement enum class as type safe bitmask...
     // http://blog.bitwigglers.org/using-enum-classes-as-type-safe-bitmasks/
