@@ -36,7 +36,7 @@
 set -e
 
 echo "-----------------------------"
-echo "--- build.sh | 2021-09-03 ---"
+echo "--- build.sh | 2021-11-11 ---"
 echo "-----------------------------"
 
 #----------------------------------
@@ -44,28 +44,30 @@ echo "-----------------------------"
 #----------------------------------
 
 ROOT_DIR=$(pwd)
-BUILD_DIR=$ROOT_DIR/build
-BIN_DIR=$ROOT_DIR/bin
-SRC_DIR=$ROOT_DIR/engine
+echo "ROOT_DIR: ${ROOT_DIR}"
+BUILD_DIR="${ROOT_DIR}/build"
+echo "BUILD_DIR: ${BUILD_DIR}"
+BIN_DIR="${ROOT_DIR}/bin"
+SRC_DIR="${ROOT_DIR}/engine"
 COMMAND=""
 
 # -p creates if the target doesn't exist, noop otherwise
-mkdir -pv $BUILD_DIR && cd $BUILD_DIR
+mkdir -pv "${BUILD_DIR}" && cd "${BUILD_DIR}"
 
 # configure libraries and prepare for the Debug build having -Werror set,
 # thus gating VS commits on being warning-free at some point in the near
 # future -- see https://github.com/vegastrike/Vega-Strike-Engine-Source/issues/50
-cmake $@ $SRC_DIR
+cmake '$@' "${SRC_DIR}"
 
 # for a clean build only
 # mut we can do it manually
 #make clean
 
 # compile now using all cpus # and show compilation commands
-cmake --build $BUILD_DIR -j $(getconf _NPROCESSORS_ONLN) # -v
+cmake --build "${BUILD_DIR}" -j $(getconf _NPROCESSORS_ONLN) # -v
 
-cd $ROOT_DIR
+cd "${ROOT_DIR}"
 
-mkdir -pv $BIN_DIR
+mkdir -pv "${BIN_DIR}"
 
-cp -v $BUILD_DIR/{vegastrike-engine,setup/vegasettings,objconv/vega-meshtool} $BIN_DIR
+cp -v "${BUILD_DIR}"/{vegastrike-engine,setup/vegasettings,objconv/vega-meshtool} "${BIN_DIR}"
