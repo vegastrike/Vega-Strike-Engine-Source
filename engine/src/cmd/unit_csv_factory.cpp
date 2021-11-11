@@ -52,6 +52,12 @@ std::vector<std::string> ProcessLine(std::string &line) {
 
         token = data.substr(0, comma_index);
         data.erase(0, comma_index + 1);
+
+        // If token starts and ends with a quote, remove them
+        if(token[0] == '"' && token[token.size()-1] == '"') {
+            token = token.substr(1, token.size()-2);
+        }
+
         cells.push_back(token);
 
         comma_index = data.find(",");

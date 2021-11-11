@@ -71,7 +71,7 @@ inline bool UnitCSVFactory::GetVariable(std::string unit_key, std::string const 
         return default_value;
     }
     boost::algorithm::to_lower(result);
-    return result == "true";
+    return (result == "true" || result == "1");
 }
 
 template <>

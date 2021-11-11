@@ -684,6 +684,14 @@ const std::string EMPTY_STRING( "" );
 
 #define OPTIM_GET( rot, table, variable ) OPTIM_GET_DEF( row, table, variable, EMPTY_STRING )
 
+void YawPitchRollParser(std::string unit_key, std::string main_string, std::string left_string, std::string right_string, float& left_pointer, float& right_pointer) {
+    float main_value = UnitCSVFactory::GetVariable(unit_key, main_string, 0.0f );
+    float right_value = UnitCSVFactory::GetVariable(unit_key, right_string, 0.0f );
+    float left_value = UnitCSVFactory::GetVariable(unit_key, left_string, 0.0f );
+    right_pointer = ( right_value > 0 ? right_value : main_value ) * VS_PI/180.;
+    left_pointer = ( left_value > 0 ? left_value : main_value ) * VS_PI/180.;
+}
+
 
 void Unit::LoadRow( CSVRow &row, string modification, bool saved_game)
 {
@@ -946,6 +954,9 @@ void Unit::LoadRow( CSVRow &row, string modification, bool saved_game)
         table->SetupOptimizer( keys, LOADROW_OPTIMIZER );
     }
 
+    if(saved_game) {
+        int i=0;
+    }
     std:: string unit_key = (saved_game ? "player_ship" : row[0]);
 
     fullname = UnitCSVFactory::GetVariable(unit_key, "Name", std::string());
@@ -1024,8 +1035,6 @@ void Unit::LoadRow( CSVRow &row, string modification, bool saved_game)
     std::string cargo_string = UnitCSVFactory::GetVariable(unit_key, "Cargo", std::string() );
     AddCarg( this, cargo_string);
 
-    std::cout << unit_key << " cargo " << cargo_string << " Cargo Imports " << cargo_import_string << "\n";
-
     // Replaced by below: AddSounds( this, OPTIM_GET( row, table, Sounds ) );
     this->addSounds(&nextElement, UnitCSVFactory::GetVariable(unit_key, "Sounds", std::string() ));
 
@@ -1062,14 +1071,15 @@ void Unit::LoadRow( CSVRow &row, string modification, bool saved_game)
     // Load shield
     // Some basic shield variables
     // TODO: lib_damage figure out how leak and efficiency work
-    //char leak = (char) (::stof( OPTIM_GET( row, table, Shield_Leak ) )*100.0);
-    float regeneration   = ::stof( OPTIM_GET( row, table, Shield_Recharge ) );
+    //char leak = static_cast<char>(UnitCSVFactory::GetVariable(unit_key, "Shield_Leak", 0.0f) * 100);
+
+    float regeneration   = UnitCSVFactory::GetVariable(unit_key, "Shield_Recharge", 0.0f);
 
     // This is necessary for upgrading shields, as it's done with an ugly macro in
     // unit_generic STDUPGRADE
     shield_regeneration = regeneration;
     shield->UpdateRegeneration(regeneration);
-    //float efficiency = ::stof( OPTIM_GET( row, table, Shield_Efficiency ), 1.0 );
+    //float efficiency = UnitCSVFactory::GetVariable(unit_key, "Shield_Efficiency", 1.0f );
 
     // Get shield count
 
@@ -1079,10 +1089,10 @@ void Unit::LoadRow( CSVRow &row, string modification, bool saved_game)
 
     // TODO: this mapping should really go away
     // I love macros, NOT.
-    shield_string_values[0] = OPTIM_GET( row, table, Shield_Front_Top_Right );
-    shield_string_values[1] = OPTIM_GET( row, table, Shield_Back_Top_Left );
-    shield_string_values[2] = OPTIM_GET( row, table, Shield_Front_Bottom_Right );
-    shield_string_values[3] = OPTIM_GET( row, table, Shield_Front_Bottom_Left );
+    shield_string_values[0] = UnitCSVFactory::GetVariable(unit_key, "Shield_Front_Top_Right", std::string() );
+    shield_string_values[1] = UnitCSVFactory::GetVariable(unit_key, "Shield_Back_Top_Left", std::string() );
+    shield_string_values[2] = UnitCSVFactory::GetVariable(unit_key, "Shield_Front_Bottom_Right", std::string() );
+    shield_string_values[3] = UnitCSVFactory::GetVariable(unit_key, "Shield_Front_Bottom_Left", std::string() );
 
 
     for(int i=0;i<4;i++) {
@@ -1116,162 +1126,142 @@ void Unit::LoadRow( CSVRow &row, string modification, bool saved_game)
 
 
     static bool WCfuelhack = XMLSupport::parse_bool( vs_config->getVariable( "physics", "fuel_equals_warp", "false" ) );
-    maxwarpenergy     = warpenergy = ::stof( OPTIM_GET( row, table, Warp_Capacitor ) );
+    maxwarpenergy     = warpenergy = UnitCSVFactory::GetVariable(unit_key, "Warp_Capacitor", 0.0f);
 
-    graphicOptions.MinWarpMultiplier = ::stof( OPTIM_GET( row, table, Warp_Min_Multiplier ), 1.0 );
-    graphicOptions.MaxWarpMultiplier = ::stof( OPTIM_GET( row, table, Warp_Max_Multiplier ), 1.0 );
+    graphicOptions.MinWarpMultiplier = UnitCSVFactory::GetVariable(unit_key, "Warp_Min_Multiplier", 1.0f);
+    graphicOptions.MaxWarpMultiplier = UnitCSVFactory::GetVariable(unit_key, "Warp_Max_Multiplier", 1.0f);
 
-    energy.Set(::stof( OPTIM_GET( row, table, Primary_Capacitor ) ), 0.0f);
-    recharge   = ::stof( OPTIM_GET( row, table, Reactor_Recharge ) );
-    jump.drive = XMLSupport::parse_bool( OPTIM_GET( row, table, Jump_Drive_Present ) ) ? -1 : -2;
-    jump.delay = ::stoi( OPTIM_GET( row, table, Jump_Drive_Delay ) );
-    forcejump = XMLSupport::parse_bool( OPTIM_GET( row, table, Wormhole ) );
-    graphicOptions.RecurseIntoSubUnitsOnCollision = stob( OPTIM_GET( row,
-                                                                     table,
-                                                                     Collide_Subunits ),
-                                                          graphicOptions.RecurseIntoSubUnitsOnCollision ? true : false ) ? 1
-                                                    : 0;
-    jump.energy = ::stof( OPTIM_GET( row, table, Outsystem_Jump_Cost ) );
-    jump.insysenergy = ::stof( OPTIM_GET( row, table, Warp_Usage_Cost ) );
+    energy.Set( UnitCSVFactory::GetVariable(unit_key, "Primary_Capacitor", 0.0f));
+    recharge   = UnitCSVFactory::GetVariable(unit_key, "Reactor_Recharge", 0.0f);
+    jump.drive = UnitCSVFactory::GetVariable(unit_key, "Jump_Drive_Present", 0) ? -1 : -2;
+    jump.delay = UnitCSVFactory::GetVariable(unit_key, "Jump_Drive_Delay", 0);
+    forcejump = UnitCSVFactory::GetVariable(unit_key, "Wormhole", false);
+    graphicOptions.RecurseIntoSubUnitsOnCollision = UnitCSVFactory::GetVariable(unit_key, "Collide_Subunits", graphicOptions.RecurseIntoSubUnitsOnCollision ? true : false) ? 1: 0;
+    jump.energy = UnitCSVFactory::GetVariable(unit_key, "Outsystem_Jump_Cost", 0.0f);
+    jump.insysenergy = UnitCSVFactory::GetVariable(unit_key, "Warp_Usage_Cost", 0.0f);
     if (WCfuelhack) fuel = warpenergy = warpenergy+jump.energy*0.1f;       //this is required to make sure we don't trigger the "globally out of fuel" if we use all warp charges -- save some afterburner for later!!!
-    afterburnenergy  = ::stof( OPTIM_GET( row, table, Afterburner_Usage_Cost ), 32767 );
-    afterburntype    = ::stoi( OPTIM_GET( row, table, Afterburner_Type ) );     //type 1 == "use fuel", type 0 == "use reactor energy", type 2 ==(hopefully) "use jump fuel" 3: NO AFTERBURNER
-    limits.yaw = ::stof( OPTIM_GET( row, table, Maneuver_Yaw ) )*VS_PI/180.;
-    limits.pitch     = ::stof( OPTIM_GET( row, table, Maneuver_Pitch ) )*VS_PI/180.;
-    limits.roll      = ::stof( OPTIM_GET( row, table, Maneuver_Roll ) )*VS_PI/180.;
-    {
-        std::string t, tn, tp;
-        t  = OPTIM_GET( row, table, Yaw_Governor );
-        tn = OPTIM_GET( row, table, Yaw_Governor_Right );
-        tp = OPTIM_GET( row, table, Yaw_Governor_Left );
-        computer.max_yaw_right = ::stof( tn.length() > 0 ? tn : t )*VS_PI/180.;
-        computer.max_yaw_left = ::stof( tp.length() > 0 ? tp : t )*VS_PI/180.;
-        t  = OPTIM_GET( row, table, Pitch_Governor );
-        tn = OPTIM_GET( row, table, Pitch_Governor_Up );
-        tp = OPTIM_GET( row, table, Pitch_Governor_Down );
-        computer.max_pitch_up = ::stof( tn.length() > 0 ? tn : t )*VS_PI/180.;
-        computer.max_pitch_down = ::stof( tp.length() > 0 ? tp : t )*VS_PI/180.;
-        t  = OPTIM_GET( row, table, Roll_Governor );
-        tn = OPTIM_GET( row, table, Roll_Governor_Right );
-        tp = OPTIM_GET( row, table, Roll_Governor_Left );
-        computer.max_roll_right = ::stof( tn.length() > 0 ? tn : t )*VS_PI/180.;
-        computer.max_roll_left = ::stof( tp.length() > 0 ? tp : t )*VS_PI/180.;
-    }
-    static float game_accel = XMLSupport::parse_float( vs_config->getVariable( "physics", "game_accel", "1" ) );
-    static float game_speed = XMLSupport::parse_float( vs_config->getVariable( "physics", "game_speed", "1" ) );
-    limits.afterburn = ::stof( OPTIM_GET( row, table, Afterburner_Accel ) )*game_accel*game_speed;
-    limits.forward   = ::stof( OPTIM_GET( row, table, Forward_Accel ) )*game_accel*game_speed;
-    limits.retro     = ::stof( OPTIM_GET( row, table, Retro_Accel ) )*game_accel*game_speed;
-    limits.lateral   = .5
-                       *( ::stof( OPTIM_GET( row, table,
-                                             Left_Accel ) )+::stof( OPTIM_GET( row, table, Right_Accel ) ) )*game_accel*game_speed;
-    limits.vertical  = .5
-                       *( ::stof( OPTIM_GET( row, table,
-                                             Top_Accel ) )+::stof( OPTIM_GET( row, table, Bottom_Accel ) ) )*game_accel*game_speed;
-    computer.max_combat_speed    = ::stof( OPTIM_GET( row, table, Default_Speed_Governor ) )*game_speed;
-    computer.max_combat_ab_speed = ::stof( OPTIM_GET( row, table, Afterburner_Speed_Governor ) )*game_speed;
-    computer.itts = stob( OPTIM_GET( row, table, ITTS ), true );
-    computer.radar.canlock = stob( OPTIM_GET( row, table, Can_Lock ), true );
-    {
-        // The Radar_Color column in the units.csv has been changed from a
-        // boolean value to a string. The boolean values are supported for
-        // backwardscompatibility.
-        // When we save this setting, it is simply converted from an integer
-        // number to a string, and we need to support this as well.
-        std::string iffval = OPTIM_GET( row, table, Radar_Color );
-        if ((iffval.empty()) || (iffval == "FALSE") || (iffval == "0"))
-        {
-            computer.radar.capability = Computer::RADARLIM::Capability::IFF_NONE;
-        }
-        else if ((iffval == "TRUE") || (iffval == "1"))
-        {
-            computer.radar.capability
-                = Computer::RADARLIM::Capability::IFF_SPHERE
-                | Computer::RADARLIM::Capability::IFF_FRIEND_FOE;
-        }
-        else if (iffval == "THREAT")
-        {
-            computer.radar.capability
-                = Computer::RADARLIM::Capability::IFF_SPHERE
-                | Computer::RADARLIM::Capability::IFF_FRIEND_FOE
-                | Computer::RADARLIM::Capability::IFF_THREAT_ASSESSMENT;
-        }
-        else if (iffval == "BUBBLE_THREAT")
-        {
-            computer.radar.capability
-                = Computer::RADARLIM::Capability::IFF_BUBBLE
-                | Computer::RADARLIM::Capability::IFF_FRIEND_FOE
-                | Computer::RADARLIM::Capability::IFF_OBJECT_RECOGNITION
-                | Computer::RADARLIM::Capability::IFF_THREAT_ASSESSMENT;
-        }
-        else if (iffval == "PLANE")
-        {
-            computer.radar.capability
-                = Computer::RADARLIM::Capability::IFF_PLANE
-                | Computer::RADARLIM::Capability::IFF_FRIEND_FOE;
-        }
-        else if (iffval == "PLANE_THREAT")
-        {
-            computer.radar.capability
-                = Computer::RADARLIM::Capability::IFF_PLANE
-                | Computer::RADARLIM::Capability::IFF_FRIEND_FOE
-                | Computer::RADARLIM::Capability::IFF_OBJECT_RECOGNITION
-                | Computer::RADARLIM::Capability::IFF_THREAT_ASSESSMENT;
-        }
-        else
-        {
-            unsigned int value = stoi(iffval, 0);
-            if (value == 0)
-            {
-                // Unknown value
-                assert(false);
-                computer.radar.capability = Computer::RADARLIM::Capability::IFF_NONE;
-            }
-            else
-            {
-                computer.radar.capability = value;
-            }
-        }
-    }
-    computer.radar.maxrange     = stof( OPTIM_GET( row, table, Radar_Range ), FLT_MAX );
-    computer.radar.maxcone      = cos( stof( OPTIM_GET( row, table, Max_Cone ), 180 )*VS_PI/180 );
-    computer.radar.trackingcone = cos( stof( OPTIM_GET( row, table, Tracking_Cone ), 180 )*VS_PI/180 );
-    computer.radar.lockcone     = cos( stof( OPTIM_GET( row, table, Lock_Cone ), 180 )*VS_PI/180 );
-    cloakmin = (int) (::stof( OPTIM_GET( row, table, Cloak_Min ) )*2147483136);
-    if (cloakmin < 0) cloakmin = 0;
-    cloakglass = XMLSupport::parse_bool( OPTIM_GET( row, table, Cloak_Glass ) );
-    if ( (cloakmin&0x1) && !cloakglass )
-        cloakmin -= 1;
-    if ( (cloakmin&0x1) == 0 && cloakglass )
-        cloakmin += 1;
-    if ( !XMLSupport::parse_bool( OPTIM_GET( row, table, Can_Cloak ) ) )
-        cloaking = -1;
-    else
-        cloaking = (int) (-2147483647)-1;
-    cloakrate    = (int) ( 2147483136.*::stof( OPTIM_GET( row, table, Cloak_Rate ) ) );     //short fix
-    cloakenergy  = ::stof( OPTIM_GET( row, table, Cloak_Energy ) );
-    repair_droid = ::stoi( OPTIM_GET( row, table, Repair_Droid ) );
-    ecm    = ::stoi( OPTIM_GET( row, table, ECM_Rating ) );
+    afterburnenergy  = UnitCSVFactory::GetVariable(unit_key, "Afterburner_Usage_Cost", 32767.0f);
+    afterburntype    = UnitCSVFactory::GetVariable(unit_key, "Afterburner_Type", 0); //type 1 == "use fuel", type 0 == "use reactor energy", type 2 ==(hopefully) "use jump fuel" 3: NO AFTERBURNER
+    limits.yaw = UnitCSVFactory::GetVariable(unit_key, "Maneuver_Yaw", 0.0f) *VS_PI/180.0;
+    limits.pitch     = UnitCSVFactory::GetVariable(unit_key, "Maneuver_Pitch", 0.0f) *VS_PI/180.0;
+    limits.roll      = UnitCSVFactory::GetVariable(unit_key, "Maneuver_Roll", 0.0f) *VS_PI/180.0;
 
-    this->HeatSink = ::stof( OPTIM_GET( row, table, Heat_Sink_Rating ) );
+    YawPitchRollParser(unit_key, "Yaw_Governor", "Yaw_Governor", "Yaw_Governor", computer.max_yaw_right, computer.max_yaw_left);
+    YawPitchRollParser(unit_key, "Pitch_Governor", "Pitch_Governor_Up", "Pitch_Governor_Down", computer.max_pitch_up, computer.max_pitch_down);
+    YawPitchRollParser(unit_key, "Roll_Governor", "Roll_Governor_Right", "Roll_Governor_Left", computer.max_roll_right, computer.max_roll_left);
+
+    static float game_accel = GameConfig::GetVariable( "physics", "game_accel", 1.0 );
+    static float game_speed = GameConfig::GetVariable( "physics", "game_speed", 1.0 );
+    limits.afterburn = UnitCSVFactory::GetVariable(unit_key, "Afterburner_Accel", 0.0f) * game_accel * game_speed;
+    limits.forward   = UnitCSVFactory::GetVariable(unit_key, "Forward_Accel", 0.0f) * game_accel * game_speed;
+    limits.retro     = UnitCSVFactory::GetVariable(unit_key, "Retro_Accel", 0.0f) * game_accel * game_speed;
+    limits.lateral   = 0.5 * (UnitCSVFactory::GetVariable(unit_key, "Left_Accel", 0.0f) +
+                              UnitCSVFactory::GetVariable(unit_key, "Right_Accel", 0.0f)) * game_accel * game_speed;
+
+    limits.vertical  = 0.5 * (UnitCSVFactory::GetVariable(unit_key, "Top_Accel", 0.0f) +
+                              UnitCSVFactory::GetVariable(unit_key, "Bottom_Accel", 0.0f)) * game_accel * game_speed;
+
+    computer.max_combat_speed    = UnitCSVFactory::GetVariable(unit_key, "Default_Speed_Governor", 0.0f) * game_speed;
+    computer.max_combat_ab_speed = UnitCSVFactory::GetVariable(unit_key, "Afterburner_Speed_Governor", 0.0f) * game_speed;
+    computer.itts = UnitCSVFactory::GetVariable(unit_key, "ITTS", true);
+    computer.radar.canlock = UnitCSVFactory::GetVariable(unit_key, "Can_Lock", true);
+
+
+    // The Radar_Color column in the units.csv has been changed from a
+    // boolean value to a string. The boolean values are supported for
+    // backwardscompatibility.
+    // When we save this setting, it is simply converted from an integer
+    // number to a string, and we need to support this as well.
+    std::string iffval = UnitCSVFactory::GetVariable(unit_key, "Radar_Color", std::string() );
+
+    if ((iffval.empty()) || (iffval == "FALSE") || (iffval == "0"))
+    {
+        computer.radar.capability = Computer::RADARLIM::Capability::IFF_NONE;
+    } else if ((iffval == "TRUE") || (iffval == "1")) {
+        computer.radar.capability = Computer::RADARLIM::Capability::IFF_SPHERE
+                | Computer::RADARLIM::Capability::IFF_FRIEND_FOE;
+    } else if (iffval == "THREAT") {
+        computer.radar.capability = Computer::RADARLIM::Capability::IFF_SPHERE
+                | Computer::RADARLIM::Capability::IFF_FRIEND_FOE
+                | Computer::RADARLIM::Capability::IFF_THREAT_ASSESSMENT;
+    } else if (iffval == "BUBBLE_THREAT") {
+        computer.radar.capability = Computer::RADARLIM::Capability::IFF_BUBBLE
+                | Computer::RADARLIM::Capability::IFF_FRIEND_FOE
+                | Computer::RADARLIM::Capability::IFF_OBJECT_RECOGNITION
+                | Computer::RADARLIM::Capability::IFF_THREAT_ASSESSMENT;
+    } else if (iffval == "PLANE") {
+        computer.radar.capability = Computer::RADARLIM::Capability::IFF_PLANE
+                | Computer::RADARLIM::Capability::IFF_FRIEND_FOE;
+    } else if (iffval == "PLANE_THREAT") {
+        computer.radar.capability
+                = Computer::RADARLIM::Capability::IFF_PLANE
+                | Computer::RADARLIM::Capability::IFF_FRIEND_FOE
+                | Computer::RADARLIM::Capability::IFF_OBJECT_RECOGNITION
+                | Computer::RADARLIM::Capability::IFF_THREAT_ASSESSMENT;
+    } else {
+        unsigned int value = stoi(iffval, 0);
+        if (value == 0) {
+            // Unknown value
+            assert(false);
+            computer.radar.capability = Computer::RADARLIM::Capability::IFF_NONE;
+        } else {
+            computer.radar.capability = value;
+        }
+    }
+
+
+    computer.radar.maxrange     = UnitCSVFactory::GetVariable(unit_key, "Radar_Range", FLT_MAX);
+    computer.radar.maxcone      = cos( UnitCSVFactory::GetVariable(unit_key, "Max_Cone", 180.0f) * VS_PI/180);
+    computer.radar.trackingcone = cos( UnitCSVFactory::GetVariable(unit_key, "Tracking_Cone", 180.0f) * VS_PI/180 );
+    computer.radar.lockcone     = cos( UnitCSVFactory::GetVariable(unit_key, "Lock_Cone", 180.0f) * VS_PI/180 );
+
+    cloakmin = static_cast<int>(UnitCSVFactory::GetVariable(unit_key, "Cloak_Min", 0.0f) * 2147483136);
+    if (cloakmin < 0) {
+        cloakmin = 0;
+    }
+
+    cloakglass = UnitCSVFactory::GetVariable(unit_key, "Cloak_Glass", false);
+    if ( (cloakmin&0x1) && !cloakglass ) {
+        cloakmin -= 1;
+    }
+
+    if ( (cloakmin&0x1) == 0 && cloakglass ) {
+        cloakmin += 1;
+    }
+
+    if ( !UnitCSVFactory::GetVariable(unit_key, "Can_Cloak", false)) {
+         cloaking = -1;
+    } else {
+        cloaking = (int) (-2147483647)-1;
+    }
+
+    cloakrate    = (int) ( 2147483136.0 * UnitCSVFactory::GetVariable(unit_key, "Cloak_Rate", 0.0f) );     //short fix
+    cloakenergy  = UnitCSVFactory::GetVariable(unit_key, "Cloak_Energy", 0.0f);
+    repair_droid = UnitCSVFactory::GetVariable(unit_key, "Repair_Droid", 0);
+    ecm    = UnitCSVFactory::GetVariable(unit_key, "ECM_Rating", 0);
+
+    this->HeatSink = UnitCSVFactory::GetVariable(unit_key, "Heat_Sink_Rating", 0.0f);
     if (ecm < 0) ecm *= -1;
     if (pImage->cockpit_damage) {
-        HudDamage( pImage->cockpit_damage, OPTIM_GET( row, table, Hud_Functionality ) );
-        HudDamage( pImage->cockpit_damage+1+MAXVDUS+UnitImages< void >::NUMGAUGES, OPTIM_GET( row, table, Max_Hud_Functionality ) );
+        std::string hud_functionality = UnitCSVFactory::GetVariable(unit_key, "Hud_Functionality", std::string());
+        std::string max_hud_functionality = UnitCSVFactory::GetVariable(unit_key, "Max_Hud_Functionality", std::string());
+
+        HudDamage( pImage->cockpit_damage, hud_functionality);
+        HudDamage( pImage->cockpit_damage+1+MAXVDUS+UnitImages< void >::NUMGAUGES, max_hud_functionality);
     }
-    LifeSupportFunctionality    = ::stof( OPTIM_GET_DEF( row, table, Lifesupport_Functionality, "1" ) );
-    LifeSupportFunctionalityMax = ::stof( OPTIM_GET_DEF( row, table, Max_Lifesupport_Functionality, "1" ) );
-    CommFunctionality = ::stof( OPTIM_GET_DEF( row, table, Comm_Functionality, "1" ) );
-    CommFunctionalityMax = ::stof( OPTIM_GET_DEF( row, table, Max_Comm_Functionality, "1" ) );
-    fireControlFunctionality    = ::stof( OPTIM_GET_DEF( row, table, FireControl_Functionality, "1" ) );
-    fireControlFunctionalityMax = ::stof( OPTIM_GET_DEF( row, table, Max_FireControl_Functionality, "1" ) );
-    SPECDriveFunctionality = ::stof( OPTIM_GET_DEF( row, table, SPECDrive_Functionality, "1" ) );
-    SPECDriveFunctionalityMax   = ::stof( OPTIM_GET_DEF( row, table, Max_SPECDrive_Functionality, "1" ) );
-    computer.slide_start = ::stoi( OPTIM_GET( row, table, Slide_Start ) );
-    computer.slide_end   = ::stoi( OPTIM_GET( row, table, Slide_End ) );
-    UpgradeUnit( this, OPTIM_GET( row, table, Upgrades ) );
+    LifeSupportFunctionality    = UnitCSVFactory::GetVariable(unit_key, "Lifesupport_Functionality", 1.0f);
+    LifeSupportFunctionalityMax = UnitCSVFactory::GetVariable(unit_key, "Max_Lifesupport_Functionality", 1.0f);
+    CommFunctionality = UnitCSVFactory::GetVariable(unit_key, "Comm_Functionality", 1.0f);
+    CommFunctionalityMax = UnitCSVFactory::GetVariable(unit_key, "Max_Comm_Functionality", 1.0f);
+    fireControlFunctionality    = UnitCSVFactory::GetVariable(unit_key, "FireControl_Functionality", 1.0f);
+    fireControlFunctionalityMax = UnitCSVFactory::GetVariable(unit_key, "Max_FireControl_Functionality", 1.0f);
+    SPECDriveFunctionality = UnitCSVFactory::GetVariable(unit_key, "SPECDrive_Functionality", 1.0f);
+    SPECDriveFunctionalityMax   = UnitCSVFactory::GetVariable(unit_key, "Max_SPECDrive_Functionality", 1.0f);
+    computer.slide_start = UnitCSVFactory::GetVariable(unit_key, "Slide_Start", 0);
+    computer.slide_end   = UnitCSVFactory::GetVariable(unit_key, "Slide_End", 0);
+    UpgradeUnit( this, UnitCSVFactory::GetVariable(unit_key, "Upgrades", std::string()));
     {
-        std::string   tractorability = OPTIM_GET( row, table, Tractorability );
+        std::string   tractorability = UnitCSVFactory::GetVariable(unit_key, "Tractorability", std::string());
         unsigned char tflags;
         if ( !tractorability.empty() ) {
             tflags = tractorImmune;
@@ -1281,15 +1271,15 @@ void Unit::LoadRow( CSVRow &row, string modification, bool saved_game)
                 tflags |= tractorIn;
         } else {tflags = tractorPush; } setTractorability( (enum tractorHow) tflags );
     }
-    this->pImage->explosion_type = OPTIM_GET( row, table, Explosion );
+    this->pImage->explosion_type = UnitCSVFactory::GetVariable(unit_key, "Explosion", std::string());
     if ( pImage->explosion_type.get().length() ) {
         cache_ani( pImage->explosion_type );
     } else {
         static std::string expani = vs_config->getVariable( "graphics", "explosion_animation", "explosion_orange.ani" );
         cache_ani( expani );
     }
-    AddLights( this, xml, OPTIM_GET( row, table, Light ) );
-    xml.shieldmesh_str = OPTIM_GET( row, table, Shield_Mesh );
+    AddLights( this, xml, UnitCSVFactory::GetVariable(unit_key, "Light", std::string()));
+    xml.shieldmesh_str = UnitCSVFactory::GetVariable(unit_key, "Shield_Mesh", std::string());
     if ( xml.shieldmesh_str.length() ) {
         addShieldMesh( &xml, xml.shieldmesh_str.c_str(), xml.unitscale, faction, getFlightgroup() );
         meshdata.back() = xml.shieldmesh;
@@ -1302,7 +1292,7 @@ void Unit::LoadRow( CSVRow &row, string modification, bool saved_game)
     meshdata.back()->EnableSpecialFX();
     //Begin the Pow-w-w-war Zone Collide Tree Generation
     {
-        xml.rapidmesh_str = OPTIM_GET( row, table, Rapid_Mesh );
+        xml.rapidmesh_str = UnitCSVFactory::GetVariable(unit_key, "Rapid_Mesh", std::string());
         vector< mesh_polygon >polies;
 
         std::string collideTreeHash = VSFileSystem::GetHashName( modification+"#"+row[0] );
@@ -1314,7 +1304,7 @@ void Unit::LoadRow( CSVRow &row, string modification, bool saved_game)
         if (!this->colTrees) {
             string val;
             xml.hasColTree = 1;
-            if ( ( val = OPTIM_GET( row, table, Use_Rapid ) ).length() )
+            if ( ( val = UnitCSVFactory::GetVariable(unit_key, "Use_Rapid", std::string())).length() )
                 xml.hasColTree = XMLSupport::parse_bool( val );
             if (xml.shieldmesh) {
                 if ( meshdata.back() ) {
