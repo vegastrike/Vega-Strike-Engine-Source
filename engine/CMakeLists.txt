@@ -1054,6 +1054,7 @@ SET(LIBGFXSERVER_SOURCES
 )
 
 SET(LIBROOTGENERIC_SOURCES
+    src/atmospheric_fog_mesh.cpp
     src/configxml.cpp
     src/easydom.cpp
     src/endianness.cpp

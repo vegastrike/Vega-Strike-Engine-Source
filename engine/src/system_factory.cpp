@@ -40,6 +40,7 @@
 #include "enhancement.h"
 #include "building.h"
 #include "asteroid.h"
+#include "atmospheric_fog_mesh.h"
 
 
 // TODO: For comparison only - remove

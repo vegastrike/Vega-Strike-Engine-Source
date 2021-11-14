@@ -38,6 +38,8 @@
 #include <assert.h>
 #include "cont_terrain.h"
 #include "atmosphere.h"
+#include "atmospheric_fog_mesh.h"
+
 #ifdef FIX_TERRAIN
 #include "gfx/planetary_transform.h"
 #endif
