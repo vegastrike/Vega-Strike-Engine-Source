@@ -435,7 +435,6 @@ public:
     virtual bool Explode( bool draw, float timeit );
 
 //Uses GFX so only in Unit class
-    virtual void Draw( const Transformation &quat = identity_transformation, const Matrix &m = identity_matrix ) override {}
     virtual void DrawNow( const Matrix &m = identity_matrix, float lod = 1000000000 ) override {}
     virtual std::string drawableGetName() override { return name; }
 
@@ -586,7 +585,7 @@ public:
     // TODO: move to jump_capable?
     ///if the unit is a wormhole
     bool  forcejump = false;
-protected:
+
 
 //Should not be drawn
     enum INVIS {DEFAULTVIS=0x0, INVISGLOW=0x1, INVISUNIT=0x2, INVISCAMERA=0x4};

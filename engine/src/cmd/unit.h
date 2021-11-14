@@ -106,11 +106,8 @@ public:
 ///What's the HudImage of this unit
     VSSprite * getHudImage() const;
 ///Draws this unit with the transformation and matrix (should be equiv) separately
-    virtual void Draw( const Transformation &quat, const Matrix &m );
-    virtual void Draw( const Transformation &quat );
-    virtual void Draw();
     virtual void DrawNow( const Matrix &m, float lod = 1000000000 );
-    virtual void DrawNow();
+
 ///Deprecated
     void addHalo( const char *filename,
                   const Matrix &trans,
@@ -171,8 +168,7 @@ public:
  **** XML struct
  *******************************************
  */
-///Holds temporary values for inter-function XML communication Saves deprecated restr info
-    Matrix WarpMatrix( const Matrix &ctm ) const;
+
 };
 
 #endif

@@ -28,7 +28,11 @@
 #include "vs_logging.h"
 #include "gfx/mesh.h"
 #include "gfx/quaternion.h"
+#include "gfx/lerp.h"
+#include "gfx/occlusion.h"
+
 #include "unit_generic.h"
+#include "vs_globals.h"
 #include "gfx/point_to_cam.h"
 #include "gfx/halo_system.h"
 #include "options.h"
@@ -133,6 +137,200 @@ bool Drawable::DrawableInit(const char *filename, int faction,
 		delete meshes;
 		return false;
 	}
+}
+
+extern double interpolation_blend_factor;
+extern double saved_interpolation_blend_factor;
+extern bool   cam_setup_phase;
+extern int cloakVal( int cloakint, int cloakminint, int cloakrateint, bool cloakglass ); //short fix?
+extern double calc_blend_factor( double frac, unsigned int priority, unsigned int when_it_will_be_simulated, unsigned int cur_simulation_frame );
+
+void Drawable::Draw( const Transformation &parent, const Matrix &parentMatrix)
+{
+    Unit *unit = static_cast<Unit*>(this);
+
+    //Quick shortcut for camera setup phase
+    bool myparent = ( unit == _Universe->AccessCockpit()->GetParent() );
+
+
+    Matrix         *ctm;
+    Matrix invview;
+    Transformation *ct;
+
+    unit->cumulative_transformation = linear_interpolate( unit->prev_physical_state,
+                                                          unit->curr_physical_state,
+                                                          interpolation_blend_factor );
+    unit->cumulative_transformation.Compose( parent, parentMatrix );
+    unit->cumulative_transformation.to_matrix( unit->cumulative_transformation_matrix );
+
+    ctm = GetCumulativeTransformationMatrix(unit, parentMatrix, invview);
+    ct  = &unit->cumulative_transformation;
+
+#ifdef PERFRAMESOUND
+    AUDAdjustSound( sound.engine, cumulative_transformation.position, GetVelocity() );
+#endif
+
+    unsigned int i, n;
+    if ( (unit->Destroyed()) && (!cam_setup_phase) ) {
+        unit->Explode( true, GetElapsedTime() );
+    }
+
+    float damagelevel = 1.0f;
+    unsigned char chardamage = 0;
+
+    // We might need to scale rSize, this "average scale" takes the transform matrix into account
+    float avgscale = 1.0f;
+
+    bool On_Screen = false;
+    bool Unit_On_Screen = false;
+    float Apparent_Size = 0.0f;
+    int cloak = unit->cloaking;
+    Matrix wmat;
+
+    if (!cam_setup_phase) {
+        // Following stuff is only needed in actual drawing phase
+        if (unit->cloaking > unit->cloakmin) {
+            cloak = (int) (unit->cloaking-interpolation_blend_factor*unit->cloakrate * simulation_atom_var );
+            cloak = cloakVal( cloak, unit->cloakmin, unit->cloakrate, unit->cloakglass );
+        }
+        if ((*unit->current_hull) < (*unit->max_hull)) {
+            damagelevel = (*unit->current_hull)/(*unit->max_hull);
+            chardamage  = ( 255-(unsigned char) (damagelevel*255) );
+        }
+        avgscale = sqrt((ctm->getP().MagnitudeSquared() + ctm->getR().MagnitudeSquared()) * 0.5);
+        wmat = unit->WarpMatrix( *ctm );
+    }
+
+    if ( ( !(unit->invisible & unit->INVISUNIT) ) && ( ( !(unit->invisible & unit->INVISCAMERA) ) || (!myparent) ) ) {
+        if (!cam_setup_phase) {
+            Camera *camera = _Universe->AccessCamera();
+            QVector camerapos = camera->GetPosition();
+
+            float minmeshradius =
+                ( camera->GetVelocity().Magnitude()+unit->Velocity.Magnitude() ) * simulation_atom_var;
+
+            unsigned int numKeyFrames = unit->graphicOptions.NumAnimationPoints;
+            for (i = 0, n = nummesh(); i <= n; i++) {
+                //NOTE LESS THAN OR EQUALS...to cover shield mesh
+                if (this->meshdata[i] == NULL)
+                    continue;
+                if (  i == n && (this->meshdata[i]->numFX() == 0 || unit->Destroyed()) ) {
+                    continue;
+                }
+
+                if (this->meshdata[i]->getBlendDst() == ONE) {
+                    if ( (unit->invisible & unit->INVISGLOW) != 0 )
+                        continue;
+                    if (damagelevel < .9)
+                        if ( unit->flickerDamage() )
+                            continue;
+                }
+                QVector TransformedPosition = Transform( *ctm, meshdata[i]->Position().Cast() );
+
+                //d can be used for level of detail shit
+                float mSize = meshdata[i]->rSize() * avgscale;
+                double d = ( TransformedPosition-camerapos ).Magnitude();
+                double rd  = d-mSize;
+                float pixradius = Apparent_Size = mSize*perspectiveFactor(
+                    (rd < g_game.znear) ? g_game.znear : rd );
+                float lod = pixradius*g_game.detaillevel;
+                if (meshdata[i]->getBlendDst() == ZERO) {
+                    if (unit->isUnit() == _UnitType::planet && pixradius > 10) {
+                        Occlusion::addOccluder(TransformedPosition, mSize, true);
+                    } else if (pixradius >= 10.0) {
+                        Occlusion::addOccluder(TransformedPosition, mSize, false);
+                    }
+                }
+                if (lod >= 0.5 && pixradius >= 2.5) {
+                    double frustd = GFXSphereInFrustum(
+                        TransformedPosition,
+                        minmeshradius+mSize );
+                    if (frustd) {
+                        //if the radius is at least half a pixel at detail 1 (equivalent to pixradius >= 0.5 / detail)
+                        float currentFrame = meshdata[i]->getCurrentFrame();
+                        this->meshdata[i]->Draw( lod, wmat, d,
+                                                 i == this->meshdata.size()-1 ? -1 : cloak,
+                                                 (camera->GetNebula() == unit->nebula && unit->nebula != NULL) ? -1 : 0,
+                                                 chardamage );                                                                                                                                                            //cloakign and nebula
+                        On_Screen = true;
+                        unsigned int numAnimFrames = 0;
+                        static const string default_animation;
+                        if ( this->meshdata[i]->getFramesPerSecond()
+                            && ( numAnimFrames = this->meshdata[i]->getNumAnimationFrames( default_animation ) ) ) {
+                            float currentprogress = floor(
+                                this->meshdata[i]->getCurrentFrame()*numKeyFrames/(float) numAnimFrames );
+                            if (numKeyFrames
+                                && floor( currentFrame*numKeyFrames/(float) numAnimFrames ) != currentprogress)
+                            {
+                                unit->graphicOptions.Animating = 0;
+                                meshdata[i]->setCurrentFrame( .1+currentprogress*numAnimFrames/(float) numKeyFrames );
+                            } else if (!unit->graphicOptions.Animating) {
+                                meshdata[i]->setCurrentFrame( currentFrame );                                 //dont' budge
+                            }
+                        }
+                    }
+                }
+            }
+
+            Unit_On_Screen = On_Screen || !!GFXSphereInFrustum(
+                ct->position,
+                minmeshradius+unit->rSize() );
+        } else Unit_On_Screen = true;
+        if (Unit_On_Screen && unit->hasSubUnits()) {
+            Unit  *un;
+            double backup = interpolation_blend_factor;
+            int    cur_sim_frame = _Universe->activeStarSystem()->getCurrentSimFrame();
+            for (un_iter iter = unit->getSubUnits(); (un = *iter); ++iter) {
+                float sim_atom_backup = simulation_atom_var;
+                //if (sim_atom_backup != SIMULATION_ATOM) {
+                //    VS_LOG(debug, (boost::format("void GameUnit::Draw( const Transformation &parent, const Matrix &parentMatrix ): sim_atom as backed up != SIMULATION_ATOM: %1%") % sim_atom_backup));
+                //}
+                if (unit->sim_atom_multiplier && un->sim_atom_multiplier) {
+                    //VS_LOG(trace, (boost::format("void GameUnit::Draw( const Transformation &parent, const Matrix &parentMatrix ): simulation_atom_var as backed up  = %1%") % simulation_atom_var));
+                    simulation_atom_var = simulation_atom_var * un->sim_atom_multiplier / unit->sim_atom_multiplier;
+                    //VS_LOG(trace, (boost::format("void GameUnit::Draw( const Transformation &parent, const Matrix &parentMatrix ): simulation_atom_var as multiplied = %1%") % simulation_atom_var));
+                }
+                interpolation_blend_factor = calc_blend_factor( saved_interpolation_blend_factor,
+                                                                un->sim_atom_multiplier,
+                                                                un->cur_sim_queue_slot,
+                                                                cur_sim_frame );
+                (un)->Draw( *ct, *ctm );
+
+                simulation_atom_var = sim_atom_backup;
+            }
+            interpolation_blend_factor = backup;
+        }
+    } else {
+        _Universe->AccessCockpit()->SetupViewPort();         ///this is the final, smoothly calculated cam
+        //UpdateHudMatrix();
+    }
+    /***DEBUGGING cosAngleFromMountTo
+     *  UnitCollection *dL = _Universe->activeStarSystem()->getUnitList();
+     *  UnitCollection::UnitIterator *tmpiter = dL->createIterator();
+     *  GameUnit<UnitType> * curun;
+     *  while (curun = tmpiter->current()) {
+     *  if (curun->selected) {
+     *   float tmpdis;
+     *   float tmpf = cosAngleFromMountTo (curun, tmpdis);
+     *   VSFileSystem::vs_fprintf (stderr,"%s: <%f d: %f\n", curun->name.c_str(), tmpf, tmpdis);
+     *
+     *  }
+     *  tmpiter->advance();
+     *  }
+     *  delete tmpiter;
+     **/
+    if (cam_setup_phase) return;
+
+    DrawSubunits(On_Screen, wmat, cloak, avgscale, chardamage);
+    DrawHalo(On_Screen, Apparent_Size, wmat, cloak);
+    Sparkle(On_Screen, ctm);
+}
+
+
+
+void Drawable::DrawNow()
+{
+    DrawNow( identity_matrix, 1000000000 );
 }
 
 void Drawable::AnimationStep()
@@ -634,5 +832,31 @@ void Drawable::LightShields( const Vector &pnt, const Vector &normal, float amt,
         return;
     }
 
-    mesh->AddDamageFX( pnt, unit->shieldtight ? unit->shieldtight*normal : Vector( 0, 0, 0 ), std::min( 1.0f, std::max( 0.0f,                                                                                                            amt ) ), color );
+    mesh->AddDamageFX( pnt, unit->shieldtight ? unit->shieldtight*normal : Vector( 0, 0, 0 ),
+                       std::min( 1.0f, std::max( 0.0f, amt ) ), color );
+}
+
+
+Matrix Drawable::WarpMatrix( const Matrix &ctm ) const
+{
+    const Unit *unit = static_cast<const Unit*>(this);
+
+    if ( unit->GetWarpVelocity().MagnitudeSquared() < (game_options.warp_stretch_cutoff * game_options.warp_stretch_cutoff * game_options.game_speed * game_options.game_speed )
+        || (game_options.only_stretch_in_warp && unit->graphicOptions.InWarp == 0) ) {
+        return ctm;
+    } else {
+        Matrix k( ctm );
+
+        float  speed = unit->GetWarpVelocity().Magnitude();
+        float stretchregion0length = game_options.warp_stretch_region0_max*(speed-(game_options.warp_stretch_cutoff * game_options.game_speed))/((game_options.warp_stretch_max_region0_speed * game_options.game_speed)-(game_options.warp_stretch_cutoff * game_options.game_speed));
+        float stretchlength =
+            (game_options.warp_stretch_max
+             -game_options.warp_stretch_region0_max)*(speed-(game_options.warp_stretch_max_region0_speed * game_options.game_speed))/((game_options.warp_stretch_max_speed * game_options.game_speed)-(game_options.warp_stretch_max_region0_speed * game_options.game_speed)+.06125f)+game_options.warp_stretch_region0_max;
+        if (stretchlength > game_options.warp_stretch_max)
+            stretchlength = game_options.warp_stretch_max;
+        if (stretchregion0length > game_options.warp_stretch_region0_max)
+            stretchregion0length = game_options.warp_stretch_region0_max;
+        ScaleMatrix( k, Vector( 1, 1, 1+(speed > (game_options.warp_stretch_max_region0_speed * game_options.game_speed) ? stretchlength : stretchregion0length) ) );
+        return k;
+    }
 }
