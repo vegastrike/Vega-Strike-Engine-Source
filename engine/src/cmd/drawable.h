@@ -145,6 +145,9 @@ public:
 
     ///Holds temporary values for inter-function XML communication Saves deprecated restr info
     Matrix WarpMatrix( const Matrix &ctm ) const;
+
+    ///Sets the camera to be within this unit.
+    void UpdateHudMatrix( int whichcam );
 };
 
 Matrix* GetCumulativeTransformationMatrix(Unit *unit, const Matrix &parentMatrix, Matrix invview);

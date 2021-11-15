@@ -197,20 +197,7 @@ bool GameUnit::queryFrustum( double frustum[6][4] ) const
 }
 
 
-void GameUnit::UpdateHudMatrix( int whichcam )
-{
-    Matrix m;
-    Matrix ctm = this->cumulative_transformation_matrix;
-    Vector q( ctm.getQ() );
-    Vector r( ctm.getR() );
-    Vector tmp;
-    CrossProduct( r, q, tmp );
-    _Universe->AccessCamera( whichcam )->SetOrientation( tmp, q, r );
 
-    _Universe->AccessCamera( whichcam )->SetPosition( Transform( ctm,
-                                                                this->pImage->CockpitCenter.Cast() ),
-                                                     this->GetWarpVelocity(), this->GetAngularVelocity(), this->GetAcceleration() );
-}
 
 extern int cloakVal( int cloakint, int cloakminint, int cloakrateint, bool cloakglass ); //short fix?
 

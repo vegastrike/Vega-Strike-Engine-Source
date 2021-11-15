@@ -862,3 +862,23 @@ Matrix Drawable::WarpMatrix( const Matrix &ctm ) const
         return k;
     }
 }
+
+
+void Drawable::UpdateHudMatrix( int whichcam )
+{
+    Unit *unit = static_cast<Unit*>(this);
+
+    Matrix m;
+    Matrix ctm = unit->cumulative_transformation_matrix;
+    Vector q( ctm.getQ() );
+    Vector r( ctm.getR() );
+    Vector tmp;
+    CrossProduct( r, q, tmp );
+    _Universe->AccessCamera( whichcam )->SetOrientation( tmp, q, r );
+
+    QVector v = Transform( ctm, unit->pImage->CockpitCenter.Cast() );
+    _Universe->AccessCamera( whichcam )->SetPosition( v,
+                                                      unit->GetWarpVelocity(),
+                                                      unit->GetAngularVelocity(),
+                                                      unit->GetAcceleration() );
+}

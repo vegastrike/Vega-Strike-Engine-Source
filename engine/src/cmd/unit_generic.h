@@ -440,7 +440,6 @@ public:
 
 //Sets the camera to be within this unit.
 //Uses Universe & GFX so not needed here -> only in Unit class
-    virtual void UpdateHudMatrix( int whichcam ) {}
 //What's the HudImage of this unit
 //Uses GFX stuff so only in Unit class
     virtual VSSprite * getHudImage() const
