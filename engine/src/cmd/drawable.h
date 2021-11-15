@@ -27,9 +27,11 @@
 #define DRAWABLE_H
 
 #include "gfx/quaternion.h"
+#include "gfx/halo_system.h"
 #include <vector>
 #include <map>
 #include <string>
+#include <memory>
 
 class Mesh;
 class Flightgroup;
@@ -44,8 +46,9 @@ using std::map;
 class Drawable
 {
 public:
-  //number of meshes (each with separate texture) this unit has
-  std::vector< Mesh* >meshdata;
+    //number of meshes (each with separate texture) this unit has
+    std::vector< Mesh* >meshdata;
+    std::unique_ptr< HaloSystem > halos;
 
 protected:
     vector< vector<Mesh *> *> vecAnimations;

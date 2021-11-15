@@ -56,17 +56,19 @@ inline static float perspectiveFactor( float d )
 }
 
 Drawable::Drawable() :
-                   animatedMesh(true),
-                   activeAnimation(0),
-                   timeperframe(3.0),
-                   done(true),
-                   activeMesh(0),
-                   nextactiveMesh(1),
-                   infiniteLoop(true),
-                   loopCount(0),
-                   curtime(0.0)
+    halos( new HaloSystem() ),
+    animatedMesh(true),
+    activeAnimation(0),
+    timeperframe(3.0),
+    done(true),
+    activeMesh(0),
+    nextactiveMesh(1),
+    infiniteLoop(true),
+    loopCount(0),
+    curtime(0.0)
 
 {}
+
 
 bool Drawable::DrawableInit(const char *filename, int faction,
         Flightgroup *flightgrp, const char *animationExt)
@@ -583,7 +585,7 @@ void Drawable::DrawHalo(bool on_screen, float apparent_size, Matrix wmat, int cl
     }
 
     // Units with no halo
-    if(game_unit->phalos->NumHalos() == 0) {
+    if(halos->NumHalos() == 0) {
         return;
     }
 
@@ -613,7 +615,7 @@ void Drawable::DrawHalo(bool on_screen, float apparent_size, Matrix wmat, int cl
     //nor is maxaccel. Instead, each halo should have its own limits specified in units.csv
     float nebd = (_Universe->AccessCamera()->GetNebula() == unit->nebula && unit->nebula != nullptr) ? -1 : 0;
     float hulld = unit->GetHull() > 0 ? damage_level : 1.0;
-    game_unit->phalos->Draw( wmat, Scale, cloak, nebd, hulld, velocity,
+    halos->Draw( wmat, Scale, cloak, nebd, hulld, velocity,
                   linaccel, angaccel, maxaccel, cmas, unit->faction );
 
 }

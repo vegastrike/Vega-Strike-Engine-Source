@@ -87,16 +87,13 @@ extern bool   cam_setup_phase;
 /**** MOVED FROM BASE_INTERFACE.CPP ****/
 extern string getCargoUnitName( const char *name );
 
-GameUnit::GameUnit( int ) : sparkle_accum( 0 )
-    , phalos( new HaloSystem() )
+GameUnit::GameUnit( int )
 {
     this->Unit::Init();
 }
 
 GameUnit::GameUnit( std::vector< Mesh* > &meshes, bool SubU, int fact ) :
     Unit( meshes, SubU, fact )
-    , sparkle_accum( 0 )
-    , phalos( new HaloSystem() )
 {}
 
 GameUnit::GameUnit( const char *filename,
@@ -105,8 +102,7 @@ GameUnit::GameUnit( const char *filename,
                                                            std::string unitModifications,
                                                            Flightgroup *flightgrp,
                                                            int fg_subnumber,
-                                                           string *netxml ) : sparkle_accum( 0 )
-    , phalos( new HaloSystem() )
+                                                           string *netxml )
 {
     Unit::Init( filename, SubU, faction, unitModifications, flightgrp, fg_subnumber, netxml );
 }
@@ -161,7 +157,7 @@ void GameUnit::addHalo( const char *filename,
                                     std::string halo_type,
                                     float halo_speed )
 {
-    phalos->AddHalo( filename, trans, size, col, halo_type, halo_speed );
+    halos->AddHalo( filename, trans, size, col, halo_type, halo_speed );
 }
 
 
@@ -317,7 +313,7 @@ void GameUnit::DrawNow( const Matrix &mato, float lod )
     float  maxaccel = this->GetMaxAccelerationInDirectionOf( mat.getR(), true );
     Vector velocity = this->GetVelocity();
     if ( !( this->docked & (DOCKED | DOCKED_INSIDE) ) )
-        phalos->Draw( mat, Scale, cloak, 0, this->GetHullPercent(), velocity, linaccel, angaccel, maxaccel, cmas, this->faction );
+        halos->Draw( mat, Scale, cloak, 0, this->GetHullPercent(), velocity, linaccel, angaccel, maxaccel, cmas, this->faction );
     if (rootunit == (const void*) this) {
         Mesh::ProcessZFarMeshes();
         Mesh::ProcessUndrawnMeshes();

@@ -96,8 +96,7 @@ public:
  **** GFX/MESHES STUFF                                                              ***
  **************************************************************************************
  */
- 	double sparkle_accum;
-    std::unique_ptr< HaloSystem >phalos;
+
 ///Process all meshes to be deleted
 
     void FixGauges();
