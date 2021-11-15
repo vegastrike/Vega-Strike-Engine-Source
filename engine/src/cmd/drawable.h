@@ -124,8 +124,9 @@ public:
     //Uses GFX so only in Unit class
     virtual void Draw( const Transformation &quat = identity_transformation,
                        const Matrix &m = identity_matrix );
-    virtual void DrawNow();
-    virtual void DrawNow( const Matrix &m = identity_matrix, float lod = 1000000000 ) = 0;
+
+    ///Draws this unit with the transformation and matrix (should be equiv) separately
+    virtual void DrawNow( const Matrix &m = identity_matrix, float lod = 1000000000 );
     virtual std::string drawableGetName() = 0;
 
     void Sparkle(bool on_screen, Matrix *ctm);

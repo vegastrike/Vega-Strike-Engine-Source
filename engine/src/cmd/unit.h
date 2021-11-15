@@ -104,7 +104,7 @@ public:
 ///What's the HudImage of this unit
     VSSprite * getHudImage() const;
 ///Draws this unit with the transformation and matrix (should be equiv) separately
-    virtual void DrawNow( const Matrix &m, float lod = 1000000000 );
+    //virtual void DrawNow( const Matrix &m, float lod = 1000000000 );
 
 ///Deprecated
     void addHalo( const char *filename,

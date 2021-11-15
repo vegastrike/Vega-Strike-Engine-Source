@@ -435,7 +435,7 @@ public:
     virtual bool Explode( bool draw, float timeit );
 
 //Uses GFX so only in Unit class
-    virtual void DrawNow( const Matrix &m = identity_matrix, float lod = 1000000000 ) override {}
+    //virtual void DrawNow( const Matrix &m = identity_matrix, float lod = 1000000000 ) override {}
     virtual std::string drawableGetName() override { return name; }
 
 //Sets the camera to be within this unit.
