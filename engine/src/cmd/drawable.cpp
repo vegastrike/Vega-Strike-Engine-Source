@@ -69,6 +69,16 @@ Drawable::Drawable() :
 
 {}
 
+Drawable::~Drawable() {
+    for (Mesh* mesh : meshdata) {
+        if (mesh) {
+            delete mesh;
+
+        }
+    }
+    meshdata.clear();
+    clear();
+}
 
 bool Drawable::DrawableInit(const char *filename, int faction,
         Flightgroup *flightgrp, const char *animationExt)
@@ -986,4 +996,11 @@ void Drawable::UpdateHudMatrix( int whichcam )
                                                       unit->GetWarpVelocity(),
                                                       unit->GetAngularVelocity(),
                                                       unit->GetAcceleration() );
+}
+
+
+VSSprite* Drawable::getHudImage() const
+{
+    const Unit *unit = static_cast<const Unit*>(this);
+    return unit->pImage->pHudImage;
 }

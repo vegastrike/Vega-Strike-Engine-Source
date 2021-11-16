@@ -307,7 +307,7 @@ public:
     void ClearMounts();
 //Loads a user interface for the user to upgrade his ship
 //Uses base stuff -> only in Unit
-    virtual void UpgradeInterface( Unit *base ) {}
+    virtual void UpgradeInterface( Unit *base );
 
     bool canUpgrade( const Unit *upgrador,
                      int mountoffset,
@@ -425,14 +425,14 @@ public:
                           const Vector &size,
                           const GFXColor &col,
                           std::string halo_type,
-                          float activation ) {}
+                          float activation );
 
 //Uses Mesh -> in NetUnit and Unit only
     std::vector< Mesh* >StealMeshes();
 /* Begin and continue explosion
  *  Uses GFX so only in Unit class
  *  But should always return true on server side = assuming explosion time=0 here */
-    virtual bool Explode( bool draw, float timeit );
+    bool Explode( bool draw, float timeit );
 
 //Uses GFX so only in Unit class
     //virtual void DrawNow( const Matrix &m = identity_matrix, float lod = 1000000000 ) override {}
@@ -441,11 +441,7 @@ public:
 //Sets the camera to be within this unit.
 //Uses Universe & GFX so not needed here -> only in Unit class
 //What's the HudImage of this unit
-//Uses GFX stuff so only in Unit class
-    virtual VSSprite * getHudImage() const
-    {
-        return NULL;
-    }
+
 //Not needed just in Unit class
 
     // Uses GFX, so generic version is a no-op.
@@ -857,11 +853,7 @@ public:
 //for click list
     float querySphereClickList( const QVector &st, const QVector &dir, float err ) const;
 //Queries if this unit is within a given frustum
-//Uses GFX -> defined only Unit class
-    bool queryFrustum( double frustum[6][4] ) const
-    {
-        return false;
-    }
+    bool queryFrustum( double frustum[6][4] ) const;
 
 /**
  * Queries the bounding sphere with a duo of mouse coordinates that project
@@ -918,6 +910,8 @@ public:
     bool isDocked( const Unit *dockingUnit ) const;
     bool UnDock( Unit *unitToDockWith );
 //Use AI
+    ///returns -1 if unit cannot dock, otherwise returns which dock it can dock at
+    // The above is no longer accurate. It returns a bool...
     bool RequestClearance( Unit *dockingunit );
     bool EndRequestClearance( Unit *dockingunit );
     bool hasPendingClearanceRequests() const;
@@ -1029,6 +1023,7 @@ public:
     // MACRO_FUNCTION(field_a, object_a, object_b)
     // object_a->field_a = object_b->field_b;
     float temporary_upgrade_float_variable;
+
 };
 
 Unit * findUnitInStarsystem( const void *unitDoNotDereference );

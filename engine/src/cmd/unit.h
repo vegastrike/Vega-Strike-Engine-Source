@@ -44,7 +44,6 @@ class Flightgroup;
 template < typename BOGUS >
 struct UnitImages;
 class Unit;
-class VSSprite;
 class Camera;
 class UnitCollection;
 
@@ -72,47 +71,16 @@ public:
   //the unit.
     GameUnit( const char *filename, bool SubUnit, int faction, std::string customizedUnit = std::string(
                   "" ), Flightgroup *flightgroup = NULL, int fg_subnumber = 0, std::string *netxml = NULL );
-    virtual ~GameUnit();
 
-    enum _UnitType isUnit() const
-    {
-        return _UnitType::unit;
-    }
 
-    unsigned int nummesh() const {
-        return Unit::nummesh();
-    }
-  ///fils in corner_min,corner_max and radial_size
-  ///returns -1 if unit cannot dock, otherwise returns which dock it can dock at
-    UnitImages< void >& GetImageInformation();
-    bool RequestClearance( Unit *dockingunit );
-  ///Loads a user interface for the user to upgrade his ship
-    void UpgradeInterface( Unit *base );
-  ///The name (type) of this unit shouldn't be public
-    virtual void Cloak( bool cloak );
 
-/*
- **************************************************************************************
- **** GFX/MESHES STUFF                                                              ***
- **************************************************************************************
- */
 
-///Process all meshes to be deleted
 
-    void FixGauges();
 
-///What's the HudImage of this unit
-    VSSprite * getHudImage() const;
-///Draws this unit with the transformation and matrix (should be equiv) separately
-    //virtual void DrawNow( const Matrix &m, float lod = 1000000000 );
 
-///Deprecated
-    void addHalo( const char *filename,
-                  const Matrix &trans,
-                  const Vector &size,
-                  const GFXColor &col,
-                  std::string halo_type,
-                  float halo_speed );
+
+
+
         
 /*
  **************************************************************************************
@@ -121,15 +89,12 @@ public:
  */
     bool TransferUnitToSystem( unsigned int whichJumpQueue, StarSystem*&previouslyActiveStarSystem, bool DoSightAndSound );
 ///Begin and continue explosion
-    bool Explode( bool draw, float timeit );
 /*
  **************************************************************************************
  **** COLLISION STUFF                                                               ***
  **************************************************************************************
  */
-///Updates the collide Queue with any possible change in sectors
-///Queries if this unit is within a given frustum
-    bool queryFrustum( double frustum[6][4] ) const;
+
 
 ///Queries the bounding sphere with a duo of mouse coordinates that project
 ///to the center of a ship and compare with a sphere...pretty fast*/

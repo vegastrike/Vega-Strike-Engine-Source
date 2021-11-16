@@ -37,7 +37,8 @@ class Mesh;
 class Flightgroup;
 class Unit;
 struct GFXColor;
-//class Transformation;
+class VSSprite;
+
 
 using std::vector;
 using std::string;
@@ -73,6 +74,7 @@ public:
     static std::map< string, Unit * > Units;
 
     Drawable();
+    ~Drawable();
 
     bool DrawableInit(const char *filename, int faction, Flightgroup *flightgrp = NULL, const char *animationExt = NULL);
 
@@ -83,7 +85,6 @@ public:
     void clear();
 
 protected:
-    virtual ~Drawable() { clear(); }
     // forbidden
     Drawable( const Drawable& ) = delete;
     // forbidden
@@ -149,6 +150,8 @@ public:
 
     ///Sets the camera to be within this unit.
     void UpdateHudMatrix( int whichcam );
+
+    VSSprite * getHudImage() const;
 };
 
 Matrix* GetCumulativeTransformationMatrix(Unit *unit, const Matrix &parentMatrix, Matrix invview);

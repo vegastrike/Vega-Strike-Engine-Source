@@ -61,7 +61,7 @@
 #include "base_util.h"
 #include "unit_jump.h"
 #include "unit_customize.h"
-#include "unit_damage.h"
+//#include "unit_damage.h"
 #include "unit_physics.h"
 #include "unit_click.h"
 #include "options.h"
@@ -84,8 +84,7 @@ extern double interpolation_blend_factor;
 extern double saved_interpolation_blend_factor;
 extern bool   cam_setup_phase;
 
-/**** MOVED FROM BASE_INTERFACE.CPP ****/
-extern string getCargoUnitName( const char *name );
+
 
 GameUnit::GameUnit( int )
 {
@@ -107,94 +106,23 @@ GameUnit::GameUnit( const char *filename,
     Unit::Init( filename, SubU, faction, unitModifications, flightgrp, fg_subnumber, netxml );
 }
 
-GameUnit::~GameUnit()
-{
-    for (unsigned int meshcount = 0; meshcount < this->meshdata.size(); meshcount++)
-        if (this->meshdata[meshcount]) {
-            delete this->meshdata[meshcount];
-            this->meshdata[meshcount] = nullptr;
-        }
-    this->meshdata.clear();
-    //delete phalos;
-}
-
-/*
-unsigned int GameUnit::nummesh() const {
-    // return number of meshes but not the shield
-    return (this->meshdata.size() - 1 );
-}*/
 
 
-void GameUnit::UpgradeInterface( Unit *baseun )
-{
-    string basename = ( ::getCargoUnitName( baseun->getFullname().c_str() ) );
-    if (baseun->isUnit() != _UnitType::planet)
-        basename = baseun->name;
-    BaseUtil::LoadBaseInterfaceAtDock( basename, baseun, this );
-}
-
-#define PARANOIA .4
-
-inline static float perspectiveFactor( float d )
-{
-    if (d > 0)
-        return g_game.x_resolution*GFXGetZPerspective( d );
-    else
-        return 1.0f;
-}
 
 
-VSSprite*GameUnit::getHudImage() const
-{
-    return this->pImage->pHudImage;
-}
 
 
-void GameUnit::addHalo( const char *filename,
-                                    const Matrix &trans,
-                                    const Vector &size,
-                                    const GFXColor &col,
-                                    std::string halo_type,
-                                    float halo_speed )
-{
-    halos->AddHalo( filename, trans, size, col, halo_type, halo_speed );
-}
 
 
-void GameUnit::Cloak( bool engage )
-{
-    Unit::Cloak( engage );         //client side unit
-}
 
 
-bool GameUnit::queryFrustum( double frustum[6][4] ) const
-{
-    unsigned int    i;
-#ifdef VARIABLE_LENGTH_PQR
-    Vector TargetPoint( cumulative_transformation_matrix[0],
-                        cumulative_transformation_matrix[1],
-                        cumulative_transformation_matrix[2] );
-    float  SizeScaleFactor = sqrtf( TargetPoint.Dot( TargetPoint ) );
-#else
-    Vector TargetPoint;
-#endif
-    for (i = 0; i < nummesh() && this->meshdata[i]; i++) {
-        TargetPoint = Transform( this->cumulative_transformation_matrix, this->meshdata[i]->Position() );
-        if ( GFXSphereInFrustum( frustum,
-                                 TargetPoint,
-                                 this->meshdata[i]->rSize()
-#ifdef VARIABLE_LENGTH_PQR
-                                 *SizeScaleFactor
-#endif
-                               ) )
-            return true;
-    }
-    const Unit *un;
-    for (un_fkiter iter = this->SubUnits.constFastIterator(); (un = *iter); ++iter)
-        if ( ( (GameUnit*)un )->queryFrustum( frustum ) )
-            return true;
-    return false;
-}
+
+
+
+
+
+
+
 
 
 
