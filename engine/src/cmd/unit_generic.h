@@ -194,10 +194,11 @@ protected:
 //forbidden
     Unit& operator=( const Unit& ) = delete;
 
-    virtual ~Unit();
+
 
 public:
     Unit();
+    virtual ~Unit();
 
 /** Default constructor. This is just to figure out where default
  *  constructors are used. The useless argument will be removed
@@ -256,7 +257,7 @@ public:
     bool UpgradeSubUnitsWithFactory( const Unit*up, int subunitoffset, bool touchme, bool downgrade, int &numave,
                                     double &percentage, Unit*(*createupgradesubunit)(std::string s,
                                                                                      int faction) );
-    virtual bool UpgradeSubUnits( const Unit *up,
+    bool UpgradeSubUnits( const Unit *up,
                                   int subunitoffset,
                                   bool touchme,
                                   bool downgrade,
@@ -333,7 +334,7 @@ public:
     bool RepairUpgradeCargo( Cargo *item, Unit *baseUnit, float *credits );           //item must not be NULL but baseUnit/credits are only used for pricing.
     Vector MountPercentOperational( int whichmount );
     bool ReduceToTemplate();
-    virtual double Upgrade( const std::string &file, int mountoffset, int subunitoffset, bool force, bool loop_through_mounts );
+    double Upgrade( const std::string &file, int mountoffset, int subunitoffset, bool force, bool loop_through_mounts );
     bool canDowngrade( const Unit *downgradeor,
                        int mountoffset,
                        int subunitoffset,
@@ -455,7 +456,7 @@ public:
  */
 
 public:
-
+    bool TransferUnitToSystem( unsigned int whichJumpQueue, StarSystem*&previouslyActiveStarSystem, bool DoSightAndSound );
 
     Computer computer;
     void SwitchCombatFlightMode();
@@ -516,6 +517,16 @@ protected:
     virtual float ExplosionRadius();
 public:
     QVector realPosition( ) override;
+
+    ///Updates physics given unit space transformations and if this is the last physics frame in the current gfx frame
+    virtual void UpdatePhysics2( const Transformation &trans,
+                                 const Transformation &old_physical_state,
+                                 const Vector &accel,
+                                 float difficulty,
+                                 const Matrix &transmat,
+                                 const Vector &CumulativeVelocity,
+                                 bool ResolveLast,
+                                 UnitCollection *uc = NULL );
 
     // Act out a unit's turn
     void ActTurn();
@@ -613,7 +624,8 @@ public:
     float ExplodingProgress() const;
 
 
-
+    ///Resolves forces of given unit on a physics frame
+    Vector ResolveForces( const Transformation&, const Matrix& );
 
 
 
@@ -861,10 +873,8 @@ public:
  * queries the sphere for weapons (world space point)
  * Only in Unit class
  */
-    virtual bool querySphereClickList( int, int, float err, Camera *activeCam ) const
-    {
-        return false;
-    }
+    bool querySphereClickList( int, int, float err, Camera *activeCam ) const;
+
 
     bool InsideCollideTree( Unit *smaller,
                             QVector &bigpos,
@@ -963,6 +973,8 @@ public:
     bool isTractorable( enum tractorHow how = tractorBoth ) const;
     void setTractorability( enum tractorHow how );
     enum tractorHow getTractorability() const;
+
+
 private:
     unsigned char   tractorability_flags = tractorImmune;
 

@@ -40,7 +40,6 @@
 #include "ai/aggressive.h"
 #include "lin_time.h"
 #include "vsfilesystem.h"
-#include "unit.h"
 #include "star_system.h"
 #include "universe.h"
 #include "weapon_info.h"
@@ -317,7 +316,7 @@ bool Mount::PhysicsAlignedFire( Unit *caller,
                         fg->nr_ships      = 1;
                         fg->nr_ships_left = 1;
                     }
-                    temp = new GameUnit (type->file.c_str(), false, caller->faction, "", fg, fgsnumber, nullptr );
+                    temp = new Unit (type->file.c_str(), false, caller->faction, "", fg, fgsnumber, nullptr );
                 } else {
                     Flightgroup *fg = caller->getFlightgroup();
                     int fgsnumber   = 0;
@@ -326,7 +325,7 @@ bool Mount::PhysicsAlignedFire( Unit *caller,
                         fg->nr_ships++;
                         fg->nr_ships_left++;
                     }
-                    temp = new GameUnit(type->file.c_str(), false, caller->faction, "", fg, fgsnumber, nullptr);
+                    temp = new Unit(type->file.c_str(), false, caller->faction, "", fg, fgsnumber, nullptr);
                 }
             }
             Vector adder = Vector( mat.r[6], mat.r[7], mat.r[8] )*type->speed;

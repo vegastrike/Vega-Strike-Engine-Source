@@ -43,7 +43,6 @@
     #include <GL/gl.h>
 #endif
 
-//#include "cmd/unit.h"
 #define SINX 1
 #define SINY 2
 #define SINZ 4

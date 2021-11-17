@@ -48,7 +48,6 @@
 #include "vsfilesystem.h"
 #include "vs_globals.h"
 #include "gfx/animation.h"
-#include "cmd/unit.h"
 #include "gfx/cockpit.h"
 #include "python/init.h"
 #include "savegame.h"
@@ -397,7 +396,7 @@ int main( int argc, char *argv[] )
         InitShipCommands();
     }
     _Universe = new Universe( argc, argv, game_options.galaxy.c_str() );
-    TheTopLevelUnit = new GameUnit(0);
+    TheTopLevelUnit = new Unit(0);
     _Universe->Loop( bootstrap_first_loop );
 
     //Unregister commands - and cleanup memory

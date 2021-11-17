@@ -34,7 +34,6 @@
 #include "universe_util.h"
 #include "unit_const_cache.h"
 #include "pilot.h"
-#include "unit.h"
 #include "cmd/ai/order.h"
 #include "universe.h"
 #include "mount_size.h"
@@ -72,13 +71,13 @@ const Unit * getUnitFromUpgradeName( const string &upgradeName, int myUnitFactio
     if (!partUnit) {
         partUnit = UnitConstCache::setCachedConst( StringIntKey( name,
                                                                 FactionUtil::GetUpgradeFaction() ),
-                                                  new GameUnit( name, true, FactionUtil::GetUpgradeFaction() ) );
+                                                  new Unit( name, true, FactionUtil::GetUpgradeFaction() ) );
     }
     if (partUnit->name == "LOAD_FAILED") {
         partUnit = UnitConstCache::getCachedConst( StringIntKey( name, myUnitFaction ) );
         if (!partUnit)
             partUnit = UnitConstCache::setCachedConst( StringIntKey( name, myUnitFaction ),
-                                                      new GameUnit( name, true, myUnitFaction ) );
+                                                      new Unit( name, true, myUnitFaction ) );
     }
     return partUnit;
 }
@@ -103,7 +102,7 @@ int SelectDockPort( Unit *utdw, Unit *parent )
 //From unit_customize.cpp
 Unit * CreateGameTurret( std::string tur, int faction )
 {
-    return new GameUnit( tur.c_str(), true, faction );
+    return new Unit( tur.c_str(), true, faction );
 }
 
 

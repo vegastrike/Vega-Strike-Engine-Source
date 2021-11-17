@@ -167,7 +167,7 @@ Missile::Missile( const char *filename,
              float radialeffect,
              float radmult,
              float detonation_radius ) :
-    GameUnit( filename, false, faction, modifications )
+    Unit( filename, false, faction, modifications )
   , time( time )
   , damage( damage )
   , phasedamage( phasedamage )
@@ -214,7 +214,7 @@ float Missile::ExplosionRadius()
 
 void Missile::Kill( bool erase ) {
     Discharge();
-    GameUnit::Kill( erase );
+    Unit::Kill( erase );
 }
 
 
@@ -228,7 +228,7 @@ void Missile::UpdatePhysics2( const Transformation &trans,
                               UnitCollection *uc )
 {
     // First we move the missile by calling the super
-    GameUnit::UpdatePhysics2( trans, old_physical_state, accel, difficulty, transmat, CumulativeVelocity, ResolveLast, uc );
+    Unit::UpdatePhysics2( trans, old_physical_state, accel, difficulty, transmat, CumulativeVelocity, ResolveLast, uc );
 
 
     // Get the target

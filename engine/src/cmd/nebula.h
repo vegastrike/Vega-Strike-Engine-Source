@@ -25,9 +25,10 @@
 
 #ifndef _NEBULA_H_
 #define _NEBULA_H_
-#include "unit.h"
 
-class Nebula : public  GameUnit
+#include "unit_generic.h"
+
+class Nebula : public  Unit
 {
 public:
 

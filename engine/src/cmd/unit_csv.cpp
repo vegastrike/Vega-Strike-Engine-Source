@@ -43,7 +43,6 @@
 #include "lin_time.h"
 #include "unit_const_cache.h"
 #include "vs_math.h"
-#include "unit.h"
 #include "universe.h"
 #include "vsfilesystem.h"
 #include "vs_logging.h"
@@ -100,7 +99,7 @@ static void UpgradeUnit( Unit *un, const std::string &upgrades )
         const Unit *upgradee = UnitConstCache::getCachedConst( StringIntKey( upgrade, FactionUtil::GetUpgradeFaction() ) );
         if (!upgradee) {
             upgradee = UnitConstCache::setCachedConst( StringIntKey( upgrade, FactionUtil::GetUpgradeFaction() ),
-                                                      new GameUnit( upgrade.c_str(),
+                                                      new Unit( upgrade.c_str(),
                                                                               true,
                                                                               FactionUtil::GetUpgradeFaction() ) );
         }
@@ -399,7 +398,7 @@ static void AddSubUnits( Unit *thus, Unit::XML &xml, const std::string &subunits
         QVector Q   = (*i).Q;
         QVector R   = (*i).R;
         double  restricted = (*i).restricted;
-        xml.units.push_back( new GameUnit( filename.c_str(), true, faction, modification, NULL ) );         //I set here the fg arg to NULL
+        xml.units.push_back( new Unit( filename.c_str(), true, faction, modification, NULL ) );         //I set here the fg arg to NULL
         if (xml.units.back()->name == "LOAD_FAILED") {
             xml.units.back()->limits.yaw = 0;
             xml.units.back()->limits.pitch = 0;

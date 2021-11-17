@@ -26,8 +26,8 @@
 #ifndef MISSILE_H_
 #define MISSILE_H_
 
-#include "unit.h"
 #include "unit_util.h"
+#include "unit_generic.h"
 
 class MissileEffect {
 private:
@@ -51,7 +51,7 @@ private:
 
 
 
-class Missile : public GameUnit
+class Missile : public Unit
 {
 protected:
     float time;
@@ -75,7 +75,7 @@ public:
                  float detonation_radius );
 
     Missile( std::vector< Mesh* >m, bool b, int i) :
-        GameUnit(m, b, i) {}
+        Unit(m, b, i) {}
 
 public:
     virtual void Kill( bool erase = true );

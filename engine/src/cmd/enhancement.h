@@ -25,11 +25,11 @@
 
 #ifndef _ENHANCER_H_
 #define _ENHANCER_H_
-#include "unit.h"
 #include "savegame.h"
 #include "universe.h"
+#include "unit_generic.h"
 
-class Enhancement : public GameUnit
+class Enhancement : public Unit
 {
 public:
     Enhancement( const char *filename,
@@ -37,7 +37,7 @@ public:
                      const string &modifications,
                      Flightgroup *flightgrp = NULL,
                      int fg_subnumber = 0 ) :
-        GameUnit( filename, false, faction, modifications, flightgrp, fg_subnumber )
+        Unit( filename, false, faction, modifications, flightgrp, fg_subnumber )
     {
         string file( filename );
         this->filename = filename;

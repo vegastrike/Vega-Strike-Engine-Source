@@ -40,7 +40,6 @@
 #include <unistd.h>
 #endif
 #include "cmd/unit_generic.h"
-#include "unit.h"
 #include <expat.h>
 #include "xml_support.h"
 
@@ -988,7 +987,7 @@ Unit* Mission::call_unit_launch( CreateFlightgroup *fg, int type, const string &
             my_unit = new Asteroid(
                 fg->fg->type.c_str(), faction_nr, fg->fg, u+fg->fg->nr_ships-fg->nr_ships, .01 );
         } else {
-            my_unit = new GameUnit( fg->fg->type.c_str(), false, faction_nr, string(
+            my_unit = new Unit( fg->fg->type.c_str(), false, faction_nr, string(
                                                   "" ), fg->fg, u+fg->fg->nr_ships-fg->nr_ships, NULL );
         }
         units[u] = my_unit;

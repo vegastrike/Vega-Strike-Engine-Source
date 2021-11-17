@@ -50,7 +50,6 @@
 #include "linecollide.h"
 #include "cmd/unit_collide.h"
 #include "cmd/unit_find.h"
-#include "unit.h"
 
 #include "python/init.h"
 #include <Python.h>
@@ -749,7 +748,7 @@ string LookupUnitStat( const string &unitname, const string &faction, const stri
 static std::vector< Unit* >cachedUnits;
 void precacheUnit( string type_string, string faction_string )
 {
-    cachedUnits.push_back( new GameUnit( type_string.c_str(), true, FactionUtil::GetFactionIndex( faction_string ) ) );
+    cachedUnits.push_back( new Unit( type_string.c_str(), true, FactionUtil::GetFactionIndex( faction_string ) ) );
 }
 Unit * getPlayer()
 {

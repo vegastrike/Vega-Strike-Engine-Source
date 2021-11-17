@@ -36,7 +36,6 @@
 #include "gfxlib_struct.h"
 #include "gfx/aux_texture.h"
 #include "gfx/animation.h"
-#include "unit.h"
 #include "audiolib.h"
 #include "config_xml.h"
 #include "gfx/camera.h"

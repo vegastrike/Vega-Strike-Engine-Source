@@ -1216,7 +1216,6 @@ SET(VEGASTRIKE_SOURCES
     src/cmd/faction_factory.cpp
     src/cmd/pilot.cpp
     src/cmd/images.cpp
-    src/cmd/unit.cpp
     src/cmd/turret.cpp
     src/gldrv/gl_program.cpp
     src/gldrv/gl_clip.cpp

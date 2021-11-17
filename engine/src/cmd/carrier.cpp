@@ -26,7 +26,6 @@
 #include "carrier.h"
 
 #include "unit_generic.h"
-#include "unit.h"
 #include "universe.h"
 #include "universe_util.h"
 
@@ -241,7 +240,7 @@ void Carrier::EjectCargo( unsigned int index )
                         ++(fg->nr_ships);
                         ++(fg->nr_ships_left);
                     }
-                    cargo = new GameUnit( ans.c_str(), false, unit->faction, "", fg, fgsnumber, NULL );
+                    cargo = new Unit( ans.c_str(), false, unit->faction, "", fg, fgsnumber, NULL );
                     cargo->PrimeOrders();
                     cargo->SetAI( new Orders::AggressiveAI( "default.agg.xml" ) );
                     cargo->SetTurretAI();
@@ -268,10 +267,10 @@ void Carrier::EjectCargo( unsigned int index )
                             ++(fg->nr_ships);
                             ++(fg->nr_ships_left);
                         }
-                        cargo = new GameUnit( "eject", false, unit->faction, "", fg, fgsnumber, NULL);
+                        cargo = new Unit( "eject", false, unit->faction, "", fg, fgsnumber, NULL);
                     } else {
                         int fac = FactionUtil::GetUpgradeFaction();
-                        cargo = new GameUnit( "eject", false, fac, "", NULL, 0, NULL );
+                        cargo = new Unit( "eject", false, fac, "", NULL, 0, NULL );
                     }
                     if (unit->owner) {
                         cargo->owner = unit->owner;
@@ -296,7 +295,7 @@ void Carrier::EjectCargo( unsigned int index )
                             ++(fg->nr_ships);
                             ++(fg->nr_ships_left);
                         }
-                        cargo = new GameUnit( "return_to_cockpit", false, unit->faction, "", fg, fgsnumber, NULL);
+                        cargo = new Unit( "return_to_cockpit", false, unit->faction, "", fg, fgsnumber, NULL);
                         if (unit->owner) {
                             cargo->owner = unit->owner;
                         } else {
@@ -307,7 +306,7 @@ void Carrier::EjectCargo( unsigned int index )
                         static float ejectcargotime =
                             XMLSupport::parse_float( vs_config->getVariable( "physics", "eject_live_time", "0" ) );
                         if (cargotime == 0.0) {
-                            cargo = new GameUnit( "eject", false, fac, "", NULL, 0, NULL);
+                            cargo = new Unit( "eject", false, fac, "", NULL, 0, NULL);
                         } else {
                             cargo = new Missile( "eject",
                                                  fac, "",

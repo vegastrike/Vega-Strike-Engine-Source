@@ -36,7 +36,6 @@
 #include "gfx/point_to_cam.h"
 #include "gfx/halo_system.h"
 #include "options.h"
-#include "unit.h"
 #include "weapon_info.h"
 #include "beam.h"
 #include "csv.h"
@@ -692,7 +691,6 @@ void Drawable::Sparkle(bool on_screen, Matrix *ctm) {
 
 void Drawable::DrawHalo(bool on_screen, float apparent_size, Matrix wmat, int cloak) {
     Unit *unit = static_cast<Unit*>(this);
-    GameUnit *game_unit = static_cast<GameUnit*>(this);
 
     // Units not shown don't emit a halo
     if(!on_screen) {
@@ -910,7 +908,7 @@ void Drawable::Split( int level )
         tempmeshes.reserve( meshsizes[i] );
         for (unsigned int j = 0; j < meshsizes[i] && k < old.size(); ++j, ++k)
             tempmeshes.push_back( old[k] );
-        unit->SubUnits.prepend( splitsub = new GameUnit( tempmeshes, true, unit->faction ) );
+        unit->SubUnits.prepend( splitsub = new Unit( tempmeshes, true, unit->faction ) );
         *splitsub->current_hull = 1000.0f;
         splitsub->name = "debris";
         splitsub->setMass(game_options.debris_mass*splitsub->getMass()/level);

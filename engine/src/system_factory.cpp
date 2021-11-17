@@ -36,7 +36,6 @@
 #include "enhancement.h"
 #include "building.h"
 #include "planetary_orbit.h"
-#include "unit.h"
 #include "enhancement.h"
 #include "building.h"
 #include "asteroid.h"
@@ -591,7 +590,7 @@ void SystemFactory::processEnhancement(string element, Star_XML *xml, Object& ob
 
     if(boost::iequals(element, "unit")) {
         Flightgroup *fg = getStaticBaseFlightgroup(faction);
-        unit = new GameUnit( filename.c_str(), false, faction, "", fg, fg->nr_ships-1 );
+        unit = new Unit( filename.c_str(), false, faction, "", fg, fg->nr_ships-1 );
         unit->setFullname(fullname);
 
         if(unit->faction != neutralfaction) {

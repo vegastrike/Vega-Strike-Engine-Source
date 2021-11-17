@@ -26,14 +26,13 @@
 #ifndef __BUILDING_H
 #define __BUILDING_H
 
-#include "unit.h"
 #include "unit_generic.h"
 
 class Terrain;
 class ContinuousTerrain;
 class Flightgroup;
 
-class Building : public GameUnit
+class Building : public Unit
 {
     // Fields
 protected:
