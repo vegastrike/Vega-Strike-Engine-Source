@@ -874,8 +874,8 @@ void Unit::LoadRow( CSVRow &row, string modification, bool saved_game)
     YawPitchRollParser(unit_key, "Pitch_Governor", "Pitch_Governor_Up", "Pitch_Governor_Down", computer.max_pitch_up, computer.max_pitch_down);
     YawPitchRollParser(unit_key, "Roll_Governor", "Roll_Governor_Right", "Roll_Governor_Left", computer.max_roll_right, computer.max_roll_left);
 
-    static float game_accel = GameConfig::GetVariable( "physics", "game_accel", 1.0 );
-    static float game_speed = GameConfig::GetVariable( "physics", "game_speed", 1.0 );
+    static float game_accel = GameConfig::GetVariable( "physics", "game_accel", 1.0f );
+    static float game_speed = GameConfig::GetVariable( "physics", "game_speed", 1.0f );
     limits.afterburn = UnitCSVFactory::GetVariable(unit_key, "Afterburner_Accel", 0.0f) * game_accel * game_speed;
     limits.forward   = UnitCSVFactory::GetVariable(unit_key, "Forward_Accel", 0.0f) * game_accel * game_speed;
     limits.retro     = UnitCSVFactory::GetVariable(unit_key, "Retro_Accel", 0.0f) * game_accel * game_speed;
@@ -926,7 +926,6 @@ void Unit::LoadRow( CSVRow &row, string modification, bool saved_game)
         unsigned int value = stoi(iffval, 0);
         if (value == 0) {
             // Unknown value
-            assert(false);
             computer.radar.capability = Computer::RADARLIM::Capability::IFF_NONE;
         } else {
             computer.radar.capability = value;
