@@ -15,6 +15,9 @@ jobs:
       fail-fast: true
       matrix:
         include:
+          - FROM:     'ubuntu:impish'
+            COMPILER: 'gcc'
+            PREFER_LEGACY_OPENGL: 'OFF'
           - FROM:     'ubuntu:hirsute'
             COMPILER: 'gcc'
             PREFER_LEGACY_OPENGL: 'ON'
