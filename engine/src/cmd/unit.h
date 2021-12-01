@@ -71,7 +71,7 @@ public:
   //customizedUnit, it will check in that directory in the home dir for
   //the unit.
     GameUnit( const char *filename, bool SubUnit, int faction, std::string customizedUnit = std::string(
-                  "" ), Flightgroup *flightgroup = NULL, int fg_subnumber = 0, std::string *netxml = NULL );
+                  "" ), Flightgroup *flightgroup = NULL, int fg_subnumber = 0);
     virtual ~GameUnit();
 
     enum _UnitType isUnit() const

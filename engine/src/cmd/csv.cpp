@@ -28,6 +28,7 @@
 #include "vs_globals.h"
 #include "vsfilesystem.h"
 #include "vs_logging.h"
+#include "unit_csv_factory.h"
 
 using std::string;
 
@@ -175,8 +176,19 @@ CSVTable::CSVTable( const string &data, const string &root )
 
 CSVTable::CSVTable( VSFileSystem::VSFile &f, const string &root )
 {
+    std::string data = f.ReadFull();
+
+    UnitCSVFactory factory;
+    if(f.GetFilename() == "units_description.csv" ||
+            f.GetFilename() == "master_part_list.csv") {
+    } else if(f.GetFilename() == "units.csv") {
+        factory.ProcessCSV(data, false);
+    } else {
+        factory.ProcessCSV(data, true);
+    }
+
     this->rootdir = root;
-    Init( f.ReadFull() );
+    Init( data );
 }
 
 static string strip_white( const string &s )
