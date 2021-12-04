@@ -414,9 +414,6 @@ SET(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${Vega_Strike_SOURCE_DIR})
 FIND_PACKAGE(LinuxDistro REQUIRED)
 
 # Python 3 is now our default -- stephengtuggy 2020-12-18
-## Python 3 has a SASL compatibility issue which causes an error
-## on some installations that prefer Python 3
-## -- Python 2.7 is default for now
 OPTION(USE_PYTHON_3 "Use Python 3 or Python 2.7 (default is 3)" ON)
 IF (USE_PYTHON_3)
     # We want at least Python 3.4, but we prefer newer versions
