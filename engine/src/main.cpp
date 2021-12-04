@@ -316,11 +316,10 @@ void initLoggingPart2(char debugLevel)
 int main( int argc, char *argv[] )
 {
     // Change to program directory if not already
-    // std::string program_as_called();
-    boost::filesystem::path program_path(argv[0]);
+    const boost::filesystem::path program_path(argv[0]);
 
-    boost::filesystem::path program_name = program_path.filename();
-    boost::filesystem::path program_directory_path = program_path.parent_path();
+    const boost::filesystem::path program_name{program_path.filename()};
+    const boost::filesystem::path program_directory_path{program_path.parent_path()};
 
     // when the program name is `vegastrike-engine` then enforce that the data directory must be specified
     // if the program name is `vegastrike` then enable legacy mode where the current path is assumed.
@@ -339,9 +338,10 @@ int main( int argc, char *argv[] )
 
     initLoggingPart1();
 
-#ifdef WIN32
-    VSFileSystem::InitHomeDirectory();
-#endif
+    // stephengtuggy 2021-12-04 Initialize the directories in the same order on Windows as on other platforms
+// #ifdef WIN32
+//     VSFileSystem::InitHomeDirectory();
+// #endif
 
     CONFIGFILE = 0;
     mission_name[0] = '\0';
@@ -387,8 +387,13 @@ int main( int argc, char *argv[] )
     }
 
     // If no debug argument is supplied, set to what the config file has.
-    if (g_game.vsdebug == '0')
+    if (g_game.vsdebug == '0') {
         g_game.vsdebug = game_options.vsdebug;
+    }
+
+    // Ugly hack until we can find a way to redo all the directory initialization stuff properly.
+    // Use the subdirectory "logs" under the Vega Strike home directory. Make sure we don't duplicate the ".vegastrike/" or ".pu/", etc. part.
+    const boost::filesystem::path home_path{boost::filesystem::absolute(VSFileSystem::homedir)};
 
     initLoggingPart2(g_game.vsdebug);
 
@@ -403,8 +408,9 @@ int main( int argc, char *argv[] )
 
 
     int exitcode;
-    if ((exitcode = readCommandLineOptions(argc,argv)) >= 0)
+    if ((exitcode = readCommandLineOptions(argc,argv)) >= 0) {
         return exitcode;
+    }
 
     //might overwrite the default mission with the command line
     InitUnitTables();

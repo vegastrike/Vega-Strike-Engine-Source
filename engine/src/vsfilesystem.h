@@ -2,8 +2,8 @@
  * vsfilesystem.h
  *
  * Copyright (C) Daniel Horn
- * Copyright (C) 2020 pyramid3d, Nachum Barcohen, Roy Falk, Stephen G. Tuggy,
- * and other Vega Strike contributors
+ * Copyright (C) 2020-2021 pyramid3d, Nachum Barcohen, Roy Falk,
+ * Stephen G. Tuggy, and other Vega Strike contributors
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -44,6 +44,8 @@ using std::vector;
 #include <boost/log/sinks/sync_frontend.hpp>
 #include <boost/log/sinks/text_file_backend.hpp>
 #include <boost/log/sinks/text_ostream_backend.hpp>
+
+#include <boost/filesystem.hpp>
 
 class VegaConfig;
 class VSImage;
@@ -316,6 +318,8 @@ VSError GetError( const char *str = NULL );
 
 VSError LookForFile( VSFile &f, VSFileType type, VSFileMode mode = ReadOnly );
 VSError LookForFile( const string &filename, VSFileType type, VSFileMode mode = ReadOnly );
+
+const boost::filesystem::path GetSavePath();
 
 /*
  ***********************************************************************************************
