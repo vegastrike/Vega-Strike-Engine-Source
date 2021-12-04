@@ -420,7 +420,7 @@ FIND_PACKAGE(LinuxDistro REQUIRED)
 OPTION(USE_PYTHON_3 "Use Python 3 or Python 2.7 (default is 3)" ON)
 IF (USE_PYTHON_3)
     # We want at least Python 3.4, but we prefer newer versions
-    SET(Python_ADDITIONAL_VERSIONS 3.9 3.8 3.7 3.6 3.5 3.4)
+    SET(Python_ADDITIONAL_VERSIONS 3.11 3.10 3.9 3.8 3.7 3.6 3.5 3.4)
 ELSE (USE_PYTHON_3)
     MESSAGE("++ Adding python 2.7 variant")
     SET(Python_ADDITIONAL_VERSIONS 2.7)
