@@ -467,27 +467,25 @@ long vs_getsize( FILE *fp )
 #ifdef WIN32
 void InitHomeDirectory()
 {
-    string userdir;
-    char szPath[MAX_PATH];
+    std::string userdir;
+    PWSTR pszPath = nullptr;
+    char mbcsPath[VS_PATH_BUF_SIZE];
+    size_t pathSize = 0;
+    errno_t conversionResult = 0;
 
-    // Get user's home directory the MS way
-    if (SUCCEEDED(SHGetFolderPathA(NULL,
-                                CSIDL_PERSONAL,
-                                NULL,
-                                0,
-                                szPath)))
-    {
-        userdir = string(szPath);
-    }
-    else
-    {
-        VS_LOG_AND_FLUSH(fatal, "!!! ERROR determining user's home directory");
-        VSExit(1);
-    }
-
-    if (!DirectoryExists(userdir))
-    {
-        VS_LOG_AND_FLUSH(fatal, "!!! ERROR : home directory not found or not a directory");
+    HRESULT getPathResult = SHGetKnownFolderPath(FOLDERID_LocalAppData, KF_FLAG_CREATE | KF_FLAG_NO_ALIAS, NULL, &pszPath);
+    if (SUCCEEDED(getPathResult)) {
+        conversionResult = wcstombs_s(&pathSize, mbcsPath, pszPath, VS_PATH_BUF_SIZE - 1);
+        CoTaskMemFree(pszPath);
+        if (conversionResult == 0) {
+            userdir = mbcsPath;
+        } else {
+            VS_LOG_AND_FLUSH(fatal, "!!! Fatal Error converting user's home directory to MBCS");
+            VSExit(1);
+        }
+    } else {
+        VS_LOG_AND_FLUSH(fatal, "!!! Fatal Error getting user's home directory");
+        CoTaskMemFree(pszPath);
         VSExit(1);
     }
 
@@ -496,16 +494,6 @@ void InitHomeDirectory()
     boost::filesystem::path absolute_home_path{boost::filesystem::absolute(home_sub_path, home_path)};
     homedir = absolute_home_path.string();
     CreateDirectoryAbs( homedir );
-
-    // #ifdef CLIENT
-    // freopen((VSFileSystem::homedir+"/stderr_client.txt").c_str(), "w", stderr);
-    // freopen((VSFileSystem::homedir+"/stdout_client.txt").c_str(), "w", stdout);
-    // #endif
-
-    // #ifdef SERVER
-    // freopen((VSFileSystem::homedir+"/stderr_server.txt").c_str(), "w", stderr);
-    // freopen((VSFileSystem::homedir+"/stdout_server.txt").c_str(), "w", stdout);
-    // #endif
 
     VS_LOG(info, (boost::format("USING HOMEDIR : %1% as the home directory ") % homedir));
 }
