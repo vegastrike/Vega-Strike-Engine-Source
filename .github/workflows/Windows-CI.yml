@@ -29,7 +29,7 @@ jobs:
         uses: actions/checkout@v2
 
       - name: install-cmake
-        uses: lukka/get-cmake@v3.21.1
+        uses: lukka/get-cmake@v3.22.0
 
       - name: install-vcpkg
         # You may pin to the exact commit or the version.
@@ -37,7 +37,7 @@ jobs:
         with:
           vcpkgDirectory: '${{ github.workspace }}/v'
           setupOnly: true
-          vcpkgGitCommitId: 'f819f66b4c2a639e18233bc30deb98531a386f78'
+          vcpkgGitCommitId: 'b3cfaaf1bba70febd07c2f672ae590dc5d914180'
           vcpkgTriplet: 'x64-windows'
           appendedCacheKey: ${{ hashFiles( '**/vcpkg.json' ) }}
           additionalCachedPaths: ${{ env.buildDir }}/vcpkg_installed
