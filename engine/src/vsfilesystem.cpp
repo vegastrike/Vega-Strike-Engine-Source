@@ -483,26 +483,25 @@ void flushLogs()
 #ifdef WIN32
 void InitHomeDirectory()
 {
-    string userdir;
-    char szPath[MAX_PATH];
+    std::string userdir;
+    PWSTR pszPath = nullptr;
+    char mbcsPath[VS_PATH_BUF_SIZE];
+    size_t pathSize = 0;
+    errno_t conversionResult = 0;
 
-    // Get user's home directory the MS way
-    if(SUCCEEDED(SHGetFolderPathA(NULL,
-                                CSIDL_PERSONAL,
-                                NULL,
-                                0,
-                                szPath))) {
-        userdir = string(szPath);
-    }
-    else
-    {
-        BOOST_LOG_TRIVIAL(fatal) << "!!! ERROR determining user's home directory";
-        VSExit(1);
-    }
-
-    if (!DirectoryExists(userdir))
-    {
-        BOOST_LOG_TRIVIAL(fatal) << "!!! ERROR : home directory not found or not a directory";
+    HRESULT getPathResult = SHGetKnownFolderPath(FOLDERID_LocalAppData, KF_FLAG_CREATE | KF_FLAG_NO_ALIAS, NULL, &pszPath);
+    if (SUCCEEDED(getPathResult)) {
+        conversionResult = wcstombs_s(&pathSize, mbcsPath, pszPath, VS_PATH_BUF_SIZE - 1);
+        CoTaskMemFree(pszPath);
+        if (conversionResult == 0) {
+            userdir = mbcsPath;
+        } else {
+            BOOST_LOG_TRIVIAL(fatal) << "!!! Fatal Error converting user's home directory to MBCS";
+            VSExit(1);
+        }
+    } else {
+        BOOST_LOG_TRIVIAL(fatal) << "!!! Fatal Error getting user's home directory";
+        CoTaskMemFree(pszPath);
         VSExit(1);
     }
 
