@@ -37,12 +37,15 @@ SET(VEGASTRIKE_VERSION_MAJOR "0")
 SET(VEGASTRIKE_VERSION_MINOR "8")
 SET(VEGASTRIKE_VERSION_PATCH "0")
 # Auto-populate with the git hash of the build
-IF (DEFINED ENV{GITHUB_SHA})
+SET (GIT_ROOT_DIR "${CMAKE_SOURCE_DIR}/..")
+MESSAGE("-- CMAKE_SOURCE_DIR = ${CMAKE_SOURCE_DIR}")
+MESSAGE("-- GIT_ROOT_DIR = ${GIT_ROOT_DIR}")
+IF (DEFINED ENV{GITHUB_SHA} AND NOT "$ENV{GITHUB_SHA}" STREQUAL "")
     SET (VEGASTRIKE_VERSION_TWEAK "$ENV{GITHUB_SHA}")
 ELSE ()
     EXECUTE_PROCESS(
         COMMAND git rev-parse --short HEAD
-        WORKING_DIRECTORY CMAKE_SOURCE_DIR
+        WORKING_DIRECTORY ${GIT_ROOT_DIR}
         OUTPUT_VARIABLE VEGASTRIKE_VERSION_TWEAK
         OUTPUT_STRIP_TRAILING_WHITESPACE
     )
@@ -408,13 +411,10 @@ SET(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${Vega_Strike_SOURCE_DIR})
 FIND_PACKAGE(LinuxDistro REQUIRED)
 
 # Python 3 is now our default -- stephengtuggy 2020-12-18
-## Python 3 has a SASL compatibility issue which causes an error
-## on some installations that prefer Python 3
-## -- Python 2.7 is default for now
 OPTION(USE_PYTHON_3 "Use Python 3 or Python 2.7 (default is 3)" ON)
 IF (USE_PYTHON_3)
     # We want at least Python 3.4, but we prefer newer versions
-    SET(Python_ADDITIONAL_VERSIONS 3.9 3.8 3.7 3.6 3.5 3.4)
+    SET(Python_ADDITIONAL_VERSIONS 3.11 3.10 3.9 3.8 3.7 3.6 3.5 3.4)
 ELSE (USE_PYTHON_3)
     MESSAGE("++ Adding python 2.7 variant")
     SET(Python_ADDITIONAL_VERSIONS 2.7)

@@ -2,8 +2,8 @@
  * vsfilesystem.cpp
  *
  * Copyright (C) Daniel Horn
- * Copyright (C) 2020 pyramid3d, Nachum Barcohen, Roy Falk, Stephen G. Tuggy,
- * and other Vega Strike contributors
+ * Copyright (C) 2020-2021 pyramid3d, Nachum Barcohen, Roy Falk,
+ * Stephen G. Tuggy, and other Vega Strike contributors
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -483,29 +483,33 @@ void flushLogs()
 #ifdef WIN32
 void InitHomeDirectory()
 {
-	string userdir;
-	char szPath[MAX_PATH];
+    std::string userdir;
+    PWSTR pszPath = nullptr;
+    char mbcsPath[VS_PATH_BUF_SIZE];
+    size_t pathSize = 0;
+    errno_t conversionResult = 0;
 
-	// Get My Documents path the MS way
-    if(SUCCEEDED(SHGetFolderPathA(NULL,
-                             CSIDL_PERSONAL,
-                             NULL,
-                             0,
-                             szPath)))
-		userdir = string(szPath);
+    HRESULT getPathResult = SHGetKnownFolderPath(FOLDERID_LocalAppData, KF_FLAG_CREATE | KF_FLAG_NO_ALIAS, NULL, &pszPath);
+    if (SUCCEEDED(getPathResult)) {
+        conversionResult = wcstombs_s(&pathSize, mbcsPath, pszPath, VS_PATH_BUF_SIZE - 1);
+        CoTaskMemFree(pszPath);
+        if (conversionResult == 0) {
+            userdir = mbcsPath;
+        } else {
+            BOOST_LOG_TRIVIAL(fatal) << "!!! Fatal Error converting user's home directory to MBCS";
+            VSExit(1);
+        }
+    } else {
+        BOOST_LOG_TRIVIAL(fatal) << "!!! Fatal Error getting user's home directory";
+        CoTaskMemFree(pszPath);
+        VSExit(1);
+    }
 
-	homedir = userdir + "/" + HOMESUBDIR;
-	CreateDirectoryAbs( homedir );
-
-	// #ifdef CLIENT
-	// freopen((VSFileSystem::homedir+"/stderr_client.txt").c_str(), "w", stderr);
-	// freopen((VSFileSystem::homedir+"/stdout_client.txt").c_str(), "w", stdout);
-	// #endif
-
-	// #ifdef SERVER
-	// freopen((VSFileSystem::homedir+"/stderr_server.txt").c_str(), "w", stderr);
-	// freopen((VSFileSystem::homedir+"/stdout_server.txt").c_str(), "w", stdout);
-	// #endif
+    boost::filesystem::path home_path{userdir};
+    boost::filesystem::path home_sub_path{HOMESUBDIR};
+    boost::filesystem::path absolute_home_path{boost::filesystem::absolute(home_sub_path, home_path)};
+    homedir = absolute_home_path.string();
+    CreateDirectoryAbs( homedir );
 
     BOOST_LOG_TRIVIAL(info) << boost::format("USING HOMEDIR : %1% as the home directory ") % homedir;
 }
@@ -740,7 +744,7 @@ void LoadConfig( string subdir )
     try {
         Galaxy galaxy = Galaxy(universe_file);
     } catch (std::exception &e) {
-        BOOST_LOG_TRIVIAL(fatal) << boost::format("Error while loading configuration. Did you specifcy the asset directory? Error: %1%") % e.what();
+        BOOST_LOG_TRIVIAL(fatal) << boost::format("Error while loading configuration. Did you specify the asset directory? Error: %1%") % e.what();
         VSExit(1);
     }
 }
@@ -816,10 +820,11 @@ void InitPaths( string conf, string subdir )
     }
     /************************** Data and home directory settings *************************/
 
-    InitDataDirectory();                //Need to be first for win32
-    #ifndef WIN32
-	InitHomeDirectory();
-	#endif
+    // Need to be first for win32. stephengtuggy 2021-12-04: O RLY? Let's try it the other way
+    InitDataDirectory();
+    // #ifndef WIN32
+    InitHomeDirectory();
+    // #endif
     LoadConfig( subdir );
     /*
       Paths relative to datadir or homedir (both should have the same structure)
@@ -1346,6 +1351,14 @@ VSError LookForFile( VSFile &f, VSFileType type, VSFileMode mode )
             return Ok;
     }
     return FileNotFound;
+}
+
+const boost::filesystem::path GetSavePath()
+{
+    const boost::filesystem::path home_path{homedir};
+    const boost::filesystem::path save_path{"save"};
+    const boost::filesystem::path ret_val{boost::filesystem::absolute(save_path, home_path)};
+    return ret_val;
 }
 
 /*

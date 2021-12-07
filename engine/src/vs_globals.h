@@ -1,3 +1,29 @@
+/**
+ * vs_globals.h
+ *
+ * Copyright (C) 2001-2002 Daniel Horn
+ * Copyright (C) 2020-2021 pyramid3d, Stephen G. Tuggy, and other Vega Strike
+ * contributors
+ *
+ * https://github.com/vegastrike/Vega-Strike-Engine-Source
+ *
+ * This file is part of Vega Strike.
+ *
+ * Vega Strike is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * Vega Strike is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
+
 #ifndef __VS_GLOBALS_H_
 #define __VS_GLOBALS_H_
 #include <vector>
@@ -72,33 +98,34 @@ extern Mission    *mission;
 template < class MyType >
 class LeakVector
 {
-    std::vector< MyType > *active_missions;
+private:
+    std::vector< MyType > *internal_vector_p_;
 public:
     bool empty() const
     {
-        return active_missions->empty();
+        return internal_vector_p_->empty();
     }
     void push_back( MyType mis )
     {
-        active_missions->push_back( mis );
+        internal_vector_p_->push_back( mis );
     }
     MyType back()
     {
-        return active_missions->back();
+        return internal_vector_p_->back();
     }
     LeakVector()
     {
-        active_missions = new std::vector< MyType > ();
+        internal_vector_p_ = new std::vector< MyType > ();
     }
 
-    unsigned int size() const
+    size_t size() const
     {
-        return (active_missions)->size();
+        return (internal_vector_p_)->size();
     }
-    MyType operator[]( unsigned int i )
+    MyType operator[]( size_t i )
     {
         // stephengtuggy 2020-10-17: Enforce bounds checking
-        return active_missions->at(i);
+        return internal_vector_p_->at(i);
     }
     ~LeakVector()
     {
@@ -106,7 +133,7 @@ public:
     }
     std::vector< MyType > * Get()
     {
-        return active_missions;
+        return internal_vector_p_;
     }
 };
 
