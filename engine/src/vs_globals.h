@@ -97,6 +97,7 @@ extern Mission    *mission;
 template < class MyType >
 class LeakVector
 {
+private:
     std::vector< MyType > *internal_vector_p_;
 public:
     bool empty() const
