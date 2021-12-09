@@ -251,10 +251,8 @@ void Damageable::ApplyDamage( const Vector &pnt,
         static bool player_autoeject =
                 GameConfig::GetVariable( "physics", "player_autoeject", true );
 
-        if(shot_at_is_player && player_autoeject) {
-            unit->EjectCargo( (unsigned int) -1 );
-        } else if(rand() < (RAND_MAX*auto_eject_percent) && unit->isUnit() == _UnitType::unit &&
-                  unit->faction != neutralfac && unit->faction != upgradesfac) {
+        if (shot_at_is_player && player_autoeject && rand() < (RAND_MAX*auto_eject_percent)
+                && unit->isUnit() == _UnitType::unit && unit->faction != neutralfac && unit->faction != upgradesfac) {
             unit->EjectCargo( (unsigned int) -1 );
         }
 
