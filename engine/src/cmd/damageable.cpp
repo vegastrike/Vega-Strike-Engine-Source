@@ -228,7 +228,7 @@ void Damageable::ApplyDamage( const Vector &pnt,
 
         // Eject cargo
         static float cargo_eject_percent =
-            GameConfig::GetVariable( "physics", "eject_cargo_percent", 1.0 );
+            GameConfig::GetVariable( "physics", "eject_cargo_percent", 1.0f );
         static unsigned int max_dump_cargo =
             GameConfig::GetVariable( "physics", "max_dumped_cargo", 15 );
         unsigned int dumped_cargo = 0;
@@ -247,13 +247,26 @@ void Damageable::ApplyDamage( const Vector &pnt,
         //static float hull_dam_to_eject    =
         //    GameConfig::GetVariable( "physics", "hull_damage_to_eject", 100.0 );
         static float auto_eject_percent =
-                GameConfig::GetVariable( "physics", "autoeject_percent", 0.5 );
+                GameConfig::GetVariable( "physics", "autoeject_percent", 0.5f );
         static bool player_autoeject =
                 GameConfig::GetVariable( "physics", "player_autoeject", true );
 
-        if (shot_at_is_player && player_autoeject && rand() < (RAND_MAX*auto_eject_percent)
-                && unit->isUnit() == _UnitType::unit && unit->faction != neutralfac && unit->faction != upgradesfac) {
-            unit->EjectCargo( (unsigned int) -1 );
+        if (shot_at_is_player) {
+            if (player_autoeject
+                    && rand() < (RAND_MAX * auto_eject_percent)) {
+                VS_LOG(debug, "Auto ejecting player");
+                unit->EjectCargo( (unsigned int) -1 );
+            } else {
+                VS_LOG(debug, "Not auto ejecting player");
+            }
+        } else {
+            if (unit->isUnit() == _UnitType::unit
+                    && rand() < (RAND_MAX * auto_eject_percent)) {
+                VS_LOG(debug, "Auto ejecting NPC");
+                unit->EjectCargo( (unsigned int) -1 );
+            } else {
+                VS_LOG(debug, "Not auto ejecting NPC");
+            }
         }
 
         return;
