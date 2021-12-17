@@ -344,13 +344,12 @@ Unit::Unit( const char *filename,
             int faction,
             std::string unitModifications,
             Flightgroup *flightgrp,
-            int fg_subnumber,
-            string *netxml ) : Drawable(), Damageable(), Movable() //: cumulative_transformation_matrix( identity_matrix )
+            int fg_subnumber) : Drawable(), Damageable(), Movable() //: cumulative_transformation_matrix( identity_matrix )
 {
     pImage  = (new UnitImages< void >);
     pilot   = new Pilot( faction );
     pImage->cockpit_damage = NULL;
-    Init( filename, SubU, faction, unitModifications, flightgrp, fg_subnumber, netxml );
+    Init( filename, SubU, faction, unitModifications, flightgrp, fg_subnumber);
     pilot->SetComm( this );
 }
 
@@ -445,8 +444,7 @@ void Unit::Init( const char *filename,
                  int faction,
                  std::string unitModifications,
                  Flightgroup *flightgrp,
-                 int fg_subnumber,
-                 string *netxml )
+                 int fg_subnumber)
 {
     static bool UNITTAB = XMLSupport::parse_bool( vs_config->getVariable( "physics", "UnitTable", "false" ) );
     CSVRow unitRow;
@@ -463,63 +461,63 @@ void Unit::Init( const char *filename,
     VSFile  unitTab;
     VSError taberr    = Unspecified;
     bool    foundFile = false;
-    if (netxml == NULL) {
-        if (unitModifications.length() != 0) {
-            string nonautosave = GetReadPlayerSaveGame( _Universe->CurrentCockpit() );
-            string filepath( "" );
-            //In network mode we only look in the save subdir in HOME
+    bool saved_game = false;
+    if (unitModifications.length() != 0) {
+        string nonautosave = GetReadPlayerSaveGame( _Universe->CurrentCockpit() );
+        string filepath( "" );
+        //In network mode we only look in the save subdir in HOME
 
-            if ( nonautosave.empty() ) {
-                VSFileSystem::CreateDirectoryHome( VSFileSystem::savedunitpath+"/"+unitModifications );
-                filepath = unitModifications+"/"+string( filename );
-            } else {
-                VSFileSystem::CreateDirectoryHome( VSFileSystem::savedunitpath+"/"+nonautosave );
-                filepath = nonautosave+"/"+string( filename );
-            }
-
-            //Try to open save
-            if (filename[0]) {
-                taberr = unitTab.OpenReadOnly( filepath+".csv", UnitSaveFile );
-                if (taberr <= Ok) {
-                    unitTables.push_back( new CSVTable( unitTab, unitTables.back()->rootdir ) );
-                    unitTab.Close();
-                }
-                if (!UNITTAB)
-                    err = f.OpenReadOnly( filepath, UnitSaveFile );
-            }
+        if ( nonautosave.empty() ) {
+            VSFileSystem::CreateDirectoryHome( VSFileSystem::savedunitpath+"/"+unitModifications );
+            filepath = unitModifications+"/"+string( filename );
+        } else {
+            VSFileSystem::CreateDirectoryHome( VSFileSystem::savedunitpath+"/"+nonautosave );
+            filepath = nonautosave+"/"+string( filename );
         }
-    }
-    if (netxml)
-        unitTables.push_back( new CSVTable( *netxml, unitTables.back()->rootdir ) );
-    //If save was not succesfull we try to open the unit file itself
-    if (netxml == NULL) {
+
+        //Try to open save
         if (filename[0]) {
-            string subdir = "factions/"+FactionUtil::GetFactionName( faction );
-            //begin deprecated code (5/11)
-            if (UNITTAB) {} else {
-                if (err > Ok) {
-                    f.SetSubDirectory( subdir );
-                    //No save found loading default unit
-                    err = f.OpenReadOnly( filename, UnitFile );
-                    if (err > Ok) {
-                        f.SetSubDirectory( "" );
-                        err = f.OpenReadOnly( filename, UnitFile );
-                    }
-                } else {
-                    f2.SetSubDirectory( subdir );
-                    //Save found so just opening default unit to get its directory for further loading
-                    err = f2.OpenReadOnly( filename, UnitFile );
-                    if (err > Ok) {
-                        f2.SetSubDirectory( "" );
-                        err = f2.OpenReadOnly( filename, UnitFile );
-                    }
-                }
+            taberr = unitTab.OpenReadOnly( filepath+".csv", UnitSaveFile );
+            if (taberr <= Ok) {
+                unitTables.push_back( new CSVTable( unitTab, unitTables.back()->rootdir ) );
+                unitTab.Close();
+                saved_game = true;
             }
-            //end deprecated code
+            if (!UNITTAB)
+                err = f.OpenReadOnly( filepath, UnitSaveFile );
         }
     }
-    if (UNITTAB)
+
+
+    //If save was not succesfull we try to open the unit file itself
+    if (filename[0]) {
+        string subdir = "factions/"+FactionUtil::GetFactionName( faction );
+        //begin deprecated code (5/11)
+        if (UNITTAB) {} else {
+            if (err > Ok) {
+                f.SetSubDirectory( subdir );
+                //No save found loading default unit
+                err = f.OpenReadOnly( filename, UnitFile );
+                if (err > Ok) {
+                    f.SetSubDirectory( "" );
+                    err = f.OpenReadOnly( filename, UnitFile );
+                }
+            } else {
+                f2.SetSubDirectory( subdir );
+                //Save found so just opening default unit to get its directory for further loading
+                err = f2.OpenReadOnly( filename, UnitFile );
+                if (err > Ok) {
+                    f2.SetSubDirectory( "" );
+                    err = f2.OpenReadOnly( filename, UnitFile );
+                }
+            }
+        }
+        //end deprecated code
+    }
+
+    if (UNITTAB) {
         unitRow = GetUnitRow( filename, SubU, faction, true, foundFile );
+    }
     else
         foundFile = (err <= Ok);
     this->filename = filename;
@@ -535,7 +533,7 @@ void Unit::Init( const char *filename,
         this->name     = string( "LOAD_FAILED" );
         calculate_extent( false );
         radial_size    = 1;
-        if ( (taberr <= Ok && taberr != Unspecified) || netxml ) {
+        if ( (taberr <= Ok && taberr != Unspecified)) {
             delete unitTables.back();
             unitTables.pop_back();
         }
@@ -554,11 +552,11 @@ void Unit::Init( const char *filename,
                                                                           tmpbool ).getRoot() : unitRow.getRoot() );
         VSFileSystem::current_subdirectory.push_back( "/"+unitRow["Directory"] );
         VSFileSystem::current_type.push_back( UnitFile );
-        LoadRow( unitRow, unitModifications, netxml );
+        LoadRow( unitRow, unitModifications, saved_game);
         VSFileSystem::current_type.pop_back();
         VSFileSystem::current_subdirectory.pop_back();
         VSFileSystem::current_path.pop_back();
-        if ( (taberr <= Ok && taberr != Unspecified) || netxml ) {
+        if ( (taberr <= Ok && taberr != Unspecified)) {
             delete unitTables.back();
             unitTables.pop_back();
         }

@@ -217,7 +217,7 @@ public:
  */
 //Uses a lot of stuff that does not belong to here
     Unit( const char *filename, bool SubUnit, int faction, std::string customizedUnit = std::string(
-              "" ), Flightgroup *flightgroup = NULL, int fg_subnumber = 0, std::string *netxml = NULL );
+              "" ), Flightgroup *flightgroup = NULL, int fg_subnumber = 0);
 
 
 public:
@@ -227,9 +227,9 @@ public:
     // TODO: get rid of this
     void Init();
     void Init( const char *filename, bool SubUnit, int faction, std::string customizedUnit = std::string(
-                   "" ), Flightgroup *flightgroup = NULL, int fg_subnumber = 0, std::string *netxml = NULL );
+                   "" ), Flightgroup *flightgroup = NULL, int fg_subnumber = 0);
 //table can be NULL, but setting it appropriately may increase performance
-    void LoadRow( class CSVRow&row, std::string unitMod, std::string*netxml = NULL );
+    void LoadRow( class CSVRow&row, std::string unitMod, bool saved_game);
 
     // TODO: implement enum class as type safe bitmask...
     // http://blog.bitwigglers.org/using-enum-classes-as-type-safe-bitmasks/

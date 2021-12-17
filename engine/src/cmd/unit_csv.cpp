@@ -49,6 +49,7 @@
 #include "mount_size.h"
 #include "weapon_info.h"
 #include "resource/resource.h"
+#include "unit_csv_factory.h"
 
 CSVRow LookupUnitRow( const string &unitname, const string &faction ) {
     string hashname = unitname+"__"+faction;
@@ -639,53 +640,18 @@ float getFuelConversion()
 
 const std::string EMPTY_STRING( "" );
 
-#define LOADROW_OPTIMIZER ((0x348299ab))
-
- /*After all, it's always used in the end*/
-#define FORCE_OPTIMIZER (1)
-
-#define OPTIMIZER_INDEX( Variable ) OPTIDX_##Variable
-
-#define INIT_OPTIMIZER( keys, Variable ) do{OPTIMIZER_INDEX(Variable)=(keys.push_back(#Variable),(keys.size()-1));}while(0)
-
-#define DEF_OPTIMIZER( Variable ) static unsigned int OPTIMIZER_INDEX( Variable ) = CSVTable::optimizer_undefined;
-
-#if FORCE_OPTIMIZER
-
-#define OPTIM_GET_DEF( row, table, variable, deflt )                                           \
-    ((                                                                                         \
-        (table->optimizer_indexes[OPTIMIZER_INDEX(variable)] == CSVTable::optimizer_undefined) \
-        ? (deflt)                                                                              \
-        : row[ table->optimizer_indexes[OPTIMIZER_INDEX(variable)] ]                           \
-    ))
-
-#else
-
-#define OPTIM_GET( row, table, variable, deflt )                             \
-    ((                                                                       \
-        use_optimizer                                                        \
-        ? (                                                                  \
-            (                                                                \
-                (OPTIMIZER_INDEX(variable) == CSVTable::optimizer_undefined) \
-                || (                                                         \
-                    table->optimizer_indexes[OPTIMIZER_INDEX(variable)]      \
-                    == CSVTable::optimizer_undefined                         \
-                   )                                                         \
-            )                                                                \
-            ? (deflt)                                                        \
-            : row[table->optimizer_indexes[OPTIMIZER_INDEX(variable )]]      \
-        )                                                                    \
-        : row[#variable]                                                     \
-    ))
-
-#endif
-
-#define OPTIM_GET( rot, table, variable ) OPTIM_GET_DEF( row, table, variable, EMPTY_STRING )
 
 
+void YawPitchRollParser(std::string unit_key, std::string main_string, std::string left_string, std::string right_string, float& left_pointer, float& right_pointer) {
+    float main_value = UnitCSVFactory::GetVariable(unit_key, main_string, 0.0f );
+    float right_value = UnitCSVFactory::GetVariable(unit_key, right_string, 0.0f );
+    float left_value = UnitCSVFactory::GetVariable(unit_key, left_string, 0.0f );
+    right_pointer = ( right_value > 0 ? right_value : main_value ) * VS_PI/180.;
+    left_pointer = ( left_value > 0 ? left_value : main_value ) * VS_PI/180.;
+}
 
 
-void Unit::LoadRow( CSVRow &row, string modification, string *netxml )
+void Unit::LoadRow( CSVRow &row, string modification, bool saved_game)
 {
     CSVTable *table = row.getParent();
     Unit::XML xml;
@@ -702,252 +668,25 @@ void Unit::LoadRow( CSVRow &row, string modification, string *netxml )
     xml.data = xml.shieldmesh = xml.rapidmesh = NULL;     //was uninitialized memory
     string tmpstr;
     csvRow   = row[0];
-    DEF_OPTIMIZER( FaceCamera );
-    DEF_OPTIMIZER( Name );
-    DEF_OPTIMIZER( Hud_image );
-    DEF_OPTIMIZER( Combat_Role );     //legacy only
-    DEF_OPTIMIZER( Unit_Role );
-    DEF_OPTIMIZER( Attack_Preference );
-    DEF_OPTIMIZER( Num_Animation_Stages );
-    DEF_OPTIMIZER( Unit_Scale );
-    DEF_OPTIMIZER( Mesh );
-    DEF_OPTIMIZER( Dock );
-    DEF_OPTIMIZER( Sub_Units );
-    DEF_OPTIMIZER( Mounts );
-    DEF_OPTIMIZER( Hold_Volume );
-    DEF_OPTIMIZER( Hidden_Hold_Volume );
-    DEF_OPTIMIZER( Upgrade_Storage_Volume );
-    DEF_OPTIMIZER( Equipment_Space );
-    DEF_OPTIMIZER( Cargo_Import );
-    DEF_OPTIMIZER( Cargo );
-    DEF_OPTIMIZER( Sounds );
-    DEF_OPTIMIZER( Cockpit );
-    DEF_OPTIMIZER( CockpitX );
-    DEF_OPTIMIZER( CockpitY );
-    DEF_OPTIMIZER( CockpitZ );
-    DEF_OPTIMIZER( Mass );
-    DEF_OPTIMIZER( Moment_Of_Inertia );
-    DEF_OPTIMIZER( Fuel_Capacity );
-    DEF_OPTIMIZER( Hull );
-    DEF_OPTIMIZER( Armor_Front_Top_Left );
-    DEF_OPTIMIZER( Armor_Front_Top_Right );
-    DEF_OPTIMIZER( Armor_Back_Top_Left );
-    DEF_OPTIMIZER( Armor_Back_Top_Right );
-    DEF_OPTIMIZER( Armor_Front_Bottom_Left );
-    DEF_OPTIMIZER( Armor_Front_Bottom_Right );
-    DEF_OPTIMIZER( Armor_Back_Bottom_Left );
-    DEF_OPTIMIZER( Armor_Back_Bottom_Right );
-//    DEF_OPTIMIZER( Description );  // What was this supposed to describe? - compiler complained that it's not used.
-    DEF_OPTIMIZER( Shield_Front_Top_Left );
-    DEF_OPTIMIZER( Shield_Front_Top_Right );
-    DEF_OPTIMIZER( Shield_Back_Top_Left );
-    DEF_OPTIMIZER( Shield_Back_Top_Right );
-    DEF_OPTIMIZER( Shield_Front_Bottom_Left );
-    DEF_OPTIMIZER( Shield_Front_Bottom_Right );
-    DEF_OPTIMIZER( Shield_Back_Bottom_Left );
-    DEF_OPTIMIZER( Shield_Back_Bottom_Right );
-    DEF_OPTIMIZER( Shield_Leak );
-    DEF_OPTIMIZER( Shield_Recharge );
-    DEF_OPTIMIZER( Shield_Efficiency );
-    DEF_OPTIMIZER( Warp_Capacitor );
-    DEF_OPTIMIZER( Warp_Min_Multiplier );
-    DEF_OPTIMIZER( Warp_Max_Multiplier );
-    DEF_OPTIMIZER( Primary_Capacitor );
-    DEF_OPTIMIZER( Reactor_Recharge );
-    DEF_OPTIMIZER( Jump_Drive_Present );
-    DEF_OPTIMIZER( Jump_Drive_Delay );
-    DEF_OPTIMIZER( Wormhole );
-    DEF_OPTIMIZER( Collide_Subunits );
-    DEF_OPTIMIZER( Outsystem_Jump_Cost );
-    DEF_OPTIMIZER( Warp_Usage_Cost );
-    DEF_OPTIMIZER( Afterburner_Usage_Cost );
-    DEF_OPTIMIZER( Afterburner_Type );
-    DEF_OPTIMIZER( Maneuver_Yaw );
-    DEF_OPTIMIZER( Maneuver_Pitch );
-    DEF_OPTIMIZER( Maneuver_Roll );
-    DEF_OPTIMIZER( Yaw_Governor );
-    DEF_OPTIMIZER( Yaw_Governor_Right );
-    DEF_OPTIMIZER( Yaw_Governor_Left );
-    DEF_OPTIMIZER( Pitch_Governor );
-    DEF_OPTIMIZER( Pitch_Governor_Up );
-    DEF_OPTIMIZER( Pitch_Governor_Down );
-    DEF_OPTIMIZER( Roll_Governor );
-    DEF_OPTIMIZER( Roll_Governor_Right );
-    DEF_OPTIMIZER( Roll_Governor_Left );
-    DEF_OPTIMIZER( Afterburner_Accel );
-    DEF_OPTIMIZER( Forward_Accel );
-    DEF_OPTIMIZER( Retro_Accel );
-    DEF_OPTIMIZER( Left_Accel );
-    DEF_OPTIMIZER( Right_Accel );
-    DEF_OPTIMIZER( Top_Accel );
-    DEF_OPTIMIZER( Bottom_Accel );
-    DEF_OPTIMIZER( Default_Speed_Governor );
-    DEF_OPTIMIZER( Afterburner_Speed_Governor );
-    DEF_OPTIMIZER( ITTS );
-    DEF_OPTIMIZER( Can_Lock );
-    DEF_OPTIMIZER( Radar_Color );
-    DEF_OPTIMIZER( Radar_Range );
-    DEF_OPTIMIZER( Max_Cone );
-    DEF_OPTIMIZER( Tracking_Cone );
-    DEF_OPTIMIZER( Lock_Cone );
-    DEF_OPTIMIZER( Cloak_Min );
-    DEF_OPTIMIZER( Cloak_Glass );
-    DEF_OPTIMIZER( Can_Cloak );
-    DEF_OPTIMIZER( Cloak_Rate );
-    DEF_OPTIMIZER( Cloak_Energy );
-    DEF_OPTIMIZER( Repair_Droid );
-    DEF_OPTIMIZER( ECM_Rating );
-    DEF_OPTIMIZER( Heat_Sink_Rating );
-    DEF_OPTIMIZER( Hud_Functionality );
-    DEF_OPTIMIZER( Max_Hud_Functionality );
-    DEF_OPTIMIZER( Lifesupport_Functionality );
-    DEF_OPTIMIZER( Max_Lifesupport_Functionality );
-    DEF_OPTIMIZER( Comm_Functionality );
-    DEF_OPTIMIZER( Max_Comm_Functionality );
-    DEF_OPTIMIZER( FireControl_Functionality );
-    DEF_OPTIMIZER( Max_FireControl_Functionality );
-    DEF_OPTIMIZER( SPECDrive_Functionality );
-    DEF_OPTIMIZER( Max_SPECDrive_Functionality );
-    DEF_OPTIMIZER( Slide_Start );
-    DEF_OPTIMIZER( Slide_End );
-    DEF_OPTIMIZER( Upgrades );
-    DEF_OPTIMIZER( Tractorability );
-    DEF_OPTIMIZER( Explosion );
-    DEF_OPTIMIZER( Light );
-    DEF_OPTIMIZER( Shield_Mesh );
-    DEF_OPTIMIZER( Rapid_Mesh );
-    DEF_OPTIMIZER( Use_Rapid );
-    DEF_OPTIMIZER( NoDamageParticles );
-    DEF_OPTIMIZER( Spec_Interdiction );
+
     if (table && !table->optimizer_setup) {
         static std::vector< std::string >keys;
         static bool optimizer_keys_init = false;
         if (!optimizer_keys_init) {
             optimizer_keys_init = true;
             VS_LOG(info, "Initializing optimizer");
-            INIT_OPTIMIZER( keys, Name );
-            INIT_OPTIMIZER( keys, Hud_image );
-            INIT_OPTIMIZER( keys, FaceCamera );
-            INIT_OPTIMIZER( keys, Combat_Role );             //legacy only
-            INIT_OPTIMIZER( keys, Unit_Role );
-            INIT_OPTIMIZER( keys, Attack_Preference );
-            INIT_OPTIMIZER( keys, Num_Animation_Stages );
-            INIT_OPTIMIZER( keys, Unit_Scale );
-            INIT_OPTIMIZER( keys, Mesh );
-            INIT_OPTIMIZER( keys, Dock );
-            INIT_OPTIMIZER( keys, Sub_Units );
-            INIT_OPTIMIZER( keys, Mounts );
-            INIT_OPTIMIZER( keys, Hold_Volume );
-            INIT_OPTIMIZER( keys, Hidden_Hold_Volume );
-            INIT_OPTIMIZER( keys, Upgrade_Storage_Volume );
-            INIT_OPTIMIZER( keys, Equipment_Space );
-            INIT_OPTIMIZER( keys, Cargo_Import );
-            INIT_OPTIMIZER( keys, Cargo );
-            INIT_OPTIMIZER( keys, Sounds );
-            INIT_OPTIMIZER( keys, Cockpit );
-            INIT_OPTIMIZER( keys, CockpitX );
-            INIT_OPTIMIZER( keys, CockpitY );
-            INIT_OPTIMIZER( keys, CockpitZ );
-            INIT_OPTIMIZER( keys, Mass );
-            INIT_OPTIMIZER( keys, Moment_Of_Inertia );
-            INIT_OPTIMIZER( keys, Fuel_Capacity );
-            INIT_OPTIMIZER( keys, Hull );
-            INIT_OPTIMIZER( keys, Armor_Front_Top_Left );
-            INIT_OPTIMIZER( keys, Armor_Front_Top_Right );
-            INIT_OPTIMIZER( keys, Armor_Back_Top_Left );
-            INIT_OPTIMIZER( keys, Armor_Back_Top_Right );
-            INIT_OPTIMIZER( keys, Armor_Front_Bottom_Left );
-            INIT_OPTIMIZER( keys, Armor_Front_Bottom_Right );
-            INIT_OPTIMIZER( keys, Armor_Back_Bottom_Left );
-            INIT_OPTIMIZER( keys, Armor_Back_Bottom_Right );
-//            INIT_OPTIMIZER( keys, Description );      // Compiler complained that this is not used
-            INIT_OPTIMIZER( keys, Shield_Front_Top_Left );
-            INIT_OPTIMIZER( keys, Shield_Front_Top_Right );
-            INIT_OPTIMIZER( keys, Shield_Back_Top_Left );
-            INIT_OPTIMIZER( keys, Shield_Back_Top_Right );
-            INIT_OPTIMIZER( keys, Shield_Front_Bottom_Left );
-            INIT_OPTIMIZER( keys, Shield_Front_Bottom_Right );
-            INIT_OPTIMIZER( keys, Shield_Back_Bottom_Left );
-            INIT_OPTIMIZER( keys, Shield_Back_Bottom_Right );
-            INIT_OPTIMIZER( keys, Shield_Leak );
-            INIT_OPTIMIZER( keys, Shield_Recharge );
-            INIT_OPTIMIZER( keys, Shield_Efficiency );
-            INIT_OPTIMIZER( keys, Warp_Capacitor );
-            INIT_OPTIMIZER( keys, Warp_Min_Multiplier );
-            INIT_OPTIMIZER( keys, Warp_Max_Multiplier );
-            INIT_OPTIMIZER( keys, Primary_Capacitor );
-            INIT_OPTIMIZER( keys, Reactor_Recharge );
-            INIT_OPTIMIZER( keys, Jump_Drive_Present );
-            INIT_OPTIMIZER( keys, Jump_Drive_Delay );
-            INIT_OPTIMIZER( keys, Wormhole );
-            INIT_OPTIMIZER( keys, Collide_Subunits );
-            INIT_OPTIMIZER( keys, Outsystem_Jump_Cost );
-            INIT_OPTIMIZER( keys, Warp_Usage_Cost );
-            INIT_OPTIMIZER( keys, Afterburner_Usage_Cost );
-            INIT_OPTIMIZER( keys, Afterburner_Type );
-            INIT_OPTIMIZER( keys, Maneuver_Yaw );
-            INIT_OPTIMIZER( keys, Maneuver_Pitch );
-            INIT_OPTIMIZER( keys, Maneuver_Roll );
-            INIT_OPTIMIZER( keys, Yaw_Governor );
-            INIT_OPTIMIZER( keys, Yaw_Governor_Right );
-            INIT_OPTIMIZER( keys, Yaw_Governor_Left );
-            INIT_OPTIMIZER( keys, Pitch_Governor );
-            INIT_OPTIMIZER( keys, Pitch_Governor_Up );
-            INIT_OPTIMIZER( keys, Pitch_Governor_Down );
-            INIT_OPTIMIZER( keys, Roll_Governor );
-            INIT_OPTIMIZER( keys, Roll_Governor_Right );
-            INIT_OPTIMIZER( keys, Roll_Governor_Left );
-            INIT_OPTIMIZER( keys, Afterburner_Accel );
-            INIT_OPTIMIZER( keys, Forward_Accel );
-            INIT_OPTIMIZER( keys, Retro_Accel );
-            INIT_OPTIMIZER( keys, Left_Accel );
-            INIT_OPTIMIZER( keys, Right_Accel );
-            INIT_OPTIMIZER( keys, Top_Accel );
-            INIT_OPTIMIZER( keys, Bottom_Accel );
-            INIT_OPTIMIZER( keys, Default_Speed_Governor );
-            INIT_OPTIMIZER( keys, Afterburner_Speed_Governor );
-            INIT_OPTIMIZER( keys, ITTS );
-            INIT_OPTIMIZER( keys, Can_Lock );
-            INIT_OPTIMIZER( keys, Radar_Color );
-            INIT_OPTIMIZER( keys, Radar_Range );
-            INIT_OPTIMIZER( keys, Max_Cone );
-            INIT_OPTIMIZER( keys, Tracking_Cone );
-            INIT_OPTIMIZER( keys, Lock_Cone );
-            INIT_OPTIMIZER( keys, Cloak_Min );
-            INIT_OPTIMIZER( keys, Cloak_Glass );
-            INIT_OPTIMIZER( keys, Can_Cloak );
-            INIT_OPTIMIZER( keys, Cloak_Rate );
-            INIT_OPTIMIZER( keys, Cloak_Energy );
-            INIT_OPTIMIZER( keys, Repair_Droid );
-            INIT_OPTIMIZER( keys, ECM_Rating );
-            INIT_OPTIMIZER( keys, Heat_Sink_Rating );
-            INIT_OPTIMIZER( keys, Hud_Functionality );
-            INIT_OPTIMIZER( keys, Max_Hud_Functionality );
-            INIT_OPTIMIZER( keys, Lifesupport_Functionality );
-            INIT_OPTIMIZER( keys, Max_Lifesupport_Functionality );
-            INIT_OPTIMIZER( keys, Comm_Functionality );
-            INIT_OPTIMIZER( keys, Max_Comm_Functionality );
-            INIT_OPTIMIZER( keys, FireControl_Functionality );
-            INIT_OPTIMIZER( keys, Max_FireControl_Functionality );
-            INIT_OPTIMIZER( keys, SPECDrive_Functionality );
-            INIT_OPTIMIZER( keys, Max_SPECDrive_Functionality );
-            INIT_OPTIMIZER( keys, Slide_Start );
-            INIT_OPTIMIZER( keys, Slide_End );
-            INIT_OPTIMIZER( keys, Upgrades );
-            INIT_OPTIMIZER( keys, Tractorability );
-            INIT_OPTIMIZER( keys, Explosion );
-            INIT_OPTIMIZER( keys, Light );
-            INIT_OPTIMIZER( keys, Shield_Mesh );
-            INIT_OPTIMIZER( keys, Rapid_Mesh );
-            INIT_OPTIMIZER( keys, Use_Rapid );
-            INIT_OPTIMIZER( keys, NoDamageParticles );
-            INIT_OPTIMIZER( keys, Spec_Interdiction );
+
         }
-        table->SetupOptimizer( keys, LOADROW_OPTIMIZER );
     }
-    //begin the geometry (and things that depend on stats)
-    fullname = OPTIM_GET( row, table, Name );
-    if ( ( tmpstr = OPTIM_GET( row, table, Hud_image ) ).length() != 0 ) {
+
+
+    std:: string unit_key = (saved_game ? "player_ship" : row[0]);
+
+    fullname = UnitCSVFactory::GetVariable(unit_key, "Name", std::string());
+
+    tmpstr = UnitCSVFactory::GetVariable(unit_key, "Hud_image", std::string());
+
+    if ( !tmpstr.empty() ) {
         std::string fac = FactionUtil::GetFaction( faction );
         fac += "_";
         fac += tmpstr;
@@ -957,75 +696,97 @@ void Unit::LoadRow( CSVRow &row, string modification, string *netxml )
             pImage->pHudImage = createVSSprite( tmpstr.c_str() );
         }
     }
-    if ( ( tmpstr = OPTIM_GET( row, table, FaceCamera ) ).length() != 0 )
+
+    tmpstr = UnitCSVFactory::GetVariable(unit_key, "FaceCamera", std::string());
+
+    if ( !tmpstr.empty() ) {
         graphicOptions.FaceCamera = XMLSupport::parse_bool( tmpstr ) ? 1 : 0;
-    std::string llegacy_combat_role( OPTIM_GET( row, table, Combat_Role ) );
-    std::string lunit_role( OPTIM_GET( row, table, Unit_Role ) );
-    std::string lattack_preference( OPTIM_GET( row, table, Attack_Preference ) );
-    if (lunit_role.length() == 0)
+    }
+
+
+    std::string llegacy_combat_role( UnitCSVFactory::GetVariable(unit_key, "Combat_Role", std::string()) );
+    std::string lunit_role(UnitCSVFactory::GetVariable(unit_key, "Unit_Role", std::string()) );
+    std::string lattack_preference( UnitCSVFactory::GetVariable(unit_key, "Attack_Preference", std::string()) );
+
+    if (lunit_role.empty()) {
         this->setUnitRole( llegacy_combat_role );
-    else
+    } else {
         this->setUnitRole( lunit_role );
-    if (lattack_preference.length() == 0)
+    }
+
+    if (lattack_preference.empty()) {
         this->setAttackPreference( llegacy_combat_role );
-    else
+    } else {
         this->setAttackPreference( lattack_preference );
-    graphicOptions.NumAnimationPoints = stoi( OPTIM_GET( row, table, Num_Animation_Stages ), 0 );
-    graphicOptions.NoDamageParticles  = stoi( OPTIM_GET( row, table, NoDamageParticles ), 0 );
+    }
+
+    graphicOptions.NumAnimationPoints = UnitCSVFactory::GetVariable(unit_key, "Num_Animation_Stages", 0 );
+    graphicOptions.NoDamageParticles  = UnitCSVFactory::GetVariable(unit_key, "NoDamageParticles", 0 );
+
     if (graphicOptions.NumAnimationPoints > 0)
         graphicOptions.Animating = 0;
-    xml.unitscale     = stof( OPTIM_GET( row, table, Unit_Scale ), 1 );
+    xml.unitscale     = UnitCSVFactory::GetVariable(unit_key, "Unit_Scale", 1.0f );
     if (!xml.unitscale) xml.unitscale = 1;
     pImage->unitscale = xml.unitscale;
-    AddMeshes( xml.meshes, xml.randomstartframe, xml.randomstartseconds, xml.unitscale, OPTIM_GET( row,
-                                                                                                   table,
-                                                                                                   Mesh ), faction,
+
+    std::string mesh_string = UnitCSVFactory::GetVariable(unit_key, "Mesh", std::string());
+    AddMeshes( xml.meshes, xml.randomstartframe, xml.randomstartseconds, xml.unitscale,
+               mesh_string, faction,
               getFlightgroup() );
-    AddDocks( this, xml, OPTIM_GET( row, table, Dock ) );
-    AddSubUnits( this, xml, OPTIM_GET( row, table, Sub_Units ), faction, modification );
+
+    std::string dock_string = UnitCSVFactory::GetVariable(unit_key, "Dock", std::string());
+    AddDocks( this, xml, UnitCSVFactory::GetVariable(unit_key, "Dock",std::string()) );
+
+    std::string sub_string = UnitCSVFactory::GetVariable(unit_key, "Sub_Units", std::string());
+    AddSubUnits( this, xml, UnitCSVFactory::GetVariable(unit_key, "Sub_Units", std::string() ), faction, modification );
 
     meshdata   = xml.meshes;
     meshdata.push_back( NULL );
     corner_min = Vector( FLT_MAX, FLT_MAX, FLT_MAX );
     corner_max = Vector( -FLT_MAX, -FLT_MAX, -FLT_MAX );
     calculate_extent( false );
-    AddMounts( this, xml, OPTIM_GET( row, table, Mounts ) );
-    this->CargoVolume = ::stof( OPTIM_GET( row, table, Hold_Volume ) );
-    this->HiddenCargoVolume = ::stof( OPTIM_GET( row, table, Hidden_Hold_Volume ) );
-    this->UpgradeVolume     = ::stof( OPTIM_GET( row, table, Upgrade_Storage_Volume ) );
-    this->equipment_volume  = ::stof( OPTIM_GET( row, table, Equipment_Space ) );
-    ImportCargo( this, OPTIM_GET( row, table, Cargo_Import ) );     //if this changes change planet_generic.cpp
-    AddCarg( this, OPTIM_GET( row, table, Cargo ) );
+    AddMounts( this, xml, UnitCSVFactory::GetVariable(unit_key, "Mounts", std::string() ) );
+    this->CargoVolume = UnitCSVFactory::GetVariable(unit_key, "Hold_Volume" , 0.0f );
+    this->HiddenCargoVolume = UnitCSVFactory::GetVariable(unit_key, "Hidden_Hold_Volume", 0.0f );
+    this->UpgradeVolume     = UnitCSVFactory::GetVariable(unit_key, "Upgrade_Storage_Volume", 0.0f );
+    this->equipment_volume  = UnitCSVFactory::GetVariable(unit_key, "Equipment_Space", 0.0f );
+
+
+    std::string cargo_import_string = UnitCSVFactory::GetVariable(unit_key, "Cargo_Import", std::string() );
+    ImportCargo( this, cargo_import_string);     //if this changes change planet_generic.cpp
+
+    std::string cargo_string = UnitCSVFactory::GetVariable(unit_key, "Cargo", std::string() );
+    AddCarg( this, cargo_string);
 
     // Replaced by below: AddSounds( this, OPTIM_GET( row, table, Sounds ) );
-    this->addSounds(&nextElement, OPTIM_GET( row, table, Sounds ));
+    this->addSounds(&nextElement, UnitCSVFactory::GetVariable(unit_key, "Sounds", std::string() ));
 
 
-    LoadCockpit( this, OPTIM_GET( row, table, Cockpit ) );
-    pImage->CockpitCenter.i = ::stof( OPTIM_GET( row, table, CockpitX ) )*xml.unitscale;
-    pImage->CockpitCenter.j = ::stof( OPTIM_GET( row, table, CockpitY ) )*xml.unitscale;
-    pImage->CockpitCenter.k = ::stof( OPTIM_GET( row, table, CockpitZ ) )*xml.unitscale;
-    Mass = stof( OPTIM_GET( row, table, Mass ), 1.0 );
-    Momentofinertia = stof( OPTIM_GET( row, table, Moment_Of_Inertia ), 1.0 );
-    fuel = ::stof( OPTIM_GET( row, table, Fuel_Capacity ) );
+    LoadCockpit( this, UnitCSVFactory::GetVariable(unit_key, "Cockpit", std::string() ));
+    pImage->CockpitCenter.i = UnitCSVFactory::GetVariable(unit_key, "CockpitX", 0.0f )*xml.unitscale;
+    pImage->CockpitCenter.j = UnitCSVFactory::GetVariable(unit_key, "CockpitY", 0.0f )*xml.unitscale;
+    pImage->CockpitCenter.k = UnitCSVFactory::GetVariable(unit_key, "CockpitZ", 0.0f )*xml.unitscale;
+    Mass = UnitCSVFactory::GetVariable(unit_key, "Mass", 1.0f );
+    Momentofinertia = UnitCSVFactory::GetVariable(unit_key, "Moment_Of_Inertia", 1.0f );
+    fuel = UnitCSVFactory::GetVariable(unit_key, "Fuel_Capacity", 0.0f );
 
     // Hull
-    float temp_hull = ::stof( OPTIM_GET( row, table, Hull ) );
+    float temp_hull = UnitCSVFactory::GetVariable(unit_key, "Hull", 0.0f);
     float hull_values[1] = {temp_hull};
     hull->UpdateFacets(1, hull_values);
 
-    specInterdiction = ::stof( OPTIM_GET( row, table, Spec_Interdiction ) );
+    specInterdiction = UnitCSVFactory::GetVariable(unit_key, "Spec_Interdiction", 0.0f );
 
     // Init armor
+    std::string armor_keys[] = {"Armor_Front_Top_Left","Armor_Front_Top_Right",
+            "Armor_Front_Bottom_Left","Armor_Front_Bottom_Right",
+            "Armor_Back_Top_Left","Armor_Back_Top_Right",
+            "Armor_Back_Bottom_Left","Armor_Back_Bottom_Right"};
     float armor_values[8];
-    armor_values[0] = ::stof( OPTIM_GET( row, table, Armor_Front_Top_Left ));
-    armor_values[1] = ::stof( OPTIM_GET( row, table, Armor_Front_Top_Right ));
-    armor_values[2] = ::stof( OPTIM_GET( row, table, Armor_Front_Bottom_Left ));
-    armor_values[3] = ::stof( OPTIM_GET( row, table, Armor_Front_Bottom_Right ));
-    armor_values[4] = ::stof( OPTIM_GET( row, table, Armor_Back_Top_Left ));
-    armor_values[5] = ::stof( OPTIM_GET( row, table, Armor_Back_Top_Right ));
-    armor_values[6] = ::stof( OPTIM_GET( row, table, Armor_Back_Bottom_Left ));
-    armor_values[7] = ::stof( OPTIM_GET( row, table, Armor_Back_Bottom_Right ));
+    for(int i=0;i<8;i++) {
+        float tmp_armor_value = UnitCSVFactory::GetVariable(unit_key, armor_keys[i], 0.0f);
+        armor_values[i] = tmp_armor_value;
+    }
 
     armor->UpdateFacets(8, armor_values);
 
@@ -1033,14 +794,15 @@ void Unit::LoadRow( CSVRow &row, string modification, string *netxml )
     // Load shield
     // Some basic shield variables
     // TODO: lib_damage figure out how leak and efficiency work
-    //char leak = (char) (::stof( OPTIM_GET( row, table, Shield_Leak ) )*100.0);
-    float regeneration   = ::stof( OPTIM_GET( row, table, Shield_Recharge ) );
+    //char leak = static_cast<char>(UnitCSVFactory::GetVariable(unit_key, "Shield_Leak", 0.0f) * 100);
+
+    float regeneration   = UnitCSVFactory::GetVariable(unit_key, "Shield_Recharge", 0.0f);
 
     // This is necessary for upgrading shields, as it's done with an ugly macro in
     // unit_generic STDUPGRADE
     shield_regeneration = regeneration;
     shield->UpdateRegeneration(regeneration);
-    //float efficiency = ::stof( OPTIM_GET( row, table, Shield_Efficiency ), 1.0 );
+    //float efficiency = UnitCSVFactory::GetVariable(unit_key, "Shield_Efficiency", 1.0f );
 
     // Get shield count
 
@@ -1050,10 +812,10 @@ void Unit::LoadRow( CSVRow &row, string modification, string *netxml )
 
     // TODO: this mapping should really go away
     // I love macros, NOT.
-    shield_string_values[0] = OPTIM_GET( row, table, Shield_Front_Top_Right );
-    shield_string_values[1] = OPTIM_GET( row, table, Shield_Back_Top_Left );
-    shield_string_values[2] = OPTIM_GET( row, table, Shield_Front_Bottom_Right );
-    shield_string_values[3] = OPTIM_GET( row, table, Shield_Front_Bottom_Left );
+    shield_string_values[0] = UnitCSVFactory::GetVariable(unit_key, "Shield_Front_Top_Right", std::string() );
+    shield_string_values[1] = UnitCSVFactory::GetVariable(unit_key, "Shield_Back_Top_Left", std::string() );
+    shield_string_values[2] = UnitCSVFactory::GetVariable(unit_key, "Shield_Front_Bottom_Right", std::string() );
+    shield_string_values[3] = UnitCSVFactory::GetVariable(unit_key, "Shield_Front_Bottom_Left", std::string() );
 
 
     for(int i=0;i<4;i++) {
@@ -1087,162 +849,141 @@ void Unit::LoadRow( CSVRow &row, string modification, string *netxml )
 
 
     static bool WCfuelhack = XMLSupport::parse_bool( vs_config->getVariable( "physics", "fuel_equals_warp", "false" ) );
-    maxwarpenergy     = warpenergy = ::stof( OPTIM_GET( row, table, Warp_Capacitor ) );
+    maxwarpenergy     = warpenergy = UnitCSVFactory::GetVariable(unit_key, "Warp_Capacitor", 0.0f);
 
-    graphicOptions.MinWarpMultiplier = ::stof( OPTIM_GET( row, table, Warp_Min_Multiplier ), 1.0 );
-    graphicOptions.MaxWarpMultiplier = ::stof( OPTIM_GET( row, table, Warp_Max_Multiplier ), 1.0 );
+    graphicOptions.MinWarpMultiplier = UnitCSVFactory::GetVariable(unit_key, "Warp_Min_Multiplier", 1.0f);
+    graphicOptions.MaxWarpMultiplier = UnitCSVFactory::GetVariable(unit_key, "Warp_Max_Multiplier", 1.0f);
 
-    energy.Set(::stof( OPTIM_GET( row, table, Primary_Capacitor ) ), 0.0f);
-    recharge   = ::stof( OPTIM_GET( row, table, Reactor_Recharge ) );
-    jump.drive = XMLSupport::parse_bool( OPTIM_GET( row, table, Jump_Drive_Present ) ) ? -1 : -2;
-    jump.delay = ::stoi( OPTIM_GET( row, table, Jump_Drive_Delay ) );
-    forcejump = XMLSupport::parse_bool( OPTIM_GET( row, table, Wormhole ) );
-    graphicOptions.RecurseIntoSubUnitsOnCollision = stob( OPTIM_GET( row,
-                                                                     table,
-                                                                     Collide_Subunits ),
-                                                          graphicOptions.RecurseIntoSubUnitsOnCollision ? true : false ) ? 1
-                                                    : 0;
-    jump.energy = ::stof( OPTIM_GET( row, table, Outsystem_Jump_Cost ) );
-    jump.insysenergy = ::stof( OPTIM_GET( row, table, Warp_Usage_Cost ) );
+    energy.Set( UnitCSVFactory::GetVariable(unit_key, "Primary_Capacitor", 0.0f));
+    recharge   = UnitCSVFactory::GetVariable(unit_key, "Reactor_Recharge", 0.0f);
+    jump.drive = UnitCSVFactory::GetVariable(unit_key, "Jump_Drive_Present", 0) ? -1 : -2;
+    jump.delay = UnitCSVFactory::GetVariable(unit_key, "Jump_Drive_Delay", 0);
+    forcejump = UnitCSVFactory::GetVariable(unit_key, "Wormhole", false);
+    graphicOptions.RecurseIntoSubUnitsOnCollision = UnitCSVFactory::GetVariable(unit_key, "Collide_Subunits", graphicOptions.RecurseIntoSubUnitsOnCollision ? true : false) ? 1: 0;
+    jump.energy = UnitCSVFactory::GetVariable(unit_key, "Outsystem_Jump_Cost", 0.0f);
+    jump.insysenergy = UnitCSVFactory::GetVariable(unit_key, "Warp_Usage_Cost", 0.0f);
     if (WCfuelhack) fuel = warpenergy = warpenergy+jump.energy*0.1f;       //this is required to make sure we don't trigger the "globally out of fuel" if we use all warp charges -- save some afterburner for later!!!
-    afterburnenergy  = ::stof( OPTIM_GET( row, table, Afterburner_Usage_Cost ), 32767 );
-    afterburntype    = ::stoi( OPTIM_GET( row, table, Afterburner_Type ) );     //type 1 == "use fuel", type 0 == "use reactor energy", type 2 ==(hopefully) "use jump fuel" 3: NO AFTERBURNER
-    limits.yaw = ::stof( OPTIM_GET( row, table, Maneuver_Yaw ) )*VS_PI/180.;
-    limits.pitch     = ::stof( OPTIM_GET( row, table, Maneuver_Pitch ) )*VS_PI/180.;
-    limits.roll      = ::stof( OPTIM_GET( row, table, Maneuver_Roll ) )*VS_PI/180.;
-    {
-        std::string t, tn, tp;
-        t  = OPTIM_GET( row, table, Yaw_Governor );
-        tn = OPTIM_GET( row, table, Yaw_Governor_Right );
-        tp = OPTIM_GET( row, table, Yaw_Governor_Left );
-        computer.max_yaw_right = ::stof( tn.length() > 0 ? tn : t )*VS_PI/180.;
-        computer.max_yaw_left = ::stof( tp.length() > 0 ? tp : t )*VS_PI/180.;
-        t  = OPTIM_GET( row, table, Pitch_Governor );
-        tn = OPTIM_GET( row, table, Pitch_Governor_Up );
-        tp = OPTIM_GET( row, table, Pitch_Governor_Down );
-        computer.max_pitch_up = ::stof( tn.length() > 0 ? tn : t )*VS_PI/180.;
-        computer.max_pitch_down = ::stof( tp.length() > 0 ? tp : t )*VS_PI/180.;
-        t  = OPTIM_GET( row, table, Roll_Governor );
-        tn = OPTIM_GET( row, table, Roll_Governor_Right );
-        tp = OPTIM_GET( row, table, Roll_Governor_Left );
-        computer.max_roll_right = ::stof( tn.length() > 0 ? tn : t )*VS_PI/180.;
-        computer.max_roll_left = ::stof( tp.length() > 0 ? tp : t )*VS_PI/180.;
-    }
-    static float game_accel = XMLSupport::parse_float( vs_config->getVariable( "physics", "game_accel", "1" ) );
-    static float game_speed = XMLSupport::parse_float( vs_config->getVariable( "physics", "game_speed", "1" ) );
-    limits.afterburn = ::stof( OPTIM_GET( row, table, Afterburner_Accel ) )*game_accel*game_speed;
-    limits.forward   = ::stof( OPTIM_GET( row, table, Forward_Accel ) )*game_accel*game_speed;
-    limits.retro     = ::stof( OPTIM_GET( row, table, Retro_Accel ) )*game_accel*game_speed;
-    limits.lateral   = .5
-                       *( ::stof( OPTIM_GET( row, table,
-                                             Left_Accel ) )+::stof( OPTIM_GET( row, table, Right_Accel ) ) )*game_accel*game_speed;
-    limits.vertical  = .5
-                       *( ::stof( OPTIM_GET( row, table,
-                                             Top_Accel ) )+::stof( OPTIM_GET( row, table, Bottom_Accel ) ) )*game_accel*game_speed;
-    computer.max_combat_speed    = ::stof( OPTIM_GET( row, table, Default_Speed_Governor ) )*game_speed;
-    computer.max_combat_ab_speed = ::stof( OPTIM_GET( row, table, Afterburner_Speed_Governor ) )*game_speed;
-    computer.itts = stob( OPTIM_GET( row, table, ITTS ), true );
-    computer.radar.canlock = stob( OPTIM_GET( row, table, Can_Lock ), true );
-    {
-        // The Radar_Color column in the units.csv has been changed from a
-        // boolean value to a string. The boolean values are supported for
-        // backwardscompatibility.
-        // When we save this setting, it is simply converted from an integer
-        // number to a string, and we need to support this as well.
-        std::string iffval = OPTIM_GET( row, table, Radar_Color );
-        if ((iffval.empty()) || (iffval == "FALSE") || (iffval == "0"))
-        {
-            computer.radar.capability = Computer::RADARLIM::Capability::IFF_NONE;
-        }
-        else if ((iffval == "TRUE") || (iffval == "1"))
-        {
-            computer.radar.capability
-                = Computer::RADARLIM::Capability::IFF_SPHERE
-                | Computer::RADARLIM::Capability::IFF_FRIEND_FOE;
-        }
-        else if (iffval == "THREAT")
-        {
-            computer.radar.capability
-                = Computer::RADARLIM::Capability::IFF_SPHERE
-                | Computer::RADARLIM::Capability::IFF_FRIEND_FOE
-                | Computer::RADARLIM::Capability::IFF_THREAT_ASSESSMENT;
-        }
-        else if (iffval == "BUBBLE_THREAT")
-        {
-            computer.radar.capability
-                = Computer::RADARLIM::Capability::IFF_BUBBLE
-                | Computer::RADARLIM::Capability::IFF_FRIEND_FOE
-                | Computer::RADARLIM::Capability::IFF_OBJECT_RECOGNITION
-                | Computer::RADARLIM::Capability::IFF_THREAT_ASSESSMENT;
-        }
-        else if (iffval == "PLANE")
-        {
-            computer.radar.capability
-                = Computer::RADARLIM::Capability::IFF_PLANE
-                | Computer::RADARLIM::Capability::IFF_FRIEND_FOE;
-        }
-        else if (iffval == "PLANE_THREAT")
-        {
-            computer.radar.capability
-                = Computer::RADARLIM::Capability::IFF_PLANE
-                | Computer::RADARLIM::Capability::IFF_FRIEND_FOE
-                | Computer::RADARLIM::Capability::IFF_OBJECT_RECOGNITION
-                | Computer::RADARLIM::Capability::IFF_THREAT_ASSESSMENT;
-        }
-        else
-        {
-            unsigned int value = stoi(iffval, 0);
-            if (value == 0)
-            {
-                // Unknown value
-                assert(false);
-                computer.radar.capability = Computer::RADARLIM::Capability::IFF_NONE;
-            }
-            else
-            {
-                computer.radar.capability = value;
-            }
-        }
-    }
-    computer.radar.maxrange     = stof( OPTIM_GET( row, table, Radar_Range ), FLT_MAX );
-    computer.radar.maxcone      = cos( stof( OPTIM_GET( row, table, Max_Cone ), 180 )*VS_PI/180 );
-    computer.radar.trackingcone = cos( stof( OPTIM_GET( row, table, Tracking_Cone ), 180 )*VS_PI/180 );
-    computer.radar.lockcone     = cos( stof( OPTIM_GET( row, table, Lock_Cone ), 180 )*VS_PI/180 );
-    cloakmin = (int) (::stof( OPTIM_GET( row, table, Cloak_Min ) )*2147483136);
-    if (cloakmin < 0) cloakmin = 0;
-    cloakglass = XMLSupport::parse_bool( OPTIM_GET( row, table, Cloak_Glass ) );
-    if ( (cloakmin&0x1) && !cloakglass )
-        cloakmin -= 1;
-    if ( (cloakmin&0x1) == 0 && cloakglass )
-        cloakmin += 1;
-    if ( !XMLSupport::parse_bool( OPTIM_GET( row, table, Can_Cloak ) ) )
-        cloaking = -1;
-    else
-        cloaking = (int) (-2147483647)-1;
-    cloakrate    = (int) ( 2147483136.*::stof( OPTIM_GET( row, table, Cloak_Rate ) ) );     //short fix
-    cloakenergy  = ::stof( OPTIM_GET( row, table, Cloak_Energy ) );
-    repair_droid = ::stoi( OPTIM_GET( row, table, Repair_Droid ) );
-    ecm    = ::stoi( OPTIM_GET( row, table, ECM_Rating ) );
+    afterburnenergy  = UnitCSVFactory::GetVariable(unit_key, "Afterburner_Usage_Cost", 32767.0f);
+    afterburntype    = UnitCSVFactory::GetVariable(unit_key, "Afterburner_Type", 0); //type 1 == "use fuel", type 0 == "use reactor energy", type 2 ==(hopefully) "use jump fuel" 3: NO AFTERBURNER
+    limits.yaw = UnitCSVFactory::GetVariable(unit_key, "Maneuver_Yaw", 0.0f) *VS_PI/180.0;
+    limits.pitch     = UnitCSVFactory::GetVariable(unit_key, "Maneuver_Pitch", 0.0f) *VS_PI/180.0;
+    limits.roll      = UnitCSVFactory::GetVariable(unit_key, "Maneuver_Roll", 0.0f) *VS_PI/180.0;
 
-    this->HeatSink = ::stof( OPTIM_GET( row, table, Heat_Sink_Rating ) );
+    YawPitchRollParser(unit_key, "Yaw_Governor", "Yaw_Governor", "Yaw_Governor", computer.max_yaw_right, computer.max_yaw_left);
+    YawPitchRollParser(unit_key, "Pitch_Governor", "Pitch_Governor_Up", "Pitch_Governor_Down", computer.max_pitch_up, computer.max_pitch_down);
+    YawPitchRollParser(unit_key, "Roll_Governor", "Roll_Governor_Right", "Roll_Governor_Left", computer.max_roll_right, computer.max_roll_left);
+
+    static float game_accel = GameConfig::GetVariable( "physics", "game_accel", 1.0f );
+    static float game_speed = GameConfig::GetVariable( "physics", "game_speed", 1.0f );
+    limits.afterburn = UnitCSVFactory::GetVariable(unit_key, "Afterburner_Accel", 0.0f) * game_accel * game_speed;
+    limits.forward   = UnitCSVFactory::GetVariable(unit_key, "Forward_Accel", 0.0f) * game_accel * game_speed;
+    limits.retro     = UnitCSVFactory::GetVariable(unit_key, "Retro_Accel", 0.0f) * game_accel * game_speed;
+    limits.lateral   = 0.5 * (UnitCSVFactory::GetVariable(unit_key, "Left_Accel", 0.0f) +
+                              UnitCSVFactory::GetVariable(unit_key, "Right_Accel", 0.0f)) * game_accel * game_speed;
+
+    limits.vertical  = 0.5 * (UnitCSVFactory::GetVariable(unit_key, "Top_Accel", 0.0f) +
+                              UnitCSVFactory::GetVariable(unit_key, "Bottom_Accel", 0.0f)) * game_accel * game_speed;
+
+    computer.max_combat_speed    = UnitCSVFactory::GetVariable(unit_key, "Default_Speed_Governor", 0.0f) * game_speed;
+    computer.max_combat_ab_speed = UnitCSVFactory::GetVariable(unit_key, "Afterburner_Speed_Governor", 0.0f) * game_speed;
+    computer.itts = UnitCSVFactory::GetVariable(unit_key, "ITTS", true);
+    computer.radar.canlock = UnitCSVFactory::GetVariable(unit_key, "Can_Lock", true);
+
+
+    // The Radar_Color column in the units.csv has been changed from a
+    // boolean value to a string. The boolean values are supported for
+    // backwardscompatibility.
+    // When we save this setting, it is simply converted from an integer
+    // number to a string, and we need to support this as well.
+    std::string iffval = UnitCSVFactory::GetVariable(unit_key, "Radar_Color", std::string() );
+
+    if ((iffval.empty()) || (iffval == "FALSE") || (iffval == "0"))
+    {
+        computer.radar.capability = Computer::RADARLIM::Capability::IFF_NONE;
+    } else if ((iffval == "TRUE") || (iffval == "1")) {
+        computer.radar.capability = Computer::RADARLIM::Capability::IFF_SPHERE
+                | Computer::RADARLIM::Capability::IFF_FRIEND_FOE;
+    } else if (iffval == "THREAT") {
+        computer.radar.capability = Computer::RADARLIM::Capability::IFF_SPHERE
+                | Computer::RADARLIM::Capability::IFF_FRIEND_FOE
+                | Computer::RADARLIM::Capability::IFF_THREAT_ASSESSMENT;
+    } else if (iffval == "BUBBLE_THREAT") {
+        computer.radar.capability = Computer::RADARLIM::Capability::IFF_BUBBLE
+                | Computer::RADARLIM::Capability::IFF_FRIEND_FOE
+                | Computer::RADARLIM::Capability::IFF_OBJECT_RECOGNITION
+                | Computer::RADARLIM::Capability::IFF_THREAT_ASSESSMENT;
+    } else if (iffval == "PLANE") {
+        computer.radar.capability = Computer::RADARLIM::Capability::IFF_PLANE
+                | Computer::RADARLIM::Capability::IFF_FRIEND_FOE;
+    } else if (iffval == "PLANE_THREAT") {
+        computer.radar.capability
+                = Computer::RADARLIM::Capability::IFF_PLANE
+                | Computer::RADARLIM::Capability::IFF_FRIEND_FOE
+                | Computer::RADARLIM::Capability::IFF_OBJECT_RECOGNITION
+                | Computer::RADARLIM::Capability::IFF_THREAT_ASSESSMENT;
+    } else {
+        unsigned int value = stoi(iffval, 0);
+        if (value == 0) {
+            // Unknown value
+            computer.radar.capability = Computer::RADARLIM::Capability::IFF_NONE;
+        } else {
+            computer.radar.capability = value;
+        }
+    }
+
+
+    computer.radar.maxrange     = UnitCSVFactory::GetVariable(unit_key, "Radar_Range", FLT_MAX);
+    computer.radar.maxcone      = cos( UnitCSVFactory::GetVariable(unit_key, "Max_Cone", 180.0f) * VS_PI/180);
+    computer.radar.trackingcone = cos( UnitCSVFactory::GetVariable(unit_key, "Tracking_Cone", 180.0f) * VS_PI/180 );
+    computer.radar.lockcone     = cos( UnitCSVFactory::GetVariable(unit_key, "Lock_Cone", 180.0f) * VS_PI/180 );
+
+    cloakmin = static_cast<int>(UnitCSVFactory::GetVariable(unit_key, "Cloak_Min", 0.0f) * 2147483136);
+    if (cloakmin < 0) {
+        cloakmin = 0;
+    }
+
+    cloakglass = UnitCSVFactory::GetVariable(unit_key, "Cloak_Glass", false);
+    if ( (cloakmin&0x1) && !cloakglass ) {
+        cloakmin -= 1;
+    }
+
+    if ( (cloakmin&0x1) == 0 && cloakglass ) {
+        cloakmin += 1;
+    }
+
+    if ( !UnitCSVFactory::GetVariable(unit_key, "Can_Cloak", false)) {
+         cloaking = -1;
+    } else {
+        cloaking = (int) (-2147483647)-1;
+    }
+
+    cloakrate    = (int) ( 2147483136.0 * UnitCSVFactory::GetVariable(unit_key, "Cloak_Rate", 0.0f) );     //short fix
+    cloakenergy  = UnitCSVFactory::GetVariable(unit_key, "Cloak_Energy", 0.0f);
+    repair_droid = UnitCSVFactory::GetVariable(unit_key, "Repair_Droid", 0);
+    ecm    = UnitCSVFactory::GetVariable(unit_key, "ECM_Rating", 0);
+
+    this->HeatSink = UnitCSVFactory::GetVariable(unit_key, "Heat_Sink_Rating", 0.0f);
     if (ecm < 0) ecm *= -1;
     if (pImage->cockpit_damage) {
-        HudDamage( pImage->cockpit_damage, OPTIM_GET( row, table, Hud_Functionality ) );
-        HudDamage( pImage->cockpit_damage+1+MAXVDUS+UnitImages< void >::NUMGAUGES, OPTIM_GET( row, table, Max_Hud_Functionality ) );
+        std::string hud_functionality = UnitCSVFactory::GetVariable(unit_key, "Hud_Functionality", std::string());
+        std::string max_hud_functionality = UnitCSVFactory::GetVariable(unit_key, "Max_Hud_Functionality", std::string());
+
+        HudDamage( pImage->cockpit_damage, hud_functionality);
+        HudDamage( pImage->cockpit_damage+1+MAXVDUS+UnitImages< void >::NUMGAUGES, max_hud_functionality);
     }
-    LifeSupportFunctionality    = ::stof( OPTIM_GET_DEF( row, table, Lifesupport_Functionality, "1" ) );
-    LifeSupportFunctionalityMax = ::stof( OPTIM_GET_DEF( row, table, Max_Lifesupport_Functionality, "1" ) );
-    CommFunctionality = ::stof( OPTIM_GET_DEF( row, table, Comm_Functionality, "1" ) );
-    CommFunctionalityMax = ::stof( OPTIM_GET_DEF( row, table, Max_Comm_Functionality, "1" ) );
-    fireControlFunctionality    = ::stof( OPTIM_GET_DEF( row, table, FireControl_Functionality, "1" ) );
-    fireControlFunctionalityMax = ::stof( OPTIM_GET_DEF( row, table, Max_FireControl_Functionality, "1" ) );
-    SPECDriveFunctionality = ::stof( OPTIM_GET_DEF( row, table, SPECDrive_Functionality, "1" ) );
-    SPECDriveFunctionalityMax   = ::stof( OPTIM_GET_DEF( row, table, Max_SPECDrive_Functionality, "1" ) );
-    computer.slide_start = ::stoi( OPTIM_GET( row, table, Slide_Start ) );
-    computer.slide_end   = ::stoi( OPTIM_GET( row, table, Slide_End ) );
-    UpgradeUnit( this, OPTIM_GET( row, table, Upgrades ) );
+    LifeSupportFunctionality    = UnitCSVFactory::GetVariable(unit_key, "Lifesupport_Functionality", 1.0f);
+    LifeSupportFunctionalityMax = UnitCSVFactory::GetVariable(unit_key, "Max_Lifesupport_Functionality", 1.0f);
+    CommFunctionality = UnitCSVFactory::GetVariable(unit_key, "Comm_Functionality", 1.0f);
+    CommFunctionalityMax = UnitCSVFactory::GetVariable(unit_key, "Max_Comm_Functionality", 1.0f);
+    fireControlFunctionality    = UnitCSVFactory::GetVariable(unit_key, "FireControl_Functionality", 1.0f);
+    fireControlFunctionalityMax = UnitCSVFactory::GetVariable(unit_key, "Max_FireControl_Functionality", 1.0f);
+    SPECDriveFunctionality = UnitCSVFactory::GetVariable(unit_key, "SPECDrive_Functionality", 1.0f);
+    SPECDriveFunctionalityMax   = UnitCSVFactory::GetVariable(unit_key, "Max_SPECDrive_Functionality", 1.0f);
+    computer.slide_start = UnitCSVFactory::GetVariable(unit_key, "Slide_Start", 0);
+    computer.slide_end   = UnitCSVFactory::GetVariable(unit_key, "Slide_End", 0);
+    UpgradeUnit( this, UnitCSVFactory::GetVariable(unit_key, "Upgrades", std::string()));
     {
-        std::string   tractorability = OPTIM_GET( row, table, Tractorability );
+        std::string   tractorability = UnitCSVFactory::GetVariable(unit_key, "Tractorability", std::string());
         unsigned char tflags;
         if ( !tractorability.empty() ) {
             tflags = tractorImmune;
@@ -1252,15 +993,15 @@ void Unit::LoadRow( CSVRow &row, string modification, string *netxml )
                 tflags |= tractorIn;
         } else {tflags = tractorPush; } setTractorability( (enum tractorHow) tflags );
     }
-    this->pImage->explosion_type = OPTIM_GET( row, table, Explosion );
+    this->pImage->explosion_type = UnitCSVFactory::GetVariable(unit_key, "Explosion", std::string());
     if ( pImage->explosion_type.get().length() ) {
         cache_ani( pImage->explosion_type );
     } else {
         static std::string expani = vs_config->getVariable( "graphics", "explosion_animation", "explosion_orange.ani" );
         cache_ani( expani );
     }
-    AddLights( this, xml, OPTIM_GET( row, table, Light ) );
-    xml.shieldmesh_str = OPTIM_GET( row, table, Shield_Mesh );
+    AddLights( this, xml, UnitCSVFactory::GetVariable(unit_key, "Light", std::string()));
+    xml.shieldmesh_str = UnitCSVFactory::GetVariable(unit_key, "Shield_Mesh", std::string());
     if ( xml.shieldmesh_str.length() ) {
         addShieldMesh( &xml, xml.shieldmesh_str.c_str(), xml.unitscale, faction, getFlightgroup() );
         meshdata.back() = xml.shieldmesh;
@@ -1273,7 +1014,7 @@ void Unit::LoadRow( CSVRow &row, string modification, string *netxml )
     meshdata.back()->EnableSpecialFX();
     //Begin the Pow-w-w-war Zone Collide Tree Generation
     {
-        xml.rapidmesh_str = OPTIM_GET( row, table, Rapid_Mesh );
+        xml.rapidmesh_str = UnitCSVFactory::GetVariable(unit_key, "Rapid_Mesh", std::string());
         vector< mesh_polygon >polies;
 
         std::string collideTreeHash = VSFileSystem::GetHashName( modification+"#"+row[0] );
@@ -1285,7 +1026,7 @@ void Unit::LoadRow( CSVRow &row, string modification, string *netxml )
         if (!this->colTrees) {
             string val;
             xml.hasColTree = 1;
-            if ( ( val = OPTIM_GET( row, table, Use_Rapid ) ).length() )
+            if ( ( val = UnitCSVFactory::GetVariable(unit_key, "Use_Rapid", std::string())).length() )
                 xml.hasColTree = XMLSupport::parse_bool( val );
             if (xml.shieldmesh) {
                 if ( meshdata.back() ) {
