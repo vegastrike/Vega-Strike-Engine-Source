@@ -1385,6 +1385,7 @@ ELSEIF (CMAKE_SYSTEM_NAME STREQUAL Linux)
         # See https://cmake.org/cmake/help/v3.3/module/CPackDeb.html
         SET(CPACK_DEBIAN_PACKAGE_NAME "Vega-Strike")
         SET(CPACK_DEBIAN_PACKAGE_MAINTAINER "maintainers@vega-strike.org")
+        SET(CPACK_DEBIAN_PACKAGE_VERSION "${VEGA_STRIKE_PACKAGE_VERSION_STR}")
         # Debian Version: /etc/debian_version - <name>/<junk>
         IF (NOT LSB_EXISTS)
             SET(USE_DEBIAN_VERSION TRUE)
