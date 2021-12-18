@@ -43,7 +43,7 @@ Vega Strike is a Space Flight Simulator that allows a player to explore, trade, 
 - BSP Trees that allow one to fly close to a starship, and in the runway of (well formed) models... unlike the victory from WC3.
 - the Normal Force which bounces starships off of each other
 - Respawn with the ';' key (semicolon)
-- Switch Ships with the '\[' key
+- Switch Ships with the `[` key
 - Joystick support for a full featured joystick
 
 ## How to Run
@@ -345,7 +345,7 @@ A new starship will be created for you by Bob.
 
 ### Transfer Ship Command
 
-If you wish to transfer command to another starship, simply press '\[' to switch over.  This is useful if you have died and do not wish to call on Bob for help.
+If you wish to transfer command to another starship, simply press `[` to switch over.  This is useful if you have died and do not wish to call on Bob for help.
 
 ### Controls
 
@@ -372,7 +372,7 @@ If you wish to transfer command to another starship, simply press '\[' to switch
 - `W` - Switch left targetting cpu
 - `Shift-W` - Shift weapons computer mode to damage mode
 - `:` - Respawn (Use after death to recreate your starship)
-- `\[` - switch ships in battle (use to control allies)
+- `[` - switch ships in battle (use to control allies)
 - `F1` - toggle cockpit/background display
 - `F2` - Left camera
 - `F3` - Right camera
