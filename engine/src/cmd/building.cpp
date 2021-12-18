@@ -25,6 +25,7 @@
 
 #include "building.h"
 #include "cont_terrain.h"
+#include "unit_generic.h"
 
 Building::Building( ContinuousTerrain *parent,
                             bool vehicle,
@@ -32,7 +33,7 @@ Building::Building( ContinuousTerrain *parent,
                             bool SubUnit,
                             int faction,
                             const string &modifications,
-                            Flightgroup *fg ) : GameUnit( filename, SubUnit, faction, modifications, fg )
+                            Flightgroup *fg ) : Unit( filename, SubUnit, faction, modifications, fg )
 {
     this->vehicle = vehicle;
     continuous    = true;
@@ -45,7 +46,7 @@ Building::Building( Terrain *parent,
                             bool SubUnit,
                             int faction,
                             const string &modifications,
-                            Flightgroup *fg ) : GameUnit( filename, SubUnit, faction, modifications, fg )
+                            Flightgroup *fg ) : Unit( filename, SubUnit, faction, modifications, fg )
 {
     this->vehicle = vehicle;
     continuous    = false;
@@ -61,14 +62,14 @@ void Building::UpdatePhysics2( const Transformation &trans,
                                    bool ResolveLast,
                                    UnitCollection *uc )
 {
-    GameUnit::UpdatePhysics2( trans,
-                                          old_physical_state,
-                                          accel,
-                                          difficulty,
-                                          transmat,
-                                          CumulativeVelocity,
-                                          ResolveLast,
-                                          uc );
+    Unit::UpdatePhysics2( trans,
+                          old_physical_state,
+                          accel,
+                          difficulty,
+                          transmat,
+                          CumulativeVelocity,
+                          ResolveLast,
+                          uc );
     QVector tmp( LocalPosition() );
     Vector  p, q, r;
     GetOrientation( p, q, r );

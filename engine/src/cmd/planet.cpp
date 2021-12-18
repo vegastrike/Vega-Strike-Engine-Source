@@ -26,7 +26,6 @@
 
 #include <math.h>
 #include "vegastrike.h"
-#include "unit.h"
 #include "planet.h"
 #include "gfxlib.h"
 #include "gfx/sphere.h"
@@ -38,6 +37,8 @@
 #include <assert.h>
 #include "cont_terrain.h"
 #include "atmosphere.h"
+#include "atmospheric_fog_mesh.h"
+
 #ifdef FIX_TERRAIN
 #include "gfx/planetary_transform.h"
 #endif
@@ -148,12 +149,12 @@ Mesh * MakeFogMesh( const AtmosphericFogMesh &f, float radius )
 //////////////////////////////////////////////
 // AtmosphereHalo
 //////////////////////////////////////////////
-class AtmosphereHalo : public GameUnit
+class AtmosphereHalo : public Unit
 {
 public:
     float planetRadius;
     AtmosphereHalo( float radiusOfPlanet, vector< Mesh* > &meshes, int faction ) :
-        GameUnit ( meshes, true, faction )
+        Unit ( meshes, true, faction )
     {
         planetRadius = radiusOfPlanet;
     }
@@ -174,7 +175,7 @@ public:
         mat.p += sqrt( planetRadius*planetRadius-HorizonHeight*HorizonHeight )*dirtocam;
         ScaleMatrix( mat, Vector( xyscale, xyscale, zscale ) );
         qua.position = mat.p;
-        GameUnit::Draw( qua, mat );
+        Unit::Draw( qua, mat );
     }
 };
 
@@ -182,7 +183,7 @@ public:
 // Constructors and the like
 //////////////////////////////////////////////
 Planet::Planet() :
-    GameUnit ( 0 )
+    Unit ( 0 )
 {
     Init();
     SetAI( new Order() );     //no behavior
@@ -209,7 +210,7 @@ Planet::Planet( QVector x,
                         int faction,
                         string fgid,
                         bool inside_out ) :
-    GameUnit ( 0 )
+    Unit ( 0 )
 {
     atmosphere = nullptr;
     atmospheric  = false;
@@ -237,11 +238,11 @@ Planet::Planet( QVector x,
             stab = ".unstable";
         string wormholename   = wormhole_unit+stab;
         string wormholeneutralname = wormhole_unit+".neutral"+stab;
-        Unit  *jum = new GameUnit( wormholename.c_str(), true, faction );
+        Unit  *jum = new Unit( wormholename.c_str(), true, faction );
         int    neutralfaction = FactionUtil::GetNeutralFaction();
         faction = neutralfaction;
 
-        Unit  *neujum  = new GameUnit( wormholeneutralname.c_str(), true, neutralfaction );
+        Unit  *neujum  = new Unit( wormholeneutralname.c_str(), true, neutralfaction );
         Unit  *jump    = jum;
         bool   anytrue = false;
         while (jump != nullptr) {
@@ -408,7 +409,7 @@ void Planet::InitPlanet( QVector x,
     int    tmpfac   = faction;
     if (UniverseUtil::LookupUnitStat( tempname, FactionUtil::GetFactionName( faction ), "Cargo_Import" ).length() == 0)
         tmpfac = FactionUtil::GetPlanetFaction();
-    Unit  *un = new GameUnit( tempname.c_str(), true, tmpfac );
+    Unit  *un = new Unit( tempname.c_str(), true, tmpfac );
 
     static bool smartplanets = XMLSupport::parse_bool( vs_config->getVariable( "physics", "planets_can_have_subunits", "false" ) );
     if ( un->name != string( "LOAD_FAILED" ) ) {
@@ -515,7 +516,7 @@ void Planet::AddFog( const std::vector< AtmosphericFogMesh > &v, bool opticalill
     if (opticalillusion)
         fawg = new AtmosphereHalo( this->rSize(), fogs, 0 );
     else
-        fawg = new GameUnit( fogs, true, 0 );
+        fawg = new Unit( fogs, true, 0 );
     fawg->setFaceCamera();
     getSubUnits().preinsert( fawg );
     *fawg->current_hull /= fawg->GetHullPercent();
@@ -600,7 +601,7 @@ Vector Planet::AddSpaceElevator( const std::string &name, const std::string &fac
             ElevatorLoc.p.Set( dir.i*mx.i, dir.j*mx.j, dir.k*mx.k );
         else
             ElevatorLoc.p.Set( -dir.i*mn.i, -dir.j*mn.j, -dir.k*mn.k );
-        Unit *un = new GameUnit( name.c_str(), true, FactionUtil::GetFactionIndex( faction ), "", nullptr );
+        Unit *un = new Unit( name.c_str(), true, FactionUtil::GetFactionIndex( faction ), "", nullptr );
         if (pImage->dockingports.back().GetPosition().MagnitudeSquared() < 10)
             pImage->dockingports.clear();
         pImage->dockingports.push_back( DockingPorts( ElevatorLoc.p, un->rSize()*1.5, 0, DockingPorts::Type::INSIDE ) );
@@ -621,7 +622,7 @@ void Planet::Draw( const Transformation &quat, const Matrix &m )
     //Do lighting fx
     //if cam inside don't draw?
     //if(!inside) {
-    GameUnit::Draw( quat, m );
+    Unit::Draw( quat, m );
     //}
     QVector    t( _Universe->AccessCamera()->GetPosition()-Position() );
     static int counter = 0;
@@ -739,7 +740,7 @@ Unit* Planet::beginElement( QVector x,
         if (isunit == true) {
             Unit *sat_unit  = nullptr;
             Flightgroup *fg = getStaticBaseFlightgroup( faction );
-            satellites.prepend( sat_unit = new GameUnit( filename.c_str(), false, faction, "", fg, fg->nr_ships-1 ) );
+            satellites.prepend( sat_unit = new Unit( filename.c_str(), false, faction, "", fg, fg->nr_ships-1 ) );
             sat_unit->setFullname( fullname );
             un = sat_unit;
             un_iter satiterator( satellites.createIterator() );
@@ -825,7 +826,7 @@ void Planet::Kill( bool erasefromsave )
     /*	*/
     satellites.clear();
     insiders.clear();
-    GameUnit::Kill( erasefromsave );
+    Unit::Kill( erasefromsave );
 }
 
 

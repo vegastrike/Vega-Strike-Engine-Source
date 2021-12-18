@@ -29,7 +29,6 @@
 #include "gfx/vec.h"
 #include "gfx/quaternion.h"
 #include "gfx/matrix.h"
-#include "cmd/unit.h"
 
 
 static void RecursiveSetSchedule(Unit *un)
@@ -47,7 +46,7 @@ static void RecursiveSetSchedule(Unit *un)
 }
 
 Asteroid::Asteroid( const char *filename, int faction, Flightgroup *fg, int fg_snumber,
-                            float difficulty ) : GameUnit ( filename, false, faction, string( "" ), fg, fg_snumber )
+                            float difficulty ) : Unit ( filename, false, faction, string( "" ), fg, fg_snumber )
 {
     asteroid_physics_offset=0;
     un_iter iter = getSubUnits();

@@ -23,7 +23,6 @@
 * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
 */
 
-#include "unit.h"
 #include "gfx/vec.h"
 #include "gfx/animation.h"
 #include "gfx/cockpit_generic.h"

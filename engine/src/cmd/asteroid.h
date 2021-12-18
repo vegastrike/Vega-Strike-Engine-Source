@@ -30,13 +30,12 @@
 #include "gfx/matrix.h"
 #include "cmd/script/flightgroup.h"
 #include "cmd/collection.h"
-#include "cmd/unit.h"
 #include "unit_generic.h"
 
 
 
 
-class Asteroid : public GameUnit
+class Asteroid : public Unit
 {
 private:
     unsigned int asteroid_physics_offset;
@@ -51,7 +50,7 @@ public:
 private:
 /// default constructor forbidden
     Asteroid();
-    Asteroid (std::vector <Mesh *> m,bool b,int i): GameUnit (m,b,i){}
+    Asteroid (std::vector <Mesh *> m,bool b,int i): Unit (m,b,i){}
 
 /// copy constructor forbidden
     Asteroid( const Asteroid& );

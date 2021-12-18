@@ -29,7 +29,6 @@
 #include "cmd/script/mission.h"
 #include "universe_util.h"
 #include "universe.h"
-#include "cmd/unit.h"
 #include "cmd/collection.h"
 #include "star_system.h"
 #include <string>

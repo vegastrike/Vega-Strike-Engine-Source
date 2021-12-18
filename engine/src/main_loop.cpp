@@ -34,9 +34,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include "lin_time.h"
-#include "cmd/unit.h"
 #include "cmd/movable.h"
-#include "unit.h"
 #include "vegastrike.h"
 #include "vs_globals.h"
 #include "in.h"
@@ -890,7 +888,7 @@ void createObjects( std::vector< std::string > &fighter0name,
                 }
 
                 VS_LOG(info, (boost::format("CREATING A LOCAL SHIP : %1%") % fightername));
-                fighters[a] = new GameUnit( fightername, false, tmptarget[a], modifications, fg, s );
+                fighters[a] = new Unit( fightername, false, tmptarget[a], modifications, fg, s );
 
                 _Universe->activeStarSystem()->AddUnit( fighters[a] );
                 if ( s == 0 && squadnum < (int) fighter0name.size() ) {
@@ -970,7 +968,7 @@ void AddUnitToSystem( const SavedUnits *su )
         break;
     case _UnitType::unit:
     default:
-        un = new GameUnit( su->filename.get().c_str(), false, FactionUtil::GetFactionIndex( su->faction ) );
+        un = new Unit( su->filename.get().c_str(), false, FactionUtil::GetFactionIndex( su->faction ) );
         un->EnqueueAI( new Orders::AggressiveAI( "default.agg.xml" ) );
         un->SetTurretAI();
         if ( _Universe->AccessCockpit()->GetParent() )

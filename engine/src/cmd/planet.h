@@ -31,8 +31,7 @@
 #define _PLANET_H_
 
 #include <stdio.h>
-
-#include "unit.h"
+#include "unit_generic.h"
 #include "ai/order.h"
 #include "collection.h"
 #include <vector>
@@ -47,7 +46,7 @@ class ContinuousTerrain;
 class PlanetaryTransform;
 class Texture;
 
-class Planet : public GameUnit
+class Planet : public Unit
 {
 private:
     Animation *shine = nullptr;

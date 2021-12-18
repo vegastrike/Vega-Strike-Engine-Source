@@ -26,7 +26,6 @@
 #ifndef __UNIT_CUSTOMIZE_CPP__
 #define __UNIT_CUSTOMIZE_CPP__
 
-#include "unit.h"
 #include "images.h"
 #include "universe.h"
 #include "vegastrike.h"
@@ -47,7 +46,7 @@ extern int GetModeFromName( const char* );
 extern Unit * CreateGameTurret( std::string tur, int faction );
 
 
-bool GameUnit::UpgradeSubUnits( const Unit *up,
+bool Unit::UpgradeSubUnits( const Unit *up,
                                             int subunitoffset,
                                             bool touchme,
                                             bool downgrade,
@@ -63,14 +62,7 @@ bool GameUnit::UpgradeSubUnits( const Unit *up,
 extern char * GetUnitDir( const char* );
 
 
-double GameUnit::Upgrade( const std::string &file,
-                                      int mountoffset,
-                                      int subunitoffset,
-                                      bool force,
-                                      bool loop_through_mounts )
-{
-    return Unit::Upgrade( file, mountoffset, subunitoffset, force, loop_through_mounts );
-}
+
 
 #endif
 

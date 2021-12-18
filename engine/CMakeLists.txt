@@ -1067,6 +1067,7 @@ SET(LIBGFXSERVER_SOURCES
 )
 
 SET(LIBROOTGENERIC_SOURCES
+    src/atmospheric_fog_mesh.cpp
     src/configxml.cpp
     src/easydom.cpp
     src/endianness.cpp
@@ -1228,7 +1229,6 @@ SET(VEGASTRIKE_SOURCES
     src/cmd/faction_factory.cpp
     src/cmd/pilot.cpp
     src/cmd/images.cpp
-    src/cmd/unit.cpp
     src/cmd/turret.cpp
     src/gldrv/gl_program.cpp
     src/gldrv/gl_clip.cpp
