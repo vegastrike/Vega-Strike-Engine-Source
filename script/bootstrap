@@ -25,7 +25,7 @@
 set -e
 
 echo "------------------------------"
-echo "--- bootstrap | 2021-08-01 ---"
+echo "--- bootstrap | 2021-12-12 ---"
 echo "------------------------------"
 
 if [ -f /etc/os-release ]
@@ -124,6 +124,38 @@ then
                     libvorbis-dev \
                     libgl1-mesa-dev \
                     libsdl1.2-dev \
+                    libpostproc-dev \
+                    freeglut3-dev \
+                    libboost-python-dev \
+                    libboost-log-dev \
+                    libboost-regex-dev \
+                    libxmu-dev \
+                    clang \
+                    lsb-release
+elif [ $LINUX_ID == "ubuntu" ] && [ $LINUX_CODENAME == "impish" ]
+then
+    apt-get update
+    apt-get -qy install \
+                    git \
+                    cmake \
+                    python3-dev \
+                    build-essential \
+                    automake \
+                    autoconf \
+                    libpng16-16 \
+                    libpng-dev \
+                    libpng-tools \
+                    libjpeg-turbo8-dev \
+                    libexpat1-dev \
+                    libgdk-pixbuf-2.0-dev \
+                    libgtk-3-dev \
+                    libopenal-dev \
+                    libogg-dev \
+                    libvorbis-dev \
+                    libglvnd-dev \
+                    libgl1-mesa-dev \
+                    libsdl1.2-dev \
+                    libopengl0 \
                     libpostproc-dev \
                     freeglut3-dev \
                     libboost-python-dev \
@@ -317,6 +349,7 @@ then
                             libSDL-1_2-0 \
                             libSDL-devel \
                             libvorbis-devel \
+                            libglvnd-devel \
                             libjpeg-turbo \
                             libjpeg62-devel \
                             libpng16-devel \
@@ -329,7 +362,7 @@ then
                             git \
                             rpm-build \
                             clang
-elif [ $LINUX_ID == "fedora" ] && ([ $LINUX_VERSION_ID -ge 34 ] && [ $LINUX_VERSION_ID -lt 35 ])
+elif [ $LINUX_ID == "fedora" ] && ([ $LINUX_VERSION_ID -ge 34 ] && [ $LINUX_VERSION_ID -lt 36 ])
 then
     dnf install -y \
                         git \
@@ -340,6 +373,7 @@ then
                         openal-soft-devel \
                         SDL-devel \
                         libvorbis-devel \
+                        libglvnd-devel \
                         libjpeg-turbo-devel \
                         libpng-devel \
                         expat-devel \
@@ -428,6 +462,7 @@ then
                         openal-soft-devel \
                         SDL-devel \
                         libvorbis-devel \
+                        libglvnd-devel \
                         libjpeg-turbo-devel \
                         libpng-devel \
                         expat-devel \
@@ -436,7 +471,7 @@ then
                         rpm-build \
                         make \
                         clang
-elif [ $LINUX_ID == "rocky" ] && [ $LINUX_VERSION_ID == "8.4" ]
+elif [ $LINUX_ID == "rocky" ] && ([ $(echo ${LINUX_VERSION_ID} | cut -f 1 -d '.') -eq 8 ] && [ $(echo ${LINUX_VERSION_ID} | cut -f 2 -d '.') -ge 4 ])
 then
     dnf -y install dnf-plugins-core
     dnf -y install epel-release
@@ -453,6 +488,7 @@ then
                         openal-soft-devel \
                         SDL-devel \
                         libvorbis-devel \
+                        libglvnd-devel \
                         libjpeg-turbo-devel \
                         libpng-devel \
                         expat-devel \
