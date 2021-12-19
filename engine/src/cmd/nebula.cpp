@@ -66,7 +66,7 @@ FOGMODE NebulaXML::parse_fogmode( string val )
 
 //WARNING : USED TO CALL a GameUnit constructor but now Nebula::Nebula calls a Unit one
 Nebula::Nebula( const char *unitfile, bool SubU, int faction, Flightgroup *fg, int fg_snumber ) :
-    GameUnit( unitfile, SubU, faction, string( "" ), fg, fg_snumber )
+    Unit( unitfile, SubU, faction, string( "" ), fg, fg_snumber )
 {
     fogme     = true;
     string fullpath( unitfile );
@@ -202,7 +202,7 @@ void Nebula::UpdatePhysics2( const Transformation &trans,
     fadeinvalue -= nebdelta*simulation_atom_var;
     if (fadeinvalue < 0)
         fadeinvalue = 0;
-    this->GameUnit::UpdatePhysics2( trans,
+    this->Unit::UpdatePhysics2( trans,
                                               old_physical_state,
                                               accel,
                                               difficulty,

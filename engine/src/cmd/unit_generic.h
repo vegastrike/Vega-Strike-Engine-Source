@@ -194,10 +194,11 @@ protected:
 //forbidden
     Unit& operator=( const Unit& ) = delete;
 
-    virtual ~Unit();
+
 
 public:
     Unit();
+    virtual ~Unit();
 
 /** Default constructor. This is just to figure out where default
  *  constructors are used. The useless argument will be removed
@@ -256,7 +257,7 @@ public:
     bool UpgradeSubUnitsWithFactory( const Unit*up, int subunitoffset, bool touchme, bool downgrade, int &numave,
                                     double &percentage, Unit*(*createupgradesubunit)(std::string s,
                                                                                      int faction) );
-    virtual bool UpgradeSubUnits( const Unit *up,
+    bool UpgradeSubUnits( const Unit *up,
                                   int subunitoffset,
                                   bool touchme,
                                   bool downgrade,
@@ -307,7 +308,7 @@ public:
     void ClearMounts();
 //Loads a user interface for the user to upgrade his ship
 //Uses base stuff -> only in Unit
-    virtual void UpgradeInterface( Unit *base ) {}
+    virtual void UpgradeInterface( Unit *base );
 
     bool canUpgrade( const Unit *upgrador,
                      int mountoffset,
@@ -333,7 +334,7 @@ public:
     bool RepairUpgradeCargo( Cargo *item, Unit *baseUnit, float *credits );           //item must not be NULL but baseUnit/credits are only used for pricing.
     Vector MountPercentOperational( int whichmount );
     bool ReduceToTemplate();
-    virtual double Upgrade( const std::string &file, int mountoffset, int subunitoffset, bool force, bool loop_through_mounts );
+    double Upgrade( const std::string &file, int mountoffset, int subunitoffset, bool force, bool loop_through_mounts );
     bool canDowngrade( const Unit *downgradeor,
                        int mountoffset,
                        int subunitoffset,
@@ -425,29 +426,23 @@ public:
                           const Vector &size,
                           const GFXColor &col,
                           std::string halo_type,
-                          float activation ) {}
+                          float activation );
 
 //Uses Mesh -> in NetUnit and Unit only
     std::vector< Mesh* >StealMeshes();
 /* Begin and continue explosion
  *  Uses GFX so only in Unit class
  *  But should always return true on server side = assuming explosion time=0 here */
-    virtual bool Explode( bool draw, float timeit );
+    bool Explode( bool draw, float timeit );
 
 //Uses GFX so only in Unit class
-    virtual void Draw( const Transformation &quat = identity_transformation, const Matrix &m = identity_matrix ) override {}
-    virtual void DrawNow( const Matrix &m = identity_matrix, float lod = 1000000000 ) override {}
+    //virtual void DrawNow( const Matrix &m = identity_matrix, float lod = 1000000000 ) override {}
     virtual std::string drawableGetName() override { return name; }
 
 //Sets the camera to be within this unit.
 //Uses Universe & GFX so not needed here -> only in Unit class
-    virtual void UpdateHudMatrix( int whichcam ) {}
 //What's the HudImage of this unit
-//Uses GFX stuff so only in Unit class
-    virtual VSSprite * getHudImage() const
-    {
-        return NULL;
-    }
+
 //Not needed just in Unit class
 
     // Uses GFX, so generic version is a no-op.
@@ -461,7 +456,7 @@ public:
  */
 
 public:
-
+    bool TransferUnitToSystem( unsigned int whichJumpQueue, StarSystem*&previouslyActiveStarSystem, bool DoSightAndSound );
 
     Computer computer;
     void SwitchCombatFlightMode();
@@ -522,6 +517,16 @@ protected:
     virtual float ExplosionRadius();
 public:
     QVector realPosition( ) override;
+
+    ///Updates physics given unit space transformations and if this is the last physics frame in the current gfx frame
+    virtual void UpdatePhysics2( const Transformation &trans,
+                                 const Transformation &old_physical_state,
+                                 const Vector &accel,
+                                 float difficulty,
+                                 const Matrix &transmat,
+                                 const Vector &CumulativeVelocity,
+                                 bool ResolveLast,
+                                 UnitCollection *uc = NULL );
 
     // Act out a unit's turn
     void ActTurn();
@@ -586,7 +591,7 @@ public:
     // TODO: move to jump_capable?
     ///if the unit is a wormhole
     bool  forcejump = false;
-protected:
+
 
 //Should not be drawn
     enum INVIS {DEFAULTVIS=0x0, INVISGLOW=0x1, INVISUNIT=0x2, INVISCAMERA=0x4};
@@ -619,7 +624,8 @@ public:
     float ExplodingProgress() const;
 
 
-
+    ///Resolves forces of given unit on a physics frame
+    Vector ResolveForces( const Transformation&, const Matrix& );
 
 
 
@@ -859,11 +865,7 @@ public:
 //for click list
     float querySphereClickList( const QVector &st, const QVector &dir, float err ) const;
 //Queries if this unit is within a given frustum
-//Uses GFX -> defined only Unit class
-    bool queryFrustum( double frustum[6][4] ) const
-    {
-        return false;
-    }
+    bool queryFrustum( double frustum[6][4] ) const;
 
 /**
  * Queries the bounding sphere with a duo of mouse coordinates that project
@@ -871,10 +873,8 @@ public:
  * queries the sphere for weapons (world space point)
  * Only in Unit class
  */
-    virtual bool querySphereClickList( int, int, float err, Camera *activeCam ) const
-    {
-        return false;
-    }
+    bool querySphereClickList( int, int, float err, Camera *activeCam ) const;
+
 
     bool InsideCollideTree( Unit *smaller,
                             QVector &bigpos,
@@ -920,6 +920,8 @@ public:
     bool isDocked( const Unit *dockingUnit ) const;
     bool UnDock( Unit *unitToDockWith );
 //Use AI
+    ///returns -1 if unit cannot dock, otherwise returns which dock it can dock at
+    // The above is no longer accurate. It returns a bool...
     bool RequestClearance( Unit *dockingunit );
     bool EndRequestClearance( Unit *dockingunit );
     bool hasPendingClearanceRequests() const;
@@ -971,6 +973,8 @@ public:
     bool isTractorable( enum tractorHow how = tractorBoth ) const;
     void setTractorability( enum tractorHow how );
     enum tractorHow getTractorability() const;
+
+
 private:
     unsigned char   tractorability_flags = tractorImmune;
 
@@ -1031,6 +1035,7 @@ public:
     // MACRO_FUNCTION(field_a, object_a, object_b)
     // object_a->field_a = object_b->field_b;
     float temporary_upgrade_float_variable;
+
 };
 
 Unit * findUnitInStarsystem( const void *unitDoNotDereference );

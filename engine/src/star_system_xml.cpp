@@ -44,6 +44,7 @@
 #include "cmd/atmosphere.h"
 #include "star_xml.h"
 #include "planetary_orbit.h"
+#include "atmospheric_fog_mesh.h"
 
 #include "options.h"
 
@@ -65,19 +66,7 @@ extern const vector< string >& ParseDestinations( const string &value );
 extern void bootstrap_draw( const string &message, Animation *SplashScreen = NULL );
 extern void disableTerrainDraw( ContinuousTerrain *ct );
 
-AtmosphericFogMesh::AtmosphericFogMesh()
-{
-    er              = eg = eb = ea = .5;
-    dr              = dg = db = da = .5;
-    meshname        = "sphereatm.bfxm";
-    scale           = 1.05;
-    focus           = .5;
-    concavity       = 0;
-    tail_mode_start = -1;
-    tail_mode_end   = -1;
-    min_alpha       = 0;
-    max_alpha       = 255;
-}
+
 
 
 

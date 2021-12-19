@@ -46,7 +46,6 @@
 #include "cmd/collide2/Stdafx.h"
 #include "cmd/collide2/CSopcodecollider.h"
 #include "vs_math.h"
-#include "unit.h"
 #include "mount_size.h"
 #include "weapon_info.h"
 

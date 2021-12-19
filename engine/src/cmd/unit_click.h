@@ -28,14 +28,13 @@
 
 #include "vegastrike.h"
 #include "gfx/mesh.h"
-#include "unit.h"
 
 extern Vector mouseline;
 extern vector< Vector >perplines;
 Vector MouseCoordinate( int mouseX, int mouseY );
 
 
-bool GameUnit::querySphereClickList( int mouseX, int mouseY, float err, Camera *activeCam ) const
+bool Unit::querySphereClickList( int mouseX, int mouseY, float err, Camera *activeCam ) const
 {
     unsigned int    i;
     Matrix vw;

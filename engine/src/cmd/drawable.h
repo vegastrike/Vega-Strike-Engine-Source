@@ -27,15 +27,18 @@
 #define DRAWABLE_H
 
 #include "gfx/quaternion.h"
+#include "gfx/halo_system.h"
 #include <vector>
 #include <map>
 #include <string>
+#include <memory>
 
 class Mesh;
 class Flightgroup;
 class Unit;
 struct GFXColor;
-//class Transformation;
+class VSSprite;
+
 
 using std::vector;
 using std::string;
@@ -44,8 +47,9 @@ using std::map;
 class Drawable
 {
 public:
-  //number of meshes (each with separate texture) this unit has
-  std::vector< Mesh* >meshdata;
+    //number of meshes (each with separate texture) this unit has
+    std::vector< Mesh* >meshdata;
+    std::unique_ptr< HaloSystem > halos;
 
 protected:
     vector< vector<Mesh *> *> vecAnimations;
@@ -70,6 +74,7 @@ public:
     static std::map< string, Unit * > Units;
 
     Drawable();
+    ~Drawable();
 
     bool DrawableInit(const char *filename, int faction, Flightgroup *flightgrp = NULL, const char *animationExt = NULL);
 
@@ -80,7 +85,6 @@ public:
     void clear();
 
 protected:
-    virtual ~Drawable() { clear(); }
     // forbidden
     Drawable( const Drawable& ) = delete;
     // forbidden
@@ -119,8 +123,11 @@ public:
     void SetAniSpeed( float speed );
 
     //Uses GFX so only in Unit class
-    virtual void Draw( const Transformation &quat = identity_transformation, const Matrix &m = identity_matrix ) = 0;
-    virtual void DrawNow( const Matrix &m = identity_matrix, float lod = 1000000000 ) = 0;
+    virtual void Draw( const Transformation &quat = identity_transformation,
+                       const Matrix &m = identity_matrix );
+
+    ///Draws this unit with the transformation and matrix (should be equiv) separately
+    virtual void DrawNow( const Matrix &m = identity_matrix, float lod = 1000000000 );
     virtual std::string drawableGetName() = 0;
 
     void Sparkle(bool on_screen, Matrix *ctm);
@@ -137,6 +144,14 @@ public:
 
     //Lights the shields, without applying damage or making the AI mad - useful for special effects
     void LightShields( const Vector &pnt, const Vector &normal, float amt, const GFXColor &color );
+
+    ///Holds temporary values for inter-function XML communication Saves deprecated restr info
+    Matrix WarpMatrix( const Matrix &ctm ) const;
+
+    ///Sets the camera to be within this unit.
+    void UpdateHudMatrix( int whichcam );
+
+    VSSprite * getHudImage() const;
 };
 
 Matrix* GetCumulativeTransformationMatrix(Unit *unit, const Matrix &parentMatrix, Matrix invview);

@@ -25,11 +25,14 @@
  * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+#include "unit_generic.h"
 
 #include <set>
 #include "configxml.h"
 #include "audiolib.h"
-#include "unit_generic.h"
+#include "base.h"
+#include "music.h"
+
 #include "beam.h"
 #include "lin_time.h"
 #include "xml_serializer.h"
@@ -63,7 +66,6 @@
 #include "galaxy_xml.h"
 #include "gfx/camera.h"
 #include "options.h"
-#include "unit.h"
 #include "star_system.h"
 #include "universe.h"
 #include "weapon_info.h"
@@ -72,6 +74,7 @@
 #include "energetic.h"
 #include "configuration/game_config.h"
 #include "resource/resource.h"
+#include "base_util.h"
 
 #include <math.h>
 #include <list>
@@ -1424,11 +1427,6 @@ Vector Unit::ClampThrust( const Vector &amt1, bool afterburn )
     return Res;
 }
 
-void Unit::Thrust( const Vector &amt1, bool afterburn )
-{
-    Vector amt = ClampThrust( amt1, afterburn );
-    ApplyLocalForce( amt );
-}
 
 void Unit::LateralThrust( float amt )
 {
@@ -1904,7 +1902,7 @@ const Unit * makeTemplateUpgrade( string name, int faction )
     if (!lim) {
         lim =
             UnitConstCache::setCachedConst( StringIntKey( limiternam,
-                                                          faction ), new GameUnit( limiternam.c_str(), true, faction ) );
+                                                          faction ), new Unit( limiternam.c_str(), true, faction ) );
     }
     if (lim->name == LOAD_FAILED)
         lim = NULL;
@@ -1916,7 +1914,7 @@ const Unit * loadUnitByCache( std::string name, int faction )
     const Unit *temprate = UnitConstCache::getCachedConst( StringIntKey( name, faction ) );
     if (!temprate)
         temprate =
-            UnitConstCache::setCachedConst( StringIntKey( name, faction ), new GameUnit( name.c_str(), true, faction ) );
+            UnitConstCache::setCachedConst( StringIntKey( name, faction ), new Unit( name.c_str(), true, faction ) );
     return temprate;
 }
 
@@ -2071,17 +2069,6 @@ void Unit::Cloak( bool loak )
 
 
 
-
-
-
-
-
-
-
-
-
-
-
 void Unit::SetRecursiveOwner( Unit *target )
 {
     owner = target;
@@ -2098,11 +2085,133 @@ void Unit::SetRecursiveOwner( Unit *target )
  **********************************************************************************
  */
 
-//virtual
-bool Unit::Explode( bool draw, float timeit )
+extern unsigned int AddAnimation( const QVector&, const float, bool, const string&, float percentgrow );
+extern string getRandomCachedAniString();
+extern Animation * GetVolatileAni( unsigned int );
+
+bool Unit::Explode( bool drawit, float timeit )
 {
-    return true;
+    if (this->pImage->pExplosion == NULL && this->pImage->timeexplode == 0) {
+        //no explosion in unit data file && explosions haven't started yet
+
+        //notify the director that a ship got destroyed
+        mission->DirectorShipDestroyed( this );
+        disableSubUnits( this );
+        this->pImage->timeexplode = 0;
+
+        string bleh = this->pImage->explosion_type;
+        if ( bleh.empty() )
+            FactionUtil::GetRandExplosionAnimation( this->faction, bleh );
+        if ( bleh.empty() ) {
+            static Animation cache( game_options.explosion_animation.c_str(), false, .1, BILINEAR, false );
+            bleh = getRandomCachedAniString();
+            if (bleh.size() == 0)
+                bleh = game_options.explosion_animation;
+        }
+        this->pImage->pExplosion = new Animation( bleh.c_str(), game_options.explosion_face_player, .1, BILINEAR, true );
+        this->pImage->pExplosion->SetDimensions( this->ExplosionRadius(), this->ExplosionRadius() );
+        Vector p, q, r;
+        this->GetOrientation( p, q, r );
+        this->pImage->pExplosion->SetOrientation( p, q, r );
+        if (this->isUnit() != _UnitType::missile) {
+            _Universe->activeStarSystem()->AddMissileToQueue( new MissileEffect( this->Position(), this->MaxShieldVal(),
+                                                                                 0, this->ExplosionRadius()*game_options.explosion_damage_center,
+                                                                                 this->ExplosionRadius()*game_options.explosion_damage_center
+                                                                                 *game_options.explosion_damage_edge, NULL ) );
+        }
+        QVector exploc = this->cumulative_transformation.position;
+        bool    sub    = this->isSubUnit();
+        Unit   *un     = NULL;
+        if (!sub)
+            if (( un = _Universe->AccessCockpit( 0 )->GetParent() )) {
+                exploc = un->Position()*game_options.explosion_closeness+exploc*(1-game_options.explosion_closeness);
+            }
+        //AUDPlay( this->sound->explode, exploc, this->Velocity, 1 );
+        playExplosionDamageSound();
+
+        if (!sub) {
+            un = _Universe->AccessCockpit()->GetParent();
+            if (this->isUnit() == _UnitType::unit) {
+                if ( rand() < RAND_MAX*game_options.percent_shockwave && ( !this->isSubUnit() ) ) {
+                    static string     shockani( game_options.shockwave_animation);
+                    static Animation *__shock__ani = new Animation( shockani.c_str(), true, .1, MIPMAP, false );
+
+                    __shock__ani->SetFaceCam( false );
+                    unsigned int      which = AddAnimation( this->Position(),
+                                                            this->ExplosionRadius(), true, shockani, game_options.shockwave_growth );
+                    Animation *ani = GetVolatileAni( which );
+                    if (ani) {
+                        ani->SetFaceCam( false );
+                        Vector p, q, r;
+                        this->GetOrientation( p, q, r );
+                        int    tmp = rand();
+                        if (tmp < RAND_MAX/24)
+                            ani->SetOrientation( Vector( 0, 0, 1 ), Vector( 1, 0, 0 ), Vector( 0, 1, 0 ) );
+                        else if (tmp < RAND_MAX/16)
+                            ani->SetOrientation( Vector( 0, 1, 0 ), Vector( 0, 0, 1 ), Vector( 1, 0, 0 ) );
+                        else if (tmp < RAND_MAX/8)
+                            ani->SetOrientation( Vector( 1, 0, 0 ), Vector( 0, 1, 0 ), Vector( 0, 0, 1 ) );
+                        else
+                            ani->SetOrientation( p, q, r );
+                    }
+                }
+                if (un) {
+                    int upgradesfaction    = FactionUtil::GetUpgradeFaction();
+                    float rel = un->getRelation( this );
+                    if (!BaseInterface::CurrentBase) {
+                        static float lasttime = 0;
+                        float newtime = getNewTime();
+                        if ( newtime-lasttime > game_options.time_between_music
+                            || (_Universe->isPlayerStarship( this ) && this->isUnit() != _UnitType::missile && this->faction
+                                != upgradesfaction) ) {
+                            //No victory for missiles or spawned explosions
+                            if (rel > game_options.victory_relationship) {
+                                lasttime = newtime;
+                                muzak->SkipRandSong( Music::LOSSLIST );
+                            } else if (rel < game_options.loss_relationship) {
+                                lasttime = newtime;
+                                muzak->SkipRandSong( Music::VICTORYLIST );
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+    bool timealldone =
+        ( this->pImage->timeexplode > game_options.debris_time || this->isUnit() == _UnitType::missile
+         || _Universe->AccessCockpit()->GetParent() == this || this->SubUnits.empty() );
+    if (this->pImage->pExplosion) {
+        this->pImage->timeexplode += timeit;
+        this->pImage->pExplosion->SetPosition( this->Position() );
+        Vector p, q, r;
+        this->GetOrientation( p, q, r );
+        this->pImage->pExplosion->SetOrientation( p, q, r );
+        if (this->pImage->pExplosion->Done() && timealldone) {
+            delete this->pImage->pExplosion;
+            this->pImage->pExplosion = NULL;
+        }
+        if (drawit && this->pImage->pExplosion)
+            this->pImage->pExplosion->Draw();              //puts on draw queue... please don't delete
+    }
+    bool alldone = this->pImage->pExplosion ? !this->pImage->pExplosion->Done() : false;
+    if ( !this->SubUnits.empty() ) {
+        Unit *su;
+        for (un_iter ui = this->getSubUnits(); (su = *ui); ++ui) {
+            bool temp = su->Explode( drawit, timeit );
+            if (su->GetImageInformation().pExplosion)
+                alldone |= temp;
+        }
+    }
+    if ( (game_options.eject_cargo_on_blowup > 0) && (this->numCargo() > 0) ) {
+        unsigned int dropcount =  floorf( this->numCargo()/game_options.eject_cargo_on_blowup )+1;
+        if ( dropcount > this->numCargo() ) dropcount = this->numCargo();
+        for (unsigned int i = 0; i < dropcount; i++)
+            this->EjectCargo( this->numCargo()-1 );              //Ejecting the last one is somewhat faster
+    }
+    return alldone || (!timealldone);
 }
+
 
 float Unit::ExplodingProgress() const
 {
@@ -2954,7 +3063,7 @@ bool Unit::UpgradeSubUnitsWithFactory( const Unit *up, int subunitoffset, bool t
                     Unit *un;                            //make garbage unit
                     //NOT 100% SURE A GENERIC UNIT CAN FIT (WAS GAME UNIT CREATION)
                     //give a default do-nothing unit
-                    ui.preinsert( un = new GameUnit( "upgrading_dummy_unit", true, faction ) );
+                    ui.preinsert( un = new Unit( "upgrading_dummy_unit", true, faction ) );
                     un->SetFaction( faction );
                     un->curr_physical_state = addToMeCur;
                     un->prev_physical_state = addToMePrev;
@@ -3108,7 +3217,7 @@ double Unit::Upgrade( const std::string &file, int mountoffset, int subunitoffse
     const Unit *up = UnitConstCache::getCachedConst( StringIntKey( file, upgradefac ) );
     if (!up)
         up = UnitConstCache::setCachedConst( StringIntKey( file, upgradefac ),
-                                            new GameUnit( file.c_str(), true, upgradefac ) );
+                                            new Unit( file.c_str(), true, upgradefac ) );
     unsigned int cargonum;
     Cargo *cargo = GetCargo(file, cargonum);
     if (cargo)
@@ -3120,7 +3229,7 @@ double Unit::Upgrade( const std::string &file, int mountoffset, int subunitoffse
         templ =
             UnitConstCache::setCachedConst( StringIntKey( templnam,
                                                           this->faction ),
-                                           new GameUnit( templnam.c_str(), true, this->faction ) );
+                                           new Unit( templnam.c_str(), true, this->faction ) );
     }
     free( unitdir );
     double percentage = 0;
@@ -4096,7 +4205,7 @@ vector< CargoColor >& Unit::FilterDowngradeList( vector< CargoColor > &mylist, b
                 NewPart = UnitConstCache::setCachedConst( StringIntKey(
                                                              mylist[i].cargo.GetContent(),
                                                              upgrfac ),
-                                                         new GameUnit( mylist[i].cargo.GetContent().c_str(), false,
+                                                         new Unit( mylist[i].cargo.GetContent().c_str(), false,
                                                                                   upgrfac ) );
             }
             if ( NewPart->name == string( "LOAD_FAILED" ) ) {
@@ -4104,7 +4213,7 @@ vector< CargoColor >& Unit::FilterDowngradeList( vector< CargoColor > &mylist, b
                     UnitConstCache::getCachedConst( StringIntKey( mylist[i].cargo.GetContent().c_str(), faction ) );
                 if (!NewPart) {
                     NewPart = UnitConstCache::setCachedConst( StringIntKey( mylist[i].cargo.content, faction ),
-                                                             new GameUnit( mylist[i].cargo.GetContent().c_str(),
+                                                             new Unit( mylist[i].cargo.GetContent().c_str(),
                                                                                       false, faction ) );
                 }
             }
@@ -4119,7 +4228,7 @@ vector< CargoColor >& Unit::FilterDowngradeList( vector< CargoColor > &mylist, b
                         templ =
                             UnitConstCache::setCachedConst( StringIntKey( templnam,
                                                                           faction ),
-                                                           new GameUnit( templnam.c_str(), true, this->faction ) );
+                                                           new Unit( templnam.c_str(), true, this->faction ) );
                     }
                     if ( templ->name == std::string( "LOAD_FAILED" ) )
                         templ = NULL;
@@ -4128,7 +4237,7 @@ vector< CargoColor >& Unit::FilterDowngradeList( vector< CargoColor > &mylist, b
                     if (downgradelimit == NULL) {
                         downgradelimit = UnitConstCache::setCachedConst( StringIntKey( limiternam,
                                                                                        faction ),
-                                                                        new GameUnit( limiternam.c_str(), true,
+                                                                        new Unit( limiternam.c_str(), true,
                                                                                                  this->faction ) );
                     }
                     if ( downgradelimit->name == std::string( "LOAD_FAILED" ) )
@@ -4701,6 +4810,126 @@ void Unit::ActTurn() {
 
 }
 
+
+void Unit::UpdatePhysics2( const Transformation &trans,
+                                           const Transformation &old_physical_state,
+                                           const Vector &accel,
+                                           float difficulty,
+                                           const Matrix &transmat,
+                                           const Vector &cum_vel,
+                                           bool lastframe,
+                                           UnitCollection *uc )
+{
+    Movable::UpdatePhysics2( trans, old_physical_state, accel, difficulty, transmat, cum_vel, lastframe, uc );
+
+    this->AddVelocity( difficulty );
+
+#ifdef DEPRECATEDPLANETSTUFF
+    if (planet) {
+        Matrix basis;
+        curr_physical_state.to_matrix( this->cumulative_transformation_matrix );
+        Vector p, q, r, c;
+        MatrixToVectors( this->cumulative_transformation_matrix, p, q, r, c );
+        planet->trans->InvTransformBasis( this->cumulative_transformation_matrix, p, q, r, c );
+        planet->cps = Transformation::from_matrix( this->cumulative_transformation_matrix );
+    }
+#endif
+    this->cumulative_transformation = this->curr_physical_state;
+    this->cumulative_transformation.Compose( trans, transmat );
+    this->cumulative_transformation.to_matrix( this->cumulative_transformation_matrix );
+    this->cumulative_velocity = TransformNormal( transmat, this->Velocity )+cum_vel;
+    unsigned int i, n;
+    if (lastframe) {
+        char   tmp  = 0;
+        //double blah = queryTime();
+        for (i = 0, n = this->meshdata.size(); i < n; i++) {
+            if (!this->meshdata[i])
+                continue;
+            if ( !this->meshdata[i]->HasBeenDrawn() ) {
+                this->meshdata[i]->UpdateFX( simulation_atom_var /*SIMULATION_ATOM?*/ );
+            } else {
+                this->meshdata[i]->UnDraw();
+                tmp = 1;
+            }
+        }
+        //double blah1 = queryTime();
+        if (!tmp && this->Destroyed())
+            Explode( false, simulation_atom_var /*SIMULATION_ATOM?*/ );
+        //double blah2 = queryTime();
+    }
+}
+
+/****************************** ONLY SOUND/GFX STUFF LEFT IN THOSE FUNCTIONS *********************************/
+
+
+void Unit::Thrust( const Vector &amt1, bool afterburn )
+{
+    if (this->afterburntype == 0)
+        afterburn = afterburn && this->energy > this->afterburnenergy*simulation_atom_var; //SIMULATION_ATOM; ?
+    if (this->afterburntype == 1)
+        afterburn = afterburn && this->fuel > 0;
+    if (this->afterburntype == 2)
+        afterburn = afterburn && this->warpenergy > 0;
+
+
+    //Unit::Thrust( amt1, afterburn );
+    {
+        Vector amt = ClampThrust( amt1, afterburn );
+        ApplyLocalForce( amt );
+    }
+
+    static bool must_afterburn_to_buzz =
+        XMLSupport::parse_bool( vs_config->getVariable( "audio", "buzzing_needs_afterburner", "false" ) );
+    if (_Universe->isPlayerStarship( this ) != NULL) {
+        static int   playerengine = AUDCreateSound( vs_config->getVariable( "unitaudio",
+                                                                            "player_afterburner",
+                                                                            "sfx10.wav" ), true );
+        static float enginegain   = XMLSupport::parse_float( vs_config->getVariable( "audio", "afterburner_gain", ".5" ) );
+        if ( afterburn != AUDIsPlaying( playerengine ) ) {
+            if (afterburn)
+                AUDPlay( playerengine, QVector( 0, 0, 0 ), Vector( 0, 0, 0 ), enginegain );
+            else
+                AUDStopPlaying( playerengine );
+        }
+    } else if (afterburn || !must_afterburn_to_buzz) {
+        static float buzzingtime     = XMLSupport::parse_float( vs_config->getVariable( "audio", "buzzing_time", "5" ) );
+        static float buzzingdistance = XMLSupport::parse_float( vs_config->getVariable( "audio", "buzzing_distance", "5" ) );
+        static float lastbuzz = getNewTime();
+        Unit *playa = _Universe->AccessCockpit()->GetParent();
+        if (playa) {
+            if (UnitUtil::getDistance( this,
+                                       playa ) < buzzingdistance && playa->owner != this && this->owner != playa
+                && this->owner != playa->owner) {
+                float ttime = getNewTime();
+                if (ttime-lastbuzz > buzzingtime) {
+                    Vector pvel    = playa->GetVelocity();
+                    Vector vel     = this->GetVelocity();
+                    pvel.Normalize();
+                    vel.Normalize();
+                    float  dotprod = vel.Dot( pvel );
+                    if (dotprod < .86) {
+                        lastbuzz = ttime;
+                        //AUDPlay( this->sound->engine, this->Position(), this->GetVelocity(), 1 );
+                        playEngineSound();
+                    } else {}
+                }
+            }
+        }
+    }
+}
+
+
+Vector Unit::ResolveForces( const Transformation &trans, const Matrix &transmat )
+{
+#ifndef PERFRAMESOUND
+    //AUDAdjustSound( this->sound->engine, this->cumulative_transformation.position, this->cumulative_velocity );
+    adjustSound(SoundType::engine);
+#endif
+    return Movable::ResolveForces( trans, transmat );
+}
+
+
+
 void Unit::UpdatePhysics3(const Transformation &trans,
                           const Matrix &transmat,
                           bool lastframe,
@@ -5040,9 +5269,203 @@ bool Unit::isPlayerShip()
     return _Universe->isPlayerStarship( this ) ? true : false;
 }
 
+///Updates the collide Queue with any possible change in sectors
+///Queries if this unit is within a given frustum
+bool Unit::queryFrustum( double frustum[6][4] ) const
+{
+    unsigned int    i;
+#ifdef VARIABLE_LENGTH_PQR
+    Vector TargetPoint( cumulative_transformation_matrix[0],
+                        cumulative_transformation_matrix[1],
+                        cumulative_transformation_matrix[2] );
+    float  SizeScaleFactor = sqrtf( TargetPoint.Dot( TargetPoint ) );
+#else
+    Vector TargetPoint;
+#endif
+    for (i = 0; i < nummesh() && this->meshdata[i]; i++) {
+        TargetPoint = Transform( this->cumulative_transformation_matrix, this->meshdata[i]->Position() );
+        if ( GFXSphereInFrustum( frustum,
+                                 TargetPoint,
+                                 this->meshdata[i]->rSize()
+#ifdef VARIABLE_LENGTH_PQR
+                                 *SizeScaleFactor
+#endif
+                               ) )
+            return true;
+    }
+    const Unit *un;
+    for (un_fkiter iter = this->SubUnits.constFastIterator(); (un = *iter); ++iter)
+        if ( un->queryFrustum( frustum ) )
+            return true;
+    return false;
+}
 
 
 
 
 
 
+void Unit::addHalo( const char *filename,
+                                    const Matrix &trans,
+                                    const Vector &size,
+                                    const GFXColor &col,
+                                    std::string halo_type,
+                                    float halo_speed )
+{
+    halos->AddHalo( filename, trans, size, col, halo_type, halo_speed );
+}
+
+
+/**** MOVED FROM BASE_INTERFACE.CPP ****/
+extern string getCargoUnitName( const char *name );
+void Unit::UpgradeInterface( Unit *baseun )
+{
+    string basename = ( ::getCargoUnitName( baseun->getFullname().c_str() ) );
+    if (baseun->isUnit() != _UnitType::planet)
+        basename = baseun->name;
+    BaseUtil::LoadBaseInterfaceAtDock( basename, baseun, this );
+}
+
+
+
+
+//From star_system_jump.cpp
+extern Hashtable< std::string, StarSystem, 127 >star_system_table;
+extern std::vector< unorigdest* >pendingjump;
+
+//From star_system_jump.cpp
+inline bool CompareDest( Unit *un, StarSystem *origin )
+{
+    for (unsigned int i = 0; i < un->GetDestinations().size(); i++)
+        if ( std::string( origin->getFileName() ) == std::string( un->GetDestinations()[i] ) )
+            return true;
+    return false;
+}
+
+inline std::vector< Unit* >ComparePrimaries( Unit *primary, StarSystem *origin )
+{
+    std::vector< Unit* >myvec;
+    if ( CompareDest( primary, origin ) )
+        myvec.push_back( primary );
+    return myvec;
+}
+
+extern void DealPossibleJumpDamage( Unit *un );
+extern void ActivateAnimation( Unit* );
+void WarpPursuit( Unit *un, StarSystem *sourcess, std::string destination );
+
+
+bool Unit::TransferUnitToSystem( unsigned int kk, StarSystem* &savedStarSystem, bool dosightandsound )
+{
+    bool ret = false;
+    if (pendingjump[kk]->orig == this->activeStarSystem || this->activeStarSystem == NULL) {
+        if ( JumpCapable::TransferUnitToSystem( pendingjump[kk]->dest ) ) {
+            ///eradicating from system, leaving no trace
+            ret = true;
+
+            Unit *unit;
+            for (un_iter iter = pendingjump[kk]->orig->getUnitList().createIterator(); (unit = *iter); ++iter) {
+                if (unit->Threat() == this)
+                    unit->Threaten( NULL, 0 );
+                if (unit->VelocityReference() == this)
+                    unit->VelocityReference( NULL );
+                if (unit->Target() == this) {
+                    if ( pendingjump[kk]->jumppoint.GetUnit() ) {
+                        unit->Target( pendingjump[kk]->jumppoint.GetUnit() );
+                        unit->ActivateJumpDrive( 0 );
+                    } else {
+                        WarpPursuit( unit, pendingjump[kk]->orig, pendingjump[kk]->dest->getFileName() );
+                    }
+                } else {
+                    Flightgroup *ff = unit->getFlightgroup();
+                    if (ff)
+                        if ( this == ff->leader.GetUnit() && (ff->directive == "f" || ff->directive == "F") ) {
+                            unit->Target( pendingjump[kk]->jumppoint.GetUnit() );
+                            unit->getFlightgroup()->directive = "F";
+                            unit->ActivateJumpDrive( 0 );
+                        }
+                }
+            }
+            if ( this == _Universe->AccessCockpit()->GetParent() ) {
+                VS_LOG(info, "Unit is the active player character...changing scene graph\n");
+                savedStarSystem->SwapOut();
+                AUDStopAllSounds();
+                savedStarSystem = pendingjump[kk]->dest;
+                pendingjump[kk]->dest->SwapIn();
+            }
+            _Universe->setActiveStarSystem( pendingjump[kk]->dest );
+            vector< Unit* >possibilities;
+            Unit *primary;
+            if (pendingjump[kk]->final_location.i == 0
+                && pendingjump[kk]->final_location.j == 0
+                && pendingjump[kk]->final_location.k == 0)
+                for (un_iter iter = pendingjump[kk]->dest->getUnitList().createIterator(); (primary = *iter); ++iter) {
+                    vector< Unit* >tmp;
+                    tmp = ComparePrimaries( primary, pendingjump[kk]->orig );
+                    if ( !tmp.empty() )
+                        possibilities.insert( possibilities.end(), tmp.begin(), tmp.end() );
+                }
+            else
+                this->SetCurPosition( pendingjump[kk]->final_location );
+            if ( !possibilities.empty() ) {
+                static int jumpdest = 235034;
+                Unit *jumpnode = possibilities[jumpdest%possibilities.size()];
+                QVector    pos = jumpnode->Position();
+
+                this->SetCurPosition( pos );
+                ActivateAnimation( jumpnode );
+                if (jumpnode->isUnit() == _UnitType::unit) {
+                    QVector Offset( pos.i < 0 ? 1 : -1,
+                                    pos.j < 0 ? 1 : -1,
+                                    pos.k < 0 ? 1 : -1 );
+                    Offset *= jumpnode->rSize()*2+this->rSize()*2;
+                    this->SetPosAndCumPos( pos+Offset );
+                    if (is_null( jumpnode->location[Unit::UNIT_ONLY] ) == false
+                        && is_null( jumpnode->location[Unit::UNIT_BOLT] ) == false)
+                        this->UpdateCollideQueue( pendingjump[kk]->dest, jumpnode->location );
+                }
+                jumpdest += 23231;
+            }
+            Unit *tester;
+            for (unsigned int jjj = 0; jjj < 2; ++jjj)
+                for (un_iter i = _Universe->activeStarSystem()->getUnitList().createIterator();
+                     (tester = *i) != NULL; ++i)
+                    if (tester->isUnit() == _UnitType::unit && tester != this)
+                        if ( ( this->LocalPosition()-tester->LocalPosition() ).Magnitude() < this->rSize()+tester->rSize() )
+                            this->SetCurPosition( this->LocalPosition()+this->cumulative_transformation_matrix.getR()
+                                           *( 4*( this->rSize()+tester->rSize() ) ) );
+            DealPossibleJumpDamage( this );
+            static int jumparrive = AUDCreateSound( vs_config->getVariable( "unitaudio", "jumparrive", "sfx43.wav" ), false );
+            if (dosightandsound)
+                AUDPlay( jumparrive, this->LocalPosition(), this->GetVelocity(), 1 );
+        } else {
+#ifdef JUMP_DEBUG
+            VS_LOG(debug, "Unit FAILED remove from star system\n");
+#endif
+        }
+        if (this->docked&DOCKING_UNITS)
+            for (unsigned int i = 0; i < this->pImage->dockedunits.size(); i++) {
+                Unit *unut;
+                if ( NULL != ( unut = this->pImage->dockedunits[i]->uc.GetUnit() ) )
+                    unut->TransferUnitToSystem( kk, savedStarSystem, dosightandsound );
+            }
+        if ( this->docked&(DOCKED|DOCKED_INSIDE) ) {
+            Unit *un = this->pImage->DockedTo.GetUnit();
+            if (!un) {
+                this->docked &= ( ~(DOCKED|DOCKED_INSIDE) );
+            } else {
+                Unit *targ = NULL;
+                for (un_iter i = pendingjump[kk]->dest->getUnitList().createIterator();
+                     ( targ = (*i) );
+                     ++i)
+                    if (targ == un)
+                        break;
+                if (targ != un)
+                    this->UnDock( un );
+            }
+        }
+    } else {
+        VS_LOG(warning, "Already jumped\n");
+    }
+    return ret;
+}

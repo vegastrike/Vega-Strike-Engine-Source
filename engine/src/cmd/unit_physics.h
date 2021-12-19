@@ -23,7 +23,6 @@
  */
 
 #include "gfx/mesh.h"
-#include "unit.h"
 #include "lin_time.h"
 #include "beam.h"
 #include "planet.h"
@@ -45,7 +44,7 @@
 extern unsigned int apply_float_to_unsigned_int( float tmp ); //short fix
 
 
-void GameUnit::UpdatePhysics2( const Transformation &trans,
+void Unit::UpdatePhysics2( const Transformation &trans,
                                            const Transformation &old_physical_state,
                                            const Vector &accel,
                                            float difficulty,
@@ -54,7 +53,7 @@ void GameUnit::UpdatePhysics2( const Transformation &trans,
                                            bool lastframe,
                                            UnitCollection *uc )
 {
-    Unit::UpdatePhysics2( trans, old_physical_state, accel, difficulty, transmat, cum_vel, lastframe, uc );
+    Movable::UpdatePhysics2( trans, old_physical_state, accel, difficulty, transmat, cum_vel, lastframe, uc );
 
     this->AddVelocity( difficulty );
 
@@ -147,13 +146,13 @@ void GameUnit::Thrust( const Vector &amt1, bool afterburn )
 }
 
 
-Vector GameUnit::ResolveForces( const Transformation &trans, const Matrix &transmat )
+Vector Unit::ResolveForces( const Transformation &trans, const Matrix &transmat )
 {
 #ifndef PERFRAMESOUND
     //AUDAdjustSound( this->sound->engine, this->cumulative_transformation.position, this->cumulative_velocity );
     adjustSound(SoundType::engine);
 #endif
-    return Unit::ResolveForces( trans, transmat );
+    return Movable::ResolveForces( trans, transmat );
 }
 
 #endif
