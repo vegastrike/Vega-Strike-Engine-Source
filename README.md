@@ -339,9 +339,11 @@ Vega Strike is now compiling on Windows! If you want to compile it, try it out, 
 
 To compile Vega Strike on Windows, start by installing either Visual Studio 2019 or just the Visual Studio 2019 Developer Tools. When selecting the Workloads and Components to install, include at least "C++ for Desktop" and a recent build of the Windows SDK. Probably Git and the GitHub for Windows extension also. Install the latest Visual Studio updates as well.
 
-Once the Visual Studio Installer finishes, and you have rebooted your computer, open `Developer PowerShell for VS 2019` and run `script/bootstrap.ps1`. Once that finishes, run `script/build.ps1`.
+Once the Visual Studio Installer finishes, reboot your computer. Then, find `Developer PowerShell for VS 2019` on the Start menu; alt-click it ("right-click"); and choose "Run as Administrator." Run `Set-ExecutionPolicy RemoteSigned` (or another suitable PowerShell Execution Policy of your choice). Type `Y` and press Enter to confirm. Exit PowerShell. Now reopen `Developer PowerShell for VS 2019`, this time without Admin privileges, and run `script/bootstrap.ps1`. Once that finishes, reboot your computer again. Finally, open `Developer PowerShell for VS 2019` one more time, and run `script/build.ps1`.
 
 Assuming all the above steps succeed, you are now ready to run Vega Strike. Note that `vegasettings` is not currently building on Windows, so you will need to edit `vegastrike.config` manually as needed. Also note: Windows installer is still pending.
+
+Finally, note that the location of the `.vegastrike` folder has changed since v0.5.1r1. It will now be located here: `C:\Users\<YourUserName>\AppData\Local\.vegastrike`.
 
 ## Compiling On MacOS
 
