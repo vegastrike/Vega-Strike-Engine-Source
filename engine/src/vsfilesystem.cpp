@@ -2134,7 +2134,7 @@ int scandir( const char *dirname, struct dirent ***namelist, int (*select)( cons
         if ( !select || (*select)(selectDir) ) {
             if (nDir == NDir) {
                 struct dirent **tempDir = (dirent**) calloc( sizeof (struct dirent*), NDir+33 );
-                if (NDir != nullptr) {
+                if (NDir) {
                     memcpy( tempDir, dir, sizeof (struct dirent*) *NDir );
                 }
                 if (dir != nullptr) {

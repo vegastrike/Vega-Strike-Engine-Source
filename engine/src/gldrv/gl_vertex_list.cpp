@@ -110,6 +110,7 @@ void GFXVertexList::Init( enum POLYTYPE *poly,
                           unsigned int *indices )
 {
     vbo_data = 0;
+    vbo_elements = nullptr;
 
     int stride = 0;
 

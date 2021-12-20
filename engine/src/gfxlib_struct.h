@@ -819,7 +819,7 @@ protected:
     bool unique_mode{}; //See Draw()
 ///Display list number if list is indeed active. 0 otherwise
     int  display_list{};
-    GLuint *vbo_elements{};
+    unsigned int *vbo_elements{};
     int  vbo_data{};
 ///number of different mode, drawn lists
     int  numlists{};
