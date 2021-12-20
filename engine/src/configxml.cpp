@@ -53,12 +53,18 @@ VegaConfig::VegaConfig( const char *configfile )
 
 VegaConfig::~VegaConfig()
 {
-    if (variables != NULL)
+    if (variables != nullptr) {
         delete variables;
-    if (colors != NULL)
+        variables = nullptr;
+    }
+    if (colors != nullptr) {
         delete colors;
-    if (bindings != NULL)
+        colors = nullptr;
+    }
+    if (bindings != nullptr) {
         delete bindings;
+        bindings = nullptr;
+    }
 }
 
 /* *********************************************************** */

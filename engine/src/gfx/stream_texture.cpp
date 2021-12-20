@@ -77,9 +77,10 @@ StreamTexture::~StreamTexture()
 {
     GFXDeleteTexture( name );
     name = -1;
-    if (this->mutabledata)
+    if (this->mutabledata != nullptr) {
         free( this->mutabledata );
-    this->mutabledata = NULL;
+        this->mutabledata = nullptr;
+    }
 }
 
 void StreamTexture::MakeActive( int stage )

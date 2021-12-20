@@ -4,6 +4,7 @@
  * Copyright (C) Daniel Horn
  * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike
  * contributors
+ * Copyright (C) 2021 Stephen G. Tuggy
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -835,8 +836,10 @@ void Cockpit::visitSystem( string systemname )
 Cockpit::~Cockpit()
 {
     Delete();
-    if (savegame != NULL)
+    if (savegame != nullptr) {
         delete savegame;
+        savegame = nullptr;
+    }
 }
 
 void Cockpit::SetInsidePanYawSpeed( float )

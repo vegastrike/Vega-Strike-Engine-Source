@@ -3,6 +3,7 @@
  *
  * Copyright (C) 2001-2002 Daniel Horn
  * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike contributors
+ * Copyright (C) 2021 Stephen G. Tuggy
  *
  * This file is part of Vega Strike.
  *
@@ -102,8 +103,10 @@ void VSSprite::ReadTexture( FILE *f )
 
 VSSprite::~VSSprite()
 {
-    if (surface != NULL)
+    if (surface != nullptr) {
         delete surface;
+        surface = nullptr;
+    }
 }
 
 void VSSprite::SetST( const float s, const float t )

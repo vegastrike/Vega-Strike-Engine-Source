@@ -1,3 +1,30 @@
+/**
+ * base_maker.cpp
+ *
+ * Copyright (C) Daniel Horn
+ * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike
+ * contributors
+ * Copyright (C) 2021 Stephen G. Tuggy
+ *
+ * https://github.com/vegastrike/Vega-Strike-Engine-Source
+ *
+ * This file is part of Vega Strike.
+ *
+ * Vega Strike is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Vega Strike is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
+
 /* Base Maker: A program to create Vega Strike bases using opengl.
  * ...
  */
@@ -92,7 +119,7 @@ class VSSprite
     float    maxs, maxt;
     float    rotation;
     Texture *surface;
-public: 
+public:
 	VSSprite( const char *file, enum FILTER texturefilter = BILINEAR, GFXBOOL force = GFXFALSE );
     ~VSSprite();
     bool LoadSuccess()
@@ -212,8 +239,10 @@ void VSSprite::ReadTexture( FILE *f )
 
 VSSprite::~VSSprite()
 {
-    if (surface != NULL)
+    if (surface != nullptr) {
         delete surface;
+        surface = nullptr;
+    }
 }
 
 void VSSprite::SetST( const float s, const float t )
@@ -1175,13 +1204,19 @@ void SetSoftwareMousePosition( int x, int y )
 
 Base::Room::~Room()
 {
-    int i;
-    for (i = 0; i < links.size(); i++)
-        if (links[i])
+    size_t i;
+    for (i = 0; i < links.size(); ++i) {
+        if (links[i] != nullptr) {
             delete links[i];
-    for (i = 0; i < objs.size(); i++)
-        if (objs[i])
+            links[i] = nullptr;
+        }
+    }
+    for (i = 0; i < objs.size(); ++i) {
+        if (objs[i] != nullptr) {
             delete objs[i];
+            objs[i] = nullptr;
+        }
+    }
 }
 
 typedef bool (*InputFunc)( std::string input, unsigned int inputroomindex, void *dat1, void *dat2, const void *dat3, float x,

@@ -89,17 +89,20 @@ extern vector< boost::shared_ptr<Faction> >factions;
 StarDate::StarDate()
 {
     initial_time = mission->getGametime();
-    initial_star_time = NULL;
+    initial_star_time = nullptr;
 }
 
 void StarDate::Init( double time )
 {
-    if (initial_star_time != NULL)
+    if (initial_star_time != nullptr) {
         delete[] initial_star_time;
+        initial_star_time = nullptr;
+    }
     initial_time = mission->getGametime();
     initial_star_time = new double[factions.size()];
-    for (unsigned int i = 0; i < factions.size(); i++)
+    for (size_t i = 0; i < factions.size(); ++i) {
         initial_star_time[i] = time;
+    }
 }
 
 //Get the current StarDate time in seconds
@@ -108,20 +111,22 @@ double StarDate::GetCurrentStarTime( int faction )
     //Get the number of seconds elapsed since the server start
     double time_since_server_started = mission->getGametime()-initial_time;
     //Add them to the current date
-    if (initial_star_time == NULL)
+    if (initial_star_time == nullptr) {
         return time_since_server_started;
-    else
-        return initial_star_time[faction]+time_since_server_started;
+    } else {
+        return initial_star_time[faction] + time_since_server_started;
+    }
 }
 
 //Needed to calculate relative message and mission times
 //into stardate
 double StarDate::GetElapsedStarTime(int faction)
 {
-    if (initial_star_time == NULL)
+    if (initial_star_time == nullptr) {
         return initial_time;
-    else
+    } else {
         return initial_star_time[faction] - initial_time;
+    }
 }
 
 /*
@@ -132,16 +137,18 @@ double StarDate::GetElapsedStarTime(int faction)
 
 void StarDate::InitTrek( string date )
 {
-    if (initial_star_time != NULL)
+    if (initial_star_time != nullptr) {
         //we must be reinitializing;
         delete[] initial_star_time;
-    initial_star_time = 0;
+        initial_star_time = nullptr;
+    }
     initial_time = mission->getGametime();
     initial_star_time = new double[factions.size()];
     double init_time = this->ConvertTrekDate( date );
     VS_LOG(trace, (boost::format("Initializing stardate from a Trek date for %1% factions") % factions.size()));
-    for (unsigned int i = 0; i < factions.size(); i++)
+    for (size_t i = 0; i < factions.size(); ++i) {
         initial_star_time[i] = init_time;
+    }
 }
 
 /// The stardate format is ddd.hhmm:sec with

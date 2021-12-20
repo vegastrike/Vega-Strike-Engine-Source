@@ -191,8 +191,10 @@ void showSplashScreen( const string &filename )
 {
     static Animation *curSplash = 0;
     if ( !filename.empty() ) {
-        if (curSplash)
+        if (curSplash != nullptr) {
             delete curSplash;
+            curSplash = nullptr;
+        }
         curSplash = new Animation( filename.c_str(), 0 );
     } else if ( !curSplash && !GetSplashScreen() ) {
         static std::vector< std::string >s = ParseDestinations( game_options.splash_screen );

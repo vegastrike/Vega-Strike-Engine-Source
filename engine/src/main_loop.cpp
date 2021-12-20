@@ -261,15 +261,15 @@ void QuitNow()
         if ( game_options.write_savegame_on_exit) {
             _Universe->WriteSaveGame( true );              //gotta do important stuff first
         }
-        for (unsigned int i = 0; i < active_missions.size(); i++) {
+        for (size_t i = 0; i < active_missions.size(); ++i) {
             if (active_missions[i]) {
                 active_missions[i]->DirectorEnd();
             }
         }
-        if (forcefeedback)
+        if (forcefeedback != nullptr)
         {
             delete forcefeedback;
-            forcefeedback = NULL;
+            forcefeedback = nullptr;
         }
         VSExit( 0 );
     }
@@ -981,8 +981,10 @@ void AddUnitToSystem( const SavedUnits *su )
 
 void destroyObjects()
 {
-    if (myterrain)
+    if (myterrain != nullptr) {
         delete myterrain;
+        myterrain = nullptr;
+    }
     Terrain::DeleteAll();
     delete tmpcockpittexture;
     delete[] fighters;

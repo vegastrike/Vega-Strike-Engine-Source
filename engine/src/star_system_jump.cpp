@@ -48,8 +48,10 @@
 void CacheJumpStar( bool destroy )
 {
     static Animation *cachedani = new Animation( game_options.jumpgate.c_str(), true, .1, MIPMAP, false );
-    if (destroy)
+    if (destroy) {
         delete cachedani;
+        cachedani = nullptr;
+    }
 }
 
 extern std::vector< unorigdest* > pendingjump;
@@ -126,11 +128,12 @@ void StarSystem::DrawJumpStars()
             }
         }
     }
-    unsigned int i;
-    for (i = 0; i < JumpAnimations.size(); ++i)
-        if (JumpAnimations[i].a)
+    for (size_t i = 0; i < JumpAnimations.size(); ++i) {
+        if (JumpAnimations[i].a) {
             JumpAnimations[i].a->Draw();
-    for (i = 0; i < VolatileJumpAnimations.size(); ++i)
+        }
+    }
+    for (size_t i = 0; i < VolatileJumpAnimations.size(); ++i)
         if (VolatileJumpAnimations[i].a) {
             float hei, wid;
             VolatileJumpAnimations[i].a->GetDimensions( hei, wid );
@@ -138,6 +141,7 @@ void StarSystem::DrawJumpStars()
                                                         VolatileJumpAnimations[i].percent*wid );
             if ( VolatileJumpAnimations[i].a->Done() ) {
                 delete VolatileJumpAnimations[i].a;
+                VolatileJumpAnimations[i].a = nullptr;
                 VolatileJumpAnimations.erase( VolatileJumpAnimations.begin()+i );
                 --i;
             } else {

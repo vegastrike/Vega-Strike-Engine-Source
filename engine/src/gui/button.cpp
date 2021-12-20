@@ -4,6 +4,8 @@
 *                           begin                : January 10, 2002
 *                           copyright            : (C) 2002 by David Ranger
 *                           email                : ussreliant@users.sourceforge.net
+*                           copyright            : (C) 2020-2021 by Stephen G. Tuggy
+*                                                  and other Vega Strike contributors
 ***************************************************************************/
 
 /***************************************************************************
@@ -42,8 +44,10 @@ void Button::ModifyName( const char *newname )
 }
 Button::~Button( void )
 {
-    if (label)
+    if (label != nullptr) {
         free( label );
+        label = nullptr;
+    }
 }
 
 void Button::Refresh( void )

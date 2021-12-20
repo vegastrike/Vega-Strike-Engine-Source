@@ -213,8 +213,8 @@ const EnumMap::Pair attribute_names[] = {
     EnumMap::Pair( "event",         EVENT ),
     EnumMap::Pair( "looping",       LOOPING ),
     EnumMap::Pair( "gain",          GAIN ),
-    
-    
+
+
     // Cockpit events
     EnumMap::Pair( "WarpReady",     Cockpit::WARP_READY ),
     EnumMap::Pair( "WarpUnready",   Cockpit::WARP_UNREADY ),
@@ -240,7 +240,7 @@ const EnumMap::Pair attribute_names[] = {
     EnumMap::Pair( "WarpSkip7",     Cockpit::WARP_LOOP0+7 ),
     EnumMap::Pair( "WarpSkip8",     Cockpit::WARP_LOOP0+8 ),
     EnumMap::Pair( "WarpSkip9",     Cockpit::WARP_LOOP0+9 ),
-    
+
     EnumMap::Pair( "ASAPEngaged",   Cockpit::ASAP_ENGAGED ),
     EnumMap::Pair( "ASAPDisengaged",Cockpit::ASAP_DISENGAGED ),
     EnumMap::Pair( "ASAPDockingAvailable",   Cockpit::ASAP_DOCKING_AVAILABLE ),
@@ -252,9 +252,9 @@ const EnumMap::Pair attribute_names[] = {
     EnumMap::Pair( "DockAvailable",     Cockpit::DOCK_AVAILABLE ),
     EnumMap::Pair( "DockUnavailable",   Cockpit::DOCK_UNAVAILABLE ),
     EnumMap::Pair( "DockFailed",        Cockpit::DOCK_FAILED ),
-    EnumMap::Pair( "JumpAvailable",     Cockpit::JUMP_AVAILABLE ),    
-    EnumMap::Pair( "JumpUnavailable",   Cockpit::JUMP_UNAVAILABLE ),    
-    EnumMap::Pair( "JumpFailed",        Cockpit::JUMP_FAILED ),    
+    EnumMap::Pair( "JumpAvailable",     Cockpit::JUMP_AVAILABLE ),
+    EnumMap::Pair( "JumpUnavailable",   Cockpit::JUMP_UNAVAILABLE ),
+    EnumMap::Pair( "JumpFailed",        Cockpit::JUMP_FAILED ),
 
     EnumMap::Pair( "Lock",              Cockpit::LOCK_WARNING ),
     EnumMap::Pair( "MissileLock",       Cockpit::MISSILELOCK_WARNING ),
@@ -359,8 +359,10 @@ void GameCockpit::beginElement( const string &name, const AttributeList &attribu
                         Pit[0] = new VSSprite( (*iter).value.c_str(), cockpit_smooth ? BILINEAR : NEAREST );
                     }
                     replaced[0] = true;
-                    if (oldpit)
+                    if (oldpit != nullptr) {
                         delete oldpit;
+                        oldpit = nullptr;
+                    }
                     break;
                 }
             case SOUNDFILE:
@@ -382,8 +384,10 @@ void GameCockpit::beginElement( const string &name, const AttributeList &attribu
                         Pit[attr-FRONT] = new VSSprite( (*iter).value.c_str(), cockpit_smooth ? BILINEAR : NEAREST );
                     }
                     replaced[attr-FRONT] = true;
-                    if (oldpit)
+                    if (oldpit != nullptr) {
                         delete oldpit;
+                        oldpit = nullptr;
+                    }
                     break;
                 }
             default:
@@ -655,7 +659,7 @@ loadsprite:
             bool looping = false;
             float gain = 1.0f;
             EVENTID event = Cockpit::NUM_EVENTS;
-            
+
             for (iter = attributes.begin(); iter != attributes.end(); iter++) {
                 switch ( attribute_map.lookup( (*iter).name ) )
                 {
@@ -675,7 +679,7 @@ loadsprite:
                     break;
                 }
             }
-            
+
             if (!soundfile.empty() && (event > 0) && (event < Cockpit::NUM_EVENTS)) {
                 SetSoundForEvent(event, SoundContainer(soundfile, looping, gain));
             }

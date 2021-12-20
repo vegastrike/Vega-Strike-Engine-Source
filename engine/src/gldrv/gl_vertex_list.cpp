@@ -204,11 +204,12 @@ void GFXVertexList::Init( enum POLYTYPE *poly,
                 }
             }
         } else {
-            if (index.b)
+            if (index.b != nullptr) {
                 free( index.b );
-            index.b = NULL;
-            data.vertices = NULL;
-            data.colors = NULL;
+                index.b = nullptr;
+            }
+            data.vertices = nullptr;
+            data.colors = nullptr;
         }
     }
     if (Mutable)

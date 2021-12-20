@@ -156,12 +156,17 @@ void ShipCommands::setkps( const char *in )
 
 void InitShipCommands()
 {
-    if (ship_commands) delete ship_commands;
+    if (ship_commands != nullptr) {
+        delete ship_commands;
+        ship_commands = nullptr;
+    }
     ship_commands = new ShipCommands;
 }
 
 void UninitShipCommands()
 {
-    if (ship_commands) delete ship_commands;
-    ship_commands = NULL;
+    if (ship_commands != nullptr) {
+        delete ship_commands;
+        ship_commands = nullptr;
+    }
 }

@@ -4,6 +4,7 @@
  * Copyright (C) 2001-2002 Daniel Horn and Alan Shieh
  * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike
  * contributors
+ * Copyright (C) 2021 Stephen G. Tuggy
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -382,8 +383,9 @@ void /*GFXDRVAPI*/ GFXSetLightContext( const int con_number )
 void GFXDestroyAllLights()
 {
     lighttable.Clear();
-    if (GLLights) {
+    if (GLLights != nullptr) {
         free( GLLights );
+        GLLights = nullptr;
     }
 }
 

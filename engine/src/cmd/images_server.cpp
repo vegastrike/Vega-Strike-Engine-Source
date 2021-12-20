@@ -28,8 +28,10 @@
 template < typename BOGUS >
 UnitImages<BOGUS>::~UnitImages()
 {
-    if (pExplosion)
+    if (pExplosion != nullptr) {
         delete pExplosion;
+        pExplosion = nullptr;
+    }
     VSDESTRUCT1
 }
 

@@ -178,8 +178,10 @@ ParticleTrail::Config::Config(const std::string &prefix)
 
 ParticleTrail::Config::~Config()
 {
-    if (texture != nullptr)
+    if (texture != nullptr) {
         delete texture;
+        texture = nullptr;
+    }
 }
 
 void ParticleTrail::Config::init()

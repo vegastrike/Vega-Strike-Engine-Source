@@ -412,14 +412,14 @@ unsigned char* VSImage::ReadPNG()
         return result;
     }
     catch (...) {
-        if (image) {
+        if (image != nullptr) {
             free( image );
+            image = nullptr;
         }
-        image = NULL;
-        if (row_pointers) {
+        if (row_pointers != nullptr) {
             free( row_pointers );
+            row_pointers = nullptr;
         }
-        row_pointers = NULL;
         return NULL;
     }
 }
@@ -537,10 +537,14 @@ unsigned char* VSImage::ReadJPEG()
         return result;
     }
     catch (...) {
-        if (image) free( image );
-        image = NULL;
-        if (row_pointers) free( row_pointers );
-        row_pointers = NULL;
+        if (image != nullptr) {
+            free( image );
+            image = nullptr;
+        }
+        if (row_pointers != nullptr) {
+            free( row_pointers );
+            row_pointers = nullptr;
+        }
         return NULL;
     }
 }
@@ -658,12 +662,18 @@ unsigned char* VSImage::ReadBMP()
         return data;
     }
     catch (...) {
-        if (cdata) free( cdata );
-        cdata = NULL;
-        if (adata) free( adata );
-        adata = NULL;
-        if (data) free( data );
-        data  = NULL;
+        if (cdata != nullptr) {
+            free( cdata );
+            cdata = nullptr;
+        }
+        if (adata != nullptr) {
+            free( adata );
+            adata = nullptr;
+        }
+        if (data != nullptr) {
+            free( data );
+            data  = nullptr;
+        }
         return NULL;
     }
     ;
@@ -819,7 +829,10 @@ unsigned char* VSImage::ReadDDS()
         return s;
     }
     catch (...) {
-        if (s) free( s );
+        if (s != nullptr) {
+            free( s );
+            s = nullptr;
+        }
         return NULL;
     }
 }

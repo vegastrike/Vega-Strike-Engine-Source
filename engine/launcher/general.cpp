@@ -5,7 +5,7 @@
  *                           copyright            : (C) 2001 by David Ranger
  *                           email                : ussreliant@users.sourceforge.net
  *                           copyright            : (C) 2020 pyramid3d
- *                           copyright            : (C) 2020 Stephen G. Tuggy
+ *                           copyright            : (C) 2020-2021 Stephen G. Tuggy
  **************************************************************************/
 
 /***************************************************************************
@@ -355,6 +355,7 @@ char *GetString(char *line) {
 void SetString(char **ptr, char *line) {
         if (*ptr != nullptr) {
             delete *ptr;
+            *ptr = nullptr;
         }
         *ptr = strdup(line);
 }

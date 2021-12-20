@@ -142,13 +142,18 @@ static void SetupViewport()
 #undef mymin
 BaseInterface::Room::~Room()
 {
-    size_t i;
-    for (i = 0; i < links.size(); i++)
-        if (links[i])
+    for (size_t i = 0; i < links.size(); ++i) {
+        if (links[i] != nullptr) {
             delete links[i];
-    for (i = 0; i < objs.size(); i++)
-        if (objs[i])
+            links[i] = nullptr;
+        }
+    }
+    for (size_t i = 0; i < objs.size(); ++i) {
+        if (objs[i] != nullptr) {
             delete objs[i];
+            objs[i] = nullptr;
+        }
+    }
 }
 
 BaseInterface::Room::Room()

@@ -481,12 +481,16 @@ BaseComputer::~BaseComputer( void )
     m_player.SetUnit( NULL );
     m_base.SetUnit( NULL );
     //Delete any group controls that the window doesn't "own".
-    for (int i = 0; i < DISPLAY_MODE_COUNT; i++)
-        if (m_modeGroups[i] != NULL)
+    for (int i = 0; i < DISPLAY_MODE_COUNT; i++) {
+        if (m_modeGroups[i] != nullptr) {
             delete m_modeGroups[i];
+            m_modeGroups[i] = nullptr;
+        }
+    }
     //If we are playing muzak, stop it.
-    if (m_playingMuzak)
+    if (m_playingMuzak) {
         muzak->Skip();
+    }
 }
 
 GFXColor BaseComputer::getColorForGroup( std::string id )

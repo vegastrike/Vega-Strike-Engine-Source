@@ -1,23 +1,27 @@
 /*
- * Vega Strike
+ * navcomputer.cpp
+ *
  * Copyright (C) 2003 Mike Byron
+ * Copyright (C) Daniel Horn
+ * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike contributors.
+ * Copyright (C) 2021 Stephen G. Tuggy
  *
- * http://vegastrike.sourceforge.net/
+ * This file is part of Vega Strike.
  *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * as published by the Free Software Foundation; either version 2
- * of the License, or (at your option) any later version.
+ * Vega Strike is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 2 of the License, or
+ * (at your option) any later version.
  *
- * This program is distributed in the hope that it will be useful,
+ * Vega Strike is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+ * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
  */
+
 
 #include "vegastrike.h"
 #if defined (_WIN32) && !defined (__CYGWIN__) && !defined (__MINGW32__)
@@ -153,14 +157,19 @@ NavComputer::NavComputer( NavigationSystem *navsystem ) :
 //Destructor.
 NavComputer::~NavComputer( void )
 {
-    int i;
     //Delete any group controls that the window doesn't "own".
-    for (i = 0; i < DISPLAY_MODE_COUNT; i++)
-        if (m_displayModeGroups[i] != NULL)
+    for (int i = 0; i < DISPLAY_MODE_COUNT; i++) {
+        if (m_displayModeGroups[i] != nullptr) {
             delete m_displayModeGroups[i];
-    for (i = 0; i < SELECTOR_MODE_COUNT; i++)
-        if (m_selectorModeGroups[i] != NULL)
+            m_displayModeGroups[i] = nullptr;
+        }
+    }
+    for (int i = 0; i < SELECTOR_MODE_COUNT; i++) {
+        if (m_selectorModeGroups[i] != nullptr) {
             delete m_selectorModeGroups[i];
+            m_selectorModeGroups[i] = nullptr;
+        }
+    }
 }
 
 //Set up the window and get everything ready.
@@ -1186,8 +1195,10 @@ void NavComputer::loadAbsoluteButton()
 
 bool NavComputer::setCurrentNode( PathNode *source )
 {
-    if (currentNode)
+    if (currentNode != nullptr) {
         delete currentNode;
+        currentNode = nullptr;
+    }
     currentNode = source;
     updateNodeDescription();
     return true;
@@ -1423,8 +1434,10 @@ bool NavComputer::actionRemoveCriteria( const EventCommandId &command, Control *
     if (criteriaCell == NULL)
         return true;
     CriteriaNode *deleteHere = criteriaCell->value()->unhook();
-    if (deleteHere)
+    if (deleteHere != nullptr) {
         delete deleteHere;
+        deleteHere = nullptr;
+    }
     updateNodeDescription();
     loadCriteriaLister();
     return true;

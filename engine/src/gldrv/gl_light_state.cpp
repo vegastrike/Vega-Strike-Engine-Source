@@ -4,6 +4,7 @@
  * Copyright (C) Daniel Horn
  * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike
  * contributors
+ * Copyright (C) 2021 Stephen G. Tuggy
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -489,10 +490,12 @@ bool gfx_light::RemoveFromTable( bool shouldremove, const GFXLight &t )
         return false;
     tmp.lc = &coltarg;
     if ( lighttable.Remove( &coltarg, tmp ) ) {
-        if (tmp.lc)
+        if (tmp.lc != nullptr) {
             delete tmp.lc;
-        else
+            tmp.lc = nullptr;
+        } else {
             assert( tmp.lc );
+        }
     }
     return true;
 }

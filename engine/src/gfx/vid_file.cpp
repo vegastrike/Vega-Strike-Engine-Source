@@ -207,24 +207,35 @@ public:
     ~VidFileImpl()
     {
         //Free framebuffer
-        if (frameBuffer)
+        if (frameBuffer != nullptr) {
             delete[] _frameBuffer;
-        if (pFrameRGB)
+            _frameBuffer = nullptr;
+
+        }
+        if (pFrameRGB != nullptr) {
             av_free( pFrameRGB );
-        if (pFrameYUV)
+            pFrameRGB = nullptr;
+        }
+        if (pFrameYUV != nullptr) {
             av_free( pFrameYUV );
-        if (pNextFrameYUV)
+            pFrameYUV = nullptr;
+        }
+        if (pNextFrameYUV != nullptr) {
             av_free( pNextFrameYUV );
-#ifndef DEPRECATED_IMG_CONVERT
-        if (pSWSCtx)
-            sws_freeContext( pSWSCtx );
-#endif
+            pNextFrameYUV = nullptr;
+        }
         //Close the codec
-        if (pCodecCtx)
+        if (pCodecCtx != nullptr) {
             avcodec_close( pCodecCtx );
+            // delete pCodecCtx;
+            pCodecCtx = nullptr;
+        }
         //Close the file
-        if (pFormatCtx)
+        if (pFormatCtx != nullptr) {
             av_close_input_file( pFormatCtx );
+            // delete pFormatCtx;
+            pFormatCtx = nullptr;
+        }
     }
 
     void open( const std::string &path )
@@ -409,18 +420,20 @@ public:
 /* ************************************ */
 
 VidFile::VidFile() :
-    impl( NULL )
+    impl( nullptr )
 {}
 
 VidFile::~VidFile()
 {
-    if (impl)
+    if (impl != nullptr) {
         delete impl;
+        impl = nullptr;
+    }
 }
 
 bool VidFile::isOpen() const
 {
-    return impl != NULL;
+    return impl != nullptr;
 }
 
 void VidFile::open( const std::string &path, size_t maxDimension, bool forcePOT )
@@ -435,9 +448,9 @@ void VidFile::open( const std::string &path, size_t maxDimension, bool forcePOT 
 
 void VidFile::close()
 {
-    if (impl) {
+    if (impl != nullptr) {
         delete impl;
-        impl = 0;
+        impl = nullptr;
     }
 }
 

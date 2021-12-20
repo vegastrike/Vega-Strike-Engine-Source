@@ -412,22 +412,22 @@ Mesh::~Mesh()
                     undrawn_meshes[j].erase( it-- );
                     VS_LOG(debug, "stale mesh found in draw queue--removed!");
                 }
-        if (vlist) {
+        if (vlist != nullptr) {
             delete vlist;
             vlist = nullptr;
         }
-        for (unsigned int i = 0; i < Decal.size(); i++)
-            if (Decal[i] != NULL) {
+        for (size_t i = 0; i < Decal.size(); ++i)
+            if (Decal[i] != nullptr) {
                 delete Decal[i];
-                Decal[i] = NULL;
+                Decal[i] = nullptr;
             }
-        if (squadlogos != NULL) {
+        if (squadlogos != nullptr) {
             delete squadlogos;
-            squadlogos = NULL;
+            squadlogos = nullptr;
         }
-        if (forcelogos != NULL) {
+        if (forcelogos != nullptr) {
             delete forcelogos;
-            forcelogos = NULL;
+            forcelogos = nullptr;
         }
         if (meshHashTable.Get( hash_name ) == this)
             meshHashTable.Delete( hash_name );
