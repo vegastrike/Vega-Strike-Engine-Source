@@ -19,14 +19,14 @@ Vega Strike Engine Versioning
 As of version 0.8.0 the Vega Strike Engine Asset API, aka Asset API, provides an interface
 for determining the versions information related to the Vega Strike Engine including:
 
-- the official version fo the Vega Strike Engine (f.e `0.8.0`)
+- the official version of the Vega Strike Engine (f.e `0.8.0`)
 - the version of the Asset API implemented by the Vega Strike Engine using a simple incrementing
   integer value.
 
-For simplicity, the Asset API Version is a simple incrementing interger value with a behavior
+For simplicity, the Asset API Version is a simple incrementing integer value with a behavior
 like that of the Android SDK version. The Asset API and the Vega Strike Engine versions have a
-loose relationship. Game Assets should use the Asset API Version as the basis for the
-determining available functionality.
+loose relationship. Game Assets should use the Asset API Version as the basis for
+determining the available functionality.
 
 Discovering the Vega Strike Engine Versions
 +++++++++++++++++++++++++++++++++++++++++++
@@ -64,7 +64,6 @@ provided.
         )
 
         # Log the information
-        trace(TRACE_WARNING, "::: What's in VS object %s :::" %(dir(VS)))
         trace(TRACE_WARNING, "::: Engine Version {0} :::".format(engineVersion))
         trace(TRACE_WARNING, "::: Asset API Version {0} :::".format(apiVersion))
 
@@ -88,7 +87,7 @@ What kind of changes avoid changing the Engine API version?
 - Refactoring the Asset API in a manner that does not change its behavior.
 - Changes to code not impacting the behavior of the Asset API.
 
-Essentially, any time a change happens to the Asset API that may effect the Game Assets.
+Essentially, any time a change happens to the Asset API that may affect the Game Assets.
 
 Asset API Version History
 -------------------------
