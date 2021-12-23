@@ -43,12 +43,11 @@
 #include "universe.h"
 #include "damageable.h"
 #include "vs_logging.h"
-
+#include "gfx/texture_manager.h"
 
 
 using std::vector;
 using std::string;
-
 
 
 extern double interpolation_blend_factor;
@@ -65,9 +64,11 @@ int Bolt::AddTexture( BoltDrawManager *q, std::string file )
     if ( decal >= (int) q->bolts.size() ) {
         q->bolts.push_back( vector< Bolt > () );
         int blargh = q->boltdecals.AddTexture( file.c_str(), MIPMAP );
-        if ( blargh >= (int) q->bolts.size() )
+        if ( blargh >= (int) q->bolts.size() ) {
             q->bolts.push_back( vector< Bolt > () );
+        }
     }
+
     return decal;
 }
 
@@ -116,26 +117,25 @@ void Bolt::DrawAllBolts()
     qmesh->BeginDrawState();
     int decal = 0;
 
-    // Iterate over specific balls
+    // Iterate over specific types of bolts (with same texture)
     for (auto&& bolt_types : bolt_draw_manager.bolts) {
         if(bolt_types.size() == 0) continue;
 
-        Texture *dec = bolt_draw_manager.boltdecals.GetTexture( decal );
-        if(!dec) {
-            VS_LOG(warning, "Failed to get texture from boltdecals");
-            decal++;
+        Bolt bolt = bolt_types[0];
+
+        Texture *texture = TextureManager::GetInstance().GetTexture(bolt.bolt_name, MIPMAP);
+        if(!texture) {
+            VS_LOG(error, (boost::format("No texture found for bolt named %1$s") % bolt.bolt_name ));
             continue;
         }
 
-        float bolt_size = 2*bolt_types[0].type->radius+bolt_types[0].type->length;
-        bolt_size *= bolt_size;
-        for (size_t pass = 0, npasses = dec->numPasses(); pass < npasses; ++pass) {
+        for (size_t pass = 0, npasses = texture->numPasses(); pass < npasses; ++pass) {
             GFXTextureEnv( 0, GFXMODULATETEXTURE );
-            if (dec->SetupPass(0, bsrc, bdst)) {
-                dec->MakeActive();
+            if (texture->SetupPass(0, bsrc, bdst)) {
+                texture->MakeActive();
                 GFXToggleTexture( true, 0 );
                 for (auto&& bolt : bolt_types) {
-                    bolt.DrawBolt(bolt_size, qmesh);
+                    bolt.DrawBolt(qmesh);
                 }
             }
         }
@@ -143,7 +143,6 @@ void Bolt::DrawAllBolts()
     }
 
     qmesh->EndDrawState();
-
 }
 
 
@@ -172,21 +171,24 @@ void Bolt::DrawAllBalls()
 }
 
 
-void Bolt::DrawBolt(float& bolt_size, GFXVertexList *qmesh)
+void Bolt::DrawBolt(GFXVertexList *qmesh)
 {
     float distance = (cur_position-BoltDrawManager::camera_position).MagnitudeSquared();
-    if (distance*BoltDrawManager::pixel_angle < bolt_size) {
-        const WeaponInfo *wt = type;
 
-        BlendTrans( drawmat, cur_position, prev_position );
-        Matrix drawmat( this->drawmat );
-        if (game_options.StretchBolts > 0) {
-            ScaleMatrix( drawmat, Vector( 1, 1, type->speed*BoltDrawManager::elapsed_time*game_options.StretchBolts/type->length ) );
-        }
-        GFXLoadMatrixModel( drawmat );
-        GFXColor4f( wt->r, wt->g, wt->b, wt->a );
-        qmesh->Draw();
+    if (distance*BoltDrawManager::pixel_angle >= bolt_size) {
+        return;
     }
+
+    const WeaponInfo *wt = type;
+
+    BlendTrans( drawmat, cur_position, prev_position );
+    Matrix drawmat( this->drawmat );
+    if (game_options.StretchBolts > 0) {
+        ScaleMatrix( drawmat, Vector( 1, 1, type->speed*BoltDrawManager::elapsed_time*game_options.StretchBolts/type->length ) );
+    }
+    GFXLoadMatrixModel( drawmat );
+    GFXColor4f( wt->r, wt->g, wt->b, wt->a );
+    qmesh->Draw();
 }
 
 void Bolt::DrawBall(float& bolt_size, Animation *cur)
@@ -209,15 +211,39 @@ void Bolt::DrawBall(float& bolt_size, Animation *cur)
 }
 
 
-extern void BoltDestroyGeneric( Bolt *whichbolt, unsigned int index, int decal, bool isBall );
 void Bolt::Destroy( unsigned int index )
 {
-    VSDESTRUCT2
     bool isBall  = true;
     if (type->type == WEAPON_TYPE::BOLT) {
         isBall = false;
     } else {}
-    BoltDestroyGeneric( this, index, decal, isBall );
+    //BoltDestroyGeneric( this, index, decal, isBall );
+
+    BoltDrawManager& q = BoltDrawManager::GetInstance();
+    vector< vector< Bolt > > *target;
+    if (!isBall) {
+        target = &q.bolts;
+    } else {
+        target = &q.balls;
+    }
+
+    vector< Bolt > *vec = &(*target)[decal];
+    if (&(*vec)[index] == this) {
+        unsigned int tsize = vec->size();
+        CollideMap  *cm    = _Universe->activeStarSystem()->collide_map[Unit::UNIT_BOLT];
+        cm->UpdateBoltInfo( vec->back().location, (*(*vec)[index].location)->ref );
+
+        assert( index < tsize );
+        cm->erase( (*vec)[index].location );
+        if ( index+1 != vec->size() ) {
+            (*vec)[index] = vec->back();                //just a memcopy, yo
+        }
+
+        vec->pop_back();         //pop that back up
+    } else {
+        VS_LOG_AND_FLUSH(fatal, "Bolt Fault Nouveau! Not found in draw queue! No Chance to recover");
+        assert( 0 );
+    }
 }
 
 // A bolt is created when fired
@@ -233,7 +259,11 @@ Bolt::Bolt( const WeaponInfo *typ,
     prev_position = cur_position;
     this->owner   = owner;
     this->type    = typ;
+    bolt_name = typ->file;
     curdist = 0;
+    bolt_size = std::pow(2*type->radius+type->length, 2);
+    ball_size = std::pow(4*type->radius, 2);
+
     CopyMatrix( drawmat, orientationpos );
     Vector vel = shipspeed+orientationpos.getR()*typ->speed;
 
@@ -254,6 +284,9 @@ Bolt::Bolt( const WeaponInfo *typ,
                                                    hint );
 
         q.bolts[decal].push_back( *this );
+
+        BoltDrawManager& bolt_draw_manager = BoltDrawManager::GetInstance();
+        bolt_texture = bolt_draw_manager.boltdecals.GetTexture( decal );
     } else {
         ScaleMatrix( drawmat, Vector( typ->radius, typ->radius, typ->radius ) );
         decal = Bolt::AddAnimation( &q, typ->file, cur_position );
@@ -416,33 +449,5 @@ Collidable::CollideRef Bolt::BoltIndex( int index, int decal, bool isBall )
     return temp;
 }
 
-void BoltDestroyGeneric( Bolt *whichbolt, unsigned int index, int decal, bool isBall )
-{
-    VSDESTRUCT2
-    BoltDrawManager& q = BoltDrawManager::GetInstance();
-    vector< vector< Bolt > > *target;
-    if (!isBall) {
-        target = &q.bolts;
-    } else {
-        target = &q.balls;
-    }
 
-    vector< Bolt > *vec = &(*target)[decal];
-    if (&(*vec)[index] == whichbolt) {
-        unsigned int tsize = vec->size();
-        CollideMap  *cm    = _Universe->activeStarSystem()->collide_map[Unit::UNIT_BOLT];
-        cm->UpdateBoltInfo( vec->back().location, (*(*vec)[index].location)->ref );
-
-        assert( index < tsize );
-        cm->erase( (*vec)[index].location );
-        if ( index+1 != vec->size() ) {
-            (*vec)[index] = vec->back();                //just a memcopy, yo
-        }
-
-        vec->pop_back();         //pop that back up
-    } else {
-        VS_LOG_AND_FLUSH(fatal, "Bolt Fault Nouveau! Not found in draw queue! No Chance to recover");
-        assert( 0 );
-    }
-}
 

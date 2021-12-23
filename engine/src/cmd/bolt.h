@@ -31,12 +31,14 @@
 #include "gfx/matrix.h"
 #include "gfx/quaternion.h"
 #include "collide_map.h"
+#include "gfx/animation.h"
 
 
 class Unit;
 class StarSystem;
 class BoltDrawManager;
 class Animation;
+class Texture;
 
 class Bolt {
 private:
@@ -48,6 +50,16 @@ private:
   void *owner;
   float curdist;
   int decal;//which image it uses
+  float bolt_size; // actually squared
+  std::string bolt_name;
+
+  float ball_size;
+  std::string ball_name;
+
+  Texture *bolt_texture;
+  Animation animation;
+
+
  public:
   CollideMap::iterator location;
   static int AddTexture(BoltDrawManager *q, std::string filename);
@@ -68,7 +80,7 @@ private:
   //static void Draw();
   static void DrawAllBolts();
   static void DrawAllBalls();
-  void DrawBolt(float& bolt_size, GFXVertexList *qmesh);
+  void DrawBolt(GFXVertexList *qmesh);
   void DrawBall(float& bolt_size, Animation *cur);
   bool Update(Collidable::CollideRef index);
   bool Collide(Collidable::CollideRef index);
