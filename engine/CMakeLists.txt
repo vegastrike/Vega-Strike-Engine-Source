@@ -1619,6 +1619,7 @@ ELSEIF (CMAKE_SYSTEM_NAME STREQUAL Linux)
         SET(CPACK_RPM_PACKAGE_LICENSE "GPLv3") # See ../LICENSE
         SET(CPACK_RPM_PACKAGE_URL "https://www.vega-strike.org")
         SET(CPACK_RPM_PACKAGE_NAME "Vega-Strike")
+        SET(CPACK_RPM_PACKAGE_VERSION "${VEGA_STRIKE_PACKAGE_VERSION_STR}")
 
         # Figure out the filename
         IF (LINUX_CODENAME)
