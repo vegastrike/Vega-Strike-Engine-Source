@@ -155,7 +155,7 @@ jobs:
       env:
         FROM:       ${{ matrix.FROM }}
         COMPILER:   ${{ matrix.COMPILER }}
-        FLAGS:      '-DVEGA_STRIKE_PREFER_LEGACY_OPENGL=${{ matrix.PREFER_LEGACY_OPENGL }}'
+        FLAGS:      '-DUSE_PYTHON_3=${{ matrix.USE_PYTHON_3 }} -DVEGA_STRIKE_PREFER_LEGACY_OPENGL=${{ matrix.PREFER_LEGACY_OPENGL }}'
         MY_OS_NAME: linux
         IS_RELEASE: 1
       run: script/cibuild $FLAGS
