@@ -44,6 +44,7 @@
 #include "universe.h"
 #include "weapon_info.h"
 #include "resource/resource.h"
+#include "gfx/boltdrawmanager.h"
 
 extern char SERVER;
 Mount::Mount()
@@ -271,11 +272,15 @@ bool Mount::PhysicsAlignedFire( Unit *caller,
                 ref.gun->Reinitialize();
             break;
         case WEAPON_TYPE::BOLT:
-        case WEAPON_TYPE::BALL:
             caller->energy -= type->energy_rate;
             hint[Unit::UNIT_BOLT] = Bolt( type, mat, velocity, owner, hint[Unit::UNIT_BOLT] ).location;             //FIXME turrets won't work! Velocity
-
             break;
+
+        case WEAPON_TYPE::BALL: {
+            caller->energy -= type->energy_rate;
+            hint[Unit::UNIT_BOLT] = BoltDrawManager::GetInstance().AddBall(type, mat, velocity, owner, hint[Unit::UNIT_BOLT]);
+            break;
+        }
         case WEAPON_TYPE::PROJECTILE:
             static bool match_speed_with_target =
                 XMLSupport::parse_float( vs_config->getVariable( "physics", "match_speed_with_target", "true" ) );

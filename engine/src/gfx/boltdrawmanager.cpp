@@ -118,3 +118,14 @@ void BoltDrawManager::Draw()
     GFXEnable( TEXTURE0 );
     GFXColor4f( 1, 1, 1, 1 );
 }
+
+
+CollideMap::iterator BoltDrawManager::AddBall( const WeaponInfo *typ,
+                                               const Matrix &orientationpos,
+                                               const Vector &shipspeed,
+                                               void *owner,
+                                               CollideMap::iterator hint ) {
+    Bolt ball = Bolt( typ, orientationpos, shipspeed, owner, hint );             //FIXME turrets won't work! Velocity
+    _balls.push_back(ball);
+    return _balls[_balls.size()-1].location;
+}
