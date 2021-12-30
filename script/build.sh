@@ -39,14 +39,21 @@ mkdir -pv "${BUILD_DIR}" && cd "${BUILD_DIR}"
 # configure libraries and prepare for the Debug build having -Werror set,
 # thus gating VS commits on being warning-free at some point in the near
 # future -- see https://github.com/vegastrike/Vega-Strike-Engine-Source/issues/50
-cmake '$@' "${SRC_DIR}"
+cmake $@ "${SRC_DIR}"
 
 # for a clean build only
 # mut we can do it manually
 #make clean
 
 # compile now using all cpus and show compilation commands
-make -j $(nproc) VERBOSE=1
+# MAX_THREADS_TO_BUILD_WITH=8
+NUM_THREADS_TO_BUILD_WITH=$(getconf _NPROCESSORS_ONLN)
+# if [ ${NUM_THREADS_TO_BUILD_WITH} -gt ${MAX_THREADS_TO_BUILD_WITH} ]
+# then
+#     NUM_THREADS_TO_BUILD_WITH=${MAX_THREADS_TO_BUILD_WITH}
+# fi
+
+VERBOSE=1 cmake --build "${BUILD_DIR}" -j $NUM_THREADS_TO_BUILD_WITH
 
 cd "${ROOT_DIR}"
 
