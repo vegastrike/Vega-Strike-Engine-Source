@@ -48,10 +48,17 @@ public:
     vector <vector <Bolt> > bolts; // The inner vector is all of the same type.
     vector <vector <Bolt> > balls;
 
+    vector<Bolt> _balls;
+
     BoltDrawManager();
     ~BoltDrawManager();
 
     static BoltDrawManager& GetInstance();
+    CollideMap::iterator AddBall( const WeaponInfo *typ,
+                                       const Matrix &orientationpos,
+                                       const Vector &shipspeed,
+                                       void *owner,
+                                       CollideMap::iterator hint );
 
     static void Draw();
 };
