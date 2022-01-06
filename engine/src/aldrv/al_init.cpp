@@ -3,7 +3,7 @@
  *
  * Copyright (C) Daniel Horn
  * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike contributors
- * Copyright (C) 2021 Stephen G. Tuggy
+ * Copyright (C) 2021-2022 Stephen G. Tuggy
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -47,15 +47,13 @@
 #include "options.h"
 #include "vs_logging.h"
 
-
-
 #if 1
-#define AL_GET_PROC( name ) ( alGetProcAddress( const_cast< ALubyte* > ( reinterpret_cast< const ALubyte* > (name) ) ) )
+#define AL_GET_PROC(name) ( alGetProcAddress( const_cast< ALubyte* > ( reinterpret_cast< const ALubyte* > (name) ) ) )
 #else
 #define AL_GET_PROC( name ) ( alGetProcAddress( name ) )
 #endif
 
-static void fixup_function_pointers( void )
+static void fixup_function_pointers(void)
 {
     /* UNCOMMENT AS NEEDED
      *     talcGetAudioChannel = (ALfloat (*)(ALuint channel))
@@ -107,7 +105,7 @@ static void fixup_function_pointers( void )
      */
 }
 #endif
-void AUDChangeVolume( float volume )
+void AUDChangeVolume(float volume)
 {
 #ifdef HAVE_AL
     if (volume == 0) {
@@ -116,25 +114,26 @@ void AUDChangeVolume( float volume )
     } else {
         usepositional = true;
     }
-    scalepos = 1./volume;
+    scalepos = 1. / volume;
 #endif
 }
 float AUDGetVolume()
 {
 #ifdef HAVE_AL
-    return 1./scalepos;
+    return 1. / scalepos;
 
 #else
     return 1;
 #endif
 }
-void AUDChangeDoppler( float doppler )
+void AUDChangeDoppler(float doppler)
 {
 #ifdef HAVE_AL
-    if (doppler <= 0)
+    if (doppler <= 0) {
         usedoppler = false;
-    else
+    } else {
         usedoppler = true;
+    }
     scalevel = doppler;
 #endif
 }
@@ -150,10 +149,10 @@ float AUDGetDoppler()
 
 #ifdef HAVE_AL
 ///I don't think we'll need to switch contexts or devices in vegastrike
-static ALCdevice  *dev = NULL;
+static ALCdevice *dev = NULL;
 
 #ifndef _WIN32
-static ALvoid     *context_id = NULL;
+static ALvoid *context_id = NULL;
 #else
 static ALCcontext *context_id = NULL;
 #endif
@@ -162,60 +161,61 @@ bool AUDInit()
 {
 #ifdef HAVE_AL
     // g_game.sound_enabled =
-    usedoppler    = game_options.Doppler;
+    usedoppler = game_options.Doppler;
     usepositional = game_options.Positional;
-    double linuxadjust=1;
+    double linuxadjust = 1;
 #ifndef _WIN32
 #ifndef __APPLE__
-    linuxadjust=1./3.;
+    linuxadjust = 1. / 3.;
 #endif
 #endif
-    scalepos = 1.0f/(game_options.Volume*linuxadjust);
+    scalepos = 1.0f / (game_options.Volume * linuxadjust);
     scalevel = game_options.DopplerScale;
     g_game.audio_frequency_mode = game_options.frequency;
-    maxallowedsingle     = game_options.MaxSingleSounds;
+    maxallowedsingle = game_options.MaxSingleSounds;
     g_game.max_sound_sources =
-    maxallowedtotal      = game_options.MaxTotalSounds;
-    if (!game_options.Sound && !game_options.Music)
+    maxallowedtotal = game_options.MaxTotalSounds;
+    if (!game_options.Sound && !game_options.Music) {
         return false;
+    }
     int attrlist[] = {ALC_FREQUENCY, g_game.audio_frequency_mode, 0};
 #ifdef _WIN32
-	dev = alcOpenDevice(  (ALCchar*)"DirectSound3D" );
+    dev = alcOpenDevice(  (ALCchar*)"DirectSound3D" );
 #elif __APPLE__
     dev = alcOpenDevice( (ALCchar*)"sdl" );
 #endif
     if (dev == NULL) {
         // use default device
-        dev = alcOpenDevice( NULL );
+        dev = alcOpenDevice(NULL);
     }
     if (dev == NULL) {
         return false;
     }
-    context_id = alcCreateContext( dev, attrlist );
+    context_id = alcCreateContext(dev, attrlist);
     if (context_id == NULL) {
-        alcCloseDevice( dev );
+        alcCloseDevice(dev);
         return false;
     }
-    alcMakeContextCurrent( (ALCcontext*) context_id );
+    alcMakeContextCurrent((ALCcontext *) context_id);
 
     fixup_function_pointers();
     ALenum alGetEr = 0;
     ALuint cursrc;
     alGetError();
-    alGenSources( 1, &cursrc );
+    alGenSources(1, &cursrc);
     alGetEr = alGetError();
     while (alGetEr == 0) {
-        unusedsrcs.push_back( cursrc );
-        if (unusedsrcs.size() >= maxallowedtotal)
+        unusedsrcs.push_back(cursrc);
+        if (unusedsrcs.size() >= maxallowedtotal) {
             break;
-        alGenSources( 1, &cursrc );
+        }
+        alGenSources(1, &cursrc);
         alGetEr = alGetError();
     }
 
     alDistanceModel(AL_INVERSE_DISTANCE_CLAMPED);
 
     g_game.sound_enabled = game_options.Sound;
-
 
     return true;
 #endif
@@ -228,19 +228,24 @@ void AUDDestroy()
     //Go through and delete all loaded wavs
     unsigned int i;
     for (i = 0; i < sounds.size(); i++) {
-        if (sounds[i].buffer != 0)
-            AUDStopPlaying( i );
-        AUDDeleteSound( i );
+        if (sounds[i].buffer != 0) {
+            AUDStopPlaying(i);
+        }
+        AUDDeleteSound(i);
     }
-    for (i = 0; i < unusedsrcs.size(); i++)
-        alDeleteSources( 1, &unusedsrcs[i] );
-    for (i = 0; i < buffers.size(); i++)
-        alDeleteBuffers( 1, &buffers[i] );
+    for (i = 0; i < unusedsrcs.size(); i++) {
+        alDeleteSources(1, &unusedsrcs[i]);
+    }
+    for (i = 0; i < buffers.size(); i++) {
+        alDeleteBuffers(1, &buffers[i]);
+    }
     buffers.clear();
-    if (context_id)
-        alcDestroyContext( (ALCcontext*) context_id );
-    if (dev)
-        alcCloseDevice( dev );
+    if (context_id) {
+        alcDestroyContext((ALCcontext *) context_id);
+    }
+    if (dev) {
+        alcCloseDevice(dev);
+    }
 #endif
 }
 
