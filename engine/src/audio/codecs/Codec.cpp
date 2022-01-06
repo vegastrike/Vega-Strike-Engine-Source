@@ -4,6 +4,7 @@
  * Copyright (C) Daniel Horn
  * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike
  * contributors
+ * Copyright (C) 2022 Stephen G. Tuggy
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -31,22 +32,22 @@
 
 namespace Audio {
 
-    Codec::~Codec()
-    {
-    }
+Codec::~Codec()
+{
+}
 
-    Codec::Codec(const std::string &_name) : name(_name)
-    {
-    }
+Codec::Codec(const std::string &_name) : name(_name)
+{
+}
 
-    const std::string& Codec::getName() const
-    {
-        return name;
-    }
+const std::string &Codec::getName() const
+{
+    return name;
+}
 
-    const std::vector<std::string>* Codec::getExtensions() const
-    {
-        return 0;
-    }
+const std::vector<std::string> *Codec::getExtensions() const
+{
+    return 0;
+}
 
 };
