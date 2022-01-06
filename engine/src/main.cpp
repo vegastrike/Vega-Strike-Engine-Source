@@ -762,6 +762,8 @@ std::string ParseCommandLine(int argc, char **lpCmdLine)
     for (int i = 1; i < argc; i++) {
         if (lpCmdLine[i][0] == '-') {
             std::cerr << "ARG #" << i << " = " << lpCmdLine[i] << std::endl;
+            std::string input(lpCmdLine[i]);
+            std::istringstream iStringStream(input);
             switch (lpCmdLine[i][1]) {
                 case 'd':
                 case 'D':
@@ -804,13 +806,18 @@ std::string ParseCommandLine(int argc, char **lpCmdLine)
                     break;
                 case 'L':
                 case 'l':
-                    if (3 == sscanf(lpCmdLine[i] + 2,
-                                    "%lf,%lf,%lf",
-                                    &PlayerLocation.i,
-                                    &PlayerLocation.j,
-                                    &PlayerLocation.k)) {
-                        SetPlayerLoc(PlayerLocation, true);
+                    try {
+                        iStringStream.ignore(2);
+                        iStringStream >> PlayerLocation.i;
+                        iStringStream.ignore(1, ',');
+                        iStringStream >> PlayerLocation.j;
+                        iStringStream.ignore(1, ',');
+                        iStringStream >> PlayerLocation.k;
+                    } catch (std::ios_base::failure &inputFailure) {
+                        std::cout << "Error reading coordinates for player location: " << inputFailure.what() << std::endl;
+                        exit(1);
                     }
+                    SetPlayerLoc(PlayerLocation, true);
                     break;
                 case 'J':
                 case 'j':             //low rez
@@ -838,7 +845,13 @@ std::string ParseCommandLine(int argc, char **lpCmdLine)
                 case '-':
                     //long options
                     if (strcmp(lpCmdLine[i], "--benchmark") == 0) {
-                        benchmark = atof(lpCmdLine[i + 1]);
+                        try {
+                            iStringStream.ignore(1);
+                            iStringStream >> benchmark;
+                        } catch (std::ios_base::failure &inputFailure) {
+                            std::cout << "Error parsing benchmark value: " << inputFailure.what() << std::endl;
+                            exit(1);
+                        }
                         i++;
                     } else if (strcmp(lpCmdLine[i], "--net") == 0) {
                         //don't ignore the network section of the config file
