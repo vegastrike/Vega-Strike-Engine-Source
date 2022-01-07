@@ -3,7 +3,7 @@
  *
  * Copyright (C) Daniel Horn
  * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike contributors
- * Copyright (C) 2021 Stephen G. Tuggy
+ * Copyright (C) 2021-2022 Stephen G. Tuggy
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -42,51 +42,51 @@
 
 using namespace Orders;
 
-PythonAI*PythonAI::last_ai = NULL;
+PythonAI *PythonAI::last_ai = NULL;
 
-PythonAI::PythonAI( PyObject *self_, float reaction_time, float aggressivity ) : FireAt( reaction_time, aggressivity )
+PythonAI::PythonAI(PyObject *self_, float reaction_time, float aggressivity) : FireAt(reaction_time, aggressivity)
 {
-    self    = self_;
+    self = self_;
     //boost::python:
-    Py_XINCREF( self );     //by passing this to whoami, we are counting on them to Destruct us
+    Py_XINCREF(self);     //by passing this to whoami, we are counting on them to Destruct us
     last_ai = this;
 }
 
 void PythonAI::Destruct()
 {
-    Py_XDECREF( self );     //this should destroy SELF
+    Py_XDECREF(self);     //this should destroy SELF
 }
 
-void PythonAI::default_Execute( FireAt &self_ )
+void PythonAI::default_Execute(FireAt &self_)
 {
     (self_).FireAt::Execute();
 }
 
-PythonAI* PythonAI::LastAI()
+PythonAI *PythonAI::LastAI()
 {
     PythonAI *myai = last_ai;
     last_ai = NULL;
     return myai;
 }
 
-PythonAI* PythonAI::Factory( const std::string &filename )
+PythonAI *PythonAI::Factory(const std::string &filename)
 {
-    CompileRunPython( filename );
+    CompileRunPython(filename);
     return LastAI();
 }
 
 void PythonAI::Execute()
 {
-    boost::python::callback< void >::call_method( self, "Execute" );
+    boost::python::callback<void>::call_method(self, "Execute");
 }
 
 void PythonAI::InitModuleAI()
 {
-    boost::python::module_builder ai_builder( "AI" );
-    boost::python::class_builder< FireAt, PythonAI >BaseClass( ai_builder, "FireAt" );
+    boost::python::module_builder ai_builder("AI");
+    boost::python::class_builder<FireAt, PythonAI> BaseClass(ai_builder, "FireAt");
 
-    BaseClass.def( boost::python::constructor< float, float > () );
-    BaseClass.def( &FireAt::Execute, "PythonAI", PythonAI::default_Execute );
+    BaseClass.def(boost::python::constructor<float, float>());
+    BaseClass.def(&FireAt::Execute, "PythonAI", PythonAI::default_Execute);
 }
 
 PythonAI::~PythonAI()
