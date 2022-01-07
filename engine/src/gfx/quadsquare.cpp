@@ -4,6 +4,7 @@
  * Copyright (C) Daniel Horn
  * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike
  * contributors
+ * Copyright (C) 2021 Stephen G. Tuggy
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -194,8 +195,10 @@ quadsquare::~quadsquare()
     for (i = 0; i < 5; i++)
         unusedvertices->push_back( Vertex[i].vertindex );
     for (i = 0; i < 4; i++) {
-        if (Child[i]) delete Child[i];
-        Child[i] = NULL;
+        if (Child[i] != nullptr) {
+            delete Child[i];
+            Child[i] = nullptr;
+        }
     }
 }
 

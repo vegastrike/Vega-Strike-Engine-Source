@@ -374,13 +374,13 @@ Unit::~Unit()
 #endif
     if (pImage->unitwriter) {
         delete pImage->unitwriter;
-        // pImage->unitwriter = nullptr;
+        pImage->unitwriter = nullptr;
     }
     delete pImage;
-    // pImage = nullptr;
 #ifdef DESTRUCTDEBUG
     VS_LOG_AND_FLUSH(trace, (boost::format("%1$d %2$x") % 3 % pImage));
 #endif
+    pImage = nullptr;
     delete pilot;
 #ifdef DESTRUCTDEBUG
     VS_LOG_AND_FLUSH(trace, (boost::format("%1$d") % 5));
@@ -405,9 +405,10 @@ Unit::~Unit()
 #ifdef DESTRUCTDEBUG
     VS_LOG_AND_FLUSH(trace, (boost::format("%1$d") % 0));
 #endif
-    for (unsigned int meshcount = 0; meshcount < meshdata.size(); ++meshcount) {
-        if (meshdata[meshcount]) {
+    for (size_t meshcount = 0; meshcount < meshdata.size(); ++meshcount) {
+        if (meshdata[meshcount] != nullptr) {
             delete meshdata[meshcount];
+            meshdata[meshcount] = nullptr;
         }
     }
     meshdata.clear();

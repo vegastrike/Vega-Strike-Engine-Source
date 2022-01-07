@@ -108,15 +108,22 @@ extern GFXBOOL /*GFXDRVAPI*/ GFXEndList()
 extern void /*GFXDRVAPI*/ GFXDeleteList( int list ) {}
 GFXVertexList::~GFXVertexList()
 {
-    if (offsets)
+    if (offsets != nullptr) {
         delete[] offsets;
-    if (mode)
+        offsets = nullptr;
+    }
+    if (mode != nullptr) {
         delete[] mode;
+        mode = nullptr;
+    }
     if (changed&HAS_COLOR) {
-        if (data.colors)
+        if (data.colors != nullptr) {
             free( data.colors );
-    } else if (data.vertices) {
+            data.colors = nullptr;
+        }
+    } else if (data.vertices != nullptr) {
         free( data.vertices );
+        data.vertices = nullptr;
     }
 }
 

@@ -1810,15 +1810,15 @@ void GameCockpit::Init( const char *file )
 void GameCockpit::Delete() {
     Cockpit::Delete();
 
-    int i;
-    if (text) {
+    if (text != nullptr) {
         delete text;
-        text = NULL;
+        text = nullptr;
     }
-    for (i = 0; i < (int) mesh.size(); ++i) {
-        if (mesh[i])
+    for (size_t i = 0; i < (int) mesh.size(); ++i) {
+        if (mesh[i] != nullptr) {
             delete mesh[i];
-        mesh[i] = NULL;
+            mesh[i] = nullptr;
+        }
     }
     mesh.clear();
     if (soundfile >= 0) {
@@ -1826,37 +1826,37 @@ void GameCockpit::Delete() {
         AUDDeleteSound( soundfile, false );
         soundfile = -1;
     }
-    for (i = 0; i < 4; i++) {
-        /*
-         *  if (Pit[i]) {
-         *  delete Pit[i];
-         *  Pit[i] = NULL;
-         *  }
-         */
-    }
-    for (i = 0; i < UnitImages< void >::NUMGAUGES; i++)
-        if (gauges[i]) {
+    // for (i = 0; i < 4; i++) {
+    //     /*
+    //      *  if (Pit[i]) {
+    //      *  delete Pit[i];
+    //      *  Pit[i] = NULL;
+    //      *  }
+    //      */
+    // }
+    for (int i = 0; i < UnitImages< void >::NUMGAUGES; ++i)
+        if (gauges[i] != nullptr) {
             delete gauges[i];
-            gauges[i] = NULL;
+            gauges[i] = nullptr;
         }
-    if (radarSprites[0]) {
+    if (radarSprites[0] != nullptr) {
         delete radarSprites[0];
-        radarSprites[0] = NULL;
+        radarSprites[0] = nullptr;
     }
-    if (radarSprites[1]) {
+    if (radarSprites[1] != nullptr) {
         delete radarSprites[1];
-        radarSprites[1] = NULL;
+        radarSprites[1] = nullptr;
     }
-    unsigned int j;
-    for (j = 0; j < vdu.size(); j++)
-        if (vdu[j]) {
+    for (size_t j = 0; j < vdu.size(); ++j)
+        if (vdu[j] != nullptr) {
             delete vdu[j];
-            vdu[j] = NULL;
+            vdu[j] = nullptr;
         }
     vdu.clear();
-    for (j = 0; j < Panel.size(); j++) {
+    for (size_t j = 0; j < Panel.size(); ++j) {
         assert( Panel[j] );
         delete Panel[j];
+        Panel[j] = nullptr;
     }
     Panel.clear();
 }

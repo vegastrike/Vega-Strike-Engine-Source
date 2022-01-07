@@ -1060,9 +1060,9 @@ void Unit::LoadRow( CSVRow &row, string modification, bool saved_game)
                                             &polies );
                     }
             }
-            if (xml.rapidmesh) {
+            if (xml.rapidmesh != nullptr) {
                 delete xml.rapidmesh;
-                xml.rapidmesh = NULL;
+                xml.rapidmesh = nullptr;
             }
         }
     }

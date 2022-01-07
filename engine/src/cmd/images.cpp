@@ -44,10 +44,14 @@ UnitImages<BOGUS>::UnitImages()
 template < typename BOGUS > //added by chuck starchaser, to try to break dependency to VSSprite in vegaserver
 UnitImages<BOGUS>::~UnitImages()
 {
-    if (pExplosion)
+    if (pExplosion != nullptr) {
         delete pExplosion;
-    if (pHudImage)
+        pExplosion = nullptr;
+    }
+    if (pHudImage != nullptr) {
         delete pHudImage;
+        pHudImage = nullptr;
+    }
     VSDESTRUCT1
 }
 

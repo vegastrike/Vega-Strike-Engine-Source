@@ -328,12 +328,18 @@ Planet::Planet( QVector x,
 
 Planet::~Planet()
 {
-    if (shine)
+    if (shine != nullptr) {
         delete shine;
-    if (terrain)
+        shine = nullptr;
+    }
+    if (terrain != nullptr) {
         delete terrain;
-    if (atmosphere)
+        terrain = nullptr;
+    }
+    if (atmosphere != nullptr) {
         delete atmosphere;
+        atmosphere = nullptr;
+    }
 #ifdef FIX_TERRAIN
     if (terraintrans) {
         Matrix *tmp = new Matrix();

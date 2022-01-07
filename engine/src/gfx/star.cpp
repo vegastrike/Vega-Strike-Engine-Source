@@ -769,11 +769,17 @@ void SpriteStarVlist::Draw( bool strertch, int whichTexture )
 
 SpriteStarVlist::~SpriteStarVlist()
 {
-    for (int i = 0; i < NUM_ACTIVE_ANIMATIONS; ++i)
-        if (decal[i])
+    for (int i = 0; i < NUM_ACTIVE_ANIMATIONS; ++i) {
+        if (decal[i] != nullptr) {
             delete decal[i];
-    for (int j = 0; j < NUM_ACTIVE_ANIMATIONS; ++j)
-        if (vlist[j])
+            decal[i] = nullptr;
+        }
+    }
+    for (int j = 0; j < NUM_ACTIVE_ANIMATIONS; ++j) {
+        if (vlist[j] != nullptr) {
             delete vlist[j];
+            vlist[j] = nullptr;
+        }
+    }
 }
 

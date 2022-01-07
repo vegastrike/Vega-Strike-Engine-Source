@@ -498,31 +498,36 @@ void GFXVertexList::Draw( enum POLYTYPE *mode, const INDEX index, const int numl
 
 GFXVertexList::~GFXVertexList()
 {
-#ifndef NO_VBO_SUPPORT
-    if (vbo_data) {
-        (*glDeleteBuffersARB_p)(1, (GLuint*) &vbo_data);
-        if (display_list)
-            (*glDeleteBuffersARB_p)(1, (GLuint*) &display_list);
-    } else
-#endif
-    if (display_list) {
+// #ifndef NO_VBO_SUPPORT
+//     if (vbo_data) {
+//         (*glDeleteBuffersARB_p)(1, (GLuint*) &vbo_data);
+//         if (display_list) {
+//             (*glDeleteBuffersARB_p)(1, (GLuint*) &display_list);
+//         }
+//     } else
+// #endif
+    if (vbo_elements != nullptr) {
+        (*glDeleteBuffersARB_p)(1, vbo_elements);
+        vbo_elements = nullptr;
+    }
+    if (display_list != 0) {
         GFXDeleteList( display_list );          //delete dis
         display_list = 0;
     }
-    if (offsets) {
+    if (offsets != nullptr) {
         delete[] offsets;
         offsets = nullptr;
     }
-    if (mode) {
+    if (mode != nullptr) {
         delete[] mode;
         mode = nullptr;
     }
     if (changed&HAS_COLOR) {
-        if (data.colors) {
+        if (data.colors != nullptr) {
             free( data.colors );
             data.colors = nullptr;
         }
-    } else if (data.vertices) {
+    } else if (data.vertices != nullptr) {
         free( data.vertices );
         data.vertices = nullptr;
     }

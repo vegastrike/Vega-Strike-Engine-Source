@@ -66,12 +66,12 @@ static float mymax( float a, float b )
 void DoParticles( QVector pos, float percent, const Vector &basevelocity, const Vector &velocity, float radial_size, float particle_size, int faction )
 {
     static ParticleEmitter sparkles(&particleTrail, "sparkle");
-    
+
     const float *col = FactionUtil::GetSparkColor( faction );
-    
-    sparkles.doParticles( 
-        pos, radial_size, percent, basevelocity, velocity, particle_size, 
-        GFXColor(col[0], col[1], col[2], 1.0f) 
+
+    sparkles.doParticles(
+        pos, radial_size, percent, basevelocity, velocity, particle_size,
+        GFXColor(col[0], col[1], col[2], 1.0f)
     );
 }
 
@@ -82,7 +82,7 @@ void LaunchOneParticle( const Matrix &mat, const Vector &vel, unsigned int seed,
         Vector back = vel;
         back.Normalize();
         back *= -game_options.sparkleabsolutespeed;
-        
+
         collideTrees *colTrees = mush->colTrees;
         if (colTrees) {
             if ( colTrees->usingColTree() ) {
@@ -113,7 +113,7 @@ void LaunchOneParticle( const Matrix &mat, const Vector &vel, unsigned int seed,
     }
 }
 
-HaloSystem::HaloSystem() 
+HaloSystem::HaloSystem()
 {
     VSCONSTRUCT2( 'h' )
 }
@@ -169,9 +169,9 @@ void HaloSystem::Draw( const Matrix &trans,
     }
     if ( maxaccel <= 0 ) maxaccel = 1;
     if ( maxvelocity <= 0 ) maxvelocity = 1;
-    
+
     double sparkledelta = GetElapsedTime() * game_options.halosparklerate;
-    
+
     for ( std::vector< Halo >::iterator i = halo.begin(); i != halo.end(); ++i ) {
         Vector thrustvector = TransformNormal( trans, i->trans.getR() ).Normalize();
         float value, maxvalue, minvalue;
@@ -191,7 +191,7 @@ void HaloSystem::Draw( const Matrix &trans,
         if ( (value > minvalue) && (scale.k > 0) ) {
             Matrix m = trans * i->trans;
             ScaleMatrix( m, Vector( scale.i*i->size.i, scale.j*i->size.j, scale.k*i->size.k*value/maxvalue ) );
-            
+
             float maxfade = minvalue * (1.0 - game_options.percent_halo_fade_in) + maxvalue * game_options.percent_halo_fade_in;
             int alpha = halo_alpha;
             if (value < maxfade) {
@@ -225,13 +225,13 @@ void HaloSystem::Draw( const Matrix &trans,
                 float vpercent = value/maxvalue;
                 i->sparkle_accum += sparkledelta * i->sparkle_rate * vpercent;
                 int spawn = (int) (i->sparkle_accum);
-                
+
                 if (spawn > 0) {
                     i->sparkle_accum -= 1;
-                    
+
                     float rsize = i->mesh->rSize()*scale.i*i->size.i;
                     Vector pvelocity = thrustvector * -rsize * game_options.halosparklespeed * vpercent;
-                    
+
                     DoParticles( m.p, hullpercent, velocity, pvelocity, rsize, rsize * game_options.halosparklescale, faction );
                 }
             } else {
@@ -247,7 +247,9 @@ HaloSystem::~HaloSystem()
 {
     VSDESTRUCT2
     for ( std::vector< Halo >::iterator i = halo.begin(); i != halo.end(); ++i ) {
-        if ( i->mesh )
+        if ( i->mesh != nullptr ) {
             delete i->mesh;
+            i->mesh = nullptr;
+        }
 	}
 }

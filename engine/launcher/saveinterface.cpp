@@ -3,6 +3,7 @@
  *
  * Copyright (C) 2020 pyramid3d, Rune Morling, Stephen G. Tuggy,
  * and other Vega Strike contributors.
+ * Copyright (C) 2021 Stephen G. Tuggy
  *
  * This file is part of Vega Strike.
  *
@@ -198,23 +199,30 @@ struct stupod {
     num=b;
   }
 };
+
 DWORD WINAPI DrawStartupDialog(LPVOID lpParameter) {
-	stupod *s= (stupod*)lpParameter;
-        progress=false;
-        Help ("Please wait while vegastrike loads...","Please wait while vegastrike loads...");
-		int pid=spawnl(P_WAIT,"./vegastrike","./vegastrike",s->num?s->num:(std::string("\"")+s->my_mission+"\"").c_str(),s->num?(std::string("\"")+s->my_mission+"\"").c_str():NULL,NULL);
-		if (pid==-1) {
-			if (chdir("bin")==0) {
-				spawnl(P_WAIT,"./vegastrike","./vegastrike",s->num?s->num:(std::string("\"")+s->my_mission+"\"").c_str(),s->num?(std::string("\"")+s->my_mission+"\"").c_str():NULL,NULL);
-				chdir("..");
-			}
-		}
-        if (s->num)
-          free (s->num);
+    stupod *s= (stupod*)lpParameter;
+    progress=false;
+    Help ("Please wait while vegastrike loads...","Please wait while vegastrike loads...");
+    int pid=spawnl(P_WAIT,"./vegastrike","./vegastrike",s->num?s->num:(std::string("\"")+s->my_mission+"\"").c_str(),s->num?(std::string("\"")+s->my_mission+"\"").c_str():NULL,NULL);
+    if (pid==-1) {
+        if (chdir("bin")==0) {
+            spawnl(P_WAIT,"./vegastrike","./vegastrike",s->num?s->num:(std::string("\"")+s->my_mission+"\"").c_str(),s->num?(std::string("\"")+s->my_mission+"\"").c_str():NULL,NULL);
+            chdir("..");
+        }
+    }
+    if (s->num != nullptr) {
+        free (s->num);
+        s->num = nullptr;
+    }
+    if (s->my_mission != nullptr) {
         free (s->my_mission);
-        delete (s);
-        progress=true;
-	return 0;
+        s->my_mission = nullptr;
+    }
+    delete (s);
+    s = nullptr;
+    progress=true;
+    return 0;
 }
 #endif
 

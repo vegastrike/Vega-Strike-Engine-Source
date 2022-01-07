@@ -1,23 +1,27 @@
 /*
- * Vega Strike
- * Copyright (C) 2001-2002 Daniel Horn
+ * gfxlib_struct.h
  *
- * http://vegastrike.sourceforge.net/
+ * Copyright (C) Daniel Horn
+ * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike contributors.
+ * Copyright (C) 2021 Stephen G. Tuggy
  *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * as published by the Free Software Foundation; either version 2
- * of the License, or (at your option) any later version.
+ * This file is part of Vega Strike.
  *
- * This program is distributed in the hope that it will be useful,
+ * Vega Strike is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * Vega Strike is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+ * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
  */
+
+
 #ifndef _GFXLIB_STRUCT
 #define _GFXLIB_STRUCT
 #include "gfx/vec.h"
@@ -648,7 +652,7 @@ public:
               float exp = 0.0f,
               float cutoff = 180.0f,
               float size = 0.0f );
-    
+
     GFXLight(const GFXLight& other)
     {
         vect[0] = other.vect[0];
@@ -791,7 +795,7 @@ protected:
 ///Num vertices allocated
     const GFXVertex * GetVertex( int index ) const;
     const GFXColorVertex * GetColorVertex( int index ) const;
-    int numVertices;
+    int numVertices{};
 ///Vertices and colors stored
     union VDAT
     {
@@ -811,20 +815,21 @@ protected:
     }
     index;
 ///Array of modes that vertices will be drawn with
-    enum POLYTYPE *mode;
-    bool unique_mode; //See Draw()
+    enum POLYTYPE *mode{};
+    bool unique_mode{}; //See Draw()
 ///Display list number if list is indeed active. 0 otherwise
-    int  display_list; //doubles as vbo_elements
-    int  vbo_data;
+    int  display_list{};
+    unsigned int *vbo_elements{};
+    int  vbo_data{};
 ///number of different mode, drawn lists
-    int  numlists;
+    int  numlists{};
 /**
  * number of vertices in each individual mode.
  * 2 triangles 3 quads and 2 lines would be {6,12,4} as the offsets
  */
-    int *offsets;
+    int *offsets{};
 ///If vertex list has been mutated since last draw.  Low 3 bits store the stride of the index list (if avail). another bit for if color is presnet
-    char changed;
+    char changed{};
 ///copies nonindexed vertices to dst vertex array
     static void VtxCopy( GFXVertexList *thus, GFXVertex *dst, int offset, int howmany );
 ///Copies nonindex colored vertices to dst vertex array

@@ -4,6 +4,7 @@
  * Copyright (C) Daniel Horn
  * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike
  * contributors
+ * Copyright (C) 2021 Stephen G. Tuggy
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -191,16 +192,22 @@ namespace Audio {
             ~FFData()
             {
                 // Free sample buffer
-                if (sampleBufferBase)
+                if (sampleBufferBase != nullptr) {
                     free(sampleBufferBase);
+                    sampleBufferBase = nullptr;
+                }
 
                 // Close the codec
-                if (pCodecCtx)
+                if (pCodecCtx != nullptr) {
                     avcodec_close(pCodecCtx);
+                    pCodecCtx = nullptr;
+                }
 
                 // Close the file
-                if (pFormatCtx)
+                if (pFormatCtx != nullptr) {
                     av_close_input_file(pFormatCtx);
+                    pFormatCtx = nullptr;
+                }
             }
 
             bool saneTimeStamps() const

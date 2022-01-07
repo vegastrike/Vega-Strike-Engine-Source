@@ -4,6 +4,7 @@
  * Copyright (C) 2001-2002 Daniel Horn
  * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike
  * contributors
+ * Copyright (C) 2021 Stephen G. Tuggy
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -292,10 +293,14 @@ void Texture::Load( const char *FileName,
                     enum ADDRESSMODE address_mode,
                     Texture *main )
 {
-    if (data) free( data );
-    if (palette) free( palette );
-    data = NULL;
-    palette = NULL;
+    if (data != nullptr) {
+        free( data );
+        data = nullptr;
+    }
+    if (palette != nullptr) {
+        free( palette );
+        palette = nullptr;
+    }
     ismipmapped = mipmap;
     texture_target     = target;
     image_target       = imagetarget;
@@ -434,10 +439,14 @@ void Texture::Load( const char *FileNameRGB,
                     enum ADDRESSMODE address_mode,
                     Texture *main )
 {
-    if (data) free( data );
-    if (palette) free( palette );
-    data = NULL;
-    palette = NULL;
+    if (data != nullptr) {
+        free( data );
+        data = nullptr;
+    }
+    if (palette != nullptr) {
+        free( palette );
+        palette = nullptr;
+    }
     ismipmapped = mipmap;
 
     this->stage = stage;

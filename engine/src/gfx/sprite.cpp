@@ -193,8 +193,10 @@ void VSSprite::ReadTexture( VSFileSystem::VSFile *f )
 VSSprite::~VSSprite()
 {
     VSDESTRUCT2
-    if (surface != NULL)
+    if (surface != nullptr) {
         delete surface;
+        surface = nullptr;
+    }
 }
 
 void VSSprite::SetST( const float s, const float t )

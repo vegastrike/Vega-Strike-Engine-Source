@@ -169,30 +169,35 @@ void endElement( void *userdata, const XML_Char *nam )
 using namespace GalaxyXML;
 SGalaxy::~SGalaxy()
 {
-    if (subheirarchy)
+    if (subheirarchy != nullptr) {
         delete subheirarchy;
-    subheirarchy = NULL;
+        subheirarchy = nullptr;
+    }
 }
+
 SGalaxy&SGalaxy::operator=( const SGalaxy &g )
 {
     if (g.subheirarchy) {
         SubHeirarchy *temp = new SubHeirarchy( *g.subheirarchy );
-        if (subheirarchy)
+        if (subheirarchy != nullptr) {
             delete subheirarchy;
+        }
         subheirarchy = temp;
-    } else if (subheirarchy) {
+    } else if (subheirarchy != nullptr) {
         delete subheirarchy;
-        subheirarchy = NULL;
+        subheirarchy = nullptr;
     }
     data = g.data;
     return *this;
 }
+
 SGalaxy::SGalaxy( const SGalaxy &g ) : data( g.data )
 {
-    if (g.subheirarchy)
+    if (g.subheirarchy) {
         subheirarchy = new SubHeirarchy( *g.subheirarchy );
-    else
-        subheirarchy = NULL;
+    } else {
+        subheirarchy = nullptr;
+    }
 }
 void SGalaxy::processSystem( const string &sys, const QVector &coords )
 {

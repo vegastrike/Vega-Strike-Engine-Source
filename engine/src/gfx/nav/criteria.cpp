@@ -1,23 +1,27 @@
 /*
- * Vega Strike
+ * criteria.cpp
+ *
  * Copyright (C) 2003 Mike Byron
+ * Copyright (C) Daniel Horn
+ * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike contributors.
+ * Copyright (C) 2021 Stephen G. Tuggy
  *
- * http://vegastrike.sourceforge.net/
+ * This file is part of Vega Strike.
  *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * as published by the Free Software Foundation; either version 2
- * of the License, or (at your option) any later version.
+ * Vega Strike is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 2 of the License, or
+ * (at your option) any later version.
  *
- * This program is distributed in the hope that it will be useful,
+ * Vega Strike is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+ * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
  */
+
 
 #include "vegastrike.h"
 #if defined (_WIN32) && !defined (__CYGWIN__) && !defined (__MINGW32__)
@@ -113,8 +117,10 @@ CriteriaRoot::CriteriaRoot( CriteriaNode *child ) :
 
 CriteriaRoot::~CriteriaRoot()
 {
-    if (m_child)
+    if (m_child != nullptr) {
         delete m_child;
+        m_child = nullptr;
+    }
 }
 
 /////////////////////////////////////////////////////////////////
@@ -189,8 +195,10 @@ CriteriaNot::CriteriaNot( CriteriaNode *child ) :
 
 CriteriaNot::~CriteriaNot()
 {
-    if (m_child)
+    if (m_child != nullptr) {
         delete m_child;
+        m_child = nullptr;
+    }
 }
 
 /////////////////////////////////////////////////////////////////
@@ -241,10 +249,14 @@ vector< CriteriaNode* >CriteriaBinaryOperator::getChildren() const
 
 CriteriaBinaryOperator::~CriteriaBinaryOperator()
 {
-    if (m_left)
+    if (m_left != nullptr) {
         delete m_left;
-    if (m_right)
+        m_left = nullptr;
+    }
+    if (m_right != nullptr) {
         delete m_right;
+        m_right = nullptr;
+    }
 }
 
 void CriteriaBinaryOperator::replaceChild( CriteriaNode *child, CriteriaNode *replacement )

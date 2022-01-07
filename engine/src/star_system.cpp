@@ -146,11 +146,15 @@ StarSystem::~StarSystem()
         _Universe->activeStarSystem()->SwapOut();
     _Universe->pushActiveStarSystem( this );
     ClientServerSetLightContext( light_context );
-    for (un_iter iter = draw_list.createIterator();!iter.isDone(); ++iter)
+    for (un_iter iter = draw_list.createIterator();!iter.isDone(); ++iter) {
         (*iter)->Kill( false );
+    }
     //if the next line goes ANYWHERE else Vega Strike will CRASH!!!!!
     //DO NOT MOVE THIS LINE! IT MUST STAY
-    if (collide_table) delete collide_table;
+    if (collide_table != nullptr) {
+        delete collide_table;
+        collide_table = nullptr;
+    }
     _Universe->popActiveStarSystem();
     vector< StarSystem* >activ;
     while ( _Universe->getNumActiveStarSystem() ) {

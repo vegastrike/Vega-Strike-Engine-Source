@@ -37,8 +37,10 @@
 
 Atmosphere::SunBox::~SunBox()
 {
-    if (sunbox)
+    if (sunbox != nullptr) {
         delete sunbox;
+        sunbox = nullptr;
+    }
 }
 
 void Atmosphere::setArray( float c0[4], const GFXColor &c1 )
