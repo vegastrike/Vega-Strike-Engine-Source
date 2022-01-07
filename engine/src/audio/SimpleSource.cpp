@@ -4,6 +4,7 @@
  * Copyright (C) Daniel Horn
  * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike
  * contributors
+ * Copyright (C) 2022 Stephen G. Tuggy
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -23,6 +24,7 @@
  * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+
 //
 // C++ Implementation: Audio::SimpleSource
 //
@@ -31,53 +33,56 @@
 
 namespace Audio {
 
-    SimpleSource::~SimpleSource()
-    {
-    }
+SimpleSource::~SimpleSource()
+{
+}
 
-    SimpleSource::SimpleSource(SharedPtr<Sound> sound, bool looping) :
+SimpleSource::SimpleSource(SharedPtr<Sound> sound, bool looping) :
         Source(sound, looping),
         playing(false),
         scene(0)
-    {
+{
+}
+
+void SimpleSource::notifySceneAttached(SimpleScene *scn)
+{
+    scene = scn;
+}
+
+SimpleScene *SimpleSource::getScene() const
+{
+    return scene;
+}
+
+void SimpleSource::startPlayingImpl(Timestamp start)
+{
+    // If it's playing, must stop and restart - cannot simply play again.
+    if (isPlaying()) {
+        stopPlaying();
     }
 
-    void SimpleSource::notifySceneAttached(SimpleScene *scn)
-    {
-        scene = scn;
+    setLastKnownPlayingTime(start);
+    playing = true;
+
+    if (getScene()) {
+        getScene()->notifySourcePlaying(shared_from_this(), true);
     }
+}
 
-    SimpleScene* SimpleSource::getScene() const
-    {
-        return scene;
-    }
+void SimpleSource::stopPlayingImpl()
+{
+    if (isPlaying()) {
+        playing = false;
 
-    void SimpleSource::startPlayingImpl(Timestamp start)
-    {
-        // If it's playing, must stop and restart - cannot simply play again.
-        if (isPlaying())
-            stopPlaying();
-
-        setLastKnownPlayingTime(start);
-        playing = true;
-
-        if (getScene())
-            getScene()->notifySourcePlaying(shared_from_this(), true);
-    }
-
-    void SimpleSource::stopPlayingImpl()
-    {
-        if (isPlaying()) {
-            playing = false;
-
-            if (getScene())
-                getScene()->notifySourcePlaying(shared_from_this(), false);
+        if (getScene()) {
+            getScene()->notifySourcePlaying(shared_from_this(), false);
         }
     }
+}
 
-    bool SimpleSource::isPlayingImpl() const
-    {
-        return playing;
-    }
+bool SimpleSource::isPlayingImpl() const
+{
+    return playing;
+}
 
 };

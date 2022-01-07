@@ -4,6 +4,7 @@
  * Copyright (C) Daniel Horn
  * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike
  * contributors
+ * Copyright (C) 2022 Stephen G. Tuggy
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -23,6 +24,7 @@
  * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+
 //
 // C++ Interface: Audio::Codec
 //
@@ -33,163 +35,172 @@
 
 namespace Audio {
 
-    template<typename T> class TVector3 {
-    public:
-        T x,y,z;
+template<typename T>
+class TVector3 {
+public:
+    T x, y, z;
 
-        TVector3() {}
-        TVector3(T xx, T yy, T zz) : x(xx), y(yy), z(zz) {}
-        explicit TVector3(T s) : x(s), y(s), z(s) {}
+    TVector3()
+    {
+    }
+    TVector3(T xx, T yy, T zz) : x(xx), y(yy), z(zz)
+    {
+    }
+    explicit TVector3(T s) : x(s), y(s), z(s)
+    {
+    }
 
-        template<typename Y>
-        TVector3(const TVector3<Y> &other) : x(T(other.x)), y(T(other.y)), z(T(other.z)) {}
+    template<typename Y>
+    TVector3(const TVector3<Y> &other) : x(T(other.x)), y(T(other.y)), z(T(other.z))
+    {
+    }
 
-        template<typename Y>
-        TVector3<T>& operator=(const TVector3<Y> &other)
-        {
-            x = T(other.x);
-            y = T(other.y);
-            z = T(other.z);
-            return *this;
-        }
+    template<typename Y>
+    TVector3<T> &operator=(const TVector3<Y> &other)
+    {
+        x = T(other.x);
+        y = T(other.y);
+        z = T(other.z);
+        return *this;
+    }
 
-        TVector3<T>& operator+=(const TVector3<T> &other)
-        {
-            x += other.x;
-            y += other.y;
-            z += other.z;
-            return *this;
-        }
+    TVector3<T> &operator+=(const TVector3<T> &other)
+    {
+        x += other.x;
+        y += other.y;
+        z += other.z;
+        return *this;
+    }
 
-        TVector3<T>& operator-=(const TVector3<T> &other)
-        {
-            x -= other.x;
-            y -= other.y;
-            z -= other.z;
-            return *this;
-        }
+    TVector3<T> &operator-=(const TVector3<T> &other)
+    {
+        x -= other.x;
+        y -= other.y;
+        z -= other.z;
+        return *this;
+    }
 
-        TVector3<T>& operator*=(const TVector3<T> &other)
-        {
-            x *= other.x;
-            y *= other.y;
-            z *= other.z;
-            return *this;
-        }
+    TVector3<T> &operator*=(const TVector3<T> &other)
+    {
+        x *= other.x;
+        y *= other.y;
+        z *= other.z;
+        return *this;
+    }
 
-        TVector3<T>& operator*=(T t)
-        {
-            x *= t;
-            y *= t;
-            z *= t;
-            return *this;
-        }
+    TVector3<T> &operator*=(T t)
+    {
+        x *= t;
+        y *= t;
+        z *= t;
+        return *this;
+    }
 
-        TVector3<T>& operator/=(const TVector3<T> &other)
-        {
-            x /= other.x;
-            y /= other.y;
-            z /= other.z;
-            return *this;
-        }
+    TVector3<T> &operator/=(const TVector3<T> &other)
+    {
+        x /= other.x;
+        y /= other.y;
+        z /= other.z;
+        return *this;
+    }
 
-        TVector3<T>& operator/=(T t)
-        {
-            x /= t;
-            y /= t;
-            z /= t;
-            return *this;
-        }
+    TVector3<T> &operator/=(T t)
+    {
+        x /= t;
+        y /= t;
+        z /= t;
+        return *this;
+    }
 
-        TVector3<T> operator+(const TVector3<T> &other) const
-        {
-            return TVector3<T>(x+other.x, y+other.y, z+other.z);
-        }
+    TVector3<T> operator+(const TVector3<T> &other) const
+    {
+        return TVector3<T>(x + other.x, y + other.y, z + other.z);
+    }
 
-        TVector3<T> operator-(const TVector3<T> &other) const
-        {
-            return TVector3<T>(x-other.x, y-other.y, z-other.z);
-        }
+    TVector3<T> operator-(const TVector3<T> &other) const
+    {
+        return TVector3<T>(x - other.x, y - other.y, z - other.z);
+    }
 
-        TVector3<T> operator-() const
-        {
-            return TVector3<T>(-x, -y, -z);
-        }
+    TVector3<T> operator-() const
+    {
+        return TVector3<T>(-x, -y, -z);
+    }
 
-        TVector3<T> operator*(const TVector3<T> &other) const
-        {
-            return TVector3<T>(x*other.x, y*other.y, z*other.z);
-        }
+    TVector3<T> operator*(const TVector3<T> &other) const
+    {
+        return TVector3<T>(x * other.x, y * other.y, z * other.z);
+    }
 
-        TVector3<T> operator/(const TVector3<T> &other) const
-        {
-            return TVector3<T>(x/other.x, y/other.y, z/other.z);
-        }
+    TVector3<T> operator/(const TVector3<T> &other) const
+    {
+        return TVector3<T>(x / other.x, y / other.y, z / other.z);
+    }
 
-        TVector3<T> operator*(T t) const
-        {
-            return TVector3<T>(x*t, y*t, z*t);
-        }
+    TVector3<T> operator*(T t) const
+    {
+        return TVector3<T>(x * t, y * t, z * t);
+    }
 
-        TVector3<T> operator/(T t) const
-        {
-            return TVector3<T>(x/t, y/t, z/t);
-        }
+    TVector3<T> operator/(T t) const
+    {
+        return TVector3<T>(x / t, y / t, z / t);
+    }
 
-        T dot(TVector3<T> other) const
-        {
-            return x*other.x + y*other.y + z*other.z;
-        }
+    T dot(TVector3<T> other) const
+    {
+        return x * other.x + y * other.y + z * other.z;
+    }
 
-        T normSquared() const
-        {
-            return dot(*this);
-        }
+    T normSquared() const
+    {
+        return dot(*this);
+    }
 
-        T norm() const
-        {
-            return sqrt(normSquared());
-        }
+    T norm() const
+    {
+        return sqrt(normSquared());
+    }
 
-        T lengthSquared() const
-        {
-            return normSquared();
-        }
+    T lengthSquared() const
+    {
+        return normSquared();
+    }
 
-        T length() const
-        {
-            return norm();
-        }
+    T length() const
+    {
+        return norm();
+    }
 
-        T distanceSquared(const TVector3<T> &other) const
-        {
-            return (other - *this).normSquared();
-        }
+    T distanceSquared(const TVector3<T> &other) const
+    {
+        return (other - *this).normSquared();
+    }
 
-        T distance(const TVector3<T> &other) const
-        {
-            return sqrt(distanceSquared(other));
-        }
+    T distance(const TVector3<T> &other) const
+    {
+        return sqrt(distanceSquared(other));
+    }
 
-        TVector3<T> cross(const TVector3<T> &v) const
-        {
-            return TVector3<T>(
+    TVector3<T> cross(const TVector3<T> &v) const
+    {
+        return TVector3<T>(
                 y * v.z - z * v.y,
                 z * v.x - x * v.z,
                 x * v.y - y * v.x
-            );
-        }
+        );
+    }
 
-        void normalize()
-        {
-            *this /= norm();
-        }
+    void normalize()
+    {
+        *this /= norm();
+    }
 
-        TVector3<T> normalized() const
-        {
-            return *this / norm();
-        }
-    };
+    TVector3<T> normalized() const
+    {
+        return *this / norm();
+    }
+};
 
 };
 

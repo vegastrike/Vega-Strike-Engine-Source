@@ -4,6 +4,7 @@
  * Copyright (C) Daniel Horn
  * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike
  * contributors
+ * Copyright (C) 2022 Stephen G. Tuggy
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -23,6 +24,7 @@
  * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+
 //
 // C++ Implementation: Audio::OpenALRenderableListener
 //
@@ -35,31 +37,31 @@
 
 namespace Audio {
 
-    OpenALRenderableListener::OpenALRenderableListener(Listener *listener)
+OpenALRenderableListener::OpenALRenderableListener(Listener *listener)
         : RenderableListener(listener)
-    {
-    }
+{
+}
 
-    OpenALRenderableListener::~OpenALRenderableListener()
-    {
-    }
+OpenALRenderableListener::~OpenALRenderableListener()
+{
+}
 
-    void OpenALRenderableListener::updateImpl(int flags)
-    {
-        if (flags & UPDATE_LOCATION) {
-            const Vector3 pos(getListener()->getPosition()); // no option but to cast it down to float :(
-            const Vector3 vel(getListener()->getVelocity());
-            const Vector3 at (getListener()->getAtDirection());
-            const Vector3 up (getListener()->getUpDirection());
-            ALfloat ori[] = { at.x, at.y, at.z, up.x, up.y, up.z };
+void OpenALRenderableListener::updateImpl(int flags)
+{
+    if (flags & UPDATE_LOCATION) {
+        const Vector3 pos(getListener()->getPosition()); // no option but to cast it down to float :(
+        const Vector3 vel(getListener()->getVelocity());
+        const Vector3 at(getListener()->getAtDirection());
+        const Vector3 up(getListener()->getUpDirection());
+        ALfloat ori[] = {at.x, at.y, at.z, up.x, up.y, up.z};
 
-            alListener3f(AL_POSITION, pos.x, pos.y, pos.z);
-            alListener3f(AL_VELOCITY, vel.x, vel.y, vel.z);
-            alListenerfv(AL_ORIENTATION, ori);
-        }
-        if (flags & UPDATE_ATTRIBUTES) {
-            alListenerf (AL_GAIN, getListener()->getGain());
-        }
+        alListener3f(AL_POSITION, pos.x, pos.y, pos.z);
+        alListener3f(AL_VELOCITY, vel.x, vel.y, vel.z);
+        alListenerfv(AL_ORIENTATION, ori);
     }
+    if (flags & UPDATE_ATTRIBUTES) {
+        alListenerf(AL_GAIN, getListener()->getGain());
+    }
+}
 
 };

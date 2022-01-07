@@ -4,6 +4,7 @@
  * Copyright (C) Daniel Horn
  * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike
  * contributors
+ * Copyright (C) 2022 Stephen G. Tuggy
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -27,6 +28,7 @@
 // C++ Implementation: Audio::Stream
 //
 
+
 #include "Stream.h"
 
 #include <utility>
@@ -36,64 +38,66 @@
 
 namespace Audio {
 
-    using std::min;
+using std::min;
 
-    Stream::Stream(const std::string& path)
-    {
+Stream::Stream(const std::string &path)
+{
+}
+
+Stream::~Stream()
+{
+}
+
+double Stream::getLength()
+{
+    return getLengthImpl();
+}
+
+double Stream::getPosition() const
+{
+    return getPositionImpl();
+}
+
+void Stream::seek(double position)
+{
+    seekImpl(position);
+}
+
+unsigned int Stream::read(void *buffer, unsigned int bufferSize)
+{
+    void *rbuffer;
+    void *rbufferEnd;
+    unsigned int rbufferSize;
+    unsigned int rode = 0;
+
+    try {
+        getBufferImpl(rbuffer, rbufferSize);
+    } catch (const NoBufferException &) {
+        nextBufferImpl();
+        getBufferImpl(rbuffer, rbufferSize);
+        curBufferPos = rbuffer;
     }
+    rbufferEnd = ((char *) rbuffer) + rbufferSize;
 
-    Stream::~Stream()
-    {
-    }
-
-    double Stream::getLength()
-    {
-        return getLengthImpl();
-    }
-
-    double Stream::getPosition() const
-    {
-        return getPositionImpl();
-    }
-
-    void Stream::seek(double position)
-    {
-        seekImpl(position);
-    }
-
-    unsigned int Stream::read(void *buffer, unsigned int bufferSize)
-    {
-        void *rbuffer;
-        void *rbufferEnd;
-        unsigned int rbufferSize;
-        unsigned int rode = 0;
-
-        try {
-            getBufferImpl(rbuffer, rbufferSize);
-        } catch (const NoBufferException&) {
+    while (bufferSize > 0) {
+        if (!((curBufferPos >= rbuffer) && (curBufferPos < rbufferEnd))) {
             nextBufferImpl();
             getBufferImpl(rbuffer, rbufferSize);
             curBufferPos = rbuffer;
-        }
-        rbufferEnd = ((char*)rbuffer) + rbufferSize;
-
-        while (bufferSize > 0) {
-            if (!((curBufferPos >= rbuffer) && (curBufferPos < rbufferEnd))) {
-                nextBufferImpl();
-                getBufferImpl(rbuffer, rbufferSize);
-                curBufferPos = rbuffer;
-                rbufferEnd = ((char*)rbuffer) + rbufferSize;
-            }
-
-            size_t remaining = min( bufferSize, (unsigned int)((char*)rbufferEnd - (char*)curBufferPos) ); //is there no std::ptrdiff?
-            memcpy(buffer, curBufferPos, remaining);
-            buffer = (void*)((char*)buffer + remaining);
-            curBufferPos = (void*)((char*)curBufferPos + remaining);
-            bufferSize -= remaining;
-            rode += remaining;
+            rbufferEnd = ((char *) rbuffer) + rbufferSize;
         }
 
-        return rode;
+        size_t remaining = min(bufferSize,
+                               (unsigned int) ((char *) rbufferEnd
+                                       - (char *) curBufferPos)); //is there no std::ptrdiff?
+        memcpy(buffer, curBufferPos, remaining);
+        buffer = (void *) ((char *) buffer + remaining);
+        curBufferPos = (void *) ((char *) curBufferPos + remaining);
+        bufferSize -= remaining;
+        rode += remaining;
     }
+
+    return rode;
+}
 
 };

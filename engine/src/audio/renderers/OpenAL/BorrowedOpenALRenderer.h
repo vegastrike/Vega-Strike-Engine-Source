@@ -4,6 +4,7 @@
  * Copyright (C) Daniel Horn
  * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike
  * contributors
+ * Copyright (C) 2022 Stephen G. Tuggy
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -23,6 +24,7 @@
  * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+
 //
 // C++ Interface: Audio::SceneManager
 //
@@ -34,43 +36,40 @@
 
 namespace Audio {
 
+/**
+ * Hooks up the renderer to an already-existing OpenAL context
+ *
+ * @remarks If you're already using OpenAL in a standard fashion, you can
+ *      still benefit from the scene graph provided by the Audio library
+ *      by initializing the OpenAL renderer through this method.
+ *          The default constructor will assume the current OpenAL context
+ *      has been previously initialized and hook up to that context.
+ */
+class BorrowedOpenALRenderer : public OpenALRenderer {
+public:
     /**
      * Hooks up the renderer to an already-existing OpenAL context
      *
      * @remarks If you're already using OpenAL in a standard fashion, you can
      *      still benefit from the scene graph provided by the Audio library
      *      by initializing the OpenAL renderer through this method.
-     *          The default constructor will assume the current OpenAL context
-     *      has been previously initialized and hook up to that context.
+     *          If any parameter was passed as null, it will be retrieved
+     *      from the current OpenAL context (which must have been previously
+     *      initialized)
+     *
+     * @param device The OpenAL device associated to this context
+     * @param context The OpenAL context associated to this renderer
      */
-    class BorrowedOpenALRenderer : public OpenALRenderer
-    {
-    public:
-        /**
-         * Hooks up the renderer to an already-existing OpenAL context
-         *
-         * @remarks If you're already using OpenAL in a standard fashion, you can
-         *      still benefit from the scene graph provided by the Audio library
-         *      by initializing the OpenAL renderer through this method.
-         *          If any parameter was passed as null, it will be retrieved
-         *      from the current OpenAL context (which must have been previously
-         *      initialized)
-         *
-         * @param device The OpenAL device associated to this context
-         * @param context The OpenAL context associated to this renderer
-         */
-        BorrowedOpenALRenderer(ALCdevice *device = 0, ALCcontext *context = 0);
+    BorrowedOpenALRenderer(ALCdevice *device = 0, ALCcontext *context = 0);
 
-        ~BorrowedOpenALRenderer();
+    ~BorrowedOpenALRenderer();
 
+    virtual void setOutputFormat(const Format &format);
 
-        virtual void setOutputFormat(const Format &format);
-
-    protected:
-        virtual void checkContext();
-    };
-
+protected:
+    virtual void checkContext();
 };
 
+};
 
 #endif//__AUDIO_BORROWED_OPENAL_RENDERER_H__INCLUDED__

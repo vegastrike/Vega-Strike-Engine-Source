@@ -4,6 +4,7 @@
  * Copyright (C) Daniel Horn
  * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike
  * contributors
+ * Copyright (C) 2022 Stephen G. Tuggy
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -23,6 +24,7 @@
  * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+
 //
 // C++ Implementation: Audio::TemplateManager
 //
@@ -37,43 +39,44 @@
 
 namespace Audio {
 
-    Timestamp getGameTime()
-    {
-        return Timestamp(UniverseUtil::GetGameTime());
+Timestamp getGameTime()
+{
+    return Timestamp(UniverseUtil::GetGameTime());
+}
+
+Timestamp getRealTime()
+{
+    return Timestamp(realTime());
+}
+
+Scalar estimateGain(const Source &src, const Listener &listener)
+{
+    // Base priority is source gain
+    Scalar gain = src.getGain();
+
+    // Account for distance attenuation
+    LScalar distance = listener.getPosition().distance(src.getPosition())
+            - listener.getRadius()
+            - src.getRadius();
+    LScalar ref = listener.getRadius();
+    LScalar rolloff = listener.getRadius() / src.getRadius();
+    gain *= (distance <= 0) ? 1.f : float(ref / (ref + rolloff * distance));
+
+    // Account for dispersion/sensing angle limitations
+    Scalar cosangle = listener.getAtDirection().dot(src.getDirection());
+    if (cosangle < listener.getCosAngleRange().min) {
+        gain *= listener.getCosAngleRange().phase(cosangle);
+    }
+    if (cosangle < src.getCosAngleRange().min) {
+        gain *= src.getCosAngleRange().phase(cosangle);
     }
 
-    Timestamp getRealTime()
-    {
-        return Timestamp(realTime());
-    }
+    return gain;
+}
 
-
-    Scalar estimateGain(const Source &src, const Listener &listener)
-    {
-        // Base priority is source gain
-        Scalar gain = src.getGain();
-
-        // Account for distance attenuation
-        LScalar distance = listener.getPosition().distance(src.getPosition())
-                         - listener.getRadius()
-                         - src.getRadius();
-        LScalar ref = listener.getRadius();
-        LScalar rolloff = listener.getRadius() / src.getRadius();
-        gain *= (distance <= 0) ? 1.f : float(ref / (ref + rolloff * distance));
-
-        // Account for dispersion/sensing angle limitations
-        Scalar cosangle = listener.getAtDirection().dot( src.getDirection() );
-        if (cosangle < listener.getCosAngleRange().min)
-            gain *= listener.getCosAngleRange().phase(cosangle);
-        if (cosangle < src.getCosAngleRange().min)
-            gain *= src.getCosAngleRange().phase(cosangle);
-
-        return gain;
-    }
-
-    void sleep(unsigned int ms)
-    {
-        micro_sleep(ms * 1000);
-    }
+void sleep(unsigned int ms)
+{
+    micro_sleep(ms * 1000);
+}
 };
 

@@ -4,6 +4,7 @@
  * Copyright (C) Daniel Horn
  * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike
  * contributors
+ * Copyright (C) 2022 Stephen G. Tuggy
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -23,6 +24,7 @@
  * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+
 //
 // C++ Interface: Audio::Source
 //
@@ -30,10 +32,9 @@
 #define __AUDIO_TEST_H__INCLUDED__
 
 namespace Audio {
-    namespace Test {
-        int main(int argc, char **argv);
-    };
+namespace Test {
+int main(int argc, char **argv);
 };
-
+};
 
 #endif//__AUDIO_TEST_H__INCLUDED__

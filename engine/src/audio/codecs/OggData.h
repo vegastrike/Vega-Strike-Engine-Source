@@ -4,6 +4,7 @@
  * Copyright (C) Daniel Horn
  * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike
  * contributors
+ * Copyright (C) 2022 Stephen G. Tuggy
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -23,6 +24,7 @@
  * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+
 //
 // C++ implementation: Audio::__impl::OggData
 //
@@ -36,22 +38,22 @@
 
 namespace Audio {
 
-    namespace __impl {
-        struct OggData {
-            OggVorbis_File vorbisFile;
-            ov_callbacks callbacks;
-            int streamIndex;
+namespace __impl {
+struct OggData {
+    OggVorbis_File vorbisFile;
+    ov_callbacks callbacks;
+    int streamIndex;
 
-            static size_t read_func(void *ptr, size_t size, size_t nmemb, void *datasource);
-            static int seek_func(void *datasource, ogg_int64_t offset, int whence);
-            static int close_func(void *datasource);
-            static long tell_func(void *datasource);
-            static int nativeIsLsb();
+    static size_t read_func(void *ptr, size_t size, size_t nmemb, void *datasource);
+    static int seek_func(void *datasource, ogg_int64_t offset, int whence);
+    static int close_func(void *datasource);
+    static long tell_func(void *datasource);
+    static int nativeIsLsb();
 
-            OggData(VSFileSystem::VSFile &file, Format &fmt, int streamIdx, bool test = false);
-            ~OggData();
-        };
-    }
+    OggData(VSFileSystem::VSFile &file, Format &fmt, int streamIdx, bool test = false);
+    ~OggData();
+};
+}
 
 };
 

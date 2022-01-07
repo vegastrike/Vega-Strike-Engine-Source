@@ -4,6 +4,7 @@
  * Copyright (C) Daniel Horn
  * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike
  * contributors
+ * Copyright (C) 2022 Stephen G. Tuggy
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -23,6 +24,7 @@
  * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+
 //
 // C++ Interface: Audio::SourceListener
 //
@@ -35,152 +37,168 @@
 
 namespace Audio {
 
-    // Forward declarations
+// Forward declarations
 
-    class Source;
+class Source;
 
+/**
+ * Source event listener abstract class
+ *
+ * @remarks This is the interface clients must implement to be able to
+ *      receive event notifications from audio sources.
+ */
+class SourceListener {
+protected:
+    struct {
+        int attach: 1;
+        int play: 1;
+        int update: 1;
+    } events;
+
+    SourceListener()
+    {
+        // Want everything
+        events.attach =
+        events.update =
+        events.play = 1;
+    }
+
+public:
+    virtual ~SourceListener()
+    {
+    }
+
+    bool wantAttachEvents() const
+    {
+        return events.attach != 0;
+    }
+    bool wantPlayEvents() const
+    {
+        return events.play != 0;
+    }
+    bool wantUpdateEvents() const
+    {
+        return events.update != 0;
+    }
 
     /**
-     * Source event listener abstract class
-     *
-     * @remarks This is the interface clients must implement to be able to
-     *      receive event notifications from audio sources.
+     * Called when the source is ABOUT TO be attached or detached
+     * @param source the source to be attached or detached
+     * @param detach if true, it's about to be detached. If false,
+     *      it's about to be attached
+     * @remarks When reattaching, only the attach call is
+     *      guaranteed to be issued. The detach may be left
+     *      implied, or it may be explicitly performed.
+     *      In any case, no event may happen between pre & post
+     *      calls.
      */
-    class SourceListener
-    {
-    protected:
-        struct {
-            int attach : 1;
-            int play : 1;
-            int update : 1;
-        } events;
-
-        SourceListener()
-        {
-            // Want everything
-            events.attach =
-            events.update =
-            events.play = 1;
-        }
-
-    public:
-        virtual ~SourceListener() { }
-
-        bool wantAttachEvents() const { return events.attach != 0; }
-        bool wantPlayEvents() const { return events.play != 0; }
-        bool wantUpdateEvents() const { return events.update != 0; }
-
-        /**
-         * Called when the source is ABOUT TO be attached or detached
-         * @param source the source to be attached or detached
-         * @param detach if true, it's about to be detached. If false,
-         *      it's about to be attached
-         * @remarks When reattaching, only the attach call is
-         *      guaranteed to be issued. The detach may be left
-         *      implied, or it may be explicitly performed.
-         *      In any case, no event may happen between pre & post
-         *      calls.
-         */
-        virtual void onPreAttach(Source &source, bool detach) = 0;
-
-        /**
-         * Called after the source has been attached or detached
-         * @param source the source to be attached or detached
-         * @param detach if true, it's been detached. If false,
-         *      it's been attached
-         */
-        virtual void onPostAttach(Source &source, bool detach) = 0;
-
-
-        /**
-         * Called when the source is ABOUT TO be updated.
-         * @param source the source to be updated
-         * @param updateFlags the level of update the source will
-         *      receive. See RenderableSource::UpdateFlags
-         * @see RenderableSource::UpdateFlags
-         */
-        virtual void onUpdate(Source &source, int updateFlags) = 0;
-
-        /**
-         * Called when the source is ABOUT TO be played (rendered) or stopped
-         * @param source the source to be played or stopped
-         * @param detach if true, it's about to be played. If false,
-         *      it's about to be stopped
-         */
-        virtual void onPrePlay(Source &source, bool stop) = 0;
-
-        /**
-         * Called after the source has been played or stopped
-         * @param source the source to be played or stopped
-         * @param detach if true, it's been played. If false,
-         *      it's been stopped
-         */
-        virtual void onPostPlay(Source &source, bool stop) = 0;
-
-        /**
-         * Called after the source has been stopped due to
-         * end-of-stream conditions.
-         * It falls on the "play" event category.
-         * @param source the source that reached its end
-         */
-        virtual void onEndOfStream(Source &source) = 0;
-    };
-
+    virtual void onPreAttach(Source &source, bool detach) = 0;
 
     /**
-     * Source update event listener abstract class
-     *
-     * @remarks This is the interface clients must implement to be able to
-     *      receive update notifications from audio sources.
-     *          This class only accepts updates (by default, it can be
-     *      overriden, but you should not - use SourceListener instead).
+     * Called after the source has been attached or detached
+     * @param source the source to be attached or detached
+     * @param detach if true, it's been detached. If false,
+     *      it's been attached
      */
-    class UpdateSourceListener : public SourceListener
+    virtual void onPostAttach(Source &source, bool detach) = 0;
+
+    /**
+     * Called when the source is ABOUT TO be updated.
+     * @param source the source to be updated
+     * @param updateFlags the level of update the source will
+     *      receive. See RenderableSource::UpdateFlags
+     * @see RenderableSource::UpdateFlags
+     */
+    virtual void onUpdate(Source &source, int updateFlags) = 0;
+
+    /**
+     * Called when the source is ABOUT TO be played (rendered) or stopped
+     * @param source the source to be played or stopped
+     * @param detach if true, it's about to be played. If false,
+     *      it's about to be stopped
+     */
+    virtual void onPrePlay(Source &source, bool stop) = 0;
+
+    /**
+     * Called after the source has been played or stopped
+     * @param source the source to be played or stopped
+     * @param detach if true, it's been played. If false,
+     *      it's been stopped
+     */
+    virtual void onPostPlay(Source &source, bool stop) = 0;
+
+    /**
+     * Called after the source has been stopped due to
+     * end-of-stream conditions.
+     * It falls on the "play" event category.
+     * @param source the source that reached its end
+     */
+    virtual void onEndOfStream(Source &source) = 0;
+};
+
+/**
+ * Source update event listener abstract class
+ *
+ * @remarks This is the interface clients must implement to be able to
+ *      receive update notifications from audio sources.
+ *          This class only accepts updates (by default, it can be
+ *      overriden, but you should not - use SourceListener instead).
+ */
+class UpdateSourceListener : public SourceListener {
+public:
+    UpdateSourceListener()
     {
-    public:
-        UpdateSourceListener()
-        {
-            // Just updates
-            events.attach =
-            events.play = 0;
-            events.update = 1;
-        }
+        // Just updates
+        events.attach =
+        events.play = 0;
+        events.update = 1;
+    }
 
-        /**
-         * No-op implementation to apease the compiler.
-         * @remarks This will never be called since attach events will be
-         *      disabled by the constructor.
-         */
-        virtual void onPreAttach(Source &source, bool detach) {};
-
-        /**
-         * No-op implementation to apease the compiler.
-         * @remarks This will never be called since attach events will be
-         *      disabled by the constructor.
-         */
-        virtual void onPostAttach(Source &source, bool detach) {};
-
-        /**
-         * No-op implementation to apease the compiler.
-         * @remarks This will never be called since play events will be
-         *      disabled by the constructor.
-         */
-        virtual void onPrePlay(Source &source, bool stop) {};
-
-        /**
-         * No-op implementation to apease the compiler.
-         * @remarks This will never be called since play events will be
-         *      disabled by the constructor.
-         */
-        virtual void onPostPlay(Source &source, bool stop) {};
-
-        /**
-         * No-op implementation to apease the compiler.
-         * @remarks This will never be called since play events will be
-         *      disabled by the constructor.
-         */
-        virtual void onEndOfStream(Source &source) {};
+    /**
+     * No-op implementation to apease the compiler.
+     * @remarks This will never be called since attach events will be
+     *      disabled by the constructor.
+     */
+    virtual void onPreAttach(Source &source, bool detach)
+    {
     };
+
+    /**
+     * No-op implementation to apease the compiler.
+     * @remarks This will never be called since attach events will be
+     *      disabled by the constructor.
+     */
+    virtual void onPostAttach(Source &source, bool detach)
+    {
+    };
+
+    /**
+     * No-op implementation to apease the compiler.
+     * @remarks This will never be called since play events will be
+     *      disabled by the constructor.
+     */
+    virtual void onPrePlay(Source &source, bool stop)
+    {
+    };
+
+    /**
+     * No-op implementation to apease the compiler.
+     * @remarks This will never be called since play events will be
+     *      disabled by the constructor.
+     */
+    virtual void onPostPlay(Source &source, bool stop)
+    {
+    };
+
+    /**
+     * No-op implementation to apease the compiler.
+     * @remarks This will never be called since play events will be
+     *      disabled by the constructor.
+     */
+    virtual void onEndOfStream(Source &source)
+    {
+    };
+};
 
 };
 

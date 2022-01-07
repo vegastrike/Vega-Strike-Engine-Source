@@ -4,6 +4,7 @@
  * Copyright (C) Daniel Horn
  * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike
  * contributors
+ * Copyright (C) 2022 Stephen G. Tuggy
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -35,15 +36,15 @@
 #define clearAlError() Audio::__impl::OpenAL::_clearAlError();
 
 namespace Audio {
-    namespace __impl {
-        namespace OpenAL {
+namespace __impl {
+namespace OpenAL {
 
-            void _checkAlErrorAt(ALenum error, const char *filename, int lineno);
-            void _clearAlError();
-            ALenum asALFormat(const Format &format);
+void _checkAlErrorAt(ALenum error, const char *filename, int lineno);
+void _clearAlError();
+ALenum asALFormat(const Format &format);
 
-        }
-    }
+}
+}
 }
 
 #endif//__OPENAL_HELPERS_H__INCLUDED__

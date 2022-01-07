@@ -4,6 +4,7 @@
  * Copyright (C) Daniel Horn
  * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike
  * contributors
+ * Copyright (C) 2022 Stephen G. Tuggy
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -23,6 +24,7 @@
  * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+
 //
 // C++ Interface: Audio::OpenALRenderableListener
 //
@@ -36,24 +38,23 @@
 
 namespace Audio {
 
-    /**
-     * OpenAL Renderable Listener class
-     *
-     * @remarks This class implements the RenderableListener interface for the
-     *      OpenAL renderer.
-     *
-     */
-    class OpenALRenderableListener : public RenderableListener
-    {
-    public:
-        OpenALRenderableListener(Listener *listener);
+/**
+ * OpenAL Renderable Listener class
+ *
+ * @remarks This class implements the RenderableListener interface for the
+ *      OpenAL renderer.
+ *
+ */
+class OpenALRenderableListener : public RenderableListener {
+public:
+    OpenALRenderableListener(Listener *listener);
 
-        virtual ~OpenALRenderableListener();
+    virtual ~OpenALRenderableListener();
 
-    protected:
-        /** @see RenderableListener::update. */
-        virtual void updateImpl(int flags);
-    };
+protected:
+    /** @see RenderableListener::update. */
+    virtual void updateImpl(int flags);
+};
 
 };
 

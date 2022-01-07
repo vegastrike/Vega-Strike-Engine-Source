@@ -4,6 +4,7 @@
  * Copyright (C) Daniel Horn
  * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike
  * contributors
+ * Copyright (C) 2022 Stephen G. Tuggy
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -23,6 +24,7 @@
  * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+
 //
 // C++ Implementation: Audio::Sound
 //
@@ -33,57 +35,61 @@
 
 namespace Audio {
 
-    Sound::Sound(const std::string& _name, bool streaming) :
+Sound::Sound(const std::string &_name, bool streaming) :
         name(_name)
-    {
-        flags.loaded = false;
-        flags.loading = false;
-        flags.streaming = streaming;
-    }
+{
+    flags.loaded = false;
+    flags.loading = false;
+    flags.streaming = streaming;
+}
 
-    Sound::~Sound()
-    {
-        unload();
-    }
+Sound::~Sound()
+{
+    unload();
+}
 
-    void Sound::load(bool wait)
-    {
-        if (!isLoaded()) {
-            if (!isLoading())
-                loadImpl(wait);
-            if (wait && !isLoaded())
-                waitLoad();
+void Sound::load(bool wait)
+{
+    if (!isLoaded()) {
+        if (!isLoading()) {
+            loadImpl(wait);
+        }
+        if (wait && !isLoaded()) {
+            waitLoad();
         }
     }
+}
 
-    void Sound::waitLoad()
-    {
-        while (isLoading())
-            Audio::sleep(10);
+void Sound::waitLoad()
+{
+    while (isLoading()) {
+        Audio::sleep(10);
     }
+}
 
-    void Sound::unload()
-    {
+void Sound::unload()
+{
+    if (isLoading()) {
+        abortLoad();
         if (isLoading()) {
-            abortLoad();
-            if (isLoading())
-                waitLoad();
-        }
-        if (isLoaded()) {
-            unloadImpl();
-            flags.loaded = false;
+            waitLoad();
         }
     }
-
-    void Sound::onLoaded(bool success)
-    {
-        flags.loaded = success;
-        flags.loading = false;
+    if (isLoaded()) {
+        unloadImpl();
+        flags.loaded = false;
     }
+}
 
-    void Sound::abortLoad()
-    {
-        // Do nothing, there's no background load
-    }
+void Sound::onLoaded(bool success)
+{
+    flags.loaded = success;
+    flags.loading = false;
+}
+
+void Sound::abortLoad()
+{
+    // Do nothing, there's no background load
+}
 
 };

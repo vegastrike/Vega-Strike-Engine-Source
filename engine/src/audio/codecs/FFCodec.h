@@ -4,6 +4,7 @@
  * Copyright (C) Daniel Horn
  * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike
  * contributors
+ * Copyright (C) 2022 Stephen G. Tuggy
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -23,6 +24,7 @@
  * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+
 //
 // C++ Interface: Audio::OggCodec
 //
@@ -33,23 +35,24 @@
 
 namespace Audio {
 
-    /**
-     * OggCodec factory class, for Ogg audio streams.
-     * @see CodecRegistry to create OggCodec instances.
-     */
-    class FFCodec : public Codec
-    {
-    public:
-        FFCodec();
+/**
+ * OggCodec factory class, for Ogg audio streams.
+ * @see CodecRegistry to create OggCodec instances.
+ */
+class FFCodec : public Codec {
+public:
+    FFCodec();
 
-        virtual ~FFCodec();
+    virtual ~FFCodec();
 
-        /** @see Codec::canHandle */
-        virtual bool canHandle(const std::string& path, bool canOpen, VSFileSystem::VSFileType type = VSFileSystem::UnknownFile);
+    /** @see Codec::canHandle */
+    virtual bool canHandle(const std::string &path,
+                           bool canOpen,
+                           VSFileSystem::VSFileType type = VSFileSystem::UnknownFile);
 
-        /** @see Codec::open */
-        virtual Stream* open(const std::string& path, VSFileSystem::VSFileType type = VSFileSystem::UnknownFile);
-    };
+    /** @see Codec::open */
+    virtual Stream *open(const std::string &path, VSFileSystem::VSFileType type = VSFileSystem::UnknownFile);
+};
 
 };
 

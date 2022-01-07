@@ -4,6 +4,7 @@
  * Copyright (C) Daniel Horn
  * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike
  * contributors
+ * Copyright (C) 2022 Stephen G. Tuggy
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -23,6 +24,7 @@
  * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+
 //
 // C++ Implementation: Audio::Renderer
 //
@@ -31,51 +33,51 @@
 
 namespace Audio {
 
-    Renderer::Renderer()
-    {
-    }
+Renderer::Renderer()
+{
+}
 
-    Renderer::~Renderer()
-    {
-    }
+Renderer::~Renderer()
+{
+}
 
-    void Renderer::setMeterDistance(Scalar distance)
-    {
-        meterDistance = distance;
-    }
+void Renderer::setMeterDistance(Scalar distance)
+{
+    meterDistance = distance;
+}
 
-    Scalar Renderer::getMeterDistance() const
-    {
-        return meterDistance;
-    }
+Scalar Renderer::getMeterDistance() const
+{
+    return meterDistance;
+}
 
-    void Renderer::setDopplerFactor(Scalar factor)
-    {
-        dopplerFactor = factor;
-    }
+void Renderer::setDopplerFactor(Scalar factor)
+{
+    dopplerFactor = factor;
+}
 
-    Scalar Renderer::getDopplerFactor() const
-    {
-        return dopplerFactor;
-    }
+Scalar Renderer::getDopplerFactor() const
+{
+    return dopplerFactor;
+}
 
-    void Renderer::setOutputFormat(const Format &format)
-    {
-        outputFormat = format;
-    }
+void Renderer::setOutputFormat(const Format &format)
+{
+    outputFormat = format;
+}
 
-    const Format& Renderer::getOutputFormat() const
-    {
-        return outputFormat;
-    }
+const Format &Renderer::getOutputFormat() const
+{
+    return outputFormat;
+}
 
-    void Renderer::beginTransaction()
-    {
-        // intentionally blank
-    }
+void Renderer::beginTransaction()
+{
+    // intentionally blank
+}
 
-    void Renderer::commitTransaction()
-    {
-        // intentionally blank
-    }
+void Renderer::commitTransaction()
+{
+    // intentionally blank
+}
 };
