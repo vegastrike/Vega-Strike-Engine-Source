@@ -4,6 +4,8 @@
  *	\file		IceRay.cpp
  *	\author		Pierre Terdiman
  *	\date		April, 4, 2000
+ *
+ *  Updated by Stephen G. Tuggy 2022-01-06
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -61,26 +63,23 @@
 // Precompiled Header
 #include "Stdafx.h"
 
-
 using namespace Opcode;
 
-float Ray::SquareDistance(const Point& point, float* t)	const
+float Ray::SquareDistance(const Point &point, float *t) const
 {
-	Point Diff = point - mOrig;
-	float fT = Diff | mDir;
+    Point Diff = point - mOrig;
+    float fT = Diff | mDir;
 
-	if(fT<=0.0f)
-	{
-		fT = 0.0f;
-	}
-	else
-	{
-		fT /= mDir.SquareMagnitude();
-		Diff -= fT*mDir;
-	}
+    if (fT <= 0.0f) {
+        fT = 0.0f;
+    } else {
+        fT /= mDir.SquareMagnitude();
+        Diff -= fT * mDir;
+    }
 
-	if(t) *t = fT;
+    if (t)
+        *t = fT;
 
-	return Diff.SquareMagnitude();
+    return Diff.SquareMagnitude();
 }
 

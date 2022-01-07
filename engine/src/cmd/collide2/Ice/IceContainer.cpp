@@ -23,13 +23,13 @@
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /**
  * Updated by Stephen G. Tuggy 2021-07-03
+ * Updated by Stephen G. Tuggy 2022-01-06
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Precompiled Header
 #include "Stdafx.h"
-
 
 using namespace Opcode;
 
@@ -47,8 +47,8 @@ uint32_t Container::mUsedRam = 0;
 Container::Container() : mMaxNbEntries(0), mCurNbEntries(0), mEntries(nullptr), mGrowthFactor(2.0f)
 {
 #ifdef CONTAINER_STATS
-	mNbContainers++;
-	mUsedRam+=sizeof(Container);
+    mNbContainers++;
+    mUsedRam += sizeof(Container);
 #endif
 }
 
@@ -57,13 +57,14 @@ Container::Container() : mMaxNbEntries(0), mCurNbEntries(0), mEntries(nullptr), 
  *	Constructor. Also allocates a given number of entries.
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-Container::Container(uint32_t size, float growth_factor) : mMaxNbEntries(0), mCurNbEntries(0), mEntries(nullptr), mGrowthFactor(growth_factor)
+Container::Container(uint32_t size, float growth_factor)
+        : mMaxNbEntries(0), mCurNbEntries(0), mEntries(nullptr), mGrowthFactor(growth_factor)
 {
 #ifdef CONTAINER_STATS
-	mNbContainers++;
-	mUsedRam+=sizeof(Container);
+    mNbContainers++;
+    mUsedRam += sizeof(Container);
 #endif
-	SetSize(size);
+    SetSize(size);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -71,13 +72,14 @@ Container::Container(uint32_t size, float growth_factor) : mMaxNbEntries(0), mCu
  *	Copy constructor.
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-Container::Container(const Container& object) : mMaxNbEntries(0), mCurNbEntries(0), mEntries(nullptr), mGrowthFactor(2.0f)
+Container::Container(const Container &object)
+        : mMaxNbEntries(0), mCurNbEntries(0), mEntries(nullptr), mGrowthFactor(2.0f)
 {
 #ifdef CONTAINER_STATS
-	mNbContainers++;
-	mUsedRam+=sizeof(Container);
+    mNbContainers++;
+    mUsedRam += sizeof(Container);
 #endif
-	*this = object;
+    *this = object;
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -87,10 +89,10 @@ Container::Container(const Container& object) : mMaxNbEntries(0), mCurNbEntries(
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 Container::~Container()
 {
-	Empty();
+    Empty();
 #ifdef CONTAINER_STATS
-	mNbContainers--;
-	mUsedRam-=GetUsedRam();
+    mNbContainers--;
+    mUsedRam -= GetUsedRam();
 #endif
 }
 
@@ -101,14 +103,14 @@ Container::~Container()
  *	\return		Self-Reference
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-Container& Container::Empty()
+Container &Container::Empty()
 {
 #ifdef CONTAINER_STATS
-	mUsedRam-=mMaxNbEntries*sizeof(uint32_t);
+    mUsedRam -= mMaxNbEntries * sizeof(uint32_t);
 #endif
-	DELETEARRAY(mEntries);
-	mCurNbEntries = mMaxNbEntries = 0;
-	return *this;
+    DELETEARRAY(mEntries);
+    mCurNbEntries = mMaxNbEntries = 0;
+    return *this;
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -121,33 +123,37 @@ Container& Container::Empty()
 bool Container::Resize(uint32_t needed)
 {
 #ifdef CONTAINER_STATS
-	// Subtract previous amount of bytes
-	mUsedRam-=mMaxNbEntries*sizeof(uint32_t);
+    // Subtract previous amount of bytes
+    mUsedRam -= mMaxNbEntries * sizeof(uint32_t);
 #endif
 
-	// Get more entries
-	mMaxNbEntries = mMaxNbEntries ? uint32_t(float(mMaxNbEntries)*mGrowthFactor) : 2;	// Default nb Entries = 2
-	if(mMaxNbEntries<mCurNbEntries + needed)	mMaxNbEntries = mCurNbEntries + needed;
+    // Get more entries
+    mMaxNbEntries = mMaxNbEntries ? uint32_t(float(mMaxNbEntries) * mGrowthFactor) : 2;    // Default nb Entries = 2
+    if (mMaxNbEntries < mCurNbEntries + needed) {
+        mMaxNbEntries = mCurNbEntries + needed;
+    }
 
-	// Get some bytes for new entries
-	uint32_t*	NewEntries = new uint32_t[mMaxNbEntries];
-	CHECKALLOC(NewEntries);
+    // Get some bytes for new entries
+    uint32_t *NewEntries = new uint32_t[mMaxNbEntries];
+    CHECKALLOC(NewEntries);
 
 #ifdef CONTAINER_STATS
-	// Add current amount of bytes
-	mUsedRam+=mMaxNbEntries*sizeof(uint32_t);
+    // Add current amount of bytes
+    mUsedRam += mMaxNbEntries * sizeof(uint32_t);
 #endif
 
-	// Copy old data if needed
-	if(mCurNbEntries)	CopyMemory(NewEntries, mEntries, mCurNbEntries*sizeof(uint32_t));
+    // Copy old data if needed
+    if (mCurNbEntries) {
+        CopyMemory(NewEntries, mEntries, mCurNbEntries * sizeof(uint32_t));
+    }
 
-	// Delete old data
-	DELETEARRAY(mEntries);
+    // Delete old data
+    DELETEARRAY(mEntries);
 
-	// Assign new pointer
-	mEntries = NewEntries;
+    // Assign new pointer
+    mEntries = NewEntries;
 
-	return true;
+    return true;
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -159,24 +165,26 @@ bool Container::Resize(uint32_t needed)
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 bool Container::SetSize(uint32_t nb)
 {
-	// Make sure it's empty
-	Empty();
+    // Make sure it's empty
+    Empty();
 
-	// Checkings
-	if(!nb)	return false;
+    // Checkings
+    if (!nb) {
+        return false;
+    }
 
-	// Initialize for nb entries
-	mMaxNbEntries = nb;
+    // Initialize for nb entries
+    mMaxNbEntries = nb;
 
-	// Get some bytes for new entries
-	mEntries = new uint32_t[mMaxNbEntries];
-	CHECKALLOC(mEntries);
+    // Get some bytes for new entries
+    mEntries = new uint32_t[mMaxNbEntries];
+    CHECKALLOC(mEntries);
 
 #ifdef CONTAINER_STATS
-	// Add current amount of bytes
-	mUsedRam+=mMaxNbEntries*sizeof(uint32_t);
+    // Add current amount of bytes
+    mUsedRam += mMaxNbEntries * sizeof(uint32_t);
 #endif
-	return true;
+    return true;
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -188,33 +196,35 @@ bool Container::SetSize(uint32_t nb)
 bool Container::Refit()
 {
 #ifdef CONTAINER_STATS
-	// Subtract previous amount of bytes
-	mUsedRam-=mMaxNbEntries*sizeof(uint32_t);
+    // Subtract previous amount of bytes
+    mUsedRam -= mMaxNbEntries * sizeof(uint32_t);
 #endif
 
-	// Get just enough entries
-	mMaxNbEntries = mCurNbEntries;
-	if(!mMaxNbEntries)	return false;
+    // Get just enough entries
+    mMaxNbEntries = mCurNbEntries;
+    if (!mMaxNbEntries) {
+        return false;
+    }
 
-	// Get just enough bytes
-	uint32_t*	NewEntries = new uint32_t[mMaxNbEntries];
-	CHECKALLOC(NewEntries);
+    // Get just enough bytes
+    uint32_t *NewEntries = new uint32_t[mMaxNbEntries];
+    CHECKALLOC(NewEntries);
 
 #ifdef CONTAINER_STATS
-	// Add current amount of bytes
-	mUsedRam+=mMaxNbEntries*sizeof(uint32_t);
+    // Add current amount of bytes
+    mUsedRam += mMaxNbEntries * sizeof(uint32_t);
 #endif
 
-	// Copy old data
-	CopyMemory(NewEntries, mEntries, mCurNbEntries*sizeof(uint32_t));
+    // Copy old data
+    CopyMemory(NewEntries, mEntries, mCurNbEntries * sizeof(uint32_t));
 
-	// Delete old data
-	DELETEARRAY(mEntries);
+    // Delete old data
+    DELETEARRAY(mEntries);
 
-	// Assign new pointer
-	mEntries = NewEntries;
+    // Assign new pointer
+    mEntries = NewEntries;
 
-	return true;
+    return true;
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -228,18 +238,18 @@ bool Container::Refit()
  *	\return		true if the value has been found in the container, else false.
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-bool Container::Contains(uint32_t entry, uint32_t* location) const
+bool Container::Contains(uint32_t entry, uint32_t *location) const
 {
-	// Look for the entry
-	for(uint32_t i=0;i<mCurNbEntries;i++)
-	{
-		if(mEntries[i]==entry)
-		{
-			if(location)	*location = i;
-			return true;
-		}
-	}
-	return false;
+    // Look for the entry
+    for (uint32_t i = 0; i < mCurNbEntries; i++) {
+        if (mEntries[i] == entry) {
+            if (location) {
+                *location = i;
+            }
+            return true;
+        }
+    }
+    return false;
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -252,17 +262,15 @@ bool Container::Contains(uint32_t entry, uint32_t* location) const
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 bool Container::Delete(uint32_t entry)
 {
-	// Look for the entry
-	for(uint32_t i=0;i<mCurNbEntries;i++)
-	{
-		if(mEntries[i]==entry)
-		{
-			// Entry has been found at index i. The strategy is to copy the last current entry at index i, and decrement the current number of entries.
-			DeleteIndex(i);
-			return true;
-		}
-	}
-	return false;
+    // Look for the entry
+    for (uint32_t i = 0; i < mCurNbEntries; i++) {
+        if (mEntries[i] == entry) {
+            // Entry has been found at index i. The strategy is to copy the last current entry at index i, and decrement the current number of entries.
+            DeleteIndex(i);
+            return true;
+        }
+    }
+    return false;
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -275,22 +283,19 @@ bool Container::Delete(uint32_t entry)
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 bool Container::DeleteKeepingOrder(uint32_t entry)
 {
-	// Look for the entry
-	for(uint32_t i=0;i<mCurNbEntries;i++)
-	{
-		if(mEntries[i]==entry)
-		{
-			// Entry has been found at index i.
-			// Shift entries to preserve order. You really should use a linked list instead.
-			mCurNbEntries--;
-			for(uint32_t j=i;j<mCurNbEntries;j++)
-			{
-				mEntries[j] = mEntries[j+1];
-			}
-			return true;
-		}
-	}
-	return false;
+    // Look for the entry
+    for (uint32_t i = 0; i < mCurNbEntries; i++) {
+        if (mEntries[i] == entry) {
+            // Entry has been found at index i.
+            // Shift entries to preserve order. You really should use a linked list instead.
+            mCurNbEntries--;
+            for (uint32_t j = i; j < mCurNbEntries; j++) {
+                mEntries[j] = mEntries[j + 1];
+            }
+            return true;
+        }
+    }
+    return false;
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -301,16 +306,17 @@ bool Container::DeleteKeepingOrder(uint32_t entry)
  *	\return		Self-Reference
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-Container& Container::FindNext(uint32_t& entry, FindMode find_mode)
+Container &Container::FindNext(uint32_t &entry, FindMode find_mode)
 {
-	uint32_t Location;
-	if(Contains(entry, &Location))
-	{
-		Location++;
-		if(Location==mCurNbEntries)	Location = find_mode==FIND_WRAP ? 0 : mCurNbEntries-1;
-		entry = mEntries[Location];
-	}
-	return *this;
+    uint32_t Location;
+    if (Contains(entry, &Location)) {
+        Location++;
+        if (Location == mCurNbEntries) {
+            Location = find_mode == FIND_WRAP ? 0 : mCurNbEntries - 1;
+        }
+        entry = mEntries[Location];
+    }
+    return *this;
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -321,16 +327,17 @@ Container& Container::FindNext(uint32_t& entry, FindMode find_mode)
  *	\return		Self-Reference
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-Container& Container::FindPrev(uint32_t& entry, FindMode find_mode)
+Container &Container::FindPrev(uint32_t &entry, FindMode find_mode)
 {
-	uint32_t Location;
-	if(Contains(entry, &Location))
-	{
-		Location--;
-		if(Location==0xffffffff)	Location = find_mode==FIND_WRAP ? mCurNbEntries-1 : 0;
-		entry = mEntries[Location];
-	}
-	return *this;
+    uint32_t Location;
+    if (Contains(entry, &Location)) {
+        Location--;
+        if (Location == 0xffffffff) {
+            Location = find_mode == FIND_WRAP ? mCurNbEntries - 1 : 0;
+        }
+        entry = mEntries[Location];
+    }
+    return *this;
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -341,13 +348,13 @@ Container& Container::FindPrev(uint32_t& entry, FindMode find_mode)
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 uint32_t Container::GetUsedRam() const
 {
-	return sizeof(Container) + mMaxNbEntries * sizeof(uint32_t);
+    return sizeof(Container) + mMaxNbEntries * sizeof(uint32_t);
 }
 
-void Container::operator=(const Container& object)
+void Container::operator=(const Container &object)
 {
-	SetSize(object.GetNbEntries());
-	CopyMemory(mEntries, object.GetEntries(), mMaxNbEntries*sizeof(uint32_t));
-	mCurNbEntries = mMaxNbEntries;
+    SetSize(object.GetNbEntries());
+    CopyMemory(mEntries, object.GetEntries(), mMaxNbEntries * sizeof(uint32_t));
+    mCurNbEntries = mMaxNbEntries;
 }
 

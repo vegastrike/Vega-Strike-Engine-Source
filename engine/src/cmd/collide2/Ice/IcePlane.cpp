@@ -4,6 +4,8 @@
  *	\file		IcePlane.cpp
  *	\author		Pierre Terdiman
  *	\date		April, 4, 2000
+ *
+ *  Updated by Stephen G. Tuggy 2022-01-06
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -31,16 +33,16 @@ using namespace Opcode;
  *	\return		Self-reference
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-Plane& Plane::Set(const Point& p0, const Point& p1, const Point& p2)
+Plane &Plane::Set(const Point &p0, const Point &p1, const Point &p2)
 {
-	Point Edge0 = p1 - p0;
-	Point Edge1 = p2 - p0;
+    Point Edge0 = p1 - p0;
+    Point Edge1 = p2 - p0;
 
-	n = Edge0 ^ Edge1;
-	n.Normalize();
+    n = Edge0 ^ Edge1;
+    n.Normalize();
 
-	d = -(p0 | n);
+    d = -(p0 | n);
 
-	return	*this;
+    return *this;
 }
 

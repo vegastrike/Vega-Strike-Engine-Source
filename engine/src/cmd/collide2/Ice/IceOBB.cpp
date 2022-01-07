@@ -19,13 +19,13 @@
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /**
  * Updated by Stephen G. Tuggy 2021-07-03
+ * Updated by Stephen G. Tuggy 2022-01-06
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Precompiled Header
 #include "Stdafx.h"
-
 
 using namespace Opcode;
 
@@ -36,25 +36,31 @@ using namespace Opcode;
  *	\return		true if inside the OBB
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-bool OBB::ContainsPoint(const Point& p) const
+bool OBB::ContainsPoint(const Point &p) const
 {
-	// Point in OBB test using lazy evaluation and early exits
+    // Point in OBB test using lazy evaluation and early exits
 
-	// Translate to box space
-	Point RelPoint = p - mCenter;
+    // Translate to box space
+    Point RelPoint = p - mCenter;
 
-	// Point * mRot maps from box space to world space
-	// mRot * Point maps from world space to box space (what we need here)
+    // Point * mRot maps from box space to world space
+    // mRot * Point maps from world space to box space (what we need here)
 
-	float f = mRot.m[0][0] * RelPoint.x + mRot.m[0][1] * RelPoint.y + mRot.m[0][2] * RelPoint.z;
-	if(f >= mExtents.x || f <= -mExtents.x) return false;
+    float f = mRot.m[0][0] * RelPoint.x + mRot.m[0][1] * RelPoint.y + mRot.m[0][2] * RelPoint.z;
+    if (f >= mExtents.x || f <= -mExtents.x) {
+        return false;
+    }
 
-	f = mRot.m[1][0] * RelPoint.x + mRot.m[1][1] * RelPoint.y + mRot.m[1][2] * RelPoint.z;
-	if(f >= mExtents.y || f <= -mExtents.y) return false;
+    f = mRot.m[1][0] * RelPoint.x + mRot.m[1][1] * RelPoint.y + mRot.m[1][2] * RelPoint.z;
+    if (f >= mExtents.y || f <= -mExtents.y) {
+        return false;
+    }
 
-	f = mRot.m[2][0] * RelPoint.x + mRot.m[2][1] * RelPoint.y + mRot.m[2][2] * RelPoint.z;
-	if(f >= mExtents.z || f <= -mExtents.z) return false;
-	return true;
+    f = mRot.m[2][0] * RelPoint.x + mRot.m[2][1] * RelPoint.y + mRot.m[2][2] * RelPoint.z;
+    if (f >= mExtents.z || f <= -mExtents.z) {
+        return false;
+    }
+    return true;
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -64,19 +70,19 @@ bool OBB::ContainsPoint(const Point& p) const
  *	\param		mat		[in] the world transform
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-void OBB::Create(const AABB& aabb, const Matrix4x4& mat)
+void OBB::Create(const AABB &aabb, const Matrix4x4 &mat)
 {
-	// Note: must be coherent with Rotate()
+    // Note: must be coherent with Rotate()
 
-	aabb.GetCenter(mCenter);
-	aabb.GetExtents(mExtents);
-	// Here we have the same as OBB::Rotate(mat) where the obb is (mCenter, mExtents, Identity).
+    aabb.GetCenter(mCenter);
+    aabb.GetExtents(mExtents);
+    // Here we have the same as OBB::Rotate(mat) where the obb is (mCenter, mExtents, Identity).
 
-	// So following what's done in Rotate:
-	// - x-form the center
-	mCenter *= mat;
-	// - combine rotation with identity, i.e. just use given matrix
-	mRot = mat;
+    // So following what's done in Rotate:
+    // - x-form the center
+    mCenter *= mat;
+    // - combine rotation with identity, i.e. just use given matrix
+    mRot = mat;
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -86,40 +92,42 @@ void OBB::Create(const AABB& aabb, const Matrix4x4& mat)
  *	\return		true if success
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-bool OBB::ComputePlanes(Plane* planes)	const
+bool OBB::ComputePlanes(Plane *planes) const
 {
-	// Checkings
-	if(!planes)	return false;
+    // Checkings
+    if (!planes) {
+        return false;
+    }
 
-	Point Axis0 = mRot[0];
-	Point Axis1 = mRot[1];
-	Point Axis2 = mRot[2];
+    Point Axis0 = mRot[0];
+    Point Axis1 = mRot[1];
+    Point Axis2 = mRot[2];
 
-	// Writes normals
-	planes[0].n = Axis0;
-	planes[1].n = -Axis0;
-	planes[2].n = Axis1;
-	planes[3].n = -Axis1;
-	planes[4].n = Axis2;
-	planes[5].n = -Axis2;
+    // Writes normals
+    planes[0].n = Axis0;
+    planes[1].n = -Axis0;
+    planes[2].n = Axis1;
+    planes[3].n = -Axis1;
+    planes[4].n = Axis2;
+    planes[5].n = -Axis2;
 
-	// Compute a point on each plane
-	Point p0 = mCenter + Axis0 * mExtents.x;
-	Point p1 = mCenter - Axis0 * mExtents.x;
-	Point p2 = mCenter + Axis1 * mExtents.y;
-	Point p3 = mCenter - Axis1 * mExtents.y;
-	Point p4 = mCenter + Axis2 * mExtents.z;
-	Point p5 = mCenter - Axis2 * mExtents.z;
+    // Compute a point on each plane
+    Point p0 = mCenter + Axis0 * mExtents.x;
+    Point p1 = mCenter - Axis0 * mExtents.x;
+    Point p2 = mCenter + Axis1 * mExtents.y;
+    Point p3 = mCenter - Axis1 * mExtents.y;
+    Point p4 = mCenter + Axis2 * mExtents.z;
+    Point p5 = mCenter - Axis2 * mExtents.z;
 
-	// Compute d
-	planes[0].d = -(planes[0].n|p0);
-	planes[1].d = -(planes[1].n|p1);
-	planes[2].d = -(planes[2].n|p2);
-	planes[3].d = -(planes[3].n|p3);
-	planes[4].d = -(planes[4].n|p4);
-	planes[5].d = -(planes[5].n|p5);
+    // Compute d
+    planes[0].d = -(planes[0].n | p0);
+    planes[1].d = -(planes[1].n | p1);
+    planes[2].d = -(planes[2].n | p2);
+    planes[3].d = -(planes[3].n | p3);
+    planes[4].d = -(planes[4].n | p4);
+    planes[5].d = -(planes[5].n | p5);
 
-	return true;
+    return true;
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -129,38 +137,40 @@ bool OBB::ComputePlanes(Plane* planes)	const
  *	\return		true if success
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-bool OBB::ComputePoints(Point* pts)	const
+bool OBB::ComputePoints(Point *pts) const
 {
-	// Checkings
-	if(!pts)	return false;
+    // Checkings
+    if (!pts) {
+        return false;
+    }
 
-	Point Axis0 = mRot[0];
-	Point Axis1 = mRot[1];
-	Point Axis2 = mRot[2];
+    Point Axis0 = mRot[0];
+    Point Axis1 = mRot[1];
+    Point Axis2 = mRot[2];
 
-	Axis0 *= mExtents.x;
-	Axis1 *= mExtents.y;
-	Axis2 *= mExtents.z;
+    Axis0 *= mExtents.x;
+    Axis1 *= mExtents.y;
+    Axis2 *= mExtents.z;
 
-	//     7+------+6			0 = ---
-	//     /|     /|			1 = +--
-	//    / |    / |			2 = ++-
-	//   / 4+---/--+5			3 = -+-
-	// 3+------+2 /    y   z	4 = --+
-	//  | /    | /     |  /		5 = +-+
-	//  |/     |/      |/		6 = +++
-	// 0+------+1      *---x	7 = -++
+    //     7+------+6			0 = ---
+    //     /|     /|			1 = +--
+    //    / |    / |			2 = ++-
+    //   / 4+---/--+5			3 = -+-
+    // 3+------+2 /    y   z	4 = --+
+    //  | /    | /     |  /		5 = +-+
+    //  |/     |/      |/		6 = +++
+    // 0+------+1      *---x	7 = -++
 
-	pts[0] = mCenter - Axis0 - Axis1 - Axis2;
-	pts[1] = mCenter + Axis0 - Axis1 - Axis2;
-	pts[2] = mCenter + Axis0 + Axis1 - Axis2;
-	pts[3] = mCenter - Axis0 + Axis1 - Axis2;
-	pts[4] = mCenter - Axis0 - Axis1 + Axis2;
-	pts[5] = mCenter + Axis0 - Axis1 + Axis2;
-	pts[6] = mCenter + Axis0 + Axis1 + Axis2;
-	pts[7] = mCenter - Axis0 + Axis1 + Axis2;
+    pts[0] = mCenter - Axis0 - Axis1 - Axis2;
+    pts[1] = mCenter + Axis0 - Axis1 - Axis2;
+    pts[2] = mCenter + Axis0 + Axis1 - Axis2;
+    pts[3] = mCenter - Axis0 + Axis1 - Axis2;
+    pts[4] = mCenter - Axis0 - Axis1 + Axis2;
+    pts[5] = mCenter + Axis0 - Axis1 + Axis2;
+    pts[6] = mCenter + Axis0 + Axis1 + Axis2;
+    pts[7] = mCenter - Axis0 + Axis1 + Axis2;
 
-	return true;
+    return true;
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -170,29 +180,30 @@ bool OBB::ComputePoints(Point* pts)	const
  *	\return		true if success
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-bool OBB::ComputeVertexNormals(Point* pts)	const
+bool OBB::ComputeVertexNormals(Point *pts) const
 {
-	static float VertexNormals[] = 
-	{
-		-INVSQRT3,	-INVSQRT3,	-INVSQRT3,
-		INVSQRT3,	-INVSQRT3,	-INVSQRT3,
-		INVSQRT3,	INVSQRT3,	-INVSQRT3,
-		-INVSQRT3,	INVSQRT3,	-INVSQRT3,
-		-INVSQRT3,	-INVSQRT3,	INVSQRT3,
-		INVSQRT3,	-INVSQRT3,	INVSQRT3,
-		INVSQRT3,	INVSQRT3,	INVSQRT3,
-		-INVSQRT3,	INVSQRT3,	INVSQRT3
-	};
+    static float VertexNormals[] =
+            {
+                    -INVSQRT3, -INVSQRT3, -INVSQRT3,
+                    INVSQRT3, -INVSQRT3, -INVSQRT3,
+                    INVSQRT3, INVSQRT3, -INVSQRT3,
+                    -INVSQRT3, INVSQRT3, -INVSQRT3,
+                    -INVSQRT3, -INVSQRT3, INVSQRT3,
+                    INVSQRT3, -INVSQRT3, INVSQRT3,
+                    INVSQRT3, INVSQRT3, INVSQRT3,
+                    -INVSQRT3, INVSQRT3, INVSQRT3
+            };
 
-	if(!pts)	return false;
+    if (!pts) {
+        return false;
+    }
 
-	const Point* VN = (const Point*)VertexNormals;
-	for(uint32_t i=0;i<8;i++)
-	{
-		pts[i] = VN[i] * mRot;
-	}
+    const Point *VN = (const Point *) VertexNormals;
+    for (uint32_t i = 0; i < 8; i++) {
+        pts[i] = VN[i] * mRot;
+    }
 
-	return true;
+    return true;
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -201,15 +212,15 @@ bool OBB::ComputeVertexNormals(Point* pts)	const
  *	\return		24 indices (12 edges) indexing the list returned by ComputePoints()
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-const uint32_t* OBB::GetEdges() const
+const uint32_t *OBB::GetEdges() const
 {
-	static uint32_t Indices[] = {
-	0, 1,	1, 2,	2, 3,	3, 0,
-	7, 6,	6, 5,	5, 4,	4, 7,
-	1, 5,	6, 2,
-	3, 7,	4, 0
-	};
-	return Indices;
+    static uint32_t Indices[] = {
+            0, 1, 1, 2, 2, 3, 3, 0,
+            7, 6, 6, 5, 5, 4, 4, 7,
+            1, 5, 6, 2,
+            3, 7, 4, 0
+    };
+    return Indices;
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -218,26 +229,26 @@ const uint32_t* OBB::GetEdges() const
  *	\return		edge normals in local space
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-const Point* OBB::GetLocalEdgeNormals() const
+const Point *OBB::GetLocalEdgeNormals() const
 {
-	static float EdgeNormals[] = 
-	{
-		0,			-INVSQRT2,	-INVSQRT2,	// 0-1
-		INVSQRT2,	0,			-INVSQRT2,	// 1-2
-		0,			INVSQRT2,	-INVSQRT2,	// 2-3
-		-INVSQRT2,	0,			-INVSQRT2,	// 3-0
+    static float EdgeNormals[] =
+            {
+                    0, -INVSQRT2, -INVSQRT2,    // 0-1
+                    INVSQRT2, 0, -INVSQRT2,    // 1-2
+                    0, INVSQRT2, -INVSQRT2,    // 2-3
+                    -INVSQRT2, 0, -INVSQRT2,    // 3-0
 
-		0,			INVSQRT2,	INVSQRT2,	// 7-6
-		INVSQRT2,	0,			INVSQRT2,	// 6-5
-		0,			-INVSQRT2,	INVSQRT2,	// 5-4
-		-INVSQRT2,	0,			INVSQRT2,	// 4-7
+                    0, INVSQRT2, INVSQRT2,    // 7-6
+                    INVSQRT2, 0, INVSQRT2,    // 6-5
+                    0, -INVSQRT2, INVSQRT2,    // 5-4
+                    -INVSQRT2, 0, INVSQRT2,    // 4-7
 
-		INVSQRT2,	-INVSQRT2,	0,			// 1-5
-		INVSQRT2,	INVSQRT2,	0,			// 6-2
-		-INVSQRT2,	INVSQRT2,	0,			// 3-7
-		-INVSQRT2,	-INVSQRT2,	0			// 4-0
-	};
-	return (const Point*)EdgeNormals;
+                    INVSQRT2, -INVSQRT2, 0,            // 1-5
+                    INVSQRT2, INVSQRT2, 0,            // 6-2
+                    -INVSQRT2, INVSQRT2, 0,            // 3-7
+                    -INVSQRT2, -INVSQRT2, 0            // 4-0
+            };
+    return (const Point *) EdgeNormals;
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -247,10 +258,10 @@ const Point* OBB::GetLocalEdgeNormals() const
  *	\param		world_normal	[out] edge normal in world space
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-void OBB::ComputeWorldEdgeNormal(uint32_t edge_index, Point& world_normal) const
+void OBB::ComputeWorldEdgeNormal(uint32_t edge_index, Point &world_normal) const
 {
-	OPASSERT(edge_index<12);
-	world_normal = GetLocalEdgeNormals()[edge_index] * mRot;
+    OPASSERT(edge_index < 12);
+    world_normal = GetLocalEdgeNormals()[edge_index] * mRot;
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -259,33 +270,32 @@ void OBB::ComputeWorldEdgeNormal(uint32_t edge_index, Point& world_normal) const
  *	\param		lss		[out] the LSS
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-void OBB::ComputeLSS(LSS& lss) const
+void OBB::ComputeLSS(LSS &lss) const
 {
-	Point Axis0 = mRot[0];
-	Point Axis1 = mRot[1];
-	Point Axis2 = mRot[2];
+    Point Axis0 = mRot[0];
+    Point Axis1 = mRot[1];
+    Point Axis2 = mRot[2];
 
-	switch(mExtents.LargestAxis())
-	{
-		case 0:
-			lss.mRadius = (mExtents.y + mExtents.z)*0.5f;
-			lss.mP0 = mCenter + Axis0 * (mExtents.x - lss.mRadius);
-			lss.mP1 = mCenter - Axis0 * (mExtents.x - lss.mRadius);
-			break;
-		case 1:
-			lss.mRadius = (mExtents.x + mExtents.z)*0.5f;
-			lss.mP0 = mCenter + Axis1 * (mExtents.y - lss.mRadius);
-			lss.mP1 = mCenter - Axis1 * (mExtents.y - lss.mRadius);
-			break;
-		case 2:
-			lss.mRadius = (mExtents.x + mExtents.y)*0.5f;
-			lss.mP0 = mCenter + Axis2 * (mExtents.z - lss.mRadius);
-			lss.mP1 = mCenter - Axis2 * (mExtents.z - lss.mRadius);
-			break;
-		default:
-			// Should not happen
-			break;
-	}
+    switch (mExtents.LargestAxis()) {
+        case 0:
+            lss.mRadius = (mExtents.y + mExtents.z) * 0.5f;
+            lss.mP0 = mCenter + Axis0 * (mExtents.x - lss.mRadius);
+            lss.mP1 = mCenter - Axis0 * (mExtents.x - lss.mRadius);
+            break;
+        case 1:
+            lss.mRadius = (mExtents.x + mExtents.z) * 0.5f;
+            lss.mP0 = mCenter + Axis1 * (mExtents.y - lss.mRadius);
+            lss.mP1 = mCenter - Axis1 * (mExtents.y - lss.mRadius);
+            break;
+        case 2:
+            lss.mRadius = (mExtents.x + mExtents.y) * 0.5f;
+            lss.mP0 = mCenter + Axis2 * (mExtents.z - lss.mRadius);
+            lss.mP1 = mCenter - Axis2 * (mExtents.z - lss.mRadius);
+            break;
+        default:
+            // Should not happen
+            break;
+    }
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -295,40 +305,55 @@ void OBB::ComputeLSS(LSS& lss) const
  *	\return		TRUE if we're inside the other box
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-bool OBB::IsInside(const OBB& box) const
+bool OBB::IsInside(const OBB &box) const
 {
-	// Make a 4x4 from the box & inverse it
-	Matrix4x4 M0Inv;
-	{
-		Matrix4x4 M0 = box.mRot;
-		M0.SetTrans(box.mCenter);
-		InvertPRMatrix(M0Inv, M0);
-	}
+    // Make a 4x4 from the box & inverse it
+    Matrix4x4 M0Inv;
+    {
+        Matrix4x4 M0 = box.mRot;
+        M0.SetTrans(box.mCenter);
+        InvertPRMatrix(M0Inv, M0);
+    }
 
-	// With our inversed 4x4, create box1 in space of box0
-	OBB _1in0;
-	Rotate(M0Inv, _1in0);
+    // With our inversed 4x4, create box1 in space of box0
+    OBB _1in0;
+    Rotate(M0Inv, _1in0);
 
-	// This should cancel out box0's rotation, i.e. it's now an AABB.
-	// => Center(0,0,0), Rot(identity)
+    // This should cancel out box0's rotation, i.e. it's now an AABB.
+    // => Center(0,0,0), Rot(identity)
 
-	// The two boxes are in the same space so now we can compare them.
+    // The two boxes are in the same space so now we can compare them.
 
-	// Create the AABB of (box1 in space of box0)
-	const Matrix3x3& mtx = _1in0.mRot;
+    // Create the AABB of (box1 in space of box0)
+    const Matrix3x3 &mtx = _1in0.mRot;
 
-	float f = fabsf(mtx.m[0][0] * mExtents.x) + fabsf(mtx.m[1][0] * mExtents.y) + fabsf(mtx.m[2][0] * mExtents.z) - box.mExtents.x;
-	if(f > _1in0.mCenter.x)		return FALSE;
-	if(-f < _1in0.mCenter.x)	return FALSE;
+    float f = fabsf(mtx.m[0][0] * mExtents.x) + fabsf(mtx.m[1][0] * mExtents.y) + fabsf(mtx.m[2][0] * mExtents.z)
+            - box.mExtents.x;
+    if (f > _1in0.mCenter.x) {
+        return FALSE;
+    }
+    if (-f < _1in0.mCenter.x) {
+        return FALSE;
+    }
 
-	f = fabsf(mtx.m[0][1] * mExtents.x) + fabsf(mtx.m[1][1] * mExtents.y) + fabsf(mtx.m[2][1] * mExtents.z) - box.mExtents.y;
-	if(f > _1in0.mCenter.y)		return FALSE;
-	if(-f < _1in0.mCenter.y)	return FALSE;
+    f = fabsf(mtx.m[0][1] * mExtents.x) + fabsf(mtx.m[1][1] * mExtents.y) + fabsf(mtx.m[2][1] * mExtents.z)
+            - box.mExtents.y;
+    if (f > _1in0.mCenter.y) {
+        return FALSE;
+    }
+    if (-f < _1in0.mCenter.y) {
+        return FALSE;
+    }
 
-	f = fabsf(mtx.m[0][2] * mExtents.x) + fabsf(mtx.m[1][2] * mExtents.y) + fabsf(mtx.m[2][2] * mExtents.z) - box.mExtents.z;
-	if(f > _1in0.mCenter.z)		return FALSE;
-	if(-f < _1in0.mCenter.z)	return FALSE;
+    f = fabsf(mtx.m[0][2] * mExtents.x) + fabsf(mtx.m[1][2] * mExtents.y) + fabsf(mtx.m[2][2] * mExtents.z)
+            - box.mExtents.z;
+    if (f > _1in0.mCenter.z) {
+        return FALSE;
+    }
+    if (-f < _1in0.mCenter.z) {
+        return FALSE;
+    }
 
-	return TRUE;
+    return TRUE;
 }
 

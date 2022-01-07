@@ -1,6 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /**
  * Updated by Stephen G. Tuggy 2021-07-03
+ * Updated by Stephen G. Tuggy 2022-01-06
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -14,25 +15,25 @@
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 inline_ bool PlanesCollider::PlanesTriOverlap(uint32_t in_clip_mask)
 {
-	// Stats
-	mNbVolumePrimTests++;
+    // Stats
+    mNbVolumePrimTests++;
 
-	const Plane* p = mPlanes;
-	uint32_t Mask = 1;
+    const Plane *p = mPlanes;
+    uint32_t Mask = 1;
 
-	while(Mask<=in_clip_mask)
-	{
-		if(in_clip_mask & Mask)
-		{
-			float d0 = p->Distance(*mVP.Vertex[0]);
-			float d1 = p->Distance(*mVP.Vertex[1]);
-			float d2 = p->Distance(*mVP.Vertex[2]);
-			if(d0>0.0f && d1>0.0f && d2>0.0f)	return FALSE;
+    while (Mask <= in_clip_mask) {
+        if (in_clip_mask & Mask) {
+            float d0 = p->Distance(*mVP.Vertex[0]);
+            float d1 = p->Distance(*mVP.Vertex[1]);
+            float d2 = p->Distance(*mVP.Vertex[2]);
+            if (d0 > 0.0f && d1 > 0.0f && d2 > 0.0f) {
+                return FALSE;
+            }
 //			if(!(IR(d0)&SIGN_BITMASK) && !(IR(d1)&SIGN_BITMASK) && !(IR(d2)&SIGN_BITMASK))	return FALSE;
-		}
-		Mask+=Mask;
-		p++;
-	}
+        }
+        Mask += Mask;
+        p++;
+    }
 /*
 	for(uint32_t i=0;i<6;i++)
 	{
@@ -42,5 +43,5 @@ inline_ bool PlanesCollider::PlanesTriOverlap(uint32_t in_clip_mask)
 		if(d0>0.0f && d1>0.0f && d2>0.0f)	return false;
 	}
 */
-	return TRUE;
+    return TRUE;
 }
