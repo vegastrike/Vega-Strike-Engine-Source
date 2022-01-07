@@ -4,6 +4,7 @@
  * Copyright (C) Daniel Horn
  * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike
  * contributors
+ * Copyright (C) 2022 Stephen G. Tuggy
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -32,19 +33,17 @@
 #include <list>
 /**
  * General namespace that does nothing on its own, but
- * Deals with the parsing of an XML file tha tcontains a number of
+ * Deals with the parsing of an XML file that contains a number of
  * event "if" statements
  * Each statement can have a minimum, max value and a "not" flag to invert it
  * and the type references the enum in the class using this one, and
  * is eventually only used for the "not" tag
  */
-namespace AIEvents
-{
+namespace AIEvents {
 ///A struct indicating an event that may or may not be executed
-struct AIEvresult
-{
+struct AIEvresult {
     ///will never be zero...negative indicates "not"
-    int   type;
+    int type;
     ///The maximum/minimum values that will cause this event
     float max, min;
     float timetofinish;
@@ -52,39 +51,45 @@ struct AIEvresult
     float priority;
     ///The string indicating what type of thing this event evaluates
     std::string script;
-    AIEvresult( int type,
-                float const min,
-                const float max,
-                float timetofinish,
-                float timetointerrupt,
-                float priority,
-                const std::string &aiscript );
-    bool Eval( const float eval ) const
+    AIEvresult(int type,
+               float const min,
+               const float max,
+               float timetofinish,
+               float timetointerrupt,
+               float priority,
+               const std::string &aiscript);
+    bool Eval(const float eval) const
     {
-        if (eval >= min)
-            if (eval < max)
-                if (type > 0)
+        if (eval >= min) {
+            if (eval < max) {
+                if (type > 0) {
                     return true;
-        if (eval < min)
-            if (eval >= max)
-                if (type < 0)
+                }
+            }
+        }
+        if (eval < min) {
+            if (eval >= max) {
+                if (type < 0) {
                     return true;
+                }
+            }
+        }
         return false;
     }
 };
-struct ElemAttrMap
-{
+struct ElemAttrMap {
     XMLSupport::EnumMap element_map;
-    int   level;
+    int level;
     float curtime;
     float maxtime;
     float obedience;                                              //short fix
-    std::vector< std::list< AIEvresult > >result;
-    ElemAttrMap( const XMLSupport::EnumMap &el ) :
-          element_map( el )
-        , level( 0 ) {}
+    std::vector<std::list<AIEvresult> > result;
+    ElemAttrMap(const XMLSupport::EnumMap &el) :
+            element_map(el), level(0)
+    {
+    }
 };
-void LoadAI( const char *filename, ElemAttrMap &result, const std::string &faction );  //num seconds
+void LoadAI(const char *filename, ElemAttrMap &result, const std::string &faction);  //num seconds
 }
 #endif
 

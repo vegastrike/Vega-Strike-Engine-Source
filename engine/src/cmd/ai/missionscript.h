@@ -4,6 +4,7 @@
  * Copyright (C) 2001-2002 Daniel Horn
  * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike
  * contributors
+ * Copyright (C) 2022 Stephen G. Tuggy
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -23,6 +24,7 @@
  * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+
 /*
  *  AI for mission scripting written by Alexander Rawass <alexannika@users.sourceforge.net>
  */
@@ -36,11 +38,10 @@
 
 #include "cmd/script/mission.h"
 
-class AImissionScript : public FlyByWire
-{
+class AImissionScript : public FlyByWire {
 public:
 ///saves scriptname in the filename var
-    AImissionScript( string modulename );
+    AImissionScript(string modulename);
     ~AImissionScript();
 ///Loads the AI script from the hard drive, or executes if loaded
     void Execute();
@@ -48,7 +49,7 @@ public:
     virtual string getOrderDescription()
     {
         char buffer[300];
-        sprintf( buffer, "%s:%d:%s", modulename.c_str(), classid, getActionString().c_str() );
+        sprintf(buffer, "%s:%d:%s", modulename.c_str(), classid, getActionString().c_str());
         return buffer;
     }
 
@@ -56,53 +57,53 @@ protected:
 
     string modulename;
     unsigned int classid;
-    bool   first_run;
+    bool first_run;
 };
 
-class AIFlyToWaypoint : public AImissionScript
-{
-public: AIFlyToWaypoint( const QVector &waypoint, float vel, bool afburn, float range );
+class AIFlyToWaypoint : public AImissionScript {
+public:
+    AIFlyToWaypoint(const QVector &waypoint, float vel, bool afburn, float range);
 
     QVector waypoint;
-    float   vel;
-    float   range;
-    bool    aburn;
+    float vel;
+    float range;
+    bool aburn;
 };
-class AIFlyToWaypointDefend : public AImissionScript
-{
-public: AIFlyToWaypointDefend( const QVector &waypoint, float vel, bool afburn, float range, float defend_range );
+class AIFlyToWaypointDefend : public AImissionScript {
+public:
+    AIFlyToWaypointDefend(const QVector &waypoint, float vel, bool afburn, float range, float defend_range);
 
     QVector waypoint;
-    float   vel;
-    float   range;
-    bool    aburn;
+    float vel;
+    float range;
+    bool aburn;
 };
 
-class AIFlyToJumppoint : public AImissionScript
-{
-public: AIFlyToJumppoint( Unit *jumppoint, float fly_speed, bool aft );
+class AIFlyToJumppoint : public AImissionScript {
+public:
+    AIFlyToJumppoint(Unit *jumppoint, float fly_speed, bool aft);
 };
 
-class AIPatrol : public AImissionScript
-{
-public: AIPatrol( int mode, const QVector &area, float range, Unit *around_unit, float patrol_speed );
+class AIPatrol : public AImissionScript {
+public:
+    AIPatrol(int mode, const QVector &area, float range, Unit *around_unit, float patrol_speed);
 };
 
-class AIPatrolDefend : public AImissionScript
-{
-public: AIPatrolDefend( int mode, const QVector &area, float range, Unit *around_unit, float patrol_speed );
+class AIPatrolDefend : public AImissionScript {
+public:
+    AIPatrolDefend(int mode, const QVector &area, float range, Unit *around_unit, float patrol_speed);
 };
 
-class AISuperiority : public AImissionScript
-{
-public: AISuperiority();
+class AISuperiority : public AImissionScript {
+public:
+    AISuperiority();
 };
 
-class AIOrderList : public AImissionScript
-{
-public: AIOrderList( olist_t *orderlist );
+class AIOrderList : public AImissionScript {
+public:
+    AIOrderList(olist_t *orderlist);
 
-    virtual olist_t * getOrderList()
+    virtual olist_t *getOrderList()
     {
         return my_orderlist;
     }
