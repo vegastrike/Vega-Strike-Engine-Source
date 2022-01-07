@@ -101,6 +101,7 @@ struct FIREKEYBOARDTYPE {
         shieldpowerstate = 1;
         doc = und = req = 0;
     }
+
     KBSTATE firekey;
     float shieldpowerstate;
     bool doc;
@@ -984,6 +985,7 @@ void FireKeyboard::DefendTarget(const KBData &, KBSTATE k)
         LeadMe("p", "Defend my target!", true);
     }
 }
+
 void FireKeyboard::DockTarget(const KBData &, KBSTATE k)
 {
     if (k == PRESS) {
@@ -997,6 +999,7 @@ void FireKeyboard::HoldPosition(const KBData &, KBSTATE k)
         LeadMe("s", "Hold Position!", true);
     }
 }
+
 void FireKeyboard::FormUp(const KBData &, KBSTATE k)
 {
     if (k == PRESS) {
@@ -1636,6 +1639,7 @@ static void DoDockingOps(Unit *parent, Unit *targ, unsigned char playa, unsigned
 }
 
 using std::list;
+
 unsigned int FireKeyboard::DoSpeechAndAni(Unit *un, Unit *parent, class CommunicationMessage &c)
 {
     this->AdjustRelationTo(un, c.getCurrentState()->messagedelta);
@@ -1669,26 +1673,33 @@ void FireKeyboard::ProcessCommMessage(class CommunicationMessage &c)
     bool reallydospeech = false;
     if (un && un->GetHull() > 0) {
         reallydospeech = true;
-        for (list<CommunicationMessage>::iterator i = resp.begin(); i != resp.end(); i++)
-            if ((*i).sender.GetUnit() == un)
-                if ((i = resp.erase(i)) == resp.end())
+        for (list<CommunicationMessage>::iterator i = resp.begin(); i != resp.end(); i++) {
+            if ((*i).sender.GetUnit() == un) {
+                if ((i = resp.erase(i)) == resp.end()) {
                     break;
+                }
+            }
+        }
         resp.push_back(c);
-        if (!foundValidMessage)
+        if (!foundValidMessage) {
             whichsound = DoSpeechAndAni(un, parent, c);
+        }
     } else if (0) {
         //none of this happens
         whichsound = DoSpeech(NULL, NULL, *c.getCurrentState());
         //this is when a unit is already dead
-        if (parent == _Universe->AccessCockpit()->GetParent())
+        if (parent == _Universe->AccessCockpit()->GetParent()) {
             MyFunction();
+        }
         //mmhmm! Gcc-4.1 hack -- otherwise linker failure
     }
     float gain;
     int sound = c.getCurrentState()->GetSound(c.sex, whichsound, gain);
-    if (reallydospeech && !AUDIsPlaying(sound))
+    if (reallydospeech && !AUDIsPlaying(sound)) {
         AUDPlay(sound, QVector(0, 0, 0), Vector(0, 0, 0), gain);
+    }
 }
+
 using std::list;
 
 static CommunicationMessage *GetTargetMessageQueue(Unit *targ, std::list<CommunicationMessage> &messagequeue)
@@ -1702,6 +1713,7 @@ static CommunicationMessage *GetTargetMessageQueue(Unit *targ, std::list<Communi
     }
     return mymsg;
 }
+
 extern std::set<Unit *> arrested_list_do_not_dereference;
 
 void Arrested(Unit *parent)

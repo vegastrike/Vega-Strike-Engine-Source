@@ -100,6 +100,7 @@ bool RequestClearence(Unit *parent, Unit *targ, unsigned char sex)
 }
 
 using Orders::FireAt;
+
 bool FireAt::PursueTarget(Unit *un, bool leader)
 {
     if (leader) {
@@ -169,11 +170,13 @@ FireAt::FireAt() : CommunicatingAI(WEAPON, STARGET)
 void FireAt::SignalChosenTarget()
 {
 }
+
 //temporary way of choosing
 struct TargetAndRange {
     Unit *t;
     float range;
     float relation;
+
     TargetAndRange(Unit *tt, float r, float rel)
     {
         t = tt;
@@ -185,11 +188,13 @@ struct TargetAndRange {
 struct RangeSortedTurrets {
     Unit *tur;
     float gunrange;
+
     RangeSortedTurrets(Unit *t, float r)
     {
         tur = t;
         gunrange = r;
     }
+
     bool operator<(const RangeSortedTurrets &o) const
     {
         return gunrange < o.gunrange;
@@ -204,10 +209,12 @@ struct TurretBin {
     {
         maxrange = 0;
     }
+
     bool operator<(const TurretBin &o) const
     {
         return maxrange > o.maxrange;
     }
+
     void AssignTargets(const TargetAndRange &finalChoice, const Matrix &pos)
     {
         //go through modularly assigning as you go;
@@ -352,14 +359,17 @@ template<class T, size_t n>
 class StaticTuple {
 public:
     T vec[n];
+
     size_t size()
     {
         return n;
     }
+
     T &operator[](size_t index)
     {
         return vec[index];
     }
+
     const T &operator[](size_t index) const
     {
         return vec[index];
@@ -384,9 +394,11 @@ class ChooseTargetClass {
     int maxtargets;
 public:
     Unit *mytarg;
+
     ChooseTargetClass()
     {
     }
+
     void init(FireAt *fireat,
               Unit *un,
               float gunrange,
@@ -419,6 +431,7 @@ public:
         this->numtargets = 0;
         this->maxtargets = maxtargets;
     }
+
     bool acquire(Unit *un, float distance)
     {
         double unkey = un->location[Unit::UNIT_ONLY]->getKey();
@@ -448,6 +461,7 @@ public:
         }
         return ShouldTargetUnit(un, distance);
     }
+
     bool ShouldTargetUnit(Unit *un, float distance)
     {
         if (un->CloakVisible() > .8) {
@@ -538,13 +552,15 @@ void FireAt::ChooseTargets(int numtargs, bool force)
         numpollers[1] = float_to_int(nextframenumpollers[1]);
     }
     pollindex[hastarg]++;     //count number of craft touched - will use in the next physics frame to spread out the vessels actually chosen to be processed among all of the vessels being touched
-    if (numpolled[hastarg] > numpollers[hastarg])      //over quota, wait until next physics frame
+    if (numpolled[hastarg] > numpollers[hastarg]) {      //over quota, wait until next physics frame
         return;
+    }
     if (!(pollindex[hastarg] % ((prevpollindex[hastarg] / numpollers[hastarg])
-            + 1)))      //spread out, in modulo fashion, the possibility of changing one's target. Use previous physics frame count of craft to estimate current number of craft
+            + 1))) {      //spread out, in modulo fashion, the possibility of changing one's target. Use previous physics frame count of craft to estimate current number of craft
         numpolled[hastarg]++;          //if a more likely candidate, we're going to search for a target.
-    else
-        return;          //skipped to achieve better fairness - see comment on modulo distribution above
+    } else {
+        return;
+    }          //skipped to achieve better fairness - see comment on modulo distribution above
     if (curtarg)
         if (isJumpablePlanet(curtarg))
             return;
@@ -788,6 +804,7 @@ bool FireAt::isJumpablePlanet(Unit *targ)
 }
 
 using std::string;
+
 void FireAt::PossiblySwitchTarget(bool unused)
 {
     static float

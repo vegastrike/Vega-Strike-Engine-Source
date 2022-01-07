@@ -64,6 +64,7 @@ public:
     {
         afterburn = tf;
     }
+
     MoveToParent(bool aft, unsigned char switchbacks, bool terminating = true)
             : afterburn(aft),
               switchbacks(switchbacks),
@@ -74,6 +75,7 @@ public:
               selfterminating(terminating)
     {
     }
+
     bool Execute(Unit *parent, const QVector &targetlocation);
 };
 class MoveTo : public Order {
@@ -84,6 +86,7 @@ public:
     {
         m.SetAfterburn(tf);
     }
+
 ///takes in the destination target, whether afterburners should be applied, and the ammount of accuracy (how many times it shoudl miss destination and come back) should be used
     MoveTo(const QVector &target, bool aft, unsigned char switchbacks, bool terminating = true) : Order(MOVEMENT,
                                                                                                         SLOCATION),
@@ -94,9 +97,11 @@ public:
         targetlocation = target;
         done = false;
     }
+
     void SetDest(const QVector &);
     virtual void Execute();
     virtual ~MoveTo();
+
     virtual string getOrderDescription()
     {
         return "moveto";
@@ -150,12 +155,15 @@ public:
                                                                                                                       term)
     {
     }
+
     void SetDest(const QVector &);
     virtual void Execute();
+
     virtual string getOrderDescription()
     {
         return "chhead";
     }
+
     virtual ~ChangeHeading();
 };
 /**
@@ -167,10 +175,12 @@ class FaceTarget : public ChangeHeading {
 public:
     FaceTarget(bool fini = false, int accuracy = 3);
     virtual void Execute();
+
     virtual string getOrderDescription()
     {
         return "facet";
     }
+
     virtual ~FaceTarget();
 };
 /**
@@ -190,10 +200,12 @@ public:
     AutoLongHaul(bool fini = false, int accuracy = 1);
     virtual void Execute();
     virtual void SetParent(Unit *parent1);
+
     virtual string getOrderDescription()
     {
         return "ASAP";
     }
+
     virtual ~AutoLongHaul();
 };
 /**
@@ -208,10 +220,12 @@ class FaceTargetITTS : public ChangeHeading {
 public:
     FaceTargetITTS(bool fini = false, int accuracy = 3);
     virtual void Execute();
+
     virtual string getOrderDescription()
     {
         return "faceitts";
     }
+
     virtual ~FaceTargetITTS();
 };
 class FormUp : public MoveTo {
@@ -221,10 +235,12 @@ public:
     void SetPos(const QVector &);
     virtual void SetParent(Unit *parent1);
     virtual void Execute();
+
     virtual string getOrderDescription()
     {
         return "formup";
     }
+
     virtual ~FormUp();
 };
 class FormUpToOwner : public MoveTo {
@@ -234,10 +250,12 @@ public:
     void SetPos(const QVector &);
     virtual void SetParent(Unit *parent1);
     virtual void Execute();
+
     virtual string getOrderDescription()
     {
         return "formuptoowner";
     }
+
     virtual ~FormUpToOwner();
 };
 class FaceDirection : public ChangeHeading {
@@ -247,10 +265,12 @@ public:
     FaceDirection(float distToMatchFacing, bool fini = false, int accuracy = 3);
     virtual void SetParent(Unit *parent1);
     virtual void Execute();
+
     virtual string getOrderDescription()
     {
         return "facedir";
     }
+
     virtual ~FaceDirection();
 };
 }

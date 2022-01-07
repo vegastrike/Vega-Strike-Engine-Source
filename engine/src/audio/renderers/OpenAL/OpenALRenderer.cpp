@@ -67,6 +67,7 @@ struct RendererData {
                 nameLen(0)
         {
         }
+
         SoundKey(VSFileSystem::VSFileType _type, const std::string &_name) :
                 type(_type),
                 nameLen(_name.length()),

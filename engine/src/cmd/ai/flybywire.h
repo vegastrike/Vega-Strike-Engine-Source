@@ -55,17 +55,22 @@ public:
     {
         done = false;
     }
+
     void Execute();
+
     void SetDesiredVelocity(const Vector &desired, bool Local)
     {
         desired_velocity = desired;
         LocalVelocity = Local;
     }
+
     void SetAfterburn(bool use_afterburn)
     {
         afterburn = use_afterburn;
     }
+
     virtual ~MatchLinearVelocity();
+
     virtual std::string getOrderDescription()
     {
         return "mlv";
@@ -91,13 +96,17 @@ public:
     {
         done = false;
     }
+
     void Execute();
+
     void SetDesiredAngularVelocity(const Vector &desired, bool Local)
     {
         desired_ang_velocity = desired;
         LocalAng = Local;
     }
+
     virtual ~MatchAngularVelocity();
+
     virtual std::string getOrderDescription()
     {
         return "mav";
@@ -113,15 +122,19 @@ public:
         this->desired_roll = desired;
         this->willfinish = finish;
     }
+
     virtual void Execute();
+
     void SetRoll(float roll)
     {
         desired_roll = roll;
     }
+
     float GetRoll()
     {
         return desired_roll;
     }
+
     virtual std::string getOrderDescription()
     {
         return "roll";
@@ -153,17 +166,22 @@ public:
         type = FACING | MOVEMENT;
         subtype = SLOCATION;
     }
+
     void Execute();
+
     void SetDesiredVelocity(const Vector &desired, const bool Local)
     {
         desired_velocity = desired;
         LocalVelocity = Local;
     }
+
     void SetAfterburn(bool use_afterburn)
     {
         afterburn = use_afterburn;
     }
+
     virtual ~MatchVelocity();
+
     virtual std::string getOrderDescription()
     {
         return "mv";
@@ -190,10 +208,12 @@ protected:
 public:
     FlyByWire();
     ~FlyByWire();
+
     void SwitchFlightMode()
     {
         controltype = !controltype;
     }
+
 ///Turns on or off velocity resolution
     void ThrustRight(float percent);
     void ThrustUp(float percent);
@@ -219,10 +239,12 @@ public:
 ///negative is decel... 0 = nothing
     void Accel(float percentage);
     void Execute();
+
     virtual std::string getOrderDescription()
     {
         return "wire";
     }
+
 private:
     FlyByWire(const FlyByWire &);
     FlyByWire &operator=(const FlyByWire &);

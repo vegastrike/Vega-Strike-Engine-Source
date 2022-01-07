@@ -230,6 +230,7 @@ static AIEvents::ElemAttrMap *getProperScript(Unit *me, Unit *targ, bool interru
 
 static float aggressivity = 2.01;
 static int randomtemp;
+
 AggressiveAI::AggressiveAI(const char *filename, Unit *target)
         : FireAt(), logic(getProperScript(NULL, NULL, "default", randomtemp = rand()))
 {

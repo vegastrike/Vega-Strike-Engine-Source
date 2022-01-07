@@ -104,7 +104,9 @@ static void fixup_function_pointers(void)
      *
      */
 }
+
 #endif
+
 void AUDChangeVolume(float volume)
 {
 #ifdef HAVE_AL
@@ -117,6 +119,7 @@ void AUDChangeVolume(float volume)
     scalepos = 1. / volume;
 #endif
 }
+
 float AUDGetVolume()
 {
 #ifdef HAVE_AL
@@ -126,6 +129,7 @@ float AUDGetVolume()
     return 1;
 #endif
 }
+
 void AUDChangeDoppler(float doppler)
 {
 #ifdef HAVE_AL
@@ -137,6 +141,7 @@ void AUDChangeDoppler(float doppler)
     scalevel = doppler;
 #endif
 }
+
 float AUDGetDoppler()
 {
 #ifdef HAVE_AL
@@ -157,6 +162,7 @@ static ALvoid *context_id = NULL;
 static ALCcontext *context_id = NULL;
 #endif
 #endif
+
 bool AUDInit()
 {
 #ifdef HAVE_AL

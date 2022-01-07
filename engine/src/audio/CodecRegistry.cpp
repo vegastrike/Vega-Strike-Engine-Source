@@ -114,6 +114,7 @@ public:
     MappedComparator(const INDEX &index) : _index(index)
     {
     }
+
     bool operator()(const T &a, const T &b) const
     {
         typename INDEX::const_iterator ait = _index.find(a);

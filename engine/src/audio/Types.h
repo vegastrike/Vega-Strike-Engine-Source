@@ -94,6 +94,7 @@ struct Range {
     {
         return max - min;
     }
+
     float phase(T x) const
     {
         if (min < max) {

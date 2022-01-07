@@ -55,6 +55,7 @@ public:
     {
         ChooseTargets(1, true);
     }
+
     void PossiblySwitchTarget(bool istargetjumpableplanet);
     virtual bool PursueTarget(Unit *, bool leader);
     void AddReplaceLastOrder(bool replace);
@@ -78,13 +79,16 @@ public:
     {
         CommunicatingAI::SetParent(parent);
     }
+
     Unit *GetParent()
     {
         return CommunicatingAI::GetParent();
     }
+
     FireAt(float aggressivitylevel); //weapon prefs?
     FireAt();
     virtual void Execute();
+
     virtual std::string Pickle()
     {
         return std::string();
@@ -92,6 +96,7 @@ public:
     virtual void UnPickle(std::string)
     {
     }
+
     virtual ~FireAt();
 };
 }

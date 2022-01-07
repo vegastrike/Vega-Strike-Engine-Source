@@ -33,6 +33,7 @@
 #include "warpto.h"
 #include "universe_util.h"
 #include <string>
+
 static void DockedScript(Unit *docker, Unit *base)
 {
     static string script = vs_config->getVariable("AI", "DockedToScript", "");
@@ -45,6 +46,7 @@ static void DockedScript(Unit *docker, Unit *base)
         docker->GetComputerData().target.SetUnit(targ);         //should be NULL;
     }
 }
+
 namespace Orders {
 DockingOps::DockingOps(Unit *unitToDockWith, Order *ai, bool physically_dock, bool keeptrying) : MoveTo(QVector(0,
                                                                                                                 0,
@@ -63,6 +65,7 @@ DockingOps::DockingOps(Unit *unitToDockWith, Order *ai, bool physically_dock, bo
     static float temptimer = XMLSupport::parse_float(vs_config->getVariable("physics", "docking_time", "10"));
     timer = temptimer;
 }
+
 void DockingOps::SetParent(Unit *par)
 {
     MoveTo::SetParent(par);
@@ -71,6 +74,7 @@ void DockingOps::SetParent(Unit *par)
         parent->SetOwner(docking.GetUnit());
     }
 }
+
 void DockingOps::Execute()
 {
     Unit *utdw = docking.GetUnit();
@@ -112,6 +116,7 @@ void DockingOps::Execute()
     parent->SetAngularVelocity(Vector(0, 0, 0));     //FIXME if you want it to turn to dock point
     done = false;
 }
+
 void DockingOps::Destroy()
 {
     if (parent) {
@@ -126,6 +131,7 @@ void DockingOps::Destroy()
     }
     docking.SetUnit(NULL);
 }
+
 void DockingOps::RestoreOldAI()
 {
     if (parent) {
@@ -137,6 +143,7 @@ void DockingOps::RestoreOldAI()
         oldstate = NULL;
     }
 }
+
 int SelectDockPort(Unit *utdw, Unit *parent)
 {
     const vector<DockingPorts> &dp = utdw->DockingPortLocations();
@@ -154,6 +161,7 @@ int SelectDockPort(Unit *utdw, Unit *parent)
     }
     return num;
 }
+
 bool DockingOps::RequestClearence(Unit *utdw)
 {
     if (physicallyDock && !utdw->RequestClearance(parent)) {
@@ -165,6 +173,7 @@ bool DockingOps::RequestClearence(Unit *utdw)
     }
     return true;
 }
+
 QVector DockingOps::Movement(Unit *utdw)
 {
     const QVector loc(Transform(utdw->GetTransformation(), utdw->DockingPortLocations()[port].GetPosition().Cast()));
@@ -181,6 +190,7 @@ QVector DockingOps::Movement(Unit *utdw)
     }
     return loc;
 }
+
 bool DockingOps::DockToTarget(Unit *utdw)
 {
     if (utdw->DockingPortLocations()[port].IsOccupied()) {
@@ -229,6 +239,7 @@ bool DockingOps::DockToTarget(Unit *utdw)
     }
     return false;
 }
+
 bool DockingOps::PerformDockingOperations(Unit *utdw)
 {
     timer -= SIMULATION_ATOM;
@@ -258,6 +269,7 @@ bool DockingOps::PerformDockingOperations(Unit *utdw)
     }
     return false;
 }
+
 bool DockingOps::Undock(Unit *utdw)
 {
     //this is a good heuristic... find the location where you are.compare with center...then fly the fuck away
@@ -269,6 +281,7 @@ bool DockingOps::Undock(Unit *utdw)
     timer -= SIMULATION_ATOM;
     return (len < 1) || done || timer < 0;
 }
+
 DockingOps *DONOTUSEAI = NULL;
 }
 

@@ -58,6 +58,7 @@ struct AIEvresult {
                float timetointerrupt,
                float priority,
                const std::string &aiscript);
+
     bool Eval(const float eval) const
     {
         if (eval >= min) {
@@ -84,6 +85,7 @@ struct ElemAttrMap {
     float maxtime;
     float obedience;                                              //short fix
     std::vector<std::list<AIEvresult> > result;
+
     ElemAttrMap(const XMLSupport::EnumMap &el) :
             element_map(el), level(0)
     {

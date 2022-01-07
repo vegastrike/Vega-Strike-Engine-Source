@@ -243,6 +243,7 @@ void FlyByJoystick::Execute()
     }
     FlyByKeyboard::Execute(false);
 }
+
 FlyByJoystick::~FlyByJoystick()
 {
 }

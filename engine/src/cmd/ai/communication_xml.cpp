@@ -123,13 +123,16 @@ void FSM::beginElement(const string &name, const AttributeList attributes)
                     string tmp = strtoupper((*iter).name);
                     unsigned int num = 0;
                     if (1 == sscanf(tmp.c_str(), "TEXT%d", &num) || tmp == "TEXT") {
-                        while (!(num < messages.size()))
+                        while (!(num < messages.size())) {
                             messages.push_back(string());
+                        }
                         nam = (*iter).value;
                         {
-                            for (string::iterator i = nam.begin(); i != nam.end(); i++)
-                                if (*i == '\\')
+                            for (string::iterator i = nam.begin(); i != nam.end(); i++) {
+                                if (*i == '\\') {
                                     *i = '\n';
+                                }
+                            }
                         }
                         messages[num] = nam;
                     }
@@ -141,14 +144,17 @@ void FSM::beginElement(const string &name, const AttributeList attributes)
         }
         case EDGE:
             unitlevel++;
-            for (iter = attributes.begin(); iter != attributes.end(); iter++)
-                if ((attribute_map.lookup((*iter).name)) == INDEX)
+            for (iter = attributes.begin(); iter != attributes.end(); iter++) {
+                if ((attribute_map.lookup((*iter).name)) == INDEX) {
                     nodes.back().edges.push_back(parse_int((*iter).value));
+                }
+            }
             break;
         default:
             break;
     }
 }
+
 void FSM::endElement(void *userData, const XML_Char *name)
 {
     using namespace CommXML;

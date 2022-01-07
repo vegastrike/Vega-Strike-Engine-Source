@@ -37,6 +37,7 @@ class Ikarus : public AggressiveAI {
 public:
     Ikarus();
     virtual void Execute();
+
     virtual string getOrderDescription()
     {
         return "ikarus";

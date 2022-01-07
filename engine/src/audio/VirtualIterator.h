@@ -52,6 +52,7 @@ public:
     VirtualIterator()
     {
     }
+
     virtual ~VirtualIterator()
     {
     }
@@ -80,6 +81,7 @@ public:
     {
         return operator*();
     }
+
     pointer_type getPtr()
     {
         return operator->();
@@ -89,6 +91,7 @@ public:
     {
         return operator++();
     }
+
     iterator_type &prev()
     {
         return operator--();
@@ -116,6 +119,7 @@ public:
     VirtualStandardIterator(const _It &_begin, const _It &_end) : begin(_begin), end(_end), cur(_begin)
     {
     }
+
     VirtualStandardIterator(const VirtualStandardIterator<_It> &o) : begin(o.begin), end(o.end), cur(o.cur)
     {
     }
@@ -124,6 +128,7 @@ public:
     {
         return *cur;
     };
+
     virtual pointer_type operator->()
     {
         return cur.operator->();
@@ -134,6 +139,7 @@ public:
         ++cur;
         return *this;
     };
+
     virtual iterator_type &operator--()
     {
         --cur;
@@ -149,6 +155,7 @@ public:
     {
         return cur == end;
     }
+
     virtual bool sos() const
     {
         return cur == begin;
@@ -172,10 +179,12 @@ public:
             it(_begin, _end)
     {
     }
+
     VirtualMappingIterator(const iterator_type &o) :
             it(o.it)
     {
     }
+
     VirtualMappingIterator(const VirtualStandardIterator<_It> &o) :
             it(o)
     {
@@ -186,6 +195,7 @@ public:
         ++it;
         return *this;
     };
+
     virtual iterator_type &operator--()
     {
         --it;
@@ -196,6 +206,7 @@ public:
     {
         return it.eos();
     }
+
     virtual bool sos() const
     {
         return it.sos();
@@ -216,10 +227,12 @@ public:
             VirtualMappingIterator<_It, value_type>(_begin, _end)
     {
     }
+
     VirtualValuesIterator(const VirtualValuesIterator<_It> &o) :
             VirtualMappingIterator<_It, value_type>(o.it)
     {
     }
+
     VirtualValuesIterator(const VirtualStandardIterator<_It> &o) :
             VirtualMappingIterator<_It, value_type>(o)
     {
@@ -229,6 +242,7 @@ public:
     {
         return VirtualMappingIterator<_It, value_type>::it->second;
     };
+
     virtual pointer_type operator->()
     {
         return &(VirtualMappingIterator<_It, value_type>::it->second);
@@ -254,10 +268,12 @@ public:
             VirtualMappingIterator<_It, value_type>(_begin, _end)
     {
     }
+
     VirtualKeysIterator(const VirtualKeysIterator<_It> &o) :
             VirtualMappingIterator<_It, value_type>(o.it)
     {
     }
+
     VirtualKeysIterator(const VirtualStandardIterator<_It> &o) :
             VirtualMappingIterator<_It, value_type>(o)
     {
@@ -267,6 +283,7 @@ public:
     {
         return VirtualMappingIterator<_It, value_type>::it->first;
     };
+
     virtual pointer_type operator->()
     {
         return VirtualMappingIterator<_It, value_type>::it->first;
@@ -298,12 +315,15 @@ public:
     ChainingIterator()
     {
     }
+
     ChainingIterator(const ChainingIterator<_It1, _It2> &o) : it1(o.it1), it2(o.it2)
     {
     }
+
     ChainingIterator(_It1 _it1, _It2 _it2) : it1(_it1), it2(_it2)
     {
     }
+
     virtual ~ChainingIterator()
     {
     }

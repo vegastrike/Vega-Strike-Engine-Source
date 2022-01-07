@@ -43,9 +43,11 @@ public:
     TVector3()
     {
     }
+
     TVector3(T xx, T yy, T zz) : x(xx), y(yy), z(zz)
     {
     }
+
     explicit TVector3(T s) : x(s), y(s), z(s)
     {
     }

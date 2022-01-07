@@ -47,10 +47,12 @@ protected:
 protected:
 public:
     virtual void Destroy();
+
     virtual float getMood()
     {
         return mood;
     }
+
     Unit *GetRandomUnit(float PlayerProbability, float TargetProbability);
     void RandomInitiateCommunication(float PlayerProbability, float TargetProbability);
     void TerminateContrabandSearch(bool foundcontraband);

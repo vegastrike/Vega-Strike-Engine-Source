@@ -66,9 +66,11 @@ protected:
         NoBufferException()
         {
         }
+
         NoBufferException(const NoBufferException &other) : Exception(other)
         {
         }
+
         explicit NoBufferException(const std::string &message) : Exception(message)
         {
         }

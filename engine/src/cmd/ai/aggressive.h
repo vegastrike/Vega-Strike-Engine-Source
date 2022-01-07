@@ -65,10 +65,12 @@ public:
     AggressiveAI(const char *file, Unit *target = NULL);
     void ExecuteNoEnemies();
     void Execute();
+
     virtual std::string getOrderDescription()
     {
         return "aggressive";
     }
+
     void AfterburnerJumpTurnTowards(Unit *target);
     float Fshield_prev;
     float Fshield_rate_old;

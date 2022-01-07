@@ -51,15 +51,19 @@ public:
     Exception()
     {
     };
+
     Exception(const Exception &other) : _message(other._message)
     {
     }
+
     explicit Exception(const std::string &message) : _message(message)
     {
     }
+
     virtual ~Exception()
     {
     }
+
     virtual const char *what() const noexcept
     {
         return _message.c_str();
@@ -75,9 +79,11 @@ public:
     FileOpenException()
     {
     }
+
     FileOpenException(const FileOpenException &other) : Exception(other)
     {
     }
+
     explicit FileOpenException(const std::string &message) : Exception(message)
     {
     }
@@ -93,9 +99,11 @@ public:
     CodecNotFoundException()
     {
     }
+
     CodecNotFoundException(const CodecNotFoundException &other) : Exception(other)
     {
     }
+
     explicit CodecNotFoundException(const std::string &message) : Exception(message)
     {
     }
@@ -110,9 +118,11 @@ public:
     FileFormatException()
     {
     }
+
     FileFormatException(const FileFormatException &other) : Exception(other)
     {
     }
+
     explicit FileFormatException(const std::string &message) : Exception(message)
     {
     }
@@ -127,9 +137,11 @@ public:
     EndOfStreamException()
     {
     }
+
     EndOfStreamException(const EndOfStreamException &other) : Exception(other)
     {
     }
+
     explicit EndOfStreamException(const std::string &message) : Exception(message)
     {
     }
@@ -149,6 +161,7 @@ public:
     CorruptStreamException(const CorruptStreamException &other) : Exception(other)
     {
     }
+
     explicit CorruptStreamException(bool _fatal)
             : Exception(_fatal ? "Fatal corruption on stream" : "Recoverable corruption on stream"),
               fatal(_fatal)
@@ -171,9 +184,11 @@ public:
     ResourceNotLoadedException()
     {
     }
+
     ResourceNotLoadedException(const ResourceNotLoadedException &other) : Exception(other)
     {
     }
+
     explicit ResourceNotLoadedException(const std::string &message) : Exception(message)
     {
     }
@@ -190,9 +205,11 @@ public:
     ResourceAlreadyLoadedException()
     {
     }
+
     ResourceAlreadyLoadedException(const ResourceAlreadyLoadedException &other) : Exception(other)
     {
     }
+
     explicit ResourceAlreadyLoadedException(const std::string &message) : Exception(message)
     {
     }
@@ -207,9 +224,11 @@ public:
     InvalidParametersException()
     {
     }
+
     InvalidParametersException(const InvalidParametersException &other) : Exception(other)
     {
     }
+
     explicit InvalidParametersException(const std::string &message) : Exception(message)
     {
     }

@@ -699,6 +699,7 @@ int AUDCreateSound(int sound, const bool LOOP /*=false*/ )
 }
 
 extern std::vector<int> soundstodelete;
+
 void AUDDeleteSound(int sound, bool music)
 {
 #ifdef HAVE_AL

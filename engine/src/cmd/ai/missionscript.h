@@ -107,6 +107,7 @@ public:
     {
         return my_orderlist;
     }
+
 private:
     olist_t *my_orderlist;
 };

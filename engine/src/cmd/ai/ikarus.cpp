@@ -43,10 +43,12 @@
 #include "gfx/cockpit_generic.h"
 #include "ikarus.h"
 using namespace Orders;
+
 Ikarus::Ikarus() : AggressiveAI("default.agg.xml")
 {
     last_time = cur_time = 0;
 }
+
 void Ikarus::ExecuteStrategy(Unit *target)
 {
     WillFire(target);
@@ -91,6 +93,7 @@ void Ikarus::WillFire(Unit *target)
         parent->ToggleWeapon(true);
     }
 }
+
 ///you should certainly edit this!!
 void Ikarus::DecideTarget()
 {

@@ -72,10 +72,12 @@ public:
     {
         return events.attach != 0;
     }
+
     bool wantPlayEvents() const
     {
         return events.play != 0;
     }
+
     bool wantUpdateEvents() const
     {
         return events.update != 0;

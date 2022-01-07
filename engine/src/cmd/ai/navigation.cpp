@@ -43,6 +43,7 @@
 #include "universe.h"
 
 using namespace Orders;
+
 /**
  * the time we need to start slowing down from now calculation (if it's in this frame we'll only accelerate for partial
  * vslowdown - decel * t = 0               t = vslowdown/decel
@@ -82,6 +83,7 @@ static float CalculateBalancedDecelTime(float l, float v, float &F, float mass)
     }
     return (-v + sqrtf(temp)) / accel;
 }
+
 /**
  * the time we need to start slowing down from now calculation (if it's in this frame we'll only accelerate for partial
  * vslowdown - decel * t = 0               t = vslowdown/decel
@@ -149,6 +151,7 @@ bool MoveToParent::OptimizeSpeed(Unit *parent, float v, float &a, float max_spee
 }
 
 float MOVETHRESHOLD = simulation_atom_var / 1.9;
+
 bool MoveToParent::Done(const Vector &ang_vel)
 {
     if (fabs(ang_vel.i) < THRESHOLD
@@ -163,6 +166,7 @@ void MoveTo::Execute()
 {
     done = done || m.Execute(parent, targetlocation);
 }
+
 bool MoveToParent::Execute(Unit *parent, const QVector &targetlocation)
 {
     bool done = false;
@@ -207,13 +211,16 @@ bool MoveToParent::Execute(Unit *parent, const QVector &targetlocation)
         float vdiv = 1.0f;
         if (selfterminating && terminatingX > 8 && terminatingY > 8 && terminatingZ > 8) {
             int tmp = (terminatingX - 4);
-            if (terminatingY < terminatingX)
+            if (terminatingY < terminatingX) {
                 tmp = terminatingY - 4;
-            if (terminatingZ < terminatingX && terminatingZ < terminatingY)
+            }
+            if (terminatingZ < terminatingX && terminatingZ < terminatingY) {
                 tmp = terminatingZ - 4;
+            }
             tmp /= 4;
-            if (tmp > 30)
+            if (tmp > 30) {
                 tmp = 30;
+            }
             vdiv = (float) (1 << tmp);
             div = vdiv;
             thrust.i /= div;
@@ -238,16 +245,18 @@ bool MoveToParent::Execute(Unit *parent, const QVector &targetlocation)
         }
         OptimizeSpeed(parent, last_velocity.k, thrust.k, max_velocity.k / vdiv);
         t = CalculateBalancedDecelTime(heading.i, last_velocity.i, thrust.i, parent->getMass());
-        if (t < THRESHOLD)
+        if (t < THRESHOLD) {
             thrust.i = -thrust.i;
-        else if (t < simulation_atom_var)
+        } else if (t < simulation_atom_var) {
             thrust.i *= (t - (simulation_atom_var - t)) / simulation_atom_var;
+        }
         OptimizeSpeed(parent, last_velocity.i, thrust.i, max_velocity.i / vdiv);
         t = CalculateBalancedDecelTime(heading.j, last_velocity.j, thrust.j, parent->getMass());
-        if (t < THRESHOLD)
+        if (t < THRESHOLD) {
             thrust.j = -thrust.j;
-        else if (t < simulation_atom_var)
+        } else if (t < simulation_atom_var) {
             thrust.j *= (t - (simulation_atom_var - t)) / simulation_atom_var;
+        }
         OptimizeSpeed(parent, last_velocity.j, thrust.j, max_velocity.j / vdiv);
     }
     parent->ApplyLocalForce(thrust);
@@ -317,12 +326,15 @@ void ChangeHeading::TurnToward(float atancalc, float ang_veli, float &torquei)
         torquei = -parent->GetMoment() * ang_veli / simulation_atom_var;         //clamping should take care of it
     }
 }
+
 void ChangeHeading::SetDest(const QVector &target)
 {
     final_heading = target;
     ResetDone();
 }
+
 float TURNTHRESHOLD = simulation_atom_var / 1.9;
+
 ///if velocity is lower than threshold
 bool ChangeHeading::Done(const Vector &ang_vel)
 {
@@ -421,12 +433,14 @@ void ChangeHeading::Execute()
         parent->ApplyLocalTorque(torque);
     }
 }
+
 ChangeHeading::~ChangeHeading()
 {
 #ifdef ORDERDEBUG
     VS_LOG_AND_FLUSH(trace, (boost::format("ch%1$x") % this));
 #endif
 }
+
 FaceTargetITTS::FaceTargetITTS(bool fini, int accuracy) : ChangeHeading(QVector(0, 0, 1), accuracy), finish(fini)
 {
     type = FACING;
@@ -440,6 +454,7 @@ FaceTargetITTS::FaceTargetITTS(bool fini, int accuracy) : ChangeHeading(QVector(
         }
     }
 }
+
 FaceTargetITTS::~FaceTargetITTS()
 {
 #ifdef ORDERDEBUG
@@ -496,6 +511,7 @@ FaceTarget::~FaceTarget()
     VS_LOG_AND_FLUSH(trace, (boost::format("ft%1$x") % this));
 #endif
 }
+
 AutoLongHaul::AutoLongHaul(bool fini, int accuracy) : ChangeHeading(QVector(0, 0, 1), accuracy), finish(fini)
 {
     type = FACING | MOVEMENT;
@@ -504,6 +520,7 @@ AutoLongHaul::AutoLongHaul(bool fini, int accuracy) : ChangeHeading(QVector(0, 0
     StraightToTarget = true;
     inside_landing_zone = false;
 }
+
 void AutoLongHaul::MakeLinearVelocityOrder()
 {
     eraseType(MOVEMENT);
@@ -521,6 +538,7 @@ void AutoLongHaul::MakeLinearVelocityOrder()
     temp->SetParent(parent);
     Order::EnqueueOrder(temp);
 }
+
 void AutoLongHaul::SetParent(Unit *parent1)
 {
     ChangeHeading::SetParent(parent1);
@@ -528,16 +546,19 @@ void AutoLongHaul::SetParent(Unit *parent1)
     inside_landing_zone = false;
     MakeLinearVelocityOrder();
 }
+
 extern bool DistanceWarrantsWarpTo(Unit *parent, float dist, bool following);
 
 QVector AutoLongHaul::NewDestination(const QVector &curnewdestination, double magnitude)
 {
     return curnewdestination;
 }
+
 static float mymax(float a, float b)
 {
     return a > b ? a : b;
 }
+
 static float mymin(float a, float b)
 {
     return a < b ? a : b;
@@ -552,6 +573,7 @@ inline void WarpRampOff(Unit *un, bool rampdown)
         }
     }
 }
+
 inline void CautiousWarpRampOn(Unit *un)
 {
     if ((un->graphicOptions.InWarp == 0)
@@ -588,6 +610,7 @@ bool useJitteryAutopilot(Unit *parent, Unit *target, float minaccel)
     }
     return false;
 }
+
 bool AutoLongHaul::InsideLandingPort(const Unit *obstacle) const
 {
     static float landing_port_limit =
@@ -787,6 +810,7 @@ void FaceDirection::SetParent(Unit *un)
     }
     ChangeHeading::SetParent(un);
 }
+
 FaceDirection::FaceDirection(float dist, bool fini, int accuracy) : ChangeHeading(QVector(0, 0, 1), accuracy),
                                                                     finish(fini)
 {
@@ -833,10 +857,12 @@ FormUp::FormUp(const QVector &pos) : MoveTo(QVector(0, 0, 0), false, 255, false)
 {
     subtype |= SSELF;
 }
+
 void FormUp::SetPos(const QVector &v)
 {
     Pos = v;
 }
+
 void FormUp::Execute()
 {
     Unit *targ = group.GetUnit();
@@ -876,10 +902,12 @@ FormUpToOwner::FormUpToOwner(const QVector &pos) : MoveTo(QVector(0, 0, 0), fals
 {
     subtype |= SSELF;
 }
+
 void FormUpToOwner::SetPos(const QVector &v)
 {
     Pos = v;
 }
+
 void FormUpToOwner::Execute()
 {
     Unit *targ = group.GetUnit();
