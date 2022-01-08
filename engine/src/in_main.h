@@ -22,14 +22,11 @@
 #ifndef INMAIN_H
 #define INMAIN_H
 
-#include "in_handler.h"
 
 void InitInput();
 void DeInitInput();
 void ProcessInput( size_t whichplayer );
 int TermInput();
-void AddListener( InputListener *il );
-void ActivateListener( InputListener *il );
-void RemoveListener( InputListener *il );
+
 #endif
 

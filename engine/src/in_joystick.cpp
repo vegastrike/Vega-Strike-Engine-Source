@@ -33,7 +33,6 @@
 #include "vs_globals.h"
 #include "vs_logging.h"
 
-#include "in_handler.h"
 #include "in_joystick.h"
 #include "config_xml.h"
 #include "in_mouse.h"

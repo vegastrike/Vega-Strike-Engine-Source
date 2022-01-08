@@ -26,31 +26,9 @@ using std::list;
 #include "in_kb.h"
 #include "in_mouse.h"
 #include "in_joystick.h"
-#include "in_handler.h"
 
 extern KBSTATE keyState[LAST_MODIFIER][KEYMAP_SIZE];
 
-queue< InputListener* >activationreqqueue;
-list< InputListener* > listeners;
-InputListener *activelistener;
-
-void AddListener( InputListener *il )
-{
-    il->keystate = keyState;
-    il->mousex   = &mousex;
-    il->mousey   = &mousey;
-    listeners.push_back( il );
-}
-
-void ActivateListener( InputListener *il )
-{
-    activationreqqueue.push( il );
-}
-
-void RemoveListener( InputListener *il )
-{
-    listeners.remove( il );
-}
 
 void ProcessInput( size_t whichplayer )
 {

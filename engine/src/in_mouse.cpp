@@ -20,7 +20,6 @@
  */
 
 #include "vegastrike.h"
-#include "in_handler.h"
 #include "in_mouse.h"
 #include <deque>
 #include "vs_globals.h"
