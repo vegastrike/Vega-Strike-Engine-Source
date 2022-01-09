@@ -10,6 +10,7 @@ packages/
 *.kdev4
 .vs/
 .vscode/
+engine/.idea/
 .editorconfig
 
 engine/src/version.h
