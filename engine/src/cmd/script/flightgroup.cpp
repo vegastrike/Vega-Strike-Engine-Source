@@ -3,7 +3,7 @@
  *
  * Copyright (C) Daniel Horn
  * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike contributors
- * Copyright (C) 2021 Stephen G. Tuggy
+ * Copyright (C) 2021-2022 Stephen G. Tuggy
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -30,27 +30,27 @@
 #include "cmd/unit_generic.h"
 #include "vs_logging.h"
 
-Flightgroup* Flightgroup::newFlightgroup( const std::string &name,
-                                          const std::string &type,
-                                          const std::string &faction,
-                                          const std::string &order,
-                                          int num_ships,
-                                          int num_waves,
-                                          const std::string &logo_tex,
-                                          const std::string &logo_alp,
-                                          Mission *mis )
+Flightgroup *Flightgroup::newFlightgroup(const std::string &name,
+                                         const std::string &type,
+                                         const std::string &faction,
+                                         const std::string &order,
+                                         int num_ships,
+                                         int num_waves,
+                                         const std::string &logo_tex,
+                                         const std::string &logo_alp,
+                                         Mission *mis)
 {
-    Flightgroup *fg    = mis->findFlightgroup( name, faction );
+    Flightgroup *fg = mis->findFlightgroup(name, faction);
     Flightgroup *fgtmp = fg;
     if (fg == nullptr) {
         fg = new Flightgroup;
     }
-    fg->Init( fgtmp, name, type, faction, order, num_ships, num_waves, mis );
-    if ( !logo_tex.empty() ) {
-        if ( logo_alp.empty() ) {
-            fg->squadLogo = new Texture( logo_tex.c_str(), 0, MIPMAP );
+    fg->Init(fgtmp, name, type, faction, order, num_ships, num_waves, mis);
+    if (!logo_tex.empty()) {
+        if (logo_alp.empty()) {
+            fg->squadLogo = new Texture(logo_tex.c_str(), 0, MIPMAP);
         } else {
-            fg->squadLogo = new Texture( logo_tex.c_str(), logo_alp.c_str(), 0, MIPMAP );
+            fg->squadLogo = new Texture(logo_tex.c_str(), logo_alp.c_str(), 0, MIPMAP);
         }
     }
     return fg;
@@ -64,7 +64,7 @@ Flightgroup::~Flightgroup()
     }
 }
 
-Flightgroup&Flightgroup::operator=( Flightgroup &other )
+Flightgroup &Flightgroup::operator=(Flightgroup &other)
 {
     VS_LOG(warning, "warning: may not work properly");
     if (squadLogo) {

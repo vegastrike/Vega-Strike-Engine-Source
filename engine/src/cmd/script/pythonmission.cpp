@@ -3,7 +3,7 @@
  *
  * Copyright (C) Daniel Horn
  * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike contributors
- * Copyright (C) 2021 Stephen G. Tuggy
+ * Copyright (C) 2021-2022 Stephen G. Tuggy
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -34,28 +34,40 @@
 
 #include "vs_logging.h"
 #include "cmd/container.h"
-PythonMissionBaseClass::PythonMissionBaseClass() {}
+
+PythonMissionBaseClass::PythonMissionBaseClass()
+{
+}
+
 void PythonMissionBaseClass::Destructor()
 {
     delete this;
 }
+
 PythonMissionBaseClass::~PythonMissionBaseClass()
 {
     for (unsigned int i = 0; i < relevant_units.size(); ++i) {
-        relevant_units[i]->SetUnit( NULL );
+        relevant_units[i]->SetUnit(NULL);
         delete relevant_units[i];
     }
     relevant_units.clear();
     VS_LOG(warning, (boost::format("BASE Destruct called. If called from C++ this is death %x") % this));
 }
 
-void PythonMissionBaseClass::Execute() {}
-void PythonMissionBaseClass::callFunction( std::string ) {}
+void PythonMissionBaseClass::Execute()
+{
+}
+
+void PythonMissionBaseClass::callFunction(std::string)
+{
+}
 
 std::string PythonMissionBaseClass::Pickle()
 {
     return std::string();
 }
 
-void PythonMissionBaseClass::UnPickle( std::string s ) {}
+void PythonMissionBaseClass::UnPickle(std::string s)
+{
+}
 

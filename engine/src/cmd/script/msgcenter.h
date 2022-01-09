@@ -4,7 +4,7 @@
  * Copyright (C) 2001-2002 Daniel Horn
  * Copyright (C) Alexander Rawass
  * Copyright (C) 2020 Stephen G. Tuggy, pyramid3d, and other Vega Strike contributors
- * Copyright (C) 2021 Stephen G. Tuggy
+ * Copyright (C) 2021-2022 Stephen G. Tuggy
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -57,24 +57,22 @@
 
 #include "SharedPool.h"
 
-class gameMessage
-{
+class gameMessage {
 public:
     StringPool::Reference from, to, message;
     double time;
 };
 
-class MessageCenter
-{
+class MessageCenter {
 public:
-    bool last( unsigned int n, gameMessage &m,
-              const std::vector< std::string > &who = std::vector< std::string > (), const std::vector< std::string > &whoNOT =
-                  std::vector< std::string > () );
-    void add( std::string from, std::string to, std::string message, double delay = 0.0 );
+    bool last(unsigned int n, gameMessage &m,
+              const std::vector<std::string> &who = std::vector<std::string>(), const std::vector<std::string> &whoNOT =
+    std::vector<std::string>());
+    void add(std::string from, std::string to, std::string message, double delay = 0.0);
     void clear(
-         const std::vector< std::string > &who = std::vector< std::string > (), const std::vector< std::string > &whoNOT =
-            std::vector< std::string > () );
-    std::vector< gameMessage >messages;
+            const std::vector<std::string> &who = std::vector<std::string>(), const std::vector<std::string> &whoNOT =
+    std::vector<std::string>());
+    std::vector<gameMessage> messages;
 };
 
 #endif //_MSGCENTER_H_
