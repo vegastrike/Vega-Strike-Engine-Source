@@ -81,10 +81,15 @@ COMMENTS_BY_FILE_SUFFIX = {
     '.h': C_LIKE_COMMENT,
     '.hpp': C_LIKE_COMMENT,
     '.h.in': C_LIKE_COMMENT,
+    '.tab.cpp.h': C_LIKE_COMMENT,
+    '.tab.cpp': C_LIKE_COMMENT,
+    '.yy.cpp': C_LIKE_COMMENT,
     '.py': SCRIPT_LIKE_COMMENT,
     '.cmake': SCRIPT_LIKE_COMMENT,
+    '.deprecated.cmake': SCRIPT_LIKE_COMMENT,
     '.txt': SCRIPT_LIKE_COMMENT,
     '.sh': SCRIPT_LIKE_COMMENT,
+    '.x11.sh': SCRIPT_LIKE_COMMENT,
     '.ps1': SCRIPT_LIKE_COMMENT,
 }
 
