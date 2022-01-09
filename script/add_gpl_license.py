@@ -2,8 +2,8 @@
 
 # add_gpl_license.py
 #
-# Copyright (C) 2021 David Wales and other Vega Strike
-# contributors
+# Copyright (C) 2021-2022 David Wales, Stephen G. Tuggy, and other 
+# Vega Strike contributors
 #
 # https://github.com/vegastrike/Vega-Strike-Engine-Source
 #
@@ -22,6 +22,7 @@
 # You should have received a copy of the GNU General Public License
 # along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
 
+
 """This script takes a file path (or paths) as an argument, and rewrites the file
 with the Vega Strike GPL 3 copyright notice prepended to it.
 
@@ -35,9 +36,9 @@ copied as the Copyright text for the GPL notice. e.g. If the LICENSE file
 contains the following lines, they will be copied in at the start of the GPL
 notice:
 
-    Copyright (c) 2001-2002 Daniel Horn
-    Copyright (c) 2002-2019 pyramid3d and other Vega Strike Contributors
-    Copyright (c) 2019-2021 Stephen G. Tuggy, and other Vega Strike Contributors
+    Copyright (C) 2001-2002 Daniel Horn
+    Copyright (C) 2002-2019 pyramid3d and other Vega Strike Contributors
+    Copyright (C) 2019-2021 Stephen G. Tuggy, and other Vega Strike Contributors
 
 Usage:
     python3 add_gpl_license.py [-h|--help]
@@ -106,14 +107,14 @@ def find_git_root() -> Path:
 
 
 def get_copyright_notice(LICENSE: Path) -> str:
-    """Return lines starting with 'Copyright (c)' from the start of a given
+    """Return lines starting with 'Copyright (C)' from the start of a given
     LICENSE file. Stop reading the file after the license title is found:
         GNU GENERAL PUBLIC LICENSE
     """
     copyright_lines = []
     with LICENSE.open() as file:
         for line in file:
-            if line.startswith('Copyright (c)'):
+            if line.startswith('Copyright (C)'):
                 copyright_lines.append(line)
             elif 'GNU GENERAL PUBLIC LICENSE' in line:
                 break
