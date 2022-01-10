@@ -112,7 +112,7 @@ void BindDigitalHatswitchKey( int joystick, int key, int dir, KBHandler handler,
     GenBindJoyKey( DIGHATSWITCH, joystick, key*MAX_DIGITAL_VALUES+dir, handler, data );
 }
 
-void ProcessJoystick( int whichplayer )
+void ProcessJoystick()
 {
     float x, y, z;
     int   buttons;
@@ -121,7 +121,7 @@ void ProcessJoystick( int whichplayer )
     SDL_JoystickUpdate();     //FIXME isn't this supposed to be called already by SDL?
 #endif
 #endif
-    for (int i = whichplayer; i < whichplayer+1 && i < MAX_JOYSTICKS; i++) {
+    for (int i = 0; i < MAX_JOYSTICKS; i++) {
         buttons = 0;
         if ( joystick[i]->isAvailable() ) {
             joystick[i]->GetJoyStick( x, y, z, buttons );

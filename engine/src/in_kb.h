@@ -51,7 +51,7 @@ unsigned int pullActiveModifiers();
 void setActiveModifiers( unsigned int mask );
 
 unsigned int getModifier( const char *mod_name );
-void ProcessKB( unsigned int player );
+void ProcessKB();
 void BindKey( int key, unsigned int modifiers, unsigned int player, KBHandler handler, const KBData &data );
 void UnbindKey( int key, unsigned int modifiers );
 void InitKB();

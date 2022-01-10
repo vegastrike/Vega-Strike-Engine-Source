@@ -417,7 +417,7 @@ void Universe::StartDraw()
     for (i = 0; i < _cockpits.size(); ++i) {
         SetActiveCockpit( i );
         pushActiveStarSystem( AccessCockpit( i )->activeStarSystem );
-        ProcessInput( i );                       //input neesd to be taken care of;
+        ProcessInput();                       //input neesd to be taken care of;
         popActiveStarSystem();
     }
     if (screenshotkey) {
