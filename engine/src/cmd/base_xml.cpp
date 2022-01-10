@@ -3,7 +3,7 @@
  *
  * Copyright (C) Daniel Horn
  * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike contributors
- * Copyright (C) 2021 Stephen G. Tuggy
+ * Copyright (C) 2021-2022 Stephen G. Tuggy
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -40,47 +40,49 @@
 #include "base_util.h"
 #include "vsfilesystem.h"
 
-
-static FILE * withAndWithout( std::string filename, std::string time_of_day_hint )
+static FILE *withAndWithout(std::string filename, std::string time_of_day_hint)
 {
-    string with( filename+"_"+time_of_day_hint+BASE_EXTENSION );
-    FILE  *fp = VSFileSystem::vs_open( with.c_str(), "r" );
+    string with(filename + "_" + time_of_day_hint + BASE_EXTENSION);
+    FILE *fp = VSFileSystem::vs_open(with.c_str(), "r");
     if (!fp) {
-        string without( filename+BASE_EXTENSION );
-        fp = VSFileSystem::vs_open( without.c_str(), "r" );
+        string without(filename + BASE_EXTENSION);
+        fp = VSFileSystem::vs_open(without.c_str(), "r");
     }
     return fp;
 }
-static FILE * getFullFile( std::string filename, std::string time_of_day_hint, std::string faction )
+
+static FILE *getFullFile(std::string filename, std::string time_of_day_hint, std::string faction)
 {
-    FILE *fp = withAndWithout( filename+"_"+faction, time_of_day_hint );
-    if (!fp)
-        fp = withAndWithout( filename, time_of_day_hint );
+    FILE *fp = withAndWithout(filename + "_" + faction, time_of_day_hint);
+    if (!fp) {
+        fp = withAndWithout(filename, time_of_day_hint);
+    }
     return fp;
 }
-void BaseInterface::Load( const char *filename, const char *time_of_day_hint, const char *faction )
+
+void BaseInterface::Load(const char *filename, const char *time_of_day_hint, const char *faction)
 {
-    FILE *inFile = getFullFile( string( "bases/" )+filename, time_of_day_hint, faction );
+    FILE *inFile = getFullFile(string("bases/") + filename, time_of_day_hint, faction);
     if (!inFile) {
-        bool   planet = false;
-        Unit  *baseun = this->baseun.GetUnit();
+        bool planet = false;
+        Unit *baseun = this->baseun.GetUnit();
         if (baseun) {
             planet = (baseun->isUnit() == _UnitType::planet);
         }
-        string basestring( "bases/unit" );
+        string basestring("bases/unit");
         if (planet) {
             basestring = "bases/planet";
         }
-        inFile = getFullFile( basestring, time_of_day_hint, faction );
+        inFile = getFullFile(basestring, time_of_day_hint, faction);
         if (!inFile) {
             return;
         }
     }
     //now that we have a FILE * named inFile and a std::string named newfile we can finally begin the python
-    string compilefile = string( filename )+time_of_day_hint+string( faction )+BASE_EXTENSION;
+    string compilefile = string(filename) + time_of_day_hint + string(faction) + BASE_EXTENSION;
     Python::reseterrors();
-    PyRun_SimpleFile( inFile, compilefile.c_str() );
+    PyRun_SimpleFile(inFile, compilefile.c_str());
     Python::reseterrors();
-    VSFileSystem::vs_close( inFile );
+    VSFileSystem::vs_close(inFile);
 }
 

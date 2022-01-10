@@ -4,6 +4,7 @@
  * Copyright (C) Daniel Horn
  * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike
  * contributors
+ * Copyright (C) 2022 Stephen G. Tuggy
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -34,8 +35,7 @@ enum class SoundType {
     engine, shield, armor, hull, explosion, cloaking, jump
 };
 
-class Audible
-{
+class Audible {
 private:
     std::map<SoundType, int> sounds;
     std::map<SoundType, std::string> defaultSoundNames;
@@ -43,15 +43,15 @@ private:
 public:
     Audible();
     void addDefaultSounds();
-    void addSounds(std::string (*nextElement)(std::string&), std::string soundsString);
+    void addSounds(std::string (*nextElement)(std::string &), std::string soundsString);
     void addSound(std::string soundString, SoundType type);
     void adjustSound(SoundType type);
     void adjustSound(SoundType type, const QVector &position, const Vector &velocity);
     void playSound(SoundType type);
 
-    void playShieldDamageSound( const Vector &pnt );
-    void playArmorDamageSound( const Vector &pnt );
-    void playHullDamageSound( const Vector &pnt );
+    void playShieldDamageSound(const Vector &pnt);
+    void playArmorDamageSound(const Vector &pnt);
+    void playHullDamageSound(const Vector &pnt);
 protected:
 
     void playExplosionDamageSound();
@@ -61,7 +61,7 @@ protected:
     void killSounds();
 
 private:
-    void playSound( const Vector &pnt, int sound, int playerSound);
+    void playSound(const Vector &pnt, int sound, int playerSound);
     void playDopplerSound(const Vector &pnt, int sound);
 };
 
