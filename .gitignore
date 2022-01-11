@@ -3,7 +3,7 @@ build/
 data/
 ext/
 *.pyc
-build-engine-Desktop-Default/
+build-*/
 packages/
 *.log
 *.bak
@@ -11,6 +11,7 @@ packages/
 .vs/
 .vscode/
 .editorconfig
+engine/.idea/
 
 engine/src/version.h
 engine/setup/src/include/version.h
