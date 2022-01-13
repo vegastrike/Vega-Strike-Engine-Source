@@ -1,6 +1,7 @@
 .git/
 bin/
 build/
+build-*/
 data/
 ext/
 *.pyc
