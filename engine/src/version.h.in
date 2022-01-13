@@ -1,8 +1,9 @@
 /*
  * Vega Strike
  * Copyright (C) 2021 Benjamen R. Meyer
+ * Copyright (C) 2022 Stephen G. Tuggy
  *
- * http://vegastrike.sourceforge.net/
+ * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -18,6 +19,8 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
+
+
 #ifndef VEGASTRIKE_VERSION_H__
 #define VEGASTRIKE_VERSION_H__
 
@@ -35,7 +38,7 @@
 
 #define VEGASTRIKE_ASSETS_API_VERSION "@VEGASTRIKE_ASSETS_API_VERSION@"
 
-#define VEGASTRIKE_VERSION_STR VEGASTRIKE_VERSION_MAJOR "." VEGASTRIKE_VERSION_MINOR "." VEGASTRIKE_VERSION_PATCH "." VEGASTRIKE_VERSION_TWEAK " ( Assets API Version: " VEGASTRIKE_ASSETS_API_VERSION ")"
+#define VEGASTRIKE_VERSION_STR VEGASTRIKE_VERSION_LONG_STR " (Assets API Version: " VEGASTRIKE_ASSETS_API_VERSION ")"
 //#pragma message "Vega Strike Version " VEGASTRIKE_VERSION_STR
 
 #endif //VEGASTRIKE_VERSION_H__
