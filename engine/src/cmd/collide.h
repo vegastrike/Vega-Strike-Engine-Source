@@ -3,6 +3,7 @@
  *
  * Copyright (C) 2020 Roy Falk, Stephen G. Tuggy and other Vega Strike
  * contributors
+ * Copyright (C) 2022 Stephen G. Tuggy
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -30,12 +31,12 @@
 #include "linecollide.h"
 #include "star_system.h"
 
-bool TableLocationChanged( const QVector &Mini, const QVector &minz );
-bool TableLocationChanged( const LineCollide &lc, const QVector &minx, const QVector &maxx );
-void KillCollideTable( LineCollide *lc, StarSystem *ss );
-bool EradicateCollideTable( LineCollide *lc, StarSystem *ss );
-void AddCollideQueue( LineCollide &tmp, StarSystem *ss );
-bool lcwithin( const LineCollide &lc, const LineCollide &tmp );
+bool TableLocationChanged(const QVector &Mini, const QVector &minz);
+bool TableLocationChanged(const LineCollide &lc, const QVector &minx, const QVector &maxx);
+void KillCollideTable(LineCollide *lc, StarSystem *ss);
+bool EradicateCollideTable(LineCollide *lc, StarSystem *ss);
+void AddCollideQueue(LineCollide &tmp, StarSystem *ss);
+bool lcwithin(const LineCollide &lc, const LineCollide &tmp);
 
 #endif
 

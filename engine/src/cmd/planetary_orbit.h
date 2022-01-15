@@ -4,6 +4,7 @@
  * Copyright (C) Daniel Horn
  * Copyright (C) 2020 Roy Falk, Stephen G. Tuggy, and other Vega Strike
  * contributors
+ * Copyright (C) 2022 Stephen G. Tuggy
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -31,12 +32,11 @@
 #include "star_system.h"
 #include "ai/order.h"
 
-class PlanetaryOrbit : public Order
-{
+class PlanetaryOrbit : public Order {
 private:
-    double  velocity;
-    double  theta;
-    double  inittheta;
+    double velocity;
+    double theta;
+    double inittheta;
 
     QVector x_size;
     QVector y_size;
@@ -44,20 +44,21 @@ private:
 #define ORBIT_PRIORITY 8
 #define NUM_ORBIT_AVERAGE (SIM_QUEUE_SIZE/ORBIT_PRIORITY)
     QVector orbiting_average[NUM_ORBIT_AVERAGE];
-    float   orbiting_last_simatom;
-    int     current_orbit_frame;
-    bool    orbit_list_filled;
+    float orbiting_last_simatom;
+    int current_orbit_frame;
+    bool orbit_list_filled;
 protected:
 ///A vector containing all lihgts currently activated on current planet
-    std::vector< int >lights;
+    std::vector<int> lights;
 
-public: PlanetaryOrbit( Unit *p,
-                        double velocity,
-                        double initpos,
-                        const QVector &x_axis,
-                        const QVector &y_axis,
-                        const QVector &Centre,
-                        Unit *target = NULL );
+public:
+    PlanetaryOrbit(Unit *p,
+                   double velocity,
+                   double initpos,
+                   const QVector &x_axis,
+                   const QVector &y_axis,
+                   const QVector &Centre,
+                   Unit *target = NULL);
     ~PlanetaryOrbit();
     void Execute();
 };

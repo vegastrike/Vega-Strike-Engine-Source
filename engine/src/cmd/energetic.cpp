@@ -4,6 +4,7 @@
  * Copyright (C) Daniel Horn
  * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike
  * contributors
+ * Copyright (C) 2022 Stephen G. Tuggy
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -35,22 +36,19 @@
 
 #include <algorithm>
 
-
-
-
 /* This class provides all energy generation methods to unit types -
  * ships, space installations, missiles, drones, etc. */
 
 
-Energetic::Energetic(): energy(0, 0),
-    recharge(0),
-    maxwarpenergy(0),
-    warpenergy(0),
-    constrained_charge_to_shields(0.0f),
-    sufficient_energy_to_recharge_shields(true),
-    fuel(0),
-    afterburnenergy(0),
-    afterburntype(0)
+Energetic::Energetic() : energy(0, 0),
+                         recharge(0),
+                         maxwarpenergy(0),
+                         warpenergy(0),
+                         constrained_charge_to_shields(0.0f),
+                         sufficient_energy_to_recharge_shields(true),
+                         fuel(0),
+                         afterburnenergy(0),
+                         afterburntype(0)
 {
     jump.warpDriveRating = 0;
     jump.energy = 100;
@@ -60,23 +58,25 @@ Energetic::Energetic(): energy(0, 0),
     jump.damage = 0;
 }
 
-
-void Energetic::decreaseWarpEnergy( bool insys, float time )
+void Energetic::decreaseWarpEnergy(bool insys, float time)
 {
     static float bleed_factor = configuration.physics.bleed_factor;
-    static bool  wc_fuel_hack  = configuration.fuel.fuel_equals_warp;
-    if (wc_fuel_hack)
+    static bool wc_fuel_hack = configuration.fuel.fuel_equals_warp;
+    if (wc_fuel_hack) {
         this->warpenergy = this->fuel;
-    this->warpenergy -= (insys ? jump.insysenergy/bleed_factor : jump.energy)*time;
-    if (this->warpenergy < 0)
+    }
+    this->warpenergy -= (insys ? jump.insysenergy / bleed_factor : jump.energy) * time;
+    if (this->warpenergy < 0) {
         this->warpenergy = 0;
-    if (wc_fuel_hack)
+    }
+    if (wc_fuel_hack) {
         this->fuel = this->warpenergy;
+    }
 }
 
-
-void Energetic::DecreaseWarpEnergyInWarp() {
-    Unit *unit = static_cast<Unit*>(this);
+void Energetic::DecreaseWarpEnergyInWarp()
+{
+    Unit *unit = static_cast<Unit *>(this);
 
     const bool in_warp = unit->graphicOptions.InWarp;
     static float bleed_factor = configuration.physics.bleed_factor;
@@ -87,7 +87,7 @@ void Energetic::DecreaseWarpEnergyInWarp() {
 
     //FIXME FIXME FIXME
     // Roy Falk - fix what?
-    float bleed = jump.insysenergy/bleed_factor * simulation_atom_var;
+    float bleed = jump.insysenergy / bleed_factor * simulation_atom_var;
     if (warpenergy > bleed) {
         warpenergy -= bleed;
     } else {
@@ -98,13 +98,13 @@ void Energetic::DecreaseWarpEnergyInWarp() {
 
 float Energetic::energyData() const
 {
-    float capacitance = const_cast<Energetic*>(this)->totalShieldEnergyCapacitance();
+    float capacitance = const_cast<Energetic *>(this)->totalShieldEnergyCapacitance();
 
     if (configuration.physics.max_shield_lowers_capacitance) {
-        if ( energy.MaxValue() <= capacitance ) {
+        if (energy.MaxValue() <= capacitance) {
             return 0;
         }
-        return ( energy )/( energy.MaxValue()-capacitance );
+        return (energy) / (energy.MaxValue() - capacitance);
     } else {
         return energy.Percent();
     }
@@ -120,7 +120,7 @@ float Energetic::fuelData() const
     return fuel;
 }
 
-float Energetic::getFuelUsage( bool afterburner )
+float Energetic::getFuelUsage(bool afterburner)
 {
     if (afterburner) {
         return configuration.fuel.afterburner_fuel_usage;
@@ -134,7 +134,8 @@ float Energetic::getFuelUsage( bool afterburner )
  * @param transfer_warp_to_fuel - true means fuel = warpenergy
  */
 // TODO: this is still an ugly hack
-void Energetic::WCWarpIsFuelHack(bool transfer_warp_to_fuel) {
+void Energetic::WCWarpIsFuelHack(bool transfer_warp_to_fuel)
+{
     if (!configuration.fuel.fuel_equals_warp) {
         return;
     }
@@ -146,11 +147,11 @@ void Energetic::WCWarpIsFuelHack(bool transfer_warp_to_fuel) {
     }
 }
 
-float Energetic::ExpendMomentaryFuelUsage( float magnitude )
+float Energetic::ExpendMomentaryFuelUsage(float magnitude)
 {
     // TODO: have this make some kind of sense to someone other than the person who wrote the comment below.
     //HACK this forces the reaction to be Li-6+D fusion with efficiency governed by the getFuelUsage function
-    float quantity = Energetic::getFuelUsage( false ) * simulation_atom_var * magnitude *
+    float quantity = Energetic::getFuelUsage(false) * simulation_atom_var * magnitude *
             configuration.fuel.fmec_exit_velocity_inverse / configuration.fuel.fuel_efficiency;
 
     return ExpendFuel(quantity);
@@ -161,12 +162,13 @@ float Energetic::ExpendMomentaryFuelUsage( float magnitude )
  * @param quantity - requested quantity to use
  * @return - actual quantity used
  */
-float Energetic::ExpendFuel(float quantity) {
+float Energetic::ExpendFuel(float quantity)
+{
     fuel -= configuration.fuel.normal_fuel_usage * quantity;
 
     if (fuel < 0) {
         quantity += fuel;
-        fuel   = 0;
+        fuel = 0;
     }
 
     return quantity;
@@ -177,16 +179,19 @@ float Energetic::getWarpEnergy() const
     return warpenergy;
 }
 
-void Energetic::increaseWarpEnergy( bool insys, float time )
+void Energetic::increaseWarpEnergy(bool insys, float time)
 {
     static bool WCfuelhack = configuration.fuel.fuel_equals_warp;
-    if (WCfuelhack)
+    if (WCfuelhack) {
         this->warpenergy = this->fuel;
-    this->warpenergy += (insys ? jump.insysenergy : jump.energy)*time;
-    if (this->warpenergy > this->maxwarpenergy)
+    }
+    this->warpenergy += (insys ? jump.insysenergy : jump.energy) * time;
+    if (this->warpenergy > this->maxwarpenergy) {
         this->warpenergy = this->maxwarpenergy;
-    if (WCfuelhack)
+    }
+    if (WCfuelhack) {
         this->fuel = this->warpenergy;
+    }
 }
 
 float Energetic::maxEnergyData() const
@@ -196,7 +201,7 @@ float Energetic::maxEnergyData() const
 
 void Energetic::rechargeEnergy()
 {
-    if ( (!configuration.fuel.reactor_uses_fuel) || (fuel > 0) ) {
+    if ((!configuration.fuel.reactor_uses_fuel) || (fuel > 0)) {
         energy += recharge * simulation_atom_var;
     }
 }
@@ -204,77 +209,78 @@ void Energetic::rechargeEnergy()
 bool Energetic::refillWarpEnergy()
 {
     static bool WCfuelhack = configuration.fuel.fuel_equals_warp;
-    if (WCfuelhack)
+    if (WCfuelhack) {
         this->warpenergy = this->fuel;
+    }
     float tmp = this->maxwarpenergy;
-    if (tmp < this->jump.energy)
+    if (tmp < this->jump.energy) {
         tmp = this->jump.energy;
+    }
     if (tmp > this->warpenergy) {
         this->warpenergy = tmp;
-        if (WCfuelhack)
+        if (WCfuelhack) {
             this->fuel = this->warpenergy;
+        }
         return true;
     }
     return false;
 }
 
-void Energetic::setAfterburnerEnergy( float aft )
+void Energetic::setAfterburnerEnergy(float aft)
 {
     afterburnenergy = aft;
 }
 
-void Energetic::setEnergyRecharge( float enrech )
+void Energetic::setEnergyRecharge(float enrech)
 {
     recharge = enrech;
 }
 
-void Energetic::setFuel( float f )
+void Energetic::setFuel(float f)
 {
     fuel = f;
 }
-
 
 float Energetic::warpCapData() const
 {
     return maxwarpenergy;
 }
 
-
 float Energetic::warpEnergyData() const
 {
-    if (maxwarpenergy > 0)
-        return ( (float) warpenergy )/( (float) maxwarpenergy );
-    if (jump.energy > 0)
-        return ( (float) warpenergy )/( (float) jump.energy );
+    if (maxwarpenergy > 0) {
+        return ((float) warpenergy) / ((float) maxwarpenergy);
+    }
+    if (jump.energy > 0) {
+        return ((float) warpenergy) / ((float) jump.energy);
+    }
     return 0.0f;
 }
-
-
 
 // Basically max or current shield x 0.2
 float Energetic::totalShieldEnergyCapacitance()
 {
-    Unit *unit = static_cast<Unit*>(this);
+    Unit *unit = static_cast<Unit *>(this);
     DamageableLayer *shield = unit->shield;
 
     float total_max_shield_value = shield->TotalMaxLayerValue();
     float total_current_shield_value = shield->TotalLayerValue();
 
     static float shield_energy_capacitance =
-        GameConfig::GetVariable( "physics", "shield_energy_capacitance", 0.2f );
-    static bool  use_max_shield_value =
-        GameConfig::GetVariable( "physics", "use_max_shield_energy_usage", false );
+            GameConfig::GetVariable("physics", "shield_energy_capacitance", 0.2f);
+    static bool use_max_shield_value =
+            GameConfig::GetVariable("physics", "use_max_shield_energy_usage", false);
 
     return shield_energy_capacitance * (use_max_shield_value ? total_max_shield_value : total_current_shield_value);
 }
-
 
 // The original code was in unit_generic:5476 RegenShields and was simply
 // incomprehensible. After several days, I've written a similar version.
 // However, someone who understands the previous code can refactor this easily
 // or better yet, write plugable consumption models.
 //GAHHH reactor in units of 100MJ, shields in units of VSD=5.4MJ to make 1MJ of shield use 1/shieldenergycap MJ
-void Energetic::ExpendEnergy(const bool player_ship) {
+void Energetic::ExpendEnergy(const bool player_ship)
+{
     // TODO: if we run out of fuel or energy, we die from lack of air
 
     MaintainShields();
@@ -287,19 +293,20 @@ void Energetic::ExpendEnergy(const bool player_ship) {
     ExpendFuel();
 }
 
-
-void Energetic::ExpendEnergy(float usage) {
+void Energetic::ExpendEnergy(float usage)
+{
     // Operator overloaded to prevent negative usage
     energy -= usage;
 }
 
 // The original code was a continuation of the comment above and simply unclear.
 // I replaced it with a very simple model.
-void Energetic::ExpendFuel() {
+void Energetic::ExpendFuel()
+{
     //Fuel Mass in metric tons expended per generation of 100MJ
-    static float FMEC_factor = GameConfig::GetVariable( "physics", "FMEC_factor", 0.000000008 );
-    static float reactor_idle_efficiency = GameConfig::GetVariable( "physics", "reactor_idle_efficiency", 0.98f );
-    static float min_reactor_efficiency = GameConfig::GetVariable( "physics", "min_reactor_efficiency", 0.00001f );
+    static float FMEC_factor = GameConfig::GetVariable("physics", "FMEC_factor", 0.000000008);
+    static float reactor_idle_efficiency = GameConfig::GetVariable("physics", "reactor_idle_efficiency", 0.98f);
+    static float min_reactor_efficiency = GameConfig::GetVariable("physics", "min_reactor_efficiency", 0.00001f);
 
     if (!configuration.fuel.reactor_uses_fuel) {
         return;
@@ -308,32 +315,32 @@ void Energetic::ExpendFuel() {
     const float fuel_usage = FMEC_factor * recharge * simulation_atom_var;
     fuel = std::max(0.0f, fuel - fuel_usage);
 
-    if ( !FINITE( fuel ) ) {
+    if (!FINITE(fuel)) {
         VS_LOG(error, "Fuel is nan C");
         fuel = 0;
     }
 }
 
-
-void Energetic::MaintainECM() {
-    static float ecm_energy_cost = GameConfig::GetVariable( "physics", "ecm_energy_cost", 0.05f );
-    Unit *unit = static_cast<Unit*>(this);
+void Energetic::MaintainECM()
+{
+    static float ecm_energy_cost = GameConfig::GetVariable("physics", "ecm_energy_cost", 0.05f);
+    Unit *unit = static_cast<Unit *>(this);
 
     if (!unit->computer.ecmactive) {
         return;
     }
 
-    float sim_atom_ecm  = ecm_energy_cost * unit->ecm * simulation_atom_var;
+    float sim_atom_ecm = ecm_energy_cost * unit->ecm * simulation_atom_var;
     ExpendEnergy(sim_atom_ecm);
 }
 
+void Energetic::MaintainShields()
+{
+    static bool shields_in_spec = GameConfig::GetVariable("physics", "shields_in_spec", false);
+    static float shield_energy_capacitance = GameConfig::GetVariable("physics", "shield_energy_capacitance", 0.2f);
+    static float shield_maintenance_cost = GameConfig::GetVariable("physics", "shield_maintenance_charge", 0.25f);
 
-void Energetic::MaintainShields() {
-    static bool shields_in_spec = GameConfig::GetVariable( "physics", "shields_in_spec", false );
-    static float shield_energy_capacitance = GameConfig::GetVariable( "physics", "shield_energy_capacitance", 0.2f );
-    static float shield_maintenance_cost = GameConfig::GetVariable( "physics", "shield_maintenance_charge", 0.25f );
-
-    Unit *unit = static_cast<Unit*>(this);
+    Unit *unit = static_cast<Unit *>(this);
 
     const bool in_warp = unit->graphicOptions.InWarp;
     const int shield_facets = unit->shield->number_of_facets;
@@ -342,7 +349,7 @@ void Energetic::MaintainShields() {
         return;
     }
 
-    if(unit->shield->TotalMaxLayerValue() == 0) {
+    if (unit->shield->TotalMaxLayerValue() == 0) {
         return;
     }
 
@@ -358,20 +365,20 @@ void Energetic::MaintainShields() {
     ExpendEnergy(shield_maintenance);
 }
 
+void Energetic::ExpendEnergyToRechargeShields()
+{
+    static bool shields_in_spec = GameConfig::GetVariable("physics", "shields_in_spec", false);
 
-void Energetic::ExpendEnergyToRechargeShields() {
-    static bool shields_in_spec = GameConfig::GetVariable( "physics", "shields_in_spec", false );
-
-    Unit *unit = static_cast<Unit*>(this);
+    Unit *unit = static_cast<Unit *>(this);
 
     const bool in_warp = unit->graphicOptions.InWarp;
 
     // TODO: add has_shields function instead of check below
-    if(unit->shield->TotalMaxLayerValue() == 0) {
+    if (unit->shield->TotalMaxLayerValue() == 0) {
         return;
     }
 
-    if(in_warp && !shields_in_spec) {
+    if (in_warp && !shields_in_spec) {
         return;
     }
 
@@ -389,20 +396,19 @@ void Energetic::ExpendEnergyToRechargeShields() {
     ExpendEnergy(energy_required_to_charge);
 }
 
-
-void Energetic::RechargeWarpCapacitors(const bool player_ship) {
+void Energetic::RechargeWarpCapacitors(const bool player_ship)
+{
     // Will try to keep the percentage of warp and normal capacitors equal
     const float transfer_capacity = 0.005f;
-    const float capacitor_percent = energy/energy.MaxValue();
-    const float warp_capacitor_percent = warpenergy/maxwarpenergy;
+    const float capacitor_percent = energy / energy.MaxValue();
+    const float warp_capacitor_percent = warpenergy / maxwarpenergy;
     const float warp_multiplier = WarpEnergyMultiplier(player_ship);
 
-    if(warp_capacitor_percent >= 1.0f ||
+    if (warp_capacitor_percent >= 1.0f ||
             warp_capacitor_percent > capacitor_percent ||
             capacitor_percent < 0.10f) {
         return;
     }
-
 
     const float previous_energy = energy.Value();
     ExpendEnergy(energy.MaxValue() * transfer_capacity);
@@ -411,25 +417,25 @@ void Energetic::RechargeWarpCapacitors(const bool player_ship) {
     warpenergy = std::min(maxwarpenergy, warpenergy + actual_energy * warp_multiplier);
 }
 
-
 float Energetic::WarpEnergyMultiplier(const bool player_ship)
 {
-    static float warp_energy_multiplier = GameConfig::GetVariable( "physics", "warp_energy_multiplier", 0.12f ) ;
-    static float player_warp_energy_multiplier = GameConfig::GetVariable( "physics", "warp_energy_player_multiplier", 0.12f );
+    static float warp_energy_multiplier = GameConfig::GetVariable("physics", "warp_energy_multiplier", 0.12f);
+    static float
+            player_warp_energy_multiplier = GameConfig::GetVariable("physics", "warp_energy_player_multiplier", 0.12f);
 
-    Unit *unit = static_cast<Unit*>(this);
+    Unit *unit = static_cast<Unit *>(this);
     bool player = player_ship;
 
     // We also apply player multiplier to wing members
     Flightgroup *flight_group = unit->getFlightgroup();
     if (flight_group && !player_ship) {
-        player = _Universe->isPlayerStarship( flight_group->leader.GetUnit() ) != nullptr;
+        player = _Universe->isPlayerStarship(flight_group->leader.GetUnit()) != nullptr;
     }
     return player ? player_warp_energy_multiplier : warp_energy_multiplier;
 }
 
-
-float Energetic::VSDPercent() {
-    static float VSD = GameConfig::GetVariable( "physics", "VSD_MJ_yield", 5.4f );
-    return VSD/100;
+float Energetic::VSDPercent()
+{
+    static float VSD = GameConfig::GetVariable("physics", "VSD_MJ_yield", 5.4f);
+    return VSD / 100;
 }

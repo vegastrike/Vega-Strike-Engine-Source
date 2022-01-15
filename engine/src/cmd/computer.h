@@ -1,27 +1,28 @@
 /**
-* computer.h
-*
-* Copyright (c) 2001-2002 Daniel Horn
-* Copyright (c) 2002-2019 pyramid3d and other Vega Strike Contributors
-* Copyright (c) 2019-2021 Stephen G. Tuggy, and other Vega Strike Contributors
-*
-* https://github.com/vegastrike/Vega-Strike-Engine-Source
-*
-* This file is part of Vega Strike.
-*
-* Vega Strike is free software: you can redistribute it and/or modify
-* it under the terms of the GNU General Public License as published by
-* the Free Software Foundation, either version 2 of the License, or
-* (at your option) any later version.
-*
-* Vega Strike is distributed in the hope that it will be useful,
-* but WITHOUT ANY WARRANTY; without even the implied warranty of
-* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-* GNU General Public License for more details.
-*
-* You should have received a copy of the GNU General Public License
-* along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
-*/
+ * computer.h
+ *
+ * Copyright (c) 2001-2002 Daniel Horn
+ * Copyright (c) 2002-2019 pyramid3d and other Vega Strike Contributors
+ * Copyright (c) 2019-2021 Stephen G. Tuggy, and other Vega Strike Contributors
+ * Copyright (C) 2022 Stephen G. Tuggy
+ *
+ * https://github.com/vegastrike/Vega-Strike-Engine-Source
+ *
+ * This file is part of Vega Strike.
+ *
+ * Vega Strike is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * Vega Strike is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
+ */
 
 #ifndef COMPUTER_H
 #define COMPUTER_H
@@ -40,40 +41,34 @@
  * and have nothing to do with the limitations of the physical nature
  * of space combat
  */
-class Computer
-{
+class Computer {
 public:
-    class RADARLIM
-    {
+    class RADARLIM {
     public:
-        struct Brand
-        {
-            enum Value
-            {
+        struct Brand {
+            enum Value {
                 SPHERE = 0,
                 BUBBLE = 1,
                 PLANE = 2
             };
         };
-        struct Capability
-        {
-            enum Value
-            {
+        struct Capability {
+            enum Value {
                 // For internal use
                 IFF_UPPER_SHIFT = 16,
                 IFF_LOWER_MASK = (1 << IFF_UPPER_SHIFT) - 1,
                 IFF_UPPER_MASK = ~IFF_LOWER_MASK,
 
                 // The lower 16 bits
-                IFF_NONE               = 0,
-                IFF_FRIEND_FOE         = 1 << 0,
+                IFF_NONE = 0,
+                IFF_FRIEND_FOE = 1 << 0,
                 IFF_OBJECT_RECOGNITION = 1 << 1,
-                IFF_THREAT_ASSESSMENT  = 1 << 2,
+                IFF_THREAT_ASSESSMENT = 1 << 2,
 
                 // The upper 16 bits
                 IFF_SPHERE = Brand::SPHERE << IFF_UPPER_SHIFT,
                 IFF_BUBBLE = Brand::BUBBLE << IFF_UPPER_SHIFT,
-                IFF_PLANE  = Brand::PLANE << IFF_UPPER_SHIFT
+                IFF_PLANE = Brand::PLANE << IFF_UPPER_SHIFT
             };
         };
         //the max range the radar can handle
@@ -85,10 +80,10 @@ public:
         //The minimum radius of the target
         float mintargetsize;
         // What kind of type and capability the radar supports
-        int   capability;
-        bool  locked;
-        bool  canlock;
-        bool  trackingactive;
+        int capability;
+        bool locked;
+        bool canlock;
+        bool trackingactive;
 
         Brand::Value GetBrand() const;
         bool UseFriendFoe() const;
@@ -108,11 +103,11 @@ public:
     UnitContainer threat;
     //Unit that it should match velocity with (not speed) if null, matches velocity with universe frame (star)
     UnitContainer velocity_ref;
-    bool  force_velocity_ref;
+    bool force_velocity_ref;
     //The threat level that was calculated from attacking unit's threat
     float threatlevel;
     //The speed the flybywire system attempts to maintain
-    float set_speed ;
+    float set_speed;
     //Computers limitation of speed
     float max_combat_speed;
     float max_combat_ab_speed;

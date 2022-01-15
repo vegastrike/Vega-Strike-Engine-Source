@@ -4,6 +4,7 @@
  * Copyright (C) Daniel Horn
  * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike
  * contributors
+ * Copyright (C) 2022 Stephen G. Tuggy
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -27,16 +28,16 @@
 #ifndef __UNIT_CSV_H__
 #define __UNIT_CSV_H__
 
-CSVRow LookupUnitRow( const std::string &name, const std::string &faction );
+CSVRow LookupUnitRow(const std::string &name, const std::string &faction);
 
-extern void AddMeshes( std::vector< Mesh* > &xmeshes,
-                       float &randomstartframe,
-                       float &randomstartseconds,
-                       float unitscale,
-                       const std::string &meshes,
-                       int faction,
-                       Flightgroup *fg,
-                       vector< unsigned int > *counts = NULL );
+extern void AddMeshes(std::vector<Mesh *> &xmeshes,
+                      float &randomstartframe,
+                      float &randomstartseconds,
+                      float unitscale,
+                      const std::string &meshes,
+                      int faction,
+                      Flightgroup *fg,
+                      vector<unsigned int> *counts = NULL);
 
 #endif
 

@@ -4,6 +4,7 @@
  * Copyright (C) Daniel Horn
  * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike
  * contributors
+ * Copyright (C) 2022 Stephen G. Tuggy
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -49,139 +50,145 @@
 #include "mount_size.h"
 #include "weapon_info.h"
 
-
 using namespace XMLSupport;
 
 /*ADDED FOR extensible use of unit pretty print and unit load */
 UNITLOADTYPE current_unit_load_mode = DEFAULT;
 extern float getFuelConversion();
 
-string KillQuadZeros( string inp )
+string KillQuadZeros(string inp)
 {
     std::string::size_type text = 0;
-    while ( ( text = inp.find( ".000000", text ) ) != string::npos )
-        inp = inp.substr( 0, text )+inp.substr( text+7 );
+    while ((text = inp.find(".000000", text)) != string::npos) {
+        inp = inp.substr(0, text) + inp.substr(text + 7);
+    }
     return inp;
 }
 
-string MakeUnitXMLPretty( string str, Unit *un )
+string MakeUnitXMLPretty(string str, Unit *un)
 {
     string writestr;
     if (un) {
-        writestr += "Name: "+un->name;
-        writestr += " "+un->getFullname();
+        writestr += "Name: " + un->name;
+        writestr += " " + un->getFullname();
         Flightgroup *fg = un->getFlightgroup();
-        if (fg)
-            writestr += " Designation "+fg->name+" "+XMLSupport::tostring( un->getFgSubnumber() );
+        if (fg) {
+            writestr += " Designation " + fg->name + " " + XMLSupport::tostring(un->getFgSubnumber());
+        }
         writestr += "\n";
     }
-    static std::set< string >lookfor;
-    if ( lookfor.empty() ) {
-        lookfor.insert( "Shie" );
-        lookfor.insert( "Armo" );
+    static std::set<string> lookfor;
+    if (lookfor.empty()) {
+        lookfor.insert("Shie");
+        lookfor.insert("Armo");
 //lookfor.insert ("Hull");
-        lookfor.insert( "Reac" );
-        lookfor.insert( "Moun" );
-        lookfor.insert( "Comp" );
+        lookfor.insert("Reac");
+        lookfor.insert("Moun");
+        lookfor.insert("Comp");
 //lookfor.insert ("Desc");
-        lookfor.insert( "Engi" );
-        lookfor.insert( "Mane" );
-        lookfor.insert( "Jump" );
+        lookfor.insert("Engi");
+        lookfor.insert("Mane");
+        lookfor.insert("Jump");
 //lookfor.insert ("Defe");
-        lookfor.insert( "Stat" );
-        lookfor.insert( "Engi" );
+        lookfor.insert("Stat");
+        lookfor.insert("Engi");
 //lookfor.insert ("Hold");
-        lookfor.insert( "Rada" );
+        lookfor.insert("Rada");
     }
     std::string::size_type foundpos;
-    while ( ( foundpos = str.find( "<" ) ) != string::npos ) {
-        if (str.size() <= foundpos+1)
+    while ((foundpos = str.find("<")) != string::npos) {
+        if (str.size() <= foundpos + 1) {
             break;
-        str = str.substr( foundpos+1 );
+        }
+        str = str.substr(foundpos + 1);
         if (str.size() > 3) {
             char mycomp[5] = {str[0], str[1], str[2], str[3], 0};
-            if ( lookfor.find( mycomp ) != lookfor.end() ) {
-                int newline = str.find( ">" );
-                if (newline > 0)
-                    if (str[newline-1] == '/')
+            if (lookfor.find(mycomp) != lookfor.end()) {
+                int newline = str.find(">");
+                if (newline > 0) {
+                    if (str[newline - 1] == '/') {
                         newline -= 1;
-                writestr += KillQuadZeros( str.substr( 0, newline )+"\n" );
+                    }
+                }
+                writestr += KillQuadZeros(str.substr(0, newline) + "\n");
             }
         }
     }
     return writestr;
 }
 
-int GetModeFromName( const char *input_buffer )
+int GetModeFromName(const char *input_buffer)
 {
-    if (strlen( input_buffer ) > 3) {
+    if (strlen(input_buffer) > 3) {
         if (input_buffer[0] == 'a'
-            && input_buffer[1] == 'd'
-            && input_buffer[2] == 'd')
+                && input_buffer[1] == 'd'
+                && input_buffer[2] == 'd') {
             return 1;
+        }
         if (input_buffer[0] == 'm'
-            && input_buffer[1] == 'u'
-            && input_buffer[2] == 'l')
+                && input_buffer[1] == 'u'
+                && input_buffer[2] == 'l') {
             return 2;
+        }
     }
     return 0;
 }
 
-extern bool CheckAccessory( Unit* );
+extern bool CheckAccessory(Unit *);
 
-
-
-void addShieldMesh( Unit::XML *xml, const char *filename, const float scale, int faction, class Flightgroup *fg )
+void addShieldMesh(Unit::XML *xml, const char *filename, const float scale, int faction, class Flightgroup *fg)
 {
-    static bool forceit = XMLSupport::parse_bool( vs_config->getVariable( "graphics", "forceOneOneShieldBlend", "true" ) );
-    xml->shieldmesh = Mesh::LoadMesh( filename, Vector( scale, scale, scale ), faction, fg );
+    static bool forceit = XMLSupport::parse_bool(vs_config->getVariable("graphics", "forceOneOneShieldBlend", "true"));
+    xml->shieldmesh = Mesh::LoadMesh(filename, Vector(scale, scale, scale), faction, fg);
     if (xml->shieldmesh && forceit) {
-        xml->shieldmesh->SetBlendMode( ONE, ONE, true );
-        xml->shieldmesh->setEnvMap( false, true );
-        xml->shieldmesh->setLighting( true, true );
+        xml->shieldmesh->SetBlendMode(ONE, ONE, true);
+        xml->shieldmesh->setEnvMap(false, true);
+        xml->shieldmesh->setLighting(true, true);
     }
 }
 
-void addRapidMesh( Unit::XML *xml, const char *filename, const float scale, int faction, class Flightgroup *fg )
+void addRapidMesh(Unit::XML *xml, const char *filename, const float scale, int faction, class Flightgroup *fg)
 {
-    xml->rapidmesh = Mesh::LoadMesh( filename, Vector( scale, scale, scale ), faction, fg );
+    xml->rapidmesh = Mesh::LoadMesh(filename, Vector(scale, scale, scale), faction, fg);
 }
 
-void pushMesh( std::vector< Mesh* > &meshes,
-               float &randomstartframe,
-               float &randomstartseconds,
-               const char *filename,
-               const float scale,
-               int faction,
-               class Flightgroup *fg,
-               int startframe,
-               double texturestarttime )
+void pushMesh(std::vector<Mesh *> &meshes,
+              float &randomstartframe,
+              float &randomstartseconds,
+              const char *filename,
+              const float scale,
+              int faction,
+              class Flightgroup *fg,
+              int startframe,
+              double texturestarttime)
 {
-    vector< Mesh* >m = Mesh::LoadMeshes( filename, Vector( scale, scale, scale ), faction, fg );
+    vector<Mesh *> m = Mesh::LoadMeshes(filename, Vector(scale, scale, scale), faction, fg);
     for (unsigned int i = 0; i < m.size(); ++i) {
-        meshes.push_back( m[i] );
+        meshes.push_back(m[i]);
         if (startframe >= 0) {
-            meshes.back()->setCurrentFrame( startframe );
+            meshes.back()->setCurrentFrame(startframe);
         } else if (startframe == -2) {
-            float r = ( (float) rand() )/RAND_MAX;
-            meshes.back()->setCurrentFrame( r*meshes.back()->getFramesPerSecond() );
+            float r = ((float) rand()) / RAND_MAX;
+            meshes.back()->setCurrentFrame(r * meshes.back()->getFramesPerSecond());
         } else if (startframe == -1) {
-            if (randomstartseconds == 0)
-                randomstartseconds = randomstartframe*meshes.back()->getNumLOD()/meshes.back()->getFramesPerSecond();
-            meshes.back()->setCurrentFrame( randomstartseconds*meshes.back()->getFramesPerSecond() );
+            if (randomstartseconds == 0) {
+                randomstartseconds =
+                        randomstartframe * meshes.back()->getNumLOD() / meshes.back()->getFramesPerSecond();
+            }
+            meshes.back()->setCurrentFrame(randomstartseconds * meshes.back()->getFramesPerSecond());
         }
         if (texturestarttime > 0) {
-            meshes.back()->setTextureCumulativeTime( texturestarttime );
+            meshes.back()->setTextureCumulativeTime(texturestarttime);
         } else {
-            float  fps    = meshes.back()->getTextureFramesPerSecond();
-            int    frames = meshes.back()->getNumTextureFrames();
-            double ran    = randomstartframe;
+            float fps = meshes.back()->getTextureFramesPerSecond();
+            int frames = meshes.back()->getNumTextureFrames();
+            double ran = randomstartframe;
             if (fps > 0 && frames > 1) {
-                ran *= frames/fps;
+                ran *= frames / fps;
             } else {
                 ran *= 1000;
             }
-            meshes.back()->setTextureCumulativeTime( ran );
+            meshes.back()->setTextureCumulativeTime(ran);
         }
     }
 }

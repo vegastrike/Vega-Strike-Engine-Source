@@ -3,6 +3,8 @@
  *
  * Copyright (C) 2020 Roy Falk, Stephen G. Tuggy and other Vega Strike
  * contributors
+ * Copyright (C) 2021 Roy Falk
+ * Copyright (C) 2022 Stephen G. Tuggy
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -39,22 +41,29 @@ class Unit;
 class UnitCollection;
 struct Quaternion;
 
-
-class Movable
-{
+class Movable {
 
 protected:
-
 
 public:
     //mass of this unit (may change with cargo)
     // TODO: subclass with return Mass+fuel;
-    float  Mass;
+    float Mass;
 
+    float getMass()
+    {
+        return Mass;
+    }
 
-    float getMass() { return Mass;}
-    float getMass() const { return Mass;}
-    void setMass(float mass) { Mass = mass;}
+    float getMass() const
+    {
+        return Mass;
+    }
+
+    void setMass(float mass)
+    {
+        Mass = mass;
+    }
 
     // Fields
 
@@ -74,7 +83,7 @@ public:
     Vector Velocity;
 
     // TODO: move enum to dockable class
-    enum DOCKENUM {NOT_DOCKED=0x0, DOCKED_INSIDE=0x1, DOCKED=0x2, DOCKING_UNITS=0x4};
+    enum DOCKENUM { NOT_DOCKED = 0x0, DOCKED_INSIDE = 0x1, DOCKED = 0x2, DOCKING_UNITS = 0x4 };
 
     //The previous state in last physics frame to interpolate within
     Transformation prev_physical_state;
@@ -86,13 +95,13 @@ public:
     bool resolveforces;
 
     //The number of frames ahead this was put in the simulation queue
-    unsigned int   sim_atom_multiplier;
+    unsigned int sim_atom_multiplier;
     //The number of frames ahead this is predicted to be scheduled in the next scheduling round
-    unsigned int   predicted_priority;
+    unsigned int predicted_priority;
     //When will physical simulation occur
-    unsigned int   cur_sim_queue_slot;
+    unsigned int cur_sim_queue_slot;
     //Used with subunit scheduling, to avoid the complex ickiness of having to synchronize scattered slots
-    unsigned int   last_processed_sqs;
+    unsigned int last_processed_sqs;
 
     // TODO: this should go up to ship
     unsigned char docked;
@@ -107,31 +116,30 @@ public:
     //How big is this unit
     float radial_size;
 
-    class graphic_options
-    {
-public:
-        unsigned SubUnit : 1;
-        unsigned RecurseIntoSubUnitsOnCollision : 1;
-        unsigned missilelock : 1;
-        unsigned FaceCamera : 1;
-        unsigned Animating : 1;
-        unsigned InWarp : 1;
-        unsigned WarpRamping : 1;
-        unsigned unused1 : 1;
-        unsigned NoDamageParticles : 1;
-        unsigned specInterdictionOnline : 1;
+    class graphic_options {
+    public:
+        unsigned SubUnit: 1;
+        unsigned RecurseIntoSubUnitsOnCollision: 1;
+        unsigned missilelock: 1;
+        unsigned FaceCamera: 1;
+        unsigned Animating: 1;
+        unsigned InWarp: 1;
+        unsigned WarpRamping: 1;
+        unsigned unused1: 1;
+        unsigned NoDamageParticles: 1;
+        unsigned specInterdictionOnline: 1;
         unsigned char NumAnimationPoints;
-        float    WarpFieldStrength = 1;
-        float    RampCounter;
-        float    MinWarpMultiplier;
-        float    MaxWarpMultiplier;
+        float WarpFieldStrength = 1;
+        float RampCounter;
+        float MinWarpMultiplier;
+        float MaxWarpMultiplier;
 
         graphic_options();
     }
-    graphicOptions;
+            graphicOptions;
 protected:
     //Moment of intertia of this unit
-    float  Momentofinertia; // Was 0 but Init says 0.01
+    float Momentofinertia; // Was 0 but Init says 0.01
     Vector SavedAccel;
     Vector SavedAngAccel;
     static bool configLoaded;
@@ -165,106 +173,111 @@ public:
 
 protected:
     // forbidden
-    Movable( const Movable& ) = delete;
+    Movable(const Movable &) = delete;
     // forbidden
-    Movable& operator= ( const Movable& ) = delete;
+    Movable &operator=(const Movable &) = delete;
     virtual ~Movable() = default;
 
 public:
-    void AddVelocity( float difficulty );
+    void AddVelocity(float difficulty);
 //Resolves forces of given unit on a physics frame
-    virtual Vector ResolveForces( const Transformation&, const Matrix& );
+    virtual Vector ResolveForces(const Transformation &, const Matrix &);
 
     //Sets the unit-space position
-    void SetPosition( const QVector &pos );
+    void SetPosition(const QVector &pos);
 
 //Returns the pqr oritnattion of the unit in world space
-    void SetOrientation( QVector q, QVector r );
-    void SetOrientation( Quaternion Q );
-    void SetOrientation( QVector p, QVector q, QVector r );
-    void GetOrientation( Vector &p, Vector &q, Vector &r ) const;
+    void SetOrientation(QVector q, QVector r);
+    void SetOrientation(Quaternion Q);
+    void SetOrientation(QVector p, QVector q, QVector r);
+    void GetOrientation(Vector &p, Vector &q, Vector &r) const;
     Vector GetNetAcceleration() const;
     Vector GetNetAngularAcceleration() const;
+
 //acceleration, retrieved from NetForce - not stable (partial during simulation), use GetAcceleration()
     Vector GetAcceleration() const
     {
         return SavedAccel;
     }
+
     Vector GetAngularAcceleration() const
     {
         return SavedAngAccel;
     }
-//acceleration, stable over the simulation
-    float GetMaxAccelerationInDirectionOf( const Vector &ref, bool afterburn ) const;
-//Transforms a orientation vector Up a coordinate level. Does not take position into account
-    Vector UpCoordinateLevel( const Vector &v ) const;
-//Transforms a orientation vector Down a coordinate level. Does not take position into account
-    Vector DownCoordinateLevel( const Vector &v ) const;
-//Transforms a orientation vector from world space to local space. Does not take position into account
-    Vector ToLocalCoordinates( const Vector &v ) const;
-//Transforms a orientation vector to world space. Does not take position into account
-    Vector ToWorldCoordinates( const Vector &v ) const;
 
-    virtual bool isPlayerShip() { return false; };
+//acceleration, stable over the simulation
+    float GetMaxAccelerationInDirectionOf(const Vector &ref, bool afterburn) const;
+//Transforms a orientation vector Up a coordinate level. Does not take position into account
+    Vector UpCoordinateLevel(const Vector &v) const;
+//Transforms a orientation vector Down a coordinate level. Does not take position into account
+    Vector DownCoordinateLevel(const Vector &v) const;
+//Transforms a orientation vector from world space to local space. Does not take position into account
+    Vector ToLocalCoordinates(const Vector &v) const;
+//Transforms a orientation vector to world space. Does not take position into account
+    Vector ToWorldCoordinates(const Vector &v) const;
+
+    virtual bool isPlayerShip()
+    {
+        return false;
+    };
 
     //Updates physics given unit space transformations and if this is the last physics frame in the current gfx frame
     //Not needed here, so only in NetUnit and Unit classes
-        void UpdatePhysics( const Transformation &trans,
-                            const Matrix &transmat,
-                            const Vector &CumulativeVelocity,
-                            bool ResolveLast,
-                            UnitCollection *uc,
-                            Unit *superunit );
-        virtual void UpdatePhysics2( const Transformation &trans,
-                                     const Transformation &old_physical_state,
-                                     const Vector &accel,
-                                     float difficulty,
-                                     const Matrix &transmat,
-                                     const Vector &CumulativeVelocity,
-                                     bool ResolveLast,
-                                     UnitCollection *uc = NULL );
+    void UpdatePhysics(const Transformation &trans,
+                       const Matrix &transmat,
+                       const Vector &CumulativeVelocity,
+                       bool ResolveLast,
+                       UnitCollection *uc,
+                       Unit *superunit);
+    virtual void UpdatePhysics2(const Transformation &trans,
+                                const Transformation &old_physical_state,
+                                const Vector &accel,
+                                float difficulty,
+                                const Matrix &transmat,
+                                const Vector &CumulativeVelocity,
+                                bool ResolveLast,
+                                UnitCollection *uc = NULL);
 
     //Returns unit-space ang velocity
-    const Vector& GetAngularVelocity() const
+    const Vector &GetAngularVelocity() const
     {
         return AngularVelocity;
     }
+
     //Return unit-space velocity
-    const Vector& GetVelocity() const
+    const Vector &GetVelocity() const
     {
         return cumulative_velocity;
     }
 
-    void SetVelocity( const Vector& );
-    void SetAngularVelocity( const Vector& );
+    void SetVelocity(const Vector &);
+    void SetAngularVelocity(const Vector &);
+
     float GetMoment() const
     {
         return Momentofinertia; // TODO: subclass with return Momentofinertia+fuel;
     }
+
     float GetMass() const
     {
         return Mass; // TODO: subclass with return Mass+fuel;
     }
 
     //Sets if forces should resolve on this unit or not
-    void SetResolveForces( bool );
+    void SetResolveForces(bool);
 
-
-
-    float GetMaxWarpFieldStrength( float rampmult = 1.f ) const;
-    void DecreaseWarpEnergy( bool insystem, float time = 1.0f );
-    void IncreaseWarpEnergy( bool insystem, float time = 1.0f );
+    float GetMaxWarpFieldStrength(float rampmult = 1.f) const;
+    void DecreaseWarpEnergy(bool insystem, float time = 1.0f);
+    void IncreaseWarpEnergy(bool insystem, float time = 1.0f);
     //Rotates about the axis
-    void Rotate( const Vector &axis );
+    void Rotate(const Vector &axis);
 
     virtual QVector realPosition() = 0;
     virtual void UpdatePhysics3(const Transformation &trans,
-                        const Matrix &transmat,
-                        bool lastframe,
-                        UnitCollection *uc,
-                        Unit *superunit) = 0;
+                                const Matrix &transmat,
+                                bool lastframe,
+                                UnitCollection *uc,
+                                Unit *superunit) = 0;
 };
-
-
 
 #endif // MOVABLE_H

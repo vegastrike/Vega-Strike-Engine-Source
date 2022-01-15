@@ -3,6 +3,7 @@
  *
  * Copyright (C) 2020 Roy Falk, Stephen G. Tuggy and other Vega Strike
  * contributors
+ * Copyright (C) 2022 Stephen G. Tuggy
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -41,50 +42,47 @@ class Cockpit;
  * we do initialization in stages.
 */
 
-class Collision
-{
+class Collision {
     // Stage 1
-    Cockpit* cockpit;
-    Unit* unit;
+    Cockpit *cockpit;
+    Unit *unit;
     _UnitType unit_type;
     bool is_player_ship;
-    const QVector& location;
-    const Vector& normal;
+    const QVector &location;
+    const Vector &normal;
     float mass;
     Vector position;
     Vector velocity;
     bool apply_force = false;
     bool deal_damage = false;
 
-    
-
-    Collision(Unit* unit, const QVector &location, const Vector& normal);
+    Collision(Unit *unit, const QVector &location, const Vector &normal);
     //pre-process based on colliding unit types to determine if force/damage should actually occur (e.g. virtual units, jump points, etc. may react differently)
-    void shouldApplyForceAndDealDamage(Unit* other_unit);
+    void shouldApplyForceAndDealDamage(Unit *other_unit);
     // Interpenetration kludge that moves the position of the colliding objects (to a hopefully non-interpenetrating location) BEFORE applying the force that puts them on the correct trajectory
-    void adjustInterpenetration(QVector& new_velocity, QVector& new_angular_velocity, const Vector& normal);
+    void adjustInterpenetration(QVector &new_velocity, QVector &new_angular_velocity, const Vector &normal);
     // needs force and location-relative-to-center-of-mass to apply torque
     void applyForce(QVector &force, QVector &location);
     // pass change in kinetic energy of entire system - collision can decide what to do with the energy values
     void dealDamage(Collision other_collision, double deltaKE_linear, double deltaKE_angular);
     bool crashLand(Unit *base);
 public:
-    static void collide( Unit* unit1,
-                           const QVector &location1,
-                           const Vector &normal1,
-                           Unit* unit2,
-                           const QVector &location2,
-                           const Vector &normal2,
-                           float distance );
-    static void validateCollision(const QVector &relative_velocity, 
-                                    const Vector &normal1, 
-                                    const QVector &location1_local, 
-                                    const QVector &location2_local, 
-                                    const QVector &v1_new, 
-                                    const QVector &v2_new, 
-                                    const QVector &w1_new, 
-                                    const QVector &w2_new);
-        
+    static void collide(Unit *unit1,
+                        const QVector &location1,
+                        const Vector &normal1,
+                        Unit *unit2,
+                        const QVector &location2,
+                        const Vector &normal2,
+                        float distance);
+    static void validateCollision(const QVector &relative_velocity,
+                                  const Vector &normal1,
+                                  const QVector &location1_local,
+                                  const QVector &location2_local,
+                                  const QVector &v1_new,
+                                  const QVector &v2_new,
+                                  const QVector &w1_new,
+                                  const QVector &w2_new);
+
 };
 
 #endif // COLLISION_H
