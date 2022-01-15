@@ -36,7 +36,7 @@
  * If the health of a non-regenerative facet is zero, it is destroyed.
  * If this facet is the sole facet of a DamageableLayer, it is destroyed.
  * If this DamageableLayer is mortal, the whole DamageableObject is destroyed.
- * Therefore, destroying the hull of a ship destoys it.
+ * Therefore, destroying the hull of a ship destroys it.
  * But, destroying the reactor or life-support of a ship also disabled it,
  * killing everyone inside,
  * potentially without actually destroying the ship.
