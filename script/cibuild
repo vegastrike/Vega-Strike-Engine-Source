@@ -8,7 +8,7 @@
 ##
 # cibuild
 #
-# Copyright (c) 2020-2021 Stephen G. Tuggy and other Vega Strike Contributors
+# Copyright (c) 2020-2022 Stephen G. Tuggy and other Vega Strike Contributors
 #
 # https://github.com/vegastrike/Vega-Strike-Engine-Source
 #
@@ -45,7 +45,7 @@ then
         export CC=clang
         export CXX=clang++
     fi
-    docker run --env CC=$CC --env CXX=$CXX --env IS_RELEASE=$IS_RELEASE --env TAG_NAME=$TAG_NAME --env GITHUB_SHA=$GITHUB_SHA --env FLAGS="$FLAGS" --name $DOCKER_CONTAINER_NAME $DST_DOCKER_IMG_NAME
+    docker run --env CC=$CC --env CXX=$CXX --env IS_RELEASE=$IS_RELEASE --env TAG_NAME=$TAG_NAME --env GITHUB_SHA=$GITHUB_SHA --env SHORT_SHA=$SHORT_SHA --env FLAGS="$FLAGS" --name $DOCKER_CONTAINER_NAME $DST_DOCKER_IMG_NAME
     docker cp $DOCKER_CONTAINER_NAME:/usr/src/Vega-Strike-Engine-Source/bin .
     if [ $IS_RELEASE -eq 1 ]
     then
