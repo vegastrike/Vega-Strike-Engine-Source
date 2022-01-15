@@ -1,3 +1,28 @@
+/*
+ * damageable_layer.h
+ *
+ * Copyright (C) 2021 Roy Falk
+ * Copyright (C) 2022 Stephen G. Tuggy
+ *
+ * https://github.com/vegastrike/Vega-Strike-Engine-Source
+ *
+ * This file is part of Vega Strike.
+ *
+ * Vega Strike is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * Vega Strike is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
+ */
+
+
 #ifndef DAMAGEABLELAYER_H
 #define DAMAGEABLELAYER_H
 
@@ -12,8 +37,7 @@
  * This can be shields, armor, hull or subsystem.
  * A layer can be regenerative (e.g. shields) or not (pretty much everything else).
  */
-struct DamageableLayer
-{
+struct DamageableLayer {
 
     int layer_index;
     FacetConfiguration configuration;
@@ -29,9 +53,9 @@ struct DamageableLayer
 
     //static float damage_component_chance = 0.03;
     DamageableLayer(int layer_index,
-                      FacetConfiguration configuration,
-                      Health health_template,
-                      bool core_layer);
+                    FacetConfiguration configuration,
+                    Health health_template,
+                    bool core_layer);
 
     DamageableLayer(int layer_index,
                     FacetConfiguration configuration,
@@ -41,12 +65,12 @@ struct DamageableLayer
 
     DamageableLayer(int layer_index,
                     int number_of_facets,
-                    std::vector<Health>& facets,
+                    std::vector<Health> &facets,
                     bool core_layer);
     DamageableLayer();
 
-    void AdjustPower(const float& percent);
-    void DealDamage( const CoreVector &attack_vector, Damage &damage, InflictedDamage& inflicted_damage );
+    void AdjustPower(const float &percent);
+    void DealDamage(const CoreVector &attack_vector, Damage &damage, InflictedDamage &inflicted_damage);
     void Destroy();
     void Disable();
     void GradualDisable();
@@ -55,10 +79,10 @@ struct DamageableLayer
     bool Enabled();
     void Enhance();
 
-    int GetFacetIndex(const CoreVector& attack_vector);
+    int GetFacetIndex(const CoreVector &attack_vector);
 
-    void ReduceLayerCapability(const float& percent,
-                               const float& chance_to_reduce_regeneration);
+    void ReduceLayerCapability(const float &percent,
+                               const float &chance_to_reduce_regeneration);
 
     float TotalLayerValue();
     float TotalMaxLayerValue();
@@ -72,7 +96,7 @@ struct DamageableLayer
     void RegenerateOrDischarge(float recharge, bool velocity_discharge, float discharge_rate);
     float GetRegeneration();
     void UpdateFacets(const unsigned int size, const float new_facets[4]);
-    void UpdateRegeneration(const float& new_regeneration_value);
+    void UpdateRegeneration(const float &new_regeneration_value);
 };
 
 #endif // DAMAGEABLELAYER_H

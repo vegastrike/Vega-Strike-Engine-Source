@@ -1,3 +1,28 @@
+/*
+ * damageable_object.h
+ *
+ * Copyright (C) 2021 Roy Falk
+ * Copyright (C) 2022 Stephen G. Tuggy
+ *
+ * https://github.com/vegastrike/Vega-Strike-Engine-Source
+ *
+ * This file is part of Vega Strike.
+ *
+ * Vega Strike is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * Vega Strike is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
+ */
+
+
 #ifndef DAMAGEABLEOBJECT_H
 #define DAMAGEABLEOBJECT_H
 
@@ -6,10 +31,9 @@
 #include "core_vector.h"
 
 /**
- * @brief The DamageableObject class repesents an overall game object - ship, space station, missile, etc.
+ * @brief The DamageableObject class represents an overall game object - ship, space station, missile, etc.
  */
-struct DamageableObject
-{
+struct DamageableObject {
     int number_of_layers;
     std::vector<DamageableLayer> layers;        // Typically shield/armor/hull
     std::vector<DamageableObject> components;   // Propoulsion, life support,
@@ -18,14 +42,14 @@ struct DamageableObject
                      std::vector<DamageableObject> components);
     DamageableObject();
 
-    InflictedDamage DealDamage( const CoreVector &attack_vector, Damage &damage );
+    InflictedDamage DealDamage(const CoreVector &attack_vector, Damage &damage);
 
     void Destroy();
     bool Destroyed();
 
     // Callbacks
     void (*explosion)(DamageableObject object);
-    void* (*residual_debris)(DamageableObject object);
+    void *(*residual_debris)(DamageableObject object);
 };
 
 #endif // DAMAGEABLEOBJECT_H
