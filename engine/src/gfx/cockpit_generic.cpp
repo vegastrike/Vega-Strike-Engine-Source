@@ -944,7 +944,7 @@ string Cockpit::MakeBaseName(const Unit *base)
     return name;
 }
 
-SoundContainer* Cockpit::GetSoundForEvent(Cockpit::EVENTID eventId) const
+SoundContainer* Cockpit::GetSoundForEvent(CockpitEvent eventId) const
 {
     if (eventId < sounds.size())
         return sounds[eventId];
@@ -952,7 +952,7 @@ SoundContainer* Cockpit::GetSoundForEvent(Cockpit::EVENTID eventId) const
         return NULL;
 }
 
-void Cockpit::SetSoundForEvent(Cockpit::EVENTID eventId, const SoundContainer &soundSpecs)
+void Cockpit::SetSoundForEvent(CockpitEvent eventId, const SoundContainer &soundSpecs)
 {
     while (eventId >= sounds.size())
         sounds.push_back(NULL);

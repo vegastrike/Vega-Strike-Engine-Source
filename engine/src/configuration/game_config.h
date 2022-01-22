@@ -113,6 +113,14 @@ inline int GameConfig::GetVariable(string const &section, string const &name, in
     return std::stoi(result);
 }
 
+template <>
+inline std::string GameConfig::GetVariable(string const &section, string const &name, std::string default_value)
+{
+    string result = _GetVariable(section, name);
+    if(result == DEFAULT_ERROR_VALUE) return default_value;
+    return result;
+}
+
 // With Subsection
 template <>
 inline bool GameConfig::GetVariable(string const &section, string const &sub_section,

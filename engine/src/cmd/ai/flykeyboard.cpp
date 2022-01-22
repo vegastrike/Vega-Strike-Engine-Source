@@ -36,6 +36,7 @@
 #include "gfx/cockpit.h"
 #include "lin_time.h"
 #include "universe.h"
+#include "cockpit/cockpit_audio.h"
 
 struct StarShipControlKeyboard
 {

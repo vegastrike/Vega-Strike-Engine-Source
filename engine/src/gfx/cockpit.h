@@ -53,43 +53,7 @@ using namespace XMLSupport;   // DONT PUT THIS ABOVE HEADERS
  * The ones starting from KPS are digital with text readout
  */
 
-struct soundContainer   //used to contain static sounds that will only be
-{
-    //created once and will get deleted automatically
-    int sound;
-    soundContainer()
-    {
-        sound = -2;
-    }
-    void loadsound( string sooundfile, bool looping = false );
-    void playsound();
-    ~soundContainer();
-};
 
-struct soundArray
-{
-    soundContainer *ptr;
-    soundArray()
-    {
-        ptr = NULL;
-    }
-    void deallocate()
-    {
-        if (ptr != NULL) {
-            delete[] ptr;
-            ptr = NULL;
-        }
-    }
-    void allocate( int siz )
-    {
-        deallocate();
-        ptr = new soundContainer[siz];
-    }
-    ~soundArray()
-    {
-        deallocate();
-    }
-};
 
 class GameCockpit : public Cockpit
 {
@@ -169,11 +133,7 @@ class GameCockpit : public Cockpit
     void endElement( const string &name );
     ///Destructs cockpit info for new loading
     void Delete();
-    ///draws the navigation symbol around targetted location
-    void DrawNavigationSymbol( const Vector &loc, const Vector &p, const Vector &q, float size );
-    ///draws the target box around targetted unit
-    float computeLockingSymbol( Unit *par );
-    void DrawTargetBox(const Radar::Sensor&);
+
     ///draws the target box around all units
     void DrawTargetBoxes(const Radar::Sensor&);
     ///draws a target cross around all units targeted by your turrets // ** jay
@@ -202,7 +162,6 @@ public:
     virtual string getTargetLabel();
     void ReceivedTargetInfo();
     static void NavScreen( const KBData&, KBSTATE k ); //scheherazade
-    static string getsoundending( int which = 0 );
     static string getsoundfile( string filename );
     void InitStatic();
     void Shake( float amt, int level /*0= shield 1=armor 2=hull*/ );

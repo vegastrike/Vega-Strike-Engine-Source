@@ -216,49 +216,49 @@ const EnumMap::Pair attribute_names[] = {
     
     
     // Cockpit events
-    EnumMap::Pair( "WarpReady",     Cockpit::WARP_READY ),
-    EnumMap::Pair( "WarpUnready",   Cockpit::WARP_UNREADY ),
-    EnumMap::Pair( "WarpEngaged",   Cockpit::WARP_ENGAGED ),
-    EnumMap::Pair( "WarpDisengaged",Cockpit::WARP_DISENGAGED ),
-    EnumMap::Pair( "WarpLoop0",     Cockpit::WARP_LOOP0 ),
-    EnumMap::Pair( "WarpLoop1",     Cockpit::WARP_LOOP0+1 ),
-    EnumMap::Pair( "WarpLoop2",     Cockpit::WARP_LOOP0+2 ),
-    EnumMap::Pair( "WarpLoop3",     Cockpit::WARP_LOOP0+3 ),
-    EnumMap::Pair( "WarpLoop4",     Cockpit::WARP_LOOP0+4 ),
-    EnumMap::Pair( "WarpLoop5",     Cockpit::WARP_LOOP0+5 ),
-    EnumMap::Pair( "WarpLoop6",     Cockpit::WARP_LOOP0+6 ),
-    EnumMap::Pair( "WarpLoop7",     Cockpit::WARP_LOOP0+7 ),
-    EnumMap::Pair( "WarpLoop8",     Cockpit::WARP_LOOP0+8 ),
-    EnumMap::Pair( "WarpLoop9",     Cockpit::WARP_LOOP0+9 ),
-    EnumMap::Pair( "WarpSkip0",     Cockpit::WARP_LOOP0 ),
-    EnumMap::Pair( "WarpSkip1",     Cockpit::WARP_LOOP0+1 ),
-    EnumMap::Pair( "WarpSkip2",     Cockpit::WARP_LOOP0+2 ),
-    EnumMap::Pair( "WarpSkip3",     Cockpit::WARP_LOOP0+3 ),
-    EnumMap::Pair( "WarpSkip4",     Cockpit::WARP_LOOP0+4 ),
-    EnumMap::Pair( "WarpSkip5",     Cockpit::WARP_LOOP0+5 ),
-    EnumMap::Pair( "WarpSkip6",     Cockpit::WARP_LOOP0+6 ),
-    EnumMap::Pair( "WarpSkip7",     Cockpit::WARP_LOOP0+7 ),
-    EnumMap::Pair( "WarpSkip8",     Cockpit::WARP_LOOP0+8 ),
-    EnumMap::Pair( "WarpSkip9",     Cockpit::WARP_LOOP0+9 ),
+    EnumMap::Pair( "WarpReady",     CockpitEvent::WARP_READY ),
+    EnumMap::Pair( "WarpUnready",   CockpitEvent::WARP_UNREADY ),
+    EnumMap::Pair( "WarpEngaged",   CockpitEvent::WARP_ENGAGED ),
+    EnumMap::Pair( "WarpDisengaged",CockpitEvent::WARP_DISENGAGED ),
+    EnumMap::Pair( "WarpLoop0",     CockpitEvent::WARP_LOOP0 ),
+    EnumMap::Pair( "WarpLoop1",     CockpitEvent::WARP_LOOP0+1 ),
+    EnumMap::Pair( "WarpLoop2",     CockpitEvent::WARP_LOOP0+2 ),
+    EnumMap::Pair( "WarpLoop3",     CockpitEvent::WARP_LOOP0+3 ),
+    EnumMap::Pair( "WarpLoop4",     CockpitEvent::WARP_LOOP0+4 ),
+    EnumMap::Pair( "WarpLoop5",     CockpitEvent::WARP_LOOP0+5 ),
+    EnumMap::Pair( "WarpLoop6",     CockpitEvent::WARP_LOOP0+6 ),
+    EnumMap::Pair( "WarpLoop7",     CockpitEvent::WARP_LOOP0+7 ),
+    EnumMap::Pair( "WarpLoop8",     CockpitEvent::WARP_LOOP0+8 ),
+    EnumMap::Pair( "WarpLoop9",     CockpitEvent::WARP_LOOP0+9 ),
+    EnumMap::Pair( "WarpSkip0",     CockpitEvent::WARP_LOOP0 ),
+    EnumMap::Pair( "WarpSkip1",     CockpitEvent::WARP_LOOP0+1 ),
+    EnumMap::Pair( "WarpSkip2",     CockpitEvent::WARP_LOOP0+2 ),
+    EnumMap::Pair( "WarpSkip3",     CockpitEvent::WARP_LOOP0+3 ),
+    EnumMap::Pair( "WarpSkip4",     CockpitEvent::WARP_LOOP0+4 ),
+    EnumMap::Pair( "WarpSkip5",     CockpitEvent::WARP_LOOP0+5 ),
+    EnumMap::Pair( "WarpSkip6",     CockpitEvent::WARP_LOOP0+6 ),
+    EnumMap::Pair( "WarpSkip7",     CockpitEvent::WARP_LOOP0+7 ),
+    EnumMap::Pair( "WarpSkip8",     CockpitEvent::WARP_LOOP0+8 ),
+    EnumMap::Pair( "WarpSkip9",     CockpitEvent::WARP_LOOP0+9 ),
     
-    EnumMap::Pair( "ASAPEngaged",   Cockpit::ASAP_ENGAGED ),
-    EnumMap::Pair( "ASAPDisengaged",Cockpit::ASAP_DISENGAGED ),
-    EnumMap::Pair( "ASAPDockingAvailable",   Cockpit::ASAP_DOCKING_AVAILABLE ),
-    EnumMap::Pair( "ASAPDockingEngaged",     Cockpit::ASAP_DOCKING_ENGAGED ),
-    EnumMap::Pair( "ASAPDockingDisengaged",  Cockpit::ASAP_DOCKING_DISENGAGED ),
-    EnumMap::Pair( "FlightComputerEnabled",  Cockpit::FLIGHT_COMPUTER_ENABLED ),
-    EnumMap::Pair( "FlightComputerDisabled", Cockpit::FLIGHT_COMPUTER_DISABLED ),
+    EnumMap::Pair( "ASAPEngaged",   CockpitEvent::ASAP_ENGAGED ),
+    EnumMap::Pair( "ASAPDisengaged",CockpitEvent::ASAP_DISENGAGED ),
+    EnumMap::Pair( "ASAPDockingAvailable",   CockpitEvent::ASAP_DOCKING_AVAILABLE ),
+    EnumMap::Pair( "ASAPDockingEngaged",     CockpitEvent::ASAP_DOCKING_ENGAGED ),
+    EnumMap::Pair( "ASAPDockingDisengaged",  CockpitEvent::ASAP_DOCKING_DISENGAGED ),
+    EnumMap::Pair( "FlightComputerEnabled",  CockpitEvent::FLIGHT_COMPUTER_ENABLED ),
+    EnumMap::Pair( "FlightComputerDisabled", CockpitEvent::FLIGHT_COMPUTER_DISABLED ),
 
-    EnumMap::Pair( "DockAvailable",     Cockpit::DOCK_AVAILABLE ),
-    EnumMap::Pair( "DockUnavailable",   Cockpit::DOCK_UNAVAILABLE ),
-    EnumMap::Pair( "DockFailed",        Cockpit::DOCK_FAILED ),
-    EnumMap::Pair( "JumpAvailable",     Cockpit::JUMP_AVAILABLE ),    
-    EnumMap::Pair( "JumpUnavailable",   Cockpit::JUMP_UNAVAILABLE ),    
-    EnumMap::Pair( "JumpFailed",        Cockpit::JUMP_FAILED ),    
+    EnumMap::Pair( "DockAvailable",     CockpitEvent::DOCK_AVAILABLE ),
+    EnumMap::Pair( "DockUnavailable",   CockpitEvent::DOCK_UNAVAILABLE ),
+    EnumMap::Pair( "DockFailed",        CockpitEvent::DOCK_FAILED ),
+    EnumMap::Pair( "JumpAvailable",     CockpitEvent::JUMP_AVAILABLE ),
+    EnumMap::Pair( "JumpUnavailable",   CockpitEvent::JUMP_UNAVAILABLE ),
+    EnumMap::Pair( "JumpFailed",        CockpitEvent::JUMP_FAILED ),
 
-    EnumMap::Pair( "Lock",              Cockpit::LOCK_WARNING ),
-    EnumMap::Pair( "MissileLock",       Cockpit::MISSILELOCK_WARNING ),
-    EnumMap::Pair( "Eject",             Cockpit::EJECT_WARNING ),
+    EnumMap::Pair( "Lock",              CockpitEvent::LOCK_WARNING ),
+    EnumMap::Pair( "MissileLock",       CockpitEvent::MISSILELOCK_WARNING ),
+    EnumMap::Pair( "Eject",             CockpitEvent::EJECT_WARNING ),
 
 };
 
@@ -654,7 +654,7 @@ loadsprite:
             std::string soundfile;
             bool looping = false;
             float gain = 1.0f;
-            EVENTID event = Cockpit::NUM_EVENTS;
+            CockpitEvent event = CockpitEvent::NUM_EVENTS;
             
             for (iter = attributes.begin(); iter != attributes.end(); iter++) {
                 switch ( attribute_map.lookup( (*iter).name ) )
@@ -666,7 +666,7 @@ loadsprite:
                     looping = XMLSupport::parse_bool( (*iter).value );
                     break;
                 case EVENT:
-                    event = (Cockpit::EVENTID) attribute_map.lookup( (*iter).value );
+                    event = (CockpitEvent) attribute_map.lookup( (*iter).value );
                     break;
                 case GAIN:
                     gain = XMLSupport::parse_float( (*iter).value );
@@ -676,7 +676,7 @@ loadsprite:
                 }
             }
             
-            if (!soundfile.empty() && (event > 0) && (event < Cockpit::NUM_EVENTS)) {
+            if (!soundfile.empty() && (event > 0) && (event < CockpitEvent::NUM_EVENTS)) {
                 SetSoundForEvent(event, SoundContainer(soundfile, looping, gain));
             }
         }

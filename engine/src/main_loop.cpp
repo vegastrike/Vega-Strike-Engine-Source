@@ -83,6 +83,7 @@
 #include "in_kb_data.h"
 #include "vs_random.h"
 #include "enhancement.h"
+#include "cockpit/cockpit_audio.h"
 
 #include "options.h"
 

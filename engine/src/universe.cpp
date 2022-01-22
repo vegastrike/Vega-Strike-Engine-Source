@@ -28,7 +28,6 @@
 #include <fcntl.h>
 #include "gfxlib.h"
 #include "universe.h"
-#include "lin_time.h"
 #include "in.h"
 #include "gfx/aux_texture.h"
 #include "profile.h"
@@ -55,6 +54,7 @@
 #include "cmd/role_bitmask.h"
 #include "universe_globals.h"
 #include "vs_logging.h"
+#include "cockpit/cockpit_audio.h"
 
 #include "weapon_factory.h"
 
@@ -78,7 +78,6 @@ extern void SortStarSystems( vector< StarSystem* > &ss, StarSystem *drawn );
 extern void bootstrap_first_loop();
 extern bool RefreshGUI();
 extern float rand01();
-extern int timecount;
 extern StarSystem * GetLoadedStarSystem( const char *system );
 extern bool screenshotkey;
 extern int getmicrosleep();
@@ -119,63 +118,6 @@ void CalculateCoords( unsigned int i, unsigned int size, float &x, float &y, flo
 
 
 
-inline void loadsounds( const string &str, const int max, soundArray &snds, bool loop = false )
-{
-    char addstr[2] = {'\0'};
-    snds.allocate( max );
-    for (int i = 0; i < max; ++i) {
-        addstr[0] = '1'+i;
-        string mynewstr = str;
-        while (1) {
-            std::string::size_type found = mynewstr.find( '?' );
-            if (found != std::string::npos) {
-                mynewstr[found] = addstr[0];
-            } else {
-                break;
-            }
-        }
-        snds.ptr[i].loadsound( mynewstr, loop );
-    }
-}
-
-static void UpdateTimeCompressionSounds()
-{
-    static int lasttimecompress = 0;
-    if ( (timecount != lasttimecompress) && (game_options.compress_max > 0) ) {
-        static bool inittimecompresssounds = false;
-        static soundArray loop_snds;
-        static soundArray burst_snds;
-        static soundArray end_snds;
-        if (inittimecompresssounds == false) {
-            loadsounds( game_options.compress_loop, game_options.compress_max, loop_snds, true );
-            loadsounds( game_options.compress_stop, game_options.compress_max, end_snds );
-            loadsounds( game_options.compress_change, game_options.compress_max, burst_snds );
-            inittimecompresssounds = true;
-        }
-        int soundfile     = (timecount-1)/game_options.compress_interval;
-        int lastsoundfile = (lasttimecompress-1)/game_options.compress_interval;
-        if (timecount > 0 && lasttimecompress >= 0) {
-            if ( (soundfile+1) >= game_options.compress_max ) {
-                burst_snds.ptr[game_options.compress_max-1].playsound();
-            } else {
-                if ( lasttimecompress > 0 && loop_snds.ptr[lastsoundfile].sound >= 0
-                    && AUDIsPlaying( loop_snds.ptr[lastsoundfile].sound ) )
-                    AUDStopPlaying( loop_snds.ptr[lastsoundfile].sound );
-                loop_snds.ptr[soundfile].playsound();
-                burst_snds.ptr[soundfile].playsound();
-            }
-        } else if (lasttimecompress > 0 && timecount == 0) {
-            for (int i = 0; i < game_options.compress_max; ++i)
-                if ( loop_snds.ptr[i].sound >= 0 && AUDIsPlaying( loop_snds.ptr[i].sound ) )
-                    AUDStopPlaying( loop_snds.ptr[i].sound );
-            if (lastsoundfile >= game_options.compress_max)
-                end_snds.ptr[game_options.compress_max-1].playsound();
-            else
-                end_snds.ptr[lastsoundfile].playsound();
-        }
-        lasttimecompress = timecount;
-    }
-}
 
 Unit * DockToSavedBases( int playernum, QVector &safevec )
 {
