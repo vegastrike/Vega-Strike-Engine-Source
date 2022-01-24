@@ -433,21 +433,16 @@ FIND_PACKAGE(LinuxDistro REQUIRED)
 
 # No more Python 2 -- stephengtuggy 2021-05-30
 # We want at least Python 3.4, but we prefer newer versions
-SET(Python_ADDITIONAL_VERSIONS 3.11 3.10 3.9 3.8 3.7 3.6 3.5 3.4)
-UNSET(PYTHON_INCLUDE_DIR CACHE)
-UNSET(PYTHON_LIBRARY CACHE)
-# The python version we want is set via Python_ADDITIONAL_VERSIONS
-MESSAGE("++ Python release(s) searched for : ${Python_ADDITIONAL_VERSIONS}")
 FIND_PACKAGE(Python3 REQUIRED COMPONENTS Development)
-MESSAGE("++ Python library : ${PYTHON3_LIBRARIES} (${Python3_VERSION})")
+MESSAGE("++ Python library : ${Python3_LIBRARIES} (${Python3_VERSION})")
 MESSAGE("++ Python include dir : ${Python3_INCLUDE_DIRS}")
 IF (Python3_FOUND)
     SET(TST_INCLUDES ${Python3_INCLUDE_DIRS})
-    SET(TST_LIBS ${PYTHON3_LIBRARIES})
+    SET(TST_LIBS ${Python3_LIBRARIES})
     SET(HAVE_PYTHON 1)
-ELSE (PYTHONLIBS_FOUND OR PYTHON_LIBRARIES AND PYTHON_INCLUDE_DIRS)
+ELSE (Python3_FOUND)
     MESSAGE(FATAL_ERROR "Can't find python")
-ENDIF (PYTHONLIBS_FOUND OR PYTHON_LIBRARIES AND PYTHON_INCLUDE_DIRS)
+ENDIF (Python3_FOUND)
 
 # Find Boost with boost_python library
 OPTION(USE_SYSTEM_BOOST "Use system boost" ON)
@@ -473,7 +468,7 @@ IF (USE_SYSTEM_BOOST)
         ENDIF (Boost_DERIVED_VERSION VERSION_EQUAL 1.67.0)
         MESSAGE("-- Boost_1_67_Or_Later_Result: ${Boost_1_67_Or_Later_Result}")
         IF (Boost_1_67_Or_Later_Result)
-            SET(BOOST_PYTHON_COMPONENT "python${PYTHON3_VERSION_MAJOR}${PYTHON3_VERSION_MINOR}")
+            SET(BOOST_PYTHON_COMPONENT "python${Python3_VERSION_MAJOR}${Python3_VERSION_MINOR}")
         ELSE (Boost_1_67_Or_Later_Result)
             SET(BOOST_PYTHON_COMPONENT "python3")
 
@@ -482,7 +477,7 @@ IF (USE_SYSTEM_BOOST)
             # Debian stretch.
             IF (CMAKE_SYSTEM_NAME STREQUAL Linux)
                 IF (LINUX_CODENAME STREQUAL xenial OR LINUX_CODENAME STREQUAL stretch)
-                    SET(BOOST_PYTHON_COMPONENT "python-py3${PYTHON3_VERSION_MINOR}")
+                    SET(BOOST_PYTHON_COMPONENT "python-py3${Python3_VERSION_MINOR}")
                 ENDIF (LINUX_CODENAME STREQUAL xenial OR LINUX_CODENAME STREQUAL stretch)
             ENDIF (CMAKE_SYSTEM_NAME STREQUAL Linux)
         ENDIF (Boost_1_67_Or_Later_Result)
