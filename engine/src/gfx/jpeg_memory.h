@@ -31,6 +31,7 @@
 
 #include <stdio.h>
 #include <string.h>
+#include <cstdint>
 #if defined (_WIN32) && !defined (__CYGWIN__)
 #ifndef NOMINMAX
 #define NOMINMAX
@@ -41,7 +42,7 @@
 #define XMD_H
 #endif
 
-typedef int jpeg_bool;
+typedef int32_t jpeg_bool;
 
 extern "C" {
 //# define XMD_H
