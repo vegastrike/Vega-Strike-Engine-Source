@@ -112,21 +112,6 @@ protected:
     ///Destructs cockpit info for new loading
     virtual void Delete();
 
-    ///draws the navigation symbol around targetted location
-    virtual void DrawNavigationSymbol( const Vector &loc, const Vector &p, const Vector &q, float size ) {}
-
-    ///draws the target box around all units
-    virtual void DrawTargetBoxes(const Radar::Sensor&) {}
-
-    ///draws a target cross around all units targeted by your turrets // ** jay
-    virtual void DrawTurretTargetBoxes() {}
-
-    ///Shows the flightgroup's target, if any.
-    virtual void DrawTacticalTargetBox() {}
-
-    ///Draws all the tracks on the radar.
-    virtual void DrawRadar(const Radar::Sensor&) {}
-
     ///Draws gauges
     virtual void DrawGauges( Unit *un ) {}
     float  cockpit_time;
@@ -229,12 +214,6 @@ public:
     Cockpit( const char *file, Unit *parent, const std::string &pilotname );
     virtual ~Cockpit();
 
-    ///Looks up a particular Gauge stat on target unit
-    virtual float LookupTargetStat( int stat, Unit *target )
-    {
-        return 1;
-    }
-
     ///Loads cockpit info...just as constructor
     virtual void Init( const char *file, bool defaultCockpit = false );
     void recreate( const std::string &pilotname );
@@ -332,10 +311,7 @@ public:
     {
         return false;
     }
-    virtual bool DrawNavSystem()
-    {
-        return false;
-    }
+
     virtual bool CheckCommAnimation( Unit *un )
     {
         return false;

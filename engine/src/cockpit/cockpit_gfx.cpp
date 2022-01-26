@@ -7,11 +7,19 @@
 #include "planet.h"
 #include "unit_util.h"
 #include "weapon_info.h"
+#include "gfx/vdu.h"
+#include "gfx/camera.h"
+#include "gfx/nav/navcomputer.h"
+#include "gfx/gauge.h"
 
+extern float rand01();
+#define SWITCH_CONST (.9)
 
 // got to move this to some more generic place
 #define SCATTER_CUBE \
     QVector( rand()/RAND_MAX -.5, rand()/RAND_MAX -.5, rand()/RAND_MAX -.5 )
+
+float LookupTargetStat( int stat, Unit *target );
 
 inline void DrawOneTargetBox( const QVector &Loc,
                               float rSize,
@@ -310,6 +318,30 @@ inline void DrawITTSMark( float Size, QVector p, QVector q, QVector aimLoc, GFXC
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+void DrawCommunicatingBoxes(std::vector< VDU* >vdu)
+{
+    Vector CamP, CamQ, CamR;
+    _Universe->AccessCamera()->GetPQR( CamP, CamQ, CamR );
+    //Vector Loc (un->ToLocalCoordinates(target->Position()-un->Position()));
+    for (unsigned int i = 0; i < vdu.size(); ++i) {
+        Unit *target = vdu[i]->GetCommunicating();
+        if (target) {
+            static GFXColor black_and_white = vs_config->getColor( "communicating" );
+            QVector Loc( target->Position()-_Universe->AccessCamera()->GetPosition() );
+            GFXDisable( TEXTURE0 );
+            GFXDisable( TEXTURE1 );
+            GFXDisable( DEPTHTEST );
+            GFXDisable( DEPTHWRITE );
+            GFXBlendMode( SRCALPHA, INVSRCALPHA );
+            GFXDisable( LIGHTING );
+            GFXColorf( black_and_white );
+
+            DrawOneTargetBox( Loc, target->rSize()*1.05, CamP, CamQ, CamR, 1, 0 );
+        }
+    }
+}
+
+
 void DrawNavigationSymbol( const Vector &Loc, const Vector &P, const Vector &Q, float size )
 {
     static float crossthick = GameConfig::GetVariable( "graphics", "hud", "NavCrossLineThickness", 1.0 );                        //1.05;
@@ -345,6 +377,166 @@ void DrawNavigationSymbol( const Vector &Loc, const Vector &P, const Vector &Q, 
 
     GFXDisable( SMOOTH );
     GFXLineWidth( 1 );
+}
+
+
+bool DrawNavSystem(NavigationSystem* nav_system, Camera* camera, float cockpit_offset)
+{
+    if(!nav_system->CheckDraw()) {
+        return false;
+    }
+
+    camera->SetFov( camera->GetFov() );
+    camera->setCockpitOffset( cockpit_offset );
+    camera->UpdateGFX( GFXFALSE, GFXFALSE, GFXTRUE );
+    nav_system->Draw();
+
+    return true;
+}
+
+
+void DrawRadar(const Radar::Sensor& sensor, float  cockpit_time, float radar_time,
+               VSSprite *radarSprites[2],
+               Radar::Display* radarDisplay)
+{
+    assert(radarDisplay);
+
+    if (radarSprites[0] || radarSprites[1])
+    {
+        GFXDisable(TEXTURE0);
+        GFXDisable(LIGHTING);
+
+
+        radarDisplay->Draw(sensor, radarSprites[0], radarSprites[1]);
+
+        GFXEnable(TEXTURE0);
+
+        // Draw radar damage
+        float damage = (sensor.GetPlayer()->GetImageInformation().cockpit_damage[0]);
+        if (sensor.GetMaxRange() < 1.0)
+            damage = std::min(damage, 0.25f);
+        if (damage < .985) {
+            if (radar_time >= 0) {
+                if ( damage > .001 && ( cockpit_time > radar_time+(1-damage) ) ) {
+                    if (rand01() > SWITCH_CONST)
+                        radar_time = -cockpit_time;
+                } else {
+                    static Animation radar_ani( "static_round.ani", true, .1, BILINEAR );
+                    radar_ani.DrawAsVSSprite( radarSprites[0] );
+                    radar_ani.DrawAsVSSprite( radarSprites[1] );
+                }
+            } else if ( cockpit_time > ( ( 1-(-radar_time) )+damage ) ) {
+                if (rand01() > SWITCH_CONST)
+                    radar_time = cockpit_time;
+            }
+        }
+    }
+}
+
+
+void DrawTacticalTargetBox(const Radar::Sensor& sensor)
+{
+    static bool drawtactarg =
+        XMLSupport::parse_bool( vs_config->getVariable( "graphics", "hud", "DrawTacticalTarget", "false" ) );
+    if (!drawtactarg)
+        return;
+    if (sensor.GetPlayer()->getFlightgroup() == NULL)
+        return;
+    Unit *target = sensor.GetPlayer()->getFlightgroup()->target.GetUnit();
+    if (target) {
+        Vector  CamP, CamQ, CamR;
+        _Universe->AccessCamera()->GetPQR( CamP, CamQ, CamR );
+        //Vector Loc (un->ToLocalCoordinates(target->Position()-un->Position()));
+        QVector Loc( target->Position()-_Universe->AccessCamera()->GetPosition() );
+        GFXDisable( TEXTURE0 );
+        GFXDisable( TEXTURE1 );
+        GFXDisable( DEPTHTEST );
+        GFXDisable( DEPTHWRITE );
+        GFXBlendMode( SRCALPHA, INVSRCALPHA );
+        GFXDisable( LIGHTING );
+
+        static float thethick = XMLSupport::parse_float( vs_config->getVariable( "graphics", "hud", "TacTargetThickness", "1.0" ) );
+        static float fudge    = XMLSupport::parse_float( vs_config->getVariable( "graphics", "hud", "TacTargetLength", "0.1" ) );
+        static float foci     = XMLSupport::parse_float( vs_config->getVariable( "graphics", "hud", "TacTargetFoci", "0.5" ) );
+        glLineWidth( (int) thethick );         //temp
+        Radar::Track track = sensor.CreateTrack(target, Loc);
+        GFXColorf(sensor.GetColor(track));
+
+        //DrawOneTargetBox (Loc, target->rSize(), CamP, CamQ, CamR,un->computeLockingPercent(),un->TargetLocked());
+
+        //** jay
+        float rSize = track.GetSize();
+
+        static VertexBuilder<> verts;
+        verts.clear();
+
+        verts.insert( Loc+( (-CamP).Cast()+(-CamQ).Cast() )*rSize*(foci+fudge) );
+        verts.insert( Loc+( (-CamP).Cast()+(-CamQ).Cast() )*rSize*(foci-fudge) );
+
+        verts.insert( Loc+( (-CamP).Cast()+(CamQ).Cast() )*rSize*(foci+fudge) );
+        verts.insert( Loc+( (-CamP).Cast()+(CamQ).Cast() )*rSize*(foci-fudge) );
+
+        verts.insert( Loc+( (CamP).Cast()+(-CamQ).Cast() )*rSize*(foci+fudge) );
+        verts.insert( Loc+( (CamP).Cast()+(-CamQ).Cast() )*rSize*(foci-fudge) );
+
+        verts.insert( Loc+( (CamP).Cast()+(CamQ).Cast() )*rSize*(foci+fudge) );
+        verts.insert( Loc+( (CamP).Cast()+(CamQ).Cast() )*rSize*(foci-fudge) );
+
+        GFXDraw( GFXLINE, verts );
+
+        glLineWidth( (int) 1 );         //temp
+    }
+}
+
+void DrawTargetBoxes(const Radar::Sensor& sensor)
+{
+    if (sensor.InsideNebula())
+        return;
+
+    StarSystem     *ssystem  = _Universe->activeStarSystem();
+    UnitCollection *unitlist = &ssystem->getUnitList();
+    //UnitCollection::UnitIterator *uiter=unitlist->createIterator();
+
+    Vector CamP, CamQ, CamR;
+    _Universe->AccessCamera()->GetPQR( CamP, CamQ, CamR );
+
+    GFXDisable( TEXTURE0 );
+    GFXDisable( TEXTURE1 );
+    GFXDisable( DEPTHTEST );
+    GFXDisable( DEPTHWRITE );
+    GFXBlendMode( SRCALPHA, INVSRCALPHA );
+    GFXDisable( LIGHTING );
+    const Unit *target;
+    Unit *player = sensor.GetPlayer();
+    assert(player);
+    for (un_kiter uiter = unitlist->constIterator(); (target=*uiter)!=NULL; ++uiter) {
+        if (target != player) {
+            QVector  Loc( target->Position() );
+            Radar::Track track = sensor.CreateTrack(target, Loc);
+
+            GFXColorf(sensor.GetColor(track));
+            switch (track.GetType())
+            {
+            case Radar::Track::Type::Base:
+            case Radar::Track::Type::CapitalShip:
+            case Radar::Track::Type::Ship:
+                if (sensor.IsTracking(track))
+                {
+                    static bool draw_dock_box =
+                        XMLSupport::parse_bool( vs_config->getVariable( "graphics", "draw_docking_boxes", "true" ) );
+                    if (draw_dock_box)
+                        DrawDockingBoxes( player, target, CamP, CamQ, CamR );
+                    DrawOneTargetBox( Loc, target->rSize(), CamP, CamQ, CamR, player->computeLockingPercent(), true );
+                } else {
+                    DrawOneTargetBox( Loc, target->rSize(), CamP, CamQ, CamR, player->computeLockingPercent(), false );
+                }
+                break;
+
+            default:
+                break;
+            }
+        }
+    }
 }
 
 
@@ -496,3 +688,101 @@ void DrawTargetBox(const Radar::Sensor& sensor, bool draw_line_to_target, bool d
 }
 
 
+void DrawTurretTargetBoxes(const Radar::Sensor& sensor)
+{
+    if (sensor.InsideNebula())
+        return;
+
+
+    GFXDisable( TEXTURE0 );
+    GFXDisable( TEXTURE1 );
+    GFXDisable( DEPTHTEST );
+    GFXDisable( DEPTHWRITE );
+    GFXDisable( LIGHTING );
+
+    static VertexBuilder<> verts;
+
+    //This avoids rendering the same target box more than once
+    Unit *subunit;
+    std::set<Unit *> drawn_targets;
+    for (un_iter iter = sensor.GetPlayer()->getSubUnits(); (subunit=*iter)!=NULL; ++iter) {
+        if (!subunit)
+            return;
+        Unit *target = subunit->Target();
+        if (!target || (drawn_targets.find(target) != drawn_targets.end()))
+            continue;
+        drawn_targets.insert(target);
+
+        Vector CamP, CamQ, CamR;
+        _Universe->AccessCamera()->GetPQR( CamP, CamQ, CamR );
+        //Vector Loc (un->ToLocalCoordinates(target->Position()-un->Position()));
+        QVector     Loc( target->Position()-_Universe->AccessCamera()->GetPosition() );
+        Radar::Track track = sensor.CreateTrack(target, Loc);
+        static bool draw_nav_symbol =
+            XMLSupport::parse_bool( vs_config->getVariable( "graphics", "hud", "drawNavSymbol", "false" ) );
+        if (draw_nav_symbol) {
+            GFXColor4f( 1, 1, 1, 1 );
+            DrawNavigationSymbol( subunit->GetComputerData().NavPoint, CamP, CamQ,
+                                 CamR.Cast().Dot( (subunit->GetComputerData().NavPoint).Cast()
+                                                 -_Universe->AccessCamera()->GetPosition() ) );
+        }
+        GFXColorf(sensor.GetColor(track));
+
+        //DrawOneTargetBox (Loc, target->rSize(), CamP, CamQ, CamR,un->computeLockingPercent(),un->TargetLocked());
+
+        //** jay
+        float rSize = track.GetSize();
+
+        GFXEnable( SMOOTH );
+        GFXBlendMode( SRCALPHA, INVSRCALPHA );
+
+        verts.clear();
+
+        verts.insert( Loc+(CamP).Cast()*rSize*1.3 );
+        verts.insert( Loc+(CamP).Cast()*rSize*.8 );
+
+        verts.insert( Loc+(-CamP).Cast()*rSize*1.3 );
+        verts.insert( Loc+(-CamP).Cast()*rSize*.8 );
+
+        verts.insert( Loc+(CamQ).Cast()*rSize*1.3 );
+        verts.insert( Loc+(CamQ).Cast()*rSize*.8 );
+
+        verts.insert( Loc+(-CamQ).Cast()*rSize*1.3 );
+        verts.insert( Loc+(-CamQ).Cast()*rSize*.8 );
+
+        GFXDraw( GFXLINESTRIP, verts );
+
+        GFXDisable( SMOOTH );
+    }
+}
+
+
+void DrawTargetGauges( Unit *target, Gauge *gauges[] )
+{
+    int i;
+    for (i = UnitImages< void >::TARGETSHIELDF; i < UnitImages< void >::KPS; i++) {
+        if (gauges[i]) {
+            gauges[i]->Draw( LookupTargetStat(i, target) );
+        }
+    }
+}
+
+
+float LookupTargetStat( int stat, Unit *target )
+{
+    switch (stat)
+    {
+    case UnitImages< void >::TARGETSHIELDF:
+        return target->FShieldData();
+
+    case UnitImages< void >::TARGETSHIELDR:
+        return target->RShieldData();
+
+    case UnitImages< void >::TARGETSHIELDL:
+        return target->LShieldData();
+
+    case UnitImages< void >::TARGETSHIELDB:
+        return target->BShieldData();
+    }
+    return 1;
+}

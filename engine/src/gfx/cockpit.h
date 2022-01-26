@@ -134,16 +134,10 @@ class GameCockpit : public Cockpit
     ///Destructs cockpit info for new loading
     void Delete();
 
-    ///draws the target box around all units
-    void DrawTargetBoxes(const Radar::Sensor&);
-    ///draws a target cross around all units targeted by your turrets // ** jay
-    void DrawTurretTargetBoxes(const Radar::Sensor&);
-    void DrawTacticalTargetBox(const Radar::Sensor&);
-    void DrawCommunicatingBoxes();
-    ///Draws all the tracks on the radar.
-    void DrawRadar(const Radar::Sensor&);
-    ///Draws target gauges
-    void DrawTargetGauges( Unit *target );
+
+
+
+
     ///Draws unit gauges
     void DrawGauges( Unit *un );
     ///Trigger scripted events
@@ -170,8 +164,7 @@ public:
     void RestoreViewPort();
     GameCockpit( const char *file, Unit *parent, const std::string &pilotname );
     ~GameCockpit();
-    ///Looks up a particular Gauge stat on target unit
-    float LookupTargetStat( int stat, Unit *target );
+
     ///Looks up a particular Gauge stat on unit
     float LookupUnitStat( int stat, Unit *target );
     ///Loads cockpit info...just as constructor
@@ -224,7 +217,6 @@ public:
 
     virtual bool SetDrawNavSystem( bool );
     virtual bool CanDrawNavSystem();
-    virtual bool DrawNavSystem();
     virtual bool CheckCommAnimation( Unit *un );
     virtual void visitSystem( std::string systemName );
     void AutoLanding();
