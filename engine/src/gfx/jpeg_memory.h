@@ -42,7 +42,9 @@
 #define XMD_H
 #endif
 
-#if !defined(HAVE_BOOLEAN)
+#if defined(_WIN32) && !defined(__CYGWIN)
+    typedef bool    jpeg_bool;
+#elif !defined(HAVE_BOOLEAN)
     typedef int32_t jpeg_bool;
 #else
     typedef bool    jpeg_bool;
