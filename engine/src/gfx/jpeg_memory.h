@@ -42,12 +42,17 @@
 #define XMD_H
 #endif
 
+#if !defined(HAVE_BOOLEAN)
+    typedef int32_t jpeg_bool;
+#else
+    typedef bool    jpeg_bool;
+#endif
+
 extern "C" {
 //# define XMD_H
 #   define DONT_USE_EXTERN_C
 #   if !defined(HAVE_BOOLEAN)
 #       define HAVE_BOOLEAN
-        typedef int32_t jpeg_bool;
 #       define boolean      jpeg_bool
 #       define TRUE         ((jpeg_bool)true)
 #       define FALSE        ((jpeg_bool)false)
@@ -55,7 +60,6 @@ extern "C" {
 #       include <jpeglib.h>
 #       undef boolean
 #   else
-        typedef bool jpeg_bool;
 #       include <jconfig.h>
 #       include <jpeglib.h>
 #   endif
