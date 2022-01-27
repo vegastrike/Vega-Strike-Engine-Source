@@ -3,7 +3,7 @@
  *
  * Copyright (C) Daniel Horn
  * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike contributors
- * Copyright (C) 2021 Stephen G. Tuggy
+ * Copyright (C) 2021-2022 Stephen G. Tuggy
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -42,13 +42,12 @@
 #define XMD_H
 #endif
 
-typedef int32_t jpeg_bool;
-
 extern "C" {
 //# define XMD_H
 #   define DONT_USE_EXTERN_C
 #   if !defined(HAVE_BOOLEAN)
 #       define HAVE_BOOLEAN
+        typedef int32_t jpeg_bool;
 #       define boolean      jpeg_bool
 #       define TRUE         ((jpeg_bool)true)
 #       define FALSE        ((jpeg_bool)false)
@@ -56,6 +55,7 @@ extern "C" {
 #       include <jpeglib.h>
 #       undef boolean
 #   else
+        typedef bool jpeg_bool;
 #       include <jconfig.h>
 #       include <jpeglib.h>
 #   endif
