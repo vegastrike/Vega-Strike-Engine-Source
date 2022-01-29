@@ -38,7 +38,6 @@
 #include "images.h"
 #include "xml_serializer.h"
 #include "vsfilesystem.h"
-#include "gfx/cockpit_generic.h"
 #include "unit_collide.h"
 #include "unit_generic.h"
 #include "gfx/sphere.h"

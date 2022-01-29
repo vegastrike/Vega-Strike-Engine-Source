@@ -202,7 +202,7 @@ static bool  waszero = false;
 
 void TextMessageCallback( unsigned int ch, unsigned int mod, bool release, int x, int y )
 {
-    GameCockpit *gcp = static_cast< GameCockpit* > ( _Universe->AccessCockpit( textmessager ) );
+    Cockpit *gcp = static_cast< Cockpit* > ( _Universe->AccessCockpit( textmessager ) );
     gcp->editingTextMessage = true;
     if ( ( release
           && (waszero || ch == WSK_KP_ENTER || ch == WSK_ESCAPE) ) || ( release == false && (ch == ']' || ch == '[') ) ) {
@@ -757,7 +757,7 @@ void IncrementStartupVariable()
         putSaveData( 0, "436457r1K3574r7uP71m35", 0, var+1 );
     }
     if (var <= game_options.times_to_show_help_screen)
-        GameCockpit::NavScreen( KBData(), PRESS );          //HELP FIXME
+        Cockpit::NavScreen( KBData(), PRESS );          //HELP FIXME
 }
 
 void createObjects( std::vector< std::string > &fighter0name,

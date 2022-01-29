@@ -35,7 +35,6 @@
 #include "ai/navigation.h"
 #include "ai/flybywire.h"
 #include "configxml.h"
-#include "gfx/cockpit_generic.h"
 #include "force_feedback.h"
 #include "ai/aggressive.h"
 #include "lin_time.h"

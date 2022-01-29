@@ -55,7 +55,6 @@
 #include "flightgroup.h"
 #include "vs_globals.h"
 #include "configxml.h"
-#include "gfx/cockpit_generic.h"
 #include "cmd/images.h"
 #include "savegame.h"
 #include "cmd/nebula.h"
@@ -70,7 +69,11 @@
 #include "star_system.h"
 #include "universe.h"
 #include "vs_logging.h"
-
+#include "weapon_info.h"
+#include "gfx/cockpit.h"
+#include "save_util.h"
+#include "gfx/background.h"
+#include "universe_util.h"
 
 extern const vector< string >& ParseDestinations( const string &value );
 extern Unit& GetUnitMasterPartList();

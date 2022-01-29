@@ -25,7 +25,6 @@
 
 #include "gfx/vec.h"
 #include "gfx/animation.h"
-#include "gfx/cockpit_generic.h"
 #include "faction_generic.h"
 #include "savegame.h"
 #include "xml_support.h"

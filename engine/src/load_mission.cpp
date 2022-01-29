@@ -32,7 +32,6 @@
 #include "vsfilesystem.h"
 #include "vs_logging.h"
 #include "cmd/unit_generic.h"
-#include "gfx/cockpit_generic.h"
 #include "cmd/ai/aggressive.h"
 #include "cmd/ai/script.h"
 #include "cmd/ai/missionscript.h"

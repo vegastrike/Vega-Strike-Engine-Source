@@ -499,7 +499,7 @@ CommandMap initGlobalCommandMap()
     CommandMap commandMap;
     commandMap["NoPositionalKey"]    = mute;
     commandMap["DopplerInc"] = incdop;
-    commandMap["Cockpit::NavScreen"] = GameCockpit::NavScreen;
+    commandMap["Cockpit::NavScreen"] = Cockpit::NavScreen;
     commandMap["DopplerDec"]         = decdop;
     commandMap["VolumeInc"]          = VolUp;
     commandMap["VolumeDec"]          = VolDown;
@@ -508,9 +508,9 @@ CommandMap initGlobalCommandMap()
     commandMap["SetShieldsOneThird"] = FireKeyboard::SetShieldsOneThird;
     commandMap["SetShieldsOff"]      = FireKeyboard::SetShieldsOff;
     commandMap["SetShieldsTwoThird"] = FireKeyboard::SetShieldsTwoThird;
-    commandMap["SwitchControl"]      = GameCockpit::SwitchControl;
-    commandMap["Respawn"] = GameCockpit::Respawn;
-    commandMap["TurretControl"]      = GameCockpit::TurretControl;
+    commandMap["SwitchControl"]      = Cockpit::SwitchControl;
+    commandMap["Respawn"] = Cockpit::Respawn;
+    commandMap["TurretControl"]      = Cockpit::TurretControl;
 
     commandMap["TimeInc"]   = inc_time_compression;
     commandMap["TimeDec"]   = dec_time_compression;

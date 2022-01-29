@@ -977,7 +977,6 @@ SET(LIBCMDSERVER_SOURCES
 SET(LIBGFXGENERIC_SOURCES
     src/gfx/texture_manager.cpp
     src/gfx/boltdrawmanager.cpp
-    src/gfx/cockpit_generic.cpp
     src/gfx/lerp.cpp
     src/gfx/matrix.cpp
     src/gfx/mesh_bxm.cpp

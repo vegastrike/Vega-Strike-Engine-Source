@@ -38,7 +38,6 @@
 #include "hard_coded_scripts.h"
 #include "cmd/script/mission.h"
 #include "universe_util.h"
-#include "gfx/cockpit_generic.h"
 #include "ikarus.h"
 using namespace Orders;
 Ikarus::Ikarus() : AggressiveAI( "default.agg.xml" )

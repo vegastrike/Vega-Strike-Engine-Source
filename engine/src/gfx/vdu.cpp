@@ -653,7 +653,7 @@ static float TwoOfFour( float a, float b, float c, float d )
     return 0;
 }
 
-void VDU::DrawTarget( GameCockpit *cp, Unit *parent, Unit *target )
+void VDU::DrawTarget( Cockpit *cp, Unit *parent, Unit *target )
 {
     float x, y, w, h;
     float fs = target->FShieldData();
@@ -784,7 +784,7 @@ void VDU::DrawTarget( GameCockpit *cp, Unit *parent, Unit *target )
     }
 }
 
-void VDU::DrawMessages( GameCockpit *parentcp, Unit *target )
+void VDU::DrawMessages( Cockpit *parentcp, Unit *target )
 {
     static bool draw_messages = XMLSupport::parse_bool( vs_config->getVariable( "graphics", "chat_text", "true" ) );
 
@@ -909,7 +909,7 @@ Unit* VDU::GetCommunicating()
     return NULL;
 }
 
-void VDU::DrawNav( GameCockpit *cp, Unit *you, Unit *targ, const Vector &nav )
+void VDU::DrawNav( Cockpit *cp, Unit *you, Unit *targ, const Vector &nav )
 {
     //Unit * you = _Universe->AccessCockpit()->GetParent();
     //Unit * targ = you!=NULL?you->Target():NULL;
@@ -1683,7 +1683,7 @@ void VDU::DrawWebcam( Unit *parent )
 
 }
 
-void VDU::Draw( GameCockpit *parentcp, Unit *parent, const GFXColor &color )
+void VDU::Draw( Cockpit *parentcp, Unit *parent, const GFXColor &color )
 {
     tp->col = color;
     GFXDisable( LIGHTING );

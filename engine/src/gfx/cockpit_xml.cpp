@@ -31,6 +31,7 @@
 #include "vdu.h"
 #include "mesh.h"
 #include "configxml.h"
+#include "gfx/soundcontainer.h"
 
 using XMLSupport::EnumMap;
 using XMLSupport::Attribute;
@@ -292,7 +293,12 @@ string getRes( string inp )
         return inp.substr( 0, where )+"_"+rez+".spr";
 }
 
-void GameCockpit::beginElement( const string &name, const AttributeList &attributes )
+void Cockpit::beginElement( void *userData, const XML_Char *name, const XML_Char **atts )
+{
+    ( (Cockpit*) userData )->beginElement( name, AttributeList( atts ) );
+}
+
+void Cockpit::beginElement( const string &name, const AttributeList &attributes )
 {
     static bool cockpit_smooth   =
         XMLSupport::parse_bool( vs_config->getVariable( "graphics", "cockpit_smooth_texture", "false" ) );
@@ -686,13 +692,18 @@ loadsprite:
     }
 }
 
-void GameCockpit::endElement( const string &name )
+void Cockpit::endElement( void *userData, const XML_Char *name )
+{
+    ( (Cockpit*) userData )->endElement( name );
+}
+
+void Cockpit::endElement( const string &name )
 {
 }
 
 using namespace VSFileSystem;
 
-void GameCockpit::LoadXML( const char *filename )
+void Cockpit::LoadXML( const char *filename )
 {
 
     VSFile    f;
@@ -701,7 +712,7 @@ void GameCockpit::LoadXML( const char *filename )
             LoadXML(f);
 }
 
-void GameCockpit::LoadXML( VSFileSystem::VSFile &f )
+void Cockpit::LoadXML( VSFileSystem::VSFile &f )
 {
     if ( !f.Valid() ) {
         cockpit_offset  = 0;

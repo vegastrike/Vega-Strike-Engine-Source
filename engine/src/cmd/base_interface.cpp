@@ -33,7 +33,6 @@
 #include "lin_time.h"
 #include "audiolib.h"
 #include "gfx/camera.h"
-#include "gfx/cockpit_generic.h"
 #include "python/init.h"
 #include "python/python_compile.h"
 #include "planet.h"

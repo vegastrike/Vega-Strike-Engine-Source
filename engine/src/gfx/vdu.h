@@ -28,6 +28,7 @@
 #define _GFX_VDU_H_
 
 #include "cmd/unit_generic.h"
+#include "view_style.h"
 #include "sprite.h"
 #include <string>
 #include <vector>
@@ -42,7 +43,7 @@ void DrawObjectivesTextPlane( TextPlane *tp, int scrolloffset, Unit *parent );
  * on a fighter craft. Can print out target info, local damage info
  * Local weapon info or Nav info.
  */
-class GameCockpit;
+class Cockpit;
 class VDU : public VSSprite
 {
 private:
@@ -71,14 +72,14 @@ private:
 ///Draws a shield display in the VDU
     void DrawVDUShield( Unit *parent );
 ///Draws the target display of Unit *target (only call with nonNULL)
-    void DrawTarget( GameCockpit *parentcp, Unit *parent, Unit *target );
+    void DrawTarget( Cockpit *parentcp, Unit *parent, Unit *target );
 ///Draws a list of cargo contents
     void DrawManifest( Unit *parent, Unit *target );
 ///Draws the message from the messagecenter
-    void DrawMessages( GameCockpit *parentcp, Unit *target );
+    void DrawMessages( Cockpit *parentcp, Unit *target );
     void DrawScanningMessage();
 ///Draws the nav point this unit is heading to
-    void DrawNav( GameCockpit *parentcp, Unit *parent, Unit *target, const Vector &navPoint );
+    void DrawNav( Cockpit *parentcp, Unit *parent, Unit *target, const Vector &navPoint );
 ///Draws the comm screen this unit can use to communicate
     void DrawComm();
 ///Draws a "scanning target" message
@@ -110,7 +111,7 @@ public:
     };
     VDU( const char *file, TextPlane *textp, unsigned short modes, short rows, short cols, float *MaxArmor, float *maxhull );
 ///Draws the entire VDU, all data, etc
-    void Draw( GameCockpit *parentcp, Unit *parent, const GFXColor &c );
+    void Draw( Cockpit *parentcp, Unit *parent, const GFXColor &c );
 ///Changes the mode of the current VDU to another legal mode
     void SwitchMode( Unit *parent );
     void SetViewingStyle( VIEWSTYLE vm );

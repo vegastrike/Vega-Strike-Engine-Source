@@ -1005,9 +1005,9 @@ bool NavComputer::toggleVisibility( const EventCommandId &command, Control *cont
         GFXLoop( main_loop );
         RestoreMouse();
 
-        GameCockpit::NavScreen( KBData(), PRESS );
+        Cockpit::NavScreen( KBData(), PRESS );
     } else {
-        GameCockpit::NavScreen( KBData(), PRESS );
+        Cockpit::NavScreen( KBData(), PRESS );
         //Initialize callback functions
         winsys_set_keyboard_func( nav_keyboard_cb );
         winsys_set_mouse_func( EventManager::ProcessMouseClick );

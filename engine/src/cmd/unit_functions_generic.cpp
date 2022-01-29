@@ -25,7 +25,6 @@
 
 #include "unit_generic.h"
 #include "gfx/vec.h"
-#include "gfx/cockpit_generic.h"
 #include "faction_generic.h"
 #include "ai/communication.h"
 #include "savegame.h"

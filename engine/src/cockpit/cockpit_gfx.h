@@ -9,8 +9,11 @@
 #include <memory>
 
 class Camera;
+class Cockpit;
 class Gauge;
+struct GFXColor;
 class NavigationSystem;
+class TextPlane;
 class VSSprite;
 class VDU;
 
@@ -26,7 +29,20 @@ inline void DrawOneTargetBox( const QVector &Loc,
                               bool ComputerLockon,
                               bool Diamond = false);
 
+//Draw the arrow pointing to the target.
+void DrawArrowToTarget(const Radar::Sensor&, Unit*,
+                       float  projection_limit_x, float projection_limit_y,
+                       float inv_screen_aspect_ratio);
+void DrawArrowToTarget(const Radar::Sensor&, Vector LocalCoordinates,
+                       float  projection_limit_x, float projection_limit_y,
+                       float inv_screen_aspect_ratio);
+
 void DrawCommunicatingBoxes(std::vector< VDU* >vdu);
+
+///Draws unit gauges
+void DrawGauges( Cockpit *cockpit, Unit *un, Gauge *gauges[],
+                 float gauge_time[], float cockpit_time, TextPlane *text,
+                 GFXColor textcol);
 
 ///draws the navigation symbol around targetted location
 void DrawNavigationSymbol( const Vector &loc, const Vector &p, const Vector &q, float size );

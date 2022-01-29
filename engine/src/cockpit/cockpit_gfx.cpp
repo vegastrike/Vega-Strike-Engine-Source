@@ -318,6 +318,105 @@ inline void DrawITTSMark( float Size, QVector p, QVector q, QVector aimLoc, GFXC
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+
+/**
+ * Draw the arrow pointing to the target.
+ */
+//THETA : angle between the arrow head and the two branches (divided by 2) (20 degrees here).
+#define TARGET_ARROW_COS_THETA (0.93969262078590838405410927732473)
+#define TARGET_ARROW_SIN_THETA (0.34202014332566873304409961468226)
+#define TARGET_ARROW_SIZE (0.05)
+
+void DrawArrowToTarget(const Radar::Sensor& sensor, Unit *target,
+                       float  projection_limit_x, float projection_limit_y,
+                       float inv_screen_aspect_ratio)
+{
+    Unit *player = sensor.GetPlayer();
+    if (player && target) {
+        Radar::Track track = sensor.CreateTrack(target);
+        GFXColorf(sensor.GetColor(track));
+        DrawArrowToTarget(sensor, track.GetPosition(), projection_limit_x, projection_limit_y,
+                          inv_screen_aspect_ratio);
+    }
+}
+
+void DrawArrowToTarget(const Radar::Sensor& sensor, Vector localcoord,
+                       float  projection_limit_x, float projection_limit_y,
+                       float inv_screen_aspect_ratio)
+{
+    float  s, t, s_normalized, t_normalized, inv_len;
+    Vector p1, p2, p_n;
+
+    //Project target position on k.
+    inv_len = 1/fabs( localcoord.k );
+    s = -localcoord.i*inv_len;
+    t = localcoord.j*inv_len;
+    if (localcoord.k > 0) {
+        //The unit is in front of us.
+        //Check if the unit is in the screen.
+        if ( (fabs( s ) < projection_limit_x) && (fabs( t ) < projection_limit_y) )
+            return;              //The unit is in the screen, do not display the arrow.
+    }
+    inv_len = 1/sqrt( s*s+t*t );
+    s_normalized = s*inv_len;                 //Save the normalized projected coordinates.
+    t_normalized = t*inv_len;
+
+    //Apply screen aspect ratio correction.
+    s *= inv_screen_aspect_ratio;
+    if ( fabs( t ) > fabs( s ) ) {
+        //Normalize t.
+        if (t > 0) {
+            s /= t;
+            t  = 1;
+        } else if (t < 0) {
+            s /= -t;
+            t  = -1;
+        }                       //case t == 0, do nothing everything is ok.
+    } else {
+        //Normalize s.
+        if (s > 0) {
+            t /= s;
+            s  = 1;
+        } else if (s < 0) {
+            t /= -s;
+            s  = -1;
+        }                      //case s == 0, do nothing everything is ok.
+    }
+    //Compute points p1 and p2 composing the arrow. Hard code a 2D rotation.
+    //p1 = p - TARGET_ARROW_SIZE * p.normalize().rot(THETA), p being the arrow head position (s,t).
+    //p2 = p - TARGET_ARROW_SIZE * p.normalize().rot(-THETA)
+    p_n.i = -TARGET_ARROW_SIZE*s_normalized;       //Vector p will be used to compute the two branches of the arrow.
+    p_n.j = -TARGET_ARROW_SIZE*t_normalized;
+    p1.i  = p_n.i*TARGET_ARROW_COS_THETA-p_n.j*TARGET_ARROW_SIN_THETA;      //p1 = p.rot(THETA)
+    p1.j  = p_n.j*TARGET_ARROW_COS_THETA+p_n.i*TARGET_ARROW_SIN_THETA;
+    p2.i  = p_n.i*TARGET_ARROW_COS_THETA-p_n.j*(-TARGET_ARROW_SIN_THETA);       //p2 = p.rot(-THETA)
+    p2.j  = p_n.j*TARGET_ARROW_COS_THETA+p_n.i*(-TARGET_ARROW_SIN_THETA);
+    p1.i += s;
+    p1.j *= g_game.aspect;
+    p1.j += t;
+    p2.i += s;
+    p2.j *= g_game.aspect;
+    p2.j += t;
+    p2.k  = p1.k = 0;
+
+    GFXEnable( SMOOTH );
+    GFXDisable( TEXTURE0 );
+    GFXDisable( TEXTURE1 );
+    GFXBlendMode( SRCALPHA, INVSRCALPHA );
+
+    const float verts[4 * 3] = {
+        s,    t,    0,
+        p1.x, p1.y, p1.z,
+        p2.x, p2.y, p2.z,
+        s,    t,    0,
+    };
+    GFXDraw( GFXLINESTRIP, verts, 4 );
+
+    GFXColor4f( 1, 1, 1, 1 );
+    GFXDisable( SMOOTH );
+}
+
+
 void DrawCommunicatingBoxes(std::vector< VDU* >vdu)
 {
     Vector CamP, CamQ, CamR;
@@ -339,6 +438,182 @@ void DrawCommunicatingBoxes(std::vector< VDU* >vdu)
             DrawOneTargetBox( Loc, target->rSize()*1.05, CamP, CamQ, CamR, 1, 0 );
         }
     }
+}
+
+
+void DrawGauges( Cockpit *cockpit, Unit *un, Gauge *gauges[],
+                 float gauge_time[], float cockpit_time, TextPlane *text,
+                 GFXColor textcol) {
+    int i;
+    for (i = 0; i < UnitImages< void >::TARGETSHIELDF; i++) {
+        if (gauges[i]) {
+            gauges[i]->Draw( cockpit->LookupUnitStat( i, un ) );
+            float damage =
+                un->GetImageInformation().cockpit_damage[(1+MAXVDUS+i)%(MAXVDUS+1+UnitImages < void > ::NUMGAUGES)];
+            if (gauge_time[i] >= 0) {
+                if ( damage > .0001 && ( cockpit_time > ( gauge_time[i]+(1-damage) ) ) )
+                    if (rand01() > SWITCH_CONST)
+                        gauge_time[i] = -cockpit_time;
+                /*else {
+                 *  static string gauge_static = vs_config->getVariable("graphics","gauge_static","static.ani");
+                 *  static Animation vdu_ani(gauge_static.c_str(),true,.1,BILINEAR);
+                 *  vdu_ani.DrawAsVSSprite(gauges[i]);
+                 *  }*/
+            } else if ( cockpit_time > ( ( ( 1-(-gauge_time[i]) )+damage ) ) ) {
+                if (rand01() > SWITCH_CONST)
+                    gauge_time[i] = cockpit_time;
+            }
+        }
+    }
+    if (!text)
+        return;
+    GFXColorf( textcol );
+    GFXColor     origbgcol = text->bgcol;
+    static float background_alpha    =
+        XMLSupport::parse_float( vs_config->getVariable( "graphics", "hud", "text_background_alpha", "0.0625" ) );
+    bool automatte = (0 == origbgcol.a);
+    if (automatte) text->bgcol = GFXColor( 0, 0, 0, background_alpha );
+    for (i = UnitImages< void >::KPS; i < UnitImages< void >::AUTOPILOT_MODAL; i++) {
+        if (gauges[i]) {
+            float sx, sy, px, py;
+            gauges[i]->GetSize( sx, sy );
+            gauges[i]->GetPosition( px, py );
+            text->SetCharSize( sx, sy );
+            text->SetPos( px, py );
+            float tmp  = cockpit->LookupUnitStat( i, un );
+            float tmp2 = 0;
+            char  ourchar[64];
+            sprintf( ourchar, "%.0f", tmp );
+            if (i == UnitImages< void >::KPS) {
+                float c = 300000000.0f;
+                if (tmp > c/10) {
+                    tmp2 = tmp/c;
+                    sprintf( ourchar, "%.2f C", tmp2 );
+                }
+            }
+            if (i == UnitImages< void >::MASSEFFECT)
+                sprintf( ourchar, "MASS:%.0f%% (base)", tmp );
+            GFXColorf( textcol );
+            text->SetSize( 2, -2 );
+            text->Draw( string( ourchar ), 0, false, false, automatte );
+        }
+    }
+    for (i = UnitImages< void >::AUTOPILOT_MODAL; i < UnitImages< void >::NUMGAUGES; i++) {
+        if (gauges[i]) {
+            float sx, sy, px, py;
+            gauges[i]->GetSize( sx, sy );
+            gauges[i]->GetPosition( px, py );
+            text->SetCharSize( sx, sy );
+            text->SetPos( px, py );
+            float tmp    = cockpit->LookupUnitStat( i, un );
+            int   ivalue = (int) tmp;
+            std::string modename;
+            std::string modevalue;
+            switch (i)
+            {
+            case UnitImages< void >::AUTOPILOT_MODAL:
+                modename = "AUTO:";
+                break;
+            case UnitImages< void >::SPEC_MODAL:
+                modename = "SPEC:";
+                break;
+            case UnitImages< void >::FLIGHTCOMPUTER_MODAL:
+                modename = "FCMP:";
+                break;
+            case UnitImages< void >::TURRETCONTROL_MODAL:
+                modename = "TCNT:";
+                break;
+            case UnitImages< void >::ECM_MODAL:
+                modename = "ECM :";
+                break;
+            case UnitImages< void >::CLOAK_MODAL:
+                modename = "CLK :";
+                break;
+            case UnitImages< void >::TRAVELMODE_MODAL:
+                modename = "GCNT:";
+                break;
+            case UnitImages< void >::RECIEVINGFIRE_MODAL:
+                modename = "RFIR:";
+                break;
+            case UnitImages< void >::RECEIVINGMISSILES_MODAL:
+                modename = "RMIS:";
+                break;
+            case UnitImages< void >::RECEIVINGMISSILELOCK_MODAL:
+                modename = "RML :";
+                break;
+            case UnitImages< void >::RECEIVINGTARGETLOCK_MODAL:
+                modename = "RTL :";
+                break;
+            case UnitImages< void >::COLLISIONWARNING_MODAL:
+                modename = "COL :";
+                break;
+            case UnitImages< void >::CANJUMP_MODAL:
+                modename = "JUMP:";
+                break;
+            case UnitImages< void >::CANDOCK_MODAL:
+                modename = "DOCK:";
+                break;
+            default:
+                modename = "UNK :";
+            }
+            switch (ivalue)
+            {
+            case UnitImages< void >::OFF:
+                modevalue = "OFF";
+                break;
+            case UnitImages< void >::ON:
+                modevalue = "ON";
+                break;
+            case UnitImages< void >::SWITCHING:
+                modevalue = "<>";
+                break;
+            case UnitImages< void >::ACTIVE:
+                modevalue = "ACTIVE";
+                break;
+            case UnitImages< void >::FAW:
+                modevalue = "FAW";
+                break;
+            case UnitImages< void >::MANEUVER:
+                modevalue = "MANEUVER";
+                break;
+            case UnitImages< void >::TRAVEL:
+                modevalue = "TRAVEL";
+                break;
+            case UnitImages< void >::NOTAPPLICABLE:
+                modevalue = "N / A";
+                break;
+            case UnitImages< void >::READY:
+                modevalue = "READY";
+                break;
+            case UnitImages< void >::NODRIVE:
+                modevalue = "NO DRIVE";
+                break;
+            case UnitImages< void >::TOOFAR:
+                modevalue = "TOO FAR";
+                break;
+            case UnitImages< void >::NOTENOUGHENERGY:
+                modevalue = "LOW ENERGY";
+                break;
+            case UnitImages< void >::WARNING:
+                modevalue = "WARNING!";
+                break;
+            case UnitImages< void >::NOMINAL:
+                modevalue = " - ";
+                break;
+            case UnitImages< void >::AUTOREADY:
+                modevalue = "AUTO READY";
+                break;
+            default:
+                modevalue = "MALFUNCTION!";
+            }
+            GFXColorf( textcol );
+            //text->SetSize(px+textwidthapproxHACK*(modename.size()+modevalue.size()), -2);
+            text->SetSize( 2, -2 );
+            text->Draw( modename+modevalue, 0, false, false, automatte );
+        }
+    }
+    text->bgcol = origbgcol;
+    GFXColor4f( 1, 1, 1, 1 );
 }
 
 

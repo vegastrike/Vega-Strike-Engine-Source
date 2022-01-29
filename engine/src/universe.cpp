@@ -448,7 +448,7 @@ void Universe::SetupCockpits(std::vector< std::string >players)
 {
     for (unsigned int i = 0; i < players.size(); ++i) {
         _cockpits.push_back( NULL );
-        _cockpits.back() = new GameCockpit( "", NULL, players[i] );
+        _cockpits.back() = new Cockpit( "", NULL, players[i] );
     }
 }
 

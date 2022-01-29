@@ -46,6 +46,8 @@
 
 #include "mount.h"
 #include "damage/damage.h"
+#include "gfx/camera.h"
+#include "images.h"
 
 #ifdef VS_DEBUG
 #define CONTAINER_DEBUG
@@ -71,7 +73,6 @@ void UncheckUnit( class Unit*un );
 #include "script/flightgroup.h"
 #include "faction_generic.h"
 #include "star_system_generic.h"
-#include "gfx/cockpit_generic.h"
 #include "vsfilesystem.h"
 #include "collide_map.h"
 #include "SharedPool.h"

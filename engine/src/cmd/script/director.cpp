@@ -68,7 +68,6 @@
 #endif
 #include "flightgroup.h"
 #include "gldrv/winsys.h"
-#include "gfx/cockpit_generic.h"
 #include "vs_logging.h"
 
 /* *********************************************************** */

@@ -83,7 +83,6 @@
 #include "gfx/cockpit.h"
 #include "gfx/occlusion.h"
 #include "gfx/vec.h"
-#include "gfx/cockpit_generic.h"
 
 #include <boost/python/errors.hpp>
 
