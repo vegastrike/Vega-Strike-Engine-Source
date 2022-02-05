@@ -1,85 +1,89 @@
 /**
-* gauge.cpp
-*
-* Copyright (c) 2001-2002 Daniel Horn
-* Copyright (c) 2002-2019 pyramid3d and other Vega Strike Contributors
-* Copyright (c) 2019-2021 Stephen G. Tuggy, and other Vega Strike Contributors
-*
-* https://github.com/vegastrike/Vega-Strike-Engine-Source
-*
-* This file is part of Vega Strike.
-*
-* Vega Strike is free software: you can redistribute it and/or modify
-* it under the terms of the GNU General Public License as published by
-* the Free Software Foundation, either version 2 of the License, or
-* (at your option) any later version.
-*
-* Vega Strike is distributed in the hope that it will be useful,
-* but WITHOUT ANY WARRANTY; without even the implied warranty of
-* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-* GNU General Public License for more details.
-*
-* You should have received a copy of the GNU General Public License
-* along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
-*/
+ * gauge.cpp
+ *
+ * Copyright (c) 2001-2002 Daniel Horn
+ * Copyright (c) 2002-2019 pyramid3d and other Vega Strike Contributors
+ * Copyright (c) 2019-2021 Stephen G. Tuggy, and other Vega Strike Contributors
+ * Copyright (C) 2022 Stephen G. Tuggy
+ *
+ * https://github.com/vegastrike/Vega-Strike-Engine-Source
+ *
+ * This file is part of Vega Strike.
+ *
+ * Vega Strike is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * Vega Strike is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
+ */
+
 
 #include "gauge.h"
 
-Gauge::Gauge( const char *file, DIRECTION up ) : VSSprite( file )
+Gauge::Gauge(const char *file, DIRECTION up) : VSSprite(file)
 {
     dir = up;
     float sx, sy;
-    VSSprite::GetSize( sx, sy );
-    SetSize( -sx, -sy );
+    VSSprite::GetSize(sx, sy);
+    SetSize(-sx, -sy);
 }
 
-void Gauge::SetSize( float x, float y )
+void Gauge::SetSize(float x, float y)
 {
-    if (dir == GAUGE_UP)
+    if (dir == GAUGE_UP) {
         y = -y;
-    else if (dir == GAUGE_LEFT)
+    } else if (dir == GAUGE_LEFT) {
         x = -x;
-    VSSprite::SetSize( x, y );
+    }
+    VSSprite::SetSize(x, y);
 }
 
-void Gauge::GetSize( float &x, float &y )
+void Gauge::GetSize(float &x, float &y)
 {
-    VSSprite::GetSize( x, y );
-    if (dir == GAUGE_UP)
+    VSSprite::GetSize(x, y);
+    if (dir == GAUGE_UP) {
         y = -y;
-    else if (dir == GAUGE_LEFT)
+    } else if (dir == GAUGE_LEFT) {
         x = -x;
+    }
 }
 
-void Gauge::Draw( float percentage )
+void Gauge::Draw(float percentage)
 {
-    if (percentage < 0) percentage = 0;
-
-    else if (percentage > 1)
+    if (percentage < 0) {
+        percentage = 0;
+    } else if (percentage > 1) {
         percentage = 1;
+    }
     float sx, sy, px, py;
-    VSSprite::GetSize( sx, sy );
-    VSSprite::GetPosition( px, py );
-    switch (dir)
-    {
-    case GAUGE_RIGHT:
-    case GAUGE_LEFT:
-        SetST( (1-percentage), 0 );
-        VSSprite::SetSize( sx*percentage, sy );
-        VSSprite::SetPosition( px+sx*(1-percentage)*.5, py );
-        break;
-    case GAUGE_DOWN:
-    case GAUGE_UP:
-        SetST( 0, (1-percentage) );
-        VSSprite::SetSize( sx, sy*percentage );
-        VSSprite::SetPosition( px, py+sy*(1-percentage)*.5 );
-        break;
-    case GAUGE_TIME:
-        VSSprite::SetTime( percentage );
-        break;
+    VSSprite::GetSize(sx, sy);
+    VSSprite::GetPosition(px, py);
+    switch (dir) {
+        case GAUGE_RIGHT:
+        case GAUGE_LEFT:
+            SetST((1 - percentage), 0);
+            VSSprite::SetSize(sx * percentage, sy);
+            VSSprite::SetPosition(px + sx * (1 - percentage) * .5, py);
+            break;
+        case GAUGE_DOWN:
+        case GAUGE_UP:
+            SetST(0, (1 - percentage));
+            VSSprite::SetSize(sx, sy * percentage);
+            VSSprite::SetPosition(px, py + sy * (1 - percentage) * .5);
+            break;
+        case GAUGE_TIME:
+            VSSprite::SetTime(percentage);
+            break;
     }
     VSSprite::Draw();
-    VSSprite::SetSize( sx, sy );
-    VSSprite::SetPosition( px, py );
+    VSSprite::SetSize(sx, sy);
+    VSSprite::SetPosition(px, py);
 }
 
