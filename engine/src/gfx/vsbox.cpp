@@ -3,7 +3,8 @@
  *
  * Copyright (C) Daniel Horn
  * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike
- * contributors
+ *  contributors
+ * Copyright (C) 2022 Stephen G. Tuggy
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -32,31 +33,31 @@
  *  return os << "(" << obj.i << "," << obj.j << "," << obj.k << ")";
  *  }
  */
-string tostring( const Vector &v )
+string tostring(const Vector &v)
 {
-    return std::string( "(" )+XMLSupport::tostring( v.i )+", "+XMLSupport::tostring( v.j )+", "+XMLSupport::tostring( v.k )+")";
+    return std::string("(") + XMLSupport::tostring(v.i) + ", " + XMLSupport::tostring(v.j) + ", "
+            + XMLSupport::tostring(v.k) + ")";
 }
 
-Box::Box( const Vector &corner1, const Vector &corner2 ) : corner_min( corner1 )
-    , corner_max( corner2 )
+Box::Box(const Vector &corner1, const Vector &corner2) : corner_min(corner1), corner_max(corner2)
 {
     InitUnit();
     draw_sequence = 3;
-    setEnvMap( GFXFALSE );
+    setEnvMap(GFXFALSE);
     blendSrc = ONE;
     blendDst = ONE;
-    Box   *oldmesh;
-    string hash_key = string( "@@Box" )+"#"+tostring( corner1 )+"#"+tostring( corner2 );
-    if ( 0 != ( oldmesh = (Box*) meshHashTable.Get( hash_key ) ) ) {
+    Box *oldmesh;
+    string hash_key = string("@@Box") + "#" + tostring(corner1) + "#" + tostring(corner2);
+    if (0 != (oldmesh = (Box *) meshHashTable.Get(hash_key))) {
         *this = *oldmesh;
         oldmesh->refcount++;
-        orig  = oldmesh;
+        orig = oldmesh;
         return;
     }
     int a = 0;
     GFXVertex *vertices = new GFXVertex[18];
 
-#define VERTEX( ax, ay, az ) \
+#define VERTEX(ax, ay, az) \
     do {vertices[a].x = ax;  \
         vertices[a].y = ay;  \
         vertices[a].z = az;  \
@@ -69,92 +70,238 @@ Box::Box( const Vector &corner1, const Vector &corner2 ) : corner_min( corner1 )
     }                        \
     while (0)
 
-    VERTEX( corner_max.i, corner_min.j, corner_max.k );
-    VERTEX( corner_min.i, corner_min.j, corner_max.k );
-    VERTEX( corner_min.i, corner_min.j, corner_min.k );
-    VERTEX( corner_max.i, corner_min.j, corner_min.k );
+    VERTEX(corner_max.i, corner_min.j, corner_max.k);
+    VERTEX(corner_min.i, corner_min.j, corner_max.k);
+    VERTEX(corner_min.i, corner_min.j, corner_min.k);
+    VERTEX(corner_max.i, corner_min.j, corner_min.k);
 
-    VERTEX( corner_max.i, corner_max.j, corner_min.k );
-    VERTEX( corner_min.i, corner_max.j, corner_min.k );
-    VERTEX( corner_min.i, corner_max.j, corner_max.k );
-    VERTEX( corner_max.i, corner_max.j, corner_max.k );
+    VERTEX(corner_max.i, corner_max.j, corner_min.k);
+    VERTEX(corner_min.i, corner_max.j, corner_min.k);
+    VERTEX(corner_min.i, corner_max.j, corner_max.k);
+    VERTEX(corner_max.i, corner_max.j, corner_max.k);
 
     a = 8;
 
-    VERTEX( corner_max.i, corner_min.j, corner_max.k );
-    VERTEX( corner_min.i, corner_min.j, corner_max.k );
-    VERTEX( corner_min.i, corner_max.j, corner_max.k );
-    VERTEX( corner_max.i, corner_max.j, corner_max.k );
+    VERTEX(corner_max.i, corner_min.j, corner_max.k);
+    VERTEX(corner_min.i, corner_min.j, corner_max.k);
+    VERTEX(corner_min.i, corner_max.j, corner_max.k);
+    VERTEX(corner_max.i, corner_max.j, corner_max.k);
 
-    VERTEX( corner_max.i, corner_max.j, corner_min.k );
-    VERTEX( corner_min.i, corner_max.j, corner_min.k );
+    VERTEX(corner_max.i, corner_max.j, corner_min.k);
+    VERTEX(corner_min.i, corner_max.j, corner_min.k);
 
-    VERTEX( corner_min.i, corner_min.j, corner_min.k );
-    VERTEX( corner_max.i, corner_min.j, corner_min.k );
+    VERTEX(corner_min.i, corner_min.j, corner_min.k);
+    VERTEX(corner_max.i, corner_min.j, corner_min.k);
 
-    VERTEX( corner_max.i, corner_min.j, corner_max.k );
-    VERTEX( corner_min.i, corner_min.j, corner_max.k );
+    VERTEX(corner_max.i, corner_min.j, corner_max.k);
+    VERTEX(corner_min.i, corner_min.j, corner_max.k);
 
     int offsets[2];
     offsets[0] = 8;
     offsets[1] = 10;
     enum POLYTYPE polys[2];
-    polys[0]   = GFXQUAD;
-    polys[1]   = GFXQUADSTRIP;
-    vlist = new GFXVertexList( polys, 18, vertices, 2, offsets );
+    polys[0] = GFXQUAD;
+    polys[1] = GFXQUADSTRIP;
+    vlist = new GFXVertexList(polys, 18, vertices, 2, offsets);
     //quadstrips[0] = new GFXVertexList(GFXQUADSTRIP,10,vertices);
     delete[] vertices;
 
-    meshHashTable.Put( hash_key, this );
+    meshHashTable.Put(hash_key, this);
     orig = this;
     refcount++;
-    draw_queue = new vector< MeshDrawContext >[NUM_ZBUF_SEQ+1];
+    draw_queue = new vector<MeshDrawContext>[NUM_ZBUF_SEQ + 1];
 #undef VERTEX
 }
 
-void Box::ProcessDrawQueue( int )
+void Box::ProcessDrawQueue(int)
 {
-    if ( !draw_queue[0].size() ) return;
-    GFXBlendMode( SRCALPHA, INVSRCALPHA );
-    GFXColor( 0.0, .90, .3, .4 );
-    GFXDisable( LIGHTING );
-    GFXDisable( TEXTURE0 );
-    GFXDisable( TEXTURE1 );
-    GFXDisable( DEPTHWRITE );
-    GFXDisable( CULLFACE );
+    if (!draw_queue[0].size()) {
+        return;
+    }
+    GFXBlendMode(SRCALPHA, INVSRCALPHA);
+    GFXColor(0.0, .90, .3, .4);
+    GFXDisable(LIGHTING);
+    GFXDisable(TEXTURE0);
+    GFXDisable(TEXTURE1);
+    GFXDisable(DEPTHWRITE);
+    GFXDisable(CULLFACE);
 
     unsigned vnum = 24 * draw_queue[0].size();
     std::vector<float> verts(vnum * (3 + 4));
     std::vector<float>::iterator v = verts.begin();
-    while ( draw_queue[0].size() ) {
-        GFXLoadMatrixModel( draw_queue[0].back().mat );
+    while (draw_queue[0].size()) {
+        GFXLoadMatrixModel(draw_queue[0].back().mat);
         draw_queue[0].pop_back();
-        *v++ = corner_max.i; *v++ = corner_min.j; *v++ = corner_max.k;  *v++ = 0.0; *v++ = 1.0; *v++ = 0.0; *v++ = 0.2;
-        *v++ = corner_max.i; *v++ = corner_max.j; *v++ = corner_max.k;  *v++ = 0.0; *v++ = 1.0; *v++ = 0.0; *v++ = 0.2;
-        *v++ = corner_min.i; *v++ = corner_max.j; *v++ = corner_max.k;  *v++ = 0.0; *v++ = 1.0; *v++ = 0.0; *v++ = 0.2;
-        *v++ = corner_min.i; *v++ = corner_min.j; *v++ = corner_max.k;  *v++ = 0.0; *v++ = 1.0; *v++ = 0.0; *v++ = 0.2;
-        *v++ = corner_min.i; *v++ = corner_min.j; *v++ = corner_min.k;  *v++ = 0.0; *v++ = 1.0; *v++ = 0.0; *v++ = 0.2;
-        *v++ = corner_min.i; *v++ = corner_max.j; *v++ = corner_min.k;  *v++ = 0.0; *v++ = 1.0; *v++ = 0.0; *v++ = 0.2;
-        *v++ = corner_max.i; *v++ = corner_max.j; *v++ = corner_min.k;  *v++ = 0.0; *v++ = 1.0; *v++ = 0.0; *v++ = 0.2;
-        *v++ = corner_max.i; *v++ = corner_min.j; *v++ = corner_min.k;  *v++ = 0.0; *v++ = 1.0; *v++ = 0.0; *v++ = 0.2;
-        *v++ = corner_max.i; *v++ = corner_min.j; *v++ = corner_max.k;  *v++ = 0.0; *v++ = 0.7; *v++ = 0.0; *v++ = 0.2;
-        *v++ = corner_min.i; *v++ = corner_min.j; *v++ = corner_max.k;  *v++ = 0.0; *v++ = 0.7; *v++ = 0.0; *v++ = 0.2;
-        *v++ = corner_min.i; *v++ = corner_min.j; *v++ = corner_min.k;  *v++ = 0.0; *v++ = 0.7; *v++ = 0.0; *v++ = 0.2;
-        *v++ = corner_max.i; *v++ = corner_min.j; *v++ = corner_min.k;  *v++ = 0.0; *v++ = 0.7; *v++ = 0.0; *v++ = 0.2;
-        *v++ = corner_max.i; *v++ = corner_max.j; *v++ = corner_min.k;  *v++ = 0.0; *v++ = 0.7; *v++ = 0.0; *v++ = 0.2;
-        *v++ = corner_min.i; *v++ = corner_max.j; *v++ = corner_min.k;  *v++ = 0.0; *v++ = 0.7; *v++ = 0.0; *v++ = 0.2;
-        *v++ = corner_min.i; *v++ = corner_max.j; *v++ = corner_max.k;  *v++ = 0.0; *v++ = 0.7; *v++ = 0.0; *v++ = 0.2;
-        *v++ = corner_max.i; *v++ = corner_max.j; *v++ = corner_max.k;  *v++ = 0.0; *v++ = 0.7; *v++ = 0.0; *v++ = 0.2;
-        *v++ = corner_max.i; *v++ = corner_max.j; *v++ = corner_max.k;  *v++ = 0.0; *v++ = 0.9; *v++ = 0.3; *v++ = 0.2;
-        *v++ = corner_max.i; *v++ = corner_min.j; *v++ = corner_max.k;  *v++ = 0.0; *v++ = 0.9; *v++ = 0.3; *v++ = 0.2;
-        *v++ = corner_max.i; *v++ = corner_min.j; *v++ = corner_min.k;  *v++ = 0.0; *v++ = 0.9; *v++ = 0.3; *v++ = 0.2;
-        *v++ = corner_max.i; *v++ = corner_max.j; *v++ = corner_min.k;  *v++ = 0.0; *v++ = 0.9; *v++ = 0.3; *v++ = 0.2;
-        *v++ = corner_min.i; *v++ = corner_max.j; *v++ = corner_min.k;  *v++ = 0.0; *v++ = 0.9; *v++ = 0.3; *v++ = 0.2;
-        *v++ = corner_min.i; *v++ = corner_min.j; *v++ = corner_min.k;  *v++ = 0.0; *v++ = 0.9; *v++ = 0.3; *v++ = 0.2;
-        *v++ = corner_min.i; *v++ = corner_min.j; *v++ = corner_max.k;  *v++ = 0.0; *v++ = 0.9; *v++ = 0.3; *v++ = 0.2;
-        *v++ = corner_min.i; *v++ = corner_max.j; *v++ = corner_max.k;  *v++ = 0.0; *v++ = 0.9; *v++ = 0.3; *v++ = 0.2;
+        *v++ = corner_max.i;
+        *v++ = corner_min.j;
+        *v++ = corner_max.k;
+        *v++ = 0.0;
+        *v++ = 1.0;
+        *v++ = 0.0;
+        *v++ = 0.2;
+        *v++ = corner_max.i;
+        *v++ = corner_max.j;
+        *v++ = corner_max.k;
+        *v++ = 0.0;
+        *v++ = 1.0;
+        *v++ = 0.0;
+        *v++ = 0.2;
+        *v++ = corner_min.i;
+        *v++ = corner_max.j;
+        *v++ = corner_max.k;
+        *v++ = 0.0;
+        *v++ = 1.0;
+        *v++ = 0.0;
+        *v++ = 0.2;
+        *v++ = corner_min.i;
+        *v++ = corner_min.j;
+        *v++ = corner_max.k;
+        *v++ = 0.0;
+        *v++ = 1.0;
+        *v++ = 0.0;
+        *v++ = 0.2;
+        *v++ = corner_min.i;
+        *v++ = corner_min.j;
+        *v++ = corner_min.k;
+        *v++ = 0.0;
+        *v++ = 1.0;
+        *v++ = 0.0;
+        *v++ = 0.2;
+        *v++ = corner_min.i;
+        *v++ = corner_max.j;
+        *v++ = corner_min.k;
+        *v++ = 0.0;
+        *v++ = 1.0;
+        *v++ = 0.0;
+        *v++ = 0.2;
+        *v++ = corner_max.i;
+        *v++ = corner_max.j;
+        *v++ = corner_min.k;
+        *v++ = 0.0;
+        *v++ = 1.0;
+        *v++ = 0.0;
+        *v++ = 0.2;
+        *v++ = corner_max.i;
+        *v++ = corner_min.j;
+        *v++ = corner_min.k;
+        *v++ = 0.0;
+        *v++ = 1.0;
+        *v++ = 0.0;
+        *v++ = 0.2;
+        *v++ = corner_max.i;
+        *v++ = corner_min.j;
+        *v++ = corner_max.k;
+        *v++ = 0.0;
+        *v++ = 0.7;
+        *v++ = 0.0;
+        *v++ = 0.2;
+        *v++ = corner_min.i;
+        *v++ = corner_min.j;
+        *v++ = corner_max.k;
+        *v++ = 0.0;
+        *v++ = 0.7;
+        *v++ = 0.0;
+        *v++ = 0.2;
+        *v++ = corner_min.i;
+        *v++ = corner_min.j;
+        *v++ = corner_min.k;
+        *v++ = 0.0;
+        *v++ = 0.7;
+        *v++ = 0.0;
+        *v++ = 0.2;
+        *v++ = corner_max.i;
+        *v++ = corner_min.j;
+        *v++ = corner_min.k;
+        *v++ = 0.0;
+        *v++ = 0.7;
+        *v++ = 0.0;
+        *v++ = 0.2;
+        *v++ = corner_max.i;
+        *v++ = corner_max.j;
+        *v++ = corner_min.k;
+        *v++ = 0.0;
+        *v++ = 0.7;
+        *v++ = 0.0;
+        *v++ = 0.2;
+        *v++ = corner_min.i;
+        *v++ = corner_max.j;
+        *v++ = corner_min.k;
+        *v++ = 0.0;
+        *v++ = 0.7;
+        *v++ = 0.0;
+        *v++ = 0.2;
+        *v++ = corner_min.i;
+        *v++ = corner_max.j;
+        *v++ = corner_max.k;
+        *v++ = 0.0;
+        *v++ = 0.7;
+        *v++ = 0.0;
+        *v++ = 0.2;
+        *v++ = corner_max.i;
+        *v++ = corner_max.j;
+        *v++ = corner_max.k;
+        *v++ = 0.0;
+        *v++ = 0.7;
+        *v++ = 0.0;
+        *v++ = 0.2;
+        *v++ = corner_max.i;
+        *v++ = corner_max.j;
+        *v++ = corner_max.k;
+        *v++ = 0.0;
+        *v++ = 0.9;
+        *v++ = 0.3;
+        *v++ = 0.2;
+        *v++ = corner_max.i;
+        *v++ = corner_min.j;
+        *v++ = corner_max.k;
+        *v++ = 0.0;
+        *v++ = 0.9;
+        *v++ = 0.3;
+        *v++ = 0.2;
+        *v++ = corner_max.i;
+        *v++ = corner_min.j;
+        *v++ = corner_min.k;
+        *v++ = 0.0;
+        *v++ = 0.9;
+        *v++ = 0.3;
+        *v++ = 0.2;
+        *v++ = corner_max.i;
+        *v++ = corner_max.j;
+        *v++ = corner_min.k;
+        *v++ = 0.0;
+        *v++ = 0.9;
+        *v++ = 0.3;
+        *v++ = 0.2;
+        *v++ = corner_min.i;
+        *v++ = corner_max.j;
+        *v++ = corner_min.k;
+        *v++ = 0.0;
+        *v++ = 0.9;
+        *v++ = 0.3;
+        *v++ = 0.2;
+        *v++ = corner_min.i;
+        *v++ = corner_min.j;
+        *v++ = corner_min.k;
+        *v++ = 0.0;
+        *v++ = 0.9;
+        *v++ = 0.3;
+        *v++ = 0.2;
+        *v++ = corner_min.i;
+        *v++ = corner_min.j;
+        *v++ = corner_max.k;
+        *v++ = 0.0;
+        *v++ = 0.9;
+        *v++ = 0.3;
+        *v++ = 0.2;
+        *v++ = corner_min.i;
+        *v++ = corner_max.j;
+        *v++ = corner_max.k;
+        *v++ = 0.0;
+        *v++ = 0.9;
+        *v++ = 0.3;
+        *v++ = 0.2;
     }
-    GFXDraw( GFXQUAD, &verts[0], vnum, 3, 4 );
-    GFXEnable( DEPTHWRITE );
+    GFXDraw(GFXQUAD, &verts[0], vnum, 3, 4);
+    GFXEnable(DEPTHWRITE);
 }
 

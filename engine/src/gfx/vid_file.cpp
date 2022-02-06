@@ -3,7 +3,7 @@
  *
  * Copyright (C) Daniel Horn
  * Copyright (C) 2020 pyramid3d and other Vega Strike contributors
- * Copyright (C) 2021 Stephen G. Tuggy
+ * Copyright (C) 2021-2022 Stephen G. Tuggy
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -54,9 +54,9 @@
 #if (LIBAVCODEC_VERSION_MAJOR >= 52) || (LIBAVCODEC_VERSION_INT >= ( ( 51<<16)+(49<<8)+0 ) ) || defined (__amd64__) \
     || defined (_M_AMD64) || defined (__x86_64) || defined (__x86_64__)
 typedef int64_t offset_t;
-    #else
+#else
 typedef int     offset_t;
-    #endif
+#endif
 #endif
 using namespace VSFileSystem;
 
@@ -121,31 +121,31 @@ private:
                 //Work on the current packet until we have decoded all of it
                 while (packetBufferSize > 0 && packet.size > 0) {
                     //Decode the next chunk of data
-                    #if (LIBAVCODEC_VERSION_MAJOR >= 53)
+#if (LIBAVCODEC_VERSION_MAJOR >= 53)
                     bytesDecoded = avcodec_decode_video2(
                         pCodecCtx, pNextFrameYUV, &frameFinished,
                         &packet );
-                    #else
+#else
                     bytesDecoded = avcodec_decode_video(
                         pCodecCtx, pNextFrameYUV, &frameFinished,
                         packetBuffer, packetBufferSize );
-                    #endif
+#endif
                     VS_LOG(trace, (boost::format("dts %1%: Decoded %2% bytes %3%") % int64_t(packet.dts) % int(bytesDecoded) %
                                                     (frameFinished ? "Got frame" : "")));
                     //Was there an error?
                     if (bytesDecoded <= 0) throw VidFile::FrameDecodeException( "Error decoding frame" );
                     //Crappy ffmpeg!
-                    #if (LIBAVCODEC_VERSION_MAJOR >= 53)
+#if (LIBAVCODEC_VERSION_MAJOR >= 53)
                     if (bytesDecoded > packet.size)
                         bytesDecoded = packet.size;
                     packet.size -= bytesDecoded;
                     packet.data += bytesDecoded;
-                    #else
+#else
                     if (bytesDecoded > packetBufferSize)
                         bytesDecoded = packetBufferSize;
                     packetBufferSize -= bytesDecoded;
                     packetBuffer     += bytesDecoded;
-                    #endif
+#endif
                     //Did we finish the current frame? Then we can return
                     if (frameFinished) {
                         pNextFrameYUV->pts = packet.dts;
@@ -156,10 +156,10 @@ private:
             }
             //Read the next packet, skipping all packets that aren't for this
             //stream
-            #if (LIBAVCODEC_VERSION_MAJOR >= 53)
+#if (LIBAVCODEC_VERSION_MAJOR >= 53)
             packet.size = packetBufferSize;
             packet.data = packetBuffer;
-            #endif
+#endif
             do {
                 //Free old packet
                 if (packet.data != NULL)
@@ -250,9 +250,9 @@ public:
         if ( ( 0 != avformat_open_input( &pFormatCtx, npath.c_str(), NULL, NULL ) )
             || ( 0 > av_find_stream_info( pFormatCtx ) ) ) throw VidFile::FileOpenException( errbase+" (wrong format or)" );
         //Dump format info in case we want to know...
-        #ifdef VS_DEBUG
+#ifdef VS_DEBUG
         dump_format( pFormatCtx, 0, npath.c_str(), false );
-        #endif
+#endif
 
         //Find first video stream
         pCodecCtx = 0;
@@ -400,28 +400,33 @@ public:
 };
 
 #else /* !HAVE_FFMPEG */
-class VidFileImpl
-{
+class VidFileImpl {
 private:
-    VidFileImpl(size_t, bool) {}
+    VidFileImpl(size_t, bool)
+    {
+    }
+
 public:
     //Avoid having to put ifdef's everywhere.
     float frameRate, duration;
-    int   width, height;
+    int width, height;
     void *frameBuffer;
-    int   frameBufferStride;
-    bool seek( float time )
+    int frameBufferStride;
+
+    bool seek(float time)
     {
         return false;
     }
 };
 
 #endif /* !HAVE_FFMPEG */
+
 /* ************************************ */
 
 VidFile::VidFile() :
-    impl( nullptr )
-{}
+        impl(nullptr)
+{
+}
 
 VidFile::~VidFile()
 {
@@ -436,7 +441,7 @@ bool VidFile::isOpen() const
     return impl != nullptr;
 }
 
-void VidFile::open( const std::string &path, size_t maxDimension, bool forcePOT )
+void VidFile::open(const std::string &path, size_t maxDimension, bool forcePOT)
 {
 #ifdef HAVE_FFMPEG
     if (!impl)
@@ -474,7 +479,7 @@ int VidFile::getHeight() const
     return impl ? impl->height : 0;
 }
 
-void* VidFile::getFrameBuffer() const
+void *VidFile::getFrameBuffer() const
 {
     return impl ? impl->frameBuffer : 0;
 }
@@ -484,7 +489,7 @@ int VidFile::getFrameBufferStride() const
     return impl ? impl->frameBufferStride : 0;
 }
 
-bool VidFile::seek( float time )
+bool VidFile::seek(float time)
 {
-    return (impl != 0) && impl->seek( time );
+    return (impl != 0) && impl->seek(time);
 }
