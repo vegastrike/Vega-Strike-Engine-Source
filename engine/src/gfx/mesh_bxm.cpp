@@ -1,9 +1,6 @@
-/**
- * mesh_bxm.cpp
- *
- * Copyright (C) Daniel Horn
- * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike contributors
- * Copyright (C) 2021-2022 Stephen G. Tuggy
+/*
+ * Copyright (C) 2001-2022 Daniel Horn, pyramid3d, Stephen G. Tuggy,
+ * and other Vega Strike contributors.
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -20,7 +17,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
+ * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
 
 
@@ -480,12 +477,13 @@ vector<Mesh *> Mesh::LoadMeshes(VSFileSystem::VSFile &Inputfile,
             xml.reverse = reverse;
             xml.force_texture = forcetexture;
             xml.sharevert = sharevert;
-            if (alphatest <= 1 && alphatest >= 0)
+            if (alphatest <= 1 && alphatest >= 0) {
                 mesh->alphatest = (unsigned char) (alphatest * 255.0);
-            else if (alphatest > 1)
+            } else if (alphatest > 1) {
                 mesh->alphatest = 255;
-            else
+            } else {
                 mesh->alphatest = 0;
+            }
             mesh->polygon_offset = polygonoffset;
             mesh->SetBlendMode((BLENDFUNC) bsrc, (BLENDFUNC) bdst);
 
@@ -559,8 +557,9 @@ vector<Mesh *> Mesh::LoadMeshes(VSFileSystem::VSFile &Inputfile,
                 if (textype == TECHNIQUE) {
                     xml.technique = texname;
                 } else {
-                    while (mesh->Decal.size() <= (unsigned int) texindex)
+                    while (mesh->Decal.size() <= (unsigned int) texindex) {
                         mesh->Decal.push_back(0);
+                    }
                     while (xml.decals.size() <= (unsigned int) texindex) {
                         MeshXML::ZeTexture z;
                         xml.decals.push_back(z);
@@ -706,9 +705,10 @@ vector<Mesh *> Mesh::LoadMeshes(VSFileSystem::VSFile &Inputfile,
                     VSSwapHostIntToLittle(inmemfile[word32index].i32val);                     //number of animation definitions
             word32index += 1;
 #ifndef STANDALONE
-            if (meshindex == 0)
+            if (meshindex == 0) {
                 for (uint32bit framecount = numLODs + 1; framecount < nummeshes; framecount++)
                     bxmfprintf(Outputfile, "<Frame FrameMeshName=\"%d_%d.xmesh\"/>\n", recordindex, framecount);
+            }
 #endif
             for (uint32bit anim = 0; anim < numanimdefs; anim++) {
                 uint32bit animnamelen =
@@ -1048,14 +1048,18 @@ vector<Mesh *> Mesh::LoadMeshes(VSFileSystem::VSFile &Inputfile,
                 reverse_vector(xml.triind);
                 reverse_vector(xml.quads);
                 reverse_vector(xml.quadind);
-                for (iter = xml.trifans.begin(); iter != xml.trifans.end(); iter++)
+                for (iter = xml.trifans.begin(); iter != xml.trifans.end(); iter++) {
                     reverse_vector(*iter);
-                for (iter = xml.quadstrips.begin(); iter != xml.quadstrips.end(); iter++)
+                }
+                for (iter = xml.quadstrips.begin(); iter != xml.quadstrips.end(); iter++) {
                     reverse_vector(*iter);
-                for (iter = xml.tristrips.begin(); iter != xml.tristrips.end(); iter++)
+                }
+                for (iter = xml.tristrips.begin(); iter != xml.tristrips.end(); iter++) {
                     reverse_vector(*iter);
-                for (iter = xml.linestrips.begin(); iter != xml.linestrips.end(); iter++)
+                }
+                for (iter = xml.linestrips.begin(); iter != xml.linestrips.end(); iter++) {
                     reverse_vector(*iter);
+                }
                 reverse_vector(xml.quadstripind);
                 reverse_vector(xml.tristripind);
                 reverse_vector(xml.linestripind);

@@ -1,85 +1,132 @@
-/**
-* python_unit_wrap.h
-*
-* Copyright (c) 2001-2002 Daniel Horn
-* Copyright (c) 2002-2019 pyramid3d and other Vega Strike Contributors
-* Copyright (c) 2019-2021 Stephen G. Tuggy, and other Vega Strike Contributors
-*
-* https://github.com/vegastrike/Vega-Strike-Engine-Source
-*
-* This file is part of Vega Strike.
-*
-* Vega Strike is free software: you can redistribute it and/or modify
-* it under the terms of the GNU General Public License as published by
-* the Free Software Foundation, either version 2 of the License, or
-* (at your option) any later version.
-*
-* Vega Strike is distributed in the hope that it will be useful,
-* but WITHOUT ANY WARRANTY; without even the implied warranty of
-* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-* GNU General Public License for more details.
-*
-* You should have received a copy of the GNU General Public License
-* along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
-*/
+/*
+ * Copyright (C) 2001-2022 Daniel Horn, pyramid3d, Stephen G. Tuggy,
+ * and other Vega Strike contributors.
+ *
+ * https://github.com/vegastrike/Vega-Strike-Engine-Source
+ *
+ * This file is part of Vega Strike.
+ *
+ * Vega Strike is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Vega Strike is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
+ */
 
 #ifndef WHICH_UNIT_EXPORT_NUMBER
 #define WHICH_UNIT_EXPORT_NUMBER 0
 #endif
-#if ( ( WHICH_UNIT_EXPORT_NUMBER == 3) || (WHICH_UNIT_EXPORT_NUMBER == 2 ) )
+#if ((WHICH_UNIT_EXPORT_NUMBER == 3) || (WHICH_UNIT_EXPORT_NUMBER == 2))
 #else
 ////////////////////////////AUTOMATIC WRAP//////
-WRAPPED2( bool, AutoPilotTo, UnitWrapper, un, bool, ignore_energy_requirement, false )
+WRAPPED2(bool, AutoPilotTo, UnitWrapper, un, bool, ignore_energy_requirement,
+false )
 voidWRAPPED0( SetTurretAI )
 voidWRAPPED0( DisableTurretAI )
-voidWRAPPED3( leach, float, XshieldPercent, float, YrechargePercent, float, ZenergyPercent )
-WRAPPED0( int, getFgSubnumber, -1 )
-WRAPPED0( std::string, getFgID, std::string( "" ) )
-voidWRAPPED1( setFullname, std::string, name )
-WRAPPED0( std::string, getFullname, std::string() )
-WRAPPED0( std::string, getFullAIDescription, std::string() )
-voidWRAPPED3( setTargetFg, std::string, primary, std::string, secondary, std::string, tertiary )
-voidWRAPPED1( ReTargetFg, int, which_target )
-WRAPPED0( bool, isStarShip, false )
-WRAPPED0( bool, isPlanet, false )
-WRAPPED0( bool, isJumppoint, false )
-WRAPPED1( bool, isEnemy, UnitWrapper, other, false )
-WRAPPED1( bool, isFriend, UnitWrapper, other, false )
-WRAPPED1( bool, isNeutral, UnitWrapper, other, false )
-WRAPPED1( float, getRelation, UnitWrapper, other, 0 )
-voidWRAPPED1( ToggleWeapon, bool, Missile )
-voidWRAPPED1( SelectAllWeapon, bool, Missile )
-voidWRAPPED1( Split, int, level )
+voidWRAPPED3( leach,
+float, XshieldPercent, float, YrechargePercent, float, ZenergyPercent )
+WRAPPED0(int, getFgSubnumber,
+-1 )
+WRAPPED0( std::string, getFgID, std::string("")
+)
+voidWRAPPED1( setFullname, std::string, name
+)
+WRAPPED0( std::string, getFullname, std::string()
+)
+WRAPPED0( std::string, getFullAIDescription, std::string()
+)
+voidWRAPPED3( setTargetFg, std::string, primary, std::string, secondary, std::string, tertiary
+)
+voidWRAPPED1( ReTargetFg,
+int, which_target )
+WRAPPED0(bool, isStarShip,
+false )
+WRAPPED0(bool, isPlanet,
+false )
+WRAPPED0(bool, isJumppoint,
+false )
+WRAPPED1(bool, isEnemy, UnitWrapper, other,
+false )
+WRAPPED1(bool, isFriend, UnitWrapper, other,
+false )
+WRAPPED1(bool, isNeutral, UnitWrapper, other,
+false )
+WRAPPED1(float, getRelation, UnitWrapper, other,
+0 )
+voidWRAPPED1( ToggleWeapon,
+bool, Missile )
+voidWRAPPED1( SelectAllWeapon,
+bool, Missile )
+voidWRAPPED1( Split,
+int, level )
 
 voidWRAPPED0( Init )
-voidWRAPPED1( ActivateJumpDrive, int, destination )
+voidWRAPPED1( ActivateJumpDrive,
+int, destination )
 voidWRAPPED0( DeactivateJumpDrive )
 voidWRAPPED0( Destroy )
-WRAPPED1( Vector, LocalCoordinates, UnitWrapper, un, Vector( 0, 0, 0 ) )
-WRAPPED3( bool, InRange, UnitWrapper, target, bool, cone, bool, cap, false )
-WRAPPED0( float, CloakVisible, false )
-voidWRAPPED1( Cloak, bool, cloak )
+WRAPPED1( Vector, LocalCoordinates, UnitWrapper, un, Vector(0, 0, 0)
+)
+WRAPPED3(bool, InRange, UnitWrapper, target, bool, cone, bool, cap,
+false )
+WRAPPED0(float, CloakVisible,
+false )
+voidWRAPPED1( Cloak,
+bool, cloak )
 voidWRAPPED0( RemoveFromSystem )
-WRAPPED4( QVector, PositionITTS, QVector, local_posit, Vector, local_velocity, float, speed, bool, steadyITTS, QVector( 0, 0, 0 ) )
-WRAPPED0( QVector, Position, QVector( 0, 0, 0 ) )
-WRAPPED0( QVector, LocalPosition, QVector( 0, 0, 0 ) )
+WRAPPED4(QVector,
+         PositionITTS,
+         QVector,
+         local_posit,
+         Vector,
+         local_velocity,
+         float,
+         speed,
+         bool,
+         steadyITTS,
+         QVector(0, 0, 0))
+WRAPPED0( QVector, Position, QVector(0, 0, 0)
+)
+WRAPPED0( QVector, LocalPosition, QVector(0, 0, 0)
+)
 
-WRAPPED0( UnitWrapper, Threat, UnitWrapper() )
-voidWRAPPED1( TargetTurret, UnitWrapper, targ )
-voidWRAPPED2( Threaten, UnitWrapper, targ, float, danger )
+WRAPPED0( UnitWrapper, Threat, UnitWrapper()
+)
+voidWRAPPED1( TargetTurret, UnitWrapper, targ
+)
+voidWRAPPED2( Threaten, UnitWrapper, targ,
+float, danger )
 voidWRAPPED0( ResetThreatLevel )
-voidWRAPPED2( Fire, unsigned int, Missile, bool, OnlyCollideWithTarget )
+voidWRAPPED2( Fire,
+unsigned int, Missile, bool, OnlyCollideWithTarget )
 voidWRAPPED0( UnFire )
-WRAPPED0( float, computeLockingPercent, 0 )  //how locked are we
-WRAPPED0( float, FShieldData, 0 )
-WRAPPED0( float, RShieldData, 0 )
-WRAPPED0( float, LShieldData, 0 )
-WRAPPED0( float, BShieldData, 0 )
-WRAPPED0( float, fuelData, 0 )
-WRAPPED0( float, energyData, 0 )
-WRAPPED0( float, GetHull, 0 )
-WRAPPED0( float, GetHullPercent, 0 )
-WRAPPED0( float, rSize, 0 )
+WRAPPED0(float, computeLockingPercent,
+0 )  //how locked are we
+WRAPPED0(float, FShieldData,
+0 )
+WRAPPED0(float, RShieldData,
+0 )
+WRAPPED0(float, LShieldData,
+0 )
+WRAPPED0(float, BShieldData,
+0 )
+WRAPPED0(float, fuelData,
+0 )
+WRAPPED0(float, energyData,
+0 )
+WRAPPED0(float, GetHull,
+0 )
+WRAPPED0(float, GetHullPercent,
+0 )
+WRAPPED0(float, rSize,
+0 )
 #endif
 #if WHICH_UNIT_EXPORT_NUMBER == 1 || WHICH_UNIT_EXPORT_NUMBER == 3
 #else

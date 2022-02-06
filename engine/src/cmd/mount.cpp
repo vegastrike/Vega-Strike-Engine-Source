@@ -1,9 +1,6 @@
-/**
- * mount.cpp
- *
- * Copyright (C) 2001-2019 Daniel Horn and other Vega Strike contributors
- * Copyright (C) 2020-2021 pyramid3d, Roy Falk, Stephen G. Tuggy,
- * and other Vega Strike contributors
+/*
+ * Copyright (C) 2001-2022 Daniel Horn, pyramid3d, Stephen G. Tuggy,
+ * and other Vega Strike contributors.
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -20,7 +17,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
+ * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
 
 
@@ -279,30 +276,36 @@ bool Mount::PhysicsAlignedFire(Unit *caller,
         static bool firemissingautotrackers =
                 XMLSupport::parse_bool(vs_config->getVariable("physics", "fire_missing_autotrackers", "true"));
         if (autotrack && NULL != target) {
-            if (!AdjustMatrix(mat, velocity, target, type->speed, autotrack >= 2, trackingcone))
-                if (!firemissingautotrackers)
+            if (!AdjustMatrix(mat, velocity, target, type->speed, autotrack >= 2, trackingcone)) {
+                if (!firemissingautotrackers) {
                     return false;
+                }
+            }
         } else if (this->size & as_integer(MOUNT_SIZE::AUTOTRACKING)) {
-            if (!firemissingautotrackers)
+            if (!firemissingautotrackers) {
                 return false;
+            }
         }
         if (type->type != WEAPON_TYPE::BEAM) {
             ref.refire = 0;
-            if (ammo > 0)
+            if (ammo > 0) {
                 ammo--;
+            }
         } else {
             static bool reduce_beam_ammo =
                     XMLSupport::parse_bool(vs_config->getVariable("physics", "reduce_beam_ammo", "0"));
-            if (ammo > 0 && reduce_beam_ammo)
+            if (ammo > 0 && reduce_beam_ammo) {
                 ammo--;
+            }
         }
         time_to_lock = type->lock_time;
         switch (type->type) {
             case WEAPON_TYPE::UNKNOWN:
                 break;
             case WEAPON_TYPE::BEAM:
-                if (ref.gun)
+                if (ref.gun) {
                     ref.gun->Reinitialize();
+                }
                 break;
             case WEAPON_TYPE::BOLT:
                 caller->energy -= type->energy_rate;
@@ -388,8 +391,9 @@ bool Mount::PhysicsAlignedFire(Unit *caller,
                     if (err <= Ok) {
                         temp->EnqueueAI(new AIScript((type->file + ".xai").c_str()));
                         temp->EnqueueAI(new Orders::FireAllYouGot);
-                        if (match_speed_with_target)
+                        if (match_speed_with_target) {
                             temp->GetComputerData().velocity_ref.SetUnit(target);
+                        }
                     } else {
                         temp->EnqueueAI(new Orders::AggressiveAI("default.agg.xml"));
                         temp->SetTurretAI();
@@ -404,8 +408,9 @@ bool Mount::PhysicsAlignedFire(Unit *caller,
                         }
                         if (relat < 0) {
                             int i = 0;
-                            while (relat < temp->getRelation(target) && i++ < 100)
+                            while (relat < temp->getRelation(target) && i++ < 100) {
                                 GetMadAt(target, temp, 2);
+                            }
                         }
                         //pissed off					getMadAt(target, 10); // how do I cause an attack here?
                     }
@@ -419,9 +424,11 @@ bool Mount::PhysicsAlignedFire(Unit *caller,
                 CopyMatrix(temp->cumulative_transformation_matrix, m);
                 _Universe->activeStarSystem()->AddUnit(temp);
                 temp->UpdateCollideQueue(_Universe->activeStarSystem(), hint);
-                for (unsigned int locind = 0; locind < Unit::NUM_COLLIDE_MAPS; ++locind)
-                    if (!is_null(temp->location[locind]))
+                for (unsigned int locind = 0; locind < Unit::NUM_COLLIDE_MAPS; ++locind) {
+                    if (!is_null(temp->location[locind])) {
                         hint[locind] = temp->location[locind];
+                    }
+                }
 
                 break;
         }
@@ -492,8 +499,9 @@ bool Mount::PhysicsAlignedFire(Unit *caller,
                 AUDDeleteSound(snd);
             }
         }
-        if (type->isMissile() && ammo == 0)
+        if (type->isMissile() && ammo == 0) {
             status = UNCHOSEN;
+        }
     }
     return true;
 }

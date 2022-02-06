@@ -1,10 +1,6 @@
 /*
- * main.cpp
- *
- * Copyright (C) 2001-2002 Daniel Horn
- * Copyright (C) 2020-2021 pyramid3d, Stephen G. Tuggy, and
- * other Vega Strike contributors
- * Copyright (C) 2022 Stephen G. Tuggy
+ * Copyright (C) 2001-2022 Daniel Horn, pyramid3d, Stephen G. Tuggy,
+ * and other Vega Strike contributors.
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -12,7 +8,7 @@
  *
  * Vega Strike is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 2 of the License, or
+ * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
  * Vega Strike is distributed in the hope that it will be useful,
@@ -21,7 +17,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
+ * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
 
 
@@ -130,6 +126,7 @@ void setup_game_data()
     g_game.MouseSensitivityX = 2;
     g_game.MouseSensitivityY = 4;
 }
+
 VegaConfig *createVegaConfig(const char *file)
 {
     return new GameVegaConfig(file);
@@ -192,6 +189,7 @@ void bootstrap_first_loop();
 #if defined (WITH_MACOSX_BUNDLE)
 //WTF! this causes windowed creation to fail... please justify yourself ;-)  #undef main
 #endif
+
 void nothinghappens(unsigned int, unsigned int, bool, int, int)
 {
 }
@@ -419,22 +417,27 @@ int main(int argc, char *argv[])
 
 static Animation *SplashScreen = NULL;
 static bool BootstrapMyStarSystemLoading = true;
+
 void SetStarSystemLoading(bool value)
 {
     BootstrapMyStarSystemLoading = value;
 }
+
 bool GetStarSystemLoading()
 {
     return BootstrapMyStarSystemLoading;
 }
+
 void SetSplashScreen(Animation *ss)
 {
     SplashScreen = ss;
 }
+
 Animation *GetSplashScreen()
 {
     return SplashScreen;
 }
+
 void bootstrap_draw(const std::string &message, Animation *newSplashScreen)
 {
     static Animation *ani = NULL;
@@ -495,6 +498,7 @@ void bootstrap_draw(const std::string &message, Animation *newSplashScreen)
 
     reentryWatchdog = false;
 }
+
 extern Unit **fighters;
 
 bool SetPlayerLoc(QVector &sys, bool set)
@@ -512,6 +516,7 @@ bool SetPlayerLoc(QVector &sys, bool set)
         return isset;
     }
 }
+
 bool SetPlayerSystem(std::string &sys, bool set)
 {
     static std::string mysys;
@@ -527,6 +532,7 @@ bool SetPlayerSystem(std::string &sys, bool set)
         return isset;
     }
 }
+
 vector<string> parse_space_string(std::string s)
 {
     vector<string> ret;
@@ -538,6 +544,7 @@ vector<string> parse_space_string(std::string s)
     ret.push_back(s);
     return ret;
 }
+
 void bootstrap_first_loop()
 {
     static int i = 0;
@@ -571,6 +578,7 @@ void SetStartupView(Cockpit *cp)
                                                                                                == "chase" ? CP_CHASE
                                                                                                           : CP_FRONT)));
 }
+
 void bootstrap_main_loop()
 {
     static bool LoadMission = true;
@@ -752,6 +760,7 @@ const char versionmessage[] =
         // (BenjamenMeyer) this will be `major.minor.patch+githash` once all is said and done
         "Vega Strike Engine Version " VEGASTRIKE_VERSION_STR "\n"
         "\n";
+
 std::string ParseCommandLine(int argc, char **lpCmdLine)
 {
     std::string st;
@@ -814,7 +823,8 @@ std::string ParseCommandLine(int argc, char **lpCmdLine)
                         iStringStream.ignore(1, ',');
                         iStringStream >> PlayerLocation.k;
                     } catch (std::ios_base::failure &inputFailure) {
-                        std::cout << "Error reading coordinates for player location: " << inputFailure.what() << std::endl;
+                        std::cout << "Error reading coordinates for player location: " << inputFailure.what()
+                                  << std::endl;
                         exit(1);
                     }
                     SetPlayerLoc(PlayerLocation, true);
@@ -889,7 +899,9 @@ std::string ParseCommandLine(int argc, char **lpCmdLine)
 
     return retstr;
 }
+
 #undef main
+
 int readCommandLineOptions(int argc, char **argv)
 {
     for (int i = 1; i < argc; ++i) {

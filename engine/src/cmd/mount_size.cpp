@@ -1,8 +1,5 @@
-/**
- * mount_size.cpp
- *
- * Copyright (C) 2021 Roy Falk and David Wales
- * Copyright (C) 2022 Stephen G. Tuggy
+/*
+ * Copyright (C) 2021-2022 Roy Falk, David Wales, and Stephen G. Tuggy.
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -10,7 +7,7 @@
  *
  * Vega Strike is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 2 of the License, or
+ * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
  * Vega Strike is distributed in the hope that it will be useful,
@@ -33,19 +30,19 @@
 
 
 static const std::map<std::string, MOUNT_SIZE> mount_map = {
-    {"LIGHT",               MOUNT_SIZE::LIGHT},
-    {"MEDIUM",              MOUNT_SIZE::MEDIUM},
-    {"HEAVY",               MOUNT_SIZE::HEAVY},
-    {"CAPSHIP-LIGHT",        MOUNT_SIZE::CAPSHIPLIGHT},
-    {"CAPSHIP-HEAVY",        MOUNT_SIZE::CAPSHIPHEAVY},
-    {"SPECIAL",             MOUNT_SIZE::SPECIAL},
-    {"LIGHT-MISSILE",        MOUNT_SIZE::LIGHTMISSILE},
-    {"MEDIUM-MISSILE",       MOUNT_SIZE::MEDIUMMISSILE},
-    {"HEAVY-MISSILE",        MOUNT_SIZE::HEAVYMISSILE},
-    {"LIGHT-CAPSHIP-MISSILE", MOUNT_SIZE::CAPSHIPLIGHTMISSILE},
-    {"HEAVY-CAPSHIP-MISSILE", MOUNT_SIZE::CAPSHIPHEAVYMISSILE},
-    {"SPECIAL-MISSILE",      MOUNT_SIZE::SPECIALMISSILE},
-    {"AUTOTRACKING",        MOUNT_SIZE::AUTOTRACKING}
+        {"LIGHT", MOUNT_SIZE::LIGHT},
+        {"MEDIUM", MOUNT_SIZE::MEDIUM},
+        {"HEAVY", MOUNT_SIZE::HEAVY},
+        {"CAPSHIP-LIGHT", MOUNT_SIZE::CAPSHIPLIGHT},
+        {"CAPSHIP-HEAVY", MOUNT_SIZE::CAPSHIPHEAVY},
+        {"SPECIAL", MOUNT_SIZE::SPECIAL},
+        {"LIGHT-MISSILE", MOUNT_SIZE::LIGHTMISSILE},
+        {"MEDIUM-MISSILE", MOUNT_SIZE::MEDIUMMISSILE},
+        {"HEAVY-MISSILE", MOUNT_SIZE::HEAVYMISSILE},
+        {"LIGHT-CAPSHIP-MISSILE", MOUNT_SIZE::CAPSHIPLIGHTMISSILE},
+        {"HEAVY-CAPSHIP-MISSILE", MOUNT_SIZE::CAPSHIPHEAVYMISSILE},
+        {"SPECIAL-MISSILE", MOUNT_SIZE::SPECIALMISSILE},
+        {"AUTOTRACKING", MOUNT_SIZE::AUTOTRACKING}
 };
 
 MountSize::MountSize()

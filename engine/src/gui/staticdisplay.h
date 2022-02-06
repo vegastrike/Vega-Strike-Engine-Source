@@ -1,22 +1,23 @@
 /*
- * Vega Strike
- * Copyright (C) 2003 Mike Byron
+ * Copyright (C) 2001-2022 Daniel Horn, Mike Byron, pyramid3d,
+ * Stephen G. Tuggy, and other Vega Strike contributors.
  *
- * http://vegastrike.sourceforge.net/
+ * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * as published by the Free Software Foundation; either version 2
- * of the License, or (at your option) any later version.
+ * This file is part of Vega Strike.
  *
- * This program is distributed in the hope that it will be useful,
+ * Vega Strike is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Vega Strike is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+ * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
 
 #ifndef __STATICDISPLAY_H__
@@ -36,125 +37,141 @@ class Scroller;
 //images, textures, meshes, etc.
 //This control does not respond to input events.
 
-class StaticDisplay : public Control
-{
+class StaticDisplay : public Control {
 public:
 //Draw the control.
-    virtual void draw( void );
+    virtual void draw(void);
 
 //Text that appears on the control.
-    virtual std::string text( void )
+    virtual std::string text(void)
     {
         return m_paintText.text();
     }
-    virtual void setText( std::string t )
+
+    virtual void setText(std::string t)
     {
-        m_paintText.setText( t );
+        m_paintText.setText(t);
     }
 
 //Set justification.
-    virtual Justification justification( void )
+    virtual Justification justification(void)
     {
         return m_paintText.justification();
     }
-    virtual void setJustification( Justification j )
+
+    virtual void setJustification(Justification j)
     {
-        m_paintText.setJustification( j );
+        m_paintText.setJustification(j);
     }
 
 //Whether the text is multi-line.
-    virtual bool multiLine( void )
+    virtual bool multiLine(void)
     {
         return m_paintText.widthExceeded() == PaintText::MULTI_LINE;
     }
-    virtual void setMultiLine( bool multi )
+
+    virtual void setMultiLine(bool multi)
     {
-        m_paintText.setWidthExceeded( multi ? PaintText::MULTI_LINE : PaintText::ELLIPSIS );
+        m_paintText.setWidthExceeded(multi ? PaintText::MULTI_LINE : PaintText::ELLIPSIS);
     }
 
 //Text margins.
-    virtual Size textMargins( void )
+    virtual Size textMargins(void)
     {
         return m_textMargins;
     }
-    virtual void setTextMargins( const Size &s );
+
+    virtual void setTextMargins(const Size &s);
 
 //Set the object that takes care of scrolling.
-    virtual void setScroller( Scroller *s );
+    virtual void setScroller(Scroller *s);
 
 //OVERRIDES
 
 //Color of text in control.
-    virtual GFXColor textColor( void )
+    virtual GFXColor textColor(void)
     {
         return m_paintText.color();
     }
-    virtual void setTextColor( const GFXColor &c )
+
+    virtual void setTextColor(const GFXColor &c)
     {
-        m_paintText.setColor( c );
+        m_paintText.setColor(c);
     }
 
 //Font for text in control.
-    virtual Font font( void )
+    virtual Font font(void)
     {
         return m_paintText.font();
     }
-    virtual void setFont( const Font &f )
+
+    virtual void setFont(const Font &f)
     {
-        m_paintText.setFont( f );
+        m_paintText.setFont(f);
     }
 
 //The outside boundaries of the control.
-    virtual void setRect( const Rect &r );
+    virtual void setRect(const Rect &r);
 
 //OVERRIDES - used for scrolling.
-    virtual bool processMouseDown( const InputEvent &event );
+    virtual bool processMouseDown(const InputEvent &event);
 
 //Process a command event.
-    virtual bool processCommand( const EventCommandId &command, Control *control );
+    virtual bool processCommand(const EventCommandId &command, Control *control);
 
 //CONSTRUCTION
-public: StaticDisplay( void );
-    virtual ~StaticDisplay( void ) {}
+public:
+    StaticDisplay(void);
+
+    virtual ~StaticDisplay(void)
+    {
+    }
 
 protected:
 //INTERNAL IMPLEMENTATION
 
 //The rect for the text object has changed -- reset it.
-    void setPaintTextRect( void );
+    void setPaintTextRect(void);
 
 //VARIABLES
 protected:
     PaintText m_paintText;      //Text object.
     Size m_textMargins;         //Inset area where no text appears.
-    int  m_scrollPosition;      //Index of first display cell shown.
-    int  m_layoutVersion;       //A way to tell when the PaintText layout has changed.
+    int m_scrollPosition;      //Index of first display cell shown.
+    int m_layoutVersion;       //A way to tell when the PaintText layout has changed.
     Scroller *m_scroller;
 };
 
-class StaticImageDisplay : public Control
-{
+class StaticImageDisplay : public Control {
 public:
 //Draw the control.
-    virtual void draw( void )
+    virtual void draw(void)
     {
-        if ( texturename.length() ) texture.draw( m_rect );
+        if (texturename.length()) {
+            texture.draw(m_rect);
+        }
     }
 
 //Text that appears on the control.
-    virtual void setTexture( std::string t )
+    virtual void setTexture(std::string t)
     {
         texturename = t;
-        texture.read( t );
+        texture.read(t);
     }
 
 //CONSTRUCTION
-public: StaticImageDisplay( void ) {}
-    virtual ~StaticImageDisplay( void ) {}
+public:
+    StaticImageDisplay(void)
+    {
+    }
+
+    virtual ~StaticImageDisplay(void)
+    {
+    }
 
 protected:
     std::string texturename;
-    GuiTexture  texture;
+    GuiTexture texture;
 //INTERNAL IMPLEMENTATION
 };
 

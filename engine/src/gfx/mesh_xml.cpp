@@ -1,9 +1,6 @@
 /*
- * mesh_xml.cpp
- *
- * Copyright (C) Daniel Horn
- * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike contributors
- * Copyright (C) 2021-2022 Stephen G. Tuggy
+ * Copyright (C) 2001-2022 Daniel Horn, pyramid3d, Stephen G. Tuggy,
+ * and other Vega Strike contributors.
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -20,7 +17,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
+ * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
 
 
@@ -160,9 +157,9 @@ const EnumMap::Pair MeshXML::attribute_names[] = {
         EnumMap::Pair("FramesPerSecond", MeshXML::FRAMESPERSECOND)
 };
 
-const EnumMapMeshXML::element_map
-(MeshXML::element_names,
-sizeof(MeshXML::element_names) / sizeof(MeshXML::element_names[0]));
+const EnumMap MeshXML::element_map
+        (MeshXML::element_names,
+         sizeof(MeshXML::element_names) / sizeof(MeshXML::element_names[0]));
 const EnumMap MeshXML::attribute_map(MeshXML::attribute_names,
                                      sizeof(MeshXML::attribute_names) / sizeof(MeshXML::attribute_names[0]));
 

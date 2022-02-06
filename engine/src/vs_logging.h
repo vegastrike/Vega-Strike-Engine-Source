@@ -1,7 +1,5 @@
 /*
- * vs_logging.h
- *
- * Copyright (C) 2021 Stephen G. Tuggy
+ * Copyright (C) 2021-2022 Stephen G. Tuggy and other Vega Strike contributors.
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -18,7 +16,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
+ * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
 
 
@@ -38,7 +36,7 @@
 namespace VegaStrikeLogging {
 
 typedef ::boost::log::sinks::synchronous_sink<::boost::log::sinks::text_ostream_backend> ConsoleLogSink;
-typedef ::boost::log::sinks::synchronous_sink<::boost::log::sinks::text_file_backend>    FileLogSink;
+typedef ::boost::log::sinks::synchronous_sink<::boost::log::sinks::text_file_backend> FileLogSink;
 
 #define VS_LOG(log_level, log_message)                      \
     do {                                                    \
@@ -52,15 +50,14 @@ typedef ::boost::log::sinks::synchronous_sink<::boost::log::sinks::text_file_bac
 
 // void exitProgram(int code);
 
-class VegaStrikeLogger
-{
+class VegaStrikeLogger {
 private:
     static ::boost::shared_ptr<ConsoleLogSink> console_log_sink_;
-    static ::boost::shared_ptr<FileLogSink>    file_log_sink_;
+    static ::boost::shared_ptr<FileLogSink> file_log_sink_;
 
 public:
     static void InitLoggingPart1();
-    static void InitLoggingPart2(const uint8_t debug_level, const ::boost::filesystem::path& vega_strike_home_dir);
+    static void InitLoggingPart2(const uint8_t debug_level, const ::boost::filesystem::path &vega_strike_home_dir);
     static void FlushLogs();
     // inline template<class LogLevel, class LogMessage> static void Log(LogLevel log_level, LogMessage log_message)
     // {

@@ -1,27 +1,24 @@
-/**
-* linecollide.h
-*
-* Copyright (c) 2001-2002 Daniel Horn
-* Copyright (c) 2002-2019 pyramid3d and other Vega Strike Contributors
-* Copyright (c) 2019-2021 Stephen G. Tuggy, and other Vega Strike Contributors
-*
-* https://github.com/vegastrike/Vega-Strike-Engine-Source
-*
-* This file is part of Vega Strike.
-*
-* Vega Strike is free software: you can redistribute it and/or modify
-* it under the terms of the GNU General Public License as published by
-* the Free Software Foundation, either version 2 of the License, or
-* (at your option) any later version.
-*
-* Vega Strike is distributed in the hope that it will be useful,
-* but WITHOUT ANY WARRANTY; without even the implied warranty of
-* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-* GNU General Public License for more details.
-*
-* You should have received a copy of the GNU General Public License
-* along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
-*/
+/*
+ * Copyright (C) 2001-2022 Daniel Horn, pyramid3d, Stephen G. Tuggy,
+ * and other Vega Strike contributors.
+ *
+ * https://github.com/vegastrike/Vega-Strike-Engine-Source
+ *
+ * This file is part of Vega Strike.
+ *
+ * Vega Strike is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Vega Strike is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
+ */
 
 #ifndef _LINECOLLIDE_H_
 #define _LINECOLLIDE_H_
@@ -37,22 +34,20 @@ class Unit;
 class Beam;
 class Bolt;
 
-struct LineCollide
-{
+struct LineCollide {
 private:
-    union OBJECT
-    {
+    union OBJECT {
         Unit *u;
         Beam *b;
         Bolt *blt;
-        int   i;
+        int i;
     };
 
 public:
-    enum collidables {UNIT, BEAM, BALL, BOLT, PROJECTILE};
+    enum collidables { UNIT, BEAM, BALL, BOLT, PROJECTILE };
 
     ///The object that this LineCollide approximates
-    OBJECT  object;
+    OBJECT object;
     ///The minimum x,y,z that this object has
     QVector Mini;
     ///The maximum x,y,z that this object has
@@ -70,42 +65,30 @@ public:
     bool hhuge;
 
     LineCollide() :
-        Mini( 0, 0, 0 )
-        , Maxi( 0, 0, 0 )
-        , lastchecked( NULL )
-        , type( UNIT )
-        , hhuge( false )
+            Mini(0, 0, 0), Maxi(0, 0, 0), lastchecked(NULL), type(UNIT), hhuge(false)
     {
         object.u = NULL;
     }
 
-    LineCollide( void *objec, collidables typ, const QVector &st, const QVector &en ) :
-        Mini( st )
-        , Maxi( en )
-        , lastchecked( NULL )
-        , type( typ )
-        , hhuge( false )
+    LineCollide(void *objec, collidables typ, const QVector &st, const QVector &en) :
+            Mini(st), Maxi(en), lastchecked(NULL), type(typ), hhuge(false)
     {
-        this->object.u = (Unit*) objec;
+        this->object.u = (Unit *) objec;
     }
 
-    LineCollide( const LineCollide &l ) :
-        Mini( l.Mini )
-        , Maxi( l.Maxi )
-        , lastchecked( NULL )
-        , type( l.type )
-        , hhuge( l.hhuge )
+    LineCollide(const LineCollide &l) :
+            Mini(l.Mini), Maxi(l.Maxi), lastchecked(NULL), type(l.type), hhuge(l.hhuge)
     {
         object = l.object;
     }
 
-    LineCollide&operator=( const LineCollide &l )
+    LineCollide &operator=(const LineCollide &l)
     {
         object = l.object;
-        type   = l.type;
-        Mini   = l.Mini;
-        Maxi   = l.Maxi;
-        hhuge  = l.hhuge;
+        type = l.type;
+        Mini = l.Mini;
+        Maxi = l.Maxi;
+        hhuge = l.hhuge;
         lastchecked = NULL;
         return *this;
     }

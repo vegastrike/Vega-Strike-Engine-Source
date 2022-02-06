@@ -1,29 +1,27 @@
-#ifndef __UNIT_PHYSICS_CPP__
-#define __UNIT_PHYSICS_CPP__
-
 /*
- * Vega Strike
- * Copyright (C) 2001-2002 Daniel Horn
- * Copyright (C) 2002-2020 pyramid3d and other Vega Strike contributors
- * Copyright (C) 2020 Roy Falk
- * Copyright (C) 2022 Stephen G. Tuggy
+ * Copyright (C) 2001-2022 Daniel Horn, Roy Falk, pyramid3d,
+ * Stephen G. Tuggy, and other Vega Strike contributors.
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * as published by the Free Software Foundation; either version 2
- * of the License, or (at your option) any later version.
+ * This file is part of Vega Strike.
  *
- * This program is distributed in the hope that it will be useful,
+ * Vega Strike is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Vega Strike is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+ * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
+
+#ifndef __UNIT_PHYSICS_CPP__
+#define __UNIT_PHYSICS_CPP__
 
 #include "gfx/mesh.h"
 #include "lin_time.h"
@@ -103,10 +101,12 @@ void GameUnit::Thrust(const Vector &amt1, bool afterburn)
     if (this->afterburntype == 0) {
         afterburn = afterburn && this->energy > this->afterburnenergy * simulation_atom_var;
     } //SIMULATION_ATOM; ?
-    if (this->afterburntype == 1)
+    if (this->afterburntype == 1) {
         afterburn = afterburn && this->fuel > 0;
-    if (this->afterburntype == 2)
+    }
+    if (this->afterburntype == 2) {
         afterburn = afterburn && this->warpenergy > 0;
+    }
     Unit::Thrust(amt1, afterburn);
 
     static bool must_afterburn_to_buzz =
@@ -117,10 +117,11 @@ void GameUnit::Thrust(const Vector &amt1, bool afterburn)
                                                                         "sfx10.wav"), true);
         static float enginegain = XMLSupport::parse_float(vs_config->getVariable("audio", "afterburner_gain", ".5"));
         if (afterburn != AUDIsPlaying(playerengine)) {
-            if (afterburn)
+            if (afterburn) {
                 AUDPlay(playerengine, QVector(0, 0, 0), Vector(0, 0, 0), enginegain);
-            else
+            } else {
                 AUDStopPlaying(playerengine);
+            }
         }
     } else if (afterburn || !must_afterburn_to_buzz) {
         static float buzzingtime = XMLSupport::parse_float(vs_config->getVariable("audio", "buzzing_time", "5"));

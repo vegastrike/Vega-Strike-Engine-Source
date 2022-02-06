@@ -1,22 +1,23 @@
 /*
- * Vega Strike
- * Copyright (C) 2003 Mike Byron
+ * Copyright (C) 2001-2022 Daniel Horn, Mike Byron, pyramid3d,
+ * Stephen G. Tuggy, and other Vega Strike contributors.
  *
- * http://vegastrike.sourceforge.net/
+ * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * as published by the Free Software Foundation; either version 2
- * of the License, or (at your option) any later version.
+ * This file is part of Vega Strike.
  *
- * This program is distributed in the hope that it will be useful,
+ * Vega Strike is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Vega Strike is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+ * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
 
 #include "vegastrike.h"
@@ -36,83 +37,87 @@
 //This control does not respond to input events.
 
 //The rect for the text object has changed -- reset it.
-void StaticDisplay::setPaintTextRect( void )
+void StaticDisplay::setPaintTextRect(void)
 {
-    const Rect textRect = m_rect.copyAndInset( m_textMargins );
-    m_paintText.setRect( textRect );
+    const Rect textRect = m_rect.copyAndInset(m_textMargins);
+    m_paintText.setRect(textRect);
 }
 
 //Set text margins.
-void StaticDisplay::setTextMargins( const Size &s )
+void StaticDisplay::setTextMargins(const Size &s)
 {
     m_textMargins = s;
     setPaintTextRect();
 }
 
 //The outside boundaries of the control.
-void StaticDisplay::setRect( const Rect &r )
+void StaticDisplay::setRect(const Rect &r)
 {
-    Control::setRect( r );
+    Control::setRect(r);
     setPaintTextRect();
 }
 
 //Draw the control.
-void StaticDisplay::draw( void )
+void StaticDisplay::draw(void)
 {
     //Draw the background.
     drawBackground();
     //If we have a scroller and the layout has changed, need to reset the scroller.
-    if ( m_scroller && m_layoutVersion != m_paintText.layoutVersion() ) {
+    if (m_scroller && m_layoutVersion != m_paintText.layoutVersion()) {
         const int lineCount = m_paintText.lineCount();
-        const int visible   = m_paintText.visibleLineCountStartingWith( m_scrollPosition, m_rect.size.height );
-        m_scroller->setRangeValues( lineCount-1, visible );
-        if (m_scrollPosition > lineCount-2 && lineCount > visible)
-            m_scrollPosition = lineCount-1;
-        m_scroller->setScrollPosition( m_scrollPosition );
+        const int visible = m_paintText.visibleLineCountStartingWith(m_scrollPosition, m_rect.size.height);
+        m_scroller->setRangeValues(lineCount - 1, visible);
+        if (m_scrollPosition > lineCount - 2 && lineCount > visible) {
+            m_scrollPosition = lineCount - 1;
+        }
+        m_scroller->setScrollPosition(m_scrollPosition);
         m_layoutVersion = m_paintText.layoutVersion();         //Remember layout version for next time.
     }
-    m_paintText.drawLines( m_scrollPosition );
+    m_paintText.drawLines(m_scrollPosition);
 }
 
 //Set the object that takes care of scrolling.
-void StaticDisplay::setScroller( Scroller *s )
+void StaticDisplay::setScroller(Scroller *s)
 {
     m_scroller = s;
-    s->setCommandTarget( this );
+    s->setCommandTarget(this);
 }
 
 //Process a command event.
-bool StaticDisplay::processCommand( const EventCommandId &command, Control *control )
+bool StaticDisplay::processCommand(const EventCommandId &command, Control *control)
 {
     if (command == "Scroller::PositionChanged") {
-        assert( control == m_scroller );
+        assert(control == m_scroller);
         m_scrollPosition = m_scroller->scrollPosition();
         return true;
     }
-    return Control::processCommand( command, control );
+    return Control::processCommand(command, control);
 }
 
 //Process wheel events for scrolling.
-bool StaticDisplay::processMouseDown( const InputEvent &event )
+bool StaticDisplay::processMouseDown(const InputEvent &event)
 {
-    static int zoominc = XMLSupport::parse_int( vs_config->getVariable( "general", "wheel_increment_lines", "3" ) );
+    static int zoominc = XMLSupport::parse_int(vs_config->getVariable("general", "wheel_increment_lines", "3"));
     if (m_scroller) {
         if (event.code == WHEELUP_MOUSE_BUTTON) {
-            if ( hitTest( event.loc ) )
-                m_scroller->setScrollPosition( m_scroller->scrollPosition()-zoominc );
+            if (hitTest(event.loc)) {
+                m_scroller->setScrollPosition(m_scroller->scrollPosition() - zoominc);
+            }
         } else if (event.code == WHEELDOWN_MOUSE_BUTTON) {
-            if ( hitTest( event.loc ) )
-                m_scroller->setScrollPosition( m_scroller->scrollPosition()+zoominc );
+            if (hitTest(event.loc)) {
+                m_scroller->setScrollPosition(m_scroller->scrollPosition() + zoominc);
+            }
         }
     }
-    return Control::processMouseDown( event );
+    return Control::processMouseDown(event);
 }
 
 //CONSTRUCTION
-StaticDisplay::StaticDisplay( void ) :
-    m_textMargins( Size( 0.0, 0.0 ) )
-    , m_scrollPosition( 0 )
-    , m_layoutVersion( m_paintText.layoutVersion() )
-    , m_scroller( NULL )
-{}
+StaticDisplay::StaticDisplay(void) :
+        m_textMargins(Size(0.0, 0.0)),
+        m_scrollPosition(0),
+        m_layoutVersion(m_paintText.layoutVersion()),
+        m_scroller(NULL)
+{
+}
 

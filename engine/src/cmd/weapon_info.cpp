@@ -1,10 +1,6 @@
-/**
- * weapon_info.cpp
- *
- * Copyright (c) 2001-2002 Daniel Horn
- * Copyright (c) 2002-2019 pyramid3d and other Vega Strike Contributors
- * Copyright (c) 2019-2021 Stephen G. Tuggy, and other Vega Strike Contributors
- * Copyright (C) 2022 Stephen G. Tuggy
+/*
+ * Copyright (C) 2001-2022 Daniel Horn, pyramid3d, Stephen G. Tuggy,
+ * and other Vega Strike contributors.
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -12,7 +8,7 @@
  *
  * Vega Strike is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 2 of the License, or
+ * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
  * Vega Strike is distributed in the hope that it will be useful,
@@ -107,27 +103,27 @@ void WeaponInfo::netswap()
     //type = VSSwapHostIntToLittle( type);
     //size = VSSwapHostIntToLittle( size);
 
-    damage              = VSSwapHostFloatToLittle(damage);
-    energy_rate         = VSSwapHostFloatToLittle(energy_rate);
-    length              = VSSwapHostFloatToLittle(length);
-    lock_time           = VSSwapHostFloatToLittle(lock_time);
-    long_range          = VSSwapHostFloatToLittle(long_range);
+    damage = VSSwapHostFloatToLittle(damage);
+    energy_rate = VSSwapHostFloatToLittle(energy_rate);
+    length = VSSwapHostFloatToLittle(length);
+    lock_time = VSSwapHostFloatToLittle(lock_time);
+    long_range = VSSwapHostFloatToLittle(long_range);
     offset.netswap();
-    phase_damage        = VSSwapHostFloatToLittle(phase_damage);
-    pulse_speed         = VSSwapHostFloatToLittle(pulse_speed);
-    radial_speed        = VSSwapHostFloatToLittle(radial_speed);
-    radius              = VSSwapHostFloatToLittle(radius);
-    range               = VSSwapHostFloatToLittle(range);
-    refire_rate         = VSSwapHostFloatToLittle(refire_rate);
+    phase_damage = VSSwapHostFloatToLittle(phase_damage);
+    pulse_speed = VSSwapHostFloatToLittle(pulse_speed);
+    radial_speed = VSSwapHostFloatToLittle(radial_speed);
+    radius = VSSwapHostFloatToLittle(radius);
+    range = VSSwapHostFloatToLittle(range);
+    refire_rate = VSSwapHostFloatToLittle(refire_rate);
     //role_bits         = VSSwapHostIntToLittle( role_bits );
-    stability           = VSSwapHostFloatToLittle(stability);
-    sound               = VSSwapHostIntToLittle(sound);
-    speed               = VSSwapHostFloatToLittle(speed);
-    texture_stretch     = VSSwapHostFloatToLittle(texture_stretch);
-    volume              = VSSwapHostFloatToLittle(volume);
+    stability = VSSwapHostFloatToLittle(stability);
+    sound = VSSwapHostIntToLittle(sound);
+    speed = VSSwapHostFloatToLittle(speed);
+    texture_stretch = VSSwapHostFloatToLittle(texture_stretch);
+    volume = VSSwapHostFloatToLittle(volume);
 
-    r                   = VSSwapHostFloatToLittle(r);
-    g                   = VSSwapHostFloatToLittle(g);
-    b                   = VSSwapHostFloatToLittle(b);
-    a                   = VSSwapHostFloatToLittle(a);
+    r = VSSwapHostFloatToLittle(r);
+    g = VSSwapHostFloatToLittle(g);
+    b = VSSwapHostFloatToLittle(b);
+    a = VSSwapHostFloatToLittle(a);
 }

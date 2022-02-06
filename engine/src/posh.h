@@ -1,27 +1,24 @@
-/**
-* posh.h
-*
-* Copyright (c) 2001-2002 Daniel Horn
-* Copyright (c) 2002-2019 pyramid3d and other Vega Strike Contributors
-* Copyright (c) 2019-2021 Stephen G. Tuggy, and other Vega Strike Contributors
-*
-* https://github.com/vegastrike/Vega-Strike-Engine-Source
-*
-* This file is part of Vega Strike.
-*
-* Vega Strike is free software: you can redistribute it and/or modify
-* it under the terms of the GNU General Public License as published by
-* the Free Software Foundation, either version 2 of the License, or
-* (at your option) any later version.
-*
-* Vega Strike is distributed in the hope that it will be useful,
-* but WITHOUT ANY WARRANTY; without even the implied warranty of
-* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-* GNU General Public License for more details.
-*
-* You should have received a copy of the GNU General Public License
-* along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
-*/
+/*
+ * Copyright (C) 2001-2022 Daniel Horn, pyramid3d, Stephen G. Tuggy,
+ * and other Vega Strike contributors.
+ *
+ * https://github.com/vegastrike/Vega-Strike-Engine-Source
+ *
+ * This file is part of Vega Strike.
+ *
+ * Vega Strike is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Vega Strike is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
+ */
 
 /** @file posh.h
  *   @author Brian Hook, poshlib@poshlib.org
@@ -794,10 +791,10 @@
 #  undef POSH_PUBLIC_API
 #endif
 
-#if ( ( defined _MSC_VER) && (_MSC_VER < 800 ) ) || (defined __BORLANDC__ && (__BORLANDC__ < 0x500 ) )
+#if ((defined _MSC_VER) && (_MSC_VER < 800)) || (defined __BORLANDC__ && (__BORLANDC__ < 0x500))
 #  define POSH_PUBLIC_API( rtype ) extern rtype POSH_IMPORTEXPORT
 #else
-#  define POSH_PUBLIC_API( rtype ) extern POSH_IMPORTEXPORT rtype
+#  define POSH_PUBLIC_API(rtype) extern POSH_IMPORTEXPORT rtype
 #endif
 
 /** @def POSH_PUBLIC_API
@@ -858,7 +855,7 @@
 #if defined FORCE_DOXYGEN
 #  define POSH_COMPILE_TIME_ASSERT( name, x )
 #else
-#  define POSH_COMPILE_TIME_ASSERT( name, x ) typedef int _POSH_dummy_##name[(x) ? 1 : -1]
+#  define POSH_COMPILE_TIME_ASSERT(name, x) typedef int _POSH_dummy_##name[(x) ? 1 : -1]
 #endif
 
 /** @def POSH_COMPILE_TIME_ASSERT(name,x)
@@ -885,11 +882,11 @@ typedef struct compiler_specific posh_u64_t;
 #  define POSH_U64( x )
 #elif defined (__LP64__) || defined (__powerpc64__) || defined POSH_CPU_SPARC64
 #  define POSH_64BIT_INTEGER 1
-typedef long          posh_i64_t;
-typedef long          posh_s64_t;
+typedef long posh_i64_t;
+typedef long posh_s64_t;
 typedef unsigned long posh_u64_t;
-#  define POSH_S64( x ) ( (posh_s64_t) x )
-#  define POSH_U64( x ) ( (posh_u64_t) x )
+#  define POSH_S64(x) ( (posh_s64_t) x )
+#  define POSH_U64(x) ( (posh_u64_t) x )
 #elif defined __GNUC__ || defined __MWERKS__ || defined __SUNPRO_C || defined __SUNPRO_CC || defined __APPLE_CC__ \
     || defined POSH_OS_IRIX || defined _LONG_LONG || defined _CRAYC
 #  define POSH_64BIT_INTEGER 1
@@ -965,18 +962,18 @@ typedef unsigned __int64 posh_u64_t;
 */
 /** @defgroup PoshTypes Basic Types
  *   @{ */
-typedef unsigned char  posh_byte_t;        /**< unsigned 8-bit integer */
-typedef unsigned char  posh_u8_t;          /**< unsigned 8-bit integer */
-typedef signed char    posh_i8_t;          /**< signed 8-bit integer */
-typedef signed char    posh_s8_t;          /**< signed 8-bit integer */
+typedef unsigned char posh_byte_t;        /**< unsigned 8-bit integer */
+typedef unsigned char posh_u8_t;          /**< unsigned 8-bit integer */
+typedef signed char posh_i8_t;          /**< signed 8-bit integer */
+typedef signed char posh_s8_t;          /**< signed 8-bit integer */
 typedef unsigned short posh_u16_t;         /**< unsigned 16-bit integer */
-typedef short          posh_i16_t;         /**< signed 16-bit integer */
-typedef short          posh_s16_t;         /**< signed 16-bit integer */
+typedef short posh_i16_t;         /**< signed 16-bit integer */
+typedef short posh_s16_t;         /**< signed 16-bit integer */
 
 #if !defined POSH_OS_PALM
-typedef unsigned       posh_u32_t;         /**< unsigned 32-bit integer */
-typedef int            posh_i32_t;         /**< signed 32-bit integer */
-typedef int            posh_s32_t;         /**< signed 32-bit integer */
+typedef unsigned posh_u32_t;         /**< unsigned 32-bit integer */
+typedef int posh_i32_t;         /**< signed 32-bit integer */
+typedef int posh_s32_t;         /**< signed 32-bit integer */
 #else
 typedef unsigned long  posh_u32_t;         /**< unsigned 32-bit integer */
 typedef long           posh_i32_t;         /**< signed 32-bit integer */
@@ -1014,26 +1011,26 @@ typedef long           posh_s32_t;         /**< signed 32-bit integer */
 ** Do sanity checks on expected sizes
 ** ----------------------------------------------------------------------------
 */
-POSH_COMPILE_TIME_ASSERT( posh_byte_t, sizeof (posh_byte_t) == 1 );
-POSH_COMPILE_TIME_ASSERT( posh_u8_t, sizeof (posh_u8_t) == 1 );
-POSH_COMPILE_TIME_ASSERT( posh_i8_t, sizeof (posh_i8_t) == 1 );
-POSH_COMPILE_TIME_ASSERT( posh_s8_t, sizeof (posh_s8_t) == 1 );
-POSH_COMPILE_TIME_ASSERT( posh_u16_t, sizeof (posh_u16_t) == 2 );
-POSH_COMPILE_TIME_ASSERT( posh_s16_t, sizeof (posh_s16_t) == 2 );
-POSH_COMPILE_TIME_ASSERT( posh_i16_t, sizeof (posh_i16_t) == 2 );
-POSH_COMPILE_TIME_ASSERT( posh_u32_t, sizeof (posh_u32_t) == 4 );
-POSH_COMPILE_TIME_ASSERT( posh_s32_t, sizeof (posh_s32_t) == 4 );
-POSH_COMPILE_TIME_ASSERT( posh_i32_t, sizeof (posh_i32_t) == 4 );
+POSH_COMPILE_TIME_ASSERT(posh_byte_t, sizeof(posh_byte_t) == 1);
+POSH_COMPILE_TIME_ASSERT(posh_u8_t, sizeof(posh_u8_t) == 1);
+POSH_COMPILE_TIME_ASSERT(posh_i8_t, sizeof(posh_i8_t) == 1);
+POSH_COMPILE_TIME_ASSERT(posh_s8_t, sizeof(posh_s8_t) == 1);
+POSH_COMPILE_TIME_ASSERT(posh_u16_t, sizeof(posh_u16_t) == 2);
+POSH_COMPILE_TIME_ASSERT(posh_s16_t, sizeof(posh_s16_t) == 2);
+POSH_COMPILE_TIME_ASSERT(posh_i16_t, sizeof(posh_i16_t) == 2);
+POSH_COMPILE_TIME_ASSERT(posh_u32_t, sizeof(posh_u32_t) == 4);
+POSH_COMPILE_TIME_ASSERT(posh_s32_t, sizeof(posh_s32_t) == 4);
+POSH_COMPILE_TIME_ASSERT(posh_i32_t, sizeof(posh_i32_t) == 4);
 
 #if !defined POSH_NO_FLOAT
-POSH_COMPILE_TIME_ASSERT( posh_testfloat_t, sizeof (float) == 4 );
-POSH_COMPILE_TIME_ASSERT( posh_testdouble_t, sizeof (double) == 8 );
+POSH_COMPILE_TIME_ASSERT(posh_testfloat_t, sizeof(float) == 4);
+POSH_COMPILE_TIME_ASSERT(posh_testdouble_t, sizeof(double) == 8);
 #endif
 
 #if defined POSH_64BIT_INTEGER
-POSH_COMPILE_TIME_ASSERT( posh_u64_t, sizeof (posh_u64_t) == 8 );
-POSH_COMPILE_TIME_ASSERT( posh_s64_t, sizeof (posh_s64_t) == 8 );
-POSH_COMPILE_TIME_ASSERT( posh_i64_t, sizeof (posh_i64_t) == 8 );
+POSH_COMPILE_TIME_ASSERT(posh_u64_t, sizeof(posh_u64_t) == 8);
+POSH_COMPILE_TIME_ASSERT(posh_s64_t, sizeof(posh_s64_t) == 8);
+POSH_COMPILE_TIME_ASSERT(posh_i64_t, sizeof(posh_i64_t) == 8);
 #endif
 
 /* ----------------------------------------------------------------------------
@@ -1072,7 +1069,7 @@ POSH_COMPILE_TIME_ASSERT( posh_i64_t, sizeof (posh_i64_t) == 8 );
 #endif
 
 #if defined POSH_64BIT_POINTER
-POSH_COMPILE_TIME_ASSERT( posh_64bit_pointer, sizeof (void*) == 8 );
+POSH_COMPILE_TIME_ASSERT(posh_64bit_pointer, sizeof(void *) == 8);
 #else
 /* if this assertion is hit then you're on a system that either has 64-bit
  *  addressing and we didn't catch it, or you're on a system with 16-bit
@@ -1099,7 +1096,7 @@ POSH_COMPILE_TIME_ASSERT( posh_32bit_pointer, sizeof (void*) == 4 );
 /** @defgroup PoshFunctions Utility Functions
  *   @{
  */
-extern const char * POSH_GetArchString( void );
+extern const char *POSH_GetArchString(void);
 /** @} */
 
 /** @defgroup FloatingPoint Floating Point
@@ -1142,23 +1139,23 @@ extern const char * POSH_GetArchString( void );
  */
 
 #if !defined POSH_NO_FLOAT
-extern posh_u32_t POSH_LittleFloatBits( float f );
-extern posh_u32_t POSH_BigFloatBits( float f );
-extern float POSH_FloatFromLittleBits( posh_u32_t bits );
-extern float POSH_FloatFromBigBits( posh_u32_t bits );
+extern posh_u32_t POSH_LittleFloatBits(float f);
+extern posh_u32_t POSH_BigFloatBits(float f);
+extern float POSH_FloatFromLittleBits(posh_u32_t bits);
+extern float POSH_FloatFromBigBits(posh_u32_t bits);
 
-extern void POSH_DoubleBits( double d, posh_byte_t dst[8] );
-extern double POSH_DoubleFromBits( const posh_byte_t src[8] );
+extern void POSH_DoubleBits(double d, posh_byte_t dst[8]);
+extern double POSH_DoubleFromBits(const posh_byte_t src[8]);
 
-extern float * POSH_WriteFloatToLittle( void *dst, float f );
-extern float * POSH_WriteFloatToBig( void *dst, float f );
-extern float POSH_ReadFloatFromLittle( const void *src );
-extern float POSH_ReadFloatFromBig( const void *src );
+extern float *POSH_WriteFloatToLittle(void *dst, float f);
+extern float *POSH_WriteFloatToBig(void *dst, float f);
+extern float POSH_ReadFloatFromLittle(const void *src);
+extern float POSH_ReadFloatFromBig(const void *src);
 
-extern double * POSH_WriteDoubleToLittle( void *dst, double d );
-extern double * POSH_WriteDoubleToBig( void *dst, double d );
-extern double POSH_ReadDoubleFromLittle( const void *src );
-extern double POSH_ReadDoubleFromBig( const void *src );
+extern double *POSH_WriteDoubleToLittle(void *dst, double d);
+extern double *POSH_WriteDoubleToBig(void *dst, double d);
+extern double POSH_ReadDoubleFromLittle(const void *src);
+extern double POSH_ReadDoubleFromBig(const void *src);
 #endif /* !defined POSH_NO_FLOAT */
 
 /** @} */
@@ -1170,11 +1167,11 @@ extern double POSH_ReadDoubleFromBig( const void *src );
  *   @{
  */
 
-extern posh_u16_t POSH_SwapU16( posh_u16_t u );
-extern posh_s16_t POSH_SwapS16( posh_s16_t u );
+extern posh_u16_t POSH_SwapU16(posh_u16_t u);
+extern posh_s16_t POSH_SwapS16(posh_s16_t u);
 
-extern posh_u32_t POSH_SwapU32( posh_u32_t u );
-extern posh_s32_t POSH_SwapS32( posh_s32_t u );
+extern posh_u32_t POSH_SwapU32(posh_u32_t u);
+extern posh_s32_t POSH_SwapS32(posh_s32_t u);
 
 /** @} */
 
@@ -1182,8 +1179,8 @@ extern posh_s32_t POSH_SwapS32( posh_s32_t u );
  *  64-bit support group */
 #if defined POSH_64BIT_INTEGER
 
-extern posh_u64_t POSH_SwapU64( posh_u64_t u );
-extern posh_s64_t POSH_SwapS64( posh_s64_t u );
+extern posh_u64_t POSH_SwapU64(posh_u64_t u);
+extern posh_s64_t POSH_SwapS64(posh_s64_t u);
 
 #endif /* defined POSH_64BIT_INTEGER */
 
@@ -1215,38 +1212,38 @@ extern posh_s64_t POSH_SwapS64( posh_s64_t u );
  *
  *  @{
  */
-extern posh_u16_t * POSH_WriteU16ToLittle( void *dst, posh_u16_t value );
-extern posh_s16_t * POSH_WriteS16ToLittle( void *dst, posh_s16_t value );
-extern posh_u32_t * POSH_WriteU32ToLittle( void *dst, posh_u32_t value );
-extern posh_s32_t * POSH_WriteS32ToLittle( void *dst, posh_s32_t value );
+extern posh_u16_t *POSH_WriteU16ToLittle(void *dst, posh_u16_t value);
+extern posh_s16_t *POSH_WriteS16ToLittle(void *dst, posh_s16_t value);
+extern posh_u32_t *POSH_WriteU32ToLittle(void *dst, posh_u32_t value);
+extern posh_s32_t *POSH_WriteS32ToLittle(void *dst, posh_s32_t value);
 
-extern posh_u16_t * POSH_WriteU16ToBig( void *dst, posh_u16_t value );
-extern posh_s16_t * POSH_WriteS16ToBig( void *dst, posh_s16_t value );
-extern posh_u32_t * POSH_WriteU32ToBig( void *dst, posh_u32_t value );
-extern posh_s32_t * POSH_WriteS32ToBig( void *dst, posh_s32_t value );
+extern posh_u16_t *POSH_WriteU16ToBig(void *dst, posh_u16_t value);
+extern posh_s16_t *POSH_WriteS16ToBig(void *dst, posh_s16_t value);
+extern posh_u32_t *POSH_WriteU32ToBig(void *dst, posh_u32_t value);
+extern posh_s32_t *POSH_WriteS32ToBig(void *dst, posh_s32_t value);
 
-extern posh_u16_t POSH_ReadU16FromLittle( const void *src );
-extern posh_s16_t POSH_ReadS16FromLittle( const void *src );
-extern posh_u32_t POSH_ReadU32FromLittle( const void *src );
-extern posh_s32_t POSH_ReadS32FromLittle( const void *src );
+extern posh_u16_t POSH_ReadU16FromLittle(const void *src);
+extern posh_s16_t POSH_ReadS16FromLittle(const void *src);
+extern posh_u32_t POSH_ReadU32FromLittle(const void *src);
+extern posh_s32_t POSH_ReadS32FromLittle(const void *src);
 
-extern posh_u16_t POSH_ReadU16FromBig( const void *src );
-extern posh_s16_t POSH_ReadS16FromBig( const void *src );
-extern posh_u32_t POSH_ReadU32FromBig( const void *src );
-extern posh_s32_t POSH_ReadS32FromBig( const void *src );
+extern posh_u16_t POSH_ReadU16FromBig(const void *src);
+extern posh_s16_t POSH_ReadS16FromBig(const void *src);
+extern posh_u32_t POSH_ReadU32FromBig(const void *src);
+extern posh_s32_t POSH_ReadS32FromBig(const void *src);
 
 /** @} */
 
 #if defined POSH_64BIT_INTEGER
-extern posh_u64_t * POSH_WriteU64ToLittle( void *dst, posh_u64_t value );
-extern posh_s64_t * POSH_WriteS64ToLittle( void *dst, posh_s64_t value );
-extern posh_u64_t * POSH_WriteU64ToBig( void *dst, posh_u64_t value );
-extern posh_s64_t * POSH_WriteS64ToBig( void *dst, posh_s64_t value );
+extern posh_u64_t *POSH_WriteU64ToLittle(void *dst, posh_u64_t value);
+extern posh_s64_t *POSH_WriteS64ToLittle(void *dst, posh_s64_t value);
+extern posh_u64_t *POSH_WriteU64ToBig(void *dst, posh_u64_t value);
+extern posh_s64_t *POSH_WriteS64ToBig(void *dst, posh_s64_t value);
 
-extern posh_u64_t POSH_ReadU64FromLittle( const void *src );
-extern posh_s64_t POSH_ReadS64FromLittle( const void *src );
-extern posh_u64_t POSH_ReadU64FromBig( const void *src );
-extern posh_s64_t POSH_ReadS64FromBig( const void *src );
+extern posh_u64_t POSH_ReadU64FromLittle(const void *src);
+extern posh_s64_t POSH_ReadS64FromLittle(const void *src);
+extern posh_u64_t POSH_ReadU64FromBig(const void *src);
+extern posh_s64_t POSH_ReadS64FromBig(const void *src);
 #endif /* POSH_64BIT_INTEGER */
 
 /** @defgroup ByteSwapMacros Endianess Conversion Macros
@@ -1273,22 +1270,22 @@ extern posh_s64_t POSH_ReadS64FromBig( const void *src );
 
 #elif defined POSH_LITTLE_ENDIAN
 
-#define POSH_LittleU16( x ) (x)
-#define POSH_LittleU32( x ) (x)
-#define POSH_LittleS16( x ) (x)
-#define POSH_LittleS32( x ) (x)
+#define POSH_LittleU16(x) (x)
+#define POSH_LittleU32(x) (x)
+#define POSH_LittleS16(x) (x)
+#define POSH_LittleS32(x) (x)
 #if defined POSH_64BIT_INTEGER
-#  define POSH_LittleU64( x ) (x)
-#  define POSH_LittleS64( x ) (x)
+#  define POSH_LittleU64(x) (x)
+#  define POSH_LittleS64(x) (x)
 #endif /* defined POSH_64BIT_INTEGER */
 
-#define POSH_BigU16( x ) POSH_SwapU16( x )
-#define POSH_BigU32( x ) POSH_SwapU32( x )
-#define POSH_BigS16( x ) POSH_SwapS16( x )
-#define POSH_BigS32( x ) POSH_SwapS32( x )
+#define POSH_BigU16(x) POSH_SwapU16( x )
+#define POSH_BigU32(x) POSH_SwapU32( x )
+#define POSH_BigS16(x) POSH_SwapS16( x )
+#define POSH_BigS32(x) POSH_SwapS32( x )
 #if defined POSH_64BIT_INTEGER
-#  define POSH_BigU64( x ) POSH_SwapU64( x )
-#  define POSH_BigS64( x ) POSH_SwapS64( x )
+#  define POSH_BigU64(x) POSH_SwapU64( x )
+#  define POSH_BigS64(x) POSH_SwapS64( x )
 #endif /* defined POSH_64BIT_INTEGER */
 
 #else

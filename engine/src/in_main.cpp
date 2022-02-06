@@ -1,22 +1,23 @@
 /*
- * Vega Strike
- * Copyright (C) 2001-2002 Daniel Horn
+ * Copyright (C) 2001-2022 Daniel Horn, pyramid3d, Stephen G. Tuggy,
+ * and other Vega Strike contributors.
  *
- * http://vegastrike.sourceforge.net/
+ * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * as published by the Free Software Foundation; either version 2
- * of the License, or (at your option) any later version.
+ * This file is part of Vega Strike.
  *
- * This program is distributed in the hope that it will be useful,
+ * Vega Strike is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Vega Strike is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+ * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
 #include <queue>
 #include <list>
@@ -30,35 +31,37 @@ using std::list;
 
 extern KBSTATE keyState[LAST_MODIFIER][KEYMAP_SIZE];
 
-queue< InputListener* >activationreqqueue;
-list< InputListener* > listeners;
+queue<InputListener *> activationreqqueue;
+list<InputListener *> listeners;
 InputListener *activelistener;
 
-void AddListener( InputListener *il )
+void AddListener(InputListener *il)
 {
     il->keystate = keyState;
-    il->mousex   = &mousex;
-    il->mousey   = &mousey;
-    listeners.push_back( il );
+    il->mousex = &mousex;
+    il->mousey = &mousey;
+    listeners.push_back(il);
 }
 
-void ActivateListener( InputListener *il )
+void ActivateListener(InputListener *il)
 {
-    activationreqqueue.push( il );
+    activationreqqueue.push(il);
 }
 
-void RemoveListener( InputListener *il )
+void RemoveListener(InputListener *il)
 {
-    listeners.remove( il );
+    listeners.remove(il);
 }
 
-void ProcessInput( size_t whichplayer )
+void ProcessInput(size_t whichplayer)
 {
-    ProcessKB( whichplayer );
+    ProcessKB(whichplayer);
     ProcessMouse();
-    for (int i = 0; i < MAX_JOYSTICKS; i++)
-        if (joystick[i]->player == whichplayer)
-            ProcessJoystick( i );
+    for (int i = 0; i < MAX_JOYSTICKS; i++) {
+        if (joystick[i]->player == whichplayer) {
+            ProcessJoystick(i);
+        }
+    }
 }
 
 void InitInput()
@@ -67,6 +70,7 @@ void InitInput()
     InitMouse();
     InitJoystick();
 }
+
 void DeInitInput()
 {
     DeInitJoystick();

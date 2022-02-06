@@ -1,9 +1,6 @@
 /*
- * pass.cpp
- *
- * Copyright (C) Daniel Horn
- * Copyright (C) 2020 pyramid3d and other Vega Strike contributors
- * Copyright (C) 2021-2022 Stephen G. Tuggy
+ * Copyright (C) 2001-2022 Daniel Horn, pyramid3d, Stephen G. Tuggy,
+ * and other Vega Strike contributors.
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -11,7 +8,7 @@
  *
  * Vega Strike is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 2 of the License, or
+ * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
  * Vega Strike is distributed in the hope that it will be useful,
@@ -20,7 +17,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
+ * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
 
 
@@ -102,8 +99,9 @@ void Pass::parsePass(ptree tree, string techniqueName, int &nextSequence)
         if (vp.empty()) {
             throw std::exception();
         } //throw InvalidParameters( "Missing vertex program reference in technique \""+techniqueName+"\"" );
-        if (fp.empty())
-            throw std::exception(); //throw InvalidParameters( "Missing fragment program reference in technique \""+techniqueName+"\"" );
+        if (fp.empty()) {
+            throw std::exception();
+        } //throw InvalidParameters( "Missing fragment program reference in technique \""+techniqueName+"\"" );
         setProgram(vp, fp);
     }
 }

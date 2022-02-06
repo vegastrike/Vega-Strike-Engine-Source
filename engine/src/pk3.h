@@ -44,37 +44,43 @@
 
 #define PK3LENGTH 512
 
-class CPK3
-{
+class CPK3 {
 private:
     struct TZipDirHeader;
     struct TZipDirFileHeader;
     struct TZipLocalHeader;
 
     FILE *f;
-    char  pk3filename[PK3LENGTH];
+    char pk3filename[PK3LENGTH];
     char *m_pDirData;     //Raw data buffer.
-    int   m_nEntries;     //Number of entries.
+    int m_nEntries;     //Number of entries.
 
 //Pointers to the dir entries in pDirData.
     const TZipDirFileHeader **m_papDir;
-    void GetFilename( int i, char *pszDest ) const;
-    int GetFileLen( int i ) const;
-    bool ReadFile( int i, void *pBuf );
+    void GetFilename(int i, char *pszDest) const;
+    int GetFileLen(int i) const;
+    bool ReadFile(int i, void *pBuf);
 
-public: CPK3() : m_nEntries( 0 ) {}
-    CPK3( FILE *n_f );
-    CPK3( const char *filename );
-    ~CPK3() {}
+public:
+    CPK3() : m_nEntries(0)
+    {
+    }
 
-    bool CheckPK3( FILE *f );
-    bool Open( const char *filename );
-    bool ExtractFile( const char *lp_name );
-    bool ExtractFile( const char *lp_name, const char *new_filename );
-    char * ExtractFile( int index, int *file_size );
-    char * ExtractFile( const char *lpname, int *file_size );
-    int FileExists( const char *lpname );                                       //Checks if a file exists and returns index or -1 if not found
-    bool Close( void );
+    CPK3(FILE *n_f);
+    CPK3(const char *filename);
+
+    ~CPK3()
+    {
+    }
+
+    bool CheckPK3(FILE *f);
+    bool Open(const char *filename);
+    bool ExtractFile(const char *lp_name);
+    bool ExtractFile(const char *lp_name, const char *new_filename);
+    char *ExtractFile(int index, int *file_size);
+    char *ExtractFile(const char *lpname, int *file_size);
+    int FileExists(const char *lpname);                                       //Checks if a file exists and returns index or -1 if not found
+    bool Close(void);
 
     void PrintFileContent();
 };

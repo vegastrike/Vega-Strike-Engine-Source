@@ -1,9 +1,6 @@
-/**
- * star_system.h
- *
- * Copyright (C) Daniel Horn
- * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike
- * contributors
+/*
+ * Copyright (C) 2001-2022 Daniel Horn, pyramid3d, Stephen G. Tuggy,
+ * and other Vega Strike contributors.
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -20,7 +17,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
+ * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
 
 
@@ -63,29 +60,25 @@ class StarSystem;
 const unsigned int SIM_QUEUE_SIZE = 128;
 bool PendingJumpsEmpty();
 
-
-
-
-struct Statistics
-{
+struct Statistics {
     //neutral, friendly, enemy
-    std::vector< UnitContainer >navs[3];
-    vsUMap< std::string, UnitContainer >jumpPoints;
-    int    system_faction;
-    int    newfriendlycount;
-    int    newenemycount;
-    int    newcitizencount;
-    int    newneutralcount;
-    int    friendlycount;
-    int    enemycount;
-    int    neutralcount;
-    int    citizencount;
+    std::vector<UnitContainer> navs[3];
+    vsUMap<std::string, UnitContainer> jumpPoints;
+    int system_faction;
+    int newfriendlycount;
+    int newenemycount;
+    int newcitizencount;
+    int newneutralcount;
+    int friendlycount;
+    int enemycount;
+    int neutralcount;
+    int citizencount;
     size_t checkIter;
     size_t navCheckIter;
     Statistics();
-    void   AddUnit( Unit *un );
-    void   RemoveUnit( Unit *un );
-    void   CheckVitals( StarSystem *ss );
+    void AddUnit(Unit *un);
+    void RemoveUnit(Unit *un);
+    void CheckVitals(StarSystem *ss);
 };
 
 /**
@@ -93,24 +86,22 @@ struct Statistics
  * Scene management for a star system
  * Per-Frame Drawing & Physics simulation
  **/
-class StarSystem
-{
+class StarSystem {
 public:
     Statistics stats;
-    std::multimap<Unit*, Unit*> last_collisions;
+    std::multimap<Unit *, Unit *> last_collisions;
     CollideMap *collide_map[2]; // 0 Unit 1 Bolt
     class CollideTable *collide_table = nullptr;
 
 protected:
 
-
     // Fields
     ///Physics is divided into 3 stages spread over 3 frames
-    enum PHYSICS_STAGE {MISSION_SIMULATION, PROCESS_UNIT, PHY_NUM}
-    current_stage = MISSION_SIMULATION;
+    enum PHYSICS_STAGE { MISSION_SIMULATION, PROCESS_UNIT, PHY_NUM }
+            current_stage = MISSION_SIMULATION;
 
-    vector<Terrain*> terrains;
-    vector<ContinuousTerrain*> continuous_terrains;
+    vector<Terrain *> terrains;
+    vector<ContinuousTerrain *> continuous_terrains;
 
     ///system name
     string name;
@@ -123,7 +114,7 @@ protected:
     /// Everything to be drawn. Folded missiles in here oneday
     UnitCollection draw_list;
     UnitCollection gravitational_units;
-    UnitCollection physics_buffer[SIM_QUEUE_SIZE+1];
+    UnitCollection physics_buffer[SIM_QUEUE_SIZE + 1];
     unsigned int current_sim_location = 0;
 
     ///The moving, fading stars
@@ -135,8 +126,7 @@ protected:
 
     unsigned int zone = 0; //short fix - TODO: figure out for what
     int light_context;
-    vector<class MissileEffect*> discharged_missiles;
-
+    vector<class MissileEffect *> discharged_missiles;
 
     ///Starsystem XML Struct For use with XML loading
     Star_XML *xml;
@@ -144,93 +134,97 @@ protected:
     ///The background associated with this system
     Background *background = nullptr;
     ///The Light Map corresponding for the BP for spheremapping
-    Texture    *light_map[6];
+    Texture *light_map[6];
 public:
     // Constructors
-    StarSystem( const string filename, const Vector &centroid = Vector( 0, 0, 0 ), const float timeofyear = 0 );
+    StarSystem(const string filename, const Vector &centroid = Vector(0, 0, 0), const float timeofyear = 0);
     virtual ~StarSystem();
     friend class Universe;
 
     // Methods
-    void AddStarsystemToUniverse( const string &filename );
+    void AddStarsystemToUniverse(const string &filename);
     void RemoveStarsystemFromUniverse();
-    void LoadXML( const string, const Vector &centroid, const float timeofyear );
+    void LoadXML(const string, const Vector &centroid, const float timeofyear);
 
-    void SetZone( unsigned int zonenum )
+    void SetZone(unsigned int zonenum)
     {
         //short fix
         this->zone = zonenum;
     }
+
     unsigned int GetZone()
     {
         //short fix
         return this->zone;
     }
-    virtual void AddMissileToQueue( class MissileEffect* );
+
+    virtual void AddMissileToQueue(class MissileEffect *);
     virtual void UpdateMissiles();
-    void UpdateUnitsPhysics( bool firstframe );
-    void UpdateUnitPhysics( bool firstframe, Unit *unit );
+    void UpdateUnitsPhysics(bool firstframe);
+    void UpdateUnitPhysics(bool firstframe, Unit *unit);
 
     ///Requeues the unit so that it is simulated ASAP.
-    void RequestPhysics( Unit *un, unsigned int queue );
-
+    void RequestPhysics(Unit *un, unsigned int queue);
 
     /// update a simulation atom ExecuteDirector must be false if star system is just loaded before mission is loaded
-        void Update( float priority, bool executeDirector );
+    void Update(float priority, bool executeDirector);
     //This one is temporarly used on server side
-        void Update( float priority );
+    void Update(float priority);
+
     ///Gets the current simulation frame
-        unsigned int getCurrentSimFrame() const
-        {
-            return current_sim_location;
-        }
+    unsigned int getCurrentSimFrame() const
+    {
+        return current_sim_location;
+    }
 
-        void ExecuteUnitAI();
+    void ExecuteUnitAI();
 
+    static void beginElement(void *userData, const XML_Char *name, const XML_Char **atts);
+    static void endElement(void *userData, const XML_Char *name);
+    std::string getFileName() const;
+    std::string getName();
 
-        static void beginElement( void *userData, const XML_Char *name, const XML_Char **atts );
-        static void endElement( void *userData, const XML_Char *name );
-        std::string getFileName() const;
-        std::string getName();
     ///Loads the star system from an XML file
-        UnitCollection& getUnitList()
-        {
-            return draw_list;
-        }
-        UnitCollection& gravitationalUnits()
-        {
-            return gravitational_units;
-        }
-        Unit * nextSignificantUnit();
+    UnitCollection &getUnitList()
+    {
+        return draw_list;
+    }
+
+    UnitCollection &gravitationalUnits()
+    {
+        return gravitational_units;
+    }
+
+    Unit *nextSignificantUnit();
     /// returns xy sorted bounding spheres of all units in current view
     ///Adds to draw list
-        void AddUnit( Unit *unit );
+    void AddUnit(Unit *unit);
     ///Removes from draw list
-        bool RemoveUnit( Unit *unit );
-        bool JumpTo( Unit *unit, Unit *jumppoint, const std::string &system, bool force = false, bool save_coordinates = false /*for intersystem transit the long way*/ );
-        static void ProcessPendingJumps();
+    bool RemoveUnit(Unit *unit);
+    bool JumpTo(Unit *unit,
+                Unit *jumppoint,
+                const std::string &system,
+                bool force = false,
+                bool save_coordinates = false /*for intersystem transit the long way*/ );
+    static void ProcessPendingJumps();
 
-
-
-
-    Background * getBackground();
+    Background *getBackground();
 
 ///activates the light map texture
-    void activateLightMap( int stage = 1 );
-    Texture * getLightMap();
+    void activateLightMap(int stage = 1);
+    Texture *getLightMap();
     static void DrawJumpStars();
 
-    Terrain * getTerrain( unsigned int which );
+    Terrain *getTerrain(unsigned int which);
     unsigned int numTerrain();
-    ContinuousTerrain * getContTerrain( unsigned int which );
+    ContinuousTerrain *getContTerrain(unsigned int which);
     unsigned int numContTerrain();
 
 /// returns xy sorted bounding spheres of all units in current view
-    ClickList * getClickList();
+    ClickList *getClickList();
 ///Adds to draw list
 ///Draws a frame of action, interpolating between physics frames
-    void Draw( bool DrawCockpit = true );
-
+    void Draw(bool DrawCockpit = true);
 
 ///re-enables the included lights and terrains
     void SwapIn();
@@ -238,11 +232,11 @@ public:
     void SwapOut();
 
     friend class Atmosphere;
-    void createBackground( Star_XML *xml );
+    void createBackground(Star_XML *xml);
 
-    void VolitalizeJumpAnimation( const int ani );
-    void DoJumpingComeSightAndSound( Unit *un );
-    int DoJumpingLeaveSightAndSound( Unit *un );
+    void VolitalizeJumpAnimation(const int ani);
+    void DoJumpingComeSightAndSound(Unit *un);
+    int DoJumpingLeaveSightAndSound(Unit *un);
 };
 
 #endif

@@ -1,3 +1,25 @@
+/*
+ * Copyright (C) 2001-2022 Daniel Horn, pyramid3d, Stephen G. Tuggy,
+ * and other Vega Strike contributors.
+ *
+ * https://github.com/vegastrike/Vega-Strike-Engine-Source
+ *
+ * This file is part of Vega Strike.
+ *
+ * Vega Strike is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Vega Strike is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
+ */
+
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /**
  *	OBB-OBB overlap test using the separating axis theorem.
@@ -72,8 +94,9 @@ inline_ bool AABBTreeCollider::BoxBoxOverlap(const Point &ea, const Point &ca, c
         }    // L = A0 x B0
         t = Tz * mR1to0.m[1][1] - Ty * mR1to0.m[1][2];
         t2 = ea.y * mAR.m[1][2] + ea.z * mAR.m[1][1] + eb.x * mAR.m[2][0] + eb.z * mAR.m[0][0];
-        if (GREATER(t, t2))
-            return FALSE;    // L = A0 x B1
+        if (GREATER(t, t2)) {
+            return FALSE;
+        }    // L = A0 x B1
         t = Tz * mR1to0.m[2][1] - Ty * mR1to0.m[2][2];
         t2 = ea.y * mAR.m[2][2] + ea.z * mAR.m[2][1] + eb.x * mAR.m[1][0] + eb.y * mAR.m[0][0];
         if (GREATER(t, t2))
@@ -161,8 +184,9 @@ inline_ bool OBBCollider::BoxBoxOverlap(const Point &extents, const Point &cente
         }    // L = A0 x B0
         t = Tz * mRBoxToModel.m[1][1] - Ty * mRBoxToModel.m[1][2];
         t2 = extents.y * mAR.m[1][2] + extents.z * mAR.m[1][1] + mBB_2;
-        if (GREATER(t, t2))
-            return FALSE;    // L = A0 x B1
+        if (GREATER(t, t2)) {
+            return FALSE;
+        }    // L = A0 x B1
         t = Tz * mRBoxToModel.m[2][1] - Ty * mRBoxToModel.m[2][2];
         t2 = extents.y * mAR.m[2][2] + extents.z * mAR.m[2][1] + mBB_3;
         if (GREATER(t, t2))

@@ -1,10 +1,6 @@
-/**
- * OpenALRenderer.cpp
- *
- * Copyright (C) Daniel Horn
- * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike
- * contributors
- * Copyright (C) 2022 Stephen G. Tuggy
+/*
+ * Copyright (C) 2001-2022 Daniel Horn, pyramid3d, Stephen G. Tuggy,
+ * and other Vega Strike contributors.
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -21,7 +17,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
+ * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
 
 
@@ -166,9 +162,9 @@ struct RendererData {
             #ifdef _WIN32
             deviceSpecifier = "DirectSound3D";
             #else
-            #ifdef __APPLE__
+                #ifdef __APPLE__
             deviceSpecifier = "sdl";
-            #endif
+                #endif
             #endif
         }
 

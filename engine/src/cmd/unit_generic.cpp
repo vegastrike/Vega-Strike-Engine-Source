@@ -1,11 +1,6 @@
-// -*- mode: c++; c-basic-offset: 4; indent-tabs-mode: nil -*-
-
 /*
- * unit_generic.cpp
- *
- * Copyright (C) 2001-2002 Daniel Horn
- * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike contributors
- * Copyright (C) 2021-2022 Stephen G. Tuggy
+ * Copyright (C) 2001-2022 Daniel Horn, pyramid3d, Stephen G. Tuggy,
+ * and other Vega Strike contributors.
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -13,7 +8,7 @@
  *
  * Vega Strike is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 2 of the License, or
+ * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
  * Vega Strike is distributed in the hope that it will be useful,
@@ -22,9 +17,10 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
+ * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
 
+// -*- mode: c++; c-basic-offset: 4; indent-tabs-mode: nil -*-
 
 #include "unit_generic.h"
 
@@ -721,13 +717,14 @@ float Unit::cosAngleTo(Unit *targ, float &dist, float speed, float range, bool t
     if ((!targ->GetDestinations().empty() && jump.drive >= 0) || (targ->faction == faction)) {
         rsize = 0;
     }                                       //HACK so missions work well
-    if (range != 0)
+    if (range != 0) {
         dist = (dist - rsize) / range;
-
-    else
+    } else {
         dist = 0;
-    if (!FINITE(dist) || dist < 0)
+    }
+    if (!FINITE(dist) || dist < 0) {
         dist = 0;
+    }
     return (rv < 0) ? 1 : cos(rv);
 }
 
@@ -1809,21 +1806,24 @@ void Unit::Kill(bool erasefromsave, bool quitting)
         unsigned int i;
         for (i = 0; i < pImage->dockedunits.size(); ++i) {
             Unit *un;
-            if (NULL != (un = pImage->dockedunits[i]->uc.GetUnit()))
+            if (NULL != (un = pImage->dockedunits[i]->uc.GetUnit())) {
                 dockedun.push_back(un);
+            }
         }
         while (!dockedun.empty()) {
 
             dockedun.back()->UnDock(this);
 
-            if (rand() <= (UnitUtil::isPlayerStarship(dockedun.back()) ? i_player_survival : i_survival))
+            if (rand() <= (UnitUtil::isPlayerStarship(dockedun.back()) ? i_player_survival : i_survival)) {
                 dockedun.back()->Kill();
+            }
             dockedun.pop_back();
         }
     }
     //eraticate everything. naturally (see previous line) we won't erraticate beams erraticated above
-    if (!isSubUnit())
+    if (!isSubUnit()) {
         RemoveFromSystem();
+    }
     computer.target.SetUnit(NULL);
 
     //God I can't believe this next line cost me 1 GIG of memory until I added it
@@ -1839,8 +1839,9 @@ void Unit::Kill(bool erasefromsave, bool quitting)
     // The following we don't want to do twice
     killed = true;
     Unit *un;
-    for (un_iter iter = getSubUnits(); (un = *iter); ++iter)
+    for (un_iter iter = getSubUnits(); (un = *iter); ++iter) {
         un->Kill();
+    }
 
     //if (isUnit() != _UnitType::missile) {
     //    VS_LOG(info, (boost::format("UNIT HAS DIED: %1% %2% (file %3%)") % name.get() % fullname % filename.get()));
@@ -5169,10 +5170,12 @@ void Unit::Thrust(const Vector &amt1, bool afterburn)
     if (this->afterburntype == 0) {
         afterburn = afterburn && this->energy > this->afterburnenergy * simulation_atom_var;
     } //SIMULATION_ATOM; ?
-    if (this->afterburntype == 1)
+    if (this->afterburntype == 1) {
         afterburn = afterburn && this->fuel > 0;
-    if (this->afterburntype == 2)
+    }
+    if (this->afterburntype == 2) {
         afterburn = afterburn && this->warpenergy > 0;
+    }
 
 
     //Unit::Thrust( amt1, afterburn );
@@ -5189,10 +5192,11 @@ void Unit::Thrust(const Vector &amt1, bool afterburn)
                                                                         "sfx10.wav"), true);
         static float enginegain = XMLSupport::parse_float(vs_config->getVariable("audio", "afterburner_gain", ".5"));
         if (afterburn != AUDIsPlaying(playerengine)) {
-            if (afterburn)
+            if (afterburn) {
                 AUDPlay(playerengine, QVector(0, 0, 0), Vector(0, 0, 0), enginegain);
-            else
+            } else {
                 AUDStopPlaying(playerengine);
+            }
         }
     } else if (afterburn || !must_afterburn_to_buzz) {
         static float buzzingtime = XMLSupport::parse_float(vs_config->getVariable("audio", "buzzing_time", "5"));

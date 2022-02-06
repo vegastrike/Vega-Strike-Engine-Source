@@ -1,10 +1,6 @@
 /*
- * @file : navscreen.cpp
- * @brief: draws nav map
- *
- * Copyright (C) 2003-2020 hellcatv, ace123, surfdargent, klaussfreire, jacks,
- * pyramid3d, Stephen G. Tuggy, and other Vega Strike contributors
- * Copyright (C) 2021-2022 Stephen G. Tuggy
+ * Copyright (C) 2001-2022 hellcatv, ace123, surfdargent, klaussfreire,
+ * jacks, pyramid3d, Stephen G. Tuggy, and other Vega Strike contributors.
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -21,7 +17,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
+ * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
 
 
@@ -1189,18 +1185,20 @@ void NavigationSystem::DrawButton(float &x1, float &x2, float &y1, float &y2, in
         //******************************************************
         //**                 BUTTON 1 FUNCTION                **	NAV-INFO vs STATUS-INFO
         //******************************************************
-        if (button_number == 1)          //releasing #1, toggle the draw (nav / mission)
+        if (button_number == 1) {          //releasing #1, toggle the draw (nav / mission)
             flipbit(whattodraw, 1);
+        }
         //******************************************************
         //******************************************************
         //**                 BUTTON 2 FUNCTION                **	PATH options
         //******************************************************
         if (button_number == 2) {
             //releasing #2, toggle the path viewing settings(off/on/only)
-            if ((checkbit(whattodraw, 1)) && (checkbit(whattodraw, 2)))
+            if ((checkbit(whattodraw, 1)) && (checkbit(whattodraw, 2))) {
                 path_view = (path_view + 1) % PATH_MAXIMUM;
-            else if (!checkbit(whattodraw, 1))
+            } else if (!checkbit(whattodraw, 1)) {
                 dosetbit(whattodraw, 3);
+            }
         }
         //******************************************************
         //******************************************************
@@ -1209,8 +1207,9 @@ void NavigationSystem::DrawButton(float &x1, float &x2, float &y1, float &y2, in
         if (button_number == 3) {
             //hit --TARGET--
             if (((checkbit(whattodraw, 1)) && (checkbit(whattodraw, 2)))             //Nav-Galaxy Mode
-                    || ((!checkbit(whattodraw, 1)) && (checkbit(whattodraw, 3))))              //Mission-Sector Mode
+                    || ((!checkbit(whattodraw, 1)) && (checkbit(whattodraw, 3)))) {              //Mission-Sector Mode
                 setDestinationSystemIndex(systemselectionindex);
+            }
         }
         //******************************************************
         //******************************************************
@@ -1257,8 +1256,9 @@ void NavigationSystem::DrawButton(float &x1, float &x2, float &y1, float &y2, in
                 zoom_s = 1.8;
 
                 axis = axis - 1;
-                if (axis == 0)
+                if (axis == 0) {
                     axis = 3;
+                }
                 camera_z = 0;
             } else {
                 //if in mission mode

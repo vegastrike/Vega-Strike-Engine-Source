@@ -1,4 +1,4 @@
-/**
+/*
  * Tux Racer
  * Copyright (C) 1999-2001 Jasmin F. Patry
  *
@@ -18,9 +18,8 @@
  *
  * Incorporated into Vega Strike
  *
- * Copyright (C) Daniel Horn
- * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike contributors
- * Copyright (C) 2021 Stephen G. Tuggy
+ * Copyright (C) 2001-2022 Daniel Horn, pyramid3d, Stephen G. Tuggy,
+ * and other Vega Strike contributors.
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -35,7 +34,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
+ * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
 
 
@@ -97,16 +96,16 @@ typedef enum {
     WSK_KP_ENTER = SDLK_KP_ENTER,
     WSK_KP_EQUALS = SDLK_KP_EQUALS,
 
-	WSK_RETURN = 13,
-	WSK_TAB = '\t',
-	WSK_ESCAPE = 27,
-	WSK_BACKSPACE =
+    WSK_RETURN = 13,
+    WSK_TAB = '\t',
+    WSK_ESCAPE = 27,
+    WSK_BACKSPACE =
 #ifdef __APPLE__
     127,
 #else
     8,
 #endif
-	WSK_DELETE =
+    WSK_DELETE =
 #ifdef __APPLE__
     8,
 #else
@@ -153,23 +152,23 @@ typedef enum {
     WSK_RMETA = SDLK_RMETA,
     WSK_LMETA = SDLK_LMETA,
     WSK_BREAK = SDLK_BREAK,
-	WSK_PAUSE = SDLK_PAUSE,
-    WSK_LAST=SDLK_LAST
+    WSK_PAUSE = SDLK_PAUSE,
+    WSK_LAST = SDLK_LAST
 
 } winsys_keysym_t;
 typedef enum {
-        WSK_MOD_NONE=KMOD_NONE,
-	WSK_MOD_LSHIFT=KMOD_LSHIFT,
-	WSK_MOD_RSHIFT=KMOD_RSHIFT,
-	WSK_MOD_LCTRL=KMOD_LCTRL ,
-	WSK_MOD_RCTRL=KMOD_RCTRL ,
-	WSK_MOD_LALT=KMOD_LALT  ,
-	WSK_MOD_RALT=KMOD_RALT  ,
-	WSK_MOD_LMETA=KMOD_LMETA ,
-	WSK_MOD_RMETA=KMOD_RMETA ,
-	WSK_MOD_NUM=KMOD_NUM   ,
-	WSK_MOD_CAPS=KMOD_CAPS  ,
-	WSK_MOD_MODE=KMOD_MODE
+    WSK_MOD_NONE = KMOD_NONE,
+    WSK_MOD_LSHIFT = KMOD_LSHIFT,
+    WSK_MOD_RSHIFT = KMOD_RSHIFT,
+    WSK_MOD_LCTRL = KMOD_LCTRL,
+    WSK_MOD_RCTRL = KMOD_RCTRL,
+    WSK_MOD_LALT = KMOD_LALT,
+    WSK_MOD_RALT = KMOD_RALT,
+    WSK_MOD_LMETA = KMOD_LMETA,
+    WSK_MOD_RMETA = KMOD_RMETA,
+    WSK_MOD_NUM = KMOD_NUM,
+    WSK_MOD_CAPS = KMOD_CAPS,
+    WSK_MOD_MODE = KMOD_MODE
 } winsys_modifiers;
 
 // mouse wheel events are only available with SDL 1.2.5 or later
@@ -183,8 +182,8 @@ typedef enum {
     WS_LEFT_BUTTON = SDL_BUTTON_LEFT,
     WS_MIDDLE_BUTTON = SDL_BUTTON_MIDDLE,
     WS_RIGHT_BUTTON = SDL_BUTTON_RIGHT,
-	WS_WHEEL_UP = SDL_BUTTON_WHEELUP,
-	WS_WHEEL_DOWN = SDL_BUTTON_WHEELDOWN
+    WS_WHEEL_UP = SDL_BUTTON_WHEELUP,
+    WS_WHEEL_DOWN = SDL_BUTTON_WHEELDOWN
 } winsys_mouse_button_t;
 
 typedef enum {
@@ -224,16 +223,16 @@ typedef enum {
     WSK_KP_ENTER = 0,
     WSK_KP_EQUALS = 0,
 
-	WSK_RETURN = 13,
-	WSK_TAB = '\t',
-	WSK_ESCAPE = 27,
-	WSK_BACKSPACE =
+    WSK_RETURN = 13,
+    WSK_TAB = '\t',
+    WSK_ESCAPE = 27,
+    WSK_BACKSPACE =
 #ifdef __APPLE__
     127,
 #else
     8,
 #endif
-	WSK_DELETE =
+    WSK_DELETE =
 #ifdef __APPLE__
     8,
 #else
@@ -281,31 +280,31 @@ typedef enum {
     WSK_RMETA = 0,
     WSK_LMETA = 0,
     WSK_BREAK = 0,
- 	WSK_PAUSE = 0,
+     WSK_PAUSE = 0,
    WSK_LAST = UCHAR_MAX /* GLUT doesn't define a max key, but this is more
 			    than enough as of version 3.7 */
 } winsys_keysym_t;
 typedef enum {
         WSK_MOD_NONE=0,
-	WSK_MOD_LSHIFT=GLUT_ACTIVE_SHIFT,
-	WSK_MOD_RSHIFT=GLUT_ACTIVE_SHIFT,
-	WSK_MOD_LCTRL=GLUT_ACTIVE_CTRL ,
-	WSK_MOD_RCTRL=GLUT_ACTIVE_CTRL ,
-	WSK_MOD_LALT=GLUT_ACTIVE_ALT  ,
-	WSK_MOD_RALT=GLUT_ACTIVE_ALT  ,
-	WSK_MOD_LMETA=0 ,
-	WSK_MOD_RMETA=0,
-	WSK_MOD_NUM=0,
-	WSK_MOD_CAPS=0,
-	WSK_MOD_MODE=0
+    WSK_MOD_LSHIFT=GLUT_ACTIVE_SHIFT,
+    WSK_MOD_RSHIFT=GLUT_ACTIVE_SHIFT,
+    WSK_MOD_LCTRL=GLUT_ACTIVE_CTRL ,
+    WSK_MOD_RCTRL=GLUT_ACTIVE_CTRL ,
+    WSK_MOD_LALT=GLUT_ACTIVE_ALT  ,
+    WSK_MOD_RALT=GLUT_ACTIVE_ALT  ,
+    WSK_MOD_LMETA=0 ,
+    WSK_MOD_RMETA=0,
+    WSK_MOD_NUM=0,
+    WSK_MOD_CAPS=0,
+    WSK_MOD_MODE=0
 } winsys_modifiers;
 
 typedef enum {
     WS_LEFT_BUTTON = GLUT_LEFT_BUTTON,
     WS_MIDDLE_BUTTON = GLUT_MIDDLE_BUTTON,
     WS_RIGHT_BUTTON = GLUT_RIGHT_BUTTON,
-	WS_WHEEL_UP,
-	WS_WHEEL_DOWN
+    WS_WHEEL_UP,
+    WS_WHEEL_DOWN
 } winsys_mouse_button_t;
 
 typedef enum {
@@ -315,40 +314,39 @@ typedef enum {
 
 #endif /* defined( SDL_WINDOWING ) */
 
-
 typedef void (*winsys_display_func_t)();
 typedef void (*winsys_idle_func_t)();
-typedef void (*winsys_reshape_func_t)( int w, int h );
-typedef void (*winsys_keyboard_func_t)( unsigned int key, unsigned int mod,
-					bool release, int x, int y );
-typedef void (*winsys_mouse_func_t)( int button, int state, int x, int y );
-typedef void (*winsys_motion_func_t)( int x, int y );
+typedef void (*winsys_reshape_func_t)(int w, int h);
+typedef void (*winsys_keyboard_func_t)(unsigned int key, unsigned int mod,
+                                       bool release, int x, int y);
+typedef void (*winsys_mouse_func_t)(int button, int state, int x, int y);
+typedef void (*winsys_motion_func_t)(int x, int y);
 
-typedef void (*winsys_atexit_func_t)( void );
+typedef void (*winsys_atexit_func_t)(void);
 
 void winsys_post_redisplay();
-void winsys_set_display_func( winsys_display_func_t func );
-void winsys_set_idle_func( winsys_idle_func_t func );
-void winsys_set_reshape_func( winsys_reshape_func_t func );
-void winsys_set_keyboard_func( winsys_keyboard_func_t func );
-void winsys_set_mouse_func( winsys_mouse_func_t func );
-void winsys_set_motion_func( winsys_motion_func_t func );
-void winsys_set_passive_motion_func( winsys_motion_func_t func );
+void winsys_set_display_func(winsys_display_func_t func);
+void winsys_set_idle_func(winsys_idle_func_t func);
+void winsys_set_reshape_func(winsys_reshape_func_t func);
+void winsys_set_keyboard_func(winsys_keyboard_func_t func);
+void winsys_set_mouse_func(winsys_mouse_func_t func);
+void winsys_set_motion_func(winsys_motion_func_t func);
+void winsys_set_passive_motion_func(winsys_motion_func_t func);
 
 void winsys_swap_buffers();
-void winsys_enable_key_repeat( bool enabled );
-void winsys_warp_pointer( int x, int y );
-void winsys_show_cursor( bool visible );
+void winsys_enable_key_repeat(bool enabled);
+void winsys_warp_pointer(int x, int y);
+void winsys_show_cursor(bool visible);
 
-void winsys_init( int *argc, char **argv, char const *window_title,
-		  char const *icon_title );
+void winsys_init(int *argc, char **argv, char const *window_title,
+                 char const *icon_title);
 void winsys_shutdown();
 
 void winsys_process_events(); /* Never returns */
 
-void winsys_atexit( winsys_atexit_func_t func );
+void winsys_atexit(winsys_atexit_func_t func);
 
-void winsys_exit( int code );
+void winsys_exit(int code);
 
 #ifdef __cplusplus
 } /* extern "C" */

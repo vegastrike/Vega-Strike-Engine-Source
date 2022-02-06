@@ -1,14 +1,7 @@
-//====================================
-// @file   : mesh_gfx.cpp
-// @brief  : draws meshes
-//====================================
-
 /*
- * mesh_gfx.cpp
- *
- * Copyright (C) 2002-2020 surfdargent, hellcatv, ace123, klaussfreire, dan_w,
- *  pyramid3d, Stephen G. Tuggy, and other Vega Strike contributors
- * Copyright (C) 2021-2022 Stephen G. Tuggy
+ * Copyright (C) 2001-2022 Daniel Horn, surfdargent, hellcatv, ace123,
+ * klaussfreire, dan_w, pyramid3d, Stephen G. Tuggy,
+ * and other Vega Strike contributors.
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -25,9 +18,13 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
+ * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
 
+//====================================
+// @file   : mesh_gfx.cpp
+// @brief  : draws meshes
+//====================================
 
 #include <algorithm>
 #include "mesh.h"
@@ -1454,13 +1451,14 @@ void Mesh::ProcessShaderDrawQueue(size_t whichpass, int whichdrawqueue, bool zso
     size_t tuimask = 0;
     for (tui = 0; tui < pass.getNumTextureUnits(); ++tui) {
         const Pass::TextureUnit &tu = pass.getTextureUnit(tui);
-        if (tu.targetIndex < 0)
+        if (tu.targetIndex < 0) {
             continue;
-        if (tu.targetParamId >= 0)
+        }
+        if (tu.targetParamId >= 0) {
             GFXShaderConstanti(tu.targetParamId, tu.targetIndex);
-
-        else
+        } else {
             continue;
+        }
         try {
             activateTextureUnit(tu);
             tuimask |= (1 << tu.targetIndex);
@@ -1478,15 +1476,17 @@ void Mesh::ProcessShaderDrawQueue(size_t whichpass, int whichdrawqueue, bool zso
             }
         }
     }
-    for (tui = 0; tui < gl_options.Multitexture; ++tui)
+    for (tui = 0; tui < gl_options.Multitexture; ++tui) {
         GFXToggleTexture(((tuimask & (1 << tui)) != 0), tui, TEXTURE2D);
+    }
     //Render all instances, no specific order if not necessary
     //TODO: right now only meshes of same kind get drawn in correct order - should fix this.
     static std::vector<int> indices;
     if (zsort) {
         indices.resize(cur_draw_queue.size());
-        for (int i = 0, n = cur_draw_queue.size(); i < n; ++i)
+        for (int i = 0, n = cur_draw_queue.size(); i < n; ++i) {
             indices[i] = i;
+        }
         std::sort(indices.begin(), indices.end(),
                   MeshDrawContextPainterSort(sortctr, cur_draw_queue));
     }
@@ -1607,15 +1607,19 @@ void Mesh::ProcessShaderDrawQueue(size_t whichpass, int whichdrawqueue, bool zso
                 }
                 vlist->Draw();
             }
-            if (popGlobals)
+            if (popGlobals) {
                 GFXPopGlobalEffects();
-            for (; fxLightsBase < lights.size(); ++fxLightsBase)
+            }
+            for (; fxLightsBase < lights.size(); ++fxLightsBase) {
                 GFXDeleteLight(lights[fxLightsBase]);
+            }
             size_t lastPass = technique->getNumPasses();
-            if (0 != forcelogos && whichpass == lastPass && !(c.cloaked & MeshDrawContext::NEARINVIS))
+            if (0 != forcelogos && whichpass == lastPass && !(c.cloaked & MeshDrawContext::NEARINVIS)) {
                 forcelogos->Draw(c.mat);
-            if (0 != squadlogos && whichpass == lastPass && !(c.cloaked & MeshDrawContext::NEARINVIS))
+            }
+            if (0 != squadlogos && whichpass == lastPass && !(c.cloaked & MeshDrawContext::NEARINVIS)) {
                 squadlogos->Draw(c.mat);
+            }
         }
     }
     vlist->EndDrawState();
@@ -1628,8 +1632,9 @@ void Mesh::ProcessShaderDrawQueue(size_t whichpass, int whichdrawqueue, bool zso
     GFXPolygonMode(GFXFILLMODE);
     GFXPolygonOffset(0, 0);
     GFXDepthFunc(LEQUAL);
-    if (pass.polyMode == Pass::Line)
+    if (pass.polyMode == Pass::Line) {
         GFXLineWidth(1);
+    }
     //Restore blend mode
     GFXPopBlendMode();
 }
@@ -1750,8 +1755,9 @@ void Mesh::ProcessFixedDrawQueue(size_t techpass, int whichdrawqueue, bool zsort
     }
 
     GFXEnable(TEXTURE0);
-    if (alphatest)
+    if (alphatest) {
         GFXAlphaTest(GEQUAL, alphatest / 255.0);
+    }
     static Texture *black = new Texture("blackclear.png");
     if (HASDECAL(BASE_TEX))
         GETDECAL(BASE_TEX)->MakeActive();
@@ -1817,16 +1823,16 @@ void Mesh::ProcessFixedDrawQueue(size_t techpass, int whichdrawqueue, bool zsort
                                                   && HASDECAL(ENVSPEC_TEX));
                     break;
                 case ENVSPEC_PASS:
-                    if (!nomultienv)
+                    if (!nomultienv) {
                         SetupSpecMapSecondPass(SAFEDECAL(ENVSPEC_TEX),
                                                myMatNum,
                                                blendSrc,
                                                (splitpass1 ? false : getEnvMap()),
                                                (splitpass1 ? GFXColor(1, 1, 1, 1) : GFXColor(0, 0, 0, 0)),
                                                polygon_offset);
-
-                    else
+                    } else {
                         SetupEnvmapPass(SAFEDECAL(ENVSPEC_TEX), myMatNum, nomultienv_passno);
+                    }
                     break;
                 case DAMAGE_PASS:
                     SetupDamageMapThirdPass(SAFEDECAL(DAMAGE_TEX), myMatNum, polygon_offset);
@@ -1840,8 +1846,9 @@ void Mesh::ProcessFixedDrawQueue(size_t techpass, int whichdrawqueue, bool zsort
             static std::vector<int> indices;
             if (zsort) {
                 indices.resize(cur_draw_queue.size());
-                for (int i = 0, n = cur_draw_queue.size(); i < n; ++i)
+                for (int i = 0, n = cur_draw_queue.size(); i < n; ++i) {
                     indices[i] = i;
+                }
                 std::sort(indices.begin(), indices.end(),
                           MeshDrawContextPainterSort(sortctr, cur_draw_queue));
             }
@@ -1853,12 +1860,15 @@ void Mesh::ProcessFixedDrawQueue(size_t techpass, int whichdrawqueue, bool zsort
                 static vector<int> specialfxlight;
 
                 MeshDrawContext &c = cur_draw_queue[zsort ? indices[i] : i];
-                if (c.mesh_seq != whichdrawqueue)
+                if (c.mesh_seq != whichdrawqueue) {
                     continue;
-                if (c.damage == 0 && whichpass == DAMAGE_PASS)
-                    continue;                      //No damage, so why draw it...
-                if ((c.cloaked & MeshDrawContext::CLOAK) && whichpass != 0)
-                    continue;                      //Cloaking, there are no multiple passes...
+                }
+                if (c.damage == 0 && whichpass == DAMAGE_PASS) {
+                    continue;
+                }                      //No damage, so why draw it...
+                if ((c.cloaked & MeshDrawContext::CLOAK) && whichpass != 0) {
+                    continue;
+                }                      //Cloaking, there are no multiple passes...
                 if (whichdrawqueue != MESH_SPECIAL_FX_ONLY) {
                     GFXLoadIdentity(MODEL);
                     GFXPickLights(Vector(c.mat.p.i, c.mat.p.j, c.mat.p.k), rSize());
@@ -1897,14 +1907,14 @@ void Mesh::ProcessFixedDrawQueue(size_t techpass, int whichdrawqueue, bool zsort
                     RestoreFirstPassState(detailTexture, detailPlanes, skipglowpass, nomultienv);
                     break;
                 case ENVSPEC_PASS:
-                    if (!nomultienv)
+                    if (!nomultienv) {
                         RestoreSpecMapState((splitpass1 ? false : getEnvMap()),
                                             detailTexture != NULL,
                                             zwrite,
                                             polygon_offset);
-
-                    else
+                    } else {
                         RestoreEnvmapState();
+                    }
                     break;
                 case DAMAGE_PASS:
                     RestoreDamageMapState(zwrite, polygon_offset);                 //nothin
@@ -1917,8 +1927,9 @@ void Mesh::ProcessFixedDrawQueue(size_t techpass, int whichdrawqueue, bool zsort
         switch (whichpass) {
             case BASE_PASS:
                 if (DecalSize > (whichpass = ((nomultienv && HASDECAL(ENVSPEC_TEX)) ? DAMAGE_PASS : ENVSPEC_PASS))) {
-                    if ((nomultienv && whichpass == ENVSPEC_PASS) || HASDECAL(whichpass))
+                    if ((nomultienv && whichpass == ENVSPEC_PASS) || HASDECAL(whichpass)) {
                         break;
+                    }
                 }
                 break; //FIXME Nothing is done here! --chuck_starchaser
             case ENVSPEC_PASS:
@@ -1929,35 +1940,41 @@ void Mesh::ProcessFixedDrawQueue(size_t techpass, int whichdrawqueue, bool zsort
                             splitpass1 = false;
                             break;
                         } else if (DecalSize > (whichpass = DAMAGE_PASS)) {
-                            if (HASDECAL(whichpass))
+                            if (HASDECAL(whichpass)) {
                                 break;
+                            }
                         } else {
                             break;
                         }
                     } else {
                         nomultienv_passno++;
-                        if (nomultienv_passno > (2 - ((splitpass1 || !HASDECAL(ENVSPEC_TEX)) ? 0 : 1)))
+                        if (nomultienv_passno > (2 - ((splitpass1 || !HASDECAL(ENVSPEC_TEX)) ? 0 : 1))) {
                             whichpass = HASDECAL(ENVSPEC_TEX) ? BASE_PASS : GLOW_PASS;
+                        }
                         break;
                     }
                 }
             case DAMAGE_PASS:
                 if (DecalSize > (whichpass = GLOW_PASS)) {
-                    if (HASDECAL(whichpass))
+                    if (HASDECAL(whichpass)) {
                         break;
+                    }
                 }
                 break; //FIXME Nothing is done here! --chuck_starchaser
             default:
                 whichpass++;             //always increment pass number, otherwise infinite loop espresso
         }
     }
-    if (alphatest)
+    if (alphatest) {
         GFXAlphaTest(ALWAYS,
-                     0);       //Are you sure it was supposed to be after vlist->EndDrawState()? It makes more sense to put it here...
-    if (!getLighting())
+                     0);
+    }       //Are you sure it was supposed to be after vlist->EndDrawState()? It makes more sense to put it here...
+    if (!getLighting()) {
         GFXEnable(LIGHTING);
-    if (!zwrite)
-        GFXEnable(DEPTHWRITE);       //risky--for instance logos might be fubar!
+    }
+    if (!zwrite) {
+        GFXEnable(DEPTHWRITE);
+    }       //risky--for instance logos might be fubar!
     RestoreCullFace(whichdrawqueue);
 }
 

@@ -1,10 +1,6 @@
-/**
- * quadsquare.cpp
- *
- * Copyright (C) Daniel Horn
- * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike
- *  contributors
- * Copyright (C) 2021-2022 Stephen G. Tuggy
+/*
+ * Copyright (C) 2001-2022 Daniel Horn, pyramid3d, Stephen G. Tuggy,
+ * and other Vega Strike contributors.
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -21,7 +17,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
+ * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
 
 
@@ -261,10 +257,12 @@ float quadsquare::GetHeight(const quadcornerdata &cd, float x, float z, Vector &
     if (ix < 0) {
         return -FLT_MAX;
     }       //ix = 0;
-    if (ix > 1)
-        return -FLT_MAX;       //ix = 1;
-    if (iz < 0)
-        return -FLT_MAX;        //iz = 0;
+    if (ix > 1) {
+        return -FLT_MAX;
+    }       //ix = 1;
+    if (iz < 0) {
+        return -FLT_MAX;
+    }        //iz = 0;
     if (iz > 1)
         return -FLT_MAX;          ///iz = 1;
 
@@ -451,12 +449,14 @@ void quadsquare::AddHeightMapAux(const quadcornerdata &cd, const HeightMapInfo &
     for (i = 0; i < 4; i++) {
         quadcornerdata q;
         SetupCornerData(&q, cd, i);
-        if (Child[i] == NULL && cd.Level > hm.Scale)
+        if (Child[i] == NULL && cd.Level > hm.Scale) {
             //Create child node w/ current (unmodified) values for corner verts.
             Child[i] = new quadsquare(&q);
+        }
         //Recurse.
-        if (Child[i])
+        if (Child[i]) {
             Child[i]->AddHeightMapAux(q, hm);
+        }
     }
     //don't want to bother changing things if the sample won't change things :-)
     int s[5];
@@ -483,10 +483,11 @@ void quadsquare::AddHeightMapAux(const quadcornerdata &cd, const HeightMapInfo &
         Vertex[i].SetTex(texture[i]);
         if (s[i] != 0) {
             Dirty = true;
-            if (Vertex[i].Y + s[i] > 0)
+            if (Vertex[i].Y + s[i] > 0) {
                 Vertex[i].Y += s[i];
-            else
+            } else {
                 Vertex[i].Y = 0;
+            }
             //vertices[Vertex[i].vertindex].x = v[i].i;//FIXME are we necessary?
             //vertices[Vertex[i].vertindex].z = v[i].k;
         }
@@ -497,14 +498,16 @@ void quadsquare::AddHeightMapAux(const quadcornerdata &cd, const HeightMapInfo &
         vertices->EndMutate();
     } else {
         //Check to see if any child nodes are dirty, and set the dirty flag if so.
-        for (i = 0; i < 4; i++)
+        for (i = 0; i < 4; i++) {
             if (Child[i] && Child[i]->Dirty) {
                 Dirty = true;
                 break;
             }
+        }
     }
-    if (Dirty)
+    if (Dirty) {
         SetStatic(cd);
+    }
 }
 
 //

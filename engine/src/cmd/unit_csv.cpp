@@ -1,11 +1,6 @@
-// -*- mode: c++; c-basic-offset: 4; indent-tabs-mode: nil -*-
-
 /*
- * unit_csv.cpp
- *
- * Copyright (C) Daniel Horn
- * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike contributors
- * Copyright (C) 2021-2022 Stephen G. Tuggy
+ * Copyright (C) 2001-2022 Daniel Horn, pyramid3d, Stephen G. Tuggy,
+ * and other Vega Strike contributors.
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -22,9 +17,10 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
+ * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
 
+// -*- mode: c++; c-basic-offset: 4; indent-tabs-mode: nil -*-
 
 #include "unit_generic.h"
 #include "csv.h"
@@ -1033,8 +1029,9 @@ void Unit::LoadRow(CSVRow &row, string modification, bool saved_game)
     ecm = UnitCSVFactory::GetVariable(unit_key, "ECM_Rating", 0);
 
     this->HeatSink = UnitCSVFactory::GetVariable(unit_key, "Heat_Sink_Rating", 0.0f);
-    if (ecm < 0)
+    if (ecm < 0) {
         ecm *= -1;
+    }
     if (pImage->cockpit_damage) {
         std::string hud_functionality = UnitCSVFactory::GetVariable(unit_key, "Hud_Functionality", std::string());
         std::string
@@ -1059,10 +1056,12 @@ void Unit::LoadRow(CSVRow &row, string modification, bool saved_game)
         unsigned char tflags;
         if (!tractorability.empty()) {
             tflags = tractorImmune;
-            if (tractorability.find_first_of("pP") != string::npos)
+            if (tractorability.find_first_of("pP") != string::npos) {
                 tflags |= tractorPush;
-            if (tractorability.find_first_of("iI") != string::npos)
+            }
+            if (tractorability.find_first_of("iI") != string::npos) {
                 tflags |= tractorIn;
+            }
         } else {
             tflags = tractorPush;
         }
@@ -1102,28 +1101,32 @@ void Unit::LoadRow(CSVRow &row, string modification, bool saved_game)
 
         std::string collideTreeHash = VSFileSystem::GetHashName(modification + "#" + row[0]);
         this->colTrees = collideTrees::Get(collideTreeHash);
-        if (this->colTrees)
+        if (this->colTrees) {
             this->colTrees->Inc();
+        }
         csOPCODECollider *colShield = NULL;
         string tmpname = row[0];       //key
         if (!this->colTrees) {
             string val;
             xml.hasColTree = 1;
-            if ((val = UnitCSVFactory::GetVariable(unit_key, "Use_Rapid", std::string())).length())
+            if ((val = UnitCSVFactory::GetVariable(unit_key, "Use_Rapid", std::string())).length()) {
                 xml.hasColTree = XMLSupport::parse_bool(val);
+            }
             if (xml.shieldmesh) {
                 if (meshdata.back()) {
                     meshdata.back()->GetPolys(polies);
                     colShield = new csOPCODECollider(polies);
                 }
             }
-            if (xml.rapidmesh_str.length())
+            if (xml.rapidmesh_str.length()) {
                 addRapidMesh(&xml, xml.rapidmesh_str.c_str(), xml.unitscale, faction, getFlightgroup());
-            else
+            } else {
                 xml.rapidmesh = NULL;
+            }
             polies.clear();
-            if (xml.rapidmesh)
+            if (xml.rapidmesh) {
                 xml.rapidmesh->GetPolys(polies);
+            }
             csOPCODECollider *csrc = NULL;
             if (xml.hasColTree) {
                 csrc = getCollideTree(Vector(1, 1, 1),
@@ -1135,13 +1138,14 @@ void Unit::LoadRow(CSVRow &row, string modification, bool saved_game)
                                               colShield);
             if (xml.rapidmesh && xml.hasColTree) {
                 //if we have a special rapid mesh we need to generate things now
-                for (unsigned int i = 1; i < collideTreesMaxTrees; ++i)
+                for (unsigned int i = 1; i < collideTreesMaxTrees; ++i) {
                     if (!this->colTrees->rapidColliders[i]) {
                         unsigned int which = 1 << i;
                         this->colTrees->rapidColliders[i] =
                                 getCollideTree(Vector(1, 1, which),
                                                &polies);
                     }
+                }
             }
             if (xml.rapidmesh != nullptr) {
                 delete xml.rapidmesh;

@@ -1,11 +1,7 @@
 /*
- * sprite.cpp
- *
- * Copyright (C) 2001-2002 Daniel Horn and Alan Shieh
- * Copyright (C) 2002-2019 klaussfreire, surfdargent, dan_w,
- *  and other Vega Strike contributors
- * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike contributors
- * Copyright (C) 2021-2022 Stephen G. Tuggy
+ * Copyright (C) 2001-2022 Daniel Horn, Alan Shieh, klaussfreire,
+ * surfdargent, dan_w, pyramid3d, Stephen G. Tuggy,
+ * and other Vega Strike contributors.
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -13,7 +9,7 @@
  *
  * Vega Strike is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 2 of the License, or
+ * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
  * Vega Strike is distributed in the hope that it will be useful,
@@ -22,7 +18,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
+ * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
 
 
@@ -36,32 +32,41 @@
 #include "audio/Types.h"
 #include "audio/Source.h"
 
-namespace VSFileSystem
-{
+namespace VSFileSystem {
 class VSFile;
 };
 
 class Texture;
 
-class VSSprite
-{
-    float    xcenter;
-    float    ycenter;
-    float    widtho2;
-    float    heighto2;
-    float    maxs, maxt;
-    float    rotation;
+class VSSprite {
+    float xcenter;
+    float ycenter;
+    float widtho2;
+    float heighto2;
+    float maxs, maxt;
+    float rotation;
     Texture *surface;
-    bool     isAnimation;
+    bool isAnimation;
+
 //For private use only
-    VSSprite() : surface( 0 ) {}
+    VSSprite() : surface(0)
+    {
+    }
+
 public:
 //Construct a sprite out of a spritefile
-    VSSprite( const char *file, enum FILTER texturefilter = BILINEAR, GFXBOOL force = GFXFALSE );
+    VSSprite(const char *file, enum FILTER texturefilter = BILINEAR, GFXBOOL force = GFXFALSE);
 //Construct a sprite out of a preloaded texture
 //@Note will take ownership of 'surface'
-    VSSprite( Texture *surface, float xcenter, float ycenter, float width, float height, float s = 0.f, float t = 0.f, bool isAnimation = false );
-    VSSprite( const VSSprite &source );
+    VSSprite(Texture *surface,
+             float xcenter,
+             float ycenter,
+             float width,
+             float height,
+             float s = 0.f,
+             float t = 0.f,
+             bool isAnimation = false);
+    VSSprite(const VSSprite &source);
     ~VSSprite();
 //Return true if sprite was loaded successfully
     bool LoadSuccess() const;
@@ -75,35 +80,39 @@ public:
  * @param ul upper-left corner
  * @note Disregards sprite position but not maxs/maxt coordinates.
  */
-    void DrawHere( Vector &ll, Vector &lr, Vector &ur, Vector &ul );
+    void DrawHere(Vector &ll, Vector &lr, Vector &ur, Vector &ul);
+
 //Add specified rotation to an already-rotated sprite
-    void Rotate( const float &rad )
+    void Rotate(const float &rad)
     {
         rotation += rad;
     }
-    void SetRotation( const float &rot );
-    void GetRotation( float &rot );
+
+    void SetRotation(const float &rot);
+    void GetRotation(float &rot);
 //Loads the sprite's texture from the given file
 //@deprecated Unused?
-    void ReadTexture( VSFileSystem::VSFile *f );
-    void GetST( float &s, float &t );
-    void SetST( const float s, const float t );
-    void SetTime( double newtime );
-    void SetPosition( const float &x1, const float &y1 );
-    void GetPosition( float &x1, float &y1 );
-    void SetSize( float s1, float s2 );
-    void GetSize( float &x1, float &y1 );
-    void SetTimeSource( SharedPtr<Audio::Source> source );
+    void ReadTexture(VSFileSystem::VSFile *f);
+    void GetST(float &s, float &t);
+    void SetST(const float s, const float t);
+    void SetTime(double newtime);
+    void SetPosition(const float &x1, const float &y1);
+    void GetPosition(float &x1, float &y1);
+    void SetSize(float s1, float s2);
+    void GetSize(float &x1, float &y1);
+    void SetTimeSource(SharedPtr<Audio::Source> source);
     void ClearTimeSource();
     bool Done() const;
     void Reset();
     SharedPtr<Audio::Source> GetTimeSource() const;
+
 //float &Rotation(){return rotation;};
-    Texture * getTexture()
+    Texture *getTexture()
     {
         return surface;
     }
-    const Texture * getTexture() const
+
+    const Texture *getTexture() const
     {
         return surface;
     }

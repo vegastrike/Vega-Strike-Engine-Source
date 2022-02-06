@@ -1,9 +1,6 @@
-/**
- * load_mission.h
- *
- * Copyright (C) Daniel Horn
- * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike
- * contributors
+/*
+ * Copyright (C) 2001-2022 Daniel Horn, pyramid3d, Stephen G. Tuggy,
+ * and other Vega Strike contributors.
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -20,17 +17,17 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
+ * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
 
 
-void LoadMission( const char*, const std::string &scriptname, bool loadfirst );
-void delayLoadMission( std::string missionfile );
-void delayLoadMission( std::string missionfile, string script );
+void LoadMission(const char *, const std::string &scriptname, bool loadfirst);
+void delayLoadMission(std::string missionfile);
+void delayLoadMission(std::string missionfile, string script);
 void processDelayedMissions();
-void UnpickleMission( std::string pickled );
+void UnpickleMission(std::string pickled);
 std::string PickleAllMissions();
-std::string UnpickleAllMissions( FILE* );
-std::string UnpickleAllMissions( char* &buf );
-std::string PickledDataSansMissionName( std::string file );
+std::string UnpickleAllMissions(FILE *);
+std::string UnpickleAllMissions(char *&buf);
+std::string PickledDataSansMissionName(std::string file);
 

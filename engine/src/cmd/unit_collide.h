@@ -1,9 +1,6 @@
 /*
- * unit_collide.h
- *
- * Copyright (C) Daniel Horn
- * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike contributors
- * Copyright (C) 2021-2022 Stephen G. Tuggy
+ * Copyright (C) 2001-2022 Daniel Horn, pyramid3d, Stephen G. Tuggy,
+ * and other Vega Strike contributors.
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -20,7 +17,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
+ * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
 
 
@@ -196,8 +193,9 @@ public:
                     if (!table[x][y][z].empty()) {
                         retval[sizer] = &table[x][y][z];
                         sizer++;
-                        if (sizer >= HUGEOBJECT + 1)
+                        if (sizer >= HUGEOBJECT + 1) {
                             return sizer;
+                        }
                     }
                 }
             }

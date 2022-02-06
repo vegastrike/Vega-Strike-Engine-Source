@@ -1,10 +1,6 @@
 /*
- * mission.cpp
- *
- * Copyright (C) 2001-2002 Daniel Horn
- * Copyright (C) Alexander Rawass <alexannika@users.sourceforge.net>
- * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike contributors
- * Copyright (C) 2021-2022 Stephen G. Tuggy
+ * Copyright (C) 2001-2022 Daniel Horn, Alexander Rawass, pyramid3d,
+ * Stephen G. Tuggy, and other Vega Strike contributors.
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -21,7 +17,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
+ * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
 
 
@@ -293,18 +289,21 @@ void Mission::terminateMission()
         vector<std::string> *scripts = &_Universe->AccessCockpit(player_num)->savegame->getMissionStringData(
                 "active_scripts");
         VS_LOG(info, (boost::format("Terminating mission #%1% - got %2% scripts") % queuenum % scripts->size()));
-        if (num < scripts->size())
+        if (num < scripts->size()) {
             scripts->erase(scripts->begin() + num);
+        }
         vector<std::string> *missions = &_Universe->AccessCockpit(player_num)->savegame->getMissionStringData(
                 "active_missions");
         VS_LOG(info, (boost::format("Terminating mission #%1% - got %2% missions") % queuenum % missions->size()));
-        if (num < missions->size())
+        if (num < missions->size()) {
             missions->erase(missions->begin() + num);
+        }
         VS_LOG(info, (boost::format("Terminating mission #%1% - %2% scripts remain") % queuenum % scripts->size()));
         VS_LOG(info, (boost::format("Terminating mission #%1% - %2% missions remain") % queuenum % missions->size()));
     }
-    if (runtime.pymissions)
+    if (runtime.pymissions) {
         runtime.pymissions->Destroy();
+    }
     runtime.pymissions = NULL;
 }
 

@@ -1,8 +1,5 @@
-/**
- * mount_size.h
- *
- * Copyright (C) 2021 Roy Falk and David Wales
- * Copyright (C) 2022 Stephen G. Tuggy
+/*
+ * Copyright (C) 2021-2022 Roy Falk, David Wales, and Stephen G. Tuggy.
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -10,7 +7,7 @@
  *
  * Vega Strike is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 2 of the License, or
+ * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
  * Vega Strike is distributed in the hope that it will be useful,
@@ -28,37 +25,36 @@
 
 #include <string>
 
-enum class MOUNT_SIZE
-{
-    NOWEAP              = 0x0,
+enum class MOUNT_SIZE {
+    NOWEAP = 0x0,
 
-    LIGHT               = 0x1,
-    MEDIUM              = 0x2,
-    HEAVY               = 0x4,
-    CAPSHIPLIGHT        = 0x8,
-    CAPSHIPHEAVY        = 0x10,
-    SPECIAL             = 0x20,
+    LIGHT = 0x1,
+    MEDIUM = 0x2,
+    HEAVY = 0x4,
+    CAPSHIPLIGHT = 0x8,
+    CAPSHIPHEAVY = 0x10,
+    SPECIAL = 0x20,
 
-    LIGHTMISSILE        = 0x40,
-    MEDIUMMISSILE       = 0x80,
-    HEAVYMISSILE        = 0x100,
+    LIGHTMISSILE = 0x40,
+    MEDIUMMISSILE = 0x80,
+    HEAVYMISSILE = 0x100,
     CAPSHIPLIGHTMISSILE = 0x200,
     CAPSHIPHEAVYMISSILE = 0x400,
-    SPECIALMISSILE      = 0x800,
+    SPECIALMISSILE = 0x800,
 
-    AUTOTRACKING        = 0x1000
+    AUTOTRACKING = 0x1000
 };
 
-template <typename Enumeration>
+template<typename Enumeration>
 auto as_integer(Enumeration const value)
-    -> typename std::underlying_type<Enumeration>::type
+-> typename std::underlying_type<Enumeration>::type
 {
     return static_cast<typename std::underlying_type<Enumeration>::type>(value);
 }
 
 MOUNT_SIZE getMountSizeFromItsValue(int value);
-MOUNT_SIZE getMountSize(const std::string& mount_string);
-int getMountSizes(const std::string& mounts_string);
+MOUNT_SIZE getMountSize(const std::string &mount_string);
+int getMountSizes(const std::string &mounts_string);
 std::string getMountSizeString(const int mount);
 
 bool isNormalGunMount(const int mount);
@@ -75,11 +71,7 @@ bool isMissileMount(const int mount);
 
 bool isAutoTrackingMount(const int mount);
 
-
-
-
-class MountSize
-{
+class MountSize {
 public:
     MountSize();
 };

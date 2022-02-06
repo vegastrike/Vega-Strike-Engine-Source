@@ -1,9 +1,6 @@
 /*
- * missile.cpp
- *
- * Copyright (C) Daniel Horn
- * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike contributors
- * Copyright (C) 2021-2022 Stephen G. Tuggy
+ * Copyright (C) 2001-2022 Daniel Horn, pyramid3d, Stephen G. Tuggy,
+ * and other Vega Strike contributors.
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -11,7 +8,7 @@
  *
  * Vega Strike is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 2 of the License, or
+ * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
  * Vega Strike is distributed in the hope that it will be useful,
@@ -20,7 +17,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
+ * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
 
 
@@ -69,8 +66,9 @@ void MissileEffect::ApplyDamage(Unit *smaller)
             distance =
                     0.f;
         }                                     //it's inside the bounding sphere, so we'll not reduce the effect
-        if (radialmultiplier < .001)
+        if (radialmultiplier < .001) {
             radialmultiplier = .001;
+        }
         float dist_part = distance / radialmultiplier;              //radialmultiplier is radius of the set damage
         float damage_mul;
         if (dist_part

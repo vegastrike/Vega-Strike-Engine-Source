@@ -1,9 +1,6 @@
 /*
- * movable.cpp
- *
- * Copyright (C) 2020-2021 Roy Falk, Stephen G. Tuggy, ministerofinformation,
- * and other Vega Strike contributors
- * Copyright (C) 2022 Stephen G. Tuggy
+ * Copyright (C) 2020-2022 Roy Falk, ministerofinformation,
+ * Stephen G. Tuggy, and other Vega Strike contributors.
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -20,7 +17,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
+ * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
 
 
@@ -531,8 +528,9 @@ float Movable::GetMaxWarpFieldStrength(float rampmult) const
         minmultiplier = maxWarp;
     } //SOFT LIMIT
     minmultiplier *= rampmult;
-    if (minmultiplier < 1)
+    if (minmultiplier < 1) {
         minmultiplier = 1;
+    }
     v *= minmultiplier;
     float vmag = sqrt(v.i * v.i + v.j * v.j + v.k * v.k);
     if (vmag > warpMaxEfVel) {
