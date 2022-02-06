@@ -1,10 +1,6 @@
-/**
- * ani_texture.h
- *
- * Copyright (c) 2001-2002 Daniel Horn
- * Copyright (c) 2002-2019 pyramid3d and other Vega Strike Contributors
- * Copyright (c) 2019-2021 Stephen G. Tuggy, and other Vega Strike Contributors
- * Copyright (C) 2022 Stephen G. Tuggy
+/*
+ * Copyright (C) 2001-2022 Daniel Horn, pyramid3d, Stephen G. Tuggy,
+ * and other Vega Strike contributors.
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -12,7 +8,7 @@
  *
  * Vega Strike is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 2 of the License, or
+ * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
  * Vega Strike is distributed in the hope that it will be useful,
@@ -94,15 +90,18 @@ protected:
 public:
     virtual void setTime(double tim);
 
-    virtual double curTime() const {
+    virtual double curTime() const
+    {
         return curtime;
     }
 
-    virtual unsigned int numFrames() const {
+    virtual unsigned int numFrames() const
+    {
         return numframes;
     }
 
-    virtual float framesPerSecond() const {
+    virtual float framesPerSecond() const
+    {
         return 1 / timeperframe;
     }
 
@@ -110,11 +109,13 @@ public:
 
     virtual unsigned int numPasses() const;
 
-    virtual bool canMultiPass() const {
+    virtual bool canMultiPass() const
+    {
         return true;
     }
 
-    virtual bool constFrameRate() const {
+    virtual bool constFrameRate() const
+    {
         return constframerate;
     }
 
@@ -144,11 +145,13 @@ public:
 
     virtual Texture *Clone();
 
-    virtual void MakeActive() {
+    virtual void MakeActive()
+    {
         MakeActive(texstage, 0);
     }                                                   //MSVC bug seems to hide MakeActive() if we define MakeActive(int,int) - the suckers!
 
-    virtual void MakeActive(int stage) {
+    virtual void MakeActive(int stage)
+    {
         MakeActive(stage, 0);
     }                                                         //MSVC bug seems to hide MakeActive(int) if we define MakeActive(int,int) - the suckers!
 
@@ -156,43 +159,53 @@ public:
 
     bool SetupPass(int pass, int stage, const enum BLENDFUNC src, const enum BLENDFUNC dst);
 
-    bool SetupPass(int pass, const enum BLENDFUNC src, const enum BLENDFUNC dst) {
+    bool SetupPass(int pass, const enum BLENDFUNC src, const enum BLENDFUNC dst)
+    {
         return SetupPass(pass, texstage, src, dst);
     }
 
-    void SetInterpolateFrames(bool set) {
+    void SetInterpolateFrames(bool set)
+    {
         options = (options & ~optInterpolateFrames) | (set ? optInterpolateFrames : 0);
     }
 
-    void SetInterpolateTCoord(bool set) {
+    void SetInterpolateTCoord(bool set)
+    {
         options = (options & ~optInterpolateTCoord) | (set ? optInterpolateTCoord : 0);
     }
 
-    void SetLoopInterp(bool set) {
+    void SetLoopInterp(bool set)
+    {
         options = (options & ~optLoopInterp) | (set ? optLoopInterp : 0);
     }
 
-    void SetLoop(bool set) {
+    void SetLoop(bool set)
+    {
         options = (options & ~optLoop) | (set ? optLoop : 0);
     }
 
-    bool GetInterpolateFrames() const {
+    bool GetInterpolateFrames() const
+    {
         return (options & optInterpolateFrames) != 0;
     }
 
-    bool GetInterpolateTCoord() const {
+    bool GetInterpolateTCoord() const
+    {
         return (options & optInterpolateTCoord) != 0;
     }
 
-    bool GetLoopInterp() const {
+    bool GetLoopInterp() const
+    {
         return (options & optLoopInterp) != 0;
     }
 
-    bool GetLoop() const {
+    bool GetLoop() const
+    {
         return (options & optLoop) != 0;
     }
 
-    SharedPtr<Audio::Source> GetTimeSource() const {
+    SharedPtr<Audio::Source> GetTimeSource() const
+    {
         return (options & optSoundTiming) ? timeSource : SharedPtr<Audio::Source>();
     }
 

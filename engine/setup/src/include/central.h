@@ -1,19 +1,24 @@
-/***************************************************************************
- *                           central.h  -  description
- *                           ----------------------------
- *                           begin                : January 18, 2002
- *                           copyright            : (C) 2002 by David Ranger
- *                           email                : sabarok@start.com.au
- **************************************************************************/
-
-/***************************************************************************
- *                                                                         *
- *   This program is free software; you can redistribute it and/or modify  *
- *   it under the terms of the GNU General Public License as published by  *
- *   the Free Software Foundation; either version 2 of the License, or     *
- *   any later version.                                                    *
- *                                                                         *
- **************************************************************************/
+/*
+ * Copyright (C) 2001-2022 Daniel Horn, David Ranger, pyramid3d, Stephen G. Tuggy,
+ * and other Vega Strike contributors.
+ *
+ * https://github.com/vegastrike/Vega-Strike-Engine-Source
+ *
+ * This file is part of Vega Strike.
+ *
+ * Vega Strike is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Vega Strike is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
+ */
 
 // Check to see if we're already loaded
 #ifndef CENTRAL_H
@@ -44,7 +49,7 @@
 
 #define CONFIG_FILE "setup.config"
 
-void Start(int*,char***);
+void Start(int *, char ***);
 void SetGroup(char *group, char *setting);
 void SetInfo(char *catagory, char *info);
 char *GetInfo(char *catagory);
@@ -55,25 +60,25 @@ struct catagory *GetNameFromInfo(char *info);
 
 typedef struct _GtkWidget GtkWidget;
 struct catagory {
-	char *group;
-	char *name;
-	char *info;
-	GtkWidget *button;
-	struct catagory *next;
+    char *group;
+    char *name;
+    char *info;
+    GtkWidget *button;
+    struct catagory *next;
 };
 
 struct group {
-	char *name;
-	char *setting;
-	struct group *next;
+    char *name;
+    char *setting;
+    struct group *next;
 };
 
 struct global_settings {
-	char *program_name;
-	char *config_file;
-	char *temp_file;
+    char *program_name;
+    char *config_file;
+    char *temp_file;
     char *data_path;
-	int columns;
+    int columns;
 };
 
 // The structs are used primarily for the interface

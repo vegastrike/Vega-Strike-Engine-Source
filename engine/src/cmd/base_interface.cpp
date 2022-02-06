@@ -1,9 +1,6 @@
 /*
- * base_interface.cpp
- *
- * Copyright (C) Daniel Horn
- * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike contributors
- * Copyright (C) 2021-2022 Stephen G. Tuggy
+ * Copyright (C) 2001-2022 Daniel Horn, pyramid3d, Stephen G. Tuggy,
+ * and other Vega Strike contributors.
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -20,7 +17,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
+ * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
 
 
@@ -444,14 +441,18 @@ void BaseInterface::Room::Draw(BaseInterface *base)
                         float wid, hei;
                         spr_marker->GetSize(wid, hei);
                         //check if the sprite is near a screenedge and correct its position if necessary
-                        if ((x + (wid / 2)) >= 1)
+                        if ((x + (wid / 2)) >= 1) {
                             x = (1 - (wid / 2));
-                        if ((y + (hei / 2)) >= 1)
+                        }
+                        if ((y + (hei / 2)) >= 1) {
                             y = (1 - (hei / 2));
-                        if ((x - (wid / 2)) <= -1)
+                        }
+                        if ((x - (wid / 2)) <= -1) {
                             x = (-1 + (wid / 2));
-                        if ((y - (hei / 2)) <= y_lower)
+                        }
+                        if ((y - (hei / 2)) <= y_lower) {
                             y = (y_lower + (hei / 2));
+                        }
                         spr_marker->SetPosition(x, y);
                         GFXDisable(TEXTURE1);
                         GFXEnable(TEXTURE0);
@@ -469,13 +470,15 @@ void BaseInterface::Room::Draw(BaseInterface *base)
                         text_wid = text_wid * links[i]->text.length()
                                 * 0.25;                                 //calc ~width of text (=multiply the average characterwidth with the number of characters)
                         if ((text_pos_x + text_offset_x + text_wid)
-                                >= 1)                                   //check right screenborder
+                                >= 1) {                                   //check right screenborder
                             text_pos_x =
-                                    (x - fabs(text_offset_x) - text_wid);                                   //align left
+                                    (x - fabs(text_offset_x) - text_wid);
+                        }                                   //align left
                         if ((text_pos_y + text_offset_y)
-                                >= 1)                                            //check upper screenborder
+                                >= 1) {                                            //check upper screenborder
                             text_pos_y = (y
-                                    - fabs(text_offset_y));                                          //align on bottom
+                                    - fabs(text_offset_y));
+                        }                                          //align on bottom
                         if ((text_pos_y + text_offset_y - text_hei)
                                 <= y_lower)                             //check lower screenborder
                             text_pos_y = (y + fabs(text_offset_y)
@@ -529,11 +532,13 @@ void BaseInterface::Room::Draw(BaseInterface *base)
                         text_pos_x = (x - fabs(text_offset_x) - text_wid);
                     }                               //align left
                     if ((text_pos_y + text_offset_y)
-                            >= 1)                                        //check upper screenborder
-                        text_pos_y = (y - fabs(text_offset_y));                                      //align on bottom
+                            >= 1) {                                        //check upper screenborder
+                        text_pos_y = (y - fabs(text_offset_y));
+                    }                                      //align on bottom
                     if ((text_pos_y + text_offset_y - text_hei)
-                            <= y_lower)                         //check lower screenborder
-                        text_pos_y = (y + fabs(text_offset_y) + text_hei);                               //align on top
+                            <= y_lower) {                         //check lower screenborder
+                        text_pos_y = (y + fabs(text_offset_y) + text_hei);
+                    }                               //align on top
                     if (enable_markers)
                         text_pos_y += text_hei;
                     text_marker.col = GFXColor(1, 1, 1, 1);

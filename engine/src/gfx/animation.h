@@ -1,11 +1,7 @@
 /*
- * animation.h
- *
- * Copyright (C) 2001-2002 Daniel Horn
- * Copyright (C) 2003-2019 ace123, surfdargent, klaussfreire,
- * jacks, dan_w, and other Vega Strike contributors
- * Copyright (C) 2020-2021 pyramid3d and Roy Falk
- * Copyright (C) 2022 Stephen G. Tuggy
+ * Copyright (C) 2001-2022 Daniel Horn, ace123, surfdargent, klaussfreire,
+ * jacks, dan_w, pyramid3d, Roy Falk, Stephen G. Tuggy,
+ * and other Vega Strike contributors.
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -13,7 +9,7 @@
  *
  * Vega Strike is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 2 of the License, or
+ * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
  * Vega Strike is distributed in the hope that it will be useful,
@@ -40,7 +36,7 @@
 #include "ani_texture.h"
 
 namespace VSFileSystem {
-    class VSFile;
+class VSFile;
 };
 
 class Animation : public AnimatedTexture {

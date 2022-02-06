@@ -1,9 +1,6 @@
 /*
- * fire.cpp
- *
- * Copyright (C) Daniel Horn
- * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike contributors
- * Copyright (C) 2021-2022 Stephen G. Tuggy
+ * Copyright (C) 2001-2022 Daniel Horn, pyramid3d, Stephen G. Tuggy,
+ * and other Vega Strike contributors.
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -20,7 +17,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
+ * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
 
 
@@ -561,17 +558,21 @@ void FireAt::ChooseTargets(int numtargs, bool force)
     } else {
         return;
     }          //skipped to achieve better fairness - see comment on modulo distribution above
-    if (curtarg)
-        if (isJumpablePlanet(curtarg))
+    if (curtarg) {
+        if (isJumpablePlanet(curtarg)) {
             return;
+        }
+    }
     bool wasnull = (curtarg == NULL);
     Flightgroup *fg = parent->getFlightgroup();
     lastchangedtarg = 0 + targrand.uniformInc(0, 1)
             * mintimetoswitch;     //spread out next valid time to switch targets - helps to ease per-frame loads.
     if (fg) {
-        if (!fg->directive.empty())
-            if (curtarg != NULL && (*fg->directive.begin()) == toupper(*fg->directive.begin()))
+        if (!fg->directive.empty()) {
+            if (curtarg != NULL && (*fg->directive.begin()) == toupper(*fg->directive.begin())) {
                 return;
+            }
+        }
     }
     //not   allowed to switch targets
     numprocessed++;
@@ -588,8 +589,9 @@ void FireAt::ChooseTargets(int numtargs, bool force)
                 AssignTBin(su, tbin);
             } else {
                 Unit *ssu = NULL;
-                for (un_iter subturret = su->getSubUnits(); (ssu = (*subturret)); ++subturret)
+                for (un_iter subturret = su->getSubUnits(); (ssu = (*subturret)); ++subturret) {
                     AssignTBin(ssu, tbin);
+                }
             }
         }
     }
@@ -612,8 +614,9 @@ void FireAt::ChooseTargets(int numtargs, bool force)
 
     maxranges[0] = gunrange;
     maxranges[1] = missilerange;
-    if (tbin.size())
+    if (tbin.size()) {
         maxranges[0] = (tbin[0].maxrange > gunrange ? tbin[0].maxrange : gunrange);
+    }
     double pretable = queryTime();
     unitLocator.action.init(this, parent, gunrange, &tbin, maxranges, maxrolepriority, maxtargets);
     static int gcounter = 0;
@@ -626,24 +629,28 @@ void FireAt::ChooseTargets(int numtargs, bool force)
             unsigned int np = _Universe->numPlayers();
             for (unsigned int i = 0; i < np; ++i) {
                 Unit *playa = _Universe->AccessCockpit(i)->GetParent();
-                if (playa)
+                if (playa) {
                     unitLocator.action.ShouldTargetUnit(playa, UnitUtil::getDistance(parent, playa));
+                }
             }
             Unit *lead = UnitUtil::getFlightgroupLeader(parent);
-            if (lead != NULL && lead != parent && (lead = lead->Target()) != NULL)
+            if (lead != NULL && lead != parent && (lead = lead->Target()) != NULL) {
                 unitLocator.action.ShouldTargetUnit(lead, UnitUtil::getDistance(parent, lead));
+            }
             Unit *threat = parent->Threat();
-            if (threat)
+            if (threat) {
                 unitLocator.action.ShouldTargetUnit(threat, UnitUtil::getDistance(parent, threat));
+            }
         } else {
             gcounter = 0;
         }
     }
-    if (unitLocator.action.mytarg == NULL)      //decided to rechoose or did not have initial target
+    if (unitLocator.action.mytarg == NULL) {      //decided to rechoose or did not have initial target
         findObjects(
                 _Universe->activeStarSystem()->collide_map[Unit::UNIT_ONLY],
                 parent->location[Unit::UNIT_ONLY],
                 &unitLocator);
+    }
     Unit *mytarg = unitLocator.action.mytarg;
     targetpick += queryTime() - pretable;
     if (mytarg) {
@@ -651,29 +658,34 @@ void FireAt::ChooseTargets(int numtargs, bool force)
         mytargrange = UnitUtil::getDistance(parent, mytarg);
     }
     TargetAndRange my_target(mytarg, mytargrange, efrel);
-    for (vector<TurretBin>::iterator k = tbin.begin(); k != tbin.end(); ++k)
+    for (vector<TurretBin>::iterator k = tbin.begin(); k != tbin.end(); ++k) {
         k->AssignTargets(my_target, parent->cumulative_transformation_matrix);
+    }
     parent->LockTarget(false);
     if (wasnull) {
         if (mytarg) {
             nextframenumpollers[hastarg] += 2;
-            if (nextframenumpollers[hastarg] > maxnumpollers)
+            if (nextframenumpollers[hastarg] > maxnumpollers) {
                 nextframenumpollers[hastarg] = maxnumpollers;
+            }
         } else {
             lastchangedtarg += targrand.uniformInc(0, 1) * minnulltimetoswitch;
             nextframenumpollers[hastarg] -= .05;
-            if (nextframenumpollers[hastarg] < minnumpollers)
+            if (nextframenumpollers[hastarg] < minnumpollers) {
                 nextframenumpollers[hastarg] = minnumpollers;
+            }
         }
     } else {
         if (parent->Target() != mytarg) {
             nextframenumpollers[hastarg] += 2;
-            if (nextframenumpollers[hastarg] > maxnumpollers)
+            if (nextframenumpollers[hastarg] > maxnumpollers) {
                 nextframenumpollers[hastarg] = maxnumpollers;
+            }
         } else {
             nextframenumpollers[hastarg] -= .01;
-            if (nextframenumpollers[hastarg] < minnumpollers)
+            if (nextframenumpollers[hastarg] < minnumpollers) {
                 nextframenumpollers[hastarg] = minnumpollers;
+            }
         }
     }
     parent->Target(mytarg);

@@ -323,8 +323,9 @@ RadixSort &RadixSort::Sort(const uint32_t *input, uint32_t nb, RadixHint hint)
 //				mOffset[128] = 0;
                 mLink[128] = mRanks2;
 //				for(i=129;i<256;i++)			mOffset[i] = mOffset[i-1] + CurCount[i-1];
-                for (i = 129; i < 256; i++)
+                for (i = 129; i < 256; i++) {
                     mLink[i] = mLink[i - 1] + CurCount[i - 1];
+                }
             }
 
             // Perform Radix Sort
@@ -420,16 +421,18 @@ RadixSort &RadixSort::Sort(const float *input2, uint32_t nb)
 //				mOffset[0] = 0;
                 mLink[0] = mRanks2;
 //				for(uint32_t i=1;i<256;i++)		mOffset[i] = mOffset[i-1] + CurCount[i-1];
-                for (uint32_t i = 1; i < 256; i++)
+                for (uint32_t i = 1; i < 256; i++) {
                     mLink[i] = mLink[i - 1] + CurCount[i - 1];
+                }
 
                 // Perform Radix Sort
                 uint8_t *InputBytes = (uint8_t *) input;
                 InputBytes += j;
                 if (INVALID_RANKS) {
 //					for(i=0;i<nb;i++)	mRanks2[mOffset[InputBytes[i<<2]]++] = i;
-                    for (uint32_t i = 0; i < nb; i++)
+                    for (uint32_t i = 0; i < nb; i++) {
                         *mLink[InputBytes[i << 2]]++ = i;
+                    }
                     VALIDATE_RANKS;
                 } else {
                     uint32_t *Indices = mRanks;
@@ -456,16 +459,18 @@ RadixSort &RadixSort::Sort(const float *input2, uint32_t nb)
                 mLink[0] =
                         &mRanks2[NbNegativeValues];                                        // First positive number takes place after the negative ones
 //				for(uint32_t i=1;i<128;i++)		mOffset[i] = mOffset[i-1] + CurCount[i-1];	// 1 to 128 for positive numbers
-                for (i = 1; i < 128; i++)
-                    mLink[i] = mLink[i - 1] + CurCount[i - 1];        // 1 to 128 for positive numbers
+                for (i = 1; i < 128; i++) {
+                    mLink[i] = mLink[i - 1] + CurCount[i - 1];
+                }        // 1 to 128 for positive numbers
 
                 // We must reverse the sorting order for negative numbers!
 //				mOffset[255] = 0;
                 mLink[255] = mRanks2;
 //				for(i=0;i<127;i++)		mOffset[254-i] = mOffset[255-i] + CurCount[255-i];	// Fixing the wrong order for negative values
-                for (i = 0; i < 127; i++)
+                for (i = 0; i < 127; i++) {
                     mLink[254 - i] =
-                            mLink[255 - i] + CurCount[255 - i];        // Fixing the wrong order for negative values
+                            mLink[255 - i] + CurCount[255 - i];
+                }        // Fixing the wrong order for negative values
 //				for(i=128;i<256;i++)	mOffset[i] += CurCount[i];							// Fixing the wrong place for negative values
                 for (i = 128; i < 256; i++)
                     mLink[i] += CurCount[i];                            // Fixing the wrong place for negative values
@@ -506,12 +511,14 @@ RadixSort &RadixSort::Sort(const float *input2, uint32_t nb)
                 if (UniqueVal >= 128) {
                     if (INVALID_RANKS) {
                         // ###Possible?
-                        for (uint32_t i = 0; i < nb; i++)
+                        for (uint32_t i = 0; i < nb; i++) {
                             mRanks2[i] = nb - i - 1;
+                        }
                         VALIDATE_RANKS;
                     } else {
-                        for (uint32_t i = 0; i < nb; i++)
+                        for (uint32_t i = 0; i < nb; i++) {
                             mRanks2[i] = mRanks[nb - i - 1];
+                        }
                     }
 
                     // Swap pointers for next pass. Valid indices - the most recent ones - are in mRanks after the swap.

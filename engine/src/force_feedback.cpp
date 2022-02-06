@@ -1,10 +1,6 @@
 /*
- * force_feedback.cpp
- *
- * Copyright (C) 2001-2002 Daniel Horn
- * Copyright (C) Alexander Rawass <alexannika@users.sourceforge.net>
- * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike contributors
- * Copyright (C) 2021 Stephen G. Tuggy
+ * Copyright (C) 2001-2022 Daniel Horn, Alexander Rawass, pyramid3d,
+ * Stephen G. Tuggy, and other Vega Strike contributors.
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -12,7 +8,7 @@
  *
  * Vega Strike is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 2 of the License, or
+ * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
  * Vega Strike is distributed in the hope that it will be useful,
@@ -21,7 +17,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
+ * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
 
 /*
@@ -37,8 +33,6 @@
 #include "config_xml.h"
 #include "cmd/script/mission.h"
 #include "options.h"
-
-
 
 #define FF_DOIT 1
 
@@ -72,22 +66,22 @@ bool ForceFeedback::haveFF()
     return have_ff;
 }
 
-void ForceFeedback::updateForce( float angle, float strength )
+void ForceFeedback::updateForce(float angle, float strength)
 {
     VS_LOG(info, (boost::format("update force %1% degrees %2%") % angle % strength));
 }
 
-void ForceFeedback::updateSpeedEffect( float strength )
+void ForceFeedback::updateSpeedEffect(float strength)
 {
     VS_LOG(info, (boost::format("speed effect %1%") % strength));
 }
 
-void ForceFeedback::playHit( float angle, float strength )
+void ForceFeedback::playHit(float angle, float strength)
 {
     VS_LOG(info, (boost::format("shield hit %1% degrees %2%") % angle % strength));
 }
 
-void ForceFeedback::playAfterburner( bool activate )
+void ForceFeedback::playAfterburner(bool activate)
 {
     if (!have_ff) {
         return;
@@ -140,7 +134,7 @@ void ForceFeedback::playLaser()
 #endif
 }
 
-void ForceFeedback::playDurationEffect( unsigned int eff_nr, bool activate )
+void ForceFeedback::playDurationEffect(unsigned int eff_nr, bool activate)
 {
     if (!have_ff) {
         return;
@@ -158,7 +152,7 @@ void ForceFeedback::playDurationEffect( unsigned int eff_nr, bool activate )
 #endif
 }
 
-void ForceFeedback::playShortEffect( unsigned int eff_nr )
+void ForceFeedback::playShortEffect(unsigned int eff_nr)
 {
     if (!have_ff) {
         return;

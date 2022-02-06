@@ -145,12 +145,15 @@ void Point::SetNotUsed()
 
 bool Point::IsNotUsed() const
 {
-    if (IR(x) != 0xffffffff)
+    if (IR(x) != 0xffffffff) {
         return FALSE;
-    if (IR(y) != 0xffffffff)
+    }
+    if (IR(y) != 0xffffffff) {
         return FALSE;
-    if (IR(z) != 0xffffffff)
+    }
+    if (IR(z) != 0xffffffff) {
         return FALSE;
+    }
     return TRUE;
 }
 

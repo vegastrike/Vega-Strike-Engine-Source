@@ -1,11 +1,7 @@
 /*
- * aux_logo.cpp
- *
- * Copyright (C) 2001-2002 Daniel Horn
- * Copyright (C) 2003-2019 ace123, surfdargent, klaussfreire,
- * jacks, dan_w, ashieh, griwodz, and other Vega Strike contributors
- * Copyright (C) 2020 pyramid3d
- * Copyright (C) 2022 Stephen G. Tuggy
+ * Copyright (C) 2001-2022 Daniel Horn, ace123, surfdargent, klaussfreire,
+ * jacks, dan_w, ashieh, griwodz, pyramid3d, Stephen G. Tuggy,
+ * and other Vega Strike contributors.
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -13,7 +9,7 @@
  *
  * Vega Strike is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 2 of the License, or
+ * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
  * Vega Strike is distributed in the hope that it will be useful,
@@ -47,7 +43,8 @@ Logo::Logo(int numberlogos,
            float *rotation,
            float offset,
            Texture *Dec,
-           Vector *Ref) {
+           Vector *Ref)
+{
     offset = 0;
     refcount = -1;
     draw_queue = NULL;
@@ -76,10 +73,11 @@ Logo::Logo(int numberlogos,
         } else {
             ///backwards compatibility shit
             Vector y;
-            if ((r.i == 1 || r.i == -1) && !r.j && !r.k)
+            if ((r.i == 1 || r.i == -1) && !r.j && !r.k) {
                 y = Vector(0, 1, 0);
-            else
+            } else {
                 y = Vector(1, 0, 0);
+            }
             ScaledCrossProduct(r, y, p);
             ScaledCrossProduct(r, p, q);
             ::Roll(rotation[i], p, q, r);
@@ -102,7 +100,8 @@ Logo::Logo(int numberlogos,
     SetDecal(Dec);
 }
 
-void Logo::SetDecal(Texture *decal) {
+void Logo::SetDecal(Texture *decal)
+{
     Decal = decal;
     //Check which draw_queue to use:
     Logo *l;
@@ -137,9 +136,11 @@ void Logo::SetDecal(Texture *decal) {
  *
  *  }*/
 
-void Logo::Draw(const Matrix &m) {
-    if (!numlogos)
+void Logo::Draw(const Matrix &m)
+{
+    if (!numlogos) {
         return;
+    }
     //Matrix m;
     //GFXGetMatrix(MODEL, m);
     draw_queue->push_back(DrawContext(m, vlist));
@@ -149,9 +150,11 @@ void Logo::Draw(const Matrix &m) {
     }
 }
 
-void Logo::ProcessDrawQueue() {
-    if (!g_game.use_logos || draw_queue->empty())
+void Logo::ProcessDrawQueue()
+{
+    if (!g_game.use_logos || draw_queue->empty()) {
         return;
+    }
     static float offs = XMLSupport::parse_float(vs_config->getVariable("graphics", "LogoOffset", "-1"));
     static float scl = XMLSupport::parse_float(vs_config->getVariable("graphics", "LogoOffsetScale", "-4.0"));
 
@@ -178,16 +181,20 @@ void Logo::ProcessDrawQueue() {
     GFXPolygonOffset(0, 0);
 }
 
-Logo::~Logo() {
-    if (owner_of_draw_queue != this)
+Logo::~Logo()
+{
+    if (owner_of_draw_queue != this) {
         delete vlist;
+    }
     //if(LogoCorner!=NULL)
     //delete [] LogoCorner;
     if (owner_of_draw_queue != NULL) {
-        if (owner_of_draw_queue != this)
+        if (owner_of_draw_queue != this) {
             owner_of_draw_queue->refcount--;
-        if (owner_of_draw_queue->refcount == 0 && owner_of_draw_queue != this)
+        }
+        if (owner_of_draw_queue->refcount == 0 && owner_of_draw_queue != this) {
             delete owner_of_draw_queue;
+        }
     }
     if (owner_of_draw_queue == this) {
         assert(refcount == 0);

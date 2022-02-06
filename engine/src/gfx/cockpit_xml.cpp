@@ -1,10 +1,6 @@
-/**
- * cockpit_xml.cpp
- *
- * Copyright (c) 2001-2002 Daniel Horn
- * Copyright (c) 2002-2019 pyramid3d and other Vega Strike Contributors
- * Copyright (c) 2019-2021 Stephen G. Tuggy, and other Vega Strike Contributors
- * Copyright (C) 2022 Stephen G. Tuggy
+/*
+ * Copyright (C) 2001-2022 Daniel Horn, pyramid3d, Stephen G. Tuggy,
+ * and other Vega Strike contributors.
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -12,7 +8,7 @@
  *
  * Vega Strike is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 2 of the License, or
+ * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
  * Vega Strike is distributed in the hope that it will be useful,
@@ -606,8 +602,9 @@ void GameCockpit::beginElement(const string &name, const AttributeList &attribut
                             if (tmp->getMode() != default_mode) {
                                 for (int i = 0; i < 32; ++i) {
                                     tmp->SwitchMode(NULL);
-                                    if (tmp->getMode() == default_mode)
+                                    if (tmp->getMode() == default_mode) {
                                         break;
+                                    }
                                 }
                             }
                         }

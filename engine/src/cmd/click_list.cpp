@@ -1,9 +1,6 @@
 /*
- * click_list.cpp
- *
- * Copyright (C) Daniel Horn
- * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike contributors
- * Copyright (C) 2021-2022 Stephen G. Tuggy
+ * Copyright (C) 2001-2022 Daniel Horn, pyramid3d, Stephen G. Tuggy,
+ * and other Vega Strike contributors.
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -20,7 +17,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
+ * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
 
 
@@ -98,9 +95,11 @@ UnitCollection *ClickList::requestIterator(int minX, int minY, int maxX, int max
     double frustum[6][4];
     GFXCalculateFrustum(frustum, view, frustmat);
     Unit *un;
-    for (un_iter myParent = parentIter->createIterator(); (un = *myParent) != NULL; ++myParent)
-        if ((un)->queryFrustum(frustum))
+    for (un_iter myParent = parentIter->createIterator(); (un = *myParent) != NULL; ++myParent) {
+        if ((un)->queryFrustum(frustum)) {
             uc->prepend(un);
+        }
+    }
     return uc;
 }
 

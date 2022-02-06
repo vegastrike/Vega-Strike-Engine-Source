@@ -1,17 +1,23 @@
 /*
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * as published by the Free Software Foundation; either version 2
- * of the License, or (at your option) any later version.
+ * Copyright (C) 2001-2022 Daniel Horn, pyramid3d, Stephen G. Tuggy,
+ * and other Vega Strike contributors.
  *
- * This program is distributed in the hope that it will be useful,
+ * https://github.com/vegastrike/Vega-Strike-Engine-Source
+ *
+ * This file is part of Vega Strike.
+ *
+ * Vega Strike is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Vega Strike is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+ * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
 
 /*
@@ -25,32 +31,31 @@ using std::string;
 #include "networking/acctserver.h"
 #include "lin_time.h"
 
-void VSExit( int code )
+void VSExit(int code)
 {
-    exit( code );
+    exit(code);
 }
 
-string getStarSystemSector( const string &in )
+string getStarSystemSector(const string &in)
 {
-    return string( "" );
+    return string("");
 }
 
-string GetUnitDir( string filename )
+string GetUnitDir(string filename)
 {
-    return string( "" );
+    return string("");
 }
 
-char  SERVER = 2;
-float simulation_atom_var = (float) 1.0/10.0;
-float audio_atom_var = (float) 1.0/18.0;
-class NetClient
-{};
+char SERVER = 2;
+float simulation_atom_var = (float) 1.0 / 10.0;
+float audio_atom_var = (float) 1.0 / 18.0;
+class NetClient {};
 NetClient *Network;
 
-int main( int argc, char **argv )
+int main(int argc, char **argv)
 {
     InitTime();
-    setNewTime( ( (double) time( NULL ) )-VEGA_EPOCH );
+    setNewTime(((double) time(NULL)) - VEGA_EPOCH);
     AccountServer *Server = new AccountServer;
 
     Server->start();

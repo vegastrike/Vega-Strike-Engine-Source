@@ -1,10 +1,8 @@
 /*
- * easydom.h
+ * Copyright (C) 2001-2022 Daniel Horn, pyramid3d, Roy Falk,
+ * Stephen G. Tuggy, and other Vega Strike contributors.
  *
- * Copyright (C) 2001-2002 Daniel Horn
- * Copyright (C) 2020 pyramid3d, Roy Falk, Stephen G. Tuggy,
- * and other Vega Strike contributors.
- * Copyright (C) 2021 Stephen G. Tuggy
+ * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
  * This file is part of Vega Strike.
  *
@@ -19,7 +17,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
+ * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
 
 /*
@@ -47,8 +45,7 @@ using XMLSupport::AttributeList;
 
 extern string parseCalike(char const *filename);
 
-class easyDomNode
-{
+class easyDomNode {
 public:
     easyDomNode();
 
@@ -57,9 +54,15 @@ public:
 
     void addChild(easyDomNode *child);
 
-    string Name() { return name; }
+    string Name()
+    {
+        return name;
+    }
 
-    void set_attribute(string name, string value) { attribute_map[name] = value; };
+    void set_attribute(string name, string value)
+    {
+        attribute_map[name] = value;
+    };
 
     string attr_value(string attr_name);
     vector<easyDomNode *> subnodes;
@@ -78,43 +81,40 @@ private:
 
 typedef map<string, int> tagMap;
 
-class tagDomNode : public easyDomNode
-{
+class tagDomNode : public easyDomNode {
 public:
     int tag;
 
     void Tag(tagMap *tagmap)
     {
         tag = (*tagmap)[Name()];
-        if (tag == 0)
-        {
+        if (tag == 0) {
             VS_LOG(trace, (boost::format("cannot translate tag %1%") % Name()));
         }
 
         vector<easyDomNode *>::const_iterator siter;
 
-        for (siter = subnodes.begin(); siter != subnodes.end(); siter++)
-        {
-            tagDomNode *tnode = (tagDomNode *)(*siter);
+        for (siter = subnodes.begin(); siter != subnodes.end(); siter++) {
+            tagDomNode *tnode = (tagDomNode *) (*siter);
             tnode->Tag(tagmap);
         }
     };
 };
 
-template <class domNodeType>
-class easyDomFactory
-{
+template<class domNodeType>
+class easyDomFactory {
 public:
-    easyDomFactory(){};
+    easyDomFactory()
+    {
+    };
 
     void getColor(char *name, float color[4]);
     char *getVariable(char *section, char *name);
 
     void c_alike_to_xml(const char *filename);
 
-    struct easyDomFactoryXML
-    {
-    } * xml;
+    struct easyDomFactoryXML {
+    } *xml;
 
     domNodeType *LoadXML(const char *filename)
     {
@@ -122,8 +122,7 @@ public:
         const int chunk_size = 16384;
 
         FILE *inFile = fopen(filename, "r");
-        if (!inFile)
-        {
+        if (!inFile) {
             //BOOST_LOG_TRIVIAL(trace) << "warning: could not open file: " << filename << endl;
             //    assert(0);
             return NULL;
@@ -136,9 +135,8 @@ public:
         XML_SetElementHandler(parser, &easyDomFactory::beginElement, &easyDomFactory::endElement);
         XML_SetCharacterDataHandler(parser, &easyDomFactory::charHandler);
 
-        do
-        {
-            char *buf = (XML_Char *)XML_GetBuffer(parser, chunk_size);
+        do {
+            char *buf = (XML_Char *) XML_GetBuffer(parser, chunk_size);
             int length;
 
             length = fread(buf, 1, chunk_size, inFile);
@@ -149,7 +147,7 @@ public:
         fclose(inFile);
         XML_ParserFree(parser);
 
-        return (domNodeType *)topnode;
+        return (domNodeType *) topnode;
     };
 
     static void charHandler(void *userData, const XML_Char *s, int len)
@@ -165,8 +163,7 @@ public:
         const int chunk_size = 16384;
 
         string module_str = parseCalike(filename);
-        if (module_str.empty())
-        {
+        if (module_str.empty()) {
             //BOOST_LOG_TRIVIAL(trace) << "warning: could not open file: " << filename << endl;
             //    assert(0);
             return NULL;
@@ -184,24 +181,20 @@ public:
         int incr = chunk_size - 2;
         int is_final = false;
 
-        do
-        {
-            char *buf = (XML_Char *)XML_GetBuffer(parser, chunk_size);
+        do {
+            char *buf = (XML_Char *) XML_GetBuffer(parser, chunk_size);
 
             int max_index = index + incr;
             int newlen = incr;
 
             printf("max_index=%d,string_size=%d\n", max_index, string_size);
-            if (max_index >= string_size)
-            {
+            if (max_index >= string_size) {
                 newlen = module_str.size() - index;
                 printf("getting string from %d length %d\n", index, newlen);
                 const string substr1 = module_str.substr(index, newlen);
                 const char *strbuf = substr1.c_str();
                 strncpy(buf, strbuf, newlen);
-            }
-            else
-            {
+            } else {
                 printf("getting string from %d length %d\n", index, incr);
                 const string substr2 = module_str.substr(index, incr);
                 const char *strbuf = substr2.c_str();
@@ -211,8 +204,7 @@ public:
 
             index += newlen;
 
-            if (index >= string_size)
-            {
+            if (index >= string_size) {
                 is_final = true;
             }
 
@@ -221,16 +213,17 @@ public:
 
         XML_ParserFree(parser);
 
-        return (domNodeType *)topnode;
+        return (domNodeType *) topnode;
     };
 
     static void beginElement(void *userData, const XML_Char *name, const XML_Char **atts)
     {
-        ((easyDomFactory *)userData)->beginElement(name, AttributeList(atts));
+        ((easyDomFactory *) userData)->beginElement(name, AttributeList(atts));
     };
+
     static void endElement(void *userData, const XML_Char *name)
     {
-        ((easyDomFactory *)userData)->endElement(name);
+        ((easyDomFactory *) userData)->endElement(name);
     };
 
     void beginElement(const string &name, const AttributeList &attributes)
@@ -239,29 +232,22 @@ public:
 
         domNodeType *parent;
 
-        if (nodestack.empty())
-        {
+        if (nodestack.empty()) {
             parent = NULL;
-        }
-        else
-        {
+        } else {
             parent = nodestack.top();
         }
 
         domNodeType *thisnode = new domNodeType();
-        thisnode->set(parent, name, (AttributeList *)&attributes);
+        thisnode->set(parent, name, (AttributeList *) &attributes);
 
-        for (iter = attributes.begin(); iter != attributes.end(); iter++)
-        {
+        for (iter = attributes.begin(); iter != attributes.end(); iter++) {
             //BOOST_LOG_TRIVIAL(trace) <<  name << "::" << (*iter).name << endl;
         }
 
-        if (parent == NULL)
-        {
+        if (parent == NULL) {
             topnode = thisnode;
-        }
-        else
-        {
+        } else {
             parent->addChild(thisnode);
         }
         nodestack.push(thisnode);
@@ -272,13 +258,10 @@ public:
 
         domNodeType *stacktop = nodestack.top();
 
-        if (stacktop->Name() != name)
-        {
+        if (stacktop->Name() != name) {
             VS_LOG(trace, (boost::format("error: expected %1% , got %2%") % stacktop->Name() % name));
             exit(0);
-        }
-        else
-        {
+        } else {
             nodestack.pop();
         }
     };

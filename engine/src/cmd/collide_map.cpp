@@ -1,9 +1,6 @@
 /*
- * collide_map.cpp
- *
- * Copyright (C) Daniel Horn
- * Copyright (C) 2020 pyramid3d, Stephen G. Tuggy, and other Vega Strike contributors
- * Copyright (C) 2021-2022 Stephen G. Tuggy
+ * Copyright (C) 2001-2022 Daniel Horn, pyramid3d, Stephen G. Tuggy,
+ * and other Vega Strike contributors.
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -20,7 +17,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
+ * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
 
 
@@ -512,13 +509,15 @@ public:
         if (!cm->Iterable(startIter)) {
             CollideArray::CollidableBackref *br = static_cast< CollideArray::CollidableBackref * > (startIter);
             CollideMap::iterator tmploc = cmbegin + br->toflattenhints_offset;
-            if (tmploc == cmend)
+            if (tmploc == cmend) {
                 tmploc--;
+            }
             tless = tmore = tmploc;     //don't decrease tless
         } else {
             tless = tmore = startIter;
-            if (tless != cmbegin)
+            if (tless != cmbegin) {
                 --tless;
+            }
         }
         ++tmore;
         return CheckCollisionsInner(cmbegin, cmend,

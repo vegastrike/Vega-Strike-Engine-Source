@@ -1,8 +1,6 @@
 /*
- * damageable_layer.h
- *
- * Copyright (C) 2021 Roy Falk
- * Copyright (C) 2022 Stephen G. Tuggy
+ * Copyright (C) 2021-2022 Roy Falk, Stephen G. Tuggy,
+ * and other Vega Strike contributors.
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -10,7 +8,7 @@
  *
  * Vega Strike is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 2 of the License, or
+ * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
  * Vega Strike is distributed in the hope that it will be useful,
@@ -46,7 +44,7 @@ struct DamageableLayer {
     std::vector<Health> facets;    // The facets container
 
     bool core_layer;    // Damage to the core layer has a chance of also
-                        // damaging internal components such as propulsion.
+    // damaging internal components such as propulsion.
 
     friend class Damageable;
     friend struct DamageableObject;

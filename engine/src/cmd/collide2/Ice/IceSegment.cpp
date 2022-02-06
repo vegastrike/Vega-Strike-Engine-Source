@@ -47,8 +47,9 @@ float Segment::SquareDistance(const Point &point, float *t) const
         }
     }
 
-    if (t)
+    if (t) {
         *t = fT;
+    }
 
     return Diff.SquareMagnitude();
 }

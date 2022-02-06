@@ -1,22 +1,24 @@
-/***************************************************************************
- *                           general.h  -  description
- *                           ----------------------------
- *                           begin                : December 28, 2001
- *                           copyright            : (C) 2001 by David Ranger
- *                           email                : ussreliant@users.sourceforge.net
- *                           copyright            : (C) 2002 Daniel Horn & ace123
- *                           copyright            : (C) 2020 pyramid3d
- *                           copyright            : (C) 2020 Stephen G. Tuggy
- **************************************************************************/
-
-/***************************************************************************
- *                                                                         *
- *   This program is free software; you can redistribute it and/or modify  *
- *   it under the terms of the GNU General Public License as published by  *
- *   the Free Software Foundation; either version 2 of the License, or     *
- *   any later version.                                                    *
- *                                                                         *
- **************************************************************************/
+/*
+ * Copyright (C) 2001-2022 Daniel Horn, David Ranger, pyramid3d,
+ * Stephen G. Tuggy, and other Vega Strike contributors.
+ *
+ * https://github.com/vegastrike/Vega-Strike-Engine-Source
+ *
+ * This file is part of Vega Strike.
+ *
+ * Vega Strike is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Vega Strike is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
+ */
 
 // Version 2.34
 
@@ -34,15 +36,15 @@
 //#define _G_ALL		// Enable everything except _G_DEBUG
 
 //#define _G_DEBUG		// Debug Messaging
-#define _G_ERROR		// Error Messaging (internal and external)
+#define _G_ERROR        // Error Messaging (internal and external)
 #ifdef _WIN32
 #define _G_GLIB		// use GLIB for string allocation
 #endif
 //#define _G_NUMBER		// Number processing
 #define _G_PATH               // Functions that deal with directories
 //#define _G_RANDOM		// Enable Random Number
-#define _G_STRING_MANAGE	// Enable String Management
-#define _G_STRING_PARSE	// Enable the String Parsing
+#define _G_STRING_MANAGE    // Enable String Management
+#define _G_STRING_PARSE    // Enable the String Parsing
 //#define _G_XML          	// Enable the XML string parsing
 
 // If memory can't be allocated to perform a function, and EXIT_ON_FATAL is not defined,
@@ -53,7 +55,7 @@
 // Also, any functions which you write that use ShowError() to produce a fatal error also won't
 // cause the program to exit
 
-#define EXIT_ON_FATAL -1	// exit(EXIT_ON_FATAL) on a fatal error. If _G_ERROR is undefined, there will be no message
+#define EXIT_ON_FATAL -1    // exit(EXIT_ON_FATAL) on a fatal error. If _G_ERROR is undefined, there will be no message
 
 #ifdef _G_ALL
 #define _G_ERROR
@@ -164,9 +166,9 @@ char *xml_chomp_comment(char *string);
 #ifdef _G_PATH
 // Emulate the glob_t struct without having to include glob.h
 typedef struct {
-	size_t gl_pathc;
-	char **gl_pathv;
-	size_t gl_offs;
+    size_t gl_pathc;
+    char **gl_pathv;
+    size_t gl_offs;
 } glob_t;
 
 int isdir(const char *file);

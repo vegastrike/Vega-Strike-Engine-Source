@@ -61,10 +61,11 @@ public:
     inline_    bool Contains(const Sphere &sphere)
     {
         float d = mRadius - sphere.mRadius;
-        if (d >= 0.0f)
+        if (d >= 0.0f) {
             return SquareDistance(sphere.mCenter) <= d * d;
-        else
+        } else {
             return false;
+        }
     }
 
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

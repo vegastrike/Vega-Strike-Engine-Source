@@ -1,48 +1,45 @@
-/**
-* Converter.h
-*
-* Copyright (c) 2001-2002 Daniel Horn
-* Copyright (c) 2002-2019 pyramid3d and other Vega Strike Contributors
-* Copyright (c) 2019-2021 Stephen G. Tuggy, and other Vega Strike Contributors
-*
-* https://github.com/vegastrike/Vega-Strike-Engine-Source
-*
-* This file is part of Vega Strike.
-*
-* Vega Strike is free software: you can redistribute it and/or modify
-* it under the terms of the GNU General Public License as published by
-* the Free Software Foundation, either version 2 of the License, or
-* (at your option) any later version.
-*
-* Vega Strike is distributed in the hope that it will be useful,
-* but WITHOUT ANY WARRANTY; without even the implied warranty of
-* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-* GNU General Public License for more details.
-*
-* You should have received a copy of the GNU General Public License
-* along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
-*/
+/*
+ * Copyright (C) 2001-2022 Daniel Horn, pyramid3d, Stephen G. Tuggy,
+ * and other Vega Strike contributors.
+ *
+ * https://github.com/vegastrike/Vega-Strike-Engine-Source
+ *
+ * This file is part of Vega Strike.
+ *
+ * Vega Strike is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Vega Strike is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
+ */
 
 #ifndef __CONVERTER_API__INCLUDED__
 #define __CONVERTER_API__INCLUDED__
 
-namespace Converter
-{
-typedef std::vector< std::string >ParameterList;
+namespace Converter {
+typedef std::vector<std::string> ParameterList;
 
 /** This class handles commands of many kinds. By registering a module, you may extend
  *       the application's functionality (by making praseParams handle more commands).
  */
-class Module
-{
+class Module {
 public:
-    typedef std::vector< std::string >NameList;
+    typedef std::vector<std::string> NameList;
 
 /** Standard virtual destructor */
-    virtual ~Module() {}
+    virtual ~Module()
+    {
+    }
 
 /** Returns the command names - each must start with '-' or '--'. @see execute for details. */
-    virtual const NameList& getNames() const = 0;
+    virtual const NameList &getNames() const = 0;
 
 /** Handle the command
  *  @remarks
@@ -66,7 +63,7 @@ public:
  *  @param phase Commands are handled twice: phase 0, probably parsing global options only,
  *       and phase 1, where commands are actually executed.
  */
-    virtual int execute( const std::string &command, ParameterList &params, unsigned int phase ) = 0;
+    virtual int execute(const std::string &command, ParameterList &params, unsigned int phase) = 0;
 
 /** Show help message for specified command
  *  @remarks
@@ -75,7 +72,7 @@ public:
  *  @par
  *       Behave as if it was execute(command,params,0).
  */
-    virtual void help( const std::string &command, ParameterList &params ) const = 0;
+    virtual void help(const std::string &command, ParameterList &params) const = 0;
 };
 
 /** Add this module to the module list, enabling the command parser to interpret
@@ -87,47 +84,47 @@ public:
  *       unknown commands, or for unbound parameters (parameter tokens not handled
  *       by any command).
  */
-void registerModule( Module *module, bool setDefault = false );
+void registerModule(Module *module, bool setDefault = false);
 
 /** Parse parameters and execute commands
  *  @remarks
  *       Returns zero if there was no error, or nonzero otherwise.
  *       You should make the returned value the process' exit code.
  */
-int parseParams( int argc, const char*const *argv );
+int parseParams(int argc, const char *const *argv);
 
 /** Parse parameters and execute commands
  *  @remarks
  *       Returns zero if there was no error, or nonzero otherwise.
  *       You should make the returned value the process' exit code.
  */
-int parseParams( const ParameterList &params );
+int parseParams(const ParameterList &params);
 
 /** Helper class, to be able to automatically register modules. */
-template < class _Module, bool _Default >
-class ModuleDeclaration
-{
-public: ModuleDeclaration()
+template<class _Module, bool _Default>
+class ModuleDeclaration {
+public:
+    ModuleDeclaration()
     {
-        registerModule( new _Module, _Default );
+        registerModule(new _Module, _Default);
     }
 };
 
 /** This class handles conversion from one format to another.
  *       It extends the functionality of the builtin --convert command.
  */
-class ConversionImpl
-{
+class ConversionImpl {
 public:
 /** Standard virtual destructor */
-    ~ConversionImpl() {}
-
-    typedef std::vector< std::string >FormatList;
-
-    enum RetCodeEnum
+    ~ConversionImpl()
     {
+    }
+
+    typedef std::vector<std::string> FormatList;
+
+    enum RetCodeEnum {
         /// Everything ok...
-        RC_OK=0,
+        RC_OK = 0,
 
         /// Invalid parameters - abort processing
         RC_INVALID_PARAMS,
@@ -153,8 +150,8 @@ public:
  *       but it also allows you to have multiple overlapping implementations, each handling
  *       a specific task (so, the one that actually can handle the task gets used).
  */
-    virtual RetCodeEnum convert( const std::string &inputFormat, const std::string &outputFormat,
-                                 const std::string &opCode ) = 0;
+    virtual RetCodeEnum convert(const std::string &inputFormat, const std::string &outputFormat,
+                                const std::string &opCode) = 0;
 
 /** Show help message, enumerating supported conversions and operations.
  *  @remarks
@@ -166,8 +163,8 @@ public:
  *  @note
  *       Remember: if you don't support the conversion, don't print anything.
  */
-    virtual void conversionHelp( const std::string &inputFormat, const std::string &outputFormat,
-                                 const std::string &opCode ) const = 0;
+    virtual void conversionHelp(const std::string &inputFormat, const std::string &outputFormat,
+                                const std::string &opCode) const = 0;
 };
 
 /** Add this conversion module to the implementation list, extending the --convert
@@ -178,44 +175,44 @@ public:
  *  @param priority The priority of the implementation. Implementations will be probed in
  *       ascending priority order.
  */
-void registerConversionImplementation( ConversionImpl *module, int priority );
+void registerConversionImplementation(ConversionImpl *module, int priority);
 
 /** Get a map with all named options */
-std::map< std::string, std::string >& getNamedOptions();
+std::map<std::string, std::string> &getNamedOptions();
 
 /** Get a specific named option - create it if it doesn't exist, with said default value. */
-std::string& getNamedOption( const std::string &name, const std::string &defValue = std::string() );
+std::string &getNamedOption(const std::string &name, const std::string &defValue = std::string());
 
 /** Get the executable's directory @note you may modify it */
-inline std::string& getRootPath()
+inline std::string &getRootPath()
 {
-    return getNamedOption( "rootPath" );
+    return getNamedOption("rootPath");
 }
 
 /** Get the user-specified input path @note you may modify it */
-inline std::string& getInputPath()
+inline std::string &getInputPath()
 {
-    return getNamedOption( "inputPath" );
+    return getNamedOption("inputPath");
 }
 
 /** Get the user-specified output path @note you may modify it */
-inline std::string& getOutputPath()
+inline std::string &getOutputPath()
 {
-    return getNamedOption( "outputPath" );
+    return getNamedOption("outputPath");
 }
 
-inline bool hasNamedOption( const std::string &name )
+inline bool hasNamedOption(const std::string &name)
 {
-    return getNamedOptions().find( name ) != getNamedOptions().end();
+    return getNamedOptions().find(name) != getNamedOptions().end();
 }
 
 /** Helper class, to be able to automatically register conversion implementations. */
-template < class _Impl, int _Priority = 0 >
-class ConversionImplDeclaration
-{
-public: ConversionImplDeclaration()
+template<class _Impl, int _Priority = 0>
+class ConversionImplDeclaration {
+public:
+    ConversionImplDeclaration()
     {
-        registerConversionImplementation( new _Impl, _Priority );
+        registerConversionImplementation(new _Impl, _Priority);
     }
 };
 }

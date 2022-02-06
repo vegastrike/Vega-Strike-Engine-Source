@@ -77,8 +77,9 @@ float Ray::SquareDistance(const Point &point, float *t) const
         Diff -= fT * mDir;
     }
 
-    if (t)
+    if (t) {
         *t = fT;
+    }
 
     return Diff.SquareMagnitude();
 }

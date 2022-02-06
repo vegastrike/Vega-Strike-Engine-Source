@@ -1,12 +1,6 @@
-// -*- mode: c++; c-basic-offset: 4; indent-tabs-mode: nil -*-
-
 /*
- * basecomputer.cpp
- *
- * Copyright (C) 2003 Mike Byron
- * Copyright (C) 2019-2021 Stephen G. Tuggy, pyramid3d, and other Vega Strike
- * contributors
- * Copyright (C) 2022 Stephen G. Tuggy
+ * Copyright (C) 2001-2022 Daniel Horn, Mike Byron, pyramid3d, Stephen G. Tuggy,
+ * and other Vega Strike contributors.
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -23,9 +17,10 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
+ * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
  */
 
+// -*- mode: c++; c-basic-offset: 4; indent-tabs-mode: nil -*-
 
 #include "vegastrike.h"
 #if defined (_WIN32) && !defined (__CYGWIN__) && !defined (__MINGW32__)
@@ -2579,8 +2574,9 @@ void BaseComputer::loadListPicker(TransactionList &tlist,
             if (percent_working == 1.0) {
                 final_color = base_color;
             }               //working = normal color
-            if (percent_working == 0.0)
-                final_color = ITEM_DESTROYED_COLOR();                   //dead = grey
+            if (percent_working == 0.0) {
+                final_color = ITEM_DESTROYED_COLOR();
+            }                   //dead = grey
         } else {
             final_color = base_color;
         }
@@ -5787,12 +5783,14 @@ void showUnitStats(Unit *playerUnit, string &text, int subunitlevel, int mode, C
                     switch (wi->type) {
                         case WEAPON_TYPE::BALL:                     //may need ammo
                         case WEAPON_TYPE::BOLT:
-                            if (wi->damage > 0)
+                            if (wi->damage > 0) {
                                 totalWeaponDamage +=
-                                        (wi->damage / wi->Refire());                              //damage per second
-                            if (wi->phase_damage > 0)
+                                        (wi->damage / wi->Refire());
+                            }                              //damage per second
+                            if (wi->phase_damage > 0) {
                                 totalWeaponDamage += (wi->phase_damage
-                                        / wi->Refire());                              //damage per second
+                                        / wi->Refire());
+                            }                              //damage per second
 
                             PRETTY_ADDU(statcolor + "   Exit velocity: #-c", wi->speed, 0, "meters/second");
                             if (playerUnit->mounts[i].ammo != -1) {
@@ -5860,13 +5858,15 @@ void showUnitStats(Unit *playerUnit, string &text, int subunitlevel, int mode, C
             text += "#n##c1:.3:.3#" + prefix + "  NO MOUNTED WEAPONS#n##-c";
         }
     }
-    if (mode)
+    if (mode) {
         return;
+    }
     if (subunitlevel == 0 && mode == 0) {
         text += "#n##n##c0:1:.5#" + prefix + "[KEY FIGURES]#n##-c";
         float maxshield = playerUnit->totalShieldEnergyCapacitance();
-        if (shields_require_power)
+        if (shields_require_power) {
             maxshield = 0;
+        }
         PRETTY_ADDU(statcolor + "Minimum time to reach full overthrust speed: #-c",
                     playerUnit->getMass() * uc.max_ab_speed() / playerUnit->limits.afterburn, 2, "seconds");
         //reactor
@@ -5941,8 +5941,9 @@ void showUnitStats(Unit *playerUnit, string &text, int subunitlevel, int mode, C
         Unit *sub;
         int i = 1;
         for (un_iter ki = playerUnit->getSubUnits(); (sub = *ki) != NULL; ++ki, ++i) {
-            if (i == 1)
+            if (i == 1) {
                 text += "#n##n##c0:1:.5#" + prefix + "[SUB UNITS]#-c";
+            }
             PRETTY_ADD("#n#" + prefix + "#c0:1:.2#[#-csub unit ", i, 0);
             text += "#c0:1:.2#]#-c#n#";
             showUnitStats(sub, text, subunitlevel + 1, 0, item);

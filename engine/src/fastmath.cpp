@@ -1,27 +1,24 @@
-/**
-* fastmath.cpp
-*
-* Copyright (c) 2001-2002 Daniel Horn
-* Copyright (c) 2002-2019 pyramid3d and other Vega Strike Contributors
-* Copyright (c) 2019-2021 Stephen G. Tuggy, and other Vega Strike Contributors
-*
-* https://github.com/vegastrike/Vega-Strike-Engine-Source
-*
-* This file is part of Vega Strike.
-*
-* Vega Strike is free software: you can redistribute it and/or modify
-* it under the terms of the GNU General Public License as published by
-* the Free Software Foundation, either version 2 of the License, or
-* (at your option) any later version.
-*
-* Vega Strike is distributed in the hope that it will be useful,
-* but WITHOUT ANY WARRANTY; without even the implied warranty of
-* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-* GNU General Public License for more details.
-*
-* You should have received a copy of the GNU General Public License
-* along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
-*/
+/*
+ * Copyright (C) 2001-2022 Daniel Horn, pyramid3d, Stephen G. Tuggy,
+ * and other Vega Strike contributors.
+ *
+ * https://github.com/vegastrike/Vega-Strike-Engine-Source
+ *
+ * This file is part of Vega Strike.
+ *
+ * Vega Strike is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Vega Strike is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
+ */
 
 /*****************************************************************************
  *  File:  fastmath.cpp
@@ -41,15 +38,15 @@
 typedef int DWORD;
 #endif
 
-#define FP_BITS( fp ) ( ( *(DWORD*) &(fp) ) )
-#define FP_ABS_BITS( fp ) ( (FP_BITS( fp )&0x7FFFFFFF) )
-#define FP_SIGN_BIT( fp ) ( (FP_BITS( fp )&0x80000000) )
+#define FP_BITS(fp) ( ( *(DWORD*) &(fp) ) )
+#define FP_ABS_BITS(fp) ( (FP_BITS( fp )&0x7FFFFFFF) )
+#define FP_SIGN_BIT(fp) ( (FP_BITS( fp )&0x80000000) )
 #define FP_ONE_BITS ( (0x3F800000) )
 #define __forceinline inline
 
 //r = 1/p
 
-#define FP_INV( r, p )                       \
+#define FP_INV(r, p)                       \
     do {                                     \
         int _i = 2*FP_ONE_BITS-*(int*) &(p); \
         r = *(float*) &_i;                   \
@@ -66,7 +63,7 @@ typedef int DWORD;
 
 float two = 2.0f;
 
-#define FP_INV2( r, p )                \
+#define FP_INV2(r, p)                \
     do {                               \
         __asm {mov eax, 0x7F000000};   \
         __asm {sub eax, dword ptr[p]}; \
@@ -81,7 +78,7 @@ float two = 2.0f;
 
 /////////////////////////////////////////////////
 
-#define FP_EXP( e, p )                            \
+#define FP_EXP(e, p)                            \
     do {                                          \
         int _i;                                   \
         e  = -1.44269504f*(float) 0x00800000*(p); \
@@ -90,7 +87,7 @@ float two = 2.0f;
     }                                             \
     while (0)
 
-#define FP_NORM_TO_BYTE( i, p )         \
+#define FP_NORM_TO_BYTE(i, p)         \
     do {                                \
         float _n = (p)+1.0f;            \
         i = *(int*) &_n;                \
@@ -101,82 +98,83 @@ float two = 2.0f;
     }                                   \
     while (0)
 
-inline unsigned long FP_NORM_TO_BYTE2( float p )
+inline unsigned long FP_NORM_TO_BYTE2(float p)
 {
-    float fpTmp = p+1.0f;
-    return ( (*(unsigned*) &fpTmp)>>15 )&0xFF;
+    float fpTmp = p + 1.0f;
+    return ((*(unsigned *) &fpTmp) >> 15) & 0xFF;
 }
 
-inline unsigned long FP_NORM_TO_BYTE3( float p )
+inline unsigned long FP_NORM_TO_BYTE3(float p)
 {
-    float ftmp = p+12582912.0f;
-    return (*(unsigned long*) &ftmp)&0xFF;
+    float ftmp = p + 12582912.0f;
+    return (*(unsigned long *) &ftmp) & 0xFF;
 }
 
 static unsigned int fast_sqrt_table[0x10000];  //declare table of square roots
-typedef union FastSqrtUnion
-{
+typedef union FastSqrtUnion {
     float f;
     unsigned int i;
 } FastSqrtUnion;
 
 void build_sqrt_table()
 {
-    unsigned int  i;
+    unsigned int i;
     FastSqrtUnion s;
     for (i = 0; i <= 0x7FFF; i++) {
         //Build a float with the bit pattern i as mantissa
         //and an exponent of 0, stored as 127
 
-        s.i = (i<<8)|(0x7F<<23);
-        s.f = (float) sqrt( s.f );
+        s.i = (i << 8) | (0x7F << 23);
+        s.f = (float) sqrt(s.f);
 
         //Take the square root then strip the first 7 bits of
         //the mantissa into the table
 
-        fast_sqrt_table[i+0x8000] = (s.i&0x7FFFFF);
+        fast_sqrt_table[i + 0x8000] = (s.i & 0x7FFFFF);
 
         //Repeat the process, this time with an exponent of 1,
         //stored as 128
 
-        s.i = (i<<8)|(0x80<<23);
-        s.f = (float) sqrt( s.f );
+        s.i = (i << 8) | (0x80 << 23);
+        s.f = (float) sqrt(s.f);
 
-        fast_sqrt_table[i] = (s.i&0x7FFFFF);
+        fast_sqrt_table[i] = (s.i & 0x7FFFFF);
     }
 }
 
-inline float fastsqrt( float n )
+inline float fastsqrt(float n)
 {
-    if (FP_BITS( n ) == 0)
-        return 0.0;             //check for square root of 0
+    if (FP_BITS(n) == 0) {
+        return 0.0;
+    }             //check for square root of 0
 
-    FP_BITS( n ) = fast_sqrt_table[(FP_BITS( n )>>8)&0xFFFF]|( ( ( (FP_BITS( n )-0x3F800000)>>1 )+0x3F800000 )&0x7F800000 );
+    FP_BITS(n) = fast_sqrt_table[(FP_BITS(n) >> 8) & 0xFFFF]
+            | ((((FP_BITS(n) - 0x3F800000) >> 1) + 0x3F800000) & 0x7F800000);
 
     return n;
 }
 
 //At the assembly level the recommended workaround for the second FIST bug is the same for the first;
 //inserting the FRNDINT instruction immediately preceding the FIST instruction.
-__forceinline void FloatToInt( int *int_pointer, float f )
+__forceinline void FloatToInt(int *int_pointer, float f)
 {
     *int_pointer = f;
 }
 
-int Stupodmain( int argc, char *argv[] )
+int Stupodmain(int argc, char *argv[])
 {
     float t, it, test_sqrt;
-    int   i = 0;
+    int i = 0;
     build_sqrt_table();
     t = 1234.121234f;
 
-    test_sqrt = fastsqrt( t );
-    printf( "sqrt expected %20.10f  approx %20.10f\n", sqrt( t ), test_sqrt );
-    FP_INV( it, t );
-    printf( "inv  expected %20.10f  approx %20.10f\n", 1/t, it );
+    test_sqrt = fastsqrt(t);
+    printf("sqrt expected %20.10f  approx %20.10f\n", sqrt(t), test_sqrt);
+    FP_INV(it, t);
+    printf("inv  expected %20.10f  approx %20.10f\n", 1 / t, it);
     i = 0xdeafbabe;
-    FloatToInt( &i, t );
-    printf( "ftol expected %d  actual %d %08X\n", (int) t, i, i );
+    FloatToInt(&i, t);
+    printf("ftol expected %d  actual %d %08X\n", (int) t, i, i);
     return 0;
 }
 
@@ -212,27 +210,26 @@ int Stupodmain( int argc, char *argv[] )
 //
 //-----------------------------------------------------------------------------
 
-struct Vec3
-{
+struct Vec3 {
     float x;
     float y;
     float z;
 };
 
-float CylTest_CapsFirst( const Vec3 &pt1, const Vec3 &pt2, float lengthsq, float radius_sq, const Vec3 &testpt )
+float CylTest_CapsFirst(const Vec3 &pt1, const Vec3 &pt2, float lengthsq, float radius_sq, const Vec3 &testpt)
 {
     float dx, dy, dz;           //vector d  from line segment point 1 to point 2
     float pdx, pdy, pdz;        //vector pd from point 1 to test point
     float dot, dsq;
-    dx  = pt2.x-pt1.x;          //translate so pt1 is origin.  Make vector from
-    dy  = pt2.y-pt1.y;          //pt1 to pt2.  Need for this is easily eliminated
-    dz  = pt2.z-pt1.z;
-    pdx = testpt.x-pt1.x;               //vector from pt1 to test point.
-    pdy = testpt.y-pt1.y;
-    pdz = testpt.z-pt1.z;
+    dx = pt2.x - pt1.x;          //translate so pt1 is origin.  Make vector from
+    dy = pt2.y - pt1.y;          //pt1 to pt2.  Need for this is easily eliminated
+    dz = pt2.z - pt1.z;
+    pdx = testpt.x - pt1.x;               //vector from pt1 to test point.
+    pdy = testpt.y - pt1.y;
+    pdz = testpt.z - pt1.z;
     //Dot the d and pd vectors to see if point lies behind the
     //cylinder cap at pt1.x, pt1.y, pt1.z
-    dot = pdx*dx+pdy*dy+pdz*dz;
+    dot = pdx * dx + pdy * dy + pdz * dz;
     //If dot is less than zero the point is behind the pt1 cap.
     //If greater than the cylinder axis line segment length squared
     //then the point is outside the other end cap at pt2.
@@ -250,11 +247,12 @@ float CylTest_CapsFirst( const Vec3 &pt1, const Vec3 &pt2, float lengthsq, float
         //dsq = pd * pd - dot * dot / lengthsq
         //where lengthsq is d*d or |d|^2 that is passed into this function
         //distance squared to the cylinder axis:
-        dsq = (pdx*pdx+pdy*pdy+pdz*pdz)-dot*dot/lengthsq;
-        if (dsq > radius_sq)
+        dsq = (pdx * pdx + pdy * pdy + pdz * pdz) - dot * dot / lengthsq;
+        if (dsq > radius_sq) {
             return -1.0f;
-        else
-            return dsq;                         //return distance squared to axis
+        } else {
+            return dsq;
+        }                         //return distance squared to axis
     }
 }
 

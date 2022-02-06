@@ -1,10 +1,6 @@
 /*
- * aux_palette.cpp
- *
- * Copyright (C) 2001-2002 Daniel Horn
- * Copyright (C) 2003-2019 dan_w and other Vega Strike contributors
- * Copyright (C) 2020 pyramid3d
- * Copyright (C) 2022 Stephen G. Tuggy
+ * Copyright (C) 2001-2022 Daniel Horn, dan_w, pyramid3d,
+ * Stephen G. Tuggy, and other Vega Strike contributors.
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -12,7 +8,7 @@
  *
  * Vega Strike is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 2 of the License, or
+ * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
  * Vega Strike is distributed in the hope that it will be useful,
@@ -74,8 +70,9 @@ void RGB_To_HSV(double r, double g, double b, double *h, double *s, double *v)
             *h = 4.0 + (r - g) / delta;
         }                   /* resulting color is between magenta and cyan */
         *h *= 60.0;                             /*convert hue to degrees*/
-        if (*h < 0.0)
-            *h += 360.0;                        /*make sure its not negative*/
+        if (*h < 0.0) {
+            *h += 360.0;
+        }                        /*make sure its not negative*/
     }
 }
 

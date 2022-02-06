@@ -1,11 +1,7 @@
 /*
- * animation.cpp
- *
- * Copyright (C) 2001-2002 Daniel Horn
- * Copyright (C) 2003-2019 ace123, surfdargent, klaussfreire,
- * jacks, dan_w, and other Vega Strike contributors
- * Copyright (C) 2020-2021 pyramid3d and Roy Falk
- * Copyright (C) 2022 Stephen G. Tuggy
+ * Copyright (C) 2001-2022 Daniel Horn, ace123, surfdargent, klaussfreire,
+ * jacks, dan_w, pyramid3d, Roy Falk, Stephen G. Tuggy,
+ * and other Vega Strike contributors.
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -13,7 +9,7 @@
  *
  * Vega Strike is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 2 of the License, or
+ * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
  * Vega Strike is distributed in the hope that it will be useful,
@@ -46,33 +42,37 @@ using std::stack;
 
 static vector<Animation *> far_animationdrawqueue;
 
-bool AnimationsLeftInFarQueue() {
+bool AnimationsLeftInFarQueue()
+{
     return !far_animationdrawqueue.empty();
 }
 
 static vector<Animation *> animationdrawqueue;
 
-bool AnimationsLeftInQueue() {
+bool AnimationsLeftInQueue()
+{
     return !animationdrawqueue.empty();
 }
-
 
 static const unsigned char ani_up = 0x01;
 static const unsigned char ani_close = 0x02;
 static const unsigned char ani_alpha = 0x04;
 static const unsigned char ani_repeat = 0x08;
 
-Animation::Animation() {
+Animation::Animation()
+{
     VSCONSTRUCT2('a')
     height = 0.001F;
     width = 0.001F;
 }
 
-void Animation::SetFaceCam(bool face) {
-    if (face)
+void Animation::SetFaceCam(bool face)
+{
+    if (face) {
         options |= ani_up;
-    else
+    } else {
         options &= (~ani_up);
+    }
 }
 
 using namespace VSFileSystem;
@@ -83,7 +83,9 @@ Animation::Animation(VSFileSystem::VSFile *f,
                      enum FILTER ismipmapped,
                      bool camorient,
                      bool appear_near_by_radius,
-                     const GFXColor &c) : mycolor(c) {}
+                     const GFXColor &c) : mycolor(c)
+{
+}
 
 Animation::Animation(const char *FileName,
                      bool Rep,
@@ -91,17 +93,21 @@ Animation::Animation(const char *FileName,
                      enum FILTER ismipmapped,
                      bool camorient,
                      bool appear_near_by_radius,
-                     const GFXColor &c) : mycolor(c) {
+                     const GFXColor &c) : mycolor(c)
+{
     Identity(local_transformation);
     VSCONSTRUCT2('a')
     //repeat = Rep;
     options = 0;
-    if (Rep)
+    if (Rep) {
         options |= ani_repeat;
-    if (camorient)
+    }
+    if (camorient) {
         options |= ani_up;
-    if (appear_near_by_radius)
+    }
+    if (appear_near_by_radius) {
         options |= ani_close;
+    }
     SetLoop(Rep);     //setup AnimatedTexture's loop flag - NOTE: Load() will leave it like this unless a force(No)Loop option is present
     SetLoopInterp(Rep);     //Default interpolation method == looping method
     VSFile f;
@@ -110,8 +116,9 @@ Animation::Animation(const char *FileName,
         //load success already set false
     } else {
         f.Fscanf("%f %f", &width, &height);
-        if (width > 0)
+        if (width > 0) {
             options |= ani_alpha;
+        }
         width = fabs(width * 0.5F);
         height = height * 0.5F;
         Load(f, 0, ismipmapped);
@@ -120,40 +127,49 @@ Animation::Animation(const char *FileName,
     //VSFileSystem::ResetCurrentPath();
 }
 
-Animation::~Animation() {
+Animation::~Animation()
+{
     vector<Animation *>::iterator i;
     while ((i =
                     std::find(far_animationdrawqueue.begin(), far_animationdrawqueue.end(),
-                              this)) != far_animationdrawqueue.end())
+                              this)) != far_animationdrawqueue.end()) {
         far_animationdrawqueue.erase(i);
-    while ((i = std::find(animationdrawqueue.begin(), animationdrawqueue.end(), this)) != animationdrawqueue.end())
+    }
+    while ((i = std::find(animationdrawqueue.begin(), animationdrawqueue.end(), this)) != animationdrawqueue.end()) {
         animationdrawqueue.erase(i);
+    }
     VSDESTRUCT2
 }
 
-void Animation::SetPosition(const QVector &p) {
+void Animation::SetPosition(const QVector &p)
+{
     local_transformation.p = p;
 }
 
-void Animation::SetOrientation(const Vector &p, const Vector &q, const Vector &r) {
+void Animation::SetOrientation(const Vector &p, const Vector &q, const Vector &r)
+{
     VectorAndPositionToMatrix(local_transformation, p, q, r, local_transformation.p);
 }
 
-QVector Animation::Position() {
+QVector Animation::Position()
+{
     return local_transformation.p;
 }
 
-void Animation::SetDimensions(float wid, float hei) {
+void Animation::SetDimensions(float wid, float hei)
+{
     width = wid;
     height = hei;
 }
 
-void Animation::GetDimensions(float &wid, float &hei) {
+void Animation::GetDimensions(float &wid, float &hei)
+{
     wid = width;
     hei = height;
 }
 
-void Animation::ProcessDrawQueue() {
+void Animation::ProcessDrawQueue()
+{
     GFXBlendMode(SRCALPHA, INVSRCALPHA);
     GFXDisable(LIGHTING);
     GFXEnable(TEXTURE0);
@@ -162,11 +178,13 @@ void Animation::ProcessDrawQueue() {
     ProcessDrawQueue(animationdrawqueue, -FLT_MAX);
 }
 
-bool Animation::NeedsProcessDrawQueue() {
+bool Animation::NeedsProcessDrawQueue()
+{
     return AnimationsLeftInQueue();
 }
 
-void Animation::ProcessFarDrawQueue(float farval) {
+void Animation::ProcessFarDrawQueue(float farval)
+{
     //set farshit
     GFXBlendMode(SRCALPHA, INVSRCALPHA);
     GFXDisable(LIGHTING);
@@ -176,13 +194,16 @@ void Animation::ProcessFarDrawQueue(float farval) {
     ProcessDrawQueue(far_animationdrawqueue, farval);
 }
 
-bool Animation::NeedsProcessFarDrawQueue() {
+bool Animation::NeedsProcessFarDrawQueue()
+{
     return AnimationsLeftInFarQueue();
 }
 
-void Animation::ProcessDrawQueue(std::vector<Animation *> &animationdrawqueue, float limit) {
-    if (g_game.use_animations == 0 && g_game.use_textures == 0)
+void Animation::ProcessDrawQueue(std::vector<Animation *> &animationdrawqueue, float limit)
+{
+    if (g_game.use_animations == 0 && g_game.use_textures == 0) {
         return;
+    }
     unsigned char alphamaps = ani_alpha;
     int i, j;     //NOT UNSIGNED
     for (i = animationdrawqueue.size() - 1; i >= 0; i--) {
@@ -195,30 +216,36 @@ void Animation::ProcessDrawQueue(std::vector<Animation *> &animationdrawqueue, f
         QVector campos = _Universe->AccessCamera()->GetPosition();
         animationdrawqueue[i]->CalculateOrientation(result);
         if ((limit
-             <= -FLT_MAX) ||
-            (animationdrawqueue[i]->Position() - campos).Magnitude() - animationdrawqueue[i]->height > limit) {
+                <= -FLT_MAX) ||
+                (animationdrawqueue[i]->Position() - campos).Magnitude() - animationdrawqueue[i]->height > limit) {
             //other way was inconsistent about what was far and what was not--need to use the same test for putting to far queueu and drawing it--otherwise graphical glitches
             GFXFogMode(FOG_OFF);
             animationdrawqueue[i]->DrawNow(result);
-            animationdrawqueue[i] = 0;             //Flag for deletion: gets called multiple times with decreasing values, and eventually is called with limit=-FLT_MAX.
+            animationdrawqueue[i] =
+                    0;             //Flag for deletion: gets called multiple times with decreasing values, and eventually is called with limit=-FLT_MAX.
         }
     }
     //Delete flagged ones
     i = 0;
-    while (i < static_cast<int>(animationdrawqueue.size()) && animationdrawqueue[i])
+    while (i < static_cast<int>(animationdrawqueue.size()) && animationdrawqueue[i]) {
         ++i;
+    }
     j = i;
     while (i < static_cast<int>(animationdrawqueue.size())) {
-        while (i < static_cast<int>(animationdrawqueue.size()) && !animationdrawqueue[i])
+        while (i < static_cast<int>(animationdrawqueue.size()) && !animationdrawqueue[i]) {
             ++i;
-        while (i < static_cast<int>(animationdrawqueue.size()) && animationdrawqueue[i])
+        }
+        while (i < static_cast<int>(animationdrawqueue.size()) && animationdrawqueue[i]) {
             animationdrawqueue[j++] = animationdrawqueue[i++];
+        }
     }
-    if (j >= 0)
+    if (j >= 0) {
         animationdrawqueue.resize(j);
+    }
 }
 
-bool Animation::CalculateOrientation(Matrix &result) {
+bool Animation::CalculateOrientation(Matrix &result)
+{
     Vector camp, camq, camr;
     QVector pos(Position());
     float hei = height;
@@ -257,7 +284,8 @@ bool Animation::CalculateOrientation(Matrix &result) {
     return retval;
 }
 
-void Animation::DrawNow(const Matrix &final_orientation) {
+void Animation::DrawNow(const Matrix &final_orientation)
+{
     if ((g_game.use_animations || g_game.use_textures) && (!Done() || (options & ani_repeat))) {
         GFXLoadMatrixModel(final_orientation);
         size_t lyr;
@@ -270,8 +298,9 @@ void Animation::DrawNow(const Matrix &final_orientation) {
         GFXGetBlendMode(src, dst);
         for (lyr = 0; (lyr < gl_options.Multitexture) || (lyr < numlayers); lyr++) {
             GFXToggleTexture((lyr < numlayers), lyr);
-            if (lyr < numlayers)
+            if (lyr < numlayers) {
                 GFXTextureCoordGenMode(lyr, NO_GEN, NULL, NULL);
+            }
         }
         for (size_t pass = 0; pass < numpasses; pass++) {
             if (SetupPass(pass, 0, src, dst)) {
@@ -296,22 +325,26 @@ void Animation::DrawNow(const Matrix &final_orientation) {
                 }
             }
         }
-        for (lyr = 0; lyr < numlayers; lyr++)
+        for (lyr = 0; lyr < numlayers; lyr++) {
             GFXToggleTexture(false, lyr);
+        }
         SetupPass(-1, 0, src, dst);
     }
 }
 
-void Animation::DrawAsVSSprite(VSSprite *spr) {
-    if (!spr)
+void Animation::DrawAsVSSprite(VSSprite *spr)
+{
+    if (!spr) {
         return;
+    }
     if (g_game.use_animations != 0 || g_game.use_textures != 0) {
         //unsigned char alphamaps=ani_alpha;
         GFXPushBlendMode();
-        if (options & ani_alpha)
+        if (options & ani_alpha) {
             GFXBlendMode(SRCALPHA, INVSRCALPHA);
-        else
+        } else {
             GFXBlendMode(ONE, ZERO);
+        }
         size_t lyr;
         size_t numlayers = numLayers();
         bool multitex = (numlayers > 1);
@@ -325,9 +358,11 @@ void Animation::DrawAsVSSprite(VSSprite *spr) {
         GFXGetBlendMode(src, dst);
         for (lyr = 0; (lyr < gl_options.Multitexture) || (lyr < numlayers); lyr++) {
             GFXToggleTexture((lyr < numlayers), lyr);
-            if (lyr < numlayers) GFXTextureCoordGenMode(lyr, NO_GEN, NULL, NULL);
+            if (lyr < numlayers) {
+                GFXTextureCoordGenMode(lyr, NO_GEN, NULL, NULL);
+            }
         }
-        for (size_t pass = 0; pass < numpasses; pass++)
+        for (size_t pass = 0; pass < numpasses; pass++) {
             if (SetupPass(pass, 0, src, dst)) {
                 MakeActive(0, pass);
                 GFXTextureEnv(0, GFXMODULATETEXTURE);
@@ -349,17 +384,20 @@ void Animation::DrawAsVSSprite(VSSprite *spr) {
                     GFXDraw(GFXQUAD, verts, 4, 3, 0, 2, 2);
                 }
             }
+        }
         SetupPass(-1, 0, src, dst);
-        for (lyr = 0; lyr < numlayers; lyr++)
+        for (lyr = 0; lyr < numlayers; lyr++) {
             GFXToggleTexture(false, lyr);
+        }
         GFXEnable(CULLFACE);
         GFXPopBlendMode();
     }
 }
 
-void Animation::DrawNoTransform(bool cross, bool blendoption) {
-    if (g_game.use_animations == 0 && g_game.use_textures == 0) {}
-    else if (!Done() || (options & ani_repeat)) {
+void Animation::DrawNoTransform(bool cross, bool blendoption)
+{
+    if (g_game.use_animations == 0 && g_game.use_textures == 0) {
+    } else if (!Done() || (options & ani_repeat)) {
         size_t lyr;
         size_t numlayers = numLayers();
         bool multitex = (numlayers > 1);
@@ -378,9 +416,11 @@ void Animation::DrawNoTransform(bool cross, bool blendoption) {
         GFXGetBlendMode(src, dst);
         for (lyr = 0; (lyr < gl_options.Multitexture) || (lyr < numlayers); lyr++) {
             GFXToggleTexture((lyr < numlayers), lyr);
-            if (lyr < numlayers) GFXTextureCoordGenMode(lyr, NO_GEN, NULL, NULL);
+            if (lyr < numlayers) {
+                GFXTextureCoordGenMode(lyr, NO_GEN, NULL, NULL);
+            }
         }
-        for (size_t pass = 0; pass < numpasses; pass++)
+        for (size_t pass = 0; pass < numpasses; pass++) {
             if (SetupPass(pass, 0, src, dst)) {
                 MakeActive(0, pass);
                 GFXTextureEnv(0, GFXMODULATETEXTURE);
@@ -423,16 +463,21 @@ void Animation::DrawNoTransform(bool cross, bool blendoption) {
                     GFXDraw(GFXQUAD, verts, vnum, 3, 0, 2, 2);
                 }
             }
+        }
         SetupPass(-1, 0, src, dst);
-        for (lyr = 0; lyr < numlayers; lyr++)
+        for (lyr = 0; lyr < numlayers; lyr++) {
             GFXToggleTexture(false, lyr);
-        if (blendoption)
-            if (options & ani_alpha)
+        }
+        if (blendoption) {
+            if (options & ani_alpha) {
                 GFXDisable(DEPTHWRITE);
+            }
+        }
     }
 }
 
-void Animation::Draw() {
+void Animation::Draw()
+{
     if (g_game.use_animations != 0 || g_game.use_textures != 0) {
         Vector camp, camq, camr;
         QVector pos(Position());
@@ -447,14 +492,15 @@ void Animation::Draw() {
         static float too_far_dist = XMLSupport::parse_float(
                 vs_config->getVariable("graphics", "anim_far_percent", ".8"));
         if (( /*R.Dot*/ (Position()
-                         - _Universe->AccessCamera()->GetPosition()).Magnitude() + HaloOffset
-                                                                                   *
-                                                                                   (height > width ? height : width)) <
-            too_far_dist * g_game.zfar)
+                - _Universe->AccessCamera()->GetPosition()).Magnitude() + HaloOffset
+                *
+                        (height > width ? height : width)) <
+                too_far_dist * g_game.zfar) {
             //if (::CalculateOrientation (pos,camp,camq,camr,wid,hei,(options&ani_close)?HaloOffset:0,false)) {ss
             animationdrawqueue.push_back(this);
-        else
+        } else {
             far_animationdrawqueue.push_back(this);
+        }
     }
 }
 
