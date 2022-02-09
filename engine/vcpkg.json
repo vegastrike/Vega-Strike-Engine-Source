@@ -3,16 +3,16 @@
     "name": "vega-strike",
     "version-string": "0.9.0",
     "dependencies": [
-        "boost-python",
-        "boost-log",
-        "boost-date-time",
-        "boost-iostreams",
-        "boost-system",
-        "boost-filesystem",
-        "boost-thread",
-        "boost-chrono",
-        "boost-atomic",
-        "boost-assign",
+        {"name": "boost-python", "version>=": "1.77.0"},
+         {"name": "boost-log","version>=": "1.77.0"},
+         {"name": "boost-date-time","version>=": "1.77.0"},
+         {"name": "boost-iostreams","version>=": "1.77.0"},
+         {"name": "boost-system","version>=": "1.77.0"},
+         {"name": "boost-filesystem","version>=": "1.77.0"},
+         {"name": "boost-thread","version>=": "1.77.0"},
+         {"name": "boost-chrono","version>=": "1.77.0"},
+         {"name": "boost-atomic","version>=": "1.77.0"},
+         {"name": "boost-assign","version>=": "1.77.0"},
         "expat",
         "freeglut",
         "libpng",
@@ -23,5 +23,6 @@
         "opengl-registry",
         "sdl1",
         "zlib"
-    ]
+    ],
+    "builtin-baseline":"cc471dc0f59b7b2066d6172c2893419412327a7a"
 }
